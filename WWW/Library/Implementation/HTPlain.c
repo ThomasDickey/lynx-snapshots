@@ -214,7 +214,7 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
     CONST char * p;
     CONST char * e = s+l;
     char c;
-    unsigned char c_unsign;
+    unsigned c_unsign;
     BOOL chk;
     UCode_t code, uck = -1;
     char saved_char_in = '\0';
@@ -534,7 +534,7 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 	   **  make it safe and output that now. - FM
 	   */
 	   } else if ((c_unsign > 0 &&
-		      c_unsign < LYlowest_eightbit[me->outUCLYhndl]) ||
+		      (int) c_unsign < LYlowest_eightbit[me->outUCLYhndl]) ||
 		      (me->T.trans_from_uni && !HTPassEightBitRaw)) {
 	    /*
 	    **	If we do not have the "7-bit approximations" as our

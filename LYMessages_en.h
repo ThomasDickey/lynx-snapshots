@@ -8,18 +8,24 @@
 #define LYMESSAGES_EN_H
 
 /*******************************************************************
- * The following definitions are for status line prompts, messages,
- * or warnings issued by Lynx during program execution.  You can
- * modify them to make them more appropriate for you site, and/or
- * to use other languages.  Links to collections of alternate
- * definitions, developed by the Lynx User Community, are maintained
- * in Lynx links:
+ * The following definitions are for status line prompts, messages, or
+ * warnings issued by Lynx during program execution.  You can modify
+ * them to make them more appropriate for your site.  We recommend that
+ * you extend these definitions to other languages using the gettext
+ * library.  There are also scattered uses of 'gettext()' throughout the
+ * Lynx source, covering all but those messages which (a) are used for
+ * debugging (CTRACE) or (b) are constants used in interaction with
+ * other programs.
+ *
+ * Links to collections of alternate definitions, developed by the Lynx
+ * User Community, are maintained in Lynx links:
  *
  *    http://www.crl.com/~subir/lynx.html
  *
- * You can substitute one of those as LYMessages_en.h, or modify
- * the header inclusion statement in your userdefs.h to include
- * one of those with a different name.
+ * Because the gettext facility is only recently (with release 2.8.2)
+ * introduced, these alternate definitions are given as variants on this
+ * file.  Use them as a starting point to construct a new message
+ * library as needed.  (see po/readme).
  */
 #define ALERT_FORMAT gettext("Alert!: %s")
 #define WELCOME_MSG gettext("Welcome")
@@ -427,6 +433,7 @@
 #define CANNOT_DOWNLOAD_FILE gettext("Unable to download file.")
 #define BUILDING_DIR_LIST gettext("Building directory listing...")
 #define SAVING gettext("Saving...")
+#define COULD_NOT_EDIT_FILE gettext("Could not edit file '%s'.")
 #define COULD_NOT_ACCESS_FILE gettext("Could not access file.")
 #define COULD_NOT_ACCESS_DIR gettext("Could not access directory.")
 #define COULD_NOT_LOAD_DATA gettext("Could not load data.")

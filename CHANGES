@@ -1,6 +1,27 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+1999-05-25 (2.8.2pre.7)
+* update illustration of forms options menu in Lynx User Guide according to
+  current lynx output -LP
+* old-style options menu:  hot key for "local e(X)ecution links" is now
+  displayed in bold (call addlbl() instead of addstr() like the other options
+  do), adapted from Hiroyuki diffs -LP
+* fix handling of incorrect html in psrc mode.  If a piece of html matched the
+  pattern "<known_tag_name unknown_attr_name any_attr_name>", then styles of
+  internal markup were unbalanced - resulted in cluttered colors -VH
+* comment-out (for release) configure option --enable-libjs -TD
+* change configure script defaults for --enable-persistent-cookies and
+  --enable-alt-bindings to 'yes' -TD
+* add DESTDIR variable to top-level makefile to facilitate packaging releases
+  with compiled-in pathnames -TD
+* further correction to VMS pathname in HFTPLoad.c, to translate /vms/fileserv/
+  to [vms.fileserv], for example.  The wku fileserver gives back a Unix-style
+  listing rather than VMS-style when given a Unix-style CWD, which confuses
+  Lynx into discarding the listing (reported by Andy Harper) -TD
+* modify LYCookies.c to append new items to the end of the list rather than
+  at the start, so cookies will be written and read from .lynx_cookies in
+  consistent order (reported by KED) -TD
 1999-05-24 (2.8.2pre.6)
 * fix for problem reported by LP -VH
   Load an html file with META charset and switch "\" to source mode.  Now press
@@ -25,8 +46,9 @@ Changes since Lynx 2.8 release
 * install COPYING and COPYRIGHT for install-help rule as well as install-doc,
   so we can refer to local copies of those files -TD
 * tweak HTParse trace message -LP
-* minor formatting change for Lynx_users_guide.html -LP
-* correct a few mismatches between variable declarations (char vs BOOLEAN) -LP
+* minor formatting change for Lynx_users_guide.html -Hiroyuki
+* correct a few mismatches between variable declarations (char vs BOOLEAN)
+  (from win32 version by Hiroyuki Senshu <senshu@shonai-cit.ac.jp>).
 1999-05-20 (2.8.2pre.5)
 * correct links to COPYHEADER and COPYING in about_lynx.html, by pointing to
   author's URLs, rather than to files which are not installed anyway -PG

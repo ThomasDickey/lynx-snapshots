@@ -464,7 +464,7 @@ PRIVATE void store_cookie ARGS3(
 	de->invcheck_bv = INVCHECK_QUERY; /* should this go here? */
 	cookie_list = de->cookie_list = HTList_new();
 	StrAllocCopy(de->domain, co->domain);
-	HTList_addObject(domain_list, de);
+	HTList_appendObject(domain_list, de);
     }
 
     /*
@@ -2740,7 +2740,7 @@ PUBLIC void cookie_domain_flag_set ARGS2(
 
 	    StrAllocCopy(de->domain, strsmall);
 	    de->cookie_list = HTList_new();
-	    HTList_addObject(domain_list, de);
+	    HTList_appendObject(domain_list, de);
 	} else {
 	    switch(flag) {
 		case (FLAG_ACCEPT_ALWAYS): de2->bv = ACCEPT_ALWAYS;
