@@ -7,7 +7,7 @@
 ** History
 **
 **	   Nov 1990  Written in Objective-C for the NeXT browser (TBL)
-**	24-Oct-1991 (JFG), written in C, browser-independant
+**	24-Oct-1991 (JFG), written in C, browser-independent
 **	21-Nov-1991 (JFG), first complete version
 **
 **	(c) Copyright CERN 1991 - See Copyright.html
@@ -16,8 +16,6 @@
 #define HASH_SIZE 101		/* Arbitrary prime. Memory/speed tradeoff */
 
 #include <HTUtils.h>
-#include <tcp.h>
-#include <ctype.h>
 #include <HTAnchor.h>
 #include <HTParse.h>
 #include <UCAux.h>
@@ -25,8 +23,6 @@
 
 #include <LYCharSets.h>
 #include <LYLeaks.h>
-
-#define FREE(x) if (x) {free(x); x = NULL;}
 
 #ifdef NOT_DEFINED
 /*
@@ -84,7 +80,7 @@ PRIVATE HTParentAnchor * HTParentAnchor_new NOARGS
     newAnchor->no_cache = FALSE;	/* no-cache? - FM */
     newAnchor->content_type = NULL;	/* Content-Type. - FM */
     newAnchor->content_language = NULL; /* Content-Language. - FM */
-    newAnchor->content_encoding = NULL; /* Compression algorith. - FM */
+    newAnchor->content_encoding = NULL; /* Compression algorithm. - FM */
     newAnchor->content_base = NULL;	/* Content-Base. - FM */
     newAnchor->content_disposition = NULL; /* Content-Disposition. - FM */
     newAnchor->content_location = NULL; /* Content-Location. - FM */

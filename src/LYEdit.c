@@ -1,5 +1,4 @@
 #include <HTUtils.h>
-#include <tcp.h>
 #include <HTParse.h>
 #include <HTAlert.h>
 #include <LYCurses.h>
@@ -19,8 +18,6 @@
 #endif
 
 #include <LYLeaks.h>
-
-#define FREE(x) if (x) {free(x); x = NULL;}
 
 /*
  *  In edit mode invoke either emacs, vi, pico, jove, jed sedt or the

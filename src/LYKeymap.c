@@ -1,5 +1,4 @@
 #include <HTUtils.h>
-#include <tcp.h>
 #include <LYUtils.h>
 #include <LYKeymap.h>
 #include <LYGlobalDefs.h>

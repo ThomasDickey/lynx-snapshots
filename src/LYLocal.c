@@ -29,7 +29,6 @@
 */
 
 #include <HTUtils.h>
-#include <tcp.h>
 #include <HTAlert.h>
 #include <HTParse.h>
 #include <LYCurses.h>
@@ -71,9 +70,6 @@
 #endif
 
 #include <LYLeaks.h>
-
-#define FREE(x) if (x) {free(x); x = NULL;}
-
 
 PRIVATE int LYExecv PARAMS((
 	char *		path,
@@ -265,7 +261,7 @@ PRIVATE BOOLEAN remove_tagged NOARGS
     count = 0;
     tag = tagged;
     while (ans == 'Y' && (cp = (char *)HTList_nextObject(tag)) != NULL) {
-	if (is_url(cp) == FILE_URL_TYPE) { /* unecessary check */
+	if (is_url(cp) == FILE_URL_TYPE) { /* unnecessary check */
 	    tp = cp;
 	    if (!strncmp(tp, "file://localhost", 16)) {
 		tp += 16;
@@ -447,7 +443,7 @@ PRIVATE BOOLEAN modify_tagged ARGS1(
 	 *  Make sure the target location is a directory which is owned
 	 * by the same uid as the owner of the current location.
 	 */
-	if ((dir_info.st_mode & S_IFMT) == S_IFDIR) {
+	if (S_ISDIR(dir_info.st_mode)) {
 	    if (dir_info.st_uid == owner) {
 		count = 0;
 		tag = tagged;
@@ -525,9 +521,9 @@ PRIVATE BOOLEAN modify_name ARGS1(
 	/*
 	 *  Change the name of the file or directory.
 	 */
-	if ((dir_info.st_mode & S_IFMT) == S_IFDIR) {
+	if (S_ISDIR(dir_info.st_mode)) {
 	     cp = "Enter new name for directory: ";
-	} else if ((dir_info.st_mode & S_IFMT) == S_IFREG) {
+	} else if (S_ISREG(dir_info.st_mode)) {
 	     cp = "Enter new name for file: ";
 	} else {
 	     _statusline(
@@ -570,11 +566,11 @@ PRIVATE BOOLEAN modify_name ARGS1(
 			return (-1);
 		    return 1;
 		}
-	    } else if ((dir_info.st_mode & S_IFMT) == S_IFDIR) {
+	    } else if (S_ISDIR(dir_info.st_mode)) {
 		_statusline(
 	    "There is already a directory with that name! Request ignored.");
 		sleep(AlertSecs);
-	    } else if ((dir_info.st_mode & S_IFMT) == S_IFREG) {
+	    } else if (S_ISREG(dir_info.st_mode)) {
 		_statusline(
 		 "There is already a file with that name! Request ignored.");
 		sleep(AlertSecs);
@@ -620,9 +616,9 @@ PRIVATE BOOLEAN modify_location ARGS1(
     /*
      *	Change the location of the file or directory.
      */
-    if ((dir_info.st_mode & S_IFMT) == S_IFDIR) {
+    if (S_ISDIR(dir_info.st_mode)) {
 	cp = "Enter new location for directory: ";
-    } else if ((dir_info.st_mode & S_IFMT) == S_IFREG) {
+    } else if (S_ISREG(dir_info.st_mode)) {
 	cp = "Enter new location for file: ";
     } else {
 	_statusline(
@@ -670,7 +666,7 @@ PRIVATE BOOLEAN modify_location ARGS1(
 	    sleep(AlertSecs);
 	    return 0;
 	}
-	if ((dir_info.st_mode & S_IFMT) != S_IFDIR) {
+	if (S_ISDIR(dir_info.st_mode)) {
 	    _statusline(
 		"Destination is not a valid directory! Request denied.");
 	    sleep(AlertSecs);
@@ -838,11 +834,11 @@ PRIVATE BOOLEAN create_file ARGS1(
 	    if (LYExecv(TOUCH_PATH, args, tmpbuf) <= 0)
 		return (-1);
 	    return 1;
-	} else if ((dir_info.st_mode & S_IFMT) == S_IFDIR) {
+	} else if (S_ISDIR(dir_info.st_mode)) {
 	    _statusline(
 	   "There is already a directory with that name! Request ignored.");
 	    sleep(AlertSecs);
-	} else if ((dir_info.st_mode & S_IFMT) == S_IFREG) {
+	} else if (S_ISREG(dir_info.st_mode)) {
 	    _statusline(
 		"There is already a file with that name! Request ignored.");
 	    sleep(AlertSecs);
@@ -904,11 +900,11 @@ PRIVATE BOOLEAN create_directory ARGS1(
 	    if (LYExecv(MKDIR_PATH, args, tmpbuf) <= 0)
 		return (-1);
 	    return 1;
-	} else if ((dir_info.st_mode & S_IFMT) == S_IFDIR) {
+	} else if (S_ISDIR(dir_info.st_mode)) {
 	    _statusline(
 	   "There is already a directory with that name! Request ignored.");
 	    sleep(AlertSecs);
-	} else if ((dir_info.st_mode & S_IFMT) == S_IFREG) {
+	} else if (S_ISREG(dir_info.st_mode)) {
 	    _statusline(
 		"There is already a file with that name! Request ignored.");
 	    sleep(AlertSecs);
@@ -985,7 +981,7 @@ PRIVATE BOOLEAN remove_single ARGS1(
     } else {
 	cp = testpath;
     }
-    if ((dir_info.st_mode & S_IFMT) == S_IFDIR) {
+    if (S_ISDIR(dir_info.st_mode)) {
 	if (strlen(cp) < 37) {
 	    sprintf(tmpbuf,
 		    "Remove '%s' and all of its contents (y or n): ", cp);
@@ -993,14 +989,14 @@ PRIVATE BOOLEAN remove_single ARGS1(
 	    sprintf(tmpbuf,
 		    "Remove directory and all of its contents (y or n): ");
 	}
-    } else if ((dir_info.st_mode & S_IFMT) == S_IFREG) {
+    } else if (S_ISREG(dir_info.st_mode)) {
 	if (strlen(cp) < 60) {
 	    sprintf(tmpbuf, "Remove file '%s' (y or n): ", cp);
 	} else {
 	    sprintf(tmpbuf, "Remove file (y or n): ");
 	}
 #ifdef S_IFLNK
-    } else if ((dir_info.st_mode & S_IFMT) == S_IFLNK) {
+    } else if (S_ISLNK(dir_info.st_mode)) {
 	if (strlen(cp) < 50) {
 	    sprintf(tmpbuf, "Remove symbolic link '%s' (y or n): ", cp);
 	} else {
@@ -1102,10 +1098,6 @@ static struct {
 				   use shell access for that. */
 };
 
-#ifndef S_ISDIR
-#define S_ISDIR(mode)   ((mode&0xF000) == 0x4000)
-#endif /* !S_ISDIR */
-
 PRIVATE char LYValidPermitFile[256] = "\0";
 
 /*
@@ -1146,8 +1138,8 @@ PRIVATE BOOLEAN permit_location ARGS3(
 	    _statusline(tmpbuf);
 	    sleep(AlertSecs);
 	    return 0;
-	} else if ((dir_info.st_mode & S_IFMT) != S_IFDIR &&
-	    (dir_info.st_mode & S_IFMT) != S_IFREG) {
+	} else if (!S_ISDIR(dir_info.st_mode) &&
+	           !S_ISREG(dir_info.st_mode)) {
 	    _statusline(
 	"The specified item is not a file nor a directory - request ignored.");
 	    sleep(AlertSecs);
@@ -1249,7 +1241,7 @@ PRIVATE BOOLEAN permit_location ARGS3(
 	fprintf(fp0,
 "<Br>\n<Li><Input Type=\"submit\" Value=\"Submit\"> \
 form to permit %s %s.\n</Ol>\n</Form>\n",
-		(dir_info.st_mode & S_IFMT) == S_IFDIR ? "directory" : "file",
+		S_ISDIR(dir_info.st_mode) ? "directory" : "file",
 		user_filename);
 	fprintf(fp0, "</Body></Html>");
 	LYCloseTempFP(fp0);
@@ -1312,8 +1304,8 @@ form to permit %s %s.\n</Ol>\n</Form>\n",
 	    _statusline(tmpbuf);
 	    sleep(AlertSecs);
 	    return 0;
-	} else if ((dir_info.st_mode & S_IFMT) != S_IFDIR &&
-	    (dir_info.st_mode & S_IFMT) != S_IFREG) {
+	} else if (!S_ISDIR(dir_info.st_mode) &&
+	           !S_ISREG(dir_info.st_mode)) {
 	    _statusline(
 	"The specified item is not a file nor a directory - request ignored.");
 	    sleep(AlertSecs);
@@ -1823,14 +1815,14 @@ PUBLIC int dired_options ARGS2(
 	if (mp->cond == DE_TAG && nothing_tagged)
 	    continue;
 	if (mp->cond == DE_DIR &&
-	    (!*path || (dir_info.st_mode & S_IFMT) != S_IFDIR))
+	    (!*path || !S_ISDIR(dir_info.st_mode)))
 	    continue;
 	if (mp->cond == DE_FILE &&
-	    (!*path || (dir_info.st_mode & S_IFMT) != S_IFREG))
+	    (!*path || !S_ISREG(dir_info.st_mode)))
 	    continue;
 #ifdef S_IFLNK
 	if (mp->cond == DE_SYMLINK &&
-	    (!*path || (dir_info.st_mode & S_IFMT) != S_IFLNK))
+	    (!*path || !S_ISLNK(dir_info.st_mode)))
 	    continue;
 #endif
 	if (*mp->sfx &&
@@ -1931,8 +1923,8 @@ PUBLIC BOOLEAN local_install ARGS3(
 	    _statusline(tmpbuf);
 	    sleep(AlertSecs);
 	    return 0;
-	} else if ((dir_info.st_mode & S_IFMT) != S_IFDIR &&
-		   (dir_info.st_mode & S_IFMT) != S_IFREG) {
+	} else if (!S_ISDIR(dir_info.st_mode) &&
+		   !S_ISREG(dir_info.st_mode)) {
 	    _statusline(
 	  "The selected item is not a file or a directory! Request ignored.");
 	    sleep(AlertSecs);
@@ -1954,12 +1946,12 @@ PUBLIC BOOLEAN local_install ARGS3(
 	_statusline(tmpbuf);
 	sleep(AlertSecs);
 	return 0;
-    } else if ((dir_info.st_mode & S_IFMT) != S_IFDIR) {
+    } else if (!S_ISDIR(dir_info.st_mode)) {
 	_statusline(
 		"The selected item is not a directory! Request ignored.");
 	sleep(AlertSecs);
 	return 0;
-    } else if (0 /*directory not writeable*/) {
+    } else if (0 /*directory not writable*/) {
 	_statusline("Install in the selected directory not permitted.");
 	sleep(AlertSecs);
 	return 0;

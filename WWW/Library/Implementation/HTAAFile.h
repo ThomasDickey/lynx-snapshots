@@ -15,9 +15,6 @@
 #ifndef HTAAFILE_H
 #define HTAAFILE_H
 
-#ifndef HTUTILS_H
-#include <HTUtils.h>            /* BOOL, PARAMS, ARGS */
-#endif /* HTUTILS_H */
 #include <HTList.h>             /* HTList */
 
 #ifdef SHORT_NAMES

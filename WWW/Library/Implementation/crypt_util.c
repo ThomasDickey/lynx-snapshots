@@ -23,9 +23,7 @@
  *
  */
 
-#ifndef HTUTILS_H
 #include <HTUtils.h>
-#endif
 
 #ifndef STATIC
 #define STATIC static

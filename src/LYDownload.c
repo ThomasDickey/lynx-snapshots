@@ -1,5 +1,4 @@
 #include <HTUtils.h>
-#include <tcp.h>
 #include <HTParse.h>
 #include <HTList.h>
 #include <HTAlert.h>
@@ -21,8 +20,6 @@
 
 #include <LYexit.h>
 #include <LYLeaks.h>
-
-#define FREE(x) if (x) {free(x); x = NULL;}
 
 /*
  *  LYDownload takes a URL and downloads it using a user selected
@@ -215,12 +212,7 @@ check_recall:
 	}
 
 	if (no_dotfiles || !show_dotfiles) {
-	  if (*buffer == '.' ||
-#ifdef VMS
-	      ((cp = strrchr(buffer, ':')) && *(cp+1) == '.') ||
-	      ((cp = strrchr(buffer, ']')) && *(cp+1) == '.') ||
-#endif /* VMS */
-	      ((cp = strrchr(buffer, '/')) && *(cp+1) == '.')) {
+	  if (*LYPathLeaf(buffer) == '.') {
 		HTAlert(FILENAME_CANNOT_BE_DOT);
 		_statusline(NEW_FILENAME_PROMPT);
 		FirstRecall = TRUE;
@@ -500,12 +492,7 @@ check_recall:
 		}
 
 		if (no_dotfiles || !show_dotfiles) {
-		    if (*buffer == '.' ||
-#ifdef VMS
-		       ((cp = strrchr(buffer, ':')) && *(cp+1) == '.') ||
-		       ((cp = strrchr(buffer, ']')) && *(cp+1) == '.') ||
-#endif /* VMS */
-		       ((cp = strrchr(buffer, '/')) && *(cp+1) == '.')) {
+		    if (*LYPathLeaf(buffer) == '.') {
 			HTAlert(FILENAME_CANNOT_BE_DOT);
 			_statusline(NEW_FILENAME_PROMPT);
 			goto again;

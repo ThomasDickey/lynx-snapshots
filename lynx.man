@@ -60,6 +60,9 @@ the arguments from stdin.  This is to allow for the
 potentially very long command line that can be associated
 with the -get_data or -post_data arguments (see below).
 .TP
+.B -accept_all_cookies
+accept all cookies.
+.TP
 .B -anonymous
 used to specify the anonymous account.
 .TP
@@ -138,9 +141,6 @@ dumps the formatted output of the default document or one
 specified on the command line to standard out. 
 This can be used in the following way:
 lynx -dump http://www.crl.com/~subir/lynx.html.
-.TP
-.B -eat_all_cookies
-accept all cookies.
 .TP
 .B -editor\fR=\fIEDITOR
 enable edit mode using the specified
@@ -281,6 +281,9 @@ disable the retrieval status messages.
 .TP
 .B -number_links
 force numbering of links.
+.B -partial 
+display partial pages while downloading. 
+.TP 
 .TP
 .B -pauth\fR=\fIID\fR:\fIPASSWD
 set authorization ID and password for a protected proxy
@@ -493,6 +496,9 @@ set alternate Lynx User-Agent header.
 .B -validate
 accept only http URLs (for validation).  Complete security
 restrictions also are implemented.
+.TP 
+.B -verbose 
+taggles [LINK], [IMAGE] and [INLINE] comments with filenames of these images. 
 .TP
 .B -version
 print version information.

@@ -63,8 +63,6 @@
 #include <LYexit.h>
 #include <LYLeaks.h>
 
-#define FREE(x) if (x) {free(x); x = NULL;}
-
 extern HTCJKlang HTCJK;
 
 /*
@@ -331,10 +329,10 @@ PUBLIC BOOL override_proxy ARGS1(
 **
 **  On entry,
 **	addr		must point to the fully qualified hypertext reference.
-**	anchor		a pareent anchor with whose address is addr
+**	anchor		a parent anchor with whose address is addr
 **
 **  On exit,
-**	returns 	HT_NO_ACCESS		Error has occured.
+**	returns 	HT_NO_ACCESS		Error has occurred.
 **			HT_OK			Success
 */
 PRIVATE int get_physical ARGS2(
@@ -578,13 +576,13 @@ PRIVATE int LYUCPopAssumed NOARGS
 **
 **  On entry,
 **	addr		must point to the fully qualified hypertext reference.
-**	anchor		a pareent anchor with whose address is addr
+**	anchor		a parent anchor with whose address is addr
 **
 **  On exit,
-**	returns 	<0		Error has occured.
+**	returns 	<0		Error has occurred.
 **			HT_LOADED	Success
 **			HT_NO_DATA	Success, but no document loaded.
-**					(telnet sesssion started etc)
+**					(telnet session started etc)
 */
 PRIVATE int HTLoad ARGS4(
 	CONST char *,		addr,
@@ -775,12 +773,12 @@ PRIVATE BOOL HTLoadDocument ARGS4(
 	*    If DONT_TRACK_INTERNAL_LINKS is defined, HText_AreDifferent()
 	*    is used to determine whether (3) applies.	If the target address
 	*    differs from that of the current document only by a fragment
-	*    and the taget address has an appended fragment, repositioning
+	*    and the target address has an appended fragment, repositioning
 	*    without reloading is always assumed.
 	*    Note that HText_AreDifferent() currently always returns TRUE
 	*    if the target has a LYNXIMGMAP URL, so that an internally
 	*    generated pseudo-document will normally not be re-used unless
-	*    condition (2) appplies. (Condition (1) cannot apply since in
+	*    condition (2) applies. (Condition (1) cannot apply since in
 	*    LYMap.c, no_cache is always set in the anchor object).  This
 	*    doesn't guarantee that the resource from which the MAP element
 	*    is taken will be read again (reloaded) when the list of links
@@ -971,7 +969,7 @@ PRIVATE BOOL HTLoadDocument ARGS4(
     if (status > 0) {
 	/*
 	**	If you get this, then please find which routine is returning
-	**	a positive unrecognised error code!
+	**	a positive unrecognized error code!
 	*/
 	fprintf(stderr,
  "**** HTAccess: socket or file number returned by obsolete load routine!\n");
@@ -1089,7 +1087,7 @@ PUBLIC BOOL HTLoadRelative ARGS2(
 **	----------------------------------------
 **
 **  On Entry,
-**	  destination		    The child or parenet anchor to be loaded.
+**	  destination		    The child or parent anchor to be loaded.
 **
 **  On Exit,
 **	  returns    YES     Success
@@ -1105,7 +1103,7 @@ PUBLIC BOOL HTLoadAnchor ARGS1(
 
     parent = HTAnchor_parent(destination);
 
-    if (HTAnchor_document(parent) == NULL) {	/* If not alread loaded */
+    if (HTAnchor_document(parent) == NULL) {	/* If not already loaded */
 						/* TBL 921202 */
 	BOOL result;
 	char * address = HTAnchor_address((HTAnchor*) parent);
@@ -1258,7 +1256,7 @@ PUBLIC BOOL HTSearchAbsolute ARGS2(
 **	As it involves file access, this should only be done once
 **	when the program first runs.
 **	This is a default algorithm -- browser don't HAVE to use this.
-**	But consistency betwen browsers is STRONGLY recommended!
+**	But consistency between browsers is STRONGLY recommended!
 **
 **  Priority order is:
 **		1	WWW_HOME environment variable (logical name, etc)

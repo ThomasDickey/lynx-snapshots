@@ -1,6 +1,4 @@
 #include <HTUtils.h>
-#include <tcp.h>
-#include <ctype.h>
 #include <HTParse.h>
 #include <HTAccess.h>
 #include <HTCJK.h>
@@ -59,8 +57,6 @@
 #include <LYStyle.h>
 #endif
 
-#undef hline   /* FIXME: this is a curses feature used as a variable here */
-
 #ifdef SVR4_BSDSELECT
 extern int BSDselect PARAMS((int nfds, fd_set * readfds, fd_set * writefds,
 			     fd_set * exceptfds, struct timeval * timeout));
@@ -87,8 +83,6 @@ extern int BSDselect PARAMS((int nfds, fd_set * readfds, fd_set * writefds,
 #define UTMP_FILE "/etc/utmp"
 #endif /* __FreeBSD__ || __bsdi__ */
 #endif /* !UTMP_FILE */
-
-#define FREE(x) if (x) {free(x); x = NULL;}
 
 extern HTkcode kanji_code;
 extern BOOLEAN LYHaveCJKCharacterSet;
@@ -4747,6 +4741,37 @@ PUBLIC CONST char * Home_Dir NOARGS
 }
 
 /*
+ * Return a pointer to the final leaf of the given pathname, If no pathname
+ * separators are found, returns the original pathname.  The leaf may be
+ * empty.
+ */
+PUBLIC char *LYPathLeaf ARGS1(char *, pathname)
+{
+    char *leaf;
+#ifdef UNIX
+    if ((leaf = strrchr(pathname, '/')) != 0) {
+	leaf++;
+    }
+#else
+#ifdef VMS
+    if ((leaf = strrchr(pathname, ']')) == 0)
+    	leaf = strrchr(pathname, ':');
+    if (leaf != 0)
+	leaf++;
+#else
+    int n;
+    for (leaf = 0, n = strlen(pathname)-1; n >= 0; n--) {
+	if (strchr("\\/:", pathname[n]) != 0) {
+	    leaf = pathname + n;
+	    break;
+	}
+    }
+#endif
+#endif
+    return (leaf != 0) ? leaf : pathname;
+}
+
+/*
  *  This function checks the acceptability of file paths that
  *  are intended to be off the home directory.	The file path
  *  should be passed in fbuffer, together with the size of the
@@ -5303,11 +5328,6 @@ Cambridge, MA 02139, USA.  */
 
 #include <sys/types.h>
 #include <errno.h>
-#ifdef STDC_HEADERS
-#include <stdlib.h>
-#else
-extern int errno;
-#endif /* STDC_HEADERS */
 
 #if defined(STDC_HEADERS) || defined(USG)
 #include <string.h>
@@ -5389,6 +5409,71 @@ int remove ARGS1(char *, name)
 
 #ifdef UNIX
 /*
+ * Verify if this is really a file, not accessed by a link, except for the
+ * special case of its directory being pointed to by a link from a directory
+ * owned by root and not writable by other users.
+ */
+PRIVATE BOOL IsOurFile ARGS1(char *, name)
+{
+    struct stat data;
+
+    if (lstat(name, &data) == 0
+    && S_ISREG(data.st_mode)
+    && data.st_nlink == 1
+    && data.st_uid == getuid()) {
+	int linked = 0;
+#if HAVE_LSTAT
+	char *path = 0;
+	char *leaf;
+
+	StrAllocCopy(path, name);
+	do {
+	    if ((leaf = LYPathLeaf(path)) != path)
+		*--leaf = '\0';	/* write a null on the '/' */
+	    if (lstat(*path ? path : "/", &data) != 0) {
+	    	break;
+	    }
+	    /*
+	     * If we find a symbolic link, it has to be in a directory that's
+	     * protected.  Otherwise someone could have switched it to point
+	     * to one of the real user's files.
+	     */
+	    if (S_ISLNK(data.st_mode)) {
+		if (!linked) {
+		    linked++;
+		} else {	/* a link-to-link is a little hard to digest */
+		    break;
+		}
+	    } else if (S_ISDIR(data.st_mode)) {
+		if (linked) {
+		    if (--linked == 0) {
+			/*
+			 * We assume that a properly-configured system has the
+			 * unwritable directories owned by root.  This is not
+			 * necessarily so (bin, news, etc., may), but the only
+			 * uid we can count on is 0.  It would be nice to add a
+			 * check for the gid also, but that wouldn't be
+			 * portable.
+			 */
+			if (data.st_uid != 0
+			 || data.st_mode & S_IWOTH) {
+			    linked = 1;
+			    break;
+			}
+		    }
+		}
+	    } else if (linked) {
+		break;
+	    }
+	} while (leaf != path);
+	free(path);
+#endif
+	return !linked;
+    }
+    return FALSE;
+}
+
+/*
  * Open a file that we don't want other users to see.
  */
 PRIVATE FILE *OpenHiddenFile ARGS2(char *, name, char *, mode)
@@ -5401,20 +5486,24 @@ PRIVATE FILE *OpenHiddenFile ARGS2(char *, name, char *, mode)
      * that no one has an existing file or link that they happen to own.
      */
     if (*mode == 'w') {
-	struct stat sb;
 	int fd = open(name, O_CREAT|O_EXCL|O_WRONLY, HIDE_CHMOD);
+	if (fd < 0
+	 && errno == EEXIST
+	 && IsOurFile(name)) {
+	    remove(name);
+	    /* FIXME: there's a race at this point if directory is open */
+	    fd = open(name, O_CREAT|O_EXCL|O_WRONLY, HIDE_CHMOD);
+	}
 	if (fd >= 0) {
 	    fp = fdopen(fd, mode);
 	}
-	else if (errno == EEXIST
-	 && stat(name, &sb) == 0
-	 && sb.st_uid == getuid()
-	 && chmod(name, HIDE_CHMOD) == 0
-	 && (fd = open(name, O_TRUNC|O_WRONLY, HIDE_CHMOD)) >= 0)
-	    fp = fdopen(fd, mode);
     }
     else
 #endif
+    if (*mode == 'a'
+     && IsOurFile(name)
+     && chmod(name, HIDE_CHMOD) == 0)
+	fp = fopen(name, mode);
     /*
      * This is less stringent, but reasonably portable.  For new files, the
      * umask will suffice; however if the file already exists we'll change
@@ -5424,7 +5513,7 @@ PRIVATE FILE *OpenHiddenFile ARGS2(char *, name, char *, mode)
      *
      * This won't work properly if the user is root, since the chmod succeeds.
      */
-    {
+    else if (*mode != 'a') {
 	int save = umask(HIDE_UMASK);
 	if (chmod(name, HIDE_CHMOD) == 0 || errno == ENOENT)
 	    fp = fopen(name, mode);

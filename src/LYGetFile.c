@@ -1,5 +1,4 @@
 #include <HTUtils.h>
-#include <tcp.h>
 #include <HTTP.h>
 #include <HTAnchor.h>	    /* Anchor class */
 #include <HTAccess.h>
@@ -44,8 +43,6 @@
 #include <syslog.h>
 #endif /* SYSLOG_REQUESTED_URLS */
 #endif /* !VMS */
-
-#define FREE(x) if (x) {free(x); x = NULL;}
 
 PRIVATE int fix_http_urls PARAMS((document *doc));
 extern char * WWW_Download_File;
@@ -286,8 +283,10 @@ Try_Redirected_URL:
 		} else if (url_type == LYNXPRINT_URL_TYPE) {
 		    return(printfile(doc));
 
+#ifdef EXP_FORMS_OPTIONS
 		} else if (url_type == LYNXOPTIONS_URL_TYPE) {
 		    return(postoptions(doc));
+#endif /* EXP_FORMS_OPTIONS */
 
 		} else if (url_type == NEWSPOST_URL_TYPE ||
 			   url_type == NEWSREPLY_URL_TYPE ||
@@ -452,11 +451,7 @@ Try_Redirected_URL:
 #endif /* !VMS */
 			    printf("\n%s", RETURN_TO_LYNX);
 			    fflush(stdout);
-#ifdef DJGPP_KEYHANDLER
-			    getxkey();
-#else
 			    LYgetch();
-#endif /* DJGPP_KEYHANDLER */
 #ifdef VMS
 			    {
 			      extern BOOLEAN HadVMSInterrupt;
@@ -909,7 +904,7 @@ Try_Redirected_URL:
 			    HTMLSetCharacterHandling(current_char_set);
 			    /*
 			     *	Check for a suggested filename from
-			     *	the Content-Dispostion header. - FM
+			     *	the Content-Disposition header. - FM
 			     */
 			    if (((tmpanchor = HTAnchor_parent(
 						HTAnchor_findAddress(&WWWDoc)

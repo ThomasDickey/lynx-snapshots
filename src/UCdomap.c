@@ -15,7 +15,6 @@
  * aeb, 950210
  */
 #include <HTUtils.h>
-#include <tcp.h>
 #include <HTMLDTD.h>
 
 #include <LYGlobalDefs.h>
@@ -66,8 +65,6 @@
 #ifdef NOTDEFINED
 #include <mnem_suni.h>
 #endif /* NOTDEFINED */
-
-#define FREE(x) if (x) {free(x); x = NULL;}
 
 /*
  *  Some of the code below, and some of the comments, are left in for

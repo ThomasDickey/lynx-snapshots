@@ -10,14 +10,14 @@
    Implemented by HTInit.c by default.
    
  */
-#ifndef HTUTILS_H
+
+#ifndef HTINIT_H
+#define HTINIT_H 1
+
 #include <HTUtils.h>
-#endif /* HTUTILS_H */
 
 extern void HTFormatInit NOPARAMS;
 extern void HTPreparsedFormatInit NOPARAMS;
 extern void HTFileInit NOPARAMS;
 
-/*
-
-    */
+#endif /* HTINIT_H */

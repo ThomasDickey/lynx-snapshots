@@ -2,7 +2,6 @@
  *	Copyright (c) 1994, University of Kansas, All Rights Reserved
  */
 #include <HTUtils.h>
-#include <tcp.h>
 #include <LYexit.h>
 #ifndef VMS
 #include <LYGlobalDefs.h>
@@ -14,8 +13,6 @@
 #include <syslog.h>
 #endif /* SYSLOG_REQUESTED_URLS */
 #endif /* !VMS */
-
-#define FREE(x) if (x) {free(x); x = NULL;}
 
 /*
  *  Stack of functions to call upon exit.

@@ -17,9 +17,6 @@
 
 
 #include <HTUtils.h>
-
-#include <string.h>
-
 #include <HTAAFile.h>	/* File routines	*/
 #include <HTGroup.h>	/* GroupDef		*/
 #include <HTACL.h>	/* Implemented here	*/

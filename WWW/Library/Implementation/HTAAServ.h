@@ -31,9 +31,6 @@
 #ifndef HTAASERV_H
 #define HTAASERV_H
 
-#ifndef HTUTILS_H
-#include <HTUtils.h>            /* BOOL, PARAMS, ARGS   */
-#endif /* HTUTILS_H */
 #include <HTRules.h>            /* This module interacts with rule system */
 #include <HTAAUtil.h>           /* Common parts of AA   */
 #include <HTAuth.h>             /* Authentication       */

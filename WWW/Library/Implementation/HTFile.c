@@ -20,6 +20,8 @@
 **			 the device or top directory.
 */
 
+#include <HTUtils.h>
+
 #ifndef VMS
 /* #define LONG_LIST */ /* Define this for long style unix listings (ls -l) */
 /* #define NO_PARENT_DIR_REFERENCE */ /* Define this for no parent links */
@@ -31,8 +33,6 @@
 #include <HTDOS.h>
 #endif /* DOSPATH */
 
-#include <HTUtils.h>
-#include <tcp.h>
 #include <HTFile.h>		/* Implemented here */
 #ifdef VMS
 #include <stat.h>
@@ -53,8 +53,6 @@
 #define MULTI_SUFFIX ".multi"	/* Extension for scanning formats */
 
 #define HT_EM_SPACE ((char)2)
-
-#define FREE(x) if (x) {free(x); x = NULL;}
 
 #ifdef VMS
 #include <HTVMSUtils.h>
@@ -237,7 +235,7 @@ PRIVATE void LYListFmtParse ARGS5(
 			PUTS(buf);
 			END(HTML_A);
 #ifdef S_IFLNK
-			if (c != 'A' && (st.st_mode & S_IFMT) == S_IFLNK &&
+			if (c != 'A' && S_ISLNK(st.st_mode) &&
 			    (len = readlink(file, buf, sizeof(buf))) >= 0) {
 				PUTS(" -> ");
 				buf[len] = '\0';
@@ -271,7 +269,7 @@ PRIVATE void LYListFmtParse ARGS5(
 			break;
 
 		case 'K':	/* size in Kilobytes but not for directories */
-			if ((st.st_mode & S_IFMT) == S_IFDIR) {
+			if (S_ISDIR(st.st_mode)) {
 				sprintf(fmt, "%%%ss ", start);
 				sprintf(buf, fmt, "");
 				break;
@@ -1532,7 +1530,7 @@ PUBLIC int HTLoadFile ARGS4(
     if (HTStat(filename, &stat_info) == -1) {
 	CTRACE(tfp, "HTLoadFile: Can't stat %s\n", filename);
     } else {
-	if (((stat_info.st_mode) & S_IFMT) == S_IFDIR) {
+	if (S_ISDIR(stat_info.st_mode)) {
 	    if (HTDirAccess == HT_DIR_FORBID) {
 		FREE(filename);
 		FREE(nodename);
@@ -1896,7 +1894,7 @@ PUBLIC int HTLoadFile ARGS4(
 	    if (stat(localname,&dir_info) == -1) dir_info.st_mode = S_IFDIR;
 #endif
 
-	    if (((dir_info.st_mode) & S_IFMT) == S_IFDIR) {
+	    if (S_ISDIR(dir_info.st_mode)) {
 		/*
 		**  If localname is a directory.
 		*/
@@ -2058,7 +2056,7 @@ PUBLIC int HTLoadFile ARGS4(
 
 			StrAllocCat(tmpfilename, dirbuf->d_name);
 			stat(tmpfilename, &file_info);
-			if (((file_info.st_mode) & S_IFMT) == S_IFDIR)
+			if (S_ISDIR(file_info.st_mode))
 #ifndef DIRED_SUPPORT
 			    sprintf((char *)dirname, "D%s",dirbuf->d_name);
 			else

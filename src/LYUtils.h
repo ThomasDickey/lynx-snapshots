@@ -46,6 +46,7 @@ extern void Define_VMSLogical PARAMS((
 	char *LogicalName, char *LogicalValue));
 #endif /* VMS */
 extern CONST char *Home_Dir NOPARAMS;
+extern char *LYPathLeaf PARAMS((char * pathname));
 extern BOOLEAN LYPathOffHomeOK PARAMS((char *fbuffer, size_t fbuffer_size));
 extern void LYAddPathToHome PARAMS((
 	char *fbuffer, size_t fbuffer_size, char *fname));

@@ -1,5 +1,4 @@
 #include <HTUtils.h>
-#include <tcp.h>
 #include <HTTP.h>
 #include <HTAlert.h>
 #include <HText.h>
@@ -22,8 +21,6 @@
 
 #include <LYexit.h>
 #include <LYLeaks.h>
-
-#define FREE(x) if (x) {free(x); x = NULL;}
 
 PUBLIC HTList * Visited_Links = NULL;	/* List of safe popped docs. */
 

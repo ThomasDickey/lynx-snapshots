@@ -7,8 +7,8 @@
 **	Bugs:
 **		strings written must be less than buffer size.
 */
+
 #include <HTUtils.h>
-#include <tcp.h>
 
 #include <HTPlain.h>
 
@@ -30,8 +30,6 @@
 
 #include <LYCharSets.h>
 #include <LYLeaks.h>
-
-#define FREE(x) if (x) {free(x); x = NULL;}
 
 extern BOOL HTPassEightBitRaw;
 extern BOOL HTPassHighCtrlRaw;

@@ -76,13 +76,13 @@
  * Note that some implementations of telnet allow passing of
  * environment variables, which might be used by unscrupulous
  * people to modify the environment in anonymous accounts.  When
- * making Lynx and Web access publically available via anonymous
+ * making Lynx and Web access publicly available via anonymous
  * accounts intended to run Lynx captively, be sure the wrapper
  * uses the -cfg switch and specifies the startfile, rather than
  * relying on the LYNX_CFG, LYNX_CFG_FILE, or WWW_HOME variables.
  *
  * Note that any SUFFIX or VIEWER mappings in the configuration
- * file will be overidden by any suffix or viewer mappings
+ * file will be overridden by any suffix or viewer mappings
  * that are established as defaults in src/HTInit.c.  You can
  * override the src/HTInit.c defaults via the mime.types and
  * mailcap files (see the examples in the samples directory).
@@ -126,7 +126,7 @@
 
 /**************************
  * SYSTEM_MAIL must be defined here to your mail sending command,
- * and SYSTEM_MAIL_FLAGS to approrpriate qualifiers.  They can be
+ * and SYSTEM_MAIL_FLAGS to appropriate qualifiers.  They can be
  * changed in lynx.cfg.
  *
  * The mail command will be spawned as a subprocess of lynx
@@ -253,13 +253,13 @@
  * Note that many implementations of telnetd allow passing of
  * environment variables, which might be used by unscrupulous
  * people to modify the environment in anonymous accounts.  When
- * making Lynx and Web access publically available via anonymous
+ * making Lynx and Web access publicly available via anonymous
  * accounts intended to run Lynx captively, be sure the wrapper
  * uses the -cfg switch and specifies the startfile, rather than
  * relying on the LYNX_CFG, LYNX_CFG_FILE, or WWW_HOME variables.
  *
  * Note that any SUFFIX or VIEWER mappings in the configuration
- * file will be overidden by any suffix or viewer mappings
+ * file will be overridden by any suffix or viewer mappings
  * that are established as defaults in src/HTInit.c.  You can
  * override the src/HTInit.c defaults via the mime.types and
  * mailcap files (see the examples in the samples directory).
@@ -542,7 +542,7 @@
 
 /*********************
  * LOCAL_DOMAIN is used for a tail match with the ut_host element of
- * the utmp or utmpx structure on systems with utmp capabilites, to
+ * the utmp or utmpx structure on systems with utmp capabilities, to
  * determine if a user is local to your campus or organization when
  * handling -restrictions=inside_foo or outside_foo settings for ftp,
  * news, telnet/tn3270 and rlogin URLs.  An "inside" user is assumed
@@ -599,7 +599,7 @@
 
 /********************************
  * CHARACTER_SET defines the default character set, i.e., that assumed
- * to be installed on the user's termimal.  It determines which characters
+ * to be installed on the user's terminal.  It determines which characters
  * or strings will be used to represent 8-bit character entities within
  * HTML.  New character sets may be defined as explained in the README
  * files of the src/chrtrans directory in the Lynx source code distribution.
@@ -662,7 +662,7 @@
  * PREFERRED_LANGUAGE is the language in MIME notation (e.g., "en",
  * "fr") which will be indicated by Lynx in its Accept-Language headers
  * as the preferred language.  If available, the document will be
- * transmitted in that language.  This definition can be overriden via
+ * transmitted in that language.  This definition can be overridden via
  * lynx.cfg.  Users also can change it via the 'o'ptions menu and save
  * that preference in their RC file. This may be a comma-separated list
  * of languages in decreasing preference.
@@ -673,7 +673,7 @@
  * PREFERRED_CHARSET specifies the character set in MIME notation (e.g.,
  * "ISO-8859-2", "ISO-8859-5") which Lynx will indicate you prefer in
  * requests to http servers using an Accept-Charsets header.
- * This definition can be overriden via lynx.cfg.  Users also can change it
+ * This definition can be overridden via lynx.cfg.  Users also can change it
  * via the 'o'ptions menu and save that preference in their RC file.
  * The value should NOT include "ISO-8859-1" or "US-ASCII", since those
  * values are always assumed by default.
@@ -818,15 +818,15 @@
  */
 #define SET_COOKIES TRUE
 
-/******************************* 
- * If EAT_ALL_COOKIES is set TRUE, and SET_COOKIES is TRUE, lynx will accept 
- * all cookies. 
- * 
- * The default defined here can be changed in lynx.cfg, and .lynxrc, or 
- * specified with the -eat_all_cookies command line switch. 
- */ 
-#define EAT_ALL_COOKIES FALSE 
- 
+/*******************************
+ * If ACCEPT_ALL_COOKIES is set TRUE, and SET_COOKIES is TRUE, Lynx will
+ * accept all cookies.
+ *
+ * The default defined here can be changed in lynx.cfg, and .lynxrc, or
+ * toggled via the -accept_all_cookies command line switch.
+ */
+#define ACCEPT_ALL_COOKIES FALSE
+
 
 /****************************************************************
  *   Section 2.   Things that you probably want to change or review
@@ -878,15 +878,15 @@
 
 /******************************
 * VERBOSE_IMAGES controls whether or not Lynx replaces the [LINK], [INLINE] and
-* [IMAGE] comments (for images without ALT) with filenames of these images. 
+* [IMAGE] comments (for images without ALT) with filenames of these images.
 * This is extremely useful because now we can determine immediately what images
-* are just decorations (button.gif, line.gif) and what images are important. 
-* 
-* The default defined here can be changed in lynx.cfg. 
-*/ 
-#define VERBOSE_IMAGES FALSE 
- 
-/****************************** 
+* are just decorations (button.gif, line.gif) and what images are important.
+*
+* The default defined here can be changed in lynx.cfg.
+*/
+#define VERBOSE_IMAGES FALSE
+
+/******************************
  * BOXVERT and BOXHORI control the layout of popup menus.  Set to 0 if your
  * curses supports line-drawing characters, set to '*' or any other character
  * to not use line-drawing (e.g., '|' for vertical and '-' for horizontal).
@@ -1083,7 +1083,7 @@
  * performed if Lynx has been invoked with the -restrictions=mail switch.
  *
  *  VMS USERS !!!
- * New mail is normally broadcast as it arrives, via "unsolicitied screen
+ * New mail is normally broadcast as it arrives, via "unsolicited screen
  * broadcasts", which can be "wiped" from the Lynx display via the Ctrl-W
  * command.  You may prefer to disable the broadcasts and use CHECKMAIL
  * instead (e.g., in a public account which will be used by people who
@@ -1183,7 +1183,7 @@
 
 /********************************
  * These definitions specify files created or used in conjunction
- * with traversals.  See CRAWL.ANNOUNCE for more infomation.
+ * with traversals.  See CRAWL.ANNOUNCE for more information.
  */
 #define TRAVERSE_FILE "traverse.dat"
 #define TRAVERSE_FOUND_FILE "traverse2.dat"
@@ -1211,7 +1211,7 @@
  * the version definition with the Project Version on checkout. Just
  * ignore it. - kw */
 /* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
-#define LYNX_VERSION "2.8.1dev.19"
+#define LYNX_VERSION "2.8.1dev.20"
 
 #ifndef MAXINT
 #define MAXINT 2147483647	/* max integer */

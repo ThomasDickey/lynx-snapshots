@@ -1,5 +1,4 @@
 #include <HTUtils.h>
-#include <tcp.h>		/* for standard io */
 
 #include <HTHistory.h>
 

@@ -10,9 +10,6 @@
 #ifndef HTFTP_H
 #define HTFTP_H
 
-#ifndef HTUTILS_H
-#include <HTUtils.h>
-#endif /* HTUTILS_H */
 #include <HTAnchor.h>
 #include <HTStream.h>
 #include <HTParse.h>

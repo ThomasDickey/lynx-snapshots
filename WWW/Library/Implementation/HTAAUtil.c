@@ -44,8 +44,7 @@
 */
 
 #include <HTUtils.h>
-#include <tcp.h>	/* NETREAD() etc.	*/
-#include <string.h>
+
 #include <HTAAUtil.h>	/* Implemented here	*/
 #include <HTAssoc.h>	/* Assoc list		*/
 #include <HTTCP.h>

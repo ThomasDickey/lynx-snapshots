@@ -10,7 +10,6 @@
 */
 
 #include <HTUtils.h>
-#include <tcp.h>
 #include <HTAlert.h>
 #include <LYGlobalDefs.h>
 #include <LYCurses.h>
@@ -21,9 +20,6 @@
 #include <LYCookie.h>
 
 #include <LYLeaks.h>
-
-#define FREE(x) if (x) {free(x); x = NULL;}
-
 
 /*	Issue a message about a problem.		HTAlert()
 **	--------------------------------
@@ -435,13 +431,13 @@ PUBLIC BOOL HTConfirmCookie ARGS4(
 	namelen = (int)(percentage*(float)namelen);
 	valuelen = (int)(percentage*(float)valuelen);
     }
-    if(!LYEatAllCookies) {
+    if(!LYAcceptAllCookies) {
 	sprintf(message, ADVANCED_COOKIE_CONFIRMATION,
 		server, namelen, name, valuelen, value);
 	_statusline(message);
     }
     while (1) {
-	if(!LYEatAllCookies) {
+	if(!LYAcceptAllCookies) {
 	    ch = LYgetch();
 	} else {
 	    ch = 'A';

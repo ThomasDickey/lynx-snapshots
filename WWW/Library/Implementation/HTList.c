@@ -11,9 +11,6 @@
 
 #include <LYLeaks.h>
 
-#define FREE(x) if (x) {free(x); x = NULL;}
-
-
 /*	Create list.
 */
 PUBLIC HTList * HTList_new NOARGS

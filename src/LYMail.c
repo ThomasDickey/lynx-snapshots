@@ -9,7 +9,6 @@
  */
 
 #include <HTUtils.h>
-#include <tcp.h>
 #include <HTParse.h>
 #include <LYGlobalDefs.h>
 #include <HTAlert.h>
@@ -24,8 +23,6 @@
 #include <LYCharSets.h>  /* to get current charset for mail header */
 
 #include <LYLeaks.h>
-
-#define FREE(x) if (x) {free(x); x = NULL;}
 
 BOOLEAN term_letter;	/* Global variable for async i/o. */
 PRIVATE void terminate_letter  PARAMS((int sig));

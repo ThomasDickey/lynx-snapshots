@@ -8,12 +8,11 @@
 **	translation necessary to
 **	represent a document. It is a linked list of styles.
 */
+
 #include <HTUtils.h>
 #include <HTStyle.h>
 
 #include <LYLeaks.h>
-
-#define FREE(x) if (x) {free(x); x = NULL;}
 
 /*	Create a new style
 */

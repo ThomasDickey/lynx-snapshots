@@ -18,8 +18,6 @@
 
 #include <LYLeaks.h>
 
-#define FREE(x) if (x) {free(x); x = NULL;}
-
 /*		Stream Object
 **		------------
 */

@@ -1,6 +1,50 @@
 Changes since Lynx 2.8 release
 ================================================================================
 
+1998-08-06 (2.8.1dev.20)
+* rename eat_all_cookies to accept_all_cookies everywhere - BJP
+* added ACCEPT_ALL_COOKIES lines to the dist lynx.cfg -- this conflicts with
+  LP's "2.8.1dev.19 typo & lynx.man/lynx.hlp/ lynx.cfg fix" patch -- his adds
+  the EAT_ALL_COOKIES option to lynx.cfg (with the appropriate description),
+  this should be the only problem there - BJP
+* added COOKIE_ACCEPT_DOMAINS and COOKIE_REJECT_DOMAINS to lynx.cfg.  These are
+  comma delimited lists of the domains to handle - BJP
+* added cookie_add_acceptlist and cookie_add_rejectlist to LYCookie.c, which
+  are passed the list of domains from lynx.cfg and add them to the global
+  cookie list.  These may be subject to change, as I might not be handling the
+  LYstrsep() right -- it works with dev19's LYstrsep(), but hasn't been tested
+  with Bela's...  - BJP
+* added a big ugly ifdef'd out section to LYrcFile.c with what I have so far on
+  the .lynxrc handling of COOKIE_{ACCEPT,REJECT}_DOMAINS.  Don't use it.  Makes
+  nasty segfaults - BJP (Brian J Pardy)
+* fix a bug where the DJGPP_KEYHANDLER version doesn't allow movement by arrow
+  keys within a text area.  Undo previous patch to LYGetFile.c, with LYgetch
+  now changed where it is defined in LYStrings.c, rather than at each place
+  where it is used.  The patch in LYStrings.c regarding Windows should fix the
+  problem with keymapping that occurred when we got rid of RAWDOSKEYHACK - DK
+* turn on DISP_PARTIAL in makefile.dos - DK
+* correct typo in LYOptions.c - BL
+* corrected logic of LYstrsep - BL
+* Few minor typos and forgotten notes in man/hlp/cfg files; also quote Bela's
+  note on lynx.cfg INCLUDE facility - LP
+* correct typos in makefile.wsl, makefile.dsl - LP
+* correct typos, misuse of character set in LYOptions.c for preferred_doc_char
+  - LP
+* move include for socks.h past tcp.h, to allow for redefinition of some
+  symbols on AIX (report by Brian Hauber) - TD
+* adjust headers so that each can be compiled separately, eliminating order
+  dependencies - TD
+* include tcp.h always from within HTUtils.h, to enforce ordering of headers
+  needed for socks5 definitions - TD
+* use S_ISREG, S_ISDIR macros to reduce clutter - TD
+* make test for OpenHiddenFile to overwrite user's file more stringent by
+  ensuring that the given pathname is not a link from a world-writable
+  directory (reported by BL, with suggested patch) - TD
+* add/use LYPathLeaf() function to reduce clutter of pathname-leaf parsing - TD
+* eliminate redundant definition of 'FREE() - TD
+* ifdef'd LYOptions.c to reduce unneeded code wrt --enable-forms-options - TD
+* check in OpenHiddenFile to ensure that we overwrite only regular files,
+  since we also force the file's permissions to 0600 - TD
 1998-07-31 (2.8.1dev.19)
 * modify OpenHiddenFile so that it can overwrite files owned by the real
   user if the O_EXCL open fails because the file already exists - TD
@@ -8,11 +52,11 @@ Changes since Lynx 2.8 release
   with EXP_FORMS_OPTIONS and configured with --enable-forms-options.
 * add option -eat_all_cookies and corresponding config variable
   EAT_ALL_COOKIES (Brian J Pardy <posterkid@psnw.com>).
-* correct spurious 'Content' string versus newline after X-URL in LYMain.c
+* correct spurious 'Content' string versus newline after X-URL in LYMail.c
   (Bela Lubkin and Larry Virden).
 * updated versions of config.guess and config.sub based on automake 1.3 - TD
 * updated experimental persistent-cookie support based on RP's patch:  Replaced
-  the call to strsep with a home-rolled one for those people who don't have it. 
+  the call to strsep with a home-rolled one for those people who don't have it.
   (Reported by Bela Lubkin, Mon, 27 Jul 1998 16:51:14 -0700 on the mailing
   list.) Bela's modification to make some character arrays static is also
   included.

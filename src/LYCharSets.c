@@ -1,5 +1,4 @@
 #include <HTUtils.h>
-#include <tcp.h>
 #include <HTCJK.h>
 #include <HTMLDTD.h>
 

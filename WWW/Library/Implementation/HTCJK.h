@@ -11,6 +11,8 @@
 #ifndef HTCJK_H
 #define HTCJK_H
 
+#include <HTUtils.h>
+
 /*
 **	STATUS CHANGE CODES
 */

@@ -1,6 +1,8 @@
 #ifndef LYKEYMAP_H
 #define LYKEYMAP_H
 
+#include <HTUtils.h>
+
 extern BOOLEAN LYisNonAlnumKeyname PARAMS((int ch, int key_name));
 extern char *key_for_func PARAMS((int func));
 extern int LYReverseKeymap PARAMS((int key_name));

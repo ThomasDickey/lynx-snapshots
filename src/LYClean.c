@@ -1,5 +1,4 @@
 #include <HTUtils.h>
-#include <tcp.h>
 #include <LYCurses.h>
 #include <LYUtils.h>
 #include <LYSignal.h>
@@ -12,8 +11,6 @@
 
 #include <LYexit.h>
 #include <LYLeaks.h>
-
-#define FREE(x) if (x) {free(x); x = NULL;}
 
 #ifdef VMS
 BOOLEAN HadVMSInterrupt = FALSE;

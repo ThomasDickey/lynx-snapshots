@@ -7,7 +7,6 @@
 */
 
 #include <HTUtils.h>
-#include <tcp.h>
 
 #include <HTTP.h>
 
@@ -25,7 +24,6 @@
 #include <HTTCP.h>
 #include <HTFormat.h>
 #include <HTFile.h>
-#include <ctype.h>
 #include <HTAlert.h>
 #include <HTMIME.h>
 #include <HTML.h>

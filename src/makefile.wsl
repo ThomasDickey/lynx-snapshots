@@ -58,5 +58,5 @@ DefaultStyle.o: DefaultStyle.c ../userdefs.h
 LYEditmap.o: LYEditmap.c ../userdefs.h
 LYCharUtils.o: LYCharUtils.c ../userdefs.h
 LYExtern.o: LYExtern.c ../userdefs.h
-LyUtils.o: LYUtils.c ../userdefs.h
+LYUtils.o: LYUtils.c ../userdefs.h
 LYCookie.o: ../userdefs.h

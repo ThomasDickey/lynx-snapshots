@@ -17,7 +17,6 @@
 */
 
 #include <HTUtils.h>
-#include <tcp.h>		/* Defines SHORT_NAMES if necessary */
 #include <HTAccess.h>
 #include <HTParse.h>
 #include <HTAlert.h>
@@ -28,8 +27,6 @@
 #include <signal.h>
 #include <sys/wait.h>
 #endif /* NSL_FORK */
-
-#define FREE(x) if (x) {free(x); x = NULL;}
 
 #define OK_HOST(p) ((p) != 0 && (p->h_length) != 0)
 

@@ -14,7 +14,6 @@
 */
 
 #include <HTUtils.h>
-#include <tcp.h>
 
 /* Implements:
 */
@@ -33,8 +32,6 @@
 #include <userdefs.h>  /* for TELNET_COMMAND and RLOGIN_COMMAND */
 
 #include <LYLeaks.h>
-
-#define FREE(x) if (x) {free(x); x = NULL;}
 
 #define HT_NO_DATA -9999
 

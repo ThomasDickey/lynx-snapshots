@@ -625,7 +625,7 @@
 #define DOMAIN_COOKIES_EATEN "All cookies in the domain have been eaten!"
 #define ALWAYS_ALLOWING_COOKIES "'A'lways allowing from domain '%s'."
 #define NEVER_ALLOWING_COOKIES "ne'V'er allowing from domain '%s'."
-#define PROMTING_TO_ALLOW_COOKIES "'P'rompting to allow from domain '%s'."
+#define PROMPTING_TO_ALLOW_COOKIES "'P'rompting to allow from domain '%s'."
 #define DELETE_ALL_COOKIES_IN_DOMAIN "Delete all cookies in this domain?"
 #define ALL_COOKIES_EATEN "All of the cookies in the jar have been eaten!"
 #define PORT_NINETEEN_INVALID "Port 19 not permitted in URLs."

@@ -9,7 +9,6 @@
 */
 
 #include <HTUtils.h>
-#include <tcp.h>
 
 #include <HTWSRC.h>
 
@@ -18,8 +17,6 @@
 #include <HTParse.h>
 
 #include <LYLeaks.h>
-
-#define FREE(x) if (x) {free(x); x = NULL;}
 
 #define BIG 10000		/* Arbitrary limit to value length */
 #define PARAM_MAX BIG

@@ -10,7 +10,6 @@
 */
 
 #include <HTUtils.h>
-#include <tcp.h>		/* For FROMASCII */
 
 /* Remove the following to disable the experimental HTML DTD parsing.
    Currently only used in this source file. - kw */
@@ -26,7 +25,6 @@
 #include <UCDefs.h>
 #include <UCAux.h>
 
-#include <ctype.h>
 #include <HTChunk.h>
 
 #include <LYCharSets.h>
@@ -34,8 +32,6 @@
 #include <LYLeaks.h>
 
 #define INVALID (-1)
-
-#define FREE(x) if (x) {free(x); x = NULL;}
 
 PUBLIC HTCJKlang HTCJK = NOCJK; 	/* CJK enum value.		*/
 PUBLIC BOOL HTPassEightBitRaw = FALSE;	/* Pass 161-172,174-255 raw.	*/

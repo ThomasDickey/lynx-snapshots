@@ -16,10 +16,7 @@
 **
 */
 
-
 #include <HTUtils.h>
-
-#include <string.h>
 
 #include <HTAAUtil.h>
 #include <HTAssoc.h>

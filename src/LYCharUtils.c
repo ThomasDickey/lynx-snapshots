@@ -3,7 +3,6 @@
 **  ==========================================================================
 */
 #include <HTUtils.h>
-#include <tcp.h>
 #include <SGML.h>
 
 #define Lynx_HTML_Handler
@@ -47,8 +46,6 @@
 
 #include <LYexit.h>
 #include <LYLeaks.h>
-
-#define FREE(x) if (x) {free(x); x = NULL;}
 
 extern BOOL HTPassEightBitRaw;
 extern BOOL HTPassEightBitNum;

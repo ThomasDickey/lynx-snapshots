@@ -1,6 +1,7 @@
-
 #ifndef LYLIST_H
 #define LYLIST_H
+
+#include <LYStructs.h>
 
 extern char * LYlist_temp_url NOPARAMS;
 extern int showlist PARAMS((document *newdoc, BOOLEAN titles));

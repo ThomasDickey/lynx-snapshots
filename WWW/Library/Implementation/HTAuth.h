@@ -8,9 +8,6 @@
 #ifndef HTAUTH_H
 #define HTAUTH_H
 
-#ifndef HTUTILS_H
-#include <HTUtils.h>
-#endif /* HTUTILS_H */
 #include <HTAAUtil.h>
 #include <HTAAProt.h>
 

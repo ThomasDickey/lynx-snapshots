@@ -15,7 +15,6 @@
 */
 
 #include <HTUtils.h>
-#include <tcp.h>
 #include <HTParse.h>
 #include <HTAlert.h>
 #include <LYCurses.h>
@@ -31,8 +30,6 @@
 
 #include <LYexit.h>
 #include <LYLeaks.h>
-
-#define FREE(x) if (x) {free(x); x = NULL;}
 
 PUBLIC char LYUploadFileURL[256] = "\0";
 
@@ -124,14 +121,9 @@ retry:
 	sprintf(buffer, "%s/%s", directory, tmpbuf);
 
 	if (no_dotfiles || !show_dotfiles) {
-	    if (*buffer == '.' ||
-#ifdef VMS
-		((cp = strrchr(buffer, ':')) && *(cp+1) == '.') ||
-		((cp = strrchr(buffer, ']')) && *(cp+1) == '.') ||
-#endif /* VMS */
-		((cp = strrchr(buffer, '/')) && *(cp+1) == '.')) {
-		_statusline(
-		  "File name may not begin with dot. Enter a new filename: ");
+	    if (*LYPathLeaf(buffer) == '.') {
+		HTAlert(FILENAME_CANNOT_BE_DOT);
+		_statusline(NEW_FILENAME_PROMPT);
 		goto retry;
 	    }
 	}

@@ -5,7 +5,8 @@
 #ifndef HTVMSUTIL_H
 #define HTVMSUTIL_H
 
-#include <stat.h>
+#include <HTUtils.h>
+#include <HTAnchor.h>
 
 extern BOOL HTVMSFileVersions;	/* Include version numbers in listing? */
 
@@ -102,7 +103,7 @@ PUBLIC char * HTVMS_name PARAMS((
 
 PUBLIC int HTStat PARAMS((
 	CONST char * filename,
-        stat_t * info));
+        struct stat * info));
 
 PUBLIC int HTVMSBrowseDir PARAMS((
 	CONST char * address,
@@ -111,6 +112,3 @@ PUBLIC int HTVMSBrowseDir PARAMS((
 	HTStream * sink));
 
 #endif /* not HTVMSUTIL_H */
-/*
-
-   End of file HTVMSUtil.h.  */

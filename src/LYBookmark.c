@@ -1,5 +1,4 @@
 #include <HTUtils.h>
-#include <tcp.h>
 #include <HTAlert.h>
 #include <LYUtils.h>
 #include <LYStrings.h>
@@ -22,8 +21,6 @@ extern BOOLEAN HadVMSInterrupt; /* Flag from cleanup_sig() AST */
 #endif /* VMS */
 
 #include <LYLeaks.h>
-
-#define FREE(x) if (x) {free(x); x = NULL;}
 
 PUBLIC char *MBM_A_subbookmark[MBM_V_MAXFILES+1];
 PUBLIC char *MBM_A_subdescript[MBM_V_MAXFILES+1];

@@ -17,10 +17,10 @@
    Brewster@think.com
 */
 
-/* 
+/*
  * this is a simple ui toolkit for building other ui's on top.
  * -brewster
- * 
+ *
  * top level functions:
  *   generate_search_apdu
  *   generate_retrieval_apdu
@@ -32,26 +32,22 @@
  *   generate multiple queries for long documents.
  *     this will crash if the file being retrieved is larger than 100k.
  *   do log_write()
- *   
+ *
  */
 
 #include <HTUtils.h>
-#include <tcp.h>
 #include <HTVMS_WaisUI.h>
 #include <HTVMS_WaisProt.h>
 #include <HTTCP.h>
-/*#include <stdio> included by HTUtils.h -- FM */
-#include <string.h>
-#include <ctype.h>
+
+#undef MAXINT	/* we don't need it here, and tcp.h may conflict */
 #include <math.h>
-#include <stdarg.h>
 
 #include <LYexit.h>
 #include <LYLeaks.h>
 
 void
-log_write(s)
-char *s;
+log_write(char *s GCC_UNUSED)
 {
     return;
 }
@@ -59,7 +55,7 @@ char *s;
 /*----------------------------------------------------------------------*/
 
 /* returns a pointer in the buffer of the first free byte.
-   if it overflows, then NULL is returned 
+   if it overflows, then NULL is returned
  */
 char *
 generate_search_apdu(buff,
@@ -95,12 +91,12 @@ long maxDocsRetrieved;
                          maxDocsRetrieved
                          );
 
-  search3 = makeSearchAPDU(30, 
+  search3 = makeSearchAPDU(30,
 			   5000, /* should be large */
 			   30,
                            1,	/* replace indicator */
                            "",	/* result set name */
-                           database_names, /* database name */   
+                           database_names, /* database name */
                            QT_RelevanceFeedbackQuery, /* query_type */
                            0,   /* element name */
                            NULL, /* reference ID */
@@ -159,9 +155,9 @@ char *database_name;
 
   refID.size = 1;
   refID.bytes = "3";
-  
+
   switch(chunk_type){
-  case CT_line: 
+  case CT_line:
     DocObjs[0] = makeDocObjUsingLines(docID, type, start, end);
     break;
   case CT_byte:
@@ -170,11 +166,11 @@ char *database_name;
   }
   DocObjs[1] = NULL;
 
-  query = makeWAISTextQuery(DocObjs);   
-  search = makeSearchAPDU( 10, 16, 15, 
+  query = makeWAISTextQuery(DocObjs);
+  search = makeSearchAPDU( 10, 16, 15,
 			  1,	/* replace indicator */
 			  "FOO", /* result set name */
-			  database_names, /* database name */   
+			  database_names, /* database name */
 			  QT_TextRetrievalQuery, /* query_type */
 			  element_names, /* element name */
 			  &refID, /* reference ID */
@@ -192,10 +188,7 @@ char *database_name;
  * to those trying to modify the transport code to use non-UNIX streams:
  *  This is the function to modify!
  */
-long read_from_stream(d,buf,nbytes)
-int d;				/* this is the stream */
-char *buf;
-long nbytes;
+PRIVATE long read_from_stream(int d, char *buf, long nbytes)
 {
   long didRead;
   long toRead = nbytes;
@@ -214,7 +207,7 @@ long nbytes;
     totalRead += didRead;
   }
   if(totalRead != nbytes)	/* we overread for some reason */
-    return(- totalRead);	/* bad news */    
+    return(- totalRead);	/* bad news */
   return(totalRead);
 }
 
@@ -222,25 +215,21 @@ long nbytes;
 
 /* returns the length of the response, 0 if an error */
 
-long 
-transport_message(connection,
-		  request_message,
-		  request_length,
-		  response_message,
-		  response_buffer_length)
-int connection;
-char *request_message;
-long request_length;
-char *response_message;
-long response_buffer_length;
+PRIVATE long
+transport_message(
+	long connection,
+	char *request_message,
+	long request_length,
+	char *response_message,
+	long response_buffer_length)
 {
   WAISMessage header;
   long response_length;
   int rv;
 
-  
+
   /* Write out message. Read back header. Figure out response length. */
-  
+
   if( request_length + HEADER_LENGTH !=
       NETWRITE(connection,request_message,
    		  (int)( request_length +HEADER_LENGTH)) )
@@ -272,7 +261,7 @@ long response_buffer_length;
     response_length = atol(length_array);
     /*
       if(verbose){
-      printf("WAIS header: '%s' length_array: '%s'\n", 
+      printf("WAIS header: '%s' length_array: '%s'\n",
       response_message, length_array);
       }
       */
@@ -281,7 +270,7 @@ long response_buffer_length;
 	 and return 0 */
       long i;
       for(i = 0; i < response_length; i++){
-	rv = read_from_stream(connection, 
+	rv = read_from_stream(connection,
 			      response_message + HEADER_LENGTH,
 			      1);
 	if (rv == HT_INTERRUPTED)
@@ -292,7 +281,7 @@ long response_buffer_length;
       return(0);
     }
   }
-  rv = read_from_stream(connection, 
+  rv = read_from_stream(connection,
 			response_message + HEADER_LENGTH,
 			response_length);
   if (rv == HT_INTERRUPTED)
@@ -304,19 +293,15 @@ long response_buffer_length;
 
 /*----------------------------------------------------------------------*/
 
-/* returns the number of bytes writen.  0 if an error */
+/* returns the number of bytes written.  0 if an error */
 long
-interpret_message(request_message,request_length,
-		  response_message,
-		  response_buffer_length,
-		  connection,
-		  verbose)
-char *request_message;
-long request_length; /* length of the buffer */
-char *response_message;
-long response_buffer_length;
-int connection;
-boolean verbose;
+interpret_message(
+	char *request_message,
+	long request_length, /* length of the buffer */
+	char *response_message,
+	long response_buffer_length,
+	long connection,
+	boolean verbose GCC_UNUSED)
 {
   long response_length;
 
@@ -328,7 +313,7 @@ boolean verbose;
     if(service_name && strlen(service_name) > 0)
       printf(" for service %s", service_name);
     printf("\n");
-    twais_dsply_rsp_apdu(request_message + HEADER_LENGTH, 
+    twais_dsply_rsp_apdu(request_message + HEADER_LENGTH,
 			 request_length);
   }
 
@@ -358,9 +343,7 @@ boolean verbose;
 
 /* modifies the string to exclude all seeker codes. sets length to
    the new length. */
-char *delete_seeker_codes(string,length)
-char *string;
-long *length;
+PRIVATE char *delete_seeker_codes(char *string, long *length)
 {
   long original_count; /* index into the original string */
   long new_count = 0; /* index into the collapsed string */
@@ -378,7 +361,7 @@ long *length;
   *length = new_count;
   return(string);
 }
-  
+
 /*----------------------------------------------------------------------*/
 
 #if defined(VMS) && defined(__GNUC__)			/* 10-AUG-1995 [pr] */
@@ -402,7 +385,7 @@ char *trim_junk(headline)
 char *headline;
 {
   long length = strlen(headline) + 1; /* include the trailing null */
-  long i;
+  size_t i;
   headline = delete_seeker_codes(headline, &length);
   /* delete leading spaces */
   for(i=0; i < strlen(headline); i++){
@@ -430,8 +413,8 @@ char *headline;
 **----------------------------------------------------------------------*/
 /* WIDE AREA INFORMATION SERVER SOFTWARE:`
    No guarantees or restrictions.  See the readme file for the full standard
-   disclaimer.	
-  
+   disclaimer.
+
    3.26.90	Harry Morris, morris@think.com
    3.30.90  Harry Morris - Changed any->bits to any->bytes
    4.11.90  HWM - generalized conditional includes (see c-dialect.h)
@@ -439,14 +422,14 @@ char *headline;
 
 #define RESERVE_SPACE_FOR_HEADER(spaceLeft)		\
 	*spaceLeft -= HEADER_LEN;
-	
+
 #define RELEASE_HEADER_SPACE(spaceLeft)			\
 	if (*spaceLeft > 0)				\
 	  *spaceLeft += HEADER_LEN;
-	
+
 /*----------------------------------------------------------------------*/
 
-InitResponseAPDU* 
+InitResponseAPDU*
 makeInitResponseAPDU(result,
 		     search,
 		     present,
@@ -476,7 +459,7 @@ char* version;
 any* refID;
 void* userInfo;
 /* build an initResponse APDU with user specified information */
-{ 
+{
   InitResponseAPDU* init = (InitResponseAPDU*)s_malloc((size_t)sizeof(InitResponseAPDU));
 
   init->PDUType = initResponseAPDU;
@@ -494,13 +477,13 @@ void* userInfo;
   init->ImplementationVersion = s_strdup(version);
   init->ReferenceID = duplicateAny(refID);
   init->UserInformationField = userInfo; /* not copied! */
-  
+
   return(init);
 }
 
 /*----------------------------------------------------------------------*/
 
-void 
+void
 freeInitResponseAPDU(init)
 InitResponseAPDU* init;
 /* free an initAPDU */
@@ -515,23 +498,23 @@ InitResponseAPDU* init;
 
 /*----------------------------------------------------------------------*/
 
-char* 
+char*
 writeInitResponseAPDU(init,buffer,len)
 InitResponseAPDU* init;
 char* buffer;
 long* len;
 /* write the initResponse to a buffer, adding system information */
-{ 
+{
   char* buf = buffer + HEADER_LEN; /* leave room for the header-length-indicator */
   long size;
   bit_map* optionsBM = NULL;
 
   RESERVE_SPACE_FOR_HEADER(len);
-  
+
   buf = writePDUType(init->PDUType,buf,len);
   buf = writeBoolean(init->Result,buf,len);
   buf = writeProtocolVersion(buf,len);
-  
+
   optionsBM = makeBitMap((unsigned long)5,init->willSearch,init->willPresent,
                          init->willDelete,init->supportAccessControl,
                          init->supportResourceControl);
@@ -545,21 +528,21 @@ long* len;
   buf = writeString(init->ImplementationName,DT_ImplementationName,buf,len);
   buf = writeString(init->ImplementationVersion,DT_ImplementationVersion,buf,len);
   buf = writeAny(init->ReferenceID,DT_ReferenceID,buf,len);
-  
+
   /* go back and write the header-length-indicator */
   RELEASE_HEADER_SPACE(len);
-  size = buf - buffer - HEADER_LEN; 
+  size = buf - buffer - HEADER_LEN;
   writeBinaryInteger(size,HEADER_LEN,buffer,len);
 
   if (init->UserInformationField != NULL)
-    buf = writeInitResponseInfo(init,buf,len);   
-    
+    buf = writeInitResponseInfo(init,buf,len);
+
   return(buf);
 }
 
 /*----------------------------------------------------------------------*/
 
-char* 
+char*
 readInitResponseAPDU(init,buffer)
 InitResponseAPDU** init;
 char* buffer;
@@ -568,35 +551,35 @@ char* buffer;
   boolean search,present,delete,accessControl,resourceControl;
   long prefSize,maxMsgSize;
   char *auth,*id,*name,*version;
-  long size; 
+  long size;
   pdu_type pduType;
   bit_map* versionBM = NULL;
   bit_map* optionsBM = NULL;
   boolean result;
   any *refID = NULL;
   void* userInfo = NULL;
-  
+
   auth = id = name = version = NULL;
   refID = NULL;
-  
+
   /* read required part */
-  buf = readBinaryInteger(&size,HEADER_LEN,buf); 
+  buf = readBinaryInteger(&size,HEADER_LEN,buf);
   buf = readPDUType(&pduType,buf);
   buf = readBoolean(&result,buf);
-  buf = readBitMap(&versionBM,buf); 
+  buf = readBitMap(&versionBM,buf);
   buf = readBitMap(&optionsBM,buf);
   buf = readNum(&prefSize,buf);
   buf = readNum(&maxMsgSize,buf);
-  
+
   /* decode optionsBM */
   search = bitAtPos(0,optionsBM);
   present = bitAtPos(1,optionsBM);
   delete = bitAtPos(2,optionsBM);
   accessControl = bitAtPos(3,optionsBM);
   resourceControl = bitAtPos(4,optionsBM);
-  
+
   /* read optional part */
-  while (buf < (buffer + size + HEADER_LEN)) 
+  while (buf < (buffer + size + HEADER_LEN))
     { data_tag tag = peekTag(buf);
       switch (tag)
 	{ case DT_IDAuthentication:
@@ -638,12 +621,12 @@ char* buffer;
       freeAny(refID);
     }
   RETURN_ON_NULL(buf);
-  
+
   /* construct the basic init object */
   *init = makeInitResponseAPDU(result,
 			       search,present,delete,accessControl,resourceControl,
 			       prefSize,maxMsgSize,auth,id,name,version,refID,userInfo);
-			 	 			        	
+
   freeBitMap(versionBM);
   freeBitMap(optionsBM);
   s_free(auth);
@@ -651,19 +634,19 @@ char* buffer;
   s_free(name);
   s_free(version);
   freeAny(refID);
-  
+
   return(buf);
 }
 
 /*----------------------------------------------------------------------*/
 
-InitResponseAPDU* 
+InitResponseAPDU*
 replyToInitAPDU(init,result,userInfo)
 InitAPDU* init;
 boolean result;
 void* userInfo;
 /* respond to an init message in the default way - echoing back
-   the init info 
+   the init info
  */
 {
   InitResponseAPDU* initResp;
@@ -679,7 +662,7 @@ void* userInfo;
 
 /*----------------------------------------------------------------------*/
 
-SearchAPDU* 
+SearchAPDU*
 makeSearchAPDU(small,
 	       large,
 	       medium,
@@ -710,7 +693,7 @@ void* queryInfo;
   query->MediumSetPresentNumber = medium;
   query->ReplaceIndicator = replace;
   query->ResultSetName = s_strdup(name);
-  query->DatabaseNames = NULL; 
+  query->DatabaseNames = NULL;
   if (databases != NULL)
     { for (i = 0, ptr = databases[i]; ptr != NULL; ptr = databases[++i])
 	{ if (query->DatabaseNames == NULL)
@@ -723,7 +706,7 @@ void* queryInfo;
 	  }
       }
   query->QueryType = s_strdup(type);
-  query->ElementSetNames = NULL; 
+  query->ElementSetNames = NULL;
   if (elements != NULL)
     { for (i = 0, ptr = elements[i]; ptr != NULL; ptr = elements[++i])
 	{ if (query->ElementSetNames == NULL)
@@ -742,7 +725,7 @@ void* queryInfo;
 
 /*----------------------------------------------------------------------*/
 
-void 
+void
 freeSearchAPDU(query)
 SearchAPDU* query;
 {
@@ -762,19 +745,19 @@ SearchAPDU* query;
 #define ES_DELIMITER_1 	"\037" 	/* separates database name from element name */
 #define ES_DELIMITER_2 	"\036" 	/* hex 1E separates <db,es> groups from one another */
 
-char* 
+char*
 writeSearchAPDU(query,buffer,len)
 SearchAPDU* query;
 char* buffer;
 long* len;
-{ 
+{
   char* buf = buffer + HEADER_LEN; /* leave room for the header-length-indicator */
   long size,i;
   char* ptr = NULL;
   char* scratch = NULL;
 
   RESERVE_SPACE_FOR_HEADER(len);
-  
+
   buf = writePDUType(query->PDUType,buf,len);
   buf = writeBinaryInteger(query->SmallSetUpperBound,(size_t)3,buf,len);
   buf = writeBinaryInteger(query->LargeSetLowerBound,(size_t)3,buf,len);
@@ -812,7 +795,7 @@ long* len;
 		ptr = query->ElementSetNames[++i]; /* the element set name */
 		scratch = (char*)s_realloc(scratch,newScratchSize);
 		s_strncat(scratch,ES_DELIMITER_1,2,newScratchSize);
-		s_strncat(scratch,ptr,strlen(ptr) + 1,newScratchSize); 
+		s_strncat(scratch,ptr,strlen(ptr) + 1,newScratchSize);
 	      }
 	      }
         else
@@ -822,28 +805,28 @@ long* len;
 	    s_strncat(scratch,ES_DELIMITER_2,2,newScratchSize);
 	    s_strncat(scratch,ptr,strlen(ptr) + 1,newScratchSize);
 	    s_strncat(scratch,ES_DELIMITER_1,2,newScratchSize);
-	    s_strncat(scratch,esPtr,strlen(esPtr) + 1,newScratchSize); 
+	    s_strncat(scratch,esPtr,strlen(esPtr) + 1,newScratchSize);
 	  }
 	  }
 	buf = writeString(scratch,DT_ElementSetNames,buf,len);
 	s_free(scratch);
-      }						
+      }
   buf = writeAny(query->ReferenceID,DT_ReferenceID,buf,len);
-    
+
   /* go back and write the header-length-indicator */
   RELEASE_HEADER_SPACE(len);
-  size = buf - buffer - HEADER_LEN; 
+  size = buf - buffer - HEADER_LEN;
   writeBinaryInteger(size,HEADER_LEN,buffer,len);
 
   if (query->Query != NULL)
-    buf = writeSearchInfo(query,buf,len);    
-    
+    buf = writeSearchInfo(query,buf,len);
+
   return(buf);
 }
 
 /*----------------------------------------------------------------------*/
 
-SearchResponseAPDU* 
+SearchResponseAPDU*
 makeSearchResponseAPDU(result,count,recordsReturned,nextPos,resultStatus,
 		       presentStatus,refID,records)
 long result;
@@ -865,12 +848,12 @@ void* records;
   query->PresentStatus = presentStatus;
   query->ReferenceID = duplicateAny(refID);
   query->DatabaseDiagnosticRecords = records;
-  return(query);  
+  return(query);
 }
 
 /*----------------------------------------------------------------------*/
 
-void 
+void
 freeSearchResponseAPDU(queryResponse)
 SearchResponseAPDU* queryResponse;
 {
@@ -880,7 +863,7 @@ SearchResponseAPDU* queryResponse;
 
 /*----------------------------------------------------------------------*/
 
-char* 
+char*
 writeSearchResponseAPDU(queryResponse,buffer,len)
 SearchResponseAPDU* queryResponse;
 char* buffer;
@@ -890,7 +873,7 @@ long* len;
   long size;
 
   RESERVE_SPACE_FOR_HEADER(len);
-  
+
   buf = writePDUType(queryResponse->PDUType,buf,len);
   buf = writeBinaryInteger(queryResponse->SearchStatus,(size_t)1,buf,len);
   buf = writeBinaryInteger(queryResponse->ResultCount,(size_t)3,buf,len);
@@ -899,21 +882,21 @@ long* len;
   buf = writeNum(queryResponse->ResultSetStatus,DT_ResultSetStatus,buf,len);
   buf = writeNum(queryResponse->PresentStatus,DT_PresentStatus,buf,len);
   buf = writeAny(queryResponse->ReferenceID,DT_ReferenceID,buf,len);
-    
+
   /* go back and write the header-length-indicator */
   RELEASE_HEADER_SPACE(len);
-  size = buf - buffer - HEADER_LEN; 
+  size = buf - buffer - HEADER_LEN;
   writeBinaryInteger(size,HEADER_LEN,buffer,len);
 
   if (queryResponse->DatabaseDiagnosticRecords != NULL)
-    buf = writeSearchResponseInfo(queryResponse,buf,len);    
-    
+    buf = writeSearchResponseInfo(queryResponse,buf,len);
+
   return(buf);
 }
 
 /*----------------------------------------------------------------------*/
 
-char* 
+char*
 readSearchResponseAPDU(queryResponse,buffer)
 SearchResponseAPDU** queryResponse;
 char* buffer;
@@ -925,20 +908,20 @@ char* buffer;
   long resultStatus,presentStatus;
   any *refID = NULL;
   void* userInfo = NULL;
-  
+
   /* read required part */
-  buf = readBinaryInteger(&size,HEADER_LEN,buf); 
+  buf = readBinaryInteger(&size,HEADER_LEN,buf);
   buf = readPDUType(&pduType,buf);
   buf = readBinaryInteger(&result,(size_t)1,buf);
   buf = readBinaryInteger(&count,(size_t)3,buf);
   buf = readBinaryInteger(&recordsReturned,(size_t)3,buf);
   buf = readBinaryInteger(&nextPos,(size_t)3,buf);
-  
+
   resultStatus = presentStatus = UNUSED;
   refID = NULL;
 
   /* read optional part */
-  while (buf < (buffer + size + HEADER_LEN)) 
+  while (buf < (buffer + size + HEADER_LEN))
     { data_tag tag = peekTag(buf);
       switch (tag)
 	{ case DT_ResultSetStatus:
@@ -956,18 +939,18 @@ char* buffer;
 	    break;
 	  }
     }
-  
+
   buf = readSearchResponseInfo(&userInfo,buf);
   if (buf == NULL)
     freeAny(refID);
   RETURN_ON_NULL(buf);
-  
+
   /* construct the search object */
   *queryResponse = makeSearchResponseAPDU(result,count,recordsReturned,nextPos,
 					  (long)resultStatus,(long)presentStatus,refID,userInfo);
 
   freeAny(refID);
-  
+
   return(buf);
 }
 
@@ -978,11 +961,11 @@ char* buffer;
 **----------------------------------------------------------------------*/
 /* WIDE AREA INFORMATION SERVER SOFTWARE:
    No guarantees or restrictions.  See the readme file for the full standard
-   disclaimer.	
-  
+   disclaimer.
+
    3.26.90	Harry Morris, morris@think.com
    3.30.90  Harry Morris - Changed any->bits to any->bytes
-   4.11.90  HWM - fixed include file names, changed 
+   4.11.90  HWM - fixed include file names, changed
    				- writeCompressedIntegerWithPadding() to
                   writeCompressedIntWithPadding()
                 - generalized conditional includes (see c-dialect.h)
@@ -992,43 +975,43 @@ char* buffer;
 char* readErrorPosition = NULL; /* pos where buf stoped making sense */
 
 /*----------------------------------------------------------------------*/
-/* A note on error handling 
+/* A note on error handling
    read - these are low level routines, they do not check the type tags
    which (sometimes) preceed the data (this is done by the higher
-   level functions which call these functions).  There is no 
+   level functions which call these functions).  There is no
    attempt made to check that the reading does not exceed the read
-   buffer.  Such cases should be very rare and usually will be 
-   caught by the calling functions. (note - it is unlikely that 
+   buffer.  Such cases should be very rare and usually will be
+   caught by the calling functions. (note - it is unlikely that
    a series of low level reads will go far off the edge without
    triggering a type error.  However, it is possible for a single
-   bad read in an array function (eg. readAny) to attempt to read a 
+   bad read in an array function (eg. readAny) to attempt to read a
    large ammount, possibly causing a segmentation violation or out
    of memory condition.
  */
 /*----------------------------------------------------------------------*/
 
-diagnosticRecord* 
+diagnosticRecord*
 makeDiag(surrogate,code,addInfo)
 boolean surrogate;
 char* code;
 char* addInfo;
 {
-  diagnosticRecord* diag = 
+  diagnosticRecord* diag =
     (diagnosticRecord*)s_malloc((size_t)sizeof(diagnosticRecord));
-  
+
   diag->SURROGATE = surrogate;
   memcpy(diag->DIAG,code,DIAGNOSTIC_CODE_SIZE);
-  diag->ADDINFO = s_strdup(addInfo); 
+  diag->ADDINFO = s_strdup(addInfo);
 
   return(diag);
 }
 
 /*----------------------------------------------------------------------*/
 
-void 
+void
 freeDiag(diag)
 diagnosticRecord* diag;
-{ 
+{
   if (diag != NULL)
     { if (diag->ADDINFO != NULL)
 	s_free(diag->ADDINFO);
@@ -1040,7 +1023,7 @@ diagnosticRecord* diag;
 
 #define END_OF_RECORD	0x1D
 
-char* 
+char*
 writeDiag(diag,buffer,len)
 diagnosticRecord* diag;
 char* buffer;
@@ -1051,42 +1034,42 @@ long* len;
 {
   char* buf = buffer;
   long  length;
-  
+
   if (diag == NULL)		/* handle unspecified optional args */
     return(buf);
 
   buf = writeTag(DT_DatabaseDiagnosticRecords,buf,len);
   CHECK_FOR_SPACE_LEFT(0,len);
-  
-  length = 3; 
+
+  length = 3;
   if (diag->ADDINFO != NULL)
     length += strlen(diag->ADDINFO);
-    
+
   if (length >= 0xFFFF )	/* make sure the length is reasonable */
     { length = 0xFFFF - 1;
       diag->ADDINFO[0xFFFF - 3 - 1] = '\0';
     }
-   
+
   buf = writeBinaryInteger(length,2,buf,len);
 
   CHECK_FOR_SPACE_LEFT(1,len);
-  buf[0] = diag->DIAG[0]; 
+  buf[0] = diag->DIAG[0];
   buf++;
-  
+
   CHECK_FOR_SPACE_LEFT(1,len);
   buf[0] = diag->DIAG[1];
   buf++;
-  
+
   if (length > 3)
     { CHECK_FOR_SPACE_LEFT(3,len);
       memcpy(buf,diag->ADDINFO,(size_t)length - 3);
       buf += length - 3;
     }
-   
+
   CHECK_FOR_SPACE_LEFT(1,len);
   buf[0] = diag->SURROGATE;
   buf++;
-  
+
   CHECK_FOR_SPACE_LEFT(1,len);
   buf[0] = END_OF_RECORD;
   buf++;
@@ -1096,25 +1079,25 @@ long* len;
 
 /*----------------------------------------------------------------------*/
 
-char* 
+char*
 readDiag(diag,buffer)
 diagnosticRecord** diag;
 char* buffer;
 {
   char* buf = buffer;
-  diagnosticRecord* d 
+  diagnosticRecord* d
     = (diagnosticRecord*)s_malloc((size_t)sizeof(diagnosticRecord));
   data_tag tag;
   long len;
-  
+
   buf = readTag(&tag,buf);
-  
+
   buf = readBinaryInteger(&len,2,buf);
-  
+
   d->DIAG[0] = buf[0];
   d->DIAG[1] = buf[1];
   d->DIAG[2] = '\0';
-    
+
   if (len > 3)
     { d->ADDINFO = (char*)s_malloc((size_t)(len - 3 + 1));
       memcpy(d->ADDINFO,(char*)(buf + 2),(size_t)(len - 3));
@@ -1122,9 +1105,9 @@ char* buffer;
     }
   else
     d->ADDINFO = NULL;
-    
+
   d->SURROGATE = buf[len - 1];
-  
+
   *diag = d;
 
   return(buf + len + 1);
@@ -1142,26 +1125,26 @@ unsigned long num;
 char* buf;
 long* len;
 /* write a binary integer in the format described on p. 40.
-   this might be sped up 
+   this might be sped up
 */
 {
   char byte;
-  long i;
+  unsigned long i;
   unsigned long size;
-  
+
   size = writtenCompressedIntSize(num);
   CHECK_FOR_SPACE_LEFT(size,len);
-  
-  for (i = size - 1; i >= 0; i--)
+
+  for (i = size - 1; i != 0; i--)
     { byte = num & dataMask;
       if (i != (size-1))	/* turn on continue bit */
 	byte = (char)(byte | continueBit);
       buf[i] = byte;
       num = num >> dataBits;	/* don't and here */
     }
-   
+
   return(buf + size);
-} 
+}
 
 /*----------------------------------------------------------------------*/
 
@@ -1170,15 +1153,15 @@ readCompressedInteger(num,buf)
 unsigned long *num;
 char* buf;
 /* read a binary integer in the format described on p. 40.
-   this might be sped up 
+   this might be sped up
 */
 {
   long i = 0;
   unsigned char byte;
 
   *num = 0;
-  
-  do 
+
+  do
     { byte = buf[i++];
       *num = *num << dataBits;
       *num += (byte & dataMask);
@@ -1186,7 +1169,7 @@ char* buf;
   while (byte & continueBit);
 
   return(buf + i);
-} 
+}
 
 /*----------------------------------------------------------------------*/
 
@@ -1199,16 +1182,16 @@ unsigned long size;
 char* buffer;
 long* len;
 /* Like writeCompressedInteger, except writes padding (128) to make
-   sure that size bytes are used.  This can be read correctly by 
+   sure that size bytes are used.  This can be read correctly by
    readCompressedInteger()
 */
 {
   char* buf = buffer;
   unsigned long needed,padding;
   long i;
-    
+
   CHECK_FOR_SPACE_LEFT(size,len);
-  
+
   needed = writtenCompressedIntSize(num);
   padding = size - needed;
   i = padding - 1;
@@ -1216,11 +1199,11 @@ long* len;
   for (i = padding - 1;i >= 0;i--)
     { buf[i] = pad;
     }
-  
+
   buf = writeCompressedInteger(num,buf + padding,len);
-  
+
   return(buf);
-} 
+}
 
 /*----------------------------------------------------------------------*/
 
@@ -1231,14 +1214,14 @@ unsigned long num;
    compressed format.  curently limited to 4 bytes
  */
 {
-  if (num < CompressedInt1Byte) 
+  if (num < CompressedInt1Byte)
     return(1);
-  else if (num < CompressedInt2Byte) 
+  else if (num < CompressedInt2Byte)
     return(2);
   else if (num < CompressedInt3Byte)
     return(3);
   else
-    return(4);    
+    return(4);
 }
 
 /*----------------------------------------------------------------------*/
@@ -1249,9 +1232,9 @@ data_tag tag;
 char* buf;
 long* len;
 /* write out a data tag */
-{ 
+{
   return(writeCompressedInteger(tag,buf,len));
-} 
+}
 
 /*----------------------------------------------------------------------*/
 
@@ -1260,16 +1243,16 @@ readTag(tag,buf)
 data_tag* tag;
 char* buf;
 /* read a data tag */
-{ 
+{
   return(readCompressedInteger(tag,buf));
-} 
+}
 
 /*----------------------------------------------------------------------*/
 
-unsigned long 
+unsigned long
 writtenTagSize(tag)
 data_tag tag;
-{ 
+{
   return(writtenCompressedIntSize(tag));
 }
 
@@ -1283,11 +1266,11 @@ char* buf;
   data_tag tag;
   readTag(&tag,buf);
   return(tag);
-} 
+}
 
 /*----------------------------------------------------------------------*/
 
-any* 
+any*
 makeAny(size,data)
 unsigned long size;
 char* data;
@@ -1304,7 +1287,7 @@ void
 freeAny(a)
 any* a;
 /* destroy an any and its associated data. Assumes a->bytes was
-   allocated using the s_malloc family of libraries 
+   allocated using the s_malloc family of libraries
  */
 {
   if (a != NULL)
@@ -1316,7 +1299,7 @@ any* a;
 
 /*----------------------------------------------------------------------*/
 
-any* 
+any*
 duplicateAny(a)
 any* a;
 {
@@ -1338,7 +1321,7 @@ any* a;
 
 /*----------------------------------------------------------------------*/
 
-char* 
+char*
 writeAny(a,tag,buffer,len)
 any* a;
 data_tag tag;
@@ -1350,7 +1333,7 @@ long* len;
 
   if (a == NULL)		/* handle unspecified optional args */
     return(buf);
-  
+
   /* write the tags */
   buf = writeTag(tag,buf,len);
   buf = writeCompressedInteger(a->size,buf,len);
@@ -1379,9 +1362,9 @@ char* buffer;
 a=(any*)s_malloc((size_t)sizeof(any));
 
   buf=buffer;
-  
+
   buf = readTag(&tag,buf);
-  
+
   buf = readCompressedInteger(&a->size,buf);
 
   /* now simply copy the bytes */
@@ -1394,7 +1377,7 @@ a=(any*)s_malloc((size_t)sizeof(any));
 
 /*----------------------------------------------------------------------*/
 
-unsigned long 
+unsigned long
 writtenAnySize(tag,a)
 data_tag tag;
 any* a;
@@ -1417,10 +1400,10 @@ stringToAny(s)
 char* s;
 {
   any* a = NULL;
-  
+
   if (s == NULL)
     return(NULL);
-    
+
   a = (any*)s_malloc((size_t)sizeof(any));
   a->size = strlen(s);
   a->bytes = (char*)s_malloc((size_t)a->size);
@@ -1435,10 +1418,10 @@ anyToString(a)
 any* a;
 {
   char* s = NULL;
-  
+
   if (a == NULL)
     return(NULL);
-    
+
   s = s_malloc((size_t)(a->size + 1));
   memcpy(s,a->bytes,(size_t)a->size);
   s[a->size] = '\0';
@@ -1447,15 +1430,15 @@ any* a;
 
 /*----------------------------------------------------------------------*/
 
-char* 
+char*
 writeString(s,tag,buffer,len)
 char* s;
 data_tag tag;
 char* buffer;
 long* len;
-/* Write a C style string.  The terminating null is not written. 
+/* Write a C style string.  The terminating null is not written.
    This function is not part of the Z39.50 spec.  It is provided
-   for the convienience of those wishing to pass C strings in 
+   for the convienience of those wishing to pass C strings in
    the place of an any.
  */
 {
@@ -1463,7 +1446,7 @@ long* len;
   any* data = NULL;
   if (s == NULL)
     return(buffer);		/* handle unused optional item before making an any */
-  data = (any*)s_malloc((size_t)sizeof(any)); 
+  data = (any*)s_malloc((size_t)sizeof(any));
   data->size = strlen(s);
   data->bytes = s;		/* save a copy here by not using stringToAny() */
   buf = writeAny(data,tag,buf,len);
@@ -1473,14 +1456,14 @@ long* len;
 
 /*----------------------------------------------------------------------*/
 
-char* 
+char*
 readString(s ,buffer)
 char** s ;
 char* buffer;
 /* Read an any and convert it into a C style string.
    This function is not part of the Z39.50 spec.  It is provided
-   for the convienience of those wishing to pass C strings in 
-   the place of an any. 
+   for the convienience of those wishing to pass C strings in
+   the place of an any.
  */
 {
   any* data = NULL;
@@ -1492,7 +1475,7 @@ char* buffer;
 
 /*----------------------------------------------------------------------*/
 
-unsigned long 
+unsigned long
 writtenStringSize(tag,s)
 data_tag tag;
 char* s;
@@ -1510,7 +1493,7 @@ char* s;
 
 /*----------------------------------------------------------------------*/
 
-any* 
+any*
 longToAny(num)
 long num;
 /* a convienience function */
@@ -1518,7 +1501,7 @@ long num;
   char s[40];
 
   sprintf(s,"%ld",num);
-  
+
   return(stringToAny(s));
 }
 
@@ -1537,7 +1520,7 @@ any* a;
   s_free(str);
   return(num);
 }
- 
+
 /*----------------------------------------------------------------------*/
 
 #define bitsPerByte	8
@@ -1551,18 +1534,18 @@ makeBitMap(unsigned long numBits, ...)
   bit_map* bm = NULL;
 
   va_start(ap,numBits);
-  
+
   bm = (bit_map*)s_malloc((size_t)sizeof(bit_map));
-  bm->size = (unsigned long)ceil((double)numBits / bitsPerByte); 
+  bm->size = (unsigned long)(ceil((double)numBits / bitsPerByte));
   bm->bytes = (char*)s_malloc((size_t)bm->size);
-  
+
   /* fill up the bits */
   for (i = 0; i < bm->size; i++) /* iterate over bytes */
     { char byte = 0;
       for (j = 0; j < bitsPerByte; j++) /* iterate over bits */
 	{ if ((i * bitsPerByte + j) < numBits)
 	    { boolean bit = false;
-	      bit = (boolean)va_arg(ap,boolean); 
+	      bit = (boolean)va_arg(ap,boolean);
 	      if (bit)
 	        { byte = byte | (1 << (bitsPerByte - j - 1));
 	        }
@@ -1589,8 +1572,8 @@ bit_map* bm;
 
 /*----------------------------------------------------------------------*/
 
-/* use this routine to interpret a bit map.  pos specifies the bit 
-   number.  bit 0 is the Leftmost bit of the first byte.  
+/* use this routine to interpret a bit map.  pos specifies the bit
+   number.  bit 0 is the Leftmost bit of the first byte.
    Could do bounds checking.
  */
 
@@ -1602,7 +1585,7 @@ bit_map* bm;
   if (pos > bm->size*bitsPerByte)
     return false;
   else
-    return((bm->bytes[(pos / bitsPerByte)] & 
+    return((bm->bytes[(pos / bitsPerByte)] &
 	    (0x80>>(pos % bitsPerByte))) ?
 	   true : false);
 }
@@ -1616,7 +1599,7 @@ data_tag tag;
 char* buffer;
 long* len;
 /* write a bitmap + type and size info */
-{ 
+{
   return(writeAny((any*)bm,tag,buffer,len));
 }
 
@@ -1639,7 +1622,7 @@ c=readAny((any**)bm,buffer);
 
 /*----------------------------------------------------------------------*/
 
-char* 
+char*
 writeByte(byte,buf,len)
 unsigned long byte;
 char* buf;
@@ -1652,7 +1635,7 @@ long* len;
 
 /*----------------------------------------------------------------------*/
 
-char* 
+char*
 readByte(byte,buf)
 unsigned char* byte;
 char* buf;
@@ -1663,7 +1646,7 @@ char* buf;
 
 /*----------------------------------------------------------------------*/
 
-char* 
+char*
 writeBoolean(flag,buf,len)
 boolean flag;
 char* buf;
@@ -1674,7 +1657,7 @@ long* len;
 
 /*----------------------------------------------------------------------*/
 
-char* 
+char*
 readBoolean(flag,buffer)
 boolean* flag;
 char* buffer;
@@ -1695,7 +1678,7 @@ long* len;
 /* PDUType is a single byte */
 {
   return(writeBinaryInteger((long)pduType,(unsigned long)1,buf,len));
-} 
+}
 
 /*----------------------------------------------------------------------*/
 
@@ -1706,14 +1689,14 @@ char* buf;
 /* PDUType is a single byte */
 {
   return(readBinaryInteger((long*)pduType,(unsigned long)1,buf));
-} 
+}
 
 /*----------------------------------------------------------------------*/
 
 pdu_type
 peekPDUType(buf)
 char* buf;
-/* read the next pdu without advancing the buffer, Note that this 
+/* read the next pdu without advancing the buffer, Note that this
    function is to be used on a buffer that is known to contain an
    APDU.  The pdu_type is written HEADER_LEN bytes into the buffer
  */
@@ -1781,11 +1764,11 @@ char* buf;
 
 /*----------------------------------------------------------------------*/
 
-unsigned long 
+unsigned long
 writtenCompressedBinIntSize(num)
 long num;
 /* return the number of bytes needed to represent the value num.
-   currently limited to max of 4 bytes 
+   currently limited to max of 4 bytes
    Only compresses for positive nums - negatives get whole 4 bytes
  */
 {
@@ -1800,7 +1783,7 @@ long num;
   else
     return(4);
 }
- 
+
 /*----------------------------------------------------------------------*/
 
 char*
@@ -1813,13 +1796,13 @@ long* len;
 {
   char* buf = buffer;
   long size = writtenCompressedBinIntSize(num);
-  
+
   if (num == UNUSED)
     return(buffer);
-    
+
   buf = writeTag(tag,buf,len);
-  buf = writeCompressedInteger(size,buf,len); 
-  buf = writeBinaryInteger(num,(unsigned long)size,buf,len); 
+  buf = writeCompressedInteger(size,buf,len);
+  buf = writeBinaryInteger(num,(unsigned long)size,buf,len);
   return(buf);
 }
 
@@ -1835,7 +1818,7 @@ char* buffer;
   data_tag tag;
   unsigned long size;
   unsigned long val;
-  
+
   buf = readTag(&tag,buf);
   buf = readCompressedInteger(&val,buf);
   size = (unsigned long)val;
@@ -1845,24 +1828,24 @@ char* buffer;
 
 /*----------------------------------------------------------------------*/
 
-unsigned long 
+unsigned long
 writtenNumSize(tag,num)
 data_tag tag;
 long num;
 {
   long dataSize = writtenCompressedBinIntSize(num);
   long size;
-  
+
   size = writtenTagSize(tag); /* space for the tag */
   size += writtenCompressedIntSize(dataSize); /* space for the size */
   size += dataSize; /* space for the data */
-  
+
   return(size);
 }
 
 /*----------------------------------------------------------------------*/
 
-typedef void (voidfunc)();
+typedef void (voidfunc)(void *);
 
 void
 doList(list,func)
@@ -1880,7 +1863,7 @@ voidfunc *func;
 
 /*----------------------------------------------------------------------*/
 
-char* 
+char*
 writeProtocolVersion(buf,len)
 char* buf;
 long* len;
@@ -1891,7 +1874,7 @@ long* len;
   if (version == NULL)
    { version = makeBitMap((unsigned long)1,true); /* version 1! */
    }
-    
+
   return(writeBitMap(version,DT_ProtocolVersion,buf,len));
 }
 
@@ -1931,8 +1914,8 @@ defaultImplementationVersion()
 **----------------------------------------------------------------------*/
 /* WIDE AREA INFORMATION SERVER SOFTWARE:
    No guarantees or restrictions.  See the readme file for the full standard
-   disclaimer.	
-  
+   disclaimer.
+
    3.26.90	Harry Morris, morris@think.com
    4.11.90  HWM - generalized conditional includes (see c-dialect.h)
 */
@@ -1978,7 +1961,7 @@ any* term;
 query_term*
 makeResultSetTerm(resultSet)
 any* resultSet;
-{ 
+{
   query_term* qt = (query_term*)s_malloc((size_t)sizeof(query_term));
 
   qt->TermType = TT_ResultSetID;
@@ -1986,13 +1969,13 @@ any* resultSet;
   qt->ResultSetID = duplicateAny(resultSet);
 
   qt->Term = NULL;
-  
+
   return(qt);
 }
 
 /*----------------------------------------------------------------------*/
 
-query_term* 
+query_term*
 makeOperatorTerm(operatorCode)
 char* operatorCode;
 {
@@ -2010,10 +1993,11 @@ char* operatorCode;
 
 /*----------------------------------------------------------------------*/
 
-void 
-freeTerm(qt)
-query_term* qt;
+void
+freeTerm(param)
+void* param;
 {
+  query_term* qt = (query_term*)param;
   switch (qt->TermType)
     { case TT_Attribute:
 	freeAny(qt->Term);
@@ -2037,7 +2021,7 @@ query_term* qt;
 #define ATTRIBUTE_LIST_SIZE	ATTRIBUTE_SIZE * 6
 #define AT_DELIMITER	" "
 
-char* 
+char*
 writeQueryTerm(qt,buffer,len)
 query_term* qt;
 char* buffer;
@@ -2048,15 +2032,15 @@ long* len;
 
   switch (qt->TermType)
     { case TT_Attribute:
-	strncpy(attributes,qt->Use,ATTRIBUTE_LIST_SIZE); 
+	strncpy(attributes,qt->Use,ATTRIBUTE_LIST_SIZE);
 	s_strncat(attributes,AT_DELIMITER,sizeof(AT_DELIMITER) + 1,ATTRIBUTE_LIST_SIZE);
-	s_strncat(attributes,qt->Relation,ATTRIBUTE_SIZE,ATTRIBUTE_LIST_SIZE); 
+	s_strncat(attributes,qt->Relation,ATTRIBUTE_SIZE,ATTRIBUTE_LIST_SIZE);
 	s_strncat(attributes,AT_DELIMITER,sizeof(AT_DELIMITER) + 1,ATTRIBUTE_LIST_SIZE);
-	s_strncat(attributes,qt->Position,ATTRIBUTE_SIZE,ATTRIBUTE_LIST_SIZE); 
+	s_strncat(attributes,qt->Position,ATTRIBUTE_SIZE,ATTRIBUTE_LIST_SIZE);
 	s_strncat(attributes,AT_DELIMITER,sizeof(AT_DELIMITER) + 1,ATTRIBUTE_LIST_SIZE);
-	s_strncat(attributes,qt->Structure,ATTRIBUTE_SIZE,ATTRIBUTE_LIST_SIZE); 
+	s_strncat(attributes,qt->Structure,ATTRIBUTE_SIZE,ATTRIBUTE_LIST_SIZE);
 	s_strncat(attributes,AT_DELIMITER,sizeof(AT_DELIMITER) + 1,ATTRIBUTE_LIST_SIZE);
-	s_strncat(attributes,qt->Truncation,ATTRIBUTE_SIZE,ATTRIBUTE_LIST_SIZE); 
+	s_strncat(attributes,qt->Truncation,ATTRIBUTE_SIZE,ATTRIBUTE_LIST_SIZE);
 	s_strncat(attributes,AT_DELIMITER,sizeof(AT_DELIMITER) + 1,ATTRIBUTE_LIST_SIZE);
 	s_strncat(attributes,qt->Completeness,ATTRIBUTE_SIZE,ATTRIBUTE_LIST_SIZE);
 	buf = writeString(attributes,DT_AttributeList,buf,len);
@@ -2079,7 +2063,7 @@ long* len;
 
 /*----------------------------------------------------------------------*/
 
-char* 
+char*
 readQueryTerm(qt,buffer)
 query_term** qt;
 char* buffer;
@@ -2097,7 +2081,7 @@ char* buffer;
   any*	resultSetID = NULL;
   data_tag tag;
 
-  
+
   tag = peekTag(buffer);
 
   switch(tag)
@@ -2117,7 +2101,7 @@ char* buffer;
 	break;
       case DT_ResultSetID:
 	buf = readAny(&resultSetID,buf);
-	*qt = makeResultSetTerm(resultSetID);	
+	*qt = makeResultSetTerm(resultSetID);
 	freeAny(resultSetID);
 	break;
       case DT_Operator:
@@ -2129,21 +2113,21 @@ char* buffer;
 	REPORT_READ_ERROR(buf);
 	break;
       }
-  
+
   return(buf);
 }
 
 /*----------------------------------------------------------------------*/
 
-static unsigned long getQueryTermSize _AP((query_term* qt));
+static unsigned long getQueryTermSize PARAMS((query_term* qt));
 
 static unsigned long
 getQueryTermSize(qt)
 query_term* qt;
 /* figure out how many bytes it will take to write this query */
 {
-  unsigned long size;
-  static char attributes[] = "11 22 33 44 55 66"; /* we just need this to 
+  unsigned long size = 0;
+  static char attributes[] = "11 22 33 44 55 66"; /* we just need this to
 						     calculate its written
 						     size */
 
@@ -2169,7 +2153,7 @@ query_term* qt;
 
 /*----------------------------------------------------------------------*/
 
-/* A query is simply a null terminated list of query terms. For 
+/* A query is simply a null terminated list of query terms. For
    transmission, a query is written into an any which is sent as
    the user information field. */
 
@@ -2227,7 +2211,7 @@ log_write(tmp);
 	{ terms = (query_term**)s_malloc((size_t)(sizeof(query_term*)*2));
 	}
       else
-	{ terms = 
+	{ terms =
 	    (query_term**)s_realloc((char*)terms,
 				    (size_t)(sizeof(query_term*)*(numTerms+2)));
 	  }
@@ -2258,14 +2242,13 @@ if(qt==NULL)
  * up a little window to explain the problem.
  * On a unix box, it will print out the error and call perror()
  */
- 
+
 /*----------------------------------------------------------------------*/
 
-static void exitAction _AP((long error));
+static void exitAction PARAMS((long error));
 
 static void
-exitAction(error)
-long error;
+exitAction(long error GCC_UNUSED)
 {
   long i;
   for (i = 0; i < 100000; i++)
@@ -2287,7 +2270,7 @@ panic(char *format, ...)
   vfprintf(stderr,format,ap);	/* print the contents */
   va_end(ap);			/* free ap */
   fflush(stderr);
-  
+
   exitAction(0);
 }
 
@@ -2298,16 +2281,13 @@ panic(char *format, ...)
 **	Routines originally from cutil.c -- FM
 **
 **----------------------------------------------------------------------*/
-/* Wide AREA INFORMATION SERVER SOFTWARE	
+/* Wide AREA INFORMATION SERVER SOFTWARE
    No guarantees or restrictions.  See the readme file for the full standard
-   disclaimer.  
-  
+   disclaimer.
+
    3.26.90	Harry Morris, morris@think.com
    4.11.90  HWM - generalized conditional includes (see c-dialect.h)
 */
-
-#include <varargs.h>
-
 
 /*----------------------------------------------------------------------*/
 
@@ -2315,7 +2295,7 @@ void
 fs_checkPtr(ptr)
 void* ptr;
 /* If the ptr is NULL, give an error */
-{ 
+{
   if (ptr == NULL)
     panic("checkPtr found a NULL pointer");
 }
@@ -2326,12 +2306,12 @@ void*
 fs_malloc(size)
 size_t size;
 /* does safety checks and optional accounting */
-{ 
+{
   register void* ptr = NULL;
 
   ptr = (void*)calloc((size_t)size,(size_t)1);
   s_checkPtr(ptr);
-  
+
   return(ptr);
 }
 
@@ -2341,19 +2321,19 @@ void*
 fs_realloc(ptr,size)
 void* ptr;
 size_t size;
-/* does safety checks and optional accounting 
+/* does safety checks and optional accounting
    note - we don't know how big ptr's memory is, so we can't ensure
    that any new memory allocated is NULLed!
  */
-{ 
+{
   register void* nptr = NULL;
-  
+
   if (ptr == NULL)		/* this is really a malloc */
     return(s_malloc(size));
-    
+
   nptr = (void*)realloc(ptr,size);
   s_checkPtr(ptr);
-   
+
   return(nptr);
 }
 
@@ -2378,16 +2358,16 @@ s_strdup(s)
 char* s;
 
 /* return a copy of s.  This is identical to the standard library routine
-   strdup(), except that it is safe.  If s == NULL or malloc fails, 
+   strdup(), except that it is safe.  If s == NULL or malloc fails,
    appropriate action is taken.
  */
 {
   unsigned long len;
   char* copy = NULL;
-  
+
   if (s == NULL)		/* saftey check to postpone stupid errors */
     return(NULL);
-    
+
   len = strlen(s);		/* length of string - terminator */
   copy = (char*)s_malloc((size_t)(sizeof(char)*(len + 1)));
   strncpy(copy,s,len + 1);
@@ -2403,13 +2383,13 @@ char* dst;
    size_t maxToAdd;
    size_t maxTotal;
 
-/* like strncat, except the fourth argument limits the maximum total 
+/* like strncat, except the fourth argument limits the maximum total
    length of the resulting string
  */
 {
   size_t dstSize = strlen(dst);
   size_t srcSize = strlen(src);
-  
+
   if (dstSize + srcSize < maxTotal) /* use regular old strncat */
     return(strncat(dst,src,maxToAdd));
   else

@@ -1,5 +1,4 @@
 #include <HTUtils.h>
-#include <tcp.h>
 #include <HTTP.h>
 #include <HTParse.h>
 #include <HTAccess.h>
@@ -51,8 +50,6 @@
 
 #include <LYexit.h>
 #include <LYLeaks.h>
-
-#define FREE(x) if (x) {free(x); x = NULL;}
 
 #ifdef VMS
 #define DISPLAY "DECW$DISPLAY"
@@ -336,7 +333,9 @@ PUBLIC BOOLEAN LYMBMAdvanced = TRUE;
 PUBLIC int LYStatusLine = -1;		 /* Line for statusline() if > -1 */
 PUBLIC BOOLEAN LYCollapseBRs = COLLAPSE_BR_TAGS;  /* Collapse serial BRs? */
 PUBLIC BOOLEAN LYSetCookies = SET_COOKIES; /* Process Set-Cookie headers? */
-PUBLIC BOOLEAN LYEatAllCookies = EAT_ALL_COOKIES; /* take all cookies?    */
+PUBLIC BOOLEAN LYAcceptAllCookies = ACCEPT_ALL_COOKIES; /* take all cookies? */
+PUBLIC char *LYCookieAcceptDomains = NULL; /* domains to accept all cookies */
+PUBLIC char *LYCookieRejectDomains = NULL; /* domains to reject all cookies */
 PUBLIC char *XLoadImageCommand = NULL;	/* Default image viewer for X */
 PUBLIC BOOLEAN LYNoISMAPifUSEMAP = FALSE; /* Omit ISMAP link if MAP present? */
 PUBLIC int LYHiddenLinks = HIDDENLINKS_SEPARATE; /* Show hidden links? */
@@ -2525,6 +2524,10 @@ static int width_fun ARGS3(
 
 static Parse_Args_Type Arg_Table [] =
 {
+   PARSE_SET(
+      "accept_all_cookies", SET_ARG,		&LYAcceptAllCookies,
+      "accepts all cookies"
+   ),
    PARSE_FUN(
       "anonymous",	FUNCTION_ARG,	anonymous_fun,
       "used to specify the anonymous account"
@@ -2607,10 +2610,6 @@ with -dump, format output as with -traversal, but to stdout"
    PARSE_FUN(
       "dump",		FUNCTION_ARG,		dump_output_fun,
       "dump the first file to stdout and exit"
-   ),
-   PARSE_SET(
-      "eat_all_cookies", SET_ARG,		&LYEatAllCookies,
-      "accepts all cookies"
    ),
    PARSE_FUN(
       "editor", 	NEED_FUNCTION_ARG,	editor_fun,

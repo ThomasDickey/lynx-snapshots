@@ -42,9 +42,8 @@
 */
 
 
-
 #include <HTUtils.h>
-#include <string.h>
+
 #include <HTAAUtil.h>
 #include <HTLex.h>	/* Lexical analysor	*/
 #include <HTGroup.h>	/* Implemented here	*/

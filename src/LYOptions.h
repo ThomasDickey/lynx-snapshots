@@ -1,12 +1,17 @@
 #ifndef LYOPTIONS_H
 #define LYOPTIONS_H
 
+#include <LYStructs.h>
+
 extern BOOLEAN term_options;
 
-extern void options NOPARAMS;
 extern void edit_bookmarks NOPARAMS;
+
+#ifdef EXP_FORMS_OPTIONS
 extern int postoptions PARAMS((document *newdoc));
 extern int gen_options PARAMS((char **newfile));
+#else
+extern void LYoptions NOPARAMS;
 
 /*
  *  Values for the options menu. - FM
@@ -63,6 +68,8 @@ extern int gen_options PARAMS((char **newfile));
 #define L_USER_AGENT	17
 #define L_EXEC		18
 #endif /* DIRED_SUPPORT */
+
+#endif /* EXP_FORMS_OPTIONS */
 
 #define OPTIONS_TITLE "Lynx Options Configuration"
 

@@ -31,11 +31,7 @@
 #ifndef HTAABROW_H
 #define HTAABROW_H
 
-#ifndef HTUTILS_H
-#include <HTUtils.h>            /* BOOL, PARAMS, ARGS */
-#endif /* HTUTILS_H */
 #include <HTAAUtil.h>           /* Common parts of AA */
-
 
 #ifdef SHORT_NAMES
 #define HTAAcoAu        HTAA_composeAuth

@@ -1,5 +1,4 @@
 #include <HTUtils.h>
-#include <tcp.h>
 #include <HTAccess.h>
 #include <HTList.h>
 #include <HTAlert.h>
@@ -25,8 +24,6 @@
 #endif
 
 #include <LYLeaks.h>
-
-#define FREE(x) if (x) {free(x); x = NULL;}
 
 /*
  *  printfile prints out the current file minus the links and targets
@@ -351,12 +348,7 @@ PUBLIC int printfile ARGS1(
 		}
 
 		if (no_dotfiles || !show_dotfiles) {
-		    if (*filename == '.' ||
-#ifdef VMS
-			((cp = strrchr(filename, ':')) && *(cp+1) == '.') ||
-			((cp = strrchr(filename, ']')) && *(cp+1) == '.') ||
-#endif /* VMS */
-			((cp = strrchr(filename, '/')) && *(cp+1) == '.')) {
+		    if (*LYPathLeaf(filename) == '.') {
 			HTAlert(FILENAME_CANNOT_BE_DOT);
 			_statusline(NEW_FILENAME_PROMPT);
 			FirstRecall = TRUE;
@@ -1125,15 +1117,7 @@ PUBLIC int printfile ARGS1(
 			}
 
 			if (no_dotfiles || !show_dotfiles) {
-			    if (*filename == '.' ||
-#ifdef VMS
-			       ((cp = strrchr(filename, ':')) &&
-						*(cp+1) == '.') ||
-			       ((cp = strrchr(filename, ']')) &&
-						*(cp+1) == '.') ||
-#endif /* VMS */
-			       ((cp = strrchr(filename, '/')) &&
-						*(cp+1) == '.')) {
+			    if (*LYPathLeaf(filename) == '.') {
 				HTAlert(FILENAME_CANNOT_BE_DOT);
 				_statusline(NEW_FILENAME_PROMPT);
 				FirstRecall = TRUE;

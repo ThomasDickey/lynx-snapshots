@@ -12,19 +12,16 @@
 **	(c) Copyright CERN 1991 - See Copyright.html
 **
 */
+
 #include <HTUtils.h>
 
 #define HASH_SIZE	101		/* Tunable */
 #include <HTAtom.h>
 
-#include <string.h>
-
 #include <HTList.h>
 
 #include <LYexit.h>
 #include <LYLeaks.h>
-
-#define FREE(x) if (x) {free(x); x = NULL;}
 
 PRIVATE HTAtom * hash_table[HASH_SIZE];
 PRIVATE BOOL initialised = NO;
@@ -43,7 +40,7 @@ PUBLIC HTAtom * HTAtom_for ARGS1(CONST char *, string)
 {
     int hash;
     HTAtom * a;
-    
+
     /*		First time around, clear hash table
     */
     /*
@@ -57,11 +54,11 @@ PUBLIC HTAtom * HTAtom_for ARGS1(CONST char *, string)
 	initialised = YES;
 	atexit(free_atoms);
     }
-    
+
     /*		Generate hash function
     */
     hash = HASH_FUNCTION(string);
-    
+
     /*		Search for the string in the list
     */
     for (a = hash_table[hash]; a; a = a->next) {
@@ -70,7 +67,7 @@ PUBLIC HTAtom * HTAtom_for ARGS1(CONST char *, string)
 	    return a;				/* Found: return it */
 	}
     }
-    
+
     /*		Generate a new entry
     */
     a = (HTAtom *)malloc(sizeof(*a));
@@ -144,7 +141,7 @@ PRIVATE BOOL mime_match ARGS2(CONST char *, name,
     }
     return NO;
 }
-	
+
 
 PUBLIC HTList *HTAtom_templateMatches ARGS1(CONST char *, templ)
 {

@@ -1,5 +1,4 @@
 #include <HTUtils.h>
-#include <tcp.h>
 #include <LYCurses.h>
 #include <LYStyle.h>
 #include <LYUtils.h>
@@ -14,8 +13,6 @@
 
 #include <LYexit.h>
 #include <LYLeaks.h>
-
-#define FREE(x) if (x) {free(x); x = NULL;}
 
 #ifdef VMS
 #define DISPLAY "DECW$DISPLAY"
@@ -652,9 +649,9 @@ PUBLIC void start_curses NOARGS
 
     if (slinit == 0) {
 	SLtt_get_terminfo();
-#if defined(__DJGPP__) && !defined(DJGPP_KEYHANDLER) 
+#if defined(__DJGPP__) && !defined(DJGPP_KEYHANDLER)
 	SLkp_init ();
-#endif /* __DJGPP__ && !DJGPP_KEYHANDLER */ 
+#endif /* __DJGPP__ && !DJGPP_KEYHANDLER */
 
 #ifdef UNIX
 #if SLANG_VERSION >= 9935
@@ -726,7 +723,7 @@ PUBLIC void start_curses NOARGS
     scrollok(0,0);
     SLsmg_Backspace_Moves = 1;
 #ifndef VMS
-#if !defined(_WINDOWS) && !defined(__DJGPP__) 
+#if !defined(_WINDOWS) && !defined(__DJGPP__)
     SLtty_set_suspend_state(1);
 #endif /* !_WINDOWS */
 #ifdef SIGTSTP
@@ -1231,7 +1228,6 @@ PUBLIC void LYstopTargetEmphasis NOARGS
 #include <descrip.h>
 #include <iodef.h>
 #include <ssdef.h>
-#include <stdlib.h>
 #include <msgdef.h>
 #include <ttdef.h>
 #include <tt2def.h>

@@ -19,7 +19,6 @@
 
 #include <HTUtils.h>
 
-#include <string.h>
 #ifndef VMS
 #ifndef NOUSERS
 #include <pwd.h>	/* Unix password file routine: getpwnam()	*/
