@@ -1107,8 +1107,9 @@ PUBLIC BOOL HTEditable ARGS1(
 	fprintf(tfp,
 	    "File mode is 0%o, uid=%d, gid=%d. My uid=%d, %d groups (",
 	    (unsigned int) fileStatus.st_mode, fileStatus.st_uid,
-	    fileStatus.st_gid,
-	    myUid, ngroups);
+	    (int) fileStatus.st_gid,
+	    (int) myUid,
+	    (int) ngroups);
 	for (i2 = 0; i2 < ngroups; i2++)
 	    fprintf(tfp, " %d", groups[i2]);
 	fprintf(tfp, ")\n");
@@ -1753,7 +1754,7 @@ PUBLIC int HTLoadFile ARGS4(
 	if ((strlen(localname) > strlen(MULTI_SUFFIX)) &&
 	    (0 == strcmp(localname + strlen(localname) - strlen(MULTI_SUFFIX),
 			 MULTI_SUFFIX))) {
-	    DIR *dp;
+	    DIR *dp = 0;
 	    BOOL forget_multi = NO;
 
 	    STRUCT_DIRENT * dirbuf;

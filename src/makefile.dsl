@@ -9,14 +9,16 @@ LYLeaks.o LYexit.o LYJump.o LYList.o LYCgi.o LYTraversal.o \
 LYEditmap.o LYCharSets.o LYCharUtils.o LYMap.o LYCookie.o LYExtern.o \
 LYStyle.o LYHash.o
 
-SLANGINC = -I/slang/src
-SLANGLIB = /slang/src/djgobjs/libslang.a
 CFLAGS= $(MCFLAGS) -I. -I.. $(SLANGINC)
 
 CC = gcc
-MCFLAGS = -O3 -DRAWDOSKEYHACK -DUSE_ZLIB -DUSE_EXTERNALS -DUSE_SLANG -DACCESS_AUTH -DNO_CUSERID -DNOUSERS -DDOSPATH -DNO_TTYTYPE -DNO_UTMP -Ichrtrans -I../WWW/library/implementation   -I../djgpp/tcplib/include -I../djgpp/tcplib/include/tcp
-WWWLIB = ../WWW/library/djgpp/libwww.a  ../djgpp/tcplib/obj/libtcp.a
-LIBS=-lz -lwmemu
+MCFLAGS = -O3 -DUSE_ZLIB -DUSE_EXTERNALS \
+-DUSE_SLANG -DDJGPP_KEYHANDLER -DACCESS_AUTH -DNO_CUSERID \
+-DNOUSERS -DDOSPATH -DNO_TTYTYPE -DNO_UTMP -I../WWW/library/implement -I../djgpp/tcplib/include \
+-I./chrtrans -I../djgpp/tcplib/include/tcp
+WWWLIB = ../WWW/library/djgpp/libwww.a ../djgpp/tcplib/obj/libtcp.a
+LIBS= -lslang -lz
+CHRTR= ./chrtrans/
 
 all: lynx.exe
 
@@ -28,9 +30,9 @@ lynx.exe:   message $(OBJS) $(WWWLIB)
 message:
 	@echo "Compiling Lynx sources"
 
-dbg:	$(OBJS) $(WWWLIB)
+dbg:    $(OBJS) $(WWWLIB)
 	@echo "Making Lynx code"
-	$(CC) -g $(OBJS) $(CFLAGS) $(WWWLIB) $(SLANGLIB) $(LIBS)
+	$(CC) $(OBJS) $(CFLAGS) $(WWWLIB) $(SLANGLIB) $(LIBS)
 
 lint:
 	lint *.c  > ../lint.out
@@ -56,10 +58,5 @@ DefaultStyle.o: DefaultStyle.c ../userdefs.h
 LYEditmap.o: LYEditmap.c ../userdefs.h
 LYCharUtils.o: LYCharUtils.c ../userdefs.h
 LYExtern.o: LYExtern.c ../userdefs.h
+LyUtils.o: LYUtils.c ../userdefs.h
 LYCookie.o: ../userdefs.h
-
-#UCdomap.o: UCdomap.c ../userdefs.h lycharsets.h
-#UCdomap.o: UCdomap.c chrtrans/UCkd.h chrtrans/makeuctb chrtrans/makeuctb.c \
-#                UCdomap.h UCMap.h ../userdefs.h
-#UCAux.o : UCAux.c $(CMN)UCAux.h $(CMN)UCDefs.h
-

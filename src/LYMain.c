@@ -35,9 +35,7 @@
 #endif
 
 #ifdef __DJGPP__
-#ifdef USE_SLANG
 #include <dos.h>
-#endif /* USE_SLANG */
 #endif /* __DJGPP__ */
 
 #ifndef VMS
@@ -2889,7 +2887,7 @@ treated '>' as a co-terminator for double-quotes and tags"
 #ifndef VMS
 #ifdef SYSLOG_REQUESTED_URLS
    PARSE_STR(
-      "syslog", 	NEED_LYSTRING_ARG, 	syslog_txt,
+      "syslog", 	NEED_LYSTRING_ARG, 	&syslog_txt,
       "=text\ninformation for syslog call"
    ),
 #endif
