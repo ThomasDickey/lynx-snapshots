@@ -59,6 +59,15 @@ extern char * HTSACopy PARAMS ((char **dest, CONST char *src));
 extern char * HTSACat  PARAMS ((char **dest, CONST char *src));
 
 /*
+optimized for heavily realloc'd strings in temp objects
+*/
+#define StrAllocCopy_extra(dest, src) HTSACopy_extra (&(dest), src)
+#define FREE_extra(x)   {if (x != NULL) {HTSAFree_extra(x); x = NULL;}}
+#define Clear_extra(x)  {if (x != NULL) {*x = '\0';}}
+extern char * HTSACopy_extra PARAMS ((char **dest, CONST char *src));
+extern void   HTSAFree_extra PARAMS ((char *s));
+
+/*
 
 Next word or quoted string
 

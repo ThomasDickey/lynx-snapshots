@@ -325,8 +325,8 @@ PRIVATE domain_entry * find_domain_entry ARGS1(
     }
     CTRACE((tfp, "find_domain_entry(%s) bv:%d, invcheck_bv:%d\n",
 		 name,
-		 de ? de->bv : -1,
-		 de ? de->invcheck_bv : -1));
+		 de ? (int) de->bv : -1,
+		 de ? (int) de->invcheck_bv : -1));
     return de;
 }
 

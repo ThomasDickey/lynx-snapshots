@@ -12,4 +12,3 @@ extern int LYShowInfo PARAMS((DocInfo *doc, int size_of_file, DocInfo *newdoc,
 							char *owner_address));
 
 #endif /* LYSHOWINFO_H */
-

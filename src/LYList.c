@@ -62,16 +62,8 @@ PUBLIC int showlist ARGS2(
 	return(-1);
     }
 
-    if (LYReuseTempfiles && titles == last_titles) {
-	fp0 = LYOpenTempRewrite(tempfile, HTML_SUFFIX, "w");
-    } else {
-	LYRemoveTemp(tempfile);
-	fp0 = LYOpenTemp(tempfile, HTML_SUFFIX, "w");
-    }
-    if (fp0 == NULL) {
-	HTUserMsg(CANNOT_OPEN_TEMP);
+    if ((fp0 = InternalPageFP(tempfile, titles == last_titles)) == 0)
 	return(-1);
-    }
 
     LYLocalFileToURL(&(newdoc->address), tempfile);
 

@@ -157,7 +157,6 @@ PUBLIC void cleanup_files NOARGS
 
 PUBLIC void cleanup NOARGS
 {
-    int i;
 #ifdef VMS
     extern BOOLEAN DidCleanup;
 #endif /* VMS */
@@ -205,14 +204,17 @@ PUBLIC void cleanup NOARGS
 #endif
 
     cleanup_files();
-    for (i = 0; i < nhist; i++) {
-	LYFreeDocInfo(&HDOC(i));
-    }
-    nhist = 0;
 #ifdef VMS
     ttclose();
     DidCleanup = TRUE;
 #endif /* VMS */
 
+    /*
+     * If we're looking at memory leaks, hang onto the trace file, since there
+     * is no memory freed in this function, and it is a nuisance to not be able
+     * to trace the cleanup activity -TD
+     */
+#ifndef LY_FIND_LEAKS
     LYCloseTracelog();
+#endif
 }

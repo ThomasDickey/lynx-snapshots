@@ -393,7 +393,7 @@ PRIVATE HTAASetup *HTAASetup_new ARGS4(
 {
     HTAASetup *setup;
 
-    if (!server || !template || !*template)
+    if (!server || isEmpty(template))
 	return NULL;
 
     if ((setup = typecalloc(HTAASetup)) == 0)

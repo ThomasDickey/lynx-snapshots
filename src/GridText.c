@@ -98,8 +98,14 @@ struct _HTStream {			/* only know it as object */
 };
 
 #define TITLE_LINES  1
+
 #define IS_UTF_EXTRA(ch) (text->T.output_utf8 && \
 			  (UCH((ch))&0xc0) == 0x80)
+
+#define IS_UTF8_EXTRA(ch) (!(text && text->T.output_utf8) || \
+			  !is8bits(ch) || \
+			  (UCH(line->data[i] & 0xc0) == 0xc0))
+
 /* a test in compact form: how many extra UTF-8 chars after initial? - kw */
 #define UTF8_XNEGLEN(c) (c&0xC0? 0 :c&32? 1 :c&16? 2 :c&8? 3 :c&4? 4 :c&2? 5:0)
 #define UTF_XLEN(c) UTF8_XNEGLEN(((char)~(c)))
@@ -149,8 +155,30 @@ PUBLIC int LYsb_begin = -1;
 PUBLIC int LYsb_end = -1;
 #endif
 
+#ifndef VMS			/* VMS has a better way - right? - kw */
+#define CHECK_FREE_MEM
+#endif
 
-    /*try to fit in 32bit */
+#ifdef CHECK_FREE_MEM
+PRIVATE void * LY_check_calloc PARAMS((size_t nmemb, size_t size));
+#define LY_CALLOC LY_check_calloc
+#else
+  /* using the regular calloc */
+#define LY_CALLOC calloc
+#endif
+
+/*
+ * The HTPool.data[] array has to align the same as malloc() would, to make the
+ * ALLOC_POOL scheme portable.  For many platforms, that is the same as the
+ * number of bytes in a pointer.  It may be larger, e.g., on machines which
+ * have more stringent requirements for floating point.  32-bits are plenty for
+ * representing styles, but we may need 64-bit or 128-bit alignment.
+ *
+ * The real issue is that performance is degraded if the alignment is not met,
+ * and some platforms such as Tru64 generate lots of warning messages.
+ */
+#define ALIGN_SIZE     8
+
 typedef struct {
 	unsigned int	direction:2;   /* on or off */
 	unsigned int	horizpos:14;   /* horizontal position of this change */
@@ -163,10 +191,12 @@ typedef struct {
 static HTStyleChange stylechanges_buffers[2][MAX_STYLES_ON_LINE];
 #endif
 
-enum { POOL_SIZE = (8192 - 4*sizeof(void*) - sizeof(struct _HTPool*) - sizeof(int)) / sizeof(HTStyleChange) };
+typedef HTStyleChange pool_data;
+
+enum { POOL_SIZE = (8192 - 4*sizeof(void*) - sizeof(struct _HTPool*) - sizeof(int)) / sizeof(pool_data) };
 
 typedef struct _HTPool {
-    HTStyleChange   data[POOL_SIZE];
+    pool_data  data[POOL_SIZE];
     struct _HTPool* prev;
     int used;
 } HTPool;
@@ -203,103 +233,93 @@ to be very efficient.
 lines, anchors, and FormInfo. Arrays of HTStyleChange are stored as is,
 other objects are stored using a cast.]
 
- Pool are referenced by pointer to the chunk that contains free slots. Macros
-that allocate memory in pools update that pointer if needed.
- There are 3 macros that deal with pools - POOL_NEW, POOL_FREE and
-ALLOC_IN_POOL.
- Here is a description of those macros as C++ functions (with names mentioned
-above and with use of C++ references)
-
-void ALLOC_IN_POOL( P*& pool, pool_type, int toalloc, T*& ptr)
-    - allocates 'toalloc' items in the pool of type 'pool_type' pointed by
-    'pool', sets the pointer 'ptr' to the "allocated" memory and updates 'pool'
-    if necessary. Sets 'ptr' to NULL if fails.
-
-void POOL_NEW( pool_type  , P*& ptr)
-    Initializes a pool of type 'pool_type' pointed by 'ptr', updating 'ptr'.
-    Sets 'ptr' to NULL if fails.
-
-void POOL_FREE( pool_type , P*& ptr)
-    Frees a pool of type 'pool_type' pointed by ptr. Sets ptr to NULL.
+ Pool is referenced by the pointer to the last chunk that contains free slots.
+Functions that allocate memory in pool update that pointer if needed.
+There are 3 functions - POOL_NEW, POOL_FREE, and ALLOC_IN_POOL.
 
       - VH
 
 *************************************************************************/
-/*
- * void ALLOC_IN_POOL( P*& pool, pool_type, int toalloc, T*& ptr)
- *     - allocates 'toalloc' items in the pool of type 'pool_type' pointed by
- *     'pool', sets the pointer 'ptr' to the "allocated" memory and updates
- *     'pool' if necessary.  Sets 'ptr' to NULL if fails.
- */
-#define ALLOC_IN_POOL(pool,pool_type,toalloc,ptr) \
-    if (!pool) {					\
-	ptr = NULL;					\
-    } else {						\
-	if (POOL_SIZE - pool->used >= toalloc) {	\
-	    ptr = pool->data + pool->used;		\
-	    pool->used += toalloc;			\
-	} else {					\
-	    pool_type* newpool = (pool_type*)LY_CALLOC(1, sizeof(pool_type)); \
-	    if (!newpool) {				\
-		ptr = NULL;				\
-	    } else {					\
-		newpool->prev = pool;			\
-		newpool->used = toalloc;		\
-		ptr = newpool->data;			\
-		pool = newpool;				\
-	   }						\
-	}						\
-    }
-/*
- * void POOL_NEW( pool_type  , P*& ptr)
- *     Initializes a pool of type 'pool_type' pointed by 'ptr', updating 'ptr'.
- *     Sets 'ptr' to NULL if fails.
- */
-#define POOL_NEW(pool_type,ptr)				\
-    {							\
-	ptr = (pool_type*)LY_CALLOC(1, sizeof(pool_type)); \
-	if (ptr) {					\
-	    ptr->prev = NULL;				\
-	    ptr->used = 0;				\
-	}						\
-    }
-/*
- * void POOL_FREE( pool_type, P*& ptr)
- *     Frees a pool of type 'pool_type' pointed by ptr. Sets ptr to NULL.
- */
-#define POOL_FREE(pool_type,ptr)			\
-    {							\
-	pool_type* cur = ptr;				\
-	pool_type* prev;				\
-	while (cur) {					\
-	    prev = cur->prev;				\
-	    FREE(cur);					\
-	    cur = prev;					\
-	}						\
-	ptr = NULL;					\
-    }
+
+#define POOLallocstyles(ptr, n)     ptr = ALLOC_IN_POOL(&HTMainText->pool, n * sizeof(pool_data))
+#define POOLallocHTLine(ptr, size)  ptr = (HTLine*) ALLOC_IN_POOL(&HTMainText->pool, LINE_SIZE(size))
+#define POOLallocstring(ptr, len)   ptr = (char*) ALLOC_IN_POOL(&HTMainText->pool, len + 1)
+#define POOLtypecalloc(T,ptr)	    ptr = (T*) ALLOC_IN_POOL(&HTMainText->pool, sizeof(T))
+
 /**************************************************************************/
+/*
+ *   Allocates 'n' items in the pool of type 'HTPool' pointed by 'poolptr'.
+ *   Returns a pointer to the "allocated" memory or NULL if fails.
+ *   Updates 'poolptr' if necessary.
+ */
+PRIVATE pool_data* ALLOC_IN_POOL ARGS2(
+	HTPool**,	ppoolptr,
+	unsigned,	request)
+{
+    HTPool* pool = *ppoolptr;
+    pool_data* ptr;
+    unsigned n;
+    unsigned j;
 
-#define _sz_           sizeof(HTStyleChange)      /* 4 */
-#define _round_up_(x)  (x%_sz_ ? x/_sz_ + 1: x/_sz_)
+    if (!pool) {
+	ptr = NULL;
+    } else {
+	n = request;
+	if (n == 0)
+	    n = 1;
+	j = (n % ALIGN_SIZE);
+	if (j != 0)
+	    n += (ALIGN_SIZE - j);
+	n /= sizeof(pool_data);
+	if (POOL_SIZE >= (pool->used + n)) {
+	    ptr = pool->data + pool->used;
+	    pool->used += n;
+	} else {
+	    HTPool* newpool = (HTPool*)LY_CALLOC(1, sizeof(HTPool));
+	    if (!newpool) {
+		ptr = NULL;
+	    } else {
+		newpool->prev = pool;
+		newpool->used = n;
+		ptr = newpool->data;
+		pool = newpool;
+	   }
+	}
+    }
+    *ppoolptr = pool;
+    return ptr;
+}
 
-#define POOLallocstyles(ptr, N)     ALLOC_IN_POOL(HTMainText->pool,HTPool,\
-					N,				\
-					ptr)
-#define POOLallocHTLine(ptr, size)  { HTStyleChange* _tmp_;		\
-				      int N = _round_up_(LINE_SIZE(size));  \
-				      ALLOC_IN_POOL(HTMainText->pool,HTPool,\
-					N,      \
-					_tmp_); \
-				      ptr = (HTLine*)_tmp_; \
-				    }
-#define POOLtypecalloc(T,ptr)	    { HTStyleChange* _tmp_;		\
-				      int N = _round_up_(sizeof(T));	\
-				      ALLOC_IN_POOL(HTMainText->pool,HTPool,\
-					N,	\
-					_tmp_);	\
-				      ptr = (T*)_tmp_;	\
-				    }
+/*
+ *   Returns a pointer to initialized pool of type 'HTPool', or NULL if fails.
+ */
+PRIVATE HTPool* POOL_NEW NOARGS
+{
+    HTPool* poolptr = (HTPool*)LY_CALLOC(1, sizeof(HTPool));
+    if (poolptr) {
+	(poolptr)->prev = NULL;
+	(poolptr)->used = 0;
+    }
+    return poolptr;
+}
+
+/*
+ *   Frees a pool of type 'HTPool' pointed by poolptr.
+ */
+PRIVATE void POOL_FREE ARGS1(
+	HTPool*,	poolptr)
+{
+    HTPool* cur = poolptr;
+    HTPool* prev;
+    while (cur) {
+	prev = cur->prev;
+	free(cur);
+	cur = prev;
+    }
+}
+
+/**************************************************************************/
+/**************************************************************************/
 
 typedef struct _line {
 	struct _line    *next;
@@ -315,7 +335,20 @@ typedef struct _line {
 
 
 #define LINE_SIZE(l) (sizeof(HTLine)+(l))	/* Allow for terminator */
-#define allocHTLine(l) (HTLine *)calloc(1, LINE_SIZE(l))
+
+/*
+ * Last line buffer; the second is used in split_line(). Not in pool!
+ * We cannot wrap in middle of multibyte sequences, so allocate 2 extra
+ * for a workspace.  This is stored in the HText, to prevent confusion
+ * between different documents.  Note also that it is declared with an
+ * HTLine at the beginning so pointers will be properly aligned.
+ */
+typedef struct {
+	HTLine	base;
+	char    data[MAX_LINE+2];
+} HTLineTemp;
+
+#define TEMP_LINE(p,n) ((HTLine *)&(p->temp_line[n]))
 
 typedef struct _TextAnchor {
 	struct _TextAnchor *	next;
@@ -349,6 +382,7 @@ struct _HText {
 	HTParentAnchor *	node_anchor;
 
 	HTLine *		last_line;
+	HTLineTemp		temp_line[2];
 	int			Lines;		/* Number of them */
 	TextAnchor *		first_anchor;	/* double-linked on demand */
 	TextAnchor *		last_anchor;
@@ -382,6 +416,7 @@ struct _HText {
 	int			last_lineno_last_disp_partial;
 #endif
 	STable_info *		stbl;
+	HTList *		enclosed_stbl;
 
 	HTkcode			kcode;			/* Kanji code? */
 	HTkcode			specified_kcode;	/* Specified Kanji code */
@@ -493,8 +528,6 @@ PUBLIC void mark_justify_start_position ARGS1(void*,text)
 	HTCJK == NOCJK && !in_DT && \
 	can_justify_here && can_justify_this_line && !form_in_htext )
 
-#else
-#define last_anchor_of_previous_line (TextAnchor*)0
 #endif /* EXP_JUSTIFY_ELTS */
 
 
@@ -535,123 +568,16 @@ PUBLIC  HTList * search_queries = NULL;  /* isindex and whereis queries   */
 #ifdef LY_FIND_LEAKS
 PRIVATE void free_all_texts NOARGS;
 #endif
-PRIVATE int HText_TrueLineSize PARAMS((
+
+PRIVATE BOOL HText_TrueEmptyLine PARAMS((
 	HTLine *	line,
 	HText *		text,
 	BOOL		IgnoreSpaces));
 
-#ifndef VMS			/* VMS has a better way - right? - kw */
-#define CHECK_FREE_MEM
-#endif
-
-/*
- * Set the initial highlight information for a given anchor.
- */
-PRIVATE void LYSetHiText ARGS3(
-	TextAnchor *,	a,
-	char *,		text,
-	int,		len)
-{
-    unsigned have = a->lites.hl_len;
-
-    if (a->lites.hl_info != NULL) {
-	while (have-- != 0) {
-	    if ((int) (have + 1) < a->lites.hl_len) {
-		FREE(a->lites.hl_info[have].hl_text);
-	    }
-	}
-	FREE(a->lites.hl_info);
-    }
-    FREE(a->lites.hl_base.hl_text);
-    a->lites.hl_len = 0;
-
-    if (text != NULL) {
-	StrnAllocCopy(a->lites.hl_base.hl_text, text, len);
-	a->lites.hl_len = 1;
-    }
-}
-
-/*
- * Add highlight information for the next line of a anchor.
- */
-PRIVATE void LYAddHiText ARGS3(
-	TextAnchor *,	a,
-	char *,		text,
-	int,		x)
-{
-    HiliteInfo *have = a->lites.hl_info;
-    unsigned need = (a->lites.hl_len - 1);
-    unsigned want = ++(a->lites.hl_len) * sizeof(HiliteInfo);
-
-    if (have != NULL) {
-	have = (HiliteInfo *) realloc(have, want);
-    } else {
-	have = (HiliteInfo *) malloc(want);
-    }
-    a->lites.hl_info = have;
-
-    have[need].hl_text = NULL;
-    StrAllocCopy(have[need].hl_text, text);
-    have[need].hl_x = x;
-}
-
-/*
- * Get the highlight text, counting from zero.
- */
-PRIVATE char *LYGetHiTextStr ARGS2(
-	TextAnchor *,	a,
-	int,		count)
-{
-    char *result;
-
-    if (count >= a->lites.hl_len)
-	result = NULL;
-    else if (count > 0)
-	result = a->lites.hl_info[count - 1].hl_text;
-    else
-	result = a->lites.hl_base.hl_text;
-    return result;
-}
-
-/*
- * Get the X-ordinate at which to draw the corresponding highlight-text
- */
-PRIVATE int LYGetHiTextPos ARGS2(
-	TextAnchor *,	a,
-	int,		count)
-{
-    int result;
-
-    if (count >= a->lites.hl_len)
-	result = -1;
-    else if (count > 0)
-	result = a->lites.hl_info[count - 1].hl_x;
-    else
-	result = a->line_pos;
-    return result;
-}
-
-/*
- * Copy highlighting information from anchor 'a' to 'b'.
- */
-PRIVATE void LYCopyHiText ARGS2(
-	TextAnchor *,	a,
-	TextAnchor *,	b)
-{
-    int count;
-    char *s;
-
-    LYSetHiText(a, NULL, 0);
-    for (count = 0; ; ++count) {
-	if ((s = LYGetHiTextStr(b, count)) == NULL)
-	    break;
-	if (count == 0) {
-	    LYSetHiText(a, s, strlen(s));
-	} else {
-	    LYAddHiText(a, s, LYGetHiTextPos(b, count));
-	}
-    }
-}
+PRIVATE int HText_TrueLineSize PARAMS((
+	HTLine *	line,
+	HText *		text,
+	BOOL		IgnoreSpaces));
 
 #ifdef CHECK_FREE_MEM
 
@@ -723,7 +649,6 @@ PRIVATE void * LY_check_calloc ARGS2(
 	HText * t = (HText *) HTList_objectAt(loaded_texts, i);
 	if (t == HTMainText)
 	    t = NULL;		/* shouldn't happen */
-	{
 	CTRACE((tfp, "\nBUG *** Emergency freeing document %d/%d for '%s'%s!\n",
 		    i + 1, n,
 		    ((t && t->node_anchor &&
@@ -732,7 +657,6 @@ PRIVATE void * LY_check_calloc ARGS2(
 		    ((t && t->node_anchor &&
 		      t->node_anchor->post_data) ?
 		     " with POST data" : "")));
-	}
 	HTList_removeObjectAt(loaded_texts, i);
 	HText_free(t);
 	if (mem_is_avail(4, nmemb * size)) {
@@ -758,14 +682,119 @@ PRIVATE void * LY_check_calloc ARGS2(
     return (calloc(nmemb, size));
 }
 
-#define LY_CALLOC LY_check_calloc
-
-#else  /* CHECK_FREE_MEM */
-
-  /* using the regular calloc */
-#define LY_CALLOC calloc
-
 #endif /* CHECK_FREE_MEM */
+
+/*
+ * Clear highlight information for a given anchor
+ * (text was allocated in the pool).
+ */
+PRIVATE void LYClearHiText ARGS1(
+	TextAnchor *,	a)
+{
+    FREE(a->lites.hl_info);
+
+    a->lites.hl_base.hl_text = NULL;
+    a->lites.hl_len = 0;
+}
+
+/*
+ * Set the initial highlight information for a given anchor.
+ */
+PRIVATE void LYSetHiText ARGS3(
+	TextAnchor *,	a,
+	char *,		text,
+	int,		len)
+{
+    if (text != NULL) {
+	POOLallocstring(a->lites.hl_base.hl_text, len);
+	memcpy(a->lites.hl_base.hl_text, text, len);
+	*(a->lites.hl_base.hl_text + len) = '\0';
+
+	a->lites.hl_len = 1;
+    }
+}
+
+/*
+ * Add highlight information for the next line of a anchor.
+ */
+PRIVATE void LYAddHiText ARGS3(
+	TextAnchor *,	a,
+	char *,		text,
+	int,		x)
+{
+    HiliteInfo *have = a->lites.hl_info;
+    unsigned need = (a->lites.hl_len - 1);
+    unsigned want = (a->lites.hl_len += 1) * sizeof(HiliteInfo);
+
+    if (have != NULL) {
+	have = (HiliteInfo *) realloc(have, want);
+    } else {
+	have = (HiliteInfo *) malloc(want);
+    }
+    a->lites.hl_info = have;
+
+    POOLallocstring(have[need].hl_text, strlen(text));
+    strcpy(have[need].hl_text, text);
+    have[need].hl_x = x;
+}
+
+/*
+ * Get the highlight text, counting from zero.
+ */
+PRIVATE char *LYGetHiTextStr ARGS2(
+	TextAnchor *,	a,
+	int,		count)
+{
+    char *result;
+
+    if (count >= a->lites.hl_len)
+	result = NULL;
+    else if (count > 0)
+	result = a->lites.hl_info[count - 1].hl_text;
+    else
+	result = a->lites.hl_base.hl_text;
+    return result;
+}
+
+/*
+ * Get the X-ordinate at which to draw the corresponding highlight-text
+ */
+PRIVATE int LYGetHiTextPos ARGS2(
+	TextAnchor *,	a,
+	int,		count)
+{
+    int result;
+
+    if (count >= a->lites.hl_len)
+	result = -1;
+    else if (count > 0)
+	result = a->lites.hl_info[count - 1].hl_x;
+    else
+	result = a->line_pos;
+    return result;
+}
+
+/*
+ * Copy highlighting information from anchor 'b' to 'a'.
+ */
+PRIVATE void LYCopyHiText ARGS2(
+	TextAnchor *,	a,
+	TextAnchor *,	b)
+{
+    int count;
+    char *s;
+
+    LYClearHiText(a);
+    for (count = 0; ; ++count) {
+	if ((s = LYGetHiTextStr(b, count)) == NULL)
+	    break;
+	if (count == 0) {
+	    LYSetHiText(a, s, strlen(s));
+	} else {
+	    LYAddHiText(a, s, LYGetHiTextPos(b, count));
+	}
+    }
+}
 
 PRIVATE void HText_getChartransInfo ARGS1(
 	HText *,	me)
@@ -877,14 +906,14 @@ PUBLIC HText *	HText_new ARGS1(
 #endif /* VMS && VAXC && !__DECC */
     }
 
-    POOL_NEW(HTPool, self->pool);
+    self->pool = POOL_NEW();
     if (!self->pool)
 	outofmem(__FILE__, "HText_New");
-    line = self->last_line = allocHTLine(MAX_LINE);
-    if (line == NULL)
-	outofmem(__FILE__, "HText_New");
+
+    line = self->last_line = TEMP_LINE(self, 0);
     line->next = line->prev = line;
     line->offset = line->size = 0;
+    line->data[line->size] = '\0';
 #ifdef USE_COLOR_STYLE
     line->numstyles = 0;
     line->styles = stylechanges_buffers[0];
@@ -1058,24 +1087,6 @@ PUBLIC void HText_free ARGS1(
 
     HTAnchor_setDocument(self->node_anchor, (HyperDoc *)0);
 
-    while (YES) {	/* Free off line array */
-	HTLine * l = self->last_line;
-	if (l) {
-	    l->next->prev = l->prev;
-	    l->prev->next = l->next;	/* Unlink l */
-	    self->last_line = l->prev;
-	    if (l != self->last_line) {
-		FREE(l);
-	    } else {
-		free(l);
-	    }
-	}
-	if (l == self->last_line) {	/* empty */
-	    l = self->last_line = NULL;
-	    break;
-	}
-    }
-
     while (self->first_anchor) {		/* Free off anchor array */
 	TextAnchor * l = self->first_anchor;
 	self->first_anchor = l->next;
@@ -1126,7 +1137,7 @@ PUBLIC void HText_free ARGS1(
 	    FREE(l->input_field->accept_cs);
 	}
 
-	LYSetHiText(l, NULL, 0);
+	LYClearHiText(l);
     }
     FormList_delete(self->forms);
 
@@ -1184,7 +1195,7 @@ PUBLIC void HText_free ARGS1(
 	    HTMainAnchor = NULL;
     }
 
-    POOL_FREE(HTPool, self->pool);
+    POOL_FREE(self->pool);
     FREE(self);
 }
 
@@ -1323,7 +1334,7 @@ PRIVATE int display_line ARGS4(
 	while (current_style < line->numstyles &&
 	       i >= (int) (CStyle.horizpos + line->offset + 1))
 	{
-	    LynxChangeStyle (CStyle.style,CStyle.direction);
+	    LynxChangeStyle (CStyle.style, CStyle.direction);
 	    current_style++;
 	}
 #endif
@@ -2430,7 +2441,7 @@ PRIVATE int set_style_by_embedded_chars ARGS4(
 PRIVATE void move_anchors_in_region ARGS7(
     HTLine *,		line,
     int,		line_number,
-    TextAnchor **,	prev_anchor,
+    TextAnchor **,	prev_anchor,	/*updates++*/
     int *,		prev_head_processed,
     int,		sbyte,
     int,		ebyte,
@@ -2496,9 +2507,9 @@ PRIVATE void move_anchors_in_region ARGS7(
  *  in appropriate places - so that characters at/after the old
  *  position end up at/after the new position, for each pair, if possible.
  *  Some necessary changes for anchors starting on this line are also done
- *  here if needed.
+ *  here if needed. Updates 'prev_anchor' internally.
  *  Returns a newly allocated HTLine* if changes were made
- *    (caller has to free the old one).
+ *    (lines allocated in pool, caller should not free the old one).
  *  Returns NULL if no changes needed.  (Remove-spaces code may be buggy...)
  * - kw
  */
@@ -2506,7 +2517,7 @@ PRIVATE HTLine * insert_blanks_in_line ARGS7(
     HTLine *,		line,
     int,		line_number,
     HText *,		text,
-    TextAnchor *,	prev_anchor,
+    TextAnchor **,	prev_anchor,	/*updates++*/
     int,		ninserts,
     int *,		oldpos,		/* Measured in cells */
     int *,		newpos)		/* Likewise */
@@ -2533,16 +2544,20 @@ PRIVATE HTLine * insert_blanks_in_line ARGS7(
 	    added_chars = newpos[ip] - oldpos[ip];
     if (line->size + added_chars > MAX_LINE - 2)
 	return NULL;
-    if (line == text->last_line)
-	mod_line = allocHTLine(MAX_LINE);
-    else
-	mod_line = allocHTLine(line->size + added_chars);
+    if (line == text->last_line) {
+	if (line == TEMP_LINE(text, 0))
+	   mod_line = TEMP_LINE(text, 1);
+	else
+	   mod_line = TEMP_LINE(text, 0);
+    } else {
+	POOLallocHTLine(mod_line, line->size + added_chars);
+    }
     if (!mod_line)
 	return NULL;
-    if (!prev_anchor)
-	prev_anchor = text->first_anchor;
-    head_processed = (prev_anchor && prev_anchor->line_num < line_number);
-    memcpy(mod_line, line, LINE_SIZE(1));
+    if (!*prev_anchor)
+	*prev_anchor = text->first_anchor;
+    head_processed = (*prev_anchor && (*prev_anchor)->line_num < line_number);
+    memcpy(mod_line, line, LINE_SIZE(0));
     t = newdata = mod_line->data;
     ip = 0;
     while (ip <= ninserts) {
@@ -2572,7 +2587,7 @@ PRIVATE HTLine * insert_blanks_in_line ARGS7(
 
 	/* Now s is at the "displayed" char, pre is before the style change */
 	if (ip)				/* Fix anchor positions */
-	    move_anchors_in_region(line, line_number, &prev_anchor,
+	    move_anchors_in_region(line, line_number, prev_anchor /*updates++*/,
 				   &head_processed,
 				   copied - line->data, pre - line->data,
 				   shift);
@@ -2600,8 +2615,8 @@ PRIVATE HTLine * insert_blanks_in_line ARGS7(
     while (pre < s)	/* Copy remaining style-codes */
 	*t++ = *pre++;
     /* Check whether the last anchor continues on the next line */
-    if (head_processed && prev_anchor && prev_anchor->line_num == line_number)
-	prev_anchor->extent += shift;
+    if (head_processed && *prev_anchor && (*prev_anchor)->line_num == line_number)
+	(*prev_anchor)->extent += shift;
     *t = '\0';
     mod_line->size = t - newdata;
     return mod_line;
@@ -2654,18 +2669,24 @@ PRIVATE void split_line ARGS2(
     int TailTrim = 0;
     int s, s_post, s_pre, t_underline = underline_on, t_bold = bold_on;
     char *p;
-    HTLine * previous = text->last_line;
     int ctrl_chars_on_previous_line = 0;
     int utfxtra_on_previous_line = UTFXTRA_ON_THIS_LINE;
     char * cp;
-    /* can't wrap in middle of multibyte sequences, so allocate 2 extra */
-    HTLine * line = (HTLine *)LY_CALLOC(1, LINE_SIZE(MAX_LINE)+2);
+
+    HTLine * previous = text->last_line;
+    HTLine * line;
 
     /*
-     *  Make new line.
+     *  Set new line.
      */
+    if (previous == TEMP_LINE(text, 0))
+	line = TEMP_LINE(text, 1);
+    else
+	line = TEMP_LINE(text, 0);
     if (line == NULL)
-	outofmem(__FILE__, "split_line_1");
+	return;
+    memset(line, 0, LINE_SIZE(0));
+
     ctrl_chars_on_this_line = 0; /*reset since we are going to a new line*/
     utfxtra_on_this_line = 0;	/*reset too, we'll count them*/
     text->LastChar = ' ';
@@ -2924,7 +2945,7 @@ PRIVATE void split_line ARGS2(
 		}
 		if ( to < line->styles + MAX_STYLES_ON_LINE - 1
 		     && to[1].direction == STACK_OFF
-		     && to[1].horizpos <= SpecialAttrChars
+		     && to[1].horizpos <= (unsigned) SpecialAttrChars
 		     && to[1].style == scan->style )
 		    to++;
 		else if (to >= line->styles) {
@@ -2956,7 +2977,7 @@ PRIVATE void split_line ARGS2(
 
     {
     HTLine* temp;
-    temp = allocHTLine(previous->size);
+    POOLallocHTLine(temp, previous->size);
     if (!temp)
 	outofmem(__FILE__, "split_line_2");
     memcpy(temp, previous, LINE_SIZE(previous->size));
@@ -2966,7 +2987,6 @@ PRIVATE void split_line ARGS2(
 	outofmem(__FILE__, "split_line_2");
     memcpy(temp->styles, previous->styles, sizeof(HTStyleChange)*previous->numstyles);
 #endif
-    FREE(previous);
     previous = temp;
     }
 
@@ -3243,7 +3263,7 @@ PRIVATE void split_line ARGS2(
 		i++;
 	    }
 	    jline = insert_blanks_in_line(previous, CurLine, text,
-					  last_anchor_of_previous_line,
+					  &last_anchor_of_previous_line /*updates++*/,
 					  ht_num_runs - 1, oldpos, newpos);
 	    free((char*)oldpos);
 	    if (jline == NULL)
@@ -3251,26 +3271,14 @@ PRIVATE void split_line ARGS2(
 	    previous->next->prev = jline;
 	    previous->prev->next = jline;
 
-	    FREE(previous);
-
 	    previous = jline;
 	}
 	{ /* (ht_num_runs==1) */
-	    /* keep maintaining 'last_anchor_of_previous_line' */
-	    TextAnchor* a2 = last_anchor_of_previous_line;
 	    if (justify_start_position) {
 		char* p2 = previous->data;
 		for( ; p2 < previous->data + justify_start_position; ++p2)
 		    *p2 = (*p2 == HT_NON_BREAK_SPACE ? ' ' : *p2);
 	    }
-
-	    if (!a2)
-		a2 = text->first_anchor;
-	    else
-		a2 = a2->next; /* 1st anchor on line we justify */
-
-	    for (; a2 && a2->line_num <= text->Lines-1;
-		last_anchor_of_previous_line = a2, a2 = a2->next);
 	}
     } else {
 	if (REALLY_CAN_JUSTIFY(text) ) {
@@ -3322,9 +3330,7 @@ PRIVATE void blank_lines ARGS2(
 	HText *,	text,
 	int,		newlines)
 {
-    BOOL IgnoreSpaces = FALSE;
-
-    if (!HText_LastLineSize(text, IgnoreSpaces)) { /* No text on current line */
+    if (HText_LastLineEmpty(text, FALSE)) { /* No text on current line */
 	HTLine * line = text->last_line->prev;
 
 #ifdef USE_COLOR_STYLE
@@ -3333,8 +3339,8 @@ PRIVATE void blank_lines ARGS2(
 	    return;			/* Do not add a blank line at start */
 #endif
 
-	while ((line != text->last_line) &&
-	       (HText_TrueLineSize(line, text, IgnoreSpaces) == 0)) {
+	while (line != text->last_line &&
+			HText_TrueEmptyLine(line, text, FALSE)) {
 	    if (newlines == 0)
 		break;
 	    newlines--;		/* Don't bother: already blank */
@@ -4356,7 +4362,7 @@ PUBLIC void _internal_HTC ARGS3(HText *,text, int,style, int,dir)
 
 	if (line->numstyles > 0 && dir == 0 &&
 	    line->styles[line->numstyles-1].direction &&
-	    line->styles[line->numstyles-1].style == style &&
+	    line->styles[line->numstyles-1].style == (unsigned) style &&
 	    (int) line->styles[line->numstyles-1].horizpos
 	    == (int)line->size - ctrl_chars_on_this_line) {
 	    /*
@@ -4488,7 +4494,7 @@ PRIVATE int HText_insertBlanksInStblLines ARGS2(
 	    }
 	}
 	if (line == me->last_line) {
-	    if (line->size == 0 || !HText_TrueLineSize(line, me, FALSE))
+	    if (line->size == 0 || HText_TrueEmptyLine(line, me, FALSE))
 		continue;
 	    /*
 	     *  Last ditch effort to end the table with a line break,
@@ -4517,7 +4523,7 @@ PRIVATE int HText_insertBlanksInStblLines ARGS2(
 	    continue;
 	}
 	mod_line = insert_blanks_in_line(line, lineno, me,
-					 me->last_anchor_before_stbl,
+					 &me->last_anchor_before_stbl /*updates++*/,
 					 ninserts, oldpos, newpos);
 	if (mod_line) {
 	    if (line == me->last_line) {
@@ -4530,7 +4536,6 @@ PRIVATE int HText_insertBlanksInStblLines ARGS2(
 	    lines_changed++;
 	    if (line == first_line)
 		first_line = mod_line;
-	    free(line);
 	    line = mod_line;
 #ifdef DISP_PARTIAL
 	    /*
@@ -4733,6 +4738,25 @@ PUBLIC void HText_startStblTABLE ARGS2(
     }
 }
 
+#ifdef EXP_NESTED_TABLES
+PRIVATE void free_enclosed_stbl ARGS1(
+	HText *,	me)
+{
+    if (me->enclosed_stbl != NULL) {
+	HTList *list = me->enclosed_stbl;
+	STable_info *stbl;
+	while (NULL != (stbl = (STable_info *)HTList_nextObject(list))) {
+	    CTRACE((tfp, "endStblTABLE: finally free %p\n", me->stbl));
+	    Stbl_free(stbl);
+	}
+	HTList_delete(me->enclosed_stbl);
+	me->enclosed_stbl = NULL;
+    }
+}
+#else
+#define free_enclosed_stbl(me) /* nothing */
+#endif
+
 /*	Finish simple table handling
  *	Return TRUE if the table is nested inside another table.
  */
@@ -4744,11 +4768,14 @@ PUBLIC int HText_endStblTABLE ARGS1(
 
     if (!me || !me->stbl) {
 	CTRACE((tfp, "endStblTABLE: ignored.\n"));
+	free_enclosed_stbl(me);
 	return FALSE;
     }
     CTRACE((tfp, "endStblTABLE: ok, will try.\n"));
+
     ncols = Stbl_finishTABLE(me->stbl);
     CTRACE((tfp, "endStblTABLE: ncols = %d.\n", ncols));
+
     if (ncols > 0) {
 	lines_changed = HText_insertBlanksInStblLines(me, ncols);
 	CTRACE((tfp, "endStblTABLE: changed %d lines, done.\n", lines_changed));
@@ -4759,19 +4786,33 @@ PUBLIC int HText_endStblTABLE ARGS1(
 	NumOfLines_partial -= lines_changed;  /* fake */
 #endif  /* DISP_PARTIAL */
     }
+
 #ifdef EXP_NESTED_TABLES
     if (nested_tables) {
 	enclosing = Stbl_get_enclosing(me->stbl);
 	me->last_anchor_before_stbl = Stbl_get_last_anchor_before(me->stbl);
-    } else
-#endif
-    Stbl_free(me->stbl);
-#ifdef EXP_NESTED_TABLES
-    if (nested_tables)
+	if (enclosing == NULL) {
+	    Stbl_free(me->stbl);
+	    free_enclosed_stbl(me);
+	} else {
+	    if (me->enclosed_stbl == NULL)
+		me->enclosed_stbl = HTList_new();
+	    HTList_addObject(me->enclosed_stbl, me->stbl);
+	    CTRACE((tfp, "endStblTABLE: postpone free %p\n", me->stbl));
+	}
 	me->stbl = enclosing;
-    else
-#endif
+    } else {
+	Stbl_free(me->stbl);
+	me->stbl = NULL;
+    }
+#else
+    Stbl_free(me->stbl);
     me->stbl = NULL;
+#endif
+
+    CTRACE((tfp, "endStblTABLE: have%s enclosing table (%p)\n",
+	    enclosing == 0 ? " NO" : "", enclosing));
+
     return enclosing != 0;
 }
 
@@ -5541,7 +5582,6 @@ PUBLIC void HText_endAppend ARGS1(
 	 */
 	next_to_the_last_line->next = line_ptr;
 	line_ptr->prev = next_to_the_last_line;
-	FREE(text->last_line);
 	text->last_line = next_to_the_last_line;
 	text->Lines--;
 	CTRACE((tfp, "GridText: New bottom line: `%s'\n",
@@ -5660,7 +5700,7 @@ re_parse:
 	 *  done the trimming & adjusting for this anchor, so avoid
 	 *  doing it a second time. - kw
 	 */
-	if ((hilite_str = LYGetHiTextStr(anchor_ptr, 0)) != NULL)
+	if (LYGetHiTextStr(anchor_ptr, 0) != NULL)
 	    continue;
 
 	if (anchor_ptr->line_pos > (int) line_ptr->size) {
@@ -5724,10 +5764,12 @@ re_parse:
 	if (line_ptr->data
 	 && anchor_ptr->extent > 0
 	 && anchor_ptr->line_pos >= 0) {
+	    LYClearHiText(anchor_ptr);
 	    LYSetHiText(anchor_ptr,
 			&line_ptr->data[anchor_ptr->line_pos],
 			anchor_ptr->extent);
 	} else {
+	    LYClearHiText(anchor_ptr);
 	    LYSetHiText(anchor_ptr, "", 0);
 	}
 
@@ -5747,7 +5789,7 @@ re_parse:
 
 	    if (!final
 	     && count_line >= stop_before) {
-		LYSetHiText(anchor_ptr, NULL, 0);
+		LYClearHiText(anchor_ptr);
 		break;
 	    } else if (line_ptr2 == text->last_line) {
 		break;
@@ -8440,6 +8482,15 @@ PUBLIC int HText_LastLineSize ARGS2(
     return HText_TrueLineSize(text->last_line, text, IgnoreSpaces);
 }
 
+PUBLIC BOOL HText_LastLineEmpty ARGS2(
+	HText *,	text,
+	BOOL,		IgnoreSpaces)
+{
+    if (!text || !text->last_line || !text->last_line->size)
+	return TRUE;
+    return HText_TrueEmptyLine(text->last_line, text, IgnoreSpaces);
+}
+
 PUBLIC int HText_LastLineOffset ARGS1(
 	HText *,	text)
 {
@@ -8461,6 +8512,22 @@ PUBLIC int HText_PreviousLineSize ARGS2(
     return HText_TrueLineSize(line, text, IgnoreSpaces);
 }
 
+PUBLIC BOOL HText_PreviousLineEmpty ARGS2(
+	HText *,	text,
+	BOOL,		IgnoreSpaces)
+{
+    HTLine * line;
+
+    if (!text || !text->last_line)
+	return TRUE;
+    if (!(line = text->last_line->prev))
+	return TRUE;
+    return HText_TrueEmptyLine(line, text, IgnoreSpaces);
+}
+
+/*
+ * Compute the "true" line size.
+ */
 PRIVATE int HText_TrueLineSize ARGS3(
 	HTLine *,	line,
 	HText *,	text,
@@ -8475,9 +8542,7 @@ PRIVATE int HText_TrueLineSize ARGS3(
     if (IgnoreSpaces) {
 	for (i = 0; i < line->size; i++) {
 	    if (!IsSpecialAttrChar(UCH(line->data[i])) &&
-		(!(text && text->T.output_utf8) ||
-		 !is8bits(line->data[i]) ||
-		 (UCH((line->data[i] & 0xc0)) == 0xc0)) &&
+		IS_UTF8_EXTRA(line->data[i]) &&
 		!isspace(UCH(line->data[i])) &&
 		UCH(line->data[i]) != HT_NON_BREAK_SPACE &&
 		UCH(line->data[i]) != HT_EN_SPACE) {
@@ -8487,14 +8552,48 @@ PRIVATE int HText_TrueLineSize ARGS3(
     } else {
 	for (i = 0; i < line->size; i++) {
 	    if (!IsSpecialAttrChar(line->data[i]) &&
-		(!(text && text->T.output_utf8) ||
-		 !is8bits(line->data[i]) ||
-		 (UCH(line->data[i] & 0xc0) == 0xc0))) {
+		IS_UTF8_EXTRA(line->data[i])) {
 		true_size++;
 	    }
 	}
     }
     return true_size;
+}
+
+/*
+ * Tell if the line is really empty.  This is invoked much more often than
+ * HText_TrueLineSize(), and most lines are not empty.  So it is faster to
+ * do this check than to check if the line size happens to be zero.
+ */
+PRIVATE BOOL HText_TrueEmptyLine ARGS3(
+	HTLine *,	line,
+	HText *,	text,
+	BOOL,		IgnoreSpaces)
+{
+    size_t i;
+
+    if (!(line && line->size))
+	return TRUE;
+
+    if (IgnoreSpaces) {
+	for (i = 0; i < line->size; i++) {
+	    if (!IsSpecialAttrChar(UCH(line->data[i])) &&
+		IS_UTF8_EXTRA(line->data[i]) &&
+		!isspace(UCH(line->data[i])) &&
+		UCH(line->data[i]) != HT_NON_BREAK_SPACE &&
+		UCH(line->data[i]) != HT_EN_SPACE) {
+		return FALSE;
+	    }
+	}
+    } else {
+	for (i = 0; i < line->size; i++) {
+	    if (!IsSpecialAttrChar(line->data[i]) &&
+		IS_UTF8_EXTRA(line->data[i])) {
+		return FALSE;
+	    }
+	}
+    }
+    return TRUE;
 }
 
 PUBLIC void HText_NegateLineOne ARGS1(
@@ -8538,7 +8637,6 @@ PUBLIC void HText_RemovePreviousLine ARGS1(
     previous->next = text->last_line;
     text->last_line->prev = previous;
     text->Lines--;
-    FREE(line);
 }
 
 /*
@@ -8587,7 +8685,7 @@ PUBLIC void HText_setTabID ARGS2(
     HTList * cur = text->tabs;
     HTList * last = NULL;
 
-    if (!text || !name || !*name)
+    if (!text || isEmpty(name))
 	return;
 
     if (!cur) {
@@ -9337,7 +9435,7 @@ PUBLIC int HText_beginInput ARGS3(
     a->link_type = INPUT_ANCHOR;
     a->show_anchor = YES;
 
-    LYSetHiText(a, NULL, 0);
+    LYClearHiText(a);
     a->extent = 2;
 
     a->input_field = f;
@@ -9981,6 +10079,7 @@ PRIVATE unsigned check_form_specialchars ARGS1(
     return result;
 }
 
+#ifdef EXP_FILE_UPLOAD
 PRIVATE CONST char *guess_content_type ARGS1(CONST char *, filename)
 {
     HTAtom *encoding;
@@ -9990,6 +10089,7 @@ PRIVATE CONST char *guess_content_type ARGS1(CONST char *, filename)
 	    ? format->name
 	    : "text/plain";
 }
+#endif
 
 /*
  *  HText_SubmitForm - generate submit data from form fields.
@@ -11726,7 +11826,7 @@ PRIVATE void insert_new_textarea_anchor ARGS2(
      *  Clone and initialize the struct's needed to add a new TEXTAREA
      *  anchor.
      */
-    l = allocHTLine(MAX_LINE);
+    POOLallocHTLine(l, MAX_LINE);
     POOLtypecalloc(TextAnchor, a);
     POOLtypecalloc(FormInfo, f);
     if (a == NULL || l == NULL || f == NULL)
@@ -12550,7 +12650,7 @@ PUBLIC int HText_InsertFile ARGS1(
 	    break;
     }
 
-    l = allocHTLine(MAX_LINE);
+    POOLallocHTLine(l, MAX_LINE);
     POOLtypecalloc(TextAnchor, a);
     POOLtypecalloc(FormInfo, f);
     if (a == NULL || l == NULL || f == NULL)

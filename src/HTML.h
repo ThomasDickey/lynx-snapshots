@@ -285,4 +285,3 @@ extern int HTLoadError PARAMS((
 	CONST char *	message));
 
 #endif /* HTML_H */
-

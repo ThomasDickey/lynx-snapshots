@@ -185,16 +185,8 @@ PUBLIC int LYUpload_options ARGS2(
     static char curloc[LY_MAXPATH];
     char *cp;
 
-    if (LYReuseTempfiles) {
-	fp0 = LYOpenTempRewrite(tempfile, HTML_SUFFIX, "w");
-    } else {
-	LYRemoveTemp(tempfile);
-	fp0 = LYOpenTemp(tempfile, HTML_SUFFIX, "w");
-    }
-    if (fp0 == NULL) {
-	HTAlert(CANNOT_OPEN_TEMP);
+    if ((fp0 = InternalPageFP(tempfile, TRUE)) == 0)
 	return(-1);
-    }
 
 #ifdef VMS
     strcpy(curloc, "/sys$login");

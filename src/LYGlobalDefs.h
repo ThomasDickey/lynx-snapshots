@@ -185,6 +185,7 @@ extern BOOLEAN LYShowCursor;	/* Show the cursor or hide it?	    */
 extern BOOLEAN LYShowTransferRate;
 extern BOOLEAN LYUseDefShoCur;	/* Command line -show_cursor toggle */
 extern BOOLEAN LYUserSpecifiedURL;  /* URL from a goto or document? */
+extern BOOLEAN LYfind_leaks;
 extern BOOLEAN LYforce_HTML_mode;
 extern BOOLEAN LYforce_no_cache;
 extern BOOLEAN LYinternal_flag; /* don't need fresh copy, was internal link */
@@ -510,6 +511,10 @@ extern BOOLEAN textfield_prompt_at_left_edge;
 extern BOOLEAN LYNoCore;
 extern BOOLEAN restore_sigpipe_for_children;
 #endif /* !VMS */
+
+#if defined(USE_COLOR_STYLE)
+extern char *lynx_lss_file;
+#endif
 
 extern int HTNoDataOK;		/* HT_NO_DATA-is-ok hack */
 extern BOOLEAN FileInitAlreadyDone;

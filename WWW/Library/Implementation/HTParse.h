@@ -70,6 +70,15 @@ extern char * HTParse PARAMS((
 	CONST char *	relatedName,
 	int		wanted));
 
+/*	HTParseAnchor(), fast HTParse() specialization
+**	----------------------------------------------
+**
+** On exit,
+**	returns		A pointer within input string (probably to its end '\0')
+*/
+extern CONST char * HTParseAnchor PARAMS((
+	CONST char *	aName));
+
 /*	Simplify a filename.				HTSimplify()
 **	--------------------
 **
@@ -183,7 +192,3 @@ extern void HTMake822Word PARAMS((
 	char **		str));
 
 #endif  /* HTPARSE_H */
-
-/*
-   end of HTParse
-    */

@@ -58,8 +58,6 @@ US-ASCII control characters <32 which are not defined in Unicode standard
 
 extern int HTCurSelectGroupType;
 extern char * HTCurSelectGroupSize;
-extern HText * HTMainText;		/* Equivalent of main window */
-extern HTParentAnchor * HTMainAnchor;	/* Anchor for HTMainText */
 
 #if defined(VMS) && defined(VAXC) && !defined(__DECC)
 extern int HTVirtualMemorySize;
@@ -161,6 +159,8 @@ extern char * HTLoadedDocumentBookmark NOPARAMS;
 extern int HText_LastLineSize PARAMS((HText *me, BOOL IgnoreSpaces));
 extern int HText_LastLineOffset PARAMS((HText *me));
 extern int HText_PreviousLineSize PARAMS((HText *me, BOOL IgnoreSpaces));
+extern BOOL HText_LastLineEmpty PARAMS((HText *me, BOOL IgnoreSpaces));
+extern BOOL HText_PreviousLineEmpty PARAMS((HText *me, BOOL IgnoreSpaces));
 extern void HText_NegateLineOne PARAMS((HText *text));
 extern BOOL HText_inLineOne PARAMS((HText *text));
 extern void HText_RemovePreviousLine PARAMS((HText *text));

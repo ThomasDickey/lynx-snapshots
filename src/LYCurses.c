@@ -615,9 +615,11 @@ PRIVATE struct {
  */
 PRIVATE int get_color_pair ARGS1(int, n)
 {
+#ifdef USE_CURSES_PAIR_0
     if (lynx_color_pairs[n].fg == default_fg
      && lynx_color_pairs[n].bg == default_bg)
     	return 0;
+#endif
     return COLOR_PAIR(n);
 }
 
@@ -1058,7 +1060,9 @@ PUBLIC void start_curses NOARGS
 		lynx_setup_colors();
 	    }
 #else
+#if defined(HAVE_USE_DEFAULT_COLORS)
 	    lynx_default_colors();
+#endif /* HAVE_USE_DEFAULT_COLORS */
 #endif /* EXP_ASSUMED_COLOR */
 #endif /* USE_DEFAULT_COLORS */
 	}
@@ -1423,7 +1427,7 @@ PUBLIC BOOLEAN setup ARGS1(
 	    LYTrimTrailing(buffer);
 	}
 
-	if (buffer == 0 || *buffer == 0)
+	if (isEmpty(buffer))
 	    StrAllocCopy(buffer,"vt100");
 
 	HTSprintf0(&term_putenv,"TERM=%.106s", buffer);

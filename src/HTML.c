@@ -1667,9 +1667,11 @@ PRIVATE int HTML_start_element ARGS6(
 	     */
 	    if (me->inBASE && *isindex_href != '\0' && *isindex_href != '#')
 		action = HTParse(isindex_href, me->base_href, PARSE_ALL);
-	    if (!(action && *action))
+	    if (isEmpty(action)) {
+		FREE(action);
 		action = HTParse(isindex_href,
 				 me->node_anchor->address, PARSE_ALL);
+	    }
 	    FREE(isindex_href);
 
 	    if (action && *action) {
@@ -2080,8 +2082,8 @@ PRIVATE int HTML_start_element ARGS6(
 	   * Otherwise, don't do anything. -DH 980814, TD 980827
 	   */
 	if ((LYCollapseBRs == FALSE &&
-	     HText_PreviousLineSize(me->text, FALSE)) ||
-	    HText_LastLineSize(me->text, FALSE)) {
+	     !HText_PreviousLineEmpty(me->text, FALSE)) ||
+	    !HText_LastLineEmpty(me->text, FALSE)) {
 	    HText_setLastChar(me->text, ' ');  /* absorb white space */
 	    HText_appendCharacter(me->text, '\r');
 	}
@@ -2113,10 +2115,10 @@ PRIVATE int HTML_start_element ARGS6(
 	     *	the last line are blank. - FM
 	     */
 	    UPDATE_STYLE;
-	    if (HText_LastLineSize(me->text, FALSE)) {
+	    if (!HText_LastLineEmpty(me->text, FALSE)) {
 		HText_setLastChar(me->text, ' ');  /* absorb white space */
 		HText_appendCharacter(me->text, '\r');
-	    } else if (!HText_PreviousLineSize(me->text, FALSE)) {
+	    } else if (HText_PreviousLineEmpty(me->text, FALSE)) {
 		HText_RemovePreviousLine(me->text);
 	    }
 	    me->in_word = NO;
@@ -2575,7 +2577,7 @@ PRIVATE int HTML_start_element ARGS6(
 	CHECK_ID(HTML_GEN_ID);
 	HText_setLastChar(me->text, ' ');  /* absorb white space */
 	if (!me->style_change)	{
-	    if (HText_LastLineSize(me->text, FALSE)) {
+	    if (!HText_LastLineEmpty(me->text, FALSE)) {
 		HText_appendCharacter(me->text, '\r');
 	    } else {
 		HText_NegateLineOne(me->text);
@@ -3019,32 +3021,15 @@ PRIVATE int HTML_start_element ARGS6(
 	     */
 	    me->inBoldA = TRUE;
 
-	    CHECK_FOR_INTERN(intern_flag,value[HTML_A_HREF]);
-	    if (present[HTML_A_ISMAP]) /*???*/
-		intern_flag = FALSE;
+	    StrAllocCopy(href, value[HTML_A_HREF]);
+	    CHECK_FOR_INTERN(intern_flag,href);  /*NULL, '\0', or '#'*/
 
-	    if (intern_flag) {
-		/*** FAST WAY: ***/
-		StrAllocCopy(href, value[HTML_A_HREF]);
-		if (href && *href)
-		    TRANSLATE_AND_UNESCAPE_TO_STD(&href);
-		if (!href || !*href)
-		    StrAllocCopy(href, "#"); /*extreme case*/
+	    if (intern_flag) { /*** FAST WAY: ***/
+		if (isEmpty(href))
+		    StrAllocCopy(href, "#");
+		TRANSLATE_AND_UNESCAPE_TO_STD(&href);
 
 	    } else {
-		/*
-		 * Prepare to do housekeeping on the reference.	 - FM
-		 */
-		if (!value[HTML_A_HREF] || *value[HTML_A_HREF] == '\0') {
-		    StrAllocCopy(href, me->node_anchor->address);
-		} else if (*value[HTML_A_HREF] == '#') {
-		    StrAllocCopy(href, me->node_anchor->address);
-		    if (strlen(value[HTML_A_HREF]) > 1) {
-			StrAllocCat(href, value[HTML_A_HREF]);
-		    }
-		} else {
-		    StrAllocCopy(href, value[HTML_A_HREF]);
-		}
 		url_type = LYLegitimizeHREF(me, &href, TRUE, TRUE);
 
 		/*
@@ -3060,24 +3045,25 @@ PRIVATE int HTML_start_element ARGS6(
 		/*
 		 * Check whether a base tag is in effect.  - FM
 		 */
-		if ((me->inBASE && *href != '\0' && *href != '#') &&
-		     (temp = HTParse(href, me->base_href, PARSE_ALL)) &&
-		      *temp != '\0')
+		if (me->inBASE) {
 		    /*
 		     * Use reference related to the base.
 		     */
-		    StrAllocCopy(href, temp);
-		FREE(temp);
+		    temp = href;
+		    href = HTParse(temp, me->base_href, PARSE_ALL);
+		    FREE(temp);
+		}
 
-	        /*
+		/*
 		 * Check whether to fill in localhost.  - FM
 		 */
-		 LYFillLocalFileURL(&href,
-				    ((*href != '\0' && *href != '#' &&
-				     me->inBASE)
-				     ? me->base_href
-				     : me->node_anchor->address));
+		LYFillLocalFileURL(&href,
+				   (me->inBASE
+				    ? me->base_href
+				    : me->node_anchor->address));
 	    }
+	    if (present[HTML_A_ISMAP]) /*???*/
+		intern_flag = FALSE;
 	} else {
 	    if (bold_name_anchors == TRUE) {
 		me->inBoldA = TRUE;
@@ -3086,7 +3072,7 @@ PRIVATE int HTML_start_element ARGS6(
 
 	if (present && present[HTML_A_TYPE] && value[HTML_A_TYPE]) {
 	    StrAllocCopy(temp, value[HTML_A_TYPE]);
-	    if (!intern_flag && href &&
+	    if (!intern_flag &&
 		!strcasecomp(value[HTML_A_TYPE], HTAtom_name(HTInternalLink)) &&
 		!LYIsUIPage3(me->node_anchor->address, UIP_LIST_PAGE, 0) &&
 		!LYIsUIPage3(me->node_anchor->address, UIP_ADDRLIST_PAGE, 0) &&
@@ -3809,7 +3795,7 @@ PRIVATE int HTML_start_element ARGS6(
 				  me->base_href : me->node_anchor->address));
 	    if (!(url_type = is_url(href))) {
 		temp = HTParse(href, me->node_anchor->address, PARSE_ALL);
-		if (!(temp && *temp)) {
+		if (isEmpty(temp)) {
 		   FREE(href);
 		   FREE(temp);
 		   break;
@@ -4242,7 +4228,7 @@ PRIVATE int HTML_start_element ARGS6(
 	    FREE(base);
 	    FREE(code);
 
-	    if (href && *href) {
+	    if (!isEmpty(href)) {
 		if (me->inA) {
 		    if (me->inBoldA == TRUE && me->inBoldH == FALSE)
 			HText_appendCharacter(me->text, LY_BOLD_END_CHAR);
@@ -5811,7 +5797,7 @@ PRIVATE int HTML_start_element ARGS6(
 	    HTML_end_element(me, HTML_U, include);
 	}
 	UPDATE_STYLE;
-	if (HText_LastLineSize(me->text, FALSE)) {
+	if (!HText_LastLineEmpty(me->text, FALSE)) {
 	    HText_setLastChar(me->text, ' ');  /* absorb white space */
 	    HText_appendCharacter(me->text, '\r');
 	}
@@ -7558,12 +7544,16 @@ End_Object:
 				me->DivisionAlignments[me->Division_Level];
 	change_paragraph_style(me, me->sp->style);
 	UPDATE_STYLE;
+
 #ifdef EXP_NESTED_TABLES
 	if (nested_tables) {
 	    me->inTABLE = HText_endStblTABLE(me->text);
-	} else
-#endif
+	} else {
+	    HText_endStblTABLE(me->text);
+	}
+#else
 	HText_endStblTABLE(me->text);
+#endif
 
 	me->current_default_alignment = me->sp->style->alignment;
 	if (me->List_Nesting_Level >= 0)
@@ -7573,7 +7563,7 @@ End_Object:
 /* These TABLE related elements may now not be SGML_EMPTY. - kw */
     case HTML_TR:
 	HText_endStblTR(me->text);
-	if (HText_LastLineSize(me->text, FALSE)) {
+	if (!HText_LastLineEmpty(me->text, FALSE)) {
 	    HText_setLastChar(me->text, ' ');  /* absorb next white space */
 	    HText_appendCharacter(me->text, '\r');
 	}

@@ -160,7 +160,7 @@ PRIVATE int LYLoadCGI ARGS4(
     char *pgm_buff = NULL;		/* PATH_INFO extraction buffer       */
     char *path_translated;		/* From document_root/path_info      */
 
-    if (!arg || !*arg || strlen(arg) <= 8) {
+    if (isEmpty(arg) || strlen(arg) <= 8) {
 	HTAlert(BAD_REQUEST);
 	status = -2;
 	return(status);

@@ -182,7 +182,7 @@ struct _HTStream {
     void *			callerData;
 #endif /* CALLERDATA */
     BOOL present[MAX_ATTRIBUTES];	/* Flags: attribute is present? */
-    char * value[MAX_ATTRIBUTES];	/* malloc'd strings or NULL if none */
+    char * value[MAX_ATTRIBUTES];	/* NULL, or strings alloc'd with StrAllocCopy_extra() */
 
     BOOL			lead_exclamation;
     BOOL			first_dash;
@@ -496,7 +496,7 @@ PRIVATE void handle_attribute_name ARGS2(
 #endif
 	    {
 	    context->present[i] = YES;
-	    FREE(context->value[i]);
+	    Clear_extra(context->value[i]);
 #ifdef USE_COLOR_STYLE
 #   ifdef USE_PRETTYSRC
 	    current_is_class = IS_C(attributes[i]);
@@ -525,7 +525,7 @@ PRIVATE void handle_attribute_value ARGS2(
 	CONST char *,	s)
 {
     if (context->current_attribute_number != INVALID) {
-	StrAllocCopy(context->value[context->current_attribute_number], s);
+	StrAllocCopy_extra(context->value[context->current_attribute_number], s);
 #ifdef USE_COLOR_STYLE
 	if (current_is_class)
 	{
@@ -631,7 +631,7 @@ PRIVATE void put_pretty_entity ARGS2(HTStream *, context, int, term)
     PUTC('&');
     PUTS(entity_string);
     if (term)
-	PUTC(term);
+	PUTC((char)term);
     PSRCSTOP(entity);
 }
 
@@ -1458,7 +1458,7 @@ PRIVATE void SGML_free ARGS1(
     */
     HTChunkFree(context->string);
     for (i = 0; i < MAX_ATTRIBUTES; i++)
-	FREE(context->value[i]);
+	FREE_extra(context->value[i]);
     FREE(context);
 
 #ifdef USE_PRETTYSRC
@@ -1501,7 +1501,7 @@ PRIVATE void SGML_abort ARGS2(
     */
     HTChunkFree(context->string);
     for (i = 0; i < MAX_ATTRIBUTES; i++)
-	FREE(context->value[i]);
+	FREE_extra(context->value[i]);
     FREE(context);
 
 #ifdef USE_PRETTYSRC

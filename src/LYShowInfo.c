@@ -281,7 +281,7 @@ PUBLIC int LYShowInfo ARGS4(
     } else {
       LYUCcharset * p_in = HTAnchor_getUCInfoStage(HTMainAnchor,
 							     UCT_STAGE_PARSER);
-      if (!p_in || !(p_in->MIMEname) || !*(p_in->MIMEname) ||
+      if (!p_in || isEmpty(p_in->MIMEname) ||
 	   HTAnchor_getUCLYhndl(HTMainAnchor, UCT_STAGE_PARSER) < 0) {
 	   p_in = HTAnchor_getUCInfoStage(HTMainAnchor, UCT_STAGE_MIME);
       }

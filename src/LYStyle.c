@@ -1,6 +1,6 @@
 /* character level styles for Lynx
  * (c) 1996 Rob Partington -- donated to the Lyncei (if they want it :-)
- * @Id: LYStyle.c 1.50 Sun, 06 Oct 2002 17:43:28 -0700 dickey @
+ * @Id: LYStyle.c 1.51 Wed, 22 Jan 2003 01:43:13 -0800 dickey @
  */
 #include <HTUtils.h>
 #include <HTML.h>
@@ -192,7 +192,9 @@ PRIVATE void parse_attributes ARGS5(
 
 	if (fA < MAX_COLOR
 	 && bA < MAX_COLOR
+#ifdef USE_CURSES_PAIR_0
 	 && (fA != default_fg || bA != default_bg)
+#endif
 	 && curPair < 255) {
 	    if (our_pairs[iBold][iBlink][iFg][iBg] != 0) {
 		curPair = our_pairs[iBold][iBlink][iFg][iBg];
@@ -505,7 +507,7 @@ PRIVATE int style_readFromFileREC ARGS2(
     int len;
 
     CTRACE2(TRACE_STYLE, (tfp, "CSS:Reading styles from file: %s\n", lss_filename ? lss_filename : "?!? empty ?!?"));
-    if (lss_filename == NULL || *lss_filename == '\0')
+    if (isEmpty(lss_filename))
 	return -1;
     if ((fh = LYOpenCFG(lss_filename, parent_filename, LYNX_LSS_FILE)) == 0) {
 	/* this should probably be an alert or something */

@@ -220,8 +220,4 @@ extern void             HText_unlinkSelection PARAMS((HText * me));
 extern HTAnchor *       HText_referenceSelected PARAMS((HText * me));
 extern HTAnchor *       HText_linkSelTo PARAMS((HText * me, HTAnchor* anchor));
 
-
 #endif /* HTEXT_H */
-/*
-
-   end */

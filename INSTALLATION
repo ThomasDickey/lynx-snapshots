@@ -506,6 +506,10 @@ II. Compile instructions -- UNIX
 	the curses library.  The variant ncursesw is the wide-character
 	version of ncurses.
 
+	The pdcurses selection supported by the configure script is a UNIX-only
+	library which uses X11.  If you are configuring with DJGPP, the likely
+	choice is "curses", since that is how PDCurses is normally installed.
+
   --with-socks[=XXX]			(define SOCKS)
 	Use this option to configure with the socks library.
 

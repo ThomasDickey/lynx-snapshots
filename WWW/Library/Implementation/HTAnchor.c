@@ -56,7 +56,9 @@ struct _HyperDoc {
 };
 #endif /* VMS */
 
-PRIVATE HTList **adult_table = 0;  /* Point to table of lists of all parents */
+/* Table of lists of all parents */
+PRIVATE HTList adult_table[HASH_SIZE] = { {NULL, NULL} };
+
 
 /*				Creation Methods
 **				================
@@ -210,10 +212,6 @@ PUBLIC HTChildAnchor * HTAnchor_findChild ARGS2(
 	} else {  /* parent doesn't have any children yet : create family */
 	   parent->children = HTBTree_new(compare);
 	}
-    } else { /*  if tag is void */
-	if (!parent->children_notag)
-	   /* create a family of this kind */
-	   parent->children_notag = HTList_new();
     }
 
     child = HTChildAnchor_new();
@@ -228,7 +226,7 @@ PUBLIC HTChildAnchor * HTAnchor_findChild ARGS2(
 	HTBTree_add(parent->children, child);
     } else {
 	child->tag = 0;
-	HTList_addObject(parent->children_notag, child);
+	HTList_linkObject(&parent->children_notag, child, &child->_add_children_notag);
     }
 
     return(child);
@@ -261,15 +259,13 @@ PUBLIC HTChildAnchor * HTAnchor_findChildAndLink ARGS4(
 
     if (href && *href) {
 	CONST char *fragment = NULL;
-	DocAddress parsed_doc;
 	HTParentAnchor * dest;
 
-	if (*href == '#' && ltype == HTInternalLink) {
+	if (ltype == HTInternalLink) {
 	    dest = parent;
-	    fragment = href+1;
 	} else {
-	    char *relative_to = HTAnchor_address((HTAnchor *)parent);
-	   /* hmm, it seems HTML.c always resolve href to absolute url??? */
+	    CONST char *relative_to = parent->parent->address;
+	    DocAddress parsed_doc;
 	    parsed_doc.address = HTParse(href, relative_to,
 	       PARSE_ACCESS | PARSE_HOST | PARSE_PATH | PARSE_PUNCTUATION);
 	    parsed_doc.post_data = NULL;
@@ -278,10 +274,13 @@ PUBLIC HTChildAnchor * HTAnchor_findChildAndLink ARGS4(
 	    parsed_doc.isHEAD = FALSE;
 	    parsed_doc.safe = FALSE;
 	    dest = HTAnchor_findAddress_nofragment(&parsed_doc);
-	    FREE(relative_to);
 	    FREE(parsed_doc.address);
-	    fragment = HTParse(href, "", PARSE_ANCHOR);
 	}
+
+	if (*href == '#')
+	    fragment = href+1;
+	else
+	    fragment = HTParseAnchor(href);
 
 	/*
 	** [comment from HTAnchor_findAddress()]
@@ -290,9 +289,6 @@ PUBLIC HTChildAnchor * HTAnchor_findChildAndLink ARGS4(
 	*/
 	if (*fragment)
 	    dest = (HTParentAnchor *)HTAnchor_findChild(dest, fragment);
-
-	if (!(*href == '#' && ltype == HTInternalLink))
-	    FREE(fragment);
 
 #define DUPLICATE_ANCHOR_NAME_WORKAROUND
 
@@ -317,47 +313,41 @@ PUBLIC HTChildAnchor * HTAnchor_findChildAndLink ARGS4(
 	    }
 	}
 #endif
-	HTAnchor_link((HTAnchor *)child, (HTAnchor *)dest, ltype);
+	HTAnchor_link(child, (HTAnchor *)dest, ltype);
     }
     return(child);
 }
 
 #ifdef LY_FIND_LEAKS
+PRIVATE BOOL free_adults_atexit = FALSE;
+
 /*
 **  Function for freeing the adult hash table. - FM
 */
 PRIVATE void free_adult_table NOARGS
 {
-    int i_counter;
-    HTList * HTAp_freeme;
+    int i;
+    HTList * list;
     HTParentAnchor * parent;
     /*
      *	Loop through all lists.
      */
-    for (i_counter = 0; i_counter < HASH_SIZE; i_counter++) {
+    for (i = 0; i < HASH_SIZE; i++) {
+
+	list = &(adult_table[i]);
 	/*
 	**  Loop through the list.
 	*/
-	while (adult_table[i_counter] != NULL) {
-	    /*
-	    **	Free off items - FM
-	    */
-	    HTAp_freeme = adult_table[i_counter];
-	    adult_table[i_counter] = HTAp_freeme->next;
-	    if (HTAp_freeme->object) {
-		parent = (HTParentAnchor *)HTAp_freeme->object;
-		CTRACE((tfp, "delete anchor:%d/%d,%d,%d %s\n",
-		       i_counter, HTList_count(HTAp_freeme) + 1,
-		       (parent->physical ? 1 : 0),
-		       (int)parent->underway,
-		       (parent->address ? parent->address : "(no address)")));
-		parent->underway = FALSE;
-		HTAnchor_delete(parent);
-	    }
-	    FREE(HTAp_freeme);
+	while ((parent = (HTParentAnchor *)HTList_unlinkLastObject(list)) != 0) {
+	    CTRACE((tfp, "delete anchor:%d/%d,%d,%d %s\n",
+		i, HTList_count(list) + 1,
+		(parent->physical ? 1 : 0),
+		(int)parent->underway,
+		(parent->address ? parent->address : "(no address)")));
+	    parent->underway = FALSE;
+	    HTAnchor_delete(parent);
 	}
     }
-    FREE(adult_table);
 }
 #endif /* LY_FIND_LEAKS */
 
@@ -373,7 +363,7 @@ PUBLIC HTAnchor * HTAnchor_findAddress ARGS1(
 	CONST DocAddress *,	newdoc)
 {
     /* Anchor tag specified ? */
-    char *tag = HTParse(newdoc->address, "", PARSE_ANCHOR);
+    CONST char *tag = HTParseAnchor(newdoc->address);
 
     CTRACE((tfp,"Entered HTAnchor_findAddress\n"));
 
@@ -397,12 +387,11 @@ PUBLIC HTAnchor * HTAnchor_findAddress ARGS1(
 	foundParent = HTAnchor_findAddress_nofragment(&parsed_doc);
 	foundAnchor = HTAnchor_findChild (foundParent, tag);
 	FREE(parsed_doc.address);
-	FREE(tag);
 	return (HTAnchor *)foundAnchor;
     }
-    FREE(tag);
     return (HTAnchor *)HTAnchor_findAddress_nofragment(newdoc);
 }
+
 
 /*  The address has no anchor tag for sure.
  */
@@ -417,21 +406,17 @@ PRIVATE HTParentAnchor * HTAnchor_findAddress_nofragment ARGS1(
 	HTList *grownups;
 	HTParentAnchor * foundAnchor;
 
+#ifdef LY_FIND_LEAKS
+	if (!free_adults_atexit) {
+	    atexit(free_adult_table);
+	    free_adults_atexit = TRUE;
+	}
+#endif
 	/*
 	**  Select list from hash table,
 	*/
 	hash = HASH_FUNCTION(newdoc->address);
-	if (!adult_table) {
-	    adult_table = typecallocn(HTList *, HASH_SIZE);
-	    if (!adult_table)
-		outofmem(__FILE__, "HTAnchor_findAddress");
-#ifdef LY_FIND_LEAKS
-	    atexit(free_adult_table);
-#endif
-	}
-	if (!adult_table[hash])
-	    adult_table[hash] = HTList_new();
-	adults = adult_table[hash];
+	adults = &(adult_table[hash]);
 
 	/*
 	**  Search list for anchor.
@@ -471,7 +456,7 @@ PRIVATE HTParentAnchor * HTAnchor_findAddress_nofragment ARGS1(
 	    StrAllocCopy(foundAnchor->bookmark, newdoc->bookmark);
 	foundAnchor->isHEAD = newdoc->isHEAD;
 	foundAnchor->safe = newdoc->safe;
-	HTList_addObject (adults, foundAnchor);
+	HTList_linkObject(adults, foundAnchor, &foundAnchor->_add_adults);
 
 	return foundAnchor;
 }
@@ -538,11 +523,11 @@ PRIVATE void deleteLinks ARGS1(
 	 *  Remove me from the parent's sources so that the
 	 *  parent knows one less anchor is it's dest.
 	 */
-	if (!HTList_isEmpty(parent->sources)) {
+	if (!HTList_isEmpty(&parent->sources)) {
 	    /*
 	     *	Really should only need to deregister once.
 	     */
-	    HTList_removeObject(parent->sources, (void *)me);
+	    HTList_unlinkObject(&parent->sources, (void *)me);
 	}
 
 	/*
@@ -583,12 +568,12 @@ PRIVATE void deleteLinks ARGS1(
 	 */
 	while ((target = (HTLink *)HTList_removeLastObject(me->links)) != 0) {
 	    parent = target->dest->parent;
-	    if (!HTList_isEmpty(parent->sources)) {
+	    if (!HTList_isEmpty(&parent->sources)) {
 		/*
 		 *  Only need to tell destination parent
 		 *  anchor once.
 		 */
-		HTList_removeObject(parent->sources, (void *)me);
+		HTList_unlinkObject(&parent->sources, (void *)me);
 	    }
 
 	    /*
@@ -699,13 +684,13 @@ PUBLIC BOOL HTAnchor_delete ARGS1(
      *	Don't actually delete this anchor, but children are OK to
      *	delete their links.
      */
-    if (!HTList_isEmpty(me->sources)) {
+    if (!HTList_isEmpty(&me->sources)) {
 	/*
 	 *  Delete all outgoing links from children, do not
 	 *  delete the children, though.
 	 */
-	if (!HTList_isEmpty(me->children_notag)) {
-	    cur = me->children_notag;
+	if (!HTList_isEmpty(&me->children_notag)) {
+	    cur = &me->children_notag;
 	    while ((child = (HTChildAnchor *)HTList_nextObject(cur)) != 0) {
 		deleteLinks((HTAnchor *)child);
 	    }
@@ -742,30 +727,23 @@ PUBLIC BOOL HTAnchor_delete ARGS1(
 	me->children = NULL;
     }
     /* ...and this kind of children */
-    if (!HTList_isEmpty(me->children_notag)) {
-	while ((child = (HTChildAnchor *)HTList_removeLastObject(
-						       me->children_notag)) != 0) {
+    if (!HTList_isEmpty(&me->children_notag)) {
+	while ((child = (HTChildAnchor *)HTList_unlinkLastObject(
+						       &me->children_notag)) != 0) {
 	   deleteLinks((HTAnchor *)child);
 	   FREE(child);
 	}
     }
+    me->children_notag.object = NULL;
+    me->children_notag.next = NULL;
+
     me->underway = FALSE;
 
     /*
-     * Delete our empty list of children_notag.
+     * Init our empty list of sources.
      */
-    if (me->children_notag) {
-	HTList_delete(me->children_notag);
-	me->children_notag = NULL;
-    }
-
-    /*
-     * Delete our empty list of sources.
-     */
-    if (me->sources) {
-	HTList_delete(me->sources);
-	me->sources = NULL;
-    }
+    me->sources.object = NULL;
+    me->sources.next = NULL;
 
     /*
      *	Delete the methods list.
@@ -817,6 +795,7 @@ PUBLIC BOOL HTAnchor_delete ARGS1(
     FREE(me->subject);
     FREE(me->date);
     FREE(me->expires);
+
     FREE(me->last_modified);
     FREE(me->ETag);
     FREE(me->server);
@@ -827,12 +806,9 @@ PUBLIC BOOL HTAnchor_delete ARGS1(
     /*
      *	Remove ourselves from the hash table's list.
      */
-    if (adult_table) {
-	unsigned short usi_hash = (unsigned short) HASH_FUNCTION(me->address);
-
-	if (adult_table[usi_hash])  {
-	    HTList_removeObject(adult_table[usi_hash], (void *)me);
-	}
+    {
+	int i = HASH_FUNCTION(me->address);
+	HTList_unlinkObject(&(adult_table[i]), (void *)me);
     }
 
     /*
@@ -847,7 +823,7 @@ PUBLIC BOOL HTAnchor_delete ARGS1(
      */
     FREE(me->address);
 
-    FREE (me->UCStages);
+    FREE(me->UCStages);
     ImageMapList_free(me->imaps);
 
 
@@ -1216,9 +1192,9 @@ PUBLIC BOOL HTAnchor_setSubject ARGS2(
 **	-------------------------------------
 */
 PUBLIC BOOL HTAnchor_link ARGS3(
-	HTAnchor *,	source,
-	HTAnchor *,	destination,
-	HTLinkType *,	type)
+	HTChildAnchor *,	source,
+	HTAnchor *,		destination,
+	HTLinkType *,		type)
 {
     if (!(source && destination))
 	return(NO);  /* Can't link to/from non-existing anchor */
@@ -1236,9 +1212,7 @@ PUBLIC BOOL HTAnchor_link ARGS3(
 	    source->links = HTList_new();
 	HTList_addObject (source->links, newLink);
     }
-    if (!destination->parent->sources)
-	destination->parent->sources = HTList_new();
-    HTList_addObject (destination->parent->sources, source);
+    HTList_linkObject(&destination->parent->sources, source, &source->_add_sources);
     return(YES);  /* Success */
 }
 

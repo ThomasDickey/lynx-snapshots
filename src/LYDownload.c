@@ -485,16 +485,9 @@ PUBLIC int LYdownload_options ARGS2(
     StrAllocCopy(sug_filename, *newfile);
     change_sug_filename(sug_filename);
 
-    if (LYReuseTempfiles) {
-	fp0 = LYOpenTempRewrite(tempfile, HTML_SUFFIX, BIN_W);
-    } else {
-	LYRemoveTemp(tempfile);
-	fp0 = LYOpenTemp(tempfile, HTML_SUFFIX, BIN_W);
-    }
-    if (fp0 == NULL) {
-	HTAlert(CANNOT_OPEN_TEMP);
+    if ((fp0 = InternalPageFP(tempfile, TRUE)) == 0)
 	return(-1);
-    }
+ 
     StrAllocCopy(downloaded_url, *newfile);
     LYLocalFileToURL(newfile, tempfile);
 

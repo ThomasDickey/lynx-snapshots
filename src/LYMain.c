@@ -290,6 +290,7 @@ PUBLIC BOOLEAN local_host_only = FALSE;
 PUBLIC BOOLEAN override_no_download = FALSE;
 PUBLIC BOOLEAN show_dotfiles = FALSE;	/* From rcfile if no_dotfiles is false */
 PUBLIC BOOLEAN LYforce_HTML_mode = FALSE;
+PUBLIC BOOLEAN LYfind_leaks = TRUE;
 
 #ifdef __DJGPP__
 PUBLIC BOOLEAN watt_debug = FALSE;	/* WATT-32 debugging */
@@ -597,7 +598,7 @@ PRIVATE void reset_break(void)
 #endif /* __DJGPP__ */
 
 #if defined(WIN_EX)
-PUBLIC int is_windows_nt(void)
+PRIVATE int is_windows_nt(void)
 {
     DWORD version;
 
@@ -1057,7 +1058,11 @@ PUBLIC int main ARGS2(
     StrAllocCopy(language, PREFERRED_LANGUAGE);
     StrAllocCopy(pref_charset, PREFERRED_CHARSET);
     StrAllocCopy(system_mail, SYSTEM_MAIL);
+#ifdef SYSTEM_MAIL_FLAGS
     StrAllocCopy(system_mail_flags, SYSTEM_MAIL_FLAGS);
+#else
+    StrAllocCopy(system_mail_flags, "");
+#endif
     StrAllocCopy(LYUserAgent, LYNX_NAME);
     StrAllocCat(LYUserAgent, "/");
     StrAllocCat(LYUserAgent, LYNX_VERSION);
@@ -2953,7 +2958,7 @@ G)oto's" },
     CONST char *value;
     BOOLEAN found, first;
 
-    if (next_arg == 0 || *next_arg == '\0') {
+    if (isEmpty(next_arg)) {
 	SetOutputMode( O_TEXT );
 	for (j = 0; j < TABLESIZE(Usage); j++) {
 	    printf("%s\n", Usage[j]);
@@ -3328,6 +3333,12 @@ keys (may be incompatible with some curses packages)"
       "include all versions of files in local VMS directory\nlistings"
    ),
 #endif
+#ifdef LY_FIND_LEAKS
+   PARSE_SET(
+      "find_leaks",	4|TOGGLE_ARG,		LYfind_leaks,
+      "toggles memory-leak checking"
+   ),
+#endif
    PARSE_SET(
       "force_empty_hrefless_a",	4|SET_ARG,	force_empty_hrefless_a,
       "\nforce HREF-less 'A' elements to be empty (close them as\nsoon as they are seen)"
@@ -3424,6 +3435,12 @@ keys (may be incompatible with some curses packages)"
       "minimal",	4|TOGGLE_ARG,		minimal_comments,
       "toggles minimal versus valid comment parsing"
    ),
+#ifdef EXP_NESTED_TABLES
+   PARSE_SET(
+      "nested_tables",	4|TOGGLE_ARG,		nested_tables,
+      "toggles nested-tables logic"
+   ),
+#endif
 #ifndef DISABLE_NEWS
    PARSE_FUN(
       "newschunksize",	4|NEED_FUNCTION_ARG,	newschunksize_fun,

@@ -497,6 +497,9 @@ PRIVATE void send_file_to_mail ARGS3(
     char *subject = NULL;
     char user_response[LINESIZE];
 
+    if (!LYSystemMail())
+	return;
+
     if (LYPreparsedSource && first_mail_preparsed &&
 	HTisDocumentSource()) {
 	if (HTConfirmDefault(CONFIRM_MAIL_SOURCE_PREPARSED, NO) == YES) {
@@ -1263,16 +1266,8 @@ PUBLIC int print_options ARGS3(
     FILE *fp0;
     lynx_list_item_type *cur_printer;
 
-    if (LYReuseTempfiles) {
-	fp0 = LYOpenTempRewrite(my_temp, HTML_SUFFIX, "w");
-    } else {
-	LYRemoveTemp(my_temp);
-	fp0 = LYOpenTemp(my_temp, HTML_SUFFIX, "w");
-    }
-    if (fp0 == NULL) {
-	HTAlert(UNABLE_TO_OPEN_PRINTOP_FILE);
+    if ((fp0 = InternalPageFP(my_temp, TRUE)) == 0)
 	return(-1);
-    }
 
     LYLocalFileToURL(newfile, my_temp);
 

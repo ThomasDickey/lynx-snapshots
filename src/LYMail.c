@@ -399,7 +399,9 @@ PRIVATE char *blat_cmd(
 #if USE_VMS_MAILER
 PUBLIC BOOLEAN LYMailPMDF(void)
 {
-    return !strncasecomp(system_mail, "PMDF SEND", 9);
+    return (system_mail != 0)
+	    ? !strncasecomp(system_mail, "PMDF SEND", 9)
+	    : FALSE;
 }
 
 /*
@@ -456,12 +458,14 @@ PRIVATE void remove_quotes (char * string)
 PUBLIC FILE *LYPipeToMailer NOARGS
 {
     char *buffer = NULL;
-    FILE *fp;
+    FILE *fp = NULL;
 
-    HTSprintf0(&buffer, "%s %s", system_mail, system_mail_flags);
-    fp = popen(buffer, "w");
-    CTRACE((tfp, "popen(%s) %s\n", buffer, fp != 0 ? "OK" : "FAIL"));
-    FREE(buffer);
+    if (LYSystemMail()) {
+	HTSprintf0(&buffer, "%s %s", system_mail, system_mail_flags);
+	fp = popen(buffer, "w");
+	CTRACE((tfp, "popen(%s) %s\n", buffer, fp != 0 ? "OK" : "FAIL"));
+	FREE(buffer);
+    }
     return fp;
 }
 #else	/* DOS, Win32, etc. */
@@ -478,6 +482,9 @@ PUBLIC int LYSendMailFile ARGS5(
     char *shell;
 #endif /* __DJGPP__ */
     int code;
+
+    if (!LYSystemMail())
+	return 0;
 
 #if USE_BLAT_MAILER
     if (mail_is_blat)
@@ -542,10 +549,10 @@ PUBLIC int LYSendMailFile ARGS5(
 **  mailform() sends form content to the mailto address(es). - FM
 */
 PUBLIC void mailform ARGS4(
-    CONST char *, 	mailto_address,
-    CONST char *, 	mailto_subject,
-    CONST char *, 	mailto_content,
-    CONST char *, 	mailto_type)
+    CONST char *,	mailto_address,
+    CONST char *,	mailto_subject,
+    CONST char *,	mailto_content,
+    CONST char *,	mailto_type)
 {
     FILE *fd;
     char *address = NULL;
@@ -572,6 +579,9 @@ PUBLIC void mailform ARGS4(
 	NONNULL(mailto_subject),
 	NONNULL(mailto_content),
 	NONNULL(mailto_type)));
+
+    if (!LYSystemMail())
+	return;
 
     if (!mailto_address || !mailto_content) {
 	HTAlert(BAD_FORM_MAILTO);
@@ -870,9 +880,9 @@ cleanup:
 */
 PUBLIC void mailmsg ARGS4(
 	int,		cur,
-	char *, 	owner_address,
-	char *, 	filename,
-	char *, 	linkname)
+	char *,		owner_address,
+	char *,		filename,
+	char *,		linkname)
 {
     FILE *fd, *fp;
     char *address = NULL;
@@ -898,6 +908,9 @@ PUBLIC void mailmsg ARGS4(
 
 #endif /* VMS */
 
+    if (!LYSystemMail())
+	return;
+
 #ifdef ALERTMAIL
     if (owner_address == NULL) {
 	owner_address = ALERTMAIL;
@@ -905,9 +918,8 @@ PUBLIC void mailmsg ARGS4(
     }
 #endif
 
-    if (owner_address == NULL || *owner_address == '\0') {
+    if (isEmpty(owner_address))
 	return;
-    }
     if ((cp = (char *)strchr(owner_address,'\n')) != NULL) {
 #ifdef ALERTMAIL
 	if (skip_parsing)
@@ -1097,8 +1109,8 @@ PUBLIC void mailmsg ARGS4(
 **  a comment from the users to the owner
 */
 PUBLIC void reply_by_mail ARGS4(
-	char *, 	mail_address,
-	char *, 	filename,
+	char *,		mail_address,
+	char *,		filename,
 	CONST char *,	title,
 	CONST char *,	refid)
 {
@@ -1142,6 +1154,9 @@ PUBLIC void reply_by_mail ARGS4(
 	NONNULL(refid)));
 
     term_letter = FALSE;
+
+    if (!LYSystemMail())
+	return;
 
     if (isEmpty(mail_address)) {
 	HTAlert(NO_ADDRESS_IN_MAILTO_URL);
@@ -1471,7 +1486,7 @@ PUBLIC void reply_by_mail ARGS4(
 	    BOOLEAN is_preparsed = (BOOL) (LYPreparsedSource &&
 				    HTisDocumentSource());
 	    if (HTConfirm(is_preparsed
-	    	? INC_PREPARSED_MSG_PROMPT
+		? INC_PREPARSED_MSG_PROMPT
 		: INC_ORIG_MSG_PROMPT) == YES) {
 		print_wwwfile_to_fd(fd, (BOOL) !is_preparsed);
 	    }
@@ -1704,7 +1719,7 @@ PUBLIC void reply_by_mail ARGS4(
 cancelled:
     HTInfoMsg(CANCELLED);
     LYCloseTempFP(fd);		/* Close the tmpfile.	*/
-    scrollok(LYwin,FALSE); 	/* Stop scrolling.	*/
+    scrollok(LYwin,FALSE);	/* Stop scrolling.	*/
 cleanup:
     signal(SIGINT, cleanup_sig);
     term_letter = FALSE;
@@ -1728,4 +1743,16 @@ cleanup:
     FREE(keywords);
     FREE(body);
     return;
+}
+
+/*
+ * Check that we have configured values for system mailer.
+ */
+PUBLIC BOOLEAN LYSystemMail NOARGS
+{
+    if (system_mail == 0 || !strcmp(system_mail, "unknown")) {
+	HTAlert(gettext("No system mailer configured"));
+	return FALSE;
+    }
+    return TRUE;
 }
