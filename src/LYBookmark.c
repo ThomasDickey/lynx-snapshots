@@ -44,7 +44,6 @@ PRIVATE char * convert_mosaic_bookmark_file PARAMS((char *filename_buffer));
 PUBLIC char * get_bookmark_filename ARGS1(
 	char **,	URL)
 {
-    char URL_buffer[256];
     static char filename_buffer[256];
     char string_buffer[256];
     FILE *fp;
@@ -113,14 +112,13 @@ success:
 	is_mosaic_hotlist = TRUE;
 	fclose(fp);
 	newname = convert_mosaic_bookmark_file(filename_buffer);
-	LYLocalFileToURL(URL_buffer, newname);
+	LYLocalFileToURL(URL, newname);
     } else {
 	fclose(fp);
 	is_mosaic_hotlist = FALSE;
-	LYLocalFileToURL(URL_buffer, filename_buffer);
+	LYLocalFileToURL(URL, filename_buffer);
     }
 
-    StrAllocCopy(*URL, URL_buffer);
     return(filename_buffer);  /* bookmark file exists */
 
 } /* big end */

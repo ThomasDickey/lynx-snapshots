@@ -1,20 +1,20 @@
 /*                System dependencies in the W3 library
                                    SYSTEM DEPENDENCIES
-                                             
+
    System-system differences for TCP include files and macros. This
    file includes for each system the files necessary for network and
    file I/O.  It should be used in conjunction with HTUtils.h to help
    ensure portability across as many platforms and flavors of platforms
    as possible.
-   
+
   AUTHORS
-  
+
   TBL                Tim Berners-Lee, W3 project, CERN, <timbl@info.cern.ch>
   EvA                     Eelco van Asperen <evas@cs.few.eur.nl>
   MA                      Marc Andreessen NCSA
   AT                      Aleksandar Totic <atotic@ncsa.uiuc.edu>
   SCW                     Susan C. Weber <sweber@kyle.eitech.com>
-                         
+
   HISTORY:
   22 Feb 91               Written (TBL) as part of the WWW library.
   16 Jan 92               PC code from EvA
@@ -35,7 +35,7 @@ Default values
 
    These values may be reset and altered by system-specific sections
    later on.  there are also a bunch of defaults at the end .
-   
+
  */
 /* Default values of those: */
 #define NETCLOSE close      /* Routine to close a TCP-IP socket         */
@@ -171,23 +171,23 @@ VAX/VMS
 
    Under VMS, there are many versions of TCP-IP. Define one if you do
    not use Digital's UCX product:
-   
+
   UCX                     DEC's "Ultrix connection" (default)
   CMU_TCP                 Available via FTP from sacusr.mp.usbr.gov
   SOCKETSHR		  Eckhart Meyer's interface to NETLIB
   WIN_TCP                 From Wollongong, now GEC software.
   MULTINET                From SRI, became TGV, then Cisco.
   DECNET                  Cern's TCP socket emulation over DECnet
-                           
+
    The last three do not interfere with the
    unix i/o library, and so they need special calls to read, write and
    close sockets. In these cases the socket number is a VMS channel
    number, so we make the @@@ HORRIBLE @@@ assumption that a channel
    number will be greater than 10 but a unix file descriptor less than
    10.  It works.
-   
+
  */
-#ifdef VMS 
+#ifdef VMS
 
 #ifdef UCX
 #undef IOCTL
@@ -434,7 +434,7 @@ struct timeval {
    On VMS machines, the linker needs to be told to put global data sections into
  a data
    segment using these storage classes. (MarkDonszelmann)
-  
+
  */
 #if defined(VAXC) && !defined(__DECC)
 #define GLOBALDEF globaldef
@@ -472,6 +472,7 @@ struct timeval {
 #define NETREAD read_s
 #undef NETCLOSE
 #define NETCLOSE close_s
+#define getsockname getsockname_s
 #endif
 
 #ifdef HAVE_UNISTD_H
@@ -512,15 +513,6 @@ Regular BSD unix versions
 #include <sys/stat.h>
 #include <sys/param.h>
 #include <sys/file.h>       /* For open() etc */
-
-#if defined(NeXT) || defined(sony_news)
-#ifndef mode_t
-typedef unsigned short mode_t;
-#endif /* !mode_t */
-
-#ifndef pid_t
-typedef int pid_t;
-#endif /* !pid_t */
 
 #ifndef S_ISLNK
 #define S_ISLNK(m)	(((m) & S_IFMT) == S_IFLNK)
@@ -585,6 +577,15 @@ typedef int pid_t;
 #ifndef S_IXOTH
 #define S_IXOTH 00001
 #endif
+
+#if defined(NeXT) || defined(sony_news)
+#ifndef mode_t
+typedef unsigned short mode_t;
+#endif /* !mode_t */
+
+#ifndef pid_t
+typedef int pid_t;
+#endif /* !pid_t */
 
 #ifndef WEXITSTATUS
 #ifdef sony_news

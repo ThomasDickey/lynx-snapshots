@@ -3210,7 +3210,7 @@ static char * user_agent_string		= "user_agent";
 #define PutTextInput(fp, name, value, size, disable) \
 	fprintf(fp,\
 	"<input size=%d type=\"text\" name=\"%s\" value=\"%s\" %s>\n",\
-		size, name, value, disable)
+		(int) size, name, value, disable)
 
 #define PutOption(fp, flag, html, name) \
 	fprintf(fp,"<option value=\"%s\" %s>%s\n", html, SELECTED(flag), name)
@@ -3679,8 +3679,7 @@ PUBLIC int gen_options ARGS1(
 {
     int i;
     BOOLEAN can_do_colors;
-    static char tempfile[256];
-    char any_filename[256];
+    static char tempfile[LY_MAXPATH];
     FILE *fp0;
     size_t cset_len = 0;
     size_t text_len = COLS - 38;	/* cf: PutLabel */
@@ -3692,9 +3691,8 @@ PUBLIC int gen_options ARGS1(
 	return(-1);
     }
 
-    LYLocalFileToURL(any_filename, tempfile);
+    LYLocalFileToURL(newfile, tempfile);
 
-    StrAllocCopy(*newfile, any_filename);
     LYforce_no_cache = TRUE;
 
     BeginInternalPage(fp0, OPTIONS_TITLE, NULL); /* help link below */

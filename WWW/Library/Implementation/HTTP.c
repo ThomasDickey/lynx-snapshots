@@ -30,6 +30,7 @@
 #include <HTInit.h>
 #include <HTAABrow.h>
 
+#include <LYCookie.h>
 #include <LYGlobalDefs.h>
 #include <GridText.h>
 #include <LYStrings.h>
@@ -62,17 +63,6 @@ extern BOOL no_url_redirection;  /* Don't follow Location: URL for */
 extern char *http_error_file;	 /* Store HTTP status code in this file */
 extern BOOL traversal;		 /* TRUE if we are doing a traversal */
 extern BOOL dump_output_immediately;  /* TRUE if no interactive user */
-
-extern char * HTLoadedDocumentURL NOPARAMS;
-extern void LYSetCookie PARAMS((
-	CONST char *	SetCookie,
-	CONST char *	SetCookie2,
-	CONST char *	address));
-extern char * LYCookie PARAMS((
-	CONST char *	hostname,
-	CONST char *	path,
-	int		port,
-	BOOL		secure));
 
 #define HTTP_NETREAD(a, b, c, d)   NETREAD(a, b, c)
 #define HTTP_NETWRITE(a, b, c, d)  NETWRITE(a, b, c)

@@ -52,8 +52,6 @@
 #define INFINITY 512		/* file name length @@ FIXME */
 #define MULTI_SUFFIX ".multi"	/* Extension for scanning formats */
 
-#define HT_EM_SPACE ((char)2)
-
 #ifdef VMS
 #include <HTVMSUtils.h>
 #endif /* VMS */
@@ -127,7 +125,6 @@ PUBLIC int HTDirReadme = HT_DIR_README_NONE;
 PUBLIC int HTDirReadme = HT_DIR_README_TOP;
 #endif /* DIRED_SUPPORT */
 
-extern BOOLEAN LYRawMode;
 extern BOOL HTPassEightBitRaw;
 extern HTCJKlang HTCJK;
 
@@ -564,69 +561,60 @@ PRIVATE int HTCreatePath ARGS1(CONST char *,path)
 **  On exit:
 **	Returns a malloc'ed string which must be freed by the caller.
 */
-PUBLIC char * HTLocalName ARGS1(
-	CONST char *,	name)
+PUBLIC char * HTnameOfFile_WWW ARGS3(
+	CONST char *,	name,
+	BOOL,		WWW_prefix,
+	BOOL,		expand_all)
 {
     char * acc_method = HTParse(name, "", PARSE_ACCESS);
     char * host = HTParse(name, "", PARSE_HOST);
     char * path = HTParse(name, "", PARSE_PATH+PARSE_PUNCTUATION);
+    char * home;
+    char * result = NULL;
 
-    HTUnEscape(path);	/* Interpret % signs */
+    if (expand_all)
+    	HTUnEscape(path);		/* Interpret all % signs */
+    else
+	HTUnEscapeSome(path, "/");	/* Interpret % signs for path delims */
 
     if (0 == strcmp(acc_method, "file")) { /* local file */
-	FREE(acc_method);
 	if ((0 == strcasecomp(host, HTHostName())) ||
 	    (0 == strcasecomp(host, "localhost")) || !*host) {
-	    FREE(host);
 	    CTRACE(tfp, "Node `%s' means path `%s'\n", name, path);
 #ifdef DOSPATH
-	    {
-		char *ret_path = NULL;
-		StrAllocCopy(ret_path, HTDOS_name(path));
-		CTRACE(tfp, "HTDOS_name changed `%s' to `%s'\n",
-			    path, ret_path);
-		FREE(path);
-		return(ret_path);
-	    }
+	    StrAllocCopy(result, HTDOS_name(path));
+	    CTRACE(tfp, "HTDOS_name changed `%s' to `%s'\n", path, result);
 #else
 #ifdef __EMX__
-	    {
-		char *ret_path = NULL;
-		if (path[0] == '/') /* pesky leading slash */
-		    StrAllocCopy(ret_path, path+1);
-		else
-		    StrAllocCopy(ret_path, path);
-		CTRACE(tfp, "EMX hack changed `%s' to `%s'\n",
-			    path, ret_path);
-		FREE(path);
-		return(ret_path);
-	    }
+	    if (path[0] == '/'
+	     && isalpha(path[1])
+	     && path[2] == ':') /* pesky leading slash */
+		StrAllocCopy(result, path+1);
+	    else
+		StrAllocCopy(result, path);
+	    CTRACE(tfp, "EMX hack changed `%s' to `%s'\n", path, result);
 #else
-	    return(path);
+	    StrAllocCopy(result, path);
 #endif /* __EMX__ */
 #endif /* DOSPATH */
-	} else {
-	    char * result = (char *)malloc(
+	} else if (WWW_prefix) {
+	    result = (char *)malloc(
 				strlen("/Net/")+strlen(host)+strlen(path)+1);
-	      if (result == NULL)
-		  outofmem(__FILE__, "HTLocalName");
+	    if (result == NULL)
+		outofmem(__FILE__, "HTLocalName");
 	    sprintf(result, "%s%s%s", "/Net/", host, path);
-	    FREE(host);
-	    FREE(path);
 	    CTRACE(tfp, "Node `%s' means file `%s'\n", name, result);
-	    return result;
+	} else {
+	    StrAllocCopy(result, path);
 	}
-    } else {  /* other access */
-	char * result;
+    } else if (WWW_prefix) {  /* other access */
 #ifdef VMS
-	char * home =  getenv("HOME");
-	if (!home)
+	if ((home = getenv("HOME")) == 0)
 	    home = HTCacheRoot;
 	else
 	    home = HTVMS_wwwName(home);
 #else
-	CONST char * home =  (CONST char*)getenv("HOME");
-	if (!home)
+	if ((home = getenv("HOME")) == 0)
 	    home = "/tmp";
 #endif /* VMS */
 	result = (char *)malloc(
@@ -634,11 +622,15 @@ PUBLIC char * HTLocalName ARGS1(
 	if (result == NULL)
 	    outofmem(__FILE__, "HTLocalName");
 	sprintf(result, "%s/WWW/%s/%s%s", home, acc_method, host, path);
-	FREE(path);
-	FREE(acc_method);
-	FREE(host);
-	return result;
+    } else {
+	StrAllocCopy(result, path);
     }
+
+    FREE(host);
+    FREE(path);
+    FREE(acc_method);
+
+    return result;
 }
 
 /*	Make a WWW name from a full local path name.

@@ -222,14 +222,18 @@ PUBLIC void HTML_put_character ARGS2(HTStructured *, me, char, c)
     case HTML_TITLE:
 	if (c == LY_SOFT_HYPHEN)
 	    return;
-	if (c != '\n' && c != '\t' && c != '\r')
+	if (c != '\n' && c != '\t' && c != '\r') {
 	    HTChunkPutc(&me->title, c);
-	else if (HTCJK == CHINESE || HTCJK == JAPANESE || HTCJK == TAIPEI)
-	    if (c == '\t')
+	} else if (HTCJK == CHINESE || HTCJK == JAPANESE || HTCJK == TAIPEI) {
+	    if (c == '\t') {
 		HTChunkPutc(&me->title, ' ');
-	    else return;
+	    } else {
+		return;
+	    }
 	    /* don't replace '\n' with ' ' if Chinese or Japanese - HN */
-	else HTChunkPutc(&me->title, ' ');
+	} else {
+	    HTChunkPutc(&me->title, ' ');
+	}
 	return;
 
     case HTML_STYLE:
@@ -7256,16 +7260,16 @@ PUBLIC HTStructured* HTML_new ARGS3(
 	    LYUCcharset *p_in = HTAnchor_getUCInfoStage(me->node_anchor,
 							UCT_STAGE_MIME);
 	    if (p_in->enc == UCT_ENC_CJK && HTCJK == NOCJK) {
-		HTAnchor_resetUCInfoStage(me->node_anchor, 0,
+		HTAnchor_resetUCInfoStage(me->node_anchor, LATIN1,
 					  UCT_STAGE_MIME,
 					  UCT_SETBY_DEFAULT);
-		HTAnchor_setUCInfoStage(me->node_anchor, 0,
+		HTAnchor_setUCInfoStage(me->node_anchor, LATIN1,
 					UCT_STAGE_MIME,
 					UCT_SETBY_DEFAULT);
-		HTAnchor_resetUCInfoStage(me->node_anchor, 0,
+		HTAnchor_resetUCInfoStage(me->node_anchor, LATIN1,
 					  UCT_STAGE_PARSER,
 					  UCT_SETBY_DEFAULT);
-		HTAnchor_setUCInfoStage(me->node_anchor, 0,
+		HTAnchor_setUCInfoStage(me->node_anchor, LATIN1,
 					UCT_STAGE_PARSER,
 					UCT_SETBY_DEFAULT);
 	    }

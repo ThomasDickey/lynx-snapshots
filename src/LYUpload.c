@@ -15,6 +15,7 @@
 */
 
 #include <HTUtils.h>
+#include <HTFile.h>
 #include <HTParse.h>
 #include <HTAlert.h>
 #include <LYCurses.h>
@@ -30,7 +31,7 @@
 #include <LYexit.h>
 #include <LYLeaks.h>
 
-PUBLIC char LYUploadFileURL[256] = "\0";
+PUBLIC char LYUploadFileURL[LY_MAXPATH] = "\0";
 
 /*
  *  LYUpload uploads a file to a given location using a
@@ -44,13 +45,13 @@ PUBLIC int LYUpload ARGS1(
     char *method, *directory, *dir;
     int method_number;
     int count;
-    char tmpbuf[256];
-    char buffer[256];
+    char tmpbuf[LY_MAXPATH];
+    char buffer[LY_MAXPATH];
     lynx_html_item_type *upload_command = 0;
     int c;
     char *cp;
     FILE *fp;
-    char cmd[512];
+    char cmd[20 + (LY_MAXPATH*2)];
 #ifdef VMS
     extern BOOLEAN HadVMSInterrupt;
 #endif /* VMS */
@@ -62,7 +63,7 @@ PUBLIC int LYUpload ARGS1(
 	goto failed;
     *(directory - 1) = '\0';
     /* go past "Directory=" */
-    directory+=3;
+    directory += 3;
 
     if((method = (char *)strstr(line, "UPLOAD=")) == NULL)
 	goto failed;
@@ -207,11 +208,11 @@ PUBLIC int LYUpload_options ARGS2(
 	char **,	newfile,
 	char *, 	directory)
 {
-    static char tempfile[256];
+    static char tempfile[LY_MAXPATH];
     FILE *fp0;
     lynx_html_item_type *cur_upload;
     int count;
-    static char curloc[256];
+    static char curloc[LY_MAXPATH];
     char *cp;
 
     LYRemoveTemp(tempfile);
@@ -223,18 +224,14 @@ PUBLIC int LYUpload_options ARGS2(
 #ifdef VMS
     strcpy(curloc, "/sys$login");
 #else
-    cp = directory;
-    if (!strncmp(cp, "file://localhost", 16))
-	cp += 16;
-    else if (!strncmp(cp, "file:", 5))
-	cp += 5;
+    cp = HTfullURL_toFile(directory);
     strcpy(curloc,cp);
-    HTUnEscape(curloc);
     LYTrimPathSep(curloc);
+    free(cp);
 #endif /* VMS */
 
-    LYLocalFileToURL(LYUploadFileURL, tempfile);
-    StrAllocCopy(*newfile, LYUploadFileURL);
+    LYLocalFileToURL(newfile, tempfile);
+    strcpy(LYUploadFileURL, *newfile);
 
     BeginInternalPage(fp0, UPLOAD_OPTIONS_TITLE, UPLOAD_OPTIONS_HELP);
 

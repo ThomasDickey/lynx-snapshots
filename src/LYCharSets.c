@@ -467,16 +467,15 @@ PUBLIC void HTMLSetCharacterHandling ARGS1(int,i)
     if (LYCharSet_UC[i].enc != UCT_ENC_CJK) {
 	HTCJK = NOCJK;
 	kanji_code = NOKANJI;
+	if (i == chndl)
+	    LYRawMode = LYUseDefaultRawMode;
+	else
+	    LYRawMode = (!LYUseDefaultRawMode);
 
 	HTPassEightBitNum =
 	    ((LYCharSet_UC[i].codepoints & UCT_CP_SUPERSETOF_LAT1) ||
 		(LYCharSet_UC[i].like8859 & UCT_R_HIGH8BIT));
 
-	if (i == chndl) {
-	    LYRawMode = LYUseDefaultRawMode ? TRUE : FALSE;
-	} else {
-	    LYRawMode = LYUseDefaultRawMode ? FALSE : TRUE;
-	}
 	if (LYRawMode) {
 	    HTPassEightBitRaw = (LYlowest_eightbit[i] <= 160);
 	} else {
@@ -494,51 +493,30 @@ PUBLIC void HTMLSetCharacterHandling ARGS1(int,i)
 	CONST char *mime = LYCharSet_UC[i].MIMEname;
 
 	if (!strcmp(mime, "euc-cn")) {
-	    HTCJK = LYUseDefaultRawMode ? CHINESE : NOCJK;
-	    LYRawMode = (HTCJK != NOCJK) ? TRUE : FALSE;
+	    HTCJK = CHINESE;
 	    kanji_code = EUC;
-	    HTPassEightBitRaw = FALSE;
-	    HTPassEightBitNum = FALSE;
-	    HTPassHighCtrlRaw = (HTCJK != NOCJK) ? TRUE : FALSE;
-	    HTPassHighCtrlNum = FALSE;
-
 	} else if (!strcmp(mime, "euc-jp")) {
-	    HTCJK = LYUseDefaultRawMode ? JAPANESE : NOCJK;
-	    LYRawMode = (HTCJK != NOCJK) ? TRUE : FALSE;
+	    HTCJK = JAPANESE;
 	    kanji_code = EUC;
-	    HTPassEightBitRaw = FALSE;
-	    HTPassEightBitNum = FALSE;
-	    HTPassHighCtrlRaw = (HTCJK != NOCJK) ? TRUE : FALSE;
-	    HTPassHighCtrlNum = FALSE;
-
 	} else if (!strcmp(mime, "shift_jis")) {
-	    HTCJK = LYUseDefaultRawMode ? JAPANESE : NOCJK;
-	    LYRawMode = (HTCJK != NOCJK) ? TRUE : FALSE;
+	    HTCJK = JAPANESE;
 	    kanji_code = SJIS;
-	    HTPassEightBitRaw = FALSE;
-	    HTPassEightBitNum = FALSE;
-	    HTPassHighCtrlRaw = (HTCJK != NOCJK) ? TRUE : FALSE;
-	    HTPassHighCtrlNum = FALSE;
-
 	} else if (!strcmp(mime, "euc-kr")) {
-	    HTCJK = LYUseDefaultRawMode ? KOREAN : NOCJK;
-	    LYRawMode = (HTCJK != NOCJK) ? TRUE : FALSE;
+	    HTCJK = KOREAN;
 	    kanji_code = EUC;
-	    HTPassEightBitRaw = FALSE;
-	    HTPassEightBitNum = FALSE;
-	    HTPassHighCtrlRaw = (HTCJK != NOCJK) ? TRUE : FALSE;
-	    HTPassHighCtrlNum = FALSE;
-
 	} else if (!strcmp(mime, "big5")) {
-	    HTCJK = LYUseDefaultRawMode ? TAIPEI : NOCJK;
-	    LYRawMode = (HTCJK != NOCJK) ? TRUE : FALSE;
+	    HTCJK = TAIPEI;
 	    kanji_code = EUC;
-	    HTPassEightBitRaw = FALSE;
-	    HTPassEightBitNum = FALSE;
-	    HTPassHighCtrlRaw = (HTCJK != NOCJK) ? TRUE : FALSE;
-	    HTPassHighCtrlNum = FALSE;
-
 	}
+
+	/* for any CJK: */
+	if (!LYUseDefaultRawMode)
+		HTCJK = NOCJK;
+	LYRawMode = (HTCJK != NOCJK) ? TRUE : FALSE;
+	HTPassEightBitRaw = FALSE;
+	HTPassEightBitNum = FALSE;
+	HTPassHighCtrlRaw = (HTCJK != NOCJK) ? TRUE : FALSE;
+	HTPassHighCtrlNum = FALSE;
     }
 
     /*
@@ -608,6 +586,9 @@ PUBLIC void Set_HTCJK ARGS2(
 /*
  *  Function to set the LYDefaultRawMode value
  *  based on the selected character set. - FM
+ *
+ *  Currently unused: the default value so obvious
+ *  that LYUseDefaultRawMode utilized directly by someone's mistake. - LP
  */
 PRIVATE void HTMLSetRawModeDefault ARGS1(int,i)
 {

@@ -277,12 +277,16 @@ PUBLIC int LYmbcsstrlen ARGS2(
 /*
  * Workaround a bug in ncurses order-of-refresh by setting a pointer to
  * the topmost window that should be displayed.
+ *
+ * FIXME: the associated call on 'keypad()' is not needed for Unix, but
+ * something in the OS/2 EMX port requires it.
  */
 PRIVATE WINDOW *my_subwindow;
 
 PUBLIC void LYsubwindow ARGS1(WINDOW *, param)
 {
-	my_subwindow = param;
+    if ((my_subwindow = param) != 0)
+	keypad(param, TRUE);
 }
 #endif
 

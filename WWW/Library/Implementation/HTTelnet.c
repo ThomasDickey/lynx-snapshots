@@ -32,6 +32,7 @@
 
 #include <userdefs.h>  /* for TELNET_COMMAND and RLOGIN_COMMAND */
 
+#include <LYStrings.h>
 #include <LYLeaks.h>
 
 #define HT_NO_DATA -9999
@@ -303,7 +304,6 @@ PRIVATE int remote_session ARGS2(char *, acc_method, char *, host)
 	    system(command);
 	}
 	else {
-	    extern int LYgetch NOPARAMS;
 	    extern BOOLEAN HadVMSInterrupt;
 
 	    printf(
@@ -421,7 +421,6 @@ PRIVATE int remote_session ARGS2(char *, acc_method, char *, host)
 	    system(command);
 	}
 	else {
-	    extern int LYgetch NOPARAMS;
 	    extern BOOLEAN HadVMSInterrupt;
 
 	    printf(
@@ -443,7 +442,6 @@ PRIVATE int remote_session ARGS2(char *, acc_method, char *, host)
 	    system(command);
 	}
 	else {
-	    extern int LYgetch NOPARAMS;
 	    extern BOOLEAN HadVMSInterrupt;
 
 	    printf(
@@ -484,8 +482,6 @@ PRIVATE int remote_session ARGS2(char *, acc_method, char *, host)
 	    printf("\nlogging in with username %s", user);
 	printf(".\n");
 	{
-	    extern int LYgetch NOPARAMS;
-
 	    printf("\nPress <return> to return to Lynx.");
 	    fflush(stdout);
 	    LYgetch();

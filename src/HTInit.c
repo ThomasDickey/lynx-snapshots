@@ -687,6 +687,8 @@ PUBLIC void HTFileInit NOARGS
 
     HTSetSuffix(".zip",		"application/x-Zip File", "binary", 1.0);
 
+    HTSetSuffix(".bz2",		"application/x-bzip2", "binary", 1.0);
+
     HTSetSuffix(".uu",		"application/x-UUencoded", "8bit", 1.0);
 
     HTSetSuffix(".hqx",		"application/x-Binhex", "8bit", 1.0);

@@ -237,17 +237,7 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 			}
 		    }
 #endif /* FNAMES_8_3 */
-		    StrAllocCopy(addr, "file://localhost");
-#ifdef DOSPATH
-		    StrAllocCat(addr, "/");
-		    StrAllocCat(addr, HTDOS_wwwName(path));
-#else
-#ifdef VMS
-		    StrAllocCat(addr, HTVMS_wwwName(path));
-#else
-		    StrAllocCat(addr, path);
-#endif /* VMS */
-#endif /* DOSPATH */
+		    LYLocalFileToURL (&addr, path);
 		    if (!use_gzread) {
 			StrAllocCopy(me->anchor->FileCache, path);
 			StrAllocCopy(me->anchor->content_encoding, "binary");

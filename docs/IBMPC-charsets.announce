@@ -12,8 +12,8 @@ character entities coming in from an HTML document to their equivalent codes,
 where possible, for various character sets.
 
 IMPORTANT:  you should choose display character set in Lynx Options Menu
-according to your font installed locally.  Please contact lynx-dev mailing list
-if you want any new codepage not listed there.
+according to your font installed locally. Probably it would be cpXXX. Please
+contact lynx-dev mailing list if you want any new codepage not listed there.
 
 Note that all points of the connection between the display at your end and Lynx
 at the remote end must be 8-bit clean.  If the high bit is being stripped at

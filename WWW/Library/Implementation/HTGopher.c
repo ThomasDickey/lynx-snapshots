@@ -26,8 +26,6 @@
 */
 #include <HTGopher.h>
 
-#define HT_EM_SPACE ((char)2)		/* For now */
-
 #define GOPHER_PORT 70		/* See protocol spec */
 #define CSO_PORT 105		/* See protocol spec */
 #define BIG 1024		/* Bug */

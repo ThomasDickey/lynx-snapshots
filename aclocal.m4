@@ -1122,7 +1122,15 @@ fi
 
 cf_path_prog=""
 cf_path_args=""
-IFS="${IFS= 	}"; cf_save_ifs="$IFS"; IFS="${IFS}:"
+IFS="${IFS= 	}"; cf_save_ifs="$IFS"
+case $host_os in #(vi
+os2*) #(vi
+	IFS="${IFS};"
+	;;
+*)
+	IFS="${IFS}:"
+	;;
+esac
 for cf_temp in $ac_cv_path_$1
 do
 	if test -z "$cf_path_prog" ; then

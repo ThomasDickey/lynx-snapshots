@@ -265,7 +265,7 @@ install-doc : $(docdir)
 install-help : $(helpdir)
 	(cd $(helpdir) && rm -rf *)
 	@echo Constructing sed-script
-	@sed	-e '/^#/d' -e '/^$$/d' \
+	@ECHO_CC@sed	-e '/^#/d' -e '/^$$/d' \
 		-e 's%\(.*\)=\(.*\@.*\)%s=@\1@=\2=%g' \
 		-e 's%\(.*\)=\(http:.*\)%s=@\1@=\2=%g' \
 		-e 's%\(.*\)=\(ftp:.*\)%s=@\1@=\2=%g' \
@@ -273,15 +273,15 @@ install-help : $(helpdir)
 		$(srcdir)/lynx_help/help_files.txt > \
 		$(helpdir)/help_files.sed
 	@echo Appending interim-fix for existing html files
-	@sed	-e '/^#/d' -e '/[:@]/d' -e '/^$$/d' \
-		-e 's%\(.*\)=\(.*\.html\)$$%s=\\<\2\\>=\2$(COMPRESS_EXT)=%g' \
+	@ECHO_CC@sed	-e '/^#/d' -e '/[:@]/d' -e '/^$$/d' \
+		-e 's%\(.*\)=\(.*\.html\)$$%s=\2=\2$(COMPRESS_EXT)=%g' \
 		$(srcdir)/lynx_help/help_files.txt >> \
 		$(helpdir)/help_files.sed
 	@echo Translating/copying html files
-	@sh -c	'cd $(srcdir)/lynx_help && ( \
-		dirs=`find . -type d -print` ; \
+	@ECHO_CC@sh -c	'cd $(srcdir)/lynx_help && ( \
+		dirs=keystrokes; \
 		(cd $(helpdir) && mkdir $$dirs 2>/dev/null ) ; \
-		files=`find . -name \*.html -print` ; \
+		files="*.html */*.html" ; \
 		for f in $$files ; do \
 			sed -f $(helpdir)/help_files.sed $$f > $(helpdir)/$$f ; \
 		done ; \
@@ -296,16 +296,18 @@ install-help : $(helpdir)
 	else \
 		cp $(srcdir)/lynx.cfg $(libdir)/lynx.tmp ; \
 	fi'
-	sed	-e '/^HELPFILE:http/s@^@#@' \
+	@echo Updating $(libdir)/lynx.cfg to point to installed help-files
+	@ECHO_CC@sed	-e '/^HELPFILE:http/s@^@#@' \
 		-e '/^#HELPFILE:file/s@#@@' \
 		-e '/^HELPFILE:file/s@/PATH_TO/lynx_help@$(helpdir)@' \
 		-e '/^HELPFILE:file/s@$$@$(COMPRESS_EXT)@' \
+		-e '/^HELPFILE:file/s@$(COMPRESS_EXT)$(COMPRESS_EXT)$$@$(COMPRESS_EXT)@' \
 		$(libdir)/lynx.tmp >$(libdir)/lynx.cfg
 	chmod 644 $(libdir)/lynx.cfg
 	-rm -f $(libdir)/lynx.tmp
 
 LYHelp.h : LYHelp.hin
-	@sed	-e '/^#/d' -e '/^$$/d' \
+	@ECHO_CC@sed	-e '/^#/d' -e '/^$$/d' \
 		-e 's%\(.*\)=\(.*\@.*\)%s=@\1@=\2=%g' \
 		-e 's%\(.*\)=\(http:.*\)%s=@\1@=\2=%g' \
 		-e 's%\(.*\)=\(ftp:.*\)%s=@\1@=\2=%g' \

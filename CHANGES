@@ -1,29 +1,66 @@
 Changes since Lynx 2.8 release
 ================================================================================
 
+1998-09-17 (2.8.1dev.28)
+* minor fix to make PRCS ProjectDate print in "dd mmm yyyy" form - TD
+1998-09-17 (2.8.1dev.27)
+* minor fixes for recent (dev24 and dev25) chartrans changes - LP 
+* add LYNX_DATE definitions in userdefs.h; Info Page now shows the date of your
+  lynx along with version number and a link to the latest sources.  - LP
+* use ECHO_CC symbol in install-help rule to control whether the sed commands
+  are echoed - TD
+* corrected install-help rule to avoid getting compress-suffix repeated in
+  the generated/updated files - TD
+* documentation nit for COLLAPSE_BR_TAGS (Michael Warner)
+* use getsockname_s rather than getsockname for djgpp (from patch by Gisle
+  Vanem) - DK
+* add .bz2 suffix to lynx.cfg and HTInit.c, for bzip2 utility - DK
+* modify store_cookie to suppress warning message for invalid domain if Lynx is
+  setup to accept all cookies - LV
+* modify/expand LYLocalFileToURL() function, getting rid of most places where
+  inline concatenation is used for "file://localhost/<filename>", as well
+  as eliminating a number of static buffers - TD
+* move fallback definitions for POSIX S_ISLNK, etc., out of NeXT ifdef's, to
+  make this compile on Apollo (reported by David Eaton) - TD
+* restructured pathname-tests in LYLocal.c, using common utility functions
+  ok_stat, ok_lstat, ok_file_or_dir to simplify freeing pointer allocated
+  by HTfullURL_toFile - TD
+* modify HTLocalName, making it a macro around a more flexible function
+  HTnameOfFile_WWW, to reuse logic for stripping off "file://localhost" and
+  "file:" prefixes, fixing some places where a spurious '/' would be left in
+  EMX local filenames (other macros: HTfullURL_toFile, HTpartURL_toFile) - TD
+* modify configure script macro CF_PATH_PROGS for OS/2 EMX, so that compiled-in
+  utility pathnames work - TD
+* use HTDOS.c module for OS/2 EMX, since it has similar device syntax - TD
+* correct logic for wrapping long lines, to not use the rightmost column of the
+  screen, fixes a problem with duplicated character (reported by LP) - TD
+* correct logic for dumping screen to file, so that blank lines are retained,
+  not counted in the logic for pruning soft-newlines which supports wrapped
+  lines - TD
+* add info and user messages to traces - TD
 1998-09-12 (2.8.1dev.26)
 * change behavior of NSL_FORK and related I/O (patch by BL)
-  - Make URL guessing (www.huh.com?  www.huh.org?  www.huh.net?) interruptible. 
-  - Make URL guessing from the command line interruptible.  
+  - Make URL guessing (www.huh.com?  www.huh.org?  www.huh.net?) interruptible.
+  - Make URL guessing from the command line interruptible.
   - Use select() instead of FIONREAD.  This makes it work on OSes where
-    previously it only *looked* like it was working. 
+    previously it only *looked* like it was working.
   - select() on stdin as well as the child pipe, when using [n]curses (not
     SLANG).  This allows interrupt to be processed instantly, without
-    up-to-1-second delay. 
+    up-to-1-second delay.
   - While looping, 1 second at a time, bail out after "too many" (currently 50)
     loops:  just in case something weird happens, like select() returning some
-    unexpected error that we ignore. 
-  - Make sure child processes are always killed and reaped.  
-  - Close pipe ends as soon as possible.  
+    unexpected error that we ignore.
+  - Make sure child processes are always killed and reaped.
+  - Close pipe ends as soon as possible.
   - Now write the length down the pipe (using a known-to-the-program length of
     sizeof(int)) first -- this both helps workaround old CMU TCP bugs and the
     fact that select() doesn't let us get number of bytes ready, like FIONREAD
-    does. 
+    does.
 * change default for NO_ANONYMOUS_EMAIL to TRUE (patch by HN)
 * use url for "W3C HTML Validation Service" rather than "A Kinder, Gentler HTML
   Validator"
 * update url for HTML Quick Reference Guide (report by LE) - TE
-* modify verbose images to show ISMAPs and USEMAPs (patch by LE). 
+* modify verbose images to show ISMAPs and USEMAPs (patch by LE).
 * fix typos in AttrList.h, LYStrings.h (reported by LV & HN) - TD
 * Chartrans recovery and cleanup:  by introducing an invariant
   "current_char_set and UCLYhndl_for_unspec always valid charsets" we solve
@@ -55,9 +92,9 @@ Changes since Lynx 2.8 release
 * limit length of strings copied via tok_values[] in LYCookies.c - TD
 * clean up a few memory leaks in cookie_add_acceptlist() and
   cookie_add_rejectlist() in LYCookie.c.  These were leaking 4 bytes for each
-  entry in COOKIE_ACCEPT_DOMAINS - BJC
+  entry in COOKIE_ACCEPT_DOMAINS - BJP
 * fix to LYLoadCookies() which was causing duplicate invalid cookies to be
-  loaded - BJC
+  loaded - BJP
 * split out install-doc rule in top-level makefile to install extra documentation
   files in $(libdir)/lynx_doc (request by HN) - TD
 * improved algorithm to set 'secure_value', used in forms-options to circumvent

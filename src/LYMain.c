@@ -264,6 +264,7 @@ PUBLIC BOOLEAN LYNewsPosting = NEWS_POSTING; /* News posting supported? */
 PUBLIC char *LynxSigFile = NULL;    /* Signature file, in or off home */
 PUBLIC char *system_mail = NULL;	  /* The path for sending mail */
 PUBLIC char *system_mail_flags = NULL;	  /* Flags for sending mail */
+PUBLIC char *lynx_cfg_file = NULL;	  /* location of active lynx.cfg */
 PUBLIC char *lynx_temp_space = NULL; /* The prefix for temporary file paths */
 PUBLIC char *lynx_save_space = NULL; /* The prefix for save to disk paths */
 PUBLIC char *LYHostName = NULL; 	/* treat as a local host name */
@@ -514,7 +515,6 @@ PUBLIC int main ARGS2(
 {
     int  i;		/* indexing variable */
     int status = 0;	/* exit status */
-    char *lynx_cfg_file = NULL;
     char *temp = NULL;
     char *cp;
     FILE *fp;
@@ -1238,7 +1238,6 @@ PUBLIC int main ARGS2(
      *	Process the configuration file.
      */
     read_cfg(lynx_cfg_file, "main program", 1);
-    FREE(lynx_cfg_file);
 
     HTSwitchDTD(New_DTD);
 
@@ -2478,7 +2477,11 @@ static int version_fun ARGS3(
 {
     SetOutputMode( O_TEXT );
 
-    printf("\n%s Version %s (1998)\n", LYNX_NAME, LYNX_VERSION);
+    printf("\n%s Version %s (%.*s)\n",
+	  LYNX_NAME, LYNX_VERSION,
+	  LYNX_DATE_LEN,
+	  LYNX_RELEASE ? LYNX_RELEASE_DATE : &LYNX_DATE[LYNX_DATE_OFF]
+	  );
     printf(
 	  "Copyrights held by the University of Kansas, CERN, and other contributors.\n"
 	  );

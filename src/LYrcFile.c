@@ -43,7 +43,7 @@ PUBLIC void read_rc NOPARAMS
     /*
      *  Process the entries.
      */
-    while (fgets(line_buffer, 256, fp) != NULL) {
+    while (fgets(line_buffer, sizeof(line_buffer)-1, fp) != NULL) {
 	/*
 	 *  Remove the /n from the end of the line.
 	 */

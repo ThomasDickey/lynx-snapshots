@@ -22,11 +22,9 @@
  * one of those with a different name.
  */
 #define REALLY_QUIT_Y "Are you sure you want to quit? [Y] "
-#ifdef VMS
-#define REALLY_EXIT_Y "Really exit from Lynx? [Y] "
-#endif /* VMS */
 #define REALLY_QUIT_N "Are you sure you want to quit? [N] "
 #ifdef VMS
+#define REALLY_EXIT_Y "Really exit from Lynx? [Y] "
 #define REALLY_EXIT_N "Really exit from Lynx? [N] "
 #endif /* VMS */
 #define CANCELLED "Cancelled!!!"
@@ -91,6 +89,11 @@
  "UNMODIFIABLE option list.  Use return or arrow keys to review or leave."
 #define CHOICE_LIST_UNM_MSG \
  "UNMODIFIABLE choice list.  Use return or arrow keys to review or leave."
+#define SUBMITTING_FORM "Submitting form..."
+#define RESETTING_FORM "Resetting form..."
+#define RELOADING_FORM \
+ "Reloading document.  Any form entries will be lost!"
+#define CANNOT_TRANSCODE_FORM "Warning: Cannot transcode form data to charset %s!"
 
 #define NORMAL_LINK_MESSAGE \
  "(NORMAL LINK)   Use right-arrow or <return> to activate."
@@ -123,11 +126,8 @@
  "            Enter text into the field by typing on the keyboard              "
 #define FORM_NOVICELINE_TWO \
 "    Ctrl-U to delete all text in field, [Backspace] to delete a character    "
-#define SUBMITTING_FORM "Submitting form..."
-#define RESETTING_FORM "Resetting form..."
-#define RELOADING_FORM \
- "Reloading document.  Any form entries will be lost!"
-#define CANNOT_TRANSCODE_FORM "Warning: Cannot transcode form data to charset %s!"
+
+/* mailto */
 #define BAD_FORM_MAILTO "Malformed mailto form submission!  Cancelled!"
 #define MAILTO_SQUASH_CTL "Warning! Control codes in mail address replaced by ?"
 #define FORM_MAILTO_DISALLOWED "Mail disallowed!  Cannot submit."
@@ -149,6 +149,7 @@
 #define SEND_COMMENT_PROMPT "Send this comment? (y/n) "
 #define SEND_MESSAGE_PROMPT "Send this message? (y/n) "
 #define SENDING_YOUR_MSG "Sending your message..."
+
 #define FILE_ACTIONS_DISALLOWED "file: ACTIONs are disallowed!"
 #define FILE_SERVED_LINKS_DISALLOWED \
  "file: URLs via served links are disallowed!"
@@ -477,12 +478,14 @@
 #define MAP_NOT_ACCESSIBLE "Client-side image MAP is not accessible!"
 #define MAPS_NOT_AVAILABLE "No client-side image MAPs are available!"
 #define MAP_NOT_AVAILABLE "Client-side image MAP is not available!"
+#ifndef  EXP_FORMS_OPTIONS
 #define OPTION_SCREEN_NEEDS_24 \
  "Screen height must be at least 24 lines for the Options menu!"
 #define OPTION_SCREEN_NEEDS_23 \
  "Screen height must be at least 23 lines for the Options menu!"
 #define OPTION_SCREEN_NEEDS_22 \
  "Screen height must be at least 22 lines for the Options menu!"
+#endif /* !EXP_FORMS_OPTIONS */
 #define NEED_ADVANCED_USER_MODE "That key requires Advanced User mode."
 #define COMMAND_PROMPT "Command: "
 #define SELECT_SEGMENT "Select "
@@ -651,16 +654,18 @@
  "Modified tail combined with head of form field value."
 
 /* Lynx internal page titles */
-#define COOKIE_JAR_TITLE	"Cookie Jar"
 #define CONFIG_DEF_TITLE	"Configuration Definitions"
+#define CONFIG_LYNXCFG_TITLE	"Lynx.cfg Information"
+#define COOKIE_JAR_TITLE	"Cookie Jar"
 #define CURRENT_KEYMAP_TITLE	"Current Key Map"
 #define DIRED_MENU_TITLE	"File Management Options"
-#define PERMIT_OPTIONS_TITLE	"File Permission Options"
 #define DOWNLOAD_OPTIONS_TITLE	"Download Options"
 #define HISTORY_PAGE_TITLE	"History Page"
 #define LIST_PAGE_TITLE		"List Page"
-#define OPTIONS_TITLE		"Options Page"
+#define OPTIONS_TITLE		"Options Menu"
+#define PERMIT_OPTIONS_TITLE	"File Permission Options"
 #define PRINT_OPTIONS_TITLE	"Printing Options"
+#define SHOWINFO_TITLE		"Information about the current document"
 #define UPLOAD_OPTIONS_TITLE	"Upload Options"
 #define VISITED_LINKS_TITLE	"Visited Links Page"
 

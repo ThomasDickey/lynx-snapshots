@@ -1861,14 +1861,8 @@ PRIVATE int UC_Register_with_LYCharSets ARGS4(
     }
 
     /*
-     *	Do different kinds of searches...
-     *	Normally the first should find the match if there is one!
+     *	Search by MIME name, (LYchar_set_names may differ...)
      */
-    for (i = 0; i < MAXCHARSETS && LYchar_set_names[i] && LYhndl < 0; i++) {
-	if (!strcmp(UC_LYNXcharset, LYchar_set_names[i])) {
-	    LYhndl = i;
-	}
-    }
     for (i = 0; i < MAXCHARSETS && LYchar_set_names[i] && LYhndl < 0; i++) {
 	if (LYCharSet_UC[i].MIMEname &&
 	    !strcmp(UC_MIMEcharset, LYCharSet_UC[i].MIMEname)) {

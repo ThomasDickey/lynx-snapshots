@@ -60,6 +60,8 @@
 #include <UCMap.h>
 #include <GridText.h>
 
+#include <GridText.h>
+#include <LYGlobalDefs.h>
 #include <LYexit.h>
 #include <LYLeaks.h>
 
@@ -620,8 +622,6 @@ PUBLIC HTStream *HTSaveStream ARGS1(
     return (*p->saveStream)(anchor);
 }
 
-extern char LYinternal_flag;		       /* from LYMainLoop.c */
-
 /*	Load a document - with logging etc		HTLoadDocument()
 **	----------------------------------
 **
@@ -639,16 +639,6 @@ extern char LYinternal_flag;		       /* from LYMainLoop.c */
 **	  returns    YES     Success in opening document
 **		     NO      Failure
 */
-
-extern char LYforce_no_cache;				 /* from GridText.c */
-extern char LYoverride_no_cache;		       /* from LYMainLoop.c */
-extern char * HTLoadedDocumentURL NOPARAMS;		   /* in GridText.c */
-extern BOOL HText_hasNoCacheSet PARAMS((HText *text));	   /* in GridText.c */
-extern BOOL reloading;
-extern BOOL permanent_redirection;
-#ifdef DIRED_SUPPORT
-extern BOOLEAN lynx_edit_mode;
-#endif
 
 PRIVATE BOOL HTLoadDocument ARGS4(
 	CONST char *,		full_address,

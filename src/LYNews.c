@@ -75,8 +75,8 @@ PUBLIC char *LYNewsPost ARGS2(
      *  open a temporary file for a conversion to JIS. - FM
      */
     CJKfile[0] = '\0';
-    if (!strncmp(LYchar_set_names[current_char_set], "Japanese (EUC)", 14) ||
-	!strncmp(LYchar_set_names[current_char_set], "Japanese (SJIS)", 15)) {
+    if (current_char_set == UCGetLYhndl_byMIME("euc-jp") ||
+	current_char_set == UCGetLYhndl_byMIME("shift_jis")) {
 	if ((fc = LYOpenTemp(CJKfile, HTML_SUFFIX, "w")) == NULL) {
 	    HTAlert(CANNOT_OPEN_TEMP);
 	    LYRemoveTemp(my_tempfile);

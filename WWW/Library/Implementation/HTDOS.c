@@ -3,6 +3,7 @@
  */
 
 #include <HTUtils.h>
+#include <HTDOS.h>
 
 /* PUBLIC							HTDOS_wwwName()
 **		CONVERTS DOS Name into WWW Name

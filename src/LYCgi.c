@@ -230,8 +230,7 @@ PRIVATE int LYLoadCGI ARGS4(
 	    return(status);
 	}
 	    
-	StrAllocCopy(new_arg, "file://localhost");
-	StrAllocCat(new_arg, orig_pgm);
+	LYLocalFileToURL (&new_arg, orig_pgm);
 
 	CTRACE(tfp, "%s is not an executable file, passing the buck.\n", arg);
 	status = HTLoadFile(new_arg, anAnchor, format_out, sink);

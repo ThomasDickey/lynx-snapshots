@@ -354,18 +354,20 @@ PRIVATE void store_cookie ARGS3(
 
 	    if (msg == 0)
 		outofmem(__FILE__, "store_cookie");
-	    sprintf(msg,
-		    INVALID_COOKIE_DOMAIN_CONFIRMATION,
-		    co->domain,
-		    hostname);
-	    if (!HTConfirm(msg)) {
-		CTRACE(tfp, "store_cookie: Rejecting domain '%s' for host '%s'.\n",
-			    co->domain,
-			    hostname);
-		freeCookie(co);
-		co = NULL;
-		FREE(msg);
-		return;
+	    if (!LYAcceptAllCookies) {
+		sprintf(msg,
+			INVALID_COOKIE_DOMAIN_CONFIRMATION,
+			co->domain,
+			hostname);
+		if (!HTConfirm(msg)) {
+		    CTRACE(tfp, "store_cookie: Rejecting domain '%s' for host '%s'.\n",
+				co->domain,
+				hostname);
+		    freeCookie(co);
+		    co = NULL;
+		    FREE(msg);
+		    return;
+		}
 	    }
 	    FREE(msg);
 	}
