@@ -73,7 +73,16 @@ void run_external(char * c)
 
 		 stop_curses();
 		 fflush(stdout);
+#ifdef __DJGPP__
+              __djgpp_set_ctrl_c(0);
+              _go32_want_ctrl_break(1);
+#endif /* __DJGPP__ */
 		 system(command);
+#ifdef __DJGPP__
+              __djgpp_set_ctrl_c(1);
+              _go32_want_ctrl_break(0);
+#endif /* __DJGPP__ */
+
 		 fflush(stdout);
 		 start_curses();
 		}

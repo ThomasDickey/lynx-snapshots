@@ -199,8 +199,8 @@ struct _HText {
 	char			kanji_buf;		/* Lead multibyte */
 	int			in_sjis;		/* SJIS flag */
 
-#ifdef EXP_CHARTRANS
 	BOOL			have_8bit_chars;   /* Any non-ASCII chars? */
+#ifdef EXP_CHARTRANS
 	LYUCcharset *		UCI;		   /* node_anchor UCInfo */
 	int			UCLYhndl;	   /* charset we are fed */
 	UCTransParams		T;

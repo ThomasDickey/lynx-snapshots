@@ -4233,7 +4233,19 @@ check_add_bookmark_to_self:
 #ifdef DOSPATH	
 	system("cls");	
 	system("echo Type EXIT to return to Lynx.");
-	system(getenv("COMSPEC") == NULL ? "command.com" : getenv("COMSPEC"));
+#ifdef __DJGPP__
+      __djgpp_set_ctrl_c(0);
+      _go32_want_ctrl_break(1);
+#endif /* __DJGPP__ */
+      if (getenv("SHELL") != NULL) {
+           system(getenv("SHELL"));
+      } else {
+	   system(getenv("COMSPEC") == NULL ? "command.com" : getenv("COMSPEC"));
+      }
+#ifdef __DJGPP__
+      __djgpp_set_ctrl_c(1);
+      _go32_want_ctrl_break(0);
+#endif /* __DJGPP__ */
 #else
 #ifdef VMS
 		system("");

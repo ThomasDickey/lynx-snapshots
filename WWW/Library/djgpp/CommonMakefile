@@ -33,15 +33,15 @@ SHELL = /bin/sh
 #	.h files are distributed but originally are made from the
 #	self-documenting hypertext files.
 
-.SUFFIXES: .h .html
+.SUFFIXES: .h .html .htm
 .html.h:
 #	- chmod +w $*.h
-	www -w90 -na -to text/x-c $*.html > $*.h
+#	www -w90 -na -to text/x-c $*.html > $*.h
 #	chmod -w $*.h
 
 # If this is actually run in a subdirectory,
 #
-# WWW = ../../..
+WWW = ../..
 # WWW = ../..	For [cernlib] build in this directory
 
 WC = $(WWW)/Library
@@ -146,7 +146,7 @@ $(LOB)/libwww.a : $(COMMON)
 
 #	Clean up everything generatable except final products
 clean :
-	rm $(LOB)/*.o $(LOB)/.created
+	rm $(LOB)/*.o $(LOB)/created
 	-rmdir $(LOB)
 
 #	Clean up everything generatable including final products
@@ -212,9 +212,9 @@ $(WWW)/Copyright.txt : $(WWW)/../Copyright.html
 # 			Common code
 #			-----------
 
-#	Directory for object files - .created checks it exists
+#	Directory for object files - created checks it exists
 
-OE = $(LOB)/.created
+OE = $(LOB)/created
 $(OE) :
 	if [ ! -r $(WTMP) ] ; then mkdir $(WTMP); else echo OK ; fi
 	if [ ! -r $(WTMP)/Library ] ; then mkdir $(WTMP)/Library; else echo OK ; fi

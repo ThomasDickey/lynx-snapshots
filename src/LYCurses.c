@@ -407,9 +407,11 @@ PRIVATE void LYsetWAttr ARGS1(WINDOW *, win)
 #endif /* DOSPATH */
 	}
 
+#ifndef __DJGPP__
 	if (no_color_video < 0) {
 		no_color_video = tigetnum("ncv");
 	}
+#endif /* __DJGPP__ */
 
 	if (Current_Attr & A_BOLD)
 		code |= 1;

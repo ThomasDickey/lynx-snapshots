@@ -5,14 +5,14 @@
 WWW_MACH = djgpp
 
 # The ASIS repository's name for the machine we are on
-ASIS_MACH = hardware/os
+#ASIS_MACH = hardware/os
 
-CFLAGS = -O -DEXP_CHARTRANS -DCOLOR_CURSES -DDOSPATH -DNOUSERS -DDEBUG -I../../../djgpp/tcplib/include -I../../../djgpp/tcplib/include/tcp
+CFLAGS = -O -DCOLOR_CURSES -DDOSPATH -DNOUSERS -DDEBUG -I../../../djgpp/tcplib/include -I../../../djgpp/tcplib/include/tcp
 LFLAGS =
 CC = gcc
 
 # Directory for installed binary:
-BINDIR = /usr/local/bin
+!BINDIR = /usr/local/bin
 
 # Where is the W3 object library to be installed (not normally done)?
 LIBDIR = $(WWW)/Library/Implementation/$(WWW_MACH)

@@ -10,6 +10,9 @@ README.configure), and miscellaneous other changes.  Note that the 2.7 ->
 2.7.1 changes (which are listed at the beginning of the current CHANGES
 file) are duplicated here. - KW]
 
+1997-08-07
+* Many minor tweaks for the DJGPP version by DK - WB
+* A rename of about_lynx_dev.html to lynx_dev.html for 8.3 systems - WB
 1997-08-04
 * Fixed header parsing in HTMIME.c so that "Safe:" is recognized. - KW
 * Changed confirmation prompts for HEAD (']') commands acting on a POST

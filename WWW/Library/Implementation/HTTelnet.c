@@ -183,7 +183,15 @@ PRIVATE int remote_session ARGS2(char *, access, char *, host)
 
 	if (TRACE)
 	    fprintf(stderr, "HTTelnet: Normal: Command is: %s\n\n", command);
+#ifdef __DJGPP__
+       __djgpp_set_ctrl_c(0);
+       _go32_want_ctrl_break(1);
+#endif /* __DJGPP__ */
 	system(command);
+#ifdef __DJGPP__
+       __djgpp_set_ctrl_c(1);
+       _go32_want_ctrl_break(0);
+#endif /* __DJGPP__ */
 	return HT_NO_DATA;		/* Ok - it was done but no data */
 #define TELNET_DONE
 #endif /* !TELNET_DONE */

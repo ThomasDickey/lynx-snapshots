@@ -633,7 +633,9 @@ PUBLIC int LYdownload_options ARGS2(
 	HTAlert(CANNOT_OPEN_TEMP);
 	return(-1);
     }
+#ifndef DOSPATH
     chmod(tempfile, 0600);
+#endif /* DOSPATH */
 
     LYstrncpy(LYValidDownloadFile,
 	      data_file,
