@@ -9,8 +9,6 @@
 
 #define BUFFER_SIZE 4096	/* Tradeoff */
 
-/*#include <stdio.h> included by HTUtils.h -- FM */
-
 #include <LYLeaks.h>
 
 #define FREE(x) if (x) {free(x); x = NULL;}

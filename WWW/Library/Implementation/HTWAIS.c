@@ -80,8 +80,6 @@
 
 #define FREE(x) if (x) {free(x); x = NULL;}
 
-extern int HTCheckForInterrupt NOPARAMS;
-
 #define DIRECTORY "/cnidr.org:210/directory-of-servers"
 /* #define DIRECTORY "/quake.think.com:210/directory-of-servers" */
 

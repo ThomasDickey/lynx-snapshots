@@ -398,15 +398,10 @@ PRIVATE int LYLoadCGI ARGS4(
 		    close(fd1[1]);
 		}
 		
-		total_chars = 0;
+		HTReadProgress(total_chars = 0, 0);
 		while((chars = read(fd2[0], buf, sizeof(buf))) > 0) {
-		    char line[40];
-		    
-		    total_chars += chars;
-		    sprintf (line, "Read %d bytes of data.", total_chars);
-		    HTProgress(line);
-		    CTRACE(tfp, "LYNXCGI: Rx: %.*s\n", chars, buf);
-		    
+		    HTReadProgress(total_chars += chars, 0);
+		    CTRACE(tfp, "LYNXCGI: Rx: %.*s\n", chars, buf);  
 		    (*target->isa->put_block)(target, buf, chars);
 		}
 #if !HAVE_WAITPID

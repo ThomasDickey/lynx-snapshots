@@ -21,8 +21,6 @@
 #include <UCMap.h>
 #include <UCAux.h>
 #include <HTVMSUtils.h>
-/*#include <stdio.h> included by HTUtils.h -- FM */
-/*#include <unixlib.h> included by HTUtils.h -- FM */
 #include <ssdef.h>
 #include <jpidef.h>
 #include <prvdef.h>

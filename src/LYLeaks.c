@@ -15,7 +15,6 @@
 #include <LYLeaks.h>
 #include <LYUtils.h>
 #include <ctype.h>
-/*#include <stdio.h> included by HTUtils.h -- FM */
 
 #define FREE(x) if (x) {free(x); x = NULL;}
 

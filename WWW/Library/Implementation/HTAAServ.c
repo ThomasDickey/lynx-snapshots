@@ -43,7 +43,6 @@
 
 #include <HTUtils.h>
 
-/*#include <stdio.h> included by HTUtils.h -- FM *//* FILE */
 #include <string.h>		/* strchr() */
 
 #include <HTString.h>

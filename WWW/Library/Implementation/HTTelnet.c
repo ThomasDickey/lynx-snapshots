@@ -24,8 +24,6 @@
 #include <HTAnchor.h>
 #include <HTTP.h>
 #include <HTFile.h>
-/*#include <errno.h> included by tcp.h -- FM */
-/*#include <stdio.h> included by HTUtils.h -- FM */
 
 #include <HText.h>
 

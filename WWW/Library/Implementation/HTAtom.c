@@ -17,7 +17,6 @@
 #define HASH_SIZE	101		/* Tunable */
 #include <HTAtom.h>
 
-/*#include <stdio.h> included by HTUtils.h -- FM *//* joe@athena, TBL 921019 */
 #include <string.h>
 
 #include <HTList.h>

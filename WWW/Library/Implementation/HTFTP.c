@@ -141,9 +141,6 @@ struct _HTStructured {
 
 #define FREE(x) if (x) {free(x); x = NULL;}
 
-extern int HTCheckForInterrupt NOPARAMS;
-
-
 /*	Global Variables
 **	---------------------
 */

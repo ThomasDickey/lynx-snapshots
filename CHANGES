@@ -1,6 +1,14 @@
 Changes since Lynx 2.8 release
 ================================================================================
 
+1998-06-25 (2.8.1dev.17)
++ add configure option --with-socks5 (request by Brian Hauber
+  <bhauber@frenzy.com>) - TD
++ define symbols HAVE_CURSESX_H, HAVE_JCURSES_H (report by Georg Schwarz
+  <schwarz@physik.tu-berlin.de>) - TD
++ modify logic that reports progress of download to update screen no more than
+  once per second, fix an overrun problem (reported by Jacob Poon
+  <a324poon@cdf.toronto.edu>) - TD  
 1998-06-11 (2.8.1dev.16)
 * modify configure script to check for special compiler options which are
   assumed for particular platforms (suggested by BL) - TD

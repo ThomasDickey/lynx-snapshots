@@ -23,12 +23,14 @@
 #undef GCC_UNUSED		/* CF_GCC_ATTRIBUTES */
 #undef GZIP_PATH		/* CF_PATH_PROG(gzip) */
 #undef HAVE_CBREAK
+#undef HAVE_CURSESX_H
 #undef HAVE_CUSERID
 #undef HAVE_DIRENT_H		/* defined by AC_HEADER_DIRENT */
 #undef HAVE_FCNTL_H		/* have <fcntl.h> */
 #undef HAVE_GETBKGD		/* defined by CF_COLOR_CURSES */
 #undef HAVE_GETCWD
 #undef HAVE_GETGROUPS
+#undef HAVE_JCURSES_H
 #undef HAVE_KEYPAD
 #undef HAVE_LIMITS_H
 #undef HAVE_LSTAT		/* defined by CF_FUNC_LSTAT */
@@ -101,6 +103,7 @@
 #undef USE_HASH			/* see USE_COLOR_STYLE */
 #undef USE_SIZECHANGEHACK	/* FIXME: find a case where this works! */
 #undef USE_SLANG		/* AC_ARG_WITH(screen=slang) */
+#undef USE_SOCKS5		/* CF_SOCKS5 */
 #undef USE_ZLIB			/* AC_ARG_WITH(zlib) */
 #undef UTMPX_FOR_UTMP		/* use <utmpx.h> since <utmp.h> not found */
 #undef UUDECODE_PATH		/* CF_PATH_PROG(uudecode) */

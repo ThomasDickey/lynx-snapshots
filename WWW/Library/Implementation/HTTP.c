@@ -66,7 +66,6 @@ extern BOOL traversal;		 /* TRUE if we are doing a traversal */
 extern BOOL dump_output_immediately;  /* TRUE if no interactive user */
 
 extern char * HTLoadedDocumentURL NOPARAMS;
-extern int HTCheckForInterrupt NOPARAMS;
 extern void LYSetCookie PARAMS((
 	CONST char *	SetCookie,
 	CONST char *	SetCookie2,
@@ -165,7 +164,6 @@ try_again:
   **  so we can start over here...
   */
   eol = 0;
-  bytes_already_read = 0;
   had_header = NO;
   length = 0;
   doing_redirect = FALSE;
@@ -640,6 +638,7 @@ try_again:
 
     line_buffer = (char *)calloc(1, (buffer_length * sizeof(char)));
 
+    HTReadProgress (bytes_already_read = 0, 0);
     do {/* Loop to read in the first line */
 	/*
 	**  Extend line buffer if necessary for those crazy WAIS URLs ;-)
@@ -700,8 +699,7 @@ try_again:
 #endif /* DISP_PARTIAL */
 
 	bytes_already_read += status;
-	sprintf (line, "Read %d bytes of data.", bytes_already_read);
-	HTProgress (line);
+	HTReadProgress (bytes_already_read, 0);
 
 #ifdef UCX  /* UCX returns -1 on EOF */
 	if (status == 0 || status == -1)

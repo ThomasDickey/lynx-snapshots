@@ -1862,9 +1862,6 @@ PUBLIC HTStream* HTNetMIME ARGS3(
 **  Software Foundation Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-/* #include <stdio.h> */	/* Included via previous headers. - FM */
-/* #include <string.h> */	/* Included via previous headers. - FM */
-
 /*
 **  MIME decoding routines
 **

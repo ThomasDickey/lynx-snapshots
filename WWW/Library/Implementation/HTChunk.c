@@ -5,7 +5,6 @@
 
 #include <HTUtils.h>
 #include <HTChunk.h>
-/*#include <stdio.h> included by HTUtils.h -- FM */
 
 #include <LYLeaks.h>
 

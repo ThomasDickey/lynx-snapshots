@@ -54,8 +54,6 @@ PUBLIC long int HTMaxBytes  = 0;	/* No effective limit */
 
 #define FREE(x) if (x) {free(x); x = NULL;}
 
-extern int HTCheckForInterrupt NOPARAMS;
-
 PUBLIC	BOOL HTOutputSource = NO;	/* Flag: shortcut parser to stdout */
 /* extern  BOOL interactive; LJM */
 
@@ -495,8 +493,7 @@ PUBLIC int HTCopy ARGS4(
 	HTStream*,		sink)
 {
     HTStreamClass targetClass;
-    char line[256];
-    int bytes = 0;
+    int bytes;
     int rv = 0;
 
     /*	Push the data down the stream
@@ -507,6 +504,7 @@ PUBLIC int HTCopy ARGS4(
     **
     **	This operation could be put into a main event loop
     */
+    HTReadProgress(bytes = 0, 0);
     for (;;) {
 	int status;
 
@@ -587,12 +585,7 @@ PUBLIC int HTCopy ARGS4(
 #endif /* DISP_PARTIAL */
 
 	bytes += status;
-	if (anchor && anchor->content_length > 0)
-	    sprintf(line, "Read %d of %d bytes of data.",
-			  bytes, anchor->content_length);
-	else
-	    sprintf(line, "Read %d bytes of data.", bytes);
-	HTProgress(line);
+        HTReadProgress(bytes, anchor ? anchor->content_length : 0);
 
     } /* next bufferload */
 
@@ -617,8 +610,7 @@ PUBLIC int HTFileCopy ARGS2(
 	HTStream*,		sink)
 {
     HTStreamClass targetClass;
-    char line[256];
-    int status, bytes = 0, nreads = 0, nprogr = 0;
+    int status, bytes;
     int rv = HT_OK;
 
     /*	Push the data down the stream
@@ -627,9 +619,9 @@ PUBLIC int HTFileCopy ARGS2(
 
     /*	Push binary from socket down sink
     */
+    HTReadProgress(bytes = 0, 0);
     for (;;) {
 	status = fread(input_buffer, 1, INPUT_BUFFER_SIZE, fp);
-	nreads++;
 	if (status == 0) { /* EOF or error */
 	    if (ferror(fp) == 0) {
 		rv = HT_LOADED;
@@ -655,38 +647,15 @@ PUBLIC int HTFileCopy ARGS2(
 #endif /* DISP_PARTIAL */
 
 	bytes += status;
-	if (nreads >= 100) {
-	    /*
-	    **	Show progress messages for local files, and check for
-	    **	user interruption.  Start doing so only after a certain
-	    **	number of reads have been done, and don't update it on
-	    **	every read (normally reading in a local file should be
-	    **	speedy). - KW
-	    */
-	    if (nprogr == 0) {
-		if (bytes < 1024000) {
-		    sprintf(line, "Read %d bytes of data.", bytes);
-		} else {
-		    sprintf(line, "Read %d KB of data. %s",
-				  bytes/1024,
-		    "(Press 'z' if you want to abort loading.)");
-		}
-		HTProgress(line);
-		if (HTCheckForInterrupt()) {
-		    _HTProgress ("Data transfer interrupted.");
-		    if (bytes) {
-			rv = HT_INTERRUPTED;
-		    } else {
-			rv = -1;
-		    }
-		    break;
-		}
-		nprogr++;
-	    } else if (nprogr == 25) {
-		nprogr = 0;
+	HTReadProgress(bytes, -2);
+	if (HTCheckForInterrupt()) {
+	    _HTProgress ("Data transfer interrupted.");
+	    if (bytes) {
+		rv = HT_INTERRUPTED;
 	    } else {
-		nprogr++;
+		rv = -1;
 	    }
+	    break;
 	}
     } /* next bufferload */
 
@@ -707,8 +676,7 @@ PRIVATE int HTGzFileCopy ARGS2(
 	HTStream*,		sink)
 {
     HTStreamClass targetClass;
-    char line[256];
-    int status, bytes = 0, nreads = 0, nprogr = 0;
+    int status, bytes;
     int gzerrnum;
     int rv = HT_OK;
 
@@ -718,9 +686,9 @@ PRIVATE int HTGzFileCopy ARGS2(
 
     /*	read and inflate gzipped file, and push binary down sink
     */
+    HTReadProgress(bytes = 0, 0);
     for (;;) {
 	status = gzread(gzfp, input_buffer, INPUT_BUFFER_SIZE);
-	nreads++;
 	if (status <= 0) { /* EOF or error */
 	    if (status == 0) {
 		rv = HT_LOADED;
@@ -752,39 +720,15 @@ PRIVATE int HTGzFileCopy ARGS2(
 #endif /* DISP_PARTIAL */
 
 	bytes += status;
-	if (nreads >= 100) {
-	    /*
-	    **	Show progress messages for local files, and check for
-	    **	user interruption.  Start doing so only after a certain
-	    **	number of reads have been done, and don't update it on
-	    **	every read (normally reading in a local file should be
-	    **	speedy). - KW
-	    */
-	    if (nprogr == 0) {
-		if (bytes < 1024000) {
-		    sprintf(line,
-			    "Read %d uncompressed bytes of data.", bytes);
-		} else {
-		    sprintf(line, "Read %d uncompressed KB of data. %s",
-				  bytes/1024,
-		    "(Press 'z' to abort.)");
-		}
-		HTProgress(line);
-		if (HTCheckForInterrupt()) {
-		    _HTProgress ("Data transfer interrupted.");
-		    if (bytes) {
-			rv = HT_INTERRUPTED;
-		    } else {
-			rv = -1;
-		    }
-		    break;
-		}
-		nprogr++;
-	    } else if (nprogr == 25) {
-		nprogr = 0;
+	HTReadProgress(bytes, -2);
+	if (HTCheckForInterrupt()) {
+	    _HTProgress ("Data transfer interrupted.");
+	    if (bytes) {
+		rv = HT_INTERRUPTED;
 	    } else {
-		nprogr++;
+		rv = -1;
 	    }
+	    break;
 	}
     } /* next bufferload */
 

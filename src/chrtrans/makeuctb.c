@@ -16,13 +16,7 @@
  *  version 2, or at your option any later version.
  */
 
-#ifdef NOTDEFINED
-#include <stdio.h>
-#include <stdlib.h>
-#include <sysexits.h>
-#include <string.h>
-#include <ctype.h>
-#else
+#define DONT_USE_SOCKS5
 #include <HTUtils.h>
 #include <tcp.h>
 /*
@@ -31,7 +25,6 @@
 #ifdef exit
 #undef exit
 #endif /* exit */
-#endif /* NODEFINED */
 
 #ifndef TOLOWER
 #define TOLOWER(c) (isupper((unsigned char)c) ? tolower((unsigned char)c) : (c))

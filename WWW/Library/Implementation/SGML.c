@@ -27,7 +27,6 @@
 #include <UCAux.h>
 
 #include <ctype.h>
-/*#include <stdio.h> included in HTUtils.h -- FM */
 #include <HTChunk.h>
 
 #include <LYCharSets.h>

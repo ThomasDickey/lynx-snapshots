@@ -59,12 +59,6 @@ Default values
 
 typedef struct sockaddr_in SockA;  /* See netinet/in.h */
 
-
-#ifndef STDIO_H
-#include <stdio.h>
-#define STDIO_H
-#endif /* !STDIO_H */
-
 #ifndef VMS
 #include <sys/types.h>
 
@@ -158,7 +152,6 @@ IBM-PC running Windows NT
 #include <time.h>
 #include <errno.h>
 #include <direct.h>
-#include <stdio.h>
 #include <winsock.h>
 typedef struct sockaddr_in SockA;  /* See netinet/in.h */
 #define EINPROGRESS          (WSABASEERR+36)
@@ -270,11 +263,6 @@ extern int socket_ioctl();
 #endif /* SOCKETSHR_TCP */
 
 #include <string.h>
-
-#ifndef STDIO_H
-#include <stdio.h>
-#define STDIO_H
-#endif /* !STDIO_H */
 
 #include <file.h>
 #include <stat.h>

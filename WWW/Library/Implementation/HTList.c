@@ -9,8 +9,6 @@
 #include <HTUtils.h>
 #include <HTList.h>
 
-/*#include <stdio.h> included by HTUtils.h -- FM *//* joe@athena, TBL 921019 */
-
 #include <LYLeaks.h>
 
 #define FREE(x) if (x) {free(x); x = NULL;}
