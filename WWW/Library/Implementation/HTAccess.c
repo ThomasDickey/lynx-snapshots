@@ -1360,7 +1360,7 @@ PUBLIC HTParentAnchor * HTHomeAnchor NOARGS
 	/*
 	**  Someone telnets in, they get a special home.
 	*/
-	FILE * fp = fopen(REMOTE_POINTER, TXT_R);
+	FILE * fp = fopen(REMOTE_POINTER, "r");
 	char * status;
 	if (fp) {
 	    my_home_document = typecallocn(char, MAX_FILE_NAME);
@@ -1382,12 +1382,12 @@ PUBLIC HTParentAnchor * HTHomeAnchor NOARGS
 	CONST char * home =  (CONST char*)getenv("HOME");
 	if (home != null) {
 	    HTSprintf0(&my_home_document, "%s/%s", home, PERSONAL_DEFAULT);
-	    fp = fopen(my_home_document, TXT_R);
+	    fp = fopen(my_home_document, "r");
 	}
 
 	if (!fp) {
 	    StrAllocCopy(my_home_document, LOCAL_DEFAULT_FILE);
-	    fp = fopen(my_home_document, TXT_R);
+	    fp = fopen(my_home_document, "r");
 	}
 	if (fp) {
 	    fclose(fp);

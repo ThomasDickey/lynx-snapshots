@@ -749,7 +749,7 @@ PUBLIC BOOL HTAnchor_delete ARGS1(
 #endif
     if (me->FileCache) {
 	FILE *fd;
-	if ((fd = fopen(me->FileCache, TXT_R)) != NULL) {
+	if ((fd = fopen(me->FileCache, "r")) != NULL) {
 	    fclose(fd);
 	    remove(me->FileCache);
 	}

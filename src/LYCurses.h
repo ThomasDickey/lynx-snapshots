@@ -183,14 +183,10 @@ typedef struct {
 #    ifdef HAVE_JCURSES_H
 #     include <jcurses.h>	/* sony_news */
 #    else
-#     ifdef PDCURSES
-#      include <pdcurses.h>	/* for PDCurses */
+#     ifdef HAVE_XCURSES
+#      include <xcurses.h>	/* PDCurses' UNIX port */
 #     else
-#      ifdef HAVE_XCURSES
-#       include <xcurses.h>	/* PDCurses' UNIX port */
-#      else
-#       include <curses.h>	/* default */
-#      endif
+#      include <curses.h>	/* default */
 #     endif
 #    endif
 #   endif
@@ -218,12 +214,8 @@ typedef struct {
 #else
 # if defined(VMS) && defined(__GNUC__)
 #  include <LYGCurses.h>
-# else
-#  ifdef PDCURSES	/* 1999/07/15 (Thu) 08:27:48 */
-#   include <pdcurses.h> /* for PDCurses */
 #  else
 #   include <curses.h>  /* everything else */
-#  endif /* not PDCURSES */
 # endif /* VMS && __GNUC__ */
 #endif /* HAVE_CONFIG_H */
 

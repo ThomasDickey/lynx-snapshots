@@ -36,7 +36,7 @@ PRIVATE BOOLEAN message_has_content ARGS2(
 
     *nonspaces = FALSE;
 
-    if (!filename || (fp = fopen(filename, TXT_R)) == NULL) {
+    if (!filename || (fp = fopen(filename, "r")) == NULL) {
 	CTRACE((tfp, "Failed to open file %s for reading!\n",
 	       NONNULL(filename)));
 	return FALSE;

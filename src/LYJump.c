@@ -387,7 +387,7 @@ PRIVATE unsigned LYRead_Jumpfile ARGS1(struct JumpTable *,jtp)
     if (st.st_fab_rfm != (char)FAB$C_STMLF) {
 	/** It's a record-oriented file. **/
 	IsStream_LF = FALSE;
-	if ((fp = fopen(jtp->file, TXT_R, "mbc=32")) == NULL) {
+	if ((fp = fopen(jtp->file, "r", "mbc=32")) == NULL) {
 	    HTAlert(CANNOT_OPEN_JUMP_FILE);
 	    FREE(mp);
 	    return 0;

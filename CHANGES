@@ -1,6 +1,22 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2001-06-10 (2.8.4pre.2)
+* corrected order of parameters of is_prefix() function in the
+  scan_cookie_sublist() function, broken in dev.21 changes (report by Ken Scott
+  <admin@shellworld.net>) -TD
+* add a fallback definition for SA_LEN(), to build with glibc 2.2 (report by
+  Mark Sutton <mes@lazo.ca>, patch by Arkadiusz Miskiewicz at
+  http://cvs.pld.org.pl/SOURCES/lynx-SA_LEN.patch?rev=1.1)
+* modify ifdef in HTCheckForInterrupt() to build with DJGPP -DK
+* remove include for <pdcurses.h>, use <curses.h> which is the default for
+  PDCurses - DK
+* reviewed/reverted some changes from dev.20 which changed explicit "r", "w",
+  and "a+" fopen modes to TXT_R, TXT_W and TXT_A, where they relied on the
+  default mode set via SetDefaultMode().  With DJGPP, files containing special
+  graphics such as README's might not otherwise display, for example (report by
+  DK) -TD
+
 2001-06-03 (2.8.4pre.1)
 This version has been test-built on Linux (BSD curses, ncurses,
 slang), Tru64 5.1 (cc, curses/ncurses/slang), OpenVMS, OS/2 EMX, win32

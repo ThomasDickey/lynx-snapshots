@@ -8014,7 +8014,7 @@ PUBLIC BOOLEAN HTreparse_document NOARGS
 	}
 	CTRACE((tfp, "  Content type is \"%s\"\n", format->name));
 
-	fp = fopen(HTMainAnchor->source_cache_file, TXT_R);
+	fp = fopen(HTMainAnchor->source_cache_file, "r");
 	if (!fp) {
 	    CTRACE((tfp, "  Cannot read file %s\n", HTMainAnchor->source_cache_file));
 	    LYRemoveTemp(HTMainAnchor->source_cache_file);
@@ -12035,7 +12035,7 @@ PUBLIC int HText_ExtEditForm ARGS1(
 	    return 0;
 	}
 
-	fp = fopen (ed_temp, TXT_R);
+	fp = fopen (ed_temp, "r");
 	size = fread (ebuf, 1, size, fp);
 	LYCloseInput (fp);
 	ebuf[size] = '\0';	/* Terminate! - kw */
@@ -12425,7 +12425,7 @@ PUBLIC int HText_InsertFile ARGS1(
 	 */
 	LYGetFileInfo(fn, 0, 0, 0, 0, 0, &file_cs);
 
-	fp   = fopen (fn, TXT_R);
+	fp   = fopen (fn, "r");
 	if (!fp) {
 	    free(fbuf);
 	    free(fn);

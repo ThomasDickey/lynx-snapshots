@@ -1245,7 +1245,7 @@ PRIVATE int read_keymap_file NOARGS
 
     LYAddPathToHome(file, sizeof(file), FNAME_LYNX_KEYMAPS);
 
-    if ((fp = fopen (file, TXT_R)) == 0)
+    if ((fp = fopen (file, "r")) == 0)
 	return 0;
 
     linenum = 0;
@@ -1593,7 +1593,7 @@ re_read:
 	    if (new_fd >= 0) {
 		FILE *frp;
 		close(new_fd);
-		frp = freopen(term_name, TXT_R, stdin);
+		frp = freopen(term_name, "r", stdin);
 		CTRACE((tfp,
 		"nozap: freopen(%s,\"r\",stdin) returned %p, stdin is now %p with fd %d.\n",
 			term_name, frp, stdin, fileno(stdin)));

@@ -786,7 +786,7 @@ PUBLIC int HTLoadWAIS ARGS4(
 		CACHE_FILE_PREFIX,
 		server_name, service, www_database);
 
-	fp = fopen(filename, TXT_R);	/* Have we found this already? */
+	fp = fopen(filename, "r");	/* Have we found this already? */
 	CTRACE((tfp, "HTWAIS: Description of server %s %s.\n",
 		    filename,
 		    fp ? "exists already" : "does NOT exist!"));

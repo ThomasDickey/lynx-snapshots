@@ -2205,7 +2205,7 @@ PUBLIC void reload_read_cfg NOARGS
 	/*
 	 *  Process the temporary RC file.
 	 */
-	rcfp = fopen(tempfile, TXT_R);
+	rcfp = fopen(tempfile, "r");
 	read_rc(rcfp);
 	LYRemoveTemp(tempfile);
 	FREE(tempfile);		/* done with it - kw */

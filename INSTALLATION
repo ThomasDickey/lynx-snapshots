@@ -736,11 +736,10 @@ Visual C++:
 	zlib.lib
 
     from the zlib build-tree, and
-	pdcurses.h
+	curses.h
 	pdcurses.lib
 
-    from the PDCurses build-tree.  Note that "pdcurses.h" is renamed from
-    PDCurses' "curses.h", to make it distinct from other versions of curses.
+    from the PDCurses build-tree.
 
     Then
 	make-msc
