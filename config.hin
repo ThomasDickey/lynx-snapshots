@@ -82,6 +82,8 @@
 #undef HAVE_JCURSES_H
 #undef HAVE_KEYPAD
 #undef HAVE_LC_MESSAGES		/* locale messages */
+#undef HAVE_LIBDBMALLOC		/* --with-dbmalloc */
+#undef HAVE_LIBDMALLOC		/* --with-dmalloc */
 #undef HAVE_LIBINTL_H		/* AM_GNU_GETTEXT, or cleanup from that */
 #undef HAVE_LIMITS_H
 #undef HAVE_LOCALE_H
@@ -94,10 +96,10 @@
 #undef HAVE_MMAP		/* AM_GNU_GETTEXT */
 #undef HAVE_MUNMAP		/* AM_GNU_GETTEXT */
 #undef HAVE_NAPMS
+#undef HAVE_NCURSESW_NCURSES_H	/* defined if we include <ncursesw/ncurses.h> */
 #undef HAVE_NCURSES_H		/* defined if we include <ncurses.h> */
 #undef HAVE_NCURSES_NCURSES_H	/* defined if we include <ncurses/ncurses.h> */
 #undef HAVE_NCURSES_TERM_H	/* have <ncurses/term.h> */
-#undef HAVE_NCURSESW_NCURSES_H	/* defined if we include <ncursesw/ncurses.h> */
 #undef HAVE_NEWPAD
 #undef HAVE_NEWTERM
 #undef HAVE_NL_TYPES_H		/* AM_GNU_GETTEXT */

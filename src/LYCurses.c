@@ -1,8 +1,17 @@
 #include <HTUtils.h>
 #include <HTAlert.h>
+
 #ifdef __DJGPP__
 #include <conio.h>
+/* The conio.h distributed with GNU gettext package may redefine gettext() to
+ * _conio_gettext().  Restore our definition.
+ */
+#ifndef HAVE_GETTEXT
+#undef gettext
+#define gettext(s) s
+#endif /* HAVE_GETTEXT */
 #endif /* __DJGPP__ */
+
 #include <LYCurses.h>
 #include <LYStyle.h>
 #include <LYUtils.h>
@@ -757,6 +766,7 @@ PUBLIC void LYnoVideo ARGS1(
 #endif
 }
 
+#define NEWTERM_NAME "newterm"
 #if       !defined(VMS) && !defined(USE_SLANG)
 /*
  * If newterm is not defined, assume a curses subset which
@@ -766,6 +776,7 @@ PUBLIC void LYnoVideo ARGS1(
 static SCREEN *LYscreen = NULL;
 #define LYDELSCR() { \
 if (recent_sizechange) { \
+    CTRACE((tfp, "Screen size: delscreen()\n")); \
     delscreen(LYscreen); \
     LYscreen = NULL; } }
 /*
@@ -773,6 +784,8 @@ if (recent_sizechange) { \
  */
 #else  /* HAVE_NEWTERM   */
 static WINDOW *LYscreen = NULL;
+#undef  NEWTERM_NAME
+#define NEWTERM_NAME "initscr"
 #undef  newterm
 #define newterm(type, out, in) (initscr())
 #define LYDELSCR()  /* nothing */
@@ -907,6 +920,7 @@ PUBLIC void start_curses NOARGS
      *	If we are VMS then do initscr() everytime start_curses()
      *	is called!
      */
+    CTRACE((tfp, "Screen size: initscr()\n"));
     initscr();	/* start curses */
 #else  /* Unix: */
 
@@ -942,12 +956,14 @@ PUBLIC void start_curses NOARGS
 	}
 #endif /* defined(__MVS__) */
 #endif /* !(defined(NCURSES) && defined(HAVE_RESIZETERM)) */
+	CTRACE((tfp, "Screen size: %s()\n", NEWTERM_NAME));
 	if (!(LYscreen = newterm(NULL,stdout,stdin))) {  /* start curses */
 	    fprintf(tfp, "%s\n",
 		gettext("Terminal initialisation failed - unknown terminal type?"));
 	    exit_immediately (EXIT_FAILURE);
 	}
 #else
+	CTRACE((tfp, "Screen size: initscr()\n"));
 	initscr();
 #endif /* HAVE_NEWTERM */
 	lynx_called_initscr = TRUE;
@@ -956,6 +972,7 @@ PUBLIC void start_curses NOARGS
 	size_change(0);
 	recent_sizechange = FALSE; /* prevent mainloop drawing 1st doc twice */
 #endif /* SIGWINCH */
+	CTRACE((tfp, "Screen size is now %d x %d\n", LYlines, LYcols ));
 
 #ifdef USE_CURSES_PADS
 	if (LYuseCursesPads) {
@@ -1416,13 +1433,6 @@ PUBLIC BOOLEAN setup ARGS1(
     start_curses();
 
 #if HAVE_TTYTYPE
-    /*
-     *	Get terminal type (strip 'dec-' from vms style types).
-     */
-    if (strncmp((CONST char*)ttytype, "dec-vt", 6) == 0) {
-	(void) setterm(ttytype + 4);
-    }
-
     /*
      *  Account for lossage on the 'sun' terminal type (80x24) Sun text
      *  console driver. It only supports reverse video, but all SGR

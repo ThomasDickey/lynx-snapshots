@@ -171,7 +171,7 @@ PRIVATE int str_n_cmp(const char *p, const char *q, int n)
 
 PRIVATE void exit_immediately_with_error_message PARAMS((int state, BOOLEAN first_file));
 PRIVATE void status_link PARAMS((char *curlink_name, BOOLEAN show_more, BOOLEAN show_indx));
-PRIVATE void show_main_statusline PARAMS((CONST linkstruct curlink, int for_what));
+PRIVATE void show_main_statusline PARAMS((CONST LinkInfo curlink, int for_what));
 PRIVATE void form_noviceline PARAMS((int));
 PRIVATE int are_different PARAMS((document *doc1, document *doc2));
 
@@ -826,9 +826,10 @@ PRIVATE int find_link_near_col ARGS2(
 
 	    while ((delta > 0 ? (i < nlinks) : (i >= 0)) && cy == links[i].ly) {
 		int cx = links[i].lx;
+		char *text = LYGetHiliteStr(i, 0);
 
-		if (links[i].hightext)
-		    cx += strlen(links[i].hightext)/2;
+		if (text != NULL)
+		    cx += strlen(text) / 2;
 		cx -= col;
 		if (cx < 0)
 		    cx = -cx;
@@ -986,7 +987,7 @@ PRIVATE int handle_LYK_ACTIVATE ARGS6(
 	if (links[curdoc.link].type == WWW_FORM_LINK_TYPE) {
 #ifdef TEXTFIELDS_MAY_NEED_ACTIVATION
 	    if (real_cmd == LYK_ACTIVATE && textfields_need_activation &&
-		F_TEXTLIKE(links[curdoc.link].form->type)) {
+		F_TEXTLIKE(links[curdoc.link].l_form->type)) {
 
 		textinput_activated = TRUE;
 		show_main_statusline(links[curdoc.link], FOR_INPUT);
@@ -998,14 +999,14 @@ PRIVATE int handle_LYK_ACTIVATE ARGS6(
 	    /*
 	     *	Don't try to submit forms with bad actions. - FM
 	     */
-	    if (links[curdoc.link].form->type == F_SUBMIT_TYPE ||
-		links[curdoc.link].form->type == F_IMAGE_SUBMIT_TYPE ||
-		links[curdoc.link].form->type ==
+	    if (links[curdoc.link].l_form->type == F_SUBMIT_TYPE ||
+		links[curdoc.link].l_form->type == F_IMAGE_SUBMIT_TYPE ||
+		links[curdoc.link].l_form->type ==
 					    F_TEXT_SUBMIT_TYPE) {
 		/*
 		 *  Do nothing if it's disabled. - FM
 		 */
-		if (links[curdoc.link].form->disabled == YES) {
+		if (links[curdoc.link].l_form->disabled == YES) {
 		    HTOutputFormat = WWW_PRESENT;
 		    LYforce_no_cache = FALSE;
 		    reloading = FALSE;
@@ -1014,8 +1015,8 @@ PRIVATE int handle_LYK_ACTIVATE ARGS6(
 		/*
 		 *  Make sure we have an action. - FM
 		 */
-		if (!links[curdoc.link].form->submit_action ||
-		    *links[curdoc.link].form->submit_action
+		if (!links[curdoc.link].l_form->submit_action ||
+		    *links[curdoc.link].l_form->submit_action
 							== '\0') {
 		    HTUserMsg(NO_FORM_ACTION);
 		    HTOutputFormat = WWW_PRESENT;
@@ -1027,7 +1028,7 @@ PRIVATE int handle_LYK_ACTIVATE ARGS6(
 		 *  Check for no_mail if the form action
 		 *  is a mailto URL. - FM
 		 */
-		if (links[curdoc.link].form->submit_method
+		if (links[curdoc.link].l_form->submit_method
 			     == URL_MAIL_METHOD && no_mail) {
 		    HTAlert(FORM_MAILTO_DISALLOWED);
 		    HTOutputFormat = WWW_PRESENT;
@@ -1041,7 +1042,7 @@ PRIVATE int handle_LYK_ACTIVATE ARGS6(
 		 */
 		if (no_file_url &&
 		    !strncasecomp(
-			    links[curdoc.link].form->submit_action,
+			    links[curdoc.link].l_form->submit_action,
 				  "file:", 5)) {
 		    HTAlert(FILE_ACTIONS_DISALLOWED);
 		    HTOutputFormat = WWW_PRESENT;
@@ -1054,48 +1055,48 @@ PRIVATE int handle_LYK_ACTIVATE ARGS6(
 		 *  via an internal URL. - FM
 		 */
 		if (!strncasecomp(
-			    links[curdoc.link].form->submit_action,
+			    links[curdoc.link].l_form->submit_action,
 				  "LYNXCOOKIE:", 11) ||
 #ifdef DIRED_SUPPORT
 #ifdef OK_PERMIT
 		    (!(strncasecomp(
-			    links[curdoc.link].form->submit_action,
+			    links[curdoc.link].l_form->submit_action,
 				   "LYNXDIRED:", 10)) &&
 		     (no_dired_support ||
 		      strncasecomp(
-			(links[curdoc.link].form->submit_action + 10),
+			(links[curdoc.link].l_form->submit_action + 10),
 				   "//PERMIT_LOCATION", 17) ||
 		      !LYIsUIPage(curdoc.address, UIP_PERMIT_OPTIONS))) ||
 #else
 		    !strncasecomp(
-			    links[curdoc.link].form->submit_action,
+			    links[curdoc.link].l_form->submit_action,
 				  "LYNXDIRED:", 10) ||
 #endif /* OK_PERMIT */
 #endif /* DIRED_SUPPORT */
 		    !strncasecomp(
-			    links[curdoc.link].form->submit_action,
+			    links[curdoc.link].l_form->submit_action,
 				  "LYNXDOWNLOAD:", 13) ||
 		    !strncasecomp(
-			    links[curdoc.link].form->submit_action,
+			    links[curdoc.link].l_form->submit_action,
 				  "LYNXHIST:", 9) ||
 		    !strncasecomp(
-			    links[curdoc.link].form->submit_action,
+			    links[curdoc.link].l_form->submit_action,
 				  "LYNXKEYMAP:", 11) ||
 		    !strncasecomp(
-			    links[curdoc.link].form->submit_action,
+			    links[curdoc.link].l_form->submit_action,
 				  "LYNXIMGMAP:", 11) ||
 		    !strncasecomp(
-			    links[curdoc.link].form->submit_action,
+			    links[curdoc.link].l_form->submit_action,
 				  "LYNXPRINT:", 10) ||
 		    !strncasecomp(
-			    links[curdoc.link].form->submit_action,
+			    links[curdoc.link].l_form->submit_action,
 				  "lynxexec:", 9) ||
 		    !strncasecomp(
-			    links[curdoc.link].form->submit_action,
+			    links[curdoc.link].l_form->submit_action,
 				  "lynxprog:", 9)) {
 		    HTAlert(SPECIAL_ACTION_DISALLOWED);
 		    CTRACE((tfp, "LYMainLoop: Rejected '%s'\n",
-				links[curdoc.link].form->submit_action));
+				links[curdoc.link].l_form->submit_action));
 		    HTOutputFormat = WWW_PRESENT;
 		    LYforce_no_cache = FALSE;
 		    reloading = FALSE;
@@ -1106,9 +1107,9 @@ PRIVATE int handle_LYK_ACTIVATE ARGS6(
 		 *  Check for enctype and let user know we
 		 *  don't yet support multipart/form-data - FM
 		 */
-		if (links[curdoc.link].form->submit_enctype) {
+		if (links[curdoc.link].l_form->submit_enctype) {
 		    if (!strcmp(
-			     links[curdoc.link].form->submit_enctype,
+			     links[curdoc.link].l_form->submit_enctype,
 				"multipart/form-data")) {
 			HTAlert(
 gettext("Enctype multipart/form-data not yet supported!  Cannot submit."));
@@ -1126,52 +1127,49 @@ gettext("Enctype multipart/form-data not yet supported!  Cannot submit."));
 		    !strncmp(curdoc.address, "file:", 5)) {
 		    LYNoRefererForThis = TRUE;
 		}
-		if (links[curdoc.link].form->submit_method
-			     != URL_MAIL_METHOD) {
+		if (links[curdoc.link].l_form->submit_method != URL_MAIL_METHOD) {
 		    StrAllocCopy(newdoc.title,
-				 links[curdoc.link].hightext);
+				 LYGetHiliteStr(curdoc.link, 0));
 		}
 	    }
+
 	    /*
 	     *	Normally we don't get here for text input fields,
 	     *  but it can happen as a result of mouse positioning.
 	     *  In that case the statusline will not have updated
 	     *  info, so update it now. - kw
 	     */
-
-	    if (F_TEXTLIKE(links[curdoc.link].form->type)) {
-		show_formlink_statusline(links[curdoc.link].form,
-					 (real_cmd==LYK_NOCACHE ||
-					  real_cmd==LYK_DOWNLOAD ||
-					  real_cmd==LYK_HEAD ||
-					  (real_cmd==LYK_SUBMIT &&
+	    if (F_TEXTLIKE(links[curdoc.link].l_form->type)) {
+		show_formlink_statusline(links[curdoc.link].l_form,
+					 (real_cmd == LYK_NOCACHE ||
+					  real_cmd == LYK_DOWNLOAD ||
+					  real_cmd == LYK_HEAD ||
+					  (real_cmd == LYK_SUBMIT &&
 					   !textinput_activated)) ?
 					 FOR_PANEL : FOR_INPUT);
-		if (user_mode==NOVICE_MODE &&
+		if (user_mode == NOVICE_MODE &&
 		    textinput_activated &&
-		    (real_cmd==LYK_ACTIVATE || real_cmd==LYK_SUBMIT)) {
-			form_noviceline(links[curdoc.link].form->disabled);
+		    (real_cmd == LYK_ACTIVATE || real_cmd == LYK_SUBMIT)) {
+			form_noviceline(links[curdoc.link].l_form->disabled);
 		}
 	    }
 
-	    *c = change_form_link(&links[curdoc.link],
+	    *c = change_form_link(curdoc.link,
 				 &newdoc, refresh_screen,
-				 links[curdoc.link].form->name,
-				 links[curdoc.link].form->value,
 				 FALSE,
-				 (BOOLEAN)(real_cmd==LYK_SUBMIT ||
-				  real_cmd==LYK_NOCACHE ||
-				  real_cmd==LYK_DOWNLOAD ||
-				  real_cmd==LYK_HEAD));
+				 (BOOLEAN)(real_cmd == LYK_SUBMIT ||
+				  real_cmd == LYK_NOCACHE ||
+				  real_cmd == LYK_DOWNLOAD ||
+				  real_cmd == LYK_HEAD));
 	    if (*c != LKC_DONE || *refresh_screen) {
 		/*
 		 *  Cannot have been a submit field for which
 		 *  newdoc was filled in. - kw
 		 */
-		if ((links[curdoc.link].form->type == F_SUBMIT_TYPE ||
-		     links[curdoc.link].form->type == F_IMAGE_SUBMIT_TYPE ||
-		     links[curdoc.link].form->type == F_TEXT_SUBMIT_TYPE) &&
-		    links[curdoc.link].form->submit_method
+		if ((links[curdoc.link].l_form->type == F_SUBMIT_TYPE ||
+		     links[curdoc.link].l_form->type == F_IMAGE_SUBMIT_TYPE ||
+		     links[curdoc.link].l_form->type == F_TEXT_SUBMIT_TYPE) &&
+		    links[curdoc.link].l_form->submit_method
 			     != URL_MAIL_METHOD) {
 		    /*
 		     *  Try to undo change of newdoc.title done above.
@@ -1233,7 +1231,7 @@ gettext("Enctype multipart/form-data not yet supported!  Cannot submit."));
 		case '\r':
 		default:
 		    if ((real_cmd == LYK_ACTIVATE || real_cmd == LYK_SUBMIT) &&
-			F_TEXTLIKE(links[curdoc.link].form->type) &&
+			F_TEXTLIKE(links[curdoc.link].l_form->type) &&
 			textinput_activated)
 			return 3;
 		    break;
@@ -1314,7 +1312,7 @@ gettext("Enctype multipart/form-data not yet supported!  Cannot submit."));
 	     *	Follow a normal link or anchor.
 	     */
 	    StrAllocCopy(newdoc.address, links[curdoc.link].lname);
-	    StrAllocCopy(newdoc.title, links[curdoc.link].hightext);
+	    StrAllocCopy(newdoc.title, LYGetHiliteStr(curdoc.link, 0));
 #ifndef DONT_TRACK_INTERNAL_LINKS
 	/*
 	 *  For internal links, retain POST content if present.
@@ -1591,7 +1589,7 @@ PRIVATE void handle_LYK_ADD_BOOKMARK ARGS3(
 		 */
 		if (links[curdoc.link].type != WWW_FORM_LINK_TYPE) {
 		    save_bookmark_link(links[curdoc.link].lname,
-				       links[curdoc.link].hightext);
+				       LYGetHiliteStr(curdoc.link, 0));
 		    *refresh_screen = TRUE; /* MultiBookmark support */
 		} else {
 		    HTUserMsg(NOBOOK_FORM_FIELD);
@@ -2020,10 +2018,10 @@ PRIVATE int handle_LYK_DOWNLOAD ARGS3(
 	return 1;	/* mouse stuff was confused, ignore - kw */
     if (nlinks > 0) {
 	if (links[curdoc.link].type == WWW_FORM_LINK_TYPE) {
-	    if (links[curdoc.link].form->type == F_SUBMIT_TYPE ||
-		links[curdoc.link].form->type == F_IMAGE_SUBMIT_TYPE ||
-		links[curdoc.link].form->type == F_TEXT_SUBMIT_TYPE) {
-		if (links[curdoc.link].form->submit_method ==
+	    if (links[curdoc.link].l_form->type == F_SUBMIT_TYPE ||
+		links[curdoc.link].l_form->type == F_IMAGE_SUBMIT_TYPE ||
+		links[curdoc.link].l_form->type == F_TEXT_SUBMIT_TYPE) {
+		if (links[curdoc.link].l_form->submit_method ==
 			 URL_MAIL_METHOD) {
 		    if (*old_c != real_c) {
 			*old_c = real_c;
@@ -2031,7 +2029,7 @@ PRIVATE int handle_LYK_DOWNLOAD ARGS3(
 		    }
 		    return 0;
 		}
-		if (!strncmp(links[curdoc.link].form->submit_action,
+		if (!strncmp(links[curdoc.link].l_form->submit_action,
 			"LYNXOPTIONS:", 12)) {
 		    if (*old_c != real_c) {
 			*old_c = real_c;
@@ -2107,7 +2105,7 @@ PRIVATE int handle_LYK_DOWNLOAD ARGS3(
 	     *  OK, we download from history page, restore URL from stack.
 	     */
 	    StrAllocCopy(newdoc.address, history[number].address);
-	    StrAllocCopy(newdoc.title, links[curdoc.link].hightext);
+	    StrAllocCopy(newdoc.title, LYGetHiliteStr(curdoc.link, 0));
 	    StrAllocCopy(newdoc.bookmark, history[number].bookmark);
 	    FREE(newdoc.post_data);
 	    FREE(newdoc.post_content_type);
@@ -2181,7 +2179,7 @@ PRIVATE int handle_LYK_DOWNLOAD ARGS3(
 	     *	entire document will be downloaded.
 	     */
 	    StrAllocCopy(newdoc.address, links[curdoc.link].lname);
-	    StrAllocCopy(newdoc.title, links[curdoc.link].hightext);
+	    StrAllocCopy(newdoc.title, LYGetHiliteStr(curdoc.link, 0));
 #ifndef DONT_TRACK_INTERNAL_LINKS
 	    /*
 	     *	Might be an internal link in the same doc from a
@@ -2246,10 +2244,11 @@ PRIVATE void handle_LYK_DOWN_LINK ARGS3(
 	int newlink;
 
 	if (*follow_col == -1) {
+	    char *text = LYGetHiliteStr(curdoc.link, 0);
 	    *follow_col = links[curdoc.link].lx;
 
-	    if (links[curdoc.link].hightext)
-		*follow_col += strlen(links[curdoc.link].hightext)/2;
+	    if (text != NULL)
+		*follow_col += strlen(text) / 2;
 	}
 
 	newlink = find_link_near_col(*follow_col, 1);
@@ -2303,8 +2302,8 @@ PRIVATE int handle_LYK_DWIMEDIT ARGS3(
      *  document.  KED
      */
     if (nlinks > 0  &&
-	links[curdoc.link].type       == WWW_FORM_LINK_TYPE &&
-	links[curdoc.link].form->type == F_TEXTAREA_TYPE)   {
+	links[curdoc.link].type         == WWW_FORM_LINK_TYPE &&
+	links[curdoc.link].l_form->type == F_TEXTAREA_TYPE)   {
 	*cmd = LYK_EDIT_TEXTAREA;
 	return 2;
     }
@@ -2321,8 +2320,8 @@ PRIVATE int handle_LYK_DWIMEDIT ARGS3(
      *   via the above if() statement.]
      */
     if (nlinks > 0 &&
-	links[curdoc.link].type       == WWW_FORM_LINK_TYPE &&
-	links[curdoc.link].form->type == F_TEXT_TYPE)       {
+	links[curdoc.link].type         == WWW_FORM_LINK_TYPE &&
+	links[curdoc.link].l_form->type == F_TEXT_TYPE)       {
 	HTUserMsg (CANNOT_EDIT_FIELD);
 	return 1;
     }
@@ -2515,11 +2514,11 @@ PRIVATE void handle_LYK_DWIMHELP ARGS1(
      */
     if (curdoc.link >= 0 && curdoc.link < nlinks &&
 	links[curdoc.link].type == WWW_FORM_LINK_TYPE &&
-	!links[curdoc.link].form->disabled &&
-	(links[curdoc.link].form->type == F_TEXT_TYPE ||
-	 links[curdoc.link].form->type == F_TEXT_SUBMIT_TYPE ||
-	 links[curdoc.link].form->type == F_PASSWORD_TYPE ||
-	 links[curdoc.link].form->type == F_TEXTAREA_TYPE)) {
+	!links[curdoc.link].l_form->disabled &&
+	(links[curdoc.link].l_form->type == F_TEXT_TYPE ||
+	 links[curdoc.link].l_form->type == F_TEXT_SUBMIT_TYPE ||
+	 links[curdoc.link].l_form->type == F_PASSWORD_TYPE ||
+	 links[curdoc.link].l_form->type == F_TEXTAREA_TYPE)) {
 	*cshelpfile = LYLineeditHelpURL();
     }
 }
@@ -2545,8 +2544,8 @@ PRIVATE void handle_LYK_EDIT_TEXTAREA ARGS3(
     /*
      *  See if the current link is in a form TEXTAREA.
      */
-    else if (links[curdoc.link].type       == WWW_FORM_LINK_TYPE &&
-	links[curdoc.link].form->type == F_TEXTAREA_TYPE)   {
+    else if (links[curdoc.link].type         == WWW_FORM_LINK_TYPE &&
+	     links[curdoc.link].l_form->type == F_TEXTAREA_TYPE)   {
 
 	/* stop screen */
 	stop_curses();
@@ -2594,9 +2593,9 @@ PRIVATE int handle_LYK_ELGOTO ARGS5(
     }
     if (!(nlinks > 0 && curdoc.link > -1) ||
 	(links[curdoc.link].type == WWW_FORM_LINK_TYPE &&
-	 links[curdoc.link].form->type != F_SUBMIT_TYPE &&
-	 links[curdoc.link].form->type != F_IMAGE_SUBMIT_TYPE &&
-	 links[curdoc.link].form->type != F_TEXT_SUBMIT_TYPE)) {
+	 links[curdoc.link].l_form->type != F_SUBMIT_TYPE &&
+	 links[curdoc.link].l_form->type != F_IMAGE_SUBMIT_TYPE &&
+	 links[curdoc.link].l_form->type != F_TEXT_SUBMIT_TYPE)) {
 	/*
 	 *  No links on page, or not a normal link
 	 *  or form submit button. - FM
@@ -2608,8 +2607,8 @@ PRIVATE int handle_LYK_ELGOTO ARGS5(
 	return 0;
     }
     if ((links[curdoc.link].type == WWW_FORM_LINK_TYPE) &&
-	(!links[curdoc.link].form->submit_action ||
-	 *links[curdoc.link].form->submit_action == '\0')) {
+	(!links[curdoc.link].l_form->submit_action ||
+	 *links[curdoc.link].l_form->submit_action == '\0')) {
 	/*
 	 *  Form submit button with no ACTION defined. - FM
 	 */
@@ -2643,7 +2642,7 @@ PRIVATE int handle_LYK_ELGOTO ARGS5(
     LYstrncpy(user_input_buffer,
 	      ((links[curdoc.link].type == WWW_FORM_LINK_TYPE)
 					?
-    links[curdoc.link].form->submit_action : links[curdoc.link].lname),
+    links[curdoc.link].l_form->submit_action : links[curdoc.link].lname),
 	      (MAX_LINE - 1));
 
     /*
@@ -2655,7 +2654,7 @@ PRIVATE int handle_LYK_ELGOTO ARGS5(
 	user_input_buffer[0] != '\0' &&
 	strcmp(user_input_buffer,
 	       ((links[curdoc.link].type == WWW_FORM_LINK_TYPE)
-			? links[curdoc.link].form->submit_action
+			? links[curdoc.link].l_form->submit_action
 			: links[curdoc.link].lname))) {
 	if (!LYTrimStartfile(user_input_buffer)) {
 	    LYRemoveBlanks(user_input_buffer);
@@ -2711,32 +2710,32 @@ PRIVATE BOOLEAN handle_LYK_FASTBACKW_LINK ARGS3(
 	 *  before it if there is one on this screen. - kw
 	 */
 	if (links[curdoc.link].type == WWW_FORM_LINK_TYPE &&
-	    links[curdoc.link].form->type == F_TEXTAREA_TYPE) {
-	    int thisgroup = links[curdoc.link].form->number;
-	    char *thisname = links[curdoc.link].form->name;
+	    links[curdoc.link].l_form->type == F_TEXTAREA_TYPE) {
+	    int thisgroup = links[curdoc.link].l_form->number;
+	    char *thisname = links[curdoc.link].l_form->name;
 
 	    if (curdoc.link > 0 &&
 		!(links[0].type == WWW_FORM_LINK_TYPE &&
-		  links[0].form->type == F_TEXTAREA_TYPE &&
-		  links[0].form->number == thisgroup &&
-		  sametext(links[0].form->name, thisname))) {
+		  links[0].l_form->type == F_TEXTAREA_TYPE &&
+		  links[0].l_form->number == thisgroup &&
+		  sametext(links[0].l_form->name, thisname))) {
 		do nextlink--;
 		while
 		    (links[nextlink].type == WWW_FORM_LINK_TYPE &&
-		     links[nextlink].form->type == F_TEXTAREA_TYPE &&
-		     links[nextlink].form->number == thisgroup &&
-		     sametext(links[nextlink].form->name, thisname));
+		     links[nextlink].l_form->type == F_TEXTAREA_TYPE &&
+		     links[nextlink].l_form->number == thisgroup &&
+		     sametext(links[nextlink].l_form->name, thisname));
 		samepage = 1;
 
 	    } else if (!more && Newline == 1 &&
 		       (links[0].type == WWW_FORM_LINK_TYPE &&
-			links[0].form->type == F_TEXTAREA_TYPE &&
-			links[0].form->number == thisgroup &&
-			sametext(links[0].form->name, thisname)) &&
+			links[0].l_form->type == F_TEXTAREA_TYPE &&
+			links[0].l_form->number == thisgroup &&
+			sametext(links[0].l_form->name, thisname)) &&
 		       !(links[nlinks-1].type == WWW_FORM_LINK_TYPE &&
-			 links[nlinks-1].form->type == F_TEXTAREA_TYPE &&
-			 links[nlinks-1].form->number == thisgroup &&
-			 sametext(links[nlinks-1].form->name, thisname))) {
+			 links[nlinks-1].l_form->type == F_TEXTAREA_TYPE &&
+			 links[nlinks-1].l_form->number == thisgroup &&
+			 sametext(links[nlinks-1].l_form->name, thisname))) {
 		nextlink = nlinks - 1;
 		samepage = 1;
 
@@ -2760,21 +2759,21 @@ PRIVATE BOOLEAN handle_LYK_FASTBACKW_LINK ARGS3(
 	 */
 	if (nextlink > 0 &&
 	    links[nextlink].type == WWW_FORM_LINK_TYPE &&
-	    links[nextlink].form->type == F_TEXTAREA_TYPE) {
-	    int thisgroup = links[nextlink].form->number;
-	    char *thisname = links[nextlink].form->name;
+	    links[nextlink].l_form->type == F_TEXTAREA_TYPE) {
+	    int thisgroup = links[nextlink].l_form->number;
+	    char *thisname = links[nextlink].l_form->name;
 	    if (links[0].type == WWW_FORM_LINK_TYPE &&
-		links[0].form->type == F_TEXTAREA_TYPE &&
-		links[0].form->number == thisgroup &&
-		sametext(links[0].form->name, thisname)) {
+		links[0].l_form->type == F_TEXTAREA_TYPE &&
+		links[0].l_form->number == thisgroup &&
+		sametext(links[0].l_form->name, thisname)) {
 		nextlink = 0;
 	    } else
 		while
 		    (nextlink > 1 &&
 		     links[nextlink-1].type == WWW_FORM_LINK_TYPE &&
-		     links[nextlink-1].form->type == F_TEXTAREA_TYPE &&
-		     links[nextlink-1].form->number == thisgroup &&
-		     sametext(links[nextlink-1].form->name, thisname)) {
+		     links[nextlink-1].l_form->type == F_TEXTAREA_TYPE &&
+		     links[nextlink-1].l_form->number == thisgroup &&
+		     sametext(links[nextlink-1].l_form->name, thisname)) {
 		    nextlink--;
 		}
 	}
@@ -2818,21 +2817,21 @@ PRIVATE void handle_LYK_FASTFORW_LINK ARGS2(
 	 *  after it if there is one on this screen. - kw
 	 */
 	if (links[curdoc.link].type == WWW_FORM_LINK_TYPE &&
-	    links[curdoc.link].form->type == F_TEXTAREA_TYPE) {
-	    int thisgroup = links[curdoc.link].form->number;
-	    char *thisname = links[curdoc.link].form->name;
+	    links[curdoc.link].l_form->type == F_TEXTAREA_TYPE) {
+	    int thisgroup = links[curdoc.link].l_form->number;
+	    char *thisname = links[curdoc.link].l_form->name;
 
 	    if (curdoc.link < nlinks-1 &&
 		!(links[nlinks-1].type == WWW_FORM_LINK_TYPE &&
-		  links[nlinks-1].form->type == F_TEXTAREA_TYPE &&
-		  links[nlinks-1].form->number == thisgroup &&
-		  sametext(links[nlinks-1].form->name, thisname))) {
+		  links[nlinks-1].l_form->type == F_TEXTAREA_TYPE &&
+		  links[nlinks-1].l_form->number == thisgroup &&
+		  sametext(links[nlinks-1].l_form->name, thisname))) {
 		do nextlink++;
 		while
 		    (links[nextlink].type == WWW_FORM_LINK_TYPE &&
-		     links[nextlink].form->type == F_TEXTAREA_TYPE &&
-		     links[nextlink].form->number == thisgroup &&
-		     sametext(links[nextlink].form->name, thisname));
+		     links[nextlink].l_form->type == F_TEXTAREA_TYPE &&
+		     links[nextlink].l_form->number == thisgroup &&
+		     sametext(links[nextlink].l_form->name, thisname));
 		samepage = 1;
 	    } else if (!more && Newline == 1 && curdoc.link > 0) {
 		nextlink = 0;
@@ -2943,8 +2942,8 @@ PRIVATE void handle_LYK_GROW_TEXTAREA ARGS1(
     /*
      *  See if the current link is in a form TEXTAREA.
      */
-    if (links[curdoc.link].type       == WWW_FORM_LINK_TYPE &&
-	links[curdoc.link].form->type == F_TEXTAREA_TYPE)   {
+    if (links[curdoc.link].type         == WWW_FORM_LINK_TYPE &&
+	links[curdoc.link].l_form->type == F_TEXTAREA_TYPE)   {
 
 	HText_ExpandTextarea (&links[curdoc.link], TEXTAREA_EXPAND_SIZE);
 
@@ -2962,10 +2961,10 @@ PRIVATE BOOLEAN handle_LYK_HEAD ARGS1(
     int c;
 
     if (nlinks > 0 &&
-	(links[curdoc.link].type != WWW_FORM_LINK_TYPE ||
-	 links[curdoc.link].form->type == F_SUBMIT_TYPE ||
-	 links[curdoc.link].form->type == F_IMAGE_SUBMIT_TYPE ||
-	 links[curdoc.link].form->type == F_TEXT_SUBMIT_TYPE)) {
+	(links[curdoc.link].type         != WWW_FORM_LINK_TYPE ||
+	 links[curdoc.link].l_form->type == F_SUBMIT_TYPE ||
+	 links[curdoc.link].l_form->type == F_IMAGE_SUBMIT_TYPE ||
+	 links[curdoc.link].l_form->type == F_TEXT_SUBMIT_TYPE)) {
 	/*
 	 * We have links, and the current link is a normal link or a form's
 	 * submit button.  - FM
@@ -3009,16 +3008,16 @@ PRIVATE BOOLEAN handle_LYK_HEAD ARGS1(
 		 strncmp(curdoc.address, "http", 4))) {
 		HTUserMsg(LINK_NOT_HTTP_URL);
 	    } else if (links[curdoc.link].type == WWW_FORM_LINK_TYPE &&
-		       links[curdoc.link].form->disabled) {
+		       links[curdoc.link].l_form->disabled) {
 		HTUserMsg(FORM_ACTION_DISABLED);
 	    } else if (links[curdoc.link].type == WWW_FORM_LINK_TYPE &&
-		       strncmp(links[curdoc.link].form->submit_action,
+		       strncmp(links[curdoc.link].l_form->submit_action,
 						      "lynxcgi:", 8) &&
-		       strncmp(links[curdoc.link].form->submit_action,
+		       strncmp(links[curdoc.link].l_form->submit_action,
 							 "http", 4)) {
 		HTUserMsg(FORM_ACTION_NOT_HTTP_URL);
 	    } else if (links[curdoc.link].type == WWW_FORM_LINK_TYPE &&
-		       links[curdoc.link].form->submit_method ==
+		       links[curdoc.link].l_form->submit_method ==
 						  URL_POST_METHOD &&
 		       HTConfirm(CONFIRM_POST_LINK_HEAD) == FALSE) {
 		HTInfoMsg(CANCELLED);
@@ -3374,8 +3373,8 @@ PRIVATE void handle_LYK_INSERT_FILE ARGS3(
     /*
      *  See if the current link is in a form TEXTAREA.
      */
-    if (links[curdoc.link].type       == WWW_FORM_LINK_TYPE &&
-	links[curdoc.link].form->type == F_TEXTAREA_TYPE)   {
+    if (links[curdoc.link].type         == WWW_FORM_LINK_TYPE &&
+	links[curdoc.link].l_form->type == F_TEXTAREA_TYPE)   {
 
 	/*
 	 *  Reject attempts to use this for gaining access to
@@ -3908,18 +3907,18 @@ PRIVATE void handle_LYK_NEXT_LINK ARGS3(
 	/*
 	 *  Move to different textarea if TAB in textarea.
 	 */
-	if (links[curdoc.link].type == WWW_FORM_LINK_TYPE &&
-	    links[curdoc.link].form->type == F_TEXTAREA_TYPE &&
+	if (links[curdoc.link].type         == WWW_FORM_LINK_TYPE &&
+	    links[curdoc.link].l_form->type == F_TEXTAREA_TYPE &&
 	    c=='\t') {
-	    int thisgroup = links[curdoc.link].form->number;
-	    char *thisname = links[curdoc.link].form->name;
+	    int thisgroup = links[curdoc.link].l_form->number;
+	    char *thisname = links[curdoc.link].l_form->name;
 
 	    do curdoc.link++;
 	    while ((curdoc.link < nlinks-1) &&
 		   links[curdoc.link].type == WWW_FORM_LINK_TYPE &&
-		   links[curdoc.link].form->type == F_TEXTAREA_TYPE &&
-		   links[curdoc.link].form->number == thisgroup &&
-		   sametext(links[curdoc.link].form->name, thisname));
+		   links[curdoc.link].l_form->type == F_TEXTAREA_TYPE &&
+		   links[curdoc.link].l_form->number == thisgroup &&
+		   sametext(links[curdoc.link].l_form->name, thisname));
 	} else {
 	    curdoc.link++;
 	}
@@ -3962,9 +3961,9 @@ PRIVATE BOOLEAN handle_LYK_NOCACHE ARGS2(
 {
     if (nlinks > 0) {
 	if (links[curdoc.link].type == WWW_FORM_LINK_TYPE &&
-	    links[curdoc.link].form->type != F_SUBMIT_TYPE &&
-	    links[curdoc.link].form->type != F_IMAGE_SUBMIT_TYPE &&
-	    links[curdoc.link].form->type != F_TEXT_SUBMIT_TYPE) {
+	    links[curdoc.link].l_form->type != F_SUBMIT_TYPE &&
+	    links[curdoc.link].l_form->type != F_IMAGE_SUBMIT_TYPE &&
+	    links[curdoc.link].l_form->type != F_TEXT_SUBMIT_TYPE) {
 	    if (*old_c != real_c) {
 		*old_c = real_c;
 		HTUserMsg(NOT_ON_SUBMIT_OR_LINK);
@@ -4481,12 +4480,12 @@ PRIVATE void handle_LYK_SWITCH_DTD NOARGS
 PRIVATE void handle_LYK_TAG_LINK NOARGS
 {
     if (lynx_edit_mode && nlinks > 0 && !no_dired_support) {
-	if (!strcmp(links[curdoc.link].hightext, ".."))
+	if (!strcmp(LYGetHiliteStr(curdoc.link, 0), ".."))
 	    return;	/* Never tag the parent directory */
 	if (dir_list_style == MIXED_STYLE) {
-	    if (!strcmp(links[curdoc.link].hightext, "../"))
+	    if (!strcmp(LYGetHiliteStr(curdoc.link, 0), "../"))
 		return;
-	} else if (!strncmp(links[curdoc.link].hightext, "Up to ", 6))
+	} else if (!strncmp(LYGetHiliteStr(curdoc.link, 0), "Up to ", 6))
 	    return;
 	{
 	    /*
@@ -4682,10 +4681,11 @@ PRIVATE void handle_LYK_UP_LINK ARGS4(
 	int newlink;
 
 	if (*follow_col == -1) {
+	    char *text = LYGetHiliteStr(curdoc.link, 0);
 	    *follow_col = links[curdoc.link].lx;
 
-	    if (links[curdoc.link].hightext)
-		*follow_col += strlen(links[curdoc.link].hightext)/2;
+	    if (text != NULL)
+		*follow_col += strlen(text) / 2;
 	}
 
 	newlink = find_link_near_col(*follow_col, -1);
@@ -4916,7 +4916,7 @@ PRIVATE void handle_LYK_digit ARGS6(
 	 *  Follow a normal link.
 	 */
 	StrAllocCopy(newdoc.address, links[lindx].lname);
-	StrAllocCopy(newdoc.title, links[lindx].hightext);
+	StrAllocCopy(newdoc.title, LYGetHiliteStr(lindx, 0));
 #ifndef DONT_TRACK_INTERNAL_LINKS
 	/*
 	 *  For internal links, retain POST content if present.
@@ -6441,10 +6441,10 @@ try_again:
 	curlink_is_editable =
 	    (nlinks > 0 &&
 	     links[curdoc.link].type == WWW_FORM_LINK_TYPE &&
-	     (links[curdoc.link].form->type == F_TEXT_TYPE ||
-	      links[curdoc.link].form->type == F_TEXT_SUBMIT_TYPE ||
-	      links[curdoc.link].form->type == F_PASSWORD_TYPE ||
-	      links[curdoc.link].form->type == F_TEXTAREA_TYPE));
+	     (links[curdoc.link].l_form->type == F_TEXT_TYPE ||
+	      links[curdoc.link].l_form->type == F_TEXT_SUBMIT_TYPE ||
+	      links[curdoc.link].l_form->type == F_PASSWORD_TYPE ||
+	      links[curdoc.link].l_form->type == F_TEXTAREA_TYPE));
 
 	use_last_tfpos = (curlink_is_editable &&
 			  (real_cmd == LYK_LPOS_PREV_LINK ||
@@ -6464,7 +6464,7 @@ try_again:
 
 	       if (links[curdoc.link].type == WWW_FORM_LINK_TYPE) {
 
-		    switch(links[curdoc.link].form->type) {
+		    switch(links[curdoc.link].l_form->type) {
 		    case F_TEXT_SUBMIT_TYPE:
 		    case F_SUBMIT_TYPE:
 		    case F_IMAGE_SUBMIT_TYPE:
@@ -6605,13 +6605,11 @@ try_again:
 		     *  Replace novice lines if in NOVICE_MODE.
 		     */
 		    if (user_mode==NOVICE_MODE) {
-			form_noviceline(links[curdoc.link].form->disabled);
+			form_noviceline(links[curdoc.link].l_form->disabled);
 		    }
-		    real_c = change_form_link(&links[curdoc.link],
+		    real_c = change_form_link(curdoc.link,
 				     &newdoc, &refresh_screen,
-				     links[curdoc.link].form->name,
-					  links[curdoc.link].form->value,
-					  use_last_tfpos, FALSE);
+				     use_last_tfpos, FALSE);
 		}
 #ifdef TEXTFIELDS_MAY_NEED_ACTIVATION
 		if (textfields_need_activation)
@@ -6630,15 +6628,15 @@ try_again:
 		    do_change_link();
 		    if ((c == '\n' || c == '\r') &&
 			links[curdoc.link].type == WWW_FORM_LINK_TYPE &&
-			F_TEXTLIKE(links[curdoc.link].form->type) &&
+			F_TEXTLIKE(links[curdoc.link].l_form->type) &&
 			!textfields_need_activation) {
 			c = DO_NOTHING;
 		    }
 #ifdef TEXTFIELDS_MAY_NEED_ACTIVATION
 		} else if ((links[curdoc.link].type == WWW_FORM_LINK_TYPE &&
-			    links[curdoc.link].form->type == F_TEXTAREA_TYPE)
+			    links[curdoc.link].l_form->type == F_TEXTAREA_TYPE)
 			   && textfields_need_activation
-			   && !links[curdoc.link].form->disabled
+			   && !links[curdoc.link].l_form->disabled
 			   && peek_mouse_link() < 0 &&
 			   (((LKC_TO_LAC(keymap,real_c) == LYK_NEXT_LINK ||
 #ifdef TEXTAREA_AUTOGROW
@@ -6648,11 +6646,11 @@ try_again:
 			      LKC_TO_LAC(keymap,real_c) == LYK_DOWN_LINK) &&
 			     ((curdoc.link < nlinks-1 &&
 			       links[curdoc.link+1].type == WWW_FORM_LINK_TYPE  &&
-			       links[curdoc.link+1].form->type == F_TEXTAREA_TYPE
-			       && (links[curdoc.link].form->number ==
-				   links[curdoc.link+1].form->number) &&
-			       strcmp(links[curdoc.link].form->name,
-				      links[curdoc.link+1].form->name) == 0) ||
+			       links[curdoc.link+1].l_form->type == F_TEXTAREA_TYPE
+			       && (links[curdoc.link].l_form->number ==
+				   links[curdoc.link+1].l_form->number) &&
+			       strcmp(links[curdoc.link].l_form->name,
+				      links[curdoc.link+1].l_form->name) == 0) ||
 			      (curdoc.link == nlinks-1 && more &&
 			       HText_TAHasMoreLines(curdoc.link, 1)))) ||
 			    ((LKC_TO_LAC(keymap,real_c) == LYK_PREV_LINK ||
@@ -6660,11 +6658,11 @@ try_again:
 			      LKC_TO_LAC(keymap,real_c) == LYK_UP_LINK) &&
 			     ((curdoc.link > 0 &&
 			       links[curdoc.link-1].type == WWW_FORM_LINK_TYPE  &&
-			       links[curdoc.link-1].form->type == F_TEXTAREA_TYPE
-			       && (links[curdoc.link].form->number ==
-				   links[curdoc.link-1].form->number) &&
-			       strcmp(links[curdoc.link].form->name,
-				      links[curdoc.link-1].form->name) == 0) ||
+			       links[curdoc.link-1].l_form->type == F_TEXTAREA_TYPE
+			       && (links[curdoc.link].l_form->number ==
+				   links[curdoc.link-1].l_form->number) &&
+			       strcmp(links[curdoc.link].l_form->name,
+				      links[curdoc.link-1].l_form->name) == 0) ||
 			      (curdoc.link == 0 && curdoc.line > 1 &&
 			       HText_TAHasMoreLines(curdoc.link, -1)))))) {
 		    textinput_activated = TRUE;
@@ -6693,23 +6691,23 @@ try_again:
 		     *   try and improve the "readability" (such as it is).
 		     *   Caveat emptor to anyone trying to change it.]
 		     */
-		    if ((links[curdoc.link].type       == WWW_FORM_LINK_TYPE &&
-			 links[curdoc.link].form->type == F_TEXTAREA_TYPE) &&
+		    if ((links[curdoc.link].type == WWW_FORM_LINK_TYPE &&
+			 links[curdoc.link].l_form->type == F_TEXTAREA_TYPE) &&
 			((curdoc.link == nlinks-1 &&
 			  !(more && HText_TAHasMoreLines(curdoc.link, 1)))
 			 ||
 			 ((curdoc.link <  nlinks-1) &&
 			  !(links[curdoc.link+1].type == WWW_FORM_LINK_TYPE  &&
-			    links[curdoc.link+1].form->type == F_TEXTAREA_TYPE))
+			    links[curdoc.link+1].l_form->type == F_TEXTAREA_TYPE))
 			 ||
 			 ((curdoc.link <  nlinks-1) &&
 			  ((links[curdoc.link+1].type == WWW_FORM_LINK_TYPE  &&
-			    links[curdoc.link+1].form->type == F_TEXTAREA_TYPE)
+			    links[curdoc.link+1].l_form->type == F_TEXTAREA_TYPE)
 			    &&
-			    ((links[curdoc.link].form->number	       !=
-				      links[curdoc.link+1].form->number)     ||
-			     (strcmp (links[curdoc.link].form->name,
-				      links[curdoc.link+1].form->name) != 0)))))) {
+			    ((links[curdoc.link].l_form->number	       !=
+				      links[curdoc.link+1].l_form->number) ||
+			     (strcmp (links[curdoc.link].l_form->name,
+				      links[curdoc.link+1].l_form->name) != 0)))))) {
 
 			HText_ExpandTextarea (&links[curdoc.link], 1);
 
@@ -6758,10 +6756,8 @@ try_again:
 		if (curlink_is_editable && !textinput_redrawn) {
 		/*draw the text entry, but don't activate it*/
 		    textinput_redrawn = TRUE;
-		    change_form_link_ex(&links[curdoc.link],
+		    change_form_link_ex(curdoc.link,
 				    &newdoc, &refresh_screen,
-				    links[curdoc.link].form->name,
-				    links[curdoc.link].form->value,
 				    use_last_tfpos, FALSE, TRUE);
 		    if (LYShowCursor) {
 			LYmove(links[curdoc.link].ly,
@@ -6869,7 +6865,7 @@ new_cmd:  /*
 	default:
 	    if (curdoc.link >= 0 && curdoc.link < nlinks &&
 		links[curdoc.link].type == WWW_FORM_LINK_TYPE &&
-		F_TEXTLIKE(links[curdoc.link].form->type)) {
+		F_TEXTLIKE(links[curdoc.link].l_form->type)) {
 
 #ifdef TEXTFIELDS_MAY_NEED_ACTIVATION
 		if (textfields_need_activation) {
@@ -7677,7 +7673,7 @@ PUBLIC void HTAddGotoURL ARGS1(
  *  to tell the user other misc info.
  */
 PRIVATE void show_main_statusline ARGS2(
-    CONST linkstruct,	curlink,
+    CONST LinkInfo,	curlink,
     int,		for_what)
 {
     /*
@@ -7710,7 +7706,7 @@ PRIVATE void show_main_statusline ARGS2(
 #endif /* NORMAL_NON_FORM_LINK_STATUSLINES_FOR_ALL_USER_MODES */
 #endif /* INDICATE_FORMS_MODE_FOR_ALL_LINKS_ON_PAGE */
 	if (curlink.type == WWW_FORM_LINK_TYPE) {
-	    show_formlink_statusline(curlink.form, for_what);
+	    show_formlink_statusline(curlink.l_form, for_what);
 	} else {
 	    statusline(NORMAL_LINK_MESSAGE);
 	}

@@ -40,6 +40,7 @@
 #include <dpmi.h>
 #include <io.h>
 #include <sys/stat.h>
+#include <sys/exceptn.h>
 #endif /* __DJGPP__ */
 
 #ifdef __EMX__
@@ -420,7 +421,7 @@ PUBLIC char *startrealm = NULL;		/* the startfile realm */
 PUBLIC char *system_mail = NULL;	/* The path for sending mail */
 PUBLIC char *system_mail_flags = NULL;	/* Flags for sending mail */
 PUBLIC char *x_display = NULL;		/* display environment variable */
-PUBLIC histstruct history[MAXHIST];
+PUBLIC HistInfo history[MAXHIST];
 PUBLIC int AlertSecs;			/* time-delay for HTAlert() messages   */
 PUBLIC int InfoSecs;			/* time-delay for Information messages */
 PUBLIC int LYMultiBookmarks = MULTI_BOOKMARK_SUPPORT;
@@ -434,7 +435,7 @@ PUBLIC int lynx_temp_subspace = 0;	/* > 0 if we made temp-directory */
 PUBLIC int nhist = 0;			/* number of history entries */
 PUBLIC int nlinks = 0;			/* number of links in memory */
 PUBLIC int outgoing_mail_charset = -1;	/* translate mail to this charset */
-PUBLIC linkstruct links[MAXLINKS];
+PUBLIC LinkInfo links[MAXLINKS];
 
 #ifndef DISABLE_BIBP
 PUBLIC BOOLEAN BibP_bibhost_available = FALSE;  /* until check succeeds  */
@@ -948,6 +949,8 @@ PUBLIC int main ARGS2(
     } else {
 	init_ctrl_break[0] = 1;
     }
+    __djgpp_set_sigquit_key(0x082D); /* Bind ALT-X to SIGQUIT */
+    signal(SIGQUIT, cleanup_sig);
     atexit(reset_break);
 #endif /* __DJGPP__ */
 
@@ -1034,8 +1037,8 @@ PUBLIC int main ARGS2(
     /*
      *	Zero the links and history struct arrays.
      */
-    memset((void *)links, 0, sizeof(linkstruct)*MAXLINKS);
-    memset((void *)history, 0, sizeof(histstruct)*MAXHIST);
+    memset((void *)links, 0, sizeof(LinkInfo)*MAXLINKS);
+    memset((void *)history, 0, sizeof(HistInfo)*MAXHIST);
     /*
      *	Zero the MultiBookmark arrays.
      */
@@ -1101,15 +1104,15 @@ PUBLIC int main ARGS2(
 
     if ((cp = getenv("LYNX_TEMP_SPACE")) != NULL)
 	StrAllocCopy(lynx_temp_space, cp);
-#if defined (UNIX)
+#if defined (UNIX) || defined (__DJGPP__)
     else if ((cp = getenv("TMPDIR")) != NULL)
 	StrAllocCopy(lynx_temp_space, cp);
 #endif
 #if defined (DOSPATH) || defined (__EMX__)
     else if ((cp = getenv("TEMP")) != NULL)
-	StrAllocCopy(lynx_temp_space, HTSYS_name(cp));
+	StrAllocCopy(lynx_temp_space, cp);
     else if ((cp = getenv("TMP")) != NULL)
-	StrAllocCopy(lynx_temp_space, HTSYS_name(cp));
+	StrAllocCopy(lynx_temp_space, cp);
 #endif
     else
 #ifdef TEMP_SPACE
@@ -1159,6 +1162,7 @@ PUBLIC int main ARGS2(
     }
 #else
     LYAddPathSep(&lynx_temp_space);
+    StrAllocCopy(lynx_temp_space, HTSYS_name(lynx_temp_space));
 #endif /* VMS */
 
     if ((HTStat(lynx_temp_space, &dir_info) < 0

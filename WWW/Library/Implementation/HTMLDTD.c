@@ -1663,7 +1663,8 @@ PUBLIC void HTSwitchDTD ARGS1(
     int,		new_flag)
 {
     if (TRACE)
-	CTRACE((tfp,"HTMLDTD: Copying DTD element info of size %d, %d * %d\n",
+	CTRACE((tfp,"HTMLDTD: Copying %s DTD element info of size %d, %d * %d\n",
+		new_flag ? "strict" : "tagsoup",
 		(int) (new_flag ? sizeof(tags_new) : sizeof(tags_old)),
 		HTML_ALL_ELEMENTS,
 		(int) sizeof(HTTag)));

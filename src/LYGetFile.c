@@ -1250,6 +1250,8 @@ PUBLIC int follow_link_number ARGS4(
     */
    if (*num > 0) {
 	int info;
+	char *text;
+
 	/*
 	 *  Get the lname, and hightext, directly from www
 	 *  structures and add it to the cur link so that
@@ -1260,12 +1262,14 @@ PUBLIC int follow_link_number ARGS4(
 	 *  in the current document, whether it is displayed
 	 *  on the screen or not!
 	 */
-	if ((info = HTGetLinkInfo(*num,
-				  want_go,
-				  &new_top,
-				  &new_link,
-				  &links[cur].hightext,
-			  &links[cur].lname)) == WWW_INTERN_LINK_TYPE) {
+	info = HTGetLinkInfo(*num,
+			     want_go,
+			     &new_top,
+			     &new_link,
+			     &text,
+			     &links[cur].lname);
+	LYSetHilite(cur, text);
+	if (info == WWW_INTERN_LINK_TYPE) {
 	    links[cur].type = WWW_INTERN_LINK_TYPE;
 	    return(DO_LINK_STUFF);
 	} else if (info == LINK_LINE_FOUND) {

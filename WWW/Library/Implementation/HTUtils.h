@@ -590,6 +590,26 @@ extern char HTGetSSLCharacter PARAMS((void * handle));
 
 #endif /* USE_SSL */
 
+#if HAVE_LIBDMALLOC
+#include <dmalloc.h>    /* Gray Watson's library */
+#define show_alloc() dmalloc_log_unfreed()
+#else
+#undef  HAVE_LIBDMALLOC
+#define HAVE_LIBDMALLOC 0
+#endif
+
+#if HAVE_LIBDBMALLOC
+#include <dbmalloc.h>   /* Conor Cahill's library */
+#define show_alloc() malloc_dump(fileno(stderr))
+#else
+#undef  HAVE_LIBDBMALLOC
+#define HAVE_LIBDBMALLOC 0
+#endif
+
+#ifndef show_alloc
+#define show_alloc()	/* nothing */
+#endif
+
 #include <userdefs.h>
 
 #endif /* HTUTILS_H */

@@ -369,16 +369,16 @@ PUBLIC int LYShowInfo ARGS4(
     if (nlinks > 0) {
 	fprintf(fp0, "<h2>%s</h2>\n<dl compact>",
 		gettext("Link that you currently have selected"));
-	StrAllocCopy(Title, links[doc->link].hightext);
+	StrAllocCopy(Title, LYGetHiliteStr(doc->link, 0));
 	LYEntify(&Title, TRUE);
 	fprintf(fp0, "<dt><em>%s</em> %s\n",
 		gettext("Linkname:"),
 		Title);
 	if (lynx_mode == FORMS_LYNX_MODE &&
 	    links[doc->link].type == WWW_FORM_LINK_TYPE) {
-	    if (links[doc->link].form->submit_method) {
-		int method = links[doc->link].form->submit_method;
-		char *enctype = links[doc->link].form->submit_enctype;
+	    if (links[doc->link].l_form->submit_method) {
+		int method = links[doc->link].l_form->submit_method;
+		char *enctype = links[doc->link].l_form->submit_enctype;
 
 		fprintf(fp0, "<dt>&nbsp;&nbsp;<em>%s</em> %s\n",
 			     gettext("Method:"),
@@ -391,13 +391,13 @@ PUBLIC int LYShowInfo ARGS4(
 			      *enctype ?
 			       enctype : "application/x-www-form-urlencoded"));
 	    }
-	    if (links[doc->link].form->submit_action) {
-		StrAllocCopy(Address, links[doc->link].form->submit_action);
+	    if (links[doc->link].l_form->submit_action) {
+		StrAllocCopy(Address, links[doc->link].l_form->submit_action);
 		LYEntify(&Address, TRUE);
 		fprintf(fp0, "<dt>&nbsp;&nbsp;<em>Action:</em> %s\n", Address);
 	    }
-	    if (!(links[doc->link].form->submit_method &&
-		  links[doc->link].form->submit_action)) {
+	    if (!(links[doc->link].l_form->submit_method &&
+		  links[doc->link].l_form->submit_action)) {
 		fprintf(fp0, "<dt>&nbsp;%s\n", gettext("(Form field)"));
 	    }
 	} else {

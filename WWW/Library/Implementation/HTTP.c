@@ -685,9 +685,12 @@ use_tunnel:
        * adding the base URL but is simpler than augmenting the dump's
        * presentation logic -TD
        */
-      if (!LYPrependBaseToSource)
+      if (LYPrependBaseToSource && dump_output_immediately) {
+	  CTRACE((tfp, "omit Accept-Encoding to work-around interaction with -source\n"));
+      } else {
 	  HTSprintf(&command, "Accept-Encoding: %s, %s%c%c",
 		    "gzip", "compress", CR, LF);
+      }
 
       if (language && *language) {
 	  HTSprintf(&command, "Accept-Language: %s%c%c", language, CR, LF);
@@ -876,7 +879,7 @@ use_tunnel:
 	    **	document being proxied.
 	    */
 	    if (!strncmp(docname, "http", 4)) {
-		cookie = LYCookie(host2, path2, port2, secure);
+		cookie = LYAddCookieHeader(host2, path2, port2, secure);
 	    }
 	    FREE(host2);
 	    FREE(path2);
@@ -888,7 +891,7 @@ use_tunnel:
 	    /*
 	    **	Add cookie for a non-proxied request. - FM
 	    */
-	    cookie = LYCookie(hostname, abspath, portnumber, secure);
+	    cookie = LYAddCookieHeader(hostname, abspath, portnumber, secure);
 	    auth_proxy = NO;
 	}
 	/*

@@ -292,7 +292,7 @@ PRIVATE void clean_extra NOARGS
 
 /* What is the relationship to are_different() from the mainloop?! */
 PRIVATE int are_identical ARGS2(
-	histstruct *,	doc,
+	HistInfo *,	doc,
 	document *,	doc1)
 {
      return (	STREQ(doc1->address, doc->address)

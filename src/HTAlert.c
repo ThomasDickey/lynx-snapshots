@@ -774,7 +774,7 @@ PUBLIC BOOL HTConfirmCookie ARGS4(
 	_statusline(message);
 	FREE(message);
     }
-    while (1) {
+    for (;;) {
 	if(LYAcceptAllCookies) {
 	    ch = 'A';
 	} else {
@@ -806,15 +806,17 @@ PUBLIC BOOL HTConfirmCookie ARGS4(
 		 && isalpha(ch)
 		 && (p = strrchr(prompt, L_PAREN)) != 0) {
 
+		    CTRACE((tfp, "Looking for %c in %s\n", ch, p));
 		    while (*p != R_PAREN && *p != 0 && isalpha(UCH(*s))) {
-			if (*p == ch) {
-			    ch = *s;
-			    break;
-			} else {
-			    if (isalpha(UCH(*p)) && (*p == TOUPPER(*p)))
-				s++;
-			    p++;
+			if (isalpha(UCH(*p)) && (*p == TOUPPER(*p))) {
+			    CTRACE((tfp, "...testing %c/%c\n", *p, *s));
+			    if (*p == ch) {
+				ch = *s;
+				break;
+			    }
+			    ++s;
 			}
+			++p;
 		    }
 		}
 	    }

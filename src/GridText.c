@@ -155,7 +155,7 @@ PUBLIC int LYsb_end = -1;
 #define MAX_STYLES_ON_LINE 64
 
     /*try to fit in 2 shorts*/
-typedef struct _stylechange {
+typedef struct {
 	unsigned int	direction:2;	/* on or off */
 	unsigned int	horizpos: (sizeof(short)*CHAR_BIT-2);
 	    /* horizontal position of this change */
@@ -187,7 +187,7 @@ HTStyleChange stylechanges_buffers[2][MAX_STYLES_ON_LINE];
 int stylechanges_buffers_free;/*this is an index of the free buffer.
     Can be 0 or 1*/
 
-/* These are generic macors for any pools (provided those structures have the
+/* These are generic macros for any pools (provided those structures have the
 same members as HTStyleChangePool).  Pools are used for allocation of groups of
 objects of the same type T.  Pools are represented as a list of structures of
 type P (called pool chunks here).  Structure P has an array of N objects of
@@ -303,9 +303,7 @@ typedef struct _TextAnchor {
 	int			line_pos;	/* Bytes/chars - extent too */
 	int			extent;		/* (see HText_trimHightext) */
 	int			line_num;	/* Place in document */
-	char *			hightext;	/* The link text */
-	char *			hightext2;	/* A second line*/
-	int			hightext2offset;/* offset from left */
+	HiliteList		lites;
 	int			link_type;	/* Normal, internal, or form? */
 	FormInfo *		input_field;	/* Info for form links */
 	BOOL			show_anchor;	/* Show the anchor? */
@@ -314,7 +312,7 @@ typedef struct _TextAnchor {
 	HTChildAnchor *		anchor;
 } TextAnchor;
 
-typedef struct _HTTabID {
+typedef struct {
 	char *			name;		/* ID value of TAB */
 	int			column;		/* Zero-based column value */
 } HTTabID;
@@ -427,7 +425,7 @@ PUBLIC BOOL can_justify_stack_depth;/* can be 0 or 1 if all code is correct*/
 #endif
 
 
-typedef struct ht_run_info_ {
+typedef struct {
     int byte_len;		/*length in bytes*/
     int cell_len;		/*length in cells*/
 } ht_run_info;
@@ -522,6 +520,114 @@ PRIVATE int HText_TrueLineSize PARAMS((
 #define CHECK_FREE_MEM
 #endif
 
+/*
+ * Set the initial highlight information for a given anchor.
+ */
+PRIVATE void LYSetHiText ARGS3(
+	TextAnchor *,	a,
+	char *,		text,
+	int,		len)
+{
+    unsigned have = a->lites.hl_len;
+
+    if (a->lites.hl_info != NULL) {
+	while (have-- != 0) {
+	    if ((int) (have + 1) < a->lites.hl_len) {
+		FREE(a->lites.hl_info[have].hl_text);
+	    }
+	}
+	FREE(a->lites.hl_info);
+    }
+    FREE(a->lites.hl_base.hl_text);
+    a->lites.hl_len = 0;
+
+    if (text != NULL) {
+	StrnAllocCopy(a->lites.hl_base.hl_text, text, len);
+	a->lites.hl_len = 1;
+    }
+}
+
+/*
+ * Add highlight information for the next line of a anchor.
+ */
+PRIVATE void LYAddHiText ARGS3(
+	TextAnchor *,	a,
+	char *,		text,
+	int,		x)
+{
+    HiliteInfo *have = a->lites.hl_info;
+    unsigned need = (a->lites.hl_len - 1);
+    unsigned want = ++(a->lites.hl_len) * sizeof(HiliteInfo);
+
+    if (have != NULL) {
+	have = realloc(have, want);
+    } else {
+	have = malloc(want);
+    }
+    a->lites.hl_info = have;
+
+    have[need].hl_text = NULL;
+    StrAllocCopy(have[need].hl_text, text);
+    have[need].hl_x = x;
+}
+
+/*
+ * Get the highlight text, counting from zero.
+ */
+PRIVATE char *LYGetHiTextStr ARGS2(
+	TextAnchor *,	a,
+	int,		count)
+{
+    char *result;
+
+    if (count >= a->lites.hl_len)
+	result = NULL;
+    else if (count > 0)
+	result = a->lites.hl_info[count - 1].hl_text;
+    else
+	result = a->lites.hl_base.hl_text;
+    return result;
+}
+
+/*
+ * Get the X-ordinate at which to draw the corresponding highlight-text
+ */
+PRIVATE int LYGetHiTextPos ARGS2(
+	TextAnchor *,	a,
+	int,		count)
+{
+    int result;
+
+    if (count >= a->lites.hl_len)
+	result = -1;
+    else if (count > 0)
+	result = a->lites.hl_info[count - 1].hl_x;
+    else
+	result = a->line_pos;
+    return result;
+}
+
+/*
+ * Copy highlighting information from anchor 'a' to 'b'.
+ */
+PRIVATE void LYCopyHiText ARGS2(
+	TextAnchor *,	a,
+	TextAnchor *,	b)
+{
+    int count;
+    char *s;
+
+    LYSetHiText(a, NULL, 0);
+    for (count = 0; ; ++count) {
+	if ((s = LYGetHiTextStr(b, count)) == NULL)
+	    break;
+	if (count == 0) {
+	    LYSetHiText(a, s, strlen(s));
+	} else {
+	    LYAddHiText(a, s, LYGetHiTextPos(b, count));
+	}
+    }
+}
 
 #ifdef CHECK_FREE_MEM
 
@@ -843,7 +949,7 @@ PUBLIC HText *	HText_new ARGS1(
 		     &LYCharSet_UC[current_char_set]);
 
     /*
-     *  Check the kcode setting if the anchor has a charset element. - FM
+     *  Check the kcode setting if the anchor has a charset element. -FM
      */
     HText_setKcode(self, anchor->charset,
 		   HTAnchor_getUCInfoStage(anchor, UCT_STAGE_HTEXT));
@@ -856,13 +962,13 @@ PUBLIC HText *	HText_new ARGS1(
      */
     if (underscore_string[0] != '.') {
 	/*
-	 *  Create an array of dots for the UNDERSCORES macro. - FM
+	 *  Create an array of dots for the UNDERSCORES macro. -FM
 	 */
 	memset(underscore_string, '.', (MAX_LINE-1));
 	underscore_string[(MAX_LINE-1)] = '\0';
 	underscore_string[MAX_LINE] = '\0';
 	/*
-	 *  Create an array of underscores for the STARS macro. - FM
+	 *  Create an array of underscores for the STARS macro. -FM
 	 */
 	memset(star_string, '_', (MAX_LINE-1));
 	star_string[(MAX_LINE-1)] = '\0';
@@ -1000,15 +1106,14 @@ PUBLIC void HText_free ARGS1(
 	    FREE(l->input_field);
 	}
 
-	FREE(l->hightext);
-	FREE(l->hightext2);
+	LYSetHiText(l, NULL, 0);
 
 	FREE(l);
     }
     FormList_delete(self->forms);
 
     /*
-     *  Free the tabs list. - FM
+     *  Free the tabs list. -FM
      */
     if (self->tabs) {
 	HTTabID * Tab = NULL;
@@ -1023,7 +1128,7 @@ PUBLIC void HText_free ARGS1(
     }
 
     /*
-     *  Free the hidden links list. - FM
+     *  Free the hidden links list. -FM
      */
     if (self->hidden_links) {
 	char * href = NULL;
@@ -1037,7 +1142,7 @@ PUBLIC void HText_free ARGS1(
 
     /*
      *  Invoke HTAnchor_delete() to free the node_anchor
-     *  if it is not a destination of other links. - FM
+     *  if it is not a destination of other links. -FM
      */
     if (self->node_anchor) {
 	HTAnchor_resetUCInfoStage(self->node_anchor, -1, UCT_STAGE_STRUCTURED,
@@ -1276,12 +1381,12 @@ PRIVATE int display_line ARGS4(
 		     *  into LastDisplayChar if it was a multibyte
 		     *  character) or hyphen, though it should have
 		     *  been excluded by HText_appendCharacter() or by
-		     *  split_line() in those cases. - FM
+		     *  split_line() in those cases. -FM
 		     */
 		    break;
 		} else {
 		    /*
-		     *  Make it a hard hyphen and fall through. - FM
+		     *  Make it a hard hyphen and fall through. -FM
 		     */
 		    buffer[0] = '-';
 		}
@@ -1339,7 +1444,7 @@ PRIVATE int display_line ARGS4(
 		     *  spacing characters in this code set,
 		     *  but this will become an issue when
 		     *  the development code set's multibyte
-		     *  character handling is used. - FM
+		     *  character handling is used. -FM
 		     */
 		    LastDisplayChar = 'M';
 		} else {
@@ -1395,7 +1500,7 @@ PRIVATE void display_title ARGS1(
     int limit;
 
     /*
-     *  Make sure we have a text structure. - FM
+     *  Make sure we have a text structure. -FM
      */
     if (!text)
 	return;
@@ -1411,7 +1516,7 @@ PRIVATE void display_title ARGS1(
 #endif /* USE_COLOR_STYLE */
 
     /*
-     *  Load the title field. - FM
+     *  Load the title field. -FM
      */
     StrAllocCopy(title,
 		 (HTAnchor_title(text->node_anchor) ?
@@ -1420,7 +1525,7 @@ PRIVATE void display_title ARGS1(
     /*
      *  There shouldn't be any \n in the title field,
      *  but if there is, lets kill it now.  Also trim
-     *  any trailing spaces. - FM
+     *  any trailing spaces. -FM
      */
     if ((cp = strchr(title,'\n')) != NULL)
 	*cp = '\0';
@@ -1465,7 +1570,7 @@ PRIVATE void display_title ARGS1(
     /*
      *  Generate and display the title string, with page indicator
      *  if appropriate, preceded by the toolbar token if appropriate,
-     *  and truncated if necessary. - FM & KW
+     *  and truncated if necessary. -FM & KW
      */
     if (HTCJK != NOCJK) {
 	if (*title &&
@@ -1518,7 +1623,7 @@ PRIVATE void display_title ARGS1(
 	/*
 	 *  Note that this truncation is not taking into
 	 *  account the possibility that multibyte
-	 *  characters might be present. - FM
+	 *  characters might be present. -FM
 	 */
 #ifdef SH_EX	/* 1999/06/15 (Tue) 10:17:28 */
 	int last;
@@ -1880,11 +1985,11 @@ PRIVATE void display_page ARGS3(
 #ifdef USE_COLOR_STYLE		/* otherwise done in display_line - kw */
 	    /*
 	     *  If the target is on this line, recursively
-	     *  seek and emphasize it. - FM
+	     *  seek and emphasize it. -FM
 	     */
 	    data = (char *)line->data;
 	    offset = (int)line->offset;
-	    while ((target && *target) &&
+	    while (non_empty(target) &&
 		    (cp = LYno_attr_mb_strstr(data,
 					      target,
 					      text->T.output_utf8, YES,
@@ -1954,7 +2059,7 @@ PRIVATE void display_page ARGS3(
 		/*
 		 *  Stop the emphasis, and reset the offset and
 		 *  data pointer for our current position in the
-		 *  line. - FM
+		 *  line. -FM
 		 */
 		LYstopTargetEmphasis();
 		LYGetYX(y, offset);
@@ -1963,7 +2068,7 @@ PRIVATE void display_page ARGS3(
 		/*
 		 *  Adjust the cursor position, should we be at
 		 *  the end of the line, or not have another hit
-		 *  in it. - FM
+		 *  in it. -FM
 		 */
 		LYmove((i + 2), 0);
 	    } /* end while */
@@ -1972,7 +2077,7 @@ PRIVATE void display_page ARGS3(
 
 	    /*
 	     *  Stop if this is the last line.  Otherwise, make sure
-	     *  display_flag is set and process the next line. - FM
+	     *  display_flag is set and process the next line. -FM
 	     */
 	    if (line == text->last_line) {
 		/*
@@ -2009,18 +2114,29 @@ PRIVATE void display_page ARGS3(
 		Anchor_ptr->line_num <= stop_before_for_anchors;
 					    Anchor_ptr = Anchor_ptr->next) {
 
-	if (Anchor_ptr->line_num >= line_number &&
-		Anchor_ptr->line_num < stop_before_for_anchors) {
+	if (Anchor_ptr->line_num >= line_number
+	 && Anchor_ptr->line_num < stop_before_for_anchors) {
+	    char *hi_string = LYGetHiTextStr(Anchor_ptr, 0);
+
 	    /*
 	     *  Load normal hypertext anchors.
 	     */
-	    if (Anchor_ptr->show_anchor && Anchor_ptr->hightext &&
-			strlen(Anchor_ptr->hightext) > 0 &&
-			(Anchor_ptr->link_type & HYPERTEXT_ANCHOR)) {
+	    if (Anchor_ptr->show_anchor
+	     && non_empty(hi_string)
+	     && (Anchor_ptr->link_type & HYPERTEXT_ANCHOR)) {
+		int count;
+		char *s;
 
-		links[nlinks].hightext	= Anchor_ptr->hightext;
-		links[nlinks].hightext2 = Anchor_ptr->hightext2;
-		links[nlinks].hightext2_offset = Anchor_ptr->hightext2offset;
+		for (count = 0; ; ++count) {
+		    s = LYGetHiTextStr(Anchor_ptr, count);
+		    if (count == 0)
+			LYSetHilite(nlinks, s);
+		    if (s == NULL)
+			break;
+		    if (count != 0)
+			LYAddHilite(nlinks, s, LYGetHiTextPos(Anchor_ptr, count));
+		}
+
 		links[nlinks].inUnderline = Anchor_ptr->inUnderline;
 
 		links[nlinks].anchor_number = Anchor_ptr->number;
@@ -2072,13 +2188,13 @@ PRIVATE void display_page ARGS3(
 		else
 		    links[nlinks].type = WWW_LINK_TYPE;
 		links[nlinks].target = empty_string;
-		links[nlinks].form = NULL;
+		links[nlinks].l_form = NULL;
 
 		nlinks++;
 		display_flag = TRUE;
 
 	    } else if (Anchor_ptr->link_type == INPUT_ANCHOR
-			&& Anchor_ptr->input_field->type != F_HIDDEN_TYPE) {
+		    && Anchor_ptr->input_field->type != F_HIDDEN_TYPE) {
 		/*
 		 *  Handle form fields.
 		 */
@@ -2089,7 +2205,7 @@ PRIVATE void display_page ARGS3(
 		links[nlinks].anchor_number = Anchor_ptr->number;
 		links[nlinks].anchor_line_num = Anchor_ptr->line_num;
 
-		links[nlinks].form = FormInfo_ptr;
+		links[nlinks].l_form = FormInfo_ptr;
 		links[nlinks].lx = Anchor_ptr->line_pos;
 		links[nlinks].ly = ((Anchor_ptr->line_num + 1) - line_number);
 		links[nlinks].type = WWW_FORM_LINK_TYPE;
@@ -2098,29 +2214,22 @@ PRIVATE void display_page ARGS3(
 		StrAllocCopy(links[nlinks].lname, empty_string);
 
 		if (FormInfo_ptr->type == F_RADIO_TYPE) {
-		    if (FormInfo_ptr->num_value)
-			links[nlinks].hightext = checked_radio;
-		    else
-			links[nlinks].hightext = unchecked_radio;
-
+		    LYSetHilite(nlinks,
+				FormInfo_ptr->num_value
+				? checked_radio
+				: unchecked_radio);
 		} else if (FormInfo_ptr->type == F_CHECKBOX_TYPE) {
-		    if (FormInfo_ptr->num_value)
-			links[nlinks].hightext = checked_box;
-		    else
-			links[nlinks].hightext = unchecked_box;
-
+		    LYSetHilite(nlinks,
+				FormInfo_ptr->num_value
+				? checked_box
+				: unchecked_box);
 		} else if (FormInfo_ptr->type == F_PASSWORD_TYPE) {
-		    links[nlinks].hightext = STARS(strlen(FormInfo_ptr->value));
-
+		    LYSetHilite(nlinks,
+				STARS(strlen(FormInfo_ptr->value)));
 		} else {  /* TEXT type */
-		    links[nlinks].hightext = FormInfo_ptr->value;
+		    LYSetHilite(nlinks,
+				FormInfo_ptr->value);
 		}
-
-		/*
-		 *  Never a second line on form types.
-		 */
-		links[nlinks].hightext2 = NULL;
-		links[nlinks].hightext2_offset = 0;
 
 		nlinks++;
 		/*
@@ -2134,23 +2243,23 @@ PRIVATE void display_page ARGS3(
 		/*
 		 *  Not showing anchor.
 		 */
-		if (Anchor_ptr->hightext && *Anchor_ptr->hightext)
+		if (non_empty(hi_string))
 		    CTRACE((tfp,
 			    "\nGridText: Not showing link, hightext=%s\n",
-			    Anchor_ptr->hightext));
+			    hi_string));
 	    }
 	}
 
 	if (Anchor_ptr == text->last_anchor)
 	    /*
-	     *  No more links in document. - FM
+	     *  No more links in document. -FM
 	     */
 	    break;
 
 	if (nlinks == MAXLINKS) {
 	    /*
 	     *  Links array is full.  If interactive, tell user
-	     *  to use half-page or two-line scrolling. - FM
+	     *  to use half-page or two-line scrolling. -FM
 	     */
 	    if (LYCursesON) {
 		HTAlert(MAXLINKS_REACHED);
@@ -2162,10 +2271,12 @@ PRIVATE void display_page ARGS3(
 
     /*
      *  Free any un-reallocated links[] entries
-     *  from the previous page draw. - FM
+     *  from the previous page draw. -FM
      */
-    for (i = nlinks; i < last_nlinks; i++)
+    for (i = nlinks; i < last_nlinks; i++) {
+	LYSetHilite(i, NULL);
 	FREE(links[i].lname);
+    }
     last_nlinks = nlinks;
 
     /*
@@ -2633,13 +2744,13 @@ PRIVATE void split_line ARGS2(
 	unsigned plen;
 	int i;
 
-	/* Split the line. - FM */
+	/* Split the line. -FM */
 	prevdata[previous->size] = '\0';
 	previous->size = split;
 
 	/*
 	 *  Trim any spaces or soft hyphens from the beginning
-	 *  of our new line. - FM
+	 *  of our new line. -FM
 	 */
 	p = prevdata + split;
 	while ((
@@ -2679,7 +2790,7 @@ PRIVATE void split_line ARGS2(
 	    }
 	    ctrl_chars_on_this_line += utfxtra_on_this_line;
 
-	    /* Add the data to the new line. - FM */
+	    /* Add the data to the new line. -FM */
 	    strcat(linedata, p);
 	    line->size += plen;
 	}
@@ -2965,7 +3076,7 @@ PRIVATE void split_line ARGS2(
 
     /*
      *  If we split the line, adjust the anchor
-     *  structure values for the new line. - FM
+     *  structure values for the new line. -FM
      */
 
     if (s > 0) {			/* if not completely empty */
@@ -3503,7 +3614,7 @@ PUBLIC void HText_appendCharacter ARGS2(
 		if (ch == CH_ESC) {  /* S/390 -- gil -- 1536 */
 		    /*
 		    **  Setting up for CJK escape sequence handling (based on
-		    **  Takuya ASADA's (asada@three-a.co.jp) CJK Lynx). - FM
+		    **  Takuya ASADA's (asada@three-a.co.jp) CJK Lynx). -FM
 		    */
 		    text->state = S_esc;
 		    text->kanji_buf = '\0';
@@ -3561,7 +3672,7 @@ PUBLIC void HText_appendCharacter ARGS2(
 		 */
 		if (ch == 'B' || ch == 'J' || ch == 'T')  {
 		    /*
-		     *  Can split here. - FM
+		     *  Can split here. -FM
 		     */
 		    text->permissible_split = text->last_line->size;
 		    text->state = S_text;
@@ -3569,7 +3680,7 @@ PUBLIC void HText_appendCharacter ARGS2(
 		} else if (ch == 'I')  {
 		    text->state = S_jisx0201_text;
 		    /*
-		     *  Can split here. - FM
+		     *  Can split here. -FM
 		     */
 		    text->permissible_split = text->last_line->size;
 		    text->kcode = JIS;
@@ -3655,7 +3766,7 @@ PUBLIC void HText_appendCharacter ARGS2(
 		} else {
 		    text->kanji_buf = ch;
 		    /*
-		     *  Can split here. - FM
+		     *  Can split here. -FM
 		     */
 		    text->permissible_split = text->last_line->size;
 		    return;
@@ -3717,7 +3828,7 @@ PUBLIC void HText_appendCharacter ARGS2(
 	    /*
 	     *  Ignore the soft hyphen if it is the first character
 	     *  on the line, or if it is preceded by a space or
-	     *  hyphen. - FM
+	     *  hyphen. -FM
 	     */
 	    if (line->size < 1 || text->permissible_split >= line->size) {
 		return;
@@ -3870,7 +3981,7 @@ PUBLIC void HText_appendCharacter ARGS2(
 	if (line->size > 0 && line->data[line->size-1] == LY_SOFT_HYPHEN) {
 	    /*
 	     *  A tab shouldn't follow a soft hyphen, so
-	     *  if one does, we'll dump the soft hyphen. - FM
+	     *  if one does, we'll dump the soft hyphen. -FM
 	     */
 	    line->data[--line->size] = '\0';
 	    ctrl_chars_on_this_line--;
@@ -3915,7 +4026,7 @@ PUBLIC void HText_appendCharacter ARGS2(
 	    new_line(text);
 	} else {
 	    /*
-	     *  Can split here. - FM
+	     *  Can split here. -FM
 	     */
 	    text->permissible_split = line->size;
 	    if (target_cu > (WRAP_COLS(text)-1))
@@ -3963,7 +4074,7 @@ check_WrapSource:
 
     if (ch == ' ') {
 	/*
-	 *  Can split here. - FM
+	 *  Can split here. -FM
 	 */
 	text->permissible_split = text->last_line->size;
 	/*
@@ -4202,7 +4313,7 @@ check_WrapSource:
 	if (ch == LY_SOFT_HYPHEN) {
 	    ctrl_chars_on_this_line++;
 	    /*
-	     *  Can split here. - FM
+	     *  Can split here. -FM
 	     */
 	    text->permissible_split = text->last_line->size;
 	}
@@ -4792,8 +4903,6 @@ PUBLIC int HText_beginAnchor ARGS3(
 
     if (a == NULL)
 	outofmem(__FILE__, "HText_beginAnchor");
-    a->hightext  = NULL;
-    a->hightext2 = NULL;
     a->inUnderline = underline;
 
     a->line_num = text->Lines;
@@ -4842,7 +4951,7 @@ PRIVATE BOOL HText_endAnchor0 ARGS3(
      *  a particular anchor.  This allows us to set links
      *  for positions indicated by NAME or ID attributes,
      *  without needing to close any anchor with an HREF
-     *  within which that link might be embedded. - FM
+     *  within which that link might be embedded. -FM
      */
     if (number <= 0 || number == text->last_anchor->number) {
 	a = text->last_anchor;
@@ -4856,7 +4965,7 @@ PRIVATE BOOL HText_endAnchor0 ARGS3(
 	    /*
 	     *  There's no anchor with that number,
 	     *  so we'll default to the last anchor,
-	     *  and cross our fingers. - FM
+	     *  and cross our fingers. -FM
 	     */
 	    a = text->last_anchor;
 	}
@@ -4907,19 +5016,19 @@ PRIVATE BOOL HText_endAnchor0 ARGS3(
 	/*
 	 *  Check if the anchor content has only
 	 *  white and special characters, starting
-	 *  with the content on the last line. - FM
+	 *  with the content on the last line. -FM
 	 */
 	a->extent += extent_adjust;
 	if (a->extent > (int)last->size) {
 	    /*
 	     *  The anchor extends over more than one line,
-	     *  so set up to check the entire last line. - FM
+	     *  so set up to check the entire last line. -FM
 	     */
 	    i = last->size;
 	} else {
 	    /*
 	     *  The anchor is restricted to the last line,
-	     *  so check from the start of the anchor. - FM
+	     *  so check from the start of the anchor. -FM
 	     */
 	    i = a->extent;
 	}
@@ -4939,14 +5048,14 @@ PRIVATE BOOL HText_endAnchor0 ARGS3(
 		 *  The anchor starts on a preceding line, and
 		 *  the last line has only white and special
 		 *  characters, so declare the entire extent
-		 *  of the last line as blank. - FM
+		 *  of the last line as blank. -FM
 		 */
 		CurBlankExtent = BlankExtent = last->size;
 	    } else {
 		/*
 		 *  The anchor starts on the last line, and
 		 *  has only white or special characters, so
-		 *  declare the anchor's extent as blank. - FM
+		 *  declare the anchor's extent as blank. -FM
 		 */
 		CurBlankExtent = BlankExtent = a->extent;
 	    }
@@ -4957,7 +5066,7 @@ PRIVATE BOOL HText_endAnchor0 ARGS3(
 	 *  checked has only white and special characters,
 	 *  check whether the anchor's content on the
 	 *  immediately preceding line also has only
-	 *  white and special characters. - FM
+	 *  white and special characters. -FM
 	 */
 	while (i == 0 &&
 	       (a->extent > CurBlankExtent ||
@@ -4971,13 +5080,13 @@ PRIVATE BOOL HText_endAnchor0 ARGS3(
 	    if (j < 0) {
 		/*
 		 *  The anchor starts on a preceding line,
-		 *  so check all of this line. - FM
+		 *  so check all of this line. -FM
 		 */
 		j = 0;
 		i = prev->size;
 	    } else {
 		/*
-		 *  The anchor starts on this line. - FM
+		 *  The anchor starts on this line. -FM
 		 */
 		i = a->extent - CurBlankExtent;
 	    }
@@ -5001,7 +5110,7 @@ PRIVATE BOOL HText_endAnchor0 ARGS3(
 		     *  This line has only white and special
 		     *  characters, so treat its entire extent
 		     *  as blank, and decrement the pointer for
-		     *  the line to be analyzed. - FM
+		     *  the line to be analyzed. -FM
 		     */
 		    CurBlankExtent += prev->size;
 		    BlankExtent = CurBlankExtent;
@@ -5010,7 +5119,7 @@ PRIVATE BOOL HText_endAnchor0 ARGS3(
 		    /*
 		     *  The anchor starts on this line, and it
 		     *  has only white or special characters, so
-		     *  declare the anchor's extent as blank. - FM
+		     *  declare the anchor's extent as blank. -FM
 		     */
 		    BlankExtent = a->extent;
 		    break;
@@ -5025,7 +5134,7 @@ PRIVATE BOOL HText_endAnchor0 ARGS3(
 	    /*
 	     *  It's an invisible anchor probably from an ALT=""
 	     *  or an ignored ISMAP attribute due to a companion
-	     *  USEMAP. - FM
+	     *  USEMAP. -FM
 	     */
 	    a->show_anchor = NO;
 
@@ -5036,7 +5145,7 @@ PRIVATE BOOL HText_endAnchor0 ARGS3(
 
 	    /*
 	     *  If links are numbered, then try to get rid of the
-	     *  numbered bracket and adjust the anchor count. - FM
+	     *  numbered bracket and adjust the anchor count. -FM
 	     *
 	     * Well, let's do this only if -hiddenlinks=merged is not in
 	     * effect, or if we can be reasonably sure that
@@ -5053,16 +5162,16 @@ PRIVATE BOOL HText_endAnchor0 ARGS3(
 		/*
 		 *  Set start->data[j] to the close-square-bracket,
 		 *  or to the beginning of the line on which the
-		 *  anchor start. - FM
+		 *  anchor start. -FM
 		 */
 		if (start == last) {
 		    /*
-		     *  The anchor starts on the last line. - FM
+		     *  The anchor starts on the last line. -FM
 		     */
 		    j = (last->size - a->extent - 1);
 		} else {
 		    /*
-		     *  The anchor starts on a previous line. - FM
+		     *  The anchor starts on a previous line. -FM
 		     */
 		    prev = start->prev;
 		    j = (start->size - a->extent + CurBlankExtent - 1);
@@ -5078,7 +5187,7 @@ PRIVATE BOOL HText_endAnchor0 ARGS3(
 		 *  a close-square-bracket, check whether we had a wrap
 		 *  and the close-square-bracket is at the end of the
 		 *  previous line.  If so, strip the numbered bracket
-		 *  from that line. - FM
+		 *  from that line. -FM
 		 */
 		if (start->data[j] == ']') {
 		    j--;
@@ -5094,7 +5203,7 @@ PRIVATE BOOL HText_endAnchor0 ARGS3(
 		    if (start->data[j] == '[') {
 			/*
 			 *  The numbered bracket is entirely
-			 *  on this line. - FM
+			 *  on this line. -FM
 			 */
 			NumSize++;
 			if (start==last && (int)text->permissible_split > j) {
@@ -5135,7 +5244,7 @@ PRIVATE BOOL HText_endAnchor0 ARGS3(
 			    /*
 			     *  The numbered bracket started on the
 			     *  previous line, and part of it was
-			     *  wrapped to this line. - FM
+			     *  wrapped to this line. -FM
 			     */
 			    NumSize++;
 			    l = (i - j);
@@ -5168,14 +5277,14 @@ PRIVATE BOOL HText_endAnchor0 ARGS3(
 			} else {
 			    /*
 			     *  Shucks!  We didn't find the
-			     *  numbered bracket. - FM
+			     *  numbered bracket. -FM
 			     */
 			    a->show_anchor = YES;
 			}
 		    } else {
 			/*
 			 *  Shucks!  We didn't find the
-			 *  numbered bracket. - FM
+			 *  numbered bracket. -FM
 			 */
 			a->show_anchor = YES;
 		    }
@@ -5205,7 +5314,7 @@ PRIVATE BOOL HText_endAnchor0 ARGS3(
 			    /*
 			     *  The numbered bracket is all on the
 			     *  previous line, and the anchor content
-			     *  was wrapped to the last line. - FM
+			     *  was wrapped to the last line. -FM
 			     */
 			    NumSize++;
 			    k = j + NumSize;
@@ -5218,21 +5327,21 @@ PRIVATE BOOL HText_endAnchor0 ARGS3(
 			} else {
 			    /*
 			     *  Shucks!  We didn't find the
-			     *  numbered bracket. - FM
+			     *  numbered bracket. -FM
 			     */
 			    a->show_anchor = YES;
 			}
 		    } else {
 			/*
 			 *  Shucks!  We didn't find the
-			 *  numbered bracket. - FM
+			 *  numbered bracket. -FM
 			 */
 			a->show_anchor = YES;
 		    }
 		} else {
 		    /*
 		     *  Shucks!  We didn't find the
-		     *  numbered bracket. - FM
+		     *  numbered bracket. -FM
 		     */
 		    a->show_anchor = YES;
 		}
@@ -5243,7 +5352,7 @@ PRIVATE BOOL HText_endAnchor0 ARGS3(
 	    /*
 	     *  The anchor's content is not restricted to only
 	     *  white and special characters, so we'll show it
-	     *  as a link. - FM
+	     *  as a link. -FM
 	     */
 	    a->show_anchor = YES;
 	    if (BlankExtent) {
@@ -5259,7 +5368,7 @@ PRIVATE BOOL HText_endAnchor0 ARGS3(
 	     *  and special characters, so set its number
 	     *  and extent to zero, decrement the visible
 	     *  anchor number counter, and add this anchor
-	     *  to the hidden links list. - FM
+	     *  to the hidden links list. -FM
 	     */
 	    a->extent = 0;
 	    if (text->hiddenlinkflag != HIDDENLINKS_MERGE) {
@@ -5272,7 +5381,7 @@ PRIVATE BOOL HText_endAnchor0 ARGS3(
 	     *  The anchor's content is not restricted to white
 	     *  and special characters, so we'll display the
 	     *  content, but shorten its extent by any trailing
-	     *  blank lines we've detected. - FM
+	     *  blank lines we've detected. -FM
 	     */
 	    a->extent -= ((BlankExtent < a->extent) ?
 					BlankExtent : 0);
@@ -5290,7 +5399,7 @@ PRIVATE BOOL HText_endAnchor0 ARGS3(
 	/*
 	 *  It's a named anchor without an HREF, so it
 	 *  should be registered but not shown as a
-	 *  link. - FM
+	 *  link. -FM
 	 */
 	a->show_anchor = NO;
 	a->extent = 0;
@@ -5349,8 +5458,7 @@ PRIVATE int remove_special_attr_chars ARGS1(
 	 */
 	soft_newline_count += (*cp == LY_SOFT_NEWLINE);
 	if (!IsSpecialAttrChar(*cp)) {
-	   *buf = *cp,
-	   buf++;
+	   *buf++ = *cp;
 	}
     }
     *buf = '\0';
@@ -5424,7 +5532,7 @@ PUBLIC void HText_endAppend ARGS1(
 
     /*
      *  Fix up the anchor structure values and
-     *  create the hightext strings. - FM
+     *  create the hightext strings. -FM
      */
     HText_trimHightext(text, TRUE, -1);
 }
@@ -5445,12 +5553,13 @@ PUBLIC void HText_endAppend ARGS1(
 **  extent fields are counting bytes in the HTLine data, including
 **  invisible special attribute chars and counting UTF-8 multibyte
 **  characters as multiple bytes.
-**  AFTER the adjustment, the anchor line_pos (and hightext2offset
-**  if applicable) fields indicate x positions in terms of displayed
-**  character cells, and the extent field apparently is unimportant;
-**  the anchor text has been copied to the hightext (and possibly
-**  hightext2) fields (which should have been NULL up to that point),
-**  with special attribute chars removed.
+**
+**  AFTER the adjustment, the anchor line_pos (and hightext offset if
+**  applicable) fields indicate x positions in terms of displayed character
+**  cells, and the extent field apparently is unimportant; the anchor text has
+**  been copied to the hightext fields (which should have been NULL up to that
+**  point), with special attribute chars removed.
+**
 **  This needs to be done so that display_page finds the anchors in the
 **  form it expects when it sets the links[] elements.
 */
@@ -5463,7 +5572,12 @@ PRIVATE void HText_trimHightext ARGS3(
     TextAnchor *anchor_ptr;
     TextAnchor *prev_a = NULL;
     HTLine *line_ptr;
+    HTLine *line_ptr2;
     unsigned char ch;
+    char *hilite_str;
+    int hilite_len;
+    int actual_len;
+    int count_line;
 
     if (!text)
 	return;
@@ -5486,7 +5600,7 @@ PRIVATE void HText_trimHightext ARGS3(
 
     /*
      *  Fix up the anchor structure values and
-     *  create the hightext strings. - FM
+     *  create the hightext strings. -FM
      */
     for (anchor_ptr = text->first_anchor;
 	anchor_ptr;
@@ -5528,7 +5642,7 @@ re_parse:
 	 *  done the trimming & adjusting for this anchor, so avoid
 	 *  doing it a second time. - kw
 	 */
-	if (anchor_ptr->hightext)
+	if ((hilite_str = LYGetHiTextStr(anchor_ptr, 0)) != NULL)
 	    continue;
 
 	if (anchor_ptr->line_pos > (int) line_ptr->size) {
@@ -5564,11 +5678,12 @@ re_parse:
 
 	CTRACE((tfp, "anchor text: '%s'\n", line_ptr->data));
 	/*
-	 *  If the link begins with an end of line and we have more
-	 *  lines, then start the highlighting on the next line. - FM
-	 *  But if an empty anchor is at the end of line and empty,
-	 *  keep it where it is, unless the previous anchor in the list
-	 *  (if any) already starts later. - kw
+	 * If the link begins with an end of line and we have more lines, then
+	 * start the highlighting on the next line.  -FM.
+	 *
+	 * But if an empty anchor is at the end of line and empty, keep it
+	 * where it is, unless the previous anchor in the list (if any) already
+	 * starts later.  - kw
 	 */
 	if ((unsigned)anchor_ptr->line_pos >= strlen(line_ptr->data)) {
 	    if (cur_line < text->Lines &&
@@ -5586,61 +5701,76 @@ re_parse:
 	}
 
 	/*
-	 *  Copy the link name into the data structure.
+	 * Copy the link name into the data structure.
 	 */
-	if (line_ptr->data &&
-	    anchor_ptr->extent > 0 && anchor_ptr->line_pos >= 0) {
-	    StrnAllocCopy(anchor_ptr->hightext,
-			  &line_ptr->data[anchor_ptr->line_pos],
-			  anchor_ptr->extent);
+	if (line_ptr->data
+	 && anchor_ptr->extent > 0
+	 && anchor_ptr->line_pos >= 0) {
+	    LYSetHiText(anchor_ptr, 
+			&line_ptr->data[anchor_ptr->line_pos],
+			anchor_ptr->extent);
 	} else {
-	    StrAllocCopy(anchor_ptr->hightext, "");
+	    LYSetHiText(anchor_ptr, "", 0);
 	}
 
 	/*
-	 *  If true the anchor extends over two lines,
-	 *  copy that into the data structure.
+	 * If the anchor extends over more than one line, copy that into the
+	 * data structure.
 	 */
-	if ((unsigned)anchor_ptr->extent > strlen(anchor_ptr->hightext)) {
-	    HTLine *line_ptr2 = line_ptr->next;
+	hilite_str = LYGetHiTextStr(anchor_ptr, 0);
+	hilite_len = strlen(hilite_str);
+	actual_len = anchor_ptr->extent;
 
-	    if (!final) {
-		if (cur_line + 1 >= stop_before) {
-		    FREE(anchor_ptr->hightext); /* bail out */
-		    break;
-		}
+	line_ptr2 = line_ptr;
+	count_line = cur_line;
+	while (actual_len > hilite_len) {
+	    count_line++;
+	    line_ptr2 = line_ptr2->next;
+
+	    if (!final
+	     && count_line >= stop_before) {
+		LYSetHiText(anchor_ptr, NULL, 0);
+		break;
 	    }
+
 	    /*
-	     *  Double check that we have a line pointer,
-	     *  and if so, copy into hightext2.
+	     * Double check that we have a line pointer, and if so, copy into
+	     * highlight text.
 	     */
 	    if (line_ptr2) {
-		StrnAllocCopy(anchor_ptr->hightext2,
+		char *hi_string = NULL;
+		int hi_offset = line_ptr2->offset;
+
+		StrnAllocCopy(hi_string,
 			      line_ptr2->data,
-			      (anchor_ptr->extent -
-			       strlen(anchor_ptr->hightext)));
-		anchor_ptr->hightext2offset = line_ptr2->offset;
+			      (actual_len - hilite_len));
+		actual_len -= strlen(hi_string);
 		/*handle LY_SOFT_NEWLINEs -VH */
-		anchor_ptr->hightext2offset +=
-			remove_special_attr_chars(anchor_ptr->hightext2);
+		hi_offset += remove_special_attr_chars(hi_string);
 
 		if (anchor_ptr->link_type & HYPERTEXT_ANCHOR) {
-		    LYTrimTrailing(anchor_ptr->hightext2);
-		    if (anchor_ptr->hightext2[0] == '\0') {
-			FREE(anchor_ptr->hightext2);
-			anchor_ptr->hightext2offset = 0;
-		    }
+		    LYTrimTrailing(hi_string);
 		}
+		if (non_empty(hi_string)) {
+		    LYAddHiText(anchor_ptr, hi_string, hi_offset);
+		}
+		FREE(hi_string);
 	    }
 	}
-	remove_special_attr_chars(anchor_ptr->hightext);
+
+	if (!final
+	 && count_line >= stop_before) {
+	    break;
+	}
+
+	hilite_str = LYGetHiTextStr(anchor_ptr, 0);
+	remove_special_attr_chars(hilite_str);
 	if (anchor_ptr->link_type & HYPERTEXT_ANCHOR) {
-	    LYTrimTrailing(anchor_ptr->hightext);
+	    LYTrimTrailing(hilite_str);
 	}
 
 	/*
-	 *  Subtract any formatting characters from the x position
-	 *  of the link.
+	 * Subtract any formatting characters from the x position of the link.
 	 */
 	if (anchor_ptr->line_pos > 0) {
 	    register int offset = 0, i = 0;
@@ -5709,7 +5839,7 @@ PUBLIC HTChildAnchor * HText_childNumber ARGS1(
 /*
  *  HText_FormDescNumber() returns a description of the form field
  *  with index N.  The index corresponds to the [number] we print
- *  for the field. - FM & LE
+ *  for the field. -FM & LE
  */
 PUBLIC void HText_FormDescNumber ARGS2(
 	int,		number,
@@ -5982,7 +6112,7 @@ PUBLIC int HTGetLinkInfo ARGS6(
 		}
 		return(LINK_LINE_FOUND);
 	    } else {
-		*hightext= a->hightext;
+		*hightext = LYGetHiTextStr(a, 0);
 		link_dest = HTAnchor_followMainLink((HTAnchor *)a->anchor);
 		{
 		    char *cp_freeme = NULL;
@@ -6057,7 +6187,7 @@ PRIVATE BOOLEAN same_anchor_or_field ARGS5(
 
 #define same_anchor_as_link(i,a,ta_same) (i >= 0 && a &&\
 		same_anchor_or_field(links[i].anchor_number,\
-		(links[i].type == WWW_FORM_LINK_TYPE) ? links[i].form : NULL,\
+		(links[i].type == WWW_FORM_LINK_TYPE) ? links[i].l_form : NULL,\
 		a->number,\
 		(a->link_type == INPUT_ANCHOR) ? a->input_field : NULL,\
 		ta_same))
@@ -6085,7 +6215,7 @@ PUBLIC BOOL HText_TAHasMoreLines ARGS2(
     if (direction < 0) {
 	for (a = HTMainText->first_anchor; a; prev_a = a, a = a->next) {
 	    if (a->link_type == INPUT_ANCHOR &&
-		links[curlink].form == a->input_field) {
+		links[curlink].l_form == a->input_field) {
 		return same_anchors(a, prev_a, TRUE);
 	    }
 	    if (links[curlink].anchor_number &&
@@ -6098,7 +6228,7 @@ PUBLIC BOOL HText_TAHasMoreLines ARGS2(
 	    if (a == HTMainText->last_anchor)
 		break;
 	    if (a->link_type == INPUT_ANCHOR &&
-		links[curlink].form == a->input_field) {
+		links[curlink].l_form == a->input_field) {
 		return same_anchors(a, a->next, TRUE);
 	    }
 	    if (links[curlink].anchor_number &&
@@ -6321,7 +6451,7 @@ PUBLIC int HTGetLinkOrFieldStart ARGS5(
  *  *data with all IsSpecial characters stripped, its offset and
  *  the printable target length (without IsSpecial, or extra CJK
  *  or utf8 characters) are loaded into *offset and *tLen, and
- *  TRUE is returned. - FM
+ *  TRUE is returned. -FM
  */
 PUBLIC BOOL HText_getFirstTargetInLine ARGS7(
 	HText *,	text,
@@ -6339,14 +6469,16 @@ PUBLIC BOOL HText_getFirstTargetInLine ARGS7(
 
     /*
      *  Make sure we have an HText structure, that line_num is
-     *  in its range, and that we have a target string. - FM
+     *  in its range, and that we have a target string. -FM
      */
-    if (!(text && line_num >= 0 && line_num <= text->Lines &&
-	  target && *target))
+    if (!(text
+       && line_num >= 0
+       && line_num <= text->Lines
+       && non_empty(target)))
 	return(FALSE);
 
     /*
-     *  Find the line and set up its data and offset - FM
+     *  Find the line and set up its data and offset -FM
      */
     for (i = 0, line = FirstHTLine(text);
 	 i < line_num && (line != text->last_line);
@@ -6364,7 +6496,7 @@ PUBLIC BOOL HText_getFirstTargetInLine ARGS7(
      *  If the target is on the line, load the offset of
      *  its first character and the subsequent line data,
      *  strip any special characters from the loaded line
-     *  data, and return TRUE. - FM
+     *  data, and return TRUE. -FM
      */
     if (((cp = LYno_attr_mb_strstr(LineData,
 				   target,
@@ -6376,7 +6508,7 @@ PUBLIC BOOL HText_getFirstTargetInLine ARGS7(
 	 *  We had a hit so load the results,
 	 *  remove IsSpecial characters from
 	 *  the allocated data string, and
-	 *  return TRUE. - FM
+	 *  return TRUE. -FM
 	 */
 	*offset = (LineOffset + HitOffset);
 	*tLen = (LenNeeded - HitOffset);
@@ -6386,7 +6518,7 @@ PUBLIC BOOL HText_getFirstTargetInLine ARGS7(
     }
 
     /*
-     *  The line does not contain the target. - FM
+     *  The line does not contain the target. -FM
      */
     return(FALSE);
 }
@@ -6421,7 +6553,7 @@ PUBLIC CONST char *HText_getStyle NOARGS
 /*
  *  HText_getSugFname returns the suggested filename of the current
  *  document (normally derived from a Content-Disposition header with
- *  attachment; filename=name.suffix). - FM
+ *  attachment; filename=name.suffix). -FM
  */
 PUBLIC CONST char * HText_getSugFname NOARGS
 {
@@ -6435,7 +6567,7 @@ PUBLIC CONST char * HText_getSugFname NOARGS
  *  or truncates the string's suffix if appropriate, based on whether
  *  the anchor indicates that the file is compressed.  We assume
  *  that the file was not uncompressed (as when downloading), and
- *  believe the headers about whether it's compressed or not. - FM
+ *  believe the headers about whether it's compressed or not. -FM
  *
  *  Added third arg - if strip_ok is FALSE, we don't trust the anchor
  *  info enough to remove a compression suffix if the anchor object
@@ -6455,7 +6587,7 @@ PUBLIC void HTCheckFnameForCompression ARGS3(
     CompressFileType second;
 
     /*
-     *  Make sure we have a string and anchor. - FM
+     *  Make sure we have a string and anchor. -FM
      */
     if (!(fn && anchor))
 	return;
@@ -6468,14 +6600,14 @@ PUBLIC void HTCheckFnameForCompression ARGS3(
 
     /*
      *  Check the anchor's content_type and content_encoding
-     *  elements for a gzip or Unix compressed file. - FM
+     *  elements for a gzip or Unix compressed file. -FM
      */
     ct = HTAnchor_content_type(anchor);
     ce = HTAnchor_content_encoding(anchor);
     if (ce == NULL && ct != 0) {
 	/*
 	 *  No Content-Encoding, so check
-	 *  the Content-Type. - FM
+	 *  the Content-Type. -FM
 	 */
 	if (!strncasecomp(ct, "application/gzip", 16) ||
 	    !strncasecomp(ct, "application/x-gzip", 18)) {
@@ -6521,7 +6653,7 @@ PUBLIC void HTCheckFnameForCompression ARGS3(
 
     /*
      *  Seek the last dot, and check whether
-     *  we have a gzip or compress suffix. - FM
+     *  we have a gzip or compress suffix. -FM
      */
     if ((dot = strrchr(fn, '.')) != NULL) {
 	if (HTCompressFileType(fn, ".", &cp) != cftNone) {
@@ -6529,7 +6661,7 @@ PUBLIC void HTCheckFnameForCompression ARGS3(
 		/*
 		 *  It has a suffix which signifies a gzipped
 		 *  or compressed file for us, but the anchor
-		 *  claims otherwise, so tweak the suffix. - FM
+		 *  claims otherwise, so tweak the suffix. -FM
 		 */
 		*dot = '\0';
 	    }
@@ -6540,7 +6672,7 @@ PUBLIC void HTCheckFnameForCompression ARGS3(
 		/*
 		 *  It has a tail which signifies a gzipped
 		 *  file for us, but the anchor claims otherwise,
-		 *  so tweak the suffix. - FM
+		 *  so tweak the suffix. -FM
 		 */
 		if (cp == dot+1)
 		    cp--;
@@ -6549,7 +6681,7 @@ PUBLIC void HTCheckFnameForCompression ARGS3(
 		/*
 		 *  The anchor claims it's gzipped, and we
 		 *  believe it, so force this tail to the
-		 *  conventional suffix. - FM
+		 *  conventional suffix. -FM
 		 */
 #ifdef VMS
 		*cp = '-';
@@ -6581,7 +6713,7 @@ PUBLIC void HTCheckFnameForCompression ARGS3(
     }
 
     /*
-     *  Add the appropriate suffix. - FM
+     *  Add the appropriate suffix. -FM
      */
     if (*suffix) {
 	if (!dot) {
@@ -6599,7 +6731,7 @@ PUBLIC void HTCheckFnameForCompression ARGS3(
 
 /*
  *  HText_getLastModified returns the Last-Modified header
- *  if available, for the current document. - FM
+ *  if available, for the current document. -FM
  */
 PUBLIC CONST char * HText_getLastModified NOARGS
 {
@@ -6609,7 +6741,7 @@ PUBLIC CONST char * HText_getLastModified NOARGS
 
 /*
  *  HText_getDate returns the Date header
- *  if available, for the current document. - FM
+ *  if available, for the current document. -FM
  */
 PUBLIC CONST char * HText_getDate NOARGS
 {
@@ -6619,7 +6751,7 @@ PUBLIC CONST char * HText_getDate NOARGS
 
 /*
  *  HText_getServer returns the Server header
- *  if available, for the current document. - FM
+ *  if available, for the current document. -FM
  */
 PUBLIC CONST char * HText_getServer NOARGS
 {
@@ -6688,7 +6820,7 @@ PUBLIC BOOL HText_pageHasPrevTarget NOARGS
 
 /*
  *  HText_LinksInLines returns the number of links in the
- *  'Lines' number of lines beginning with 'line_num'-1. - FM
+ *  'Lines' number of lines beginning with 'line_num'-1. -FM
  */
 PUBLIC int HText_LinksInLines ARGS3(
 	HText *,	text,
@@ -6828,7 +6960,7 @@ PUBLIC BOOL HText_select ARGS1(
 	HTMainAnchor = text->node_anchor;
 
 	/*
-	 *  Make this text the most current in the loaded texts list. - FM
+	 *  Make this text the most current in the loaded texts list. -FM
 	 */
 	if (loaded_texts && HTList_removeObject(loaded_texts, text))
 	    HTList_addObject(loaded_texts, text);
@@ -6841,7 +6973,7 @@ PUBLIC BOOL HText_select ARGS1(
 /*
  *  This function returns TRUE if doc's post_data, address
  *  and isHEAD elements are identical to those of a loaded
- *  (memory cached) text. - FM
+ *  (memory cached) text. -FM
  */
 PUBLIC BOOL HText_POSTReplyLoaded ARGS1(
 	document *,	doc)
@@ -6852,13 +6984,13 @@ PUBLIC BOOL HText_POSTReplyLoaded ARGS1(
     BOOL is_head;
 
     /*
-     *  Make sure we have the structures. - FM
+     *  Make sure we have the structures. -FM
      */
     if (!cur || !doc)
 	return(FALSE);
 
     /*
-     *  Make sure doc is for a POST reply. - FM
+     *  Make sure doc is for a POST reply. -FM
      */
     if ((post_data = doc->post_data) == NULL ||
 	(address = doc->address) == NULL)
@@ -6867,7 +6999,7 @@ PUBLIC BOOL HText_POSTReplyLoaded ARGS1(
 
     /*
      *  Loop through the loaded texts looking for a
-     *  POST reply match. - FM
+     *  POST reply match. -FM
      */
     while (NULL != (text = (HText *)HTList_nextObject(cur))) {
 	if (text->node_anchor &&
@@ -7059,7 +7191,7 @@ PUBLIC HTAnchor * HText_linkSelTo ARGS2(
 }
 
 /*
- *  Utility for freeing the list of previous isindex and whereis queries. - FM
+ *  Utility for freeing the list of previous isindex and whereis queries. -FM
  */
 PUBLIC void HTSearchQueries_free NOARGS
 {
@@ -7079,7 +7211,7 @@ PUBLIC void HTSearchQueries_free NOARGS
 
 /*
  *  Utility for listing isindex and whereis queries, making
- *  any repeated queries the most current in the list. - FM
+ *  any repeated queries the most current in the list. -FM
  */
 PUBLIC void HTAddSearchQuery ARGS1(
 	char *,		query)
@@ -7088,7 +7220,7 @@ PUBLIC void HTAddSearchQuery ARGS1(
     char *old;
     HTList *cur;
 
-    if (!(query && *query))
+    if (!non_empty(query))
 	return;
 
     StrAllocCopy(new_query, query);
@@ -7140,7 +7272,7 @@ PUBLIC int do_www_search ARGS1(
 	HTUnEscape(searchstring);
 	strcpy(temp, searchstring);
 	/*
-	 *  Make sure it's treated as the most recent query. - FM
+	 *  Make sure it's treated as the most recent query. -FM
 	 */
 	HTAddSearchQuery(searchstring);
     } else {
@@ -7172,19 +7304,19 @@ get_query:
 	if (recall && ch == UPARROW) {
 	    if (PreviousSearch) {
 		/*
-		 *  Use the second to last query in the list. - FM
+		 *  Use the second to last query in the list. -FM
 		 */
 		QueryNum = 1;
 		PreviousSearch = FALSE;
 	    } else {
 		/*
-		 *  Go back to the previous query in the list. - FM
+		 *  Go back to the previous query in the list. -FM
 		 */
 		QueryNum++;
 	    }
 	    if (QueryNum >= QueryTotal)
 		/*
-		 *  Roll around to the last query in the list. - FM
+		 *  Roll around to the last query in the list. -FM
 		 */
 		QueryNum = 0;
 	    if ((cp=(char *)HTList_objectAt(search_queries,
@@ -7203,19 +7335,19 @@ get_query:
 	} else if (recall && ch == DNARROW) {
 	    if (PreviousSearch) {
 		/*
-		 *  Use the first query in the list. - FM
+		 *  Use the first query in the list. -FM
 		 */
 		QueryNum = QueryTotal - 1;
 		PreviousSearch = FALSE;
 	    } else {
 		/*
-		 *  Advance to the next query in the list. - FM
+		 *  Advance to the next query in the list. -FM
 		 */
 		QueryNum--;
 	    }
 	    if (QueryNum < 0)
 		/*
-		 *  Roll around to the first query in the list. - FM
+		 *  Roll around to the first query in the list. -FM
 		 */
 		QueryNum = QueryTotal - 1;
 	    if ((cp=(char *)HTList_objectAt(search_queries,
@@ -7241,7 +7373,7 @@ get_query:
     }
 
     /*
-     *  Strip leaders and trailers. - FM
+     *  Strip leaders and trailers. -FM
      */
     LYTrimLeading(searchstring);
     if (!(*searchstring)) {
@@ -7260,7 +7392,7 @@ get_query:
 
     /*
      *  Add searchstring to the query list,
-     *  or make it the most current. - FM
+     *  or make it the most current. -FM
      */
     HTAddSearchQuery(searchstring);
 
@@ -7309,7 +7441,7 @@ get_query:
      *  If it's redirection, use_this_url_instead is set, and
      *  mainloop() will deal with it such that security features
      *  and restrictions are checked before acting on the URL, or
-     *  rejecting it. - FM
+     *  rejecting it. -FM
      */
     return(NOT_FOUND);
 }
@@ -7373,7 +7505,7 @@ PUBLIC void print_wwwfile_to_fd ARGS2(
 	if (!first && line->data[0] != LY_SOFT_NEWLINE) {
 	    fputc('\n',fp);
 	    /*
-	     *  Add news-style quotation if requested. - FM
+	     *  Add news-style quotation if requested. -FM
 	     */
 	    if (is_reply) {
 		fputc('>',fp);
@@ -7586,26 +7718,29 @@ PRIVATE BOOL anchor_has_target ARGS2(
 {
     OptionType * option;
     char *stars = NULL, *cp;
+    int count;
 
     /*
-     *  Search the hightext string, and hightext2 if present,
-     *  taking the case_sensitive setting into account. - FM
+     * Search the hightext strings, taking the case_sensitive setting into
+     * account.  -FM
      */
-    if (LYno_attr_strstr(a->hightext, target)
-     || LYno_attr_strstr(a->hightext2, target)) {
-	return TRUE;
+    for (count = 0; ; ++count) {
+	if ((cp = LYGetHiTextStr(a, count)) == NULL)
+	    break;
+	if (LYno_attr_strstr(cp, target))
+	    return TRUE;
     }
 
     /*
      *  Search the relevant form fields, taking the
-     *  case_sensitive setting into account. - FM
+     *  case_sensitive setting into account. -FM
      */
     if ((a->input_field != NULL && a->input_field->value != NULL) &&
 	a->input_field->type != F_HIDDEN_TYPE) {
 	if (a->input_field->type == F_PASSWORD_TYPE) {
 	    /*
 	     *  Check the actual, hidden password, and then
-	     *  the displayed string. - FM
+	     *  the displayed string. -FM
 	     */
 	    if (LYno_attr_strstr(a->input_field->value, target)) {
 		return TRUE;
@@ -7621,7 +7756,7 @@ PRIVATE BOOL anchor_has_target ARGS2(
        } else if (a->input_field->type == F_OPTION_LIST_TYPE) {
 	    /*
 	     *  Search the option strings that are displayed
-	     *  when the popup is invoked. - FM
+	     *  when the popup is invoked. -FM
 	     */
 	    option = a->input_field->select_list;
 	    while (option != NULL) {
@@ -7632,7 +7767,7 @@ PRIVATE BOOL anchor_has_target ARGS2(
 	    }
 	} else if (a->input_field->type == F_RADIO_TYPE) {
 	    /*
-	     *  Search for checked or unchecked parens. - FM
+	     *  Search for checked or unchecked parens. -FM
 	     */
 	    if (a->input_field->num_value) {
 		cp = checked_radio;
@@ -7644,7 +7779,7 @@ PRIVATE BOOL anchor_has_target ARGS2(
 	    }
 	} else if (a->input_field->type == F_CHECKBOX_TYPE) {
 	    /*
-	     *  Search for checked or unchecked square brackets. - FM
+	     *  Search for checked or unchecked square brackets. -FM
 	     */
 	    if (a->input_field->num_value) {
 		cp = checked_box;
@@ -7656,10 +7791,9 @@ PRIVATE BOOL anchor_has_target ARGS2(
 	    }
 	} else {
 	    /*
-	     *  Check the values intended for display.
-	     *  May have been found already via the
-	     *  hightext search, but make sure here
-	     *  that the entire value is searched. - FM
+	     * Check the values intended for display.  May have been found
+	     * already via the hightext search, but make sure here that the
+	     * entire value is searched.  -FM
 	     */
 	    if (LYno_attr_strstr(a->input_field->value, target)) {
 		return TRUE;
@@ -8368,7 +8502,7 @@ PUBLIC BOOL HText_inLineOne ARGS1(
  *  the removed line (i.e., control characters, or it
  *  wouldn't have tested blank) should have been
  *  reiterated by split_line() in the retained blank
- *  line. - FM
+ *  line. -FM
  */
 PUBLIC void HText_RemovePreviousLine ARGS1(
 	HText *,	text)
@@ -8393,7 +8527,7 @@ PUBLIC void HText_RemovePreviousLine ARGS1(
  *	  alignment is HT_LEFT.  The offset is still zero,
  *	  because that's not determined for HT_CENTER or
  *	  HT_RIGHT until subsequent characters are received
- *	  and split_line() is called. - FM
+ *	  and split_line() is called. -FM
  */
 PUBLIC int HText_getCurrentColumn ARGS1(
 	HText *,	text)
@@ -8424,7 +8558,7 @@ PUBLIC int HText_getMaximumColumn ARGS1(
 /*
  *  NOTE: This function uses HText_getCurrentColumn() which
  *	  presently is correct only if the alignment is
- *	  HT_LEFT. - FM
+ *	  HT_LEFT. -FM
  */
 PUBLIC void HText_setTabID ARGS2(
 	HText *,	text,
@@ -8467,7 +8601,7 @@ PUBLIC int HText_getTabIDColumn ARGS2(
     HTTabID * Tab;
     HTList * cur = text->tabs;
 
-    if (text && name && *name && cur) {
+    if (text && non_empty(name) && cur) {
 	while (NULL != (Tab = (HTTabID *)HTList_nextObject(cur))) {
 	    if (Tab->name && !strcmp(Tab->name, name))
 		break;
@@ -8487,7 +8621,7 @@ PUBLIC int HText_getTabIDColumn ARGS2(
  *  into text->hidden_links, whose count can be determined
  *  via HText_HiddenLinks(), below.  The addresses can be
  *  retrieved via HText_HiddenLinkAt(), below, based on
- *  count. - FM
+ *  count. -FM
  */
 PRIVATE void HText_AddHiddenLink ARGS2(
 	HText *,	text,
@@ -8496,14 +8630,14 @@ PRIVATE void HText_AddHiddenLink ARGS2(
     HTAnchor *dest;
 
     /*
-     *  Make sure we have an HText structure and anchor. - FM
+     *  Make sure we have an HText structure and anchor. -FM
      */
     if (!(text && textanchor && textanchor->anchor))
 	return;
 
     /*
      *  Create the hidden links list
-     *  if it hasn't been already. - FM
+     *  if it hasn't been already. -FM
      */
     if (text->hidden_links == NULL)
 	text->hidden_links = HTList_new();
@@ -8511,7 +8645,7 @@ PRIVATE void HText_AddHiddenLink ARGS2(
     /*
      *  Store the address, in reverse list order
      *  so that first in will be first out on
-     *  retrievals. - FM
+     *  retrievals. -FM
      */
     if ((dest = HTAnchor_followMainLink((HTAnchor *)textanchor->anchor)) &&
 	(text->hiddenlinkflag != HIDDENLINKS_IGNORE ||
@@ -8523,7 +8657,7 @@ PRIVATE void HText_AddHiddenLink ARGS2(
 
 /*
  *  This function returns the number of addresses
- *  that are loaded in text->hidden_links. - FM
+ *  that are loaded in text->hidden_links. -FM
  */
 PUBLIC int HText_HiddenLinkCount ARGS1(
 	HText *,	text)
@@ -8539,7 +8673,7 @@ PUBLIC int HText_HiddenLinkCount ARGS1(
 /*
  *  This function returns the address, corresponding to
  *  a hidden link, at the position (zero-based) in the
- *  text->hidden_links list of the number argument. - FM
+ *  text->hidden_links list of the number argument. -FM
  */
 PUBLIC char * HText_HiddenLinkAt ARGS2(
 	HText *,	text,
@@ -8581,7 +8715,7 @@ PUBLIC void HText_beginForm ARGS5(
     HTFormDisabled = FALSE;
 
     /*
-     *  Check the ACTION. - FM
+     *  Check the ACTION. -FM
      */
     if (action != NULL) {
 	if (!strncmp(action, "mailto:", 7)) {
@@ -8593,16 +8727,16 @@ PUBLIC void HText_beginForm ARGS5(
 	StrAllocCopy(HTFormAction, HTLoadedDocumentURL());
 
     /*
-     *  Check the METHOD. - FM
+     *  Check the METHOD. -FM
      */
     if (method != NULL && HTFormMethod != URL_MAIL_METHOD)
 	if (!strcasecomp(method,"post") || !strcasecomp(method,"pget"))
 	    HTFormMethod = URL_POST_METHOD;
 
     /*
-     *  Check the ENCTYPE. - FM
+     *  Check the ENCTYPE. -FM
      */
-    if ((enctype != NULL) && *enctype) {
+    if (non_empty(enctype)) {
 	StrAllocCopy(HTFormEnctype, enctype);
 	if (HTFormMethod != URL_MAIL_METHOD &&
 	    !strncasecomp(enctype, "multipart/form-data", 19))
@@ -8612,9 +8746,9 @@ PUBLIC void HText_beginForm ARGS5(
     }
 
     /*
-     *  Check the TITLE. - FM
+     *  Check the TITLE. -FM
      */
-    if ((title != NULL) && *title)
+    if (non_empty(title))
 	StrAllocCopy(HTFormTitle, title);
     else
 	FREE(HTFormTitle);
@@ -8662,18 +8796,18 @@ PUBLIC void HText_endForm ARGS1(
     if (HTFormFields == 1 && text && text->first_anchor) {
 	/*
 	 *  Support submission of a single text input field in
-	 *  the form via <return> instead of a submit button. - FM
+	 *  the form via <return> instead of a submit button. -FM
 	 */
 	TextAnchor * a = text->first_anchor;
 	/*
-	 *  Go through list of anchors and get our input field. - FM
+	 *  Go through list of anchors and get our input field. -FM
 	 */
 	while (a) {
 	    if (a->link_type == INPUT_ANCHOR &&
 		a->input_field->number == HTFormNumber &&
 		a->input_field->type == F_TEXT_TYPE) {
 		/*
-		 *  Got it.  Make it submitting. - FM
+		 *  Got it.  Make it submitting. -FM
 		 */
 		a->input_field->submit_action = NULL;
 		StrAllocCopy(a->input_field->submit_action, HTFormAction);
@@ -8815,7 +8949,7 @@ PRIVATE char * HText_skipOptionNumPrefix ARGS1(
 	 */
 	char *cp = opname;
 
-	if ((cp && *cp && *cp++ == '(') &&
+	if ((non_empty(cp) && *cp++ == '(') &&
 	    *cp && isdigit(UCH(*cp++))) {
 	    while (*cp && isdigit(UCH(*cp)))
 		++cp;
@@ -8897,7 +9031,7 @@ PUBLIC char * HText_setLastOptionValue ARGS7(
 	fields_are_numbered()) {
 	/*
 	 *  Collapse any space between the popup option
-	 *  prefix and actual value. - FM
+	 *  prefix and actual value. -FM
 	 */
 	if ((cp1 = HText_skipOptionNumPrefix(cp)) > cp) {
 	    i = 0, j = (cp1 - cp);
@@ -9152,7 +9286,7 @@ PUBLIC int HText_beginInput ARGS3(
      *  to a radio button, and it's the first with this name, make
      *  sure it's checked by default.  Otherwise, if it's checked,
      *  uncheck the default or any preceding radio button with this
-     *  name that was checked. - FM
+     *  name that was checked. -FM
      */
     if (I->type != NULL && !strcmp(I->type,"OPTION") &&
 	HTCurSelectGroupType == F_RADIO_TYPE && LYSelectPopups == FALSE) {
@@ -9194,7 +9328,7 @@ PUBLIC int HText_beginInput ARGS3(
     a->link_type = INPUT_ANCHOR;
     a->show_anchor = YES;
 
-    a->hightext = NULL;
+    LYSetHiText(a, NULL, 0);
     a->extent = 2;
 
     a->input_field = f;
@@ -9207,7 +9341,7 @@ PUBLIC int HText_beginInput ARGS3(
     HTFormFields++;
 
     /*
-     *  Set the no_cache flag if the METHOD is POST. - FM
+     *  Set the no_cache flag if the METHOD is POST. -FM
      */
     if (HTFormMethod == URL_POST_METHOD)
 	f->no_cache = TRUE;
@@ -9329,7 +9463,7 @@ PUBLIC int HText_beginInput ARGS3(
 	    f->type = F_KEYGEN_TYPE;
 	} else {
 	    /*
-	     *  Note that TYPE="scribble" defaults to TYPE="text". - FM
+	     *  Note that TYPE="scribble" defaults to TYPE="text". -FM
 	     */
 	    f->type = F_TEXT_TYPE; /* default */
 	}
@@ -9375,7 +9509,7 @@ PUBLIC int HText_beginInput ARGS3(
 
     /*
      *  Set VALUE, if it exists.  Otherwise, if it's not
-     *  an option list make it a zero-length string. - FM
+     *  an option list make it a zero-length string. -FM
      */
     if (IValue != NULL) {
 	/*
@@ -9407,7 +9541,7 @@ PUBLIC int HText_beginInput ARGS3(
      *  Run checks and fill in necessary values.
      */
     if (f->type == F_RESET_TYPE) {
-	if (f->value && *f->value != '\0') {
+	if (non_empty(f->value)) {
 	    f->size = strlen(f->value);
 	} else {
 	    StrAllocCopy(f->value, "Reset");
@@ -9415,7 +9549,7 @@ PUBLIC int HText_beginInput ARGS3(
 	}
     } else if (f->type == F_IMAGE_SUBMIT_TYPE ||
 	       f->type == F_SUBMIT_TYPE) {
-	if (f->value && *f->value != '\0') {
+	if (non_empty(f->value)) {
 	    f->size = strlen(f->value);
 	} else if (f->type == F_IMAGE_SUBMIT_TYPE) {
 	    StrAllocCopy(f->value, "[IMAGE]-Submit");
@@ -9523,7 +9657,7 @@ PUBLIC int HText_beginInput ARGS3(
 	     *  the most we could highlight on overwrites, and/or
 	     *  handle in the line editor.  The actual values for
 	     *  text entry lines can be long, and will be scrolled
-	     *  horizontally within the editing window. - FM
+	     *  horizontally within the editing window. -FM
 	     */
 	    MaximumSize -= (1 +
 			  (int)text->style->leftIndent +
@@ -9551,7 +9685,7 @@ PUBLIC int HText_beginInput ARGS3(
 	     *  For all other fields we limit the size element to
 	     *  10 less than the screen width, because either they
 	     *  are types with small placeholders, and/or are a
-	     *  type which is handled via a popup window. - FM
+	     *  type which is handled via a popup window. -FM
 	     */
 	    MaximumSize -= 10;
 	    break;
@@ -9660,7 +9794,7 @@ PRIVATE double get_trans_q ARGS2(
 				  UCGetLYhndl_byMIME(givenmime));
     if (!tq)
 	return 0.0;
-    if (p && *p) {
+    if (non_empty(p)) {
 	char *pair, *field = p, *pval, *ptok;
 	/* Get all the parameters to the Charset */
 	while ((pair = HTNextTok(&field, ";", "\"", NULL)) != NULL) {
@@ -9905,7 +10039,7 @@ PUBLIC int HText_SubmitForm ARGS4(
 
     if (submit_item->submit_action) {
 	/*
-	 *  If we're mailing, make sure it's a mailto ACTION. - FM
+	 *  If we're mailing, make sure it's a mailto ACTION. -FM
 	 */
 	if ((submit_item->submit_method == URL_MAIL_METHOD) &&
 	    strncmp(submit_item->submit_action, "mailto:", 7)) {
@@ -9917,13 +10051,13 @@ PUBLIC int HText_SubmitForm ARGS4(
     }
 
     /*
-     *  Check the ENCTYPE and set up the appropriate variables. - FM
+     *  Check the ENCTYPE and set up the appropriate variables. -FM
      */
     if (submit_item->submit_enctype &&
 	!strncasecomp(submit_item->submit_enctype, "text/plain", 10)) {
 	/*
 	 *  Do not hex escape, and use physical newlines
-	 *  to separate name=value pairs. - FM
+	 *  to separate name=value pairs. -FM
 	 */
 	PlainText = TRUE;
     } else if (submit_item->submit_enctype &&
@@ -9931,7 +10065,7 @@ PUBLIC int HText_SubmitForm ARGS4(
 			     "application/sgml-form-urlencoded", 32)) {
 	/*
 	 *  Use semicolons instead of ampersands as the
-	 *  separators for name=value pairs. - FM
+	 *  separators for name=value pairs. -FM
 	 */
 	SemiColon = TRUE;
     } else if (submit_item->submit_enctype &&
@@ -9941,7 +10075,7 @@ PUBLIC int HText_SubmitForm ARGS4(
 	 *  Use the multipart MIME format.  We should generate
 	 *  a boundary string which we are sure doesn't occur
 	 *  in the content, but for now we'll just assume that
-	 *  this string doesn't. - FM
+	 *  this string doesn't. -FM
 	 */
 	Boundary = "xnyLAaB03X";
     }
@@ -10012,7 +10146,7 @@ PUBLIC int HText_SubmitForm ARGS4(
 		field_has_special = NO;
 
 		for (p = val;
-		     p && *p && !(field_has_8bit && field_has_special);
+		     non_empty(p) && !(field_has_8bit && field_has_special);
 		     p++)
 		    if ((*p == HT_NON_BREAK_SPACE) ||
 			(*p == HT_EN_SPACE) ||
@@ -10022,7 +10156,7 @@ PUBLIC int HText_SubmitForm ARGS4(
 			field_has_8bit = YES;
 		    }
 		for (p = form_ptr->name;
-		     p && *p && !(name_has_8bit && name_has_special);
+		     non_empty(p) && !(name_has_8bit && name_has_special);
 		     p++)
 		    if ((*p == HT_NON_BREAK_SPACE) ||
 			(*p == HT_EN_SPACE) ||
@@ -10115,7 +10249,7 @@ PUBLIC int HText_SubmitForm ARGS4(
 	/*
 	 *  We are submitting POST content to a server,
 	 *  so load content_type_out.  This will be put in
-	 *  the post_content_type element if all goes well. - FM, kw
+	 *  the post_content_type element if all goes well. -FM, kw
 	 */
 	if (SemiColon == TRUE) {
 	    StrAllocCopy(content_type_out,
@@ -10207,19 +10341,19 @@ PUBLIC int HText_SubmitForm ARGS4(
 		case F_SUBMIT_TYPE:
 		case F_TEXT_SUBMIT_TYPE:
 		case F_IMAGE_SUBMIT_TYPE:
-		    if (!(form_ptr->name && *form_ptr->name != '\0' &&
+		    if (!(non_empty(form_ptr->name) &&
 			  !strcmp(form_ptr->name, link_name))) {
 			CTRACE((tfp,
 				    "SubmitForm: skipping submit field with "));
 			CTRACE((tfp, "name \"%s\" for link_name \"%s\", %s.\n",
 				    form_ptr->name ? form_ptr->name : "???",
 				    link_name ? link_name : "???",
-				    (form_ptr->name && *form_ptr->name) ?
+				    non_empty(form_ptr->name) ?
 				    "not current link" : "no field name"));
 			break;
 		    }
 		    if (!(form_ptr->type == F_TEXT_SUBMIT_TYPE ||
-			(form_ptr->value && *form_ptr->value != '\0' &&
+			(non_empty(form_ptr->value) &&
 			 !strcmp(form_ptr->value, link_value)))) {
 			CTRACE((tfp,
 				"SubmitForm: skipping submit field with "));
@@ -10255,7 +10389,7 @@ PUBLIC int HText_SubmitForm ARGS4(
 		    field_has_8bit = NO;
 		    field_has_special = NO;
 		    for (p = val_used;
-			 p && *p && !(field_has_8bit && field_has_special);
+			 non_empty(p) && !(field_has_8bit && field_has_special);
 			 p++) {
 			if ((*p == HT_NON_BREAK_SPACE) ||
 			    (*p == HT_EN_SPACE) ||
@@ -10341,7 +10475,7 @@ PUBLIC int HText_SubmitForm ARGS4(
 		    name_has_8bit = NO;
 		    name_has_special = NO;
 		    for (p = name_used;
-			 p && *p && !(name_has_8bit && name_has_special);
+			 non_empty(p) && !(name_has_8bit && name_has_special);
 			 p++) {
 			if ((*p == HT_NON_BREAK_SPACE) ||
 			    (*p == HT_EN_SPACE) ||
@@ -10454,12 +10588,12 @@ PUBLIC int HText_SubmitForm ARGS4(
 		     *  multiple submit buttons, or a single type="text"
 		     *  that's been converted to a TEXT_SUBMIT_TYPE),
 		     *  include the name=value pair, or fake name.x=0 and
-		     *  name.y=0 pairs for IMAGE_SUBMIT_TYPE. - FM
+		     *  name.y=0 pairs for IMAGE_SUBMIT_TYPE. -FM
 		     */
-		    if ((form_ptr->name && *form_ptr->name != '\0' &&
+		    if ((non_empty(form_ptr->name) &&
 			!strcmp(form_ptr->name, link_name)) &&
 		       (form_ptr->type == F_TEXT_SUBMIT_TYPE ||
-			(form_ptr->value && *form_ptr->value != '\0' &&
+			(non_empty(form_ptr->value) &&
 			 !strcmp(form_ptr->value, link_value)))) {
 			int cdisp_name_startpos = 0;
 
@@ -10495,7 +10629,7 @@ PUBLIC int HText_SubmitForm ARGS4(
 			    /*
 			     *  It's a clickable image submit button.
 			     *  Fake a 0,0 coordinate pair, which
-			     *  typically returns the image's default. - FM
+			     *  typically returns the image's default. -FM
 			     */
 			    if (Boundary) {
 				escaped1[cdisp_name_startpos] = '\0';
@@ -11054,7 +11188,7 @@ PUBLIC BOOL HText_hasUTF8OutputSet ARGS1(
 }
 
 /*
-**  Check charset and set the kcode element. - FM
+**  Check charset and set the kcode element. -FM
 **  Info on the input charset may be passed in in two forms,
 **  as a string (if given explicitly) and as a pointer to
 **  a LYUCcharset (from chartrans mechanism); either can be NULL.
@@ -11087,7 +11221,7 @@ PUBLIC void HText_setKcode ARGS3(
 	charset = p_in->MIMEname;
     }
     /*
-    **  Check whether we have a specified charset. - FM
+    **  Check whether we have a specified charset. -FM
     */
     if (!charset || *charset == '\0') {
 	return;
@@ -11097,7 +11231,7 @@ PUBLIC void HText_setKcode ARGS3(
     **  We've included the charset, and not forced a download offer,
     **  only if the currently selected character set can handle it,
     **  so check the charset value and set the text->kcode element
-    **  appropriately. - FM
+    **  appropriately. -FM
     */
     /*  If charset isn't specified explicitely nor assumed,
      *  p_in->MIMEname would be set as display charset.
@@ -11126,7 +11260,7 @@ PUBLIC void HText_setKcode ARGS3(
     } else {
 	/*
 	**  If we get to here, it's not CJK, so disable that if
-	**  it is enabled.  But only if we are quite sure. - FM & kw
+	**  it is enabled.  But only if we are quite sure. -FM & kw
 	*/
 	text->kcode = NOKANJI;
 	if (HTCJK != NOCJK) {
@@ -11149,7 +11283,7 @@ PUBLIC void HText_setKcode ARGS3(
 }
 
 /*
-**  Set a permissible split at the current end of the last line. - FM
+**  Set a permissible split at the current end of the last line. -FM
 */
 PUBLIC void HText_setBreakPoint ARGS1(
 	HText *,	text)
@@ -11158,7 +11292,7 @@ PUBLIC void HText_setBreakPoint ARGS1(
 	return;
 
     /*
-     *  Can split here. - FM
+     *  Can split here. -FM
      */
     text->permissible_split = text->last_line->size;
 
@@ -11176,7 +11310,7 @@ PUBLIC void HText_setBreakPoint ARGS1(
 **  command.  Otherwise, it returns TRUE, i.e, that
 **  the target document might differ from the current,
 **  based on any caching directives or analyses which
-**  claimed or suggested this. - FM
+**  claimed or suggested this. -FM
 */
 PUBLIC BOOL HText_AreDifferent ARGS2(
 	HTParentAnchor *,	anchor,
@@ -11273,7 +11407,7 @@ PUBLIC BOOL HText_AreDifferent ARGS2(
     /*
      *  We'll assume the target is a position in the currently
      *  displayed document, and thus can ignore any header, META,
-     *  or other directives not to use a cached rendition. - FM
+     *  or other directives not to use a cached rendition. -FM
      */
     return(FALSE);
 }
@@ -11693,9 +11827,7 @@ PRIVATE void insert_new_textarea_anchor ARGS2(
     a->line_pos	       = anchor->line_pos;
     a->extent	       = anchor->extent;
     a->line_num	       = anchor->line_num + 1;
-    StrAllocCopy (a->hightext,  anchor->hightext);
-    StrAllocCopy (a->hightext2, anchor->hightext2);
-    a->hightext2offset = anchor->hightext2offset;
+    LYCopyHiText(a, anchor);
     a->link_type       = anchor->link_type;
     a->input_field     = f;
     a->show_anchor     = anchor->show_anchor;
@@ -11918,7 +12050,7 @@ hang_detected:  /* ugliness has happened; inform user and do the best we can */
  *  --KED  02/01/99
  */
 PUBLIC int HText_ExtEditForm ARGS1(
-	   struct link *,  form_link)
+	   LinkInfo *,	form_link)
 {
     struct stat stat_info;
     size_t	size;
@@ -11939,7 +12071,7 @@ PUBLIC int HText_ExtEditForm ARGS1(
     int		orig_cnt      = 0;
     int		line_cnt      = 1;
 
-    FormInfo   *form	 = form_link->form;
+    FormInfo   *form	 = form_link->l_form;
     char       *areaname = form->name;
     int		form_num = form->number;
 
@@ -12256,14 +12388,14 @@ PUBLIC int HText_ExtEditForm ARGS1(
  *  --KED  02/14/99
  */
 PUBLIC void HText_ExpandTextarea ARGS2(
-	    struct link *,  form_link,
-	    int,	    newlines)
+	    LinkInfo *,	form_link,
+	    int,	newlines)
 {
     TextAnchor *anchor_ptr;
     TextAnchor *end_anchor    = NULL;
     BOOLEAN	firstanchor   = TRUE;
 
-    FormInfo *form      = form_link->form;
+    FormInfo *form      = form_link->l_form;
     char     *areaname  = form->name;
     int       form_num  = form->number;
 
@@ -12356,7 +12488,7 @@ PUBLIC void HText_ExpandTextarea ARGS2(
  *  --KED  02/21/99
  */
 PUBLIC int HText_InsertFile ARGS1(
-	   struct link *,  form_link)
+	   LinkInfo *,	form_link)
 {
     struct stat stat_info;
     size_t	size;
@@ -12370,7 +12502,7 @@ PUBLIC int HText_InsertFile ARGS1(
     BOOLEAN	firstanchor = TRUE;
     BOOLEAN truncalert = FALSE;
 
-    FormInfo   *form	 = form_link->form;
+    FormInfo   *form	 = form_link->l_form;
     char       *areaname = form->name;
     int		form_num = form->number;
 
@@ -12518,9 +12650,7 @@ PUBLIC int HText_InsertFile ARGS1(
     a->line_pos	       = anchor_ptr->line_pos;
     a->extent	       = anchor_ptr->extent;
     a->line_num	       = anchor_ptr->line_num;
-    StrAllocCopy (a->hightext,  anchor_ptr->hightext);
-    StrAllocCopy (a->hightext2, anchor_ptr->hightext2);
-    a->hightext2offset = anchor_ptr->hightext2offset;
+    LYCopyHiText(a, anchor_ptr);
     a->link_type       = anchor_ptr->link_type;
     a->input_field     = f;
     a->show_anchor     = anchor_ptr->show_anchor;
@@ -12675,14 +12805,12 @@ PUBLIC int HText_InsertFile ARGS1(
  * characters) of it.  It doesn't check whether the 'len' bytes crosses a
  * character boundary (if multibyte chars are in string).  Assumes that the
  * cursor is positioned in the place where the 1st char of string should be
- * drawn.  Currently used only in redraw_lines_of_link when
- *    defined(USE_COLOR_STYLE) && !defined(NO_HILIT_FIX)
+ * drawn.
+ *
  * This code is based on display_line.  This code was tested with ncurses only
- * (since no support for lss is availble for Slang) and with
- * defined(USE_COLOR_STYLE).
- * -HV.
+ * (since no support for lss is availble for Slang) -HV.
  */
-#if defined(USE_COLOR_STYLE) && !defined(NO_HILIT_FIX)
+#ifdef USE_COLOR_STYLE
 PRIVATE void redraw_part_of_line ARGS4(
 	HTLine *,	line,
 	char*,		str,
@@ -12772,12 +12900,12 @@ PRIVATE void redraw_part_of_line ARGS4(
 		     *  into LastDisplayChar if it was a multibyte
 		     *  character) or hyphen, though it should have
 		     *  been excluded by HText_appendCharacter() or by
-		     *  split_line() in those cases. - FM
+		     *  split_line() in those cases. -FM
 		     */
 		    break;
 		} else {
 		    /*
-		     *  Make it a hard hyphen and fall through. - FM
+		     *  Make it a hard hyphen and fall through. -FM
 		     */
 		    buffer[0] = '-';
 		    i++;
@@ -12814,7 +12942,7 @@ PRIVATE void redraw_part_of_line ARGS4(
 		     *  spacing characters in this code set,
 		     *  but this will become an issue when
 		     *  the development code set's multibyte
-		     *  character handling is used. - FM
+		     *  character handling is used. -FM
 		     */
 		    LastDisplayChar = 'M';
 		} else {
@@ -12839,7 +12967,7 @@ PRIVATE void redraw_part_of_line ARGS4(
 #endif
     return;
 }
-#endif /* defined(USE_COLOR_STYLE) && !defined(NO_HILIT_FIX)  */
+#endif /* USE_COLOR_STYLE */
 
 #ifndef USE_COLOR_STYLE
 /*
@@ -13153,12 +13281,12 @@ PRIVATE void move_to_glyph ARGS10(
 		     *  into LastDisplayChar if it was a multibyte
 		     *  character) or hyphen, though it should have
 		     *  been excluded by HText_appendCharacter() or by
-		     *  split_line() in those cases. - FM
+		     *  split_line() in those cases. -FM
 		     */
 		    break;
 		} else {
 		    /*
-		     *  Make it a hard hyphen and fall through. - FM
+		     *  Make it a hard hyphen and fall through. -FM
 		     */
 		    buffer[0] = '-';
 		}
@@ -13273,15 +13401,13 @@ PRIVATE void move_to_glyph ARGS10(
 		    i++;
 		    sdata++; data++;
 		    /*
-		     *  For now, load 'M' into LastDisplayChar,
-		     *  but we should check whether it's white
-		     *  and if so, use ' '.  I don't know if
-		     *  there actually are white CJK characters,
-		     *  and we're loading ' ' for multibyte
-		     *  spacing characters in this code set,
-		     *  but this will become an issue when
-		     *  the development code set's multibyte
-		     *  character handling is used. - FM
+		     * For now, load 'M' into LastDisplayChar, but we should
+		     * check whether it's white and if so, use ' '.  I don't
+		     * know if there actually are white CJK characters, and
+		     * we're loading ' ' for multibyte spacing characters in
+		     * this code set, but this will become an issue when the
+		     * development code set's multibyte character handling is
+		     * used.  -FM
 		     */
 		    LastDisplayChar = 'M';
 		} else {
@@ -13350,7 +13476,7 @@ PUBLIC void LYMoveToLink ARGS6(
 	if (links[i].ly < links[cur].ly)
 	    break;
 	if (links[i].type == WWW_FORM_LINK_TYPE) {
-	    XP_draw_min = links[i].ly + links[i].form->size;
+	    XP_draw_min = links[i].ly + links[i].l_form->size;
 	    break;
 	}
     }
@@ -13384,41 +13510,37 @@ PUBLIC void LYMoveToLink ARGS6(
 #endif /* !USE_COLOR_STYLE */
 
 /*
-  This is used only if compiled with lss support. It's called to draw
-  regular link (1st two lines of link) when it's being unhighlighted in
-  highlight:LYUtils.
-*/
-
+ * This is used only if compiled with lss support.  It's called to draw regular
+ * link (1st two lines of link) when it's being unhighlighted in LYhighlight().
+ */
 PUBLIC void redraw_lines_of_link ARGS1(
 	int,		cur GCC_UNUSED)
 {
-#if defined(USE_COLOR_STYLE) && !defined(NO_HILIT_FIX)
+#ifdef USE_COLOR_STYLE
 #define pvtTITLE_HEIGHT 1
-    HTLine* todr1, *todr2;
+    HTLine* todr1;
     int lines_back;
+    int row, col, count;
+    char *text;
 
     if (HTMainText->next_line == HTMainText->last_line) {
     /* we are at the last page - that is partially filled */
-	lines_back = HTMainText->Lines - ( links[cur].ly-pvtTITLE_HEIGHT+
+	lines_back = HTMainText->Lines - ( links[cur].ly - pvtTITLE_HEIGHT+
 	HTMainText->top_of_screen);
     } else {
-	lines_back = display_lines - (links[cur].ly-pvtTITLE_HEIGHT);
+	lines_back = display_lines - (links[cur].ly - pvtTITLE_HEIGHT);
     }
     todr1 = HTMainText->next_line;
     while (lines_back-- > 0)
 	todr1 = todr1->prev;
-    todr2 = (links[cur].hightext2 && links[cur].ly < display_lines) ?
-	    todr1->next : 0;
 
-    LYmove(links[cur].ly,  links[cur].lx);
-    redraw_part_of_line (todr1, links[cur].hightext,
-			 strlen(links[cur].hightext),  HTMainText);
-    if (todr2) {
-	LYmove(links[cur].ly+1,links[cur].hightext2_offset);
-	redraw_part_of_line (todr2, links[cur].hightext2,
-			     strlen(links[cur].hightext2),  HTMainText);
+    row = links[cur].ly;
+    for (count = 0; row < display_lines && (text = LYGetHiliteStr(cur, count)) != NULL; ++count) {
+	col = LYGetHilitePos(cur, count);
+	LYmove(row++, col);
+	redraw_part_of_line (todr1, text, strlen(text), HTMainText);
+	todr1 = todr1->next;
     }
-
 #undef pvtTITLE_HEIGHT
 #else
     /* no dead code !*/

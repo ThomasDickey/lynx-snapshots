@@ -31,8 +31,10 @@ CTRACE((tfp, "\n" \
             "}\n", \
             (L), sizeof(*((L))), \
             (L)->lname, (L)->lname, (L)->target, (L)->target, \
-            (L)->hightext, (L)->hightext, (L)->hightext2, (L)->hightext2, \
-            (L)->hightext2_offset, (L)->inUnderline, (L)->lx, (L)->ly, \
+            (L)->l_hightext, (L)->l_hightext, \
+	    (L)->l_hightext2, (L)->l_hightext2, \
+            (L)->l_hightext2_offset, \
+	    (L)->inUnderline, (L)->lx, (L)->ly, \
             (L)->type, (L)->anchor_number, (L)->anchor_line_num, (L)->form)); \
 }else{ \
 CTRACE((tfp, "\n" \

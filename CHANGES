@@ -1,6 +1,75 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2002-01-01 (2.8.5dev.6)
+* add configure options to link with dbmalloc and dmalloc debugging libraries
+  which offer different features than --enable-find-leaks -TD
+* restructured LYhighlight() and logic related to highlighted text using new
+  functions LYSetHilite(), LYAddHilite(), LYGetHiliteStr() and LYGetHilitePos()
+  to allow more than two lines to be highlighted in links (Debian #114062) -TD
+* simplified some of LYCookie.c with new functions find_domain_entry(),
+  alloc_attr_value() and parse_attribute() -TD
+* modify expansion of %s for WIN_EX EXTERN commands so that short names (used
+  when the command begins with an uppercase character) are not quoted, and use
+  backslashes.  The normal %s expansion uses forward slashes and may quote the
+  name if it contains a blank -TD
+* modify local directory sort by type to ignore leading '.' characters when
+  looking for filetype -TD
+* modify logic of HTDirEntry() to avoid storing a trailing backslash (DOS-style
+  path separator) in the anchor URL for local directory entries (from report
+  by Hataguchi Takeshi) -TD
+* amend change in 2.8.5dev.2 to HTLoadHTTP() to omit "Accept-Encoding:  gzip"
+  ensuring that also -source or -dump option is used.  Retesting excite.com
+  shows that it no longer matters, since the page was replaced by a short
+  javascript which is not sent compressed (request by Hataguchi Takeshi) -TD
+* correct a missing definition for COMPRESS_PROG in the configure script
+  introduced by 2.8.5dev.5 changes (also noted by Stepan Kasal) -TD
+* several fixes from Stepan Kasal <kasal@math.cas.cz>:
+  + remove code in LYCurses.c which checks ttytype variable for "dec-vt"
+    prefix.  EWAN, a decent telnet program for M$ Windows, sets $TERM to
+    dec-vt100.  This is similar to vt102 but it is not appropriate to use vt100
+    settings for it.  ncurses has in its terminfo database an entry for
+	"dec-vt100|EWAN telnet's terminal"
+    The terminfo file is successfully opened when ncurses is initialised and
+    ttytype is set to the name mentioned above.  After stripping "dec-" from
+    it, lynx ends up searching for
+	"/usr/share/terminfo/v/vt100|EWAN telnet's terminal"
+    which cannot cannot be found and lynx crashes.
+  + compress installed html files with the -9 option of gzip.
+  + improved install-help makefile rule
+* fix some longstanding problems with the DOS port -DK
+  + fix inability to break out of a hung nameserver lookup or hung connection
+    attempt without aborting lynx entirely.  Using the WATT-32 signal handler
+    for this seems to work well.  Change the default compile option for DJGPP
+    to -DIGNORE_CTRL_C, causing lynx to ignore SIGINT, so CTRL-BREAK is
+    completely disabled.  With this patch CTRL-C stops current actions without
+    quitting lynx.  To have a way to abort lynx when necessary, bind ALT-X to
+    SIGQUIT.  (The unix default of CTRL-\ is not bound to the same scan code on
+    different international keyboards, while ALT-X is familiar to DOS users for
+    existing programs).  Because the WATT-32 signal handler was not available
+    to external programs, a patch to WATT-32 is necessary for the new lynx code
+    to work.  The patch for WATT-32 is shown in the INSTALLATION documentation.
+  + added some fixes for "/" vs "\" handling in pathnames so that non-DJGPP
+    programs will see standard DOS pathnames when called.  The mailer code was
+    ignoring the environment variable SHELL when calling the mailer, leading to
+    a lack of environment space for the mailer to work -DK
+  + add calls to _eth_release() and _eth_init(), which Gisle Vanem says should
+    not be necessary in this part of lynx.  But this seems to fix get
+    intermittent hung nameserver lookup sessions after using CTRL-C.
+* simplified a loop in HTConfirmCookie() and added CTRACE's to demonstrate that
+  this is working properly (addresses Debian #119751) -TD
+* add some CTRACE's to curses screen initialization and resizing to provide
+  better diagnosis of problem reported by David Balazic
+  <david.balazic@uni-mb.si> on HP-UX 11.00) -PG
+* modify configure.in and aclocal.m4 to work with autoconf 2.52 patched with
+    ftp://invisible-island.net/autoconf/autoconf-2.52-20011227.patch.gz
+* modify configure macros CF_CURSES_CPPFLAGS and CF_NCURSES_CPPFLAGS to ensure
+  that the (n)curses.h header file is actually found, in case someone tries to
+  build lynx without having installed the development files (based on anonymous
+  posting on comp.os.linux.networking newsgroup) -TD
+* update config.guess, config.sub from
+    http://subversions.gnu.org/cgi-bin/viewcvs/config/config/
+
 2001-11-18 (2.8.5dev.5)
 * modify prompt for file- or directory-name in rename/move operation to provide
   a default based on the selected file/directory -TD

@@ -13,6 +13,10 @@
 #include <LYexit.h>
 #include <LYLeaks.h>
 
+#ifdef WATT32
+extern void sig_handler_watt(int);
+#endif /* WATT32 */
+
 #ifdef VMS
 BOOLEAN HadVMSInterrupt = FALSE;
 #endif /* VMS */
@@ -29,8 +33,17 @@ PUBLIC void cleanup_sig ARGS1(
 	/*
 	 * Need to rearm the signal.
 	 */
+#ifdef WATT32
+	if (wathndlcbrk) {
+	    sig_handler_watt(sig);	/* Use WATT-32 signal handler */
+	}				/* Requires patch to WATT-32 */
+#endif /* WATT32 */
 	signal(SIGINT, cleanup_sig);
 	sigint = TRUE;
+#ifdef WATT32
+	_eth_release();
+	_eth_init();
+#endif /* WATT32 */
 	return;
     }
 #endif /* IGNORE_CTRL_C */

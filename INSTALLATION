@@ -467,6 +467,12 @@ II. Compile instructions -- UNIX
  	Limit the number of charsets that are compiled-in to the specified
 	list of comma-separated MIME names.
 
+  --with-dbmalloc
+	use Conor Cahill's dbmalloc library
+
+  --with-dmalloc
+	use Gray Watson's dmalloc library
+
   --with-included-gettext
 	use the GNU gettext library included here (default).  See
 	"--enable-nls".
@@ -848,6 +854,25 @@ V. Compile instructions -- 386 DOS
     can be obtained from the openssl-dev archives at:                     
     "http://www.mail-archive.com/openssl-dev@openssl.org/msg09104/096b.pch.gz"
 
+    In order for lynx to be able to break out of a stuck nameserver
+    lookup or connection attempt, you should compile with -DIGNORE_CTRL_C
+    and apply the following patch to WATT-32.
+
+    --- watt32-2.1dev.rel.5/src/pc_cbrk.c.ori	Mon Jun 19 16:08:06 2000
+    +++ watt32-2.1dev.rel.5/src/pc_cbrk.c	Sun Nov 18 11:18:50 2001
+    @@ -74,6 +74,11 @@
+          longjmp (sig_jmp, 1);
+     }
+     
+    +void sig_handler_watt (int sig)
+    +{
+    +	sig_handler (int sig);
+    +}
+    +
+     /*
+      * want_brk = 0: no ^Break checking
+      * want_brk = 1: normal ^Break checks
+
     If you have trouble applying the patches, try using the "patch" program,
     ("ftp://ftp.simtel.net/pub/simtelnet/gnu/djgpp/v2gnu/pat253b.zip").
     To read the Unix man style documentation, use, for example, "less"
@@ -951,7 +976,7 @@ V. Compile instructions -- 386 DOS
     instead of the SLANG keyhandler unless you define "NO_DJ_KEYHANDLER".
 
     #!/bin/sh
-    CFLAGS="-O2 -I/djgpp/pdcur24 -I/djgpp/watt32/inc" \
+    CFLAGS="-O2 -DIGNORE_CTRL_C -I/djgpp/pdcur24 -I/djgpp/watt32/inc" \
     LIBS="-L/djgpp/pdcur24/lib -L/djgpp/watt32/lib -liconv" \
     ./configure --prefix=d:/djgpp/lynx-rel/lynx-cnf \
     --with-screen=curses \
@@ -975,7 +1000,7 @@ V. Compile instructions -- 386 DOS
 
 -- 1997/9/29 - D. Kaufman <dkaufman@rahul.net>
 -- 1997/10/3 - B. Schiavo <Wschiavo@concentric.net>
--- Last update - 2001/08/01
+-- Last update - 2001/12/19
 
 
 VI. General installation instructions
