@@ -378,7 +378,7 @@ PRIVATE void HTMIME_put_character ARGS2(
 			    cp4 = cp3;
 			    chndl = UCGetLYhndl_byMIME(cp3);
 			    if (UCCanTranslateFromTo(chndl,
-						     current_char_set)) {
+						     current_char_set) != TQ_NO) {
 				chartrans_ok = YES;
 				*cp1 = '\0';
 				me->format = HTAtom_for(cp);
@@ -390,7 +390,7 @@ PRIVATE void HTMIME_put_character ARGS2(
 						 recognize it */
 				chndl = UCLYhndl_for_unrec;
 				if (UCCanTranslateFromTo(chndl,
-							 current_char_set)) {
+							 current_char_set) != TQ_NO) {
 				    chartrans_ok = YES;
 				    *cp1 = '\0';
 				    me->format = HTAtom_for(cp);
@@ -2388,8 +2388,8 @@ PUBLIC void HTmmdecode ARGS2(
 			for (p = s+2; *p; p++)
 			    *p = TOLOWER(*p);
 			invalid = ((LYhndl = UCGetLYhndl_byMIME(s+2)) < 0 ||
-				   !UCCanTranslateFromTo(LYhndl,
-							 current_char_set));
+				   UCCanTranslateFromTo(LYhndl,
+						 current_char_set) != TQ_NO);
 			*qm2 = '?';
 		    }
 		    if (!invalid) {

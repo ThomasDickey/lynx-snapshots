@@ -144,12 +144,16 @@ PUBLIC int edit_current_file ARGS3(
                                                                 filename);
 #endif /* DOSPATH */
     else
+#ifdef __DJGPP__
+        sprintf(command, "%s %s", editor, HTDOS_name(filename));
+#else
 	sprintf(command, "%s \"%s\"", editor,
 #ifdef DOSPATH
 				 HTDOS_name(filename));
 #else
 				 filename);
 #endif /* DOSPATH */
+#endif /* __DJGPP__ */
 #endif /* VMS */
     if (TRACE) {
 	fprintf(stderr, "LYEdit: %s\n", command);

@@ -288,28 +288,16 @@ PRIVATE void add_printer_to_list ARGS2(
     }
 }
 
-#if USE_COLOR_TABLE
-#ifdef DOSPATH /* I.E. broken curses */
-static char *Color_Strings[16] =
-{
-	 "black",
-	 "blue",
-	 "green",
-	 "cyan",
-	 "red",
-	 "magenta",
-	 "brown",
-	 "lightgray",
-	 "gray",
-	 "brightblue",
-	 "brightgreen",
-	 "brightcyan",
-	 "brightred",
-	 "brightmagenta",
-	 "yellow",
-	 "white"
-};
-#else
+#if defined(USE_COLOR_STYLE) || defined(USE_COLOR_TABLE)
+
+#ifdef USE_SLANG
+#define COLOR_WHITE 7
+#define COLOR_BLACK 0
+#endif
+
+int default_fg = COLOR_WHITE;
+int default_bg = COLOR_BLACK;
+
 static char *Color_Strings[16] =
 {
     "black",
@@ -329,22 +317,47 @@ static char *Color_Strings[16] =
     "brightcyan",
     "white"
 };
-#endif /* DOSPATH (broken curses) */
+
+#ifdef DOSPATH
+/*
+ * PDCurses (and possibly some other implementations) use a non-ANSI set of
+ * codes for colors.
+ */
+PRIVATE int ColorCode ARGS1(
+	int,	color)
+{
+	static int map[] = {
+		0,  4,  2,  6, 1,  5,  3,  7,
+		8, 12, 10, 14, 9, 13, 11, 15 };
+	return map[n];
+}
+#else
+#define ColorCode(n) (n)
+#endif
 
 /*
  *  Validator for COLOR fields.
  */
-PRIVATE int check_color ARGS1(
-	char *,	color)
+PUBLIC int check_color ARGS2(
+	char *,	color,
+	int,	the_default)
 {
     int i;
 
+    if (!strcasecmp(color, "default"))
+	return the_default;
+    if (!strcasecmp(color, "nocolor"))
+	return NO_COLOR;
+
     for (i = 0; i < 16; i++) {
-	if (!strcmp(color, Color_Strings[i]))
-	    return i;
+	if (!strcasecmp(color, Color_Strings[i]))
+	    return ColorCode(i);
     }
-    return -1;
+    return ERR_COLOR;
 }
+#endif /* USE_COLOR_STYLE || USE_COLOR_TABLE */
+
+#if defined(USE_COLOR_TABLE)
 
 /*
  *  Exit routine for failed COLOR parsing.
@@ -358,7 +371,8 @@ Syntax Error parsing COLOR in configuration file:\n\
 The line must be of the form:\n\
 COLOR:INTEGER:FOREGROUND:BACKGROUND\n\
 \n\
-Here FOREGROUND and BACKGROUND must be one of:\n"
+Here FOREGROUND and BACKGROUND must be one of:\n\
+The special strings 'nocolor' or 'default', or\n"
 	    );
     for (i = 0; i < 16; i += 4) {
 	fprintf(stderr, "%16s %16s %16s %16s\n",
@@ -412,13 +426,15 @@ PRIVATE void parse_color ARGS1(
     *bg++ = 0;
 
 #if defined(USE_SLANG)
-    if ((-1 == check_color(fg)) ||
-        (-1 == check_color(bg)))
+    if ((check_color(fg, default_fg) < 0) ||
+        (check_color(bg, default_bg) < 0))
 	exit_with_color_syntax(parse_color_line);
 
     SLtt_set_color(color, NULL, fg, bg);
 #else
-    if (lynx_chg_color(color, check_color(fg), check_color(bg)) < 0)
+    if (lynx_chg_color(color,
+	check_color(fg, default_fg),
+	check_color(bg, default_bg)) < 0)
 	exit_with_color_syntax(parse_color_line);
 #endif
 }
@@ -1039,6 +1055,14 @@ PUBLIC void read_cfg ARGS1(
 	    add_printer_to_list(&buffer[8], &printers);
 	}
 	break;
+
+#ifdef RAWDOSKEYHACK
+	case 'R':
+	if (!strncasecomp(buffer, "RAW_DOS_KEY_HACK:", 17)) {
+		 raw_dos_key_hack = is_true(buffer+17);
+	}
+	break;
+#endif /* RAWDOSKEYHACK */
 
 	case 'S':
 	if (!strncasecomp(buffer, "SAVE_SPACE:", 11)) {

@@ -7,6 +7,7 @@
 #
 
 errstatus=0
+umask 022
 
 for file in ${1+"$@"} ; do
    set fnord `echo ":$file" | sed -ne 's/^:\//#/;s/^://;s/\// /g;s/^#/\//;p'`

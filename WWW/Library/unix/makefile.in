@@ -18,8 +18,11 @@ VPATH		= $(srcdir)
 LYFLAGS		= # FIXME: set in parent makefile
 
 CC		= @CC@
-CPPOPTS		= @DEFS@ @CPPFLAGS@ $(LYFLAGS) -I../../.. -I../../../src
-CFLAGS		= $(CPPOPTS) @CFLAGS@
+DEFS		= @DEFS@
+CPPFLAGS	= @CPPFLAGS@
+CPPOPTS		= $(DEFS) $(CPPFLAGS) $(LYFLAGS) -I../../.. -I../../../src
+LY_CFLAGS	= @CFLAGS@
+CFLAGS		= $(CPPOPTS) $(LY_CFLAGS)
 
 # Directory for installed binary:
 BINDIR		= @bindir@

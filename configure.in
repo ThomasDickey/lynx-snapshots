@@ -47,7 +47,7 @@ CF_ARG_ENABLE(debug,
 AC_MSG_RESULT($with_debug)
 if test "$with_debug" = "yes" ; then
 	case $host_os in
-	ultrix*|osf[34].*)
+	ultrix*|osf*)
 		CF_STRIP_O_OPT(CFLAGS)
 		if test -z "$GCC" ; then
 			CFLAGS="$CFLAGS -g3"
@@ -56,7 +56,7 @@ if test "$with_debug" = "yes" ; then
 	esac
 else
 	case $host_os in
-	ultrix*) #(vi
+	ultrix*|osf*) #(vi
 		CF_STRIP_G_OPT(CFLAGS)
 		;;
 	*)
@@ -265,7 +265,6 @@ ncurses)
 	CF_NCURSES_LIBS
 	;;
 slang)
-	CF_TERMCAP_LIBS
 	CF_SLANG_CPPFLAGS
 	CF_SLANG_LIBS
 	;;
@@ -318,6 +317,7 @@ AC_CHECK_FUNCS( \
 	getgroups \
 	putenv \
 	readdir \
+	strerror \
 	waitpid \
 )
 AC_REPLACE_FUNCS( \
@@ -351,6 +351,8 @@ if test $cf_cv_screen != slang ; then
 	AC_CHECK_FUNCS( \
 		cbreak \
 		keypad \
+		use_default_colors \
+		wborder \
 	)
 fi
 
@@ -409,6 +411,14 @@ no)
 	AC_MSG_RESULT($LYNX_LSS_FILE)
 	;;
 esac
+
+AC_MSG_CHECKING(if you want to use external commands)
+CF_ARG_ENABLE(externs,
+[  --enable-externs        use external commands],
+	[use_externs=yes],
+	[use_externs=no])
+AC_MSG_RESULT($use_externs)
+test $use_externs != ".no" && AC_DEFINE(USE_EXTERNS)
 
 AC_MSG_CHECKING(if you want to use zlib for decompression of some gzip files)
 AC_ARG_WITH(zlib,

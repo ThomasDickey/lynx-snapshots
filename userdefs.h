@@ -675,12 +675,18 @@
 /*****************************
  * PREFERRED_CHARSET specifies the character set in MIME notation (e.g.,
  * "ISO-8859-2", "ISO-8859-5") which Lynx will indicate you prefer in
- * requests to http servers using an Accept-Charsets header.  The value
- * should NOT include "ISO-8859-1" or "US-ASCII", since those values are
- * always assumed by default.  If a file in that character set is available,
- * the server will send it.  Otherwise, the server will send the file in
- * ISO-8859-1 or US-ASCII.  Users can change or eliminate this definition
+ * requests to http servers using an Accept-Charsets header.
+ * This definition can be overriden via lynx.cfg.  Users also can change it
  * via the 'o'ptions menu and save that preference in their RC file.
+ * The value should NOT include "ISO-8859-1" or "US-ASCII", since those
+ * values are always assumed by default.
+ * If a file in that character set is available, the server will send it.
+ * If no Accept-Charset header is present, the default is that any
+ * character set is acceptable. If an Accept-Charset header is present,
+ * and if the server cannot send a response which is acceptable
+ * according to the Accept-Charset header, then the server SHOULD send
+ * an error response with the 406 (not acceptable) status code, though
+ * the sending of an unacceptable response is also allowed. (RFC2068)
  */
 #define PREFERRED_CHARSET ""
 
@@ -1188,7 +1194,7 @@
  * the version definition with the Project Version on checkout. Just
  * ignore it. - kw */
 /* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
-#define LYNX_VERSION "2.7.1ac-0.95"
+#define LYNX_VERSION "2.7.1ac-0.102"
 
 #ifndef MAXINT
 #define MAXINT 2147483647	/* max integer */

@@ -31,6 +31,7 @@
 #undef HAVE_PUTENV
 #undef HAVE_READDIR
 #undef HAVE_SIZECHANGE		/* defined by CF_SIZECHANGE */
+#undef HAVE_STRERROR
 #undef HAVE_STRING_H
 #undef HAVE_SYS_DIR_H		/* defined by AC_HEADER_DIRENT */
 #undef HAVE_SYS_FCNTL_H		/* have <sys/fcntl.h> */
@@ -42,8 +43,10 @@
 #undef HAVE_TTYTYPE
 #undef HAVE_TYPE_UNIONWAIT	/* CF_UNION_WAIT */
 #undef HAVE_UNISTD_H		/* have <unistd.h> */
+#undef HAVE_USE_DEFAULT_COLORS	/* ncurses extension */
 #undef HAVE_UTMP
 #undef HAVE_WAITPID
+#undef HAVE_WBORDER
 #undef IGNORE_CTRL_C		/* FIXME: make tests? */
 #undef INSTALL_ARGS		/* CF_PATH_PROG(install) */
 #undef INSTALL_PATH		/* CF_PATH_PROG(install) */
@@ -80,6 +83,7 @@
 #undef UNIX
 #undef UNZIP_PATH		/* CF_PATH_PROG(unzip) */
 #undef USE_COLOR_STYLE		/* CF_ARG_ENABLE(color-style) */
+#undef USE_EXTERNS		/* CF_ARG_ENABLE(externs) */
 #undef USE_HASH			/* see USE_COLOR_STYLE */
 #undef USE_SIZECHANGEHACK	/* FIXME: find a case where this works! */
 #undef USE_SLANG		/* AC_ARG_WITH(screen=slang) */

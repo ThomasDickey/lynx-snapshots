@@ -25,30 +25,40 @@ FONTMAP_INC = iso01_un.h
 
 CHRTR=
 
-TABLES= $(CHRTR)iso01_un.h \
- $(CHRTR)iso02_un.h \
+TABLES= $(CHRTR)iso01_uni.h \
  $(CHRTR)def7_uni.h \
- $(CHRTR)iso03_un.h \
- $(CHRTR)iso04_un.h \
- $(CHRTR)iso05_un.h \
- $(CHRTR)iso06_un.h \
- $(CHRTR)iso07_un.h \
- $(CHRTR)iso08_un.h \
- $(CHRTR)iso09_un.h \
- $(CHRTR)iso10_un.h \
- $(CHRTR)koi8r_un.h \
- $(CHRTR)cp437_un.h \
- $(CHRTR)cp850_un.h \
- $(CHRTR)cp852_un.h \
- $(CHRTR)cp866_un.h \
- $(CHRTR)cp1250_u.h \
- $(CHRTR)cp1251_u.h \
- $(CHRTR)cp1252_u.h \
- $(CHRTR)viscii_u.h \
+ $(CHRTR)iso02_uni.h \
+ $(CHRTR)cp1252_uni.h \
+ $(CHRTR)dmcs_uni.h \
+ $(CHRTR)mac_uni.h \
+ $(CHRTR)next_uni.h \
+ $(CHRTR)koi8r_uni.h \
+ $(CHRTR)viscii_uni.h \
+ $(CHRTR)cp437_uni.h \
+ $(CHRTR)cp850_uni.h \
+ $(CHRTR)cp852_uni.h \
+ $(CHRTR)cp866_uni.h \
+ $(CHRTR)cp737_uni.h \
+ $(CHRTR)cp869_uni.h \
+ $(CHRTR)cp864_uni.h \
+ $(CHRTR)cp862_uni.h \
+ $(CHRTR)cp1250_uni.h \
+ $(CHRTR)cp1251_uni.h \
+ $(CHRTR)cp1253_uni.h \
+ $(CHRTR)cp1255_uni.h \
+ $(CHRTR)cp1256_uni.h \
+ $(CHRTR)iso03_uni.h \
+ $(CHRTR)iso04_uni.h \
+ $(CHRTR)iso05_uni.h \
+ $(CHRTR)iso06_uni.h \
+ $(CHRTR)iso07_uni.h \
+ $(CHRTR)iso08_uni.h \
+ $(CHRTR)iso09_uni.h \
+ $(CHRTR)iso10_uni.h \
  $(CHRTR)utf8_uni.h \
  $(CHRTR)rfc_suni.h \
- $(CHRTR)mnemonic.h \
- $(CHRTR)mnem_sun.h
+ $(CHRTR)mnemonic_suni.h \
+ $(CHRTR)mnem_suni.h
 
 default: $(TABLES)
 
@@ -61,28 +71,40 @@ makeuctb.exe: makeuctb.c UCkd.h
 .tbl.h:
 	./makeuctb $*.tbl > $@
 
-iso01_un.h: iso01_un.tbl makeuctb.exe
-iso02_un.h: iso02_un.tbl makeuctb.exe
-def7_uni.h: def7_uni.tbl makeuctb.exe
-iso03_un.h: iso03_un.tbl makeuctb.exe
-iso04_un.h: iso04_un.tbl makeuctb.exe
-iso05_un.h: iso05_un.tbl makeuctb.exe
-iso06_un.h: iso06_un.tbl makeuctb.exe
-iso07_un.h: iso07_un.tbl makeuctb.exe
-iso08_un.h: iso08_un.tbl makeuctb.exe
-iso09_un.h: iso09_un.tbl makeuctb.exe
-iso10_un.h: iso10_un.tbl makeuctb.exe
-koi8r_un.h: koi8r_un.tbl makeuctb.exe
-cp437_un.h: cp437_un.tbl makeuctb.exe
-cp850_un.h: cp850_un.tbl makeuctb.exe
-cp852_un.h: cp852_un.tbl makeuctb.exe
-cp1250_u.h: cp1250_u.tbl makeuctb.exe
-cp1251_u.h: cp1251_u.tbl makeuctb.exe
-cp1252_u.h: cp1252_u.tbl makeuctb.exe
-utf8_uni.h: utf8_uni.tbl makeuctb.exe
-mnemonic.h: mnemonic.tbl makeuctb.exe
-mnem_sun.h: mnem_sun.tbl makeuctb.exe
-rfc_suni.h: rfc_suni.tbl makeuctb.exe
+def7_uni.h:		def7_uni.tbl		makeuctb.exe
+iso01_uni.h:		iso01_uni.tbl		makeuctb.exe
+iso02_uni.h:		iso02_uni.tbl		makeuctb.exe
+cp1252_uni.h:		cp1252_uni.tbl		makeuctb.exe
+dmcs_uni.h:		dmcs_uni.tbl		makeuctb.exe
+mac_uni.h:		mac_uni.tbl		makeuctb.exe
+next_uni.h:		next_uni.tbl		makeuctb.exe
+koi8r_uni.h:		koi8r_uni.tbl		makeuctb.exe
+viscii_uni.h:		viscii_uni.tbl		makeuctb.exe
+cp437_uni.h:		cp437_uni.tbl		makeuctb.exe
+cp850_uni.h:		cp850_uni.tbl		makeuctb.exe
+cp852_uni.h:		cp852_uni.tbl		makeuctb.exe
+cp866_uni.h:		cp866_uni.tbl		makeuctb.exe
+cp737_uni.h:		cp737_uni.tbl		makeuctb.exe
+cp869_uni.h:		cp869_uni.tbl		makeuctb.exe
+cp864_uni.h:		cp864_uni.tbl		makeuctb.exe
+cp862_uni.h:		cp862_uni.tbl		makeuctb.exe
+cp1250_uni.h:		cp1250_uni.tbl		makeuctb.exe
+cp1251_uni.h:		cp1251_uni.tbl		makeuctb.exe
+cp1253_uni.h:		cp1253_uni.tbl		makeuctb.exe
+cp1255_uni.h:		cp1255_uni.tbl		makeuctb.exe
+cp1256_uni.h:		cp1256_uni.tbl		makeuctb.exe
+iso03_uni.h:		iso03_uni.tbl		makeuctb.exe
+iso04_uni.h:		iso04_uni.tbl		makeuctb.exe
+iso05_uni.h:		iso05_uni.tbl		makeuctb.exe
+iso06_uni.h:		iso06_uni.tbl		makeuctb.exe
+iso07_uni.h:		iso07_uni.tbl		makeuctb.exe
+iso08_uni.h:		iso08_uni.tbl		makeuctb.exe
+iso09_uni.h:		iso09_uni.tbl		makeuctb.exe
+iso10_uni.h:		iso10_uni.tbl		makeuctb.exe
+utf8_uni.h:		utf8_uni.tbl		makeuctb.exe
+mnemonic_suni.h:	mnemonic_suni.tbl	makeuctb.exe
+mnem_suni.h:		mnem_suni.tbl		makeuctb.exe
+rfc_suni.h:		rfc_suni.tbl		makeuctb.exe
 
 clean:
 	rm -f makeuctb.exe makeuctb *.o *un.h *u.h *c.h *i.h

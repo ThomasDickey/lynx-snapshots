@@ -137,6 +137,41 @@ if test "$cf_cv_bool_defs" = no ; then
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl Check for data that is usually declared in <stdio.h> or <errno.h>
+dnl $1 = the name to check
+AC_DEFUN([CF_CHECK_ERRNO],
+[
+AC_MSG_CHECKING([declaration of $1])
+AC_CACHE_VAL(cf_cv_dcl_$1,[
+    AC_TRY_COMPILE([
+#include <stdio.h>
+#include <sys/types.h>
+#include <errno.h> ],
+    [long x = (long) $1],
+    [eval 'cf_cv_dcl_'$1'=yes'],
+    [eval 'cf_cv_dcl_'$1'=no]')])
+eval 'cf_result=$cf_cv_dcl_'$1
+AC_MSG_RESULT($cf_result)
+
+# It's possible (for near-UNIX clones) that the data doesn't exist
+if test $cf_result = no ; then
+    eval 'cf_result=DECL_'$1
+    CF_UPPER(cf_result,$cf_result)
+    AC_DEFINE_UNQUOTED($cf_result)
+    AC_MSG_CHECKING([existence of $1])
+    AC_CACHE_VAL(cf_cv_have_$1,[
+        AC_TRY_LINK([
+#undef $1
+extern long $1;
+],
+            [$1 = 2],
+            [eval 'cf_cv_have_'$1'=yes'],
+            [eval 'cf_cv_have_'$1'=no'])])
+    eval 'cf_result=$cf_cv_have_'$1
+    AC_MSG_RESULT($cf_result)
+fi
+])dnl
+dnl ---------------------------------------------------------------------------
 dnl Check if a function is declared by including a set of include files.
 dnl Invoke the corresponding actions according to whether it is found or not.
 dnl CF_CHECK_FUNCDECL(INCLUDES, FUNCTION, [ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND]])
@@ -330,15 +365,7 @@ dnl ---------------------------------------------------------------------------
 dnl Check if 'errno' is declared in <errno.h>
 AC_DEFUN([CF_ERRNO],
 [
-AC_MSG_CHECKING([for errno external decl])
-AC_CACHE_VAL(cf_cv_extern_errno,[
-    AC_TRY_COMPILE([
-#include <errno.h>],
-        [int x = errno],
-        [cf_cv_extern_errno=yes],
-        [cf_cv_extern_errno=no])])
-AC_MSG_RESULT($cf_cv_extern_errno)
-test $cf_cv_extern_errno = no && AC_DEFINE(DECL_ERRNO)
+CF_CHECK_ERRNO(errno)
 ])dnl
 dnl ---------------------------------------------------------------------------
 AC_DEFUN([CF_FANCY_CURSES],
@@ -710,8 +737,15 @@ dnl and the linker will record a dependency.
 AC_DEFUN([CF_NCURSES_LIBS],
 [AC_REQUIRE([CF_NCURSES_CPPFLAGS])
 
+	# This works, except for the special case where we find gpm, but
+	# ncurses is in a nonstandard location via $LIBS, and we really want
+	# to link gpm.
 cf_ncurses_LIBS=""
-AC_CHECK_LIB(gpm,Gpm_Open,[AC_CHECK_LIB(gpm,initscr,,[cf_ncurses_LIBS="-lgpm"])])
+cf_ncurses_SAVE="$LIBS"
+AC_CHECK_LIB(gpm,Gpm_Open,
+	[AC_CHECK_LIB(gpm,initscr,
+		[LIBS="$cf_ncurses_SAVE"],
+		[cf_ncurses_LIBS="-lgpm"])])
 
 case $host_os in #(vi
 freebsd*)
@@ -1065,11 +1099,28 @@ dnl ---------------------------------------------------------------------------
 dnl Look for the slang library.
 AC_DEFUN([CF_SLANG_LIBS],
 [
+cf_slang_LIBS1="$LIBS"
+CF_TERMCAP_LIBS
+cf_slang_LIBS2="$LIBS"
 AC_CHECK_FUNC(acos,,[CF_RECHECK_FUNC(acos,m,LIBS)])
 CF_FIND_LIBRARY(slang,
 	[#include <slang.h>],
 	[SLtt_get_screen_size()],
 	SLtt_get_screen_size)
+cf_slang_LIBS3="$LIBS"
+AC_MSG_CHECKING(if we can link slang without termcap)
+if test -n "$cf_slang_LIBS1" ; then
+	cf_exclude=`echo ".$cf_slang_LIBS2" | sed -e "s@$cf_slang_LIBS1@@" -e 's@^.@@'`
+else
+	cf_exclude="$cf_slang_LIBS2"
+fi
+LIBS=`echo ".$cf_slang_LIBS3" | sed -e "s@$cf_exclude@@" -e 's@^.@@'`
+AC_TRY_LINK([#include <slang.h>],
+	[SLtt_get_screen_size()],
+	[cf_result=yes],
+	[cf_result=no])
+AC_MSG_RESULT($cf_result)
+test $cf_result = no && LIBS="$cf_slang_LIBS3"
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl	Remove "-g" option from the compiler options
@@ -1099,33 +1150,15 @@ AC_MSG_RESULT($cf_cv_system_mail_flags)
 AC_DEFINE_UNQUOTED(SYSTEM_MAIL_FLAGS, "$cf_cv_system_mail_flags")
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl Check for declaration of sys_errlist in one of stdio.h and errno.h.
-dnl Declaration of sys_errlist on BSD4.4 interferes with our declaration.
-dnl Reported by Keith Bostic.
+dnl Check for declaration of sys_nerr and sys_errlist in one of stdio.h and
+dnl errno.h.  Declaration of sys_errlist on BSD4.4 interferes with our
+dnl declaration.  Reported by Keith Bostic.
 AC_DEFUN([CF_SYS_ERRLIST],
 [
-AC_MSG_CHECKING([declaration of sys_errlist])
-AC_CACHE_VAL(cf_cv_dcl_sys_errlist,[
-    AC_TRY_COMPILE([
-#include <stdio.h>
-#include <sys/types.h>
-#include <errno.h> ],
-    [char *c = (char *) *sys_errlist],
-    [cf_cv_dcl_sys_errlist=yes],
-    [cf_cv_dcl_sys_errlist=no])])
-AC_MSG_RESULT($cf_cv_dcl_sys_errlist)
-
-# It's possible (for near-UNIX clones) that sys_errlist doesn't exist
-if test $cf_cv_dcl_sys_errlist = no ; then
-    AC_DEFINE(DECL_SYS_ERRLIST)
-    AC_MSG_CHECKING([existence of sys_errlist])
-    AC_CACHE_VAL(cf_cv_have_sys_errlist,[
-        AC_TRY_LINK([#include <errno.h>],
-            [char *c = (char *) *sys_errlist],
-            [cf_cv_have_sys_errlist=yes],
-            [cf_cv_have_sys_errlist=no])])
-    AC_MSG_RESULT($cf_cv_have_sys_errlist)
-fi
+for cf_name in sys_nerr sys_errlist
+do
+    CF_CHECK_ERRNO($cf_name)
+done
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl Look for termcap libraries, needed by some versions of slang.

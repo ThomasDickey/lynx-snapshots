@@ -78,6 +78,8 @@ message:
 do_chartrans_stuff:
 	-cd chrtrans && $(MAKE) \
 		SITE_DEFS="$(SITE_DEFS)" \
+		CFLAGS="$(CFLAGS)" \
+		CPPFLAGS="$(CPPFLAGS)" \
 		CC="$(CC)" tables
 
 lint:

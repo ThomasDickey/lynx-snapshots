@@ -27,9 +27,9 @@ mkgmtime(t)
 register struct tm	*t;
 {
 	register short	month, year;
-	register long	time;
+	register time_t	result;
 	static int	m_to_d[12] =
-{0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334};
+		{0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334};
 
 	month = t->tm_mon;
 	year = t->tm_year + month / 12 + 1900;
@@ -39,22 +39,22 @@ register struct tm	*t;
 		year -= 1;
 		month += 12;
 	}
-	time = (year - 1970) * 365 + (year - 1969) / 4 + m_to_d[month];
-	time = (year - 1970) * 365 + m_to_d[month];
+	result = (year - 1970) * 365 + (year - 1969) / 4 + m_to_d[month];
+	result = (year - 1970) * 365 + m_to_d[month];
 	if (month <= 1)
 		year -= 1;
-	time += (year - 1968) / 4;
-	time -= (year - 1900) / 100;
-	time += (year - 1600) / 400;
-	time += t->tm_mday;
-	time -= 1;
-	time *= 24;
-	time += t->tm_hour;
-	time *= 60;
-	time += t->tm_min;
-	time *= 60;
-	time += t->tm_sec;
-	return(time);
+	result += (year - 1968) / 4;
+	result -= (year - 1900) / 100;
+	result += (year - 1600) / 400;
+	result += t->tm_mday;
+	result -= 1;
+	result *= 24;
+	result += t->tm_hour;
+	result *= 60;
+	result += t->tm_min;
+	result *= 60;
+	result += t->tm_sec;
+	return(result);
 }
 
 /*
@@ -66,12 +66,12 @@ time_t
 mktime(t)
 struct tm	*t;
 {
-	time_t	now;
+	time_t	result;
 
 	tzset();
-	now = mkgmtime(t) + timezone;
+	result = mkgmtime(t) + timezone;
 	if (t->tm_isdst > 0
-	|| (t->tm_isdst < 0 && localtime(&now)->tm_isdst))
-		now -= 3600;
-	return(now);
+	|| (t->tm_isdst < 0 && localtime(&result)->tm_isdst))
+		result -= 3600;
+	return(result);
 }

@@ -349,7 +349,8 @@ re_read:
    }
 #endif /* !USE_SLANG || VMS */
 
-#ifdef DOSPATH
+#ifdef RAWDOSKEYHACK
+ if (raw_dos_key_hack) {
 	if (c == 0) c = '/';
 	if (c > 255) {      /* handle raw dos keys */
 		switch (c)
@@ -362,7 +363,9 @@ re_read:
 			default: break;
 		}
 	}
-#endif
+ }
+#endif /* RAWDOSKEYHACK */
+
 #ifdef USE_GETCHAR
     if (c == EOF && errno == EINTR)	/* Ctrl-Z causes EINTR in getchar() */
         goto re_read;
@@ -613,6 +616,34 @@ re_read:
 	   c=127;		   /* backspace key (delete, not Ctrl-H) */
 	   break;
 #endif /* KEY_BACKSPACE */
+#ifdef KEY_DC
+	case KEY_DC:
+	   c=REMOVE_KEY;	   /* delete character */
+	   break;
+#endif /* KEY_DC */
+#ifdef KEY_IC
+	case KEY_IC:
+	   c=INSERT_KEY;	   /* insert character */
+	   break;
+#endif /* KEY_IC */
+#ifdef KEY_FIND
+	case KEY_FIND:
+	   c=FIND_KEY;		   /* find */
+	   break;
+#endif /* KEY_FIND */
+#ifdef KEY_SELECT
+	case KEY_SELECT:
+	   c=SELECT_KEY;	   /* select */
+	   break;
+#endif /* KEY_SELECT */
+#ifdef KEY_F
+	case KEY_F(1):
+	   c=F1;		   /* help-key */
+	   break;
+	case KEY_F(16):
+	   c=DO_KEY;		   /* help-key */
+	   break;
+#endif /* KEY_F */
 
 #ifdef NCURSES_MOUSE_VERSION
 	case KEY_MOUSE:
