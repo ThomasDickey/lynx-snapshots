@@ -15,6 +15,17 @@
 
 #include <LYLeaks.h>
 
+PRIVATE BOOLEAN editor_can_position NOARGS
+{
+#ifdef VMS
+    return (strstr(editor, "sedt") || strstr(editor, "SEDT"));
+#else
+    return (strstr(editor, "emacs") || strstr(editor, "vi") ||
+	strstr(editor, "pico") || strstr(editor, "jove") ||
+	strstr(editor, "jed"));
+#endif
+}
+
 /*
  *  In edit mode invoke either emacs, vi, pico, jove, jed sedt or the
  *  default editor to display and edit the current file.
@@ -27,9 +38,13 @@ PUBLIC int edit_current_file ARGS3(
 	int,		cur,
 	int,		lineno)
 {
-    char command[512];
+    int result = FALSE;
+    int params = 1;
+    char *format = "%s %s";
+    char *command = NULL;
     char *filename = NULL;
     char *colon, *number_sign;
+    char position[80];
     FILE *fp;
 
     /*
@@ -63,13 +78,16 @@ PUBLIC int edit_current_file ARGS3(
 	filename = HTParse(newfile, "", PARSE_PATH+PARSE_PUNCTUATION);
 	HTUnEscape(filename);
 #if defined (DOSPATH) || defined (__EMX__)
-	if (strlen(filename)>1) filename++;
+	if (strlen(filename) > 1) {	/* FIXME: why do we need to do this? */
+	    int n;
+	    for (n = 0; (filename[n] = filename[n+1]) != 0; n++)
+		;
+	}
 #endif
 	if ((fp = fopen(HTSYS_name(filename), "r")) == NULL)
 	{
 	    HTAlert(COULD_NOT_ACCESS_FILE);
-	    FREE(filename);
-	    goto failure;
+	    goto done;
 	}
 #if !defined (VMS) && !defined (DOSPATH) && !defined (__EMX__)
     }
@@ -83,7 +101,7 @@ PUBLIC int edit_current_file ARGS3(
     if ((fp = fopen(HTSYS_name(filename), "a")) == NULL)
     {
 	HTUserMsg(NOAUTH_TO_EDIT_FILE);
-	goto failure;
+	goto done;
     }
     fclose(fp);
 #endif /* VMS || CANT_EDIT_UNWRITABLE_FILES */
@@ -98,36 +116,36 @@ PUBLIC int edit_current_file ARGS3(
     /*
      *  Set up the command for the editor. - FM
      */
+    *position = 0;
 #ifdef VMS
-    if ((strstr(editor, "sedt") || strstr(editor, "SEDT")) &&
-	((lineno - 1) + (nlinks ? links[cur].ly : 0)) > 0) {
-	sprintf(command, "%s %s -%d",
-			 editor,
-			 HTVMS_name("", filename),
-			 ((lineno - 1) + (nlinks ? links[cur].ly : 0)));
+    lineno--;
+#endif
+    lineno += (nlinks ? links[cur].ly : 0);
+    if (lineno > 0)
+	sprintf(position, "%d", lineno);
+
+    if (editor_can_position() && *position) {
+#ifdef VMS
+	format = "%s %s -%s";
+	HTAddParam(&command, format, params++, editor);
+	HTAddParam(&command, format, params++, HTVMS_name("", filename));
+	HTAddParam(&command, format, params++, position);
+	HTEndParam(&command, format, params);
+#else
+	format = "%s +%s %s";
+	HTAddParam(&command, format, params++, editor);
+	HTAddParam(&command, format, params++, position);
+	HTAddParam(&command, format, params++, HTSYS_name(filename));
+	HTEndParam(&command, format, params);
+#endif
     } else {
-	sprintf(command, "%s %s", editor, HTVMS_name("", filename));
+	HTAddParam(&command, format, params++, editor);
+	HTAddParam(&command, format, params++, HTSYS_name(filename));
+	HTEndParam(&command, format, params);
     }
-#else
-    if (strstr(editor, "emacs") || strstr(editor, "vi") ||
-	strstr(editor, "pico") || strstr(editor, "jove") ||
-	strstr(editor, "jed"))
-	sprintf(command, "%s +%d \"%s\"",
-			 editor,
-			 (lineno + (nlinks ? links[cur].ly : 0)),
-			 HTSYS_name(filename));
-    else
-#ifdef __DJGPP__
-	sprintf(command, "%s %s", editor, HTDOS_name(filename));
-#else
-	sprintf(command, "%s \"%s\"", editor, HTSYS_name(filename));
-#endif /* __DJGPP__ */
-#endif /* VMS */
+
     CTRACE(tfp, "LYEdit: %s\n", command);
     CTRACE_SLEEP(MessageSecs);
-#ifndef __EMX__
-    FREE(filename);
-#endif
 
     /*
      *  Invoke the editor. - FM
@@ -136,18 +154,16 @@ PUBLIC int edit_current_file ARGS3(
     LYSystem(command);
     start_curses();
 
-    /*
-     *  Restore the fragment if there was one. - FM
-     */
-    if (number_sign)
-	*number_sign = '#';
-    return TRUE;
+    result = TRUE;
 
-failure:
+done:
     /*
      *  Restore the fragment if there was one. - FM
      */
     if (number_sign)
 	*number_sign = '#';
-    return FALSE;
+
+    FREE(command);
+    FREE(filename);
+    return (result);
 }

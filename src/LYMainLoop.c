@@ -5009,7 +5009,9 @@ check_add_bookmark_to_self:
 		    break;
 		}
 #endif /* VMS */
-		fprintf(tfp, "\t\t%s\n\n", LYNX_TRACELOG_TITLE);
+		fprintf(tfp, "\t\t%s (%s)\n\n",
+			     LYNX_TRACELOG_TITLE,
+			     LYNX_VERSION);
 	    }
 	    HTUserMsg(WWW_TraceFlag ? TRACE_ON : TRACE_OFF);
 	    break;

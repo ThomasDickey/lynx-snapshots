@@ -1684,7 +1684,7 @@ PUBLIC int main ARGS2(
      */
     StrAllocCopy(helpfilepath, helpfile);
     if ((cp = LYPathLeaf(helpfilepath)) != helpfilepath)
-        *cp = '\0';
+	*cp = '\0';
     LYAddHtmlSep(&helpfilepath);
 
     /*
@@ -1747,7 +1747,9 @@ PUBLIC int main ARGS2(
 	    LYisConfiguredForX = TRUE;
 	}
 	ena_csi((LYlowest_eightbit[current_char_set] > 155));
+	LYOpenCloset();
 	status = mainloop();
+	LYCloseCloset();
 	cleanup();
 	exit(status);
     }

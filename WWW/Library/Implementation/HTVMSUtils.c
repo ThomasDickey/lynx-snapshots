@@ -33,8 +33,6 @@
 #include <LYUtils.h>
 #include <LYLeaks.h>
 
-#define FREE(x) if (x) {free(x); x = NULL;}
-
 #define INFINITY 512            	/* File name length @@ FIXME */
 
 PUBLIC BOOL HTVMSFileVersions=FALSE; /* Include version numbers in listing? */

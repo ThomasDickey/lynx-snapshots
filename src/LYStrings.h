@@ -188,12 +188,14 @@ extern void LYSetupEdit PARAMS((
 	int		maxdsp));
 extern void LYRefreshEdit PARAMS((
 	EditFieldData *	edit));
+extern int EditBinding PARAMS((int ch));
 extern int LYEdit1 PARAMS((
 	EditFieldData *	edit,
 	int		ch,
 	int		action,
 	BOOL		maxMessage));
-
+extern void LYOpenCloset NOPARAMS;
+extern void LYCloseCloset NOPARAMS;
 
 extern int current_lineedit;
 extern char * LYLineeditNames[];

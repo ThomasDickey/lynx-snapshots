@@ -1126,8 +1126,8 @@ PRIVATE void HTML_start_element ARGS6(
 	    if (present && present[HTML_LINK_CLASS] &&
 	    value && *value[HTML_LINK_CLASS]!='\0')
 	    {
-		char tmp[1024];
-		sprintf(tmp, "link.%s.%s.%s", value[HTML_LINK_CLASS], title, value[HTML_LINK_CLASS]);
+		char *tmp = 0;
+		HTSprintf0(&tmp, "link.%s.%s.%s", value[HTML_LINK_CLASS], title, value[HTML_LINK_CLASS]);
 		CTRACE(tfp, "CSSTRIM:link=%s\n", tmp);
 
 		HText_characterStyle(me->text, hash_code(tmp), 1);
@@ -1136,6 +1136,7 @@ PRIVATE void HTML_start_element ARGS6(
 		HTML_put_string(me, value[HTML_LINK_CLASS]);
 		HTML_put_string(me, ")");
 		HText_characterStyle(me->text, hash_code(tmp), 0);
+		FREE(tmp);
 	    }
 	    else
 #endif

@@ -25,6 +25,17 @@ extern unsigned short *LYKbLayout;
 extern BOOL HTPassHighCtrlRaw;
 extern HTCJKlang HTCJK;
 
+/*Allowing the user to press tab when entering URL to get the closest
+  match in the closet*/
+#define LYClosetSize 100
+static char* LYCloset[LYClosetSize]; /* Closet with LYClosetSize shelves */
+static int LYClosetTop = 0;		/*Points to the next empty shelf */
+
+PRIVATE char *LYFindInCloset PARAMS((
+	char*		base));
+PRIVATE int LYAddToCloset PARAMS((
+	char*		str));
+
 /* If you want to add mouse support for some new platform, it's fairly
 ** simple to do.  Once you've determined the X and Y coordinates of
 ** the mouse event, loop through the elements in the links[] array and
@@ -2003,6 +2014,7 @@ PUBLIC int LYgetstr ARGS4(
     int x, y, MaxStringSize;
     int ch;
     EditFieldData MyEdit;
+    char *res;
 
     LYGetYX(y, x);		/* Use screen from cursor position to eol */
     MaxStringSize = (bufsize < sizeof(MyEdit.buffer)) ?
@@ -2025,6 +2037,7 @@ again:
 #endif /* VMS */
 	if (recall && (ch == UPARROW || ch == DNARROW)) {
 	    strcpy(inputline, MyEdit.buffer);
+	    LYAddToCloset(MyEdit.buffer);
 	    return(ch);
 	}
 	if (keymap[ch + 1] == LYK_REFRESH)
@@ -2033,6 +2046,17 @@ again:
 	case LYE_TAB:
 	    ch = '\t';
 	    /* fall through */
+	    res = LYFindInCloset(MyEdit.buffer);
+	    if (res != 0) {
+		LYEdit1(&MyEdit, '\0', LYE_ERASE, FALSE);
+		while (*res != '\0') {
+		    LYLineEdit(&MyEdit, (int)(*res), FALSE);
+		    res++;
+		}
+	    } else {
+		ch = '\0';
+	    }
+	    break;
 	case LYE_AIX:
 	    /*
 	     *	Hex 97.
@@ -2051,6 +2075,7 @@ again:
 	     *	Terminate the string and return.
 	     */
 	    strcpy(inputline, MyEdit.buffer);
+	    LYAddToCloset(MyEdit.buffer);
 	    return(ch);
 
 	case LYE_ABORT:
@@ -2513,6 +2538,61 @@ PUBLIC char * LYno_attr_mbcs_strstr ARGS5(
     } /* end for */
 
     return(NULL);
+}
+
+PUBLIC void LYOpenCloset NOARGS
+{
+    /* We initialize the list-looka-like, i.e., the Closet */
+    int i = 0;
+    while(i < LYClosetSize){
+	LYCloset[i] = NULL;
+	i = i + 1;
+    }
+    LYClosetTop = 0;
+}
+
+PUBLIC void LYCloseCloset NOARGS
+{
+    int i = 0;
+
+    /* Clean up the list-looka-like, i.e., the Closet */
+    while (i < LYClosetSize){
+	FREE(LYCloset[i]);
+	i = i + 1;
+    }
+}
+
+/*
+ * Strategy:  We begin at the top and search downwards.  We return the first
+ * match, i.e., the newest since we search from the top.  This should be made
+ * more intelligent, but works for now.
+ */
+PRIVATE char * LYFindInCloset ARGS1(char*, base)
+{
+    int shelf;
+    unsigned len = strlen(base);
+
+    shelf = (LYClosetTop - 1 + LYClosetSize) % LYClosetSize;
+
+    while (LYCloset[shelf] != NULL){
+	if (!strncmp(base, LYCloset[shelf], len)) {
+	    return(LYCloset[shelf]);
+	}
+	shelf = (shelf - 1 + LYClosetSize) % LYClosetSize;
+    }
+    return(0);
+}
+
+PRIVATE int LYAddToCloset ARGS1(char*, str)
+{
+    unsigned len = strlen(str);
+
+    LYCloset[LYClosetTop] = malloc(len+1);
+    strcpy(LYCloset[LYClosetTop], str);
+
+    LYClosetTop = (LYClosetTop + 1) % LYClosetSize;
+    FREE(LYCloset[LYClosetTop]);
+    return(1);
 }
 
 /*
