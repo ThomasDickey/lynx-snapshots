@@ -195,6 +195,7 @@ BOOLEAN bold_name_anchors = FALSE;
 BOOLEAN case_sensitive = CASE_SENSITIVE_ALWAYS_ON;
 BOOLEAN check_mail = CHECKMAIL;
 BOOLEAN child_lynx = FALSE;
+BOOLEAN dump_links_only = FALSE;
 BOOLEAN dump_output_immediately = FALSE;
 BOOLEAN emacs_keys = EMACS_KEYS_ALWAYS_ON;
 BOOLEAN error_logging = MAIL_SYSTEM_ERROR_LOGGING;
@@ -207,7 +208,6 @@ BOOLEAN is_www_index = FALSE;
 BOOLEAN jump_buffer = JUMPBUFFER;	/* TRUE if offering default shortcut */
 BOOLEAN lynx_mode = NORMAL_LYNX_MODE;
 BOOLEAN minimal_comments = FALSE;
-BOOLEAN nolist = FALSE;
 BOOLEAN number_fields_on_left = TRUE;
 BOOLEAN number_links_on_left = TRUE;
 BOOLEAN recent_sizechange = FALSE;	/* the window size changed recently? */
@@ -375,6 +375,7 @@ BOOLEAN crawl = FALSE;		/* Do crawl? */
 BOOLEAN keep_mime_headers = FALSE;	/* Include mime headers with source dump */
 BOOLEAN more = FALSE;		/* is there more text to display? */
 BOOLEAN more_links = FALSE;	/* Links beyond a displayed page with no links? */
+BOOLEAN no_list = FALSE;
 BOOLEAN no_url_redirection = FALSE;	/* Don't follow URL redirections */
 BOOLEAN pseudo_inline_alts = MAKE_PSEUDO_ALTS_FOR_INLINES;
 BOOLEAN scan_for_buried_news_references = TRUE;
@@ -447,7 +448,7 @@ int LYcols = DFT_COLS;
 int LYlines = DFT_ROWS;
 int MessageSecs;		/* time-delay for important Messages   */
 int ReplaySecs;			/* time-delay for command-scripts */
-int ccount = 0;			/* Starting number for lnk#.dat files in crawls */
+int crawl_count = 0;		/* Starting number for lnk#.dat files in crawls */
 int dump_output_width = 0;
 int lynx_temp_subspace = 0;	/* > 0 if we made temp-directory */
 int nhist = 0;			/* number of history entries */
@@ -571,6 +572,7 @@ BOOLEAN FileInitAlreadyDone = FALSE;
 static BOOLEAN stack_dump = FALSE;
 static char *terminal = NULL;
 static char *pgm;
+static BOOLEAN no_numbers = FALSE;
 static BOOLEAN number_links = FALSE;
 static BOOLEAN number_fields = FALSE;
 static BOOLEAN LYPrependBase = FALSE;
@@ -1771,6 +1773,13 @@ int main(int argc,
     if (vi_keys)
 	set_vi_keys();
 
+    if (no_numbers) {
+	number_links = FALSE;
+	number_fields = FALSE;
+	keypad_mode = NUMBERS_AS_ARROWS;
+	set_numbers_as_arrows();
+    }
+
     if (crawl) {
 	/* No numbered links by default, as documented
 	   in CRAWL.announce. - kw */
@@ -2035,7 +2044,9 @@ int main(int argc,
 	 */
 	if (crawl && !number_links && !number_fields) {
 	    keypad_mode = NUMBERS_AS_ARROWS;
-	} else if (!nolist) {
+	} else if (no_numbers) {
+	    keypad_mode = NUMBERS_AS_ARROWS;
+	} else if (!no_list) {
 	    if (!links_are_numbered()) {
 		if (number_fields)
 		    keypad_mode = LINKS_AND_FIELDS_ARE_NUMBERED;
@@ -2059,7 +2070,7 @@ int main(int argc,
 	    CTRACE((tfp, "dumping %d:%d %s\n",
 		    i + 1, HTList_count(Goto_URLs), startfile));
 	    status = mainloop();
-	    if (!nolist &&
+	    if (!no_list &&
 		!crawl &&	/* For -crawl it has already been done! */
 		links_are_numbered())
 		printlist(stdout, FALSE);
@@ -2068,7 +2079,7 @@ int main(int argc,
 	}
 #else
 	status = mainloop();
-	if (!nolist &&
+	if (!no_list &&
 	    !crawl &&		/* For -crawl it has already been done! */
 	    links_are_numbered())
 	    printlist(stdout, FALSE);
@@ -2514,9 +2525,9 @@ static int convert_to_fun(char *next_arg)
 	if ((cp1 = strchr(outformat, ';')) != NULL) {
 	    if ((cp2 = LYstrstr(cp1, "charset")) != NULL) {
 		cp2 += 7;
-		while (*cp2 == ' ' || *cp2 == '=' || *cp2 == '\"')
+		while (*cp2 == ' ' || *cp2 == '=' || *cp2 == '"')
 		    cp2++;
-		for (cp4 = cp2; (*cp4 != '\0' && *cp4 != '\"' &&
+		for (cp4 = cp2; (*cp4 != '\0' && *cp4 != '"' &&
 				 *cp4 != ';' &&
 				 !WHITE(*cp4)); cp4++) ;	/* do nothing */
 		*cp4 = '\0';
@@ -3461,8 +3472,12 @@ keys (may be incompatible with some curses packages)"
    ),
 #endif
    PARSE_INT(
-      "link",		4|NEED_INT_ARG,		ccount,
+      "link",		4|NEED_INT_ARG,		crawl_count,
       "=NUMBER\nstarting count for lnk#.dat files produced by -crawl"
+   ),
+   PARSE_SET(
+      "listonly",	4|TOGGLE_ARG,		dump_links_only,
+      "with -dump, forces it to show only the list of links"
    ),
    PARSE_SET(
       "localhost",	4|SET_ARG,		local_host_only,
@@ -3537,7 +3552,7 @@ keys (may be incompatible with some curses packages)"
       "disable transmission of Referer headers for file URLs"
    ),
    PARSE_SET(
-      "nolist",		4|SET_ARG,		nolist,
+      "nolist",		4|SET_ARG,		no_list,
       "disable the link list feature in dumps"
    ),
    PARSE_SET(
@@ -3550,6 +3565,10 @@ keys (may be incompatible with some curses packages)"
       "\nmake window size change handler non-restarting"
    ),
 #endif /* HAVE_SIGACTION */
+   PARSE_SET(
+      "nonumbers",	4|SET_ARG,		no_numbers,
+      "disable the link/form numbering feature in dumps"
+   ),
    PARSE_FUN(
       "nopause",	4|FUNCTION_ARG,		nopause_fun,
       "disable forced pauses for statusline messages"

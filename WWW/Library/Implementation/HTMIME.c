@@ -155,11 +155,11 @@ void HTMIME_TrimDoubleQuotes(char *value)
     int i;
     char *cp = value;
 
-    if (!(cp && *cp) || *cp != '\"')
+    if (!(cp && *cp) || *cp != '"')
 	return;
 
     i = strlen(cp);
-    if (cp[(i - 1)] != '\"')
+    if (cp[(i - 1)] != '"')
 	return;
     else
 	cp[(i - 1)] = '\0';
@@ -219,10 +219,10 @@ static int pumpData(HTStream *me)
 		int chndl;
 
 		cp2 += 7;
-		while (*cp2 == ' ' || *cp2 == '=' || *cp2 == '\"')
+		while (*cp2 == ' ' || *cp2 == '=' || *cp2 == '"')
 		    cp2++;
 		StrAllocCopy(cp3, cp2);		/* copy to mutilate more */
-		for (cp4 = cp3; (*cp4 != '\0' && *cp4 != '\"' &&
+		for (cp4 = cp3; (*cp4 != '\0' && *cp4 != '"' &&
 				 *cp4 != ';' && *cp4 != ':' &&
 				 !WHITE(*cp4)); cp4++) ;	/* do nothing */
 		*cp4 = '\0';
@@ -255,6 +255,17 @@ static int pumpData(HTStream *me)
 						UCT_STAGE_MIME,
 						UCT_SETBY_DEFAULT);
 		    }
+		} else {
+		    /*
+		     * Something like 'big5' - we cannot translate it, but
+		     * the user may still be able to navigate the links.
+		     */
+		    *cp1 = '\0';
+		    me->format = HTAtom_for(cp);
+		    StrAllocCopy(me->anchor->charset, cp4);
+		    HTAnchor_setUCInfoStage(me->anchor, chndl,
+					    UCT_STAGE_MIME,
+					    UCT_SETBY_MIME);
 		}
 		if (chartrans_ok) {
 		    LYUCcharset *p_in =
@@ -623,9 +634,9 @@ static int dispatchField(HTStream *me)
 	if (*cp == '\0')
 	    break;
 	StrAllocCopy(me->anchor->SugFname, cp);
-	if (*me->anchor->SugFname == '\"') {
+	if (*me->anchor->SugFname == '"') {
 	    if ((cp = strchr((me->anchor->SugFname + 1),
-			     '\"')) != NULL) {
+			     '"')) != NULL) {
 		*(cp + 1) = '\0';
 		HTMIME_TrimDoubleQuotes(me->anchor->SugFname);
 	    } else {
@@ -749,7 +760,7 @@ static int dispatchField(HTStream *me)
 	 * double-quotes.  - FM
 	 */
 	for (i = 0, j = 0; me->value[i]; i++) {
-	    if (me->value[i] != ' ' && me->value[i] != '\"') {
+	    if (me->value[i] != ' ' && me->value[i] != '"') {
 		me->value[j++] = (char) TOLOWER(me->value[i]);
 	    }
 	}

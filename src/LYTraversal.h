@@ -7,7 +7,7 @@
 #include <HTUtils.h>		/* BOOL, ARGS */
 #endif
 
-extern BOOLEAN lookup(char *target);
+extern BOOLEAN lookup_link(char *target);
 extern void add_to_table(char *target);
 extern void add_to_traverse_list(char *fname, char *prev_link_name);
 extern void dump_traversal_history(void);

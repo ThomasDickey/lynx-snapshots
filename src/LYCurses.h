@@ -295,7 +295,7 @@ extern WINDOW *LYtopwindow(void);
 #endif /* NCURSES */
 
 extern void LYbox(WINDOW * win, BOOLEAN formfield);
-extern WINDOW *LYstartPopup(int top_y, int left_x, int height, int width);
+extern WINDOW *LYstartPopup(int *top_y, int *left_x, int *height, int *width);
 
 /*
  * Useful macros not in PDCurses or very old ncurses headers.
@@ -367,6 +367,24 @@ extern long LYgetattrs(WINDOW * win);
 extern int LYlines;		/* replaces LINES */
 extern int LYcols;		/* replaces COLS */
 
+/*
+ * The scrollbar, if used, occupies the rightmost column.
+ */
+#ifdef USE_SCROLLBAR
+#define LYbarWidth (LYShowScrollbar ? 1 : 0)
+#else
+#define LYbarWidth 0
+#endif
+
+/*
+ * Usable limits for display:
+ */
+#if defined(FANCY_CURSES) || defined(USE_SLANG)
+#define LYcolLimit (LYcols - LYbarWidth)
+#else
+#define LYcolLimit (LYcols - 1)
+#endif
+
 #ifdef USE_CURSES_PADS
 extern WINDOW *LYwin;
 extern int LYshiftWin;
@@ -389,6 +407,9 @@ extern int Masked_Attr;
 extern BOOLEAN setup(char *terminal);
 extern int LYscreenHeight(void);
 extern int LYscreenWidth(void);
+extern int LYstrExtent(const char *string, int len, int maxCells);
+extern int LYstrExtent2(const char *string, int len);
+extern int LYstrCells(const char *string);
 extern void LYclear(void);
 extern void LYclrtoeol(void);
 extern void LYerase(void);
@@ -727,9 +748,9 @@ extern void lynx_stop_underline(void);
  * Adjust our "hidden" cursor position accordingly.
  */
 #if defined(FANCY_CURSES) || defined(USE_SLANG)
-#define LYHideCursor() LYmove((LYlines - 1), (LYcols - 1))
+#define LYHideCursor() LYmove((LYlines - 1), (LYcolLimit))
 #else
-#define LYHideCursor() LYmove((LYlines - 1), (LYcols - 2))
+#define LYHideCursor() LYmove((LYlines - 1), (LYcolLimit - 1))
 #endif
 
 extern void LYstowCursor(WINDOW * win, int row, int col);

@@ -1,6 +1,69 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2004-10-10 (2.8.6dev.6)
+* highlight the target and pause for 20 milliseconds when selecting a link with
+  the mouse -GV
+* improve layout of options-menu and info-page for multibyte character sets by
+  computing the extent of the labels.  This works only for wide-character
+  curses (this addresses part of Debian #240069) -TD
+* improve check in LYstartPopup() for case where a window would be created too
+  far right to be entirely visible.  ncurses changes in 20040417 to allow
+  windows to extend beyond the terminal limits exposed this problem (which may
+  have occurred with other versions of curses).  Older versions of ncurses
+  would return an error in this case (forcing lynx to do the proper layout),
+  obscuring the actual problem.  Noticed that the same problem applies to slang
+  configuration, and applied a comparable fix there too -TD
+* modify HTConfirmCookie() to ensure the translator's note is copied into the
+  lynx.pot file, by adding a gettext("Y/N/A/V") call after the comment -TD
+* remove references in makefile.in to the "intl" subdirectory since that is no
+  longer packaged with lynx -TD
+* modify column limits, allowing text to be written to the last column on the
+  screen.  This allows users to view text which is formatted for 80 columns
+  without the last character of each line wrapping to the next line -TD
+* minor fixes to fr.po (Debian #119751, and aspell) -TD
+* remove newline from format in lookup_reject(), fixes a bug introduced in
+  2.8.5dev.2 which caused traversal reject-lookups to fail -TD
+* minor fixes to fr.po, cs.po and pt_BR.po to eliminate fatal errors as
+  reported by "msgfmt -c -v" -TD
+* minor fix to fr.po (Debian #271048, report/patch by Arnaud Giersch).
+* update URL for "HTML Quick Reference Guide" in lynx_help_main.html (report
+  by Jim Jackson).
+* update hu.po from
+	http://www.iro.umontreal.ca/translation/maint/lynx
+* remove a "defined(gettext)" from the ifdef's in HTConfirmCookie(), since
+  recent GNU gettext, e.g., 0.13.1, introduced an incompatible/undocumented
+  change to make the function a macro which is defined in terms of dgettext()
+  (Debian #204994, report by Mattias Ostergren).
+* modify pumpData() in HTMIME.c to improve recovery when a charset is found
+  that cannot be translated.  Before this change, the charset was not stripped
+  from the format string, e.g.,
+	text/html; charset=big5
+  and since there would be no match for the format, lynx would offer to simply
+  download the page (if interactive), or refuse to format (for dumps).
+  Although the content of the page is unusable, the user can still navigate
+  the page using the links which may be there (Debian #254603) -TD
+* add -nonumbers option, which modifies the output of -dump to suppress the
+  link-numbering (Debian #255571) -TD
+* add -listonly option, which modifies the output of -dump to show only the
+  list of links (Debian #255571) -TD
+* modify treatment of symbolic links for ftp-URLs to show the link target, as
+  with the local directory editor -TD
+* correct sort-order of local directory listing, using the target of a symbolic
+  link to determine whether it is grouped with files or directories (adapted
+  from patch by Kees Cook) -TD
+* modify template for temporary-directory name, adding "lynx" prefix (Debian
+  #267356) -TD
+* fixes for configure script macros used for --enable-nls when --srcdir is
+  used (from bug report for dialog by Mike Castle) -TD
+* improve configure script macro CF_XOPEN_SOURCE, ensuring that _POSIX_C_SOURCE
+  is defined with a value (comment on comp.sys.stratus newsgroup) -TD
+* reduce TRST_MAXROWSPAN and TRST_MAXCOLSPAN to 200, which is more plausible
+  than 10000 by 1000 (discussion on lynx-dev related to report by Edgard
+  Pineda) -TD
+* modify LYShowInfo.c to entify most strings, and provide for alignment of
+  fields in different locales -TD
+
 2004-06-30 (2.8.6dev.5)
 * use LYEnsureAbsoluteURL() on the value passed to handle_LYK_HELP() in case
   it is of the form file:///path rather than file://localhost/path -DK
@@ -879,7 +942,7 @@ FreeBSD 4.1, 4.8, NetBSD 1.5, 1.6 and OpenBSD 2.8 (curses/ncurses).
 * add environment variable LYNX_LOCALEDIR to simplify configuration on OS/2
   EMX (from discussion with Michel Such) -TD
 * add alias for charsets "ISO-8859-8-I" and "ISO-8859-8-E" to "iso-8859-8"
-  (request by Atsuhito Kohda) -TD
+  (Debian #152441, request by Atsuhito Kohda) -TD
 * modify handling of HTML_SUP to always append '^'.  It was checking if the
   preceding character was a valid hexadecimal code (reported by HN and Steve
   White <swhite@zipcon.net>) -TD

@@ -40,9 +40,11 @@ typedef long int HTMLFont;	/* For now */
 #define LY_SOFT_NEWLINE		((char)8)
 
 #ifdef EBCDIC
-#define IsSpecialAttrChar(a)  (((a) > '\002') && ((a) <= '\011') && ((a)!='\t'))
+#define IsSpecialAttrChar(a)	(((a) > '\002') && ((a) <= '\011') && ((a)!='\t'))
 #else
-#define IsSpecialAttrChar(a)  (((a) > '\002') && ((a) <= '\010'))
+#define IsSpecialAttrChar(a)	(((a) > '\002') && ((a) <= '\010'))
 #endif
+
+#define IsNormalChar(a)		((a) != '\0' && !IsSpecialAttrChar(a))
 
 #endif /* HTFONT_H */

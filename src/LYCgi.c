@@ -67,6 +67,8 @@ static void add_environment_value(char *env_value);
 
 #define PERROR(msg) CTRACE((tfp, "LYNXCGI: %s: %s\n", msg, LYStrerror(errno)))
 
+#define PUTS(buf)    (*target->isa->put_block)(target, buf, strlen(buf))
+
 #ifdef LY_FIND_LEAKS
 static void free_alloced_lynxcgi(void)
 {
@@ -663,28 +665,28 @@ static int LYLoadCGI(const char *arg,
 
     HTSprintf0(&buf, "<html>\n<head>\n<title>%s</title>\n</head>\n<body>\n",
 	       gettext("Good Advice"));
-    (*target->isa->put_block) (target, buf, strlen(buf));
+    PUTS(buf);
 
     HTSprintf0(&buf, "<h1>%s</h1>\n", gettext("Good Advice"));
-    (*target->isa->put_block) (target, buf, strlen(buf));
+    PUTS(buf);
 
     HTSprintf0(&buf, "%s <a\n",
 	       gettext("An excellent http server for VMS is available via"));
-    (*target->isa->put_block) (target, buf, strlen(buf));
+    PUTS(buf);
 
     HTSprintf0(&buf,
 	       "href=\"http://kcgl1.eng.ohio-state.edu/www/doc/serverinfo.html\"\n");
-    (*target->isa->put_block) (target, buf, strlen(buf));
+    PUTS(buf);
 
     HTSprintf0(&buf, ">%s</a>.\n", gettext("this link"));
-    (*target->isa->put_block) (target, buf, strlen(buf));
+    PUTS(buf);
 
     HTSprintf0(&buf, "<p>%s\n",
 	       gettext("It provides state of the art CGI script support.\n"));
-    (*target->isa->put_block) (target, buf, strlen(buf));
+    PUTS(buf);
 
     HTSprintf0(&buf, "</body>\n</html>\n");
-    (*target->isa->put_block) (target, buf, strlen(buf));
+    PUTS(buf);
 
     (*target->isa->_free) (target);
     FREE(buf);

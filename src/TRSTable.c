@@ -23,9 +23,9 @@
 #endif
 
 #ifdef USE_CURSES_PADS
-#  define MAX_STBL_POS (LYwideLines ? MAX_COLS - 1 : LYcols-1)
+#  define MAX_STBL_POS (LYwideLines ? MAX_COLS - 1 : LYcolLimit)
 #else
-#  define MAX_STBL_POS (LYcols-1)
+#  define MAX_STBL_POS (LYcolLimit)
 #endif
 
 /* must be different from HT_ALIGN_NONE and HT_LEFT, HT_CENTER etc.: */

@@ -34,6 +34,7 @@
 #endif
 
 #include <LYGlobalDefs.h>
+#include <LYCurses.h>
 #include <LYLeaks.h>
 
 #define PUTC(c) (*me->targetClass.put_character)(me->target, c)
@@ -623,8 +624,6 @@ static const HTStructuredClass HTMLGeneration =		/* As opposed to print etc */
 /*	Subclass-specific Methods
  *	-------------------------
  */
-extern int LYcols;		/* LYCurses.h, set in LYMain.c  */
-
 HTStructured *HTMLGenerator(HTStream *output)
 {
     HTStructured *me = (HTStructured *) malloc(sizeof(*me));
@@ -655,7 +654,7 @@ HTStructured *HTMLGenerator(HTStream *output)
     } else if (dump_output_immediately) {
 	me->buffer_maxchars = 80;	/* try to honor -width - kw */
     } else {
-	me->buffer_maxchars = LYcols - 2;
+	me->buffer_maxchars = (LYcolLimit - 1);
 	if (me->buffer_maxchars < 38)	/* too narrow, let GridText deal */
 	    me->buffer_maxchars = 40;
     }

@@ -1696,6 +1696,11 @@ static int print_local_dir(DIR *dp, char *localname,
     BOOL need_parent_link = FALSE;
     int status;
     int i;
+    struct stat *actual_info;
+
+#ifdef S_IFLNK
+    struct stat link_info;
+#endif
 
     CTRACE((tfp, "print_local_dir() started\n"));
 
@@ -1796,22 +1801,37 @@ static int print_local_dir(DIR *dp, char *localname,
 	    StrAllocCat(tmpfilename, dirbuf->d_name);
 	    data = (DIRED *) malloc(sizeof(DIRED) + strlen(dirbuf->d_name) + 4);
 	    if (data == NULL) {
-		/* FIXME */
+		status = HT_PARTIAL_CONTENT;
+		break;
 	    }
 	    LYTrimPathSep(tmpfilename);
-	    if (lstat(tmpfilename, &(data->file_info)) < 0)
-		data->file_info.st_mode = 0;
+
+	    actual_info = &(data->file_info);
+#ifdef S_IFLNK
+	    if (lstat(tmpfilename, actual_info) < 0) {
+		actual_info->st_mode = 0;
+	    } else {
+		if (S_ISLNK(actual_info->st_mode)) {
+		    actual_info = &link_info;
+		    if (stat(tmpfilename, actual_info) < 0)
+			actual_info->st_mode = 0;
+		}
+	    }
+#else
+	    if (stat(tmpfilename, actual_info) < 0)
+		actual_info->st_mode = 0;
+#endif
 
 	    strcpy(data->file_name, dirbuf->d_name);
 #ifndef DIRED_SUPPORT
-	    if (S_ISDIR(data->file_info.st_mode)) {
+	    if (S_ISDIR(actual_info->st_mode)) {
 		data->sort_tags = 'D';
 	    } else {
 		data->sort_tags = 'F';
 		/* D & F to have first directories, then files */
 	    }
 #else
-	    if (S_ISDIR(data->file_info.st_mode)) {
+	    if (S_ISDIR(actual_info->st_mode)) {
 		if (dir_list_style == MIXED_STYLE) {
 		    data->sort_tags = ' ';
 		    LYAddPathSep0(data->file_name);

@@ -320,6 +320,9 @@ do justification of text.
 .B \-link\fR=\fINUMBER
 starting count for lnk#.dat files produced by \fB\-crawl\fR.
 .TP
+.B -listonly
+for \fB-dump\fR, show only the list of links.
+.TP
 .B \-localhost
 disable URLs that point to remote hosts.
 .TP
@@ -380,6 +383,10 @@ Lynx needs to be compiled with HAVE_SIGACTION defined.
 If available, this flag \fImay\fR cause Lynx to react
 more immediately to window changes when run within
 an \fBxterm\fR.
+.TP
+.B \-nonumbers
+disable link- and field-numbering.
+This overrides \fB-number_fields\fR and \fB-number_links\fR.
 .TP
 .B \-nopause
 disable forced pauses for statusline messages.

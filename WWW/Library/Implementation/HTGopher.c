@@ -77,8 +77,6 @@
 #define END(e) (*targetClass.end_element)(target, e, 0)
 #define FREE_TARGET (*targetClass._free)(target)
 
-#define GOPHER_PROGRESS(foo) HTAlert(foo)
-
 #define NEXT_CHAR HTGetCharacter()
 
 /*

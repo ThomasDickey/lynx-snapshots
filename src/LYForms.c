@@ -387,8 +387,8 @@ static int form_getstr(int cur,
      * Get the initial position of the cursor.
      */
     LYGetYX(startline, startcol);
-    if ((startcol + form->size) > (LYcols - 1))
-	far_col = (LYcols - 1);
+    if ((startcol + form->size) > LYcolLimit)
+	far_col = LYcolLimit;
     else
 	far_col = (startcol + form->size);
 

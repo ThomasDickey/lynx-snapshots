@@ -13,6 +13,7 @@
 #include <HTFile.h>
 #include <UCDefs.h>
 #include <UCAux.h>
+#include <HText.h>
 
 #include <assert.h>
 
@@ -54,14 +55,15 @@ unsigned int cached_styles[CACHEH][CACHEW];
 #include <LYJustify.h>
 
 #ifdef USE_CURSES_PADS
-#  define DISPLAY_COLS (LYwideLines ? MAX_COLS : LYcols)
+#  define DISPLAY_COLS    (LYwideLines ? MAX_COLS : LYcols)
 #  define WRAP_COLS(text) ((text)->stbl ?				\
 			   (LYtableCols <= 0				\
-			    ? DISPLAY_COLS : (LYtableCols * LYcols)/12)	\
-			   : LYcols)
+			    ? DISPLAY_COLS				\
+			    : (LYtableCols * LYcols)/12) - LYbarWidth	\
+			   : LYcolLimit)
 #else
-#  define DISPLAY_COLS LYcols
-#  define WRAP_COLS(text) LYcols
+#  define DISPLAY_COLS    LYcols
+#  define WRAP_COLS(text) LYcolLimit
 #endif
 
 #define FirstHTLine(text) ((text)->last_line->next)
@@ -103,6 +105,7 @@ struct _HTStream {		/* only know it as object */
 #ifdef KANJI_CODE_OVERRIDE
 HTkcode last_kcode = NOKANJI;	/* 1997/11/14 (Fri) 09:09:26 */
 #endif
+
 #ifdef CJK_EX
 #define CHAR_WIDTH 6
 #else
@@ -117,8 +120,8 @@ HTParentAnchor *HTMainAnchor = NULL;	/* Anchor for HTMainText */
 char *HTAppName = LYNX_NAME;	/* Application name */
 char *HTAppVersion = LYNX_VERSION;	/* Application version */
 
-int HTFormNumber = 0;
-int HTFormFields = 0;
+static int HTFormNumber = 0;
+static int HTFormFields = 0;
 char *HTCurSelectGroup = NULL;	/* Form select group name */
 static int HTCurSelectGroupCharset = -1;	/* ... and name's charset */
 int HTCurSelectGroupType = F_RADIO_TYPE;	/* Group type */
@@ -1315,8 +1318,8 @@ static int display_line(HTLine *line, HText *text, int scrline GCC_UNUSED,
      * go over the COLS limit on the display.
      */
     j = (int) line->offset;
-    if (j > (int) DISPLAY_COLS - 1)
-	j = (int) DISPLAY_COLS - 1;
+    if (j >= DISPLAY_COLS)
+	j = DISPLAY_COLS - 1;
 #ifdef USE_SLANG
     SLsmg_forward(j);
     i = j;
@@ -1364,7 +1367,7 @@ static int display_line(HTLine *line, HText *text, int scrline GCC_UNUSED,
 #endif /* SHOW_WHEREIS_TARGETS */
 #endif /* USE_COLOR_STYLE */
 
-    while ((i < DISPLAY_COLS) && ((buffer[0] = *data) != '\0')) {
+    while ((i <= DISPLAY_COLS) && ((buffer[0] = *data) != '\0')) {
 
 #ifndef USE_COLOR_STYLE
 #if defined(SHOW_WHEREIS_TARGETS)
@@ -1456,7 +1459,7 @@ static int display_line(HTLine *line, HText *text, int scrline GCC_UNUSED,
 		lynx_stop_bold();
 	    break;
 
-#endif
+#endif /* !USE_COLOR_STYLE */
 	case LY_SOFT_NEWLINE:
 	    if (!dump_output_immediately) {
 		LYaddch('+');
@@ -1525,27 +1528,24 @@ static int display_line(HTLine *line, HText *text, int scrline GCC_UNUSED,
 		/*
 		 * For CJK strings, by Masanobu Kimura.
 		 */
-		if (i >= DISPLAY_COLS)
-		    goto after_while;
-
-		buffer[1] = *data;
-		buffer[2] = '\0';
-		data++;
-		i++;
-		LYaddstr(buffer);
-		buffer[1] = '\0';
-		/*
-		 * For now, load 'M' into LastDisplayChar,
-		 * but we should check whether it's white
-		 * and if so, use ' '.  I don't know if
-		 * there actually are white CJK characters,
-		 * and we're loading ' ' for multibyte
-		 * spacing characters in this code set,
-		 * but this will become an issue when
-		 * the development code set's multibyte
-		 * character handling is used.  -FM
-		 */
-		LastDisplayChar = 'M';
+		if (i < DISPLAY_COLS) {
+		    buffer[1] = *data;
+		    buffer[2] = '\0';
+		    data++;
+		    i++;
+		    LYaddstr(buffer);
+		    buffer[1] = '\0';
+		    /*
+		     * For now, load 'M' into LastDisplayChar, but we should
+		     * check whether it's white and if so, use ' '.  I don't
+		     * know if there actually are white CJK characters, and
+		     * we're loading ' ' for multibyte spacing characters in
+		     * this code set, but this will become an issue when the
+		     * development code set's multibyte character handling is
+		     * used.  -FM
+		     */
+		    LastDisplayChar = 'M';
+		}
 	    } else {
 		LYaddstr(buffer);
 		LastDisplayChar = buffer[0];
@@ -1553,7 +1553,6 @@ static int display_line(HTLine *line, HText *text, int scrline GCC_UNUSED,
 	}			/* end of switch */
     }				/* end of while */
 
-  after_while:
 #if !(defined(NCURSES_VERSION) || defined(WIDEC_CURSES))
     if (text->has_utf8) {
 	LYtouchline(scrline);
@@ -1717,6 +1716,12 @@ static void display_title(HText *text)
 	LynxChangeStyle(s_forw_backw, STACK_OFF);
     }
 #endif /* USE_COLOR_STYLE */
+#ifdef WIDEC_CURSES
+    i = limit - LYbarWidth - strlen(percent) - LYstrCells(title);
+    if (i <= 0)
+	i = 0;
+    LYmove(0, i);
+#else
     i = (limit - 1) - strlen(percent) - strlen(title);
     if (i >= CHAR_WIDTH) {
 	LYmove(0, i);
@@ -1737,6 +1742,7 @@ static void display_title(HText *text)
 	}
 	LYmove(0, CHAR_WIDTH);
     }
+#endif
     LYaddstr(title);
     if (percent[0] != '\0')
 	LYaddstr(percent);
@@ -1745,7 +1751,7 @@ static void display_title(HText *text)
 
 #if defined(USE_COLOR_STYLE) && defined(CAN_CUT_AND_PASTE)
     if (s_hot_paste != NOSTYLE) {	/* Only if the user set the style */
-	LYmove(0, LYcols - 1);
+	LYmove(0, LYcolLimit);
 	LynxChangeStyle(s_hot_paste, STACK_ON);
 	LYaddch(ACS_RARROW);
 	LynxChangeStyle(s_hot_paste, STACK_OFF);
@@ -1823,7 +1829,7 @@ static void display_scrollbar(HText *text)
 	    LynxChangeStyle(s, ABS_ON);
 	}
 #endif /* USE_COLOR_STYLE */
-	LYmove(1, LYcols + LYshiftWin - 1);
+	LYmove(1, LYcolLimit + LYshiftWin);
 	addch_raw(ACS_UARROW);
 #ifdef USE_COLOR_STYLE
 	LynxChangeStyle(s, STACK_OFF);
@@ -1844,7 +1850,7 @@ static void display_scrollbar(HText *text)
 	if (i - 1 <= h - bot_skip && i > h - bot_skip)
 	    LynxChangeStyle(s_sb_bar, STACK_OFF);
 #endif /* USE_COLOR_STYLE */
-	LYmove(i + off, LYcols + LYshiftWin - 1);
+	LYmove(i + off, LYcolLimit + LYshiftWin);
 	if (i > top_skip && i <= h - bot_skip) {
 	    LYaddch(ACS_BLOCK);
 	} else {
@@ -1865,7 +1871,7 @@ static void display_scrollbar(HText *text)
 	    LynxChangeStyle(s, ABS_ON);
 	}
 #endif /* USE_COLOR_STYLE */
-	LYmove(h + 2, LYcols + LYshiftWin - 1);
+	LYmove(h + 2, LYcolLimit + LYshiftWin);
 	addch_raw(ACS_DARROW);
 #ifdef USE_COLOR_STYLE
 	LynxChangeStyle(s, STACK_OFF);
@@ -2100,7 +2106,7 @@ static void display_page(HText *text, int line_number,
 					     text->T.output_utf8, YES,
 					     NULL,
 					     &LenNeeded)) != NULL &&
-		   ((int) line->offset + LenNeeded) < DISPLAY_COLS) {
+		   ((int) line->offset + LenNeeded) <= DISPLAY_COLS) {
 		int itmp = 0;
 		int written = 0;
 		int x_pos = offset + (int) (cp - data);
@@ -2330,6 +2336,7 @@ static void display_page(HText *text, int line_number,
 				? checked_box
 				: unchecked_box);
 		} else if (FormInfo_ptr->type == F_PASSWORD_TYPE) {
+		    /* FIXME: use LYstrExtent, not strlen */
 		    LYSetHilite(nlinks,
 				STARS(strlen(FormInfo_ptr->value)));
 		} else {	/* TEXT type */
@@ -2432,6 +2439,7 @@ static void display_page(HText *text, int line_number,
 #endif /* WIDEC_CURSES */
 
     LYrefresh();
+    return;
 }
 
 /*			Object Building methods
@@ -2729,8 +2737,9 @@ static void split_line(HText *text, unsigned split)
 {
     HTStyle *style = text->style;
     int spare;
-    int indent = text->in_line_1 ?
-    text->style->indent1st : text->style->leftIndent;
+    int indent = (text->in_line_1
+		  ? text->style->indent1st
+		  : text->style->leftIndent);
     short alignment;
     TextAnchor *a;
     int CurLine = text->Lines;
@@ -2739,9 +2748,12 @@ static void split_line(HText *text, unsigned split)
     int TailTrim = 0;
     int s, s_post, s_pre, t_underline = underline_on, t_bold = bold_on;
     char *p;
-    int ctrl_chars_on_previous_line = 0;
-    int utfxtra_on_previous_line = UTFXTRA_ON_THIS_LINE;
     char *cp;
+    int ctrl_chars_on_previous_line = 0;
+
+#ifndef WIDEC_CURSES
+    int utfxtra_on_previous_line = UTFXTRA_ON_THIS_LINE;
+#endif
 
     HTLine *previous = text->last_line;
     HTLine *line;
@@ -3084,7 +3096,9 @@ static void split_line(HText *text, unsigned split)
 		*cp == LY_UNDERLINE_END_CHAR ||
 		*cp == LY_BOLD_START_CHAR ||
 		*cp == LY_BOLD_END_CHAR ||
+#ifndef WIDEC_CURSES
 		IS_UTF_EXTRA(*cp) ||
+#endif
 		*cp == LY_SOFT_HYPHEN) {
 		ctrl_chars_on_previous_line++;
 	    }
@@ -3094,7 +3108,14 @@ static void split_line(HText *text, unsigned split)
 	    ctrl_chars_on_previous_line--;
 
 	/* @@ first line indent */
-	spare = (WRAP_COLS(text) - 1) -
+#ifdef WIDEC_CURSES
+	spare = WRAP_COLS(text) -
+	    (int) style->rightIndent - indent +
+	    ctrl_chars_on_previous_line - LYstrExtent2(previous->data, previous->size);
+	if (spare < 0 && LYwideLines)	/* Can be wider than screen */
+	    spare = 0;
+#else
+	spare = WRAP_COLS(text) -
 	    (int) style->rightIndent - indent +
 	    ctrl_chars_on_previous_line - previous->size;
 	if (spare < 0 && LYwideLines)	/* Can be wider than screen */
@@ -3104,9 +3125,9 @@ static void split_line(HText *text, unsigned split)
 	    text->T.output_utf8 && ctrl_chars_on_previous_line) {
 	    utfxtra_on_previous_line -= UTFXTRA_ON_THIS_LINE;
 	    if (utfxtra_on_previous_line) {
-		int spare_cu = (LYcols_cu(text) - 1) -
-		utfxtra_on_previous_line - indent +
-		ctrl_chars_on_previous_line - previous->size;
+		int spare_cu = (LYcols_cu(text) -
+				utfxtra_on_previous_line - indent +
+				ctrl_chars_on_previous_line - previous->size);
 
 		/*
 		 * Shift non-leftaligned UTF-8 lines that would be
@@ -3124,13 +3145,13 @@ static void split_line(HText *text, unsigned split)
 			    (int) (previous->offset + indent + spare / 2 +
 				   previous->size)
 			    - ctrl_chars_on_previous_line
-			    + utfxtra_on_previous_line <= (LYcols_cu(text) - 1))
+			    + utfxtra_on_previous_line <= LYcols_cu(text))
 			    /* do nothing - it still fits - kw */ ;
 			else {
 			    spare = spare_cu;
 			    if (alignment == HT_CENTER) {
 				/*
-				 * Can't move towars center all the way,
+				 * Can't move toward center all the way,
 				 * but at least make line contents appear
 				 * as far right as possible.  - kw
 				 */
@@ -3145,6 +3166,7 @@ static void split_line(HText *text, unsigned split)
 		}
 	    }
 	}
+#endif
     }
 
     switch (style->alignment) {
@@ -3269,7 +3291,7 @@ static void split_line(HText *text, unsigned split)
 	&& justify_max_void_percent > 0
 	&& justify_max_void_percent <= 100
 	&& justify_max_void_percent >= ((100 * spare)
-					/ ((WRAP_COLS(text) - 1)
+					/ (WRAP_COLS(text)
 					   - (int) style->rightIndent
 					   - indent
 					   + ctrl_chars_on_previous_line))) {
@@ -3966,7 +3988,7 @@ void HText_appendCharacter(HText *text, int ch)
 		    + ((line->size > 0) &&
 		       (int) (line->data[line->size - 1] ==
 			      LY_SOFT_HYPHEN ?
-			      1 : 0)) >= (LYcols_cu(text) - 1))
+			      1 : 0)) >= LYcols_cu(text))
 		) {
 		if (!text->permissible_split || text->source) {
 		    text->permissible_split = line->size;
@@ -4110,7 +4132,7 @@ void HText_appendCharacter(HText *text, int ch)
 	else
 	    target_cu = target + (here_cu - here);
 
-	if (target > (WRAP_COLS(text) - 1) - (int) style->rightIndent &&
+	if (target > WRAP_COLS(text) - (int) style->rightIndent &&
 	    HTOutputFormat != WWW_SOURCE) {
 	    new_line(text);
 	} else {
@@ -4118,8 +4140,8 @@ void HText_appendCharacter(HText *text, int ch)
 	     * Can split here.  -FM
 	     */
 	    text->permissible_split = line->size;
-	    if (target_cu > (WRAP_COLS(text) - 1))
-		target -= target_cu - (WRAP_COLS(text) - 1);
+	    if (target_cu > WRAP_COLS(text))
+		target -= target_cu - WRAP_COLS(text);
 	    if (line->size == 0) {
 		line->offset = line->offset + target - here;
 	    } else {
@@ -4142,10 +4164,10 @@ void HText_appendCharacter(HText *text, int ch)
 	int target = (int) (line->offset + line->size) - ctrl_chars_on_this_line;
 	int target_cu = target + UTFXTRA_ON_THIS_LINE;
 
-	if (target >= (WRAP_COLS(text) - 1) - style->rightIndent -
+	if (target >= WRAP_COLS(text) - style->rightIndent -
 	    (((HTCJK != NOCJK) && text->kanji_buf) ? 1 : 0) ||
 	    (text->T.output_utf8 &&
-	     target_cu + UTF_XLEN(ch) >= (LYcols_cu(text) - 1))) {
+	     target_cu + UTF_XLEN(ch) >= LYcols_cu(text))) {
 	    int saved_kanji_buf;
 	    int saved_state;
 
@@ -4182,7 +4204,7 @@ void HText_appendCharacter(HText *text, int ch)
 	int nominal = (indent + (int) (line->offset + line->size) - ctrl_chars_on_this_line);
 	int number;
 
-	limit = (WRAP_COLS(text) - 1);
+	limit = WRAP_COLS(text);
 	if (fields_are_numbered()
 	    && !number_fields_on_left
 	    && text->last_anchor != 0
@@ -4200,7 +4222,7 @@ void HText_appendCharacter(HText *text, int ch)
 				  : 1))))) + 2;
 	}
 	if ((nominal + (int) style->rightIndent) >= limit
-	    || (nominal + UTFXTRA_ON_THIS_LINE) >= (LYcols_cu(text) - 1)) {
+	    || (nominal + UTFXTRA_ON_THIS_LINE) >= LYcols_cu(text)) {
 	    return;
 	}
     }
@@ -4214,12 +4236,12 @@ void HText_appendCharacter(HText *text, int ch)
 
     if (text->T.output_utf8) {
 	actual += (UTFXTRA_ON_THIS_LINE - ctrl_chars_on_this_line + UTF_XLEN(ch));
-	limit = (LYcols_cu(text) - 1);
+	limit = LYcols_cu(text);
     } else {
 	actual +=
 	    (int) style->rightIndent - ctrl_chars_on_this_line +
 	    (((HTCJK != NOCJK) && text->kanji_buf) ? 1 : 0);
-	limit = (WRAP_COLS(text) - 1);
+	limit = WRAP_COLS(text);
     }
 
     if (actual >= limit) {
@@ -4661,7 +4683,7 @@ static int HText_insertBlanksInStblLines(HText *me, int ncols)
 	alignment = style->alignment;
     indent = style->leftIndent;
     /* Calculate spare character positions */
-    spare = (WRAP_COLS(me) - 1) -
+    spare = WRAP_COLS(me) -
 	(int) style->rightIndent - indent - max_width;
     if (spare < 0 && (int) style->rightIndent + spare >= 0) {
 	/*
@@ -5579,7 +5601,7 @@ void HText_endAppend(HText *text)
     if (!text)
 	return;
 
-    CTRACE((tfp, "Gridtext: Entering HText_endAppend\n"));
+    CTRACE((tfp, "GridText: Entering HText_endAppend\n"));
 
     /*
      * Create a blank line at the bottom.
@@ -5679,12 +5701,12 @@ static void HText_trimHightext(HText *text, BOOLEAN final,
 	return;
 
     if (final) {
-	CTRACE((tfp, "Gridtext: Entering HText_trimHightext (final)\n"));
+	CTRACE((tfp, "GridText: Entering HText_trimHightext (final)\n"));
     } else {
 	if (stop_before < 0 || stop_before > text->Lines)
 	    stop_before = text->Lines;
 	CTRACE((tfp,
-		"Gridtext: Entering HText_trimHightext (partial: 0..%d/%d)\n",
+		"GridText: Entering HText_trimHightext (partial: 0..%d/%d)\n",
 		stop_before, text->Lines));
     }
 
@@ -5701,7 +5723,7 @@ static void HText_trimHightext(HText *text, BOOLEAN final,
     for (anchor_ptr = text->first_anchor;
 	 anchor_ptr != NULL;
 	 prev_a = anchor_ptr, anchor_ptr = anchor_ptr->next) {
-	int have_soft_newline_in_1st_line = 0;
+	int anchor_col;
 
       re_parse:
 	/*
@@ -5750,7 +5772,7 @@ static void HText_trimHightext(HText *text, BOOLEAN final,
 	    anchor_ptr->line_num = cur_line;
 	}
 	CTRACE((tfp,
-		"Gridtext: Anchor found on line:%d col:%d [%d] ext:%d\n",
+		"GridText: Anchor found on line:%d col:%d [%d] ext:%d\n",
 		cur_line, anchor_ptr->line_pos,
 		anchor_ptr->number, anchor_ptr->extent));
 
@@ -5878,12 +5900,29 @@ static void HText_trimHightext(HText *text, BOOLEAN final,
 	}
 
 	/*
+	 * Save the offset (bytes) of the anchor in the line's data.
+	 */
+	anchor_col = anchor_ptr->line_pos;
+
+	/*
 	 * Subtract any formatting characters from the x position of the link.
 	 */
+#ifdef WIDEC_CURSES
+	if (anchor_ptr->line_pos > 0) {
+	    /*
+	     * LYstrExtent filters out the formatting characters, so we do not
+	     * have to count them here.
+	     *
+	     * FIXME: do we have to count soft-newlines?
+	     */
+	    anchor_ptr->line_pos = LYstrExtent2(line_ptr->data, anchor_col);
+	}
+#else /* 8-bit curses, etc.  */
 	if (anchor_ptr->line_pos > 0) {
 	    register int offset = 0, i = 0;
+	    int have_soft_newline_in_1st_line = 0;
 
-	    for (; i < anchor_ptr->line_pos; i++) {
+	    for (; i < anchor_col; i++) {
 		if (IS_UTF_EXTRA(line_ptr->data[i]) ||
 		    IsSpecialAttrChar(line_ptr->data[i])) {
 		    offset++;
@@ -5891,16 +5930,16 @@ static void HText_trimHightext(HText *text, BOOLEAN final,
 		}
 	    }
 	    anchor_ptr->line_pos -= offset;
+	    /*handle LY_SOFT_NEWLINEs -VH */
+	    anchor_ptr->line_pos += have_soft_newline_in_1st_line;
 	}
+#endif /* WIDEC_CURSES */
 
 	/*
-	 * Add the offset, and set the line number.
+	 * Set the line number.
 	 */
 	anchor_ptr->line_pos += line_ptr->offset;
 	anchor_ptr->line_num = cur_line;
-
-	/*handle LY_SOFT_NEWLINEs -VH */
-	anchor_ptr->line_pos += have_soft_newline_in_1st_line;
 
 	CTRACE((tfp, "GridText:     add link on line %d col %d [%d] %s\n",
 		cur_line, anchor_ptr->line_pos,
@@ -6623,7 +6662,7 @@ BOOL HText_getFirstTargetInLine(HText *text, int line_num,
 				   utf_flag, YES,
 				   &HitOffset,
 				   &LenNeeded)) != NULL) &&
-	(LineOffset + LenNeeded) < DISPLAY_COLS) {
+	(LineOffset + LenNeeded) <= DISPLAY_COLS) {
 	/*
 	 * We had a hit so load the results,
 	 * remove IsSpecial characters from
@@ -7724,7 +7763,7 @@ void print_crawl_to_fd(FILE *fp, char *thelink,
     /*
      * Add the References list if appropriate
      */
-    if ((nolist == FALSE) &&
+    if ((no_list == FALSE) &&
 	links_are_numbered()) {
 	printlist(fp, FALSE);
     }
@@ -8172,18 +8211,40 @@ void HTuncache_current_document(void)
 static HTProtocol scm =
 {"source-cache-mem", 0, 0};	/* dummy - kw */
 
+static BOOLEAN useSourceCache(void)
+{
+    BOOLEAN result = FALSE;
+
+    if (LYCacheSource == SOURCE_CACHE_FILE) {
+	result = (HTMainAnchor->source_cache_file != 0);
+	CTRACE((tfp, "SourceCache: file-cache%s found\n",
+		result ? "" : " not"));
+    }
+    return result;
+}
+
+static BOOLEAN useMemoryCache(void)
+{
+    BOOLEAN result = FALSE;
+
+    if (LYCacheSource == SOURCE_CACHE_MEMORY) {
+	result = (HTMainAnchor->source_cache_chunk != 0);
+	CTRACE((tfp, "SourceCache: memory-cache%s found\n",
+		result ? "" : " not"));
+    }
+    return result;
+}
+
 BOOLEAN HTreparse_document(void)
 {
     BOOLEAN ok = FALSE;
 
-    if (!HTMainAnchor || LYCacheSource == SOURCE_CACHE_NONE ||
-	(LYCacheSource == SOURCE_CACHE_FILE &&
-	 !HTMainAnchor->source_cache_file) ||
-	(LYCacheSource == SOURCE_CACHE_MEMORY &&
-	 !HTMainAnchor->source_cache_chunk))
+    if (!HTMainAnchor || LYCacheSource == SOURCE_CACHE_NONE) {
+	CTRACE((tfp, "HTreparse_document returns FALSE\n"));
 	return FALSE;
+    }
 
-    if (LYCacheSource == SOURCE_CACHE_FILE && HTMainAnchor->source_cache_file) {
+    if (useSourceCache()) {
 	FILE *fp;
 	HTFormat format;
 	int ret;
@@ -8243,10 +8304,11 @@ BOOLEAN HTreparse_document(void)
 		    HTLoadedDocumentURL()));
 	}
 	ok = (BOOL) (ret == HT_LOADED || ret == HT_PARTIAL_CONTENT);
+
+	CTRACE((tfp, "Reparse file %s\n", (ok ? "succeeded" : "failed")));
     }
 
-    if (LYCacheSource == SOURCE_CACHE_MEMORY &&
-	HTMainAnchor->source_cache_chunk) {
+    if (useMemoryCache()) {
 	HTFormat format = WWW_HTML;
 	int ret;
 
@@ -8292,32 +8354,27 @@ BOOLEAN HTreparse_document(void)
 	ret = HTParseMem(format, HTOutputFormat, HTMainAnchor,
 			 HTMainAnchor->source_cache_chunk, NULL);
 	ok = (BOOL) (ret == HT_LOADED);
-    }
 
-    CTRACE((tfp, "Reparse %s\n", (ok ? "succeeded" : "failed")));
+	CTRACE((tfp, "Reparse memory %s\n", (ok ? "succeeded" : "failed")));
+    }
 
     return ok;
 }
 
 BOOLEAN HTcan_reparse_document(void)
 {
-    if (!HTMainAnchor || LYCacheSource == SOURCE_CACHE_NONE ||
-	(LYCacheSource == SOURCE_CACHE_FILE &&
-	 !HTMainAnchor->source_cache_file) ||
-	(LYCacheSource == SOURCE_CACHE_MEMORY &&
-	 !HTMainAnchor->source_cache_chunk))
-	return FALSE;
+    BOOLEAN result = FALSE;
 
-    if (LYCacheSource == SOURCE_CACHE_FILE && HTMainAnchor->source_cache_file) {
-	return LYCanReadFile(HTMainAnchor->source_cache_file);
+    if (!HTMainAnchor || LYCacheSource == SOURCE_CACHE_NONE) {
+	result = FALSE;
+    } else if (useSourceCache()) {
+	result = LYCanReadFile(HTMainAnchor->source_cache_file);
+    } else if (useMemoryCache()) {
+	result = TRUE;
     }
 
-    if (LYCacheSource == SOURCE_CACHE_MEMORY &&
-	HTMainAnchor->source_cache_chunk) {
-	return TRUE;
-    }
-
-    return FALSE;		/* if came to here */
+    CTRACE((tfp, "HTcan_reparse_document -> %d\n", result));
+    return result;
 }
 
 static void trace_setting_change(const char *name,
@@ -8336,11 +8393,7 @@ BOOLEAN HTdocument_settings_changed(void)
      * Annoying Hack(TM):  If we don't have a source cache, we can't
      * reparse anyway, so pretend the settings haven't changed.
      */
-    if (!HTMainAnchor || !HTMainText || LYCacheSource == SOURCE_CACHE_NONE ||
-	(LYCacheSource == SOURCE_CACHE_FILE &&
-	 !HTMainAnchor->source_cache_file) ||
-	(LYCacheSource == SOURCE_CACHE_MEMORY &&
-	 !HTMainAnchor->source_cache_chunk))
+    if (!HTMainText || !HTcan_reparse_document())
 	return FALSE;
 
     if (TRACE) {
@@ -8660,11 +8713,10 @@ int HText_getCurrentColumn(HText *text)
 
 int HText_getMaximumColumn(HText *text)
 {
-    int column = (DISPLAY_COLS - 2);
+    int column = DISPLAY_COLS;
 
     if (text) {
-	column = ((int) text->style->rightIndent ? (DISPLAY_COLS - 2) :
-		  ((DISPLAY_COLS - 1) - (int) text->style->rightIndent));
+	column -= (int) text->style->rightIndent;
     }
     return column;
 }
@@ -9731,7 +9783,7 @@ int HText_beginInput(HText *text, BOOL underline,
     /*
      * Restrict SIZE to maximum allowable size.
      */
-    MaximumSize = WRAP_COLS(text) - adjust_marker;
+    MaximumSize = WRAP_COLS(text) + 1 - adjust_marker;
     switch (f->type) {
 
     case F_SUBMIT_TYPE:
@@ -13226,7 +13278,6 @@ static void move_to_glyph(int YP,
 			  int flags,
 			  BOOL utf_flag)
 {
-    register int i;
     char buffer[7];
     const char *end_of_data;
     size_t utf_extra = 0;
@@ -13236,12 +13287,22 @@ static void move_to_glyph(int YP,
     int i_start_tgt = 0, i_after_tgt;
     int HitOffset, LenNeeded;
 #endif /* SHOW_WHEREIS_TARGETS */
-    BOOL intarget = NO, inunderline = NO, inbold = NO;
-    BOOL drawing = NO, inU = NO, hadutf8 = NO;
-    BOOL incurlink = NO, drawingtarget = NO, flag = NO;
+    BOOL intarget = NO;
+    BOOL inunderline = NO;
+    BOOL inbold = NO;
+    BOOL drawing = NO;
+    BOOL inU = NO;
+    BOOL hadutf8 = NO;
+    BOOL incurlink = NO;
+    BOOL drawingtarget = NO;
+    BOOL flag = NO;
     char *sdata = data;
     char LastDisplayChar = ' ';
-    int XP_link = XP;
+
+    int i = (int) offset;	/* FIXME: should be columns, not offset? */
+    int last_i = DISPLAY_COLS;
+    int XP_link = XP;		/* column of link */
+    int XP_next = XP;		/* column to move to when done drawing */
     int linkvlen;
 
     int len;
@@ -13256,11 +13317,17 @@ static void move_to_glyph(int YP,
      * Add offset, making sure that we do not
      * go over the COLS limit on the display.
      */
-    i = (int) offset;
-    if (i > (int) DISPLAY_COLS - 1)
-	i = (int) DISPLAY_COLS - 1;
-
-    linkvlen = hightext ? LYmbcsstrlen(hightext, utf_flag, YES) : 0;
+    if (hightext != 0) {
+#ifdef WIDEC_CURSES
+	len = strlen(hightext);
+	last_i = i + LYstrExtent2(data, datasize);
+#endif
+	linkvlen = LYmbcsstrlen(hightext, utf_flag, YES);
+    } else {
+	linkvlen = 0;
+    }
+    if (i >= last_i)
+	i = last_i - 1;
 
     /*
      * Scan through the data, making sure that we do not
@@ -13282,7 +13349,7 @@ static void move_to_glyph(int YP,
 				     &HitOffset,
 				     &LenNeeded);
 	if (cp_tgt) {
-	    if ((int) offset + LenNeeded >= DISPLAY_COLS ||
+	    if ((int) offset + LenNeeded > last_i ||
 		((int) offset + HitOffset >= XP + linkvlen)) {
 		cp_tgt = NULL;
 	    } else {
@@ -13302,7 +13369,7 @@ static void move_to_glyph(int YP,
      * XP_draw_min) is found, or when we reach the link itself (if
      * highlight is non-NULL).  - kw
      */
-    while ((i < DISPLAY_COLS - 1) && data < end_of_data && (*data != '\0')) {
+    while ((i <= last_i) && data < end_of_data && (*data != '\0')) {
 
 	if (data && hightext && i >= XP && !incurlink) {
 
@@ -13313,12 +13380,12 @@ static void move_to_glyph(int YP,
 	     * routine is applied to normal hyperlink anchors) the text in
 	     * hightext will be identical to that part of the HTLine that
 	     * data was already pointing to, except that special attribute
-	     * chars LY_BOLD_START_CHAR etc.  have been stripped out (see
+	     * chars LY_BOLD_START_CHAR etc., have been stripped out (see
 	     * HText_trimHightext).  So the switching should not result in
 	     * any different display, but it ensures that it doesn't go
 	     * unnoticed if somehow hightext got messed up somewhere else.
 	     * This is also useful in preparation for using this function
-	     * for something else than normal hyperlink anchors, i.e. form
+	     * for something else than normal hyperlink anchors, i.e., form
 	     * fields.
 	     * Turn on drawing here or make sure it gets turned on before the
 	     * next actual normal character is handled.  - kw
@@ -13326,7 +13393,8 @@ static void move_to_glyph(int YP,
 	    data = hightext;
 	    len = strlen(hightext);
 	    end_of_data = hightext + len;
-	    XP += linkvlen;	/* from now on XP includes hightext chars */
+	    last_i = i + len;
+	    XP_next += linkvlen;
 	    incurlink = YES;
 #ifdef SHOW_WHEREIS_TARGETS
 	    if (cp_tgt) {
@@ -13335,7 +13403,7 @@ static void move_to_glyph(int YP,
 	    }
 #endif
 	    /*
-	     * The logic of where to set intarget drawingtarget etc.
+	     * The logic of where to set in-target drawing target etc.
 	     * and when to react to it should be cleaned up (here and
 	     * further below).  For now this seems to work but isn't
 	     * very clear.  The complications arise from reproducing
@@ -13385,11 +13453,10 @@ static void move_to_glyph(int YP,
 
 	    }
 	}
-	if (i >= XP || data >= end_of_data)
+	if (i >= last_i || data >= end_of_data)
 	    break;
 	if ((buffer[0] = *data) == '\0')
 	    break;
-
 #if defined(SHOW_WHEREIS_TARGETS)
 	/*
 	 * Look for a subsequent occurrence of the target string,
@@ -13398,7 +13465,7 @@ static void move_to_glyph(int YP,
 	if (cp_tgt && i >= i_after_tgt) {
 	    if (intarget) {
 
-		if (incurlink && flag && i == XP - 1)
+		if (incurlink && flag && i == last_i - 1)
 		    cp_tgt = NULL;
 		else
 		    cp_tgt = LYno_attr_mb_strstr(sdata,
@@ -13412,13 +13479,13 @@ static void move_to_glyph(int YP,
 		    if (incurlink) {
 			if (flag && i_start_tgt == XP_link)
 			    i_start_tgt++;
-			if (flag && i_start_tgt == XP - 1)
+			if (flag && i_start_tgt == last_i - 1)
 			    i_start_tgt++;
-			if (flag && i_after_tgt >= XP)
-			    i_after_tgt = XP - 1;
-			if (flag && i_start_tgt >= XP)
+			if (flag && i_after_tgt >= last_i)
+			    i_after_tgt = last_i - 1;
+			if (flag && i_start_tgt >= last_i)
 			    cp_tgt = NULL;
-		    } else if (i_start_tgt == XP) {
+		    } else if (i_start_tgt == last_i) {
 			if (flag)
 			    i_start_tgt++;
 		    }
@@ -13448,7 +13515,7 @@ static void move_to_glyph(int YP,
 	/*
 	 * Advance data to point to the next input char (for the
 	 * next round).  Advance sdata, used for searching for a
-	 * target string, so that they stays in synch.  As long
+	 * target string, so that they stay in synch.  As long
 	 * as we are not within the highlight text, data and sdata
 	 * have identical values.  After we have switched data to
 	 * point into hightext, sdata remains a pointer into the
@@ -13458,11 +13525,10 @@ static void move_to_glyph(int YP,
 	 * not present in highlight in order to stay in synch.  - kw
 	 */
 	data++;
-	if (*sdata) {
-	    do
-		sdata++;
-	    while (incurlink && *sdata && sdata != data &&
-		   IsSpecialAttrChar(*(sdata - 1)));
+	if (incurlink) {
+	    while (IsNormalChar(*sdata)) {
+		++sdata;
+	    }
 	}
 
 	switch (buffer[0]) {
@@ -13531,9 +13597,9 @@ static void move_to_glyph(int YP,
 	     */
 #if defined(SHOW_WHEREIS_TARGETS)
 	    if (incurlink && intarget && flag && i_after_tgt > i) {
-		if (i == XP - 1) {
+		if (i == last_i - 1) {
 		    i_after_tgt = i;
-		} else if (i == XP - 2 && HTCJK != NOCJK &&
+		} else if (i == last_i - 2 && HTCJK != NOCJK &&
 			   is8bits(buffer[0])) {
 		    i_after_tgt = i;
 		    cp_tgt = NULL;
@@ -13552,14 +13618,14 @@ static void move_to_glyph(int YP,
 
 		    if (incurlink && drawing &&
 			!(flag &&
-			  (i == XP_link || i == XP - 1))) {
+			  (i == XP_link || i == last_i - 1))) {
 			lynx_stop_link_color(flag, inU);
 		    }
 		    if (incurlink && !drawing) {
 			LYmove(YP, i);
 			if (inunderline)
 			    inU = YES;
-			if (flag && (i == XP_link || i == XP - 1)) {
+			if (flag && (i == XP_link || i == last_i - 1)) {
 			    lynx_start_link_color(flag, inU);
 			    drawingtarget = NO;
 			} else {
@@ -13576,7 +13642,7 @@ static void move_to_glyph(int YP,
 			lynx_start_link_color(flag, inU);
 		    } else if (drawing &&
 			       !(flag &&
-				 (i == XP_link || (incurlink && i == XP - 1)))) {
+				 (i == XP_link || (incurlink && i == last_i - 1)))) {
 			LYstartTargetEmphasis();
 			drawingtarget = YES;
 		    }
@@ -13595,11 +13661,13 @@ static void move_to_glyph(int YP,
 	    }
 
 	    i++;
+#ifndef WIDEC_CURSES
 	    if (utf_flag && is8bits(buffer[0])) {
 		hadutf8 = YES;
 		utf_extra = utf8_length(utf_flag, data - 1);
 		LastDisplayChar = 'M';
 	    }
+#endif
 	    if (utf_extra) {
 		strncpy(&buffer[1], data, utf_extra);
 		buffer[utf_extra + 1] = '\0';
@@ -13628,7 +13696,7 @@ static void move_to_glyph(int YP,
 		/*
 		 * For CJK strings, by Masanobu Kimura.
 		 */
-		if (drawing && (i < DISPLAY_COLS - 1)) {
+		if (drawing && (i <= last_i)) {
 		    buffer[1] = *data;
 		    LYaddstr(buffer);
 		    buffer[1] = '\0';
@@ -13656,7 +13724,7 @@ static void move_to_glyph(int YP,
     }				/* end of while */
 
     if (!drawing) {
-	LYmove(YP, i);
+	LYmove(YP, XP_next);
 	lynx_start_link_color(flag, inU);
     } else {
 #if defined(SHOW_WHEREIS_TARGETS)

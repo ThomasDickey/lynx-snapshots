@@ -46,9 +46,6 @@ struct _HTStream {
     HTStreamClass *isa;
 };
 
-extern char *HTAppName;		/* Application name: please supply */
-extern char *HTAppVersion;	/* Application version: please supply */
-
 BOOL reloading = FALSE;		/* Reloading => send no-cache pragma to proxy */
 char *redirecting_url = NULL;	/* Location: value. */
 BOOL permanent_redirection = FALSE;	/* Got 301 status? */
@@ -345,7 +342,7 @@ static void strip_userid(char *host)
 	if ((fake = HTParse(host, "", PARSE_HOST)) != NULL) {
 	    char *msg = NULL;
 
-	    CTRACE((tfp, "FIXME:%s\n", fake));
+	    CTRACE((tfp, "parsed:%s\n", fake));
 	    HTSprintf0(&msg, gettext("Address contains a username: %s"), host);
 	    HTAlert(msg);
 	    FREE(msg);
@@ -1898,7 +1895,7 @@ static int HTLoadHTTP(const char *arg,
 			   format_out,
 			   sink, anAnchor);
 
-    if (!target || target == NULL) {
+    if (target == NULL) {
 	char *buffer = NULL;
 
 	HTTP_NETCLOSE(s, handle);

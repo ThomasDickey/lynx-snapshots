@@ -204,6 +204,7 @@ extern BOOLEAN bold_name_anchors;
 extern BOOLEAN case_sensitive;	/* TRUE to turn on case sensitive search */
 extern BOOLEAN check_mail;	/* TRUE to report unread/new mail messages */
 extern BOOLEAN child_lynx;	/* TRUE to exit with an arrow */
+extern BOOLEAN dump_links_only;
 extern BOOLEAN dump_output_immediately;
 extern BOOLEAN emacs_keys;	/* TRUE to turn on emacs-like key movement */
 extern BOOLEAN error_logging;	/* TRUE to mail error messages */
@@ -345,7 +346,7 @@ extern char *personal_extension_map;
 extern char *LYHostName;
 extern char *LYLocalDomain;
 extern BOOLEAN use_underscore;
-extern BOOLEAN nolist;
+extern BOOLEAN no_list;
 extern BOOLEAN historical_comments;
 extern BOOLEAN minimal_comments;
 extern BOOLEAN soft_dquotes;
@@ -397,7 +398,7 @@ extern BOOLEAN traversal;
 extern BOOLEAN check_realm;
 extern char *startrealm;
 extern BOOLEAN more_links;
-extern int ccount;
+extern int crawl_count;
 extern BOOLEAN LYCancelledFetch;
 extern char *LYToolbarName;
 

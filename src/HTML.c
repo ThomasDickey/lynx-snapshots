@@ -1964,7 +1964,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 	    } else {
 		me->sp->style->alignment = HT_CENTER;
 	    }
-	    width = LYcols - 1 -
+	    width = LYcolLimit -
 		me->new_style->leftIndent - me->new_style->rightIndent;
 	    if (present && present[HTML_HR_WIDTH] && value[HTML_HR_WIDTH] &&
 		isdigit(UCH(*value[HTML_HR_WIDTH])) &&
@@ -4338,7 +4338,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		me->sp->style->freeFormat) {
 		HTML_put_character(me, ' ');
 		me->in_word = NO;
-	    } else if (HText_LastLineSize(me->text, FALSE) > (LYcols - 7)) {
+	    } else if (HText_LastLineSize(me->text, FALSE) > (LYcolLimit - 6)) {
 		HTML_put_character(me, '\n');
 		me->in_word = NO;
 	    }
@@ -4503,7 +4503,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		me->sp->style->freeFormat) {
 		HTML_put_character(me, ' ');
 		me->in_word = NO;
-	    } else if (HText_LastLineSize(me->text, FALSE) > (LYcols - 7)) {
+	    } else if (HText_LastLineSize(me->text, FALSE) > (LYcolLimit - 6)) {
 		HTML_put_character(me, '\n');
 		me->in_word = NO;
 	    }
@@ -5012,7 +5012,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 	else {
 	    int width;
 
-	    width = LYcols - 1 -
+	    width = LYcolLimit -
 		me->new_style->leftIndent - me->new_style->rightIndent;
 	    if (dump_output_immediately)	/* don't waste too much for this */
 		width = HTMIN(width, 60);
@@ -8076,6 +8076,7 @@ HTStream *HTMLToPlain(HTPresentation *pres,
 		      HTParentAnchor *anchor,
 		      HTStream *sink)
 {
+    CTRACE((tfp, "HTMLToPlain calling CacheThru_new\n"));
     return CacheThru_new(anchor,
 			 SGML_new(&HTML_dtd, anchor,
 				  HTML_new(anchor, pres->rep_out, sink)));
@@ -8138,6 +8139,7 @@ HTStream *HTMLParsedPresent(HTPresentation *pres,
     }
     if (!intermediate)
 	return NULL;
+    CTRACE((tfp, "HTMLParsedPresent calling CacheThru_new\n"));
     return CacheThru_new(anchor,
 			 SGML_new(&HTML_dtd, anchor,
 				  HTMLGenerator(intermediate)));
@@ -8166,6 +8168,7 @@ HTStream *HTMLToC(HTPresentation *pres GCC_UNUSED,
     html->comment_end = " */\n";	/* Must start in col 1 for cpp */
     if (!sink)
 	HTML_put_string(html, html->comment_start);
+    CTRACE((tfp, "HTMLToC calling CacheThru_new\n"));
     return CacheThru_new(anchor,
 			 SGML_new(&HTML_dtd, anchor, html));
 }
@@ -8183,6 +8186,7 @@ HTStream *HTMLPresent(HTPresentation *pres GCC_UNUSED,
 		      HTParentAnchor *anchor,
 		      HTStream *sink GCC_UNUSED)
 {
+    CTRACE((tfp, "HTMLPresent calling CacheThru_new\n"));
     return CacheThru_new(anchor,
 			 SGML_new(&HTML_dtd, anchor,
 				  HTML_new(anchor, WWW_PRESENT, NULL)));

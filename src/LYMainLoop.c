@@ -506,16 +506,33 @@ BOOL LYMainLoop_pageDisplay(int line_num)
 }
 #endif /* DISP_PARTIAL */
 
-static void set_curdoc_link(int nextlink)
+static BOOL set_curdoc_link(int nextlink)
 {
+    BOOL result = FALSE;
+
     if (curdoc.link != nextlink
 	&& nextlink >= 0
 	&& nextlink < nlinks) {
-	if (curdoc.link >= 0 && curdoc.link < nlinks)
+	if (curdoc.link >= 0 && curdoc.link < nlinks) {
 	    LYhighlight(OFF, curdoc.link, prev_target);
+	    result = TRUE;
+	}
 	curdoc.link = nextlink;
     }
+    return result;
 }
+
+#ifdef USE_MOUSE
+static void set_curdoc_link_by_mouse(int nextlink)
+{
+    if (set_curdoc_link(nextlink)) {
+	LYhighlight(ON, nextlink, prev_target);
+	LYmsec_delay(20);
+    }
+}
+#else
+#define set_curdoc_link_by_mouse(nextlink) set_curdoc_link(nextlink)
+#endif
 
 static int do_change_link(void)
 {
@@ -535,7 +552,7 @@ static int do_change_link(void)
 	    FREE(msgtmp);
 	    return (-1);	/* indicates unexpected error */
 	}
-	set_curdoc_link(mouse_tmp);
+	set_curdoc_link_by_mouse(mouse_tmp);
     }
 #endif /* USE_MOUSE */
     return (0);			/* indicates OK */
@@ -894,20 +911,21 @@ static int DoTraversal(int c,
 	rlink_allowed = FALSE;
     }
     if (rlink_exists && rlink_allowed) {
-	if (lookup(links[curdoc.link].lname)) {
+	if (lookup_link(links[curdoc.link].lname)) {
 	    if (more_links ||
-		(curdoc.link > -1 && curdoc.link < nlinks - 1))
+		(curdoc.link > -1 && curdoc.link < nlinks - 1)) {
 		c = DNARROW;
-	    else {
+	    } else {
 		if (STREQ(curdoc.title, "Entry into main screen") ||
 		    (nhist <= 0)) {
 		    if (!dump_output_immediately) {
 			cleanup();
 			exit_immediately(EXIT_FAILURE);
 		    }
-		    return (-1);
+		    c = -1;
+		} else {
+		    c = LTARROW;
 		}
-		c = LTARROW;
 	    }
 	} else {
 	    StrAllocCopy(traversal_link_to_add,
@@ -921,9 +939,9 @@ static int DoTraversal(int c,
 	    /* uncomment in previous line to avoid duplicates - kw */
 	    add_to_reject_list(links[curdoc.link].lname);
 	if (more_links ||
-	    (curdoc.link > -1 && curdoc.link < nlinks - 1))
+	    (curdoc.link > -1 && curdoc.link < nlinks - 1)) {
 	    c = DNARROW;
-	else {
+	} else {
 	    /*
 	     * curdoc.title doesn't always work, so bail out if the history
 	     * list is empty.
@@ -934,11 +952,16 @@ static int DoTraversal(int c,
 		    cleanup();
 		    exit_immediately(EXIT_FAILURE);
 		}
-		return (-1);
+		c = -1;
+	    } else {
+		c = LTARROW;
 	    }
-	    c = LTARROW;
 	}
-    }				/* right link not NULL or link to another site */
+    }
+    CTRACE((tfp, "DoTraversal(%d:%d) -> %s\n",
+	    nlinks > 0 ? curdoc.link : 0,
+	    nlinks,
+	    LYKeycodeToString(c, FALSE)));
     return c;
 }
 
@@ -1213,8 +1236,9 @@ static int handle_LYK_ACTIVATE(int *c,
 		default:
 		    if ((real_cmd == LYK_ACTIVATE || real_cmd == LYK_SUBMIT) &&
 			F_TEXTLIKE(links[curdoc.link].l_form->type) &&
-			textinput_activated)
+			textinput_activated) {
 			return 3;
+		    }
 		    break;
 		}
 	    }
@@ -5053,7 +5077,7 @@ static BOOLEAN handle_LYK_LINEWRAP_TOGGLE(int *cmd,
 
     /* Somehow the mouse is over the number instead of being over the
        name, so we decrease x. */
-    c = LYChoosePopup(!LYwideLines, LYlines / 2 - 2, LYcols / 2 - 6,
+    c = LYChoosePopup(!LYwideLines, LYlines / 2 - 2, LYcolLimit / 2 - 6,
 		      choices, TABLESIZE(choices) - 1, FALSE, TRUE);
     /*
      * LYhandlePopupList() wasn't really meant to be used outside of old-style
@@ -5240,7 +5264,7 @@ int mainloop(void)
 	    force_load = TRUE;
 #endif
 	/*
-	 * If newdoc.address is different then curdoc.address then we need to
+	 * If newdoc.address is different from curdoc.address then we need to
 	 * go out and find and load newdoc.address.
 	 */
 	if (LYforce_no_cache || force_load ||
@@ -5771,7 +5795,7 @@ int mainloop(void)
 			/*
 			 * Add the address we sought to TRAVERSE_FILE.
 			 */
-			if (!lookup(traversal_link_to_add))
+			if (!lookup_link(traversal_link_to_add))
 			    add_to_table(traversal_link_to_add);
 			FREE(traversal_link_to_add);
 		    }
@@ -5916,7 +5940,7 @@ int mainloop(void)
 	if (dump_output_immediately) {
 	    if (crawl) {
 		print_crawl_to_fd(stdout, curdoc.address, curdoc.title);
-	    } else {
+	    } else if (!dump_links_only) {
 		print_wwwfile_to_fd(stdout, FALSE, FALSE);
 	    }
 	    return (EXIT_SUCCESS);
@@ -6032,7 +6056,7 @@ int mainloop(void)
 		/*
 		 * Set up the crawl output stuff.
 		 */
-		if (curdoc.address && !lookup(curdoc.address)) {
+		if (curdoc.address && !lookup_link(curdoc.address)) {
 		    if (!isLYNXIMGMAP(curdoc.address))
 			crawl_ok = TRUE;
 		    add_to_table(curdoc.address);
@@ -6357,11 +6381,11 @@ int mainloop(void)
 	    if (crawl && crawl_ok) {
 		crawl_ok = FALSE;
 #ifdef FNAMES_8_3
-		sprintf(cfile, "lnk%05d.dat", ccount);
+		sprintf(cfile, "lnk%05d.dat", crawl_count);
 #else
-		sprintf(cfile, "lnk%08d.dat", ccount);
+		sprintf(cfile, "lnk%08d.dat", crawl_count);
 #endif /* FNAMES_8_3 */
-		ccount = ccount + 1;
+		crawl_count = crawl_count + 1;
 		if ((cfp = LYNewTxtFile(cfile)) != NULL) {
 		    print_crawl_to_fd(cfp, curdoc.address, curdoc.title);
 		    LYCloseOutput(cfp);
@@ -7015,6 +7039,7 @@ int mainloop(void)
 		goto new_keyboard_input;
 	    case 3:
 		pending_form_c = c;
+		break;
 	    }
 	    break;
 
@@ -7506,7 +7531,7 @@ static void show_main_statusline(const LinkInfo curlink,
 	if (is_www_index) {
 	    char *indx = gettext("-index-");
 
-	    LYmove(LYlines - 1, LYcols - strlen(indx) - 1);
+	    LYmove(LYlines - 1, LYcolLimit - strlen(indx));
 	    lynx_start_reverse();
 	    LYaddstr(indx);
 	    lynx_stop_reverse();
@@ -7658,7 +7683,7 @@ static void status_link(char *curlink_name,
 			BOOLEAN show_more,
 			BOOLEAN show_indx)
 {
-#define MAX_STATUS (LYcols - 2)
+#define MAX_STATUS (LYcolLimit - 1)
 #define MIN_STATUS 0
     char format[MAX_LINE];
     int prefix = 0;

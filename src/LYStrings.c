@@ -372,7 +372,7 @@ static int set_clicked_link(int x,
 			    int clicks)
 {
     int left = 6;
-    int right = LYcols - 6;
+    int right = LYcolLimit - 5;
 
     /* yes, I am assuming that my screen will be a certain width. */
     int i;
@@ -386,7 +386,7 @@ static int set_clicked_link(int x,
 	if (x == 0 && toolbar)	/* On '#' */
 	    c = LAC_TO_LKC0(LYK_TOOLBAR);
 #if defined(CAN_CUT_AND_PASTE) && defined(USE_COLOR_STYLE)
-	else if (y == 0 && x == LYcols - 1 && s_hot_paste != NOSTYLE)
+	else if (y == 0 && x == LYcolLimit && s_hot_paste != NOSTYLE)
 	    c = LAC_TO_LKC0(LYK_PASTE_URL);
 #endif
 	else if (clicks > 1) {
@@ -422,7 +422,7 @@ static int set_clicked_link(int x,
 		c = LAC_TO_LKC0(LYK_PREV_PAGE);
 	}
 #ifdef USE_SCROLLBAR
-    } else if (x == LYcols - 1 && LYShowScrollbar && LYsb_begin >= 0) {
+    } else if (x == (LYcols - 1) && LYShowScrollbar && LYsb_begin >= 0) {
 	int h = display_lines - 2 * (LYsb_arrow != 0);
 
 	mouse_link = -2;
@@ -659,31 +659,33 @@ int LYmbcsstrlen(char *str,
 {
     int i, j, len = 0;
 
-    if (!non_empty(str))
-	return (len);
-
-    for (i = 0; str[i] != '\0'; i++) {
-	if (IsSpecialAttrChar(str[i])) {
-	    continue;
-	} else {
-	    len++;
-	}
-	if (IS_NEW_GLYPH(str[i])) {
-	    j = 0;
-	    while (str[(i + 1)] != '\0' &&
-		   !IsSpecialAttrChar(str[(i + 1)]) &&
-		   j < 5 &&
-		   IS_UTF_EXTRA(str[(i + 1)])) {
-		i++;
-		j++;
+    if (non_empty(str)) {
+#ifdef WIDEC_CURSES
+	if (count_gcells) {
+	    len = LYstrCells(str);
+	} else
+#endif
+	{
+	    for (i = 0; str[i] != '\0'; i++) {
+		if (!IsSpecialAttrChar(str[i])) {
+		    len++;
+		    if (IS_NEW_GLYPH(str[i])) {
+			j = 0;
+			while (IsNormalChar(str[(i + 1)]) &&
+			       j < 5 &&
+			       IS_UTF_EXTRA(str[(i + 1)])) {
+			    i++;
+			    j++;
+			}
+		    } else if (!utf_flag && HTCJK != NOCJK && !count_gcells &&
+			       is8bits(str[i]) &&
+			       IsNormalChar(str[(i + 1)])) {
+			i++;
+		    }
+		}
 	    }
-	} else if (!utf_flag && HTCJK != NOCJK && !count_gcells &&
-		   is8bits(str[i]) && str[(i + 1)] != '\0' &&
-		   !IsSpecialAttrChar(str[(i + 1)])) {
-	    i++;
 	}
     }
-
     return (len);
 }
 
@@ -2253,7 +2255,7 @@ static int LYgetch_for(int code)
 #define V_CMD_AREA	1
 
 		int left = H_CMD_AREA;
-		int right = (LYcols - H_CMD_AREA);
+		int right = (LYcolLimit - H_CMD_AREA - 1);
 
 		/* yes, I am assuming that my screen will be a certain width. */
 
@@ -2680,10 +2682,10 @@ char *LYElideString(char *str,
 
     LYstrncpy(buff, str, sizeof(buff) - 1);
     len = strlen(buff);
-    if (len > (LYcols - 10)) {
+    if (len > (LYcolLimit - 9)) {
 	buff[cut_pos] = '.';
 	buff[cut_pos + 1] = '.';
-	for (s = (buff + len) - (LYcols - 10) + cut_pos + 1,
+	for (s = (buff + len) - (LYcolLimit - 9) + cut_pos + 1,
 	     d = (buff + cut_pos) + 2;
 	     s >= buff &&
 	     d >= buff &&
@@ -4007,10 +4009,13 @@ int LYhandlePopupList(int cur_choice,
     }
 
     if (for_mouse) {
+	int check = (Lnum + (int) width + 4);
+	int limit = LYcols;
+
 	/* shift horizontally to lie within screen width, if possible */
-	if (Lnum + (int) width + 4 < LYcols) {
-	    if (lx - 1 + (Lnum + (int) width + 4) > LYcols)
-		lx = LYcols + 1 - (Lnum + width + 4);
+	if (check < limit) {
+	    if (lx - 1 + check > limit)
+		lx = limit + 1 - check;
 	    else if (lx <= 0)
 		lx = 1;
 	}
@@ -4020,12 +4025,19 @@ int LYhandlePopupList(int cur_choice,
      * Set up the overall window, including the boxing characters ('*'), if it
      * all fits.  Otherwise, set up the widest window possible.  - FM
      */
+    width += Lnum;
+    bottom -= top;
+
     if (num_choices <= 0
 	|| cur_choice > num_choices
-	|| (form_window = LYstartPopup(top, lx,
-				       bottom - top,
-				       Lnum + width)) == 0)
+	|| (form_window = LYstartPopup(&top,
+				       &lx,
+				       &bottom,
+				       &width)) == 0)
 	return (orig_choice);
+
+    width -= Lnum;
+    bottom += top;
 
     /*
      * Clear the command line and write the popup statusline.  - FM
@@ -4785,7 +4797,7 @@ int LYgetstr(char *inputline,
     LYGetYX(y, x);		/* Use screen from cursor position to eol */
     MaxStringSize = (bufsize < sizeof(MyEdit.buffer)) ?
 	(bufsize - 1) : (sizeof(MyEdit.buffer) - 1);
-    LYSetupEdit(&MyEdit, inputline, MaxStringSize, (LYcols - 1) - x);
+    LYSetupEdit(&MyEdit, inputline, MaxStringSize, LYcolLimit - x);
     MyEdit.hidden = (BOOL) hidden;
 
     CTRACE((tfp, "called LYgetstr\n"));
@@ -5252,8 +5264,7 @@ char *LYno_attr_mbcs_case_strstr(char *chptr,
     for (; *chptr != '\0'; chptr++) {
 	if ((!utf_flag && HTCJK != NOCJK && is8bits(*chptr) &&
 	     *chptr == *tarptr &&
-	     *(chptr + 1) != '\0' &&
-	     !IsSpecialAttrChar(*(chptr + 1))) ||
+	     IsNormalChar(*(chptr + 1))) ||
 	    (0 == UPPER8(*chptr, *tarptr))) {
 	    int tarlen = 0;
 
@@ -5278,8 +5289,7 @@ char *LYno_attr_mbcs_case_strstr(char *chptr,
 	    }
 	    if (!utf_flag && HTCJK != NOCJK && is8bits(*chptr) &&
 		*chptr == *tarptr &&
-		*tmpchptr != '\0' &&
-		!IsSpecialAttrChar(*tmpchptr)) {
+		IsNormalChar(*tmpchptr)) {
 		/*
 		 * Check the CJK multibyte.  - FM
 		 */
@@ -5355,8 +5365,7 @@ char *LYno_attr_mbcs_case_strstr(char *chptr,
 	} else if (!(IS_UTF_EXTRA(*chptr) ||
 		     IsSpecialAttrChar(*chptr))) {
 	    if (!utf_flag && HTCJK != NOCJK && is8bits(*chptr) &&
-		*(chptr + 1) != '\0' &&
-		!IsSpecialAttrChar(*(chptr + 1))) {
+		IsNormalChar(*(chptr + 1))) {
 		chptr++;
 		if (count_gcells)
 		    len++;
@@ -5439,8 +5448,7 @@ char *LYno_attr_mbcs_strstr(char *chptr,
 		return (chptr);
 	    }
 	    if (!utf_flag && HTCJK != NOCJK && is8bits(*chptr) &&
-		*tmpchptr != '\0' &&
-		!IsSpecialAttrChar(*tmpchptr)) {
+		IsNormalChar(*tmpchptr)) {
 		/*
 		 * Check the CJK multibyte.  - FM
 		 */
@@ -5515,8 +5523,7 @@ char *LYno_attr_mbcs_strstr(char *chptr,
 	} else if (!(IS_UTF_EXTRA(*chptr) ||
 		     IsSpecialAttrChar(*chptr))) {
 	    if (!utf_flag && HTCJK != NOCJK && is8bits(*chptr) &&
-		*(chptr + 1) != '\0' &&
-		!IsSpecialAttrChar(*(chptr + 1))) {
+		IsNormalChar(*(chptr + 1))) {
 		chptr++;
 		if (count_gcells)
 		    len++;
