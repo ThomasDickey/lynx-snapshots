@@ -7,6 +7,14 @@ platforms see also INSTALLATION, for some changes for auto-configure and
 simple curses color see also README.configure).  Note that the 2.7 -> 2.7.1
 changes are included here. - KW]
 
+1998-01-04
+* correct temporary filename for -traversal -crawl (patch by Doug Kaufman). - TD
+* correct redefinition of SYSTEM_MAIL_FLAGS. (reported by Doug Kaufman). - TD
+* uncache current document when character set may have changed (patch
+  by Andrey A. Chernov) - TD
+* modify Linux setfont code to restore the original font on exit - TD
+* correct missing backslash (again) in makefile.in
+  (reported by Mark Mentovai - again) - TD
 1998-01-02
 * workaround for sed expression when rerunning configure with config.cache
   for slang libraries (reported by Hynek Med). - TD

@@ -342,7 +342,6 @@
 #define SYSTEM_MAIL_FLAGS "-t -oi"
 #endif /* __FreeBSD || __NetBSD__ || __bsdi__ */
 #endif /* MMDF */
-#define SYSTEM_MAIL_FLAGS ""
 #endif	/* !HAVE_CONFIG_H */
 
 /**************************
@@ -1208,7 +1207,7 @@
  * the version definition with the Project Version on checkout. Just
  * ignore it. - kw */
 /* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
-#define LYNX_VERSION "2.7.1ac-0.105"
+#define LYNX_VERSION "2.7.1ac-0.106"
 
 #ifndef MAXINT
 #define MAXINT 2147483647	/* max integer */

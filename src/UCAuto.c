@@ -21,6 +21,8 @@
 #include "UCDefs.h"
 #include "UCAuto.h"
 #include "LYGlobalDefs.h"
+#include "LYClean.h"
+#include "LYUtils.h"
 
 #ifdef EXP_CHARTRANS_AUTOSWITCH
 
@@ -45,7 +47,7 @@ static char T_font_fn[100] = "\0";
 static char T_umap_fn[100] = "\0";
 static char T_setfont_cmd[200] = "\0";
 #define SETFONT "setfont"
-#define NOOUTPUT "2>/dev/null"
+#define NOOUTPUT "2>/dev/null >/dev/null"
 
 PRIVATE void call_setfont ARGS3(
 	char *,		font,
@@ -98,6 +100,15 @@ PRIVATE void write_esc ARGS1(
     }
 }
 
+PRIVATE int nonempty_file ARGS1(
+	CONST char *,	p)
+{
+    struct stat sb;
+    return (stat(p, &sb) == 0
+       &&   (sb.st_mode & S_IFMT) == S_IFREG
+       &&   (sb.st_size != 0));
+}
+
 /*
  *  This is the thing that actually gets called from display_page().
  */
@@ -111,13 +122,52 @@ PUBLIC void UCChangeTerminalCodepage ARGS2(
     static TGen_state_t lastUtf = Dunno;
     static TGen_state_t lastHasUmap = Dunno;
 
-    CONST char * name = p->MIMEname;
+    static char *old_font;
+    static char *old_umap;
+
+    CONST char * name;
     TTransT_t TransT = GN_dunno;
     TGen_state_t Utf = Dunno;
     TGen_state_t HasUmap = Dunno;
 
     char tmpbuf1[100], tmpbuf2[20];
     char *cp;
+
+    /* Restore the original character set */
+    if (newcs < 0 || p == 0) {
+	if (old_font && *old_font
+	 && old_umap && *old_umap) {
+	    int have_font = nonempty_file(old_font);
+	    int have_umap = nonempty_file(old_umap);
+
+	    if (have_font) {
+		if (have_umap)
+		    sprintf(tmpbuf1, "%s %s -u %s %s",
+			    SETFONT, old_font, old_umap, NOOUTPUT);
+		else
+		    sprintf(tmpbuf1, "%s %s %s",
+			    SETFONT, old_font, NOOUTPUT);
+		system(tmpbuf1);
+	    }
+
+	    remove(old_font);
+	    free(old_font);
+	    old_font = 0;
+
+	    remove(old_umap);
+	    free(old_umap);
+	    old_umap = 0;
+	}
+	return;
+    } else if (lastcs < 0 && old_umap == 0 && old_font == 0) {
+	old_umap = tempnam((char *)0, "umap");
+	old_font = tempnam((char *)0, "font");
+	sprintf(tmpbuf1, "%s -o %s -ou %s %s",
+		SETFONT, old_font, old_umap, NOOUTPUT);
+	system(tmpbuf1);
+    }
+
+    name = p->MIMEname;
 
     /*
      *  Font sizes are currently hardwired here.

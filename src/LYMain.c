@@ -2466,10 +2466,10 @@ PRIVATE void parse_arg ARGS3(
    exec            disable execution scripts\n\
     exec_frozen     disallow the user from changing the execution link\n");
 #ifdef USE_EXTERNALS
-        printf("\
+		printf("\
     externals       disable passing URLs to external programs\n");
 #endif
-        printf("\
+		printf("\
    file_url        disallow using G)oto, served links or bookmarks for\n\
                    file: URL's\n\
    goto            disable the 'g' (goto) command\n");
@@ -2720,7 +2720,7 @@ Output_Help_List:
     printf("    -emacskeys       enable emacs-like key movement\n");
     printf("    -enable_scrollback  toggles compatibility with comm programs' scrollback\n");
     printf("                        keys (may be incompatible with some curses packages)\n");
-     printf("    -error_file=FILE write the HTTP status code here\n");
+    printf("    -error_file=FILE write the HTTP status code here\n");
 #if defined(EXEC_LINKS) || defined(EXEC_SCRIPTS)
 #ifndef NEVER_ALLOW_REMOTE_EXEC
     printf("    -exec            enable local program execution\n");
