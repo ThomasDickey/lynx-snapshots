@@ -7,6 +7,7 @@
 #undef ARCHIVE_ONLY		/* CF_ARG_DISABLE(dired-archive) */
 #undef BZIP2_PATH		/* CF_PATH_PROG(bzip2) */
 #undef CHMOD_PATH		/* CF_PATH_PROG(chmod) */
+#undef CJK_EX			/* CF_ARG_ENABLE(cjk) */
 #undef COLOR_CURSES		/* defined by CF_COLOR_CURSES */
 #undef COMPRESS_PATH		/* CF_PATH_PROG(compress) */
 #undef COPY_PATH		/* CF_PATH_PROG(cp) */
@@ -33,9 +34,11 @@
 #undef EXP_ALT_BINDINGS		/* CF_ARG_ENABLE(alt-bindings) */
 #undef EXP_CHARTRANS_AUTOSWITCH	/* CF_ARG_ENABLE(font-switch) */
 #undef EXP_FILE_UPLOAD		/* CF_ARG_ENABLE(file-upload) */
+#undef EXP_JUSTIFY_ELTS		/* CF_ARG_ENABLE(justify-elts) */
 #undef EXP_KEYBOARD_LAYOUT	/* CF_ARG_ENABLE(kbd-layout) */
 #undef EXP_LIBJS		/* CF_ARG_ENABLE(libjs) */
 #undef EXP_PERSISTENT_COOKIES	/* CF_ARG_ENABLE(persistent-cookies) */
+#undef EXP_READPROGRESS		/* CF_ARG_ENABLE(read-eta) */
 #undef FANCY_CURSES		/* defined by CF_FANCY_CURSES */
 #undef GCC_PRINTF		/* CF_GCC_ATTRIBUTES */
 #undef GCC_UNUSED		/* CF_GCC_ATTRIBUTES */
@@ -75,8 +78,10 @@
 #undef HAVE_PUTENV
 #undef HAVE_READDIR
 #undef HAVE_RESOLV_H
+#undef HAVE_RESIZETERM
 #undef HAVE_SETENV		/* defined by AM_GNU_GETTEXT */
 #undef HAVE_SETLOCALE
+#undef HAVE_SIGACTION		/* CF_FUNC_SIGACTION */
 #undef HAVE_SIZECHANGE		/* defined by CF_SIZECHANGE */
 #undef HAVE_STDARG_H		/* CF_VARARGS */
 #undef HAVE_STDLIB_H

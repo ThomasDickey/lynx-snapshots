@@ -247,9 +247,9 @@ extern int map_string_to_keysym PARAMS((char * src, int *lec));
 #endif
 
 extern void LYLowerCase PARAMS((
-	unsigned char *	buffer));
+	char *		buffer));
 extern void LYUpperCase PARAMS((
-	unsigned char *	buffer));
+	char *		buffer));
 extern void LYRemoveBlanks PARAMS((
 	char *		buffer));
 extern char * LYSkipBlanks PARAMS((

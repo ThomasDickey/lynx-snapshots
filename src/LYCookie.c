@@ -629,7 +629,9 @@ PRIVATE char * scan_cookie_sublist ARGS6(
 	co = (cookie *)hl->object;
 	next = hl->next;
 
-	if (co) {
+       if ((co) && /* speed-up host_matches() and limit trace output */
+	   (LYstrstr((char *)hostname, co->domain) != NULL))
+       {
 	    CTRACE(tfp, "Checking cookie %p %s=%s\n",
 			hl,
 			(co->name ? co->name : "(no name)"),

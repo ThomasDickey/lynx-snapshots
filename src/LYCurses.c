@@ -938,14 +938,18 @@ PUBLIC void lynx_enable_mouse ARGS1(int,state)
 	/* Inform ncurses which mouse events we're interested in.
 	 * We shouldn't need to include BUTTONn_PRESSED and BUTTONn_RELEASED
 	 * events, since ncurses should translate them to click events. - kw
+	 * However, if we do not include them, then ncurses effectively
+	 * ignores mouseinterval(), thus translates *any* sequence of
+	 * press/release to a click, which leads to inconveniences.
+	 * We special-case these events in LYStrings.c.
 	 */
 	mousemask(BUTTON_CTRL | BUTTON_ALT
-		  /* | BUTTON1_PRESSED | BUTTON1_RELEASED */
+		  | BUTTON1_PRESSED | BUTTON1_RELEASED
 		  | BUTTON1_CLICKED
 		  | BUTTON1_DOUBLE_CLICKED | BUTTON1_TRIPLE_CLICKED
-		  /* | BUTTON2_PRESSED | BUTTON2_RELEASED */
+		  | BUTTON2_PRESSED | BUTTON2_RELEASED
 		  | BUTTON2_CLICKED
-		  /* | BUTTON3_PRESSED | BUTTON3_RELEASED */
+		  | BUTTON3_PRESSED | BUTTON3_RELEASED
 		  | BUTTON3_CLICKED
 		  | BUTTON3_DOUBLE_CLICKED | BUTTON3_TRIPLE_CLICKED,
 		  NULL);

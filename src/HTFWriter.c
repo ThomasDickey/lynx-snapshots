@@ -312,7 +312,7 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 			    stop_curses();
 #endif
 			}
-#ifdef _WIN_CC
+#if _WIN_CC
 			exec_command(me->end_command, FALSE);
 #else
 			LYSystem(me->end_command);
@@ -368,7 +368,7 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 		stop_curses();
 #endif
 	    }
-#ifdef _WIN_CC
+#if _WIN_CC
 	    exec_command(me->end_command, FALSE);
 #else
 	    LYSystem(me->end_command);

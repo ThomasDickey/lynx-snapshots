@@ -3663,6 +3663,11 @@ PUBLIC int postoptions ARGS1(
 		 && keypad_mode != newval) {
 		keypad_mode = newval;
 		need_reload = TRUE;
+		if (keypad_mode == NUMBERS_AS_ARROWS) {
+		    set_numbers_as_arrows();
+		} else {
+		    reset_numbers_as_arrows();
+		}
 	    }
 	}
 

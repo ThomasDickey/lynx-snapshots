@@ -464,6 +464,7 @@ AC_CHECK_HEADERS( \
 	unistd.h \
 )
 CF_TERMIO_AND_TERMIOS
+CF_FUNC_SIGACTION
 CF_FUNC_WAIT
 CF_VARARGS
 AC_TYPE_GETGROUPS
@@ -529,9 +530,9 @@ if test $cf_cv_screen != slang ; then
 		cbreak \
 		define_key \
 		keypad \
+		resizeterm \
 		use_default_colors \
-		wborder \
-	)
+		wborder )
 fi
 
 dnl --------------------------------------------------------------------------
@@ -572,6 +573,14 @@ CF_ARG_ENABLE(addrlist-page,
 	[use_addrlist_page=no])
 AC_MSG_RESULT($use_addrlist_page)
 test $use_addrlist_page != no && AC_DEFINE(EXP_ADDRLIST_PAGE)
+
+AC_MSG_CHECKING(if experimental CJK logic should be used)
+CF_ARG_ENABLE(cjk,
+[  --enable-cjk            use experimental CJK logic],
+	[use_cjk=$enableval],
+	[use_cjk=no])
+AC_MSG_RESULT($use_cjk)
+test $use_cjk != no && AC_DEFINE(CJK_EX)
 
 AC_MSG_CHECKING(if color-style code should be used)
 CF_ARG_ENABLE(color-style,
@@ -630,6 +639,14 @@ CF_ARG_ENABLE(file-upload,
 AC_MSG_RESULT($use_file_upload)
 test $use_file_upload != no && AC_DEFINE(EXP_FILE_UPLOAD)
 
+AC_MSG_CHECKING(if experimental element-justification logic should be used)
+CF_ARG_ENABLE(justify-elts,
+[  --enable-justify-elts   use experimental element-justification logic],
+	[use_exp_justify_elts=$enableval],
+	[use_exp_justify_elts=no])
+AC_MSG_RESULT($use_exp_justify_elts)
+test $use_exp_justify_elts != no && AC_DEFINE(EXP_JUSTIFY_ELTS)
+
 AC_MSG_CHECKING(if experimental keyboard-layout logic should be used)
 CF_ARG_ENABLE(kbd-layout,
 [  --enable-kbd-layout     use experimental keyboard-layout support],
@@ -653,6 +670,14 @@ CF_ARG_ENABLE(prettysrc,
 	[use_prettysrc=no])
 AC_MSG_RESULT($use_prettysrc)
 test $use_prettysrc != no && AC_DEFINE(USE_PSRC)
+
+AC_MSG_CHECKING(if read-progress message should show ETA)
+CF_ARG_ENABLE(read-eta,
+[  --enable-read-eta       experimental read-progress message shows ETA],
+	[use_read_eta=$enableval],
+	[use_read_eta=no])
+AC_MSG_RESULT($use_read_eta)
+test $use_read_eta != no && AC_DEFINE(EXP_READPROGRESS)
 
 AC_MSG_CHECKING(if source caching should be used)
 CF_ARG_ENABLE(source-cache,

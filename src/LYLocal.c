@@ -796,7 +796,7 @@ PUBLIC BOOLEAN local_modify ARGS2(
 #ifdef OK_PERMIT
     _statusline(gettext("Modify name, location, or permission (n, l, or p): "));
 #else
-    _statusline(gettext("Modify name, or location (n or l): "));
+    _statusline(gettext("Modify name or location (n or l): "));
 #endif /* OK_PERMIT */
     c = LYgetch();
     ans = TOUPPER(c);
@@ -1359,7 +1359,7 @@ PUBLIC void tagflag ARGS2(
 
 #if defined(FANCY_CURSES) || defined(USE_SLANG)
 	if (!LYShowCursor)
-	    move((LYlines - 1), (LYcols - 1)); /* get cursor out of the way */
+	    LYHideCursor(); /* get cursor out of the way */
 	else
 #endif /* FANCY CURSES || USE_SLANG */
 	    /*

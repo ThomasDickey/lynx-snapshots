@@ -151,7 +151,7 @@ PUBLIC int strncasecomp ARGS3(
     return ((long)n < 0 ? 0 : cm[*us1] - cm[*--us2]);
 }
 
-#else
+#else 	/* SH_EX */
 
 /*	Strings of any length
 **	---------------------

@@ -281,10 +281,10 @@ PUBLIC void save_bookmark_link ARGS2(
 	if (HTCJK == JAPANESE) {
 	    switch(kanji_code) {
 	    case EUC:
-		TO_EUC(title, tmp_buffer);
+		TO_EUC((CONST unsigned char *) title, (unsigned char *) tmp_buffer);
 		break;
 	    case SJIS:
-		TO_SJIS(title, tmp_buffer);
+		TO_SJIS((CONST unsigned char *) title, (unsigned char *) tmp_buffer);
 		break;
 	    default:
 		break;
@@ -316,13 +316,13 @@ PUBLIC void save_bookmark_link ARGS2(
     if (HTCJK == JAPANESE) {
 	switch(kanji_code) {	/* 1997/11/22 (Sat) 09:28:00 */
 	case EUC:
-	    TO_EUC(string_buffer, tmp_buffer);
+	    TO_EUC((CONST unsigned char *) string_buffer, (unsigned char *) tmp_buffer);
 	    break;
 	case SJIS:
-	    TO_SJIS(string_buffer, tmp_buffer);
+	    TO_SJIS((CONST unsigned char *) string_buffer, (unsigned char *) tmp_buffer);
 	    break;
 	default:
-	    TO_JIS(string_buffer, tmp_buffer);
+	    TO_JIS((CONST unsigned char *) string_buffer, (unsigned char *) tmp_buffer);
 	    break;
 	}
 	StrAllocCopy(Title, tmp_buffer);

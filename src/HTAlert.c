@@ -174,6 +174,38 @@ PUBLIC void HTProgress ARGS1(
 #endif
 }
 
+#ifdef EXP_READPROGRESS
+PRIVATE char *sprint_bytes ARGS3(
+	char *,		s,
+	long,		n,
+	char *, 	was_units)
+{
+    static long kb_units = 1024;
+    static char *bunits;
+    static char *kbunits;
+    char *u;
+
+    if (!bunits) {
+	bunits = gettext("bytes");
+	kbunits = gettext("KB");
+    }
+
+    u = kbunits;
+    if (LYshow_kb_rate && (n >= 10 * kb_units))
+	sprintf(s, "%ld", n/kb_units);
+    else if (LYshow_kb_rate && (n >= kb_units))
+	sprintf(s, "%.2g", ((double)n)/kb_units);
+    else {
+	sprintf(s, "%ld", n);
+	u = bunits;
+    }
+
+    if (!was_units || was_units != u)
+	sprintf(s + strlen(s), " %s", u);
+    return u;
+}
+#endif /* EXP_READPROGRESS */
+
 /*	Issue a read-progress message.			HTReadProgress()
 **	------------------------------
 */
@@ -239,9 +271,90 @@ PUBLIC void HTReadProgress ARGS2(
 	    if (total < -1)
 		strcat(line, " (Press 'z' to abort)");
 	}
-	_HTProgress(line);
+	statusline(line);
     }
+#else /* !WIN_EX */
+#ifdef EXP_READPROGRESS
+    static long bytes_last, total_last;
+    static long transfer_rate = 0;
+    char line[300], bytesp[80], totalp[80], transferp[80];
+    int renew = 0;
+    char *was_units;
+#if HAVE_GETTIMEOFDAY
+    struct timeval tv;
+    int dummy = gettimeofday(&tv, (struct timezone *)0);
+    double now = tv.tv_sec + tv.tv_usec/1000000. ;
+    static double first, last, last_active;
 #else
+    time_t now = time((time_t *)0);  /* once per second */
+    static time_t first, last, last_active;
+#endif
+
+    if (bytes == 0) {
+	first = last = last_active = now;
+	bytes_last = bytes;
+	line[0] = 0;
+    } else if (bytes < 0) {	/* stalled */
+	bytes = bytes_last;
+	total = total_last;
+    }
+    if ((bytes > 0) &&
+	       (now != first))
+		/* 1 sec delay for transfer_rate calculation without g-t-o-d */ {
+	if (transfer_rate <= 0)    /* the very first time */
+	    transfer_rate = (bytes) / (now - first);   /* bytes/sec */
+	total_last = total;
+
+	/*
+	 * Optimal refresh time:  every 0.2 sec, use interpolation.  Transfer
+	 * rate is not constant when we have partial content in a proxy, so
+	 * interpolation lies - will check every second at least for sure.
+	 */
+#if HAVE_GETTIMEOFDAY
+	if (now >= last + 0.2)
+	    renew = 1;
+#else
+	if (((bytes - bytes_last) > (transfer_rate / 5)) || (now != last)) {
+	    renew = 1;
+	    bytes_last += (transfer_rate / 5);	/* until we got next second */
+	}
+#endif
+	if (renew) {
+	    if (now != last) {
+		last = now;
+		if (bytes_last != bytes)
+		    last_active = now;
+		bytes_last = bytes;
+		transfer_rate = bytes / (now - first); /* more accurate here */
+	    }
+
+	    if (total > 0)
+		was_units = sprint_bytes(totalp, total, 0);
+	    else
+		was_units = 0;
+	    sprint_bytes(bytesp, bytes, was_units);
+	    sprint_bytes(transferp, transfer_rate, 0);
+
+	    if (total > 0)
+		sprintf (line, gettext("Read %s of %s of data"), bytesp, totalp);
+	    else
+		sprintf (line, gettext("Read %s of data"), bytesp);
+	    if (transfer_rate > 0)
+		sprintf (line + strlen(line), gettext(", %s/sec"), transferp);
+	    if (now - last_active >= 5)
+		sprintf (line + strlen(line), gettext(" (stalled for %ld sec)"), (long)(now - last_active));
+	    if (total > 0 && transfer_rate)
+		sprintf (line + strlen(line), gettext(", ETA %ld sec"), (long)((total - bytes)/transfer_rate));
+	    sprintf (line + strlen(line), ".");
+	    if (total < -1)
+		strcat(line, gettext(" (Press 'z' to abort)"));
+
+	    /* do not store the message for history page. */
+	    statusline(line);
+	    CTRACE(tfp, "%s\n", line);
+	}
+    }
+#else /* !EXP_READPROGRESS */
     static long kb_units = 1024;
     static time_t first, last;
     static long bytes_last;
@@ -304,7 +417,8 @@ PUBLIC void HTReadProgress ARGS2(
 	    CTRACE(tfp, "%s\n", line);
 	}
     }
-#endif
+#endif /* EXP_READPROGRESS */
+#endif /* WIN_EX */
 }
 
 PRIVATE BOOL conf_cancelled = NO; /* used by HTConfirm only - kw */

@@ -208,9 +208,9 @@ PRIVATE void LYListFmtParse ARGS5(
 #ifdef _WINDOWS	/* 1998/01/06 (Tue) 21:20:53 */
 	static char *pbits[] = {
 		"---", "--x", "-w-", "-wx",
-		"r--", "r-x", "rw-", "rwx", 
+		"r--", "r-x", "rw-", "rwx",
 		0 };
-#define PBIT(a, n, s)  pbits[((a) >> (n)) & 0x7] 
+#define PBIT(a, n, s)  pbits[((a) >> (n)) & 0x7]
 
 #else
 	static char *pbits[] = { "---", "--x", "-w-", "-wx",
@@ -378,7 +378,7 @@ PRIVATE void LYListFmtParse ARGS5(
 			default: type = '?'; break;
 			}
 #ifdef _WINDOWS
-			sprintf(tmp, "%c%s", type, 
+			sprintf(tmp, "%c%s", type,
 				PBIT(st.st_mode, 6, st.st_mode & S_IRWXU));
 #else
 			sprintf(tmp, "%c%s%s%s", type,
@@ -1123,30 +1123,6 @@ PUBLIC float HTFileValue ARGS1(
 **	1.	No code for non-unix systems.
 **	2.	Isn't there a quicker way?
 */
-
-#if defined(HAVE_CONFIG_H)
-
-#ifndef HAVE_GETGROUPS
-#define NO_GROUPS
-#endif
-
-#else
-
-#ifdef VMS
-#define NO_GROUPS
-#endif /* VMS */
-#ifdef NO_UNIX_IO
-#define NO_GROUPS
-#endif /* NO_UNIX_IO */
-#ifdef PCNFS
-#define NO_GROUPS
-#endif /* PCNFS */
-#ifdef NOUSERS
-#define NO_GROUPS
-#endif /* PCNFS */
-
-#endif	/* HAVE_CONFIG_H */
-
 PUBLIC BOOL HTEditable ARGS1(
 	CONST char *,	filename)
 {

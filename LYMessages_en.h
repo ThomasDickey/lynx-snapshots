@@ -2,7 +2,7 @@
  * Lynx - Hypertext navigation system
  *
  *   (c) Copyright 1992, 1993, 1994 University of Kansas
- *	 1995, 1996: GNU General Public License
+ *	 1995-1999: GNU General Public License
  */
 #ifndef LYMESSAGES_EN_H
 #define LYMESSAGES_EN_H
@@ -22,10 +22,9 @@
  *
  *    http://www.crl.com/~subir/lynx.html
  *
- * Because the gettext facility is only recently (with release 2.8.2)
- * introduced, these alternate definitions are given as variants on this
- * file.  Use them as a starting point to construct a new message
- * library as needed.  (see po/readme).
+ * See ABOUT-NLS and po/readme for details and location of contributed
+ * translations.  When no translation is available, the English default is
+ * used.
  */
 #define ALERT_FORMAT gettext("Alert!: %s")
 #define WELCOME_MSG gettext("Welcome")
@@ -720,7 +719,7 @@
 #define URL_PORT_BAD gettext("URL has a bad port field.")
 #define HTML_STACK_OVERRUN gettext("Maximum nesting of HTML elements exceeded.")
 #define BAD_PARTIAL_REFERENCE gettext("Bad partial reference!  Stripping lead dots.")
-#define TRACELOG_OPEN_FAILED gettext("Trace Log open failed.  Trace off!.")
+#define TRACELOG_OPEN_FAILED gettext("Trace Log open failed.  Trace off!")
 #define LYNX_TRACELOG_TITLE gettext("Lynx Trace Log")
 #define NO_TRACELOG_STARTED gettext("No trace log has been started for this session.")
 #define MAX_TEMPCOUNT_REACHED \

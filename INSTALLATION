@@ -279,10 +279,11 @@ II. Compile instructions -- UNIX
 
   --disable-persistent-cookies		(define EXP_PERSISTENT_COOKIES)
 	Use this option to tell configure whether to compile-in support for
-	saving cookies to a file, for subsequent reuse.  This creates the file
-	specified by the 'COOKIE_FILE' option, or defaults to ".lynx_cookies"
-	in the home directory.  (Currently there is no protection against
-	conflict if several lynx copies are active from the same account).
+	saving cookies to a file, for subsequent reuse.  Persistent cookie
+	support will use (or create) the file specified by the 'COOKIE_FILE'
+	option, or default to ".lynx_cookies" in the home directory.
+	(Currently there is no protection against conflict if several lynx
+	sessions are active from the same account).
 
   --disable-trace			(define NO_LYNX_TRACE)
 	Turn off code that lets you trace internal details of Lynx's operation.
@@ -301,6 +302,9 @@ II. Compile instructions -- UNIX
   --enable-cgi-links			(define LYNXCGI_LINKS)
 	Allows lynx to access a cgi script directly without the need for
 	a http daemon.
+
+  --enable-cjk				(define CJK_EX)
+	Add special logic for supporting CJK documents.
 
   --enable-color-style			(define USE_COLOR_STYLE)
   	Use this option to enable optional and *experimental* color style.
@@ -340,6 +344,9 @@ II. Compile instructions -- UNIX
   --enable-gzip-help
 	Install the lynx help files in gzip'd format [*.gz] to save space.
 
+  --enable-justify-elts			(define EXP_JUSTIFY_ELTS)
+	use experimental element-justification logic.
+
   --enable-internal-links		(define DONT_TRACK_INTERNAL_LINKS)
 	Disabled by default, this option allows tracking of internal links,
 	a feature which could, however, compromise a secure transaction by
@@ -367,6 +374,11 @@ II. Compile instructions -- UNIX
 	Use this option to compile-in support for colorizing the source view of
 	HTML pages.  If compiled-in, new source view mode is available with
 	-prettysrc command line option.
+
+  --enable-read-eta			(define EXP_READPROGRESS)
+	Enhance the read-progress message to show ETA (estimated time to
+	completion), as well as the amount of time stalled without any data
+	transferred.
 
   --enable-source-cache			(define SOURCE_CACHE)
 	Use this option to compile-in support for caching HTML pages locally,
@@ -609,11 +621,11 @@ IV. Compile instructions -- Win32 (Windows95/98/NT)
     IDE file.  A sample IDE file and helper libraries are available at
     "http://www.fdisk.com/doslynx/wlynx/source/".
 
-    First build the .h files in src\chrtrans using "MAKEW32.BAT".  Double
+    First build the .h files in src\chrtrans using "makew32.bat".  Double
     check for new .tbl files; hand edit in any new ones, and then do "makew32".
     Jump into Borland C++, load the project (IDE file) and compile Lynx.
     Alternately, after compiling the chartrans tables, you can come back to
-    the top directory and compile manually, i.e., do "make -f makefile.w32".
+    the top directory and compile manually, i.e., do "make -f makefile.bcb".
 
     I also have a binary available at "http://www.fdisk.com/doslynx/".  This
     binary was compiled with pdcurses 2.3, hacked so win32 mouse support works,

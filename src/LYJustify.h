@@ -17,6 +17,10 @@ extern BOOL can_justify_this_line;
 extern int wait_for_this_stacked_elt;
 extern BOOL form_in_htext;
 
+    /*this is the element with SGML_EMPTY content, so it won't
+    get on the stack, so we can't trap it with wait_for_this_stacked_elt */
+extern BOOL in_DT;
+
 /*disabled by default*/
 /*#define DEBUG_JUSTIFY*/
 #ifdef DEBUG_JUSTIFY

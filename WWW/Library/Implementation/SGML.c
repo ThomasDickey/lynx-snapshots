@@ -228,7 +228,7 @@ PRIVATE void HTMLSRC_apply_markup ARGS3(
     }
 }
 
-#ifdef __STDC__
+#if defined(__STDC__) || _WIN_CC
 #  define PSRCSTART(x)	HTMLSRC_apply_markup(context,HTL_##x,START)
 #  define PSRCSTOP(x)  HTMLSRC_apply_markup(context,HTL_##x,STOP)
 #else
@@ -4628,7 +4628,7 @@ PUBLIC void TO_SJIS ARGS2(
 {
     unsigned char *euc;
 
-    euc = malloc(strlen(any) + 1);
+    euc = malloc(strlen((CONST char *) any) + 1);
 #ifdef CJK_EX
     if (!euc)
 	outofmem(__FILE__, "TO_SJIS");
@@ -4637,7 +4637,7 @@ PUBLIC void TO_SJIS ARGS2(
     if (is_EUC_JP(euc))
 	EUC_TO_SJIS(euc, sjis);
     else
-	strcpy(sjis, any);
+	strcpy((char *) sjis, (CONST char *) any);
     free(euc);
 }
 
@@ -4651,7 +4651,7 @@ PUBLIC void TO_JIS ARGS2(
 	jis[0] = 0;
 	return;
     }
-    euc = malloc(strlen(any) + 1);
+    euc = malloc(strlen((CONST char *) any) + 1);
 #ifdef CJK_EX
     if (!euc)
 	outofmem(__FILE__, "TO_JIS");

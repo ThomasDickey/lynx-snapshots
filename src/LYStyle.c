@@ -1,6 +1,6 @@
 /* character level styles for Lynx
  * (c) 1996 Rob Partington -- donated to the Lyncei (if they want it :-)
- * $Id: LYStyle.c,v 1.22 1999/07/14 16:44:55 tom Exp $
+ * $Id: LYStyle.c,v 1.23 1999/07/30 16:06:54 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTML.h>
@@ -67,8 +67,9 @@ PUBLIC int	s_alink  = NOSTYLE, s_a     = NOSTYLE, s_status = NOSTYLE,
 		s_whereis= NOSTYLE;
 
 /* start somewhere safe */
+#define MAX_COLOR 8
 PRIVATE int colorPairs = 0;
-PRIVATE int last_fA = COLOR_WHITE, last_bA = COLOR_BLACK;
+PRIVATE unsigned char our_pairs[2][MAX_COLOR][MAX_COLOR];
 
 /* icky parsing of the style options */
 PRIVATE void parse_attributes ARGS5(char*,mono,char*,fg,char*,bg,int,style,char*,element)
@@ -118,6 +119,13 @@ PRIVATE void parse_attributes ARGS5(char*,mono,char*,fg,char*,bg,int,style,char*
 
     fA = check_color(fg, default_fg);
     bA = check_color(bg, default_bg);
+
+    if (style == -1) {			/* default */
+	CTRACE(tfp, "CSS(DEF):default_fg=%d, default_bg=%d\n", fA, bA);
+	default_fg = fA;
+	default_bg = bA;
+	return;
+    }
     if (fA == NO_COLOR) {
 	bA = NO_COLOR;
     } else if (COLORS) {
@@ -139,19 +147,31 @@ PRIVATE void parse_attributes ARGS5(char*,mono,char*,fg,char*,bg,int,style,char*
      */
     if (lynx_has_color && colorPairs < COLOR_PAIRS-1 && fA != NO_COLOR)
     {
-	if (colorPairs <= 0 || fA != last_fA || bA != last_bA) {
-	    colorPairs++;
-	    init_pair(colorPairs, fA, bA);
-	    last_fA = fA;
-	    last_bA = bA;
+	int curPair;
+
+	if (fA < MAX_COLOR
+	 && bA < MAX_COLOR
+	 && our_pairs[cA == A_BOLD][fA][bA])
+	    curPair = our_pairs[cA == A_BOLD][fA][bA] - 1;
+	else {
+	    curPair = ++colorPairs;
+	    init_pair(curPair, fA, bA);
+	    if (fA < MAX_COLOR
+	     && bA < MAX_COLOR
+	     && curPair < 255)
+		our_pairs[cA == A_BOLD][fA][bA] = curPair + 1;
 	}
+	CTRACE(tfp, "CSS(CURPAIR):%d\n", colorPairs);
 	if (style < DSTYLE_ELEMENTS)
-	    setStyle(style, COLOR_PAIR(colorPairs)|cA, cA, mA);
-	setHashStyle(newstyle, COLOR_PAIR(colorPairs)|cA, cA, mA, element);
+	    setStyle(style, COLOR_PAIR(curPair)|cA, cA, mA);
+	setHashStyle(newstyle, COLOR_PAIR(curPair)|cA, cA, mA, element);
     }
     else
     {
-    /* only mono is set */
+	if (lynx_has_color && fA != NO_COLOR) {
+	    CTRACE(tfp, "CSS(NC): maximum of %d colorpairs exhausted\n", COLOR_PAIRS - 1);
+	}
+	/* only mono is set */
 	if (style < DSTYLE_ELEMENTS)
 	    setStyle(style, -1, -1, mA);
 	setHashStyle(newstyle, -1, -1, mA, element);
@@ -218,7 +238,11 @@ where OBJECT is one of EM,STRONG,B,I,U,BLINK etc.\n\n"), buffer);
     /*
     * We use some pseudo-elements, so catch these first
     */
-    if (!strncasecomp(element, "alink", 5)) /* active link */
+    if (!strncasecomp(element, "default", 7)) /* default fg/bg */
+    {
+	parse_attributes(mono,fg,bg,-1,"default");
+    }
+    else if (!strncasecomp(element, "alink", 5)) /* active link */
     {
 	parse_attributes(mono,fg,bg,DSTYLE_ALINK,"alink");
     }
@@ -396,7 +420,7 @@ PUBLIC void style_defaultStyleSheet NOARGS
 		HStyle_addStyle(default_stylesheet[i]);
 }
 
-PUBLIC int style_readFromFile ARGS1(char*, file)
+PRIVATE int style_readFromFileREC ARGS2(char*, file, int, toplevel)
 {
     FILE *fh;
     char *buffer = NULL;
@@ -413,15 +437,19 @@ PUBLIC int style_readFromFile ARGS1(char*, file)
 	return -1;
     }
 
-    style_initialiseHashTable();
-    style_deleteStyleList();
+    if (toplevel) {
+      style_initialiseHashTable();
+      style_deleteStyleList();
+    }
 
     while (LYSafeGets(&buffer, fh) != NULL)
     {
 	LYTrimTrailing(buffer);
 	LYTrimTail(buffer);
 	LYTrimHead(buffer);
-	if (buffer[0] != '#' && (len = strlen(buffer)) > 0)
+	if (!strncasecomp(buffer,"include:",8))
+	    style_readFromFileREC(buffer+8, 0);
+	else if (buffer[0] != '#' && (len = strlen(buffer)) > 0)
 	    HStyle_addStyle(buffer);
     }
     /* the default styles are added after the user styles in order
@@ -430,9 +458,14 @@ PUBLIC int style_readFromFile ARGS1(char*, file)
     /*	style_defaultStyleSheet(); */
 
     fclose (fh);
-    if (LYCursesON)
+    if (toplevel && LYCursesON)
 	parse_userstyles();
     return 0;
+}
+
+PUBLIC int style_readFromFile ARGS1(char*, file)
+{
+    return style_readFromFileREC(file, 1);
 }
 
 /* Used in HTStructured methods: - kw */

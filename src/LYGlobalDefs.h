@@ -118,70 +118,71 @@ extern BOOLEAN LYUseFormsOptions; /* use Forms-based options menu */
 #else
 #define LYUseFormsOptions FALSE	/* simplify ifdef'ing in LYMainLoop.c */
 #endif
-extern BOOLEAN LYShowCursor;	/* Show the cursor or hide it?	    */
-extern BOOLEAN verbose_img;	/* display filenames of images?     */
-extern BOOLEAN LYUseDefShoCur;	/* Command line -show_cursor toggle */
-extern BOOLEAN LYCursesON;  /* start_curses()->TRUE, stop_curses()->FALSE */
-extern BOOLEAN LYUserSpecifiedURL;  /* URL from a goto or document? */
+
+extern BOOLEAN LYCursesON;  	/* start_curses()->TRUE, stop_curses()->FALSE */
 extern BOOLEAN LYJumpFileURL;   /* URL from the jump file shortcuts? */
-extern BOOLEAN jump_buffer;     /* TRUE if offering default shortcut */
-extern BOOLEAN goto_buffer;     /* TRUE if offering default goto URL */
-extern char *LYRequestTitle;    /* newdoc.title in calls to getfile() */
-extern char *jumpprompt;        /* The default jump statusline prompt */
-extern int more;  /* is there more document to display? */
-extern int display_lines; /* number of lines in the display */
-extern int www_search_result;
-extern char *checked_box;  /* form boxes */
-extern char *unchecked_box;  /* form boxes */
-extern char *checked_radio;  /* form radio buttons */
-extern char *unchecked_radio;  /* form radio buttons */
-extern char *empty_string;
-extern char *LynxHome;
-extern char *original_dir;
-extern char *startfile;
-extern char *helpfile;
-extern char *helpfilepath;
-extern char *lynxjumpfile;
-extern char *lynxlistfile;
-extern char *lynxlinksfile;
-extern char *x_display;
-extern char *language;
-extern char *pref_charset;	/* Lynx's preferred character set - MM */
 extern BOOLEAN LYNewsPosting;	/* News posting supported if TRUE */
-extern char *LynxSigFile;	/* Signature file, in or off home */
-extern char *system_mail;
-extern char *system_mail_flags;
-extern char *lynx_cfg_file;	/* location of active lynx.cfg file */
-extern char *lynx_temp_space;
-extern char *lynx_save_space;
+extern BOOLEAN LYShowCursor;	/* Show the cursor or hide it?	    */
+extern BOOLEAN LYUseDefShoCur;	/* Command line -show_cursor toggle */
+extern BOOLEAN LYUserSpecifiedURL;  /* URL from a goto or document? */
 extern BOOLEAN LYforce_HTML_mode;
 extern BOOLEAN LYforce_no_cache;
-extern BOOLEAN LYoverride_no_cache;  /* don't need fresh copy, from history */
 extern BOOLEAN LYinternal_flag; /* don't need fresh copy, was internal link */
+extern BOOLEAN LYoverride_no_cache;  /* don't need fresh copy, from history */
 extern BOOLEAN LYresubmit_posts;
 extern BOOLEAN LYshow_kb_rate;	/* show KB/sec in HTReadProgress */
-extern int user_mode;		/* novice or advanced */
-extern BOOLEAN is_www_index;
-extern BOOLEAN dump_output_immediately;
-extern int dump_output_width;
-extern BOOLEAN lynx_mode;
-extern BOOLEAN bold_headers;
 extern BOOLEAN bold_H1;
+extern BOOLEAN bold_headers;
 extern BOOLEAN bold_name_anchors;
-extern BOOLEAN recent_sizechange;
-extern BOOLEAN telnet_ok;
-extern BOOLEAN news_ok;
-extern BOOLEAN ftp_ok;
-extern BOOLEAN rlogin_ok;
-extern BOOLEAN system_editor;     /* True if locked-down editor */
-extern BOOLEAN child_lynx;        /* TRUE to exit with an arrow */
-extern BOOLEAN error_logging;     /* TRUE to mail error messages */
-extern BOOLEAN check_mail;        /* TRUE to report unread/new mail messages */
-extern BOOLEAN vi_keys;           /* TRUE to turn on vi-like key movement */
-extern BOOLEAN emacs_keys;        /* TRUE to turn on emacs-like key movement */
-extern int keypad_mode;           /* is set to either NUMBERS_AS_ARROWS *
-				   * or LINKS_ARE_NUMBERED 		*/
 extern BOOLEAN case_sensitive;    /* TRUE to turn on case sensitive search */
+extern BOOLEAN check_mail;        /* TRUE to report unread/new mail messages */
+extern BOOLEAN child_lynx;        /* TRUE to exit with an arrow */
+extern BOOLEAN dump_output_immediately;
+extern BOOLEAN emacs_keys;        /* TRUE to turn on emacs-like key movement */
+extern BOOLEAN error_logging;     /* TRUE to mail error messages */
+extern BOOLEAN ftp_ok;
+extern BOOLEAN goto_buffer;     /* TRUE if offering default goto URL */
+extern BOOLEAN is_www_index;
+extern BOOLEAN jump_buffer;     /* TRUE if offering default shortcut */
+extern BOOLEAN long_url_ok;
+extern BOOLEAN lynx_mode;
+extern BOOLEAN news_ok;
+extern BOOLEAN recent_sizechange;
+extern BOOLEAN rlogin_ok;
+extern BOOLEAN system_editor;	  /* True if locked-down editor */
+extern BOOLEAN telnet_ok;
+extern BOOLEAN verbose_img;	/* display filenames of images?     */
+extern BOOLEAN vi_keys;		/* TRUE to turn on vi-like key movement */
+extern char *LYRequestTitle;	/* newdoc.title in calls to getfile() */
+extern char *LynxHome;
+extern char *LynxSigFile;	/* Signature file, in or off home */
+extern char *checked_box;	/* form boxes */
+extern char *checked_radio;	/* form radio buttons */
+extern char *empty_string;
+extern char *helpfile;
+extern char *helpfilepath;
+extern char *jumpprompt;	/* The default jump statusline prompt */
+extern char *language;
+extern char *lynx_cfg_file;	/* location of active lynx.cfg file */
+extern char *lynx_save_space;
+extern char *lynx_temp_space;
+extern char *lynxjumpfile;
+extern char *lynxlinksfile;
+extern char *lynxlistfile;
+extern char *original_dir;
+extern char *pref_charset;	/* Lynx's preferred character set - MM */
+extern char *startfile;
+extern char *system_mail;
+extern char *system_mail_flags;
+extern char *unchecked_box;	/* form boxes */
+extern char *unchecked_radio;	/* form radio buttons */
+extern char *x_display;
+extern int display_lines;	/* number of lines in the display */
+extern int dump_output_width;
+extern int keypad_mode;		/* NUMBERS_AS_ARROWS or LINKS_ARE_NUMBERED */
+extern int more;		/* is there more document to display? */
+extern int user_mode;		/* novice or advanced */
+extern int www_search_result;
 
 extern BOOLEAN had_restrictions_default; /* flags to note whether we have... */
 extern BOOLEAN had_restrictions_all;     /* parsed these restriction options */
@@ -397,6 +398,12 @@ extern BOOLEAN with_backspaces;
 #ifndef NO_EMPTY_HREFLESS_A
 extern BOOL force_empty_hrefless_a;
 #endif
+
+#ifndef NO_NONSTICKY_INPUTS
+extern BOOL sticky_inputs;
+extern BOOL textinput_drawn;
+#endif
+
 
 #ifndef VMS
 extern BOOLEAN LYNoCore;

@@ -47,13 +47,6 @@
 #define NOCHOP 0
 #define CHOP   1
 
-#define TABSTOP 8
-#define SPACES  "        "  /* must be at least TABSTOP spaces long */
-#define SPLAT   '.'
-
-#define NOCHOP 0
-#define CHOP   1
-
 /* just for information:
 US-ASCII control characters <32 which are not defined in Unicode standard
 =00	U+0000	NULL

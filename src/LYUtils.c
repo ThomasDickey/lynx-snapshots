@@ -145,6 +145,10 @@ PUBLIC void highlight ARGS3(
      */
     if (cur < 0)
 	cur = 0;
+#ifndef NO_NONSTICKY_INPUTS
+    if (flag == OFF)
+	textinput_drawn = FALSE;
+#endif
 
     if (nlinks > 0) {
 #if  defined(USE_COLOR_STYLE) && !defined(NO_HILIT_FIX)
@@ -1748,7 +1752,7 @@ highlight_search_done:
 	    /*
 	     *	Get cursor out of the way.
 	     */
-	    move((LYlines - 1), (LYcols - 1));
+	    LYHideCursor();
 	else
 #endif /* FANCY CURSES || USE_SLANG */
 	    /*
@@ -1914,7 +1918,7 @@ PUBLIC void statusline ARGS1(
 	    else
 		TO_SJIS((CONST unsigned char *)text_buff, temp);
 #else
-	    strcpy(temp, text_buff);
+	    strcpy((char *) temp, text_buff);
 #endif
 	} else {
 	    for (i = 0, j = 0; text_buff[i]; i++) {
@@ -3145,6 +3149,53 @@ PUBLIC void LYExtSignal ARGS2(
 	signal(sig, handler);
 }
 #endif /* HAVE_SIGACTION */
+
+#if defined(SIGTSTP) && !defined(USE_SLANG)
+#if HAVE_SIGACTION
+/*
+ *  For switching a signal's handling between SIG_DFL and something
+ *  (possibly) different that may have been set up by lynx code or
+ *  e.g. by curses library.  Uses sigaction to preserve / restore as
+ *  much state as possible.
+ *  Second arg is where to save or restore from.
+ *  Third arg to_dfl specifies what to do:
+ *  	1	Save current state in where, set handling to SIG_DFL
+ *	0	Restore current state to previously saved one in where
+ *
+ *  Currently only used for SIGTSTP without SLANG, to prevent (n)curses
+ *  signal handler from running while lynx is waiting in system() for
+ *  an interactive command like an editor. - kw
+ */
+PRIVATE BOOLEAN LYToggleSigDfl ARGS3(
+    int,			sig,
+    struct sigaction *,		where,
+    int,			to_dfl)
+{
+    int rv = -1;
+    struct sigaction oact;
+
+    if (to_dfl == 1) {
+	rv = sigaction(sig, NULL, &oact);
+	if (rv == 0) {
+	    if (oact.sa_handler != SIG_DFL) {
+		oact.sa_handler = SIG_DFL;
+		rv = sigaction(sig, &oact, where);
+	    } else if (where) {
+		memcpy(where, &oact, sizeof(oact));
+		rv = 0;
+	    }
+	}
+    } else {
+	rv = sigaction(sig, where, NULL);
+    }
+    if (rv != 0) {
+	CTRACE(tfp, "Error in LYToggleSigDfl: %s\n", LYStrerror(errno));
+	return FALSE;
+    } else
+	return TRUE;
+}
+#endif /* HAVE_SIGACTION */
+#endif /* SIGTSTP && !USE_SLANG */
 
 /**************
 ** This bit of code catches window size change signals
@@ -5298,7 +5349,11 @@ PUBLIC CONST char * Home_Dir NOARGS
     if (homedir == NULL) {
 	if ((cp = getenv("HOME")) == NULL || *cp == '\0'
 #ifdef UNIX
-	    || *cp != '/'
+		 || !(LYIsPathSep(*cp)
+#  ifdef __EMX__
+		 || (*cp && cp[1] == ':' && LYIsPathSep(cp[2]))
+#  endif
+		)
 #endif /* UNIX */
 	    ) {
 #if defined (DOSPATH) || defined (__EMX__) /* BAD!	WSB */
@@ -7048,6 +7103,11 @@ PUBLIC int LYSystem ARGS1(
 {
     int code;
     int do_free = 0;
+#if HAVE_SIGACTION && defined(SIGTSTP) && !defined(USE_SLANG)
+    struct sigaction saved_sigtstp_act;
+    BOOLEAN sigtstp_saved = FALSE;
+#endif
+    int saved_errno = 0;
 
     fflush(stdout);
     fflush(stderr);
@@ -7141,7 +7201,16 @@ PUBLIC int LYSystem ARGS1(
 #else
     if (restore_sigpipe_for_children)
 	signal(SIGPIPE, SIG_DFL); /* Some commands expect the default */
+#if HAVE_SIGACTION && defined(SIGTSTP) && !defined(USE_SLANG)
+    if (!dump_output_immediately && !LYCursesON && !no_suspend)
+	sigtstp_saved = LYToggleSigDfl(SIGTSTP, &saved_sigtstp_act, 1);
+#endif
     code = system(command);
+    saved_errno = errno;
+#if HAVE_SIGACTION && defined(SIGTSTP) && !defined(USE_SLANG)
+    if (sigtstp_saved)
+	LYToggleSigDfl(SIGTSTP, &saved_sigtstp_act, 0);
+#endif
     if (restore_sigpipe_for_children)
 	signal(SIGPIPE, SIG_IGN); /* Ignore it again - kw */
 #endif
@@ -7157,6 +7226,9 @@ PUBLIC int LYSystem ARGS1(
 
     if (do_free)
 	FREE(command);
+#if !defined(UCX) || !defined(VAXC) /* errno not modifiable ?? */
+    errno = saved_errno;	/* may have been clobbered */
+#endif
     return code;
 }
 

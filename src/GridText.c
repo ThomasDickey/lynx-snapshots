@@ -103,7 +103,6 @@ extern HTCJKlang HTCJK;
 
 #ifdef CJK_EX
 PUBLIC HTkcode last_kcode = NOKANJI;	/* 1997/11/14 (Fri) 09:09:26 */
-extern char *str_kcode(HTkcode code);
 #define CHAR_WIDTH 6
 #else
 #define CHAR_WIDTH 1
@@ -210,6 +209,7 @@ struct _HText {
 	BOOLEAN			minimal_comments;
 	BOOLEAN			soft_dquotes;
 	BOOLEAN			old_dtd;
+	int			keypad_mode;
 	int			lines;		/* Screen size */
 	int			cols;
 #endif
@@ -276,6 +276,7 @@ PUBLIC int wait_for_this_stacked_elt;/* -1 if can justify contents of the
     ok_justify ==FALSE or in psrcview. */
 PUBLIC BOOL form_in_htext;/*to indicate that we are in form (since HTML_FORM is
   not stacked in the HTML.c */
+PUBLIC BOOL in_DT = FALSE;
 #ifdef DEBUG_JUSTIFY
 PUBLIC BOOL can_justify_stack_depth;/* can be 0 or 1 if all code is correct*/
 #endif
@@ -300,8 +301,18 @@ static int justified_text_map[MAX_LINE]; /* this is a map - for each index i
 
 PUBLIC void ht_justify_cleanup NOARGS
 {
+    wait_for_this_stacked_elt = !ok_justify
+#  ifdef USE_PSRC
+	|| psrc_view
+#  endif
+	? 30000/*MAX_NESTING*/+2 /*some unreachable value*/ : -1;
+    can_justify_here = TRUE;
+    can_justify_this_line = TRUE;
+    form_in_htext = FALSE;
+
     last_anchor_of_previous_line = NULL;
     this_line_was_splitted = FALSE;
+    in_DT = FALSE;
 }
 
 PUBLIC void mark_justify_start_position ARGS1(void*,text)
@@ -314,7 +325,7 @@ PUBLIC void mark_justify_start_position ARGS1(void*,text)
 #define REALLY_CAN_JUSTIFY(text) ( (wait_for_this_stacked_elt<0) && \
 	( text->style->alignment == HT_LEFT     || \
 	  text->style->alignment == HT_JUSTIFY) && \
-	HTCJK == NOCJK && \
+	HTCJK == NOCJK && !in_DT && \
 	can_justify_here && can_justify_this_line && !form_in_htext )
 
 #endif /* EXP_JUSTIFY_ELTS */
@@ -523,6 +534,8 @@ PUBLIC HText *	HText_new ARGS1(
     if (!self)
 	return self;
 
+    CTRACE(tfp, "GridText: start HText_new\n");
+
 #if defined(VMS) && defined (VAXC) && !defined(__DECC)
     status = lib$stat_vm(&VMType, &VMTotal);
     CTRACE(tfp, "GridText: VMTotal = %d\n", VMTotal);
@@ -595,6 +608,7 @@ PUBLIC HText *	HText_new ARGS1(
     self->minimal_comments = minimal_comments;
     self->soft_dquotes = soft_dquotes;
     self->old_dtd = Old_DTD;
+    self->keypad_mode = keypad_mode;
     self->lines = LYlines;
     self->cols = LYcols;
 #endif
@@ -691,8 +705,9 @@ PUBLIC HText *	HText_new ARGS1(
 	self->last_lineno_last_disp_partial = -1;
 #endif
 
-    CTRACE(tfp, "GridText: start HText_new\n");
-
+#ifdef EXP_JUSTIFY_ELTS
+    ht_justify_cleanup();
+#endif
     return self;
 }
 
@@ -1193,8 +1208,20 @@ PRIVATE void display_title ARGS1(
 	 *  account the possibility that multibyte
 	 *  characters might be present. - FM
 	 */
+#ifdef SH_EX	/* 1999/06/15 (Tue) 10:17:28 */
+	int last;
+	last = (int)strlen(percent) + CHAR_WIDTH;
+	if (LYcols - 3 >= last) {
+	    title[(LYcols - 3) - last] = '.';
+	    title[(LYcols - 2) - last] = '.';
+	    title[(LYcols - 1) - last] = '\0';
+	} else {
+	    title[(LYcols - 1) - last] = '\0';
+	}
+#else
 	if ((i = ((LYcols - 2) - strlen(percent)) - CHAR_WIDTH) >= 0)
 	    title[i] = '\0';
+#endif
 	move(0, CHAR_WIDTH);
     }
     addstr(title);
@@ -2579,8 +2606,7 @@ PRIVATE void split_line ARGS2(
 		for (i=0; i<j; ++i)
 		    *jdata++ = ' ';
 	    }
-	    *m++ = justify_start_position + total_cell_len +
-		    spare + ht_num_runs - 1; /*map the end*/
+	    *m++ = previous->size + spare; /*map the end */
 
 	    text->chars += spare;
 
@@ -2600,10 +2626,16 @@ PRIVATE void split_line ARGS2(
 
 	    /* now copy and fix colorstyles */
 	    for(i = 0; i < jline->numstyles; ++i) {
+		int hpos = previous->styles[i].horizpos;
+
 		jline->styles[i].style = previous->styles[i].style;
 		jline->styles[i].direction = previous->styles[i].direction;
 		jline->styles[i].previous = previous->styles[i].previous;
-		jline->styles[i].horizpos = justified_text_map[previous->styles[i].horizpos];
+
+		/*there are stylechanges with hpos > line length */
+		jline->styles[i].horizpos = (hpos > previous->size)
+			? previous->size + spare
+			: justified_text_map[hpos];
 	    }
 #endif
 	    /* we have to fix anchors*/
@@ -2652,7 +2684,7 @@ PRIVATE void split_line ARGS2(
 
 			} else {
 			    /* This is the anchor that was started on previous
-			     * line.  Its .line_pos and .start were updated. 
+			     * line.  Its .line_pos and .start were updated.
 			     * So we have to update only extent.  If anchor
 			     * text is longer than two lines, we don't bother
 			     * setting it to correct value.
@@ -6782,6 +6814,14 @@ PUBLIC BOOLEAN HTreparse_document NOARGS
 	      HTMainAnchor->source_cache_file);
 
 	/*
+	 * This magic FREE(anchor->UCStages) call
+	 * stolen from HTuncache_current_document() above.
+	 */
+	if (!(HTOutputFormat && HTOutputFormat == WWW_SOURCE)) {
+	    FREE(HTMainAnchor->UCStages);
+	}
+
+	/*
 	 * This is more or less copied out of HTLoadFile(), except we don't
 	 * get a content encoding.  This may be overkill.  -dsb
 	 */
@@ -6826,6 +6866,14 @@ PUBLIC BOOLEAN HTreparse_document NOARGS
 
 	CTRACE(tfp, "Reparsing from source memory cache %p\n",
 		    (void *)HTMainAnchor->source_cache_chunk);
+
+	/*
+	 * This magic FREE(anchor->UCStages) call
+	 * stolen from HTuncache_current_document() above.
+	 */
+	if (!(HTOutputFormat && HTOutputFormat == WWW_SOURCE)) {
+	    FREE(HTMainAnchor->UCStages);
+	}
 
 	/*
 	 * This is only done to make things aligned with SOURCE_CACHE_NONE and
@@ -6936,6 +6984,8 @@ PUBLIC BOOLEAN HTdocument_settings_changed NOARGS
 	trace_setting_change("SOFT_DQUOTES",
 			     HTMainText->soft_dquotes, soft_dquotes);
 	trace_setting_change("OLD_DTD", HTMainText->old_dtd, Old_DTD);
+	trace_setting_change("KEYPAD_MODE",
+			     HTMainText->keypad_mode, keypad_mode);
 	if (HTMainText->lines != LYlines || HTMainText->cols != LYcols)
 	    CTRACE(tfp,
 		   "HTdocument_settings_changed: Screen size has changed (was %dx%d, now %dx%d)\n",
@@ -6944,12 +6994,13 @@ PUBLIC BOOLEAN HTdocument_settings_changed NOARGS
 
     return (HTMainText->clickable_images != clickable_images ||
 	    HTMainText->pseudo_inline_alts != pseudo_inline_alts ||
-	   HTMainText->verbose_img != verbose_img ||
+	    HTMainText->verbose_img != verbose_img ||
 	    HTMainText->raw_mode != LYUseDefaultRawMode ||
 	    HTMainText->historical_comments != historical_comments ||
 	    HTMainText->minimal_comments != minimal_comments ||
 	    HTMainText->soft_dquotes != soft_dquotes ||
 	    HTMainText->old_dtd != Old_DTD ||
+	    HTMainText->keypad_mode != keypad_mode ||
 	    HTMainText->lines != LYlines ||
 	    HTMainText->cols != LYcols);
 }
@@ -10684,7 +10735,6 @@ PUBLIC int HText_ExtEditForm ARGS1(
     int		newlines  = 0;
     int		len;
 
-
     CTRACE(tfp, "GridText: entered HText_ExtEditForm()\n");
 
     ed_temp = (char *) malloc (LY_MAXPATH);
@@ -10821,6 +10871,9 @@ PUBLIC int HText_ExtEditForm ARGS1(
 	   len = cp - lp;
 	else
 	   len = strlen (lp);
+
+	if (len >= MAX_LINE - 1)
+	    len = MAX_LINE - 1;
 
 	strncpy (line, lp, len);
 	*(line + len) = '\0';
