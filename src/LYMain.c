@@ -1811,7 +1811,6 @@ PUBLIC int main ARGS2(
 #endif /* EXP_PERSISTENT_COOKIES */
 	cleanup_files();
 	exit_immediately(status);
-	cleanup_files();
     } else {
 	/*
 	 *  Start an INTERACTIVE session. - FM
