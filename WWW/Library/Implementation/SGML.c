@@ -1740,8 +1740,9 @@ top1:
      */
     if ((HTCJK==JAPANESE) && (context->state==S_in_kanji) &&
 	!IS_JAPANESE_2BYTE(context->kanji_buf,(unsigned char)c)) {
-#ifdef CONV_JISX0201KANA_TO_JISX0208KANA
+#ifdef CONV_JISX0201KANA_JISX0208KANA
 	if (IS_SJIS_X0201KANA(context->kanji_buf)) {
+	    unsigned char sjis_hi, sjis_lo;
 	    JISx0201TO0208_SJIS(context->kanji_buf, &sjis_hi, &sjis_lo);
 	    PUTC(sjis_hi);
 	    PUTC(sjis_lo);

@@ -1055,11 +1055,14 @@ Try_Redirected_URL:
 			    return(NULLFILE);
 
 			} else {
-			/*
-			 *  May set www_search_result.
-			 */
-			    if (pound != NULL)
+			    if (pound != NULL) {
+				if (!HTMainText) /* this should not happen... */
+				    return(NULLFILE); /* but it can. - kw */
+				/*
+				 *  May set www_search_result.
+				 */
 				HTFindPoundSelector(pound+1);
+			    }
 			    return(NORMAL);
 			}
 		    }

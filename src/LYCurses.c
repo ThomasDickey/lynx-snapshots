@@ -1356,7 +1356,7 @@ PUBLIC void LYtouchline ARGS1(
 #if defined(HAVE_WREDRAWLN)
     wredrawln(stdscr, row, 1);
 #else
-#if defined(VMS) && !defined(_BSD44_CURSES)
+#if defined(VMS) && !defined(_BSD44_CURSES) && !defined(USE_SLANG)
     /* touchline() is not available on VMS before version 7.0, and then
      * only on Alpha, since prior ports of curses were broken.
      */

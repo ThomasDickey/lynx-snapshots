@@ -7044,7 +7044,7 @@ PUBLIC BOOLEAN LYValidateFilename ARGS2(
 #else
 
 #ifndef __EMX__
-    if (!LYIsPathSep(*given)) {
+    if (!LYisAbsPath(given)) {
 #if defined(__DJGPP__) || defined(_WINDOWS)
     if (strchr(result, ':') != NULL)
 	cp = NULL;
@@ -7331,7 +7331,7 @@ PUBLIC int LYCopyFile ARGS2(
 	char *,		src,
 	char *,		dst)
 {
-#if defined(DOSPATH)		/* thanks to Hiroyuki Senshu */
+#if defined(DOSPATH) || defined(__CYGWIN__) /* thanks to Hiroyuki Senshu */
 
 #define BUF_SIZE	1024
 
