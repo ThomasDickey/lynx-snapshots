@@ -6427,34 +6427,51 @@ End_Object:
 	    if (current_char_set)
 	        LYExpandString(&me->textarea.data);
 
-	    cp = strtok(me->textarea.data, "\n");
-	    LYUnEscapeEntities(cp, me->UsePlainSpace, me->HiddenValue);
+	    if ((cp = strtok(me->textarea.data, "\n")) != NULL) {
+		StrAllocCopy(temp, cp);
+		LYUnEscapeEntities(temp,
+				   me->UsePlainSpace, me->HiddenValue);
+	    } else {
+		FREE(temp);
+	    }
 	    for (i = 0; i < me->textarea_rows; i++) {
-		I.value = cp;
-
+		I.value = temp;
                 chars = HText_beginInput(me->text, me->inUnderline, &I);
 	        for (; chars > 0; chars--)
 	    	    HTML_put_character(me, '_');
 	        HText_appendCharacter(me->text, '\r');
-	
-		cp = strtok(NULL, "\n");
-		LYUnEscapeEntities(cp, me->UsePlainSpace, me->HiddenValue);
+		if (cp) {
+		    if ((cp = strtok(NULL, "\n")) != NULL) {
+			StrAllocCopy(temp, cp);
+			LYUnEscapeEntities(temp,
+					   me->UsePlainSpace,
+					   me->HiddenValue);
+		    } else {
+			FREE(temp);
+		    }
+		}
 	    }
 
 	    /*
 	     *  Check for more data lines than the rows attribute.
    	     */
 	    while (cp) {
-		I.value = cp;
-
-                chars = HText_beginInput(me->text, me->inUnderline, &I);
-                for (chars = atoi(me->textarea_cols); chars>0; chars--)
-                    HTML_put_character(me, '_');
-                HText_appendCharacter(me->text, '\r');
-        
-                cp = strtok(NULL, "\n");
-		LYUnEscapeEntities(cp, me->UsePlainSpace, me->HiddenValue);
+		StrAllocCopy(temp, cp);
+		I.value = temp;
+		chars = HText_beginInput(me->text, me->inUnderline, &I);
+		for (chars = atoi(me->textarea_cols); chars > 0; chars--)
+		    HTML_put_character(me, '_');
+		HText_appendCharacter(me->text, '\r');
+		if ((cp = strtok(NULL, "\n")) != NULL) {
+		    StrAllocCopy(temp, cp);
+		    LYUnEscapeEntities(temp,
+				       me->UsePlainSpace,
+				       me->HiddenValue);
+		} else {
+		    FREE(temp);
+		}
             }
+	    FREE(temp);
 
 	    me->UsePlainSpace = FALSE;
 

@@ -175,6 +175,9 @@ int mainloop NOARGS
     char *tp;
     char tmpbuf[1024];
     struct stat dir_info;
+    extern char LYPermitFileURL[];
+    extern char LYDiredFileURL[];
+    extern char LYUploadFileURL[];
 #endif /* DIRED_SUPPORT */
 
 /*
@@ -2444,9 +2447,24 @@ new_cmd:  /*
 			if (!strncasecomp(
 				    links[curdoc.link].form->submit_action,
 					  "LYNXCOOKIE:", 11) ||
+#ifdef DIRED_SUPPORT
+#ifdef OK_PERMIT
+			    (!(strncasecomp(
+				    links[curdoc.link].form->submit_action,
+					   "LYNXDIRED:", 10)) &&
+			     (no_dired_support ||
+			      strncasecomp(
+				(links[curdoc.link].form->submit_action + 10),
+					   "//PERMIT_LOCATION", 17) ||
+			      strcmp(curdoc.address, LYPermitFileURL) ||
+			      strcmp((curdoc.title ? curdoc.title : ""),
+				     PERMIT_OPTIONS_TITLE)))  ||
+#else
 			    !strncasecomp(
 				    links[curdoc.link].form->submit_action,
 					  "LYNXDIRED:", 10) ||
+#endif /* OK_PERMIT */
+#endif /* DIRED_SUPPORT */
 			    !strncasecomp(
 				    links[curdoc.link].form->submit_action,
 					  "LYNXDOWNLOAD:", 13) ||
@@ -2469,6 +2487,11 @@ new_cmd:  /*
 				    links[curdoc.link].form->submit_action,
 					  "lynxprog:", 9)) {
 			    HTAlert(SPECIAL_ACTION_DISALLOWED);
+			    if (TRACE) {
+			        fprintf(stderr,
+					"LYMainLoop: Rejected '%s'\n",
+					links[curdoc.link].form->submit_action);
+			    }
 			    HTOutputFormat = WWW_PRESENT;
 			    LYforce_no_cache = FALSE;
 			    break;
@@ -2557,12 +2580,15 @@ new_cmd:  /*
 #ifdef DIRED_SUPPORT
 			(!strncmp(links[curdoc.link].lname,
 				  "LYNXDIRED:", 10) &&
-			 strcmp((curdoc.title ? curdoc.title : ""),
-				DIRED_MENU_TITLE) &&
-			 strcmp((curdoc.title ? curdoc.title : ""),
-				PERMIT_OPTIONS_TITLE) &&
-			 strcmp((curdoc.title ? curdoc.title : ""),
-				UPLOAD_OPTIONS_TITLE)) ||
+			 (strcmp(curdoc.address, LYDiredFileURL) ||
+			  strcmp((curdoc.title ? curdoc.title : ""),
+				DIRED_MENU_TITLE)) &&
+			 (strcmp(curdoc.address, LYPermitFileURL) ||
+			  strcmp((curdoc.title ? curdoc.title : ""),
+				PERMIT_OPTIONS_TITLE)) &&
+			 (strcmp(curdoc.address, LYUploadFileURL) ||
+			  strcmp((curdoc.title ? curdoc.title : ""),
+				UPLOAD_OPTIONS_TITLE))) ||
 #endif /* DIRED_SUPPORT */
 			(!strncmp(links[curdoc.link].lname,
 				 "LYNXDOWNLOAD:", 13) &&
@@ -3211,41 +3237,27 @@ check_goto_URL:
 			 *  Servers properly use it...  Treat like
 			 *  case LYK_RELOAD (see comments there). - KW
 			 */
-			if (HTisDocumentSource()) {
-			    HTOutputFormat = WWW_SOURCE;
-			}
-			HEAD_request = HTLoadedDocumentIsHEAD();
-			HTuncache_current_document();
-#ifdef NO_ASSUME_SAME_DOC
-			newdoc.line = 1;
-			newdoc.link = 0;
-#else
-			if (lynx_mode == FORMS_LYNX_MODE) {
-			    _statusline(RELOADING_FORM);
-			    sleep(AlertSecs);
-			}
-			newdoc.line = ((curdoc.line > 0) ?
-					     curdoc.line : 1);
-			newdoc.link = ((curdoc.link > -1) ?
-					      curdoc.link : 0);
-#endif /* NO_ASSUME_SAME_DOC */
-		        FREE(curdoc.address);
 			reloading = TRUE;
-		    } else if (keypad_mode_flag != keypad_mode ||
-			       (user_mode_flag != user_mode &&
-				(user_mode_flag == NOVICE_MODE ||
-				 user_mode == NOVICE_MODE)) ||
-			       (((HTfileSortMethod_flag != HTfileSortMethod) ||
-#ifdef DIRED_SUPPORT
-				 (c != dir_list_style) ||
-#endif /* DIRED_SUPPORT */
-				 (show_dotfiles_flag != show_dotfiles)) &&
-				(!strncmp(curdoc.address, "file:", 5) ||
-				 !strncmp(curdoc.address, "ftp:", 4))) ||
-				LYSelectPopups_flag != LYSelectPopups) {
-		        HTuncache_current_document();
-		        FREE(curdoc.address);
 		    }
+		    if (lynx_mode == FORMS_LYNX_MODE) {
+			_statusline(RELOADING_FORM);
+			sleep(AlertSecs);
+		    }
+		    if (HTisDocumentSource()) {
+			HTOutputFormat = WWW_SOURCE;
+		    }
+		    HEAD_request = HTLoadedDocumentIsHEAD();
+		    HTuncache_current_document();
+#ifdef NO_ASSUME_SAME_DOC
+		    newdoc.line = 1;
+		    newdoc.link = 0;
+#else
+		    newdoc.line = ((curdoc.line > 0) ?
+					 curdoc.line : 1);
+		    newdoc.link = ((curdoc.link > -1) ?
+					  curdoc.link : 0);
+#endif /* NO_ASSUME_SAME_DOC */
+		    FREE(curdoc.address);
 		}
 	    }
 	    keypad_mode_flag = keypad_mode;
@@ -3996,6 +4008,7 @@ check_goto_URL:
 	     *  Don't do if not allowed or already viewing the menu.
 	     */	
 	    if (lynx_edit_mode && !no_dired_support &&
+		strcmp(curdoc.address, LYDiredFileURL) &&
 	        strcmp((curdoc.title ? curdoc.title : ""),
 		       DIRED_MENU_TITLE)) {
 	        dired_options(&curdoc,&newdoc.address);
@@ -4029,10 +4042,13 @@ check_goto_URL:
 	        strcmp((curdoc.title ? curdoc.title : ""),
 		       PRINT_OPTIONS_TITLE) &&
 #ifdef DIRED_SUPPORT
+		strcmp(curdoc.address, LYDiredFileURL) &&
 	        strcmp((curdoc.title ? curdoc.title : ""),
 		       DIRED_MENU_TITLE) &&
+		strcmp(curdoc.address, LYPermitFileURL) &&
 	        strcmp((curdoc.title ? curdoc.title : ""),
 		       PERMIT_OPTIONS_TITLE) &&
+		strcmp(curdoc.address, LYUploadFileURL) &&
 	        strcmp((curdoc.title ? curdoc.title : ""),
 		       UPLOAD_OPTIONS_TITLE) &&
 #endif /* DIRED_SUPPORT */
@@ -4304,7 +4320,8 @@ check_add_bookmark_to_self:
 		    }
 
 #ifdef DIRED_SUPPORT
-		} else if (!strcmp((curdoc.title ? curdoc.title : ""),
+		} else if (!strcmp(curdoc.address, LYUploadFileURL) ||
+			   !strcmp((curdoc.title ? curdoc.title : ""),
 				   UPLOAD_OPTIONS_TITLE)) {
 		    if (old_c != real_c)	{
 			old_c = real_c;
@@ -4312,7 +4329,8 @@ check_add_bookmark_to_self:
 			sleep(MessageSecs);
 		    }
 
-		} else if (!strcmp((curdoc.title ? curdoc.title : ""),
+		} else if (!strcmp(curdoc.address, LYPermitFileURL) ||
+			   !strcmp((curdoc.title ? curdoc.title : ""),
 				   PERMIT_OPTIONS_TITLE)) {
 		    if (old_c != real_c)	{
 			old_c = real_c;
@@ -4426,7 +4444,8 @@ check_add_bookmark_to_self:
 	    /*
 	     *  Don't do if already viewing upload options page.
 	     */
-	    if (!strcmp((curdoc.title ? curdoc.title : ""),
+	    if (!strcmp(curdoc.address, LYUploadFileURL) ||
+		!strcmp((curdoc.title ? curdoc.title : ""),
 	    		UPLOAD_OPTIONS_TITLE))
 	        break;
 

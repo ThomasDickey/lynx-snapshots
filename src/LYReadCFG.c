@@ -350,7 +350,7 @@ PRIVATE int check_color ARGS1(
  *  Exit routine for failed COLOR parsing.
  */
 PRIVATE void exit_with_color_syntax ARGS1(
-	char *,	error_line)
+	char *,		error_line)
 {
     unsigned int i;
     fprintf (stderr, "\
@@ -434,6 +434,7 @@ PUBLIC void read_cfg ARGS1(
     char buffer[501];
     char temp[501];
     char *line_feed;
+    char *cp, *cp1;
     int i, j, len;
 
     /*
@@ -462,7 +463,19 @@ PUBLIC void read_cfg ARGS1(
 	    *line_feed = '\0';
 	
 	/*
-	 *  Strip off trailing white space
+	 *  Trim off any trailing comments.
+	 */
+	if ((cp = (char *)strrchr(buffer, ':')) != NULL) {
+	    if ((cp1 = (char *)strchr(cp, '#')) != NULL) {
+		cp1--;
+		if (isspace((unsigned char)*cp1)) {
+		    *cp1 = '\0';
+		}
+	    }
+	}
+
+	/*
+	 *  Strip off trailing white space.
 	 */
 	len = strlen(buffer);
 	while (len && isspace(buffer[len-1])) {
@@ -471,7 +484,7 @@ PUBLIC void read_cfg ARGS1(
 	}
 
 	/*
-	 *  Skip any comment or blank lines.
+	 *  Skip any blank or purely comment lines.
 	 */
 	if (buffer[0] == '\0' || buffer[0] == '#')
 	    continue;
@@ -512,14 +525,16 @@ PUBLIC void read_cfg ARGS1(
 	} else if (!strncasecomp(buffer, "ASSUME_LOCAL_CHARSET:", 21)) {
 	    StrAllocCopy(UCAssume_localMIMEcharset, buffer+21);
 	    for (i = 0; UCAssume_localMIMEcharset[i]; i++)
-	        UCAssume_localMIMEcharset[i] = TOLOWER(UCAssume_localMIMEcharset[i]);
+	        UCAssume_localMIMEcharset[i] =
+			TOLOWER(UCAssume_localMIMEcharset[i]);
 	    UCLYhndl_HTFile_for_unspec =
 		UCGetLYhndl_byMIME(UCAssume_localMIMEcharset);
 
 	} else if (!strncasecomp(buffer, "ASSUME_UNREC_CHARSET:", 21)) {
 	    StrAllocCopy(UCAssume_unrecMIMEcharset, buffer+21);
 	    for (i = 0; UCAssume_unrecMIMEcharset[i]; i++)
-	        UCAssume_unrecMIMEcharset[i] = TOLOWER(UCAssume_unrecMIMEcharset[i]);
+	        UCAssume_unrecMIMEcharset[i] =
+			TOLOWER(UCAssume_unrecMIMEcharset[i]);
 	    UCLYhndl_for_unrec =
 		UCGetLYhndl_byMIME(UCAssume_unrecMIMEcharset);
 #endif /* EXP_CHARTRANS */
@@ -1127,6 +1142,7 @@ PUBLIC void read_cfg ARGS1(
 	    add_trusted(&buffer[13], EXEC_PATH); /* Add exec path */
 	}
 #endif /* EXEC_LINKS */
+
 #ifdef LYNXCGI_LINKS
 	if (!strncasecomp(buffer, "TRUSTED_LYNXCGI:", 16)) {
 	    add_trusted(&buffer[16], CGI_PATH); /* Add CGI path */

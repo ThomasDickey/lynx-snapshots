@@ -1,32 +1,33 @@
-/* Routines to manipulate the local filesystem. */
-/* Written by: Rick Mallett, Carleton University */
-/* Report problems to rmallett@ccs.carleton.ca */
-/* Modified 18-Dec-95 David Trueman (david@cs.dal.ca):
-	Added OK_PERMIT compilation option.
-	Support replacement of compiled-in f)ull menu configuration via
-	  DIRED_MENU definitions in lynx.cfg, so that more than one menu
-	  can be driven by the same executable. */
-/* Modified Oct-96 Klaus Weide (kweide@tezcat.com):
-	Changed to use the library's HTList_* functions and macros for
-	  managing the list of tagged file URLs.
-	Keep track of proper level of URL escaping, so that unusual filenames
-	  which contain #% etc. are handled properly (some HTUnEscapeSome()'s
-	  left in to be conservative, and to document where superfluous
-	  unescaping took place before).
-	Dynamic memory instead of fixed length buffers in a few cases.
-	Other minor changes to make things work as intended. */
-/* Modified Jun-97 Klaus Weide (kweide@tezcat.com) & FM:
-	Modified the code handling DIRED_MENU to do more careful
-	  checking of the selected file.  In addition to "TAG", "FILE", and
-	  "DIR", DIRED_MENU definitions in lynx.cfg now also recognize LINK as
-	  a type.  DIRED_MENU definitions with a type field of "LINK" are only
-	  used if the current selection is a symbolic link ("FILE" and "DIR"
-	  definitions are not used in that case).  The default menu
-	  definitions have been updated to reflect this change, and to avoid
-	  the showing of menu items whose action would always fail - KW
-	Cast all code into the Lynx programming style. - FM */
+/*
+**  Routines to manipulate the local filesystem.
+**  Written by: Rick Mallett, Carleton University
+**  Report problems to rmallett@ccs.carleton.ca
+**  Modified 18-Dec-95 David Trueman (david@cs.dal.ca):
+**	Added OK_PERMIT compilation option.
+**	Support replacement of compiled-in f)ull menu configuration via
+**	  DIRED_MENU definitions in lynx.cfg, so that more than one menu
+**	  can be driven by the same executable.
+**  Modified Oct-96 Klaus Weide (kweide@tezcat.com):
+**	Changed to use the library's HTList_* functions and macros for
+**	  managing the list of tagged file URLs.
+**	Keep track of proper level of URL escaping, so that unusual filenames
+**	  which contain #% etc. are handled properly (some HTUnEscapeSome()'s
+**	  left in to be conservative, and to document where superfluous
+**	  unescaping took place before).
+**	Dynamic memory instead of fixed length buffers in a few cases.
+**	Other minor changes to make things work as intended.
+**  Modified Jun-97 Klaus Weide (kweide@tezcat.com) & FM:
+**	Modified the code handling DIRED_MENU to do more careful
+**	  checking of the selected file.  In addition to "TAG", "FILE", and
+**	  "DIR", DIRED_MENU definitions in lynx.cfg now also recognize LINK as
+**	  a type.  DIRED_MENU definitions with a type field of "LINK" are only
+**	  used if the current selection is a symbolic link ("FILE" and "DIR"
+**	  definitions are not used in that case).  The default menu
+**	  definitions have been updated to reflect this change, and to avoid
+**	  the showing of menu items whose action would always fail - KW
+**	Cast all code into the Lynx programming style. - FM
+*/
 
-#ifdef DIRED_SUPPORT
 #include "HTUtils.h"
 #include "tcp.h"
 #include "HTParse.h"
@@ -42,18 +43,25 @@
 #include "LYLocal.h"
 #include "LYSystem.h"
 
+#ifndef VMS
 #include <sys/wait.h>
 #include <errno.h>
 #include <grp.h>
+#endif /* VMS */
 
 #include "LYLeaks.h"
 
 #define FREE(x) if (x) {free(x); x = NULL;}
 
-PRIVATE int my_spawn PARAMS((
+PUBLIC int LYExecv PARAMS((
 	char *		path,
 	char **		argv,
 	char *		msg));
+
+#ifdef DIRED_SUPPORT
+PUBLIC char LYPermitFileURL[256] = "\0";
+PUBLIC char LYDiredFileURL[256] = "\0";
+
 PRIVATE char *filename PARAMS((
 	char *		prompt,
 	char *		buf,
@@ -263,7 +271,7 @@ PRIVATE BOOLEAN remove_tagged NOARGS
 		args[2] = testpath;
 		args[3] = (char *) 0;
 		sprintf(tmpbuf, "remove %s", testpath);
-		if (my_spawn(RM_PATH, args, tmpbuf) <= 0) {
+		if (LYExecv(RM_PATH, args, tmpbuf) <= 0) {
 		    FREE(testpath);
 		    return ((count == 0) ? -1 : count);
 		}
@@ -376,95 +384,102 @@ PRIVATE BOOLEAN modify_tagged ARGS1(
 		FREE(cp1);
 		return 0;
 	    }
-	  strcpy(tmpbuf, cp1);
-	  FREE(cp1);
-      }
+	    strcpy(tmpbuf, cp1);
+	    FREE(cp1);
+	}
 
-/* if path is relative prefix it with current location */
+	/*
+	 *  If path is relative, prefix it with current location.
+	 */
+	if (tmpbuf[0] != '/') {
+	    if (savepath[(strlen(savepath) - 1)] != '/')
+		StrAllocCat(savepath,"/");
+	    StrAllocCat(savepath,tmpbuf);
+	} else {
+	    StrAllocCopy(savepath,tmpbuf);
+	}
 
-      if (tmpbuf[0] != '/') {
-	 if (savepath[strlen(savepath)-1] != '/')
-	     StrAllocCat(savepath,"/");
-	 StrAllocCat(savepath,tmpbuf);
-      } else {
-	 StrAllocCopy(savepath,tmpbuf);
-      }
-
-/* stat the target location to determine type and ownership */
-
-      if (stat(savepath,&dir_info) == -1) {
-	 sprintf(tmpbuf,"Unable to get status of '%s'.",savepath);
-	 _statusline(tmpbuf);
-	 sleep(AlertSecs);
-	 FREE(savepath);
-	 return 0;
-      }
-
-/* make sure the source and target locations are not the same place */
-
-      if (dev == dir_info.st_dev && inode == dir_info.st_ino) {
-	 _statusline(
-	   "Source and destination are the same location - request ignored!");
-	 sleep(AlertSecs);
-	 FREE(savepath);
-	 return 0;
-      }
-
-/* make sure the target location is a directory which is owned */
-/* by the same uid as the owner of the current location */
-
-      if((dir_info.st_mode & S_IFMT) == S_IFDIR) {
-	 if(dir_info.st_uid == owner) {
-	    count = 0;
-	    tag = tagged;
-
-/* move all tagged items to the target location */
-
-	    while((cp = (char *)HTList_nextObject(tag)) != NULL) {
-	       if(!strncmp(cp,"file://localhost",16))
-		 cp += 16;
-	       else if(!strncmp(cp,"file:",5))
-		 cp += 5;
-	       StrAllocCopy(srcpath, cp);
-	       HTUnEscape(srcpath);
-
-	       sprintf(tmpbuf, "move %s to %s", srcpath, savepath);
-	       args[0] = "mv";
-	       args[1] = srcpath;
-	       args[2] = savepath;
-	       args[3] = (char *) 0;
-	       if (my_spawn(MV_PATH, args, tmpbuf) <= 0) {
-		  if (count == 0)
-		      count = -1;
-		  break;
-	       }
-	       ++count;
-	    }
-	    FREE(srcpath);
-	    FREE(savepath);
-	    clear_tags();
-	    return count;
-	 } else {
-	    _statusline("Destination has different owner! Request denied. ");
+	/*
+	 *  stat() the target location to determine type and ownership.
+	 */
+	if (stat(savepath, &dir_info) == -1) {
+	    sprintf(tmpbuf,"Unable to get status of '%s'.",savepath);
+	    _statusline(tmpbuf);
 	    sleep(AlertSecs);
-	    FREE(srcpath);
 	    FREE(savepath);
 	    return 0;
-	 }
-      } else {
-	 _statusline("Destination is not a valid directory! Request denied. ");
-	 sleep(AlertSecs);
-	 FREE(savepath);
-	 return 0;
-      }
-   }
-   return 0;
+	}
+
+	/*
+	 *  Make sure the source and target locations are not the same place.
+	 */
+	if (dev == dir_info.st_dev && inode == dir_info.st_ino) {
+	    _statusline(
+	   "Source and destination are the same location - request ignored!");
+	    sleep(AlertSecs);
+	    FREE(savepath);
+	    return 0;
+	}
+
+	/*
+	 *  Make sure the target location is a directory which is owned
+	 * by the same uid as the owner of the current location.
+	 */
+	if ((dir_info.st_mode & S_IFMT) == S_IFDIR) {
+	    if (dir_info.st_uid == owner) {
+		count = 0;
+		tag = tagged;
+
+		/*
+		 *  Move all tagged items to the target location.
+		 */
+		while ((cp = (char *)HTList_nextObject(tag)) != NULL) {
+		    if (!strncmp(cp, "file://localhost", 16)) {
+			cp += 16;
+		    } else if (!strncmp(cp, "file:", 5)) {
+			cp += 5;
+		    }
+		    StrAllocCopy(srcpath, cp);
+		    HTUnEscape(srcpath);
+
+		    sprintf(tmpbuf, "move %s to %s", srcpath, savepath);
+		    args[0] = "mv";
+		    args[1] = srcpath;
+		    args[2] = savepath;
+		    args[3] = (char *) 0;
+		    if (LYExecv(MV_PATH, args, tmpbuf) <= 0) {
+			if (count == 0)
+			    count = -1;
+			break;
+		    }
+		    ++count;
+		}
+		FREE(srcpath);
+		FREE(savepath);
+		clear_tags();
+		return count;
+	    } else {
+		_statusline(
+			"Destination has different owner! Request denied.");
+		sleep(AlertSecs);
+		FREE(srcpath);
+		FREE(savepath);
+		return 0;
+	    }
+	} else {
+	    _statusline(
+	    	   "Destination is not a valid directory! Request denied.");
+	    sleep(AlertSecs);
+	    FREE(savepath);
+	    return 0;
+	}
+    }
+    return 0;
 }
 
 /*
  *  Modify the name of the specified item.
  */
-
 PRIVATE BOOLEAN modify_name ARGS1(
 	char *,		testpath)
 {
@@ -529,7 +544,7 @@ PRIVATE BOOLEAN modify_name ARGS1(
 		    args[1] = savepath;
 		    args[2] = newpath;
 		    args[3] = (char *) 0;
-		    if (my_spawn(MV_PATH, args, tmpbuf) <= 0)
+		    if (LYExecv(MV_PATH, args, tmpbuf) <= 0)
 			return (-1);
 		    return 1; 
 		}
@@ -656,7 +671,7 @@ PRIVATE BOOLEAN modify_location ARGS1(
 	    args[1] = savepath;
 	    args[2] = newpath;
 	    args[3] = (char *) 0;
-	    if (my_spawn(MV_PATH, args, tmpbuf) <= 0)
+	    if (LYExecv(MV_PATH, args, tmpbuf) <= 0)
 		return (-1);
 	    return 1;
 	} else {
@@ -799,7 +814,7 @@ PRIVATE BOOLEAN create_file ARGS1(
 	    args[0] = "touch";
 	    args[1] = testpath;
 	    args[2] = (char *) 0;
-	    if (my_spawn(TOUCH_PATH, args, tmpbuf) <= 0)
+	    if (LYExecv(TOUCH_PATH, args, tmpbuf) <= 0)
 		return (-1);
 	    return 1;
 	} else if ((dir_info.st_mode & S_IFMT) == S_IFDIR) {
@@ -865,7 +880,7 @@ PRIVATE BOOLEAN create_directory ARGS1(
 	    args[0] = "mkdir";
 	    args[1] = testpath;
 	    args[2] = (char *) 0;
-	    if (my_spawn(MKDIR_PATH, args, tmpbuf) <= 0)
+	    if (LYExecv(MKDIR_PATH, args, tmpbuf) <= 0)
 		return (-1);
 	    return 1;
 	} else if ((dir_info.st_mode & S_IFMT) == S_IFDIR) {
@@ -984,7 +999,7 @@ PRIVATE BOOLEAN remove_single ARGS1(
 	args[1] = "-rf";
 	args[2] = testpath;
 	args[3] = (char *) 0;
-	if (my_spawn(RM_PATH, args, tmpbuf) <= 0)
+	if (LYExecv(RM_PATH, args, tmpbuf) <= 0)
 	    return (-1);
 	return 1;
     }
@@ -1058,6 +1073,8 @@ static struct {
 #define S_ISDIR(mode)   ((mode&0xF000) == 0x4000)
 #endif /* !S_ISDIR */
     
+PRIVATE char LYValidPermitFile[256] = "\0";
+
 /*
  *  Handle DIRED permissions.
  */
@@ -1071,7 +1088,7 @@ PRIVATE BOOLEAN permit_location ARGS3(
     sleep(AlertSecs);
     return(0);
 #else
-    static char tempfile[128];
+    static char tempfile[256] = "\0";
     static BOOLEAN first = TRUE;
     char *cp;
     char tmpbuf[LINESIZE];
@@ -1082,7 +1099,6 @@ PRIVATE BOOLEAN permit_location ARGS3(
 	 *  Create form.
 	 */
 	FILE *fp0;
-	char print_filename[256];
 	char * user_filename;
 	struct group * grp;
 	char * group_name;
@@ -1113,10 +1129,17 @@ PRIVATE BOOLEAN permit_location ARGS3(
 	}
 	
 	if (first) {
+	    /*
+	     *  Get an unused tempfile name. - FM
+	     */
 	    tempname(tempfile, NEW_FILE);
-	    first = FALSE;
 	}
 	
+	/*
+	 *  Open the tempfile for writing and set its
+	 *  protection in case this wasn't done via an
+	 *  external umask. - FM
+	 */
 	if ((fp0 = fopen(tempfile, "w")) == NULL) {
 	    _statusline("Unable to open permit options file");
 	    sleep(AlertSecs);
@@ -1124,12 +1147,15 @@ PRIVATE BOOLEAN permit_location ARGS3(
 	}
 	chmod(tempfile, 0600);
 	
-	/*
-	 *  Make the tempfile a URL.
-	 */
-	strcpy(print_filename, "file://localhost");
-	strcat(print_filename, tempfile);
-	StrAllocCopy(*newpath, print_filename);
+	if (first) {
+	    /*
+	     *  Make the tempfile a URL.
+	     */
+	    strcpy(LYPermitFileURL, "file://localhost");
+	    strcat(LYPermitFileURL, tempfile);
+	    first = FALSE;
+	}
+	StrAllocCopy(*newpath, LYPermitFileURL);
 
 	grp = getgrgid(dir_info.st_gid);
 	if (grp == NULL) {
@@ -1137,6 +1163,10 @@ PRIVATE BOOLEAN permit_location ARGS3(
 	} else {
 	    group_name = grp->gr_name;
 	}
+
+	LYstrncpy(LYValidPermitFile,
+		  srcpath,
+		  (sizeof(LYValidPermitFile) - 1));
 
 	fprintf(fp0, "<Html><Head>\n<Title>%s</Title>\n</Head>\n<Body>\n",
 		PERMIT_OPTIONS_TITLE);
@@ -1215,6 +1245,22 @@ form to permit %s %s.\n</Ol>\n</Form>\n",
 	char *args[5];
 	char amode[10];
 	
+	/*
+	 *  Make sure we have a valid set-permission
+	 *  file comparison string loaded via a previous
+	 *  call with srcpath != NULL. - kw
+	 */
+	if (LYValidPermitFile[0] == '\0') {
+	    if (LYCursesON)
+		HTAlert(INVALID_PERMIT_URL);
+	    else
+		fprintf(stderr, "%s\n", INVALID_PERMIT_URL);
+	    if (TRACE)
+		fprintf(stderr, "permit_location: called for <%s>.\n",
+			(destpath ?
+			 destpath : "NULL URL pointer"));
+	    return 0;
+	}
 	cp = destpath;
 	while (*cp != '\0' && *cp != '?') { /* Find filename */
 	    cp++;
@@ -1227,6 +1273,20 @@ form to permit %s %s.\n</Ol>\n</Form>\n",
 
 	HTUnEscape(destpath);	/* Will now operate only on filename part. */
 	
+	/*
+	 *  Make sure that the file string is the one from
+	 *  the last displayed File Permissions menu. - kw
+	 */
+	if (strcmp(destpath, LYValidPermitFile)) {
+	    if (LYCursesON)
+		HTAlert(INVALID_PERMIT_URL);
+	    else
+		fprintf(stderr, "%s\n", INVALID_PERMIT_URL);
+	    if (TRACE)
+		fprintf(stderr, "permit_location: called for file '%s'.\n",
+			destpath);
+	    return 0;
+	}
 	/*
 	 *  A couple of sanity tests.
 	 */
@@ -1295,7 +1355,7 @@ form to permit %s %s.\n</Ol>\n</Form>\n",
 	args[1] = amode;
 	args[2] = destpath;
 	args[3] = (char *) 0;
-	if (my_spawn(CHMOD_PATH, args, tmpbuf) <= 0) {
+	if (LYExecv(CHMOD_PATH, args, tmpbuf) <= 0) {
 	    return (-1);
 	}
 	LYforce_no_cache = TRUE;	/* Force update of dired listing. */
@@ -1376,6 +1436,10 @@ PUBLIC int local_dired ARGS1(
     char buffer[512];
 
     line_url = doc->address;
+    if (TRACE)
+	fprintf(stderr, "local_dired: called for <%s>.\n",
+		(line_url ?
+		 line_url : "NULL URL pointer"));
     HTUnEscapeSome(line_url, "/");	/* don't mess too much with *doc */
 
     StrAllocCopy(line, line_url);
@@ -1598,7 +1662,7 @@ PUBLIC int dired_options ARGS2(
 	document *,	doc,
 	char **,	newfile)
 {
-    static char tempfile[128];
+    static char tempfile[256];
     static BOOLEAN first = TRUE;
     char path[512], dir[512]; /* much too large */
     char tmpbuf[LINESIZE];
@@ -1620,10 +1684,17 @@ PUBLIC int dired_options ARGS2(
 
 
     if (first) {
+	/*
+	 *  Get an unused tempfile name. - FM
+	 */
         tempname(tempfile, NEW_FILE);
-	first = FALSE;
     }
 
+    /*
+     *  Open the tempfile for writing and set its
+     *  protection in case this wasn't done via an
+     *  external umask. - FM
+     */
     if ((fp0 = fopen(tempfile,"w")) == NULL) {
 	_statusline("Unable to open file management menu file.");
 	sleep(AlertSecs);
@@ -1631,9 +1702,15 @@ PUBLIC int dired_options ARGS2(
     }
     chmod(tempfile, 0600);
     
-    /* make the tempfile a URL */
-    StrAllocCopy(*newfile, "file://localhost");
-    StrAllocCat(*newfile, tempfile);
+    if (first) {
+	/*
+	 *  Make the tempfile a URL.
+ 	 */
+	strcpy(LYDiredFileURL, "file://localhost");
+	strcat(LYDiredFileURL, tempfile);
+	first = FALSE;
+    }
+    StrAllocCopy(*newfile, LYDiredFileURL);
     
     cp = doc->address;
     if (!strncmp(cp, "file://localhost", 16)) {
@@ -1788,72 +1865,6 @@ PUBLIC int dired_options ARGS2(
 }
 
 /*
- *  Execute DIRED command.
- */
-PRIVATE int my_spawn ARGS3(
-	char *,		path,
-	char **,	argv,
-	char *,		msg)
-{
-    int rc;
-    char tmpbuf[512];
-    pid_t pid;
-#if defined(NeXT) || defined(AIX4) || defined(sony_news)
-    union wait wstatus;
-#else
-    int wstatus;
-#endif /* NeXT || AIX4 || sony_news */
-
-    rc = 1;		/* It will work */
-    tmpbuf[0] = '\0';	/* empty buffer for alert messages */
-    stop_curses();
-    pid = fork();	/* fork and execute rm */
-    switch (pid) {
- 	case -1:
-	    sprintf(tmpbuf, "Unable to %s due to system error!", msg);
-	    rc = 0;
-	    break;	/* don't fall thru! - KW */
-	case 0:  /* child */
-	    execv(path, argv);
-	    exit(-1);	/* execv failed, give wait() something to look at */
-	default:  /* parent */
-#if defined(NeXT) || defined(AIX4) || defined(sony_news)
-	    while (wait(&wstatus) != pid)
-		; /* do nothing */
-#else
-	    waitpid(pid, &wstatus, 0); /* wait for child */
-#endif /* NeXT || AIX4 || sony_news */
-	    if (WEXITSTATUS(wstatus) != 0 ||
-		WTERMSIG(wstatus) > 0)  { /* error return */
-		sprintf(tmpbuf, "Probable failure to %s due to system error!",
-				msg);
-		rc = 0;
-	    }
-    }
-#ifdef VMS
-    {
-	extern BOOLEAN HadVMSInterrupt;
-	HadVMSInterrupt = FALSE;
-    }
-#endif /* VMS */
-
-    if (rc == 0) {
-        /*
-	 *  Screen may have message from the failed execv'd command.
-	 *  Give user time to look at it before screen refresh.
-	 */
-	sleep(AlertSecs);
-    }
-    start_curses();
-    if (tmpbuf[0]) {
-	_statusline(tmpbuf);
-	sleep(AlertSecs);
-    }
-
-    return(rc);
-}
-
-/*
  *  Check DIRED filename.
  */
 PRIVATE char *filename ARGS3(
@@ -1964,7 +1975,7 @@ PUBLIC BOOLEAN local_install ARGS3(
 
     if (HTList_isEmpty(tagged)) {
 	args[src] = savepath;
-	if (my_spawn(INSTALL_PATH, args, tmpbuf) <= 0)
+	if (LYExecv(INSTALL_PATH, args, tmpbuf) <= 0)
 	    return (-1);
 	count++;
     } else {
@@ -1974,7 +1985,7 @@ PUBLIC BOOLEAN local_install ARGS3(
 	    if (strncmp("file://localhost", args[src], 16) == 0)
 		 args[src] = (name + 16);
 
-	    if (my_spawn(INSTALL_PATH, args, tmpbuf) <= 0)
+	    if (LYExecv(INSTALL_PATH, args, tmpbuf) <= 0)
 		return ((count == 0) ? -1 : count);
 	    count++;
 	}	
@@ -2171,3 +2182,70 @@ PRIVATE char * render_item ARGS6(
     return buf;
 }
 #endif /* DIRED_SUPPORT */
+
+/*
+ *  Execute DIRED command.
+ */
+PUBLIC int LYExecv ARGS3(
+	char *,		path,
+	char **,	argv,
+	char *,		msg)
+{
+#ifdef VMS
+    if (TRACE) {
+	fprintf(stderr, "LYExecv:  Called inappropriately!\n");
+    }
+    return(0);
+#else
+    int rc;
+    char tmpbuf[512];
+    pid_t pid;
+#if defined(NeXT) || defined(AIX4) || defined(sony_news)
+    union wait wstatus;
+#else
+    int wstatus;
+#endif /* NeXT || AIX4 || sony_news */
+
+    rc = 1;		/* It will work */
+    tmpbuf[0] = '\0';	/* empty buffer for alert messages */
+    stop_curses();
+    pid = fork();	/* fork and execute rm */
+    switch (pid) {
+ 	case -1:
+	    sprintf(tmpbuf, "Unable to %s due to system error!", msg);
+	    rc = 0;
+	    break;	/* don't fall thru! - KW */
+	case 0:  /* child */
+	    execv(path, argv);
+	    exit(-1);	/* execv failed, give wait() something to look at */
+	default:  /* parent */
+#if defined(NeXT) || defined(AIX4) || defined(sony_news)
+	    while (wait(&wstatus) != pid)
+		; /* do nothing */
+#else
+	    waitpid(pid, &wstatus, 0); /* wait for child */
+#endif /* NeXT || AIX4 || sony_news */
+	    if (WEXITSTATUS(wstatus) != 0 ||
+		WTERMSIG(wstatus) > 0)  { /* error return */
+		sprintf(tmpbuf, "Probable failure to %s due to system error!",
+				msg);
+		rc = 0;
+	    }
+    }
+
+    if (rc == 0) {
+        /*
+	 *  Screen may have message from the failed execv'd command.
+	 *  Give user time to look at it before screen refresh.
+	 */
+	sleep(AlertSecs);
+    }
+    start_curses();
+    if (tmpbuf[0]) {
+	_statusline(tmpbuf);
+	sleep(AlertSecs);
+    }
+
+    return(rc);
+#endif /* VMS */
+}

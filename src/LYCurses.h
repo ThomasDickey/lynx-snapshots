@@ -161,6 +161,7 @@ extern unsigned int Lynx_Color_Flags;
 
 #define SL_LYNX_USE_COLOR	1
 #define SL_LYNX_USE_BLINK	2
+#define SL_LYNX_OVERRIDE_COLOR	4
 #define start_bold()      	LYaddAttr(1)
 #define start_reverse()   	LYaddAttr(2)
 #define start_underline() 	LYaddAttr(4)

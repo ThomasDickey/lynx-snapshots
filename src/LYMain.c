@@ -154,7 +154,9 @@ PUBLIC lynx_html_item_type *externals = NULL;
 #endif
 PUBLIC lynx_html_item_type *uploaders = NULL;
 PUBLIC int port_syntax = 1;
-PUBLIC BOOLEAN LYShowColor = SHOW_COLOR; /* to show or not to show */
+PUBLIC int LYShowColor = SHOW_COLOR_UNKNOWN; /* to show or not to show */
+PUBLIC int LYChosenShowColor = SHOW_COLOR_UNKNOWN; /* whether to show and save */
+PUBLIC int LYrcShowColor = SHOW_COLOR_UNKNOWN;  /* ... as last read or written */
 PUBLIC BOOLEAN LYShowCursor = SHOW_CURSOR; /* to show or not to show */
 PUBLIC BOOLEAN LYUseDefShoCur = TRUE;	/* Command line -show_cursor toggle */
 PUBLIC BOOLEAN LYforce_no_cache = FALSE;
@@ -355,7 +357,7 @@ PUBLIC FILE LYOrigStderr;			/* Original stderr pointer */
 PUBLIC BOOLEAN LYSeekFragMAPinCur = TRUE;
 PUBLIC BOOLEAN LYSeekFragAREAinCur = TRUE;
 
-PUBLIC BOOLEAN LYStripDotDotURLs = FALSE;	/* Try to fix ../ in some URLs? */
+PUBLIC BOOLEAN LYStripDotDotURLs = TRUE;	/* Try to fix ../ in some URLs? */
 PUBLIC BOOLEAN LYForceSSLCookiesSecure = FALSE;
 
 /* These are declared in cutil.h for current freeWAIS libraries. - FM */
@@ -534,6 +536,7 @@ PUBLIC int main ARGS2(
     terminal = "vt100";
 #endif
 
+    LYShowColor = (SHOW_COLOR ? SHOW_COLOR_ON : SHOW_COLOR_OFF);
     /*
      *  Set up the argument list.
      */
@@ -1329,12 +1332,15 @@ PUBLIC int main ARGS2(
     read_rc();
 
 #ifdef USE_SLANG
-    if (LYShowColor == TRUE &&
+    if (LYShowColor >= SHOW_COLOR_ON &&
 	!(Lynx_Color_Flags & SL_LYNX_USE_COLOR)) {
 	Lynx_Color_Flags |= SL_LYNX_USE_COLOR;
     } else if ((Lynx_Color_Flags & SL_LYNX_USE_COLOR) ||
 	       getenv("COLORTERM") != NULL) {
-	LYShowColor = TRUE;
+	if (LYShowColor != SHOW_COLOR_NEVER &&
+	    LYShowColor != SHOW_COLOR_ALWAYS) {
+	    LYShowColor = SHOW_COLOR_ON;
+	}
     }
 #endif /* USE_SLANG */
 
@@ -1873,7 +1879,9 @@ PRIVATE void parse_arg ARGS3(
 #ifdef USE_SLANG
     } else if (strncmp(argv[0], "-color", 6) == 0) {
         Lynx_Color_Flags |= SL_LYNX_USE_COLOR;
-	LYShowColor = TRUE;
+	if (LYShowColor != SHOW_COLOR_ALWAYS) {
+	    LYShowColor = SHOW_COLOR_ON;
+	}
 #endif /* USE_SLANG */
 
     } else if (strncmp(argv[0], "-crawl", 6) == 0) {
@@ -2180,9 +2188,10 @@ PRIVATE void parse_arg ARGS3(
 	HTDirAccess = HT_DIR_FORBID;
 
     } else if (strncmp(argv[0], "-nocolor", 8) == 0) {
-	LYShowColor = FALSE;
+	LYShowColor = SHOW_COLOR_NEVER;
 #ifdef USE_SLANG
 	Lynx_Color_Flags &= ~SL_LYNX_USE_COLOR;
+	Lynx_Color_Flags |= SL_LYNX_OVERRIDE_COLOR;
 #endif
 
 #if defined(EXEC_LINKS) || defined(EXEC_SCRIPTS)
@@ -2594,7 +2603,7 @@ Output_Help_List:
     printf("    -child           exit on left-arrow in startfile, and disable save to disk\n");
 #ifdef USE_SLANG
     printf("    -color           force color mode on with standard bg colors\n");
-    printf("    -blink           force color mode on with high intensity bg colors\n");
+    printf("    -blink           force high intensity bg colors in color mode\n");
 #endif /* USE_SLANG */
     printf("    -cookies         toggles handling of Set-Cookie headers\n");
     printf("    -crawl           with -traversal, output each page to a file\n");

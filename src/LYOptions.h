@@ -24,9 +24,9 @@ extern void edit_bookmarks NOPARAMS;
 #define L_FTPSTYPE	 5
 #define L_MAIL_ADDRESS	 6
 #define L_SSEARCH	 7
-#define L_CHARSET	 8
-#define L_LANGUAGE	 9
-#define L_PREF_CHARSET	10
+#define L_LANGUAGE	 8
+#define L_PREF_CHARSET	 9
+#define L_CHARSET	10
 #define L_RAWMODE	11
 
 #define L_COLOR		L_RAWMODE

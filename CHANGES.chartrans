@@ -1,6 +1,10 @@
-$Id: CHANGES.chartrans,v 1.3 1997/07/18 07:44:14 tom Exp $
-$ProjectHeader: Lynx 2.7.1ac-0.36 Fri, 18 Jul 1997 01:44:14 -0600 kweide $
+$Id: CHANGES.chartrans,v 1.4 1997/07/27 10:30:27 tom Exp $
+$ProjectHeader: Lynx 2.7.1ac-0.42 Sat, 26 Jul 1997 09:06:19 -0600 kweide $
 
+1997-07-25
+ Lynx 2.7.1ac-0.42
+* Map charsets of the form "ibmNNN<...>" to "cpNNN<...>" in UCdomap.c
+  if not already recognized.  Also recognize "windows-1252".
 1997-07-17
  Lynx 2.7.1ac-0.35
 * Since 1997-06-29 the chartrans code (with minor changes; most relating

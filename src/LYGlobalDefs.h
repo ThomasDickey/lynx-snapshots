@@ -98,7 +98,15 @@ extern char star_string[MAX_LINE + 1]; /* from GridText.c */
  ((n) >= MAX_LINE ? star_string : &star_string[(MAX_LINE-1)] - (n))
 #define DIRNAMESIZE 256
 
-extern BOOLEAN LYShowColor;	/* Show color or monochrome?	    */
+#define SHOW_COLOR_UNKNOWN	(-1)
+#define SHOW_COLOR_NEVER  0
+#define SHOW_COLOR_OFF	  1
+#define SHOW_COLOR_ON	  2
+#define SHOW_COLOR_ALWAYS 3
+extern int LYShowColor;		/* Show color or monochrome?	    */
+extern int LYChosenShowColor;	/* extended color/monochrome choice */
+extern int LYrcShowColor;	/* ... as read or last written	    */
+
 extern BOOLEAN LYShowCursor;	/* Show the cursor or hide it?	    */
 extern BOOLEAN LYUseDefShoCur;	/* Command line -show_cursor toggle */
 extern BOOLEAN LYCursesON;  /* start_curses()->TRUE, stop_curses()->FALSE */

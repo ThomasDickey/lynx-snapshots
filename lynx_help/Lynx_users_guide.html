@@ -457,11 +457,11 @@ options.
      D)ISPLAY variable            : aixtest.cc.ukans.edu:0.0
      mu(L)ti-bookmarks: OFF       B)ookmark file: lynx_bookmarks.html
      F)TP sort criteria           : By Filename
-     P)ersonal mail address       : montulli@ukanaix.cc.ukans.edu
+     P)ersonal mail address       : montulli@netscape.com
      S)earching type              : CASE INSENSITIVE
-     display (C)haracter set      : ISO Latin 1
      preferred document lan(G)uage: en
      preferred document c(H)arset : NONE
+     display (C)haracter set      : ISO Latin 1
      raw 8-bit or CJK m(O)de      : ON      show color (&)  : OFF
      V)I keys: OFF    e(M)acs keys: OFF     sho(W) dot files: OFF
      popups for selec(T) fields   : ON      show cursor (@) : OFF
@@ -573,28 +573,35 @@ return to Lynx or the '<em>&gt;</em>' command to save the options to a
 	    for words within documents will be done in a case-sensitive or
 	    case-insensitive manner. 
 
-   <dt>Display Character set
-	<dd>This option allows you to set up the default character set for
-	    your specific terminal.  The character set provides a mapping
-	    of 8-bit ISO Latin character entities and/or Asian (CJK) or
-	    UTF-8 characters into viewable characters and should be set in
-	    relation to your terminal's character set if you will be
-	    viewing such characters with Lynx.  You must have the selected
-	    character set installed on your terminal.
-
    <dt>Preferred Document Language
 	<dd>The language you prefer if multi-language files are available
-	    from servers.  Use MIME abbreviations, e.g., en for English,
-	    fr for French, etc.  Can be a comma-separated list in descending
-	    order of preferences.
+	    from servers.  Use RFC 1766 abbreviations, e.g., en for English,
+	    fr for French, etc.  Can be a comma-separated list, which may
+	    be interpreted by servers as descending order of preferences.
+	    You can also make your order of preference explicit by using
+	    q factors as defined by the HTTP protocol, for servers which
+	    understand it, for example:  da, en-gb;q=0.8, en;q=0.7
 	
    <dt>Preferred Document Charset
 	<dd>The character set you prefer if sets in addition to ISO-8859-1
 	    and US-ASCII are available from servers.  Use MIME notation
 	    (e.g., ISO-8859-2) and do not include ISO-8859-1 or US-ASCII,
 	    since those values are always assumed by default.  Can be a
-	    comma-separated list in descending order of preferences.
+	    comma-separated list, which may be interpreted by servers as 
+	    descending order of preferences.
+	    You can also make your order of preference explicit by using
+	    q factors as defined by the HTTP protocol, for servers which
+	    understand it, for example:  iso-8859-5, unicode-1-1;q=0.8
 	
+   <dt>Display Character set
+	<dd>This option allows you to set up the default character set for
+	    your specific terminal.  The character set provides a mapping
+	    of 8-bit ISO Latin character entities and/or Asian (CJK) or
+	    Unicode characters into viewable characters and should be set
+	    according to your terminal's character set if you will be
+	    viewing such characters with Lynx.  You must have the selected
+	    character set installed on your terminal.
+
    <dt>Raw 8-bit or CJK Mode
 	<dd>Whether 8-bit characters are assumed to correspond with the
 	    selected character set and therefore are processed without
@@ -612,13 +619,39 @@ return to Lynx or the '<em>&gt;</em>' command to save the options to a
 	    <em>-raw</em> switch.
 
    <dt>Show color.
-	<dd>This option will be present if color support is available.  If set
-	    to ON, color mode will be forced on.  If set to OFF, a monochrome
-	    terminal will be assumed.  If saved to a <em>.lynxrc</em> file,
-	    that setting will be used as the default on startups of Lynx.  If
-	    the default is OFF, it can be overridden via the <em>-color</em> or
-	    <em>-nocolor</em> command line switches or (if built with the
-	    slang library) <em>COLORTERM</em> environment variable.
+	<dd>This option will be present if color support is available.
+	    If set to ON or ALWAYS, color mode will be forced on if possible.
+	    If (n)curses color support is available but cannot be used for
+	    the current terminal type, selecting ON is rejected with a message.
+	    If set to OFF or NEVER, color mode will be turned off.<BR>
+	    ALWAYS and
+	    NEVER are not offered in anonymous accounts.  If saved to a
+	    <em>.lynxrc</em> file in non-anonymous accounts, ALWAYS will
+	    cause Lynx to set color mode on at startup if supported.
+            If Lynx is built with the slang library, this is equivalent to
+	    having included the <em>-color</em> command line switch or having the
+	    <em>COLORTERM</em> environment variable set. If color support is
+	    provided by curses or ncurses, this is equivalent to the default
+	    behavior of using color when the terminal type supports it.
+	    If (n)curses color support is available but cannot be used for
+	    the current terminal type, the preference can still be saved
+	    but will have no effect.<BR>
+	    A saved value of NEVER will
+	    cause Lynx to assume a monochrome terminal at startup.
+	    It is similar to the <em>-nocolor</em> switch, but (when the
+	    slang library is used) can be overridden with the <em>-color</em> 
+	    switch.<BR>
+	    If the setting is OFF or ON
+	    when the current options are saved to a <em>.lynxrc</em> file,
+	    the default startup behavior is retained, such that color mode
+	    will be turned on at startup only if the terminal info indicates
+	    that you have a color-capable terminal, or (when the
+            slang library is used) if forced on via the
+	    <em>-color</em> switch or <em>COLORTERM</em> variable.  This
+	    default behavior always is used in anonymous accounts, or if
+	    the <em>option_save</em> restriction is set explicitly.  If
+	    for any reason the startup color mode is incorrect for your
+	    terminal, set it appropriately on or off via this option.
 
    <dt>VI keys
 	<dd>If set to ON then the lowercase h, j, k, and l keys will be
@@ -948,14 +981,14 @@ commands.
    <dt><em>^A</em>
   	<dd><em>Control-A</em> jumps you to the beginning of the current
 	    document.  It is a synonym for the Keypad <em>Home</em> key, and
-	    can be used when <em>Links are numbered</em> mode is on.  The
+	    can be used also when <em>Links are numbered</em> mode is on.  The
 	    <em>Find</em> Function key also is a synonym, and ideally the
 	    latter has been mapped to the Function key labeled <em>Home</em>
 	    if you are using an IBM Enhanced Keyboard.
    <dt><em>^E</em>
   	<dd><em>Control-E</em> jumps you to the end of the current document.
 	    It is a synonym for the Keypad <em>End</em> key, and can be used
-	    when <em>Links are numbered</em> mode is on.  The <em>Select</em>
+	    also when <em>Links are numbered</em> mode is on.  The <em>Select</em>
 	    Function key also is a synonym, and ideally the latter has been
 	    mapped to the Function key labeled <em>End</em> if you are using
 	    an IBM Enhanced Keyboard.
@@ -1091,9 +1124,9 @@ commands.
 	    before the interrupt, it will be displayed.
    <dt><em>numbers</em>
 	<dd>Lynx offers other, advanced navigation features when numbers
-	    are used to invoke the<br>
-	    &nbsp;&nbsp;<a href="keystroke_commands/follow_help.html"
-	    >Follow link (or page) number:</a> or<br>
+	    are used to invoke the <a
+	    href="keystroke_commands/follow_help.html"
+	    >Follow link (or goto link or page) number:</a> or<br>
 	    &nbsp;&nbsp;<a
 	    href="keystroke_commands/follow_help.html#select-option"
 	    >Select option (or page) number:</a><br>
@@ -1815,6 +1848,11 @@ where
 	     <dt><code>-base</code>
 		<dd>prepend a request URL comment and BASE tag to text/html
 		    outputs for -source or -mime_header dumps.
+	     <dt><code>-blink</code>
+		<dd>forces high intensity bg colors for color mode,
+		    if available and supported by the terminal.
+		    Lynx needs to be compiled with the slang library for this
+		    flag.
 	     <dt><code>-book</code>
 		<dd>use the bookmark page as the startfile.  The default or
                     command line startfile is still set for the Main screen
@@ -1836,6 +1874,14 @@ where
     		    lynx.cfg.
              <dt><code>-child</code>
     		<dd>exit on left-arrow in startfile, and disable save to disk.
+             <dt><code>-color</code>
+    		<dd>forces color mode on, if available.  Default color control sequences
+		       which work for many terminal types are assumed if the terminal
+		       capability description does not specify how to handle color.
+		       Lynx needs to be compiled with the slang library for this flag.
+		       A saved show_color=always setting found in a .lynxrc file at
+		       startup has the same effect.  A saved show_color=always found
+		       in .lynxrc on startup is overridden by this flag.
              <dt><code>-cookies</code>
     		<dd>toggles handling of Set-Cookie headers.
              <dt><code>-crawl</code>
@@ -1919,6 +1965,9 @@ where
     		<dd>maximum news articles in listings before chunking.
              <dt><code>-nobrowse</code>
     		<dd>disable directory browsing.
+             <dt><code>-nocolor</code>
+    		<dd>force color mode off, overriding terminal capabilities and any
+	       <em>-color</em> flags, <em>COLORTERM</em> variable, and saved .lynxrc settings.
              <dt><code>-noexec</code>
     		<dd>disable local program execution. (DEFAULT)
              <dt><code>-nofilereferer</code>

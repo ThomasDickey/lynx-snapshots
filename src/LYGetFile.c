@@ -93,8 +93,10 @@ PUBLIC BOOLEAN getfile ARGS1(
 	char *cp = NULL;
 	char *temp = NULL;
 	DocAddress WWWDoc;  /* a WWW absolute doc address struct */
+	int redirection_counter = 0;
 
 Try_Redirected_URL:
+	redirection_counter++;
 	/*
 	 *  Load the WWWDoc struct in case we need to use it.
 	 */
@@ -238,6 +240,25 @@ Try_Redirected_URL:
 
 		} else if (url_type == DATA_URL_TYPE) {
 		    HTAlert(UNSUPPORTED_DATA_URL);
+		    return(NULLFILE);
+
+		} else if (redirection_counter != 1 &&
+			   (url_type == LYNXDOWNLOAD_URL_TYPE ||
+			    url_type == LYNXEXEC_URL_TYPE ||
+			    url_type == LYNXPROG_URL_TYPE ||
+			    url_type == LYNXDIRED_URL_TYPE)) {
+		    /*
+		     *  Some schemes are definitely not acceptable
+		     *  from server redirections. - kw
+		     */
+		    HTAlert(INVALID_URL_SCHEME_IN_REDIRECTION);
+		    if (LYCursesON) {
+			_user_message("Bad URL: %s", doc->address);
+			sleep(AlertSecs);
+		    } else {
+			fprintf(stderr,
+				"Bad Redirection URL: %s", doc->address);
+		    }
 		    return(NULLFILE);
 
 		} else if (url_type == LYNXPRINT_URL_TYPE) {

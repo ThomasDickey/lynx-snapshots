@@ -70,6 +70,7 @@ TABLES= $(CHRTR)iso02_uni.h \
  $(CHRTR)cp850_uni.h \
  $(CHRTR)cp852_uni.h \
  $(CHRTR)cp1250_uni.h \
+ $(CHRTR)cp1251_uni.h \
  $(CHRTR)cp1252_uni.h \
  $(CHRTR)utf8_uni.h \
  $(CHRTR)rfc_suni.h \

@@ -47,6 +47,7 @@
 #include "[.chrtrans]cp850_uni.h"
 #include "[.chrtrans]cp852_uni.h"
 #include "[.chrtrans]cp1250_uni.h"
+#include "[.chrtrans]cp1251_uni.h"
 #include "[.chrtrans]cp1252_uni.h"
 #include "[.chrtrans]utf8_uni.h"
 #include "[.chrtrans]rfc_suni.h"
@@ -69,6 +70,7 @@
 #include "chrtrans/cp850_uni.h"
 #include "chrtrans/cp852_uni.h"
 #include "chrtrans/cp1250_uni.h"
+#include "chrtrans/cp1251_uni.h"
 #include "chrtrans/cp1252_uni.h"
 #include "chrtrans/utf8_uni.h"
 #include "chrtrans/rfc_suni.h"
@@ -1263,6 +1265,27 @@ PUBLIC int UCGetLYhndl_byMIME ARGS1(
 	  return UCGetLYhndl_byMIME("iso-2022-cn");
 	} else if (!strcmp(UC_MIMEcharset, "euc-cn")) {
 	  return UCGetLYhndl_byMIME("iso-2022-cn");
+	} else if (!strcmp(UC_MIMEcharset, "windows-1252")) {
+	    /*
+	     *  It's not my fault that Microsoft hasn't registered
+	     *  the name people are using... - kw
+	     */
+	  return UCGetLYhndl_byMIME("iso-8859-1-windows-3.1-latin-1");
+	} else if (!strncmp(UC_MIMEcharset, "ibm", 3)) {
+	    CONST char * cp = UC_MIMEcharset + 3;
+	    char * cptmp = NULL;
+	    if (*cp && isdigit(*cp) &&
+		*(cp++) && isdigit(*cp) &&
+		*(cp++) && isdigit(*cp)) {
+		/*
+		 *  For "ibmNNN<...>", try "cpNNN<...>" if not yet found - kw
+		 */
+		StrAllocCopy(cptmp, UC_MIMEcharset + 1);
+		cptmp[0] = 'c';
+		cptmp[1] = 'p';
+		LYhndl = UCGetLYhndl_byMIME(cptmp);
+		FREE(cptmp);
+	    }
 	} else if (!strcmp(UC_MIMEcharset, "koi-8")) { /* accentsoft bogosity */
 	  return UCGetLYhndl_byMIME("koi8-r");
   }
@@ -1648,6 +1671,7 @@ PUBLIC void UCInit NOARGS
   UC_CHARSET_SETUP_cp850;
   UC_CHARSET_SETUP_cp852;
   UC_CHARSET_SETUP_windows_1250;
+  UC_CHARSET_SETUP_windows_1251;
   UC_CHARSET_SETUP_iso_8859_1_windows_;
   UC_CHARSET_SETUP_unicode_1_1_utf_8;
   UC_CHARSET_SETUP_mnemonic_ascii_0;
