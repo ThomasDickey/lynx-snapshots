@@ -30,12 +30,6 @@ extern int HTNewsChunkSize; /* Number of news articles per chunk (HTNews.c) */
 PUBLIC BOOLEAN have_read_cfg=FALSE;
 PUBLIC BOOLEAN LYUseNoviceLineTwo=TRUE;
 
-#ifdef VMS
-#define DISPLAY "DECW$DISPLAY"
-#else
-#define DISPLAY "DISPLAY"
-#endif /* VMS */
-
 /*
  *  Translate a TRUE/FALSE field in a string buffer.
  */
@@ -526,14 +520,16 @@ static int character_set_fun ARGS1(
     size_t len;
 
     len = strlen (value);
-    for (i = 0; LYchar_set_names[i]; i++) {
+    for (i = 0; LYchar_set_names[i]; i++) { /* search by name, compatibility */
 	if (!strncmp(value, LYchar_set_names[i], len)) {
 	    current_char_set = i;
-	    HTMLSetRawModeDefault(i);
-	    break;
+	    HTMLSetRawModeDefault(current_char_set);
+	    return 0;
 	}
     }
 
+    current_char_set = UCGetLYhndl_byMIME(value); /* by MIME */
+    HTMLSetRawModeDefault(current_char_set);
     return 0;
 }
 
@@ -744,7 +740,6 @@ static int viewer_fun ARGS1(
     char *mime_type;
     char *viewer;
     char *environment;
-    char *cp;
 
     mime_type = value;
 
@@ -767,10 +762,10 @@ static int viewer_fun ARGS1(
 	 * there is a $DISPLAY variable.
 	 */
 	if (!strcasecomp(environment,"XWINDOWS")) {
-	    if ((cp = getenv(DISPLAY)) != NULL && *cp != '\0')
+	    if (LYgetXDisplay() != NULL)
 		HTSetPresentation(mime_type, viewer, 1.0, 3.0, 0.0, 0);
 	} else if (!strcasecomp(environment,"NON_XWINDOWS")) {
-	    if ((cp = getenv(DISPLAY)) == NULL || *cp == '\0')
+	    if (LYgetXDisplay() == NULL)
 		HTSetPresentation(mime_type, viewer, 1.0, 3.0, 0.0, 0);
 	} else {
 	    HTSetPresentation(mime_type, viewer, 1.0, 3.0, 0.0, 0);
@@ -807,6 +802,9 @@ static Config_Type Config_Table [] =
      PARSE_FUN("color", CONF_FUN, color_fun),
 #endif
      PARSE_STR("cookie_accept_domains", CONF_STR, LYCookieAcceptDomains),
+#ifdef EXP_PERSISTENT_COOKIES
+     PARSE_STR("cookie_file", CONF_STR, LYCookieFile),
+#endif /* EXP_PERSISTENT_COOKIES */
      PARSE_STR("cookie_reject_domains", CONF_STR, LYCookieRejectDomains),
      PARSE_ENV("cso_proxy", CONF_ENV, 0 ),
 #ifdef VMS
@@ -831,6 +829,7 @@ static Config_Type Config_Table [] =
      PARSE_ADD("external", CONF_ADD_ITEM, externals),
 #endif
      PARSE_ENV("finger_proxy", CONF_ENV, 0 ),
+     PARSE_SET("force_8bit_toupper", CONF_BOOL, UCForce8bitTOUPPER),
      PARSE_SET("force_ssl_cookies_secure", CONF_BOOL, LYForceSSLCookiesSecure),
      PARSE_ENV("ftp_proxy", CONF_ENV, 0 ),
      PARSE_STR("global_extension_map", CONF_STR, global_extension_map),
@@ -875,7 +874,7 @@ static Config_Type Config_Table [] =
      PARSE_INT("messagesecs", CONF_INT, MessageSecs),
      PARSE_SET("minimal_comments", CONF_BOOL, minimal_comments),
      PARSE_INT("multi_bookmark_support", CONF_BOOL, LYMultiBookmarks),
-     PARSE_SET("ncr_in_bookmarks", CONF_BOOL, LYSaveBookmarksInUnicode),
+     PARSE_SET("ncr_in_bookmarks", CONF_BOOL, UCSaveBookmarksInUnicode),
      PARSE_FUN("news_chunk_size", CONF_FUN, news_chunk_size_fun),
      PARSE_FUN("news_max_chunk", CONF_FUN, news_max_chunk_fun),
      PARSE_FUN("news_posting", CONF_FUN, news_posting_fun),

@@ -30,7 +30,6 @@
 #include <LYUtils.h>
 #include <LYGlobalDefs.h>
 #include <LYSignal.h>
-#include <LYSystem.h>
 #include <GridText.h>
 #include <LYexit.h>
 #include <LYLeaks.h>
@@ -139,7 +138,7 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 	 *  we want to convert to fixed records format. - FM
 	 */
 #ifdef USE_COMMAND_FILE
-	    system(FIXED_RECORD_COMMAND);
+	    LYSystem(FIXED_RECORD_COMMAND);
 #else
 	    LYVMS_FixedLengthRecords(FIXED_RECORD_COMMAND);
 #endif /* USE_COMMAND_FILE */
@@ -147,7 +146,6 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 
 	    if (me->remove_command) {
 		/* NEVER REMOVE THE FILE unless during an abort!*/
-		/* system(me->remove_command); */
 		FREE(me->remove_command);
 	    }
 	} else
@@ -191,7 +189,7 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 		     *	Uncompress it. - FM
 		     */
 		    if (me->end_command && me->end_command[0])
-			system(me->end_command);
+			LYSystem(me->end_command);
 		    fp = fopen(me->anchor->FileCache, "r");
 		}
 		if (fp != NULL) {
@@ -318,11 +316,10 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 			    HTProgress(me->end_command);
 			    stop_curses();
 			}
-			system(me->end_command);
+			LYSystem(me->end_command);
 
 			if (me->remove_command) {
 			    /* NEVER REMOVE THE FILE unless during an abort!!!*/
-			    /* system(me->remove_command); */
 			    FREE(me->remove_command);
 			}
 			if (!dump_output_immediately)
@@ -348,7 +345,6 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 	    }
 	    if (me->remove_command) {
 		/* NEVER REMOVE THE FILE unless during an abort!!!*/
-		/* system(me->remove_command); */
 		FREE(me->remove_command);
 	    }
 	} else if (strcmp(me->end_command, "SaveToFile")) {
@@ -363,11 +359,10 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 		_HTProgress(me->end_command);
 		stop_curses();
 	    }
-	    system(me->end_command);
+	    LYSystem(me->end_command);
 
 	    if (me->remove_command) {
 		/* NEVER REMOVE THE FILE unless during an abort!!!*/
-		/* system(me->remove_command); */
 		FREE(me->remove_command);
 	    }
 	    if (!dump_output_immediately)
@@ -379,7 +374,6 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 	     */
 	    if (me->remove_command) {
 		/* NEVER REMOVE THE FILE unless during an abort!!!*/
-		/* system(me->remove_command); */
 		FREE(me->remove_command);
 	    }
 	}
@@ -423,7 +417,7 @@ PRIVATE void HTFWriter_abort ARGS2(
 	CTRACE(tfp, "HTFWriter: Aborting: file not executed.\n");
 	FREE(me->end_command);
 	if (me->remove_command) {
-	    system(me->remove_command);
+	    LYSystem(me->remove_command);
 	    FREE(me->remove_command);
 	}
     }

@@ -118,6 +118,26 @@ PUBLIC void LYAddVisitedLink ARGS1(
 }
 
 /*
+ *  Returns true if this is a page that we would push onto the stack if not
+ *  forced.
+ */
+PUBLIC BOOLEAN LYwouldPush ARGS1(
+	char *,	title)
+{
+    return (!strcmp(title, HISTORY_PAGE_TITLE)
+         || !strcmp(title, PRINT_OPTIONS_TITLE)
+         || !strcmp(title, DOWNLOAD_OPTIONS_TITLE)
+#ifdef DIRED_SUPPORT
+	 || !strcmp(title, DIRED_MENU_TITLE)
+	 || !strcmp(title, UPLOAD_OPTIONS_TITLE)
+	 || !strcmp(title, PERMIT_OPTIONS_TITLE)
+#endif /* DIRED_SUPPORT */
+	 )
+	 ? FALSE
+	 : TRUE;
+}
+
+/*
  *  Push the current filename, link and line number onto the history list.
  */
 PUBLIC void LYpush ARGS2(
@@ -138,26 +158,11 @@ PUBLIC void LYpush ARGS2(
 	/*
 	 *  Don't push the history, printer, or download lists.
 	 */
-	if (!strcmp(doc->title, HISTORY_PAGE_TITLE) ||
-	    !strcmp(doc->title, PRINT_OPTIONS_TITLE) ||
-	    !strcmp(doc->title, DOWNLOAD_OPTIONS_TITLE)) {
+	if (!LYwouldPush(doc->title)) {
 	    if (!LYforce_no_cache)
 		LYoverride_no_cache = TRUE;
 	    return;
 	}
-
-#ifdef DIRED_SUPPORT
-	/*
-	 *  Don't push DIRED menu, upload or permit lists.
-	 */
-	if (!strcmp(doc->title, DIRED_MENU_TITLE) ||
-	    !strcmp(doc->title, UPLOAD_OPTIONS_TITLE) ||
-	    !strcmp(doc->title, PERMIT_OPTIONS_TITLE)) {
-	    if (!LYforce_no_cache)
-		LYoverride_no_cache = TRUE;
-	    return;
-	}
-#endif /* DIRED_SUPPORT */
     }
 
     /*
@@ -402,13 +407,8 @@ PUBLIC int showhistory ARGS1(
     LYforce_HTML_mode = TRUE;	/* force this file to be HTML */
     LYforce_no_cache = TRUE;	/* force this file to be new */
 
-    fprintf(fp0, "<head>\n");
-    LYAddMETAcharsetToFD(fp0, -1);
-    fprintf(fp0, "<title>%s</title>\n</head>\n<body>\n",
-		 HISTORY_PAGE_TITLE);
-    fprintf(fp0, "<h1>%s (%s), help on <a href=\"%s%s\">%s</a></h1>\n",
-		 LYNX_NAME, LYNX_VERSION,
-		 helpfilepath, HISTORY_PAGE_HELP, HISTORY_PAGE_TITLE);
+    BeginInternalPage(fp0, HISTORY_PAGE_TITLE, HISTORY_PAGE_HELP);
+
     fprintf(fp0, "<pre>\n");
     fprintf(fp0, "<em>You selected:</em>\n");
     for (x = nhist-1; x >= 0; x--) {
@@ -440,7 +440,8 @@ PUBLIC int showhistory ARGS1(
 	}
 	fprintf(fp0, "<tab to=t%d>%s\n", x, Title);
     }
-    fprintf(fp0,"</pre>\n</body>\n");
+    fprintf(fp0,"</pre>\n");
+    EndInternalPage(fp0);
 
     LYCloseTempFP(fp0);
     FREE(Title);
@@ -553,13 +554,8 @@ PUBLIC int LYShowVisitedLinks ARGS1(
     LYforce_HTML_mode = TRUE;	/* force this file to be HTML */
     LYforce_no_cache = TRUE;	/* force this file to be new */
 
-    fprintf(fp0, "<head>\n");
-    LYAddMETAcharsetToFD(fp0, -1);
-    fprintf(fp0, "<title>%s</title>\n</head>\n<body>\n",
-		 VISITED_LINKS_TITLE);
-    fprintf(fp0, "<h1>%s (%s), help on <a href=\"%s%s\">%s</a></h1>\n",
-	LYNX_NAME, LYNX_VERSION,
-	helpfilepath, VISITED_LINKS_HELP, VISITED_LINKS_TITLE);
+    BeginInternalPage(fp0, VISITED_LINKS_TITLE, VISITED_LINKS_HELP);
+
     fprintf(fp0, "<pre>\n");
     fprintf(fp0,
   "<em>You visited (POSTs, bookmark, menu and list files excluded):</em>\n");
@@ -596,7 +592,8 @@ PUBLIC int LYShowVisitedLinks ARGS1(
 	fprintf(fp0, "<tab to=t%d>%s\n", x,
 		     ((Address != NULL) ? Address : "(no address)"));
     }
-    fprintf(fp0,"</pre>\n</body>\n");
+    fprintf(fp0,"</pre>\n");
+    EndInternalPage(fp0);
 
     LYCloseTempFP(fp0);
     FREE(Title);

@@ -2,7 +2,7 @@
 Mwindows-1251
 
 #Name as a Display Charset (used on Options screen)
-OWinCyrillic (cp1251)
+OCyrillic (windows-1251)
 
 #
 #    Name:     cp1251 to Unicode table

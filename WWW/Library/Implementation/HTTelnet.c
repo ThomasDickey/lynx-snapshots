@@ -14,6 +14,7 @@
 */
 
 #include <HTUtils.h>
+#include <LYUtils.h>
 
 /* Implements:
 */
@@ -50,10 +51,6 @@ PRIVATE int remote_session ARGS2(char *, acc_method, char *, host)
 	enum _login_protocol { telnet, rlogin, tn3270 } login_protocol =
 		strcmp(acc_method, "rlogin") == 0 ? rlogin :
 		strcmp(acc_method, "tn3270") == 0 ? tn3270 : telnet;
-#ifdef VMS
-	extern int DCLsystem PARAMS((char *command));
-#define system(a) DCLsystem(a) /* use LYCurses.c routines for spawns */
-#endif /* VMS */
 
 	/*
 	 *	Modified to allow for odd chars in a username only if exists.

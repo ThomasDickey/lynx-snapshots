@@ -737,8 +737,7 @@ PRIVATE void HTML_start_element ARGS6(
 	    char *related = NULL;
 
 	    StrAllocCopy(base, value[HTML_BASE_HREF]);
-	    if (!(url_type = LYLegitimizeHREF(me, (char**)&base,
-					      TRUE, TRUE))) {
+	    if (!(url_type = LYLegitimizeHREF(me, &base, TRUE, TRUE))) {
 		CTRACE(tfp, "HTML: BASE '%s' is not an absolute URL.\n",
 			    (base ? base : ""));
 		if (me->inBadBASE == FALSE)
@@ -832,7 +831,7 @@ PRIVATE void HTML_start_element ARGS6(
 
     case HTML_META:
 	if (present)
-	    LYHandleMETA(me, present, value, (char **)&include);
+	    LYHandleMETA(me, present, value, include);
 	break;
 
     case HTML_TITLE:
@@ -856,7 +855,7 @@ PRIVATE void HTML_start_element ARGS6(
 		}
 	    } else {
 		StrAllocCopy(href, value[HTML_LINK_HREF]);
-		url_type = LYLegitimizeHREF(me, (char**)&href, TRUE, TRUE);
+		url_type = LYLegitimizeHREF(me, &href, TRUE, TRUE);
 	    }
 
 	    /*
@@ -874,7 +873,7 @@ PRIVATE void HTML_start_element ARGS6(
 	    /*
 	     *	Check whether to fill in localhost. - FM
 	     */
-	    LYFillLocalFileURL((char **)&href,
+	    LYFillLocalFileURL(&href,
 			       ((*href != '\0' && *href != '#' &&
 				 me->inBASE) ?
 			       me->base_href : me->node_anchor->address));
@@ -899,7 +898,7 @@ PRIVATE void HTML_start_element ARGS6(
 					PARSE_ALL);
 			StrAllocCopy(href, temp);
 			FREE(temp);
-			LYFillLocalFileURL((char **)&href,
+			LYFillLocalFileURL(&href,
 					   (me->inBASE ?
 					 me->base_href :
 					 me->node_anchor->address));
@@ -1074,7 +1073,7 @@ PRIVATE void HTML_start_element ARGS6(
 		 *  fingers. - FM
 		 */
 		SET_SKIP_STACK(HTML_A);
-		HTML_end_element(me, HTML_A, (char **)&include);
+		HTML_end_element(me, HTML_A, include);
 	    }
 
 	    /*
@@ -1163,8 +1162,7 @@ PRIVATE void HTML_start_element ARGS6(
 		StrAllocCopy(isindex_href, value[HTML_ISINDEX_HREF]);
 	    else
 		StrAllocCopy(isindex_href, value[HTML_ISINDEX_ACTION]);
-	    url_type = LYLegitimizeHREF(me, (char**)&isindex_href,
-					TRUE, TRUE);
+	    url_type = LYLegitimizeHREF(me, &isindex_href, TRUE, TRUE);
 
 	    /*
 	     *	Check whether a base tag is in effect.
@@ -1260,7 +1258,7 @@ PRIVATE void HTML_start_element ARGS6(
 	    value[HTML_FRAME_SRC] && *value[HTML_FRAME_SRC] != '\0') {
 	    StrAllocCopy(href, value[HTML_FRAME_SRC]);
 	    CHECK_FOR_INTERN(href);
-	    url_type = LYLegitimizeHREF(me, (char**)&href, TRUE, TRUE);
+	    url_type = LYLegitimizeHREF(me, &href, TRUE, TRUE);
 
 	    /*
 	     *	Check whether a base tag is in effect. - FM
@@ -1277,14 +1275,14 @@ PRIVATE void HTML_start_element ARGS6(
 	    /*
 	     *	Check whether to fill in localhost. - FM
 	     */
-	    LYFillLocalFileURL((char **)&href,
+	    LYFillLocalFileURL(&href,
 			       ((*href != '\0' && *href != '#' &&
 				 me->inBASE) ?
 			       me->base_href : me->node_anchor->address));
 
 	    if (me->inA) {
 		SET_SKIP_STACK(HTML_A);
-		HTML_end_element(me, HTML_A, (char **)&include);
+		HTML_end_element(me, HTML_A, include);
 	    }
 	    me->CurrentA = HTAnchor_findChildAndLink(
 				me->node_anchor,	/* Parent */
@@ -1332,7 +1330,7 @@ PRIVATE void HTML_start_element ARGS6(
 	    value[HTML_IFRAME_SRC] && *value[HTML_IFRAME_SRC] != '\0') {
 	    StrAllocCopy(href, value[HTML_IFRAME_SRC]);
 	    CHECK_FOR_INTERN(href);
-	    url_type = LYLegitimizeHREF(me, (char**)&href, TRUE, TRUE);
+	    url_type = LYLegitimizeHREF(me, &href, TRUE, TRUE);
 
 	    /*
 	     *	Check whether a base tag is in effect. - FM
@@ -1349,13 +1347,13 @@ PRIVATE void HTML_start_element ARGS6(
 	    /*
 	     *	Check whether to fill in localhost. - FM
 	     */
-	    LYFillLocalFileURL((char **)&href,
+	    LYFillLocalFileURL(&href,
 			       ((*href != '\0' && *href != '#' &&
 				 me->inBASE) ?
 			       me->base_href : me->node_anchor->address));
 
 	    if (me->inA)
-		HTML_end_element(me, HTML_A, (char **)&include);
+		HTML_end_element(me, HTML_A, include);
 	    me->CurrentA = HTAnchor_findChildAndLink(
 				me->node_anchor,	/* Parent */
 				NULL,			/* Tag */
@@ -1544,7 +1542,7 @@ PRIVATE void HTML_start_element ARGS6(
 	break;
 
     case HTML_P:
-	LYHandleP(me, present, value, (char **)&include, TRUE);
+	LYHandleP(me, present, value, include, TRUE);
 	break;
 
     case HTML_BR:
@@ -1791,7 +1789,7 @@ PRIVATE void HTML_start_element ARGS6(
 	 */
 #ifdef NOTUSED_FOTEMODS
 	if (me->inFONT == TRUE)
-	    HTML_end_element(me, HTML_FONT, (char **)&include);
+	    HTML_end_element(me, HTML_FONT, &include);
 #endif /* NOTUSED_FOTEMODS */
 
 	/*
@@ -2394,7 +2392,7 @@ PRIVATE void HTML_start_element ARGS6(
 	 */
 	if (me->inA) {
 	    SET_SKIP_STACK(HTML_A);
-	    HTML_end_element(me, HTML_A, (char **)&include);
+	    HTML_end_element(me, HTML_A, include);
 	}
 	/*
 	 *  Set to know we are in an anchor.
@@ -2441,7 +2439,7 @@ PRIVATE void HTML_start_element ARGS6(
 	    } else {
 		StrAllocCopy(href, value[HTML_A_HREF]);
 	    }
-	    url_type = LYLegitimizeHREF(me, (char**)&href, TRUE, TRUE);
+	    url_type = LYLegitimizeHREF(me, &href, TRUE, TRUE);
 
 	    /*
 	     *	Deal with our ftp gateway kludge. - FM
@@ -2473,7 +2471,7 @@ PRIVATE void HTML_start_element ARGS6(
 	    /*
 	     *	Check whether to fill in localhost. - FM
 	     */
-	    LYFillLocalFileURL((char **)&href,
+	    LYFillLocalFileURL(&href,
 			       ((*href != '\0' && *href != '#' &&
 				 me->inBASE) ?
 			       me->base_href : me->node_anchor->address));
@@ -2577,7 +2575,7 @@ PRIVATE void HTML_start_element ARGS6(
 	 */
 	if (href == NULL && me->inBoldA == FALSE) {
 	    SET_SKIP_STACK(HTML_A);
-	    HTML_end_element(me, HTML_A, (char **)&include);
+	    HTML_end_element(me, HTML_A, &include);
 	}
 #endif /* NOTUSED_FOTEMODS */
 	FREE(href);
@@ -2617,7 +2615,7 @@ PRIVATE void HTML_start_element ARGS6(
 	    value[HTML_IMG_USEMAP] && *value[HTML_IMG_USEMAP]) {
 	    StrAllocCopy(map_href, value[HTML_IMG_USEMAP]);
 	    CHECK_FOR_INTERN(map_href);
-	    url_type = LYLegitimizeHREF(me, (char**)&map_href, TRUE, TRUE);
+	    url_type = LYLegitimizeHREF(me, &map_href, TRUE, TRUE);
 	    /*
 	     *	If map_href ended up zero-length or otherwise doesn't
 	     *	have a hash, it can't be valid, so ignore it. - FM
@@ -2665,7 +2663,7 @@ PRIVATE void HTML_start_element ARGS6(
 	    /*
 	     *	Check whether to fill in localhost. - FM
 	     */
-	    LYFillLocalFileURL((char **)&map_href,
+	    LYFillLocalFileURL(&map_href,
 			       ((UseBASE && me->inBASE) ?
 			  me->base_href : me->node_anchor->address));
 	    UseBASE = TRUE;
@@ -2809,7 +2807,7 @@ PRIVATE void HTML_start_element ARGS6(
 	    present && present[HTML_IMG_SRC] &&
 	    value[HTML_IMG_SRC] && *value[HTML_IMG_SRC] != '\0') {
 	    StrAllocCopy(href, value[HTML_IMG_SRC]);
-	    url_type = LYLegitimizeHREF(me, (char**)&href, TRUE, TRUE);
+	    url_type = LYLegitimizeHREF(me, &href, TRUE, TRUE);
 
 	    /*
 	     *	Check whether a base tag is in effect. - FM
@@ -2826,7 +2824,7 @@ PRIVATE void HTML_start_element ARGS6(
 	    /*
 	     *	Check whether to fill in localhost. - FM
 	     */
-	    LYFillLocalFileURL((char **)&href,
+	    LYFillLocalFileURL(&href,
 			       ((*href != '\0' && *href != '#' &&
 				 me->inBASE) ?
 			       me->base_href : me->node_anchor->address));
@@ -3151,7 +3149,7 @@ PRIVATE void HTML_start_element ARGS6(
 	     */
 	    StrAllocCopy(href, value[HTML_AREA_HREF]);
 	    CHECK_FOR_INTERN(href);
-	    url_type = LYLegitimizeHREF(me, (char**)&href, TRUE, TRUE);
+	    url_type = LYLegitimizeHREF(me, &href, TRUE, TRUE);
 
 	    /*
 	     *	Check whether a BASE tag is in effect, and use it
@@ -3173,7 +3171,7 @@ PRIVATE void HTML_start_element ARGS6(
 	    /*
 	     *	Check whether to fill in localhost. - FM
 	     */
-	    LYFillLocalFileURL((char **)&href,
+	    LYFillLocalFileURL(&href,
 			       ((((me->inBASE && *href != '\0') &&
 				  !(*href == '#' &&
 				    LYSeekFragAREAinCur == TRUE)))
@@ -3256,7 +3254,7 @@ PRIVATE void HTML_start_element ARGS6(
 	me->inFIG = TRUE;
 	if (me->inA) {
 	    SET_SKIP_STACK(HTML_A);
-	    HTML_end_element(me, HTML_A, (char **)&include);
+	    HTML_end_element(me, HTML_A, include);
 	}
 	if (!present ||
 	    (present && !present[HTML_FIG_ISOBJECT])) {
@@ -3275,7 +3273,7 @@ PRIVATE void HTML_start_element ARGS6(
 	    value[HTML_FIG_SRC] && *value[HTML_FIG_SRC] != '\0') {
 	    StrAllocCopy(href, value[HTML_FIG_SRC]);
 	    CHECK_FOR_INTERN(href);
-	    url_type = LYLegitimizeHREF(me, (char**)&href, TRUE, TRUE);
+	    url_type = LYLegitimizeHREF(me, &href, TRUE, TRUE);
 	    if (*href) {
 		/*
 		 *  Check whether a base tag is in effect. - FM
@@ -3292,7 +3290,7 @@ PRIVATE void HTML_start_element ARGS6(
 		/*
 		 *  Check whether to fill in localhost. - FM
 		 */
-		LYFillLocalFileURL((char **)&href,
+		LYFillLocalFileURL(&href,
 				   ((*href != '#' &&
 				     me->inBASE) ?
 				   me->base_href : me->node_anchor->address));
@@ -3435,7 +3433,7 @@ PRIVATE void HTML_start_element ARGS6(
 	    value[HTML_OVERLAY_SRC] && *value[HTML_OVERLAY_SRC] != '\0') {
 	    StrAllocCopy(href, value[HTML_OVERLAY_SRC]);
 	    CHECK_FOR_INTERN(href);
-	    url_type = LYLegitimizeHREF(me, (char**)&href, TRUE, TRUE);
+	    url_type = LYLegitimizeHREF(me, &href, TRUE, TRUE);
 	    if (*href) {
 		/*
 		 *  Check whether a base tag is in effect. - FM
@@ -3452,14 +3450,14 @@ PRIVATE void HTML_start_element ARGS6(
 		/*
 		 *  Check whether to fill in localhost. - FM
 		 */
-		LYFillLocalFileURL((char **)&href,
+		LYFillLocalFileURL(&href,
 				   ((*href != '#' &&
 				     me->inBASE) ?
 				   me->base_href : me->node_anchor->address));
 
 		if (me->inA) {
 		    SET_SKIP_STACK(HTML_A);
-		    HTML_end_element(me, HTML_A, (char **)&include);
+		    HTML_end_element(me, HTML_A, include);
 		}
 		me->CurrentA = HTAnchor_findChildAndLink(
 					me->node_anchor,	/* Parent */
@@ -3555,14 +3553,13 @@ PRIVATE void HTML_start_element ARGS6(
 		 */
 		if (*base == '\0')
 		    StrAllocCopy(base, "/");
-		if (base[strlen(base)-1] != '/')
-		    StrAllocCat(base, "/");
-		url_type = LYLegitimizeHREF(me, (char**)&base, TRUE, FALSE);
+		LYAddHtmlSep(&base);
+		url_type = LYLegitimizeHREF(me, &base, TRUE, FALSE);
 
 		/*
 		 *  Check whether to fill in localhost. - FM
 		 */
-		LYFillLocalFileURL((char **)&base,
+		LYFillLocalFileURL(&base,
 				   (me->inBASE ?
 				 me->base_href : me->node_anchor->address));
 
@@ -3588,7 +3585,7 @@ PRIVATE void HTML_start_element ARGS6(
 	    }
 
 	    StrAllocCopy(code, value[HTML_APPLET_CODE]);
-	    url_type = LYLegitimizeHREF(me, (char**)&code, TRUE, FALSE);
+	    url_type = LYLegitimizeHREF(me, &code, TRUE, FALSE);
 	    href = HTParse(code, base, PARSE_ALL);
 	    FREE(base);
 	    FREE(code);
@@ -3641,7 +3638,7 @@ PRIVATE void HTML_start_element ARGS6(
 	    value[HTML_BGSOUND_SRC] && *value[HTML_BGSOUND_SRC] != '\0') {
 	    StrAllocCopy(href, value[HTML_BGSOUND_SRC]);
 	    CHECK_FOR_INTERN(href);
-	    url_type = LYLegitimizeHREF(me, (char**)&href, TRUE, TRUE);
+	    url_type = LYLegitimizeHREF(me, &href, TRUE, TRUE);
 	    if (*href == '\0') {
 		FREE(href);
 		break;
@@ -3662,7 +3659,7 @@ PRIVATE void HTML_start_element ARGS6(
 	    /*
 	     *	Check whether to fill in localhost. - FM
 	     */
-	    LYFillLocalFileURL((char **)&href,
+	    LYFillLocalFileURL(&href,
 			       ((*href != '#' &&
 				 me->inBASE) ?
 			       me->base_href : me->node_anchor->address));
@@ -3755,7 +3752,7 @@ PRIVATE void HTML_start_element ARGS6(
 	    value[HTML_EMBED_SRC] && *value[HTML_EMBED_SRC] != '\0') {
 	    StrAllocCopy(href, value[HTML_EMBED_SRC]);
 	    CHECK_FOR_INTERN(href);
-	    url_type = LYLegitimizeHREF(me, (char**)&href, TRUE, TRUE);
+	    url_type = LYLegitimizeHREF(me, &href, TRUE, TRUE);
 	    if (*href != '\0') {
 		/*
 		 *  Check whether a base tag is in effect. - FM
@@ -3772,7 +3769,7 @@ PRIVATE void HTML_start_element ARGS6(
 		/*
 		 *  Check whether to fill in localhost. - FM
 		 */
-		LYFillLocalFileURL((char **)&href,
+		LYFillLocalFileURL(&href,
 				   ((*href != '#' &&
 				     me->inBASE) ?
 				   me->base_href : me->node_anchor->address));
@@ -3901,7 +3898,7 @@ PRIVATE void HTML_start_element ARGS6(
 	    if (me->inFORM) {
 		CTRACE(tfp, "HTML: Missing FORM end tag. Faking it!\n");
 		SET_SKIP_STACK(HTML_FORM);
-		HTML_end_element(me, HTML_FORM, (char **)&include);
+		HTML_end_element(me, HTML_FORM, include);
 	    }
 
 	    /*
@@ -3919,7 +3916,7 @@ PRIVATE void HTML_start_element ARGS6(
 		 *  Prepare to do housekeeping on the reference. - FM
 		 */
 		StrAllocCopy(action, value[HTML_FORM_ACTION]);
-		url_type = LYLegitimizeHREF(me, (char**)&action, TRUE, TRUE);
+		url_type = LYLegitimizeHREF(me, &action, TRUE, TRUE);
 
 		/*
 		 *  Check whether a base tag is in effect.  Note that
@@ -4355,7 +4352,7 @@ PRIVATE void HTML_start_element ARGS6(
 		if (me->sp->tag_number != HTML_SELECT) {
 		    SET_SKIP_STACK(HTML_SELECT);
 		}
-		HTML_end_element(me, HTML_SELECT, (char **)&include);
+		HTML_end_element(me, HTML_SELECT, include);
 	    }
 
 	    /*
@@ -4401,7 +4398,7 @@ PRIVATE void HTML_start_element ARGS6(
 		 *  SRC's value a link if it's still not zero-length
 		 *  legitiimizing it. - FM
 		 */
-		url_type = LYLegitimizeHREF(me, (char**)&href, TRUE, TRUE);
+		url_type = LYLegitimizeHREF(me, &href, TRUE, TRUE);
 		if (*href) {
 		    /*
 		     *	Check whether a base tag is in effect. - FM
@@ -4418,7 +4415,7 @@ PRIVATE void HTML_start_element ARGS6(
 		    /*
 		     *	Check whether to fill in localhost. - FM
 		     */
-		    LYFillLocalFileURL((char **)&href,
+		    LYFillLocalFileURL(&href,
 				       ((*href != '#' &&
 					 me->inBASE) ?
 				       me->base_href :
@@ -4426,7 +4423,7 @@ PRIVATE void HTML_start_element ARGS6(
 
 		    if (me->inA) {
 			SET_SKIP_STACK(HTML_A);
-			HTML_end_element(me, HTML_A, (char **)&include);
+			HTML_end_element(me, HTML_A, include);
 		    }
 		    me->CurrentA = HTAnchor_findChildAndLink(
 					me->node_anchor,	/* Parent */
@@ -4798,7 +4795,7 @@ PRIVATE void HTML_start_element ARGS6(
 	    if (me->sp->tag_number != HTML_SELECT) {
 		SET_SKIP_STACK(HTML_SELECT);
 	    }
-	    HTML_end_element(me, HTML_SELECT, (char **)&include);
+	    HTML_end_element(me, HTML_SELECT, include);
 	}
 
 	/*
@@ -4806,7 +4803,7 @@ PRIVATE void HTML_start_element ARGS6(
 	 */
 	LYHandleSELECT(me,
 		       present, (CONST char **)value,
-		       (char **)&include,
+		       include,
 		       TRUE);
 	break;
 
@@ -5022,11 +5019,11 @@ PRIVATE void HTML_start_element ARGS6(
 	 */
 	if (me->inA) {
 	    SET_SKIP_STACK(HTML_A);
-	    HTML_end_element(me, HTML_A, (char **)&include);
+	    HTML_end_element(me, HTML_A, include);
 	}
 	if (me->Underline_Level > 0) {
 	    SET_SKIP_STACK(HTML_U);
-	    HTML_end_element(me, HTML_U, (char **)&include);
+	    HTML_end_element(me, HTML_U, include);
 	}
 	me->inTABLE = TRUE;
 	if (!strcmp(me->sp->style->name, "Preformatted")) {
@@ -5076,11 +5073,11 @@ PRIVATE void HTML_start_element ARGS6(
 	 */
 	if (me->inA) {
 	    SET_SKIP_STACK(HTML_A);
-	    HTML_end_element(me, HTML_A, (char **)&include);
+	    HTML_end_element(me, HTML_A, include);
 	}
 	if (me->Underline_Level > 0) {
 	    SET_SKIP_STACK(HTML_U);
-	    HTML_end_element(me, HTML_U, (char **)&include);
+	    HTML_end_element(me, HTML_U, include);
 	}
 	UPDATE_STYLE;
 	if (HText_LastLineSize(me->text, FALSE)) {
@@ -5128,11 +5125,11 @@ PRIVATE void HTML_start_element ARGS6(
 	 */
 	if (me->inA) {
 	    SET_SKIP_STACK(HTML_A);
-	    HTML_end_element(me, HTML_A, (char **)&include);
+	    HTML_end_element(me, HTML_A, include);
 	}
 	if (me->Underline_Level > 0) {
 	    SET_SKIP_STACK(HTML_U);
-	    HTML_end_element(me, HTML_U, (char **)&include);
+	    HTML_end_element(me, HTML_U, include);
 	}
 	UPDATE_STYLE;
 	CHECK_ID(HTML_TR_ID);
@@ -5145,11 +5142,11 @@ PRIVATE void HTML_start_element ARGS6(
 	 */
 	if (me->inA) {
 	    SET_SKIP_STACK(HTML_A);
-	    HTML_end_element(me, HTML_A, (char **)&include);
+	    HTML_end_element(me, HTML_A, include);
 	}
 	if (me->Underline_Level > 0) {
 	    SET_SKIP_STACK(HTML_U);
-	    HTML_end_element(me, HTML_U, (char **)&include);
+	    HTML_end_element(me, HTML_U, include);
 	}
 	UPDATE_STYLE;
 	CHECK_ID(HTML_COL_ID);
@@ -5158,11 +5155,11 @@ PRIVATE void HTML_start_element ARGS6(
     case HTML_TH:
 	if (me->inA) {
 	    SET_SKIP_STACK(HTML_A);
-	    HTML_end_element(me, HTML_A, (char **)&include);
+	    HTML_end_element(me, HTML_A, include);
 	}
 	if (me->Underline_Level > 0) {
 	    SET_SKIP_STACK(HTML_U);
-	    HTML_end_element(me, HTML_U, (char **)&include);
+	    HTML_end_element(me, HTML_U, include);
 	}
 	UPDATE_STYLE;
 	CHECK_ID(HTML_TD_ID);
@@ -5176,11 +5173,11 @@ PRIVATE void HTML_start_element ARGS6(
     case HTML_TD:
 	if (me->inA) {
 	    SET_SKIP_STACK(HTML_A);
-	    HTML_end_element(me, HTML_A, (char **)&include);
+	    HTML_end_element(me, HTML_A, include);
 	}
 	if (me->Underline_Level > 0) {
 	    SET_SKIP_STACK(HTML_U);
-	    HTML_end_element(me, HTML_U, (char **)&include);
+	    HTML_end_element(me, HTML_U, include);
 	}
 	UPDATE_STYLE;
 	CHECK_ID(HTML_TD_ID);
@@ -5269,7 +5266,7 @@ PRIVATE void HTML_start_element ARGS6(
 #if defined(PREVAIL)
 			start=strrchr(Style_className, '.');
 			if (start)
-				strcpy(prevailing_class, (char*)(start+1));
+				strcpy(prevailing_class, (start+1));
 			else
 				strcpy(prevailing_class, "");
 #endif
@@ -5489,7 +5486,7 @@ PRIVATE void HTML_end_element ARGS3(
 				     ((MBM_A_subdescript[i] &&
 				       *MBM_A_subdescript[i]) ?
 					 MBM_A_subdescript[i] : "(none)"));
-			LYEntify((char **)&temp, TRUE);
+			LYEntify(&temp, TRUE);
 			StrAllocCat(*include, temp);
 			StrAllocCat(*include,
 				"<BR><EM>&nbsp;&nbsp;&nbsp;Filepath:</EM> ");
@@ -5497,7 +5494,7 @@ PRIVATE void HTML_end_element ARGS3(
 				     ((MBM_A_subbookmark[i] &&
 				       *MBM_A_subbookmark[i]) ?
 					 MBM_A_subbookmark[i] : "(unknown)"));
-			LYEntify((char **)&temp, TRUE);
+			LYEntify(&temp, TRUE);
 			StrAllocCat(*include, temp);
 			FREE(temp);
 			StrAllocCat(*include, "</H2>");
@@ -5626,7 +5623,7 @@ PRIVATE void HTML_end_element ARGS3(
     case HTML_P:
 	LYHandleP(me,
 		 (CONST BOOL*)0, (CONST char **)0,
-		 (char **)&include,
+		 include,
 		 FALSE);
 	break;
 
@@ -6200,7 +6197,7 @@ End_Object:
 	    if (me->sp->tag_number != HTML_SELECT) {
 		SET_SKIP_STACK(HTML_SELECT);
 	    }
-	    HTML_end_element(me, HTML_SELECT, (char **)&include);
+	    HTML_end_element(me, HTML_SELECT, include);
 	}
 
 	/*
@@ -6651,7 +6648,7 @@ End_Object:
 	{
 		char *dot=strrchr(Style_className,'.');
 		LYstrncpy(prevailing_class,
-			  dot ? (char*)(dot+1) : "",
+			  dot ? (dot+1) : "",
 			  (TEMPSTRINGSIZE - 1));
 	}
 #endif
@@ -6730,15 +6727,15 @@ PRIVATE void HTML_free ARGS1(HTStructured *, me)
 	    CTRACE(tfp,"HTML_free: Ending underline\n");
 	}
 	if (me->inA) {
-	    HTML_end_element(me, HTML_A, (char **)&include);
+	    HTML_end_element(me, HTML_A, &include);
 	    me->inA = FALSE;
 	}
 	if (me->inFONT) {
-	    HTML_end_element(me, HTML_FONT, (char **)&include);
+	    HTML_end_element(me, HTML_FONT, &include);
 	    me->inFONT = FALSE;
 	}
 	if (me->inFORM) {
-	    HTML_end_element(me, HTML_FORM, (char **)&include);
+	    HTML_end_element(me, HTML_FORM, &include);
 	    me->inFORM = FALSE;
 	}
 	if (me->option.size > 0) {
@@ -6795,14 +6792,14 @@ PRIVATE void HTML_free ARGS1(HTStructured *, me)
 	if (!dump_output_immediately &&
 	    HText_sourceAnchors(me->text) < 1 &&
 	    HText_HiddenLinkCount(me->text) > 0) {
-	    HTML_start_element(me, HTML_P, 0, 0, -1, (char **)&include);
+	    HTML_start_element(me, HTML_P, 0, 0, -1, &include);
 	    HTML_put_character(me, '[');
-	    HTML_start_element(me, HTML_EM, 0, 0, -1, (char **)&include);
+	    HTML_start_element(me, HTML_EM, 0, 0, -1, &include);
 	    HTML_put_string(me,
 		"Document has only hidden links. Use the 'l'ist command.");
-	    HTML_end_element(me, HTML_EM, (char **)&include);
+	    HTML_end_element(me, HTML_EM, &include);
 	    HTML_put_character(me, ']');
-	    HTML_end_element(me, HTML_P, (char **)&include);
+	    HTML_end_element(me, HTML_P, &include);
 	}
 
 	/*
@@ -6888,15 +6885,15 @@ PRIVATE void HTML_abort ARGS2(HTStructured *, me, HTError, e)
 	    me->Underline_Level = 0;
 	}
 	if (me->inA) {
-	    HTML_end_element(me, HTML_A, (char **)&include);
+	    HTML_end_element(me, HTML_A, &include);
 	    me->inA = FALSE;
 	}
 	if (me->inFONT) {
-	    HTML_end_element(me, HTML_FONT, (char **)&include);
+	    HTML_end_element(me, HTML_FONT, &include);
 	    me->inFONT = FALSE;
 	}
 	if (me->inFORM) {
-	    HTML_end_element(me, HTML_FORM, (char **)&include);
+	    HTML_end_element(me, HTML_FORM, &include);
 	    me->inFORM = FALSE;
 	}
 

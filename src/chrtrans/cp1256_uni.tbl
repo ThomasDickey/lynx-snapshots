@@ -2,7 +2,7 @@
 Mwindows-1256
 
 #Name as a Display Charset (used on Options screen).
-OWinArabic (cp1256)
+OArabic (windows-1256)
 
 #
 #    Name:     cp1256 to Unicode table

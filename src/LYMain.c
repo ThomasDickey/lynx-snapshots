@@ -51,12 +51,6 @@
 #include <LYexit.h>
 #include <LYLeaks.h>
 
-#ifdef VMS
-#define DISPLAY "DECW$DISPLAY"
-#else
-#define DISPLAY "DISPLAY"
-#endif /* VMS */
-
 /* ahhhhhhhhhh!! Global variables :-< */
 #ifdef SOCKS
 PUBLIC BOOLEAN socks_flag=TRUE;
@@ -259,7 +253,7 @@ PUBLIC char *lynxlinksfile = NULL;  /* the current visited links file URL */
 PUBLIC char *startrealm = NULL;     /* the startfile realm */
 PUBLIC char *indexfile = NULL;	    /* an index file if there is one */
 PUBLIC char *personal_mail_address = NULL; /* the users mail address */
-PUBLIC char *display = NULL;	    /* display environment variable */
+PUBLIC char *x_display = NULL;	    /* display environment variable */
 PUBLIC char *personal_type_map = NULL;	   /* .mailcap */
 PUBLIC char *global_type_map = NULL;	   /* global mailcap */
 PUBLIC char *global_extension_map = NULL;  /* global mime.types */
@@ -301,7 +295,8 @@ PUBLIC BOOLEAN LYUseDefaultRawMode = TRUE;
 PUBLIC char *UCAssume_MIMEcharset = NULL;
 PUBLIC char *UCAssume_localMIMEcharset = NULL;
 PUBLIC char *UCAssume_unrecMIMEcharset = NULL;
-PUBLIC BOOLEAN LYSaveBookmarksInUnicode = FALSE;
+PUBLIC BOOLEAN UCSaveBookmarksInUnicode = FALSE;
+PUBLIC BOOLEAN UCForce8bitTOUPPER = FALSE; /* override locale for case-conversion? */
 PUBLIC int LYlines = 24;
 PUBLIC int LYcols = 80;
 PUBLIC int dump_output_width = 0;
@@ -337,6 +332,9 @@ PUBLIC BOOLEAN LYSetCookies = SET_COOKIES; /* Process Set-Cookie headers? */
 PUBLIC BOOLEAN LYAcceptAllCookies = ACCEPT_ALL_COOKIES; /* take all cookies? */
 PUBLIC char *LYCookieAcceptDomains = NULL; /* domains to accept all cookies */
 PUBLIC char *LYCookieRejectDomains = NULL; /* domains to reject all cookies */
+#ifdef EXP_PERSISTENT_COOKIES
+PUBLIC char *LYCookieFile = NULL;          /* default cookie file */
+#endif /* EXP_PERSISTENT_COOKIES */
 PUBLIC char *XLoadImageCommand = NULL;	/* Default image viewer for X */
 PUBLIC BOOLEAN LYNoISMAPifUSEMAP = FALSE; /* Omit ISMAP link if MAP present? */
 PUBLIC int LYHiddenLinks = HIDDENLINKS_SEPARATE; /* Show hidden links? */
@@ -357,7 +355,8 @@ PUBLIC BOOLEAN LYPrependCharsetToSource = FALSE;
 PUBLIC BOOLEAN LYQuitDefaultYes = QUIT_DEFAULT_YES;
 
 #ifdef DISP_PARTIAL
-PUBLIC BOOLEAN display_partial = FALSE; /* Display document during download */
+PUBLIC BOOLEAN display_partial = TRUE; /* Display document during download */
+PUBLIC BOOLEAN debug_display_partial = FALSE; /* Show with MessageSecs delay */
 #endif
 
 /* These are declared in cutil.h for current freeWAIS libraries. - FM */
@@ -441,7 +440,7 @@ PRIVATE void free_lynx_globals NOARGS
     FREE(jumpfile);
 #endif /* JUMPFILE */
     FREE(indexfile);
-    FREE(display);
+    FREE(x_display);
     FREE(global_type_map);
     FREE(personal_type_map);
     FREE(global_extension_map);
@@ -518,7 +517,6 @@ PUBLIC int main ARGS2(
 {
     int  i;		/* indexing variable */
     int status = 0;	/* exit status */
-    int len;
     char *lynx_cfg_file = NULL;
     char *temp = NULL;
     char *cp;
@@ -694,8 +692,7 @@ PUBLIC int main ARGS2(
     if ((cp = strchr(lynx_temp_space, '~'))) {
 	*(cp++) = '\0';
 	StrAllocCopy(temp, lynx_temp_space);
-	if (((len = strlen(temp)) > 0) && temp[len-1] == '/')
-	    temp[len-1] = '\0';
+	LYTrimPathSep(temp);
 #ifdef DOSPATH
 	StrAllocCat(temp, HTDOS_wwwName((char *)Home_Dir()));
 #else
@@ -726,11 +723,10 @@ PUBLIC int main ARGS2(
 #ifdef VMS
     LYLowerCase(lynx_temp_space);
     if (strchr(lynx_temp_space, '/') != NULL) {
-	if ((len = strlen(lynx_temp_space)) == 1) {
+	if (strlen(lynx_temp_space) == 1) {
 	    StrAllocCopy(lynx_temp_space, "sys$scratch:");
 	} else {
-	    if (lynx_temp_space[len-1] != '/')
-		StrAllocCat(lynx_temp_space, "/");
+	    LYAddPathSep(&lynx_temp_space);
 	    StrAllocCopy(temp, HTVMS_name("", lynx_temp_space));
 	    StrAllocCopy(lynx_temp_space, temp);
 	    FREE(temp);
@@ -741,17 +737,7 @@ PUBLIC int main ARGS2(
 	StrAllocCat(lynx_temp_space, ":");
     }
 #else
-#if !defined(__DJGPP__) && !defined(_WINDOWS)
-    if (((len = strlen(lynx_temp_space)) > 1) &&
-	lynx_temp_space[len-1] != '/') {
-	StrAllocCat(lynx_temp_space, "/");
-    }
-#else
-    if (((len = strlen(lynx_temp_space)) > 1) &&
-	lynx_temp_space[len-1] != '\\') {
-	StrAllocCat(lynx_temp_space, "\\");
-    }
-#endif /* !__DJGPP__ && !_WINDOWS */
+    LYAddPathSep(&lynx_temp_space);
 #endif /* VMS */
 #ifdef VMS
     StrAllocCopy(mail_adrs, MAIL_ADRS);
@@ -1068,7 +1054,7 @@ PUBLIC int main ARGS2(
 	    fprintf(stderr, "%s\n", TRACELOG_OPEN_FAILED);
 
 #if defined(__DJGPP__) || defined(_WINDOWS)
-		_fmode = O_BINARY;
+	    _fmode = O_BINARY;
 #endif /* __DJGPP__ or _WINDOWS */
 	    exit(-1);
 	}
@@ -1137,7 +1123,7 @@ PUBLIC int main ARGS2(
      */
 #ifndef _WINDOWS /* avoid the whole ~ thing for now */
    /* I think this should only be performed if lynx_cfg_file starts with ~/ */
-   if ((lynx_cfg_file[0] == '~') && (lynx_cfg_file[1] == '/'))
+   if ((lynx_cfg_file[0] == '~') && LYIsPathSep(lynx_cfg_file[1]))
      {
 #ifdef VMS
 	StrAllocCopy(temp, HTVMS_wwwName((char *)Home_Dir()));
@@ -1198,8 +1184,7 @@ PUBLIC int main ARGS2(
     if ((cp = strchr(lynx_lss_file, '~'))) {
 	*(cp++) = '\0';
 	StrAllocCopy(temp, lynx_lss_file);
-	if ((len=strlen(temp)) > 0 && temp[len-1] == '/')
-	    temp[len-1] = '\0';
+	LYTrimPathSep(temp);
 #ifdef VMS
 	StrAllocCat(temp, HTVMS_wwwName((char *)Home_Dir()));
 #else
@@ -1278,8 +1263,7 @@ PUBLIC int main ARGS2(
 	if ((cp = strchr(lynx_save_space, '~')) != NULL) {
 	    *(cp++) = '\0';
 	    StrAllocCopy(temp, lynx_save_space);
-	    if (((len = strlen(temp)) > 0) && temp[len-1] == '/')
-		temp[len-1] = '\0';
+	    LYTrimPathSep(temp);
 #ifdef DOSPATH
 	    StrAllocCat(temp, HTDOS_wwwName((char *)Home_Dir()));
 #else
@@ -1296,11 +1280,10 @@ PUBLIC int main ARGS2(
 #ifdef VMS
 	LYLowerCase(lynx_save_space);
 	if (strchr(lynx_save_space, '/') != NULL) {
-	    if ((len = strlen(lynx_save_space)) == 1) {
+	    if (strlen(lynx_save_space) == 1) {
 		StrAllocCopy(lynx_save_space, "sys$login:");
 	    } else {
-		if (lynx_save_space[len-1] != '/')
-		    StrAllocCat(lynx_save_space, "/");
+		LYAddPathSep(&lynx_save_space);
 		StrAllocCopy(temp, HTVMS_name("", lynx_save_space));
 		StrAllocCopy(lynx_save_space, temp);
 		FREE(temp);
@@ -1311,12 +1294,7 @@ PUBLIC int main ARGS2(
 	    StrAllocCat(lynx_save_space, ":");
 	}
 #else
-    {
-	if (((len = strlen(lynx_save_space)) > 1) &&
-	    lynx_save_space[len-1] != '/') {
-	    StrAllocCat(lynx_save_space, "/");
-	}
-    }
+	LYAddPathSep(&lynx_save_space);
 #endif /* VMS */
     }
 
@@ -1523,7 +1501,37 @@ PUBLIC int main ARGS2(
      *	Sod it, this looks like a reasonable place to load the
      *	cookies file, probably.  - RP
      */
-    LYLoadCookies("cookies"); /* add command line options! */
+    if(LYCookieFile == NULL) {
+#ifdef VMS
+	/* I really don't know if this is going to work on VMS. Someone
+	 * who knows needs to take a look. - BJP
+	 */
+	StrAllocCopy(LYCookieFile, "sys$login:cookies");
+#else
+	StrAllocCopy(LYCookieFile, Home_Dir());
+	StrAllocCat(LYCookieFile, "/cookies");
+#endif /* VMS */
+    } else {
+	if ((cp = strchr(LYCookieFile, '~'))) {
+	    temp = NULL;
+	    *(cp++) = '\0';
+	    StrAllocCopy(temp, cp);
+	    LYTrimPathSep(temp);
+#ifdef DOSPATH
+	    StrAllocCopy(LYCookieFile, HTDOS_wwwName((char *)Home_Dir()));
+#else
+#ifdef VMS
+	    StrAllocCopy(LYCookieFile, HTVMS_wwwName((char *)Home_Dir()));
+#else
+	    StrAllocCopy(LYCookieFile, Home_Dir());
+#endif /* VMS */
+#endif /* DOSPATH */
+
+	    StrAllocCat(LYCookieFile, temp);
+	    FREE(temp);
+	}
+    }
+    LYLoadCookies(LYCookieFile);
 #endif
 
     /*
@@ -1654,14 +1662,9 @@ PUBLIC int main ARGS2(
      *	Set up our help and about file base paths. - FM
      */
     StrAllocCopy(helpfilepath, helpfile);
-    if ((cp=strrchr(helpfilepath, '/')) != NULL)
-	*cp = '\0';
-    /*
-     *	Remove code to merge the historical about_lynx
-     *	directory into lynx_help. - HN
-     */
-    StrAllocCat(helpfilepath, "/");
-
+    if ((cp = LYPathLeaf(helpfilepath)) != helpfilepath)
+        *cp = '\0';
+    LYAddPathSep(&helpfilepath);
 
     /*
      *	Make sure our bookmark default strings
@@ -1695,7 +1698,7 @@ PUBLIC int main ARGS2(
 		keypad_mode = LINKS_ARE_NUMBERED;
 	    }
 	}
-	if (display != NULL && *display != '\0') {
+	if (x_display != NULL && *x_display != '\0') {
 	    LYisConfiguredForX = TRUE;
 	}
 	if (dump_output_width > 0) {
@@ -1723,7 +1726,7 @@ PUBLIC int main ARGS2(
 	 *  INTERACTIVE session. - FM
 	 */
 	if (setup(terminal)) {
-	    if (display != NULL && *display != '\0') {
+	    if (x_display != NULL && *x_display != '\0') {
 		LYisConfiguredForX = TRUE;
 	    }
 	    ena_csi((LYlowest_eightbit[current_char_set] > 155));
@@ -1888,7 +1891,7 @@ static int assume_charset_fun ARGS3(
 	char *,			next_arg)
 {
     if (next_arg == 0) {
-	UCLYhndl_for_unspec = 0;
+	UCLYhndl_for_unspec = UCGetLYhndl_byMIME("iso-8859-1");
     } else {
 	LYLowerCase(next_arg);
 	StrAllocCopy(UCAssume_MIMEcharset, next_arg);
@@ -1905,7 +1908,7 @@ static int assume_local_charset_fun ARGS3(
 	char *,			next_arg)
 {
     if (next_arg == 0) {
-	UCLYhndl_HTFile_for_unspec = 0;
+	UCLYhndl_HTFile_for_unspec = UCGetLYhndl_byMIME("iso-8859-1");
     } else {
 	LYLowerCase(next_arg);
 	StrAllocCopy(UCAssume_localMIMEcharset, next_arg);
@@ -1923,7 +1926,7 @@ static int assume_unrec_charset_fun ARGS3(
 	char *,			next_arg)
 {
     if (next_arg == 0) {
-	UCLYhndl_for_unrec = 0;
+	UCLYhndl_for_unrec = UCGetLYhndl_byMIME("iso-8859-1");
     } else {
 	LYLowerCase(next_arg);
 	StrAllocCopy(UCAssume_unrecMIMEcharset, next_arg);
@@ -2037,19 +2040,9 @@ static int display_fun ARGS3(
 	char *,			next_arg)
 {
     if (next_arg != 0) {
-#ifdef VMS
-	LYUpperCase(next_arg);
-	Define_VMSLogical(DISPLAY, next_arg);
-#else
-	static char display_putenv_command[142];
-
-	sprintf(display_putenv_command, "DISPLAY=%s", next_arg);
-	putenv(display_putenv_command);
-#endif /* VMS */
-
-	if ((0 != (next_arg = getenv(DISPLAY)))
-	    && (*next_arg != '\0'))
-	  StrAllocCopy(display, next_arg);
+	LYsetXDisplay(next_arg);
+	if ((next_arg = LYgetXDisplay()) != 0)
+	    StrAllocCopy(x_display, next_arg);
     }
 
     return 0;
@@ -2096,9 +2089,9 @@ static int error_file_fun ARGS3(
 #if defined(EXEC_LINKS) || defined(EXEC_SCRIPTS)
 /* -exec */
 static int exec_fun ARGS3(
-	Parse_Args_Type*,	p,
-	char **,		argv,
-	char *,			next_arg)
+	Parse_Args_Type*,	p GCC_UNUSED,
+	char **,		argv GCC_UNUSED,
+	char *,			next_arg GCC_UNUSED)
 {
 #ifndef NEVER_ALLOW_REMOTE_EXEC
     local_exec = TRUE;
@@ -2538,6 +2531,7 @@ static int width_fun ARGS3(
     return 0;
 }
 
+/* NOTE: This table is sorted by name; the lookup relies on that. */
 static Parse_Args_Type Arg_Table [] =
 {
    PARSE_SET(
@@ -2608,6 +2602,12 @@ static Parse_Args_Type Arg_Table [] =
       "cookies",	TOGGLE_ARG,		&LYSetCookies,
       "toggles handling of Set-Cookie headers"
    ),
+#ifdef EXP_PERSISTENT_COOKIES
+   PARSE_STR(
+      "cookie_file",	LYSTRING_ARG,		&LYCookieFile,
+      "=FILENAME\nspecifies a file to use to store cookies"
+   ),
+#endif /* EXP_PERSISTENT_COOKIES */
 #ifndef VMS
    PARSE_SET(
       "core",		TOGGLE_ARG,		&LYNoCore,
@@ -2619,6 +2619,12 @@ static Parse_Args_Type Arg_Table [] =
       "with -traversal, output each page to a file\n\
 with -dump, format output as with -traversal, but to stdout"
    ),
+#ifdef DISP_PARTIAL
+   PARSE_SET(
+      "debug_partial",	TOGGLE_ARG,		&debug_display_partial,
+      "incremental display stages with MessageSecs delay"
+   ),
+#endif
    PARSE_FUN(
       "display",	NEED_FUNCTION_ARG,	display_fun,
       "=DISPLAY\nset the display variable for X exec'ed programs"

@@ -451,7 +451,7 @@ PUBLIC void read_rc NOPARAMS
 		cp = cp2 + 1;
 	    while (isspace(*cp))
 		cp++; /* get rid of spaces */
-            cookie_add_acceptlist(cp);
+	    cookie_add_acceptlist(cp);
 
 
 	/*
@@ -465,6 +465,19 @@ PUBLIC void read_rc NOPARAMS
 		cp++; /* get rid of spaces */
 	    cookie_add_rejectlist(cp);
 
+#ifdef EXP_PERSISTENT_COOKIES
+	/*
+	 * File to store cookies in.
+	 */
+	} else if ((cp = LYstrstr(line_buffer, "cookie_file"))
+		!= NULL && cp-line_buffer < number_sign) {
+	    if((cp2 = (char *)strchr(cp,'=')) != NULL)
+		cp = cp2 + 1;
+	    while (isspace(*cp))
+		cp++; /* get rid of spaces */
+
+	    StrAllocCopy(LYCookieFile, cp);
+#endif /* EXP_PERSISTENT_COOKIES */
 
 	/*
 	 *  User mode.
@@ -891,6 +904,44 @@ PUBLIC int save_rc NOPARAMS
 		(user_mode == NOVICE_MODE ? "NOVICE" :
 			 (user_mode == ADVANCED_MODE ?
 					  "ADVANCED" : "INTERMEDIATE")));
+
+    /*
+     * Cookie options
+     */
+    fprintf(fp, "\
+# accept_all_cookies allows the user to tell Lynx to automatically\n\
+# accept all cookies if desired.  The default is \"FALSE\" which will\n\
+# prompt for each cookie.  Set accept_all_cookies to \"TRUE\" to accept\n\
+# all cookies.\n");
+    fprintf(fp, "accept_all_cookies=%s\n\n",
+		(LYAcceptAllCookies == FALSE ? "FALSE" : "TRUE"));
+
+    fprintf(fp, "\
+# cookie_accept_domains and cookie_reject_domains are comma-delimited\n\
+# lists of domains (with a leading '.') to automatically accept or\n\
+# reject all cookies from.  The accept_all_cookies parameter will\n\
+# override any settings made here.  If a single domain is specified in\n\
+# both cookie_accept_domains and in cookie_reject_domains, the rejection\n\
+# will take precedence.\n");
+    fprintf(fp, "# cookie_accept_domains=\n");
+    fprintf(fp, "# cookie_reject_domains=\n\n");
+
+    /*
+     * cookie_accept_domains and cookie_reject_domains not set here because
+     * there's not currently a method on the options menu (maybe later?)
+     * to set them.
+     */
+
+#ifdef EXP_PERSISTENT_COOKIES
+    /*
+     * Cookie file.
+     */
+    fprintf(fp, "\
+# cookie_file specifies the file in which to store persistent cookies.\n\
+# The default is ~/.lynx_cookies.\n");
+    fprintf(fp, "cookie_file=%s\n\n",
+		(LYCookieFile == NULL ? "~/.lynx_cookies" : LYCookieFile));
+#endif /* EXP_PERSISTENT_COOKIES */
 
 #if defined(EXEC_LINKS) || defined(EXEC_SCRIPTS)
     /*

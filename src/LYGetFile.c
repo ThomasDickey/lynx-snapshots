@@ -20,7 +20,6 @@
 #include <LYDownload.h>
 #include <LYNews.h>
 #include <LYMail.h>
-#include <LYSystem.h>
 #include <LYKeymap.h>
 #include <LYBookmark.h>
 #include <LYMap.h>
@@ -49,41 +48,6 @@ extern char * WWW_Download_File;
 #ifdef VMS
 extern BOOLEAN LYDidRename;
 #endif /* VMS */
-
-#if 0 /* UNUSED */
-#ifdef DIRED_SUPPORT
-PRIVATE char * LYSanctify ARGS1(
-	char *, 	href)
-{
-    int i;
-    char *p, *cp, *tp;
-    char address_buffer[1024];
-
-    i = (strlen(href) - 1);
-    while (i && href[i] == '/') href[i--] = '\0';
-
-    if ((cp = (char *)strchr(href,'~')) != NULL) {
-       if (!strncmp(href, "file://localhost/", 17))
-	 tp = (href + 17);
-       else
-	 tp = (href + 5);
-       if ((cp - tp) && *(cp-1) != '/')
-	 return href;
-       LYstrncpy(address_buffer, href, (cp - href));
-       if (address_buffer[(strlen(address_buffer) - 1)] == '/')
-	 address_buffer[(strlen(address_buffer) - 1)] = '\0';
-       p = (char *)Home_Dir();
-       strcat(address_buffer, p);
-       if (strlen(++cp))
-	 strcat(address_buffer, cp);
-       if (strcmp(href, address_buffer))
-	 StrAllocCopy(href, address_buffer);
-    }
-    return href;
-}
-#endif /* DIRED_SUPPORT */
-#endif
-
 
 PUBLIC BOOLEAN getfile ARGS1(
 	document *,	doc)
@@ -426,14 +390,10 @@ Try_Redirected_URL:
 			/*
 			 *  Run the command.
 			 */
-#ifdef __DJGPP__
-			__djgpp_set_ctrl_c(0);
-			_go32_want_ctrl_break(1);
-#endif /* __DJGPP__ */
 			if (strstr(p,"//") == p+9)
-			    system(p+11);
+			    LYSystem(p+11);
 			else
-			    system(p+9);
+			    LYSystem(p+9);
 			if (url_type != LYNXPROG_URL_TYPE) {
 			    /*
 			     *	Make sure user gets to see screen output.
@@ -450,10 +410,6 @@ Try_Redirected_URL:
 			      HadVMSInterrupt = FALSE;
 			    }
 #endif /* VMS */
-#ifdef __DJGPP__
-			    __djgpp_set_ctrl_c(1);
-			    _go32_want_ctrl_break(0);
-#endif /* __DJGPP__ */
 			}
 			start_curses();
 			LYAddVisitedLink(doc);
@@ -1309,7 +1265,7 @@ PRIVATE int fix_http_urls ARGS1(
      *	If it's an ftp URL with a trailing slash, trim it off.
      */
     if (!strncmp(doc->address, "ftp", 3) &&
-	doc->address[strlen(doc->address)-1] == '/') {
+	LYIsHtmlSep(doc->address[strlen(doc->address)-1])) {
 	char * proxy;
 	char *path = HTParse(doc->address, "", PARSE_PATH|PARSE_PUNCTUATION);
 
@@ -1317,7 +1273,7 @@ PRIVATE int fix_http_urls ARGS1(
 	 *  If the path is a lone slash, we're done. - FM
 	 */
 	if (path) {
-	    if (path[0] == '/' && path[1] == '\0') {
+	    if (LYIsHtmlSep(path[0]) && path[1] == '\0') {
 		FREE(path);
 		return 0;
 	    }
@@ -1335,7 +1291,7 @@ PRIVATE int fix_http_urls ARGS1(
 	 *  If we get to here, trim the trailing slash. - FM
 	 */
 	CTRACE(tfp, "fix_http_urls: URL '%s'\n", doc->address);
-	doc->address[strlen(doc->address)-1] = '\0';
+	LYTrimHtmlSep(doc->address);
 	CTRACE(tfp, "        changed to '%s'\n", doc->address);
 	CTRACE_SLEEP(MessageSecs);
     }
@@ -1344,12 +1300,12 @@ PRIVATE int fix_http_urls ARGS1(
      *	If there isn't a slash besides the two at the beginning, append one.
      */
     if ((slash = strrchr(doc->address, '/')) != NULL) {
-	if (*(slash-1) != '/' || *(slash-2) != ':') {
+	if (!LYIsHtmlSep(*(slash-1)) || *(slash-2) != ':') {
 	    return(0);
 	}
     }
     CTRACE(tfp, "fix_http_urls: URL '%s'\n", doc->address);
-    StrAllocCat(doc->address, "/");
+    LYAddHtmlSep(&(doc->address));
     CTRACE(tfp, "        changed to '%s'\n",doc->address);
     CTRACE_SLEEP(MessageSecs);
 

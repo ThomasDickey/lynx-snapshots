@@ -222,10 +222,9 @@ II. Compile instructions -- UNIX
 	Turn off code that lets Lynx display parts of a long page while loading
 	it.
 
-  --enable-8bit-toupper			(define EXP_8BIT_TOUPPER)
-	Use experimental 8-bit case-conversion for case-insensitive
-	searches in non-ASCII display character set, this overrides locale
-	settings.
+  --enable-cgi-links                    (define LYNXCGI_LINKS)
+	Allows lynx to access a cgi script directly without the need for
+	a http daemon.
 
   --enable-color-style			(define USE_COLOR_STYLE)
   	Use this option to enable optional and *experimental* color style.
@@ -238,6 +237,12 @@ II. Compile instructions -- UNIX
   	enable use of default-color background (ncurses/slang).  Either
 	configuration supports the use of 'default' for colors even without
 	this option.
+
+  --enable-exec-links                   (define EXEC_LINKS)
+	Allows lynx to execute programs by accessing a link.
+
+  --enable-exec-scripts                 (define EXEC_SCRIPTS)
+	Allows lynx to execute programs inferred from a link.
 
   --enable-externs			(define USE_EXTERNALS)
 	Use this option to enable external application support. (See lynx.cfg.)
@@ -257,10 +262,6 @@ II. Compile instructions -- UNIX
 	Disabled by default, this option allows tracking of internal links,
 	a feature which could, however, compromise a secure transaction by
 	forcing inappropriate resubmission of form content.
-
-  --enable-cgi-links                    (define LYNXCGI_LINKS)
-	Allows lynx to access a cgi script directly without the need for
-	a http daemon.
 
   --enable-nsl-fork			(define NSL_FORK)
 	Disabled by default, this allows interruption of NSL requests,

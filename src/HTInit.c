@@ -26,16 +26,9 @@
 #include <LYUtils.h>
 #include <LYGlobalDefs.h>
 #include <LYSignal.h>
-#include <LYSystem.h>
 
 #include <LYexit.h>
 #include <LYLeaks.h>
-
-#ifdef VMS
-#define DISPLAY "DECW$DISPLAY"
-#else
-#define DISPLAY "DISPLAY"
-#endif /* VMS */
 
 PRIVATE int HTLoadTypesConfigFile PARAMS((char *fn));
 PRIVATE int HTLoadExtensionsConfigFile PARAMS((char *fn));
@@ -43,7 +36,6 @@ PRIVATE int HTLoadExtensionsConfigFile PARAMS((char *fn));
 PUBLIC void HTFormatInit NOARGS
 {
  FILE *fp = NULL;
- char *cp = NULL;
 
 #ifdef NeXT
   HTSetPresentation("application/postscript",   "open %s", 1.0, 2.0, 0.0, 0);
@@ -52,7 +44,7 @@ PUBLIC void HTFormatInit NOARGS
   HTSetPresentation("audio/basic",              "open %s", 1.0, 2.0, 0.0, 0);
   HTSetPresentation("*",                        "open %s", 1.0, 0.0, 0.0, 0);
 #else
- if ((cp = getenv(DISPLAY)) != NULL && *cp != '\0') {	/* Must have X11 */
+ if (LYgetXDisplay() != 0) {	/* Must have X11 */
   HTSetPresentation("application/postscript", "ghostview %s&",
   							    1.0, 3.0, 0.0, 0);
   HTSetPresentation("image/gif",        XLoadImageCommand,  1.0, 3.0, 0.0, 0);
@@ -491,7 +483,6 @@ PRIVATE int PassesTest ARGS1(
 {
     int result;
     char *cmd, TmpFileName[TMPFILE_NAME_SIZE];
-    char *cp = NULL;
 
     /*
      *  Make sure we have a command
@@ -505,7 +496,7 @@ PRIVATE int PassesTest ARGS1(
     if (0 == strcasecomp(mc->testcommand, "test -n \"$DISPLAY\"")) {
 	FREE(mc->testcommand);
 	CTRACE(tfp, "PassesTest: Testing for XWINDOWS environment.\n");
-    	if ((cp = getenv(DISPLAY)) != NULL && *cp != '\0') {
+    	if (LYgetXDisplay() != NULL) {
 	    CTRACE(tfp, "PassesTest: Test passed!\n");
 	    return(0 == 0);
 	} else {
@@ -516,7 +507,7 @@ PRIVATE int PassesTest ARGS1(
     if (0 == strcasecomp(mc->testcommand, "test -z \"$DISPLAY\"")) {
 	FREE(mc->testcommand);
 	CTRACE(tfp, "PassesTest: Testing for NON_XWINDOWS environment.\n");
-    	if (!((cp = getenv(DISPLAY)) != NULL && *cp != '\0')) {
+    	if (LYgetXDisplay() == NULL) {
 	    CTRACE(tfp,"PassesTest: Test passed!\n");
 	    return(0 == 0);
 	} else {
@@ -558,7 +549,7 @@ PRIVATE int PassesTest ARGS1(
 		 TmpFileName,
 		 strlen(TmpFileName));
     CTRACE(tfp, "PassesTest: Executing test command: %s\n", cmd);
-    result = system(cmd);
+    result = LYSystem(cmd);
     FREE(cmd);
     LYRemoveTemp(TmpFileName);
 

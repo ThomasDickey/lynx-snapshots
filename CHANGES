@@ -1,6 +1,99 @@
 Changes since Lynx 2.8 release
 ================================================================================
 
+1998-09-06 (2.8.1dev.25)
+* corrected compiled-in path for lynx_site.txt - TD
+* implement logic for exec-links in forms-options page - TD
+* add configure options --enable-exec-links and --enable-exec-scripts - TD
+* correct logic for show-color in forms-options page (reported by DK) - TD.
+* implement logic to set $DISPLAY in forms-options page - TD
+* add/use functions LYsetXDisplay() and LYgetXDisplay() to reduce clutter - TD
+* retain help-link on internal pages only for those where the pages would be
+  pushed onto the history stack, and only in novice mode - TD
+* absorb LYSystem.h into LYUtils.h, adding LYSystem() and LYSysShell functions
+  to LYUtils.c to hide djgpp clutter - TD
+* limit strings passed to mailer in LYMail.c to 7-bit ASCII, converting other
+  characters to '?'.  This guards against trash on the end of the mailing
+  address in a mailto link (from Duncan Simpson <dps@io.stargate.co.uk>).
+* add fallback definitions for <sys/stat.h> S_xxx macros to tcp.h (from report
+  by Francisco A Tomei Torres <fatomei@sandburg.unm.edu> that OpenStep 4.0
+  lacks definition for S_IWOTH) - TD
+* modify quote_pathname() so that for DJGPP it does not put single-quotes
+  around the result - DK
+* correct a missing assignment to turn bold off in split_line (GridText.c) - LE
+* Fixed: forms input in display_partial mode! Previously hightext was printed
+  at wrong positions while loading was in process (try -debug_partial to see
+  the bug).  Fix made in HText_pageDisplay:  we call HText_trimHightext() which
+  was the main part of HText_endAppend() before.  People, no more problems
+  reported from incremental rendering mode!  - LP
+* set PARTIAL mode ON by default, unless it disabled in lynx.cfg or by
+  configure --disable-partial option - LP
+* restore temporary -debug_partial switch, broken in dev.23. - LP
+* made trace in HText_appendCharacter() a little more readable
+  for lynx special characters - LP
+* chartrans:  human-readable character set names in Options Menu now changed
+  according to Netscape 4.x style - "language (MIMEname)", it looks more useful
+  and reduce chaos in people's heads.  Documentation corrected
+  (option_help.html/Lynx_User_guide.html).  Minor tip:  "Central and Eastern
+  European" was truncated to "Eastern European" because of space limitation in
+  popup menu.  (Changes in chrtrans/*.tbl, LYCharSets.c, also docs including
+  userdefs.h/lynx.cfg).  Since names were changed, users on display other than
+  iso-8859-1 should go to options menu and resave .lynxrc (and probably correct
+  lynx.cfg - character_set now uses MIME notation in sync with other charset
+  settings, although complete name string is still acceptable for this field).
+  - LP
+* an attempt made to tweak the code replacing lynx internal 'main' charset '0'
+  (iso-8859-1 in fact) with its MIME name. - LP
+* rename ifdef EXP_8BIT_TOUPPER in favor of lynx.cfg switch FORCE_8BIT_TOUPPER
+  - LP
+* remove a lot of "(char **)" casts from HTML.c which obscured some type
+  mismatches - TD
+* add/use functions LYIsHtmlSep, LYAddHtmlSep, LYTrimHtmlSep, LYIsPathSep,
+  LYAddPathSep, LYTrimPathSep to reduce clutter - TD
+* fix a bug, present at least since dev.17, where lynx can't download files if
+  it is started from one of the root directories of a disk drive, since it is
+  trying to write to "c:\\file.ext", rather than "c:\file.ext" - DK
+* correct a comment in userdefs.h; commercial Japanese sites are named with
+  co.jp, not com.jp (Larry Virden).
+* correct some debug messages in LYCookie.c - BJP
+* fix a missing </h1> in ShowInfo.c - SKY
+* modified '+'->' ' conversion to allow Unix commands to have '+' beginning
+  options - TD
+* sorted all option items (i.e., static variables, postoptions(), gen_options())
+  according to the sections they are in - SKY
+* added '+'->' ' conversion for forms-options values - SKY
+* centered 'save to disk' and put a dash between 'accept' and 'reset' for
+  clarity - SKY
+* add "-cookie_file=" commandline option to specify cookie file - BJP
+* add "cookie_file=" option to .lynxrc - BJP
+* add "cookie_file:" option to lynx.cfg - BJP
+* change default cookie file to "Home_Dir()/cookies" (or sys$login:cookies
+  for VMS, which may or may not work, DOS also needs to be checked) - BJP
+* add cookies switch to options menu - LP
+* Security considerations and form-based options:  items restricted in
+  gen_options() should be ALSO restricted under the same conditions in
+  postoptions() to prevent a limited access user to edit option's HTML code
+  manually and submit a restricted items.  This may be not a good idea to have
+  two functions in sync but those functions are synchronized anyway.  Please
+  read comments inside the functions if change something!  - LP
+* add new functions BeginInternalPage and EndInternalPage to reduce clutter in
+  code that sets up internal pages (email from LP).
+* change version in makefile.in to 2-8-1 (reported by DK).
+* the code in GridText that adds control characters to the current line
+  does not test for buffer overflow.  Normally Lynx gets away with this because
+  it will wrap the current line as soon as the line exceeds the display width,
+  but if you have a file with nothing but control characters with no
+  displayable text in-between (a few thousand hidden links will do), then Lynx
+  bombs.  Modified to silently ignore excess control characters as well as add
+  a few extra bytes when allocating the line buffer to allow for a bunch of
+  control characters followed by a kanji or utf-8 sequence.  (patch by Dick
+  Wesseling <ftu@fi.uu.nl>)
+* remove WWW/Library/Implementation/HTInit.c, which is not used, since
+  src/HTInit.c has this functionality - TD
+* change ID="<number>" in Lynx_users_guide.html to ID="<name>" to appease
+  weblint; tested with IE&NS - TD.
+* Al's convention of '#<number>' into '#<id name>' in Lynx_users_guide.html is
+  included - SKY
 1998-08-31 (2.8.1dev.24)
 * re-correct DH's patch for COLLAPSE_BR_TAGS (reported by Larry Virden) - TD
 1998-08-29 (2.8.1dev.23)
@@ -29,8 +122,6 @@ Changes since Lynx 2.8 release
   'config.cache'.  Its corresponding makefile macro is 'install-log' - SKY
 * New Form-based options page is re-organized; logical sections are introduced
   and sorted alphabetically (except for 'User Mode' - SKY
-* Al's convention of '#<number>' into '#<id name>' in Lynx_users_guide.html is
-  included - SKY
 * All links in the help files are marked, i.e., each
   'href="../_filename.html_#section"' is converted to
   'href="../@FILENAME@#section"'.  This is useful if a help filename or

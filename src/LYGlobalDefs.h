@@ -135,7 +135,7 @@ extern char *helpfilepath;
 extern char *lynxjumpfile;
 extern char *lynxlistfile;
 extern char *lynxlinksfile;
-extern char *display;
+extern char *x_display;
 extern char *language;
 extern char *pref_charset;	/* Lynx's preferred character set - MM */
 extern BOOLEAN LYNewsPosting;	/* News posting supported if TRUE */
@@ -289,7 +289,8 @@ extern BOOLEAN LYUseDefaultRawMode;
 extern char *UCAssume_MIMEcharset;
 extern char *UCAssume_localMIMEcharset;
 extern char *UCAssume_unrecMIMEcharset;
-extern BOOLEAN LYSaveBookmarksInUnicode; /* in titles,  chars >127 save as &#xUUUU */
+extern BOOLEAN UCSaveBookmarksInUnicode; /* in titles,  chars >127 save as &#xUUUU */
+extern BOOLEAN UCForce8bitTOUPPER; /* disable locale case-conversion for >127 */
 extern BOOLEAN LYisConfiguredForX;
 extern char *URLDomainPrefixes;
 extern char *URLDomainSuffixes;
@@ -302,9 +303,12 @@ extern BOOLEAN LYMBMAdvanced;		/* MBM statusline for ADVANCED?	 */
 extern int LYStatusLine;		/* Line for statusline() or -1   */
 extern BOOLEAN LYCollapseBRs;		/* Collapse serial BRs?		 */
 extern BOOLEAN LYSetCookies;		/* Process Set-Cookie headers?	 */
-extern BOOLEAN LYAcceptAllCookies;      /* accept ALL cookies?          */
+extern BOOLEAN LYAcceptAllCookies;      /* accept ALL cookies?           */
 extern char *LYCookieAcceptDomains;     /* domains to accept all cookies */
 extern char *LYCookieRejectDomains;     /* domains to reject all cookies */
+#ifdef EXP_PERSISTENT_COOKIES
+extern char *LYCookieFile;              /* file to store cookies in      */
+#endif /* EXP_PERSISTENT_COOKIES */
 extern char *XLoadImageCommand;		/* Default image viewer for X	 */
 #ifdef USE_EXTERNALS
 extern BOOLEAN no_externals; 		/* don't allow the use of externals */

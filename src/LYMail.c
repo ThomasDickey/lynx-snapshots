@@ -18,7 +18,6 @@
 #include <LYClean.h>
 #include <LYStrings.h>
 #include <GridText.h>
-#include <LYSystem.h>
 #include <LYMail.h>
 #include <LYCharSets.h>  /* to get current charset for mail header */
 
@@ -27,6 +26,27 @@
 BOOLEAN term_letter;	/* Global variable for async i/o. */
 PRIVATE void terminate_letter  PARAMS((int sig));
 PRIVATE void remove_tildes PARAMS((char *string));
+
+/* HTUnEscape with control-code nuking */
+PRIVATE void SafeHTUnEscape ARGS1(
+	char *,	string)
+{
+     int i;
+     int flg = FALSE;
+
+     HTUnEscape(string);
+     for (i=0; string[i] != '\0'; i++)
+     {
+	/* FIXME: this is explicitly 7-bit ASCII */
+	if (string[i] < ' ' || string[i] >= 127)
+	{
+	   string[i] = '?';
+	   flg = TRUE;
+	}
+     }
+     if (flg)
+	HTAlert(MAILTO_SQUASH_CTL);
+}
 
 /*
 **  mailform() sends form content to the mailto address(es). - FM
@@ -95,7 +115,7 @@ PUBLIC void mailform ARGS4(
 		    *cp1 = '\0';
 		}
 		if (*cp) {
-		    HTUnEscape(subject);
+		    SafeHTUnEscape(subject);
 		    LYstrncpy(subject, cp, 70);
 		}
 		if (cp1) {
@@ -202,7 +222,7 @@ PUBLIC void mailform ARGS4(
 	    }
 	    if (keywords != NULL) {
 		if (*keywords != '\0') {
-		    HTUnEscape(keywords);
+		    SafeHTUnEscape(keywords);
 		} else {
 		    FREE(keywords);
 		}
@@ -255,9 +275,9 @@ PUBLIC void mailform ARGS4(
     /*
      *	Unescape the address and ccaddr fields. - FM
      */
-    HTUnEscape(address);
+    SafeHTUnEscape(address);
     if (ccaddr != NULL) {
-	HTUnEscape(ccaddr);
+	SafeHTUnEscape(ccaddr);
     }
 
     /*
@@ -531,7 +551,7 @@ PUBLIC void mailform ARGS4(
 
     stop_curses();
     printf("Sending form content:\n\n$ %s\n\nPlease wait...", command);
-    system(command);
+    LYSystem(command);
     FREE(command);
     sleep(AlertSecs);
     start_curses();
@@ -545,7 +565,7 @@ PUBLIC void mailform ARGS4(
     StrAllocCat(command, my_tmpfile);
     stop_curses();
     printf("Sending form content:\n\n$ %s\n\nPlease wait...", command);
-    system(command);
+    LYSystem(command);
     FREE(command);
     sleep(MessageSecs);
     start_curses();
@@ -658,7 +678,7 @@ PUBLIC void mailmsg ARGS4(
     /*
      *	Unescape the address field. - FM
      */
-    HTUnEscape(address);
+    SafeHTUnEscape(address);
     if (address[(strlen(address) - 1)] == ',')
 	address[(strlen(address) - 1)] = '\0';
     if (*address == '\0') {
@@ -788,7 +808,7 @@ PUBLIC void mailmsg ARGS4(
 	address_ptr1 = address_ptr2;
     } while (address_ptr1 != NULL);
 
-    system(command);
+    LYSystem(command);
     FREE(command);
     LYRemoveTemp(my_tmpfile);
     if (isPMDF) {
@@ -800,7 +820,7 @@ PUBLIC void mailmsg ARGS4(
     StrAllocCat(command, address);
     StrAllocCat(command, "\" -F ");
     StrAllocCat(command, my_tmpfile);
-    system(command);
+    LYSystem(command);
     FREE(command);
     LYRemoveTemp(my_tmpfile);
 #endif
@@ -934,7 +954,7 @@ PUBLIC void reply_by_mail ARGS3(
 		if (*cp) {
 		    strncpy(subject, cp, 70);
 		    subject[70] = '\0';
-		    HTUnEscape(subject);
+		    SafeHTUnEscape(subject);
 		}
 		if (cp1) {
 		    *cp1 = '&';
@@ -1041,7 +1061,7 @@ PUBLIC void reply_by_mail ARGS3(
 	    }
 	    if (keywords != NULL) {
 		if (*keywords != '\0') {
-		    HTUnEscape(keywords);
+		    SafeHTUnEscape(keywords);
 		} else {
 		    FREE(keywords);
 		}
@@ -1164,9 +1184,9 @@ PUBLIC void reply_by_mail ARGS3(
     /*
      *	Unescape the address and ccaddr fields. - FM
      */
-    HTUnEscape(address);
+    SafeHTUnEscape(address);
     if (ccaddr != NULL) {
-	HTUnEscape(ccaddr);
+	SafeHTUnEscape(ccaddr);
     }
 
     /*
@@ -1563,7 +1583,7 @@ PUBLIC void reply_by_mail ARGS3(
 	sprintf(user_input, "%s%s %s", editor, editor_arg, my_tmpfile);
 	_statusline(SPAWNING_EDITOR_FOR_MAIL);
 	stop_curses();
-	if (system(user_input)) {
+	if (LYSystem(user_input)) {
 	    start_curses();
 	    HTAlert(ERROR_SPAWNING_EDITOR);
 	} else {
@@ -1802,7 +1822,7 @@ PUBLIC void reply_by_mail ARGS3(
 
     stop_curses();
     printf("Sending your comment:\n\n$ %s\n\nPlease wait...", command);
-    system(command);
+    LYSystem(command);
     FREE(command);
     sleep(AlertSecs);
     start_curses();
@@ -1844,7 +1864,7 @@ PUBLIC void reply_by_mail ARGS3(
     LYCloseTempFP(fp);	/* Close the tmpfile. */
     stop_curses();
     printf("Sending your comment:\n\n$ %s\n\nPlease wait...", command);
-    system(command);
+    LYSystem(command);
     FREE(command);
     sleep(MessageSecs);
     start_curses();

@@ -41,7 +41,6 @@
 #include <LYHistory.h>
 #include <LYUpload.h>
 #include <LYLocal.h>
-#include <LYSystem.h>
 
 #ifndef VMS
 #ifndef _WINDOWS
@@ -247,7 +246,7 @@ PRIVATE BOOLEAN remove_tagged NOARGS
     char tmpbuf[1024];
     char *testpath = NULL;
     struct stat dir_info;
-    int count, i;
+    int count;
     HTList *tag;
     char *args[5];
 
@@ -270,8 +269,7 @@ PRIVATE BOOLEAN remove_tagged NOARGS
 	    }
 	    StrAllocCopy(testpath, tp);
 	    HTUnEscape(testpath);
-	    if ((i = strlen(testpath)) && testpath[i-1] == '/')
-		testpath[(i - 1)] = '\0';
+	    LYTrimPathSep(testpath);
 
 	    /*
 	     *	Check the current status of the path to be deleted.
@@ -406,9 +404,8 @@ PRIVATE BOOLEAN modify_tagged ARGS1(
 	/*
 	 *  If path is relative, prefix it with current location.
 	 */
-	if (tmpbuf[0] != '/') {
-	    if (savepath[(strlen(savepath) - 1)] != '/')
-		StrAllocCat(savepath,"/");
+	if (!LYIsPathSep(tmpbuf[0])) {
+	    LYAddPathSep(&savepath);
 	    StrAllocCat(savepath,tmpbuf);
 	} else {
 	    StrAllocCopy(savepath,tmpbuf);
@@ -616,7 +613,7 @@ PRIVATE BOOLEAN modify_location ARGS1(
 	    strcat(newpath, (tmpbuf + 1));
 	    strcpy(tmpbuf, newpath);
 	}
-	if (tmpbuf[0] != '/') {
+	if (!LYIsPathSep(tmpbuf[0])) {
 	    if ((cp = strrchr(newpath,'/')) != NULL) {
 		*++cp = '\0';
 		strcat(newpath,tmpbuf);
@@ -774,9 +771,7 @@ PRIVATE BOOLEAN create_file ARGS1(
 	HTAlert("Illegal redirection \"//\" found! Request ignored.");
     } else if (strlen(tmpbuf) && strchr(bad_chars, tmpbuf[0]) == NULL) {
 	strcpy(testpath,current_location);
-	if (testpath[(strlen(testpath) - 1)] != '/') {
-	    strcat(testpath,"/");
-	}
+	LYAddPathSep0(testpath);
 
 	/*
 	 *  Append the target filename to the current location.
@@ -836,9 +831,8 @@ PRIVATE BOOLEAN create_directory ARGS1(
 	HTAlert("Illegal redirection \"//\" found! Request ignored.");
     } else if (strlen(tmpbuf) && strchr(bad_chars, tmpbuf[0]) == NULL) {
 	strcpy(testpath,current_location);
-	if (testpath[(strlen(testpath) - 1)] != '/') {
-	    strcat(testpath,"/");
-	}
+	LYAddPathSep0(testpath);
+
 	strcat(testpath, tmpbuf);
 
 	/*
@@ -1450,8 +1444,7 @@ PUBLIC int local_dired ARGS1(
 	if (LYUpload(line_url))
 	    LYforce_no_cache = TRUE;
     } else {
-	if (line[(strlen(line) - 1)] == '/')
-	    line[strlen(line)-1] = '\0';
+	LYTrimPathSep(line);
 	if ((cp = strrchr(line, '/')) == NULL) {
 	    FREE(line);
 	    return 0;
@@ -1586,8 +1579,7 @@ PUBLIC int local_dired ARGS1(
 	    _statusline(tmpbuf);
 	    stop_curses();
 	    printf("%s\n", tmpbuf);
-	    fflush(stdout);
-	    system(buffer);
+	    LYSystem(buffer);
 #ifdef VMS
 	    extern BOOLEAN HadVMSInterrupt
 	    HadVMSInterrupt = FALSE;
@@ -1647,13 +1639,12 @@ PUBLIC int dired_options ARGS2(
     } else if (!strncmp(cp, "file:", 5)) {
 	cp += 5;
     }
-    strcpy(dir, cp);
     StrAllocCopy(dir_url, cp);
-    if (dir_url[(strlen(dir_url) - 1)] == '/')
-	dir_url[(strlen(dir_url) - 1)] = '\0';
+    LYTrimHtmlSep(dir_url);
+
+    strcpy(dir, cp);
     HTUnEscape(dir);
-    if (dir[(strlen(dir) - 1)] == '/')
-	dir[(strlen(dir) - 1)] = '\0';
+    LYTrimPathSep(dir);
 
     if (doc->link > -1 && doc->link < (nlinks+1)) {
 	cp = links[doc->link].lname;
@@ -1662,13 +1653,12 @@ PUBLIC int dired_options ARGS2(
 	} else if (!strncmp(cp, "file:", 5)) {
 	    cp += 5;
 	}
-	strcpy(path, cp);
 	StrAllocCopy(path_url, cp);
-	if (*path_url && path_url[1] && path_url[(strlen(path_url) - 1)] == '/')
-	    path_url[(strlen(path_url) - 1)] = '\0';
+	LYTrimHtmlSep(path_url);
+
+	strcpy(path, cp);
 	HTUnEscape(path);
-	if (*path && path[1] && path[(strlen(path) - 1)] == '/')
-	    path[(strlen(path) - 1)] = '\0';
+	LYTrimPathSep(path);
 
 	if (lstat(path, &dir_info) == -1 && stat(path, &dir_info) == -1) {
 	    sprintf(tmpbuf, "Unable to get status of '%s'.", path);
@@ -1686,11 +1676,8 @@ PUBLIC int dired_options ARGS2(
 
     nothing_tagged = (HTList_isEmpty(tagged));
 
-    fprintf(fp0, "<head>\n<title>%s</title></head>\n<body>\n",
-		 DIRED_MENU_TITLE);
-    fprintf(fp0, "<h1>%s (%s), help on <a href=\"%s%s\">%s</a></h1>\n",
-		 LYNX_NAME, LYNX_VERSION,
-		 helpfilepath, DIRED_MENU_HELP, DIRED_MENU_TITLE);
+    BeginInternalPage(fp0, DIRED_MENU_TITLE, DIRED_MENU_HELP);
+
     fprintf(fp0, "<em>Current directory:</em> %s<br>\n", dir);
 
     if (nothing_tagged) {
@@ -1714,8 +1701,7 @@ PUBLIC int dired_options ARGS2(
 		     n, ((n == 1) ? ":" : "s:"));
 	StrAllocCopy(cd, doc->address);
 	HTUnEscapeSome(cd, "/");
-	if (*cd && cd[(strlen(cd) - 1)] != '/')
-	    StrAllocCat(cd, "/");
+	LYAddHtmlSep(&cd);
 	m = (n < NUM_TAGS_TO_WRITE) ? n : NUM_TAGS_TO_WRITE;
 	for (i = 1; i <= m; i++) {
 	    cp1 = HTRelative(HTList_objectAt(tagged, i-1),
@@ -1782,7 +1768,7 @@ PUBLIC int dired_options ARGS2(
 	}
     }
 
-    fprintf(fp0, "</body>\n");
+    EndInternalPage(fp0);
     LYCloseTempFP(fp0);
 
     FREE(dir_url);
