@@ -688,6 +688,10 @@ PUBLIC void start_curses NOARGS
 #endif /* SLANG_VERSION >= 9935 */
 #endif /* UNIX */
 
+#if !defined(USE_KEYMAPS) && defined(ENHANCED_LINEEDIT) && defined(ESCDELAY)
+	/* way to get ESC that's not part of a recognized sequence through */
+	ESCDELAY = 2000;
+#endif
 	/*
 	 *  Check whether a saved show_color:off override is in effect. - kw
 	 */
@@ -792,8 +796,10 @@ PUBLIC void start_curses NOARGS
 	recent_sizechange = FALSE; /* prevent mainloop drawing 1st doc twice */
 #endif /* SIGWINCH */
 #if defined(USE_KEYMAPS) && defined(NCURSES_VERSION)
-	if (-1 == lynx_initialize_keymaps ())
+	if (-1 == lynx_initialize_keymaps ()) {
+	    endwin();
 	    exit (-1);
+	}
 #endif
 
 	/*
@@ -912,12 +918,8 @@ PUBLIC void lynx_enable_mouse ARGS1(int,state)
 	FlushConsoleInputBuffer(hConIn);
     }
 #else
-    /* Inform ncurses that we're interested in knowing when mouse
-     * button 1 is clicked.  We cannot just specify
-     * BUTTON1_CLICKED | BUTTON3_CLICKED, since ncurses will try hard
-     * to translate other events to single-clicks.
-     * Compensate for small value of maxclick in ncurses.  */
     if (state) {
+	/* Compensate for small value of maxclick in ncurses.  */
 	static int was = 0;
 
 	if (!was) {
@@ -927,7 +929,20 @@ PUBLIC void lynx_enable_mouse ARGS1(int,state)
 	    if (old < 200)		/* Default 166 */
 		mouseinterval(300);
 	}
-	mousemask(ALL_MOUSE_EVENTS, NULL);
+	/* Inform ncurses which mouse events we're interested in.
+	 * We shouldn't need to include BUTTONn_PRESSED and BUTTONn_RELEASED
+	 * events, since ncurses should translate them to click events. - kw
+	 */
+	mousemask(BUTTON_CTRL | BUTTON_ALT
+		  /* | BUTTON1_PRESSED | BUTTON1_RELEASED */
+		  | BUTTON1_CLICKED
+		  | BUTTON1_DOUBLE_CLICKED | BUTTON1_TRIPLE_CLICKED
+		  /* | BUTTON2_PRESSED | BUTTON2_RELEASED */
+		  | BUTTON2_CLICKED
+		  /* | BUTTON3_PRESSED | BUTTON3_RELEASED */
+		  | BUTTON3_CLICKED
+		  | BUTTON3_DOUBLE_CLICKED | BUTTON3_TRIPLE_CLICKED,
+		  NULL);
     } else
 	mousemask(0, NULL);
 #endif /* __BORLANDC__ and __PDCURSES__ */

@@ -5,6 +5,7 @@
 #include <HTAccess.h>
 #include <HTFormat.h>
 #include <HTAlert.h>
+#include <LYStrings.h>		/* for USE_KEYMAP stuff - kw */
 
 #include <LYLeaks.h>
 
@@ -17,7 +18,7 @@
 #ifdef EXP_KEYBOARD_LAYOUT
 PUBLIC int current_layout = 0;  /* Index into LYKbLayouts[]   */
 
-PUBLIC LYKeymap_t * LYKbLayouts[]={
+PUBLIC unsigned short * LYKbLayouts[]={
 	kb_layout_rot13,
 	kb_layout_jcuken,
 	kb_layout_yawerty
@@ -29,7 +30,7 @@ PUBLIC char * LYKbLayoutNames[]={
 	"YAWERTY Cyrillic, for DEC LK201 kbd",
         (char *) 0
 };
-#endif
+#endif /* EXP_KEYBOARD_LAYOUT */
 
 PRIVATE CONST DocAddress keymap_anchor = {"LYNXKEYMAP", NULL, NULL,
 	NULL, FALSE, FALSE};
@@ -38,6 +39,19 @@ struct _HTStream
 {
   HTStreamClass * isa;
 };
+
+/* * *  Tables mapping LynxKeyCodes to LynxActionCodes  * * */
+
+/*
+ *  Lynxkeycodes include all single-byte keys as well as codes
+ *  for function keys and some special purposes.  See LYStrings.h.
+ *  Extended lynxkeycode values can also contain flags for modifiers
+ *  and other purposes, but here only the base values are mapped to
+ *  lynxactioncodes.  They are called `keystrokes' in lynx.cfg.
+ *
+ *  Lynxactioncodes (confusingly, constants are named LYK_foo and
+ *  typed as LYKeymapCode) specify key `functions', see LYKeymap.h.
+ */
 
 /* the character gets 1 added to it before lookup,
  * so that EOF maps to 0
@@ -662,6 +676,8 @@ PRIVATE struct rmap revmap[] = {
 { "END",		"go to the end of the current document" },
 { "PREV_LINK",		"make the previous link current" },
 { "NEXT_LINK",		"make the next link current" },
+{ "LPOS_PREV_LINK",	"make previous link current, same column for input" },
+{ "LPOS_NEXT_LINK",	"make next link current, same column for input" },
 { "FASTBACKW_LINK",	"previous link or text area, only stops on links" },
 { "FASTFORW_LINK",	"next link or text area, only stops on links" },
 { "UP_LINK",		"move up the page to a previous link" },
@@ -671,9 +687,11 @@ PRIVATE struct rmap revmap[] = {
 { "HISTORY",		"display stack of currently-suspended documents" },
 { "PREV_DOC",		"go back to the previous document" },
 { "ACTIVATE",		"go to the document given by the current link" },
+{ "MOUSE_SUBMIT",	"follow current link, submit" }, /* not mapped */
 { "GOTO",		"go to a document given as a URL" },
 { "ECGOTO",		"edit the current document's URL and go to it" },
 { "HELP",		"display help on using the browser" },
+{ "DWIMHELP",		"display help page that may depend on context" },
 { "INDEX",		"display an index of potentially useful documents" },
 { "NOCACHE",		"force submission of form or link with no-cache" },
 { "INTERRUPT",		"interrupt network connection or transmission" },
@@ -713,11 +731,12 @@ PRIVATE struct rmap revmap[] = {
 { "SWITCH_DTD",		"switch between two ways of parsing HTML" },
 { "ELGOTO",		"edit the current link's URL or ACTION and go to it" },
 { "CHANGE_LINK",	"force reset of the current link on the page" },
+{ "DWIMEDIT",		"use external editor for context-dependent purpose" },
 { "EDITTEXTAREA",	"use an external editor to edit a form's textarea" },
 { "GROWTEXTAREA",	"add 5 new blank lines to the bottom of a textarea" },
 { "INSERTFILE",		"insert file into a textarea (just above cursorline)" },
 #ifdef EXP_ADDRLIST_PAGE
-{ "ADDRLIST",		"like LIST command, but always shows the links URL's" },
+{ "ADDRLIST",		"like LIST command, but always shows the links' URLs" },
 #endif
 #ifdef USE_EXTERNALS
 { "EXTERN",		"run external program with url" },
@@ -757,7 +776,7 @@ PRIVATE CONST char *funckey[] = {
   "Back Tab",
   0, 0, 0, 0, 0, 0, 0, 0,
   0, 0, 0, 0, 0,
-  "mouse pseudo key",		/* normally not mapped to keymap[] action? */
+  "mouse pseudo key",		/* normally not mapped to keymap[] action */
 };
 
 PRIVATE char *pretty ARGS1 (int, c)
@@ -826,6 +845,65 @@ PRIVATE void print_binding ARGS2(HTStream *, target, int, i)
 	(*target->isa->put_block)(target, buf, strlen(buf));
 	FREE(buf);
     }
+}
+
+/*
+ *  Return lynxactioncode whose name is the string func.
+ *  func must be present in the revmap table.
+ *  returns -1 if not found. - kw
+ */
+PUBLIC int lacname_to_lac ARGS1(
+	CONST char *,	func)
+{
+       int i;
+       struct rmap *mp;
+
+       if (func == NULL || *func == '\0')
+	       return (-1);
+       for (i = 0, mp = revmap; (*mp).name != NULL; mp++, i++) {
+               if (strcmp((*mp).name, func) == 0) {
+                       return i;
+               }
+       }
+       return (-1);
+}
+
+/*
+ *  Return lynxkeycode represented by string src.
+ *  returns -1 if not valid.
+ *  This is simpler than what map_string_to_keysym() does for
+ *  USE_KEYMAP, but compatible with revmap() used for processing
+ *  KEYMAP options in the configuration file. - kw
+ */
+PUBLIC int lkcstring_to_lkc ARGS1(
+	CONST char *,	src)
+{
+       int c = -1;
+
+       if (strlen(src) == 1)
+               c = *src;
+       else if (strlen(src) == 2 && *src == '^')
+               c = src[1] & 037;
+       else if (strlen(src) >= 2 && isdigit(*src)) {
+               if (sscanf(src, "%i", &c) != 1)
+                       return (-1);
+#ifdef USE_KEYMAPS
+       } else {
+	   map_string_to_keysym((char *)src, &c);
+#ifndef USE_SLANG
+	   if (c >= 0) {
+	       if ((c&LKC_MASK) > 255 && !(c & LKC_ISLKC))
+		   return (-1);	/* Don't accept untranslatable curses KEY_* */
+	       else
+		   c &= ~LKC_ISLKC;
+	   }
+#endif
+#endif
+       } 
+       if (c < -1)
+	   return (-1);
+       else
+	   return c;
 }
 
 PRIVATE int LYLoadKeymap ARGS4 (
@@ -908,21 +986,30 @@ PUBLIC int remap ARGS2(
 {
        int i;
        struct rmap *mp;
-       int c = 0;
+       int c;
 
        if (func == NULL)
 	       return 0;
-       if (strlen(key) == 1)
-               c = *key;
-       else if (strlen(key) == 2 && *key == '^')
-               c = key[1] & 037;
-       else if (strlen(key) >= 2 && isdigit(*key))
-               if (sscanf(key, "%i", &c) != 1)
-                       return 0;
+       c = lkcstring_to_lkc(key);
+       if (c <= -1)
+	   return 0;
+       else if (c >= 0) {
+	   /* Remapping of key actions is supported only for basic
+	    * lynxkeycodes, without modifiers etc.!  If we get somehow
+	    * called for an invalid lynxkeycode, fail or silently
+	    * modifiers. - kw
+	    */
+	   if (c & LKC_ISLAC)
+	       return 0;
+	   if ((c & LKC_MASK) != c)
+	       c &= LKC_MASK;
+       }
+       if (c + 1 >= KEYMAP_SIZE)
+	   return 0;
        for (i = 0, mp = revmap; (*mp).name != NULL; mp++, i++) {
                if (strcmp((*mp).name, func) == 0) {
                        keymap[c+1] = i;
-                       return c;
+                       return (c ? c : LAC_TO_LKC0(i));
                }
        }
        return 0;

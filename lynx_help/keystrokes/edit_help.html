@@ -9,19 +9,21 @@
 
 Lynx invokes a built-in <em>Line Editor</em> for entering strings in
 response to prompts, in forms, and for email messages if an external editor
-has not been defined.  Administrators can offer alternate key bindings
-by adding them in LYEditmap.c before compiling Lynx.  If available, they may
+has not been defined.  Administrators can offer alternative key bindings
+by configuring with --enable-alt-bindings or by adding them in LYEditmap.c
+before compiling Lynx.  If available, they may
 be selected via the 'o'ptions menu, or by editing lineedit_mode in the
 '.lynxrc' file.
 
-<p>One such alternate key binding, which may be available on your system,
-is the <A HREF="alt_edit_help.html">Alternate Bindings</A> keymap.
+<p>Two such alternative key bindings, which may be available on your system,
+are the <A HREF="alt_edit_help.html">Alternative Binding</A> keymap and the
+<A HREF="bashlike_edit_help.html">Bash-like Binding</A> keymap.
 
 <p>Note: setting emacs/vi keys ON has no effect on line-editor bindings.
 
 <p>This is the <em>Default Binding</em> keymap:
 
-<p><pre>
+<pre>
      ENTER  Input complete        -  RETURN
      TAB    Input complete        -  TAB, Do
      ABORT  Input cancelled       -  Ctrl-G, Ctrl-O, (Ctrl-C on some systems)
@@ -44,13 +46,14 @@ is the <A HREF="alt_edit_help.html">Alternate Bindings</A> keymap.
      LOWER  Lower case the line   -  Ctrl-K
 
      LKCMD  Invoke cmd prompt     -  Ctrl-V (in form text fields, only) [2]
-     SWMAP  Switch input keymap   -  Ctrl-^
+     SWMAP  Switch input keymap   -  Ctrl-^ (if compiled in)
 
 [1] "next" means the character "under" a box or underline style cursor; it
      means "to the immediate right of" an I-beam (between characters) type
      cursor.
 
-[2]  Follow Ctrl-V with the key "e" bound to the EDIT function,
+[2]  Follow Ctrl-V with the key "e" bound to the DWIMEDIT function,
+     or with some other key bound to EDITTEXTAREA or DWIMEDIT,
      to edit the form's textarea field using an external editor.
 </pre>
 </body>

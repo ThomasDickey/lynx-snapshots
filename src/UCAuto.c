@@ -117,8 +117,8 @@ PUBLIC void UCChangeTerminalCodepage ARGS2(
     static TGen_state_t lastUtf = Dunno;
     static TGen_state_t lastHasUmap = Dunno;
 
-    static char *old_font;
-    static char *old_umap;
+    static char *old_font = NULL;
+    static char *old_umap = NULL;
 
     CONST char * name;
     TTransT_t TransT = GN_dunno;
@@ -145,26 +145,57 @@ PUBLIC void UCChangeTerminalCodepage ARGS2(
 		    HTSprintf0(&tmpbuf1, "%s %s %s",
 			    SETFONT, old_font, NOOUTPUT);
 		}
+		CTRACE(tfp, "Executing setfont to restore: '%s'\n", tmpbuf1);
 		LYSystem(tmpbuf1);
 		FREE(tmpbuf1);
 	    }
-
-	    remove(old_font);
-	    FREE(old_font);
-	    old_font = 0;
-
-	    remove(old_umap);
-	    FREE(old_umap);
-	    old_umap = 0;
+	}
+	if (newcs < 0 && p == 0) {
+	    if (old_font) {
+		LYRemoveTemp(old_font);
+		FREE(old_font);
+	    }
+	    if (old_umap) {
+		LYRemoveTemp(old_umap);
+		FREE(old_umap);
+	    }
 	}
 	return;
     } else if (lastcs < 0 && old_umap == 0 && old_font == 0) {
+#if 0
 	old_umap = tempnam((char *)0, "umap");
 	old_font = tempnam((char *)0, "font");
-	HTSprintf0(&tmpbuf1, "%s -o %s -ou %s %s",
-		SETFONT, old_font, old_umap, NOOUTPUT);
-	LYSystem(tmpbuf1);
-	FREE(tmpbuf1);
+#endif
+	FILE * fp1;
+	FILE * fp2 = NULL;
+	if ((old_font = calloc(1, LY_MAXPATH)))
+	    old_umap = calloc(1, LY_MAXPATH);
+	if ((fp1 = LYOpenTemp(old_font, ".fnt", "wb")))
+	    fp2 = LYOpenTemp(old_umap, ".uni", "wb");
+	if (fp1 && fp2) {
+	    size_t nlen;
+	    char *rp;
+	    HTSprintf0(&tmpbuf1, "%s -o %s -ou %s %s",
+		       SETFONT, old_font, old_umap, NOOUTPUT);
+	    CTRACE(tfp, "Executing setfont to save: '%s'\n", tmpbuf1);
+	    LYSystem(tmpbuf1);
+	    FREE(tmpbuf1);
+	    LYCloseTempFP(fp1);
+	    LYCloseTempFP(fp2);
+	    if ((nlen = strlen(old_font)) + 1 < LY_MAXPATH &&
+		 (rp = realloc(old_font, nlen + 1)))
+		old_font = rp;
+	    if ((nlen = strlen(old_umap)) + 1 < LY_MAXPATH &&
+		 (rp = realloc(old_umap, nlen + 1)))
+		old_umap = rp;
+	} else {
+	    if (fp1)
+		LYRemoveTemp(old_font);
+	    if (fp2)
+		LYRemoveTemp(old_umap);
+	    FREE(old_font);
+	    FREE(old_umap);
+	}
     }
 
     name = p->MIMEname;

@@ -12,7 +12,8 @@ extern  int popup_choice PARAMS((
 	int		column,
 	char ** 	choices,
 	int		i_length,
-	int		disabled));
+	int		disabled,
+	BOOLEAN		for_mouse));
 
 #ifndef NO_OPTION_FORMS
 extern int postoptions PARAMS((document *newdoc));

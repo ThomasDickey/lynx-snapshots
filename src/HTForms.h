@@ -8,7 +8,9 @@
 /* in LYForms.c */
 extern int change_form_link PARAMS((struct link *form_link,
                                     document *newdoc, BOOLEAN *refresh_screen,
-				    char *link_name, char *link_value));
+				    char *link_name, char *link_value,
+				    BOOLEAN use_last_tfpos,
+				    BOOLEAN immediate_submit));
 
 /* InputFieldData is used to pass the info between
  * HTML.c and Gridtext.c in HText_beginInput()
@@ -133,5 +135,8 @@ typedef struct _PerFormInfo
 #define FIRST_ORDER  1
 #define MIDDLE_ORDER 2
 #define LAST_ORDER   3
+
+/* in LYForms.c */
+extern void show_formlink_statusline PARAMS((CONST FormInfo * form));
 
 #endif /* HTFORMS_H */

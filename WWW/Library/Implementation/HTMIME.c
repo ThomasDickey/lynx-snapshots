@@ -1558,6 +1558,13 @@ PRIVATE void HTMIME_put_character ARGS2(
 		if (!strcasecomp(me->value, "YES") ||
 		    !strcasecomp(me->value, "TRUE")) {
 		    me->anchor->safe = TRUE;
+		} else if (!strcasecomp(me->value, "NO") ||
+		    !strcasecomp(me->value, "FALSE")) {
+		    /*
+		    **  If server explicitly tells us that it has changed
+		    **  its mind, reset flag in anchor. - kw
+		    */
+		    me->anchor->safe = FALSE;
 		}
 		break;
 	    case miSERVER:

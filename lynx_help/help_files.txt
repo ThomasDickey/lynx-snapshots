@@ -12,6 +12,7 @@
 #
 ABOUT_LYNX=about_lynx.html
 ALT_EDIT_HELP=alt_edit_help.html
+BASHLIKE_EDIT_HELP=bashlike_edit_help.html
 BOOKMARK_HELP=bookmark_help.html
 COOKIE_HELP=cookie_help.html
 DIRED_HELP=dired_help.html

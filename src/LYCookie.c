@@ -2228,6 +2228,7 @@ PRIVATE int LYHandleCookies ARGS4 (
     if (HTList_isEmpty(domain_list)) {
 	HTProgress(COOKIE_JAR_IS_EMPTY);
 	sleep(MessageSecs);
+	HTNoDataOK = 1;
 	return(HT_NO_DATA);
     }
 
@@ -2288,6 +2289,7 @@ PRIVATE int LYHandleCookies ARGS4 (
 			    if (HTConfirm(DELETE_COOKIE_CONFIRMATION) == FALSE)
 			    {
 				FREE(lynxID);
+				HTNoDataOK = 1;
 				return(HT_NO_DATA);
 			    }
 			    HTList_removeObject(de->cookie_list, co);
@@ -2313,6 +2315,7 @@ PRIVATE int LYHandleCookies ARGS4 (
 				HTProgress(COOKIE_EATEN);
 			    }
 			    sleep(MessageSecs);
+			    HTNoDataOK = 1;
 			    break;
 			}
 		    }
@@ -2328,8 +2331,9 @@ PRIVATE int LYHandleCookies ARGS4 (
 		    } else {
 			_statusline(DELETE_COOKIES_SET_ALLOW_OR_CANCEL);
 		    }
+		    HTNoDataOK = 1;
 		    while (1) {
-			ch = LYgetch();
+			ch = LYgetch_for(FOR_SINGLEKEY);
 #ifdef VMS
 			if (HadVMSInterrupt) {
 			    HadVMSInterrupt = FALSE;

@@ -645,7 +645,7 @@ PUBLIC struct hostent * LYGetHostByName ARGS1(
     struct _statuses {
 	size_t rehostentlen;
 	int h_length;
-	int child_errno;  /* maybe not very useful */
+	int child_errno;  /* sometimes useful to pass this on */
 	int child_h_errno;
 	BOOL h_errno_valid;
     } statuses;
@@ -687,7 +687,7 @@ PUBLIC struct hostent * LYGetHostByName ARGS1(
     CTRACE(tfp, "LYGetHostByName: Calling gethostbyname(%s)\n", host);
 #endif /* MVS */
 
-    CTRACE_FLUSH(tfp);  /* so child messages will not mess parent log */
+    CTRACE_FLUSH(tfp);  /* so child messages will not mess up parent log */
 
     lynx_nsl_status = HT_INTERNAL;	/* should be set to something else below */
 
@@ -699,6 +699,10 @@ PUBLIC struct hostent * LYGetHostByName ARGS1(
 	*/
     {
 	int got_rehostent = 0;
+#if HAVE_SIGACTION
+	sigset_t old_sigset;
+	sigset_t new_sigset;
+#endif
 	/*
 	**	Pipe, child pid, status buffers, start time, select()
 	**	control variables.
@@ -726,6 +730,32 @@ PUBLIC struct hostent * LYGetHostByName ARGS1(
 	waitret = 0;
 
 	pipe(pfd);
+
+#if HAVE_SIGACTION
+	/*
+	 *  Attempt to prevent a rare situation where the child
+	 *  could execute the Lynx signal handlers because it gets
+	 *  killed before it even has a chance to reset its handlers,
+	 *  resulting in bogus 'Exiting via interrupt' message and
+	 *  screen corruption or worse.
+	 *  Should that continue to be reported, for systems without
+	 *  sigprocmask(), we need to find a different solutions for
+	 *  those. - kw 19990430
+	 */
+	sigemptyset(&new_sigset);
+	sigaddset(&new_sigset, SIGTERM);
+	sigaddset(&new_sigset, SIGINT);
+#ifndef NOSIGHUP
+	sigaddset(&new_sigset, SIGHUP);
+#endif /* NOSIGHUP */
+#ifdef SIGTSTP
+	sigaddset(&new_sigset, SIGTSTP);
+#endif /* SIGTSTP */
+#ifdef SIGWINCH
+	sigaddset(&new_sigset, SIGWINCH);
+#endif /* SIGWINCH */
+	sigprocmask(SIG_BLOCK, &new_sigset, &old_sigset);
+#endif /* HAVE_SIGACTION */
 
 	if ((fpid = fork()) == 0 ) {
 	    struct hostent  *phost;	/* Pointer to host - See netdb.h */
@@ -764,13 +794,26 @@ PUBLIC struct hostent * LYGetHostByName ARGS1(
 	    signal(SIGSEGV, SIG_DFL);
 	    signal(SIGILL, SIG_DFL);
 
+#if HAVE_SIGACTION
+	    /* Restore signal mask to whatever it was before the fork. -kw */
+	    sigprocmask(SIG_SETMASK, &old_sigset, NULL);
+#endif /* HAVE_SIGACTION */
+
 	    /*
 	    **  Child won't use read side.  -BL
 	    */
 	    close(pfd[0]);
+#ifdef HAVE_H_ERRNO
+	    /* to detect cases when it doesn't get set although it should */
+	    h_errno = -2;
+#endif
+	    errno = 0;
 	    phost = gethostbyname(host);
+	    statuses.child_errno = errno;
 	    statuses.child_h_errno = h_errno;
+#ifdef HAVE_H_ERRNO
 	    statuses.h_errno_valid = YES;
+#endif
 #ifdef MVS
 	    CTRACE(tfp, "LYGetHostByName: gethostbyname() returned %d\n", phost);
 #endif /* MVS */
@@ -790,12 +833,17 @@ PUBLIC struct hostent * LYGetHostByName ARGS1(
 		statuses.h_length = 0;
 	    } else {
 		statuses.h_length = ((struct hostent *)rehostent)->h_length;
+#ifdef HAVE_H_ERRNO
+		if (h_errno == -2) /* success, but h_errno unchanged? */
+		    statuses.h_errno_valid = NO;
+#endif
 	    }
 	    /*
 	    **  Send variables indicating status of lookup to parent.
 	    **  That includes rehostentlen, which the parent will use
 	    **  as the size for the second read (if > 0).
 	    */
+	    if (!statuses.child_errno)
 	    statuses.child_errno = errno;
 	    statuses.rehostentlen = rehostentlen;
 	    write(pfd[1], &statuses, sizeof(statuses));
@@ -814,6 +862,14 @@ PUBLIC struct hostent * LYGetHostByName ARGS1(
 		_exit(1);
 	    }
 	}
+
+#if HAVE_SIGACTION
+	/*
+	**  (parent) Restore signal mask to whatever it was
+	**  before the fork. - kw
+	*/
+	sigprocmask(SIG_SETMASK, &old_sigset, NULL);
+#endif /* HAVE_SIGACTION */
 
 	/*
 	**	(parent) Wait until lookup finishes, or interrupt,
@@ -871,8 +927,44 @@ PUBLIC struct hostent * LYGetHostByName ARGS1(
 		if (readret == sizeof(statuses)) {
 		    h_errno = statuses.child_h_errno;
 		    errno = statuses.child_errno;
-		    if (statuses.h_errno_valid)
+#ifdef HAVE_H_ERRNO
+		    if (statuses.h_errno_valid) {
 			lynx_nsl_status = HT_H_ERRNO_VALID;
+			/*
+			 *  If something went wrong in the child process
+			 *  other than normal lookup errors, and it appears
+			 *  that we have enough info to know what went wrong,
+			 *  generate diagnostic output.
+			 *  ENOMEM observed on linux in processes constrained
+			 *  with ulimit.  It would be too unkind to abort
+			 *  the session, access to local files or through a
+			 *  proxy may still work. - kw
+			 */
+			if (
+#ifdef NETDB_INTERNAL		/* linux glibc: defined in netdb.h */
+			    (errno && h_errno == NETDB_INTERNAL) ||
+#endif
+			    (errno == ENOMEM &&
+			     statuses.rehostentlen == 0 &&
+			     /* should probably be NETDB_INTERNAL if child
+				memory exhausted, but we may find that
+				h_errno remains unchanged. - kw */
+			     h_errno == -2)) {
+#ifndef MULTINET
+			    HTInetStatus("CHILD gethostbyname");
+#endif
+			    HTAlert(LYStrerror(statuses.child_errno));
+			    if (errno == ENOMEM) {
+				/*
+				 *  Not much point in continuing, right?
+				 *  Fake a 'z', should shorten pointless
+				 *  guessing cycle. - kw
+				 */
+				LYFakeZap(YES);
+			    }
+			}
+		    }
+#endif /* HAVE_H_ERRNO */
 		    if (statuses.rehostentlen > sizeof(struct hostent)) {
 			/*
 			**  Then get the full reorganized hostent.  -BL, kw
@@ -1311,6 +1403,11 @@ PUBLIC CONST char * HTHostName NOARGS
     return hostname;
 }
 
+#ifndef MULTINET		/* SOCKET_ERRNO != errno ? */
+#if !defined(UCX) || !defined(VAXC) /* errno not modifiable ? */
+#define SOCKET_DEBUG_TRACE    /* show errno status after some system calls */
+#endif  /* UCX && VAXC */
+#endif /* MULTINET */
 /*
 **  Interruptable connect as implemented for Mosaic by Marc Andreesen
 **  and hacked in for Lynx years ago by Lou Montulli, and further
@@ -1449,6 +1546,13 @@ PUBLIC int HTDoConnect ARGS4(
 	int ret;
 	int tries=0;
 
+#ifdef SOCKET_DEBUG_TRACE
+	{
+	    int saved_errno = SOCKET_ERRNO;
+	    HTInetStatus("this socket's first connect");
+	    errno = saved_errno;	/* I don't trust HTInetStatus */
+	}
+#endif /* SOCKET_DEBUG_TRACE */
 	ret = 0;
 	while (ret <= 0) {
 	    fd_set writefds;
@@ -1477,6 +1581,13 @@ PUBLIC int HTDoConnect ARGS4(
 #endif /* SOCKS */
 	    ret = select(FD_SETSIZE, NULL, (void *)&writefds, NULL, &timeout);
 
+#ifdef SOCKET_DEBUG_TRACE
+	    if (tries == 1) {
+		int saved_errno = SOCKET_ERRNO;
+		HTInetStatus("this socket's first select");
+		errno = saved_errno;	/* I don't trust HTInetStatus */
+	    }
+#endif /* SOCKET_DEBUG_TRACE */
 	   /*
 	   **  If we suspend, then it is possible that select will be
 	   **  interrupted.  Allow for this possibility. - JED
@@ -1484,6 +1595,13 @@ PUBLIC int HTDoConnect ARGS4(
 	   if ((ret == -1) && (errno == EINTR))
 	     continue;
 
+#ifdef SOCKET_DEBUG_TRACE
+	   if (ret < 0) {
+	       int saved_errno = SOCKET_ERRNO;
+	       HTInetStatus("failed select");
+	       errno = saved_errno;	/* I don't trust HTInetStatus */
+	   }
+#endif /* SOCKET_DEBUG_TRACE */
 	    /*
 	    **	Again according to the Sun and Motorola man pages for connect:
 	    **	   EALREADY	       The socket is non-blocking and a  previ-
@@ -1527,8 +1645,16 @@ PUBLIC int HTDoConnect ARGS4(
 
 		if (status && (SOCKET_ERRNO == EALREADY)) /* new stuff LJM */
 		    ret = 0; /* keep going */
-		else
+		else {
+#ifdef SOCKET_DEBUG_TRACE
+		    if (status < 0) {
+			int saved_errno = SOCKET_ERRNO;
+			HTInetStatus("confirm-ready connect");
+			errno = saved_errno;
+		    }
+#endif /* SOCKET_DEBUG_TRACE */
 		    break;
+		}
 #ifdef SOCKS
 		}
 #endif /* SOCKS */
@@ -1559,6 +1685,11 @@ PUBLIC int HTDoConnect ARGS4(
 		    (SOCKET_ERRNO != 18242) &&
 #endif /* UCX */
 		    (SOCKET_ERRNO != EISCONN)) {
+#ifdef SOCKET_DEBUG_TRACE
+		    int saved_errno = SOCKET_ERRNO;
+		    HTInetStatus("confirm-not-ready connect");
+		    errno = saved_errno;
+#endif /* SOCKET_DEBUG_TRACE */
 		    break;
 		}
 	    }
@@ -1570,6 +1701,13 @@ PUBLIC int HTDoConnect ARGS4(
 	    }
 	}
     }
+#ifdef SOCKET_DEBUG_TRACE
+    else if (status < 0) {
+	    int saved_errno = SOCKET_ERRNO;
+	    HTInetStatus("this socket's first and only connect");
+	    errno = saved_errno;	/* I don't trust HTInetStatus */
+    }
+#endif /* SOCKET_DEBUG_TRACE */
 #endif /* !DJGPP */
     if (status < 0) {
 	/*

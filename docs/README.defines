@@ -5,10 +5,10 @@ Does not include
 - symbols defined and documented in userdefs.h
 - symbols expected to be set by compiler to indicate system type or
   compiler features
-- some symbols set and used only in connection with the ./configure
+- many symbols set and used only in connection with the ./configure
   mechanism - the full and current list can be found in config.hin
   (as a template) or, after running ./configure, in lynx_cfg.h.
-- symbols and macros defined in the source code
+- most symbols and macros defined in the source code
 
 ***Not complete.***
 
@@ -50,8 +50,8 @@ Network related, specific protocols
                		see comments in makefile.in
 # -DNOPORT         if you must use PASV instead of PORT for FTP
 
-Related to DirEd code - probably one usable for UNIX or similar
----------------------------------------------------------------
+Related to DirEd code - probably only usable for UNIX or similar
+----------------------------------------------------------------
 # -DDIRED_SUPPORT  (see INSTALLATION, Section II-1c)
 # -DOK_GZIP        (see INSTALLATION, Section II-1c)
 # -DOK_OVERRIDE    (see INSTALLATION, Section II-1c)
@@ -61,6 +61,7 @@ Related to DirEd code - probably one usable for UNIX or similar
 # -DOK_ZIP         (see INSTALLATION, Section II-1c)
 # -DARCHIVE_ONLY   (see INSTALLATION, Section II-1c)
 # -DNO_CHANGE_EXECUTE_PERMS (see INSTALLATION, Section II-1c)
+# -DCANT_EDIT_UNWRITABLE_FILES (see LYEdit.c - always in effect for VMS)
 
 Related to formatting of local directory listings
 -------------------------------------------------
@@ -82,8 +83,8 @@ Using curses or ncurses library:
 # -DNO_SIZECHANGE (old) or HAVE_SIZECHANGE (new) whether using code to detect
                    new size after size changes of the terminal (window).
                    for UNIX handled by ./configure, may be set in HTUtils.h
-# -DUSE_SIZECHANGEHACK  enable hack to handle increasing the window size
-			above window size at startup
+# -DUSE_SIZECHANGEHACK  gone (was: enable hack to handle increasing the
+                        window size above window size at startup)
 
 Using slang library:
 # -DUSE_SLANG      (see INSTALLATION, Section II-1c)
@@ -99,15 +100,38 @@ Related to *experimental* (unsupported) character style code
 # -DUSE_HASH       (see INSTALLATION, Section II-1c)  probably needs the above
 # -DLINKEDSTYLES   (see INSTALLATION, Section II-1c)  probably needs the above
 
-Other
------
+Other general
+-------------
 # -DDONT_TRACK_INTERNAL_LINKS - Handle following links to same doc differently.
-# -DEXP_CHARTRANS_AUTOSWITCH also let lynx switch term mode(Linux console only)
+# -DEXP_CHARTRANS_AUTOSWITCH (see INSTALLATION, Section II-1c) 
 # -DIGNORE_CTRL_C  Define if Control-C shouldn't exit lynx.
 # -DLY_FIND_LEAKS  (see INSTALLATION, Section II-1c)
 # -DNO_CPU_LIMIT   Disables Max CPU timeout (includes CLOCKS_PER_SECOND)
 # -DNSL_FORK       For fork-based name server lookups that can be 'z'apped.
 # -DSYSLOG_REQUESTED_URLS
 # 	if you would like logging of client requests via syslog()
-# -DUSE_ZLIB       To use some functions from zlib library if you have it.
+# -DUSE_ZLIB       (see INSTALLATION)
 # -DDECLARE_WAIS_LOGFILES   see comments in makefile.in
+# -DNO_RULES	   Disables code for CERN-style rules files
+# -DHAVE_SIGACTION Can use sigaction() and related functions
+
+Untested
+--------
+# -DNO_EXTENDED_HTMLDTD	Disable some "SortaSGML" code, see SGML.c
+
+B. Symbols defined locally to modify some behavior
+==================================================
+Defined in the source files to which they apply.  Only filenames are listed,
+the files would have to be read and edited anyway to change the definition.
+Normally installers shouldn't have to care about any of these symbols.
+
+SOCKET_DEBUG_TRACE			HTTCP.c
+DEBUG_HOSTENT				HTTCP.c
+DEBUG_HOSTENT_CHILD			HTTCP.c
+DUPLICATE_ANCHOR_NAME_WORKAROUND	HTAnchor.c
+reverse_mailcap				HTInit.c
+EXTENDED_OPTION_LOGIC			LYMain.c
+EXTENDED_STARTFILE_RECALL		LYMain.c
+reverse_mailcap				HTInit.c
+ADVANCED_INFO				LYShowInfo.c
+CHECK_FREE_MEM				GridText.c

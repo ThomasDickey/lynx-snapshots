@@ -645,6 +645,9 @@ PRIVATE int ExitWithError ARGS1(
     return(-1);
 }
 
+/* Reverse the entries from each mailcap after it has been read, so that
+ * earlier entries have precedence.  Set to 0 to get traditional lynx
+ * behavior, which means that the last match wins. - kw */
 #define reverse_mailcap 1
 
 PRIVATE int HTLoadTypesConfigFile ARGS1(

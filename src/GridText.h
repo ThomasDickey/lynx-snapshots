@@ -224,7 +224,7 @@ extern int HText_beginInput PARAMS((
 extern void HText_trimHightext PARAMS((
 	HText *		text,
 	BOOLEAN 	final));
-extern void HText_SubmitForm PARAMS((
+extern int HText_SubmitForm PARAMS((
 	FormInfo *	submit_item,
 	document *	doc,
 	char *		link_name,

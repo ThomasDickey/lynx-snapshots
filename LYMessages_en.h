@@ -60,7 +60,7 @@
 #define FORM_LINK_TEXT_UNM_MSG \
  gettext("UNMODIFIABLE form text field.  Use UP or DOWN arrows or tab to move off.")
 #define FORM_LINK_TEXT_SUBMIT_MESSAGE \
- gettext("(Form field) Enter text.  Use <return> to submit ('x' for no cache).")
+ gettext("(Form field) Enter text.  Use <return> to submit (^Vx for no cache).")
 #define FORM_LINK_TEXT_RESUBMIT_MESSAGE \
  gettext("(Form field) Enter text.  Use <return> to submit, arrows or tab to move off.")
 #define FORM_LINK_TEXT_SUBMIT_UNM_MSG \
@@ -173,12 +173,14 @@
 #define SENDING_COMMENT gettext("Sending your comment:")
 
 /* textarea */
-#define NOT_IN_TEXTAREA gettext("Not in a TEXTAREA; cannot use external editor.")
+#define NOT_IN_TEXTAREA_NOEDIT gettext("Not in a TEXTAREA; cannot use external editor.")
+#define NOT_IN_TEXTAREA gettext("Not in a TEXTAREA; cannot use command.")
 
 
 #define FILE_ACTIONS_DISALLOWED gettext("file: ACTIONs are disallowed!")
 #define FILE_SERVED_LINKS_DISALLOWED \
  gettext("file: URLs via served links are disallowed!")
+#define NOAUTH_TO_ACCESS_FILES gettext("Access to local files denied.")
 #define FILE_BOOKMARKS_DISALLOWED gettext("file: URLs via bookmarks are disallowed!")
 #define SPECIAL_VIA_EXTERNAL_DISALLOWED \
  gettext("This special URL is not allowed in external documents!")
@@ -374,6 +376,7 @@
 #define CONFIRM_COMMENT gettext("Do you wish to send a comment?")
 #define MAIL_DISALLOWED gettext("Mail is disallowed so you cannot send a comment")
 #define EDIT_DISABLED gettext("The 'e'dit command is currently disabled.")
+#define ANYEDIT_DISABLED gettext("External editing is currently disabled.")
 #define NO_STATUS gettext("System error - failure to get status.")
 #define NO_EDITOR gettext("No editor is defined!")
 #define PRINT_DISABLED gettext("The 'p'rint command is currently disabled.")

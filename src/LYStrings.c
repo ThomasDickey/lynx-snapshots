@@ -14,6 +14,7 @@
 #include <HTString.h>
 #include <LYCharUtils.h>
 #include <HTParse.h>
+#include <LYMainLoop.h>
 
 #ifdef DJGPP_KEYHANDLER
 #include <pc.h>
@@ -66,8 +67,9 @@ static MEVENT levent;
 PUBLIC int peek_mouse_levent NOARGS
 {
 #ifdef NCURSES_MOUSE_VERSION
-    if (have_levent) {
+    if (have_levent > 0) {
 	ungetmouse(&levent);
+	have_levent--;
 	return 1;
     }
 #endif
@@ -148,9 +150,21 @@ PUBLIC int fancy_mouse ARGS3(
 	    cur_selection += delta;
 	    cmd = LYX_TOGGLE;
 #endif
+	} else if (event.x <= getbegx(win) + 1 ||
+		   event.x >= getbegx(win) + getmaxx(win) - 2) {
+	    /* Click on left or right border for positioning without
+	     * immediate action: select, but do nothing else.
+	     * Actually, allow an error of one position inwards. - kw
+	     */
+	    *position += delta;
+	    cmd = -1;
 	} else if (event.bstate & (BUTTON_ALT | BUTTON_SHIFT | BUTTON_CTRL)) {
 	    /* Probably some unrelated activity, such as selecting some text.
 	     * Select, but do nothing else.
+	     */
+	    /* Possibly this is never returned by ncurses, so this case
+	     * may be useless depending on situation (kind of mouse support
+	     * and library versions). - kw
 	     */
 	    *position += delta;
 	    cmd = -1;
@@ -159,8 +173,9 @@ PUBLIC int fancy_mouse ARGS3(
 	    *position += delta;
 #if 0
 	    /* Immediate action looks reasonable since we have no help
-	     * available for individual options.  Moreover, one can position
-	     * active element with shift-click-1.  (;-)
+	     * available for individual options.  Moreover, one should be
+	     * able to position active element with <some modifier>-click-1
+	     * (but see remark above), or with click on left or right border.
 	     */
 	    if (!(event.bstate & (BUTTON1_DOUBLE_CLICKED
 				| BUTTON1_TRIPLE_CLICKED)))
@@ -200,10 +215,11 @@ PRIVATE int XYdist ARGS5(
 ** link.
 **/
 
-PRIVATE int set_clicked_link ARGS3(
+PRIVATE int set_clicked_link ARGS4(
     int,	x,
     int,	y,
-    int,	code)
+    int,	code,
+    int,	clicks)
 {
     int left = 6;
     int right = LYcols-6;
@@ -213,8 +229,8 @@ PRIVATE int set_clicked_link ARGS3(
 
     if (y == (LYlines-1)) {
 	mouse_link = -2;
-	if (x < left) c = LTARROW;
-	else if (x > right) c = '\b';
+	if (x < left)	    c = (code==FOR_PROMPT) ? LTARROW : LTARROW;
+	else if (x > right) c = (code==FOR_PROMPT) ? RTARROW : '\b';
 	else c = PGDOWN;
     } else if (y == 0) {
 	mouse_link = -2;
@@ -222,16 +238,18 @@ PRIVATE int set_clicked_link ARGS3(
 	else if (x > right) c = '\b';
 	else c = PGUP;
     } else {
-	int mouse_err = -1, cur_err;
+	int mouse_err = 3, /* must be closer than this for approx stuff */
+	    cur_err;
 
 	/* Loop over the links and see if we can get a match */
 	for (i = 0; i < nlinks; i++) {
 	    int len, lx = links[i].lx, is_text = 0;
 
 	    if (links[i].type == WWW_FORM_LINK_TYPE
-		/* XXXX What else? */
-		&& (links[i].form->type == F_TEXTAREA_TYPE
-		 || links[i].form->type == F_TEXT_TYPE))
+		&& (links[i].form->type == F_TEXT_TYPE
+		 || links[i].form->type == F_TEXT_SUBMIT_TYPE
+		 || links[i].form->type == F_PASSWORD_TYPE
+		 || links[i].form->type == F_TEXTAREA_TYPE))
 		is_text = 1;
 
 	    if (is_text)
@@ -246,6 +264,22 @@ PRIVATE int set_clicked_link ARGS3(
 		    int cury, curx;
 
 		    LYGetYX(cury,curx);
+		    /* double-click, if we care:
+		       submit text submit fields. - kw */
+		    if (clicks > 1 && is_text &&
+			links[i].form->type == F_TEXT_SUBMIT_TYPE) {
+			if (code != FOR_INPUT
+			    /* submit current input field directly */
+			    || !(cury == y && (curx >= lx) && ((curx - lx) <= len))) {
+			    c = LAC_TO_LKC0(LYK_SUBMIT);
+			    mouse_link = i;
+			} else {
+			    c = LAC_TO_LKC0(LYK_SUBMIT);
+			    mouse_link = -1;
+			}
+			mouse_err = 0;
+			break;
+		    }
 		    if (code != FOR_INPUT
 			/* Do not pick up the current input field */
 			|| !((cury == y && (curx >= lx) && ((curx - lx) <= len)))) {
@@ -283,29 +317,16 @@ PRIVATE int set_clicked_link ARGS3(
 	 * the Enter key).
 	 */
 	if (mouse_link >= 0) {
-	    if (mouse_err == 0)
-		c = lookup_keymap(LYK_ACTIVATE);
-	    else if (mouse_err >= 0)
+	    if (mouse_err == 0) {
+		if (c == -1)
+		    c = lookup_keymap(LYK_ACTIVATE);
+	    } else if (mouse_err >= 0)
 		c = lookup_keymap(LYK_CHANGE_LINK);
 	}
     }
     return c;
 }
 
-
-/*
- *  LYstrerror emulates the ANSI strerror() function.
- */
-#ifdef LYStrerror
-    /* defined as macro in .h file. */
-#else
-PUBLIC char *LYStrerror ARGS1(int, code)
-{
-    static char temp[80];
-    sprintf(temp, "System errno is %d.\r\n", code);
-    return temp;
-}
-#endif /* HAVE_STRERROR */
 
 
 /*
@@ -522,12 +543,21 @@ PRIVATE int sl_parse_mouse_event ARGS3(int *, x, int *, y, int *, button)
 	return -1;
     }
 
-    *x = SLang_getkey () - 33;
-    *y = SLang_getkey () - 33;
+    *x = SLang_getkey ();
+    if (*x == CH_ESC)		/* Undo 7-bit replace for large x - kw */
+	*x = SLang_getkey () + 64 - 33;
+    else
+	*x -= 33;
+    *y = SLang_getkey ();
+    if (*y == CH_ESC)		/* Undo 7-bit replace for large y - kw */
+	*y = SLang_getkey () + 64 - 33;
+    else
+	*y -= 33;
     return 0;
 }
 
-PRIVATE int sl_read_mouse_event NOARGS
+PRIVATE int sl_read_mouse_event ARGS1(
+    int,	code)
 {
    int mouse_x, mouse_y, button;
 
@@ -535,7 +565,7 @@ PRIVATE int sl_read_mouse_event NOARGS
    if (-1 != sl_parse_mouse_event (&mouse_x, &mouse_y, &button))
      {
 	if (button == 0)  /* left */
-	  return set_clicked_link (mouse_x, mouse_y, FOR_PANEL);
+	  return set_clicked_link (mouse_x, mouse_y, FOR_PANEL, 1);
 
 	if (button == 2)   /* right */
 	  {
@@ -546,7 +576,10 @@ PRIVATE int sl_read_mouse_event NOARGS
 	     return LYReverseKeymap (LYK_PREV_DOC);
 	  }
      }
-   return -1;
+   if (code == FOR_INPUT || code == FOR_PROMPT)
+       return DO_NOTHING;
+   else
+       return -1;
 }
 #endif
 
@@ -566,7 +599,7 @@ PUBLIC void ena_csi ARGS1(
 	SLexpand_escaped_string(dst, first, last)
 static SLKeyMap_List_Type *Keymap_List;
 /* This value should be larger than anything in LYStrings.h */
-#define MOUSE_KEYSYM 0x1000
+#define MOUSE_KEYSYM 0x0400
 #endif
 
 
@@ -609,7 +642,7 @@ static Keysym_String_List Keysym_Strings [] =
     DEFINE_KEY( "SELECT_KEY",	SELECT_KEY,	KEY_SELECT ),
     DEFINE_KEY( "INSERT_KEY",	INSERT_KEY,	KEY_IC ),
     DEFINE_KEY( "REMOVE_KEY",	REMOVE_KEY,	KEY_DC ),
-    DEFINE_KEY( "DO_NOTHING",	DO_NOTHING,	0 ),
+    DEFINE_KEY( "DO_NOTHING",	DO_NOTHING,	DO_NOTHING|LKC_ISLKC ),
     DEFINE_KEY( NULL, 		-1,		ERR )
 };
 
@@ -763,17 +796,52 @@ PRIVATE BOOLEAN unescape_string ARGS2(char*, src, char *, dst)
     return ok;
 }
 
-PRIVATE int map_string_to_keysym ARGS2(char*, str, int*,keysym)
+PUBLIC int map_string_to_keysym ARGS2(char*, str, int*,keysym)
 {
+    int modifier = 0;
     *keysym = -1;
 
+    if (strncasecomp(str, "LAC:", 4) == 0) {
+	*keysym = lacname_to_lac(str + 4);
+	if (*keysym >= 0) {
+	    *keysym = LAC_TO_LKC0(*keysym);
+	    return (*keysym);
+	}
+    }
+    if (strncasecomp(str, "Meta-", 5) == 0) {
+	str += 5;
+	modifier = LKC_MOD2;
+	if (*str) {
+	    size_t len = strlen(str);
+	    if (len == 1)
+		return (*keysym = ((unsigned char)str[0])|modifier);
+	    else if (len == 2 && str[0] == '^' &&
+		     (isalpha(str[1]) ||
+		      (TOASCII(str[1]) >= '@' && TOASCII(str[1]) <= '_')))
+		return (*keysym = FROMASCII((unsigned char)str[1]&0x1f)|modifier);
+	    else if (len == 2 && str[0] == '^' &&
+		     str[1] == '?')
+		return (*keysym = CH_DEL|modifier);
+	    if (*str == '^' || *str == '\\') {
+		char buf[BUFSIZ];
+		expand_substring(buf, str, str + HTMIN(len, 28));
+		if (strlen(buf) <= 1)
+		    return (*keysym = ((unsigned char)buf[0])|modifier);
+	    }
+	}
+    }
     if (*str == SQUOTE) {
 	unescaped_char(str, keysym);
     } else if (isdigit(*str)) {
 	char *tmp;
 	long value = strtol(str, &tmp, 0);
-	if (!isalnum(*tmp))
+	if (!isalnum(*tmp)) {
 	    *keysym = value;
+#ifndef USE_SLANG
+	    if (*keysym > 255)
+		*keysym |= LKC_ISLKC; /* caller should remove this flag - kw */
+#endif	    
+	}
     } else {
 	Keysym_String_List *k;
 
@@ -787,6 +855,8 @@ PRIVATE int map_string_to_keysym ARGS2(char*, str, int*,keysym)
 	}
     }
 
+    if (*keysym >= 0)
+	*keysym |= modifier;
     return (*keysym);
 }
 
@@ -996,7 +1066,7 @@ PUBLIC int lynx_initialize_keymaps NOARGS
 #endif				       /* USE_KEYMAPS */
 
 #ifdef NCURSES_MOUSE_VERSION
-PRIVATE int LYmouse_menu ARGS3(int, x, int, y, int, atlink)
+PRIVATE int LYmouse_menu ARGS4(int, x, int, y, int, atlink, int, code)
 {
     static char *choices[] = {
 	"Quit",
@@ -1059,59 +1129,123 @@ PRIVATE int LYmouse_menu ARGS3(int, x, int, y, int, atlink)
     };
     static int actions_link[] = {
 	LYK_HELP,
-	LYK_REFRESH,
-	LYK_ACTIVATE,
+	LYK_DO_NOTHING,
+	LYK_SUBMIT,
 	LYK_INFO,
 	LYK_DOWNLOAD
     };
-    int c;
+    int c, retlac;
 
     /* Somehow the mouse is over the number instead of being over the
        name, so we decrease x. */
-    c = popup_choice((atlink ? 2 : 9) - 1, y, (x >= 5 ? x-5 : 0),
+    c = popup_choice((atlink ? 2 : 10) - 1, y, (x > 5 ? x-5 : 1),
 		     (atlink ? choices_link : choices),
 		     (atlink
 		      ? (sizeof(actions_link)/sizeof(int))
-		      : (sizeof(actions)/sizeof(int))), FALSE);
+		      : (sizeof(actions)/sizeof(int))), FALSE, TRUE);
 
-    return atlink ? (actions_link[c]) : (actions[c]);
+    /*
+     *  popup_choice() in LYOptions.c wasn't really meant to be used
+     *  outside of old-style Options menu processing.  One result of
+     *  mis-using it here is that we have to deal with side-effects
+     *  regarding SIGINT signal handler and the term_options global
+     *  variable. - kw
+     */
+    if (term_options) {
+	retlac = LYK_DO_NOTHING;
+	term_options = FALSE;
+    } else {
+	retlac = atlink ? (actions_link[c]) : (actions[c]);
+    }
+
+    if (code == FOR_INPUT && mouse_link == -1) {
+	switch (retlac) {
+	    case LYK_ABORT:
+		retlac = LYK_QUIT; /* a bit softer... */
+		/* fall through */
+	    case LYK_MAIN_MENU:
+	    case LYK_PREV_DOC:
+	    case LYK_HOME:
+	    case LYK_PREV_PAGE:
+	    case LYK_UP_HALF:
+	    case LYK_UP_TWO:
+	    case LYK_HISTORY:
+	    case LYK_HELP:
+/*	    case LYK_REFRESH:*/
+	    case LYK_RELOAD:
+	    case LYK_ECGOTO:
+	    case LYK_INFO:
+	    case LYK_WHEREIS:
+	    case LYK_PRINT:
+	    case LYK_DOWN_TWO:
+	    case LYK_DOWN_HALF:
+	    case LYK_NEXT_PAGE:
+	    case LYK_END:
+	    case LYK_VIEW_BOOKMARK:
+ 	    case LYK_COOKIE_JAR:
+	    case LYK_INDEX_SEARCH:
+	    case LYK_OPTIONS:
+		mouse_link = -3; /* so LYgetch_for() passes it on - kw */
+	}
+    }
+    if (retlac == LYK_DO_NOTHING ||
+	retlac == LYK_REFRESH) {
+	mouse_link = -1;	/* mainloop should not change cur link - kw */
+    }
+    if (code == FOR_INPUT && retlac == LYK_DO_NOTHING) {
+	repaint_main_statusline();
+    }
+    return retlac;
 }
 #endif
 
 #if defined(USE_KEYMAPS) && defined(USE_SLANG)
 
+PRIVATE int current_sl_modifier = 0;
+
 /* We cannot guarantee the type for 'GetChar', and should not use a cast. */
 PRIVATE int myGetChar NOARGS
 {
-   return GetChar();
-}
-
-PUBLIC int LYgetch NOARGS
-{
-   SLang_Key_Type *key;
-   int keysym;
-
-   key = SLang_do_key (Keymap_List, myGetChar);
-   if ((key == NULL) || (key->type != SLKEY_F_KEYSYM))
-     return DO_NOTHING;
-
-   keysym = key->f.keysym;
-
-#if defined (USE_SLANG_MOUSE)
-   if (keysym == MOUSE_KEYSYM)
-     return sl_read_mouse_event ();
-#endif
-
-   if ((keysym+1 >= KEYMAP_SIZE) || (keysym < 0))
-     return 0;
-
-   return keysym;
+    int i = GetChar();
+    if (i == 0)			/* trick to get NUL char through - kw */
+	current_sl_modifier = LKC_ISLKC;
+    return i;
 }
 
 PUBLIC int LYgetch_for ARGS1(
 	int, 	code)
 {
-    return LYgetch();
+   SLang_Key_Type *key;
+   int keysym;
+   current_sl_modifier = 0;
+
+   key = SLang_do_key (Keymap_List, myGetChar);
+   if ((key == NULL) || (key->type != SLKEY_F_KEYSYM))
+     return (current_sl_modifier ? 0 : DO_NOTHING);
+
+   keysym = key->f.keysym;
+
+#if defined (USE_SLANG_MOUSE)
+   if (keysym == MOUSE_KEYSYM)
+     return sl_read_mouse_event (code);
+#endif
+
+   if (keysym < 0)
+       return 0;
+
+   if (keysym&LKC_ISLAC)
+       return (keysym);
+
+   current_sl_modifier = 0;
+   if (LKC_HAS_ESC_MOD(keysym)) {
+       current_sl_modifier = LKC_MOD2;
+       keysym &= LKC_MASK;
+   }
+
+   if (keysym+1 >= KEYMAP_SIZE)
+     return 0;
+
+   return (keysym|current_sl_modifier);
 }
 
 #else	/* NOT  defined(USE_KEYMAPS) && defined(USE_SLANG) */
@@ -1121,21 +1255,24 @@ PUBLIC int LYgetch_for ARGS1(
  */
 #define found_CSI(first,second) ((second) == '[' || (first) == 155)
 
-PUBLIC int LYgetch NOARGS
-{
-    return LYgetch_for(FOR_PANEL);
-}
-
 PUBLIC int LYgetch_for ARGS1(
 	int, 	code)
 {
     int a, b, c, d = -1;
+    int current_modifier = 0;
+    BOOLEAN done_esc = FALSE;
 
     have_levent = 0;
 
-#if defined(IGNORE_CTRL_C) || defined(USE_GETCHAR) || !defined(NCURSES)
+#if defined(IGNORE_CTRL_C) || defined(USE_GETCHAR) || !defined(NCURSES) || \
+    (HAVE_KEYPAD && defined(KEY_RESIZE)) || \
+    (defined(NCURSES_MOUSE_VERSION) && !defined(DOSPATH))
 re_read:
-#endif /* IGNORE_CTRL_C || USE_GETCHAR */
+#endif /* IGNORE_CTRL_C || USE_GETCHAR etc. */
+#if !defined(UCX) || !defined(VAXC) /* errno not modifiable ? */
+    if (errno == EINTR)
+	errno = 0;		/* reset - kw */
+#endif  /* UCX && VAXC */
 #ifndef USE_SLANG
     clearerr(stdin); /* needed here for ultrix and SOCKETSHR, but why? - FM */
 #endif /* !USE_SLANG */
@@ -1161,6 +1298,25 @@ re_read:
 #ifdef USE_GETCHAR
     if (c == EOF && errno == EINTR)	/* Ctrl-Z causes EINTR in getchar() */
 	goto re_read;
+#else
+    if (c == EOF && errno == EINTR) {
+
+#if HAVE_SIZECHANGE || defined(USE_SLANG)
+	   CTRACE(tfp, "Got EOF with EINTR, recent_sizechange so far is %d\n",
+		  recent_sizechange);
+	   if (!recent_sizechange) { /* not yet detected by ourselves */
+	       size_change(0);
+	       CTRACE(tfp, "Now recent_sizechange is %d\n", recent_sizechange);
+	   }
+#else /* HAVE_SIZECHANGE || USE_SLANG */
+	   CTRACE(tfp, "Got EOF with EINTR, recent_sizechange is %d\n",
+		  recent_sizechange);
+#endif /* HAVE_SIZECHANGE || USE_SLANG */
+#if !defined(UCX) || !defined(VAXC) /* errno not modifiable ? */
+	errno = 0;		/* reset - kw */
+#endif  /* UCX && VAXC */
+	return(DO_NOTHING);
+    }
 #endif /* USE_GETCHAR */
 
 #ifdef USE_SLANG
@@ -1173,7 +1329,7 @@ re_read:
 #endif /* IGNORE_CTRL_C */
 	return(7); /* use ^G to cancel whatever called us. */
     }
-#else
+#else  /* not USE_SLANG: */
     if (feof(stdin) || ferror(stdin) || c == EOF) {
 	if (recent_sizechange)
 	    return(7); /* use ^G to cancel whatever called us. */
@@ -1195,6 +1351,7 @@ re_read:
 #endif /* USE_SLANG */
 
     if (c == CH_ESC || (csi_is_csi && c == (unsigned char)CH_ESC_PAR)) { /* handle escape sequence  S/390 -- gil -- 2024 */
+	done_esc = TRUE;		/* Flag: we did it, not keypad() */
 	b = GetChar();
 
 	if (b == '[' || b == 'O') {
@@ -1220,7 +1377,7 @@ re_read:
 #ifdef USE_SLANG_MOUSE
 	   if (found_CSI(c,b))
 	     {
-		c = sl_read_mouse_event ();
+		c = sl_read_mouse_event (code);
 	     }
 	   else
 #endif
@@ -1236,6 +1393,8 @@ re_read:
 	case 'k':
 	    if (b == 'O')
 		c = '+';  /* keypad + on my xterminal :) */
+	    else
+		done_esc = FALSE; /* we have another look below - kw */
 	    break;
 	case 'l':
 #ifdef VMS
@@ -1264,6 +1423,8 @@ re_read:
 	case '1':			    /** VTxxx  Find  **/
 	    if (found_CSI(c,b) && (d=GetChar()) == '~')
 		c = FIND_KEY;
+	    else
+		done_esc = FALSE; /* we have another look below - kw */
 	    break;
 	case '2':
 	    if (found_CSI(c,b)) {
@@ -1280,22 +1441,32 @@ re_read:
 		    d = -1;
 		 }
 	    }
+	    else
+		done_esc = FALSE; /* we have another look below - kw */
 	    break;
 	case '3':			     /** VTxxx Delete **/
 	    if (found_CSI(c,b) && (d=GetChar()) == '~')
 		c = REMOVE_KEY;
+	    else
+		done_esc = FALSE; /* we have another look below - kw */
 	    break;
 	case '4':			     /** VTxxx Select **/
 	    if (found_CSI(c,b) && (d=GetChar()) == '~')
 		c = SELECT_KEY;
+	    else
+		done_esc = FALSE; /* we have another look below - kw */
 	    break;
 	case '5':			     /** VTxxx PrevScreen **/
 	    if (found_CSI(c,b) && (d=GetChar()) == '~')
 		c = PGUP;
+	    else
+		done_esc = FALSE; /* we have another look below - kw */
 	    break;
 	case '6':			     /** VTxxx NextScreen **/
 	    if (found_CSI(c,b) && (d=GetChar()) == '~')
 		c = PGDOWN;
+	    else
+		done_esc = FALSE; /* we have another look below - kw */
 	    break;
 	case '[':			     /** Linux F1-F5: ^[[[A etc. **/
 	    if (found_CSI(c,b)) {
@@ -1304,12 +1475,41 @@ re_read:
 		break;
 	    }
 	default:
+	    if (c == CH_ESC && a == b && !found_CSI(c,b)) {
+		current_modifier = LKC_MOD2;
+		c = a;
+		/* We're not yet done if ESC + curses-keysym: */
+		done_esc = ((a & ~0xFF) == 0);
+		break;
+	    }
 	    CTRACE(tfp,"Unknown key sequence: %d:%d:%d\n",c,b,a);
 	    CTRACE_SLEEP(MessageSecs);
 	    break;
 	}
 	if (isdigit(a) && found_CSI(c,b) && d != -1 && d != '~')
 	    d = GetChar();
+	if (!done_esc && (a & ~0xFF) == 0) {
+	    if (a == b && !found_CSI(c,b) && c == CH_ESC) {
+		current_modifier = LKC_MOD2;
+		c = a;
+		done_esc = TRUE;
+	    } else {
+		done_esc = TRUE;
+	    }
+	}
+    }
+#ifdef USE_KEYMAPS
+    if (c >= 0 && (c&LKC_ISLKC)) {
+	c &= ~LKC_ISLKC;
+	done_esc = TRUE; /* already a lynxkeycode, skip keypad switches - kw */
+    }
+    if (c >= 0 && LKC_HAS_ESC_MOD(c)) {
+	current_modifier = LKC_MOD2;
+	c &= LKC_MASK;
+    }
+#endif
+    if (done_esc) {
+	/* don't do keypad() switches below, we already got it - kw */
     }
 #if HAVE_KEYPAD
     else {
@@ -1426,6 +1626,43 @@ re_read:
 	   c = BACKTAB_KEY;	   /* Back tab, often Shift-Tab */
 	   break;
 #endif /* KEY_BTAB */
+#ifdef KEY_RESIZE
+	case KEY_RESIZE:	   /* size change detected by ncurses */
+#if HAVE_SIZECHANGE || defined(USE_SLANG)
+	   /* Make call to detect new size, if that may be implemented.
+	    * The call may set recent_sizechange (except for USE_SLANG),
+	    * which will tell mainloop() to refresh. - kw */
+	   CTRACE(tfp, "Got KEY_RESIZE, recent_sizechange so far is %d\n",
+		  recent_sizechange);
+	   size_change(0);
+	   CTRACE(tfp, "Now recent_sizechange is %d\n", recent_sizechange);
+#else /* HAVE_SIZECHANGE || USE_SLANG */
+	   CTRACE(tfp, "Got KEY_RESIZE, recent_sizechange is %d\n",
+		  recent_sizechange);
+#endif /* HAVE_SIZECHANGE || USE_SLANG */
+	   if (!recent_sizechange) {
+#if 0			/* assumption seems flawed? */
+	       /*  Not detected by us or already processed by us.  It can
+		*  happens that ncurses lags behind us in detecting the
+		*  change, since its own SIGTSTP handler is not installed
+		*  so detecting happened *at the end* of the last refresh.
+		*  Tell it to refresh again... - kw */
+	       refresh();
+#endif
+	       /*
+		*  May be just the delayed effect of mainloop()'s call
+		*  to resizeterm().  Pretend we haven't read anything
+		*  yet, don't return. - kw
+		*/
+	       goto re_read;
+	   }
+	   /*
+	    *  Yep, we agree there was a change.  Return now so that
+	    *  the caller can react to it. - kw
+	    */
+	   c = DO_NOTHING;
+	   break;
+#endif /* KEY_RESIZE */
 
 /* The following maps PDCurses keys away from lynx reserved values */
 #if (defined(_WINDOWS) || defined(__DJGPP__)) && !defined(USE_SLANG)
@@ -1452,46 +1689,71 @@ re_read:
 	case KEY_MOUSE:
 	    if (code == FOR_CHOICE) {
 		c = MOUSE_KEY;		/* Will be processed by the caller */
+	    } else if (code == FOR_SINGLEKEY) {
+		MEVENT event;
+		getmouse(&event);	/* Completely ignore event - kw */
+		c = DO_NOTHING;
 	    } else {
 #ifndef DOSPATH
 		MEVENT event;
 		int err;
+		int lac = LYK_UNKNOWN;
 
 		c = -1;
 		mouse_link = -1;
 		err = getmouse(&event);
+		if (err != OK) {
+		    CTRACE(tfp, "Mouse error: no event available!\n");
+		    return(code==FOR_PANEL ? 0 : DO_NOTHING);
+		}
 		levent = event;		/* Allow setting pos in entry fields */
 		if (event.bstate & BUTTON1_CLICKED) {
-		    c = set_clicked_link(event.x, event.y, code);
+		    c = set_clicked_link(event.x, event.y, code, 1);
 		} else if (event.bstate & BUTTON1_DOUBLE_CLICKED) {
-		    c = set_clicked_link(event.x, event.y, code);
+		    c = set_clicked_link(event.x, event.y, code, 2);
 		    if (c == PGDOWN)
 			c = END_KEY;
 		    else if (c == PGUP)
 			c = HOME;
+		    else if (c == RTARROW)
+			c = END_KEY;
+		    else if (c == LTARROW && code == FOR_PROMPT)
+			c = HOME;
 		    else if (c == LTARROW)
 			c = LYReverseKeymap(LYK_MAIN_MENU);
+		    else if (c == '\b' && (code == FOR_PANEL || code == FOR_INPUT))
+			c = LAC_TO_LKC0(LYK_VLINKS);
+		    else if (c == LAC_TO_LKC0(LYK_SUBMIT) && code == FOR_INPUT)
+			lac = LYK_SUBMIT;
 		} else if (event.bstate & BUTTON3_CLICKED) {
-		    c = LYReverseKeymap (LYK_PREV_DOC);
+		    c = LAC_TO_LKC0(LYK_PREV_DOC);
+		} else if (code == FOR_PROMPT) {
+		    /* Completely ignore - don't return anything, to
+		       avoid canceling the prompt - kw */
+		    goto re_read;
 		} else if (event.bstate & BUTTON2_CLICKED) {
 		    int atlink;
 
-		    c = set_clicked_link(event.x, event.y, code);
-		    atlink = c == LYReverseKeymap (LYK_ACTIVATE);
+		    c = set_clicked_link(event.x, event.y, code, 1);
+		    atlink = (c == LYReverseKeymap(LYK_ACTIVATE));
 		    if (!atlink)
 			mouse_link = -1; /* Forget about approx stuff. */
 
-		    c = LYmouse_menu(event.x, event.y, atlink);
-		    if (c == LYK_ACTIVATE && mouse_link == -1) {
+		    lac = LYmouse_menu(event.x, event.y, atlink, code);
+		    if (lac == LYK_SUBMIT && mouse_link == -1)
+			lac = LYK_ACTIVATE;
+		    if (lac == LYK_ACTIVATE && mouse_link == -1) {
 			HTAlert("No link chosen");
-			c = LYK_DO_NOTHING;
-			c = LYK_REFRESH; /* refresh() below does not work... */
+			lac = LYK_REFRESH;
 		    }
-		    c = LYReverseKeymap(c);
+		    c = LAC_TO_LKC(lac);
+#if 0	/* Probably not necessary any more - kw */
 		    lynx_force_repaint();
 		    refresh();
+#endif
 		}
-		if (code == FOR_INPUT && mouse_link == -1) {
+		if (code == FOR_INPUT && mouse_link == -1 &&
+		    lac != LYK_REFRESH && lac != LYK_SUBMIT) {
 		    ungetmouse(&event);	/* Caller will process this. */
 		    getch();		/* ungetmouse puts KEY_MOUSE back */
 		    c = MOUSE_KEY;
@@ -1501,11 +1763,15 @@ re_read:
 		mouse_link = -1;
 		request_mouse_pos();
 		if (BUTTON_STATUS(1) & BUTTON_CLICKED) {
-		    c = set_clicked_link(MOUSE_X_POS, MOUSE_Y_POS, FOR_PANEL);
+		    c = set_clicked_link(MOUSE_X_POS, MOUSE_Y_POS,FOR_PANEL,1);
 		} else if (BUTTON_STATUS(3) & BUTTON_CLICKED) {
-		    c = LYReverseKeymap (LYK_PREV_DOC);
+		    c = LAC_TO_LKC(LYK_PREV_DOC);
 		}
 #endif /* DOSPATH */
+/*		if (c < 0)
+		    c = 0; */
+		if ((c+1) >= KEYMAP_SIZE && (c&LKC_ISLAC))
+		    return(c);
 	    }
 	    break;
 #endif /* NCURSES_MOUSE_VERSION */
@@ -1625,11 +1891,16 @@ re_read:
 	 */
 	return (0);
     } else {
-	return(c);
+	return(c|current_modifier);
     }
 }
 
 #endif	/* NOT  defined(USE_KEYMAPS) && defined(USE_SLANG) */
+
+PUBLIC int LYgetch NOARGS
+{
+    return LYgetch_for(FOR_PANEL);
+}
 
 /*
  * Convert a null-terminated string to lowercase
@@ -1774,6 +2045,13 @@ PUBLIC BOOLEAN LYTrimStartfile ARGS1(
 #define DspWdth  edit->dspwdth
 #define DspStart edit->xpan
 #define Margin	 edit->margin
+#ifdef ENHANCED_LINEEDIT
+#define Mark	 edit->mark
+#endif
+
+#ifdef ENHANCED_LINEEDIT
+PRIVATE char killbuffer[1024] = "\0";
+#endif
 
 PUBLIC void LYSetupEdit ARGS4(
 	EDREC *,	edit,
@@ -1788,12 +2066,16 @@ PUBLIC void LYSetupEdit ARGS4(
     edit->pad	= ' ';
     edit->dirty = TRUE;
     edit->panon = FALSE;
+    edit->current_modifiers = 0;
 
     StrLen  = strlen(old);
     MaxLen  = maxstr;
     DspWdth = maxdsp;
     Margin  = 0;
     Pos = strlen(old);
+#ifdef ENHANCED_LINEEDIT
+    Mark = 0;
+#endif
     DspStart = 0;
 
     if (maxstr > maxdsp) {  /* Need panning? */
@@ -1874,9 +2156,42 @@ PUBLIC int LYEdit1 ARGS4(
 		current_char_set);
 #endif
 	/*
-	 *  ch is printable or ISO-8859-1 escape character.
+	 *  ch is (presumably) printable character.
 	 */
 	if (Pos <= (MaxLen) && StrLen < (MaxLen)) {
+#ifdef ENHANCED_LINEEDIT
+	    if (Mark > Pos)
+		Mark++;
+#endif
+	    for(i = length; i >= Pos; i--)    /* Make room */
+		Buf[i+1] = Buf[i];
+	    Buf[length+1]='\0';
+	    Buf[Pos] = (unsigned char) ch;
+	    Pos++;
+	} else if (maxMessage) {
+	    _statusline(MAXLEN_REACHED_DEL_OR_MOV);
+	}
+	break;
+
+    case LYE_C1CHAR:
+	/*
+	 *  ch is the second part (in most cases, a capital letter) of
+	 *  a 7-bit replacement for a character in the 8-bit C1 control
+	 *  range.
+	 *  This is meant to undo transformations like
+	 *  0x81 -> 0x1b 0x41 (ESC A) etc. done by slang on Unix and
+	 *  possibly some comm programs.  It's an imperfect workaround
+	 *  that doesn't work for all such characters.
+	 */
+	ch &= 0xFF;
+	if (ch + 64 >= LYlowest_eightbit[current_char_set])
+	    ch += 64;
+	
+	if (Pos <= (MaxLen) && StrLen < (MaxLen)) {
+#ifdef ENHANCED_LINEEDIT
+	    if (Mark > Pos)
+		Mark++;
+#endif
 	    for(i = length; i >= Pos; i--)    /* Make room */
 		Buf[i+1] = Buf[i];
 	    Buf[length+1]='\0';
@@ -1913,6 +2228,9 @@ PUBLIC int LYEdit1 ARGS4(
 	 *  Erase the line to start fresh.
 	 */
 	 Buf[0] = '\0';
+#ifdef ENHANCED_LINEEDIT
+	Mark = 0;
+#endif
 	 /* fall through */
 
     case LYE_BOL:
@@ -1994,6 +2312,10 @@ PUBLIC int LYEdit1 ARGS4(
 	 */
 	if (length == 0 || Pos == 0)
 	    break;
+#ifdef ENHANCED_LINEEDIT
+	if (Mark >= Pos)
+	    Mark--;
+#endif
 	Pos--;
 	for (i = Pos; i < length; i++)
 	    Buf[i] = Buf[i+1];
@@ -2016,6 +2338,90 @@ PUBLIC int LYEdit1 ARGS4(
 	if (Pos > 0)
 	    Pos--;
 	break;
+
+#ifdef ENHANCED_LINEEDIT
+    case LYE_TPOS:
+	/*
+	 *  Transpose characters - bash or ksh(emacs not gmacs) style
+	 */
+	if (length <= 1 || Pos == 0)
+	    return(ch);
+	if (Pos == length)
+	    Pos--;
+	if (Mark == Pos || Mark == Pos+1)
+	    Mark = Pos-1;
+	if (Buf[Pos-1] == Buf[Pos]) {
+	    Pos++;
+	    return(0);
+	}
+	i = Buf[Pos-1]; Buf[Pos-1] = Buf[Pos]; Buf[Pos++] = i;
+	break;
+
+    case LYE_SETMARK:
+	/*
+	 *  primitive emacs-like set-mark-command
+	 */
+	Mark = Pos;
+	return(0);
+
+    case LYE_XPMARK:
+	/*
+	 *  emacs-like exchange-point-and-mark
+	 */
+	if (Mark == Pos)
+	    return(0);
+	i = Pos; Pos = Mark; Mark = i;
+	break;
+
+    case LYE_KILLREG:
+	/*
+	 *  primitive emacs-like kill-region
+	 */
+	if (Mark == Pos) {
+	    killbuffer[0] = '\0';
+	    return(0);
+	}
+	if (Mark > Pos)
+	    LYEdit1(edit, 0, LYE_XPMARK, FALSE);
+	{
+	    int reglen = Pos - Mark;
+
+	    LYstrncpy(killbuffer, &Buf[Mark],
+		      HTMIN(reglen, (int)sizeof(killbuffer)-1));
+	    for (i = Mark; Buf[i+reglen]; i++)
+		Buf[i] = Buf[i+reglen];
+	    Buf[i] = Buf[i+reglen]; /* terminate */
+	    Pos = Mark;
+	}
+	break;
+
+    case LYE_YANK:
+	/*
+	 *  primitive emacs-like yank
+	 */
+	if (!killbuffer[0]) {
+	    Mark = Pos;
+	    return(0);
+	}
+	{
+	    int yanklen = strlen(killbuffer);
+
+	    if (Pos+yanklen <= (MaxLen) && StrLen+yanklen <= (MaxLen)) {
+		Mark = Pos;
+
+		for(i = length; i >= Pos; i--)    /* Make room */
+		    Buf[i+yanklen] = Buf[i];
+		Buf[length+1]='\0';
+		for (i = 0; i < yanklen; i++)
+		    Buf[Pos++] = (unsigned char) killbuffer[i];
+
+	    } else if (maxMessage) {
+		_statusline(MAXLEN_REACHED_DEL_OR_MOV);
+	    }
+	}
+	break;
+
+#endif /* ENHANCED_LINEEDIT */
 
     case LYE_UPPER:
 	LYUpperCase(Buf);
@@ -2147,6 +2553,7 @@ PUBLIC void LYRefreshEdit ARGS1(
     refresh();
 }
 
+#define CurModif MyEdit.current_modifiers
 
 PUBLIC int LYgetstr ARGS4(
 	char *, 	inputline,
@@ -2156,6 +2563,8 @@ PUBLIC int LYgetstr ARGS4(
 {
     int x, y, MaxStringSize;
     int ch;
+    int xlec;
+    int last_xlkc = -1;
     EditFieldData MyEdit;
     char *res;
 
@@ -2168,13 +2577,13 @@ PUBLIC int LYgetstr ARGS4(
     for (;;) {
 again:
 	LYRefreshEdit(&MyEdit);
-	ch = LYgetch();
+	ch = LYgetch_for(FOR_PROMPT);
 #ifdef VMS
 	if (term_letter || term_options ||
 #ifndef DISABLE_NEWS
-	      term_message
+	      term_message ||
 #endif
-	      || HadVMSInterrupt) {
+	      HadVMSInterrupt) {
 	    HadVMSInterrupt = FALSE;
 	    ch = 7;
 	}
@@ -2191,9 +2600,35 @@ again:
 	    LYAddToCloset(MyEdit.buffer);
 	    return(ch);
 	}
-	if (keymap[ch + 1] == LYK_REFRESH)
+	ch |= CurModif;
+	CurModif = 0;
+	if (last_xlkc != -1) {
+	    if (ch == last_xlkc)
+		ch |= LKC_MOD3;
+	    last_xlkc = -1;	/* consumed */
+	}
+	if (LKC_TO_LAC(keymap,ch) == LYK_REFRESH)
 	    goto again;
-	switch (EditBinding(ch)) {
+	xlec = EditBinding(ch);
+	if ((xlec & LYE_DF) && !(xlec & LYE_FORM_LAC)) {
+	    last_xlkc = ch;
+	    xlec &= ~LYE_DF;
+	} else {
+	    last_xlkc = -1;
+	}
+	switch (xlec) {
+	case LYE_SETM1:
+	    /*
+	     *  Set flag for modifier 1.
+	     */
+	    CurModif |= LKC_MOD1;
+	    break;
+	case LYE_SETM2:
+	    /*
+	     *  Set flag for modifier 2.
+	     */
+	    CurModif |= LKC_MOD2;
+	    break;
 	case LYE_TAB:
 	    ch = '\t';
 	    /* This used to fall through to the next case before
@@ -2254,11 +2689,42 @@ again:
 	    break;
 
 	default:
+	    if (xlec & LYE_FORM_LAC) {
+		/*
+		 *	Used in form_getstr() to end line editing and
+		 *	pass on the lynxkeycode already containing a
+		 *	lynxactioncode.  Here it is just ignored. - kw
+		 */
+		break;
+	    }
+
 	    LYLineEdit(&MyEdit, ch, FALSE);
 	}
     }
 }
 
+PUBLIC CONST char * LYLineeditHelpURL NOARGS
+{
+    static int lasthelp_lineedit = -1;
+    static char helpbuf[LY_MAXPATH] = "\0";
+    static char *phelp = &helpbuf[0];
+    if (lasthelp_lineedit == current_lineedit)
+	return &helpbuf[0];
+    if (lasthelp_lineedit == -1) {
+	LYstrncpy(helpbuf, helpfilepath, sizeof(helpbuf) - 1);
+	phelp += strlen(helpbuf);
+    }
+    if (LYLineeditHelpURLs[current_lineedit] &&
+	strlen(LYLineeditHelpURLs[current_lineedit]) &&
+	(strlen(LYLineeditHelpURLs[current_lineedit]) <=
+	 sizeof(helpbuf) - (phelp - helpbuf))) {
+	LYstrncpy(phelp, LYLineeditHelpURLs[current_lineedit],
+		  sizeof(helpbuf) - (phelp - helpbuf) - 1);
+	lasthelp_lineedit = current_lineedit;
+	return (&helpbuf[0]);
+    }
+    return NULL;
+}
 /*
  *  A replacement for 'strsep()'
  */
@@ -2968,8 +3434,14 @@ PUBLIC char *LYSafeGets ARGS2(
 	if (strchr(buffer, '\n') != 0)
 	    break;
     }
-    if (feof(fp)
-     || ferror(fp)) {
+    if (ferror(fp)) {
+	FREE(result);
+    } else if (feof(fp) && result && *result == '\0') {
+	/*
+	 *  If the file ends in the middle of a line, return the
+	 *  partial line; if another call is made after this, it
+	 *  will return NULL. - kw
+	 */
 	FREE(result);
     }
     if (src != 0)

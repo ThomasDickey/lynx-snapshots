@@ -7,6 +7,7 @@
 #include <UCMap.h>
 #include <UCDefs.h>
 #include <HTInit.h>
+#include <HTAlert.h>
 #include <LYCurses.h>
 #include <LYStyle.h>
 #include <HTML.h>
@@ -180,7 +181,7 @@ PUBLIC BOOLEAN nolist = FALSE;
 PUBLIC BOOLEAN historical_comments = FALSE;
 PUBLIC BOOLEAN minimal_comments = FALSE;
 PUBLIC BOOLEAN soft_dquotes = FALSE;
-PUBLIC BOOLEAN LYRestricted = FALSE;
+PUBLIC BOOLEAN LYRestricted = FALSE; /* whether we have -anonymous option */
 PUBLIC BOOLEAN LYValidate = FALSE;
 PUBLIC BOOLEAN LYPermitURL = FALSE;
 PUBLIC BOOLEAN child_lynx = FALSE;
@@ -190,6 +191,7 @@ PUBLIC BOOLEAN vi_keys = VI_KEYS_ALWAYS_ON;
 PUBLIC BOOLEAN emacs_keys = EMACS_KEYS_ALWAYS_ON;
 PUBLIC int keypad_mode = DEFAULT_KEYPAD_MODE;
 PUBLIC BOOLEAN case_sensitive = CASE_SENSITIVE_ALWAYS_ON;
+
 PUBLIC BOOLEAN telnet_ok = TRUE;
 #ifndef DISABLE_NEWS
 PUBLIC BOOLEAN news_ok = TRUE;
@@ -197,6 +199,9 @@ PUBLIC BOOLEAN news_ok = TRUE;
 PUBLIC BOOLEAN rlogin_ok = TRUE;
 PUBLIC BOOLEAN ftp_ok = TRUE;
 PUBLIC BOOLEAN system_editor = FALSE;
+
+PUBLIC BOOLEAN had_restrictions_default = FALSE;
+PUBLIC BOOLEAN had_restrictions_all = FALSE;
 #ifdef USE_EXTERNALS
 PUBLIC BOOLEAN no_externals = FALSE;
 #endif
@@ -247,6 +252,7 @@ PUBLIC BOOLEAN no_goto_snews = FALSE;
 PUBLIC BOOLEAN no_goto_telnet = FALSE;
 PUBLIC BOOLEAN no_goto_tn3270 = FALSE;
 PUBLIC BOOLEAN no_goto_wais = FALSE;
+PUBLIC BOOLEAN no_goto_configinfo = FALSE;
 PUBLIC BOOLEAN no_jump = FALSE;
 PUBLIC BOOLEAN no_file_url = FALSE;
 #ifndef DISABLE_NEWS
@@ -255,6 +261,14 @@ PUBLIC BOOLEAN no_newspost = FALSE;
 PUBLIC BOOLEAN no_mail = FALSE;
 PUBLIC BOOLEAN no_dotfiles = NO_DOT_FILES;
 PUBLIC BOOLEAN no_useragent = FALSE;
+PUBLIC BOOLEAN no_lynxcfg_info = FALSE;
+#ifndef NO_CONFIG_INFO
+PUBLIC BOOLEAN no_lynxcfg_xinfo = FALSE;
+#ifdef HAVE_CONFIG_H
+PUBLIC BOOLEAN no_compileopts_info = FALSE;
+#endif
+#endif
+
 PUBLIC BOOLEAN no_statusline = FALSE;
 PUBLIC BOOLEAN no_filereferer = FALSE;
 PUBLIC BOOLEAN local_host_only = FALSE;
@@ -394,6 +408,8 @@ PUBLIC BOOLEAN debug_display_partial = FALSE; /* Show with MessageSecs delay */
 PUBLIC int partial_threshold = -1;  /* # of lines to be d/l'ed until we repaint */
 #endif
 
+PUBLIC BOOLEAN LYNonRestartingSIGWINCH = FALSE;
+
 /* These are declared in cutil.h for current freeWAIS libraries. - FM */
 #ifdef DECLARE_WAIS_LOGFILES
 PUBLIC char *log_file_name = NULL; /* for WAIS log file name	in libWWW */
@@ -417,6 +433,12 @@ PRIVATE HTList *LYStdinArgs = NULL;
 #define EXTENDED_OPTION_LOGIC 1
 #endif
 
+#ifndef EXTENDED_STARTFILE_RECALL
+/* if set then additional non-option args (before the last one) will be
+   made available for 'g'oto recall - kw */
+#define EXTENDED_STARTFILE_RECALL 1
+#endif
+
 #if EXTENDED_OPTION_LOGIC
 PRIVATE BOOLEAN no_options_further=FALSE; /* set to TRUE after '--' argument */
 #endif
@@ -427,6 +449,7 @@ PRIVATE void print_help_and_exit PARAMS((int exit_status));
 
 #ifndef VMS
 PUBLIC BOOLEAN LYNoCore = NO_FORCED_CORE_DUMP;
+PUBLIC BOOLEAN restore_sigpipe_for_children = FALSE;
 PRIVATE void FatalProblem PARAMS((int sig));
 #endif /* !VMS */
 
@@ -1148,15 +1171,15 @@ PUBLIC int main ARGS2(
 	strlen((char *)ANONYMOUS_USER) > 0 &&
 #if defined (VMS) || defined (NOUSERS)
 	!strcasecomp(((char *)getenv("USER")==NULL ? " " : getenv("USER")),
-		     ANONYMOUS_USER))
+		     ANONYMOUS_USER)
 #else
 #if HAVE_CUSERID
-	STREQ((char *)cuserid((char *) NULL), ANONYMOUS_USER))
+	STREQ((char *)cuserid((char *) NULL), ANONYMOUS_USER)
 #else
-	STREQ(((char *)getlogin()==NULL ? " " : getlogin()), ANONYMOUS_USER))
+	STREQ(((char *)getlogin()==NULL ? " " : getlogin()), ANONYMOUS_USER)
 #endif /* HAVE_CUSERID */
 #endif /* VMS */
-    {
+	) {
 	parse_restrictions("default");
 	LYRestricted = TRUE;
 	LYUseTraceLog = FALSE;
@@ -1548,6 +1571,14 @@ PUBLIC int main ARGS2(
     if (vi_keys)
 	set_vi_keys();
 
+    if (crawl) {
+	/* No numbered links by default, as documented
+	   in CRAWL.announce. - kw */
+	if (!number_links) {
+	    keypad_mode = NUMBERS_AS_ARROWS;
+	}
+    }
+
     if (number_links && keypad_mode == NUMBERS_AS_ARROWS)
 	keypad_mode = LINKS_ARE_NUMBERED;
     if (keypad_mode == NUMBERS_AS_ARROWS)
@@ -1620,7 +1651,7 @@ PUBLIC int main ARGS2(
 #endif /* NOSIGHUP */
     (void) signal(SIGTERM, cleanup_sig);
 #ifdef SIGWINCH
-    (void) signal(SIGWINCH, size_change);
+	LYExtSignal(SIGWINCH, size_change);
 #endif /* SIGWINCH */
 #ifndef VMS
     if (!TRACE && !dump_output_immediately && !stack_dump) {
@@ -1642,7 +1673,8 @@ PUBLIC int main ARGS2(
 	 *   more.
 	 */
 #ifndef DOSPATH
-	(void) signal(SIGPIPE, SIG_IGN);
+	if (signal(SIGPIPE, SIG_IGN) != SIG_IGN)
+    	     restore_sigpipe_for_children = TRUE;
 #endif /* DOSPATH */
     }
 #endif /* !VMS */
@@ -1782,13 +1814,12 @@ PUBLIC int main ARGS2(
 	 *  Finish setting up and start a
 	 *  NON-INTERACTIVE session. - FM
 	 */
-	if (crawl && !number_links) {
-	    keypad_mode = NUMBERS_AS_ARROWS;
-	} else if (!nolist) {
+	if (!crawl && !nolist) {
 	    if (keypad_mode == NUMBERS_AS_ARROWS) {
 		keypad_mode = LINKS_ARE_NUMBERED;
 	    }
 	}
+
 	if (x_display != NULL && *x_display != '\0') {
 	    LYisConfiguredForX = TRUE;
 	}
@@ -1797,6 +1828,7 @@ PUBLIC int main ARGS2(
 	}
 	status = mainloop();
 	if (!nolist &&
+	    !crawl &&		/* For -crawl it has already been done! */
 	    (keypad_mode == LINKS_ARE_NUMBERED ||
 	     keypad_mode == LINKS_AND_FORM_FIELDS_ARE_NUMBERED))
 	    printlist(stdout,FALSE);
@@ -1869,10 +1901,32 @@ PUBLIC void LYRegisterLynxProtocols NOARGS
  */
 PUBLIC void reload_read_cfg NOARGS
 {
+    /*
+     *  no_option_save is always set for -anonymous and -validate.
+     *  It is better to check for one or several specific restriction
+     *  flags than for 'LYRestricted', which doesn't get set for
+     *  individual restrictions or for -validate!
+     *  However, no_option_save may not be the appropriate one to
+     *  check - in that case, a new no_something should be added
+     *  that gets automatically set for -anonymous and -validate
+     *  (and whether it applies for -anonymous can be made installer-
+     *  configurable in the usual way at the bottom of userdefs.h). - kw
+     *  
+     */
+    if (no_option_save) {
+	/* current logic requires(?) that saving user preferences is
+	   possible.  Additional applicable restrictions are already
+	   checked by caller. - kw */
+	return;
+    }
+#if 0				/* therefore this isn't needed: */
     if (LYRestricted) return;  /* for sure */
-
+#endif
     /* save .lynxrc file in case we change something from Options Menu */
-    if (!save_rc()) return;    /* can not write the very own file :( */
+    if (!save_rc()) {
+	HTAlwaysAlert(NULL, OPTIONS_NOT_SAVED);
+	return;    /* can not write the very own file :( */
+    }
 
     {
 	/* set few safe flags: */
@@ -1922,7 +1976,7 @@ PUBLIC void reload_read_cfg NOARGS
 	 }
 	 if (strcmp(LYCookieFile, LYCookieFile_flag)) {
 	     StrAllocCopy(LYCookieFile, LYCookieFile_flag);
-	     CTRACE(tfp, "cookies file can be changed in next session only, restored.\n")
+	     CTRACE(tfp, "cookies file can be changed in next session only, restored.\n");
 	 }
 #endif
 
@@ -2041,9 +2095,19 @@ static int anonymous_fun ARGS1(
     *  override or replace any additional
     *  restrictions from the command line. - FM
     */
-   if (!LYRestricted)
-      parse_restrictions("default");
-   LYRestricted = TRUE;
+    if (!LYRestricted) {
+	/* This should not happen unless the option parsing logic
+	   is broken. - kw */
+	fprintf(stderr, "Lynx: internal error parsing -anonymous!\n");
+#ifndef VMS
+	if (LYNoCore)		/* not worth a core dump, I think - kw */
+	    FatalProblem(0);
+	else
+	    exit(70);	/* EX_SOFTWARE in sysexits.h */
+#else
+	exit(-1);
+#endif
+    }
    return 0;
 }
 
@@ -2166,8 +2230,10 @@ static int display_fun ARGS1(
 {
     if (next_arg != 0) {
 	LYsetXDisplay(next_arg);
+#if 0		/* LYsetXDisplay already does this as a side effect  - kw */
 	if ((next_arg = LYgetXDisplay()) != 0)
 	    StrAllocCopy(x_display, next_arg);
+#endif
     }
 
     return 0;
@@ -2437,6 +2503,7 @@ static int restrictions_fun ARGS1(
  ""
 ,"   USAGE: lynx -restrictions=[option][,option][,option]"
 ,"   List of Options:"
+,"   ?               when used alone, list restrictions in effect."
 ,"   all             restricts all options."
 ,"   bookmark        disallow changing the location of the bookmark file."
 ,"   bookmark_exec   disallow execution links via the bookmark file"
@@ -2445,23 +2512,29 @@ static int restrictions_fun ARGS1(
 ,"                   (but still allow it for directories) when local file"
 ,"                   management is enabled."
 #endif /* DIRED_SUPPORT && OK_PERMIT */
-,"   default         same as commandline option -anonymous.  Disables"
-,"                   default services for anonymous users.  Currently set to,"
-,"                   all restricted except for: inside_telnet, outside_telnet,"
-,"                   inside_news, inside_ftp, outside_ftp, inside_rlogin,"
-,"                   outside_rlogin, goto, jump and mail.  Defaults"
-,"                   are settable within userdefs.h"
+#if defined(HAVE_CONFIG_H) && !defined(NO_CONFIG_INFO)
+,"   compileopts_info  disable info on options used to compile the binary"
+#endif
+,"   default         same as commandline option -anonymous.  Sets the"
+,"                   default service restrictions for anonymous users.  Set to"
+,"                   all restricted, except for: inside_telnet, outside_telnet,"
+,"                   inside_ftp, outside_ftp, inside_rlogin, outside_rlogin,"
+,"                   inside_news, outside_news, telnet_port, jump, mail, print,"
+,"                   exec, and goto.  The settings for these, as well as"
+,"                   additional goto restrictions for specific URL schemes"
+,"                   that are also applied, are derived from definitions"
+,"                   within userdefs.h."
 #ifdef DIRED_SUPPORT
 ,"   dired_support   disallow local file management"
 #endif /* DIRED_SUPPORT */
 ,"   disk_save       disallow saving to disk in the download and print menus"
 ,"   dotfiles        disallow access to, or creation of, hidden (dot) files"
-,"   download        disallow downloaders in the download menu"
+,"   download        disallow some downloaders in the download menu"
 ,"   editor          disallow editing"
 ,"   exec            disable execution scripts"
-,"   exec_frozen     disallow the user from changing the execution link"
+,"   exec_frozen     disallow the user from changing the execution link option"
 #ifdef USE_EXTERNALS
-,"   externals       disable passing URLs to external programs"
+,"   externals       disable passing URLs to some external programs"
 #endif
 ,"   file_url        disallow using G)oto, served links or bookmarks for"
 ,"                   file: URL's"
@@ -2469,37 +2542,40 @@ static int restrictions_fun ARGS1(
 #if !defined(HAVE_UTMP) || defined(VMS) /* not selective */
 ,"   inside_ftp      disallow ftps for people coming from inside your"
 ,"                   domain (utmp required for selectivity)"
-,"   inside_news     disallow USENET news posting for people coming from"
-,"                   inside your domain (utmp required for selectivity)"
+,"   inside_news     disallow USENET news reading and posting for people coming"
+,"                   from inside your domain (utmp required for selectivity)"
 ,"   inside_rlogin   disallow rlogins for people coming from inside your"
 ,"                   domain (utmp required for selectivity)"
 ,"   inside_telnet   disallow telnets for people coming from inside your"
 ,"                   domain (utmp required for selectivity)"
 #else
 ,"   inside_ftp      disallow ftps for people coming from inside your domain"
-,"   inside_news     disallow USENET news posting for people coming from inside"
-,"                   your domain"
+,"   inside_news     disallow USENET news reading and posting for people coming"
+,"                   from inside your domain"
 ,"   inside_rlogin   disallow rlogins for people coming from inside your domain"
 ,"   inside_telnet   disallow telnets for people coming from inside your domain"
 #endif /* HAVE_UTMP || VMS */
 ,"   jump            disable the 'j' (jump) command"
-,"   mail            disallow mail"
+,"   lynxcfg_info    disable viewing of lynx.cfg configuration file info"
+#ifndef NO_CONFIG_INFO
+,"   lynxcfg_xinfo   disable extended lynx.cfg viewing and reloading"
+#endif
 ,"   multibook       disallow multiple bookmark files"
 ,"   news_post       disallow USENET News posting."
 ,"   option_save     disallow saving options in .lynxrc"
 #if !defined(HAVE_UTMP) || defined(VMS) /* not selective */
 ,"   outside_ftp     disallow ftps for people coming from outside your"
 ,"                   domain (utmp required for selectivity)"
-,"   outside_news    disallow USENET news posting for people coming from"
-,"                   outside your domain (utmp required for selectivity)"
+,"   outside_news    disallow USENET news reading and posting for people coming"
+,"                   from outside your domain (utmp required for selectivity)"
 ,"   outside_rlogin  disallow rlogins for people coming from outside your"
 ,"                   domain (utmp required for selectivity)"
 ,"   outside_telnet  disallow telnets for people coming from outside your"
 ,"                   domain (utmp required for selectivity)"
 #else
 ,"   outside_ftp     disallow ftps for people coming from outside your domain"
-,"   outside_news    disallow USENET news posting for people coming from outside"
-,"                   your domain"
+,"   outside_news    disallow USENET news reading and posting for people coming"
+,"                   from outside your domain"
 ,"   outside_rlogin  disallow rlogins for people coming from outside your domain"
 ,"   outside_telnet  disallow telnets for people coming from outside your domain"
 #endif /* !HAVE_UTMP || VMS */
@@ -2512,14 +2588,19 @@ static int restrictions_fun ARGS1(
     };
     size_t n;
 
-    if (next_arg != 0) {
-	parse_restrictions(next_arg);
-    } else {
+    if (next_arg == 0 || *next_arg == '\0') {
 	SetOutputMode( O_TEXT );
 	for (n = 0; n < sizeof(Usage)/sizeof(Usage[0]); n++)
 	    printf("%s\n", Usage[n]);
 	SetOutputMode( O_BINARY );
 	exit(0);
+    } else if (*next_arg == '?') {
+	SetOutputMode( O_TEXT );
+	print_restrictions_to_fd(stdout);
+	SetOutputMode( O_BINARY );
+	exit(0);
+    } else {
+	parse_restrictions(next_arg);
     }
     return 0;
 }
@@ -2616,7 +2697,7 @@ static Parse_Args_Type Arg_Table [] =
    ),
    PARSE_FUN(
       "anonymous",	FUNCTION_ARG,	anonymous_fun,
-      "used to specify the anonymous account"
+      "apply restrictions for anonymous account,\nsee also -restrictions"
    ),
    PARSE_FUN(
       "assume_charset", NEED_FUNCTION_ARG, assume_charset_fun,
@@ -2862,13 +2943,19 @@ keys (may be incompatible with some curses packages)"
       "nolog",		UNSET_ARG,		&error_logging,
       "disable mailing of error messages to document owners"
    ),
+#if HAVE_SIGACTION && defined(SIGWINCH)
+   PARSE_SET(
+      "nonrestarting_sigwinch", SET_ARG,	&LYNonRestartingSIGWINCH,
+      "make window size change handler non-restarting"
+   ),
+#endif /* HAVE_SIGACTION */
    PARSE_FUN(
       "nopause",	FUNCTION_ARG,		nopause_fun,
       "disable forced pauses for statusline messages"
    ),
    PARSE_SET(
       "noprint",	SET_ARG,		&no_print,
-      "disable print functions"
+      "disable some print functions, like -restrictions=print"
    ),
    PARSE_SET(
       "noredir",	SET_ARG,		&no_url_redirection,
@@ -2928,7 +3015,7 @@ to visualize how lynx behaves with invalid HTML"
 #endif
    PARSE_SET(
       "print",		UNSET_ARG,		&no_print,
-      "enable print functions (DEFAULT)"
+      "enable print functions (DEFAULT), opposite of -noprint"
    ),
    PARSE_SET(
       "pseudo_inlines", TOGGLE_ARG,		&pseudo_inline_alts,
@@ -3024,7 +3111,7 @@ treated '>' as a co-terminator for double-quotes and tags"
 #if defined(NCURSES_MOUSE_VERSION) || defined(USE_SLANG_MOUSE)
    PARSE_SET(
       "use_mouse",	SET_ARG,		&LYUseMouse,
-      "turn on xterm mouse support"
+      "turn on mouse support"
    ),
 #endif
    PARSE_STR(
@@ -3033,7 +3120,7 @@ treated '>' as a co-terminator for double-quotes and tags"
    ),
    PARSE_SET(
       "validate",	IGNORE_ARG,		0,
-      "accept only http URLs (for validation)"
+      "accept only http URLs (meant for validation)\nimplies more restrictions than -anonymous, but\ngoto is allowed for http and https"
    ),
    PARSE_SET(
       "verbose",	TOGGLE_ARG,		&verbose_img,
@@ -3204,6 +3291,9 @@ PRIVATE void parse_arg ARGS2(
 {
     Parse_Args_Type *p;
     char *arg_name;
+#if EXTENDED_STARTFILE_RECALL
+    static BOOLEAN had_nonoption = FALSE;
+#endif
 
     arg_name = argv[0];
 
@@ -3216,6 +3306,12 @@ PRIVATE void parse_arg ARGS2(
     if (*arg_name != '-' || no_options_further == TRUE )
 #endif
     {
+#if EXTENDED_STARTFILE_RECALL
+	if (had_nonoption && !dump_output_immediately) {
+	    HTAddGotoURL(startfile); /* startfile was set by a previous arg */
+	}
+	had_nonoption = TRUE;
+#endif
 	StrAllocCopy(startfile, arg_name);
 	LYTrimStartfile(startfile);
 	return;
@@ -3381,11 +3477,14 @@ have concise descriptions of the command and/or URL which causes\r\n\
 the problem, the operating system name with version number, the\r\n\
 TCPIP implementation, and any other relevant information.\r\n");
 
-	fprintf(stderr, "\r\n\
+	if (!(sig == 0 && LYNoCore)) {
+	    fprintf(stderr, "\r\n\
 Do NOT mail the core file if one was generated.\r\n");
-
-	fprintf(stderr, "\r\n\
+	}
+	if (sig != 0) {
+	    fprintf(stderr, "\r\n\
 Lynx now exiting with signal:  %d\r\n\r\n", sig);
+	}
 
 	/*
 	 *  Exit and possibly dump core.

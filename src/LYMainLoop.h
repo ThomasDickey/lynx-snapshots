@@ -10,7 +10,9 @@
 #define AUTOEXTEDIT
 
 extern BOOLEAN LYOpenTraceLog NOPARAMS;
-extern void LYCloseTracelog NOPARAMS;
 extern int mainloop NOPARAMS;
+extern void HTAddGotoURL PARAMS((char *url));
+extern void LYCloseTracelog NOPARAMS;
+extern void repaint_main_statusline NOPARAMS;
 
 #endif /* LYMAINLOOP_H */

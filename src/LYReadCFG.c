@@ -178,8 +178,10 @@ PRIVATE void add_item_to_list ARGS2(
 	remove_backslashes(cur_item->name);
 
 	/*
-	 *  Process TRUE/FALSE field.  If we do not find one, assume it is
-	 *  true.  In any case, we want the command string.
+	 *  Find end of command string and beginning of TRUE/FALSE option
+	 *  field.  If we do not find a colon that ends the command string,
+	 *  leave the always_enabled option flag as FALSE.  In any case,
+	 *  we want the command string.
 	 */
 	if ((next_colon = find_colon(colon+1)) == NULL) {
 	    next_colon = colon + strlen(colon);
@@ -190,7 +192,6 @@ PRIVATE void add_item_to_list ARGS2(
 		outofmem(__FILE__, "read_cfg");
 	    LYstrncpy(cur_item->command, colon+1, (int)(next_colon-(colon+1)));
 	    remove_backslashes(cur_item->command);
-	    cur_item->always_enabled = TRUE;
 	}
 	if (*next_colon++) {
 	    cur_item->always_enabled = is_true(next_colon);
@@ -635,18 +636,60 @@ static int keyboard_layout_fun ARGS1(
 static int keymap_fun ARGS1(
 	char *,		key)
 {
-    char *func;
+    char *func, *efunc;
 
     if ((func = strchr(key, ':')) != NULL)	{
 	*func++ = '\0';
+	efunc = strchr(func, ':');
 	/* Allow comments on the ends of key remapping lines. - DT */
-	if (!remap(key, strtok(func, " \t\n#")))
-	    fprintf(stderr, "%s%s%s%s%s\n",
-		    gettext("key remapping of "),
-		    key, TO_SEGMENT, func,
-		    gettext(" failed"));
-	else if (!strcmp("TOGGLE_HELP", strtok(func, " \t\n#")))
-	    LYUseNoviceLineTwo = FALSE;
+	/* Allow third field for line-editor action. - kw */
+	if (efunc == func) {	/* have 3rd field, but 2nd field empty */
+	    func = NULL;
+	} else if (!remap(key, strtok(func, " \t\n:#"))) {
+	    fprintf(stderr, gettext("key remapping of %s to %s failed\n"),
+		    key, func);
+	} else {
+	    if (func && !strcmp("TOGGLE_HELP", func))
+		LYUseNoviceLineTwo = FALSE;
+	}
+	if (efunc) {
+	    efunc++;
+	    if (efunc == strtok((func ? NULL : efunc), " \t\n:#") && *efunc) {
+		BOOLEAN success = FALSE;
+		int lkc = lkcstring_to_lkc(key);
+		int lec = -1;
+		if (strcasecomp(efunc, "PASS!") == 0) {
+		    if (func) {
+			lec = LYE_FORM_LAC|lacname_to_lac(func);
+			success = LYRemapEditBinding(lkc, lec);
+		    }
+		    if (!success)
+			fprintf(stderr,
+				gettext(
+   "setting of line-editor binding for key %s (0x%x) to 0x%x for %s failed\n"),
+				key, lkc, lec, efunc);
+		    else
+			return 0;
+		}
+		if (!success && strncasecomp(efunc, "PASS", 4) == 0) {
+		    lec = LYE_FORM_PASS;
+		    success = LYRemapEditBinding(lkc, lec);
+		}
+		if (!success) {
+		    if (lec != -1) {
+			fprintf(stderr,
+				gettext(
+   "setting of line-editor binding for key %s (0x%x) to 0x%x for %s failed\n"),
+				key, lkc, lec, efunc);
+		    } else {
+			fprintf(stderr,
+				gettext(
+	   "setting of line-editor binding for key %s (0x%x) for %s failed\n"),
+				key, lkc, efunc);
+		    }
+		}
+	    }
+	}
     }
     return 0;
 }
@@ -854,6 +897,16 @@ static int viewer_fun ARGS1(
     return 0;
 }
 
+static int nonrest_sigwinch_fun ARGS1(
+	char *, 	value)
+{
+    if (!strncasecomp(value, "XWINDOWS", 8)) {
+	LYNonRestartingSIGWINCH = (LYgetXDisplay() != NULL);
+    } else {
+	LYNonRestartingSIGWINCH = is_true(value);
+    }
+    return 0;
+}
 
 #ifdef USE_PSRC
 
@@ -1111,6 +1164,7 @@ static Config_Type Config_Table [] =
      PARSE_SET("no_ismap_if_usemap", CONF_BOOL, &LYNoISMAPifUSEMAP),
      PARSE_ENV("no_proxy", CONF_ENV, 0 ),
      PARSE_SET("no_referer_header", CONF_BOOL, &LYNoRefererHeader),
+     PARSE_SET("nonrestarting_sigwinch", CONF_FUN, nonrest_sigwinch_fun),
      PARSE_FUN("outgoing_mail_charset", CONF_FUN, outgoing_mail_charset_fun),
 #ifdef DISP_PARTIAL
      PARSE_SET("partial", CONF_BOOL, &display_partial_flag),
@@ -1448,7 +1502,7 @@ PRIVATE void do_read_cfg ARGS5(
 	    }
 
 #ifndef NO_CONFIG_INFO
-	    if (fp0 != 0  &&  !LYRestricted) {
+	    if (fp0 != 0  &&  !no_lynxcfg_xinfo) {
 		LYLocalFileToURL(&url, value);
 		StrAllocCopy(cp1, value);
 		if (strchr(value, '&') || strchr(value, '<')) {
@@ -1509,7 +1563,7 @@ PRIVATE void do_read_cfg ARGS5(
 	     * of allowed options in <ul>.  Option names will be uppercased. 
 	     * FIXME:  uppercasing option names can be considered redundant.
 	     */
-	    if (fp0 != 0  &&  !LYRestricted && resultant_set) {
+	    if (fp0 != 0  &&  !no_lynxcfg_xinfo && resultant_set) {
 		char *buf = NULL;
 		unsigned i;
 
@@ -1527,7 +1581,7 @@ PRIVATE void do_read_cfg ARGS5(
 	    do_read_cfg (value, cfg_filename, nesting_level + 1, fp0,resultant_set);
 
 #ifndef NO_CONFIG_INFO
-	    if (fp0 != 0  &&  !LYRestricted) {
+	    if (fp0 != 0  &&  !no_lynxcfg_xinfo) {
 		fprintf(fp0, "    #&lt;end of %s&gt;\n\n", cp1);
 		FREE(url);
 		FREE(cp1);
@@ -1651,7 +1705,7 @@ PUBLIC void read_cfg ARGS4(
 
 /*
  *  Show rendered lynx.cfg data without comments, LYNXCFG:/ internal page.
- *  Called from getfile() cyrcle:
+ *  Called from getfile() cycle:
  *  we create and load the page just in place and return to mainloop().
  */
 PUBLIC int lynx_cfg_infopage ARGS1(
@@ -1671,9 +1725,9 @@ PUBLIC int lynx_cfg_infopage ARGS1(
      * "  <a href=\"LYNXCFG://reload\">RELOAD THE CHANGES</a>\n"
      *--------------------------------------------------*/
 
-    if ((strstr(newdoc->address, "LYNXCFG://reload")) && !LYRestricted) {
+    if (!no_lynxcfg_xinfo && (strstr(newdoc->address, "LYNXCFG://reload"))) {
 	/*
-	 *  Some staff to reload read_cfg(),
+	 *  Some stuff to reload read_cfg(),
 	 *  but also load options menu items and command-line options
 	 *  to make things consistent.	Implemented in LYMain.c
 	 */
@@ -1730,7 +1784,7 @@ PUBLIC int lynx_cfg_infopage ARGS1(
 
 
 #ifndef NO_CONFIG_INFO
-	if (!LYRestricted) {
+	if (!no_lynxcfg_xinfo) {
 #if defined(HAVE_CONFIG_H) || defined(VMS)
 	    if (strcmp(lynx_cfg_file, LYNX_CFG_FILE)) {
 		fprintf(fp0, "<em>%s\n%s",
@@ -1787,7 +1841,7 @@ PUBLIC int lynx_cfg_infopage ARGS1(
 	LYCloseTempFP(fp0);
     }
 
-    /* return to getfile() cyrcle */
+    /* return to getfile() cycle */
     StrAllocCopy(newdoc->address, local_url);
     WWWDoc.address = newdoc->address;
     WWWDoc.post_data = newdoc->post_data;
@@ -1805,7 +1859,7 @@ PUBLIC int lynx_cfg_infopage ARGS1(
 #if defined(HAVE_CONFIG_H) && !defined(NO_CONFIG_INFO)
 /*
  *  Compile-time definitions info, LYNXCOMPILEOPTS:/ internal page,
- *  from getfile() cyrcle.
+ *  from getfile() cycle.
  */
 PUBLIC int lynx_compile_opts ARGS1(
     document *,		       newdoc)
@@ -1848,7 +1902,7 @@ PUBLIC int lynx_compile_opts ARGS1(
 	LYCloseTempFP(fp0);
     }
 
-    /* exit to getfile() cyrcle */
+    /* exit to getfile() cycle */
     StrAllocCopy(newdoc->address, info_url);
     WWWDoc.address = newdoc->address;
     WWWDoc.post_data = newdoc->post_data;

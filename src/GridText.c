@@ -1069,7 +1069,14 @@ PRIVATE void display_title ARGS1(
     /*
      *  Generate the page indicator (percent) string.
      */
-    if ((text->Lines + 1) > (display_lines)) {
+    if (LYcols < 10) {
+	percent[0] = '\0';	/* Null string */
+    } else if ((display_lines) <= 0 && LYlines > 0 &&
+	text->top_of_screen <= 99999 && text->Lines <= 999999) {
+	sprintf(percent, " (l%d of %d)",
+		text->top_of_screen, text->Lines);
+    } else if ((text->Lines + 1) > (display_lines) &&
+	(display_lines) > 0) {
 	/*
 	 *  In a small attempt to correct the number of pages counted....
 	 *    GAB 07-14-94
@@ -1130,7 +1137,8 @@ PRIVATE void display_title ARGS1(
 	 *  account the possibility that multibyte
 	 *  characters might be present. - FM
 	 */
-	title[((LYcols - 2) - strlen(percent))] = '\0';
+	if (LYcols - 2 >= (int)strlen(percent))
+	    title[((LYcols - 2) - strlen(percent))] = '\0';
 	move(0, 1);
     }
     addstr(title);
@@ -1203,6 +1211,12 @@ PRIVATE void display_page ARGS3(
 
     tmp[0] = tmp[1] = tmp[2] = '\0';
     text->page_has_target = NO;
+    if (display_lines <= 0) {
+	/*  No screen space to display anything!
+	 *  returning here makes it more likely we will survive if
+	 *  an xterm is temporarily made very small. - kw */
+	return;
+    }
     last_screen = text->Lines - (display_lines - 2);
     line = text->last_line->prev;
 
@@ -7905,7 +7919,15 @@ PRIVATE int find_best_target_cs ARGS3(
     return (-1);
 }
 
-PUBLIC void HText_SubmitForm ARGS4(
+/*
+ *  HText_SubmitForm - generate submit data from form fields.
+ *  For mailto forms, send the data.
+ *  For other methods, set fields in structure pointed to by doc
+ *  appropriately for next request.
+ *  Returns 1 if *doc set appropriately for next request,
+ *	    0 otherwise. - kw
+ */
+PUBLIC int HText_SubmitForm ARGS4(
 	FormInfo *,	submit_item,
 	document *,	doc,
 	char *,		link_name,
@@ -7941,7 +7963,7 @@ PUBLIC void HText_SubmitForm ARGS4(
 
     CTRACE(tfp, "FIXME:SubmitForm\n");
     if (!HTMainText)
-	return;
+	return 0;
 
     thisform = HTList_objectAt(HTMainText->forms, form_number - 1);
     /*  Sanity check */
@@ -7961,10 +7983,10 @@ PUBLIC void HText_SubmitForm ARGS4(
 	if ((submit_item->submit_method == URL_MAIL_METHOD) &&
 	    strncmp(submit_item->submit_action, "mailto:", 7)) {
 	    HTAlert(BAD_FORM_MAILTO);
-	    return;
+	    return 0;
 	}
     } else {
-	return;
+	return 0;
     }
 
     /*
@@ -8830,7 +8852,7 @@ PUBLIC void HText_SubmitForm ARGS4(
 		 doc->post_content_type);
 	FREE(query);
 	FREE(doc->post_content_type);
-	return;
+	return 0;
     } else {
 	_statusline(SUBMITTING_FORM);
     }
@@ -8840,13 +8862,13 @@ PUBLIC void HText_SubmitForm ARGS4(
 	CTRACE(tfp,"GridText - post_data: %s\n",doc->post_data);
 	StrAllocCopy(doc->address, submit_item->submit_action);
 	FREE(query);
-	return;
+	return 1;
     } else { /* GET_METHOD */
 	StrAllocCopy(doc->address, query);
 	FREE(doc->post_data);
 	FREE(doc->post_content_type);
 	FREE(query);
-	return;
+	return 1;
     }
 }
 
@@ -10069,7 +10091,13 @@ PUBLIC int HText_ExtEditForm ARGS1(
     HTSprintf0 (&tbuf, "%s %s %s", editor, ed_offset, ed_temp);
 #endif
 
-    LYSystem (tbuf);   /* finally the editor is called */
+    if (LYSystem (tbuf)) {   /* finally the editor is called */
+	/*
+	 *  If something went wrong, we should probably return soon;
+	 *  currently we don't, but at least put out a message. - kw
+	 */
+	HTAlwaysAlert(NULL, ERROR_SPAWNING_EDITOR);
+    }
 
 #ifdef UNIX
     /*
@@ -10352,6 +10380,12 @@ PUBLIC int HText_InsertFile ARGS1(
 	HTInfoMsg (FILE_INSERT_CANCELLED);
 	CTRACE(tfp, "GridText: file insert cancelled - no filename provided\n");
 	return (0);
+    }
+    if (no_dotfiles || !show_dotfiles) {
+	if (*LYPathLeaf(fn) == '.') {
+	    HTUserMsg(FILENAME_CANNOT_BE_DOT);
+	    return (0);
+	}
     }
 
     /*
@@ -10790,7 +10824,7 @@ PUBLIC void redraw_lines_of_link ARGS1(
 	lines_back = display_lines - (links[cur].ly-pvtTITLE_HEIGHT);
     }
     todr1 = HTMainText->next_line;
-    while (lines_back--)
+    while (lines_back-- > 0)
 	todr1 = todr1->prev;
     todr2 = (links[cur].hightext2 && links[cur].ly < display_lines) ?
 	    todr1->next : 0;
