@@ -1,6 +1,43 @@
 Changes since Lynx 2.8 release
 ================================================================================
 
+1998-06-04 (2.8.1dev.14)
+* minor formatting fixes and documentation for upload screen - LP
+* remove config.cache at beginning of configure script - TD
+* eliminate cast for GetChar in LYStrings.c (from bug report by Michael Warner,
+  analysis by BL) - TD
+* shorten logs from WWW/* by disabling echo of compiler options as in src/* - TD
+* add configure test for types pid_t and uid_t - TD
+* add configure test for array type used in getgroups call, to distinguish
+  between BSD and POSIX variations which use different sizes - TD
+* modify configure script to compile DISP_PARTIAL code by default - TD
+* fix compiler warnings dealing with unreached statements - TD
+* change 'keymap[] array to unsigned char, move logic that relies on its size
+  into LYKeymap.c - TD
+* make LYOpenScratch() work properly for 8.3 names (reported by DK) - TD
+* DISP_PARTIAL:  introduce separate variables Newline_partial and
+  NumOfLines_partial, initialize them in mainloop and synchronize with Newline
+  later when the reload completes (case NORMAL).  To reduce the CPU usage while
+  downloading, call HText_pageDisplay only if NumOfLines_partial is in the
+  current display page or any Scroll key pressed by the user.  We disable
+  partial_display if requested URL have #fragment, otherwise user will see the
+  top page first (yes, s/he will be moved to #fragment when the download
+  completed, but only if no scroll keys were pressed before!).  Processing of
+  "END" key changed from MAXINT to real number of lines in the document
+  (important for display_partial mode) - LP.
+* correct problem that caused DGJPP version built with slang 1.2.2 to lose its
+  socket whenever the rendering of a http URL is interrupted with "z".  This is
+  in HTCheckForInterrupt in LYUtils.c (reported by John Lewis) - DK
+* add files pdcurses.key, slang.key, djgpp.key to document the keybindings
+  used for DJGPP version - DK
+* allow mapping of ALT and Function keys with the DOS port for both the
+  PDCurses version and the SLANG version with the DJGPP keyhandler.  The
+  extended keys to be mapped have to be specified numerically according to the
+  definitions in curses.h (for PDCurses) or in keys.h (for SLANG with DJGPP
+  keyhandler).  DJGPP maps keys up to 0x293, while PDCurses maps keys up to
+  0x1c0 - DK
+* don't try to use -std1 option for gcc on Digital Unix (reported by Michael
+  Warner <warner@wsu.edu>) - TD
 1998-05-23 (2.8.1dev.13)
 * use new function LYLocalFileToUrl to cleanup some pathname references - TD
 * eliminate 'tempname()' function, using LYNewTxtFile, etc., with new functions

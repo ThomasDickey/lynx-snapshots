@@ -464,7 +464,7 @@ PUBLIC int HTConfirmPostRedirect ARGS2(
 	return 303;
     }
 
-    if (dump_output_immediately)
+    if (dump_output_immediately) {
         if (server_status == 301) {
 	    /*
 	    **  Treat 301 as historical, i.e., like 303 (GET
@@ -479,6 +479,7 @@ PUBLIC int HTConfirmPostRedirect ARGS2(
 	    */
 	    return 0;
 	}
+    }
 
     StatusInfo[254] = StatusInfo[255] = '\0';
     url[254] = url[(LYcols < 250 ? LYcols-1 : 255)] = '\0';

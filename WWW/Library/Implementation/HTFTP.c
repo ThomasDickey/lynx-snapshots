@@ -2097,7 +2097,6 @@ PRIVATE EntryInfo * parse_dir_entry ARGS2(
 	    */
 	    StrAllocCopy(entry_info->filename, entry);
 	    return(entry_info); /* mostly empty info */
-	    break; /* not needed */
 
     } /* switch (server_type) */
 
@@ -2164,7 +2163,6 @@ PRIVATE int compare_EntryInfo_structs ARGS2(
 		    return(1);
 		else
 		    return(-1);
-	    break;
 
 	case FILE_BY_TYPE:
 	    if (entry1->type && entry2->type) {
@@ -2174,7 +2172,6 @@ PRIVATE int compare_EntryInfo_structs ARGS2(
 		/* else fall to filename comparison */
 	    }
 	    return (strcmp(entry1->filename, entry2->filename));
-	    break;
 
 	case FILE_BY_DATE:
 	    if (entry1->date && entry2->date) {
@@ -2266,7 +2263,6 @@ PRIVATE int compare_EntryInfo_structs ARGS2(
 		/* else fall to filename comparison */
 	    }
 	    return (strcmp(entry1->filename, entry2->filename));
-	    break;
 
 	case FILE_BY_NAME:
 	default:

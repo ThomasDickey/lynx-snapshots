@@ -48,8 +48,6 @@
 
 #include <LYLeaks.h>
 
-#define FREE(x) if (x) {free(x); x = NULL;}
-
 struct _HTStream 
 {
   HTStreamClass * isa;

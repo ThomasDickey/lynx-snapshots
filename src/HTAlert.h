@@ -1,11 +1,12 @@
-/*  */
-
 /*      Displaying messages and getting input for WWW Library
 **      =====================================================
 **
 **         May 92 Created By C.T. Barker
 **         Feb 93 Portablized etc TBL
 */
+
+#ifndef HTALERT_H
+#define HTALERT_H 1
 
 #ifndef HTUTILS_H
 #include <HTUtils.h>
@@ -128,6 +129,4 @@ extern int HTConfirmPostRedirect PARAMS((
 	CONST char *	Redirecting_url,
 	int		server_status));
 
-/*
-
-    */
+#endif /* HTALERT_H */

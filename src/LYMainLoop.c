@@ -90,7 +90,10 @@ PUBLIC	HTList * Goto_URLs = NULL;  /* List of Goto URLs */
 
 PUBLIC char * LYRequestTitle = NULL; /* newdoc.title in calls to getfile() */
 
-PUBLIC int Newline = 0; /* HText_pageDisplay() requires it */
+#ifdef DISP_PARTIAL
+PUBLIC int Newline_partial = 0;     /* required for display_partial mode */
+PUBLIC int NumOfLines_partial = 0;  /* required for display_partial mode */
+#endif
 
 PRIVATE document newdoc;
 PRIVATE document curdoc;
@@ -187,6 +190,7 @@ int mainloop NOARGS
     int getresult;
     int arrowup = FALSE, show_help = FALSE;
     int lines_in_file = -1;
+    int Newline = 0;
     char prev_target[512];
     char user_input_buffer[1024];
     char *owner_address = NULL;  /* Holds the responsible owner's address     */
@@ -212,6 +216,9 @@ int mainloop NOARGS
     BOOLEAN LYSelectPopups_flag = LYSelectPopups;
     BOOLEAN trace_mode_flag = FALSE;
     BOOLEAN forced_HTML_mode = LYforce_HTML_mode;
+#ifdef DISP_PARTIAL
+    BOOLEAN display_partial_flag = display_partial;
+#endif
     char cfile[128];
     FILE *cfp;
     char *cp, *toolbar;
@@ -491,6 +498,27 @@ try_again:
 		     !strcmp(newdoc.address, homepage))) {
 		    LYPermitURL = TRUE;
 		}
+
+#ifdef DISP_PARTIAL
+		display_partial = display_partial_flag; /* reset */
+		Newline_partial = 0;     /* initialize */
+		NumOfLines_partial = 0;  /* initialize */
+		/*
+		 *  Disable display_partial if requested URL has #fragment.
+		 *  Otherwise user got the new document from the first page and
+		 *  be moved to #fragment later after download completed, but
+		 *  only if user did not mess screen up by scrolling before... 
+		 *  So fall down to old behavior here.
+		 *  Also we should avoid displaying 'd'ownloaded files
+		 *  since they are not supposed to be shown on the screen.
+		 *  (actually we may get 'curdoc' displayed from the first page...)
+		 */
+		if (display_partial && (strchr(newdoc.address, '#')==NULL) &&
+			    (strncmp(newdoc.address, "LYNXDOWNLOAD:", 13)==0))
+			display_partial = TRUE;
+		else
+			display_partial = FALSE;
+#endif /* DISP_PARTIAL */
 
 #ifndef DONT_TRACK_INTERNAL_LINKS
 		if (try_internal) {
@@ -783,10 +811,9 @@ try_again:
 		       }
 		       cmd = LYK_PREV_DOC;
 		       goto new_cmd;
-		       }
+		    }
 		    override_LYresubmit_posts = TRUE;
 		    goto try_again;
-		    break;
 
 		case NORMAL:
 		    /*
@@ -963,6 +990,14 @@ try_again:
 		     *	before, or it is 1 if this is a new file.
 		     */
 		    Newline = newdoc.line;
+#ifdef DISP_PARTIAL
+		    /*
+		     *	Override newdoc.line value with a new one if user
+		     *	scrolled the document while downloading.
+		     */
+		    if (display_partial && (Newline_partial != 0))
+			Newline = Newline_partial;
+#endif /* DISP_PARTIAL */
 
 		    /*
 		     *	If we are going to a target line or
@@ -1322,7 +1357,7 @@ try_again:
 			 (links[curdoc.link].type & WWW_LINK_TYPE))) {
 #endif /* NORMAL_NON_FORM_LINK_STATUSLINES_FOR_ALL_USER_MODES */
 #endif /* INDICATE_FORMS_MODE_FOR_ALL_LINKS_ON_PAGE */
-		if (links[curdoc.link].type == WWW_FORM_LINK_TYPE)
+		if (links[curdoc.link].type == WWW_FORM_LINK_TYPE) {
 		    switch(links[curdoc.link].form->type) {
 		    case F_PASSWORD_TYPE:
 			if (links[curdoc.link].form->disabled == YES)
@@ -1395,8 +1430,9 @@ try_again:
 			    statusline(FORM_LINK_TEXT_MESSAGE);
 			break;
 		    }
-		else
+		} else {
 		    statusline(NORMAL_LINK_MESSAGE);
+		}
 
 		/*
 		 *  Let them know if it's an index -- very rare.
@@ -1419,17 +1455,18 @@ try_again:
 		}
 		if (!cp)
 		    cp = links[curdoc.link].lname;
-		if (more)
+		if (more) {
 		    if (is_www_index)
 			_user_message("-more- -index- %s",
 						 cp);
 		    else
 			_user_message("-more- %s",cp);
-		else
+		} else {
 		    if (is_www_index)
 			_user_message("-index- %s",cp);
 		    else
 			statusline(cp);
+		}
 	    } else if (is_www_index && more) {
 		char buf[128];
 
@@ -1678,8 +1715,8 @@ new_keyboard_input:
 	cmd = keymap[c+1];  /* add 1 to map EOF to 0 */
 
 #if defined(DIRED_SUPPORT) && defined(OK_OVERRIDE)
-	if (lynx_edit_mode && override[c+1] && !no_dired_support)
-	  cmd = override[c+1];
+	if (lynx_edit_mode && key_override[c+1] && !no_dired_support)
+	  cmd = key_override[c+1];
 #endif /* DIRED_SUPPORT && OK_OVERRIDE */
 
 	real_cmd = cmd;
@@ -2184,7 +2221,6 @@ new_cmd:  /*
 
 	case LYK_ABORT: 	/* don't ask the user about quitting */
 	    return(0);
-	    break;
 
 	case LYK_NEXT_PAGE:	/* next page */
 	    if (more) {
@@ -2303,7 +2339,7 @@ new_cmd:  /*
 
 	case LYK_END:
 	    if (more) {
-	       Newline = MAXINT; /* go to end of file */
+	       Newline = lines_in_file - display_lines + 3;  /* go to end of file */
 	       arrowup = TRUE;	 /* position on last link */
 	    } else {
 		cmd = LYK_NEXT_PAGE;
@@ -5197,7 +5233,6 @@ check_add_bookmark_to_self:
 	    sleep(MessageSecs);
 	    cmd = LYK_RELOAD;
 	    goto new_cmd;
-	    break;
 
 	case LYK_INLINE_TOGGLE:
 	    if (pseudo_inline_alts)
@@ -5210,7 +5245,6 @@ check_add_bookmark_to_self:
 	    sleep(MessageSecs);
 	    cmd = LYK_RELOAD;
 	    goto new_cmd;
-	    break;
 
 	case LYK_RAW_TOGGLE:
 	    if (LYUseDefaultRawMode)
@@ -5223,7 +5257,6 @@ check_add_bookmark_to_self:
 	    sleep(MessageSecs);
 	    cmd = LYK_RELOAD;
 	    goto new_cmd;
-	    break;
 
 	case LYK_HEAD:
 	    if (nlinks > 0 &&

@@ -112,7 +112,7 @@ extern int LYChosenShowColor;	/* extended color/monochrome choice */
 extern int LYrcShowColor;	/* ... as read or last written	    */
 
 extern BOOLEAN LYShowCursor;	/* Show the cursor or hide it?	    */
-extern BOOLEAN verbose_img;	/* display filenames of images?     */	 
+extern BOOLEAN verbose_img;	/* display filenames of images?     */
 extern BOOLEAN LYUseDefShoCur;	/* Command line -show_cursor toggle */
 extern BOOLEAN LYCursesON;  /* start_curses()->TRUE, stop_curses()->FALSE */
 extern BOOLEAN LYUserSpecifiedURL;  /* URL from a goto or document? */
@@ -121,7 +121,6 @@ extern BOOLEAN jump_buffer;     /* TRUE if offering default shortcut */
 extern BOOLEAN goto_buffer;     /* TRUE if offering default goto URL */
 extern char *LYRequestTitle;    /* newdoc.title in calls to getfile() */
 extern char *jumpprompt;        /* The default jump statusline prompt */
-extern int Newline;		/* HText_pageDisplay() requires it */
 extern int more;  /* is there more document to display? */
 extern int display_lines; /* number of lines in the display */
 extern int www_search_result;
@@ -177,7 +176,7 @@ extern BOOLEAN case_sensitive;    /* TRUE to turn on case sensitive search */
 extern BOOLEAN no_inside_telnet;  /* this and following are restrictions */
 extern BOOLEAN no_outside_telnet;
 extern BOOLEAN no_telnet_port;
-extern BOOLEAN no_inside_news;  
+extern BOOLEAN no_inside_news;
 extern BOOLEAN no_outside_news;
 extern BOOLEAN no_inside_ftp;
 extern BOOLEAN no_outside_ftp;
@@ -253,6 +252,8 @@ extern BOOLEAN keep_mime_headers; /* Include mime headers and *
 				   * force source dump	      */
 extern BOOLEAN no_url_redirection;   /* Don't follow URL redirections */
 extern BOOLEAN display_partial;      /* Display document during download */
+extern int Newline_partial;          /* -//- "current" newline position */
+extern int NumOfLines_partial;       /* -//- "current" number of lines */
 extern char *form_post_data;         /* User data for post form */
 extern char *form_get_data;          /* User data for get form */
 extern char *http_error_file;        /* Place HTTP status code in this file */
@@ -307,7 +308,7 @@ extern BOOLEAN no_externals; /* don't allow the use of externals */
 extern BOOLEAN LYNoISMAPifUSEMAP;	/* Omit ISMAP link if MAP present? */
 extern int LYHiddenLinks;
 
-extern BOOL New_DTD; 
+extern BOOL New_DTD;
 
 #define BOOKMARK_TITLE "Bookmark file"
 #define MOSAIC_BOOKMARK_TITLE "Converted Mosaic Hotlist"

@@ -77,14 +77,14 @@ PUBLIC LexItem lex ARGS1(FILE *, fp)
 		else		  return LEX_ALPH_STR;
 	    }
 	    else switch(ch) {
-	      case EOF:		return LEX_EOF;		break;
+	      case EOF:		return LEX_EOF;
 	      case '\n':
-		HTlex_line++;	return LEX_REC_SEP;	break;
-	      case ':':		return LEX_FIELD_SEP;	break;
-	      case ',':		return LEX_ITEM_SEP;	break;
-	      case '(':		return LEX_OPEN_PAREN;	break;
-	      case ')':		return LEX_CLOSE_PAREN;	break;
-	      case '@':		return LEX_AT_SIGN;	break;
+		HTlex_line++;	return LEX_REC_SEP;
+	      case ':':		return LEX_FIELD_SEP;
+	      case ',':		return LEX_ITEM_SEP;
+	      case '(':		return LEX_OPEN_PAREN;
+	      case ')':		return LEX_CLOSE_PAREN;
+	      case '@':		return LEX_AT_SIGN;
 	      default:	;	/* Leading white space ignored (SP,TAB,CR) */
 	    }
 	    break;
@@ -104,39 +104,28 @@ PUBLIC char *lex_verbose ARGS1(LexItem, lex_item)
     switch (lex_item) {
       case LEX_NONE:		/* Internally used	*/
 	return "NO-LEX-ITEM";
-	break;
       case LEX_EOF:		/* End of file		*/
 	return "end-of-file";
-	break;
       case LEX_REC_SEP:		/* Record separator	*/
 	return "record separator (newline)";
-	break;
       case LEX_FIELD_SEP:	/* Field separator	*/
 	return "field separator ':'";
-	break;
       case LEX_ITEM_SEP:	/* List item separator	*/
 	return "item separator ','";
-	break;
       case LEX_OPEN_PAREN:	/* Group start tag	*/
 	return "'('";
-	break;
       case LEX_CLOSE_PAREN:	/* Group end tag	*/
 	return "')'";
-	break;
       case LEX_AT_SIGN:		/* Address qualifier	*/
 	return "address qualifier '@'";
-	break;
       case LEX_ALPH_STR:	/* Alphanumeric string	*/
 	sprintf(msg, "alphanumeric string '%s'", HTlex_buffer);
 	return msg;
-	break;
       case LEX_TMPL_STR:	/* Template string	*/
 	sprintf(msg, "template string '%s'", HTlex_buffer);
 	return msg;
-	break;
       default:
 	return "UNKNOWN-LEX-ITEM";
-	break;
     }
 }
 

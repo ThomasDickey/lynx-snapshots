@@ -82,15 +82,11 @@ PRIVATE int set_clicked_link ARGS2(int,x,int,y)
   if (mouse_link == -1) return -1;
 
   /* If a link was hit, we must look for a key which will activate LYK_ACTIVATE
-  ** XXX The 127 in the following line will depend on the size of the keymap[]
-  ** array.  However, usually we'll find LYK_ACTIVATE somewhere in the first
-  ** 127 keys (it's usually mapped to the Enter key)
+  ** We expect to find LYK_ACTIVATE (it's usually mapped to the Enter key).
   **/
-  for (i=0; i<127; i++) {
-    if (LYisNonAlnumKeyname(i, LYK_ACTIVATE)) {
+  if ((i = lookup_keymap(LYK_ACTIVATE)) >= 0)
       return i;
-    }
-  }
+
     /* Whoops!	Nothing's defined as LYK_ACTIVATE!
        Well, who are we to argue with the user?
        Forget about the mouse click */
@@ -311,23 +307,6 @@ PRIVATE int sl_parse_mouse_event ARGS3(int *, x, int *, y, int *, button)
 }
 #endif
 
-#if defined(USE_SLANG_MOUSE) || defined(NCURSES_MOUSE_VERSION)
-PRIVATE int map_function_to_key ARGS1(char, keysym)
-{
-   int i;
-
-   /* I would prefer to use sizeof keymap but its size is not available.
-    * A better method would be to declare it as some fixed size.
-    */
-   for (i = 1; i < 256; i++)
-     {
-	if (keymap[i] == keysym)
-	  return i - 1;
-     }
-   return -1;
-}
-#endif
-
 #if defined(USE_SLANG_MOUSE)
 PRIVATE int sl_read_mouse_event NOARGS
 {
@@ -345,7 +324,7 @@ PRIVATE int sl_read_mouse_event NOARGS
 	      * The problem is that we need to determine
 	      * what to return to achieve this.
 	      */
-	     return map_function_to_key (LYK_PREV_DOC);
+	     return LYReverseKeymap (LYK_PREV_DOC);
 	  }
      }
    return -1;
@@ -392,7 +371,7 @@ static Keysym_String_List Keysym_Strings [] =
    {NULL, -1}
 };
 
-static int map_string_to_keysym (char *str, int *keysym)
+PRIVATE int map_string_to_keysym (char *str, int *keysym)
 {
    Keysym_String_List *k;
 
@@ -413,7 +392,7 @@ static int map_string_to_keysym (char *str, int *keysym)
 
 
 /* The second argument may either be a string or and integer */
-static int setkey_cmd (int argc GCC_UNUSED, SLcmd_Cmd_Table_Type *table)
+PRIVATE int setkey_cmd (int argc GCC_UNUSED, SLcmd_Cmd_Table_Type *table)
 {
    char *keyseq;
    int keysym;
@@ -426,7 +405,7 @@ static int setkey_cmd (int argc GCC_UNUSED, SLcmd_Cmd_Table_Type *table)
 	break;
 
       case SLANG_STRING_TYPE:
-        if (-1 == map_string_to_keysym (table->string_args[2], &keysym))
+	if (-1 == map_string_to_keysym (table->string_args[2], &keysym))
 	  return -1;
 	break;
 
@@ -437,7 +416,7 @@ static int setkey_cmd (int argc GCC_UNUSED, SLcmd_Cmd_Table_Type *table)
    return SLkm_define_keysym (keyseq, keysym, Keymap_List);
 }
 
-static int unsetkey_cmd (int argc GCC_UNUSED, SLcmd_Cmd_Table_Type *table)
+PRIVATE int unsetkey_cmd (int argc GCC_UNUSED, SLcmd_Cmd_Table_Type *table)
 {
    SLang_undefine_key (table->string_args[1], Keymap_List);
    if (SLang_Error) return -1;
@@ -451,7 +430,7 @@ static SLcmd_Cmd_Type Keymap_Cmd_Table [] =
    {NULL}
 };
 
-static int read_keymap_file NOARGS
+PRIVATE int read_keymap_file NOARGS
 {
    char line[1024];
    FILE *fp;
@@ -466,7 +445,11 @@ static int read_keymap_file NOARGS
    keymap_file = "lynx.keymaps";
    home = "SYS$LOGIN:";
 #else
+#ifdef FNAMES_8_3
+   keymap_file = "/_lynxkey.map";
+#else
    keymap_file = "/.lynx-keymaps";
+#endif /* FNAMES_8_3 */
    home = getenv ("HOME");
    if (home == NULL) home = "";
 #endif
@@ -504,7 +487,7 @@ static int read_keymap_file NOARGS
    return ret;
 }
 
-int lynx_initialize_keymaps NOARGS
+PUBLIC int lynx_initialize_keymaps NOARGS
 {
    int i;
    char keybuf[2];
@@ -547,12 +530,18 @@ int lynx_initialize_keymaps NOARGS
    return 0;
 }
 
-int LYgetch (void)
+/* We cannot guarantee the type for 'GetChar', and should not use a cast. */
+PRIVATE int myGetChar NOARGS
+{
+   return GetChar();
+}
+
+PUBLIC int LYgetch NOARGS
 {
    SLang_Key_Type *key;
    int keysym;
 
-   key = SLang_do_key (Keymap_List, (int (*)(void)) GetChar);
+   key = SLang_do_key (Keymap_List, myGetChar);
    if ((key == NULL) || (key->type != SLKEY_F_KEYSYM))
      return DO_NOTHING;
 
@@ -601,28 +590,6 @@ re_read:
 	}
    }
 #endif /* !USE_SLANG || VMS */
-
-/* The RAWDOSKEYHACK takes key definitions from curses.h (when using
- * PDCURSES) or from the DJGPP file keys.h (when using SLANG) and maps
- * them to the values used by the lynx file LYKeymap.c. */
-
-#ifdef RAWDOSKEYHACK
-    if (raw_dos_key_hack) {
-	if (c == 0) c = '/';
-	if (c > 255) {	    /* handle raw dos keys */
-	    switch (c)
-	    {
-		case 464: c = '-';	break;	/* keypad minus*/
-		case 465: c = '+';	break;	/* keypad plus*/
-		case 459: c = 13;	break;	/* keypad enter*/
-		case 463: c = '*';	break;	/* keypad * */
-		case 440: c = 'Q';	break;	/* alt x */
-		case 265: c = 'H';	break;	/* F1 */
-		default: break;
-	    }
-	}
-    }
-#endif /* RAWDOSKEYHACK */
 
 #ifdef USE_GETCHAR
     if (c == EOF && errno == EINTR)	/* Ctrl-Z causes EINTR in getchar() */
@@ -791,74 +758,6 @@ re_read:
 	if (isdigit(a) && (b == '[' || c == 155) && d != -1 && d != '~')
 	    d = GetChar();
     }
-#if defined(__DJGPP__) && defined(USE_SLANG)
-#ifdef DJGPP_KEYHANDLER
-    else { /* DJGPP keypad interface (see file "keys.h" for definitions) */
-	switch (c) {
-	    case K_Up:		c = UPARROW;	break; /* up arrow */
-	    case K_EUp: 	c = UPARROW;	break; /* up arrow */
-	    case K_Down:	c = DNARROW;	break; /* down arrow */
-	    case K_EDown:	c = DNARROW;	break; /* down arrow */
-	    case K_Right:	c = RTARROW;	break; /* right arrow */
-	    case K_ERight:	c = RTARROW;	break; /* right arrow */
-	    case K_Left:	c = LTARROW;	break; /* left arrow */
-	    case K_ELeft:	c = LTARROW;	break; /* left arrow */
-	    case K_PageDown:	c = PGDOWN;	break; /* page down */
-	    case K_EPageDown:	c = PGDOWN;	break; /* page down */
-	    case K_PageUp:	c = PGUP;	break; /* page up */
-	    case K_EPageUp:	c = PGUP;	break; /* page up */
-	    case K_Home:	c = HOME;	break; /* HOME */
-	    case K_EHome:	c = HOME;	break; /* HOME */
-	    case K_End: 	c = END_KEY;	break; /* END */
-	    case K_EEnd:	c = END_KEY;	break; /* END */
-	    case K_F1:		c = F1; 	break; /* F1 */
-	    case K_Alt_X:	c = 4;		break; /* alt x */
-	}
-    }
-#else
-    else { /* SLang keypad interface (see file "slang.h" for definitions) */
-	switch (c) {
-	case SL_KEY_UP:
-	    c = UPARROW;
-	    break;
-	case SL_KEY_DOWN:
-	    c = DNARROW;
-	    break;
-	case SL_KEY_RIGHT:
-	    c = RTARROW;
-	    break;
-	case SL_KEY_B2:
-	    c = DO_NOTHING;
-	    break;
-	case SL_KEY_LEFT:
-	    c = LTARROW;
-	    break;
-	case SL_KEY_PPAGE:
-	case SL_KEY_A3:
-	    c = PGUP;
-	    break;
-	case SL_KEY_NPAGE:
-	case SL_KEY_C3:
-	    c = PGDOWN;
-	    break;
-	case SL_KEY_HOME:
-	case SL_KEY_A1:
-	    c = HOME;
-	    break;
-	case SL_KEY_END:
-	case SL_KEY_C1:
-	    c = END_KEY;
-	    break;
-	case SL_KEY_F(1):
-	    c = F1;
-	    break;
-	case SL_KEY_BACKSPACE:
-	    c = 127;
-	    break;
-	}
-    }
-#endif /* DJGPP_KEYHANDLER */
-#endif /* __DJGPP__ && USE_SLANG */
 #if HAVE_KEYPAD
     else {
 	/*
@@ -926,7 +825,7 @@ re_read:
 	   c = 127;		   /* backspace key (delete, not Ctrl-H) */
 	   break;
 #endif /* KEY_BACKSPACE */
-#ifdef KEY_F
+#if defined(KEY_F) && !defined(__DJGPP__)
 	case KEY_F(1):
 	   c = F1;		   /* VTxxx Help */
 	   break;
@@ -972,7 +871,7 @@ re_read:
 	   if (event.bstate & BUTTON1_CLICKED) {
 	     c = set_clicked_link(event.x, event.y);
 	   } else if (event.bstate & BUTTON3_CLICKED) {
-	     c = map_function_to_key (LYK_PREV_DOC);
+	     c = LYReverseKeymap (LYK_PREV_DOC);
 	   }
 #else /* pdcurses version */
 	      int left,right;
@@ -983,15 +882,17 @@ re_read:
 	      mouse_link = -1;
 	      request_mouse_pos();
 	      if (Mouse_status.button[0] & BUTTON_CLICKED) {
-		if (Mouse_status.y == (LYlines-1))
+		if (Mouse_status.y == (LYlines-1)) {
 		       if (Mouse_status.x < left) c=LTARROW;
 		       else if (Mouse_status.x > right) c='\b';
-		       else c=PGDOWN;
-		else if (Mouse_status.y == 0)
+		       else c = PGDOWN;
+		} else if (Mouse_status.y == 0) {
 		       if (Mouse_status.x < left) c=LTARROW;
 		       else if (Mouse_status.x > right) c='\b';
-		       else c=PGUP;
-		else c = set_clicked_link(Mouse_status.x, Mouse_status.y);
+		       else c = PGUP;
+		} else {
+		    c = set_clicked_link(Mouse_status.x, Mouse_status.y);
+		}
 	      }
 #endif /* _WINDOWS */
 	  }
@@ -1001,7 +902,12 @@ re_read:
     }
 #endif /* HAVE_KEYPAD */
 
-    if (c > DO_NOTHING) {
+#ifdef __DJGPP__
+    if (c > 659)
+#else
+    if (c > DO_NOTHING)
+#endif /* __DJGPP__ */
+    {
 	/*
 	 *  Don't return raw values for KEYPAD symbols which we may have
 	 *  missed in the switch above if they are obviously invalid when
@@ -1523,7 +1429,6 @@ again:
 	     */
 	    strcpy(inputline, MyEdit.buffer);
 	    return(ch);
-	    break;
 
 	case LYE_ABORT:
 	    /*
@@ -1531,7 +1436,6 @@ again:
 	     */
 	    inputline[0] = '\0';
 	    return(-1);
-	    break;
 
 	case LYE_LKCMD:
 	    /*

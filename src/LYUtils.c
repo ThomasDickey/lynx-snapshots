@@ -16,6 +16,9 @@
 #ifdef DOSPATH
 #include <HTDOS.h>
 #endif
+#ifdef DJGPP_KEYHANDLER
+#include <bios.h>
+#endif /* DJGPP_KEYHANDLER */
 #ifdef DISP_PARTIAL
 #include <LYKeymap.h>
 #endif /* DISP_PARTIAL */
@@ -2059,7 +2062,11 @@ PUBLIC int HTCheckForInterrupt NOARGS
 	Note that this isn't taking possible SOCKSification
 	and the socks_flag into account, and may fail on the
 	slang library's select() when SOCKSified. - FM **/
+#ifdef DJGPP_KEYHANDLER
+    if (0 == _bios_keybrd(_NKEYBRD_READY))
+#else
     if (0 == SLang_input_pending(0))
+#endif /* DJGPP_KEYHANDLER */
 	return(FALSE);
 
 #else /* Unix curses: */
@@ -2102,35 +2109,45 @@ PUBLIC int HTCheckForInterrupt NOARGS
 	switch (keymap[c+1])
 	{
 	case LYK_PREV_PAGE :
-	    if (Newline > 1)
-		Newline -= display_lines ;
+	    if (Newline_partial > 1)
+		Newline_partial -= display_lines ;
 	    break ;
 	case LYK_NEXT_PAGE :
 	    if (HText_canScrollDown())
-		Newline += display_lines ;
+		Newline_partial += display_lines ;
+	    break ;
+	case LYK_UP_HALF :
+	    if (Newline_partial > 1)
+		Newline_partial -= (display_lines/2) ;
+	    break ;
+	case LYK_DOWN_HALF :
+	    if (HText_canScrollDown())
+		Newline_partial += (display_lines/2) ;
 	    break ;
 	case LYK_UP_TWO :
-	    if (Newline > 1)
-		Newline -= 2 ;
+	    if (Newline_partial > 1)
+		Newline_partial -= 2 ;
 	    break ;
 	case LYK_DOWN_TWO :
 	    if (HText_canScrollDown())
-		Newline += 2 ;
+		Newline_partial += 2 ;
 	    break ;
 	case LYK_HOME:
-	    if (Newline > 1)
-		Newline = 1;
+	    if (Newline_partial > 1)
+		Newline_partial = 1;
 	    break;
 	case LYK_END:
 	    if (HText_canScrollDown())
-		Newline = MAXINT;
+		Newline_partial = HText_getNumOfLines() - display_lines + 2;
+		/* set "current" value */
 	    break;
 	case LYK_REFRESH :
 	    break ;
 	default :
 	    return ((int)FALSE) ;
 	}
-	HText_pageDisplay(Newline, "");
+	NumOfLines_partial = HText_getNumOfLines();
+	HText_pageDisplay(Newline_partial, "");
     }
 #endif /* DISP_PARTIAL */
 
@@ -3226,12 +3243,15 @@ PUBLIC void change_sug_filename ARGS1(
  */
 PRIVATE char *fmt_tempname ARGS3(
 	char *, 	result,
-	unsigned,	counter,
+	CONST char *, 	prefix,
 	CONST char *,	suffix)
 {
+    static unsigned counter;
     char *leaf;
-    strcpy(result, lynx_temp_space);
+
+    strcpy(result, prefix);
     leaf = result + strlen(result);
+    counter++;
 #ifdef FNAMES_8_3
     /*
      * The 'lynx_temp_space' string ends with a '/' or '\\', so we only have to
@@ -5487,7 +5507,6 @@ PUBLIC FILE *LYOpenTemp ARGS3(
     BOOL txt = TRUE;
     BOOL wrt = 'r';
     LY_TEMP *p;
-    static unsigned counter;
 
     CTRACE(tfp, "LYOpenTemp(,%s,%s)\n", suffix, mode);
     while (*mode != '\0') {
@@ -5502,7 +5521,7 @@ PUBLIC FILE *LYOpenTemp ARGS3(
     }
 
     do {
-	(void) fmt_tempname(result, counter++, suffix);
+	(void) fmt_tempname(result, lynx_temp_space, suffix);
 	if (txt) {
 	    switch (wrt) {
 	    case 'w':
@@ -5535,7 +5554,7 @@ PUBLIC FILE *LYReopenTemp ARGS1(
 	char *, 	name)
 {
     LY_TEMP *p;
-    FILE *fp;
+    FILE *fp = 0;
 
     LYCloseTemp(name);
     for (p = ly_temp; p != 0; p = p->next) {
@@ -5558,7 +5577,7 @@ PUBLIC FILE *LYOpenScratch ARGS2(
     FILE *fp;
     LY_TEMP *p;
 
-    sprintf(result, "%s-%u.%s", prefix, getpid(), HTML_SUFFIX);
+    (void) fmt_tempname(result, prefix, HTML_SUFFIX);
     if ((fp = LYNewTxtFile (result)) != 0) {
 	if ((p = (LY_TEMP *)calloc(1, sizeof(LY_TEMP))) != 0) {
 	    p->next = ly_temp;
