@@ -467,6 +467,7 @@ PUBLIC void read_rc NOPARAMS
 		user_mode = NOVICE_MODE;
 	    }
 
+#ifdef NOTUSED
 #ifdef DISP_PARTIAL
 	/*
 	 *  Partial display logic--set the threshold # of lines before
@@ -477,6 +478,7 @@ PUBLIC void read_rc NOPARAMS
 	    if (atoi(cp) != 0)
 		partial_threshold = atoi(cp);
 #endif /* DISP_PARTIAL */
+#endif /* NOTUSED */
 
 #ifdef ALLOW_USERS_TO_CHANGE_EXEC_WITHIN_OPTIONS
 	/*
@@ -854,6 +856,7 @@ enabled.\n\
 	       ((keypad_mode == LINKS_ARE_NUMBERED) ? "LINKS_ARE_NUMBERED" :
 				      "LINKS_AND_FORM_FIELDS_ARE_NUMBERED")));
 
+#ifdef NOTUSED
 #ifdef DISP_PARTIAL
     /*
      *  Partial display threshold
@@ -867,6 +870,7 @@ partial_thres=-1 would use the entire screensize\n\
 "));
     fprintf(fp, "partial_thres=%d\n\n", partial_threshold);
 #endif /* DISP_PARTIAL */
+#endif /* NOTUSED */
 
     /*
      *  Line edit mode.

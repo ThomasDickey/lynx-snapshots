@@ -1345,7 +1345,7 @@ PUBLIC int local_dired ARGS1(
 {
     char *line_url;    /* will point to doc's address, which is a URL */
     char *line = NULL; /* same as line_url, but HTUnEscaped, will be alloced */
-    char *tp;
+    char *tp = NULL;
     char *tmpbuf = NULL;
     char *buffer = NULL;
     char *dirname = NULL;
@@ -1360,7 +1360,6 @@ PUBLIC int local_dired ARGS1(
     HTUnEscape(line);	/* _file_ (not URL) syntax, for those functions
 			   that need it.  Don't forget to FREE it. */
 
-    tp = NULL;
     if (!strncmp(line, "LYNXDIRED://NEW_FILE", 20)) {
 	if (create_file(&line[20]) > 0)
 	    LYforce_no_cache = TRUE;
@@ -1370,6 +1369,7 @@ PUBLIC int local_dired ARGS1(
     } else if (!strncmp(line, "LYNXDIRED://INSTALL_SRC", 23)) {
 	local_install(NULL, &line[23], &tp);
 	StrAllocCopy(doc->address, tp);
+	FREE(tp);
 	FREE(line);
 	return 0;
     } else if (!strncmp(line, "LYNXDIRED://INSTALL_DEST", 24)) {
@@ -1393,6 +1393,7 @@ PUBLIC int local_dired ARGS1(
 	     */
 	    StrAllocCopy(doc->address, tp);
 	FREE(line);
+	FREE(tp);
 	return 0;
     } else if (!strncmp(line, "LYNXDIRED://PERMIT_LOCATION", 27)) {
 	permit_location(&line_url[27], NULL, &tp);
@@ -1570,6 +1571,7 @@ PUBLIC int local_dired ARGS1(
     FREE(tmpbuf);
     FREE(buffer);
     FREE(line);
+    FREE(tp);
     LYpop(doc);
     return 0;
 }
@@ -1609,6 +1611,7 @@ PUBLIC int dired_options ARGS2(
     cp = HTpartURL_toFile(doc->address);
     strcpy(dir, cp);
     LYTrimPathSep(dir);
+    FREE(cp);
 
     if (doc->link > -1 && doc->link < (nlinks+1)) {
 	cp = HTfullURL_toFile(links[doc->link].lname);

@@ -12,9 +12,10 @@
 #ifndef HTBTREE_H
 #define HTBTREE_H 1
 
+#ifndef HTUTILS_H
 #include <HTUtils.h>
-
-
+#endif
+ 
 /*
 
 Data structures

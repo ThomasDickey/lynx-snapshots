@@ -1,7 +1,10 @@
 #ifndef LYCHARSETS_H
 #define LYCHARSETS_H
 
+#ifndef HTUTILS_H
 #include <HTUtils.h>
+#endif
+
 #include <UCDefs.h>
 
 #ifndef UCMAP_H

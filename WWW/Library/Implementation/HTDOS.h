@@ -3,6 +3,9 @@
 #ifndef HTDOS_H
 #define HTDOS_H
 
+#ifndef HTUTILS_H
+#include <HTUtils.h>
+#endif /* HTUTILS_H */
 
 /* PUBLIC                                                       HTDOS_wwwName()
 **              CONVERTS DOS Name into WWW Name

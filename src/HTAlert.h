@@ -8,7 +8,9 @@
 #ifndef HTALERT_H
 #define HTALERT_H 1
 
+#ifndef HTUTILS_H
 #include <HTUtils.h>
+#endif
 
 #define ALERT_PREFIX_LEN 5
 

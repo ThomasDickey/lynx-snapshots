@@ -7,8 +7,10 @@
 #ifndef HTTCP_H
 #define HTTCP_H
 
+#ifndef HTUTILS_H
 #include <HTUtils.h>
-
+#endif
+ 
 /*      Produce a string for an internet address
 **      ---------------------------------------
 **

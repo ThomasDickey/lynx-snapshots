@@ -11,8 +11,10 @@
 #ifndef HTUU_H
 #define HTUU_H
 
+#ifndef HTUTILS_H
 #include <HTUtils.h>
-
+#endif
+ 
 PUBLIC int HTUU_encode PARAMS((unsigned char *bufin,
                                unsigned int nbytes,
                                char *bufcoded));

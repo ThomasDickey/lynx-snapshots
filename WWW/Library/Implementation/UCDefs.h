@@ -3,7 +3,9 @@
 #ifndef UCDEFS_H
 #define UCDEFS_H
 
+#ifndef HTUTILS_H
 #include <HTUtils.h>
+#endif
 
 typedef struct _LYUCcharset {
     int UChndl;  	/* -1 for "old" charsets, >= 0 for chartrans tables */

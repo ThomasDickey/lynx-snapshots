@@ -1,7 +1,10 @@
 #ifndef LYCOOKIES_H
 #define LYCOOKIES_H
 
+#ifndef HTUTILS_H
 #include <HTUtils.h>
+#endif
+
 #include <HTList.h>
 
 typedef enum {ACCEPT_ALWAYS, REJECT_ALWAYS, QUERY_USER, FROM_FILE} behaviour;

@@ -1,7 +1,10 @@
 #ifndef LYMAP_H
 #define LYMAP_H
 
+#ifndef HTUTILS_H
 #include <HTUtils.h>
+#endif
+
 #include <HTList.h>
 #include <HTAnchor.h>
 

@@ -7,7 +7,9 @@
 #ifndef HTLIST_H
 #define HTLIST_H
 
+#ifndef HTUTILS_H
 #include <HTUtils.h>
+#endif
 
 typedef struct _HTList HTList;
 

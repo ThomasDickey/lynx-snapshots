@@ -1,7 +1,9 @@
 #ifndef LYCHARVALS_H
 #define LYCHARVALS_H 1
 
+#ifndef HTUTILS_H
 #include <HTUtils.h>
+#endif
 
 /*
  * Use integer values for character constants rather than '\octal' form, since

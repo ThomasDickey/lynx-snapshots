@@ -31,7 +31,10 @@
 #ifndef _H_WAIS_protocol_
 #define _H_WAIS_protocol_
 
+#ifndef HTUTILS_H
 #include <HTUtils.h>
+#endif
+
 #include <HTVMS_WaisUI.h>
 
 /*----------------------------------------------------------------------*/
@@ -345,7 +348,10 @@ void CSTFreeWAISTextQuery PARAMS(( any* query));
 #ifndef WMESSAGE_H
 #define WMESSAGE_H
 
+#ifndef HTUTILS_H
 #include <HTUtils.h>
+#endif
+ 
 #include <HTVMS_WaisUI.h>
 
 typedef struct wais_header {

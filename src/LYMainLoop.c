@@ -1267,6 +1267,11 @@ try_again:
 	     *	to Newline, so we get a redraw.
 	     */
 	    curdoc.line = -1;
+
+	    /*
+	     * I have no idea what this does, but it seems to be necessary... -dsb
+	     */
+	    LYUCPopAssumed();
 	}
 #endif
 
@@ -2778,6 +2783,7 @@ new_cmd:  /*
 		newdoc.isHEAD = FALSE;
 		newdoc.safe = FALSE;
 		newdoc.internal_link = FALSE;
+		newdoc.link = 1; /*@@@ bypass "recent statusline messages" link */
 		FREE(curdoc.address);  /* so it doesn't get pushed */
 
 		refresh_screen = TRUE;

@@ -575,6 +575,8 @@ PRIVATE size_t fill_rehostent ARGS3(
 #undef  h_errno
 #define h_errno my_errno
 static int my_errno;
+#else /* we do HAVE_H_ERRNO: */
+extern int h_errno;
 #endif
 
 /*	Resolve an internet hostname, like gethostbyname

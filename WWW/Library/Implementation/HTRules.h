@@ -18,8 +18,10 @@
 #ifndef HTRULE_H
 #define HTRULE_H
 
+#ifndef HTUTILS_H
 #include <HTUtils.h>
-
+#endif
+ 
 typedef enum _HTRuleOp {
         HT_Invalid,
         HT_Map,
@@ -140,4 +142,4 @@ extern int HTLoadRules PARAMS((CONST char * filename));
  */
 
 #endif /* NO_RULES */
-#endif /* HTUtils.h */
+#endif /* HTRULE_H */

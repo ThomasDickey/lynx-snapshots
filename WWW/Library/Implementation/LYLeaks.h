@@ -41,7 +41,10 @@
 /*
 **  Required includes
 */
+
+#ifndef HTUTILS_H
 #include <HTUtils.h>
+#endif
 
 /*
 **	Constant defines

@@ -5,8 +5,10 @@
 #ifndef HTLEX_H
 #define HTLEX_H
 
+#ifndef HTUTILS_H
 #include <HTUtils.h>
-
+#endif
+ 
 typedef enum {
     LEX_NONE,		/* Internally used      */
     LEX_EOF,		/* End of file          */

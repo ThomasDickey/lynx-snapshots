@@ -1058,7 +1058,7 @@ PUBLIC BOOLEAN setup ARGS1(
 PUBLIC BOOLEAN setup ARGS1(
 	char *, 	terminal)
 {
-    char *term_putenv;
+    char *term_putenv = NULL;
     char *buffer = NULL;
     char *cp;
 #if defined(HAVE_SIZECHANGE) && !defined(USE_SLANG) && defined(NOTDEFINED)

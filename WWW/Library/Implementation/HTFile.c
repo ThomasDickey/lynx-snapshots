@@ -1468,6 +1468,7 @@ Bug removed thanks to joe@athena.mit.edu */
 	HTDisplayPartial();
 	fclose(fp);
     }
+    FREE(readme_file_name);
 }
 
 PRIVATE int print_local_dir ARGS5(
@@ -1949,6 +1950,7 @@ PUBLIC int HTLoadFile ARGS4(
 		if (HTStat(enable_file_name, &stat_info) == -1) {
 		    FREE(filename);
 		    FREE(nodename);
+		    FREE(enable_file_name);
 		    return HTLoadError(sink, 403, DISALLOWED_SELECTIVE_ACCESS);
 		}
 	    }
@@ -2324,6 +2326,7 @@ PUBLIC int HTLoadFile ARGS4(
 		    if (stat(enable_file_name, &file_info) != 0) {
 			FREE(localname);
 			FREE(nodename);
+			FREE(enable_file_name);
 			return HTLoadError(sink, 403, DISALLOWED_SELECTIVE_ACCESS);
 		    }
 		}

@@ -338,6 +338,8 @@ PRIVATE void store_cookie ARGS3(
 			    co = NULL;
 			    FREE(msg);
 			    return;
+			} else {
+			    FREE(msg);
 			}
 		}
 	}
@@ -2284,7 +2286,10 @@ PRIVATE int LYHandleCookies ARGS4 (
 			     *	Delete it if confirmed. - FM
 			     */
 			    if (HTConfirm(DELETE_COOKIE_CONFIRMATION) == FALSE)
+			    {
+				FREE(lynxID);
 				return(HT_NO_DATA);
+			    }
 			    HTList_removeObject(de->cookie_list, co);
 			    freeCookie(co);
 			    co = NULL;
