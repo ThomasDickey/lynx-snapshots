@@ -8860,10 +8860,7 @@ static void HText_AddHiddenLink(HText *text, TextAnchor *textanchor)
     if ((dest = HTAnchor_followLink(textanchor->anchor)) &&
 	(text->hiddenlinkflag != HIDDENLINKS_IGNORE ||
 	 HTList_isEmpty(text->hidden_links))) {
-	char *cp_freeme = NULL;
-
-	HTList_appendObject(text->hidden_links, cp_freeme = HTAnchor_address(dest));
-	FREE(cp_freeme);
+	HTList_appendObject(text->hidden_links, HTAnchor_address(dest));
     }
 
     return;

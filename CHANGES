@@ -1,6 +1,15 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2005-01-05 (2.8.6dev.11)
+* add presentation type for application/xml and text/xml mime types as per
+    http://www.w3.org/TR/xhtml-media-types/
+    http://www.w3.org/TR/2002/NOTE-xhtml-media-types-20020801
+  which states that they may be used, though application/xhtml+xml is the
+  preferred media type (Debian #184482) -TD
+* remove an extra free() introduced in fixes from dev.10 for leak-checking
+  (reports by Thorsten Glaser, FLWM) -TD
+
 2005-01-02 (2.8.6dev.10)
 * correct final sed command in help_files.sed which was not a basic regular
   expression, left some links ending with .gz.gz -TD
