@@ -40,8 +40,7 @@ LYNX_DEV=lynx-dev.html
 #
 LYNX_DEV_ARCHIVE=http://www.flora.org/lynx-dev/html/
 LYNX_DIST=http://lynx.isc.org/current/index.html
-LYNX_FAQ=http://www.slcc.edu/lynx/faq.html
-LYNX_FAQ_AL=http://www.access.digex.net/~asgilman/lynx/FAQ/
+LYNX_FAQ=http://lynx.isc.org/cgi-bin/fom
 LYNX_FAQ_O_MATIC=http://lynx.isc.org/cgi-bin/fom
 LYNX_HOME=http://lynx.browser.org/
 LYNX_SPEECH=http://leb.net/blinux/blynx/

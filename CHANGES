@@ -1,6 +1,34 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2000-04-19 (2.8.3pre.7)
+* move initialization of WATT-32 "sock_init()" code in LYMain.c so it precedes
+  Lynx's code to setup SIGINT handler, since WATT-32 installs a SIGINT handler
+  as well.  This makes Lynx's handler the default again -DK
+* correct handling of CHARSET attributes on LINK and A.  Basically this reverts
+  back to original 2.7.2ac logic -KW
+* enable handling of CHARSET attributes on LINK - it was disabled, probably
+  accidentally -KW
+* prevent CHARSET attributes from modifying the charset assumption for the
+  _current_ document -KW
+* correct errors in HTML.c that could result in infinite loop (iteration
+  counter was not incremented) -KW
+* revert one strcpy -> StrAllocCopy change - see added comment in LYCgi.c -KW
+* correct limit of formatted string in status_link() -KW
+* change NO_FILE_REFERER default to TRUE (i.e., do not send local file name
+  in the referer field unless explicitly specified by the user) -LP, KW
+* implement a workaround for gettext'd ADVANCED_COOKIE_CONFIRMATION to make
+  it consistent with HTConfirmDefault(), fixes Debian #62105 -TD
+* clarify/expand notes in lynx.cfg dealing with USE_MOUSE (from comments by
+  Morten Bo Johansen <mojo@image.dk>) -TD
+* noted glibc 2.1.3 bug in PROBLEMS -TD
+* reorganize forms-based options menu:  options are now grouped by sections in
+  a more logical way (design by KW).  (BTW, it is now more aligned with
+  htmlized-cfg cattoc.html).  Help files changed accordingly.  A few gettext'ed
+  messages were changed -LP
+* add ifdef's (USE_BLAT_MAILER and USE_ALT_BLAT_MAILER) and corresponding code
+  for blat vs blatj mailer (request by Victor Schneider) -TD
+* update Lynx FAQ locations -JS
 2000-04-17 (2.8.3pre.6)
 * change version number in remaining documentation to 2.8.3 -TD
 * remove redundant defines for SUPPORT_MULTIBYTE_EDIT and COLOR_TABLE from
@@ -181,8 +209,8 @@ Changes since Lynx 2.8 release
 * add configure option --enable-htmlized-cfg to install the htmlized lynx.cfg
   in the help directory (request by LP) -TD
 * suppress sleep's in crawl or traversal mode (request by LV) -TD
-* cleanup LYReadCFG.c, LYrcFile.c a little, using new functions putBool, getBool, putEnum
-  and getEnum -TD
++ cleanup LYReadCFG.c, LYrcFile.c a little, using new functions putBool,
+  getBool, putEnum and getEnum -TD
 * change default mode for visited-links-page to match original behavior, add
   visited_links to .lynxrc file (requests by KD, LP) -TD
 * update documentation to reflect move from sol.slcc.edu to lynx.isc.org -PG
@@ -245,7 +273,7 @@ Changes since Lynx 2.8 release
   + wrap a long text which includes only CJK characters in source mode.
   + avoid writing CJK characters at the 80th column.
   + improve kanji code override routine
-    # My change seemes to have broken this
+    # My change seems to have broken this
   + change the phrase "half width kana" to "JIS x0201 Kana" in comments.
     # The latter has been used originally.
   + enable assume_charset when display charset and assume charset
@@ -400,7 +428,7 @@ Changes since Lynx 2.8 release
 * made global from_source_cache PRIVATE to mainloop -KW
 * reset DIRED_MENU item list when lynx.cfg is reloaded -KW
 * new lynx.cfg option AUTO_UNCACHE_DIRLISTS for Dired mode, see lynx.cfg -KW
-* prevent filedescriptor and inode leak in HTFWriter.c that occurred if
+* prevent file descriptor and inode leak in HTFWriter.c that occurred if
   the same resource is repeatedly downloaded (for 'd' or for passing to
   a viewer) -KW
 * corrected logic for suppressing last HTDisplayPartial call at end of file,
@@ -440,7 +468,7 @@ Changes since Lynx 2.8 release
   feet" while still reading from it.  Previously that was done by just never
   rewriting an existing source cache.  After changing that (see previous item),
   a different approach is needed to prevent such collisions.  This is now
-  solved in two ways:  (a) Bse a temporary new file or memory chunk for
+  solved in two ways:  (a) Base a temporary new file or memory chunk for
   writing, and only commit it to the doc's ParentAnchor object (replacing the
   previous copy) at the end of the incoming data stream.  This is done in
   CacheThru_free(), but not in CacheThru_abort(), meaning that an interrupted
@@ -557,7 +585,7 @@ Changes since Lynx 2.8 release
   behavior is invoked the first time (and *only* the first time) when lynx
   encounters an error or EOF when reading key input.  (Currently this will not
   get detected if slang with USE_KEYMAPS is used.) In this, case, -nozap
-  reverts to the default state ('z' will be ckecked for again).  Under some
+  reverts to the default state ('z' will be checked for again).  Under some
   conditions are true (key input was taken from stdin, and stdin was not
   connected to a terminal), lynx will then attempt to reopen stdin, connecting
   it to a terminal (stdout, stderr, and the process's controlling tty are
@@ -576,10 +604,10 @@ Changes since Lynx 2.8 release
 * the Newline variable is now PRIVATE except the mouse code in LYStrings.c -LP
 * modify HTDOS.c for Wattcp targets (Watt-32 and original wattcp).  When Lynx
   is sitting idle in getxkey() waiting for a keypress, no network functions are
-  called.  Hence no sockets are procesessed, "ICMP Echo replies" is sent etc.
+  called.  Hence no sockets are processed, "ICMP Echo replies" is sent etc.
   This patch has been tested with SLang and '-DDJGPP_KEYHANDLER' I'm not sure
   how to hook into 'SLkp_getkey()' or keyboard polling in performed under raw
-  PCcurses (Gisle Vanem <gvanem@eunet.no>)
+  PDCurses (Gisle Vanem <gvanem@eunet.no>)
 * update docs for -tna instead of --sticky_inputs -KW
 * document extended KEYMAP syntax in lynx.cfg -KW
 * update Users Guide for KEYMAP changes, especially the TEXTAREA-related
@@ -644,7 +672,7 @@ Changes since Lynx 2.8 release
 * implement COLSPAN=0 and ROWSPAN=0 according to HTML 4.01 (not HTML 4.0).  The
   span extends until the end of the current column group and row group (i.e.
   next THEAD/TFOOT/TBODY), respectively; or until the end of the row or table,
-  respecitively, if there is no containing group (thus acting as per HTML 4.0).
+  respectively, if there is no containing group (thus acting as per HTML 4.0).
   Also cancel effect of all ROWSPANs at a THEAD/TFOOT/TBODY boundary (problem
   with other browser described and behavior proposed by G.  James Berigan in
   <http://www.war-of-the-worlds.org/html/span-vs-group.html>) -KW
@@ -711,7 +739,7 @@ Changes since Lynx 2.8 release
   really a LYNXCFG:  view -KW
 * corrected problems with "show color" in forms Options page.  Omit "ON" choice
   if color is not possible (but saving allowed).  When option_save restriction
-  was in effect, the ON/OFF initialisation was wrong (resulting in unwanted
+  was in effect, the ON/OFF initialization was wrong (resulting in unwanted
   toggling of color each time options were changed in an anonymous account) -KW
 * tweaks of reload_read_cfg() for retaining "show color" setting and for
   updating display_lines (user_mode may have changed) -KW
@@ -933,7 +961,7 @@ Changes since Lynx 2.8 release
 * LYPrettySrc.c was slightly cleaned up, added support for lynx.cfg reloading,
   memory deallocation -VH
 * possible bug in print_wwwfile_to_fd fixed - when quoting the page, seems that
-  several '>'s could be emitted on the long line formed by concatenating ilnes
+  several '>'s could be emitted on the long line formed by concatenating lines
   with LY_SOFT_NEWLINEs at the begining of them -VH
 * general notes -VH:
   + users of lss-enabled lynx should consider on upgrading the lynx - at least
@@ -960,7 +988,8 @@ Changes since Lynx 2.8 release
   [ For some non-Unix systems, LYSystem messes around with the passed command
     string in various ways, and does some other stuff for DJGPP.  So no change
     for those, since I assume it worked before.  For Unix the change prevents
-    the following occuring with ncurses (at least if USE_SIGACTION is defined):
+    the following occurring with ncurses (at least if USE_SIGACTION is
+    defined):
      - access some (valid) telnet://some.host URL.
      - within telnet client, escape to command level (usually '^]')
      - suspend (usually 'z' or ^Z)
@@ -1263,7 +1292,7 @@ Changes since Lynx 2.8 release
   - in HTML 4, an OBJECT with USEMAP attribute can refer to a MAP within the
     OBJECT's content, possibly within nested inner OBJECTs.  Lynx would fail to
     find the MAP in that case, now it doesn't.
-  - in HTML 4, MAP can contain arbitray block elements in addition to AREA.
+  - in HTML 4, MAP can contain arbitrary block elements in addition to AREA.
     Lynx now shows such block content, even if it occurs within (possibly
     nested) OBJECTs with USEMAP whose contents we would otherwise skip.
     Sometimes we may show too much now, by generating a LYNXIMGMAP link as well
@@ -1309,7 +1338,7 @@ Changes since Lynx 2.8 release
   course).  Most of them don't apply with color style lynx, so it continues to
   have more UTF-8 problems.  Pages with mostly ASCII characters should be more
   or less ok.  Problems that otherwise are not visible become apparent in
-  search higlighting, and after ^Z / fg.
+  search highlighting, and after ^Z / fg.
 * GridText.c:  More changes to deal with problems caused by using UTF-8 output
   with a display library that isn't aware of it.  Break line with UTF-8 before
   curses does it.  This causes lines that are too short, effectively the
@@ -1317,7 +1346,7 @@ Changes since Lynx 2.8 release
   characters.  The alternative, letting curses wrap the line when it thinks it
   got too long, is worse, so do it in lynx code instead.
 * avoid memory overrun for very long lines in UTF-8 mode.  Avoid splitting line
-  in the middle of a mutibyte UTF-8 character.
+  in the middle of a multibyte UTF-8 character.
 * test for SHOW_WHEREIS_TARGETS instead of 'defined(FANCY_CURSES) ||
   defined(USE_SLANG)'.
 * initialize new textarea lines created by insert_new_textarea_anchor with
@@ -1337,7 +1366,7 @@ Changes since Lynx 2.8 release
   lynx.cfg.  The long list of built-in file suffix rules in HTInit.c can now be
   disabled, either at compile time - see userdefs.h - or at run time.  The
   equivalent functionality is now available in lynx.cfg for those who want it.
-  Added somments, see HTFileInit in HTInit.c.
+  Added comments, see HTFileInit in HTInit.c.
 * various tweaks of built-in file suffix rules.
 * allow XLOADIMAGE_COMMAND to be empty (in lynx.cfg) or NULL (in userdefs.h),
   just don't use a default X viewer for image types in that case.
@@ -1700,7 +1729,7 @@ Changes since Lynx 2.8 release
 * add configure option --enable-justify-elts (request by VH) -TD
 * add configure test for sigaction function and related structs -TD
 * restore hardcoded escape sequences on Unix in setup_vtXXX_keymap()
-  inadvertantly dropped in dev.4, to accommodate users of slang library who
+  inadvertently dropped in dev.4, to accommodate users of slang library who
   have their $TERM set incorrectly -TD
 * correct ifdef's for resizeterm() call to allow Lynx to build with old
   versions of ncurses -TD
@@ -1795,7 +1824,7 @@ Changes since Lynx 2.8 release
   previously it only worked with TagSoup -KW
 * removed special handling for empty last field from LYstrsep(), which made it
   act differently from (GNU) C library's strsep() -KW
-* macro DEFAULT_INVCHECK_BV for default invalid cookie checking behaviour, can
+* macro DEFAULT_INVCHECK_BV for default invalid cookie checking behavior, can
   be changed at top of LYCookie.c for those who really want that -KW
 * reorganize code for invalid cookie checking / prompting somewhat, it is
   hopefully easier to follow now, and should result in more logical prompting
@@ -1825,7 +1854,7 @@ Changes since Lynx 2.8 release
   sharing a cookie file between Lynx and a Netscape browser (although such
   sharing shouldn't be recommended) -KW
 * treat case as insignificant in cookie domains more consistently -KW
-* remove remnants of FROM_FILE domain behaviour, it was unused -KW
+* remove remnants of FROM_FILE domain behavior, it was unused -KW
 * add some clarifications in lynx.cfg regarding cookies -KW
 * entify strings when adding them to LYNXMESSAGES: stack -KW
 * save HTAlwaysAlert messages for LYNXMESSAGES: page -KW
@@ -1932,7 +1961,7 @@ Changes since Lynx 2.8 release
 * add null-pointer checks for buf2 variable in
   exit_immediately_with_error_message().  Invalid memory access happens if
   access to startfile fails but first_file is not true -KW
-* change all ifdef's except on for VAX ultrix that use the presumed predefined
+* change all ifdef's except on for VAX Ultrix that use the presumed predefined
   symbol 'unix' to 'UNIX', which the configure script sets.  Not all Unix
   systems define this in their compiler -TD
   From compiler warning on NetBSD 1.4 (report by JS):
@@ -2026,7 +2055,7 @@ Changes since Lynx 2.8 release
     textarea line, the last column position (relative to the field) is
     remembered.  They are not mapped by default, but mentioned in lynx.cfg.
   - New key action DWIMHELP.  It should give some context-sensitive help.
-    Currentely the appropriate Line Editor Binding help page is shown if a form
+    Currently the appropriate Line Editor Binding help page is shown if a form
     input field is selected, otherwise it defaults to the main HELP page.
   - New key action DWIMEDIT.  Revert meaning of EDIT back to previous meaning:
     always edit document file, not textarea content.  DWIMEDIT acts like

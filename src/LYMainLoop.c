@@ -7590,13 +7590,13 @@ PRIVATE void status_link ARGS3(
     *format = 0;
     if (show_more) {
 	sprintf(format, "%.*s ",
-		(int)(sizeof(format) - 1),
+		(int)(sizeof(format) - 2),
 		gettext("-more-"));
 	prefix = strlen(format);
     }
     if (show_indx) {
 	sprintf(format + prefix, "%.*s ",
-		(int)(sizeof(format) - prefix - 1),
+		(int)(sizeof(format) - prefix - 2),
 		gettext("-index-"));
     }
     prefix = strlen(format);

@@ -791,15 +791,15 @@ PUBLIC void HTPromptUsernameAndPassword ARGS4(
 **		TRUE if the cookie should be set.
 */
 PUBLIC BOOL HTConfirmCookie ARGS4(
-	void *, 	dp,
+	domain_entry *, de,
 	CONST char *,	server,
 	CONST char *,	name,
 	CONST char *,	value)
 {
-    domain_entry *de;
     int ch;
+    char *prompt = ADVANCED_COOKIE_CONFIRMATION;
 
-    if ((de = (domain_entry *)dp) == NULL)
+    if (de == NULL)
 	return FALSE;
 
     /*	If the user has specified a list of domains to allow or deny
@@ -833,7 +833,7 @@ PUBLIC BOOL HTConfirmCookie ARGS4(
 	char *message = 0;
 
 	space_free = ((LYcols - 1)
-		      - (strlen(ADVANCED_COOKIE_CONFIRMATION)
+		      - (strlen(prompt)
 			 - 10)		/* %s and %.*s and %.*s chars */
 		      - strlen(server));
 	if (space_free < 0)
@@ -850,16 +850,56 @@ PUBLIC BOOL HTConfirmCookie ARGS4(
 	    namelen = (percentage * namelen) / 100;
 	    valuelen = (percentage * valuelen) / 100;
 	}
-	HTSprintf(&message, ADVANCED_COOKIE_CONFIRMATION,
-		 server, namelen, name, valuelen, value);
+	HTSprintf(&message, prompt, server, namelen, name, valuelen, value);
 	_statusline(message);
 	FREE(message);
     }
     while (1) {
-	if(!LYAcceptAllCookies) {
-	    ch = LYgetch_for(FOR_SINGLEKEY);
-	} else {
+	if(LYAcceptAllCookies) {
 	    ch = 'A';
+	} else {
+	    ch = LYgetch_for(FOR_SINGLEKEY);
+	    ch = TOUPPER(ch);
+#if defined(LOCALE) && defined(HAVE_GETTEXT) && !defined(gettext)
+	    /*
+	     * Special-purpose workaround for gettext support (we should do
+	     * this in a more general way -- after 2.8.3).
+	     *
+	     * NOTE TO TRANSLATORS:  If the prompt has been rendered into
+	     * another language, and if yes/no are distinct, assume the
+	     * translator can make an ordered list in parentheses with one
+	     * capital letter for each as we assumed in HTConfirmDefault(). 
+	     * The list has to be in the same order as in the original message,
+	     * and the four capital letters chosen to not match those in the
+	     * original unless they have the same position.
+	     *
+	     * Example:
+	     *	(Y/N/Always/neVer)		- English (original)
+	     *	(O/N/Toujours/Jamais)		- French
+	     */
+	    {
+#define L_PAREN '('
+#define R_PAREN ')'
+		char *p;
+		char *s = "YNAV\007\003"; /* see ADVANCED_COOKIE_CONFIRMATION */
+
+		if (strchr(s, ch) == 0
+		 && isalpha(ch)
+		 && (p = strrchr(prompt, L_PAREN)) != 0) {
+
+		    while (*p != R_PAREN && *p != 0 && isalpha(*s)) {
+			if (*p == ch) {
+			    ch = *s;
+			    break;
+			} else {
+			    if (isalpha(*p) && (*p == TOUPPER(*p)))
+				s++;
+			    p++;
+			}
+		    }
+		}
+	    }
+#endif
 	}
 #ifdef VMS
 	if (HadVMSInterrupt) {
@@ -867,7 +907,7 @@ PUBLIC BOOL HTConfirmCookie ARGS4(
 	    ch = 'N';
 	}
 #endif /* VMS */
-	switch(TOUPPER(ch)) {
+	switch(ch) {
 	    case 'A':
 		/*
 		**  Set to accept all cookies for this domain.

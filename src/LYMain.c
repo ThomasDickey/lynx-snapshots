@@ -272,7 +272,7 @@ PUBLIC BOOLEAN no_compileopts_info = FALSE;
 #endif
 
 PUBLIC BOOLEAN no_statusline = FALSE;
-PUBLIC BOOLEAN no_filereferer = FALSE;
+PUBLIC BOOLEAN no_filereferer = TRUE;
 PUBLIC char LYRefererWithQuery = 'D'; /* 'D' for drop */
 PUBLIC BOOLEAN local_host_only = FALSE;
 PUBLIC BOOLEAN override_no_download = FALSE;
@@ -283,10 +283,6 @@ PUBLIC BOOLEAN watt_debug = FALSE;  /* WATT-32 debugging */
 #endif /* __DJGPP__ */
 
 #ifdef WIN_EX
-#undef SYSTEM_MAIL
-#undef SYSTEM_MAIL_FLAGS
-#define SYSTEM_MAIL		"BLATJ"
-#define SYSTEM_MAIL_FLAGS	""
 PUBLIC BOOLEAN focus_window = FALSE;	/* 1998/10/05 (Mon) 17:18:42 */
 PUBLIC char windows_drive[4];		/* 1998/01/13 (Tue) 21:13:24 */
 #endif
@@ -1832,6 +1828,20 @@ PUBLIC int main ARGS2(
     set_vms_keys();
 #endif /* VMS */
 
+#if defined (__DJGPP__)
+    if (watt_debug)
+      dbug_init();
+    sock_init();
+
+    __system_flags =
+	__system_emulate_chdir	      |	/* handle `cd' internally */
+	__system_handle_null_commands |	/* ignore cmds with no effect */
+	__system_allow_long_cmds      |	/* handle commands > 126 chars	 */
+	__system_use_shell	      |	/* use $SHELL if set */
+	__system_allow_multiple_cmds  |	/* allow `cmd1; cmd2; ...' */
+	__system_redirect;		/* redirect internally */
+#endif  /* __DJGPP__ */
+
     /* trap interrupts */
     if (!dump_output_immediately)
 #ifndef NOSIGHUP
@@ -1997,20 +2007,6 @@ PUBLIC int main ARGS2(
 	StrAllocCopy(MBM_A_subbookmark[0], bookmark_page);
 	StrAllocCopy(MBM_A_subdescript[0], MULTIBOOKMARKS_DEFAULT);
     }
-
-#if defined (__DJGPP__)
-    if (watt_debug)
-      dbug_init();
-    sock_init();
-
-    __system_flags =
-       __system_emulate_chdir        |  /* handle `cd' internally */
-       __system_handle_null_commands |  /* ignore cmds with no effect */
-       __system_allow_long_cmds      |  /* handle commands > 126 chars  */
-       __system_use_shell            |  /* use $SHELL if set */
-       __system_allow_multiple_cmds  |  /* allow `cmd1; cmd2; ...' */
-       __system_redirect;               /* redirect internally */
-#endif  /* __DJGPP__ */
 
 #if !defined(VMS) && defined(SYSLOG_REQUESTED_URLS)
     LYOpenlog (syslog_txt);
