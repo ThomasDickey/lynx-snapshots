@@ -44,6 +44,7 @@
 #undef HAVE_SYS_IOCTL_H		/* have <sys/ioctl.h> */
 #undef HAVE_SYS_NDIR_H		/* defined by AC_HEADER_DIRENT */
 #undef HAVE_SYS_WAIT_H		/* have <sys/wait.h> */
+#undef HAVE_TERMIO_H		/* have <termio.h> */
 #undef HAVE_TERMIOS_H		/* have <termios.h> */
 #undef HAVE_TTYTYPE
 #undef HAVE_TYPE_UNIONWAIT	/* CF_UNION_WAIT */
@@ -109,7 +110,6 @@
 #undef mode_t			/* defined by AC_TYPE_MODE_T */
 #undef vfork			/* defined by AC_FUNC_FORK */
 /* FIXME:ALLOW_USERS_TO_CHANGE_EXEC_WITHIN_OPTIONS */
-/* FIXME:BSDI */
 /* FIXME:DECLARE_WAIS_LOGFILES */
 /* FIXME:DGUX */
 /* FIXME:DGUX_OLD */

@@ -219,8 +219,9 @@ II. Compile instructions -- UNIX
   	Use this option to disable "Up-to" parent-links in directory listings.
 
   --enable-8bit-toupper			(define EXP_8BIT_TOUPPER)
-	use experimental 8-bit case-conversion, e.g., for case-insensitive
-	searches in non-ASCII character set.
+	Use experimental 8-bit case-conversion, e.g., for case-insensitive 
+	searches in non-ASCII display character set, this overrides locale 
+	settings. 
 
   --enable-color-style			(define USE_COLOR_STYLE)
   	Use this option to enable optional and *experimental* color style.

@@ -1627,8 +1627,8 @@ PUBLIC char * SNACat ARGS3(
 **   may be interpreted as equal, but this side effect is negligible
 **   if the user search string is more than one character long.  - LP
 **
-**   Currently we enable new technique only for DOS/WINDOWS display charsets
-**   and also for EXP_8BIT_TOUPPER compilation symbol.
+**   We enable new technique only if  DisplayCharsetMatchLocale = FALSE 
+**   (see description in LYCharSets.c) 
 */
 PUBLIC int UPPER8 ARGS2(int,ch1, int,ch2)
 {
@@ -1640,21 +1640,15 @@ PUBLIC int UPPER8 ARGS2(int,ch1, int,ch2)
     /* case-insensitive match for upper half */
     if ((unsigned char)ch1 > 127 && (unsigned char)ch2 >127)
     {
-	CONST char *disp_charset;
-	disp_charset = LYCharSet_UC[current_char_set].MIMEname;
-
-#if !defined(EXP_8BIT_TOUPPER)
-	if  (!(strncasecomp(disp_charset, "cp", 2) ||
-		strncasecomp(disp_charset, "windows", 7))) {
-
-	return(TOUPPER(ch1) - TOUPPER(ch2)); /* old-style */
-	} else 
-#endif
+	if (DisplayCharsetMatchLocale) 
+	   return(TOUPPER(ch1) - TOUPPER(ch2)); /* old-style */ 
+	else 
 	{
 	/* compare "7bit approximation" for letters >127   */
 	/* BTW, if we remove the check for >127 above	   */
 	/* we get even more "relaxed" insensitive match... */
 
+        CONST char *disp_charset = LYCharSet_UC[current_char_set].MIMEname; 
 	int charset_in, charset_out, uck1, uck2;
 	char replace_buf1 [10], replace_buf2 [10];
 
@@ -1671,6 +1665,7 @@ PUBLIC int UPPER8 ARGS2(int,ch1, int,ch2)
 
 	/* check to be sure we have not lost any strange characters */
 	/* which are not found in def7_uni.tbl but _equal_ in fact. */
+	/* this also applied for "x-transparent" display mode.	    */ 
 	if ((unsigned char)ch1==(unsigned char)ch2)
 	    return(0);	 /* match */
 	}

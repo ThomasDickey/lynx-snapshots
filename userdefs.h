@@ -230,6 +230,9 @@
 #else     /* UNIX */
 
 /**************************
+ * NOTE: This variable is set by the configure scrip; editing changes will
+ * be ignored.
+ *
  * LYNX_CFG_FILE is the location and name of the default lynx
  * global configuration file.  It is sought and processed at
  * startup of Lynx, followed by a seek and processing of a
@@ -322,32 +325,9 @@
 #define XLOADIMAGE_COMMAND "xli %s &"
 
 /**************************
- * For UNIX systems this should be sendmail
- * sendmail should be in /usr/lib
- *
- * You definitely want sendmail, not mail or elm or something else,
- * except in the case where MMDF is your mail agent.
- * For MMDF you should use submit (SCO)
- *
- * SYSTEM_MAIL must be defined here.  You can change it in lynx.cfg.
- *
- * SYSTEM_MAIL_FLAGS must be defined here appropriately for your
- * SYSTEM_MAIL definition.  You can change it in lynx.cfg.
+ * For UNIX systems, SYSTEM_MAIL and SYSTEM_MAIL_FLAGS are set by the
+ * configure-script.
  */
-#ifndef HAVE_CONFIG_H
-#ifdef MMDF
-#define SYSTEM_MAIL "/usr/mmdf/bin/submit"
-#define SYSTEM_MAIL_FLAGS "-mlruxto,cc\\*"
-#else
-#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__bsdi__)
-#define SYSTEM_MAIL "/usr/sbin/sendmail"
-#define SYSTEM_MAIL_FLAGS "-t -oi"
-#else /* everything else: */
-#define SYSTEM_MAIL "/usr/lib/sendmail"
-#define SYSTEM_MAIL_FLAGS "-t -oi"
-#endif /* __FreeBSD || __NetBSD__ || __bsdi__ */
-#endif /* MMDF */
-#endif	/* !HAVE_CONFIG_H */
 
 /**************************
  * A place to put temporary files, it's almost always in "/tmp/"
@@ -1212,7 +1192,7 @@
  * the version definition with the Project Version on checkout. Just
  * ignore it. - kw */
 /* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
-#define LYNX_VERSION "2.8rel.3"
+#define LYNX_VERSION "2.8.1dev.2"
 
 #ifndef MAXINT
 #define MAXINT 2147483647	/* max integer */
@@ -1283,56 +1263,7 @@
 #define CHMOD_PATH      "chmod"
 
 #else	/* Unix */
-
-/*
-**  Check these paths on Unix!
-**  ==========================
-*/
-#ifndef HAVE_CONFIG_H
-#if defined(__FreeBSD__)||defined(__NetBSD__)||defined(__bsdi__)||defined(LINUX)
-/*
-**  FreeBSD, NetBSD, BSDI, or Linux:
-**  ================================
-*/
-#define	COMPRESS_PATH	"/usr/bin/compress"
-#define	UNCOMPRESS_PATH	"/usr/bin/gunzip"
-#define	UUDECODE_PATH	"/usr/bin/uudecode"
-#define	ZCAT_PATH	"/usr/bin/zcat"
-#define	GZIP_PATH	"/usr/bin/gzip"
-#define	INSTALL_PATH	"/usr/bin/install"
-#define	INSTALL_ARGS	"-c"
-#define	TAR_PATH	"/usr/bin/tar"
-#define	TOUCH_PATH	"/usr/bin/touch"
-#else
-/*
-**  Other Unix:
-**  ===========
-*/
-#define	COMPRESS_PATH	"/usr/ucb/compress"
-#define	UNCOMPRESS_PATH	"/usr/ucb/uncompress"
-#define UUDECODE_PATH   "/bin/uudecode"
-#define	ZCAT_PATH	"/usr/local/bin/zcat"
-#define	GZIP_PATH	"/usr/local/bin/gzip"
-#define	INSTALL_PATH	"/bin/install"
-#define	INSTALL_ARGS	"-c"
-#define	TAR_PATH	"/bin/tar"
-#define	TOUCH_PATH	"/bin/touch"
-
-#endif /* __FreeBSD__ || __NetBSD__ || __bsdi__ || LINUX */
-
-/*
-**  All Unix:
-**  =========
-*/
-#define	ZIP_PATH	"/usr/local/bin/zip"
-#define	UNZIP_PATH	"/usr/local/bin/unzip"
-#define	MKDIR_PATH	"/bin/mkdir"
-#define	MV_PATH		"/bin/mv"
-#define	RM_PATH		"/bin/rm"
-#define COPY_PATH	"/bin/cp"
-#define CHMOD_PATH	"/bin/chmod"
-
-#endif /* HAVE_CONFIG_H */
+	/* this is done via the configure script */
 #endif /* DOSPATH */
 #endif /* VMS */
 

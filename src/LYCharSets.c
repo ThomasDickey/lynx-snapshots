@@ -23,6 +23,7 @@ extern BOOL HTPassHighCtrlNum;
 extern HTCJKlang HTCJK;
 PUBLIC HTkcode kanji_code = NOKANJI;
 PUBLIC BOOLEAN LYHaveCJKCharacterSet = FALSE;
+PUBLIC BOOLEAN DisplayCharsetMatchLocale = TRUE;
 extern void UCInit NOARGS;
 extern int UCInitialized;
 PUBLIC int LYNumCharsets = 0; /* Will be initialized later by UC_Register. */
@@ -664,6 +665,42 @@ PUBLIC void HTMLSetHaveCJKCharacterSet ARGS1(int,i)
 }
 
 /*
+ *  Function to set the DisplayCharsetMatchLocale value
+ *  based on the selected character set.
+ *  It is used in UPPER8 for 8bit case-insensitive search
+ *  by matching def7_uni.tbl images. - LP
+ */
+PRIVATE void HTMLSetDisplayCharsetMatchLocale ARGS1(int,i)
+{
+    if (strncasecomp(LYCharSet_UC[i].MIMEname, "cp", 2) ||
+	strncasecomp(LYCharSet_UC[i].MIMEname, "windows", 7)) {
+	/*
+	** Assume dos/windows displays usually on remote terminal,
+	** so rarely match locale.
+	** (in fact, MS Windows codepoints locale are never seen on UNIX).
+	*/
+	DisplayCharsetMatchLocale = FALSE;
+    } else {
+	DisplayCharsetMatchLocale = TRUE;
+    }
+
+#if !defined(LOCALE)
+       DisplayCharsetMatchLocale = FALSE;
+#endif
+#if defined(EXP_8BIT_TOUPPER)
+	/*
+	** Force disable locale,
+	** but we have no intention to pass CJK via UCTransChar if that happened.
+	** Let someone from CJK correct this if necessary.
+	*/
+	if  (!LYHaveCJKCharacterSet)
+	    DisplayCharsetMatchLocale = FALSE;
+#endif
+
+    return;
+}
+
+/*
  *  Entity names -- Ordered by ISO Latin 1 value.
  *  ---------------------------------------------
  *   For conversions of DECIMAL escaped entities.
@@ -910,6 +947,7 @@ PUBLIC void HTMLUseCharacterSet ARGS1(int,i)
     p_entity_values = LYCharSets[i];
     HTMLSetCharacterHandling(i);
     HTMLSetHaveCJKCharacterSet(i);
+    HTMLSetDisplayCharsetMatchLocale(i);
     return;
 }
 

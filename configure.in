@@ -392,6 +392,7 @@ CF_ARG_ENABLE(8bit-toupper,
 [  --enable-8bit-toupper   use experimental 8-bit case-conversion],
 	[use_8bit_toupper=$enableval],
 	[use_8bit_toupper=no])
+AC_MSG_RESULT($use_8bit_toupper)
 test $use_8bit_toupper != no && AC_DEFINE(EXP_8BIT_TOUPPER)
 
 AC_MSG_CHECKING(if color-style code should be used)
@@ -418,7 +419,7 @@ no)
 	;;
 *)
 	AC_DEFINE(USE_COLOR_STYLE)
-	AC_MSG_RESULT(curses-style)
+	AC_MSG_RESULT(yes)
 
 	AC_MSG_CHECKING(for location of style-sheet file)
 	LYNX_LSS_FILE=$cf_libdir/lynx.lss

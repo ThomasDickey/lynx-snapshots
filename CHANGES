@@ -1,0 +1,20 @@
+Changes since Lynx 2.8 release
+================================================================================
+
+1998-03-18 (2.8.1dev.1)
+* correct an ifdef that caused inconsistent pathname separators on Windows
+  (reported by afn, patch by DK).
+* correct a missing AC_MSG_RESULT in configure.in (also MM) - TD
+* guard against illegal (e.g., zero) value for DEFAULT_CACHE_SIZE, when it is
+  read from lynx.cfg (reported by Martin Mokrejs
+  <mmokrejs@prfdec.natur.cuni.cz>) - TD
+* implement simple 'include' facility for lynx.cfg - BL
+* change TagClass and TagFlags to #define's to accommodate older compilers
+  which do not accept initialization of enums from data that do not correspond
+  to the declared values, e.g., CLIX (which complains) and Apollo (which fails
+  to compile, reported by Dave Eaton).  - TD
+* remove some obsolete definitions from userdefs.h, tcp.h and HTUtils.h - TD
+* remove obsolete files from WWW/Library - TD
+1998-03-12
+* UPPER8: a separate function HTMLSetDisplayCharsetMatchLocale() introduced
+  (LYCharSets.c). Locale mismatch assumed for DOS/WINDOWS display charsets. - LP

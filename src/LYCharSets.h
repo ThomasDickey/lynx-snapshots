@@ -7,6 +7,7 @@
 #endif /* !UCMAP_H */
 
 extern BOOLEAN LYHaveCJKCharacterSet;
+extern BOOLEAN DisplayCharsetMatchLocale; 
 
 /*
  *  LYchar_set_name[current_char_set] points to the currently active set.

@@ -4063,7 +4063,7 @@ have_VMS_URL:
 #endif /* DOSPATH */
 	if (*old_string == '~') {
 	    /*
-	     *	On Unix, covert '~' to Home_Dir().
+	     *	On Unix, convert '~' to Home_Dir().
 	     */
 	    StrAllocCat(*AllocatedString, Home_Dir());
 	    if ((cp = strchr(old_string, '/')) != NULL) {
