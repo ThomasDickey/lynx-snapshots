@@ -15,13 +15,6 @@
 #define u8 unsigned char
 #endif /* u8 */
 
-#ifdef NOTDEFINED
-struct consolefontdesc {
-	u_short charcount;	/* characters in font (256 or 512) */
-	u_short charheight;	/* scan lines per character (1-32) */
-	char *chardata;		/* font data in expanded form */
-};
-#endif /* NOTDEFINED */
 typedef char scrnmap_t;
 #define		E_TABSZ		256
 

@@ -5,10 +5,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: lynx 2.8.5pre15\n"
+"Project-Id-Version: lynx 2.8.5-rel1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2004-01-03 12:18-0500\n"
-"PO-Revision-Date: 2003-06-03 20:58+0200\n"
+"POT-Creation-Date: 2004-04-19 19:39-0400\n"
+"PO-Revision-Date: 2004-03-07 20:34+0100\n"
 "Last-Translator: Mihály Gyulai <gyulai@fbi.hu>\n"
 "Language-Team: Hungarian <translation-team-hu@lists.sourceforge.net>\n"
 "MIME-Version: 1.0\n"
@@ -2787,17 +2787,19 @@ msgstr "POST tartalommal rendelkezõ dokumentum nem található a gyorstárban. Újra
 
 #: WWW/Library/Implementation/HTAccess.c:939
 msgid "Loading failed, use a previous copy."
-msgstr ""
+msgstr "A betöltés sikertelen, korábbi példány használata."
 
-#: WWW/Library/Implementation/HTAccess.c:1047 src/GridText.c:8312
+#: WWW/Library/Implementation/HTAccess.c:1047 src/GridText.c:8317
 msgid "Loading incomplete."
 msgstr "A betöltés nem teljes."
 
 #: WWW/Library/Implementation/HTAccess.c:1077
+#, c-format
 msgid "**** HTAccess: socket or file number returned by obsolete load routine!\n"
 msgstr "**** HTAccess: elavult betöltési rutin által adott socket vagy fájl szám!\n"
 
 #: WWW/Library/Implementation/HTAccess.c:1079
+#, c-format
 msgid "**** HTAccess: Internal software error.  Please mail lynx-dev@sig.net!\n"
 msgstr "**** HTaccess: Belsõ programhiba. Kérem írjon egy emailt a lynx-dev@sig.net címre (angolul)!\n"
 
@@ -2810,7 +2812,7 @@ msgstr "**** HTAccess: Visszatérési állapot: %d\n"
 #. * hack: if we fail in HTAccess.c
 #. * avoid duplicating URL, oh.
 #.
-#: WWW/Library/Implementation/HTAccess.c:1086 src/LYMainLoop.c:7736
+#: WWW/Library/Implementation/HTAccess.c:1086 src/LYMainLoop.c:7735
 msgid "Can't Access"
 msgstr "Nem lehet elérni"
 
@@ -3052,11 +3054,11 @@ msgstr "Nem sikerült a nem blokkolt csatlakozás."
 msgid "Connection failed (too many retries)."
 msgstr "A kapcsolat sikertelen (túl sok próbálkozás)."
 
-#: WWW/Library/Implementation/HTTCP.c:1896
+#: WWW/Library/Implementation/HTTCP.c:1897
 msgid "Could not restore socket to blocking."
 msgstr "Nem lehet visszaállítani az illesztõpontot blokkosra."
 
-#: WWW/Library/Implementation/HTTCP.c:1962
+#: WWW/Library/Implementation/HTTCP.c:1964
 msgid "Socket read failed for 180,000 tries."
 msgstr "Az illesztõpont 180.000 olvasás után is sikertelen."
 
@@ -3356,143 +3358,139 @@ msgstr "Karbantartó"
 msgid "Host"
 msgstr "Kiszolgáló"
 
-#: src/GridText.c:688
+#: src/GridText.c:684
 msgid "Memory exhausted, display interrupted!"
 msgstr "A memória elfogyott, megjelenítés megszakítva!"
 
-#: src/GridText.c:693
+#: src/GridText.c:689
 msgid "Memory exhausted, will interrupt transfer!"
 msgstr "A memória elfogyott, az átvitel meg lesz szakítva!"
 
-#: src/GridText.c:3578
+#: src/GridText.c:3574
 msgid " *** MEMORY EXHAUSTED ***"
 msgstr " *** A MEMÓRIA ELFOGYOTT ***"
 
-#: src/GridText.c:6007 src/GridText.c:6014 src/LYList.c:252
+#: src/GridText.c:6006 src/GridText.c:6013 src/LYList.c:252
 msgid "unknown field or link"
 msgstr "ismeretlen mezõ vagy hivatkozás"
 
-#: src/GridText.c:6023
+#: src/GridText.c:6022
 msgid "text entry field"
 msgstr "szöveg bejegyzés mezõ"
 
-#: src/GridText.c:6026
+#: src/GridText.c:6025
 msgid "password entry field"
 msgstr "jelszó bejegyzés mezõ"
 
-#: src/GridText.c:6029
+#: src/GridText.c:6028
 msgid "checkbox"
 msgstr "jelölõnégyzet"
 
-#: src/GridText.c:6032
+#: src/GridText.c:6031
 msgid "radio button"
 msgstr "választógomb"
 
-#: src/GridText.c:6035
+#: src/GridText.c:6034
 msgid "submit button"
 msgstr "küldõ gomb"
 
-#: src/GridText.c:6038
+#: src/GridText.c:6037
 msgid "reset button"
 msgstr "törlés gomb"
 
-#: src/GridText.c:6041
+#: src/GridText.c:6040
 msgid "popup menu"
 msgstr "felbukkanó menü"
 
-#: src/GridText.c:6044
+#: src/GridText.c:6043
 msgid "hidden form field"
 msgstr "rejtett ûrlap mezõ"
 
-#: src/GridText.c:6047
+#: src/GridText.c:6046
 msgid "text entry area"
 msgstr "szöveg bejegyzés terület"
 
-#: src/GridText.c:6050
+#: src/GridText.c:6049
 msgid "range entry field"
 msgstr "tartomány bejegyzés mezõ"
 
-#: src/GridText.c:6053
+#: src/GridText.c:6052
 msgid "file entry field"
 msgstr "fájl bejegyzés mezõ"
 
-#: src/GridText.c:6056
+#: src/GridText.c:6055
 msgid "text-submit field"
 msgstr "szöveg-küldõ mezõ"
 
-#: src/GridText.c:6059
+#: src/GridText.c:6058
 msgid "image-submit button"
 msgstr "kép-küldõ mezõ"
 
-#: src/GridText.c:6062
+#: src/GridText.c:6061
 msgid "keygen field"
 msgstr "kulcsgeneráló mezõ"
 
-#: src/GridText.c:6065
+#: src/GridText.c:6064
 msgid "unknown form field"
 msgstr "ismeretlen ûrlap mezõ"
 
-#: src/GridText.c:10066
+#: src/GridText.c:10071
 msgid "Can't open file for uploading"
 msgstr "Nem lehet megnyitni a fájlt a feltöltéshez"
 
-#: src/GridText.c:11218
+#: src/GridText.c:11223
 #, c-format
 msgid "Submitting %s"
 msgstr "%s továbbítása"
 
 #. ugliness has happened; inform user and do the best we can
-#: src/GridText.c:12375
+#: src/GridText.c:12380
 msgid "Hang Detect: TextAnchor struct corrupted - suggest aborting!"
 msgstr "Akadásjelzés: A TextAnchor szerkezete sérült - javaslom a megszakítást!"
 
 #. don't show previous state
-#: src/GridText.c:12581
+#: src/GridText.c:12586
 msgid "Wrap lines to fit displayed area?"
 msgstr "Tördeljem a sorokat, hogy kiférjenek?"
 
-#: src/GridText.c:12633
+#: src/GridText.c:12638
 msgid "Very long lines have been wrapped!"
 msgstr "A hosszú sorokat tördeltem!"
 
-#: src/GridText.c:13079
+#: src/GridText.c:13084
 msgid "Very long lines have been truncated!"
 msgstr "A hosszú sorok végét levágtam!"
 
-#: src/HTAlert.c:154 src/LYShowInfo.c:318
+#: src/HTAlert.c:150 src/LYShowInfo.c:318
 msgid "bytes"
 msgstr "bájt"
 
-#: src/HTAlert.c:155
-msgid "KB"
-msgstr "kB"
-
-#: src/HTAlert.c:274
+#: src/HTAlert.c:285
 #, c-format
 msgid "Read %s of %s of data"
 msgstr "Adat olvasása: %s (összesen: %s)"
 
-#: src/HTAlert.c:276
+#: src/HTAlert.c:287
 #, c-format
 msgid "Read %s of data"
 msgstr "%s adat olvasása"
 
-#: src/HTAlert.c:281
+#: src/HTAlert.c:292
 #, c-format
 msgid ", %s/sec"
 msgstr ", %s/sec"
 
-#: src/HTAlert.c:290
+#: src/HTAlert.c:301
 #, c-format
 msgid " (stalled for %s)"
 msgstr " (megállt %s sec-ra)"
 
-#: src/HTAlert.c:294
+#: src/HTAlert.c:305
 #, c-format
 msgid ", ETA %s"
 msgstr ", ETA %s sec"
 
-#: src/HTAlert.c:301
+#: src/HTAlert.c:312
 msgid " (Press 'z' to abort)"
 msgstr " (Nyomja le a 'Z'-t a megszakításhoz)"
 
@@ -3521,39 +3519,39 @@ msgstr " (Nyomja le a 'Z'-t a megszakításhoz)"
 #. *  Lynx will also accept y Y n N as responses unless there is a conflict
 #. *  with the first letter of the "yes" or "no" translation.
 #.
-#: src/HTAlert.c:342 src/HTAlert.c:390
+#: src/HTAlert.c:353 src/HTAlert.c:401
 msgid "yes"
 msgstr "igen"
 
-#: src/HTAlert.c:345 src/HTAlert.c:391
+#: src/HTAlert.c:356 src/HTAlert.c:402
 msgid "no"
 msgstr "nem"
 
-#: src/HTML.c:5985
+#: src/HTML.c:5928
 msgid "Description:"
 msgstr "Leírás:"
 
-#: src/HTML.c:5990
+#: src/HTML.c:5933
 msgid "(none)"
 msgstr "(nincs)"
 
-#: src/HTML.c:5994
+#: src/HTML.c:5937
 msgid "Filepath:"
 msgstr "Útvonal:"
 
-#: src/HTML.c:5999
+#: src/HTML.c:5942
 msgid "(unknown)"
 msgstr "(ismeretlen)"
 
-#: src/HTML.c:7452
+#: src/HTML.c:7390
 msgid "Document has only hidden links.  Use the 'l'ist command."
 msgstr "(A dokumentum csak rejtett hivatkozásokat tartalmaz. Használja az 'L' parancsot."
 
-#: src/HTML.c:7958
+#: src/HTML.c:7887
 msgid "Source cache error - disk full?"
 msgstr "Forrás gyorstárazási hiba - a lemez megtelt?"
 
-#: src/HTML.c:7971
+#: src/HTML.c:7900
 msgid "Source cache error - not enough memory!"
 msgstr "Forrás gyorstárazási hiba - nincs elég memória!"
 
@@ -3570,6 +3568,7 @@ msgstr ""
 "      'R' billentyû (lehet, hogy ez meg lett változtatva)."
 
 #: src/LYBookmark.c:379
+#, c-format
 msgid ""
 "     You can delete links by the 'R' key<br>\n"
 "<ol>\n"
@@ -3615,23 +3614,23 @@ msgstr "A fájl még helyreállítható innen: %s, ebben a folyamatban"
 #. *  Neither the path as given nor any components examined by
 #. *  backing up were stat()able. - kw
 #.
-#: src/LYCgi.c:231
+#: src/LYCgi.c:241
 msgid "Unable to access cgi script"
 msgstr "Nem lehet elérni a cgi alkalmazói programot"
 
-#: src/LYCgi.c:654 src/LYCgi.c:657
+#: src/LYCgi.c:664 src/LYCgi.c:667
 msgid "Good Advice"
 msgstr "Jó tanács"
 
-#: src/LYCgi.c:660
+#: src/LYCgi.c:670
 msgid "An excellent http server for VMS is available via"
 msgstr "Egy kitûnõ http szerver VMS-hez rendelkezésre áll"
 
-#: src/LYCgi.c:667
+#: src/LYCgi.c:677
 msgid "this link"
 msgstr "ezen a linken keresztül"
 
-#: src/LYCgi.c:671
+#: src/LYCgi.c:681
 msgid "It provides state of the art CGI script support.\n"
 msgstr "Nagyon jól támogatja a CGI szkripteket.\n"
 
@@ -3655,31 +3654,31 @@ msgstr "Belsõ"
 msgid "cookie_domain_flag_set error, aborting program"
 msgstr "cookie_domain_flag_set hiba, program megszakítva"
 
-#: src/LYCurses.c:1004
+#: src/LYCurses.c:1006
 msgid "Terminal initialisation failed - unknown terminal type?"
 msgstr "Terminál megnyitás sikertelen - ismeretlen terminál típus?"
 
-#: src/LYCurses.c:1426
+#: src/LYCurses.c:1434
 msgid "Terminal ="
 msgstr "Terminál ="
 
-#: src/LYCurses.c:1430
+#: src/LYCurses.c:1438
 msgid "You must use a vt100, 200, etc. terminal with this program."
 msgstr "Önnek vt100, 200 stb.-t kell használnia ehhez a programhoz."
 
-#: src/LYCurses.c:1480
+#: src/LYCurses.c:1488
 msgid "Your Terminal type is unknown!"
 msgstr "A terminál típus ismeretlen!"
 
-#: src/LYCurses.c:1481
+#: src/LYCurses.c:1489
 msgid "Enter a terminal type:"
 msgstr "Kérem a terminál típusát:"
 
-#: src/LYCurses.c:1495
+#: src/LYCurses.c:1503
 msgid "TERMINAL TYPE IS SET TO"
 msgstr "A TERMINÁL TÍPUS BEÁLLÍTVA:"
 
-#: src/LYCurses.c:1994
+#: src/LYCurses.c:2002
 #, c-format
 msgid ""
 "\n"
@@ -3688,7 +3687,8 @@ msgstr ""
 "\n"
 "Végzetes hiba lépett fel a %s %s verzióban\n"
 
-#: src/LYCurses.c:1996
+#: src/LYCurses.c:2004
+#, c-format
 msgid ""
 "\n"
 "Please notify your system administrator to confirm a bug, and if\n"
@@ -3738,9 +3738,8 @@ msgid "Save to disk"
 msgstr "Mentés lemezre"
 
 #: src/LYDownload.c:558
-#, fuzzy
 msgid "View temporary file"
-msgstr "A fájl nézése "
+msgstr "Átmeneti fájl nézése"
 
 #: src/LYDownload.c:565
 msgid "Save to disk disabled."
@@ -3751,34 +3750,35 @@ msgid "Local additions:"
 msgstr "Helyi adalékok:"
 
 #: src/LYDownload.c:578 src/LYUpload.c:216
+#, c-format
 msgid "No Name Given"
 msgstr "Nincs név megadva"
 
-#: src/LYHistory.c:657
+#: src/LYHistory.c:658
 msgid "You selected:"
 msgstr "Kiválasztva:"
 
-#: src/LYHistory.c:681 src/LYHistory.c:921
+#: src/LYHistory.c:682 src/LYHistory.c:912
 msgid "(no address)"
 msgstr "(nincs cím)"
 
-#: src/LYHistory.c:685
+#: src/LYHistory.c:686
 msgid " (internal)"
 msgstr " (belsõ)"
 
-#: src/LYHistory.c:687
+#: src/LYHistory.c:688
 msgid " (was internal)"
 msgstr "(belsõ volt)"
 
-#: src/LYHistory.c:785
+#: src/LYHistory.c:786
 msgid " (From History)"
 msgstr " (Elõzményekbõl)"
 
-#: src/LYHistory.c:841
+#: src/LYHistory.c:832
 msgid "You visited (POSTs, bookmark, menu and list files excluded):"
 msgstr "Ön itt volt (POST, könyvjelzõ, menü és listafájl kihagyva):"
 
-#: src/LYHistory.c:1137
+#: src/LYHistory.c:1128
 msgid "(No messages yet)"
 msgstr "(Még nincs üzenet)"
 
@@ -3862,272 +3862,272 @@ msgstr "Hivatkozások"
 msgid "Visible links"
 msgstr "Látható hivatkozás"
 
-#: src/LYLocal.c:267
+#: src/LYLocal.c:268
 #, c-format
 msgid "Unable to get status of '%s'."
 msgstr "Nem lehet a %s állapotát meghatározni."
 
-#: src/LYLocal.c:301
+#: src/LYLocal.c:302
 msgid "The selected item is not a file or a directory!  Request ignored."
 msgstr "A kiválasztott elem nem fájl vagy könyvtár! A kérés figyelmen kívül hagyva."
 
-#: src/LYLocal.c:366
+#: src/LYLocal.c:367
 #, c-format
 msgid "Unable to %s due to system error!"
 msgstr "A %s nem végrehajtható, rendszerhiba miatt!"
 
 #. error return
-#: src/LYLocal.c:400
+#: src/LYLocal.c:401
 #, c-format
 msgid "Probable failure to %s due to system error!"
 msgstr "Valószínûleg megsérült a %s, rendszerhiba miatt!"
 
-#: src/LYLocal.c:463
+#: src/LYLocal.c:464 src/LYLocal.c:485
 #, c-format
 msgid "remove %s"
 msgstr "%s eltávolítása"
 
-#: src/LYLocal.c:481
+#: src/LYLocal.c:503
 #, c-format
 msgid "touch %s"
 msgstr "%s létrehozása"
 
-#: src/LYLocal.c:508
+#: src/LYLocal.c:530
 #, c-format
 msgid "move %s to %s"
 msgstr "%s mozgatása ide: %s"
 
-#: src/LYLocal.c:548
+#: src/LYLocal.c:570
 msgid "There is already a directory with that name!  Request ignored."
 msgstr "Ezen a néven már létezik egy könyvtár! A kérés figyelmen kívül hagyva."
 
-#: src/LYLocal.c:550
+#: src/LYLocal.c:572
 msgid "There is already a file with that name!  Request ignored."
 msgstr "Ezen a néven már létezik egy fájl! A kérés figyelmen kívül hagyva."
 
-#: src/LYLocal.c:552
+#: src/LYLocal.c:574
 msgid "The specified name is already in use!  Request ignored."
 msgstr "A megadott név már használatban van! A kérés figyelmen kívül hagyva."
 
-#: src/LYLocal.c:563
+#: src/LYLocal.c:585
 msgid "Destination has different owner!  Request denied."
 msgstr "A célnak más a tulajdonosa! Kérés megtagadva."
 
-#: src/LYLocal.c:566
+#: src/LYLocal.c:588
 msgid "Destination is not a valid directory!  Request denied."
 msgstr "A cél nem érvényes könyvtár! Kérés megtagadva."
 
-#: src/LYLocal.c:588
+#: src/LYLocal.c:610
 msgid "Remove all tagged files and directories?"
 msgstr "Minden megjelölt fájl és könyvtár eltávolítása?"
 
-#: src/LYLocal.c:647
+#: src/LYLocal.c:669
 msgid "Enter new location for tagged items: "
 msgstr "Kérem az új helyét a megjelölt elemeknek: "
 
-#: src/LYLocal.c:716
+#: src/LYLocal.c:738
 msgid "Path too long"
 msgstr "Az elérési út túl hosszú"
 
-#: src/LYLocal.c:747
+#: src/LYLocal.c:769
 msgid "Source and destination are the same location - request ignored!"
 msgstr "A forrás és a cél ugyanaz az hely - figyelmen kívül hagyva!"
 
-#: src/LYLocal.c:805
+#: src/LYLocal.c:827
 msgid "Enter new name for directory: "
 msgstr "Kérem az új könyvtárnevet: "
 
-#: src/LYLocal.c:807
+#: src/LYLocal.c:829
 msgid "Enter new name for file: "
 msgstr "Kérem az új fájlnevet: "
 
-#: src/LYLocal.c:819
+#: src/LYLocal.c:841
 msgid "Illegal character (path-separator) found! Request ignored."
 msgstr "Érvénytelen karaktert találtam (elérési út elválasztó)! Kérés figyelmen kívül hagyva."
 
-#: src/LYLocal.c:868
+#: src/LYLocal.c:890
 msgid "Enter new location for directory: "
 msgstr "Kérem a könyvtár új helyét: "
 
-#: src/LYLocal.c:874
+#: src/LYLocal.c:896
 msgid "Enter new location for file: "
 msgstr "Kérem a fájl új helyét: "
 
-#: src/LYLocal.c:901
+#: src/LYLocal.c:923
 msgid "Unexpected failure - unable to find trailing path separator"
 msgstr "Váratlan hiba - hiányzik a záró elérési út elválasztó"
 
-#: src/LYLocal.c:921
+#: src/LYLocal.c:943
 msgid "Source and destination are the same location!  Request ignored!"
 msgstr "A forrás és a cél ugyanaz az hely - figyelmen kívül hagyva!"
 
-#: src/LYLocal.c:970
+#: src/LYLocal.c:992
 msgid "Modify name, location, or permission (n, l, or p): "
 msgstr "Név (N), hely (L) vagy jogok (P) módosítása:"
 
-#: src/LYLocal.c:972
+#: src/LYLocal.c:994
 msgid "Modify name or location (n or l): "
 msgstr "Név (N) vagy hely (L) módosítása:"
 
 #.
 #. *	Code for changing ownership needed here.
 #.
-#: src/LYLocal.c:1001
+#: src/LYLocal.c:1023
 msgid "This feature not yet implemented!"
 msgstr "Ez a képesség még nincs készen!"
 
-#: src/LYLocal.c:1019
+#: src/LYLocal.c:1041
 msgid "Enter name of file to create: "
 msgstr "Kérem a létrehozandó fájl nevét: "
 
-#: src/LYLocal.c:1027 src/LYLocal.c:1069
+#: src/LYLocal.c:1049 src/LYLocal.c:1091
 msgid "Illegal redirection \"//\" found! Request ignored."
 msgstr "Érvénytelen átirányítás \"//\"! A kérés figyelmen kívül hagyva."
 
-#: src/LYLocal.c:1061
+#: src/LYLocal.c:1083
 msgid "Enter name for new directory: "
 msgstr "Kérem az új könyvtár nevét: "
 
-#: src/LYLocal.c:1106
+#: src/LYLocal.c:1128
 msgid "Create file or directory (f or d): "
 msgstr "Fájl (F) vagy könyvtár (D) létrehozása: "
 
-#: src/LYLocal.c:1146
+#: src/LYLocal.c:1169
 #, c-format
-msgid "Remove '%s' and all of its contents?"
-msgstr "%s eltávolítása minden tartalmával együtt?"
+msgid "Remove directory '%s'?"
+msgstr "'%s' könyvtár eltávolítása?"
 
-#: src/LYLocal.c:1149
-msgid "Remove directory and all of its contents?"
-msgstr "A könyvtár eltávolítása minden tartalmával együtt?"
+#: src/LYLocal.c:1172
+msgid "Remove directory?"
+msgstr "Könyvtár eltávolítása?"
 
-#: src/LYLocal.c:1153
+#: src/LYLocal.c:1177
 #, c-format
 msgid "Remove file '%s'?"
 msgstr "'%s' fájl eltávolítása?"
 
-#: src/LYLocal.c:1155
+#: src/LYLocal.c:1179
 msgid "Remove file?"
 msgstr "Fájl eltávolítása?"
 
-#: src/LYLocal.c:1160
+#: src/LYLocal.c:1184
 #, c-format
 msgid "Remove symbolic link '%s'?"
 msgstr "Eltávolítsam a %s szimbolikus hivatkozást?"
 
-#: src/LYLocal.c:1162
+#: src/LYLocal.c:1186
 msgid "Remove symbolic link?"
 msgstr "Eltávolítsam a szimbolikus hivatkozást?"
 
-#: src/LYLocal.c:1248
+#: src/LYLocal.c:1274
 msgid "Sorry, don't know how to permit non-UNIX files yet."
 msgstr "Sajnálom, nem tudom hogy kell engedélyezni a nem-UNIX fájlokat."
 
-#: src/LYLocal.c:1278
+#: src/LYLocal.c:1304
 msgid "Unable to open permit options file"
 msgstr "Nem lehet megnyitni az engedély beállítások fájlt"
 
-#: src/LYLocal.c:1305
+#: src/LYLocal.c:1331
 msgid "Specify permissions below:"
 msgstr "Adja meg a jogosultságokat:"
 
-#: src/LYLocal.c:1306 src/LYShowInfo.c:196
+#: src/LYLocal.c:1332 src/LYShowInfo.c:196
 msgid "Owner:"
 msgstr "Tulajdonos:"
 
-#: src/LYLocal.c:1322
+#: src/LYLocal.c:1348
 msgid "Group"
 msgstr "Csoport"
 
-#: src/LYLocal.c:1338
+#: src/LYLocal.c:1364
 msgid "Others:"
 msgstr "A többiek:"
 
-#: src/LYLocal.c:1356
+#: src/LYLocal.c:1382
 msgid "form to permit"
 msgstr "engedélyezve"
 
-#: src/LYLocal.c:1452
+#: src/LYLocal.c:1478
 msgid "Invalid mode format."
 msgstr "Érvénytelen mód formátum."
 
-#: src/LYLocal.c:1456
+#: src/LYLocal.c:1482
 msgid "Invalid syntax format."
 msgstr "Érvénytelen szintaktika."
 
-#: src/LYLocal.c:1645
+#: src/LYLocal.c:1671
 msgid "Warning!  UUDecoded file will exist in the directory you started Lynx."
 msgstr "Figyelmeztetés! UU-dekódolt fájl jön létre abban a könyvtárban, ahonnan elindította a Lynxet."
 
-#: src/LYLocal.c:1825
+#: src/LYLocal.c:1862
 msgid "NULL URL pointer"
 msgstr "ÜRES URL mutató"
 
-#: src/LYLocal.c:1908
+#: src/LYLocal.c:1945
 #, c-format
 msgid "Executing %s "
 msgstr "%s futtatása "
 
-#: src/LYLocal.c:1911
+#: src/LYLocal.c:1948
 msgid "Executing system command. This might take a while."
 msgstr "Rendszerparancs végrehajtása. Ez eltarthat egy ideig."
 
-#: src/LYLocal.c:1985
+#: src/LYLocal.c:2022
 msgid "Current directory:"
 msgstr "Aktuális könyvtár:"
 
-#: src/LYLocal.c:1988 src/LYLocal.c:2006
+#: src/LYLocal.c:2025 src/LYLocal.c:2043
 msgid "Current selection:"
 msgstr "Jelenlegi kiválasztás:"
 
-#: src/LYLocal.c:1992
+#: src/LYLocal.c:2029
 msgid "Nothing currently selected."
 msgstr "Semmi nincs kiválasztva."
 
-#: src/LYLocal.c:2007
+#: src/LYLocal.c:2044
 msgid "tagged item:"
 msgstr "jelölt elem:"
 
-#: src/LYLocal.c:2007
+#: src/LYLocal.c:2044
 msgid "tagged items:"
 msgstr "jelölt elemek:"
 
-#: src/LYLocal.c:2105 src/LYLocal.c:2116
+#: src/LYLocal.c:2142 src/LYLocal.c:2153
 msgid "Illegal filename; request ignored."
 msgstr "Érvénytelen fájlnév; a kérés figyelmen kívül hagyva."
 
 #. directory not writable
-#: src/LYLocal.c:2213 src/LYLocal.c:2271
+#: src/LYLocal.c:2250 src/LYLocal.c:2308
 msgid "Install in the selected directory not permitted."
 msgstr "A telepítés nincs engedélyezve a kiválasztott könyvtárba."
 
-#: src/LYLocal.c:2267
+#: src/LYLocal.c:2304
 msgid "The selected item is not a directory!  Request ignored."
 msgstr "A kiválasztott elem nem könyvtár! A kérés figyelmen kívül hagyva."
 
-#: src/LYLocal.c:2276
+#: src/LYLocal.c:2313
 msgid "Just a moment, ..."
 msgstr "Egy pillanat, ..."
 
-#: src/LYLocal.c:2293
+#: src/LYLocal.c:2330
 msgid "Error buiding install args"
 msgstr "Hiba a telepítési paraméterek létrehozása során"
 
-#: src/LYLocal.c:2308 src/LYLocal.c:2337
+#: src/LYLocal.c:2345 src/LYLocal.c:2374
 #, c-format
 msgid "Source and target are the same: %s"
 msgstr "A forrás és a cél ugyanaz: %s"
 
-#: src/LYLocal.c:2315 src/LYLocal.c:2344
+#: src/LYLocal.c:2352 src/LYLocal.c:2381
 #, c-format
 msgid "Already in target directory: %s"
 msgstr "Már a cél könyvtárban van: %s"
 
-#: src/LYLocal.c:2362
+#: src/LYLocal.c:2399
 msgid "Installation complete"
 msgstr "Telepítés kész"
 
-#: src/LYLocal.c:2551
+#: src/LYLocal.c:2588
 msgid "Temporary URL or list would be too long."
 msgstr "Az átmeneti URL vagy lista túl hosszú."
 
@@ -4166,19 +4166,21 @@ msgstr "Ez az üzenet önmûködõen jött létre"
 msgid "No system mailer configured"
 msgstr "Nincsen rendszerszintû levelezõ beállítva"
 
-#: src/LYMain.c:969
+#: src/LYMain.c:976
+#, c-format
 msgid "No Winsock found, sorry."
 msgstr "Nem találtam Winsock-ot, bocs."
 
-#: src/LYMain.c:1170
+#: src/LYMain.c:1178
+#, c-format
 msgid "You MUST define a valid TMP or TEMP area!\n"
 msgstr "Önnek meg kell határoznia egy érvényes TMP vagy TEMP területet\n"
 
-#: src/LYMain.c:1224 src/LYMainLoop.c:5028
+#: src/LYMain.c:1232 src/LYMainLoop.c:5027
 msgid "No such directory"
 msgstr "Nincs ilyen könyvtár"
 
-#: src/LYMain.c:1436
+#: src/LYMain.c:1444
 #, c-format
 msgid ""
 "\n"
@@ -4189,7 +4191,8 @@ msgstr ""
 "A %s konfigurációs fájl nem áll rendelkezésre.\n"
 "\n"
 
-#: src/LYMain.c:1446
+#: src/LYMain.c:1454
+#, c-format
 msgid ""
 "\n"
 "Lynx character sets not declared.\n"
@@ -4199,7 +4202,8 @@ msgstr ""
 "Nincs deklarált karakterkészlet a Lynx-ben.\n"
 "\n"
 
-#: src/LYMain.c:1475
+#: src/LYMain.c:1483
+#, c-format
 msgid ""
 "\n"
 "Lynx edit map not declared.\n"
@@ -4209,7 +4213,7 @@ msgstr ""
 "Nincs deklarált szerkesztõkép a Lynx-ben.\n"
 "\n"
 
-#: src/LYMain.c:1504
+#: src/LYMain.c:1512
 #, c-format
 msgid ""
 "\n"
@@ -4220,58 +4224,64 @@ msgstr ""
 "A %s Lynx-fájl nem áll rendelkezésre.\n"
 "\n"
 
-#: src/LYMain.c:1743
+#: src/LYMain.c:1755
 msgid "Warning:"
 msgstr "Figyelem:"
 
-#: src/LYMain.c:2293
+#: src/LYMain.c:2305
 msgid "persistent cookies state will be changed in next session only."
 msgstr "az állandó süti állapot csak a következõ folyamat során fog megváltozni."
 
-#: src/LYMain.c:2540 src/LYMain.c:2588
+#: src/LYMain.c:2552 src/LYMain.c:2600
 #, c-format
 msgid "Lynx: ignoring unrecognized charset=%s\n"
 msgstr "A Lynx figyelmen kívül hagyja a %s fel nem ismert karakterkészletet\n"
 
-#: src/LYMain.c:3120
-#, fuzzy, c-format
+#: src/LYMain.c:3132
+#, c-format
 msgid "%s Version %s (%s)"
-msgstr "%s Verzió %s (%s)\n"
+msgstr "%s Verzió %s (%s)"
 
-#: src/LYMain.c:3143
+#: src/LYMain.c:3155
 #, c-format
 msgid "Built on %s %s %s\n"
 msgstr "Készítve %s %s %s\n"
 
-#: src/LYMain.c:3166
+#: src/LYMain.c:3178
+#, c-format
 msgid "Copyrights held by the University of Kansas, CERN, and other contributors.\n"
 msgstr "A szerzõi és kiadó jogokat a Kansas Egyetem, a CERN és az egyéb terjesztõk gyakorolják.\n"
 
-#: src/LYMain.c:3168
+#: src/LYMain.c:3180
+#, c-format
 msgid "Distributed under the GNU General Public License.\n"
 msgstr "A GNU Általános Nyilvános Licensz szerint kiadva.\n"
 
-#: src/LYMain.c:3170
+#: src/LYMain.c:3182
+#, c-format
 msgid ""
 "See http://lynx.isc.org/ and the online help for more information.\n"
 "\n"
-msgstr "Nézze meg a súgót és a http://lynx.isc.org/-ot, ahol segítséget kaphat.\n"
+msgstr ""
+"Nézze meg a súgót és a http://lynx.isc.org/-ot, ahol segítséget kaphat.\n"
+"\n"
 
-#: src/LYMain.c:3919
+#: src/LYMain.c:3935
 #, c-format
 msgid "USAGE: %s [options] [file]\n"
 msgstr "HASZNÁLAT: %s [opciók] [fájl]\n"
 
-#: src/LYMain.c:3920
+#: src/LYMain.c:3936
+#, c-format
 msgid "Options are:\n"
 msgstr "Opciók:\n"
 
-#: src/LYMain.c:4191
+#: src/LYMain.c:4207
 #, c-format
 msgid "%s: Invalid Option: %s\n"
 msgstr "%s: Érvénytelen opció: %s \n"
 
-#: src/LYMainLoop.c:539
+#: src/LYMainLoop.c:538
 #, c-format
 msgid "Internal error: Invalid mouse link %d!"
 msgstr "Belsõ hiba: Hibás egér hivatkozás %d!"
@@ -4279,103 +4289,103 @@ msgstr "Belsõ hiba: Hibás egér hivatkozás %d!"
 #.
 #. * Make a name for this new URL.
 #.
-#: src/LYMainLoop.c:653 src/LYMainLoop.c:5050
+#: src/LYMainLoop.c:652 src/LYMainLoop.c:5049
 msgid "A URL specified by the user"
 msgstr "Felhasználó által megadott URL"
 
-#: src/LYMainLoop.c:1110
+#: src/LYMainLoop.c:1109
 msgid "Enctype multipart/form-data not yet supported!  Cannot submit."
 msgstr "Enctype multipart/form-data még nincs támogatva! Nem tudom elküldeni."
 
 #.
 #. *  Make a name for this help file.
 #.
-#: src/LYMainLoop.c:3053
+#: src/LYMainLoop.c:3052
 msgid "Help Screen"
 msgstr "Súgó képernyõ"
 
-#: src/LYMainLoop.c:3177
+#: src/LYMainLoop.c:3176
 msgid "System Index"
 msgstr "Rendszer index"
 
-#: src/LYMainLoop.c:3549 src/LYMainLoop.c:5270
+#: src/LYMainLoop.c:3548 src/LYMainLoop.c:5269
 msgid "Entry into main screen"
 msgstr "Belépés a fõképernyõbe"
 
-#: src/LYMainLoop.c:3824
+#: src/LYMainLoop.c:3823
 msgid "No next document present"
 msgstr "Nincs következõ dokumentum"
 
-#: src/LYMainLoop.c:4131
+#: src/LYMainLoop.c:4130
 msgid "charset for this document specified explicitly, sorry..."
 msgstr "a dokumentum karakterkészlete már erre van beállítva, bocs..."
 
-#: src/LYMainLoop.c:5004
+#: src/LYMainLoop.c:5003
 msgid "cd to:"
 msgstr "könyvtárváltás:"
 
-#: src/LYMainLoop.c:5031
+#: src/LYMainLoop.c:5030
 msgid "A component of path is not a directory"
 msgstr "Az útvonal egy összetevõje nem könyvtár"
 
-#: src/LYMainLoop.c:5034
+#: src/LYMainLoop.c:5033
 msgid "failed to change directory"
 msgstr "nem sikerült a  könyvtárváltás"
 
-#: src/LYMainLoop.c:6204
+#: src/LYMainLoop.c:6203
 msgid "Reparsing document under current settings..."
 msgstr "A dokumentumot átalakítom az aktuális beállításoknak megfelelõen..."
 
-#: src/LYMainLoop.c:6489 src/LYMainLoop.c:6493
+#: src/LYMainLoop.c:6488 src/LYMainLoop.c:6492
 #, c-format
 msgid "Fatal error - could not open output file %s\n"
 msgstr "Végzetes hiba: nem lehet megnyitni a '%s' kimeneti fájlt\n"
 
-#: src/LYMainLoop.c:6834
+#: src/LYMainLoop.c:6833
 msgid "TABLE center enable."
 msgstr "'Táblázat középre' engedélyezve."
 
-#: src/LYMainLoop.c:6837
+#: src/LYMainLoop.c:6836
 msgid "TABLE center disable."
 msgstr "'Táblázat középre' tiltva."
 
-#: src/LYMainLoop.c:6914
+#: src/LYMainLoop.c:6913
 msgid "Current URL is empty."
 msgstr "Üres a pillanatnyi URL."
 
-#: src/LYMainLoop.c:6916 src/LYUtils.c:1688
+#: src/LYMainLoop.c:6915 src/LYUtils.c:1696
 msgid "Copy to clipboard failed."
 msgstr "Sikertelen a vágólapra másolás."
 
-#: src/LYMainLoop.c:6918
+#: src/LYMainLoop.c:6917
 msgid "Document URL put to clipboard."
 msgstr "A dokumentum URL-jét a vágólapra tesszük."
 
-#: src/LYMainLoop.c:6920
+#: src/LYMainLoop.c:6919
 msgid "Link URL put to clipboard."
 msgstr "A link URL-jét a vágólapra tesszük."
 
-#: src/LYMainLoop.c:6946
+#: src/LYMainLoop.c:6945
 msgid "No URL in the clipboard."
 msgstr "Nincsen URL a vágólapon."
 
-#: src/LYMainLoop.c:7621 src/LYMainLoop.c:7794
+#: src/LYMainLoop.c:7620 src/LYMainLoop.c:7793
 msgid "-index-"
 msgstr "-index-"
 
-#: src/LYMainLoop.c:7731
+#: src/LYMainLoop.c:7730
 msgid "lynx: Can't access startfile"
 msgstr "lynx: Nincs nyitófájl"
 
-#: src/LYMainLoop.c:7744
+#: src/LYMainLoop.c:7743
 msgid "lynx: Start file could not be found or is not text/html or text/plain"
 msgstr "lynx: A nyitófájlt nem találom (vagy nem HTML szöveg, vagy nem sima szöveg)"
 
-#: src/LYMainLoop.c:7745
+#: src/LYMainLoop.c:7744
 msgid "      Exiting..."
 msgstr "      Kilépés..."
 
-#: src/LYMainLoop.c:7788
+#: src/LYMainLoop.c:7787
 msgid "-more-"
 msgstr "-több-"
 
@@ -4448,100 +4458,296 @@ msgstr "(B): a könyvjelzõ fájlok áttekintése/szerkesztése"
 msgid "B)ookmark file: "
 msgstr "(B): a könyvjelzõ fájl: "
 
-#: src/LYOptions.c:2547 src/LYOptions.c:2571
+#: src/LYOptions.c:2103 src/LYOptions.c:2109
+msgid "ON"
+msgstr "BE"
+
+#. verbose_img variable
+#: src/LYOptions.c:2104 src/LYOptions.c:2108 src/LYOptions.c:2237 src/LYOptions.c:2246
+msgid "OFF"
+msgstr "KI"
+
+#: src/LYOptions.c:2105
+msgid "NEVER"
+msgstr "SOHA"
+
+#: src/LYOptions.c:2106
+msgid "ALWAYS"
+msgstr "MINDIG"
+
+#: src/LYOptions.c:2120 src/LYOptions.c:2230
+msgid "ignore"
+msgstr "hanyagol"
+
+#: src/LYOptions.c:2121
+msgid "ask user"
+msgstr "kérdez"
+
+#: src/LYOptions.c:2122
+msgid "accept all"
+msgstr "mindent elfogad"
+
+#: src/LYOptions.c:2133
+msgid "ALWAYS OFF"
+msgstr "Mindig: KI"
+
+#: src/LYOptions.c:2134
+msgid "FOR LOCAL FILES ONLY"
+msgstr "Csak helyi fájlokra"
+
+#: src/LYOptions.c:2136
+msgid "ALWAYS ON"
+msgstr "Mindig: BE"
+
+#: src/LYOptions.c:2146
+msgid "Numbers act as arrows"
+msgstr "A számok mint nyilak"
+
+#: src/LYOptions.c:2148
+msgid "Links are numbered"
+msgstr "A linkek számozottak"
+
+#: src/LYOptions.c:2151
+msgid "Links and form fields are numbered"
+msgstr "Linkek és ûrlapok számozottak"
+
+#: src/LYOptions.c:2154
+msgid "Form fields are numbered"
+msgstr "Ûrlapok számozottak"
+
+#: src/LYOptions.c:2161
+msgid "Case insensitive"
+msgstr "Kis/nagybetûre érzéketlen"
+
+#: src/LYOptions.c:2162
+msgid "Case sensitive"
+msgstr "Kis/nagybetûre érzékeny"
+
+#: src/LYOptions.c:2183
+msgid "prompt normally"
+msgstr "szokásos kérdés"
+
+#: src/LYOptions.c:2184
+msgid "force yes-response"
+msgstr "mindig IGEN-válasz"
+
+#: src/LYOptions.c:2185
+msgid "force no-response"
+msgstr "mindig NEM-válasz"
+
+#: src/LYOptions.c:2200
+msgid "Novice"
+msgstr "Kezdõ"
+
+#: src/LYOptions.c:2201
+msgid "Intermediate"
+msgstr "Haladó"
+
+#: src/LYOptions.c:2202
+msgid "Advanced"
+msgstr "Profi"
+
+#: src/LYOptions.c:2209
+msgid "By First Visit"
+msgstr "Elsõ alkalommal"
+
+#: src/LYOptions.c:2211
+msgid "By First Visit Reversed"
+msgstr "Elsõ alkalommal megfordítva"
+
+#: src/LYOptions.c:2212
+msgid "As Visit Tree"
+msgstr "Látogatási fa"
+
+#: src/LYOptions.c:2213
+msgid "By Last Visit"
+msgstr "Utolsó látogatás"
+
+#: src/LYOptions.c:2215
+msgid "By Last Visit Reversed"
+msgstr "Utolsó látogatás megfordítva"
+
+#. Old_DTD variable
+#: src/LYOptions.c:2224
+msgid "relaxed (TagSoup mode)"
+msgstr "enyhe (TagSoup mód)"
+
+#: src/LYOptions.c:2225
+msgid "strict (SortaSGML mode)"
+msgstr "szigorú (SortaSGML mód)"
+
+#: src/LYOptions.c:2231
+msgid "as labels"
+msgstr "címkék"
+
+#: src/LYOptions.c:2232
+msgid "as links"
+msgstr "linkek"
+
+#: src/LYOptions.c:2238
+msgid "show filename"
+msgstr "fájlnév mutatása"
+
+#: src/LYOptions.c:2247
+msgid "STANDARD"
+msgstr "SZOKÁSOS"
+
+#: src/LYOptions.c:2248
+msgid "ADVANCED"
+msgstr "FEJLETT"
+
+#: src/LYOptions.c:2272
+msgid "Directories first"
+msgstr "Elõbb könyvtárak"
+
+#: src/LYOptions.c:2273
+msgid "Files first"
+msgstr "Elõbb fájlok"
+
+#: src/LYOptions.c:2274
+msgid "Mixed style"
+msgstr "Kevert stílus"
+
+#: src/LYOptions.c:2279 src/LYOptions.c:2294
+msgid "By Name"
+msgstr "Név szerint"
+
+#: src/LYOptions.c:2280 src/LYOptions.c:2295
+msgid "By Type"
+msgstr "Típus szerint"
+
+#: src/LYOptions.c:2281 src/LYOptions.c:2296
+msgid "By Size"
+msgstr "Méret szerint"
+
+#: src/LYOptions.c:2282 src/LYOptions.c:2297
+msgid "By Date"
+msgstr "Dátum szerint"
+
+#: src/LYOptions.c:2283
+msgid "By Mode"
+msgstr "Mód szerint"
+
+#: src/LYOptions.c:2285
+msgid "By User"
+msgstr "Felh. szerint"
+
+#: src/LYOptions.c:2286
+msgid "By Group"
+msgstr "Csoport szerint"
+
+#: src/LYOptions.c:2303
+msgid "Do not show rate"
+msgstr "Ne mutassa a sebességet"
+
+#: src/LYOptions.c:2304 src/LYOptions.c:2305
+#, c-format
+msgid "Show %s/sec rate"
+msgstr "Az átvitel sebesség megjelenítése (%s/s)"
+
+#: src/LYOptions.c:2307 src/LYOptions.c:2308
+#, c-format
+msgid "Show %s/sec, ETA"
+msgstr "%s/s mutatása, ETA"
+
+#: src/LYOptions.c:2558 src/LYOptions.c:2582
 #, c-format
 msgid "Use %s to invoke the Options menu!"
-msgstr "Használja a %s-t, hogy meghívja a Beállítások menüt!"
+msgstr "Használja a %s-t, hogy bejöjjön a Beállítások menü!"
 
-#: src/LYOptions.c:3253
+#: src/LYOptions.c:3297
 msgid "(options marked with (!) will not be saved)"
 msgstr "(a '!'-el jelölt opciók nem lesznek megõrizve)"
 
-#: src/LYOptions.c:3261
+#: src/LYOptions.c:3305
 msgid "General Preferences"
 msgstr "Általános beállítások"
 
 #. ***************************************************************
 #. User Mode: SELECT
-#: src/LYOptions.c:3265
+#: src/LYOptions.c:3309
 msgid "User mode"
 msgstr "Felhasználói mód"
 
 #. Editor: INPUT
-#: src/LYOptions.c:3271
+#: src/LYOptions.c:3315
 msgid "Editor"
 msgstr "Szerkesztõ"
 
 #. Search Type: SELECT
-#: src/LYOptions.c:3276
+#: src/LYOptions.c:3320
 msgid "Type of Search"
 msgstr "Keresés típusa"
 
-#: src/LYOptions.c:3281
+#: src/LYOptions.c:3325
 msgid "Security and Privacy"
-msgstr ""
+msgstr "Biztonság és magánszféra"
 
 #. ***************************************************************
 #. Cookies: SELECT
-#: src/LYOptions.c:3285
+#: src/LYOptions.c:3329
 msgid "Cookies"
 msgstr "Sütik"
 
 #. Cookie Prompting: SELECT
-#: src/LYOptions.c:3299
+#: src/LYOptions.c:3343
 msgid "Invalid-Cookie Prompting"
-msgstr ""
+msgstr "Érvénytelen süti"
 
 #. SSL Prompting: SELECT
-#: src/LYOptions.c:3306
+#: src/LYOptions.c:3350
 msgid "SSL Prompting"
-msgstr ""
+msgstr "SSL választás"
 
-#: src/LYOptions.c:3312
+#: src/LYOptions.c:3356
 msgid "Keyboard Input"
 msgstr "Billentyûzet bevitel"
 
 #. ***************************************************************
 #. Keypad Mode: SELECT
-#: src/LYOptions.c:3316
+#: src/LYOptions.c:3360
 msgid "Keypad mode"
 msgstr "Numerikus pad módja"
 
 #. Emacs keys: ON/OFF
-#: src/LYOptions.c:3322
+#: src/LYOptions.c:3366
 msgid "Emacs keys"
 msgstr "Emacs billentyûk"
 
 #. VI Keys: ON/OFF
-#: src/LYOptions.c:3328
+#: src/LYOptions.c:3372
 msgid "VI keys"
 msgstr "vi billentyûk"
 
 #. Line edit style: SELECT
 #. well, at least 2 line edit styles available
-#: src/LYOptions.c:3335
+#: src/LYOptions.c:3379
 msgid "Line edit style"
 msgstr "Sorszerkesztõi stílus"
 
 #. Keyboard layout: SELECT
-#: src/LYOptions.c:3347
+#: src/LYOptions.c:3391
 msgid "Keyboard layout"
 msgstr "Billentyûzet kiosztás"
 
 #.
 #. * Display and Character Set
 #.
-#: src/LYOptions.c:3360
+#: src/LYOptions.c:3404
 msgid "Display and Character Set"
 msgstr "Képernyõ és karakterkészlet "
 
-#. ***************************************************************
+#. Use locale-based character set: ON/OFF
+#: src/LYOptions.c:3409
+msgid "Use locale-based character set"
+msgstr "Helyi karakterkészlet használata"
+
 #. Display Character Set: SELECT
-#: src/LYOptions.c:3364
+#: src/LYOptions.c:3418
 msgid "Display character set"
 msgstr "Képernyõ karakterkészlet"
 
-#: src/LYOptions.c:3393
+#: src/LYOptions.c:3447
 msgid "Assumed document character set"
 msgstr "Feltételezett karakterkészlet"
 
@@ -4550,156 +4756,162 @@ msgstr "Feltételezett karakterkészlet"
 #. * we split the header to make it more readable:
 #. * "CJK mode" for CJK display charsets, and "Raw 8-bit" for others.
 #.
-#: src/LYOptions.c:3413
+#: src/LYOptions.c:3467
 msgid "CJK mode"
 msgstr "CJK mód"
 
-#: src/LYOptions.c:3415
+#: src/LYOptions.c:3469
 msgid "Raw 8-bit"
 msgstr "Nyers 8-bites mód"
 
 #. X Display: INPUT
-#: src/LYOptions.c:3423
+#: src/LYOptions.c:3477
 msgid "X Display"
 msgstr "X képernyõ"
 
 #.
 #. * Document Appearance
 #.
-#: src/LYOptions.c:3429
+#: src/LYOptions.c:3483
 msgid "Document Appearance"
 msgstr "Dokumentum megjelenése"
 
-#: src/LYOptions.c:3435
+#: src/LYOptions.c:3489
 msgid "Show color"
 msgstr "Színek mutatása"
 
 #. Show cursor: ON/OFF
-#: src/LYOptions.c:3459
+#: src/LYOptions.c:3513
 msgid "Show cursor"
 msgstr "Kurzor mutatása"
 
+#. Underline links: ON/OFF
+#: src/LYOptions.c:3519
+msgid "Underline links"
+msgstr "Rejtett hivatkozás"
+
 #. Show scrollbar: ON/OFF
-#: src/LYOptions.c:3466
+#: src/LYOptions.c:3526
 msgid "Show scrollbar"
 msgstr "Csúszka mutatása"
 
 #. Select Popups: ON/OFF
-#: src/LYOptions.c:3473
+#: src/LYOptions.c:3533
 msgid "Popups for select fields"
 msgstr "Felbukkanó ablakok használata"
 
 #. HTML error recovery: SELECT
-#: src/LYOptions.c:3479
+#: src/LYOptions.c:3539
 msgid "HTML error recovery"
 msgstr "HTML hiba helyreállítás"
 
 #. Show Images: SELECT
-#: src/LYOptions.c:3485
+#: src/LYOptions.c:3545
 msgid "Show images"
 msgstr "Képek mutatása"
 
 #. Verbose Images: ON/OFF
-#: src/LYOptions.c:3499
+#: src/LYOptions.c:3559
 msgid "Verbose images"
 msgstr "Tallózás a képek között"
 
 #.
 #. * Headers Transferred to Remote Servers
 #.
-#: src/LYOptions.c:3507
+#: src/LYOptions.c:3567
 msgid "Headers Transferred to Remote Servers"
 msgstr "A távoli gépeknek átküldött fejlécek"
 
 #. ***************************************************************
 #. Mail Address: INPUT
-#: src/LYOptions.c:3511
+#: src/LYOptions.c:3571
 msgid "Personal mail address"
 msgstr "Személyes email cím"
 
 #. Preferred Document Character Set: INPUT
-#: src/LYOptions.c:3516
+#: src/LYOptions.c:3576
 msgid "Preferred document character set"
 msgstr "Elsõdleges karakterkészlet"
 
 #. Preferred Document Language: INPUT
-#: src/LYOptions.c:3521
+#: src/LYOptions.c:3581
 msgid "Preferred document language"
 msgstr "Elsõdleges nyelv"
 
-#: src/LYOptions.c:3527
+#: src/LYOptions.c:3587
 msgid "User-Agent header"
 msgstr "Böngészõ-azonosító fejléc"
 
 #.
 #. * Listing and Accessing Files
 #.
-#: src/LYOptions.c:3535
+#: src/LYOptions.c:3595
 msgid "Listing and Accessing Files"
 msgstr "Fájlok listázása és elérése"
 
 #. ***************************************************************
 #. FTP sort: SELECT
-#: src/LYOptions.c:3539
+#: src/LYOptions.c:3599
 msgid "FTP sort criteria"
 msgstr "FTP-s rendezés módja"
 
 #. Local Directory Sort: SELECT
-#: src/LYOptions.c:3546
+#: src/LYOptions.c:3606
 msgid "Local directory sort criteria"
 msgstr "Helyi könyvtárrendezés módja"
 
 #. Local Directory Order: SELECT
-#: src/LYOptions.c:3552
+#: src/LYOptions.c:3612
 msgid "Local directory sort order"
 msgstr "Helyi könyvtárrendezés sorrendje"
 
-#: src/LYOptions.c:3561
+#: src/LYOptions.c:3621
 msgid "Show dot files"
 msgstr "Rejtett fájlok mutatása"
 
-#: src/LYOptions.c:3569
+#: src/LYOptions.c:3629
 msgid "Execution links"
 msgstr "Futtatható hivatkozások"
 
-#. Local Directory Sort: SELECT
-#: src/LYOptions.c:3589
+#. Show transfer rate: SELECT
+#: src/LYOptions.c:3649
 msgid "Show transfer rate"
 msgstr "Az átvitel sebesség megjelenítése"
 
 #.
 #. * Special Files and Screens
 #.
-#: src/LYOptions.c:3598
+#: src/LYOptions.c:3668
 msgid "Special Files and Screens"
 msgstr "Speciális fájlok és képernyõk"
 
-#: src/LYOptions.c:3603
+#: src/LYOptions.c:3673
 msgid "Multi-bookmarks"
 msgstr "Többszörös könyvjelzõk"
 
-#: src/LYOptions.c:3611
+#: src/LYOptions.c:3681
 msgid "Review/edit Bookmarks files"
 msgstr "Könyvjelzõk szerkesztése, átnézése"
 
-#: src/LYOptions.c:3613
+#: src/LYOptions.c:3683
 msgid "Goto multi-bookmark menu"
 msgstr "Ugrás a többszörös könyvjelzõi menübe"
 
-#: src/LYOptions.c:3615
+#: src/LYOptions.c:3685
 msgid "Bookmarks file"
 msgstr "Könyvjelzõ fájl"
 
 #. Visited Pages: SELECT
-#: src/LYOptions.c:3621
+#: src/LYOptions.c:3691
 msgid "Visited Pages"
 msgstr "Meglátogatott lapok"
 
-#: src/LYOptions.c:3628
+#: src/LYOptions.c:3696
 msgid "View the file "
 msgstr "A fájl nézése "
 
 #: src/LYPrint.c:952
+#, c-format
 msgid " Print job complete.\n"
 msgstr "Nyomtatási munka kész.\n"
 
@@ -4745,7 +4957,7 @@ msgstr "Mentés helyi fájlba"
 
 #: src/LYPrint.c:1304
 msgid "Save to disk disabled"
-msgstr "Lemezre mentés le van tiltva"
+msgstr "A lemezre mentés le van tiltva"
 
 #: src/LYPrint.c:1311
 msgid "Mail the file"
@@ -4760,6 +4972,7 @@ msgid "Print out on a printer attached to your vt100 terminal"
 msgstr "Nyomtatás a vt100-as terminálhoz csatlakozó nyomtatóra."
 
 #: src/LYReadCFG.c:339
+#, c-format
 msgid ""
 "Syntax Error parsing COLOR in configuration file:\n"
 "The line must be of the form:\n"
@@ -4813,44 +5026,44 @@ msgstr "A Lynx nem tud elindulni, a CERN %s szabály fájlja nem áll rendelkezésre
 msgid "(no name)"
 msgstr "(névtelen)"
 
-#: src/LYReadCFG.c:1782
+#: src/LYReadCFG.c:1787
 #, c-format
 msgid "More than %d nested lynx.cfg includes -- perhaps there is a loop?!?\n"
 msgstr "Több mint %d egymásba-ágyazást találtam a lynx.cfg-ben -- hurok alakult ki???\n"
 
-#: src/LYReadCFG.c:1784
+#: src/LYReadCFG.c:1789
 #, c-format
 msgid "Last attempted include was '%s',\n"
 msgstr "Az utolsó beillesztés %s volt,\n"
 
-#: src/LYReadCFG.c:1785
+#: src/LYReadCFG.c:1790
 #, c-format
 msgid "included from '%s'.\n"
 msgstr "beszúrva innen: %s.\n"
 
-#: src/LYReadCFG.c:2191 src/LYReadCFG.c:2204 src/LYReadCFG.c:2262
+#: src/LYReadCFG.c:2196 src/LYReadCFG.c:2209 src/LYReadCFG.c:2267
 msgid "The following is read from your lynx.cfg file."
-msgstr "Az itt következõket a lynx.cfg fájlból olvasom ki."
+msgstr "Az itt következõk a lynx.cfg fájlban olvashatók."
 
-#: src/LYReadCFG.c:2192 src/LYReadCFG.c:2205
+#: src/LYReadCFG.c:2197 src/LYReadCFG.c:2210
 msgid "Please read the distribution"
 msgstr "Kérem olvassa el az ide vonatkozó leírást ("
 
-#: src/LYReadCFG.c:2198 src/LYReadCFG.c:2208
+#: src/LYReadCFG.c:2203 src/LYReadCFG.c:2213
 msgid "for more comments."
 msgstr ") további információért."
 
-#: src/LYReadCFG.c:2244
+#: src/LYReadCFG.c:2249
 msgid "RELOAD THE CHANGES"
 msgstr "VÁLTOZÁSOK ÚJRATÖLTÉSE"
 
-#: src/LYReadCFG.c:2253
+#: src/LYReadCFG.c:2258
 msgid "Your primary configuration"
 msgstr "Az elsõdleges beállítás:"
 
 #: src/LYShowInfo.c:129
 msgid "Directory that you are currently viewing"
-msgstr "A könyvtár, amit jelenleg néz."
+msgstr "A könyvtár, amit jelenleg néz:"
 
 #: src/LYShowInfo.c:132
 msgid "Name:"
@@ -5081,31 +5294,33 @@ msgstr "Feltöltés:"
 msgid "Upload options:"
 msgstr "Feltöltési beállítások:"
 
-#: src/LYUtils.c:1690
+#: src/LYUtils.c:1698
 msgid "Download document URL put to clipboard."
 msgstr "A letöltendõ dokumentum URL-jét a vágólapra tesszük."
 
-#: src/LYUtils.c:2468
+#: src/LYUtils.c:2476
 msgid "Unexpected access protocol for this URL scheme."
 msgstr "Nem támogatott elérési protokoll ezen az URL sémán."
 
-#: src/LYUtils.c:3294
+#: src/LYUtils.c:3302
 msgid "Too many tempfiles"
 msgstr "Túl sok átmeneti fájl"
 
-#: src/LYUtils.c:3595
+#: src/LYUtils.c:3603
 msgid "unknown restriction"
 msgstr "ismeretlen szigorítás"
 
-#: src/LYUtils.c:3626
+#: src/LYUtils.c:3634
+#, c-format
 msgid "No restrictions set.\n"
 msgstr "Nincs szigorítás beállítva.\n"
 
-#: src/LYUtils.c:3629
+#: src/LYUtils.c:3637
+#, c-format
 msgid "Restrictions set:\n"
 msgstr "Szigorítási beállítás:\n"
 
-#: src/LYUtils.c:5034
+#: src/LYUtils.c:5042
 msgid "Cannot find HOME directory"
 msgstr "Nem találom a HOME könyvtárat"
 
@@ -5129,8 +5344,8 @@ msgid ""
 "file into which the user can paste links for easy access at a later\n"
 "date.\n"
 msgstr ""
-"a bookmark_file eltárolja annak a fájlnak nevét és helyét, amibe linkeket\n"
-" lehet felvenni.\n"
+"a bookmark_file eltárolja annak a fájlnak a nevét és helyét, amibe linkeket\n"
+" lehet felvenni, és késõbb felhasználni.\n"
 
 #: src/LYrcFile.c:307
 msgid ""
@@ -5231,10 +5446,10 @@ msgid ""
 "unless it is activated from the command line, and the built-in line editor\n"
 "will be used for sending mail.\n"
 msgstr ""
-"A file_editor határozza a szerkesztõt helyi fájlokhoz vagy üzenetekhez.\n"
+"A file_editor rendeli a szerkesztõt a helyi fájlokhoz vagy levelekhez.\n"
 "Ha ez nincs meghatározva, akkor a fájl szerkesztés letiltódik, hacsak nem\n"
-" parancssorból lett aktiválva, mert akkor a beépített szerkesztõ lesz\n"
-" használva a levélíráshoz.\n"
+"parancssorból lett aktiválva, mert akkor a beépített szerkesztõ lesz\n"
+"használva a levélíráshoz.\n"
 
 #: src/LYrcFile.c:371
 msgid ""
@@ -5278,7 +5493,7 @@ msgstr ""
 "Szó törlése:         ^B      ^F    ^E = sor végére \n"
 "A pillanatnyi 'lineedit' módok:\n"
 
-#: src/LYrcFile.c:404
+#: src/LYrcFile.c:407
 msgid ""
 "The following allow you to define sub-bookmark files and descriptions.\n"
 "The format is multi_bookmark<capital_letter>=<filename>,<description>\n"
@@ -5288,9 +5503,9 @@ msgstr ""
 "Itt definiálhatjuk az al-könyvjelzõ fájlokat és leírásukat.\n"
 "A forma a következõ: többszörös_könyvjelzõ<nagy_betû>=<fájlnév>,<leírás>\n"
 "Összesen 26 könyvjelzõt lehet létrehozni (az angol ABC nagy betûibõl)\n"
-"Kezdjük a \"multi_bookmarkB\"-vel, mivel az 'A' az alapbeállítás (lásd késõbb).\n"
+"Kezdjük a \"multi_bookmarkB\"-vel, mivel az 'A' az alapbeállítás.\n"
 
-#: src/LYrcFile.c:410
+#: src/LYrcFile.c:413
 msgid ""
 "personal_mail_address specifies your personal mail address.  The\n"
 "address will be sent during HTTP file transfers for authorization and\n"
@@ -5302,13 +5517,13 @@ msgid ""
 msgstr ""
 "A personal_mail_address határozza meg az ön személyes email címét. Ez a\n"
 "cím lesz elküldve HTTP fájl átvitel hitelesítésekor, tárolva lesz, amikor\n"
-"bejelentkezik egy gépre és amikor egy megjegyzést küld.\n"
+"bejelentkezik egy gépre és amikor egy levelet küld.\n"
 "Ha nem akarja, hogy ezt az adatot kiadja a program, akkor \n"
 "állítsa be a NO_FROM_HEADER-t TRUE-ra a lynx.cfg-ben, vagy használja\n"
-"a -nofrom parancssori kapcsolót. Üresen is hagyhatja a mezõt, de akkor\n"
-"nem lesz belefoglalva az elküldött megjegyzésbe.\n"
+"a -nofrom parancssori kapcsolót. Üresen is hagyhatja a mezõt, akkor\n"
+"nem lesz benne az elküldött levélben.\n"
 
-#: src/LYrcFile.c:419
+#: src/LYrcFile.c:422
 msgid ""
 "preferred_charset specifies the character set in MIME notation (e.g.,\n"
 "ISO-8859-2, ISO-8859-5) which Lynx will indicate you prefer in requests\n"
@@ -5323,18 +5538,18 @@ msgid ""
 "an error response, though the sending of an unacceptable response\n"
 "is also allowed.\n"
 msgstr ""
-"A preferred_charset meghatározza a MIME jelölés karakterkészletét(pl.\n"
-" ISO-8859-2, ISO-8859-5) amit a Lynx jelez a http szervernek az Accept-Charset\n"
+"A preferred_charset meghatározza a MIME jelölés karakterkészletét (pl.\n"
+"ISO-8859-2, ISO-8859-5) amit a Lynx jelez a http szervernek az Accept-Charset\n"
 "fejlécen keresztül. Fölösleges az ISO-8859-1 vagy US-ASCII beállítás,\n"
-" mert ezeket alapból használja.\n"
-"Készíthet belõlük kettõsponttal elválasztott listát.\n"
-"Ha a karakterkészlet elérhetõ, a szerver elküldi.\n"
+"mert ezeket alapból használja.\n"
+"Készíthetünk belõlük kettõsponttal elválasztott listát.\n"
+"Ha a karakterkészlet elérhetõ, a szerver azt küldi.\n"
 "Ha nincs Accept-Charset fejléc, akkor az összes karakterkészletet\n"
 "elfogadjuk. Ha az Accept-Charset létezik, de a szerver nem tud küldeni\n"
 "ennek megfelelõ választ, akkor a szervernek hiba üzenetet\n"
 "kell küldenie, bár elfogadhatatlan válasz is lehetséges.\n"
 
-#: src/LYrcFile.c:433
+#: src/LYrcFile.c:436
 msgid ""
 "preferred_language specifies the language in MIME notation (e.g., en,\n"
 "fr, may be a comma-separated list in decreasing preference)\n"
@@ -5348,7 +5563,7 @@ msgstr ""
 "a fájl ezen a nyelven elérhetõ, akkor a szerver azt küldi vissza. \n"
 "Egyébként a szerver az általa alapértelmezettnek vett nyelven fog beszélni.\n"
 
-#: src/LYrcFile.c:442
+#: src/LYrcFile.c:445
 msgid ""
 "If run_all_execution_links is set \"on\" then all local execution links\n"
 "will be executed when they are selected.\n"
@@ -5370,7 +5585,7 @@ msgstr ""
 "           hozzáférhet a személyes adatainkhoz. Kizárólag abban az\n"
 "           esetben állítsuk \"on\"-ra, ha megbízható forrást használunk.\n"
 
-#: src/LYrcFile.c:453
+#: src/LYrcFile.c:456
 msgid ""
 "If run_execution_links_on_local_files is set \"on\" then all local\n"
 "execution links that are found in LOCAL files will be executed when they\n"
@@ -5397,7 +5612,7 @@ msgstr ""
 "           hozzáférhet a személyes adatainkhoz. Kizárólag abban az\n"
 "           esetben állítsuk \"on\"-ra, ha megbízható forrást használunk.\n"
 
-#: src/LYrcFile.c:471
+#: src/LYrcFile.c:474
 msgid ""
 "select_popups specifies whether the OPTIONs in a SELECT block which\n"
 "lacks a MULTIPLE attribute are presented as a vertical list of radio\n"
@@ -5416,7 +5631,7 @@ msgstr ""
 "pedig jelölõnégyzeteket.\n"
 "Az alapértelmezett beállítást a -popup paranccsal felül lehet írni.\n"
 
-#: src/LYrcFile.c:481
+#: src/LYrcFile.c:484
 msgid ""
 "show_color specifies how to set the color mode at startup.  A value of\n"
 "\"never\" will force color mode off (treat the terminal as monochrome)\n"
@@ -5448,7 +5663,7 @@ msgstr ""
 " -color és -nocolor kapcsolókkal.\n"
 "Az induláskori beállításokat meg lehet változtatni a \"színek mutatása\" opcióval.\n"
 
-#: src/LYrcFile.c:498
+#: src/LYrcFile.c:501
 msgid ""
 "show_cursor specifies whether to 'hide' the cursor to the right (and\n"
 "bottom, if possible) of the screen, or to place it to the left of the\n"
@@ -5469,7 +5684,7 @@ msgstr ""
 "\"balra\" pozicionálás érvényes, míg \"OFF\" állásban a kurzor elrejtésre\n"
 "kerül. Felülírható a \"-show_cursor\" parancssori opcióval.\n"
 
-#: src/LYrcFile.c:509
+#: src/LYrcFile.c:512
 msgid ""
 "show_dotfiles specifies that the directory listing should include\n"
 "\"hidden\" (dot) files/directories.  If set \"on\", this will be\n"
@@ -5483,7 +5698,7 @@ msgstr ""
 "engedélyezzük és a parancssorban sem tiltottuk le. Ha a rejtett fájlok \n"
 "megjelenítése le van tiltva, akkor az ilyen fájlok létrehozása sem lehetséges.\n"
 
-#: src/LYrcFile.c:520
+#: src/LYrcFile.c:523
 msgid ""
 "If sub_bookmarks is not turned \"off\", and multiple bookmarks have\n"
 "been defined (see below), then all bookmark operations will first\n"
@@ -5506,7 +5721,7 @@ msgstr ""
 "állítva, akkor a menü - felhasználói módra való tekintet nélkül -\n"
 "megjelenik.\n"
 
-#: src/LYrcFile.c:533
+#: src/LYrcFile.c:537
 msgid ""
 "user_mode specifies the users level of knowledge with Lynx.  The\n"
 "default is \"NOVICE\" which displays two extra lines of help at the\n"
@@ -5521,7 +5736,7 @@ msgstr ""
 "kikapcsolja ezeket a sorokat. A \"HALADÓ\" szinten a képernyõ alján a\n"
 "kiválasztott link URL-je látható.\n"
 
-#: src/LYrcFile.c:542
+#: src/LYrcFile.c:546
 msgid ""
 "If verbose_images is \"on\", lynx will print the name of the image\n"
 "source file in place of [INLINE], [LINK] or [IMAGE]\n"
@@ -5531,7 +5746,7 @@ msgstr ""
 "az [INLINE], [LINK] vagy [IMAGE] elõfordulásakor. (Lásd még:\n"
 "VERBOSE_IMAGES a lynx.cfg fájlban\n"
 
-#: src/LYrcFile.c:547
+#: src/LYrcFile.c:551
 msgid ""
 "If vi_keys is set to \"on\", then the normal VI movement keys:\n"
 "  j = down    k = up\n"
@@ -5547,7 +5762,7 @@ msgstr ""
 "A parancsok kisbetûsek! A nagy 'H', 'J' és 'K' segítséget, ugrást, és\n"
 "billentyû beállítást jelent.\n"
 
-#: src/LYrcFile.c:555
+#: src/LYrcFile.c:559
 msgid ""
 "The visited_links setting controls how Lynx organizes the information\n"
 "in the Visited Links Page.\n"
@@ -5555,7 +5770,7 @@ msgstr ""
 "A visited_links beállítás határozza meg, hogy a Lynx hogyan szervezi a\n"
 "meglátogatott oldalakkal kapcsolatos információkat.\n"
 
-#: src/LYrcFile.c:772
+#: src/LYrcFile.c:776
 msgid ""
 "If keypad_mode is set to \"NUMBERS_AS_ARROWS\", then the numbers on\n"
 "your keypad when the numlock is on will act as arrow keys:\n"
@@ -5576,7 +5791,7 @@ msgstr ""
 "Ugyanígy viselkednek a betûknél lévõ számok is, függetlenül a NumLock\n"
 "gomb állásától.\n"
 
-#: src/LYrcFile.c:781
+#: src/LYrcFile.c:785
 msgid ""
 "If keypad_mode is set to \"LINKS_ARE_NUMBERED\", then numbers will\n"
 "appear next to each link and numbers are used to select links.\n"
@@ -5585,7 +5800,7 @@ msgstr ""
 "számozva lesznek\"), a hivatkozások mellett számok fognak megjelenni, amivel\n"
 "ki lehet választani az adott hivatkozást.\n"
 
-#: src/LYrcFile.c:785
+#: src/LYrcFile.c:789
 msgid ""
 "If keypad_mode is set to \"LINKS_AND_FORM_FIELDS_ARE_NUMBERED\", then\n"
 "numbers will appear next to each link and visible form input field.\n"
@@ -5604,7 +5819,7 @@ msgstr ""
 "opció nem látható a képernyõn. Referencia listák és a listaparancsból\n"
 "származó kimenetek szintén beszámozzák az ûrlap bemeneteket.\n"
 
-#: src/LYrcFile.c:794
+#: src/LYrcFile.c:798
 msgid ""
 "NOTE: Some fixed format documents may look disfigured when\n"
 "\"LINKS_ARE_NUMBERED\" or \"LINKS_AND_FORM_FIELDS_ARE_NUMBERED\" are\n"
@@ -5614,7 +5829,7 @@ msgstr ""
 "ki, ha a LINKS_ARE_NUMBERED vagy a LINKS_AND_FORM_FIELDS_ARE_NUMBERED\n"
 "opció engedélyezve van.\n"
 
-#: src/LYrcFile.c:827
+#: src/LYrcFile.c:831
 msgid ""
 "Lynx User Defaults File\n"
 "\n"

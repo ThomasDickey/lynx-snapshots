@@ -2701,7 +2701,7 @@ PRIVATE void make_blink_boldbg NOARGS
  */
 PUBLIC long LYgetattrs ARGS1(WINDOW *, win)
 {
-#if (defined(NCURSES_VERSION_MAJOR) && NCURSES_VERSION_MAJOR < 5) || !defined(NCURSES_MAJOR_VERSION)
+#if ( defined(HAVE_GETATTRS) && ( !defined(NCURSES_MAJOR_VERSION) || NCURSES_VERSION_MAJOR < 5 ) )
     long result = 0;
     result = getattrs(win);
 #else

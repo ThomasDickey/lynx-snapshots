@@ -6021,7 +6021,7 @@ try_again:
 	    if (crawl) {
 		print_crawl_to_fd(stdout, curdoc.address, curdoc.title);
 	    } else {
-		print_wwwfile_to_fd(stdout, FALSE);
+		print_wwwfile_to_fd(stdout, FALSE, FALSE);
 	    }
 	    return(EXIT_SUCCESS);
 	}

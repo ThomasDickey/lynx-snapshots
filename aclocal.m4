@@ -750,6 +750,24 @@ fi
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_ANSI_CC_REQD version: 3 updated: 1997/09/06 13:40:44
+dnl ---------------
+dnl For programs that must use an ANSI compiler, obtain compiler options that
+dnl will make it recognize prototypes.  We'll do preprocessor checks in other
+dnl macros, since tools such as unproto can fake prototypes, but only part of
+dnl the preprocessor.
+AC_DEFUN([CF_ANSI_CC_REQD],
+[AC_REQUIRE([CF_ANSI_CC_CHECK])
+if test "$cf_cv_ansi_cc" = "no"; then
+	AC_ERROR(
+[Your compiler does not appear to recognize prototypes.
+You have the following choices:
+	a. adjust your compiler options
+	b. get an up-to-date compiler
+	c. use a wrapper such as unproto])
+fi
+])dnl
+dnl ---------------------------------------------------------------------------
 dnl CF_ARG_DISABLE version: 3 updated: 1999/03/30 17:24:31
 dnl --------------
 dnl Allow user to disable a normally-on option.
@@ -802,6 +820,71 @@ if test "$cf_cv_bool_defs" = no ; then
 	AC_DEFINE(TRUE,(1))
 	AC_DEFINE(FALSE,(0))
 fi
+])dnl
+dnl ---------------------------------------------------------------------------
+dnl CF_BUILD_CC version: 2 updated: 2004/01/19 16:20:54
+dnl -----------
+dnl If we're cross-compiling, allow the user to override the tools and their
+dnl options.  The configure script is oriented toward identifying the host
+dnl compiler, etc., but we need a build compiler to generate parts of the
+dnl source.
+dnl
+dnl $1 = default for $CPPFLAGS
+dnl $2 = default for $LIBS
+AC_DEFUN([CF_BUILD_CC],[
+AC_REQUIRE([CF_PROG_EXT])
+if test "$cross_compiling" = yes ; then
+	# defaults that we might want to override
+	: ${BUILD_CC:='$(CC)'}
+	: ${BUILD_CPP:='$(CC) -E'}
+	: ${BUILD_CFLAGS:=''}
+	: ${BUILD_CPPFLAGS:='ifelse([$1],,,[$1])'}
+	: ${BUILD_LDFLAGS:=''}
+	: ${BUILD_LIBS:='ifelse([$2],,,[$2])'}
+	: ${BUILD_EXEEXT:='$x'}
+	: ${BUILD_OBJEXT:='o'}
+	AC_ARG_WITH(build-cc,
+		[  --with-build-cc=XXX     the build C compiler ($BUILD_CC)],
+		[BUILD_CC="$withval"],
+		[AC_CHECK_PROGS(BUILD_CC, $CC gcc cc)])
+	AC_ARG_WITH(build-cpp,
+		[  --with-build-cpp=XXX    the build C preprocessor ($BUILD_CPP)],
+		[BUILD_CPP="$withval"],
+		[BUILD_CPP='$(CC) -E'])
+	AC_ARG_WITH(build-cflags,
+		[  --with-build-cflags=XXX the build C compiler-flags],
+		[BUILD_CFLAGS="$withval"])
+	AC_ARG_WITH(build-cppflags,
+		[  --with-build-cppflags=XXX the build C preprocessor-flags],
+		[BUILD_CPPFLAGS="$withval"])
+	AC_ARG_WITH(build-ldflags,
+		[  --with-build-ldflags=XXX the build linker-flags],
+		[BUILD_LDFLAGS="$withval"])
+	AC_ARG_WITH(build-libs,
+		[  --with-build-libs=XXX   the build libraries],
+		[BUILD_LIBS="$withval"])
+	# this assumes we're on Unix.
+	BUILD_EXEEXT=
+	BUILD_OBJEXT=o
+else
+	: ${BUILD_CC:='$(CC)'}
+	: ${BUILD_CPP:='$(CPP)'}
+	: ${BUILD_CFLAGS:='$(CFLAGS)'}
+	: ${BUILD_CPPFLAGS:='$(CPPFLAGS)'}
+	: ${BUILD_LDFLAGS:='$(LDFLAGS)'}
+	: ${BUILD_LIBS:='$(LIBS)'}
+	: ${BUILD_EXEEXT:='$x'}
+	: ${BUILD_OBJEXT:='o'}
+fi
+
+AC_SUBST(BUILD_CC)
+AC_SUBST(BUILD_CPP)
+AC_SUBST(BUILD_CFLAGS)
+AC_SUBST(BUILD_CPPFLAGS)
+AC_SUBST(BUILD_LDFLAGS)
+AC_SUBST(BUILD_LIBS)
+AC_SUBST(BUILD_EXEEXT)
+AC_SUBST(BUILD_OBJEXT)
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl CF_BUNDLED_INTL version: 10 updated: 2003/09/14 18:49:13
@@ -916,7 +999,7 @@ if test "$USE_INCLUDED_LIBINTL" = yes ; then
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_CHECK_CACHE version: 8 updated: 2004/01/26 20:58:40
+dnl CF_CHECK_CACHE version: 9 updated: 2004/01/30 15:59:13
 dnl --------------
 dnl Check if we're accidentally using a cache from a different machine.
 dnl Derive the system name, as a check for reusing the autoconf cache.
@@ -925,9 +1008,12 @@ dnl If we've packaged config.guess and config.sub, run that (since it does a
 dnl better job than uname).  Normally we'll use AC_CANONICAL_HOST, but allow
 dnl an extra parameter that we may override, e.g., for AC_CANONICAL_SYSTEM
 dnl which is useful in cross-compiles.
+dnl
+dnl Note: we would use $ac_config_sub, but that is one of the places where
+dnl autoconf 2.5x broke compatibility with autoconf 2.13
 AC_DEFUN([CF_CHECK_CACHE],
 [
-if test -f $ac_config_sub ; then
+if test -f $srcdir/config.guess ; then
 	ifelse([$1],,[AC_CANONICAL_HOST],[$1])
 	system_name="$host_os"
 else

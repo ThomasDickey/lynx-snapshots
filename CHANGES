@@ -1,6 +1,31 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2004-04-19 (2.8.6dev.1)
+* correct ifdef in LYgetattrs() to ensure that getattrs() is used only if the
+  configure script actually found it (report/patch by Paul Gilmartin).
+* correct LYcommandList() to allocate data passed to HTList_addObject(), since
+  LYRemoveFromCloset() may free it (report by FLWM) -TD
+* modify configure-script check for use_default_colors() to allow it to find
+  NetBSD's implementation of that function (report/patch by Julian Coleman)
+* check for non-null file pointer in cleanup of makeuctb to work properly when
+  it is invoked without command-line parameters (report by FLWM) -TD
+* add a null-pointer check to parameter of HTQuoteParameter(), fixes bug
+  introduced in 2.8.5pre.4 (report by FLWM) -TD
+* correct units shown by HTReadProgress() for very low rates - bug from
+  2.8.5pre.3 changes (report by PG) -TD
+* use symbol USE_VERTRACE in HTUtils.h to allow makefiles that do not use the
+  configure script to turn on the equivalent --enable vertrace feature (request
+  by FLWM) -TD
+* modify configure script and makefiles to allow cross-compiling -TD
+* make ANSI C required, drop support for K&R C -TD
+* update current-version in README -LP
+* updated po files (da.po, de.po, et.po, hu.po, tr.po) from
+  http://www.iro.umontreal.ca/contrib/po/maint/lynx/
+* use autoconf 2.52 (plus patches), to simplify use in cross-compiling -TD
+* escape "From " when it appears in a page which is mailed, to avoid confusing
+  mail clients -TD
+
 2004-02-04 (2.8.5rel.1)
 * build fixes for MINGW32 -DK
 * build fixes for OS/2 (reported by IZ) -TD
