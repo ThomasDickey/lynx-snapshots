@@ -340,6 +340,7 @@ PRIVATE void LYListFmtParse ARGS5(
 		case 'K':	/* size in Kilobytes but not for directories */
 			if (S_ISDIR(data->file_info.st_mode)) {
 				FormatStr(&buf, start, "");
+				StrAllocCat(buf, " ");
 				break;
 			}
 			/* FALL THROUGH */
@@ -1318,16 +1319,15 @@ PUBLIC void HTDirEntry ARGS3(
 	CONST char *,	entry)
 {
     char * relative = NULL;
+    char * stripped = NULL;
     char * escaped = NULL;
     int len;
 
-    if (0 == strcmp(entry,"../")) {
-	/*
-	**  Undo slash appending for anchor creation.
-	*/
-	StrAllocCopy(escaped,"..");
-    } else {
-	escaped = HTEscape(entry, URL_XPALPHAS);
+    StrAllocCopy(escaped, entry);
+    LYTrimPathSep(escaped);
+    if (strcmp(escaped, "..") != 0) {
+	stripped = escaped;
+	escaped = HTEscape(stripped, URL_XPALPHAS);
 	if (((len = strlen(escaped)) > 2) &&
 	    escaped[(len - 3)] == '%' &&
 	    escaped[(len - 2)] == '2' &&
@@ -1353,6 +1353,7 @@ PUBLIC void HTDirEntry ARGS3(
 	HTStartAnchor(target, NULL, relative);
 	FREE(relative);
     }
+    FREE(stripped);
     FREE(escaped);
 }
 
@@ -1632,7 +1633,10 @@ PRIVATE void do_readme ARGS2(HTStructured *, target, CONST char *, localname)
 
 PRIVATE char *file_type ARGS1(char *, path)
 {
-    char *type = strchr(path, '.');
+    char *type;
+    while (*path == '.')
+	++path;
+    type = strchr(path, '.');
     if (type == NULL)
 	type = "";
     return type;
@@ -1672,6 +1676,13 @@ PRIVATE int dired_cmp ARGS2(void *, a, void *, b)
 #endif /* LONG_LIST */
     if (code == 0)
 	code = AS_cmp(p->file_name, q->file_name);
+#if 0
+    CTRACE((tfp, "dired_cmp(%d) ->%d\n\t%c:%s (%s)\n\t%c:%s (%s)\n",
+	    dir_list_order,
+	    code,
+	    p->sort_tags, p->file_name, file_type(p->file_name),
+	    q->sort_tags, q->file_name, file_type(q->file_name)));
+#endif
     return code;
 }
 

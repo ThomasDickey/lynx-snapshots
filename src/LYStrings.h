@@ -78,6 +78,8 @@ extern char * LYno_attr_mbcs_case_strstr PARAMS((
 	int *		nstartp,
 	int *		nendp));
 
+#define non_empty(s) ((s) != NULL && *(s) != '\0')
+
 #define LYno_attr_mb_strstr(chptr, tarptr, utf_flag, count_gcells, nstartp, nendp) \
 	(case_sensitive \
 	    ? LYno_attr_mbcs_strstr(chptr, tarptr, utf_flag, count_gcells, nstartp, nendp) \

@@ -68,10 +68,6 @@ static char *decode_string(char *s)
 #ifdef WIN_EX
 /*
  *  Quote the path to make it safe for shell command processing.
- *
- *  We use a simple technique which involves quoting the entire
- *  string using single quotes, escaping the real single quotes
- *  with double quotes. This may be gross but it seems to work.
  */
 PUBLIC char * quote_pathname ARGS1(
 	char *, 	pathname)
@@ -110,20 +106,16 @@ PRIVATE char *format_command ARGS2(
     char *,	command,
     char *,	param)
 {
-#ifdef WIN_EX
-    char pram_string[LY_MAXPATH];
-#endif
     char *cmdbuf = NULL;
 
-#if (defined(VMS) || defined(DOSPATH) || defined(__EMX__)) && !defined(WIN_EX)
-    format(&cmdbuf, command, param);
-#else	/* Unix or DOS/Win: */
 #if defined(WIN_EX)
     if (*param != '\"' && strchr(param, ' ') != NULL) {
 	char *cp = quote_pathname(param);
 	format(&cmdbuf, command, cp);
 	FREE(cp);
     } else {
+	char pram_string[LY_MAXPATH];
+
 	LYstrncpy(pram_string, param, sizeof(pram_string)-1);
 	decode_string(pram_string);
 	param = pram_string;
@@ -156,31 +148,28 @@ PRIVATE char *format_command ARGS2(
 		    *p = '\0';
 		}
 	    }
-	    if (*e_buff != '\"' && strchr(e_buff, ' ') != NULL) {
-		p = quote_pathname(e_buff);
-		LYstrncpy(e_buff, p, sizeof(e_buff)-1);
-		FREE(p);
-	    }
 
-	    /* Less ==> short filename,
-	     * less ==> long filename
+	    /* Less ==> short filename with backslashes,
+	     * less ==> long filename with forward slashes, may be quoted
 	     */
 	    if (isupper(command[0])) {
 		format(&cmdbuf,
 			command, HTDOS_short_name(e_buff));
 	    } else {
+		if (*e_buff != '\"' && strchr(e_buff, ' ') != NULL) {
+		    p = quote_pathname(e_buff);
+		    LYstrncpy(e_buff, p, sizeof(e_buff)-1);
+		    FREE(p);
+		}
 		format(&cmdbuf, command, e_buff);
 	    }
 	} else {
 	    format(&cmdbuf, command, param);
 	}
     }
-#else	/* Unix */
-    {
-	format(&cmdbuf, command, param);
-    }
+#else
+    format(&cmdbuf, command, param);
 #endif
-#endif	/* VMS */
     return cmdbuf;
 }
 

@@ -4,10 +4,7 @@
 
 #include <HTUtils.h>
 #include <HTDOS.h>
-
-#ifdef WIN_EX
-#include <LYGlobalDefs.h>
-#endif
+#include <LYStrings.h>
 
 /*
  * Make a copy of the source argument in the result, allowing some extra
@@ -71,14 +68,6 @@ char * HTDOS_wwwName ARGS1(CONST char *, dosname)
 	cp_url++;
 	*cp_url = '\0';
     }
-
-#ifdef NOTUSED
-    if(*cp_url == ':') {
-	cp_url++;
-	*cp_url = '/';	/* terminate drive letter to survive */
-    }
-#endif
-
     return(wwwname);
 }
 
@@ -150,6 +139,25 @@ char * HTDOS_name ARGS1(char *, wwwname)
     CTRACE((tfp, "HTDOS_name changed `%s' to `%s'\n", wwwname, result));
     return (result);
 }
+
+#ifdef WIN_EX
+PUBLIC char *HTDOS_short_name(char *path)
+{
+    static char sbuf[LY_MAXPATH];
+    char *ret;
+    DWORD r;
+
+    if (strchr(path, '/'))
+	path = HTDOS_name(path);
+    r = GetShortPathName(path, sbuf, sizeof sbuf);
+    if (r >= sizeof(sbuf) || r == 0) {
+	ret = LYstrncpy(sbuf, path, sizeof(sbuf));
+    } else {
+	ret = sbuf;
+    }
+    return ret;
+}
+#endif
 
 #if defined(DJGPP) && defined(DJGPP_KEYHANDLER)
 /* PUBLIC       getxkey()

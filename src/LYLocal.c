@@ -434,7 +434,11 @@ PRIVATE int make_directory ARGS1(char *, path)
     code = (LYExecv(MKDIR_PATH, args, msg) <= 0) ? -1 : 1;
     FREE(msg);
 #else
+#ifdef _WINDOWS
+    code = mkdir(path) ? -1 : 1;
+#else
     code = mkdir(path, 0777) ? -1 : 1;
+#endif
 #endif
     return (code);
 }

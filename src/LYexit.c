@@ -166,6 +166,7 @@ PUBLIC void LYexit ARGS1(
     }
     LYCloseTracelog();
 #endif /* !VMS */
+    show_alloc();
     exit(status);
 }
 

@@ -1,6 +1,6 @@
 /* character level styles for Lynx
  * (c) 1996 Rob Partington -- donated to the Lyncei (if they want it :-)
- * @Id: LYStyle.c 1.48 Wed, 15 Aug 2001 15:09:52 -0700 dickey @
+ * @Id: LYStyle.c 1.49 Tue, 01 Jan 2002 17:30:08 -0800 dickey @
  */
 #include <HTUtils.h>
 #include <HTML.h>
@@ -604,7 +604,7 @@ PUBLIC void cache_tag_styles NOARGS
 
     for (i = 0; i < HTML_ELEMENTS; ++i)
     {
-	strcpy(buf, HTML_dtd.tags[i].name);
+	LYstrncpy(buf, HTML_dtd.tags[i].name, sizeof(buf)-1);
 	LYLowerCase(buf);
 	cached_tag_styles[i] = hash_code(buf);
     }

@@ -452,26 +452,28 @@ PRIVATE int set_clicked_link ARGS4(
 	/* Loop over the links and see if we can get a match */
 	for (i = 0; i < nlinks; i++) {
 	    int len, lx = links[i].lx, is_text = 0;
+	    int count = 0;
+	    char *text = LYGetHiliteStr(i, count);
 
 	    if (links[i].type == WWW_FORM_LINK_TYPE
-		&& F_TEXTLIKE(links[i].form->type))
+		&& F_TEXTLIKE(links[i].l_form->type))
 		is_text = 1;
 
-	    if (is_text)
-		len = links[i].form->size;
-	    else
-		len = strlen(links[i].hightext );
-
 	    /* Check the first line of the link */
-	    if ( links[i].hightext != NULL) {
+	    if (text != NULL) {
+		if (is_text)
+		    len = links[i].l_form->size;
+		else
+		    len = strlen(text);
 		cur_err = XYdist(x, y, links[i].lx, links[i].ly, len);
 		/* Check the second line */
-		if (cur_err > 0 && links[i].hightext2 != NULL) {
-		    /* Note that there is never hightext2 if is_text */
+		while (cur_err > 0
+		   && (text = LYGetHiliteStr(i, ++count)) != NULL) {
+		    /* Note that there is at most one hightext if is_text */
 		    int cur_err_2 = XYdist(x, y,
-					   links[i].hightext2_offset,
-					   links[i].ly+1,
-					   strlen(links[i].hightext2));
+					   LYGetHilitePos(i, count),
+					   links[i].ly + count,
+					   strlen(text));
 		    cur_err = HTMIN(cur_err, cur_err_2);
 		}
 		if (cur_err > 0 && is_text)
@@ -484,7 +486,7 @@ PRIVATE int set_clicked_link ARGS4(
 		    /* double-click, if we care:
 		       submit text submit fields. - kw */
 		    if (clicks > 1 && is_text &&
-			links[i].form->type == F_TEXT_SUBMIT_TYPE) {
+			links[i].l_form->type == F_TEXT_SUBMIT_TYPE) {
 			if (code != FOR_INPUT
 			    /* submit current input field directly */
 			    || !(cury == y && (curx >= lx) && ((curx - lx) <= len))) {
@@ -649,7 +651,7 @@ PUBLIC int LYmbcsstrlen ARGS3(
 {
     int i, j, len = 0;
 
-    if (!str && *str)
+    if (!non_empty(str))
 	return(len);
 
     for (i = 0; str[i] != '\0'; i++) {
@@ -2103,7 +2105,7 @@ re_read:
 			else if (mouse_link >= 0 &&
 				 textfields_need_activation &&
 				 links[mouse_link].type == WWW_FORM_LINK_TYPE &&
-				 F_TEXTLIKE(links[mouse_link].form->type))
+				 F_TEXTLIKE(links[mouse_link].l_form->type))
 			    lac = LYK_ACTIVATE;
 #endif
 		    }
@@ -4393,7 +4395,7 @@ redraw:
 		     */
 		    if ((cp = (char *)HTList_objectAt(search_queries,
 						      0)) != NULL) {
-			LYstrncpy(prev_target_buffer, cp, sizeof(prev_target_buffer));
+			LYstrncpy(prev_target_buffer, cp, sizeof(prev_target_buffer) - 1);
 			QueryNum = 0;
 			FirstRecall = FALSE;
 		    }
@@ -4938,6 +4940,7 @@ PUBLIC CONST char * LYLineeditHelpURL NOARGS
     }
     return NULL;
 }
+
 /*
  *  A replacement for 'strsep()'
  */
@@ -5420,7 +5423,7 @@ PUBLIC char * SNACat ARGS3(
 	CONST char *,	src,
 	int,		n)
 {
-    if (src && *src) {
+    if (non_empty(src)) {
 	if (*dest) {
 	    int length = strlen(*dest);
 	    *dest = (char *)realloc(*dest, length + n + 1);

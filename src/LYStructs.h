@@ -5,24 +5,36 @@
 #include <HTAnchor.h>
 #endif /* HTANCHOR_H */
 
-typedef struct link {
+typedef struct {
+    int hl_x;
+    char *hl_text;
+} HiliteInfo;
+
+typedef struct {
+    int hl_len;		/* number of strings in this struct */
+    HiliteInfo hl_base;
+    HiliteInfo *hl_info;
+} HiliteList;
+
+typedef struct {
     char *lname;
     char *target;
-    char *hightext;
-    char *hightext2;
-    int hightext2_offset;
+    char *l_hightext;
+    char *l_hightext2;
+    int l_hightext2_offset;
     BOOL inUnderline;	/* TRUE when this link is in underlined context. */
     int lx;
     int ly;
     int type;		/* Type of link, Forms, WWW, etc. */
     int anchor_number;	/* The anchor number within the HText structure.  */
     int anchor_line_num;/* The anchor line number in the HText structure. */
-    struct _FormInfo *form;	/* Pointer to form info. */
-} linkstruct;
-extern linkstruct links[MAXLINKS];
+    HiliteList list;
+    struct _FormInfo *l_form;	/* Pointer to form info. */
+} LinkInfo;
+extern LinkInfo links[MAXLINKS];
 extern int nlinks;
 
-typedef struct _document {
+typedef struct {
    char * title;
    char * address;
    char * post_data;
@@ -43,7 +55,7 @@ typedef struct _document {
 #include <HTForms.h>
 #endif /* HTFORMS_H */
 
-typedef struct _histstruct {
+typedef struct {
     char * title;
     char * address;
     char * post_data;
@@ -58,7 +70,7 @@ typedef struct _histstruct {
     int    intern_seq_start;	/* indicates which element on the history
 				   is the start of this sequence of
 				   "internal links", otherwise -1 */
-} histstruct;
+} HistInfo;
 
 extern int Visited_Links_As;
 
@@ -77,7 +89,7 @@ typedef struct _VisitedLink {
     struct _VisitedLink *prev_first;
 } VisitedLink;
 
-extern histstruct history[MAXHIST];
+extern HistInfo history[MAXHIST];
 extern int nhist;
 
 /******************************************************************************/

@@ -476,6 +476,9 @@ PUBLIC int LYSendMailFile ARGS5(
     char *,	message)
 {
     char *cmd = NULL;
+#ifdef __DJGPP__
+    char *shell;
+#endif /* __DJGPP__ */
     int code;
 
 #if USE_BLAT_MAILER
@@ -492,10 +495,33 @@ PUBLIC int LYSendMailFile ARGS5(
 	);
     else
 #endif
+#ifdef __DJGPP__
+	if ((shell = getenv("SHELL")) != NULL) {
+	    if (strstr(shell, "sh") != NULL) {
+		HTSprintf0(&cmd, "%s -c %s -t \"%s\" -F %s",
+			   shell,
+			   system_mail,
+			   the_address,
+			   the_filename);
+	    } else {
+		HTSprintf0(&cmd, "%s /c %s -t \"%s\" -F %s",
+			   shell,
+			   system_mail,
+			   the_address,
+			   the_filename);
+	    }
+	} else {
+	    HTSprintf0(&cmd, "%s -t \"%s\" -F %s",
+		       system_mail,
+		       the_address,
+		       the_filename);
+	}
+#else
 	HTSprintf0(&cmd, "%s -t \"%s\" -F %s",
 		   system_mail,
 		   the_address,
 		   the_filename);
+#endif /* __DJGPP__ */
 
     stop_curses();
     SetOutputMode(O_TEXT);
@@ -988,7 +1014,7 @@ PUBLIC void mailmsg ARGS4(
 
     fprintf(fd, gettext("The link   %s :?: %s \n"),
 		links[cur].lname, links[cur].target);
-    fprintf(fd, gettext("called \"%s\"\n"), links[cur].hightext);
+    fprintf(fd, gettext("called \"%s\"\n"), LYGetHiliteStr(cur, 0));
     fprintf(fd, gettext("in the file \"%s\" called \"%s\"\n"), filename, linkname);
     fprintf(fd, "%s\n\n", gettext("was requested but was not available."));
     fprintf(fd, "%s\n\n", gettext("Thought you might want to know."));

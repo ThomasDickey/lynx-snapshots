@@ -188,7 +188,7 @@ PRIVATE LY_TEMP *FindTempfileByFP ARGS1(FILE *, fp)
 PRIVATE char *getenv_text ARGS1(char *, name)
 {
     char *result = getenv(name);
-    return (result != 0 && *result != 0) ? result : 0;
+    return non_empty(result) ? result : 0;
 }
 
 /*
@@ -229,6 +229,721 @@ PUBLIC size_t utf8_length ARGS2(
 }
 
 /*
+ * Set the initial highlight information for a given link.
+ */
+PUBLIC void LYSetHilite ARGS2(
+	int,		cur,
+	char *,		text)
+{
+    links[cur].list.hl_base.hl_text = text;
+    links[cur].list.hl_len = (text != NULL) ? 1 : 0;
+    FREE(links[cur].list.hl_info);
+}
+
+/*
+ * Add highlight information for the next line of a link.
+ */
+PUBLIC void LYAddHilite ARGS3(
+	int,		cur,
+	char *,		text,
+	int,		x)
+{
+    HiliteList *list = &(links[cur].list);
+    HiliteInfo *have = list->hl_info;
+    unsigned need = (list->hl_len - 1);
+    unsigned want = ++(list->hl_len) * sizeof(HiliteInfo);
+
+    if (have != NULL) {
+	have = realloc(have, want);
+    } else {
+	have = malloc(want);
+    }
+    list->hl_info = have;
+    have[need].hl_text = text;
+    have[need].hl_x = x;
+}
+
+/*
+ * Get the highlight text, counting from zero.
+ */
+PUBLIC char *LYGetHiliteStr ARGS2(
+	int,		cur,
+	int,		count)
+{
+    char *result;
+
+    if (count >= links[cur].list.hl_len)
+	result = NULL;
+    else if (count > 0)
+	result = links[cur].list.hl_info[count - 1].hl_text;
+    else
+	result = links[cur].list.hl_base.hl_text;
+    return result;
+}
+
+/*
+ * Get the X-ordinate at which to draw the corresponding highlight-text
+ */
+PUBLIC int LYGetHilitePos ARGS2(
+	int,		cur,
+	int,		count)
+{
+    int result;
+
+    if (count >= links[cur].list.hl_len)
+	result = -1;
+    else if (count > 0)
+	result = links[cur].list.hl_info[count - 1].hl_x;
+    else
+	result = links[cur].lx;
+    return result;
+}
+
+#define LXP (links[cur].lx)
+#define LYP (links[cur].ly)
+
+#ifdef SHOW_WHEREIS_TARGETS
+
+#define SKIP_GLYPHS(theFlag, theData, theOffset) \
+	(theFlag \
+	    ? LYmbcs_skip_glyphs(theData, (theOffset), theFlag) \
+	    : (theData + (theOffset)))
+
+/*
+ * If we have an emphasized WHEREIS hit in the highlighted text, restore the
+ * emphasis.  Note that we never emphasize the first and last characters of the
+ * highlighted text when we are making the link current, so the link attributes
+ * for the current link will persist at the beginning and end, providing an
+ * indication to the user that it has been made current.  Also note that we use
+ * HText_getFirstTargetInLine() to determine if there's a hit in the HText
+ * structure line containing the link, and if so, get back a copy of the line
+ * starting at that first hit (which might be before or after our link), and
+ * with all IsSpecial characters stripped, so we don't need to deal with them
+ * here.  -FM
+ */
+PRIVATE BOOL show_whereis_targets ARGS6(
+	int,	flag,
+	int,	cur,
+	int,	count,
+	char *,	target,
+	BOOL,	TargetEmphasisON,
+	BOOL,	utf_flag)
+{
+    char *Data = NULL;
+    char *cp;
+    char *theData = NULL;
+    char buffer[MAX_LINE];
+    char tmp[7];
+    int HitOffset;
+    int LenNeeded;
+    int Offset;
+    int tLen;
+
+    tmp[0] = tmp[1] = tmp[2] = '\0';
+
+    if (non_empty(target)
+     && (links[cur].type & WWW_LINK_TYPE)
+     && non_empty(LYGetHiliteStr(cur, count))
+     && links[cur].ly + count < display_lines
+     && HText_getFirstTargetInLine(HTMainText,
+				   links[cur].anchor_line_num + count,
+				   utf_flag,
+				   &Offset,
+				   &tLen,
+				   &theData,
+				   target)) {
+	int itmp, written, len, y, offset;
+	char *data;
+	int tlen = strlen(target);
+	int hlen, hLen;
+	int hLine = links[cur].ly + count;
+	int hoffset = LYGetHilitePos(cur, count);
+	size_t utf_extra = 0;
+
+	/*
+	 * Copy into the buffer only what will fit up to the right border of
+	 * the screen.  -FM
+	 */
+	LYmbcsstrncpy(buffer,
+		      (LYGetHiliteStr(cur, count) ?
+		       LYGetHiliteStr(cur, count) : ""),
+		      (sizeof(buffer) - 1),
+		      ((LYcols - 1) - LYGetHilitePos(cur, count)),
+		      utf_flag);
+	hlen = strlen(buffer);
+	hLen = ((HTCJK != NOCJK || utf_flag) ?
+	      LYmbcsstrlen(buffer, utf_flag, YES) : hlen);
+
+	/*
+	 * Break out if the first hit in the line starts after this link.  -FM
+	 */
+	if (Offset < (hoffset + hLen)) {
+	    /*
+	     * Recursively skip hits that end before this link, and break out
+	     * if there is no hit beyond those.  -FM
+	     */
+	    Data = theData;
+	    while ((Offset < hoffset) &&
+		   ((Offset + tLen) <= hoffset)) {
+		data = (Data + tlen);
+		offset = (Offset + tLen);
+		if (((cp = LYno_attr_mb_strstr(data,
+					       target,
+					       utf_flag, YES,
+					       &HitOffset,
+					       &LenNeeded)) != NULL)
+	         && (offset + LenNeeded) < LYcols) {
+		    Data = cp;
+		    Offset = (offset + HitOffset);
+		} else {
+		    goto highlight_search_done;
+		}
+	    }
+	    data = buffer;
+	    offset = hoffset;
+
+	    /*
+	     * If the hit starts before the hightext, and ends in or beyond the
+	     * hightext, restore the emphasis, skipping the first and last
+	     * characters of the hightext if we're making the link current.
+	     * -FM
+	     */
+	    if ((Offset < offset) &&
+		((Offset + tLen) > offset)) {
+		itmp = 0;
+		written = 0;
+		len = (tlen - (offset - Offset));
+
+		/*
+		 * Go to the start of the hightext and handle its first
+		 * character.  -FM
+		 */
+		LYmove(hLine, offset);
+		tmp[0] = data[itmp];
+		utf_extra = utf8_length(utf_flag, data + itmp);
+		if (utf_extra) {
+		    LYstrncpy(&tmp[1], &data[itmp+1], utf_extra);
+		    itmp += utf_extra;
+		    /*
+		     * Start emphasis immediately if we are making the link
+		     * non-current.  -FM
+		     */
+		    if (flag != ON) {
+			LYstartTargetEmphasis();
+			TargetEmphasisON = TRUE;
+			LYaddstr(tmp);
+		    } else {
+			LYmove(hLine, (offset + 1));
+		    }
+		    tmp[1] = '\0';
+		    written += (utf_extra + 1);
+		    utf_extra = 0;
+		} else if (HTCJK != NOCJK && is8bits(tmp[0])) {
+		    /*
+		     * For CJK strings, by Masanobu Kimura.
+		     */
+		    tmp[1] = data[++itmp];
+		    /*
+		     * Start emphasis immediately if we are making the link
+		     * non-current.  -FM
+		     */
+		    if (flag != ON) {
+			LYstartTargetEmphasis();
+			TargetEmphasisON = TRUE;
+			LYaddstr(tmp);
+		    } else {
+			LYmove(hLine, (offset + 1));
+		    }
+		    tmp[1] = '\0';
+		    written += 2;
+		} else {
+		    /*
+		     * Start emphasis immediately if we are making the link
+		     * non-current.  -FM
+		     */
+		    if (flag != ON) {
+			LYstartTargetEmphasis();
+			TargetEmphasisON = TRUE;
+			LYaddstr(tmp);
+		    } else {
+			LYmove(hLine, (offset + 1));
+		    }
+		    written++;
+		}
+		itmp++;
+		/*
+		 * Start emphasis after the first character if we are making
+		 * the link current and this is not the last character.  -FM
+		 */
+		if (!TargetEmphasisON &&
+		    data[itmp] != '\0') {
+		    LYstartTargetEmphasis();
+		    TargetEmphasisON = TRUE;
+		}
+
+		/*
+		 * Handle the remaining characters.  -FM
+		 */
+		for (;
+		     written < len && (tmp[0] = data[itmp]) != '\0';
+		     itmp++)  {
+		    /*
+		     * Print all the other target chars, except the last
+		     * character if it is also the last character of hightext
+		     * and we are making the link current.  -FM
+		     */
+		    utf_extra = utf8_length(utf_flag, data + itmp);
+		    if (utf_extra) {
+			LYstrncpy(&tmp[1], &data[itmp+1], utf_extra);
+			itmp += utf_extra;
+			/*
+			 * Make sure we don't restore emphasis to the last
+			 * character of hightext if we are making the link
+			 * current.  -FM
+			 */
+			if (flag == ON && data[(itmp + 1)] == '\0') {
+			    LYstopTargetEmphasis();
+			    TargetEmphasisON = FALSE;
+			    LYGetYX(y, offset);
+			    LYmove(hLine, (offset + 1));
+			} else {
+			    LYaddstr(tmp);
+			}
+			tmp[1] = '\0';
+			written += (utf_extra + 1);
+			utf_extra = 0;
+		    } else if (HTCJK != NOCJK && is8bits(tmp[0])) {
+			/*
+			 * For CJK strings, by Masanobu Kimura.
+			 */
+			tmp[1] = data[++itmp];
+			/*
+			 * Make sure we don't restore emphasis to the last
+			 * character of hightext if we are making the link
+			 * current.  -FM
+			 */
+			if (flag == ON && data[(itmp + 1)] == '\0') {
+			    LYstopTargetEmphasis();
+			    TargetEmphasisON = FALSE;
+			    LYGetYX(y, offset);
+			    LYmove(hLine, (offset + 1));
+			} else {
+			    LYaddstr(tmp);
+			}
+			tmp[1] = '\0';
+			written += 2;
+		    } else {
+			/*
+			 * Make sure we don't restore emphasis to the last
+			 * character of hightext if we are making the link
+			 * current.  -FM
+			 */
+			if (flag == ON && data[(itmp + 1)] == '\0') {
+			    LYstopTargetEmphasis();
+			    TargetEmphasisON = FALSE;
+			    LYGetYX(y, offset);
+			    LYmove(hLine, (offset + 1));
+			} else {
+			    LYaddstr(tmp);
+			}
+			written++;
+		    }
+		}
+
+		/*
+		 * Stop the emphasis if we haven't already, then reset the
+		 * offset to our current position in the line, and if that is
+		 * beyond the link, or or we are making the link current and it
+		 * is the last character of the hightext, we are done.  -FM
+		 */
+		if (TargetEmphasisON) {
+		    LYstopTargetEmphasis();
+		    TargetEmphasisON = FALSE;
+		}
+		LYGetYX(y, offset);
+		if (offset < (hoffset + (flag == ON ? (hLen - 1) : hLen))
+		    /*
+		     * See if we have another hit that starts within the
+		     * hightext.  -FM
+		     */
+		 && ((cp = LYno_attr_mb_strstr(data = SKIP_GLYPHS(utf_flag, Data, offset - Offset),
+					       target,
+					       utf_flag, YES,
+					       &HitOffset,
+					       &LenNeeded)) != NULL)
+		 && (offset + LenNeeded) < LYcols
+		    /*
+		     * If the hit starts after the end of the hightext, or we
+		     * are making the link current and the hit starts at its
+		     * last character, we are done.  -FM
+		     */
+		 && (HitOffset + offset) <
+		     (hoffset +
+		      (flag == ON ? (hLen - 1) : hLen)))  {
+		    /*
+		     * Set up the data and offset for the hit, and let the code
+		     * for within hightext hits handle it.  -FM
+		     */
+		    Data = cp;
+		    Offset = (offset + HitOffset);
+		    data = buffer;
+		    offset = hoffset;
+		    goto highlight_hit_within_hightext;
+		}
+		goto highlight_search_done;
+	    }
+
+highlight_hit_within_hightext:
+	    /*
+	     * If we get to here, the hit starts within the hightext.  If we
+	     * are making the link current and it's the last character in the
+	     * hightext, we are done.  Otherwise, move there and start
+	     * restoring the emphasis.  -FM
+	     */
+	    if ((Offset - offset) <= (flag == ON ? (hLen - 1) : hLen))  {
+		data = SKIP_GLYPHS(utf_flag, data, Offset - offset);
+		if (utf_flag) {
+		    LYrefresh();
+		}
+		offset = Offset;
+		itmp = 0;
+		written = 0;
+		len = tlen;
+
+		/*
+		 * Go to the start of the hit and handle its first character.
+		 * -FM
+		 */
+		LYmove(hLine, offset);
+		tmp[0] = data[itmp];
+		utf_extra = utf8_length(utf_flag, data + itmp);
+		if (utf_extra) {
+		    LYstrncpy(&tmp[1], &data[itmp+1], utf_extra);
+		    itmp += utf_extra;
+		    /*
+		     * Start emphasis immediately if we are making the link
+		     * non-current, or we are making it current but this is not
+		     * the first or last character of the hightext.  -FM
+		     */
+		    if (flag != ON ||
+			(offset > hoffset && data[itmp+1] != '\0')) {
+			LYstartTargetEmphasis();
+			TargetEmphasisON = TRUE;
+			LYaddstr(tmp);
+		    } else {
+			LYmove(hLine, (offset + 1));
+		    }
+		    tmp[1] = '\0';
+		    written += (utf_extra + 1);
+		    utf_extra = 0;
+		} else if (HTCJK != NOCJK && is8bits(tmp[0])) {
+		    /*
+		     * For CJK strings, by Masanobu Kimura.
+		     */
+		    tmp[1] = data[++itmp];
+		    /*
+		     * Start emphasis immediately if we are making the link
+		     * non-current, or we are making it current but this is not
+		     * the first or last character of the hightext.  -FM
+		     */
+		    if (flag != ON ||
+			(offset > hoffset && data[itmp+1] != '\0')) {
+			LYstartTargetEmphasis();
+			TargetEmphasisON = TRUE;
+			LYaddstr(tmp);
+		    } else {
+			LYmove(hLine, (offset + 1));
+		    }
+		    tmp[1] = '\0';
+		    written += 2;
+		} else {
+		    /*
+		     * Start emphasis immediately if we are making the link
+		     * non-current, or we are making it current but this is not
+		     * the first or last character of the hightext.  -FM
+		     */
+		    if (flag != ON ||
+			(offset > hoffset && data[itmp+1] != '\0')) {
+			LYstartTargetEmphasis();
+			TargetEmphasisON = TRUE;
+			LYaddstr(tmp);
+		    } else {
+			LYmove(hLine, (offset + 1));
+		    }
+		    written++;
+		}
+		itmp++;
+		/*
+		 * Start emphasis after the first character if we are making
+		 * the link current and this is not the last character.  -FM
+		 */
+		if (!TargetEmphasisON &&
+		    data[itmp] != '\0') {
+		    LYstartTargetEmphasis();
+		    TargetEmphasisON = TRUE;
+		}
+
+		for (;
+		     written < len && (tmp[0] = data[itmp]) != '\0';
+		     itmp++)  {
+		    /*
+		     * Print all the other target chars, except the last
+		     * character if it is also the last character of hightext
+		     * and we are making the link current.  -FM
+		     */
+		    utf_extra = utf8_length(utf_flag, data + itmp);
+		    if (utf_extra) {
+			LYstrncpy(&tmp[1], &data[itmp+1], utf_extra);
+			itmp += utf_extra;
+			/*
+			 * Make sure we don't restore emphasis to the last
+			 * character of hightext if we are making the link
+			 * current.  -FM
+			 */
+			if (flag == ON && data[(itmp + 1)] == '\0') {
+			    LYstopTargetEmphasis();
+			    TargetEmphasisON = FALSE;
+			    LYGetYX(y, offset);
+			    LYmove(hLine, (offset + 1));
+			} else {
+			    LYaddstr(tmp);
+			}
+			tmp[1] = '\0';
+			written += (utf_extra + 1);
+			utf_extra = 0;
+		    } else if (HTCJK != NOCJK && is8bits(tmp[0])) {
+			/*
+			 * For CJK strings, by Masanobu Kimura.
+			 */
+			tmp[1] = data[++itmp];
+			/*
+			 * Make sure we don't restore emphasis to the last
+			 * character of hightext if we are making the link
+			 * current.  -FM
+			 */
+			if (flag == ON && data[(itmp + 1)] == '\0') {
+			    LYstopTargetEmphasis();
+			    TargetEmphasisON = FALSE;
+			    LYGetYX(y, offset);
+			    LYmove(hLine, (offset + 1));
+			} else {
+			    LYaddstr(tmp);
+			}
+			tmp[1] = '\0';
+			written += 2;
+		    } else {
+			/*
+			 * Make sure we don't restore emphasis to the last
+			 * character of hightext if we are making the link
+			 * current.  -FM
+			 */
+			if (flag == ON && data[(itmp + 1)] == '\0') {
+			    LYstopTargetEmphasis();
+			    TargetEmphasisON = FALSE;
+			    LYGetYX(y, offset);
+			    LYmove(hLine, (offset + 1));
+			} else {
+			    LYaddstr(tmp);
+			}
+			written++;
+		    }
+		}
+
+		/*
+		 * Stop the emphasis if we haven't already, then reset the
+		 * offset to our current position in the line, and if that is
+		 * beyond the link, or we are making the link current and it is
+		 * the last character in the hightext, we are done.  -FM
+		 */
+		if (TargetEmphasisON) {
+		    LYstopTargetEmphasis();
+		    TargetEmphasisON = FALSE;
+		}
+		LYGetYX(y, offset);
+		if (offset < (hoffset + (flag == ON ? (hLen - 1) : hLen))
+		    /*
+		     * See if we have another hit that starts within the
+		     * hightext.  -FM
+		     */
+		 && ((cp = LYno_attr_mb_strstr(data = SKIP_GLYPHS(utf_flag, Data, offset - Offset),
+					       target,
+					       utf_flag, YES,
+					       &HitOffset,
+					       &LenNeeded)) != NULL)
+		 && (offset + LenNeeded) < LYcols
+		    /*
+		     * If the hit starts after the end of the hightext, or we
+		     * are making the link current and the hit starts at its
+		     * last character, we are done.  -FM
+		     */
+		 && (HitOffset + offset) < (hoffset + (flag == ON ? (hLen - 1) : hLen))) {
+		    /*
+		     * If the target extends beyond our buffer, emphasize
+		     * everything in the hightext starting at this hit.
+		     * Otherwise, set up the data and offsets, and loop back.
+		     * -FM
+		     */
+		    if ((HitOffset + (offset + tLen)) >= (hoffset + hLen)) {
+			offset = (HitOffset + offset);
+			data = SKIP_GLYPHS(utf_flag, Data, offset - hoffset);
+			if (utf_flag) {
+			    LYrefresh();
+			}
+			LYmove(hLine, offset);
+			itmp = 0;
+			written = 0;
+			len = strlen(data);
+
+			/*
+			 * Turn the emphasis back on.  -FM
+			 */
+			LYstartTargetEmphasis();
+			TargetEmphasisON = TRUE;
+			for (;
+			     written < len && (tmp[0] = data[itmp]) != '\0';
+			     itmp++)  {
+			    /*
+			     * Print all the other target chars, except the
+			     * last character if it is also the last character
+			     * of hightext and we are making the link current.
+			     * -FM
+			     */
+			    utf_extra = utf8_length(utf_flag, data + itmp);
+			    if (utf_extra) {
+				LYstrncpy(&tmp[1], &data[itmp+1], utf_extra);
+				itmp += utf_extra;
+				/*
+				 * Make sure we don't restore emphasis to the
+				 * last character of hightext if we are making
+				 * the link current.  -FM
+				 */
+				if (flag == ON && data[(itmp + 1)] == '\0') {
+				    LYstopTargetEmphasis();
+				    TargetEmphasisON = FALSE;
+				    LYGetYX(y, offset);
+				    LYmove(hLine, (offset + 1));
+				} else {
+				    LYaddstr(tmp);
+				}
+				tmp[1] = '\0';
+				written += (utf_extra + 1);
+				utf_extra = 0;
+			    } else if (HTCJK != NOCJK && is8bits(tmp[0])) {
+				/*
+				 * For CJK strings, by Masanobu Kimura.
+				 */
+				tmp[1] = data[++itmp];
+				/*
+				 * Make sure we don't restore emphasis to the
+				 * last character of hightext if we are making
+				 * the link current.  -FM
+				 */
+				if (flag == ON && data[(itmp + 1)] == '\0') {
+				    LYstopTargetEmphasis();
+				    TargetEmphasisON = FALSE;
+				} else {
+				    LYaddstr(tmp);
+				}
+				tmp[1] = '\0';
+				written += 2;
+			    } else {
+				/*
+				 * Make sure we don't restore emphasis to the
+				 * last character of hightext if we are making
+				 * the link current.  -FM
+				 */
+				if (flag == ON && data[(itmp + 1)] == '\0') {
+				    LYstopTargetEmphasis();
+				    TargetEmphasisON = FALSE;
+				} else {
+				    LYaddstr(tmp);
+				}
+				written++;
+			    }
+			}
+			/*
+			 * Turn off the emphasis if we haven't already, and
+			 * then we're done.  -FM
+			 */
+			if (TargetEmphasisON) {
+			    LYstopTargetEmphasis();
+			}
+		    } else {
+			Data = cp;
+			Offset = (offset + HitOffset);
+			data = buffer;
+			offset = hoffset;
+			goto highlight_hit_within_hightext;
+		    }
+		}
+	    }
+	}
+    }
+highlight_search_done:
+    FREE(theData);
+    return TargetEmphasisON;
+}
+#endif /* SHOW_WHEREIS_TARGETS */
+
+#ifdef USE_COLOR_STYLE
+PRIVATE int find_cached_style ARGS2(
+	int,	cur,
+	int,	flag)
+{
+    int s = s_alink;
+
+#ifdef TEXTFIELDS_MAY_NEED_ACTIVATION
+    if ( textfields_need_activation
+     && links[cur].type == WWW_FORM_LINK_TYPE
+     && F_TEXTLIKE(links[cur].l_form->type) )
+	s = s_curedit;
+#endif
+
+    if (flag != ON) {
+	int x;
+	/*
+	 * This is where we try to restore the original style when a link is
+	 * unhighlighted.  The purpose of cached_styles[][] is to save the
+	 * original style just for this case.  If it doesn't have a color
+	 * change saved at just the right position, we look at preceding
+	 * positions in the same line until we find one.
+	 */
+	if (LYP >= 0 && LYP < CACHEH && LXP >= 0 && LXP < CACHEW) {
+	    CTRACE2(TRACE_STYLE,
+		    (tfp, "STYLE.highlight.off: cached style @(%d,%d): ",
+			  LYP, LXP));
+	    s = cached_styles[LYP][LXP];
+	    if (s == 0) {
+		for (x = LXP-1; x >= 0; x--) {
+		    if (cached_styles[LYP][x]) {
+			if (cached_styles[LYP][x] > 0) {
+			    s = cached_styles[LYP][x];
+			    cached_styles[LYP][LXP] = s;
+			}
+			CTRACE((tfp, "found %d, x_offset=%d.\n",
+				cached_styles[LYP][x], (int)x-LXP));
+			break;
+		    }
+		}
+		if (s == 0) {
+		    CTRACE((tfp, "not found, assume <a>.\n"));
+		    s = s_a;
+		}
+	    } else {
+		CTRACE((tfp, "found %d.\n", s));
+	    }
+	} else {
+	    CTRACE2(TRACE_STYLE, (tfp, "STYLE.highlight.off: can't use cache.\n"));
+	    s = s_a;
+	}
+    } else {
+	CTRACE2(TRACE_STYLE, (tfp, "STYLE.highlight.on: @(%d,%d).\n", LYP, LXP));
+    }
+    return s;
+}
+#endif /* USE_COLOR_STYLE */
+
+/*
  *  Highlight (or unhighlight) a given link.
  */
 PUBLIC void LYhighlight ARGS3(
@@ -236,31 +951,29 @@ PUBLIC void LYhighlight ARGS3(
 	int,		cur,
 	char *,		target)
 {
-    char buffer[200];
+    char buffer[MAX_LINE];
     int i;
+    int hi_count;
+    int hi_offset;
     char tmp[7];
+    char *hi_string;
 #ifdef SHOW_WHEREIS_TARGETS
-    char *cp;
-    char *theData = NULL;
-    char *Data = NULL;
-    int Offset, HitOffset, tLen;
-    int LenNeeded;
     BOOL TargetEmphasisON = FALSE;
     BOOL target1_drawn = NO;
 #endif
     BOOL utf_flag = (BOOL)(LYCharSet_UC[current_char_set].enc == UCT_ENC_UTF8);
     BOOL hl1_drawn = NO;
-#if defined(USE_COLOR_STYLE) && !defined(NO_HILIT_FIX)
-    BOOL hl2_drawn = FALSE;	/* whether links[cur].hightext2 is already drawn
+#ifdef USE_COLOR_STYLE
+    BOOL hl2_drawn = FALSE;	/* whether links[cur].l_hightext2 is already drawn
 				   properly */
 #endif
     tmp[0] = tmp[1] = tmp[2] = '\0';
 
     /*
-     *	Bugs in the history code might cause -1 to be sent for cur, which
-     *	yields a crash when LYstrncpy() is called with a nonsense pointer.
-     *	As far as I know, such bugs have been squashed, but if they should
-     *	reappear, this works around them. - FM
+     * Bugs in the history code might cause -1 to be sent for cur, which yields
+     * a crash when LYstrncpy() is called with a nonsense pointer.  As far as I
+     * know, such bugs have been squashed, but if they should reappear, this
+     * works around them.  -FM
      */
     if (cur < 0)
 	cur = 0;
@@ -270,1371 +983,120 @@ PUBLIC void LYhighlight ARGS3(
 #endif
 
     if (nlinks > 0) {
-#if  defined(USE_COLOR_STYLE) && !defined(NO_HILIT_FIX)
-	if (flag == ON || links[cur].type == WWW_FORM_LINK_TYPE)
-#endif
-	{
-#ifndef USE_COLOR_STYLE
-	if (links[cur].type == WWW_FORM_LINK_TYPE ||
-	    !links[cur].hightext) {
+#ifdef USE_COLOR_STYLE
+	if (flag == ON || links[cur].type == WWW_FORM_LINK_TYPE) {
+	    LYmove(LYP, LXP);
+	    LynxChangeStyle(find_cached_style(cur, flag), STACK_ON);
+	}
+#else
+	if (links[cur].type == WWW_FORM_LINK_TYPE
+	 || LYGetHiliteStr(cur, 0) == NULL) {
 	    LYMoveToLink(cur, target, NULL,
 			 flag, links[cur].inUnderline, utf_flag);
 	    lynx_start_link_color (flag == ON, links[cur].inUnderline);
 	} else {
-	    LYMoveToLink(cur, target, links[cur].hightext,
+	    LYMoveToLink(cur, target, LYGetHiliteStr(cur, 0),
 			 flag, links[cur].inUnderline, utf_flag);
 	    hl1_drawn = YES;
 #ifdef SHOW_WHEREIS_TARGETS
 	    target1_drawn = YES;
 #endif
 	}
-#else	/* here USE_COLOR_STYLE defined */
-	int s = s_alink;
-
-#ifdef TEXTFIELDS_MAY_NEED_ACTIVATION
-	if ( textfields_need_activation &&
-	     links[cur].type == WWW_FORM_LINK_TYPE &&
-	     F_TEXTLIKE(links[cur].form->type) )
-	    s = s_curedit;
 #endif
-
-
-#  define LXP (links[cur].lx)
-#  define LYP (links[cur].ly)
-	if (flag != ON) {
-	    int x;
-		/*
-		 *  This is where we try to restore the original style when
-		 *  a link is unhighlighted.  The purpose of cached_styles[][]
-		 *  is to save the original style just for this case.
-		 *  If it doesn't have a color change saved at just the right
-		 *  position, we look at preceding positions in the same line
-		 *  until we find one.
-		 */
-	    if (LYP >= 0 && LYP < CACHEH && LXP >= 0 && LXP < CACHEW) {
-		CTRACE2(TRACE_STYLE,
-			(tfp, "STYLE.highlight.off: cached style @(%d,%d): ",
-			      LYP, LXP));
-		s = cached_styles[LYP][LXP];
-		if (s == 0) {
-		    for (x = LXP-1; x >= 0; x--) {
-			if (cached_styles[LYP][x]) {
-			    if (cached_styles[LYP][x] > 0) {
-				s = cached_styles[LYP][x];
-				cached_styles[LYP][LXP] = s;
-			    }
-			    CTRACE((tfp, "found %d, x_offset=%d.\n",
-				    cached_styles[LYP][x], (int)x-LXP));
-			    break;
-			}
-		    }
-		    if (s == 0) {
-			CTRACE((tfp, "not found, assume <a>.\n"));
-			s = s_a;
-		    }
-		} else {
-		    CTRACE((tfp, "found %d.\n", s));
-		}
-	    } else {
-		CTRACE2(TRACE_STYLE, (tfp, "STYLE.highlight.off: can't use cache.\n"));
-		s = s_a;
-	    }
-	} else {
-	    CTRACE2(TRACE_STYLE, (tfp, "STYLE.highlight.on: @(%d,%d).\n", LYP, LXP));
-	}
-	LYmove(LYP, LXP);
-	LynxChangeStyle(s, STACK_ON);
-#endif
-	}
-
 
 	if (links[cur].type == WWW_FORM_LINK_TYPE) {
 	    int len;
 	    int avail_space = (LYcols - links[cur].lx) - 1;
+	    char *text = LYGetHiliteStr(cur, 0);
 
-	    LYstrncpy(buffer,
-		      (links[cur].hightext ?
-		       links[cur].hightext : ""),
-		      (avail_space > links[cur].form->size ?
-				      links[cur].form->size : avail_space));
+	    if (avail_space > links[cur].l_form->size)
+		avail_space = links[cur].l_form->size;
+	    if (avail_space > (int) sizeof(buffer) - 1)
+		avail_space = (int) sizeof(buffer) - 1;
+
+	    LYstrncpy(buffer, (text != NULL ? text : ""), avail_space);
 	    LYaddstr(buffer);
 
 	    len = strlen(buffer);
-	    for (; len < links[cur].form->size && len < avail_space; len++)
+	    for (; len < links[cur].l_form->size && len < avail_space; len++)
 		LYaddch('_');
 
-	} else {
-#if defined(USE_COLOR_STYLE) && !defined(NO_HILIT_FIX)
-	    if (flag == OFF) {
-		hl2_drawn = TRUE;
-		redraw_lines_of_link(cur);
-		CTRACE2(TRACE_STYLE, (tfp, "STYLE.highlight.off: NOFIX branch @(%d,%d).\n", LYP, LXP));
-	    } else
+#ifdef USE_COLOR_STYLE
+	} else if (flag == OFF) {
+	    hl2_drawn = TRUE;
+	    redraw_lines_of_link(cur);
+	    CTRACE2(TRACE_STYLE, (tfp, "STYLE.highlight.off: NOFIX branch @(%d,%d).\n", LYP, LXP));
 #endif
-	    if (!hl1_drawn) {
+	} else if (!hl1_drawn) {
 	    /*
-	     *	Copy into the buffer only what will fit
-	     *	within the width of the screen.
+	     * Copy into the buffer only what will fit within the width of the
+	     * screen.
 	     */
-		LYmbcsstrncpy(buffer,
-			      (links[cur].hightext ?
-			       links[cur].hightext : ""),
-			      (sizeof(buffer) - 1),
-			      ((LYcols - 1) - links[cur].lx),
-			      utf_flag);
-		LYaddstr(buffer);
-	    }
+	    LYmbcsstrncpy(buffer,
+			  (LYGetHiliteStr(cur, 0) ?
+			   LYGetHiliteStr(cur, 0) : ""),
+			  (sizeof(buffer) - 1),
+			  ((LYcols - 1) - links[cur].lx),
+			  utf_flag);
+	    LYaddstr(buffer);
 	}
 
 	/*
 	 *  Display a second line as well.
 	 */
-	if ( links[cur].hightext2 && links[cur].ly < display_lines
-#if defined(USE_COLOR_STYLE) && !defined(NO_HILIT_FIX)
-	  && hl2_drawn == FALSE
+#ifdef USE_COLOR_STYLE
+	if (hl2_drawn == FALSE)
 #endif
-	) {
-	    lynx_stop_link_color (flag == ON, links[cur].inUnderline);
-	    LYmove((links[cur].ly + 1), links[cur].hightext2_offset);
-#ifndef USE_COLOR_STYLE
-	    lynx_start_link_color (flag == ON, links[cur].inUnderline);
+	{
+	    for (hi_count = 1;
+		    (hi_string = LYGetHiliteStr(cur, hi_count)) != NULL
+		    && links[cur].ly + hi_count <= display_lines;
+			++hi_count) {
+
+		hi_offset = LYGetHilitePos(cur, hi_count);
+		lynx_stop_link_color (flag == ON, links[cur].inUnderline);
+		LYmove(links[cur].ly + hi_count, hi_offset);
+
+#ifdef USE_COLOR_STYLE
+		CTRACE2(TRACE_STYLE,
+			(tfp, "STYLE.highlight.line2: @(%d,%d), style=%d.\n",
+			      links[cur].ly + hi_count, hi_offset,
+			      flag == ON ? s_alink : s_a));
+		LynxChangeStyle(flag == ON ? s_alink : s_a, ABS_ON);
 #else
-	    CTRACE2(TRACE_STYLE,
-		    (tfp, "STYLE.highlight.line2: @(%d,%d), style=%d.\n",
-			  links[cur].ly + 1, links[cur].hightext2_offset,
-			  flag == ON ? s_alink : s_a));
-	    LynxChangeStyle(flag == ON ? s_alink : s_a, ABS_ON);
+		lynx_start_link_color (flag == ON, links[cur].inUnderline);
 #endif
 
-	    for (i = 0; (tmp[0] = links[cur].hightext2[i]) != '\0' &&
-			i+links[cur].hightext2_offset < LYcols; i++) {
-		if (!IsSpecialAttrChar(links[cur].hightext2[i])) {
-		    /*
-		     *	For CJK strings, by Masanobu Kimura.
-		     */
-		    if (HTCJK != NOCJK && is8bits(tmp[0])) {
-			tmp[1] = links[cur].hightext2[++i];
-			LYaddstr(tmp);
-			tmp[1] = '\0';
-		    } else {
-			LYaddstr(tmp);
-		    }
-		 }
+		for (i = 0; (tmp[0] = hi_string[i]) != '\0'
+			   && (i + hi_offset) < LYcols; i++) {
+		    if (!IsSpecialAttrChar(hi_string[i])) {
+			/*
+			 * For CJK strings, by Masanobu Kimura.
+			 */
+			if (HTCJK != NOCJK && is8bits(tmp[0])) {
+			    tmp[1] = LYGetHiliteStr(cur, 1)[++i];
+			    LYaddstr(tmp);
+			    tmp[1] = '\0';
+			} else {
+			    LYaddstr(tmp);
+			}
+		     }
+		}
 	    }
+	    lynx_stop_link_color (flag == ON, links[cur].inUnderline);
 	}
-#if defined(USE_COLOR_STYLE) && !defined(NO_HILIT_FIX)
-	if ( hl2_drawn == FALSE )
-#endif
-	lynx_stop_link_color (flag == ON, links[cur].inUnderline);
 
 #ifdef SHOW_WHEREIS_TARGETS
-	if (!target1_drawn)
-	/*
-	 *  If we have an emphasized WHEREIS hit in the highlighted
-	 *  text, restore the emphasis.  Note that we never emphasize
-	 *  the first and last characters of the highlighted text when
-	 *  we are making the link current, so the link attributes for
-	 *  the current link will persist at the beginning and end,
-	 *  providing an indication to the user that it has been made
-	 *  current.   Also note that we use HText_getFirstTargetInLine()
-	 *  to determine if there's a hit in the HText structure line
-	 *  containing the link, and if so, get back a copy of the line
-	 *  starting at that first hit (which might be before or after
-	 *  our link), and with all IsSpecial characters stripped, so we
-	 *  don't need to deal with them here. - FM
-	 */
-	if (target && *target && (links[cur].type & WWW_LINK_TYPE) &&
-	    links[cur].hightext && *links[cur].hightext &&
-	    HText_getFirstTargetInLine(HTMainText,
-				       links[cur].anchor_line_num,
-				       utf_flag,
-				       (int *)&Offset,
-				       (int *)&tLen,
-				       (char **)&theData,
-				       target)) {
-	    int itmp, written, len, y, offset;
-	    char *data;
-	    int tlen = strlen(target);
-	    int hlen, hLen;
-	    int hLine = links[cur].ly, hoffset = links[cur].lx;
-	    size_t utf_extra = 0;
-
-	    /*
-	     *	Copy into the buffer only what will fit
-	     *	up to the right border of the screen. - FM
-	     */
-	    LYmbcsstrncpy(buffer,
-			  (links[cur].hightext ?
-			   links[cur].hightext : ""),
-			  (sizeof(buffer) - 1),
-			  ((LYcols - 1) - links[cur].lx),
-			  utf_flag);
-	    hlen = strlen(buffer);
-	    hLen = ((HTCJK != NOCJK || utf_flag) ?
-		  LYmbcsstrlen(buffer, utf_flag, YES) : hlen);
-
-	    /*
-	     *	Break out if the first hit in the line
-	     *	starts after this link. - FM
-	     */
-	    if (Offset >= (hoffset + hLen)) {
-		goto highlight_search_hightext2;
-	    }
-
-	    /*
-	     *	Recursively skip hits that end before this link, and
-	     *	break out if there is no hit beyond those. - FM
-	     */
-	    Data = theData;
-	    while ((Offset < hoffset) &&
-		   ((Offset + tLen) <= hoffset)) {
-		data = (Data + tlen);
-		offset = (Offset + tLen);
-		if (((cp = LYno_attr_mb_strstr(data,
-					       target,
-					       utf_flag, YES,
-					       &HitOffset,
-					       &LenNeeded)) != NULL) &&
-		    (offset + LenNeeded) < LYcols) {
-		    Data = cp;
-		    Offset = (offset + HitOffset);
-		} else {
-		    goto highlight_search_hightext2;
-		}
-	    }
-	    data = buffer;
-	    offset = hoffset;
-
-	    /*
-	     *	If the hit starts before the hightext, and ends
-	     *	in or beyond the hightext, restore the emphasis,
-	     *	skipping the first and last characters of the
-	     *	hightext if we're making the link current. - FM
-	     */
-	    if ((Offset < offset) &&
-		((Offset + tLen) > offset)) {
-		itmp = 0;
-		written = 0;
-		len = (tlen - (offset - Offset));
-
-		/*
-		 *  Go to the start of the hightext and
-		 *  handle its first character. - FM
-		 */
-		LYmove(hLine, offset);
-		tmp[0] = data[itmp];
-		utf_extra = utf8_length(utf_flag, data + itmp);
-		if (utf_extra) {
-		    LYstrncpy(&tmp[1], &data[itmp+1], utf_extra);
-		    itmp += utf_extra;
-		    /*
-		     *	Start emphasis immediately if we are
-		     *	making the link non-current. - FM
-		     */
-		    if (flag != ON) {
-			LYstartTargetEmphasis();
-			TargetEmphasisON = TRUE;
-			LYaddstr(tmp);
-		    } else {
-			LYmove(hLine, (offset + 1));
-		    }
-		    tmp[1] = '\0';
-		    written += (utf_extra + 1);
-		    utf_extra = 0;
-		} else if (HTCJK != NOCJK && is8bits(tmp[0])) {
-		    /*
-		     *	For CJK strings, by Masanobu Kimura.
-		     */
-		    tmp[1] = data[++itmp];
-		    /*
-		     *	Start emphasis immediately if we are
-		     *	making the link non-current. - FM
-		     */
-		    if (flag != ON) {
-			LYstartTargetEmphasis();
-			TargetEmphasisON = TRUE;
-			LYaddstr(tmp);
-		    } else {
-			LYmove(hLine, (offset + 1));
-		    }
-		    tmp[1] = '\0';
-		    written += 2;
-		} else {
-		    /*
-		     *	Start emphasis immediately if we are making
-		     *	the link non-current. - FM
-		     */
-		    if (flag != ON) {
-			LYstartTargetEmphasis();
-			TargetEmphasisON = TRUE;
-			LYaddstr(tmp);
-		    } else {
-			LYmove(hLine, (offset + 1));
-		    }
-		    written++;
-		}
-		itmp++;
-		/*
-		 *  Start emphasis after the first character
-		 *  if we are making the link current and this
-		 *  is not the last character. - FM
-		 */
-		if (!TargetEmphasisON &&
-		    data[itmp] != '\0') {
-		    LYstartTargetEmphasis();
-		    TargetEmphasisON = TRUE;
-		}
-
-		/*
-		 *  Handle the remaining characters. - FM
-		 */
-		for (;
-		     written < len && (tmp[0] = data[itmp]) != '\0';
-		     itmp++)  {
-		    /*
-		     *	Print all the other target chars, except
-		     *	the last character if it is also the last
-		     *	character of hightext and we are making
-		     *	the link current. - FM
-		     */
-		    utf_extra = utf8_length(utf_flag, data + itmp);
-		    if (utf_extra) {
-			LYstrncpy(&tmp[1], &data[itmp+1], utf_extra);
-			itmp += utf_extra;
-			/*
-			 *  Make sure we don't restore emphasis to
-			 *  the last character of hightext if we
-			 *  are making the link current. - FM
-			 */
-			if (flag == ON && data[(itmp + 1)] == '\0') {
-			    LYstopTargetEmphasis();
-			    TargetEmphasisON = FALSE;
-			    LYGetYX(y, offset);
-			    LYmove(hLine, (offset + 1));
-			} else {
-			    LYaddstr(tmp);
-			}
-			tmp[1] = '\0';
-			written += (utf_extra + 1);
-			utf_extra = 0;
-		    } else if (HTCJK != NOCJK && is8bits(tmp[0])) {
-			/*
-			 *  For CJK strings, by Masanobu Kimura.
-			 */
-			tmp[1] = data[++itmp];
-			/*
-			 *  Make sure we don't restore emphasis to
-			 *  the last character of hightext if we
-			 *  are making the link current. - FM
-			 */
-			if (flag == ON && data[(itmp + 1)] == '\0') {
-			    LYstopTargetEmphasis();
-			    TargetEmphasisON = FALSE;
-			    LYGetYX(y, offset);
-			    LYmove(hLine, (offset + 1));
-			} else {
-			    LYaddstr(tmp);
-			}
-			tmp[1] = '\0';
-			written += 2;
-		    } else {
-			/*
-			 *  Make sure we don't restore emphasis to
-			 *  the last character of hightext if we
-			 *  are making the link current. - FM
-			 */
-			if (flag == ON && data[(itmp + 1)] == '\0') {
-			    LYstopTargetEmphasis();
-			    TargetEmphasisON = FALSE;
-			    LYGetYX(y, offset);
-			    LYmove(hLine, (offset + 1));
-			} else {
-			    LYaddstr(tmp);
-			}
-			written++;
-		    }
-		}
-
-		/*
-		 *  Stop the emphasis if we haven't already, then
-		 *  reset the offset to our current position in
-		 *  the line, and if that is beyond the link, or
-		 *  or we are making the link current and it is
-		 *  the last character of the hightext, we are
-		 *  done. - FM
-		 */
-		if (TargetEmphasisON) {
-		    LYstopTargetEmphasis();
-		    TargetEmphasisON = FALSE;
-		}
-		LYGetYX(y, offset);
-		if (offset >=
-		    (hoffset +
-		     (flag == ON ? (hLen - 1) : hLen)))  {
-		    goto highlight_search_hightext2;
-		}
-
-		/*
-		 *  See if we have another hit that starts
-		 *  within the hightext. - FM
-		 */
-		data = (Data + (offset - Offset));
-		if (!utf_flag) {
-		    data = Data + (offset - Offset);
-		} else {
-		    data = LYmbcs_skip_glyphs(Data,
-					      (offset - Offset),
-					      utf_flag);
-		}
-		if (((cp = LYno_attr_mb_strstr(data,
-					       target,
-					       utf_flag, YES,
-					       &HitOffset,
-					       &LenNeeded)) != NULL) &&
-		    (offset + LenNeeded) < LYcols) {
-		    /*
-		     *	If the hit starts after the end of the hightext,
-		     *	or we are making the link current and the hit
-		     *	starts at its last character, we are done. - FM
-		     */
-		    if ((HitOffset + offset) >=
-			(hoffset +
-			 (flag == ON ? (hLen - 1) : hLen)))  {
-			goto highlight_search_hightext2;
-		    }
-
-		    /*
-		     *	Set up the data and offset for the hit, and let
-		     *	the code for within hightext hits handle it. - FM
-		     */
-		    Data = cp;
-		    Offset = (offset + HitOffset);
-		    data = buffer;
-		    offset = hoffset;
-		    goto highlight_hit_within_hightext;
-		}
-		goto highlight_search_hightext2;
-	    }
-
-highlight_hit_within_hightext:
-	    /*
-	     *	If we get to here, the hit starts within the
-	     *	hightext.  If we are making the link current
-	     *	and it's the last character in the hightext,
-	     *	we are done.  Otherwise, move there and start
-	     *	restoring the emphasis. - FM
-	     */
-	    if ((Offset - offset) >
-		(flag == ON ? (hLen - 1) : hLen))  {
-		goto highlight_search_hightext2;
-	    }
-	    if (!utf_flag) {
-		data += (Offset - offset);
-	    } else {
-		LYrefresh();
-		data = LYmbcs_skip_glyphs(data,
-					  (Offset - offset),
-					  utf_flag);
-	    }
-	    offset = Offset;
-	    itmp = 0;
-	    written = 0;
-	    len = tlen;
-
-	    /*
-	     *	Go to the start of the hit and
-	     *	handle its first character. - FM
-	     */
-	    LYmove(hLine, offset);
-	    tmp[0] = data[itmp];
-	    utf_extra = utf8_length(utf_flag, data + itmp);
-	    if (utf_extra) {
-		LYstrncpy(&tmp[1], &data[itmp+1], utf_extra);
-		itmp += utf_extra;
-		/*
-		 *  Start emphasis immediately if we are making
-		 *  the link non-current, or we are making it
-		 *  current but this is not the first or last
-		 *  character of the hightext. - FM
-		 */
-		if (flag != ON ||
-		    (offset > hoffset && data[itmp+1] != '\0')) {
-		    LYstartTargetEmphasis();
-		    TargetEmphasisON = TRUE;
-		    LYaddstr(tmp);
-		} else {
-		    LYmove(hLine, (offset + 1));
-		}
-		tmp[1] = '\0';
-		written += (utf_extra + 1);
-		utf_extra = 0;
-	    } else if (HTCJK != NOCJK && is8bits(tmp[0])) {
-		/*
-		 *  For CJK strings, by Masanobu Kimura.
-		 */
-		tmp[1] = data[++itmp];
-		/*
-		 *  Start emphasis immediately if we are making
-		 *  the link non-current, or we are making it
-		 *  current but this is not the first or last
-		 *  character of the hightext. - FM
-		 */
-		if (flag != ON ||
-		    (offset > hoffset && data[itmp+1] != '\0')) {
-		    LYstartTargetEmphasis();
-		    TargetEmphasisON = TRUE;
-		    LYaddstr(tmp);
-		} else {
-		    LYmove(hLine, (offset + 1));
-		}
-		tmp[1] = '\0';
-		written += 2;
-	    } else {
-		/*
-		 *  Start emphasis immediately if we are making
-		 *  the link non-current, or we are making it
-		 *  current but this is not the first or last
-		 *  character of the hightext. - FM
-		 */
-		if (flag != ON ||
-		    (offset > hoffset && data[itmp+1] != '\0')) {
-		    LYstartTargetEmphasis();
-		    TargetEmphasisON = TRUE;
-		    LYaddstr(tmp);
-		} else {
-		    LYmove(hLine, (offset + 1));
-		}
-		written++;
-	    }
-	    itmp++;
-	    /*
-	     *	Start emphasis after the first character
-	     *	if we are making the link current and this
-	     *	is not the last character. - FM
-	     */
-	    if (!TargetEmphasisON &&
-		data[itmp] != '\0') {
-		LYstartTargetEmphasis();
-		TargetEmphasisON = TRUE;
-	    }
-
-	    for (;
-		 written < len && (tmp[0] = data[itmp]) != '\0';
-		 itmp++)  {
-		/*
-		 *  Print all the other target chars, except
-		 *  the last character if it is also the last
-		 *  character of hightext and we are making
-		 *  the link current. - FM
-		 */
-		utf_extra = utf8_length(utf_flag, data + itmp);
-		if (utf_extra) {
-		    LYstrncpy(&tmp[1], &data[itmp+1], utf_extra);
-		    itmp += utf_extra;
-		    /*
-		     *	Make sure we don't restore emphasis to
-		     *	the last character of hightext if we
-		     *	are making the link current. - FM
-		     */
-		    if (flag == ON && data[(itmp + 1)] == '\0') {
-			LYstopTargetEmphasis();
-			TargetEmphasisON = FALSE;
-			LYGetYX(y, offset);
-			LYmove(hLine, (offset + 1));
-		    } else {
-			LYaddstr(tmp);
-		    }
-		    tmp[1] = '\0';
-		    written += (utf_extra + 1);
-		    utf_extra = 0;
-		} else if (HTCJK != NOCJK && is8bits(tmp[0])) {
-		    /*
-		     *	For CJK strings, by Masanobu Kimura.
-		     */
-		    tmp[1] = data[++itmp];
-		    /*
-		     *	Make sure we don't restore emphasis to
-		     *	the last character of hightext if we
-		     *	are making the link current. - FM
-		     */
-		    if (flag == ON && data[(itmp + 1)] == '\0') {
-			LYstopTargetEmphasis();
-			TargetEmphasisON = FALSE;
-			LYGetYX(y, offset);
-			LYmove(hLine, (offset + 1));
-		    } else {
-			LYaddstr(tmp);
-		    }
-		    tmp[1] = '\0';
-		    written += 2;
-		} else {
-		    /*
-		     *	Make sure we don't restore emphasis to
-		     *	the last character of hightext if we
-		     *	are making the link current. - FM
-		     */
-		    if (flag == ON && data[(itmp + 1)] == '\0') {
-			LYstopTargetEmphasis();
-			TargetEmphasisON = FALSE;
-			LYGetYX(y, offset);
-			LYmove(hLine, (offset + 1));
-		    } else {
-			LYaddstr(tmp);
-		    }
-		    written++;
-		}
-	    }
-
-	    /*
-	     *	Stop the emphasis if we haven't already, then reset
-	     *	the offset to our current position in the line, and
-	     *	if that is beyond the link, or we are making the link
-	     *	current and it is the last character in the hightext,
-	     *	we are done. - FM
-	     */
-	    if (TargetEmphasisON) {
-		LYstopTargetEmphasis();
-		TargetEmphasisON = FALSE;
-	    }
-	    LYGetYX(y, offset);
-	    if (offset >=
-		(hoffset + (flag == ON ? (hLen - 1) : hLen))) {
-		goto highlight_search_hightext2;
-	    }
-
-	    /*
-	     *	See if we have another hit that starts
-	     *	within the hightext. - FM
-	     */
-	    if (!utf_flag) {
-		data = Data + (offset - Offset);
-	    } else {
-		data = LYmbcs_skip_glyphs(Data,
-					  (offset - Offset),
-					  utf_flag);
-	    }
-	    if (((cp = LYno_attr_mb_strstr(data,
-					   target,
-					   utf_flag, YES,
-					   &HitOffset,
-					   &LenNeeded)) != NULL) &&
-		(offset + LenNeeded) < LYcols) {
-		/*
-		 *  If the hit starts after the end of the hightext,
-		 *  or we are making the link current and the hit
-		 *  starts at its last character, we are done. - FM
-		 */
-		if ((HitOffset + offset) >=
-		    (hoffset +
-		     (flag == ON ? (hLen - 1) : hLen)))  {
-		    goto highlight_search_hightext2;
-		}
-
-		/*
-		 *  If the target extends beyond our buffer, emphasize
-		 *  everything in the hightext starting at this hit.
-		 *  Otherwise, set up the data and offsets, and loop
-		 *  back. - FM
-		 */
-		if ((HitOffset + (offset + tLen)) >=
-		    (hoffset + hLen)) {
-		    offset = (HitOffset + offset);
-		    if (!utf_flag) {
-			data = buffer + (offset - hoffset);
-		    } else {
-			LYrefresh();
-			data = LYmbcs_skip_glyphs(buffer,
-						  (offset - hoffset),
-						  utf_flag);
-		    }
-		    LYmove(hLine, offset);
-		    itmp = 0;
-		    written = 0;
-		    len = strlen(data);
-
-		    /*
-		     *	Turn the emphasis back on. - FM
-		     */
-		    LYstartTargetEmphasis();
-		    TargetEmphasisON = TRUE;
-		    for (;
-			 written < len && (tmp[0] = data[itmp]) != '\0';
-			 itmp++)  {
-			/*
-			 *  Print all the other target chars, except
-			 *  the last character if it is also the last
-			 *  character of hightext and we are making
-			 *  the link current. - FM
-			 */
-			utf_extra = utf8_length(utf_flag, data);
-			if (utf_extra) {
-			    LYstrncpy(&tmp[1], &data[itmp+1], utf_extra);
-			    itmp += utf_extra;
-			    /*
-			     *	Make sure we don't restore emphasis to
-			     *	the last character of hightext if we
-			     *	are making the link current. - FM
-			     */
-			    if (flag == ON && data[(itmp + 1)] == '\0') {
-				LYstopTargetEmphasis();
-				TargetEmphasisON = FALSE;
-				LYGetYX(y, offset);
-				LYmove(hLine, (offset + 1));
-			    } else {
-				LYaddstr(tmp);
-			    }
-			    tmp[1] = '\0';
-			    written += (utf_extra + 1);
-			    utf_extra = 0;
-			} else if (HTCJK != NOCJK && is8bits(tmp[0])) {
-			    /*
-			     *	For CJK strings, by Masanobu Kimura.
-			     */
-			    tmp[1] = data[++itmp];
-			    /*
-			     *	Make sure we don't restore emphasis to
-			     *	the last character of hightext if we
-			     *	are making the link current. - FM
-			     */
-			    if (flag == ON && data[(itmp + 1)] == '\0') {
-				LYstopTargetEmphasis();
-				TargetEmphasisON = FALSE;
-			    } else {
-				LYaddstr(tmp);
-			    }
-			    tmp[1] = '\0';
-			    written += 2;
-			} else {
-			    /*
-			     *	Make sure we don't restore emphasis to
-			     *	the last character of hightext if we
-			     *	are making the link current. - FM
-			     */
-			    if (flag == ON && data[(itmp + 1)] == '\0') {
-				LYstopTargetEmphasis();
-				TargetEmphasisON = FALSE;
-			    } else {
-				LYaddstr(tmp);
-			    }
-			    written++;
-			}
-		    }
-		    /*
-		     *	Turn off the emphasis if we haven't already,
-		     *	and then we're done. - FM
-		     */
-		    if (TargetEmphasisON) {
-			LYstopTargetEmphasis();
-		    }
-		    goto highlight_search_hightext2;
-		} else {
-		    Data = cp;
-		    Offset = (offset + HitOffset);
-		    data = buffer;
-		    offset = hoffset;
-		    goto highlight_hit_within_hightext;
-		}
-	    }
-	    goto highlight_search_hightext2;
+	for (hi_count = target1_drawn ? 1 : 0;
+		LYGetHiliteStr(cur, hi_count) != NULL;
+			hi_count++) {
+	    TargetEmphasisON = show_whereis_targets(flag,
+						    cur,
+						    hi_count,
+						    target,
+						    TargetEmphasisON,
+						    utf_flag);
 	}
-highlight_search_hightext2:
-	if (target && *target && (links[cur].type & WWW_LINK_TYPE) &&
-	    links[cur].hightext2 && *links[cur].hightext2 &&
-	    links[cur].ly < display_lines &&
-	    HText_getFirstTargetInLine(HTMainText,
-				       (links[cur].anchor_line_num + 1),
-				       utf_flag,
-				       (int *)&Offset,
-				       (int *)&tLen,
-				       (char **)&theData,
-				       target)) {
-	    int itmp, written, len, y, offset;
-	    char *data;
-	    int tlen = strlen(target);
-	    int hlen, hLen;
-	    int hLine = (links[cur].ly + 1);
-	    int hoffset = links[cur].hightext2_offset;
-	    size_t utf_extra = 0;
-
-	    /*
-	     *	Copy into the buffer only what will fit
-	     *	up to the right border of the screen. - FM
-	     */
-	    LYmbcsstrncpy(buffer,
-			  (links[cur].hightext2 ?
-			   links[cur].hightext2 : ""),
-			  (sizeof(buffer) - 1),
-			  ((LYcols - 1) - links[cur].hightext2_offset),
-			  utf_flag);
-	    hlen = strlen(buffer);
-	    hLen = ((HTCJK != NOCJK || utf_flag) ?
-		  LYmbcsstrlen(buffer, utf_flag, YES) : hlen);
-
-	    /*
-	     *	Break out if the first hit in the line
-	     *	starts after this link. - FM
-	     */
-	    if (Offset >= (hoffset + hLen)) {
-		goto highlight_search_done;
-	    }
-
-	    /*
-	     *	Recursively skip hits that end before this link, and
-	     *	break out if there is no hit beyond those. - FM
-	     */
-	    Data = theData;
-	    while ((Offset < hoffset) &&
-		   ((Offset + tLen) <= hoffset)) {
-		data = (Data + tlen);
-		offset = (Offset + tLen);
-		if (((cp = LYno_attr_mb_strstr(data,
-					       target,
-					       utf_flag, YES,
-					       &HitOffset,
-					       &LenNeeded)) != NULL) &&
-		    (offset + LenNeeded) < LYcols) {
-		    Data = cp;
-		    Offset = (offset + HitOffset);
-		} else {
-		    goto highlight_search_done;
-		}
-	    }
-	    data = buffer;
-	    offset = hoffset;
-
-	    /*
-	     *	If the hit starts before the hightext2, and ends
-	     *	in or beyond the hightext2, restore the emphasis,
-	     *	skipping the first and last characters of the
-	     *	hightext2 if we're making the link current. - FM
-	     */
-	    if ((Offset < offset) &&
-		((Offset + tLen) > offset)) {
-		itmp = 0;
-		written = 0;
-		len = (tlen - (offset - Offset));
-
-		/*
-		 *  Go to the start of the hightext2 and
-		 *  handle its first character. - FM
-		 */
-		LYmove(hLine, offset);
-		tmp[0] = data[itmp];
-		utf_extra = utf8_length(utf_flag, data + itmp);
-		if (utf_extra) {
-		    LYstrncpy(&tmp[1], &data[itmp+1], utf_extra);
-		    itmp += utf_extra;
-		    /*
-		     *	Start emphasis immediately if we are
-		     *	making the link non-current. - FM
-		     */
-		    if (flag != ON) {
-			LYstartTargetEmphasis();
-			TargetEmphasisON = TRUE;
-			LYaddstr(tmp);
-		    } else {
-			LYmove(hLine, (offset + 1));
-		    }
-		    tmp[1] = '\0';
-		    written += (utf_extra + 1);
-		    utf_extra = 0;
-		} else if (HTCJK != NOCJK && is8bits(tmp[0])) {
-		    /*
-		     *	For CJK strings, by Masanobu Kimura.
-		     */
-		    tmp[1] = data[++itmp];
-		    /*
-		     *	Start emphasis immediately if we are
-		     *	making the link non-current. - FM
-		     */
-		    if (flag != ON) {
-			LYstartTargetEmphasis();
-			TargetEmphasisON = TRUE;
-			LYaddstr(tmp);
-		    } else {
-			LYmove(hLine, (offset + 1));
-		    }
-		    tmp[1] = '\0';
-		    written += 2;
-		} else {
-		    /*
-		     *	Start emphasis immediately if we are making
-		     *	the link non-current. - FM
-		     */
-		    if (flag != ON) {
-			LYstartTargetEmphasis();
-			TargetEmphasisON = TRUE;
-			LYaddstr(tmp);
-		    } else {
-			LYmove(hLine, (offset + 1));
-		    }
-		    written++;
-		}
-		itmp++;
-		/*
-		 *  Start emphasis after the first character
-		 *  if we are making the link current and this
-		 *  is not the last character. - FM
-		 */
-		if (!TargetEmphasisON &&
-		    data[itmp] != '\0') {
-		    LYstartTargetEmphasis();
-		    TargetEmphasisON = TRUE;
-		}
-
-		/*
-		 *  Handle the remaining characters. - FM
-		 */
-		for (;
-		     written < len && (tmp[0] = data[itmp]) != '\0';
-		     itmp++)  {
-		    /*
-		     *	Print all the other target chars, except
-		     *	the last character if it is also the last
-		     *	character of hightext2 and we are making
-		     *	the link current. - FM
-		     */
-		    utf_extra = utf8_length(utf_flag, data + itmp);
-		    if (utf_extra) {
-			LYstrncpy(&tmp[1], &data[itmp+1], utf_extra);
-			itmp += utf_extra;
-			/*
-			 *  Make sure we don't restore emphasis to
-			 *  the last character of hightext2 if we
-			 *  are making the link current. - FM
-			 */
-			if (flag == ON && data[(itmp + 1)] == '\0') {
-			    LYstopTargetEmphasis();
-			    TargetEmphasisON = FALSE;
-			    LYGetYX(y, offset);
-			    LYmove(hLine, (offset + 1));
-			} else {
-			    LYaddstr(tmp);
-			}
-			tmp[1] = '\0';
-			written += (utf_extra + 1);
-			utf_extra = 0;
-		    } else if (HTCJK != NOCJK && is8bits(tmp[0])) {
-			/*
-			 *  For CJK strings, by Masanobu Kimura.
-			 */
-			tmp[1] = data[++itmp];
-			/*
-			 *  Make sure we don't restore emphasis to
-			 *  the last character of hightext2 if we
-			 *  are making the link current. - FM
-			 */
-			if (flag == ON && data[(itmp + 1)] == '\0') {
-			    LYstopTargetEmphasis();
-			    TargetEmphasisON = FALSE;
-			    LYGetYX(y, offset);
-			    LYmove(hLine, (offset + 1));
-			} else {
-			    LYaddstr(tmp);
-			}
-			tmp[1] = '\0';
-			written += 2;
-		    } else {
-			/*
-			 *  Make sure we don't restore emphasis to
-			 *  the last character of hightext2 if we
-			 *  are making the link current. - FM
-			 */
-			if (flag == ON && data[(itmp + 1)] == '\0') {
-			    LYstopTargetEmphasis();
-			    TargetEmphasisON = FALSE;
-			    LYGetYX(y, offset);
-			    LYmove(hLine, (offset + 1));
-			} else {
-			    LYaddstr(tmp);
-			}
-			written++;
-		    }
-		}
-
-		/*
-		 *  Stop the emphasis if we haven't already, then
-		 *  reset the offset to our current position in
-		 *  the line, and if that is beyond the link, or
-		 *  or we are making the link current and it is
-		 *  the last character of the hightext2, we are
-		 *  done. - FM
-		 */
-		if (TargetEmphasisON) {
-		    LYstopTargetEmphasis();
-		    TargetEmphasisON = FALSE;
-		}
-		LYGetYX(y, offset);
-		if (offset >=
-		    (hoffset +
-		     (flag == ON ? (hLen - 1) : hLen)))  {
-		    goto highlight_search_done;
-		}
-
-		/*
-		 *  See if we have another hit that starts
-		 *  within the hightext2. - FM
-		 */
-		if (!utf_flag) {
-		    data = Data + (offset - Offset);
-		} else {
-		    data = LYmbcs_skip_glyphs(Data,
-					      (offset - Offset),
-					      utf_flag);
-		}
-		if (((cp = LYno_attr_mb_strstr(data,
-					       target,
-					       utf_flag, YES,
-					       &HitOffset,
-					       &LenNeeded)) != NULL) &&
-		    (offset + LenNeeded) < LYcols) {
-		    /*
-		     *	If the hit starts after the end of the hightext2,
-		     *	or we are making the link current and the hit
-		     *	starts at its last character, we are done. - FM
-		     */
-		    if ((HitOffset + offset) >=
-			(hoffset +
-			 (flag == ON ? (hLen - 1) : hLen)))  {
-			goto highlight_search_done;
-		    }
-
-		    /*
-		     *	Set up the data and offset for the hit, and let
-		     *	the code for within hightext2 hits handle it. - FM
-		     */
-		    Data = cp;
-		    Offset = (offset + HitOffset);
-		    data = buffer;
-		    offset = hoffset;
-		    goto highlight_hit_within_hightext2;
-		}
-		goto highlight_search_done;
-	    }
-
-highlight_hit_within_hightext2:
-	    /*
-	     *	If we get to here, the hit starts within the
-	     *	hightext2.  If we are making the link current
-	     *	and it's the last character in the hightext2,
-	     *	we are done.  Otherwise, move there and start
-	     *	restoring the emphasis. - FM
-	     */
-	    if ((Offset - offset) >
-		(flag == ON ? (hLen - 1) : hLen))  {
-		goto highlight_search_done;
-	    }
-	    if (!utf_flag) {
-		data += (Offset - offset);
-	    } else {
-		LYrefresh();
-		data = LYmbcs_skip_glyphs(data,
-					  (Offset - offset),
-					  utf_flag);
-	    }
-	    offset = Offset;
-	    itmp = 0;
-	    written = 0;
-	    len = tlen;
-
-	    /*
-	     *	Go to the start of the hit and
-	     *	handle its first character. - FM
-	     */
-	    LYmove(hLine, offset);
-	    tmp[0] = data[itmp];
-	    utf_extra = utf8_length(utf_flag, data + itmp);
-	    if (utf_extra) {
-		LYstrncpy(&tmp[1], &data[itmp+1], utf_extra);
-		itmp += utf_extra;
-		/*
-		 *  Start emphasis immediately if we are making
-		 *  the link non-current, or we are making it
-		 *  current but this is not the first or last
-		 *  character of the hightext2. - FM
-		 */
-		if (flag != ON ||
-		    (offset > hoffset && data[itmp+1] != '\0')) {
-		    LYstartTargetEmphasis();
-		    TargetEmphasisON = TRUE;
-		    LYaddstr(tmp);
-		} else {
-		    LYmove(hLine, (offset + 1));
-		}
-		tmp[1] = '\0';
-		written += (utf_extra + 1);
-		utf_extra = 0;
-	    } else if (HTCJK != NOCJK && is8bits(tmp[0])) {
-		/*
-		 *  For CJK strings, by Masanobu Kimura.
-		 */
-		tmp[1] = data[++itmp];
-		/*
-		 *  Start emphasis immediately if we are making
-		 *  the link non-current, or we are making it
-		 *  current but this is not the first or last
-		 *  character of the hightext2. - FM
-		 */
-		if (flag != ON ||
-		    (offset > hoffset && data[itmp+1] != '\0')) {
-		    LYstartTargetEmphasis();
-		    TargetEmphasisON = TRUE;
-		    LYaddstr(tmp);
-		} else {
-		    LYmove(hLine, (offset + 1));
-		}
-		tmp[1] = '\0';
-		written += 2;
-	    } else {
-		/*
-		 *  Start emphasis immediately if we are making
-		 *  the link non-current, or we are making it
-		 *  current but this is not the first or last
-		 *  character of the hightext2. - FM
-		 */
-		if (flag != ON ||
-		    (offset > hoffset && data[itmp+1] != '\0')) {
-		    LYstartTargetEmphasis();
-		    TargetEmphasisON = TRUE;
-		    LYaddstr(tmp);
-		} else {
-		    LYmove(hLine, (offset + 1));
-		}
-		written++;
-	    }
-	    itmp++;
-	    /*
-	     *	Start emphasis after the first character
-	     *	if we are making the link current and this
-	     *	is not the last character. - FM
-	     */
-	    if (!TargetEmphasisON &&
-		data[itmp] != '\0') {
-		LYstartTargetEmphasis();
-		TargetEmphasisON = TRUE;
-	    }
-
-	    for (;
-		 written < len && (tmp[0] = data[itmp]) != '\0';
-		 itmp++)  {
-		/*
-		 *  Print all the other target chars, except
-		 *  the last character if it is also the last
-		 *  character of hightext2 and we are making
-		 *  the link current. - FM
-		 */
-		utf_extra = utf8_length(utf_flag, data + itmp);
-		if (utf_extra) {
-		    LYstrncpy(&tmp[1], &data[itmp+1], utf_extra);
-		    itmp += utf_extra;
-		    /*
-		     *	Make sure we don't restore emphasis to
-		     *	the last character of hightext2 if we
-		     *	are making the link current. - FM
-		     */
-		    if (flag == ON && data[(itmp + 1)] == '\0') {
-			LYstopTargetEmphasis();
-			TargetEmphasisON = FALSE;
-			LYGetYX(y, offset);
-			LYmove(hLine, (offset + 1));
-		    } else {
-			LYaddstr(tmp);
-		    }
-		    tmp[1] = '\0';
-		    written += (utf_extra + 1);
-		    utf_extra = 0;
-		} else if (HTCJK != NOCJK && is8bits(tmp[0])) {
-		    /*
-		     *	For CJK strings, by Masanobu Kimura.
-		     */
-		    tmp[1] = data[++itmp];
-		    /*
-		     *	Make sure we don't restore emphasis to
-		     *	the last character of hightext2 if we
-		     *	are making the link current. - FM
-		     */
-		    if (flag == ON && data[(itmp + 1)] == '\0') {
-			LYstopTargetEmphasis();
-			TargetEmphasisON = FALSE;
-			LYGetYX(y, offset);
-			LYmove(hLine, (offset + 1));
-		    } else {
-			LYaddstr(tmp);
-		    }
-		    tmp[1] = '\0';
-		    written += 2;
-		} else {
-		    /*
-		     *	Make sure we don't restore emphasis to
-		     *	the last character of hightext2 if we
-		     *	are making the link current. - FM
-		     */
-		    if (flag == ON && data[(itmp + 1)] == '\0') {
-			LYstopTargetEmphasis();
-			TargetEmphasisON = FALSE;
-			LYGetYX(y, offset);
-			LYmove(hLine, (offset + 1));
-		    } else {
-			LYaddstr(tmp);
-		    }
-		    written++;
-		}
-	    }
-
-	    /*
-	     *	Stop the emphasis if we haven't already, then reset
-	     *	the offset to our current position in the line, and
-	     *	if that is beyond the link, or we are making the link
-	     *	current and it is the last character in the hightext2,
-	     *	we are done. - FM
-	     */
-	    if (TargetEmphasisON) {
-		LYstopTargetEmphasis();
-		TargetEmphasisON = FALSE;
-	    }
-	    LYGetYX(y, offset);
-	    if (offset >=
-		(hoffset + (flag == ON ? (hLen - 1) : hLen))) {
-		goto highlight_search_done;
-	    }
-
-	    /*
-	     *	See if we have another hit that starts
-	     *	within the hightext2. - FM
-	     */
-	    if (!utf_flag) {
-		data = (Data + (offset - Offset));
-	    } else {
-		data = LYmbcs_skip_glyphs(Data,
-					  (offset - Offset),
-					  utf_flag);
-	    }
-	    if (((cp = LYno_attr_mb_strstr(data,
-					   target,
-					   utf_flag, YES,
-					   &HitOffset,
-					   &LenNeeded)) != NULL) &&
-		(offset + LenNeeded) < LYcols) {
-		/*
-		 *  If the hit starts after the end of the hightext2,
-		 *  or we are making the link current and the hit
-		 *  starts at its last character, we are done. - FM
-		 */
-		if ((HitOffset + offset) >=
-		    (hoffset +
-		     (flag == ON ? (hLen - 1) : hLen)))  {
-		    goto highlight_search_done;
-		}
-
-		/*
-		 *  If the target extends beyond our buffer, emphasize
-		 *  everything in the hightext2 starting at this hit.
-		 *  Otherwise, set up the data and offsets, and loop
-		 *  back. - FM
-		 */
-		if ((HitOffset + (offset + tLen)) >=
-		    (hoffset + hLen)) {
-		    offset = (HitOffset + offset);
-		    if (!utf_flag) {
-			data = buffer + (offset - hoffset);
-		    } else {
-			LYrefresh();
-			data = LYmbcs_skip_glyphs(buffer,
-						  (offset - hoffset),
-						  utf_flag);
-		    }
-		    LYmove(hLine, offset);
-		    itmp = 0;
-		    written = 0;
-		    len = strlen(data);
-
-		    /*
-		     *	Turn the emphasis back on. - FM
-		     */
-		    LYstartTargetEmphasis();
-		    TargetEmphasisON = TRUE;
-		    for (;
-			 written < len && (tmp[0] = data[itmp]) != '\0';
-			 itmp++)  {
-			/*
-			 *  Print all the other target chars, except
-			 *  the last character if it is also the last
-			 *  character of hightext2 and we are making
-			 *  the link current. - FM
-			 */
-			utf_extra = utf8_length(utf_flag, data + itmp);
-			if (utf_extra) {
-			    LYstrncpy(&tmp[1], &data[itmp+1], utf_extra);
-			    itmp += utf_extra;
-			    /*
-			     *	Make sure we don't restore emphasis to
-			     *	the last character of hightext2 if we
-			     *	are making the link current. - FM
-			     */
-			    if (flag == ON && data[(itmp + 1)] == '\0') {
-				LYstopTargetEmphasis();
-				TargetEmphasisON = FALSE;
-				LYGetYX(y, offset);
-				LYmove(hLine, (offset + 1));
-			    } else {
-				LYaddstr(tmp);
-			    }
-			    tmp[1] = '\0';
-			    written += (utf_extra + 1);
-			    utf_extra = 0;
-			} else if (HTCJK != NOCJK && is8bits(tmp[0])) {
-			    /*
-			     *	For CJK strings, by Masanobu Kimura.
-			     */
-			    tmp[1] = data[++itmp];
-			    /*
-			     *	Make sure we don't restore emphasis to
-			     *	the last character of hightext2 if we
-			     *	are making the link current. - FM
-			     */
-			    if (flag == ON && data[(itmp + 1)] == '\0') {
-				LYstopTargetEmphasis();
-				TargetEmphasisON = FALSE;
-			    } else {
-				LYaddstr(tmp);
-			    }
-			    tmp[1] = '\0';
-			    written += 2;
-			} else {
-			    /*
-			     *	Make sure we don't restore emphasis to
-			     *	the last character of hightext2 if we
-			     *	are making the link current. - FM
-			     */
-			    if (flag == ON && data[(itmp + 1)] == '\0') {
-				LYstopTargetEmphasis();
-				TargetEmphasisON = FALSE;
-			    } else {
-				LYaddstr(tmp);
-			    }
-			    written++;
-			}
-		    }
-		    /*
-		     *	Turn off the emphasis if we haven't already,
-		     *	and then we're done. - FM
-		     */
-		    if (TargetEmphasisON) {
-			LYstopTargetEmphasis();
-		    }
-		    goto highlight_search_done;
-		} else {
-		    Data = cp;
-		    Offset = (offset + HitOffset);
-		    data = buffer;
-		    offset = hoffset;
-		    goto highlight_hit_within_hightext2;
-		}
-	    }
-	    goto highlight_search_done;
-	}
-highlight_search_done:
-	FREE(theData);
 
 	if (!LYShowCursor)
 	    /*
@@ -2432,7 +1894,7 @@ PUBLIC void LYAddLocalhostAlias ARGS1(
 {
     char *LocalAlias = NULL;
 
-    if (!(alias && *alias))
+    if (!non_empty(alias))
 	return;
 
     if (!localhost_aliases) {
@@ -2910,12 +2372,11 @@ PUBLIC BOOLEAN LYFixCursesOnForAccess ARGS2(
  *  Determine whether we allow HEAD and related flags for a URL. - kw
  */
 PUBLIC BOOLEAN LYCanDoHEAD ARGS1(
-    CONST char *,	address
-    )
+    CONST char *,	address)
 {
     char *temp0 = NULL;
     int isurl;
-    if (!(address && *address))
+    if (!non_empty(address))
 	return FALSE;
     if (!strncmp(address, "http", 4))
 	return TRUE;
@@ -2963,7 +2424,7 @@ PUBLIC BOOLEAN LYCanDoHEAD ARGS1(
 #ifdef ALLOW_PROXY_HEAD
     if (isurl != FILE_URL_TYPE) {
 	char *acc_method = HTParse(temp0, "", PARSE_ACCESS);
-	if (acc_method && *acc_method) {
+	if (non_empty(acc_method)) {
 	    char *proxy;
 	    StrAllocCat(acc_method, "_proxy");
 	    proxy = getenv(acc_method);
@@ -3341,7 +2802,7 @@ PUBLIC void HTAddSugFilename ARGS1(
     char *old;
     HTList *cur;
 
-    if (!(fname && *fname))
+    if (!non_empty(fname))
 	return;
 
     StrAllocCopy(new, fname);
@@ -4237,7 +3698,7 @@ PUBLIC void LYEnsureAbsoluteURL ARGS3(
 {
     char *temp = NULL;
 
-    if (!(*href && *(*href)))
+    if (!non_empty(*href))
 	return;
 
     /*
@@ -4254,7 +3715,7 @@ PUBLIC void LYEnsureAbsoluteURL ARGS3(
 		    (name ? name : ""), (name ? " " : ""), *href));
 	LYConvertToURL(href, fixit);
     }
-    if ((temp = HTParse(*href, "", PARSE_ALL)) != NULL && *temp != '\0')
+    if (non_empty(temp = HTParse(*href, "", PARSE_ALL)))
 	StrAllocCopy(*href, temp);
     FREE(temp);
 }
@@ -5213,7 +4674,7 @@ PUBLIC BOOLEAN LYAddSchemeForURL ARGS2(
 	FREE(Str);
 	return GotScheme;
 
-    } else if (default_scheme != NULL && *default_scheme != '\0') {
+    } else if (non_empty(default_scheme)) {
 	StrAllocCopy(Str, default_scheme);
 	GotScheme = TRUE;
 	StrAllocCat(Str, *AllocatedString);
@@ -5424,7 +4885,7 @@ PUBLIC CONST char * Home_Dir NOARGS
 		StrAllocCopy(HomeDir, "/tmp");
 	    }
 #ifdef UNIX
-	    if (cp && *cp)
+	    if (non_empty(cp))
 		HTAlwaysAlert(NULL, gettext("Ignoring invalid HOME"));
 #endif
 #endif /* VMS */
@@ -5701,7 +5162,7 @@ PUBLIC void LYAddPathToHome ARGS3(
 #else
 #define NO_HOMEPATH "/error"
 #endif /* VMS */
-    if (!(home && *home))
+    if (!non_empty(home))
 	/*
 	 *  Home_Dir() has a bug if this ever happens. - FM
 	 */
@@ -5789,7 +5250,7 @@ PUBLIC time_t LYmktime ARGS2(
     /*
      *	Make sure we have a string to parse. - FM
      */
-    if (!(string && *string))
+    if (!non_empty(string))
 	return(0);
     s = string;
     CTRACE((tfp, "LYmktime: Parsing '%s'\n", s));
@@ -6707,7 +6168,7 @@ PUBLIC int LYRemoveTemp ARGS1(
     LY_TEMP *p, *q;
     int code = -1;
 
-    if (name != 0 && *name != 0) {
+    if (non_empty(name)) {
 	CTRACE((tfp, "LYRemoveTemp(%s)\n", name));
 	for (p = ly_temp, q = 0; p != 0; q = p, p = p->next) {
 	    if (!strcmp(name, p->name)) {
@@ -7196,7 +6657,7 @@ PUBLIC void LYTrimPathSep ARGS1(
 #endif
 
 /*
- * Add a trailing path-separator to avoid confusing other programs when we concateate
+ * Add a trailing path-separator to avoid confusing other programs when we concatenate
  * to it.  This only applies to local filesystems.
  */
 PUBLIC void LYAddPathSep ARGS1(
@@ -7750,8 +7211,6 @@ PUBLIC void get_clip_release NOARGS
 
 #if defined(WIN_EX)	/* 1997/10/16 (Thu) 20:13:28 */
 
-#define	MAX_DOS_PATH	128	/* exactly 80 */
-
 PUBLIC int put_clip(char *szBuffer)
 {
     HANDLE hWnd;
@@ -7837,28 +7296,6 @@ PUBLIC void get_clip_release()
     GlobalUnlock(m_hLogData);
     CloseClipboard();
     m_locked = 0;
-}
-
-
-PUBLIC char *HTDOS_short_name(char *path)
-{
-    static char sbuf[MAX_DOS_PATH];
-    char *ret;
-    DWORD r;
-
-    r = GetShortPathName(path, sbuf, sizeof sbuf);
-    if (r >= sizeof sbuf) {
-#if 0	/* DEBUG */
-	fprintf(stderr, "bug: recompile with MAX_DOS_PATH > %d\n", r);
-#endif
-	ret = path;
-    }
-    if (r == 0) {
-	ret = path;
-    } else {
-	ret = sbuf;
-    }
-    return ret;
 }
 #endif
 

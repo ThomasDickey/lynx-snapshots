@@ -5,9 +5,16 @@ dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
 
 AC_PREREQ(2.12.971222)
 AC_INIT(userdefs.h)
+
+# autoconf 2.5x defaults to no cache file; we need the cache file's information
+# for building the config page.  But start with it empty to avoid confusion by
+# people who don't do a "make distclean" after applying patches.
+cache_file=config.cache
 rm -f config.cache; touch config.cache
+
 CONFIG_H=lynx_cfg.h
 AC_CONFIG_HEADER($CONFIG_H:config.hin)
+
 CF_CHECK_CACHE
 
 PACKAGE=lynx
@@ -128,6 +135,26 @@ then
 	CF_GCC_ATTRIBUTES
 	CF_GCC_WARNINGS
 fi
+fi
+
+AC_MSG_CHECKING(if you want to link with dbmalloc for testing)
+AC_ARG_WITH(dbmalloc,
+	[  --with-dbmalloc         test: use Conor Cahill's dbmalloc library],
+	[with_dbmalloc=$withval],
+	[with_dbmalloc=no])
+AC_MSG_RESULT($with_dbmalloc)
+if test $with_dbmalloc = yes ; then
+	AC_CHECK_LIB(dbmalloc,debug_malloc)
+fi
+
+AC_MSG_CHECKING(if you want to link with dmalloc for testing)
+AC_ARG_WITH(dmalloc,
+	[  --with-dmalloc          test: use Gray Watson's dmalloc library],
+	[with_dmalloc=$withval],
+	[with_dmalloc=no])
+AC_MSG_RESULT($with_dmalloc)
+if test $with_dmalloc = yes ; then
+	AC_CHECK_LIB(dmalloc,dmalloc_debug)
 fi
 
 dnl --------------------------------------------------------------------------
@@ -309,16 +336,7 @@ CF_GNU_SOURCE
 
 dnl Collect tests for compiler options into one place
 if test -n "$TRY_CFLAGS" ; then
-	cf_save_CFLAGS="$CFLAGS"
-	cf_save_CPPFLAGS="$CPPFLAGS"
-	CF_ADD_CFLAGS($TRY_CFLAGS)
-	AC_MSG_CHECKING(if we should use compile options $TRY_CFLAGS)
-	AC_TRY_COMPILE([#include <stdio.h>],[FILE *fp = stdin],[cf_result=yes],[cf_result=no])
-	AC_MSG_RESULT($cf_result)
-	if test "$cf_result" = no ; then
-		CFLAGS="$cf_save_CFLAGS"
-		CPPFLAGS="$cf_save_CPPFLAGS"
-	fi
+	CF_CHECK_CFLAGS($TRY_CFLAGS)
 fi
 
 dnl --------------------------------------------------------------------------
@@ -381,11 +399,11 @@ ncurses|ncursesw|slang)
 pdcurses)
 	cf_cv_ncurses_header=xcurses.h
 	;;
-curses)
-	if eval "test \"`echo '$''{'cf_cv_ncurses_header'+set}'`\" != set"; then
-		cf_cv_ncurses_header=curses.h
-	fi
-	;;
+#curses)
+#	if eval "test \"`echo '$''{'cf_cv_ncurses_header'+set}'`\" != set"; then
+#		cf_cv_ncurses_header=curses.h
+#	fi
+#	;;
 esac
 
 case $cf_cv_screen in
@@ -945,15 +963,6 @@ CF_ARG_ENABLE(gzip-help,
 	[use_gzip_help=no])
 AC_MSG_RESULT($use_gzip_help)
 
-COMPRESS_PROG=
-COMPRESS_EXT=
-if test $use_gzip_help = yes ; then
-	COMPRESS_PROG=$ac_cv_path_GZIP
-	COMPRESS_EXT=.gz
-fi
-AC_SUBST(COMPRESS_PROG)
-AC_SUBST(COMPRESS_EXT)
-
 AC_MSG_CHECKING(if you want to use zlib for decompression of some gzip files)
 AC_ARG_WITH(zlib,
 [  --with-zlib             use zlib for decompression of some gzip files],
@@ -1095,6 +1104,7 @@ CF_PATH_PROG(RLOGIN,	rlogin)
 
 CF_PATH_PROG(MV,	mv)
 
+CF_PATH_PROG(GZIP,	gzip)
 CF_PATH_PROG(UNCOMPRESS,gunzip)
 CF_PATH_PROG(UNZIP,	unzip)
 CF_PATH_PROG(BZIP2,	bzip2)
@@ -1105,12 +1115,12 @@ dnl --------------------------------------------------------------------------
 if test ".$use_dired" != ".no" ; then
 
 CF_PATH_PROG(COMPRESS,	compress)
-CF_PATH_PROG(GZIP,	gzip)
 CF_PATH_PROG(RM,	rm)
 CF_PATH_PROG(TAR,	tar)
 CF_PATH_PROG(UUDECODE,	uudecode)
 CF_PATH_PROG(ZCAT,	zcat)
 CF_PATH_PROG(ZIP,	zip)
+
 dnl builtin: CF_PATH_PROG(CHMOD,	chmod)
 dnl builtin: CF_PATH_PROG(COPY,		cp)
 dnl builtin: CF_PATH_PROG(MKDIR,	mkdir)
@@ -1129,6 +1139,15 @@ $srcdir*) # (vi
 	;;
 esac
 fi
+
+COMPRESS_PROG=
+COMPRESS_EXT=
+if test $use_gzip_help = yes ; then
+	COMPRESS_PROG="$ac_cv_path_GZIP -9"
+	COMPRESS_EXT=.gz
+fi
+AC_SUBST(COMPRESS_PROG)
+AC_SUBST(COMPRESS_EXT)
 
 if test $cf_cv_screen = pdcurses ; then
 	CF_HELP_MESSAGE(Special Libraries for PDCurses X11:)

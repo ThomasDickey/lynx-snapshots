@@ -327,8 +327,8 @@ help_files.sed : makefile $(srcdir)/lynx_help/help_files.txt
 	@ECHO_CC@if test -n "$(COMPRESS_EXT)"; then echo 's%\$(COMPRESS_EXT)\$(COMPRESS_EXT)%$(COMPRESS_EXT)%g' >> $@; fi
 	@-rm -f help_files.tmp
 
-install-help : help_files.sed $(HELPDIR)
-	(cd $(HELPDIR) && WD=`pwd` && HEAD=`echo $$WD|sed -e 's!/lynx_help$$!!'` && test $$WD != $$HEAD && rm -rf *)
+install-help : help_files.sed $(HELPDIR) $(HELPDIR)/keystrokes
+	- (cd $(HELPDIR) && WD=`pwd` && HEAD=`echo $$WD|sed -e 's!/lynx_help$$!!'` && test $$WD != $$HEAD && rm -f * keystrokes/*)
 @LYNXCFG_MAKE@	@echo 'Making htmlized lynx.cfg'
 @LYNXCFG_MAKE@	cd src && make LYReadCFG.i
 @LYNXCFG_MAKE@	@-rm -f alphatoc.html body.html cattoc.html
@@ -336,23 +336,20 @@ install-help : help_files.sed $(HELPDIR)
 @LYNXCFG_MAKE@	sed  -e 's/ *{ *"\([^"]*\)".*/\1/' | \
 @LYNXCFG_MAKE@	perl $(srcdir)/scripts/cfg2html.pl -ms $(srcdir)/lynx.cfg
 	@echo Translating/copying html files
-	@cat help_files.sed > $(HELPDIR)/help_files.sed
 @LYNXCFG_MAKE@	@$(SHELL) -c 'for f in alphatoc.html body.html cattoc.html ; do \
-@LYNXCFG_MAKE@		sed -f $(HELPDIR)/help_files.sed $$f > $(HELPDIR)/$$f ; \
+@LYNXCFG_MAKE@		sed -f help_files.sed $$f > $(HELPDIR)/$$f ; \
 @LYNXCFG_MAKE@		done'
 @LYNXCFG_MAKE@	-rm -f src/LYReadCFG.i
-	@ECHO_CC@$(SHELL) -c 'cd $(srcdir)/lynx_help && ( \
-		dirs=keystrokes; \
-		(cd $(HELPDIR) && mkdir $$dirs 2>/dev/null ) ; \
-		files="*.html */*.html" ; \
+	@ECHO_CC@$(SHELL) -c 'sed_prog=`pwd`/help_files.sed && \
+		cd $(srcdir)/lynx_help && \
+		dirs=keystrokes && \
+		files="*.html */*.html" && \
 		for f in $$files ; do \
-			sed -f $(HELPDIR)/help_files.sed $$f > $(HELPDIR)/$$f ; \
-		done ; \
+			sed -f $$sed_prog $$f > $(HELPDIR)/$$f ; \
+		done && \
 		if test "$(COMPRESS_PROG)" != "" ; then \
 			(cd $(HELPDIR) && $(COMPRESS_PROG) $$files ) \
-		fi ; \
-		)'
-	@-rm -f $(HELPDIR)/help_files.sed
+		fi'
 	@echo Updating $(libdir)/lynx.cfg
 	$(SHELL) -c 'if test -f $(LIBDIR)/lynx.cfg ; then \
 		mv $(LIBDIR)/lynx.cfg $(LIBDIR)/lynx.tmp ; \
@@ -413,7 +410,12 @@ uninstall-doc ::
 	-test -d $(DOCDIR) && WD=`cd $(DOCDIR) && pwd` && HEAD=`echo $$WD|sed -e 's!/lynx_doc$$!!'` && test $$WD != $$HEAD && rm -rf $(DOCDIR)
 	-test -d $(HELPDIR) && WD=`cd $(HELPDIR) && pwd` && HEAD=`echo $$WD|sed -e 's!/lynx_help$$!!'` && test $$WD != $$HEAD && cd $(HELPDIR) && rm -f COPYING COPYHEADER
 
-$(BINDIR) $(MANDIR) $(LIBDIR) $(HELPDIR) $(DOCDIR) :
+$(BINDIR) \
+$(MANDIR) \
+$(LIBDIR) \
+$(HELPDIR) \
+$(HELPDIR)/keystrokes \
+$(DOCDIR) :
 	$(srcdir)/mkdirs.sh $@
 etags:
 	etags -r "/\(PRIVATE\|PUBLIC\)[ \t]+\([a-zA-Z_][a-zA-Z_0-1]*[ \t*]+\)*\([a-zA-Z_][a-zA-Z_0-1]*\)[ \t]+\(ARGS[0-9]\|NOARGS\)/\3/" *.[ch] */*.[ch] */*/*.[ch] */*/*/*.[ch]

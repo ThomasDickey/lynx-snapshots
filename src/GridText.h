@@ -260,12 +260,12 @@ extern BOOL HText_AreDifferent PARAMS((
 	CONST char *		full_address));
 
 extern int HText_ExtEditForm PARAMS((
-	struct link *	form_link));
+	LinkInfo *	form_link));
 extern void HText_ExpandTextarea PARAMS((
-	struct link *	form_link,
+	LinkInfo *	form_link,
 	int             newlines));
 extern int HText_InsertFile PARAMS((
-	struct link *	form_link));
+	LinkInfo *	form_link));
 
 extern void redraw_lines_of_link PARAMS((int cur));
 extern void LYMoveToLink PARAMS((
