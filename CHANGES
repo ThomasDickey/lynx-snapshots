@@ -1,6 +1,18 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+1999-05-31 (2.8.2pre.10)
++ add links to HTML'ized lynxcfg to users' guide -LP
+* cleanup temporary files left by
+     lynx -dump LYNXCFG:// > /dev/null
+  (analysis by LP) -VH
+* add comments to lynx.cfg describing effect of restricting configuration
+  settings in nested includes -VH
+* delineate URL's in README with "<URL:" and ">", with space in lynx.man -LV
+* add some comments to lynx.lss -TD
+* minor improvements to configure script:  use newer config.guess and
+  config.sub from xterm, which adds case for HP 9000/800 (fix problem reported
+  by Peter Jones <jones.peter@uqam.ca>) -TD
 1999-05-29 (2.8.2pre.9)
 * use StrAllocCopy rather than HTSprintf in LYstore_message() because no
   formatting is done there; the message may contain formatting controls such as

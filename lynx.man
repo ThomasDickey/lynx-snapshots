@@ -22,7 +22,7 @@ use "lynx -help" to display a complete list of current options.
 Lynx
 is a fully-featured World Wide Web (WWW) client for users
 running cursor-addressable, character-cell display devices (e.g.,
-vt100 terminals, vt100 emulators running on PCs or Macs, or any
+vt100 terminals, vt100 emulators running on Windows 95/NT or Macintoshes, or any
 other "curses-oriented" display).  It will display hypertext
 markup language (HTML) documents containing links to
 files residing on the local system, as well as files residing on
@@ -31,7 +31,7 @@ Current versions of
 .I
 Lynx
 run on
-Unix, VMS, Windows95/NT, 386DOS and OS/2 EMX.
+Unix, VMS, Windows 95/NT, 386DOS and OS/2 EMX.
 .PP
 .I
 Lynx
@@ -147,7 +147,7 @@ dumps the formatted output of the default document or one
 specified on the command line to standard out.
 This can be used in the following way:
 .sp
-lynx -dump http://www.crl.com/~subir/lynx.html.
+lynx -dump http://www.crl.com/~subir/lynx.html
 .TP
 .B -editor\fR=\fIEDITOR
 enable edit mode using the specified
