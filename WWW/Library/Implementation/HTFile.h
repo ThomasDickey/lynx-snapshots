@@ -192,18 +192,32 @@ extern void LYGetFileInfo(const char *filename,
 extern float HTFileValue(const char *filename);
 
 /*
- *  Determine compression type from file name, by looking at its suffix.
+ *  Known compression types.
  */
 typedef enum {
     cftNone
     ,cftCompress
     ,cftGzip
     ,cftBzip2
+    ,cftDeflate
 } CompressFileType;
 
+/*
+ *  Determine compression type from file name, by looking at its suffix.
+ */
 extern CompressFileType HTCompressFileType(char *filename,
 					   char *dots,
 					   char **suffix);
+
+/*
+ *  Determine compression type from the content-type.
+ */
+extern CompressFileType HTContentToCompressType(const char *encoding);
+
+/*
+ *  Determine compression type from the content-encoding.
+ */
+extern CompressFileType HTEncodingToCompressType(const char *encoding);
 
 /*
  *  Determine write access to a file.
@@ -276,6 +290,7 @@ typedef enum {
     ,ppCOPY
     ,ppCSWING
     ,ppGZIP
+    ,ppINFLATE
     ,ppINSTALL
     ,ppMKDIR
     ,ppMV

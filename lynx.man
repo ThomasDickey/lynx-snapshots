@@ -83,7 +83,8 @@ apply restrictions for anonymous account, see also \fB\-restrictions\fR.
 charset for documents that don't specify it.
 .TP
 .B \-assume_local_charset\fR=\fIMIMEname
-charset assumed for local files.
+charset assumed for local files,
+i.e., files which lynx creates such as internal pages for the options menu.
 .TP
 .B \-assume_unrec_charset\fR=\fIMIMEname
 use this instead of unrecognized charsets.
@@ -451,7 +452,7 @@ show HTML source view with lexical elements and tags in color.
 enable print functions. (default)
 .TP
 .B \-pseudo_inlines
-toggles pseudo-ALTs for inlines with no ALT string.
+toggles pseudo-ALTs for inline images with no ALT string.
 .TP
 .B \-raw
 toggles default setting of 8-bit character translations

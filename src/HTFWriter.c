@@ -172,7 +172,8 @@ static void HTFWriter_free(HTStream *me)
 		 */
 		StrAllocCopy(path, me->anchor->FileCache);
 		if ((len = strlen(path)) > 3 &&
-		    !strcasecomp(&path[len - 2], "gz")) {
+		    (!strcasecomp(&path[len - 2], "gz") ||
+		     !strcasecomp(&path[len - 2], "zz"))) {
 #ifdef USE_ZLIB
 		    if (!skip_loadfile) {
 			use_zread = YES;
@@ -955,11 +956,11 @@ HTStream *HTCompressed(HTPresentation *pres,
     HTFormat format;
     char *type = NULL;
     HTPresentation *Pres = NULL;
+    HTPresentation *Pnow = NULL;
     int n, i;
     BOOL can_present = FALSE;
     char fnam[LY_MAXPATH];
     char temp[LY_MAXPATH];	/* actually stores just a suffix */
-    const char *program;
     const char *suffix;
     char *uncompress_mask = NULL;
     char *compress_suffix = "";
@@ -980,44 +981,67 @@ HTStream *HTCompressed(HTPresentation *pres,
     }
     n = HTList_count(HTPresentations);
     for (i = 0; i < n; i++) {
-	Pres = (HTPresentation *) HTList_objectAt(HTPresentations, i);
-	if (!strcasecomp(Pres->rep->name, anchor->content_type) &&
-	    Pres->rep_out == WWW_PRESENT) {
+	Pnow = (HTPresentation *) HTList_objectAt(HTPresentations, i);
+	if (!strcasecomp(Pnow->rep->name, anchor->content_type) &&
+	    Pnow->rep_out == WWW_PRESENT) {
+	    const char *program = "";
+
+	    /*
+	     * Pick the best presentation.  User-defined mappings are at the
+	     * end of the list, and unless the quality is lower, we prefer
+	     * those.
+	     */
+	    if (Pres == 0)
+		Pres = Pnow;
+	    else if (Pres->quality > Pnow->quality)
+		continue;
+	    else
+		Pres = Pnow;
 	    /*
 	     * We have a presentation mapping for it.  - FM
 	     */
 	    can_present = TRUE;
-	    if ((!strcasecomp(anchor->content_encoding, "x-gzip") ||
-		 !strcasecomp(anchor->content_encoding, "gzip")) &&
-		(program = HTGetProgramPath(ppGZIP)) != NULL) {
-		/*
-		 * It's compressed with the modern gzip.  - FM
-		 */
-		StrAllocCopy(uncompress_mask, program);
-		StrAllocCat(uncompress_mask, " -d --no-name %s");
-		compress_suffix = "gz";
+	    switch (HTEncodingToCompressType(anchor->content_encoding)) {
+	    case cftGzip:
+		if ((program = HTGetProgramPath(ppGZIP)) != NULL) {
+		    /*
+		     * It's compressed with the modern gzip.  - FM
+		     */
+		    StrAllocCopy(uncompress_mask, program);
+		    StrAllocCat(uncompress_mask, " -d --no-name %s");
+		    compress_suffix = "gz";
+		}
+		break;
+	    case cftDeflate:
+		if ((program = HTGetProgramPath(ppINFLATE)) != NULL) {
+		    /*
+		     * It's compressed with a zlib wrapper.
+		     */
+		    StrAllocCopy(uncompress_mask, program);
+		    StrAllocCat(uncompress_mask, " %s");
+		    compress_suffix = "zz";
+		}
+		break;
+	    case cftBzip2:
+		if ((program = HTGetProgramPath(ppBZIP2)) != NULL) {
+		    StrAllocCopy(uncompress_mask, program);
+		    StrAllocCat(uncompress_mask, " -d %s");
+		    compress_suffix = "bz2";
+		}
+		break;
+	    case cftCompress:
+		if ((program = HTGetProgramPath(ppUNCOMPRESS)) != NULL) {
+		    /*
+		     * It's compressed the old fashioned Unix way.  - FM
+		     */
+		    StrAllocCopy(uncompress_mask, program);
+		    StrAllocCat(uncompress_mask, " %s");
+		    compress_suffix = "Z";
+		}
+		break;
+	    case cftNone:
 		break;
 	    }
-	    if ((!strcasecomp(anchor->content_encoding, "x-bzip2") ||
-		 !strcasecomp(anchor->content_encoding, "bzip2")) &&
-		(program = HTGetProgramPath(ppBZIP2)) != NULL) {
-		StrAllocCopy(uncompress_mask, program);
-		StrAllocCat(uncompress_mask, " -d %s");
-		compress_suffix = "bz2";
-		break;
-	    }
-	    if ((!strcasecomp(anchor->content_encoding, "x-compress") ||
-		 !strcasecomp(anchor->content_encoding, "compress")) &&
-		(program = HTGetProgramPath(ppUNCOMPRESS)) != NULL) {
-		/*
-		 * It's compressed the old fashioned Unix way.  - FM
-		 */
-		StrAllocCopy(uncompress_mask, program);
-		StrAllocCat(uncompress_mask, " %s");
-		compress_suffix = "Z";
-		break;
-	    }
-	    break;
 	}
     }
     if (can_present == FALSE ||	/* no presentation mapping */
@@ -1087,6 +1111,7 @@ HTStream *HTCompressed(HTPresentation *pres,
     } else if (!strncasecomp(anchor->content_type, "text/", 5)) {
 	middle = TEXT_SUFFIX + 1;
     } else if (!strncasecomp(anchor->content_type, "application/", 12)) {
+	/* FIXME: why is this BEFORE HTFileSuffix? */
 	middle = BIN_SUFFIX + 1;
     } else if ((suffix =
 		HTFileSuffix(HTAtom_for(anchor->content_type), NULL)) &&
@@ -1158,6 +1183,7 @@ HTStream *HTCompressed(HTPresentation *pres,
     } else
 #endif
 #ifdef USE_ZLIB
+	/* FIXME: allow deflate here, e.g., 'z' */
 	if (compress_suffix[0] == 'g'	/* must be gzip */
 	    && !me->viewer_command) {
 	/*

@@ -29,6 +29,24 @@ struct struct_parts {
     char *anchor;
 };
 
+#if 0				/* for debugging */
+static void show_parts(const char *name, struct struct_parts *parts, int line)
+{
+    if (TRACE) {
+	CTRACE((tfp, "struct_parts(%s) %s@%d\n", name, __FILE__, line));
+	CTRACE((tfp, "   access   '%s'\n", NONNULL(parts->access)));
+	CTRACE((tfp, "   host     '%s'\n", NONNULL(parts->host)));
+	CTRACE((tfp, "   absolute '%s'\n", NONNULL(parts->absolute)));
+	CTRACE((tfp, "   relative '%s'\n", NONNULL(parts->relative)));
+	CTRACE((tfp, "   search   '%s'\n", NONNULL(parts->search)));
+	CTRACE((tfp, "   anchor   '%s'\n", NONNULL(parts->anchor)));
+    }
+}
+#define SHOW_PARTS(name) show_parts(#name, &name, __LINE__)
+#else
+#define SHOW_PARTS(name)	/* nothing */
+#endif
+
 /*	Strip white space off a string.				HTStrip()
  *	-------------------------------
  *
@@ -163,6 +181,16 @@ static void scan(char *name,
 #define LYalloca_free(x)   free(x)
 #endif
 
+static char *strchr_or_end(char *string, int ch)
+{
+    char *result = strchr(string, ch);
+
+    if (result == 0) {
+	result = string + strlen(string);
+    }
+    return result;
+}
+
 /*	Parse a Name relative to another name.			HTParse()
  *	--------------------------------------
  *
@@ -187,7 +215,7 @@ char *HTParse(const char *aName,
     int len, len1, len2;
     char *name = NULL;
     char *rel = NULL;
-    char *p;
+    char *p, *q;
     char *acc_method;
     struct struct_parts given, related;
 
@@ -236,6 +264,7 @@ char *HTParse(const char *aName,
      * Cut up the string into URL fields.
      */
     scan(name, &given);
+    SHOW_PARTS(given);
 
     /*
      * Now related string.
@@ -254,6 +283,7 @@ char *HTParse(const char *aName,
 	memcpy(rel, relatedName, len2);
 	scan(rel, &related);
     }
+    SHOW_PARTS(related);
 
     /*
      * Handle the scheme (access) field.
@@ -450,12 +480,24 @@ char *HTParse(const char *aName,
 	    *tail++ = '/';
 	    strcpy(tail, related.absolute);
 	    if (given.relative) {
-		p = strchr(tail, '?');	/* Search part? */
-		if (p == NULL)
-		    p = (tail + strlen(tail) - 1);
-		for (; *p != '/'; p--) ;	/* last / */
-		p[1] = '\0';	/* Remove filename */
-		strcat(p, given.relative);	/* Add given one */
+		/* RFC 1808 part 4 step 5 (if URL path is empty) */
+		/* a) if given has params, add/replace that */
+		if (given.relative[0] == ';') {
+		    strcpy(strchr_or_end(tail, ';'), given.relative);
+		}
+		/* b) if given has query, add/replace that */
+		else if (given.relative[0] == '?') {
+		    strcpy(strchr_or_end(tail, '?'), given.relative);
+		}
+		/* otherwise fall through to RFC 1808 part 4 step 6 */
+		else {
+		    p = strchr(tail, '?');	/* Search part? */
+		    if (p == NULL)
+			p = (tail + strlen(tail) - 1);
+		    for (; *p != '/'; p--) ;	/* last / */
+		    p[1] = '\0';	/* Remove filename */
+		    strcat(p, given.relative);	/* Add given one */
+		}
 		HTSimplify(result);
 	    }
 	    CTRACE((tfp, "HTParse: (Related-ABS)\n"));
@@ -536,7 +578,7 @@ char *HTParse(const char *aName,
 	default:
 	    CTRACE((tfp, "HTParse:      encode:`%s'\n", result));
 	    do {
-		char *q = p + strlen(p) + 2;
+		q = p + strlen(p) + 2;
 
 		while (q != p + 1) {
 		    q[0] = q[-2];

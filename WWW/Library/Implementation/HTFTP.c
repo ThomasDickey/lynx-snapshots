@@ -3725,10 +3725,13 @@ int HTFTPLoad(const char *name,
 		case cftGzip:
 		    StrAllocCopy(anchor->content_encoding, "x-gzip");
 		    break;
+		case cftDeflate:
+		    StrAllocCopy(anchor->content_encoding, "x-deflate");
+		    break;
 		case cftBzip2:
 		    StrAllocCopy(anchor->content_encoding, "x-bzip2");
 		    break;
-		default:
+		case cftNone:
 		    break;
 		}
 	    }

@@ -6737,8 +6737,9 @@ void HTCheckFnameForCompression(char **fname,
 				BOOL strip_ok)
 {
     char *fn = *fname;
-    char *dot = NULL, *cp = NULL;
-    char *suffix;
+    char *dot = NULL;
+    char *cp = NULL;
+    char *suffix = "";
     const char *ct = NULL;
     const char *ce = NULL;
     CompressFileType method = cftNone;
@@ -6778,16 +6779,7 @@ void HTCheckFnameForCompression(char **fname,
 	    method = cftBzip2;
 	}
     } else if (ce != 0) {
-	if (!strcasecomp(ce, "gzip") ||
-	    !strcasecomp(ce, "x-gzip")) {
-	    method = cftGzip;
-	} else if (!strcasecomp(ce, "compress") ||
-		   !strcasecomp(ce, "x-compress")) {
-	    method = cftCompress;
-	} else if (!strcasecomp(ce, "bzip2") ||
-		   !strcasecomp(ce, "x-bzip2")) {
-	    method = cftBzip2;
-	}
+	method = HTEncodingToCompressType(ce);
     }
 
     /*
@@ -6856,11 +6848,14 @@ void HTCheckFnameForCompression(char **fname,
     }
 
     switch (method) {
-    default:
+    case cftNone:
 	suffix = "";
 	break;
     case cftCompress:
 	suffix = ".Z";
+	break;
+    case cftDeflate:
+	suffix = ".zz";
 	break;
     case cftGzip:
 	suffix = ".gz";

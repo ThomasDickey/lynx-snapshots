@@ -2665,7 +2665,7 @@ BOOLEAN inlocaldomain(void)
     } else {
 	CTRACE((tfp,
 		"Could not get ttyname (returned %s) or open UTMP file %s\n",
-		((cp != 0) ? cp : "<null>"), UTMP_FILE));
+		NONNULL(cp), UTMP_FILE));
     }
 
     return (FALSE);
@@ -7490,9 +7490,9 @@ void LYmsec_delay(unsigned msec)
     struct timeval tv;
     unsigned long usec = 1000UL * msec;
 
-    tv.tv_sec  = usec / 1000000UL;
+    tv.tv_sec = usec / 1000000UL;
     tv.tv_usec = usec % 1000000UL;
-    select (0, NULL, NULL, NULL, &tv);
+    select(0, NULL, NULL, NULL, &tv);
 #endif
 }
 

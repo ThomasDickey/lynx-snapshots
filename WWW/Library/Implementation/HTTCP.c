@@ -1390,6 +1390,7 @@ static LYNX_ADDRINFO *HTGetAddrInfo(const char *str,
 	res = NULL;
     }
 
+    free(s);
     return res;
 }
 #endif /* INET6 */

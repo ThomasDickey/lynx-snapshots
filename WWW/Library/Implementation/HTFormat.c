@@ -436,7 +436,7 @@ static HTPresentation *HTFindPresentation(HTFormat rep_in,
 		    if (failsMailcap(pres, anchor))
 			continue;
 		    last_default_match = pres;
-		/* otherwise use the first one */
+		    /* otherwise use the first one */
 		}
 	    }
 	}
@@ -1084,6 +1084,122 @@ static int HTGzFileCopy(gzFile gzfp, HTStream *sink)
     HTFinishDisplayPartial();
     return rv;
 }
+
+/*	Push data from a deflate file pointer down a stream
+ *	-------------------------------------
+ *
+ *  This routine is responsible for creating and PRESENTING any
+ *  graphic (or other) objects described by the file.  The code is
+ *  loosely based on the inflate.c file from w3m.
+ *
+ *
+ *  State of file and target stream on entry:
+ *		      FILE (zzfp) assumed open (should have deflated content),
+ *		      target (sink) assumed valid.
+ *
+ *  Return values:
+ *	HT_INTERRUPTED  Interruption after some data read.
+ *	HT_PARTIAL_CONTENT	Error after some data read.
+ *	-1		Error before any data read.
+ *	HT_LOADED	Normal end of file indication on reading.
+ *
+ *  State of file and target stream on return:
+ *	always		zzfp still open, target stream still valid.
+ */
+static int HTZzFileCopy(FILE *zzfp, HTStream *sink)
+{
+    static char dummy_head[1 + 1] =
+    {
+	0x8 + 0x7 * 0x10,
+	(((0x8 + 0x7 * 0x10) * 0x100 + 30) / 31 * 31) & 0xFF,
+    };
+
+    z_stream s;
+    HTStreamClass targetClass;
+    int bytes;
+    int rv = HT_OK;
+    char output_buffer[INPUT_BUFFER_SIZE];
+    int status;
+    int flush;
+    int retry = 0;
+    int len = 0;
+
+    /*  Push the data down the stream
+     */
+    targetClass = *(sink->isa);	/* Copy pointers to procedures */
+
+    s.zalloc = Z_NULL;
+    s.zfree = Z_NULL;
+    s.opaque = Z_NULL;
+    status = inflateInit(&s);
+    if (status != Z_OK) {
+	CTRACE((tfp, "HTZzFileCopy inflateInit() %s\n", zError(status)));
+	exit(1);
+    }
+    s.avail_in = 0;
+    s.next_out = (Bytef *) output_buffer;
+    s.avail_out = sizeof(output_buffer);
+    flush = Z_NO_FLUSH;
+
+    /*  read and inflate deflate'd file, and push binary down sink
+     */
+    HTReadProgress(bytes = 0, 0);
+    for (;;) {
+	if (s.avail_in == 0) {
+	    s.next_in = (Bytef *) input_buffer;
+	    len = s.avail_in = fread(input_buffer, 1, INPUT_BUFFER_SIZE, zzfp);
+	}
+	status = inflate(&s, flush);
+	if (status == Z_STREAM_END || status == Z_BUF_ERROR) {
+	    len = sizeof(output_buffer) - s.avail_out;
+	    if (len > 0) {
+		(*targetClass.put_block) (sink, output_buffer, len);
+		bytes += len;
+		HTReadProgress(bytes, -1);
+		HTDisplayPartial();
+	    }
+	    rv = HT_LOADED;
+	    break;
+	} else if (status == Z_DATA_ERROR && !retry++) {
+	    status = inflateReset(&s);
+	    if (status != Z_OK) {
+		CTRACE((tfp, "HTZzFileCopy inflateReset() %s\n", zError(status)));
+		rv = bytes ? HT_PARTIAL_CONTENT : -1;
+		break;
+	    }
+	    s.next_in = (Bytef *) dummy_head;
+	    s.avail_in = sizeof(dummy_head);
+	    status = inflate(&s, flush);
+	    s.next_in = (Bytef *) input_buffer;
+	    s.avail_in = len;
+	    continue;
+	} else if (status != Z_OK) {
+	    CTRACE((tfp, "HTZzFileCopy inflate() %s\n", zError(status)));
+	    rv = bytes ? HT_PARTIAL_CONTENT : -1;
+	    break;
+	} else if (s.avail_out == 0) {
+	    len = sizeof(output_buffer);
+	    s.next_out = (Bytef *) output_buffer;
+	    s.avail_out = sizeof(output_buffer);
+
+	    (*targetClass.put_block) (sink, output_buffer, len);
+	    bytes += len;
+	    HTReadProgress(bytes, -1);
+	    HTDisplayPartial();
+
+	    if (HTCheckForInterrupt()) {
+		_HTProgress(TRANSFER_INTERRUPTED);
+		rv = bytes ? HT_INTERRUPTED : -1;
+		break;
+	    }
+	}
+	retry = 1;
+    }				/* next bufferload */
+
+    inflateEnd(&s);
+    HTFinishDisplayPartial();
+    return rv;
+}
 #endif /* USE_ZLIB */
 
 #ifdef USE_BZLIB
@@ -1473,6 +1589,74 @@ int HTParseGzFile(HTFormat rep_in,
     }
 
     HTCloseGzFile(gzfp);
+    if (rv == -1)
+	return HT_NO_DATA;
+    else if (rv == HT_INTERRUPTED || (rv > 0 && rv != HT_LOADED))
+	return HT_PARTIAL_CONTENT;
+    else
+	return HT_LOADED;
+}
+
+/*	HTParseZzFile
+ *
+ *  State of file and target stream on entry:
+ *			FILE (zzfp) assumed open,
+ *			target (sink) usually NULL (will call stream stack).
+ *
+ *  Return values:
+ *	-501		Stream stack failed (cannot present or convert).
+ *	-1		Download cancelled.
+ *	HT_NO_DATA	Error before any data read.
+ *	HT_PARTIAL_CONTENT	Interruption or error after some data read.
+ *	HT_LOADED	Normal end of file indication on reading.
+ *
+ *  State of file and target stream on return:
+ *	always		zzfp closed; target freed, aborted, or NULL.
+ */
+int HTParseZzFile(HTFormat rep_in,
+		  HTFormat format_out,
+		  HTParentAnchor *anchor,
+		  FILE *zzfp,
+		  HTStream *sink)
+{
+    HTStream *stream;
+    HTStreamClass targetClass;
+    int rv;
+
+    stream = HTStreamStack(rep_in, format_out, sink, anchor);
+
+    if (!stream) {
+	char *buffer = 0;
+
+	fclose(zzfp);
+	if (LYCancelDownload) {
+	    LYCancelDownload = FALSE;
+	    return -1;
+	}
+	HTSprintf0(&buffer, CANNOT_CONVERT_I_TO_O,
+		   HTAtom_name(rep_in), HTAtom_name(format_out));
+	CTRACE((tfp, "HTFormat(in HTParseGzFile): %s\n", buffer));
+	rv = HTLoadError(sink, 501, buffer);
+	FREE(buffer);
+	return rv;
+    }
+
+    /*
+     * Push the data down the stream
+     *
+     * @@ Bug:  This decision ought to be made based on "encoding" rather than
+     * on content-type.  @@@ When we handle encoding.  The current method
+     * smells anyway.
+     */
+    targetClass = *(stream->isa);	/* Copy pointers to procedures */
+    rv = HTZzFileCopy(zzfp, stream);
+    if (rv == -1 || rv == HT_INTERRUPTED) {
+	(*targetClass._abort) (stream, NULL);
+    } else {
+	(*targetClass._free) (stream);
+    }
+
+    fclose(zzfp);
     if (rv == -1)
 	return HT_NO_DATA;
     else if (rv == HT_INTERRUPTED || (rv > 0 && rv != HT_LOADED))

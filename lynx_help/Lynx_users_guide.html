@@ -1362,7 +1362,7 @@ commands.
             probably disabled in anonymous or validation accounts.
    <dt><A NAME="*-key"><em>*</em></A>
         <dd>The '<em>*</em>' command toggles image_links mode on and off.
-            When on, links will be created for all images, including inlines.
+            When on, links will be created for all images, including inline images.
             If you have an image viewer mapped to the image's MIME type, you
             can activate such links to view an inline image.  You should
             normally have this mode toggled off.
@@ -2356,7 +2356,9 @@ where
              <dt><code>-assume_charset=MIMENAME</code>
                 <dd>charset for documents that don't specify it.
              <dt><code>-assume_local_charset=MIMENAME</code>
-                <dd>charset assumed for local files.
+                <dd>charset assumed for local files,
+                    i.e., files which lynx creates such as internal pages for
+                    the options menu.
              <dt><code>-assume_unrec_charset=MIMENAME</code>
                 <dd>use this instead of unrecognized charsets.
              <dt><code>-auth=ID:PW</code>
@@ -2652,7 +2654,7 @@ where
              <dt><code>-print</code>
                 <dd>enable print functions. (default)
              <dt><code>-pseudo_inlines</code>
-                <dd>toggles pseudo-ALTs for inlines with no ALT string.
+                <dd>toggles pseudo-ALTs for inline images with no ALT string.
              <dt><code>-raw</code>
                 <dd>toggles default setting of 8-bit character translations
                     or CJK mode for the startup character set.

@@ -1,6 +1,58 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2004-10-?? (2.8.6dev.7)
+* update de.po, et.po from
+    http://www.iro.umontreal.ca/translation/maint/lynx
+* clarification in manpage description of "-pseudo_inlines" option (Dan
+  Jacobson).
+* correct parsing of embedded URLs which have parameters but no path, e.g.,
+  base
+    http://wj55.org/Minutes.php
+  and embedded
+    ?date_meeting=2004-08-31
+  (Debian #274619, report/analysis by Liam K Morland) -TD
+* improve description of --assume-local-charset option (Debina #270915).
+* revise configure script check whether _POSIX_C_SOURCE should be defined,
+  taking into account the _POSIX_SOURCE definition (report by PG) -TD
+* add --with-system-type option to configure script to simplify testing the
+  case-statements involving $host_os -TD
+* fix a memory leak in IPv6 version of HTGetAddrInfo() -TD
+* modify HTCompressed() to choose the last viewer in the list with the best
+  quality.  User-defined viewers appear after the built-in viewers, and by
+  choosing the last, lynx allows one to override the built-in defaults -TD
+* add "deflate" to the encoding types which lynx implements.  This consists
+  of several parts (report by Thorsten Glaser) -TD
+  + adapted logic from w3m's inflate.c to construct an internal "deflate"
+    decompressor.  Tested this with 
+      http://carsten.codimi.de/gzip.yaws/
+  + simplify VMS-specific logic for trimming version in HTLoadFile().
+  + combined VMS- and Unix logic for decompression in HTLoadFile() as a new
+    function decompressAndParse() to eliminate clutter.  As a side-effect,
+    eliminate some memory leaks in cases where the file is not loaded properly.
+  + add/use new function HTEncodingToCompressType() to eliminate clutter.
+  + add "deflate" to the options menu.
+  + modify logic that builds "Accept-Encoding" value to omit encodings which
+    have no external decompressor associated.  The effect of this change is to
+    allow lynx to behave as it did before adding the (possibly incomplete)
+    "inflate" support.
+  + add INFLATE_PATH to lynx.cfg, to optionally specify an external program
+    which can be used to decompress deflated files.  For testing, a shell
+    script using w3m's utility, e.g., /usr/lib/w3m/inflate, sufficed.
+    NOTE: As currently implemented, lynx requires the external decompression
+    programs to be specified even if it can decompress using library calls.
+  + use ".zz" for suffix of downloaded (but not inflated) deflated files,
+    mapped to application/deflate and application/x-deflate.
+* fix LYSetConfigValue(), which did not properly handle the CONF_PRG case which
+  is used to allow user configuring the program paths -TD
+* fix content_is_compressed() function, which was checking for the absence only
+  of some nonstandard encodings (8bit, 7bit, binary) rather than for the
+  presence of the encodings as specified in RFC 2068 (gzip, compress, etc).
+  This makes lynx able to view a site
+  which puts the charset as the Content-Type (report by FLWM) -TD
+* fix configure script:  top-level makefile uses $(TAR), which was not defined
+  if --without-dired option was used (report by Gabor Z Papp) -TD
+
 2004-10-10 (2.8.6dev.6)
 * highlight the target and pause for 20 milliseconds when selecting a link with
   the mouse -GV

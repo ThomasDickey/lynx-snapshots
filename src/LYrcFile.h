@@ -91,6 +91,7 @@
 #define RC_HTTPS_PROXY                  "https_proxy"
 #define RC_HTTP_PROXY                   "http_proxy"
 #define RC_INCLUDE                      "include"
+#define RC_INFLATE_PATH                 "inflate_path"
 #define RC_INFOSECS                     "infosecs"
 #define RC_INSTALL_PATH                 "install_path"
 #define RC_JUMPBUFFER                   "jumpbuffer"

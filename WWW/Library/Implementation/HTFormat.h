@@ -218,9 +218,13 @@ typedef enum {
 typedef enum {
     encodingNONE = 0
     ,encodingGZIP = 1
-    ,encodingCOMPRESS = 2
-    ,encodingBZIP2 = 4
-    ,encodingALL = encodingGZIP + encodingCOMPRESS + encodingBZIP2
+    ,encodingDEFLATE = 2
+    ,encodingCOMPRESS = 4
+    ,encodingBZIP2 = 8
+    ,encodingALL = (encodingGZIP
+		    + encodingDEFLATE
+		    + encodingCOMPRESS
+		    + encodingBZIP2)
 } AcceptEncoding;
 
 /*
@@ -480,6 +484,19 @@ extern int HTParseGzFile(HTFormat format_in,
 			 HTFormat format_out,
 			 HTParentAnchor *anchor,
 			 gzFile gzfp,
+			 HTStream *sink);
+
+/*
+HTParseZzFile: Parse a deflate'd File through a file pointer
+
+   This routine is called by protocols modules to load an object.  uses
+   HTStreamStack and HTZzFileCopy.  Returns HT_LOADED if successful, can also
+   return HT_PARTIAL_CONTENT, HT_NO_DATA, or other <0 for failure.
+ */
+extern int HTParseZzFile(HTFormat format_in,
+			 HTFormat format_out,
+			 HTParentAnchor *anchor,
+			 FILE *zzfp,
 			 HTStream *sink);
 
 #endif /* USE_ZLIB */

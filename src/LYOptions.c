@@ -2383,6 +2383,7 @@ static OptValues encoding_values[] =
     {encodingNONE, N_("None"), "encoding_none"},
 #if defined(USE_ZLIB) || defined(GZIP_PATH)
     {encodingGZIP, N_("gzip"), "encoding_gzip"},
+    {encodingDEFLATE, N_("deflate"), "encoding_deflate"},
 #endif
 #if defined(USE_ZLIB) || defined(COMPRESS_PATH)
     {encodingCOMPRESS, N_("compress"), "encoding_compress"},
