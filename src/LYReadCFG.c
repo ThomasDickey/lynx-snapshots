@@ -819,6 +819,18 @@ static int printer_fun ARGS1(
     return 0;
 }
 
+static int referer_with_query_fun ARGS1(
+	char *,		value)
+{
+    if (!strncasecomp(value, "SEND", 4))
+	LYRefererWithQuery = 'S';
+    else if (!strncasecomp(value, "PARTIAL", 7))
+	LYRefererWithQuery = 'P';
+    else
+	LYRefererWithQuery = 'D';
+    return 0;
+}
+
 #ifdef SOURCE_CACHE
 static int source_cache_fun ARGS1(
 	char *,		value)
@@ -1392,6 +1404,7 @@ static Config_Type Config_Table [] =
      PARSE_SET("psrcview_no_anchor_numbering", CONF_BOOL, &psrcview_no_anchor_numbering),
 #endif
      PARSE_SET("quit_default_yes", CONF_BOOL, &LYQuitDefaultYes),
+     PARSE_SET("referer_with_query", CONF_FUN, referer_with_query_fun),
      PARSE_SET("reuse_tempfiles", CONF_BOOL, &LYReuseTempfiles),
 #ifndef NO_RULES
      PARSE_FUN("rule", CONF_FUN, HTSetConfiguration),

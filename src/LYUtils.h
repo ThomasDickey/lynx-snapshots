@@ -118,7 +118,7 @@ extern void LYsetXDisplay PARAMS((char *new_display));
 extern void change_sug_filename PARAMS((char *fname));
 extern void convert_to_spaces PARAMS((char *string, BOOL condense));
 extern void free_and_clear PARAMS((char **obj));
-extern void highlight PARAMS((int flag, int cur, char *target));
+extern void highlight PARAMS((int flag, int cur));
 extern void noviceline PARAMS((int more_flag));
 extern void parse_restrictions PARAMS((CONST char *s));
 extern void print_restrictions_to_fd PARAMS((FILE *fp));

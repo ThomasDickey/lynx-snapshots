@@ -558,7 +558,8 @@ try_again:
       if (!(LYUserSpecifiedURL ||
 	    LYNoRefererHeader || LYNoRefererForThis) &&
 	  strcmp(HTLoadedDocumentURL(), "")) {
-	  char *cp = HTLoadedDocumentURL();
+	  char *cp = LYRequestReferer;
+	  if (!cp) cp = HTLoadedDocumentURL(); /* @@@ Try both? - kw */
 	  StrAllocCat(command, "Referer: ");
 	  if (!strncasecomp(cp, "LYNXIMGMAP:", 11)) {
 	      char *cp1 = strchr(cp, '#');

@@ -60,11 +60,15 @@
 #define FORM_LINK_TEXT_MESSAGE \
  gettext("(Text entry field) Enter text.  Use UP or DOWN arrows or tab to move off.")
 #define FORM_LINK_TEXTAREA_MESSAGE \
- gettext("(Textarea) Enter text. Use UP/DOWN arrows or TAB to move off (^Ve for editor).")
+ gettext("(Textarea) Enter text. Use UP/DOWN arrows or TAB to move off.")
+#define FORM_LINK_TEXTAREA_MESSAGE_E \
+ gettext("(Textarea) Enter text. Use UP/DOWN arrows or TAB to move off (%s for editor).")
 #define FORM_LINK_TEXT_UNM_MSG \
  gettext("UNMODIFIABLE form text field.  Use UP or DOWN arrows or tab to move off.")
 #define FORM_LINK_TEXT_SUBMIT_MESSAGE \
- gettext("(Form field) Enter text.  Use <return> to submit (^Vx for no cache).")
+ gettext("(Form field) Enter text.  Use <return> to submit.")
+#define FORM_LINK_TEXT_SUBMIT_MESSAGE_X \
+ gettext("(Form field) Enter text.  Use <return> to submit (%s for no cache).")
 #define FORM_LINK_TEXT_RESUBMIT_MESSAGE \
  gettext("(Form field) Enter text.  Use <return> to submit, arrows or tab to move off.")
 #define FORM_LINK_TEXT_SUBMIT_UNM_MSG \

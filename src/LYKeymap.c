@@ -782,6 +782,39 @@ PRIVATE char *pretty ARGS1 (int, c)
 	static char buf[30];
 
 	if (c == '\t')
+		sprintf(buf, "<tab>");
+	else if (c == '\r')
+		sprintf(buf, "<return>");
+	else if (c == CH_ESC)
+		sprintf(buf, "ESC");
+	else if (c == ' ')
+		sprintf(buf, "<space>");
+	else if (c == '<')
+		sprintf(buf, "<");
+	else if (c == '>')
+		sprintf(buf, ">");
+	else if (c == 0177)
+		sprintf(buf, "<delete>");
+	else if (c > ' ' && c <= 0377)
+		sprintf(buf, "%c", c);
+	else if (c < ' ')
+		sprintf(buf, "^%c", c|0100);
+	else if (c >= 0400 && (c - 0400) < (int) TABLESIZE(funckey)
+		 && funckey[c-0400])
+		sprintf(buf, "%s", funckey[c-0400]);
+	else if (c >= 0400)
+		sprintf(buf, "key-%#x", c);
+	else
+		return 0;
+
+	return buf;
+}
+
+PRIVATE char *pretty_html ARGS1 (int, c)
+{
+	static char buf[30];
+
+	if (c == '\t')
 		sprintf(buf, "&lt;tab&gt;      ");
 	else if (c == '\r')
 		sprintf(buf, "&lt;return&gt;   ");
@@ -820,7 +853,7 @@ PRIVATE char * format_binding ARGS2(
      && the_key < TABLESIZE(revmap)
      && revmap[the_key].name != 0
      && revmap[the_key].doc != 0
-     && (formatted = pretty(i-1)) != 0) {
+     && (formatted = pretty_html(i-1)) != 0) {
 	HTSprintf0(&buf, "%-11s %-13s %s\n", formatted,
 		revmap[the_key].name,
 		revmap[the_key].doc);
@@ -996,7 +1029,7 @@ PUBLIC int remap ARGS2(
     else if (c >= 0) {
 	/* Remapping of key actions is supported only for basic
 	 * lynxkeycodes, without modifiers etc.!  If we get somehow
-	 * called for an invalid lynxkeycode, fail or silently
+	 * called for an invalid lynxkeycode, fail or silently ignore
 	 * modifiers. - kw
 	 */
 	if (c & LKC_ISLAC)
@@ -1163,6 +1196,122 @@ PUBLIC char *key_for_func ARGS1 (
 	StrAllocCopy(buf, "");
     }
     return buf;
+}
+
+/*
+ *  Given one or two keys as lynxkeycodes, returns an allocated string
+ *  representing the key(s) suitable for statusline messages.
+ *  The caller must free the string. - kw
+ */
+PRIVATE char *fmt_keys ARGS2(
+    int,	lkc_first,
+    int,	lkc_second)
+{
+    char *buf = NULL;
+    BOOLEAN quotes = FALSE;
+    char *fmt_first = pretty(lkc_first);
+    char *fmt_second;
+    if (fmt_first && strlen(fmt_first) == 1 && *fmt_first != '\'') {
+	quotes = TRUE;
+    }
+    if (quotes) {
+	if (lkc_second < 0) {
+	    HTSprintf0(&buf, "'%s'", fmt_first);
+	    return buf;
+	} else {
+	    HTSprintf0(&buf, "'%s", fmt_first);
+	}
+    } else {
+	StrAllocCopy(buf, fmt_first);
+    }
+    if (lkc_second >= 0) {
+	fmt_second = pretty(lkc_second);
+	if (!fmt_second) {
+	    FREE(buf);
+	    return NULL;
+	}
+	HTSprintf(&buf, "%s%s%s",
+		  ((strlen(fmt_second) > 2 && *fmt_second != '<') ||
+		   (strlen(buf) > 2 && buf[strlen(buf)-1] != '>')) ? " " : "",
+		  fmt_second, quotes ? "'" : "");
+    }
+    return buf;
+}
+
+/*
+ *  This function returns the (int)ch mapped to the
+ *  LYK_foo value passed to it as an argument.  It is like
+ *  LYReverseKeymap, only the order of search is different;
+ *  e.g., small ASCII letters will be returned in preference to
+ *  capital ones.  Cf. LYKeyForEditAction, LYEditKeyForAction in
+ *  LYEditmap.c which use the same order to find a best key.
+ *  In addition, this function takes the dired override map into
+ *  account while LYReverseKeymap doesn't.
+ *  The caller must free the returned string. - kw
+ */
+#define FIRST_I 97
+#define NEXT_I(i,imax) ((i==122) ? 32 : (i==96) ? 123 : (i==126) ? 0 :\
+			(i==31) ? 256 : (i==imax) ? 127 :\
+			(i==255) ? (-1) :i+1)
+PRIVATE int best_reverse_keymap ARGS1(
+	int,	lac)
+{
+    int i, c;
+
+    for (i = FIRST_I; i >= 0; i = NEXT_I(i,KEYMAP_SIZE-2)) {
+#ifdef NOT_ASCII
+	if (i < 256) {
+	    c = FROMASCII(i);
+	} else
+#endif
+	    c = i;
+#if defined(DIRED_SUPPORT) && defined(OK_OVERRIDE)
+	if (lynx_edit_mode && !no_dired_support && lac &&
+	    LKC_TO_LAC(key_override,c) == lac)
+	    return c;
+#endif /* DIRED_SUPPORT && OK_OVERRIDE */
+	if (LKC_TO_LAC(keymap,c) == lac) {
+	    return c;
+	}
+    }
+
+    return(-1);
+}
+
+/*
+ *  This function returns a string representing a key mapped
+ *  to a LYK_foo function, or NULL if not found.  The string
+ *  may represent a pair of keys.  if context_code is FOR_INPUT,
+ *  an appropriate binding for use while in the (forms) line editor
+ *  is sought.  - kw
+ */
+PUBLIC char* key_for_func_ext ARGS2(
+    int,	lac,
+    int,	context_code)
+{
+    int lkc, modkey = -1;
+
+    if (context_code == FOR_INPUT) {
+	lkc = LYEditKeyForAction(lac, &modkey);
+	if (lkc >= 0) {
+	    if (lkc & (LKC_MOD1|LKC_MOD2|LKC_MOD3)) {
+		return fmt_keys(modkey, lkc & ~(LKC_MOD1|LKC_MOD2|LKC_MOD3));
+	    } else {
+		return fmt_keys(lkc, -1);
+	    }
+	}
+    }
+    lkc = best_reverse_keymap(lac);
+    if (lkc < 0)
+	return NULL;
+    if (context_code == FOR_INPUT) {
+	modkey = LYKeyForEditAction(LYE_LKCMD);
+	if (modkey < 0)
+	    return NULL;
+	return fmt_keys(modkey, lkc);
+    } else {
+	return fmt_keys(lkc, -1);
+    }
 }
 
 /*

@@ -108,7 +108,7 @@ extern void HText_scrollUp PARAMS((HText * text));	/* One page */
 extern void HText_scrollDown PARAMS((HText * text));	/* One page */
 extern void HText_scrollTop PARAMS((HText * text));
 extern void HText_scrollBottom PARAMS((HText * text));
-extern void HText_pageDisplay PARAMS((int line_num, char *target));
+extern void HText_pageDisplay PARAMS((int line_num));
 extern BOOL HText_pageHasPrevTarget NOPARAMS;
 
 extern int HText_LinksInLines PARAMS((HText *text, int line_num, int Lines));
@@ -163,7 +163,7 @@ extern BOOL HText_getFirstTargetInLine PARAMS((
 	int *		offset,
 	int *		tLen,
 	char **		data,
-	char *		target));
+	CONST char *	target));
 extern int HTisDocumentSource NOPARAMS;
 extern void HTuncache_current_document NOPARAMS;
 #ifdef SOURCE_CACHE

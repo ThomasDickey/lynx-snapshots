@@ -541,7 +541,7 @@ PUBLIC void HTDisplayPartial NOARGS
 		 */
 	) {
 	    NumOfLines_partial = HText_getNumOfLines();
-	    HText_pageDisplay(Newline_partial, "");
+	    HText_pageDisplay(Newline_partial);
 	}
     }
 #else /* nothing */

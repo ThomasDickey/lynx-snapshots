@@ -278,6 +278,8 @@ extern void LYRefreshEdit PARAMS((
 	EditFieldData *	edit));
 extern int EditBinding PARAMS((int ch));		   /* in LYEditmap.c */
 extern int LYRemapEditBinding PARAMS((int xlkc, int lec)); /* in LYEditmap.c */
+extern int LYKeyForEditAction PARAMS((int lec));	   /* in LYEditmap.c */
+extern int LYEditKeyForAction PARAMS((int lac, int *pmodkey));/* LYEditmap.c */
 extern int LYEdit1 PARAMS((
 	EditFieldData *	edit,
 	int		ch,

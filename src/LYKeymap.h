@@ -7,10 +7,11 @@
 
 extern BOOLEAN LYisNonAlnumKeyname PARAMS((int ch, int KeyName));
 extern char *key_for_func PARAMS((int func));
+extern char *key_for_func_ext PARAMS((int lac, int context_code));
 extern int LYReverseKeymap PARAMS((int KeyName));
-extern int lookup_keymap PARAMS((int code));
 extern int lacname_to_lac PARAMS((CONST char *func));
 extern int lkcstring_to_lkc PARAMS((CONST char *src));
+extern int lookup_keymap PARAMS((int code));
 extern int remap PARAMS((char *key, char *func));
 extern void print_keymap PARAMS((char **newfile));
 extern void reset_emacs_keys NOPARAMS;

@@ -9,23 +9,52 @@ LYLeaks.o LYexit.o LYJump.o LYList.o LYCgi.o LYTraversal.o \
 LYEditmap.o LYCharSets.o LYCharUtils.o LYMap.o LYCookie.o LYExtern.o \
 LYStyle.o LYHash.o LYPrettySrc.o TRSTable.o
 
-CFLAGS= $(MCFLAGS) -I. -I.. $(SLANGINC)
+CFLAGS= $(MCFLAGS) $(INTLFLAGS) -I. -I.. $(SLANGINC)
 
 # comment this line to suppress DIRED support
-DIRED_DEFS = -DDIRED_SUPPORT -DOK_UUDECODE -DOK_TAR -DOK_GZIP -DOK_ZIP
+DIRED_DEFS = \
+ -DDIRED_SUPPORT \
+ -DOK_UUDECODE \
+ -DOK_TAR \
+ -DOK_GZIP \
+ -DOK_ZIP \
+ -DOK_OVERRIDE 
 
 CC = gcc
-MCFLAGS = -O2 -DHAVE_GETBKGD -DDISP_PARTIAL -DUSE_ZLIB \
- -DSOURCE_CACHE -DUSE_PSRC \
- -DUSE_EXTERNALS -DCOLOR_CURSES -DNCURSES -DFANCY_CURSES \
- -DACCESS_AUTH -DNO_CUSERID -DNOUSERS -DDOSPATH -DNO_TTYTYPE -DNO_UTMP \
- -DEXP_PERSISTENT_COOKIES -DEXP_ADDRLIST_PAGE -DEXP_ALT_BINDINGS \
- -DEXP_FILE_UPLOAD \
- -DWATT32 \
+
+MCFLAGS = -O2 \
  $(DIRED_DEFS) \
- -I./chrtrans -I../WWW/Library/Implementation \
- -I../curses -I../djgpp/watt32/inc -I../djgpp/watt32/inc/sys
-WWWLIB = ../WWW/Library/djgpp/libwww.a ../curses/pdcurses.a ../djgpp/watt32/lib/libwatt.a
+ -DACCESS_AUTH \
+ -DCOLOR_CURSES \
+ -DDISP_PARTIAL \
+ -DDOSPATH \
+ -DEXP_ADDRLIST_PAGE \
+ -DEXP_ALT_BINDINGS \
+ -DEXP_FILE_UPLOAD \
+ -DEXP_PERSISTENT_COOKIES \
+ -DFANCY_CURSES \
+ -DHAVE_GETBKGD \
+ -DNCURSES \
+ -DNOUSERS \
+ -DNO_CUSERID \
+ -DNO_TTYTYPE \
+ -DNO_UTMP \
+ -DSOURCE_CACHE \
+ -DUSE_EXTERNALS \
+ -DUSE_PSRC \
+ -DUSE_ZLIB \
+ -DWATT32 \
+ -I./chrtrans \
+ -I../WWW/Library/Implementation \
+ -I../curses \
+ -I../djgpp/watt32/inc \
+ -I../djgpp/watt32/inc/sys
+
+WWWLIB = \
+ ../WWW/Library/djgpp/libwww.a \
+ ../curses/pdcurses.a \
+ ../djgpp/watt32/lib/libwatt.a
+
 LIBS= -lz # -lintl
 #INTLFLAGS = -DHAVE_GETTEXT -DHAVE_LIBINTL_H
 
@@ -33,7 +62,7 @@ all: lynx
 
 lynx:   message $(OBJS) $(WWWLIB)
 	@echo "Linking and creating Lynx executable"
-	$(CC) $(CFLAGS) -o lynx.exe  $(OBJS) $(WWWLIB) $(SLANGLIB) $(LIBS)
+	$(CC) $(CFLAGS) -o lynx.exe  $(OBJS) $(WWWLIB) $(LIBS)
 	@echo "Welcome to Lynx!"
 
 message:
@@ -41,7 +70,7 @@ message:
 
 dbg:	$(OBJS) $(WWWLIB)
 	@echo "Making Lynx code"
-	$(CC) -g $(OBJS) $(CFLAGS) $(WWWLIB) $(SLANGLIB) $(LIBS)
+	$(CC) -g $(OBJS) $(CFLAGS) $(WWWLIB) $(LIBS)
 
 lint:
 	lint *.c  > ../lint.out
@@ -68,3 +97,4 @@ LYReadCFG.o:	../userdefs.h
 LYShowInfo.o:	../userdefs.h
 LYStrings.o:	../userdefs.h
 LYTraversal.o:	../userdefs.h
+LYUtils.o:	../userdefs.h

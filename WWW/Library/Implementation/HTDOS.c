@@ -9,7 +9,7 @@
  * Make a copy of the source argument in the result, allowing some extra
  * space so we can append directly onto the result without reallocating.
  */
-PRIVATE char * copy_plus ARGS2(char **, result, char *, source)
+PRIVATE char * copy_plus ARGS2(char **, result, CONST char *, source)
 {
     int length = strlen(source);
     HTSprintf0(result, "%-*s", length+10, source);
@@ -26,7 +26,7 @@ PRIVATE char * copy_plus ARGS2(char **, result, char *, source)
 **	returns 	WWW file specification
 **
 */
-char * HTDOS_wwwName ARGS1(char *, dosname)
+char * HTDOS_wwwName ARGS1(CONST char *, dosname)
 {
     static char *wwwname = NULL;
     char *cp_url = copy_plus(&wwwname, dosname);

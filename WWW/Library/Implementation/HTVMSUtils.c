@@ -243,9 +243,9 @@ char *colon;
 **
 */
 PUBLIC char * HTVMS_wwwName ARGS1(
-	char *, vmsname)
+	CONST char *,	vmsname)
 {
-static char wwwname[256];
+static char wwwname[LY_MAXPATH];
 char *src, *dst;
 int dir;
    dst = wwwname;

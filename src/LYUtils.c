@@ -14,8 +14,10 @@
 #include <LYClean.h>
 #include <LYCharSets.h>
 #include <LYCharUtils.h>
+
 #include <LYMainLoop.h>
 #include <LYKeymap.h>
+#include <LYSearch.h>
 
 #ifdef __DJGPP__
 #include <go32.h>
@@ -119,10 +121,9 @@ PUBLIC	HTList * sug_filenames = NULL;		/* Suggested filenames	 */
 /*
  *  Highlight (or unhighlight) a given link.
  */
-PUBLIC void highlight ARGS3(
+PUBLIC void highlight ARGS2(
 	int,		flag,
-	int,		cur,
-	char *,		target)
+	int,		cur)
 {
     char buffer[200];
     int i;
@@ -142,6 +143,7 @@ PUBLIC void highlight ARGS3(
     BOOL hl2_drawn=FALSE;	/* whether links[cur].hightext2 is already drawn
 				   properly */
 #endif
+    CONST char *target = search_target;  /* search_target is global */
     tmp[0] = tmp[1] = tmp[2] = '\0';
 
     /*
@@ -1910,12 +1912,13 @@ PUBLIC void statusline ARGS1(
     }
 #if 0
     /* This is broken.  It shows a truncated name if the complete URL is
-       so long that it has already been shortened by the caller to fit.
-       Moreover it doesn't belong here.  This function should just display
-       what it's asked to and not second-guess its caller.  If you want
-       a different message displayed, pass it a different message.
-       Finally, I dislike the intended change anyway.  It shows less
-       information, it is a dumbed down interface. - kw */
+     * so long that it has already been shortened by the caller to fit.
+     * Moreover it doesn't belong here.  This function should just display
+     * what it's asked to and not second-guess its caller.  If you want
+     * a different message displayed, pass it a different message.
+     * Finally, I dislike the intended change anyway.  It shows less
+     * information, it is a dumbed down interface. - kw
+     */
     if (strncmp(text, "LYNXDOWNLOAD:", 13) == 0) {
 	p = strstr(text + 13, "SugFile=");
 	if (p != NULL) {
@@ -2098,7 +2101,7 @@ PUBLIC void noviceline ARGS1(
     clrtoeol();
 #if defined(DIRED_SUPPORT ) && defined(OK_OVERRIDE)
     if (lynx_edit_mode && !no_dired_support)
-       addstr(DIRED_NOVICELINE);
+	addstr(DIRED_NOVICELINE);
     else
 #endif /* DIRED_SUPPORT && OK_OVERRIDE */
 
@@ -2200,6 +2203,7 @@ PRIVATE int DontCheck NOARGS
 PUBLIC int HTCheckForInterrupt NOARGS
 {
     int c;
+    int cmd;
 #ifndef VMS /* UNIX stuff: */
 #ifndef USE_SLANG
     struct timeval socket_timeout;
@@ -2307,24 +2311,33 @@ PUBLIC int HTCheckForInterrupt NOARGS
 	/* There is a subset of mainloop() actions available at this stage:
 	** no new getfile() cycle is possible until the previous finished.
 	** Currently we have scrolling in partial mode and toggling of trace
-	** log.
+	** log. User search now in progress...
 	*/
-    switch (LKC_TO_LAC(keymap,c))
+    cmd = (LKC_TO_LAC(keymap,c));
+    switch (cmd)
     {
-    case LYK_TRACE_TOGGLE :	       /*  Toggle TRACE mode. */
-	WWW_TraceFlag = ! WWW_TraceFlag;
-	if (LYOpenTraceLog())
-	    HTUserMsg(WWW_TraceFlag ? TRACE_ON : TRACE_OFF);
-	break ;
+    case LYK_TRACE_TOGGLE :	/*  Toggle TRACE mode. */
+	   handle_LYK_TRACE_TOGGLE();
+	   break;
     default :
 
 #ifdef DISP_PARTIAL
 	if (display_partial && (NumOfLines_partial > 2))
 	/* OK, we got several lines from new document and want to scroll... */
 	{
-	    int res;
-	    switch (LKC_TO_LAC(keymap,c))
+	   BOOLEAN do_refresh;
+	   int res;
+	   switch (cmd)
 	    {
+	   case LYK_WHEREIS: /* search within the document */
+	   case LYK_NEXT:	 /* search for the next occurrence in the document */
+	       handle_LYK_WHEREIS(cmd, &do_refresh);
+	       if (do_refresh && www_search_result != -1) {
+		    Newline_partial = www_search_result;
+		    www_search_result = -1;	/* reset */
+	       }
+	       break;
+
 	    case LYK_FASTBACKW_LINK :
 		if (Newline_partial <= (display_lines)+1) {
 		    Newline_partial -= display_lines ;
@@ -2393,7 +2406,7 @@ PUBLIC int HTCheckForInterrupt NOARGS
 	    if (Newline_partial < 1)
 		Newline_partial = 1;
 	    NumOfLines_partial = HText_getNumOfLines();
-	    HText_pageDisplay(Newline_partial, "");
+	    HText_pageDisplay(Newline_partial);
 	}
 #endif /* DISP_PARTIAL */
 	break;
@@ -4303,7 +4316,7 @@ PUBLIC void LYConvertToURL ARGS2(
 	     *	Home_Dir(), and assume the rest of the path, if
 	     *	any, has SHELL syntax.
 	     */
-	    StrAllocCat(*AllocatedString, HTVMS_wwwName((char *)Home_Dir()));
+	    StrAllocCat(*AllocatedString, HTVMS_wwwName(Home_Dir()));
 	    if ((cp = strchr(old_string, '/')) != NULL) {
 		/*
 		 *  Append rest of path, if present, skipping "user" if
@@ -4693,7 +4706,7 @@ have_VMS_URL:
 	     *	login directory. - FM
 	     */
 #ifdef VMS
-	    StrAllocCat(*AllocatedString, HTVMS_wwwName((char *)Home_Dir()));
+	    StrAllocCat(*AllocatedString, HTVMS_wwwName(Home_Dir()));
 #else
 	    StrAllocCat(*AllocatedString, "/");
 	} else if ((stat(old_string, &st) > -1) ||
@@ -5809,7 +5822,7 @@ PUBLIC time_t LYmktime ARGS2(
      */
     start = s;
     while (*s != '\0' && isdigit((unsigned char)*s))
-       s++;
+	s++;
     if (*s == '\0' || (s - start) > 2)
 	return(0);
     LYstrncpy(temp, start, (int)(s - start));
@@ -6740,10 +6753,10 @@ PUBLIC  char * wwwName ARGS1(
     char *cp = NULL;
 
 #ifdef DOSPATH
-    cp = HTDOS_wwwName((char *)pathname);
+    cp = HTDOS_wwwName(pathname);
 #else
 #ifdef VMS
-    cp = HTVMS_wwwName((char *)pathname);
+    cp = HTVMS_wwwName(pathname);
 #else
     cp = (char *)pathname;
 #endif /* VMS */
@@ -7601,7 +7614,7 @@ PUBLIC char * w32_strerror(DWORD ercode)
  * syslog() interface
  */
 PUBLIC void LYOpenlog ARGS1(
-       CONST char *, banner)
+	CONST char *, banner)
 {
 #if defined(WATT32)
     openlog("lynx", LOG_PID|LOG_NDELAY, LOG_LOCAL5);
@@ -7635,7 +7648,7 @@ PRIVATE BOOLEAN looks_like_password ARGS2(
 }
 
 PUBLIC void LYSyslog ARGS1(
-       char *,		arg)
+	char *,		arg)
 {
     char *colon1;
     char *colon2;

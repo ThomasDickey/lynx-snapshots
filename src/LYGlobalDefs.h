@@ -154,6 +154,7 @@ extern BOOLEAN telnet_ok;
 extern BOOLEAN verbose_img;	/* display filenames of images?     */
 extern BOOLEAN vi_keys;		/* TRUE to turn on vi-like key movement */
 extern char *LYRequestTitle;	/* newdoc.title in calls to getfile() */
+extern char *LYRequestReferer;	/* Referer, may be set in getfile() */
 extern char *LynxHome;
 extern char *LynxSigFile;	/* Signature file, in or off home */
 extern char *checked_box;	/* form boxes */
@@ -244,6 +245,7 @@ extern BOOLEAN no_compileopts_info;
 
 extern BOOLEAN no_statusline;
 extern BOOLEAN no_filereferer;
+extern char LYRefererWithQuery;	/* 'S', 'P', or 'D' */
 extern BOOLEAN local_host_only;
 extern BOOLEAN override_no_download;
 extern BOOLEAN show_dotfiles;	/* From rcfile if no_dotfiles is false */
@@ -290,6 +292,10 @@ extern BOOLEAN debug_display_partial;  /* show with MessageSecs delay */
 extern BOOLEAN display_partial_flag; /* permanent flag, not mutable */
 extern int Newline; /* original newline position, from mainloop() */
 #endif
+
+extern char search_target[512];	     /* user search string:                   *
+				      * used by highlight() and display_page(),*
+				      * changed in LYMainLoop.c only          */
 extern char *form_post_data;         /* User data for post form */
 extern char *form_get_data;          /* User data for get form */
 extern char *http_error_file;        /* Place HTTP status code in this file */
@@ -334,7 +340,7 @@ extern char *URLDomainSuffixes;
 extern BOOLEAN startfile_ok;
 extern BOOLEAN LYSelectPopups;		/* Cast popups to radio buttons? */
 extern BOOLEAN LYUseDefSelPop;		/* Command line -popup toggle    */
-extern BOOLEAN LYMultiBookmarks;    	/* Multi bookmark support on?	 */
+extern BOOLEAN LYMultiBookmarks;	/* Multi bookmark support on?	 */
 extern BOOLEAN LYMBMBlocked;		/* Force MBM support off?	 */
 extern BOOLEAN LYMBMAdvanced;		/* MBM statusline for ADVANCED?	 */
 extern int LYStatusLine;		/* Line for statusline() or -1   */

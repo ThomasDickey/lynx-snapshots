@@ -1671,10 +1671,9 @@ PRIVATE void display_scrollbar ARGS1(
 /*	Output a page
 **	-------------
 */
-PRIVATE void display_page ARGS3(
+PRIVATE void display_page ARGS2(
 	HText *,	text,
-	int,		line_number,
-	char *,		target)
+	int,		line_number)
 {
     HTLine * line = NULL;
     int i;
@@ -1694,6 +1693,7 @@ PRIVATE void display_page ARGS3(
 #ifdef DISP_PARTIAL
     int last_disp_partial = -1;
 #endif
+    CONST char *target = search_target;  /* search_target is global */
 
     lynx_mode = NORMAL_LYNX_MODE;
 
@@ -1723,7 +1723,6 @@ PRIVATE void display_page ARGS3(
 #endif /* DISP_PARTIAL */
 
     tmp[0] = tmp[1] = tmp[2] = '\0';
-    if (target && *target == '\0') target = NULL;
     text->page_has_target = NO;
     if (display_lines <= 0) {
 	/*  No screen space to display anything!
@@ -2167,7 +2166,7 @@ PRIVATE void display_page ARGS3(
 		/*
 		 *  Bold the link after incrementing nlinks.
 		 */
-		highlight(OFF, (nlinks - 1), target);
+		highlight(OFF, (nlinks - 1));
 
 		display_flag = TRUE;
 
@@ -2309,6 +2308,14 @@ PUBLIC void HText_beginAppend ARGS1(
 */
 #define new_line(text) split_line(text, 0)
 
+#define DEBUG_SPLITLINE
+
+#ifdef DEBUG_SPLITLINE
+#define CTRACE_SPLITLINE(p)	CTRACE(p)
+#else
+#define CTRACE_SPLITLINE(p)	/*nothing*/
+#endif
+
 PRIVATE void split_line ARGS2(
 	HText *,	text,
 	unsigned,	split)
@@ -2329,7 +2336,6 @@ PRIVATE void split_line ARGS2(
     int TailTrim = 0;
     int s;
 
-#define DEBUG_SPLITLINE
     /*
      *  Make new line.
      */
@@ -2432,7 +2438,7 @@ PRIVATE void split_line ARGS2(
 		 alignment != HT_LEFT ||
 		 style->wordWrap || style->freeFormat ||
 		 style->spaceBefore || style->spaceAfter)) ||
-	       *p == LY_SOFT_HYPHEN) {
+		*p == LY_SOFT_HYPHEN) {
 	    p++;
 	    HeadTrim++;
 	}
@@ -2776,10 +2782,11 @@ PRIVATE void split_line ARGS2(
 		IS_UTF_EXTRA(*cp) ||
 		*cp == LY_SOFT_HYPHEN)
 		ctrl_chars_on_previous_line++;
-	    if ((previous->size > 0) &&
-		(int)(previous->data[previous->size-1] == LY_SOFT_HYPHEN))
-		ctrl_chars_on_previous_line--;
 	}
+	if ((previous->size > 0) &&
+		(int)(previous->data[previous->size-1] == LY_SOFT_HYPHEN))
+	    ctrl_chars_on_previous_line--;
+
 	/* @@ first line indent */
 	spare =  (LYcols-1) -
 	    (int)style->rightIndent - indent +
@@ -2895,10 +2902,7 @@ PRIVATE void split_line ARGS2(
 		if (!old_e &&
 		    (!a->number || a->show_anchor) &&
 		    a0 <= s + HeadTrim) {
-#ifdef DEBUG_SPLITLINE
-		CTRACE((tfp, "anchor %d case %d: ",
-		       a->number,1));
-#endif
+		    CTRACE_SPLITLINE((tfp, "anchor %d case %d: ", a->number,1));
 		    /*
 		     *  It is meant to be empty, and/or endAnchor
 		     *  has seen it and recognized it as empty.
@@ -2914,10 +2918,7 @@ PRIVATE void split_line ARGS2(
 		} else if (old_e &&
 		     a0 >= s - TailTrim && a0 <= s + HeadTrim &&
 		     a1 <= s + HeadTrim) {
-#ifdef DEBUG_SPLITLINE
-		CTRACE((tfp, "anchor %d case %d: ",
-		       a->number,2));
-#endif
+		    CTRACE_SPLITLINE((tfp, "anchor %d case %d: ", a->number,2));
 		    /*
 		     *  endAnchor has seen it, it is effectively empty
 		     *  after our trimming, but endAnchor has for some
@@ -2936,19 +2937,13 @@ PRIVATE void split_line ARGS2(
 		    }
 		    new_ext = 0;
 		} else if (a0 >= s + HeadTrim) {
-#ifdef DEBUG_SPLITLINE
-		CTRACE((tfp, "anchor %d case %d: ",
-		       a->number,3));
-#endif
+		    CTRACE_SPLITLINE((tfp, "anchor %d case %d: ", a->number,3));
 		    /*
 		     *  Completely after split, just shift.
 		     */
 		    new_pos = a0 - TailTrim + 1 - HeadTrim + SpecialAttrChars;
 		} else if (!old_e) {
-#ifdef DEBUG_SPLITLINE
-		CTRACE((tfp, "anchor %d case %d: ",
-		       a->number,4));
-#endif
+		    CTRACE_SPLITLINE((tfp, "anchor %d case %d: ", a->number,4));
 		    /*
 		     *  No extent set, we may still be growing it.
 		     */
@@ -2966,24 +2961,15 @@ PRIVATE void split_line ARGS2(
 		     */
 		} else if (a0 < s - TailTrim &&
 			   a1 > s + HeadTrim) {
-#ifdef DEBUG_SPLITLINE
-		CTRACE((tfp, "anchor %d case %d: ",
-		       a->number,5));
-#endif
+		    CTRACE_SPLITLINE((tfp, "anchor %d case %d: ", a->number,5));
 		    new_pos = a0;
 		    new_ext = old_e - TailTrim - HeadTrim + SpecialAttrChars;
 		} else if (a0 < s - TailTrim) {
-#ifdef DEBUG_SPLITLINE
-		CTRACE((tfp, "anchor %d case %d: ",
-		       a->number,6));
-#endif
+		    CTRACE_SPLITLINE((tfp, "anchor %d case %d: ", a->number,6));
 		    new_pos = a0;
 		    new_ext = s - TailTrim - a0;
 		} else if (a1 > s + HeadTrim) {
-#ifdef DEBUG_SPLITLINE
-		CTRACE((tfp, "anchor %d case %d: ",
-		       a->number,7));
-#endif
+		    CTRACE_SPLITLINE((tfp, "anchor %d case %d: ", a->number,7));
 		    new_pos = s - TailTrim + 1 + SpecialAttrChars;
 		    new_ext = old_e - (s + HeadTrim - a0);
 		} else {
@@ -2996,11 +2982,9 @@ PRIVATE void split_line ARGS2(
 			   a->line_num,a->start,a->line_pos,a->extent));
 		    continue;
 		}
-#ifdef DEBUG_SPLITLINE
-		CTRACE((tfp, "(T,H,S)=(%d,%d,%d); (line,start,pos,ext):(%d,%d,%d,%d",
+		CTRACE_SPLITLINE((tfp, "(T,H,S)=(%d,%d,%d); (line,start,pos,ext):(%d,%d,%d,%d",
 		       TailTrim,HeadTrim,SpecialAttrChars,
 		       a->line_num,a->start,a->line_pos,a->extent));
-#endif
 		if (new_pos != a->line_pos)
 		    a->start = new_pos + d;
 		if (new_pos > s - TailTrim) {
@@ -3010,11 +2994,8 @@ PRIVATE void split_line ARGS2(
 		a->line_pos = new_pos;
 		a->extent = new_ext;
 
-#ifdef DEBUG_SPLITLINE
-		CTRACE((tfp, "))->(%d,%d,%d,%d)\n",
+		CTRACE_SPLITLINE((tfp, "))->(%d,%d,%d,%d)\n",
 		       a->line_num,a->start,a->line_pos,a->extent));
-#endif
-
 	    }
 	}
     }
@@ -6312,7 +6293,7 @@ PUBLIC BOOL HText_getFirstTargetInLine ARGS7(
 	int *,		offset,
 	int *,		tLen,
 	char **,	data,
-	char *,		target)
+	CONST char *,	target)
 {
     HTLine *line;
     char *LineData;
@@ -6647,9 +6628,8 @@ PUBLIC CONST char * HText_getServer NOARGS
  *  starting from the line 'line_num'-1.
  *  This is the primary call for lynx.
  */
-PUBLIC void HText_pageDisplay ARGS2(
-	int,		line_num,
-	char *,		target)
+PUBLIC void HText_pageDisplay ARGS1(
+	int,		line_num)
 {
 #ifdef DISP_PARTIAL
     if (debug_display_partial || (LYTraceLogFP != NULL)) {
@@ -6673,7 +6653,7 @@ PUBLIC void HText_pageDisplay ARGS2(
     }
 #endif
 
-    display_page(HTMainText, line_num-1, target);
+    display_page(HTMainText, line_num-1);
 
 #ifdef DISP_PARTIAL
     if (display_partial && debug_display_partial)
@@ -6744,7 +6724,7 @@ PUBLIC void HText_refresh ARGS1(
 	HText *,	text)
 {
     if (text->stale)
-	display_page(text, text->top_of_screen, "");
+	display_page(text, text->top_of_screen);
 }
 
 PUBLIC int HText_sourceAnchors ARGS1(
@@ -6772,25 +6752,25 @@ PUBLIC BOOL HText_canScrollDown NOARGS
 PUBLIC void HText_scrollTop ARGS1(
 	HText *,	text)
 {
-    display_page(text, 0, "");
+    display_page(text, 0);
 }
 
 PUBLIC void HText_scrollDown ARGS1(
 	HText *,	text)
 {
-    display_page(text, text->top_of_screen + display_lines, "");
+    display_page(text, text->top_of_screen + display_lines);
 }
 
 PUBLIC void HText_scrollUp ARGS1(
 	HText *,	text)
 {
-    display_page(text, text->top_of_screen - display_lines, "");
+    display_page(text, text->top_of_screen - display_lines);
 }
 
 PUBLIC void HText_scrollBottom ARGS1(
 	HText *,	text)
 {
-    display_page(text, text->Lines - display_lines, "");
+    display_page(text, text->Lines - display_lines);
 }
 
 
@@ -6858,7 +6838,7 @@ PUBLIC BOOL HText_select ARGS1(
 	if (loaded_texts && HTList_removeObject(loaded_texts, text))
 	    HTList_addObject(loaded_texts, text);
 	  /* let lynx do it */
-	/* display_page(text, text->top_of_screen, ""); */
+	/* display_page(text, text->top_of_screen); */
     }
     return YES;
 }
@@ -11720,6 +11700,10 @@ PRIVATE void insert_new_textarea_anchor ARGS2(
 #if defined(USE_COLOR_STYLE)
     /* dup styles[] if needed [no need in TEXTAREA (?); leave 0's] */
     l->numstyles       = htline->numstyles;
+#ifndef OLD_HTSTYLECHANGE
+    /*we fork the pointers!*/
+    l->styles = htline->styles;
+#endif
 #endif
     strcpy (l->data,     htline->data);
     if (keypad_mode == LINKS_AND_FIELDS_ARE_NUMBERED) {
@@ -12589,6 +12573,10 @@ PUBLIC int HText_InsertFile ARGS1(
 #if defined(USE_COLOR_STYLE)
     /* dup styles[] if needed [no need in TEXTAREA (?); leave 0's] */
     l->numstyles       = htline->numstyles;
+#ifndef OLD_HTSTYLECHANGE
+    /*we fork the pointers!*/
+    l->styles = htline->styles;
+#endif
 #endif
     strcpy (l->data,     htline->data);
 

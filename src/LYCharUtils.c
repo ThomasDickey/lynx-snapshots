@@ -476,7 +476,7 @@ PUBLIC void LYFillLocalFileURL ARGS2(
      * a listing for the login directory. - FM
      */
     if (!strcmp(*href, "file://localhost/"))
-	StrAllocCat(*href, (HTVMS_wwwName((char *)Home_Dir())+1));
+	StrAllocCat(*href, (HTVMS_wwwName(Home_Dir())+1));
 #endif /* VMS */
 
     FREE(temp);
