@@ -813,7 +813,7 @@ PUBLIC int save_rc NOPARAMS
 # current link in documents, or current option in select popup windows.\n\
 # Positioning the cursor to the left of the current link or option is\n\
 # helpful for speech or braille interfaces, and when the terminal is\n\
-# one which does not distingish the current link based on highlighting\n\
+# one which does not distinguish the current link based on highlighting\n\
 # or color.  A value of \"on\" will set positioning to the left as the\n\
 # default while a value of \"off\" will set 'hiding' of the cursor.\n\
 # The default can be overridden via the -show_cursor command line toggle.\n");
@@ -961,7 +961,7 @@ PUBLIC int save_rc NOPARAMS
      *  Local execution mode - all links.
      */
     fprintf(fp, "\
-# If run_all_execution_links is set \"on\" then all local exection links\n\
+# If run_all_execution_links is set \"on\" then all local execution links\n\
 # will be executed when they are selected.\n\
 #\n\
 # WARNING - This is potentially VERY dangerous.  Since you may view\n\

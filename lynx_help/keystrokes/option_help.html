@@ -14,9 +14,10 @@ compiled in or chosen in `lynx.cfg':<P>
 <UL>
 <LI>Personal Preferences
 <UL>
-<LI>-- Cookies : no help given --
+<LI><A HREF="#CK">Cookies</A>
 <LI><A HREF="#ED">Editor</A>
 <LI><A HREF="#EM">Emacs keys</A>
+<LI><A HREF="#LL">Execution links</A>
 <LI><A HREF="#KM">Keypad mode</A>
 <LI><A HREF="#PM">Personal Mail Address</A>
 <LI><A HREF="#PU">Pop-ups for select fields</A>
@@ -40,19 +41,21 @@ compiled in or chosen in `lynx.cfg':<P>
 <UL>
 <LI><A HREF="#FT">FTP sort criteria</A>
 <LI><A HREF="#LD">Local directory sort criteria</A>
-<LI><A HREF="#DF">Show dot files</A>
-</UL>
+<LI><A HREF="#DF">Show dot files</A></UL>
 <LI>Headers transferred to remote server
 <UL>
 <LI><A HREF="#PC">Preferred Document Charset</A>
 <LI><A HREF="#PL">Preferred Document Language</A>
-<LI><A HREF="#UA">User Agent</A>
-</UL>
-<LI>-- not in Options Form --
+<LI><A HREF="#UA">User Agent</A></UL>
+<LI> -- not in Options Form --
 <UL>
-<LI><A HREF="#LE">Line edit style</A>
-<LI><A HREF="#LL">Local execution links</A></UL>
+<LI><A HREF="#LE">Line edit style</A></UL>
 </UL>
+
+<H1><A NAME="CK">Cookies</A></H1>
+
+This can be set to accept or reject all cookies or to ask each time.
+See the Users Guide (under `h'elp) for details of cookie usage.
 
 <H1><A NAME="ED">Editor</A></H1>
 
@@ -65,6 +68,12 @@ If set to 'ON' then the CTRL-P, CTRL-N, CTRL-F and CTRL-B keys will be mapped
 to up-arrow, down-arrow, right-arrow and left-arrow respectively.  Otherwise,
 they remain mapped to their configured bindings (normally UP_TWO lines,
 DOWN_TWO lines, NEXT_PAGE and PREV_PAGE respectively).
+
+<H1><A NAME="LL">Execution links</A></H1>
+
+If set to 'ALWAYS ON', Lynx will locally execute commands contained
+inside any links.  This can be HIGHLY DANGEROUS, so it is recommended
+that they remain 'ALWAYS OFF' or 'FOR LOCAL FILES ONLY'.
 
 <H1><A NAME="KM">Keypad mode</A></H1>
 
@@ -303,12 +312,6 @@ to one which does not include `Lynx' or `lynx'.
 This allows you to set alternate key bindings for the built-in line editor,
 if your system administrator has installed alternates.
 Otherwise, Lynx uses the <A HREF="edit_help.html">Default Binding</A>.
-
-<H1><A NAME="LL">Local execution links</A></H1>
-
-If set to 'ALWAYS ON', Lynx will locally execute commands contained
-inside any links.  This can be HIGHLY DANGEROUS, so it is recommended
-that they remain 'ALWAYS OFF' or 'FOR LOCAL FILES ONLY'.
 
 </BODY>
 </HTML>

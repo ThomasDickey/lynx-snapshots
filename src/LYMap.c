@@ -168,6 +168,8 @@ PUBLIC BOOL LYAddImageMap ARGS3(
     if (theList) {
 	cur = theList;
 	while (NULL != (old = (LYImageMap *)HTList_nextObject(cur))) {
+	    if (old->address == 0)	/* shouldn't happen */
+	    	continue;
 	    if (!strcmp(old->address, address)) {
 		FREE(old->address);
 		FREE(old->title);

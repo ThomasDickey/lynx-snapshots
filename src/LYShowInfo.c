@@ -23,7 +23,7 @@
 #include <LYLocal.h>
 #endif /* DIRED_SUPPORT */
 
-#ifndef NO_CONFIG_INFO
+#if defined(HAVE_CONFIG_H) && !defined(NO_CONFIG_INFO)
 #define HAVE_CFG_DEFS_H
 
 #define PutDefs(table, N) fprintf(fp0, "%-35s %s\n", table[N].name, table[N].value)

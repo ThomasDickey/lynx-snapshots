@@ -453,6 +453,9 @@ PUBLIC int HTParseInet ARGS2(
 	    fd_set readfds;
 	    struct timeval timeout;
 	    int dns_patience = 30; /* how many seconds will we wait for DNS? */
+#ifdef WNOWAIT
+	    int child_exited = 0;
+#endif
 
 	    /*
 	    **  Reap any children that have terminated since last time
@@ -574,11 +577,26 @@ PUBLIC int HTParseInet ARGS2(
 		    break;
 	    	}
 
+#ifdef WNOWAIT
+		/*
+		**  Clean up if child exited before & no data received.  -BL
+		*/
+		if (child_exited) {
+		    waitret = waitpid(fpid, &cst1, WNOHANG);
+		    break;
+		}
+		/*
+		**  If child exited, loop once more looking for data.  -BL
+		*/
+		if ((waitret = waitpid(fpid, &cst1, WNOHANG | WNOWAIT)) > 0)
+		    child_exited = 1;
+#else
 		/*
 		**  End loop if child exited.
 		*/
 		if ((waitret = waitpid(fpid, &cst1, WNOHANG)) > 0)
 		    break;
+#endif
 
 		/*
 		**  Abort if interrupt key pressed.

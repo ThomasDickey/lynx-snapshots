@@ -476,7 +476,7 @@
  * with the Up-Arrow or Down-Arrow keys after entering the 'g'oto
  * command, whether or not a default is offered.
  */
-#define GOTOBUFFER	  TRUE
+#define GOTOBUFFER	  FALSE
 
 /*****************************
  * JUMPFILE is the default local file checked for shortcut URLs when
@@ -514,7 +514,7 @@
  * jumps files and corresponding key mappings, each will have its own
  * circular buffer.
  */
-#define JUMPBUFFER	  TRUE
+#define JUMPBUFFER	  FALSE
 
 /********************************
  * If PERMIT_GOTO_FROM_JUMP is defined, then a : or / in a jump target
@@ -1184,7 +1184,7 @@
  * explicit Y or y to confirm.  The default defined here can be changed
  * in lynx.cfg.
  */
-#define QUIT_DEFAULT_YES	FALSE
+#define QUIT_DEFAULT_YES	TRUE
 
 /********************************
  * These definitions specify files created or used in conjunction
@@ -1216,12 +1216,12 @@
  * the version definition with the Project Version on checkout. Just
  * ignore it. - kw */
 /* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
-#define LYNX_VERSION "2.8.1pre.10"
+#define LYNX_VERSION "2.8.1pre.11"
 #define LYNX_WWW_HOME "http://lynx.browser.org/"
 #define LYNX_WWW_DIST "http://www.slcc.edu/lynx/current/"
 #define LYNX_RELEASE FALSE
 /* $Format: "#define LYNX_DATE \"$ProjectDate$\""$ */
-#define LYNX_DATE "Wed, 14 Oct 1998 06:23:56 -0600"
+#define LYNX_DATE "Sat, 17 Oct 1998 15:20:41 -0600"
 #define LYNX_DATE_OFF 5		/* truncate the automatically-generated date */
 #define LYNX_DATE_LEN 11	/* truncate the automatically-generated date */
 #define LYNX_RELEASE_DATE "1998"
