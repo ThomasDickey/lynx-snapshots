@@ -1,5 +1,5 @@
-/*                                ACCESS CONTROL LIST ROUTINES
-                                             
+/*				  ACCESS CONTROL LIST ROUTINES
+
  */
 
 #ifndef HTACL_H
@@ -12,10 +12,9 @@
 #include "HTGroup.h"
 
 #ifdef SHORT_NAMES
-#define HTAAgAFn        HTAA_getAclFilename
-#define HTAAoACL        HTAA_openAcl
-#define HTAAcACL        HTAA_closeAcl
-#define HTAAgAEn        HTAA_getAclEntry
+#define HTAAoACL	HTAA_openAcl
+#define HTAAcACL	HTAA_closeAcl
+#define HTAAgAEn	HTAA_getAclEntry
 #endif /* SHORT_NAMES */
 
 /*
@@ -24,43 +23,26 @@ Opening Access Control List File
 
  */
 
-/* PUBLIC						HTAA_getAclFilename()
-**	    RESOLVE THE FULL PATHNAME OF ACL FILE FOR A GIVEN FILE
+/* PUBLIC						HTAA_openAcl()
+**		OPEN THE ACL FILE FOR THE GIVEN DOCUMENT
 ** ON ENTRY:
-**	path	is the pathname of the file for which to
-**		ACL file should be found.
-**
-**		ACL filename is computed by replacing
-**		the filename by .www_acl in the pathname
-**		(this is done to a local copy, of course).
+**	pathname	is the absolute pathname of
+**			the file to be accessed.
 **
 ** ON EXIT:
-**	returns	the absolute pathname of ACL file
-**		(which is automatically freed next time
-**		this fuction is called).
-*/
-PUBLIC char *HTAA_getAclFilename PARAMS((CONST char * pathname));
-
-/* PUBLIC                                               HTAA_openAcl()
-**              OPEN THE ACL FILE FOR THE GIVEN DOCUMENT
-** ON ENTRY:
-**      pathname        is the absolute pathname of
-**                      the file to be accessed.
-**
-** ON EXIT:
-**      returns         the FILE* to open ACL.
-**                      NULL, if ACL not found.
+**	returns 	the FILE* to open ACL.
+**			NULL, if ACL not found.
 */
 PUBLIC FILE *HTAA_openAcl PARAMS((CONST char * pathname));
 
 
-/* PUBLIC                                               HTAA_closeAcl()
-**                      CLOSE ACL FILE
+/* PUBLIC						HTAA_closeAcl()
+**			CLOSE ACL FILE
 ** ON ENTRY:
-**      acl_file is Access Control List file to close.
+**	acl_file is Access Control List file to close.
 **
 ** ON EXIT:
-**      returns nothing.
+**	returns nothing.
 */
 PUBLIC void HTAA_closeAcl PARAMS((FILE * acl_file));
 /*
@@ -69,54 +51,54 @@ Getting ACL Entry
 
  */
 
-/* PUBLIC                                               HTAA_getAclEntry()
-**                      CONSULT THE ACCESS CONTROL LIST AND
-**                      GIVE A LIST OF GROUPS (AND USERS)
-**                      AUTHORIZED TO ACCESS A GIVEN FILE
+/* PUBLIC						HTAA_getAclEntry()
+**			CONSULT THE ACCESS CONTROL LIST AND
+**			GIVE A LIST OF GROUPS (AND USERS)
+**			AUTHORIZED TO ACCESS A GIVEN FILE
 ** ON ENTRY:
-**      acl_file        is an open ACL file.
-**      pathname        is the absolute pathname of
-**                      the file to be accessed.
-**      method          is the method for which access is wanted.
+**	acl_file	is an open ACL file.
+**	pathname	is the absolute pathname of
+**			the file to be accessed.
+**	method		is the method for which access is wanted.
 **
 ** ALC FILE FORMAT:
 **
-**      template : method, method, ... : group@addr, user, group, ...
+**	template : method, method, ... : group@addr, user, group, ...
 **
-**      The last item is in fact in exactly the same format as
-**      group definition in group file, i.e. everything that
-**      follows the 'groupname:' part,
-**      e.g.
-**              user, group, user@address, group@address,
-**              (user,group,...)@(address, address, ...)
+**	The last item is in fact in exactly the same format as
+**	group definition in group file, i.e. everything that
+**	follows the 'groupname:' part,
+**	e.g.
+**		user, group, user@address, group@address,
+**		(user,group,...)@(address, address, ...)
 **
 ** ON EXIT:
-**      returns         NULL, if there is no entry for the file in the ACL,
-**                      or ACL doesn't exist.
-**                      If there is, a GroupDef object containing the
-**                      group and user names allowed to access the file
-**                      is returned (this is automatically freed
-**                      next time this function is called).
+**	returns 	NULL, if there is no entry for the file in the ACL,
+**			or ACL doesn't exist.
+**			If there is, a GroupDef object containing the
+**			group and user names allowed to access the file
+**			is returned (this is automatically freed
+**			next time this function is called).
 ** IMPORTANT:
-**      Returns the first entry with matching template and
-**      method. This function should be called multiple times
-**      to process all the valid entries (until it returns NULL).
-**      This is because there can be multiple entries like:
+**	Returns the first entry with matching template and
+**	method. This function should be called multiple times
+**	to process all the valid entries (until it returns NULL).
+**	This is because there can be multiple entries like:
 **
-**              *.html : get,put : ari,timbl,robert
-**              *.html : get     : jim,james,jonathan,jojo
+**		*.html : get,put : ari,timbl,robert
+**		*.html : get	 : jim,james,jonathan,jojo
 **
 ** NOTE:
-**      The returned group definition may well contain references
-**      to groups defined in group file. Therefore these references
-**      must be resolved according to that rule file by function
-**      HTAA_resolveGroupReferences() (group file is read in by
-**      HTAA_readGroupFile()) and after that access authorization
-**      can be checked with function HTAA_userAndInetGroup().
+**	The returned group definition may well contain references
+**	to groups defined in group file. Therefore these references
+**	must be resolved according to that rule file by function
+**	HTAA_resolveGroupReferences() (group file is read in by
+**	HTAA_readGroupFile()) and after that access authorization
+**	can be checked with function HTAA_userAndInetGroup().
 */
-PUBLIC GroupDef *HTAA_getAclEntry PARAMS((FILE *        acl_file,
-                                          CONST char *  pathname,
-                                          HTAAMethod    method));
+PUBLIC GroupDef *HTAA_getAclEntry PARAMS((FILE *	acl_file,
+					  CONST char *	pathname,
+					  HTAAMethod	method));
 /*
 
  */

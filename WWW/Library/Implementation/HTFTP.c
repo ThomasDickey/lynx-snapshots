@@ -186,7 +186,7 @@ PRIVATE int     server_type = GENERIC_SERVER;   /* the type of ftp host */
 PRIVATE int     unsure_type = FALSE;            /* sure about the type? */
 PRIVATE BOOLEAN use_list = FALSE;		/* use the LIST command? */
 
-PRIVATE interrupted_in_next_data_char = FALSE;
+PRIVATE int	interrupted_in_next_data_char = FALSE;
 
 #ifdef POLL_PORTS
 PRIVATE	unsigned short	port_number = FIRST_TCP_PORT;
@@ -213,15 +213,6 @@ PRIVATE int close_connection PARAMS((
 	connection *	con));
 
 
-PRIVATE void cleanup_ftp NOARGS
-{
-    if (control) {
-	if (control->socket != -1)
-	    close_connection(control);
-	FREE(control);
-    }
-}
-
 /*
 **  This function frees module globals. - FM
 */
@@ -229,7 +220,11 @@ PRIVATE void free_FTPGlobals NOARGS
 {
     FREE(user_entered_password);
     FREE(last_username_and_host);
-    cleanup_ftp();
+    if (control) {
+	if (control->socket != -1)
+	    close_connection(control);
+	FREE(control);
+    }
 }
 
 /* PUBLIC						HTMake_VMS_name()
@@ -540,7 +535,7 @@ PRIVATE int set_mac_binary ARGS1(
     if (ServerType == APPLESHARE_SERVER ||
 	ServerType == NETPRESENZ_SERVER) {
 	/*
-	 *  Presumably E means "Enable"  - kw
+	 *  Presumably E means "Enable".  - KW
 	 */
 	return(2 == response("MACB E\r\n"));
     } else {
@@ -660,7 +655,6 @@ PRIVATE int get_connection ARGS2(
 	if (con == NULL)
 	    outofmem(__FILE__, "get_connection");
     }
-
     con->socket = -1;
 
     if (!arg) return -1;		/* Bad if no name specified	*/
@@ -2633,7 +2627,7 @@ unload_btree:
 	server_type == NETPRESENZ_SERVER) {
 	/*
 	 *  Without closing the data socket first,
-	 *  the response(NIL) below hangs... - kw
+	 *  the response(NIL) below hangs. - KW
 	 */
 	NETCLOSE(data_soc);
     }

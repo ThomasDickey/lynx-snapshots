@@ -85,44 +85,39 @@ Step 6. (Anonymous account -- VERY IMPORTANT!!!!! -- )
 
 II. Compile instructions -- UNIX
 
-1a. Auto-configure.  The auto-configure script uses autoconf 2.12 to generate
-    a Bourne shell script, configure, which can be run on a UNIX platform to
-    create "lynx_cfg.h" and "makefile" to replace the top-level Makefile.
+1a. Auto-configure.  The auto-configure script uses autoconf2.12 to generate a
+    Bourne shell script, configure, which creates "makefile" and "lynx_cfg.h".
 
-    To use the configure script, simply type
+    If you are on a UNIX platform, the easiest way to build Lynx is to type:
 
 	    ./configure
-    or	    ./configure --with-screen=ncurses
-    or	    ./configure --with-screen=slang
-
     and
 	    make
+
+    NOTE:  Configure has a number of useful options.  Please see below.
 
     NOTE:  Lynx is a curses-based application, so you must have a curses
     library available to link to.  Native curses (on the system when it was
     installed) are often broken, so you may get superior performance if you
-    have either "ncurses" ("ftp://ftp.clark.net/pub/dickey/ncurses" or "slang"
+    have either "ncurses" ("ftp://ftp.clark.net/pub/dickey/ncurses") or "slang"
     ("ftp://space.mit.edu/pub/davis/slang").  If you install these libraries
     in your home directory or a non-default location, you may need to set the
     CPPFLAGS (full path to include files) and LIBS (full path to library files)
     environment variables BEFORE running configure.  See "1d. Environment".
+    Use the "--with-screen=ncurses" or "--with-screen=slang" option.
 
 1b. Platforms.  Configure should work properly on any Unix-style system.
     It has been tested on the following platforms.
 
-	AIX 3.2.5 (cc with curses)
-	CLIX (cc with curses and ncurses)
-	DGUX
-	Digital Unix 3.2C (gcc and cc with slang)
-	FreeBSD 2.1.5 (gcc 2.6.3 with curses and ncurses)
-	HP-UX (K&R and ANSI cc, gcc with curses, ncurses and slang)
-	IRIX 5.2 and 6.2 (cc and gcc with curses, ncurses and slang)
-	Linux 2.0.0 (gcc 2.7.2 with curses, ncurses and slang)
-	NetBSD
-	SCO (cc with curses)
-	Solaris 2.5 (cc and gcc with curses, ncurses and slang)
-	Solaris 2.6 (gcc with slang)
-	SunOS 4.1 (cc curses, gcc ncurses and slang)
+	AIX 3.2.5 (cc w/ curses)	CLIX (cc w/ curses & ncurses)
+	DGUX				Digital Unix 3.2C (gcc & cc w/ slang)
+	FreeBSD 2.1.5 (gcc 2.6.3 w/ curses & ncurses)
+	HP-UX (K&R and ANSI cc, gcc w/ curses, ncurses & slang)
+	IRIX 5.2 and 6.2 (cc & gcc w/ curses, ncurses & slang)
+	Linux 2.0.0 (gcc 2.7.2 w/ curses, ncurses & slang)
+	MkLinux 2.1.5 (gcc 2.7.2.1)	NetBSD		SCO (cc w/ curses)
+	Solaris 2.5 & 2.6 (cc & gcc w/ curses, ncurses & slang)
+	SunOS 4.1 (cc w/ curses, gcc w/ ncurses & slang)
 
     NOTE:  SunOS and HP-UX come with a bundled K&R compiler, which is only
     useful for compiling with the bundled curses.  Both ncurses and slang
@@ -194,6 +189,11 @@ II. Compile instructions -- UNIX
   	Use this option to control whether full utility pathnames are used.
 	By default, configure substitutes full pathnames.
 
+  --disable-internal-links		(define DONT_TRACK_INTERNAL_LINKS)
+	Defined by default, this option prevents tracking of internal links,
+	a useful feature which could, however, compromise a secure transaction
+	by forcing inappropriate resubmission of form content.
+
   --disable-long-list			(prevent defining LONG_LIST)
   	Use this option to disable long "ls -l" directory listings.
 
@@ -214,7 +214,9 @@ II. Compile instructions -- UNIX
 	Use this option to compile-in logic for testing memory leaks.
 
   --enable-font-switch			(define EXP_CHARTRANS_AUTOSWITCH)
-	Use Linux setfont for character-translation.  (Use with discretion.)
+	Allow Lynx to automatically change the Linux console state (switch
+	fonts) according to the current Display Character Set.  (Linux console
+        only.  *Use with discretion.*  See docs/README.chartrans.)
 
   --enable-nsl-fork			(define NSL_FORK)
 	Use this option to allow NSL requests to be aborted at will.
@@ -271,9 +273,20 @@ II. Compile instructions -- UNIX
 
 -- 1997/7/27 - T. Dickey <dickey@clark.net>
 
-1e. Example
-    I use the following csh shell script to set environment variables and
-    configure options rather than type them at the command line each time.
+1e. Examples
+    If you are compiling Lynx for your personal use and are restricted to your
+    home directory, a simple method for building would be to choose some
+    directory, say ".lynx", and then type:
+
+	./configure --prefix=~/.lynx --exec-prefix=~/.lynx
+    and
+	make install
+
+    Now you only need to add "~/.lynx/bin" to your PATH and edit "~/.lynx/lib/
+    lynx.cfg" as described above.
+
+    I personally use the following csh shell script to set environment
+    variables and configure options rather than type them each time.
 	setenv RESOLVLIB -lbind
 
 	#!/bin/csh -f
@@ -429,11 +442,12 @@ IV. Compile instructions -- Win32 (Windows95/NT)
 
 -- 1997/10/12 - W. Buttles <lynx-port@fdisk.com>
 
-    Although not well documented, it is possible to compile under the cygwin32
-    system, which will allow you to use the configure script described above
-    for Unix.  You also have the choice of using either slang or pdcurses.
-    See "http://www.flora.org/lynx-dev/html/month1097/msg00559.html" and
-    "http://www.flora.org/lynx-dev/html/month1097/msg00186.html", and other
+    It is possible to compile under the cygwin32 system, which will allow you
+    to use the configure script described above for Unix.  Type, for example,
+    "./configure --with-screen=slang --with-libz" in a Dos window running the
+    cygwin bash$ shell.  You also have the choice of using either pdcurses or
+    slang.  See "http://www.flora.org/lynx-dev/html/month1097/msg00559.html"
+    and "http://www.flora.org/lynx-dev/html/month1097/msg00186.html", and other
     messages along those threads.  You will have to make a minor alteration to
     HTTCP.c (change delay to 30 seconds) and modify HTFILE.c (concerning
     getgroups).  You will need a launch program to call helper applications.
@@ -491,18 +505,23 @@ V. Compile instructions -- 386 DOS
     If all goes well, you will have a lynx.exe file.  If you have trouble,
     check to be sure djgpp.env is the way it came in the original package.  
 
-    You'll want to test Lynx now, but Lynx_386 won't work without a packet
-    driver installed.  You can use slip8250.com, available in the CRYNWR
+    To test Lynx_386 you must have a packet driver installed.  The simplest
+    method is to use a null packet driver that just allows Lynx to start up,
+    but doesn't do anything else.  One such executable driver has been posted,
+    uuencoded, to the lynx-dev mailing list: "msg00031.html", "msg00057.html",
+    and "msg00066.html" under "http://www.flora.org/lynx-dev/html/month0198/".
+    Start the dummy packet driver with "nullpkt 0x60", and take it out of
+    memory with "nullpkt -u".  You can also use slip8250.com.  See the CRYNWR
     package "http://www.simtel.net/pub/simtelnet/msdos/pktdrvr/pktd11.zip".
     Usage is "slip8250 0x60", but you may have to invoke it as, for example,
     "slip8250  0x60 6 3 0x2F8" so that it uses COM2 and IRQ 3, in order to
     avoid an IRQ conflict with a mouse or some other device.  Another packet
     driver is slipper.exe, which is available from many sites, including
     "ftp://jazz.trumpet.com.au/slipper".  To remove it from memory use 
-    termin.com (usage "termin 0x60"), available in the CRYNWR package.  To 
-    connect over a dialup PPP connection you need a package such as klos'
-    pppshare or dosppp (available at "ftp://ftp.klos.com/demo/pppshare.exe" and
-    "http://www.simtel.net/pub/simtelnet/msdos/pktdrvr/dosppp05.zip").
+    termin.com (usage "termin 0x60"), available in the CRYNWR package.  To
+    connect over a dialup PPP connection you need dosppp or klos' pppshare.
+    (Find at "http://www.simtel.net/pub/simtelnet/msdos/pktdrvr/dosppp05.zip"
+    and "ftp://ftp.klos.com/demo/pppshare.exe".)
 
     See "http://www.fdisk.com/doslynx/lynxport.htm" for more hints and some
     precompiled libraries.  One problem you can run into is when editing
@@ -538,15 +557,22 @@ VI. General installation instructions
 
     Once you have compiled Lynx, test it out on "lynx_help/about_lynx.html".
     You shouldn't need to install Lynx to test it.  Once you are satisfied
-    that it works, go ahead and install Lynx.
-
-    For Unix, type "make install".
+    that it works, go ahead and install Lynx.  For Unix, type "make install".
 
     For VMS, you need to have the executable in a public place, make it
     accessible, define it as a foreign command, and copy lynx.cfg to
     "Lynx_Dir".  Look at lynx.com in the samples directory as a model for
     installing Lynx.  To include lynx.hlp in the system HELP library, use
     the command: "$ library/replace sys$help:helplib.hlb lynx.hlp".
+
+    Local copies of the Lynx online help should be made accessible in response
+    to the Lynx 'h'elp command by defining HELPFILE in userdefs.h and/or
+    lynx.cfg to an appropriate file://localhost/path URL.  On Unix, all you
+    need to do is type "make install-help."  If you are installing manually,
+    copy the files "COPYHEADER" and "COPYING" into the lynx_help directory
+    BEFORE moving the lynx_help tree to its final location.  These files are
+    referenced hypertextually from help documents.  Find tips for installing
+    the help files at "http://www.irm.nara.kindai.ac.jp/lynxdev/README.help".
 
     If you have old, pre-existing bookmark files from earlier versions of
     Lynx, those files may have to be updated.  Conversion may just consist
@@ -555,15 +581,6 @@ VI. General installation instructions
 
     IMPORTANT!  Be sure you have read the warnings about setting up an
     anonymous account with Lynx if you plan to give public access to Lynx.
-
-    You are urged to make local copies of the Lynx online help accessible in
-    response to the Lynx 'h'elp command by defining HELPFILE in userdefs.h
-    and/or lynx.cfg to an appropriate file://localhost/path URL.  Copy the
-    files "COPYHEADER" and "COPYING" into the lynx_help directory (on Unix,
-    do "cp COPY* lynx_help") BEFORE moving the lynx_help tree to its final
-    location.  These files are referenced hypertextually from help documents.
-    See "http://www.irm.nara.kindai.ac.jp/lynxdev/README.help" for tips on
-    installation of the help file tree.
 
     After applying patches or editing files to correct for an unsuccessful
     build, be certain to do a "make clean" (or "make distclean" for those
@@ -726,4 +743,4 @@ VIII. Acknowledgment
    Thanks to the many volunteers who offered suggestions for making this
    installation manual as accurate and complete as possible.
 
--- 1997/12/26 - H. Nelson <lynx-admin@irm.nara.kindai.ac.jp>
+-- 1998/01/22 - H. Nelson <lynx-admin@irm.nara.kindai.ac.jp>

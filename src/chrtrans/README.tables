@@ -1,12 +1,12 @@
 The translation table files in this directory are _examples only_.
 They were collected from several sources (among them Linux kbd package, 
-ftp://dkuug.dk/, ftp://unicode.org/) and automatically comverted (if
+ftp://dkuug.dk/, ftp://unicode.org/) and automatically converted (if
 applicable), but not checked in detail.  The Unicode/UCS2 values
 for some of the RFC 1345 Mnemonic codes are out of date, a cleanup and
 update would be needed for serious use (including removing the mappings
 from the "private zone" U+E000 etc.).
 
-More tranlation files can be easily provided (and new character entities
+More translation files can be easily provided (and new character entities
 added to HTMLDTD.c), this set is just to test whether the system works 
 in principle (and also how it behaves with incomplete data...)
 
@@ -20,7 +20,7 @@ included by UCdomap.c.
 
 Ideally, this should be taken care of by the Makefiles.  On VMS, use
 build-chrtrans.com to compile and link makeuctb.exe and create the
-set of .h files from the current set of .tlb files.  Thereafter, use
+set of .h files from the current set of .tbl files.  Thereafter, use
 build-header.com to update particular .h files.
 
 To make a new chartrans table available to Lynx (and thereby make a new
@@ -40,7 +40,7 @@ b) At the bottom, you will find a bunch of lines (again, some may be
     UC_CHARSET_SETUP_<something>;
 
 which should correspond to the #include lines from a).  Again,
-add or substract as you wish (but preferably consistent with what you
+add or subtract as you wish (but preferably consistent with what you
 did under a)...) [The <something> is derived from the charset's MIME name.
 if in doubt, check the last lines of the corresponding ...uni.h file.]
 

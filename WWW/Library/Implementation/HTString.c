@@ -23,7 +23,7 @@ PUBLIC int WWW_TraceFlag = 0;	/* Global trace flag for ALL W3 code */
 PUBLIC CONST char * HTLibraryVersion = VC; /* String for help screen etc */
 
 #ifndef VM		/* VM has these already it seems */
-	
+
 /*	Strings of any length
 **	---------------------
 */
@@ -35,13 +35,13 @@ PUBLIC int strcasecomp ARGS2(
     CONST char *q = b;
 
     for (p = a, q = b; *p && *q; p++, q++) {
-        int diff = TOLOWER(*p) - TOLOWER(*q);
+	int diff = TOLOWER(*p) - TOLOWER(*q);
 	if (diff) return diff;
     }
     if (*p)
-        return 1;	/* p was longer than q */
+	return 1;	/* p was longer than q */
     if (*q)
-        return -1;	/* p was shorter than q */
+	return -1;	/* p was shorter than q */
     return 0;		/* Exact match */
 }
 
@@ -58,7 +58,7 @@ PUBLIC int strncasecomp ARGS3(
     CONST char *q = b;
 
     for (p = a, q = b; ; p++, q++) {
-        int diff;
+	int diff;
 	if (p == (a+n))
 	    return 0;	/*   Match up to n characters */
 	if (!(*p && *q))
@@ -79,7 +79,7 @@ PUBLIC char * HTSACopy ARGS2(
 {
     FREE(*dest);
     if (src) {
-        *dest = (char *) malloc (strlen(src) + 1);
+	*dest = (char *) malloc (strlen(src) + 1);
 	if (*dest == NULL)
 	    outofmem(__FILE__, "HTSACopy");
 	strcpy (*dest, src);
@@ -94,16 +94,16 @@ PUBLIC char * HTSACat ARGS2(
 	CONST char *,	src)
 {
     if (src && *src) {
-        if (*dest) {
+	if (*dest) {
 	    int length = strlen(*dest);
 	    *dest = (char *)realloc(*dest, length + strlen(src) + 1);
 	    if (*dest == NULL)
-	        outofmem(__FILE__, "HTSACat");
+		outofmem(__FILE__, "HTSACat");
 	    strcpy (*dest + length, src);
 	} else {
 	    *dest = (char *)malloc(strlen(src) + 1);
 	    if (*dest == NULL)
-	        outofmem(__FILE__, "HTSACat");
+		outofmem(__FILE__, "HTSACat");
 	    strcpy (*dest, src);
 	}
     }
@@ -123,26 +123,26 @@ PUBLIC char * HTSACat ARGS2(
 **		field
 **		THE STRING HAS BEEN MUTILATED by a 0 terminator
 **
-**	returns	a pointer to the first field
+**	returns a pointer to the first field
 */
 PUBLIC char * HTNextField ARGS1(
 	char **,	pstr)
 {
     char * p = *pstr;
     char * start;			/* start of field */
-    
+
     while (*p && WHITE(*p))
-        p++;				/* Strip white space */
+	p++;				/* Strip white space */
     if (!*p) {
 	*pstr = p;
-        return NULL;		/* No first field */
+	return NULL;		/* No first field */
     }
     if (*p == '"') {			/* quoted field */
-        p++;
+	p++;
 	start = p;
 	for (; *p && *p!='"'; p++) {
 	    if (*p == '\\' && p[1])
-	        p++;			/* Skip escaped chars */
+		p++;			/* Skip escaped chars */
 	}
     } else {
 	start = p;
@@ -150,7 +150,7 @@ PUBLIC char * HTNextField ARGS1(
 	    p++;			/* Skip first field */
     }
     if (*p)
-        *p++ = '\0';
+	*p++ = '\0';
     *pstr = p;
     return start;
 }
@@ -160,31 +160,31 @@ PUBLIC char * HTNextField ARGS1(
 **	Finds the next token in a string
 **	On entry,
 **	*pstr	points to a string to be parsed.
-**      delims  lists characters to be recognized as delimiters.
-**              If NULL default is white white space "," ";" or "=".
-**              The word can optionally be quoted or enclosed with
+**	delims	lists characters to be recognized as delimiters.
+**		If NULL default is white white space "," ";" or "=".
+**		The word can optionally be quoted or enclosed with
 **		chars from bracks.
 **		Comments surrrounded by '(' ')' are filtered out
 **		unless they are specifically reqested by including
 **		' ' or '(' in delims or bracks.
-**      bracks  lists bracketing chars.  Some are recognized as
-**              special, for those give the opening char.
+**	bracks	lists bracketing chars.  Some are recognized as
+**		special, for those give the opening char.
 **		If NULL defaults to <"> and "<" ">".
-**      found   points to location to fill with the ending delimiter
-**              found, or is NULL.
+**	found	points to location to fill with the ending delimiter
+**		found, or is NULL.
 **
-** 	On exit,
+**	On exit,
 **	*pstr	has been moved to the first delimiter past the
 **		field
 **		THE STRING HAS BEEN MUTILATED by a 0 terminator
-**      found   points to the delimiter found unless it was NULL.
-**	Returns	a pointer to the first word or NULL on error
+**	found	points to the delimiter found unless it was NULL.
+**	Returns a pointer to the first word or NULL on error
 */
 PUBLIC char * HTNextTok ARGS4(
 	char **,	pstr,
 	const char *,	delims,
 	const char *,	bracks,
-	char *,		found)
+	char *, 	found)
 {
     char * p = *pstr;
     char * start = NULL;
@@ -198,15 +198,15 @@ PUBLIC char * HTNextTok ARGS4(
 
     get_blanks = (!strchr(delims,' ') && !strchr(bracks,' '));
     get_comments = (strchr(bracks,'(') != NULL);
-    skip_comments = (!get_comments && !strchr(delims,'(') && !get_blanks); 
+    skip_comments = (!get_comments && !strchr(delims,'(') && !get_blanks);
 #define skipWHITE(c) (!get_blanks && WHITE(c))
 
     while (*p && skipWHITE(*p))
-        p++;				/* Strip white space */
+	p++;				/* Strip white space */
     if (!*p) {
 	*pstr = p;
 	if (found) *found = '\0';
-        return NULL;		/* No first field */
+	return NULL;		/* No first field */
     }
     while (1) {
 	/* Strip white space and other delimiters */
@@ -214,7 +214,7 @@ PUBLIC char * HTNextTok ARGS4(
 	if (!*p) {
 	    *pstr = p;
 	    if (found) *found = *(p-1);
-	    return NULL;				   	 /* No field */
+	    return NULL;					 /* No field */
 	}
 
 	if (*p == '(' && (skip_comments || get_comments)) {	  /* Comment */
@@ -238,13 +238,13 @@ PUBLIC char * HTNextTok ARGS4(
 		} else
 		    get_closing_char_too = (strchr(bracks,*p) != NULL);
 	    }
-	} else if (strchr(bracks,*p)) {	       /* quoted or bracketted field */
+	} else if (strchr(bracks,*p)) {        /* quoted or bracketted field */
 	    switch (*p) {
 	       case '<': closer = '>'; break;
 	       case '[': closer = ']'; break;
 	       case '{': closer = '}'; break;
 	       case ':': closer = ';'; break;
-	    default:     closer = *p;
+	    default:	 closer = *p;
 	    }
 	    if (!start) start = ++p;
 	    for(;*p && *p!=closer; p++)
@@ -258,7 +258,7 @@ PUBLIC char * HTNextTok ARGS4(
 	    } else
 	    break;			    /* kr95-10-9: needs to stop here */
 #if 0
-	} else if (*p == '<') {				     /* quoted field */
+	} else if (*p == '<') { 			     /* quoted field */
 	    if (!start) start = ++p;
 	    for(;*p && *p!='>'; p++)
 		if (*p == '\\' && *(p+1)) p++;	       /* Skip escaped chars */
@@ -267,14 +267,14 @@ PUBLIC char * HTNextTok ARGS4(
 	} else {					      /* Spool field */
 	    if (!start) start = p;
 	    while(*p && !skipWHITE(*p) && !strchr(bracks,*p) &&
-		                          !strchr(delims,*p))
+					  !strchr(delims,*p))
 		p++;
 	    if (*p && strchr(bracks,*p)) {
 		get_closing_char_too = TRUE;
 	    } else {
 		if (*p=='(' && skip_comments) {
 		    *pstr = p;
-		    HTNextTok(pstr, NULL, "(", found);  /*      Advance pstr */
+		    HTNextTok(pstr, NULL, "(", found);	/*	Advance pstr */
 		    *p = '\0';
 		    if (*pstr && **pstr) (*pstr)++;
 		    return start;
@@ -284,7 +284,7 @@ PUBLIC char * HTNextTok ARGS4(
 	}
     }
     if (found) *found = *p;
-	
+
     if (*p) *p++ = '\0';
     *pstr = p;
     return start;

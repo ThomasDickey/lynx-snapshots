@@ -64,6 +64,10 @@ PUBLIC BOOLEAN socks_flag=TRUE;
 PUBLIC BOOLEAN sigint = FALSE;
 #endif /* IGNORE_CTRL_C */
 
+#ifdef __DJGPP__
+char init_ctrl_break[1];
+#endif /* __DJGPP__ */
+
 #ifdef VMS
 PUBLIC char *mail_adrs = NULL;	/* the mask for a VMS mail transport */
 	       /* create FIXED 512 binaries */
@@ -389,6 +393,13 @@ PRIVATE void FatalProblem PARAMS((int sig));
 #if defined(USE_HASH)
     char *lynx_lss_file=NULL;
 #endif
+    
+#ifdef __DJGPP__
+void  reset_break() 
+{
+    PDC_set_ctrl_break(init_ctrl_break[0]);
+}
+#endif /* __DJGPP__ */
 
 PRIVATE void free_lynx_globals NOARGS
 {
@@ -538,7 +549,12 @@ PUBLIC int main ARGS2(
     }
 #endif /* _WINDOWS */
 
-#ifdef DJGPP
+#ifdef __DJGPP__
+if (PDC_get_ctrl_break() == 0) {
+    PDC_set_ctrl_break(TRUE);
+    init_ctrl_break[0] = 0;}
+else {init_ctrl_break[0] = 1;}
+    atexit(reset_break);
     sock_init();
 #endif
 

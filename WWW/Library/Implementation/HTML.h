@@ -7,18 +7,17 @@
 #ifndef HTML_H
 #define HTML_H
 
-#include "UCDefs.h"
-#include "UCAux.h"
-
 #ifndef HTUTILS_H
 #include "HTUtils.h"
 #endif /* HTUTILS_H */
+#include "UCDefs.h"
+#include "UCAux.h"
 #include "HTAnchor.h"
 #include "HTMLDTD.h"
 
 #ifdef SHORT_NAMES
-#define HTMLPresentation        HTMLPren
-#define HTMLPresent             HTMLPres
+#define HTMLPresentation	HTMLPren
+#define HTMLPresent		HTMLPres
 #endif /* SHORT_NAMES */
 
 extern CONST HTStructuredClass HTMLPresentation;
@@ -30,30 +29,30 @@ extern CONST HTStructuredClass HTMLPresentation;
 */
 
 typedef struct _stack_element {
-        HTStyle *	style;
+	HTStyle *	style;
 	int		tag_number;
 } stack_element;
 
 /*		HTML Object
 **		-----------
 */
-#define MAX_NESTING 800		/* Should be checked by parser */
+#define MAX_NESTING 800 	/* Should be checked by parser */
 
 struct _HTStructured {
-    CONST HTStructuredClass * 	isa;
-    HTParentAnchor * 		node_anchor;
-    HText * 			text;
+    CONST HTStructuredClass *	isa;
+    HTParentAnchor *		node_anchor;
+    HText *			text;
 
-    HTStream*			target;			/* Output stream */
+    HTStream*			target; 		/* Output stream */
     HTStreamClass		targetClass;		/* Output routines */
 
     HTChildAnchor *		CurrentA;	/* current HTML_A anchor */
-    int				CurrentANum;	/* current HTML_A number */
+    int 			CurrentANum;	/* current HTML_A number */
     char *			base_href;	/* current HTML_BASE href */
     char *			map_address;	/* current HTML_MAP address */
 
-    HTChunk 			title;		/* Grow by 128 */
-    HTChunk			object;		/* Grow by 128 */
+    HTChunk			title;		/* Grow by 128 */
+    HTChunk			object; 	/* Grow by 128 */
     BOOL			object_started;
     BOOL			object_declare;
     BOOL			object_shapes;
@@ -67,40 +66,40 @@ struct _HTStructured {
     char *			object_codebase;
     char *			object_codetype;
     char *			object_name;
-    HTChunk			option;		/* Grow by 128 */
+    HTChunk			option; 	/* Grow by 128 */
     BOOL			first_option;	/* First OPTION in SELECT? */
     char *			LastOptionValue;
     BOOL			LastOptionChecked;
     BOOL			select_disabled;
     HTChunk			textarea;	/* Grow by 128 */
     char *			textarea_name;
-    int				textarea_name_cs;
+    int 			textarea_name_cs;
     char *			textarea_accept_cs;
     char *			textarea_cols;
     int 			textarea_rows;
-    int				textarea_disabled;
+    int 			textarea_disabled;
     char *			textarea_id;
     HTChunk			math;		/* Grow by 128 */
     HTChunk			style_block;	/* Grow by 128 */
-    HTChunk			script;		/* Grow by 128 */
+    HTChunk			script; 	/* Grow by 128 */
 
     /*
-     *  Used for nested lists. - FM
+     *	Used for nested lists. - FM
      */
-    int		List_Nesting_Level;	/* counter for list nesting level */
-    int 	OL_Counter[12];		/* counter for ordered lists */
-    char 	OL_Type[12];		/* types for ordered lists */
+    int 	List_Nesting_Level;	/* counter for list nesting level */
+    int 	OL_Counter[12]; 	/* counter for ordered lists */
+    char	OL_Type[12];		/* types for ordered lists */
     int 	Last_OL_Count;		/* last count in ordered lists */
-    char 	Last_OL_Type;		/* last type in ordered lists */
+    char	Last_OL_Type;		/* last type in ordered lists */
 
-    int				Division_Level;
+    int 			Division_Level;
     short			DivisionAlignments[MAX_NESTING];
-    int				Underline_Level;
-    int				Quote_Level;
+    int 			Underline_Level;
+    int 			Quote_Level;
 
     BOOL			UsePlainSpace;
     BOOL			HiddenValue;
-    int				lastraw;
+    int 			lastraw;
 
     char *			comment_start;	/* for literate programming */
     char *			comment_end;
@@ -109,15 +108,15 @@ struct _HTStructured {
     BOOL			style_change;
     HTStyle *			new_style;
     HTStyle *			old_style;
-    int				current_default_alignment;
+    int 			current_default_alignment;
     BOOL			in_word;  /* Have just had a non-white char */
-    stack_element 	stack[MAX_NESTING];
-    stack_element 	*sp;		/* Style stack pointer */
+    stack_element	stack[MAX_NESTING];
+    stack_element	*sp;		/* Style stack pointer */
     BOOL		stack_overrun;	/* Was MAX_NESTING exceeded? */
-    int			skip_stack; /* flag to skip next style stack operation */
+    int 		skip_stack; /* flag to skip next style stack operation */
 
     /*
-    **  Track if we are in an anchor, paragraph, address, base, etc.
+    **	Track if we are in an anchor, paragraph, address, base, etc.
     */
     BOOL		inA;
     BOOL		inAPPLET;
@@ -145,41 +144,41 @@ struct _HTStructured {
     BOOL		needBoldH;
 
     /*
-    **  UCI and UCLYhndl give the UCInfo and charset registered for
-    **  the HTML parser in the node_anchor's UCStages structure.  It
-    **  indicates what is fed to the HTML parser as the stream of character
-    **  data (not necessarily tags and attributes).  It should currently
-    **  always be set to be the same as UCI and UCLhndl for the HTEXT stage
-    **  in the node_anchor's UCStages structure, since the HTML parser sends
-    **  its input character data to the output without further charset
-    **  translation.
+    **	UCI and UCLYhndl give the UCInfo and charset registered for
+    **	the HTML parser in the node_anchor's UCStages structure.  It
+    **	indicates what is fed to the HTML parser as the stream of character
+    **	data (not necessarily tags and attributes).  It should currently
+    **	always be set to be the same as UCI and UCLhndl for the HTEXT stage
+    **	in the node_anchor's UCStages structure, since the HTML parser sends
+    **	its input character data to the output without further charset
+    **	translation.
     */
-    LYUCcharset	*	UCI;
-    int			UCLYhndl;
+    LYUCcharset *	UCI;
+    int 		UCLYhndl;
     /*
-    **  inUCI and inUCLYhndl indicate the UCInfo and charset which the
-    **  HTML parser treats at the input charset.  It is normally set
-    **  to the UCI and UCLhndl for the SGML parser in the node_anchor's
-    **  UCStages structure (which may be a dummy, based on the MIME
-    **  parser's UCI and UCLhndl in that structure, when we are handling
-    **  a local file or non-http(s) gateway).  It could be changed
-    **  temporarily by the HTML parser, for conversions of attribute
-    **  strings, but should be reset once done. - FM
+    **	inUCI and inUCLYhndl indicate the UCInfo and charset which the
+    **	HTML parser treats at the input charset.  It is normally set
+    **	to the UCI and UCLhndl for the SGML parser in the node_anchor's
+    **	UCStages structure (which may be a dummy, based on the MIME
+    **	parser's UCI and UCLhndl in that structure, when we are handling
+    **	a local file or non-http(s) gateway).  It could be changed
+    **	temporarily by the HTML parser, for conversions of attribute
+    **	strings, but should be reset once done. - FM
     */
-    LYUCcharset	*	inUCI;
-    int			inUCLYhndl;
+    LYUCcharset *	inUCI;
+    int 		inUCLYhndl;
     /*
-    **  outUCI and outUCLYhndl indicate the UCInfo and charset which
-    **  the HTML parser treats as the output charset.  It is normally
-    **  set to its own UCI and UCLhndl.  It could be changed for
-    **  conversions of attribute strings, but should be reset once
-    **  done. - FM
+    **	outUCI and outUCLYhndl indicate the UCInfo and charset which
+    **	the HTML parser treats as the output charset.  It is normally
+    **	set to its own UCI and UCLhndl.  It could be changed for
+    **	conversions of attribute strings, but should be reset once
+    **	done. - FM
     */
-    LYUCcharset	*	outUCI;
-    int			outUCLYhndl;
+    LYUCcharset *	outUCI;
+    int 		outUCLYhndl;
     /*
-    **  T holds the transformation rules for conversions of strings
-    **  between the input and output charsets by the HTML parser. - FM
+    **	T holds the transformation rules for conversions of strings
+    **	between the input and output charsets by the HTML parser. - FM
     */
     UCTransParams	T;
 
@@ -207,32 +206,32 @@ extern int HTML_put_entity PARAMS((HTStructured *me, int entity_number));
 **  HTConverter to present HTML
 */
 extern HTStream* HTMLToPlain PARAMS((
-        HTPresentation *        pres,
-        HTParentAnchor *        anchor,
-        HTStream *              sink));
+	HTPresentation *	pres,
+	HTParentAnchor *	anchor,
+	HTStream *		sink));
 
 extern HTStream* HTMLToC PARAMS((
-        HTPresentation *        pres,
-        HTParentAnchor *        anchor,
-        HTStream *              sink));
+	HTPresentation *	pres,
+	HTParentAnchor *	anchor,
+	HTStream *		sink));
 
 extern HTStream* HTMLPresent PARAMS((
-        HTPresentation *        pres,
-        HTParentAnchor *        anchor,
-        HTStream *              sink));
+	HTPresentation *	pres,
+	HTParentAnchor *	anchor,
+	HTStream *		sink));
 
 extern HTStructured* HTML_new PARAMS((
-        HTParentAnchor * anchor,
-        HTFormat        format_out,
-        HTStream *      target));
+	HTParentAnchor * anchor,
+	HTFormat	format_out,
+	HTStream *	target));
 
 /*
 **  Names for selected internal representations.
 */
 typedef enum _HTMLCharacterSet {
-        HTML_ISO_LATIN1,
-        HTML_NEXT_CHARS,
-        HTML_PC_CP950
+	HTML_ISO_LATIN1,
+	HTML_NEXT_CHARS,
+	HTML_PC_CP950
 } HTMLCharacterSet;
 
 /*
@@ -243,11 +242,11 @@ typedef enum _HTMLCharacterSet {
 **  and leaves the document unloaded.
 **
 **  On entry,
-**      sink    is a stream to the output device if any
-**      number  is the HTTP error number
-**      message is the human readable message.
+**	sink	is a stream to the output device if any
+**	number	is the HTTP error number
+**	message is the human readable message.
 **  On exit,
-**      a retrun code like HT_LOADED if object exists else 60; 0
+**	a retrun code like HT_LOADED if object exists else 60; 0
 */
 extern int HTLoadError PARAMS((
 	HTStream *	sink,

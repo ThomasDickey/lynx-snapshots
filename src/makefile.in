@@ -50,7 +50,7 @@ LYForms.o LYPrint.o LYrcFile.o LYDownload.o LYNews.o LYKeymap.o \
 HTML.o HTFWriter.o HTInit.o DefaultStyle.o LYLocal.o LYUpload.o \
 LYLeaks.o LYexit.o LYJump.o LYList.o LYCgi.o LYTraversal.o \
 LYEditmap.o LYCharSets.o LYCharUtils.o LYMap.o LYCookie.o LYExtern.o \
-LYStyle.o LYHash.o @EXTRA_OBJS@ @LIBOBJS@
+LYStyle.o LYHash.o $(CHARTRANS_OBJS) @LIBOBJS@
 
 C_SRC	= $(OBJS:.o=.c)
 
@@ -66,7 +66,7 @@ all: lynx
 @RULE_CC@
 	@ECHO_CC@$(CPP) -C $(CPP_OPTS) $*.c >$@
 
-lynx:   message @EXTRA_DEPS@ $(OBJS) $(WWWLIB)
+lynx:   message do_chartrans_stuff $(OBJS) $(WWWLIB)
 	@echo "Linking and creating Lynx executable"
 	$(CC) $(CC_OPTS) $(LDFLAGS) -o lynx  $(OBJS) $(WWWLIB) $(LIBS)
 	@echo "Copying Lynx executable into top-level directory"

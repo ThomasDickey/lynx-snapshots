@@ -277,10 +277,10 @@ DIR_DEFS = $(DIRED_SUPPORT) $(DIRED_ARCHIVE) $(DIRED_TAR) $(DIRED_ZIP) $(DIRED_G
 #SITE_LIBS= # Your libraries here (remove the "#")
 
 # Set SITE_LYDEFS to one or more of the defines for the WWW Library:
-SITE_LYDEFS = $(DIR_LYDEFS) $(RP_LYDEFS) -DEXP_CHARTRANS # Your defines here
+SITE_LYDEFS = $(DIR_LYDEFS) $(RP_LYDEFS) # Your defines here
 
 # Set SITE_DEFS to one or more of the defines for lynx below:
-SITE_DEFS = $(DIR_DEFS) $(RP_DEFS) -DEXP_CHARTRANS -DNSL_FORK -DLYNXCGI_LINKS -DUSE_EXTERNALS # Your defines here
+SITE_DEFS = $(DIR_DEFS) $(RP_DEFS) -DNSL_FORK -DLYNXCGI_LINKS -DUSE_EXTERNALS # Your defines here
 
 # if you are compiling on a previously unsupported system, modify
 # this generic entry!!
@@ -309,8 +309,6 @@ SITE_DEFS = $(DIR_DEFS) $(RP_DEFS) -DEXP_CHARTRANS -DNSL_FORK -DLYNXCGI_LINKS -D
 # -DNOPORT         if you must use PASV instead of PORT for FTP
 # -DNO_TTYTYPE	   if your system lacks a ttytype variable
 # -DNSL_FORK	   For fork-based name server lookups that can be 'z'apped.
-# -DEXP_CHARTRANS  enable chartrans support w/ new charsets, UTF8 mode etc.
-#                  (needed in SITE_DEFS *and* SITE_LYDEFS !)
 # -DEXP_CHARTRANS_AUTOSWITCH also let lynx switch term mode(Linux console only)
 # -DSLANG_MBCS_HACK prevent cutoff lines when using UTF8 console (slang only)
 # -DUSE_ZLIB       To use some functions from zlib library if you have it.
