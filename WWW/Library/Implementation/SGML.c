@@ -5,7 +5,7 @@
 **	SGML file, create this object which is a parser. The object
 **	is (currently) created by being passed a DTD structure,
 **	and a target HTStructured oject at which to throw the parsed stuff.
-**	
+**
 **	 6 Feb 93  Binary seraches used. Intreface modified.
 */
 
@@ -37,7 +37,7 @@
 #define FREE(x) if (x) {free(x); x = NULL;}
 
 PUBLIC HTCJKlang HTCJK = NOCJK; 	/* CJK enum value.		*/
-PUBLIC BOOL HTPassEightBitRaw = FALSE;	/* Pass 161-172,174-255 raw.	*/ 
+PUBLIC BOOL HTPassEightBitRaw = FALSE;	/* Pass 161-172,174-255 raw.	*/
 PUBLIC BOOL HTPassEightBitNum = FALSE;	/* Pass ^ numeric entities raw. */
 PUBLIC BOOL HTPassHighCtrlRaw = FALSE;	/* Pass 127-160,173,&#127; raw. */
 PUBLIC BOOL HTPassHighCtrlNum = FALSE;	/* Pass &#128;-&#159; raw.	*/
@@ -52,7 +52,7 @@ extern int LYlowest_eightbit[];
 
 #define MAX_ATTRIBUTES 36	/* Max number of attributes per element */
 
-	
+
 /*		Element Stack
 **		-------------
 **	This allows us to return down the stack reselcting styles.
@@ -71,7 +71,7 @@ struct _HTElement {
 struct _HTStream {
 
     CONST HTStreamClass *	isa;		/* inherited from HTStream */
-    
+
     CONST SGML_dtd		*dtd;
     HTStructuredClass		*actions;	/* target class  */
     HTStructured		*target;	/* target object */
@@ -112,8 +112,8 @@ struct _HTStream {
     HTParentAnchor *		node_anchor;
     LYUCcharset *		inUCI;		/* pointer to anchor UCInfo */
     int 			inUCLYhndl;	/* charset we are fed	    */
-    LYUCcharset *		outUCI;		/* anchor UCInfo for target */
-    int				outUCLYhndl;	/* charset for target	    */
+    LYUCcharset *		outUCI; 	/* anchor UCInfo for target */
+    int 			outUCLYhndl;	/* charset for target	    */
     char			utf_count;
     UCode_t			utf_char;
     char			utf_buf[8];
@@ -144,13 +144,13 @@ PRIVATE void set_chartrans_handling ARGS3(
 	chndl = HTAnchor_getUCLYhndl(anchor, UCT_STAGE_STRUCTURED);
 	if (chndl < 0)
 	    /*
-	    **  That wasn't set either, so seek the HText default. - FM
+	    **	That wasn't set either, so seek the HText default. - FM
 	    */
 	    chndl = HTAnchor_getUCLYhndl(anchor, UCT_STAGE_HTEXT);
 	if (chndl < 0)
 	    /*
-	    **  That wasn't set either, so assume the current display
-	    **  character set. - FM
+	    **	That wasn't set either, so assume the current display
+	    **	character set. - FM
 	    */
 	    chndl = current_char_set;
 	/*
@@ -173,18 +173,18 @@ PRIVATE void set_chartrans_handling ARGS3(
 						      UCT_STAGE_STRUCTURED);
     }
     /*
-    **  Set the in->out transformation parameters. - FM
+    **	Set the in->out transformation parameters. - FM
     */
     UCSetTransParams(&context->T,
 		     context->inUCLYhndl, context->inUCI,
 		     context->outUCLYhndl, context->outUCI);
     /*
-    **  This is intended for passing the SGML parser's input
-    **  charset as an argument in each call to the HTML
-    **  parser's start tag function, but it would be better
-    **  to call a Lynx_HTML_parser function to set an element
-    **  in its HTStructured object, itself, if this were
-    **  needed. - FM
+    **	This is intended for passing the SGML parser's input
+    **	charset as an argument in each call to the HTML
+    **	parser's start tag function, but it would be better
+    **	to call a Lynx_HTML_parser function to set an element
+    **	in its HTStructured object, itself, if this were
+    **	needed. - FM
     */
     if (HTCJK != NOCJK) {
 	context->current_tag_charset = -1;
@@ -200,7 +200,7 @@ PRIVATE void set_chartrans_handling ARGS3(
 	context->current_tag_charset = UCGetLYhndl_byMIME("unicode-1-1-utf-8");
     } else {
 	context->current_tag_charset = 0;
-    }	
+    }
 }
 
 PRIVATE void change_chartrans_handling ARGS1(
@@ -261,14 +261,14 @@ PRIVATE void handle_attribute_name ARGS2(
     int high, low, i, diff;
 
     /*
-    **  Ignore unknown tag. - KW
+    **	Ignore unknown tag. - KW
     */
     if (tag == context->unknown_tag) {
 	return;
     }
 
     /*
-    **  Binary search for attribute name.
+    **	Binary search for attribute name.
     */
     for (low = 0, high = tag->number_of_attributes;
 	 high > low;
@@ -286,9 +286,9 @@ PRIVATE void handle_attribute_name ARGS2(
 #endif
 	    return;
 	} /* if */
-	
+
     } /* for */
-    
+
     if (TRACE)
 	fprintf(stderr, "SGML: Unknown attribute %s for tag %s\n",
 	    s, context->current_tag->name);
@@ -327,7 +327,13 @@ PRIVATE void handle_attribute_value ARGS2(
 
 
 /*
-**  translate some Unicodes to Lynx special codes and output them.
+**  Translate some Unicodes to Lynx special codes and output them.
+**  Special codes - ones those output depend on parsing.
+**
+**  Additional issue, like handling bidirectional text if nesseccery
+**  may be called from here:  zwnj (8204), zwj (8205), lrm (8206), rlm (8207)
+**  - currently they are passed to def7_uni.tbl as regular characters.
+**
 */
 PRIVATE BOOL put_special_unicodes ARGS2(
 	HTStream *,	context,
@@ -346,13 +352,20 @@ PRIVATE BOOL put_special_unicodes ARGS2(
     } else if (code == 8194 || code == 8195 || code == 8201) {
 	/*
 	**  Use Lynx special character for ensp, emsp or thinsp.
+	**
+	**  Originally, Lynx use space '32' as word delimiter and omits this
+	**  space at end of line if word is wrapped to the next line.  There
+	**  are several other spaces in the Unicode repertoire and we should
+	**  teach Lynx to understand them, not only as regular characters but
+	**  in the context of line wrapping.  Unfortunately, if we use
+	**  HT_EM_SPACE we override the chartrans tables for those spaces
+	**  (e.g., emsp= double space) with a single '32' for all (but do line
+	**  wrapping more fancy).  In the future we need HT_SPACE with a
+	**  transferred parameter (Unicode number) which falls back to
+	**  chartrans if line wrapping is not the case.
+	**
 	*/
 	PUTC(HT_EM_SPACE);
-    } else if (code == 8211 || code == 8212) {
-	/*
-	**  Use ASCII hyphen for ndash/endash or mdash/emdash.
-	*/
-	PUTC('-');
     } else {
 	/*
 	**  Return NO if nothing done.
@@ -391,49 +404,14 @@ PRIVATE void handle_entity ARGS2(
 	HTStream *,	context,
 	char,		term)
 {
-    CONST char ** entities = context->dtd->entity_names;
     UCode_t code;
     long uck;
     CONST char *s = context->string->data;
     int high, low, i, diff;
 
-    /*
-    **	Use Lynx special characters for nbsp (160), ensp (8194),
-    **	emsp (8195), thinsp (8201), and shy (173). - FM
-    */
-    if (!strcmp(s, "nbsp")) {
-	PUTC(HT_NON_BREAK_SPACE);
-	FoundEntity = TRUE;
-	return;
-    }
-    if (!strcmp(s, "ensp") || !strcmp(s, "emsp") || !strcmp(s, "thinsp")) {
-	PUTC(HT_EM_SPACE);
-	FoundEntity = TRUE;
-	return;
-    }
-    if (!strcmp(s, "shy")) {
-	PUTC(LY_SOFT_HYPHEN);
-	FoundEntity = TRUE;
-	return;
-    }
-
-#ifdef NOTUSED_FOTEMODS
-    /*
-    **	For ndash or endash (8211), and mdash or emdash (8212),
-    **	use an ASCII hyphen (32). - FM
-    */
-    if (!strcmp(s, "ndash") ||
-	!strcmp(s, "endash") ||
-	!strcmp(s, "mdash") ||
-	!strcmp(s, "endash")) {
-	PUTC('-');
-	FoundEntity = TRUE;
-	return;
-    }
-#endif /* NOTUSED_FOTEMODS */
 
     /*
-    **	Handle all other entities normally. - FM
+    **	Handle named entities.
     */
     FoundEntity = FALSE;
     if ((code = HTMLGetEntityUCValue(s)) != 0) {
@@ -441,12 +419,13 @@ PRIVATE void handle_entity ARGS2(
 	**  We got a Unicode value for the entity name.
 	**  Check for special Unicodes. - FM
 	*/
-	if (put_special_unicodes(context, code)) {  
+	if (put_special_unicodes(context, code)) {
 	    FoundEntity = TRUE;
 	    return;
 	}
 	/*
-	**  Seek a translation from the chartrans tables.
+	**  No special unicodes -
+	**  seek a translation from the chartrans tables.
 	*/
 	if ((uck = UCTransUniChar(code, context->outUCLYhndl)) >= 32 &&
 	    uck < 256 &&
@@ -499,55 +478,12 @@ PRIVATE void handle_entity ARGS2(
 	    return;
 	}
     }
-#ifdef NOTUSED_FOTEMODS
-    /*
-    **	Ignore zwnj (8204) and zwj (8205), if we get to here.
-    **	Note that zwnj may have been handled as <WBR>
-    **	by the calling function. - FM
-    */
-    if (!strcmp(s, "zwnj") ||
-	!strcmp(s, "zwj")) {
-	if (TRACE) {
-	    fprintf(stderr, "handle_entity: Ignoring '%s'.\n", s);
-	}
-	FoundEntity = TRUE;
-	return;
-    }
-
-    /*
-    **  Ignore lrm (8206), and rln (8207), if we get to here. - FM
-    */
-    if (!strcmp(s, "lrm") ||
-	!strcmp(s, "rlm")) {
-	if (TRACE) {
-	    fprintf(stderr, "handle_entity: Ignoring '%s'.\n", s);
-	}
-	FoundEntity = TRUE;
-	return;
-    }
-#endif /* NOTUSED_FOTEMODS */
-
-    /*
-    **	We haven't succeeded yet, so try the old LYCharSets
-    **	arrays for translation strings. - FM
-    */
-    for (low = 0, high = context->dtd->number_of_entities;
-	 high > low;
-	 diff < 0 ? (low = i+1) : (high = i)) {  /* Binary search */
-	i = (low + (high-low)/2);
-	diff = strcmp(entities[i], s);	/* Case sensitive! */
-	if (diff == 0) {		/* success: found it */
-	    (*context->actions->put_entity)(context->target, i);
-	    FoundEntity = TRUE;
-	    return;
-	}
-    }
 
     /*
     **	If entity string not found, display as text.
     */
     if (TRACE)
-	fprintf(stderr, "SGML: Unknown entity '%s'\n", s); 
+	fprintf(stderr, "SGML: Unknown entity '%s'\n", s);
     PUTC('&');
     {
 	CONST char *p;
@@ -732,7 +668,7 @@ PRIVATE void do_close_stacked ARGS1(
 PRIVATE int is_on_stack ARGS2(
 	HTStream *,	context,
 	HTTag *,	old_tag)
-{ 
+{
    HTElement * stacked = context->element_stack;
     int i = 1;
     for (; stacked; stacked = stacked->next, i++) {
@@ -837,11 +773,11 @@ PRIVATE void end_element ARGS2(
 #ifdef WIND_DOWN_STACK
     while (context->element_stack) { /* Loop is error path only */
 #else
-    if (context->element_stack) { /* Substitute and remove one stack element */ 
+    if (context->element_stack) { /* Substitute and remove one stack element */
 #endif /* WIND_DOWN_STACK */
 	HTElement * N = context->element_stack;
 	HTTag * t = N->tag;
-	
+
 	if (old_tag != t) {		/* Mismatch: syntax error */
 	    if (context->element_stack->next) { /* This is not the last level */
 		if (TRACE) fprintf(stderr,
@@ -854,7 +790,7 @@ PRIVATE void end_element ARGS2(
 		return; 		/* Ignore */
 	    }
 	}
-	
+
 	context->element_stack = N->next;		/* Remove from stack */
 	FREE(N);
 	(*context->actions->end_element)(context->target,
@@ -865,9 +801,9 @@ PRIVATE void end_element ARGS2(
 #else
 	return;
 #endif /* WIND_DOWN_STACK */
-	
+
 	/* Syntax error path only */
-	
+
     }
     if (TRACE)
 	fprintf(stderr, "SGML: Extra end tag </%s> found and ignored.\n",
@@ -941,7 +877,7 @@ PRIVATE void start_element ARGS1(
 		return;
 	    }
 	}
-    
+
 	if (context->element_stack &&
 	    canclose_check == close_error && !(valid =
 					       element_valid_within(
@@ -1120,7 +1056,7 @@ PRIVATE void SGML_free ARGS1(
     **	Free the strings and context structure. - FM
     */
     HTChunkFree(context->string);
-    for (i = 0; i < MAX_ATTRIBUTES; i++) 
+    for (i = 0; i < MAX_ATTRIBUTES; i++)
 	FREE(context->value[i]);
     FREE(context);
 }
@@ -1158,7 +1094,7 @@ PRIVATE void SGML_abort ARGS2(
     **	Free the strings and context structure. - FM
     */
     HTChunkFree(context->string);
-    for (i = 0; i < MAX_ATTRIBUTES; i++) 
+    for (i = 0; i < MAX_ATTRIBUTES; i++)
 	FREE(context->value[i]);
     FREE(context);
 }
@@ -1172,7 +1108,7 @@ PRIVATE void SGML_abort ARGS2(
 **   particular SGML context.
 */
 
-#ifdef CALLERDATA		  
+#ifdef CALLERDATA
 PUBLIC void* SGML_callerData ARGS1(
 	HTStream *,	context)
 {
@@ -1218,7 +1154,7 @@ PRIVATE void SGML_character ARGS2(
 	*/
 	if ((unsigned char)c > 127) {
 	    /*
-	    **  We have an octet from a multibyte character. - FM
+	    **	We have an octet from a multibyte character. - FM
 	    */
 	    if (context->utf_count > 0 && (c & 0xc0) == 0x80) {
 		context->utf_char = (context->utf_char << 6) | (c & 0x3f);
@@ -1227,9 +1163,9 @@ PRIVATE void SGML_character ARGS2(
 		(context->utf_buf_p)++;
 		if (context->utf_count == 0) {
 		    /*
-		    **  We have all of the bytes, so terminate
-		    **  the buffer and set 'clong' to the UCode_t
-		    **  value. - FM
+		    **	We have all of the bytes, so terminate
+		    **	the buffer and set 'clong' to the UCode_t
+		    **	value. - FM
 		    */
 		    *(context->utf_buf_p) = '\0';
 		    clong = context->utf_char;
@@ -1289,20 +1225,10 @@ PRIVATE void SGML_character ARGS2(
 	}
     }
 
-#ifdef NOTDEFINED
-    /*
-    **  If we have a koi8-r input and do not have
-    **  koi8-r as the output, save the raw input
-    **  in saved_char_in before we potentially
-    **  convert it to Unicode. - FM
-    */
-    if (context->T.strip_raw_char_in)
-	saved_char_in = c;
-#endif /* NOTDEFINED */
 
     /*
-    **  If we want the raw input converted
-    **  to Unicode, try that now. - FM
+    **	If we want the raw input converted
+    **	to Unicode, try that now. - FM
     */
     if (context->T.trans_to_uni &&
 	((unsign_c >= 127) ||
@@ -1418,7 +1344,7 @@ top1:
     **	or HTCJK set. - FM
     */
 #define PASSHICTRL (context->T.transp || \
-                    unsign_c >= LYlowest_eightbit[context->inUCLYhndl])
+		    unsign_c >= LYlowest_eightbit[context->inUCLYhndl])
     if (c == 127 &&
 	!(PASSHICTRL || HTCJK != NOCJK))
 	return;
@@ -1437,7 +1363,7 @@ top1:
     switch(context->state) {
 
     case S_in_kanji:
-        /*
+	/*
 	**  Note that if we don't have a CJK input, then this
 	**  is not the second byte of a CJK di-byte, and we're
 	**  trashing the input.  That's why 8-bit characters
@@ -1455,13 +1381,13 @@ top1:
 	if (HTCJK != NOCJK && (c & 0200) != 0) {
 	    /*
 	    **	Setting up for Kanji multibyte handling (based on
-	    **  Takuya ASADA's (asada@three-a.co.jp) CJK Lynx).
-	    **  Note that if the input is not in fact CJK, the
-	    **  next byte also will be mishandled, as explained
-	    **  above.  Toggle raw mode off in such cases, or
-	    **  select the "7 bit approximations" display
-	    **  character set, which is largely equivalent
-	    **  to having raw mode off with CJK. - FM
+	    **	Takuya ASADA's (asada@three-a.co.jp) CJK Lynx).
+	    **	Note that if the input is not in fact CJK, the
+	    **	next byte also will be mishandled, as explained
+	    **	above.	Toggle raw mode off in such cases, or
+	    **	select the "7 bit approximations" display
+	    **	character set, which is largely equivalent
+	    **	to having raw mode off with CJK. - FM
 	    */
 	    context->state = S_in_kanji;
 	    PUTC(c);
@@ -1525,7 +1451,7 @@ top1:
 	    saved_char_in = '\0';
 /******************************************************************
  *   I. LATIN-1 OR UCS2  TO  DISPLAY CHARSET
- ******************************************************************/  
+ ******************************************************************/
 	} else if ((chk = (context->T.trans_from_uni && unsign_c >= 160)) &&
 		   (uck = UCTransUniChar(unsign_c,
 					 context->outUCLYhndl)) >= 32 &&
@@ -1536,7 +1462,7 @@ top1:
 			uck, FROMASCII((char)uck));
 	    }
 	    /*
-	    **  We got one octet from the conversions, so use it. - FM
+	    **	We got one octet from the conversions, so use it. - FM
 	    */
 	    PUTC(FROMASCII((char)uck));
 	} else if (chk &&
@@ -1548,9 +1474,9 @@ top1:
 		   */
 		   (uck = UCTransUniCharStr(replace_buf, 60, clong,
 					    context->outUCLYhndl,
-					    0) >= 0)) { 
+					    0) >= 0)) {
 	    /*
-	    **  Got a replacement string.
+	    **	Got a replacement string.
 	    **	No further tests for valididy - assume that whoever
 	    **	defined replacement strings knew what she was doing. - KW
 	    */
@@ -1636,7 +1562,7 @@ top1:
 	}
 	break;
 
-    /*	
+    /*
     **	In litteral mode, waits only for specific end tag (for
     **	compatibility with old servers, and for Lynx). - FM
     */
@@ -1646,7 +1572,7 @@ top1:
 					   '/' :
 			context->element_stack->tag->name[string->size-2])) {
 	    int i;
-	    
+
 	    /*
 	    **	If complete match, end litteral.
 	    */
@@ -1665,7 +1591,7 @@ top1:
 	    for (i = 0; i < string->size; i++)	/* recover */
 	       PUTC(string->data[i]);
 	    string->size = 0;
-	    context->state = S_text;	
+	    context->state = S_text;
 	}
 	break;
 
@@ -1677,11 +1603,11 @@ top1:
 	    /*
 	    **	Setting up for possible numeric entity.
 	    */
-	    context->state = S_cro;  /* &# is Char Ref Open */ 
+	    context->state = S_cro;  /* &# is Char Ref Open */
 	    break;
 	}
 	context->state = S_entity;   /* Fall through! */
-	
+
     /*
     **	Handle possible named entity.
     */
@@ -1719,9 +1645,9 @@ top1:
 		"SGML_character: Handling 'zwnj' entity as 'WBR' element.\n");
 		}
 		if (c != ';') {
-		    sprintf(temp, "<WBR>%c", c); 
+		    sprintf(temp, "<WBR>%c", c);
 		} else {
-		    sprintf(temp, "<WBR>"); 
+		    sprintf(temp, "<WBR>");
 		}
 		if (context->recover == NULL) {
 		    StrAllocCopy(context->recover, temp);
@@ -1953,9 +1879,9 @@ top1:
 		    **	the standard semi-colon. - FM
 		    */
 		    if (c != ';') {
-			sprintf(temp, "<WBR>%c", c); 
+			sprintf(temp, "<WBR>%c", c);
 		    } else {
-			sprintf(temp, "<WBR>"); 
+			sprintf(temp, "<WBR>");
 		    }
 		    /*
 		    **	Add the replacement string to the
@@ -1972,17 +1898,12 @@ top1:
 		    context->state = S_text;
 		    break;
 		}
-		if (code == 160 || code == 173) {
+
 		    /*
-		    **	We *always* should interpret these as Latin1 here!
-		    **	Output the Lynx special character for nbsp and
-		    **	then recycle the terminator or break. - FM
+		**  Check for special Unicodes.
 		    */
-		    if (code == 160) {
-			PUTC(HT_NON_BREAK_SPACE);
-		    } else {
-			PUTC(LY_SOFT_HYPHEN);
-		    }
+			if (put_special_unicodes(context, code)) {
+
 		    string->size = 0;
 		    context->isHex = FALSE;
 		    context->state = S_text;
@@ -1991,7 +1912,8 @@ top1:
 		    break;
 		}
 		/*
-		**  Seek a translation from the chartrans tables.
+		**  No special unicodes -
+		**  seek a translation from the chartrans tables.
 		*/
 		if ((uck = UCTransUniChar(code,
 					  context->outUCLYhndl)) >= 32 &&
@@ -2023,7 +1945,7 @@ top1:
 			   */
 			   (uck = UCTransUniCharStr(replace_buf, 60, code,
 						    context->outUCLYhndl,
-						    0) >= 0)) { 
+						    0) >= 0)) {
 		    for (p = replace_buf; *p; p++) {
 			PUTC(*p);
 		    }
@@ -2114,11 +2036,6 @@ top1:
 			**  ensp, emsp or thinsp. - FM
 			*/
 			PUTC(HT_EM_SPACE);
-		    } else if (code == 8211 || code == 8212) {
-			/*
-			**  ndash or mdash. - FM
-			*/
-			PUTC('-');
 		    } else {
 			/*
 			**  Unhandled or illegal value.  Recover the
@@ -2148,7 +2065,7 @@ top1:
 		    PUTC(FROMASCII((char)code));
 		} else {
 		    /*
-		    **  Handle as named entity. - FM
+		    **	Handle as named entity. - FM
 		    */
 		    code -= 160;
 		    EntityName = HTMLGetEntityName(code);
@@ -2230,7 +2147,7 @@ top1:
 
     /*
     **	Tag
-    */	    
+    */
     case S_tag: 				/* new tag */
 	if (unsign_c < 127 && (string->size ?
 		  isalnum((unsigned char)c) : isalpha((unsigned char)c))) {
@@ -2311,8 +2228,8 @@ top1:
 		*/
 	    }
 	    context->current_tag = t;
-	    
-	    /* 
+
+	    /*
 	    **	Clear out attributes.
 	    */
 	    {
@@ -2322,7 +2239,7 @@ top1:
 	    }
 	    string->size = 0;
 	    context->current_attribute_number = INVALID;
-	    
+
 	    if (c == '>') {
 		if (context->current_tag->name)
 		    start_element(context);
@@ -2619,7 +2536,7 @@ top1:
 	HTChunkPutc(string, c);
 	context->state = S_attr; /* Get attribute */
 	break;
-	
+
 				/* accumulating value */
     case S_attr:
 	if (WHITE(c) || (c == '>') || (c == '=')) {	/* End of word */
@@ -2637,7 +2554,7 @@ top1:
 	    HTChunkPutc(string, c);
 	}
 	break;
-		
+
     case S_attr_gap:		/* Expecting attribute or '=' or '>' */
 	if (WHITE(c))
 	    break;		/* Gap after attribute */
@@ -2653,8 +2570,8 @@ top1:
 	HTChunkPutc(string, c);
 	context->state = S_attr;		/* Get next attribute */
 	break;
-	
-    case S_equals:		/* After attr = */ 
+
+    case S_equals:		/* After attr = */
 	if (WHITE(c))
 	    break;		/* Before attribute value */
 	if (c == '>') { 	/* End of tag */
@@ -2664,7 +2581,7 @@ top1:
 		start_element(context);
 	    context->state = S_text;
 	    break;
-	    
+
 	} else if (c == '\'') {
 	    context->state = S_squoted;
 	    break;
@@ -2676,7 +2593,7 @@ top1:
 	HTChunkPutc(string, c);
 	context->state = S_value;
 	break;
-	
+
     case S_value:
 	if (WHITE(c) || (c == '>')) {		/* End of word */
 	    HTChunkTerminate(string) ;
@@ -2712,7 +2629,7 @@ top1:
 	    HTChunkPutc(string, c);
 	}
 	break;
-		
+
     case S_squoted:		/* Quoted attribute value */
 	if (c == '\'') {	/* End of attribute value */
 	    HTChunkTerminate(string) ;
@@ -2749,7 +2666,7 @@ top1:
 	    HTChunkPutc(string, c);
 	}
 	break;
-	
+
     case S_dquoted:		/* Quoted attribute value */
 	if (c == '"' || 	/* Valid end of attribute value */
 	    (soft_dquotes &&	/*  If emulating old Netscape bug, treat '>' */
@@ -2790,7 +2707,7 @@ top1:
 	    HTChunkPutc(string, c);
 	}
 	break;
-	
+
     case S_end: 				/* </ */
 	if (unsign_c < 127 && isalnum((unsigned char)c)) {
 	    HTChunkPutc(string, c);
@@ -2806,7 +2723,7 @@ top1:
 	    }
 	    if (!t || t == context->unknown_tag) {
 		if (TRACE)
-		    fprintf(stderr, "Unknown end tag </%s>\n", string->data); 
+		    fprintf(stderr, "Unknown end tag </%s>\n", string->data);
 	    } else {
 		BOOL tag_OK = (c == '>' || WHITE(c));
 		context->current_tag = t;
@@ -3178,15 +3095,15 @@ PRIVATE void SGML_write ARGS3(
 /*	Structured Object Class
 **	-----------------------
 */
-PUBLIC CONST HTStreamClass SGMLParser = 
-{		
+PUBLIC CONST HTStreamClass SGMLParser =
+{
 	"SGMLParser",
 	SGML_free,
 	SGML_abort,
-	SGML_character, 
+	SGML_character,
 	SGML_string,
 	SGML_write,
-}; 
+};
 
 /*	Create SGML Engine
 **	------------------
@@ -3217,7 +3134,7 @@ PUBLIC HTStream* SGML_new  ARGS3(
     context->state = S_text;
     context->element_stack = 0; 		/* empty */
     context->inSELECT = FALSE;
-#ifdef CALLERDATA		  
+#ifdef CALLERDATA
     context->callerData = (void*) callerData;
 #endif /* CALLERDATA */
     for (i = 0; i < MAX_ATTRIBUTES; i++)
@@ -3270,15 +3187,15 @@ PUBLIC HTStream* SGML_new  ARGS3(
 ////////////////////////////////////////////////////////////////////////
 Copyright (c) 1993 Electrotechnical Laboratry (ETL)
 
-Permission to use, copy, modify, and distribute this material 
-for any purpose and without fee is hereby granted, provided 
-that the above copyright notice and this permission notice 
-appear in all copies, and that the name of ETL not be 
-used in advertising or publicity pertaining to this 
-material without the specific, prior written permission 
+Permission to use, copy, modify, and distribute this material
+for any purpose and without fee is hereby granted, provided
+that the above copyright notice and this permission notice
+appear in all copies, and that the name of ETL not be
+used in advertising or publicity pertaining to this
+material without the specific, prior written permission
 of an authorized representative of ETL.
-ETL MAKES NO REPRESENTATIONS ABOUT THE ACCURACY OR SUITABILITY 
-OF THIS MATERIAL FOR ANY PURPOSE.  IT IS PROVIDED "AS IS", 
+ETL MAKES NO REPRESENTATIONS ABOUT THE ACCURACY OR SUITABILITY
+OF THIS MATERIAL FOR ANY PURPOSE.  IT IS PROVIDED "AS IS",
 WITHOUT ANY EXPRESS OR IMPLIED WARRANTIES.
 /////////////////////////////////////////////////////////////////////////
 Content-Type:	program/C; charset=US-ASCII
@@ -3298,7 +3215,7 @@ PUBLIC void JISx0201TO0208_EUC ARGS4(
 	register unsigned char *,	OHI,
 	register unsigned char *,	OLO)
 {
-    static char *table[] = { 
+    static char *table[] = {
 	"\xA1\xA3", "\xA1\xD6", "\xA1\xD7", "\xA1\xA2", "\xA1\xA6", "\xA5\xF2",
 	"\xA5\xA1", "\xA5\xA3", "\xA5\xA5", "\xA5\xA7", "\xA5\xA9",
 	"\xA5\xE3", "\xA5\xE5", "\xA5\xE7", "\xA5\xC3", "\xA1\xBC",

@@ -420,6 +420,9 @@ PUBLIC LYUCcharset LYCharSet_UC[MAXCHARSETS]=
  *  Add the code of the the lowest character with the high bit set
  *  that can be directly displayed.
  *  The order of LYCharSets and LYlowest_eightbit MUST be the same.
+ *
+ *  (If charset have chartrans unicode table,
+ *  LYlowest_eightbit will be verified/modified anyway.)
  */
 PUBLIC int LYlowest_eightbit[MAXCHARSETS]={
 	160,	/* ISO Latin 1		*/
@@ -778,13 +781,21 @@ PUBLIC CONST char * HTMLGetEntityName ARGS1(
  *  Function to return the UCode_t (long int) value for entity names
  *  in the ISO_Latin1 and UC_entity_info extra_entities arrays.  It
  *  returns 0 if not found. - FM
+ *
+ *  Unicode-based extra_entities[] table now handles all the names from old
+ *  style entities[] too.  In the future we will try to redirect all calls to
+ *  both entities[] and extra_entities[] through HTMLGetEntityUCValue() only.
+ *  Also, we should not worry about control characters, they will pass through
+ *  Unicode anyway and should be processed *after* calling this function.
+ *  (see put_special_unicodes() in SGML.c).  - LP
  */
 PUBLIC UCode_t HTMLGetEntityUCValue ARGS1(
 	CONST char *,	name)
 {
     UCode_t value = 0;
-    int i, high, low, diff = 0;
-    CONST char ** entities = HTML_dtd.entity_names;
+    size_t i, high, low;
+    int diff = 0;
+/*  CONST char ** entities = HTML_dtd.entity_names;  */
     CONST UC_entity_info * extra_entities = HTML_dtd.extra_entity_info;
 
     /*
@@ -792,6 +803,12 @@ PUBLIC UCode_t HTMLGetEntityUCValue ARGS1(
      */
     if (!(name && *name))
 	return(value);
+
+
+#ifdef NOTDEFINED
+/*
+**  extra_entities[] now handle all names from entities[], so disable latter.
+*/
 
     /*
      *	Handle names that have control characters
@@ -848,6 +865,11 @@ PUBLIC UCode_t HTMLGetEntityUCValue ARGS1(
 
     /*
      *	Not yet found, so try UC_entity_info extra_entities[]. - FM
+     */
+#endif /* NOTDEFINED */
+
+    /*
+     *	Try UC_entity_info extra_entities[].
      */
     for (low = 0, high = HTML_dtd.number_of_extra_entities;
 	 high > low;
@@ -920,7 +942,7 @@ PUBLIC void HTMLUseCharacterSet ARGS1(int,i)
 
 /*
  *  Initializer, calls initialization function for the
- *  CHARTRANS handling if compiled in. - KW
+ *  CHARTRANS handling. - KW
  */
 PUBLIC int LYCharSetsDeclared NOPARAMS
 {

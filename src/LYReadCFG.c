@@ -1047,6 +1047,9 @@ PUBLIC void read_cfg ARGS1(
 	} else if (!strncasecomp(buffer, "PREPEND_BASE_TO_SOURCE:", 23)) {
 	    LYPrependBaseToSource = is_true(buffer+23);
 
+	} else if (!strncasecomp(buffer, "PREPEND_CHARSET_TO_SOURCE:", 26)) {
+	    LYPrependCharsetToSource = is_true(buffer+26);
+
 	} else if (!strncasecomp(buffer, "PRINTER:", 8)) {
 	    add_printer_to_list(&buffer[8], &printers);
 	}
@@ -1059,6 +1062,12 @@ PUBLIC void read_cfg ARGS1(
 	}
 	break;
 #endif /* RAWDOSKEYHACK */
+
+	case 'Q':
+	if (!strncasecomp(buffer, "QUIT_DEFAULT_YES:", 17)) {
+	    LYQuitDefaultYes = is_true(buffer+17);
+	}
+	break;
 
 	case 'S':
 	if (!strncasecomp(buffer, "SAVE_SPACE:", 11)) {

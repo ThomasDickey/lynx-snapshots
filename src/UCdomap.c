@@ -28,13 +28,13 @@
 /*
  *  Include tables & parameters.
  */
-#include "cp1250_uni.h"		/* WinLatin2 (cp1250)	*/
-#include "cp1251_uni.h"		/* WinCyrillic (cp1251)	*/
-#include "cp1252_uni.h"		/* WinLatin1 (cp1252)	*/
-#include "cp1253_uni.h"		/* WinGreek (cp1253)	*/
-#include "cp1255_uni.h"		/* WinHebrew (cp1255)	*/
-#include "cp1256_uni.h"		/* WinArabic (cp1256)	*/
-#include "cp1257_uni.h"		/* WinBaltRim (cp1257)	*/
+#include "cp1250_uni.h" 	/* WinLatin2 (cp1250)	*/
+#include "cp1251_uni.h" 	/* WinCyrillic (cp1251) */
+#include "cp1252_uni.h" 	/* WinLatin1 (cp1252)	*/
+#include "cp1253_uni.h" 	/* WinGreek (cp1253)	*/
+#include "cp1255_uni.h" 	/* WinHebrew (cp1255)	*/
+#include "cp1256_uni.h" 	/* WinArabic (cp1256)	*/
+#include "cp1257_uni.h" 	/* WinBaltRim (cp1257)	*/
 #include "cp437_uni.h"		/* DosLatinUS (cp437)	*/
 #include "cp737_uni.h"		/* DosGreek (cp737)	*/
 #include "cp775_uni.h"		/* DosBaltRim (cp775)	*/
@@ -54,15 +54,15 @@
 #include "iso06_uni.h"		/* ISO 8859-6 Arabic	*/
 #include "iso07_uni.h"		/* ISO 8859-7 Greek	*/
 #include "iso08_uni.h"		/* ISO 8859-8 Hebrew	*/
-#include "iso09_uni.h"		/* ISO 8859-9 (Latin 5)	*/
+#include "iso09_uni.h"		/* ISO 8859-9 (Latin 5) */
 #include "iso10_uni.h"		/* ISO 8859-10		*/
 #include "koi8r_uni.h"		/* KOI8-R Cyrillic	*/
 #include "mac_uni.h"		/* Macintosh (8 bit)	*/
-#include "mnem2_suni.h"		/* RFC 1345 Mnemonic	*/
+#include "mnem2_suni.h" 	/* RFC 1345 Mnemonic	*/
 #include "next_uni.h"		/* NeXT character set	*/
 #include "rfc_suni.h"		/* RFC 1345 w/o Intro	*/
 #include "utf8_uni.h"		/* UNICODE UTF 8	*/
-#include "viscii_uni.h"		/* Vietnamese (VISCII)	*/
+#include "viscii_uni.h" 	/* Vietnamese (VISCII)	*/
 #ifdef NOTDEFINED
 #include "mnem_suni.h"
 #endif /* NOTDEFINED */
@@ -342,7 +342,7 @@ PRIVATE void set_inverse_transl ARGS1(
 	glyph = conv_uni_to_pc(p[j], 0);
 	if (glyph >= 0 && glyph < MAX_GLYPH && q[glyph] < 32) {
 	    /*
-	     *  Prefer '-' above SHY etc.
+	     *	Prefer '-' above SHY etc.
 	     */
 	    q[glyph] = j;
 	}
@@ -485,7 +485,7 @@ PRIVATE void UC_con_set_trans ARGS3(
     return;			/* nothing to be done */
   }
     /*
-     *  The font is always 256 characters - so far.
+     *	The font is always 256 characters - so far.
      */
   con_clear_unimap();
 #endif
@@ -500,7 +500,7 @@ PRIVATE void UC_con_set_trans ARGS3(
 	}
     }
     if (update_flag) {
-	set_inverse_transl(Gn);	/* Update inverse translation for this one */
+	set_inverse_transl(Gn); /* Update inverse translation for this one */
     }
 }
 
@@ -603,7 +603,7 @@ PRIVATE int con_insert_unipair ARGS3(
 
 PRIVATE int con_insert_unipair_str ARGS3(
 	u16,		unicode,
-	char *,		replace_str,
+	char *, 	replace_str,
 	int,		fordefault)
 {
     int i, n;
@@ -642,7 +642,7 @@ PRIVATE int con_insert_unipair_str ARGS3(
     return 0;
 }
 
-/* 
+/*
  *  ui arg was a leftover, deleted. - KW
  */
 PRIVATE void con_clear_unimap ARGS1(
@@ -694,7 +694,7 @@ PRIVATE void con_clear_unimap_str ARGS1(int, fordefault)
       unidefault_pagedir_str[i] = NULL;
     }
 
-    unidefault_str_contents_valid = 1;  /* ??? probably no use... */
+    unidefault_str_contents_valid = 1;	/* ??? probably no use... */
   } else {
     for (i = 0; i < 32; i++) {
 	if ((p1 = uni_pagedir_str[i]) != NULL) {
@@ -743,7 +743,7 @@ PRIVATE void con_set_default_unimap NOARGS
     u16 *p;
 
     /*
-     *  The default font is always 256 characters.
+     *	The default font is always 256 characters.
      */
     con_clear_unimap(1);
 
@@ -795,7 +795,7 @@ PRIVATE int UC_con_set_unimap ARGS2(
     UC_current_unitable = p;
 
     /*
-     *  The font is always 256 characters - so far.
+     *	The font is always 256 characters - so far.
      */
     con_clear_unimap(0);
 
@@ -831,7 +831,7 @@ PRIVATE int UC_con_set_unimap_str ARGS3(
     }
 
     /*
-     *  No inverse translations for replacement strings!
+     *	No inverse translations for replacement strings!
      */
     if (!err) {
 	if (fordefault)
@@ -847,7 +847,7 @@ PRIVATE int UC_con_set_unimap_str ARGS3(
 PRIVATE int con_get_unimap ARGS3(
 	u16,			ct,
 	u16 *,			uct,
-	struct unipair *, 	list)
+	struct unipair *,	list)
 {
     int i, j, k, ect;
     u16 **p1, *p2;
@@ -882,9 +882,9 @@ PRIVATE int conv_uni_to_pc ARGS2(
 {
     int h;
     u16 **p1, *p2;
-  
+
     /*
-     *  Only 16-bit codes supported at this time.
+     *	Only 16-bit codes supported at this time.
      */
     if (ucs > 0xffff) {
 	/*
@@ -928,7 +928,7 @@ PRIVATE int conv_uni_to_pc ARGS2(
     }
 
     /*
-     *  Not found.
+     *	Not found.
      */
     return -4;
 }
@@ -946,7 +946,7 @@ PRIVATE int conv_uni_to_str ARGS4(
     char ***p1, **p2;
 
     /*
-     *  Only 16-bit codes supported at this time.
+     *	Only 16-bit codes supported at this time.
      */
     if (ucs > 0xffff) {
 	/*
@@ -954,7 +954,7 @@ PRIVATE int conv_uni_to_str ARGS4(
 	 */
 	ucs = 0xfffd;
     /*
-     *  Maybe the following two cases should be allowed here?? - KW
+     *	Maybe the following two cases should be allowed here?? - KW
      */
     } else if (ucs < 0x20 || ucs >= 0xfffe) {
 	/*
@@ -996,7 +996,7 @@ PRIVATE int conv_uni_to_str ARGS4(
     }
 
     /*
-     *  Not found.
+     *	Not found.
      */
     return -4;
 }
@@ -1070,7 +1070,7 @@ PUBLIC int UCTransUniChar ARGS2(
  *  Returns string length, or negative value for error.
  */
 PUBLIC int UCTransUniCharStr ARGS5(
-	char *,		outbuf,
+	char *, 	outbuf,
 	int,		buflen,
 	long,		unicode,
 	int,		charset_out,
@@ -1369,7 +1369,7 @@ PUBLIC int UCReverseTransChar ARGS3(
  *  Returns string length, or negative value for error.
  */
 PUBLIC int UCTransCharStr ARGS6(
-	char *,		outbuf,
+	char *, 	outbuf,
 	int,		buflen,
 	char,		ch_in,
 	int,		charset_in,
@@ -1533,7 +1533,7 @@ PUBLIC int UCGetLYhndl_byMIME ARGS1(
 	if (!strcmp(UC_MIMEcharset, "unicode-1-1-utf-8") ||
 	    !strcmp(UC_MIMEcharset, "utf8")) {
 	    /*
-	     *  Treat these as synonyms for the IANA registered name. - FM
+	     *	Treat these as synonyms for the IANA registered name. - FM
 	     */
 	    return UCGetLYhndl_byMIME("utf-8");
 	}
@@ -1570,8 +1570,8 @@ PUBLIC int UCGetLYhndl_byMIME ARGS1(
 	    !strcmp(UC_MIMEcharset, "ibm1252") ||
 	    !strcmp(UC_MIMEcharset, "iso-8859-1-windows-3.0-latin-1")) {
 	    /*
-	     *  Treat these as synonyms for windows-1252, which is more
-	     *  commonly used than the IANA registered name. - FM
+	     *	Treat these as synonyms for windows-1252, which is more
+	     *	commonly used than the IANA registered name. - FM
 	     */
 	    return UCGetLYhndl_byMIME("windows-1252");
 	}
@@ -1580,7 +1580,7 @@ PUBLIC int UCGetLYhndl_byMIME ARGS1(
 	    !strcmp(UC_MIMEcharset, "cp-1250") ||
 	    !strcmp(UC_MIMEcharset, "ibm1250")) {
 	    /*
-	     *  Treat these as synonyms for windows-1250. - FM
+	     *	Treat these as synonyms for windows-1250. - FM
 	     */
 	    return UCGetLYhndl_byMIME("windows-1250");
 	}
@@ -1590,8 +1590,8 @@ PUBLIC int UCGetLYhndl_byMIME ARGS1(
 	    isdigit((unsigned char)UC_MIMEcharset[4]) &&
 	    isdigit((unsigned char)UC_MIMEcharset[5])) {
 	    /*
-	     *  For "ibmNNN<...>" or "cp-NNN", try "cpNNN<...>"
-	     *  if not yet found. - KW & FM
+	     *	For "ibmNNN<...>" or "cp-NNN", try "cpNNN<...>"
+	     *	if not yet found. - KW & FM
 	     */
 	    char * cptmp = NULL;
 
@@ -1603,7 +1603,7 @@ PUBLIC int UCGetLYhndl_byMIME ARGS1(
 		return LYhndl;
 	    }
 	    /*
-	     *  Try windows-NNN<...> if not yet found. - FM
+	     *	Try windows-NNN<...> if not yet found. - FM
 	     */
 	    StrAllocCopy(cptmp, "windows-");
 	    StrAllocCat(cptmp, (UC_MIMEcharset + 3));
@@ -1616,7 +1616,7 @@ PUBLIC int UCGetLYhndl_byMIME ARGS1(
 	    isdigit((unsigned char)UC_MIMEcharset[9]) &&
 	    isdigit((unsigned char)UC_MIMEcharset[10])) {
 	    /*
-	     *  For "windows-NNN<...>", try "cpNNN<...>" - FM
+	     *	For "windows-NNN<...>", try "cpNNN<...>" - FM
 	     */
 	    char * cptmp = NULL;
 
@@ -1631,7 +1631,7 @@ PUBLIC int UCGetLYhndl_byMIME ARGS1(
 	  return UCGetLYhndl_byMIME("koi8-r");
   }
     }
-  return LYhndl;        /* returns -1 if no charset found by that MIME name */
+  return LYhndl;	/* returns -1 if no charset found by that MIME name */
 }
 
 /*
@@ -1641,7 +1641,7 @@ PUBLIC int UCGetLYhndl_byMIME ARGS1(
  *  any more), but it works (as far as it goes..).
  *
  *  We try to be conservative and only allocate new memory for this
- *  if needed.  If not needed, just point to SevenBitApproximations[i].
+ *  if needed.	If not needed, just point to SevenBitApproximations[i].
  *  [Could do the same for ISO_Latin1[] if it's identical to that, but
  *   would make it even *more* messy than it already is...]
  *  This the only function in this file that knows, or cares, about the
@@ -1692,7 +1692,7 @@ PRIVATE char ** UC_setup_LYCharSets_repl ARGS2(
     u8 *ti;
 
     /*
-     *  Create a temporary table for reverse lookup of latin1 codes:
+     *	Create a temporary table for reverse lookup of latin1 codes:
      */
     tp = (char **)malloc(96 * sizeof(char *));
     if (!tp)
@@ -1710,9 +1710,9 @@ PRIVATE char ** UC_setup_LYCharSets_repl ARGS2(
     pp = UCInfo[UC_charset_in_hndl].unitable;
 
     /*
-     *  Determine if we have any mapping of a Unicode in the range 160-255
-     *  to an allowed code point > 0x80 in our new charset...
-     *  Store any mappings found in ti[].
+     *	Determine if we have any mapping of a Unicode in the range 160-255
+     *	to an allowed code point > 0x80 in our new charset...
+     *	Store any mappings found in ti[].
      */
     if (UCInfo[UC_charset_in_hndl].num_uni > 0) {
 	for (i = 0; i < 256; i++) {
@@ -1745,9 +1745,9 @@ PRIVATE char ** UC_setup_LYCharSets_repl ARGS2(
 	}
     }
     /*
-     *  Now allocate a new table compatible with LYCharSets[]
-     *  and with the HTMLDTD for entities.
-     *  We don't know yet whether we'll keep it around. */
+     *	Now allocate a new table compatible with LYCharSets[]
+     *	and with the HTMLDTD for entities.
+     *	We don't know yet whether we'll keep it around. */
     p = prepl = (char **)malloc(HTML_dtd.number_of_entities * sizeof(char *));
     if (!p) {
 	FREE(tp);
@@ -1766,8 +1766,8 @@ PRIVATE char ** UC_setup_LYCharSets_repl ARGS2(
 	*p = s7;
 	if (s8 && (unsigned char)(*s8) >= 160 && strlen(s8) == 1) {
 	    /*
-	     *  We have an entity that is mapped to
-	     *  one valid eightbit latin1 char.
+	     *	We have an entity that is mapped to
+	     *	one valid eightbit latin1 char.
 	     */
 	    if (ti[(unsigned char)(*s8) - 160] >= lowest8 &&
 		!(s7[0] == ti[(unsigned char)(*s8) - 160] &&
@@ -1795,10 +1795,10 @@ PRIVATE char ** UC_setup_LYCharSets_repl ARGS2(
 		    (*p)[1] = '\0';
 #else
 		    /*
-		     *  Use this instead... make those 1-char strings
-		     *  into HTAtoms, so they will be cleaned up
-		     *  at exit... all for the sake of preventing
-		     *  memory leaks, sigh.
+		     *	Use this instead... make those 1-char strings
+		     *	into HTAtoms, so they will be cleaned up
+		     *	at exit... all for the sake of preventing
+		     *	memory leaks, sigh.
 		     */
 		    static char dummy[2];	/* one char dummy string */
 
@@ -1851,8 +1851,8 @@ PRIVATE int UC_Register_with_LYCharSets ARGS4(
     }
 
     /*
-     *  Do different kinds of searches...
-     *  Normally the first should find the match if there is one!
+     *	Do different kinds of searches...
+     *	Normally the first should find the match if there is one!
      */
     for (i = 0; i < MAXCHARSETS && LYchar_set_names[i] && LYhndl < 0; i++) {
 	if (!strcmp(UC_LYNXcharset, LYchar_set_names[i])) {
@@ -1896,15 +1896,15 @@ PRIVATE int UC_Register_with_LYCharSets ARGS4(
     }
   LYCharSet_UC[LYhndl].UChndl = s;
     /*
-     *  Can we just copy the pointer?  Hope so...
+     *	Can we just copy the pointer?  Hope so...
      */
   LYCharSet_UC[LYhndl].MIMEname = UC_MIMEcharset;
   LYCharSet_UC[LYhndl].enc = UCInfo[s].enc;
 
     /*
-     *  @@@ We really SHOULD get more info from the table files,
-     *  and set relevant flags in the LYCharSet_UC[] entry with
-     *  that info...  For now, let's try it without. - KW
+     *	@@@ We really SHOULD get more info from the table files,
+     *	and set relevant flags in the LYCharSet_UC[] entry with
+     *	that info...  For now, let's try it without. - KW
      */
     if (lowest_eightbit < LYlowest_eightbit[LYhndl]) {
     LYlowest_eightbit[LYhndl] = lowest_eightbit;
@@ -1917,7 +1917,7 @@ PRIVATE int UC_Register_with_LYCharSets ARGS4(
     if (repl) {
       LYCharSets[LYhndl] = repl;
 	    /*
-	     *  Remember to FREE at exit.
+	     *	Remember to FREE at exit.
 	     */
       remember_allocated_LYCharSets[LYhndl]=repl;
     }
@@ -1943,7 +1943,7 @@ PUBLIC void UC_Charset_Setup ARGS8(
     int i, status = 0, found;
 
     /*
-     *  Get (new?) slot.
+     *	Get (new?) slot.
      */
     found = -1;
     for (i = 0; i < UCNumCharsets && found < 0; i++) {
@@ -2012,23 +2012,29 @@ PUBLIC void UCInit NOARGS
 
     UC_CHARSET_SETUP;	/* us-ascii */	  /* 7 bit approximations */
 
+/*
+ *  The order of charset names visible in Lynx Options menu
+ *  correspond to the order of lines below,
+ *  except for CJK and others described in LYCharSet.c
+ */
+
     UC_CHARSET_SETUP_iso_8859_1;	  /* ISO Latin 1	  */
     UC_CHARSET_SETUP_cp850;		  /* DosLatin1 (cp850)	  */
-    UC_CHARSET_SETUP_windows_1252;	  /* WinLatin1 (cp1252)	  */
-    UC_CHARSET_SETUP_cp437;		  /* DosLatinUS (cp437)	  */
+    UC_CHARSET_SETUP_windows_1252;	  /* WinLatin1 (cp1252)   */
+    UC_CHARSET_SETUP_cp437;		  /* DosLatinUS (cp437)   */
 
-    UC_CHARSET_SETUP_dec_mcs;		  /* DEC Multinational    */
-    UC_CHARSET_SETUP_macintosh;		  /* Macintosh (8 bit)    */
+    UC_CHARSET_SETUP_dec_mcs;		  /* DEC Multinational	  */
+    UC_CHARSET_SETUP_macintosh; 	  /* Macintosh (8 bit)	  */
     UC_CHARSET_SETUP_next;		  /* NeXT character set   */
 
     UC_CHARSET_SETUP_viscii;		  /* Vietnamese (VISCII)  */
 
     UC_CHARSET_SETUP_iso_8859_2;	  /* ISO Latin 2	  */
     UC_CHARSET_SETUP_cp852;		  /* DosLatin2 (cp852)	  */
-    UC_CHARSET_SETUP_windows_1250;	  /* WinLatin2 (cp1250)	  */
+    UC_CHARSET_SETUP_windows_1250;	  /* WinLatin2 (cp1250)   */
     UC_CHARSET_SETUP_iso_8859_3;	  /* ISO Latin 3	  */
     UC_CHARSET_SETUP_iso_8859_4;	  /* ISO Latin 4	  */
-    UC_CHARSET_SETUP_cp775;		  /* DosBaltRim (cp775)	  */
+    UC_CHARSET_SETUP_cp775;		  /* DosBaltRim (cp775)   */
     UC_CHARSET_SETUP_windows_1257;	  /* WinBaltRim (cp1257)  */
     UC_CHARSET_SETUP_iso_8859_5;	  /* ISO 8859-5 Cyrillic  */
     UC_CHARSET_SETUP_cp866;		  /* DosCyrillic (cp866)  */
@@ -2036,21 +2042,26 @@ PUBLIC void UCInit NOARGS
     UC_CHARSET_SETUP_koi8_r;		  /* KOI8-R Cyrillic	  */
     UC_CHARSET_SETUP_iso_8859_6;	  /* ISO 8869-6 Arabic	  */
     UC_CHARSET_SETUP_cp864;		  /* DosArabic (cp864)	  */
-    UC_CHARSET_SETUP_windows_1256;	  /* WinArabic (cp1256)	  */
+    UC_CHARSET_SETUP_windows_1256;	  /* WinArabic (cp1256)   */
     UC_CHARSET_SETUP_iso_8859_7;	  /* ISO 8859-7 Greek	  */
     UC_CHARSET_SETUP_cp737;		  /* DosGreek (cp737)	  */
     UC_CHARSET_SETUP_cp869;		  /* DosGreek2 (cp869)	  */
     UC_CHARSET_SETUP_windows_1253;	  /* WinGreek (cp1253)	  */
     UC_CHARSET_SETUP_iso_8859_8;	  /* ISO 8859-8 Hebrew	  */
     UC_CHARSET_SETUP_cp862;		  /* DosHebrew (cp862)	  */
-    UC_CHARSET_SETUP_windows_1255;	  /* WinHebrew (cp1255)	  */
+    UC_CHARSET_SETUP_windows_1255;	  /* WinHebrew (cp1255)   */
     UC_CHARSET_SETUP_iso_8859_9;	  /* ISO 8859-9 (Latin 5) */
     UC_CHARSET_SETUP_iso_8859_10;	  /* ISO 8859-10	  */
 
     UC_CHARSET_SETUP_utf_8;		  /* UNICODE UTF-8	  */
-    UC_CHARSET_SETUP_mnemonic_ascii_0;	  /* RFC 1345 w/o Intro	  */
+    UC_CHARSET_SETUP_mnemonic_ascii_0;	  /* RFC 1345 w/o Intro   */
     UC_CHARSET_SETUP_mnemonic;		  /* RFC 1345 Mnemonic	  */
 #ifdef NOTDEFINED
     UC_CHARSET_SETUP_mnem;
 #endif /* NOTDEFINED */
+
+/*
+ *  To add synonyms for any charset name
+ *  check function UCGetLYhndl_byMIME in this file.
+ */
 }

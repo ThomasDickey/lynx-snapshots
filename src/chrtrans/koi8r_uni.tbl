@@ -6,6 +6,8 @@ Mkoi8-r
 
 0x20-0x7f       idem
 # Based on a table received from "Glenn E. Thobe" <thobe@lafn.org>
+# (verified against RFC1489).
+#
 #hex unicode # description     
 #--- U+---- # ---------------     
 0x80 U+2500 # FORMS LIGHT HORIZONTAL   
@@ -137,9 +139,3 @@ Mkoi8-r
 0xFE U+0427 # CAP CHE    
 0xFF U+042A # CAP HARD SIGN   
 
-# TRADE MARK SIGN:
-U+2122:(TM)
-
-0x60    U+2018          # left single quotation mark <`>
-0x27    U+2019-U+201b   # various single quotation marks <'>
-0x22    U+201c-U+201f   # various double quotation marks <">

@@ -464,6 +464,39 @@ PUBLIC int printfile ARGS1(
 			    "<!-- X-URL: %s -->\n<BASE HREF=\"%s\">\n",
 			    newdoc->address, content_base);
 		}
+
+		if (LYPrependCharsetToSource && HTisDocumentSource()) {
+		    /*
+		     *	Added the document's charset as a META CHARSET tag
+		     *	to the top of the file.  May create
+		     *	technically invalid HTML, but will help to resolve
+		     *	properly the document converted via chartrans:
+		     *  printed document correspond to a display charset
+		     *  and we *should* override both assume_local_charset
+		     *  and original document's META CHARSET (if any).
+		     *
+		     *  Currently, if several META CHARSET found
+		     *  Lynx use the first only, and it is opposite to BASE
+		     *  where original BASE in the <HEAD>
+		     *  override ones from the top.
+		     *
+		     *  Like in print-to-email we write charset only if
+		     *  the document has 8-bit characters, and
+		     *  we have no CJK or an inofficial "x-" charset.
+		     *
+		     */
+			use_cte = HTLoadedDocumentEightbit();
+			disp_charset = LYCharSet_UC[current_char_set].MIMEname;
+			if (!use_cte || LYHaveCJKCharacterSet ||
+			    strncasecomp(disp_charset, "x-", 2) == 0) {
+			} else {
+			fprintf(outfile_fp,
+				"<META HTTP-EQUIV=\"Content-Type\" "
+				"CONTENT=\"text/html; charset=%s\">\n\n",
+				disp_charset);
+			}
+		}
+
 		print_wwwfile_to_fd(outfile_fp,0);
 		if (keypad_mode)
 		    printlist(outfile_fp,FALSE);

@@ -311,7 +311,7 @@ PUBLIC BOOL override_proxy ARGS1(
 
 	if ((!templ_port || templ_port == port)  &&
 	    (t_len > 0	&&  t_len <= h_len  &&
-	     !strncmp(Host + h_len - t_len, no_proxy, t_len))) {
+             !strncasecomp(Host + h_len - t_len, no_proxy, t_len))) {
 	    FREE(host);
 	    return YES;
 	}

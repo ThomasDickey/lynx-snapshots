@@ -31,12 +31,12 @@
 
 /*******************************************************************
  * Things you must change
- *  Section 1. 
+ *  Section 1.
  */
 
 /*******************************************************************
  * Things you must change  VMS specific
- *  Section 1a). 
+ *  Section 1a).
  */
 #ifdef VMS
 /**************************
@@ -92,7 +92,7 @@
 #endif /* LYNX_CFG_FILE */
 
 /**************************
- * The EXTENSION_MAP file allows you to map file suffix's to 
+ * The EXTENSION_MAP file allows you to map file suffix's to
  * mime types.
  * These global and personal files override anything in
  * lynx.cfg or src/HTInit.c
@@ -101,11 +101,11 @@
 #define PERSONAL_EXTENSION_MAP "mime.types"
 
 /**************************
- * The MAILCAP file allows you to map file MIME types to 
+ * The MAILCAP file allows you to map file MIME types to
  * external viewers.
  * These global and personal files override anything in
  * lynx.cfg or src/HTInit.c
- */ 
+ */
 #define GLOBAL_MAILCAP "Lynx_Dir:mailcap"
 #define PERSONAL_MAILCAP ".mailcap"
 
@@ -225,7 +225,7 @@
 
 /*******************************************************************
  * Things you must change  UNIX specific
- *  Section 1b). 
+ *  Section 1b).
  */
 #else     /* UNIX */
 
@@ -266,7 +266,7 @@
 #endif /* LYNX_CFG_FILE */
 
 /**************************
- * The EXTENSION_MAP file allows you to map file suffix's to 
+ * The EXTENSION_MAP file allows you to map file suffix's to
  * mime types.
  * These global and personal files override anything in
  * lynx.cfg or src/HTInit.c
@@ -275,7 +275,7 @@
 #define PERSONAL_EXTENSION_MAP ".mime.types"
 
 /**************************
- * The MAILCAP file allows you to map file MIME types to 
+ * The MAILCAP file allows you to map file MIME types to
  * external viewers.
  * These global and personal files override anything in
  * lynx.cfg or src/HTInit.c
@@ -317,7 +317,7 @@
 
 /**************************
  * For UNIX systems this should be sendmail
- * sendmail should be in /usr/lib 
+ * sendmail should be in /usr/lib
  *
  * You definitely want sendmail, not mail or elm or something else,
  * except in the case where MMDF is your mail agent.
@@ -330,14 +330,14 @@
  */
 #ifndef HAVE_CONFIG_H
 #ifdef MMDF
-#define SYSTEM_MAIL "/usr/mmdf/bin/submit" 
+#define SYSTEM_MAIL "/usr/mmdf/bin/submit"
 #define SYSTEM_MAIL_FLAGS "-mlruxto,cc\\*"
 #else
 #if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__bsdi__)
 #define SYSTEM_MAIL "/usr/sbin/sendmail"
 #define SYSTEM_MAIL_FLAGS "-t -oi"
 #else /* everything else: */
-#define SYSTEM_MAIL "/usr/lib/sendmail" 
+#define SYSTEM_MAIL "/usr/lib/sendmail"
 #define SYSTEM_MAIL_FLAGS "-t -oi"
 #endif /* __FreeBSD || __NetBSD__ || __bsdi__ */
 #endif /* MMDF */
@@ -437,14 +437,14 @@
 /*****************************
  * STARTFILE is the default file if none is specified in lynx.cfg,
  *  on the command line, or via a WWW_HOME environment variable.
- * 
+ *
  * note: STARTFILE must be a URL.  See the Lynx online help for more
  *       information on URLs
  */
 #define STARTFILE "http://lynx.browser.org/"
 
 /*****************************
- * HELPFILE must be defined as a URL and must have a 
+ * HELPFILE must be defined as a URL and must have a
  * complete path if local:
  * file://localhost/PATH_TO/lynx_help/lynx_help_main.html
  *   Replace PATH_TO with the path to the lynx_help subdirectory
@@ -641,6 +641,7 @@
  *   DosLatin2 (cp852)			cp852
  *   DosLatinUS (cp437)			cp437
  *   ISO 8859-10			iso-8859-10
+ *   ISO 8859-5 Cyrillic		iso-8859-5
  *   ISO 8859-6 Arabic			iso-8859-6
  *   ISO 8859-7 Greek			iso-8859-7
  *   ISO 8859-8 Hebrew			iso-8859-8
@@ -649,14 +650,12 @@
  *   ISO Latin 2			iso-8859-2
  *   ISO Latin 3			iso-8859-3
  *   ISO Latin 4			iso-8859-4
- *   ISO 8859-5 Cyrillic		iso-8859-5
  *   Japanese (EUC)			euc-jp
  *   Japanese (SJIS)			shift_jis
  *   KOI8-R Cyrillic			koi8-r
  *   Korean				euc-kr
  *   Macintosh (8 bit)			macintosh
  *   NeXT character set			next
- *   Other ISO Latin			x-iso-8859-other
  *   RFC 1345 Mnemonic			mnemonic
  *   RFC 1345 w/o Intro			mnemonic+ascii+0
  *   Taipei (Big5)			big5
@@ -904,7 +903,7 @@
  * umlaut.  If defined, a digraph is displayed, e.g., auml --> ae
  * Otherwise, a single character is displayed,  e.g., auml --> a
  * Note that this is currently not supported with the chartrans code,
- * or rather it doesn't have an effect if translations for a display 
+ * or rather it doesn't have an effect if translations for a display
  * character set are taken from one of the *.tbl files in src/chrtrans.
  * One would have to modify the corresponding *.tbl file for this.
  */
@@ -958,7 +957,7 @@
  * very serious security risk to your system and its
  * users.  If you do define these I suggest that
  * you only allow users to execute files/scripts
- * that reside on your local machine. 
+ * that reside on your local machine.
  *
  * YOU HAVE BEEN WARNED!
  *
@@ -966,13 +965,13 @@
  * also see src/HTInit.c to verify/change the execution
  * script extensions and/or commands.
  */
-/* #define EXEC_LINKS  */ 
-/* #define EXEC_SCRIPTS  */ 
+/* #define EXEC_LINKS  */
+/* #define EXEC_SCRIPTS  */
 
 /**********
  * UNIX:
  * =====
- * CGI script support. Defining LYNXCGI_LINKS allows you to use the 
+ * CGI script support. Defining LYNXCGI_LINKS allows you to use the
  *
  *   lynxcgi:path
  *
@@ -1007,7 +1006,7 @@
 #if defined(EXEC_LINKS) || defined(EXEC_SCRIPTS)
 
 /**********
- * if ALLOW_USERS_TO_CHANGE_EXEC_WITHIN_OPTIONS 
+ * if ALLOW_USERS_TO_CHANGE_EXEC_WITHIN_OPTIONS
  * is defined then the user will be able to change
  * the execution status within the options screen.
  */
@@ -1031,7 +1030,7 @@
  * EXEC_SCRIPTS defined.
  *
  * The first two settings:
- * LOCAL_EXECUTION_LINKS_ALWAYS_ON 
+ * LOCAL_EXECUTION_LINKS_ALWAYS_ON
  * LOCAL_EXECUTION_LINKS_ON_BUT_NOT_REMOTE
  * specify the DEFAULT setting of the users execution link
  * options, but the user may still change those options.
@@ -1042,7 +1041,7 @@
  * LOCAL_EXECUTION_LINKS_ALWAYS_ON will be FALSE
  * if NEVER_ALLOW_REMOTE_EXEC has been defined.
  *
- * if LOCAL_EXECUTION_LINKS_ALWAYS_OFF_FOR_ANONYMOUS is 
+ * if LOCAL_EXECUTION_LINKS_ALWAYS_OFF_FOR_ANONYMOUS is
  * true all execution links will be disabled when the
  * -anonymous command line option is used.  Anonymous
  * users are not allowed to change the execution options
@@ -1061,7 +1060,7 @@
 #endif /*  defined(EXEC_LINKS) || defined(EXEC_SCRIPTS) */
 
 /*********************************
- *  MAIL_SYSTEM_ERROR_LOGGING will send a message to the owner of 
+ *  MAIL_SYSTEM_ERROR_LOGGING will send a message to the owner of
  *  the information if there is one, every time
  *  that a document cannot be accessed!
  *
@@ -1102,7 +1101,7 @@
 /*********************************
  * DEFAULT_KEYPAD_MODE specifies whether by default the user
  * has numbers that work like arrows or else numbered links
- * DEFAULT KEYPAD MODE may be set to 
+ * DEFAULT KEYPAD MODE may be set to
  *	NUMBERS_AS_ARROWS   or
  *	LINKS_ARE_NUMBERED  or
  *	LINKS_AND_FORM_FIELDS_ARE_NUMBERED
@@ -1169,12 +1168,13 @@
 #define SUBSTITUTE_UNDERSCORES	FALSE /* Use _underline_ format in dumps */
 
 /********************************
- * If QUIT_DEFAULT_YES is defined then when the QUIT command is entered,
- * any response other than n or N will confirm.  Comment this out if
- * you prefer the more conservative action of requiring an explicit
- * Y or y to confirm.
+ * If QUIT_DEFAULT_YES is defined as TRUE then when the QUIT command
+ * is entered, any response other than n or N will confirm.  Define it
+ * as FALSE if you prefer the more conservative action of requiring an
+ * explicit Y or y to confirm.  The default defined here can be changed
+ * in lynx.cfg.
  */
-#define QUIT_DEFAULT_YES
+#define QUIT_DEFAULT_YES	TRUE
 
 /********************************
  * These definitions specify files created or used in conjunction
@@ -1206,7 +1206,7 @@
  * the version definition with the Project Version on checkout. Just
  * ignore it. - kw */
 /* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
-#define LYNX_VERSION "2.7.1ac-0.111"
+#define LYNX_VERSION "2.7.1ac-0.113"
 
 #ifndef MAXINT
 #define MAXINT 2147483647	/* max integer */
@@ -1352,7 +1352,7 @@
  *
  * It is very important to have this correctly defined or include
  * the "-anonymous" command line option for invocation of Lynx
- * in an anonymous account!  If you do not you will be putting 
+ * in an anonymous account!  If you do not you will be putting
  * yourself at GREAT security risk!
  */
 #define ANONYMOUS_USER ""

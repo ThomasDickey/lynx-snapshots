@@ -6,22 +6,20 @@ Lynx CHARTRANS
    character set, *IF* the document charset is known by a translation 
    table (compiled in at installation).
 
- - Old method for specifying translations of Latin1 characters and
-   SGML entities still supported. (IBMPC-charsets.announce is still
-   relevant.)
-
  - New method to define character sets: used for input charset as well
    as display character set, translation tables compiled in from 
    separate files (one per charset).  One table is designated as default
    and can be used for fallback translation to 7-bit replacements for
    display.
 
+ - New method for specifying translations of SGML entities.
+
  - Unicode (UTF8) support: can (attempt to) decode and translate UTF8 to
    display character set, or pass through UTF to display (if terminal
    or console understands UTF8).  [raw display of UTF only tested with Slang 
    so far, does not always position everything correctly on screen]
 
- - Support for CHARSET attribute on A tag (and sometimesLINK), as in HTML
+ - Support for CHARSET attribute on A tag (and sometimes LINK), as in HTML
    i18n RFC 2070 and W3C HTML 4.0 drafts.  A link can suggest the target's
    charset in this way.
 
@@ -48,7 +46,7 @@ Additions/changes to user interface:
    -assume_local_charset=... assume this as charset of local file: docs 
    also available as ASSUME_CHARSET etc. in lynx.cfg
    In "Advanced User" mode, ASSUME_CHARSET can be changed during a session
-   from the Optios Screen.
+   from the Options Screen.
 
  - The "Raw" toggle (from -raw flag, '@' key, or Options screen)
    o  toggles the assumption "Default remote charset is same as Display
@@ -138,7 +136,7 @@ HOW TO INSTALL:
      not xterm, not a dialup *into* the Linux box), you can compile
      with -DEXP_CHARTRANS_AUTOSWITCH.  This is very useful for testing
      the various Display Character Sets, Lynx will try to automatically
-     chage the console state.  You need to have the Linux kbd package
+     change the console state.  You need to have the Linux kbd package
      installed, with a working `setfont' command executable by the user,
      and the right font files - check the source in src/UCAuto.c for
      the files used and/or to change them!  
@@ -165,6 +163,6 @@ HOW TO INSTALL:
 
     Suggestions for improvement would be welcome, as well as 
     contributed translation tables (for stuff that is not available
-    at ftp://dkuug.dk or ftp://unicode.org).
+    at ftp://dkuug.dk or ftp://ftp.unicode.org).
 
 KW  1997-11-06

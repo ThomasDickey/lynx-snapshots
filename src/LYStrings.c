@@ -664,7 +664,7 @@ re_read:
 	   err=getmouse(&event);
 	   if (event.bstate & BUTTON1_CLICKED) {
 	     c = set_clicked_link(event.x, event.y);
-	   } else if (event.bstate & BUTTON2_CLICKED) {
+	   } else if (event.bstate & BUTTON3_CLICKED) {
 	     c = map_function_to_key (LYK_PREV_DOC);
 	   }
 #else /* pdcurses version */

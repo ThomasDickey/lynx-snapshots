@@ -12,7 +12,7 @@ OUNICODE UTF-8
 # Some kind of raw Unicode?
 # Use 6 for for really "raw" 16bit UCS-2, 7 for UTF-8, ...
 
-# most of these codes currently don't make much sense in a *.uni file,
+# most of these codes currently don't make much sense in a *.tbl file,
 # but for completeness (from UCDefs.h):
 #  #define UCT_ENC_7BIT 0
 #  #define UCT_ENC_8BIT 1

@@ -174,9 +174,4 @@ ONeXT character set
 0xfd	U+00ff	# LATIN SMALL LETTER Y WITH DIAERESIS
 #0xfe	U+fffd	# .notdef, REPLACEMENT CHARACTER
 #0xff	U+fffd	# .notdef, REPLACEMENT CHARACTER
-#
-# degree sign (&#176;) - deg
-U+00B0:DEG
-#
-# TRADE MARK SIGN
-U+2122:(TM)
+

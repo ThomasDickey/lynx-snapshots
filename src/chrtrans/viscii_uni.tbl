@@ -18,7 +18,7 @@ OVietnamese (VISCII)
 # Special 'enc' flag to signal that some C0 characters are used.
 # Tables with R3 should properly map the allowed C0 control chars!
 #
-# most of these codes currently don't make much sense in a *.uni file,
+# most of these codes currently don't make much sense in a *.tbl file,
 # but for completeness (from UCDefs.h):
 #  #define UCT_ENC_7BIT 0
 #  #define UCT_ENC_8BIT 1
@@ -298,9 +298,3 @@ U+1ef6:Y?
 U+1ef8:Y~
 0xdb	U+1ef9
 
-# TRADE MARK SIGN:
-U+2122:(TM)
-
-0x60    U+2018          # left single quotation mark <`>
-0x27    U+2019-U+201b   # various single quotation marks <'>
-0x22    U+201c-U+201f   # various double quotation marks <">

@@ -1,7 +1,7 @@
 The translation table files in this directory are _examples only_.
-They were collected from several sources (among them Linux kbd package, 
-ftp://dkuug.dk/, ftp://unicode.org/) and automatically converted (if
-applicable), but not checked in detail.  The Unicode/UCS2 values
+They were collected from several sources (among them ftp://ftp.unicode.org,
+Linux kbd package, ftp://dkuug.dk/) and are believed to be correct
+in their mappings, but not checked in detail.  The Unicode/UCS2 values
 for some of the RFC 1345 Mnemonic codes are out of date, a cleanup and
 update would be needed for serious use (including removing the mappings
 from the "private zone" U+E000 etc.).

@@ -9,43 +9,35 @@
 extern HTCJKlang HTCJK;
 extern LYUCcharset LYCharSet_UC[];
 
-PUBLIC UCTQ_t UCCanUniTranslateFrom ARGS1(
+PUBLIC BOOL UCCanUniTranslateFrom ARGS1(
 	int,		from)
 {
     if (from < 0)
-	return TQ_NO;
+	return NO;
     if (LYCharSet_UC[from].enc == UCT_ENC_7BIT ||
 	LYCharSet_UC[from].enc == UCT_ENC_UTF8)
-	return TQ_EXCELLENT;
+	return YES;
     if (LYCharSet_UC[from].codepoints & (UCT_CP_SUBSETOF_LAT1))
-	return TQ_EXCELLENT;
-    return ((LYCharSet_UC[from].UChndl >= 0) ? TQ_GOOD : TQ_NO);
+	return YES;
+    return (LYCharSet_UC[from].UChndl >= 0);
 }
 
-PUBLIC UCTQ_t UCCanTranslateUniTo ARGS1(
+PUBLIC BOOL UCCanTranslateUniTo ARGS1(
 	int,		to)
 {
     if (to < 0)
-	return TQ_NO;
-    if (LYCharSet_UC[to].enc == UCT_ENC_7BIT)
-	return TQ_POOR;
-    if (LYCharSet_UC[to].enc == UCT_ENC_UTF8)
-	return TQ_EXCELLENT;
-    if (LYCharSet_UC[to].enc == UCT_ENC_CJK)
-	return TQ_POOR;
-    if (LYCharSet_UC[to].UChndl >= 0)
-	return TQ_GOOD;
-    return TQ_GOOD;	/* at least some characters, we don't know more */
+	return NO;
+    return YES;			/* well at least some characters... */
 }
 
-PUBLIC UCTQ_t UCCanTranslateFromTo ARGS2(
+PUBLIC BOOL UCCanTranslateFromTo ARGS2(
 	int,		from,
 	int,		to)
 {
     if (from == to)
-	return TQ_EXCELLENT;
+	return YES;
     if (from < 0 || to < 0)
-	return TQ_NO;
+	return NO;
     if (from == 0)
 	return UCCanTranslateUniTo(to);
     if (to == 0 || LYCharSet_UC[to].enc == UCT_ENC_UTF8)
@@ -55,9 +47,9 @@ PUBLIC UCTQ_t UCCanTranslateFromTo ARGS2(
 	CONST char * toname = LYCharSet_UC[to].MIMEname;
 	if (!strcmp(fromname, "x-transparent") ||
 	    !strcmp(toname, "x-transparent")) {
-	    return TQ_GOOD;
+	    return YES;
 	} else if (!strcmp(fromname, "us-ascii")) {
-	    return TQ_GOOD;
+	    return YES;
 	}
 	if (LYCharSet_UC[from].enc == UCT_ENC_CJK) {
 	    /*
@@ -66,25 +58,25 @@ PUBLIC UCTQ_t UCCanTranslateFromTo ARGS2(
 	    **  be for capability in relation to another document,
 	    **  for which CJK mode might be turned on when retrieved.
 	    **  Thus, when the from charset is CJK, check if the to
-	    **  charset is CJK, and return TQ_NO or TQ_GOOD depending on
+	    **  charset is CJK, and return NO or YES in relation to
 	    **  that. - FM
 	    */
 	    if (LYCharSet_UC[to].enc != UCT_ENC_CJK)
-		return TQ_NO;
+		return NO;
 	    if ((!strcmp(toname, "euc-jp") ||
 		 !strcmp(toname, "shift_jis")) &&
 		(!strcmp(fromname, "euc-jp") ||
 		 !strcmp(fromname, "shift_jis")))
-		return TQ_GOOD;
+		return YES;
 	    /*
 	    **  The euc-cn and euc-kr charsets were handled
 	    **  by the (from == to) above, so we need not
 	    **  check those. - FM
 	    **/
-	    return TQ_NO;
+	    return NO;
 	}
-	return ((LYCharSet_UC[from].UChndl >= 0) ? TQ_GOOD : TQ_NO);
     }
+    return (LYCharSet_UC[from].UChndl >= 0);
 }
 
 /*
@@ -242,7 +234,7 @@ PUBLIC void UCSetTransParams ARGS5(
 	    **  treated as already Unicode here.
 	    */
 	    pT->trans_to_uni = (!intm_ucs &&
-				UCCanUniTranslateFrom(cs_in) != TQ_NO);
+				UCCanUniTranslateFrom(cs_in));
 	    /*
 	    **  We set this if we are translating to Unicode and
 	    **  what normally are low value control characters in
@@ -255,27 +247,11 @@ PUBLIC void UCSetTransParams ARGS5(
 	    **  We set this, presently, for VISCII. - FM
 	    */
 	    pT->repl_translated_C0 = (p_out->enc == UCT_ENC_8BIT_C0);
-#ifdef NOTDEFINED
 	    /*
-	    **  This is a flag for whether we are dealing with koi8-r
-	    **  as the input, and could do 8th-bit stripping for other
-	    **  output charsets.  Note that this always sets 8th-bit
-	    **  stripping if the input charset is KOI8-R and the output
-	    **  charset needs it, i.e., regardless of the RawMode and
-	    **  consequent HTPassEightBitRaw setting, so you can't look
-	    **  at raw koi8-r without selecting that as the display
-	    **  character set (or transparent).  That's just as well,
-	    **  but worth noting for developers - FM
+	    **  Currently unused for any charset combination.
+	    **  Should always be FALSE
 	    */
-	    pT->strip_raw_char_in = ((!intm_ucs ||
-				      (p_out->enc == UCT_ENC_7BIT) ||
-				      (p_out->repertoire &
-				       UCT_REP_SUBSETOF_LAT1)) &&
-				     cs_in != cs_out &&
-				     !strcmp(p_in->MIMEname, "koi8-r"));
-#else
 	    pT->strip_raw_char_in = FALSE;
-#endif /* NOTDEFINED */
 	    /*
 	    **  use_ucs should be set TRUE if we have or will create
 	    **  Unicode values for input octets or UTF multibytes. - FM
@@ -314,7 +290,7 @@ PUBLIC void UCSetTransParams ARGS5(
 	    */
 	    pT->trans_from_uni = (use_ucs && !pT->do_8bitraw &&
 				  !pT->use_raw_char_in &&
-				  UCCanTranslateUniTo(cs_out) != TQ_NO);
+				  UCCanTranslateUniTo(cs_out));
 	}
     }
 }

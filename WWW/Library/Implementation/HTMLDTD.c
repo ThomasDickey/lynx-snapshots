@@ -1215,7 +1215,6 @@ static CONST UC_entity_info extra_entities[] = {
 /* {"smid",	0x????},  shortmid				 # ISOamsr */
 };
 
-
 /*		Attribute Lists
 **		---------------
 **
@@ -2662,9 +2661,9 @@ PUBLIC CONST SGML_dtd HTML_dtd = {
 	tags,
 	HTML_ELEMENTS,
 	entities,
-	sizeof(entities)/sizeof(char*),
+	sizeof(entities)/sizeof(entities[0]),
 	extra_entities,
-	sizeof(extra_entities)/sizeof(UC_entity_info),
+	sizeof(extra_entities)/sizeof(extra_entities[0])
 };
 
 /* This function fills the "tags" part of the HTML_dtd structure with

@@ -890,6 +890,35 @@ Prepend_BASE:
 		anchor->address, (temp ? temp : anchor->address));
 	FREE(temp);
     }
+        if (LYPrependCharsetToSource &&
+	!strncasecomp(pres->rep->name, "text/html", 9) &&
+	!anchor->content_encoding) {
+	/*
+	 *  Add the document's charset as a META CHARSET tag
+	 *  at the top of the file, so HTTP charset header
+	 *  will not be forgotten when a document saved as local file.
+	 *  We add this line only(!) if HTTP charset present. - LP
+	 *  Note that the markup will be technically invalid if a DOCTYPE
+	 *  declaration, or HTML or HEAD tags, are present, and thus the
+	 *  file may need editing for perfection. - FM
+	 */
+
+/* ++++ Not checked in detail - whether we may use anchor->charset
+or should find something else in HTAnchor.c or HTMime.c - LP.
++++++++++ */
+
+	char *temp = NULL;
+
+	if (anchor->charset && *anchor->charset) {
+	    StrAllocCopy(temp, anchor->charset);
+	    collapse_spaces(temp);
+		fprintf(ret_obj->fp,
+		"<META HTTP-EQUIV=\"Content-Type\" "
+		"CONTENT=\"text/html; charset=%s\">\n\n",
+		temp);
+	}
+	FREE(temp);
+    }
     return ret_obj;
 }
 

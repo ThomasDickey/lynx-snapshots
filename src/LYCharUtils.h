@@ -6,6 +6,8 @@
 #include "HTUtils.h"
 #endif /* HTUTILS_H */
 
+#define CHECK_ID(code) LYCheckForID(me, present, value, (int)code)
+
 typedef enum {
     st_HTML	= 0,	/* attributes and content found in HTML, probably meant for display */
     st_URL,		/* URLs, fragments, NAME and ID */
@@ -54,10 +56,8 @@ extern char *LYUppercaseI_OL_String PARAMS((
 	int			seqnum));
 extern char *LYLowercaseI_OL_String PARAMS((
 	int			seqnum));
-#ifdef HTML_H
 extern void LYGetChartransInfo PARAMS((
 	HTStructured *		me));
-#endif
 extern void add_META_charset_to_fd PARAMS((
 	FILE *			fp,
 	int			disp_chndl));
@@ -66,14 +66,12 @@ extern void LYHandleMETA PARAMS((
 	CONST BOOL*		present,
 	CONST char **		value,
 	char ** 		include));
-#ifdef NOTDEFINED
 extern void LYHandleP PARAMS((
 	HTStructured *		me,
 	CONST BOOL*		present,
 	CONST char **		value,
 	char ** 		include,
 	BOOL			start));
-#endif
 extern void LYHandleSELECT PARAMS((
 	HTStructured *		me,
 	CONST BOOL*		present,

@@ -153,7 +153,8 @@ PRIVATE void HTPlain_put_character ARGS2(
     } else if ((unsigned char)c > 160) {
 	if (!HTPassEightBitRaw &&
 	    current_char_set != 0) {
-	    int len, high, low, i, diff = 1;
+	    size_t len, high, low, i;
+	    int diff = 1;
 	    CONST char * name;
 	    UCode_t value = (UCode_t)((unsigned char)c - 160);
 
@@ -528,7 +529,8 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 		/*
 		**  Out of luck, so use the UHHH notation (ugh). - FM
 		*/
-		int len, high, low, i, diff=1;
+		size_t len, high, low, i;
+		int diff = 1;
 		CONST char * name;
 		int value = (int)(code - 160);
 
