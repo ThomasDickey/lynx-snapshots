@@ -823,7 +823,7 @@ PRIVATE BOOL HTLoadDocument ARGS4(
 	    NewDoc.bookmark = anchor->bookmark;
 	    NewDoc.isHEAD = anchor->isHEAD;
 	    NewDoc.safe = anchor->safe;
-	    anchor = (HTParentAnchor *)HTAnchor_findAddress(&NewDoc);
+	    anchor = HTAnchor_parent(HTAnchor_findAddress(&NewDoc));
 	}
     }
     /*

@@ -43,7 +43,6 @@ PUBLIC void cleanup_sig ARGS1(
 	 *  Reassert the AST.
 	 */
 	(void) signal(SIGINT, cleanup_sig);
-	HadVMSInterrupt = TRUE;
 	if (!LYCursesON)
 	    return;
 
@@ -61,6 +60,7 @@ PUBLIC void cleanup_sig ARGS1(
 	} else {
 	    c = HTConfirmDefault(REALLY_EXIT_N, NO);
 	}
+	HadVMSInterrupt = TRUE;
 	if (LYQuitDefaultYes == TRUE) {
 	    if (c == NO) {
 		return;

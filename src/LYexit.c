@@ -8,9 +8,9 @@
 #include <LYGlobalDefs.h>
 #include <LYUtils.h>
 #include <LYSignal.h>
-#include <LYClean.h>
 #include <LYMainLoop.h>
 #endif /* !VMS */
+#include <LYClean.h>
 
 /*
  *  Flag for outofmem macro. - FM

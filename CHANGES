@@ -1,6 +1,30 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2000-05-05 (2.8.4dev.1)
+* use built-in LYCopyFile logic for CYGWIN rather than external cp program -DK
+* minor refinement to  LYValidateFilename() to avoid prepending a drive
+  letter when saving files via the PRINT command on DOS systems -DK
+* update URLs in lynx_help_main.html (Frederic L W Meunier)
+* update description in INSTALLATION dealing with passive ftp (report by
+  Frederic L W Meunier) -TD
+* correct ifdef'ing in LYtouchline() for VMS curses versus slang (report by
+  Jerome Lauret)
+* correct an overlooked change of ifdef's from
+  CONV_JISX0201KANA_TO_JISX0208KANA to CONV_JISX0201KANA_JISX0208KANA -TH
+* move include of LYClean.h in LYexit.c to ensure that cleanup_files() is
+  prototyped on VMS (report by Jerome Lauret) 
+* move assignment of HadVMSInterrupt in cleanup_sig() to avoid interaction with
+  logic in HTConfirmDefault() on VMS (reported/tested by Jerome Lauret) -KW
+* minor fixes to lynx.man / lynx.hlp for descriptions of -get_data, -post_data,
+  -short_url -KW
+* avoid invalid memory access that can result from redirection messages
+  that include a fragment in the new URL -KW
+* change sed delimiter in makefile.in from '%' to '"', to work around SINIX
+  v5.43 (SYSV4) sed which becomes confused by nested '%' in expression for
+  htmlized cfg install (reported by Shishakov Vjacheslav"
+  <shishako@avn.skiftel.ru>) -TD
+
 2000-04-23 (2.8.3rel.1)
 * replace LYNX_RELEASE variable in userdefs.h by functions LYVersionIsRelease()
   and LYVersionStatus() in LYShowInfo.c -TD

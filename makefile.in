@@ -331,8 +331,8 @@ install-doc : $(DOCDIR) $(HELPDIR)
 		done'
 
 # HPUX 'sed' does not seem to like '=' as pattern delimiter.
-FIX_SED = tr '=' '%'
-#FIX_SED = cat
+# We cannot use '%' because it may appear in a URL.
+FIX_SED = tr '=' '"'
 
 help_files.sed : makefile $(srcdir)/lynx_help/help_files.txt
 	@echo Constructing sed-script $@

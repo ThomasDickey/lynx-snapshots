@@ -212,7 +212,9 @@ toggles transmissions of From headers.
 disable ftp access.
 .TP
 .B -get_data
-send form data from stdin using GET method and dump results.
+properly formatted data for a get form are read in from
+stdin and passed to the form.
+Input is terminated by a line that starts with '---'.
 .TP
 .B -head
 send a HEAD request for the mime headers.
@@ -361,7 +363,9 @@ toggles handling of single-choice SELECT options via
 popup windows or as lists of radio buttons.
 .TP
 .B -post_data
-send form data from stdin using POST method and dump results.
+properly formatted data for a post form are read in from 
+stdin and passed to the form.
+Input is terminated by a line that starts with '---'. 
 .TP
 .B -preparsed
 show HTML source preparsed and reformatted when used with -source
@@ -537,7 +541,7 @@ disable recognition of rlogin commands.
 require .www_browsable files to browse directories.
 .TP
 .B -short_url
-show very long URLs in the status line with "___" to represent the
+show very long URLs in the status line with "..." to represent the
 portion which cannot be displayed.
 The beginning and end of the URL are displayed, rather than suppressing the end.
 .TP

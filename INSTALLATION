@@ -590,10 +590,9 @@ Step 1.  Downloading binary files.
     comments in FIXED512.COM, userdefs.h and lynx.cfg for more information.
 
 Step 2.  Passive FTP
-    If your system requires the PASV FTP code instead of the standard
-    PORT FTP code (e.g., to deal with a firewall) then edit "WWW/Library/
-    Implementation/HTFTP.c" and comment out line 43 like so:
-	     /*  #define LISTEN   /* @@@@ Test LJM */.
+    If your system requires the PASV FTP code instead of the standard PORT FTP
+    code (e.g., to deal with a firewall) then set the FTP_PASSIVE option in
+    lynx.cfg
 
 Step 3a.
     Lynx uses the VMS port of gzip for uncompressing streams which have
