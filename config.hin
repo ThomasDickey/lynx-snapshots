@@ -55,6 +55,7 @@
 #undef HAVE_ARGZ_H		/* defined by AM_GNU_GETTEXT */
 #undef HAVE_ARPA_INET_H
 #undef HAVE_ASSUME_DEFAULT_COLORS /* ncurses extension */
+#undef HAVE_BSD_TOUCHLINE	/* CF_CURS_TOUCHLINE */
 #undef HAVE_CATGETS		/* defined if you want to use non-GNU catgets */
 #undef HAVE_CBREAK
 #undef HAVE_CURSESX_H
@@ -90,7 +91,10 @@
 #undef HAVE_MKTEMP
 #undef HAVE_MMAP		/* defined by AM_GNU_GETTEXT */
 #undef HAVE_MUNMAP		/* defined by AM_GNU_GETTEXT */
+#undef HAVE_NAPMS
 #undef HAVE_NCURSES_H		/* defined if we include <ncurses.h> */
+#undef HAVE_NCURSES_NCURSES_H	/* defined if we include <ncurses/ncurses.h> */
+#undef HAVE_NCURSES_TERM_H	/* have <ncurses/term.h> */
 #undef HAVE_NEWPAD
 #undef HAVE_NEWTERM
 #undef HAVE_NL_TYPES_H		/* defined by AM_GNU_GETTEXT */
@@ -113,6 +117,7 @@
 #undef HAVE_STRERROR
 #undef HAVE_STRING_H
 #undef HAVE_SYSLOG_H
+#undef HAVE_SYSV_TOUCHLINE	/* CF_CURS_TOUCHLINE */
 #undef HAVE_SYS_DIR_H		/* defined by AC_HEADER_DIRENT */
 #undef HAVE_SYS_FCNTL_H		/* have <sys/fcntl.h> */
 #undef HAVE_SYS_FILIO_H		/* have <sys/filio.h> */
@@ -123,6 +128,7 @@
 #undef HAVE_SYS_WAIT_H		/* have <sys/wait.h> */
 #undef HAVE_TERMIOS_H		/* have <termios.h> */
 #undef HAVE_TERMIO_H		/* have <termio.h> */
+#undef HAVE_TERM_H		/* have <term.h> */
 #undef HAVE_TOUCHLINE
 #undef HAVE_TOUCHWIN
 #undef HAVE_TRUNCATE
@@ -140,6 +146,7 @@
 #undef HAVE_VALUES_H		/* defined by AM_GNU_GETTEXT */
 #undef HAVE_VARARGS_H		/* CF_VARARGS */
 #undef HAVE_VASPRINTF
+#undef HAVE_VFORK_H		/* have <vfork.h> */
 #undef HAVE_WAITPID
 #undef HAVE_WBORDER
 #undef HAVE_WREDRAWLN
@@ -234,7 +241,13 @@
 #undef ut_name			/* CF_UTMP */
 #undef ut_xstatus		/* CF_UTMP_UT_XSTATUS */
 #undef ut_xtime			/* CF_UTMP_UT_XTIME */
+
+/*
+ * U/Win defines vfork() as a macro in vfork.h, which is included from unistd.h.
+ */
+#ifndef HAVE_VFORK_H
 #undef vfork			/* defined by AC_FUNC_FORK */
+#endif
 
 /* 'const' may be defined externally by the compiler-wrapper, as in 'unproto'
  * or by AC_C_CONST

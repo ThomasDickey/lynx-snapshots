@@ -230,7 +230,6 @@
  gettext("Spawning your default shell.  Use 'exit' to return to Lynx.\n")
 #endif
 #endif /* VMS */
-#define CHDIR_DISABLED gettext("Changing working-directory is currently disabled.")
 #define SPAWNING_DISABLED gettext("Spawning is currently disabled.")
 #define DOWNLOAD_DISABLED gettext("The 'd'ownload command is currently disabled.")
 #define NO_DOWNLOAD_INPUT gettext("You cannot download an input field.")
@@ -244,7 +243,6 @@
 #define NO_DOWNLOAD_CHOICE gettext("Nothing to download.")
 #define TRACE_ON gettext("Trace ON!")
 #define TRACE_OFF gettext("Trace OFF!")
-#define TRACE_DISABLED gettext("Trace not supported")
 #define CLICKABLE_IMAGES_ON \
  gettext("Links will be included for all images!  Reloading...")
 #define CLICKABLE_IMAGES_OFF \
@@ -269,9 +267,6 @@
 #define NOT_IN_STARTING_REALM gettext("URL is not in starting realm!")
 #define NEWSPOSTING_DISABLED gettext("News posting is disabled!")
 #define DIRED_DISABLED gettext("File management support is disabled!")
-#define SHIFT_VS_LINEWRAP gettext("Shifting is disabled while line-wrap is in effect")
-#define LINEWRAP_ON gettext("Linewrap ON!")
-#define LINEWRAP_OFF gettext("Linewrap OFF!")
 #define NO_JUMPFILE gettext("No jump file is currently available.")
 #define JUMP_PROMPT gettext("Jump to (use '?' for list): ")
 #define JUMP_DISALLOWED gettext("Jumping to a shortcut URL is disallowed!")
@@ -859,5 +854,14 @@ definitions when this copy of Lynx was built.")
 #ifdef USE_EXTERNALS
 #define EXTERNALS_DISABLED gettext("External support is currently disabled.")
 #endif /* USE_EXTERNALS */
+
+/* new with 2.8.4dev.21 */
+#define CHDIR_DISABLED gettext("Changing working-directory is currently disabled.")
+#define LINEWRAP_OFF gettext("Linewrap OFF!")
+#define LINEWRAP_ON gettext("Linewrap ON!")
+#define NESTED_TABLES_OFF gettext("Parsing nested-tables toggled OFF!  Reloading...")
+#define NESTED_TABLES_ON gettext("Parsing nested-tables toggled ON!  Reloading...")
+#define SHIFT_VS_LINEWRAP gettext("Shifting is disabled while line-wrap is in effect")
+#define TRACE_DISABLED gettext("Trace not supported")
 
 #endif /* LYMESSAGES_EN_H */

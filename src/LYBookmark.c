@@ -25,6 +25,24 @@ PUBLIC char *MBM_A_subdescript[MBM_V_MAXFILES+1];
 PRIVATE BOOLEAN is_mosaic_hotlist = FALSE;
 PRIVATE char * convert_mosaic_bookmark_file PARAMS((char *filename_buffer));
 
+PUBLIC int LYindex2MBM ARGS1(int, n)
+{
+    static char MBMcodes[MBM_V_MAXFILES+2] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    return n >= 0 && n <= MBM_V_MAXFILES ? MBMcodes[n] : '?';
+}
+
+PUBLIC int LYMBM2index ARGS1(int, ch)
+{
+    if ((ch = TOUPPER(ch)) > 0) {
+	char *letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+	char *result = strchr(letters, ch);
+	if (result != 0
+	 && (result - letters) <= MBM_V_MAXFILES)
+	    return (result - letters);
+    }
+    return -1;
+}
+
 PRIVATE void
 show_bookmark_not_defined NOARGS
 {
@@ -253,7 +271,7 @@ PUBLIC void save_bookmark_link ARGS2(
      *	If the link will be added to the same
      *	bookmark file, get confirmation. - FM
      */
-    if (LYMultiBookmarks == TRUE &&
+    if (LYMultiBookmarks != MBM_OFF &&
 	strstr(HTLoadedDocumentURL(),
 	       (*BookmarkPage == '.' ?
 		    (BookmarkPage+1) : BookmarkPage)) != NULL) {
@@ -354,7 +372,7 @@ PUBLIC void save_bookmark_link ARGS2(
 	else
 	    fprintf(fp, "<META %s %s>\n",
 		    "http-equiv=\"content-type\"",
-		    "content=\"text/html;charset=iso-2022-jp\""); 
+		    "content=\"text/html;charset=iso-2022-jp\"");
 #else
 	LYAddMETAcharsetToFD(fp, -1);
 #endif	/* !_WINDOWS */
@@ -679,7 +697,7 @@ PUBLIC int select_multi_bookmarks NOARGS
     /*
      *	If not enabled, pick the "default" (0).
      */
-    if (LYMultiBookmarks == FALSE || LYHaveSubBookmarks() == FALSE) {
+    if (LYMultiBookmarks == MBM_OFF || LYHaveSubBookmarks() == FALSE) {
 	if (MBM_A_subbookmark[0]) /* If it exists! */
 	    return(0);
 	else
@@ -691,7 +709,7 @@ PUBLIC int select_multi_bookmarks NOARGS
      *	the 2 redraws of the screen, if LYMBMAdvnced is TRUE.  '=' will
      *	still show the screen and let them do it the "long" way.
      */
-    if (LYMBMAdvanced && user_mode == ADVANCED_MODE) {
+    if (LYMultiBookmarks == MBM_ADVANCED && user_mode == ADVANCED_MODE) {
 	LYMBM_statusline(MULTIBOOKMARKS_SELECT);
 get_advanced_choice:
 	c = LYgetch();
@@ -733,8 +751,7 @@ get_advanced_choice:
 		 *  Convert to an array index, act on it if valid.
 		 *  Otherwise, get another keystroke.
 		 */
-		c = TOUPPER(c) - 'A';
-		if (c < 0 || c > MBM_V_MAXFILES) {
+		if ((c = LYMBM2index(c)) < 0) {
 		    goto get_advanced_choice;
 		}
 	}
@@ -755,20 +772,18 @@ get_advanced_choice:
  */
 PUBLIC int select_menu_multi_bookmarks NOARGS
 {
-    int c, MBM_tmp_count, MBM_allow;
+    int c, d, MBM_tmp_count, MBM_allow;
     int MBM_screens, MBM_from, MBM_to, MBM_current;
 
     /*
      *	If not enabled, pick the "default" (0).
      */
-    if (LYMultiBookmarks == FALSE)
+    if (LYMultiBookmarks == MBM_OFF)
 	return(0);
 
     /*
      *	Filip M. Gieszczykiewicz (filipg@paranoia.com) & FM
      *	---------------------------------------------------
-     *	LYMultiBookmarks - TRUE when multi_support enabled.
-     *
      *	MBM_A_subbookmark[n] - Hold values of the respective
      *	"multi_bookmarkn" in the lynxrc file.
      *
@@ -804,137 +819,128 @@ PUBLIC int select_menu_multi_bookmarks NOARGS
 
     MBM_current = 1; /* Gotta start somewhere :-) */
 
-draw_bookmark_choices:
-    MBM_from = MBM_allow * MBM_current - MBM_allow;
-    if (MBM_from < 0)
-	MBM_from = 0; /* 0 is default bookmark... */
-    if (MBM_current != 1)
-	MBM_from++;
+    for (;;) {
+	MBM_from = MBM_allow * MBM_current - MBM_allow;
+	if (MBM_from < 0)
+	    MBM_from = 0; /* 0 is default bookmark... */
+	if (MBM_current != 1)
+	    MBM_from++;
 
-    MBM_to = (MBM_allow * MBM_current);
-    if (MBM_to > MBM_V_MAXFILES)
-	MBM_to = MBM_V_MAXFILES;
+	MBM_to = (MBM_allow * MBM_current);
+	if (MBM_to > MBM_V_MAXFILES)
+	    MBM_to = MBM_V_MAXFILES;
 
-    /*
-     *	Display menu of bookmarks.  NOTE that we avoid printw()'s
-     *	to increase the chances that any non-ASCII or multibyte/CJK
-     *	characters will be handled properly. - FM
-     */
-    LYclear();
-    LYmove(1, 5);
-    lynx_start_h1_color ();
-    if (MBM_screens > 1) {
-	char *shead_buffer = 0;
-	HTSprintf0(&shead_buffer,
-		MULTIBOOKMARKS_SHEAD_MASK, MBM_current, MBM_screens);
-	LYaddstr(shead_buffer);
-	FREE(shead_buffer);
-    } else {
-	LYaddstr(MULTIBOOKMARKS_SHEAD);
-    }
+	/*
+	 *  Display menu of bookmarks.  NOTE that we avoid printw()'s
+	 *  to increase the chances that any non-ASCII or multibyte/CJK
+	 *  characters will be handled properly. - FM
+	 */
+	LYclear();
+	LYmove(1, 5);
+	lynx_start_h1_color ();
+	if (MBM_screens > 1) {
+	    char *shead_buffer = 0;
+	    HTSprintf0(&shead_buffer,
+		    MULTIBOOKMARKS_SHEAD_MASK, MBM_current, MBM_screens);
+	    LYaddstr(shead_buffer);
+	    FREE(shead_buffer);
+	} else {
+	    LYaddstr(MULTIBOOKMARKS_SHEAD);
+	}
 
-    lynx_stop_h1_color ();
+	lynx_stop_h1_color ();
 
-    MBM_tmp_count = 0;
-    for (c = MBM_from; c <= MBM_to; c++) {
-	LYmove(3+MBM_tmp_count, 5);
-	LYaddch(UCH((c + 'A')));
-	LYaddstr(" : ");
-	if (MBM_A_subdescript[c])
-	    LYaddstr(MBM_A_subdescript[c]);
-	LYmove(3+MBM_tmp_count,36);
-	LYaddch('(');
-	if (MBM_A_subbookmark[c])
-	    LYaddstr(MBM_A_subbookmark[c]);
-	LYaddch(')');
-	MBM_tmp_count++;
-    }
+	MBM_tmp_count = 0;
+	for (c = MBM_from; c <= MBM_to; c++) {
+	    LYmove(3+MBM_tmp_count, 5);
+	    LYaddch(LYindex2MBM(c));
+	    LYaddstr(" : ");
+	    if (MBM_A_subdescript[c])
+		LYaddstr(MBM_A_subdescript[c]);
+	    LYmove(3+MBM_tmp_count,36);
+	    LYaddch('(');
+	    if (MBM_A_subbookmark[c])
+		LYaddstr(MBM_A_subbookmark[c]);
+	    LYaddch(')');
+	    MBM_tmp_count++;
+	}
 
-    /*
-     *	Don't need to show it if it all fits on one screen!
-     */
-    if (MBM_screens > 1) {
-	LYmove(LYlines-2, 0);
-	LYaddstr("'");
-	start_bold();
-	LYaddstr("[");
-	stop_bold();
-	LYaddstr("' ");
-	LYaddstr(PREVIOUS);
-	LYaddstr(", '");
-	start_bold();
-	LYaddstr("]");
-	stop_bold();
-	LYaddstr("' ");
-	LYaddstr(NEXT_SCREEN);
-    }
+	/*
+	 *  Don't need to show it if it all fits on one screen!
+	 */
+	if (MBM_screens > 1) {
+	    LYmove(LYlines-2, 0);
+	    LYaddstr("'");
+	    start_bold();
+	    LYaddstr("[");
+	    stop_bold();
+	    LYaddstr("' ");
+	    LYaddstr(PREVIOUS);
+	    LYaddstr(", '");
+	    start_bold();
+	    LYaddstr("]");
+	    stop_bold();
+	    LYaddstr("' ");
+	    LYaddstr(NEXT_SCREEN);
+	}
 
-    LYMBM_statusline(MULTIBOOKMARKS_SAVE);
-get_bookmark_choice:
-    c = LYgetch();
+	LYMBM_statusline(MULTIBOOKMARKS_SAVE);
+
+	for (;;) {
+	    c = LYgetch();
 #ifdef VMS
-    if (HadVMSInterrupt) {
-	HadVMSInterrupt = FALSE;
-	c = 7;
-    }
+	    if (HadVMSInterrupt) {
+		HadVMSInterrupt = FALSE;
+		c = 7;
+	    }
 #endif /* VMS */
 
-    if (LYisNonAlnumKeyname(c, LYK_PREV_DOC) ||
-	c == 7 || c == 3) {
-	/*
-	 *  Treat left-arrow, ^G, or ^C as cancel.
-	 */
-	return(-2);
-    }
+	    if ((d = LYMBM2index(c)) >= 0) {
+		/*
+		 *  See if we have a bookmark like that.
+		 */
+		if (MBM_A_subbookmark[d] != NULL)
+		    return(d);
 
-    if (LYisNonAlnumKeyname(c, LYK_REFRESH)) {
-	/*
-	 *  Refresh the screen.
-	 */
-	lynx_force_repaint();
-	LYrefresh();
-	goto get_bookmark_choice;
-    }
+		show_bookmark_not_defined();
+		LYMBM_statusline(MULTIBOOKMARKS_SAVE);
+	    } else if (LYisNonAlnumKeyname(c, LYK_PREV_DOC) ||
+		c == 7 || c == 3) {
+		/*
+		 *  Treat left-arrow, ^G, or ^C as cancel.
+		 */
+		return(-2);
+	    } else if (LYisNonAlnumKeyname(c, LYK_REFRESH)) {
+		/*
+		 *  Refresh the screen.
+		 */
+		lynx_force_repaint();
+		LYrefresh();
+	    } else if (LYisNonAlnumKeyname(c, LYK_ACTIVATE)) {
+		/*
+		 *  Assume default bookmark file on ENTER or right-arrow.
+		 */
+		return(MBM_A_subbookmark[0] ? 0 : -1);
+	    } else if ((c == ']' ||  LYisNonAlnumKeyname(c, LYK_NEXT_PAGE)) &&
+		MBM_screens > 1) {
+		/*
+		 *  Next range, if available.
+		 */
+		if (++MBM_current > MBM_screens)
+		    MBM_current = 1;
+		break;
+	    }
 
-    if (LYisNonAlnumKeyname(c, LYK_ACTIVATE)) {
-	/*
-	 *  Assume default bookmark file on ENTER or right-arrow.
-	 */
-	return(MBM_A_subbookmark[0] ? 0 : -1);
-    }
-
-    /*
-     *	Next range, if available.
-     */
-    if ((c == ']' ||  LYisNonAlnumKeyname(c, LYK_NEXT_PAGE)) &&
-	MBM_screens > 1) {
-	if (++MBM_current > MBM_screens)
-	    MBM_current = 1;
-	goto draw_bookmark_choices;
-    }
-
-    /*
-     *	Previous range, if available.
-     */
-    if ((c == '[' ||  LYisNonAlnumKeyname(c, LYK_PREV_PAGE)) &&
-	MBM_screens > 1) {
-	if (--MBM_current <= 0)
-	    MBM_current = MBM_screens;
-	goto draw_bookmark_choices;
-    }
-
-    c = TOUPPER(c) - 'A';
-    /*
-     *	See if we have a bookmark like that.
-     */
-    if (c < 0 || c > MBM_V_MAXFILES) {
-	goto get_bookmark_choice;
-    } else if (!MBM_A_subbookmark[c]) {
-	show_bookmark_not_defined();
-	LYMBM_statusline(MULTIBOOKMARKS_SAVE);
-	goto get_bookmark_choice;
-    } else {
-	return(c);
+	    else if ((c == '[' ||  LYisNonAlnumKeyname(c, LYK_PREV_PAGE)) &&
+		MBM_screens > 1) {
+		/*
+		 *  Previous range, if available.
+		 */
+		if (--MBM_current <= 0)
+		    MBM_current = MBM_screens;
+		break;
+	    }
+	}
     }
 }
 
@@ -958,7 +964,7 @@ PUBLIC BOOLEAN LYHaveSubBookmarks NOARGS
 /*
  *  This function passes a string to _statusline(), making
  *  sure it is at the bottom of the screen if LYMultiBookmarks
- *  is TRUE, otherwise, letting it go to the normal statusline
+ *  is not MBM_OFF, otherwise, letting it go to the normal statusline
  *  position based on the current user mode.  We want to use
  *  _statusline() so that any multibyte/CJK characters in the
  *  string will be handled properly. - FM
@@ -966,7 +972,7 @@ PUBLIC BOOLEAN LYHaveSubBookmarks NOARGS
 PUBLIC void LYMBM_statusline  ARGS1(
 	char *,		text)
 {
-    if (LYMultiBookmarks == TRUE && user_mode == NOVICE_MODE) {
+    if (LYMultiBookmarks != MBM_OFF && user_mode == NOVICE_MODE) {
 	LYStatusLine = (LYlines - 1);
 	_statusline(text);
 	LYStatusLine = -1;
@@ -1095,4 +1101,22 @@ PRIVATE  char* title_convert8bit ARGS1(CONST char *, Title)
     FREE(comment);
     FREE(ncr);
     return(buf);
+}
+
+/*
+ * Since this is the "Default Bookmark File", we save it as a global, and as
+ * the first MBM_A_subbookmark entry.
+ */
+PUBLIC void set_default_bookmark_page ARGS1(
+	char *,		value)
+{
+    if (value != 0) {
+	if (bookmark_page == 0
+	 || strcmp(bookmark_page, value)) {
+	    StrAllocCopy(bookmark_page, value);
+	}
+	StrAllocCopy(BookmarkPage, bookmark_page);
+	StrAllocCopy(MBM_A_subbookmark[0], bookmark_page);
+	StrAllocCopy(MBM_A_subdescript[0], MULTIBOOKMARKS_DEFAULT);
+    }
 }

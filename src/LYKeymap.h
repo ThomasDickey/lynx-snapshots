@@ -68,14 +68,6 @@ extern LYKeymap_t key_override[];
 				/* mask for lynxactioncode - must cover all
 				   assigned LYK_* values */
 
-
-#if 0
-/*  Substitute a single actioncode given a double one - NOT USED */
-#define LKC2_TO_LKC(c,n)   (((c) == -1 || !((c) & LKC_ISLECLAC)) ? (c) : \
-			    ((n) == 1) ? (((c) & LAC_MASK) | LKC_ISLAC) : \
-			    (((((c)&~LKC_ISLECLAC)>>LAC_SHIFT) & LAC_MASK) | LKC_ISLECLAC))
-#endif /* 0 */
-
 /*  Return lkc masking single actioncode, given an lkc masking a lac + lec */
 #define LKC2_TO_LKC(c)   (((c) == -1 || !((c) & LKC_ISLECLAC)) ? (c) : \
 			    (((c) & LAC_MASK) | LKC_ISLAC))
@@ -168,6 +160,7 @@ typedef enum {
   , LYK_OPTIONS
   , LYK_INDEX_SEARCH
   , LYK_WHEREIS
+  , LYK_PREV
   , LYK_NEXT
   , LYK_COMMENT
   , LYK_EDIT
@@ -265,6 +258,13 @@ typedef enum {
 #define LYK_PASTE_URL      LYK_UNKNOWN
 #define LYK_TO_CLIPBOARD   LYK_UNKNOWN
 #endif
+
+#ifdef EXP_NESTED_TABLES
+  , LYK_NESTED_TABLES
+#else
+#define LYK_NESTED_TABLES  LYK_UNKNOWN
+#endif
+
 } LYKeymapCode;
 
 /*

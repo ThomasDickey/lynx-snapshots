@@ -43,5 +43,6 @@ extern void LYLoadCookies PARAMS((
 extern void cookie_domain_flag_set PARAMS((
 	char * 		domainstr,
 	int 		flag));
+extern void LYConfigCookies NOPARAMS;
 
 #endif /* LYCOOKIES_H */

@@ -24,8 +24,20 @@
 
 #include <HTParse.h>
 
+#undef timezone	/* U/Win defines this in time.h, hides implementation detail */
+
 #if defined(HAVE_FTIME) && defined(HAVE_SYS_TIMEB_H)
 #include <sys/timeb.h>
+#endif
+
+/*
+ * 'napms()' is preferable to 'sleep()' in any case because it does not
+ * interfere with output, but also because it can be less than a second.
+ */
+#ifdef HAVE_NAPMS
+#define LYSleep(n) napms(n)
+#else
+#define LYSleep(n) sleep(n)
 #endif
 
 /*	Issue a message about a problem.		HTAlert()
@@ -80,7 +92,7 @@ PUBLIC void HTInfoMsg ARGS1(
     if (Msg && *Msg) {
 	CTRACE((tfp, "Info message: %s\n", Msg));
 	LYstore_message(Msg);
-	sleep(InfoSecs);
+	LYSleep(InfoSecs);
     }
 }
 
@@ -192,6 +204,9 @@ PUBLIC void HTReadProgress ARGS2(
     static time_t first, last, last_active;
 #endif
 #endif
+
+    if (!LYShowTransferRate)
+	LYTransferRate = rateOFF;
 
     if (bytes == 0) {
 	first = last = last_active = now;
@@ -1000,19 +1015,19 @@ PUBLIC int HTConfirmPostRedirect ARGS2(
 PUBLIC void LYSleepAlert NOARGS
 {
     if (okToSleep())
-	sleep(AlertSecs);
+	LYSleep(AlertSecs);
 }
 
 PUBLIC void LYSleepInfo NOARGS
 {
     if (okToSleep())
-	sleep(InfoSecs);
+	LYSleep(InfoSecs);
 }
 
 PUBLIC void LYSleepMsg NOARGS
 {
     if (okToSleep())
-	sleep(MessageSecs);
+	LYSleep(MessageSecs);
 }
 
 /*

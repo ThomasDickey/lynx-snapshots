@@ -290,12 +290,6 @@ PUBLIC void UCChangeTerminalCodepage ARGS2(
 	}
 	Utf = Is_Unset;
     } else if (!strcmp(name, "iso-8859-2")) {
-#ifdef NOTDEFINED
-	/*
-	 *  "setfont lat2-16.psf -u lat2.uni"
-	 */
-	status = call_setfont("lat2", SUFF2, "lat2.uni");
-#endif /* NOTDEFINED */
 	/*
 	 *  "setfont iso02.f16 -u iso02.uni"
 	 */
@@ -355,11 +349,6 @@ PUBLIC void UCChangeTerminalCodepage ARGS2(
 	Utf = Is_Unset;
     } else if (!strcmp(name, "cp866") ||
 	       !strcmp(name, "cp852") ||
-#if 0
-	       !strcmp(name, "cp861") ||
-	       !strcmp(name, "cp850") ||
-	       !strcmp(name, "cp437") ||
-#endif
 	       !strcmp(name, "cp862")) { /* MS-Kermit has these files */
 	HTSprintf0(&tmpbuf2, "%s.uni", name);
 	/*
@@ -462,7 +451,7 @@ PUBLIC void UCChangeTerminalCodepage ARGS2(
 
     if (newcs < 0)
 	newcs = auto_display_charset;
-    res = Switch_Display_Charset(newcs, 1);
+    res = Switch_Display_Charset(newcs, SWITCH_DISPLAY_CHARSET_REALLY);
     CTRACE((tfp, "UCChangeTerminalCodepage: Switch_Display_Charset(%d) returned %d\n", newcs, res));
 #else
     CTRACE((tfp, "UCChangeTerminalCodepage: Called, but not implemented!"));
@@ -535,11 +524,11 @@ PUBLIC int Find_Best_Display_Charset ARGS1 (int, ord)
 
 #  ifdef __EMX__
 /* Switch display for the best fit for LYCharSet_UC[ord].
-   If !REALLY, the switch is tentative only, another switch may happen
+   If really is MAYBE, the switch is tentative only, another switch may happen
    before the actual display.
 
    Returns the charset we switched to.  */
-PRIVATE int _Switch_Display_Charset ARGS2 (int, ord, int, really)
+PRIVATE int _Switch_Display_Charset ARGS2 (int, ord, enum switch_display_charset_t, really)
 {
     CONST char *name;
     unsigned short cp;
@@ -548,24 +537,28 @@ PRIVATE int _Switch_Display_Charset ARGS2 (int, ord, int, really)
     UCHAR msgbuf[MAXPATHLEN + 80];
 
     CTRACE((tfp, "_Switch_Display_Charset(cp=%d, really=%d).\n", ord, really));
-    /* Do not trust current_char_set if really, we fake it without really! */
-    if (ord == current_char_set && !really)
+    /* Do not trust current_char_set unless REALLY, we fake it if MAYBE! */
+    if (ord == current_char_set && really == SWITCH_DISPLAY_CHARSET_MAYBE)
 	return ord;
     if (ord == auto_other_display_charset
 	|| ord == auto_display_charset || ord == font_loaded_for) {
-	if (!really)
+	if (really == SWITCH_DISPLAY_CHARSET_MAYBE)
 	    return ord; /* Report success, to avoid flicker, switch later */
     } else	/* Currently supports only koi8-r to cp866 translation */
 	ord = Find_Best_Display_Charset(ord);
 
+    /* Ignore sizechange unless the font is loaded */
+    if (ord != font_loaded_for && really == SWITCH_DISPLAY_CHARSET_SIZECHANGE)
+	return ord;
+
     if (ord == real_charsets[0] || ord == real_charsets[1]) {
 	ord1 = (ord == real_charsets[1]
 	       ? auto_other_display_charset : auto_display_charset);
-	if (!really)
+	if (really == SWITCH_DISPLAY_CHARSET_MAYBE)
 	    return ord; /* Can switch later, report success to avoid flicker */
     } else
 	ord1 = ord;
-    if (ord == current_char_set && !really)
+    if (ord == current_char_set && really == SWITCH_DISPLAY_CHARSET_MAYBE)
 	return ord;
 
     name = LYCharSet_UC[ord1].MIMEname;
@@ -663,12 +656,17 @@ PRIVATE int _Switch_Display_Charset ARGS2 (int, ord, int, really)
 }
 #  endif /* __EMX__ */
 
-PUBLIC int Switch_Display_Charset ARGS2 (CONST int, ord, CONST int, really)
+PUBLIC int Switch_Display_Charset ARGS2 (CONST int, ord, CONST enum switch_display_charset_t, really)
 {
     int prev = current_char_set;
     int res;
+    static int repeated;
 
-    if (!switch_display_charsets && !really)
+    if (!switch_display_charsets
+	&& (really == SWITCH_DISPLAY_CHARSET_MAYBE
+	    /* The first switch is not due to an interactive action */
+	    || (really == SWITCH_DISPLAY_CHARSET_REALLY
+		&& !(repeated++))))
 	return 0;
     res = _Switch_Display_Charset(ord, really);
     if (res < 0 || prev == res)		/* No change */

@@ -779,7 +779,7 @@ PUBLIC BOOL HTAnchor_delete ARGS1(
      *	Remove ourselves from the hash table's list.
      */
     if (adult_table) {
-	unsigned short int usi_hash = HASH_FUNCTION(me->address);
+	unsigned short usi_hash = (unsigned short) HASH_FUNCTION(me->address);
 
 	if (adult_table[usi_hash])  {
 	    HTList_removeObject(adult_table[usi_hash], (void *)me);
@@ -1399,7 +1399,7 @@ PUBLIC int HTAnchor_getUCLYhndl ARGS2(
 #ifdef CAN_SWITCH_DISPLAY_CHARSET
 PRIVATE void setup_switch_display_charset ARGS2(HTParentAnchor *, me, int, h)
 {
-    if (!Switch_Display_Charset(h,0))
+    if (!Switch_Display_Charset(h,SWITCH_DISPLAY_CHARSET_MAYBE))
 	return;
     HTAnchor_setUCInfoStage(me, current_char_set,
 			    UCT_STAGE_HTEXT, UCT_SETBY_MIME); /* highest priorty! */

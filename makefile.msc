@@ -17,7 +17,7 @@ ETC_LIB = lib
 #CS_OBJS = "LYHash.obj" "LYStyle.obj"
 
 # Uncomment SOCK_DEFS if you wish to build with winsock2.
-#SOCK_DEFS = /D "USE_WINSOCK2_H"
+#SOCK_DEFS = /D "USE_WINSOCK2_H" /D "_WIN32_WINNT=0x0400"
 
 INCLUDES = \
  /I "." \
@@ -37,7 +37,11 @@ DEFS = $(CS_DEFS) $(SOCK_DEFS) \
  /D "DISP_PARTIAL" \
  /D "DOSPATH" \
  /D "EXP_ALT_BINDINGS" \
+ /D "EXP_CMD_LOGGING" \
+ /D "EXP_JUSTIFY_ELTS" \
+ /D "EXP_NESTED_TABLES" \
  /D "EXP_PERSISTENT_COOKIES" \
+ /D "EXP_READPROGRESS" \
  /D "FANCY_CURSES" \
  /D "HAVE_KEYPAD" \
  /D "LONG_LIST" \
@@ -56,6 +60,7 @@ DEFS = $(CS_DEFS) $(SOCK_DEFS) \
  /D "USE_EXTERNALS" \
  /D "USE_MULTIBYTE_CURSES" \
  /D "USE_PRETTYSRC" \
+ /D "USE_SCROLLBAR" \
  /D "USE_ZLIB" \
  /D "WIN_EX" \
  /D "WIN32" \
@@ -88,11 +93,11 @@ OBJS = $(CS_OBJS) \
 	"HTBTree.obj" \
 	"HTChunk.obj" \
 	"HTDOS.obj" \
+	"HTFTP.obj" \
+	"HTFWriter.obj" \
 	"HTFile.obj" \
 	"HTFinger.obj" \
 	"HTFormat.obj" \
-	"HTFTP.obj" \
-	"HTFWriter.obj" \
 	"HTGopher.obj" \
 	"HTGroup.obj" \
 	"HTInit.obj" \
@@ -109,8 +114,8 @@ OBJS = $(CS_OBJS) \
 	"HTString.obj" \
 	"HTStyle.obj" \
 	"HTTCP.obj" \
-	"HTTelnet.obj" \
 	"HTTP.obj" \
+	"HTTelnet.obj" \
 	"HTUU.obj" \
 	"HTWSRC.obj" \
 	"LYBookmark.obj" \
@@ -123,7 +128,6 @@ OBJS = $(CS_OBJS) \
 	"LYDownload.obj" \
 	"LYEdit.obj" \
 	"LYEditmap.obj" \
-	"LYexit.obj" \
 	"LYExtern.obj" \
 	"LYForms.obj" \
 	"LYGetFile.obj" \
@@ -141,7 +145,6 @@ OBJS = $(CS_OBJS) \
 	"LYOptions.obj" \
 	"LYPrettySrc.obj" \
 	"LYPrint.obj" \
-	"LYrcFile.obj" \
 	"LYReadCFG.obj" \
 	"LYSearch.obj" \
 	"LYShowInfo.obj" \
@@ -149,6 +152,8 @@ OBJS = $(CS_OBJS) \
 	"LYTraversal.obj" \
 	"LYUpload.obj" \
 	"LYUtils.obj" \
+	"LYexit.obj" \
+	"LYrcFile.obj" \
 	"SGML.obj" \
 	"TRSTable.obj" \
 	"UCAuto.obj" \
@@ -159,11 +164,16 @@ OBJS = $(CS_OBJS) \
 
 # Dependencies for building
 
+.SUFFIXES : .i
+.c.i :
+	$(CC) $(INCLUDES) $(DEFS) /P $<
+
 all : lynx.exe
 
 clean :
 	-del *.map
 	-del *.obj
+	-del/f/s/q *.i
 
 lynx.exe: $(OBJS) dirent.obj
 	$(LINK) $(OBJS) $(LIBS)

@@ -36,7 +36,7 @@
  */
 PUBLIC BOOL LYVersionIsRelease NOARGS
 {
-    return strstr(LYNX_VERSION, "rel") != 0;
+    return (BOOL)(strstr(LYNX_VERSION, "rel") != 0);
 }
 
 PUBLIC char *LYVersionStatus NOARGS
@@ -56,11 +56,11 @@ PUBLIC char *LYVersionDate NOARGS
 }
 
 /*
- *  Showinfo prints a page of info about the current file and the link
+ *  LYShowInfo prints a page of info about the current file and the link
  *  that the cursor is on.
  */
 
-PUBLIC int showinfo ARGS4(
+PUBLIC int LYShowInfo ARGS4(
 	document *,	doc,
 	int,		size_of_file,
 	document *,	newdoc,

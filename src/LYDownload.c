@@ -122,7 +122,7 @@ PUBLIC void LYDownload ARGS1(
      *	Set up the sug_filenames recall buffer.
      */
     FnameTotal = (sug_filenames ? HTList_count(sug_filenames) : 0);
-    recall = ((FnameTotal >= 1) ? RECALL : NORECALL);
+    recall = ((FnameTotal >= 1) ? RECALL_URL : NORECALL);
     FnameNum = FnameTotal;
 
     if (method_number < 0) {

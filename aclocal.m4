@@ -4,7 +4,7 @@ dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
 dnl and Philippe De Muyter <phdm@macqel.be>
 dnl
 dnl Created: 1997/1/28
-dnl Updated: 2001/2/4
+dnl Updated: 2001/4/15
 dnl
 dnl The autoconf used in Lynx development is GNU autoconf, patched
 dnl by Tom Dickey.  See your local GNU archives, and this URL:
@@ -861,6 +861,44 @@ if test $cf_cv_color_curses = yes ; then
 fi
 ])
 dnl ---------------------------------------------------------------------------
+dnl Look for the curses headers.
+AC_DEFUN([CF_CURSES_CPPFLAGS],[
+
+AC_CACHE_CHECK(for extra include directories,cf_cv_curses_incdir,[
+cf_cv_curses_incdir=no
+case $host_os in #(vi
+hpux10.*|hpux11.*) #(vi
+	test -d /usr/include/curses_colr && \
+	cf_cv_curses_incdir="-I/usr/include/curses_colr"
+	;;
+sunos3*|sunos4*)
+	test -d /usr/5lib && \
+	test -d /usr/5include && \
+	cf_cv_curses_incdir="-I/usr/5include"
+	;;
+esac
+])
+test "$cf_cv_curses_incdir" != no && CPPFLAGS="$CPPFLAGS $cf_cv_curses_incdir"
+
+AC_CACHE_CHECK(if we have identified curses headers,cf_cv_ncurses_header,[
+cf_cv_ncurses_header=curses.h
+for cf_header in \
+	curses.h \
+	ncurses.h \
+	ncurses/curses.h \
+	ncurses/ncurses.h
+do
+AC_TRY_COMPILE([#include <${cf_header}>],
+	[initscr(); tgoto("?", 0,0)],
+	[cf_cv_ncurses_header=$cf_header; break],[])
+done
+])
+
+# cheat, to get the right #define's for HAVE_NCURSES_H, etc.
+AC_CHECK_HEADERS($cf_cv_ncurses_header)
+
+])
+dnl ---------------------------------------------------------------------------
 dnl Curses-functions are a little complicated, since a lot of them are macros.
 AC_DEFUN([CF_CURSES_FUNCS],
 [
@@ -904,7 +942,7 @@ done
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl Look for the curses libraries.  Older curses implementations may require
-dnl termcap/termlib to be linked as well.
+dnl termcap/termlib to be linked as well.  Call CF_CURSES_CPPFLAGS first.
 AC_DEFUN([CF_CURSES_LIBS],[
 
 AC_MSG_CHECKING(if we have identified curses libraries)
@@ -922,7 +960,6 @@ freebsd*) #(vi
 hpux10.*|hpux11.*) #(vi
 	AC_CHECK_LIB(cur_colr,initscr,[
 		LIBS="-lcur_colr $LIBS"
-		CPPFLAGS="-I/usr/include/curses_colr $CPPFLAGS"
 		ac_cv_func_initscr=yes
 		],[
 	AC_CHECK_LIB(Hcurses,initscr,[
@@ -935,15 +972,12 @@ hpux10.*|hpux11.*) #(vi
 linux*) # Suse Linux does not follow /usr/lib convention
 	LIBS="$LIBS -L/lib"
 	;;
+sunos3*|sunos4*)
+	test -d /usr/5lib && \
+	LIBS="$LIBS -L/usr/5lib -lcurses -ltermcap"
+	ac_cv_func_initscr=yes
+	;;
 esac
-
-if test ".$With5lib" != ".no" ; then
-if test -d /usr/5lib ; then
-	# SunOS 3.x or 4.x
-	CPPFLAGS="$CPPFLAGS -I/usr/5include"
-	LIBS="$LIBS -L/usr/5lib"
-fi
-fi
 
 if test ".$ac_cv_func_initscr" != .yes ; then
 	cf_save_LIBS="$LIBS"
@@ -1033,6 +1067,30 @@ AC_MSG_RESULT($cf_cv_curs_performance)
 test $cf_cv_curs_performance = yes && AC_DEFINE(CURS_PERFORMANCE)
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl Check for the flavor of the touchline function, to distinguish between BSD
+dnl and SYSV.  This is needed on NetBSD 1.5 which has a partial implementation
+dnl of SVR4 curses.
+AC_DEFUN([CF_CURS_TOUCHLINE],[
+AC_CACHE_CHECK(for curses touchline function,cf_cv_curs_touchline,[
+	AC_TRY_LINK([
+#include <${cf_cv_ncurses_header-curses.h}>],
+	[touchline(stdscr, 1,2,3);],
+	[cf_cv_curs_touchline=bsd],
+	[AC_TRY_LINK([
+#include <${cf_cv_ncurses_header-curses.h}>],
+		[touchline(stdscr, 1,2);],
+		[cf_cv_curs_touchline=sysv],
+		[cf_cv_curs_touchline=bsd])])])
+case "$cf_cv_curs_touchline" in #(vi
+bsd) #(vi
+	AC_DEFINE(HAVE_BSD_TOUCHLINE)
+	;;
+sysv)
+	AC_DEFINE(HAVE_SYSV_TOUCHLINE)
+	;;
+esac
+])dnl
+dnl ---------------------------------------------------------------------------
 dnl Check for a program in the given list $3, defining the corresponding
 dnl program variable $2.
 dnl
@@ -1051,6 +1109,9 @@ AC_CACHE_VAL(cf_cv_$2,[
 AC_MSG_RESULT($cf_cv_$2)
 AC_DEFINE_UNQUOTED($2,"$cf_cv_$2")
 ])
+dnl ---------------------------------------------------------------------------
+dnl "dirname" is not portable, so we fake it with a shell script.
+AC_DEFUN([CF_DIRNAME],[$1=`echo $2 | sed -e 's:/[[^/]]*$::'`])dnl
 dnl ---------------------------------------------------------------------------
 dnl You can always use "make -n" to see the actual options, but it's hard to
 dnl pick out/analyze warning messages when the compile-line is long.
@@ -1854,14 +1915,16 @@ fi
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl Look for the SVr4 curses clone 'ncurses' in the standard places, adjusting
-dnl the CPPFLAGS variable.
+dnl the CPPFLAGS variable so we can include its header.
 dnl
-dnl The header files may be installed as either curses.h, or ncurses.h
-dnl (obsolete).  If not installed for overwrite, the curses.h file would be
-dnl in an ncurses subdirectory (e.g., /usr/include/ncurses), but someone may
-dnl have installed overwriting the vendor's curses.  Only very old versions
-dnl (pre-1.9.2d, the first autoconf'd version) of ncurses don't define
-dnl either __NCURSES_H or NCURSES_VERSION in the header.
+dnl The header files may be installed as either curses.h, or ncurses.h (would
+dnl be obsolete, except that some packagers prefer this name to distinguish it
+dnl from a "native" curses implementation).  If not installed for overwrite,
+dnl the curses.h file would be in an ncurses subdirectory (e.g.,
+dnl /usr/include/ncurses), but someone may have installed overwriting the
+dnl vendor's curses.  Only very old versions (pre-1.9.2d, the first autoconf'd
+dnl version) of ncurses don't define either __NCURSES_H or NCURSES_VERSION in
+dnl the header.
 dnl
 dnl If the installer has set $CFLAGS or $CPPFLAGS so that the ncurses header
 dnl is already in the include-path, don't even bother with this, since we cannot
@@ -1869,9 +1932,14 @@ dnl easily determine which file it is.  In this case, it has to be <curses.h>.
 dnl
 AC_DEFUN([CF_NCURSES_CPPFLAGS],
 [
-AC_MSG_CHECKING(for ncurses header file)
-AC_CACHE_VAL(cf_cv_ncurses_header,[
-	AC_TRY_COMPILE([#include <curses.h>],[
+AC_CACHE_CHECK(for ncurses header in include-path, cf_cv_ncurses_h,[
+	for cf_header in \
+		curses.h \
+		ncurses.h \
+		ncurses/curses.h \
+		ncurses/ncurses.h
+	do
+	AC_TRY_COMPILE([#include <$cf_header>],[
 #ifdef NCURSES_VERSION
 printf("%s\n", NCURSES_VERSION);
 #else
@@ -1881,46 +1949,64 @@ printf("old\n");
 make an error
 #endif
 #endif
-	],
-	[cf_cv_ncurses_header=predefined],[
+	]
+	,[cf_cv_ncurses_h=$cf_header; break]
+	,[cf_cv_ncurses_h=no])
+	done
+])
+
+if test "$cf_cv_ncurses_h" != no ; then
+	cf_cv_ncurses_header=$cf_cv_ncurses_h
+else
+AC_CACHE_CHECK(for ncurses include-path, cf_cv_ncurses_h2,[
 	CF_HEADER_PATH(cf_search,ncurses)
 	test -n "$verbose" && echo
 	for cf_incdir in $cf_search
 	do
 		for cf_header in \
-			curses.h \
-			ncurses.h
+			ncurses.h \
+			curses.h
 		do
 			if egrep "NCURSES_[[VH]]" $cf_incdir/$cf_header 1>&AC_FD_CC 2>&1; then
-				cf_cv_ncurses_header=$cf_incdir/$cf_header
+				cf_cv_ncurses_h2=$cf_incdir/$cf_header
 				test -n "$verbose" && echo $ac_n "	... found $ac_c" 1>&AC_FD_MSG
 				break
 			fi
 			test -n "$verbose" && echo "	... tested $cf_incdir/$cf_header" 1>&AC_FD_MSG
 		done
-		test -n "$cf_cv_ncurses_header" && break
+		test -n "$cf_cv_ncurses_h2" && break
 	done
-	test -z "$cf_cv_ncurses_header" && AC_ERROR(not found)
-	])])
-AC_MSG_RESULT($cf_cv_ncurses_header)
+	test -z "$cf_cv_ncurses_h2" && AC_ERROR(not found)
+	])
+
+	CF_DIRNAME(cf_1st_incdir,$cf_cv_ncurses_h2)
+	CF_DIRNAME(cf_2nd_incdir,$cf_1st_incdir)
+	cf_cv_ncurses_header=`basename $cf_cv_ncurses_h2`
+	echo cf_1st_include=$cf_1st_incdir
+	echo cf_2nd_include=$cf_2nd_incdir
+	if test `basename $cf_1st_incdir` = ncurses ; then
+		cf_cv_ncurses_header=ncurses/$cf_cv_ncurses_header
+		CF_ADD_INCDIR($cf_2nd_incdir)
+	fi
+	CF_ADD_INCDIR($cf_1st_incdir)
+
+fi
+
 AC_DEFINE(NCURSES)
 
-cf_incdir=`echo $cf_cv_ncurses_header | sed -e 's:/[[^/]]*$::'`
 
 case $cf_cv_ncurses_header in # (vi
-*/ncurses.h)
+*ncurses.h)
 	AC_DEFINE(HAVE_NCURSES_H)
 	;;
 esac
 
 case $cf_cv_ncurses_header in # (vi
-predefined) # (vi
-	cf_cv_ncurses_header=curses.h
-	;;
-*)
-	CF_ADD_INCDIR($cf_incdir)
+ncurses/curses.h|ncurses/ncurses.h)
+	AC_DEFINE(HAVE_NCURSES_NCURSES_H)
 	;;
 esac
+
 CF_NCURSES_VERSION
 ])dnl
 dnl ---------------------------------------------------------------------------
@@ -1975,13 +2061,17 @@ fi
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl Check for the version of ncurses, to aid in reporting bugs, etc.
+dnl Call CF_CURSES_CPPFLAGS first, or CF_NCURSES_CPPFLAGS.  We don't use
+dnl AC_REQUIRE since that does not work with the shell's if/then/else/fi.
 AC_DEFUN([CF_NCURSES_VERSION],
-[AC_MSG_CHECKING(for ncurses version)
-AC_CACHE_VAL(cf_cv_ncurses_version,[
+[
+AC_CACHE_CHECK(for ncurses version, cf_cv_ncurses_version,[
 	cf_cv_ncurses_version=no
 	cf_tempfile=out$$
+	rm -f $cf_tempfile
 	AC_TRY_RUN([
 #include <${cf_cv_ncurses_header-curses.h}>
+#include <stdio.h>
 int main()
 {
 	FILE *fp = fopen("$cf_tempfile", "w");
@@ -2000,8 +2090,7 @@ int main()
 #endif
 	exit(0);
 }],[
-	cf_cv_ncurses_version=`cat $cf_tempfile`
-	rm -f $cf_tempfile],,[
+	cf_cv_ncurses_version=`cat $cf_tempfile`],,[
 
 	# This will not work if the preprocessor splits the line after the
 	# Autoconf token.  The 'unproto' program does that.
@@ -2024,8 +2113,10 @@ EOF
 		test -n "$cf_out" && cf_cv_ncurses_version="$cf_out"
 		rm -f conftest.out
 	fi
-])])
-AC_MSG_RESULT($cf_cv_ncurses_version)
+])
+	rm -f $cf_tempfile
+])
+test "$cf_cv_ncurses_version" = no || AC_DEFINE(NCURSES)
 ])
 dnl ---------------------------------------------------------------------------
 dnl After checking for functions in the default $LIBS, make a further check
@@ -2401,7 +2492,7 @@ AC_CACHE_VAL(cf_cv_slang_header,[
 AC_MSG_RESULT($cf_cv_slang_header)
 AC_DEFINE(USE_SLANG)
 
-cf_incdir=`echo $cf_cv_slang_header | sed -e 's:/[[^/]]*$::'`
+CF_DIRNAME(cf_incdir,$cf_cv_slang_header)
 
 case $cf_cv_slang_header in # (vi
 predefined) # (vi

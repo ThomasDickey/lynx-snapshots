@@ -15,7 +15,7 @@
 
 #ifndef NO_LYNX_TRACE
 PUBLIC BOOLEAN WWW_TraceFlag = 0;	/* Global trace flag for ALL W3 code */
-PUBLIC unsigned WWW_TraceMask = 0;	/* Global trace flag for ALL W3 code */
+PUBLIC int WWW_TraceMask = 0;		/* Global trace flag for ALL W3 code */
 #endif
 
 #ifndef VC
@@ -454,13 +454,6 @@ PUBLIC char * HTNextTok ARGS4(
 		    get_closing_char_too = (BOOL) (strchr(bracks,*p) != NULL);
 	    } else
 	    break;			    /* kr95-10-9: needs to stop here */
-#if 0
-	} else if (*p == '<') {				     /* quoted field */
-	    if (!start) start = ++p;
-	    for(;*p && *p!='>'; p++)
-		if (*p == '\\' && *(p+1)) p++;	       /* Skip escaped chars */
-	    break;			    /* kr95-10-9: needs to stop here */
-#endif
 	} else {					      /* Spool field */
 	    if (!start) start = p;
 	    while(*p && !skipWHITE(*p) && !strchr(bracks,*p) &&

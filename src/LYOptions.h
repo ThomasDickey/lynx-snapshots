@@ -6,6 +6,7 @@
 
 extern BOOLEAN term_options; /* for LYgetstr() */
 
+extern BOOLEAN LYCheckUserAgent NOPARAMS;
 extern void edit_bookmarks NOPARAMS;
 extern  int popup_choice PARAMS((
 	int		cur_choice,
@@ -18,8 +19,6 @@ extern  int popup_choice PARAMS((
 
 #define LYChoosePopup(cur, line, column, choices, length, disabled, mouse) \
 	popup_choice(cur, line, column, (CONST char **)choices, length, disabled, mouse)
-
-extern int SetupChosenShowColor NOPARAMS;
 
 #ifndef NO_OPTION_FORMS
 extern int postoptions PARAMS((document *newdoc));

@@ -28,14 +28,6 @@
 #include <LYStrings.h>
 
 #ifdef WIN_EX
-/* 1997/10/15 (Wed) 17:39:50 */
-
-#ifndef PATH_MAX
-#define PATH_MAX	1024
-#endif
-
-#define STRING_MAX	512
-
 /* ASCII char -> HEX digit */
 #define ASC2HEXD(x) (((x) >= '0' && (x) <= '9') ?               \
 		     ((x) - '0') : (toupper(x) - 'A' + 10))
@@ -72,37 +64,6 @@ static char *decode_string(char *s)
     return save_s;
 }
 #endif	/* WIN_EX */
-
-#ifndef STRING_MAX
-#define	STRING_MAX 512
-#endif
-
-/* 1997/11/10 (Mon) 14:26:10 */
-PUBLIC char *string_short ARGS2(
-	char *,		str,
-	int,		cut_pos)
-{
-    char buff[STRING_MAX], *s, *d;
-    static char s_str[STRING_MAX];
-    int len;
-
-    LYstrncpy(buff, str, sizeof(buff)-1);
-    len = strlen(buff);
-    if (len > (LYcols - 10)) {
-	buff[cut_pos] = '.';
-	buff[cut_pos + 1] = '.';
-	for (s = (buff + len) - (LYcols - 10) + cut_pos + 1,
-	     d = (buff + cut_pos) + 2;
-	     s >= buff &&
-	     d >= buff &&
-	     d < buff + LYcols &&
-	     (*d++ = *s++) != 0; )
-	    ;
-	buff[LYcols] = 0;
-    }
-    strcpy(s_str, buff);
-    return (s_str);
-}
 
 #ifdef WIN_EX
 /*
@@ -150,7 +111,7 @@ PRIVATE char *format_command ARGS2(
     char *,	param)
 {
 #ifdef WIN_EX
-    char pram_string[PATH_MAX];
+    char pram_string[LY_MAXPATH];
 #endif
     char *cmdbuf = NULL;
 
@@ -180,7 +141,7 @@ PRIVATE char *format_command ARGS2(
 
 	    format(&cmdbuf, command, host);
 	} else if (strnicmp("file://localhost/", param, 17) == 0) {
-	    char e_buff[PATH_MAX], *p;
+	    char e_buff[LY_MAXPATH], *p;
 
 	    p = param + 17;
 	    *e_buff = 0;
@@ -323,7 +284,7 @@ BOOL run_external ARGS2(
 #endif
     int redraw_flag = TRUE;
     char *cmdbuf = NULL;
-    int found = 0;
+    BOOL found = FALSE;
     int confirmed = TRUE;
 
     if (externals == NULL)
@@ -340,7 +301,7 @@ BOOL run_external ARGS2(
     if (cmdbuf != 0 && *cmdbuf != '\0') {
 #ifdef WIN_EX			/* 1997/10/17 (Fri) 14:07:50 */
 	int len;
-	char buff[PATH_MAX];
+	char buff[LY_MAXPATH];
 
 	CTRACE((tfp, "Lynx EXTERNAL: '%s'\n", cmdbuf));
 #ifdef WIN_GUI			/* 1997/11/06 (Thu) 14:17:15 */
@@ -349,7 +310,7 @@ BOOL run_external ARGS2(
 			       MB_ICONQUESTION | MB_SETFOREGROUND | MB_OKCANCEL)
 		    != IDCANCEL;
 #else
-	confirmed = HTConfirm(string_short(cmdbuf, 40)) != NO;
+	confirmed = HTConfirm(LYElideString(cmdbuf, 40)) != NO;
 #endif
 	if (confirmed) {
 	    len = strlen(cmdbuf);
@@ -361,7 +322,7 @@ BOOL run_external ARGS2(
 			   MB_ICONEXCLAMATION | MB_SETFOREGROUND | MB_OK);
 		SetConsoleTitle("Lynx for Win32");
 #else
-		HTConfirm(string_short(buff, 40));
+		HTConfirm(LYElideString(buff, 40));
 #endif
 		confirmed = FALSE;
 	    } else {
@@ -401,7 +362,7 @@ BOOL run_external ARGS2(
 			   "Lynx (EXTERNAL COMMAND EXEC)",
 			   MB_ICONSTOP | MB_SETFOREGROUND | MB_OK);
 #else
-		HTConfirm(string_short(buff, 40));
+		HTConfirm(LYElideString(buff, 40));
 #endif /* 1 */
 	    }
 #else	/* Not WIN_EX */

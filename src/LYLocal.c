@@ -67,11 +67,6 @@
 #define DIRED_MAXBUF 512
 #endif
 
-PRIVATE int LYExecv PARAMS((
-	char *		path,
-	char **		argv,
-	char *		msg));
-
 #ifdef DIRED_SUPPORT
 
 #ifdef OK_INSTALL
@@ -88,7 +83,7 @@ PRIVATE char *get_filename PARAMS((
 	size_t		bufsize));
 
 #ifdef OK_PERMIT
-PRIVATE BOOLEAN permit_location PARAMS((
+PRIVATE int permit_location PARAMS((
 	char *		destpath,
 	char *		srcpath,
 	char **		newpath));
@@ -327,6 +322,121 @@ PRIVATE BOOLEAN ok_localname ARGS2(char*, dst, CONST char*, src)
 }
 #endif /* OK_INSTALL */
 
+/*
+ *  Execute DIRED command, return -1 or 0 on failure, 1 success.
+ */
+PRIVATE int LYExecv ARGS3(
+	char *,		path,
+	char **,	argv,
+	char *,		msg)
+{
+    int rc = 0;
+#if defined(VMS)
+    CTRACE((tfp, "LYExecv:  Called inappropriately!\n"));
+#else
+#if defined(_WINDOWS)
+    if (!strcmp(path, TOUCH_PATH)) {
+#if defined(__BORLANDC__) || defined(__MINGW32__)
+	int fd = _creat(argv[1], S_IREAD | S_IWRITE);
+#else /* Visual C++ */
+	int fd = _creat(argv[1], _S_IREAD | _S_IWRITE);
+#endif
+	if (fd >= 0) {
+	    close(fd);
+	    return(1);
+	}
+    } else if (!strcmp(path, RM_PATH)) {
+	rc = remove(argv[2]);
+    } else {
+	CTRACE((tfp, "LYExecv:  Called inappropriately! (path=%s)\n", path));
+    }
+#else
+    int n;
+    char *tmpbuf = 0;
+#ifdef __DJGPP__
+    stop_curses();
+    HTSprintf0(&tmpbuf, "%s", path);
+    for (n = 1; argv[n] != 0; n++)
+	HTSprintf(&tmpbuf, " %s", argv[n]);
+    HTSprintf(&tmpbuf, "\n");
+    rc = LYSystem(tmpbuf) ? 0 : 1;
+#else
+    pid_t pid;
+#ifdef HAVE_TYPE_UNIONWAIT
+    union wait wstatus;
+#else
+    int wstatus;
+#endif
+
+    if (TRACE) {
+	CTRACE((tfp, "LYExecv path='%s'\n", path));
+	for (n = 0; argv[n] != 0; n++)
+	    CTRACE((tfp, "argv[%d] = '%s'\n", n, argv[n]));
+    }
+
+    rc = 1;		/* It will work */
+    stop_curses();
+    pid = fork();	/* fork and execute command */
+
+    switch (pid) {
+	case -1:
+	    HTSprintf0(&tmpbuf, gettext("Unable to %s due to system error!"), msg);
+	    rc = 0;
+	    break;	/* don't fall thru! - KW */
+
+	case 0:  /* child */
+#ifdef USE_EXECVP
+	    execvp(path, argv);	/* this uses our $PATH */
+#else
+	    execv(path, argv);
+#endif
+	    exit(EXIT_FAILURE);	/* execv failed, give wait() something to look at */
+	    /*NOTREACHED*/
+
+	default:  /* parent */
+#if !HAVE_WAITPID
+	    while (wait(&wstatus) != pid)
+		; /* do nothing */
+#else
+	    while (-1 == waitpid(pid, &wstatus, 0)) { /* wait for child */
+#ifdef EINTR
+		if (errno == EINTR)
+		    continue;
+#endif /* EINTR */
+#ifdef ERESTARTSYS
+		if (errno == ERESTARTSYS)
+		    continue;
+#endif /* ERESTARTSYS */
+		break;
+	    }
+#endif /* !HAVE_WAITPID */
+	    if (WEXITSTATUS(wstatus) != 0 ||
+		WTERMSIG(wstatus) > 0)	{ /* error return */
+		HTSprintf0(&tmpbuf, gettext("Probable failure to %s due to system error!"),
+				   msg);
+		rc = 0;
+	    }
+    }
+#endif /* __DJGPP__ */
+
+    if (rc == 0) {
+	/*
+	 *  Screen may have message from the failed execv'd command.
+	 *  Give user time to look at it before screen refresh.
+	 */
+	LYSleepAlert();
+    }
+    start_curses();
+    if (tmpbuf != 0) {
+	if (rc == 0)
+	    HTAlert(tmpbuf);
+	FREE(tmpbuf);
+    }
+
+#endif /* _WINDOWS */
+#endif /* VMS */
+    return(rc);
+}
 PRIVATE int move_file ARGS2(char *, source, char *, target)
 {
     int code;
@@ -388,7 +498,7 @@ PRIVATE BOOLEAN dir_has_same_owner ARGS2(struct stat *, info, int, owner)
 /*
  *  Remove all tagged files and directories.
  */
-PRIVATE BOOLEAN remove_tagged NOARGS
+PRIVATE int remove_tagged NOARGS
 {
     int ans;
     BOOL will_clear = TRUE;
@@ -450,7 +560,7 @@ PRIVATE BOOLEAN remove_tagged NOARGS
  *  If a user has enough permissions to move a file somewhere, the same
  *   uid with Lynx & dired can do the same thing.
  */
-PRIVATE BOOLEAN modify_tagged ARGS1(
+PRIVATE int modify_tagged ARGS1(
 	char *,		testpath)
 {
     char *cp;
@@ -606,7 +716,7 @@ PRIVATE BOOLEAN modify_tagged ARGS1(
 /*
  *  Modify the name of the specified item.
  */
-PRIVATE BOOLEAN modify_name ARGS1(
+PRIVATE int modify_name ARGS1(
 	char *,		testpath)
 {
     char *cp;
@@ -661,7 +771,7 @@ PRIVATE BOOLEAN modify_name ARGS1(
 /*
  *  Change the location of a file or directory.
  */
-PRIVATE BOOLEAN modify_location ARGS1(
+PRIVATE int modify_location ARGS1(
 	char *,		testpath)
 {
     char *cp;
@@ -748,7 +858,7 @@ PRIVATE BOOLEAN modify_location ARGS1(
 /*
  *  Modify name or location of a file or directory on localhost.
  */
-PUBLIC BOOLEAN local_modify ARGS2(
+PUBLIC int local_modify ARGS2(
 	document *,	doc,
 	char **,	newpath)
 {
@@ -821,7 +931,7 @@ PUBLIC BOOLEAN local_modify ARGS2(
 /*
  *  Create a new empty file in the current directory.
  */
-PRIVATE BOOLEAN create_file ARGS1(
+PRIVATE int create_file ARGS1(
 	char *,		current_location)
 {
     int code = FALSE;
@@ -831,38 +941,37 @@ PRIVATE BOOLEAN create_file ARGS1(
     char *bad_chars = ".~/";
 
     if (get_filename(gettext("Enter name of file to create: "),
-		     tmpbuf, sizeof(tmpbuf)) == NULL) {
-	return code;
-    }
+		     tmpbuf, sizeof(tmpbuf)) != NULL) {
 
-    if (!no_dotfiles && show_dotfiles) {
-	bad_chars = "~/";
-    }
-
-    if (strstr(tmpbuf, "//") != NULL) {
-	HTAlert(gettext("Illegal redirection \"//\" found! Request ignored."));
-    } else if (strlen(tmpbuf) && strchr(bad_chars, tmpbuf[0]) == NULL) {
-	StrAllocCopy(testpath, current_location);
-	LYAddPathSep(&testpath);
-
-	/*
-	 *  Append the target filename to the current location.
-	 */
-	StrAllocCat(testpath, tmpbuf);
-
-	/*
-	 *  Make sure the target does not already exist
-	 */
-	if (not_already_exists(testpath)) {
-	    char *msg = 0;
-	    HTSprintf0(&msg,gettext("create %s"),testpath);
-	    args[0] = "touch";
-	    args[1] = testpath;
-	    args[2] = (char *) 0;
-	    code = (LYExecv(TOUCH_PATH, args, msg) <= 0) ? -1 : 1;
-	    FREE(msg);
+	if (!no_dotfiles && show_dotfiles) {
+	    bad_chars = "~/";
 	}
-	FREE(testpath);
+
+	if (strstr(tmpbuf, "//") != NULL) {
+	    HTAlert(gettext("Illegal redirection \"//\" found! Request ignored."));
+	} else if (strlen(tmpbuf) && strchr(bad_chars, tmpbuf[0]) == NULL) {
+	    StrAllocCopy(testpath, current_location);
+	    LYAddPathSep(&testpath);
+
+	    /*
+	     *  Append the target filename to the current location.
+	     */
+	    StrAllocCat(testpath, tmpbuf);
+
+	    /*
+	     *  Make sure the target does not already exist
+	     */
+	    if (not_already_exists(testpath)) {
+		char *msg = 0;
+		HTSprintf0(&msg,gettext("create %s"),testpath);
+		args[0] = "touch";
+		args[1] = testpath;
+		args[2] = (char *) 0;
+		code = (LYExecv(TOUCH_PATH, args, msg) <= 0) ? -1 : 1;
+		FREE(msg);
+	    }
+	    FREE(testpath);
+	}
     }
     return code;
 }
@@ -870,7 +979,7 @@ PRIVATE BOOLEAN create_file ARGS1(
 /*
  *  Create a new directory in the current directory.
  */
-PRIVATE BOOLEAN create_directory ARGS1(
+PRIVATE int create_directory ARGS1(
 	char *,		current_location)
 {
     int code = FALSE;
@@ -880,35 +989,34 @@ PRIVATE BOOLEAN create_directory ARGS1(
     char *bad_chars = ".~/";
 
     if (get_filename(gettext("Enter name for new directory: "),
-		     tmpbuf, sizeof(tmpbuf)) == NULL) {
-	return code;
-    }
+		     tmpbuf, sizeof(tmpbuf)) != NULL) {
 
-    if (!no_dotfiles && show_dotfiles) {
-	bad_chars = "~/";
-    }
-
-    if (strstr(tmpbuf, "//") != NULL) {
-	HTAlert(gettext("Illegal redirection \"//\" found! Request ignored."));
-    } else if (strlen(tmpbuf) && strchr(bad_chars, tmpbuf[0]) == NULL) {
-	StrAllocCopy(testpath, current_location);
-	LYAddPathSep(&testpath);
-
-	StrAllocCat(testpath, tmpbuf);
-
-	/*
-	 *  Make sure the target does not already exist.
-	 */
-	if (not_already_exists(testpath)) {
-	    char *msg = 0;
-	    HTSprintf0(&msg,"make directory %s",testpath);
-	    args[0] = "mkdir";
-	    args[1] = testpath;
-	    args[2] = (char *) 0;
-	    code = (LYExecv(MKDIR_PATH, args, msg) <= 0) ? -1 : 1;
-	    FREE(msg);
+	if (!no_dotfiles && show_dotfiles) {
+	    bad_chars = "~/";
 	}
-	FREE(testpath);
+
+	if (strstr(tmpbuf, "//") != NULL) {
+	    HTAlert(gettext("Illegal redirection \"//\" found! Request ignored."));
+	} else if (strlen(tmpbuf) && strchr(bad_chars, tmpbuf[0]) == NULL) {
+	    StrAllocCopy(testpath, current_location);
+	    LYAddPathSep(&testpath);
+
+	    StrAllocCat(testpath, tmpbuf);
+
+	    /*
+	     *  Make sure the target does not already exist.
+	     */
+	    if (not_already_exists(testpath)) {
+		char *msg = 0;
+		HTSprintf0(&msg,"make directory %s",testpath);
+		args[0] = "mkdir";
+		args[1] = testpath;
+		args[2] = (char *) 0;
+		code = (LYExecv(MKDIR_PATH, args, msg) <= 0) ? -1 : 1;
+		FREE(msg);
+	    }
+	    FREE(testpath);
+	}
     }
     return code;
 }
@@ -916,7 +1024,7 @@ PRIVATE BOOLEAN create_directory ARGS1(
 /*
  *  Create a file or a directory at the current location.
  */
-PUBLIC BOOLEAN local_create ARGS1(
+PUBLIC int local_create ARGS1(
 	document *,	doc)
 {
     int ans;
@@ -946,7 +1054,7 @@ PUBLIC BOOLEAN local_create ARGS1(
 /*
  *  Remove a single file or directory.
  */
-PRIVATE BOOLEAN remove_single ARGS1(
+PRIVATE int remove_single ARGS1(
 	char *,		testpath)
 {
     int code = 0;
@@ -1012,7 +1120,7 @@ PRIVATE BOOLEAN remove_single ARGS1(
 /*
  *  Remove a file or a directory.
  */
-PUBLIC BOOLEAN local_remove ARGS1(
+PUBLIC int local_remove ARGS1(
 	document *,	doc)
 {
     char *cp, *tp;
@@ -1052,33 +1160,28 @@ PUBLIC BOOLEAN local_remove ARGS1(
 }
 
 #ifdef OK_PERMIT
-/*
- *  Table of permission strings and chmod values.
- *  Makes the code a bit cleaner.
- */
-static struct {
-    CONST char *string_mode;	/* Key for  value below */
-    long permit_bits;		/* Value for chmod/whatever */
-} permissions[] = {
-    {"IRUSR", S_IRUSR},
-    {"IWUSR", S_IWUSR},
-    {"IXUSR", S_IXUSR},
-    {"IRGRP", S_IRGRP},
-    {"IWGRP", S_IWGRP},
-    {"IXGRP", S_IXGRP},
-    {"IROTH", S_IROTH},
-    {"IWOTH", S_IWOTH},
-    {"IXOTH", S_IXOTH},
-    {NULL, 0}			/* Don't include setuid and friends;
-				   use shell access for that. */
-};
 
 PRIVATE char LYValidPermitFile[LY_MAXPATH] = "\0";
+
+PRIVATE long permit_bits ARGS1(char *, string_mode)
+{
+    if (!strcmp(string_mode, "IRUSR")) return S_IRUSR;
+    if (!strcmp(string_mode, "IWUSR")) return S_IWUSR;
+    if (!strcmp(string_mode, "IXUSR")) return S_IXUSR;
+    if (!strcmp(string_mode, "IRGRP")) return S_IRGRP;
+    if (!strcmp(string_mode, "IWGRP")) return S_IWGRP;
+    if (!strcmp(string_mode, "IXGRP")) return S_IXGRP;
+    if (!strcmp(string_mode, "IROTH")) return S_IROTH;
+    if (!strcmp(string_mode, "IWOTH")) return S_IWOTH;
+    if (!strcmp(string_mode, "IXOTH")) return S_IXOTH;
+    /* Don't include setuid and friends; use shell access for that. */
+    return 0;
+}
 
 /*
  *  Handle DIRED permissions.
  */
-PRIVATE BOOLEAN permit_location ARGS3(
+PRIVATE int permit_location ARGS3(
 	char *,		destpath,
 	char *,		srcpath,
 	char **,	newpath)
@@ -1278,22 +1381,18 @@ PRIVATE BOOLEAN permit_location ARGS3(
 		*cr++ = '\0';
 	    }
 	    if (strncmp(cp, "mode=", 5) == 0) { /* Magic string. */
-		int i;
+		long mask = permit_bits(cp + 5);
 
-		for(i = 0; permissions[i].string_mode != NULL; i++) {
-		    if (strcmp(permissions[i].string_mode, cp+5) == 0) {
-			/*
-			 *  If restricted, only change eXecute
-			 *  permissions on directories.
-			 */
-			if (!no_change_exec_perms ||
-			    strchr(cp+5,'X') == NULL ||
-			    S_ISDIR(dir_info.st_mode))
-			    new_mode |= permissions[i].permit_bits;
-			break;
-		    }
-		}
-		if (permissions[i].string_mode == NULL) {
+		if (mask != 0) {
+		    /*
+		     *  If restricted, only change eXecute
+		     *  permissions on directories.
+		     */
+		    if (!no_change_exec_perms
+		     || strchr(cp+5, 'X') == NULL
+		     || S_ISDIR(dir_info.st_mode))
+			new_mode |= mask;
+		} else {
 		    HTAlert(gettext("Invalid mode format."));
 		    return 0;
 		}
@@ -1756,7 +1855,7 @@ PUBLIC int dired_options ARGS2(
     dir = HTfullURL_toFile(doc->address);
     LYTrimPathSep(dir);
 
-    nothing_tagged = (HTList_isEmpty(tagged));
+    nothing_tagged = (BOOL) (HTList_isEmpty(tagged));
 
     BeginInternalPage(fp0, DIRED_MENU_TITLE, DIRED_MENU_HELP);
 
@@ -2311,7 +2410,7 @@ PRIVATE char * render_item ARGS6(
 		    break;
 		default:
 		    *BP_INC = '%';
-		    *BP_INC =*s;
+		    *BP_INC = *s;
 		    break;
 	    }
 	} else {
@@ -2333,119 +2432,3 @@ PRIVATE char * render_item ARGS6(
 }
 
 #endif /* DIRED_SUPPORT */
-
-/*
- *  Execute DIRED command, return -1 or 0 on failure, 1 success.
- */
-PRIVATE int LYExecv ARGS3(
-	char *,		path,
-	char **,	argv,
-	char *,		msg)
-{
-    int rc = 0;
-#if defined(VMS)
-    CTRACE((tfp, "LYExecv:  Called inappropriately!\n"));
-#else
-#if defined(_WINDOWS)
-    if (!strcmp(path, TOUCH_PATH)) {
-#if defined(__BORLANDC__) || defined(__MINGW32__)
-	int fd = _creat(argv[1], S_IREAD | S_IWRITE);
-#else /* Visual C++ */
-	int fd = _creat(argv[1], _S_IREAD | _S_IWRITE);
-#endif
-	if (fd >= 0) {
-	    close(fd);
-	    return(1);
-	}
-    } else if (!strcmp(path, RM_PATH)) {
-	rc = remove(argv[2]);
-    } else {
-	CTRACE((tfp, "LYExecv:  Called inappropriately! (path=%s)\n", path));
-    }
-#else
-    int n;
-    char *tmpbuf = 0;
-#ifdef __DJGPP__
-    stop_curses();
-    HTSprintf0(&tmpbuf, "%s", path);
-    for (n = 1; argv[n] != 0; n++)
-	HTSprintf(&tmpbuf, " %s", argv[n]);
-    HTSprintf(&tmpbuf, "\n");
-    rc = LYSystem(tmpbuf) ? 0 : 1;
-#else
-    pid_t pid;
-#ifdef HAVE_TYPE_UNIONWAIT
-    union wait wstatus;
-#else
-    int wstatus;
-#endif
-
-    if (TRACE) {
-	CTRACE((tfp, "LYExecv path='%s'\n", path));
-	for (n = 0; argv[n] != 0; n++)
-	    CTRACE((tfp, "argv[%d] = '%s'\n", n, argv[n]));
-    }
-
-    rc = 1;		/* It will work */
-    stop_curses();
-    pid = fork();	/* fork and execute command */
-
-    switch (pid) {
-	case -1:
-	    HTSprintf0(&tmpbuf, gettext("Unable to %s due to system error!"), msg);
-	    rc = 0;
-	    break;	/* don't fall thru! - KW */
-
-	case 0:  /* child */
-#ifdef USE_EXECVP
-	    execvp(path, argv);	/* this uses our $PATH */
-#else
-	    execv(path, argv);
-#endif
-	    exit(EXIT_FAILURE);	/* execv failed, give wait() something to look at */
-	    /*NOTREACHED*/
-
-	default:  /* parent */
-#if !HAVE_WAITPID
-	    while (wait(&wstatus) != pid)
-		; /* do nothing */
-#else
-	    while (-1 == waitpid(pid, &wstatus, 0)) { /* wait for child */
-#ifdef EINTR
-		if (errno == EINTR)
-		    continue;
-#endif /* EINTR */
-#ifdef ERESTARTSYS
-		if (errno == ERESTARTSYS)
-		    continue;
-#endif /* ERESTARTSYS */
-		break;
-	    }
-#endif /* !HAVE_WAITPID */
-	    if (WEXITSTATUS(wstatus) != 0 ||
-		WTERMSIG(wstatus) > 0)	{ /* error return */
-		HTSprintf0(&tmpbuf, gettext("Probable failure to %s due to system error!"),
-				   msg);
-		rc = 0;
-	    }
-    }
-#endif /* __DJGPP__ */
-
-    if (rc == 0) {
-	/*
-	 *  Screen may have message from the failed execv'd command.
-	 *  Give user time to look at it before screen refresh.
-	 */
-	LYSleepAlert();
-    }
-    start_curses();
-    if (tmpbuf != 0) {
-	if (rc == 0)
-	    HTAlert(tmpbuf);
-	FREE(tmpbuf);
-    }
-
-#endif /* _WINDOWS */
-#endif /* VMS */
-    return(rc);
-}

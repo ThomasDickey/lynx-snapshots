@@ -56,7 +56,34 @@ typedef struct {
     int width;
 } WINDOW;
 
+/* slang doesn't really do windows... */
+#define waddch(w,c)  LYaddch(c)
 #define waddstr(w,s) addstr(s)
+#define wmove(win, row, col) SLsmg_gotorc((win)->top_y + (row), (win)->left_x + (col));
+
+#ifndef SLSMG_UARROW_CHAR
+#define SLSMG_UARROW_CHAR '^'
+#endif
+
+#ifndef SLSMG_DARROW_CHAR
+#define SLSMG_DARROW_CHAR 'v'
+#endif
+
+#ifndef SLSMG_LARROW_CHAR
+#define SLSMG_LARROW_CHAR '<'
+#endif
+
+#ifndef SLSMG_RARROW_CHAR
+#define SLSMG_RARROW_CHAR '>'
+#endif
+
+#ifndef SLSMG_CKBRD_CHAR
+#define SLSMG_CKBRD_CHAR '#'
+#endif
+
+#ifndef SLSMG_BLOCK_CHAR
+#define SLSMG_BLOCK_CHAR '#'
+#endif
 
 #ifndef ACS_UARROW  
 #define ACS_UARROW  SLSMG_UARROW_CHAR
@@ -130,23 +157,40 @@ typedef struct {
 #undef MOUSE_MOVED	/* conflict between PDCURSES and _WIN32 */
 #endif /* _MSC_VER */
 
+/*
+ * Do this to build with glibc 2.1.3 (apparently it was not used to build a
+ * system before release).
+ */
+#include <signal.h>
+
+#undef CS			/* some BSD versions of curses use this */
+#define CS curses_CS		/* ...but we don't */
+
+#ifdef ERR
+#undef ERR			/* all versions of curses define this */
+#endif
+
 #ifdef HAVE_CONFIG_H
-# ifdef HAVE_NCURSES_H
-#  include <ncurses.h>
+# ifdef HAVE_NCURSES_NCURSES_H
+#   include <ncurses/ncurses.h>
 # else
-#  ifdef HAVE_CURSESX_H
-#   include <cursesX.h>		/* Ultrix */
+#  ifdef HAVE_NCURSES_H
+#   include <ncurses.h>
 #  else
-#   ifdef HAVE_JCURSES_H
-#    include <jcurses.h>	/* sony_news */
+#   ifdef HAVE_CURSESX_H
+#    include <cursesX.h>	/* Ultrix */
 #   else
-#    ifdef PDCURSES
-#     include <pdcurses.h>	/* for PDCurses */
+#    ifdef HAVE_JCURSES_H
+#     include <jcurses.h>	/* sony_news */
 #    else
-#     ifdef HAVE_XCURSES
-#      include <xcurses.h>	/* PDCurses' UNIX port */
+#     ifdef PDCURSES
+#      include <pdcurses.h>	/* for PDCurses */
 #     else
-#      include <curses.h>	/* default */
+#      ifdef HAVE_XCURSES
+#       include <xcurses.h>	/* PDCurses' UNIX port */
+#      else
+#       include <curses.h>	/* default */
+#      endif
 #     endif
 #    endif
 #   endif
@@ -157,10 +201,19 @@ typedef struct {
 #  define getbkgd(w) wgetbkgd(w)	/* workaround pre-1.9.9g bug */
 # endif
 
-#if defined(NCURSES_VERSION) && defined(HAVE_DEFINE_KEY)
-#include <term.h>
-#define USE_KEYMAPS		1
-#endif
+# ifdef FANCY_CURSES
+#  if defined(NCURSES) && defined(HAVE_NCURSES_TERM_H)
+#    include <ncurses/term.h>
+#  else
+#   if defined(HAVE_TERM_H)
+#    include <term.h>
+#   endif
+#  endif
+# endif
+
+# if defined(NCURSES_VERSION) && defined(HAVE_DEFINE_KEY)
+#  define USE_KEYMAPS		1
+# endif
 
 #else
 # if defined(VMS) && defined(__GNUC__)
@@ -269,9 +322,13 @@ extern int LYcols;	/* replaces COLS */
 #ifdef USE_CURSES_PADS
 extern WINDOW *LYwin;
 extern int LYshiftWin;
-extern int LYlineWrap;
+extern int LYwideLines;
+extern int LYtableCols;
 #else
 #define LYwin stdscr
+#define LYshiftWin	0
+#define LYwideLines	0
+#define LYtableCols	0
 #endif
 
 #if defined(USE_COLOR_TABLE) || defined(USE_SLANG)
@@ -315,7 +372,11 @@ extern void curses_style PARAMS((int style, int dir));
 extern void setHashStyle PARAMS((int style, int color, int cattr, int mono, char* element));
 extern void setStyle PARAMS((int style, int color, int cattr, int mono));
 extern void wcurses_css PARAMS((WINDOW * win, char* name, int dir));
-#define LynxChangeStyle(style,dir) curses_style(style,dir)
+extern void curses_w_style PARAMS((WINDOW* win, int style, int	dir));
+#  define LynxChangeStyle(style,dir) curses_style(style,dir)
+#  define LynxWChangeStyle(win,style,dir) curses_w_style(win,style,dir)
+#else
+#  define LynxWChangeStyle(win,style,dir)	(void)1
 #endif /* USE_COLOR_STYLE */
 
 #if USE_COLOR_TABLE
@@ -337,8 +398,7 @@ extern unsigned int Lynx_Color_Flags;
 #endif
 
 #define SL_LYNX_USE_COLOR	1
-#define SL_LYNX_USE_BLINK	2
-#define SL_LYNX_OVERRIDE_COLOR	4
+#define SL_LYNX_OVERRIDE_COLOR	2
 
 #define start_bold()      	LYaddAttr(1)
 #define start_reverse()   	LYaddAttr(2)
@@ -521,6 +581,22 @@ FANCY_CURSES.  Check your config.log to see why the FANCY_CURSES test failed.
 #define wstop_reverse(a)	wstandend(a)
 
 #endif /* FANCY_CURSES */
+
+#ifndef ACS_UARROW  
+#define ACS_UARROW  '^'
+#endif
+
+#ifndef ACS_DARROW
+#define ACS_DARROW  'V'
+#endif
+
+#ifndef ACS_LARROW
+#define ACS_LARROW '{'
+#endif
+
+#ifndef ACS_RARROW
+#define ACS_RARROW '}'
+#endif
 
 #define LYaddch(ch)		waddch(LYwin, ch)
 

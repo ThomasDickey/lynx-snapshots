@@ -639,39 +639,34 @@ use_tunnel:
       for (i = 0; i < n; i++) {
 	  HTPresentation *pres =
 			(HTPresentation *)HTList_objectAt(HTPresentations, i);
-	  if (pres->rep_out == WWW_PRESENT) {
-	      if (pres->rep != WWW_SOURCE &&
-		  strcasecomp(HTAtom_name(pres->rep), "www/mime") &&
-		  strcasecomp(HTAtom_name(pres->rep), "www/compressed") &&
-		  pres->quality <= 1.0 && pres->quality >= 0.0) {
-		  if (pres->quality < 1.0) {
-		      if (pres->maxbytes > 0) {
-			  sprintf(temp, ";q=%4.3f;mxb=%ld",
-					pres->quality, pres->maxbytes);
-		      } else {
-			  sprintf(temp, ";q=%4.3f", pres->quality);
-		      }
-		  } else if (pres->maxbytes > 0) {
-		      sprintf(temp, ";mxb=%ld", pres->maxbytes);
+	  if (pres->get_accept) {
+	      if (pres->quality < 1.0) {
+		  if (pres->maxbytes > 0) {
+		      sprintf(temp, ";q=%4.3f;mxb=%ld",
+				    pres->quality, pres->maxbytes);
 		  } else {
-		      temp[0] = '\0';
+		      sprintf(temp, ";q=%4.3f", pres->quality);
 		  }
-		  HTSprintf0(&linebuf, "%s%s%s",
-				(first_Accept ?
-				   "Accept: " : ", "),
+	      } else if (pres->maxbytes > 0) {
+		  sprintf(temp, ";mxb=%ld", pres->maxbytes);
+	      } else {
+		  temp[0] = '\0';
+	      }
+	      HTSprintf0(&linebuf, "%s%s%s",
+			    (first_Accept ?
+			       "Accept: " : ", "),
+			    HTAtom_name(pres->rep),
+			    temp);
+	      len += strlen(linebuf);
+	      if (len > 252 && !first_Accept) {
+		  StrAllocCat(command, crlf);
+		  HTSprintf0(&linebuf, "Accept: %s%s",
 				HTAtom_name(pres->rep),
 				temp);
-		  len += strlen(linebuf);
-		  if (len > 252 && !first_Accept) {
-		      StrAllocCat(command, crlf);
-		      HTSprintf0(&linebuf, "Accept: %s%s",
-				    HTAtom_name(pres->rep),
-				    temp);
-		      len = strlen(linebuf);
-		  }
-		  StrAllocCat(command, linebuf);
-		  first_Accept = FALSE;
+		  len = strlen(linebuf);
 	      }
+	      StrAllocCat(command, linebuf);
+	      first_Accept = FALSE;
 	  }
       }
       HTSprintf(&command, "%s*/*;q=0.01%c%c",

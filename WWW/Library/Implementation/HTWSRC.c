@@ -22,8 +22,6 @@
 #define PARAM_MAX BIG
 #define CACHE_PERIOD (7*86400)	/* Time to keep .src file in seconds */
 
-#define HEX_ESCAPE '%'
-
 struct _HTStructured {
 	CONST HTStructuredClass *	isa;
 	/* ... */

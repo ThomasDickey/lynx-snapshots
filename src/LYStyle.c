@@ -1,6 +1,6 @@
 /* character level styles for Lynx
  * (c) 1996 Rob Partington -- donated to the Lyncei (if they want it :-)
- * @Id: LYStyle.c 1.44 Sun, 01 Apr 2001 17:51:46 -0700 dickey @
+ * @Id: LYStyle.c 1.45 Sun, 03 Jun 2001 12:58:00 -0700 dickey @
  */
 #include <HTUtils.h>
 #include <HTML.h>
@@ -67,6 +67,12 @@ PUBLIC int s_prompt_sel		= NOSTYLE;
 PUBLIC int s_status		= NOSTYLE;
 PUBLIC int s_title		= NOSTYLE;
 PUBLIC int s_whereis		= NOSTYLE;
+PUBLIC int s_menu_frame		= NOSTYLE;
+PUBLIC int s_menu_bg		= NOSTYLE;
+PUBLIC int s_menu_number	= NOSTYLE;
+PUBLIC int s_menu_entry		= NOSTYLE;
+PUBLIC int s_menu_active	= NOSTYLE;
+PUBLIC int s_menu_sb		= NOSTYLE;
 
 #ifdef USE_SCROLLBAR
 PUBLIC int s_sb_aa		= NOSTYLE;
@@ -78,14 +84,23 @@ PUBLIC int s_sb_naa		= NOSTYLE;
 /* start somewhere safe */
 #define MAX_COLOR 16
 PRIVATE int colorPairs = 0;
-PRIVATE unsigned char our_pairs[2][MAX_COLOR][MAX_COLOR];
+
+#ifdef USE_BLINK
+#  define MAX_BLINK	2
+#  define M_BLINK	A_BLINK
+#else
+#  define MAX_BLINK	1
+#  define M_BLINK	0
+#endif
+
+PRIVATE unsigned char our_pairs[2][MAX_BLINK][MAX_COLOR][MAX_COLOR];
 
 /* icky parsing of the style options */
 PRIVATE void parse_attributes ARGS5(char*,mono,char*,fg,char*,bg,int,style,char*,element)
 {
     int mA = 0;
-    short fA = default_fg;
-    short bA = default_bg;
+    short fA = (short) default_fg;
+    short bA = (short) default_bg;
     int cA = A_NORMAL;
     int newstyle = hash_code(element);
 
@@ -116,8 +131,8 @@ PRIVATE void parse_attributes ARGS5(char*,mono,char*,fg,char*,bg,int,style,char*
     }
     CTRACE2(TRACE_STYLE, (tfp, "CSS(CP):%d\n", colorPairs));
 
-    fA = check_color(fg, default_fg);
-    bA = check_color(bg, default_bg);
+    fA = (short) check_color(fg, default_fg);
+    bA = (short) check_color(bg, default_bg);
 
     if (style == -1) {			/* default */
 	CTRACE2(TRACE_STYLE, (tfp, "CSS(DEF):default_fg=%d, default_bg=%d\n", fA, bA));
@@ -129,6 +144,14 @@ PRIVATE void parse_attributes ARGS5(char*,mono,char*,fg,char*,bg,int,style,char*
     if (fA == NO_COLOR) {
 	bA = NO_COLOR;
     } else if (COLORS) {
+#ifdef USE_BLINK
+	if (term_blink_is_boldbg) {
+	    if (fA >= COLORS)
+		cA = A_BOLD;
+	    if (bA >= COLORS)
+		cA |= M_BLINK;
+	} else
+#endif
 	if (fA >= COLORS || bA >= COLORS)
 	    cA = A_BOLD;
 	if (fA >= COLORS)
@@ -151,15 +174,15 @@ PRIVATE void parse_attributes ARGS5(char*,mono,char*,fg,char*,bg,int,style,char*
 
 	if (fA < MAX_COLOR
 	 && bA < MAX_COLOR
-	 && our_pairs[cA == A_BOLD][fA][bA])
-	    curPair = our_pairs[cA == A_BOLD][fA][bA] - 1;
+	 && our_pairs[!!(cA & A_BOLD)][!!(cA & A_BLINK)][fA][bA])
+	    curPair = our_pairs[!!(cA & A_BOLD)][!!(cA & M_BLINK)][fA][bA] - 1;
 	else {
 	    curPair = ++colorPairs;
-	    init_pair(curPair, fA, bA);
+	    init_pair((short) curPair, fA, bA);
 	    if (fA < MAX_COLOR
 	     && bA < MAX_COLOR
 	     && curPair < 255)
-		our_pairs[cA == A_BOLD][fA][bA] = curPair + 1;
+		our_pairs[!!(cA & A_BOLD)][!!(cA & M_BLINK)][fA][bA] = curPair + 1;
 	}
 	CTRACE2(TRACE_STYLE, (tfp, "CSS(CURPAIR):%d\n", curPair));
 	if (style < DSTYLE_ELEMENTS)
@@ -209,6 +232,12 @@ PRIVATE void parse_style ARGS1(char*,buffer)
 	{ "edit.prompt.marked",	DSTYLE_ELEMENTS,	&s_prompt_sel },
 	{ "edit.prompt",	DSTYLE_ELEMENTS,	&s_prompt_edit },
 	{ "forwbackw.arrow",	DSTYLE_ELEMENTS,	&s_forw_backw },
+	{ "menu.frame",		DSTYLE_ELEMENTS,	&s_menu_frame },
+	{ "menu.bg",		DSTYLE_ELEMENTS,	&s_menu_bg },
+	{ "menu.n",		DSTYLE_ELEMENTS,	&s_menu_number },
+	{ "menu.entry",		DSTYLE_ELEMENTS,	&s_menu_entry },
+	{ "menu.active",	DSTYLE_ELEMENTS,	&s_menu_active },
+	{ "menu.sb",		DSTYLE_ELEMENTS,	&s_menu_sb },
     };
     unsigned n;
     BOOL found = FALSE;
@@ -401,6 +430,11 @@ PUBLIC void parse_userstyles NOARGS
     dft_style(s_aedit_pad,		s_aedit);
     dft_style(s_curedit,		s_aedit);
     dft_style(s_aedit_sel,		s_aedit);
+    dft_style(s_menu_bg,		s_normal);
+    dft_style(s_menu_entry,		s_menu_bg);
+    dft_style(s_menu_frame,		s_menu_bg);
+    dft_style(s_menu_number,		s_menu_bg);
+    dft_style(s_menu_active,		s_alink);
 }
 
 

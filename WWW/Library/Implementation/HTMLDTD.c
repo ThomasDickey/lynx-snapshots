@@ -1660,14 +1660,14 @@ PUBLIC CONST SGML_dtd HTML_dtd = {
    is limited and I didn't want to list the whole tags_new table
    twice... - kw */
 PUBLIC void HTSwitchDTD ARGS1(
-    BOOL,		new)
+    int,		new_flag)
 {
     if (TRACE)
 	CTRACE((tfp,"HTMLDTD: Copying DTD element info of size %d, %d * %d\n",
-		(int) (new ? sizeof(tags_new) : sizeof(tags_old)),
+		(int) (new_flag ? sizeof(tags_new) : sizeof(tags_old)),
 		HTML_ALL_ELEMENTS,
 		(int) sizeof(HTTag)));
-    if (new)
+    if (new_flag)
 	memcpy(tags, tags_new, HTML_ALL_ELEMENTS * sizeof(HTTag));
     else
 	memcpy(tags, tags_old, HTML_ALL_ELEMENTS * sizeof(HTTag));

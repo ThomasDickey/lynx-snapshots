@@ -39,12 +39,6 @@
 # include <LYPrettySrc.h>
 #endif
 
-#if 0
-#ifdef CJK_EX	/* 1997/12/12 (Fri) 16:54:58 */
-extern HTkcode last_kcode;
-#endif
-#endif
-
 #define INVALID (-1)
 
 #ifdef USE_PRETTYSRC
@@ -1005,13 +999,6 @@ PRIVATE void end_element ARGS2(
 		do_close_stacked(context);
 		extra_action_taken = YES;
 		stackpos = is_on_stack(context, old_tag);
-#if 0	/* done below with more specific message - kw */
-	    } else {
-		CTRACE((tfp, "SGML: Still open %s \t<- ***invalid end </%s>\n",
-			    context->element_stack->tag->name,
-			    old_tag->name));
-		return;
-#endif
 	    }
 	}
 
@@ -1476,10 +1463,6 @@ PRIVATE void SGML_character ARGS2(
     **	we can revert back to the unchanged c_in. - KW
     */
 #define unsign_c clong
-#if 0
-    static unsigned char sjis_1st = '\0';
-    unsigned char sjis_hi, sjis_lo;
-#endif
 
     c = c_in;
     clong = UCH(c);	/* a.k.a. unsign_c */
@@ -1692,29 +1675,6 @@ top1:
 	c != '\t' && c != '\n' && c != '\r' &&
 	HTCJK == NOCJK)
 	goto after_switch;
-
-#if 0	/* This JIS X0201 Kana to JIS X0208 Kana conversion is/should be
-	 * done in the HTextAppendCharacter. -- TH
-	 */
-#ifdef CJK_EX	/* 1998/11/24 (Tue) 17:02:31 */
-    if (HTCJK == JAPANESE && last_kcode == SJIS) {
-	if (sjis_1st == '\0' && (IS_SJIS_HI1(c) || IS_SJIS_HI2(c))) {
-	    sjis_1st = c;
-	} else if (sjis_1st && IS_SJIS_LO(c)) {
-	    sjis_1st = '\0';
-	} else {
-	    if (context->state == S_text) {
-		if (0xA1 <= UCH(c) && UCH(c) <= 0xDF) {
-		    JISx0201TO0208_SJIS(c, &sjis_hi, &sjis_lo);
-		    PUTC(sjis_hi);
-		    PUTC(sjis_lo);
-		    goto after_switch;
-		}
-	    }
-	}
-    }
-#endif
-#endif
 
     /*
     **	Ignore 127 if we don't have HTPassHighCtrlRaw
@@ -3495,7 +3455,7 @@ top1:
 		break;
 	    }
 #ifdef USE_PRETTYSRC
-	    }  else {
+	    } else {
 		PUTC(' ');
 		if (context->current_attribute_number == INVALID)
 		    PSRCSTART(badattr);
@@ -3561,22 +3521,19 @@ top1:
 	    context->state = S_equals;
 	    break;
 	}
-#ifdef USE_PRETTYSRC
-#if 0 /*seems this is not needed. It was causing some LSS style stack underflow -VH*/
-	/* we are here because this char seemed the beginning of attrname */
-	if (psrc_view && context->current_attribute_number == INVALID) {
-	    PSRCSTOP(badattr);
-	    PUTC(' ');
-	}
-#endif
-#endif
 	HTChunkPutc(string, c);
 	context->state = S_attr; /* Get next attribute */
 	break;
 
     case S_equals:		/* After attr = */
-	if (WHITE(c))
+	if (WHITE(c)) {
+	    CTRACE((tfp, "SGML: found = but no value\n"));
+	    HTChunkTerminate(string) ;
+	    handle_attribute_value(context, string->data);
+	    string->size = 0;
+	    PUTC(c);
 	    break;		/* Before attribute value */
+	}
 	if (c == '>') {		/* End of tag */
 	    CTRACE((tfp, "SGML: found = but no value\n"));
 #ifdef USE_PRETTYSRC
@@ -4803,121 +4760,6 @@ PRIVATE CONST unsigned char *repairJIStoEUC ARGS2(
     return 0;
 }
 
-#if 0	/* NOTUSED */
-
-static struct {
-    char *ee;
-    char de;
-} entities[] = {
-    {"&lt;", '<' },
-    {"&gt;", '>' },
-    {"&amp;", '&'},
-    {"&quot;", '"'},
-    {NULL, 0}
-};
-
-PRIVATE int isHTMLentity ARGS2(
-	char *, str,
-	int *, chp)
-{
-    int ei, ej;
-    char *es, ec;
-    int off;
-
-    off = *str == '&' ? 0 : 1;
-    for (ei = 0; (es = entities[ei].ee) != '\0'; ei++) {
-	for (ej = 0; (ec = es[off + ej]) != '\0'; ej++) {
-	    if (ec != str[ej])
-		break;
-	    if (ec == ';') {
-		*chp = entities[ei].de;
-		return ej + 1;
-	    }
-	}
-    }
-    return 0;
-}
-
-#define sputc(sp,ch)	(sp?(*sp++ = ch):ch)
-
-PUBLIC int FIX_2022 ARGS3(
-	char *, src,
-	char *, dst,
-	char *, ctype)
-{
-    int in2B;
-    char ch1, ch2, *sp, *dp;
-    int bad;
-    int isHTML, len, ech;
-
-    in2B = 0;
-    sp = src;
-    dp = dst;
-    bad = 0;
-
-    isHTML = strcasecomp(ctype, "text/html") == 0;
-
-    while ((ch1 = *sp++) != '\0') {
-	if (ch1 == ESC) {
-	    if (*sp == TO_2BCODE) {
-		if (sp[1] == 'B' || sp[1] == '@') {
-		    in2B = 1;
-		    sputc(dp, ch1);
-		    sputc(dp, *sp++);
-		    sputc(dp, *sp++);
-		    continue;
-		}
-	    } else if (*sp == TO_1BCODE) {
-		if (sp[1] == 'B' || sp[1] == 'J') {
-		    in2B = 0;
-		    sputc(dp, ch1);
-		    sputc(dp, *sp++);
-		    sputc(dp, *sp++);
-		    continue;
-		}
-	    }
-	}
-	if (in2B) {
-	    if ((ch1 <= 0x20)
-		|| (sp[0] <= 0x20)
-		|| (ch1 == '<' && sp[0] == '/')
-		|| (sp[0] == '<' && sp[1] == '/')) {
-		in2B = 0;
-		sputc(dp, ESC);
-		sputc(dp, TO_1BCODE);
-		sputc(dp, 'B');
-		sputc(dp, ch1);
-		bad = 1;
-		continue;
-	    }
-	    if (isHTML && ch1 == '&')
-		if ((len = isHTMLentity(sp, &ech)) != '\0')
-		    if (sp[len] != 0) {
-			ch1 = ech;
-			sp += len;
-			bad = 1;
-		    }
-	    ch2 = *sp++;
-
-	    if (isHTML && ch2 == '&')
-		if ((len = isHTMLentity(sp, &ech)) != '\0')
-		    if (sp[len] != 0) {
-			ch2 = ech;
-			sp += len;
-			bad = 1;
-		    }
-	    sputc(dp, ch1);
-	    sputc(dp, ch2);
-	} else {
-	    sputc(dp, ch1);
-	}
-    }
-    sputc(dp, 0);
-    return bad;
-}
-
-#endif
-
 PUBLIC unsigned char *TO_EUC ARGS2(
 	CONST unsigned char *,	jis,
 	unsigned char *,	euc)
@@ -5065,12 +4907,6 @@ PUBLIC void TO_JIS ARGS2(
 	outofmem(__FILE__, "TO_JIS");
 #endif
     TO_EUC(any, euc);
-#if 0
-    if (is_EUC_JP(euc))
-	EUC_TO_JIS(euc, jis, TO_KANJI, TO_ASCII);
-    else
-	strcpy(jis, any);
-#endif
     is_EUC_JP(euc);
     EUC_TO_JIS(euc, jis, TO_KANJI, TO_ASCII);
 

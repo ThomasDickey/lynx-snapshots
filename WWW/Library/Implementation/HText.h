@@ -83,7 +83,7 @@ extern void HText_setStyle PARAMS((HText * text, HTStyle * style));
   ADD ONE CHARACTER
 
  */
-extern void HText_appendCharacter PARAMS((HText * text, char ch));
+extern void HText_appendCharacter PARAMS((HText * text, int ch));
 
 /*
 

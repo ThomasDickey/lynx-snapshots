@@ -575,13 +575,16 @@ typedef struct {
 	int user;
 	} USER_DATA;
 
+#ifndef NOUSERS
 PRIVATE HTList *known_grp = NULL;
 PRIVATE HTList *known_pwd = NULL;
 PRIVATE BOOL uidgid_cache_inited = NO;
+#endif
 
 #ifdef LY_FIND_LEAKS
 PRIVATE void clear_uidgid_cache NOARGS
 {
+#ifndef NOUSERS
     USER_DATA *data;
     if (known_grp) {
 	while ((data = HTList_removeLastObject(known_grp)) != NULL) {
@@ -597,6 +600,7 @@ PRIVATE void clear_uidgid_cache NOARGS
 	}
 	FREE(known_pwd);
     }
+#endif
 }
 #endif /* LY_FIND_LEAKS */
 

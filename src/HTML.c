@@ -239,10 +239,6 @@ PUBLIC BOOL LYBadHTML ARGS1(
 */
 PUBLIC void HTML_put_character ARGS2(HTStructured *, me, char, c)
 {
-#if 0 /* def KANJI_CODE_OVERRIDE */
-    static unsigned char save_ch1 = 0;
-    static unsigned char save_ch2 = 0;
-#endif
     /*
      *	Ignore all non-MAP content when just
      *	scanning a document for MAPs. - FM
@@ -423,25 +419,6 @@ PUBLIC void HTML_put_character ARGS2(HTStructured *, me, char, c)
 	    } else {
 		me->inP = TRUE;
 		me->inLABEL = FALSE;
-#if 0 /* Should this check be done in HText_appendCharacter? */
-		if (last_kcode == EUC) {
-		    if (save_ch1 && !save_ch2) {
-			if (UCH(c) & 0x80) {
-			    save_ch2 = c;
-			}
-			HText_appendCharacter(me->text, save_ch1);
-			HText_appendCharacter(me->text, save_ch2);
-			save_ch1 = save_ch2 = '\0';
-		    } else if (UCH(c) & 0x80) {
-			save_ch1 = c;
-			save_ch2 = '\0';
-		    } else {
-			HText_appendCharacter(me->text, c);
-		    }
-		} else {
-		    HText_appendCharacter(me->text, c);
-		}
-#endif
 		HText_appendCharacter(me->text, c);
 		me->in_word = YES;
 	    }
@@ -3931,72 +3908,6 @@ PRIVATE int HTML_start_element ARGS6(
 			0,
 			NULL,
 			NULL, YES, TRUE, &intern_flag);
-#if 0
-	me->inFIG = TRUE;
-	if (me->inA) {
-	    SET_SKIP_STACK(HTML_A);
-	    HTML_end_element(me, HTML_A, include);
-	}
-	if (!present ||
-	    (present && !present[HTML_FIG_ISOBJECT])) {
-	    LYEnsureDoubleSpace(me);
-	    LYResetParagraphAlignment(me);
-	    me->inFIGwithP = TRUE;
-	} else {
-	    me->inFIGwithP = FALSE;
-	    HTML_put_character(me, ' ');  /* space char may be ignored */
-	}
-	CHECK_ID(HTML_FIG_ID);
-	me->in_word = NO;
-	me->inP = FALSE;
-
-	if (clickable_images && present && present[HTML_FIG_SRC] &&
-	    value[HTML_FIG_SRC] && *value[HTML_FIG_SRC] != '\0') {
-	    StrAllocCopy(href, value[HTML_FIG_SRC]);
-	    CHECK_FOR_INTERN(intern_flag,href);
-	    url_type = LYLegitimizeHREF(me, &href, TRUE, TRUE);
-	    if (*href) {
-		/*
-		 *  Check whether a base tag is in effect. - FM
-		 */
-		if ((me->inBASE && *href != '#') &&
-		    (temp = HTParse(href, me->base_href, PARSE_ALL)) &&
-		    *temp != '\0')
-		    /*
-		     *	Use reference related to the base.
-		     */
-		    StrAllocCopy(href, temp);
-		FREE(temp);
-
-		/*
-		 *  Check whether to fill in localhost. - FM
-		 */
-		LYFillLocalFileURL(&href,
-				   ((*href != '#' &&
-				     me->inBASE) ?
-				   me->base_href : me->node_anchor->address));
-
-		me->CurrentA = HTAnchor_findChildAndLink(
-					me->node_anchor,	/* Parent */
-					NULL,			/* Tag */
-					href,			/* Addresss */
-					INTERN_LT);		/* Type */
-		HText_beginAnchor(me->text, me->inUnderline, me->CurrentA);
-		if (me->inBoldH == FALSE)
-		    HText_appendCharacter(me->text, LY_BOLD_START_CHAR);
-		HTML_put_string(me, (present[HTML_FIG_ISOBJECT] ?
-		      (present[HTML_FIG_IMAGEMAP] ?
-					"(IMAGE)" : "(OBJECT)") : "[FIGURE]"));
-		if (me->inBoldH == FALSE)
-		    HText_appendCharacter(me->text, LY_BOLD_END_CHAR);
-		HText_endAnchor(me->text, 0);
-		HTML_put_character(me, '-');
-		HTML_put_character(me, ' '); /* space char may be ignored */
-		me->in_word = NO;
-	    }
-	    FREE(href);
-	}
-#endif
 	break;
 
     case HTML_OBJECT:
@@ -4954,8 +4865,8 @@ PRIVATE int HTML_start_element ARGS6(
 		 */
 		for (i = 0; I.value[i]; i++) {
 		    HTML_put_character(me,
-				       (I.value[i] ==  ' ' ?
-					HT_NON_BREAK_SPACE : I.value[i]));
+				       (char)(I.value[i] ==  ' ' ?
+					      HT_NON_BREAK_SPACE : I.value[i]));
 		}
 		while (i++ < chars) {
 		    HTML_put_character(me, HT_NON_BREAK_SPACE);
@@ -5244,7 +5155,7 @@ PRIVATE int HTML_start_element ARGS6(
 		    &I_value,
 		    ATTR_CS_IN,
 		    I.value_cs,
-		    (me->UsePlainSpace && !me->HiddenValue),
+		    (BOOL)(me->UsePlainSpace && !me->HiddenValue),
 		    me->UsePlainSpace,
 		    me->HiddenValue);
 		I.value = I_value;
@@ -5456,8 +5367,9 @@ PRIVATE int HTML_start_element ARGS6(
 		     */
 		    for (i = 0; I.value[i]; i++)
 			HTML_put_character(me,
-					   (I.value[i] ==  ' ' ?
-					    HT_NON_BREAK_SPACE : I.value[i]));
+					   (char)(I.value[i] ==  ' '
+						   ? HT_NON_BREAK_SPACE
+						   : I.value[i]));
 		    while (i++ < chars)
 			HTML_put_character(me, HT_NON_BREAK_SPACE);
 		}
@@ -5804,9 +5716,11 @@ PRIVATE int HTML_start_element ARGS6(
 	 *  table tracking code.  Cancel tracking, it would only make
 	 *  things worse. - kw
 	 */
-#ifndef EXP_NESTED_TABLES
-	HText_cancelStbl(me->text);
+#ifdef EXP_NESTED_TABLES
+	if (!nested_tables)
 #endif
+	HText_cancelStbl(me->text);
+
 	if (me->inA) {
 	    SET_SKIP_STACK(HTML_A);
 	    HTML_end_element(me, HTML_A, include);
@@ -6008,7 +5922,7 @@ PRIVATE int HTML_start_element ARGS6(
 		}
 	    }
 	    HText_startStblCOL(me->text, span, stbl_align,
-			       (ElementNumber == HTML_COLGROUP));
+			       (BOOL)(ElementNumber == HTML_COLGROUP));
 	}
 	CHECK_ID(HTML_COL_ID);
 	break;
@@ -6051,7 +5965,7 @@ PRIVATE int HTML_start_element ARGS6(
 		}
 	    }
 	    HText_startStblTD(me->text, colspan, rowspan, stbl_align,
-			      (ElementNumber == HTML_TH));
+			      (BOOL)(ElementNumber == HTML_TH));
 	}
 	me->in_word = NO;
 	break;
@@ -6219,7 +6133,7 @@ PRIVATE int HTML_end_element ARGS3(
      *	SGML_EMPTY in HTMLDTD.c. - FM & KW
      */
     if (HTML_dtd.tags[element_number].contents != SGML_EMPTY) {
-	skip_stack_requested = me->skip_stack > 0;
+	skip_stack_requested = (BOOL) (me->skip_stack > 0);
 	if ((element_number != me->sp[0].tag_number) &&
 	    me->skip_stack <= 0 &&
 	    HTML_dtd.tags[HTML_LH].contents != SGML_EMPTY &&
@@ -6415,7 +6329,7 @@ PRIVATE int HTML_end_element ARGS3(
 	 *  charset routines. - FM
 	 */
 	if (me->node_anchor->bookmark && *me->node_anchor->bookmark) {
-	    if ((LYMultiBookmarks == TRUE) ||
+	    if ((LYMultiBookmarks != MBM_OFF) ||
 		((bookmark_page && *bookmark_page) &&
 		 strcmp(me->node_anchor->bookmark, bookmark_page))) {
 		if (!include)
@@ -7625,9 +7539,11 @@ End_Object:
 	break;
 
     case HTML_TABLE:
-#ifndef EXP_NESTED_TABLES
-	me->inTABLE = FALSE;
+#ifdef EXP_NESTED_TABLES
+	if (!nested_tables)
 #endif
+	me->inTABLE = FALSE;
+
 	if (!strcmp(me->sp->style->name, "Preformatted")) {
 	    break;
 	}
@@ -7639,10 +7555,12 @@ End_Object:
 	change_paragraph_style(me, me->sp->style);
 	UPDATE_STYLE;
 #ifdef EXP_NESTED_TABLES
-	me->inTABLE = HText_endStblTABLE(me->text);
-#else
-	HText_endStblTABLE(me->text);
+	if (nested_tables) {
+	    me->inTABLE = HText_endStblTABLE(me->text);
+	} else
 #endif
+	HText_endStblTABLE(me->text);
+
 	me->current_default_alignment = me->sp->style->alignment;
 	if (me->List_Nesting_Level >= 0)
 	    HText_NegateLineOne(me->text);
@@ -8321,53 +8239,6 @@ PUBLIC HTStructured* HTML_new ARGS3(
     class_string[0] = '\0';
 #endif
 
-#ifdef NOTUSED_FOTEMODS
-    /*
-    **	If the anchor already has stage info, make sure that it is
-    **	appropriate for the current display charset.  HTMIMEConvert()
-    **	does this for the http and https schemes, and HTCharsetFormat()
-    **	does it for the file and and ftp schemes, be we need to do it,
-    **	if necessary, for the gateway schemes. - FM
-    */
-    if (me->node_anchor->UCStages) {
-	if (HTAnchor_getUCLYhndl(me->node_anchor,
-				 UCT_STAGE_STRUCTURED) != current_char_set) {
-	    /*
-	    **	We are reloading due to a change in the display character
-	    **	set.  Free the stage info and let the stage info creation
-	    **	mechanisms create a new UCStages structure appropriate for
-	    **	the current display character set. - FM
-	    */
-	    FREE(anchor->UCStages);
-	} else if (HTAnchor_getUCLYhndl(me->node_anchor,
-					UCT_STAGE_MIME) == current_char_set) {
-	    /*
-	    **	The MIME stage is set to the current display character
-	    **	set.  If it is CJK, and HTCJK does not point to a CJK
-	    **	character set, assume we are reloading due to a raw
-	    **	mode toggle and reset the MIME and PARSER stages to
-	    **	an ISO Latin 1 default. - FM
-	    */
-	    LYUCcharset *p_in = HTAnchor_getUCInfoStage(me->node_anchor,
-							UCT_STAGE_MIME);
-	    if (p_in->enc == UCT_ENC_CJK && HTCJK == NOCJK) {
-		HTAnchor_resetUCInfoStage(me->node_anchor, LATIN1,
-					  UCT_STAGE_MIME,
-					  UCT_SETBY_DEFAULT);
-		HTAnchor_setUCInfoStage(me->node_anchor, LATIN1,
-					UCT_STAGE_MIME,
-					UCT_SETBY_DEFAULT);
-		HTAnchor_resetUCInfoStage(me->node_anchor, LATIN1,
-					  UCT_STAGE_PARSER,
-					  UCT_SETBY_DEFAULT);
-		HTAnchor_setUCInfoStage(me->node_anchor, LATIN1,
-					UCT_STAGE_PARSER,
-					UCT_SETBY_DEFAULT);
-	    }
-	}
-    }
-#endif /* NOTUSED_FOTEMODS */
-
     /*
     **	Create a chartrans stage info structure for the anchor,
     **	if it does not exist already (in which case the default
@@ -8404,11 +8275,6 @@ PUBLIC HTStructured* HTML_new ARGS3(
 					 UCT_STAGE_STRUCTURED);
     me->outUCLYhndl = HTAnchor_getUCLYhndl(me->node_anchor,
 					   UCT_STAGE_STRUCTURED);
-#ifdef NOTUSED_FOTEMODS
-    UCSetTransParams(&me->T,
-		     me->inUCLYhndl, me->inUCI,
-		     me->outUCLYhndl, me->outUCI);
-#endif
 
     me->target = stream;
     if (stream)
@@ -8619,10 +8485,6 @@ PRIVATE HTStream* CacheThru_new ARGS2(
 	if (anchor->source_cache_file) {
 	    CTRACE((tfp, "SourceCacheWriter: If successful, will replace source cache file %s\n",
 		    anchor->source_cache_file));
-#if 0 /* No, let's NOT do this. - kw 1999-12-05 */
-	    FREE(stream);
-	    return target;
-#endif
 	}
 
 	/*
@@ -8649,10 +8511,6 @@ PRIVATE HTStream* CacheThru_new ARGS2(
 	    CTRACE((tfp,
 		    "SourceCacheWriter: If successful, will replace memory chunk %p\n",
 		    (void *)anchor->source_cache_chunk));
-#if 0 /* No, let's NOT do this. - kw 1999-12-05 */
-	    FREE(stream);
-	    return target;
-#endif
 	}
 
 #ifdef SAVE_TIME_NOT_SPACE
@@ -8769,11 +8627,6 @@ PUBLIC HTStream* HTMLToC ARGS3(
 	HTStream *,		sink)
 {
     HTStructured * html;
-#if 0
-    if (!sink)
-	sink = HTStreamStack(WWW_SOURCE, HTAtom_for("www/dump"),
-	HTOutputStream, anchor);
-#endif
     if (sink)
 	(*sink->isa->put_string)(sink, "/* ");	/* Before even title */
     html = HTML_new(anchor, WWW_PLAINTEXT, sink);

@@ -4,7 +4,6 @@
 #
 .AUTODEPEND
 
-
 #
 # Borland C++ tools
 #
@@ -21,7 +20,7 @@ BCB = $(MAKEDIR)/..
 BCC_INC = $(BCB)/INCLUDE
 #BCC_INC = c:/cbuilder/include
 WWW_LIB = WWW/Library/Implementation
-OBJ = ../obj
+OBJ = ..\obj
 ETC_LIB = ../curses
 
 
@@ -33,41 +32,54 @@ DEBUG=
 #DEBUG=-v -y -vG
 #DEBUG=-v -y
 
-CC_FLAGS = $(DEBUG) \
+# Uncomment the CS_DEFS and CS_OBJS lines if you wish to build the color-style
+# configuration.
+#CS_DEFS = /DCHAR_BIT=8 /DUSE_COLOR_STYLE
+#CS_OBJS = $(OBJ)/LYHash.obj $(OBJ)/LYStyle.obj
+
+# Uncomment SOCK_DEFS if you wish to build with winsock2.
+#SOCK_DEFS = /DUSE_WINSOCK2_H /D_WIN32_WINNT=0x0400
+
+CC_FLAGS = $(DEBUG) $(CS_DEFS) $(SOCK_DEFS) \
 -I./;$(ETC_LIB);SRC;$(WWW_LIB);$(BCC_INC);SRC/CHRTRANS \
--DNO_UNISTD_H \
--DVC="2.14FM" \
--D_WINDOWS \
--DXMOSAIC_HACK \
 -DACCESS_AUTH \
--DNO_FILIO_H \
--DNO_UTMP \
--DNO_CUSERID \
--DNO_TTYTYPE \
--DNOSIGHUP \
--DDOSPATH \
--DNOUSERS \
--DFANCY_CURSES \
 -DCOLOR_CURSES \
--DHAVE_KEYPAD \
--DUSE_EXTERNALS \
--DUSE_ZLIB \
--DPDCURSES \
--DUSE_MULTIBYTE_CURSES \
--DLONG_LIST \
+-DDIRED_SUPPORT \
 -DDISP_PARTIAL \
--DHAVE_DIRENT_H=1 \
--DEXP_PERSISTENT_COOKIES \
--DNO_CONFIG_INFO \
+-DDOSPATH \
 -DEXP_ALT_BINDINGS \
+-DEXP_CMD_LOGGING \
+-DEXP_JUSTIFY_ELTS \
+-DEXP_NESTED_TABLES \
+-DEXP_PERSISTENT_COOKIES \
+-DEXP_READPROGRESS \
+-DFANCY_CURSES \
+-DHAVE_DIRENT_H=1 \
+-DHAVE_KEYPAD \
+-DLONG_LIST \
+-DNOSIGHUP \
+-DNOUSERS \
+-DNO_CONFIG_INFO \
+-DNO_CUSERID \
+-DNO_FILIO_H \
+-DNO_TTYTYPE \
+-DNO_UNISTD_H \
+-DNO_UTMP \
+-DPDCURSES \
 -DSOURCE_CACHE \
+-DUSE_EXTERNALS \
+-DUSE_MULTIBYTE_CURSES \
 -DUSE_PRETTYSRC \
+-DUSE_ZLIB \
+-DVC="2.14FM" \
+-DXMOSAIC_HACK \
+-D_WINDOWS \
 ### Add by Hiroyuki
--DLY_MAXPATH=1024 \
--D_WIN_CC=1 \
 -DCJK_EX \
+-DLY_MAXPATH=1024 \
 -DSH_EX \
--DWIN_EX
+-DWIN_EX \
+-D_WIN_CC=1
 
 #
 # Dependency List
@@ -77,35 +89,40 @@ Dep_lynx = lynx.exe
 lynx : BccW32.cfg $(Dep_lynx)
   echo MakeNode 
 
+clean :
+	-del *.tds
+	-del *.map
+	-del $(OBJ)\*.obj
+	-del /f/s/q *.i
+
 Dep_lynxdexe = \
    $(ETC_LIB)/zlib.lib\
    $(ETC_LIB)/pdcurses.lib\
-   $(OBJ)/HTDOS.obj\
-   $(OBJ)/UCAuto.obj\
-   $(OBJ)/UCAux.obj\
-   $(OBJ)/UCdomap.obj\
-   $(OBJ)/HTAlert.obj\
-   $(OBJ)/HTFwriter.obj\
-   $(OBJ)/HTInit.obj\
-   $(OBJ)/HTTcp.obj\
+   $(OBJ)/DefaultStyle.obj\
+   $(OBJ)/GridText.obj\
    $(OBJ)/HTAABrow.obj\
    $(OBJ)/HTAAProt.obj\
    $(OBJ)/HTAAUtil.obj\
    $(OBJ)/HTAccess.obj\
+   $(OBJ)/HTAlert.obj\
    $(OBJ)/HTAnchor.obj\
    $(OBJ)/HTAssoc.obj\
    $(OBJ)/HTAtom.obj\
    $(OBJ)/HTBtree.obj\
    $(OBJ)/HTChunk.obj\
+   $(OBJ)/HTDOS.obj\
    $(OBJ)/HTFile.obj\
    $(OBJ)/HTFinger.obj\
    $(OBJ)/HTFormat.obj\
    $(OBJ)/HTFtp.obj\
+   $(OBJ)/HTFwriter.obj\
    $(OBJ)/HTGopher.obj\
    $(OBJ)/HTGroup.obj\
+   $(OBJ)/HTInit.obj\
    $(OBJ)/HTLex.obj\
    $(OBJ)/HTList.obj\
    $(OBJ)/HTMIME.obj\
+   $(OBJ)/HTML.obj\
    $(OBJ)/HTMLDTD.obj\
    $(OBJ)/HTMLGen.obj\
    $(OBJ)/HTNews.obj\
@@ -114,14 +131,11 @@ Dep_lynxdexe = \
    $(OBJ)/HTRules.obj\
    $(OBJ)/HTString.obj\
    $(OBJ)/HTStyle.obj\
-   $(OBJ)/HTTelnet.obj\
    $(OBJ)/HTTP.obj\
+   $(OBJ)/HTTcp.obj\
+   $(OBJ)/HTTelnet.obj\
    $(OBJ)/HTUU.obj\
    $(OBJ)/HTWSRC.obj\
-   $(OBJ)/SGML.obj\
-   $(OBJ)/DefaultStyle.obj\
-   $(OBJ)/GridText.obj\
-   $(OBJ)/HTML.obj\
    $(OBJ)/LYBookmark.obj\
    $(OBJ)/LYCgi.obj\
    $(OBJ)/LYCharSets.obj\
@@ -148,9 +162,8 @@ Dep_lynxdexe = \
    $(OBJ)/LYMap.obj\
    $(OBJ)/LYNews.obj\
    $(OBJ)/LYOptions.obj\
-   $(OBJ)/LYPrint.obj\
    $(OBJ)/LYPrettySrc.obj\
-   $(OBJ)/LYrcFile.obj\
+   $(OBJ)/LYPrint.obj\
    $(OBJ)/LYReadCFG.obj\
    $(OBJ)/LYSearch.obj\
    $(OBJ)/LYShowInfo.obj\
@@ -158,13 +171,18 @@ Dep_lynxdexe = \
    $(OBJ)/LYTraversal.obj\
    $(OBJ)/LYUpload.obj\
    $(OBJ)/LYUtils.obj\
+   $(OBJ)/LYrcFile.obj\
+   $(OBJ)/SGML.obj\
    $(OBJ)/TRSTable.obj\
-   $(OBJ)/XSystem.obj
+   $(OBJ)/UCAuto.obj\
+   $(OBJ)/UCAux.obj\
+   $(OBJ)/UCdomap.obj\
+   $(OBJ)/Xsystem.obj $(CS_OBJS)
 
 
 lynx.exe : $(Dep_lynxdexe)
 #	$(BCC32) $(DEBUG) -lOS -elynx.exe @lynx_dbg.rsp
-	$(BCC32) $(DEBUG) -lOS -elynx.exe @lynx.rsp
+	$(BCC32) $(DEBUG) -lOS -elynx.exe $(CS_OBJS) @lynx.rsp
 #
 ###
 
@@ -448,6 +466,11 @@ $(OBJ)/LYGetFile.obj :  src/LYGetFile.c
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ src/LYGetFile.c
 |
 
+$(OBJ)/LYHash.obj :  src/LYHash.c
+  $(BCC32) -P- -c @&&|
+ $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ src/LYHash.c
+|
+
 $(OBJ)/LYHistory.obj :  src/LYHistory.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ src/LYHistory.c
@@ -543,6 +566,11 @@ $(OBJ)/LYStrings.obj :  src/LYStrings.c
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ src/LYStrings.c
 |
 
+$(OBJ)/LYStyle.obj :  src/LYStyle.c
+  $(BCC32) -P- -c @&&|
+ $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ src/LYStyle.c
+|
+
 $(OBJ)/LYTraversal.obj :  src/LYTraversal.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ src/LYTraversal.c
@@ -563,9 +591,9 @@ $(OBJ)/TRSTable.obj :  src/TRSTable.c
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ src/TRSTable.c
 |
 
-$(OBJ)/xsystem.obj :  src/xsystem.c
+$(OBJ)/Xsystem.obj :  src/Xsystem.c
   $(BCC32) -P- -c @&&|
- $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ src/xsystem.c
+ $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ src/Xsystem.c
 |
 
 # Compiler configuration file

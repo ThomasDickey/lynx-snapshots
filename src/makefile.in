@@ -41,7 +41,7 @@ WWWLIB		= $(top_builddir)/WWW/Library/Implementation/libwww.a
 INTLLIB		= @INTLDIR_MAKE@@INTLLIBS@
 INTLDIR_CPPFLAGS= @INTLDIR_CPPFLAGS@-I$(top_srcdir)/intl
 
-CPP_OPTS	= $(CHARSET_DEFS) $(DEFS) $(CPPFLAGS) \
+CPP_OPTS	= $(CPPFLAGS) $(DEFS) $(CHARSET_DEFS) \
 		-DLOCALEDIR=\"$(localedir)\" \
 		-I. \
 		-I$(top_builddir) \

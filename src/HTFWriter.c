@@ -506,7 +506,7 @@ PRIVATE void chrcat ARGS2(
 	int,		ch)
 {
     result += strlen(result);
-    *result++ = ch;
+    *result++ = (char)ch;
     *result = 0;
 }
 

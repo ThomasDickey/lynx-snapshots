@@ -171,6 +171,12 @@ PUBLIC void HTFormatInit NOARGS
   */
  HTReorderPresentation(WWW_PLAINTEXT, WWW_PRESENT);
  HTReorderPresentation(WWW_HTML, WWW_PRESENT);
+
+ /*
+  * Analyze the list, and set 'get_accept' for those whose representations
+  * are not redundant.
+  */
+ HTFilterPresentations();
 }
 
 PUBLIC void HTPreparsedFormatInit NOARGS
@@ -651,7 +657,7 @@ PRIVATE int ExitWithError ARGS1(
 /* Reverse the entries from each mailcap after it has been read, so that
  * earlier entries have precedence.  Set to 0 to get traditional lynx
  * behavior, which means that the last match wins. - kw */
-#define reverse_mailcap 1
+static int reverse_mailcap = 1;
 
 PRIVATE int HTLoadTypesConfigFile ARGS1(
 	char *,		fn)
@@ -1084,7 +1090,7 @@ PRIVATE int HTGetLine ARGS3(
 	if (s[i] == CR) {
 	    r = fgetc(f);
 	    if (r == LF)
-		s[i] = r;
+		s[i] = (char) r;
 	    else if (r != EOF)
 		ungetc(r, f);
 	}

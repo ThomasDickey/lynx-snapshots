@@ -50,6 +50,12 @@ extern int	s_prompt_sel;
 extern int	s_status;
 extern int	s_title;
 extern int	s_whereis;
+extern int	s_menu_frame;
+extern int	s_menu_bg;
+extern int	s_menu_number;
+extern int	s_menu_entry;
+extern int	s_menu_active;
+extern int	s_menu_sb;
 
 #ifdef USE_SCROLLBAR
 extern int	s_sb_aa;

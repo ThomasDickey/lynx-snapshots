@@ -2175,7 +2175,7 @@ PRIVATE int HTLoadNews ARGS4(
 	**	xxxxx			News group (no "@")
 	**	group/n1-n2		Articles n1 to n2 in group
 	*/
-	normal_url = (!strncmp(arg, "news:", 5) || !strncmp(arg, "nntp:", 5));
+	normal_url = (BOOL) (!strncmp(arg, "news:", 5) || !strncmp(arg, "nntp:", 5));
 	spost_wanted = (BOOL) (!normal_url && strstr(arg, "snewspost:") != NULL);
 	sreply_wanted = (BOOL) (!(normal_url || spost_wanted) &&
 			 strstr(arg, "snewsreply:") != NULL);

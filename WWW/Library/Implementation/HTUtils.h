@@ -100,6 +100,8 @@
 #define HAVE_UTMP 1
 #endif
 
+#endif /* HAVE_CONFIG_H */
+
 #ifndef lynx_srand
 #define lynx_srand srand
 #endif
@@ -107,8 +109,6 @@
 #ifndef lynx_rand
 #define lynx_rand rand
 #endif
-
-#endif /* HAVE_CONFIG_H */
 
 #if '0' != 48
 #define NOT_ASCII
@@ -169,6 +169,10 @@ typedef unsigned short mode_t;
 
 #if  defined(__EMX__) || defined(WIN_EX)
 #  define CAN_CUT_AND_PASTE
+#endif
+
+#if defined(USE_SLANG) || (defined(USE_COLOR_STYLE) && defined(__EMX__))
+#  define USE_BLINK
 #endif
 
 /*
@@ -489,7 +493,7 @@ The local equivalents of CR and LF
 #define LYTraceLogFP    0
 #else
 extern BOOLEAN WWW_TraceFlag;
-extern unsigned WWW_TraceMask;
+extern int WWW_TraceMask;
 #endif
 
 #define TRACE           (WWW_TraceFlag)
@@ -498,13 +502,13 @@ extern unsigned WWW_TraceMask;
 #define TRACE_TRST      (TRACE_bit(2))
 
 #if defined(LY_TRACELINE)
-#define LY_SHOWWHERE fprintf( tfp, "%s: %d: ", __FILE__, LY_TRACELINE );
+#define LY_SHOWWHERE fprintf( tfp, "%s: %d: ", __FILE__, LY_TRACELINE ),
 #else
 #define LY_SHOWWHERE /* nothing */
 #endif
 
-#define CTRACE(p)          if (TRACE) { LY_SHOWWHERE fprintf p; }
-#define CTRACE2(m,p)       if (m)     { LY_SHOWWHERE fprintf p; }
+#define CTRACE(p)         ((void)((TRACE) && ( LY_SHOWWHERE fprintf p )))
+#define CTRACE2(m,p)      ((void)((m)     && ( LY_SHOWWHERE fprintf p )))
 #define tfp TraceFP()
 #define CTRACE_SLEEP(secs) if (TRACE && LYTraceLogFP == 0) sleep(secs)
 #define CTRACE_FLUSH(fp)   if (TRACE) fflush(fp)

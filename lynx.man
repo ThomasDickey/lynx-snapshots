@@ -97,7 +97,8 @@ outputs for -source dumps.
 .B -blink
 forces high intensity background colors for color mode, if available
 and supported by the terminal.
-Lynx needs to be compiled with the \fBslang\fR library for this flag.
+This applies to the \fBslang\fR library (for a few terminal emulators),
+or to OS/2 EMX with \fBncurses\fR.
 .TP
 .B -book
 use the bookmark page as the startfile.  The default or command

@@ -1,6 +1,8 @@
 #ifndef LYSTYLE_H
 #define LYSTYLE_H
 
+#include <HTUtils.h>
+
 #ifdef USE_COLOR_STYLE
 
 #include <AttrList.h>
@@ -24,12 +26,10 @@ extern void style_defaultStyleSheet NOPARAMS;
 
 extern int style_readFromFile PARAMS((char* file));
 
-
 extern void TrimColorClass PARAMS((
     CONST char *	tagname,
     char *		styleclassname,
     int *		phcode));
-
 
  /* this is an array of styles for tags that don't specify 'class' - the
     values from that array will be suggested by SGML.c by setting the

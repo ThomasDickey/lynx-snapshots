@@ -14,6 +14,7 @@
 #include <GridText.h>
 #include <LYCharSets.h>
 #include <LYNews.h>
+#include <LYEdit.h>
 
 #include <LYGlobalDefs.h>
 
@@ -99,7 +100,6 @@ PUBLIC char *LYNewsPost ARGS2(
 	BOOLEAN,	followup)
 {
     char user_input[1024];
-    char *command = NULL;
     char CJKinput[1024];
     char *cp = NULL;
     CONST char *kp = NULL;
@@ -342,10 +342,6 @@ PUBLIC char *LYNewsPost ARGS2(
      *  Have the user create the message body.
      */
     if (!no_editor && editor && *editor != '\0') {
-	/*
-	 *  Use an external editor.
-	 */
-	char *editor_arg = "";
 
 	if (followup && nhist > 0) {
 	    /*
@@ -372,19 +368,7 @@ PUBLIC char *LYNewsPost ARGS2(
 	/*
 	 *  Spawn the user's editor on the news file.
 	 */
-	if (strstr(editor, "pico")) {
-	    editor_arg = " -t"; /* No prompt for filename to use */
-	}
-	HTSprintf0(&command, "%s%s %s", editor, editor_arg, my_tempfile);
-	_statusline(SPAWNING_EDITOR_FOR_NEWS);
-	stop_curses();
-	if (LYSystem(command)) {
-	    start_curses();
-	    HTAlert(ERROR_SPAWNING_EDITOR);
-	} else {
-	    start_curses();
-	}
-	FREE(command);
+	edit_temporary_file(my_tempfile, "", SPAWNING_EDITOR_FOR_NEWS);
 
 	nonempty = message_has_content(my_tempfile, &nonspaces);
 

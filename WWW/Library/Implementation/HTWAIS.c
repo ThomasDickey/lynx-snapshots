@@ -299,7 +299,7 @@ PRIVATE char * WWW_from_WAIS ARGS1(
 	l = *p++;		/* Length */
 	for (i = 0; i < l; i++, p++){
 	    if (!acceptable[*p]) {
-		*q++ = HEX_ESCAPE;	/* Means hex commming */
+		*q++ = HEX_ESCAPE;	/* Means hex coming */
 		*q++ = hex[(*p) >> 4];
 		*q++ = hex[(*p) & 15];
 	    }
@@ -457,7 +457,7 @@ PRIVATE void display_search_response ARGS4(
     WAISSearchResponse	*info;
     long i, k;
 
-    BOOL archie =  strstr(database, "archie")!=0;	/* Specical handling */
+    BOOL archie =  strstr(database, "archie")!=0;	/* Special handling */
 
     CTRACE((tfp, "HTWAIS: Displaying search response\n"));
     PUTS(gettext("Index "));
@@ -613,8 +613,6 @@ PUBLIC int HTLoadWAIS ARGS4(
 #define MAXDOCS 200
 
 {
-    static CONST char * error_header =
-"<h1>Access error</h1>\nThe following error occured in accesing a WAIS server:<P>\n";
     char * key;			  /* pointer to keywords in URL */
     char* request_message = NULL; /* arbitrary message limit */
     char* response_message = NULL; /* arbitrary message limit */
@@ -647,7 +645,7 @@ PUBLIC int HTLoadWAIS ARGS4(
     /*	Decipher and check syntax of WWW address:
     **	----------------------------------------
     **
-    **	First we remove the "wais:" if it was spcified.  920110
+    **	First we remove the "wais:" if it was specified.  920110
     */
     names = HTParse(arg, "", PARSE_HOST | PARSE_PATH | PARSE_PUNCTUATION);
     key = strchr(names, '?');

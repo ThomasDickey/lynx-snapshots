@@ -50,7 +50,8 @@ char *XCursesProgramName = "Lynx";
 #ifdef USE_CURSES_PADS
 WINDOW *LYwin = 0;
 int LYshiftWin = 0;
-int LYlineWrap = TRUE;
+int LYwideLines = FALSE;
+int LYtableCols = 0;			/* in 1/12 of screen width */
 #endif
 
 /*
@@ -60,6 +61,10 @@ int LYlineWrap = TRUE;
 
 PRIVATE int dumbterm PARAMS((char *terminal));
 BOOLEAN LYCursesON = FALSE;
+
+#if defined(USE_BLINK) && defined(__EMX__)
+PRIVATE void make_blink_boldbg NOARGS;
+#endif
 
 #if USE_COLOR_TABLE || defined(USE_SLANG)
 PUBLIC int Current_Attr, Masked_Attr;
@@ -206,6 +211,8 @@ PRIVATE void sl_suspend ARGS1(
 #else
 
 #ifdef FANCY_CURSES
+
+#ifndef VMS
 /* definitions for the mono attributes we can use */
 static struct {
     char *name;
@@ -233,6 +240,7 @@ PUBLIC int string_to_attr ARGS1(
     }
     return 0;
 }
+#endif /* VMS */
 
 #ifdef USE_COLOR_STYLE
 PRIVATE char *attr_to_string ARGS1(
@@ -328,6 +336,7 @@ PUBLIC void LYbox ARGS2(
      *	specify our own ASCII characters for the corners and call
      *	wborder() instead of box(). - kw
      */
+    LynxWChangeStyle(win, s_menu_frame, STACK_ON);
 #ifdef HAVE_WBORDER
     if (!boxvert || !boxhori)
 	box(win, boxvert, boxhori);
@@ -338,6 +347,7 @@ PUBLIC void LYbox ARGS2(
 #else
     box(win, boxvert, boxhori);
 #endif
+    LynxWChangeStyle(win, s_menu_frame, STACK_OFF);
 #ifdef CSS
     if (formfield)
 	wcurses_css(win, "frame", ABS_OFF);
@@ -412,7 +422,7 @@ PRIVATE int LYAttrset ARGS3(
     }
 }
 
-PRIVATE void curses_w_style ARGS3(
+PUBLIC void curses_w_style ARGS3(
 	WINDOW*,	win,
 	int,		style,
 	int,		dir)
@@ -469,7 +479,7 @@ PRIVATE void curses_w_style ARGS3(
 			"in LynxChangeStyle(curses_w_style)"));
 	    last_colorattr_ptr--;
 	}
-	last_styles[last_colorattr_ptr++] = getattrs(LYwin);
+	last_styles[last_colorattr_ptr++] = getattrs(win);
 	/* don't cache style changes for active links */
 #if OMIT_SCN_KEEPING
 	/* since we don't compute the hcode to stack off in HTML.c, we
@@ -537,7 +547,9 @@ PUBLIC void curses_style ARGS2(
 }
 #endif /* USE_COLOR_STYLE */
 
+#ifndef USE_SLANG
 PRIVATE BOOL lynx_called_initscr = FALSE;
+#endif
 
 #if HAVE_USE_DEFAULT_COLORS && USE_DEFAULT_COLORS
 /*
@@ -837,11 +849,7 @@ PUBLIC void start_curses NOARGS
 	 *  If set, the blink escape sequence will turn on high
 	 *  intensity background (rxvt and maybe Linux console).
 	 */
-	if (LYShowColor && (Lynx_Color_Flags & SL_LYNX_USE_BLINK)) {
-	    SLtt_Blink_Mode = 1;
-	} else {
-	    SLtt_Blink_Mode = 0;
-	}
+	SLtt_Blink_Mode = term_blink_is_boldbg;
 #endif /* (VMS || REAL_UNIX_SYSTEM) && !__CYGWIN__  */
     }
 #ifdef __DJGPP__
@@ -944,7 +952,7 @@ PUBLIC void start_curses NOARGS
 #ifdef USE_CURSES_PADS
 	LYwin = newpad(LYlines, MAX_COLS);
 	LYshiftWin = 0;
-	LYlineWrap = TRUE;
+	LYwideLines = FALSE;
 #endif
 
 #if defined(USE_KEYMAPS) && defined(NCURSES_VERSION)
@@ -1062,6 +1070,11 @@ PUBLIC void start_curses NOARGS
     LYclear();
 #endif
 
+#if defined(USE_BLINK) && defined(__EMX__)
+    if (term_blink_is_boldbg)		/* Now actually make it so! */
+	make_blink_boldbg();
+#endif
+
     LYCursesON = TRUE;
     CTRACE((tfp, "start_curses: done.\n"));
 }  /* end of start_curses() */
@@ -1155,8 +1168,8 @@ PUBLIC void lynx_enable_mouse ARGS1(int,state)
  * SVr4 curses (and ncurses) initialize the terminal I/O to raw mode, and
  * simulate other modes in the library.  This means that when running, it
  * simulates the OCRNL setting.  Normally that is not a problem.  However, when
- * spawning a subprocess (e.g., xli), the subprocess may write to the screen. 
- * Fine so far - curses resets the terminal I/O to the normal state on exit. 
+ * spawning a subprocess (e.g., xli), the subprocess may write to the screen.
+ * Fine so far - curses resets the terminal I/O to the normal state on exit.
  * But the subprocess's messages can still be coming to the screen when lynx
  * returns to the screen mode.  This function delays restoring OCRNL until
  * after the first getch() call.
@@ -1173,29 +1186,37 @@ PUBLIC void lynx_enable_mouse ARGS1(int,state)
  */
 PUBLIC void lynx_nl2crlf ARGS1(int, normal GCC_UNUSED)
 {
-    
-#if defined(NCURSES_VERSION) && defined(SET_TTY) && defined(TERMIOS) && defined(ONLCR)
+#if defined(NCURSES_VERSION_PATCH) && defined(SET_TTY) && defined(TERMIOS) && defined(ONLCR)
     static TTY saved_tty;
     static int did_save = FALSE;
     static int waiting = FALSE;
+    static int can_fix = TRUE;
 
     if (!did_save) {
 	saved_tty = cur_term->Nttyb;
 	did_save = TRUE;
+#if NCURSES_VERSION_PATCH < 20010529
+	/* workaround for optimizer bug with nonl() */
+	if ((tigetstr("cud1") != 0 && *tigetstr("cud1") == '\n')
+	 || (tigetstr("ind")  != 0 && *tigetstr("ind")  == '\n'))
+	    can_fix = FALSE;
+#endif
     }
-    if (normal) {
-	if (!waiting) {
-	    cur_term->Nttyb.c_oflag |= ONLCR;
-	    waiting = TRUE;
-	    nonl();
-	}
-    } else {
-	if (waiting) {
-	    cur_term->Nttyb = saved_tty;
-	    SET_TTY(fileno(stdout), &saved_tty);
-	    waiting = FALSE;
-	    nl();
-	    LYrefresh();
+    if (can_fix) {
+	if (normal) {
+	    if (!waiting) {
+		cur_term->Nttyb.c_oflag |= ONLCR;
+		waiting = TRUE;
+		nonl();
+	    }
+	} else {
+	    if (waiting) {
+		cur_term->Nttyb = saved_tty;
+		SET_TTY(fileno(stdout), &saved_tty);
+		waiting = FALSE;
+		nl();
+		LYrefresh();
+	    }
 	}
     }
 #endif
@@ -1308,7 +1329,6 @@ PUBLIC BOOLEAN setup ARGS1(
     LYLowerCase(term);
 
     printf("%s%s\n", gettext("Terminal ="), term);
-    sleep(InfoSecs);
     if ((strlen(term) < 5) ||
 	strncmp(term, "vt", 2) || !isdigit(term[2])) {
 	printf("%s\n",
@@ -1479,8 +1499,12 @@ PUBLIC void LYpaddstr ARGS3(
 	int,		width,
 	CONST char *,	the_string)
 {
+    int y, x;
+    getyx(the_window, y, x);
+    if (width + x >= LYcols)
+	width = LYcols - x - 1;
+    LYwaddnstr(the_window, the_string, width);
     width -= strlen(the_string);
-    LYwaddstr(the_window, the_string);
     while (width-- > 0)
 	waddstr(the_window, " ");
 }
@@ -1507,6 +1531,22 @@ PUBLIC WINDOW *LYstartPopup ARGS4(
 	HTAlert(POPUP_FAILED);
     } else {
 	LYsubwindow(form_window);
+#  ifdef USE_COLOR_STYLE
+	{
+	    attr_t b;
+
+	    /* Get a proper value for the attribute */
+	    LynxWChangeStyle(form_window, s_menu_bg, STACK_ON);
+	    b = getattrs(form_window);
+	    LynxWChangeStyle(form_window, s_menu_bg, STACK_OFF);
+	    wbkgd(form_window, b | ' ');
+	    /* wbkgdset does not make a lot of sense with USE_COLOR_STYLE
+	       since it *forces* attributes on all the cells in the window.
+	       Undo the change done in LYsubwindow, since we set our styles.
+	     */
+	    wbkgdset(form_window, (b & ~(A_BOLD|A_BLINK)) | ' ');
+	}
+#  endif
     }
 #endif /* USE_SLANG */
     return form_window;
@@ -1556,7 +1596,11 @@ PUBLIC void LYtouchline ARGS1(
      * Alpha, since prior ports of curses were broken.  BSD touchline() has a
      * 4th parameter since it is used internally by touchwin().
      */
-    touchline(LYwin, row, 1, 0);
+#if defined(HAVE_BSD_TOUCHLINE)
+    touchline(LYwin, row, 0, COLS);
+#else
+    touchline(LYwin, row, 1);
+#endif
 #else
 #if !defined(USE_SLANG)
     touchwin(LYwin);
@@ -2142,7 +2186,7 @@ PUBLIC void LYrefresh NOARGS
     if (LYwin != stdscr) {
 	/*
 	 * Workaround for special case where lynx is prompting for a mailto,
-	 * and has a subject line that is wider than the screen.  The 
+	 * and has a subject line that is wider than the screen.  The
 	 * wnoutrefresh() call resets newscr's position to match stdscr's,
 	 * which happens to be the window's origin because we were not updating
 	 * that, and other stray wmove's in lynx fail because the coordinate
@@ -2362,3 +2406,18 @@ PUBLIC void LYstowCursor ARGS3(
     wrefresh(win);
 #endif /* USE_SLANG  */
 }
+
+#if defined(USE_BLINK) && defined(__EMX__) /* Can't put it earler due to BOOLEAN conflict */
+#  define BOOLEAN os2BOOLEAN
+#  define INCL_VIO
+#  include "os2.h"
+PRIVATE void make_blink_boldbg NOARGS
+{
+    VIOINTENSITY buf;		/* VIO windows have it anyway, */
+				/* but FS session need a switch */
+    buf.cb = sizeof(buf);
+    buf.type = 2;		/* VIOINTENSITY request */
+    buf.fs = 1;			/* Intensity == boldbg */
+    VioSetState(&buf,0);
+}
+#endif

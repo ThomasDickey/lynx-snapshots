@@ -71,6 +71,7 @@ Default values
 #endif /* DJGPP or __BORLANDC__ */
 
 #if defined(_MSC_VER)
+#undef HAVE_DIRENT_H
 #define HAVE_DIRENT_H
 #undef HAVE_SYS_FILIO_H
 #endif /* _MSC_VER */
@@ -191,9 +192,8 @@ extern int ws_netread(int fd, char *buf, int len);
 #include <errno.h>
 #include <direct.h>
 
-/* FIXME: someone might consider porting to winsock2.h */
 #ifdef USE_WINSOCK2_H
-#include <winsock.h>
+#include <winsock2.h>		/* normally included in windows.h */
 
 #undef EINPROGRESS
 #undef EALREADY
@@ -680,6 +680,8 @@ typedef int pid_t;
 #include <libintl.h>
 #endif
 
+#define N_(s) (s)
+
 #ifndef HAVE_GETTEXT
 #define gettext(s) s
 #endif
@@ -700,6 +702,8 @@ Defaults
 #endif
 #include <netdb.h>
 #endif  /* TCP includes */
+
+typedef unsigned short PortNumber;
 
 #ifndef S_ISLNK
 #define S_ISLNK(m)	(((m) & S_IFMT) == S_IFLNK)
