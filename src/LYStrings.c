@@ -1622,8 +1622,12 @@ PUBLIC char * SNACat ARGS3(
 **   have their "7bit approximation" images (in def7_uni.tbl)
 **   matched case-insensitive (7bit).
 **
-**   By this technique we cover *any* charset known for Lynx chartrans
-**   and need no extra information for it.  - LP
+**   By this technique we automatically cover *any* charset
+**   known for Lynx chartrans and need no any extra information for it.
+**
+**   The cost of this assumption is that several differently accented letters
+**   may be interpreted as equal, but this side effect is negligible
+**   if the user search string is more than one character long.  - LP
 **
 */
 PUBLIC int UPPER8(int ch1, int ch2)
@@ -1655,22 +1659,12 @@ PUBLIC int UPPER8(int ch1, int ch2)
 			      charset_in, charset_out, YES);
 	uck2 = UCTransCharStr(replace_buf2, sizeof(replace_buf2), ch2,
 			      charset_in, charset_out, YES);
-	/*
-	** Got both replacement strings (yippey).  - FM
-	*/
-	if (strcmp(replace_buf1, replace_buf2)!=0)  /* case-sensitive ! */
-	/*
-	** Two strings different.  We assume the different letters
-	** should not have the equal strings for "7bit approx",
-	** overwise differently accented letters may be vanished.
-	** Now we return case-INsensitive comparision of strings:
-	*/
 
-	if ((uck1 > 0) && (uck2 > 0))
+	if ((uck1 > 0) && (uck2 > 0))  /* both replacement strings found */
 	    return (strcasecomp(replace_buf1, replace_buf2));
     }
 
-    return(-10);  /* mismatch */
+    return(-10);  /* mismatch, if we come to here */
 }
 
 #endif /* EXP_8BIT_TOUPPER */

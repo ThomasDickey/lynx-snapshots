@@ -1,6 +1,6 @@
 /* character level styles for Lynx
  * (c) 1996 Rob Partington -- donated to the Lyncei (if they want it :-)
- * @Id: LYStyle.c 1.15 Sat, 13 Dec 1997 16:30:40 -0700 dickey @
+ * @Id: LYStyle.c 1.16 Fri, 27 Feb 1998 11:25:07 -0700 dickey @
  */
 #include "HTUtils.h"
 #include "HTML.h"

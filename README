@@ -1,6 +1,12 @@
 
                              Lynx README file
 
+Lynx Version 2.8 is the latest "official" release.  This release is based on
+the lynx2.7.1ac-0.118 development code set, and includes bug fixes through
+February 28, 1998.  See the CHANGES2.8 file in the docs subdirectory for a
+complete record of all changes and bug fixes in this release.  New releases
+are announced on the lynx-dev mailing list (see below).
+
                                        
 WHAT IS LYNX?
 

@@ -684,7 +684,7 @@ PRIVATE BOOL HTLoadDocument ARGS4(
     **	per requested URL from a user, because the HTTP/1.1
     **	will no longer specify a restriction to 5, but will
     **	leave it up to the browser's discretion, in deference
-    **	to MicroSoft.  - FM
+    **	to Microsoft.  - FM
     */
     if (redirection_attempts > 10) {
 	redirection_attempts = 0;

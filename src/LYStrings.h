@@ -3,8 +3,8 @@
 
 #include <string.h>
 
-#if !defined(EXP_8BIT_TOUPPER) && !defined(LOCALE) && !defined(__DJGPP__)
-#define EXP_8BIT_TOUPPER 1
+#if !defined(EXP_8BIT_TOUPPER) && (!defined(LOCALE) || defined(__DJGPP__))
+#define EXP_8BIT_TOUPPER
 #endif
 
 #ifdef EXP_8BIT_TOUPPER

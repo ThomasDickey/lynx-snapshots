@@ -396,6 +396,9 @@
   -underscore
        toggles use of _underline_ format in dumps.
 
+  -useragent=Name
+       set alternate Lynx User-Agent header.
+
   -validate
        accept only http URLs (for validation).  Complete security
        restrictions also are implemented.
@@ -443,7 +446,7 @@
  and the WWW community.  Also a special thanks to Foteos Macrides who
  ported much of Lynx to VMS and did or organized most of its development
  since the departures of Lou Montulli and Garrett Blythe from the
- University of Kansas in the summer of 1994 through the current release
+ University of Kansas in the summer of 1994 through the release
  of v2.7.2, and to everyone on the net who has contributed to Lynx's
  development either directly (through patches, comments or bug reports)
  or indirectly (through inspiration and development of other systems).
