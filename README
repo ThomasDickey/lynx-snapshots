@@ -45,6 +45,14 @@ WHAT IS LYNX?
    Lynx.  See WWW/Copyright.txt for copyright info regarding CERN
    products used in Lynx.
 
+YEAR 2000 COMPLIANCE
+
+   We believe Lynx works properly for the Year 2000 issues, since it does
+   not store dates in 2-digit form.  Since it must communicate with a wide
+   range of web servers, it interprets dates in a variety of formats.  In
+   particular, if Lynx receives a date with a 2-digit year, it assumes that
+   values less than 70 are in the range 2000-2069.
+
 DOCUMENTATION
 
    A users guide is included in this distribution along with a man page
@@ -88,14 +96,6 @@ PROBLEMS
    INSTALLATION file.  Instructions are given there for reporting your
    problem to the "lynx-dev" mailing list, which is frequented by experienced
    Lynx users.
-
-YEAR 2000 COMPLIANCE
-
-   We believe Lynx works properly for the Year 2000 issues, since it does
-   not store dates in 2-digit form.  Since it must communicate with a wide
-   range of web servers, it interprets dates in a variety of formats.  In
-   particular, if Lynx receives a date with a 2-digit year, it assumes that
-   values less than 70 are in the range 2000-2069.
 
 LYNX-DEV MAILING LIST
 

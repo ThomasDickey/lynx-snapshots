@@ -7,9 +7,18 @@ platforms see also INSTALLATION, for some changes for auto-configure and
 simple curses color see also README.configure).  Note that the 2.7 -> 2.7.1
 changes are included here. - KW]
 
+1998-03-04
+* strip -g compiler option if not otherwise specified, for debugging (note
+  that autoconf 2.12 does not try to use -O option due to concerns about
+  compiler optimization). - TD
+* correct value of $host_os used in CF_CURSES_LIBS for special-case of
+  HP's -lHcurses (Jonathan Sergent <sergent@ecn.purdue.edu>).
+* correct def7_uni.tbl for Greek letters, note about UPPER8 assumption
+  added to chrtrans/README.format. - LP
+* few comments corrected. - LP
 1998-02-28
 * create new PRCS revision (2.8pre) for pre-release testing of Lynx 2.8
-* remove RELEASE_STATEMENT, merging it into CHANGES as per HN's
+* remove RELEASE_STATEMENT, merging it into README as per HN's
   recommendation - TD
 * comments/minor changes to HTDOS.c, HTDOS.h, LYUtils.c - LP
 * document recent fix for RAW_DOS_KEY_HACK in lynx.cfg - DK

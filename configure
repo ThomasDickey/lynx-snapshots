@@ -1144,12 +1144,12 @@ else
 		CFLAGS=`echo ${CFLAGS} | sed -e 's/-g //' -e 's/-g$//'`
 		;;
 	*)
-		if test -n "$GCC" ; then
 			CFLAGS=`echo ${CFLAGS} | sed -e 's/-g //' -e 's/-g$//'`
-		fi
 		;;
 	esac
 fi
+
+
 
 if test -n "$GCC"
 then
@@ -3429,7 +3429,7 @@ else
 fi
 
 	;;
-*hp-hpux10.*)
+hpux10.*)
 	echo $ac_n "checking for initscr in -lHcurses""... $ac_c" 1>&6
 echo "configure:3435: checking for initscr in -lHcurses" >&5
 ac_lib_var=`echo Hcurses'_'initscr | sed 'y%./+-%__p_%'`

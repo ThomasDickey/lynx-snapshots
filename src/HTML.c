@@ -6334,7 +6334,7 @@ End_Object:
 	     *	SGML unescape any character references in TEXTAREA
 	     *	content, then parse it into individual lines
 	     *	to be handled as a series of INPUT fields (ugh!).
-	     *	Any raw 8-bit or multibye characters already have been
+	     *	Any raw 8-bit or multibyte characters already have been
 	     *	handled in relation to the display character set
 	     *	in SGML_character().
 	     */

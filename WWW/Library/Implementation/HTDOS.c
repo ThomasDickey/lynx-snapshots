@@ -23,16 +23,16 @@ char * HTDOS_wwwName (char *dosname)
 	strcpy(wwwname,dosname);
 
 	for ( ; *cp_url != '\0' ; cp_url++)
-	  if(*cp_url == '\\') *cp_url = '/';
+	  if(*cp_url == '\\') *cp_url = '/';   /* convert dos backslash to unix-style */
 
-	 if(strlen(wwwname) > 3 && *cp_url == '/')
+	if(strlen(wwwname) > 3 && *cp_url == '/')
 		*cp_url = '\0';
 
-	 if(*cp_url == ':')
-	 {
+	if(*cp_url == ':')
+	{
 		cp_url++;
 		*cp_url = '/';
-	 }
+	}
 
 /*
 	if((strlen(wwwname)>2)&&(wwwname[1]==':')) wwwname[1]='|';
@@ -59,7 +59,7 @@ char * HTDOS_name(char *wwwname)
 	int joe;
 
 	memset(cp_url, 0, 1023);
-/*	strset(cp_url,0); */
+/*	strset(cp_url,0);                 */
 	sprintf(cp_url, "%s",wwwname);
 
 	for(joe = 0; cp_url[joe] != '\0'; joe++)	{
@@ -89,7 +89,7 @@ char * HTDOS_name(char *wwwname)
 		printf("\n\n%s = %i\n\n",cp_url+1,strlen(cp_url));
 		sleep(5);
 #endif
-		strcpy(wwwname, cp_url+1);
+      strcpy(wwwname, cp_url+1);
       return(wwwname); /* return(cp_url+1);  */
 	}
 }

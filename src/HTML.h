@@ -26,9 +26,6 @@
 #define TRANSLATE_AND_UNESCAPE_ENTITIES(s, p, h) \
 	LYUCFullyTranslateString(s, ATTR_CS_IN, current_char_set, YES, p, h, st_HTML)
 
-#define TRANSLATE_AND_UNESCAPE_ENTITIES4(s, cs_to, p, h) \
-	LYUCFullyTranslateString(s, ATTR_CS_IN, cs_to, YES, p, h, st_HTML) /* not used */
-
 #define TRANSLATE_AND_UNESCAPE_ENTITIES5(s,cs_from,cs_to,p,h) \
 	LYUCFullyTranslateString(s, cs_from, cs_to, YES, p, h, st_HTML)
 

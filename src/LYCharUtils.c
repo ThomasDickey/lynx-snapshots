@@ -413,6 +413,11 @@ PUBLIC void LYFillLocalFileURL ARGS2(
 **  The META tag is not written if the display character set (passed as
 **  disp_chndl) already corresponds to the charset assumption that
 **  would be made when the file is read. - KW
+**
+**  Currently this function used for temporary files like "Lynx Info Page"
+**  and for one permanent - bookmarks (so may be a problem if you change
+**  display charset later: new bookmark entries may be wrongly interpreted).
+** 								 - LP
 */
 PUBLIC void LYAddMETAcharsetToFD ARGS2(
 	FILE *, 	fd,
@@ -1513,16 +1518,33 @@ PRIVATE char * UCPutUtf8ToBuffer ARGS3(char *, q, UCode_t, code, BOOL, terminate
 PRIVATE char *hex = "0123456789ABCDEF";
 
 /*
-**  This function translates a string from charset
-**  `cs_from' to charset `cs_to', reallocating it if necessary.
-**  If `do_ent' is YES, it also converts HTML named entities
-**  and numeric character references (NCRs) to their `cs_to'
-**  replacements.
+ *	  Any raw 8-bit or multibyte characters already have been 
+ *	  handled in relation to the display character set        
+ *	  in SGML_character(), including named and numeric entities.
+ *
+**  This function used for translations HTML special fields inside tags
+**  (ALT=, VALUE=, etc.) from charset `cs_from' to charset `cs_to'.
+**  It also unescapes non-ASCII characters from URL (#fragments !)
+**  if st_URL is active.
+**
+**  If `do_ent' is YES, it converts named entities
+**  and numeric character references (NCRs) to their `cs_to' replacements.
+**
+**  Named entities converted to unicodes.  NCRs (unicodes) converted
+**  by UCdomap.c chartrans functions.
+**  ???NCRs with values in the ISO-8859-1 range 160-255 may be converted
+**  to their HTML entity names (via old-style entities) and then translated
+**  according to the LYCharSets.c array for `cs_out'???.
+**
+**  Some characters (see descriptions in `put_special_unicodes' from SGML.c)
+**  translated in relation with the state of boolean variables
+**  `use_lynx_specials', `plain_space' and `hidden'. It is not clear yet:
+**
 **  If plain_space is TRUE, nbsp (160) will be treated as an ASCII
 **  space (32).  If hidden is TRUE, entities will be translated
 **  (if `do_ent' is YES) but escape sequences will be passed unaltered.
 **  If `hidden' is FALSE, some characters are converted to Lynx special
-**  codes (160, 173, .. @@ need list @@) (or ASCII space if `plain_space'
+**  codes (see `put_special_unicodes') or ASCII space if `plain_space'
 **  applies).  @@ is `use_lynx_specials' needed, does it have any effect? @@
 **  If `use_lynx_specials' is YES, translate byte values 160 and 173
 **  meaning U+00A0 and U+00AD given as or converted from raw char input
@@ -1535,15 +1557,6 @@ PRIVATE char *hex = "0123456789ABCDEF";
 **
 **  If `Back' is YES, an attempt is made to use UCReverseTransChar() for
 **  back translation which may be more efficient. (?)
-**
-**  Named entities may be converted to their translations in the
-**  active LYCharSets.c array for `cs_out' or looked up as a Unicode
-**  value which is then passed to the chartrans functions (see UCdomap.c).
-**  @@ order? @@
-**  NCRs with values in the ISO-8859-1 range 160-255 may be converted
-**  to their HTML entity names and then translated according to the
-**  LYCharSets.c array for `cs_out', in general NCRs are translated
-**  by UCdomap.c chartrans functions if necessary.
 **
 **  If `stype' is st_URL, non-ASCII characters are URL-encoded instead.
 **  The sequence of bytes being URL-encoded is the raw input character if
@@ -1560,8 +1573,11 @@ PRIVATE char *hex = "0123456789ABCDEF";
 **  - dropped		if `stype'  is st_other, otherwise (i.e. st_HTML)
 **  - passed		if `hidden' is TRUE or HTCJK is set, otherwise
 **  - dropped.
-*/
-/*
+**
+**  (If `stype' is st_URL or st_other most of the parameters really predefined:
+**  cs_from=cs_to, use_lynx_specials=plain_space=NO, and hidden=YES)
+**
+**
 **  Returns pointer to the char** passed in
 **		 if string translated or translation unnecessary,
 **	    NULL otherwise
@@ -2204,7 +2220,7 @@ PRIVATE char ** LYUCFullyTranslateString_1 ARGS9(
 	    }
 	    /*
 	    **	Didn't find the entity.
-	    **	Return to screen verbatim.
+	    **	Return verbatim.
 	    */
 	    state = S_recover;
 	    break;

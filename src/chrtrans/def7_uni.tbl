@@ -92,6 +92,7 @@ U+00fc:u:
 0x79	U+00fd
 U+00fe:th
 0x79	U+00ff
+# end of latin-1 repertoire
 0x41	U+0100	U+0102	U+0104			# A
 0x61	U+0101	U+0103	U+0105			# a
 0x43	U+0106	U+0108	U+010a	U+010c		# C
@@ -243,7 +244,8 @@ U+0217:u)
 #   Linkname: FAQ: Representing IPA Phonetics in ASCII
 #        URL: http://www.hpl.hp.com/personal/Evan_Kirshenbaum/IPA/faq.html
 #        (corrected in Russian Cyrillic area).
-# 
+#        (corrected in Greek area).
+#
 0x41	U+0251 #	LATIN SMALL LETTER SCRIPT A	-> A
 U+0252:A.
 U+0253:b`
@@ -344,6 +346,7 @@ U+037a:j3
 U+037e:?%
 U+0384:'*
 U+0385:'%
+# Greek letters
 U+0386:A%
 U+0387:.*
 U+0388:E%
@@ -355,69 +358,70 @@ U+038f:W%
 U+0390:i3
 U+0391:A
 U+0392:B
-U+0393:G*
-U+0394:D*
+U+0393:G
+U+0394:D
 U+0395:E
 U+0396:Z
-U+0397:Y*
-U+0398:H*
+U+0397:Y
+U+0398:TH
 U+0399:I
 U+039a:K
-U+039b:L*
+U+039b:L
 U+039c:M
 U+039d:N
-U+039e:C*
+U+039e:C
 U+039f:O
-U+03a0:P*
-U+03a1:R*
-U+03a3:S*
+U+03a0:P
+U+03a1:R
+U+03a3:S
 U+03a4:T
-U+03a5:U*
-U+03a6:F*
-U+03a7:X*
-U+03a8:Q*
-U+03a9:W*
-U+03aa:J*
+U+03a5:U
+U+03a6:F
+U+03a7:X
+U+03a8:Q
+U+03a9:W
+U+03aa:J
 U+03ab:V*
 U+03ac:a%
 U+03ad:e%
 U+03ae:y%
 U+03af:i%
 U+03b0:u3
-U+03b1:a*
-U+03b2:b*
-U+03b3:g*
-U+03b4:d*
-U+03b5:e*
-U+03b6:z*
-U+03b7:y*
-U+03b8:h*
-U+03b9:i*
-U+03ba:k*
-U+03bb:l*
-U+03bc:m*
-U+03bd:n*
-U+03be:c*
+U+03b1:a
+U+03b2:b
+U+03b3:g
+U+03b4:d
+U+03b5:e
+U+03b6:z
+U+03b7:y
+U+03b8:th
+U+03b9:i
+U+03ba:k
+U+03bb:l
+U+03bc:m
+U+03bd:n
+U+03be:c
 U+03bf:o
-U+03c0:p*
-U+03c1:r*
+U+03c0:p
+U+03c1:r
 U+03c2:*s
-U+03c3:s*
-U+03c4:t*
-U+03c5:u*
-U+03c6:f*
-U+03c7:x*
-U+03c8:q*
-U+03c9:w*
-U+03ca:j*
+U+03c3:s
+U+03c4:t
+U+03c5:u
+U+03c6:f
+U+03c7:x
+U+03c8:q
+U+03c9:w
+U+03ca:j
 U+03cb:v*
 U+03cc:o%
 U+03cd:u%
 U+03ce:w%
-U+03d0:b3
+# Greek symbols
+U+03d0:beta 
 U+03d1:theta 
-U+03d2:upsi
-U+03d5:phi
+U+03d2:upsi 
+U+03d5:phi 
 U+03d6:pi 
 U+03da:T3
 U+03db:t3
@@ -427,7 +431,7 @@ U+03de:K3
 U+03df:k3
 U+03e0:P3
 U+03e1:p3
-U+03f0:kappa
+U+03f0:kappa 
 U+03f1:rho 
 U+03f4:'%
 U+03f5:j3
@@ -1276,6 +1280,7 @@ U+1fdf:?;
 U+1fed:!:
 U+1fef:!*
 U+1ffe:;;
+# General punctuation:
 0x20	U+2000 U+2002	U+2004-U+2009	# spaces
 U+2001:  
 U+2003:  
@@ -1315,6 +1320,7 @@ U+203c:!!
 U+203e:'-
 0x2d   U+2043  # HYPHEN BULLET ?
 U+2044:/
+# end of General punctuation.
 U+2070:^0
 U+2074:^4
 U+2075:^5
