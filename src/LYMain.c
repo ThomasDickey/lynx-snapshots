@@ -3095,7 +3095,7 @@ static int width_fun ARGS1(
     return 0;
 }
 
-/* NOTE: This table is sorted by name; the lookup relies on that. */
+/* NOTE: This table is sorted by name to make the help message useful */
 static Parse_Args_Type Arg_Table [] =
 {
    PARSE_SET(
@@ -3180,10 +3180,6 @@ static Parse_Args_Type Arg_Table [] =
       "=FORMAT\nconvert input, FORMAT is in MIME type notation (experimental)"
    ),
 #endif
-   PARSE_SET(
-      "cookies",	TOGGLE_ARG,		&LYSetCookies,
-      "toggles handling of Set-Cookie headers"
-   ),
 #ifdef EXP_PERSISTENT_COOKIES
    PARSE_STR(
       "cookie_file",	LYSTRING_ARG,		&LYCookieFile,
@@ -3194,6 +3190,10 @@ static Parse_Args_Type Arg_Table [] =
       "=FILENAME\nspecifies a file to use to store cookies"
    ),
 #endif /* EXP_PERSISTENT_COOKIES */
+   PARSE_SET(
+      "cookies",	TOGGLE_ARG,		&LYSetCookies,
+      "toggles handling of Set-Cookie headers"
+   ),
 #ifndef VMS
    PARSE_SET(
       "core",		TOGGLE_ARG,		&LYNoCore,

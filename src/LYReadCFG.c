@@ -1327,7 +1327,7 @@ static int read_htmlsrc_tagname_xform ARGS1( char*,str)
 }
 #endif
 
-/* This table should be sorted alphabetically, ignoring case */
+/* This table is searched ignoring case */
 static Config_Type Config_Table [] =
 {
      PARSE_SET("accept_all_cookies", CONF_BOOL, &LYAcceptAllCookies),

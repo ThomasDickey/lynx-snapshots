@@ -38,10 +38,6 @@
 extern unsigned short *LYKbLayout;
 extern BOOL HTPassHighCtrlRaw;
 
-#ifdef SUPPORT_MULTIBYTE_EDIT
-#define IS_KANA(c)	(0xa0 <= c && c <= 0xdf)
-#endif
-
 #if defined(WIN_EX)
 #undef  BUTTON_CTRL
 #define BUTTON_CTRL	0	/* Quick hack */
@@ -2314,7 +2310,7 @@ PUBLIC void LYLowerCase ARGS1(
 #ifdef SUPPORT_MULTIBYTE_EDIT	/* 1998/11/23 (Mon) 17:04:55 */
     {
 	if (buffer[i] & 0x80) {
-	    if (IS_KANA(buffer[i])) {
+	    if ((kanji_code == SJIS) && IS_SJIS_X0201KANA((unsigned char)(buffer[i]))) {
 		continue;
 	    }
 	    i++;
@@ -2339,7 +2335,7 @@ PUBLIC void LYUpperCase ARGS1(
 #ifdef SUPPORT_MULTIBYTE_EDIT	/* 1998/11/23 (Mon) 17:05:10 */
     {
 	if (buffer[i] & 0x80) {
-	    if (IS_KANA(buffer[i])) {
+	    if ((kanji_code == SJIS) && IS_SJIS_X0201KANA((unsigned char)(buffer[i]))) {
 		continue;
 	    }
 	    i++;
@@ -2540,8 +2536,8 @@ PRIVATE int prev_pos ARGS2(
 	while (i < pos - 1) {
 	    int c;
 	    c = Buf[i];
-
-	    if (!(isascii(c) || IS_KANA(c))) {
+	    if (!(isascii(c) ||
+		  ((kanji_code == SJIS) && IS_SJIS_X0201KANA((unsigned char)c)))) {
 		i++;
 	    }
 	    i++;
@@ -3207,7 +3203,7 @@ PUBLIC int LYgetstr ARGS4(
     EditFieldData MyEdit;
     char *res;
 #ifdef SUPPORT_MULTIBYTE_EDIT
-    BOOL refresh = TRUE;
+    BOOL refresh_mb = TRUE;
 #endif /* SUPPORT_MULTIBYTE_EDIT */
 
     LYGetYX(y, x);		/* Use screen from cursor position to eol */
@@ -3221,17 +3217,17 @@ again:
 #ifndef SUPPORT_MULTIBYTE_EDIT
 	LYRefreshEdit(&MyEdit);
 #else /* SUPPORT_MULTIBYTE_EDIT */
-	if (refresh)
+	if (refresh_mb)
 	    LYRefreshEdit(&MyEdit);
 #endif /* SUPPORT_MULTIBYTE_EDIT */
 	ch = LYgetch_for(FOR_PROMPT);
 #ifdef SUPPORT_MULTIBYTE_EDIT
 #ifdef CJK_EX	/* for SJIS code */
-	if (!refresh
+	if (!refresh_mb
 	 && (EditBinding(ch) != LYE_CHAR))
 	    goto again;
 #else
-	if (!refresh
+	if (!refresh_mb
 	 && (EditBinding(ch) != LYE_CHAR)
 	 && (EditBinding(ch) != LYE_AIX))
 	    goto again;
@@ -3393,12 +3389,12 @@ again:
 	    LYLineEdit(&MyEdit, ch, FALSE);
 #else /* SUPPORT_MULTIBYTE_EDIT */
 	    if (LYLineEdit(&MyEdit, ch, FALSE) == 0) {
-		if (refresh && HTCJK != NOCJK && (0x81 <= ch) && (ch <= 0xfe))
-		    refresh = FALSE;
+		if (refresh_mb && HTCJK != NOCJK && (0x81 <= ch) && (ch <= 0xfe))
+		    refresh_mb = FALSE;
 		else
-		    refresh = TRUE;
+		    refresh_mb = TRUE;
 	    } else {
-		if (!refresh) {
+		if (!refresh_mb) {
 		    LYEdit1(&MyEdit, 0, LYE_DELP, FALSE);
 		}
 	    }

@@ -1,6 +1,18 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2000-04-17 (2.8.3pre.6)
+* change version number in remaining documentation to 2.8.3 -TD
+* remove redundant defines for SUPPORT_MULTIBYTE_EDIT and COLOR_TABLE from
+  DOS/Win32 makefiles -TD
+* small change to configure test for REAL_UNIX_SYSTEM to accommodate linkers
+  that allow assignment from a nonexistent extern.  Also, change a few UNIX
+  symbols in LYCurses.c and LYUtils.c to REAL_UNIX_SYSTEM to build on platforms
+  that do not define this symbol -TD
+* update notes in LYMain.c and LYReadCFG.c regarding the options and config
+  variable tables, which no longer need to be sorted -TD
+* htmlized lynx.cfg: add .h2 RULESFILE, remove confusing .h1 header -LP
+* define SUPPORT_MULTIBYTE_EDIT in userdefs.h -TH
 2000-04-13 (2.8.3pre.5)
 * fix printing of Last-Modified field in downloaded/printed source -LP
 * update URL for RFC 1942 -LV, DK

@@ -2164,7 +2164,7 @@ PUBLIC int LYConsoleInputFD ARGS1(
 #ifdef USE_SLANG
     if (!LYCursesON)
 	fd = fileno(stdin);
-#if ((SLANG_VERSION >= 9919) && defined(UNIX) && !defined(__CYGWIN__))
+#if ((SLANG_VERSION >= 9919) && defined(REAL_UNIX_SYSTEM) && !defined(__CYGWIN__))
     /* SLang_TT_Read_FD introduced in slang 0.99.19, from its changelog:
      *   SLang_TT_Read_FD variable is now available for unix.  This is the file
      *   descriptor used by SLang_getkey. */

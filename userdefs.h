@@ -1339,12 +1339,12 @@
  * the version definition with the Project Version on checkout.  Just
  * ignore it. - kw */
 /* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
-#define LYNX_VERSION "2.8.3pre.5"
+#define LYNX_VERSION "2.8.3pre.6"
 #define LYNX_WWW_HOME "http://lynx.browser.org/"
 #define LYNX_WWW_DIST "http://lynx.isc.org/current/"
 #define LYNX_RELEASE FALSE
 /* $Format: "#define LYNX_DATE \"$ProjectDate$\""$ */
-#define LYNX_DATE "Thu, 13 Apr 2000 19:39:31 -0700"
+#define LYNX_DATE "Mon, 17 Apr 2000 03:59:17 -0700"
 #define LYNX_DATE_OFF 5		/* truncate the automatically-generated date */
 #define LYNX_DATE_LEN 11	/* truncate the automatically-generated date */
 #define LYNX_RELEASE_DATE "1999"
@@ -1442,6 +1442,14 @@
 
 
 /***************************** 
+ * SUPPORT_MULTIBYTE_EDIT provides better support of CJK characters to
+ * Lynx's Line Editor.  JIS X0201 Kana is partially supported.  The
+ * reason why I didn't support it fully is I think supporting it is not
+ * required so much and I don't have an environment to test it. - TH
+ */
+#define SUPPORT_MULTIBYTE_EDIT
+
+/*****************************
  * USE_TH_JP_AUTO_DETECT, CONV_JISX0201KANA_JISX0208KANA,  
  * and KANJI_CODE_OVERRIDE are the macros for Japanese. - TH 
  */ 
