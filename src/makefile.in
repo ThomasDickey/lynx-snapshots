@@ -112,6 +112,7 @@ HTInit.o: ../userdefs.h
 LYTraversal.o: ../userdefs.h
 LYMail.o: ../userdefs.h
 LYCharSets.o: ../userdefs.h
+LYShowInfo.o: ../cfg_defs.h
 
 CHRTR= chrtrans/
 

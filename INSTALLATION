@@ -223,7 +223,7 @@ II. Compile instructions -- UNIX
 	(2.7.1/2.7.2) behavior, but is not well-tested.
 
   --disable-forms-options               (define NO_OPTION_FORMS)
-	Disable the forms-based options screen.  (See --disable-menu-options). 
+	Disable the forms-based options screen.  (See --disable-menu-options).
 	Please note that a few users with broken curses may have problems with
 	popup forms fields.  The default behaviour is to compile both forms and
 	menu options code with FORMS_OPTIONS switch in lynx.cfg, or
@@ -237,7 +237,7 @@ II. Compile instructions -- UNIX
   	Use this option to disable long "ls -l" directory listings.
 
   --disable-menu-options                (define NO_OPTION_MENU)
-	Disable the menu-style options screen.  (See --disable-forms-options). 
+	Disable the menu-style options screen.  (See --disable-forms-options).
 	Please note that a few users with broken curses may have problems with
 	popup forms fields.  The default behaviour is to compile both styles
 	options menu code with FORMS_OPTIONS switch in lynx.cfg, or
@@ -294,8 +294,9 @@ II. Compile instructions -- UNIX
 
   --enable-persistent-cookies		(define EXP_PERSISTENT_COOKIES)
 	Use this option to compile-in support for saving cookies to a file,
-	for subsequent reuse.  This creates a file named 'cookies' in the
-	current directory.  (Currently there is no protection against conflict
+	for subsequent reuse.  This creates the file specified by the
+	'COOKIE_FILE' option, or defaults to ".lynx_cookies" in the home
+	directory.  (Currently there is no protection against conflict
 	if several lynx copies active from the same account).
 
   --enable-syslog			(define SYSLOG_REQUESTED_URLS)

@@ -3422,8 +3422,8 @@ PUBLIC int postoptions ARGS1(
     PostPair *data = 0;
     int i;
     BOOLEAN save_all = FALSE;
-    BOOLEAN display_char_set_changed = FALSE;
-    BOOLEAN raw_mode_changed = FALSE;
+    int display_char_set_old = current_char_set;
+    BOOLEAN raw_mode_old = LYRawMode;
     BOOLEAN assume_char_set_changed = FALSE;
     BOOLEAN need_reload = FALSE;
 #if defined(USE_SLANG) || defined(COLOR_CURSES)
@@ -3599,7 +3599,11 @@ PUBLIC int postoptions ARGS1(
 	    int newval;
 
 	    newval = UCGetLYhndl_byMIME(data[i].value);
-	    if (newval != UCLYhndl_for_unspec) {
+	    if ((raw_mode_old &&
+		 newval != safeUCGetLYhndl_byMIME(UCAssume_MIMEcharset))
+	       || (!raw_mode_old &&
+		   newval != UCLYhndl_for_unspec)) {
+
 		UCLYhndl_for_unspec = newval;
 		StrAllocCopy(UCAssume_MIMEcharset, data[i].value);
 		assume_char_set_changed = TRUE;
@@ -3613,7 +3617,6 @@ PUBLIC int postoptions ARGS1(
 	    newval = atoi(data[i].value);
 	    if (newval != current_char_set) {
 		current_char_set = newval;
-		display_char_set_changed = TRUE;
 	    }
 	}
 
@@ -3623,7 +3626,6 @@ PUBLIC int postoptions ARGS1(
 
 	    if (newmode != LYRawMode) {
 		LYRawMode = newmode;
-		raw_mode_changed = TRUE;
 	    }
 	}
 
@@ -3677,11 +3679,13 @@ PUBLIC int postoptions ARGS1(
     /*
      * Process the flags:
      */
-     if ( display_char_set_changed || raw_mode_changed || assume_char_set_changed ) {
+     if ( display_char_set_old != current_char_set ||
+	       raw_mode_old != LYRawMode ||
+	       assume_char_set_changed ) {
 	/*
 	 * charset settings: the order is essential here.
 	 */
-	if (display_char_set_changed) {
+       if (display_char_set_old != current_char_set) {
 		/*
 		 *  Set the LYUseDefaultRawMode value and character
 		 *  handling if LYRawMode was changed. - FM
@@ -3692,7 +3696,7 @@ PUBLIC int postoptions ARGS1(
 	if (assume_char_set_changed) {
 		LYRawMode = (UCLYhndl_for_unspec == current_char_set);
 	    }
-	if (raw_mode_changed || assume_char_set_changed) {
+       if (raw_mode_old != LYRawMode || assume_char_set_changed) {
 		/*
 		 *  Set the raw 8-bit or CJK mode defaults and
 		 *  character set if changed. - FM
@@ -3990,20 +3994,18 @@ PUBLIC int gen_options ARGS1(
 
     /* Assume Character Set: SELECT */
     /* if (user_mode==ADVANCED_MODE) */
-	{
+    {
 	int curval;
 	curval = UCLYhndl_for_unspec;
 
-    /*
-     * FIXME: If bogus value in lynx.cfg, then in old way, that is the
-     * string that was displayed.  Now, user will never see that.  Good
-     * or bad?  I don't know.  MRC
-     */
-	if (curval == current_char_set && UCAssume_MIMEcharset) {
-	    curval = UCGetLYhndl_byMIME(UCAssume_MIMEcharset);
-	}
-	if (curval < 0) {
-	    curval = LYRawMode ? current_char_set : 0;
+	/*
+	 * FIXME: If bogus value in lynx.cfg, then in old way, that is the
+	 * string that was displayed.  Now, user will never see that.  Good
+	 * or bad?  I don't know.  MRC
+	 */
+	if (curval == current_char_set) {
+	    /* ok, LYRawMode, so use UCAssume_MIMEcharset */
+	    curval = safeUCGetLYhndl_byMIME(UCAssume_MIMEcharset);
 	}
 	PutLabel(fp0, "Assumed document character set");
 	BeginSelect(fp0, assume_char_set_string);

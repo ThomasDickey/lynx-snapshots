@@ -4458,7 +4458,7 @@ PRIVATE void HTML_start_element ARGS6(
 
 		if (I.type && !strcasecomp(I.type, "hidden")) {
 		    me->HiddenValue = TRUE;
-		    current_char_set = 0;	/* Default ISO-Latin1 */
+		    current_char_set = LATIN1;	/* Default ISO-Latin1 */
 		    LYUseDefaultRawMode = TRUE;
 		    HTMLSetCharacterHandling(current_char_set);
 		}

@@ -60,6 +60,10 @@
 
 #include <LYLeaks.h>
 
+#define max_cookies_domain 50
+#define max_cookies_global 500
+#define max_cookies_buffer 4096
+
 /*
 **  The first level of the cookie list is a list indexed by the domain
 **  string; cookies with the same domain will be placed in the same
@@ -474,7 +478,7 @@ PRIVATE void store_cookie ARGS3(
     /*
      *	Don't add the cookie if we're over the domain's limit. - FM
      */
-    } else if (HTList_count(cookie_list) > 50) {
+    } else if (HTList_count(cookie_list) > max_cookies_domain) {
 	CTRACE(tfp, "store_cookie: Domain's cookie limit exceeded!  Rejecting cookie.\n");
 	freeCookie(co);
 	co = NULL;
@@ -482,7 +486,7 @@ PRIVATE void store_cookie ARGS3(
     /*
      *	Don't add the cookie if we're over the total cookie limit. - FM
      */
-    } else if (total_cookies > 500) {
+    } else if (total_cookies > max_cookies_global) {
 	CTRACE(tfp, "store_cookie: Total cookie limit exceeded!  Rejecting cookie.\n");
 	freeCookie(co);
 	co = NULL;
@@ -749,7 +753,7 @@ PRIVATE void LYProcessSetCookies ARGS6(
     if (SetCookie && *p) {
 	CTRACE(tfp, "LYProcessSetCookies: Using Set-Cookie2 header.\n");
     }
-    while (NumCookies <= 50 && *p) {
+    while (NumCookies <= max_cookies_domain && *p) {
 	attr_start = attr_end = value_start = value_end = NULL;
 	p = LYSkipCBlanks(p);
 	/*
@@ -926,8 +930,8 @@ PRIVATE void LYProcessSetCookies ARGS6(
 	    if (value_end > value_start) {
 		int value_len = (value_end - value_start);
 
-		if (value_len > 4096) {
-		    value_len = 4096;
+		if (value_len > max_cookies_buffer) {
+		    value_len = max_cookies_buffer;
 		}
 		value = (char *)calloc(1, value_len + 1);
 		if (value == NULL)
@@ -1152,7 +1156,7 @@ PRIVATE void LYProcessSetCookies ARGS6(
 		 *  If we've started a cookie, and it's not too big,
 		 *  save it in the CombinedCookies list. - FM
 		 */
-		if (length <= 4096 && cur_cookie != NULL) {
+		if (length <= max_cookies_buffer && cur_cookie != NULL) {
 		    /*
 		     *	Assume version 1 if not set to that or higher. - FM
 		     */
@@ -1198,7 +1202,9 @@ PRIVATE void LYProcessSetCookies ARGS6(
      *	Add any final SetCookie2 cookie to the CombinedCookie list
      *	if we are within the length limit. - FM
      */
-    if (NumCookies <= 50 && length <= 4096 && cur_cookie != NULL) {
+    if (NumCookies <= max_cookies_domain
+     && length <= max_cookies_buffer
+     && cur_cookie != NULL) {
 	if (cur_cookie->version < 1) {
 	    cur_cookie->version = 1;
 	}
@@ -1208,9 +1214,12 @@ PRIVATE void LYProcessSetCookies ARGS6(
 		    (cur_cookie->name ? cur_cookie->name : "[no name]"),
 		    (cur_cookie->value ? cur_cookie->value : "[no value]"));
 	CTRACE(tfp, "                     due to excessive %s%s%s\n",
-		    (length > 4096 ? "length" : ""),
-		    (length > 4096 && NumCookies > 50 ? " and " : ""),
-		    (NumCookies > 50 ? "number!\n" : "!\n"));
+		    (length > max_cookies_buffer ? "length" : ""),
+		    (length > max_cookies_buffer &&
+		     NumCookies > max_cookies_domain
+			? " and "
+			: ""),
+		    (NumCookies > max_cookies_domain ? "number!\n" : "!\n"));
 	freeCookie(cur_cookie);
 	cur_cookie = NULL;
     }
@@ -1226,7 +1235,7 @@ PRIVATE void LYProcessSetCookies ARGS6(
     if (SetCookie2 && *p) {
 	CTRACE(tfp, "LYProcessSetCookies: Using Set-Cookie header.\n");
     }
-    while (NumCookies <= 50 && *p) {
+    while (NumCookies <= max_cookies_domain && *p) {
 	attr_start = attr_end = value_start = value_end = NULL;
 	p = LYSkipCBlanks(p);
 	/*
@@ -1400,8 +1409,8 @@ PRIVATE void LYProcessSetCookies ARGS6(
 	    if (value_end > value_start) {
 		int value_len = (value_end - value_start);
 
-		if (value_len > 4096) {
-		    value_len = 4096;
+		if (value_len > max_cookies_buffer) {
+		    value_len = max_cookies_buffer;
 		}
 		value = (char *)calloc(1, value_len + 1);
 		if (value == NULL)
@@ -1613,7 +1622,7 @@ PRIVATE void LYProcessSetCookies ARGS6(
 		 *  If we've started a cookie, and it's not too big,
 		 *  save it in the CombinedCookies list. - FM
 		 */
-		if (length <= 4096 && cur_cookie != NULL) {
+		if (length <= max_cookies_buffer && cur_cookie != NULL) {
 		    /*
 		     *	If we had a Set-Cookie2 header, make sure
 		     *	the version is at least 1, and mark it for
@@ -1661,7 +1670,7 @@ PRIVATE void LYProcessSetCookies ARGS6(
     /*
      *	Handle the final Set-Cookie cookie if within length limit. - FM
      */
-    if (NumCookies <= 50 && length <= 4096 && cur_cookie != NULL) {
+    if (NumCookies <= max_cookies_domain && length <= max_cookies_buffer && cur_cookie != NULL) {
 	if (SetCookie2 != NULL) {
 	    if (cur_cookie->version < 1) {
 		cur_cookie->version = 1;
@@ -1674,9 +1683,9 @@ PRIVATE void LYProcessSetCookies ARGS6(
 		    (cur_cookie->name ? cur_cookie->name : "[no name]"),
 		    (cur_cookie->value ? cur_cookie->value : "[no value]"));
 	CTRACE(tfp, "                     due to excessive %s%s%s\n",
-		    (length > 4096 ? "length" : ""),
-		    (length > 4096 && NumCookies > 50 ? " and " : ""),
-		    (NumCookies > 50 ? "number!\n" : "!\n"));
+		    (length > max_cookies_buffer ? "length" : ""),
+		    (length > max_cookies_buffer && NumCookies > max_cookies_domain ? " and " : ""),
+		    (NumCookies > max_cookies_domain ? "number!\n" : "!\n"));
 	freeCookie(cur_cookie);
 	cur_cookie = NULL;
     }

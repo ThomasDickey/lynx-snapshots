@@ -35,11 +35,8 @@ void run_external ARGS1(char *, c)
 		 externals2=externals2->next)
 	{
 
-#ifdef _WINDOWS
-	 if (!strnicmp(externals2->name,c,strlen(externals2->name)))
-#else
-	 if (!strncasecomp(externals2->name,c,strlen(externals2->name)))
-#endif
+	 if (externals2->command != 0
+	  && !strncasecomp(externals2->name,c,strlen(externals2->name)))
 	 {
 	     char *cp;
 

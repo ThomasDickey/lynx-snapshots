@@ -167,15 +167,22 @@ PRIVATE void add_item_to_list ARGS2(
 	remove_backslashes(cur_item->name);
 
 	/*
-	 *  Process TRUE/FALSE field
+	 *  Process TRUE/FALSE field.  If we do not find one, assume it is
+	 *  true.  In any case, we want the command string.
 	 */
-	if ((next_colon = find_colon(colon+1)) != NULL) {
+	if ((next_colon = find_colon(colon+1)) == NULL) {
+	    next_colon = colon + strlen(colon);
+	}
+	if (next_colon - (colon+1) > 0) {
 	    cur_item->command = (char *)calloc(next_colon-colon, sizeof(char));
 	    if (cur_item->command == NULL)
 		outofmem(__FILE__, "read_cfg");
 	    LYstrncpy(cur_item->command, colon+1, (int)(next_colon-(colon+1)));
 	    remove_backslashes(cur_item->command);
-	    cur_item->always_enabled = is_true(next_colon+1);
+	    cur_item->always_enabled = TRUE;
+	}
+	if (*next_colon++) {
+	    cur_item->always_enabled = is_true(next_colon);
 	}
     }
 }

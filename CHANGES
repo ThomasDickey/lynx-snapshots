@@ -1,8 +1,28 @@
 Changes since Lynx 2.8 release
 ================================================================================
 
+1998-10-17 (2.8.1pre.11)
+* add dependency on cfg_defs.h to src/makefile.in for LYShowInfo.o 
+  (pg@sweng.stortek.com)
+* modify add_item_to_list() so that if the restriction flag is omitted from
+  a download/upload/extern line in lynx.cfg, it is assumed true.  Also check
+  for null command string in LYExtern.c (bug report by HN) - TD
+* modify logic in forms-options menu so that assume_char_set now works
+  correctly for any LYRawMode value by synchronizing gen_options() and
+  postoptions() via rawmode memory - LP
+* correct ifdef'ing in LYShowInfo.c for non-Unix platforms - LP
+* modify waitpid logic in nsl-fork support to handle a case where the child
+  process exits without reporting anything (reported by Serge Munhoven) - BL
+* small updates to lynx_help files and other documentation (BJP, PW, LV).
+* add #define's for later work to simplify configuring the maximum number
+  of cookies (suggested by BJP) - TD
+* flush output in makeuctb, to fix build problems on systems that do not
+  implement POSIX 'exit()' call -- including Digital Unix 4.0 (reported by
+  Serge Munhoven <munhoven@mema.ucl.ac.be>) - TD
+* put GOTOBUFFER, JUMPBUFFER and QUIT_DEFAULT_YES back the way they used to be
+  (majority decision) - TD
 1998-10-14 (2.8.1pre.10)
-+ add/use HTSYS_purge and HTSYS_remove functions (based on report by Tony
+* add/use HTSYS_purge and HTSYS_remove functions (based on report by Tony
   Bolton and patch by BJP dealing with removing older versions of cookie files)
   - TD
 * add --disable-config-info option - TD
