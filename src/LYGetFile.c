@@ -385,25 +385,44 @@ Try_Redirected_URL:
 #endif /* DIRED_SUPPORT */
 
 		}
+
 		if (LYNoRefererHeader == FALSE &&
 		    LYNoRefererForThis == FALSE) {
+		    char *ref_url = HTLoadedDocumentURL();
+		    if (!strncmp(ref_url, "LYNXIMGMAP:", 11))
+			ref_url += 11;
 		    if (no_filereferer == TRUE &&
-			!strncmp(HTLoadedDocumentURL(), "file:", 5)) {
+			!strncmp(ref_url, "file:", 5)) {
 			LYNoRefererForThis = TRUE;
 		    }
 		    if (LYNoRefererForThis == FALSE &&
-			(cp = strchr(HTLoadedDocumentURL(), '?')) != NULL &&
-		    strchr(cp, '=') != NULL) {
+			(cp = strchr(ref_url, '?')) != NULL &&
+			strchr(cp, '=') != NULL) {
 			/*
 			 *  Don't send a Referer header if the URL is
 			 *  the reply from a form with method GET, in
 			 *  case the content has personal data (e.g.,
 			 *  a password or credit card number) which
 			 *  would become visible in logs. - FM
+			 *
+			 *  Changed 1999-11-01 to be controlled by
+			 *  REFERER_WITH_QUERY option. - kw
 			 */
-			LYNoRefererForThis = TRUE;
+			if (LYRefererWithQuery == 'S') { /* SEND */
+			    StrAllocCopy(LYRequestReferer, ref_url);
+			} else if (LYRefererWithQuery == 'P') { /* PARTIAL */
+			    FREE(LYRequestReferer); /* just to be sure */
+			    LYRequestReferer = HTParse(ref_url, "",
+		PARSE_ACCESS|PARSE_HOST|PARSE_STRICTPATH|PARSE_PUNCTUATION);
+			} else { /* Everyhting else - don't send Referer */
+			    LYNoRefererForThis = TRUE;
+			}
 			cp = NULL;
+		    } else if (LYNoRefererForThis == FALSE) {
+			StrAllocCopy(LYRequestReferer, ref_url);
 		    }
+		} else {
+		    StrAllocCopy(LYRequestReferer, HTLoadedDocumentURL());
 		}
 		if (url_type == LYNXHIST_URL_TYPE) {
 		    /*

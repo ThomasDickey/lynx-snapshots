@@ -316,7 +316,10 @@ II. Compile instructions -- UNIX
 	(Also defines USE_HASH, LINKEDSTYLES)
 
   --enable-debug			(The symbol DEBUG is always defined.)
-  	Use this option to compile-in support for debugging.
+        Use this option to compile-in support for debugging. 
+        Note that this flag is ignored if the CFLAGS environment 
+        variable is set, in that case "-g" (or whatever) has to 
+        be included in the CFLAGS value to get debugging. 
 
   --enable-default-colors		(define USE_DEFAULT_COLORS)
   	Enable use of default-color background (ncurses/slang).  Either

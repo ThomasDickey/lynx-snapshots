@@ -114,7 +114,11 @@
 #define ANSI_PREPRO 1
 #endif
 
-#if defined(__CYGWIN__)			/* 1998/12/31 (Thu) 16:13:46 */
+#if defined(__CYGWIN32__) && ! defined(__CYGWIN__)
+#define __CYGWIN__ 1
+#endif
+
+#if defined(__CYGWIN__)		/* 1998/12/31 (Thu) 16:13:46 */
 #include <windows.h>		/* #include "windef.h" */
 #define BOOLEAN_DEFINED
 #undef HAVE_POPEN		/* FIXME: does this not work, or is it missing */

@@ -3336,7 +3336,19 @@ static OptValues user_mode_values[] = {
 	{ INTERMEDIATE_MODE,	"Intermediate", "Intermediate" },
 	{ ADVANCED_MODE,	"Advanced",	"Advanced" },
 	{ 0, 0, 0 }};
+
 static char * vi_keys_string		= "vi_keys";
+
+static char * visited_pages_type_string	= "visited_pages_type";
+static OptValues visited_pages_type_values[] = {
+	{ VISITED_LINKS_AS_FIRST_V, "By First Visit",	"first_visited" },
+	{ VISITED_LINKS_AS_FIRST_V | VISITED_LINKS_REVERSE,
+		    "By First Visit Reversed",	"first_visited_reversed" },
+	{ VISITED_LINKS_AS_TREE,    "As Visit Tree",	"visit_tree" },
+	{ VISITED_LINKS_AS_LATEST,  "By Last Visit",	"last_visited" },
+	{ VISITED_LINKS_AS_LATEST | VISITED_LINKS_REVERSE,
+		    "By Last Visit Reversed",	"last_visited_reversed" },
+	{ 0, 0, 0 }};
 
 /*
  * Document Layout
@@ -3794,6 +3806,10 @@ PUBLIC int postoptions ARGS1(
 		display_lines = LYlines-2;
 	    }
 	}
+
+	/* Type of visited pages page: SELECT */
+	if (!strcmp(data[i].tag, visited_pages_type_string))
+	   GetOptValues(visited_pages_type_values, data[i].value, &Visited_Links_As);
 
 	/* Show Images: SELECT */
 	if (!strcmp(data[i].tag, images_string)) {
@@ -4355,6 +4371,12 @@ PRIVATE int gen_options ARGS1(
     PutLabel(fp0, gettext("VI keys"));
     BeginSelect(fp0, vi_keys_string);
     PutOptValues(fp0, vi_keys, bool_values);
+    EndSelect(fp0);
+
+    /* Visited Pages: SELECT */
+    PutLabel(fp0, gettext("Visited Pages"));
+    BeginSelect(fp0, visited_pages_type_string);
+    PutOptValues(fp0, Visited_Links_As, visited_pages_type_values);
     EndSelect(fp0);
 
     /* Display Character Set: SELECT */

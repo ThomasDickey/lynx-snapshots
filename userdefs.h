@@ -890,7 +890,7 @@
  * Showing the cursor is handy if you are a sighted user with a poor
  * terminal that can't do bold and reverse video at the same time or
  * at all.  It also can be useful to blind users, as an alternative
- * or supplement to setting LINKS_AND_FORM_FIELDS_ARE_NUMBERED or
+ * or supplement to setting LINKS_AND_FIELDS_ARE_NUMBERED or
  * LINKS_ARE_NUMBERED.
  *
  * The default defined here can be changed in lynx.cfg.  It can be
@@ -1059,7 +1059,8 @@
 /**********
  * UNIX:
  * =====
- * CGI script support.  Defining LYNXCGI_LINKS allows you to use the
+ * CGI script support.  Defining LYNXCGI_LINKS (done by the configure script)
+ * allows you to use the
  *
  *   lynxcgi:path
  *
@@ -1089,7 +1090,9 @@
  * lynxcgi:advice  as a G)oto URL for more information and links to the
  * OSU server distribution.
  */
+#ifndef HAVE_CONFIG_H
 /* #define LYNXCGI_LINKS */
+#endif
 
 /*********************************
  *  MAIL_SYSTEM_ERROR_LOGGING will send a message to the owner of
@@ -1150,12 +1153,12 @@
  * DEFAULT KEYPAD MODE may be set to
  *	NUMBERS_AS_ARROWS   or
  *	LINKS_ARE_NUMBERED  or
- *	LINKS_AND_FORM_FIELDS_ARE_NUMBERED
+ *	LINKS_AND_FIELDS_ARE_NUMBERED
  *
  * This default setting can be overridden in lynx.cfg (but not to
  * the third value), and it can be changed at run time by the user.
  */
-#define DEFAULT_KEYPAD_MODE	NUMBERS_AS_ARROWS
+#define DEFAULT_KEYPAD_MODE	LINKS_AND_FIELDS_ARE_NUMBERED
 
 /********************************
  * The default search.
@@ -1235,8 +1238,24 @@
  * case, but some users may find this surprising and expect <return> to just
  * move to the next link as for other text entry fields.
  */
-
 /* #define TEXT_SUBMIT_CONFIRM_WANTED */
+
+/********************************
+ * The following three definitions control some aspects of extended
+ * textarea handling.  TEXTAREA_EXPAND_SIZE is the number of new empty
+ * lines that get appended at the end of a textarea by a GROWTEXTAREA
+ * key.  If TEXTAREA_AUTOGROW is defined (to anything), <return> or
+ * <enter> in the last line of a textarea automatically extends the
+ * area by adding a new line.  If TEXTAREA_AUTOEXTEDIT is defined (to
+ * anything), a key mapped to DWIMEDIT will invoke the external editor
+ * like EDITTEXTAREA when used in a text input field.  Comment those
+ * last two definitions out to disable the corresponding behavior.
+ * See under KEYMAP in lynx.cfg for mapping keys to GROWTEXTAREA or
+ * DWIMEDIT actions.
+ */
+#define TEXTAREA_EXPAND_SIZE  5
+#define TEXTAREA_AUTOGROW
+#define TEXTAREA_AUTOEXTEDIT
 
 /********************************
  * If BUILTIN_SUFFIX_MAPS is defined (to anything), default mappings
@@ -1279,12 +1298,12 @@
  * the version definition with the Project Version on checkout.  Just
  * ignore it. - kw */
 /* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
-#define LYNX_VERSION "2.8.3dev.14"
+#define LYNX_VERSION "2.8.3dev.15"
 #define LYNX_WWW_HOME "http://lynx.browser.org/"
 #define LYNX_WWW_DIST "http://www.slcc.edu/lynx/current/"
 #define LYNX_RELEASE FALSE
 /* $Format: "#define LYNX_DATE \"$ProjectDate$\""$ */
-#define LYNX_DATE "Wed, 03 Nov 1999 19:41:39 -0700"
+#define LYNX_DATE "Wed, 17 Nov 1999 21:08:08 -0700"
 #define LYNX_DATE_OFF 5		/* truncate the automatically-generated date */
 #define LYNX_DATE_LEN 11	/* truncate the automatically-generated date */
 #define LYNX_RELEASE_DATE "1999"
@@ -1371,7 +1390,8 @@
 #define MKDIR_PATH      "mkdir"
 #define MV_PATH         "mv"
 #define RM_PATH         "rm"
-#define COPY_PATH       "cp"
+/* COPY_PATH is not required for DOSPATH any more (implemented directly) */
+/* #define COPY_PATH       "cp" */
 #define CHMOD_PATH      "chmod"
 #define TELNET_PATH     "telnet"
 #define TN3270_PATH     "tn3270"

@@ -394,7 +394,7 @@ PRIVATE int form_getstr ARGS3(
 	     *  If we can edit it, report that we are using the tail. - FM
 	     */
 	    HTUserMsg(FORM_VALUE_TOO_LONG);
-	    show_formlink_statusline(form);
+	    show_formlink_statusline(form, FOR_INPUT);
 	    move(startline, startcol);
 	}
     }
@@ -1825,8 +1825,9 @@ restore_popup_statusline:
 /*
  *  Display statusline info tailored for the current form field.
  */
-PUBLIC void show_formlink_statusline ARGS1(
-    CONST FormInfo *,	form)
+PUBLIC void show_formlink_statusline ARGS2(
+    CONST FormInfo *,	form,
+    int,		for_what)
 {
     switch(form->type) {
     case F_PASSWORD_TYPE:
@@ -1865,7 +1866,17 @@ PUBLIC void show_formlink_statusline ARGS1(
 	} else if (form->no_cache) {
 	    statusline(FORM_LINK_TEXT_RESUBMIT_MESSAGE);
 	} else {
-	    statusline(FORM_LINK_TEXT_SUBMIT_MESSAGE);
+	    char *submit_str = NULL;
+	    char *xkey_info = key_for_func_ext(LYK_NOCACHE, for_what);
+	    if (xkey_info && *xkey_info) {
+		HTSprintf0(&submit_str, FORM_LINK_TEXT_SUBMIT_MESSAGE_X,
+			   xkey_info);
+		statusline(submit_str);
+		FREE(submit_str);
+	    } else {
+		statusline(FORM_LINK_TEXT_SUBMIT_MESSAGE);
+	    }
+	    FREE(xkey_info);
 	}
 	break;
     case F_SUBMIT_TYPE:
@@ -1933,8 +1944,25 @@ PUBLIC void show_formlink_statusline ARGS1(
     case F_TEXTAREA_TYPE:
 	if (form->disabled == YES)
 	    statusline(FORM_LINK_TEXT_UNM_MSG);
-	else
+	else if (no_editor || !editor || !*editor) {
 	    statusline(FORM_LINK_TEXTAREA_MESSAGE);
+	} else {
+	    char *submit_str = NULL;
+	    char *xkey_info = key_for_func_ext(LYK_EDIT_TEXTAREA, for_what);
+#ifdef TEXTAREA_AUTOEXTEDIT
+	    if (!xkey_info)
+		xkey_info = key_for_func_ext(LYK_DWIMEDIT, for_what);
+#endif
+	    if (xkey_info && *xkey_info) {
+		HTSprintf0(&submit_str, FORM_LINK_TEXTAREA_MESSAGE_E,
+			   xkey_info);
+		statusline(submit_str);
+		FREE(submit_str);
+	    } else {
+		statusline(FORM_LINK_TEXTAREA_MESSAGE);
+	    }
+	    FREE(xkey_info);
+	}
 	break;
     }
 }

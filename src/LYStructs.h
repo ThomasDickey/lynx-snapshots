@@ -60,9 +60,22 @@ typedef struct _histstruct {
 				   "internal links", otherwise -1 */
 } histstruct;
 
+extern int Visited_Links_As;
+
+#define VISITED_LINKS_AS_FIRST_V 0
+#define VISITED_LINKS_AS_TREE    1
+#define VISITED_LINKS_AS_LATEST  2
+#define VISITED_LINKS_REVERSE    4
+
 typedef struct _VisitedLink {
     char * title;
     char * address;
+    int level;
+    struct _VisitedLink *next_tree;
+    struct _VisitedLink *prev_tree;
+    struct _VisitedLink *prev_latest;
+    struct _VisitedLink *next_latest;
+    struct _VisitedLink *prev_first;
 } VisitedLink;
 
 extern histstruct history[MAXHIST];

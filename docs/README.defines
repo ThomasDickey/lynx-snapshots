@@ -142,7 +142,8 @@ They may directly affect several source files.  Filenames show where
 they are set.  Normally installers shouldn't have to care about these
 symbols.
 
-SAVE_TIME_NOT_SPACE	HTString.c	minmize number of some malloc calls
+COOKIE_FILE		LYMain.c	default cookie file in HOME dir
+SAVE_TIME_NOT_SPACE	HTString.c	minimize number of some malloc calls
 SHOW_WHEREIS_TARGETS	LYCurses.h	whereis search highlighting
 USE_KEYMAPS		LYCurses.h	use of .lynx-keymaps files
 

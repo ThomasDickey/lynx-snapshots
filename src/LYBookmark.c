@@ -598,9 +598,9 @@ PUBLIC void remove_bookmark_link ARGS2(
 #if defined(_WINDOWS) || defined(WIN_EX)
 #if defined(WIN_EX)
 	if (GetLastError() == ERROR_NOT_SAME_DEVICE)
-#else /* !_WIN_CC */
+#else /* !_WIN_EX */
 	if (errno == ENOTSAM)
-#endif /* _WIN_CC */
+#endif /* _WIN_EX */
 	{
 	    if (rename(newfile, filename_buffer) != 0) {
 		if (LYCopyFile(newfile, filename_buffer) == 0)

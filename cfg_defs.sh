@@ -2,6 +2,7 @@
 # Translate the lynx_cfg.h and config.cache data into a table, useful for
 # display at runtime.
 
+TOP="${1-.}"
 OUT=cfg_defs.h
 
 cat >$OUT <<EOF
@@ -19,7 +20,7 @@ sed \
 	-e 's/^.[^=]*_cv_//' \
 	-e 's/=\${.*=/=/'  \
 	-e 's/}$//'          \
-	config.cache | cfg_edit.sh >>$OUT
+	config.cache | $TOP/cfg_edit.sh >>$OUT
 
 cat >>$OUT <<EOF
 };
@@ -35,7 +36,7 @@ sed	-e 's@	@ @g' \
 	-e 's@^[ 	]*#define[ 	]*@@' \
 	-e 's@[ ]*/\*.*\*/@@' \
 	-e 's@[ 	][ 	]*@=@' \
-    | cfg_edit.sh >>$OUT
+    | $TOP/cfg_edit.sh >>$OUT
 
 cat >>$OUT <<EOF
 };

@@ -25,6 +25,14 @@
 #include <LYLeaks.h>
 
 PUBLIC HTList * Visited_Links = NULL;	/* List of safe popped docs. */
+PUBLIC int Visited_Links_As = VISITED_LINKS_AS_TREE;
+PRIVATE VisitedLink *PrevVisitedLink = NULL;	    /* NULL on auxillary */
+PRIVATE VisitedLink *PrevActiveVisitedLink = NULL;  /* Last non-auxillary */
+PRIVATE VisitedLink Latest_first;
+PRIVATE VisitedLink Latest_last;
+PRIVATE VisitedLink *Latest_tree;
+PRIVATE VisitedLink *First_tree;
+PRIVATE VisitedLink *Last_by_first;
 
 #ifdef LY_FIND_LEAKS
 /*
@@ -35,6 +43,8 @@ PRIVATE void Visited_Links_free NOARGS
     VisitedLink *vl;
     HTList *cur = Visited_Links;
 
+    PrevVisitedLink = NULL;
+    PrevActiveVisitedLink = NULL;
     if (!cur)
 	return;
 
@@ -45,6 +55,9 @@ PRIVATE void Visited_Links_free NOARGS
     }
     HTList_delete(Visited_Links);
     Visited_Links = NULL;
+    Latest_last.prev_latest = &Latest_first;
+    Latest_first.next_latest = &Latest_last;
+    Last_by_first = Latest_tree = First_tree = 0;
     return;
 }
 #endif /* LY_FIND_LEAKS */
@@ -57,11 +70,13 @@ PUBLIC void LYAddVisitedLink ARGS1(
 	document *,	doc)
 {
     VisitedLink *new;
-    VisitedLink *old;
     HTList *cur;
+    char *title = (doc->title ? doc->title : NO_TITLE);
 
-    if (!(doc->address && *doc->address))
+    if (!(doc->address && *doc->address)) {
+	PrevVisitedLink = NULL;
 	return;
+    }
 
     /*
      *	Exclude POST or HEAD replies, and bookmark, menu
@@ -70,61 +85,115 @@ PUBLIC void LYAddVisitedLink ARGS1(
     if (doc->post_data || doc->isHEAD || doc->bookmark ||
 	(/* special url or a temp file */
 	 (!strncmp(doc->address, "LYNX", 4) ||
-	  !strncmp(doc->address, "file://localhost/", 17))
-	 && (
-	!strcmp((doc->title ? doc->title : ""), HISTORY_PAGE_TITLE) ||
-	!strcmp((doc->title ? doc->title : ""), PRINT_OPTIONS_TITLE) ||
-	!strcmp((doc->title ? doc->title : ""), DOWNLOAD_OPTIONS_TITLE) ||
-	!strcmp((doc->title ? doc->title : ""), OPTIONS_TITLE) ||
-#ifdef DIRED_SUPPORT
-	!strcmp((doc->title ? doc->title : ""), DIRED_MENU_TITLE) ||
-	!strcmp((doc->title ? doc->title : ""), UPLOAD_OPTIONS_TITLE) ||
-	!strcmp((doc->title ? doc->title : ""), PERMIT_OPTIONS_TITLE) ||
-#endif /* DIRED_SUPPORT */
-	!strcmp((doc->title ? doc->title : ""), CURRENT_KEYMAP_TITLE) ||
-	!strcmp((doc->title ? doc->title : ""), LIST_PAGE_TITLE) ||
-#ifdef EXP_ADDRLIST_PAGE
-	!strcmp((doc->title ? doc->title : ""), ADDRLIST_PAGE_TITLE) ||
-#endif
-	!strcmp((doc->title ? doc->title : ""), SHOWINFO_TITLE) ||
-	!strcmp((doc->title ? doc->title : ""), STATUSLINES_TITLE) ||
-	!strcmp((doc->title ? doc->title : ""), CONFIG_DEF_TITLE) ||
-	!strcmp((doc->title ? doc->title : ""), LYNXCFG_TITLE) ||
-	!strcmp((doc->title ? doc->title : ""), COOKIE_JAR_TITLE) ||
-	!strcmp((doc->title ? doc->title : ""), VISITED_LINKS_TITLE) ||
-	!strcmp((doc->title ? doc->title : ""), LYNX_TRACELOG_TITLE)))) {
-	return;
-    }
+	  !strncmp(doc->address, "file://localhost/", 17)))) {
+	int related = 1;	/* First approximation only */
 
-    if ((new = (VisitedLink *)calloc(1, sizeof(*new))) == NULL)
-	outofmem(__FILE__, "LYAddVisitedLink");
-    StrAllocCopy(new->address, doc->address);
-    StrAllocCopy(new->title, (doc->title ? doc->title : NO_TITLE));
+	if (	!strcmp(title, HISTORY_PAGE_TITLE) ||
+		!strcmp(title, VISITED_LINKS_TITLE) ||
+		!strcmp(title, SHOWINFO_TITLE) ||
+		!strcmp(title, STATUSLINES_TITLE) ||
+			(related = 0)	||
+#ifdef DIRED_SUPPORT
+		!strcmp(title, DIRED_MENU_TITLE) ||
+		!strcmp(title, UPLOAD_OPTIONS_TITLE) ||
+		!strcmp(title, PERMIT_OPTIONS_TITLE) ||
+#endif /* DIRED_SUPPORT */
+		!strcmp(title, PRINT_OPTIONS_TITLE) ||
+		!strcmp(title, DOWNLOAD_OPTIONS_TITLE) ||
+		!strcmp(title, OPTIONS_TITLE) ||
+		!strcmp(title, CURRENT_KEYMAP_TITLE) ||
+		!strcmp(title, LIST_PAGE_TITLE) ||
+#ifdef EXP_ADDRLIST_PAGE
+		!strcmp(title, ADDRLIST_PAGE_TITLE) ||
+#endif
+		!strcmp(title, CONFIG_DEF_TITLE) ||
+		!strcmp(title, LYNXCFG_TITLE) ||
+		!strcmp(title, COOKIE_JAR_TITLE) ||
+		!strcmp(title, LYNX_TRACELOG_TITLE)	) {
+	    if (!related)
+		PrevVisitedLink = NULL;
+	    return;
+	}
+    }
 
     if (!Visited_Links) {
 	Visited_Links = HTList_new();
 #ifdef LY_FIND_LEAKS
 	atexit(Visited_Links_free);
 #endif
-	HTList_addObject(Visited_Links, new);
-	return;
+	Latest_last.prev_latest = &Latest_first;
+	Latest_first.next_latest = &Latest_last;
+	Latest_last.next_latest = NULL;		/* Find bugs quick! */
+	Latest_first.prev_latest = NULL;
+	Last_by_first = Latest_tree = First_tree = NULL;
     }
 
     cur = Visited_Links;
-    while (NULL != (old = (VisitedLink *)HTList_nextObject(cur))) {
-	if (!strcmp((old->address ? old->address : ""),
-		    (new->address ? new->address : ""))) {
-	    if (!(new->title && *new->title) && old->title) {
-		StrAllocCopy(new->title, old->title);
-	    }
-	    FREE(old->address);
-	    FREE(old->title);
-	    HTList_removeObject(Visited_Links, old);
-	    FREE(old);
-	    break;
+    while (NULL != (new = (VisitedLink *)HTList_nextObject(cur))) {
+	if (!strcmp((new->address ? new->address : ""),
+		    (doc->address ? doc->address : ""))) {
+	    PrevVisitedLink = PrevActiveVisitedLink = new;
+	    /* Already visited.  Update the last-visited info. */
+	    if (new->next_latest == &Latest_last)	/* optimization */
+		return;
+
+	    /* Remove from "latest" chain */
+	    new->prev_latest->next_latest = new->next_latest;
+	    new->next_latest->prev_latest = new->prev_latest;
+
+	    /* Insert at the end of the "latest" chain */
+	    Latest_last.prev_latest->next_latest = new;
+	    new->prev_latest = Latest_last.prev_latest;
+	    new->next_latest = &Latest_last;
+	    Latest_last.prev_latest = new;
+	    return;
 	}
     }
-    HTList_addObject(Visited_Links, new);
+
+    if ((new = (VisitedLink *)calloc(1, sizeof(*new))) == NULL)
+	outofmem(__FILE__, "LYAddVisitedLink");
+    StrAllocCopy(new->address, doc->address);
+    StrAllocCopy(new->title, title);
+
+    /* First-visited chain */
+    HTList_appendObject(Visited_Links, new);	/* At end */
+    new->prev_first = Last_by_first;
+    Last_by_first = new;
+
+    /* Tree structure */
+    if (PrevVisitedLink) {
+	VisitedLink *a = PrevVisitedLink;
+	VisitedLink *b = a->next_tree;
+	int l = PrevVisitedLink->level;
+
+	/* Find last on the deeper levels */
+	while (b && b->level > l)
+	    a = b, b = b->next_tree;
+
+	if (a->next_tree)
+	    a->next_tree->prev_tree = new;
+	new->prev_tree = a;
+	new->next_tree = a->next_tree;
+	a->next_tree = new;
+
+	new->level = PrevVisitedLink->level + 1;
+    } else {
+	if (Latest_tree)
+	    Latest_tree->next_tree = new;
+	new->prev_tree = Latest_tree;
+	new->level = 0;
+	new->next_tree = NULL;
+    }
+    PrevVisitedLink = PrevActiveVisitedLink = new;
+    Latest_tree = new;
+    if (!First_tree)
+	First_tree = new;
+
+    /* "latest" chain */
+    Latest_last.prev_latest->next_latest = new;
+    new->prev_latest = Latest_last.prev_latest;
+    new->next_latest = &Latest_last;
+    Latest_last.prev_latest = new;
 
     return;
 }
@@ -560,8 +629,8 @@ PUBLIC BOOLEAN historytarget ARGS1(
 }
 
 /*
- *  This procedure outputs the Visited Links
- *  list into a temporary file. - FM
+ *  This procedure outputs the Visited Links list into a temporary file. - FM
+ *  Returns links's number to make active (1-based), or 0 if not required.
  */
 PUBLIC int LYShowVisitedLinks ARGS1(
 	char **,	newfile)
@@ -569,10 +638,13 @@ PUBLIC int LYShowVisitedLinks ARGS1(
     static char tempfile[LY_MAXPATH] = "\0";
     char *Title = NULL;
     char *Address = NULL;
-    int x;
+    int x, tot;
     FILE *fp0;
     VisitedLink *vl;
     HTList *cur = Visited_Links;
+    int offset;
+    int ret = 0;
+    char *arrow, *post_arrow;
 
     if (!cur)
 	return(-1);
@@ -595,16 +667,78 @@ PUBLIC int LYShowVisitedLinks ARGS1(
 
     BeginInternalPage(fp0, VISITED_LINKS_TITLE, VISITED_LINKS_HELP);
 
+    fprintf(fp0, "<form action=\"LYNXOPTIONS:\" method=\"post\">\n");
+    fprintf(fp0, "<select name=\"visited_pages_type\">\n");
+    fprintf(fp0, " <option value=\"first_visited\" %s>Sort By First Visited\n",
+		 (Visited_Links_As == VISITED_LINKS_AS_FIRST_V ? "selected" : ""));
+    fprintf(fp0, " <option value=\"first_visited_reversed\" %s>Reverse Sort By First Visited\n",
+		 (Visited_Links_As == (VISITED_LINKS_AS_FIRST_V|VISITED_LINKS_REVERSE) ? "selected" : ""));
+    fprintf(fp0, " <option value=\"visit_tree\" %s>View As Visit Tree\n",
+		 (Visited_Links_As == VISITED_LINKS_AS_TREE ? "selected" : ""));
+    fprintf(fp0, " <option value=\"last_visited\" %s>Sort By Last Visited\n",
+		 (Visited_Links_As == VISITED_LINKS_AS_LATEST ? "selected" : ""));
+    fprintf(fp0, " <option value=\"last_visited_reversed\" %s>Reverse Sort By Last Visited\n",
+		 (Visited_Links_As == (VISITED_LINKS_AS_LATEST|VISITED_LINKS_REVERSE)
+		   ? "selected" : ""));
+    fprintf(fp0, "</select>\n");
+    fprintf(fp0, "<input type=\"submit\" value=\"Accept Changes\">\n");
+    fprintf(fp0, "</form>\n");
+    fprintf(fp0, "<P>\n");
+
     fprintf(fp0, "<pre>\n");
     fprintf(fp0, "<em>%s</em>\n",
 	    gettext("You visited (POSTs, bookmark, menu and list files excluded):"));
-    x = HTList_count(Visited_Links);
-    while (NULL != (vl = (VisitedLink *)HTList_nextObject(cur))) {
+    if (Visited_Links_As & VISITED_LINKS_REVERSE)
+	tot = x = HTList_count(Visited_Links);
+    else
+	tot = x = -1;
+
+    if (Visited_Links_As & VISITED_LINKS_AS_TREE) {
+	vl = First_tree;
+    } else if (Visited_Links_As & VISITED_LINKS_AS_LATEST) {
+	if (Visited_Links_As & VISITED_LINKS_REVERSE)
+	    vl = Latest_last.prev_latest;
+	else
+	    vl = Latest_first.next_latest;
+	if (vl == &Latest_last || vl == &Latest_first)
+	    vl = NULL;
+    } else {
+	if (Visited_Links_As & VISITED_LINKS_REVERSE)
+	    vl = Last_by_first;
+	else
+	    vl = (VisitedLink *)HTList_nextObject(cur);
+    }
+    while (NULL != vl) {
 	/*
 	 *  The number of the document (most recent highest),
 	 *  its title in a link, and its address. - FM
 	 */
-	x--;
+	post_arrow = arrow = "";
+	if (Visited_Links_As & VISITED_LINKS_REVERSE)
+	    x--;
+	else
+	    x++;
+	if (vl == PrevActiveVisitedLink) {
+	    if (Visited_Links_As & VISITED_LINKS_REVERSE)
+		ret = tot - x + 2;
+	    else
+		ret = x + 3;
+	}
+	if (vl == PrevActiveVisitedLink) {
+	    post_arrow = "<A NAME=current></A>";
+	    /* Otherwise levels 0 and 1 look the same when with arrow: */
+	    arrow = (vl->level && (Visited_Links_As & VISITED_LINKS_AS_TREE))
+			 ? "==>" : "=>";
+	    StrAllocCat(*newfile, "#current");
+	}
+	if (Visited_Links_As & VISITED_LINKS_AS_TREE) {
+	    offset = 2 * vl->level;
+	    if (offset > 24)
+		offset = (offset + 24)/2;
+	    if (offset > LYcols * 3/4)
+		offset = LYcols * 3/4;
+	} else
+	    offset = (x > 99 ? 0 : x < 10 ? 2 : 1);
 	if (vl->title != NULL && *vl->title != '\0') {
 	    StrAllocCopy(Title, vl->title);
 	    LYEntify(&Title, TRUE);
@@ -619,13 +753,13 @@ PUBLIC int LYShowVisitedLinks ARGS1(
 	    StrAllocCopy(Address, vl->address);
 	    LYEntify(&Address, FALSE);
 	    fprintf(fp0,
-		    "%s<em>%d</em>. <tab id=t%d><a href=\"%s\">%s</a>\n",
-		    (x > 99 ? "" : x < 10 ? "  " : " "),
+		    "%-*s%s<em>%d</em>. <tab id=t%d><a href=\"%s\">%s</a>\n",
+		    offset, arrow, post_arrow,
 		    x, x, Address, Title);
 	} else {
 	    fprintf(fp0,
-		    "%s<em>%d</em>. <tab id=t%d><em>%s</em>\n",
-		    (x > 99 ? "" : x < 10 ? "  " : " "),
+		    "%-*s%s<em>%d</em>. <tab id=t%d><em>%s</em>\n",
+		    offset, arrow, post_arrow,
 		    x, x, Title);
 	}
 	if (Address != NULL) {
@@ -634,6 +768,21 @@ PUBLIC int LYShowVisitedLinks ARGS1(
 	}
 	fprintf(fp0, "<tab to=t%d>%s\n", x,
 		     ((Address != NULL) ? Address : gettext("(no address)")));
+	if (Visited_Links_As & VISITED_LINKS_AS_TREE)
+	    vl = vl->next_tree;
+	else if (Visited_Links_As & VISITED_LINKS_AS_LATEST) {
+	    if (Visited_Links_As & VISITED_LINKS_REVERSE)
+		vl = vl->prev_latest;
+	    else
+		vl = vl->next_latest;
+	    if (vl == &Latest_last || vl == &Latest_first)
+		vl = NULL;
+	} else {
+	    if (Visited_Links_As & VISITED_LINKS_REVERSE)
+		vl = vl->prev_first;
+	    else
+		vl = (VisitedLink *)HTList_nextObject(cur);
+	}
     }
     fprintf(fp0,"</pre>\n");
     EndInternalPage(fp0);
@@ -641,7 +790,7 @@ PUBLIC int LYShowVisitedLinks ARGS1(
     LYCloseTempFP(fp0);
     FREE(Title);
     FREE(Address);
-    return(0);
+    return(ret);
 }
 
 

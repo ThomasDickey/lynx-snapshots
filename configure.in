@@ -58,7 +58,7 @@ test "$with_leak_checks" = "yes" && AC_DEFINE(LY_FIND_LEAKS)
 
 AC_MSG_CHECKING(if you want to enable debug-code)
 CF_ARG_ENABLE(debug,
-	[  --enable-debug          logic for object code debugging],
+	[  --enable-debug          compile w/ debugging (if \$CFLAGS is set, add -g there, too)],
 	[with_debug=yes],
 	[with_debug=no])
 AC_MSG_RESULT($with_debug)
@@ -267,6 +267,9 @@ clix*)
 	;;
 convex*)
 	CFLAGS="$CFLAGS -D__STDC__ -Dunix"
+	;;
+cygwin*)
+	PROG_EXT=".exe"
 	;;
 dgux*)
 	CFLAGS="$CFLAGS -DDGUX"

@@ -16,7 +16,7 @@
 **	returns		WWW file specification
 **
 */
-char * HTDOS_wwwName PARAMS((char * dosname));
+char * HTDOS_wwwName PARAMS((CONST char * dosname));
 
 
 /* PUBLIC                                                       HTDOS_name()

@@ -244,7 +244,7 @@ PRIVATE void WSRCParser_put_character ARGS2(HTStream*, me, char, c)
 PRIVATE BOOL write_cache ARGS1(HTStream *, me)
 {
     FILE * fp;
-    char cache_file_name[256];
+    char cache_file_name[LY_MAXPATH];
     char * www_database;
     if (!me->par_value[PAR_DATABASE_NAME]
 	|| !me->par_value[PAR_IP_NAME]

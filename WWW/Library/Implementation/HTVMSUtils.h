@@ -87,7 +87,7 @@ PUBLIC BOOL HTVMS_checkAccess PARAMS((
 **	
 */
 PUBLIC char * HTVMS_wwwName PARAMS((
-	char * vmsname));
+	CONST char *	vmsname));
 
 /* PUBLIC							HTVMS_name()
 **		CONVERTS WWW name into a VMS name

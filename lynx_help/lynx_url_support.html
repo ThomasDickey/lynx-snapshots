@@ -209,18 +209,24 @@ URL which Lynx created for it.
 
 The ftp URL has the general format:
 <pre>
-      <em>ftp://username:password@host:port/path;type=[D,I, or A]</em>
+      <em>ftp://host:port/path;type=[D,I, or A]</em>
+      <em>ftp://username@host:port/path;type=[D,I, or A]</em>
 </pre>
 
 <p>The default port is <em>:21</em> and the default <em>username</em>
-is <em>anonymous</em>.  If <em>username</em> is included but not
-<em>:password</em>, Lynx will prompt you for the password.  This is
-recommended, as otherwise the URL will have it completely unencrypted.
-Do not include the <em>@</em> if neither <em>username</em> nor
-<em>:password</em> is included.  For anonymous ftp, Lynx uses your
-<em>personal_mail_address</em> (user@host) as the <em>:password</em>
+is <em>anonymous</em>.  If <em>username</em> is included,
+Lynx will prompt you for the password.  For anonymous ftp, Lynx uses your
+<em>personal_mail_address</em> (user@host) as the <em>password</em>
 if it has been defined via the '<em>o</em>'ptions menu.  Otherwise,
 Lynx uses the dummy password <em>WWWUser</em>.
+(A password can also be embedded in the URL, by replacing
+<em>username</em> with <em>username:password</em>.  This is strongly
+discouraged for 'real' passwords that must be kept secret, since URLs
+with the completely unencrypted <em>password</em> may show up on the
+screen, in HISTORY and LIST pages etc., and may even become visible to
+remote sites for example through Referer headers.)
+Do not include the <em>@</em> if neither <em>username</em> nor
+<em>:password</em> is included.
 
 <p>The <em>;type=</em> parameter can be used with value <em>D</em>,
 <em>I</em>, or <em>A</em> to force handling of the URL as, respectively,
@@ -566,10 +572,13 @@ ACTION for a FORM, and if enabled in your Lynx image has the format:
 <pre>
       <em>lynxcgi://localhost/path_to_CGI_script</em>
 </pre>
-where <em>//localhost/</em> is optional and always implied.
-The output of the script should be text/html and is rendered and displayed
-by Lynx. (Note that restrictions on acceptable paths can be imposed
-by the system administrator.)
+where <em>//localhost</em> is optional and always implied;
+the full path should be specified, as `~' is not recognised;
+if the script is in the directory Lynx was started from,
+the simple file name is adequate.  The output of the script
+should be text/html and is rendered and displayed by Lynx.
+Restrictions on use of lynxcgi and on acceptable paths can be imposed
+in <em>userdefs.h</em> and <em>lynx.cfg</em>, qv.
 
 <p>This is a Lynxism and should be used only in local documents intended
 solely for Lynx, or for limited local testing of CGI scripts without an

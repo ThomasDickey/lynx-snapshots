@@ -14,7 +14,9 @@
 #include <HTString.h>
 #include <LYCharUtils.h>
 #include <HTParse.h>
+#ifdef NCURSES_MOUSE_VERSION
 #include <LYMainLoop.h>
+#endif /* NCURSES_MOUSE_VERSION */
 
 #ifdef DJGPP_KEYHANDLER
 #include <pc.h>
@@ -1364,11 +1366,11 @@ PRIVATE int LYmouse_menu ARGS4(int, x, int, y, int, atlink, int, code)
 	mouse_link = -1;	/* mainloop should not change cur link - kw */
     }
     if (code == FOR_INPUT && retlac == LYK_DO_NOTHING) {
-	repaint_main_statusline();
+	repaint_main_statusline(FOR_INPUT);
     }
     return retlac;
 }
-#endif
+#endif /* NCURSES_MOUSE_VERSION */
 
 #if defined(USE_KEYMAPS) && defined(USE_SLANG)
 

@@ -1051,11 +1051,218 @@ PUBLIC int LYRemapEditBinding ARGS2(
 }
 
 /*
+ *  Macro to walk through lkc-indexed tables up to imax, in the (ASCII) order
+ *     97 - 122  ('a' - 'z'),
+ *     32 -  96  (' ' - '`', includes 'A' - 'Z'),
+ *    123 - 126  ('{' - '~'),
+ *      0 -  31  (^@  - ^_),
+ *    256 - imax,
+ *    127 - 255
+ */
+#define NEXT_I(i,imax) ((i==122) ? 32 : (i==96) ? 123 : (i==126) ? 0 :\
+			(i==31) ? 256 : (i==imax) ? 127 :\
+			(i==255) ? (-1) :i+1)
+#define FIRST_I 97
+
+PUBLIC int LYKeyForEditAction ARGS1(
+    int,		lec)
+{
+    int editaction, i;
+    for (i = FIRST_I; i >= 0; i = NEXT_I(i,KEYMAP_SIZE-2)) {
+        editaction = LYLineEditors[current_lineedit][i];
+	if (editaction == lec) {
+#ifdef NOT_ASCII
+	    if (i < 256) {
+		return FROMASCII(i);
+	    } else
+#endif
+		return i;
+	}
+    }
+    return (-1);
+}
+
+/*
+ *  Given a lynxactioncode, return a key (lynxkeycode) or sequence
+ *  of two keys that results in the given action while forms-editing.
+ *  The main keycode is returned as function value, possibly with modifier
+ *  bits set; in addition, if applicable, a key that sets the required
+ *  modifier flag is returned in *pmodkey if (pmodkey!=NULL).
+ *  Non-lineediting bindings that would require typing LYE_LKCMD (default ^V)
+ *  to activate are not checked here, the caller should do that separately if
+ *  required.  If no key is bound by current line-editor bindings to the
+ *  action, -1 is returned.
+ *  This is all a bit long - it is general enough to continue to work
+ *  should the three Mod<N>Binding[] become different tables. - kw
+ */
+PUBLIC int LYEditKeyForAction ARGS2(
+    int,		lac,
+    int *,		pmodkey)
+{
+    int editaction, i, c;
+    int mod1found = -1, mod2found = -1, mod3found = -1;
+    if (pmodkey)
+	*pmodkey = -1;
+    for (i = FIRST_I; i >= 0; i = NEXT_I(i,KEYMAP_SIZE-2)) {
+        editaction = LYLineEditors[current_lineedit][i];
+#ifdef NOT_ASCII
+	if (i < 256) {
+	    c = FROMASCII(i);
+	} else
+#endif
+	    c = i;
+	if (editaction == (lac | LYE_FORM_LAC))
+	    return c;
+	if (editaction == LYE_FORM_PASS) {
+#if defined(DIRED_SUPPORT) && defined(OK_OVERRIDE)
+	    if (lynx_edit_mode && !no_dired_support && lac &&
+		LKC_TO_LAC(key_override,c) == lac)
+		return c;
+#endif /* DIRED_SUPPORT && OK_OVERRIDE */
+	    if (LKC_TO_LAC(keymap,c) == lac)
+		return c;
+	}
+	if (editaction == LYE_TAB) {
+#if defined(DIRED_SUPPORT) && defined(OK_OVERRIDE)
+	    if (lynx_edit_mode && !no_dired_support && lac &&
+		LKC_TO_LAC(key_override,'\t') == lac)
+		return c;
+#endif /* DIRED_SUPPORT && OK_OVERRIDE */
+	    if (LKC_TO_LAC(keymap,'\t') == lac)
+		return c;
+	}
+	if (editaction == LYE_SETM1 && mod1found < 0)
+	    mod1found = i;
+	if (editaction == LYE_SETM2 && mod2found < 0)
+	    mod2found = i;
+	if ((editaction & LYE_DF) && mod3found < 0)
+	    mod3found = i;
+    }
+    if (mod3found >= 0) {
+	for (i = mod3found; i >= 0; i = NEXT_I(i,LAST_MOD3_LKC)) {
+	    editaction = LYLineEditors[current_lineedit][i];
+	    if (!(editaction & LYE_DF))
+		continue;
+	    editaction = Mod3Binding[i];
+#ifdef NOT_ASCII
+	    if (i < 256) {
+		c = FROMASCII(i);
+	    } else
+#endif
+		c = i;
+	    if (pmodkey)
+		*pmodkey = c;
+	    if (editaction == (lac | LYE_FORM_LAC))
+		return (c|LKC_MOD3);
+	    if (editaction == LYE_FORM_PASS) {
+#if defined(DIRED_SUPPORT) && defined(OK_OVERRIDE)
+		if (lynx_edit_mode && !no_dired_support && lac &&
+		    LKC_TO_LAC(key_override,c) == lac)
+		    return (c|LKC_MOD3);
+#endif /* DIRED_SUPPORT && OK_OVERRIDE */
+		if (LKC_TO_LAC(keymap,c) == lac)
+		    return (c|LKC_MOD3);
+	    }
+	    if (editaction == LYE_TAB) {
+#if defined(DIRED_SUPPORT) && defined(OK_OVERRIDE)
+		if (lynx_edit_mode && !no_dired_support && lac &&
+		    LKC_TO_LAC(key_override,'\t') == lac)
+		    return (c|LKC_MOD3);
+#endif /* DIRED_SUPPORT && OK_OVERRIDE */
+		if (LKC_TO_LAC(keymap,'\t') == lac)
+		    return (c|LKC_MOD3);
+	    }
+	}
+    }
+    if (mod1found >= 0) {
+	if (pmodkey) {
+#ifdef NOT_ASCII
+	    if (mod1found < 256) {
+		pmodkey = FROMASCII(mod1found);
+	    } else
+#endif
+		*pmodkey = mod1found;
+	}
+	for (i = FIRST_I; i >= 0; i = NEXT_I(i,LAST_MOD1_LKC)) {
+	    editaction = Mod1Binding[i];
+#ifdef NOT_ASCII
+	    if (i < 256) {
+		c = FROMASCII(i);
+	    } else
+#endif
+		c = i;
+	    if (editaction == (lac | LYE_FORM_LAC))
+		return (c|LKC_MOD1);
+	    if (editaction == LYE_FORM_PASS) {
+#if defined(DIRED_SUPPORT) && defined(OK_OVERRIDE)
+		if (lynx_edit_mode && !no_dired_support && lac &&
+		    LKC_TO_LAC(key_override,c) == lac)
+		    return (c|LKC_MOD1);
+#endif /* DIRED_SUPPORT && OK_OVERRIDE */
+		if (LKC_TO_LAC(keymap,c) == lac)
+		    return (c|LKC_MOD1);
+	    }
+	    if (editaction == LYE_TAB) {
+#if defined(DIRED_SUPPORT) && defined(OK_OVERRIDE)
+		if (lynx_edit_mode && !no_dired_support && lac &&
+		    LKC_TO_LAC(key_override,'\t') == lac)
+		    return (c|LKC_MOD1);
+#endif /* DIRED_SUPPORT && OK_OVERRIDE */
+		if (LKC_TO_LAC(keymap,'\t') == lac)
+		    return (c|LKC_MOD1);
+	    }
+	}
+    }
+    if (mod2found >= 0) {
+	if (pmodkey) {
+#ifdef NOT_ASCII
+	    if (mod1found < 256) {
+		pmodkey = FROMASCII(mod1found);
+	    } else
+#endif
+		*pmodkey = mod1found;
+	}
+	for (i = FIRST_I; i >= 0; i = NEXT_I(i,LAST_MOD2_LKC)) {
+	    editaction = Mod2Binding[i];
+#ifdef NOT_ASCII
+	    if (i < 256) {
+		c = FROMASCII(i);
+	    } else
+#endif
+		c = i;
+	    if (editaction == (lac | LYE_FORM_LAC))
+		return (c|LKC_MOD2);
+	    if (editaction == LYE_FORM_PASS) {
+#if defined(DIRED_SUPPORT) && defined(OK_OVERRIDE)
+		if (lynx_edit_mode && !no_dired_support && lac &&
+		    LKC_TO_LAC(key_override,c) == lac)
+		    return (c|LKC_MOD2);
+#endif /* DIRED_SUPPORT && OK_OVERRIDE */
+		if (LKC_TO_LAC(keymap,c) == lac)
+		    return (c|LKC_MOD2);
+	    }
+	    if (editaction == LYE_TAB) {
+#if defined(DIRED_SUPPORT) && defined(OK_OVERRIDE)
+		if (lynx_edit_mode && !no_dired_support && lac &&
+		    LKC_TO_LAC(key_override,'\t') == lac)
+		    return (c|LKC_MOD2);
+#endif /* DIRED_SUPPORT && OK_OVERRIDE */
+		if (LKC_TO_LAC(keymap,'\t') == lac)
+		    return (c|LKC_MOD2);
+	    }
+	}
+    }
+    if (pmodkey)
+	*pmodkey = -1;
+    return (-1);
+}
+
+/*
  * Dummy initializer to ensure this module is linked
  * if the external model is common block, and the
  * module is ever placed in a library. - FM
  */
-PUBLIC int LYEditmapDeclared NOPARAMS
+PUBLIC int LYEditmapDeclared NOARGS
 {
     int status = 1;
 

@@ -4,7 +4,6 @@
 #include <LYStyle.h>
 #include <LYUtils.h>
 #include <LYGlobalDefs.h>
-#include <LYMainLoop.h>
 #include <LYSignal.h>
 #include <LYClean.h>
 #include <LYReadCFG.h>
@@ -518,21 +517,6 @@ PRIVATE void LYsetWAttr ARGS1(WINDOW *, win)
 	if (Current_Attr & A_UNDERLINE)
 		code |= 4;
 	attr = lynx_color_cfg[code].attr;
-
-	/*
-	 * no_color_video is implemented in ncurses 4.2, but not in other
-	 * flavors of curses.  So we check before adding video attributes that
-	 * might conflict with colors.  For A_BOLD, check for both the bold and
-	 * standout mask items because standout often uses bold in conjunction
-	 * with another attribute.  -TD
-	 */
-	if ((Current_Attr & A_BOLD) && !(NoColorVideo & 33)) {
-		attr |= A_BOLD;
-	}
-
-	if ((Current_Attr & A_UNDERLINE) && !(NoColorVideo & 2)) {
-		attr |= A_UNDERLINE;
-	}
 
 	if (code+offs < COLOR_PAIRS) {
 		attr |= COLOR_PAIR(code+offs);
@@ -1810,8 +1794,10 @@ PUBLIC void lynx_force_repaint NOARGS
     else
 	a = A_NORMAL;
     bkgdset(a | ' ');
-#ifndef USE_COLOR_STYLE
+#if !defined(USE_COLOR_STYLE) && defined(NCURSES_VERSION)
+#if NCURSES_VERSION_MAJOR < 4 || (NCURSES_VERSION_MAJOR == 4 && NCURSES_VERSION_MINOR == 0)
     bkgd(a | ' ');
+#endif
 #endif
     attrset(a);
 #endif /* COLOR_CURSES */

@@ -266,6 +266,7 @@ PUBLIC BOOLEAN no_compileopts_info = FALSE;
 
 PUBLIC BOOLEAN no_statusline = FALSE;
 PUBLIC BOOLEAN no_filereferer = FALSE;
+PUBLIC char LYRefererWithQuery = 'D'; /* 'D' for drop */
 PUBLIC BOOLEAN local_host_only = FALSE;
 PUBLIC BOOLEAN override_no_download = FALSE;
 PUBLIC BOOLEAN show_dotfiles = FALSE; /* From rcfile if no_dotfiles is false */
@@ -408,7 +409,7 @@ PUBLIC char *LYCookieSStrictCheckDomains = NULL; /* check strictly  */
 PUBLIC char *LYCookieSLooseCheckDomains = NULL;  /* check loosely   */
 PUBLIC char *LYCookieSQueryCheckDomains = NULL;  /* check w/a query */
 #ifdef EXP_PERSISTENT_COOKIES
-BOOLEAN persistent_cookies = TRUE;
+BOOLEAN persistent_cookies = FALSE; 	/* disabled by default! */
 PUBLIC char *LYCookieFile = NULL;	   /* default cookie file */
 #endif /* EXP_PERSISTENT_COOKIES */
 PUBLIC char *XLoadImageCommand = NULL;	/* Default image viewer for X */
@@ -1370,7 +1371,7 @@ PUBLIC int main ARGS2(
    if ((lynx_cfg_file[0] == '~') && LYIsPathSep(lynx_cfg_file[1]))
      {
 #ifdef VMS
-	StrAllocCopy(temp, HTVMS_wwwName((char *)Home_Dir()));
+	StrAllocCopy(temp, HTVMS_wwwName(Home_Dir()));
 #else
 	StrAllocCopy(temp, Home_Dir());
 #endif /* VMS */
@@ -1455,7 +1456,7 @@ PUBLIC int main ARGS2(
 	StrAllocCopy(temp, lynx_lss_file);
 	LYTrimPathSep(temp);
 #ifdef VMS
-	StrAllocCat(temp, HTVMS_wwwName((char *)Home_Dir()));
+	StrAllocCat(temp, HTVMS_wwwName(Home_Dir()));
 #else
 	StrAllocCat(temp, Home_Dir());
 #endif /* VMS */
@@ -2979,7 +2980,7 @@ static Parse_Args_Type Arg_Table [] =
 {
    PARSE_SET(
       "accept_all_cookies", SET_ARG,		&LYAcceptAllCookies,
-      "\naccepts all cookies"
+      "\naccept cookies without prompting if Set-Cookie handling is on"
    ),
    PARSE_FUN(
       "anonymous",	FUNCTION_ARG,	anonymous_fun,

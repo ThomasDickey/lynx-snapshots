@@ -44,12 +44,14 @@ the '.lynxrc' file.
      UPPER  Upper case the line   -  M-u
      LOWER  Lower case the line   -  M-l
 
-<!-- PASS!  Textarea external edit  - C-e C-e - mentioned in note [3] below
-                                    statusline shows binding where relevant
+     LKCMD  Invoke cmd prompt     -  C-v [FORM]
+     SWMAP  Switch input keymap   -  C-^ (if compiled in)
+
+<A NAME="TASpecial">Special commands for use in textarea fields</A> [FORM]:
+
+     PASS!  Textarea external edit  - C-e C-e [4], C-x e
      PASS!  Insert file in textarea - C-x i
      PASS!  Grow textarea           - C-x g
--->     LKCMD  Invoke cmd prompt     -  C-v [FORM]
-     SWMAP  Switch input keymap   -  C-^ (if compiled in)
 
 </pre>
 Here is a little textarea for practice:<BR>
@@ -70,14 +72,14 @@ Advanced emacs-like commands:
     YANK    Insert text last killed (with KILLREG) -  C-y
 </pre>
 <h2>Notes</h2>
-<P><tt>
+<P><samp>
      <DFN>C-</DFN><strong>key</strong> means Control+<strong><kbd>key</kbd></strong>.  <DFN
-     ><tt>C-x </tt></DFN><strong>key</strong> means first Control+<kbd>x</kbd>, then
+     ><code>C-x </code></DFN><strong>key</strong> means first Control+<kbd>x</kbd>, then
      <strong><kbd>key</kbd></strong>.
                                                                        <DFN
                         >M-</DFN>key means Meta+<strong><kbd>key</kbd></strong>, where Meta
      is a modifier that can be entered in a variety of ways:
-</tt></P><UL>
+</samp></P><UL>
 <LI>First ESC, then the <strong><kbd>key</kbd></strong>.
     This doesn't work with all systems or on all connections, and if it
     does may not work for some keys (because the ESC character is also

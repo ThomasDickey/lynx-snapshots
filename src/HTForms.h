@@ -147,6 +147,7 @@ typedef struct _PerFormInfo
 #define LAST_ORDER   3
 
 /* in LYForms.c */
-extern void show_formlink_statusline PARAMS((CONST FormInfo * form));
+extern void show_formlink_statusline PARAMS((CONST FormInfo *	form,
+					     int		for_what));
 
 #endif /* HTFORMS_H */

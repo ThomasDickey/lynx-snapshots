@@ -109,8 +109,7 @@ struct _STable_info {
 **  Implemented:
 **  - ALIGN={left,right,center,justify} applied to individual table cells
 **    ("justify" is treated as "left")
-**  - Inheritance of horizontal alignment according to HTML 4.0 (with the
-**    exception of COLGROUP/COL)
+**  - Inheritance of horizontal alignment according to HTML 4.0
 **  - COLSPAN >1 (may work incorrectly for some tables?)
 **  - ROWSPAN >1 (reserving cells in following rows)
 **  - Line breaks at start of first cell or at end of last cell are treated
