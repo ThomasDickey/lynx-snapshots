@@ -675,7 +675,8 @@ use_tunnel:
       first_Accept = FALSE;
       len = 0;
 
-      HTSprintf(&command, "Accept-Encoding: %s, %s%c%c",
+      if (!LYPrependBaseToSource)
+	  HTSprintf(&command, "Accept-Encoding: %s, %s%c%c",
 		    "gzip", "compress", CR, LF);
 
       if (language && *language) {

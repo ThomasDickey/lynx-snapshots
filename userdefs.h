@@ -1351,11 +1351,11 @@
  * the version definition with the Project Version on checkout.  Just
  * ignore it. - kw */
 /* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
-#define LYNX_VERSION "2.8.5dev.1"
+#define LYNX_VERSION "2.8.5dev.2"
 #define LYNX_WWW_HOME "http://lynx.browser.org/"
 #define LYNX_WWW_DIST "http://lynx.isc.org/current/"
 /* $Format: "#define LYNX_DATE \"$ProjectDate$\""$ */
-#define LYNX_DATE "Tue, 24 Jul 2001 17:54:30 -0700"
+#define LYNX_DATE "Wed, 15 Aug 2001 15:09:52 -0700"
 #define LYNX_DATE_OFF 5		/* truncate the automatically-generated date */
 #define LYNX_DATE_LEN 11	/* truncate the automatically-generated date */
 
@@ -1409,6 +1409,9 @@
 #endif
 #else
 /* have to define something... */
+#ifdef SYSTEM_MAIL
+#undef SYSTEM_MAIL
+#endif /* SYSTEM_MAIL */
 #define SYSTEM_MAIL "sendmail"
 #define SYSTEM_MAIL_FLAGS "-t -oi"
 #endif
@@ -1432,6 +1435,7 @@
 **    WINDOWS/DOS
 **    ===========
 */
+#ifndef HAVE_CONFIG_H
 #define COMPRESS_PATH   "compress"
 #define UNCOMPRESS_PATH "uncompress"
 #define UUDECODE_PATH   "uudecode"
@@ -1452,6 +1456,7 @@
 #define TELNET_PATH     "telnet"
 #define TN3270_PATH     "tn3270"
 #define RLOGIN_PATH     "rlogin"
+#endif /* HAVE_CONFIG_H */
 
 #else	/* Unix */
 	/* Standard locations are defined via the configure script.  When

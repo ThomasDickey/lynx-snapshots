@@ -1,5 +1,8 @@
 #include <HTUtils.h>
 #include <HTAlert.h>
+#ifdef __DJGPP__
+#include <conio.h>
+#endif /* __DJGPP__ */
 #include <LYCurses.h>
 #include <LYStyle.h>
 #include <LYUtils.h>
@@ -1387,14 +1390,13 @@ PUBLIC BOOLEAN setup ARGS1(
      *	Query the terminal type.
      */
     if (dumbterm(getenv("TERM"))) {
-	char *s;
-
 	printf("\n\n  %s\n\n", gettext("Your Terminal type is unknown!"));
 	printf("  %s [vt100] ", gettext("Enter a terminal type:"));
 
-	if (LYSafeGets(&buffer, stdin) != 0)
-	    if ((s = strchr(buffer, '\n')) != NULL)
-		*s = '\0';
+	if (LYSafeGets(&buffer, stdin) != 0) {
+	    LYTrimLeading(buffer);
+	    LYTrimTrailing(buffer);
+	}
 
 	if (buffer == 0 || *buffer == 0)
 	    StrAllocCopy(buffer,"vt100");
@@ -2383,17 +2385,13 @@ PUBLIC void LYstowCursor ARGS3(
     int,	row,
     int,	col)
 {
-#ifdef USE_SLANG
-    if (LYShowCursor)
-	SLsmg_gotorc(win->top_y + row, win->left_x + col);
-    else
-	LYHideCursor();
-    SLsmg_refresh();
-#else
     if (LYShowCursor)
 	wmove(win, row, col);
     else
 	LYHideCursor();
+#ifdef USE_SLANG
+    SLsmg_refresh();
+#else
     wrefresh(win);
 #endif /* USE_SLANG  */
 }

@@ -149,14 +149,6 @@ extern void HText_appendImage PARAMS((
 
 /*
 
-  DUMP DIAGNOSTICS TO STDERR
-
- */
-
-extern void HText_dump PARAMS((HText * me));
-
-/*
-
   RETURN THE ANCHOR ASSOCIATED WITH THIS NODE
 
  */

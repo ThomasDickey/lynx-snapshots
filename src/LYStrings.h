@@ -310,6 +310,8 @@ extern CONST char * LYSkipCNonBlanks PARAMS((
 	CONST char *	buffer));
 extern void LYTrimLeading PARAMS((
 	char *		buffer));
+extern char * LYTrimNewline PARAMS((
+	char *		buffer));
 extern void LYTrimTrailing PARAMS((
 	char *		buffer));
 extern BOOLEAN LYTrimStartfile PARAMS((

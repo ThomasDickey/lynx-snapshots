@@ -1,6 +1,6 @@
 /* character level styles for Lynx
  * (c) 1996 Rob Partington -- donated to the Lyncei (if they want it :-)
- * @Id: LYStyle.c 1.47 Tue, 24 Jul 2001 17:54:30 -0700 dickey @
+ * @Id: LYStyle.c 1.48 Wed, 15 Aug 2001 15:09:52 -0700 dickey @
  */
 #include <HTUtils.h>
 #include <HTML.h>
@@ -417,7 +417,6 @@ PRIVATE HTList *lss_styles = NULL;
 
 PUBLIC void parse_userstyles NOARGS
 {
-    static BOOL first = TRUE;
     char *name;
     HTList *cur = lss_styles;
 

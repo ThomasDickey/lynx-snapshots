@@ -236,12 +236,8 @@ PRIVATE char *lookup_external ARGS2(
 	HTUserMsg(EXTERNALS_DISABLED);
     } else if (num_choices > 1) {
 	int old_y, old_x;
-#ifdef USE_SLANG
-	old_y = SLsmg_get_row();
-	old_x = SLsmg_get_column();
-#else
-	getyx(LYwin, old_y, old_x);
-#endif
+
+	LYGetYX(old_y, old_x);
 	cur_choice = LYhandlePopupList(
 			-1,
 			0,
@@ -252,11 +248,7 @@ PRIVATE char *lookup_external ARGS2(
 			FALSE,
 			TRUE,
 			FALSE);
-#ifdef USE_SLANG
-	SLsmg_gotorc(old_y, old_x);
-#else
 	wmove(LYwin, old_y, old_x);
-#endif
 	CTRACE((tfp, "selected choice %d of %d\n", cur_choice, num_choices));
 	if (cur_choice < 0) {
 	    HTInfoMsg(CANCELLED);

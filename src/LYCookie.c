@@ -2067,28 +2067,17 @@ PUBLIC void LYLoadCookies ARGS1 (
     number_of_file_cookies = 0;
     while (LYSafeGets(&buf, cookie_handle) != 0) {
 	cookie *moo;
-	unsigned i = 0;
 	int tok_loop;
 	char *tok_out, *tok_ptr;
 
-	if ((buf[0] == '\0' || buf[0] == '\n' || buf[0] == '#')) {
+	LYTrimNewline(buf);
+	if (buf[0] == '\0' || buf[0] == '#') {
 	    continue;
 	}
 
 	number_of_file_cookies ++;
 
-	/*
-	 * Strip out the newline that fgets() puts at the end of a
-	 * cookie.
-	 */
-
-	while(buf[i] != '\n' && buf[i] != 0) {
-	    i++;
-	}
-	if (buf[i] == '\n') {
-	    buf[i++] = '\t';	/* add sep after line if enough space - kw */
-	    buf[i] = '\0';
-	}
+	strcat(buf, "\t");	/* add sep after line if enough space - kw */
 
 	/*
 	 * Tokenise the cookie line into its component parts -

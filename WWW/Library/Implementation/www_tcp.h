@@ -553,15 +553,17 @@ extern int errno;
 #define DECL_ERRNO
 #include <errno.h>
 #include <sys/types.h>
-#include <socket.h>
 #include <io.h>
 #ifdef WATT32
+#include <sys/socket.h>
 #include <arpa/inet.h>
 #include <tcp.h>
 #ifdef word
 #undef word
 #endif /* word */
 #define select select_s
+#else
+#include <socket.h>
 #endif /* WATT32 */
 
 #undef NETWRITE
@@ -570,12 +572,21 @@ extern int errno;
 #define NETREAD read_s
 #undef NETCLOSE
 #define NETCLOSE close_s
+#ifdef UNIX
+#undef UNIX
+#endif /* UNIX */
 #ifndef WATT32
 #define getsockname getsockname_s
 #endif /* !WATT32 */
 #ifdef HAVE_GETTEXT
 #define gettext gettext__
 #endif
+#if !defined(NCURSES) && !defined(USE_SLANG)
+#define HAVE_CBREAK 1
+#endif /* !NCURSES && !USE_SLANG */
+#if defined(USE_SLANG) && !defined(NO_DJ_KEYHANDLER) && defined(HAVE_CONFIG_H)
+#define DJGPP_KEYHANDLER
+#endif /* USE_SLANG && !NO_DJ_KEYHANDLER  && HAVE_CONFIG_H */
 #endif /* DJGPP */
 
 #ifdef HAVE_UNISTD_H

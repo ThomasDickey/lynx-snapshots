@@ -33,6 +33,10 @@
 
 #include <LYStrings.h>
 #include <LYLeaks.h>
+#ifdef __DJGPP__
+#include <sys/exceptn.h>
+#include <go32.h>
+#endif /* __DJGPP__ */
 
 PRIVATE void do_system ARGS1(char *, command)
 {

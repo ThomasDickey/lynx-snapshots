@@ -269,13 +269,13 @@ PUBLIC HTChildAnchor * HTAnchor_findChildAndLink ARGS4(
 #ifdef DUPLICATE_ANCHOR_NAME_WORKAROUND
 	if (tag && *tag) {
 	    HTAnchor *testdest1;
-	    int nlinks;
+	    int child_links;
 	    testdest1 = child->mainLink.dest;
 	    if (testdest1) {
-		nlinks = 1 + HTList_count(child->links);
+		child_links = 1 + HTList_count(child->links);
 		CTRACE((tfp,
 		       "*** Duplicate ChildAnchor %p named `%s' with %d links",
-		       child, tag, nlinks));
+		       child, tag, child_links));
 		if (dest == testdest1 && ltype == child->mainLink.type) {
 		    CTRACE((tfp,", same dest %p and type, keeping it\n",
 			   testdest1));

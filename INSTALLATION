@@ -761,25 +761,35 @@ Visual C++:
 
 V. Compile instructions -- 386 DOS
 
-    Compiling for DOS with DJGPP is a multistep procedure. First install
-    the C compiler and its libraries (see readme.1st from DJGPP distribution).
+    Compiling for DOS with DJGPP has traditionally been a multistep     
+    procedure. Now, if you have a full installation of DJGPP you can    
+    also install using the configure script, just as in the UNIX        
+    section. This needs to be done under a BASH shell. Use a shell      
+    script to run configure as in the example at the end of this        
+    section. Otherwise you can follow the below instructions. The       
+    multistep procedure for DOS may not be supported in the future      
+    and use of the configure script is recommended. The information     
+    about required libraries and unpacking applies to both methods of   
+    compiling.                                                          
 
-    Originally, lynx makefiles come with the initial -O2 optimization level. 
-    If you experience compilation process too slow due to paging to the disk
-    (DPMI server provide virtual memory, when in lack of RAM), you may change
-    optimization to -O1 or turn the optimization off entirely.
+    First install the C compiler and its libraries (see readme.1st from
+    DJGPP distribution).
 
-    Alternatively, to get the last bit of run-time performance you may try
-    -O2 or -O3, in this case you may need to "stubedit" your "cc1.exe" file
-    to enlarge compiler stack size.  If using DJGPP 2.02 and GCC 2.8.1,
-    to compile with -O3 optimization, the stub needs to be edited to give
-    a larger stack. To do this go into  djgpp\lib\gcc-lib\djgpp\2.81
-    and either type the command:
+    Originally, lynx makefiles come with the initial -O2 optimization   
+    level. If you experience compilation process too slow due to paging 
+    to the disk (DPMI server provide virtual memory, when in lack of    
+    RAM), you may change optimization to -O1 or turn the optimization   
+    off entirely.                                                       
+
+    If using optimization level -O2 or -O3 with older versions of DJGPP   
+    and GCC, you may need to "stubedit" your "cc1.exe" file to enlarge    
+    compiler stack size. For instance, if using DJGPP 2.02 and GCC 2.8.1, 
+    to compile with -O3 optimization, the stub needs to be edited to give 
+    a larger stack. To do this go into djgpp\lib\gcc-lib\djgpp\2.81 and   
+    either type the command:                                              
    	 "stubedit cc1.exe bufsize=63k minstack=2M",
-    or edit interactively with: "stubedit cc1.exe".
-    The requirements for compiling with optimization using DJGPP 2.03
-    and GCC 2.95.2 have not yet been fully investigated. The above
-    should serve as a guide.
+    or edit interactively with: "stubedit cc1.exe". Current versions of
+    DJGPP and GCC generally work with the standard stack.
 
     Unpack the source code using a DOS program like UNZIP386.  If you are
     using PKUNZIP to unpack the .zip archive, you must use the -d command
@@ -827,12 +837,20 @@ V. Compile instructions -- 386 DOS
      	setcbrk(setting);
      # else
 
-    If you have trouble applying the patch, try using the "patch" program,
+    If you wish to compile with SSL enabled, you need to get and          
+    compile openssl. The DJGPP port has been successfully compiled with   
+    openssl-0.9.6b. After obtaining the source file, unpack it with       
+    DJTARX, then apply the patch for DOS before compiling. This will      
+    create a file "install.djgpp" which gives further details. The patch  
+    can be obtained from the openssl-dev archives at:                     
+    "http://www.mail-archive.com/openssl-dev@openssl.org/msg09104/096b.pch.gz"
+
+    If you have trouble applying the patches, try using the "patch" program,
     ("ftp://ftp.simtel.net/pub/simtelnet/gnu/djgpp/v2gnu/pat253b.zip").
     To read the Unix man style documentation, use, for example, "less"
     ("ftp://ftp.simtel.net/pub/simtelnet/gnu/djgpp/v2gnu/lss358b.zip").
-    Compile or place your compiled PDCurses library in lynx2-*/curses, and
-    compile or place your compiled WATT-32 library in lynx2-*/djgpp/watt32.  If
+    Compile or place your compiled PDCurses library in /djgpp/pdcur24, and
+    compile or place your compiled WATT-32 library in /djgpp/watt32.  If
     using the SLANG library, put libslang.a in your DJGPP/lib directory and put
     slang.h and slcurses.h in your DJGPP/include directory, or in the
     appropriate directories specified by LIBRARY_PATH and INCLUDE_PATH in your
@@ -894,7 +912,6 @@ V. Compile instructions -- 386 DOS
     file://localhost/c:/
     file://localhost/c:/dos
     file://localhost/c:/dos/command.com
-    file://localhost/dev/c/dos/command.com
 
     See "http://www.fdisk.com/doslynx/lynxport.htm" for more hints and
     some precompiled libraries. One problem you can encounter is editing
@@ -924,9 +941,38 @@ V. Compile instructions -- 386 DOS
     complete batch file with error checking and annotation can be found at:
     "http://www.flora.org/lynx-dev/html/month111997/msg00250.html".
 
+    If you use the configure method, remember that if you configure with
+    the option "--enable-nls", you also need to set LIBS="-liconv". A
+    sample shell script to run configure using PDCurses follows. If you
+    compile to use SLANG, note that the DJGPP keyhandler will be used
+    instead of the SLANG keyhandler unless you define "NO_DJ_KEYHANDLER".
+
+    #!/bin/sh
+    CFLAGS="-O2 -I/djgpp/pdcur24 -I/djgpp/watt32/inc" \
+    LIBS="-L/djgpp/pdcur24/lib -L/djgpp/watt32/lib -liconv" \
+    ./configure --prefix=d:/djgpp/lynx-rel/lynx-cnf \
+    --with-screen=curses \
+    --disable-full-paths \
+    --enable-addrlist-page \
+    --enable-change-exec \
+    --enable-cgi-links \
+    --enable-charset-choice \
+    --enable-default-colors \
+    --enable-exec-links \
+    --enable-externs \
+    --enable-file-upload \
+    --enable-nls \
+    --enable-prettysrc \
+    --enable-read-eta \
+    --enable-source-cache \
+    --enable-nested-tables \
+    --libdir=d:/djgpp/lynx-rel/lynx-cnf \
+    --with-zlib \
+    --with-ssl
+
 -- 1997/9/29 - D. Kaufman <dkaufman@rahul.net>
 -- 1997/10/3 - B. Schiavo <Wschiavo@concentric.net>
--- Last update - 2001/07/12
+-- Last update - 2001/08/01
 
 
 VI. General installation instructions

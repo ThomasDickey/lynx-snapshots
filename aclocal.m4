@@ -266,7 +266,7 @@ AC_DEFUN(AM_WITH_NLS,
 	   if test "$gt_cv_func_gettext_libc" != "yes"; then
 	     AC_CHECK_LIB(intl, bindtextdomain,
 	       [ gt_save_LIBS="$LIBS"
-		 LIBS="$gt_save_LIBS -lintl"
+		 LIBS="-lintl $gt_save_LIBS"
 	         AC_CACHE_CHECK([for gettext in libintl],
 		 gt_cv_func_gettext_libintl,
 		 [AC_TRY_LINK([], [return (int) gettext ("")],
@@ -276,7 +276,7 @@ AC_DEFUN(AM_WITH_NLS,
 	   fi
 
 	   if test "$gt_cv_func_gettext_libintl" = yes; then
-	     LIBS="$LIBS -lintl"
+	     LIBS="-lintl $LIBS"
 	   fi
 
 	   if test "$gt_cv_func_gettext_libc" = "yes" \
@@ -2668,7 +2668,7 @@ dnl which usually is only 16-bits.
 AC_DEFUN([CF_SRAND],[
 AC_CACHE_CHECK(for random-integer functions, cf_cv_srand_func,[
 cf_cv_srand_func=unknown
-for cf_func in srand48/lrand48 srandom/random srand/rand
+for cf_func in srandom/random srand48/lrand48 srand/rand
 do
 	cf_srand_func=`echo $cf_func | sed -e 's@/.*@@'`
 	cf_rand_func=`echo  $cf_func | sed -e 's@.*/@@'`

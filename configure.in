@@ -191,6 +191,11 @@ irix*)
 linux*)
 	TRY_CFLAGS="$TRY_CFLAGS -DLINUX"
 	;;
+msdosdjgpp*)
+	PROG_EXT=".exe"
+	LIBS="$LIBS -lwatt"
+	TRY_CFLAGS="$TRY_CFLAGS -DDOSPATH -DNOUSERS -DWATT32"
+	;;
 next*)
 	TRY_CFLAGS="$TRY_CFLAGS -DNEXT -DXMOSAIC_HACK"
 	;;

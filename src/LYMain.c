@@ -442,7 +442,13 @@ PUBLIC char *LYCookieSaveFile = NULL;	/* cookie save file */
 #endif /* EXP_PERSISTENT_COOKIES */
 
 #ifdef EXP_NESTED_TABLES
-PUBLIC BOOLEAN nested_tables = TRUE;
+PUBLIC BOOLEAN nested_tables =
+#if defined(USE_COLOR_STYLE)
+    TRUE
+#else
+    FALSE				/* see 2001-08-15  */
+#endif
+    ;
 #endif
 
 PUBLIC BOOLEAN LYShowTransferRate = TRUE;

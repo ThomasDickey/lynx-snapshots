@@ -194,6 +194,7 @@ PRIVATE void LYListFmtParse ARGS5(
 	struct stat st;
 	char *buf = NULL;
 	char tmp[LY_MAXPATH];
+	char tmp2[LY_MAXPATH];
 	char type;
 #ifndef _WINDOWS
 	char *name;
@@ -228,7 +229,9 @@ PRIVATE void LYListFmtParse ARGS5(
 #define PTBIT(a, s)  PBIT(a, 0, 0)
 #endif
 
-	if (lstat(file, &st) < 0)
+	strcpy(tmp2, file);
+	LYTrimPathSep (tmp2);
+	if (lstat(tmp2, &st) < 0)
 		fmtstr = "    %a";	/* can't stat so just do anchor */
 
 	StrAllocCopy(str, fmtstr);
@@ -1411,7 +1414,7 @@ PUBLIC BOOL HTDirTitles ARGS3(
 	}
 	cp = NULL;
     }
-    current = strrchr(path, '/');	/* last part or "" */
+    current = LYPathLeaf (path);	/* last part or "" */
 
     {
       char * printable = NULL;
@@ -1429,7 +1432,7 @@ PUBLIC BOOL HTDirTitles ARGS3(
 	  FREE(cp);
       }
 #else
-      StrAllocCopy(printable, (current ? current + 1 : ""));
+      StrAllocCopy(printable, current);
       HTUnEscape(printable);
 #endif /* DIRED_SUPPORT */
 
@@ -1475,11 +1478,13 @@ PUBLIC BOOL HTDirTitles ARGS3(
 #ifdef DOSPATH
     if (current != path)	/* leave "/c:" alone */
 #endif
-    if (current && current[1]) {   /* was a slash AND something else too */
+    if (current - path > 1
+      && LYIsPathSep(current[-1])
+      && current[0] != '\0') {	/* was a slash AND something else too */
 	char * parent = NULL;
 	char * relative = NULL;
 
-	*current++ = '\0';
+	current[-1] = '\0';
 	parent = strrchr(path, '/');  /* penultimate slash */
 
 	if ((parent &&
@@ -1661,6 +1666,7 @@ PRIVATE int print_local_dir ARGS5(
     struct stat file_info;
     int status;
     int i;
+    int code;
 
     CTRACE((tfp, "print_local_dir() started\n"));
 
@@ -1759,14 +1765,13 @@ PRIVATE int print_local_dir ARGS5(
 		continue;
 
 	    StrAllocCopy(tmpfilename, localname);
-	    if (strcmp(localname, "/"))
-		/*
-		**  If filename is not root directory.
-		*/
-		StrAllocCat(tmpfilename, "/");
+	    /*
+	    **  If filename is not root directory, add trailing separator.
+	    */
+	    LYAddPathSep(&tmpfilename);
 
 	    StrAllocCat(tmpfilename, dirbuf->d_name);
-	    stat(tmpfilename, &file_info);
+	    code = stat(tmpfilename, &file_info);
 #ifndef DIRED_SUPPORT
 	    if (S_ISDIR(file_info.st_mode))
 		HTSprintf0(&dirname, "D%s",dirbuf->d_name);
@@ -1774,16 +1779,16 @@ PRIVATE int print_local_dir ARGS5(
 		HTSprintf0(&dirname, "F%s",dirbuf->d_name);
 		/* D & F to have first directories, then files */
 #else
-	    if (S_ISDIR(file_info.st_mode))
-	    {
-		if (dir_list_style == MIXED_STYLE)
-		    HTSprintf0(&dirname, " %s/", dirbuf->d_name);
-		else if (!strcmp(dirbuf->d_name, ".."))
+	    if (S_ISDIR(file_info.st_mode)) {
+		if (dir_list_style == MIXED_STYLE) {
+		    HTSprintf0(&dirname, " %s", dirbuf->d_name);
+		    LYAddPathSep(&dirname);
+		} else if (!strcmp(dirbuf->d_name, "..")) {
 		    HTSprintf0(&dirname, "A%s", dirbuf->d_name);
-		else
+		} else {
 		    HTSprintf0(&dirname, "D%s", dirbuf->d_name);
-	    }
-	    else if (dir_list_style == MIXED_STYLE)
+		}
+	    } else if (dir_list_style == MIXED_STYLE)
 		HTSprintf0(&dirname, " %s", dirbuf->d_name);
 	    else if (dir_list_style == FILES_FIRST)
 		HTSprintf0(&dirname, "C%s", dirbuf->d_name);
@@ -1848,11 +1853,10 @@ PRIVATE int print_local_dir ARGS5(
 		}
 #endif
 		StrAllocCopy(tmpfilename,localname);
-		if (strcmp(localname, "/"))
-		    /*
-		    **	If filename is not root directory.
-		    */
-		    LYAddHtmlSep(&tmpfilename);
+		/*
+		**	If filename is not root directory.
+		*/
+		LYAddPathSep(&tmpfilename);
 
 		entry = (char*)HTBTree_object(next_element)+1;
 		/*

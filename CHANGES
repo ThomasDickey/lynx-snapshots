@@ -1,6 +1,62 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2001-08-15 (2.8.5dev.2)
+* several small fixes to HTFile.c to make directory listings work properly on
+  win32, e.g., stat'ing a directory with a trailing slash fails (reported by
+  Hataguchi Takeshi) -TD
+* adjust definitions in LYCurses.h to get rid of slang-ifdef's for getyx() and
+  wmove() -TD
+* change order of random and rand48 -DK
+* patch to get the DJGPP port to use the configure script -DK
+  It seems to work well in the variations I have tried, including both PDCurses
+  and SLang.  revised INSTALLATION for DOS, giving a URL for my DOS patch to
+  openssl.  I dropped the reference to goto URL of the form
+  file:///dev/c/path/filename, since this only works in certain parts of lynx
+  (such as lynx.cfg).  I'll try to get this working in the future.  In fixing
+  makefile.in, I patched the sed script for converting the path to docdir.  As
+  far as I can tell, however, from my examination of lynx.cfg, this isn't used
+  for any platform.  Does this part of the sed script do anything?
+  Things still needing fixing for DOS:
+  + support for both forms of file addressing, [a-zA-Z]:[/\\] and
+    /dev/[a-zA-z]/.
+  + support for gzipped help files.  This works with long file names in a DOS
+    box under Windows, but not in plain DOS, which doesn't allow double
+    extensions.
+  + better handling of local files in root directory.  "file:///c:/" takes a
+    long time to work, but "file:///c:/." works fine.  I haven't really looked
+    to see why.
+  + no ability to break out of hung nameserver lookups or http requests without
+    closing lynx with SIGINT.  This is the biggest complaint I get by email.
+* modify ifdef for myGetChar() in LYStrings.c to build with PDCurses 2.3 e.g.,
+  to use a version which is modified for Japanese input (patch by Hataguchi
+  Takeshi <patakuti@t3.rim.or.jp>).
+* review LYSafeGets() calls, stripping newlines from a few places where they
+  were overlooked, and simplifying some places where LYSafeGets() would
+  normally return a buffer ended with a newline (prompted by a report by Brian
+  S Queen <bqueen@nas.nasa.gov> for LYTraversal.c) -TD
+* correct reallocation-size in ProcessMailcapEntry()
+* modify HTLoadHTTP() to omit "Accept-Encoding: gzip" if command-line "-base"
+  option is given.  This makes
+	lynx -base -source excite.com
+  work as expected.  Otherwise, excite.com will transmit the document gzip'd,
+  and the ensuing logic in HTSaveToFile() would see the mime-type as gzip
+  rather than text/html, and not prepend the base URL (report by Kai Shih
+  <kai@mit.edu>) -TD
+* work around defect in move_anchors_in_region() and related logic by changing
+  default for nested-tables to FALSE when Lynx is not configured for
+  color-style.  The problem is that when an anchor is shifted right by
+  nested-table logic, if it has a <BR> near the beginning of a table cell and
+  it happens to be split across a line, its size will not be adjusted properly
+  (report by Hataguchi Takeshi) -TD
+* correct logic used for trimming TEXTAREA introduced in 2.8.4pre.3, which did
+  not trim carriage-return characters if TRIM_INPUT_FIELDS was false.
+  (report by Hataguchi Takeshi <patakuti@t3.rim.or.jp>) -TD
+* correct a bug in search logic which happens with pages shorter than the
+  screen, due to improper starting-line value sent to search function.  Fixed
+  by adding checks in www_search_backward() and www_search_foreward(), (report
+  by -Frederic L W Meunier) -TD
+
 2001-07-24 (2.8.5dev.1)
 * modify GetChar() definition for PDCurses to ignore key-modifiers which are
   passed back from getch() as if they were key codes.  Those interfere with
