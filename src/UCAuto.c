@@ -649,6 +649,9 @@ PRIVATE int _Switch_Display_Charset ARGS2 (int, ord, enum switch_display_charset
 	font_loaded_for = ord1;
 	old_h = font->cyCell;
 	old_w = font->cxCell;
+    } else {
+	ord = ord1 = auto_display_charset;
+	goto retry;
     }
   report:
     CTRACE((tfp, "Display font set to '%s'.\n", name));

@@ -479,7 +479,7 @@ II. Compile instructions -- UNIX
 
   --with-screen=XXX
 	Use this option to select the screen type.  The option value,
-	XXX must be one of curses (the default), ncurses or slang.
+	XXX must be one of curses (the default), ncurses, pdcurses or slang.
 	Specifying a screen type causes the configure script to look in
 	standard locations for the associated header and library files,
 	unless you have preset the $CFLAGS and $LIBS variables.
@@ -491,11 +491,21 @@ II. Compile instructions -- UNIX
 	does not support color, while on others, ncurses is installed as
 	the curses library.
 
-  --with-socks				(define SOCKS)
+  --with-socks[=XXX]			(define SOCKS)
 	Use this option to configure with the socks library.
 
-  --with-socks5				(define USE_SOCKS5, SOCKS)
+	The optional value XXX specifies the directory in which the library
+	can be found, and may be either the path of the "lib" directory,
+	or one level above.  In either case, the corresponding header files
+	are assumed to be in the parallel "include" directory.
+
+  --with-socks5[=XXX]			(define USE_SOCKS5, SOCKS)
 	Use this option to configure with the socks5 library.
+
+	The optional value XXX specifies the directory in which the library
+	can be found, and may be either the path of the "lib" directory,
+	or one level above.  In either case, the corresponding header files
+	are assumed to be in the parallel "include" directory.
 
 	If you make a SOCKSified lynx, you may have trouble accessing FTP
 	servers.  Also, instead of SOCKSifying lynx for use behind a firewall,
@@ -506,9 +516,14 @@ II. Compile instructions -- UNIX
 	SITE_LYDEFS and SITE_DEFS.  If you do SOCKSify lynx, you can turn off
 	SOCKS proxy usage via a -nosocks command line switch.
 
-  --with-ssl				(define USE_SSL)
-	Use this option to configure with the OpenSSL library.
+  --with-ssl[=XXX]			(define USE_SSL)
+	Use this option to configure with the OpenSSL library, or SSLeay.
 	See docs/README.ssl for additional information.
+
+	The optional value XXX specifies the directory in which the library
+	can be found, and may be either the path of the "lib" directory,
+	or one level above.  In either case, the corresponding header files
+	are assumed to be in the parallel "include" directory.
 
   --with-zlib				(define USE_ZLIB)
 	Use zlib for decompression of some gzip files.
@@ -715,16 +730,14 @@ Borland C:
 -- 1997/10/12 - W. Buttles <lynx-port@fdisk.com>
 
 Cygwin:
-    It is possible to compile under the cygwin system, which will allow you
-    to use the configure script described above for Unix.  Type, for example,
+    It is possible to compile under the cygwin system, which will allow you to
+    use the configure script described above for Unix.  Type, for example,
     "./configure --with-screen=ncurses --with-libz" in a Dos window running the
     cygwin bash$ shell.  You also have the choice of using either pdcurses or
     slang.  You will need a launch program such as sh.exe to call helper
-    applications. Paths may need to be in cygwin style, rather than Windows
-    style (e.g., TMPDIR=/d/cygwin/tmp, rather than TMPDIR=d:\cygwin\tmp).  You
-    will not be able to use the cygwin1.dll that comes with the standard b20
-    distribution of cygwin. Substitute the cygwin1.dll from:
-    "ftp://sourceware.cygnus.com/pub/cygwin/snapshot-19990115/cygwin1-19990115.dll.gz"
+    applications.  Paths may need to be in cygwin style, rather than Windows
+    style (e.g., TMPDIR=/cygdrive/d/cygwin/tmp, rather than
+    TMPDIR=d:\cygwin\tmp).
 
 Visual C++:
     You must have compiled zlib and PDCurses with the -MT (threaded code)
@@ -751,10 +764,10 @@ V. Compile instructions -- 386 DOS
     Compiling for DOS with DJGPP is a multistep procedure. First install
     the C compiler and its libraries (see readme.1st from DJGPP distribution).
 
-    Originally, lynx makefiles come with the initial -O1 optimization level.
+    Originally, lynx makefiles come with the initial -O2 optimization level. 
     If you experience compilation process too slow due to paging to the disk
-    (DPMI server provide virtual memory, when in lack of RAM),
-    you may turn the optimization off entirely.
+    (DPMI server provide virtual memory, when in lack of RAM), you may change
+    optimization to -O1 or turn the optimization off entirely.
 
     Alternatively, to get the last bit of run-time performance you may try
     -O2 or -O3, in this case you may need to "stubedit" your "cc1.exe" file
@@ -779,19 +792,19 @@ V. Compile instructions -- 386 DOS
     long filenames that will not be recognized by DJGPP tools.
 
     If you wish to compile with "USE_ZLIB" (recommended), you must have the
-    zlib library.  Get the source from "http://www.cdrom.com/pub/infozip/zlib/"
+    zlib library.  Get the source from
+	    http://www.info-zip.org/pub/infozip/zlib/
     and compile it.  Put libz.a in the lib subdirectory of DJGPP, and put
     zlib.h and zconf.h in the include subdirectory.
 
-    In addition to the files in the Lynx distribution, you will need a
-    curses package and a TCP package. You can use PDCurses (available
-    at "http://www.lightlink.com/hessling/") and the DJGPP port of
-    WATTCP. The updated version of WATTCP is known as WATT-32, and
-    is available at "http://www.bgnett.no/~giva/". You can also
-    use slang ("ftp://space.mit.edu/pub/davis/slang") as your curses
-    library. You need to compile these before you go any further. If
-    you wish to use PDCurses 2.4, you need to first apply the following
-    patch:
+    In addition to the files in the Lynx distribution, you will need a curses
+    package and a TCP package.  You can use PDCurses (available at
+    "http://www.lightlink.com/hessling/") and the DJGPP port of WATTCP.  The
+    updated version of WATTCP is known as WATT-32, and is available at
+    "http://www.bgnett.no/~giva/".  You can also use slang (available at
+    "ftp://space.mit.edu/pub/davis/slang") as your screen library.  You must
+    compile these before you go any further.  If you wish to use PDCurses 2.4,
+    you need to first apply the following patch:
 
     --- dos/pdckbd.c.ori	Sun Dec 26 23:15:04 1999
     +++ dos/pdckbd.c	Fri Mar  3 00:20:14 2000
@@ -815,9 +828,9 @@ V. Compile instructions -- 386 DOS
      # else
 
     If you have trouble applying the patch, try using the "patch" program,
-    ("http://www.simtel.net/pub/simtelnet/gnu/djgpp/v2gnu/pat25b.zip").
+    ("ftp://ftp.simtel.net/pub/simtelnet/gnu/djgpp/v2gnu/pat253b.zip").
     To read the Unix man style documentation, use, for example, "less"
-    ("http://www.simtel.net/pub/simtelnet/gnu/djgpp/v2gnu/lss332b.zip").
+    ("ftp://ftp.simtel.net/pub/simtelnet/gnu/djgpp/v2gnu/lss358b.zip").
     Compile or place your compiled PDCurses library in lynx2-*/curses, and
     compile or place your compiled WATT-32 library in lynx2-*/djgpp/watt32.  If
     using the SLANG library, put libslang.a in your DJGPP/lib directory and put
@@ -841,13 +854,13 @@ V. Compile instructions -- 386 DOS
     incompatibilities from mixing different programs.
 
     If you wish to compile with support for internationalization of messages,
-    you first need to install the DOS port of the GNU gettext package,
-    available from any DJGPP mirror site.  You may wish to recompile with DJGPP
-    2.03.  Then uncomment the lines for INTLFLAGS in src/makefile.dsl and in
-    WWW/Library/djgpp/makefile.sla, and remove the "#" from the LIBS line in
-    src/makefile.dsl.  Make similar changes if using one of the other DOS
-    makefiles.  See the gettext documentation for information on creating and
-    using message files for different languages.
+    you first need to install the DOS ports of the GNU gettext and libiconv
+    packages, available from any DJGPP mirror site.  Then uncomment the lines
+    for INTLFLAGS in src/makefile.dsl and in WWW/Library/djgpp/makefile.sla,
+    and remove the "#" from the LIBS line in src/makefile.dsl.  Make similar
+    changes if using one of the other DOS makefiles.  See the gettext
+    documentation for information on creating and using message files for
+    different languages.
 
     If all goes well, you will have a lynx.exe file.  If you have trouble,
     check to be sure djgpp.env is the way it came in the original package.
@@ -859,7 +872,7 @@ V. Compile instructions -- 386 DOS
     "http://www.flora.org/lynx-dev/html/month011998/msg00057.html".
     Start the dummy packet driver with "nullpkt 0x60", and take it out of
     memory with "nullpkt -u".  You can also use slip8250.com.  See the CRYNWR
-    package "http://www.simtel.net/pub/simtelnet/msdos/pktdrvr/pktd11.zip".
+    package "ftp://ftp.simtel.net/pub/simtelnet/msdos/pktdrvr/pktd11.zip".
     Usage is "slip8250 0x60", but you may have to invoke it as, for example,
     "slip8250  0x60 6 3 0x2F8" so that it uses COM2 and IRQ 3, in order to
     avoid an IRQ conflict with a mouse or some other device.  Another packet
@@ -870,7 +883,7 @@ V. Compile instructions -- 386 DOS
     (Find at:
     "http://mvmpc9.ciw.uni-karlsruhe.de/c:/user/toni/dosppp/dosppp06.zip",
     "http://personal.redestb.es/tonilop/dosppp/dosppp06.zip", or
-    "ftp://ftp.agate.net/users/01935/internet/dosppp06.zip";
+    "ftp://ftp.oldskool.org/pub/tvdog/internet/dosppp06.zip";
     "http://www.klos.com/get.pppshare.html")
 
     File access looks like this:
@@ -881,6 +894,7 @@ V. Compile instructions -- 386 DOS
     file://localhost/c:/
     file://localhost/c:/dos
     file://localhost/c:/dos/command.com
+    file://localhost/dev/c/dos/command.com
 
     See "http://www.fdisk.com/doslynx/lynxport.htm" for more hints and
     some precompiled libraries. One problem you can encounter is editing
@@ -912,7 +926,7 @@ V. Compile instructions -- 386 DOS
 
 -- 1997/9/29 - D. Kaufman <dkaufman@rahul.net>
 -- 1997/10/3 - B. Schiavo <Wschiavo@concentric.net>
--- Last update - 2000/03/03
+-- Last update - 2001/07/12
 
 
 VI. General installation instructions

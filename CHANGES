@@ -1,6 +1,16 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2001-07-14 (2.8.4pre.5)
+* document CHARSETS_DIRECTORY and CHARSET_SWITCH_RULES in lynx.cfg -IZ
+* add a fallback in _Switch_Display_Charset() if no CHARSETS_DIRECTORY was
+  specified -IZ
+* ensure that config variable names in LYReadCFG.c are in alphabetic order,
+  though only the first character matters (report by IZ) -TD
+* updated notes on DOS in INSTALLATION -DK
+* modify ifdef in HTTP.c to build with configure --with-ssl --disable-news
+  (report by Frederic L W Meunier) -TD
+
 2001-07-10 (2.8.4pre.4)
 * correct red/blue color swapping for PDCurses when built on Unix, which uses
   X11 -TD

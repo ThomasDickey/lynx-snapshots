@@ -1363,7 +1363,7 @@ use_tunnel:
 		 *  > 206 is unknown.
 		 *  All should return something to display.
 		 */
-#ifdef USE_SSL
+#if defined(USE_SSL) && !defined(DISABLE_NEWS)
 		if (do_connect) {
 		    CTRACE((tfp, "HTTP: Proxy tunnel to '%s' established.\n",
 				connect_host));
