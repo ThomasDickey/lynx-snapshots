@@ -1339,15 +1339,13 @@
  * the version definition with the Project Version on checkout.  Just
  * ignore it. - kw */
 /* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
-#define LYNX_VERSION "2.8.3pre.8"
+#define LYNX_VERSION "2.8.3rel.1"
 #define LYNX_WWW_HOME "http://lynx.browser.org/"
 #define LYNX_WWW_DIST "http://lynx.isc.org/current/"
-#define LYNX_RELEASE FALSE
 /* $Format: "#define LYNX_DATE \"$ProjectDate$\""$ */
-#define LYNX_DATE "Sat, 22 Apr 2000 18:16:38 -0700"
+#define LYNX_DATE "Sun, 23 Apr 2000 18:44:03 -0700"
 #define LYNX_DATE_OFF 5		/* truncate the automatically-generated date */
 #define LYNX_DATE_LEN 11	/* truncate the automatically-generated date */
-#define LYNX_RELEASE_DATE "1999"
 
 #define LINESIZE 1024		/* max length of line to read from file */
 #define MAXHIST  1024		/* max links we remember in history */

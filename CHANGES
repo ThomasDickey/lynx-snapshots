@@ -1,6 +1,13 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2000-04-23 (2.8.3rel.1)
+* replace LYNX_RELEASE variable in userdefs.h by functions LYVersionIsRelease()
+  and LYVersionStatus() in LYShowInfo.c -TD
+* remove symbol LYNX_RELEASE_DATE, use same format for both development and
+  release dates -LP
+* remove po/ChangeLog (noted by LP)
+
 2000-04-22 (2.8.3pre.8)
 * update option_help.html to describe the Visited Pages settings -TD
 * correct order of body_attr[] and button_attr[] in HTMLDTD.c -TD
