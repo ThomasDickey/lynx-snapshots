@@ -1484,7 +1484,7 @@ AC_CACHE_CHECK(if we can include termio.h with curses,cf_cv_termio_and_curses,[
     rm -f lynx_cfg.h
 ])
 
-test $cf_cv_termio_and_curses = no && AC_DEFINE(TERMIO_AND_CURSES)
+test $cf_cv_termio_and_curses = yes && AC_DEFINE(TERMIO_AND_CURSES)
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl Check if including both termio.h and termios.h die like on DG.UX

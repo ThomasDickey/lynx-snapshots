@@ -645,6 +645,8 @@ PUBLIC int HTParseInet ARGS2(
 #endif /* !NSL_FORK */
 #ifndef _WINDOWS_NSL
 	FREE(host);
+#else
+	memcpy((void *)&soc_in->sin_addr, phost->h_addr, phost->h_length);
 #endif /* _WINDOWS_NSL */
 
     }

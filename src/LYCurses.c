@@ -873,12 +873,20 @@ PUBLIC void lynx_enable_mouse ARGS1(int,state)
 #else
 
 #ifdef NCURSES_MOUSE_VERSION
+#if defined(__BORLANDC__) && defined(__PDCURSES__)
+    if (state)
+    {
+	SetConsoleMode(hConIn, ENABLE_MOUSE_INPUT | ENABLE_WINDOW_INPUT);
+	FlushConsoleInputBuffer(hConIn);
+    }
+#else
     /* Inform ncurses that we're interested in knowing when mouse
      * button 1 is clicked */
     if (state)
 	mousemask(BUTTON1_CLICKED | BUTTON3_CLICKED, NULL);
     else
 	mousemask(0, NULL);
+#endif /* __BORLANDC__ and __PDCURSES__ */
 #endif /* NCURSES_MOUSE_VERSION */
 
 #if defined(DJGPP) && !defined(USE_SLANG)
