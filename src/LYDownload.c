@@ -81,6 +81,7 @@ PUBLIC void LYDownload ARGS1(
 	 *  Go past "SugFile=".
 	 */
 	sug_file += 8;
+	HTUnEscape(sug_file);
     }
 
     if ((file = (char *)strstr(Line, "File=")) == NULL)

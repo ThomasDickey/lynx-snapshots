@@ -231,6 +231,7 @@ extern BOOLEAN local_host_only;
 extern BOOLEAN override_no_download;
 extern BOOLEAN show_dotfiles;	/* From rcfile if no_dotfiles is false */
 extern char *indexfile;
+extern int outgoing_mail_charset; /* translate outgoing mail to this charset */
 extern char *personal_mail_address;
 extern char *homepage;	      /* startfile or command line argument */
 extern char *editor;          /* if non empty it enables edit mode with
@@ -250,6 +251,7 @@ extern BOOLEAN historical_comments;
 extern BOOLEAN minimal_comments;
 extern BOOLEAN soft_dquotes;
 extern BOOLEAN LYCancelDownload;
+extern BOOLEAN LYRestricted;
 extern BOOLEAN LYValidate;
 extern BOOLEAN LYPermitURL;
 extern BOOLEAN enable_scrollback; /* Clear screen before displaying new page */

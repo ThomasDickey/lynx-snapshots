@@ -673,13 +673,106 @@ PRIVATE void HTMLSetDisplayCharsetMatchLocale ARGS1(int,i)
     return;
 }
 
+
+/*
+ *  lynx 2.8/2.7.2(and more early) compatibility code:
+ *  "human-readable" charset names changes with time
+ *  so we map that history names to MIME here
+ *  to get old lynx.cfg and (especially) .lynxrc always recognized.
+ *  Please update this table when you change "fullname" of any present charset.
+ */
+typedef struct _names_pairs {
+    CONST char * fullname;
+    CONST char * MIMEname;
+} names_pairs;
+
+PRIVATE CONST names_pairs OLD_charset_names[] = {
+    {"ISO Latin 1",         "iso-8859-1"},
+    {"ISO Latin 2",         "iso-8859-2"},
+    {"WinLatin1 (cp1252)",  "windows-1252"},
+    {"DEC Multinational",   "dec-mcs"},
+    {"Macintosh (8 bit)",   "macintosh"},
+    {"NeXT character set",  "next"},
+    {"KOI8-R Cyrillic",     "koi8-r"},
+    {"Chinese",             "euc-cn"},
+    {"Japanese (EUC)",      "euc-jp"},
+    {"Japanese (SJIS)",     "shift_jis"},
+    {"Korean",              "euc-kr"},
+    {"Taipei (Big5)",       "big5"},
+    {"Vietnamese (VISCII)", "viscii"},
+    {"7 bit approximations","us-ascii"},
+    {"Transparent",         "x-transparent"},
+    {"DosLatinUS (cp437)",  "cp437"},
+    {"IBM PC character set","cp437"},
+    {"DosLatin1 (cp850)",   "cp850"},
+    {"IBM PC codepage 850", "cp850"},
+    {"DosLatin2 (cp852)",   "cp852"},
+    {"PC Latin2 CP 852",    "cp852"},
+    {"DosCyrillic (cp866)", "cp866"},
+    {"DosArabic (cp864)",   "cp864"},
+    {"DosGreek (cp737)",    "cp737"},
+    {"DosBaltRim (cp775)",  "cp775"},
+    {"DosGreek2 (cp869)",   "cp869"},
+    {"DosHebrew (cp862)",   "cp862"},
+    {"WinLatin2 (cp1250)",  "windows-1250"},
+    {"WinCyrillic (cp1251)","windows-1251"},
+    {"WinGreek (cp1253)",   "windows-1253"},
+    {"WinHebrew (cp1255)",  "windows-1255"},
+    {"WinArabic (cp1256)",  "windows-1256"},
+    {"WinBaltRim (cp1257)", "windows-1257"},
+    {"ISO Latin 3",         "iso-8859-3"},
+    {"ISO Latin 4",         "iso-8859-4"},
+    {"ISO 8859-5 Cyrillic", "iso-8859-5"},
+    {"ISO 8859-6 Arabic",   "iso-8859-6"},
+    {"ISO 8859-7 Greek",    "iso-8859-7"},
+    {"ISO 8859-8 Hebrew",   "iso-8859-8"},
+    {"ISO 8859-9 (Latin 5)","iso-8859-9"},
+    {"ISO 8859-10",         "iso-8859-10"},
+    {"UNICODE UTF 8",       "utf-8"},
+    {"RFC 1345 w/o Intro",  "mnemonic+ascii+0"},
+    {"RFC 1345 Mnemonic",   "mnemonic"},
+    {NULL,   NULL},
+};
+
+/*
+ *  lynx 2.8/2.7.2 compatibility code:
+ *  read "character_set" parameter from lynx.cfg and .lynxrc
+ *  in both MIME name and "human-readable" name (old and new style).
+ *  Returns -1 if not recognized.
+ */
+PUBLIC int UCGetLYhndl_byAnyName ARGS1 (CONST char *, value)
+{
+    int i;
+
+    if (value == NULL) return -1;
+
+    /* search by name */
+    for (i = 0; (i < MAXCHARSETS && LYchar_set_names[i]); i++) {
+	if (!strncmp(LYchar_set_names[i], value,
+		     strlen(LYchar_set_names[i]))) {
+	    return i;  /* OK */
+	}
+    }
+
+    /* search by old name from 2.8/2.7.2 version */
+    for (i = 0; (OLD_charset_names[i].fullname); i++) {
+	if (!strncmp(OLD_charset_names[i].fullname, value,
+		     strlen(OLD_charset_names[i].fullname))) {
+	    return UCGetLYhndl_byMIME(OLD_charset_names[i].MIMEname); /* OK */
+	}
+    }
+
+    return UCGetLYhndl_byMIME(value); /* by MIME */
+}
+
+
 /*
  *  Entity names -- Ordered by ISO Latin 1 value.
  *  ---------------------------------------------
  *   For conversions of DECIMAL escaped entities.
  *   Must be in order of ascending value.
  */
-PUBLIC CONST char * LYEntityNames[] = {
+PRIVATE CONST char * LYEntityNames[] = {
 /*	 NAME		   DECIMAL VALUE */
 	"nbsp", 	/* 160, non breaking space */
 	"iexcl",	/* 161, inverted exclamation mark */
@@ -801,7 +894,7 @@ PUBLIC CONST char * HTMLGetEntityName ARGS1(
  *  in the ISO_Latin1 and UC_entity_info unicode_entities arrays.
  *  It returns 0 if not found. - FM
  *
- *  unicode_entities[] now handles all the names from old style entities[] too.
+ *  unicode_entities[] handles all the names from old style entities[] too.
  *  Lynx now calls unicode_entities[] only through this function:
  *  HTMLGetEntityUCValue().  Note, we need not check for special characters
  *  here in function or even before it, we should check them *after*

@@ -256,7 +256,11 @@ II. Compile instructions -- UNIX
         only.  *Use with discretion.*  See docs/README.chartrans.)
 
   --enable-forms-options                (define EXP_FORMS_OPTIONS)
-	Add forms-based options screen.
+	Use forms-based options screen only.
+	Please note that a few users with broken curses may have problems
+	with popup forms fields.  (The default behaviour is to compile
+	both styles options menu code with FORMS_OPTIONS switch in lynx.cfg
+	as well as -forms_options command line toggle).
 
   --enable-internal-links		(define DONT_TRACK_INTERNAL_LINKS)
 	Disabled by default, this option allows tracking of internal links,

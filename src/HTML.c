@@ -177,6 +177,18 @@ PRIVATE void change_paragraph_style ARGS2(HTStructured *, me, HTStyle *,style)
 **			A C T I O N	R O U T I N E S
 */
 
+/* FIXME:  this should be amended to do the substitution only when not in a
+ * multibyte stream.
+ */
+#if EXP_JAPANESE_SPACES
+#define FIX_JAPANESE_SPACES \
+	(HTCJK == CHINESE || HTCJK == JAPANESE || HTCJK == TAIPEI)
+	/* don't replace '\n' with ' ' if Chinese or Japanese - HN
+	 */
+#else
+#define FIX_JAPANESE_SPACES 0
+#endif
+
 /*	Character handling
 **	------------------
 */
@@ -218,13 +230,12 @@ PUBLIC void HTML_put_character ARGS2(HTStructured *, me, char, c)
 	    return;
 	if (c != '\n' && c != '\t' && c != '\r') {
 	    HTChunkPutc(&me->title, c);
-	} else if (HTCJK == CHINESE || HTCJK == JAPANESE || HTCJK == TAIPEI) {
+	} else if (FIX_JAPANESE_SPACES) {
 	    if (c == '\t') {
 		HTChunkPutc(&me->title, ' ');
 	    } else {
 		return;
 	    }
-	    /* don't replace '\n' with ' ' if Chinese or Japanese - HN */
 	} else {
 	    HTChunkPutc(&me->title, ' ');
 	}
@@ -339,11 +350,7 @@ PUBLIC void HTML_put_character ARGS2(HTStructured *, me, char, c)
 		UPDATE_STYLE;
 	    }
 	    if (c == '\n') {
-		if (HTCJK == CHINESE || HTCJK == JAPANESE ||
-		    HTCJK == TAIPEI) {
-		    /* don't replace '\n' with ' ' if Chinese or Japanese - HN
-		     */
-		} else {
+		if (!FIX_JAPANESE_SPACES) {
 		    if (me->in_word) {
 			if (HText_getLastChar(me->text) != ' ') {
 			    me->inP = TRUE;
@@ -480,12 +487,7 @@ PUBLIC void HTML_put_string ARGS2(HTStructured *, me, CONST char *, s)
 		    UPDATE_STYLE;
 		}
 		if (c == '\n') {
-		    if (HTCJK == CHINESE || HTCJK == JAPANESE ||
-			HTCJK == TAIPEI) {
-			/* don't replace '\n' with ' '
-			 * if Chinese or Japanese - HN
-			 */
-		    } else {
+		    if (!FIX_JAPANESE_SPACES) {
 			if (me->in_word) {
 			    if (HText_getLastChar(me->text) != ' ')
 				HText_appendCharacter(me->text, ' ');

@@ -4031,9 +4031,11 @@ PUBLIC int gen_options ARGS1(
 		     NOTEMPTY(LYUserAgent), text_len, "");
     }
 
-    fprintf(fp0,
-	    "<a href=\"%s\">lynx.cfg information (read-only)</a>\n",
-	    lynx_cfg_infopage());
+    if (!LYRestricted) {
+	fprintf(fp0,
+		"<a href=\"%s\">lynx.cfg information (read-only)</a>\n",
+		lynx_cfg_infopage());
+    }
 
     fprintf(fp0,"\n</pre>\n");
 

@@ -52,11 +52,11 @@ PRIVATE char *lynx_compile_opts NOARGS
 	fprintf(fp0, "See also <a href=\"%s\">your lynx.cfg</a> for run-time options\n\n",
 		     lynx_cfg_infopage());
 
-	fprintf(fp0, "\n<em>config.cache</em>\n");
+	fprintf(fp0, "\n%s<br>\n<em>config.cache</em>\n", AUTOCONF_CONFIG_CACHE);
 	for (n = 0; n < TABLESIZE(config_cache); n++) {
 	    PutDefs(config_cache, n);
 	}
-	fprintf(fp0, "\n<em>lynx_cfg.h</em>\n");
+	fprintf(fp0, "\n%s<br>\n<em>lynx_cfg.h</em>\n", AUTOCONF_LYNXCFG_H);
 	for (n = 0; n < TABLESIZE(config_defines); n++) {
 	    PutDefs(config_defines, n);
 	}
@@ -131,13 +131,16 @@ PUBLIC int showinfo ARGS4(
 		 (LYNX_RELEASE ? LYNX_RELEASE_DATE : &LYNX_DATE[LYNX_DATE_OFF]),
 		 (LYNX_RELEASE ? LYNX_WWW_HOME     : LYNX_WWW_DIST),
 		 (LYNX_RELEASE ? "latest release"  : "development version") );
+
+    if (!LYRestricted) {
 #ifdef HAVE_CFG_DEFS_H
-    fprintf(fp0, " - <a href=\"%s\">compile time settings</a></h1>\n",
-		 lynx_compile_opts());
+	fprintf(fp0, " - <a href=\"%s\">compile time settings</a></h1>\n",
+		     lynx_compile_opts());
 #else
-    fprintf(fp0, " - <a href=\"%s\">your lynx.cfg</a></h1>\n",
-		 lynx_cfg_infopage());
+	fprintf(fp0, " - <a href=\"%s\">your lynx.cfg</a></h1>\n",
+		     lynx_cfg_infopage());
 #endif
+    }
 
 #ifdef DIRED_SUPPORT
     if (lynx_edit_mode && nlinks > 0) {

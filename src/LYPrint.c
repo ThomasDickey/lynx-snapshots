@@ -63,6 +63,8 @@
 PRIVATE int remove_quotes PARAMS((char *string));
 #endif /* VMS */
 
+PRIVATE  CONST char* subject_translate8bit PARAMS((char *source));
+
 PUBLIC int printfile ARGS1(
 	document *,	newdoc)
 {
@@ -91,6 +93,7 @@ PUBLIC int printfile ARGS1(
     HTAtom *encoding;
     BOOL use_mime, use_cte, use_type;
     CONST char *disp_charset;
+    CONST char *subject;   /* print-to-email */
     static BOOLEAN first_mail_preparsed = TRUE;
     char *envbuffer = NULL;
 #ifdef VMS
@@ -243,6 +246,7 @@ PUBLIC int printfile ARGS1(
      *	Act on the request. - FM
      */
     switch (type) {
+
 	case TO_FILE:
 #if defined(__DJGPP__) || defined(_WINDOWS)
 		_fmode = O_TEXT;
@@ -591,7 +595,13 @@ PUBLIC int printfile ARGS1(
 		}
 		use_type =  (disp_charset || HTisDocumentSource());
 
-		change_sug_filename(sug_filename);
+		/*
+		 *  Use newdoc->title as a subject instead of sug_filename:
+		 *  MORE readable and 8-bit letters shouldn't be a problem - LP
+		 */
+		/* change_sug_filename(sug_filename); */
+		subject = subject_translate8bit(newdoc->title);
+
 #ifdef VMS
 		if (strchr(user_response,'@') && !strchr(user_response,':') &&
 		   !strchr(user_response,'%') && !strchr(user_response,'"')) {
@@ -687,7 +697,7 @@ PUBLIC int printfile ARGS1(
 		     *	For PMDF, put the subject in the
 		     *	header file and close it. - FM
 		     */
-		    fprintf(hfd, "Subject: %.70s\n\n", newdoc->title);
+		    fprintf(hfd, "Subject: %.70s\n\n", subject);
 		    LYCloseTempFP(hfd);
 		    /*
 		     *	Now set up the command. - FM
@@ -704,12 +714,12 @@ PUBLIC int printfile ARGS1(
 		     *	For "generic" VMS MAIL, include
 		     *	the subject in the command. - FM
 		     */
-		    remove_quotes(sug_filename);
+		    remove_quotes(subject); */
 		    sprintf(buffer,
 			    "%s %s/subject=\"%.70s\" %s %s",
 			    system_mail,
 			    system_mail_flags,
-			    newdoc->title,
+			    subject,
 			    tempfile,
 			    user_response);
 		}
@@ -815,11 +825,9 @@ PUBLIC int printfile ARGS1(
 
 		/*
 		 *  Add the To, Subject, and X-URL headers. - FM
-		 *  Use newdoc->title as a subject instead of sug_filename:
-		 *  MORE readable and 8-bit letters shouldn't be a problem - LP
 		 */
 		fprintf(outfile_fp, "To: %s\nSubject: %s\n",
-				     user_response, newdoc->title);
+				     user_response, subject);
 		fprintf(outfile_fp, "X-URL: %s\n\n", newdoc->address);
 		if (LYPrependBaseToSource && HTisDocumentSource()) {
 		    /*
@@ -1224,6 +1232,55 @@ PRIVATE int remove_quotes ARGS1(
    return(0);
 }
 #endif /* VMS */
+
+/*
+ *  Mail subject may have 8-bit characters and they are in display charset.
+ *  There is no stable practice for 8-bit subject encodings:
+ *  MIME define "quoted-printable" which holds charset info
+ *  but most mailers still don't support it, on the other hand
+ *  many mailers send open 8-bit subjects without charset info
+ *  and use local assumption for certain countries.
+ *
+ *  We translate subject to "outgoing_mail_charset" (defined in lynx.cfg)
+ *  it may correspond to US-ASCII as the safest value or any other
+ *  lynx character handler, -1 for no translation (so display charset).
+ *
+ */
+PRIVATE  CONST char* subject_translate8bit ARGS1(char *, source)
+{
+    CONST char *p = source;
+    char temp[256];
+    char *q = temp;
+    char *target = NULL;
+
+    int charset_in, charset_out, uck;
+    char replace_buf [10];
+
+    int i = outgoing_mail_charset;  /* from lynx.cfg, -1 by default */
+
+    if (i < 0
+     || LYHaveCJKCharacterSet
+     || LYCharSet_UC[i].enc == UCT_ENC_CJK) {
+	return(source); /* OK */
+    } else {
+	charset_out = i;
+	charset_in  = current_char_set;
+    }
+
+    for ( ; *p; p++) {
+	LYstrncpy(q, p, 1);
+	if ((unsigned char)*q <= 127) {
+	    StrAllocCat(target, q);
+	} else {
+	    uck = UCTransCharStr(replace_buf, sizeof(replace_buf), *q,
+				 charset_in, charset_out, YES);
+	    if (uck >0)
+	    StrAllocCat(target, replace_buf);
+	}
+    }
+
+    return(target);
+}
 
 /*
  * print_options writes out the current printer choices to a file

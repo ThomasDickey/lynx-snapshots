@@ -519,20 +519,24 @@ static int assume_unrec_charset_fun ARGS1(
 static int character_set_fun ARGS1(
 	char *, 	value)
 {
-    size_t i;
-    size_t len;
+    int i = UCGetLYhndl_byAnyName(value); /* by MIME or full name */
+    if (i < 0)
+	; /* do nothing here: so fallback to userdefs.h */
+    else
+	current_char_set = i;
 
-    len = strlen (value);
-    for (i = 0; LYchar_set_names[i]; i++) { /* search by name, compatibility */
-	if (!strncmp(value, LYchar_set_names[i], len)) {
-	    current_char_set = i;
-	    return 0;
-	}
-    }
-
-    current_char_set = safeUCGetLYhndl_byMIME(value); /* by MIME */
     return 0;
 }
+
+static int outgoing_mail_charset_fun ARGS1(
+	char *, 	value)
+{
+    outgoing_mail_charset = UCGetLYhndl_byMIME(value);
+    /* -1 if NULL or not recognized value: no translation (compatibility) */
+
+    return 0;
+}
+
 
 #ifdef USE_COLOR_TABLE
 static int color_fun ARGS1(
@@ -896,6 +900,7 @@ static Config_Type Config_Table [] =
      PARSE_SET("no_ismap_if_usemap", CONF_BOOL, LYNoISMAPifUSEMAP),
      PARSE_ENV("no_proxy", CONF_ENV, 0 ),
      PARSE_SET("no_referer_header", CONF_BOOL, LYNoRefererHeader),
+     PARSE_FUN("outgoing_mail_charset", CONF_FUN, outgoing_mail_charset_fun),
 #ifdef DISP_PARTIAL
      PARSE_SET("partial", CONF_BOOL, display_partial),
 #endif
@@ -1127,7 +1132,7 @@ PUBLIC void read_cfg ARGS4(
 	    	LYLowerCase(name);
 	    else
 	    	LYUpperCase(name);
-		
+
 	    if (getenv (name) == 0) {
 #ifdef VMS
 		Define_VMSLogical(tbl->name, value);
@@ -1225,11 +1230,11 @@ PUBLIC char *lynx_cfg_infopage NOARGS
 
 	LYforce_no_cache = TRUE;  /* don't cache this doc */
 
-#ifdef HAVE_CONFIG_H
+#if defined(HAVE_CONFIG_H) || defined(VMS)
 	StrAllocCopy(temp, LYNX_CFG_FILE);
 #else
-	StrAllocCopy(temp, helpfilepath);
-	StrAllocCat(temp, LYNXCFG_HELP);  /* DJGPP/Win32/VMS should care of */
+	StrAllocCopy(temp, helpfilepath); /* FIXME: no absolute path */
+	StrAllocCat(temp, LYNXCFG_HELP);  /* for lynx.cfg on DOS/Win32 */
 #endif /* HAVE_CONFIG_H */
 
 	BeginInternalPage (fp0, LYNXCFG_TITLE, NULL);
