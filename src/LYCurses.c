@@ -128,8 +128,6 @@ PUBLIC void lynx_setup_colors NOARGS
     SLtt_set_mono(7, NULL, SLTT_ULINE_MASK | SLTT_BOLD_MASK | SLTT_REV_MASK);
 }
 
-
-
 PRIVATE void sl_suspend ARGS1(
 	int,		sig)
 {
@@ -211,7 +209,7 @@ PRIVATE int LYAttrset ARGS3(WINDOW*,win,int,color,int,mono)
 {
 	if (TRACE)
 		fprintf(stderr, "CSS:LYAttrset (%d, %d)\n", color, mono);
-	if (has_color && LYShowColor && color > -1)
+	if (has_color && LYShowColor >= SHOW_COLOR_ON && color > -1)
 	{
 		wattrset(win,color);
 #if 0
@@ -394,7 +392,7 @@ PRIVATE struct {
  */
 PRIVATE void LYsetWAttr ARGS1(WINDOW *, win)
 {
-    if (lynx_uses_color && LYShowColor) {
+    if (lynx_uses_color && LYShowColor >= SHOW_COLOR_ON) {
 	int code = 0;
 	int attr = A_NORMAL;
 	int offs = 1;
@@ -462,7 +460,7 @@ PRIVATE void lynx_map_color ARGS1(int, n)
 		lynx_color_pairs[n+m+1].fg,
 		lynx_color_pairs[n+m+1].bg);
 	}
-	if (n == 0 && LYShowColor)
+	if (n == 0 && LYShowColor >= SHOW_COLOR_ON)
 	    bkgd(COLOR_PAIR(9));
     }
 }
@@ -488,7 +486,7 @@ PUBLIC int lynx_chg_color ARGS3(
 
 PUBLIC void lynx_set_color ARGS1(int, a)
 {
-    if (lynx_uses_color && LYShowColor) {
+    if (lynx_uses_color && LYShowColor >= SHOW_COLOR_ON) {
 	attrset(lynx_color_cfg[a].attr | COLOR_PAIR(a+1));
     }
 }
@@ -517,11 +515,12 @@ PRIVATE void lynx_init_colors NOARGS
 			lynx_color_pairs[n+m+1].fg,
 			lynx_color_pairs[n+m+1].bg);
 	    }
-	    if (n == 0 && LYShowColor)
+	    if (n == 0 && LYShowColor >= SHOW_COLOR_ON)
 		bkgd(COLOR_PAIR(9));
 	}
-    } else
-	LYShowColor = FALSE;
+    } else if (LYShowColor != SHOW_COLOR_NEVER) {
+	LYShowColor = SHOW_COLOR_OFF;
+    }
 }
 
 PUBLIC void lynx_setup_colors NOARGS
@@ -575,8 +574,34 @@ PUBLIC void start_curses NOARGS
 
     if (slinit == 0) {
 	SLtt_get_terminfo();
-	if (LYShowColor && (Lynx_Color_Flags & SL_LYNX_USE_COLOR))
+	/*
+	 *  Check whether a saved show_color:off override is in effect. - kw
+	 */
+	if (LYrcShowColor == SHOW_COLOR_NEVER) {
+	    SLtt_Use_Ansi_Colors = 0;
+	}
+	/*
+	 *  Check whether we're forcing color on. - FM
+	 */
+	if ((LYShowColor > 1) && (Lynx_Color_Flags & SL_LYNX_USE_COLOR))
 	    SLtt_Use_Ansi_Colors = 1;
+	/*
+	 *  Check whether a -nocolor override is in effect. - kw
+	 */
+	if (Lynx_Color_Flags & SL_LYNX_OVERRIDE_COLOR)
+	    SLtt_Use_Ansi_Colors = 0;
+	/*
+	 *  Make sure our flags are in register. - FM
+	 */
+	if (SLtt_Use_Ansi_Colors == 1) {
+	    if (LYShowColor != SHOW_COLOR_ALWAYS) {
+		LYShowColor = SHOW_COLOR_ON;
+	    }
+	} else {
+	    if (LYShowColor != SHOW_COLOR_NEVER) {
+		LYShowColor = SHOW_COLOR_OFF;
+	    }
+	}
 	size_change(0);
 
 	SLtt_add_color_attribute(4, SLTT_ULINE_MASK);
@@ -585,10 +610,11 @@ PUBLIC void start_curses NOARGS
 	 *  If set, the blink escape sequence will turn on high
 	 *  intensity background (rxvt and maybe Linux console).
 	 */
-	if (LYShowColor && (Lynx_Color_Flags & SL_LYNX_USE_BLINK))
+	if (LYShowColor && (Lynx_Color_Flags & SL_LYNX_USE_BLINK)) {
 	    SLtt_Blink_Mode = 1;
-	else
+	} else {
 	    SLtt_Blink_Mode = 0;
+	}
     }
     slinit = 1;
     Current_Attr = 0;
@@ -1495,7 +1521,7 @@ PUBLIC void VMSbox ARGS3(
 PUBLIC void lynx_force_repaint NOARGS
 {
 #if defined(COLOR_CURSES)
-    chtype a = (LYShowColor) ? COLOR_PAIR(9) : A_NORMAL;
+    chtype a = (LYShowColor >= SHOW_COLOR_ON) ? COLOR_PAIR(9) : A_NORMAL;
     bkgdset(a | ' ');
     bkgd(a | ' ');
     attrset(a);
@@ -1606,7 +1632,7 @@ PUBLIC void lynx_start_target_color NOARGS
 PUBLIC void lynx_start_status_color NOARGS
 {
 #if USE_COLOR_TABLE && defined(COLOR_CURSES)
-    if (lynx_uses_color && LYShowColor)
+    if (lynx_uses_color && LYShowColor >= SHOW_COLOR_ON)
 	lynx_set_color (2);
     else
 #endif
@@ -1616,7 +1642,7 @@ PUBLIC void lynx_start_status_color NOARGS
 PUBLIC void lynx_stop_status_color NOARGS
 {
 #if USE_COLOR_TABLE && defined(COLOR_CURSES)
-    if (lynx_uses_color && LYShowColor)
+    if (lynx_uses_color && LYShowColor >= SHOW_COLOR_ON)
 	lynx_set_color (0);
     else
 #endif

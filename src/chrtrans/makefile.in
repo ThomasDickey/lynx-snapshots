@@ -48,6 +48,7 @@ TABLES= $(CHRTR)iso02_uni.h \
  $(CHRTR)cp850_uni.h \
  $(CHRTR)cp852_uni.h \
  $(CHRTR)cp1250_uni.h \
+ $(CHRTR)cp1251_uni.h \
  $(CHRTR)cp1252_uni.h \
  $(CHRTR)utf8_uni.h \
  $(CHRTR)rfc_suni.h \
@@ -88,6 +89,7 @@ cp437_uni.h: cp437_uni.tbl makeuctb
 cp850_uni.h: cp850_uni.tbl makeuctb
 cp852_uni.h: cp852_uni.tbl makeuctb
 cp1250_uni.h: cp1250_uni.tbl makeuctb
+cp1251_uni.h: cp1251_uni.tbl makeuctb
 cp1252_uni.h: cp1252_uni.tbl makeuctb
 utf8_uni.h: utf8_uni.tbl makeuctb
 mnemonic_suni.h: mnemonic_suni.tbl makeuctb

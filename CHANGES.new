@@ -10,6 +10,64 @@ README.configure), and miscellaneous other changes.  Note that the 2.7 ->
 2.7.1 changes (which are listed at the beginning of the current CHANGES
 file) are duplicated here. - KW]
 
+1997-07-26
+* Changed the default value for STRIP_DOTDOT_URLS (lynx.cfg) to TRUE. - KW
+* Made some of the additional checks introduced yesterday in LYMainLoop.c
+  for invalid links to internal dired URLs more strict, as they probably
+  were intended. - KW
+* Added checks for some internal URL types, which should be rejected
+  if received in a server redirection, to LYGetFile.c.  Maybe more types
+  should be added to the list. - KW
+1997-07-25
+* Map charsets of the form "ibmNNN<...>" to "cpNNN<...>" in UCdomap.c
+  if not already recognized.  Also recognize "windows-1252". - KW
+* Compared the hanndling of 4-way "show color (&)" in the 'o'ptions menu
+  against FM's implementation, and made some changes (mostly in formatting, 
+  variable and constant names and usage, ordering of statements) to aid
+  further comparison.  The logic is still messy and needs further cleanup
+  and simplification, but seems to do what it should.  Note that this
+  also handles color-curses, in a (hopefully) resonable way.  Command
+  line flags -nocolor and (if using slang) -color override a preference
+  found in the RC file. See updated "Lynx Users Guide" file and the 
+  comments written to the RC file.
+  Documentation changes adapted from FM's changes. - KW
+* Mods of the DIRED_SUPPORT to check the actual URLs of temporary files
+  rather than just their titles when filtering for spoofing attempts via
+  external files with internal URLs.  Also recast the PRIVATE my_spawn()
+  to a PUBLIC LYExecv(), so that it can be used by any module (though
+  presently it's still used only by LYLocal.c functions). - FM
+* Tweaks of LYCharUtils.c to handle Set-Cookie HTTP-EQUIVs in META elements
+  without risking crashes in LYCookie.c or HTParse.c. - FM
+1997-07-24
+* Made "show color" option a 4-way choice, if compiled with color support
+  and if saving of options to a .lynxrc file is allowed. - KW
+* Made changing file permissions with DIRED_SUPPORT work again; one of
+  the recently added checks in LYMainLoop.c was too restrictive.
+  Added protection to permit_location in LYLocal.c, similar to the changes
+  of 1997-06-24 to LYDownload.c. - KW
+* Generate CANCELLED message when editing of a string value on the Options
+  Screen has been cancelled (typically with ^G), instead of an 
+  inappropriate VALUE_ACCEPTED statusline. - KW
+1997-07-23
+* Tweaks of the strtok() calls for textarea values in HTML.c, so that they
+  will never be repeated after NULL has been returned, and thus won't cause
+  linux-alpha to crash. - FM
+* Make -nocolor command line flag work if compiled with slang.  Note that
+  -nocolor is strong, it overrides all other reasons that might otherwise
+  turn color on. - KW
+* Tweaks in LYCurses.c to ensure that slang library and Lynx flags for
+  whether color support is on stay in register. - FM
+* Change the default in userdefs.h for SHOW_COLOR to FALSE for USE_SLANG.
+  Because of the different logic used for LYShowColor in the curses code
+  vs. slang code, setting SHOW_COLOR to TRUE makes it difficult to invoke
+  a binary compiled with slang so that color is not used on startup
+  (except by using -nocolor).
+  Note that reading show_color from .lynxrc is still commented out. - KW
+* There is now a "trailing comment" handler in LYReadCFG.c. It treats '#'
+  as a comment token only if it is somewhere after the last colon for the
+  lynx.cfg entry and is preceded by a space or tab. - FM
+* Added TT to the Utterly Tag and Attribute Soup group of HTML elements. - FM
+  (applies only to "old" DTD in this code set, as usual - KW)
 1997-07-22
 * Modify curses popups in LYForms.c and LYOptions.c to use background color
   from main window - TD
@@ -41,6 +99,10 @@ file) are duplicated here. - KW]
 * Add configure check for compiler options to enable prototypes - TD
 * Remove IRIX "-cckr" compiler flags. - TD
 * Correct whitespace as per LPS: LYCurses.c, LYOptions.c - TD
+* Tweaks of LYMainLoop.c in the code controlling how the document is reloaded
+  due to any changes in the 'o'ption menu which require a new rendering of
+  the document (but still without forcing a proxy cache refresh when that is
+  inappropriate; see the 1997-05-26 mods). - FM
 1997-07-18
 * Mods in LYexit.c and LYCurses.c to ensure restoration of stderr (if it
   was changed for output to the trace log) on all exits. - BRL & FM
@@ -48,6 +110,9 @@ file) are duplicated here. - KW]
   HTAtom.c - CK
 * Modified change to is_url() of 1997-07-13 to check for the slash after
   stripping any lead space characters. - FM
+1997-07-16
+* Added the Windows Cyrillic display character set. - AAC
+  (Andrey A. Chernov <ache@null.net>)
 1997-07-15
 * Added support for a commentURL attribute in cookies.  This attribute is
   under discussion in the HTTP-WG and not presently in the draft (see the

@@ -480,6 +480,7 @@
 #define BOOKMARK_CHANGE_DISALLOWED \
  "You are not allowed to change the bookmark file!"
 #define COLOR_TOGGLE_DISABLED "Terminal does not support color"
+#define COLOR_TOGGLE_DISABLED_FOR_TERM "Your '%s' terminal does not support color."
 #define DOTFILE_ACCESS_DISABLED "Access to dot files is disabled!"
 #define UA_COPYRIGHT_WARNING \
  "WARNING: Misrepresentation of the User-Agent may be a copyright violation!"
@@ -495,6 +496,7 @@
 #define ERROR_UNCOMPRESSING_TEMP "Error uncompressing temporary file!"
 #define UNSUPPORTED_URL_SCHEME "Unsupported URL scheme!"
 #define UNSUPPORTED_DATA_URL "Unsupported data: URL!  Use SHOWINFO, for now."
+#define INVALID_URL_SCHEME_IN_REDIRECTION "Invalid Lynx-internal URL received from server!"
 #define	SERVER_ASKED_FOR_REDIRECTION \
  "Server asked for redirection of POST content to"
 #define	PROCEED_GET_CANCEL "P)roceed, use G)ET or C)ancel "
@@ -607,6 +609,7 @@
 #define DIRED_NOVICELINE \
  "  C)reate  D)ownload  E)dit  F)ull menu  M)odify  R)emove  T)ag  U)pload     \n"
 #define CURRENT_LINK_STATUS_FAILED "Failed to obtain status of current link!"
+#define INVALID_PERMIT_URL "Special URL only valid from current File Permission menu!"
 #endif /* DIRED_SUPPORT */
 
 #ifdef USE_EXTERNALS

@@ -16,15 +16,15 @@
 #include "HTMLGen.h"
 #include "HTParse.h"
 
-#include "LYGlobalDefs.h"
-#include "LYCharUtils.h"
-#include "LYCharSets.h"
-
 #ifdef EXP_CHARTRANS
 #include "UCMap.h"
 #include "UCDefs.h"
 #include "UCAux.h"
 #endif
+
+#include "LYGlobalDefs.h"
+#include "LYCharUtils.h"
+#include "LYCharSets.h"
 
 #include "HTAlert.h"
 #include "HTFont.h"
@@ -36,6 +36,7 @@
 #include "LYMap.h"
 #include "LYBookmark.h"
 #include "LYCurses.h"
+#include "LYCookie.h"
 
 #ifdef VMS
 #include "HTVMSUtils.h"
@@ -55,10 +56,6 @@ extern BOOL HTPassHighCtrlRaw;
 extern BOOL HTPassHighCtrlNum;
 extern HTkcode kanji_code;
 extern HTCJKlang HTCJK;
-
-extern void LYSetCookie PARAMS((
-	CONST char *	header,
-	CONST char *	address));
 
 /*
  *  Used for nested lists. - FM
@@ -2007,10 +2004,13 @@ PUBLIC void LYHandleMETA ARGS4(
 		    HTPassEightBitRaw = TRUE;
 		}
 		LYGetChartransInfo(me);
-			} else  /* Fall through to old behavior */
+	    /*
+	     *  Fall through to old behavior.
+	     */
+			} else
 #endif /* EXP_CHARTRANS */
 	    if (!strncmp(cp1, "us-ascii", 8) ||
-		!strncmp(cp1, "iso-8859-1", 10)) {
+		       !strncmp(cp1, "iso-8859-1", 10)) {
 		StrAllocCopy(me->node_anchor->charset, "iso-8859-1");
 		HTCJK = NOCJK;
 
@@ -2259,11 +2259,18 @@ PUBLIC void LYHandleMETA ARGS4(
      */
     } else if (!strcasecomp((http_equiv ? http_equiv : ""), "Set-Cookie")) {
 	/*
-	 *  We're using the Request-URI as the second argument,
-	 *  regardless of whether a Content-Base header or BASE
-	 *  tag are present.
+	 *  This will need to be updated when Set-Cookie/Set-Cookie2
+	 *  handling is finalized.  For now, we'll still assume
+	 *  "historical" cookies in META directives. - FM
 	 */
-	LYSetCookie(content, me->node_anchor->address);
+	url_type = is_url(me->inBASE ?
+		       me->base_href : me->node_anchor->address);
+	if (url_type == HTTP_URL_TYPE || url_type == HTTPS_URL_TYPE) {
+	    LYSetCookie(content,
+	    		NULL,
+			(me->inBASE ?
+		      me->base_href : me->node_anchor->address));
+	}
     }
 
     /*

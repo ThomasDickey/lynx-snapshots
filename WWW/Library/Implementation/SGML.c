@@ -2232,6 +2232,7 @@ top1:
 			    !strcasecomp(string->data, "FORM") ||
 			    !strcasecomp(string->data, "I") ||
 			    !strcasecomp(string->data, "STRONG") ||
+			    !strcasecomp(string->data, "TT") ||
 			    !strcasecomp(string->data, "U"))) {
 		    /*
 		    **  Handle end tags for container elements declared

@@ -803,7 +803,7 @@
 /******************************
  * SHOW_COLOR controls whether the program displays in color by default.
  */
-#if defined(USE_SLANG) || defined(COLOR_CURSES)
+#ifdef COLOR_CURSES
 #define SHOW_COLOR TRUE
 #else
 #define SHOW_COLOR FALSE
@@ -1246,7 +1246,7 @@
  * the version definition with the Project Version on checkout. Just
  * ignore it. - kw */
 /* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
-#define LYNX_VERSION "2.7.1ac-0.38"
+#define LYNX_VERSION "2.7.1ac-0.42"
 
 /****************************************************************
  * The LYMessages_en.h header defines default, English strings

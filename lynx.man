@@ -80,6 +80,11 @@ this switch.
 prepend a request URL comment and BASE tag to text/html
 outputs for -source or -mime_header dumps.
 .TP
+.B -blink
+forces high intensity bg colors for color mode, if available
+and supported by the terminal.
+Lynx needs to be compiled with the slang library for this flag.
+.TP
 .B -book
 use the bookmark page as the startfile.  The default or command
 line startfile is still set for the Main screen command, and will
@@ -104,6 +109,15 @@ lynx.cfg.
 .TP
 .B -child
 exit on left-arrow in startfile, and disable save to disk.
+.TP
+.B -color
+forces color mode on, if available.  Default color control sequences
+which work for many terminal types are assumed if the terminal
+capability description does not specify how to handle color.
+Lynx needs to be compiled with the slang library for this flag.
+A saved show_color=always setting found in a .lynxrc file at
+startup has the same effect.  A saved show_color=always found
+in .lynxrc on startup is overridden by this flag.
 .TP
 .B -cookies
 toggles handling of Set-Cookie headers.
@@ -200,6 +214,10 @@ maximum news articles in listings before chunking.
 .TP
 .B -nobrowse
 disable directory browsing.
+.TP
+.B -nocolor
+force color mode off, overriding terminal capabilities and any
+-color flags, COLORTERM variable, and saved .lynxrc settings.
 .TP
 .B -noexec
 disable local program execution. (DEFAULT)

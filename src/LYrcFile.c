@@ -335,8 +335,7 @@ PUBLIC void read_rc NOPARAMS
 	        show_dotfiles = TRUE;
 	    else
 	        show_dotfiles = FALSE;
-#if 0	/* UNUSED */
-#if defined(USE_SLANG) || defined(COLOR_CURSES)
+
 	/*
 	 *  Show color.
 	 */
@@ -346,13 +345,20 @@ PUBLIC void read_rc NOPARAMS
 	    if ((cp2 = (char * )strchr(cp, '=')) != NULL)
 		cp = cp2 + 1;
 	    while (isspace(*cp))
-		cp++;  /* get rid of spaces */
-	    if (!strncasecomp(cp, "off", 3))
-		LYShowColor = FALSE;
-	    else
-		LYShowColor = TRUE;
+	        cp++;  /* get rid of spaces */
+	    if (!strncasecomp(cp, "always", 6)) {
+		LYrcShowColor = SHOW_COLOR_ALWAYS;
+#if defined(USE_SLANG) || defined(COLOR_CURSES)
+		if (LYShowColor != SHOW_COLOR_NEVER)
+		    LYShowColor = SHOW_COLOR_ALWAYS;
 #endif /* USE_SLANG || COLOR_CURSES */
-#endif /* UNUSED */
+	    } else if (!strncasecomp(cp, "never", 5)) {
+		LYrcShowColor = SHOW_COLOR_NEVER;
+#if defined(COLOR_CURSES)
+		if (LYShowColor == SHOW_COLOR_ON)
+		    LYShowColor = SHOW_COLOR_OFF;
+#endif /* COLOR_CURSES */
+	    }
 
 	/*
 	 *  Select popups.
@@ -669,18 +675,31 @@ PUBLIC int save_rc NOPARAMS
     fprintf(fp, "preferred_charset=%s\n\n",
     		(pref_charset ? pref_charset : ""));
 
-#if defined(USE_SLANG) || defined(COLOR_CURSES)
     /*
      *  Show color.
      */
-    fprintf(fp, "\
-# show_color specifies whether to show colors when available, or assume a\n\
-# monochrome terminal.  A value of \"on\" will force color mode on, while\n\
-# a value of \"off\" will force it off.  The default can be overridden via\n\
-# the -color and -nocolor command line switches or (if built with slang) the\n\
-# COLORTERM environment variable.\n");
-    fprintf(fp, "show_color=%s\n\n", (LYShowColor ? "on" : "off"));
-#endif /* USE_SLANG || COLOR_CURSES */
+    if (LYChosenShowColor != SHOW_COLOR_UNKNOWN) {
+	fprintf(fp, "\
+# show_color specifies how to set the color mode at startup.  A value of\n\
+# \"never\" will force color mode off (treat the terminal as monochrome)\n\
+# at startup even if the terminal appears to be color capable.  A value of\n\
+# \"always\" will force color mode on even if the terminal appears to be\n\
+# monochrome, if this is supported by the library used to build lynx.\n\
+# A value of \"default\" will yield the behavior of assuming\n\
+# a monochrome terminal unless color capability is inferred at startup\n\
+# based on the terminal type, or the -color command line switch is used, or\n\
+# the COLORTERM environment variable is set. The default behavior always is\n\
+# used in anonymous accounts or if the \"option_save\" restriction is set.\n\
+# The effect of the saved value can be overridden via\n\
+# the -color and -nocolor command line switches.\n\
+# The mode set at startup can be changed via the \"show color\" option in\n\
+# the 'o'ptions menu.  If the option settings are saved, the \"on\" and\n\
+# \"off\" \"show color\" settings will be treated as \"default\".\n");
+     fprintf(fp, "show_color=%s\n\n",
+	     ((LYChosenShowColor == SHOW_COLOR_NEVER  ? "never"  :
+	       (LYChosenShowColor == SHOW_COLOR_ALWAYS ? "always" :
+						      "default"))));
+    }
 
     /*
      *  VI keys.

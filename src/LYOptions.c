@@ -69,6 +69,30 @@ PRIVATE void option_statusline ARGS1(
     LYStatusLine = -1;
 }
 
+PRIVATE void option_user_message ARGS2(
+	CONST char *,		message,
+	char *,			argument)
+{
+    /*
+     *  Make sure we have a pointer to a string.
+     */
+    if (message == NULL || argument == NULL)
+	return;
+
+    /*
+     *  Don't print statusline messages if dumping to stdout.
+     */
+    if (dump_output_immediately)
+	return;
+
+    /*
+     *  Use _user_message() set to output on the bottom line.
+     */
+    LYStatusLine = (LYlines - 1);
+    _user_message((char *)message, argument);
+    LYStatusLine = -1;
+}
+
 PUBLIC void options NOARGS
 {
 #ifdef ALLOW_USERS_TO_CHANGE_EXEC_WITHIN_OPTIONS
@@ -117,6 +141,42 @@ PUBLIC void options NOARGS
 
     term_options = FALSE;
     signal(SIGINT, terminate_options);
+    if (no_option_save) {
+	if (LYShowColor == SHOW_COLOR_NEVER) {
+	    LYShowColor = SHOW_COLOR_OFF;
+	} else if (LYShowColor == SHOW_COLOR_ALWAYS) {
+	    LYShowColor = SHOW_COLOR_ON;
+	}
+#if defined(USE_SLANG) || defined(COLOR_CURSES)
+    } else {
+	if (LYChosenShowColor == SHOW_COLOR_UNKNOWN) {
+	    switch (LYrcShowColor) {
+	    case SHOW_COLOR_NEVER:
+		LYChosenShowColor =
+		    (LYShowColor >= SHOW_COLOR_ON) ?
+				     SHOW_COLOR_ON :
+				     SHOW_COLOR_NEVER;
+		break;
+	    case SHOW_COLOR_ALWAYS:
+#if defined(COLOR_CURSES)
+		if (!has_colors())
+		    LYChosenShowColor = SHOW_COLOR_ALWAYS;
+		else
+#endif
+		    LYChosenShowColor =
+			(LYShowColor >= SHOW_COLOR_ON) ?
+		    		     SHOW_COLOR_ALWAYS :
+				     SHOW_COLOR_OFF;
+		break;
+	    default:
+		LYChosenShowColor =
+		    (LYShowColor >= SHOW_COLOR_ON) ?
+				     SHOW_COLOR_ON :
+				     SHOW_COLOR_OFF;
+	    }
+	}
+#endif /* USE_SLANG || COLOR_CURSES */
+    }
 
 draw_options:
     /*
@@ -191,7 +251,29 @@ draw_options:
 #if defined(USE_SLANG) || defined(COLOR_CURSES)
     move(L_COLOR, B_COLOR);
     addstr("show color (&)  : ");
-    addstr(LYShowColor ? "ON " : "OFF");
+    if (no_option_save) {
+	addstr((LYShowColor == SHOW_COLOR_OFF ? "OFF" :
+	   					"ON "));
+    } else {
+	switch (LYChosenShowColor) {
+	case SHOW_COLOR_NEVER:
+		addstr("NEVER     ");
+		break;
+	case SHOW_COLOR_OFF:
+		addstr("OFF");
+		break;
+	case SHOW_COLOR_ON:
+		addstr("ON ");
+		break;
+	case SHOW_COLOR_ALWAYS:
+#if defined(COLOR_CURSES)
+		if (!has_colors())
+		    addstr("Always try");
+		else
+#endif
+		    addstr("ALWAYS    ");
+	}
+    }
 #endif /* USE_SLANG || COLOR_CURSES */
 
     move(L_BOOL_A, B_VIKEYS);
@@ -333,7 +415,13 @@ draw_options:
 			addstr(display_option);
 		    }
 		    clrtoeol();
-		    option_statusline(VALUE_ACCEPTED);
+		    if (ch == -1) {
+			option_statusline(CANCELLED);
+			sleep(InfoSecs);
+			option_statusline("");
+		    } else {
+			option_statusline(VALUE_ACCEPTED);
+		    }
 		}
 		response = ' ';
 		break;
@@ -368,7 +456,13 @@ draw_options:
 		     */
 		    addstr((display && *display) ? display : "NONE");
 		    clrtoeol();
-		    option_statusline(VALUE_ACCEPTED);
+		    if (ch == -1) {
+			option_statusline(CANCELLED);
+			sleep(InfoSecs);
+			option_statusline("");
+		    } else {
+			option_statusline(VALUE_ACCEPTED);
+		    }
 		    response = ' ';
 		    break;
 		} else if (*display_option == '\0') {
@@ -543,7 +637,13 @@ draw_options:
 			addstr(bookmark_page);
 		    }
 		    clrtoeol();
-		    option_statusline(VALUE_ACCEPTED);
+		    if (ch == -1) {
+			option_statusline(CANCELLED);
+			sleep(InfoSecs);
+			option_statusline("");
+		    } else {
+			option_statusline(VALUE_ACCEPTED);
+		    }
 		} else { /* anonymous */
 		    option_statusline(BOOKMARK_CHANGE_DISALLOWED);
 		}
@@ -626,7 +726,13 @@ draw_options:
 		    addstr(display_option);
 		}
 		clrtoeol();
-		option_statusline(VALUE_ACCEPTED);
+		if (ch == -1) {
+		    option_statusline(CANCELLED);
+		    sleep(InfoSecs);
+		    option_statusline("");
+		} else {
+		    option_statusline(VALUE_ACCEPTED);
+		}
 		response = ' ';
 		break;
 
@@ -750,7 +856,13 @@ draw_options:
 		    addstr(display_option);
 		}
 		clrtoeol();
-		option_statusline(VALUE_ACCEPTED);
+		if (ch == -1) {
+		    option_statusline(CANCELLED);
+		    sleep(InfoSecs);
+		    option_statusline("");
+		} else {
+		    option_statusline(VALUE_ACCEPTED);
+		}
 		response = ' ';
 		break;
 
@@ -781,7 +893,13 @@ draw_options:
 		    addstr(display_option);
 		}
 		clrtoeol();
-		option_statusline(VALUE_ACCEPTED);
+		if (ch == -1) {
+		    option_statusline(CANCELLED);
+		    sleep(InfoSecs);
+		    option_statusline("");
+		} else {
+		    option_statusline(VALUE_ACCEPTED);
+		}
 		response = ' ';
 		break;
 
@@ -875,34 +993,119 @@ draw_options:
 
 #if defined(USE_SLANG) || defined(COLOR_CURSES)
 	    case '&':	/* Change show color setting. */
+		if (no_option_save) {
 #if defined(COLOR_CURSES)
-		if (!has_colors()) {
-		    option_statusline(COLOR_TOGGLE_DISABLED);
-		    break;
-		}
+		    if (!has_colors()) {
+			char * terminal = getenv("TERM");
+			if (terminal)
+			    option_user_message(
+				COLOR_TOGGLE_DISABLED_FOR_TERM,
+				terminal);
+			else
+			    option_statusline(COLOR_TOGGLE_DISABLED);
+			sleep(AlertSecs);
+		    }
 #endif
 		/*
 		 *  Copy strings into choice array.
 		 */
-		choices[0] = NULL;
-		StrAllocCopy(choices[0], "OFF");
-		choices[1] = NULL;
-		StrAllocCopy(choices[1], "ON ");
-		choices[2] = NULL;
-		LYShowColor = boolean_choice(LYShowColor,
-					      L_COLOR,
-					      C_COLOR,
-					      choices);
+		    choices[0] = NULL;
+		    StrAllocCopy(choices[0], "OFF");
+		    choices[1] = NULL;
+		    StrAllocCopy(choices[1], "ON ");
+		    choices[2] = NULL;
+		    LYShowColor = boolean_choice((LYShowColor - 1),
+						 L_COLOR,
+						 C_COLOR,
+						 choices);
+		    if (LYShowColor == 0) {
+			LYShowColor = SHOW_COLOR_OFF;
+		    } else {
+			LYShowColor = SHOW_COLOR_ON;
+		    }
+		} else {		/* !no_option_save */
+		    BOOLEAN again = FALSE;
+		    int chosen;
+		/*
+		 *  Copy strings into choice array.
+		 */
+		    choices[0] = NULL;
+		    StrAllocCopy(choices[0], "NEVER     ");
+		    choices[1] = NULL;
+		    StrAllocCopy(choices[1], "OFF       ");
+		    choices[2] = NULL;
+		    StrAllocCopy(choices[2], "ON        ");
+		    choices[3] = NULL;
+#if defined(COLOR_CURSES)
+		    if (!has_colors())
+			StrAllocCopy(choices[3], "Always try");
+		    else
+#endif
+			StrAllocCopy(choices[3], "ALWAYS    ");
+		    choices[4] = NULL;
+		    do {
+			if (!LYSelectPopups) {
+			    chosen = boolean_choice(LYChosenShowColor,
+						    L_COLOR,
+						    C_COLOR,
+						    choices);
+			} else {
+			    chosen = popup_choice(LYChosenShowColor,
+						  L_COLOR,
+						  C_COLOR,
+						  choices, 4, FALSE);
+			}
+#if defined(COLOR_CURSES)
+			again = (chosen == 2 && !has_colors());
+			if (again) {
+			    char * terminal = getenv("TERM");
+			    if (terminal)
+				option_user_message(
+				    COLOR_TOGGLE_DISABLED_FOR_TERM,
+				    terminal);
+			    else
+				option_statusline(COLOR_TOGGLE_DISABLED);
+			    sleep(AlertSecs);
+			}
+#endif
+		    } while (again);
+		    LYChosenShowColor = chosen;
+#if defined(VMS)
+		    if (LYSelectPopups) {
+			move(L_COLOR, C_COLOR);
+			clrtoeol();
+			addstr(choices[LYChosenShowColor]);
+		    }
+#endif /* VMS */
+#if defined(COLOR_CURSES)
+		    if (has_colors())
+#endif
+			LYShowColor = chosen;
+		    FREE(choices[2]);
+		    FREE(choices[3]);
+		}
 		FREE(choices[0]);
 		FREE(choices[1]);
 		if (CurrentShowColor != LYShowColor) {
-		    CurrentShowColor = LYShowColor;
-#ifdef USE_SLANG
-		    SLtt_Use_Ansi_Colors = LYShowColor;
-#endif
 		    lynx_force_repaint();
 		}
+		CurrentShowColor = LYShowColor;
+#ifdef USE_SLANG
+		SLtt_Use_Ansi_Colors = (LYShowColor > 1 ? 1 : 0);
+#endif
 		response = ' ';
+		if (LYSelectPopups && !no_option_save) {
+#if !defined(VMS) || defined(USE_SLANG)
+		    if (term_options) {
+		        term_options = FALSE;
+	            } else {
+		        AddValueAccepted = TRUE;
+		    }
+		    goto draw_options;
+#else
+		    term_options = FALSE;
+#endif /* !VMS || USE_SLANG */
+		}
 		break;
 #endif /* USE_SLANG or COLOR_CURSES */
 
@@ -1137,7 +1340,11 @@ draw_options:
 			addstr(display_option);
 		    }
 		    clrtoeol();
-		    if (LYUserAgent && *LYUserAgent &&
+		    if (ch == -1) {
+			option_statusline(CANCELLED);
+			sleep(InfoSecs);
+			option_statusline("");
+		    } else if (LYUserAgent && *LYUserAgent &&
 			!strstr(LYUserAgent, "Lynx") &&
 			!strstr(LYUserAgent, "lynx")) {
 			option_statusline(UA_COPYRIGHT_WARNING);
@@ -1241,6 +1448,7 @@ draw_options:
 		if (!no_option_save) {
 		    option_statusline(SAVING_OPTIONS);
 		    if (save_rc()) {
+			LYrcShowColor = LYChosenShowColor;
 			option_statusline(OPTIONS_SAVED);
 		    } else {
 			HTAlert(OPTIONS_NOT_SAVED);
@@ -2675,7 +2883,7 @@ check_recall:
 		 *  If we started at the beginning, it can't be present. - FM
 		 */
 		if (cur_choice == 0) {
-		    _user_message(STRING_NOT_FOUND, prev_target_buffer);
+		    option_user_message(STRING_NOT_FOUND, prev_target_buffer);
 		    sleep(MessageSecs);
 		    goto restore_popup_statusline;
 		}
@@ -2718,7 +2926,7 @@ check_recall:
 		/*
 		 *  Didn't find it in the preceding choices either. - FM
 		 */
-		_user_message(STRING_NOT_FOUND, prev_target_buffer);
+		option_user_message(STRING_NOT_FOUND, prev_target_buffer);
 		sleep(MessageSecs);
 
 restore_popup_statusline:

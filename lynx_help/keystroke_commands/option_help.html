@@ -61,12 +61,34 @@
                            default is 'Case Insensitive' substring
                            searches
 
+     Preferred Document -  The language you prefer if multi-language files
+     Language              are available from servers.  Use RFC 1766 tags,
+                           e.g., en for English, fr for French, etc.  Can be
+                           a comma-separated list, which may be interpreted
+			   by servers as descending order of preferences.
+			   You can also make your order of preference explicit
+			   by using q factors as defined by the HTTP protocol,
+			   for servers which understand it, for example:
+				<kbd>da, en-gb;q=0.8, en;q=0.7</kbd>
+
+     Preferred Document -  The character set you prefer if sets in addition
+     Charset               to ISO-8859-1 and US-ASCII are available from
+                           servers.  Use MIME notation (e.g., ISO-8859-2)
+                           and do not include ISO-8859-1 or US-ASCII, since
+                           those values are always assumed by default.  Can
+                           be a comma-separated list, which may be interpreted
+			   by servers as descending order of preferences.
+			   You can also make your order of preference explicit
+			   by using q factors as defined by the HTTP protocol,
+			   for servers which understand it, for example:
+				<kbd>iso-8859-5, unicode-1-1;q=0.8</kbd>
+
      Display Character  -  This option allows you to set up the default
      set                   character set for your specific terminal.
                            The character set provides a mapping of 8-bit ISO
                            Latin character entities and/or Asian (CJK) or
-                           UTF-8 characters into viewable characters and
-                           should be set in relation to your terminal's
+                           Unicode characters into viewable characters and
+                           should be set according to your terminal's
                            character set if you will be viewing such
                            characters with Lynx.  You must have the selected
                            character set installed on your terminal.
@@ -89,19 +111,44 @@
                            toggled via the RAW_TOGGLE command, normally mapped
                            to '@', and at startup via the -raw switch.
 
-     Preferred Document -  The language you prefer if multi-language files are
-     Language              available from servers.  Use MIME abbreviations,
-                           e.g., en for English, fr for French, etc.  Can be
-                           a comma-separated list in descending order of
-                           preferences.
-
-     Preferred Document -  The character set you prefer if sets in addition
-     Charset               to ISO-8859-1 and US-ASCII are available from
-                           servers.  Use MIME notation (e.g., ISO-8859-2)
-                           and do not include ISO-8859-1 or US-ASCII, since
-                           those values are always assumed by default.  Can
-                           be a comma-separated list in descending order of
-                           preferences.
+     Show color        -   This option will be present if color support is
+                           available.  If set to ON or ALWAYS, color mode will
+                           be forced on if possible.  If (n)curses color
+                           support is available but cannot be used for the
+                           current terminal type, selecting ON is rejected
+                           with a message.  If set to OFF or NEVER, color mode
+                           will be turned off.
+                           ALWAYS and NEVER are not offered in anonymous
+                           accounts.  If saved to a '.lynxrc' file in
+                           non-anonymous accounts, ALWAYS will cause Lynx to
+                           set color mode on at startup if supported.  If Lynx
+                           is built with the slang library, this is equivalent
+                           to having included the -color command line switch
+                           or having the COLORTERM environment variable
+                           set. If color support is provided by curses or
+                           ncurses, this is equivalent to the default behavior
+                           of using color when the terminal type supports it.
+                           If (n)curses color support is available but cannot
+                           be used for the current terminal type, the
+                           preference can still be saved but will have no
+                           effect.
+                           A saved value of NEVER will cause Lynx to assume a
+                           monochrome terminal at startup.  It is similar to
+                           the -nocolor switch, but (when the slang library is
+                           used) can be overridden with the -color switch.
+                           If the setting is OFF or ON when the current
+                           options are saved to a '.lynxrc' file, the default
+                           startup behavior is retained, such that color mode
+                           will be turned on at startup only if the terminal
+                           info indicates that you have a color-capable
+                           terminal, or (when the slang library is used) if
+                           forced on via the -color switch or COLORTERM
+                           variable.  This default behavior always is used in
+                           anonymous accounts, or if the 'option'_save
+                           restriction is set explicitly.  If for any reason
+                           the startup color mode is incorrect for your
+                           terminal, set it appropriately on or off via this
+                           option.
 
      VI keys           -   If set to 'ON' then the lowercase h, j, k, and l,
                            keys will be mapped to left-arrow, down-arrow,
