@@ -1910,7 +1910,10 @@ prompts, or ne'<em>V</em>'er to never allow cookies from that
 MIME headers).	All unexpired cookies are held in a hypothetical
 <em>Cookie Jar</em> which can be examined via the COOKIE_JAR keystroke
 command, normally mapped to <em>Ctrl-K</em>, for invoking the <a
-href="keystrokes/cookie_help.html">Cookie Jar Page</a>.
+href="keystrokes/cookie_help.html">Cookie Jar Page</a>. If Lynx has been
+compiled with the --enable-persistent-cookies flag, then unexpired cookies
+will be stored between sessions in the filename set with the COOKIE_FILE
+option in your .lynxrc.
 
 <p>A common use of cookies by http servers is simply to track the
 documents visited by individual users.	Though this can be useful to the

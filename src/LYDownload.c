@@ -10,12 +10,6 @@
 #include <LYClean.h>
 #include <LYGetFile.h>
 #include <LYDownload.h>
-#ifdef VMS
-#include <HTVMSUtils.h>
-#endif /* VMS */
-#ifdef DOSPATH
-#include <HTDOS.h>
-#endif
 
 #include <LYexit.h>
 #include <LYLeaks.h>
@@ -273,11 +267,7 @@ check_recall:
 
 	if (cp) {
 	    sprintf(command, "%s/%s", cp, buffer);
-#ifdef DOSPATH
-	    strcpy(buffer, HTDOS_name(command));
-#else
-	    strcpy(buffer, command);
-#endif
+	    strcpy(buffer, HTSYS_name(command));
 	}
 #endif /* VMS */
 

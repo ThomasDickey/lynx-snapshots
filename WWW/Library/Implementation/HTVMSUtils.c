@@ -30,6 +30,7 @@
 #include <starlet.h>
 #include <rmsdef.h>
 
+#include <LYUtils.h>
 #include <LYLeaks.h>
 
 #define FREE(x) if (x) {free(x); x = NULL;}
@@ -1245,3 +1246,33 @@ PUBLIC int HTVMSBrowseDir ARGS4(
     return HT_LOADED;
 
 } /* End of directory reading section */
+
+/*
+ * Remove all versions of the given file.  We assume there are no permissions
+ * problems, since we do this mainly for removing temporary files.
+ */
+int HTVMS_remove(char *filename)
+{
+    int code = remove(filename);	/* return the first status code */
+    while (remove(filename) == 0)
+	;
+    return code;
+}
+
+/*
+ * Remove all older versions of the given file.  We may fail to remove some
+ * version due to permissions -- the loop stops either at that point, or when
+ * we run out of older versions to remove.
+ */
+void HTVMS_purge(char *filename)
+{
+    char *older_file = 0;
+
+    StrAllocCopy(older_file, filename);
+    StrAllocCat(older_file, ";-1");
+
+    while (remove(older_file) == 0)
+	;
+
+    FREE(older_file);
+}

@@ -16,6 +16,7 @@
 #include <HTAlert.h>
 #include <HTFile.h>
 
+#include <LYUtils.h>
 #include <LYLeaks.h>
 
 /*		Stream Object

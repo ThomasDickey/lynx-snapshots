@@ -15,12 +15,6 @@
 #include <LYHistory.h>
 #include <LYList.h>
 #include <LYCharSets.h>  /* To get current charset for mail header. */
-#ifdef VMS
-#include <HTVMSUtils.h>
-#endif /* VMS */
-#ifdef DOSPATH
-#include <HTDOS.h>
-#endif
 
 #include <LYLeaks.h>
 
@@ -407,17 +401,9 @@ PUBLIC int printfile ARGS1(
 
 		LYTrimPathSep(cp);
 		if (cp)
-#ifdef DOSPATH
-		    sprintf(buffer, "%s/%s", cp, HTDOS_name(filename));
-#else
-		    sprintf(buffer, "%s/%s", cp, filename);
-#endif
+		    sprintf(buffer, "%s/%s", cp, HTSYS_name(filename));
 		else
-#ifdef DOSPATH
-		    strcpy(buffer, HTDOS_name(filename));
-#else
-		    strcpy(buffer, filename);
-#endif
+		    strcpy(buffer, HTSYS_name(filename));
 #endif /* VMS */
 
 		/*

@@ -1,6 +1,23 @@
 Changes since Lynx 2.8 release
 ================================================================================
 
+1998-10-14 (2.8.1pre.10)
++ add/use HTSYS_purge and HTSYS_remove functions (based on report by Tony
+  Bolton and patch by BJP dealing with removing older versions of cookie files)
+  - TD
+* add --disable-config-info option - TD
+* change configure script --enable-forms-options to --disable-forms-options,
+  add --disable-menu-options - TD
+* comment-out FM's code to fold cookie headers and force cookies to be presented
+  in the same order that they were received - BJP
+* use full "Implementation" directory name in include path in WWW djgpp
+  makefile - DK
+* use HTDOS_name() to force DOS temporary-directory into consistent form - DK
+* include HTVMSUtils.h and HTDOS.h from LYUtils.h, consolidate some ifdef's
+  using macro HTSYS_name - TD
+* another fix for HTTCP.c, for lookups with Lynx/32 - WB 
+* add fallback to $TMPDIR for Lynx temporary directory on Unix - TD
+* remove verbose_links variable due to popular demand - TD
 1998-10-10 (2.8.1pre.9)
 * add verbose_links variable to lynx.cfg and userdefs.h to control whether Lynx
   should show "(LINK)" before links (request/patch by Moshe Zadka

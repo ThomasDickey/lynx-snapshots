@@ -836,7 +836,7 @@ static Config_Type Config_Table [] =
      PARSE_ENV("finger_proxy", CONF_ENV, 0 ),
      PARSE_SET("force_8bit_toupper", CONF_BOOL, UCForce8bitTOUPPER),
      PARSE_SET("force_ssl_cookies_secure", CONF_BOOL, LYForceSSLCookiesSecure),
-#ifndef EXP_FORMS_OPTIONS
+#if !defined(NO_OPTION_FORMS) && !defined(NO_OPTION_MENU)
      PARSE_SET("forms_options", CONF_BOOL, LYUseFormsOptions),
 #endif
      PARSE_ENV("ftp_proxy", CONF_ENV, 0 ),
@@ -950,7 +950,6 @@ static Config_Type Config_Table [] =
 #endif
      PARSE_SET("use_select_popups", CONF_BOOL, LYSelectPopups),
      PARSE_SET("verbose_images", CONF_BOOL, verbose_img),
-     PARSE_SET("verbose_links", CONF_BOOL, verbose_links), 
      PARSE_SET("vi_keys_always_on", CONF_BOOL, vi_keys),
      PARSE_FUN("viewer", CONF_FUN, viewer_fun),
      PARSE_ENV("wais_proxy", CONF_ENV, 0 ),
@@ -1238,23 +1237,27 @@ PUBLIC char *lynx_cfg_infopage NOARGS
 
 	LYforce_no_cache = TRUE;  /* don't cache this doc */
 
+	BeginInternalPage (fp0, LYNXCFG_TITLE, NULL);
+	fprintf(fp0, "<pre>\n");
+
+#ifndef NO_CONFIG_INFO
+	fprintf(fp0, "<em>This is read from your lynx.cfg file,\n");
 #if defined(HAVE_CONFIG_H) || defined(VMS)
 	StrAllocCopy(temp, LYNX_CFG_FILE);
 #else
-	StrAllocCopy(temp, helpfilepath); /* FIXME: no absolute path */
+	StrAllocCopy(temp, helpfilepath); /* no absolute path... */
 	StrAllocCat(temp, LYNXCFG_HELP);  /* for lynx.cfg on DOS/Win32 */
 #endif /* HAVE_CONFIG_H */
-
-	BeginInternalPage (fp0, LYNXCFG_TITLE, NULL);
-	fprintf(fp0, "<pre>\n");
-	fprintf(fp0, "<em>This is read from your lynx.cfg file,\n");
-
 	fprintf(fp0, "please \"read\" distribution's <a href=\"%s\">lynx.cfg",
 		     temp);
 	fprintf(fp0, "</a> for more comments.</em>\n\n");
 
 	fprintf(fp0, "    #<em>Your primary configuration %s</em>\n",
 		     lynx_cfg_file);
+#else
+	fprintf(fp0, "<em>This is read from your lynx.cfg file:</em>\n\n");
+#endif /* NO_CONFIG_INFO */
+
 	/*
 	 *  Process the configuration file.
 	 */

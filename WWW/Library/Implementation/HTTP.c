@@ -7,8 +7,8 @@
 */
 
 #include <HTUtils.h>
-
 #include <HTTP.h>
+#include <LYUtils.h>
 
 #define HTTP_VERSION	"HTTP/1.0"
 

@@ -157,6 +157,11 @@ II. Compile instructions -- UNIX
     order shown by the -help option is different.  See "docs/README.defines"
     for information on defines for which there are no option switches.
 
+  --disable-config-info			(define NO_CONFIG_INFO)
+  	Use this option to disable the browsable configuration information
+	(screens that show the result of the configuration script, as well
+	as a pointer to the lynx.cfg file).
+
   --disable-dired			(define DIRED_SUPPORT)
 	Use this option to disable the optional directory-editor.
 
@@ -217,12 +222,26 @@ II. Compile instructions -- UNIX
 	disable extended HTML DTD logic.  This should revert to old-style
 	(2.7.1/2.7.2) behavior, but is not well-tested.
 
+  --disable-forms-options               (define NO_OPTION_FORMS)
+	Disable the forms-based options screen.  (See --disable-menu-options). 
+	Please note that a few users with broken curses may have problems with
+	popup forms fields.  The default behaviour is to compile both forms and
+	menu options code with FORMS_OPTIONS switch in lynx.cfg, or
+	-forms_options command-line switch.
+
   --disable-full-paths
   	Use this option to control whether full utility pathnames are used.
 	By default, configure substitutes full pathnames.
 
   --disable-long-list			(prevent defining LONG_LIST)
   	Use this option to disable long "ls -l" directory listings.
+
+  --disable-menu-options                (define NO_OPTION_MENU)
+	Disable the menu-style options screen.  (See --disable-forms-options). 
+	Please note that a few users with broken curses may have problems with
+	popup forms fields.  The default behaviour is to compile both styles
+	options menu code with FORMS_OPTIONS switch in lynx.cfg, or
+	-forms_options command-line switch.
 
   --disable-parent-dir-refs		(define NO_PARENT_DIR_REFERENCE)
   	Use this option to disable "Up-to" parent-links in directory listings.
@@ -263,12 +282,6 @@ II. Compile instructions -- UNIX
 	Allow Lynx to automatically change the Linux console state (switch
 	fonts) according to the current Display Character Set.  (Linux console
         only.  *Use with discretion.*  See docs/README.chartrans.)
-
-  --enable-forms-options                (define EXP_FORMS_OPTIONS)
-	Use forms-based options screen only.
-	Please note that a few users with broken curses may have problems
-	with popup forms fields.  (The default behaviour is to compile
-	both styles options menu code with FORMS_OPTIONS switch in lynx.cfg).
 
   --enable-internal-links		(define DONT_TRACK_INTERNAL_LINKS)
 	Disabled by default, this option allows tracking of internal links,

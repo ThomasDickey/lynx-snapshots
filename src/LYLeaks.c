@@ -155,22 +155,8 @@ PUBLIC void LYLeaks NOARGS
     fprintf(Fp_leakagesink, "\nTotal memory leakage this run:\t%u\n",
 		(unsigned)st_total);
     fclose(Fp_leakagesink);
-#ifdef VMS
-    {
-	char VMSfilename[256];
-	/*
-	 *  Purge lower versions of the file.
-	 */
-	sprintf(VMSfilename, "%s;-1", LEAKAGE_SINK);
-	while (remove(VMSfilename) == 0)
-	    ;
-	/*
-	 *  Reset version number.
-	 */
-	sprintf(VMSfilename, "%s;1", LEAKAGE_SINK);
-	rename(LEAKAGE_SINK, VMSfilename);
-    }
-#endif /* VMS */
+
+    HTSYS_purge(LEAKAGE_SINK);
 }
 
 /*

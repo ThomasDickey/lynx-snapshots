@@ -46,10 +46,6 @@
 #include <io.h>
 #endif
 
-#ifdef VMS
-#include <HTVMSUtils.h>
-#endif /* VMS */
-
 #ifdef DIRED_SUPPORT
 #include <LYLocal.h>
 #include <LYUpload.h>
@@ -202,7 +198,7 @@ int mainloop NOARGS
     BOOLEAN vi_keys_flag = vi_keys;
     BOOLEAN emacs_keys_flag = emacs_keys;
     BOOLEAN LYRawMode_flag = LYRawMode;
-#ifndef EXP_FORMS_OPTIONS
+#ifndef NO_OPTION_MENU
     BOOLEAN LYSelectPopups_flag = LYSelectPopups;
     BOOLEAN verbose_img_flag = verbose_img;
     BOOLEAN keypad_mode_flag = keypad_mode;
@@ -3721,7 +3717,7 @@ check_goto_URL:
 #ifdef DIRED_SUPPORT
 	    c = dir_list_style;
 #endif /* DIRED_SUPPORT */
-#ifndef EXP_FORMS_OPTIONS
+#ifndef NO_OPTION_MENU
 if (!LYUseFormsOptions) {
 
 	    LYoptions(); /* do the old-style options stuff */
@@ -3820,7 +3816,8 @@ if (!LYUseFormsOptions) {
 	    refresh_screen = TRUE; /* to repaint screen */
 	    break;
 } /* end if !LYUseFormsOptions */
-#endif /* !EXP_FORMS_OPTIONS */
+#endif /* !NO_OPTION_MENU */
+#ifndef NO_OPTION_FORMS
 	    /*
 	     * FIXME: Blatantly stolen from LYK_PRINT below.
 	     * how much is really valid here?  I don't know the
@@ -3852,6 +3849,7 @@ if (!LYUseFormsOptions) {
 		 */
 		HTuncache_current_document();
 	    }
+#endif /* NO_OPTION_FORMS */
 	    break;
 
 	case LYK_INDEX_SEARCH: /* search for a user string */
@@ -5073,8 +5071,7 @@ check_add_bookmark_to_self:
 		}
 #ifdef VMS
 		LYCloseTracelog();
-		while (remove(LYTraceLogPath) == 0)
-		    ;
+		HTSYS_remove(LYTraceLogPath);
 		if ((LYTraceLogFP = LYNewTxtFile(LYTraceLogPath)) == NULL) {
 		    TracelogOpenFailed();
 		    break;

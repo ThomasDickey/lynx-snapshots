@@ -23,7 +23,7 @@
 #include <LYLocal.h>
 #endif /* DIRED_SUPPORT */
 
-#ifdef HAVE_CONFIG_H
+#ifndef NO_CONFIG_INFO
 #define HAVE_CFG_DEFS_H
 
 #define PutDefs(table, N) fprintf(fp0, "%-35s %s\n", table[N].name, table[N].value)
@@ -68,7 +68,7 @@ PRIVATE char *lynx_compile_opts NOARGS
 }
 #else
 #undef HAVE_CFG_DEFS_H
-#endif /* HAVE_CONFIG_H */
+#endif /* !NO_CONFIG_INFO */
 
 /*
  *  Showinfo prints a page of info about the current file and the link

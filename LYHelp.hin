@@ -9,6 +9,7 @@
 #define DOWNLOAD_OPTIONS_HELP	"@LYNX_USERS_GUIDE@#RemoteSource"
 #define HISTORY_PAGE_HELP	"keystrokes/@HISTORY_HELP@"
 #define LIST_PAGE_HELP		"keystrokes/@FOLLOW_HELP@"
+#define LYNXCFG_HELP		"lynx.cfg"
 #define OPTIONS_HELP		"keystrokes/@OPTION_HELP@"
 #define PRINT_OPTIONS_HELP	"keystrokes/@PRINT_HELP@"
 #define UPLOAD_OPTIONS_HELP	"@LYNX_USERS_GUIDE@#DirEd"

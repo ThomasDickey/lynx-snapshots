@@ -442,13 +442,29 @@ dnl --------------------------------------------------------------------------
 CF_HELP_MESSAGE(
 Miscellaneous Options:)
 
-AC_MSG_CHECKING(if experimental forms-based options screen should be used)
-CF_ARG_ENABLE(forms-options,
-[  --enable-forms-options  use experimental forms-based options],
+AC_MSG_CHECKING(if new-style forms-based options screen should be used)
+CF_ARG_DISABLE(forms-options,
+[  --disable-forms-options disable experimental forms-based options],
 	[use_forms_options=$enableval],
-	[use_forms_options=no])
+	[use_forms_options=yes])
 AC_MSG_RESULT($use_forms_options)
-test $use_forms_options != no && AC_DEFINE(EXP_FORMS_OPTIONS)
+test $use_forms_options = no && AC_DEFINE(NO_OPTION_FORMS)
+
+AC_MSG_CHECKING(if old-style options menu should be used)
+CF_ARG_DISABLE(menu-options,
+[  --disable-menu-options  disable old-style option menu],
+	[use_menu_options=$enableval],
+	[use_menu_options=yes])
+AC_MSG_RESULT($use_menu_options)
+test $use_menu_options = no && AC_DEFINE(NO_OPTION_MENU)
+
+AC_MSG_CHECKING(if configuration info should be browsable)
+CF_ARG_DISABLE(config-info,
+[  --disable-config-info   disable browsable configuration-info],
+	[use_config_info=$enableval],
+	[use_config_info=yes])
+AC_MSG_RESULT($use_config_info)
+test $use_config_info = no && AC_DEFINE(NO_CONFIG_INFO)
 
 AC_MSG_CHECKING(if experimental persistent-cookie logic should be used)
 CF_ARG_ENABLE(persistent-cookies,

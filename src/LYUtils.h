@@ -5,6 +5,30 @@
 #include <HTList.h>
 #endif /* HTLIST_H */
 
+#ifdef VMS
+#include <HTVMSUtils.h>
+#define HTSYS_name(path)   HTVMS_name("", path)
+#define HTSYS_purge(path)  HTVMS_purge(path)
+#define HTSYS_remove(path) HTVMS_remove(path)
+#endif /* VMS */
+
+#if defined(DOSPATH) || defined(__EMX__)
+#include <HTDOS.h>
+#define HTSYS_name(path) HTDOS_name(path)
+#endif
+
+#ifndef HTSYS_name
+#define HTSYS_name(path) path
+#endif
+
+#ifndef HTSYS_purge
+#define HTSYS_purge(path) /*nothing*/
+#endif
+
+#ifndef HTSYS_remove
+#define HTSYS_remove(path) remove(path)
+#endif
+
 #ifdef DOSPATH
 #define LYIsPathSep(ch) ((ch) == '/' || (ch) == '\\')
 #else

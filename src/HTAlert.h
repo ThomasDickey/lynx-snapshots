@@ -39,7 +39,6 @@ extern void HTUserMsg2 PARAMS((CONST char * Msg, CONST char * Arg));
 */
 extern void HTProgress PARAMS((CONST char * Msg));
 extern void HTReadProgress PARAMS((long bytes, long total));
-extern BOOLEAN mustshow;
 #define _HTProgress(msg)	mustshow = TRUE, HTProgress(msg)
 
 /*

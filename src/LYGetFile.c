@@ -24,9 +24,6 @@
 #include <LYBookmark.h>
 #include <LYMap.h>
 #include <LYList.h>
-#ifdef VMS
-#include <HTVMSUtils.h>
-#endif /* VMS */
 #ifdef DIRED_SUPPORT
 #include <LYLocal.h>
 #endif /* DIRED_SUPPORT */
@@ -242,9 +239,11 @@ Try_Redirected_URL:
 		} else if (url_type == LYNXPRINT_URL_TYPE) {
 		    return(printfile(doc));
 
+#ifndef NO_OPTION_FORMS
 		} else if (url_type == LYNXOPTIONS_URL_TYPE) {
 		    /* forms-based options menu */
 		    return(postoptions(doc));
+#endif
 
 		} else if (url_type == NEWSPOST_URL_TYPE ||
 			   url_type == NEWSREPLY_URL_TYPE ||

@@ -68,6 +68,7 @@
 #include <HTML.h>
 
 #include <LYStrings.h>
+#include <LYUtils.h>
 #include <LYLeaks.h>
 
 #define PUTC(c) (*targetClass.put_character)(target, c)

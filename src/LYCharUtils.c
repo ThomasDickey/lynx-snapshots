@@ -37,13 +37,6 @@
 #include <LYCurses.h>
 #include <LYCookie.h>
 
-#ifdef VMS
-#include <HTVMSUtils.h>
-#endif /* VMS */
-#ifdef DOSPATH
-#include <HTDOS.h>
-#endif
-
 #include <LYexit.h>
 #include <LYLeaks.h>
 
