@@ -408,7 +408,7 @@ AC_ARG_WITH(screen,
                           (XXX is curses (default), ncurses or slang)],
 	[
 case $withval in
-curses|ncurses|slang)
+curses|ncurses|pdcurses|slang)
 	cf_cv_screen=$withval
 	;;
 *)	AC_ERROR(Unexpected value)
@@ -416,11 +416,18 @@ curses|ncurses|slang)
 esac],
 	[cf_cv_screen=curses])])
 
-if test $cf_cv_screen != ncurses ; then
+case $cf_cv_screen in
+ncurses|slang)
+	;;
+pdcurses)
+	cf_cv_ncurses_header=xcurses.h
+	;;
+curses)
 	if eval "test \"`echo '$''{'cf_cv_ncurses_header'+set}'`\" != set"; then
 		cf_cv_ncurses_header=curses.h
 	fi
-fi
+	;;
+esac
 
 case $cf_cv_screen in
 curses)
@@ -431,9 +438,11 @@ ncurses)
 	CF_NCURSES_CPPFLAGS
 	CF_NCURSES_LIBS
 	;;
+pdcurses)
+	# do this last, since it changes definition of main: CF_PDCURSES_X11
+	;;
 slang)
-	CF_SLANG_CPPFLAGS
-	CF_SLANG_LIBS
+	CF_SLANG_UNIX_DEFS
 	;;
 esac
 
@@ -929,7 +938,7 @@ AC_MSG_RESULT($use_zlib)
 
 if test ".$use_zlib" != ".no" ; then
 	AC_MSG_CHECKING(if we need to add -I option to get zlib.h)
-	AC_TRY_COMPILE([#include <zlibx.h>],[],[AC_MSG_RESULT(no)],[
+	AC_TRY_COMPILE([#include <zlib.h>],[],[AC_MSG_RESULT(no)],[
 	AC_MSG_RESULT(yes)
 	CF_HEADER_PATH(cf_search,zlib)
 	for cf_incdir in $cf_search
@@ -1057,7 +1066,11 @@ AC_MSG_RESULT($enableval)
 dnl --------------------------------------------------------------------------
 dnl Test features that rely on configure-definitions
 dnl --------------------------------------------------------------------------
-CF_TERMIO_AND_CURSES(LYCurses.h)
+if test $cf_cv_screen = pdcurses ; then
+	CF_PDCURSES_X11
+else
+	CF_TERMIO_AND_CURSES(LYCurses.h)
+fi
 
 ### Finally, build config.h and the makefiles
 CFLAGS="$CFLAGS $EXTRA_CFLAGS"

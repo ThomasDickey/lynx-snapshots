@@ -28,7 +28,7 @@ BOOLEAN term_options;
 
 PRIVATE void terminate_options	PARAMS((int sig));
 
-#if !defined(NO_OPTION_MENU) || (defined(NCURSES_MOUSE_VERSION) || defined(PDCURSES_MOUSE_VERSION))
+#if !defined(NO_OPTION_MENU) || (defined(USE_MOUSE) && (defined(NCURSES) || defined(PDCURSES)))
 #define COL_OPTION_VALUES 36  /* display column where option values start */
 #endif
 
@@ -2138,7 +2138,7 @@ draw_bookmark_list:
     signal(SIGINT, cleanup_sig);
 }
 
-#if !defined(NO_OPTION_MENU) || (defined(NCURSES_MOUSE_VERSION) || defined(PDCURSES_MOUSE_VERSION))
+#if !defined(NO_OPTION_MENU) || (defined(USE_MOUSE) && (defined(NCURSES) || defined(PDCURSES)))
 /*
 **  This function prompts for a choice or page number.
 **  If a 'g' or 'p' suffix is included, that will be
@@ -2384,7 +2384,7 @@ PUBLIC int popup_choice ARGS7(
 	StrAllocCopy(popup_status_msg, CHOICE_LIST_UNM_MSG);
     } else if (!for_mouse) {
 	StrAllocCopy(popup_status_msg, CHOICE_LIST_MESSAGE);
-#if defined(NCURSES_MOUSE_VERSION) || defined(PDCURSES_MOUSE_VERSION)
+#if defined(USE_MOUSE) && (defined(NCURSES) || defined(PDCURSES))
     } else {
 	StrAllocCopy(popup_status_msg, gettext(
 		"Left mouse button or return to select, arrow keys to scroll."));
@@ -3148,7 +3148,7 @@ restore_popup_statusline:
 #ifndef USE_SLANG
     touchwin(stdscr);
     delwin(form_window);
-#ifdef NCURSES
+#if defined(NCURSES) || defined(PDCURSES)
     LYsubwindow(0);
 #endif
 #endif /* !USE_SLANG */

@@ -128,6 +128,7 @@
 #undef HAVE_WAITPID
 #undef HAVE_WBORDER
 #undef HAVE_WREDRAWLN
+#undef HAVE_XCURSES		/* CF_PDCURSES_X11 */
 #undef HAVE___ARGZ_COUNT	/* defined by AM_GNU_GETTEXT */
 #undef HAVE___ARGZ_NEXT		/* defined by AM_GNU_GETTEXT */
 #undef HAVE___ARGZ_STRINGIFY	/* defined by AM_GNU_GETTEXT */
@@ -165,6 +166,7 @@
 #undef OK_TAR			/* CF_ARG_DISABLE(dired-tar) */
 #undef OK_UUDECODE		/* CF_ARG_DISABLE(dired-uudecode) */
 #undef OK_ZIP			/* CF_ARG_DISABLE(dired-zip) */
+#undef REAL_UNIX_SYSTEM		/* CF_SLANG_UNIX_DEFS */
 #undef RLOGIN_PATH		/* CF_PATH_PROG(rlogin) */
 #undef RM_PATH			/* CF_PATH_PROG(rm) */
 #undef SOCKS			/* CF_SOCKS, CF_SOCKS5 */
@@ -201,6 +203,7 @@
 #undef UUDECODE_PATH		/* CF_PATH_PROG(uudecode) */
 #undef WAITPID_USES_UNION	/* CF_FUNC_WAIT */
 #undef WAIT_USES_UNION		/* CF_FUNC_WAIT */
+#undef XCURSES			/* CF_PDCURSES_X11 */
 #undef ZCAT_PATH		/* CF_PATH_PROG(zcat) */
 #undef ZIP_PATH			/* CF_PATH_PROG(zip) */
 #undef _ALL_SOURCE		/* AC_AIX */

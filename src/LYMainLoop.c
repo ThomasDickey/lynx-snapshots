@@ -452,6 +452,7 @@ PRIVATE void set_curdoc_link ARGS1(
 
 PRIVATE int do_change_link NOARGS
 {
+#ifdef USE_MOUSE
     /* Is there a mouse-clicked link waiting? */
     int mouse_tmp = get_mouse_link();
     /* If yes, use it as the link */
@@ -467,6 +468,7 @@ PRIVATE int do_change_link NOARGS
 	}
 	set_curdoc_link(mouse_tmp);
     }
+#endif /* USE_MOUSE */
     return(0);			/* indicates OK */
 }
 

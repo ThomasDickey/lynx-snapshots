@@ -34,13 +34,10 @@ DEFS = $(CS_DEFS) \
  /D "DISP_PARTIAL" \
  /D "DOSPATH" \
  /D "EXP_ALT_BINDINGS" \
- /D "EXP_CHARTRANS" \
  /D "EXP_PERSISTENT_COOKIES" \
  /D "FANCY_CURSES" \
  /D "HAVE_KEYPAD" \
  /D "LONG_LIST" \
- /D "NCURSES" \
- /D "NCURSES_VERSION" \
  /D "NDEBUG" \
  /D "NO_CONFIG_INFO" \
  /D "NO_CUSERID" \
@@ -51,11 +48,13 @@ DEFS = $(CS_DEFS) \
  /D "NOSIGHUP" \
  /D "NOUSERS" \
  /D "PDCURSES" \
+ /D "SOURCE_CACHE" \
  /D "SH_EX" \
  /D "SUPPORT_MULTIBYTE_EDIT" \
  /D "USE_COLOR_TABLE" \
  /D "USE_EXTERNALS" \
  /D "USE_MULTIBYTE_CURSES" \
+ /D "USE_PRETTYSRC" \
  /D "USE_ZLIB" \
  /D "WIN_EX" \
  /D "WIN32" \
@@ -139,6 +138,7 @@ OBJS = $(CS_OBJS) \
 	"LYMap.obj" \
 	"LYNews.obj" \
 	"LYOptions.obj" \
+	"LYPrettySrc.obj" \
 	"LYPrint.obj" \
 	"LYrcFile.obj" \
 	"LYReadCFG.obj" \
@@ -264,6 +264,9 @@ LYNews.obj : $(SRC_DIR)\LYNews.c
 
 LYOptions.obj : $(SRC_DIR)\LYOptions.c
 	$(COMPILE) $(SRC_DIR)\LYOptions.c
+
+LYPrettySrc.obj : $(SRC_DIR)\LYPrettySrc.c
+	$(COMPILE) $(SRC_DIR)\LYPrettySrc.c
 
 LYPrint.obj : $(SRC_DIR)\LYPrint.c
 	$(COMPILE) $(SRC_DIR)\LYPrint.c

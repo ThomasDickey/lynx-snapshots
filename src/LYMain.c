@@ -3626,7 +3626,7 @@ treated '>' as a co-terminator for double-quotes and tags"
       "underscore",	TOGGLE_ARG,		&use_underscore,
       "toggles use of _underline_ format in dumps"
    ),
-#if defined(NCURSES_MOUSE_VERSION) || defined(PDCURSES_MOUSE_VERSION) || defined(USE_SLANG_MOUSE)
+#if defined(USE_MOUSE)
    PARSE_SET(
       "use_mouse",	SET_ARG,		&LYUseMouse,
       "turn on mouse support"

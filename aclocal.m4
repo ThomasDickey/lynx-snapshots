@@ -736,9 +736,14 @@ do
 		eval cf_result='$ac_cv_func_'$cf_func
 		if test ".$cf_result" != ".no"; then
 			AC_TRY_LINK([
+#ifdef HAVE_XCURSES
+#include <xcurses.h>
+char * XCursesProgramName = "test";
+#else
 #include <curses.h>
 #ifdef HAVE_TERM_H
 #include <term.h>
+#endif
 #endif],
 			[
 #ifndef ${cf_func}
@@ -767,7 +772,7 @@ case $host_os in #(vi
 freebsd*) #(vi
 	AC_CHECK_LIB(mytinfo,tgoto,[LIBS="-lmytinfo $LIBS"])
 	;;
-hpux10.*)
+hpux10.*|hpux11.*)
 	AC_CHECK_LIB(cur_colr,initscr,[
 		LIBS="-lcur_colr $LIBS"
 		CFLAGS="-I/usr/include/curses_colr $CFLAGS"
@@ -1765,6 +1770,32 @@ case ".[$]$1" in #(vi
 esac
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl Configure for PDCurses' X11 library
+AC_DEFUN([CF_PDCURSES_X11],[
+AC_REQUIRE([CF_X_ATHENA])
+LDFLAGS="$LDFLAGS $X_LIBS"
+CFLAGS="$CFLAGS $X_CFLAGS"
+AC_CHECK_LIB(X11,XOpenDisplay,
+	[LIBS="-lX11 $LIBS"],,
+	[$X_PRE_LIBS $LIBS $X_EXTRA_LIBS])
+AC_CACHE_CHECK(for XCurses library,cf_cv_lib_XCurses,[
+LIBS="-lXCurses $LIBS"
+AC_TRY_LINK([
+#include <xcurses.h>
+char *XCursesProgramName = "test";
+],[XCursesExit();],
+[cf_cv_lib_XCurses=yes],
+[cf_cv_lib_XCurses=no])
+])
+if test $cf_cv_lib_XCurses = yes ; then
+	AC_DEFINE(UNIX)
+	AC_DEFINE(XCURSES)
+	AC_DEFINE(HAVE_XCURSES)
+else
+	AC_ERROR(Cannot link with XCurses)
+fi
+])
+dnl ---------------------------------------------------------------------------
 dnl Re-check on a function to see if we can pick it up by adding a library.
 dnl	$1 = function to check
 dnl	$2 = library to check in
@@ -1968,6 +1999,28 @@ AC_TRY_LINK([#include <slang.h>],
 	[cf_result=no])
 AC_MSG_RESULT($cf_result)
 test $cf_result = no && LIBS="$cf_slang_LIBS3"
+])dnl
+dnl ---------------------------------------------------------------------------
+dnl Slang's header files rely on some predefined symbols to declare variables
+dnl that we might find useful.  This check is needed, because those symbols
+dnl are generally not available.
+AC_DEFUN([CF_SLANG_UNIX_DEFS],
+[
+AC_REQUIRE([CF_SLANG_CPPFLAGS])
+AC_REQUIRE([CF_SLANG_LIBS])
+AC_CACHE_CHECK(if we must tell slang this is UNIX,cf_cv_slang_unix,[
+AC_TRY_LINK([#include <slang.h>],
+	[
+#ifdef REAL_UNIX_SYSTEM
+make an error
+#else
+int x = SLang_TT_Baud_Rate
+#endif
+],
+	[cf_cv_slang_unix=yes],
+	[cf_cv_slang_unix=no])
+])
+test $cf_cv_slang_unix = yes && AC_DEFINE(REAL_UNIX_SYSTEM)
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl Check for socks library
@@ -2350,4 +2403,155 @@ AC_TRY_LINK([
 	[cf_cv_need_xopen_extension=yes],
 	[cf_cv_need_xopen_extension=no])])])
 test $cf_cv_need_xopen_extension = yes && CFLAGS="$CFLAGS -D_XOPEN_SOURCE_EXTENDED"
+])dnl
+dnl ---------------------------------------------------------------------------
+dnl Check for Xaw (Athena) libraries
+dnl
+AC_DEFUN([CF_X_ATHENA],
+[AC_REQUIRE([CF_X_TOOLKIT])
+cf_x_athena=${cf_x_athena-Xaw}
+
+AC_ARG_WITH(Xaw3d,
+	[  --with-Xaw3d            link with Xaw 3d library],
+	[cf_x_athena=Xaw3d])
+
+AC_ARG_WITH(neXtaw,
+	[  --with-neXtaw           link with neXT Athena library],
+	[cf_x_athena=neXtaw])
+
+
+AC_CHECK_LIB(Xext,XextCreateExtension,
+	[LIBS="-lXext $LIBS"])
+
+cf_x_athena_include=""
+cf_x_athena_lib=""
+
+for cf_path in default \
+	/usr/contrib/X11R6 \
+	/usr/contrib/X11R5 \
+	/usr/lib/X11R5
+do
+
+	if test -z "$cf_x_athena_include" ; then
+		cf_save="$CFLAGS"
+		cf_test=X11/$cf_x_athena/SimpleMenu.h
+		if test $cf_path != default ; then
+			CFLAGS="-I$cf_path/include $cf_save"
+			AC_MSG_CHECKING(for $cf_test in $cf_path)
+		else
+			AC_MSG_CHECKING(for $cf_test)
+		fi
+		AC_TRY_COMPILE([
+#include <X11/Intrinsic.h>
+#include <$cf_test>],[],
+			[cf_result=yes],
+			[cf_result=no])
+		AC_MSG_RESULT($cf_result)
+		if test "$cf_result" = yes ; then
+			cf_x_athena_include=$cf_path
+		else
+			CFLAGS="$cf_save"
+		fi
+	fi
+
+	for cf_lib in "-l$cf_x_athena -lXmu" "-l${cf_x_athena}_s -lXmu_s"
+	do
+		if test -z "$cf_x_athena_lib" ; then
+			cf_save="$LIBS"
+			cf_test=XawSimpleMenuAddGlobalActions
+			if test $cf_path != default ; then
+				LIBS="-L$cf_path/lib $cf_lib $LIBS"
+				AC_MSG_CHECKING(for $cf_lib in $cf_path)
+			else
+				LIBS="$cf_lib $LIBS"
+				AC_MSG_CHECKING(for $cf_test in $cf_lib)
+			fi
+			AC_TRY_LINK([],[$cf_test()],
+				[cf_result=yes],
+				[cf_result=no],
+				[$X_PRE_LIBS $LIBS $X_EXTRA_LIBS])
+			AC_MSG_RESULT($cf_result)
+			if test "$cf_result" = yes ; then
+				cf_x_athena_lib="$cf_lib"
+			else
+				LIBS="$cf_save"
+			fi
+		fi
+	done
+done
+
+if test -z "$cf_x_athena_include" ; then
+	AC_MSG_WARN(
+[Unable to successfully find Athena header files with test program])
+fi
+
+if test -z "$cf_x_athena_lib" ; then
+	AC_ERROR(
+[Unable to successfully link Athena library (-l$cf_x_athena) with test program])
+fi
+
+CF_UPPER(CF_X_ATHENA_LIBS,HAVE_LIB_$cf_x_athena)
+AC_DEFINE_UNQUOTED($CF_X_ATHENA_LIBS)
+])dnl
+dnl ---------------------------------------------------------------------------
+dnl Check for X Toolkit libraries
+dnl
+AC_DEFUN([CF_X_TOOLKIT],
+[
+AC_REQUIRE([CF_CHECK_CACHE])
+# We need to check for -lsocket and -lnsl here in order to work around an
+# autoconf bug.  autoconf-2.12 is not checking for these prior to checking for
+# the X11R6 -lSM and -lICE libraries.  The resultant failures cascade...
+# 	(tested on Solaris 2.5 w/ X11R6)
+SYSTEM_NAME=`echo "$cf_cv_system_name"|tr ' ' -`
+cf_have_X_LIBS=no
+case $SYSTEM_NAME in
+changequote(,)dnl
+irix[56]*) ;;
+changequote([,])dnl
+clix*)
+	# FIXME: modify the library lookup in autoconf to
+	# allow _s.a suffix ahead of .a
+	AC_CHECK_LIB(c_s,open,
+		[LIBS="-lc_s $LIBS"
+	AC_CHECK_LIB(bsd,gethostname,
+		[LIBS="-lbsd $LIBS"
+	AC_CHECK_LIB(nsl_s,gethostname,
+		[LIBS="-lnsl_s $LIBS"
+	AC_CHECK_LIB(X11_s,XOpenDisplay,
+		[LIBS="-lX11_s $LIBS"
+	AC_CHECK_LIB(Xt_s,XtAppInitialize,
+		[LIBS="-lXt_s $LIBS"
+		 cf_have_X_LIBS=Xt
+		]) ]) ]) ]) ])
+	;;
+*)
+	AC_CHECK_LIB(socket,socket)
+	AC_CHECK_LIB(nsl,gethostname)
+	;;
+esac
+
+if test $cf_have_X_LIBS = no ; then
+	AC_PATH_XTRA
+	LDFLAGS="$LDFLAGS $X_LIBS"
+	CFLAGS="$CFLAGS $X_CFLAGS"
+	AC_CHECK_LIB(X11,XOpenDisplay,
+		[LIBS="-lX11 $LIBS"],,
+		[$X_PRE_LIBS $LIBS $X_EXTRA_LIBS])
+	AC_CHECK_LIB(Xt, XtAppInitialize,
+		[AC_DEFINE(HAVE_LIBXT)
+		 cf_have_X_LIBS=Xt
+		 LIBS="-lXt $X_PRE_LIBS $LIBS"],,
+		[$X_PRE_LIBS $LIBS $X_EXTRA_LIBS])
+else
+	LDFLAGS="$LDFLAGS $X_LIBS"
+	CFLAGS="$CFLAGS $X_CFLAGS"
+fi
+
+if test $cf_have_X_LIBS = no ; then
+	AC_WARN(
+[Unable to successfully link X Toolkit library (-lXt) with
+test program.  You will have to check and add the proper libraries by hand
+to makefile.])
+fi
 ])dnl
