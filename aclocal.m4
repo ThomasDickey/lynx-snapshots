@@ -387,6 +387,14 @@ test "$prefix" != /usr/local     && $1="[$]$1 /usr/local/include /usr/local/incl
 test "$prefix" != /usr           && $1="[$]$1 /usr/include /usr/include/$2"
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl Insert text into the help-message, for readability, from AC_ARG_WITH.
+AC_DEFUN([CF_HELP_MESSAGE],
+[AC_DIVERT_PUSH(AC_DIVERSION_NOTICE)dnl
+ac_help="$ac_help
+[$1]"
+AC_DIVERT_POP()dnl
+])dnl
+dnl ---------------------------------------------------------------------------
 dnl Construct a search-list for a nonstandard library-file
 AC_DEFUN([CF_LIBRARY_PATH],
 [$1=""
@@ -999,6 +1007,26 @@ $1=`echo $2 | tr '[a-z]' '[A-Z]'`
 changequote([,])dnl
 ])dnl
 dnl ---------------------------------------------------------------------------
+AC_DEFUN([CF_UNION_WAIT],
+[
+AC_MSG_CHECKING([for union wait])
+AC_CACHE_VAL(cf_cv_type_unionwait,[
+	AC_TRY_COMPILE([
+#include <sys/types.h>
+#if HAVE_SYS_WAIT_H
+#include <sys/wait.h>
+#endif
+#if HAVE_WAITSTATUS_H
+#include <waitstatus.h>
+#endif
+],
+	[union wait x],
+	[cf_cv_type_unionwait=yes],
+	[cf_cv_type_unionwait=no])])
+AC_MSG_RESULT($cf_cv_type_unionwait)
+test $cf_cv_type_unionwait = yes && AC_DEFINE(HAVE_TYPE_UNIONWAIT)
+])dnl
+dnl ---------------------------------------------------------------------------
 AC_DEFUN([CF_UTMP],
 [
 AC_MSG_CHECKING(if struct utmp is declared)
@@ -1021,17 +1049,31 @@ test $cf_cv_have_utmp = utmpx && AC_DEFINE(UTMPX_FOR_UTMP)
 dnl ---------------------------------------------------------------------------
 dnl Wrapper for AC_ARG_WITH to ensure that user supplies a pathname, not just
 dnl defaulting to yes/no.
+dnl
+dnl $1 = option name
+dnl $2 = help-text
+dnl $3 = environment variable to set
+dnl $4 = default value, shown in the help-message, must be a constant
+dnl $5 = default value, if it's an expression & cannot be in the help-message
+dnl
 AC_DEFUN([CF_WITH_PATH],
 [AC_ARG_WITH($1,[$2 ](default: ifelse($4,,empty,$4)),,
-ifelse($4,,[withval="${$3}"],[withval="${$3-$4}"]))dnl
+ifelse($4,,[withval="${$3}"],[withval="${$3-ifelse($5,,$4,$5)}"]))dnl
 case ".$withval" in #(vi
-./*)
+./*) #(vi
+  ;;
+.\${*) #(vi
+  eval withval="$withval"
+  case ".$withval" in #(vi
+  .NONE/*)
+    withval=`echo $withval | sed -e s@NONE@$ac_default_prefix@`
+    ;;
+  esac
   ;; #(vi
 *)
-  echo 'configure: error: expected a pathname for $3' 1>&2
-  exit 1
+  AC_ERROR(expected a pathname for $1)
   ;;
 esac
-$3="$withval"
+eval $3="$withval"
 AC_SUBST($3)dnl
 ])dnl

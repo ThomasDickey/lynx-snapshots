@@ -88,8 +88,12 @@ $ define/user sys$output 'CHRwhere'iso04_uni.h
 $ makeuctb iso04_uni.tbl
 $ define/user sys$output 'CHRwhere'iso05_uni.h
 $ makeuctb iso05_uni.tbl
+$ define/user sys$output 'CHRwhere'iso06_uni.h
+$ makeuctb iso06_uni.tbl
 $ define/user sys$output 'CHRwhere'iso07_uni.h
 $ makeuctb iso07_uni.tbl
+$ define/user sys$output 'CHRwhere'iso08_uni.h
+$ makeuctb iso08_uni.tbl
 $ define/user sys$output 'CHRwhere'iso09_uni.h
 $ makeuctb iso09_uni.tbl
 $ define/user sys$output 'CHRwhere'iso10_uni.h
@@ -110,6 +114,8 @@ $ define/user sys$output 'CHRwhere'cp1251_uni.h
 $ makeuctb cp1251_uni.tbl
 $ define/user sys$output 'CHRwhere'cp1252_uni.h
 $ makeuctb cp1252_uni.tbl
+$ define/user sys$output 'CHRwhere'viscii_uni.h
+$ makeuctb viscii_uni.tbl
 $ define/user sys$output 'CHRwhere'utf8_uni.h
 $ makeuctb utf8_uni.tbl
 $ define/user sys$output 'CHRwhere'mnemonic_suni.h

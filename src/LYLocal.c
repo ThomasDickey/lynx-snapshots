@@ -34,6 +34,7 @@
 #include "HTParse.h"
 #include "LYCurses.h"
 #include "LYGlobalDefs.h"
+#include "HTAlert.h"
 #include "LYUtils.h"
 #include "LYStrings.h"
 #include "LYCharUtils.h"
@@ -1353,8 +1354,8 @@ form to permit %s %s.\n</Ol>\n</Form>\n",
 	/*
 	 *  Call chmod().
 	 */
-	sprintf(tmpbuf, "chmod %.4o %s", new_mode, destpath);
-	sprintf(amode, "%.4o", new_mode);
+	sprintf(tmpbuf, "chmod %.4o %s", (unsigned int)new_mode, destpath);
+	sprintf(amode, "%.4o", (unsigned int)new_mode);
 	args[0] = "chmod";
 	args[1] = amode;
 	args[2] = destpath;
@@ -2204,11 +2205,11 @@ PUBLIC int LYExecv ARGS3(
     int rc;
     char tmpbuf[512];
     pid_t pid;
-#if defined(NeXT) || defined(AIX4) || defined(sony_news)
+#if HAVE_TYPE_UNION_WAIT && !HAVE_WAITPID
     union wait wstatus;
 #else
     int wstatus;
-#endif /* NeXT || AIX4 || sony_news */
+#endif
 
     rc = 1;		/* It will work */
     tmpbuf[0] = '\0';	/* empty buffer for alert messages */
@@ -2223,12 +2224,12 @@ PUBLIC int LYExecv ARGS3(
 	    execv(path, argv);
 	    exit(-1);	/* execv failed, give wait() something to look at */
 	default:  /* parent */
-#if defined(NeXT) || defined(AIX4) || defined(sony_news)
+#if HAVE_TYPE_UNION_WAIT && !HAVE_WAITPID
 	    while (wait(&wstatus) != pid)
 		; /* do nothing */
 #else
 	    waitpid(pid, &wstatus, 0); /* wait for child */
-#endif /* NeXT || AIX4 || sony_news */
+#endif
 	    if (WEXITSTATUS(wstatus) != 0 ||
 		WTERMSIG(wstatus) > 0)  { /* error return */
 		sprintf(tmpbuf, "Probable failure to %s due to system error!",

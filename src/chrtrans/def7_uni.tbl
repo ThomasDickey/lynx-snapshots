@@ -497,7 +497,24 @@ U+0480:C3
 U+0481:c3
 U+0490:G3
 U+0491:g3
-U+05d0:A+
+
+# These may may Yiddish slightly more readable, until we have
+# something better.
+
+0x69	U+05b4	# i
+0x61	U+05b7	# a
+0x6f	U+05b8	# o
+0x75	U+05bc	# u
+0x68	U+05bf	# h
+0x3a	U+05c2	# :
+
+0x76	U+05f0	# v
+U+05f1:oy
+U+05f2:ey
+
+# U+05d0:A+
+0x23	U+05d0	# '#'
+
 U+05d1:B+
 U+05d2:G+
 U+05d3:D+
@@ -524,6 +541,7 @@ U+05e7:Q+
 U+05e8:R+
 U+05e9:Sh
 U+05ea:T+
+
 U+060c:,+
 U+061b:;+
 U+061f:?+
@@ -920,7 +938,8 @@ U+1357:pWa
 U+1358:mYa
 U+1359:rYa
 U+135A:fYa
-# ETHIOPIC SPACE U+1360 mapped to ASCII space above
+# ETHIOPIC SPACE U+1360 mapped to ASCII space
+0x20	U+1360 
 0x3a	U+1361	#::
 U+1362:::
 0x2c	U+1363	#:,
@@ -1372,7 +1391,7 @@ U+2214:.+
 U+2217:*
 U+2218:Ob
 U+2219:sb
-U+221a:RT
+U+221a: SQRT 
 U+221d:0(
 U+221e:00
 U+221f:-L

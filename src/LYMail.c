@@ -976,7 +976,12 @@ PUBLIC void reply_by_mail ARGS3(
             /*
 	     *  Ask if the user wants to include the original message.
 	     */
-            _statusline(INC_ORIG_MSG_PROMPT);
+	    BOOLEAN is_preparsed = (LYPreparsedSource &&
+				    HTisDocumentSource());
+	    if (is_preparsed)
+		_statusline(INC_PREPARSED_MSG_PROMPT);
+	    else
+		_statusline(INC_ORIG_MSG_PROMPT);
             c = 0;
             while (TOUPPER(c) != 'Y' && TOUPPER(c) != 'N' &&
 	           !term_letter && c != 7   && c != 3)
@@ -985,7 +990,10 @@ PUBLIC void reply_by_mail ARGS3(
                 /*
 		 *  The 1 will add the reply "> " in front of every line.
 		 */
-                print_wwwfile_to_fd(fd, 1);
+		if (is_preparsed)
+		    print_wwwfile_to_fd(fd, 0);
+		else
+		    print_wwwfile_to_fd(fd, 1);
 	    }
         }
 	fclose(fd);		/* Close the tmpfile. */

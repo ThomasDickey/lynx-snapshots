@@ -1313,8 +1313,8 @@ PUBLIC LYUCcharset * HTAnchor_copyUCInfoStage ARGS4(
 	    me->UCStages->s[to_stage].LYhndl =
 		me->UCStages->s[from_stage].LYhndl;
 
-	    memcpy(p_to, p_from,
-		       sizeof(LYUCcharset));
+	    if (p_to != p_from)
+		memcpy(p_to, p_from, sizeof(LYUCcharset));
 
 	    return p_to;
 	}

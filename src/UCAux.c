@@ -103,6 +103,7 @@ PUBLIC void UCSetTransParams ARGS5(
     int,		cs_out,
     CONST LYUCcharset*,	p_out)
 {
+    pT->trans_C0_to_uni = FALSE;
     pT->transp = (!strcmp(p_in->MIMEname, "x-transparent") ||
 		  !strcmp(p_out->MIMEname, "x-transparent"));
     if (pT->transp) {
@@ -113,6 +114,9 @@ PUBLIC void UCSetTransParams ARGS5(
 	pT->use_raw_char_in = TRUE;
 	pT->strip_raw_char_in = FALSE;
 	pT->pass_160_173_raw = TRUE;
+	pT->repl_translated_C0 = (p_out->enc == UCT_ENC_8BIT_C0);
+	pT->trans_C0_to_uni = (p_in->enc == UCT_ENC_8BIT_C0 ||
+			       p_out->enc == UCT_ENC_8BIT_C0);
     } else {
 	BOOL intm_ucs = FALSE;
 	BOOL use_ucs = FALSE;
@@ -126,6 +130,7 @@ PUBLIC void UCSetTransParams ARGS5(
 	    pT->do_8bitraw = FALSE;
 	    pT->pass_160_173_raw = TRUE;
 	    pT->use_raw_char_in = FALSE; /* not used for CJK */
+	    pT->repl_translated_C0 = FALSE;
 	    pT->trans_from_uni = FALSE; /* not used for CJK */
 	} else {
 	    intm_ucs = (cs_in == 0 || pT->decode_utf8 ||
@@ -133,6 +138,9 @@ PUBLIC void UCSetTransParams ARGS5(
 			 (UCT_CP_SUBSETOF_LAT1|UCT_CP_SUBSETOF_UCS2)));
 	    pT->trans_to_uni = (!intm_ucs &&
 				UCCanUniTranslateFrom(cs_in));
+	    pT->trans_C0_to_uni = (pT->trans_to_uni &&
+				   p_in->enc == UCT_ENC_8BIT_C0);
+	    pT->repl_translated_C0 = (p_out->enc == UCT_ENC_8BIT_C0);
 	    pT->strip_raw_char_in = ((!intm_ucs ||
 				      (p_out->enc == UCT_ENC_7BIT) ||
 				       (p_out->repertoire &
@@ -143,7 +151,8 @@ PUBLIC void UCSetTransParams ARGS5(
 	    pT->do_8bitraw = (!use_ucs);
 	    pT->pass_160_173_raw = (!use_ucs &&
 				    !(p_in->like8859 & UCT_R_8859SPECL));
-	    pT->use_raw_char_in = (!pT->output_utf8 && cs_in == cs_out);
+	    pT->use_raw_char_in = (!pT->output_utf8 && cs_in == cs_out &&
+		                   !pT->trans_C0_to_uni);
 	    pT->trans_from_uni = (use_ucs && !pT->do_8bitraw &&
 				  !pT->use_raw_char_in &&
 				  UCCanTranslateUniTo(cs_out));
@@ -163,6 +172,8 @@ PUBLIC void UCTransParams_clear ARGS1(
     pT->strip_raw_char_in = FALSE;
     pT->pass_160_173_raw = FALSE;
     pT->trans_to_uni = FALSE;
+    pT->trans_C0_to_uni = FALSE;
+    pT->repl_translated_C0 = FALSE;
     pT->trans_from_uni = FALSE;
 }
 

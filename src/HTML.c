@@ -409,46 +409,65 @@ PUBLIC void HTML_put_string ARGS2(HTStructured *, me, CONST char *, s)
     	HTChunkPuts(&me->math, s);
 	break;
 
-    default:					/* Free format text */
-        {
+    default:					/* Free format text? */
+	if (!me->sp->style->freeFormat) {
+	    /*
+	     *  If we are within a preformatted text style not caught
+	     *  by the cases above (HTML_PRE or similar may not be the
+	     *  last element pushed on the style stack). - kw
+	     */
+	    HText_appendText(me->text, s);
+	    break;
+	} else {
 	    CONST char *p = s;
+	    char c;
 	    if (me->style_change) {
-		for (; *p &&
-		       ((*p == '\n') || (*p == ' ') || (*p == '\t')); p++)
+		for (; *p && ((*p == '\n') || (*p == '\r') ||
+			      (*p == ' ') || (*p == '\t')); p++)
 		    ;	/* Ignore leaders */
 		if (!*p)
 		    return;
 		UPDATE_STYLE;
 	    }
 	    for (; *p; p++) {
+		if (*p == 13 && p[1] != 10) {
+		    /*
+		     *  Treat any '\r' which is not followed by '\n'
+		     *  as '\n', to account for macintosh lineend in
+		     *  ALT attributes etc. - kw
+		     */
+		    c = '\n';
+		} else {
+		    c = *p;
+		}
 		if (me->style_change) {
-		    if ((*p == '\n') || (*p == ' ') || (*p == '\t')) 
+		    if ((c == '\n') || (c == ' ') || (c == '\t')) 
 			continue;  /* Ignore it */
 		    UPDATE_STYLE;
 		}
-		if (*p == '\n') {
+		if (c == '\n') {
 		    if (me->in_word) {
 		        if (HText_getLastChar(me->text) != ' ')
 			    HText_appendCharacter(me->text, ' ');
 			me->in_word = NO;
 		    }
 
-		} else if (*p == ' ' || *p == '\t') {
+		} else if (c == ' ' || c == '\t') {
 		   if (HText_getLastChar(me->text) != ' ')
 			HText_appendCharacter(me->text, ' ');
 			
-		} else if (*p == '\r') {
+		} else if (c == '\r') {
 			/* ignore */
 		} else {
-		    HText_appendCharacter(me->text, *p);
+		    HText_appendCharacter(me->text, c);
 		    me->in_word = YES;
 		}
 
 		/* set the Last Character */
-    		if (*p == '\n' || *p == '\t') {
+    		if (c == '\n' || c == '\t') {
 		    /* set it to a generic seperater */
         	    HText_setLastChar(me->text, ' ');
-    		} else if (*p == '\r' &&
+    		} else if (c == '\r' &&
 			   HText_getLastChar(me->text) == ' ') {
 		    /* 
 		     *  \r's are ignored.  In order to keep collapsing
@@ -458,7 +477,7 @@ PUBLIC void HTML_put_string ARGS2(HTStructured *, me, CONST char *, s)
 		     */
        		    HText_setLastChar(me->text, ' ');
     		} else {
-       		    HText_setLastChar(me->text, *p);
+       		    HText_setLastChar(me->text, c);
     		}
 
 	    } /* for */
@@ -7205,6 +7224,59 @@ PUBLIC HTStream* HTMLToPlain ARGS3(
 	HTStream *,		sink)
 {
     return SGML_new(&HTML_dtd, anchor, HTML_new(anchor, pres->rep_out, sink));
+}
+
+/*	HTConverter for HTML source to plain text
+**	-----------------------------------------
+**
+**	This will preparse HTML and convert back to presentation or plain text.
+*/
+PUBLIC HTStream* HTMLParsedPresent ARGS3(
+	HTPresentation *,	pres,
+	HTParentAnchor *,	anchor,	
+	HTStream *,		sink)
+{
+    HTStream * intermediate = sink;
+    if (!intermediate) {
+#ifdef EXP_CHARTRANS
+	/*
+	 *  Trick to prevent HTPlainPresent from translating again.
+	 *  Temporarily change UCT_STAGE_PARSER setting in anchor
+	 *  while the HTPlain stream is initialized, so that HTPlain
+	 *  sees its input and output charsets as the same.  - kw
+	 */
+	int old_parser_cset = HTAnchor_getUCLYhndl(anchor,UCT_STAGE_PARSER);
+	int structured_cset = HTAnchor_getUCLYhndl(anchor,UCT_STAGE_STRUCTURED);
+	if (structured_cset < 0)
+	    structured_cset = HTAnchor_getUCLYhndl(anchor,UCT_STAGE_HTEXT);
+	if (structured_cset < 0)
+	    structured_cset = current_char_set;
+	HTAnchor_setUCInfoStage(anchor, structured_cset,
+				UCT_STAGE_PARSER, UCT_SETBY_MIME);
+#endif /* EXP_CHARTRANS */
+	if (pres->rep_out == WWW_SOURCE) {
+/*	    intermediate = HTPlainPresent(pres, anchor, NULL); */
+	    intermediate = HTStreamStack(WWW_PLAINTEXT, WWW_PRESENT,
+					 NULL, anchor);
+	} else {
+	    intermediate = HTStreamStack(WWW_PLAINTEXT, pres->rep_out,
+					 NULL, anchor);
+	}
+#ifdef EXP_CHARTRANS
+	if (old_parser_cset != structured_cset) {
+	    HTAnchor_resetUCInfoStage(anchor, old_parser_cset,
+				      UCT_STAGE_PARSER, UCT_SETBY_NONE);
+	    if (old_parser_cset >= 0) {
+		HTAnchor_setUCInfoStage(anchor, old_parser_cset,
+					UCT_STAGE_PARSER,
+					UCT_SETBY_DEFAULT+1);
+	    }
+	}
+#endif /* EXP_CHARTRANS */
+    }
+    if (!intermediate)
+	return NULL;
+    return SGML_new(&HTML_dtd, anchor, HTMLGenerator(intermediate));
 }
 
 /*	HTConverter for HTML to C code

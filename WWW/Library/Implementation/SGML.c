@@ -44,7 +44,7 @@ PUBLIC BOOL HTPassEightBitNum = FALSE;	/* Pass ^ numeric entities raw.	*/
 PUBLIC BOOL HTPassHighCtrlRaw = FALSE;	/* Pass 127-160,173,&#127; raw.	*/
 PUBLIC BOOL HTPassHighCtrlNum = FALSE;	/* Pass &#128;-&#159; raw.	*/
 
-extern BOOLEAN LYCheckForCSI PARAMS((HTStructured *target, char **url));
+extern BOOLEAN LYCheckForCSI PARAMS((HTParentAnchor *anchor, char **url));
 extern void LYDoCSI PARAMS((char *url, CONST char *comment, char **csi));
 
 /*	The State (context) of the parser
@@ -457,7 +457,7 @@ PRIVATE void handle_comment ARGS1(
 
     if (context->csi == NULL &&
         strncmp(s, "!--#", 4) == 0 &&
-        LYCheckForCSI(context->target, (char **)&context->url) == TRUE) {
+        LYCheckForCSI(context->node_anchor, (char **)&context->url) == TRUE) {
 	LYDoCSI(context->url, s, (char **)&context->csi);
     }
 
@@ -1072,7 +1072,10 @@ PUBLIC void SGML_character ARGS2(
     if (context->T.strip_raw_char_in)
 	saved_char_in = c;
 
-    if (context->T.trans_to_uni && unsign_c >= 127) {
+    if (context->T.trans_to_uni &&
+	(unsign_c >= 127 ||
+	    (unsign_c < 32 && unsign_c != 0 &&
+	     context->T.trans_C0_to_uni))) {
 	clong = UCTransToUni(c, context->in_char_set);
 	if (clong > 0) {
 	    saved_char_in = c;
@@ -1081,6 +1084,46 @@ PUBLIC void SGML_character ARGS2(
 	    }
 	}
 	goto top1;
+    } else if (unsign_c < 32 && unsign_c != 0 &&
+	       context->T.trans_C0_to_uni) {
+	/* This else if may be too ugly to keep... - kw */
+	if (context->T.trans_from_uni &&
+	    (((clong = UCTransToUni(c, context->in_char_set)) >= 32) ||
+	     (context->T.transp &&
+	      (clong = UCTransToUni(c, context->in_char_set)) > 0))) {
+	    saved_char_in = c;
+	    if (clong < 256) {
+		c = (char)clong;
+	    }
+	    goto top1;
+	} else {
+	    uck = -1;
+	    if (context->T.transp) {
+		uck = UCTransCharStr(replace_buf, 60, c,
+				     context->in_char_set,
+				     context->in_char_set, NO);
+	    }
+	    if (!context->T.transp || uck < 0) {
+		uck = UCTransCharStr(replace_buf, 60, c,
+				     context->in_char_set,
+				     context->html_char_set, YES);
+	    }
+	    if (uck == 0) {
+		return;
+	    } else if (uck < 0) {
+		goto top0a;
+	    }
+	    c = replace_buf[0];
+	    if (c && replace_buf[1]) {
+		if (context->state == S_text) {
+		    for (p=replace_buf; *p; p++)
+			PUTC(*p);
+		    return;
+		}
+		StrAllocCat(context->recover, replace_buf + 1);
+	    }
+	    goto top0a;
+	} /* next line end of ugly stuff for C0 - kw */
     } else {
 	goto top0a;
     }
@@ -1221,7 +1264,9 @@ top1:
 	    }
 	    c = (char)(uck & 0xff);
 	    PUTC(c);
-	} else if (chk && (uck == -4) &&
+	} else if (chk && ((uck == -4 ||
+			    (context->T.repl_translated_C0 &&
+			     uck > 0 && uck <32))) &&
 		/*
 		**  Not found; look for replacement string.
 		*/
@@ -1443,13 +1488,16 @@ top1:
 	    if ((context->isHex ? sscanf(string->data, "%x", &value) :
 				  sscanf(string->data, "%d", &value)) == 1) {
 #ifdef EXP_CHARTRANS
-		if (value == 160) {
+		if (value == 160 || value == 173) {
 		    /*
 		    **  We *always* should interpret this as Latin1 here!
 		    **  Output the Lynx special character for nbsp and
 		    **  then recycle the terminator or break. - FM
 		    */
-		    PUTC(1);
+		    if (value == 160)
+			PUTC(1);
+		    else	/* 173 */
+			PUTC(7);
 		    string->size = 0;
 		    context->isHex = FALSE;
 		    context->state = S_text;
@@ -1474,7 +1522,9 @@ top1:
 		  else {
 		      PUTC(FROMASCII((char)uck));
 		  }
-	      } else if ((uck == -4) &&
+	      } else if ((uck == -4 ||
+			    (context->T.repl_translated_C0 &&
+			     uck > 0 && uck <32)) &&
 			   /*
 			   **  Not found; look for replacement string.
 			   */

@@ -12,8 +12,6 @@
 #include "HTTP.h"
 #include "HTAlert.h"
 #include "HTCJK.h"
-#include "UCDefs.h"
-#include "UCAux.h"
 
 #include <assert.h>
 #include <ctype.h>
@@ -4487,6 +4485,7 @@ PUBLIC void print_wwwfile_to_fd ARGS2(
                  fputc(line->data[i],fp);
 	     } else if (line->data[i] == LY_SOFT_HYPHEN &&
 		 line->data[i + 1] == '\0') { /* last char on line */
+#ifdef EXP_CHARTRANS
 		 if (dump_output_immediately &&
 		     LYRawMode &&
 		     LYlowest_eightbit[current_char_set] <= 173 &&
@@ -4497,6 +4496,9 @@ PUBLIC void print_wwwfile_to_fd ARGS2(
 		 } else {
 		     fputc('-', fp);
 		 }
+#else /* EXP_CHARTRANS */
+		 fputc('-', fp);
+#endif /* EXP_CHARTRANS */
 	     } else if (dump_output_immediately && use_underscore) {
 		switch (line->data[i]) {
 		    case LY_UNDERLINE_START_CHAR:
@@ -4563,6 +4565,7 @@ PUBLIC void print_crawl_to_fd ARGS3(
                 fputc(line->data[i],fp);
 	     } else if (line->data[i] == LY_SOFT_HYPHEN &&
 		 line->data[i + 1] == '\0') { /* last char on line */
+#ifdef EXP_CHARTRANS
 		 if (dump_output_immediately &&
 		     LYRawMode &&
 		     LYlowest_eightbit[current_char_set] <= 173 &&
@@ -4573,6 +4576,9 @@ PUBLIC void print_crawl_to_fd ARGS3(
 		 } else {
 		     fputc('-', fp);
 		 }
+#else /* EXP_CHARTRANS */
+		 fputc('-', fp);
+#endif /* EXP_CHARTRANS */
 	     }
 	}
         /*

@@ -712,6 +712,8 @@ Try_Redirected_URL:
 			 *  Check for redirection.
 			 */
 			if (use_this_url_instead != NULL) {
+			    char *pound;
+
 			    if (!is_url(use_this_url_instead)) {
 			        /*
 				 *  The server did not return a complete
@@ -803,6 +805,24 @@ Try_Redirected_URL:
 				FREE(use_this_url_instead);
 				return(NULLFILE);
 			    }
+			    if ((pound = strchr(doc->address, '#')) != NULL &&
+				strchr(use_this_url_instead, '#') == NULL) {
+				/*
+				 *  Our requested URL had a fragment
+				 *  associated with it, and the redirection
+				 *  URL doesn't, so we'll append the fragment
+				 *  associated with the original request.  If
+				 *  it's bogus for the redirection URL, we'll
+				 *  be positioned at the top of that document,
+				 *  so there's no harm done. - FM
+				 */
+				if (TRACE) {
+				    fprintf(stderr,
+			"getfile: Adding fragment '%s' to redirection URL.\n",
+				    pound);
+				}
+			        StrAllocCat(use_this_url_instead, pound);
+			    }
 			    if (TRACE)
 			        sleep(MessageSecs);
 			    _user_message(WWW_USING_MESSAGE,
@@ -846,7 +866,7 @@ Try_Redirected_URL:
                     {
                         char *pound;
                         /*
-			 *  Check for #selector.
+			 *  Check for a #fragment selector.
 			 */
                         pound = (char *)strchr(doc->address, '#');
 

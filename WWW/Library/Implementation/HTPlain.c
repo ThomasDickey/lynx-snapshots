@@ -299,7 +299,9 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 	    }
 	}
 	
-	if (me->T.trans_to_uni && unsign_c >= 127) {
+	if (me->T.trans_to_uni && (unsign_c >= 127 ||
+				   (unsign_c < 32 && unsign_c != 0 &&
+				    me->T.trans_C0_to_uni))) {
 	    unsign_c = UCTransToUni(c_p, me->in_char_set);
 	    if (unsign_c > 0) {
 		if (unsign_c < 256) {
@@ -395,7 +397,9 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 			uck, (char)uck);
 	    }
 	    HText_appendCharacter(me->text, (char)(uck & 0xff));
-	} else if (chk && (uck == -4) &&
+	} else if (chk && (uck == -4 ||
+			    (me->T.repl_translated_C0 &&
+			     uck > 0 && uck <32)) &&
 		   /*
 		   **  Not found; look for replacement string.
 		   */

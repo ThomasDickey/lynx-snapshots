@@ -488,7 +488,7 @@ PUBLIC int main ARGS2(
 
     if (argc >= 3) {
 	strncpy(this_MIMEcharset,argv[2],UC_MAXLEN_MIMECSNAME);
-    } else if (!this_MIMEcharset || !(*this_MIMEcharset)) {
+    } else if (this_MIMEcharset[0] == '\0') {
 	strncpy(this_MIMEcharset,tblname,UC_MAXLEN_MIMECSNAME);
 	if ((p = strchr(this_MIMEcharset,'.')) != 0) {
 	    *p = '\0';
@@ -499,7 +499,7 @@ PUBLIC int main ARGS2(
     }
     if (argc >= 4) {
 	strncpy(this_LYNXcharset,argv[3],UC_MAXLEN_LYNXCSNAME);
-    } else if (!this_LYNXcharset || !(*this_LYNXcharset)) {
+    } else if (this_LYNXcharset[0] == '\0') {
 	strncpy(this_LYNXcharset,this_MIMEcharset,UC_MAXLEN_LYNXCSNAME);
     }
     if ((i = strlen(this_LYNXcharset)) < UC_LEN_LYNXCSNAME) {

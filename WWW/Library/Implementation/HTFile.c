@@ -865,7 +865,7 @@ PUBLIC HTFormat HTCharsetFormat ARGS3(
 					UCT_STAGE_HTEXT,
 					UCT_SETBY_DEFAULT);
 	    }
-	    if (!(p_in->enc & UCT_ENC_CJK) &&
+	    if (p_in->enc != UCT_ENC_CJK &&
 		(p_in->codepoints & UCT_CP_SUBSETOF_LAT1)) {
 		HTCJK = NOCJK;
 	    } else if (chndl == current_char_set) {

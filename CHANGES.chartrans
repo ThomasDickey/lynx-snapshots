@@ -1,6 +1,10 @@
-$Id: CHANGES.chartrans,v 1.5 1997/07/28 00:39:05 tom Exp $
-$ProjectHeader: Lynx 2.7.1ac-0.43 Sun, 27 Jul 1997 18:36:15 -0600 dickey $
+$Id: CHANGES.chartrans,v 1.6 1997/09/07 17:04:10 tom Exp $
+$ProjectHeader: Lynx 2.7.1ac-0.64 Thu, 11 Sep 1997 20:18:32 -0600 kweide $
 
+1997-09-06
+ Lynx 2.7.1ac-0.61
+  Several new translation tables have been added or modified recently,
+  associated code changes.
 1997-07-25
  Lynx 2.7.1ac-0.42
 * Map charsets of the form "ibmNNN<...>" to "cpNNN<...>" in UCdomap.c

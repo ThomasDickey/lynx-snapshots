@@ -15,6 +15,7 @@
 #endif /* HTUTILS_H */
 
 extern void HTFormatInit NOPARAMS;
+extern void HTPreparsedFormatInit NOPARAMS;
 extern void HTFileInit NOPARAMS;
 
 /*

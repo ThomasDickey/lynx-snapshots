@@ -627,7 +627,7 @@ PUBLIC void read_cfg ARGS1(
 		keypad_mode = LINKS_ARE_NUMBERED;
 
 	} else if (!strncasecomp(buffer, "DEFAULT_USER_MODE:", 18)) {
-	    if (!strncasecomp(buffer+18, "NOVICE", 5))
+	    if (!strncasecomp(buffer+18, "NOVICE", 6))
 		user_mode = NOVICE_MODE;
 	    else if (!strncasecomp(buffer+18, "INTER", 5))
 		user_mode = INTERMEDIATE_MODE;

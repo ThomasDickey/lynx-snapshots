@@ -15,7 +15,8 @@
 #include "HTUtils.h"
 #include "tcp.h"
 
-#define BUFFER_SIZE	80	/* Line buffer attempts to make neat breaks */
+#define BUFFER_SIZE    200	/* Line buffer attempts to make neat breaks */
+#define MAX_CLEANNESS	20
 
 /* Implements:
 */
@@ -50,16 +51,29 @@ struct _HTStructured {
 	HTStreamClass			targetClass;	/* COPY for speed */
 	
 	char				buffer[BUFFER_SIZE+1]; /* 1for NL */
+        int				buffer_maxchars;
 	char *				write_pointer;
-	char *				line_break;
+        char *				line_break [MAX_CLEANNESS+1];
 	int				cleanness;
-	BOOL				delete_line_break_char;
+	BOOL				overflowed;
+    	BOOL				delete_line_break_char[MAX_CLEANNESS+1];
 	BOOL				preformatted;
+	BOOL				escape_specials;
+	BOOL				in_attrval;
 };
 
 /*	Flush Buffer
 **	------------
 */
+
+PRIVATE void flush_breaks (HTStructured * me)
+{
+    int i;
+    for (i=0; i<= MAX_CLEANNESS; i++) {
+        me->line_break[i] = NULL;
+    }
+}
+
 PRIVATE void HTMLGen_flush ARGS1(
 	HTStructured *,		me)
 {
@@ -67,9 +81,26 @@ PRIVATE void HTMLGen_flush ARGS1(
 				 me->buffer,
 				 me->write_pointer - me->buffer);
     me->write_pointer = me->buffer;
-    me->line_break = me->buffer;
+    flush_breaks(me);
     me->cleanness = 0;
-    me->delete_line_break_char = NO;
+    me->delete_line_break_char[0] = NO;
+}
+
+/*	Weighted optional line break
+**
+**	We keep track of all the breaks for when we chop the line
+*/
+
+PRIVATE void allow_break (HTStructured * me, int new_cleanness, BOOL dlbc)
+{
+    if (dlbc && me->write_pointer == me->buffer) dlbc = NO;
+    me->line_break[new_cleanness] = 
+			 dlbc ? me->write_pointer - 1 /* Point to space */
+			      : me->write_pointer ;   /* point to gap */
+    me->delete_line_break_char[new_cleanness] = dlbc;
+    if (new_cleanness >= me->cleanness &&
+	(me->overflowed || me->line_break[new_cleanness] > me->buffer))
+	me->cleanness = new_cleanness;
 }
 
 /*	Character handling
@@ -83,12 +114,38 @@ PRIVATE void HTMLGen_flush ARGS1(
 **	file. We give extra "cleanness" to spaces appearing directly
 **	after periods (full stops), [semi]colons and commas.
 **	   This should make the source files easier to read and modify
-**	by hand, too, though this is not a primary design consideration.
+**	by hand, too, though this is not a primary design consideration. TBL
 */
 PRIVATE void HTMLGen_put_character ARGS2(
 	HTStructured *,		me,
 	char,			c)
 {
+    if (me->escape_specials && (unsigned char)c < 32) {
+	if (c == HT_NON_BREAK_SPACE || c == HT_EM_SPACE ||
+	    c == LY_SOFT_HYPHEN) { /* recursion... */
+	    HTMLGen_put_character(me, '&');
+	    HTMLGen_put_character(me, '#');
+	    HTMLGen_put_character(me, 'x');
+	    switch(c) {
+	    case HT_NON_BREAK_SPACE: /* &#xA0; */
+		HTMLGen_put_character(me, 'A');
+		HTMLGen_put_character(me, '0');
+		break;
+	    case HT_EM_SPACE: /* &#x2003; */
+		HTMLGen_put_character(me, '2');
+		HTMLGen_put_character(me, '0');
+		HTMLGen_put_character(me, '0');
+		HTMLGen_put_character(me, '3');
+		break;
+	    case LY_SOFT_HYPHEN: /* &#xAD; */
+		HTMLGen_put_character(me, 'A');
+		HTMLGen_put_character(me, 'D');
+		break;
+	    }
+	    c = ';';
+	}
+    }
+    
     *me->write_pointer++ = c;
     
     if (c == '\n') {
@@ -96,36 +153,37 @@ PRIVATE void HTMLGen_put_character ARGS2(
 	return;
     }
     
-    if ((!me->preformatted && c == ' ')) {
-        int new_cleanness = 1;
+    /* Figure our whether we can break at this point
+    */
+    if ((!me->preformatted && (c == ' ' || c == '\t'))) {
+        int new_cleanness = 3;
 	if (me->write_pointer > (me->buffer + 1)) {
 	    char delims[5];
 	    char * p;
 	    strcpy(delims, ",;:.");		/* @@ english bias */
 	    p = strchr(delims, me->write_pointer[-2]);
-	    if (p) new_cleanness = p - delims + 2;
+	    if (p) new_cleanness = p - delims + 6;
+	    if (!me->in_attrval) new_cleanness += 10;
 	}
-	if (new_cleanness >= me->cleanness) {
-	    me->line_break = me->write_pointer - 1;  /* Point to space */
-	    me->cleanness = new_cleanness;
-	    me->delete_line_break_char = YES;
-	}
+	allow_break(me, new_cleanness, YES);
     }
     
     /*
-     *  Flush buffer out when full.
+     *  Flush buffer out when full, or whenever the line is over
+     *  the nominal maximum and we can break at all
      */
-    if (me->write_pointer == me->buffer + BUFFER_SIZE) {
+    if (me->write_pointer >= me->buffer + me->buffer_maxchars ||
+	(me->overflowed && me->cleanness)) {
     	if (me->cleanness) {
-	    char line_break_char = me->line_break[0];
-	    char * saved = me->line_break;
+	    char line_break_char = me->line_break[me->cleanness][0];
+	    char * saved = me->line_break[me->cleanness];
 	    
-	    if (me->delete_line_break_char) saved++; 
-	    me->line_break[0] = '\n'; 
+	    if (me->delete_line_break_char[me->cleanness]) saved++; 
+	    me->line_break[me->cleanness][0] = '\n'; 
 	    (*me->targetClass.put_block)(me->target,
      					 me->buffer,
-					 me->line_break - me->buffer + 1);
-	    me->line_break[0] = line_break_char;
+			       me->line_break[me->cleanness] - me->buffer + 1);
+	    me->line_break[me->cleanness][0] = line_break_char;
 	    {  /* move next line in */
 	    	char * p = saved;
 		char *q;
@@ -133,16 +191,36 @@ PRIVATE void HTMLGen_put_character ARGS2(
 		    *q++ = *p++;
 	    }
 	    me->cleanness = 0;
-	    me->delete_line_break_char = 0;
+	    /* Now we have to check whether ther are any perfectly good breaks
+	    ** which weren't good enough for the last line but may be
+	    **  good enough for the next
+	    */
+	    {
+	        int i;
+		for(i=0; i <= MAX_CLEANNESS; i++) {
+		    if (me->line_break[i] != NULL &&
+			me->line_break[i] > saved) {
+		        me->line_break[i] = me->line_break[i] -
+						(saved-me->buffer);
+			me->cleanness = i;
+		    } else {
+		        me->line_break[i] = NULL;
+		    }
+		}
+	    }
+
+	    me->delete_line_break_char[0] = 0;
 	    me->write_pointer = me->write_pointer - (saved-me->buffer);
+	    me->overflowed = NO;
 
 	} else {
 	    (*me->targetClass.put_block)(me->target,
 					 me->buffer,
-					 BUFFER_SIZE);
+					 me->buffer_maxchars);
 	    me->write_pointer = me->buffer;
+	    flush_breaks(me);
+	    me->overflowed = YES;
 	}
-	me->line_break = me->buffer;
     }
 }
 
@@ -187,21 +265,47 @@ PRIVATE void HTMLGen_start_element ARGS5(
     BOOL was_preformatted = me->preformatted;
     HTTag * tag = &HTML_dtd.tags[element_number];
 
-    me->preformatted = NO;	/* free text within tags */
+    me->preformatted = YES;	/* free text within tags */
     HTMLGen_put_character(me, '<');
     HTMLGen_put_string(me, tag->name);
     if (present) {
+	BOOL had_attr = NO;
 	for (i = 0; i < tag->number_of_attributes; i++) {
 	    if (present[i]) {
+		had_attr = YES;
 		HTMLGen_put_character(me, ' ');
+		allow_break(me, 11, YES);
 		HTMLGen_put_string(me, tag->attributes[i].name);
 		if (value[i]) {
-		    HTMLGen_put_string(me, "=\"");
-		    HTMLGen_put_string(me, value[i]);
-		    HTMLGen_put_character(me, '"');
+		    me->preformatted = was_preformatted;
+		    me->in_attrval = YES;
+		    if (strchr(value[i], '"') == NULL) {
+			HTMLGen_put_string(me, "=\"");
+			HTMLGen_put_string(me, value[i]);
+			HTMLGen_put_character(me, '"');
+		    } else if (strchr(value[i], '\'') == NULL) {
+			HTMLGen_put_string(me, "='");
+			HTMLGen_put_string(me, value[i]);
+			HTMLGen_put_character(me, '\'');
+		    } else {  /* attribute value has both kinds of quotes */
+			CONST char *p;
+			HTMLGen_put_string(me, "=\"");
+			for (p = value[i]; *p; p++) {
+			    if (*p != '"') {
+				HTMLGen_put_character(me, *p);
+			    } else {
+				HTMLGen_put_string(me, "&#34;");
+			    }
+			}
+			HTMLGen_put_character(me, '"');
+		    }
+		    me->preformatted = YES;
+		    me->in_attrval = NO;
 		}
 	    }
 	}
+	if (had_attr)
+	    allow_break(me, 12, NO);
     }
     HTMLGen_put_string(me, ">"); /* got rid of \n LJM */
     
@@ -214,9 +318,10 @@ PRIVATE void HTMLGen_start_element ARGS5(
      *  Can break after element start.
      */ 
     if (!me->preformatted && tag->contents != SGML_EMPTY) {  
-    	me->line_break = me->write_pointer;	/* Don't you hate SGML?  */
-	me->cleanness = 1;
-	me->delete_line_break_char = NO;
+	if (HTML_dtd.tags[element_number].contents == SGML_ELEMENT)
+	    allow_break(me, 15, NO);
+	else
+	    allow_break(me, 2, NO);
     }
 }
 
@@ -241,9 +346,10 @@ PRIVATE void HTMLGen_end_element ARGS3(
     	/*
 	 *  Can break before element end.
 	 */ 
-    	me->line_break = me->write_pointer;	/* Don't you hate SGML?  */
-	me->cleanness = 1;
-	me->delete_line_break_char = NO;
+	if (HTML_dtd.tags[element_number].contents == SGML_ELEMENT)
+	    allow_break(me, 14, NO);
+	else
+	    allow_break(me, 1, NO);
     }
     HTMLGen_put_string(me, "</");
     HTMLGen_put_string(me, HTML_dtd.tags[element_number].name);
@@ -325,6 +431,10 @@ PRIVATE CONST HTStructuredClass HTMLGeneration = /* As opposed to print etc */
 /*	Subclass-specific Methods
 **	-------------------------
 */
+extern int LYcols;			/* LYCurses.h, set in LYMain.c	*/
+extern BOOL dump_output_immediately;	/* TRUE if no interactive user 	*/
+extern BOOLEAN LYPreparsedSource;	/* Show source as preparsed?	*/
+
 PUBLIC HTStructured * HTMLGenerator ARGS1(
 	HTStream *,		output)
 {
@@ -337,10 +447,41 @@ PUBLIC HTStructured * HTMLGenerator ARGS1(
     me->targetClass = *me->target->isa; /* Copy pointers to routines for speed*/
     
     me->write_pointer = me->buffer;
-    me->line_break = 	me->buffer;
+    flush_breaks(me);
+    me->line_break[0] = me->buffer;
     me->cleanness = 	0;
-    me->delete_line_break_char = NO;
+    me->overflowed = NO;
+    me->delete_line_break_char[0] = NO;
     me->preformatted = 	NO;
+    me->in_attrval = NO;
+
+    /*
+     *  For what line length should we attempt to wrap ? - kw
+     */
+    if (!LYPreparsedSource) {
+	me->buffer_maxchars = 80; /* work as before - kw */
+    } else if (dump_output_immediately) {
+	me->buffer_maxchars = 80; /* work as before - kw */
+    } else {
+	me->buffer_maxchars = LYcols - 2;
+	if (me->buffer_maxchars < 38) /* too narrow, let GridText deal */
+	    me->buffer_maxchars = 40;
+	if (me->buffer_maxchars > 900) /* likely not true - kw */
+	    me->buffer_maxchars = 78;
+	if (me->buffer_maxchars > BUFFER_SIZE) /* must not be larger! */
+	    me->buffer_maxchars = BUFFER_SIZE - 2;
+    }
+
+    /*
+     *	If dump_output_immediately is set, there likely isn't anything
+     *  after this stream to interpret the Lynx special chars.  Also
+     *  if they get displayed via HTPlain, that will probably make
+     *	non-breaking space chars etc. invisible.  So let's translate
+     *  them to numerical character references.  For debugging
+     *  purposes we'll use the new hex format.
+     */
+    me->escape_specials = LYPreparsedSource;
+	    
     return me;
 }
 
@@ -382,8 +523,16 @@ PUBLIC HTStream* HTPlainToHTML ARGS3(
      */
     me->target = sink;
     me->targetClass = *me->target->isa;
+    me->write_pointer = me->buffer;
+    flush_breaks(me);
+    me->cleanness = 	0;
+    me->overflowed = NO;
+    me->delete_line_break_char[0] = NO;
+    me->buffer_maxchars = 80;
 	
     HTMLGen_put_string(me, "<HTML>\n<BODY>\n<PRE>\n");
     me->preformatted = YES;
+    me->escape_specials = NO;
+    me->in_attrval = NO;
     return (HTStream*) me;
 }

@@ -178,6 +178,11 @@ extern HTStream* HTMLToPlain PARAMS((
         HTParentAnchor *        anchor,
         HTStream *              sink));
 
+extern HTStream* HTMLParsedPresent PARAMS((
+        HTPresentation *        pres,
+        HTParentAnchor *        anchor,
+        HTStream *              sink));
+
 extern HTStream* HTMLToC PARAMS((
         HTPresentation *        pres,
         HTParentAnchor *        anchor,

@@ -1,3 +1,22 @@
+97-09-10
+--------
+* Modify CF_WITH_PATH to allow substitution of --libdir and other
+  configure options pathnames, e.g., for --with-cfg-file. - TD
+* Include lynx_cfg.h in userdefs.h to resolve redefinition reported by
+  AC. - TD
+* Remove Ultrix/sony_news -specific ifdef's for curses headers,
+  replace with configure-tests. - TD
+* Remove AIX/NeXT/sony_news -specific ifdef's for wait vs waitpid,
+  replace with configure-tests. - TD
+* Add/use CF_HELP_MESSAGE macro to visually break down the very long
+  help message into sections. - TD
+* Move the development options to the beginning of the configure script,
+  to facilitate adjustment of compiler options (especially for Ultrix)
+  to reduce the number of spurious warnings from miscombining -g/-O
+  options. - TD
+* Correct misplaced assignment to cf_cv_ncurses_header in configure.in,
+  which caused misconfigure against vendor curses, reported by Hynek Med
+  (Ultrix) and Roger Hill (HP-UX 10.x). - TD
 97-09-04
 --------
 * Correct ifdef'ing for getbkgd function calls. - TD

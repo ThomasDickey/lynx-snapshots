@@ -364,6 +364,7 @@ PUBLIC BOOLEAN LYSeekFragAREAinCur = TRUE;
 PUBLIC BOOLEAN LYStripDotDotURLs = TRUE;	/* Try to fix ../ in some URLs? */
 PUBLIC BOOLEAN LYForceSSLCookiesSecure = FALSE;
 PUBLIC BOOLEAN LYNoCc = FALSE;
+PUBLIC BOOLEAN LYPreparsedSource = FALSE;	/* Show source as preparsed?	 */
 
 /* These are declared in cutil.h for current freeWAIS libraries. - FM */
 #ifdef DECLARE_WAIS_LOGFILES
@@ -1356,6 +1357,10 @@ PUBLIC int main ARGS2(
     }
 #endif /* USE_SLANG */
 
+    if (LYPreparsedSource) {
+	HTPreparsedFormatInit();
+    }
+	
 #if defined(EXEC_LINKS) || defined(EXEC_SCRIPTS)
 #ifdef NEVER_ALLOW_REMOTE_EXEC
     if (local_exec) {
@@ -2329,6 +2334,9 @@ PRIVATE void parse_arg ARGS3(
 	    StrAllocCat(*post_data, buf);
 	}
 
+    } else if (strncmp(argv[0], "-preparsed", 9) == 0) {
+        LYPreparsedSource = TRUE;
+
     } else if (strncmp(argv[0], "-print", 6) == 0) {
 	no_print=FALSE;
 
@@ -2693,6 +2701,7 @@ Output_Help_List:
     printf("                     popup windows or as lists of radio buttons\n");
     printf("    -post_data       user data for post forms, read from stdin,\n");
     printf("                     terminated by '---' on a line\n");
+    printf("    -preparsed       show parsed text/html with -source and in source view\n");
     printf("    -print           enable print functions (DEFAULT)\n");
     printf("    -pseudo_inlines  toggles pseudo-ALTs for inlines with no ALT string\n");
     printf("    -raw             toggles default setting of 8-bit character translations\n");

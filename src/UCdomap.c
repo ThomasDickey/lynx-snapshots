@@ -39,7 +39,9 @@
 #include "[.chrtrans]iso03_uni.h"
 #include "[.chrtrans]iso04_uni.h"
 #include "[.chrtrans]iso05_uni.h"
+#include "[.chrtrans]iso06_uni.h"
 #include "[.chrtrans]iso07_uni.h"
+#include "[.chrtrans]iso08_uni.h"
 #include "[.chrtrans]iso09_uni.h"
 #include "[.chrtrans]iso10_uni.h"
 #include "[.chrtrans]koi8r_uni.h"
@@ -51,6 +53,7 @@
 #include "[.chrtrans]cp1251_uni.h"
 #include "[.chrtrans]cp1252_uni.h"
 #include "[.chrtrans]utf8_uni.h"
+#include "[.chrtrans]viscii_uni.h"
 #include "[.chrtrans]rfc_suni.h"
 #include "[.chrtrans]mnemonic_suni.h"
 #ifdef NOTDEFINED 
@@ -63,7 +66,9 @@
 #include "chrtrans/iso03_uni.h"
 #include "chrtrans/iso04_uni.h"
 #include "chrtrans/iso05_uni.h"
+#include "chrtrans/iso06_uni.h"
 #include "chrtrans/iso07_uni.h"
+#include "chrtrans/iso08_uni.h"
 #include "chrtrans/iso09_uni.h"
 #include "chrtrans/iso10_uni.h"
 #include "chrtrans/koi8r_uni.h"
@@ -74,6 +79,7 @@
 #include "chrtrans/cp1250_uni.h"
 #include "chrtrans/cp1251_uni.h"
 #include "chrtrans/cp1252_uni.h"
+#include "chrtrans/viscii_uni.h"
 #include "chrtrans/utf8_uni.h"
 #include "chrtrans/rfc_suni.h"
 #include "chrtrans/mnemonic_suni.h"
@@ -1060,11 +1066,15 @@ PUBLIC long int UCTransToUni ARGS2(
 #ifndef UC_NO_SHORTCUTS
   if (charset_in == 0)
     return ch_iu;
-  if ((unsigned char)ch_in < 128)
+  if ((unsigned char)ch_in < 128 && (unsigned char)ch_in >= 32)
     return ch_iu;
 #endif /* UC_NO_SHORTCUTS */
     if (charset_in < 0)
 	return -11;
+  if ((unsigned char)ch_in < 32 &&
+      LYCharSet_UC[charset_in].enc != UCT_ENC_8BIT_C0)
+      /* don't translate C0 chars except for specific charsets */
+      return ch_iu;
   if ((UChndl_in = LYCharSet_UC[charset_in].UChndl) < 0)
     return -11;
   if (!UCInfo[UChndl_in].num_uni)
@@ -1200,7 +1210,8 @@ if (buflen<2)
     if (rc >= 32) {
       outbuf[0] = rc; outbuf[1] = '\0';
 	    return 1;
-	} else {
+	} else if (rc <= 0) {
+	    outbuf[0] = '\0';
 	    return rc;
 	}
   }
@@ -1261,12 +1272,12 @@ PUBLIC int UCGetLYhndl_byMIME ARGS1(
 	}
 	if (!strncmp(UC_MIMEcharset, "iso-2022-jp", 11)) {
 	  return UCGetLYhndl_byMIME("euc-jp");
-	} else if (!strcmp(UC_MIMEcharset, "euc-kr")) {
-	  return UCGetLYhndl_byMIME("iso-2022-kr");
+	} else if (!strcmp(UC_MIMEcharset, "iso-2022-kr")) {
+	  return UCGetLYhndl_byMIME("euc-kr");
 	} else if (!strcmp(UC_MIMEcharset, "gb2312")) {
-	  return UCGetLYhndl_byMIME("iso-2022-cn");
-	} else if (!strcmp(UC_MIMEcharset, "euc-cn")) {
-	    return UCGetLYhndl_byMIME("iso-2022-cn");
+	  return UCGetLYhndl_byMIME("euc-cn");
+	} else if (!strcmp(UC_MIMEcharset, "iso-2022-cn")) {
+	    return UCGetLYhndl_byMIME("euc-cn");
 	} else if (!strcmp(UC_MIMEcharset, "windows-1252")) {
 	    /*
 	     *  It's not my fault that Microsoft hasn't registered
@@ -1664,7 +1675,9 @@ PUBLIC void UCInit NOARGS
     UC_CHARSET_SETUP_iso_8859_3;
     UC_CHARSET_SETUP_iso_8859_4;
     UC_CHARSET_SETUP_iso_8859_5;
+    UC_CHARSET_SETUP_iso_8859_6;
     UC_CHARSET_SETUP_iso_8859_7;
+    UC_CHARSET_SETUP_iso_8859_8;
     UC_CHARSET_SETUP_iso_8859_9;
     UC_CHARSET_SETUP_iso_8859_10;
     UC_CHARSET_SETUP_koi8_r;
@@ -1676,6 +1689,7 @@ PUBLIC void UCInit NOARGS
     UC_CHARSET_SETUP_windows_1250;
     UC_CHARSET_SETUP_windows_1251;
     UC_CHARSET_SETUP_iso_8859_1_windows_;
+    UC_CHARSET_SETUP_viscii;
     UC_CHARSET_SETUP_unicode_1_1_utf_8;
     UC_CHARSET_SETUP_mnemonic_ascii_0;
     UC_CHARSET_SETUP_mnemonic;

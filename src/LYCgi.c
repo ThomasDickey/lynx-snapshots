@@ -289,11 +289,11 @@ PRIVATE int LYLoadCGI ARGS4(
 	int fd1[2], fd2[2];
 	char buf[1024];
 	pid_t pid;
-#if defined(NeXT) || defined(AIX4) || defined(sony_news)
+#if HAVE_TYPE_UNION_WAIT && !HAVE_WAITPID
 	union wait wstatus;
 #else
 	int wstatus;
-#endif /* NeXT || AIX4 || sony_news */
+#endif
 
 	/* Decode full HTTP response */
 	format_in = HTAtom_for("www/mime");
@@ -376,12 +376,12 @@ PRIVATE int LYLoadCGI ARGS4(
 		    
 		    (*target->isa->put_block)(target, buf, chars);
 		}
-#if defined(NeXT) || defined(AIX4) || defined(sony_news)
+#if HAVE_TYPE_UNION_WAIT && !HAVE_WAITPID
 		while (wait(&wstatus) != pid)
 		    ; /* do nothing */
 #else
 		waitpid(pid, &wstatus, 0); /* wait for child */
-#endif /* NeXT || AIX4 || sony_news */
+#endif
 		if (anAnchor->post_data) {
 		    close(fd1[1]);
 		}

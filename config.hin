@@ -1,4 +1,7 @@
 /* The configure script translates "config.hin" into "lynx_cfg.h" */
+#ifndef LYNX_CFG_H
+#define LYNX_CFG_H 1
+
 #undef USE_COLOR_STYLE		/* FIXME: was 'CS' */
 #undef USEHASH			/* FIXME: rename to USE_HASHING */
 #undef UNPAINT_CACHE		/* FIXME: for RP's code */
@@ -81,7 +84,6 @@
 #undef ZIP_PATH			/* CF_PATH_PROG(zip) */
 #undef const			/* defined by AC_C_CONST */
 #undef vfork			/* defined by AC_FUNC_FORK */
-/* FIXME:AIX4 */
 /* FIXME:ALLOW_USERS_TO_CHANGE_EXEC_WITHIN_OPTIONS */
 /* FIXME:BSDI */
 /* FIXME:DECLARE_WAIS_LOGFILES */
@@ -101,3 +103,5 @@
 /* FIXME:SOCKS */
 /* FIXME:SVR4_BSDSELECT */
 /* FIXME:SYSLOG_REQUESTED_URLS */
+
+#endif /* LYNX_CFG_H */
