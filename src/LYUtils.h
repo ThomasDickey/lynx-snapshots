@@ -101,7 +101,6 @@ extern int HTCheckForInterrupt NOPARAMS;
 extern int LYCheckForProxyURL PARAMS((char *filename));
 extern int LYConsoleInputFD PARAMS((BOOLEAN need_selectable));
 extern int LYCopyFile PARAMS((char *src, char *dst));
-extern int LYOpenInternalPage PARAMS((FILE **fp0, char **newfile));
 extern int LYRemoveTemp PARAMS((char *name));
 extern int LYSystem PARAMS((char *command));
 extern int LYValidateOutput PARAMS((char * filename));

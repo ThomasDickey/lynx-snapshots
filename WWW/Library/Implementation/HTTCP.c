@@ -1208,12 +1208,12 @@ PRIVATE int HTParseInet ARGS2(
 	strptr = port;
 	if (port[0] >= '0' && port[0] <= '9') {
 #ifdef UNIX
-	    soc_in->sin_port = htons(strtol(port, &strptr, 10));
+	    soc_in->sin_port = (PortNumber)htons(strtol(port, &strptr, 10));
 #else /* VMS: */
 #ifdef DECNET
 	    soc_in->sdn_objnum = (unsigned char)(strtol(port, &strptr, 10));
 #else
-	    soc_in->sin_port = htons((unsigned short)strtol(port,&strptr,10));
+	    soc_in->sin_port = htons((PortNumber)strtol(port, &strptr, 10));
 #endif /* Decnet */
 #endif /* Unix vs. VMS */
 #ifdef SUPPRESS		/* 1. crashes!?!.  2. URL syntax has number not name */
@@ -1547,7 +1547,7 @@ PUBLIC int HTDoConnect ARGS4(
     */
     memset(soc_in, 0, sizeof(*soc_in));
     soc_in->sin_family = AF_INET;
-    soc_in->sin_port = htons((unsigned short) default_port);
+    soc_in->sin_port = htons((PortNumber) default_port);
 #endif /* INET6 */
 
     /*

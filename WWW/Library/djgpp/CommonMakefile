@@ -143,13 +143,12 @@ $(LOB)/libwww.a : $(COMMON)
 
 #	Clean up everything generatable except final products
 clean :
-	rm $(LOB)/*.o
-	-rmdir $(LOB)
+	rm -f $(LOB)/*.o
 
 #	Clean up everything generatable including final products
 
 cleanall : clean
-	rm $(LOB)/libwww.a
+	rm -f $(LOB)/libwww.a
 
 #	Install W3 library into system space (not normally necessary)
 

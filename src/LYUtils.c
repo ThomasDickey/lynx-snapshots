@@ -453,17 +453,11 @@ PUBLIC void highlight ARGS3(
 		   ((Offset + tLen) <= hoffset)) {
 		data = (Data + tlen);
 		offset = (Offset + tLen);
-		if ((case_sensitive ?
-		     (cp = LYno_attr_mbcs_strstr(data,
-						 target,
-						 utf_flag, YES,
-						 &HitOffset,
-						 &LenNeeded)) != NULL :
-		     (cp = LYno_attr_mbcs_case_strstr(data,
-						 target,
-						 utf_flag, YES,
-						 &HitOffset,
-						 &LenNeeded)) != NULL) &&
+		if (((cp = LYno_attr_mb_strstr(data,
+					       target,
+					       utf_flag, YES,
+					       &HitOffset,
+					       &LenNeeded)) != NULL) &&
 		    (offset + LenNeeded) < LYcols) {
 		    Data = cp;
 		    Offset = (offset + HitOffset);
@@ -701,17 +695,11 @@ PUBLIC void highlight ARGS3(
 					      (offset - Offset),
 					      utf_flag);
 		}
-		if ((case_sensitive ?
-		     (cp = LYno_attr_mbcs_strstr(data,
-						 target,
-						 utf_flag, YES,
-						 &HitOffset,
-						 &LenNeeded)) != NULL :
-		     (cp = LYno_attr_mbcs_case_strstr(data,
-						 target,
-						 utf_flag, YES,
-						 &HitOffset,
-						 &LenNeeded)) != NULL) &&
+		if (((cp = LYno_attr_mb_strstr(data,
+					       target,
+					       utf_flag, YES,
+					       &HitOffset,
+					       &LenNeeded)) != NULL) &&
 		    (offset + LenNeeded) < LYcols) {
 		    /*
 		     *	If the hit starts after the end of the hightext,
@@ -980,17 +968,11 @@ highlight_hit_within_hightext:
 					  (offset - Offset),
 					  utf_flag);
 	    }
-	    if ((case_sensitive ?
-		 (cp = LYno_attr_mbcs_strstr(data,
-					     target,
-					     utf_flag, YES,
-					     &HitOffset,
-					     &LenNeeded)) != NULL :
-		 (cp = LYno_attr_mbcs_case_strstr(data,
-					     target,
-					     utf_flag, YES,
-					     &HitOffset,
-					     &LenNeeded)) != NULL) &&
+	    if (((cp = LYno_attr_mb_strstr(data,
+					   target,
+					   utf_flag, YES,
+					   &HitOffset,
+					   &LenNeeded)) != NULL) &&
 		(offset + LenNeeded) < LYcols) {
 		/*
 		 *  If the hit starts after the end of the hightext,
@@ -1183,17 +1165,11 @@ highlight_search_hightext2:
 		   ((Offset + tLen) <= hoffset)) {
 		data = (Data + tlen);
 		offset = (Offset + tLen);
-		if ((case_sensitive ?
-		     (cp = LYno_attr_mbcs_strstr(data,
-						 target,
-						 utf_flag, YES,
-						 &HitOffset,
-						 &LenNeeded)) != NULL :
-		     (cp = LYno_attr_mbcs_case_strstr(data,
-						 target,
-						 utf_flag, YES,
-						 &HitOffset,
-						 &LenNeeded)) != NULL) &&
+		if (((cp = LYno_attr_mb_strstr(data,
+					       target,
+					       utf_flag, YES,
+					       &HitOffset,
+					       &LenNeeded)) != NULL) &&
 		    (offset + LenNeeded) < LYcols) {
 		    Data = cp;
 		    Offset = (offset + HitOffset);
@@ -1430,17 +1406,11 @@ highlight_search_hightext2:
 					      (offset - Offset),
 					      utf_flag);
 		}
-		if ((case_sensitive ?
-		     (cp = LYno_attr_mbcs_strstr(data,
-						 target,
-						 utf_flag, YES,
-						 &HitOffset,
-						 &LenNeeded)) != NULL :
-		     (cp = LYno_attr_mbcs_case_strstr(data,
-						 target,
-						 utf_flag, YES,
-						 &HitOffset,
-						 &LenNeeded)) != NULL) &&
+		if (((cp = LYno_attr_mb_strstr(data,
+					       target,
+					       utf_flag, YES,
+					       &HitOffset,
+					       &LenNeeded)) != NULL) &&
 		    (offset + LenNeeded) < LYcols) {
 		    /*
 		     *	If the hit starts after the end of the hightext2,
@@ -1709,17 +1679,11 @@ highlight_hit_within_hightext2:
 					  (offset - Offset),
 					  utf_flag);
 	    }
-	    if ((case_sensitive ?
-		 (cp = LYno_attr_mbcs_strstr(data,
-					     target,
-					     utf_flag, YES,
-					     &HitOffset,
-					     &LenNeeded)) != NULL :
-		 (cp = LYno_attr_mbcs_case_strstr(data,
-					     target,
-					     utf_flag, YES,
-					     &HitOffset,
-					     &LenNeeded)) != NULL) &&
+	    if (((cp = LYno_attr_mb_strstr(data,
+					   target,
+					   utf_flag, YES,
+					   &HitOffset,
+					   &LenNeeded)) != NULL) &&
 		(offset + LenNeeded) < LYcols) {
 		/*
 		 *  If the hit starts after the end of the hightext2,
@@ -2277,6 +2241,7 @@ PRIVATE int DontCheck NOARGS
      * and expensive operation - TD
      */
 #if HAVE_GETTIMEOFDAY
+#undef timezone			/* U/Win defines a conflicting macro */
     {
 	struct timeval tv;
 	gettimeofday(&tv, (struct timezone *)0);
@@ -2297,7 +2262,7 @@ PUBLIC int HTCheckForInterrupt NOARGS
     int c;
     int cmd;
 #ifndef VMS /* UNIX stuff: */
-#ifndef USE_SLANG
+#if !defined(USE_SLANG) && defined(UNIX)
     struct timeval socket_timeout;
     int ret = 0;
     fd_set readfds;
@@ -2423,8 +2388,9 @@ PUBLIC int HTCheckForInterrupt NOARGS
 
 	    switch (cmd)
 	    {
-	    case LYK_WHEREIS: /* search within the document */
-	    case LYK_NEXT:	 /* search for the next occurrence in the document */
+	    case LYK_WHEREIS:	/* search within the document */
+	    case LYK_NEXT:	/* search for the next occurrence in the document */
+	    case LYK_PREV:	/* search for the previous occurrence in the document */
 		handle_LYK_WHEREIS(cmd, &do_refresh);
 		if (www_search_result != -1) {
 		    Newline_partial = www_search_result;
@@ -3508,12 +3474,8 @@ PUBLIC void size_change ARGS1(
 		old_lines, old_cols, LYlines, LYcols));
 #if defined(CAN_SWITCH_DISPLAY_CHARSET) && defined(CAN_AUTODETECT_DISPLAY_CHARSET)
 	/* May need to reload the font due to different char-box size */
-	if (current_char_set != auto_display_charset) {
-	    int old = current_char_set;
-
-	    Switch_Display_Charset(auto_display_charset, 1);
-	    Switch_Display_Charset(old, 1);
-	}
+	if (current_char_set != auto_display_charset)
+	    Switch_Display_Charset(current_char_set, SWITCH_DISPLAY_CHARSET_SIZECHANGE);
 #endif
     }
 #ifdef SIGWINCH
@@ -3935,7 +3897,7 @@ PRIVATE int fmt_tempname ARGS3(
      */
     counter = MAX_TEMPNAME;
     while (names_used < MAX_TEMPNAME) {
-	counter = ( (float)MAX_TEMPNAME * lynx_rand() ) / LYNX_RAND_MAX + 1;
+	counter = (unsigned)(( (float)MAX_TEMPNAME * lynx_rand() ) / LYNX_RAND_MAX + 1);
 	counter %= SIZE_TEMPNAME;	/* just in case... */
 	/*
 	 * Avoid reusing a temporary name, since there are places in the code
@@ -4961,7 +4923,7 @@ have_VMS_URL:
 
 #if defined(_WINDOWS) /* 1998/06/23 (Tue) 16:45:20 */
 
-PUBLIC int win32_check_interrupt()
+PUBLIC int win32_check_interrupt(void)
 {
     int c;
 
@@ -6555,7 +6517,7 @@ PUBLIC FILE *LYOpenTemp ARGS3(
 {
     FILE *fp = 0;
     BOOL txt = TRUE;
-    BOOL wrt = 'r';
+    char wrt = 'r';
     LY_TEMP *p;
 
     CTRACE((tfp, "LYOpenTemp(,%s,%s)\n", suffix, mode));
@@ -7341,27 +7303,6 @@ PUBLIC void LYLocalFileToURL ARGS2(
     StrAllocCat(*target, leaf);
 }
 
-#ifdef NOTDEFINED
-/* FIXME: this may be useful for pages that do not allow nested pages */
-PUBLIC int LYOpenInternalPage ARGS2(
-	FILE **,  fp0,
-	char **, newfile)
-{
-    static char tempfile[LY_MAXPATH];
-
-    LYRemoveTemp(tempfile);
-    if ((*fp0 = LYOpenTemp(tempfile, HTML_SUFFIX, "w")) == NULL) {
-	HTAlert(CANNOT_OPEN_TEMP);
-	return(-1);
-    }
-
-    LYLocalFileToURL(newfile, tempfile);
-    LYforce_no_cache = TRUE;  /* don't cache this doc */
-
-    return(0);  /* OK */
-}
-#endif
-
 PUBLIC void BeginInternalPage ARGS3(
 	FILE *, fp0,
 	char*, Title,
@@ -8041,7 +7982,6 @@ PUBLIC char* get_clip_grab()
 {
     HANDLE hWnd;
     LPTSTR pLogData;
-    int val;
 
     hWnd = NULL;
     if (!OpenClipboard(hWnd)) {
@@ -8131,11 +8071,6 @@ PUBLIC char * w32_strerror(DWORD ercode)
      */
     if (ercode > WSABASEERR) {
 	hModule = GetModuleHandle("wsock32");
-#if 0
-	if (hModule == NULL) {
-	    hModule = LoadLibrary("wsock32");
-	}
-#endif
 	if (hModule == NULL)
 	    ercode = GetLastError();
 	else
@@ -8151,12 +8086,6 @@ PUBLIC char * w32_strerror(DWORD ercode)
 		  msg_buff,
 		  sizeof(msg_buff),
 		  NULL);
-
-#if 0
-    if (hModule) {
-	FreeLibrary(hModule);
-    }
-#endif
 
     strcpy(tmp_buff, msg_buff);
     p = q = tmp_buff;

@@ -44,10 +44,14 @@ extern BOOL HTPassHighCtrlRaw;
 #define BUTTON_CTRL	0	/* Quick hack */
 #endif
 
-/*Allowing the user to press tab when entering URL to get the closest
-  match in the closet*/
+/*
+ * The edit_history lists allow the user to press tab when entering URL to get
+ * the closest match in the closet
+ */
 #define LYClosetSize 100
+
 static HTList *URL_edit_history;
+static HTList *MAIL_edit_history;
 
 /* If you want to add mouse support for some new platform, it's fairly
 ** simple to do.  Once you've determined the X and Y coordinates of
@@ -232,16 +236,6 @@ PUBLIC int fancy_mouse ARGS3(
 	} else {
 	    /* No scrolling or overflow checks necessary. */
 	    *position += delta;
-#if 0
-	    /* Immediate action looks reasonable since we have no help
-	     * available for individual options.  Moreover, one should be
-	     * able to position active element with <some modifier>-click-1
-	     * (but see remark above), or with click on left or right border.
-	     */
-	    if (!(event.bstate & (BUTTON1_DOUBLE_CLICKED
-				| BUTTON1_TRIPLE_CLICKED)))
-		goto redraw;
-#endif
 	    cmd = LYK_ACTIVATE;
 	}
     } else if (event.bstate & (BUTTON3_CLICKED | BUTTON3_DOUBLE_CLICKED | BUTTON3_TRIPLE_CLICKED)) {
@@ -256,27 +250,47 @@ PUBLIC int fancy_mouse ARGS3(
 }
 
 /*
+ * Manage the collection of edit-histories
+ */
+PRIVATE HTList *whichRecall ARGS1(
+    RecallType,		recall)
+{
+    HTList **list;
+
+    switch (recall) {
+    case RECALL_CMD:
+	return LYcommandList();
+    case RECALL_MAIL:
+	list = &MAIL_edit_history;
+	break;
+    default:
+	list = &URL_edit_history;
+	break;
+    }
+    if (*list == 0)
+	*list = HTList_new();
+    return *list;
+}
+
+/*
  * Remove the oldest item in the closet
  */
-PRIVATE void LYRemoveFromCloset NOARGS
+PRIVATE void LYRemoveFromCloset ARGS1(HTList *, list)
 {
-    char *data = HTList_removeFirstObject(URL_edit_history);
+    char *data = HTList_removeFirstObject(list);
 
     if (data != 0)
 	FREE(data);
 }
 
-PUBLIC void LYOpenCloset NOARGS
+PUBLIC void LYCloseCloset ARGS1(RecallType, recall)
 {
-    URL_edit_history = HTList_new();
-}
+    HTList *list = whichRecall(recall);
 
-PUBLIC void LYCloseCloset NOARGS
-{
-    while (!HTList_isEmpty(URL_edit_history) ) {
-	LYRemoveFromCloset();
+    while (!HTList_isEmpty(list) ) {
+	LYRemoveFromCloset(list);
     }
-    HTList_delete(URL_edit_history);	/* should already be empty */
+    HTList_delete(list);	/* should already be empty */
 }
 
 /*
@@ -284,9 +298,9 @@ PUBLIC void LYCloseCloset NOARGS
  * match, i.e., the newest since we search from the top.  This should be made
  * more intelligent, but works for now.
  */
-PRIVATE char * LYFindInCloset ARGS1(char*, base)
+PRIVATE char * LYFindInCloset ARGS2(RecallType, recall, char*, base)
 {
-    HTList *list = URL_edit_history;
+    HTList *list = whichRecall(recall);
     char *data;
     unsigned len = strlen(base);
 
@@ -299,14 +313,15 @@ PRIVATE char * LYFindInCloset ARGS1(char*, base)
     return(0);
 }
 
-PRIVATE void LYAddToCloset ARGS1(char*, str)
+PRIVATE void LYAddToCloset ARGS2(RecallType, recall, char*, str)
 {
+    HTList *list = whichRecall(recall);
     char *data = NULL;
 
     StrAllocCopy(data, str);
-    HTList_addObject(URL_edit_history, data);
-    while (HTList_count(URL_edit_history) > LYClosetSize)
-	LYRemoveFromCloset();
+    HTList_addObject(list, data);
+    while (HTList_count(list) > LYClosetSize)
+	LYRemoveFromCloset(list);
 }
 
 
@@ -420,7 +435,7 @@ PRIVATE int set_clicked_link ARGS4(
 
 	    l -= display_lines;
 	    if (l > 0)
-		LYSetNewline(frac * l + 1 + 0.5);
+		LYSetNewline((int)(frac * l + 1 + 0.5));
 	    return LYReverseKeymap(LYK_DO_NOTHING);
 	}
 
@@ -502,23 +517,6 @@ PRIVATE int set_clicked_link ARGS4(
 		    mouse_link = i;
 		}
 	    }
-#if 0	/* should not have second line if no first - kw */
-	    /* Check the second line */
-	    if (links[i].hightext2 != NULL) {
-		cur_err = XYdist(x, y,
-				 links[i].hightext2_offset,
-				 links[i].ly+1,
-				 strlen(links[i].hightext2));
-		if (cur_err == 0) {
-		    mouse_link = i;
-		    mouse_err = 0;
-		    break;
-		} else if (cur_err < mouse_err) {
-		    mouse_err = cur_err;
-		    mouse_link = i;
-		}
-	    }
-#endif
 	}
 	/*
 	 * If a link was hit, we must look for a key which will activate
@@ -1353,84 +1351,63 @@ PUBLIC int lynx_initialize_keymaps NOARGS
 #endif				       /* USE_KEYMAPS */
 
 
-#if defined(USE_MOUSE) && (defined(NCURSES) || defined(PDCURSES))
+#if defined(USE_MOUSE) && (defined(NCURSES))
 PRIVATE int LYmouse_menu ARGS4(int, x, int, y, int, atlink, int, code)
 {
-    static char *choices[] = {
-	"Quit",
-	"Home page",
-	"Previous document",
-	"Beginning of document",
-	"Page up",
-	"Half page up",
-	"Two lines up",
-	"History",
-	"Help",
-	"Do nothing (refresh)",
-	"Load again",
-	"Edit URL and load",
-	"Show info",
-	"Search",
-	"Print",
-	"Two lines down",
-	"Half page down",
-	"Page down",
-	"End of document",
-	"Bookmarks",
-	"Cookie jar",
-	"Search index",
-	"Set Options",
-	NULL
+#define ENT_ONLY_DOC	1
+#define ENT_ONLY_LINK	2
+    static const struct {
+	char *txt;
+	int  action;
+	unsigned int  flag;
+    } possible_entries[] = {
+	{"Quit",			LYK_ABORT,		ENT_ONLY_DOC},
+	{"Home page",			LYK_MAIN_MENU,		ENT_ONLY_DOC},
+	{"Previous document",		LYK_PREV_DOC,		ENT_ONLY_DOC},
+	{"Beginning of document",	LYK_HOME,		ENT_ONLY_DOC},
+	{"Page up",			LYK_PREV_PAGE,		ENT_ONLY_DOC},
+	{"Half page up",		LYK_UP_HALF,		ENT_ONLY_DOC},
+	{"Two lines up",		LYK_UP_TWO,		ENT_ONLY_DOC},
+	{"History",			LYK_HISTORY,		ENT_ONLY_DOC},
+	{"Help",			LYK_HELP,		0},
+	{"Do nothing (refresh)",	LYK_REFRESH,		0},
+	{"Load again",			LYK_RELOAD,		ENT_ONLY_DOC},
+	{"Edit Doc URL and load",	LYK_ECGOTO,		ENT_ONLY_DOC},
+	{"Edit Link URL and load",	LYK_ELGOTO,		ENT_ONLY_LINK},
+	{"Show info",			LYK_INFO,		0},
+	{"Search",			LYK_WHEREIS,		ENT_ONLY_DOC},
+	{"Print",			LYK_PRINT,		ENT_ONLY_DOC},
+	{"Two lines down",		LYK_DOWN_TWO,		ENT_ONLY_DOC},
+	{"Half page down",		LYK_DOWN_HALF,		ENT_ONLY_DOC},
+	{"Page down",			LYK_NEXT_PAGE,		ENT_ONLY_DOC},
+	{"End of document",		LYK_END,		ENT_ONLY_DOC},
+	{"Bookmarks",			LYK_VIEW_BOOKMARK,	ENT_ONLY_DOC},
+	{"Cookie jar",			LYK_COOKIE_JAR,		ENT_ONLY_DOC},
+	{"Search index",		LYK_INDEX_SEARCH,	ENT_ONLY_DOC},
+	{"Set Options",			LYK_OPTIONS,		ENT_ONLY_DOC},
+	{"Activate this link",		LYK_SUBMIT,		ENT_ONLY_LINK},
+	{"Download",			LYK_DOWNLOAD,		ENT_ONLY_LINK}
     };
-    static char *choices_link[] = {
-	"Help",
-	"Do nothing",
-	"Activate this link",
-	"Show info",
-	"Download",
-	NULL
-    };
-    static int actions[] = {
-	LYK_ABORT,
-	LYK_MAIN_MENU,
-	LYK_PREV_DOC,
-	LYK_HOME,
-	LYK_PREV_PAGE,
-	LYK_UP_HALF,
-	LYK_UP_TWO,
-	LYK_HISTORY,
-	LYK_HELP,
-	LYK_REFRESH,
-	LYK_RELOAD,
-	LYK_ECGOTO,
-	LYK_INFO,
-	LYK_WHEREIS,
-	LYK_PRINT,
-	LYK_DOWN_TWO,
-	LYK_DOWN_HALF,
-	LYK_NEXT_PAGE,
-	LYK_END,
-	LYK_VIEW_BOOKMARK,
-	LYK_COOKIE_JAR,
-	LYK_INDEX_SEARCH,
-	LYK_OPTIONS
-    };
-    static int actions_link[] = {
-	LYK_HELP,
-	LYK_DO_NOTHING,
-	LYK_SUBMIT,
-	LYK_INFO,
-	LYK_DOWNLOAD
-    };
-    int c, retlac;
+#define TOTAL_MENUENTRIES	TABLESIZE(possible_entries)
+    char *choices[TOTAL_MENUENTRIES + 1];
+    int actions[TOTAL_MENUENTRIES];
+
+    int c, c1, retlac, filter_out = (atlink ? ENT_ONLY_DOC : ENT_ONLY_LINK);
+
+    c = c1 = 0;
+    while (c < (int) TOTAL_MENUENTRIES) {
+	if (!(possible_entries[c].flag & filter_out)) {
+	    choices[c1] = possible_entries[c].txt;
+	    actions[c1++] = possible_entries[c].action;
+	}
+	c++;
+    }
+    choices[c1] = NULL;
 
     /* Somehow the mouse is over the number instead of being over the
        name, so we decrease x. */
     c = LYChoosePopup((atlink ? 2 : 10) - 1, y, (x > 5 ? x-5 : 1),
-		     (atlink ? choices_link : choices),
-		     (atlink
-		      ? TABLESIZE(actions_link)
-		      : TABLESIZE(actions)), FALSE, TRUE);
+		     choices, c1, FALSE, TRUE);
 
     /*
      *  LYhandlePopupList() wasn't really meant to be used
@@ -1443,7 +1420,7 @@ PRIVATE int LYmouse_menu ARGS4(int, x, int, y, int, atlink, int, code)
 	retlac = LYK_DO_NOTHING;
 	term_options = FALSE;
     } else {
-	retlac = atlink ? (actions_link[c]) : (actions[c]);
+	retlac = actions[c];
     }
 
     if (code == FOR_INPUT && mouse_link == -1) {
@@ -1616,7 +1593,7 @@ re_read:
 	    if (new_fd >= 0) {
 		FILE *frp;
 		close(new_fd);
-		freopen(term_name, TXT_R, stdin);
+		frp = freopen(term_name, TXT_R, stdin);
 		CTRACE((tfp,
 		"nozap: freopen(%s,\"r\",stdin) returned %p, stdin is now %p with fd %d.\n",
 			term_name, frp, stdin, fileno(stdin)));
@@ -1700,17 +1677,17 @@ re_read:
 
 	switch (a) {
 	case 'A': c = UPARROW; break;
-	case 'x': c = UPARROW; break;  /* keypad up on pc ncsa telnet */
+	case 'x': c = UPARROW; break;	/* keypad up on pc ncsa telnet */
 	case 'B': c = DNARROW; break;
-	case 'r': c = DNARROW; break; /* keypad down on pc ncsa telnet */
+	case 'r': c = DNARROW; break;	/* keypad down on pc ncsa telnet */
 	case 'C': c = RTARROW; break;
-	case 'v': c = RTARROW; break; /* keypad right on pc ncsa telnet */
+	case 'v': c = RTARROW; break;	/* keypad right on pc ncsa telnet */
 	case 'D': c = LTARROW; break;
-	case 't': c = LTARROW; break;  /* keypad left on pc ncsa telnet */
-	case 'y': c = PGUP;    break;  /* keypad on pc ncsa telnet */
-	case 's': c = PGDOWN;  break;  /* keypad on pc ncsa telnet */
-	case 'w': c = HOME;    break;  /* keypad on pc ncsa telnet */
-	case 'q': c = END_KEY; break;  /* keypad on pc ncsa telnet */
+	case 't': c = LTARROW; break;	/* keypad left on pc ncsa telnet */
+	case 'y': c = PGUP;    break;	/* keypad on pc ncsa telnet */
+	case 's': c = PGDOWN;  break;	/* keypad on pc ncsa telnet */
+	case 'w': c = HOME;    break;	/* keypad on pc ncsa telnet */
+	case 'q': c = END_KEY; break;	/* keypad on pc ncsa telnet */
 	case 'M':
 #if defined(USE_SLANG) && defined(USE_MOUSE)
 	   if (found_CSI(c,b))
@@ -1719,18 +1696,18 @@ re_read:
 	     }
 	   else
 #endif
-	     c = '\n'; /* keypad enter on pc ncsa telnet */
+	     c = '\n';		/* keypad enter on pc ncsa telnet */
 	   break;
 
 	case 'm':
 #ifdef VMS
 	    if (b != 'O')
 #endif /* VMS */
-		c = '-';  /* keypad on pc ncsa telnet */
+		c = '-';	/* keypad on pc ncsa telnet */
 	    break;
 	case 'k':
 	    if (b == 'O')
-		c = '+';  /* keypad + on my xterminal :) */
+		c = '+';	/* keypad + on my xterminal :) */
 	    else
 		done_esc = FALSE; /* we have another look below - kw */
 	    break;
@@ -1738,7 +1715,7 @@ re_read:
 #ifdef VMS
 	    if (b != 'O')
 #endif /* VMS */
-		c = '+';  /* keypad on pc ncsa telnet */
+		c = '+';	/* keypad on pc ncsa telnet */
 	    break;
 	case 'P':
 #ifdef VMS
@@ -1750,15 +1727,15 @@ re_read:
 #ifdef VMS
 	    if (b != 'O')
 #endif /* VMS */
-		c = F1;  /* macintosh help button */
+		c = F1;		/* macintosh help button */
 	    break;
 	case 'p':
 #ifdef VMS
 	    if (b == 'O')
 #endif /* VMS */
-		c = '0';  /* keypad 0 */
+		c = '0';	/* keypad 0 */
 	    break;
-	case '1':			    /** VTxxx  Find  **/
+	case '1':		/** VTxxx  Find  **/
 	    if (found_CSI(c,b) && (d=GetChar()) == '~')
 		c = FIND_KEY;
 	    else
@@ -2455,11 +2432,11 @@ PUBLIC void LYUpperCase ARGS1(
 	    }
 	    i++;
 	} else {
-	    buffer[i] = TOUPPER(buffer[i]);
+	    buffer[i] = UCH(TOUPPER(buffer[i]));
 	}
     }
 #else
-	buffer[i] = TOUPPER(buffer[i]);
+	buffer[i] = UCH(TOUPPER(buffer[i]));
 #endif
 }
 
@@ -2542,6 +2519,35 @@ PUBLIC void LYTrimTrailing ARGS1(
     size_t i = strlen(buffer);
     while (i != 0 && isspace(UCH(buffer[i-1])))
 	buffer[--i] = 0;
+}
+
+/* 1997/11/10 (Mon) 14:26:10, originally string_short() in LYExterns.c, but
+ * moved here because LYExterns is not always configured.
+ */
+PUBLIC char *LYElideString ARGS2(
+	char *,		str,
+	int,		cut_pos)
+{
+    char buff[MAX_LINE], *s, *d;
+    static char s_str[MAX_LINE];
+    int len;
+
+    LYstrncpy(buff, str, sizeof(buff)-1);
+    len = strlen(buff);
+    if (len > (LYcols - 10)) {
+	buff[cut_pos] = '.';
+	buff[cut_pos + 1] = '.';
+	for (s = (buff + len) - (LYcols - 10) + cut_pos + 1,
+	     d = (buff + cut_pos) + 2;
+	     s >= buff &&
+	     d >= buff &&
+	     d < buff + LYcols &&
+	     (*d++ = *s++) != 0; )
+	    ;
+	buff[LYcols] = 0;
+    }
+    strcpy(s_str, buff);
+    return (s_str);
 }
 
 /*
@@ -2794,6 +2800,7 @@ PUBLIC int LYEdit1 ARGS4(
      */
     int i;
     int length;
+    unsigned char uch;
 
     if (MaxLen <= 0)
 	return(0); /* Be defensive */
@@ -2822,13 +2829,10 @@ PUBLIC int LYEdit1 ARGS4(
 	    return(ch);
 	/* FALLTHRU */
 #endif
-    case LYE_CHAR: {
-	unsigned char uch = UCH(ch);
-
+    case LYE_CHAR:
+	uch = UCH(ch);
 	LYEditInsert(edit, &uch, 1, map_active, maxMessage);
 	return 0;			/* All changes already registered */
-    }
-    break;
 
     case LYE_C1CHAR:
 	/*
@@ -3282,13 +3286,6 @@ PUBLIC int get_popup_number ARGS3(
 #  define TmpStyleOff(s)
 #endif	/* defined USE_COLOR_STYLE */
 
-#ifndef ACS_LARROW
-#  define ACS_LARROW '{'
-#endif
-#ifndef ACS_RARROW
-#  define ACS_RARROW '}'
-#endif
-
 PUBLIC void LYRefreshEdit ARGS1(
 	EDREC *,	edit)
 {
@@ -3530,17 +3527,6 @@ PRIVATE void reinsertEdit ARGS2(
     }
 }
 
-PRIVATE HTList *whichRecall ARGS1(
-    RecallType,		recall)
-{
-    switch (recall) {
-    case RECALL_CMD:
-	return LYcommandList();
-    default:
-	return URL_edit_history;
-    }
-}
-
 PRIVATE int caselessCmpList ARGS2(
     CONST void *,	a,
     CONST void *,	b)
@@ -3671,13 +3657,29 @@ PRIVATE void draw_option ARGS7(
     if (reversed)
 	SLsmg_set_color(0);
 #else
-    wmove(win, entry, 2);
+    wmove(win, entry, 1);
+    LynxWChangeStyle(win, s_menu_entry, STACK_ON);
+    waddch(win, ' ');
+    LynxWChangeStyle(win, s_menu_entry, STACK_OFF);
+    LynxWChangeStyle(win, s_menu_number, STACK_ON);
     waddstr(win, Cnum);
+    LynxWChangeStyle(win, s_menu_number, STACK_OFF);
+#ifdef USE_COLOR_STYLE
+    LynxWChangeStyle(win, reversed ? s_menu_active : s_menu_entry, STACK_ON);
+#else
     if (reversed)
 	wstart_reverse(win);
+#endif
     LYpaddstr(win, width, value);
+#ifdef USE_COLOR_STYLE
+    LynxWChangeStyle(win, reversed ? s_menu_active : s_menu_entry, STACK_OFF);
+#else
     if (reversed)
 	wstop_reverse(win);
+#endif
+    LynxWChangeStyle(win, s_menu_entry, STACK_ON);
+    waddch(win, ' ');
+    LynxWChangeStyle(win, s_menu_entry, STACK_OFF);
 #endif /* USE_SLANG */
 }
 
@@ -3724,6 +3726,10 @@ PUBLIC int LYhandlePopupList ARGS9(
     char buffer[MAX_LINE];
     char *popup_status_msg = NULL;
     CONST char **Cptr = NULL;
+#define CAN_SCROLL_DOWN	1
+#define CAN_SCROLL_UP	2
+#define CAN_SCROLL	4
+    int can_scroll = 0, can_scroll_was = 0;
 
     orig_choice = cur_choice;
     if (cur_choice < 0)
@@ -3738,7 +3744,7 @@ PUBLIC int LYhandlePopupList ARGS9(
     }
     *prev_target = '\0';
     QueryTotal = (search_queries ? HTList_count(search_queries) : 0);
-    recall = ((QueryTotal >= 1) ? RECALL : NORECALL);
+    recall = ((QueryTotal >= 1) ? RECALL_URL : NORECALL);
     QueryNum = QueryTotal;
 
     /*
@@ -3836,6 +3842,8 @@ PUBLIC int LYhandlePopupList ARGS9(
      *  This is really fun, when the length is 4, it means 0 to 4, or 5.
      */
     length = (bottom - top) - 2;
+    if (length <= num_choices)
+	can_scroll = CAN_SCROLL;
 
     /*
      *  Move the window down if it's too high.
@@ -3913,7 +3921,7 @@ redraw:
 			 max_choices, i, choices[i]);
 	}
     }
-    LYbox(form_window, !numbered);
+    LYbox(form_window, (BOOLEAN)!numbered);
     Cptr = NULL;
 
     /*
@@ -3921,6 +3929,29 @@ redraw:
      */
     while (cmd != LYK_ACTIVATE) {
 	int row = ((i + 1) - window_offset);
+
+	/* Show scroll indicators. */
+	if (can_scroll) {
+	    can_scroll = ((window_offset ? CAN_SCROLL_UP : 0)
+			  | (num_choices - window_offset >= length
+			     ? CAN_SCROLL_DOWN : 0));
+	    if (~can_scroll & can_scroll_was) {	/* Need to redraw */
+		LYbox(form_window, (BOOLEAN)!numbered);
+		can_scroll_was = 0;
+	    }
+	    if (can_scroll & ~can_scroll_was & CAN_SCROLL_UP) {
+		wmove(form_window, 1, Lnum + width + 3);
+		LynxWChangeStyle(form_window, s_menu_sb, STACK_ON);
+		waddch(form_window, ACS_UARROW);
+		LynxWChangeStyle(form_window, s_menu_sb, STACK_OFF);
+	    }
+	    if (can_scroll & ~can_scroll_was & CAN_SCROLL_DOWN) {
+		wmove(form_window, length, Lnum + width + 3);
+		LynxWChangeStyle(form_window, s_menu_sb, STACK_ON);
+		waddch(form_window, ACS_DARROW);
+		LynxWChangeStyle(form_window, s_menu_sb, STACK_OFF);
+	    }
+	}
 
 	/*
 	 *  Unreverse cur choice.
@@ -4567,7 +4598,7 @@ restore_popup_statusline:
 		*prev_target = '\0';
 		QueryTotal = (search_queries ? HTList_count(search_queries)
 					     : 0);
-		recall = ((QueryTotal >= 1) ? RECALL : NORECALL);
+		recall = ((QueryTotal >= 1) ? RECALL_URL : NORECALL);
 		QueryNum = QueryTotal;
 		if (ReDraw == TRUE) {
 		    ReDraw = FALSE;
@@ -4611,7 +4642,7 @@ PUBLIC int LYgetstr ARGS4(
     MaxStringSize = (bufsize < sizeof(MyEdit.buffer)) ?
 		    (bufsize - 1) : (sizeof(MyEdit.buffer) - 1);
     LYSetupEdit(&MyEdit, inputline, MaxStringSize, (LYcols-1)-x);
-    MyEdit.hidden = hidden ;
+    MyEdit.hidden = (BOOL) hidden ;
 
     CTRACE((tfp, "called LYgetstr\n"));
     for (;;) {
@@ -4652,7 +4683,7 @@ again:
 
 	if (recall != NORECALL && (ch == UPARROW || ch == DNARROW)) {
 	    LYstrncpy(inputline, MyEdit.buffer, (int)bufsize);
-	    LYAddToCloset(MyEdit.buffer);
+	    LYAddToCloset(recall, MyEdit.buffer);
 	    CTRACE((tfp, "LYgetstr(%s) recall\n", inputline));
 	    return(ch);
 	}
@@ -4692,7 +4723,7 @@ again:
 	    if (xlec == last_xlec && recall != NORECALL) {
 		HTList *list = whichRecall(recall);
 		if (!HTList_isEmpty(list)) {
-		    char **data = sortedList(list, recall == RECALL_CMD);
+		    char **data = sortedList(list, (BOOL)(recall == RECALL_CMD));
 		    int old_y, old_x;
 		    int cur_choice = 0;
 		    int num_options = LYarrayLength((CONST char **)data);
@@ -4730,7 +4761,7 @@ again:
 		    FREE(data);
 		}
 	    } else {
-		reinsertEdit(&MyEdit, LYFindInCloset(MyEdit.buffer));
+		reinsertEdit(&MyEdit, LYFindInCloset(recall, MyEdit.buffer));
 	    }
 	    break;
 
@@ -4757,7 +4788,7 @@ again:
 	     */
 	    LYstrncpy(inputline, MyEdit.buffer, (int)bufsize);
 	    if (!hidden)
-		LYAddToCloset(MyEdit.buffer);
+		LYAddToCloset(recall, MyEdit.buffer);
 	    CTRACE((tfp, "LYgetstr(%s) LYE_ENTER\n", inputline));
 	    return(ch);
 
@@ -5475,70 +5506,6 @@ PUBLIC int UPPER8 ARGS2(int,ch1, int,ch2)
     return(-10);  /* mismatch, if we come to here */
 }
 
-
-#ifdef NOTUSED
-/*
-**   We extend this function for 8bit letters
-**   using Lynx internal chartrans feature:
-**   we assume that upper/lower case letters
-**   have their "7bit approximation" images (in def7_uni.tbl)
-**   matched case-insensitive (7bit).
-**
-**   By this technique we automatically cover *any* charset
-**   known for Lynx chartrans and need no any extra information for it.
-**
-**   The cost of this assumption is that several differently accented letters
-**   may be interpreted as equal, but this side effect is negligible
-**   if the user search string is more than one character long.  - LP
-**
-**   We enable new technique only if  DisplayCharsetMatchLocale = FALSE
-**   (see description in LYCharSets.c)
-*/
-PUBLIC int UPPER8 ARGS2(int,ch1, int,ch2)
-{
-
-    /* case-insensitive match for us-ascii */
-    if (UCH(TOASCII(ch1)) < 128 && UCH(TOASCII(ch2)) < 128)
-	return(TOUPPER(ch1) - TOUPPER(ch2));
-
-    /* case-insensitive match for upper half */
-    if (UCH(TOASCII(ch1)) > 127 &&  /* S/390 -- gil -- 2066 */
-	UCH(TOASCII(ch2)) > 127)
-    {
-	if (DisplayCharsetMatchLocale)
-	   return(TOUPPER(ch1) - TOUPPER(ch2)); /* old-style */
-	else
-	{
-	/* compare "7bit approximation" for letters >127   */
-	/* BTW, if we remove the check for >127 above	   */
-	/* we get even more "relaxed" insensitive match... */
-
-	int charset_in, charset_out, uck1, uck2;
-	char replace_buf1 [10], replace_buf2 [10];
-
-	charset_in  = current_char_set;  /* display character set */
-	charset_out = UCGetLYhndl_byMIME("us-ascii");
-
-	uck1 = UCTransCharStr(replace_buf1, sizeof(replace_buf1), (char)ch1,
-			      charset_in, charset_out, YES);
-	uck2 = UCTransCharStr(replace_buf2, sizeof(replace_buf2), (char)ch2,
-			      charset_in, charset_out, YES);
-
-	if ((uck1 > 0) && (uck2 > 0))  /* both replacement strings found */
-	    return (strcasecomp(replace_buf1, replace_buf2));
-
-	/* check to be sure we have not lost any strange characters */
-	/* which are not found in def7_uni.tbl but _equal_ in fact. */
-	/* this also applied for "x-transparent" display mode.	    */
-	if (UCH(ch1) == UCH(ch2))
-	    return(0);	 /* match */
-	}
-    }
-
-    return(-10);  /* mismatch, if we come to here */
-}
-#endif /* NOTUSED */
-
 /*
  * Replaces 'fgets()' calls into a fixed-size buffer with reads into a buffer
  * that is allocated.  When an EOF or error is found, the buffer is freed
@@ -5582,33 +5549,6 @@ static char basis_64[] =
    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 #define B64_LINE       76
-
-#if 0
-#define XX 255	/* illegal base64 char */
-#define EQ 254	/* padding */
-static unsigned char index_64[256] = {
-    XX,XX,XX,XX, XX,XX,XX,XX, XX,XX,XX,XX, XX,XX,XX,XX,
-    XX,XX,XX,XX, XX,XX,XX,XX, XX,XX,XX,XX, XX,XX,XX,XX,
-    XX,XX,XX,XX, XX,XX,XX,XX, XX,XX,XX,62, XX,XX,XX,63,
-    52,53,54,55, 56,57,58,59, 60,61,XX,XX, XX,EQ,XX,XX,
-    XX, 0, 1, 2,  3, 4, 5, 6,  7, 8, 9,10, 11,12,13,14,
-    15,16,17,18, 19,20,21,22, 23,24,25,XX, XX,XX,XX,XX,
-    XX,26,27,28, 29,30,31,32, 33,34,35,36, 37,38,39,40,
-    41,42,43,44, 45,46,47,48, 49,50,51,XX, XX,XX,XX,XX,
-
-    XX,XX,XX,XX, XX,XX,XX,XX, XX,XX,XX,XX, XX,XX,XX,XX,
-    XX,XX,XX,XX, XX,XX,XX,XX, XX,XX,XX,XX, XX,XX,XX,XX,
-    XX,XX,XX,XX, XX,XX,XX,XX, XX,XX,XX,XX, XX,XX,XX,XX,
-    XX,XX,XX,XX, XX,XX,XX,XX, XX,XX,XX,XX, XX,XX,XX,XX,
-    XX,XX,XX,XX, XX,XX,XX,XX, XX,XX,XX,XX, XX,XX,XX,XX,
-    XX,XX,XX,XX, XX,XX,XX,XX, XX,XX,XX,XX, XX,XX,XX,XX,
-    XX,XX,XX,XX, XX,XX,XX,XX, XX,XX,XX,XX, XX,XX,XX,XX,
-    XX,XX,XX,XX, XX,XX,XX,XX, XX,XX,XX,XX, XX,XX,XX,XX,
-};
-
-#define GETC(str,len)  (len > 0 ? len--,*str++ : EOF)
-#define INVALID_B64(c) (index_64[UCH(c)] == XX)
-#endif
 
 PUBLIC void base64_encode ARGS3(
     char *,	dest,
@@ -5696,7 +5636,7 @@ PUBLIC void LYOpenCmdLogfile ARGS2(
 
 PUBLIC BOOL LYHaveCmdScript NOARGS
 {
-    return cmd_script != 0;
+    return (BOOL)(cmd_script != 0);
 }
 
 PUBLIC void LYOpenCmdScript NOARGS

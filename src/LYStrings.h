@@ -5,8 +5,9 @@
 
 typedef enum {
     NORECALL = 0
-    , RECALL
+    , RECALL_URL
     , RECALL_CMD
+    , RECALL_MAIL
 } RecallType;
 
 /*  UPPER8(ch1,ch2) is an extension of (TOUPPER(ch1) - TOUPPER(ch2))  */
@@ -59,6 +60,7 @@ extern int LYmbcsstrlen PARAMS((
 	char *		str,
 	BOOL		utf_flag,
 	BOOL		count_gcells));
+
 extern char * LYno_attr_mbcs_strstr PARAMS((
 	char *		chptr,
 	CONST char *	tarptr,
@@ -73,12 +75,23 @@ extern char * LYno_attr_mbcs_case_strstr PARAMS((
 	BOOL		count_gcells,
 	int *		nstartp,
 	int *		nendp));
+
+#define LYno_attr_mb_strstr(chptr, tarptr, utf_flag, count_gcells, nstartp, nendp) \
+	(case_sensitive \
+	    ? LYno_attr_mbcs_strstr(chptr, tarptr, utf_flag, count_gcells, nstartp, nendp) \
+	    : LYno_attr_mbcs_case_strstr(chptr, tarptr, utf_flag, count_gcells, nstartp, nendp))
+
 extern char * LYno_attr_char_strstr PARAMS((
 	char *		chptr,
 	char *		tarptr));
 extern char * LYno_attr_char_case_strstr PARAMS((
 	char *		chptr,
 	char *		tarptr));
+
+#define LYno_attr_strstr(chptr, tarptr) \
+	(case_sensitive \
+	? LYno_attr_char_strstr(chptr, tarptr) \
+	: LYno_attr_char_case_strstr(chptr, tarptr))
 
 extern char * SNACopy PARAMS((
 	char **		dest,
@@ -278,6 +291,9 @@ extern int lynx_initialize_keymaps NOPARAMS;
 extern int map_string_to_keysym PARAMS((CONST char * src, int *lec));
 #endif
 
+extern char *LYElideString PARAMS((
+	char *		str,
+	int		cut_pos));
 extern void LYLowerCase PARAMS((
 	char *		buffer));
 extern void LYUpperCase PARAMS((
@@ -317,8 +333,7 @@ extern int LYEdit1 PARAMS((
 	int		ch,
 	int		action,
 	BOOL		maxMessage));
-extern void LYOpenCloset NOPARAMS;
-extern void LYCloseCloset NOPARAMS;
+extern void LYCloseCloset PARAMS((RecallType recall));
 extern int LYhandlePopupList PARAMS((
 	int		cur_choice,
 	int		ly,

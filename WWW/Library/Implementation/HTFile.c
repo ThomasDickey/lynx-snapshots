@@ -1886,7 +1886,7 @@ PRIVATE int print_local_dir ARGS5(
 			    }
 #endif /* !LONG_LIST */
 			state =
-			   (*(char *)(HTBTree_object(next_element))
+			   (char) (*(char *)(HTBTree_object(next_element))
 			    == 'D' ? 'D' : 'F');
 			START(HTML_H2);
 			if (dir_list_style != MIXED_STYLE) {
@@ -1913,7 +1913,7 @@ PRIVATE int print_local_dir ARGS5(
 			}
 #endif /* !LONG_LIST */
 			state =
-			  (*(char *)(HTBTree_object(next_element))
+			  (char) (*(char *)(HTBTree_object(next_element))
 			   == 'D' ? 'D' : 'F');
 			START(HTML_H2);
 			START(HTML_EM);

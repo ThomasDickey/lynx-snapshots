@@ -9,6 +9,7 @@
 #include <LYStrings.h>
 #include <GridText.h>
 #include <LYMail.h>
+#include <LYEdit.h>
 #include <LYCharSets.h>  /* to get current charset for mail header */
 
 #include <LYLeaks.h>
@@ -229,7 +230,7 @@ PRIVATE BOOLEAN trim_comma ARGS1(
 {
     if (address[(strlen(address) - 1)] == ',')
 	address[(strlen(address) - 1)] = '\0';
-    return *address == '\0';
+    return (BOOL) (*address == '\0');
 }
 
 /*
@@ -1431,10 +1432,6 @@ PUBLIC void reply_by_mail ARGS4(
 #endif /* !VMS */
 
     if (!no_editor && !EMPTY(editor)) {
-	/*
-	 *  Use an external editor for the message.
-	 */
-	char *editor_arg = "";
 
 	if (body) {
 	    cp1 = body;
@@ -1452,7 +1449,7 @@ PUBLIC void reply_by_mail ARGS4(
 	    if (HTConfirm(is_preparsed
 	    	? INC_PREPARSED_MSG_PROMPT
 		: INC_ORIG_MSG_PROMPT) == YES) {
-		print_wwwfile_to_fd(fd, (BOOLEAN)!is_preparsed);
+		print_wwwfile_to_fd(fd, (BOOL) !is_preparsed);
 	    }
 	}
 	LYCloseTempFP(fd);	/* Close the tmpfile. */
@@ -1464,20 +1461,7 @@ PUBLIC void reply_by_mail ARGS4(
 	/*
 	 *  Spawn the users editor on the mail file
 	 */
-	if (strstr(editor, "pico")) {
-	    editor_arg = " -t"; /* No prompt for filename to use */
-	}
-	command = 0;
-	HTSprintf0(&command, "%s%s %s", editor, editor_arg, my_tmpfile);
-	_statusline(SPAWNING_EDITOR_FOR_MAIL);
-	stop_curses();
-	if (LYSystem(command)) {	/* Spawn Editor */
-	    start_curses();
-	    HTAlert(ERROR_SPAWNING_EDITOR);
-	} else {
-	    start_curses();
-	}
-	FREE(command);
+	edit_temporary_file(my_tmpfile, "", SPAWNING_EDITOR_FOR_MAIL);
 
     } else if (body) {
 	/*

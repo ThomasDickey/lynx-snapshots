@@ -217,28 +217,3 @@ they will be outlined in this file.
     SOCKETSHR 0.9D sources and offers the fixes as:
        http://alder.cc.kcl.ac.uk/fileserv/zip/socketshr_src_09d-2.zip
        ftp://ftp2.kcl.ac.uk/zip/socketshr_src_09d-2.zip
-
----------
-
-    On Linux, glibc 2.1.3 (first reported 3 March 2000) has an error which
-    interferes with ncurses.  The file <sys/ucontext.h>, which is included by
-    <signal.h>, contains these lines:
-
-		# define TRAPNO TRAPNO 
-		  ERR, 
-		# define ERR    ERR 
-		  EIP, 
-
-    while ncurses' header curses.h contains this:
-
-		#if	!defined(ERR) || ((ERR) != -1)
-		#define ERR     (-1)
-		#endif
-
-    which fails to compile because of the redefinition.
-
-    Quick fix: modify <sys/ucontext.h>, for instance, changing ERR to
-    GLIBC_BUG (the symbol is not used).
-
-    Better fix: upgrade to a better version of glibc which presumably
-    has been tested with normal applications.

@@ -230,7 +230,11 @@ extern void user_message PARAMS((
 
 #define _user_message(msg, arg)	mustshow = TRUE, user_message(msg, arg)
 
-extern void www_user_search PARAMS((int start_line, document *doc, char *target));
+extern void www_user_search PARAMS((
+	int		start_line,
+	document *	doc,
+	char *		target,
+	int		direction));
 
 extern void print_crawl_to_fd PARAMS((
 	FILE *		fp,

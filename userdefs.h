@@ -739,27 +739,27 @@
 #define PREFERRED_CHARSET ""
 
 /*****************************
-* If MULTI_BOOKMARK_SUPPORT is set TRUE, and BLOCK_MULTI_BOOKMARKS (see
-* below) is FALSE, and sub-bookmarks exist, all bookmark operations will
-* first prompt the user to select an active sub-bookmark file or the
-* default bookmark file.  FALSE is the default so that one (the default)
-* bookmark file will be available initially.  The default set here can
-* be overridden in lynx.cfg.  The user can turn on multiple bookmark
-* support via the 'o'ptions menu, and can save that choice as the startup
-* default via the .lynxrc file.  When on, the setting can be STANDARD or
-* ADVANCED.  If support is set to the latter, and the user mode also is
-* ADVANCED, the VIEW_BOOKMARK command will invoke a status line prompt at
-* which the user can enter the letter token (A - Z) of the desired bookmark,
+* If MULTI_BOOKMARK_SUPPORT is set to MBM_STANDARD or MBM_ADVANCED, and
+* BLOCK_MULTI_BOOKMARKS (see below) is FALSE, and sub-bookmarks exist, all
+* bookmark operations will first prompt the user to select an active
+* sub-bookmark file or the default bookmark file.  MBM_OFF is the default so
+* that one (the default) bookmark file will be available initially.  The
+* default set here can be overridden in lynx.cfg.  The user can turn on
+* multiple bookmark support via the 'o'ptions menu, and can save that choice as
+* the startup default via the .lynxrc file.  When on, the setting can be
+* STANDARD or ADVANCED.  If support is set to the latter, and the user mode
+* also is ADVANCED, the VIEW_BOOKMARK command will invoke a status line prompt
+* at which the user can enter the letter token (A - Z) of the desired bookmark,
 * or '=' to get a menu of available bookmark files.  The menu always is
 * presented in NOVICE or INTERMEDIATE mode, or if the support is set to
 * STANDARD.  No prompting or menu display occurs if only one (the startup
 * default) bookmark file has been defined (define additional ones via the
-* 'o'ptions menu).  The startup default, however set, can be overridden on
-* the command line via the -restrictions=multibook or the -anonymous or
-* -validate switches.
+* 'o'ptions menu).  The startup default, however set, can be overridden on the
+* command line via the -restrictions=multibook or the -anonymous or -validate
+* switches.
 */
 #ifndef MULTI_BOOKMARK_SUPPORT
-#define MULTI_BOOKMARK_SUPPORT FALSE
+#define MULTI_BOOKMARK_SUPPORT MBM_OFF
 #endif /* MULTI_BOOKMARK_SUPPORT */
 
 /*****************************
@@ -1351,11 +1351,11 @@
  * the version definition with the Project Version on checkout.  Just
  * ignore it. - kw */
 /* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
-#define LYNX_VERSION "2.8.4dev.20"
+#define LYNX_VERSION "2.8.4dev.21"
 #define LYNX_WWW_HOME "http://lynx.browser.org/"
 #define LYNX_WWW_DIST "http://lynx.isc.org/current/"
 /* $Format: "#define LYNX_DATE \"$ProjectDate$\""$ */
-#define LYNX_DATE "Sun, 01 Apr 2001 17:51:46 -0700"
+#define LYNX_DATE "Sun, 03 Jun 2001 12:58:00 -0700"
 #define LYNX_DATE_OFF 5		/* truncate the automatically-generated date */
 #define LYNX_DATE_LEN 11	/* truncate the automatically-generated date */
 

@@ -12,11 +12,11 @@
 CFLAGS = $(MCFLAGS)
 
 CC = gcc
-MCFLAGS = -O1 -DDOSPATH -DNO_TTYTYP \
+MCFLAGS = -O2 -DDOSPATH -DNO_TTYTYP \
 -I. \
 -I../../WWW/Library/Implementation \
--I../../djgpp/watt32/inc \
--I../../djgpp/watt32/inc/sys \
+-I/djgpp/watt32/inc \
+-I/djgpp/watt32/inc/sys \
 -I../..
 
 .SUFFIXES: .tbl

@@ -213,11 +213,11 @@ PUBLIC char *LYJump ARGS1(int, key)
 
     ShortcutTotal = (jtp->history ? HTList_count(jtp->history) : 0);
     if (jump_buffer && *buf) {
-	recall = ((ShortcutTotal > 1) ? RECALL : NORECALL);
+	recall = ((ShortcutTotal > 1) ? RECALL_URL : NORECALL);
 	ShortcutNum = 0;
 	FirstShortcutRecall = FALSE;
     } else {
-	recall = ((ShortcutTotal >= 1) ? RECALL : NORECALL);
+	recall = ((ShortcutTotal >= 1) ? RECALL_URL : NORECALL);
 	ShortcutNum = ShortcutTotal;
 	FirstShortcutRecall = TRUE;
     }

@@ -21,6 +21,7 @@ src/LYCgi.c
 src/LYClean.c
 src/LYCookie.c
 src/LYCurses.c
+src/LYEdit.c
 src/LYDownload.c
 src/LYHistory.c
 src/LYLeaks.c

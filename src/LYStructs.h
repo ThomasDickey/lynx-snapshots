@@ -80,6 +80,8 @@ typedef struct _VisitedLink {
 extern histstruct history[MAXHIST];
 extern int nhist;
 
+/******************************************************************************/
+
 typedef struct _lynx_list_item_type {
     struct _lynx_list_item_type *next;  /* the next item in the linked list */
     char *name; 			/* a description of the item */
@@ -113,6 +115,53 @@ extern lynx_list_item_type *uploaders;
 #ifdef USE_EXTERNALS
 /* for external commands */
 extern lynx_list_item_type *externals;
+#endif
+
+/******************************************************************************/
+
+typedef struct
+{
+    CONST char *name;
+    int value;
+}
+Config_Enum;
+
+typedef int (*ParseFunc) PARAMS((char *));
+
+#define ParseUnionMembers \
+	lynx_list_item_type** add_value; \
+	BOOLEAN * set_value; \
+	int *     int_value; \
+	char **   str_value; \
+	ParseFunc fun_value; \
+	long	  def_value
+
+typedef union {
+	ParseUnionMembers;
+} ParseUnion;
+
+#ifdef	PARSE_DEBUG
+#define ParseUnionPtr Config_Type *
+#define ParseUnionOf(tbl) tbl
+#define ParseData ParseUnionMembers
+#define UNION_ADD(v) &v,  0,  0,  0,  0,  0
+#define UNION_SET(v)  0, &v,  0,  0,  0,  0
+#define UNION_INT(v)  0,  0, &v,  0,  0,  0
+#define UNION_STR(v)  0,  0,  0, &v,  0,  0
+#define UNION_ENV(v)  0,  0,  0,  v,  0,  0
+#define UNION_FUN(v)  0,  0,  0,  0,  v,  0
+#define UNION_DEF(v)  0,  0,  0,  0,  0,  v
+#else
+#define ParseUnionPtr ParseUnion *
+#define ParseUnionOf(tbl) (ParseUnionPtr)(&(tbl->value))
+#define ParseData long value
+#define UNION_ADD(v) (long)&(v)
+#define UNION_SET(v) (long)&(v)
+#define UNION_INT(v) (long)&(v)
+#define UNION_STR(v) (long)&(v)
+#define UNION_ENV(v) (long) (v)
+#define UNION_FUN(v) (long) (v)
+#define UNION_DEF(v) (long) (v)
 #endif
 
 #endif /* LYSTRUCTS_H */

@@ -115,14 +115,22 @@ extern char star_string[MAX_LINE + 1]; /* from GridText.c */
 #define STARS(n) \
  ((n) >= MAX_LINE ? star_string : &star_string[(MAX_LINE-1)] - (n))
 
-#define SHOW_COLOR_UNKNOWN	(-1)
-#define SHOW_COLOR_NEVER  0
-#define SHOW_COLOR_OFF	  1
-#define SHOW_COLOR_ON	  2
-#define SHOW_COLOR_ALWAYS 3
+typedef enum {
+    SHOW_COLOR_UNKNOWN = 0
+    , SHOW_COLOR_NEVER
+    , SHOW_COLOR_OFF
+    , SHOW_COLOR_ON
+    , SHOW_COLOR_ALWAYS
+} enumShowColor;
+
 extern int LYShowColor;		/* Show color or monochrome?	    */
-extern int LYChosenShowColor;	/* extended color/monochrome choice */
 extern int LYrcShowColor;	/* ... as read or last written	    */
+
+typedef enum {
+    MBM_OFF = 0
+    , MBM_STANDARD
+    , MBM_ADVANCED
+} enumMultiBookmarks;
 
 #if !defined(NO_OPTION_FORMS) && !defined(NO_OPTION_MENU)
 extern BOOLEAN LYUseFormsOptions; /* use Forms-based options menu */
@@ -150,6 +158,7 @@ extern BOOLEAN LYCursesON;  	/* start_curses()->TRUE, stop_curses()->FALSE */
 extern BOOLEAN LYJumpFileURL;   /* URL from the jump file shortcuts? */
 extern BOOLEAN LYNewsPosting;	/* News posting supported if TRUE */
 extern BOOLEAN LYShowCursor;	/* Show the cursor or hide it?	    */
+extern BOOLEAN LYShowTransferRate;
 extern BOOLEAN LYUseDefShoCur;	/* Command line -show_cursor toggle */
 extern BOOLEAN LYUserSpecifiedURL;  /* URL from a goto or document? */
 extern BOOLEAN LYforce_HTML_mode;
@@ -333,6 +342,7 @@ extern BOOLEAN HEAD_request;         /* Do a HEAD request */
 extern BOOLEAN scan_for_buried_news_references;
 extern BOOLEAN bookmark_start;       /* Use bookmarks as startfile */
 extern BOOLEAN clickable_images;
+extern BOOLEAN nested_tables;
 extern BOOLEAN pseudo_inline_alts;
 extern BOOLEAN crawl;
 extern BOOLEAN traversal;
@@ -368,9 +378,8 @@ extern char *URLDomainSuffixes;
 extern BOOLEAN startfile_ok;
 extern BOOLEAN LYSelectPopups;		/* Cast popups to radio buttons? */
 extern BOOLEAN LYUseDefSelPop;		/* Command line -popup toggle    */
-extern BOOLEAN LYMultiBookmarks;	/* Multi bookmark support on?	 */
+extern int LYMultiBookmarks;		/* Multi bookmark support on?	 */
 extern BOOLEAN LYMBMBlocked;		/* Force MBM support off?	 */
-extern BOOLEAN LYMBMAdvanced;		/* MBM statusline for ADVANCED?	 */
 extern int LYStatusLine;		/* Line for statusline() or -1   */
 extern BOOLEAN LYCollapseBRs;		/* Collapse serial BRs?		 */
 extern BOOLEAN LYSetCookies;		/* Process Set-Cookie headers?	 */
@@ -409,7 +418,7 @@ extern BOOLEAN no_externals; 		/* don't allow the use of externals */
 extern BOOLEAN LYNoISMAPifUSEMAP;	/* Omit ISMAP link if MAP present? */
 extern int LYHiddenLinks;
 
-extern BOOLEAN Old_DTD;
+extern int Old_DTD;
 
 #define MBM_V_MAXFILES  25		/* Max number of sub-bookmark files */
 /*
@@ -456,7 +465,7 @@ extern int connect_timeout;
 
 #ifdef TEXTFIELDS_MAY_NEED_ACTIVATION
 extern BOOL textfields_need_activation;
-extern BOOL global_textfields_need_activation;
+extern BOOL textfields_activation_option;
 #ifdef INACTIVE_INPUT_STYLE_VH
 extern BOOL textinput_redrawn;
 #endif
@@ -513,14 +522,18 @@ extern int setmode(int handle, int amode);
 
 #ifdef USE_SCROLLBAR
 /* GridText.c */
-extern int LYsb;
-extern int LYsb_arrow;
+extern BOOLEAN LYsb;
+extern BOOLEAN LYsb_arrow;
 extern int LYsb_begin;
 extern int LYsb_end;
 #endif
 
 #ifdef MARK_HIDDEN_LINKS
 extern char* hidden_link_marker;
+#endif
+
+#ifdef USE_BLINK
+extern BOOLEAN term_blink_is_boldbg;
 #endif
 
 #endif /* LYGLOBALDEFS_H */

@@ -13,20 +13,38 @@ WWW_MACH = djgpp
  -DUSE_HASH \
  -DLINKEDSTYLES
 
+# comment this line to suppress DIRED support
+DIRED_DEFS = -DDIRED_SUPPORT
 
-CFLAGS = -O1 -DUSE_ZLIB -DDOSPATH -DNOUSERS -DDISP_PARTIAL \
--DDIRED_SUPPORT -DSOURCE_CACHE -DUSE_PRETTYSRC \
+CFLAGS= -O2 $(MCFLAGS) $(INTLFLAGS) $(SSLFLAGS) $(SSLINC)
+
+MCFLAGS = \
+ $(DIRED_DEFS) \
  $(ENABLE_COLOR_STYLE) \
--DEXP_FILE_UPLOAD \
--DWATT32 \
--I../Implementation \
--I../../../djgpp/watt32/inc -I../../../djgpp/watt32/inc/sys \
--I../../../src \
--I../../../curses \
--I../../.. $(INTLFLAGS)
+ -DDISP_PARTIAL \
+ -DDOSPATH \
+ -DEXP_FILE_UPLOAD \
+ -DNOUSERS \
+ -DSOURCE_CACHE \
+ -DUSE_PRETTYSRC \
+ -DUSE_ZLIB \
+ -DWATT32 \
+ -I../Implementation \
+ -I../../../src \
+ -I../../.. \
+ -I/djgpp/pdcur24 \
+ -I/djgpp/watt32/inc \
+ -I/djgpp/watt32/inc/sys
+
 LFLAGS =
 CC = gcc
+
+# Uncomment the following to enable Internationalization.
 #INTLFLAGS = -DHAVE_GETTEXT -DHAVE_LIBINTL_H
+
+# Uncomment the following to enable SSL.
+#SSLFLAGS = -DUSE_SSL
+#SSLINC = -I/djgpp/include/openssl
 
 # Directory for installed binary:
 !BINDIR = /usr/local/bin

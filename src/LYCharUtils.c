@@ -929,562 +929,6 @@ PUBLIC void LYGetChartransInfo ARGS1(
 				      UCT_STAGE_STRUCTURED);
 }
 
-#ifdef NOTUSED_FOTEMODS
-/*
-**  This function reallocates an allocated string and converts
-**  characters for the current display character set.  It assumes
-**  that invalid control characters have been dealt with by the
-**  SGML (or other initial) parser of the document input stream
-**  (i.e., are present only if elements or global flags have been
-**  set to allow them), and that otherwise this is a copy of the
-**  string with the charset of the input stream.  It handles Lynx
-**  special characters based on the 'me' structure's element values
-**  (the me->UsePlainSpace and me->HiddenValue elements, and its
-**  chartrans related elements), and calls to other functions which
-**  return structure element values.  HTChunk functions are used to
-**  keep memory allocations at a minimum. - FM
-*/
-PUBLIC void LYExpandString ARGS2(
-	HTStructured *,		me,
-	char **,		str)
-{
-    char *p = *str;
-    HTChunk *s;
-    BOOLEAN plain_space, hidden;
-    char c;
-    unsigned char c_unsign;
-    char saved_char_in = '\0';
-    BOOLEAN chk;
-    UCode_t code, uck;
-    char replace_buf [64];
-    char utf_buf[8], utf_count = 0;
-    char *utf_buf_p = utf_buf;
-    UCode_t utf_char = 0, value;
-    CONST char *name;
-    int i, j, high, low, diff = 0;
-
-    /*
-    **	Don't do anything if we have no structure
-    **	or string, or are in CJK mode. - FM
-    */
-    if (!me || !p || *p == '\0' ||
-	HTCJK != NOCJK)
-	return;
-
-    /*
-    **	Set "convenience copies" of me structure
-    **	elements. - FM
-    */
-    plain_space = me->UsePlainSpace;
-    hidden = me->HiddenValue;
-
-    /*
-    **	Check for special input charsets - FM
-    */
-    if (!strcmp(me->inUCI->MIMEname, "x-transparent")) {
-	/*
-	**  Conversions not intended. - FM
-	*/
-	return;
-    }
-    if (!strcmp(me->inUCI->MIMEname, "mnemonic") ||
-	!strcmp(me->inUCI->MIMEname, "mnemonic+ascii+0")) {
-	/*
-	**  All ASCII representations of Unicode characters,
-	**  and we have no reverse translation code for the
-	**  multibyte characters, so punt. - FM
-	*/
-	return;
-    }
-    if (me->inUCLYhndl < 0 || me->outUCLYhndl < 0) {
-	/*
-	**  The chartrans procedure failed, so we don't
-	**  do anything, and hope for the best. - FM
-	*/
-	CTRACE((tfp, "LYExpandString: Bad in (%d) or out (%d) handle(s).\n",
-		    me->inUCLYhndl, me->outUCLYhndl));
-	return;
-    }
-
-    /*
-    **	Zero the UTF-8 multibytes buffer. - FM
-    */
-    utf_buf[0] = utf_buf[6] = utf_buf[7] = '\0';
-
-    /*
-    **	Set up an HTChunk for accumulating the expanded copy
-    **	of the string, so that allocations are done in 128
-    **	byte increments, only as required. - FM
-    */
-    s = HTChunkCreate(128);
-
-    /*
-    **	Check each character in the original string,
-    **	and add the characters or substitutions to
-    **	our clean copy. - FM
-    */
-    for (i = 0; p[i]; i++) {
-	/*
-	**  Make sure the character is handled as Unicode
-	**  whenever that's appropriate.  - FM
-	*/
-	c = p[i];
-	c_unsign = UCH(c);
-	code = (UCode_t)c_unsign;
-	saved_char_in = '\0';
-	/*
-	**  Combine any UTF-8 multibytes into Unicode
-	**  to check for special characters. - FM
-	*/
-	if (me->T.decode_utf8) {
-	    /*
-	    **	Our input charset is UTF-8, so check
-	    **	for non-ASCII characters. - FM
-	    */
-	    if (TOASCII(c_unsign) > 127) {  /* S/390 -- gil -- 1703 */
-		/*
-		**  We have an octet from a multibyte character. - FM
-		*/
-		if (utf_count > 0 && (c & 0xc0) == 0x80) {
-		    /*
-		    **	Adjust the UCode_t value, add the octet
-		    **	to the buffer, and decrement the byte
-		    **	count. - FM
-		    */
-		    utf_char = (utf_char << 6) | (c & 0x3f);
-		    utf_count--;
-		    *utf_buf_p = c;
-		    utf_buf_p++;
-		    if (utf_count == 0) {
-			/*
-			**  We have all of the bytes, so terminate
-			**  the buffer and set 'code' to the UCode_t
-			**  value. - FM
-			*/
-			*utf_buf_p = '\0';
-			code = utf_char;
-			/*
-			**  Set up the monobyte character
-			**  values or non-character flags
-			**  and fall through. - FM
-			*/
-			if (code > 0 && code < 256) {
-			    c = ((char)(code & 0xff));
-			    c_unsign = UCH(c);
-			}
-		    } else {
-			/*
-			**  Get the next byte. - FM
-			*/
-			continue;
-		    }
-		} else {
-		    /*
-		    **	Start handling a new multibyte character. - FM
-		    */
-		    utf_buf[0] = c;
-		    utf_buf_p = &utf_buf[1];
-		    if ((c & 0xe0) == 0xc0) {
-			utf_count = 1;
-			utf_char = (c & 0x1f);
-		    } else if ((c & 0xf0) == 0xe0) {
-			utf_count = 2;
-			utf_char = (c & 0x0f);
-		    } else if ((c & 0xf8) == 0xf0) {
-			utf_count = 3;
-			utf_char = (c & 0x07);
-		    } else if ((c & 0xfc) == 0xf8) {
-			utf_count = 4;
-			utf_char = (c & 0x03);
-		    } else if ((c & 0xfe) == 0xfc) {
-			utf_count = 5;
-			utf_char = (c & 0x01);
-		    } else {
-			/*
-			**  We got garbage, even though it should
-			**  have been filtered out by the SGML or
-			**  input stream parser, so we'll ignore
-			**  it. - FM
-			*/
-			utf_count = 0;
-			utf_buf[0] = '\0';
-			utf_buf_p = utf_buf;
-		    }
-		    /*
-		    **	Get the next byte. - FM
-		    */
-		    continue;
-		}
-	    } else if (utf_count > 0) {
-		/*
-		**  Got an ASCII character when expecting
-		**  UTF-8 multibytes, so ignore the buffered
-		**  multibyte characters and fall through with
-		**  the current ASCII character. - FM
-		*/
-		utf_count = 0;
-		utf_buf[0] = '\0';
-		utf_buf_p = utf_buf;
-		code = (UCode_t)c_unsign;
-	    } else {
-		/*
-		**  Got a valid ASCII character, so fall
-		**  through with it. - FM
-		*/
-		code = (UCode_t)c_unsign;
-	    }
-	}
-	/*
-	**  Convert characters from non-UTF-8 charsets
-	**  to Unicode (if appropriate). - FM
-	*/
-	if (!(me->T.decode_utf8 &&
-	      UCH(p[i]) > 127)) {
-#ifdef NOTDEFINED
-	    if (me->T.strip_raw_char_in)
-		saved_char_in = c;
-#endif /* NOTDEFINED */
-	    if (me->T.trans_to_uni &&
-		(code >= LYlowest_eightbit[me->inUCLYhndl] ||
-		 (code < 32 && code != 0 &&
-		  me->T.trans_C0_to_uni))) {
-		/*
-		**  Convert the octet to Unicode. - FM
-		*/
-		code = (UCode_t)UCTransToUni(c, me->inUCLYhndl);
-		if (code > 0) {
-		    saved_char_in = c;
-		    if (code < 256) {
-			c = ((char)(code & 0xff));
-			c_unsign = UCH(c);
-		    }
-		}
-	    } else if (code < ' ' && code != 0 &&  /* S/390 -- gil -- 1720 */
-		       me->T.trans_C0_to_uni) {
-		/*
-		**  Quote from SGML.c:
-		**	"This else if may be too ugly to keep. - KW"
-		*/
-		if (me->T.trans_from_uni &&
-		    (((code = UCTransToUni(c, me->inUCLYhndl)) >= ' ') ||  /* S/390 -- gil -- 1737 */
-		     (me->T.transp &&
-		      (code = UCTransToUni(c, me->inUCLYhndl)) > 0))) {
-		    saved_char_in = c;
-		    if (code < 256) {
-			c = ((char)(code & 0xff));
-			c_unsign = UCH(c);
-		    }
-		} else {
-		    uck = -1;
-		    if (me->T.transp) {
-			uck = UCTransCharStr(replace_buf, 60, c,
-					     me->inUCLYhndl,
-					     me->inUCLYhndl, NO);
-		    }
-		    if (!me->T.transp || uck < 0) {
-			uck = UCTransCharStr(replace_buf, 60, c,
-					     me->inUCLYhndl,
-					     me->outUCLYhndl, YES);
-		    }
-		    if (uck == 0) {
-			continue;
-		    } else if (uck < 0) {
-			utf_buf[0] = '\0';
-			code = UCH(c);
-		    } else {
-			c = replace_buf[0];
-			if (c && replace_buf[1]) {
-			    HTChunkPuts(s, replace_buf);
-			    continue;
-			}
-		    }
-		    utf_buf[0] = '\0';
-		    code = UCH(c);
-		} /*  Next line end of ugly stuff for C0. - KW */
-	    } else {
-		utf_buf[0] = '\0';
-		code = UCH(c);
-	    }
-	}
-	/*
-	**  Ignore low ISO 646 7-bit control characters
-	**  if they sneaked through (should have been
-	**  filtered by the parser). - FM
-	*/
-	if (code < ' ' &&  /* S/390 -- gil -- 1754 */
-	    c != 9 && c != 10 && c != 13) {
-	    continue;
-	}
-	/*
-	**  Ignore 127 if we don't have HTPassHighCtrlRaw
-	**  and it sneaked through (should have been
-	**  filtered by the parser). - FM
-	*/
-	if (TOASCII(c) == 127 &&  /* S/390 -- gil -- 1771 */
-	    !(me->T.transp ||
-	      code >= LYlowest_eightbit[me->inUCLYhndl])) {
-	    continue;
-	}
-	/*
-	**  Ignore 8-bit control characters 128 - 159 if we don't
-	**  have HTPassHighCtrlRaw set and they sneaked through
-	**  (should have been filtered by the parser). - FM
-	*/
-	if (TOASCII(code) > 127 && TOASCII(code) < 160 &&  /* S/390 -- gil -- 1788 */
-	    !(me->T.transp ||
-	      code >= LYlowest_eightbit[me->inUCLYhndl])) {
-	    continue;
-	}
-	/*
-	**  For 160 (nbsp), substitute Lynx special character
-	**  (or a space if plain_space or hidden is set) if
-	**  HTPassHighCtrlRaw is not set. - FM
-	*/
-	if (code == CH_NBSP) {  /* S/390 -- gil -- 1805 */
-	    if (!me->T.pass_160_173_raw) {
-		if (plain_space || hidden) {
-		    HTChunkPutc(s, ' ');
-		} else {
-		    HTChunkPutc(s, HT_NON_BREAK_SPACE);
-		}
-	    } else if (!me->T.output_utf8) {
-		HTChunkPutc(s, ((char)(code & 0xff)));
-	    } else if (me->T.decode_utf8 && *utf_buf) {
-		HTChunkPuts(s, utf_buf);
-		utf_buf[0] == '\0';
-		utf_buf_p = utf_buf;
-	    } else {
-		HTChunkPutUtf8Char(s, code);
-	    }
-	    continue;
-	}
-	/*
-	**  For 173 (shy), substitute Lynx special character
-	**  (or skip it if plain_space or hidden is set) if
-	**  HTPassHighCtrlRaw is not set. - FM
-	*/
-	if (code == CH_SHY) {  /* S/390 -- gil -- 1822 */
-	    if (!me->T.pass_160_173_raw) {
-		if (!(plain_space || hidden)) {
-		    HTChunkPutc(s, LY_SOFT_HYPHEN);
-		}
-	    } else if (!me->T.output_utf8) {
-		HTChunkPutc(s, ((char)(code & 0xff)));
-	    } else if (me->T.decode_utf8 && *utf_buf) {
-		HTChunkPuts(s, utf_buf);
-		utf_buf[0] == '\0';
-		utf_buf_p = utf_buf;
-	    } else {
-		HTChunkPutUtf8Char(s, code);
-	    }
-	    continue;
-	}
-	/*
-	**  For 8194 (ensp), 8195 (emsp), or 8201 (thinsp), use
-	**  an ASCII space (32) if plain_space or hidden is TRUE,
-	**  otherwise use the Lynx special character. - FM
-	*/
-	if (code == 8194 || code == 8195 || code == 8201) {
-	    if (plain_space || hidden) {
-		HTChunkPutc(s, ' ');
-	    } else {
-		HTChunkPutc(s, HT_EN_SPACE);
-	    }
-	    if (me->T.decode_utf8 && *utf_buf) {
-		utf_buf[0] == '\0';
-		utf_buf_p = utf_buf;
-	    }
-	    continue;
-	}
-	/*
-	**  If we want the raw character, pass it now. - FM
-	*/
-	if (me->T.use_raw_char_in && saved_char_in) {
-	    HTChunkPutc(s, saved_char_in);
-	    continue;
-	}
-	/*
-	**  Seek a translation from the chartrans tables.
-	*/
-	if ((chk = (me->T.trans_from_uni && code >= 160)) &&
-	    (uck = UCTransUniChar(code, me->outUCLYhndl)) >= 32 &&
-	    uck < 256 &&
-	    (uck < 127 ||
-	     uck >= LYlowest_eightbit[me->outUCLYhndl])) {
-	    HTChunkPutc(s, ((char)(uck & 0xff)));
-	    continue;
-	} else if (chk &&
-		   (uck == -4 ||
-		    (me->T.repl_translated_C0 &&
-		     uck > 0 && uck < ' ')) &&  /* S/390 -- gil -- 1839 */
-		   /*
-		   **  Not found; look for replacement string.
-		   */
-		   (uck = UCTransUniCharStr(replace_buf,
-					    60, code,
-					    me->outUCLYhndl,
-					    0) >= 0)) {
-	    /*
-	    **	Got a replacement string.
-	    */
-	    HTChunkPuts(s, replace_buf);
-	    continue;
-	}
-	/*
-	**  If we want raw UTF-8, output that now. - FM
-	*/
-	if (me->T.output_utf8 &&
-	    TOASCII(code) > 127 && code <= 0x7fffffffL) {  /* S/390 -- gil -- 1856 */
-	    if (me->T.decode_utf8 && *utf_buf) {
-		HTChunkPuts(s, utf_buf);
-		utf_buf[0] == '\0';
-		utf_buf_p = utf_buf;
-	    } else {
-		HTChunkPutUtf8Char(s, code);
-	    }
-	    continue;
-	}
-	/*
-	**  If it's any other (> 160) 8-bit character
-	**  and we have not set HTPassEightBitRaw
-	**  nor have the "ISO Latin 1" character set selected,
-	**  back translate for our character set. - FM
-	*/
-	if (code > 160 && code < 256 &&
-	     me->outUCLYhndl != LATIN1 &&
-	     (!(HTPassEightBitRaw ||
-		(me->T.do_8bitraw && !me->T.trans_from_uni)))) {
-	    value = (code - 160);
-	    name = HTMLGetEntityName(value);
-	    for (low = 0, high = HTML_dtd.number_of_entities;
-		 high > low;
-		 diff < 0 ? (low = j+1) : (high = j)) {
-		/*
-		**  Binary search.
-		*/
-		j = (low + (high-low)/2);
-		diff = strcmp(HTML_dtd.entity_names[j], name);
-		if (diff == 0) {
-		    HTChunkPuts(s, LYCharSets[me->outUCLYhndl][j]);
-		    break;
-		}
-	    }
-	    if (diff == 0) {
-		continue;
-	    }
-	}
-	/*
-	**  If it's ASCII at this point, use it. - FM
-	*/
-	if (TOASCII(code) < 127 && code > 0) {  /* S/390 -- gil -- 1873 */
-	    HTChunkPutc(s, ((char)(code & 0xff)));
-	    continue;
-	}
-	/*
-	**  At this point, if we should have translated, the
-	**  translation has failed.  We should have sent UTF-8
-	**  output to the parser already, but what the heck,
-	**  try again. - FM
-	*/
-	if (me->T.output_utf8 && *utf_buf) {
-	    HTChunkPuts(s, utf_buf);
-	    utf_buf[0] == '\0';
-	    utf_buf_p = utf_buf;
-	    continue;
-	}
-#ifdef NOTDEFINED
-	/*
-	**  Check for a strippable koi8-r 8-bit character. - FM
-	*/
-	if (me->T.strip_raw_char_in &&
-	    UCH(saved_char_in) >= 192 &&
-	    UCH(saved_char_in) < 255 &&
-	    saved_char_in) {
-	    /*
-	    **	KOI8 special: strip high bit, gives (somewhat) readable
-	    **	ASCII or KOI7 - it was constructed that way! - KW
-	    */
-	    HTChunkPutc(s, (saved_char_in & 0x7f));
-	    continue;
-	}
-#endif /* NOTDEFINED */
-	/*
-	**  Ignore 8204 (zwnj), 8205 (zwj)
-	**  8206 (lrm), and 8207 (rlm),
-	**  if we get to here. - FM
-	*/
-	if (code == 8204 || code == 8205 ||
-	    code == 8206 || code == 8207) {
-	    CTRACE((tfp, "LYExpandString: Ignoring '%ld'.\n", code));
-	    if (me->T.decode_utf8 && *utf_buf) {
-		utf_buf[0] == '\0';
-		utf_buf_p = utf_buf;
-	    }
-	    continue;
-	}
-	/*
-	**  If we don't actually want the character,
-	**  make it safe and output that now. - FM
-	*/
-	if ((c_unsign > 0 &&
-	     c_unsign < LYlowest_eightbit[me->outUCLYhndl]) ||
-	    (me->T.trans_from_uni && !HTPassEightBitRaw)) {
-	    /*
-	    **	If we do not have the "7-bit approximations" as our
-	    **	output character set (in which case we did it already)
-	    **	seek a translation for that.  Otherwise, or if the
-	    **	translation fails, use UHHH notation. - FM
-	    */
-	    if ((chk = (me->outUCLYhndl !=
-			UCGetLYhndl_byMIME("us-ascii"))) &&
-		(uck = UCTransUniChar(code,
-				      UCGetLYhndl_byMIME("us-ascii")))
-				      >= ' ' && TOASCII(uck) < 127) {  /* S/390 -- gil -- 1890 */
-		/*
-		**  Got an ASCII character (yippey). - FM
-		*/
-		c = ((char)(uck & 0xff));
-		HTChunkPutc(s, c);
-		continue;
-	    } else if ((uck == -4) &&
-		       (uck = UCTransUniCharStr(replace_buf,
-						60, code,
-						UCGetLYhndl_byMIME("us-ascii"),
-						0) >= 0)) {
-		/*
-		**  Got a replacement string (yippey). - FM
-		*/
-		HTChunkPuts(s, replace_buf);
-		continue;
-	    } else {
-		/*
-		**  Out of luck, so use the UHHH notation (ugh). - FM
-		*/
-		sprintf(replace_buf, "U%.2lX", TOASCII(code));  /* S/390 -- gil -- 1907 */
-		HTChunkPuts(s, replace_buf);
-		continue;
-	    }
-	}
-	/*
-	**  If we get to here and have a monobyte character,
-	**  pass it. - FM
-	*/
-	if (c_unsign > 0 && c_unsign < 256) {
-	    HTChunkPutc(s, c);
-	}
-    }
-
-    /*
-    **	Terminate the expanded string,
-    **	replace the original, and free
-    **	the chunk. - FM
-    */
-    HTChunkTerminate(s);
-    StrAllocCopy(*str, s->data);
-    HTChunkFree(s);
-}
-#endif /* NOTUSED_FOTEMODS */
-
 /*
  *  Given an UCS character code, will fill buffer passed in as q with
  *  the code's UTF-8 encoding.
@@ -1973,22 +1417,14 @@ PUBLIC char ** LYUCFullyTranslateString ARGS9(
 		    /* What else can we do? */
 		    code = UCH(*p);
 		}
-#ifdef NOTUSED_FOTEMODS
-	    } else if (T.strip_raw_char_in &&
-		       UCH(*p) >= 0xc0 &&
-		       UCH(*p) < 255) {
-		code = ((*p & 0x7f));
-		state = S_got_outchar;
-		break;
-#endif /* NOTUSED_FOTEMODS */
 	    } else if (!T.trans_from_uni) {
 		state = S_got_outchar;
 		break;
 	    }
 	    /*
-		    **	Substitute Lynx special character for
-		    **	160 (nbsp) if use_lynx_specials is set.
-		    */
+	    **	Substitute Lynx special character for
+	    **	160 (nbsp) if use_lynx_specials is set.
+	    */
 	    if (use_lynx_specials && !Back &&
 		(code == 160 || code == 173)) {
 		code = ((code==160 ? HT_NON_BREAK_SPACE : LY_SOFT_HYPHEN));
@@ -2398,30 +1834,23 @@ PUBLIC char ** LYUCFullyTranslateString ARGS9(
 
 	case S_recover:
 	    if (what == P_decimal || what == P_hex) {
-		    /*
-		    **	Illegal or not yet handled value.
-		    **	Return "&#" verbatim and continue
-		    **	from there. - FM
-		    */
-		    *q++ = '&';
-		    *q++ = '#';
-		    if (what == P_hex)
-			*q++ = 'x';
-		    if (cpe != '\0')
-			*(p-1) = cpe;
-		    p = cp;
-		    state = S_done;
+		/*
+		**  Illegal or not yet handled value.
+		**  Return "&#" verbatim and continue
+		**  from there. - FM
+		*/
+		*q++ = '&';
+		*q++ = '#';
+		if (what == P_hex)
+		    *q++ = 'x';
+		if (cpe != '\0')
+		    *(p-1) = cpe;
+		p = cp;
+		state = S_done;
 	    } else if (what == P_named) {
 		*cp = cpe;
 		*q++ = '&';
 		state = S_done;
-#ifdef NOTUSED_FOTEMODS
-	    } else if (T.strip_raw_char_in &&
-		UCH(*p) >= 0xc0 &&
-		UCH(*p) < 255) {
-		code = (((*p) & 0x7f));
-		state = S_got_outchar;
-#endif /* NOTUSED_FOTEMODS */
 	    } else if (!T.output_utf8 && stype == st_HTML && !hidden &&
 		!(HTPassEightBitRaw &&
 		 UCH(*p) >= lowest_8)) {
@@ -2441,7 +1870,6 @@ PUBLIC char ** LYUCFullyTranslateString ARGS9(
 		cp++;
 	    cpe = *cp;
 	    *cp = '\0';
-/*	    ppuni = cp - 1; */
 	    name = p;
 	    state = S_check_name;
 	    break;
@@ -2837,7 +2265,7 @@ PUBLIC void LYHandleMETA ARGS4(
 
 #ifdef CAN_SWITCH_DISPLAY_CHARSET
 	    /* Allow a switch to a more suitable display charset */
-	    if (Switch_Display_Charset (chndl, 0)) {
+	    if (Switch_Display_Charset (chndl, SWITCH_DISPLAY_CHARSET_MAYBE)) {
 		/* UCT_STAGE_STRUCTURED and UCT_STAGE_HTEXT
 		   should have the same setting for UCInfoStage. */
 		int structured = HTAnchor_getUCInfoStage(me->node_anchor,
@@ -3383,15 +2811,11 @@ PUBLIC void LYHandleSELECT ARGS5(
 	    me->select_disabled = TRUE;
 	if (present && present[HTML_SELECT_SIZE] &&
 	    value[HTML_SELECT_SIZE] && *value[HTML_SELECT_SIZE]) {
-#ifdef NOTDEFINED
-	    StrAllocCopy(size, value[HTML_SELECT_SIZE]);
-#else
 	    /*
 	     *	Let the size be determined by the number of OPTIONs. - FM
 	     */
 	    CTRACE((tfp, "LYHandleSELECT: Ignoring SIZE=\"%s\" for SELECT.\n",
 			value[HTML_SELECT_SIZE]));
-#endif /* NOTDEFINED */
 	}
 
 	if (me->inBoldH == TRUE &&
@@ -3562,7 +2986,13 @@ PUBLIC int LYLegitimizeHREF ARGS4(
 	    *pound = '\0';
 	    convert_to_spaces(fragment, FALSE);
 	}
-	LYRemoveBlanks(*href);
+	/*
+	 * No blanks really belong in the HREF, but if it refers to an actual
+	 * file, it may actually have blanks in the name.  Try to accommodate.
+	 */
+	convert_to_spaces(*href, FALSE);
+	LYTrimLeading(*href);
+	LYTrimTrailing(*href);
 	if (fragment != NULL) {
 	    StrAllocCat(*href, fragment);
 	    FREE(fragment);

@@ -101,10 +101,6 @@ typedef struct _connection {
     BOOL			binary; /* Binary mode? */
 } connection;
 
-#ifndef NIL
-#define NIL 0
-#endif /* !NIL */
-
 /*		Hypertext object building machinery
 */
 #include <HTML.h>
@@ -171,14 +167,14 @@ PRIVATE BOOLEAN use_list = FALSE;		/* use the LIST command? */
 PRIVATE int	interrupted_in_next_data_char = FALSE;
 
 #ifdef POLL_PORTS
-PRIVATE unsigned short	port_number = FIRST_TCP_PORT;
+PRIVATE PortNumber	port_number = FIRST_TCP_PORT;
 #endif /* POLL_PORTS */
 
 PRIVATE int	master_socket = -1;	/* Listening socket = invalid	*/
 PRIVATE char	port_command[255];	/* Command for setting the port */
 PRIVATE fd_set	open_sockets;		/* Mask of active channels */
 PRIVATE int	num_sockets;		/* Number of sockets to scan */
-PRIVATE unsigned short	passive_port;	/* Port server specified for data */
+PRIVATE PortNumber	passive_port;	/* Port server specified for data */
 
 
 #define NEXT_CHAR HTGetCharacter()	/* Use function in HTFormat.c */
@@ -380,7 +376,7 @@ PRIVATE char *help_message_cache_contents NOARGS
 **
 ** On entry,
 **	control	points to the connection which is established.
-**	cmd	points to a command, or is NIL to just get the response.
+**	cmd	points to a command, or is zero to just get the response.
 **
 **	The command should already be terminated with the CRLF pair.
 **
@@ -433,7 +429,7 @@ PRIVATE int write_cmd ARGS1(
 **
 ** On entry,
 **	control	points to the connection which is established.
-**	cmd	points to a command, or is NIL to just get the response.
+**	cmd	points to a command, or is zero to just get the response.
 **
 **	The command must already be terminated with the CRLF pair.
 **
@@ -522,16 +518,6 @@ PRIVATE int response ARGS1(
     }
     return result/100;
 }
-
-#if 0
-PRIVATE int send_cmd_nowait ARGS1(char *, verb)
-{
-    char command[20];
-
-    sprintf(command, "%.*s%c%c", (int) sizeof(command)-4, verb, CR, LF);
-    return write_cmd(command);
-}
-#endif
 
 PRIVATE int send_cmd_1 ARGS1(char *, verb)
 {
@@ -1156,7 +1142,7 @@ PRIVATE int get_listen_socket NOARGS
 #endif /* INET6 */
 #ifdef POLL_PORTS
     {
-	unsigned short old_port_number = port_number;
+	PortNumber old_port_number = port_number;
 	for (port_number = (old_port_number+1); ; port_number++) {
 	    int status;
 	    if (port_number > LAST_TCP_PORT)
@@ -2908,7 +2894,7 @@ unload_btree:
     if (WasInterrupted || data_soc != -1) { /* should always be true */
 	/*
 	 *  Without closing the data socket first,
-	 *  the response(NIL) later may hang.
+	 *  the response(0) later may hang.
 	 *  Some servers expect the client to fin/ack the close
 	 *  of the data connection before proceeding with the
 	 *  conversation on the control connection. - kw
@@ -3084,7 +3070,7 @@ PUBLIC int HTFTPLoad ARGS4(
 		fprintf(tfp, "HTFTP: PASV reply has no inet address!\n");
 		return -99;
 	    }
-	    passive_port = (p0<<8) + p1;
+	    passive_port = (PortNumber)((p0<<8) + p1);
 #endif /* INET6 */
 	    CTRACE((tfp, "HTFTP: Server is listening on port %d\n",
 			 passive_port));
@@ -3635,7 +3621,7 @@ listen:
 	if (final_status > 0) {
 	    if (server_type != CMS_SERVER)
 		if (outstanding-- > 0) {
-		    status = response(NIL);
+		    status = response(0);
 		    if (status < 0 ||
 			(status == 2 && !strncmp(response_text, "221", 3)))
 			outstanding = 0;
@@ -3731,7 +3717,7 @@ listen:
 	    (void) HTInetStatus("close");	/* Comment only */
 	} else {
 	    if (rv != HT_LOADED && outstanding--) {
-		status = response(NIL);		/* Pick up final reply */
+		status = response(0);		/* Pick up final reply */
 		if (status != 2 && rv != HT_INTERRUPTED && rv != -1) {
 		    data_soc = -1;		/* invalidate it */
 		    init_help_message_cache();  /* to free memory */
@@ -3746,7 +3732,7 @@ listen:
     }
     while (outstanding-- > 0 &&
 	   (status > 0)) {
-	status = response(NIL);
+	status = response(0);
 	if (status == 2 && !strncmp(response_text, "221", 3))
 	    break;
     }

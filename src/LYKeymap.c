@@ -133,7 +133,7 @@ LYK_DOWNLOAD,        LYK_ELGOTO,  LYK_DIRED_MENU,   LYK_ECGOTO,
 LYK_HELP,            LYK_INDEX,      LYK_JUMP,      LYK_KEYMAP,
 /* H */              /* I */         /* J */        /* K */
 
-LYK_LIST,          LYK_MAIN_MENU,    LYK_NEXT,      LYK_OPTIONS,
+LYK_LIST,          LYK_MAIN_MENU,    LYK_PREV,      LYK_OPTIONS,
 /* L */              /* M */         /* N */        /* O */
 
 LYK_PRINT,          LYK_ABORT,    LYK_DEL_BOOKMARK, LYK_INDEX_SEARCH,
@@ -169,7 +169,7 @@ LYK_TAG_LINK,     LYK_PREV_DOC,   LYK_VIEW_BOOKMARK,   0,
 LYK_NOCACHE,            0,          LYK_INTERRUPT, LYK_SHIFT_LEFT,
 /* x */              /* y */          /* z */       /* { */
 
-LYK_LINEWRAP_TOGGLE, LYK_SHIFT_RIGHT,  0,          LYK_HISTORY,
+LYK_LINEWRAP_TOGGLE, LYK_SHIFT_RIGHT, LYK_NESTED_TABLES, LYK_HISTORY,
 /* | */               /* } */         /* ~ */       /* del */
 
 
@@ -784,6 +784,9 @@ PRIVATE Kcmd revmap[] = {
 	LYK_WHEREIS, "WHEREIS",
 	"search within the current document" ),
     DATA(
+	LYK_PREV, "PREV",
+	"search for the previous occurence" ),
+    DATA(
 	LYK_NEXT, "NEXT",
 	"search for the next occurence" ),
     DATA(
@@ -966,6 +969,11 @@ PRIVATE Kcmd revmap[] = {
     DATA(
 	LYK_TO_CLIPBOARD, "TO_CLIPBOARD",
 	"link's URL to Clip Board" ),
+#endif
+#ifdef EXP_NESTED_TABLES
+    DATA(
+	LYK_NESTED_TABLES, "NESTED_TABLES",
+	"toggle nested-table parsing on/off" ),
 #endif
     DATA(
 	LYK_UNKNOWN, NULL,
@@ -1234,7 +1242,7 @@ PRIVATE char *pretty_html ARGS1 (int, c)
 		}
 	    }
 	    if (!found) {
-		*dst++ = c;
+		*dst++ = (char) c;
 	    }
 	}
 	adj -= (dst - buf) - PRETTY_LEN;
@@ -1320,9 +1328,9 @@ PRIVATE void print_binding ARGS3(
 PUBLIC int lacname_to_lac ARGS1(
 	CONST char *,	func)
 {
-       Kcmd *mp = LYStringToKcmd(func);
+    Kcmd *mp = LYStringToKcmd(func);
 
-       return (mp != 0) ? (int) mp->code : -1;
+    return (mp != 0) ? (int) mp->code : -1;
 }
 
 /*
@@ -1333,17 +1341,17 @@ PUBLIC int lacname_to_lac ARGS1(
 PUBLIC int lecname_to_lec ARGS1(
 	CONST char *,	func)
 {
-       int i;
-       struct emap *mp;
+    int i;
+    struct emap *mp;
 
-       if (func == NULL || *func == '\0')
-	       return (-1);
-       for (i = 0, mp = ekmap; (*mp).name != NULL; mp++, i++) {
-               if (strcmp((*mp).name, func) == 0) {
-                       return (*mp).code;
-               }
-       }
-       return (-1);
+    if (func != NULL && *func != '\0') {
+	for (i = 0, mp = ekmap; (*mp).name != NULL; mp++, i++) {
+	    if (strcmp((*mp).name, func) == 0) {
+		return (*mp).code;
+	    }
+	}
+    }
+    return (-1);
 }
 
 /*
@@ -1490,7 +1498,7 @@ PUBLIC int remap ARGS3(
 	    key_override[c+1] = mp->code;
 	else
 #endif
-	    keymap[c+1] = mp->code;
+	    keymap[c+1] = (LYKeymap_t) mp->code;
 	return (c ? c : (int) LAC_TO_LKC0(mp->code)); /* don't return 0, successful */
     }
     return 0;
@@ -1761,9 +1769,12 @@ PUBLIC BOOL LYisNonAlnumKeyname ARGS2(
 	int,	ch,
 	int,	KeyName)
 {
-    if ((ch >= '0' && ch <= '9') ||
-        (ch >= 'A' && ch <= 'z') ||
-	ch < 0 || ch >= KEYMAP_SIZE)
+    if (ch < 0 || ch >= KEYMAP_SIZE)
+	return (FALSE);
+    if (ch > 0
+     && strchr("0123456789\
+ABCDEFGHIJKLMNOPQRSTUVWXYZ\
+abcdefghijklmnopqrstuvwxyz", ch) != NULL)
 	return (FALSE);
 
     return (BOOL) (keymap[ch+1] == KeyName);

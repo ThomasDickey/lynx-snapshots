@@ -188,7 +188,7 @@ PRIVATE int RecallFilename ARGS5(
 	*total = (sug_filenames ? HTList_count(sug_filenames) : 0);
 	*now = *total;
     }
-    recall = ((*total >= 1) ? RECALL : NORECALL);
+    recall = ((*total >= 1) ? RECALL_URL : NORECALL);
 
     if ((ch = LYgetstr(filename, VISIBLE, LY_MAXPATH, recall)) < 0 ||
 	*filename == '\0' || ch == UPARROW || ch == DNARROW) {
@@ -509,7 +509,7 @@ PRIVATE void send_file_to_mail ARGS3(
 
     _statusline(MAIL_ADDRESS_PROMPT);
     LYstrncpy(user_response, personal_mail_address, sizeof(user_response)-1);
-    if (LYgetstr(user_response, VISIBLE, sizeof(user_response), NORECALL) < 0 ||
+    if (LYgetstr(user_response, VISIBLE, sizeof(user_response), RECALL_MAIL) < 0 ||
 	*user_response == '\0') {
 	CancelPrint(MAIL_REQUEST_CANCELLED);
     }

@@ -226,6 +226,8 @@ PUBLIC BOOLEAN LYwouldPush ARGS2(
 	CONST char *,	title,
 	CONST char *,	docurl)
 {
+    BOOLEAN rc = FALSE;
+
     /*
      *  All non-pushable generated pages have URLs that begin with
      *  "file://localhost/" and end with HTML_SUFFIX. - kw
@@ -234,16 +236,18 @@ PUBLIC BOOLEAN LYwouldPush ARGS2(
 	size_t ulen;
 	if (strncmp(docurl, "file://localhost/", 17) != 0 ||
 	    (ulen = strlen(docurl)) <= strlen(HTML_SUFFIX) ||
-	    strcmp(docurl + ulen - strlen(HTML_SUFFIX), HTML_SUFFIX) != 0)
+	    strcmp(docurl + ulen - strlen(HTML_SUFFIX), HTML_SUFFIX) != 0) {
 	    /*
 	     *  If it is not a local HTML file, it may be a Web page that
 	     *  accidentally has the same title.  So return TRUE now. - kw
 	     */
 	    return TRUE;
+	}
     }
 
     if (docurl) {
-	return (LYIsUIPage(docurl, UIP_HISTORY)
+	rc = (BOOLEAN)
+		! (LYIsUIPage(docurl, UIP_HISTORY)
 		|| LYIsUIPage(docurl, UIP_PRINT_OPTIONS)
 		|| LYIsUIPage(docurl, UIP_DOWNLOAD_OPTIONS)
 #ifdef DIRED_SUPPORT
@@ -251,11 +255,10 @@ PUBLIC BOOLEAN LYwouldPush ARGS2(
 		|| LYIsUIPage(docurl, UIP_UPLOAD_OPTIONS)
 		|| LYIsUIPage(docurl, UIP_PERMIT_OPTIONS)
 #endif /* DIRED_SUPPORT */
-	    )
-	    ? FALSE
-	    : TRUE;
+	    );
     } else {
-	return (!strcmp(title, HISTORY_PAGE_TITLE)
+	rc = (BOOLEAN)
+		! (!strcmp(title, HISTORY_PAGE_TITLE)
 		|| !strcmp(title, PRINT_OPTIONS_TITLE)
 		|| !strcmp(title, DOWNLOAD_OPTIONS_TITLE)
 #ifdef DIRED_SUPPORT
@@ -263,10 +266,9 @@ PUBLIC BOOLEAN LYwouldPush ARGS2(
 		|| !strcmp(title, UPLOAD_OPTIONS_TITLE)
 		|| !strcmp(title, PERMIT_OPTIONS_TITLE)
 #endif /* DIRED_SUPPORT */
-	    )
-	    ? FALSE
-	    : TRUE;
+	    );
     }
+    return rc;
 }
 
 /*

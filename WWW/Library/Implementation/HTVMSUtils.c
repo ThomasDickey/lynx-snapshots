@@ -383,14 +383,6 @@ static char *Name;
 #endif	/* !_POSIX_SOURCE */
 
 typedef	struct __dirdesc {
-#if 0
-	int	dd_fd;		/* file descriptor */
-	long	dd_loc;		/* buf offset of entry from last readddir() */
-	long	dd_size;	/* amount of valid data in buffer */
-	long	dd_bsize;	/* amount of entries read at a time */
-	long	dd_off;		/* Current offset in dir (for telldir) */
-	char	*dd_buf;	/* directory data buffer */
-#endif
 	long	context;	/* context descriptor for LIB$FIND_FILE calls */
 	char	dirname[255+1];	/* keeps the directory name, including *.* */
 	struct dsc$descriptor_s dirname_desc;	/* descriptor of dirname */
@@ -399,28 +391,11 @@ typedef	struct __dirdesc {
 PRIVATE	DIR *HTVMSopendir(char *dirname);
 PRIVATE	struct dirent *HTVMSreaddir(DIR *dirp);
 PRIVATE	int HTVMSclosedir(DIR *dirp);
-#if 0
-#ifndef	_POSIX_SOURCE
-extern	void seekdir(/* DIR *dirp, int loc */);
-extern	long telldir(/* DIR *dirp */);
-#endif	/* POSIX_SOURCE */
-extern	void rewinddir(/* DIR *dirp */);
-
-#ifndef	lint
-#define	rewinddir(dirp)	seekdir((dirp), (long)0)
-#endif
-#endif /* not defined for VMS */
 
 /*** #include <sys_dirent.h> ***/
 /*** "sys_dirent.h" ***/
 struct	dirent {
-#if 0
-	off_t		d_off;		/* offset of next disk dir entry */
-#endif
 	unsigned long	d_fileno;	/* file number of entry */
-#if 0
-	unsigned short	d_reclen;	/* length of this record */
-#endif
 	unsigned short	d_namlen;	/* length of string in d_name */
 	char		d_name[255+1];	/* name (up to MAXNAMLEN + 1) */
 };

@@ -492,6 +492,7 @@ again:
 	}
 #endif /* VMS */
 
+	action = 0;
 #ifdef USE_MOUSE
 #  if defined(NCURSES) || defined(PDCURSES)
 	if (ch != -1 && (ch & LKC_ISLAC) && !(ch & LKC_ISLECLAC)) /* already lynxactioncode? */
@@ -505,10 +506,10 @@ again:
 	    if (MOUSE_Y_POS == cury) {
 		repeat = MOUSE_X_POS - curx;
 		if (repeat < 0) {
-		    ch = LTARROW;
+		    action = LYE_BACK;
 		    repeat = - repeat;
 		} else
-		    ch = RTARROW;
+		    action = LYE_FORW;
 	    }
 #else
 	    MEVENT	event;
@@ -519,10 +520,10 @@ again:
 	    if (event.y == cury) {
 		repeat = event.x - curx;
 		if (repeat < 0) {
-		    ch = LTARROW;
+		    action = LYE_BACK;
 		    repeat = - repeat;
 		} else
-		    ch = RTARROW;
+		    action = LYE_FORW;
 	    }
 #endif /* PDCURSES */
 	    else {
@@ -553,7 +554,8 @@ again:
 	if (peek_mouse_link() != -1)
 	    break;
 
-	action = EditBinding(ch);
+	if (!action)
+	    action = EditBinding(ch);
 	if ((action & LYE_DF) && !(action & LYE_FORM_LAC)) {
 	    last_xlkc = ch;
 	    action &= ~LYE_DF;
@@ -689,18 +691,6 @@ again:
 /* ASATAKU emacskey hack */
 #endif
 	switch (ch) {
-#ifdef NOTDEFINED	/* The first four are mapped to LYE_FORM_PASS now */
-	    case DNARROW:
-	    case UPARROW:
-	    case PGUP:
-	    case PGDOWN:
-	    case HOME:
-	    case END_KEY:
-	    case FIND_KEY:
-	    case SELECT_KEY:
-		goto breakfor;
-#endif /* NOTDEFINED */
-
 	    default:
 	    /*	[ 1999/04/14 (Wed) 15:01:33 ]
 	     *  Left arrrow in column 0 deserves special treatment here,
@@ -755,7 +745,7 @@ again:
 		if (repeat < 0)
 		    repeat = 1;
 		while (repeat--) {
-		    int rc = LYLineEdit(&MyEdit, ch, TRUE);
+		    int rc = LYEdit1(&MyEdit, ch, action & ~LYE_DF, TRUE);
 
 		    if (rc < 0) {
 			ch = -rc;

@@ -981,8 +981,7 @@ Attribute numbers
 #endif
 extern CONST SGML_dtd HTML_dtd;
 
-extern void HTSwitchDTD PARAMS((
-    BOOL new));
+extern void HTSwitchDTD PARAMS((int new_flag));
 
 extern HTTag HTTag_unrecognized;
 extern HTTag HTTag_mixedObject;

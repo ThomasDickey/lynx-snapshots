@@ -53,9 +53,6 @@ PUBLIC int edit_current_file ARGS3(
 	int,		lineno)
 {
     int result = FALSE;
-    int params = 1;
-    char *format = "%s %s";
-    char *command = NULL;
     char *filename = NULL;
 #if !(defined(VMS) || defined(DOSPATH) || defined(__EMX__))
     char *colon;
@@ -69,8 +66,11 @@ PUBLIC int edit_current_file ARGS3(
     unsigned char temp_buff[LY_MAXPATH];
 #endif
 
+    CTRACE((tfp, "edit_current_file(newfile=%s, cur=%d, lineno=%d)\n",
+		 newfile, cur, lineno));
+
     /*
-     *  If its a remote file then we can't edit it.
+     *  If it's a remote file then we can't edit it.
      */
     if (!LYisLocalFile(newfile)) {
 	HTUserMsg(CANNOT_EDIT_REMOTE_FILES);
@@ -155,17 +155,47 @@ PUBLIC int edit_current_file ARGS3(
     if (lineno > 0)
 	sprintf(position, "%d", lineno);
 
+    edit_temporary_file(filename, position, NULL);
+
+done:
+    /*
+     *  Restore the fragment if there was one. - FM
+     */
+    if (number_sign)
+	*number_sign = '#';
+
+    FREE(filename);
+    return (result);
+}
+
+PUBLIC void edit_temporary_file ARGS3(
+	char *,		filename,
+	char *,		position,
+	char *,		message)
+{
+    struct stat stat_info;
+    char *format = "%s %s";
+    char *command = NULL;
+    char *editor_arg = "";
+    int params = 1;
+    int rv;
+
+    if (strstr(editor, "pico")) {
+	editor_arg = " -t"; /* No prompt for filename to use */
+    }
     if (editor_can_position() && *position) {
 #ifdef VMS
-	format = "%s %s -%s";
+	format = "%s %s -%s%s";
 	HTAddXpand(&command, format, params++, editor);
 	HTAddParam(&command, format, params++, filename);
 	HTAddParam(&command, format, params++, position);
+	HTAddParam(&command, format, params++, editor_arg);
 	HTEndParam(&command, format, params);
 #else
-	format = "%s +%s %s";
+	format = "%s +%s%s %s";
 	HTAddXpand(&command, format, params++, editor);
 	HTAddParam(&command, format, params++, position);
+	HTAddParam(&command, format, params++, editor_arg);
 	HTAddParam(&command, format, params++, filename);
 	HTEndParam(&command, format, params);
 #endif
@@ -206,27 +236,49 @@ PUBLIC int edit_current_file ARGS3(
 	HTAddParam(&command, format, params++, filename);
 	HTEndParam(&command, format, params);
     }
+    if (message != NULL) {
+	_statusline(message);
+    }
 
     CTRACE((tfp, "LYEdit: %s\n", command));
     CTRACE_SLEEP(MessageSecs);
 
-    /*
-     *  Invoke the editor. - FM
-     */
     stop_curses();
-    LYSystem(command);
-    start_curses();
 
-    result = TRUE;
-
-done:
+#ifdef UNIX
+    set_errno(0);
+#endif
+    if ((rv = LYSystem(command)) != 0) {	/* Spawn Editor */
+	start_curses();
+	/*
+	 *  If something went wrong, we should probably return soon;
+	 *  currently we don't, but at least put out a message. - kw
+	 */
+	{
+#ifdef UNIX
+	    int rvhi = (rv >> 8);
+	    CTRACE((tfp, "ExtEditForm: system() returned %d (0x%x), %s\n",
+		   rv, rv, errno ? LYStrerror(errno) : "reason unknown"));
+	    LYFixCursesOn("show error warning:");
+	    if (rv != -1 && (rv && 0xff) && !rvhi) {
+		HTAlwaysAlert(NULL, gettext("Editor killed by signal"));
+	    } else if (!(rv == -1 || (rvhi == 127 && errno))) {
+		HTUserMsg2(gettext("Editor returned with error status, %s"),
+			   errno ? LYStrerror(errno) : gettext("reason unknown."));
+	    } else
+#endif
+		HTAlwaysAlert(NULL, ERROR_SPAWNING_EDITOR);
+	}
+    } else {
+	start_curses();
+    }
+#ifdef UNIX
     /*
-     *  Restore the fragment if there was one. - FM
+     *  Delete backup file, if that's your style.
      */
-    if (number_sign)
-	*number_sign = '#';
-
+    HTSprintf0 (&command, "%s~", filename);
+    if (stat (command, &stat_info) == 0)
+	remove (command);
+#endif
     FREE(command);
-    FREE(filename);
-    return (result);
 }

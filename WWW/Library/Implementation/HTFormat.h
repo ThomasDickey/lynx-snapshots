@@ -172,6 +172,7 @@ struct _HTPresentation {
         float		secs;
         float		secs_per_byte;
 	long int	maxbytes;
+	BOOL		get_accept;	/* list in "Accept:" for GET */
 };
 
 /*
@@ -270,6 +271,12 @@ HTReorderPresentation: put presentation near head of list
 extern void HTReorderPresentation PARAMS((
         HTFormat                format_in,
         HTFormat                format_out));
+
+/*
+ * Setup 'get_accept' flag to denote presentations that are not redundant,
+ * and will be listed in "Accept:" header.
+ */
+extern void HTFilterPresentations NOPARAMS;
 
 /*
 
