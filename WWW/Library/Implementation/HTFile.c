@@ -235,12 +235,14 @@ PRIVATE void LYListFmtParse ARGS5(
 			sprintf(buf, fmt, entry);
 			PUTS(buf);
 			END(HTML_A);
+#ifdef S_IFLNK
 			if (c != 'A' && (st.st_mode & S_IFMT) == S_IFLNK &&
 			    (len = readlink(file, buf, sizeof(buf))) >= 0) {
 				PUTS(" -> ");
 				buf[len] = '\0';
 				PUTS(buf);
 			}
+#endif
 			*buf = '\0';
 			break;
 
@@ -284,9 +286,13 @@ PRIVATE void LYListFmtParse ARGS5(
 			case S_IFIFO: type = 'p'; break;
 			case S_IFCHR: type = 'c'; break;
 			case S_IFDIR: type = 'd'; break;
-			case S_IFBLK: type = 'b'; break;
 			case S_IFREG: type = '-'; break;
+#ifdef S_IFBLK
+			case S_IFBLK: type = 'b'; break;
+#endif
+#ifdef S_IFLNK
 			case S_IFLNK: type = 'l'; break;
+#endif
 #ifdef S_IFSOCK
 # ifdef S_IFIFO 	/* some older machines (e.g., apollo) have a conflict */
 #  if S_IFIFO != S_IFSOCK

@@ -9,14 +9,15 @@
 **	 6 Feb 93  Binary seraches used. Intreface modified.
 */
 
+#include "HTUtils.h"
+#include "tcp.h"		/* For FROMASCII */
+
 /* Remove the following to disable the experimental HTML DTD parsing.
    Currently only used in this source file. - kw */
 
+#ifndef NO_EXTENDED_HTMLDTD
 #define EXTENDED_HTMLDTD
-
-
-#include "HTUtils.h"
-#include "tcp.h"		/* For FROMASCII */
+#endif
 
 #include "SGML.h"
 #include "HTMLDTD.h"
@@ -197,7 +198,7 @@ PRIVATE void set_chartrans_handling ARGS3(
 	context->current_tag_charset = context->inUCLYhndl;
     } else if (context->T.output_utf8 ||
 	       context->T.trans_from_uni) {
-	context->current_tag_charset = UCGetLYhndl_byMIME("unicode-1-1-utf-8");
+	context->current_tag_charset = UCGetLYhndl_byMIME("utf-8");
     } else {
 	context->current_tag_charset = 0;
     }
@@ -366,6 +367,13 @@ PRIVATE BOOL put_special_unicodes ARGS2(
 	**
 	*/
 	PUTC(HT_EM_SPACE);
+#ifdef NOTUSED_FOTEMODS
+    } else if (code == 8211 || code == 8212) {
+	/*
+	**  Use ASCII hyphen for ndash/endash or mdash/emdash.
+	*/
+	PUTC('-');
+#endif
     } else {
 	/*
 	**  Return NO if nothing done.
@@ -395,8 +403,8 @@ PRIVATE BOOL put_special_unicodes ARGS2(
 PRIVATE char replace_buf [64];	      /* buffer for replacement strings */
 PRIVATE BOOL FoundEntity = FALSE;
 
-#define IncludesLatin1Enc(cs) \
-		(cs == 0 || \
+#define IncludesLatin1Enc \
+		(context->outUCLYhndl == 0 || \
 		 (context->outUCI && \
 		  (context->outUCI->enc & (UCT_CP_SUPERSETOF_LAT1))))
 
@@ -406,12 +414,48 @@ PRIVATE void handle_entity ARGS2(
 {
     UCode_t code;
     long uck;
+    CONST char *p;
     CONST char *s = context->string->data;
+#ifdef NOTUSED_FOTEMODS
     int high, low, i, diff;
 
 
     /*
-    **	Handle named entities.
+    **	Use Lynx special characters for nbsp (160), ensp (8194),
+    **	emsp (8195), thinsp (8201), and shy (173). - FM
+    */
+    if (!strcmp(s, "nbsp")) {
+	PUTC(HT_NON_BREAK_SPACE);
+	FoundEntity = TRUE;
+	return;
+    }
+    if (!strcmp(s, "ensp") || !strcmp(s, "emsp") || !strcmp(s, "thinsp")) {
+	PUTC(HT_EM_SPACE);
+	FoundEntity = TRUE;
+	return;
+    }
+    if (!strcmp(s, "shy")) {
+	PUTC(LY_SOFT_HYPHEN);
+	FoundEntity = TRUE;
+	return;
+    }
+
+    /*
+    **	For ndash or endash (8211), and mdash or emdash (8212),
+    **	use an ASCII hyphen (32). - FM
+    */
+    if (!strcmp(s, "ndash") ||
+	!strcmp(s, "endash") ||
+	!strcmp(s, "mdash") ||
+	!strcmp(s, "endash")) {
+	PUTC('-');
+	FoundEntity = TRUE;
+	return;
+    }
+#endif
+
+    /*
+    **	Handle all other entities normally. - FM
     */
     FoundEntity = FALSE;
     if ((code = HTMLGetEntityUCValue(s)) != 0) {
@@ -424,28 +468,13 @@ PRIVATE void handle_entity ARGS2(
 	    return;
 	}
 	/*
-	**  No special unicodes -
-	**  seek a translation from the chartrans tables.
+	**  Seek a translation from the chartrans tables.
 	*/
 	if ((uck = UCTransUniChar(code, context->outUCLYhndl)) >= 32 &&
 	    uck < 256 &&
 	    (uck < 127 ||
 	     uck >= LYlowest_eightbit[context->outUCLYhndl])) {
-	    if (uck == 160 && IncludesLatin1Enc(context->outUCLYhndl)) {
-		/*
-		**  Would only happen if some other Unicode
-		**  is mapped to Latin-1 160.
-		*/
-		PUTC(HT_NON_BREAK_SPACE);
-	    } else if (uck == 173 && IncludesLatin1Enc(context->outUCLYhndl)) {
-		/*
-		**  Would only happen if some other Unicode
-		**  is mapped to Latin-1 173.
-		*/
-		PUTC(LY_SOFT_HYPHEN);
-	    } else {
-		PUTC(FROMASCII((char)uck));
-	    }
+	    PUTC(FROMASCII((char)uck));
 	    FoundEntity = TRUE;
 	    return;
 	} else if ((uck == -4 ||
@@ -456,7 +485,6 @@ PRIVATE void handle_entity ARGS2(
 		   */
 		   (uck = UCTransUniCharStr(replace_buf, 60, code,
 					    context->outUCLYhndl, 0) >= 0)) {
-	    CONST char *p;
 	    for (p = replace_buf; *p; p++)
 		PUTC(*p);
 	    FoundEntity = TRUE;
@@ -477,6 +505,82 @@ PRIVATE void handle_entity ARGS2(
 	    FoundEntity = TRUE;
 	    return;
 	}
+#ifdef NOTUSED_FOTEMODS
+	/*
+	**  If the value is greater than 255 and we do not
+	**  have the "7-bit approximations" as our output
+	**  character set (in which case we did it already)
+	**  seek a translation for that. - FM
+	*/
+	if ((chk = ((code > 255) &&
+		    context->outUCLYhndl !=
+				   UCGetLYhndl_byMIME("us-ascii"))) &&
+	    (uck = UCTransUniChar(code,
+				   UCGetLYhndl_byMIME("us-ascii")))>= 32 &&
+	    uck < 127) {
+	    /*
+	    **	Got an ASCII character (yippey). - FM
+	    */
+	    PUTC(((char)(uck & 0xff)));
+	    FoundEntity = TRUE;
+	    return;
+	} else if ((chk && uck == -4) &&
+		   (uck = UCTransUniCharStr(replace_buf,
+					    60, code,
+					    UCGetLYhndl_byMIME("us-ascii"),
+					    0) >= 0)) {
+	    /*
+	    **	Got a replacement string (yippey). - FM
+	    */
+	    for (p = replace_buf; *p; p++)
+		PUTC(*p);
+	    FoundEntity = TRUE;
+	    return;
+	}
+    }
+    /*
+    **	Ignore zwnj (8204) and zwj (8205), if we get to here.
+    **	Note that zwnj may have been handled as <WBR>
+    **	by the calling function. - FM
+    */
+    if (!strcmp(s, "zwnj") ||
+	!strcmp(s, "zwj")) {
+	if (TRACE) {
+	    fprintf(stderr, "handle_entity: Ignoring '%s'.\n", s);
+	}
+	FoundEntity = TRUE;
+	return;
+    }
+
+    /*
+    **	Ignore lrm (8206), and rln (8207), if we get to here. - FM
+    */
+    if (!strcmp(s, "lrm") ||
+	!strcmp(s, "rlm")) {
+	if (TRACE) {
+	    fprintf(stderr, "handle_entity: Ignoring '%s'.\n", s);
+	}
+	FoundEntity = TRUE;
+	return;
+    }
+
+    /*
+    **	We haven't succeeded yet, so try the old LYCharSets
+    **	arrays for translation strings. - FM
+    */
+    for (low = 0, high = context->dtd->number_of_entities;
+	 high > low;
+	 diff < 0 ? (low = i+1) : (high = i)) {  /* Binary search */
+	i = (low + (high-low)/2);
+	diff = strcmp(entities[i], s);	/* Case sensitive! */
+	if (diff == 0) {		/* success: found it */
+	    for (p = LYCharSets[context->outUCLYhndl][i]; *p; p++) {
+		PUTC(*p);
+	    }
+	    FoundEntity = TRUE;
+	    return;
+	}
+#endif
     }
 
     /*
@@ -485,11 +589,8 @@ PRIVATE void handle_entity ARGS2(
     if (TRACE)
 	fprintf(stderr, "SGML: Unknown entity '%s'\n", s);
     PUTC('&');
-    {
-	CONST char *p;
-	for (p = s; *p; p++) {
-	    PUTC(*p);
-	}
+    for (p = s; *p; p++) {
+	PUTC(*p);
     }
     if (term != '\0')
 	PUTC(term);
@@ -606,6 +707,7 @@ PRIVATE void handle_sgmlatt ARGS1(
     return;
 }
 
+#ifdef EXTENDED_HTMLDTD
 
 PRIVATE BOOL element_valid_within ARGS3(
     HTTag *,	new_tag,
@@ -624,8 +726,6 @@ PRIVATE BOOL element_valid_within ARGS3(
 	return ((new_tag->tagclass & usecontains) &&
 		(stacked_tag->tagclass & usecontained));
 }
-
-#ifdef EXTENDED_HTMLDTD
 
 extern BOOL New_DTD;
 
@@ -1170,7 +1270,7 @@ PRIVATE void SGML_character ARGS2(
 		    *(context->utf_buf_p) = '\0';
 		    clong = context->utf_char;
 		    if (clong < 256) {
-			c = (char)clong;
+			c = ((char)(clong & 0xff));
 		    }
 		    goto top1;
 		} else {
@@ -1225,6 +1325,16 @@ PRIVATE void SGML_character ARGS2(
 	}
     }
 
+#ifdef NOTDEFINED
+    /*
+    **	If we have a koi8-r input and do not have
+    **	koi8-r as the output, save the raw input
+    **	in saved_char_in before we potentially
+    **	convert it to Unicode. - FM
+    */
+    if (context->T.strip_raw_char_in)
+	saved_char_in = c;
+#endif /* NOTDEFINED */
 
     /*
     **	If we want the raw input converted
@@ -1465,8 +1575,8 @@ top1:
 	    **	We got one octet from the conversions, so use it. - FM
 	    */
 	    PUTC(FROMASCII((char)uck));
-	} else if (chk &&
-		   ((uck == -4 ||
+	} else if ((chk &&
+		   (uck == -4 ||
 		    (context->T.repl_translated_C0 &&
 		     uck > 0 && uck < 32))) &&
 		   /*
@@ -1497,13 +1607,11 @@ top1:
 		    (context->T.do_8bitraw && !context->T.trans_from_uni))
 	} else if (unsign_c > 160 && unsign_c < 256 &&
 		   !(PASSHI8BIT || HTCJK != NOCJK) &&
-		   !IncludesLatin1Enc(context->outUCLYhndl)) {
+		   !IncludesLatin1Enc) {
 	    int i;
-	    int value;
 
 	    string->size = 0;
-	    value = (int)(unsign_c - 160);
-	    EntityName = HTMLGetEntityName(value);
+	    EntityName = HTMLGetEntityName((int)(unsign_c - 160));
 	    for (i = 0; EntityName[i]; i++)
 		HTChunkPutc(string, EntityName[i]);
 	    HTChunkTerminate(string);
@@ -1550,10 +1658,44 @@ top1:
 	} else if ((unsigned char)c <
 			LYlowest_eightbit[context->outUCLYhndl] ||
 		   (context->T.trans_from_uni && !HTPassEightBitRaw)) {
-	    sprintf(replace_buf, "U%.2lX", unsign_c);
-	    for (p = replace_buf; *p; p++) {
-		PUTC(*p);
+#ifdef NOTUSED_FOTEMODS
+	    /*
+	    **	If we do not have the "7-bit approximations" as our
+	    **	output character set (in which case we did it already)
+	    **	seek a translation for that.  Otherwise, or if the
+	    **	translation fails, use UHHH notation. - FM
+	    */
+	    if ((chk = (context->outUCLYhndl !=
+			UCGetLYhndl_byMIME("us-ascii"))) &&
+		(uck = UCTransUniChar(unsign_c,
+				      UCGetLYhndl_byMIME("us-ascii")))
+				      >= 32 && uck < 127) {
+		/*
+		**  Got an ASCII character (yippey). - FM
+		*/
+		PUTC(((char)(uck & 0xff)));
+	    } else if ((chk && uck == -4) &&
+		       (uck = UCTransUniCharStr(replace_buf,
+						60, clong,
+						UCGetLYhndl_byMIME("us-ascii"),
+						0) >= 0)) {
+		/*
+		**  Got a replacement string (yippey). - FM
+		*/
+		for (p = replace_buf; *p; p++)
+		    PUTC(*p);
+	    } else {
+		/*
+		**  Out of luck, so use the UHHH notation (ugh). - FM
+		*/
+#endif /* NOTUSED_FOTEMODS */
+		sprintf(replace_buf, "U%.2lX", unsign_c);
+		for (p = replace_buf; *p; p++) {
+		    PUTC(*p);
+		}
+#ifdef NOTUSED_FOTEMODS
 	    }
+#endif /* NOTUSED_FOTEMODS */
 	/*
 	**  If we get to here, pass the character. - FM
 	*/
@@ -1897,13 +2039,11 @@ top1:
 		    context->isHex = FALSE;
 		    context->state = S_text;
 		    break;
-		}
-
+		} else if (put_special_unicodes(context, code)) {
 		    /*
-		**  Check for special Unicodes.
+		    **	We handled the value as a special character,
+		    **	so recycle the terminator or break. - FM
 		    */
-			if (put_special_unicodes(context, code)) {
-
 		    string->size = 0;
 		    context->isHex = FALSE;
 		    context->state = S_text;
@@ -1912,31 +2052,14 @@ top1:
 		    break;
 		}
 		/*
-		**  No special unicodes -
-		**  seek a translation from the chartrans tables.
+		**  Seek a translation from the chartrans tables.
 		*/
 		if ((uck = UCTransUniChar(code,
 					  context->outUCLYhndl)) >= 32 &&
 		    uck < 256 &&
 		    (uck < 127 ||
 		     uck >= LYlowest_eightbit[context->outUCLYhndl])) {
-		    if (uck == 160 &&
-			IncludesLatin1Enc(context->outUCLYhndl)) {
-			/*
-			**  Would only happen if some other Unicode
-			**  is mapped to Latin-1 160.
-			*/
-			PUTC(HT_NON_BREAK_SPACE);
-		    } else if (uck == 173 &&
-			IncludesLatin1Enc(context->outUCLYhndl)) {
-			/*
-			**  Would only happen if some other Unicode
-			**  is mapped to Latin-1 173.
-			*/
-			PUTC(LY_SOFT_HYPHEN);
-		    } else {
-			PUTC(FROMASCII((char)uck));
-		    }
+		    PUTC(FROMASCII((char)uck));
 		} else if ((uck == -4 ||
 			    (context->T.repl_translated_C0 &&
 			     uck > 0 && uck < 32)) &&
@@ -1954,15 +2077,6 @@ top1:
 		*/
 		} else if (context->T.output_utf8 && PUTUTF8(code)) {
 		    ;  /* do nothing more */
-		/*
-		**  Handle trade as named entity. - FM
-		*/
-		} else if (code == 8482) {
-		    string->size = 0;
-		    HTChunkPuts(string, "trade");
-		    context->isHex = FALSE;
-		    context->state = S_entity;
-		    goto top1;
 #ifdef NOTUSED_FOTEMODS
 		/*
 		**  If the value is greater than 255 and we do not
@@ -1998,10 +2112,14 @@ top1:
 			   code == 8206 ||
 			   code == 8207) {
 		    if (TRACE) {
+			string->size--;
+			LYstrncpy(replace_buf,
+				  string->data,
+				  (string->size < 64 ? string->size : 63));
 			fprintf(stderr,
 				"SGML_character: Ignoring '%s%s'.\n",
 				(context->isHex ? "&#x" : "&#"),
-				string->data);
+				replace_buf);
 		    }
 		    string->size = 0;
 		    context->isHex = FALSE;
@@ -2031,12 +2149,6 @@ top1:
 			    !(HTPassHighCtrlRaw || HTCJK != NOCJK)) ||
 			   (code > 127 && code < 160 &&
 			    !HTPassHighCtrlNum)) {
-		    if (code == 8194 || code == 8195 || code == 8201) {
-			/*
-			**  ensp, emsp or thinsp. - FM
-			*/
-			PUTC(HT_EM_SPACE);
-		    } else {
 			/*
 			**  Unhandled or illegal value.  Recover the
 			**  "&#" or "&#x" and digit(s), and recycle
@@ -2055,10 +2167,9 @@ top1:
 			context->isHex = FALSE;
 			context->state = S_text;
 			goto top1;
-		    }
 		} else if (code < 161 ||
 			   HTPassEightBitNum ||
-			   IncludesLatin1Enc(context->outUCLYhndl)) {
+			   IncludesLatin1Enc) {
 		    /*
 		    **	No conversion needed. - FM
 		    */

@@ -278,7 +278,7 @@ PUBLIC void HTML_put_character ARGS2(HTStructured *, me, char, c)
 	me->inPRE = TRUE;
 	break;
 
-    case HTML_LISTING:				/* Litteral text */
+    case HTML_LISTING:				/* Literal text */
     case HTML_XMP:
     case HTML_PLAINTEXT:
 	/*
@@ -393,7 +393,7 @@ PUBLIC void HTML_put_string ARGS2(HTStructured *, me, CONST char *, s)
 	break;
 
     case HTML_PRE:				/* Formatted text */
-    case HTML_LISTING:				/* Litteral text */
+    case HTML_LISTING:				/* Literal text */
     case HTML_XMP:
     case HTML_PLAINTEXT:
 	/*
@@ -567,12 +567,12 @@ PUBLIC void HTML_write ARGS3(HTStructured *, me, CONST char*, s, int, l)
    just an abbreviation. - kw */
 #define INTERN_LT (HTLinkType *)(intern_flag ? LINK_INTERNAL : NULL)
 
-#else  /* TRACK_INTERNAL_LINKS */
+#else  /* !DONT_TRACK_INTERNAL_LINKS */
 
 #define CHECK_FOR_INTERN(s)  /* do nothing */ ;
 #define INTERN_LT (HTLinkType *)NULL
 
-#endif /* TRACK_INTERNAL_LINKS */
+#endif /* DONT_TRACK_INTERNAL_LINKS */
 
 #ifdef USE_COLOR_STYLE
 char class_string[TEMPSTRINGSIZE];
@@ -609,9 +609,9 @@ PRIVATE void HTML_start_element ARGS6(
     BOOL UseBASE = TRUE;		     /* Resoved vs. BASE if present? */
     HTChildAnchor *ID_A = NULL; 	     /* HTML_foo_ID anchor */
     int url_type = 0, i = 0;
-    BOOL intern_flag = FALSE;
     char *cp = NULL;
     int ElementNumber = element_number;
+    BOOL intern_flag = FALSE;
 
     if (LYMapsOnly) {
 	if (!(ElementNumber == HTML_MAP || ElementNumber == HTML_AREA ||
@@ -810,7 +810,9 @@ PRIVATE void HTML_start_element ARGS6(
 	break;
 
     case HTML_LINK:
+#ifndef DONT_TRACK_INTERNAL_LINKS
 	intern_flag = FALSE;
+#endif
 	if (present && present[HTML_LINK_HREF]) {
 	    CHECK_FOR_INTERN(value[HTML_LINK_HREF]);
 	    /*
@@ -1207,7 +1209,7 @@ PRIVATE void HTML_start_element ARGS6(
 
     case HTML_STYLE:
 	/*
-	 *  We're getting it as Litteral text, which, for now,
+	 *  We're getting it as Literal text, which, for now,
 	 *  we'll just ignore. - FM
 	 */
 	HTChunkClear(&me->style_block);
@@ -1215,7 +1217,7 @@ PRIVATE void HTML_start_element ARGS6(
 
     case HTML_SCRIPT:
 	/*
-	 *  We're getting it as Litteral text, which, for now,
+	 *  We're getting it as Literal text, which, for now,
 	 *  we'll just ignore. - FM
 	 */
 	HTChunkClear(&me->script);
@@ -2470,6 +2472,7 @@ PRIVATE void HTML_start_element ARGS6(
 		me->inBoldA = TRUE;
 	    }
 	}
+#ifndef DONT_TRACK_INTERNAL_LINKS
 	if (present && present[HTML_A_TYPE] && value[HTML_A_TYPE]) {
 	    StrAllocCopy(temp, value[HTML_A_TYPE]);
 	    if (!intern_flag && href &&
@@ -2487,6 +2490,7 @@ PRIVATE void HTML_start_element ARGS6(
 		FREE(temp);
 	    }
 	}
+#endif /* DONT_TRACK_INTERNAL_LINKS */
 
 	me->CurrentA = HTAnchor_findChildAndLink(
 			me->node_anchor,			/* Parent */
@@ -2599,7 +2603,9 @@ PRIVATE void HTML_start_element ARGS6(
 	    }
 	}
 
+#ifndef DONT_TRACK_INTERNAL_LINKS
 	intern_flag = FALSE;	/* unless set below - kw */
+#endif
 	/*
 	 *  If there's a USEMAP, resolve it. - FM
 	 */
@@ -5507,7 +5513,7 @@ PRIVATE void HTML_end_element ARGS3(
 
     case HTML_STYLE:
 	/*
-	 *  We're getting it as Litteral text, which, for now,
+	 *  We're getting it as Literal text, which, for now,
 	 *  we'll just ignore. - FM
 	 */
 	HTChunkTerminate(&me->style_block);
@@ -5520,7 +5526,7 @@ PRIVATE void HTML_end_element ARGS3(
 
     case HTML_SCRIPT:
 	/*
-	 *  We're getting it as Litteral text, which, for now,
+	 *  We're getting it as Literal text, which, for now,
 	 *  we'll just ignore. - FM
 	 */
 	HTChunkTerminate(&me->script);
@@ -5625,75 +5631,10 @@ PRIVATE void HTML_end_element ARGS3(
 	break;
 
     case HTML_P:
-	UPDATE_STYLE;
-	    /*
-	     *	In general, treat </P> as an instruction to
-	     *	end the current line if it has been started,
-	     *	and ensure spacing as required by the current
-	     *	paragraph style's spaceAfter.  Don't insert
-	     *	spacing required for starting the next paragraph
-	     *	as required by its style->spaceBefore, since we
-	     *	don't know yet what the next structure element
-	     *	(if any) will be.  If it is another P, it will
-	     *	take care of its leading space on its own.  - kw
-	     */
-	if (me->List_Nesting_Level >= 0) {
-	    /*
-	     *	We're in a list.  Treat </P> as an instruction to
-	     *	end the current line if it has been started,
-	     *	and set "second line" margins.
-	     */
-	    if (me->inP) {
-		if (me->inFIG || me->inAPPLET ||
-		    me->inCAPTION || me->inCREDIT ||
-		    me->sp->style->spaceAfter > 0) {
-		    LYEnsureDoubleSpace(me);
-		} else {
-		    LYEnsureSingleSpace(me);
-		}
-	    }
-	} else if (me->sp[0].tag_number == HTML_ADDRESS) {
-	    /*
-	     *	We're in an ADDRESS. Treat </P> as an instruction
-	     *	to start a newline, if needed. - kw
-	     */
-	    if (HText_LastLineSize(me->text, FALSE)) {
-		HText_setLastChar(me->text, ' ');  /* absorb white space */
-		HText_appendCharacter(me->text, '\r');
-	    }
-	} else {
-	    if (me->sp->style->spaceAfter > 0) {
-		LYEnsureDoubleSpace(me);
-	    } else {
-		LYEnsureSingleSpace(me);
-	    }
-	    me->inLABEL = FALSE;
-	}
-	me->in_word = NO;
-
-	/*
-	 *  If the P ending here had an ALIGN attribute, we have to
-	 *  revert to whatever is in effect for outer elements or
-	 *  the default. - kw
-	 */
-	if (LYoverride_default_alignment(me)) {
-	    me->sp->style->alignment = styles[me->sp[0].tag_number]->alignment;
-	} else if (me->List_Nesting_Level >= 0 ||
-		   ((me->Division_Level < 0) &&
-		    (!strcmp(me->sp->style->name, "Normal") ||
-		     !strcmp(me->sp->style->name, "Preformatted")))) {
-		me->sp->style->alignment = HT_LEFT;
-	} else {
-	    me->sp->style->alignment = me->current_default_alignment;
-	}
-
-	/*
-	 *  Mark that we have to start a new paragraph
-	 *  and don't have any of its text yet. - kw
-	 *
-	 */
-	me->inP = FALSE;
-
+	LYHandleP(me,
+	    	 (CONST BOOL*)0, (CONST char **)0,
+		 (char **)&include,
+		 FALSE);
 	break;
 
     case HTML_FONT:
@@ -5792,7 +5733,7 @@ PRIVATE void HTML_end_element ARGS3(
 	 *  Set to know that we are no longer in a PRE block.
 	 */
 	me->inPRE = FALSE;
-    case HTML_LISTING:				/* Litteral text */
+    case HTML_LISTING:				/* Literal text */
     case HTML_XMP:
     case HTML_PLAINTEXT:
 	if (me->comment_start)
@@ -6672,7 +6613,7 @@ End_Object:
 
     case HTML_MATH:
 	/*
-	 *  We're getting it as Litteral text, which, until we can process
+	 *  We're getting it as Literal text, which, until we can process
 	 *  it, we'll display as is, within brackets to alert the user. - FM
 	 */
 	HTChunkPutc(&me->math, ' ');
@@ -6760,22 +6701,6 @@ PUBLIC int HTML_put_entity ARGS2(HTStructured *, me, int, entity_number)
     if (entity_number < nent) {
 	HTML_put_string(me, p_entity_values[entity_number]);
 	return HT_OK;
-    } else if (me->UCLYhndl < 0) {
-	return HT_CANNOT_TRANSLATE;
-    }
-    uni = HTML_dtd.extra_entity_info[entity_number-nent].code;
-    c_out = UCTransUniChar(uni, me->UCLYhndl);
-    if (c_out > 0) {
-	HTML_put_character(me, (char)c_out);
-	return HT_OK;
-    } else if (c_out == UCTRANS_NOTFOUND) {
-	char buf[21];
-	int c_out2 = UCTransUniCharStr(buf,20, uni, me->UCLYhndl, NO);
-
-	if (c_out2 >= 0) {
-	    HTML_put_string(me, buf);
-	    return HT_OK;
-	}
     }
     return HT_CANNOT_TRANSLATE;
 }
@@ -7167,7 +7092,7 @@ PUBLIC CONST HTStructuredClass HTMLPresentation = /* As opposed to print etc */
 /*		New Structured Text object
 **		--------------------------
 **
-**	The strutcured stream can generate either presentation,
+**	The structured stream can generate either presentation,
 **	or plain text, or HTML.
 */
 PUBLIC HTStructured* HTML_new ARGS3(

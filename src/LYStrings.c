@@ -363,6 +363,7 @@ re_read:
 		case 459: c = 13;	break;	/* keypad enter*/
 		case 463: c = '*';	break;	/* keypad * */
 		case 440: c = 'Q';	break;	/* alt x */
+		case 265: c = 'H';	break;	/* F1 */
 		default: break;
 	    }
 	}

@@ -1954,31 +1954,5 @@ U+009c:ST
 U+009d:OC
 U+009e:PM
 U+009f:AC
-U+e000:"3
-U+e001:"1
-U+e002:"!
-U+e003:"'
-U+e004:">
-U+e005:"?
-U+e006:"-
-U+e007:"(
-U+e008:".
-U+e009:":
-U+e00a:"0
-U+e00b:",
-U+e00c:"_
-U+e00d:""
-U+e00e:";
-U+e00f:"<
-U+e010:"=
-U+e011:"/
-U+e012:"p
-U+e013:"d
-U+e014:"i
-U+e015:+_
-U+e016:a+:
-U+e017:Tel
-U+e018:UA
-U+e019:UB
-U+e01e:Mc
-U+e01f:Fl
+# Characters in Private Use Area (e000-f8ff) do not have ussigned numbers
+# according Unicode 2.0

@@ -475,21 +475,20 @@ PUBLIC int printfile ARGS1(
 		     *  and we *should* override both assume_local_charset
 		     *  and original document's META CHARSET (if any).
 		     *
-		     *  Currently, if several META CHARSET found
-		     *  Lynx use the first only, and it is opposite to BASE
-		     *  where original BASE in the <HEAD>
-		     *  override ones from the top.
+		     *	Currently, if several META CHARSETs are found Lynx uses
+		     *	the first only, and it is opposite to BASE where the
+		     *	original BASE in the <HEAD> overrides ones from the
+		     *	top.
 		     *
-		     *  Like in print-to-email we write charset only if
-		     *  the document has 8-bit characters, and
-		     *  we have no CJK or an inofficial "x-" charset.
-		     *
+		     *	As in print-to-email we write charset only if the
+		     *	document has 8-bit characters, and we have no CJK or an
+		     *	unofficial "x-" charset.
 		     */
-			use_cte = HTLoadedDocumentEightbit();
-			disp_charset = LYCharSet_UC[current_char_set].MIMEname;
-			if (!use_cte || LYHaveCJKCharacterSet ||
-			    strncasecomp(disp_charset, "x-", 2) == 0) {
-			} else {
+		     use_cte = HTLoadedDocumentEightbit();
+		     disp_charset = LYCharSet_UC[current_char_set].MIMEname;
+		     if (!use_cte || LYHaveCJKCharacterSet ||
+			  strncasecomp(disp_charset, "x-", 2) == 0) {
+		     } else {
 			fprintf(outfile_fp,
 				"<META HTTP-EQUIV=\"Content-Type\" "
 				"CONTENT=\"text/html; charset=%s\">\n\n",

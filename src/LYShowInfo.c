@@ -128,14 +128,17 @@ PUBLIC int showinfo ARGS4(
 	    } else if (((dir_info.st_mode) & S_IFMT) == S_IFREG) {
 		fprintf(fp0, 
 		      "\nFile that you have currently selected\n\n");
+#ifdef S_IFLNK
 	    } else if (((dir_info.st_mode) & S_IFMT) == S_IFLNK) {
 		fprintf(fp0,
 	     "\nSymbolic link that you have currently selected\n\n");
+#endif
 	    } else {
 		fprintf(fp0,
 		      "\nItem that you have currently selected\n\n");
 	    }
 	    fprintf(fp0,"       <em>Full name:</em>  %s\n", temp);
+#ifdef S_IFLNK
 	    if (((dir_info.st_mode) & S_IFMT) == S_IFLNK) {
 		char buf[1025];
 		int buf_size;
@@ -147,6 +150,7 @@ PUBLIC int showinfo ARGS4(
 		}
 		fprintf(fp0, "  <em>Points to file:</em>  %s\n", buf);
 	    }
+#endif
 	    pw = getpwuid(dir_info.st_uid);
 	    if (pw)
 	        fprintf(fp0, "   <em>Name of owner:</em>  %s\n", pw->pw_name);
@@ -222,8 +226,10 @@ PUBLIC int showinfo ARGS4(
 		    strcat(modes, ", search");
 	        else {
 		    strcat(modes, ", execute");
+#ifdef S_ISVTX
 		    if ((dir_info.st_mode & S_ISVTX))
 		        strcat(modes, ", sticky");
+#endif
 	        }
 	    }
 	    fprintf(fp0, "%s\n", (char *)&modes[2]);  /* Skip leading ', ' */

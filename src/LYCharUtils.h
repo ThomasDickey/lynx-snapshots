@@ -58,9 +58,6 @@ extern char *LYLowercaseI_OL_String PARAMS((
 	int			seqnum));
 extern void LYGetChartransInfo PARAMS((
 	HTStructured *		me));
-extern void add_META_charset_to_fd PARAMS((
-	FILE *			fp,
-	int			disp_chndl));
 extern void LYHandleMETA PARAMS((
 	HTStructured *		me,
 	CONST BOOL*		present,

@@ -23,7 +23,7 @@
 #include "HTVMSUtils.h"
 #endif /* VMS */
 
-#ifdef UNIX
+#if HAVE_UTMP
 #include <pwd.h>
 #ifdef UTMPX_FOR_UTMP
 #include <utmpx.h>
@@ -35,7 +35,7 @@
 #else
 #include <utmp.h>
 #endif /* UTMPX_FOR_UTMP */
-#endif /* UNIX */
+#endif /* HAVE_UTMP */
 
 #if NEED_PTEM_H
 /* they neglected to define struct winsize in termios.h -- it's only in

@@ -404,12 +404,6 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 	*/
 	} else if (code == 8194 || code == 8195 || code == 8201) {
 	    HText_appendCharacter(me->text, ' ');
-	/*
-	**  Use ASCII hyphen for 8211 (ndash/endash)
-	**  or 8212 (mdash/emdash). - FM
-	*/
-	} else if (code == 8211 || code == 8212) {
-	    HText_appendCharacter(me->text, '-');
 #endif /* NOTDEFINED */
 
 /******************************************************************

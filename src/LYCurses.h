@@ -48,6 +48,10 @@
 #define REDEFINE_CR
 #endif /* CR */
 
+#ifdef HZ
+#undef HZ  /* to prevent parse error :( */
+#endif /* HZ */
+
 #ifdef HAVE_CONFIG_H
 # ifdef HAVE_NCURSES_H
 #  include <ncurses.h>

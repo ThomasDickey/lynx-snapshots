@@ -3066,8 +3066,8 @@ PUBLIC void HText_endAnchor ARGS2(
 	    a->extent = 0;
 	    if (text->hiddenlinkflag != HIDDENLINKS_MERGE) {
 		a->number = 0;
-		HText_AddHiddenLink(text, a);
 	        text->last_anchor_number--;
+		HText_AddHiddenLink(text, a);
 	    }
 	} else {
 	    /*
@@ -6757,6 +6757,9 @@ PUBLIC int HText_beginInput ARGS3(
  *  The parsed input string will be mutilated on exit(!).
  *  Note that results are not normalised to 1.0, but results from
  *  different calls of this function can be compared. - kw
+ *
+ *  Obsolete, it was planned to use here a quality parametr UCTQ_t,
+ *  which is boolean now.
  */
 PRIVATE double get_trans_q ARGS2(
     int,		cs_from,

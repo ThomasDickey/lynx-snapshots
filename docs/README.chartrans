@@ -1,8 +1,8 @@
 Lynx CHARTRANS
 
- Features (in addition to those which Lynx already has):
+ Features (in addition to those which Lynx 2.7.1 already has):
  
-- Can (attempt to) translate from any document charset to any display
+ - Can (attempt to) translate from any document charset to any display
    character set, *IF* the document charset is known by a translation 
    table (compiled in at installation).
 
@@ -23,7 +23,7 @@ Lynx CHARTRANS
    i18n RFC 2070 and W3C HTML 4.0 drafts.  A link can suggest the target's
    charset in this way.
 
--  Support for ACCEPT-CHARSET attribute of FORM tags.
+ - Support for ACCEPT-CHARSET attribute of FORM tags.
 
  - EXPERIMENTAL, currently enabled only for Linux console: 
    can (attempt to) automatically switch terminal mode and load new
@@ -42,9 +42,9 @@ Additions/changes to user interface:
  - new command line flags:
    -assume_charset=...  assume this as charset for documents that don't
                         specify a charset parameter in HTTP headers
-   -assume_unknown_charset=...  in case a charset parameter is not recognized 
-   -assume_local_charset=... assume this as charset of local file: docs 
-   also available as ASSUME_CHARSET etc. in lynx.cfg
+   -assume_local_charset=...  assume this as charset of local file
+   -assume_unrec_charset=...  in case a charset parameter is not recognized;
+   docs also available as ASSUME_CHARSET etc. in lynx.cfg
    In "Advanced User" mode, ASSUME_CHARSET can be changed during a session
    from the Options Screen.
 
@@ -61,6 +61,7 @@ Additions/changes to user interface:
       unchanged from the ISO-8859-1 default, toggling "Raw" may have some
       additional effect for characters that can't be translated.
    (Try the "Transparent" Display Character Set for more "rawness".)
+
 
 Requirements:  same as for Lynx in general :)
 
@@ -101,7 +102,7 @@ HOW TO INSTALL:
     What's supposed to happen (in addition to the usual things when
     building Lynx): in the new subdirectory src/chrtrans, make should
     first compile the auxiliary program `makeuctb', then invoke that
-    program to create xxxxx_yyy.h files from the provided xxxxx.yyy
+    program to create xxxxx_yyy.h files from the provided xxxxx_yyy.tab
     translation table files.  (See README.* files in src/chrtrans for
     more info.)
 
