@@ -59,8 +59,10 @@ PRIVATE char **env = NULL;  /* Environment variables */
 PRIVATE int envc_size = 0;  /* Slots in environment array */
 PRIVATE int envc = 0;	    /* Slots used so far */
 #ifdef LYNXCGI_LINKS
-PRIVATE char user_agent[64];
-PRIVATE char server_software[64];
+PRIVATE char *user_agent;
+PRIVATE char *server_software;
+PRIVATE char *accept_language;
+PRIVATE char *post_len;
 #endif /* LYNXCGI_LINKS */
 
 PRIVATE void add_environment_value PARAMS((char *env_value));
@@ -311,9 +313,12 @@ PRIVATE int LYLoadCGI ARGS4(
 			       sink, anAnchor);
 
 	if (!target || target == NULL) {
-	    sprintf(buf, CANNOT_CONVERT_I_TO_O,
-		    HTAtom_name(format_in), HTAtom_name(format_out));
-	    HTAlert(buf);
+	    char *tmp = 0;
+	    HTSprintf0(&tmp, CANNOT_CONVERT_I_TO_O,
+		       HTAtom_name(format_in),
+		       HTAtom_name(format_out));
+	    HTAlert(tmp);
+	    FREE(tmp);
 	    status = HT_NOT_LOADED;
 
 	} else if (anAnchor->post_data && pipe(fd1) < 0) {
@@ -341,11 +346,11 @@ PRIVATE int LYLoadCGI ARGS4(
 		add_environment_value("REMOTE_HOST=localhost");
 		add_environment_value("REMOTE_ADDR=127.0.0.1");
 
-		sprintf(user_agent, "HTTP_USER_AGENT=%s/%s libwww/%s",
+		HTSprintf0(&user_agent, "HTTP_USER_AGENT=%s/%s libwww/%s",
 			LYNX_NAME, LYNX_VERSION, HTLibraryVersion);
 		add_environment_value(user_agent);
 
-		sprintf(server_software, "SERVER_SOFTWARE=%s/%s",
+		HTSprintf0(&server_software, "SERVER_SOFTWARE=%s/%s",
 			LYNX_NAME, LYNX_VERSION);
 		add_environment_value(server_software);
 	    }
@@ -423,10 +428,8 @@ PRIVATE int LYLoadCGI ARGS4(
 
 	    } else if (pid == 0) { /* The Bad, */
 		char **argv = NULL;
-		char post_len[32];
 		int argv_cnt = 3; /* name, one arg and terminator */
 		char **cur_argv = NULL;
-		char buf2[BUFSIZ];
 
 		/* Set up output pipe */
 		close(fd2[0]);
@@ -434,10 +437,8 @@ PRIVATE int LYLoadCGI ARGS4(
 		dup2(fd2[1], fileno(stderr));
 		close(fd2[1]);
 
-		sprintf(buf2, "HTTP_ACCEPT_LANGUAGE=%.*s",
-			     (int)(sizeof(buf2) - 22), language);
-		buf2[(sizeof(buf2) - 1)] = '\0';
-		add_environment_value(buf2);
+		HTSprintf0(&accept_language, "HTTP_ACCEPT_LANGUAGE=%s", language);
+		add_environment_value(accept_language);
 
 		if (pref_charset) {
 		    cp = NULL;
@@ -463,7 +464,7 @@ PRIVATE int LYLoadCGI ARGS4(
 
 		    add_environment_value("REQUEST_METHOD=POST");
 
-		    sprintf(post_len, "CONTENT_LENGTH=%d",
+		    HTSprintf0(&post_len, "CONTENT_LENGTH=%d",
 			    strlen(anAnchor->post_data));
 		    add_environment_value(post_len);
 		} else {
@@ -582,38 +583,39 @@ PRIVATE int LYLoadCGI ARGS4(
     FREE(pgm);
     FREE(orig_pgm);
 #else  /* VMS */
-	HTStream *target;
-	char buf[256];
+    HTStream *target;
+    char *buf = 0;
 
-	target = HTStreamStack(WWW_HTML,
-			       format_out,
-			       sink, anAnchor);
+    target = HTStreamStack(WWW_HTML,
+			   format_out,
+			   sink, anAnchor);
 
-	sprintf(buf, "<head>\n<title>%s</title>\n</head>\n<body>\n", gettext("Good Advice"));
-	(*target->isa->put_block)(target, buf, strlen(buf));
+    HTSprintf0(&buf, "<head>\n<title>%s</title>\n</head>\n<body>\n", gettext("Good Advice"));
+    (*target->isa->put_block)(target, buf, strlen(buf));
 
-	sprintf(buf, "<h1>%s</h1>\n", gettext("Good Advice"));
-	(*target->isa->put_block)(target, buf, strlen(buf));
+    HTSprintf0(&buf, "<h1>%s</h1>\n", gettext("Good Advice"));
+    (*target->isa->put_block)(target, buf, strlen(buf));
 
-	sprintf(buf, "%s <a\n", gettext("An excellent http server for VMS is available via"));
-	(*target->isa->put_block)(target, buf, strlen(buf));
+    HTSprintf0(&buf, "%s <a\n", gettext("An excellent http server for VMS is available via"));
+    (*target->isa->put_block)(target, buf, strlen(buf));
 
-	sprintf(buf,
-	 "href=\"http://kcgl1.eng.ohio-state.edu/www/doc/serverinfo.html\"\n");
-	(*target->isa->put_block)(target, buf, strlen(buf));
+    HTSprintf0(&buf,
+	       "href=\"http://kcgl1.eng.ohio-state.edu/www/doc/serverinfo.html\"\n");
+    (*target->isa->put_block)(target, buf, strlen(buf));
 
-	sprintf(buf, ">%s</a>.\n", gettext("this link"));
-	(*target->isa->put_block)(target, buf, strlen(buf));
+    HTSprintf0(&buf, ">%s</a>.\n", gettext("this link"));
+    (*target->isa->put_block)(target, buf, strlen(buf));
 
-	sprintf(buf, "<p>%s\n",
-              gettext("It provides state of the art CGI script support.\n"));
-	(*target->isa->put_block)(target, buf, strlen(buf));
+    HTSprintf0(&buf, "<p>%s\n",
+	       gettext("It provides state of the art CGI script support.\n"));
+    (*target->isa->put_block)(target, buf, strlen(buf));
 
-	sprintf(buf,"</body>\n");
-	(*target->isa->put_block)(target, buf, strlen(buf));
+    HTSprintf0(&buf,"</body>\n");
+    (*target->isa->put_block)(target, buf, strlen(buf));
 
-	(*target->isa->_free)(target);
-	status = HT_LOADED;
+    (*target->isa->_free)(target);
+    FREE(buf);
+    status = HT_LOADED;
 #endif /* VMS */
 #else /* LYNXCGI_LINKS */
     HTUserMsg(CGI_NOT_COMPILED);

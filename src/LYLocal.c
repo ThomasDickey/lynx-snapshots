@@ -80,7 +80,7 @@ PRIVATE int LYExecv PARAMS((
 PUBLIC char LYPermitFileURL[LY_MAXPATH] = "\0";
 PUBLIC char LYDiredFileURL[LY_MAXPATH] = "\0";
 
-PRIVATE char *filename PARAMS((
+PRIVATE char *get_filename PARAMS((
 	char *		prompt,
 	char *		buf,
 	size_t		bufsize));
@@ -309,7 +309,7 @@ PRIVATE int move_file ARGS2(char *, source, char *, target)
     return code;
 }
 
-PRIVATE BOOLEAN already_exists ARGS1(char *, name)
+PRIVATE BOOLEAN not_already_exists ARGS1(char *, name)
 {
     struct stat dir_info;
 
@@ -585,7 +585,7 @@ PRIVATE BOOLEAN modify_name ARGS1(
 	} else {
 	     return ok_file_or_dir(&dir_info);
 	}
-	if (filename(cp, tmpbuf, sizeof(tmpbuf)) == NULL)
+	if (get_filename(cp, tmpbuf, sizeof(tmpbuf)) == NULL)
 	    return 0;
 
 	/*
@@ -603,7 +603,7 @@ PRIVATE BOOLEAN modify_name ARGS1(
 	    /*
 	     *	Make sure the destination does not already exist.
 	     */
-	    if (!already_exists(newpath)) {
+	    if (not_already_exists(newpath)) {
 		return move_file(savepath, newpath);
 	    }
 	}
@@ -646,7 +646,7 @@ PRIVATE BOOLEAN modify_location ARGS1(
     } else {
 	return ok_file_or_dir(&dir_info);
     }
-    if (filename(cp, tmpbuf, sizeof(tmpbuf)) == NULL)
+    if (get_filename(cp, tmpbuf, sizeof(tmpbuf)) == NULL)
 	return 0;
     if (strlen(tmpbuf)) {
 	strcpy(savepath, testpath);
@@ -781,8 +781,8 @@ PRIVATE BOOLEAN create_file ARGS1(
     char *args[5];
     char *bad_chars = ".~/";
 
-    if (filename(gettext("Enter name of file to create: "),
-		 tmpbuf, sizeof(tmpbuf)) == NULL) {
+    if (get_filename(gettext("Enter name of file to create: "),
+		     tmpbuf, sizeof(tmpbuf)) == NULL) {
 	return code;
     }
 
@@ -804,7 +804,7 @@ PRIVATE BOOLEAN create_file ARGS1(
 	/*
 	 *  Make sure the target does not already exist
 	 */
-	if (!already_exists(testpath)) {
+	if (not_already_exists(testpath)) {
 	    char *msg = 0;
 	    HTSprintf(&msg,gettext("create %s"),testpath);
 	    args[0] = "touch";
@@ -829,8 +829,8 @@ PRIVATE BOOLEAN create_directory ARGS1(
     char *args[5];
     char *bad_chars = ".~/";
 
-    if (filename(gettext("Enter name for new directory: "),
-		 tmpbuf, sizeof(tmpbuf)) == NULL) {
+    if (get_filename(gettext("Enter name for new directory: "),
+		     tmpbuf, sizeof(tmpbuf)) == NULL) {
 	return code;
     }
 
@@ -849,7 +849,7 @@ PRIVATE BOOLEAN create_directory ARGS1(
 	/*
 	 *  Make sure the target does not already exist.
 	 */
-	if (!already_exists(testpath)) {
+	if (not_already_exists(testpath)) {
 	    char *msg = 0;
 	    HTSprintf(&msg,"make directory %s",testpath);
 	    args[0] = "mkdir";
@@ -1744,7 +1744,7 @@ PUBLIC int dired_options ARGS2(
 /*
  *  Check DIRED filename.
  */
-PRIVATE char *filename ARGS3(
+PRIVATE char *get_filename ARGS3(
 	char *, 	prompt,
 	char *, 	buf,
 	size_t, 	bufsize)

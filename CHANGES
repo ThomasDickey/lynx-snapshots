@@ -1,6 +1,23 @@
 Changes since Lynx 2.8.1 release
 ================================================================================
 
+1998-12-26 (2.8.2dev.12)
+* use HTSprintf0 in LYCgi.c - TD
+* add tab-completion on URL's, by using previously-entered strings for
+  matching (patch by Kari Davidsson <karid@loki.midheimar>) - TD
+* add version number to trace log (patch by IC)
+* modify HTDOS_name to be consistent with HTVMS_name, which does not modify
+  its parameter (reported by LP).  Also, modify HTDOS_name and HTDOS_wwwName
+  so they allocate space for the result rather than using a static buffer - TD
+* modify LYEdit.c to use HTAddParam - TD
+* make HREF/NAME for "Environment" consistent in Lynx_users_guide.html
+  (reported by LP)
+* correct DOS/EMX logic in LYEdit.c which incremented 'filename' pointer when
+  its length was greater than 1 rather than recopying the string, causing a
+  core dump when 'filename' was freed (reported by LP, this applies to
+  2.8.1rel.2) - TD
+* correct sense of 'already_exists()' function from dev.11, which caused
+  various file-menu operations to stop working (reported by IC) - TD
 1998-12-24 (2.8.2dev.11)
 * use HTSprintf/HTSprintf0 in about half of the WWW library files where
   applicable:  HTAABrow.c HTAAServ.c HTAAUtil.c HTAccess.c HTAnchor.c HTDOS.c

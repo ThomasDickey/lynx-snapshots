@@ -18,7 +18,7 @@ LYE_NOP,        LYE_BOL,        LYE_DELPW,      LYE_ABORT,
 LYE_DELN,       LYE_EOL,        LYE_DELNW,      LYE_ABORT,
 /* ^D           ^E              ^F              ^G      */
 
-LYE_DELP,       LYE_ENTER,      LYE_ENTER,      LYE_LOWER,
+LYE_DELP,       LYE_TAB,      LYE_ENTER,      LYE_LOWER,
 /* bs           tab             nl              ^K      */
 
 LYE_NOP,        LYE_ENTER,      LYE_FORWW,      LYE_ABORT,
