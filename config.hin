@@ -184,9 +184,11 @@
 #undef uid_t			/* defined by AC_TYPE_UID_T */
 #undef vfork			/* defined by AC_FUNC_FORK */
 
-/* 'const' may be defined externally by the compiler-wrapper, as in 'unproto' */
+/* 'const' may be defined externally by the compiler-wrapper, as in 'unproto'
+ * or by AC_C_CONST
+ */
 #ifndef const
-#undef const			/* defined by AC_C_CONST */
+#undef const
 #endif
 
 /* FIXME:ALLOW_USERS_TO_CHANGE_EXEC_WITHIN_OPTIONS */

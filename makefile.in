@@ -311,7 +311,7 @@ install-full: install install-help install-doc
 install-bin: $(BINDIR)
 @MSG_DIR_MAKE@	cd po && $(MAKE) CC="$(CC)" install
 	-mv -f $(BINDIR)/lynx$x $(BINDIR)/lynx.old
-	$(INSTALL_PROGRAM) lynx$x $(BINDIR)/lynx$x 
+	$(INSTALL_PROGRAM) lynx$x $(BINDIR)/lynx$x
 
 install-man : $(MANDIR)
 	$(INSTALL_DATA) $(srcdir)/lynx.man $(MANDIR)/lynx.1
@@ -372,8 +372,8 @@ install-help : $(DOCDIR) $(HELPDIR)
 		$(LIBDIR)/lynx.tmp >$(LIBDIR)/lynx.cfg
 	chmod 644 $(LIBDIR)/lynx.cfg
 	-rm -f $(LIBDIR)/lynx.tmp
-	$(INSTALL_DATA) COPYHEADER $(DOCDIR)/COPYHEADER
-	$(INSTALL_DATA) COPYING    $(DOCDIR)/COPYING
+	$(INSTALL_DATA) $(srcdir)/COPYHEADER $(DOCDIR)/COPYHEADER
+	$(INSTALL_DATA) $(srcdir)/COPYING    $(DOCDIR)/COPYING
 	cd $(HELPDIR) && ( \
 		ln $(DOCDIR)/COPYHEADER . || cp $(DOCDIR)/COPYHEADER . ; \
 		ln $(DOCDIR)/COPYING    . || cp $(DOCDIR)/COPYING . )

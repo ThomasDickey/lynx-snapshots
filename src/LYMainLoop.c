@@ -1945,14 +1945,6 @@ new_cmd:  /*
 	     *	 this.	As the problems show up, we'll try to fix them,
 	     *	 or add warnings.  - FM)
 	     */
-	    if (lynx_mode == FORMS_LYNX_MODE) {
-		/*
-		 *  Note that if there are no form links on the current
-		 *  page, lynx_mode won't have this setting and we won't
-		 *  know that this warning should be issued. - FM
-		 */
-		HTAlert(RELOADING_FORM);
-	    }
 	    newdoc.line = curdoc.line;
 	    newdoc.link = curdoc.link;
 #endif /* NO_ASSUME_SAME_DOC */
@@ -3920,14 +3912,6 @@ if (!LYUseFormsOptions) {
 			}
 		    }
 #endif
-		    if (lynx_mode == FORMS_LYNX_MODE) {
-			/*
-			 *  Note that if there are no form links on the current
-			 *  page, lynx_mode won't have this setting and we won't
-			 *  know that this warning should be issued. - FM
-			 */
-			HTAlert(RELOADING_FORM);
-		    }
 		    HEAD_request = HTLoadedDocumentIsHEAD();
 		    HTuncache_current_document();
 #ifdef NO_ASSUME_SAME_DOC
