@@ -2544,7 +2544,7 @@ PUBLIC char * LYTrimNewline ARGS1(
 	char *,		buffer)
 {
     size_t i = strlen(buffer);
-    while (i != 0 && buffer[i-1] == '\n')
+    while (i != 0 && (buffer[i-1] == '\n' || buffer[i-1] == '\r'))
 	buffer[--i] = 0;
     return buffer;
 }

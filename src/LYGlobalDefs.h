@@ -34,7 +34,7 @@
 #define VISITED_LINKS_HELP	"keystrokes/visited_help.html"
 #endif /* LYHELP_H */
 
-#ifdef SOURCE_CACHE
+#ifdef USE_SOURCE_CACHE
 #include <HTChunk.h>
 #endif
 
@@ -167,13 +167,13 @@ typedef enum {
     rateOFF = 0
     , rateBYTES = 1
     , rateKB
-#ifdef EXP_READPROGRESS
+#ifdef USE_READPROGRESS
     , rateEtaBYTES
     , rateEtaKB
 #endif
 } TransferRate;
 
-#ifdef EXP_READPROGRESS
+#ifdef USE_READPROGRESS
 #  define rateEtaKB_maybe	rateEtaKB
 #else
 #  define rateEtaKB_maybe	rateKB
@@ -204,6 +204,8 @@ extern BOOLEAN emacs_keys;        /* TRUE to turn on emacs-like key movement */
 extern BOOLEAN error_logging;     /* TRUE to mail error messages */
 extern BOOLEAN ftp_ok;
 extern BOOLEAN ftp_passive;	/* TRUE if we want to use passive mode ftp */
+extern BOOLEAN ftp_local_passive;
+extern char *ftp_lasthost;
 extern BOOLEAN goto_buffer;     /* TRUE if offering default goto URL */
 extern BOOLEAN is_www_index;
 extern BOOLEAN jump_buffer;     /* TRUE if offering default shortcut */
@@ -335,7 +337,7 @@ extern BOOLEAN historical_comments;
 extern BOOLEAN minimal_comments;
 extern BOOLEAN soft_dquotes;
 
-#ifdef SOURCE_CACHE
+#ifdef USE_SOURCE_CACHE
 extern BOOLEAN source_cache_file_error;
 extern int LYCacheSource;
 #define SOURCE_CACHE_NONE	0
@@ -436,11 +438,11 @@ extern BOOLEAN BibP_bibhost_checked;    /* bibhost has been checked      */
 extern BOOLEAN BibP_bibhost_available;  /* bibhost is responding         */
 #endif
 
-#ifdef EXP_PERSISTENT_COOKIES
+#ifdef USE_PERSISTENT_COOKIES
 extern BOOLEAN persistent_cookies;
 extern char *LYCookieFile;              /* cookie read file              */
 extern char *LYCookieSaveFile;          /* cookie save file              */
-#endif /* EXP_PERSISTENT_COOKIES */
+#endif /* USE_PERSISTENT_COOKIES */
 
 extern char *XLoadImageCommand;		/* Default image viewer for X	 */
 
@@ -501,6 +503,11 @@ extern int justify_max_void_percent;
 extern BOOLEAN with_backspaces;
 #endif
 
+#if defined(PDCURSES) && defined(PDC_BUILD) && PDC_BUILD >= 2401
+extern int scrsize_x;
+extern int scrsize_y;
+#endif
+
 #ifndef NO_LYNX_TRACE
 extern FILE *LYTraceLogFP;		/* Pointer for TRACE log	 */
 extern char *LYTraceLogPath;		/* Path for TRACE log		 */
@@ -534,6 +541,11 @@ extern char *lynx_lss_file;
 
 extern int HTNoDataOK;		/* HT_NO_DATA-is-ok hack */
 extern BOOLEAN FileInitAlreadyDone;
+
+#ifdef __DJGPP__
+extern BOOLEAN watt_debug;
+extern BOOLEAN dj_is_bash;
+#endif /* __DJGPP__ */
 
 #ifdef WIN_EX
 /* LYMain.c */

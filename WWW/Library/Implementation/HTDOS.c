@@ -24,10 +24,10 @@ PRIVATE char * copy_plus ARGS2(char **, result, CONST char *, source)
 /* PUBLIC							HTDOS_wwwName()
 **		CONVERTS DOS Name into WWW Name
 ** ON ENTRY:
-**	dosname 	DOS file specification (NO NODE)
+**	dosname		DOS file specification (NO NODE)
 **
 ** ON EXIT:
-**	returns 	WWW file specification
+**	returns		WWW file specification
 **
 */
 char * HTDOS_wwwName ARGS1(CONST char *, dosname)
@@ -93,10 +93,10 @@ char * HTDOS_slashes ARGS1(char *, path)
 /* PUBLIC							HTDOS_name()
 **		CONVERTS WWW name into a DOS name
 ** ON ENTRY:
-**	wwwname 	WWW file name
+**	wwwname		WWW file name
 **
 ** ON EXIT:
-**	returns 	DOS file specification
+**	returns		DOS file specification
 */
 char * HTDOS_name ARGS1(char *, wwwname)
 {

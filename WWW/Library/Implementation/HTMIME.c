@@ -180,15 +180,12 @@ PRIVATE BOOL content_is_compressed ARGS1(HTStream *, me)
 }
 
 /*
- * Strip parameters and quotes from a URL.
+ * Strip quotes from a refresh-URL.
  */
 PRIVATE void dequote ARGS1(char *, url)
 {
-    char *p;
     int len;
 
-    if ((p = strchr(url, '?')) != NULL)
-	*p = '\0';
     len = strlen(url);
     if (*url == '\'' && len > 1 && url[len-1] == url[0]) {
 	url[len-1] = '\0';
@@ -472,7 +469,7 @@ PRIVATE int pumpData ARGS1(HTStream *, me)
 	char *base = "";	/* FIXME: refresh_url may be relative to doc */
 
 	LYParseRefreshURL(me->refresh_url, &num, &url);
-	if (url != NULL) {
+	if (url != NULL && me->format == WWW_HTML) {
 	    CTRACE((tfp, "Formatting refresh-url as first line of result\n"));
 	    HTSprintf0(&txt, gettext("Refresh: "));
 	    HTSprintf(&txt, gettext("%s seconds "), num);

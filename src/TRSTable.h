@@ -8,16 +8,13 @@
 typedef struct _STable_info STable_info;
 extern STable_info * Stbl_startTABLE PARAMS((short));
 extern int Stbl_finishTABLE PARAMS((STable_info *));
-extern void Stbl_finishRowInTable PARAMS((STable_info *));
 extern void Stbl_free PARAMS((STable_info *));
 extern int Stbl_addRowToTable PARAMS((STable_info *, int, int));
 extern int Stbl_addCellToTable PARAMS((STable_info *, int, int, int, int, int, int, int));
-extern BOOL Stbl_at_start_of_cell PARAMS((STable_info *, int, int));
 extern int Stbl_finishCellInTable PARAMS((STable_info *, int, int, int, int));
 extern int Stbl_addColInfo PARAMS((STable_info *, int, short, BOOL));
 extern int Stbl_finishColGroup PARAMS((STable_info *));
 extern int Stbl_addRowGroup PARAMS((STable_info *, short));
-extern int Stbl_trimFakeRows PARAMS((STable_info *, int, int));
 
 #define TRST_ENDCELL_ENDTD	1
 #define TRST_ENDCELL_LINEBREAK	0

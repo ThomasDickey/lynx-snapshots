@@ -71,13 +71,14 @@ PRIVATE int HTSSLCallback(int preverify_ok, X509_STORE_CTX *x509_ctx)
     int result = 1;
 
     if (!(preverify_ok || ssl_okay || ssl_noprompt)) {
-
+#ifdef USE_X509_SUPPORT
 	HTSprintf0(&msg, "SSL error:%s-Continue?",
 		   X509_verify_cert_error_string(X509_STORE_CTX_get_error(x509_ctx)));
 	if (HTForcedPrompt(ssl_noprompt, msg, YES))
 	    ssl_okay = 1;
 	else
 	    result = 0;
+#endif
 
 	FREE(msg);
     }
@@ -604,8 +605,12 @@ use_tunnel:
 	  cert_host += 4;
 	  if ((p = strchr(cert_host, '/')) != NULL)
 	      *p = '\0';
+	  if ((p = strchr(cert_host, ':')) != NULL)
+	      *p = '\0';
 	  ssl_host = HTParse(url, "", PARSE_HOST);
-	  if (strcmp(ssl_host, cert_host)) {
+	  if ((p = strchr(ssl_host, ':')) != NULL)
+	      *p = '\0';
+	  if (strcasecomp(ssl_host, cert_host)) {
 	      HTSprintf0(&msg,
 			 gettext("SSL error:host(%s)!=cert(%s)-Continue?"),
 			 ssl_host,

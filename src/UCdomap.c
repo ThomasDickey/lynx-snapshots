@@ -69,6 +69,7 @@
 #include <viscii_uni.h>		/* Vietnamese (VISCII)	*/
 #include <cp866u_uni.h>		/* Ukrainian Cyrillic (866) */
 #include <koi8u_uni.h>		/* Ukrainian Cyrillic (koi8-u */
+#include <pt154_uni.h>		/* Cyrillic-Asian (PT154) */
 
 #ifdef CAN_AUTODETECT_DISPLAY_CHARSET
 int auto_display_charset = -1;
@@ -648,7 +649,7 @@ PUBLIC int UCLYhndl_for_unrec = -1;
  /* easy to type, will initialize later */
 PUBLIC int LATIN1 = -1;        /* UCGetLYhndl_byMIME("iso-8859-1") */
 PUBLIC int US_ASCII = -1;      /* UCGetLYhndl_byMIME("us-ascii")   */
-PUBLIC int UTF8 = -1;          /* UCGetLYhndl_byMIME("utf-8")      */
+PUBLIC int UTF8_handle = -1;   /* UCGetLYhndl_byMIME("utf-8")      */
 PUBLIC int TRANSPARENT = -1;   /* UCGetLYhndl_byMIME("x-transparent")  */
 
 
@@ -2075,6 +2076,7 @@ PUBLIC void UCInit NOARGS
     UC_CHARSET_SETUP_mnemonic;		  /* RFC 1345 Mnemonic	  */
     UC_CHARSET_SETUP_cp866u;		  /* Ukrainian Cyrillic (866) */
     UC_CHARSET_SETUP_koi8_u;		  /* Ukrainian Cyrillic (koi8-u) */
+    UC_CHARSET_SETUP_ptcp154;		  /* Cyrillic-Asian (PT154) */
 
 #ifdef CAN_AUTODETECT_DISPLAY_CHARSET
 #  ifdef __EMX__
@@ -2108,7 +2110,7 @@ PUBLIC void UCInit NOARGS
 /* for coding/performance - easy to type: */
     LATIN1   = UCGetLYhndl_byMIME("iso-8859-1");
     US_ASCII = UCGetLYhndl_byMIME("us-ascii");
-    UTF8     = UCGetLYhndl_byMIME("utf-8");
+    UTF8_handle = UCGetLYhndl_byMIME("utf-8");
     TRANSPARENT = UCGetLYhndl_byMIME("x-transparent");
 }
 

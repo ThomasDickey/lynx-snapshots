@@ -92,7 +92,7 @@ struct _HTStream {
 	CONST HTStreamClass *	isa;
 	HTStructured *		target;
 	char *			par_value[PAR_COUNT];
-	enum tokenstate 	state;
+	enum tokenstate		state;
 	char			param[BIG+1];
 	int			param_number;
 	int			param_count;
@@ -431,7 +431,7 @@ PRIVATE void WSRCParser_abort ARGS2(HTStream *, me, HTError, e GCC_UNUSED)
 }
 
 
-/*		Stream subclass 	-- method routines
+/*		Stream subclass		-- method routines
 **		---------------
 */
 

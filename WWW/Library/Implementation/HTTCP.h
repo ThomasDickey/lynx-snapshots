@@ -103,8 +103,8 @@ extern int HTDoConnect PARAMS((
 	int *		s));
 
 extern int HTDoRead PARAMS((
-	int 		fildes,
+	int		fildes,
 	void *		buf,
-	unsigned 	nbyte));
+	unsigned	nbyte));
 
 #endif   /* HTTCP_H */

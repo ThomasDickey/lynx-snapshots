@@ -191,6 +191,37 @@ PUBLIC char *LYGetEnv ARGS1(CONST char *, name)
 }
 
 /*
+ * ascii versions of locale sensitive functions needed because in
+ * Turkish locales tolower("I") is not "i". That's fatal for case
+ * sensitive operations with charset names, HTML tags etc.
+ */
+#ifdef EXP_ASCII_CTYPES
+PUBLIC int ascii_tolower ARGS1(int, i)
+{
+    if ( 91 > i && i > 64 )
+	return (i+32);
+    else
+	return i;
+}
+
+PUBLIC int ascii_toupper ARGS1(int, i)
+{
+    if ( 123 > i && i > 96 )
+	return (i-32);
+    else
+	return i;
+}
+
+PUBLIC int ascii_isupper ARGS1(int, i)
+{
+    if ( 91 > i && i > 64 )
+	return 1;
+    else
+	return 0;
+}
+#endif /* EXP_ASCII_CTYPES */
+
+/*
  * Check for UTF-8 data, returning the length past the first character.
  * Return zero if we found an ordinary character rather than UTF-8.
  */
@@ -1536,7 +1567,7 @@ PUBLIC int HTCheckForInterrupt NOARGS
     int c;
     int cmd;
 #ifndef VMS /* UNIX stuff: */
-#if !defined(USE_SLANG) && (defined(UNIX) || defined(__DJGPP__))
+#if !defined(USE_SLANG)
     struct timeval socket_timeout;
     int ret = 0;
     fd_set readfds;
@@ -5319,6 +5350,30 @@ PUBLIC void LYAddPathToHome ARGS3(
 }
 
 /*
+ * Given a filename, concatenate it to the save-space pathname, unless it is
+ * an absolute pathname.  If there is no save-space defined, use the home
+ * directory. Return a new string with the result.
+ */
+PUBLIC char * LYAddPathToSave ARGS1(
+	char *,		fname)
+{
+    char *result = NULL;
+
+    if (LYisAbsPath(fname)) {
+	StrAllocCopy(result, fname);
+    } else {
+	if (lynx_save_space != NULL) {
+	    StrAllocCopy(result, lynx_save_space);
+	} else {
+	    char temp[LY_MAXPATH];
+	    LYAddPathToHome(temp, sizeof(temp), fname);
+	    StrAllocCopy(result, temp);
+	}
+    }
+    return result;
+}
+
+/*
  *  This function takes a string in the format
  *	"Mon, 01-Jan-96 13:45:35 GMT" or
  *	"Mon,  1 Jan 1996 13:45:35 GMT"" or
@@ -5933,7 +5988,7 @@ PUBLIC FILE *LYOpenTemp ARGS3(
      * Verify if the given space looks secure enough.  Otherwise, make a
      * secure subdirectory of that.
      */
-#if defined(MULTI_USER_UNIX) && defined(HAVE_MKTEMP)
+#if defined(MULTI_USER_UNIX) && (defined(HAVE_MKTEMP) || defined(HAVE_MKDTEMP))
     if (lynx_temp_subspace == 0)
     {
 	BOOL make_it = FALSE;
@@ -6681,6 +6736,8 @@ PUBLIC void LYLocalFileToURL ARGS2(
     if (!LYisAbsPath(source)) {
 	char temp[LY_MAXPATH];
 	Current_Dir(temp);
+	if (!LYIsHtmlSep(*temp))
+	    LYAddHtmlSep(target);
 	StrAllocCat(*target, temp);
     }
     if (!LYIsHtmlSep(*leaf))
@@ -6931,6 +6988,33 @@ PUBLIC int LYCopyFile ARGS2(
     return code;
 }
 
+#ifdef __DJGPP__
+PRIVATE char *escape_backslashes ARGS1(char *, source)
+{
+    char *result = 0;
+    int count = 0;
+    int n;
+
+    for (n = 0; source[n] != '\0'; ++n) {
+	if (source[n] == '\\')
+	    ++count;
+    }
+    if (count != 0) {
+	result = malloc(count + n + 1);
+	if (result != 0) {
+	    int ch;
+	    char *target = result;
+	    while ((ch = *source++) != '\0') {
+		if (ch == '\\')
+		    *target++ = ch;
+		*target++ = ch;
+	    }
+	    *target = '\0';
+	}
+    }
+    return result;
+}
+#endif /* __DJGPP__ */
 /*
  * Invoke a shell command, return nonzero on error.
  */
@@ -7041,6 +7125,17 @@ PUBLIC int LYSystem ARGS1(
 	command = new_command;
     }
 #endif
+
+#ifdef __DJGPP__
+    if (dj_is_bash) {
+	char *new_command = escape_backslashes(command);
+	if (new_command != 0) {
+	    if (do_free)
+		free(command);
+	    command = new_command;
+	}
+    }
+#endif /* __DJGPP__ */
 
 #ifdef _WIN_CC
     code = exec_command(command, TRUE);	/* Wait exec */
@@ -7351,7 +7446,7 @@ PUBLIC void get_clip_release NOARGS
 
 PRIVATE int clip_grab NOARGS
 {
-    char *cmd = getenv ("RL_PASTE_CMD");
+    char *cmd = LYGetEnv("RL_PASTE_CMD");
 
     if (paste_handle)
 	pclose(paste_handle);
@@ -7397,7 +7492,7 @@ PUBLIC char* get_clip_grab NOARGS
 PUBLIC int
 put_clip ARGS1(char *, s)
 {
-    char *cmd = getenv ("RL_CLCOPY_CMD");
+    char *cmd = LYGetEnv("RL_CLCOPY_CMD");
     FILE *fh;
     int l = strlen(s), res;
 

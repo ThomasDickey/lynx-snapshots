@@ -172,7 +172,7 @@ PRIVATE char *sprint_bytes ARGS3(
     return u;
 }
 
-#ifdef EXP_READPROGRESS
+#ifdef USE_READPROGRESS
 #define TIME_HMS_LENGTH (16)
 PRIVATE char *sprint_tbuf ARGS2(
 	char *,	       s,
@@ -186,7 +186,7 @@ PRIVATE char *sprint_tbuf ARGS2(
 	sprintf (s, "%ld sec", t);
     return s;
 }
-#endif /* EXP_READPROGRESS */
+#endif /* USE_READPROGRESS */
 
 /*	Issue a read-progress message.			HTReadProgress()
 **	------------------------------
@@ -204,10 +204,10 @@ PUBLIC void HTReadProgress ARGS2(
 
 #ifdef HAVE_GETTIMEOFDAY
     struct timeval tv;
-    int dummy = gettimeofday(&tv, (struct timezone *)0);
-    double now = tv.tv_sec + tv.tv_usec/1000000. ;
+    double now;
     static double first, last, last_active;
-    (void)dummy;		/* quiet unused-assignment warning */
+    gettimeofday(&tv, (struct timezone *)0);
+    now = tv.tv_sec + tv.tv_usec/1000000. ;
 #else
 #if defined(HAVE_FTIME) && defined(HAVE_SYS_TIMEB_H)
     static double now, first, last, last_active;
@@ -281,7 +281,7 @@ PUBLIC void HTReadProgress ARGS2(
 		HTSprintf (&line, gettext(", %s/sec"), transferp);
 	    }
 
-#ifdef EXP_READPROGRESS
+#ifdef USE_READPROGRESS
 	    if (LYTransferRate == rateEtaBYTES
 	     || LYTransferRate == rateEtaKB) {
 		char tbuf[TIME_HMS_LENGTH];

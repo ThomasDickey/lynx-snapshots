@@ -238,7 +238,7 @@ PUBLIC char *LYJump ARGS1(int, key)
 
   check_recall:
     bp = buf;
-    if (toupper(key) == 'G' && strncmp(buf, "o ", 2) == 0)
+    if (TOUPPER(key) == 'G' && strncmp(buf, "o ", 2) == 0)
 	bp++;
     bp = LYSkipBlanks(bp);
     if (*bp == '\0' &&
@@ -335,7 +335,7 @@ PUBLIC char *LYJump ARGS1(int, key)
 		       (!jump_buffer && ShortcutTotal == 1)) {
 		_statusline(EDIT_THE_PREV_SHORTCUT);
 	    } else {
-		_statusline(EDIT_THE_PREV_SHORTCUT);
+		_statusline(EDIT_A_PREV_SHORTCUT);
 	    }
 	    if ((ch = LYgetstr(buf, VISIBLE, sizeof(buf), recall)) < 0) {
 		/*

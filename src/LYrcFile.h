@@ -173,6 +173,7 @@
 #define RC_RUN_EXECUTION_LINKS_LOCAL    "run_execution_links_on_local_files"
 #define RC_SAVE_SPACE                   "save_space"
 #define RC_SCAN_FOR_BURIED_NEWS_REFS    "scan_for_buried_news_refs"
+#define RC_SCREEN_SIZE                  "screen_size"
 #define RC_SCROLLBAR                    "scrollbar"
 #define RC_SCROLLBAR_ARROW              "scrollbar_arrow"
 #define RC_SEEK_FRAG_AREA_IN_CUR        "seek_frag_area_in_cur"

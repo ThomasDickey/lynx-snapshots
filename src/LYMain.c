@@ -76,7 +76,7 @@ PUBLIC BOOLEAN sigint = FALSE;
 #endif /* IGNORE_CTRL_C */
 
 #ifdef __DJGPP__
-char init_ctrl_break[1];
+PRIVATE char init_ctrl_break[1];
 #endif /* __DJGPP__ */
 
 #if USE_VMS_MAILER
@@ -189,6 +189,8 @@ PUBLIC BOOLEAN dump_output_immediately = FALSE;
 PUBLIC BOOLEAN emacs_keys = EMACS_KEYS_ALWAYS_ON;
 PUBLIC BOOLEAN error_logging = MAIL_SYSTEM_ERROR_LOGGING;
 PUBLIC BOOLEAN ftp_passive = FTP_PASSIVE; /* TRUE if doing ftp in passive mode */
+PUBLIC BOOLEAN ftp_local_passive;
+PUBLIC char *ftp_lasthost;
 PUBLIC BOOLEAN goto_buffer = GOTOBUFFER; /* TRUE if offering default goto URL */
 PUBLIC BOOLEAN historical_comments = FALSE;
 PUBLIC BOOLEAN is_www_index = FALSE;
@@ -294,6 +296,7 @@ PUBLIC BOOLEAN LYfind_leaks = TRUE;
 
 #ifdef __DJGPP__
 PUBLIC BOOLEAN watt_debug = FALSE;	/* WATT-32 debugging */
+PUBLIC BOOLEAN dj_is_bash = FALSE;  /* Check for bash shell under DJGPP */
 #endif /* __DJGPP__ */
 
 #ifdef WIN_EX
@@ -444,11 +447,11 @@ PUBLIC char *BibP_bibhost = NULL;	 /* local server for bibp: links  */
 PUBLIC char *BibP_globalserver = NULL;   /* global server for bibp: links */
 #endif
 
-#ifdef EXP_PERSISTENT_COOKIES
+#ifdef USE_PERSISTENT_COOKIES
 PUBLIC BOOLEAN persistent_cookies = FALSE; /* disabled by default! */
 PUBLIC char *LYCookieFile = NULL;	/* cookie read file */
 PUBLIC char *LYCookieSaveFile = NULL;	/* cookie save file */
-#endif /* EXP_PERSISTENT_COOKIES */
+#endif /* USE_PERSISTENT_COOKIES */
 
 #ifdef EXP_NESTED_TABLES
 PUBLIC BOOLEAN nested_tables =
@@ -461,7 +464,7 @@ PUBLIC BOOLEAN nested_tables =
 #endif
 
 PUBLIC BOOLEAN LYShowTransferRate = TRUE;
-PUBLIC int LYTransferRate = rateEtaKB_maybe;
+PUBLIC int LYTransferRate = rateKB;
 
 PUBLIC char *XLoadImageCommand = NULL;	/* Default image viewer for X */
 PUBLIC BOOLEAN LYNoISMAPifUSEMAP = FALSE; /* Omit ISMAP link if MAP present? */
@@ -502,6 +505,11 @@ PUBLIC int justify_max_void_percent = 35;
 
 #ifndef NO_DUMP_WITH_BACKSPACES
 PUBLIC BOOLEAN with_backspaces = FALSE;
+#endif
+
+#if defined(PDCURSES) && defined(PDC_BUILD) && PDC_BUILD >= 2401
+PUBLIC int scrsize_x = 0;
+PUBLIC int scrsize_y = 0;
 #endif
 
 PUBLIC BOOL force_empty_hrefless_a = FALSE;
@@ -668,7 +676,7 @@ PRIVATE void free_lynx_globals NOARGS
     FREE(BibP_bibhost);
     FREE(BibP_globalserver);
 #endif
-#ifdef EXP_PERSISTENT_COOKIES
+#ifdef USE_PERSISTENT_COOKIES
     FREE(LYCookieFile);
     FREE(LYCookieSaveFile);
 #endif
@@ -866,6 +874,49 @@ PRIVATE BOOL cleanup_win32(DWORD fdwCtrlType)
 #endif
 
 /*
+ * Append the SSL version to lynx version or user-agent string.
+ */
+#ifdef USE_SSL
+PRIVATE void append_ssl_version ARGS2(
+	char **,	target,
+	char *,		separator)
+{
+    char SSLLibraryVersion[256];
+    char *SSLcp;
+
+    HTSprintf(target, " SSL-MM%s1.4.1", separator);
+
+#undef LYNX_SSL_VERSION
+
+#if defined(SSLEAY_VERSION)
+#define LYNX_SSL_VERSION SSLeay_version(SSLEAY_VERSION)
+#else
+#if defined(OPENSSL_VERSION_TEXT)
+#define LYNX_SSL_VERSION OPENSSL_VERSION_TEXT
+#else
+#if defined(GNUTLS_VERSION)
+#define LYNX_SSL_VERSION GNUTLS_VERSION
+#endif /* GNUTLS_VERSION */
+#endif /* OPENSSL_VERSION_TEXT */
+#endif
+
+#ifdef LYNX_SSL_VERSION
+    if (*separator == ' ')
+	StrAllocCat(*target, ",");
+    LYstrncpy(SSLLibraryVersion, LYNX_SSL_VERSION, sizeof(SSLLibraryVersion)-1);
+    if ((SSLcp = strchr(SSLLibraryVersion, ' ')) != NULL) {
+	*SSLcp++ = *separator;
+	if ((SSLcp = strchr(SSLcp, ' ')) != NULL) {
+	    *SSLcp = '\0';
+	    StrAllocCat(*target, " ");
+	    StrAllocCat(*target, SSLLibraryVersion);
+	}
+    }
+#endif /* LYNX_SSL_VERSION */
+}
+#endif /* USE_SSL */
+
+/*
  * Wow!  Someone wants to start up Lynx.
  */
 PUBLIC int main ARGS2(
@@ -883,10 +934,6 @@ PUBLIC int main ARGS2(
 #ifdef _WINDOWS
     WSADATA WSAData;
 #endif /* _WINDOWS */
-#ifdef USE_SSL
-    char SSLLibraryVersion[256];
-    char *SSLcp;
-#endif /* USE_SSL */
 
     /*
      * Just in case someone has the idea to install lynx set-uid, let's try
@@ -899,6 +946,11 @@ PUBLIC int main ARGS2(
 #ifdef    NOT_ASCII
     FixCharacters();
 #endif /* NOT_ASCII */
+
+#ifndef DISABLE_FTP
+    /* malloc a sizeof(char) so 1st strcmp() won't dump in HTLoadFile() */
+    ftp_lasthost = calloc(1,sizeof(char));
+#endif
 
 #ifdef EXP_CHARSET_CHOICE
     memset((char*)charset_subsets, 0, sizeof(charset_subset_t)*MAXCHARSETS);
@@ -955,6 +1007,10 @@ PUBLIC int main ARGS2(
     __djgpp_set_sigquit_key(0x082D); /* Bind ALT-X to SIGQUIT */
     signal(SIGQUIT, cleanup_sig);
     atexit(reset_break);
+
+    if (((cp = LYGetEnv("SHELL")) != NULL)
+      && (strstr(LYPathLeaf(cp), "sh") != NULL))
+	dj_is_bash = TRUE;
 #endif /* __DJGPP__ */
 
     /*
@@ -1070,6 +1126,7 @@ PUBLIC int main ARGS2(
 #else
     StrAllocCopy(system_mail_flags, "");
 #endif
+
     StrAllocCopy(LYUserAgent, LYNX_NAME);
     StrAllocCat(LYUserAgent, "/");
     StrAllocCat(LYUserAgent, LYNX_VERSION);
@@ -1078,20 +1135,10 @@ PUBLIC int main ARGS2(
 	StrAllocCat(LYUserAgent, HTLibraryVersion);
     }
 #ifdef USE_SSL
-    StrAllocCat(LYUserAgent, " SSL-MM/1.4.1");
-#ifdef OPENSSL_VERSION_TEXT
-    LYstrncpy(SSLLibraryVersion, OPENSSL_VERSION_TEXT, sizeof(SSLLibraryVersion)-1);
-    if ((SSLcp = strchr(SSLLibraryVersion, ' ')) != NULL) {
-	*SSLcp++ = '/';
-	if ((SSLcp = strchr(SSLcp, ' ')) != NULL) {
-	    *SSLcp = '\0';
-	    StrAllocCat(LYUserAgent, " ");
-	    StrAllocCat(LYUserAgent, SSLLibraryVersion);
-	}
-    }
-#endif /* OPENSSL_VERSION_TEXT */
+    append_ssl_version(&LYUserAgent, "/");
 #endif /* USE_SSL */
     StrAllocCopy(LYUserAgentDefault, LYUserAgent);
+
 #ifdef VMS
     Define_VMSLogical("LYNX_VERSION", LYNX_VERSION);
 #else
@@ -1601,7 +1648,7 @@ PUBLIC int main ARGS2(
      */
     HTMLUseCharacterSet(current_char_set);
 
-#ifdef EXP_PERSISTENT_COOKIES
+#ifdef USE_PERSISTENT_COOKIES
     /*
      * Sod it, this looks like a reasonable place to load the
      * cookies file, probably.  - RP
@@ -1785,7 +1832,7 @@ PUBLIC int main ARGS2(
 	no_multibook = TRUE;
     }
 
-#ifdef SOURCE_CACHE
+#ifdef USE_SOURCE_CACHE
     /*
      * Disable source caching if not interactive.
      */
@@ -2021,7 +2068,7 @@ PUBLIC int main ARGS2(
 	    !crawl &&		/* For -crawl it has already been done! */
 	    links_are_numbered())
 	    printlist(stdout, FALSE);
-#ifdef EXP_PERSISTENT_COOKIES
+#ifdef USE_PERSISTENT_COOKIES
 	/*
 	 *  We want to save cookies picked up when in immediate dump
 	 *  mode.  Instead of calling cleanup() here, let's only call
@@ -2029,7 +2076,7 @@ PUBLIC int main ARGS2(
 	 */
 	if (persistent_cookies)
 	    LYStoreCookies(LYCookieSaveFile);
-#endif /* EXP_PERSISTENT_COOKIES */
+#endif /* USE_PERSISTENT_COOKIES */
 	exit_immediately(status);
     } else {
 	/*
@@ -2058,6 +2105,15 @@ PUBLIC int main ARGS2(
 	LYCloseCloset(RECALL_URL);
 	LYCloseCloset(RECALL_MAIL);
 	cleanup();
+#if defined(PDCURSES) && defined(PDC_BUILD) && PDC_BUILD >= 2401
+	if (! isendwin()) {
+	    extern int saved_scrsize_x;
+	    extern int saved_scrsize_y;
+	    if ((saved_scrsize_x != 0) && (saved_scrsize_y != 0)) {
+	        resize_term(saved_scrsize_y, saved_scrsize_x);
+	    }
+	}
+#endif
 	exit(status);
     }
 
@@ -2162,7 +2218,7 @@ PUBLIC void reload_read_cfg NOARGS
 
     {
 	/* set few safe flags: */
-#ifdef EXP_PERSISTENT_COOKIES
+#ifdef USE_PERSISTENT_COOKIES
 	BOOLEAN persistent_cookies_flag = persistent_cookies;
 	char * LYCookieFile_flag = NULL;
 	char * LYCookieSaveFile_flag = NULL;
@@ -2183,7 +2239,7 @@ PUBLIC void reload_read_cfg NOARGS
 #endif
 	/* free downloaders, printers, environments, dired menu */
 	free_lynx_cfg();
-#ifdef SOURCE_CACHE
+#ifdef USE_SOURCE_CACHE
 	source_cache_file_error = FALSE; /* reset flag */
 #endif
 
@@ -2230,7 +2286,7 @@ PUBLIC void reload_read_cfg NOARGS
 		 * a major problem: file paths
 		 * like lynx_save_space, LYCookieFile etc.
 		 */
-#ifdef EXP_PERSISTENT_COOKIES
+#ifdef USE_PERSISTENT_COOKIES
 	/* restore old settings */
 	if (persistent_cookies != persistent_cookies_flag) {
 	    persistent_cookies = persistent_cookies_flag;
@@ -3057,30 +3113,20 @@ PRIVATE int traversal_fun ARGS1(
 PRIVATE int version_fun ARGS1(
 	char *,			next_arg GCC_UNUSED)
 {
-#ifdef USE_SSL
-    char SSLLibraryVersion[256];
-    char *SSLcp;
-#endif
+    char *result = NULL;
 
     SetOutputMode( O_TEXT );
 
-    printf(gettext("%s Version %s (%s)\n"),
-	  LYNX_NAME, LYNX_VERSION,
-	  LYVersionDate());
+    HTSprintf0(&result, gettext("%s Version %s (%s)"),
+	       LYNX_NAME, LYNX_VERSION,
+	       LYVersionDate());
 #ifdef USE_SSL
-    printf("libwww-FM %s, SSL-MM 1.4.1", HTLibraryVersion);
-#ifdef OPENSSL_VERSION_TEXT
-    LYstrncpy(SSLLibraryVersion, OPENSSL_VERSION_TEXT, sizeof(SSLLibraryVersion)-1);
-    if ((SSLcp = strchr(SSLLibraryVersion, ' ')) != NULL) {
-	*SSLcp++ = ' ';
-	if ((SSLcp = strchr(SSLcp, ' ')) != NULL) {
-	    *SSLcp = '\0';
-	    printf(", %s", SSLLibraryVersion);
-	}
-    }
-#endif /* OPENSSL_VERSION_TEXT */
-    printf("\n");
+    StrAllocCat(result, "\n");
+    HTSprintf(&result, "libwww-FM %s,", HTLibraryVersion);
+    append_ssl_version(&result, " ");
 #endif /* USE_SSL */
+    printf("%s\n", result);
+    free(result);
 
 #ifndef __DATE__
 #define __DATE__ ""
@@ -3150,6 +3196,34 @@ PRIVATE int width_fun ARGS1(
 
     return 0;
 }
+
+#if defined(PDCURSES) && defined(PDC_BUILD) && PDC_BUILD >= 2401
+/* -scrsize */
+PRIVATE int scrsize_fun ARGS1(
+	char *,			next_arg)
+{
+    if (next_arg != 0) {
+	char *cp;
+
+	if ((cp = strchr(next_arg, ',')) != 0) {
+	    *cp++ = '\0';	/* Terminate ID */
+	    scrsize_x = atoi(next_arg);
+	    scrsize_y = atoi(cp);
+	    if ((scrsize_x <= 1) || (scrsize_y <= 1)) {
+		scrsize_x = scrsize_y = 0;
+	    }
+	    if ((scrsize_x > 0) && (scrsize_x < 80)) {
+		scrsize_x = 80;
+	    }
+	    if ((scrsize_y > 0) && (scrsize_y < 4)) {
+		scrsize_y = 4;
+	    }
+	    CTRACE((tfp, "scrsize: x=%d, y=%d\n", scrsize_x, scrsize_y));
+	}
+    }
+    return 0;
+}
+#endif
 
 /* NOTE: This table is sorted by name to make the help message useful */
 PRIVATE Config_Type Arg_Table [] =
@@ -3248,7 +3322,7 @@ PRIVATE Config_Type Arg_Table [] =
       "=FORMAT\nconvert input, FORMAT is in MIME type notation\n(experimental)"
    ),
 #endif
-#ifdef EXP_PERSISTENT_COOKIES
+#ifdef USE_PERSISTENT_COOKIES
    PARSE_STR(
       "cookie_file",	4|LYSTRING_ARG,		LYCookieFile,
       "=FILENAME\nspecifies a file to use to read cookies"
@@ -3257,7 +3331,7 @@ PRIVATE Config_Type Arg_Table [] =
       "cookie_save_file",	4|LYSTRING_ARG,	LYCookieSaveFile,
       "=FILENAME\nspecifies a file to use to store cookies"
    ),
-#endif /* EXP_PERSISTENT_COOKIES */
+#endif /* USE_PERSISTENT_COOKIES */
    PARSE_SET(
       "cookies",	4|TOGGLE_ARG,		LYSetCookies,
       "toggles handling of Set-Cookie headers"
@@ -3618,6 +3692,12 @@ with the PREV_DOC command or from the History List"
       "rlogin",		4|UNSET_ARG,		rlogin_ok,
       "disable rlogins"
    ),
+#if defined(PDCURSES) && defined(PDC_BUILD) && PDC_BUILD >= 2401
+   PARSE_FUN(
+      "scrsize",	4|NEED_FUNCTION_ARG,	scrsize_fun,
+      "=width,height\nsize of window"
+   ),
+#endif
 #ifdef USE_SCROLLBAR
    PARSE_SET(
       "scrollbar",	4|TOGGLE_ARG,		LYShowScrollbar,
@@ -3646,7 +3726,7 @@ with the PREV_DOC command or from the History List"
       "show_cursor",	4|TOGGLE_ARG,		LYUseDefShoCur,
       "toggles hiding of the cursor in the lower right corner"
    ),
-#ifdef EXP_READPROGRESS
+#ifdef USE_READPROGRESS
    PARSE_SET(
       "show_rate",	4|TOGGLE_ARG,		LYShowTransferRate,
       "toggles display of transfer rate"

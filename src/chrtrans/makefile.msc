@@ -61,6 +61,7 @@ TABLES= \
  mnem2_suni.h \
  mnem_suni.h \
  next_uni.h \
+ pt154_uni.h \
  rfc_suni.h \
  utf8_uni.h \
  viscii_uni.h
@@ -115,6 +116,7 @@ mac_uni.h:		mac_uni.tbl		makeuctb.exe
 mnem2_suni.h:		mnem2_suni.tbl		makeuctb.exe
 mnem_suni.h:		mnem_suni.tbl		makeuctb.exe
 next_uni.h:		next_uni.tbl		makeuctb.exe
+pt154_uni.h:		pt154_uni.tbl		makeuctb.exe
 rfc_suni.h:		rfc_suni.tbl		makeuctb.exe
 utf8_uni.h:		utf8_uni.tbl		makeuctb.exe
 viscii_uni.h:		viscii_uni.tbl		makeuctb.exe

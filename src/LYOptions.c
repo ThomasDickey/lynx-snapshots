@@ -2128,7 +2128,7 @@ static char * emacs_keys_string		= RC_EMACS_KEYS;
 #define EXEC_ALWAYS 2
 #define EXEC_LOCAL  1
 #define EXEC_NEVER  0
-static char * exec_links_string		= "exec_options";
+static char * exec_links_string		= RC_RUN_ALL_EXECUTION_LINKS;
 static OptValues exec_links_values[]	= {
 	{ EXEC_NEVER,	"ALWAYS OFF",		"ALWAYS OFF" },
 	{ EXEC_LOCAL,	"FOR LOCAL FILES ONLY",	"FOR LOCAL FILES ONLY" },
@@ -2243,7 +2243,7 @@ static OptValues mbm_values[] = {
 	{ MBM_ADVANCED,		"ADVANCED",		"ADVANCED" },
 	{ 0, 0, 0 }};
 
-static char * single_bookmark_string	= "single_bookmark_name";
+static char * single_bookmark_string	= RC_BOOKMARK_FILE;
 
 /*
  * Character Set Options
@@ -2293,7 +2293,7 @@ static OptValues rate_values[] = {
 	{ rateOFF,		"Do not show rate",	"rate_off" },
 	{ rateBYTES,		"Show Bytes/sec rate",	"rate_bytes" },
 	{ rateKB,		"Show KB/sec rate",	"rate_kb" },
-#ifdef EXP_READPROGRESS
+#ifdef USE_READPROGRESS
 	{ rateEtaBYTES,		"Show Bytes/sec, ETA",	"rate_eta_bytes" },
 	{ rateEtaKB,		"Show KB/sec, ETA",	"rate_eta_kb" },
 #endif
@@ -2984,8 +2984,7 @@ PUBLIC int postoptions ARGS1(
     if (!HTLoadAbsolute(&WWWDoc))
 	return(NOT_FOUND);
 
-    /* comment out to avoid warning when removing forms content... */
-    /* HTuncache_current_document(); */ /* will never use again */
+    HTuncache_current_document(); /* will never use again */
 
     /*
      *  Return to previous doc, not to options menu!
@@ -3052,7 +3051,7 @@ PUBLIC int postoptions ARGS1(
 	if (HTisDocumentSource()) {
 	    srcmode_for_next_retrieval(1);
 	}
-#ifdef SOURCE_CACHE
+#ifdef USE_SOURCE_CACHE
 	if (reloading == FALSE) {
 	    /* one more attempt to be smart enough: */
 	    if (HTcan_reparse_document()) {
@@ -3198,8 +3197,7 @@ PRIVATE int gen_options ARGS1(
        LYReuseTempfiles==FALSE.  Even for LYReuseTempfiles=TRUE, code
        at the end of postoptions() may remove an older cached version
        from memory if that version of the page was left by submitting
-       changes. (But that code doesn't do that - HTuncache_current_document
-       is currently commented out.) - kw 1999-11-27
+       changes. - kw 1999-11-27
        If access to the actual file via getfile() later fails
        (maybe because of some restrictions), mainloop may leave
        this flag on after popping the previous doc which is then
@@ -3586,13 +3584,13 @@ PRIVATE int gen_options ARGS1(
     EndSelect(fp0);
 #endif /* ENABLE_OPTS_CHANGE_EXEC */
 
-#ifdef EXP_READPROGRESS
+#ifdef USE_READPROGRESS
     /* Local Directory Sort: SELECT */
     PutLabel(fp0, gettext("Show transfer rate"), show_rate_string);
     BeginSelect(fp0, show_rate_string);
     PutOptValues(fp0, LYTransferRate, rate_values);
     EndSelect(fp0);
-#endif /* EXP_READPROGRESS */
+#endif /* USE_READPROGRESS */
 
     /*
      * Special Files and Screens

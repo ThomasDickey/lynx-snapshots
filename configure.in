@@ -4,7 +4,7 @@ dnl by T.E.Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
 dnl
 dnl ask PRCS to plug-in the project-version for the configure-script.
-dnl $Format: AC_REVISION($ProjectVersion: 2.8.5dev.16 $\""$)
+dnl $Format: AC_REVISION($ProjectVersion: 2.8.5dev.17 $\""$)
 AC_REVISION(none)
 
 # Save the original $CFLAGS so we can distinguish whether the user set those
@@ -183,7 +183,7 @@ AC_DEFINE(UNIX)
 AC_C_CONST
 
 dnl Only add to this case statement things that we cannot design tests for.
-PROG_EXT=
+CF_PROG_EXT
 TRY_CFLAGS=
 case $host_os in
 aix4*)
@@ -191,6 +191,7 @@ aix4*)
 	LIBS="$LIBS -lbsd"
 	;;
 aix*)
+	TRY_CFLAGS="$TRY_CFLAGS -D_ACS_COMPAT_CODE"
 	LIBS="$LIBS -lbsd"
 	;;
 apollo*)
@@ -209,7 +210,6 @@ convex*)
 	TRY_CFLAGS="$TRY_CFLAGS -D__STDC__ -Dunix"
 	;;
 cygwin*)
-	PROG_EXT=".exe"
 	LIBS="$LIBS -luser32"
 	;;
 dgux*)
@@ -233,21 +233,14 @@ linux*)
 	TRY_CFLAGS="$TRY_CFLAGS -DLINUX"
 	;;
 msdosdjgpp*)
-	PROG_EXT=".exe"
 	LIBS="$LIBS -lwatt"
 	TRY_CFLAGS="$TRY_CFLAGS -DDOSPATH -DNOUSERS -DWATT32"
 	;;
 next*)
-	TRY_CFLAGS="$TRY_CFLAGS -DNEXT -DXMOSAIC_HACK"
+	TRY_CFLAGS="$TRY_CFLAGS -DNEXT"
 	;;
 openbsd*)
 	LIBS="$LIBS -lcompat"
-	;;
-os2*)
-	# We make sure -Zexe is not used -- it would interfere with @PROG_EXT@
-	TRY_CFLAGS="$TRY_CFLAGS -Zmt -D__ST_MT_ERRNO__"
-	LDFLAGS=`echo "$LDFLAGS -Zmt -Zcrtdll" | sed "s/-Zexe//g"`
-	PROG_EXT=".exe"
 	;;
 osf4*)
 	# The -Olimit flag (see below) is no longer available with
@@ -302,7 +295,6 @@ ultrix*)
 		 cf_cv_ncurses_header=cursesX.h])
 	;;
 esac
-AC_SUBST(PROG_EXT)
 
 if test -z "$GCC" ; then
 	CF_ANSI_CC_CHECK
@@ -350,7 +342,7 @@ if test $with_full_paths = no ; then
 fi
 fi
 
-CF_GNU_SOURCE
+CF_XOPEN_SOURCE
 
 dnl Collect tests for compiler options into one place
 if test -n "$TRY_CFLAGS" ; then
@@ -633,7 +625,7 @@ test $use_config_info = no && AC_DEFINE(NO_CONFIG_INFO)
 
 AC_MSG_CHECKING(if new-style forms-based options screen should be used)
 CF_ARG_DISABLE(forms-options,
-[  --disable-forms-options disable experimental forms-based options],
+[  --disable-forms-options disable forms-based options],
 	[use_forms_options=$enableval],
 	[use_forms_options=yes])
 AC_MSG_RESULT($use_forms_options)
@@ -712,14 +704,6 @@ AC_MSG_RESULT($use_dft_colors)
 test $use_dft_colors = "yes" && AC_DEFINE(USE_DEFAULT_COLORS)
 fi
 
-AC_MSG_CHECKING(if experimental file-upload logic should be used)
-CF_ARG_ENABLE(file-upload,
-[  --enable-file-upload    use experimental file-upload support],
-	[use_file_upload=$enableval],
-	[use_file_upload=no])
-AC_MSG_RESULT($use_file_upload)
-test $use_file_upload != no && AC_DEFINE(EXP_FILE_UPLOAD)
-
 AC_MSG_CHECKING(if experimental htmlized lynx.cfg should be built)
 CF_ARG_ENABLE(htmlized-cfg,
 [  --enable-htmlized-cfg   build experimental htmlized lynx.cfg],
@@ -763,13 +747,13 @@ CF_ARG_ENABLE(kbd-layout,
 AC_MSG_RESULT($use_kbd_layout)
 test $use_kbd_layout != no && AC_DEFINE(EXP_KEYBOARD_LAYOUT)
 
-AC_MSG_CHECKING(if experimental JavaScript support should be used)
-CF_ARG_ENABLE(libjs,
-[  --enable-libjs          use experimental JavaScript support (Mozilla libjs)],
-	[use_libjs=$enableval],
-	[use_libjs=no])
-AC_MSG_RESULT($use_libjs)
-test $use_libjs != no && AC_DEFINE(EXP_LIBJS)
+dnl AC_MSG_CHECKING(if experimental JavaScript support should be used)
+dnl CF_ARG_ENABLE(libjs,
+dnl [  --enable-libjs          use experimental JavaScript support (Mozilla libjs)],
+dnl 	[use_libjs=$enableval],
+dnl 	[use_libjs=no])
+dnl AC_MSG_RESULT($use_libjs)
+dnl test $use_libjs != no && AC_DEFINE(EXP_LIBJS)
 
 AC_MSG_CHECKING(if experimental nested-table logic should be used)
 CF_ARG_ENABLE(nested-tables,
@@ -779,36 +763,12 @@ CF_ARG_ENABLE(nested-tables,
 AC_MSG_RESULT($use_nested_tables)
 test $use_nested_tables != no && AC_DEFINE(EXP_NESTED_TABLES)
 
-AC_MSG_CHECKING(if html source should be colorized)
-CF_ARG_ENABLE(prettysrc,
-[  --enable-prettysrc      colorize HTML source],
-	[use_prettysrc=$enableval],
-	[use_prettysrc=no])
-AC_MSG_RESULT($use_prettysrc)
-test $use_prettysrc != no && AC_DEFINE(USE_PRETTYSRC)
-
-AC_MSG_CHECKING(if read-progress message should show ETA)
-CF_ARG_ENABLE(read-eta,
-[  --enable-read-eta       experimental read-progress message shows ETA],
-	[use_read_eta=$enableval],
-	[use_read_eta=no])
-AC_MSG_RESULT($use_read_eta)
-test $use_read_eta != no && AC_DEFINE(EXP_READPROGRESS)
-
 AC_MSG_CHECKING(if scrollbar code should be used)
 CF_ARG_ENABLE(scrollbar,
 [  --enable-scrollbar      use experimental scrollbar, with mouse],
 	[use_scrollbar=$enableval],
 	[use_scrollbar=no])
 AC_MSG_RESULT($use_scrollbar)
-
-AC_MSG_CHECKING(if source caching should be used)
-CF_ARG_ENABLE(source-cache,
-[  --enable-source-cache   cache HTML source for parse mode changes],
-	[use_source_cache=$enableval],
-	[use_source_cache=no])
-AC_MSG_RESULT($use_source_cache)
-test $use_source_cache != no && AC_DEFINE(SOURCE_CACHE)
 
 dnl --------------------------------------------------------------------------
 dnl Miscellaneous options that don't need to test system features
@@ -833,6 +793,14 @@ CF_ARG_DISABLE(extended-dtd,
 AC_MSG_RESULT($use_ext_htmldtd)
 test $use_ext_htmldtd = "no" && AC_DEFINE(NO_EXTENDED_HTMLDTD)
 
+AC_MSG_CHECKING(if file-upload logic should be used)
+CF_ARG_DISABLE(file-upload,
+[  --disable-file-upload   use file-upload support],
+	[use_file_upload=$enableval],
+	[use_file_upload=yes])
+AC_MSG_RESULT($use_file_upload)
+test $use_file_upload != no && AC_DEFINE(USE_FILE_UPLOAD)
+
 AC_MSG_CHECKING(if partial-display should be used)
 CF_ARG_DISABLE(partial,
 [  --disable-partial       use partial-display logic],
@@ -840,6 +808,38 @@ CF_ARG_DISABLE(partial,
 	[use_partial_display=yes])
 AC_MSG_RESULT($use_partial_display)
 test $use_partial_display != no && AC_DEFINE(DISP_PARTIAL)
+
+AC_MSG_CHECKING(if persistent-cookie logic should be used)
+CF_ARG_DISABLE(persistent-cookies,
+[  --disable-persistent-cookies  disable persistent-cookie support],
+	[use_filed_cookies=$enableval],
+	[use_filed_cookies=yes])
+AC_MSG_RESULT($use_filed_cookies)
+test $use_filed_cookies != no && AC_DEFINE(USE_PERSISTENT_COOKIES)
+
+AC_MSG_CHECKING(if html source should be colorized)
+CF_ARG_DISABLE(prettysrc,
+[  --disable-prettysrc     colorize HTML source],
+	[use_prettysrc=$enableval],
+	[use_prettysrc=yes])
+AC_MSG_RESULT($use_prettysrc)
+test $use_prettysrc != no && AC_DEFINE(USE_PRETTYSRC)
+
+AC_MSG_CHECKING(if read-progress message should show ETA)
+CF_ARG_DISABLE(read-eta,
+[  --disable-read-eta      read-progress message shows ETA],
+	[use_read_eta=$enableval],
+	[use_read_eta=yes])
+AC_MSG_RESULT($use_read_eta)
+test $use_read_eta != no && AC_DEFINE(USE_READPROGRESS)
+
+AC_MSG_CHECKING(if source caching should be used)
+CF_ARG_DISABLE(source-cache,
+[  --disable-source-cache  cache HTML source for parse mode changes],
+	[use_source_cache=$enableval],
+	[use_source_cache=yes])
+AC_MSG_RESULT($use_source_cache)
+test $use_source_cache != no && AC_DEFINE(USE_SOURCE_CACHE)
 
 AC_MSG_CHECKING(if you want to use external commands)
 CF_ARG_ENABLE(externs,
@@ -916,14 +916,6 @@ CF_ARG_ENABLE(syslog,
 AC_MSG_RESULT($use_syslog)
 test $use_syslog = yes && AC_DEFINE(SYSLOG_REQUESTED_URLS)
 
-AC_MSG_CHECKING(if persistent-cookie logic should be used)
-CF_ARG_DISABLE(persistent-cookies,
-[  --disable-persistent-cookies  disable persistent-cookie support],
-	[use_filed_cookies=$enableval],
-	[use_filed_cookies=yes])
-AC_MSG_RESULT($use_filed_cookies)
-test $use_filed_cookies != no && AC_DEFINE(EXP_PERSISTENT_COOKIES)
-
 AC_MSG_CHECKING(if you want to underline links)
 CF_ARG_ENABLE(underlines,
 [  --enable-underlines     underline links rather than using boldface],
@@ -939,6 +931,18 @@ CF_ARG_ENABLE(gzip-help,
 	[use_gzip_help=no])
 AC_MSG_RESULT($use_gzip_help)
 
+AC_MSG_CHECKING(if you want to use libbz2 for decompression of some bzip2 files)
+AC_ARG_WITH(bzlib,
+[  --with-bzlib            use libbz2 for decompression of some bzip2 files],
+	[use_bzlib=$withval],
+	[use_bzlib=no])
+AC_MSG_RESULT($use_bzlib)
+
+if test ".$use_bzlib" != ".no" ; then
+	CF_WITH_BZLIB
+	AC_DEFINE(USE_BZLIB)
+fi
+
 AC_MSG_CHECKING(if you want to use zlib for decompression of some gzip files)
 AC_ARG_WITH(zlib,
 [  --with-zlib             use zlib for decompression of some gzip files],
@@ -947,26 +951,12 @@ AC_ARG_WITH(zlib,
 AC_MSG_RESULT($use_zlib)
 
 if test ".$use_zlib" != ".no" ; then
-	AC_MSG_CHECKING(if we need to add -I option to get zlib.h)
-	AC_TRY_COMPILE([#include <zlib.h>],[],[AC_MSG_RESULT(no)],[
-	AC_MSG_RESULT(yes)
-	CF_HEADER_PATH(cf_search,zlib)
-	for cf_incdir in $cf_search
-	do
-		if test -f $cf_incdir/zlib.h ; then
-			CF_ADD_CFLAGS(-I$cf_incdir)
-			CF_VERBOSE(... found in $cf_incdir)
-			break
-		fi
-		CF_VERBOSE(... tested $cf_incdir)
-	done
-	])
-	CF_FIND_LIBRARY(z,z,
-		[#include <zlib.h>],
-		[gzopen("name","mode")],
-		gzopen)
+	CF_WITH_ZLIB
 	AC_DEFINE(USE_ZLIB)
 fi
+
+CF_HELP_MESSAGE(
+Other Network Services:)
 
 AC_MSG_CHECKING(if you want to exclude FINGER code)
 CF_ARG_DISABLE(finger,
@@ -1022,7 +1012,7 @@ if test ".$use_dired" != ".no" ; then
 
 	AC_MSG_CHECKING(if you wish to allow extracting from archives via DirEd)
 	CF_ARG_DISABLE(dired-dearchive,
-	[  --disable-dired-archive  disable dearchiving commands],[AC_DEFINE(ARCHIVE_ONLY)])
+	[  --disable-dired-dearchive disable dearchiving commands],[AC_DEFINE(ARCHIVE_ONLY)])
 	AC_MSG_RESULT($enableval)
 
 	AC_MSG_CHECKING(if DirEd mode should override keys)
@@ -1155,12 +1145,15 @@ if test $cf_cv_screen != slang ; then
 		newpad \
 		newterm \
 		pnoutrefresh \
-		wresize resizeterm \
+		resizeterm \
 		touchline \
 		touchwin \
 		use_default_colors \
+		wattr_get \
 		wborder \
-		wredrawln )
+		wredrawln \
+		wresize \
+		)
 fi
 
 if test $use_color_style != no ; then
@@ -1181,19 +1174,19 @@ if test $use_scrollbar != no ; then
 fi
 
 ### Finally, build config.h and the makefiles
+test -z "$CONFIG_SHELL" && CONFIG_SHELL=/bin/sh
+AC_SUBST(CONFIG_SHELL)
+
 CFLAGS="$CFLAGS $EXTRA_CFLAGS"
 srcdir="$srcdir"
 SRCDIR_CLEAN="#"
 if test -n "$srcdir" ; then
 	echo srcdir is $srcdir
-	$srcdir/mkdirs.sh WWW/Library/Implementation
-	$srcdir/mkdirs.sh src/chrtrans
-	test "$USE_INCLUDED_LIBINTL" = yes && $srcdir/mkdirs.sh intl
+	$CONFIG_SHELL $srcdir/mkdirs.sh WWW/Library/Implementation
+	$CONFIG_SHELL $srcdir/mkdirs.sh src/chrtrans
+	test "$USE_INCLUDED_LIBINTL" = yes && $CONFIG_SHELL $srcdir/mkdirs.sh intl
 	test "$srcdir" != "." && SRCDIR_CLEAN=""
 fi
-
-test -z "$CONFIG_SHELL" && CONFIG_SHELL=/bin/sh
-AC_SUBST(CONFIG_SHELL)
 
 AC_SUBST(SRCDIR_CLEAN)
 AC_OUTPUT(

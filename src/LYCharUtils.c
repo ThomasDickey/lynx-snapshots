@@ -2058,7 +2058,7 @@ PUBLIC char *LYParseTagParam ARGS2(
 
     StrAllocCopy(result, string);
     len = 0;
-    while (isprint(UCH(string[len])) && string[len] != ';') {
+    while (isprint(UCH(string[len])) && !isspace(UCH(string[len]))) {
 	len++;
     }
     result[len] = '\0';

@@ -791,7 +791,7 @@ static attr object_attr[] = {		/* OBJECT attributes */
 	{ "USEMAP"        T(h) },
 	{ "VSPACE"        T(N) },
 	{ "WIDTH"         T(N) },
-	{ 0               T(N) } 	/* Terminate list */
+	{ 0               T(N) }	/* Terminate list */
 };
 
 static attr olist_attr[] = {		/* OL attributes */

@@ -31,10 +31,6 @@ INCLUDES = \
  /I "$(WWW_DIR)" \
  /I "$(ETC_LIB)"
 DEFS = $(CS_DEFS) $(SOCK_DEFS) $(SSL_DEFS) \
- /D "__WIN32__" \
- /D "_CONSOLE" \
- /D "_MBCS" \
- /D "_WINDOWS" \
  /D "ACCESS_AUTH" \
  /D "CJK_EX" \
  /D "COLOR_CURSES" \
@@ -43,37 +39,40 @@ DEFS = $(CS_DEFS) $(SOCK_DEFS) $(SSL_DEFS) \
  /D "DOSPATH" \
  /D "EXP_ALT_BINDINGS" \
  /D "EXP_CMD_LOGGING" \
- /D "EXP_FILE_UPLOAD" \
  /D "EXP_JUSTIFY_ELTS" \
  /D "EXP_NESTED_TABLES" \
- /D "EXP_PERSISTENT_COOKIES" \
- /D "EXP_READPROGRESS" \
  /D "FANCY_CURSES" \
  /D "HAVE_KEYPAD" \
  /D "LONG_LIST" \
  /D "NDEBUG" \
+ /D "NOSIGHUP" \
+ /D "NOUSERS" \
  /D "NO_CONFIG_INFO" \
  /D "NO_CUSERID" \
  /D "NO_FILIO_H" \
  /D "NO_TTYTYPE" \
  /D "NO_UNISTD_H" \
  /D "NO_UTMP" \
- /D "NOSIGHUP" \
- /D "NOUSERS" \
  /D "OK_OVERRIDE" \
  /D "PDCURSES" \
- /D "SOURCE_CACHE" \
  /D "SH_EX" \
  /D "USE_EXTERNALS" \
+ /D "USE_FILE_UPLOAD" \
  /D "USE_MULTIBYTE_CURSES" \
+ /D "USE_PERSISTENT_COOKIES" \
  /D "USE_PRETTYSRC" \
+ /D "USE_READPROGRESS" \
  /D "USE_SCROLLBAR" \
+ /D "USE_SOURCE_CACHE" \
  /D "USE_ZLIB" \
- /D "WIN_EX" \
  /D "WIN32" \
- /D "XMOSAIC_HACK" \
- /D _WIN_CC="1" \
+ /D "WIN_EX" \
+ /D "_CONSOLE" \
+ /D "_MBCS" \
+ /D "_WINDOWS" \
+ /D "__WIN32__" \
  /D LY_MAXPATH="1024"  \
+ /D _WIN_CC="1" \
  /D VC="2.14FM"
 CFLAGS   = /nologo /MT /W3 /GX /O2 /c
 #CFLAGS   = /nologo /MT /W3 /GX /Zi /c

@@ -22,7 +22,7 @@
 **	27 Jan 95 Ensured that proxy service will be overridden for files
 **		  on the local host (because HTLoadFile() doesn't try ftp
 **		  for those) and will substitute ftp for remote files. FM
-**	28 Jan 95 Tweeked PDM's proxy override mods to handle port info
+**	28 Jan 95 Tweaked PDM's proxy override mods to handle port info
 **		  for news and wais URL's. FM
 **
 **  Bugs
@@ -713,7 +713,7 @@ PUBLIC int redirection_attempts = 0; /* counter in HTLoadDocument */
 **	- Checks or documents already loaded
 **	- Logs the access
 **	- Allows stdin filter option
-**	- Trace ouput and error messages
+**	- Trace output and error messages
 **
 **  On Entry,
 **	  anchor	    is the node_anchor for the document
@@ -726,13 +726,13 @@ PUBLIC int redirection_attempts = 0; /* counter in HTLoadDocument */
 */
 
 PRIVATE BOOL HTLoadDocument ARGS4(
-	CONST char *,		full_address,
+	CONST char *,		full_address, /* may include #fragment */
 	HTParentAnchor *,	anchor,
 	HTFormat,		format_out,
 	HTStream*,		sink)
 {
-    int		status;
-    HText *	text;
+    int     status;
+    HText * text;
     CONST char * address_to_load = full_address;
     char *cp;
     BOOL ForcingNoCache = LYforce_no_cache;
@@ -772,9 +772,9 @@ PRIVATE BOOL HTLoadDocument ARGS4(
      *	are LYNXIMGMAP documents, for which we defer to LYLoadIMGmap
      *	for prompting if necessary. - kw
      */
-    if (LYinternal_flag && !LYforce_no_cache &&
+    text = (HText *)HTAnchor_document(anchor);
+    if (LYinternal_flag && !text && !LYforce_no_cache &&
 	anchor->post_data && !anchor->safe &&
-	(text = (HText *)HTAnchor_document(anchor)) == NULL &&
 	!isLYNXIMGMAP(full_address) &&
 	HTConfirm(gettext("Document with POST content not found in cache.  Resubmit?"))
 	!= TRUE) {
@@ -832,7 +832,8 @@ PRIVATE BOOL HTLoadDocument ARGS4(
     /*
     **	See if we can use an already loaded document.
     */
-    if (!LYforce_no_cache && (text = (HText *)HTAnchor_document(anchor))) {
+    text = (HText *)HTAnchor_document(anchor);
+    if (text && !LYforce_no_cache) {
 	/*
 	**  We have a cached rendition of the target document.
 	**  Check if it's OK to re-use it.  We consider it OK if:
@@ -884,15 +885,15 @@ PRIVATE BOOL HTLoadDocument ARGS4(
 	**  etc.) but the code for doing those other things isn't
 	**  available yet.
 	*/
-#ifdef DONT_TRACK_INTERNAL_LINKS
-	if (LYoverride_no_cache || !HText_hasNoCacheSet(text) ||
-	    !HText_AreDifferent(anchor, full_address))
-#else
 	if (LYoverride_no_cache ||
+#ifdef DONT_TRACK_INTERNAL_LINKS
+	    !HText_hasNoCacheSet(text) ||
+	    !HText_AreDifferent(anchor, full_address)
+#else
 	    ((LYinternal_flag || !HText_hasNoCacheSet(text)) &&
-	     !isLYNXIMGMAP(full_address)))
+	     !isLYNXIMGMAP(full_address))
 #endif /* TRACK_INTERNAL_LINKS */
-	{
+	) {
 	    CTRACE((tfp, "HTAccess: Document already in memory.\n"));
 	    HText_select(text);
 
@@ -908,6 +909,14 @@ PRIVATE BOOL HTLoadDocument ARGS4(
 	}
     }
 
+    if (text && HText_HaveUserChangedForms(text)) {
+	/*
+	 * Issue a warning.  User forms content will be lost.
+	 * Will not restore changed forms, currently.
+	 */
+	HTAlert(RELOADING_FORM);
+    }
+
     /*
     **	Get the document from the net.	If we are auto-reloading,
     **	the mutable anchor elements from the previous rendition
@@ -916,10 +925,28 @@ PRIVATE BOOL HTLoadDocument ARGS4(
     */
     LYforce_no_cache = NO;  /* reset after each time through */
     if (ForcingNoCache) {
-	FREE(anchor->title);
+	FREE(anchor->title);  /* ??? */
     }
     status = HTLoad(address_to_load, anchor, format_out, sink);
     CTRACE((tfp, "HTAccess:  status=%d\n", status));
+
+    /*
+     *  RECOVERY:
+     *  if the loading failed, and we had a cached HText copy,
+     *  and no new HText created - use a previous copy, issue a warning.
+     */
+    if (text && status < 0 && (HText *)HTAnchor_document(anchor) == text) {
+	HTAlert(gettext("Loading failed, use a previous copy."));
+	CTRACE((tfp, "HTAccess: Loading failed, use a previous copy.\n"));
+	HText_select(text);
+
+#ifdef DIRED_SUPPORT
+	if (HTAnchor_format(anchor) == WWW_DIRED)
+	    lynx_edit_mode = TRUE;
+#endif
+	redirection_attempts = 0;
+	return YES;
+    }
 
     /*
     **	Log the access if necessary.
@@ -1106,7 +1133,7 @@ PUBLIC BOOL HTLoadToStream ARGS3(
 	HTStream *,	sink)
 {
     return HTLoadDocument(addr,
-			  HTAnchor_findAddress(addr),
+			  HTAnchor_findSimpleAddress(addr),
 			  (HTOutputFormat ? HTOutputFormat : WWW_PRESENT),
 			  sink);
 }
@@ -1145,7 +1172,7 @@ PUBLIC BOOL HTLoadRelative ARGS2(
     full_address.address =
 		HTParse(stripped,
 			here->address,
-			PARSE_ACCESS|PARSE_HOST|PARSE_PATH|PARSE_PUNCTUATION);
+			PARSE_ALL_WITHOUT_ANCHOR);
     result = HTLoadAbsolute(&full_address);
     /*
     **	If we got redirection, result will be NO, but use_this_url_instead

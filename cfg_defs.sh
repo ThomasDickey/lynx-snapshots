@@ -20,7 +20,7 @@ sed \
 	-e 's/^.[^=]*_cv_//' \
 	-e 's/=\${.*=/=/'  \
 	-e 's/}$//'          \
-	config.cache | $TOP/cfg_edit.sh >>$OUT
+	config.cache | /bin/sh $TOP/cfg_edit.sh >>$OUT
 
 cat >>$OUT <<EOF
 };
@@ -36,7 +36,7 @@ sed	-e 's@	@ @g' \
 	-e 's@^[ 	]*#define[ 	]*@@' \
 	-e 's@[ ]*/\*.*\*/@@' \
 	-e 's@[ 	][ 	]*@=@' \
-    | $TOP/cfg_edit.sh >>$OUT
+    | /bin/sh $TOP/cfg_edit.sh >>$OUT
 
 cat >>$OUT <<EOF
 };
