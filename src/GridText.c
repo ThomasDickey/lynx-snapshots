@@ -2680,7 +2680,7 @@ PUBLIC int HText_beginAnchor ARGS3(
 	BOOL,			underline,
 	HTChildAnchor *,	anc)
 {
-    char marker[16];
+    char marker[32]; 
 
     TextAnchor * a = (TextAnchor *) calloc(1, sizeof(*a));
 
@@ -2719,6 +2719,9 @@ PUBLIC int HText_beginAnchor ARGS3(
     /*
      *  If we are doing link_numbering add the link number.
      */
+    if (verbose_links) { 
+	HText_appendText(text, "(LINK)"); 
+    } 
     if ((a->number > 0) &&
 	(keypad_mode == LINKS_ARE_NUMBERED ||
 	 keypad_mode == LINKS_AND_FORM_FIELDS_ARE_NUMBERED)) {

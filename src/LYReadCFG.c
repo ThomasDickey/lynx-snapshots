@@ -950,6 +950,7 @@ static Config_Type Config_Table [] =
 #endif
      PARSE_SET("use_select_popups", CONF_BOOL, LYSelectPopups),
      PARSE_SET("verbose_images", CONF_BOOL, verbose_img),
+     PARSE_SET("verbose_links", CONF_BOOL, verbose_links), 
      PARSE_SET("vi_keys_always_on", CONF_BOOL, vi_keys),
      PARSE_FUN("viewer", CONF_FUN, viewer_fun),
      PARSE_ENV("wais_proxy", CONF_ENV, 0 ),

@@ -177,6 +177,7 @@ extern BOOLEAN vi_keys;           /* TRUE to turn on vi-like key movement */
 extern BOOLEAN emacs_keys;        /* TRUE to turn on emacs-like key movement */
 extern int keypad_mode;           /* is set to either NUMBERS_AS_ARROWS *
 				   * or LINKS_ARE_NUMBERED 		*/
+extern BOOLEAN verbose_links;     /* TRUE if links are preceded by (LINK) */ 
 extern BOOLEAN case_sensitive;    /* TRUE to turn on case sensitive search */
 extern BOOLEAN no_inside_telnet;  /* this and following are restrictions */
 extern BOOLEAN no_outside_telnet;

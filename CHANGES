@@ -1,6 +1,37 @@
 Changes since Lynx 2.8 release
 ================================================================================
 
+1998-10-10 (2.8.1pre.9)
+* add verbose_links variable to lynx.cfg and userdefs.h to control whether Lynx
+  should show "(LINK)" before links (request/patch by Moshe Zadka
+  <moshez@math.huji.ac.il>) - TD
+* change defaults in lynx.cfg and userdefs.h, add comments - PW
+  (a) defaults are stated for `verbose' & `KB';
+  (b) GOTOBUFFER & JUMPBUFFER defaults to TRUE; 
+  (c) QUIT_DEFAULT_YES defaults to FALSE 
+* restore suggested file name in download menu:  it is really useful for other
+  download methods which should be available in menu when `save to disk' is
+  disabled.  Remove local_path/ prefix (LYNX_SAVE_SPACE if any) from visible
+  suggested file name string near the top instead - LP
+* restore newline position when toggling comments parsing (at least we could
+  return to previous screen to try comments toggling twice) - LP
+* add a link from keystrokes help for edit_help.html (input line keys) - LP 
+* corrected to make -nostatus command-line option override HTReadProgress - TD
+* updates to lynx-dev.html (Al Gilman).
+* modify NSL-fork support in HTTCP.c to use waitpid call to reap child processes
+  which may otherwise become orphaned.  The new variable "dns_patience"
+  represents how many seconds we're willing to wait for DNS to respond (should
+  later make it configurable) - BL
+* modify PutTextInput and PutDefs macros in LYOptions.c and LYShowInfo.c to
+  avoid pre-ANSI compilers attempting to substitute macro parameters in
+  coincidental matches within quoted strings - BL
+  gcc -Wtraditional reports the first, but not the second, which is "n"
+  substituted into "\n" - TD
+* add an error-check for fg/bg values to lynx_chg_color function in case lynx.cfg
+  specifies color names not in Lynx's table - BL
+* modify IsOurFile function to accommodate links-to-links, so that users whose
+  home directory is reached by that type of path can save .lynxrc file
+  (reported by PW) - TD
 1998-10-04 (2.8.1pre.8)
 * modify HTTCP.c to copy soc_in from phost in HTParseInet, making Lynx/32 do
   lookups again - WB
@@ -9,8 +40,8 @@ Changes since Lynx 2.8 release
 1998-10-04 (2.8.1pre.7)
 * add special-case CF_TERMIOS_AND_CURSES configure macro (fixes problem reported
   by Philippe De Muyter) - TD
-* update/reorganize option_help.html (Philip Webb).
-* Restore newline position when return from the Print menu or follow a link
+* update/reorganize option_help.html - PW
+* restore newline position when return from the Print menu or follow a link
   from History page (was broken for partial display mode only):  LYPop() and
   LYPop_num now reinitialize Newline_partial if it happens on getfile stage. 
   Also remove changes from 1998-06-11 (case LYK_DOWNLOAD) since this is now

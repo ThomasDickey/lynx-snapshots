@@ -134,13 +134,22 @@ II. Compile instructions -- UNIX
 	IRIX 5.2 and 6.2 (cc & gcc w/ curses, ncurses & slang)
 	Linux 2.0.0 (gcc 2.7.2 w/ curses, ncurses & slang)
 	MkLinux 2.1.5 (gcc 2.7.2.1)	NetBSD
-	OS/2 EMX 0.9b			SCO (cc w/ curses)
+	OS/2 EMX 0.9b (ncurses) 	SCO (cc w/ curses)
 	Solaris 2.5 & 2.6 (cc & gcc w/ curses, ncurses & slang)
 	SunOS 4.1 (cc w/ curses, gcc w/ ncurses & slang)
 
-    NOTE:  SunOS and HP-UX come with a bundled K&R compiler, which is only
-    useful for compiling with the bundled curses.  Both ncurses and slang
-    require a compiler that recognizes prototypes.
+    NOTES:
+
+      + SunOS and HP-UX come with a bundled K&R compiler, which is only useful
+	for compiling with the bundled curses.  Both ncurses and slang require
+	a compiler that recognizes prototypes.
+
+      + ncurses 4.2 builds/works on OS/2; however you should get at least the
+	post-4.2 patches from October 1998, since that supports mouse and
+	screen sizes other than 25x80.
+
+	    http://www.clark.net/pub/dickey/ncurses/ncurses.faq.html
+	    ftp://ftp.clark.net/pub/dickey/ncurses/
 
 1c. Options
     To get a list of the configure script's options, type "./configure --help".
@@ -259,8 +268,7 @@ II. Compile instructions -- UNIX
 	Use forms-based options screen only.
 	Please note that a few users with broken curses may have problems
 	with popup forms fields.  (The default behaviour is to compile
-	both styles options menu code with FORMS_OPTIONS switch in lynx.cfg
-	as well as -forms_options command line toggle).
+	both styles options menu code with FORMS_OPTIONS switch in lynx.cfg).
 
   --enable-internal-links		(define DONT_TRACK_INTERNAL_LINKS)
 	Disabled by default, this option allows tracking of internal links,

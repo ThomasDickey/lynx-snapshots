@@ -5434,7 +5434,7 @@ PRIVATE BOOL IsOurFile ARGS1(char *, name)
     && S_ISREG(data.st_mode)
     && data.st_nlink == 1
     && data.st_uid == getuid()) {
-	int linked = 0;
+	int linked = FALSE;
 #if HAVE_LSTAT
 	char *path = 0;
 	char *leaf;
@@ -5452,27 +5452,22 @@ PRIVATE BOOL IsOurFile ARGS1(char *, name)
 	     * to one of the real user's files.
 	     */
 	    if (S_ISLNK(data.st_mode)) {
-		if (!linked) {
-		    linked++;
-		} else {	/* a link-to-link is a little hard to digest */
-		    break;
-		}
+		linked = TRUE;	/* could be link-to-link; doesn't matter */
 	    } else if (S_ISDIR(data.st_mode)) {
 		if (linked) {
-		    if (--linked == 0) {
-			/*
-			 * We assume that a properly-configured system has the
-			 * unwritable directories owned by root.  This is not
-			 * necessarily so (bin, news, etc., may), but the only
-			 * uid we can count on is 0.  It would be nice to add a
-			 * check for the gid also, but that wouldn't be
-			 * portable.
-			 */
-			if (data.st_uid != 0
-			 || data.st_mode & S_IWOTH) {
-			    linked = 1;
-			    break;
-			}
+		    linked = FALSE;
+		    /*
+		     * We assume that a properly-configured system has the
+		     * unwritable directories owned by root.  This is not
+		     * necessarily so (bin, news, etc., may), but the only
+		     * uid we can count on is 0.  It would be nice to add a
+		     * check for the gid also, but that wouldn't be
+		     * portable.
+		     */
+		    if (data.st_uid != 0
+		     || data.st_mode & S_IWOTH) {
+			linked = TRUE;	/* force an error-return */
+			break;
 		    }
 		}
 	    } else if (linked) {

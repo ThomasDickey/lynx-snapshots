@@ -619,10 +619,9 @@ PUBLIC int LYdownload_options ARGS2(
   <em>Downloaded link:</em> %s\n",
 	downloaded_url);
 
-    if (!no_disk_save && !child_lynx)
     fprintf(fp0, "\
-  <em>Suggested file name:</em> %s%s\n",
-	(lynx_save_space ? lynx_save_space : ""), sug_filename);
+  <em>Suggested file name:</em> %s\n",
+	sug_filename);
 
     fprintf(fp0, "\n%s options:\n",
 	(user_mode == NOVICE_MODE) ? "Standard download" : "Download");

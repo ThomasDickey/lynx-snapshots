@@ -209,7 +209,6 @@ int mainloop NOARGS
     BOOLEAN show_dotfiles_flag = show_dotfiles;
     BOOLEAN user_mode_flag = user_mode;
     int CurrentAssumeCharSet_flag = UCLYhndl_for_unspec;
-    int CurrentAssumeLocalCharSet_flag = UCLYhndl_HTFile_for_unspec;
     int CurrentCharSet_flag = current_char_set;
     int HTfileSortMethod_flag = HTfileSortMethod;
 #endif
@@ -2024,10 +2023,8 @@ new_cmd:  /*
 		 */
 		HTAlert(RELOADING_FORM);
 	    }
-	    newdoc.line = ((curdoc.line > 0) ?
-				 curdoc.line : 1);
-	    newdoc.link = ((curdoc.link > -1) ?
-				  curdoc.link : 0);
+	    newdoc.line = curdoc.line;
+	    newdoc.link = curdoc.link;
 #endif /* NO_ASSUME_SAME_DOC */
 	    FREE(curdoc.address); /* so it doesn't get pushed */
 #ifdef VMS
@@ -2060,6 +2057,8 @@ new_cmd:  /*
 		HTuncache_current_document();
 		StrAllocCopy(newdoc.address, curdoc.address);
 		FREE(curdoc.address);
+		newdoc.line = curdoc.line;
+		newdoc.link = curdoc.link;
 	    }
 	    if (historical_comments)
 		historical_comments = FALSE;
@@ -2090,6 +2089,8 @@ new_cmd:  /*
 		    HTuncache_current_document();
 		    StrAllocCopy(newdoc.address, curdoc.address);
 		    FREE(curdoc.address);
+		    newdoc.line = curdoc.line;
+		    newdoc.link = curdoc.link;
 		}
 	    }
 	    if (minimal_comments)
@@ -2120,6 +2121,8 @@ new_cmd:  /*
 		HTuncache_current_document();
 		StrAllocCopy(newdoc.address, curdoc.address);
 		FREE(curdoc.address);
+		newdoc.line = curdoc.line;
+		newdoc.link = curdoc.link;
 	    }
 	    if (soft_dquotes)
 		soft_dquotes = FALSE;
@@ -2154,11 +2157,11 @@ new_cmd:  /*
 		FREE(curdoc.address);
 	    }
 #ifdef NO_ASSUME_SAME_DOC
-	    newdoc.line=1;
-	    newdoc.link=0;
+	    newdoc.line = 1;
+	    newdoc.link = 0;
 #else
-	    newdoc.line = ((curdoc.line > 0) ? curdoc.line : 1);
-	    newdoc.link = ((curdoc.link > -1) ? curdoc.link : 0);
+	    newdoc.line = curdoc.line;
+	    newdoc.link = curdoc.link;
 #endif /* NO_ASSUME_SAME_DOC */
 	    if (New_DTD)
 		New_DTD = NO;
@@ -3736,7 +3739,6 @@ if (!LYUseFormsOptions) {
 		  !strncmp(curdoc.address, "ftp:", 4))) ||
 		CurrentCharSet_flag != current_char_set ||
 		CurrentAssumeCharSet_flag != UCLYhndl_for_unspec ||
-		CurrentAssumeLocalCharSet_flag != UCLYhndl_HTFile_for_unspec ||
 		verbose_img_flag != verbose_img ||
 		LYRawMode_flag != LYRawMode ||
 		LYSelectPopups_flag != LYSelectPopups ||
@@ -3793,10 +3795,8 @@ if (!LYUseFormsOptions) {
 		    newdoc.line = 1;
 		    newdoc.link = 0;
 #else
-		    newdoc.line = ((curdoc.line > 0) ?
-					 curdoc.line : 1);
-		    newdoc.link = ((curdoc.link > -1) ?
-					  curdoc.link : 0);
+		    newdoc.line = curdoc.line;
+		    newdoc.link = curdoc.link;
 #endif /* NO_ASSUME_SAME_DOC */
 		    LYforce_no_cache = TRUE;
 		    FREE(curdoc.address); /* So it doesn't get pushed. */
@@ -3807,7 +3807,6 @@ if (!LYUseFormsOptions) {
 	    HTfileSortMethod_flag = HTfileSortMethod;
 	    CurrentCharSet_flag = current_char_set;
 	    CurrentAssumeCharSet_flag = UCLYhndl_for_unspec;
-	    CurrentAssumeLocalCharSet_flag = UCLYhndl_HTFile_for_unspec;
 	    show_dotfiles_flag = show_dotfiles;
 	    verbose_img_flag = verbose_img;
 	    LYRawMode_flag = LYRawMode;
@@ -4220,10 +4219,8 @@ if (!LYUseFormsOptions) {
 				     *	Seek old position,
 				     *	which probably changed.
 				     */
-				    newdoc.line =
-					((curdoc.line > 0) ? curdoc.line : 1);
-				    newdoc.link =
-					((curdoc.link > -1) ? curdoc.link : 0);
+				    newdoc.line = curdoc.line;
+				    newdoc.link = curdoc.link;
 #endif /* NO_SEEK_OLD_POSITION */
 				    clear();  /* clear the screen */
 				}
