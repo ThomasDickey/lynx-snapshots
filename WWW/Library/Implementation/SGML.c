@@ -60,6 +60,11 @@ PRIVATE void fake_put_character ARGS2(
 
 #endif
 
+/* my_casecomp() - optimized by the first character, NOT_ASCII ok */
+#define my_casecomp(a,b)  ((TOUPPER(*a) == TOUPPER(*b)) ? \
+			AS_casecomp(a,b) : \
+			(TOASCII(TOUPPER(*a)) - TOASCII(TOUPPER(*b))))
+
  /* will use partially inlined version */
 #define orig_HTChunkPutUtf8Char HTChunkPutUtf8Char
 #undef HTChunkPutUtf8Char
@@ -502,7 +507,7 @@ PRIVATE void handle_attribute_name ARGS2(
 	 high > low;
 	 diff < 0 ? (low = i+1) : (high = i)) {
 	i = (low + (high-low)/2);
-	diff = strcasecomp(attributes[i].name, s);
+	diff = my_casecomp(attributes[i].name, s);
 	if (diff == 0) {		/* success: found it */
 	    context->current_attribute_number = i;
 #ifdef USE_PRETTYSRC
@@ -1292,8 +1297,10 @@ PRIVATE void start_element ARGS1(
     if (!context->inSELECT) {
 	/*
 	**  We are not in a SELECT block, so check if this starts one. - FM
+	**  (frequent case!)
 	*/
-	if (!strcasecomp(new_tag->name, "SELECT")) {
+	/* my_casecomp() - optimized by the first character */
+	if (!my_casecomp(new_tag->name, "SELECT")) {
 	    /*
 	    **	Set the inSELECT flag and fall through. - FM
 	    */
@@ -1324,7 +1331,7 @@ PRIVATE void start_element ARGS1(
 		*/
 		CTRACE((tfp, "SGML: ***Faking SELECT end tag before <%s> start tag.\n",
 			    new_tag->name));
-		end_element(context, SGMLFindUprTag(context->dtd, "SELECT"));
+		end_element(context, SGMLFindTag(context->dtd, "SELECT"));
 	    } else {
 		/*
 		**  Ignore the start tag. - FM
@@ -1371,42 +1378,6 @@ PRIVATE void start_element ARGS1(
 **
 ** On entry,
 **	dtd	points to dtd structure including valid tag list
-**	string	points to name of uppercased tag in question
-**
-** On exit,
-**	returns:
-**		NULL		tag not found
-**		else		address of tag structure in dtd
-*/
-PUBLIC HTTag * SGMLFindUprTag ARGS2(
-	CONST SGML_dtd*,	dtd,
-	CONST char *,		string)
-{
-    int high, low, i, diff;
-
-    for (low = 0, high=dtd->number_of_tags;
-	 high > low;
-	 diff < 0 ? (low = i+1) : (high = i)) {	 /* Binary search */
-	i = (low + (high-low)/2);
-	diff = AS_cmp(dtd->tags[i].name, string);	/* Case sensitive */
-	if (diff == 0) {		/* success: found it */
-	    return &dtd->tags[i];
-	}
-    }
-    if (IsNmStart(string[0])) {
-	/*
-	**  Unrecognized, but may be valid. - KW
-	*/
-	return &HTTag_unrecognized;
-    }
-    return NULL;
-}
-
-/*		Find Tag in DTD tag list
-**		------------------------
-**
-** On entry,
-**	dtd	points to dtd structure including valid tag list
 **	string	points to name of tag in question
 **
 ** On exit,
@@ -1416,12 +1387,33 @@ PUBLIC HTTag * SGMLFindUprTag ARGS2(
 */
 PUBLIC HTTag * SGMLFindTag ARGS2(
 	CONST SGML_dtd*,	dtd,
-	char *,			string)
+	CONST char *,		s)
 {
-    char * p = string;
-    for ( ; *p; p++)
-	*p = TOUPPER(*p);
-    return SGMLFindUprTag(dtd, string);
+    int high, low, i, diff;
+    static HTTag* last[64] = {NULL};  /*optimize using the previous results*/
+    HTTag** res = last + (UCH(*s) % 64);     /*pointer arithmetic*/
+
+    if (*res && !strcasecomp((*res)->name, s))
+	return *res;
+
+    for (low = 0, high=dtd->number_of_tags;
+	  high > low;
+	  diff < 0 ? (low = i+1) : (high = i)) {	/* Binary search */
+	i = (low + (high-low)/2);
+	/* my_casecomp() - optimized by the first character, NOT_ASCII ok */
+	diff = my_casecomp(dtd->tags[i].name, s);	/* Case insensitive */
+	if (diff == 0) {		/* success: found it */
+	    *res = &dtd->tags[i];
+	    return *res;
+	}
+    }
+    if (IsNmStart(*s)) {
+	/*
+	**  Unrecognized, but may be valid. - KW
+	*/
+	return &HTTag_unrecognized;
+    }
+    return NULL;
 }
 
 /*________________________________________________________________________
@@ -3992,7 +3984,7 @@ top1:
 			    CTRACE((tfp, "SGML: ***Faking SELECT end tag before </%s> end tag.\n",
 					string->data));
 			    end_element(context,
-					SGMLFindUprTag(context->dtd, "SELECT"));
+					SGMLFindTag(context->dtd, "SELECT"));
 			    CTRACE((tfp, "SGML: End </%s>\n", string->data));
 
 #ifdef USE_PRETTYSRC
@@ -4459,6 +4451,19 @@ PUBLIC HTStream* SGML_new  ARGS3(
 	context->inUCLYhndl = HTAnchor_getUCLYhndl(anchor,
 						   UCT_STAGE_PARSER);
     }
+#ifdef CAN_SWITCH_DISPLAY_CHARSET /* Allow a switch to a more suitable display charset */
+    else if (anchor->UCStages
+	     && anchor->UCStages->s[UCT_STAGE_PARSER].LYhndl >= 0
+	     && anchor->UCStages->s[UCT_STAGE_PARSER].LYhndl != current_char_set ) {
+	int o = anchor->UCStages->s[UCT_STAGE_PARSER].LYhndl;
+
+	anchor->UCStages->s[UCT_STAGE_PARSER].LYhndl = -1; /* Force reset */
+	HTAnchor_resetUCInfoStage(anchor, o, UCT_STAGE_PARSER,
+				  /* Preserve change this: */
+				  anchor->UCStages->s[UCT_STAGE_PARSER].lock);
+    }
+#endif
+
     context->inUCI = HTAnchor_getUCInfoStage(anchor,
 					     UCT_STAGE_PARSER);
     set_chartrans_handling(context, anchor, -1);

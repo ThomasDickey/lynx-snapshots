@@ -227,18 +227,19 @@ PUBLIC void LYEntify ARGS2(
 PUBLIC void LYTrimHead ARGS1(
 	char *, str)
 {
-    int i = 0, j;
+    CONST char *s = str;
 
-    if (!str || *str == '\0')
+    if (isEmpty(s))
 	return;
 
-    while (str[i] != '\0' && WHITE(str[i]) && UCH(str[i]) != UCH(CH_ESC))   /* S/390 -- gil -- 1669 */
-	i++;
-    if (i > 0) {
-	for (j = 0; str[i] != '\0'; i++) {
-	    str[j++] = str[i];
+    while (*s && WHITE(*s) && UCH(*s) != UCH(CH_ESC))   /* S/390 -- gil -- 1669 */
+	s++;
+    if (s > str) {
+	char *ns = str;
+	while (*s) {
+	    *ns++ = *s++;
 	}
-	str[j] = '\0';
+	*ns = '\0';
     }
 }
 
@@ -252,10 +253,10 @@ PUBLIC void LYTrimTail ARGS1(
 {
     int i;
 
-    if (!str || *str == '\0')
+    if (isEmpty(str))
 	return;
 
-    i = (strlen(str) - 1);
+    i = strlen(str) - 1;
     while (i >= 0) {
 	if (WHITE(str[i]))
 	    str[i] = '\0';
@@ -434,7 +435,7 @@ PUBLIC void LYFillLocalFileURL ARGS2(
 	 */
 	LYAddPathSep(href);
     }
-#endif /* DOSPATH */
+#endif /* USE_DOS_DRIVES */
 
     /*
      * No path in a file://localhost URL means a
@@ -1980,14 +1981,14 @@ PUBLIC char ** LYUCFullyTranslateString ARGS9(
     *q = '\0';
     if (chunk) {
 	HTChunkPutb(CHUNK, qs, q-qs + 1); /* also terminates */
-	if (stype == st_URL) {
+	if (stype == st_URL || stype == st_other) {
 	    LYTrimHead(chunk->data);
 	    LYTrimTail(chunk->data);
 	}
 	StrAllocCopy(*str, chunk->data);
 	HTChunkFree(chunk);
     } else {
-	if (stype == st_URL) {
+	if (stype == st_URL || stype == st_other) {
 	    LYTrimHead(qs);
 	    LYTrimTail(qs);
 	}
@@ -2129,8 +2130,6 @@ PUBLIC void LYHandleMETA ARGS4(
 	convert_to_spaces(http_equiv, TRUE);
 	LYUCTranslateHTMLString(&http_equiv, me->tag_charset, me->tag_charset,
 				 NO, NO, YES, st_other);
-	LYTrimHead(http_equiv);
-	LYTrimTail(http_equiv);
 	if (*http_equiv == '\0') {
 	    FREE(http_equiv);
 	}
@@ -2141,8 +2140,6 @@ PUBLIC void LYHandleMETA ARGS4(
 	convert_to_spaces(name, TRUE);
 	LYUCTranslateHTMLString(&name, me->tag_charset, me->tag_charset,
 				 NO, NO, YES, st_other);
-	LYTrimHead(name);
-	LYTrimTail(name);
 	if (*name == '\0') {
 	    FREE(name);
 	}
@@ -2187,8 +2184,6 @@ PUBLIC void LYHandleMETA ARGS4(
 	!strcasecomp(NonNull(http_equiv), "Cache-Control")) {
 	LYUCTranslateHTMLString(&content, me->tag_charset, me->tag_charset,
 				 NO, NO, YES, st_other);
-	LYTrimHead(content);
-	LYTrimTail(content);
 	if (!strcasecomp(content, "no-cache")) {
 	    me->node_anchor->no_cache = TRUE;
 	    HText_setNoCache(me->text);
@@ -2261,8 +2256,6 @@ PUBLIC void LYHandleMETA ARGS4(
 	 */
 	LYUCTranslateHTMLString(&content, me->tag_charset, me->tag_charset,
 				 NO, NO, YES, st_other);
-	LYTrimHead(content);
-	LYTrimTail(content);
 	StrAllocCopy(me->node_anchor->expires, content);
 	if (me->node_anchor->no_cache == FALSE) {
 	    if (!strcmp(content, "0")) {
@@ -2304,8 +2297,6 @@ PUBLIC void LYHandleMETA ARGS4(
 	LYUCcharset * p_out = NULL;
 	LYUCTranslateHTMLString(&content, me->tag_charset, me->tag_charset,
 				 NO, NO, YES, st_other);
-	LYTrimHead(content);
-	LYTrimTail(content);
 	LYLowerCase(content);
 
 	if ((cp1 = strstr(content, "charset")) != NULL) {
@@ -2493,8 +2484,7 @@ PUBLIC void LYHandleMETA ARGS4(
 		/*
 		 *  We found a URL field, so check it out. - FM
 		 */
-		if (!(url_type = LYLegitimizeHREF(me, (char**)&href,
-						  TRUE, FALSE))) {
+		if (!(url_type = LYLegitimizeHREF(me, &href, TRUE, FALSE))) {
 		    /*
 		     *	The specs require a complete URL,
 		     *	but this is a Netscapism, so don't
@@ -2514,13 +2504,16 @@ PUBLIC void LYHandleMETA ARGS4(
 			StrAllocCopy(href, me->node_anchor->address);
 			HText_setNoCache(me->text);
 		    }
-		}
-		/*
-		 *  Check whether to fill in localhost. - FM
-		 */
-		LYFillLocalFileURL((char **)&href,
+
+		} else {
+		    /*
+		     *  Check whether to fill in localhost. - FM
+		     */
+		    LYFillLocalFileURL(&href,
 				   (me->inBASE ?
 				 me->base_href : me->node_anchor->address));
+		}
+
 		/*
 		 *  Set the no_cache flag if the Refresh URL
 		 *  is the same as the document's address. - FM
@@ -2741,10 +2734,12 @@ PUBLIC void LYHandlePlike ARGS6(
 	if (LYoverride_default_alignment(me)) {
 	    me->sp->style->alignment = LYstyles(me->sp[0].tag_number)->alignment;
 	} else if ((me->List_Nesting_Level >= 0 &&
-		    strncmp(me->sp->style->name, "Div", 3)) ||
+			(me->sp->style->id == ST_DivCenter ||
+			 me->sp->style->id == ST_DivLeft ||
+			 me->sp->style->id == ST_DivRight)) ||
 		   ((me->Division_Level < 0) &&
-		    (!strcmp(me->sp->style->name, "Normal") ||
-		     !strcmp(me->sp->style->name, "Preformatted")))) {
+			(me->sp->style->id == ST_Normal ||
+			 me->sp->style->id == ST_Preformatted))) {
 		me->sp->style->alignment = HT_LEFT;
 	} else {
 	    me->sp->style->alignment = (short) me->current_default_alignment;
@@ -3003,8 +2998,9 @@ PUBLIC int LYLegitimizeHREF ARGS4(
 	BOOL,			strip_dots)
 {
     int url_type = 0;
+    char *p = NULL;
     char *pound = NULL;
-    char *fragment = NULL;
+    CONST char *Base = NULL;
 
     if (!me || !href || isEmpty(*href))
 	return(url_type);
@@ -3017,36 +3013,55 @@ PUBLIC int LYLegitimizeHREF ARGS4(
 	 *  with atrocities inflicted on the Web by
 	 *  authoring tools such as Frontpage. - FM
 	 */
-	if ((pound = findPoundSelector(*href)) != NULL) {
-	    StrAllocCopy(fragment, pound);
-	    *pound = '\0';
-	    convert_to_spaces(fragment, FALSE);
-	}
-	/*
-	 * No blanks really belong in the HREF, but if it refers to an actual
-	 * file, it may actually have blanks in the name.  Try to accommodate.
-	 */
-	if (LYRemoveNewlines(*href) || strchr(*href, '\t') != 0)
-	    LYRemoveBlanks(*href);
-	else
-	    convert_to_spaces(*href, FALSE);
-	LYTrimLeading(*href);
-	LYTrimTrailing(*href);
-	if (fragment != NULL) {
-	    StrAllocCat(*href, fragment);
-	    FREE(fragment);
+
+	/*  Before working on spaces check if we have any, usually none. */
+	for (p = *href; (*p && !isspace(*p)); p++)
+	    ;
+
+	if (*p) {  /* p == first space character */
+		   /* no reallocs below, all converted in place */
+
+	    pound = findPoundSelector(*href);
+
+	    if (pound != NULL && pound < p) {
+		convert_to_spaces(p, FALSE);  /* done */
+
+	    } else {
+		if (pound != NULL)
+		    *pound = '\0';  /* mark */
+
+		/*
+		 * No blanks really belong in the HREF,
+		 * but if it refers to an actual file,
+		 * it may actually have blanks in the name.
+		 * Try to accommodate. See also HTParse().
+		 */
+		if (LYRemoveNewlines(p) || strchr(p, '\t') != 0) {
+		    LYRemoveBlanks(p);  /* a compromise... */
+		}
+
+		if (pound != NULL) {
+		    p = strchr(p, '\0');
+		    *pound = '#';  /* restore */
+		    convert_to_spaces(pound, FALSE);
+		    if (p < pound)
+			strcpy(p, pound);
+		}
+	    }
 	}
     }
-    if (*(*href) == '\0')
+    if (**href == '\0')
 	return(url_type);
-    LYUCTranslateHTMLString(href, me->tag_charset, me->tag_charset,
-			     NO, NO, YES, st_URL);
+
+    TRANSLATE_AND_UNESCAPE_TO_STD(href);
+
+    Base = me->inBASE ?
+		me->base_href : me->node_anchor->address;
+
     url_type = is_url(*href);
-    if (!url_type && force_slash &&
+    if (!url_type && force_slash && **href == '.' &&
 	(!strcmp(*href, ".") || !strcmp(*href, "..")) &&
-	 !isFILE_URL((me->inBASE
-		     ? me->base_href
-		     : me->node_anchor->address))) {
+	 !isFILE_URL(Base)) {
 	/*
 	 *  The Fielding RFC/ID for resolving partial HREFs says
 	 *  that a slash should be on the end of the preceding
@@ -3057,10 +3072,8 @@ PUBLIC int LYLegitimizeHREF ARGS4(
 	 */
 	StrAllocCat(*href, "/");
     }
-    if ((!url_type && LYStripDotDotURLs && strip_dots && *(*href) == '.') &&
-	 !strncasecomp((me->inBASE ?
-		     me->base_href : me->node_anchor->address),
-		       "http", 4)) {
+    if ((!url_type && LYStripDotDotURLs && strip_dots && **href == '.') &&
+	 !strncasecomp(Base, "http", 4)) {
 	/*
 	 *  We will be resolving a partial reference versus an http
 	 *  or https URL, and it has lead dots, which may be retained
@@ -3078,18 +3091,12 @@ PUBLIC int LYLegitimizeHREF ARGS4(
 	char *temp = NULL, *path = NULL, *cp;
 	CONST char *str = "";
 
-	if (((temp = HTParse(*href,
-			     (me->inBASE ?
-			   me->base_href : me->node_anchor->address),
-			     PARSE_ALL)) != NULL && temp[0] != '\0') &&
-	    (path = HTParse(temp, "",
-			    PARSE_PATH+PARSE_PUNCTUATION)) != NULL &&
-	    !strncmp(path, "/..", 3)) {
+	temp = HTParse(*href, Base, PARSE_ALL);
+	path = HTParse(temp, "", PARSE_PATH+PARSE_PUNCTUATION);
+	if (!strncmp(path, "/..", 3)) {
 	    cp = (path + 3);
 	    if (LYIsHtmlSep(*cp) || *cp == '\0') {
-		if ((me->inBASE
-		   ? me->base_href[4]
-		   : me->node_anchor->address[4]) == 's') {
+		if (Base[4] == 's') {
 		    str = "s";
 		}
 		CTRACE((tfp, "LYLegitimizeHREF: Bad value '%s' for http%s URL.\n",
@@ -3347,8 +3354,8 @@ PUBLIC void LYResetParagraphAlignment ARGS1(
 
     if (me->List_Nesting_Level >= 0 ||
 	((me->Division_Level < 0) &&
-	 (!strcmp(me->sp->style->name, "Normal") ||
-	  !strcmp(me->sp->style->name, "Preformatted")))) {
+	 (me->sp->style->id == ST_Normal ||
+	  me->sp->style->id == ST_Preformatted))) {
 	me->sp->style->alignment = HT_LEFT;
     } else {
 	me->sp->style->alignment = (short) me->current_default_alignment;

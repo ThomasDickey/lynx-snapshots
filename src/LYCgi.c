@@ -388,16 +388,20 @@ PRIVATE int LYLoadCGI ARGS4(
 
 		if (anAnchor->post_data) {
 		    int written, remaining, total_written = 0;
+
 		    close(fd1[0]);
 
 		    /* We have form data to push across the pipe */
-		    CTRACE((tfp, "LYNXCGI: Doing post, content-type '%s'\n",
+		    if (TRACE) {
+			CTRACE((tfp, "LYNXCGI: Doing post, content-type '%s'\n",
 				anAnchor->post_content_type));
-		    CTRACE((tfp, "LYNXCGI: Writing:\n%s----------------------------------\n",
-				anAnchor->post_data));
-		    remaining = strlen(anAnchor->post_data);
+			CTRACE((tfp, "LYNXCGI: Writing:\n"));
+			trace_bstring(anAnchor->post_data);
+			CTRACE((tfp, "----------------------------------\n"));
+		    }
+		    remaining = BStrLen(anAnchor->post_data);
 		    while ((written = write(fd1[1],
-					    anAnchor->post_data + total_written,
+					    BStrData(anAnchor->post_data) + total_written,
 					    remaining)) != 0) {
 			if (written < 0) {
 #ifdef EINTR
@@ -514,7 +518,7 @@ PRIVATE int LYLoadCGI ARGS4(
 		    add_environment_value("REQUEST_METHOD=POST");
 
 		    HTSprintf0(&post_len, "CONTENT_LENGTH=%d",
-			    strlen(anAnchor->post_data));
+			       BStrLen(anAnchor->post_data));
 		    add_environment_value(post_len);
 		} else {
 		    close(fileno(stdin));

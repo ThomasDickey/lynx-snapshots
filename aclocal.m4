@@ -576,6 +576,8 @@ changequote([,])dnl
     AC_SUBST(GENCAT)
   ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_ADD_CFLAGS version: 5 updated: 2002/12/01 00:12:15
+dnl -------------
 dnl Copy non-preprocessor flags to $CFLAGS, preprocessor flags to $CPPFLAGS
 dnl The second parameter if given makes this macro verbose.
 AC_DEFUN([CF_ADD_CFLAGS],
@@ -612,6 +614,8 @@ fi
 
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_ADD_INCDIR version: 4 updated: 2002/12/21 14:25:52
+dnl -------------
 dnl Add an include-directory to $CPPFLAGS.  Don't add /usr/include, since it's
 dnl redundant.  We don't normally need to add -I/usr/local/include for gcc,
 dnl but old versions (and some misinstalled ones) need that.  To make things
@@ -648,6 +652,8 @@ do
 done
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_ALT_CHAR_SET version: 6 updated: 1998/11/18 14:45:34
+dnl ---------------
 dnl Check for existence of alternate-character-set support in curses, so we
 dnl can decide to use it for box characters.
 dnl
@@ -669,6 +675,8 @@ AC_MSG_RESULT($cf_cv_alt_char_set)
 test $cf_cv_alt_char_set != no && AC_DEFINE_UNQUOTED(ALT_CHAR_SET,$cf_cv_alt_char_set)
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_ANSI_CC_CHECK version: 9 updated: 2001/12/30 17:53:34
+dnl ----------------
 dnl This is adapted from the macros 'fp_PROG_CC_STDC' and 'fp_C_PROTOTYPES'
 dnl in the sharutils 4.2 distribution.
 AC_DEFUN([CF_ANSI_CC_CHECK],
@@ -719,14 +727,20 @@ fi
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_ARG_DISABLE version: 3 updated: 1999/03/30 17:24:31
+dnl --------------
 dnl Allow user to disable a normally-on option.
 AC_DEFUN([CF_ARG_DISABLE],
 [CF_ARG_OPTION($1,[$2],[$3],[$4],yes)])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_ARG_ENABLE version: 3 updated: 1999/03/30 17:24:31
+dnl -------------
 dnl Allow user to enable a normally-off option.
 AC_DEFUN([CF_ARG_ENABLE],
 [CF_ARG_OPTION($1,[$2],[$3],[$4],no)])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_ARG_OPTION version: 3 updated: 1997/10/18 14:42:41
+dnl -------------
 dnl Restricted form of AC_ARG_ENABLE that ensures user doesn't give bogus
 dnl values.
 dnl
@@ -748,6 +762,8 @@ ifelse($3,,[    :]dnl
 ])dnl
   ])])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_BOOL_DEFS version: 3 updated: 1998/04/27 20:32:33
+dnl ------------
 dnl Check if curses.h defines TRUE/FALSE (it does under SVr4).
 AC_DEFUN([CF_BOOL_DEFS],
 [
@@ -765,6 +781,8 @@ if test "$cf_cv_bool_defs" = no ; then
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_BUNDLED_INTL version: 5 updated: 2002/11/17 12:25:28
+dnl ---------------
 dnl Top-level macro for configuring an application with a bundled copy of
 dnl the intl and po directories for gettext.
 dnl
@@ -857,6 +875,8 @@ if test "$USE_INCLUDED_LIBINTL" = yes ; then
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_CHECK_CACHE version: 7 updated: 2001/12/19 00:50:10
+dnl --------------
 dnl Check if we're accidentally using a cache from a different machine.
 dnl Derive the system name, as a check for reusing the autoconf cache.
 dnl
@@ -887,6 +907,8 @@ if test ".$system_name" != ".$cf_cv_system_name" ; then
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_CHECK_CFLAGS version: 2 updated: 2001/12/30 19:09:58
+dnl ---------------
 dnl Conditionally add to $CFLAGS and $CPPFLAGS values which are derived from
 dnl a build-configuration such as imake.  These have the pitfall that they
 dnl often contain compiler-specific options which we cannot use, mixed with
@@ -907,6 +929,8 @@ AC_TRY_LINK([#include <stdio.h>],[printf("Hello world");],,
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_CHECK_ERRNO version: 9 updated: 2001/12/30 18:03:23
+dnl --------------
 dnl Check for data that is usually declared in <stdio.h> or <errno.h>, e.g.,
 dnl the 'errno' variable.  Define a DECL_xxx symbol if we must declare it
 dnl ourselves.
@@ -936,6 +960,8 @@ fi
 CF_CHECK_EXTERN_DATA($1,int)
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_CHECK_EXTERN_DATA version: 3 updated: 2001/12/30 18:03:23
+dnl --------------------
 dnl Check for existence of external data in the current set of libraries.  If
 dnl we can modify it, it's real enough.
 dnl $1 = the name to check
@@ -959,6 +985,8 @@ fi
 
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_CHECK_FUNCDECL version: 6 updated: 1999/03/30 12:24:31
+dnl -----------------
 dnl Check if a function is declared by including a set of include files.
 dnl Invoke the corresponding actions according to whether it is found or not.
 dnl
@@ -992,6 +1020,8 @@ ifelse([$4], , , [$4
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_CHECK_FUNCDECLS version: 4 updated: 1999/03/30 12:24:31
+dnl ------------------
 dnl Check if functions are declared by including a set of include files.
 dnl and define DECL_XXX if not.
 dnl
@@ -1007,6 +1037,8 @@ CF_CHECK_FUNCDECL([$1], $ac_func,
 done
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_CHECK_IPV6 version: 2 updated: 2000/04/13 21:38:04
+dnl -------------
 dnl Check for IPV6 configuration.
 AC_DEFUN([CF_CHECK_IPV6],[
 CF_FIND_IPV6_TYPE
@@ -1029,6 +1061,8 @@ fi
 
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_COLOR_CURSES version: 6 updated: 2002/10/27 18:21:42
+dnl ---------------
 dnl Check if curses supports color.  (Note that while SVr3 curses supports
 dnl color, it does this differently from SVr4 curses; more work would be needed
 dnl to accommodate SVr3).
@@ -1057,6 +1091,8 @@ if test $cf_cv_color_curses = yes ; then
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_CURSES_CPPFLAGS version: 6 updated: 2002/10/27 18:21:42
+dnl ------------------
 dnl Look for the curses headers.
 AC_DEFUN([CF_CURSES_CPPFLAGS],[
 
@@ -1099,6 +1135,8 @@ AC_CHECK_HEADERS($cf_cv_ncurses_header)
 
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_CURSES_FUNCS version: 10 updated: 2001/07/17 17:04:37
+dnl ---------------
 dnl Curses-functions are a little complicated, since a lot of them are macros.
 AC_DEFUN([CF_CURSES_FUNCS],
 [
@@ -1145,6 +1183,8 @@ exit(foo == 0);
 done
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_CURSES_LIBS version: 22 updated: 2002/10/27 18:21:42
+dnl --------------
 dnl Look for the curses libraries.  Older curses implementations may require
 dnl termcap/termlib to be linked as well.  Call CF_CURSES_CPPFLAGS first.
 AC_DEFUN([CF_CURSES_LIBS],[
@@ -1242,6 +1282,8 @@ fi
 
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_CURS_PERFORMANCE version: 3 updated: 1998/04/27 20:32:33
+dnl -------------------
 dnl Solaris 2.x curses provides a "performance" tradeoff according to whether
 dnl CURS_PERFORMANCE is defined.  If defined, the implementation defines macros
 dnl that access the WINDOW structure.  Otherwise, function calls are used.
@@ -1271,6 +1313,8 @@ AC_MSG_RESULT($cf_cv_curs_performance)
 test $cf_cv_curs_performance = yes && AC_DEFINE(CURS_PERFORMANCE)
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_CURS_TOUCHLINE version: 2 updated: 2001/05/13 13:42:46
+dnl -----------------
 dnl Check for the flavor of the touchline function, to distinguish between BSD
 dnl and SYSV.  This is needed on NetBSD 1.5 which has a partial implementation
 dnl of SVR4 curses.
@@ -1295,6 +1339,8 @@ sysv)
 esac
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_DEFINE_PROG version: 3 updated: 2002/10/27 18:21:42
+dnl --------------
 dnl Check for a program in the given list $3, defining the corresponding
 dnl program variable $2.
 dnl
@@ -1314,9 +1360,13 @@ AC_MSG_RESULT($cf_cv_$2)
 AC_DEFINE_UNQUOTED($2,"$cf_cv_$2")
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_DIRNAME version: 4 updated: 2002/12/21 19:25:52
+dnl ----------
 dnl "dirname" is not portable, so we fake it with a shell script.
 AC_DEFUN([CF_DIRNAME],[$1=`echo $2 | sed -e 's%/[[^/]]*$%%'`])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_DISABLE_ECHO version: 9 updated: 1999/09/09 00:28:43
+dnl ---------------
 dnl You can always use "make -n" to see the actual options, but it's hard to
 dnl pick out/analyze warning messages when the compile-line is long.
 dnl
@@ -1348,12 +1398,16 @@ AC_SUBST(SHOW_CC)
 AC_SUBST(ECHO_CC)
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_ERRNO version: 5 updated: 1997/11/30 12:44:39
+dnl --------
 dnl Check if 'errno' is declared in <errno.h>
 AC_DEFUN([CF_ERRNO],
 [
 CF_CHECK_ERRNO(errno)
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_FANCY_CURSES version: 4 updated: 2002/10/27 18:21:42
+dnl ---------------
 AC_DEFUN([CF_FANCY_CURSES],
 [
 AC_MSG_CHECKING(if curses supports fancy attributes)
@@ -1373,6 +1427,8 @@ AC_MSG_RESULT($cf_cv_fancy_curses)
 test $cf_cv_fancy_curses = yes && AC_DEFINE(FANCY_CURSES)
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_FIND_IPV6_LIBS version: 6 updated: 2002/11/09 09:05:18
+dnl -----------------
 dnl Based on the IPV6 stack type, look for the corresponding library.
 AC_DEFUN([CF_FIND_IPV6_LIBS],[
 AC_REQUIRE([CF_FIND_IPV6_TYPE])
@@ -1452,6 +1508,8 @@ fi
 
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_FIND_IPV6_TYPE version: 5 updated: 2001/10/11 20:46:17
+dnl -----------------
 AC_DEFUN([CF_FIND_IPV6_TYPE],[
 AC_CACHE_CHECK(ipv6 stack type, cf_cv_ipv6type, [
 cf_cv_ipv6type=unknown
@@ -1530,6 +1588,8 @@ done
 ])
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_FIND_LIBRARY version: 7 updated: 2000/04/13 21:38:04
+dnl ---------------
 dnl Look for a non-standard library, given parameters for AC_TRY_LINK.  We
 dnl prefer a standard location, and use -L options only if we do not find the
 dnl library in the standard library location(s).
@@ -1578,6 +1638,8 @@ fi
 ])
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_FIONBIO version: 2 updated: 1998/02/24 06:51:46
+dnl ----------
 dnl Check for availability of fcntl versus ioctl(,FIONBIO,).  Lynx uses this
 dnl for Sequent (ptx), and it is needed for OS/2 EMX.
 AC_DEFUN([CF_FIONBIO],
@@ -1606,6 +1668,8 @@ AC_TRY_LINK([
 test "$cf_cv_fionbio" = "fcntl" && AC_DEFINE(USE_FCNTL)
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_FUNC_GETADDRINFO version: 5 updated: 2000/09/28 06:18:08
+dnl -------------------
 dnl Look for a working version of getaddrinfo(), for IPV6 support.
 AC_DEFUN([CF_FUNC_GETADDRINFO],[
 AC_CACHE_CHECK(working getaddrinfo, cf_cv_getaddrinfo,[
@@ -1695,6 +1759,8 @@ if test "$cf_cv_getaddrinfo" = yes ; then
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_FUNC_LSTAT version: 2 updated: 1997/09/07 13:00:21
+dnl -------------
 dnl A conventional existence-check for 'lstat' won't work with the Linux
 dnl version of gcc 2.7.0, since the symbol is defined only within <sys/stat.h>
 dnl as an inline function.
@@ -1717,6 +1783,8 @@ if test $ac_cv_func_lstat = yes; then
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_FUNC_SIGACTION version: 2 updated: 1999/07/28 06:09:35
+dnl -----------------
 dnl Check if we have the sigaction function and related structures.
 AC_DEFUN([CF_FUNC_SIGACTION],[
 AC_CACHE_CHECK(for sigaction and structs,cf_cv_func_sigaction,[
@@ -1736,6 +1804,8 @@ AC_TRY_LINK([
 test "$cf_cv_func_sigaction" = yes && AC_DEFINE(HAVE_SIGACTION)
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_FUNC_WAIT version: 2 updated: 1997/10/21 19:45:33
+dnl ------------
 dnl Test for the presence of <sys/wait.h>, 'union wait', arg-type of 'wait()'
 dnl and/or 'waitpid()'.
 dnl
@@ -1774,6 +1844,8 @@ if test $cf_cv_type_unionwait = yes; then
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_GCC_ATTRIBUTES version: 9 updated: 2002/12/21 19:25:52
+dnl -----------------
 dnl Test for availability of useful gcc __attribute__ directives to quiet
 dnl compiler warnings.  Though useful, not all are supported -- and contrary
 dnl to documentation, unrecognized directives cause older compilers to barf.
@@ -1847,6 +1919,8 @@ rm -rf conftest*
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_GCC_WARNINGS version: 12 updated: 2002/11/23 16:02:49
+dnl ---------------
 dnl Check if the compiler supports useful warning options.  There's a few that
 dnl we don't use, simply because they're too noisy:
 dnl
@@ -1895,6 +1969,8 @@ fi
 AC_SUBST(EXTRA_CFLAGS)
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_GNU_SOURCE version: 3 updated: 2000/10/29 23:30:53
+dnl -------------
 dnl Check if we must define _GNU_SOURCE to get a reasonable value for
 dnl _XOPEN_SOURCE, upon which many POSIX definitions depend.  This is a defect
 dnl (or misfeature) of glibc2, which breaks portability of many applications,
@@ -1923,6 +1999,75 @@ make an error
 test "$cf_cv_gnu_source" = yes && CPPFLAGS="$CPPFLAGS -D_GNU_SOURCE"
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_GNUTLS version: 1 updated: 2003/04/13 17:26:30
+dnl ---------
+dnl Check for gnutls library (TLS "is" SSL)
+dnl $1 = the [optional] directory in which the library may be found
+AC_DEFUN([CF_GNUTLS],[
+cf_ssl_library="-lgnutls-extra -lgnutls -lcrypt"
+case "$1" in #(vi
+no) #(vi
+  ;;
+yes) #(vi
+  AC_CHECK_LIB(gnutls, SSL_get_version,[],[
+  	if test -d /usr/local/gnutls ; then
+		CF_VERBOSE(assume it is in /usr/local/gnutls)
+		cf_ssl_library="-L/usr/local/gnutls/lib $cf_ssl_library"
+		CPPFLAGS="-I/usr/local/gnutls/include $CPPFLAGS"
+	else
+		AC_MSG_ERROR(cannot find gnutls library)
+	fi
+	],
+	[-lcrypt])
+  ;;
+*)
+  if test -d $1 ; then
+    if test -d $1/include ; then
+      CPPFLAGS="$CPPFLAGS -I$1/include"
+      cf_ssl_library="-L$1/lib $cf_ssl_library"
+    else
+      cf_ssl_library="-L$1 $cf_ssl_library"
+      test -d $1/../include && CPPFLAGS="$CPPFLAGS -I$1/../include"
+    fi
+  else
+    AC_MSG_WARN(expected a directory: $1)
+  fi
+  ;;
+esac
+LIBS="$cf_ssl_library $LIBS"
+
+AC_MSG_CHECKING(for gnutls include directory)
+AC_TRY_COMPILE([
+#include <stdio.h>
+#include <gnutls/openssl.h>],
+	[SSL_shutdown((SSL *)0)],
+	[cf_openssl_incl=yes],
+	[cf_openssl_incl=no])
+AC_MSG_RESULT($cf_openssl_incl)
+test "$cf_openssl_incl" = yes && AC_DEFINE(USE_GNUTLS_INCL)
+
+AC_MSG_CHECKING(if we can link to gnutls library)
+AC_TRY_LINK([
+#include <stdio.h>
+#ifdef USE_GNUTLS_INCL
+#include <gnutls/openssl.h>
+#else
+#include <ssl.h>
+#endif
+],
+	[SSL_shutdown((SSL *)0)],
+	[cf_ssl_library=yes],
+	[cf_ssl_library=no])
+AC_MSG_RESULT($cf_ssl_library)
+if test "$cf_ssl_library" = yes ; then
+	AC_DEFINE(USE_SSL)
+else
+	AC_ERROR(Cannot link with gnutls library)
+fi
+])dnl
+dnl ---------------------------------------------------------------------------
+dnl CF_HEADER_PATH version: 8 updated: 2002/11/10 14:46:59
+dnl --------------
 dnl Construct a search-list for a nonstandard header-file
 AC_DEFUN([CF_HEADER_PATH],
 [CF_SUBDIR_PATH($1,$2,include)
@@ -1942,11 +2087,15 @@ test -d "$oldincludedir" && {
 
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_HELP_MESSAGE version: 3 updated: 1998/01/14 10:56:23
+dnl ---------------
 dnl Insert text into the help-message, for readability, from AC_ARG_WITH.
 AC_DEFUN([CF_HELP_MESSAGE],
 [AC_DIVERT_HELP([$1])dnl
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_INET_ADDR version: 4 updated: 1999/03/30 12:24:31
+dnl ------------
 dnl For Lynx, check if the libraries we have found give us inet_aton, or
 dnl inet_addr.  If not, try to find the latter function with -lbind or
 dnl -lresolv, and put that on the end of the libraries, i.e., after the network
@@ -1999,6 +2148,8 @@ else
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_LASTLOG version: 4 updated: 2002/10/27 23:21:42
+dnl ----------
 dnl Check for header defining _PATH_LASTLOG, or failing that, see if the lastlog
 dnl file exists.
 AC_DEFUN([CF_LASTLOG],
@@ -2024,11 +2175,16 @@ AC_TRY_COMPILE([
 test $cf_cv_path_lastlog != no && AC_DEFINE(USE_LASTLOG)
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_LIBRARY_PATH version: 7 updated: 2002/11/10 14:46:59
+dnl ---------------
 dnl Construct a search-list for a nonstandard library-file
 AC_DEFUN([CF_LIBRARY_PATH],
 [CF_SUBDIR_PATH($1,$2,lib)])dnl
 dnl ---------------------------------------------------------------------------
-dnl Check if we've got setlocale() and its header, <locale.h>
+dnl CF_LOCALE version: 4 updated: 2003/02/16 08:16:04
+dnl ---------
+dnl Check if we have setlocale() and its header, <locale.h>
+dnl The optional parameter $1 tells what to do if we do have locale support.
 AC_DEFUN([CF_LOCALE],
 [
 AC_MSG_CHECKING(for setlocale())
@@ -2039,15 +2195,19 @@ AC_TRY_LINK([#include <locale.h>],
 	[cf_cv_locale=no])
 	])
 AC_MSG_RESULT($cf_cv_locale)
-test $cf_cv_locale = yes && AC_DEFINE(LOCALE)
+test $cf_cv_locale = yes && { ifelse($1,,AC_DEFINE(LOCALE),[$1]) }
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_MSG_LOG version: 3 updated: 1997/09/07 14:05:52
+dnl ----------
 dnl Write a debug message to config.log, along with the line number in the
 dnl configure script.
 AC_DEFUN([CF_MSG_LOG],[
 echo "(line __oline__) testing $* ..." 1>&AC_FD_CC
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_NCURSES_BROKEN version: 6 updated: 1998/04/27 20:32:34
+dnl -----------------
 dnl Check for pre-1.9.9g ncurses (among other problems, the most obvious is
 dnl that color combinations don't work).
 AC_DEFUN([CF_NCURSES_BROKEN],
@@ -2075,6 +2235,8 @@ fi
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_NCURSES_CC_CHECK version: 3 updated: 2003/01/12 18:59:28
+dnl -------------------
 dnl Check if we can compile with ncurses' header file
 dnl $1 is the cache variable to set
 dnl $2 is the header-file to include
@@ -2106,6 +2268,8 @@ printf("old\n");
 	,[$1=no])
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_NCURSES_CPPFLAGS version: 16 updated: 2002/12/29 18:30:46
+dnl -------------------
 dnl Look for the SVr4 curses clone 'ncurses' in the standard places, adjusting
 dnl the CPPFLAGS variable so we can include its header.
 dnl
@@ -2202,6 +2366,8 @@ esac
 CF_NCURSES_VERSION
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_NCURSES_LIBS version: 11 updated: 2002/12/22 14:22:25
+dnl ---------------
 dnl Look for the ncurses library.  This is a little complicated on Linux,
 dnl because it may be linked with the gpm (general purpose mouse) library.
 dnl Some distributions have gpm linked with (bsd) curses, which makes it
@@ -2266,6 +2432,8 @@ CF_UPPER(cf_nculib_ROOT,HAVE_LIB$cf_nculib_root)
 AC_DEFINE_UNQUOTED($cf_nculib_ROOT)
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_NCURSES_VERSION version: 10 updated: 2002/10/27 18:21:42
+dnl ------------------
 dnl Check for the version of ncurses, to aid in reporting bugs, etc.
 dnl Call CF_CURSES_CPPFLAGS first, or CF_NCURSES_CPPFLAGS.  We don't use
 dnl AC_REQUIRE since that does not work with the shell's if/then/else/fi.
@@ -2325,6 +2493,8 @@ EOF
 test "$cf_cv_ncurses_version" = no || AC_DEFINE(NCURSES)
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_NETLIBS version: 4 updated: 1999/12/23 15:20:39
+dnl ----------
 dnl After checking for functions in the default $LIBS, make a further check
 dnl for the functions that are netlib-related (these aren't always in the
 dnl libc, etc., and have to be handled specially because there are conflicting
@@ -2366,6 +2536,8 @@ LIBS="$LIBS $cf_cv_netlibs"
 test $cf_test_netlibs = no && echo "$cf_cv_netlibs" >&AC_FD_MSG
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_NGROUPS version: 3 updated: 2001/12/27 07:55:07
+dnl ----------
 dnl Check for the symbol NGROUPS
 AC_DEFUN([CF_NGROUPS],
 [
@@ -2400,6 +2572,8 @@ elif test "$cf_cv_ngroups" = NGROUPS_MAX ; then
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_OUR_MESSAGES version: 3 updated: 2000/01/20 10:49:08
+dnl ---------------
 dnl Check if we use the messages included with this program
 AC_DEFUN([CF_OUR_MESSAGES],
 [
@@ -2418,6 +2592,8 @@ test $use_our_messages = yes && USE_OUR_MESSAGES=
 AC_SUBST(USE_OUR_MESSAGES)
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_PATHSEP version: 3 updated: 2001/01/12 01:23:53
+dnl ----------
 dnl Provide a value for the $PATH and similar separator
 AC_DEFUN([CF_PATHSEP],
 [
@@ -2429,6 +2605,8 @@ ifelse($1,,,[$1=$PATHSEP])
 	AC_SUBST(PATHSEP)
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_PATH_PROG version: 5 updated: 2001/11/18 20:52:38
+dnl ------------
 dnl Check for a given program, defining corresponding symbol.
 dnl	$1 = environment variable, which is suffixed by "_PATH" in the #define.
 dnl	$2 = program name to find.
@@ -2478,6 +2656,8 @@ if test -n "$cf_path_prog" ; then
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_PATH_SYNTAX version: 9 updated: 2002/09/17 23:03:38
+dnl --------------
 dnl Check the argument to see that it looks like a pathname.  Rewrite it if it
 dnl begins with one of the prefix/exec_prefix variables, and then again if the
 dnl result begins with 'NONE'.  This is necessary to work around autoconf's
@@ -2507,6 +2687,8 @@ case ".[$]$1" in #(vi
 esac
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_PDCURSES_X11 version: 6 updated: 2002/10/27 18:21:42
+dnl ---------------
 dnl Configure for PDCurses' X11 library
 AC_DEFUN([CF_PDCURSES_X11],[
 AC_REQUIRE([CF_X_ATHENA])
@@ -2533,6 +2715,8 @@ else
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_RECHECK_FUNC version: 3 updated: 2000/10/18 19:29:13
+dnl ---------------
 dnl Re-check on a function to see if we can pick it up by adding a library.
 dnl	$1 = function to check
 dnl	$2 = library to check in
@@ -2557,6 +2741,8 @@ AC_CHECK_LIB($2,$1,[
 	[[$]$3])
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_REMOVE_BROKEN version: 3 updated: 1997/11/23 14:49:44
+dnl ----------------
 dnl Check for broken definition of 'remove()'.  This is (in particular) broken
 dnl on the older version of SCO (I'd cite version if I knew where to look) by
 dnl having <stdio.h> #define remove to __unlink, which appears in no library.
@@ -2585,6 +2771,8 @@ AC_MSG_RESULT($cf_cv_baddef_remove)
 test "$cf_cv_baddef_remove" != no && AC_DEFINE(NEED_REMOVE)
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_SET_ERRNO version: 2 updated: 2000/03/26 22:37:59
+dnl ------------
 dnl Check if 'errno' is declared in a fashion that lets us set it.
 AC_DEFUN([CF_SET_ERRNO],
 [
@@ -2607,6 +2795,8 @@ int main()
 test "$cf_cv_set_errno" != no && AC_DEFINE(CAN_SET_ERRNO)
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_SIZECHANGE version: 8 updated: 2000/11/04 12:22:16
+dnl -------------
 dnl Check for definitions & structures needed for window size-changing
 dnl FIXME: check that this works with "snake" (HP-UX 10.x)
 AC_DEFUN([CF_SIZECHANGE],
@@ -2675,6 +2865,8 @@ if test "$cf_cv_sizechange" != no ; then
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_SLANG_CPPFLAGS version: 6 updated: 2001/04/15 19:18:04
+dnl -----------------
 dnl Look for the slang header files in the standard places, adjusting the
 dnl CPPFLAGS variable.
 dnl
@@ -2715,6 +2907,8 @@ predefined) # (vi
 esac
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_SLANG_LIBS version: 7 updated: 2002/09/17 19:03:38
+dnl -------------
 dnl Look for the slang library.
 AC_DEFUN([CF_SLANG_LIBS],
 [
@@ -2750,6 +2944,8 @@ AC_MSG_RESULT($cf_result)
 test $cf_result = no && LIBS="$cf_slang_LIBS3"
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_SLANG_UNIX_DEFS version: 3 updated: 2000/05/20 11:59:59
+dnl ------------------
 dnl Slang's header files rely on some predefined symbols to declare variables
 dnl that we might find useful.  This check is needed, because those symbols
 dnl are generally not available.
@@ -2773,6 +2969,8 @@ SLang_TT_Baud_Rate = 1
 test $cf_cv_slang_unix = yes && AC_DEFINE(REAL_UNIX_SYSTEM)
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_SOCKS version: 3 updated: 2001/01/01 09:54:40
+dnl --------
 dnl Check for socks library
 dnl $1 = the [optional] directory in which the library may be found
 AC_DEFUN([CF_SOCKS],[
@@ -2809,6 +3007,8 @@ AC_TRY_LINK([
 	[AC_ERROR(Cannot link with socks library)])
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_SOCKS5 version: 7 updated: 2001/01/01 09:54:40
+dnl ---------
 dnl Check for socks5 configuration
 dnl $1 = the [optional] directory in which the library may be found
 AC_DEFUN([CF_SOCKS5],[
@@ -2870,6 +3070,8 @@ AC_MSG_RESULT($cf_use_socks5p_h)
 test "$cf_use_socks5p_h" = yes && AC_DEFINE(INCLUDE_PROTOTYPES)
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_SRAND version: 6 updated: 2002/09/17 19:03:38
+dnl --------
 dnl Check for functions similar to srand() and rand().  lrand48() and random()
 dnl return a 31-bit value, while rand() returns a value less than RAND_MAX
 dnl which usually is only 16-bits.
@@ -2923,6 +3125,8 @@ if test "$cf_cv_srand_func" != unknown ; then
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_SSL version: 2 updated: 2001/01/01 20:53:43
+dnl ------
 dnl Check for ssl library
 dnl $1 = the [optional] directory in which the library may be found
 AC_DEFUN([CF_SSL],[
@@ -2988,15 +3192,21 @@ else
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_STRIP_G_OPT version: 3 updated: 2002/12/21 19:25:52
+dnl --------------
 dnl	Remove "-g" option from the compiler options
 AC_DEFUN([CF_STRIP_G_OPT],
 [$1=`echo ${$1} | sed -e 's%-g %%' -e 's%-g$%%'`])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_STRIP_O_OPT version: 3 updated: 2001/02/02 19:06:08
+dnl --------------
 dnl	Remove "-O" option from the compiler options
 AC_DEFUN([CF_STRIP_O_OPT],[
 $1=`echo ${$1} | sed -e 's/-O[[1-9]]\? //' -e 's/-O[[1-9]]\?$//'`
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_STRUCT_TERMIOS version: 5 updated: 2000/11/04 12:22:46
+dnl -----------------
 dnl Some machines require _POSIX_SOURCE to completely define struct termios.
 dnl If so, define SVR4_TERMIO
 AC_DEFUN([CF_STRUCT_TERMIOS],[
@@ -3031,6 +3241,8 @@ if test "$ac_cv_header_termios_h" = yes ; then
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_SUBDIR_PATH version: 3 updated: 2002/12/29 18:30:46
+dnl --------------
 dnl Construct a search-list for a nonstandard header/lib-file
 dnl	$1 = the variable to return as result
 dnl	$2 = the package name
@@ -3093,6 +3305,8 @@ test -d /usr && {
 }
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_SYSTEM_MAIL_FLAGS version: 3 updated: 1998/11/18 14:45:34
+dnl --------------------
 AC_DEFUN([CF_SYSTEM_MAIL_FLAGS],
 [
 AC_MSG_CHECKING([system mail flags])
@@ -3109,6 +3323,8 @@ AC_MSG_RESULT($cf_cv_system_mail_flags)
 AC_DEFINE_UNQUOTED(SYSTEM_MAIL_FLAGS, "$cf_cv_system_mail_flags")
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_SYSV_UTMP version: 5 updated: 2001/12/27 12:55:07
+dnl ------------
 dnl Check if this is a SYSV flavor of UTMP
 AC_DEFUN([CF_SYSV_UTMP],
 [
@@ -3128,6 +3344,8 @@ struct $cf_cv_have_utmp x;
 test $cf_cv_sysv_utmp = yes && AC_DEFINE(USE_SYSV_UTMP)
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_SYS_ERRLIST version: 6 updated: 2001/12/30 13:03:23
+dnl --------------
 dnl Check for declaration of sys_nerr and sys_errlist in one of stdio.h and
 dnl errno.h.  Declaration of sys_errlist on BSD4.4 interferes with our
 dnl declaration.  Reported by Keith Bostic.
@@ -3137,6 +3355,8 @@ AC_DEFUN([CF_SYS_ERRLIST],
     CF_CHECK_ERRNO(sys_errlist)
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_TERMCAP_LIBS version: 10 updated: 2001/10/18 20:42:39
+dnl ---------------
 dnl Look for termcap libraries, or the equivalent in terminfo.
 AC_DEFUN([CF_TERMCAP_LIBS],
 [
@@ -3193,6 +3413,8 @@ if test "$cf_cv_termlib" = none; then
 fi
 ])])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_TERMIO_AND_CURSES version: 3 updated: 2000/12/31 19:47:37
+dnl --------------------
 dnl Check if including termio.h with <curses.h> dies like on sysv68
 dnl FIXME: this is too Lynx-specific
 AC_DEFUN([CF_TERMIO_AND_CURSES],
@@ -3214,6 +3436,8 @@ AC_CACHE_CHECK(if we can include termio.h with curses,cf_cv_termio_and_curses,[
 test $cf_cv_termio_and_curses = yes && AC_DEFINE(TERMIO_AND_CURSES)
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_TERMIO_AND_TERMIOS version: 2 updated: 1997/08/28 20:22:00
+dnl ---------------------
 dnl Check if including both termio.h and termios.h die like on DG.UX
 AC_DEFUN([CF_TERMIO_AND_TERMIOS],
 [
@@ -3233,6 +3457,8 @@ AC_MSG_RESULT($cf_cv_termio_and_termios)
 test $cf_cv_termio_and_termios = no && AC_DEFINE(TERMIO_AND_TERMIOS)
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_TTYTYPE version: 4 updated: 2002/10/27 18:21:42
+dnl ----------
 AC_DEFUN([CF_TTYTYPE],
 [
 AC_MSG_CHECKING(if ttytype is declared in curses library)
@@ -3246,6 +3472,8 @@ AC_MSG_RESULT($cf_cv_have_ttytype)
 test $cf_cv_have_ttytype = yes && AC_DEFINE(HAVE_TTYTYPE)
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_UNION_WAIT version: 5 updated: 1997/11/23 14:49:44
+dnl -------------
 dnl Check to see if the BSD-style union wait is declared.  Some platforms may
 dnl use this, though it is deprecated in favor of the 'int' type in Posix.
 dnl Some vendors provide a bogus implementation that declares union wait, but
@@ -3290,6 +3518,8 @@ AC_MSG_RESULT($cf_cv_type_unionwait)
 test $cf_cv_type_unionwait = yes && AC_DEFINE(HAVE_TYPE_UNIONWAIT)
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_UPPER version: 5 updated: 2001/01/29 23:40:59
+dnl --------
 dnl Make an uppercase version of a variable
 dnl $1=uppercase($2)
 AC_DEFUN([CF_UPPER],
@@ -3297,24 +3527,34 @@ AC_DEFUN([CF_UPPER],
 $1=`echo "$2" | sed y%abcdefghijklmnopqrstuvwxyz./-%ABCDEFGHIJKLMNOPQRSTUVWXYZ___%`
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_UTF8_LIB version: 4 updated: 2003/03/01 18:36:42
+dnl -----------
 dnl Check for multibyte support, and if not found, utf8 compatibility library
 AC_DEFUN([CF_UTF8_LIB],
 [
 AC_CACHE_CHECK(for multibyte character support,cf_cv_utf8_lib,[
-AC_TRY_LINK([
-#include <stdlib.h>],[putwc(0,0);],cf_cv_utf8_lib=yes,[
-cf_save_LIBS="$LIBS"
-LIBS="-lutf8 $LIBS"
-AC_TRY_LINK([
+	cf_save_LIBS="$LIBS"
+	AC_TRY_LINK([
+#include <stdlib.h>],[putwc(0,0);],
+	[cf_cv_utf8_lib=yes],
+	[LIBS="-lutf8 $LIBS"
+	 AC_TRY_LINK([
 #include <libutf8.h>],[putwc(0,0);],
-[cf_cv_utf8_lib=add-on],
-[cf_cv_utf8_lib=no])])
-])
+		[cf_cv_utf8_lib=add-on],
+		[cf_cv_utf8_lib=no])
+	LIBS="$cf_save_LIBS"
+])])
 
-# This is used by ncurses if curses.h is shared between ncurses/ncursesw:
-test "$cf_cv_utf8_lib" != no && AC_DEFINE(HAVE_LIBUTF8_H)
+# HAVE_LIBUTF8_H is used by ncurses if curses.h is shared between
+# ncurses/ncursesw:
+if test "$cf_cv_utf8_lib" = "add-on" ; then
+	AC_DEFINE(HAVE_LIBUTF8_H)
+	LIBS="-lutf8 $LIBS"
+fi
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_UTMP version: 8 updated: 2002/10/27 23:21:42
+dnl -------
 dnl Check for UTMP/UTMPX headers
 AC_DEFUN([CF_UTMP],
 [
@@ -3360,6 +3600,8 @@ if test $cf_cv_have_utmp != no ; then
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_UTMP_UT_HOST version: 6 updated: 2002/10/27 23:21:42
+dnl ---------------
 dnl Check if UTMP/UTMPX struct defines ut_host member
 AC_DEFUN([CF_UTMP_UT_HOST],
 [
@@ -3378,6 +3620,8 @@ test $cf_cv_have_utmp_ut_host != no && AC_DEFINE(HAVE_UTMP_UT_HOST)
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_UTMP_UT_NAME version: 3 updated: 2002/10/27 23:21:42
+dnl ---------------
 dnl Check if UTMP/UTMPX struct defines ut_name member
 AC_DEFUN([CF_UTMP_UT_NAME],
 [
@@ -3413,6 +3657,8 @@ esac
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_UTMP_UT_SESSION version: 4 updated: 2002/10/27 23:21:42
+dnl ------------------
 dnl Check if UTMP/UTMPX struct defines ut_session member
 AC_DEFUN([CF_UTMP_UT_SESSION],
 [
@@ -3431,6 +3677,8 @@ fi
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_UTMP_UT_XSTATUS version: 3 updated: 2001/12/27 12:55:07
+dnl ------------------
 dnl Check for known variants on the UTMP/UTMPX struct's exit-status as reported
 dnl by various people:
 dnl
@@ -3467,6 +3715,8 @@ fi
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_UTMP_UT_XTIME version: 6 updated: 2002/10/27 23:21:42
+dnl ----------------
 dnl Check if UTMP/UTMPX struct defines ut_xtime member
 AC_DEFUN([CF_UTMP_UT_XTIME],
 [
@@ -3494,6 +3744,8 @@ fi
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_VARARGS version: 3 updated: 1998/12/10 20:06:29
+dnl ----------
 dnl Check for ANSI stdarg.h vs varargs.h.  Note that some systems include
 dnl <varargs.h> within <stdarg.h>.
 AC_DEFUN([CF_VARARGS],
@@ -3518,11 +3770,15 @@ AC_MSG_RESULT($cf_cv_ansi_varargs)
 test $cf_cv_ansi_varargs = yes && AC_DEFINE(ANSI_VARARGS)
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_VERBOSE version: 2 updated: 1997/09/05 10:45:14
+dnl ----------
 dnl Use AC_VERBOSE w/o the warnings
 AC_DEFUN([CF_VERBOSE],
 [test -n "$verbose" && echo "	$1" 1>&AC_FD_MSG
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_WAIT_HEADERS version: 2 updated: 1997/10/21 19:45:33
+dnl ---------------
 dnl Build up an expression $cf_wait_headers with the header files needed to
 dnl compile against the prototypes for 'wait()', 'waitpid()', etc.  Assume it's
 dnl Posix, which uses <sys/types.h> and <sys/wait.h>, but allow SVr4 variation
@@ -3552,6 +3808,8 @@ fi
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_WIDEC_CURSES version: 3 updated: 2001/11/18 20:52:38
+dnl ---------------
 dnl Check for curses implementations that can handle wide-characters
 AC_DEFUN([CF_WIDEC_CURSES],
 [
@@ -3597,6 +3855,8 @@ fi
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_WITH_CURSES_DIR version: 2 updated: 2002/11/10 14:46:59
+dnl ------------------
 dnl Wrapper for AC_ARG_WITH to specify directory under which to look for curses
 dnl libraries.
 AC_DEFUN([CF_WITH_CURSES_DIR],[
@@ -3607,6 +3867,8 @@ AC_ARG_WITH(curses-dir,
 	[cf_cv_curses_dir=no])
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_WITH_PATH version: 6 updated: 1998/10/11 00:40:17
+dnl ------------
 dnl Wrapper for AC_ARG_WITH to ensure that user supplies a pathname, not just
 dnl defaulting to yes/no.
 dnl
@@ -3624,6 +3886,8 @@ eval $3="$withval"
 AC_SUBST($3)dnl
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_XOPEN_CURSES version: 6 updated: 2002/11/12 06:55:30
+dnl ---------------
 dnl Test if we should define X/Open source for curses, needed on Digital Unix
 dnl 4.x, to see the extended functions, but breaks on IRIX 6.x.
 AC_DEFUN([CF_XOPEN_CURSES],
@@ -3644,6 +3908,8 @@ AC_TRY_LINK([
 test $cf_cv_need_xopen_extension = yes && CPPFLAGS="$CPPFLAGS -D_XOPEN_SOURCE_EXTENDED"
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_X_ATHENA version: 11 updated: 2002/12/26 20:56:10
+dnl -----------
 dnl Check for Xaw (Athena) libraries
 dnl
 AC_DEFUN([CF_X_ATHENA],
@@ -3671,6 +3937,8 @@ CF_X_ATHENA_CPPFLAGS($cf_x_athena)
 CF_X_ATHENA_LIBS($cf_x_athena)
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_X_ATHENA_CPPFLAGS version: 2 updated: 2002/10/09 20:00:37
+dnl --------------------
 dnl Normally invoked by CF_X_ATHENA, with $1 set to the appropriate flavor of
 dnl the Athena widgets, e.g., Xaw, Xaw3d, neXtaw.
 AC_DEFUN([CF_X_ATHENA_CPPFLAGS],
@@ -3716,6 +3984,8 @@ elif test "$cf_x_athena_include" != default ; then
 fi
 ])
 dnl ---------------------------------------------------------------------------
+dnl CF_X_ATHENA_LIBS version: 3 updated: 2003/02/16 15:24:54
+dnl ----------------
 dnl Normally invoked by CF_X_ATHENA, with $1 set to the appropriate flavor of
 dnl the Athena widgets, e.g., Xaw, Xaw3d, neXtaw.
 AC_DEFUN([CF_X_ATHENA_LIBS],
@@ -3744,13 +4014,15 @@ do
 				LIBS="$cf_lib $LIBS"
 				AC_MSG_CHECKING(for $cf_test in $cf_lib)
 			fi
+			cf_SAVE="$LIBS"
+			LIBS="$X_PRE_LIBS $LIBS $X_EXTRA_LIBS"
 			AC_TRY_LINK([],[$cf_test()],
 				[cf_result=yes],
-				[cf_result=no],
-				[$X_PRE_LIBS $LIBS $X_EXTRA_LIBS])
+				[cf_result=no])
 			AC_MSG_RESULT($cf_result)
 			if test "$cf_result" = yes ; then
 				cf_x_athena_lib="$cf_lib"
+				LIBS="$cf_SAVE"
 				break
 			else
 				LIBS="$cf_save"
@@ -3768,6 +4040,8 @@ CF_UPPER(cf_x_athena_LIBS,HAVE_LIB_$cf_x_athena)
 AC_DEFINE_UNQUOTED($cf_x_athena_LIBS)
 ])
 dnl ---------------------------------------------------------------------------
+dnl CF_X_TOOLKIT version: 9 updated: 2001/12/30 19:09:58
+dnl ------------
 dnl Check for X Toolkit libraries
 dnl
 AC_DEFUN([CF_X_TOOLKIT],

@@ -289,7 +289,7 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 			/*
 			 *  Tell user what's happening. - FM
 			 */
-			_user_message(WWW_USING_MESSAGE, addr);
+			HTUserMsg2(WWW_USING_MESSAGE, addr);
 		    }
 
 		    if (skip_loadfile) {
@@ -332,7 +332,7 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 			if (!dump_output_immediately) {
 #ifdef WIN_EX
 			    if (focus_window) {
-				HTInfoMsg("Set focus1");
+				HTInfoMsg(gettext("Set focus1"));
 				status = SetForegroundWindow(cur_handle);
 			    }
 #else
@@ -389,7 +389,7 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 	    if (!dump_output_immediately) {
 #ifdef WIN_EX
 		if (focus_window) {
-		    HTInfoMsg("Set focus2");
+		    HTInfoMsg(gettext("Set focus2"));
 		    status = SetForegroundWindow(cur_handle);
 		}
 #else
@@ -408,7 +408,7 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 	    if (!dump_output_immediately) {
 #ifdef WIN_EX
 		if (focus_window) {
-		    HTInfoMsg("Set focus3");
+		    HTInfoMsg(gettext("Set focus3"));
 		    status = SetForegroundWindow(cur_handle);
 		}
 #else

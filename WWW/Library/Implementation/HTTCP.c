@@ -76,7 +76,6 @@ PRIVATE char *hostname = NULL;		/* The name of this host */
 **  PUBLIC VARIABLES
 */
 #ifdef SOCKS
-extern BOOLEAN socks_flag;
 PUBLIC unsigned long socks_bind_remoteAddr; /* for long Rbind */
 #endif /* SOCKS */
 

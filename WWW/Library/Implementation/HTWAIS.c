@@ -637,8 +637,6 @@ PUBLIC int HTLoadWAIS ARGS4(
     int return_status = HT_LOADED;
     int rv;
 
-    extern FILE * connect_to_server();
-
     if (!acceptable_inited)
 	init_acceptable();
 

@@ -1639,7 +1639,7 @@ PRIVATE CONST char ** UC_setup_LYCharSets_repl ARGS2(
 	s7 = SevenBitApproximations[i];
 	s8 = ISO_Latin1[i];
 	*p = s7;
-	if (s8 && UCH(*s8) >= 160 && strlen(s8) == 1) {
+	if (s8 && UCH(*s8) >= 160 && s8[1] == '\0') {
 	    /*
 	     *	We have an entity that is mapped to
 	     *	one valid eightbit latin1 char.

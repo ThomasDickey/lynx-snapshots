@@ -118,15 +118,39 @@ extern void HTEndParam PARAMS((char ** result, CONST char * command, int number)
 #define HTOptParam(result, command, number, parameter) HTSACat(result, parameter)
 
 /* Binary copy and concat */
-#ifdef EXP_FILE_UPLOAD
-
 typedef struct {
 	char *str;
 	int len;
 } bstring;
 
-extern void HTSABCopy PARAMS((bstring** dest, CONST char * src, int len));
-extern void HTSABCat PARAMS((bstring ** dest, CONST char * src, int len));
+extern void HTSABCopy  PARAMS((bstring ** dest, CONST char * src, int len));
+extern void HTSABCopy0 PARAMS((bstring ** dest, CONST char * src));
+extern void HTSABCat   PARAMS((bstring ** dest, CONST char * src, int len));
+extern void HTSABCat0  PARAMS((bstring ** dest, CONST char * src));
+extern BOOL HTSABEql   PARAMS((bstring * a, bstring * b));
+extern void HTSABFree  PARAMS((bstring ** ptr));
+
+#define BStrLen(s)    (((s) != 0) ? (s)->len : 0)
+#define BStrData(s)   (((s) != 0) ? (s)->str : 0)
+
+#define BINEQ(a,b)    (HTSABEql(a,b))	/* like STREQ() */
+
+#define isBEmpty(p)   ((p) == 0 || BStrLen(p) == 0)
+
+#define BStrCopy(d,s)  HTSABCopy(  &(d), BStrData(s), BStrLen(s))
+#define BStrCopy0(d,s) HTSABCopy0( &(d), s)
+#define BStrCat(d,s)   HTSABCat(   &(d), BStrData(s), BStrLen(s))
+#define BStrCat0(d,s)  HTSABCat0(  &(d), s)
+#define BStrFree(d)    HTSABFree(  &(d))
+
+#ifdef ANSI_VARARGS
+extern bstring * HTBprintf (bstring ** pstr, CONST char * fmt, ...)
+			    GCC_PRINTFLIKE(2,3);
+#else
+extern bstring * HTBprintf () GCC_PRINTFLIKE(2,3);
 #endif
+
+extern void trace_bstring PARAMS((bstring *data));
+extern void trace_bstring2 PARAMS((CONST char *text, int size));
 
 #endif /* HTSTRING_H */

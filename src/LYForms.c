@@ -649,7 +649,7 @@ again:
 		}
 		LYRefreshEdit(&MyEdit);
 	    } else {
-		HTInfoMsg("Clipboard empty or Not text data.");
+		HTInfoMsg(gettext("Clipboard empty or Not text data."));
 		continue;
 	    }
 	}

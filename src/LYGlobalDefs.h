@@ -42,6 +42,7 @@
 
 #ifdef SOCKS
 extern BOOLEAN socks_flag;
+extern unsigned long socks_bind_remoteAddr;
 #endif /* SOCKS */
 
 #ifdef IGNORE_CTRL_C

@@ -216,7 +216,7 @@ PUBLIC BOOL LYAddMapElement ARGS5(
 	char *,		address,
 	char *,		title,
 	HTParentAnchor *, node_anchor,
-	BOOL,		intern_flag)
+	BOOL,		intern_flag GCC_UNUSED)
 {
     LYMapElement *new = NULL;
     LYImageMap *theMap = NULL;
@@ -547,7 +547,7 @@ PRIVATE int LYLoadIMGmap ARGS4 (
     } else if (LYRequestTitle && *LYRequestTitle &&
 	       strcasecomp(LYRequestTitle, "[USEMAP]")) {
 	StrAllocCopy(MapTitle, LYRequestTitle);
-    } else if ((cp=strrchr(address, '#')) != NULL) {
+    } else if ((cp = strrchr(address, '#')) != NULL) {
 	StrAllocCopy(MapTitle, (cp+1));
     }
     if (!(MapTitle && *MapTitle)) {

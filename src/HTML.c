@@ -364,7 +364,7 @@ PUBLIC void HTML_put_character ARGS2(HTStructured *, me, char, c)
 	/*
 	 *  Free format text.
 	 */
-	if (!strcmp(me->sp->style->name,"Preformatted")) {
+	if (me->sp->style->id == ST_Preformatted) {
 	    if (c != '\r' &&
 		!(c == '\n' && me->inLABEL && !me->inP) &&
 		!(c == '\n' && !me->inPRE)) {
@@ -374,8 +374,8 @@ PUBLIC void HTML_put_character ARGS2(HTStructured *, me, char, c)
 	    }
 	    me->inPRE = TRUE;
 
-	} else if (!strcmp(me->sp->style->name,"Listing") ||
-		   !strcmp(me->sp->style->name,"Example")) {
+	} else if (me->sp->style->id == ST_Listing ||
+		   me->sp->style->id == ST_Example) {
 	    if (c != '\r') {
 		me->inP = TRUE;
 		me->inLABEL = FALSE;
@@ -799,33 +799,12 @@ PRIVATE void LYHandleFIG ARGS10(
 	me->in_word = NO;
 	me->inP = FALSE;
 
-	if (clickable_images && src && src != '\0') {
+	if (clickable_images && src && *src) {
 	    char *href = NULL;
 	    StrAllocCopy(href, src);
 	    CHECK_FOR_INTERN(*intern_flag,href);
 	    LYLegitimizeHREF(me, &href, TRUE, TRUE);
 	    if (*href) {
-		char *temp = NULL;
-		/*
-		 *  Check whether a base tag is in effect. - FM
-		 */
-		if ((me->inBASE && *href != '#') &&
-		    (temp = HTParse(href, me->base_href, PARSE_ALL)) &&
-		    *temp != '\0')
-		    /*
-		     *	Use reference related to the base.
-		     */
-		    StrAllocCopy(href, temp);
-		FREE(temp);
-
-		/*
-		 *  Check whether to fill in localhost. - FM
-		 */
-		LYFillLocalFileURL(&href,
-				   ((*href != '#' &&
-				     me->inBASE) ?
-				   me->base_href : me->node_anchor->address));
-
 		me->CurrentA = HTAnchor_findChildAndLink(
 					me->node_anchor,	/* Parent */
 					NULL,			/* Tag */
@@ -883,6 +862,12 @@ PRIVATE void clear_objectdata ARGS1(
     }
 }
 
+#define HTParseALL(pp,pconst)  \
+	{ char* free_me = *pp; \
+	  *pp = HTParse(*pp, pconst, PARSE_ALL); \
+	  FREE(free_me);       \
+	}
+
 /*	Start Element
 **	-------------
 */
@@ -904,10 +889,10 @@ PRIVATE int HTML_start_element ARGS6(
     char *I_value = NULL;
     char *I_name = NULL;
     char *temp = NULL;
+    CONST char *Base = NULL;
     int dest_char_set = -1;
     HTParentAnchor *dest = NULL;	     /* An anchor's destination */
     BOOL dest_ismap = FALSE;		     /* Is dest an image map script? */
-    BOOL UseBASE = TRUE;		     /* Resolved vs. BASE if present? */
     HTChildAnchor *ID_A = NULL;		     /* HTML_foo_ID anchor */
     int url_type = 0, i = 0;
     char *cp = NULL;
@@ -1212,9 +1197,11 @@ PRIVATE int HTML_start_element ARGS6(
 	if (present && present[HTML_BASE_HREF] && !local_host_only &&
 	    value[HTML_BASE_HREF] && *value[HTML_BASE_HREF]) {
 	    char *base = NULL;
-	    char *related = NULL;
+	    CONST char *related = NULL;
 
 	    StrAllocCopy(base, value[HTML_BASE_HREF]);
+	    CTRACE((tfp, "*HTML_BASE: initial href=`%s'\n", NonNull(base)));
+
 	    if (!(url_type = LYLegitimizeHREF(me, &base, TRUE, TRUE))) {
 		CTRACE((tfp, "HTML: BASE '%s' is not an absolute URL.\n",
 			    NonNull(base)));
@@ -1232,41 +1219,28 @@ PRIVATE int HTML_start_element ARGS6(
 		 *  resolution of relative URLs anyway.  We can
 		 *  also strip the #map part. - kw
 		 */
-		temp = HTParse(base + 11, "",
-			       PARSE_ACCESS+PARSE_HOST+PARSE_PATH
-			       +PARSE_PUNCTUATION);
-		if (temp) {
-		    FREE(base);
-		    base = temp;
-		    temp = NULL;
-		}
+		temp = base;
+		base = HTParse(base + 11, "", PARSE_ALL_WITHOUT_ANCHOR);
+		FREE(temp);
 	    }
 
 	    /*
 	     *	Get parent's address for defaulted fields.
 	     */
-	    StrAllocCopy(related, me->node_anchor->address);
+	    related = me->node_anchor->address;
 
 	    /*
 	     *	Create the access field.
 	     */
-	    if ((temp = HTParse(base, related,
-				PARSE_ACCESS+PARSE_PUNCTUATION)) &&
-		*temp != '\0') {
-		StrAllocCopy(me->base_href, temp);
-	    } else {
-		FREE(temp);
-		StrAllocCopy(me->base_href, (temp = HTParse(related, "",
-					 PARSE_ACCESS+PARSE_PUNCTUATION)));
-	    }
+	    temp = HTParse(base, related, PARSE_ACCESS+PARSE_PUNCTUATION);
+	    StrAllocCopy(me->base_href, temp);
 	    FREE(temp);
 
 	    /*
 	     *	Create the host[:port] field.
 	     */
-	    if ((temp = HTParse(base, "",
-				PARSE_HOST+PARSE_PUNCTUATION)) &&
-		!strncmp(temp, "//", 2)) {
+	    temp = HTParse(base, "", PARSE_HOST+PARSE_PUNCTUATION);
+	    if (!strncmp(temp, "//", 2)) {
 		StrAllocCat(me->base_href, temp);
 		if (!strcmp(me->base_href, "file://")) {
 		    StrAllocCat(me->base_href, "localhost");
@@ -1281,14 +1255,19 @@ PRIVATE int HTML_start_element ARGS6(
 		}
 	    }
 	    FREE(temp);
-	    FREE(related);
 
 	    /*
 	     *	Create the path field.
 	     */
-	    if ((temp = HTParse(base, "",
-				PARSE_PATH+PARSE_PUNCTUATION)) &&
-		*temp != '\0') {
+	    temp = HTParse(base, "", PARSE_PATH+PARSE_PUNCTUATION);
+	    if (*temp != '\0') {
+		char *p = strchr(temp, '?');
+		if (p)
+		    *p = '\0';
+		p = strrchr(temp, '/');
+		if (p)
+		    *(p+1) = '\0';  /* strip after the last slash */
+
 		StrAllocCat(me->base_href, temp);
 	    } else if (!strcmp(me->base_href, STR_NEWS_URL)) {
 		StrAllocCat(me->base_href, "*");
@@ -1303,7 +1282,11 @@ PRIVATE int HTML_start_element ARGS6(
 	    FREE(base);
 
 	    me->inBASE = TRUE;
+	    me->node_anchor->inBASE = TRUE;
 	    StrAllocCopy(me->node_anchor->content_base, me->base_href);
+	    /* me->base_href is a valid URL */
+
+	    CTRACE((tfp, "*HTML_BASE: final href=`%s'\n", me->base_href));
 	}
 	break;
 
@@ -1317,44 +1300,26 @@ PRIVATE int HTML_start_element ARGS6(
 	break;
 
     case HTML_LINK:
-#ifndef DONT_TRACK_INTERNAL_LINKS
 	intern_flag = FALSE;
-#endif
 	if (present && present[HTML_LINK_HREF]) {
 	    CHECK_FOR_INTERN(intern_flag,value[HTML_LINK_HREF]);
 	    /*
 	     *	Prepare to do housekeeping on the reference. - FM
 	     */
 	    if (!value[HTML_LINK_HREF]) {
-		if (me->inBASE && me->base_href && *me->base_href) {
-		    StrAllocCopy(href, me->base_href);
-		} else {
-		    StrAllocCopy(href, me->node_anchor->address);
-		}
+		Base = (me->inBASE)
+			? me->base_href
+			: me->node_anchor->address;
+		StrAllocCopy(href, Base);
 	    } else {
 		StrAllocCopy(href, value[HTML_LINK_HREF]);
 		url_type = LYLegitimizeHREF(me, &href, TRUE, TRUE);
+
+		Base = (me->inBASE && *href != '\0' && *href != '#')
+			? me->base_href
+			: me->node_anchor->address;
+		HTParseALL(&href, Base);
 	    }
-
-	    /*
-	     *	Check whether a base tag is in effect. - FM
-	     */
-	    if ((me->inBASE && *href != '\0' && *href != '#') &&
-		(temp = HTParse(href, me->base_href, PARSE_ALL)) &&
-		*temp != '\0')
-		/*
-		 *  Use reference related to the base.
-		 */
-		StrAllocCopy(href, temp);
-	    FREE(temp);
-
-	    /*
-	     *	Check whether to fill in localhost. - FM
-	     */
-	    LYFillLocalFileURL(&href,
-			       ((*href != '\0' && *href != '#' &&
-				 me->inBASE) ?
-			       me->base_href : me->node_anchor->address));
 
 	    /*
 	     *	Handle links with a REV attribute. - FM
@@ -1369,18 +1334,6 @@ PRIVATE int HTML_start_element ARGS6(
 		    /*
 		     *	Load the owner element. - FM
 		     */
-		    if (!is_url(href)) {
-			temp = HTParse(href,
-				       (me->inBASE ?
-				     me->base_href : me->node_anchor->address),
-					PARSE_ALL);
-			StrAllocCopy(href, temp);
-			FREE(temp);
-			LYFillLocalFileURL(&href,
-					   (me->inBASE ?
-					 me->base_href :
-					 me->node_anchor->address));
-		    }
 		    HTAnchor_setOwner(me->node_anchor, href);
 		    CTRACE((tfp, "HTML: DOC OWNER '%s' found\n", href));
 		    FREE(href);
@@ -1647,9 +1600,6 @@ PRIVATE int HTML_start_element ARGS6(
 	if (((present)) &&
 	    ((present[HTML_ISINDEX_HREF] && value[HTML_ISINDEX_HREF]) ||
 	     (present[HTML_ISINDEX_ACTION] && value[HTML_ISINDEX_ACTION]))) {
-	    char * action = NULL;
-	    char * isindex_href = NULL;
-
 	    /*
 	     *	Lynx was supporting ACTION, which never made it into
 	     *	the HTML 2.0 specs.  HTML 3.0 uses HREF, so we'll
@@ -1657,41 +1607,22 @@ PRIVATE int HTML_start_element ARGS6(
 	     *	until people have fully switched over. - FM
 	     */
 	    if (present[HTML_ISINDEX_HREF] && value[HTML_ISINDEX_HREF])
-		StrAllocCopy(isindex_href, value[HTML_ISINDEX_HREF]);
+		StrAllocCopy(href, value[HTML_ISINDEX_HREF]);
 	    else
-		StrAllocCopy(isindex_href, value[HTML_ISINDEX_ACTION]);
-	    url_type = LYLegitimizeHREF(me, &isindex_href, TRUE, TRUE);
+		StrAllocCopy(href, value[HTML_ISINDEX_ACTION]);
+	    LYLegitimizeHREF(me, &href, TRUE, TRUE);
 
-	    /*
-	     *	Check whether a base tag is in effect.
-	     */
-	    if (me->inBASE && *isindex_href != '\0' && *isindex_href != '#')
-		action = HTParse(isindex_href, me->base_href, PARSE_ALL);
-	    if (isEmpty(action)) {
-		FREE(action);
-		action = HTParse(isindex_href,
-				 me->node_anchor->address, PARSE_ALL);
-	    }
-	    FREE(isindex_href);
-
-	    if (action && *action) {
-		HTAnchor_setIndex(me->node_anchor, action);
-	    } else {
-		HTAnchor_setIndex(me->node_anchor, me->node_anchor->address);
-	    }
-	    FREE(action);
+	    Base = (me->inBASE && *href != '\0' && *href != '#')
+		    ? me->base_href
+		    : me->node_anchor->address;
+	    HTParseALL(&href, Base);
+	    HTAnchor_setIndex(me->node_anchor, href);
+	    FREE(href);
 
 	} else {
-	    if (me->inBASE)
-		/*
-		 *  Use base.
-		 */
-		HTAnchor_setIndex(me->node_anchor, me->base_href);
-	    else
-		/*
-		 *  Use index's address.
-		 */
-		HTAnchor_setIndex(me->node_anchor, me->node_anchor->address);
+	    Base = (me->inBASE) ?
+			me->base_href : me->node_anchor->address;
+	    HTAnchor_setIndex(me->node_anchor, Base);
 	}
 	/*
 	 *  Support HTML 3.0 PROMPT attribute. - FM
@@ -1752,30 +1683,9 @@ PRIVATE int HTML_start_element ARGS6(
 	    LYTrimTail(id_string);
 	}
 	if (present && present[HTML_FRAME_SRC] &&
-	    value[HTML_FRAME_SRC] && *value[HTML_FRAME_SRC] != '\0') {
+	    value[HTML_FRAME_SRC] && *value[HTML_FRAME_SRC]) {
 	    StrAllocCopy(href, value[HTML_FRAME_SRC]);
-	    CHECK_FOR_INTERN(intern_flag,href);
-	    url_type = LYLegitimizeHREF(me, &href, TRUE, TRUE);
-
-	    /*
-	     *	Check whether a base tag is in effect. - FM
-	     */
-	    if ((me->inBASE && *href != '\0' && *href != '#') &&
-		(temp = HTParse(href, me->base_href, PARSE_ALL)) &&
-		*temp != '\0')
-		/*
-		 *  Use reference related to the base.
-		 */
-		StrAllocCopy(href, temp);
-	    FREE(temp);
-
-	    /*
-	     *	Check whether to fill in localhost. - FM
-	     */
-	    LYFillLocalFileURL(&href,
-			       ((*href != '\0' && *href != '#' &&
-				 me->inBASE) ?
-			       me->base_href : me->node_anchor->address));
+	    LYLegitimizeHREF(me, &href, TRUE, TRUE);
 
 	    if (me->inA) {
 		SET_SKIP_STACK(HTML_A);
@@ -1785,7 +1695,7 @@ PRIVATE int HTML_start_element ARGS6(
 				me->node_anchor,	/* Parent */
 				NULL,			/* Tag */
 				href,			/* Addresss */
-				INTERN_LT);		/* Type */
+				(HTLinkType*)0);	/* Type */
 	    CAN_JUSTIFY_PUSH(FALSE);
 	    LYEnsureSingleSpace(me);
 	    if (me->inUnderline == FALSE)
@@ -1827,38 +1737,18 @@ PRIVATE int HTML_start_element ARGS6(
 	    LYTrimTail(id_string);
 	}
 	if (present && present[HTML_IFRAME_SRC] &&
-	    value[HTML_IFRAME_SRC] && *value[HTML_IFRAME_SRC] != '\0') {
+	    value[HTML_IFRAME_SRC] && *value[HTML_IFRAME_SRC]) {
 	    StrAllocCopy(href, value[HTML_IFRAME_SRC]);
-	    CHECK_FOR_INTERN(intern_flag,href);
-	    url_type = LYLegitimizeHREF(me, &href, TRUE, TRUE);
-
-	    /*
-	     *	Check whether a base tag is in effect. - FM
-	     */
-	    if ((me->inBASE && *href != '\0' && *href != '#') &&
-		(temp = HTParse(href, me->base_href, PARSE_ALL)) &&
-		*temp != '\0')
-		/*
-		 *  Use reference related to the base.
-		 */
-		StrAllocCopy(href, temp);
-	    FREE(temp);
-
-	    /*
-	     *	Check whether to fill in localhost. - FM
-	     */
-	    LYFillLocalFileURL(&href,
-			       ((*href != '\0' && *href != '#' &&
-				 me->inBASE) ?
-			       me->base_href : me->node_anchor->address));
+	    LYLegitimizeHREF(me, &href, TRUE, TRUE);
 
 	    if (me->inA)
 		HTML_end_element(me, HTML_A, include);
+
 	    me->CurrentA = HTAnchor_findChildAndLink(
 				me->node_anchor,	/* Parent */
 				NULL,			/* Tag */
 				href,			/* Addresss */
-				INTERN_LT);		/* Type */
+				(HTLinkType*)0);	/* Type */
 	    LYEnsureDoubleSpace(me);
 	    CAN_JUSTIFY_PUSH_F
 	    LYResetParagraphAlignment(me);
@@ -2184,10 +2074,10 @@ PRIVATE int HTML_start_element ARGS6(
 		me->Division_Level >= 0) {
 		me->sp->style->alignment =
 				me->DivisionAlignments[me->Division_Level];
-	    } else if (!strcmp(me->sp->style->name, "HeadingCenter") ||
-		       !strcmp(me->sp->style->name, "Heading1")) {
+	    } else if (me->sp->style->id == ST_HeadingCenter ||
+		       me->sp->style->id == ST_Heading1) {
 		me->sp->style->alignment = HT_CENTER;
-	    } else if (!strcmp(me->sp->style->name, "HeadingRight")) {
+	    } else if (me->sp->style->id == ST_HeadingRight) {
 		me->sp->style->alignment = HT_RIGHT;
 	    } else {
 		me->sp->style->alignment = HT_LEFT;
@@ -3041,27 +2931,8 @@ PRIVATE int HTML_start_element ARGS6(
 		    for (i = 0; (href[i] = href[i+7]) != 0; i++)
 			;
 		}
-
-		/*
-		 * Check whether a base tag is in effect.  - FM
-		 */
-		if (me->inBASE) {
-		    /*
-		     * Use reference related to the base.
-		     */
-		    temp = href;
-		    href = HTParse(temp, me->base_href, PARSE_ALL);
-		    FREE(temp);
-		}
-
-		/*
-		 * Check whether to fill in localhost.  - FM
-		 */
-		LYFillLocalFileURL(&href,
-				   (me->inBASE
-				    ? me->base_href
-				    : me->node_anchor->address));
 	    }
+
 	    if (present[HTML_A_ISMAP]) /*???*/
 		intern_flag = FALSE;
 	} else {
@@ -3202,9 +3073,7 @@ PRIVATE int HTML_start_element ARGS6(
 	    }
 	}
 
-#ifndef DONT_TRACK_INTERNAL_LINKS
 	intern_flag = FALSE;	/* unless set below - kw */
-#endif
 	/*
 	 *  If there's a USEMAP, resolve it. - FM
 	 */
@@ -3230,50 +3099,16 @@ PRIVATE int HTML_start_element ARGS6(
 	     *	If the MAP reference doesn't yet begin with a scheme,
 	     *	check whether a base tag is in effect. - FM
 	     */
-	    if (!url_type && me->inBASE) {
 		/*
 		 *  If the
 		 *  USEMAP value is a lone fragment and LYSeekFragMAPinCur
 		 *  is set, we'll use the current document's URL for
 		 *  resolving.	Otherwise use the BASE. - kw
 		 */
-		if ((*map_href == '#' &&
-		     LYSeekFragMAPinCur == TRUE)) {
-		    /*
-		     *	Use reference related to the current stream. - FM
-		     */
-		    temp = HTParse(map_href, me->node_anchor->address,
-				    PARSE_ALL);
-		    StrAllocCopy(map_href, temp);
-		    UseBASE = FALSE;
-		} else {
-		    /*
-		     *	Use reference related to the base. - FM
-		     */
-		    temp = HTParse(map_href, me->base_href, PARSE_ALL);
-		    StrAllocCopy(map_href, temp);
-		    UseBASE = TRUE;
-		}
-		FREE(temp);
-	    }
-
-	    /*
-	     *	Check whether to fill in localhost. - FM
-	     */
-	    LYFillLocalFileURL(&map_href,
-			       ((UseBASE && me->inBASE) ?
-			  me->base_href : me->node_anchor->address));
-	    UseBASE = TRUE;
-
-	    /*
-	     *	If it's not yet a URL, resolve versus
-	     *	the current document's address. - FM
-	     */
-	    if (!(url_type = is_url(map_href))) {
-		temp = HTParse(map_href, me->node_anchor->address, PARSE_ALL);
-		StrAllocCopy(map_href, temp);
-		FREE(temp);
-	    }
+	    Base = (me->inBASE &&
+			!(*map_href == '#' && LYSeekFragMAPinCur == TRUE)) ?
+				me->base_href : me->node_anchor->address;
+	    HTParseALL(&map_href, Base);
 
 	    /*
 	     *	Prepend our client-side MAP access field. - FM
@@ -3407,29 +3242,9 @@ PRIVATE int HTML_start_element ARGS6(
 	 */
 	if (clickable_images &&
 	    present && present[HTML_IMG_SRC] &&
-	    value[HTML_IMG_SRC] && *value[HTML_IMG_SRC] != '\0') {
+	    value[HTML_IMG_SRC] && *value[HTML_IMG_SRC]) {
 	    StrAllocCopy(href, value[HTML_IMG_SRC]);
-	    url_type = LYLegitimizeHREF(me, &href, TRUE, TRUE);
-
-	    /*
-	     *	Check whether a base tag is in effect. - FM
-	     */
-	    if ((me->inBASE && *href != '\0' && *href != '#') &&
-		(temp = HTParse(href, me->base_href, PARSE_ALL)) &&
-		*temp != '\0')
-		/*
-		 *  Use reference related to the base.
-		 */
-		StrAllocCopy(href, temp);
-	    FREE(temp);
-
-	    /*
-	     *	Check whether to fill in localhost. - FM
-	     */
-	    LYFillLocalFileURL(&href,
-			       ((*href != '\0' && *href != '#' &&
-				 me->inBASE) ?
-			       me->base_href : me->node_anchor->address));
+	    LYLegitimizeHREF(me, &href, TRUE, TRUE);
 
 	    /*
 	     *	If it's an ISMAP and/or USEMAP, or graphic for an
@@ -3774,35 +3589,10 @@ PRIVATE int HTML_start_element ARGS6(
 	     *	HREF is a lone fragment and LYSeekFragAREAinCur
 	     *	is set. - FM
 	     */
-	    if (((me->inBASE && *href != '\0') &&
-		 !(*href == '#' && LYSeekFragAREAinCur == TRUE)) &&
-		(temp = HTParse(href, me->base_href, PARSE_ALL)) &&
-		*temp != '\0')
-		/*
-		 *  Use reference related to the base.
-		 */
-		StrAllocCopy(href, temp);
-	    FREE(temp);
-
-	    /*
-	     *	Check whether to fill in localhost. - FM
-	     */
-	    LYFillLocalFileURL(&href,
-			       ((((me->inBASE && *href != '\0') &&
-				  !(*href == '#' &&
-				    LYSeekFragAREAinCur == TRUE)))
-						?
-				  me->base_href : me->node_anchor->address));
-	    if (!(url_type = is_url(href))) {
-		temp = HTParse(href, me->node_anchor->address, PARSE_ALL);
-		if (isEmpty(temp)) {
-		   FREE(href);
-		   FREE(temp);
-		   break;
-		}
-		StrAllocCopy(href, temp);
-		FREE(temp);
-	    }
+	    Base = ((me->inBASE && *href != '\0') &&
+			!(*href == '#' && LYSeekFragAREAinCur == TRUE)) ?
+				me->base_href : me->node_anchor->address;
+	    HTParseALL(&href, Base);
 
 	    /*
 	     *	Check for an ALT. - FM
@@ -4068,30 +3858,10 @@ PRIVATE int HTML_start_element ARGS6(
     case HTML_OVERLAY:
 	if (clickable_images && me->inFIG &&
 	    present && present[HTML_OVERLAY_SRC] &&
-	    value[HTML_OVERLAY_SRC] && *value[HTML_OVERLAY_SRC] != '\0') {
+	    value[HTML_OVERLAY_SRC] && *value[HTML_OVERLAY_SRC]) {
 	    StrAllocCopy(href, value[HTML_OVERLAY_SRC]);
-	    CHECK_FOR_INTERN(intern_flag,href);
-	    url_type = LYLegitimizeHREF(me, &href, TRUE, TRUE);
+	    LYLegitimizeHREF(me, &href, TRUE, TRUE);
 	    if (*href) {
-		/*
-		 *  Check whether a base tag is in effect. - FM
-		 */
-		if ((me->inBASE && *href != '#') &&
-		    (temp = HTParse(href, me->base_href, PARSE_ALL)) &&
-		    *temp != '\0')
-		    /*
-		     *	Use reference related to the base.
-		     */
-		    StrAllocCopy(href, temp);
-		FREE(temp);
-
-		/*
-		 *  Check whether to fill in localhost. - FM
-		 */
-		LYFillLocalFileURL(&href,
-				   ((*href != '#' &&
-				     me->inBASE) ?
-				   me->base_href : me->node_anchor->address));
 
 		if (me->inA) {
 		    SET_SKIP_STACK(HTML_A);
@@ -4101,7 +3871,7 @@ PRIVATE int HTML_start_element ARGS6(
 					me->node_anchor,	/* Parent */
 					NULL,			/* Tag */
 					href,			/* Addresss */
-					INTERN_LT);		/* Type */
+					(HTLinkType*)0);	/* Type */
 		HTML_put_character(me, ' ');
 		HText_appendCharacter(me->text, '+');
 		me->CurrentANum = HText_beginAnchor(me->text,
@@ -4174,10 +3944,12 @@ PRIVATE int HTML_start_element ARGS6(
 	 *  If we're making all sources links, get the source. - FM
 	 */
 	if (clickable_images && present && present[HTML_APPLET_CODE] &&
-	    value[HTML_APPLET_CODE] && *value[HTML_APPLET_CODE] != '\0') {
+	    value[HTML_APPLET_CODE] && *value[HTML_APPLET_CODE]) {
 	    char * base = NULL;
-	    char * code = NULL;
 
+	    Base = (me->inBASE)
+		    ? me->base_href
+		    : me->node_anchor->address;
 	    /*
 	     *	Check for a CODEBASE attribute. - FM
 	     */
@@ -4192,43 +3964,17 @@ PRIVATE int HTML_start_element ARGS6(
 		if (*base == '\0')
 		    StrAllocCopy(base, "/");
 		LYAddHtmlSep(&base);
-		url_type = LYLegitimizeHREF(me, &base, TRUE, FALSE);
+		LYLegitimizeHREF(me, &base, TRUE, FALSE);
 
-		/*
-		 *  Check whether to fill in localhost. - FM
-		 */
-		LYFillLocalFileURL(&base,
-				   (me->inBASE ?
-				 me->base_href : me->node_anchor->address));
-
-		if (!(url_type = is_url(base))) {
-		    /*
-		     *	Check whether a base tag is in effect.
-		     */
-		    if (me->inBASE) {
-			temp = HTParse(base, me->base_href, PARSE_ALL);
-		    } else {
-			temp = HTParse(base, me->node_anchor->address,
-							PARSE_ALL);
-		    }
-		    StrAllocCopy(base, temp);
-		    FREE(temp);
-		}
-	    } else {
-		if (me->inBASE) {
-		    StrAllocCopy(base, me->base_href);
-		} else {
-		    StrAllocCopy(base, me->node_anchor->address);
-		}
+		HTParseALL(&base, Base);
 	    }
 
-	    StrAllocCopy(code, value[HTML_APPLET_CODE]);
-	    url_type = LYLegitimizeHREF(me, &code, TRUE, FALSE);
-	    href = HTParse(code, base, PARSE_ALL);
+	    StrAllocCopy(href, value[HTML_APPLET_CODE]);
+	    LYLegitimizeHREF(me, &href, TRUE, FALSE);
+	    HTParseALL(&href, (base ? base : Base));
 	    FREE(base);
-	    FREE(code);
 
-	    if (!isEmpty(href)) {
+	    if (*href) {
 		if (me->inA) {
 		    if (me->inBoldA == TRUE && me->inBoldH == FALSE)
 			HText_appendCharacter(me->text, LY_BOLD_END_CHAR);
@@ -4273,34 +4019,13 @@ PRIVATE int HTML_start_element ARGS6(
 	 *  If we're making all sources links, get the source. - FM
 	 */
 	if (clickable_images && present && present[HTML_BGSOUND_SRC] &&
-	    value[HTML_BGSOUND_SRC] && *value[HTML_BGSOUND_SRC] != '\0') {
+	    value[HTML_BGSOUND_SRC] && *value[HTML_BGSOUND_SRC]) {
 	    StrAllocCopy(href, value[HTML_BGSOUND_SRC]);
-	    CHECK_FOR_INTERN(intern_flag,href);
-	    url_type = LYLegitimizeHREF(me, &href, TRUE, TRUE);
+	    LYLegitimizeHREF(me, &href, TRUE, TRUE);
 	    if (*href == '\0') {
 		FREE(href);
 		break;
 	    }
-
-	    /*
-	     *	Check whether a base tag is in effect. - FM
-	     */
-	    if ((me->inBASE && *href != '#') &&
-		(temp = HTParse(href, me->base_href, PARSE_ALL)) &&
-		*temp != '\0')
-		/*
-		 *  Use reference related to the base.
-		 */
-		StrAllocCopy(href, temp);
-	    FREE(temp);
-
-	    /*
-	     *	Check whether to fill in localhost. - FM
-	     */
-	    LYFillLocalFileURL(&href,
-			       ((*href != '#' &&
-				 me->inBASE) ?
-			       me->base_href : me->node_anchor->address));
 
 	    if (me->inA) {
 		if (me->inBoldA == TRUE && me->inBoldH == FALSE)
@@ -4315,7 +4040,7 @@ PRIVATE int HTML_start_element ARGS6(
 					me->node_anchor,	/* Parent */
 					NULL,			/* Tag */
 					href,			/* Addresss */
-					INTERN_LT);		/* Type */
+					(HTLinkType*)0);	/* Type */
 	    me->CurrentANum = HText_beginAnchor(me->text,
 						me->inUnderline,
 						me->CurrentA);
@@ -4387,31 +4112,10 @@ PRIVATE int HTML_start_element ARGS6(
 	 *  If we're making all sources links, get the source. - FM
 	 */
 	if (clickable_images && present && present[HTML_EMBED_SRC] &&
-	    value[HTML_EMBED_SRC] && *value[HTML_EMBED_SRC] != '\0') {
+	    value[HTML_EMBED_SRC] && *value[HTML_EMBED_SRC]) {
 	    StrAllocCopy(href, value[HTML_EMBED_SRC]);
-	    CHECK_FOR_INTERN(intern_flag,href);
-	    url_type = LYLegitimizeHREF(me, &href, TRUE, TRUE);
-	    if (*href != '\0') {
-		/*
-		 *  Check whether a base tag is in effect. - FM
-		 */
-		if ((me->inBASE && *href != '#') &&
-		    (temp = HTParse(href, me->base_href, PARSE_ALL)) &&
-		    *temp != '\0')
-		    /*
-		     *	Use reference related to the base.
-		     */
-		    StrAllocCopy(href, temp);
-		FREE(temp);
-
-		/*
-		 *  Check whether to fill in localhost. - FM
-		 */
-		LYFillLocalFileURL(&href,
-				   ((*href != '#' &&
-				     me->inBASE) ?
-				   me->base_href : me->node_anchor->address));
-
+	    LYLegitimizeHREF(me, &href, TRUE, TRUE);
+	    if (*href) {
 		if (me->inA) {
 		    if (me->inBoldA == TRUE && me->inBoldH == FALSE)
 			HText_appendCharacter(me->text, LY_BOLD_END_CHAR);
@@ -4422,7 +4126,7 @@ PRIVATE int HTML_start_element ARGS6(
 					me->node_anchor,	/* Parent */
 					NULL,			/* Tag */
 					href,			/* Addresss */
-					INTERN_LT);		/* Type */
+					(HTLinkType*)0);	/* Type */
 		me->CurrentANum = HText_beginAnchor(me->text,
 						    me->inUnderline,
 						    me->CurrentA);
@@ -4551,63 +4255,43 @@ PRIVATE int HTML_start_element ARGS6(
 		accept_cs = value[HTML_FORM_ACCEPT_CHARSET] ?
 			    value[HTML_FORM_ACCEPT_CHARSET] : "UNKNOWN";
 	    }
+
+	    Base = (me->inBASE)
+		    ? me->base_href
+		    : me->node_anchor->address;
+
 	    if (present && present[HTML_FORM_ACTION] &&
-		value[HTML_FORM_ACTION])  {
-		/*
-		 *  Prepare to do housekeeping on the reference. - FM
-		 */
+		value[HTML_FORM_ACTION]) {
+
 		StrAllocCopy(action, value[HTML_FORM_ACTION]);
-		url_type = LYLegitimizeHREF(me, &action, TRUE, TRUE);
+		LYLegitimizeHREF(me, &action, TRUE, TRUE);
 
 		/*
 		 *  Check whether a base tag is in effect.  Note that
 		 *  actions always are resolved w.r.t. to the base,
 		 *  even if the action is empty. - FM
 		 */
-		if ((me->inBASE && me->base_href && *me->base_href) &&
-		    (temp = HTParse(action, me->base_href, PARSE_ALL)) &&
-		    *temp != '\0') {
-		    /*
-		     *	Use action related to the base.
-		     */
-		    StrAllocCopy(action, temp);
-		} else if ((temp = HTParse(action,
-					   me->node_anchor->address,
-					   PARSE_ALL)) &&
-		    *temp != '\0') {
-		    /*
-		     *	Use action related to the current document.
-		     */
-		    StrAllocCopy(action, temp);
-		} else {
-		    FREE(action);
-		}
-		FREE(temp);
+		HTParseALL(&action, Base);
+
+	    } else {
+		StrAllocCopy(action, Base);
 	    }
-	    if (!(action && *action)) {
-		if (me->inBASE && me->base_href && *me->base_href) {
-		     StrAllocCopy(action, me->base_href);
-		} else {
-		     StrAllocCopy(action, me->node_anchor->address);
-		}
-	    }
-	    if (action) {
-		source = HTAnchor_findChildAndLink(me->node_anchor,
+
+	    source = HTAnchor_findChildAndLink(me->node_anchor,
 						   NULL,
 						   action,
 						   (HTLinkType*)0);
-		if ((link_dest = HTAnchor_followLink(source)) != NULL) {
-		    /*
-		     *	Memory leak fixed.
-		     *	05-28-94 Lynx 2-3-1 Garrett Arch Blythe
-		     */
-		    auto char *cp_freeme = HTAnchor_address(link_dest);
-		    if (cp_freeme != NULL) {
-			StrAllocCopy(action, cp_freeme);
-			FREE(cp_freeme);
-		    } else {
-			StrAllocCopy(action, "");
-		    }
+	    if ((link_dest = HTAnchor_followLink(source)) != NULL) {
+		/*
+		 *  Memory leak fixed.
+		 *  05-28-94 Lynx 2-3-1 Garrett Arch Blythe
+		 */
+		char* cp_freeme = HTAnchor_address(link_dest);
+		if (cp_freeme != NULL) {
+		    StrAllocCopy(action, cp_freeme);
+		    FREE(cp_freeme);
+		} else {
+		    StrAllocCopy(action, "");
 		}
 	    }
 
@@ -5040,28 +4724,8 @@ PRIVATE int HTML_start_element ARGS6(
 		 *  SRC's value a link if it's still not zero-length
 		 *  legitimizing it. - FM
 		 */
-		url_type = LYLegitimizeHREF(me, &href, TRUE, TRUE);
+		LYLegitimizeHREF(me, &href, TRUE, TRUE);
 		if (*href) {
-		    /*
-		     *	Check whether a base tag is in effect. - FM
-		     */
-		    if ((me->inBASE && *href != '#') &&
-			(temp = HTParse(href, me->base_href, PARSE_ALL)) &&
-			*temp != '\0')
-			/*
-			 *  Use reference related to the base.
-			 */
-			StrAllocCopy(href, temp);
-		    FREE(temp);
-
-		    /*
-		     *	Check whether to fill in localhost. - FM
-		     */
-		    LYFillLocalFileURL(&href,
-				       ((*href != '#' &&
-					 me->inBASE) ?
-				       me->base_href :
-				       me->node_anchor->address));
 
 		    if (me->inA) {
 			SET_SKIP_STACK(HTML_A);
@@ -5718,7 +5382,7 @@ PRIVATE int HTML_start_element ARGS6(
 	    HTML_end_element(me, HTML_U, include);
 	}
 	me->inTABLE = TRUE;
-	if (!strcmp(me->sp->style->name, "Preformatted")) {
+	if (me->sp->style->id == ST_Preformatted) {
 	    UPDATE_STYLE;
 	    CHECK_ID(HTML_TABLE_ID);
 	    break;
@@ -5803,7 +5467,7 @@ PRIVATE int HTML_start_element ARGS6(
 	}
 	me->in_word = NO;
 
-	if (!strcmp(me->sp->style->name, "Preformatted")) {
+	if (me->sp->style->id == ST_Preformatted) {
 	    CHECK_ID(HTML_TR_ID);
 	    me->inP = FALSE;
 /*	    HText_cancelStbl(me->text);  seems unnecessary here - kw */
@@ -5813,8 +5477,8 @@ PRIVATE int HTML_start_element ARGS6(
 	    me->sp->style->alignment = styles[me->sp[0].tag_number]->alignment;
 	} else if (me->List_Nesting_Level >= 0 ||
 		   ((me->Division_Level < 0) &&
-		    (!strcmp(me->sp->style->name, "Normal") ||
-		     !strcmp(me->sp->style->name, "Preformatted")))) {
+		    (me->sp->style->id == ST_Normal ||
+		     me->sp->style->id == ST_Preformatted))) {
 		me->sp->style->alignment = HT_LEFT;
 	} else {
 	    me->sp->style->alignment = (short) me->current_default_alignment;
@@ -6451,10 +6115,10 @@ PRIVATE int HTML_end_element ARGS3(
 	if (me->Division_Level >= 0) {
 	    me->sp->style->alignment =
 				me->DivisionAlignments[me->Division_Level];
-	} else if (!strcmp(me->sp->style->name, "HeadingCenter") ||
-		   !strcmp(me->sp->style->name, "Heading1")) {
+	} else if (me->sp->style->id == ST_HeadingCenter ||
+		   me->sp->style->id == ST_Heading1) {
 	    me->sp->style->alignment = HT_CENTER;
-	} else if (!strcmp(me->sp->style->name, "HeadingRight")) {
+	} else if (me->sp->style->id == ST_HeadingRight) {
 	    me->sp->style->alignment = HT_RIGHT;
 	} else {
 	    me->sp->style->alignment = HT_LEFT;
@@ -7534,7 +7198,7 @@ End_Object:
 #endif
 	me->inTABLE = FALSE;
 
-	if (!strcmp(me->sp->style->name, "Preformatted")) {
+	if (me->sp->style->id == ST_Preformatted) {
 	    break;
 	}
 	if (me->Division_Level >= 0)
@@ -7848,12 +7512,12 @@ PRIVATE void HTML_free ARGS1(HTStructured *, me)
 	(*me->targetClass._free)(me->target);
     }
     if (me->sp && me->sp->style && me->sp->style->name) {
-	if (!strcmp(me->sp->style->name, "DivCenter") ||
-	    !strcmp(me->sp->style->name, "HeadingCenter") ||
-	    !strcmp(me->sp->style->name, "Heading1")) {
+	if (me->sp->style->id == ST_DivCenter ||
+	    me->sp->style->id == ST_HeadingCenter ||
+	    me->sp->style->id == ST_Heading1) {
 	    me->sp->style->alignment = HT_CENTER;
-	} else if (!strcmp(me->sp->style->name, "DivRight") ||
-		   !strcmp(me->sp->style->name, "HeadingRight")) {
+	} else if (me->sp->style->id == ST_DivRight ||
+		   me->sp->style->id == ST_HeadingRight) {
 	    me->sp->style->alignment = HT_RIGHT;
 	} else	{
 	    me->sp->style->alignment = HT_LEFT;
@@ -7938,12 +7602,12 @@ PRIVATE void HTML_abort ARGS2(HTStructured *, me, HTError, e)
 	(*me->targetClass._abort)(me->target, e);
     }
     if (me->sp && me->sp->style && me->sp->style->name) {
-	if (!strcmp(me->sp->style->name, "DivCenter") ||
-	    !strcmp(me->sp->style->name, "HeadingCenter") ||
-	    !strcmp(me->sp->style->name, "Heading1")) {
+	if (me->sp->style->id == ST_DivCenter ||
+	    me->sp->style->id == ST_HeadingCenter ||
+	    me->sp->style->id == ST_Heading1) {
 	    me->sp->style->alignment = HT_CENTER;
-	} else if (!strcmp(me->sp->style->name, "DivRight") ||
-		   !strcmp(me->sp->style->name, "HeadingRight")) {
+	} else if (me->sp->style->id == ST_DivRight ||
+		   me->sp->style->id == ST_HeadingRight) {
 	    me->sp->style->alignment = HT_RIGHT;
 	} else	{
 	    me->sp->style->alignment = HT_LEFT;
@@ -7972,71 +7636,73 @@ PRIVATE void HTML_abort ARGS2(HTStructured *, me, HTError, e)
 */
 PRIVATE void get_styles NOARGS
 {
-    styleSheet = DefaultStyle();
-    default_style =		HTStyleNamed(styleSheet, "Normal");
+    HTStyle** st = NULL;
+    styleSheet = DefaultStyle(&st);  /* sets st[] array */
 
-    styles[HTML_H1] =		HTStyleNamed(styleSheet, "Heading1");
-    styles[HTML_H2] =		HTStyleNamed(styleSheet, "Heading2");
-    styles[HTML_H3] =		HTStyleNamed(styleSheet, "Heading3");
-    styles[HTML_H4] =		HTStyleNamed(styleSheet, "Heading4");
-    styles[HTML_H5] =		HTStyleNamed(styleSheet, "Heading5");
-    styles[HTML_H6] =		HTStyleNamed(styleSheet, "Heading6");
-    styles[HTML_HCENTER] =	HTStyleNamed(styleSheet, "HeadingCenter");
-    styles[HTML_HLEFT] =	HTStyleNamed(styleSheet, "HeadingLeft");
-    styles[HTML_HRIGHT] =	HTStyleNamed(styleSheet, "HeadingRight");
+    default_style =		st[ST_Normal];
 
-    styles[HTML_DCENTER] =	HTStyleNamed(styleSheet, "DivCenter");
-    styles[HTML_DLEFT] =	HTStyleNamed(styleSheet, "DivLeft");
-    styles[HTML_DRIGHT] =	HTStyleNamed(styleSheet, "DivRight");
+    styles[HTML_H1] =		st[ST_Heading1];
+    styles[HTML_H2] =		st[ST_Heading2];
+    styles[HTML_H3] =		st[ST_Heading3];
+    styles[HTML_H4] =		st[ST_Heading4];
+    styles[HTML_H5] =		st[ST_Heading5];
+    styles[HTML_H6] =		st[ST_Heading6];
+    styles[HTML_HCENTER] =	st[ST_HeadingCenter];
+    styles[HTML_HLEFT] =	st[ST_HeadingLeft];
+    styles[HTML_HRIGHT] =	st[ST_HeadingRight];
 
-    styles[HTML_DL] =		HTStyleNamed(styleSheet, "Glossary");
+    styles[HTML_DCENTER] =	st[ST_DivCenter];
+    styles[HTML_DLEFT] =	st[ST_DivLeft];
+    styles[HTML_DRIGHT] =	st[ST_DivRight];
+
+    styles[HTML_DL] =		st[ST_Glossary];
 	/* nested list styles */
-    styles[HTML_DL1] =		HTStyleNamed(styleSheet, "Glossary1");
-    styles[HTML_DL2] =		HTStyleNamed(styleSheet, "Glossary2");
-    styles[HTML_DL3] =		HTStyleNamed(styleSheet, "Glossary3");
-    styles[HTML_DL4] =		HTStyleNamed(styleSheet, "Glossary4");
-    styles[HTML_DL5] =		HTStyleNamed(styleSheet, "Glossary5");
-    styles[HTML_DL6] =		HTStyleNamed(styleSheet, "Glossary6");
+    styles[HTML_DL1] =		st[ST_Glossary1];
+    styles[HTML_DL2] =		st[ST_Glossary2];
+    styles[HTML_DL3] =		st[ST_Glossary3];
+    styles[HTML_DL4] =		st[ST_Glossary4];
+    styles[HTML_DL5] =		st[ST_Glossary5];
+    styles[HTML_DL6] =		st[ST_Glossary6];
 
     styles[HTML_UL] =
-    styles[HTML_OL] =		HTStyleNamed(styleSheet, "List");
+    styles[HTML_OL] =		st[ST_List];
 	/* nested list styles */
-    styles[HTML_OL1] =		HTStyleNamed(styleSheet, "List1");
-    styles[HTML_OL2] =		HTStyleNamed(styleSheet, "List2");
-    styles[HTML_OL3] =		HTStyleNamed(styleSheet, "List3");
-    styles[HTML_OL4] =		HTStyleNamed(styleSheet, "List4");
-    styles[HTML_OL5] =		HTStyleNamed(styleSheet, "List5");
-    styles[HTML_OL6] =		HTStyleNamed(styleSheet, "List6");
+    styles[HTML_OL1] =		st[ST_List1];
+    styles[HTML_OL2] =		st[ST_List2];
+    styles[HTML_OL3] =		st[ST_List3];
+    styles[HTML_OL4] =		st[ST_List4];
+    styles[HTML_OL5] =		st[ST_List5];
+    styles[HTML_OL6] =		st[ST_List6];
 
     styles[HTML_MENU] =
-    styles[HTML_DIR] =		HTStyleNamed(styleSheet, "Menu");
+    styles[HTML_DIR] =		st[ST_Menu];
 	/* nested list styles */
-    styles[HTML_MENU1] =	HTStyleNamed(styleSheet, "Menu1");
-    styles[HTML_MENU2] =	HTStyleNamed(styleSheet, "Menu2");
-    styles[HTML_MENU3] =	HTStyleNamed(styleSheet, "Menu3");
-    styles[HTML_MENU4] =	HTStyleNamed(styleSheet, "Menu4");
-    styles[HTML_MENU5] =	HTStyleNamed(styleSheet, "Menu5");
-    styles[HTML_MENU6] =	HTStyleNamed(styleSheet, "Menu6");
+    styles[HTML_MENU1] =	st[ST_Menu1];
+    styles[HTML_MENU2] =	st[ST_Menu2];
+    styles[HTML_MENU3] =	st[ST_Menu3];
+    styles[HTML_MENU4] =	st[ST_Menu4];
+    styles[HTML_MENU5] =	st[ST_Menu5];
+    styles[HTML_MENU6] =	st[ST_Menu6];
 
-    styles[HTML_DLC] =		HTStyleNamed(styleSheet, "GlossaryCompact");
+    styles[HTML_DLC] =		st[ST_GlossaryCompact];
 	/* nested list styles */
-    styles[HTML_DLC1] =		HTStyleNamed(styleSheet, "GlossaryCompact1");
-    styles[HTML_DLC2] =		HTStyleNamed(styleSheet, "GlossaryCompact2");
-    styles[HTML_DLC3] =		HTStyleNamed(styleSheet, "GlossaryCompact3");
-    styles[HTML_DLC4] =		HTStyleNamed(styleSheet, "GlossaryCompact4");
-    styles[HTML_DLC5] =		HTStyleNamed(styleSheet, "GlossaryCompact5");
-    styles[HTML_DLC6] =		HTStyleNamed(styleSheet, "GlossaryCompact6");
+    styles[HTML_DLC1] =		st[ST_GlossaryCompact1];
+    styles[HTML_DLC2] =		st[ST_GlossaryCompact2];
+    styles[HTML_DLC3] =		st[ST_GlossaryCompact3];
+    styles[HTML_DLC4] =		st[ST_GlossaryCompact4];
+    styles[HTML_DLC5] =		st[ST_GlossaryCompact5];
+    styles[HTML_DLC6] =		st[ST_GlossaryCompact6];
 
-    styles[HTML_ADDRESS] =	HTStyleNamed(styleSheet, "Address");
-    styles[HTML_BANNER] =	HTStyleNamed(styleSheet, "Banner");
-    styles[HTML_BLOCKQUOTE] =	HTStyleNamed(styleSheet, "Blockquote");
-    styles[HTML_BQ] =		HTStyleNamed(styleSheet, "Bq");
-    styles[HTML_FN] =		HTStyleNamed(styleSheet, "Footnote");
-    styles[HTML_NOTE] =		HTStyleNamed(styleSheet, "Note");
+    styles[HTML_ADDRESS] =	st[ST_Address];
+    styles[HTML_BANNER] =	st[ST_Banner];
+    styles[HTML_BLOCKQUOTE] =	st[ST_Blockquote];
+    styles[HTML_BQ] =		st[ST_Bq];
+    styles[HTML_FN] =		st[ST_Footnote];
+    styles[HTML_NOTE] =		st[ST_Note];
     styles[HTML_PLAINTEXT] =
-    styles[HTML_XMP] =		HTStyleNamed(styleSheet, "Example");
-    styles[HTML_PRE] =		HTStyleNamed(styleSheet, "Preformatted");
-    styles[HTML_LISTING] =	HTStyleNamed(styleSheet, "Listing");
+    styles[HTML_XMP] =		st[ST_Example];
+    styles[HTML_PRE] =		st[ST_Preformatted];
+    styles[HTML_LISTING] =	st[ST_Listing];
 }
 
 /*
@@ -8183,6 +7849,7 @@ PUBLIC HTStructured* HTML_new ARGS3(
     me->inBadHREF = FALSE;
     me->inBadHTML = FALSE;
     me->inBASE = FALSE;
+    me->node_anchor->inBASE = FALSE;
     me->inBoldA = FALSE;
     me->inBoldH = FALSE;
     me->inCAPTION = FALSE;

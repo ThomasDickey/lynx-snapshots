@@ -138,17 +138,19 @@ extern BOOL HText_getFirstTargetInLine PARAMS((
 	CONST char *	target));
 extern int HTisDocumentSource NOPARAMS;
 extern void HTuncache_current_document NOPARAMS;
+
 #ifdef SOURCE_CACHE
 extern BOOLEAN HTreparse_document NOPARAMS;
 extern BOOLEAN HTcan_reparse_document NOPARAMS;
 extern BOOLEAN HTdocument_settings_changed NOPARAMS;
 #endif
+
 extern int HText_getTopOfScreen NOPARAMS;
 extern int HText_getLines PARAMS((HText * text));
 extern int HText_getNumOfLines NOPARAMS;
 extern int do_www_search PARAMS((DocInfo *doc));
 extern char * HTLoadedDocumentURL NOPARAMS;
-extern char * HTLoadedDocumentPost_data NOPARAMS;
+extern bstring * HTLoadedDocumentPost_data NOPARAMS;
 extern char * HTLoadedDocumentTitle NOPARAMS;
 extern BOOLEAN HTLoadedDocumentIsHEAD NOPARAMS;
 extern BOOLEAN HTLoadedDocumentIsSafe NOPARAMS;
@@ -173,6 +175,7 @@ extern char * HText_HiddenLinkAt PARAMS((HText *text, int number));
 
 /* "simple table" stuff */
 extern int HText_endStblTABLE PARAMS((HText *));
+extern int HText_trimCellLines PARAMS((HText * text));
 extern void HText_cancelStbl PARAMS((HText *));
 extern void HText_endStblCOLGROUP PARAMS((HText *));
 extern void HText_endStblTD PARAMS((HText *));

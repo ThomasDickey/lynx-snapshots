@@ -503,15 +503,19 @@ PUBLIC BOOL LYMainLoop_pageDisplay ARGS1(
 	 * If the requested URL has the #fragment, and we are not popped
 	 * from the history stack, and have not scrolled the document yet -
 	 * we should calculate correct newline position for the fragment.
-	 * (This is a bit suboptimal since HTFindPoundSelector() traverse
-	 * anchors list each time, so we have a quadratic complexity
-	 * and may load CPU in a worst case).
 	 */
 	if (display_partial
 	    && newdoc.line == 1 && line_num == 1 && prev_newline == 1
 	    && (pound = findPoundSelector(newdoc.address))
 	    && *pound && *(pound+1)) {
-	    if (HTFindPoundSelector(pound+1)) {
+
+	    HTChildAnchor sample;           /** 5 lines from HTAnchor.c **/
+	    sample.tag = (char*)pound+1;    /* for compare_anchors() only */
+
+	    if (HTMainAnchor         /* document is coming */
+		&& HTMainAnchor->children
+		&& HTBTree_search(HTMainAnchor->children, &sample) != NULL
+		&& HTFindPoundSelector(pound+1)) {
 		/* HTFindPoundSelector will initialize www_search_result */
 		Newline = www_search_result;
 	    } else {
@@ -631,7 +635,6 @@ PRIVATE void do_check_goto_URL ARGS3(
 	 * If it's not a URL then make it one.
 	 */
 	StrAllocCopy(*old_user_input, user_input_buffer);
-	LYFillLocalFileURL(old_user_input, "file://localhost");
 	LYEnsureAbsoluteURL(old_user_input, "", TRUE);
 	sprintf(user_input_buffer, "%.*s",
 		(int)(MAX_LINE - 1), *old_user_input);
@@ -976,9 +979,8 @@ PRIVATE BOOLEAN check_history NOARGS
 
     if (nhist > 0
      && !LYresubmit_posts
-     && curdoc.post_data
      && HDOC(nhist - 1).post_data
-     && !strcmp(curdoc.post_data, HDOC(nhist - 1).post_data)
+     && BINEQ(curdoc.post_data, HDOC(nhist - 1).post_data)
      && (base = HText_getContentBase()) != 0) {
 	 char *text = !isLYNXIMGMAP(HDOC(nhist - 1).address)
 		     ? HDOC(nhist - 1).address
@@ -1190,8 +1192,9 @@ gettext("Enctype multipart/form-data not yet supported!  Cannot submit."));
 		}
 	    } else {
 		if (HTOutputFormat == HTAtom_for("www/download") &&
-		newdoc.post_data != NULL &&
-		newdoc.safe == FALSE) {
+		    newdoc.post_data != NULL &&
+		    newdoc.safe == FALSE) {
+
 		    if ((HText_POSTReplyLoaded(&newdoc) == TRUE) &&
 			HTConfirm(CONFIRM_POST_RESUBMISSION) == FALSE) {
 			HTInfoMsg(CANCELLED);
@@ -1199,7 +1202,7 @@ gettext("Enctype multipart/form-data not yet supported!  Cannot submit."));
 			LYforce_no_cache = FALSE;
 			copy_address(&newdoc, &curdoc);
 			StrAllocCopy(newdoc.title, curdoc.title);
-			StrAllocCopy(newdoc.post_data, curdoc.post_data);
+			BStrCopy(newdoc.post_data, curdoc.post_data);
 			StrAllocCopy(newdoc.post_content_type,
 				     curdoc.post_content_type);
 			StrAllocCopy(newdoc.bookmark, curdoc.bookmark);
@@ -2099,8 +2102,8 @@ PRIVATE int handle_LYK_DOWNLOAD ARGS3(
 	    StrAllocCopy(newdoc.bookmark, HDOC(number).bookmark);
 	    LYFreePostData(&newdoc);
 	    if (HDOC(number).post_data)
-		StrAllocCopy(newdoc.post_data,
-			     HDOC(number).post_data);
+		BStrCopy(newdoc.post_data,
+			 HDOC(number).post_data);
 	    if (HDOC(number).post_content_type)
 		StrAllocCopy(newdoc.post_content_type,
 			     HDOC(number).post_content_type);
@@ -3243,7 +3246,7 @@ PRIVATE void handle_LYK_INDEX_SEARCH ARGS4(
 	     *	Since we have already gotten it.
 	     */
 	    copy_address(&curdoc, &newdoc);
-	    StrAllocCopy(newdoc.post_data, curdoc.post_data);
+	    BStrCopy(newdoc.post_data, curdoc.post_data);
 	    StrAllocCopy(newdoc.post_content_type, curdoc.post_content_type);
 	    newdoc.internal_link = FALSE;
 	    curdoc.line = -1;
@@ -3252,7 +3255,8 @@ PRIVATE void handle_LYK_INDEX_SEARCH ARGS4(
 	    /*
 	     *	Got back a redirecting URL.  Check it out.
 	     */
-	    _user_message("Using %s", use_this_url_instead);
+	    HTUserMsg2 (WWW_USING_MESSAGE, use_this_url_instead);
+
 	    /*
 	     *	Make a name for this URL.
 	     */
@@ -3271,7 +3275,7 @@ PRIVATE void handle_LYK_INDEX_SEARCH ARGS4(
 	     *	Yuk, the search failed.  Restore the old file.
 	     */
 	    copy_address(&newdoc, &curdoc);
-	    StrAllocCopy(newdoc.post_data, curdoc.post_data);
+	    BStrCopy(newdoc.post_data, curdoc.post_data);
 	    StrAllocCopy(newdoc.post_content_type,
 			 curdoc.post_content_type);
 	    StrAllocCopy(newdoc.bookmark, curdoc.bookmark);
@@ -5312,7 +5316,7 @@ initialize:
     CTRACE((tfp, "Entering mainloop, startfile=%s\n", startfile));
 
     if (form_post_data) {
-	StrAllocCopy(newdoc.post_data, form_post_data);
+	BStrCopy0(newdoc.post_data, form_post_data);
 	StrAllocCopy(newdoc.post_content_type,
 		     "application/x-www-form-urlencoded");
     } else if (form_get_data) {
@@ -5764,13 +5768,14 @@ try_again:
 		       if (!curdoc.address) {
 			   set_address(&newdoc, HTLoadedDocumentURL());
 			   StrAllocCopy(newdoc.title, HTLoadedDocumentTitle());
-			   if (HTMainAnchor && HTMainAnchor->post_data) {
-			       StrAllocCopy(newdoc.post_data,
-					    HTMainAnchor->post_data);
+			   if (HTMainAnchor
+			    && HTMainAnchor->post_data) {
+			       BStrCopy(newdoc.post_data,
+					HTMainAnchor->post_data);
 			       StrAllocCopy(newdoc.post_content_type,
 					    HTMainAnchor->post_content_type);
 			   } else {
-			       FREE(newdoc.post_data);
+			       BStrFree(newdoc.post_data);
 			   }
 			   newdoc.isHEAD = HTLoadedDocumentIsHEAD();
 			   newdoc.safe = HTLoadedDocumentIsSafe();
@@ -5778,7 +5783,7 @@ try_again:
 		       } else {
 			   copy_address(&newdoc, &curdoc);
 			   StrAllocCopy(newdoc.title, curdoc.title);
-			   StrAllocCopy(newdoc.post_data, curdoc.post_data);
+			   BStrCopy(newdoc.post_data, curdoc.post_data);
 			   StrAllocCopy(newdoc.post_content_type,
 					curdoc.post_content_type);
 			   newdoc.isHEAD = curdoc.isHEAD;
@@ -5982,7 +5987,7 @@ try_again:
 	     *	Set the files the same.
 	     */
 	    copy_address(&curdoc, &newdoc);
-	    StrAllocCopy(curdoc.post_data, newdoc.post_data);
+	    BStrCopy(curdoc.post_data, newdoc.post_data);
 	    StrAllocCopy(curdoc.post_content_type, newdoc.post_content_type);
 	    StrAllocCopy(curdoc.bookmark, newdoc.bookmark);
 #ifdef USE_COLOR_STYLE
@@ -6864,10 +6869,10 @@ new_cmd:  /*
 
 	    if (no_table_center) {
 		no_table_center = FALSE;
-		HTInfoMsg("TABLE center enable.");
+		HTInfoMsg(gettext("TABLE center enable."));
 	    } else {
 		no_table_center = TRUE;
-		HTInfoMsg("TABLE center disable.");
+		HTInfoMsg(gettext("TABLE center disable."));
 	    }
 #endif
 	    /* FALLTHRU */
@@ -6927,30 +6932,30 @@ new_cmd:  /*
 	case LYK_TO_CLIPBOARD:	/* ^S */
 	    {
 		char *s;
-		int c;
+		int ch2;
 
 		/* The logic resembles one of ADD_BOOKMARK */
 		if (nlinks > 0 && links[curdoc.link].lname
 		    && links[curdoc.link].type != WWW_FORM_LINK_TYPE) {
 		    /* Makes sense to copy a link */
 		    _statusline("Copy D)ocument's or L)ink's URL to clipboard or C)ancel?");
-		    c = LYgetch_single();
-		    if (c == 'D')
+		    ch2 = LYgetch_single();
+		    if (ch2 == 'D')
 			s = curdoc.address;
-		    else if (c == 'C')
+		    else if (ch2 == 'C')
 			break;
 		    else
 			s = links[curdoc.link].lname;
 		} else
 		    s = curdoc.address;
 		if (isEmpty(s))
-		    HTInfoMsg("Current URL is empty.");
+		    HTInfoMsg(gettext("Current URL is empty."));
 		if (put_clip(s))
-		    HTInfoMsg("Copy to clipboard failed.");
+		    HTInfoMsg(gettext("Copy to clipboard failed."));
 		else if (s == curdoc.address)
-		    HTInfoMsg("Document URL put to clipboard.");
+		    HTInfoMsg(gettext("Document URL put to clipboard."));
 		else
-		    HTInfoMsg("Link URL put to clipboard.");
+		    HTInfoMsg(gettext("Link URL put to clipboard."));
 	    }
 	    break;
 
@@ -6960,36 +6965,39 @@ new_cmd:  /*
 	    } else {
 		unsigned char *s = get_clip_grab(), *e, *t;
 		char *buf;
-		int len;
+		int len2;
 
 		if (!s)
 		    break;
-		len = strlen(s);
-		e = s + len;
+		len2 = strlen(s);
+		e = s + len2;
 		while (s < e && strchr(" \t\n\r", *s))
 		    s++;
 		while (s < e && strchr(" \t\n\r", e[-1]))
 		    e--;
 		if (s >= e) {
-		    HTInfoMsg("No URL in the clipboard.");
+		    HTInfoMsg(gettext("No URL in the clipboard."));
 		    break;
 		}
-		buf = (char*)malloc(e - s + 1);
+		len = e - s + 1;
+		if (len < MAX_LINE)
+		    len = MAX_LINE;	/* Required for do_check_goto_URL() */
+		buf = (char*)malloc(len);
 		strncpy(buf, s, e - s);
 		buf[e - s] = '\0';
 		t = buf;
 
 		while (s < e) {
 		    if (strchr(" \t\n\r", *s)) {
-			int nl = 0;	/* Keep whitespace without NL - file names! */
+			int nl2 = 0;	/* Keep whitespace without NL - file names! */
 			unsigned char *s1 = s;
 
 			while (strchr(" \t\n\r", *s)) {
-			    if (!nl && *s == '\n')
-				nl = 1;
+			    if (!nl2 && *s == '\n')
+				nl2 = 1;
 			    s++;
 			}
-			if (!nl) {
+			if (!nl2) {
 			    while (s1 < s) {
 				if (*s1 != '\r' && *s1 != '\r')
 				    *t = *s1;
@@ -7450,7 +7458,7 @@ PRIVATE int are_different ARGS2(
      */
     if (doc1->post_data) {
 	if (doc2->post_data) {
-	    if (strcmp(doc1->post_data, doc2->post_data))
+	    if (!BINEQ(doc1->post_data, doc2->post_data))
 		return(TRUE);
 	} else
 	    return(TRUE);
@@ -7523,7 +7531,7 @@ PRIVATE int are_phys_different ARGS2(
      */
     if (doc1->post_data) {
 	if (doc2->post_data) {
-	    if (strcmp(doc1->post_data, doc2->post_data))
+	    if (!BINEQ(doc1->post_data, doc2->post_data))
 		return(TRUE);
 	} else
 	    return(TRUE);
@@ -7867,4 +7875,11 @@ PRIVATE void status_link ARGS3(
 	    _user_message(format, curlink_name);
 	}
     }
+}
+
+PUBLIC char*
+LYDownLoadAddress NOARGS
+{
+    char *s = newdoc.address ? newdoc.address : "";
+    return s;
 }

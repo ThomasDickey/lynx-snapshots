@@ -1252,9 +1252,7 @@ PRIVATE Config_Type Config_Table [] =
 #endif
      PARSE_PRG(RC_COMPRESS_PATH,        ppCOMPRESS),
      PARSE_PRG(RC_COPY_PATH,            ppCOPY),
-#ifndef __DJGPP__
      PARSE_INT(RC_CONNECT_TIMEOUT,      connect_timeout),
-#endif
      PARSE_STR(RC_COOKIE_ACCEPT_DOMAINS, LYCookieSAcceptDomains),
 #ifdef EXP_PERSISTENT_COOKIES
      PARSE_STR(RC_COOKIE_FILE,          LYCookieFile),

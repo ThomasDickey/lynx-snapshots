@@ -282,7 +282,7 @@ PUBLIC BOOLEAN LYwouldPush ARGS2(
 PUBLIC void LYFreePostData ARGS1(
     DocInfo *,		doc)
 {
-    FREE(doc->post_data);
+    BStrFree(doc->post_data);
     FREE(doc->post_content_type);
 }
 
@@ -335,8 +335,7 @@ PRIVATE int are_identical ARGS2(
 	DocInfo *,	doc1)
 {
      return (	STREQ(doc1->address, doc->hdoc.address)
-		&& !strcmp(NonNull(doc1->post_data),
-			   NonNull(doc->hdoc.post_data))
+		&& BINEQ(doc1->post_data, doc->hdoc.post_data)
 		&& !strcmp(NonNull(doc1->bookmark),
 			   NonNull(doc->hdoc.bookmark))
 		&& doc1->isHEAD == doc->hdoc.isHEAD );
@@ -417,7 +416,7 @@ PUBLIC int LYpush ARGS2(
 	StrAllocCopy(HDOC(nhist).address, doc->address);
 
 	HDOC(nhist).post_data = NULL;
-	StrAllocCopy(HDOC(nhist).post_data, doc->post_data);
+	BStrCopy(HDOC(nhist).post_data, doc->post_data);
 
 	HDOC(nhist).post_content_type = NULL;
 	StrAllocCopy(HDOC(nhist).post_content_type, doc->post_content_type);
@@ -618,7 +617,7 @@ PUBLIC void LYpop_num ARGS2(
 	doc->line = HDOC(number).line;
 	StrAllocCopy(doc->title, HDOC(number).title);
 	StrAllocCopy(doc->address, HDOC(number).address);
-	StrAllocCopy(doc->post_data, HDOC(number).post_data);
+	BStrCopy(doc->post_data, HDOC(number).post_data);
 	StrAllocCopy(doc->post_content_type, HDOC(number).post_content_type);
 	StrAllocCopy(doc->bookmark, HDOC(number).bookmark);
 	doc->isHEAD = HDOC(number).isHEAD;

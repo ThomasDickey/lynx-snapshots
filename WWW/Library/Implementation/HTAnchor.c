@@ -18,6 +18,7 @@
 #include <HTUtils.h>
 #include <HTAnchor.h>
 #include <HTParse.h>
+#include <HTString.h>
 #include <UCAux.h>
 #include <UCMap.h>
 
@@ -79,6 +80,7 @@ PRIVATE HTParentAnchor * HTParentAnchor_new NOARGS
     newAnchor->isHEAD = FALSE;		/* HEAD request if TRUE. - FM */
     newAnchor->safe = FALSE;		/* Safe. - FM */
     newAnchor->no_cache = FALSE;	/* no-cache? - FM */
+    newAnchor->inBASE = FALSE;		/* duplicated from HTML.c/h */
     newAnchor->content_length = 0;	/* Content-Length. - FM */
     return(newAnchor);
 }
@@ -95,86 +97,83 @@ PRIVATE HTChildAnchor * HTChildAnchor_new NOARGS
 
 
 #ifdef CASE_INSENSITIVE_ANCHORS
-/*	Case insensitive string comparison
-**	----------------------------------
+/* Case insensitive string comparison */
+#define HT_EQUIV(a,b) (TOUPPER(a) == TOUPPER(b))
+#else
+/* Case sensitive string comparison */
+#define HT_EQUIV(a,b) ((a) == (b))
+#endif
+
+/*	Null-terminated string comparison
+**	---------------------------------
 ** On entry,
 **	s	Points to one string, null terminated
 **	t	points to the other.
 ** On exit,
-**	returns YES if the strings are equivalent ignoring case
-**		NO if they differ in more than	their case.
+**	returns YES if the strings are equivalent
+**		NO if they differ.
 */
-PRIVATE BOOL HTEquivalent ARGS2(
+PRIVATE BOOL HTSEquivalent ARGS2(
 	CONST char *,	s,
 	CONST char *,	t)
 {
     if (s && t) {  /* Make sure they point to something */
 	for (; *s && *t; s++, t++) {
-	    if (TOUPPER(*s) != TOUPPER(*t)) {
+	    if (!HT_EQUIV(*s, *t)) {
 		return(NO);
 	    }
 	}
-	return( TOUPPER(*s) == TOUPPER(*t));
+	return(HT_EQUIV(*s, *t));
     } else {
 	return(s == t);		/* Two NULLs are equivalent, aren't they ? */
     }
 }
 
-#else
-
-/*	Case sensitive string comparison
-**	----------------------------------
+/*	Binary string comparison
+**	------------------------
 ** On entry,
-**	s	Points to one string, null terminated
+**	s	Points to one bstring
 **	t	points to the other.
 ** On exit,
-**	returns YES if the strings are identical or both NULL
+**	returns YES if the strings are equivalent
 **		NO if they differ.
 */
-PRIVATE BOOL HTIdentical ARGS2(
-	CONST char *,	s,
-	CONST char *,	t)
+PRIVATE BOOL HTBEquivalent ARGS2(
+	CONST bstring *,	s,
+	CONST bstring *,	t)
 {
-    if (s && t) {  /* Make sure they point to something */
-	for (; *s && *t; s++, t++) {
-	    if (*s != *t) {
+    if (!isBEmpty(s)
+     && !isBEmpty(t)
+     && BStrLen(s) == BStrLen(t)) {
+	int j;
+	int len = BStrLen(s);
+	for (j = 0; j < len; ++j) {
+	    if (!HT_EQUIV(BStrData(s)[j], BStrData(t)[j])) {
 		return(NO);
 	    }
 	}
-	return (BOOL) (*s == *t);
+	return (HT_EQUIV(BStrData(s)[j], BStrData(t)[j]));
     } else {
-	return (BOOL) (s == t);  /* Two NULLs are identical, aren't they ? */
+	return(s == t);		/* Two NULLs are equivalent, aren't they ? */
     }
 }
-#endif /* CASE_INSENSITIVE_ANCHORS */
 
 /*
  *  Three-way compare function
  */
-PRIVATE int compare ARGS2(
+PRIVATE int compare_anchors ARGS2(
 	void *, l,
 	void *, r)
 {
     CONST char* a = ((HTChildAnchor *)l)->tag;
     CONST char* b = ((HTChildAnchor *)r)->tag;
+    /* both tags are not NULL */
 
-    if (a && b) {  /* Make sure they point to something */
 #ifdef CASE_INSENSITIVE_ANCHORS
 	return strcasecomp(a, b); /* Case insensitive */
 #else
 	return strcmp(a, b);      /* Case sensitive - FM */
 #endif /* CASE_INSENSITIVE_ANCHORS */
-    } else {
-	/*  bring up an order when one or both strings are nulls */
-	if (a) {
-	    return 1;
-	} else if (b) {
-	    return -1;
-	} else {
-	    /* both nulls - assume equivalent */
-	    return 0;
-	}
-    }
 }
 
 
@@ -197,20 +196,20 @@ PUBLIC HTChildAnchor * HTAnchor_findChild ARGS2(
 
     if (tag && *tag) {	       /* TBL */
 	if (parent->children) {
-	   /*
-	   **  Parent has children.  Search them.
-	   */
-	   HTChildAnchor sample;
-	   sample.tag = (char*)tag;    /* for compare() only */
+	    /*
+	    **  Parent has children.  Search them.
+	    */
+	    HTChildAnchor sample;
+	    sample.tag = (char*)tag;    /* for compare_anchors() only */
 
-	   child = (HTChildAnchor *)HTBTree_search(parent->children, &sample);
-	   if (child != NULL) {
-	       CTRACE((tfp, "Child anchor %p of parent %p with name `%s' already exists.\n",
-		       (void *)child, (void *)parent, tag));
-	       return(child);
+	    child = (HTChildAnchor *)HTBTree_search(parent->children, &sample);
+	    if (child != NULL) {
+		CTRACE((tfp, "Child anchor %p of parent %p with name `%s' already exists.\n",
+				(void *)child, (void *)parent, tag));
+		return(child);
 	    }
 	} else {  /* parent doesn't have any children yet : create family */
-	   parent->children = HTBTree_new(compare);
+	    parent->children = HTBTree_new(compare_anchors);
 	}
     }
 
@@ -235,6 +234,11 @@ PUBLIC HTChildAnchor * HTAnchor_findChild ARGS2(
 
 PRIVATE HTParentAnchor * HTAnchor_findAddress_nofragment PARAMS((
 	CONST DocAddress *	newdoc));
+
+PRIVATE BOOL HTAnchor_link PARAMS((
+	HTChildAnchor *		child,
+	HTAnchor *		destination,
+	HTLinkType *		type));
 
 
 /*	Create or find a child anchor with a possible link
@@ -265,21 +269,21 @@ PUBLIC HTChildAnchor * HTAnchor_findChildAndLink ARGS4(
 	if (ltype == HTInternalLink && *href == '#') {
 	    dest = parent;
 	} else {
-	    CONST char *relative_to = parent->address;
+	    CONST char *relative_to = (parent->inBASE && *href != '#') ?
+				parent->content_base : parent->address;
 	    DocAddress parsed_doc;
 	    parsed_doc.address = HTParse(href, relative_to,
-	       PARSE_ACCESS | PARSE_HOST | PARSE_PATH | PARSE_PUNCTUATION);
+					 PARSE_ALL_WITHOUT_ANCHOR);
+
 	    parsed_doc.post_data = NULL;
 	    parsed_doc.post_content_type = NULL;
-#ifndef DONT_TRACK_INTERNAL_LINKS
 	    if (ltype && parent->post_data && ltype == HTInternalLink) {
 		/* for internal links, find a destination with the same
 		   post data if the source of the link has post data. - kw
-		   not sure this ever happens when *href != '#' - LP */
+		   Example: LYNXIMGMAP: */
 		parsed_doc.post_data = parent->post_data;
 		parsed_doc.post_content_type = parent->post_content_type;
 	    }
-#endif
 	    parsed_doc.bookmark = NULL;
 	    parsed_doc.isHEAD = FALSE;
 	    parsed_doc.safe = FALSE;
@@ -298,28 +302,20 @@ PUBLIC HTChildAnchor * HTAnchor_findChildAndLink ARGS4(
 	if (*fragment)
 	    dest = (HTParentAnchor *)HTAnchor_findChild(dest, fragment);
 
-#define DUPLICATE_ANCHOR_NAME_WORKAROUND  /*it will not work without*/
 
-#ifdef DUPLICATE_ANCHOR_NAME_WORKAROUND
 	if (tag && *tag) {
-	    if (child->dest) {
+	    if (child->dest) { /* DUPLICATE_ANCHOR_NAME_WORKAROUND  - kw */
 		CTRACE((tfp,
-		       "*** Duplicate ChildAnchor %p named `%s'",
-		       child, tag));
-		if ((HTAnchor *)dest == child->dest && ltype == child->type) {
-		    CTRACE((tfp,", same dest %p and type, already linked\n",
-			   child->dest));
-		    /* skip HTAnchor_link() */
-		    return child;
-
-		} else {
-		    CTRACE((tfp,", different dest %p, creating unnamed child\n",
+			   "*** Duplicate ChildAnchor %p named `%s'",
+			   child, tag));
+		if ((HTAnchor *)dest != child->dest || ltype != child->type) {
+		    CTRACE((tfp,
+			   ", different dest %p or type, creating unnamed child\n",
 			   child->dest));
 		    child = HTAnchor_findChild(parent, 0);
 		}
 	    }
 	}
-#endif
 	HTAnchor_link(child, (HTAnchor *)dest, ltype);
     }
     return child;
@@ -384,7 +380,7 @@ PUBLIC HTAnchor * HTAnchor_findAddress ARGS1(
 	HTChildAnchor * foundAnchor;
 
 	parsed_doc.address = HTParse(newdoc->address, "",
-		PARSE_ACCESS | PARSE_HOST | PARSE_PATH | PARSE_PUNCTUATION);
+				     PARSE_ALL_WITHOUT_ANCHOR);
 	parsed_doc.post_data = newdoc->post_data;
 	parsed_doc.post_content_type = newdoc->post_content_type;
 	parsed_doc.bookmark = newdoc->bookmark;
@@ -431,15 +427,9 @@ PRIVATE HTParentAnchor * HTAnchor_findAddress_nofragment ARGS1(
 	grownups = adults;
 	while (NULL != (foundAnchor =
 			(HTParentAnchor *)HTList_nextObject(grownups))) {
-#ifdef CASE_INSENSITIVE_ANCHORS
-	    if (HTEquivalent(foundAnchor->address, newdoc->address) &&
-		HTEquivalent(foundAnchor->post_data, newdoc->post_data) &&
+	    if (HTSEquivalent(foundAnchor->address, newdoc->address) &&
+		HTBEquivalent(foundAnchor->post_data, newdoc->post_data) &&
 		foundAnchor->isHEAD == newdoc->isHEAD)
-#else
-	    if (HTIdentical(foundAnchor->address, newdoc->address) &&
-		HTIdentical(foundAnchor->post_data, newdoc->post_data) &&
-		foundAnchor->isHEAD == newdoc->isHEAD)
-#endif /* CASE_INSENSITIVE_ANCHORS */
 	    {
 		CTRACE((tfp, "Anchor %p with address `%s' already exists.\n",
 			    (void *)foundAnchor, newdoc->address));
@@ -455,7 +445,7 @@ PRIVATE HTParentAnchor * HTAnchor_findAddress_nofragment ARGS1(
 		    (void *)foundAnchor, hash, newdoc->address));
 	StrAllocCopy(foundAnchor->address, newdoc->address);
 	if (newdoc->post_data)
-	    StrAllocCopy(foundAnchor->post_data, newdoc->post_data);
+	    BStrCopy(foundAnchor->post_data, newdoc->post_data);
 	if (newdoc->post_content_type)
 	    StrAllocCopy(foundAnchor->post_content_type,
 			 newdoc->post_content_type);
@@ -489,14 +479,42 @@ PUBLIC HTAnchor * HTAnchor_findSimpleAddress ARGS1(
 }
 
 
+/*	Link me Anchor to another given one
+**	-------------------------------------
+*/
+PRIVATE BOOL HTAnchor_link ARGS3(
+	HTChildAnchor *,	child,
+	HTAnchor *,		destination,
+	HTLinkType *,		type)
+{
+    if (!(child && destination))
+	return(NO);  /* Can't link to/from non-existing anchor */
+
+    CTRACE((tfp, "Linking child %p to anchor %p\n", child, destination));
+    if (child->dest) {
+	CTRACE((tfp, "*** child anchor already has destination, exiting!\n"));
+	return(NO);
+    }
+
+    child->dest = destination;
+    child->type = type;
+
+    if (child->parent != destination->parent)
+	/* link only foreign children */
+	HTList_linkObject(&destination->parent->sources, child, &child->_add_sources);
+
+    return(YES);  /* Success */
+}
+
+
 /*	Delete an anchor and possibly related things (auto garbage collection)
 **	--------------------------------------------
 **
 **	The anchor is only deleted if the corresponding document is not loaded.
-**	All outgoing links from parent and children are deleted, and this anchor
-**	is removed from the sources list of its target.
+**	All outgoing links from children are deleted, and children are
+**	removed from the sources lists of theirs targets.
 **	We also try to delete the targets whose documents are not loaded.
-**	If this anchor's source list is empty, we delete it and its children.
+**	If this anchor's sources list is empty, we delete it and its children.
 */
 
 /*
@@ -508,28 +526,13 @@ PRIVATE void deleteLinks ARGS1(
 	HTChildAnchor *,	me)
 {
     /*
-     *	Memory leaks fixed.
-     *	05-27-94 Lynx 2-3-1 Garrett Arch Blythe
-     */
-
-    /*
-     *	Anchor is NULL, do nothing.
-     */
-    if (!me) {
-	return;
-    }
-
-    /*
      *	Unregister me with our destination anchor's parent.
      */
     if (me->dest) {
 	HTParentAnchor *parent = me->dest->parent;
 
 	/*
-	 *  Set the dest pointer to zero NOW.  If we don't,
-	 *  and we get somehow called recursively again for this
-	 *  same old me during the HTAnchor_delete below, weird
-	 *  things can occasionally happen. - kw
+	 *  Start.  Set the dest pointer to zero.
 	 */
 	 me->dest = NULL;
 
@@ -537,7 +540,7 @@ PRIVATE void deleteLinks ARGS1(
 	 *  Remove me from the parent's sources so that the
 	 *  parent knows one less anchor is its dest.
 	 */
-	if (!HTList_isEmpty(&parent->sources)) {
+	if ((me->parent != parent) && !HTList_isEmpty(&parent->sources)) {
 	    /*
 	     *	Really should only need to deregister once.
 	     */
@@ -545,19 +548,17 @@ PRIVATE void deleteLinks ARGS1(
 	}
 
 	/*
+	 *  Recursive call.
 	 *  Test here to avoid calling overhead.
-	 *  If the parent has no loaded document, then we should
-	 *  tell it to attempt to delete itself.
-	 *  Also, don't do this if the destination parent is our
-	 *  parent.
+	 *  Don't delete if document is loaded or being loaded.
 	 */
-	if (!parent->document &&
-	    me->parent != parent) {
+	if (!(parent->document || parent->underway)) {
 	    HTAnchor_delete(parent);
 	}
 
 	/*
-	 *  At this point, we haven't a destination.  Set it to be so.
+	 *  At this point, we haven't a destination.  Set it to be
+	 *  so.
 	 *  Leave the HTAtom pointed to by type up to other code to
 	 *  handle (reusable, near static).
 	 */
@@ -565,27 +566,6 @@ PRIVATE void deleteLinks ARGS1(
     }
 }
 
-#ifdef SOURCE_CACHE
-PUBLIC void HTAnchor_clearSourceCache ARGS1(
-	HTParentAnchor *,	me)
-{
-    /*
-     * Clean up the source cache, if any.
-     */
-    if (me->source_cache_file) {
-	CTRACE((tfp, "SourceCache: Removing file %s\n",
-	       me->source_cache_file));
-	LYRemoveTemp(me->source_cache_file);
-	FREE(me->source_cache_file);
-    }
-    if (me->source_cache_chunk) {
-	CTRACE((tfp, "SourceCache: Removing memory chunk %p\n",
-	       (void *)me->source_cache_chunk));
-	HTChunkFree(me->source_cache_chunk);
-	me->source_cache_chunk = NULL;
-    }
-}
-#endif /* SOURCE_CACHE */
 
 PUBLIC BOOL HTAnchor_delete ARGS1(
 	HTParentAnchor *,	me)
@@ -618,33 +598,37 @@ PUBLIC BOOL HTAnchor_delete ARGS1(
      */
     me->underway = TRUE;
 
-    /*
-     *	There are still incoming links to this one (we are the
-     *	destination of another anchor).
-     *	Don't actually delete this parent anchor, but children are OK to
-     *	delete their links.
-     */
-    if (!HTList_isEmpty(&me->sources)) {
+    {
 	/*
-	 *  Delete all outgoing links from children, do not
-	 *  delete the children, though.
+	 *  Delete all outgoing links from children.
+	 *  Do not delete named children itself (may have incoming links).
 	 */
 	if (!HTList_isEmpty(&me->children_notag)) {
 	    cur = &me->children_notag;
-	    while ((child = (HTChildAnchor *)HTList_nextObject(cur)) != 0) {
+	    while ((child =
+			(HTChildAnchor *)HTList_unlinkLastObject(cur)) != 0) {
 		deleteLinks(child);
+		FREE(child);
 	    }
 	}
 	if (me->children) {
 	    ele = HTBTree_next(me->children, NULL);
 	    while (ele != NULL) {
 		child = (HTChildAnchor *)HTBTree_object(ele);
-		deleteLinks(child);
+		if (child->dest)
+		    deleteLinks(child);
 		ele = HTBTree_next(me->children, ele);
 	    }
 	}
-	me->underway = FALSE;
+    }
+    me->underway = FALSE;
 
+
+    /*
+     * There are still incoming links to this one (we are the
+     * destination of another anchor).
+     */
+    if (!HTList_isEmpty(&me->sources)) {
 	/*
 	 *  Can't delete parent, still have sources.
 	 */
@@ -652,38 +636,19 @@ PUBLIC BOOL HTAnchor_delete ARGS1(
     }
 
     /*
-     *	No more incoming links : kill everything
-     *	First, recursively delete children and their links.
+     *	No more incoming and outgoing links : kill everything
+     *	First, delete named children.
      */
     if (me->children) {
 	ele = HTBTree_next(me->children, NULL);
 	while (ele != NULL) {
 	    child = (HTChildAnchor *)HTBTree_object(ele);
-	    deleteLinks(child);
 	    FREE(child->tag);
+	    FREE(child);
 	    ele = HTBTree_next(me->children, ele);
 	}
-	HTBTreeAndObject_free(me->children);
-	me->children = NULL;
+	HTBTree_free(me->children);
     }
-    /* ...and this kind of children */
-    if (!HTList_isEmpty(&me->children_notag)) {
-	while ((child = (HTChildAnchor *)HTList_unlinkLastObject(
-						       &me->children_notag)) != 0) {
-	   deleteLinks(child);
-	   FREE(child);
-	}
-    }
-    me->children_notag.object = NULL;
-    me->children_notag.next = NULL;
-
-    me->underway = FALSE;
-
-    /*
-     * Init our empty list of sources.
-     */
-    me->sources.object = NULL;
-    me->sources.next = NULL;
 
     /*
      *	Delete the methods list.
@@ -705,7 +670,7 @@ PUBLIC BOOL HTAnchor_delete ARGS1(
     FREE(me->isIndexPrompt);
     FREE(me->title);
     FREE(me->physical);
-    FREE(me->post_data);
+    BStrFree(me->post_data);
     FREE(me->post_content_type);
     FREE(me->bookmark);
     FREE(me->owner);
@@ -776,6 +741,28 @@ PUBLIC BOOL HTAnchor_delete ARGS1(
 }
 
 
+#ifdef SOURCE_CACHE
+PUBLIC void HTAnchor_clearSourceCache ARGS1(
+	HTParentAnchor *,	me)
+{
+    /*
+     * Clean up the source cache, if any.
+     */
+    if (me->source_cache_file) {
+	CTRACE((tfp, "SourceCache: Removing file %s\n",
+	       me->source_cache_file));
+	LYRemoveTemp(me->source_cache_file);
+	FREE(me->source_cache_file);
+    }
+    if (me->source_cache_chunk) {
+	CTRACE((tfp, "SourceCache: Removing memory chunk %p\n",
+	       (void *)me->source_cache_chunk));
+	HTChunkFree(me->source_cache_chunk);
+	me->source_cache_chunk = NULL;
+    }
+}
+#endif /* SOURCE_CACHE */
+
 /*	Data access functions
 **	---------------------
 */
@@ -833,7 +820,7 @@ PUBLIC HTFormat HTAnchor_format ARGS1(
 
 PUBLIC void HTAnchor_setIndex ARGS2(
 	HTParentAnchor *,	me,
-	char *,			address)
+	CONST char *,		address)
 {
     if (me) {
 	me->isIndex = YES;
@@ -843,7 +830,7 @@ PUBLIC void HTAnchor_setIndex ARGS2(
 
 PUBLIC void HTAnchor_setPrompt ARGS2(
 	HTParentAnchor *,	me,
-	char *,			prompt)
+	CONST char *,		prompt)
 {
     if (me) {
 	StrAllocCopy(me->isIndexPrompt, prompt);
@@ -1127,31 +1114,6 @@ PUBLIC BOOL HTAnchor_setSubject ARGS2(
     StrAllocCopy(me->subject, subject);
     return TRUE;
 }
-
-/*	Link me Anchor to another given one
-**	-------------------------------------
-*/
-PUBLIC BOOL HTAnchor_link ARGS3(
-	HTChildAnchor *,	source,
-	HTAnchor *,		destination,
-	HTLinkType *,		type)
-{
-    if (!(source && destination))
-	return(NO);  /* Can't link to/from non-existing anchor */
-
-    CTRACE((tfp, "Linking anchor %p to anchor %p\n", source, destination));
-    if (source->dest) {
-	CTRACE((tfp, "*** ERR: child anchor already has destination!\n"));
-	return(NO);
-    }
-
-    source->dest = destination;
-    source->type = type;
-
-    HTList_linkObject(&destination->parent->sources, source, &source->_add_sources);
-    return(YES);  /* Success */
-}
-
 
 /*	Manipulation of links
 **	---------------------

@@ -113,6 +113,10 @@ extern int BSDselect PARAMS((int nfds, fd_set * readfds, fd_set * writefds,
 #define FD_SETSIZE 256
 #endif /* !FD_SETSIZE */
 
+#ifdef __DJGPP__
+#undef select			/* defined to select_s in www_tcp.h */
+#endif
+
 #ifndef UTMP_FILE
 #if defined(__FreeBSD__) || defined(__bsdi__)
 #define UTMP_FILE _PATH_UTMP
@@ -1142,11 +1146,15 @@ PUBLIC void convert_to_spaces ARGS2(
 	BOOL,		condense)
 {
     char *s = string;
-    char *ns = string;
+    char *ns;
     BOOL last_is_space = FALSE;
 
-    if (!string)
+    if (!s)
 	return;
+
+    for ( ; (*s && !isspace(*s)); s++)
+	;
+    ns = s;
 
     while (*s) {
 	switch (*s) {
@@ -1510,7 +1518,7 @@ PRIVATE int DontCheck NOARGS
      * Avoid checking interrupts more than one per second, since it is a slow
      * and expensive operation - TD
      */
-#if HAVE_GETTIMEOFDAY
+#ifdef HAVE_GETTIMEOFDAY
 #undef timezone			/* U/Win defines a conflicting macro */
     {
 	struct timeval tv;
@@ -1532,7 +1540,7 @@ PUBLIC int HTCheckForInterrupt NOARGS
     int c;
     int cmd;
 #ifndef VMS /* UNIX stuff: */
-#if !defined(USE_SLANG) && (defined(UNIX) || defined(__DJGPP__) || defined(__MINGW32__))
+#if !defined(USE_SLANG) && (defined(UNIX) || defined(__DJGPP__))
     struct timeval socket_timeout;
     int ret = 0;
     fd_set readfds;
@@ -1637,16 +1645,26 @@ PUBLIC int HTCheckForInterrupt NOARGS
 
 	/* There is a subset of mainloop() actions available at this stage:
 	** no new getfile() cycle is possible until the previous finished.
-	** Currently we have scrolling in partial mode and toggling of trace
-	** log. User search now in progress...
+	** Currently we have scrolling in partial mode, toggling of trace
+	** log, and pasting. User search now in progress...
 	*/
     cmd = (LKC_TO_LAC(keymap,c));
     switch (cmd) {
     case LYK_TRACE_TOGGLE :	/*  Toggle TRACE mode. */
 	handle_LYK_TRACE_TOGGLE();
 	break;
-    default :
+#ifdef CAN_CUT_AND_PASTE
+    case LYK_TO_CLIPBOARD: {	/* ^S */
+	char *s = LYDownLoadAddress();
 
+	if (!s || !*s || put_clip(s))
+	    HTInfoMsg(gettext("Copy to clipboard failed."));
+	else
+	    HTInfoMsg(gettext("Download document URL put to clipboard."));
+	break;
+    }
+#endif	/* defined CAN_CUT_AND_PASTE */
+    default :
 #ifdef DISP_PARTIAL
 	/* OK, we got several lines from new document and want to scroll... */
 	if (display_partial && (NumOfLines_partial > 2)) {
@@ -1760,7 +1778,7 @@ PUBLIC BOOLEAN LYisAbsPath ARGS1(
 	   && LYIsPathSep(path[2])));
 #else
 	result = (LYIsPathSep(path[0]));
-#endif /* DOSPATH */
+#endif /* USE_DOS_DRIVES */
 #endif
     }
     return result;
@@ -2264,7 +2282,7 @@ PUBLIC int is_url ARGS1(
 		/*
 		 * If it doesn't contain "://", and it's not one of the the
 		 * above, it can't be a URL with a scheme we know, so check if
-		 * it's an unknown scheme for which proxying has been set up. 
+		 * it's an unknown scheme for which proxying has been set up.
 		 * - FM
 		 */
 		if (cp1 != NULL
@@ -2355,7 +2373,7 @@ PUBLIC int is_url ARGS1(
 	    }
 	}
 	/*
-	 * Check if it is an unknown scheme for which proxying has been set up. 
+	 * Check if it is an unknown scheme for which proxying has been set up.
 	 */
 	if (result == NOT_A_URL_TYPE)
 	    result = LYCheckForProxyURL(filename);
@@ -3733,8 +3751,10 @@ PUBLIC void LYCheckMail NOARGS
 **  lead tildes via LYConvertToURL() if needed,
 **  and tweaking/simplifying via HTParse().  It
 **  is used for LynxHome, startfile, homepage,
-**  an 'g'oto entries, after they have been
+**  and 'g'oto entries, after they have been
 **  passed to LYFillLocalFileURL(). - FM
+**  Such URLs have no `base' reference to which they
+**  could be resolved.  LYLegitimizeHREF could not be used.
 */
 PUBLIC void LYEnsureAbsoluteURL ARGS3(
 	char **,	href,
@@ -3743,23 +3763,29 @@ PUBLIC void LYEnsureAbsoluteURL ARGS3(
 {
     char *temp = NULL;
 
-    if (!non_empty(*href))
+    if (isEmpty(*href))
 	return;
+
+   /*
+    *  Check whether to fill in localhost. - FM
+    */
+    LYFillLocalFileURL(href, "file://localhost");
 
     /*
      *	If it is not a URL then make it one.
      */
     if (!strcasecomp(*href, STR_NEWS_URL)) {
 	StrAllocCat(*href, "*");
-    } else if (!strcasecomp(*href, STR_NEWS_URL) ||
-	       !strcasecomp(*href, STR_SNEWS_URL)) {
+    } else if (!strcasecomp(*href, STR_SNEWS_URL)) {
 	StrAllocCat(*href, "/*");
     }
+
     if (!is_url(*href)) {
 	CTRACE((tfp, "%s%s'%s' is not a URL\n",
 		    NonNull(name), (name ? " " : ""), *href));
 	LYConvertToURL(href, fixit);
     }
+
     temp = HTParse(*href, "", PARSE_ALL);
     if (non_empty(temp))
 	StrAllocCopy(*href, temp);
@@ -3796,7 +3822,7 @@ PUBLIC void LYConvertToURL ARGS2(
 	if (LYIsDosDrive(*AllocatedString) && *cp_url == ':')
 	    LYAddPathSep(AllocatedString);
     }
-#endif /* DOSPATH */
+#endif /* USE_DOS_DRIVES */
 
     *AllocatedString = NULL;  /* so StrAllocCopy doesn't free it */
     StrAllocCopy(*AllocatedString, "file://localhost");
@@ -3805,7 +3831,7 @@ PUBLIC void LYConvertToURL ARGS2(
 	char *fragment = NULL;
 #if defined(USE_DOS_DRIVES)
 	StrAllocCat(*AllocatedString,"/");
-#endif /* DOSPATH */
+#endif /* USE_DOS_DRIVES */
 #ifdef VMS
 	/*
 	 *  Not a SHELL pathspec.  Get the full VMS spec and convert it.
@@ -3984,7 +4010,7 @@ have_VMS_URL:
 	}
 #endif
 	else
-#endif /* DOSPATH */
+#endif /* USE_DOS_DRIVES */
 	if (*old_string == '~') {
 	    /*
 	     *	On Unix, convert '~' to Home_Dir().
@@ -4035,7 +4061,7 @@ have_VMS_URL:
 	    StrAllocCopy(temp, curdir);
 	    StrAllocCat(temp, "/");
 	    StrAllocCat(temp, old_string);
-#endif /* DOSPATH */
+#endif /* USE_DOS_DRIVES */
 	    LYTrimRelFromAbsPath(temp);
 	    CTRACE((tfp, "Converted '%s' to '%s'\n", old_string, temp));
 	    if ((stat(temp, &st) > -1) ||
@@ -4054,7 +4080,7 @@ have_VMS_URL:
 		    cp = HTEscape(temp, URL_PATH);
 #else
 		cp = HTEscape(temp, URL_PATH);
-#endif /* DOSPATH */
+#endif /* USE_DOS_DRIVES */
 		StrAllocCat(*AllocatedString, cp);
 		FREE(cp);
 		CTRACE((tfp, "Converted '%s' to '%s'\n",
@@ -4864,7 +4890,7 @@ PUBLIC char * Current_Dir ARGS1(
 	char *,	pathname)
 {
     char *result;
-#if HAVE_GETCWD
+#ifdef HAVE_GETCWD
     result = getcwd (pathname, LY_MAXPATH);
 #else
     result = getwd (pathname);
@@ -6112,7 +6138,7 @@ PUBLIC FILE *LYOpenTempRewrite ARGS3(
 	 *  Yes, it exists, is writable if we checked, and everything
 	 *  looks ok so far.  This should be the most regular case. - kw
 	 */
-#if HAVE_TRUNCATE
+#ifdef HAVE_TRUNCATE
 	if (txt == TRUE) {	/* limitation of LYReopenTemp.  shrug */
 	    /*
 	     *  We truncate and then append, this avoids having a small
@@ -6495,7 +6521,7 @@ PUBLIC  CONST char * wwwName ARGS1(
 #else
     cp = pathname;
 #endif /* VMS */
-#endif /* DOSPATH */
+#endif
 
     return cp;
 }
@@ -7191,8 +7217,8 @@ PUBLIC void LYsetXDisplay ARGS1(
 
 static int proc_type = -1;
 static PPIB pib;
-HAB hab;
-HMQ hmq;
+static HAB hab;
+static HMQ hmq;
 
 PRIVATE void morph_PM NOARGS
 {
@@ -7224,7 +7250,7 @@ PUBLIC int size_clip NOARGS
     return 8192;
 }
 
-/* Code partialy stolen from FED editor. */
+/* Code partially stolen from FED editor. */
 
 PUBLIC int put_clip ARGS1(char *, s)
 {
@@ -7310,7 +7336,88 @@ PUBLIC void get_clip_release NOARGS
     unmorph_PM();
 }
 
-#endif
+#else	/* !( defined __EMX__ ) */
+
+#  if !defined(WIN_EX) && defined(HAVE_POPEN)
+
+static FILE* paste_handle = 0;
+static char *paste_buf = NULL;
+
+PUBLIC void get_clip_release NOARGS
+{
+    if (paste_handle != 0)
+	pclose(paste_handle);
+    if (paste_buf)
+	FREE (paste_buf);
+}
+
+PRIVATE int clip_grab NOARGS
+{
+    char *cmd = getenv ("RL_PASTE_CMD");
+
+    if (paste_handle)
+	pclose(paste_handle);
+    if (!cmd)
+	return 0;
+
+    paste_handle = popen(cmd, "rt");
+    if (!paste_handle)
+	return 0;
+    return 1;
+}
+
+#define PASTE_BUFFER 1008
+#define CF_TEXT 0			/* Not used */
+
+PUBLIC char* get_clip_grab NOARGS
+{
+    int len;
+    int size = PASTE_BUFFER;
+    int off = 0;
+
+    if (!clip_grab())
+	return NULL;
+    if (!paste_handle)
+	return NULL;
+    if (paste_buf)
+	FREE (paste_buf);
+    paste_buf = (char*)malloc (PASTE_BUFFER);
+    while (1) {
+	len = fread (paste_buf + off, 1, PASTE_BUFFER - 1, paste_handle);
+	paste_buf[off + len] = '\0';
+	if (len < PASTE_BUFFER - 1)
+	break;
+	if (strchr (paste_buf + off, '\r')
+	 || strchr (paste_buf + off, '\n'))
+	    break;
+	paste_buf = realloc (paste_buf, size += PASTE_BUFFER - 1);
+	off += len;
+    }
+    return paste_buf;
+}
+
+PUBLIC int
+put_clip ARGS1(char *, s)
+{
+    char *cmd = getenv ("RL_CLCOPY_CMD");
+    FILE *fh;
+    int l = strlen(s), res;
+
+    if (!cmd)
+	return -1;
+
+    fh = popen (cmd, "wt");
+    if (!fh)
+	return -1;
+    res = fwrite (s, 1, l, fh);
+    if (pclose (fh) != 0 || res != l)
+	return -1;
+    return 0;
+}
+
+#  endif	/* !defined(WIN_EX) && defined(HAVE_POPEN) */
+
+#endif /* __EMX__ */
 
 #if defined(WIN_EX)	/* 1997/10/16 (Thu) 20:13:28 */
 
@@ -7400,7 +7507,7 @@ PUBLIC void get_clip_release()
     CloseClipboard();
     m_locked = 0;
 }
-#endif
+#endif	/* WIN_EX */
 #endif /* CAN_CUT_AND_PASTE */
 
 #if defined(WIN_EX)
@@ -7533,7 +7640,7 @@ PUBLIC void LYSyslog ARGS1(
 	    buf[colon2 - arg + 1] = 0;
 	    StrAllocCat(buf, "******");
 	    StrAllocCat(buf, atsign);
-	    syslog (LOG_INFO|LOG_LOCAL5, buf);
+	    syslog (LOG_INFO|LOG_LOCAL5, "%s", buf);
 	    CTRACE((tfp, "...alter %s\n", buf));
 	    FREE(buf);
 	    return;
@@ -7549,4 +7656,3 @@ PUBLIC void LYCloselog NOARGS
 }
 
 #endif /* !VMS && SYSLOG_REQUESTED_URLS */
-

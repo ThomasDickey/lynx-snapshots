@@ -172,8 +172,6 @@ in .lynxrc on startup is overridden by this flag.
 .TP
 .B \-connect_timeout\fR=\fIN
 Sets the connection timeout, where N is given in seconds.
-This is not available under DOS (use the sockdelay
-parameter of WATTCP under DOS).
 .TP
 .B \-cookie_file\fR=\fIFILENAME
 specifies a file to use to read cookies.
@@ -217,7 +215,7 @@ dumps the formatted output of the default document or one
 specified on the command line to standard output.
 This can be used in the following way:
 .sp
-lynx \fB\-dump\fR http://www.trill-home.com/lynx.html
+lynx \fB\-dump\fR http://www.subir.com/lynx.html
 .TP
 .B \-editor\fR=\fIEDITOR
 enable external editing, using the specified
@@ -681,6 +679,8 @@ Logically OR the values to combine options:
 4=TRST (table layout)
 .br
 8=config (lynx.cfg and .lynxrc contents)
+.br
+16=binary string copy/append, used in form data construction.
 .TP
 .B \-traversal
 traverse all http links derived from startfile.  When used with

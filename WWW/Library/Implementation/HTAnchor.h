@@ -48,7 +48,7 @@ struct _HTParentAnchor {
 
   HyperDoc *	document;	/* The document within which this is an anchor */
   char *	address;	/* Absolute address of this node */
-  char *	post_data;	/* Posting data */
+  bstring *	post_data;	/* Posting data */
   char *	post_content_type;  /* Type of post data */
   char *	bookmark;	/* Bookmark filename */
   HTFormat	format;		/* Pointer to node format descriptor */
@@ -79,6 +79,7 @@ struct _HTParentAnchor {
   char *	SugFname;	/* Suggested filename */
   char *	cache_control;	/* Cache-Control */
   BOOL		no_cache;	/* Cache-Control, Pragma or META "no-cache"? */
+  BOOL		inBASE;		/* duplicated from HTStructured (HTML.c/h) */
   char *	content_type;		/* Content-Type */
   char *	content_language;	/* Content-Language */
   char *	content_encoding;	/* Compression algorithm */
@@ -119,12 +120,12 @@ typedef struct {
 **  needed information including posting data and post content type.
 */
 typedef struct _DocAddress {
-    char * address;
-    char * post_data;
-    char * post_content_type;
-    char * bookmark;
-    BOOL   isHEAD;
-    BOOL   safe;
+    char *	address;
+    bstring *	post_data;
+    char *	post_content_type;
+    char *	bookmark;
+    BOOL	isHEAD;
+    BOOL	safe;
 } DocAddress;
 
 /* "internal" means "within the same document, with certainty". */
@@ -177,10 +178,10 @@ extern HTAnchor * HTAnchor_findSimpleAddress PARAMS((
 **	--------------------------------------------
 **
 **	The anchor is only deleted if the corresponding document is not loaded.
-**	All outgoing links from parent and children are deleted, and this anchor
-**	is removed from the sources list of all its targets.
+**	All outgoing links from children are deleted, and children are
+**	removed from the sources lists of their targets.
 **	We also try to delete the targets whose documents are not loaded.
-**	If this anchor's source list is empty, we delete it and its children.
+**	If this anchor's sources list is empty, we delete it and its children.
 */
 extern BOOL HTAnchor_delete PARAMS((
 	HTParentAnchor *	me));
@@ -218,11 +219,11 @@ extern HTFormat HTAnchor_format PARAMS((
 
 extern void HTAnchor_setIndex PARAMS((
 	HTParentAnchor *	me,
-	char *		address));
+	CONST char *		address));
 
 extern void HTAnchor_setPrompt PARAMS((
 	HTParentAnchor *	me,
-	char *			prompt));
+	CONST char *		prompt));
 
 extern BOOL HTAnchor_isIndex PARAMS((
 	HTParentAnchor *	me));
@@ -354,14 +355,6 @@ extern CONST char * HTAnchor_subject PARAMS((
 extern BOOL HTAnchor_setSubject PARAMS((
 	HTParentAnchor *	me,
 	CONST char *		subject));
-
-/*	Link this Anchor to another given one
-**	-------------------------------------
-*/
-extern BOOL HTAnchor_link PARAMS((
-	HTChildAnchor *		source,
-	HTAnchor *		destination,
-	HTLinkType *		type));
 
 /*	Manipulation of links
 **	---------------------

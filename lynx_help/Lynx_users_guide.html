@@ -204,7 +204,7 @@ Here are some sample URLs.
 
 <dl>
    <dt>HTTP  (HyperText Transfer Protocol)
-        <dd><code>http://www.trill-home.com/lynx.html</code>
+        <dd><code>http://www.subir.com/lynx.html</code>
 
    <dt>Gopher
         <dd><code>gopher://gopher.micro.umn.edu/11/</code>
@@ -2387,8 +2387,6 @@ where
                        in .lynxrc on startup is overridden by this flag.
              <dt><code>-connect_timeout=N</code>
                 <dd>Sets the connection timeout, where N is given in seconds.
-                    This is not available under DOS (use the sockdelay
-                    parameter of WATTCP under DOS).
              <dt><code>-cookie_file=FILENAME</code>
                 <dd>specifies a file to use to read cookies.
                     If none is specified, the default value is ~/.lynx_cookies
@@ -2849,6 +2847,8 @@ where
                        <dd>TRST (table layout)
                     <dt>8
                        <dd>config (lynx.cfg and .lynxrc contents)
+                    <dt>16
+                       <dd>binary string copy/append, used in form data construction.
                     </dl>
              <dt><code>-traversal</code>
                 <dd>traverse all http links derived from startfile.  When

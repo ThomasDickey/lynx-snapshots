@@ -122,11 +122,6 @@ PRIVATE char ThisYear[8];
 PRIVATE char LastYear[8];
 PRIVATE int TheDate;
 PRIVATE BOOLEAN HaveYears = FALSE;
-#ifdef SOCKS
-extern BOOLEAN socks_flag;
-extern unsigned long socks_bind_remoteAddr;
-#endif /* SOCKS */
-extern char *personal_mail_address;
 
 /*	Module-Wide Variables
 **	---------------------

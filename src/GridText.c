@@ -177,7 +177,9 @@ PRIVATE void * LY_check_calloc PARAMS((size_t nmemb, size_t size));
  * The real issue is that performance is degraded if the alignment is not met,
  * and some platforms such as Tru64 generate lots of warning messages.
  */
-#define ALIGN_SIZE     8
+#ifndef ALIGN_SIZE
+#define ALIGN_SIZE      sizeof(double)
+#endif
 
 typedef struct {
 	unsigned int	direction:2;   /* on or off */
@@ -556,7 +558,7 @@ PRIVATE int utfxtra_on_this_line = 0; /* num of UTF-8 extra bytes in line,
 #endif
 
 PRIVATE HTStyle default_style =
-	{ 0,  "(Unstyled)", "",
+	{ 0,  "(Unstyled)", 0, "",
 	(HTFont)0, 1, HT_BLACK,		0, 0,
 	0, 0, 0, HT_LEFT,		1, 0,	0,
 	NO, NO, 0, 0,			0 };
@@ -578,6 +580,9 @@ PRIVATE int HText_TrueLineSize PARAMS((
 	HTLine *	line,
 	HText *		text,
 	BOOL		IgnoreSpaces));
+
+PRIVATE void HText_RemoveEmptyLastLine PARAMS((
+	HText *		text));
 
 #ifdef CHECK_FREE_MEM
 
@@ -960,8 +965,10 @@ PUBLIC HText *	HText_new ARGS1(
     else
 	self->hiddenlinkflag = LYHiddenLinks;
     self->hidden_links = NULL;
-    self->no_cache = ((anchor->no_cache || anchor->post_data) ?
-							  YES : NO);
+    self->no_cache = ((anchor->no_cache ||
+		      anchor->post_data)
+		      ? YES
+		      : NO);
     self->LastChar = '\0';
     self->IgnoreExcess = FALSE;
 
@@ -2410,6 +2417,10 @@ PUBLIC void HText_beginAppend ARGS1(
 */
 #define new_line(text) split_line(text, 0)
 
+#define AT_START_OF_CELL(text)	\
+  (text->stbl			\
+   && Stbl_at_start_of_cell(text->stbl, text->Lines, text->last_line->size))
+
 #define DEBUG_SPLITLINE
 
 #ifdef DEBUG_SPLITLINE
@@ -2621,6 +2632,32 @@ PRIVATE HTLine * insert_blanks_in_line ARGS7(
     return mod_line;
 }
 
+PRIVATE void reset_cached_linedata ARGS3(
+	HText *,	text,
+	char *,		p,
+	unsigned,	plen)
+{			/* Count funny characters */
+    int i;
+
+    text->permissible_split = ctrl_chars_on_this_line =
+	utfxtra_on_this_line = 0;
+    for (i = (plen - 1); i >= 0; i--) {
+	if (p[i] == LY_UNDERLINE_START_CHAR ||
+	    p[i] == LY_UNDERLINE_END_CHAR ||
+	    p[i] == LY_BOLD_START_CHAR ||
+	    p[i] == LY_BOLD_END_CHAR ||
+	    p[i] == LY_SOFT_HYPHEN) {
+	    ctrl_chars_on_this_line++;
+	} else if (IS_UTF_EXTRA(p[i])) {
+	    utfxtra_on_this_line++;
+	}
+	if (p[i] == LY_SOFT_HYPHEN && (int)text->permissible_split < i)
+	    text->permissible_split = i + 1;
+    }
+    ctrl_chars_on_this_line += utfxtra_on_this_line;
+}
+
+
 #if defined(USE_COLOR_STYLE)
 PRIVATE HTStyleChange * skip_matched_and_correct_offsets ARGS3(
 	HTStyleChange *,	end,
@@ -2772,7 +2809,6 @@ PRIVATE void split_line ARGS2(
     if (split > 0) {	/* Delete space at "split" splitting line */
 	char *prevdata = previous->data, *linedata = line->data;
 	unsigned plen;
-	int i;
 
 	/* Split the line. -FM */
 	prevdata[previous->size] = '\0';
@@ -2805,20 +2841,7 @@ PRIVATE void split_line ARGS2(
 
 	plen = strlen(p);
 	if (plen) {			/* Count funny characters */
-	    for (i = (plen - 1); i >= 0; i--) {
-		if (p[i] == LY_UNDERLINE_START_CHAR ||
-		    p[i] == LY_UNDERLINE_END_CHAR ||
-		    p[i] == LY_BOLD_START_CHAR ||
-		    p[i] == LY_BOLD_END_CHAR ||
-		    p[i] == LY_SOFT_HYPHEN) {
-		    ctrl_chars_on_this_line++;
-		} else if (IS_UTF_EXTRA(p[i])) {
-		    utfxtra_on_this_line++;
-		}
-		if (p[i] == LY_SOFT_HYPHEN && (int)text->permissible_split < i)
-		    text->permissible_split = i + 1;
-	    }
-	    ctrl_chars_on_this_line += utfxtra_on_this_line;
+	    reset_cached_linedata(text,	p, plen);
 
 	    /* Add the data to the new line. -FM */
 	    strcat(linedata, p);
@@ -3365,7 +3388,8 @@ PUBLIC void HText_appendParagraph ARGS1(
 {
     int after = text->style->spaceAfter;
     int before = text->style->spaceBefore;
-    blank_lines(text, ((after > before) ? after : before));
+    if (!AT_START_OF_CELL(text))
+	blank_lines(text, ((after > before) ? after : before));
 }
 
 
@@ -3948,6 +3972,8 @@ PUBLIC void HText_appendCharacter ARGS2(
      *  New Line.
      */
     if (ch == '\n') {
+	if (AT_START_OF_CELL(text))
+	    return;
 	new_line(text);
 	text->in_line_1 = YES;	/* First line of new paragraph */
 	/*
@@ -3981,6 +4007,8 @@ PUBLIC void HText_appendCharacter ARGS2(
      *  i.e., use the second line indenting.
      */
     if (ch == '\r') {
+	if (AT_START_OF_CELL(text))
+	    return;
 	new_line(text);
 	text->in_line_1 = NO;
 	/*
@@ -4756,6 +4784,72 @@ PRIVATE void free_enclosed_stbl ARGS1(
 #define free_enclosed_stbl(me) /* nothing */
 #endif
 
+/*	Remove trailing blank lines from the last cell.  */
+PUBLIC int HText_trimCellLines ARGS1(
+	HText *,	text)
+{
+    int ret = 0;
+    HTLine *lastline;
+#if defined(USE_COLOR_STYLE)
+    HTStyleChange *laststyles;
+#endif
+
+    if (!(text && text->stbl))
+	return 0;
+
+    lastline = text->last_line;
+#if defined(USE_COLOR_STYLE)
+    laststyles = lastline->styles;
+#endif
+    while ( text->last_line && text->Lines >= 1
+	    && HText_LastLineSize(text, FALSE) == 0 ) {
+	/* Empty line should survive only if
+	   a) It is a first line of a row;
+	   b) This is not a fake row.
+	   */
+	if (Stbl_trimFakeRows(text->stbl, text->Lines, text->last_line->size))
+	    ret++, HText_RemoveEmptyLastLine(text);
+	else
+	    break;
+    }
+
+    if (!ret)
+	return 0;
+
+#ifndef FIXME_FIXME_XXXX
+    /* De-POOL the line */
+    memcpy(lastline, text->last_line, LINE_SIZE(text->last_line->size));
+#if defined(USE_COLOR_STYLE)
+    /* De-POOL the style buffers */
+    memcpy(laststyles, lastline->styles,
+	   sizeof(HTStyleChange)*lastline->numstyles);
+    lastline->styles = laststyles;
+#endif
+
+    if (text->last_line->next == text->last_line)
+	lastline->next = lastline->prev = lastline;
+    text->last_line = lastline;
+    lastline->prev->next = lastline;	/* Link in new line */
+    lastline->next->prev = lastline;	/* Could be same node of course */
+
+#endif	/* FIXME_FIXME_XXXX */
+
+    /* Fix global state for the last line */
+    reset_cached_linedata(text, text->last_line->data,
+			  text->last_line->size);
+#if 0
+    /* XXXX This is not enough.  Actually we need also to clear the
+       me->in_word flag of HTML.c.  Since this is not
+       possible, fake a real space. */
+    text->LastChar = (text->last_line->size
+		      ? text->last_line->data[text->last_line->size - 1]
+		      : ' ');
+#else
+    HText_appendCharacter(text, ' ');
+#endif
+    return ret;
+}
+
 /*	Finish simple table handling
  *	Return TRUE if the table is nested inside another table.
  */
@@ -4832,9 +4926,8 @@ PUBLIC void HText_startStblTR ARGS2(
 PUBLIC void HText_endStblTR ARGS1(
 	HText *,	me)
 {
-    if (!me || !me->stbl)
-	return;
-    /* should this do something?? */
+    if (me && me->stbl)
+	Stbl_finishRowInTable(me->stbl);
 }
 
 /*	Start simple table cell
@@ -4870,6 +4963,7 @@ PUBLIC void HText_endStblTD ARGS1(
 {
     if (!me || !me->stbl)
 	return;
+    HText_trimCellLines(me);
     if (Stbl_finishCellInTable(me->stbl, TRST_ENDCELL_ENDTD,
 			       me->Lines, HText_LastLineOffset(me), HText_LastLineSize(me,FALSE)) < 0)
 	HText_cancelStbl(me);	/* give up */
@@ -7043,7 +7137,8 @@ PUBLIC BOOL HText_POSTReplyLoaded ARGS1(
 {
     HText *text = NULL;
     HTList *cur = loaded_texts;
-    char *post_data, *address;
+    bstring *post_data;
+    char *address;
     BOOL is_head;
 
     /*
@@ -7067,7 +7162,7 @@ PUBLIC BOOL HText_POSTReplyLoaded ARGS1(
     while (NULL != (text = (HText *)HTList_nextObject(cur))) {
 	if (text->node_anchor &&
 	    text->node_anchor->post_data &&
-	    !strcmp(post_data, text->node_anchor->post_data) &&
+	    BINEQ(post_data, text->node_anchor->post_data) &&
 	    text->node_anchor->address &&
 	    !strcmp(address, text->node_anchor->address) &&
 	    is_head == text->node_anchor->isHEAD) {
@@ -8148,8 +8243,9 @@ PUBLIC void HTuncache_current_document NOARGS
 			      htmain_anchor->address) ?
 			       htmain_anchor->address : "unknown anchor"),
 			    ((htmain_anchor &&
-			      htmain_anchor->post_data) ?
-				      " with POST data" : "")));
+			      htmain_anchor->post_data)
+			      ? " with POST data"
+			      : "")));
 	HTList_removeObject(loaded_texts, HTMainText);
 	HText_free(HTMainText);
 	HTMainText = NULL;
@@ -8392,15 +8488,14 @@ PUBLIC char * HTLoadedDocumentURL NOARGS
 	return ("");
 }
 
-PUBLIC char * HTLoadedDocumentPost_data NOARGS
+PUBLIC bstring * HTLoadedDocumentPost_data NOARGS
 {
-    if (!HTMainText)
-	return ("");
-
-    if (HTMainText->node_anchor && HTMainText->node_anchor->post_data)
+    if (HTMainText
+     && HTMainText->node_anchor
+     && HTMainText->node_anchor->post_data)
 	return(HTMainText->node_anchor->post_data);
     else
-	return ("");
+	return (0);
 }
 
 PUBLIC char * HTLoadedDocumentTitle NOARGS
@@ -8632,13 +8727,36 @@ PUBLIC void HText_RemovePreviousLine ARGS1(
 {
     HTLine *line, *previous;
 
-    if (!(text && text->Lines > 1))
+    if (!(text && text->Lines >= 1))	/* Lines is 0-based */
 	return;
 
     line = text->last_line->prev;
     previous = line->prev;
     previous->next = text->last_line;
     text->last_line->prev = previous;
+    text->Lines--;
+}
+
+/*
+ *  This function is for removing the last blank lines.
+ *  It should be called after
+ *  checking the situation with HText_LastLineSize().
+ *  With POOLed allocation is should be wrapped into code restoring the
+ *  expected POOLed/unPOOLed state of the line chain.
+ */
+PRIVATE void HText_RemoveEmptyLastLine ARGS1(
+	HText *,	text)
+{
+    HTLine *line, *previous;
+
+    if (!(text && text->Lines >= 1))	/* Lines is 0-based */
+	return;
+
+    line = text->last_line;
+    previous = line->prev;
+    previous->next = line->next;
+    previous->next->prev = previous;
+    text->last_line = previous;
     text->Lines--;
 }
 
@@ -9970,82 +10088,38 @@ PRIVATE int find_best_target_cs ARGS3(
     return (-1);
 }
 
-PRIVATE BOOLEAN begin_submission_part ARGS5(
-    char **,	query,
-    BOOLEAN,	first_one,
-    BOOLEAN,	SemiColon,
-    BOOLEAN,	PlainText,
-    char *,	Boundary)
-{
-    if (first_one) {
-	if (Boundary) {
-	    HTSprintf(query, "--%s\r\n", Boundary);
-	}
-	first_one = FALSE;
-    } else {
-	if (PlainText) {
-	    StrAllocCat(*query, "\n");
-	} else if (SemiColon) {
-	    StrAllocCat(*query, ";");
-	} else if (Boundary) {
-	    HTSprintf(query, "\r\n--%s\r\n", Boundary);
-	} else {
-	    StrAllocCat(*query, "&");
-	}
-    }
-    return FALSE;
-}
-
 #ifdef EXP_FILE_UPLOAD
-PRIVATE char * load_a_file ARGS2(
-    BOOLEAN *,	use_mime,
-    char *,	val_used)
+PRIVATE void load_a_file ARGS2(
+    char *,	val_used,
+    bstring **,	result)
 {
-    char *escaped2 = NULL;
     FILE *fd;
-    size_t n, bytes;
+    size_t bytes;
     char buffer[257];
-    char base64buf[128];
 
     CTRACE((tfp, "Ok, about to convert %s to mime/thingy\n", val_used));
-
-    *use_mime = FALSE;
 
     if ((fd = fopen(val_used, BIN_R)) == 0) {
 	HTAlert(gettext("Can't open file for uploading"));
     } else {
-	StrAllocCopy(escaped2, "");
 	while ((bytes = fread(buffer, sizeof(char), 256, fd)) != 0) {
-	    buffer[bytes] = 0;
-	    for (n = 0; n < bytes; ++n) {
-		int ch = UCH(buffer[n]);
-		if ((iscntrl(ch) && !isspace(ch))
-		 || (!iscntrl(ch) && !isprint(ch))) {
-		    *use_mime = TRUE;
-		    break;
-		}
-	    }
-	    if (*use_mime)
-		break;
-	    StrAllocCat(escaped2, buffer);
-	}
-	if (*use_mime) {
-	    rewind(fd);
-	    StrAllocCopy(escaped2, "");
-	    while ((bytes = fread(buffer, sizeof(char), 45, fd)) != 0) {
-		base64_encode(base64buf, buffer, bytes);
-		StrAllocCat(escaped2, base64buf);
-	    }
-	}
-	if (ferror(fd)) {
-	    HTAlert(gettext("Short read from file, problem?"));
-	    FREE(escaped2);
+	    HTSABCat(result, buffer, bytes);
 	}
 	LYCloseInput(fd);
     }
-    return escaped2;
+}
+
+PRIVATE CONST char *guess_content_type ARGS1(CONST char *, filename)
+{
+    HTAtom *encoding;
+    CONST char *desc;
+    HTFormat format = HTFileFormat (filename, &encoding, &desc);
+    return (format != 0 && non_empty(format->name))
+	    ? format->name
+	    : "text/plain";
 }
 #endif /* EXP_FILE_UPLOAD */
+
 
 PRIVATE void cannot_transcode ARGS2(
     BOOL *,		had_warning,
@@ -10082,17 +10156,209 @@ PRIVATE unsigned check_form_specialchars ARGS1(
     return result;
 }
 
-#ifdef EXP_FILE_UPLOAD
-PRIVATE CONST char *guess_content_type ARGS1(CONST char *, filename)
+/*
+ * Scan the given data, adding characters to the MIME-boundary to keep it from
+ * matching any part of the data.
+ */
+PRIVATE void UpdateBoundary ARGS2(
+	char **,	Boundary,
+	bstring *,	data)
 {
-    HTAtom *encoding;
-    CONST char *desc;
-    HTFormat format = HTFileFormat (filename, &encoding, &desc);
-    return (format != 0 && non_empty(format->name))
-	    ? format->name
-	    : "text/plain";
+    int j;
+    int have = strlen(*Boundary);
+    int last = BStrLen(data);
+    char *text = BStrData(data);
+    char *want = *Boundary;
+
+    for (j = 0; j <= (last - have); ++j) {
+	if (want[0] == text[j]
+	 && !memcmp(want, text + j, have)) {
+	    char temp[2];
+	    temp[0] = isdigit(text[have + j]) ? 'a' : '0';
+	    temp[1] = '\0';
+	    StrAllocCat(want, temp);
+	    ++have;
+	}
+    }
+    *Boundary = want;
 }
-#endif
+
+/*
+ * Convert a string to base64
+ */
+PRIVATE char * convert_to_base64 ARGS2(
+	char *,		src,
+	int,		len)
+{
+#define B64_LINE       76
+
+    static CONST char basis_64[] =
+	"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+    char *dest;
+    int rlen;   /* length of result string */
+    unsigned char c1, c2, c3;
+    char *eol, *r, *str;
+    int eollen;
+    int chunk;
+
+    str = src;
+    eol = "\n";
+    eollen = 1;
+
+    /* calculate the length of the result */
+    rlen = (len+2) / 3 * 4;	/* encoded bytes */
+    if (rlen) {
+	/* add space for EOL */
+	rlen += ((rlen-1) / B64_LINE + 1) * eollen;
+    }
+
+    /* allocate a result buffer */
+    if ((dest = (char *) malloc(rlen + 1)) == NULL) {
+	outofmem(__FILE__, "convert_to_base64");
+    }
+    r = dest;
+
+    /* encode */
+    for (chunk=0; len > 0; len -= 3, chunk++) {
+	if (chunk == (B64_LINE/4)) {
+	    char *c = eol;
+	    char *e = eol + eollen;
+	    while (c < e)
+		*r++ = *c++;
+	    chunk = 0;
+	}
+	c1 = *str++;
+	c2 = *str++;
+	*r++ = basis_64[c1>>2];
+	*r++ = basis_64[((c1 & 0x3)<< 4) | ((c2 & 0xF0) >> 4)];
+	if (len > 2) {
+	    c3 = *str++;
+	    *r++ = basis_64[((c2 & 0xF) << 2) | ((c3 & 0xC0) >>6)];
+	    *r++ = basis_64[c3 & 0x3F];
+	} else if (len == 2) {
+	    *r++ = basis_64[(c2 & 0xF) << 2];
+	    *r++ = '=';
+	} else { /* len == 1 */
+	    *r++ = '=';
+	    *r++ = '=';
+	}
+    }
+    if (rlen) {
+	/* append eol to the result string */
+	char *c = eol;
+	char *e = eol + eollen;
+	while (c < e)
+	    *r++ = *c++;
+    }
+    *r = '\0';
+
+    return dest;
+}
+
+typedef enum {
+    NO_QUOTE		/* no quoting needed */
+    , QUOTE_MULTI	/* multipart */
+    , QUOTE_BASE64	/* encode as base64 */
+    , QUOTE_SPECIAL	/* escape special characters only */
+} QuoteData;
+
+typedef struct {
+    int type;		/* the type of this field */
+    BOOL first;		/* true if this begins a submission part */
+    char *name;		/* the name of this field */
+    char *value;	/* the nominal value of this field */
+    bstring *data;	/* its data, which is usually the same as the value */
+    QuoteData quote;	/* how to quote/translate the data */
+} PostData;
+
+PRIVATE char *escape_or_quote_name ARGS3(
+	char *,		name,
+	QuoteData,	quoting,
+	char *,		MultipartContentType)
+{
+    char *escaped1 = NULL;
+
+    switch (quoting) {
+    case NO_QUOTE:
+       StrAllocCopy(escaped1, name);
+       break;
+    case QUOTE_MULTI:
+    case QUOTE_BASE64:
+	StrAllocCopy(escaped1, "Content-Disposition: form-data");
+	HTSprintf(&escaped1, "; name=\"%s\"", name);
+	if (MultipartContentType)
+	    HTSprintf(&escaped1, MultipartContentType, "text/plain");
+	if (quoting == QUOTE_BASE64)
+	    StrAllocCat(escaped1, "\r\nContent-Transfer-Encoding: base64");
+	StrAllocCat(escaped1, "\r\n\r\n");
+	break;
+    case QUOTE_SPECIAL:
+	escaped1 = HTEscapeSP(name, URL_XALPHAS);
+	break;
+    }
+    return escaped1;
+}
+
+PRIVATE char *escape_or_quote_value ARGS2(
+	char *,		value,
+	QuoteData,	quoting)
+{
+    char *escaped2 = NULL;
+
+    switch (quoting) {
+    case NO_QUOTE:
+    case QUOTE_MULTI:
+	StrAllocCopy(escaped2, NonNull(value));
+	break;
+    case QUOTE_BASE64:
+	/* FIXME: this is redundant */
+	escaped2 = convert_to_base64(value, strlen(value));
+	break;
+    case QUOTE_SPECIAL:
+	escaped2 = HTEscapeSP(value, URL_XALPHAS);
+	break;
+    }
+    return escaped2;
+}
+
+/*
+ * Check if we should encode the data in base64.  We can, only if we're using
+ * a multipart content type.  We should, if we're sending mail and the data
+ * contains long lines or nonprinting characters.
+ */
+PRIVATE int check_if_base64_needed ARGS2(
+	int,		submit_method,
+	bstring *,	data)
+{
+    int width = 0;
+    BOOL printable = TRUE;
+    char *text = BStrData(data);
+
+    if (text != 0) {
+	int col = 0;
+	int n;
+	int length = BStrLen(data);
+
+	for (n = 0; n < length; ++n) {
+	    int ch = UCH(text[n]);
+	    if (is8bits(ch) || ((ch < 32 && ch != '\n'))) {
+		CTRACE((tfp, "nonprintable %d:%#x\n", n, ch));
+		printable = FALSE;
+	    }
+	    if (ch == '\n' || ch == '\r') {
+		if (width < col)
+		    width = col;
+		col = 0;
+	    } else {
+		++col;
+	    }
+	}
+	if (width < col)
+	    width = col;
+    }
+    return !printable && ((submit_method == URL_MAIL_METHOD) && (width > 72));
+}
 
 /*
  *  HText_SubmitForm - generate submit data from form fields.
@@ -10113,11 +10379,13 @@ PUBLIC int HText_SubmitForm ARGS4(
     BOOL success;
     BOOLEAN PlainText = FALSE;
     BOOLEAN SemiColon = FALSE;
-    BOOLEAN first_one = TRUE;
+    BOOL skip_field = FALSE;
     CONST char *out_csname;
     CONST char *target_csname = NULL;
     PerFormInfo *thisform;
+    PostData *my_data = NULL;
     TextAnchor *anchor_ptr;
+    bstring *my_query = NULL;
     char *Boundary = NULL;
     char *MultipartContentType = NULL;
     char *content_type_out = NULL;
@@ -10128,17 +10396,14 @@ PUBLIC int HText_SubmitForm ARGS4(
     char *last_textarea_name = NULL;
     char *name_used = "";
     char *previous_blanks = NULL;
-    char *query = NULL;
     char *val_used = "";
     int anchor_count = 0;
     int anchor_limit = 0;
     int form_number = submit_item->number;
+    int result = 0;
     int target_cs = -1;
     int textarea_lineno = 0;
     unsigned form_is_special = 0;
-#ifdef EXP_FILE_UPLOAD
-    BOOLEAN use_mime;
-#endif
 
     CTRACE((tfp, "SubmitForm\n  link_name=%s\n  link_value=%s\n", link_name, link_value));
     if (!HTMainText)
@@ -10155,16 +10420,17 @@ PUBLIC int HText_SubmitForm ARGS4(
 	thisform = NULL;
     }
 
-    if (submit_item->submit_action) {
-	/*
-	 *  If we're mailing, make sure it's a mailto ACTION. -FM
-	 */
-	if ((submit_item->submit_method == URL_MAIL_METHOD) &&
-	    !isMAILTO_URL(submit_item->submit_action)) {
-	    HTAlert(BAD_FORM_MAILTO);
-	    return 0;
-	}
-    } else {
+    if (isEmpty(submit_item->submit_action)) {
+	CTRACE((tfp, "SubmitForm: no action given\n"));
+	return 0;
+    }
+
+    /*
+     *  If we're mailing, make sure it's a mailto ACTION. -FM
+     */
+    if ((submit_item->submit_method == URL_MAIL_METHOD) &&
+	!isMAILTO_URL(submit_item->submit_action)) {
+	HTAlert(BAD_FORM_MAILTO);
 	return 0;
     }
 
@@ -10190,10 +10456,8 @@ PUBLIC int HText_SubmitForm ARGS4(
 	       !strncasecomp(submit_item->submit_enctype,
 			     "multipart/form-data", 19)) {
 	/*
-	 *  Use the multipart MIME format.  We should generate
-	 *  a boundary string which we are sure doesn't occur
-	 *  in the content, but for now we'll just assume that
-	 *  this string doesn't. -FM
+	 *  Use the multipart MIME format.  Later we will ensure it does not
+	 *  occur within the content.
 	 */
 	Boundary = "xnyLAaB03X";
     }
@@ -10311,6 +10575,16 @@ PUBLIC int HText_SubmitForm ARGS4(
 	}
     }
 
+    /*
+     * If we have input fields (we expect this), make an array of them so we
+     * can organize the data.
+     */
+    if (anchor_limit != 0) {
+	my_data = typecallocn(PostData, anchor_limit);
+	if (my_data == 0)
+	    outofmem(__FILE__, "HText_SubmitForm");
+    }
+
     if (target_csname == NULL && target_cs >= 0) {
 	if ((form_is_special & SPECIAL_8BIT) != 0) {
 	    target_csname = LYCharSet_UC[target_cs].MIMEname;
@@ -10322,19 +10596,22 @@ PUBLIC int HText_SubmitForm ARGS4(
     }
 
     if (submit_item->submit_method == URL_GET_METHOD && Boundary == NULL) {
-	StrAllocCopy(query, submit_item->submit_action);
+	char *temp = NULL;
+
+	StrAllocCopy(temp, submit_item->submit_action);
 	/*
 	 *  Method is GET.  Clip out any anchor in the current URL.
 	 */
-	strtok (query, "#");
+	strtok (temp, "#");
 	/*
 	 *  Clip out any old query in the current URL.
 	 */
-	strtok (query, "?");
+	strtok (temp, "?");
 	/*
 	 *  Add the lead question mark for the new URL.
 	 */
-	StrAllocCat(query,"?");
+	StrAllocCat(temp,"?");
+	BStrCat0(my_query, temp);
     } else {
 	/*
 	 *  We are submitting POST content to a server,
@@ -10349,8 +10626,7 @@ PUBLIC int HText_SubmitForm ARGS4(
 			 "text/plain");
 	} else if (Boundary != NULL) {
 	    StrAllocCopy(content_type_out,
-			 "multipart/form-data; boundary=");
-	    StrAllocCat(content_type_out, Boundary);
+			 "multipart/form-data");
 	} else {
 	    StrAllocCopy(content_type_out,
 			 "application/x-www-form-urlencoded");
@@ -10396,7 +10672,7 @@ PUBLIC int HText_SubmitForm ARGS4(
     out_csname = target_csname;
 
     /*
-     * Go through list of anchors and assemble URL query.
+     * Build up a list of the input fields and their associated values.
      */
     for (anchor_ptr = HTMainText->first_anchor;
 	 anchor_ptr != NULL;
@@ -10410,20 +10686,28 @@ PUBLIC int HText_SubmitForm ARGS4(
 
 	    FormInfo *form_ptr = anchor_ptr->input_field;
 	    int out_cs;
+	    QuoteData quoting = (PlainText
+				 ? NO_QUOTE
+				 : (Boundary
+				    ? QUOTE_MULTI
+				    : QUOTE_SPECIAL));
 
 	    if (form_ptr->type != F_TEXTAREA_TYPE)
 		textarea_lineno = 0;
 
-	    ++anchor_count;
+	    CTRACE((tfp, "SubmitForm[%d/%d]: ",
+		   anchor_count + 1, anchor_limit));
+
+	    name_used = NonNull(form_ptr->name);
+
 	    switch(form_ptr->type) {
 	    case F_RESET_TYPE:
+		CTRACE((tfp, "reset\n"));
 		break;
 #ifdef EXP_FILE_UPLOAD
 	    case F_FILE_TYPE:
-		name_used = NonNull(form_ptr->name);
 		val_used = NonNull(form_ptr->value);
-		CTRACE((tfp, "SubmitForm[%d/%d]: I'd submit %s (from %s), but you've not finished it\n",
-			     anchor_count, anchor_limit,
+		CTRACE((tfp, "I will submit %s (from %s)\n",
 			     val_used, name_used));
 		break;
 #endif
@@ -10432,8 +10716,7 @@ PUBLIC int HText_SubmitForm ARGS4(
 	    case F_IMAGE_SUBMIT_TYPE:
 		if (!(non_empty(form_ptr->name) &&
 		      !strcmp(form_ptr->name, link_name))) {
-		    CTRACE((tfp, "SubmitForm[%d/%d]: skipping submit field with ",
-				 anchor_count, anchor_limit));
+		    CTRACE((tfp, "skipping submit field with "));
 		    CTRACE((tfp, "name \"%s\" for link_name \"%s\", %s.\n",
 				 form_ptr->name ? form_ptr->name : "???",
 				 link_name ? link_name : "???",
@@ -10444,8 +10727,7 @@ PUBLIC int HText_SubmitForm ARGS4(
 		if (!(form_ptr->type == F_TEXT_SUBMIT_TYPE ||
 		    (non_empty(form_ptr->value) &&
 		     !strcmp(form_ptr->value, link_value)))) {
-		    CTRACE((tfp, "SubmitForm[%d/%d]: skipping submit field with ",
-				 anchor_count, anchor_limit));
+		    CTRACE((tfp, "skipping submit field with "));
 		    CTRACE((tfp, "name \"%s\" for link_name \"%s\", %s!\n",
 				 form_ptr->name ? form_ptr->name : "???",
 				 link_name ? link_name : "???",
@@ -10479,8 +10761,7 @@ PUBLIC int HText_SubmitForm ARGS4(
 		    success = LYUCTranslateBackFormData(&copied_val_used,
 							form_ptr->value_cs,
 							target_cs, PlainText);
-		    CTRACE((tfp, "SubmitForm[%d/%d]: field \"%s\" %d %s -> %d %s %s\n",
-				 anchor_count, anchor_limit,
+		    CTRACE((tfp, "field \"%s\" %d %s -> %d %s %s\n",
 				 NonNull(form_ptr->name),
 				 form_ptr->value_cs,
 				 form_ptr->value_cs >= 0
@@ -10493,8 +10774,7 @@ PUBLIC int HText_SubmitForm ARGS4(
 			val_used = copied_val_used;
 		    }
 		} else {  /* We can use the value directly. */
-		    CTRACE((tfp, "SubmitForm[%d/%d]: field \"%s\" %d %s OK\n",
-				 anchor_count, anchor_limit,
+		    CTRACE((tfp, "field \"%s\" %d %s OK\n",
 				 NonNull(form_ptr->name),
 				 target_cs,
 				 target_csname ? target_csname : "???"));
@@ -10537,8 +10817,6 @@ PUBLIC int HText_SubmitForm ARGS4(
 			break;
 		    }
 		}
-		name_used = (form_ptr->name ?
-			     form_ptr->name : "");
 
 		if (check_form_specialchars(name_used) != 0) {
 		    /*  We should translate back. */
@@ -10546,8 +10824,7 @@ PUBLIC int HText_SubmitForm ARGS4(
 		    success = LYUCTranslateBackFormData(&copied_name_used,
 							form_ptr->name_cs,
 							target_cs, PlainText);
-		    CTRACE((tfp, "SubmitForm[%d/%d]: name \"%s\" %d %s -> %d %s %s\n",
-				 anchor_count, anchor_limit,
+		    CTRACE((tfp, "name \"%s\" %d %s -> %d %s %s\n",
 				 NonNull(form_ptr->name),
 				 form_ptr->name_cs,
 				 form_ptr->name_cs >= 0
@@ -10569,8 +10846,7 @@ PUBLIC int HText_SubmitForm ARGS4(
 			}
 		    }
 		} else {  /* We can use the name directly. */
-		    CTRACE((tfp, "SubmitForm[%d/%d]: name \"%s\" %d %s OK\n",
-				anchor_count, anchor_limit,
+		    CTRACE((tfp, "name \"%s\" %d %s OK\n",
 				NonNull(form_ptr->name),
 				target_cs,
 				target_csname ? target_csname : "???"));
@@ -10595,64 +10871,210 @@ PUBLIC int HText_SubmitForm ARGS4(
 		     *  as multipart/form-data can only occur if the form
 		     *  provider specifically asked for it anyway. - kw
 		     */
-		    HTMake822Word(&copied_name_used);
+		    HTMake822Word(&copied_name_used, FALSE);
 		    name_used = copied_name_used;
 		}
 
 		break;
 	    default:
-		CTRACE((tfp, "SubmitForm[%d/%d]: What type is %d?\n",
-			     anchor_count, anchor_limit,
-			     form_ptr->type));
+		CTRACE((tfp, "What type is %d?\n", form_ptr->type));
 		break;
 	    }
 
+	    skip_field = FALSE;
+	    my_data[anchor_count].first = TRUE;
+	    my_data[anchor_count].type = form_ptr->type;
+
+	    /*
+	     * Using the values of 'name_used' and 'val_used' computed in the
+	     * previous case-statement, compute the 'first' and 'data' values
+	     * for the current input field.
+	     */
 	    switch(form_ptr->type) {
 
-	    case F_RESET_TYPE:
+	    default:
+		skip_field = TRUE;
 		break;
 
 #ifdef EXP_FILE_UPLOAD
 	    case F_FILE_TYPE:
-		first_one = begin_submission_part(&query,
-						  first_one,
-						  SemiColon,
-						  PlainText,
-						  Boundary);
-		if ((escaped2 = load_a_file(&use_mime, val_used)) == NULL) {
-		    StrAllocCopy(escaped2, "");
-		}
-
-		/* FIXME: we need to modify the mime-type here - rp */
-		/* Note: could use LYGetFileInfo for that and for
-		   other headers that should be transmitted - kw */
-
-		if (PlainText) {
-		    StrAllocCopy(escaped1, name_used);
-		} else if (Boundary) {
-		    StrAllocCopy(escaped1, "Content-Disposition: form-data");
-		    HTSprintf(&escaped1, "; name=\"%s\"", name_used);
-		    HTSprintf(&escaped1, "; filename=\"%s\"", val_used);
-		    if (MultipartContentType) {
-			HTSprintf(&escaped1, MultipartContentType, guess_content_type(val_used));
-			if (use_mime)
-			    StrAllocCat(escaped1, "\r\nContent-Transfer-Encoding: base64");
-		    }
-		    StrAllocCat(escaped1, "\r\n\r\n");
-		} else {
-		    escaped1 = HTEscapeSP(name_used, URL_XALPHAS);
-		}
-
-		HTSprintf(&query,
-			  "%s%s%s%s%s",
-			  escaped1,
-			  (Boundary ? "" : "="),
-			  (PlainText ? "\n" : ""),
-			  escaped2,
-			  ((PlainText && *escaped2) ? "\n" : ""));
+		load_a_file(val_used, &(my_data[anchor_count].data));
 		break;
 #endif /* EXP_FILE_UPLOAD */
 
+	    case F_SUBMIT_TYPE:
+	    case F_TEXT_SUBMIT_TYPE:
+	    case F_IMAGE_SUBMIT_TYPE:
+		if ((non_empty(form_ptr->name) &&
+		    !strcmp(form_ptr->name, link_name)) &&
+		   (form_ptr->type == F_TEXT_SUBMIT_TYPE ||
+		    (non_empty(form_ptr->value) &&
+		     !strcmp(form_ptr->value, link_value)))) {
+		    ;
+		} else {
+		    skip_field = TRUE;
+		}
+		break;
+
+	    case F_RADIO_TYPE:
+	    case F_CHECKBOX_TYPE:
+		/*
+		 *  Only add if selected.
+		 */
+		if (form_ptr->num_value) {
+		    ;
+		} else {
+		    skip_field = TRUE;
+		}
+		break;
+
+	    case F_TEXTAREA_TYPE:
+		if (!last_textarea_name ||
+		    strcmp(last_textarea_name, form_ptr->name)) {
+		    textarea_lineno = 1;
+		    last_textarea_name = form_ptr->name;
+		} else {
+		    my_data[anchor_count].first = FALSE;
+		}
+		break;
+
+	    case F_PASSWORD_TYPE:
+	    case F_TEXT_TYPE:
+	    case F_OPTION_LIST_TYPE:
+	    case F_HIDDEN_TYPE:
+		break;
+	    }
+
+	    /*
+	     * If we did not decide to skip the current field, populate the
+	     * values in the array for it.
+	     */
+	    if (!skip_field) {
+		StrAllocCopy(my_data[anchor_count].name, name_used);
+		StrAllocCopy(my_data[anchor_count].value, val_used);
+		if (my_data[anchor_count].data == 0)
+		    BStrCat0(my_data[anchor_count].data, val_used);
+		my_data[anchor_count].quote = quoting;
+		if (quoting == QUOTE_MULTI
+		 && check_if_base64_needed(submit_item->submit_method,
+					   my_data[anchor_count].data)) {
+		    CTRACE((tfp, "will encode as base64\n"));
+		    my_data[anchor_count].quote = QUOTE_BASE64;
+		    escaped2 = convert_to_base64(
+				BStrData(my_data[anchor_count].data),
+				BStrLen(my_data[anchor_count].data));
+		    BStrCopy0(my_data[anchor_count].data, escaped2);
+		    FREE(escaped2);
+	        }
+	    }
+	    ++anchor_count;
+
+	    FREE(copied_name_used);
+	    FREE(copied_val_used);
+
+	} else if (anchor_ptr->input_field->number > form_number) {
+	    break;
+	}
+    }
+
+    FREE(copied_name_used);
+
+    if (my_data != 0) {
+	BOOL first_one = TRUE;
+
+	/*
+	 * If we're using a MIME-boundary, make it unique.
+	 */
+	if (content_type_out != 0 && Boundary != 0) {
+	    Boundary = 0;
+	    StrAllocCopy(Boundary, "LYNX");
+	    for (anchor_count = 0; anchor_count < anchor_limit; ++anchor_count) {
+		if (my_data[anchor_count].data != 0) {
+		    UpdateBoundary(&Boundary, my_data[anchor_count].data);
+		}
+	    }
+	    HTSprintf(&content_type_out, "; boundary=%s", Boundary);
+	}
+
+	for (anchor_count = 0; anchor_count < anchor_limit; ++anchor_count) {
+
+	    if (my_data[anchor_count].name != 0
+	     && my_data[anchor_count].value != 0) {
+
+		CTRACE((tfp, "processing [%d:%d] name=%s(first:%d, value=%s, data=%p)\n",
+			anchor_count + 1,
+			anchor_limit,
+			NonNull(my_data[anchor_count].name),
+			my_data[anchor_count].first,
+			NonNull(my_data[anchor_count].value),
+			my_data[anchor_count].data));
+
+		if (my_data[anchor_count].first) {
+		    if (first_one) {
+			if (Boundary) {
+			    HTBprintf(&my_query, "--%s\r\n", Boundary);
+			}
+			first_one = FALSE;
+		    } else {
+			if (PlainText) {
+			    BStrCat0(my_query, "\n");
+			} else if (SemiColon) {
+			    BStrCat0(my_query, ";");
+			} else if (Boundary) {
+			    HTBprintf(&my_query, "\r\n--%s\r\n", Boundary);
+			} else {
+			    BStrCat0(my_query, "&");
+			}
+		    }
+		}
+
+		/* append a null to the string */
+		HTSABCat(&(my_data[anchor_count].data), "", 1);
+		name_used = my_data[anchor_count].name;
+		val_used = my_data[anchor_count].value;
+
+	    } else {
+		/* there is no data to send */
+		continue;
+	    }
+
+	    switch (my_data[anchor_count].type) {
+	    case F_TEXT_TYPE:
+	    case F_PASSWORD_TYPE:
+	    case F_OPTION_LIST_TYPE:
+	    case F_HIDDEN_TYPE:
+		escaped1 = escape_or_quote_name(my_data[anchor_count].name,
+						my_data[anchor_count].quote,
+						MultipartContentType);
+
+		escaped2 = escape_or_quote_value(val_used,
+						 my_data[anchor_count].quote);
+
+		HTBprintf(&my_query,
+			"%s%s%s%s%s",
+			escaped1,
+			(Boundary ? "" : "="),
+			(PlainText ? "\n" : ""),
+			escaped2,
+			((PlainText && *escaped2) ? "\n" : ""));
+		break;
+	    case F_CHECKBOX_TYPE:
+	    case F_RADIO_TYPE:
+		escaped1 = escape_or_quote_name(my_data[anchor_count].name,
+						my_data[anchor_count].quote,
+						MultipartContentType);
+
+		escaped2 = escape_or_quote_value(val_used,
+						 my_data[anchor_count].quote);
+
+		HTBprintf(&my_query,
+			"%s%s%s%s%s",
+			escaped1,
+			(Boundary ? "" : "="),
+			(PlainText ? "\n" : ""),
+			escaped2,
+			((PlainText && *escaped2) ? "\n" : ""));
+		break;
 	    case F_SUBMIT_TYPE:
 	    case F_TEXT_SUBMIT_TYPE:
 	    case F_IMAGE_SUBMIT_TYPE:
@@ -10665,111 +11087,45 @@ PUBLIC int HText_SubmitForm ARGS4(
 		 *  include the name=value pair, or fake name.x=0 and
 		 *  name.y=0 pairs for IMAGE_SUBMIT_TYPE. -FM
 		 */
-		if ((non_empty(form_ptr->name) &&
-		    !strcmp(form_ptr->name, link_name)) &&
-		   (form_ptr->type == F_TEXT_SUBMIT_TYPE ||
-		    (non_empty(form_ptr->value) &&
-		     !strcmp(form_ptr->value, link_value)))) {
+		escaped1 = escape_or_quote_name(my_data[anchor_count].name,
+						my_data[anchor_count].quote,
+						MultipartContentType);
 
-		    first_one = begin_submission_part(&query,
-						      first_one,
-						      SemiColon,
-						      PlainText,
-						      Boundary);
+		escaped2 = escape_or_quote_value(val_used,
+						 my_data[anchor_count].quote);
 
-		    if (PlainText) {
-			StrAllocCopy(escaped1, name_used);
-		    } else if (Boundary) {
-			StrAllocCopy(escaped1, "Content-Disposition: form-data");
-			HTSprintf(&escaped1, "; name=\"%s\"", name_used);
-			if (MultipartContentType)
-			    HTSprintf(&escaped1, MultipartContentType, "text/plain");
-			StrAllocCat(escaped1, "\r\n\r\n");
+		if (my_data[anchor_count].type == F_IMAGE_SUBMIT_TYPE) {
+		    /*
+		     * It's a clickable image submit button.  Fake a 0,0
+		     * coordinate pair, which typically returns the image's
+		     * default.  -FM
+		     */
+		    if (Boundary) {
+			*(strchr(escaped1, '=') + 1) = '\0';
+			HTBprintf(&my_query,
+				  "%s\"%s.x\"\r\n\r\n0\r\n--%s\r\n%s\"%s.y\"\r\n\r\n0",
+				  escaped1,
+				  my_data[anchor_count].name,
+				  Boundary,
+				  escaped1,
+				  my_data[anchor_count].name);
 		    } else {
-			escaped1 = HTEscapeSP(name_used, URL_XALPHAS);
-		    }
-
-		    if (PlainText || Boundary) {
-			StrAllocCopy(escaped2,
-				     (val_used ?
-				      val_used : ""));
-		    } else {
-			escaped2 = HTEscapeSP(val_used, URL_XALPHAS);
-		    }
-
-		    if (form_ptr->type == F_IMAGE_SUBMIT_TYPE) {
-			/*
-			 * It's a clickable image submit button.  Fake a 0,0
-			 * coordinate pair, which typically returns the image's
-			 * default.  -FM
-			 */
-			if (Boundary) {
-			    *(strchr(escaped1, '=') + 1) = '\0';
-			    HTSprintf(&query,
-				    "%s.x\r\n\r\n0\r\n--%s\r\n%s.y\r\n\r\n0",
-				    escaped1,
-				    Boundary,
-				    escaped1);
-			} else {
-			    HTSprintf(&query,
-				    "%s.x=0%s%s.y=0%s",
-				    escaped1,
-				    (PlainText ?
-					  "\n" : (SemiColon ?
-							";" : "&")),
-				    escaped1,
-				    ((PlainText && *escaped1) ?
-							 "\n" : ""));
-			}
-		    } else {
-			/*
-			 * It's a standard submit button.  Use the name=value
-			 * pair.  = FM
-			 */
-			HTSprintf(&query,
-				"%s%s%s%s%s",
+			HTBprintf(&my_query,
+				"%s.x=0%s%s.y=0%s",
 				escaped1,
-				(Boundary ? "" : "="),
-				(PlainText ? "\n" : ""),
-				escaped2,
-				((PlainText && *escaped2) ? "\n" : ""));
+				(PlainText ?
+				      "\n" : (SemiColon ?
+						    ";" : "&")),
+				escaped1,
+				((PlainText && *escaped1) ?
+						     "\n" : ""));
 		    }
-		}
-		break;
-
-	    case F_RADIO_TYPE:
-	    case F_CHECKBOX_TYPE:
-		/*
-		 *  Only add if selected.
-		 */
-		if (form_ptr->num_value) {
-		    first_one = begin_submission_part(&query,
-						      first_one,
-						      SemiColon,
-						      PlainText,
-						      Boundary);
-
-		    if (PlainText) {
-			StrAllocCopy(escaped1, name_used);
-		    } else if (Boundary) {
-			StrAllocCopy(escaped1, "Content-Disposition: form-data");
-			HTSprintf(&escaped1, "; name=\"%s\"", name_used);
-			if (MultipartContentType)
-			    HTSprintf(&escaped1, MultipartContentType, "text/plain");
-			StrAllocCat(escaped1, "\r\n\r\n");
-		    } else {
-			escaped1 = HTEscapeSP(name_used, URL_XALPHAS);
-		    }
-
-		    if (PlainText || Boundary) {
-			StrAllocCopy(escaped2,
-				     (val_used ?
-				      val_used : ""));
-		    } else {
-			escaped2 = HTEscapeSP(val_used, URL_XALPHAS);
-		    }
-
-		    HTSprintf(&query,
+		} else {
+		    /*
+		     * It's a standard submit button.  Use the name=value
+		     * pair.  = FM
+		     */
+		    HTBprintf(&my_query,
 			    "%s%s%s%s%s",
 			    escaped1,
 			    (Boundary ? "" : "="),
@@ -10778,18 +11134,14 @@ PUBLIC int HText_SubmitForm ARGS4(
 			    ((PlainText && *escaped2) ? "\n" : ""));
 		}
 		break;
-
+	    case F_RESET_TYPE:
+		/* ignore */
+		break;
 	    case F_TEXTAREA_TYPE:
-		if (PlainText || Boundary) {
-		    StrAllocCopy(escaped2,
-				 (val_used ?
-				  val_used : ""));
-		} else {
-		    escaped2 = HTEscapeSP(val_used, URL_XALPHAS);
-		}
+		escaped2 = escape_or_quote_value(val_used,
+						 my_data[anchor_count].quote);
 
-		if (!last_textarea_name ||
-		    strcmp(last_textarea_name, form_ptr->name)) {
+		if (my_data[anchor_count].first) {
 		    textarea_lineno = 1;
 		    /*
 		     * Names are different so this is the first textarea or a
@@ -10800,159 +11152,142 @@ PUBLIC int HText_SubmitForm ARGS4(
 		    } else {
 			FREE(previous_blanks);
 		    }
-		    first_one = begin_submission_part(&query,
-						      first_one,
-						      SemiColon,
-						      PlainText,
-						      Boundary);
+		    escaped1 = escape_or_quote_name(name_used,
+						    my_data[anchor_count].quote,
+						    MultipartContentType);
 
-		    if (PlainText) {
-			StrAllocCopy(escaped1, name_used);
-		    } else if (Boundary) {
-			StrAllocCopy(escaped1, "Content-Disposition: form-data");
-			HTSprintf(&escaped1, "; name=\"%s\"", name_used);
-			if (MultipartContentType)
-			    HTSprintf(&escaped1, MultipartContentType, "text/plain");
-			StrAllocCat(escaped1, "\r\n\r\n");
-		    } else {
-			escaped1 = HTEscapeSP(name_used, URL_XALPHAS);
-		    }
-
-		    HTSprintf(&query,
+		    HTBprintf(&my_query,
 			    "%s%s%s%s%s",
 			    escaped1,
 			    (Boundary ? "" : "="),
 			    (PlainText ? "\n" : ""),
 			    escaped2,
 			    ((PlainText && *escaped2) ? "\n" : ""));
-		    last_textarea_name = form_ptr->name;
 		} else {
+		    char *marker = (PlainText
+				    ? "\n"
+				    : (Boundary
+				       ? "\r\n"
+				       : "%0d%0a"));
 		    /*
 		     * This is a continuation of a previous textarea.
-		     * Add %0d%0a (\r\n) and the escaped string.
 		     */
 		    if (escaped2[0] != '\0') {
 			if (previous_blanks) {
-			    StrAllocCat(query, previous_blanks);
+			    BStrCat0(my_query, previous_blanks);
 			    FREE(previous_blanks);
 			}
-			if (PlainText) {
-			    HTSprintf(&query, "%s\n", escaped2);
-			} else if (Boundary) {
-			    HTSprintf(&query, "%s\r\n", escaped2);
-			} else {
-			    HTSprintf(&query, "%%0d%%0a%s", escaped2);
-			}
+			BStrCat0(my_query, escaped2);
+			BStrCat0(my_query, marker);
 		    } else {
-			if (PlainText) {
-			    StrAllocCat(previous_blanks, "\n");
-			} else if (Boundary) {
-			    StrAllocCat(previous_blanks, "\r\n");
-			} else {
-			    StrAllocCat(previous_blanks, "%0d%0a");
-			}
+			StrAllocCat(previous_blanks, marker);
 		    }
 		}
 		break;
-
-	    case F_PASSWORD_TYPE:
-	    case F_TEXT_TYPE:
-	    case F_OPTION_LIST_TYPE:
-	    case F_HIDDEN_TYPE:
-		first_one = begin_submission_part(&query,
-						  first_one,
-						  SemiColon,
-						  PlainText,
-						  Boundary);
+	    case F_RANGE_TYPE:
+		/* not implemented */
+		break;
+#ifdef EXP_FILE_UPLOAD
+	    case F_FILE_TYPE:
 		if (PlainText) {
-		   StrAllocCopy(escaped1, name_used);
+		    StrAllocCopy(escaped1, my_data[anchor_count].name);
 		} else if (Boundary) {
+		    CONST char *t = guess_content_type(val_used);
+
 		    StrAllocCopy(escaped1, "Content-Disposition: form-data");
-		    HTSprintf(&escaped1, "; name=\"%s\"", name_used);
-		    if (MultipartContentType)
-			HTSprintf(&escaped1, MultipartContentType, "text/plain");
+		    HTSprintf(&escaped1, "; name=\"%s\"", my_data[anchor_count].name);
+		    HTSprintf(&escaped1, "; filename=\"%s\"", val_used);
+		    /* Should we take into account the encoding? */
+		    HTSprintf(&escaped1, "\r\nContent-Type: %s", t);
+		    if (my_data[anchor_count].quote == QUOTE_BASE64)
+			StrAllocCat(escaped1, "\r\nContent-Transfer-Encoding: base64");
 		    StrAllocCat(escaped1, "\r\n\r\n");
 		} else {
-		    escaped1 = HTEscapeSP(name_used, URL_XALPHAS);
+		    escaped1 = HTEscapeSP(my_data[anchor_count].name, URL_XALPHAS);
 		}
 
-		if (PlainText || Boundary) {
-		    StrAllocCopy(escaped2,
-				 (val_used ?
-				  val_used : ""));
-		} else {
-		    escaped2 = HTEscapeSP(val_used, URL_XALPHAS);
+		HTBprintf(&my_query,
+			  "%s%s%s",
+			  escaped1,
+			  (Boundary ? "" : "="),
+			  (PlainText ? "\n" : ""));
+		/*
+		 * If we have anything more than the trailing null we added,
+		 * append the file-data to the query.
+		 */
+		if (BStrLen(my_data[anchor_count].data) > 1) {
+		    HTSABCat(&my_query,
+			     BStrData(my_data[anchor_count].data),
+			     BStrLen(my_data[anchor_count].data) - 1);
+		    if (PlainText)
+			HTBprintf(&my_query, "\n");
 		}
-
-		HTSprintf(&query,
-			"%s%s%s%s%s",
-			escaped1,
-			(Boundary ? "" : "="),
-			(PlainText ? "\n" : ""),
-			escaped2,
-			((PlainText && *escaped2) ? "\n" : ""));
+		break;
+#endif /* EXP_FILE_UPLOAD */
+	    case F_KEYGEN_TYPE:
+		/* not implemented */
 		break;
 	    }
+
 	    FREE(escaped1);
 	    FREE(escaped2);
-	    FREE(copied_name_used);
-	    FREE(copied_val_used);
-	} else if (anchor_ptr->input_field->number > form_number) {
-	    break;
+	}
+	if (Boundary) {
+	    HTBprintf(&my_query, "\r\n--%s--\r\n", Boundary);
+	}
+	/*
+	 * The data may contain a null - so we use fwrite().
+	 */
+	if (TRACE) {
+	    CTRACE((tfp, "Query %d{", BStrLen(my_query)));
+	    trace_bstring(my_query);
+	    CTRACE((tfp, "}\n"));
 	}
     }
 
-    FREE(copied_name_used);
-    if (Boundary) {
-	FREE(MultipartContentType);
-	HTSprintf(&query, "\r\n--%s--\r\n", Boundary);
-    } else if (!query) {
-	StrAllocCopy(query, "");
-    }
-    FREE(previous_blanks);
-
-    CTRACE((tfp, "QUERY (%d) >> \n%s\n", (int) strlen(query), query));
-
     if (submit_item->submit_method == URL_MAIL_METHOD) {
 	HTUserMsg2(gettext("Submitting %s"), submit_item->submit_action);
-	CTRACE((tfp, "\nGridText - mailto_address: %s\n",
-			    (submit_item->submit_action+7)));
-	CTRACE((tfp, "GridText - mailto_subject: %s\n",
-			    ((submit_item->submit_title &&
-			      *submit_item->submit_title) ?
-			      (submit_item->submit_title) :
-					(HText_getTitle() ?
-					 HText_getTitle() : ""))));
-	CTRACE((tfp,"GridText - mailto_content: %s\n",query));
+	HTSABCat(&my_query, "", 1);	/* append null */
 	mailform((submit_item->submit_action+7),
-		 ((submit_item->submit_title &&
-		   *submit_item->submit_title) ?
-		   (submit_item->submit_title) :
-			     (HText_getTitle() ?
-			      HText_getTitle() : "")),
-		 query,
+		 (isEmpty(submit_item->submit_title)
+		   ? NonNull(HText_getTitle())
+		   : submit_item->submit_title),
+		 BStrData(my_query),
 		 content_type_out);
-	FREE(query);
+	result = 0;
+	BStrFree(my_query);
 	FREE(content_type_out);
-	return 0;
     } else {
 	_statusline(SUBMITTING_FORM);
+
+	if (submit_item->submit_method == URL_POST_METHOD || Boundary) {
+	    LYFreePostData(doc);
+	    doc->post_data = my_query;
+	    doc->post_content_type = content_type_out; /* don't free c_t_out */
+	    CTRACE((tfp, "GridText - post_data set:\n%s\n", content_type_out));
+	    StrAllocCopy(doc->address, submit_item->submit_action);
+	} else { /* GET_METHOD */
+	    HTSABCat(&my_query, "", 1);	/* append null */
+	    StrAllocCopy(doc->address, BStrData(my_query));	/* FIXME? */
+	    LYFreePostData(doc);
+	    FREE(content_type_out);
+	}
+	result = 1;
     }
 
-    if (submit_item->submit_method == URL_POST_METHOD || Boundary) {
-	LYFreePostData(doc);
-	doc->post_data = query;
-	doc->post_content_type = content_type_out; /* don't free c_t_out */
-	CTRACE((tfp,"GridText - post_data: %s\n",doc->post_data));
-	StrAllocCopy(doc->address, submit_item->submit_action);
-	return 1;
-    } else { /* GET_METHOD */
-	StrAllocCopy(doc->address, query);
-	LYFreePostData(doc);
-	FREE(content_type_out);
-	FREE(query);
-	return 1;
+    FREE(MultipartContentType);
+    FREE(previous_blanks);
+    FREE(Boundary);
+    if (my_data != 0) {
+	for (anchor_count = 0; anchor_count < anchor_limit; ++anchor_count) {
+	    FREE(my_data[anchor_count].name);
+	    FREE(my_data[anchor_count].value);
+	    BStrFree(my_data[anchor_count].data);
+	}
+	FREE(my_data);
     }
+
+    return (result);
 }
 
 PUBLIC void HText_DisableCurrentForm NOARGS
@@ -11396,7 +11731,7 @@ PUBLIC BOOL HText_AreDifferent ARGS2(
     if (MTaddress == MTanc->address) {
 	if (MTanc->post_data) {
 	    if (anchor->post_data) {
-		if (strcmp(MTanc->post_data, anchor->post_data)) {
+		if (!BINEQ(MTanc->post_data, anchor->post_data)) {
 		    /*
 		     *  Both have contents, and they differ.
 		     */
