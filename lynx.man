@@ -94,6 +94,9 @@ this switch.
 prepend a request URL comment and BASE tag to text/html
 outputs for -source dumps.
 .TP
+.B -bibp\fR=\fIURL
+specify a local bibp server (default http://bibhost/).
+.TP
 .B -blink
 forces high intensity background colors for color mode, if available
 and supported by the terminal.
@@ -117,6 +120,9 @@ The default is 10.
 .TP
 .B -case
 enable case-sensitive string searching.
+.TP
+.B -center
+Toggle center alignment in HTML TABLE.
 .TP
 .B -cfg\fR=\fIFILENAME
 specifies a Lynx configuration file other than the default
@@ -148,16 +154,23 @@ A saved show_color=always setting found in a .lynxrc file at
 startup has the same effect.  A saved show_color=never found
 in .lynxrc on startup is overridden by this flag.
 .TP
-.B -cookies
-toggles handling of Set-Cookie headers.
-.TP
-.B -cookie_file\fR=\fIFILENAME
-specifies a file to use to store cookies.
-.TP
 .B -connect_timeout\fR=\fIN
 Sets the connection timeout, where N is given in seconds.
 This is not available under DOS (use the sockdelay
 parameter of WATTCP under DOS).
+.TP
+.B -cookie_file\fR=\fIFILENAME
+specifies a file to use to read cookies.
+If none is specified, the default value is ~/.lynx_cookies
+for most systems, but ~/cookies for MS-DOS.
+.TP
+.B -cookie_save_file\fR=\fIFILENAME
+specifies a file to use to store cookies.
+If none is specified, the value given by
+\fB-cookie_file\fR is used.
+.TP
+.B -cookies
+toggles handling of Set-Cookie headers.
 .TP
 .B -core
 toggles forced core dumps on fatal errors.
@@ -166,8 +179,12 @@ toggles forced core dumps on fatal errors.
 with -traversal, output each page to a file.
 with -dump, format output as with -traversal, but to stdout.
 .TP
+.B -curses_pads
+toggles the use of curses "pad" feature which supports
+left/right scrolling of the display.
+.TP
 .B -debug_partial
-incremental display stages with MessageSecs delay
+separate incremental display stages with MessageSecs delay
 .TP
 .B -display\fR=\fIDISPLAY
 set the display variable for X rexec-ed programs.
@@ -281,6 +298,10 @@ disable URLs that point to remote hosts.
 enable local program execution from local files only (if
 Lynx was compiled with local execution enabled).
 .TP
+.B -lss\fR=\fIFILENAME
+specify filename containing color-style information.
+The default is lynx.lss.
+.TP
 .B -mime_header
 prints the MIME header of a fetched document along with its
 source.
@@ -362,7 +383,7 @@ force numbering of links.
 .B -partial
 toggles display partial pages while loading.
 .TP
-.B partial_thres\fR=\fINUMBER
+.B -partial_thres\fR=\fINUMBER
 number of lines to render before repainting display
 with partial-display logic
 .TP
@@ -550,6 +571,12 @@ with the PREV_DOC command or from the History List.
 .B -rlogin
 disable recognition of rlogin commands.
 .TP
+.B -scrollbar
+toggles showing scrollbar.
+.TP
+.B -scrollbar_arrow
+toggles showing arrows at ends of the scrollbar.
+.TP
 .B -selective
 require .www_browsable files to browse directories.
 .TP
@@ -589,6 +616,9 @@ allow non-http startfile and homepage with -validate.
 read the startfile from standard input
 (UNIX only).
 .TP
+.B -syslog\fR=\fItext
+information for syslog call.
+.TP
 .B -tagsoup
 initialize parser, using Tag Soup DTD rather than SortaSGML.
 .TP
@@ -619,6 +649,8 @@ on -tlog.
 turn on optional traces, which may result in very large trace files.
 Logically OR the values to combine options:
 .br
+1=SGML character parsing states
+.br
 2=color-style
 .br
 4=TRST (table layout)
@@ -628,6 +660,9 @@ traverse all http links derived from startfile.  When used with
 -crawl, each link that begins with the same string as startfile
 is output to a file, intended for indexing.  See CRAWL.announce
 for more information.
+.TP
+.B trim_input_fields
+trim input text/textarea fields in forms.
 .TP
 .B -underscore
 toggles use of _underline_ format in dumps.

@@ -22,7 +22,7 @@
 #include <HTUtils.h>
 #endif
  
-typedef enum _HTRuleOp {
+typedef enum {
         HT_Invalid,
         HT_Map,
         HT_Pass,

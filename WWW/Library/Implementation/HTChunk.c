@@ -8,6 +8,17 @@
 
 #include <LYLeaks.h>
 
+/*
+**	Initialize a chunk with a certain allocation unit
+*/
+PUBLIC void HTChunkInit ARGS2 (HTChunk *,ch, int,grow)
+{
+    ch->data = 0;
+    ch->growby = grow;
+    ch->size = 0;
+    ch->allocated = 0;
+}
+
 /*	Create a chunk with a certain allocation unit
 **	--------------
 */
@@ -17,12 +28,10 @@ PUBLIC HTChunk * HTChunkCreate ARGS1 (int,grow)
     if (ch == NULL)
 	outofmem(__FILE__, "creation of chunk");
 
-    ch->data = 0;
-    ch->growby = grow;
-    ch->size = 0;
-    ch->allocated = 0;
+    HTChunkInit (ch, grow);
     return ch;
 }
+
 PUBLIC HTChunk * HTChunkCreateMayFail ARGS2 (int,grow, int,failok)
 {
     HTChunk * ch = typecalloc(HTChunk);
@@ -33,10 +42,7 @@ PUBLIC HTChunk * HTChunkCreateMayFail ARGS2 (int,grow, int,failok)
 	    return ch;
 	}
     }
-    ch->data = 0;
-    ch->growby = grow;
-    ch->size = 0;
-    ch->allocated = 0;
+    HTChunkInit (ch, grow);
     ch->failok = failok;
     return ch;
 }
@@ -50,7 +56,7 @@ PUBLIC HTChunk * HTChunkCreate2 ARGS2 (int,grow, size_t, needed)
     if (ch == NULL)
 	outofmem(__FILE__, "HTChunkCreate2");
 
-    ch->growby = grow;
+    HTChunkInit (ch, grow);
     if (needed > 0) {
 	ch->allocated = needed-1 - ((needed-1) % ch->growby)
 	    + ch->growby; /* Round up */
@@ -60,7 +66,6 @@ PUBLIC HTChunk * HTChunkCreate2 ARGS2 (int,grow, size_t, needed)
 	if (!ch->data)
 	    outofmem(__FILE__, "HTChunkCreate2 data");
     }
-    ch->size = 0;
     return ch;
 }
 

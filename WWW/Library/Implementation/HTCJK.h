@@ -52,8 +52,8 @@
 #define IS_BIG5_HI(hi)	((0xA1<=hi)&&(hi<=0xFE))
 #define IS_BIG5(hi,lo) (IS_BIG5_HI(hi) && (IS_BIG5_LOS(lo) || IS_BIG5_LOX(lo)))
 
-typedef enum _HTkcode {NOKANJI, EUC, SJIS, JIS} HTkcode;
-typedef enum _HTCJKlang {NOCJK, JAPANESE, CHINESE, KOREAN, TAIPEI} HTCJKlang;
+typedef enum {NOKANJI, EUC, SJIS, JIS} HTkcode;
+typedef enum {NOCJK, JAPANESE, CHINESE, KOREAN, TAIPEI} HTCJKlang;
 
 extern HTCJKlang HTCJK;
 

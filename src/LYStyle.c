@@ -1,6 +1,6 @@
 /* character level styles for Lynx
  * (c) 1996 Rob Partington -- donated to the Lyncei (if they want it :-)
- * @Id: LYStyle.c 1.45 Sun, 03 Jun 2001 12:58:00 -0700 dickey @
+ * @Id: LYStyle.c 1.46 Sat, 07 Jul 2001 18:30:13 -0700 dickey @
  */
 #include <HTUtils.h>
 #include <HTML.h>
@@ -95,44 +95,56 @@ PRIVATE int colorPairs = 0;
 
 PRIVATE unsigned char our_pairs[2][MAX_BLINK][MAX_COLOR][MAX_COLOR];
 
-/* icky parsing of the style options */
-PRIVATE void parse_attributes ARGS5(char*,mono,char*,fg,char*,bg,int,style,char*,element)
+/*
+ * Parse a string containing a combination of video attributes and color.
+ */
+PRIVATE void parse_either ARGS4(
+    char *,	attrs,
+    int,	dft_color,
+    int *,	monop,
+    int *,	colorp)
 {
-    int mA = 0;
-    short fA = (short) default_fg;
-    short bA = (short) default_bg;
+    int value;
+
+    while (*attrs != '\0') {
+	char *next = strchr(attrs, '+');
+	char save = (next != NULL) ? *next : '\0';
+	if (next == NULL)
+	    next = attrs + strlen(attrs);
+
+	if (save != 0)	/* attrs might be a constant string */
+	    *next = '\0';
+	if ((value = string_to_attr(attrs)) != 0)
+	    *monop |= value;
+	else if (colorp != 0
+	 && (value = check_color(attrs, dft_color)) != ERR_COLOR)
+	    *colorp = value;
+
+	attrs = next;
+	if (save != '\0')
+	    *attrs++ = save;
+    }
+}
+
+/* icky parsing of the style options */
+PRIVATE void parse_attributes ARGS5(
+    char *,	mono,
+    char *,	fg,
+    char *,	bg,
+    int,	style,
+    char *,	element)
+{
+    int mA = A_NORMAL;
+    int fA = default_fg;
+    int bA = default_bg;
     int cA = A_NORMAL;
     int newstyle = hash_code(element);
 
-    CTRACE2(TRACE_STYLE, (tfp, "CSS(PA):style d=%d / h=%d, e=%s\n", style, newstyle,element));
+    CTRACE2(TRACE_STYLE, (tfp, "CSS(PA):style d=%d / h=%d, e=%s\n", style, newstyle, element));
 
-    mA = string_to_attr(mono);
-    if (!mA) {
-	/*
-	 *  Not found directly yet, see whether we have a combination
-	 *  of several mono attributes separated by '+' - kw
-	 */
-	char *cp0 = mono;
-	char csep = '+';
-	char *cp = strchr(mono, csep);
-	while (cp) {
-	    *cp = '\0';
-	    mA |= string_to_attr(cp0);
-	    if (!csep)
-		break;
-	    *cp = csep;
-	    cp0 = cp + 1;
-	    cp = strchr(cp0, csep);
-	    if (!cp) {
-		cp = cp0 + strlen(cp0);
-		csep = '\0';
-	    }
-	}
-    }
-    CTRACE2(TRACE_STYLE, (tfp, "CSS(CP):%d\n", colorPairs));
-
-    fA = (short) check_color(fg, default_fg);
-    bA = (short) check_color(bg, default_bg);
+    parse_either(mono, ERR_COLOR, &mA, (int *)0);
+    parse_either(bg, default_bg, &cA, &bA);
+    parse_either(fg, default_fg, &cA, &fA);
 
     if (style == -1) {			/* default */
 	CTRACE2(TRACE_STYLE, (tfp, "CSS(DEF):default_fg=%d, default_bg=%d\n", fA, bA));
@@ -178,7 +190,7 @@ PRIVATE void parse_attributes ARGS5(char*,mono,char*,fg,char*,bg,int,style,char*
 	    curPair = our_pairs[!!(cA & A_BOLD)][!!(cA & M_BLINK)][fA][bA] - 1;
 	else {
 	    curPair = ++colorPairs;
-	    init_pair((short) curPair, fA, bA);
+	    init_pair(curPair, fA, bA);
 	    if (fA < MAX_COLOR
 	     && bA < MAX_COLOR
 	     && curPair < 255)

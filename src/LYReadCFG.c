@@ -1465,6 +1465,7 @@ PRIVATE Config_Type Config_Table [] =
 #if defined(_WINDOWS)
      PARSE_INT("timeout",              lynx_timeout),
 #endif
+     PARSE_SET("trim_input_fields",  LYtrimInputFields),
 #ifdef EXEC_LINKS
      PARSE_DEF("trusted_exec",         EXEC_PATH),
 #endif

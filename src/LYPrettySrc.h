@@ -24,7 +24,7 @@ extern BOOL psrc_first_tag; /* this is also used in HTML.c to trigger the
 extern BOOL mark_htext_as_source;
 
 /* here is a list of lexeme codes. */
-typedef enum _HTlexeme {
+typedef enum {
   HTL_comm=0,
   HTL_tag,
   HTL_attrib,

@@ -1,6 +1,56 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2001-07-07 (2.8.4pre.3)
+* review/add descriptions of new command-line options in lynx.man, lynx.hlp and
+  Lynx_users_guide.html -TD
+* update da.po, ja.po, ru.po, sv.po from
+    http://www.iro.umontreal.ca/contrib/po/maint/lynx/
+  (report by JS) -TD
+* add command-line option -curses-pads which can be used to disable the
+  left/right scrolling logic.  This is used for testing, e.g., the repaint
+  bug reported below -TD
+* remove logic in lynx_force_repaint() which reset the window background, since
+  it does not work with the logic used to implement left/right scrolling. 
+  Retested older versions of ncurses and did not find a case where this was
+  needed after all (report by IZ) -TD
+* revert dev.21 change to SGML_character() S_equals case, which has undesirable
+  side effects regarding spacing around '=' (report by nsh@horae.dti.ne.jp) -TD
+* define additional -trace-mask option, 1=SGML -TD
+* add -trim_input_fields command-line option and corresponding
+  TRIM_INPUT_FIELDS to lynx.cfg to suppress trimming of TEXT and TEXTAREA
+  fields in forms.  This does not retain trailing blank lines in a TEXTAREA;
+  more work would be needed to do that (reported by VH, most browsers appear to
+  retain trailing blanks) -TD
+* modify parsing of "<script>...</script>" to allow "<!-- ... -->" comments
+  in SGML_character().  Though the HTML 4.0 spec is fairly clear, other
+  browsers (and some webpages) assume that "</" does not have to be escaped
+  when it appears in a script which is commented to avoid confusion with older
+  browsers.  This change doesn't ensure that the comment is at the beginning
+  of a line, since that's awkward to do with SGML_character(), and also leaves
+  the script in a comment which works for lynx since lynx does not interpret
+  it anyway -TD
+* remove redundant enum identifiers in typedefs -TD
+* modify parse_attributes() in LYStyle.c to allow video attributes such as bold
+  and reverse to be combined with colors, used this to debug problem with
+  <script> and comment -TD
+* improve logic for nested-tables to handle cases such as www.tin.org -IZ
+  TRST ignores the horizontal alignment *inside* a multi-line cell of a table. 
+  This limitation, in conjunction with the nested-tables modifications does not
+  work well when text with a horizontal alignment (e.g., <ul>) is put in a
+  table cell.  This patch introduces a *limited* logic to take this info into
+  account.  It should work OK as far as the last non-empty line of the cell is
+  ended by a "line-end" command, not by a </td> (this is often the case with
+  contents using horizontal formatting).
+* updated URLs for ncurses (report by DK) -TD
+* updated samples/bright-blue.lss -IZ
+* make definition of $(SHELL) in makefile.in's consistent, in terms of
+  CONFIG_SHELL, since the configure script no longer uses 'include', and
+  this creates some problem with nonstandard shells (report by IZ) -TD
+* update/extend lists in lynx_help_main.html -Frederic L W Meunier
+* add note about lynx.cfg mouse and color configuration to user's guide -PW
+* document -cmd_log and -cmd_script options in user's guide (Michael Warner).
+
 2001-06-10 (2.8.4pre.2)
 * corrected order of parameters of is_prefix() function in the
   scan_cookie_sublist() function, broken in dev.21 changes (report by Ken Scott

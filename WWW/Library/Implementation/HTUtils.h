@@ -498,6 +498,7 @@ extern int WWW_TraceMask;
 
 #define TRACE           (WWW_TraceFlag)
 #define TRACE_bit(n)    (TRACE && (WWW_TraceMask & (1 << n)) != 0)
+#define TRACE_SGML      (TRACE_bit(0))
 #define TRACE_STYLE     (TRACE_bit(1))
 #define TRACE_TRST      (TRACE_bit(2))
 

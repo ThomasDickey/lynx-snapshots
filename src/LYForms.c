@@ -822,6 +822,7 @@ again:
 	    HTUserMsg(FORM_TAIL_COMBINED_WITH_HEAD);
 	}
 
+	/* 2.8.4pre.3 - most browsers appear to preserve trailing spaces -VH */
 	/*
 	 *  Remove trailing spaces
 	 *
@@ -830,10 +831,12 @@ again:
 	 *  their hard earned spaces.  Better deal with trailing spaces
 	 *  when submitting the form????
 	 */
-	p = &(form->value[strlen(form->value)]);
-	while ((p != form->value) && (p[-1] == ' '))
-	    p--;
-	*p = '\0';
+	if (LYtrimInputFields) {
+	    p = &(form->value[strlen(form->value)]);
+	    while ((p != form->value) && (p[-1] == ' '))
+		p--;
+	    *p = '\0';
+	}
 
 	/*
 	 *  If the field has been changed, assume that it is now in

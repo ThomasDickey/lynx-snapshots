@@ -2795,7 +2795,7 @@ PRIVATE void split_line ARGS2(
 	while (scan >= previous->styles && at_end >= previous->styles) {
 	    /* The algorithm: scan back though the styles on the previous line.
 	       a) If OFF, skip the matched group.
-	          Report a bug on failure.
+		  Report a bug on failure.
 	       b) If ON, (try to) cancel the corresponding ON at at_end,
 		  and the corresponding OFF at to;
 		  If not, put the corresponding OFF at at_end, and copy to to;
@@ -2952,6 +2952,20 @@ PRIVATE void split_line ARGS2(
 	}
     }
 
+    switch (style->alignment) {
+	case HT_CENTER :
+	    previous->offset = previous->offset + indent + spare/2;
+	    break;
+	case HT_RIGHT :
+	    previous->offset = previous->offset + indent + spare;
+	    break;
+	case HT_LEFT :
+	case HT_JUSTIFY :		/* Not implemented */
+	default:
+	    previous->offset = previous->offset + indent;
+	    break;
+    } /* switch */
+
     if (text->stbl)
 	/*
 	 *  Notify simple table stuff of line split, so that it can
@@ -2966,21 +2980,8 @@ PRIVATE void split_line ARGS2(
 	 */
 	Stbl_lineBreak(text->stbl,
 		       text->Lines - 1,
+		       previous->offset,
 		       previous->size - ctrl_chars_on_previous_line);
-
-    switch (style->alignment) {
-	case HT_CENTER :
-	    previous->offset = previous->offset + indent + spare/2;
-	    break;
-	case HT_RIGHT :
-	    previous->offset = previous->offset + indent + spare;
-	    break;
-	case HT_LEFT :
-	case HT_JUSTIFY :		/* Not implemented */
-	default:
-	    previous->offset = previous->offset + indent;
-	    break;
-    } /* switch */
 
     text->in_line_1 = NO;		/* unless caller sets it otherwise */
 
@@ -4701,7 +4702,7 @@ PUBLIC void HText_startStblTD ARGS5(
 	rowspan = 1;
     }
     if (Stbl_addCellToTable(me->stbl, colspan, rowspan, alignment, isheader,
-			    me->Lines, HText_LastLineSize(me,FALSE)) < 0)
+			    me->Lines, HText_LastLineOffset(me), HText_LastLineSize(me,FALSE)) < 0)
 	HText_cancelStbl(me);	/* give up */
 }
 
@@ -4713,7 +4714,7 @@ PUBLIC void HText_endStblTD ARGS1(
     if (!me || !me->stbl)
 	return;
     if (Stbl_finishCellInTable(me->stbl, TRST_ENDCELL_ENDTD,
-			       me->Lines, HText_LastLineSize(me,FALSE)) < 0)
+			       me->Lines, HText_LastLineOffset(me), HText_LastLineSize(me,FALSE)) < 0)
 	HText_cancelStbl(me);	/* give up */
 }
 
@@ -6053,7 +6054,8 @@ PRIVATE BOOLEAN same_anchor_or_field ARGS5(
 	return(NO);
     }
     if (formA->type != formB->type ||
-	formA->type != F_TEXTAREA_TYPE || formB->type != F_TEXTAREA_TYPE) {
+	formA->type != F_TEXTAREA_TYPE ||
+	formB->type != F_TEXTAREA_TYPE) {
 	return(NO);
     }
     if (formA->number != formB->number)
@@ -8294,6 +8296,14 @@ PUBLIC int HText_LastLineSize ARGS2(
     return HText_TrueLineSize(text->last_line, text, IgnoreSpaces);
 }
 
+PUBLIC int HText_LastLineOffset ARGS1(
+	HText *,	text)
+{
+    if (!text || !text->last_line)
+	return 0;
+    return  text->last_line->offset;
+}
+
 PUBLIC int HText_PreviousLineSize ARGS2(
 	HText *,	text,
 	BOOL,		IgnoreSpaces)
@@ -9753,7 +9763,7 @@ PUBLIC int HText_SubmitForm ARGS4(
     char *copied_val_used = NULL;
     char *copied_name_used = NULL;
 
-    CTRACE((tfp, "FIXME:SubmitForm\n"));
+    CTRACE((tfp, "SubmitForm\n  link_name=%s\n  link_value=%s\n", link_name, link_value));
     if (!HTMainText)
 	return 0;
 
@@ -9880,7 +9890,7 @@ PUBLIC int HText_SubmitForm ARGS4(
 		     p && *p && !(field_has_8bit && field_has_special);
 		     p++)
 		    if ((*p == HT_NON_BREAK_SPACE) ||
-		        (*p == HT_EN_SPACE) ||
+			(*p == HT_EN_SPACE) ||
 			(*p == LY_SOFT_HYPHEN)) {
 			field_has_special = YES;
 		    } else if ((*p & 0x80) != 0) {
@@ -10037,7 +10047,6 @@ PUBLIC int HText_SubmitForm ARGS4(
 	    }
 	}
     }
-
 
     out_csname = target_csname;
 
@@ -10291,6 +10300,7 @@ PUBLIC int HText_SubmitForm ARGS4(
 		default:
 		    CTRACE((tfp, "SubmitForm: What type is %d?\n",
 				form_ptr->type));
+		    break;
 		}
 
 		switch(form_ptr->type) {
@@ -10384,7 +10394,7 @@ PUBLIC int HText_SubmitForm ARGS4(
 		case F_IMAGE_SUBMIT_TYPE:
 		    /*
 		     *  If it has a non-zero length name (e.g., because
-		     *  it's IMAGE_SUBMIT_TYPE to be handled homologously
+		     *  its IMAGE_SUBMIT_TYPE is to be handled homologously
 		     *  to an image map, or a SUBMIT_TYPE in a set of
 		     *  multiple submit buttons, or a single type="text"
 		     *  that's been converted to a TEXT_SUBMIT_TYPE),
@@ -10571,7 +10581,7 @@ PUBLIC int HText_SubmitForm ARGS4(
 			    if (Boundary) {
 				HTSprintf(&query, "--%s\r\n", Boundary);
 			    }
-			    first_one=FALSE;
+			    first_one = FALSE;
 			} else {
 			    if (PlainText) {
 				StrAllocCat(query, "\n");
@@ -11291,11 +11301,13 @@ PRIVATE void cleanup_line_for_textarea ARGS2(
     /*
      *  Whack off trailing whitespace from the line.
      */
-    for (i = len, p = line + (len - 1); i != 0; p--, i--) {
-	if (isspace(UCH(*p)))
-	    *p = '\0';
-	else
-	    break;
+    if (LYtrimInputFields) {
+	for (i = len, p = line + (len - 1); i != 0; p--, i--) {
+	    if (isspace(UCH(*p)))
+		*p = '\0';
+	    else
+		break;
+	}
     }
 
     if (strlen (line) != 0) {
@@ -11756,7 +11768,7 @@ PRIVATE void insert_new_textarea_anchor ARGS2(
  *  --KED  02/13/99
  */
 PRIVATE void update_subsequent_anchors ARGS4(
-	int,		 n,
+	int,		 newlines,
 	TextAnchor *,	 start_anchor,
 	HTLine *,	 start_htline,
 	int,		 start_tag)
@@ -11771,7 +11783,7 @@ PRIVATE void update_subsequent_anchors ARGS4(
     int      hang_detect = 100000;  /* ditto */
 
 
-    CTRACE((tfp, "GridText: adjusting struct's to add %d new line(s)\n", n));
+    CTRACE((tfp, "GridText: adjusting struct's to add %d new line(s)\n", newlines));
 
     /*
      *  Update numeric fields of the rest of the anchors.
@@ -11785,8 +11797,8 @@ PRIVATE void update_subsequent_anchors ARGS4(
     while (anchor) {
 	if ((keypad_mode == LINKS_AND_FIELDS_ARE_NUMBERED) &&
 	    (anchor->number != 0))
-	    anchor->number += n;
-	anchor->line_num  += n;
+	    anchor->number += newlines;
+	anchor->line_num  += newlines;
 	anchor = anchor->next;
     }
 
@@ -11825,7 +11837,7 @@ PRIVATE void update_subsequent_anchors ARGS4(
 	while (htline != FirstHTLine(HTMainText)) {
 
 	    while (anchor) {
-		if ((anchor->number - n) == start_tag)
+		if ((anchor->number - newlines) == start_tag)
 		    break;
 
 		/*** A HANG (infinite loop) *has* occurred here, with */
@@ -11855,7 +11867,8 @@ PRIVATE void update_subsequent_anchors ARGS4(
 
 	    if (anchor) {
 		line_adj = increment_tagged_htline (htline,  anchor,  &lx,
-						    &start_tag, n,  NOCHOP);
+						    &start_tag, newlines,
+						    NOCHOP);
 		htline->size += line_adj;
 		tag_adj      += line_adj;
 
@@ -11872,9 +11885,9 @@ finish:
     /*
      *  Fixup various global variables.
      */
-    nlinks                         += n;
-    HTMainText->Lines              += n;
-    HTMainText->last_anchor_number += n;
+    nlinks                         += newlines;
+    HTMainText->Lines              += newlines;
+    HTMainText->last_anchor_number += newlines;
 
     more = HText_canScrollDown();
 
@@ -12044,8 +12057,11 @@ PUBLIC int HText_ExtEditForm ARGS1(
     /*
      *	Nuke any blank lines from the end of the edited data.
      */
-    while ((size != 0) && (isspace(UCH(ebuf[size-1])) || (ebuf[size-1] == '\0')))
-	ebuf[--size] = '\0';
+    if (LYtrimInputFields) {
+	while ((size != 0)
+	 && (isspace(UCH(ebuf[size-1])) || (ebuf[size-1] == '\0')))
+	    ebuf[--size] = '\0';
+    }
 
     /*
      *	Copy each line from the temp file into the corresponding anchor

@@ -21,14 +21,18 @@ textarea:normal:white:cyan
 # type-less input is the same as type=text (similar to textarea)
 input.type.:normal:white:cyan
 input.type.text:normal:white:cyan
-edit.current:normal:yellow:white
+input.type.password:normal:white:cyan
+input.type.file:normal:brightred:cyan
+# Shows gray on black?!
+edit.current:normal:yellow:lightgray
+#edit.current:normal:yellow:white
 edit.active:normal:black:white
 edit.active.marked:normal:white:black
-edit.prompt:normal:green:cyan
+edit.prompt:normal:white:gray
 edit.prompt.marked:normal:black:white
 edit.active.arrow:normal:red:white
-edit.prompt.arrow:normal:yellow:gray
-edit.active.pad:normal:red:white
+edit.prompt.arrow:normal:red:gray
+edit.active.pad:normal:red:lightgray
 edit.prompt.pad:normal:white:black
 option:normal:red:black
 #alink:normal:red:green
@@ -45,13 +49,19 @@ font.letter:normal:default:black
 link.blue:bold:white:brightblue
 link.blue.prev:bold:yellow:brightblue
 title:normal:magenta:black
+forwbackw.arrow:bold:red:default
 i:bold:white
 table:normal:white
 blockquote:normal:white
 li.blue:bold:blue:black
 link.blue.next:bold:blue:black
 normal:normal:default:default
+menu.bg:normal:black:lightgray
+menu.frame:normal:black:lightgray
+menu.entry:normal:white:gray
+menu.n:normal:white:gray
+menu.active:normal:white:black
+menu.sb:normal:brightred:lightgray
+hot.paste:normal:brightred:gray
 INCLUDE:lynx.lss
 default:normal:brightcyan:blue
-#default:normal:cyan:blue
-scroll.noarrow:normal:black:default

@@ -26,12 +26,13 @@
 SGML content types
 
  */
-typedef enum _SGMLContent {
+typedef enum {
     SGML_EMPTY,	   /* No content. */
     SGML_LITTERAL, /* Literal character data.  Recognize exact close tag only.
 		      Old www server compatibility only!  Not SGML */
     SGML_CDATA,	   /* Character data.  Recognize </ only.
 		      (But we treat it just as SGML_LITTERAL.) */
+    SGML_SCRIPT,   /* Like CDATA, but allow it to be a comment */
     SGML_RCDATA,   /* Replaceable character data. Should recognize </ and &ref;
 		      (but we treat it like SGML_MIXED for old times' sake). */
     SGML_MIXED,	   /* Elements and parsed character data.
@@ -231,7 +232,7 @@ typedef struct _HTStructuredClass{
 		HTStructured*	me,
 		int		entity_number));
 
-}HTStructuredClass;
+} HTStructuredClass;
 
 /*
   Equivalents to the following functions possibly could be generalised

@@ -96,7 +96,7 @@ COMPRESS_EXT=@COMPRESS_EXT@
 
 # !!!!!!!!!!!!! NCURSES Support (For color version of Lynx). !!!!!!!!!!!!!!
 # If you need ncurses, the latest version can always be found
-# in ftp://ftp.clark.net/pub/dickey/ncurses/
+# in ftp://invisible-island.net/ncurses/
 # or ftp://ftp.gnu.org/pub/gnu/
 
 # Also be sure to check out the compilation symbols in userdefs.h

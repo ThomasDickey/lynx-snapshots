@@ -47,6 +47,7 @@ within a single LAN.
 <li><A HREF="#Bookmarks" NAME="ToC-Bookmarks">Lynx bookmarks</A>
 <li><A HREF="#Jumps" NAME="ToC-Jumps">Jump command</A>
 <li><A HREF="#DirEd" NAME="ToC-DirEd">Directory Editing</A>
+<li><A HREF="#ColorMouse" NAME="ToC-ColorMouse">Using Color & the Mouse</A>
 <li><A HREF="#MiscKeys" NAME="ToC-MiscKeys">Scrolling and Other useful commands</A>
 <li><a href="#Forms" NAME="ToC-Forms">Lynx and HTML Forms</a>
 | <a href="#Images" NAME="ToC-Images">Lynx and HTML Images</a>
@@ -1145,6 +1146,13 @@ on your local system.  The commands available in DIRED mode are
     <A HREF="#lynx.cfg">lynx.cfg</A> .
 </dl>
 [<A HREF="#ToC-DirEd">ToC</A>]
+
+<h2 ID="ColorMouse"><A NAME="ColorMouse"><em>Using Color & the Mouse</em></A></h2>
+
+A limited range of colors & mouse commands are available, if the user chooses:
+see <em>lynx.cfg</em> for details.
+
+[<A HREF="#ToC-ColorMouse">ToC</A>]
 
 <h2 ID="MiscKeys"><A NAME="MiscKeys"><em>Scrolling and Other useful commands</em></A></h2>
 
@@ -2287,11 +2295,13 @@ where
              <dt><code>-base</code>
                 <dd>prepend a request URL comment and BASE tag to text/html
                     outputs for -source dumps.
+             <dt><code>-bibp=URL</code>
+                <dd>specify a local bibp server (default http://bibhost/).
              <dt><code>-blink</code>
-                <dd>forces high intensity bg colors for color mode,
+                <dd>forces high intensity background colors for color mode,
                     if available and supported by the terminal.
-                    Lynx needs to be compiled with the slang library for this
-                    flag.
+                    This applies to the slang library (for a few terminal
+                    emulators), or to OS/2 EMX with ncurses.
              <dt><code>-book</code>
                 <dd>use the bookmark page as the startfile.  The default or
                     command line startfile is still set for the Main screen
@@ -2306,6 +2316,8 @@ where
              <dt><code>-cache=NUMBER</code>
                 <dd>set the <em>NUMBER</em> of documents cached in memory.
                     The default is 10.
+             <dt><code>-center</code>
+                <dd>Toggle center alignment in HTML TABLE.
              <dt><code>-case</code>
                 <dd>enable case-sensitive string searching.
              <dt><code>-cfg=FILENAME</code>
@@ -2313,6 +2325,14 @@ where
                     <A HREF="#lynx.cfg">lynx.cfg</A>.
              <dt><code>-child</code>
                 <dd>exit on left-arrow in startfile, and disable save to disk.
+             <dt><code>-cmd_log=FILENAME</code>
+                <dd>write keystroke commands and related information to the
+                    specified file.
+             <dt><code>-cmd_script=FILENAME</code>
+                <dd>read keystroke commands from the specified file.  You can
+                    use the data written using the <em>-cmd_log</em> option.
+                    Lynx will ignore other information which the
+                    command-logging may have written to the log-file.
              <dt><code>-color</code>
                 <dd>forces color mode on, if available.  Default color control sequences
                        which work for many terminal types are assumed if the terminal
@@ -2326,6 +2346,18 @@ where
                        A saved show_color=always setting found in a .lynxrc file at
                        startup has the same effect.  A saved show_color=always found
                        in .lynxrc on startup is overridden by this flag.
+             <dt><code>-connect_timeout=N</code>
+                <dd>Sets the connection timeout, where N is given in seconds.
+                    This is not available under DOS (use the sockdelay
+                    parameter of WATTCP under DOS).
+             <dt><code>-cookie_file=FILENAME</code>
+                <dd>specifies a file to use to read cookies.
+                    If none is specified, the default value is ~/.lynx_cookies
+                    for most systems, but ~/cookies for MS-DOS.
+             <dt><code>-cookie_save_file=FILENAME</code>
+                <dd>specifies a file to use to store cookies.
+                    If none is specified, the value given by
+                    <code>-cookie_file</code> is used.
              <dt><code>-cookies</code>
                 <dd>toggles handling of Set-Cookie headers.
              <dt><code>-core</code>
@@ -2334,8 +2366,18 @@ where
                 <dd>with <em>-traversal</em>, output each page to a file.<br>
                     with <em>-dump</em>, format output as with
                     <em>-traversal</em>, but to stdout.
+             <dt><code>-curses_pads</code>
+                <dd>toggles the use of curses "pad" feature which supports
+                    left/right scrolling of the display.
+             <dt><code>-debug_partial</code>
+                <dd>separate incremental display stages with MessageSecs delay
              <dt><code>-display=DISPLAY</code>
                 <dd>set the display variable for X rexe-ced programs.
+             <dt><code>-display_charset=MIMEname</code>
+                <dd>set the charset for the terminal output.
+             <dt><code>-dont_wrap_pre</code>
+		<dd>inhibit wrapping of text in &lt;pre&gt; when -dump'ing and
+		    -crawl'ing, mark wrapped lines in interactive session.
              <dt><code>-dump</code>
                 <dd>dumps the formatted output of the default document
                     or one specified on the command line to standard out.
@@ -2353,19 +2395,25 @@ where
              <dt><code>-error_file=FILENAME</code>
                 <dd>the status code from the HTTP request is placed in this
                     file.
+             <dt><code>-exec</code>
+                <dd>enable local program execution (normally not configured).
              <dt><code>-fileversions</code>
                 <dd>include all versions of files in local VMS directory
                     listings.
+             <dt><code>-force_empty_hrefless_a</code>
+                <dd>force HREF-less 'A' elements to be empty (close them as soon as they are seen).
              <dt><code>-force_html</code>
                 <dd>forces the first document to be interpreted as HTML.
              <dt><code>-force_secure</code>
                 <dd>toggles forcing of the secure flag for SSL cookies.
+             <dt><code>-forms_options</code>
+                <dd>toggles whether the Options Menu is key-based or form-based.
              <dt><code>-from</code>
                 <dd>toggles transmissions of From headers to HTTP or HTTPS
                     servers.
              <dt><code>-ftp</code>
                 <dd>disable ftp access.
-            <dt><code>-get_data</code>
+             <dt><code>-get_data</code>
                 <dd>properly formatted data for a get form are read in from
                     stdin and passed to the form.  Input is terminated by a
                     line that starts with '---'.
@@ -2373,6 +2421,21 @@ where
                 <dd>send a HEAD request for the mime headers.
              <dt><code>-help</code>
                 <dd>print this Lynx command syntax usage message.
+             <dt><code>-hiddenlinks=<em>option</em></code>
+                <dd>control the display of hidden links.  Option values are:
+                <dl>
+                <dt><code>merge</code>
+                   <dd>hidden links show up as bracketed numbers and are
+                       numbered together with other links in the sequence of
+                       their occurrence in the document.
+                <dt><code>listonly</code>
+                   <dd>hidden links are shown only on <em>L</em>ist screens and
+                       listings generated by <code>-dump</code> or from the
+                       <em>P</em>rint menu, but appear separately at the end of
+                       those lists.  This is the default behavior.
+                <dt><code>ignore</code>
+                   <dd>hidden links do not appear even in listings.
+                </dl>
              <dt><code>-historical</code>
                 <dd>toggles use of '&gt;' or '--&gt;' as a terminator for
                     comments.
@@ -2388,6 +2451,8 @@ where
                     MAPs are present.
              <dt><code>-index=URL</code>
                 <dd>set the default index file to the specified <em>URL</em>
+             <dt><code>-justify</code>
+                <dd>do justification of text.
              <dt><code>-link=NUMBER</code>
                 <dd>starting count for lnk#.dat files produced by
                     <em>-crawl</em>.
@@ -2396,6 +2461,9 @@ where
              <dt><code>-locexec</code>
                 <dd>enable local program execution from local files only
                     (if lynx was compiled with local execution enabled).
+             <dt><code>-lss=FILENAME</code>
+                <dd>specify filename containing color-style information.
+                    The default is lynx.lss.
              <dt><code>-mime_header</code>
                 <dd>include mime headers and force source dump.
              <dt><code>-minimal</code>
@@ -2409,6 +2477,8 @@ where
                 <dd>number of articles in chunked news listings.
              <dt><code>-newsmaxchunk=NUMBER</code>
                 <dd>maximum news articles in listings before chunking.
+             <dt><code>-nobold</code>
+                <dd>disable bold video-attribute.
              <dt><code>-nobrowse</code>
                 <dd>disable directory browsing.
              <dt><code>-nocc</code>
@@ -2441,14 +2511,23 @@ where
                 <dd>don't follow URL redirections
              <dt><code>-noreferer</code>
                 <dd>disable transmissions of Referer headers.
+             <dt><code>-noreverse</code>
+                <dd>disable reverse video-attribute.
              <dt><code>-nosocks</code>
                 <dd>disable SOCKS proxy usage by a SOCKSified Lynx.
              <dt><code>-nostatus</code>
                 <dd>disable the retrieval status messages.
+             <dt><code>-nounderline</code>
+                <dd>disable underline video-attribute.
+             <dt><code>-number_fields</code>
+                <dd>force numbering of links as well as form input fields.
              <dt><code>-number_links</code>
                 <dd>force numbering of links.
              <dt><code>-partial</code>
                 <dd>toggles displaying of partial pages while loading.
+             <dt><code>-partial_thres=<em>NUMBER</em></code>
+                <dd>number of lines to render before repainting display
+                    with partial-display logic.
              <dt><code>-pauth=ID:PW</code>
                 <dd>set authorization ID and password for a protected proxy
                     server at startup.  Be sure to protect any script files
@@ -2471,6 +2550,9 @@ where
                     to visualize the difference between SortaSGML and TagSoup
                    <A HREF="keystrokes/option_help.html#tagsoup">recovery modes</A>,
                     switched by '<em>^V</em>'.
+             <dt><code>-prettysrc</code>
+		<dd>do syntax highlighting and hyperlink handling in source
+		    view.
              <dt><code>-print</code>
                 <dd>enable print functions. (default)
              <dt><code>-pseudo_inlines</code>
@@ -2632,8 +2714,17 @@ where
                     the <em>History Page</em>.
              <dt><code>-rlogin</code>
                 <dd>disable recognition of rlogin commands.
+             <dt><code>-scrollbar</code>
+                <dd>toggles showing scrollbar.
+             <dt><code>-scrollbar_arrow</code>
+                <dd>toggles showing arrows at ends of the scrollbar.
              <dt><code>-selective</code>
                 <dd>require .www_browsable files to browse directories.
+             <dt><code>-short_url</code>
+		<dd>show very long URLs in the status line with "..." to
+		    represent the portion which cannot be displayed.  The
+		    beginning and end of the URL are displayed, rather than
+		    suppressing the end.
              <dt><code>-show_cursor </code>
                 <dd>If enabled the cursor will not be hidden in the right hand
                     corner but will instead be positioned at the start of the
@@ -2643,6 +2734,10 @@ where
                     <A HREF="#lynx.cfg">lynx.cfg</A>.
                     It also can be set and saved via the 'o'ptions menu.
                     The command line switch toggles the default.
+             <dt><code>-show_rate</code>
+		<dd>If enabled the transfer rate is shown in bytes/second.  If
+		    disabled, no transfer rate is shown.  Use lynx.cfg or the
+		    options menu to select KB/second and/or ETA.
              <dt><code>-soft_dquotes</code>
                 <dd>toggles emulation of the old Netscape and Mosaic bug which
                     treated '<em>&gt;</em>' as a co-terminator for
@@ -2650,9 +2745,16 @@ where
              <dt><code>-source</code>
                 <dd>works the same as dump but outputs HTML source instead of
                     formatted text.
+             <dt><code>-stack_dump</code>
+                <dd>disable SIGINT cleanup handler.
              <dt><code>-startfile_ok</code>
                 <dd>allow non-http startfile and homepage with
                     <em>-validate</em>.
+             <dt><code>-stdin</code>
+                <dd>read the startfile from standard input
+                    (UNIX only).
+             <dt><code>-syslog=<em>text</em>
+                <dd>information for syslog call.
              <dt><code>-tagsoup</code>
                 <dd>initialize DTD with "TagSoup" tables,
                     <A HREF="keystrokes/option_help.html#tagsoup">more details</A>.
@@ -2663,6 +2765,8 @@ where
                     (This may be useful for remote execution, when, for
                     example, Lynx connects to a remote TCP/IP port that starts
                     a script that, in turn, starts another Lynx process.)
+             <dt><code>-timeout=<em>N</em></code>
+                <dd>For win32, sets the network read-timeout, where N is given in seconds.
              <dt><code>-tlog</code>
                 <dd>toggles use of a <em>Lynx Trace Log</em> for the
                     session.  The log is named <em>Lynx.trace</em> and is
@@ -2687,20 +2791,33 @@ where
                     can be examined during the session via the TRACE_LOG
                     (normally, '<em>;</em>') command.  If no Trace Log
                     file is in use, trace messages go to stderr.
+             <dt><code>-trace_mask=<em>value</em></code>
+                <dd>turn on optional traces, which may result in very large trace files.
+                    Logically OR the values to combine options:
+                    <dl>
+                    <dt>1
+                       <dd>SGML character parsing states
+                    <dt>2
+                       <dd>color-style
+                    <dt>4
+                       <dd>TRST (table layout)
+                    <dl>
              <dt><code>-traversal</code>
                 <dd>traverse all http links derived from startfile.  When
                     used with <em>-crawl</em>, each link that begins with the
                     same string as startfile is output to a file, intended for
                     indexing.  See CRAWL.announce for more information.
+             <dt><code>-trim_input_fields</code>
+                <dd>trim input text/textarea fields in forms.
              <dt><code>-underscore</code>
                 <dd>toggles use of _underline_ format in dumps.
+             <dt><code>-use_mouse</code>
+               <dd>turn on mouse support, if available.
              <dt><code>-useragent=STRING</code>
                 <dd>set different Lynx User-Agent header.  Lynx produces a
                     warning on startup if the STRING does not contain "Lynx"
                     or "L_y_n_x", see the <A HREF="#note_ua">note</A> in the
                     Options Menu section for rationale.
-             <dt><code>-use_mouse</code>
-               <dd>turn on mouse support, if available.
              <dt><code>-validate</code>
                 <dd>accept only http URLs (meant for validation).
                 <dd>This flag implies security restrictions
@@ -2725,8 +2842,15 @@ where
                 <dd>print version information.
              <dt><code>-vikeys</code>
                 <dd>enable vi-like key movement.
+             <dt><code>-wdebug</code>
+		<dd>enable Waterloo tcp/ip packet debug (print to watt
+		    debugfile).  This applies only to DOS versions compiled
+		    with WATTCP or WATT-32.
              <dt><code>-width=NUMBER</code>
                 <dd>number of columns for formatting of dumps, default is 80.
+             <dt><code>-with_backspaces</code>
+		<dd>emit backspaces in output if -dumping or -crawling (like
+		<code>man</code> does).
          </dl>
 </dl>
 

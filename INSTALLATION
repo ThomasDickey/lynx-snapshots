@@ -129,7 +129,7 @@ II. Compile instructions -- UNIX
     NOTE:  Lynx is a curses-based application, so you must have a curses
     library available to link to.  Native curses (on the system when it was
     installed) are often broken, so you may get superior performance if you
-    have either "ncurses" ("ftp://ftp.clark.net/pub/dickey/ncurses") or "slang"
+    have either "ncurses" ("ftp://invisible-island.net/ncurses") or "slang"
     ("ftp://space.mit.edu/pub/davis/slang").  If you install these libraries
     in your home directory or a non-default location, you may need to set the
     CPPFLAGS (full path to include files) and LIBS (full path to library files)
@@ -143,7 +143,7 @@ II. Compile instructions -- UNIX
     slang, e.g., before 0.99-38, because slang's interfaces change periodically.
 
     Note compiler/system specific problems below.  See also:
-	http://www.clark.net/pub/dickey/ncurses/ncurses.faq.html
+	http://invisible-island.net/ncurses/ncurses.faq.html
 
 1b. Platforms.  Configure should work properly on any Unix-style system.
     It has been tested on the following platforms.

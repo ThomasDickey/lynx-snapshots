@@ -52,6 +52,7 @@ WINDOW *LYwin = 0;
 int LYshiftWin = 0;
 int LYwideLines = FALSE;
 int LYtableCols = 0;			/* in 1/12 of screen width */
+BOOL LYuseCursesPads = TRUE;	/* use pads for left/right shifting */
 #endif
 
 /*
@@ -950,9 +951,13 @@ PUBLIC void start_curses NOARGS
 #endif /* SIGWINCH */
 
 #ifdef USE_CURSES_PADS
-	LYwin = newpad(LYlines, MAX_COLS);
-	LYshiftWin = 0;
-	LYwideLines = FALSE;
+	if (LYuseCursesPads) {
+	    LYwin = newpad(LYlines, MAX_COLS);
+	    LYshiftWin = 0;
+	    LYwideLines = FALSE;
+	} else {
+	    LYwin = stdscr;
+	}
 #endif
 
 #if defined(USE_KEYMAPS) && defined(NCURSES_VERSION)
@@ -2210,20 +2215,6 @@ PUBLIC void LYrefresh NOARGS
 
 PUBLIC void lynx_force_repaint NOARGS
 {
-#if defined(COLOR_CURSES)
-    chtype a;
-    if (LYShowColor >= SHOW_COLOR_ON)
-	a = COLOR_BKGD;
-    else
-	a = A_NORMAL;
-    wbkgdset(LYwin, a | ' ');
-#if !defined(USE_COLOR_STYLE) && defined(NCURSES_VERSION)
-#if NCURSES_VERSION_MAJOR < 4 || (NCURSES_VERSION_MAJOR == 4 && NCURSES_VERSION_MINOR == 0)
-    wbkgd(LYwin, a | ' ');
-#endif
-#endif
-    wattrset(LYwin, a);
-#endif /* COLOR_CURSES */
     clearok(curscr, TRUE);
 }
 

@@ -4,9 +4,9 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: lynx 2.8.3\n"
+"Project-Id-Version: lynx 2.8.4.dev20\n"
 "POT-Creation-Date: 2001-06-01 18:55-0400\n"
-"PO-Revision-Date: 2001-01-16 23:46+03:00\n"
+"PO-Revision-Date: 2001-06-11 23:22+04:00\n"
 "Last-Translator: Dmitry S. Sivachenko <dima@Chg.RU>\n"
 "Language-Team: Russian <ru@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -1657,7 +1657,7 @@ msgstr "Команда: "
 
 #: LYMessages.c:554
 msgid "Unknown or ambiguous command"
-msgstr ""
+msgstr "Неизвестная или неоднозначная команда"
 
 #: LYMessages.c:555
 msgid " Version "
@@ -2674,7 +2674,7 @@ msgstr "последняя стабильная версия"
 
 #: LYMessages.c:835
 msgid "pre-release version"
-msgstr "нестабильная версия"
+msgstr "почти стабильная версия"
 
 #: LYMessages.c:836
 msgid "development version"
@@ -4135,7 +4135,7 @@ msgstr "Вы ДОЛЖНЫ определить правильную область TMP или TEMP!\n"
 
 #: src/LYMain.c:1156 src/LYMainLoop.c:5117
 msgid "No such directory"
-msgstr " каталог"
+msgstr "Нет каталога"
 
 #: src/LYMain.c:1378
 #, c-format
@@ -4269,18 +4269,16 @@ msgid "charset for this document specified explicitly, sorry..."
 msgstr "извините, кодировка для этого документа указана явно..."
 
 #: src/LYMainLoop.c:5093
-#, fuzzy
 msgid "cd to:"
-msgstr " для "
+msgstr "перейти в:"
 
 #: src/LYMainLoop.c:5120
 msgid "A component of path is not a directory"
-msgstr ""
+msgstr "Компонента пути не является каталогом"
 
 #: src/LYMainLoop.c:5123
-#, fuzzy
 msgid "failed to change directory"
-msgstr "Ошибка доступа к каталогу."
+msgstr "не удалось изменить каталог"
 
 #: src/LYMainLoop.c:6291
 msgid "Reparsing document under current settings..."
@@ -4387,7 +4385,7 @@ msgstr "Используйте %s для вызова меню Параметров!"
 
 #: src/LYOptions.c:3208
 msgid "General Preferences"
-msgstr "Персональные Предпочтения"
+msgstr "Общие Предпочтения"
 
 #. ***************************************************************
 #. User Mode: SELECT
@@ -4403,7 +4401,7 @@ msgstr "Редактор"
 #. Search Type: SELECT
 #: src/LYOptions.c:3223
 msgid "Type of Search"
-msgstr ""
+msgstr "Тип поиска"
 
 #. Cookies: SELECT
 #: src/LYOptions.c:3229
@@ -4412,7 +4410,7 @@ msgstr "Cookie"
 
 #: src/LYOptions.c:3243
 msgid "Keyboard Input"
-msgstr ""
+msgstr "Ввод с клавиатуры"
 
 #. ***************************************************************
 #. Keypad Mode: SELECT
@@ -4438,15 +4436,16 @@ msgstr ""
 
 #. Keyboard layout: SELECT
 #: src/LYOptions.c:3278
+#, fuzzy
 msgid "Keyboard layout"
-msgstr ""
+msgstr "Ввод с клавиатуры"
 
 #.
 #. * Display and Character Set
 #.
 #: src/LYOptions.c:3291
 msgid "Display and Character Set"
-msgstr "Кодировка отображения"
+msgstr "Отображение и Набор Символов"
 
 #. ***************************************************************
 #. Display Character Set: SELECT
@@ -4481,7 +4480,7 @@ msgstr "Экран X"
 #.
 #: src/LYOptions.c:3360
 msgid "Document Appearance"
-msgstr ""
+msgstr "Внешний вид документа"
 
 #: src/LYOptions.c:3366
 msgid "Show color"
@@ -4517,7 +4516,7 @@ msgstr "Заменять изображения на адреса"
 #.
 #: src/LYOptions.c:3432
 msgid "Headers Transferred to Remote Servers"
-msgstr "Заголовки, переданные на удаленный сервер"
+msgstr "Заголовки, переданные на удаленные серверы"
 
 #. ***************************************************************
 #. Mail Address: INPUT
@@ -4568,14 +4567,14 @@ msgstr "Выполнение ссылок"
 #. Local Directory Sort: SELECT
 #: src/LYOptions.c:3507
 msgid "Show transfer rate"
-msgstr "Передача данных завершена"
+msgstr "Показывать скорость передачи"
 
 #.
 #. * Special Files and Screens
 #.
 #: src/LYOptions.c:3516
 msgid "Special Files and Screens"
-msgstr ""
+msgstr "Специальные файлы и экраны"
 
 #: src/LYOptions.c:3521
 msgid "Multi-bookmarks"
