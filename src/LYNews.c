@@ -152,9 +152,7 @@ PUBLIC char *LYNewsPost ARGS2(
 	/*
 	 *  Add the default subject.
 	 */
-	while (isspace(*cp)) {
-	    cp++;
-	}
+	cp = LYSkipBlanks(cp);
 	if (strncasecomp(cp, "Re:", 3)) {
             strcat(user_input, "Re: ");
 	}

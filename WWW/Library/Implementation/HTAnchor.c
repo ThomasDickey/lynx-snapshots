@@ -44,10 +44,10 @@ PRIVATE int HASH_FUNCTION ARGS1(
 	CONST char *,	cp_address)
 {
     int hash;
-    unsigned char *p;
+    CONST unsigned char *p;
 
-    for (p = (unsigned char *)cp_address, hash = 0; *p; p++)
-	hash = (int) (hash * 3 + (*(unsigned char *)p)) % HASH_SIZE;
+    for (p = (CONST unsigned char *)cp_address, hash = 0; *p; p++)
+	hash = (int) (hash * 3 + (*(CONST unsigned char *)p)) % HASH_SIZE;
 
     return hash;
 }

@@ -237,8 +237,7 @@ check_recall:
     bp = buf;
     if (toupper(key) == 'G' && strncmp(buf, "o ", 2) == 0)
 	bp++;
-    while (isspace(*bp))
-	bp++;
+    bp = LYSkipBlanks(bp);
     if (*bp == '\0' &&
 	!(recall && (ch == UPARROW || ch == DNARROW))) {
 	/*

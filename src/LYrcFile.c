@@ -55,8 +55,7 @@ PUBLIC void read_rc NOPARAMS
 	/*
 	 *  Remove any trailing white space.
 	 */
-	while (line_buffer[0] && isspace(line_buffer[strlen(line_buffer)-1]))
-	    line_buffer[strlen(line_buffer)-1] = '\0';
+	LYTrimTrailing(line_buffer);
 
 	/*
 	 *  Skip any comment or blank lines.
@@ -81,8 +80,7 @@ PUBLIC void read_rc NOPARAMS
 
 	    if ((cp2 = (char *)strchr(cp, '=')) != NULL)
 		cp = cp2 + 1;
-	    while (isspace(*cp))
-		cp++;  /* get rid of spaces */
+	    cp = LYSkipBlanks(cp);
 	    StrAllocCopy(editor, cp);
 
 	/*
@@ -93,8 +91,7 @@ PUBLIC void read_rc NOPARAMS
 
 	    if ((cp2 = (char *)strchr(cp,'=')) != NULL)
 		cp = cp2 + 1;
-	    while (isspace(*cp))
-		cp++;  /* get rid of spaces */
+	    cp = LYSkipBlanks(cp);
 
 	    /*
 	     *  Since this is the "Default Bookmark File", we save it
@@ -113,8 +110,7 @@ PUBLIC void read_rc NOPARAMS
 
 	   if ((cp2 = (char *)strchr(cp, '=')) != NULL)
 		cp = (cp2 + 1);
-	   while (isspace(*cp))
-	       cp++;  /* get rid of spaces */
+	   cp = LYSkipBlanks(cp);
 	   if (!strncasecomp(cp, "standard", 8)) {
 	      LYMultiBookmarks = TRUE;
 	      LYMBMAdvanced = FALSE;
@@ -181,8 +177,7 @@ PUBLIC void read_rc NOPARAMS
 			    /*
 			     *  Eat spaces in front of description.
 			     */
-			    while (isspace(*MBM_cp1))
-				MBM_cp1++;
+			    MBM_cp1 = LYSkipBlanks(MBM_cp1);
 			    while (*MBM_cp1)
 				MBM_line[MBM_i2++] = *MBM_cp1++;
 			    MBM_line[MBM_i2++] = '\0';
@@ -205,8 +200,7 @@ PUBLIC void read_rc NOPARAMS
 
 	   if ((cp2 = (char *)strchr(cp, '=')) != NULL)
 		cp = cp2 + 1;
-	   while (isspace(*cp))
-	       cp++;  /* get rid of spaces */
+	   cp = LYSkipBlanks(cp);
 	   if (!strncasecomp(cp, "BY_FILENAME", 11))
 		HTfileSortMethod = FILE_BY_NAME;
 	   else if (!strncasecomp(cp, "BY_TYPE", 7))
@@ -225,8 +219,7 @@ PUBLIC void read_rc NOPARAMS
 
 	    if ((cp2 = (char *)strchr(cp, '=')) != NULL)
 		cp = cp2 + 1;
-	    while (isspace(*cp))
-		cp++;  /* get rid of spaces */
+	    cp = LYSkipBlanks(cp);
 	    StrAllocCopy(personal_mail_address, cp);
 
 	/*
@@ -238,8 +231,7 @@ PUBLIC void read_rc NOPARAMS
 
 	    if ((cp2 = (char *)strchr(cp, '=')) != NULL)
 		cp = cp2 + 1;
-	    while (isspace(*cp))
-		cp++;  /* get rid of spaces */
+	    cp = LYSkipBlanks(cp);
 	    if (!strncasecomp(cp, "on", 2))
 		case_sensitive = TRUE;
 	    else
@@ -255,8 +247,7 @@ PUBLIC void read_rc NOPARAMS
 
 	    if ((cp2 = (char *)strchr(cp, '=')) != NULL)
 		cp = cp2 + 1;
-	    while (isspace(*cp))
-		cp++;  /* get rid of spaces */
+	    cp = LYSkipBlanks(cp);
 	    for (; LYchar_set_names[i]; i++) {
 		if (!strncmp(cp, LYchar_set_names[i], strlen(cp))) {
 		    current_char_set=i;
@@ -274,8 +265,7 @@ PUBLIC void read_rc NOPARAMS
 
 	    if ((cp2 = (char *)strchr(cp, '=')) != NULL)
 		cp = cp2 + 1;
-	    while (isspace(*cp))
-		cp++;  /* get rid of spaces */
+	    cp = LYSkipBlanks(cp);
 	    StrAllocCopy(language, cp);
 
 	/*
@@ -287,8 +277,7 @@ PUBLIC void read_rc NOPARAMS
 
 	    if ((cp2 = (char *)strchr(cp, '=')) != NULL)
 		cp = cp2 + 1;
-	    while (isspace(*cp))
-		cp++;  /* get rid of spaces */
+	    cp = LYSkipBlanks(cp);
 	    StrAllocCopy(pref_charset, cp);
 
 	/*
@@ -299,8 +288,7 @@ PUBLIC void read_rc NOPARAMS
 
 	    if ((cp2 = (char * )strchr(cp, '=')) != NULL)
 		cp = cp2 + 1;
-	    while (isspace(*cp))
-		cp++;  /* get rid of spaces */
+	    cp = LYSkipBlanks(cp);
 	    if (!strncasecomp(cp, "on", 2))
 		vi_keys = TRUE;
 	    else
@@ -314,8 +302,7 @@ PUBLIC void read_rc NOPARAMS
 
 	    if ((cp2 = (char *)strchr(cp, '=')) != NULL)
 		cp = cp2 + 1;
-	    while (isspace(*cp))
-		cp++;  /* get rid of spaces */
+	    cp = LYSkipBlanks(cp);
 	    if (!strncasecomp(cp, "on", 2))
 		emacs_keys = TRUE;
 	    else
@@ -329,8 +316,7 @@ PUBLIC void read_rc NOPARAMS
 
 	    if ((cp2 = (char * )strchr(cp, '=')) != NULL)
 		cp = cp2 + 1;
-	    while (isspace(*cp))
-		cp++;  /* get rid of spaces */
+	    cp = LYSkipBlanks(cp);
 	    if (!strncasecomp(cp, "on", 2))
 		show_dotfiles = TRUE;
 	    else
@@ -344,8 +330,7 @@ PUBLIC void read_rc NOPARAMS
 
 	    if ((cp2 = (char * )strchr(cp, '=')) != NULL)
 		cp = cp2 + 1;
-	    while (isspace(*cp))
-		cp++;  /* get rid of spaces */
+	    cp = LYSkipBlanks(cp);
 	    if (!strncasecomp(cp, "always", 6)) {
 		LYrcShowColor = SHOW_COLOR_ALWAYS;
 #if defined(USE_SLANG) || defined(COLOR_CURSES)
@@ -368,8 +353,7 @@ PUBLIC void read_rc NOPARAMS
 
 	    if ((cp2 = (char * )strchr(cp, '=')) != NULL)
 		cp = cp2 + 1;
-	    while (isspace(*cp))
-		cp++;  /* get rid of spaces */
+	    cp = LYSkipBlanks(cp);
 	    if (!strncasecomp(cp, "off", 3))
 		LYSelectPopups = FALSE;
 	    else
@@ -383,8 +367,7 @@ PUBLIC void read_rc NOPARAMS
 
 	    if ((cp2 = (char * )strchr(cp, '=')) != NULL)
 		cp = cp2 + 1;
-	    while (isspace(*cp))
-		cp++;  /* get rid of spaces */
+	    cp = LYSkipBlanks(cp);
 	    if (!strncasecomp(cp, "off", 3))
 		LYShowCursor = FALSE;
 	    else
@@ -398,8 +381,7 @@ PUBLIC void read_rc NOPARAMS
 
 	    if ((cp2 = (char *)strchr(cp, '=')) != NULL)
 		cp = cp2 + 1;
-	    while (isspace(*cp))
-		cp++;  /* get rid of spaces */
+	    cp = LYSkipBlanks(cp);
 	    if (LYstrstr(cp, "LINKS_ARE_NUMBERED"))
 		keypad_mode = LINKS_ARE_NUMBERED;
 	    else if (LYstrstr(cp, "LINKS_AND_FORM_FIELDS_ARE_NUMBERED"))
@@ -417,8 +399,7 @@ PUBLIC void read_rc NOPARAMS
 
 	    if ((cp2 = (char *)strchr(cp, '=')) != NULL)
 		cp = cp2 + 1;
-	    while (isspace(*cp))
-		cp++;  /* get rid of spaces */
+	    cp = LYSkipBlanks(cp);
 	    for (; LYLineeditNames[i]; i++) {
 		if (!strncmp(cp, LYLineeditNames[i], strlen(cp))) {
 		    current_lineedit = i;
@@ -435,8 +416,7 @@ PUBLIC void read_rc NOPARAMS
 
 	    if ((cp2 = (char *)strchr(cp,'=')) != NULL)
 		cp = cp2 + 1;
-	    while (isspace(*cp))
-		cp++;  /* get rid of spaces */
+	    cp = LYSkipBlanks(cp);
 	    if (LYstrstr(cp, "FILES_FIRST") != NULL) {
 		dir_list_style = FILES_FIRST;
 	    } else if (LYstrstr(cp,"DIRECTORIES_FIRST") != NULL) {
@@ -454,8 +434,7 @@ PUBLIC void read_rc NOPARAMS
 
 	    if ((cp2 = (char *)strchr(cp, '=')) != NULL)
 		cp = cp2 + 1;
-	    while (isspace(*cp))
-		cp++;  /* get rid of spaces */
+	    cp = LYSkipBlanks(cp);
 	    if (LYstrstr(cp, "ADVANCED") != NULL) {
 		user_mode = ADVANCED_MODE;
 	    } else if (LYstrstr(cp,"INTERMEDIATE") != NULL) {
@@ -474,9 +453,7 @@ PUBLIC void read_rc NOPARAMS
 
 	    if ((cp2 = (char *)strchr(cp, '=')) != NULL)
 		cp = cp2 + 1;
-	    while (isspace(*cp))
-		cp++;  /* get rid of spaces */
-
+	    cp = LYSkipBlanks(cp);
 	    if (!strncasecomp(cp, "on", 2))
 		local_exec = TRUE;
 	     else
@@ -491,8 +468,7 @@ PUBLIC void read_rc NOPARAMS
 
 	    if ((cp2 = (char *)strchr(cp, '=')) != NULL)
 		cp = cp2 + 1;
-	    while (isspace(*cp))
-		cp++;  /* get rid of spaces */
+	    cp = LYSkipBlanks(cp);
 	    if (!strncasecomp(cp, "on", 2))
 		local_exec_on_local_files = TRUE;
 	    else

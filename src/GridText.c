@@ -748,7 +748,7 @@ PRIVATE int display_line ARGS2(
 #define CStyle line->styles[current_style]
 
 	while (current_style < line->numstyles &&
-	       i >= CStyle.horizpos + line->offset + 1)
+	       i >= (int) (CStyle.horizpos + line->offset + 1))
 	{
 		LynxChangeStyle (CStyle.style,CStyle.direction,CStyle.previous);
 		current_style++;
@@ -3124,7 +3124,7 @@ PRIVATE void remove_special_attr_chars ARGS1(
 PUBLIC void HText_endAppend ARGS1(
 	HText *,	text)
 {
-    int cur_line, cur_char, cur_shift, len;
+    int cur_line, cur_char, cur_shift;
     TextAnchor *anchor_ptr;
     HTLine *line_ptr;
     unsigned char ch;
@@ -3275,16 +3275,8 @@ re_parse:
 	        anchor_ptr->hightext2offset = line_ptr2->offset;
 		remove_special_attr_chars(anchor_ptr->hightext2);
 		if (anchor_ptr->link_type & HYPERTEXT_ANCHOR) {
-		    if ((len = strlen(anchor_ptr->hightext2)) > 0) {
-			len--;
-			while (len >= 0 &&
-			       isspace((unsigned char)
-				       anchor_ptr->hightext2[len])) {
-			    anchor_ptr->hightext2[len] = '\0';
-			    len--;
-			}
-		    }
-		    if (len <= 0 && anchor_ptr->hightext2[0] == '\0') {
+		    LYTrimTrailing(anchor_ptr->hightext2);
+		    if (anchor_ptr->hightext2[0] == '\0') {
 			FREE(anchor_ptr->hightext2);
 			anchor_ptr->hightext2offset = 0;
 		    }
@@ -3293,14 +3285,7 @@ re_parse:
 	}
 	remove_special_attr_chars(anchor_ptr->hightext);
 	if (anchor_ptr->link_type & HYPERTEXT_ANCHOR) {
-	    if ((len = strlen(anchor_ptr->hightext)) > 0) {
-		len--;
-		while (len >= 0 &&
-		       isspace((unsigned char)anchor_ptr->hightext[len])) {
-		    anchor_ptr->hightext[len] = '\0';
-		    len--;
-	        }
-	    }
+	    LYTrimTrailing(anchor_ptr->hightext);
 	}
 
 	/*
@@ -3736,10 +3721,10 @@ PUBLIC char *HText_getStyle NOARGS
  *  document (normally derived from a Content-Disposition header with
  *  attachment; filename=name.suffix). - FM
  */
-PUBLIC char * HText_getSugFname NOARGS
+PUBLIC CONST char * HText_getSugFname NOARGS
 {
     return(HTMainText ?
-	  (char *) HTAnchor_SugFname(HTMainText->node_anchor) : NULL);
+	  HTAnchor_SugFname(HTMainText->node_anchor) : 0);
 }
 
 /*
@@ -4408,7 +4393,7 @@ PUBLIC int do_www_search ARGS1(
 	document *,	doc)
 {
     char searchstring[256], temp[256], *cp, *tmpaddress = NULL;
-    int ch, recall, i;
+    int ch, recall;
     int QueryTotal;
     int QueryNum;
     BOOLEAN PreviousSearch = FALSE;
@@ -4533,22 +4518,13 @@ get_query:
     /*
      *  Strip leaders and trailers. - FM
      */
-    cp = searchstring;
-    while (*cp && isspace((unsigned char)*cp))
-	cp++;
-    if (!(*cp)) {
+    LYTrimLeading(searchstring);
+    if (!(*searchstring)) {
 	_statusline(CANCELLED);
 	sleep(InfoSecs);
 	return(NULLFILE);
     }
-    if (cp > searchstring) {
-	for (i = 0; *cp; i++)
-	    searchstring[i] = *cp++;
-	searchstring[i] = '\0';
-    }
-    cp = searchstring + strlen(searchstring) - 1;
-    while ((cp > searchstring) && isspace((unsigned char)*cp))
-	*cp-- = '\0';
+    LYTrimTrailing(searchstring);
 
     /*
      *  Don't resubmit the same query unintentionally.
@@ -5258,20 +5234,20 @@ PUBLIC char * HText_getRevTitle NOARGS
  *  HText_getContentBase returns the Content-Base header
  *  of the current document.
  */
-PUBLIC char * HText_getContentBase NOARGS
+PUBLIC CONST char * HText_getContentBase NOARGS
 {
     return(HTMainText ?
-	   (char *)HTAnchor_content_base(HTMainText->node_anchor) : NULL);
+	   HTAnchor_content_base(HTMainText->node_anchor) : 0);
 }
 
 /*
  *  HText_getContentLocation returns the Content-Location header
  *  of the current document.
  */
-PUBLIC char * HText_getContentLocation NOARGS
+PUBLIC CONST char * HText_getContentLocation NOARGS
 {
     return(HTMainText ?
-	   (char *)HTAnchor_content_location(HTMainText->node_anchor) : NULL);
+	   HTAnchor_content_location(HTMainText->node_anchor) : 0);
 }
 
 PUBLIC void HTuncache_current_document NOARGS
@@ -5735,11 +5711,9 @@ PUBLIC void HText_beginForm ARGS5(
      *  convert to lowercase and collapse spaces. - kw
      */
     if (accept_cs != NULL) {
-	int i;
 	StrAllocCopy(HTFormAcceptCharset, accept_cs);
-	collapse_spaces(HTFormAcceptCharset);
-	for (i = 0; HTFormAcceptCharset[i]; i++)
-	    HTFormAcceptCharset[i] = TOLOWER(HTFormAcceptCharset[i]);
+	LYRemoveBlanks(HTFormAcceptCharset);
+	LYLowerCase(HTFormAcceptCharset);
     }
 
     /*
@@ -6559,9 +6533,8 @@ PUBLIC int HText_beginInput ARGS3(
      */
     if (I->accept_cs) {
 	StrAllocCopy(f->accept_cs, I->accept_cs);
-	collapse_spaces(f->accept_cs);
-	for (i = 0; f->accept_cs[i]; i++)
-	    f->accept_cs[i] = TOLOWER(f->accept_cs[i]);
+	LYRemoveBlanks(f->accept_cs);
+	LYLowerCase(f->accept_cs);
     }
 
     /*

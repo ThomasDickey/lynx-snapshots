@@ -38,13 +38,18 @@ AC_DEFUN([CF_ALT_CHAR_SET],
 [
 AC_MSG_CHECKING([if curses supports alternate-character set])
 AC_CACHE_VAL(cf_cv_alt_char_set,[
+for mapname in acs_map _acs_map
+do
 	AC_TRY_LINK([
 #include <${cf_cv_ncurses_header-curses.h}>
 	],[chtype x = acs_map['l']; acs_map['m'] = 0],
-	[cf_cv_alt_char_set=yes],  
-	[cf_cv_alt_char_set=no])])
+	[cf_cv_alt_char_set=$mapname
+	 break],  
+	[cf_cv_alt_char_set=no])
+done
+	])
 AC_MSG_RESULT($cf_cv_alt_char_set)
-test $cf_cv_alt_char_set = yes && AC_DEFINE(ALT_CHAR_SET)
+test $cf_cv_alt_char_set != no && AC_DEFINE_UNQUOTED(ALT_CHAR_SET,$mapname)
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl This is adapted from the macros 'fp_PROG_CC_STDC' and 'fp_C_PROTOTYPES'
@@ -62,7 +67,13 @@ cf_save_CFLAGS="$CFLAGS"
 # HP-UX			-Aa -D_HPUX_SOURCE
 # SVR4			-Xc
 # UnixWare 1.2		(cannot use -Xc, since ANSI/POSIX clashes)
-for cf_arg in "-DCC_HAS_PROTOS" "" -qlanglvl=ansi -std1 "-Aa -D_HPUX_SOURCE" -Xc
+for cf_arg in "-DCC_HAS_PROTOS" \
+	"" \
+	-qlanglvl=ansi \
+	-std1 \
+	"-Aa -D_HPUX_SOURCE +e" \
+	"-Aa -D_HPUX_SOURCE" \
+	-Xc
 do
 	CFLAGS="$cf_save_CFLAGS $cf_arg"
 	AC_TRY_COMPILE(

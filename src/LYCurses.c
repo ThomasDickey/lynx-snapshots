@@ -777,9 +777,9 @@ PUBLIC void start_curses NOARGS
 	{
 	    int n;
 	    for (n = 0; n < 128; n++)
-		if (acs_map[n] & 0x80) {
-		    acs_map[n] &= 0xff;
-		    acs_map[n] |= A_ALTCHARSET;
+		if (ALT_CHAR_SET[n] & 0x80) {
+		    ALT_CHAR_SET[n] &= 0xff;
+		    ALT_CHAR_SET[n] |= A_ALTCHARSET;
 		}
 	}
 #endif
@@ -956,9 +956,7 @@ PUBLIC BOOLEAN setup ARGS1(
 #endif /* SIGTSTP */
 	exit(status);
     }
-    for (cp = term; *cp != '\0'; cp++)
-	if (isupper(*cp))
-	    *cp = TOLOWER(*cp);
+    LYLowerCase(term);
 
     printf("Terminal = %s\n", term);
     sleep(InfoSecs);

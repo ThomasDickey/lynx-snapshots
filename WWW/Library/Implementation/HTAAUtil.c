@@ -1,4 +1,3 @@
-
 /* MODULE							HTAAUtil.c
 **		COMMON PARTS OF ACCESS AUTHORIZATION MODULE
 **			FOR BOTH SERVER AND BROWSER
@@ -52,6 +51,7 @@
 #include <HTTCP.h>
 #include <HTAlert.h>
 
+#include <LYStrings.h>
 #include <LYLeaks.h>
 
 /* PUBLIC						HTAAScheme_enum()
@@ -67,17 +67,12 @@
 PUBLIC HTAAScheme HTAAScheme_enum ARGS1(CONST char*, name)
 {
     char *upcased = NULL;
-    char *cur;
 
     if (!name)
 	return HTAA_UNKNOWN;
 
     StrAllocCopy(upcased, name);
-    cur = upcased;
-    while (*cur) {
-	*cur = TOUPPER(*cur);
-	cur++;
-    }
+    LYUpperCase(upcased);
 
     if (!strncmp(upcased, "NONE", 4)) {
 	FREE(upcased);
@@ -149,23 +144,12 @@ PUBLIC char *HTAAScheme_name ARGS1(HTAAScheme, scheme)
 */
 PUBLIC HTAAMethod HTAAMethod_enum ARGS1(CONST char *, name)
 {
-    char tmp[MAX_METHODNAME_LEN+1];
-    CONST char *src = name;
-    char *dest = tmp;
-
     if (!name)
 	return METHOD_UNKNOWN;
 
-    while (*src) {
-	*dest = TOUPPER(*src);
-	dest++;
-	src++;
-    }
-    *dest = 0;
-
-    if (0==strcmp(tmp, "GET"))
+    if (0==strcasecomp(name, "GET"))
 	return METHOD_GET;
-    else if (0==strcmp(tmp, "PUT"))
+    else if (0==strcasecomp(name, "PUT"))
 	return METHOD_PUT;
     else
 	return METHOD_UNKNOWN;

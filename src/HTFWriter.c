@@ -878,7 +878,7 @@ Prepend_BASE:
 	    StrAllocCopy(temp, anchor->content_location);
 	}
 	if (temp) {
-	    collapse_spaces(temp);
+	    LYRemoveBlanks(temp);
 	    if (!is_url(temp)) {
 		FREE(temp);
 	    }
@@ -905,8 +905,8 @@ Prepend_BASE:
 
 	if (anchor->charset && *anchor->charset) {
 	    StrAllocCopy(temp, anchor->charset);
-	    collapse_spaces(temp);
-		fprintf(ret_obj->fp,
+	    LYRemoveBlanks(temp);
+	    fprintf(ret_obj->fp,
 		"<META HTTP-EQUIV=\"Content-Type\" CONTENT=\"text/html; charset=%s\">\n\n",
 		temp);
 	}

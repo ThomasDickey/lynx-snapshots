@@ -435,11 +435,11 @@ re_read:
 	case 'C': c = RTARROW; break;
 	case 'v': c = RTARROW; break; /* keypad right on pc ncsa telnet */
 	case 'D': c = LTARROW; break;
-	case 't': c = LTARROW; break; /* keypad left on pc ncsa telnet */
-	case 'y': c = PGUP; break;  /* keypad on pc ncsa telnet */
-	case 's': c = PGDOWN; break;  /* keypad on pc ncsa telnet */
-	case 'w': c = HOME; break;  /* keypad on pc ncsa telnet */
-	case 'q': c = END; break;  /* keypad on pc ncsa telnet */
+	case 't': c = LTARROW; break;  /* keypad left on pc ncsa telnet */
+	case 'y': c = PGUP;    break;  /* keypad on pc ncsa telnet */
+	case 's': c = PGDOWN;  break;  /* keypad on pc ncsa telnet */
+	case 'w': c = HOME;    break;  /* keypad on pc ncsa telnet */
+	case 'q': c = END_KEY; break;  /* keypad on pc ncsa telnet */
 	case 'M':
 #ifdef USE_SLANG_MOUSE
 	   if ((c == 27) && (b == '['))
@@ -585,7 +585,7 @@ re_read:
 	   c = PGUP;
 	   break;
 	case KEY_LL:		   /* home down or bottom (lower left) */
-	   c = END;
+	   c = END_KEY;
 	   break;
 					/* The keypad is arranged like this:*/
 					/*    a1    up	  a3   */
@@ -601,14 +601,14 @@ re_read:
 	   c = DO_NOTHING;
 	   break;
 	case KEY_C1:		   /* lower left of keypad */
-	   c = END;
+	   c = END_KEY;
 	   break;
 	case KEY_C3:		   /* lower right of keypad */
 	   c = PGDOWN;
 	   break;
 #ifdef KEY_END
 	case KEY_END:		   /* end key		001 */
-	   c = END;
+	   c = END_KEY;
 	   break;
 #endif /* KEY_END */
 #ifdef KEY_HELP
@@ -708,6 +708,108 @@ re_read:
     }
 }
 
+/*
+ * Convert a null-terminated string to lowercase
+ */
+PUBLIC void LYLowerCase ARGS1(
+	char *,		buffer)
+{
+    size_t i;
+    for (i = 0; buffer[i]; i++)
+	buffer[i] = TOLOWER(buffer[i]);
+}
+
+/*
+ * Convert a null-terminated string to uppercase
+ */
+PUBLIC void LYUpperCase ARGS1(
+	char *,		buffer)
+{
+    size_t i;
+    for (i = 0; buffer[i]; i++)
+	buffer[i] = TOUPPER(buffer[i]);
+}
+
+/*
+ * Remove ALL whitespace from a string (including embedded blanks).
+ */
+PUBLIC void LYRemoveBlanks ARGS1(
+	char *,		buffer)
+{
+    if (buffer != 0) {
+	size_t i, j;
+	for (i = j = 0; buffer[i]; i++)
+	    if (!isspace((unsigned char)(buffer[i])))
+		buffer[j++] = buffer[i];
+	buffer[j] = 0;
+    }
+}
+
+/*
+ * Skip whitespace
+ */
+PUBLIC char * LYSkipBlanks ARGS1(
+	char *,		buffer)
+{
+    while (isspace((unsigned char)(*buffer)))
+    	buffer++;
+    return buffer;
+}
+
+/*
+ * Skip non-whitespace
+ */
+PUBLIC char * LYSkipNonBlanks ARGS1(
+	char *,		buffer)
+{
+    while (*buffer != 0 && !isspace((unsigned char)(*buffer)))
+    	buffer++;
+    return buffer;
+}
+
+/*
+ * Skip CONST whitespace
+ */
+PUBLIC CONST char * LYSkipCBlanks ARGS1(
+	CONST char *,	buffer)
+{
+    while (isspace((unsigned char)(*buffer)))
+    	buffer++;
+    return buffer;
+}
+
+/*
+ * Skip CONST non-whitespace
+ */
+PUBLIC CONST char * LYSkipCNonBlanks ARGS1(
+	CONST char *,	buffer)
+{
+    while (*buffer != 0 && !isspace((unsigned char)(*buffer)))
+    	buffer++;
+    return buffer;
+}
+
+/*
+ * Trim leading blanks from a string
+ */
+PUBLIC void LYTrimLeading ARGS1(
+	char *,		buffer)
+{
+    char *skipped = LYSkipBlanks(buffer);
+    while ((*buffer++ = *skipped++) != 0)
+    	;
+}
+
+/*
+ * Trim trailing blanks from a string
+ */
+PUBLIC void LYTrimTrailing ARGS1(
+	char *,		buffer)
+{
+    size_t i = strlen(buffer);
+    while (i != 0 && isspace((unsigned char)buffer[i-1]))
+    	buffer[--i] = 0;
+}
 
 /*
 **  Display the current value of the string and allow the user
@@ -794,7 +896,7 @@ PUBLIC int LYEdit1 ARGS4(
     if (MaxLen <= 0)
 	return(0); /* Be defensive */
 
-    length=strlen(&Buf[0]);
+    length = strlen(&Buf[0]);
     StrLen = length;
 
     switch (action) {
@@ -940,13 +1042,11 @@ PUBLIC int LYEdit1 ARGS4(
 	break;
 
     case LYE_UPPER:
-	for (i = 0; Buf[i]; i++)
-	   Buf[i] = TOUPPER(Buf[i]);
+	LYUpperCase(Buf);
 	break;
 
     case LYE_LOWER:
-	for (i = 0; Buf[i]; i++)
-	   Buf[i] = TOLOWER(Buf[i]);
+	LYLowerCase(Buf);
 	break;
 
     default:

@@ -33,6 +33,7 @@
 #include <HTAABrow.h>
 
 #include <LYGlobalDefs.h>
+#include <LYStrings.h>
 #include <LYLeaks.h>
 
 struct _HTStream
@@ -307,8 +308,7 @@ try_again:
 	  strcpy(line, pref_charset);
 	  if (line[strlen(line)-1] == ',')
 	      line[strlen(line)-1] = '\0';
-	  for (i = 0; line[i]; i++)
-	      line[i] = TOLOWER(line[i]);
+	  LYLowerCase(line);
 	  if (strstr(line, "iso-8859-1") == NULL)
 	      strcat(line, ", iso-8859-1;q=0.01");
 	  if (strstr(line, "us-ascii") == NULL)

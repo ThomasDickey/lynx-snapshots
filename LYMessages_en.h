@@ -222,6 +222,8 @@
 #define BOOKTEMP_OPEN_FAILED_FOR_DEL \
  "Unable to open temporary file for deletion of link."
 #define ERROR_RENAMING_TEMP "Error renaming temporary file."
+#define BOOKTEMP_COPY_FAIL \
+ "Unable to copy temporary file for deletion of link."
 #define BOOKTEMP_REOPEN_FAIL_FOR_DEL \
  "Unable to reopen temporary file for deletion of link."
 #endif /* VMS */

@@ -3471,10 +3471,11 @@ PUBLIC unsigned char * EUC_TO_JIS ARGS4(
 }
 
 PUBLIC unsigned char * TO_EUC ARGS2(
-	unsigned char *,	jis,
+	CONST unsigned char *,	jis,
 	unsigned char *,	euc)
 {
-    register unsigned char *s, *d, c, jis_stat;
+    register CONST unsigned char *s;
+    register unsigned char *d, c, jis_stat;
     register int to1B, to2B;
     register int in_sjis = 0;
 
@@ -3524,7 +3525,7 @@ PUBLIC unsigned char * TO_EUC ARGS2(
 }
 
 PUBLIC void TO_SJIS ARGS2(
-	unsigned char *,	any,
+	CONST unsigned char *,	any,
 	unsigned char *,	sjis)
 {
     unsigned char *euc;
@@ -3542,7 +3543,7 @@ PUBLIC void TO_SJIS ARGS2(
 }
 
 PUBLIC void TO_JIS ARGS2(
-	unsigned char *,	any,
+	CONST unsigned char *,	any,
 	unsigned char *,	jis)
 {
     unsigned char *euc;

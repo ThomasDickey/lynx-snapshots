@@ -388,7 +388,7 @@ again:
 	    case PGDOWN:
 #ifdef NOTDEFINED
 	    case HOME:
-	    case END:
+	    case END_KEY:
 	    case FIND_KEY:
 	    case SELECT_KEY:
 #endif /* NOTDEFINED */

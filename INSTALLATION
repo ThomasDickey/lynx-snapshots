@@ -100,12 +100,12 @@ II. Compile instructions -- UNIX
     NOTE:  The 'configure' script generates auxiliary files "config.status"
     "config.cache" and "config.log".  Normally you will not notice these;
     they are created automatically and removed by a "make distclean".
-    
+
 	+ If you wish to rebuild Lynx with a new host, or change ANY of the
 	  parameters which are stored in config.cache, you MUST first remove
 	  the config.cache file before running configure; its options do NOT
 	  override the settings in that file.
-    
+
 	+ The config.status file is a script which creates (or regenerates)
 	  the files created by the configure script.
 
@@ -219,9 +219,9 @@ II. Compile instructions -- UNIX
   	Use this option to disable "Up-to" parent-links in directory listings.
 
   --enable-8bit-toupper			(define EXP_8BIT_TOUPPER)
-	Use experimental 8-bit case-conversion, e.g., for case-insensitive 
-	searches in non-ASCII display character set, this overrides locale 
-	settings. 
+	Use experimental 8-bit case-conversion, e.g., for case-insensitive
+	searches in non-ASCII display character set, this overrides locale
+	settings.
 
   --enable-color-style			(define USE_COLOR_STYLE)
   	Use this option to enable optional and *experimental* color style.
@@ -525,10 +525,15 @@ V. Compile instructions -- 386 DOS
     See "http://www.flora.org/lynx-dev/html/month1097/msg00390.html".  You
     need to compile these before you go any further. If you wish to use the
     beta version of PDCurses 2.3, you need to first apply a patch (available at
-    "http://www.flora.org/lynx-dev/html/month0997/msg00441.html").  If you have
-    trouble applying the patch, we recommend that you use the "patch" program,
-    ("http://www.simtel.net/pub/simtelnet/gnu/djgpp/v2gnu/pat25b.zip").  To
-    read the Unix man style documentation, use, for example, "less"
+    "http://www.flora.org/lynx-dev/html/month0997/msg00441.html").
+    Most of the patch has already been applied if you get the latest
+    beta version. If you have trouble applying the patch, we recommend
+    that you use the "patch" program,
+    ("http://www.simtel.net/pub/simtelnet/gnu/djgpp/v2gnu/pat25b.zip").
+    The WATTCP TCPLIB sources also need to be patched prior to compilation.
+    See "http://www.flora.org/lynx-dev/html/month1197/msg00403.html".
+
+    To read the Unix man style documentation, use, for example, "less"
     ("http://www.simtel.net/pub/simtelnet/gnu/djgpp/v2gnu/lss332b.zip").
     Compile or place your compiled PDCurses library in lynx2-*/curses, and
     compile or place your compiled WATTCP library in lynx2-*/djgpp/tcplib.
@@ -543,8 +548,8 @@ V. Compile instructions -- 386 DOS
     To test Lynx_386 you must have a packet driver installed.  The simplest
     method is to use a null packet driver that just allows Lynx to start up,
     but doesn't do anything else.  One such executable driver has been posted,
-    uuencoded, to the lynx-dev mailing list: "msg00031.html", "msg00057.html",
-    and "msg00066.html" under "http://www.flora.org/lynx-dev/html/month0198/".
+    uuencoded, to the lynx-dev mailing list:
+    "http://www.flora.org/lynx-dev/html/month0198/msg00057.html".
     Start the dummy packet driver with "nullpkt 0x60", and take it out of
     memory with "nullpkt -u".  You can also use slip8250.com.  See the CRYNWR
     package "http://www.simtel.net/pub/simtelnet/msdos/pktdrvr/pktd11.zip".

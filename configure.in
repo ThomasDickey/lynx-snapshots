@@ -197,6 +197,11 @@ os2*)
 	LDFLAGS=`echo "$LDFLAGS -Zmt -Zcrtdll" | sed "s/-Zexe//g"`
 	PROG_EXT=".exe"
 	;;
+osf4*) 
+	# The -Olimit flag (see below) is no longer available with 
+	# Digital C 5.2, which is bundled with Digital UNIX 4.0. 
+	CFLAGS="$CFLAGS -DDSYS5" 
+	;; 
 osf*)
 	# Increase the maximum size of functions that will be optimized.
 	test -z "$GCC" && CFLAGS="$CFLAGS -O -Olimit 4000"
