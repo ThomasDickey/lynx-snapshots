@@ -193,7 +193,7 @@ PUBLIC BOOL LYAddImageMap ARGS3(
     new = (old != NULL) ?
 		    old : (LYImageMap *)calloc(1, sizeof(LYImageMap));
     if (new == NULL) {
-	perror(gettext("Out of memory in LYAddImageMap"));
+	outofmem(__FILE__, "LYAddImageMap");
 	return FALSE;
     }
     StrAllocCopy(new->address, address);
@@ -434,7 +434,7 @@ PRIVATE int LYLoadIMGmap ARGS4 (
 	if (anAnchor->post_data && !WWWDoc.safe &&
 	    ((underlying && underlying->document && !LYforce_no_cache) ||
 	     HTConfirm(CONFIRM_POST_RESUBMISSION) != TRUE)) {
-	    HTAlert(gettext("Image map from POST response not available!"));
+	    HTAlert(FAILED_MAP_POST_REQUEST);
 	    return(HT_NOT_LOADED);
 	}
 	LYforce_no_cache = TRUE;
@@ -471,7 +471,7 @@ PRIVATE int LYLoadIMGmap ARGS4 (
 	if (anAnchor->post_data && !WWWDoc.safe &&
 	    ((underlying && underlying->document && !LYforce_no_cache) ||
 	    HTConfirm(CONFIRM_POST_RESUBMISSION) != TRUE)) {
-	    HTAlert(gettext("Image map from POST response not available!"));
+	    HTAlert(FAILED_MAP_POST_REQUEST);
 	    return(HT_NOT_LOADED);
 	}
 	LYforce_no_cache = TRUE;

@@ -358,7 +358,7 @@ PRIVATE NNTPAuthResult HTHandleAuthInfo ARGS1(
 	sprintf(buffer, "AUTHINFO USER %.*s%c%c", 495, UserName, CR, LF);
 	if ((status = response(buffer)) < 0) {
 	    if (status == HT_INTERRUPTED)
-		_HTProgress(gettext("Connection interrupted."));
+		_HTProgress(CONNECTION_INTERRUPTED);
 	    else
 		HTAlert(gettext("Connection closed ???"));
 	    if (auth) {
@@ -442,7 +442,7 @@ PRIVATE NNTPAuthResult HTHandleAuthInfo ARGS1(
 	    sprintf(buffer, "AUTHINFO PASS %.*s%c%c", 495, PassWord, CR, LF);
 	    if ((status = response(buffer)) < 0) {
 		if (status == HT_INTERRUPTED) {
-		    _HTProgress(gettext("Connection interrupted."));
+		    _HTProgress(CONNECTION_INTERRUPTED);
 		} else {
 		    HTAlert(gettext("Connection closed ???"));
 		}
@@ -2039,7 +2039,7 @@ PRIVATE int HTLoadNews ARGS4(
 		p1++;
 	    }
 	    if (!(p1 && *p1)) {
-		HTAlert(gettext("Invalid URL!"));
+		HTAlert(WWW_ILLEGAL_URL_MESSAGE);
 		return(HT_NO_DATA);
 	    }
 	    if (!(cp = HTParse(arg, "", PARSE_HOST)) || *cp == '\0') {
@@ -2335,7 +2335,7 @@ PRIVATE int HTLoadNews ARGS4(
 		**  Interrupt cleanly.
 		*/
 		CTRACE(tfp, "HTNews: Interrupted on connect; recovering cleanly.\n");
-		_HTProgress(gettext("Connection interrupted."));
+		_HTProgress(CONNECTION_INTERRUPTED);
 		if (!(post_wanted || reply_wanted ||
 		      spost_wanted || sreply_wanted)) {
 		    ABORT_TARGET;
@@ -2383,7 +2383,7 @@ PRIVATE int HTLoadNews ARGS4(
 			NEWS_NETCLOSE(s);
 			s = -1;
 			if (status == HT_INTERRUPTED) {
-			    _HTProgress(gettext("Connection interrupted."));
+			    _HTProgress(CONNECTION_INTERRUPTED);
 			    if (!(post_wanted || reply_wanted ||
 				  spost_wanted || sreply_wanted)) {
 				ABORT_TARGET;
@@ -2412,7 +2412,7 @@ PRIVATE int HTLoadNews ARGS4(
 		    HTCanPost = FALSE;
 		    if (post_wanted || reply_wanted ||
 			spost_wanted || sreply_wanted) {
-			HTAlert(gettext("Cannot POST to this host."));
+			HTAlert(CANNOT_POST);
 			FREE(NewsHREF);
 			if (ProxyHREF) {
 			    StrAllocCopy(NewsHost, ProxyHost);
@@ -2433,7 +2433,7 @@ PRIVATE int HTLoadNews ARGS4(
 	if (post_wanted || reply_wanted ||
 	     spost_wanted || sreply_wanted) {
 	    if (!HTCanPost) {
-		HTAlert(gettext("Cannot POST to this host."));
+		HTAlert(CANNOT_POST);
 		FREE(NewsHREF);
 		if (ProxyHREF) {
 		    StrAllocCopy(NewsHost, ProxyHost);
@@ -2451,7 +2451,7 @@ PRIVATE int HTLoadNews ARGS4(
 		postfile = LYNewsPost(ListArg, (reply_wanted || sreply_wanted));
 	    }
 	    if (postfile == NULL) {
-		HTProgress(gettext("Cancelled!"));
+		HTProgress(CANCELLED);
 		FREE(NewsHREF);
 		if (ProxyHREF) {
 		    StrAllocCopy(NewsHost, ProxyHost);
@@ -2473,7 +2473,7 @@ PRIVATE int HTLoadNews ARGS4(
 
 	    sprintf(buffer, "mode reader%c%c", CR, LF);
 	    if ((status = response(buffer)) == HT_INTERRUPTED) {
-		_HTProgress(gettext("Connection interrupted."));
+		_HTProgress(CONNECTION_INTERRUPTED);
 		break;
 	    }
 	    if (status == 480) {
@@ -2488,7 +2488,7 @@ PRIVATE int HTLoadNews ARGS4(
 		    break;
 		}
 		if ((status = response(buffer)) == HT_INTERRUPTED) {
-		    _HTProgress(gettext("Connection interrupted."));
+		    _HTProgress(CONNECTION_INTERRUPTED);
 		    break;
 		}
 	    }
@@ -2496,7 +2496,7 @@ PRIVATE int HTLoadNews ARGS4(
 
 Send_NNTP_command:
 	if ((status = response(command)) == HT_INTERRUPTED) {
-	    _HTProgress(gettext("Connection interrupted."));
+	    _HTProgress(CONNECTION_INTERRUPTED);
 	    break;
 	}
 	if (status < 0) {
@@ -2585,7 +2585,7 @@ Send_NNTP_command:
 	    **	Handle posting of an article. - FM
 	    */
 	    if (status != 340) {
-		HTAlert(gettext("Cannot POST to this host."));
+		HTAlert(CANNOT_POST);
 		if (postfile) {
 		    HTSYS_remove(postfile);
 		}
@@ -2630,7 +2630,7 @@ Send_NNTP_command:
 	    status = read_article();
 	}
 	if (status == HT_INTERRUPTED) {
-	    _HTProgress(gettext("Connection interrupted."));
+	    _HTProgress(CONNECTION_INTERRUPTED);
 	    status = HT_LOADED;
 	}
 	if (!(post_wanted || reply_wanted ||

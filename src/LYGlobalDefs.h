@@ -3,10 +3,6 @@
 #ifndef LYGLOBALDEFS_H
 #define LYGLOBALDEFS_H
 
-#ifndef USERDEFS_H
-#include <userdefs.h>
-#endif /* USERDEFS_H */
-
 #ifndef HTUTILS_H
 #include <HTUtils.h>
 #endif /* HTUTILS_H */

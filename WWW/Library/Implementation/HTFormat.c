@@ -561,7 +561,7 @@ PUBLIC int HTCopy ARGS4(
 	}
 
 	if (HTCheckForInterrupt()) {
-	    _HTProgress (gettext("Data transfer interrupted."));
+	    _HTProgress (TRANSFER_INTERRUPTED);
 	    (*targetClass._abort)(sink, NULL);
 	    if (bytes)
 		rv = HT_INTERRUPTED;
@@ -576,7 +576,7 @@ PUBLIC int HTCopy ARGS4(
 	    if (status == 0) {
 		break;
 	    } else if (status == HT_INTERRUPTED) {
-		_HTProgress (gettext("Data transfer interrupted."));
+		_HTProgress (TRANSFER_INTERRUPTED);
 		(*targetClass._abort)(sink, NULL);
 		if (bytes)
 		    rv = HT_INTERRUPTED;
@@ -680,7 +680,7 @@ PUBLIC int HTFileCopy ARGS2(
 	HTDisplayPartial();
 
 	if (HTCheckForInterrupt()) {
-	    _HTProgress (gettext("Data transfer interrupted."));
+	    _HTProgress (TRANSFER_INTERRUPTED);
 	    if (bytes) {
 		rv = HT_INTERRUPTED;
 	    } else {
@@ -747,7 +747,7 @@ PRIVATE int HTGzFileCopy ARGS2(
 	HTDisplayPartial();
 
 	if (HTCheckForInterrupt()) {
-	    _HTProgress (gettext("Data transfer interrupted."));
+	    _HTProgress (TRANSFER_INTERRUPTED);
 	    if (bytes) {
 		rv = HT_INTERRUPTED;
 	    } else {

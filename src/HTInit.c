@@ -21,7 +21,6 @@
 #include <HTWSRC.h>
 
 #include <HTSaveToFile.h>  /* LJM */
-#include <userdefs.h>
 #include <LYStrings.h>
 #include <LYUtils.h>
 #include <LYGlobalDefs.h>

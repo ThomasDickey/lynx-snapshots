@@ -1,10 +1,6 @@
 #ifndef LYSTRUCTS_H
 #define LYSTRUCTS_H
 
-#ifndef USERDEFS_H
-#include <userdefs.h>
-#endif /* USERDEFS_H */
-
 #ifndef HTANCHOR_H
 #include <HTAnchor.h>
 #endif /* HTANCHOR_H */

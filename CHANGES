@@ -1,6 +1,98 @@
 Changes since Lynx 2.8.1 release
 ================================================================================
 
+1998-12-03 (2.8.2dev.8)
+* use HTSprintf/HTSprintf0 in LYCookie.c, LYLocal.c - TD
+* correct logic in OpenHiddenFile, which did not check if a failure to open a
+  file for append was due to the file's not existing and hence causing
+  IsOurFile to return failure.  This caused the -traversal option to fail
+  (reported by Francis Irving <francis@ncgraphics.co.uk>, applies to
+  2.8.1rel.2) - TD
+* fixed line number removal code in HText_endAnchor in several places, it was
+  modifying the wrong line which could lead to memory corruption - KW
+* tweaks in HText_startAnchor and HText_endAnchor for handling link numbers: 
+  don't swallow space after number if line was split, find link number on
+  previous line even it it is at the very end, adjust line split position after
+  number removal.  Generate TRACE output in interesting cases - KW
+* Prevent havoc (access to already freed memory etc.) caused by multiple
+  recursive invocations of HTAnchor_delete on the same HTParentAnchor.  This
+  does not seem to actually happen normally during a session, but can occur
+  when the HTAnchor structures are cleaned up while handling a terminating
+  signal or outofmem condition - KW
+* Reset the HTAnchor "underway" flag during final cleanup, so structures are
+  not prevented from being freed.  This also should only make a difference when
+  handling a terminating signal or outofmem condition - KW
+* show sticky-bit in directory listings - LW
+* correct options-message on Print page - IC
+* update installation note about freewais library (reported by Chris Maden
+  <crism@oreilly.com>) - TD
+* improvements to mouse code, ncurses-based, from Ilya Zakharevich
+  a) Mouse navigation inside text entry fields;
+  b) Mouse navigation to a text entry field (including an empty one)
+  c) Mouse navigation to a specific position of a text field (since I do not
+     know which fields are text fields, I implemented "b" and "c" for
+     F_TEXTAREA_TYPE and F_TEXT_TYPE only, search for these symbols in the
+     patch);
+  d) Mouse navigation in menus:  To scroll, one can click on top/bottom border
+     (single=byline, double=bypage, triple=beg/end), or above/below menu
+     (single=bypage, double=beg/end)) mouse-3 ==> quit;
+  e) Double-click-1 on the first and last row are interpreted as goto-
+     start/end/main-window (depending on the location of the click). 
+  Other Changes:
+  a) Ask ncurses for all mouse events, but increase mouseinterval() to simulate
+     current behavior (which is effectively an infinite mouseinterval() +
+     masking of repeated clicks);
+  b) Earlier clicking to the left of a link would activate the link.  I see no
+     use for this, so consider this a bug.
+* HText_trimHightext (GridText.c):  don't apply final adjustment repeatedly to
+  an anchor that has already been handled by this function; the function may be
+  called repeatedly if partial display is enabled.  Some other changes in this
+  function, to interact better with the other GridText.c functions, especially
+  for partial display mode.  We don't have to handle all anchors if the new
+  parameter "final" is not set. 
+  Also empty anchors should now generally not any more move down over empty
+  lines, if they happen at a line end.  Made some trace messages give more
+  information - KW, LP
+* color styles:  reset screen style cache to avoid random coloring when a link
+  is unhighlighted - KW, LP
+* Tweak in HText_setLastOptionValue:  if an OPTION tag was directly followed by
+  several newlines, characters could be dropped - KW, LP
+* modify havevisible() function in LYBookmark.c to compare against Unicode
+  value rather than ASCII.  Optimize title_convert8bit() by moving character
+  translation out of loop - LP
+* ifdef user/group function caching calls so that this builds with djgpp, which
+  doesn't need/support this (patch by Gisle Vanem)
+* documentation updates for NLS - HN
+* separate some html from gettext in LYCgi.c, LYHistory.c, LYLocal.c - JS
+* avoid setting recent_sizechange during the very first start_curses call for
+  ncurses.  This would result in an unnecessary refresh after loading the first
+  document - KW
+* added logic to display_page to avoid repainting the full screen contents in a
+  specific situation:  if it has been called before (for the same lines in the
+  same document) during partial display, and is now being called normally (not
+  during partial display).  If this applies, the normal line content is not
+  redrawn, but the title line and form fields are still repainted, and updating
+  of the links structures is always done.  There are additional checks for
+  recent_sizechange and a text->stale flag (which was already implemented but
+  unused) to do the full redraw if that may be needed.  This should avoid
+  unnecessary screen 'blinking' with curses when partial display is used (which
+  didn't seem to happen with slang) - KW
+* modify SGML.c to check for SGML_ELEMENT tag contents, fixing a case where an
+  entity that appears within a TABLE but outside of any table row TR will be
+  displayed by Lynx _without_ its entities being interpreted (analysis by Alan
+  J Flavell <flavell@a5.ph.gla.ac.uk>, applies to 2.8.1rel.2) - KW
+* check that stdin is really a tty before trying to select from it in the
+  NSL-FORK logic in HTParseInet(), file HTTCP.c (reported by Kim DeVaughn, for
+  someone who was unable to run lynx -dump in a cron job, applies to
+  2.8.1rel.2) - TD, BL
+* updates for lynx_help_main.html (JS, IC).
+* change fopen for write in LYCookie.c to LYNewTxtFile so that the resulting
+  file will be readable by only the owner (Bill Nottingham <wen2@po.cwru.edu>
+  suggested using umask, but that may not be portable enough) - TD
+* use CONST in some places in UCdomap.c and makeuctb, to make more tables
+  sharable (suggested by LP) - TD
+* fixes for SunOS K&R compiler with/without unproto wrapper, i.e., definition
+  of 'const' - TD
 1998-11-23 (2.8.2dev.7)
 * convert KEY_ENTER to newline in LYgetch() to make Lynx work with IRIX's
   iris-ansi terminfo description, which equates the kent capability with
@@ -98,7 +190,7 @@ Changes since Lynx 2.8.1 release
   using only va_alist in the parameter list - TD
 * correct html expression in LYShowInfo.c of dev.3 which did not allow the temp
   file with the lynx.cfg settings to be accessed from the Configuration
-  Definitions page (patch by Ismael Cordeiro).
+  Definitions page (patch by IC - Ismael Cordeiro).
 * correct "Exiting" message format in cleanup_sig(), which had unexpanded %d
   (reported by BJP) - TD
 * add to config.hin the definitions set by AM_GNU_GETTEXT macro (PG pointed

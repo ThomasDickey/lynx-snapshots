@@ -708,7 +708,7 @@ PUBLIC HTStream* HTSaveToFile ARGS3(
      *	Unix folks don't need to know this, but we'll show it to
      *	them, too. - FM
      */
-    HTUserMsg2(gettext("Content-type: %s"), pres->rep->name);
+    HTUserMsg2(CONTENT_TYPE_MSG, pres->rep->name);
 
     StrAllocCopy(WWW_Download_File,fnam);
 

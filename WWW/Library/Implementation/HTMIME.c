@@ -2112,7 +2112,7 @@ PUBLIC int main ARGS2(
 	fp = stdin;
     } else {
 	if ((fp = fopen(av[i], "r")) == NULL) {
-	    fprintf(stderr, gettext("%s: cannot open %s\n"), av[0], av[i]);
+	    fprintf(stderr, "%s: cannot open %s\n", av[0], av[i]);
 	    exit(1);
 	}
     }

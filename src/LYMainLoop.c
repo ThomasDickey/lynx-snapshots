@@ -1058,6 +1058,8 @@ try_again:
 		start_curses();
 		clear();
 		refresh_screen = TRUE; /* to force a redraw */
+		if (HTMainText)	/* to REALLY force it... - kw */
+		    HText_setStale(HTMainText);
 		recent_sizechange = FALSE;
 		if (user_mode == NOVICE_MODE) {
 		    display_lines = LYlines-4;

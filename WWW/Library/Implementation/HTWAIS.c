@@ -164,7 +164,7 @@ PRIVATE int mosaic_connect_to_server ARGS3(
 	HTAlert (gettext("Could not connect to WAIS server."));
 	return 0;
     } else if (rv == -1) {
-	HTAlert (gettext("Connection interrupted."));
+	HTAlert (CONNECTION_INTERRUPTED);
 	return -1;
     }
 
@@ -949,7 +949,7 @@ PUBLIC int HTLoadWAIS ARGS4(
 	    CTRACE(tfp, "HTWAIS: Slice number %ld\n", count);
 
 	    if (HTCheckForInterrupt()) {
-		HTAlert (gettext("Data transfer interrupted."));
+		HTAlert (TRANSFER_INTERRUPTED);
 		(*target->isa->_abort)(target, NULL);
 #ifdef VMS
 		FREE(type);
@@ -993,7 +993,7 @@ PUBLIC int HTLoadWAIS ARGS4(
 				   false /* true verbose */
 				  );
 	    if (rv == HT_INTERRUPTED) {
-		HTAlert (gettext("Data transfer interrupted."));
+		HTAlert (TRANSFER_INTERRUPTED);
 		return_status = HT_INTERRUPTED;
 		FREE_TARGET;
 		FREE(type);

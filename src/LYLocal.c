@@ -238,12 +238,12 @@ struct dired_menu {
 
 PRIVATE BOOLEAN ok_stat ARGS2(char *, name, struct stat*, sb)
 {
-    char tmpbuf[LY_MAXPATH+80];
-
     CTRACE(tfp, "testing ok_stat(%s)\n", name);
     if (stat(name, sb) < 0) {
-	sprintf(tmpbuf, gettext("Unable to get status of '%s'."), name);
+	char *tmpbuf = 0;
+	HTSprintf(&tmpbuf, gettext("Unable to get status of '%s'."), name);
 	HTAlert(tmpbuf);
+	FREE(tmpbuf);
 	return FALSE;
     }
     return TRUE;
@@ -252,12 +252,12 @@ PRIVATE BOOLEAN ok_stat ARGS2(char *, name, struct stat*, sb)
 #ifdef HAVE_LSTAT
 PRIVATE BOOLEAN ok_lstat ARGS2(char *, name, struct stat*, sb)
 {
-    char tmpbuf[LY_MAXPATH+80];
-
     CTRACE(tfp, "testing ok_lstat(%s)\n", name);
     if (lstat(name, sb) < 0) {
-	sprintf(tmpbuf, gettext("Unable to get status of '%s'."), name);
+	char *tmpbuf = 0;
+	HTSprintf(&tmpbuf, gettext("Unable to get status of '%s'."), name);
 	HTAlert(tmpbuf);
+	FREE(tmpbuf);
 	return FALSE;
     }
     return TRUE;
@@ -297,8 +297,9 @@ PRIVATE BOOLEAN ok_localname ARGS2(char*, dst, char*, src)
 PRIVATE BOOLEAN remove_tagged NOARGS
 {
     int c, ans;
-    char *cp, *tp;
-    char tmpbuf[1024];
+    BOOL will_clear = TRUE;
+    char *cp;
+    char *tmpbuf = NULL;
     char *testpath = NULL;
     struct stat dir_info;
     int count;
@@ -316,33 +317,35 @@ PRIVATE BOOLEAN remove_tagged NOARGS
     tag = tagged;
     while (ans == 'Y' && (cp = (char *)HTList_nextObject(tag)) != NULL) {
 	if (is_url(cp) == FILE_URL_TYPE) { /* unnecessary check */
-	    tp = HTfullURL_toFile(cp);
-	    StrAllocCopy(testpath, tp);
-	    free(tp);
-
+	    testpath = HTfullURL_toFile(cp);
 	    LYTrimPathSep(testpath);
+	    will_clear = TRUE;
 
 	    /*
 	     *	Check the current status of the path to be deleted.
 	     */
 	    if (!ok_stat(testpath, &dir_info)) {
-		return count;
+		will_clear = FALSE;
+		break;
 	    } else {
 		args[0] = "rm";
 		args[1] = "-rf";
 		args[2] = testpath;
 		args[3] = (char *) 0;
-		sprintf(tmpbuf, gettext("remove %s"), testpath);
+		HTSprintf0(&tmpbuf, gettext("remove %s"), testpath);
 		if (LYExecv(RM_PATH, args, tmpbuf) <= 0) {
-		    FREE(testpath);
-		    return ((count == 0) ? -1 : count);
+		    if (count == 0) count = -1;
+		    will_clear = FALSE;
+		    break;
 		}
 		++count;
 	    }
 	}
     }
     FREE(testpath);
-    clear_tags();
+    FREE(tmpbuf);
+    if (will_clear)
+	clear_tags();
     return count;
 }
 
@@ -485,18 +488,19 @@ PRIVATE BOOLEAN modify_tagged ARGS1(
 		while ((cp = (char *)HTList_nextObject(tag)) != NULL) {
 		    cp = HTfullURL_toFile(cp);
 		    StrAllocCopy(srcpath, cp);
-		    free(cp);
 
-		    sprintf(tmpbuf, gettext("move %s to %s"), srcpath, savepath);
+		    HTSprintf0(&cp, gettext("move %s to %s"), srcpath, savepath);
 		    args[0] = "mv";
 		    args[1] = srcpath;
 		    args[2] = savepath;
 		    args[3] = (char *) 0;
-		    if (LYExecv(MV_PATH, args, tmpbuf) <= 0) {
+		    if (LYExecv(MV_PATH, args, cp) <= 0) {
+			FREE(cp);
 			if (count == 0)
 			    count = -1;
 			break;
 		    }
+		    FREE(cp);
 		    ++count;
 		}
 		FREE(srcpath);
@@ -567,19 +571,22 @@ PRIVATE BOOLEAN modify_name ARGS1(
 	     *	Make sure the destination does not already exist.
 	     */
 	    if (stat(newpath, &dir_info) == -1) {
+		char *msg = 0;
 		if (errno != ENOENT) {
-		    sprintf(tmpbuf,
+		    HTSprintf(&msg,
 			    gettext("Unable to determine status of '%s'."), newpath);
-		    HTAlert(tmpbuf);
+		    HTAlert(msg);
+		    FREE(msg);
 		} else {
-		    sprintf(tmpbuf, gettext("move %s to %s"), savepath, newpath);
+		    int code;
+		    HTSprintf(&msg, gettext("move %s to %s"), savepath, newpath);
 		    args[0] = "mv";
 		    args[1] = savepath;
 		    args[2] = newpath;
 		    args[3] = (char *) 0;
-		    if (LYExecv(MV_PATH, args, tmpbuf) <= 0)
-			return (-1);
-		    return 1;
+		    code = (LYExecv(MV_PATH, args, msg) <= 0) ? -1 : 1;
+		    FREE(msg);
+		    return code;
 		}
 	    } else if (S_ISDIR(dir_info.st_mode)) {
 		HTAlert(gettext("There is already a directory with that name! Request ignored."));
@@ -680,14 +687,16 @@ PRIVATE BOOLEAN modify_location ARGS1(
 	    return 0;
 	}
 	if (dir_info.st_uid == owner) {
-	    sprintf(tmpbuf,gettext("move %s to %s"),savepath,newpath);
+	    int code;
+	    char *msg = 0;
+	    HTSprintf(&msg,gettext("move %s to %s"),savepath,newpath);
 	    args[0] = "mv";
 	    args[1] = savepath;
 	    args[2] = newpath;
 	    args[3] = (char *) 0;
-	    if (LYExecv(MV_PATH, args, tmpbuf) <= 0)
-		return (-1);
-	    return 1;
+	    code = (LYExecv(MV_PATH, args, msg) <= 0) ? -1 : 1;
+	    FREE(msg);
+	    return code;
 	} else {
 	    HTAlert(gettext("Destination has different owner! Request denied."));
 	    return 0;
@@ -803,19 +812,22 @@ PRIVATE BOOLEAN create_file ARGS1(
 	 *  Make sure the target does not already exist
 	 */
 	if (stat(testpath, &dir_info) == -1) {
+	    int code;
+	    char *msg = 0;
 	    if (errno != ENOENT) {
-		sprintf(tmpbuf,
+		HTSprintf(&msg,
 			gettext("Unable to determine status of '%s'."), testpath);
-		HTAlert(tmpbuf);
-		return 0;
+		HTAlert(msg);
+		code = 0;
+	    } else {
+		HTSprintf(&msg,gettext("create %s"),testpath);
+		args[0] = "touch";
+		args[1] = testpath;
+		args[2] = (char *) 0;
+		code = (LYExecv(TOUCH_PATH, args, msg) <= 0) ? -1 : 1;
 	    }
-	    sprintf(tmpbuf,gettext("create %s"),testpath);
-	    args[0] = "touch";
-	    args[1] = testpath;
-	    args[2] = (char *) 0;
-	    if (LYExecv(TOUCH_PATH, args, tmpbuf) <= 0)
-		return (-1);
-	    return 1;
+	    FREE(msg);
+	    return code;
 	} else if (S_ISDIR(dir_info.st_mode)) {
 	    HTAlert(gettext("There is already a directory with that name! Request ignored."));
 	} else if (S_ISREG(dir_info.st_mode)) {
@@ -860,19 +872,22 @@ PRIVATE BOOLEAN create_directory ARGS1(
 	 *  Make sure the target does not already exist.
 	 */
 	if (stat(testpath, &dir_info) == -1) {
+	    int code;
+	    char *msg = 0;
 	    if (errno != ENOENT) {
-		sprintf(tmpbuf,
-			gettext("Unable to determine status of '%s'."), testpath);
-		HTAlert(tmpbuf);
-		return 0;
+		HTSprintf(&msg,
+			  gettext("Unable to determine status of '%s'."), testpath);
+		HTAlert(msg);
+		code = 0;
+	    } else {
+		HTSprintf(&msg,"make directory %s",testpath);
+		args[0] = "mkdir";
+		args[1] = testpath;
+		args[2] = (char *) 0;
+		code = (LYExecv(MKDIR_PATH, args, msg) <= 0) ? -1 : 1;
 	    }
-	    sprintf(tmpbuf,"make directory %s",testpath);
-	    args[0] = "mkdir";
-	    args[1] = testpath;
-	    args[2] = (char *) 0;
-	    if (LYExecv(MKDIR_PATH, args, tmpbuf) <= 0)
-		return (-1);
-	    return 1;
+	    FREE(msg);
+	    return code;
 	} else if (S_ISDIR(dir_info.st_mode)) {
 	    HTAlert(gettext("There is already a directory with that name! Request ignored."));
 	} else if (S_ISREG(dir_info.st_mode)) {
@@ -918,8 +933,9 @@ PRIVATE BOOLEAN remove_single ARGS1(
 	char *, 	testpath)
 {
     int c;
+    int code = 0;
     char *cp;
-    char tmpbuf[1024];
+    char *tmpbuf = 0;
     struct stat dir_info;
     char *args[5];
 
@@ -939,45 +955,45 @@ PRIVATE BOOLEAN remove_single ARGS1(
 	/*** This strlen stuff will probably screw up intl translations /jes ***/
 	/*** Course, it's probably broken for screen sizes other 80, too     ***/
 	if (strlen(cp) < 37) {
-	    sprintf(tmpbuf,
-		    gettext("Remove '%s' and all of its contents (y or n): "), cp);
+	    HTSprintf0(&tmpbuf,
+		       gettext("Remove '%s' and all of its contents (y or n): "), cp);
 	} else {
-	    sprintf(tmpbuf,
-		    gettext("Remove directory and all of its contents (y or n): "));
+	    HTSprintf0(&tmpbuf,
+		       gettext("Remove directory and all of its contents (y or n): "));
 	}
     } else if (S_ISREG(dir_info.st_mode)) {
 	if (strlen(cp) < 60) {
-	    sprintf(tmpbuf, gettext("Remove file '%s' (y or n): "), cp);
+	    HTSprintf0(&tmpbuf, gettext("Remove file '%s' (y or n): "), cp);
 	} else {
-	    sprintf(tmpbuf, gettext("Remove file (y or n): "));
+	    HTSprintf0(&tmpbuf, gettext("Remove file (y or n): "));
 	}
 #ifdef S_IFLNK
     } else if (S_ISLNK(dir_info.st_mode)) {
 	if (strlen(cp) < 50) {
-	    sprintf(tmpbuf, gettext("Remove symbolic link '%s' (y or n): "), cp);
+	    HTSprintf0(&tmpbuf, gettext("Remove symbolic link '%s' (y or n): "), cp);
 	} else {
-	    sprintf(tmpbuf, gettext("Remove symbolic link (y or n): "));
+	    HTSprintf0(&tmpbuf, gettext("Remove symbolic link (y or n): "));
 	}
 #endif
     } else {
-	sprintf(tmpbuf, gettext("Unable to determine status of '%s'."), testpath);
+	HTSprintf0(&tmpbuf, gettext("Unable to determine status of '%s'."), testpath);
 	HTAlert(tmpbuf);
+	FREE(tmpbuf);
 	return 0;
     }
     _statusline(tmpbuf);
 
     c = LYgetch();
     if (TOUPPER(c) == 'Y') {
-	sprintf(tmpbuf,"remove %s",testpath);
+	HTSprintf0(&tmpbuf,"remove %s",testpath);
 	args[0] = "rm";
 	args[1] = "-rf";
 	args[2] = testpath;
 	args[3] = (char *) 0;
-	if (LYExecv(RM_PATH, args, tmpbuf) <= 0)
-	    return (-1);
-	return 1;
+	code = (LYExecv(RM_PATH, args, tmpbuf) <= 0) ? -1 : 1;
     }
-    return 0;
+    FREE(tmpbuf);
+    return code;
 }
 
 /*
@@ -1056,7 +1072,7 @@ PRIVATE BOOLEAN permit_location ARGS3(
 #else
     static char tempfile[LY_MAXPATH] = "\0";
     char *cp;
-    char tmpbuf[LINESIZE];
+    char *tmpbuf = NULL;
     char tmpdst[LY_MAXPATH];
     struct stat dir_info;
 
@@ -1101,7 +1117,7 @@ PRIVATE BOOLEAN permit_location ARGS3(
 
 	fprintf(fp0, "<Html><Head>\n<Title>%s</Title>\n</Head>\n<Body>\n",
 		PERMIT_OPTIONS_TITLE);
-	fprintf(fp0,gettext("<H1>%s%s</H1>\n"), PERMISSIONS_SEGMENT, user_filename);
+      fprintf(fp0,"<H1>%s%s</H1>\n", PERMISSIONS_SEGMENT, user_filename);
 	{   /*
 	     *	Prevent filenames which include '#' or '?' from messing it up.
 	     */
@@ -1160,8 +1176,8 @@ PRIVATE BOOLEAN permit_location ARGS3(
 		(dir_info.st_mode & S_IXOTH) ? "checked" : "",
 		S_ISDIR(dir_info.st_mode) ? "Search" : "Execute");
 
-	fprintf(fp0, gettext(
-"<Br>\n<Li><Input Type=\"submit\" Value=\"Submit\">  %s %s %s.\n</Ol>\n</Form>\n"),
+      fprintf(fp0,
+"<Br>\n<Li><Input Type=\"submit\" Value=\"Submit\">  %s %s %s.\n</Ol>\n</Form>\n",
 		gettext("form to permit"),
 		S_ISDIR(dir_info.st_mode) ? "directory" : "file",
 		user_filename);
@@ -1275,15 +1291,17 @@ PRIVATE BOOLEAN permit_location ARGS3(
 	/*
 	 *  Call chmod().
 	 */
-	sprintf(tmpbuf, "chmod %.4o %s", (unsigned int)new_mode, destpath);
+	HTSprintf(&tmpbuf, "chmod %.4o %s", (unsigned int)new_mode, destpath);
 	sprintf(amode, "%.4o", (unsigned int)new_mode);
 	args[0] = "chmod";
 	args[1] = amode;
 	args[2] = destpath;
 	args[3] = (char *) 0;
 	if (LYExecv(CHMOD_PATH, args, tmpbuf) <= 0) {
+	    FREE(tmpbuf);
 	    return (-1);
 	}
+	FREE(tmpbuf);
 #endif /* UNIX */
 	LYforce_no_cache = TRUE;	/* Force update of dired listing. */
 	return 1;
@@ -1353,14 +1371,17 @@ PUBLIC void showtags ARGS1(
  *  about not escaping parsing '#' "the URL way" built into HTParse, but that
  *  doesn't look like a clean way.)
  */
+#ifdef VMS
+    extern BOOLEAN HadVMSInterrupt;
+#endif /* VMS */
 PUBLIC int local_dired ARGS1(
 	document *,	doc)
 {
     char *line_url;    /* will point to doc's address, which is a URL */
     char *line = NULL; /* same as line_url, but HTUnEscaped, will be alloced */
     char *cp, *tp, *bp;
-    char tmpbuf[256];
-    char buffer[512];
+    char *tmpbuf = NULL;
+    char *buffer = NULL;
 
     line_url = doc->address;
     CTRACE(tfp, "local_dired: called for <%s>.\n",
@@ -1437,16 +1458,15 @@ PUBLIC int local_dired ARGS1(
 	 *  Construct the appropriate system command taking care to
 	 *  escape all path references to avoid spoofing the shell.
 	 */
-	*buffer = '\0';
 	if (!strncmp(line, "LYNXDIRED://DECOMPRESS", 22)) {
 	    tp = quote_pathname(line + 22);
-	    sprintf(buffer,"%s %s", UNCOMPRESS_PATH, tp);
+	    HTSprintf0(&buffer,"%s %s", UNCOMPRESS_PATH, tp);
 	    FREE(tp);
 
 #if defined(OK_UUDECODE) && !defined(ARCHIVE_ONLY)
 	} else if (!strncmp(line, "LYNXDIRED://UUDECODE", 20)) {
 	    tp = quote_pathname(line + 20);
-	    sprintf(buffer,"%s %s", UUDECODE_PATH, tp);
+	    HTSprintf0(&buffer,"%s %s", UUDECODE_PATH, tp);
 	    HTAlert(gettext("Warning! UUDecoded file will exist in the directory you started Lynx."));
 	    FREE(tp);
 #endif /* OK_UUDECODE && !ARCHIVE_ONLY */
@@ -1458,8 +1478,8 @@ PUBLIC int local_dired ARGS1(
 	    tp = quote_pathname(line+20);
 	    *cp++ = '\0';
 	    cp = quote_pathname(line + 20);
-	    sprintf(buffer, "%s -qdc %s | (cd %s; %s -xf -)",
-			    GZIP_PATH, tp, cp, TAR_PATH);
+	    HTSprintf0(&buffer, "%s -qdc %s | (cd %s; %s -xf -)",
+				GZIP_PATH, tp, cp, TAR_PATH);
 	    FREE(cp);
 	    FREE(tp);
 #  endif /* OK_GZIP */
@@ -1468,8 +1488,8 @@ PUBLIC int local_dired ARGS1(
 	    tp = quote_pathname(line + 19);
 	    *cp++ = '\0';
 	    cp = quote_pathname(line + 19);
-	    sprintf(buffer, "%s %s | (cd %s; %s -xf -)",
-			    ZCAT_PATH, tp, cp, TAR_PATH);
+	    HTSprintf0(&buffer, "%s %s | (cd %s; %s -xf -)",
+				ZCAT_PATH, tp, cp, TAR_PATH);
 	    FREE(cp);
 	    FREE(tp);
 
@@ -1477,7 +1497,7 @@ PUBLIC int local_dired ARGS1(
 	    tp = quote_pathname(line + 17);
 	    *cp++ = '\0';
 	    cp = quote_pathname(line + 17);
-	    sprintf(buffer, "cd %s; %s -xf %s", cp, TAR_PATH, tp);
+	    HTSprintf0(&buffer, "cd %s; %s -xf %s", cp, TAR_PATH, tp);
 	    FREE(cp);
 	    FREE(tp);
 # endif /* !ARCHIVE_ONLY */
@@ -1487,8 +1507,8 @@ PUBLIC int local_dired ARGS1(
 	    *cp++ = '\0';
 	    cp = quote_pathname(cp);
 	    tp = quote_pathname(line + 18);
-	    sprintf(buffer, "(cd %s; %s -cf - %s) | %s -qc >%s/%s.tar.gz",
-			    tp, TAR_PATH, cp, GZIP_PATH, tp, cp);
+	    HTSprintf0(&buffer, "(cd %s; %s -cf - %s) | %s -qc >%s/%s.tar.gz",
+				tp, TAR_PATH, cp, GZIP_PATH, tp, cp);
 	    FREE(cp);
 	    FREE(tp);
 # endif /* OK_GZIP */
@@ -1497,8 +1517,8 @@ PUBLIC int local_dired ARGS1(
 	    *cp++ = '\0';
 	    cp = quote_pathname(cp);
 	    tp = quote_pathname(line + 17);
-	    sprintf(buffer, "(cd %s; %s -cf - %s) | %s >%s/%s.tar.Z",
-			    tp, TAR_PATH, cp, COMPRESS_PATH, tp, cp);
+	    HTSprintf0(&buffer, "(cd %s; %s -cf - %s) | %s >%s/%s.tar.Z",
+				tp, TAR_PATH, cp, COMPRESS_PATH, tp, cp);
 	    FREE(cp);
 	    FREE(tp);
 
@@ -1506,7 +1526,7 @@ PUBLIC int local_dired ARGS1(
 	    *cp++ = '\0';
 	    cp = quote_pathname(cp);
 	    tp = quote_pathname(line + 15);
-	    sprintf(buffer, "(cd %s; %s -cf %s.tar %s)",
+	    HTSprintf0(&buffer, "(cd %s; %s -cf %s.tar %s)",
 			    tp, TAR_PATH, cp, cp);
 	    FREE(cp);
 	    FREE(tp);
@@ -1515,12 +1535,12 @@ PUBLIC int local_dired ARGS1(
 #ifdef OK_GZIP
 	} else if (!strncmp(line, "LYNXDIRED://GZIP", 16)) {
 	    tp = quote_pathname(line + 16);
-	    sprintf(buffer, "%s -q %s", GZIP_PATH, tp);
+	    HTSprintf0(&buffer, "%s -q %s", GZIP_PATH, tp);
 	    FREE(tp);
 #ifndef ARCHIVE_ONLY
 	} else if (!strncmp(line, "LYNXDIRED://UNGZIP", 18)) {
 	    tp = quote_pathname(line + 18);
-	    sprintf(buffer, "%s -d %s", GZIP_PATH, tp);
+	    HTSprintf0(&buffer, "%s -d %s", GZIP_PATH, tp);
 	    FREE(tp);
 #endif /* !ARCHIVE_ONLY */
 #endif /* OK_GZIP */
@@ -1531,7 +1551,7 @@ PUBLIC int local_dired ARGS1(
 	    *cp++ = '\0';
 	    bp = quote_pathname(cp);
 	    cp = quote_pathname(line + 15);
-	    sprintf(buffer, "cd %s; %s -rq %s.zip %s", cp, ZIP_PATH, tp, bp);
+	    HTSprintf0(&buffer, "cd %s; %s -rq %s.zip %s", cp, ZIP_PATH, tp, bp);
 	    FREE(cp);
 	    FREE(bp);
 	    FREE(tp);
@@ -1540,7 +1560,7 @@ PUBLIC int local_dired ARGS1(
 	    tp = quote_pathname(line + 17);
 	    *cp = '\0';
 	    cp = quote_pathname(line + 17);
-	    sprintf(buffer, "cd %s; %s -q %s", cp, UNZIP_PATH, tp);
+	    HTSprintf0(&buffer, "cd %s; %s -q %s", cp, UNZIP_PATH, tp);
 	    FREE(cp);
 	    FREE(tp);
 # endif /* !ARCHIVE_ONLY */
@@ -1548,23 +1568,22 @@ PUBLIC int local_dired ARGS1(
 
 	} else if (!strncmp(line, "LYNXDIRED://COMPRESS", 20)) {
 	    tp = quote_pathname(line + 20);
-	    sprintf(buffer, "%s %s", COMPRESS_PATH, tp);
+	    HTSprintf0(&buffer, "%s %s", COMPRESS_PATH, tp);
 	    FREE(tp);
 	}
 
-	if (strlen(buffer)) {
+	if (buffer != 0) {
 	    if (strlen(buffer) < 60) {
-		sprintf(tmpbuf, gettext("Executing %s "), buffer);
+		HTSprintf0(&tmpbuf, gettext("Executing %s "), buffer);
 	    } else {
-		sprintf(tmpbuf,
-			gettext("Executing system command. This might take a while."));
+		HTSprintf0(&tmpbuf,
+			   gettext("Executing system command. This might take a while."));
 	    }
 	    _statusline(tmpbuf);
 	    stop_curses();
 	    printf("%s\n", tmpbuf);
 	    LYSystem(buffer);
 #ifdef VMS
-	    extern BOOLEAN HadVMSInterrupt
 	    HadVMSInterrupt = FALSE;
 #endif /* VMS */
 	    start_curses();
@@ -1572,6 +1591,8 @@ PUBLIC int local_dired ARGS1(
 	}
     }
 
+    FREE(tmpbuf);
+    FREE(buffer);
     FREE(line);
     LYpop(doc);
     return 0;
@@ -1777,7 +1798,7 @@ PUBLIC BOOLEAN local_install ARGS3(
 	char *, 	srcpath,
 	char **,	newpath)
 {
-    char tmpbuf[512];
+    char *tmpbuf = NULL;
     static char savepath[512]; /* This will be the link that
 				  is to be installed. */
     struct stat dir_info;
@@ -1819,7 +1840,7 @@ PUBLIC BOOLEAN local_install ARGS3(
     src = n++;
     args[n++] = destpath;
     args[n] = (char *)0;
-    sprintf(tmpbuf, "install %s", destpath);
+    HTSprintf(&tmpbuf, "install %s", destpath);
     tag = tagged;
 
     if (HTList_isEmpty(tagged)) {
@@ -1840,6 +1861,7 @@ PUBLIC BOOLEAN local_install ARGS3(
 	}
 	clear_tags();
     }
+    FREE(tmpbuf);
     HTInfoMsg(gettext("Installation complete"));
     return count;
 }
@@ -2030,7 +2052,7 @@ PRIVATE int LYExecv ARGS3(
     return(0);
 #else
     int rc;
-    char tmpbuf[512];
+    char *tmpbuf = 0;
     pid_t pid;
 #if HAVE_TYPE_UNIONWAIT
     union wait wstatus;
@@ -2046,12 +2068,11 @@ PRIVATE int LYExecv ARGS3(
     }
 
     rc = 1;		/* It will work */
-    tmpbuf[0] = '\0';	/* empty buffer for alert messages */
     stop_curses();
     pid = fork();	/* fork and execute rm */
     switch (pid) {
 	case -1:
-	    sprintf(tmpbuf, gettext("Unable to %s due to system error!"), msg);
+	    HTSprintf(&tmpbuf, gettext("Unable to %s due to system error!"), msg);
 	    rc = 0;
 	    break;	/* don't fall thru! - KW */
 	case 0:  /* child */
@@ -2076,8 +2097,8 @@ PRIVATE int LYExecv ARGS3(
 #endif /* !HAVE_WAITPID */
 	    if (WEXITSTATUS(wstatus) != 0 ||
 		WTERMSIG(wstatus) > 0)	{ /* error return */
-		sprintf(tmpbuf, gettext("Probable failure to %s due to system error!"),
-				msg);
+		HTSprintf(&tmpbuf, gettext("Probable failure to %s due to system error!"),
+				   msg);
 		rc = 0;
 	    }
     }
@@ -2090,8 +2111,9 @@ PRIVATE int LYExecv ARGS3(
 	sleep(AlertSecs);
     }
     start_curses();
-    if (tmpbuf[0]) {
+    if (tmpbuf != 0) {
 	HTAlert(tmpbuf);
+	FREE(tmpbuf);
     }
 
     return(rc);

@@ -24,11 +24,7 @@
 **                it is to be kept.
 */
 #ifndef _WINDOWS
-#ifdef __STDC__
-        extern const char * HTInetString(struct sockaddr_in* mysin);
-#else
-        extern char * HTInetString();
-#endif
+extern CONST char * HTInetString PARAMS((struct sockaddr_in* mysin));
 #endif
 
 

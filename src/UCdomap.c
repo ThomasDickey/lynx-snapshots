@@ -471,7 +471,7 @@ PRIVATE void UC_con_set_trans ARGS3(
 	int,		update_flag)
 {
   int i, j;
-  u16 *p;
+  CONST u16 *p;
   u16 *ptrans;
 
     if (!UC_valid_UC_charset(UC_charset_in_hndl)) {
@@ -533,7 +533,7 @@ PRIVATE char* **uni_pagedir_str[32] =
   NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
 };
 
-PRIVATE u16 * UC_current_unitable = NULL;
+PRIVATE CONST u16 * UC_current_unitable = NULL;
 PRIVATE struct unimapdesc_str *UC_current_unitable_str = NULL;
 
 /*
@@ -558,8 +558,8 @@ static char* **unidefault_pagedir_str[32] =
   NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
 };
 
-PRIVATE u16 * UC_default_unitable = NULL;
-PRIVATE struct unimapdesc_str *UC_default_unitable_str = NULL;
+PRIVATE CONST u16 * UC_default_unitable = 0;
+PRIVATE CONST struct unimapdesc_str *UC_default_unitable_str = 0;
 
 PRIVATE int con_insert_unipair ARGS3(
 	u16,		unicode,
@@ -745,7 +745,7 @@ PRIVATE int con_set_unimap ARGS2(
 PRIVATE void con_set_default_unimap NOARGS
 {
     int i, j;
-    u16 *p;
+    CONST u16 *p;
 
     /*
      *	The default font is always 256 characters.
@@ -784,7 +784,7 @@ PRIVATE int UC_con_set_unimap ARGS2(
 	int,		update_flag)
 {
     int i, j;
-    u16 *p;
+    CONST u16 *p;
 
     if (!UC_valid_UC_charset(UC_charset_out_hndl)) {
 	CTRACE(tfp, "UC_con_set_unimap: Invalid charset handle %d.\n",
@@ -1028,7 +1028,7 @@ PUBLIC int UCTransUniChar ARGS2(
     int rc = 0;
     int UChndl_out;
     int isdefault, trydefault = 0;
-    u16 * ut;
+    CONST u16 * ut;
 
     if ((UChndl_out = LYCharSet_UC[charset_out].UChndl) < 0) {
 	if ((UChndl_out = default_UChndl) < 0)
@@ -1079,7 +1079,7 @@ PUBLIC int UCTransUniCharStr ARGS5(
     int UChndl_out;
     int isdefault, trydefault = 0;
     struct unimapdesc_str * repl;
-    u16 * ut;
+    CONST u16 * ut;
 
     if (buflen < 2)
 	return -13;
@@ -1204,7 +1204,7 @@ PUBLIC int UCTransChar ARGS3(
     int rc = -4;
     int UChndl_in, UChndl_out;
     int isdefault, trydefault = 0;
-    u16 * ut;
+    CONST u16 * ut;
     int upd = 0;
 
 #ifndef UC_NO_SHORTCUTS
@@ -1311,7 +1311,7 @@ PUBLIC int UCReverseTransChar ARGS3(
     int UChndl_in, UChndl_out;
     int isdefault;
     int i_ch = (unsigned char)ch_out;
-    u16 * ut;
+    CONST u16 * ut;
 
 #ifndef UC_NO_SHORTCUTS
     if (charset_in == charset_out)
@@ -1377,7 +1377,7 @@ PUBLIC int UCTransCharStr ARGS6(
     int UChndl_in, UChndl_out;
     int isdefault, trydefault = 0;
     struct unimapdesc_str * repl;
-    u16 * ut;
+    CONST u16 * ut;
     int upd = 0;
 
     if (buflen < 2)
@@ -1690,7 +1690,7 @@ PRIVATE CONST char ** UC_setup_LYCharSets_repl ARGS2(
     CONST char **ISO_Latin1 = LYCharSets[0];
     CONST char **p;
     char **prepl;
-    u16 *pp;
+    CONST u16 *pp;
     CONST char **tp;
     CONST char *s7;
     CONST char *s8;
@@ -1934,8 +1934,8 @@ PRIVATE int UC_Register_with_LYCharSets ARGS4(
 PUBLIC void UC_Charset_Setup ARGS9(
 	CONST char *,		UC_MIMEcharset,
 	CONST char *,		UC_LYNXcharset,
-	u8 *,			unicount,
-	u16 *,			unitable,
+	CONST u8 *,		unicount,
+	CONST u16 *,		unitable,
 	int,			nnuni,
 	struct unimapdesc_str,	replacedesc,
 	int,			lowest_eight,

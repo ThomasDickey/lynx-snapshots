@@ -131,12 +131,10 @@ PRIVATE void MemAllocCopy ARGS3(
 PRIVATE cookie * newCookie NOARGS
 {
     cookie *p = (cookie *)calloc(1, sizeof(cookie));
-    char lynxID[64];
 
     if (p == NULL)
 	outofmem(__FILE__, "newCookie");
-    sprintf(lynxID, "%p", p);
-    StrAllocCopy(p->lynxID, lynxID);
+    HTSprintf0(&(p->lynxID), "%p", p);
     p->port = 80;
     return p;
 }
@@ -350,16 +348,9 @@ PRIVATE void store_cookie ARGS3(
 	     */
 	    ptr = ((hostname + strlen(hostname)) - strlen(co->domain));
 	    if (strchr(hostname, '.') < ptr) {
-		char *msg = calloc(1,
-				   (strlen(co->domain) +
-				    strlen(hostname) +
-				    strlen(INVALID_COOKIE_DOMAIN_CONFIRMATION) +
-				    1));
-
-		if (msg == 0)
-		    outofmem(__FILE__, "store_cookie");
 		if (!LYAcceptAllCookies) {
-		    sprintf(msg,
+		    char *msg = 0;
+		    HTSprintf0(&msg,
 			    INVALID_COOKIE_DOMAIN_CONFIRMATION,
 			    co->domain,
 			    hostname);
@@ -372,8 +363,8 @@ PRIVATE void store_cookie ARGS3(
 			FREE(msg);
 			return;
 		    }
+		    FREE(msg);
 		}
-		FREE(msg);
 	    }
 	}
     }
@@ -624,9 +615,7 @@ PRIVATE char * scan_cookie_sublist ARGS6(
 		     *	the version number goes before the
 		     *	first cookie.
 		     */
-		    char version[16];
-		    sprintf(version, "$Version=\"%d\"; ", co->version);
-		    StrAllocCopy(header, version);
+		    HTSprintf0(&header, "$Version=\"%d\"; ", co->version);
 		    len += strlen(header);
 		}
 	    } else {
@@ -1093,9 +1082,7 @@ PRIVATE void LYProcessSetCookies ARGS6(
 		     *	Don't process a repeat port. - FM
 		     */
 		    if (cur_cookie->PortList == NULL) {
-			char temp[256];
-			sprintf(temp, "%d", port);
-			StrAllocCopy(cur_cookie->PortList, temp);
+			HTSprintf0(&(cur_cookie->PortList), "%d", port);
 			length += strlen(cur_cookie->PortList);
 		    }
 		    known_attr = YES;
@@ -1579,9 +1566,7 @@ PRIVATE void LYProcessSetCookies ARGS6(
 		     *	Don't process a repeat port. - FM
 		     */
 		    if (cur_cookie->PortList == NULL) {
-			char temp[256];
-			sprintf(temp, "%d", port);
-			StrAllocCopy(cur_cookie->PortList, temp);
+			HTSprintf0(&(cur_cookie->PortList), "%d", port);
 			length += strlen(cur_cookie->PortList);
 		    }
 		    known_attr = YES;
@@ -2003,9 +1988,11 @@ PUBLIC void LYLoadCookies ARGS1 (
 
 /* rjp - experimental persistent cookie support */
 PUBLIC void LYStoreCookies ARGS1 (
-	CONST char *,	cookie_file)
+	char *,		cookie_file)
 {
-    char buf[1024];
+#if 0
+    char *buf = NULL;
+#endif
     HTList *dl, *cl;
     domain_entry *de;
     cookie *co;
@@ -2023,7 +2010,7 @@ PUBLIC void LYStoreCookies ARGS1 (
 	return;
     }
 
-    cookie_handle = fopen(cookie_file, "w+");
+    cookie_handle = LYNewTxtFile (cookie_file);
     for (dl = domain_list; dl != NULL; dl = dl->next) {
 	de = dl->object;
 	if (de == NULL)
@@ -2032,20 +2019,23 @@ PUBLIC void LYStoreCookies ARGS1 (
 	     */
 	    continue;
 
+#if 0
 	switch (de->bv) {
 	case (ACCEPT_ALWAYS):
-	    sprintf(buf, COOKIES_ALWAYS_ALLOWED);
+	    HTSprintf0(&buf, COOKIES_ALWAYS_ALLOWED);
 	    break;
 	case (REJECT_ALWAYS):
-	    sprintf(buf, COOKIES_NEVER_ALLOWED);
+	    HTSprintf0(&buf, COOKIES_NEVER_ALLOWED);
 	    break;
 	case (QUERY_USER):
-	    sprintf(buf, COOKIES_ALLOWED_VIA_PROMPT);
+	    HTSprintf0(&buf, COOKIES_ALLOWED_VIA_PROMPT);
 	    break;
 	case (FROM_FILE):
-	    sprintf(buf, gettext("(From Cookie Jar)"));
+	    HTSprintf0(&buf, gettext("(From Cookie Jar)"));
 	    break;
 	}
+	/* FIXME: buf unused */
+#endif
 
 	/*
 	 *  Show the domain's cookies. - FM
@@ -2097,7 +2087,7 @@ PRIVATE int LYHandleCookies ARGS4 (
 {
     HTFormat format_in = WWW_HTML;
     HTStream *target = NULL;
-    char buf[1024];
+    char *buf = NULL;
     char *domain = NULL;
     char *lynxID = NULL;
     HTList *dl, *cl, *next;
@@ -2352,9 +2342,10 @@ Delete_all_cookies_in_domain:
 			   format_out,
 			   sink, anAnchor);
     if (!target || target == NULL) {
-	sprintf(buf, CANNOT_CONVERT_I_TO_O,
+	HTSprintf0(&buf, CANNOT_CONVERT_I_TO_O,
 		HTAtom_name(format_in), HTAtom_name(format_out));
 	HTAlert(buf);
+	FREE(buf);
 	return(HT_NOT_LOADED);
     }
 
@@ -2362,21 +2353,21 @@ Delete_all_cookies_in_domain:
      *	Load HTML strings into buf and pass buf
      *	to the target for parsing and rendering. - FM
      */
-    sprintf(buf, "<HEAD>\n<TITLE>%s</title>\n</HEAD>\n<BODY>\n",
+    HTSprintf0(&buf, "<HEAD>\n<TITLE>%s</title>\n</HEAD>\n<BODY>\n",
 		 COOKIE_JAR_TITLE);
     (*target->isa->put_block)(target, buf, strlen(buf));
-    sprintf(buf, "<h1>%s (%s)%s<a href=\"%s%s\">%s</a></h1>\n",
+    HTSprintf0(&buf, "<h1>%s (%s)%s<a href=\"%s%s\">%s</a></h1>\n",
 	LYNX_NAME, LYNX_VERSION,
         HELP_ON_SEGMENT,
 	helpfilepath, COOKIE_JAR_HELP, COOKIE_JAR_TITLE);
     (*target->isa->put_block)(target, buf, strlen(buf));
 
-    sprintf(buf, "<NOTE>%s\n", ACTIVATE_TO_GOBBLE);
+    HTSprintf0(&buf, "<NOTE>%s\n", ACTIVATE_TO_GOBBLE);
     (*target->isa->put_block)(target, buf, strlen(buf));
-    sprintf(buf, "%s</NOTE>\n", OR_CHANGE_ALLOW);
+    HTSprintf0(&buf, "%s</NOTE>\n", OR_CHANGE_ALLOW);
     (*target->isa->put_block)(target, buf, strlen(buf));
 
-    sprintf(buf, "<DL COMPACT>\n");
+    HTSprintf0(&buf, "<DL COMPACT>\n");
     (*target->isa->put_block)(target, buf, strlen(buf));
     for (dl = domain_list; dl != NULL; dl = dl->next) {
 	de = dl->object;
@@ -2389,25 +2380,25 @@ Delete_all_cookies_in_domain:
 	/*
 	 *  Show the domain link and 'allow' setting. - FM
 	 */
-	sprintf(buf, "<DT>%s<DD><A HREF=\"LYNXCOOKIE://%s/\">Domain=%s</A>\n",
+	HTSprintf0(&buf, "<DT>%s<DD><A HREF=\"LYNXCOOKIE://%s/\">Domain=%s</A>\n",
 		      de->domain, de->domain, de->domain);
 	(*target->isa->put_block)(target, buf, strlen(buf));
 	switch (de->bv) {
 	    case (ACCEPT_ALWAYS):
-		sprintf(buf, COOKIES_ALWAYS_ALLOWED);
+		HTSprintf0(&buf, COOKIES_ALWAYS_ALLOWED);
 		break;
 	    case (REJECT_ALWAYS):
-		sprintf(buf, COOKIES_NEVER_ALLOWED);
+		HTSprintf0(&buf, COOKIES_NEVER_ALLOWED);
 		break;
 	    case (QUERY_USER):
-		sprintf(buf, COOKIES_ALLOWED_VIA_PROMPT);
+		HTSprintf0(&buf, COOKIES_ALLOWED_VIA_PROMPT);
 		break;
 	    case (FROM_FILE):
-		sprintf(buf, COOKIES_READ_FROM_FILE);
+		HTSprintf0(&buf, COOKIES_READ_FROM_FILE);
 		break;
 	}
 	(*target->isa->put_block)(target, buf, strlen(buf));
-	sprintf(buf, "\n");
+	HTSprintf0(&buf, "\n");
 	(*target->isa->put_block)(target, buf, strlen(buf));
 
 	/*
@@ -2435,7 +2426,7 @@ Delete_all_cookies_in_domain:
 	    } else {
 		StrAllocCopy(value, NO_VALUE);
 	    }
-	    sprintf(buf, "<DD><A HREF=\"LYNXCOOKIE://%s/%s\">%s=%s</A>\n",
+	    HTSprintf0(&buf, "<DD><A HREF=\"LYNXCOOKIE://%s/%s\">%s=%s</A>\n",
 			 de->domain, co->lynxID, name, value);
 	    FREE(name);
 	    FREE(value);
@@ -2450,7 +2441,7 @@ Delete_all_cookies_in_domain:
 	    } else {
 		StrAllocCopy(path, "/");
 	    }
-	    sprintf(buf, "<DD>Path=%s\n<DD>Port: %d Secure: %s Discard: %s\n",
+	    HTSprintf0(&buf, "<DD>Path=%s\n<DD>Port: %d Secure: %s Discard: %s\n",
 			 path, co->port,
 			 ((co->flags & COOKIE_FLAG_SECURE) ? "YES" : "NO"),
 			 ((co->flags & COOKIE_FLAG_DISCARD) ? "YES" : "NO"));
@@ -2461,7 +2452,7 @@ Delete_all_cookies_in_domain:
 	     *	Show the list of acceptable ports, if present. - FM
 	     */
 	    if (co->PortList) {
-		sprintf(buf, "<DD>PortList=\"%s\"\n", co->PortList);
+		HTSprintf0(&buf, "<DD>PortList=\"%s\"\n", co->PortList);
 		(*target->isa->put_block)(target, buf, strlen(buf));
 	    }
 
@@ -2473,7 +2464,7 @@ Delete_all_cookies_in_domain:
 		LYEntify(&Address, FALSE);
 		StrAllocCopy(Title, co->commentURL);
 		LYEntify(&Title, TRUE);
-		sprintf(buf,
+		HTSprintf0(&buf,
 			"<DD>CommentURL: <A href=\"%s\">%s</A>\n",
 			Address,
 			Title);
@@ -2488,7 +2479,7 @@ Delete_all_cookies_in_domain:
 	    if (co->comment) {
 		StrAllocCopy(comment, co->comment);
 		LYEntify(&comment, TRUE);
-		sprintf(buf, "<DD>Comment: %s\n", comment);
+		HTSprintf0(&buf, "<DD>Comment: %s\n", comment);
 		FREE(comment);
 		(*target->isa->put_block)(target, buf, strlen(buf));
 	    }
@@ -2496,7 +2487,7 @@ Delete_all_cookies_in_domain:
 	    /*
 	     *	Show the Maximum Gobble Date. - FM
 	     */
-	    sprintf(buf, "<DD><EM>%s</EM> %s%s",
+	    HTSprintf0(&buf, "<DD><EM>%s</EM> %s%s",
 	    		 gettext("Maximum Gobble Date:"),
 			 ((co->expires > 0 &&
 			   !(co->flags & COOKIE_FLAG_DISCARD))
@@ -2508,10 +2499,10 @@ Delete_all_cookies_in_domain:
 					 "" : "\n"));
 	    (*target->isa->put_block)(target, buf, strlen(buf));
 	}
-	sprintf(buf, "</DT>\n");
+	HTSprintf0(&buf, "</DT>\n");
 	(*target->isa->put_block)(target, buf, strlen(buf));
     }
-    sprintf(buf, "</DL>\n</BODY>\n");
+    HTSprintf0(&buf, "</DL>\n</BODY>\n");
     (*target->isa->put_block)(target, buf, strlen(buf));
 
     /*
@@ -2519,6 +2510,7 @@ Delete_all_cookies_in_domain:
      *	Cookie Jar Page, and report a successful load. - FM
      */
     (*target->isa->_free)(target);
+    FREE(buf);
     return(HT_LOADED);
 }
 

@@ -1,6 +1,5 @@
 #include <HTUtils.h>
 #include <HTCJK.h>
-#include <LYCurses.h>
 #include <LYUtils.h>
 #include <LYStrings.h>
 #include <LYGlobalDefs.h>
@@ -39,13 +38,123 @@ extern HTCJKlang HTCJK;
 /* The number of the link selected w/ the mouse (-1 if none) */
 static int mouse_link = -1;
 
+static int have_levent;
+
+#ifdef NCURSES_MOUSE_VERSION
+static MEVENT levent;
+#endif
+
+/* Return the value of mouse_link */
+PUBLIC int peek_mouse_levent NOARGS
+{
+#ifdef NCURSES_MOUSE_VERSION
+    if (have_levent) {
+	ungetmouse(&levent);
+	return 1;
+    }
+#endif
+    return 0;
+}
+
 /* Return the value of mouse_link, erasing it */
 PUBLIC int get_mouse_link NOARGS
 {
-  int t;
-  t=mouse_link;
-  mouse_link = -1;
-  return t;
+    int t;
+    t = mouse_link;
+    mouse_link = -1;
+    if (t < 0)
+	t = -1;			/* Backward compatibility. */
+    return t;
+}
+
+/* Return the value of mouse_link */
+PUBLIC int peek_mouse_link NOARGS
+{
+    return mouse_link;
+}
+
+PUBLIC int fancy_mouse ARGS3(
+    WINDOW *,	win,
+    int,	row,
+    int *,	position)
+{
+    int cmd = LYK_DO_NOTHING;
+#ifdef NCURSES_MOUSE_VERSION
+#ifndef getbegx
+#define getbegx(win) ((win)->_begx)
+#endif
+#ifndef getbegy
+#define getbegy(win) ((win)->_begy)
+#endif
+    MEVENT	event;
+
+    getmouse(&event);
+    if ((event.bstate & (BUTTON1_CLICKED
+		       | BUTTON1_DOUBLE_CLICKED
+		       | BUTTON1_TRIPLE_CLICKED))
+    && (event.x >= getbegx(win)
+    && (event.x < (getbegx(win) + getmaxx(win))))) {
+	int mypos = event.y - getbegy(win);
+	int delta = mypos - row;
+
+	if (mypos+1 == getmaxy(win)) {
+	    /* At the decorative border: scroll forward */
+	    if (event.bstate & BUTTON1_TRIPLE_CLICKED)
+		cmd = LYK_END;
+	    else if (event.bstate & BUTTON1_DOUBLE_CLICKED)
+		cmd = LYK_NEXT_PAGE;
+	    else
+		cmd = LYK_NEXT_LINK;
+	} else if (mypos >= getmaxy(win)) {
+	    if (event.bstate & (BUTTON1_DOUBLE_CLICKED
+			      | BUTTON1_TRIPLE_CLICKED))
+		cmd = LYK_END;
+	    else
+		cmd = LYK_NEXT_PAGE;
+	} else if (mypos == 0) {
+	    /* At the decorative border: scroll back */
+	    if (event.bstate & BUTTON1_TRIPLE_CLICKED)
+		cmd = LYK_HOME;
+	    else if (event.bstate & BUTTON1_DOUBLE_CLICKED)
+		cmd = LYK_PREV_PAGE;
+	    else
+		cmd = LYK_PREV_LINK;
+	} else if (mypos < 0) {
+	    if (event.bstate & (BUTTON1_DOUBLE_CLICKED
+			      | BUTTON1_TRIPLE_CLICKED))
+		cmd = LYK_HOME;
+	    else
+		cmd = LYK_PREV_PAGE;
+#ifdef KNOW_HOW_TO_TOGGLE
+	} else if (event.bstate & (BUTTON_CTRL)) {
+	    cur_selection += delta;
+	    cmd = LYX_TOGGLE;
+#endif
+	} else if (event.bstate & (BUTTON_ALT | BUTTON_SHIFT | BUTTON_CTRL)) {
+	    /* Probably some unrelated activity, such as selecting some text. 
+	     * Select, but do nothing else.
+	     */
+	    *position += delta;
+	    cmd = -1;
+	} else {
+	    /* No scrolling or overflow checks necessary. */
+	    *position += delta;
+#if 0
+	    /* Immediate action looks reasonable since we have no help
+	     * available for individual options.  Moreover, one can position
+	     * active element with shift-click-1.  (;-)
+	     */
+	    if (!(event.bstate & (BUTTON1_DOUBLE_CLICKED
+				| BUTTON1_TRIPLE_CLICKED)))
+		goto redraw;
+#endif
+	    cmd = LYK_ACTIVATE;
+	}
+    } else if (event.bstate & (BUTTON3_CLICKED | BUTTON3_DOUBLE_CLICKED | BUTTON3_TRIPLE_CLICKED)) {
+	cmd = LYK_QUIT;
+    }
+#endif
+    return cmd;
 }
 
 /* Given X and Y coordinates of a mouse event, set mouse_link to the
@@ -55,7 +164,7 @@ PUBLIC int get_mouse_link NOARGS
 ** link.
 **/
 
-PRIVATE int set_clicked_link ARGS2(int,x,int,y)
+PRIVATE int set_clicked_link ARGS3(int,x,int,y,int,code)
 {
     int left = 6;
     int right = LYcols-6;
@@ -64,21 +173,44 @@ PRIVATE int set_clicked_link ARGS2(int,x,int,y)
     int c = -1;
 
     if (y == (LYlines-1)) {
+	mouse_link = -2;
 	if (x < left) c = LTARROW;
 	else if (x > right) c = '\b';
 	else c = PGDOWN;
     } else if (y == 0) {
+	mouse_link = -2;
 	if (x < left) c = LTARROW;
 	else if (x > right) c = '\b';
 	else c = PGUP;
     } else {
 	/* Loop over the links and see if we can get a match */
 	for (i = 0; i < nlinks; i++) {
+	    int len, lx = links[i].lx, is_text = 0;
+
+	    if (links[i].type == WWW_FORM_LINK_TYPE
+		/* XXXX What else? */
+		&& (links[i].form->type == F_TEXTAREA_TYPE
+		 || links[i].form->type == F_TEXT_TYPE))
+		is_text = 1;
+
+	    if (is_text)
+		len = links[i].form->size;
+	    else
+		len = strlen(links[i].hightext );
+
 	    /* Check the first line of the link */
 	    if ( links[i].hightext != NULL &&
-		links[i].ly == y &&
-		(x - links[i].lx) < (int)strlen(links[i].hightext ) ) {
-		mouse_link = i;
+		links[i].ly == y && (x - lx) < len && (x >= lx)) {
+		int cury, curx;
+
+		if (code != FOR_INPUT
+		    /* Do not pick up the current input field */
+		    || !(LYGetYX(cury,curx),
+			 (cury == y && (curx >= lx) && ((curx - lx) <= len)))) {
+		    if (is_text)
+			have_levent = 1;
+		    mouse_link = i;
+		}
 		break;
 	    }
 	    /* Check the second line */
@@ -324,7 +456,7 @@ PRIVATE int sl_read_mouse_event NOARGS
    if (-1 != sl_parse_mouse_event (&mouse_x, &mouse_y, &button))
      {
 	if (button == 0)  /* left */
-	  return set_clicked_link (mouse_x, mouse_y);
+	  return set_clicked_link (mouse_x, mouse_y, FOR_PANEL);
 
 	if (button == 2)   /* right */
 	  {
@@ -809,6 +941,12 @@ PUBLIC int LYgetch NOARGS
    return keysym;
 }
 
+PUBLIC int LYgetch_for ARGS1(
+	int, 	code)
+{
+    return LYgetch();
+}
+
 #else /* !USE_KEYMAPS */
 
 /*
@@ -818,7 +956,15 @@ PUBLIC int LYgetch NOARGS
 
 PUBLIC int LYgetch NOARGS
 {
+    return LYgetch_for(FOR_PANEL);
+}
+
+PUBLIC int LYgetch_for ARGS1(
+	int, 	code)
+{
     int a, b, c, d = -1;
+
+    have_levent = 0;
 
 #if defined(IGNORE_CTRL_C) || defined(USE_GETCHAR) || !defined(NCURSES)
 re_read:
@@ -1105,7 +1251,9 @@ re_read:
 #endif /* KEY_DC */
 #ifdef NCURSES_MOUSE_VERSION
 	case KEY_MOUSE:
-	    {
+	    if (code == FOR_CHOICE) {
+		c = MOUSE_KEY;		/* Will be processed by the caller */
+	    } else {
 #ifndef DOSPATH
 		MEVENT event;
 		int err;
@@ -1113,17 +1261,31 @@ re_read:
 		c = -1;
 		mouse_link = -1;
 		err = getmouse(&event);
+		levent = event;		/* Allow setting pos in entry fields */
 		if (event.bstate & BUTTON1_CLICKED) {
-		    c = set_clicked_link(event.x, event.y);
+		    c = set_clicked_link(event.x, event.y, code);
+		} else if (event.bstate & BUTTON1_DOUBLE_CLICKED) {
+		    c = set_clicked_link(event.x, event.y, code);
+		    if (c == PGDOWN)
+			c = END_KEY;
+		    else if (c == PGUP)
+			c = HOME;
+		    else if (c == LTARROW)
+			c = LYReverseKeymap(LYK_MAIN_MENU);
 		} else if (event.bstate & BUTTON3_CLICKED) {
 		    c = LYReverseKeymap (LYK_PREV_DOC);
+		}
+		if (code == FOR_INPUT && mouse_link == -1) {
+		    ungetmouse(&event);	/* Caller will process this. */
+		    getch();		/* ungetmouse puts KEY_MOUSE back */
+		    c = MOUSE_KEY;
 		}
 #else /* pdcurses version */
 		c = -1;
 		mouse_link = -1;
 		request_mouse_pos();
 		if (BUTTON_STATUS(1) & BUTTON_CLICKED) {
-		    c = set_clicked_link(MOUSE_X_POS, MOUSE_Y_POS);
+		    c = set_clicked_link(MOUSE_X_POS, MOUSE_Y_POS, FOR_PANEL);
 		} else if (BUTTON_STATUS(3) & BUTTON_CLICKED) {
 		    c = LYReverseKeymap (LYK_PREV_DOC);
 		}

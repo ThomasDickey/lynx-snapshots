@@ -1420,7 +1420,7 @@ PUBLIC void reply_by_mail ARGS3(
      */
     addstr(ENTER_SUBJECT_LINE);
     addstr(CTRL_U_TO_ERASE);
-    addstr(gettext("Subject: "));
+    addstr(SUBJECT_PROMPT);
     /* Add the default subject. */
     sprintf(user_input, "%.70s%.63s",
 			(subject[0] != '\0') ?

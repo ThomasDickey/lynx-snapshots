@@ -178,6 +178,13 @@ PRIVATE void LYListFmtParse ARGS5(
 		"r-S", "r-s", "rwS", "rws", 0 };
 #define PBIT(a, n, s)  (s) ? psbits[((a) >> (n)) & 0x7] : \
 	pbits[((a) >> (n)) & 0x7]
+#ifdef S_ISVTX
+	static char *ptbits[] = { "--T", "--t", "-wT", "-wt",
+		"r-T", "r-t", "rwT", "rwt", 0 };
+#define PTBIT(a, s)  (s) ? ptbits[(a) & 0x7] : pbits[(a) & 0x7]
+#else
+#define PTBIT(a, s)  (a, 0, 0)
+#endif
 
 	if (lstat(file, &st) < 0)
 		fmtstr = "%a";	/* can't stat so just do anchor */
@@ -294,7 +301,7 @@ PRIVATE void LYListFmtParse ARGS5(
 			sprintf(buf, "%c%s%s%s", type,
 			  PBIT(st.st_mode, 6, st.st_mode & S_ISUID),
 			  PBIT(st.st_mode, 3, st.st_mode & S_ISGID),
-			  PBIT(st.st_mode, 0, 0));
+			  PTBIT(st.st_mode,   st.st_mode & S_ISVTX));
 			sprintf(fmt, "%%%ss", start);
 			sprintf(buf, fmt, buf);
 			break;

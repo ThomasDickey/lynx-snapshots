@@ -183,7 +183,7 @@ PRIVATE int response ARGS5(
 
 	if (interrupted_in_htgetcharacter) {
 	    CTRACE(tfp, "HTFinger: Interrupted in HTGetCharacter, apparently.\n");
-	    _HTProgress (gettext("Connection interrupted."));
+	    _HTProgress (CONNECTION_INTERRUPTED);
 	    goto end_html;
         }
 
@@ -385,7 +385,7 @@ PUBLIC int HTLoadFinger ARGS4(
     if (status == HT_INTERRUPTED) {
         /* Interrupt cleanly */
 	CTRACE(tfp, "HTFinger: Interrupted on connect; recovering cleanly.\n");
-	HTProgress (gettext("Connection interrupted."));
+	HTProgress (CONNECTION_INTERRUPTED);
 	FREE(str);
 	FREE(command);
 	return HT_NOT_LOADED;

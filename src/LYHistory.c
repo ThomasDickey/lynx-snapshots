@@ -385,7 +385,7 @@ PUBLIC int showhistory ARGS1(
     BeginInternalPage(fp0, HISTORY_PAGE_TITLE, HISTORY_PAGE_HELP);
 
     fprintf(fp0, "<pre>\n");
-    fprintf(fp0, gettext("<em>%s</em>\n"), gettext("You selected:"));
+    fprintf(fp0, "<em>%s</em>\n", gettext("You selected:"));
     for (x = nhist-1; x >= 0; x--) {
 	/*
 	 *  The number of the document in the hist stack,

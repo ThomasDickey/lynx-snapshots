@@ -2528,9 +2528,16 @@ redraw:
 #endif /* USE_SLANG  */
 
 	term_options = FALSE;
-	c = LYgetch();
+	c = LYgetch_for(FOR_CHOICE);
 	if (term_options || c == 3 || c == 7) {
 	    cmd = LYK_QUIT;
+#ifndef USE_SLANG
+	} else if (c == MOUSE_KEY) {
+	    if ((cmd = fancy_mouse(form_window, i + 1 + window_offset, &cur_choice)) < 0)
+		goto redraw;
+	    if  (cmd == LYK_ACTIVATE)
+		break;
+#endif
 	} else {
 	    cmd = keymap[c+1];
 	}
@@ -4154,7 +4161,7 @@ PUBLIC int gen_options ARGS1(
     /*
      * File Management Options
      */
-    fprintf(fp0,"\n  <em>%s</em>\n", gettext("File Management Options"));
+    fprintf(fp0,"\n  <em>%s</em>\n", DIRED_MENU_TITLE);
 
     /* FTP sort: SELECT */
     PutLabel(fp0, gettext("FTP sort criteria"));

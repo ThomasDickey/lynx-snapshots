@@ -30,8 +30,6 @@
 #include <HTAccess.h>
 #include <HTAlert.h>
 
-#include <userdefs.h>  /* for TELNET_COMMAND and RLOGIN_COMMAND */
-
 #include <LYStrings.h>
 #include <LYLeaks.h>
 
