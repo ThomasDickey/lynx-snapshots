@@ -41,8 +41,6 @@
 #include <LYShowInfo.h>
 #include <LYLeaks.h>
 
-extern BOOL HTPassHighCtrlRaw;
-
 #if defined(WIN_EX)
 #undef  BUTTON_CTRL
 #define BUTTON_CTRL	0	/* Quick hack */
@@ -328,7 +326,7 @@ PRIVATE void LYAddToCloset ARGS2(RecallType, recall, char*, str)
 	LYRemoveFromCloset(list);
 }
 
-
+#ifdef USE_MOUSE
 PRIVATE int XYdist ARGS5(
     int,	x1,
     int,	y1,
@@ -552,6 +550,7 @@ PRIVATE int set_clicked_link ARGS4(
     }
     return c;
 }
+#endif /* USE_MOUSE */
 
 /*
  *  LYstrncpy() terminates strings with a null byte.
@@ -813,7 +812,7 @@ PRIVATE int sl_read_mouse_event ARGS1(
 	if (button == 0)  /* left */
 	  return set_clicked_link (mouse_x, mouse_y, FOR_PANEL, 1);
 
-        if (button == 1)  /* middle */
+	if (button == 1)  /* middle */
 	  return LYReverseKeymap (LYK_VIEW_BOOKMARK);
 
 	if (button == 2)   /* right */
@@ -5448,9 +5447,9 @@ PUBLIC char * SNACopy ARGS3(
 {
     FREE(*dest);
     if (src) {
-	*dest = typecallocn(char, n + 1);
+	*dest = typeMallocn(char, n + 1);
 	if (*dest == NULL) {
-	    CTRACE((tfp, "Tried to calloc %d bytes\n", n));
+	    CTRACE((tfp, "Tried to malloc %d bytes\n", n));
 	    outofmem(__FILE__, "SNACopy");
 	}
 	strncpy (*dest, src, n);
@@ -5476,7 +5475,7 @@ PUBLIC char * SNACat ARGS3(
 	    strncpy(*dest + length, src, n);
 	    *(*dest + length + n) = '\0'; /* terminate */
 	} else {
-	    *dest = typecallocn(char, n + 1);
+	    *dest = typeMallocn(char, n + 1);
 	    if (*dest == NULL)
 		outofmem(__FILE__, "SNACat");
 	    memcpy(*dest, src, n);

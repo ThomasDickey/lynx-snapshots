@@ -129,8 +129,6 @@ PUBLIC int HTDirReadme = HT_DIR_README_NONE;
 PUBLIC int HTDirReadme = HT_DIR_README_TOP;
 #endif /* DIRED_SUPPORT */
 
-extern BOOL HTPassEightBitRaw;
-
 PRIVATE char *HTMountRoot = "/Net/";		/* Where to find mounts */
 #ifdef VMS
 PRIVATE char *HTCacheRoot = "/WWW$SCRATCH";	/* Where to cache things */
@@ -2035,30 +2033,26 @@ PUBLIC int HTStat ARGS2(
 	struct stat *,	data)
 {
     int result = -1;
-    char *temp_name = NULL;
     size_t len = strlen(filename);
 
     if (len != 0 && LYIsPathSep(filename[len-1])) {
+	char *temp_name = NULL;
 	HTSprintf0(&temp_name, "%s.", filename);
-    } else {
-	temp_name = (char *)filename;
-    }
-#ifdef _WINDOWS
-    /*
-     * Someone claims that stat() doesn't give the proper result for a
-     * directory on Windows.
-     */
-    if (access(temp_name, 0) == 0) {
-	if (stat(temp_name, data) == -1)
-	    data->st_mode = S_IFDIR;
-	result = 0;
-    }
-#else
-    result = stat(temp_name, data);
-#endif
-
-    if (temp_name != filename) {
+	result = HTStat(temp_name, data);
 	FREE(temp_name);
+    } else {
+	result = stat(filename, data);
+#ifdef _WINDOWS
+	/*
+	 * Someone claims that stat() doesn't give the proper result for a
+	 * directory on Windows.
+	 */
+	if (result == -1
+	 && access(filename, 0) == 0) {
+	    data->st_mode = S_IFDIR;
+	    result = 0;
+	}
+#endif
     }
     return result;
 }
@@ -2751,6 +2745,155 @@ PUBLIC int HTLoadFile ARGS4(
 	CTRACE((tfp, "Can't open `%s', errno=%d\n", addr, SOCKET_ERRNO));
 
 	return HTLoadError(sink, 403, FAILED_FILE_UNREADABLE);
+    }
+}
+
+static CONST char *program_paths[pp_Last];
+
+/*
+ * Given a program number, return its path
+ */
+PUBLIC CONST char * HTGetProgramPath ARGS1(
+	ProgramPaths,	code)
+{
+    CONST char *result = NULL;
+    if (code > ppUnknown && code < pp_Last)
+	result = program_paths[code];
+    return result;
+}
+
+/*
+ * Store a program's path
+ */
+PUBLIC void HTSetProgramPath ARGS2(
+	ProgramPaths,	code,
+	CONST char *,	path)
+{
+    if (code > ppUnknown && code < pp_Last) {
+	program_paths[code] = isEmpty(path) ? 0 : path;
+    }
+}
+
+/*
+ * Reset the list of known program paths to the ones that are compiled-in
+ */
+PUBLIC void HTInitProgramPaths NOARGS
+{
+    ProgramPaths code;
+    CONST char *path;
+    CONST char *test;
+
+    for (code = ppUnknown + 1; code < pp_Last; ++code) {
+	switch (code) {
+#ifdef BZIP2_PATH
+	case ppBZIP2:
+	    path = BZIP2_PATH;
+	    break;
+#endif
+#ifdef CHMOD_PATH
+	case ppCHMOD:
+	    path = CHMOD_PATH;
+	    break;
+#endif
+#ifdef COMPRESS_PATH
+	case ppCOMPRESS:
+	    path = COMPRESS_PATH;
+	    break;
+#endif
+#ifdef COPY_PATH
+	case ppCOPY:
+	    path = COPY_PATH;
+	    break;
+#endif
+#ifdef CSWING_PATH
+	case ppCSWING:
+	    path = CSWING_PATH;
+	    break;
+#endif
+#ifdef GZIP_PATH
+	case ppGZIP:
+	    path = GZIP_PATH;
+	    break;
+#endif
+#ifdef INSTALL_PATH
+	case ppINSTALL:
+	    path = INSTALL_PATH;
+	    break;
+#endif
+#ifdef MKDIR_PATH
+	case ppMKDIR:
+	    path = MKDIR_PATH;
+	    break;
+#endif
+#ifdef MV_PATH
+	case ppMV:
+	    path = MV_PATH;
+	    break;
+#endif
+#ifdef RLOGIN_PATH
+	case ppRLOGIN:
+	    path = RLOGIN_PATH;
+	    break;
+#endif
+#ifdef RM_PATH
+	case ppRM:
+	    path = RM_PATH;
+	    break;
+#endif
+#ifdef TAR_PATH
+	case ppTAR:
+	    path = TAR_PATH;
+	    break;
+#endif
+#ifdef TELNET_PATH
+	case ppTELNET:
+	    path = TELNET_PATH;
+	    break;
+#endif
+#ifdef TN3270_PATH
+	case ppTN3270:
+	    path = TN3270_PATH;
+	    break;
+#endif
+#ifdef TOUCH_PATH
+	case ppTOUCH:
+	    path = TOUCH_PATH;
+	    break;
+#endif
+#ifdef UNCOMPRESS_PATH
+	case ppUNCOMPRESS:
+	    path = UNCOMPRESS_PATH;
+	    break;
+#endif
+#ifdef UNZIP_PATH
+	case ppUNZIP:
+	    path = UNZIP_PATH;
+	    break;
+#endif
+#ifdef UUDECODE_PATH
+	case ppUUDECODE:
+	    path = UUDECODE_PATH;
+	    break;
+#endif
+#ifdef ZCAT_PATH
+	case ppZCAT:
+	    path = ZCAT_PATH;
+	    break;
+#endif
+#ifdef ZIP_PATH
+	case ppZIP:
+	    path = ZIP_PATH;
+	    break;
+#endif
+	default:
+	    path = NULL;
+	    break;
+	}
+	test = HTGetProgramPath(code);
+	if (test != NULL && test != path) {
+	    free((char *)test);
+	}
+	HTSetProgramPath(code, path);
     }
 }
 

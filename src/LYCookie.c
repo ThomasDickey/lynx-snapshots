@@ -1931,8 +1931,8 @@ PUBLIC void LYLoadCookies ARGS1 (
 	tok_ptr = buf;
 	tok_out = LYstrsep(&tok_ptr, "\t");
 	for (tok_loop = 0; tok_out && tok_values[tok_loop].s; tok_loop++) {
-	    CTRACE((tfp, "\t%d:%p:%p:[%s]\n",
-		tok_loop, tok_values[tok_loop].s, tok_out, tok_out));
+	    CTRACE((tfp, "\t%d:[%03d]:[%s]\n",
+		tok_loop, tok_out - buf, tok_out));
 	    LYstrncpy(tok_values[tok_loop].s, tok_out, tok_values[tok_loop].n);
 	    /*
 	     * It looks like strtok ignores a leading delimiter,
@@ -2066,7 +2066,8 @@ PUBLIC void LYStoreCookies ARGS1 (
 	    if ((co = (cookie *)cl->object) == NULL)
 		continue;
 
-	    CTRACE((tfp, "LYStoreCookies: %ld cf %ld ", (long) now, (long) co->expires));
+	    CTRACE((tfp, "LYStoreCookies: %ld cf %ld ",
+		   (long) now, (long) co->expires));
 
 	    if ((co->flags & COOKIE_FLAG_DISCARD)) {
 		CTRACE((tfp, "not stored - DISCARD\n"));
@@ -2080,11 +2081,11 @@ PUBLIC void LYStoreCookies ARGS1 (
 	    }
 
 	    fprintf(cookie_handle, "%s\t%s\t%s\t%s\t%ld\t%s\t%s%s%s\n",
-		de->domain,
+		    de->domain,
 		    (de->domain[0] == '.') ? "TRUE" : "FALSE",
 		    co->path,
-		co->flags & COOKIE_FLAG_SECURE ? "TRUE" : "FALSE",
-		(long) co->expires, co->name,
+		    co->flags & COOKIE_FLAG_SECURE ? "TRUE" : "FALSE",
+		    (long) co->expires, co->name,
 		    (co->quoted ? "\"" : ""),
 		    NonNull(co->value),
 		    (co->quoted ? "\"" : ""));

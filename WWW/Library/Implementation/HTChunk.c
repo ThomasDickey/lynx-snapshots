@@ -61,7 +61,7 @@ PUBLIC HTChunk * HTChunkCreate2 ARGS2 (int,grow, size_t, needed)
 	ch->allocated = needed-1 - ((needed-1) % ch->growby)
 	    + ch->growby; /* Round up */
 	CTRACE((tfp, "HTChunkCreate2: requested %d, allocate %d\n",
-	       needed, ch->allocated));
+	       (int) needed, ch->allocated));
 	ch->data = typecallocn(char, ch->allocated);
 	if (!ch->data)
 	    outofmem(__FILE__, "HTChunkCreate2 data");
@@ -249,7 +249,7 @@ PUBLIC void HTChunkTerminate ARGS1 (HTChunk *,ch)
 PUBLIC void HTChunkPuts ARGS2 (HTChunk *,ch, CONST char *,s)
 {
     CONST char * p;
-    for (p=s; *p; p++) {
+    for (p = s; *p; p++) {
 	HTChunkPutc(ch, *p);
 	if (ch->allocated == 0)
 	    return;		/* must have been allocation failure - kw */

@@ -549,11 +549,13 @@ extern int errno;
 #ifdef __DJGPP__
 #undef SELECT
 #define TCP_INCLUDES_DONE
-#define NO_IOCTL
+#undef  IOCTL
+#define IOCTL(s,cmd,arg) ioctlsocket(s,cmd,(char*)(arg))
 #define DECL_ERRNO
 #include <errno.h>
 #include <sys/types.h>
 #include <io.h>
+#include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <tcp.h>

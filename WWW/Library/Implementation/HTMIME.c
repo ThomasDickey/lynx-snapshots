@@ -26,8 +26,6 @@
 #include <LYUtils.h>
 #include <LYLeaks.h>
 
-extern BOOL HTPassEightBitRaw;
-
 /*		MIME Object
 **		-----------
 */
@@ -198,6 +196,16 @@ PRIVATE char *parse_parameter ARGS2(
     }
     result[len] = '\0';
     return result;
+}
+
+PRIVATE BOOL content_is_compressed ARGS1(HTStream *, me)
+{
+    char *encoding = me->anchor->content_encoding;
+
+    return encoding != 0
+        && strcmp(encoding, "8bit") != 0
+	&& strcmp(encoding, "7bit") != 0
+	&& strcmp(encoding, "binary") != 0;
 }
 
 PRIVATE int pumpData ARGS1(HTStream *, me)
@@ -467,9 +475,11 @@ PRIVATE int pumpData ARGS1(HTStream *, me)
     } else {
 	me->state = MIME_IGNORE;	/* What else to do? */
     }
-    if (me->refresh_url != NULL) {
+    if (me->refresh_url != NULL && !content_is_compressed(me)) {
 	char *url = parse_parameter(me->refresh_url, "URL");
 	char *txt = NULL;
+	char *arg = NULL;
+	char *base = "";	/* FIXME: refresh_url may be relative to doc */
 	int num = 0;
 
 	if (url != NULL) {
@@ -479,7 +489,10 @@ PRIVATE int pumpData ARGS1(HTStream *, me)
 	    HTSprintf0(&txt, gettext("Refresh: "));
 	    if (num != 0)
 		HTSprintf(&txt, gettext("%.*s seconds "), num, me->refresh_url);
-	    HTSprintf(&txt, "<a href=\"%s\">%s</a><br>", url, url);
+	    if ((arg = strchr(url, '?')) != NULL)
+		*arg = '\0';
+	    HTSprintf(&txt, "<a href=\"%s%s\">%s</a><br>", base, url, url);
+	    CTRACE((tfp, "URL %s%s\n", base, url));
 	    (me->isa->put_string)(me, txt);
 	    free(url);
 	    free(txt);
@@ -658,20 +671,18 @@ PRIVATE int dispatchField ARGS1(HTStream *, me)
 	LYLowerCase(me->value);
 	StrAllocCopy(me->anchor->content_encoding, me->value);
 	FREE(me->compression_encoding);
-	if (!strcmp(me->value, "8bit") ||
-	    !strcmp(me->value, "7bit") ||
-	    !strcmp(me->value, "binary")) {
-	    /*
-	    **	Some server indicated "8bit", "7bit" or "binary"
-	    **	inappropriately.  We'll ignore it. - FM
-	    */
-	    CTRACE((tfp, "                Ignoring it!\n"));
-	} else {
+	if (content_is_compressed(me)) {
 	    /*
 	    **	Save it to use as a flag for setting
 	    **	up a "www/compressed" target. - FM
 	    */
 	    StrAllocCopy(me->compression_encoding, me->value);
+	} else {
+	    /*
+	    **	Some server indicated "8bit", "7bit" or "binary"
+	    **	inappropriately.  We'll ignore it. - FM
+	    */
+	    CTRACE((tfp, "                Ignoring it!\n"));
 	}
 	break;
     case miCONTENT_FEATURES:

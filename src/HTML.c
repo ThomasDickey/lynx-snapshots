@@ -77,19 +77,13 @@
 #include <HTAccess.h>
 #endif
 
+#include <LYCurses.h>
 #include <LYJustify.h>
 
 #include <LYexit.h>
 #include <LYLeaks.h>
 
 #define STACKLEVEL(me) ((me->stack + MAX_NESTING - 1) - me->sp)
-
-extern BOOL HTPassEightBitRaw;
-
-extern BOOLEAN HT_Is_Gopher_URL;
-
-/* from Curses.h */
-extern int LYcols;
 
 struct _HTStream {
     CONST HTStreamClass *	isa;
@@ -661,7 +655,6 @@ PUBLIC void HTML_write ARGS3(HTStructured *, me, CONST char*, s, int, l)
  *  context an internal link makes no sense (e.g., IMG SRC=).
  */
 
-#ifndef DONT_TRACK_INTERNAL_LINKS
 /* A flag is used to keep track of whether an "URL reference" encountered
    had a real "URL" or not.  In the latter case, it will be marked as
    "internal".	The flag is set before we start messing around with the
@@ -672,14 +665,8 @@ PUBLIC void HTML_write ARGS3(HTStructured *, me, CONST char*, s, int, l)
 
 /* Last argument to pass to HTAnchor_findChildAndLink() calls,
    just an abbreviation. - kw */
-#define INTERN_LT (HTLinkType *)(intern_flag ? LINK_INTERNAL : NULL)
+#define INTERN_LT (HTLinkType *)(intern_flag ? HTInternalLink : NULL)
 
-#else  /* !DONT_TRACK_INTERNAL_LINKS */
-
-#define CHECK_FOR_INTERN(flag,s)  /* do nothing */ ;
-#define INTERN_LT (HTLinkType *)NULL
-
-#endif /* DONT_TRACK_INTERNAL_LINKS */
 
 #ifdef USE_COLOR_STYLE
 # if !OPT_SCN
@@ -3020,82 +3007,87 @@ PRIVATE int HTML_start_element ARGS6(
 		   value[HTML_A_NAME] && *value[HTML_A_NAME]) {
 	    StrAllocCopy(id_string, value[HTML_A_NAME]);
 	}
-	if (id_string) {
+	if (id_string)
 	    TRANSLATE_AND_UNESCAPE_TO_STD(&id_string);
-	    if (*id_string == '\0') {
-		FREE(id_string);
-	    }
-	}
 
 	/*
 	 *  Handle the reference. - FM
 	 */
 	if (present && present[HTML_A_HREF]) {
-#ifndef DONT_TRACK_INTERNAL_LINKS
-	    if (present[HTML_A_ISMAP])
-		intern_flag = FALSE;
-	    else
-		CHECK_FOR_INTERN(intern_flag,value[HTML_A_HREF]);
-#endif
 	    /*
-	     *	Prepare to do housekeeping on the reference. - FM
-	     */
-	    if (!value[HTML_A_HREF] || *value[HTML_A_HREF] == '\0') {
-		StrAllocCopy(href, me->node_anchor->address);
-	    } else if (*value[HTML_A_HREF] == '#') {
-		StrAllocCopy(href, me->node_anchor->address);
-		if (strlen(value[HTML_A_HREF]) > 1) {
-		    StrAllocCat(href, value[HTML_A_HREF]);
-		}
-	    } else {
-		StrAllocCopy(href, value[HTML_A_HREF]);
-	    }
-	    url_type = LYLegitimizeHREF(me, &href, TRUE, TRUE);
-
-	    /*
-	     *	Deal with our ftp gateway kludge. - FM
-	     */
-	    if (!url_type && !strncmp(href, "/foo/..", 7) &&
-		(isFTP_URL(me->node_anchor->address) ||
-		 isFILE_URL(me->node_anchor->address))) {
-		for (i = 0; (href[i] = href[i+7]) != 0; i++)
-		    ;
-	    }
-
-	    /*
-	     *	Set to know we are making the content bold.
+	     * Set to know we are making the content bold.
 	     */
 	    me->inBoldA = TRUE;
 
-	    /*
-	     *	Check whether a base tag is in effect. - FM
-	     */
-	    if ((me->inBASE && *href != '\0' && *href != '#') &&
-		(temp = HTParse(href, me->base_href, PARSE_ALL)) &&
-		*temp != '\0')
-		/*
-		 *  Use reference related to the base.
-		 */
-		StrAllocCopy(href, temp);
-	    FREE(temp);
+	    CHECK_FOR_INTERN(intern_flag,value[HTML_A_HREF]);
+	    if (present[HTML_A_ISMAP]) /*???*/
+		intern_flag = FALSE;
 
-	    /*
-	     *	Check whether to fill in localhost. - FM
-	     */
-	    LYFillLocalFileURL(&href,
-			       ((*href != '\0' && *href != '#' &&
-				 me->inBASE) ?
-			       me->base_href : me->node_anchor->address));
+	    if (intern_flag) {
+		/*** FAST WAY: ***/
+		StrAllocCopy(href, value[HTML_A_HREF]);
+		if (href && *href)
+		    TRANSLATE_AND_UNESCAPE_TO_STD(&href);
+		if (!href || !*href)
+		    StrAllocCopy(href, "#"); /*extreme case*/
+
+	    } else {
+		/*
+		 * Prepare to do housekeeping on the reference.	 - FM
+		 */
+		if (!value[HTML_A_HREF] || *value[HTML_A_HREF] == '\0') {
+		    StrAllocCopy(href, me->node_anchor->address);
+		} else if (*value[HTML_A_HREF] == '#') {
+		    StrAllocCopy(href, me->node_anchor->address);
+		    if (strlen(value[HTML_A_HREF]) > 1) {
+			StrAllocCat(href, value[HTML_A_HREF]);
+		    }
+		} else {
+		    StrAllocCopy(href, value[HTML_A_HREF]);
+		}
+		url_type = LYLegitimizeHREF(me, &href, TRUE, TRUE);
+
+		/*
+		 * Deal with our ftp gateway kludge.  - FM
+		 */
+		if (!url_type && !strncmp(href, "/foo/..", 7) &&
+		      (isFTP_URL(me->node_anchor->address) ||
+		       isFILE_URL(me->node_anchor->address))) {
+		    for (i = 0; (href[i] = href[i+7]) != 0; i++)
+			;
+		}
+
+		/*
+		 * Check whether a base tag is in effect.  - FM
+		 */
+		if ((me->inBASE && *href != '\0' && *href != '#') &&
+		     (temp = HTParse(href, me->base_href, PARSE_ALL)) &&
+		      *temp != '\0')
+		    /*
+		     * Use reference related to the base.
+		     */
+		    StrAllocCopy(href, temp);
+		FREE(temp);
+
+	        /*
+		 * Check whether to fill in localhost.  - FM
+		 */
+		 LYFillLocalFileURL(&href,
+				    ((*href != '\0' && *href != '#' &&
+				     me->inBASE)
+				     ? me->base_href
+				     : me->node_anchor->address));
+	    }
 	} else {
 	    if (bold_name_anchors == TRUE) {
 		me->inBoldA = TRUE;
 	    }
 	}
-#ifndef DONT_TRACK_INTERNAL_LINKS
+
 	if (present && present[HTML_A_TYPE] && value[HTML_A_TYPE]) {
 	    StrAllocCopy(temp, value[HTML_A_TYPE]);
 	    if (!intern_flag && href &&
-		!strcasecomp(value[HTML_A_TYPE], HTAtom_name(LINK_INTERNAL)) &&
+		!strcasecomp(value[HTML_A_TYPE], HTAtom_name(HTInternalLink)) &&
 		!LYIsUIPage3(me->node_anchor->address, UIP_LIST_PAGE, 0) &&
 		!LYIsUIPage3(me->node_anchor->address, UIP_ADDRLIST_PAGE, 0) &&
 		!isLYNXIMGMAP(me->node_anchor->address)) {
@@ -3108,7 +3100,6 @@ PRIVATE int HTML_start_element ARGS6(
 		FREE(temp);
 	    }
 	}
-#endif /* DONT_TRACK_INTERNAL_LINKS */
 
 	me->CurrentA = HTAnchor_findChildAndLink(
 			me->node_anchor,			/* Parent */

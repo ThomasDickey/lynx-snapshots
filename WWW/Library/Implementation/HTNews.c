@@ -17,6 +17,7 @@
 #include <HTCJK.h>
 #include <HTMIME.h>
 #include <HTFont.h>
+#include <HTFormat.h>
 #include <HTTCP.h>
 #include <LYUtils.h>
 #include <LYStrings.h>
@@ -73,11 +74,6 @@ struct _HTStream
 
 #define LINE_LENGTH 512			/* Maximum length of line of ARTICLE etc */
 #define GROUP_NAME_LENGTH	256	/* Maximum length of group name */
-extern BOOLEAN scan_for_buried_news_references;
-extern BOOLEAN LYListNewsNumbers;
-extern BOOLEAN LYListNewsDates;
-extern int interrupted_in_htgetcharacter;
-extern BOOL keep_mime_headers;	 /* Include mime headers and force raw text */
 extern BOOL using_proxy;	/* Are we using an NNTP proxy? */
 
 /*

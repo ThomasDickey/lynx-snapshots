@@ -158,6 +158,9 @@ PRIVATE int str_n_cmp(const char *p, const char *q, int n)
 #include <LYexit.h>
 #include <LYLeaks.h>
 
+/* two constants: */
+PUBLIC HTLinkType * HTInternalLink = 0;
+PUBLIC HTAtom * WWW_SOURCE = 0;
 
 #ifndef DONT_TRACK_INTERNAL_LINKS
 #define NO_INTERNAL_OR_DIFFERENT(c,n) TRUE
@@ -471,13 +474,22 @@ PRIVATE void move_address ARGS2(
 /*
  * This is for traversal call from within partial mode in LYUtils.c
  * and HTFormat.c  It simply calls HText_pageDisplay() but utilizes
- * LYMainLoop.c PRIVATE variables.
- * Perhaps, this could adhere more logic from mainloop(), in the future.
+ * LYMainLoop.c PRIVATE variables to manage proper newline position
+ * in case of #fragment
  */
-PUBLIC void LYMainLoop_pageDisplay ARGS1(
+PUBLIC BOOL LYMainLoop_pageDisplay ARGS1(
 	int,		line_num)
 {
 #ifdef DISP_PARTIAL
+    CONST char * pound;
+    int prev_newline = Newline;
+
+    /*
+     *  Override Newline with a new value if user
+     *  scrolled the document while loading (in LYUtils.c).
+     */
+    Newline = line_num;
+
 #ifdef SOURCE_CACHE
     /*
      * reparse_document() acts on 'curdoc' which always on top of the
@@ -487,29 +499,30 @@ PUBLIC void LYMainLoop_pageDisplay ARGS1(
      */
     if (!from_source_cache)
 #endif
-    /*
-     * Disable display_partial if requested URL has #fragment and we are not
-     * popped from the history stack so can't calculate correct newline
-     * position for fragment.  Otherwise user got the new document from the
-     * first page and was moved to #fragment later after download completed,
-     * but only if s/he did not mess screen up by scrolling before...  So fall
-     * down to old behavior here ... until we rewrite HTFindPoundSelector()
-     */
-    if (display_partial
-     && newdoc.line == 1
-     && findPoundSelector(newdoc.address)) {
-	display_partial = FALSE; /* restrict for this document */
-	return;			/* no repaint */
-    }
-
-    /*
-     *  Override Newline with a new value if user
-     *  scrolled the document while loading (in LYUtils.c).
-     */
+	/*
+	 * If the requested URL has the #fragment, and we are not popped
+	 * from the history stack, and have not scrolled the document yet -
+	 * we should calculate correct newline position for the fragment.
+	 * (This is a bit suboptimal since HTFindPoundSelector() traverse
+	 * anchors list each time, so we have a quadratic complexity
+	 * and may load CPU in a worst case).
+	 */
+	if (display_partial
+	    && newdoc.line == 1 && line_num == 1 && prev_newline == 1
+	    && (pound = findPoundSelector(newdoc.address))
+	    && *pound && *(pound+1)) {
+	    if (HTFindPoundSelector(pound+1)) {
+		/* HTFindPoundSelector will initialize www_search_result */
+		Newline = www_search_result;
+	    } else {
+		Newline = prev_newline; /* restore ??? */
+		return NO;	/* no repaint */
+	    }
+	}
 #endif /* DISP_PARTIAL */
-    Newline = line_num;
 
     HText_pageDisplay(Newline, prev_target);
+    return YES;
 }
 
 
@@ -1848,18 +1861,19 @@ PRIVATE void handle_LYK_DIRED_MENU ARGS3(
 {
 #ifdef VMS
     char *cp, *temp = 0;
+    char *test = HTGetProgramPath(ppCSWING);
 
     /*
      *	Check if the CSwing Directory/File Manager is available.
-     *	Will be disabled if LYCSwingPath is NULL, zero-length,
+     *	Will be disabled if CSWING path is NULL, zero-length,
      *	or "none" (case insensitive), if no_file_url was set via
      *	the file_url restriction, if no_goto_file was set for
      *	the anonymous account, or if HTDirAccess was set to
      *	HT_DIR_FORBID or HT_DIR_SELECTIVE via the -nobrowse
      *	or -selective switches. - FM
      */
-    if (!(LYCSwingPath && *LYCSwingPath) ||
-	!strcasecomp(LYCSwingPath, "none") ||
+    if (isEmpty(test) ||
+	!strcasecomp(test, "none") ||
 	no_file_url || no_goto_file ||
 	HTDirAccess == HT_DIR_FORBID ||
 	HTDirAccess == HT_DIR_SELECTIVE) {
@@ -1893,7 +1907,7 @@ PRIVATE void handle_LYK_DIRED_MENU ARGS3(
 	if (HTStat(cp, &stat_info) == -1) {
 	    CTRACE((tfp, "mainloop: Can't stat %s\n", cp));
 	    FREE(cp);
-	    HTSprintf0(&temp, "%s []", LYCSwingPath);
+	    HTSprintf0(&temp, "%s []", HTGetProgramPath(ppCSWING));
 	    *refresh_screen = TRUE;  /* redisplay */
 	} else {
 	    char *VMSdir = NULL;
@@ -1921,7 +1935,7 @@ PRIVATE void handle_LYK_DIRED_MENU ARGS3(
 		    cp == NULL;
 		}
 	    }
-	    HTSprintf0(&temp, "%s %s", LYCSwingPath, VMSdir);
+	    HTSprintf0(&temp, "%s %s", HTGetProgramPath(ppCSWING), VMSdir);
 	    FREE(VMSdir);
 	    /*
 	     *	Uncache the current document in case we
@@ -1944,7 +1958,7 @@ PRIVATE void handle_LYK_DIRED_MENU ARGS3(
 	 *  an argument and don't uncache the current
 	 *  document. - FM
 	 */
-	HTSprintf0(&temp, "%s []", LYCSwingPath);
+	HTSprintf0(&temp, "%s []", HTGetProgramPath(ppCSWING));
 	*refresh_screen = TRUE;	/* redisplay */
     }
     stop_curses();
@@ -5234,6 +5248,16 @@ int mainloop NOARGS
     int i;
     int follow_col = -1, key_count = 0, last_key = 0;
 
+/*  "internal" means "within the same document, with certainty".
+ *  It includes a space so it cannot conflict with any (valid) "TYPE"
+ *  attributes on A elements. [According to which DTD, anyway??] - kw
+ */
+    HTInternalLink = HTAtom_for("internal link");  /* init, used as const */
+
+#ifndef WWW_SOURCE
+    WWW_SOURCE = HTAtom_for("www/source");  /* init, used as const */
+#endif
+
 /*
  *  curdoc.address contains the name of the file that is currently open.
  *  newdoc.address contains the name of the file that will soon be
@@ -6051,9 +6075,16 @@ try_again:
 	    resizeterm(LYlines, LYcols);
 	    wresize(LYwin, LYlines, LYcols);
 #else
+#if 0 /* defined(PDCURSES) && defined(HAVE_XCURSES) */
+	    resize_term(LYlines, LYcols);
+	    if (LYwin != 0)
+		LYwin = resize_window(LYwin, LYlines, LYcols);
+	    refresh();
+#else
 	    stop_curses();
 	    start_curses();
 	    LYclear();
+#endif
 #endif
 	    refresh_screen = TRUE; /* to force a redraw */
 	    if (HTMainText)	/* to REALLY force it... - kw */

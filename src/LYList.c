@@ -48,6 +48,7 @@ PUBLIC int showlist ARGS2(
     char *LinkTitle = NULL;  /* Rel stored as property of link, not of dest */
     BOOLEAN intern_w_post = FALSE;
     char *desc = "unknown field or link";
+    void* helper;
 
     refs = HText_sourceAnchors(HTMainText);
     hidden_links = HText_HiddenLinkCount(HTMainText);
@@ -102,8 +103,9 @@ PUBLIC int showlist ARGS2(
 	if (LYHiddenLinks == HIDDENLINKS_IGNORE)
 	    hidden_links = 0;
     }
+    helper = NULL; /* init */
     for (cnt = 1; cnt <= refs; cnt++) {
-	HTChildAnchor *child = HText_childNumber(cnt);
+	HTChildAnchor *child = HText_childNextNumber(cnt, &helper);
 	HTAnchor *dest_intl = NULL;
 	HTAnchor *dest;
 	HTParentAnchor *parent;
@@ -134,7 +136,7 @@ PUBLIC int showlist ARGS2(
 	}
 #ifndef DONT_TRACK_INTERNAL_LINKS
 	dest_intl = HTAnchor_followTypedLink((HTAnchor *)child,
-						       LINK_INTERNAL);
+						       HTInternalLink);
 #endif
 	dest = dest_intl ?
 	    dest_intl : HTAnchor_followMainLink((HTAnchor *)child);
@@ -256,6 +258,7 @@ PUBLIC void printlist ARGS2(
     int refs, hidden_links;
     char *address = NULL;
     char *desc = gettext("unknown field or link");
+    void* helper;
 
     refs = HText_sourceAnchors(HTMainText);
     if (refs <= 0 && LYHiddenLinks != HIDDENLINKS_SEPARATE)
@@ -270,8 +273,9 @@ PUBLIC void printlist ARGS2(
 	    if (LYHiddenLinks == HIDDENLINKS_IGNORE)
 		hidden_links = 0;
 	}
+       helper = NULL; /* init */
 	for (cnt = 1; cnt <= refs; cnt++) {
-	    HTChildAnchor *child = HText_childNumber(cnt);
+	    HTChildAnchor *child = HText_childNextNumber(cnt, &helper);
 	    HTAnchor *dest;
 	    HTParentAnchor *parent;
 	    CONST char *title;

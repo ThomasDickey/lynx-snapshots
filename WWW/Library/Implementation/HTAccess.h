@@ -310,7 +310,6 @@ extern void LYUCPushAssumed PARAMS((
     HTParentAnchor *	anchor));
 extern int LYUCPopAssumed NOPARAMS;
 
-#endif /* HTACCESS_H */
-/*
+extern BOOL using_proxy;
 
-   end of HTAccess  */
+#endif /* HTACCESS_H */

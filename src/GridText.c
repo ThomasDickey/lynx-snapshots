@@ -104,8 +104,6 @@ struct _HTStream {			/* only know it as object */
 #define UTF8_XNEGLEN(c) (c&0xC0? 0 :c&32? 1 :c&16? 2 :c&8? 3 :c&4? 4 :c&2? 5:0)
 #define UTF_XLEN(c) UTF8_XNEGLEN(((char)~(c)))
 
-extern BOOL HTPassHighCtrlRaw;
-
 #ifdef KANJI_CODE_OVERRIDE
 PUBLIC HTkcode last_kcode = NOKANJI;	/* 1997/11/14 (Fri) 09:09:26 */
 #endif
@@ -151,8 +149,9 @@ PUBLIC int LYsb_begin = -1;
 PUBLIC int LYsb_end = -1;
 #endif
 
-#if defined(USE_COLOR_STYLE)
-#define MAX_STYLES_ON_LINE 64
+#ifndef CHAR_BIT
+#define CHAR_BIT 8
+#endif
 
     /*try to fit in 2 shorts*/
 typedef struct {
@@ -161,49 +160,39 @@ typedef struct {
 	    /* horizontal position of this change */
 	unsigned short	style;		/* which style to change to */
 } HTStyleChange;
-#endif
-
-typedef struct _line {
-	struct _line	*next;
-	struct _line	*prev;
-	unsigned	offset;		/* Implicit initial spaces */
-	unsigned	size;		/* Number of characters */
-#if defined(USE_COLOR_STYLE)
-	HTStyleChange* styles;
-	int	numstyles;
-#endif
-	char	data[1];		/* Space for terminator at least! */
-} HTLine;
 
 #if defined(USE_COLOR_STYLE)
-typedef struct _HTStyleChangePool {
-	HTStyleChange	data[4092];
-	struct _HTStyleChangePool* next;
-	int free_items;
-} HTStyleChangePool;
+#define MAX_STYLES_ON_LINE   64
+  /* buffers used when current line is being aggregated, in split_line() */
+static HTStyleChange stylechanges_buffers[2][MAX_STYLES_ON_LINE];
+#endif
 
-/*these are used when current line is being aggregated. */
-HTStyleChange stylechanges_buffers[2][MAX_STYLES_ON_LINE];
-int stylechanges_buffers_free;/*this is an index of the free buffer.
-    Can be 0 or 1*/
+#define POOL_SIZE (8192 - 4*sizeof(void*) - sizeof(struct _HTPool*) + sizeof(int)) / sizeof(HTStyleChange)
 
-/* These are generic macros for any pools (provided those structures have the
-same members as HTStyleChangePool).  Pools are used for allocation of groups of
+typedef struct _HTPool {
+    HTStyleChange   data[POOL_SIZE];
+    struct _HTPool* prev;
+    int used;
+} HTPool;
+
+/************************************************************************
+These are generic macros for any pools (provided those structures have the
+same members as HTPool).  Pools are used for allocation of groups of
 objects of the same type T.  Pools are represented as a list of structures of
 type P (called pool chunks here).  Structure P has an array of N objects of
 type T named 'data' (the number N in the array can be chosen arbitrary),
-pointer to the next pool chunk named 'pool', and the number of free items in
-that pool chunk named 'free_items'.  Here is a definition of the structure P:
+pointer to the previous pool chunk named 'prev', and the number of used items
+in that pool chunk named 'used'.  Here is a definition of the structure P:
 	struct P
 	{
 	    T data[N];
-	    struct P* next;
-	    int free_items;
+	    struct P* prev;
+	    int used;
 	};
  It's recommended that sizeof(P) be memory page size minus 32 in order malloc'd
 chunks to fit in machine page size.
- Allocation of 'n' items in the pool is implemented by decrementing member
-'free_items' by 'n' if 'free_items' >= 'n', or allocating a new pool chunk and
+ Allocation of 'n' items in the pool is implemented by incrementing member
+'used' by 'n' if (used+n <= N), or malloc a new pool chunk and
 allocating 'n' items in that new chunk.  It's the task of the programmer to
 assert that 'n' is <= N.  Only entire pool may be freed - this limitation makes
 allocation algorithms trivial and fast - so the use of pools is limited to
@@ -214,6 +203,9 @@ speed due to the simple algorithms used.  Due to the fact that memory is
 'allocated' in array, alignment overhead is minimal.  Allocating strings in a
 pool provided their length will never exceed N and is much smaller than N seems
 to be very efficient.
+ [Several types of memory-hungry objects are stored in the pool now:  styles,
+lines, anchors, and FormInfo. Arrays of HTStyleChange are stored as is,
+other objects are aligned to sizeof(void*) bytes and stored using a cast.]
 
  Pool are referenced by pointer to the chunk that contains free slots. Macros
 that allocate memory in pools update that pointer if needed.
@@ -222,7 +214,7 @@ ALLOC_IN_POOL.
  Here is a description of those macros as C++ functions (with names mentioned
 above and with use of C++ references)
 
-void ALLOC_IN_POOL( P*& pool, pool_type, int toalloc, T*& ptr)
+void ALLOC_IN_POOL( P*& pool, pool_type, int toalloc, T*& ptr, int align=1)
     - allocates 'toalloc' items in the pool of type 'pool_type' pointed by
     'pool', sets the pointer 'ptr' to the "allocated" memory and updates 'pool'
     if necessary. Sets 'ptr' to NULL if fails.
@@ -231,67 +223,104 @@ void POOL_NEW( pool_type  , P*& ptr)
     Initializes a pool of type 'pool_type' pointed by 'ptr', updating 'ptr'.
     Sets 'ptr' to NULL if fails.
 
-void POOL_FREE( pool_type , P* ptr)
-    Frees a pool of type 'pool_type' pointed by ptr.
+void POOL_FREE( pool_type , P*& ptr)
+    Frees a pool of type 'pool_type' pointed by ptr. Sets ptr to NULL.
 
-      - VH */
+      - VH
 
+*************************************************************************/
 /*
-void ALLOC_IN_POOL( P*& pool, pool_type, int toalloc, T*& ptr)
-    - allocates 'toalloc' items in the pool of type 'pool_type' pointed by
-    'pool', sets the pointer 'ptr' to the "allocated" memory and updates 'pool'
-    if necessary. Sets 'ptr' to NULL if fails.
-*/
-#define ALLOC_IN_POOL(pool,pool_type,toalloc,ptr)     \
-if (!pool)  \
-    ptr = NULL; \
-else { \
-    if ((pool)->free_items > toalloc) { \
-	(pool)->free_items -= toalloc; \
-	ptr = (pool)->data + (pool)->free_items; \
-    } else { \
-	pool_type* newpool = (pool_type*)malloc(sizeof(pool_type)); \
-	if (!newpool) { \
-	    ptr = NULL; \
-	} else { \
-	    newpool->next = pool; \
-	    newpool->free_items = sizeof newpool->data/ \
-		    sizeof newpool->data[0] - toalloc; \
-	    pool = newpool; \
-	    ptr = newpool->data + sizeof newpool->data/sizeof newpool->data[0] - toalloc; \
-	} \
-    } \
-}
-/*
-void POOL_NEW( pool_type  , P*& ptr)
-    Initializes a pool of type 'pool_type' pointed by 'ptr', updating 'ptr'.
-    Sets 'ptr' to NULL if fails.
-*/
-#define POOL_NEW(pool_type,ptr) \
-    { \
-	pool_type* newpool = (pool_type*)malloc(sizeof(pool_type)); \
-	if (!newpool) { \
-	    ptr = NULL; \
-	} else { \
-	    newpool->next = NULL; \
-	    newpool->free_items = sizeof newpool->data/sizeof newpool->data[0]; \
-	    ptr = newpool; \
-	} \
+ * void ALLOC_IN_POOL( P*& pool, pool_type, int toalloc, T*& ptr, int align=1)
+ *     - allocates 'toalloc' items in the pool of type 'pool_type' pointed by
+ *     'pool', sets the pointer 'ptr' to the "allocated" memory and updates
+ *     'pool' if necessary.  Sets 'ptr' to NULL if fails.
+ */
+#define ALLOC_IN_POOL(pool,pool_type,toalloc,ptr,align) \
+    if (!pool) {					\
+	ptr = NULL;					\
+    } else {						\
+	if (align)					\
+	    pool->used += (pool->used % align);		\
+	if (POOL_SIZE - pool->used >= toalloc) { 	\
+	    ptr = pool->data + pool->used;		\
+	    pool->used += toalloc;			\
+	} else {					\
+	    pool_type* newpool = (pool_type*)LY_CALLOC(1, sizeof(pool_type)); \
+	    if (!newpool) {				\
+		ptr = NULL;				\
+	    } else {					\
+		newpool->prev = pool;			\
+		newpool->used = toalloc;		\
+		ptr = newpool->data;			\
+		pool = newpool;				\
+	   }						\
+	}						\
     }
 /*
-void POOL_FREE( pool_type , P* ptr)
-    Frees a pool of type 'pool_type' pointed by ptr.
-*/
-#define POOL_FREE(pool_type,xptr) \
-    { \
-	pool_type* ptr = xptr; \
-	do { \
-	    pool_type* prevpool = ptr; \
-	    ptr = ptr->next; \
-	    FREE(prevpool); \
-	} while (ptr); \
+ * void POOL_NEW( pool_type  , P*& ptr)
+ *     Initializes a pool of type 'pool_type' pointed by 'ptr', updating 'ptr'.
+ *     Sets 'ptr' to NULL if fails.
+ */
+#define POOL_NEW(pool_type,ptr)				\
+    {							\
+	ptr = (pool_type*)LY_CALLOC(1, sizeof(pool_type)); \
+	if (ptr) {					\
+	    ptr->prev = NULL;				\
+	    ptr->used = 0;				\
+	}						\
     }
+/*
+ * void POOL_FREE( pool_type, P*& ptr)
+ *     Frees a pool of type 'pool_type' pointed by ptr. Sets ptr to NULL.
+ */
+#define POOL_FREE(pool_type,ptr)			\
+    {							\
+	pool_type* cur = ptr;				\
+	pool_type* prev;				\
+	while (cur) {					\
+	    prev = cur->prev;				\
+	    FREE(cur);					\
+	    cur = prev;					\
+	}						\
+	ptr = NULL;					\
+    }
+/**************************************************************************/
+
+#define _sz_        sizeof(HTStyleChange)      /* 4 */
+#define _align_     (sizeof(void*)/_sz_)       /*64bit OS!*/
+#define _round_(x)  (x%_sz_ ? x/_sz_ + 1: x/_sz_)
+
+#define POOLallocstyles(ptr, N)     ALLOC_IN_POOL(HTMainText->pool,HTPool,\
+					N,				\
+					ptr,				\
+					1)
+#define POOLallocHTLine(ptr, size)  { HTStyleChange* _tmp_;		\
+				      ALLOC_IN_POOL(HTMainText->pool,HTPool,\
+					_round_(LINE_SIZE(size)),	\
+					_tmp_,				\
+					_align_);			\
+				      ptr = (HTLine*)_tmp_;		\
+				    }
+#define POOLtypecalloc(T,ptr)	    { HTStyleChange* _tmp_;		\
+				      ALLOC_IN_POOL(HTMainText->pool,HTPool,\
+					_round_(sizeof(T)),		\
+					_tmp_,				\
+					_align_);			\
+				      ptr = (T*)_tmp_;			\
+				    }
+
+typedef struct _line {
+	struct _line    *next;
+	struct _line    *prev;
+	unsigned short	offset;	/* Implicit initial spaces */
+	unsigned short	size;	/* Number of characters */
+#if defined(USE_COLOR_STYLE)
+	HTStyleChange*  styles;
+	unsigned short  numstyles;
 #endif
+	char	data[1];	/* Space for terminator at least! */
+} HTLine;
+
 
 #define LINE_SIZE(l) (sizeof(HTLine)+(l))	/* Allow for terminator */
 #define allocHTLine(l) (HTLine *)calloc(1, LINE_SIZE(l))
@@ -300,15 +329,16 @@ typedef struct _TextAnchor {
 	struct _TextAnchor *	next;
 	struct _TextAnchor *	prev;		/* www_user_search only! */
 	int			number;		/* For user interface */
-	int			line_pos;	/* Bytes/chars - extent too */
-	int			extent;		/* (see HText_trimHightext) */
 	int			line_num;	/* Place in document */
-	HiliteList		lites;
-	int			link_type;	/* Normal, internal, or form? */
-	FormInfo *		input_field;	/* Info for form links */
+	short			line_pos;	/* Bytes/chars - extent too */
+	short			extent;		/* (see HText_trimHightext) */
 	BOOL			show_anchor;	/* Show the anchor? */
 	BOOL			inUnderline;	/* context is underlined */
 	BOOL			expansion_anch; /* TEXTAREA edit new anchor */
+	char			link_type;	/* Normal, internal, or form? */
+	FormInfo *		input_field;	/* Info for form links */
+	HiliteList		lites;
+
 	HTChildAnchor *		anchor;
 } TextAnchor;
 
@@ -325,27 +355,13 @@ typedef struct {
 */
 struct _HText {
 	HTParentAnchor *	node_anchor;
-#ifdef SOURCE_CACHE
-	/*
-	 * Parse settings when this HText was generated.
-	 */
-	BOOLEAN			clickable_images;
-	BOOLEAN			pseudo_inline_alts;
-	BOOLEAN			verbose_img;
-	BOOLEAN			raw_mode;
-	BOOLEAN			historical_comments;
-	BOOLEAN			minimal_comments;
-	BOOLEAN			soft_dquotes;
-	int			old_dtd;
-	int			keypad_mode;
-	int			disp_lines;	/* Screen size */
-	int			disp_cols;	/* Used for reports only */
-#endif
+
 	HTLine *		last_line;
 	int			Lines;		/* Number of them */
-	TextAnchor *		first_anchor;	/* Singly linked list */
+	TextAnchor *		first_anchor;	/* double-linked on demand */
 	TextAnchor *		last_anchor;
 	TextAnchor *		last_anchor_before_stbl;
+	TextAnchor *		last_anchor_before_split;
 	HTList *		forms;		/* also linked internally */
 	int			last_anchor_number;	/* user number */
 	BOOL			source;		/* Is the text source? */
@@ -389,20 +405,36 @@ struct _HText {
 	enum grid_state       { S_text, S_esc, S_dollar, S_paren,
 				S_nonascii_text, S_dollar_paren,
 				S_jisx0201_text }
-				state;			/* Escape sequence? */
-	int			kanji_buf;		/* Lead multibyte */
-	int			in_sjis;		/* SJIS flag */
-	int			halted;			/* emergency halt */
+				state;		/* Escape sequence? */
+	int			kanji_buf;	/* Lead multibyte */
+	int			in_sjis;	/* SJIS flag */
+	int			halted;		/* emergency halt */
 
-	BOOL			have_8bit_chars;   /* Any non-ASCII chars? */
-	LYUCcharset *		UCI;		   /* node_anchor UCInfo */
-	int			UCLYhndl;	   /* charset we are fed */
+	BOOL			have_8bit_chars; /* Any non-ASCII chars? */
+	LYUCcharset *		UCI;		/* node_anchor UCInfo */
+	int			UCLYhndl;	/* charset we are fed */
 	UCTransParams		T;
 
-	HTStream *		target;			/* Output stream */
-	HTStreamClass		targetClass;		/* Output routines */
-#if defined(USE_COLOR_STYLE)
-	HTStyleChangePool*	styles_pool;
+	HTStream *		target;		/* Output stream */
+	HTStreamClass		targetClass;	/* Output routines */
+
+	HTPool*			pool;		/* this HText memory pool */
+
+#ifdef SOURCE_CACHE
+	/*
+	* Parse settings when this HText was generated.
+	*/
+	BOOL			clickable_images;
+	BOOL			pseudo_inline_alts;
+	BOOL			verbose_img;
+	BOOL			raw_mode;
+	BOOL			historical_comments;
+	BOOL			minimal_comments;
+	BOOL			soft_dquotes;
+	short			old_dtd;
+	short			keypad_mode;
+	short			disp_lines;	/* Screen size */
+	short			disp_cols;	/* Used for reports only */
 #endif
 };
 
@@ -560,9 +592,9 @@ PRIVATE void LYAddHiText ARGS3(
     unsigned want = ++(a->lites.hl_len) * sizeof(HiliteInfo);
 
     if (have != NULL) {
-	have = realloc(have, want);
+	have = (HiliteInfo *) realloc(have, want);
     } else {
-	have = malloc(want);
+	have = (HiliteInfo *) malloc(want);
     }
     a->lites.hl_info = have;
 
@@ -696,7 +728,7 @@ PRIVATE void * LY_check_calloc ARGS2(
     }
     n = HTList_count(loaded_texts);
     for (i = n - 1; i > 0; i--) {
-	HText * t = HTList_objectAt(loaded_texts, i);
+	HText * t = (HText *) HTList_objectAt(loaded_texts, i);
 	if (t == HTMainText)
 	    t = NULL;		/* shouldn't happen */
 	{
@@ -853,6 +885,9 @@ PUBLIC HText *	HText_new ARGS1(
 #endif /* VMS && VAXC && !__DECC */
     }
 
+    POOL_NEW(HTPool, self->pool);
+    if (!self->pool)
+	outofmem(__FILE__, "HText_New");
     line = self->last_line = allocHTLine(MAX_LINE);
     if (line == NULL)
 	outofmem(__FILE__, "HText_New");
@@ -860,14 +895,11 @@ PUBLIC HText *	HText_new ARGS1(
     line->offset = line->size = 0;
 #ifdef USE_COLOR_STYLE
     line->numstyles = 0;
-    POOL_NEW(HTStyleChangePool,self->styles_pool);
-    if (!self->styles_pool)
-	outofmem(__FILE__, "HText_New");
-    stylechanges_buffers_free = 0;
     line->styles = stylechanges_buffers[0];
 #endif
     self->Lines = 0;
     self->first_anchor = self->last_anchor = NULL;
+    self->last_anchor_before_split = NULL;
     self->style = &default_style;
     self->top_of_screen = 0;
     self->node_anchor = anchor;
@@ -1033,26 +1065,6 @@ PUBLIC void HText_free ARGS1(
 	return;
 
     HTAnchor_setDocument(self->node_anchor, (HyperDoc *)0);
-#if defined(USE_COLOR_STYLE)
-    POOL_FREE(HTStyleChangePool,self->styles_pool);
-#endif
-    while (YES) {	/* Free off line array */
-	HTLine * l = self->last_line;
-	if (l) {
-	    l->next->prev = l->prev;
-	    l->prev->next = l->next;	/* Unlink l */
-	    self->last_line = l->prev;
-	    if (l != self->last_line) {
-		FREE(l);
-	    } else {
-		free(l);
-	    }
-	}
-	if (l == self->last_line) {	/* empty */
-	    l = self->last_line = NULL;
-	    break;
-	}
-    }
 
     while (self->first_anchor) {		/* Free off anchor array */
 	TextAnchor * l = self->first_anchor;
@@ -1102,13 +1114,9 @@ PUBLIC void HText_free ARGS1(
 	    FREE(l->input_field->submit_title);
 
 	    FREE(l->input_field->accept_cs);
-
-	    FREE(l->input_field);
 	}
 
 	LYSetHiText(l, NULL, 0);
-
-	FREE(l);
     }
     FormList_delete(self->forms);
 
@@ -1166,6 +1174,7 @@ PUBLIC void HText_free ARGS1(
 	    HTMainAnchor = NULL;
     }
 
+    POOL_FREE(HTPool, self->pool);
     FREE(self);
 }
 
@@ -1769,19 +1778,6 @@ PRIVATE void display_scrollbar ARGS1(
 #define display_scrollbar(text) /*nothing*/
 #endif /* USE_SCROLLBAR */
 
-/*
- * Utility to let us use for-loops on the anchor-pointers.
- */
-PRIVATE TextAnchor * next_anchor ARGS2(
-	HText *,	text,
-	TextAnchor *,	anchor_ptr)
-{
-    if (anchor_ptr == text->last_anchor)
-	anchor_ptr = NULL;
-    else
-	anchor_ptr = anchor_ptr->next;
-    return anchor_ptr;
-}
 
 /*	Output a page
 **	-------------
@@ -1846,6 +1842,7 @@ PRIVATE void display_page ARGS3(
 	 *  an xterm is temporarily made very small. - kw */
 	return;
     }
+
     last_screen = text->Lines - (display_lines - 2);
     line = text->last_line->prev;
 
@@ -2123,7 +2120,7 @@ PRIVATE void display_page ARGS3(
     nlinks = 0;
     for (Anchor_ptr = text->first_anchor;
 	 Anchor_ptr != NULL && Anchor_ptr->line_num <= stop_before_for_anchors;
-	 Anchor_ptr = next_anchor(text, Anchor_ptr)) {
+	 Anchor_ptr = Anchor_ptr->next) {
 
 	if (Anchor_ptr->line_num >= line_number
 	 && Anchor_ptr->line_num < stop_before_for_anchors) {
@@ -2167,7 +2164,7 @@ PRIVATE void display_page ARGS3(
 #ifndef DONT_TRACK_INTERNAL_LINKS
 			if (Anchor_ptr->link_type == INTERNAL_LINK_ANCHOR) {
 			    link_dest_intl = HTAnchor_followTypedLink(
-				(HTAnchor *)Anchor_ptr->anchor, LINK_INTERNAL);
+				(HTAnchor *)Anchor_ptr->anchor, HTInternalLink);
 			    if (link_dest_intl && link_dest_intl != link_dest) {
 
 				CTRACE((tfp,
@@ -2430,20 +2427,19 @@ PRIVATE void move_anchors_in_region ARGS7(
     int,		shift)		/* Likewise */
 {
     /*
-     *  Update anchor positions for anchors that start on this line.
-     *  Note: we rely on a->line_pos counting bytes, not
-     *  characters.  That's one reason why HText_trimHightext
-     *  has to be prevented from acting on these anchors in
-     *  partial display mode before we get a chance to
-     *  deal with them here.
+     * Update anchor positions for anchors that start on this line.  Note:  we
+     * rely on a->line_pos counting bytes, not characters.  That's one reason
+     * why HText_trimHightext has to be prevented from acting on these anchors
+     * in partial display mode before we get a chance to deal with them here.
      */
     TextAnchor *a;
     int head_processed = *prev_head_processed;
 
-    /* We need to know whether (*prev_anchor)->line_pos is "in new
-       coordinates" or in old ones.  If prev_anchor' head was touched
-       on the previous iteraction, we set head_processed.  The tail
-       may need to be treated now. */
+    /*
+     * We need to know whether (*prev_anchor)->line_pos is "in new coordinates"
+     * or in old ones.  If prev_anchor' head was touched on the previous
+     * iteration, we set head_processed.  The tail may need to be treated now.
+     */
     for (a = *prev_anchor;
 	 a && a->line_num <= line_number;
 	 a = a->next, head_processed = 0) {
@@ -2492,7 +2488,7 @@ PRIVATE void move_anchors_in_region ARGS7(
  *  Some necessary changes for anchors starting on this line are also done
  *  here if needed.
  *  Returns a newly allocated HTLine* if changes were made
- *    (caller has to free the old one).
+ *    (lines allocated in pool, caller should not free the old one).
  *  Returns NULL if no changes needed.  (Remove-spaces code may be buggy...)
  * - kw
  */
@@ -2536,7 +2532,7 @@ PRIVATE HTLine * insert_blanks_in_line ARGS7(
     if (!prev_anchor)
 	prev_anchor = text->first_anchor;
     head_processed = (prev_anchor && prev_anchor->line_num < line_number);
-    memcpy(mod_line, line, LINE_SIZE(1));
+    memcpy(mod_line, line, LINE_SIZE(0));
     t = newdata = mod_line->data;
     ip = 0;
     while (ip <= ninserts) {
@@ -2637,7 +2633,6 @@ PRIVATE void split_line ARGS2(
 	unsigned,	split)
 {
     HTStyle * style = text->style;
-    HTLine * temp;
     int spare;
     int indent = text->in_line_1 ?
 	  text->style->indent1st : text->style->leftIndent;
@@ -2657,10 +2652,12 @@ PRIVATE void split_line ARGS2(
     HTLine * line = (HTLine *)LY_CALLOC(1, LINE_SIZE(MAX_LINE)+2);
 
     /*
-     *  Make new line.
+     *  Set new line.
      */
     if (line == NULL)
 	outofmem(__FILE__, "split_line_1");
+    memset(line, 0, LINE_SIZE(0));
+
     ctrl_chars_on_this_line = 0; /*reset since we are going to a new line*/
     utfxtra_on_this_line = 0;	/*reset too, we'll count them*/
     text->LastChar = ' ';
@@ -2852,7 +2849,10 @@ PRIVATE void split_line ARGS2(
 #endif
 
 #if defined(USE_COLOR_STYLE)
-    line->styles = stylechanges_buffers[stylechanges_buffers_free = (stylechanges_buffers_free + 1) &1];
+    if (previous->styles == stylechanges_buffers[0])
+	line->styles = stylechanges_buffers[1];
+    else
+	line->styles = stylechanges_buffers[0];
     line->numstyles = 0;
     {
 	HTStyleChange *from = previous->styles + previous->numstyles - 1;
@@ -2946,18 +2946,20 @@ PRIVATE void split_line ARGS2(
     }
 #endif /*USE_COLOR_STYLE*/
 
-    temp = (HTLine *)LY_CALLOC(1, LINE_SIZE(previous->size));
-    if (temp == NULL)
+    {
+    HTLine* temp;
+    POOLallocHTLine(temp, previous->size);
+    if (!temp)
 	outofmem(__FILE__, "split_line_2");
     memcpy(temp, previous, LINE_SIZE(previous->size));
 #if defined(USE_COLOR_STYLE)
-    ALLOC_IN_POOL((text->styles_pool),HTStyleChangePool,previous->numstyles,temp->styles);
-    memcpy(temp->styles, previous->styles, sizeof(HTStyleChange)*previous->numstyles);
+    POOLallocstyles(temp->styles, previous->numstyles);
     if (!temp->styles)
 	outofmem(__FILE__, "split_line_2");
+    memcpy(temp->styles, previous->styles, sizeof(HTStyleChange)*previous->numstyles);
 #endif
-    FREE(previous);
     previous = temp;
+    }
 
     previous->prev->next = previous;	/* Link in new line */
     previous->next->prev = previous;	/* Could be same node of course */
@@ -3085,7 +3087,6 @@ PRIVATE void split_line ARGS2(
      */
 
     if (s > 0) {			/* if not completely empty */
-	TextAnchor * prev_a = NULL;
 	int moved = 0;
 
 	/* In the algorithm below we move or not move anchors between
@@ -3097,10 +3098,15 @@ PRIVATE void split_line ARGS2(
 	 */
 	/* Our operations can make a non-empty all-whitespace link
 	   empty.  So what? */
-	for (a = text->first_anchor; a; prev_a = a, a = a->next) {
+	if ((a = text->last_anchor_before_split) == 0)
+	    a = text->first_anchor;
+
+	for ( ; a; a = a->next) {
 	    if (a->line_num == CurLine) {
 		int len = a->extent, n = a->number, start = a->line_pos;
 		int end = start + len;
+
+		text->last_anchor_before_split = a;
 
 		/* Which anchors do we leave on the previous line?
 		   a) empty finished (We need a cut-off value.
@@ -3236,8 +3242,6 @@ PRIVATE void split_line ARGS2(
 	    previous->next->prev = jline;
 	    previous->prev->next = jline;
 
-	    FREE(previous);
-
 	    previous = jline;
 	}
 	{ /* (ht_num_runs==1) */
@@ -3252,11 +3256,10 @@ PRIVATE void split_line ARGS2(
 	    if (!a2)
 		a2 = text->first_anchor;
 	    else
-		a2 = next_anchor(text, a2); /* 1st anchor on line we justify */
+		a2 = a2->next; /* 1st anchor on line we justify */
 
-	    if (a2)
-		for (; a2 && a2->line_num <= text->Lines-1;
-		    last_anchor_of_previous_line = a2, a2 = a2->next);
+	    for (; a2 && a2->line_num <= text->Lines-1;
+		last_anchor_of_previous_line = a2, a2 = a2->next);
 	}
     } else {
 	if (REALLY_CAN_JUSTIFY(text) ) {
@@ -4122,8 +4125,8 @@ check_WrapSource:
      *  Check for end of line.
      */
     actual = ((indent + (int)line->offset + (int)line->size) +
-       ((line->size > 0) &&
-	(int)(line->data[line->size-1] == LY_SOFT_HYPHEN ? 1 : 0)));
+	      ((line->size > 0) &&
+	       (int)(line->data[line->size-1] == LY_SOFT_HYPHEN ? 1 : 0)));
 
     if (text->T.output_utf8) {
 	actual += (UTFXTRA_ON_THIS_LINE - ctrl_chars_on_this_line + UTF_XLEN(ch));
@@ -4516,7 +4519,6 @@ PRIVATE int HText_insertBlanksInStblLines ARGS2(
 	    lines_changed++;
 	    if (line == first_line)
 		first_line = mod_line;
-	    free(line);
 	    line = mod_line;
 #ifdef DISP_PARTIAL
 	    /*
@@ -4902,8 +4904,9 @@ PUBLIC int HText_beginAnchor ARGS3(
 	BOOL,			underline,
 	HTChildAnchor *,	anc)
 {
-    TextAnchor * a = typecalloc(TextAnchor);
+    TextAnchor * a;
 
+    POOLtypecalloc(TextAnchor, a);
     if (a == NULL)
 	outofmem(__FILE__, "HText_beginAnchor");
     a->inUnderline = underline;
@@ -4922,7 +4925,7 @@ PUBLIC int HText_beginAnchor ARGS3(
     text->last_anchor = a;
 
 #ifndef DONT_TRACK_INTERNAL_LINKS
-    if (HTAnchor_followTypedLink((HTAnchor*)anc, LINK_INTERNAL)) {
+    if (HTAnchor_followTypedLink((HTAnchor*)anc, HTInternalLink)) {
 	a->number = ++(text->last_anchor_number);
 	a->link_type = INTERNAL_LINK_ANCHOR;
     } else
@@ -5526,7 +5529,6 @@ PUBLIC void HText_endAppend ARGS1(
 	 */
 	next_to_the_last_line->next = line_ptr;
 	line_ptr->prev = next_to_the_last_line;
-	FREE(text->last_line);
 	text->last_line = next_to_the_last_line;
 	text->Lines--;
 	CTRACE((tfp, "GridText: New bottom line: `%s'\n",
@@ -5607,7 +5609,7 @@ PRIVATE void HText_trimHightext ARGS3(
      */
     for (anchor_ptr = text->first_anchor;
 	anchor_ptr != NULL;
-	prev_a = anchor_ptr, anchor_ptr = next_anchor(text, anchor_ptr)) {
+	prev_a = anchor_ptr, anchor_ptr = anchor_ptr->next) {
 	int have_soft_newline_in_1st_line = 0;
 re_parse:
 	/*
@@ -5817,23 +5819,33 @@ PUBLIC HTParentAnchor * HText_nodeAnchor ARGS1(
 /*				GridText specials
 **				=================
 */
+
 /*
- *  HTChildAnchor() returns the anchor with index N.
- *  The index corresponds to the [number] we print for the anchor.
+ *  HText_childNextNumber() returns the anchor with index [number],
+ *  using a pointer from the previous number (=optimization) or NULL.
  */
-PUBLIC HTChildAnchor * HText_childNumber ARGS1(
-	int,		number)
+PUBLIC HTChildAnchor * HText_childNextNumber ARGS2(
+	int,		number,
+	void**,		prev)
 {
-    TextAnchor * a;
+    /* Sorry, TextAnchor is not declared outside this file, use a cast. */
+    TextAnchor * a = *prev;
 
-    if (!(HTMainText && HTMainText->first_anchor) || number <= 0)
+    if (!HTMainText || number <= 0)
 	return (HTChildAnchor *)0;	/* Fail */
+    if (number == 1 || !a)
+	a = HTMainText->first_anchor;
 
-    for (a = HTMainText->first_anchor; a; a = a->next) {
-	if (a->number == number)
-	    return(a->anchor);
-    }
-    return (HTChildAnchor *)0;	/* Fail */
+    /* a strange thing:  positive a->number's are sorted,
+     * and between them several a->number's may be 0 -- skip them
+     */
+    for( ; a && a->number != number; a = a->next)
+	;
+
+    if (!a)
+	return (HTChildAnchor *)0;	/* Fail */
+    *prev = (void*)a;
+    return a->anchor;
 }
 
 /*
@@ -6122,7 +6134,7 @@ PUBLIC int HTGetLinkInfo ARGS6(
 #ifndef DONT_TRACK_INTERNAL_LINKS
 			if (a->link_type == INTERNAL_LINK_ANCHOR) {
 			    link_dest_intl = HTAnchor_followTypedLink(
-				(HTAnchor *)a->anchor, LINK_INTERNAL);
+				(HTAnchor *)a->anchor, HTInternalLink);
 			    if (link_dest_intl && link_dest_intl != link_dest) {
 
 				CTRACE((tfp, "HTGetLinkInfo: unexpected typed link to %s!\n",
@@ -6224,7 +6236,7 @@ PUBLIC BOOL HText_TAHasMoreLines ARGS2(
 	}
 	return NO;
     } else {
-	for (a = HTMainText->first_anchor; a; a = next_anchor(HTMainText, a)) {
+	for (a = HTMainText->first_anchor; a; a = a->next) {
 	    if (a->link_type == INPUT_ANCHOR &&
 		links[curlink].l_form == a->input_field) {
 		return same_anchors(a, a->next, TRUE);
@@ -6469,11 +6481,12 @@ PUBLIC BOOL HText_getFirstTargetInLine ARGS7(
      *  Make sure we have an HText structure, that line_num is
      *  in its range, and that we have a target string. -FM
      */
-    if (!(text
-       && line_num >= 0
-       && line_num <= text->Lines
-       && non_empty(target)))
+    if (!(text &&
+	line_num >= 0 &&
+	line_num <= text->Lines &&
+	non_empty(target))) {
 	return(FALSE);
+    }
 
     /*
      *  Find the line and set up its data and offset -FM
@@ -6834,8 +6847,8 @@ PUBLIC int HText_LinksInLines ARGS3(
 	return total;
 
     for (Anchor_ptr = text->first_anchor;
-		Anchor_ptr != NULL && Anchor_ptr->line_num <= end;
-			Anchor_ptr = next_anchor(text, Anchor_ptr)) {
+	 Anchor_ptr != NULL && Anchor_ptr->line_num <= end;
+	 Anchor_ptr = Anchor_ptr->next) {
 	if (Anchor_ptr->line_num >= start &&
 	    Anchor_ptr->line_num < end &&
 	    Anchor_ptr->show_anchor &&
@@ -7012,7 +7025,7 @@ PUBLIC BOOL HText_POSTReplyLoaded ARGS1(
 }
 
 PUBLIC BOOL HTFindPoundSelector ARGS1(
-	char *,		selector)
+	CONST char *,		selector)
 {
     TextAnchor * a;
 
@@ -7748,7 +7761,7 @@ PRIVATE BOOL anchor_has_target ARGS2(
 		return TRUE;
 	    }
 	    FREE(stars);
-       } else if (a->input_field->type == F_OPTION_LIST_TYPE) {
+	} else if (a->input_field->type == F_OPTION_LIST_TYPE) {
 	    /*
 	     *  Search the option strings that are displayed
 	     *  when the popup is invoked. -FM
@@ -8503,18 +8516,15 @@ PUBLIC void HText_RemovePreviousLine ARGS1(
 	HText *,	text)
 {
     HTLine *line, *previous;
-    char *data;
 
     if (!(text && text->Lines > 1))
 	return;
 
     line = text->last_line->prev;
-    data = line->data;
     previous = line->prev;
     previous->next = text->last_line;
     text->last_line->prev = previous;
     text->Lines--;
-    FREE(line);
 }
 
 /*
@@ -8797,7 +8807,7 @@ PUBLIC void HText_endForm ARGS1(
 	/*
 	 *  Go through list of anchors and get our input field. -FM
 	 */
-	for (a = text->first_anchor; a != NULL; a = next_anchor(text, a)) {
+	for (a = text->first_anchor; a != NULL; a = a->next) {
 	    if (a->link_type == INPUT_ANCHOR &&
 		a->input_field->number == HTFormNumber &&
 		a->input_field->type == F_TEXT_TYPE) {
@@ -9249,8 +9259,8 @@ PUBLIC int HText_beginInput ARGS3(
 	BOOL,			underline,
 	InputFieldData *,	I)
 {
-    TextAnchor * a = typecalloc(TextAnchor);
-    FormInfo * f = typecalloc(FormInfo);
+    TextAnchor * a;
+    FormInfo * f;
     CONST char *cp_option = NULL;
     char *IValue = NULL;
     unsigned char *tmp = NULL;
@@ -9261,6 +9271,8 @@ PUBLIC int HText_beginInput ARGS3(
 
     CTRACE((tfp, "GridText: Entering HText_beginInput\n"));
 
+    POOLtypecalloc(TextAnchor, a);
+    POOLtypecalloc(FormInfo, f);
     if (a == NULL || f == NULL)
 	outofmem(__FILE__, "HText_beginInput");
 
@@ -9287,7 +9299,7 @@ PUBLIC int HText_beginInput ARGS3(
 	} else {
 	    TextAnchor * b;
 	    int i2 = 0;
-	    for (b = text->first_anchor; b != NULL; b = next_anchor(text, b)) {
+	    for (b = text->first_anchor; b != NULL; b = b->next) {
 		if (b->link_type == INPUT_ANCHOR &&
 		    b->input_field->type == F_RADIO_TYPE &&
 		    b->input_field->number == HTFormNumber) {
@@ -9474,8 +9486,6 @@ PUBLIC int HText_beginInput ARGS3(
 	     */
 	    CTRACE((tfp,
 		  "GridText: No name present in input field; not displaying\n"));
-	    FREE(a);
-	    FREE(f);
 	    FREE(IValue);
 	    return(0);
 	}
@@ -9957,6 +9967,16 @@ PRIVATE unsigned check_form_specialchars ARGS1(
     return result;
 }
 
+PRIVATE CONST char *guess_content_type ARGS1(CONST char *, filename)
+{
+    HTAtom *encoding;
+    CONST char *desc;
+    HTFormat format = HTFileFormat (filename, &encoding, &desc);
+    return (format != 0 && non_empty(format->name))
+	    ? format->name
+	    : "text/plain";
+}
+
 /*
  *  HText_SubmitForm - generate submit data from form fields.
  *  For mailto forms, send the data.
@@ -10111,7 +10131,7 @@ PUBLIC int HText_SubmitForm ARGS4(
      */
     for (anchor_ptr = HTMainText->first_anchor;
 	 anchor_ptr != NULL;
-	 anchor_ptr = next_anchor(HTMainText, anchor_ptr)) {
+	 anchor_ptr = anchor_ptr->next) {
 
 	if (anchor_ptr->link_type != INPUT_ANCHOR)
 	    continue;
@@ -10263,7 +10283,7 @@ PUBLIC int HText_SubmitForm ARGS4(
      */
     for (anchor_ptr = HTMainText->first_anchor;
 	 anchor_ptr != NULL;
-	 anchor_ptr = next_anchor(HTMainText, anchor_ptr)) {
+	 anchor_ptr = anchor_ptr->next) {
 
 	if (anchor_ptr->link_type != INPUT_ANCHOR)
 	    continue;
@@ -10373,7 +10393,7 @@ PUBLIC int HText_SubmitForm ARGS4(
 		    out_csname = LYCharSet_UC[out_cs].MIMEname;
 		if (Boundary) {
 		    StrAllocCopy(MultipartContentType,
-				 "\r\nContent-Type: text/plain");
+				 "\r\nContent-Type: %s");
 		    if (!success && form_ptr->value_cs < 0) {
 			/*  This is weird. */
 			out_csname = "UNKNOWN-8BIT";
@@ -10482,8 +10502,9 @@ PUBLIC int HText_SubmitForm ARGS4(
 						  SemiColon,
 						  PlainText,
 						  Boundary);
-		if ((escaped2 = load_a_file(&use_mime, val_used)) == NULL)
-		    goto exit_disgracefully;
+		if ((escaped2 = load_a_file(&use_mime, val_used)) == NULL) {
+		    StrAllocCopy(escaped2, "");
+		}
 
 		/* FIXME: we need to modify the mime-type here - rp */
 		/* Note: could use LYGetFileInfo for that and for
@@ -10496,7 +10517,7 @@ PUBLIC int HText_SubmitForm ARGS4(
 		    HTSprintf(&escaped1, "; name=\"%s\"", name_used);
 		    HTSprintf(&escaped1, "; filename=\"%s\"", val_used);
 		    if (MultipartContentType) {
-			StrAllocCat(escaped1, MultipartContentType);
+			HTSprintf(&escaped1, MultipartContentType, guess_content_type(val_used));
 			if (use_mime)
 			    StrAllocCat(escaped1, "\r\nContent-Transfer-Encoding: base64");
 		    }
@@ -10545,7 +10566,7 @@ PUBLIC int HText_SubmitForm ARGS4(
 			StrAllocCopy(escaped1, "Content-Disposition: form-data");
 			HTSprintf(&escaped1, "; name=\"%s\"", name_used);
 			if (MultipartContentType)
-			    StrAllocCat(escaped1, MultipartContentType);
+			    HTSprintf(&escaped1, MultipartContentType, "text/plain");
 			StrAllocCat(escaped1, "\r\n\r\n");
 		    } else {
 			escaped1 = HTEscapeSP(name_used, URL_XALPHAS);
@@ -10617,7 +10638,7 @@ PUBLIC int HText_SubmitForm ARGS4(
 			StrAllocCopy(escaped1, "Content-Disposition: form-data");
 			HTSprintf(&escaped1, "; name=\"%s\"", name_used);
 			if (MultipartContentType)
-			    StrAllocCat(escaped1, MultipartContentType);
+			    HTSprintf(&escaped1, MultipartContentType, "text/plain");
 			StrAllocCat(escaped1, "\r\n\r\n");
 		    } else {
 			escaped1 = HTEscapeSP(name_used, URL_XALPHAS);
@@ -10674,7 +10695,7 @@ PUBLIC int HText_SubmitForm ARGS4(
 			StrAllocCopy(escaped1, "Content-Disposition: form-data");
 			HTSprintf(&escaped1, "; name=\"%s\"", name_used);
 			if (MultipartContentType)
-			    StrAllocCat(escaped1, MultipartContentType);
+			    HTSprintf(&escaped1, MultipartContentType, "text/plain");
 			StrAllocCat(escaped1, "\r\n\r\n");
 		    } else {
 			escaped1 = HTEscapeSP(name_used, URL_XALPHAS);
@@ -10732,7 +10753,7 @@ PUBLIC int HText_SubmitForm ARGS4(
 		    StrAllocCopy(escaped1, "Content-Disposition: form-data");
 		    HTSprintf(&escaped1, "; name=\"%s\"", name_used);
 		    if (MultipartContentType)
-			StrAllocCat(escaped1, MultipartContentType);
+			HTSprintf(&escaped1, MultipartContentType, "text/plain");
 		    StrAllocCat(escaped1, "\r\n\r\n");
 		} else {
 		    escaped1 = HTEscapeSP(name_used, URL_XALPHAS);
@@ -10773,7 +10794,7 @@ PUBLIC int HText_SubmitForm ARGS4(
     }
     FREE(previous_blanks);
 
-    CTRACE((tfp, "QUERY (%d) >> \n%s\n", strlen(query), query));
+    CTRACE((tfp, "QUERY (%d) >> \n%s\n", (int) strlen(query), query));
 
     if (submit_item->submit_method == URL_MAIL_METHOD) {
 	HTUserMsg2(gettext("Submitting %s"), submit_item->submit_action);
@@ -10815,18 +10836,6 @@ PUBLIC int HText_SubmitForm ARGS4(
 	FREE(query);
 	return 1;
     }
-#ifdef EXP_FILE_UPLOAD
-exit_disgracefully:
-    FREE(escaped1);
-    FREE(escaped2);
-    FREE(previous_blanks);
-    FREE(copied_name_used);
-    FREE(copied_val_used);
-    FREE(MultipartContentType);
-    FREE(query);
-    FREE(content_type_out);
-    return 0;
-#endif
 }
 
 PUBLIC void HText_DisableCurrentForm NOARGS
@@ -10842,7 +10851,7 @@ PUBLIC void HText_DisableCurrentForm NOARGS
      */
     for (anchor_ptr = HTMainText->first_anchor;
 	 anchor_ptr != NULL;
-	 anchor_ptr = next_anchor(HTMainText, anchor_ptr)) {
+	 anchor_ptr = anchor_ptr->next) {
 	if (anchor_ptr->link_type == INPUT_ANCHOR &&
 	    anchor_ptr->input_field->number == HTFormNumber) {
 
@@ -10867,7 +10876,7 @@ PUBLIC void HText_ResetForm ARGS1(
      */
     for (anchor_ptr = HTMainText->first_anchor;
 	 anchor_ptr != NULL;
-	 anchor_ptr = next_anchor(HTMainText, anchor_ptr)) {
+	 anchor_ptr = anchor_ptr->next) {
 	if (anchor_ptr->link_type == INPUT_ANCHOR) {
 	    if (anchor_ptr->input_field->number == form->number) {
 
@@ -10916,7 +10925,7 @@ PUBLIC BOOLEAN HText_HaveUserChangedForms NOARGS
      */
     for (anchor_ptr = HTMainText->first_anchor;
 	 anchor_ptr != NULL;
-	 anchor_ptr = next_anchor(HTMainText, anchor_ptr)) {
+	 anchor_ptr = anchor_ptr->next) {
 	if (anchor_ptr->link_type == INPUT_ANCHOR) {
 
 	    if (anchor_ptr->input_field->type == F_RADIO_TYPE ||
@@ -10957,7 +10966,7 @@ PUBLIC void HText_activateRadioButton ARGS1(
 	return;
     for (anchor_ptr = HTMainText->first_anchor;
 	 anchor_ptr != NULL;
-	 anchor_ptr = next_anchor(HTMainText, anchor_ptr)) {
+	 anchor_ptr = anchor_ptr->next) {
 	if (anchor_ptr->link_type == INPUT_ANCHOR &&
 		anchor_ptr->input_field->type == F_RADIO_TYPE) {
 
@@ -11703,9 +11712,10 @@ PRIVATE void insert_new_textarea_anchor ARGS2(
      *  Clone and initialize the struct's needed to add a new TEXTAREA
      *  anchor.
      */
-    if (((a = typecalloc(TextAnchor)) == 0) ||
-	((f = typecalloc(FormInfo)) == 0) ||
-	((l = allocHTLine(MAX_LINE)) == 0))
+    POOLallocHTLine(l, MAX_LINE);
+    POOLtypecalloc(TextAnchor, a);
+    POOLtypecalloc(FormInfo, f);
+    if (a == NULL || l == NULL || f == NULL)
 	outofmem(__FILE__, "insert_new_textarea_anchor");
 
     /*  Init all the fields in the new TextAnchor.                 */
@@ -12526,9 +12536,10 @@ PUBLIC int HText_InsertFile ARGS1(
 	    break;
     }
 
-    if (((a = typecalloc(TextAnchor)) == 0) ||
-	((f = typecalloc(FormInfo)) == 0) ||
-	((l = allocHTLine(MAX_LINE)) == 0))
+    POOLallocHTLine(l, MAX_LINE);
+    POOLtypecalloc(TextAnchor, a);
+    POOLtypecalloc(FormInfo, f);
+    if (a == NULL || l == NULL || f == NULL)
 	outofmem(__FILE__, "HText_InsertFile");
 
     /*  Init all the fields in the new TextAnchor.                 */

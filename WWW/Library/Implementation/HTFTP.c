@@ -63,6 +63,7 @@ BUGS:	@@@	Limit connection cache size!
 
 #include <HTFTP.h>	/* Implemented here */
 #include <HTTCP.h>
+#include <HTTP.h>
 #include <HTFont.h>
 
 #define REPEAT_PORT	/* Give the port number for each file */
@@ -2746,8 +2747,6 @@ AgainForMultiNet:
 	    BytesReceived += chunk->size;
 	    if (BytesReceived > BytesReported + 1024) {
 #ifdef _WINDOWS
-		extern int ws_read_per_sec;
-
 		sprintf(NumBytes,gettext("Transferred %d bytes (%5d)"),
 				BytesReceived, ws_read_per_sec);
 #else

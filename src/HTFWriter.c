@@ -190,11 +190,9 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 			path[len-3] = '\0';
 			remove(path);
 		    }
-#ifdef BZIP2_PATH
 		} else if (len > 4 && !strcasecomp(&path[len-3], "bz2")) {
 		    path[len-4] = '\0';
 		    remove(path);
-#endif /* BZIP2_PATH */
 		} else if (len > 2 && !strcasecomp(&path[len-1], "Z")) {
 		    path[len-2] = '\0';
 		    remove(path);
@@ -1020,6 +1018,7 @@ PUBLIC HTStream* HTCompressed ARGS3(
     BOOL can_present = FALSE;
     char fnam[LY_MAXPATH];
     char temp[LY_MAXPATH];	/* actually stores just a suffix */
+    CONST char *program;
     CONST char *suffix;
     char *uncompress_mask = NULL;
     char *compress_suffix = "";
@@ -1048,39 +1047,36 @@ PUBLIC HTStream* HTCompressed ARGS3(
 	     *	We have a presentation mapping for it. - FM
 	     */
 	    can_present = TRUE;
-#ifdef GZIP_PATH
-	    if (!strcasecomp(anchor->content_encoding, "x-gzip") ||
-		!strcasecomp(anchor->content_encoding, "gzip")) {
+	    if ((!strcasecomp(anchor->content_encoding, "x-gzip") ||
+		 !strcasecomp(anchor->content_encoding, "gzip")) &&
+		 (program = HTGetProgramPath(ppGZIP)) != NULL) {
 		/*
 		 *  It's compressed with the modern gzip. - FM
 		 */
-		StrAllocCopy(uncompress_mask, GZIP_PATH);
+		StrAllocCopy(uncompress_mask, program);
 		StrAllocCat(uncompress_mask, " -d --no-name %s");
 		compress_suffix = "gz";
 		break;
 	    }
-#endif /* GZIP_PATH */
-#ifdef BZIP2_PATH
-	    if (!strcasecomp(anchor->content_encoding, "x-bzip2") ||
-		!strcasecomp(anchor->content_encoding, "bzip2")) {
-		StrAllocCopy(uncompress_mask, BZIP2_PATH);
+	    if ((!strcasecomp(anchor->content_encoding, "x-bzip2") ||
+		 !strcasecomp(anchor->content_encoding, "bzip2")) &&
+		(program = HTGetProgramPath(ppBZIP2)) != NULL) {
+		StrAllocCopy(uncompress_mask, program);
 		StrAllocCat(uncompress_mask, " -d %s");
 		compress_suffix = "bz2";
 		break;
 	    }
-#endif /* BZIP2_PATH */
-#ifdef UNCOMPRESS_PATH
-	    if (!strcasecomp(anchor->content_encoding, "x-compress") ||
-		       !strcasecomp(anchor->content_encoding, "compress")) {
+	    if ((!strcasecomp(anchor->content_encoding, "x-compress") ||
+		 !strcasecomp(anchor->content_encoding, "compress")) &&
+		(program = HTGetProgramPath(ppUNCOMPRESS)) != NULL) {
 		/*
 		 *  It's compressed the old fashioned Unix way. - FM
 		 */
-		StrAllocCopy(uncompress_mask, UNCOMPRESS_PATH);
+		StrAllocCopy(uncompress_mask, program);
 		StrAllocCat(uncompress_mask, " %s");
 		compress_suffix = "Z";
 		break;
 	    }
-#endif /* UNCOMPRESS_PATH */
 	    break;
 	}
     }

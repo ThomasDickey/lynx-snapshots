@@ -74,6 +74,11 @@
 int auto_display_charset = -1;
 #endif
 
+CONST char *UC_GNsetMIMEnames[4] =
+	{"iso-8859-1", "x-dec-graphics", "cp437", "x-transparent"};
+
+int UC_GNhandles[4] = {-1, -1, -1, -1};
+
 /*
  *  Some of the code below, and some of the comments, are left in for
  *  historical reasons.  Not all those tables below are currently
@@ -831,6 +836,7 @@ PRIVATE int conv_uni_to_str ARGS4(
 }
 
 PUBLIC int UCInitialized = 0;
+
 /*
  *  [ original comment: - KW ]
  * This is called at sys_setup time, after memory and the console are

@@ -64,7 +64,8 @@ extern HTParentAnchor * HTMainAnchor;	/* Anchor for HTMainText */
 #if defined(VMS) && defined(VAXC) && !defined(__DECC)
 extern int HTVirtualMemorySize;
 #endif /* VMS && VAXC && !__DECC */
-extern HTChildAnchor * HText_childNumber PARAMS((int n));
+
+extern HTChildAnchor * HText_childNextNumber PARAMS((int n, void** prev));
 extern void HText_FormDescNumber PARAMS((int n, char **desc));
 
 /*	Is there any file left?
@@ -111,7 +112,7 @@ extern void HText_setMainTextOwner PARAMS((CONST char * owner));
 extern void print_wwwfile_to_fd PARAMS((FILE * fp, BOOLEAN is_reply));
 extern BOOL HText_select PARAMS((HText *text));
 extern BOOL HText_POSTReplyLoaded PARAMS((DocInfo *doc));
-extern BOOL HTFindPoundSelector PARAMS((char *selector));
+extern BOOL HTFindPoundSelector PARAMS((CONST char *selector));
 extern int HTGetRelLinkNum PARAMS((int num, int rel, int cur));
 extern int HTGetLinkInfo PARAMS((
 	int		number,

@@ -55,7 +55,6 @@ PUBLIC long int HTMaxBytes  = 0;	/* No effective limit */
 #endif
 
 PUBLIC	BOOL HTOutputSource = NO;	/* Flag: shortcut parser to stdout */
-/* extern  BOOL interactive; LJM */
 
 #ifdef ORIGINAL
 struct _HTStream {
@@ -627,8 +626,8 @@ PUBLIC void HTDisplayPartial NOARGS
 		 * If partial_threshold <= 0, then it's a full page
 		 */
 	) {
-	    NumOfLines_partial = HText_getNumOfLines();
-	    LYMainLoop_pageDisplay(Newline_partial);
+	    if (LYMainLoop_pageDisplay(Newline_partial))
+		NumOfLines_partial = HText_getNumOfLines();
 	}
     }
 #else /* nothing */
@@ -688,12 +687,6 @@ PUBLIC int HTCopy ARGS4(
     BOOL suppress_readprogress = NO;
     int bytes;
     int rv = 0;
-#ifdef _WINDOWS	/* 1997/11/11 (Tue) 15:18:16 */
-    long file_length;
-    extern int bytes_already_read;
-
-    file_length = anchor->content_length;
-#endif
 
     /*	Push the data down the stream
     */

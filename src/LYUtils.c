@@ -139,10 +139,9 @@ extern int BSDselect PARAMS((int nfds, fd_set * readfds, fd_set * writefds,
 
 #define COPY_COMMAND "%s %s %s"
 
-extern BOOLEAN LYHaveCJKCharacterSet;
-
 PRIVATE HTList * localhost_aliases = NULL;	/* Hosts to treat as local */
 PRIVATE char *HomeDir = NULL;			/* HOME directory */
+
 PUBLIC	HTList * sug_filenames = NULL;		/* Suggested filenames	 */
 
 /*
@@ -392,7 +391,7 @@ PRIVATE BOOL show_whereis_targets ARGS6(
 					       utf_flag, YES,
 					       &HitOffset,
 					       &LenNeeded)) != NULL)
-	         && (offset + LenNeeded) < LYcols) {
+		 && (offset + LenNeeded) < LYcols) {
 		    Data = cp;
 		    Offset = (offset + HitOffset);
 		} else {
@@ -1356,8 +1355,10 @@ PUBLIC void statusline ARGS1(
 #else
 	/* draw the status bar in the STATUS style */
 	{
-		int a=(strncmp(buffer, ALERT_FORMAT, ALERT_PREFIX_LEN) ||
-		       !hashStyles[s_alert].name) ? s_status : s_alert;
+		int a = (strncmp(buffer, ALERT_FORMAT, ALERT_PREFIX_LEN)
+			|| !hashStyles[s_alert].name)
+			? s_status
+			: s_alert;
 		LynxChangeStyle (a, STACK_ON);
 		LYaddstr(buffer);
 		wbkgdset(LYwin,
@@ -1731,8 +1732,8 @@ PUBLIC int HTCheckForInterrupt NOARGS
 	    } /* end switch */
 	    if (Newline_partial < 1)
 		Newline_partial = 1;
-	    NumOfLines_partial = HText_getNumOfLines();
-	    LYMainLoop_pageDisplay(Newline_partial);
+	    if (LYMainLoop_pageDisplay(Newline_partial))
+		NumOfLines_partial = HText_getNumOfLines();
 	}
 #endif /* DISP_PARTIAL */
 	break;
@@ -3710,7 +3711,7 @@ PUBLIC void LYConvertToURL ARGS2(
 	for(; *cp_url != '\0'; cp_url++)
 	    if (*cp_url == '\\')
 		*cp_url = '/';
-	    cp_url--;
+	cp_url--;
 	if (LYIsDosDrive(*AllocatedString) && *cp_url == ':')
 	    LYAddPathSep(AllocatedString);
     }
@@ -4851,7 +4852,7 @@ PRIVATE char *HomeEnv NOARGS
     }
 #endif
 
-    return result; 
+    return result;
 }
 
 PUBLIC CONST char * Home_Dir NOARGS
@@ -6759,45 +6760,43 @@ PUBLIC int LYCopyFile ARGS2(
 	char *,		dst)
 {
     int code;
+    CONST char *program;
 
-#if !defined(COPY_PATH)
+    if ((program = HTGetProgramPath(ppCOPY)) != NULL) {
+	char *the_command = 0;
 
-#define BUF_SIZE	1024
+	HTAddParam(&the_command, COPY_COMMAND, 1, program);
+	HTAddParam(&the_command, COPY_COMMAND, 2, src);
+	HTAddParam(&the_command, COPY_COMMAND, 3, dst);
+	HTEndParam(&the_command, COPY_COMMAND, 3);
 
-    FILE *fin, *fout;
-    unsigned char buff[BUF_SIZE];
-    int len;
+	CTRACE((tfp, "command: %s\n", the_command));
+	stop_curses();
+	code = LYSystem(the_command);
+	start_curses();
 
-    code = EOF;
-    if ((fin = fopen(src, BIN_R)) != 0) {
-	if ((fout = fopen(dst, BIN_W)) != 0) {
-	    code = 0;
-	    while ((len = fread(buff, 1, BUF_SIZE, fin)) > 0) {
-		fwrite(buff, 1, len, fout);
-		if (ferror(fout)) {
-		    code = EOF;
-		    break;
+	FREE(the_command);
+    } else {
+	FILE *fin, *fout;
+	unsigned char buff[BUFSIZ];
+	int len;
+
+	code = EOF;
+	if ((fin = fopen(src, BIN_R)) != 0) {
+	    if ((fout = fopen(dst, BIN_W)) != 0) {
+		code = 0;
+		while ((len = fread(buff, 1, sizeof(buff), fin)) > 0) {
+		    fwrite(buff, 1, len, fout);
+		    if (ferror(fout)) {
+			code = EOF;
+			break;
+		    }
 		}
+		LYCloseOutput(fout);
 	    }
-	    LYCloseOutput(fout);
+	    LYCloseInput(fin);
 	}
-	LYCloseInput(fin);
     }
-#else
-    char *the_command = 0;
-
-    HTAddParam(&the_command, COPY_COMMAND, 1, COPY_PATH);
-    HTAddParam(&the_command, COPY_COMMAND, 2, src);
-    HTAddParam(&the_command, COPY_COMMAND, 3, dst);
-    HTEndParam(&the_command, COPY_COMMAND, 3);
-
-    CTRACE((tfp, "command: %s\n", the_command));
-    stop_curses();
-    code = LYSystem(the_command);
-    start_curses();
-
-    FREE(the_command);
-#endif
 
     if (code) {
 	HTAlert(CANNOT_WRITE_TO_FILE);

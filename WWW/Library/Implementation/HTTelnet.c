@@ -36,7 +36,7 @@
 
 PRIVATE void do_system ARGS1(char *, command)
 {
-    if (command != 0) {
+    if (!isEmpty(command)) {
 	CTRACE((tfp, "HTTelnet: Command is: %s\n\n", command));
 	LYSystem(command);
 	FREE(command);
@@ -48,6 +48,7 @@ PRIVATE void do_system ARGS1(char *, command)
 */
 PRIVATE int remote_session ARGS2(char *, acc_method, char *, host)
 {
+    CONST char *program;
 	char * user = host;
 	char * password = NULL;
 	char * cp;
@@ -155,14 +156,14 @@ PRIVATE int remote_session ARGS2(char *, acc_method, char *, host)
 #if	!defined(TELNET_DONE) && (defined(NeXT) && defined(NeXTSTEP) && NeXTSTEP<=20100)
 #define FMT_TELNET "%s%s%s %s %s"
 
-#ifdef TELNET_PATH
-	HTAddParam(&command, FMT_TELNET, 1, TELNET_PATH);
-	HTOptParam(&command, FMT_TELNET, 2, user ? " -l " : "");
-	HTAddParam(&command, FMT_TELNET, 3, user);
-	HTAddParam(&command, FMT_TELNET, 4, hostname);
-	HTAddParam(&command, FMT_TELNET, 5, port);
-	HTEndParam(&command, FMT_TELNET, 5);
-#endif
+	if ((program = HTGetProgramPath(ppTELNET)) != NULL) {
+	    HTAddParam(&command, FMT_TELNET, 1, program);
+	    HTOptParam(&command, FMT_TELNET, 2, user ? " -l " : "");
+	    HTAddParam(&command, FMT_TELNET, 3, user);
+	    HTAddParam(&command, FMT_TELNET, 4, hostname);
+	    HTAddParam(&command, FMT_TELNET, 5, port);
+	    HTEndParam(&command, FMT_TELNET, 5);
+	}
 	do_system(command);
 #define TELNET_DONE
 #endif
@@ -176,31 +177,31 @@ PRIVATE int remote_session ARGS2(char *, acc_method, char *, host)
 
 	switch (login_protocol) {
 	case rlogin:
-#ifdef RLOGIN_PATH
-	    HTAddParam(&command, FMT_RLOGIN, 1, RLOGIN_PATH);
-	    HTAddParam(&command, FMT_RLOGIN, 2, hostname);
-	    HTOptParam(&command, FMT_RLOGIN, 3, user ? " -l " : "");
-	    HTAddParam(&command, FMT_RLOGIN, 4, user);
-	    HTEndParam(&command, FMT_RLOGIN, 4);
-#endif
+	    if ((program = HTGetProgramPath(ppRLOGIN)) != NULL) {
+		HTAddParam(&command, FMT_RLOGIN, 1, program);
+		HTAddParam(&command, FMT_RLOGIN, 2, hostname);
+		HTOptParam(&command, FMT_RLOGIN, 3, user ? " -l " : "");
+		HTAddParam(&command, FMT_RLOGIN, 4, user);
+		HTEndParam(&command, FMT_RLOGIN, 4);
+	    }
 	    break;
 
 	case tn3270:
-#ifdef TN3270_PATH
-	    HTAddParam(&command, FMT_TN3270, 1, TN3270_PATH);
-	    HTAddParam(&command, FMT_TN3270, 2, hostname);
-	    HTAddParam(&command, FMT_TN3270, 3, port);
-	    HTEndParam(&command, FMT_TN3270, 3);
-#endif
+	    if ((program = HTGetProgramPath(ppTN3270)) != NULL) {
+		HTAddParam(&command, FMT_TN3270, 1, program);
+		HTAddParam(&command, FMT_TN3270, 2, hostname);
+		HTAddParam(&command, FMT_TN3270, 3, port);
+		HTEndParam(&command, FMT_TN3270, 3);
+	    }
 	    break;
 
 	case telnet:
-#ifdef TELNET_PATH
-	    HTAddParam(&command, FMT_TELNET, 1, TELNET_PATH);
-	    HTAddParam(&command, FMT_TELNET, 2, hostname);
-	    HTAddParam(&command, FMT_TELNET, 3, port);
-	    HTEndParam(&command, FMT_TELNET, 3);
-#endif
+	    if ((program = HTGetProgramPath(ppTELNET)) != NULL) {
+		HTAddParam(&command, FMT_TELNET, 1, program);
+		HTAddParam(&command, FMT_TELNET, 2, hostname);
+		HTAddParam(&command, FMT_TELNET, 3, port);
+		HTEndParam(&command, FMT_TELNET, 3);
+	    }
 	    break;
 	}
 

@@ -57,12 +57,11 @@
 #include <HTAlert.h>		/* HTConfirm(), HTPrompt()	*/
 #include <HTAAUtil.h>		/* AA common to both sides	*/
 #include <HTAssoc.h>		/* Assoc list			*/
+#include <HTAccess.h>		/* Are we using an HTTP gateway? */
 #include <HTAABrow.h>		/* Implemented here		*/
 #include <HTUU.h>		/* Uuencoding and uudecoding	*/
 
 #include <LYLeaks.h>
-
-extern BOOL using_proxy;	/* Are we using an HTTP gateway? */
 
 /*
 **  Local datatype definitions

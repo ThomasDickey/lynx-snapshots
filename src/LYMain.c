@@ -96,10 +96,6 @@ PUBLIC char *syslog_txt = NULL;		/* syslog arb text for session */
 #endif /* SYSLOG_REQUESTED_URLS */
 #endif /* !VMS */
 
-#ifdef VMS
-PUBLIC char *LYCSwingPath = NULL;
-#endif /* VMS */
-
 #ifdef DIRED_SUPPORT
 PUBLIC BOOLEAN lynx_edit_mode = FALSE;
 PUBLIC BOOLEAN no_dired_support = FALSE;
@@ -530,8 +526,7 @@ PUBLIC int LYNoZapKey = 0; /* 0: off (do z checking), 1: full, 2: initially */
 #endif
 
 #ifndef DISABLE_NEWS
-extern int HTNewsChunkSize; /* Number of news articles per chunk (HTNews.c) */
-extern int HTNewsMaxChunk;  /* Max news articles before chunking (HTNews.c) */
+#include <HTNews.h>
 #endif
 
 PUBLIC BOOLEAN FileInitAlreadyDone = FALSE;
@@ -633,8 +628,10 @@ PRIVATE void free_lynx_globals NOARGS
 
 #ifdef VMS
     Define_VMSLogical("LYNX_VERSION", "");
-    FREE(LYCSwingPath);
 #endif /* VMS */
+#ifndef VMS
+    FREE(lynx_version_putenv_command);
+#endif
 
 #if USE_VMS_MAILER
     FREE(mail_adrs);
@@ -1013,7 +1010,7 @@ PUBLIC int main ARGS2(
     /* Set the text message domain.  */
 #if defined(HAVE_LIBINTL_H) || defined(HAVE_LIBGETTEXT_H)
 #ifndef __DJGPP__
-    if ((cp = LYGetEnv("LYNX_LOCALDIR")) == 0)
+    if ((cp = LYGetEnv("LYNX_LOCALEDIR")) == 0)
 	cp = LOCALEDIR;
     bindtextdomain ("lynx", cp);
 #endif /* !__DJGPP__ */
@@ -1168,12 +1165,6 @@ PUBLIC int main ARGS2(
 		gettext("No such directory"));
 	exit_immediately(EXIT_FAILURE);
     }
-
-#ifdef VMS
-#ifdef CSWING_PATH
-    StrAllocCopy(LYCSwingPath, CSWING_PATH);
-#endif /* CSWING_PATH */
-#endif /* VMS */
 
 #if USE_VMS_MAILER
 #ifndef MAIL_ADRS

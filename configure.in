@@ -2,6 +2,19 @@ dnl Process this file with autoconf to produce a configure script.
 dnl written jan/1997
 dnl by T.E.Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
+dnl
+dnl ask PRCS to plug-in the project-version for the configure-script.
+dnl $Format: AC_REVISION($ProjectVersion: 2.8.5dev.11 $\""$)
+AC_REVISION(none)
+
+# Save the original $CFLAGS so we can distinguish whether the user set those
+# in the environment, or whether autoconf added -O and -g options:
+ORIGINAL_CFLAGS="$CFLAGS"
+
+# For autoconf 2.13, make sure we have no cache file at the beginning of this
+# script.  That fixes problems with tests whose cached values change from one
+# run to the next, as well as with tests that are order-dependent.
+rm -f config.cache
 
 AC_PREREQ(2.13.20020210)
 AC_INIT(userdefs.h)
@@ -79,6 +92,9 @@ CF_ARG_ENABLE(find-leaks,
 AC_MSG_RESULT($with_leak_checks)
 test "$with_leak_checks" = "yes" && AC_DEFINE(LY_FIND_LEAKS)
 
+# The comment about adding -g to $CFLAGS is unclear.  Autoconf tries to add
+# a -g flag; we remove it if the user's $CFLAGS was not set and debugging is
+# disabled.
 AC_MSG_CHECKING(if you want to enable debug-code)
 CF_ARG_ENABLE(debug,
 	[  --enable-debug          compile w/ debugging (if \$CFLAGS is set, add -g there, too)],
@@ -88,7 +104,7 @@ AC_MSG_RESULT($with_debug)
 if test "$with_debug" = "yes" ; then
 	case $host_os in
 	ultrix*|osf*)
-		CF_STRIP_O_OPT(CFLAGS)
+		test -z "$ORIGINAL_CFLAGS" && CF_STRIP_O_OPT(CFLAGS)
 		if test -z "$GCC" ; then
 			CFLAGS="$CFLAGS -g3"
 		fi
@@ -98,10 +114,10 @@ else
 	case $host_os in
 	osf*) #(vi
 		test -z "$GCC" && CFLAGS="$CFLAGS -std1"
-		CF_STRIP_G_OPT(CFLAGS)
+		test -z "$ORIGINAL_CFLAGS" && CF_STRIP_G_OPT(CFLAGS)
 		;;
 	*)
-		CF_STRIP_G_OPT(CFLAGS)
+		test -z "$ORIGINAL_CFLAGS" && CF_STRIP_G_OPT(CFLAGS)
 		;;
 	esac
 fi
@@ -299,7 +315,7 @@ CF_HELP_MESSAGE(
 Basic Configuration Options:)
 
 dnl internationalization macros
-CF_BUNDLED_INTL(makefile)
+CF_BUNDLED_INTL(makefile,disable)
 
 INTLDIR_CPPFLAGS="#"
 if test -z "$INTLDIR_MAKE" ; then
@@ -394,16 +410,9 @@ esac],
 	[cf_cv_screen=curses])])
 
 case $cf_cv_screen in
-ncurses|ncursesw|slang)
+curses|ncurses*)
+	CF_WITH_CURSES_DIR
 	;;
-pdcurses)
-	cf_cv_ncurses_header=xcurses.h
-	;;
-#curses)
-#	if eval "test \"`echo '$''{'cf_cv_ncurses_header'+set}'`\" != set"; then
-#		cf_cv_ncurses_header=curses.h
-#	fi
-#	;;
 esac
 
 case $cf_cv_screen in
@@ -426,6 +435,7 @@ ncursesw)
 	CF_NCURSES_VERSION
 	;;
 pdcurses)
+	cf_cv_ncurses_header=xcurses.h
 	# do this last, since it changes definition of main: CF_PDCURSES_X11
 	;;
 slang)
@@ -536,6 +546,7 @@ dnl --------------------------------------------------------------------------
 dnl Checks for library units
 dnl --------------------------------------------------------------------------
 
+AC_FUNC_ALLOCA
 AC_FUNC_VFORK
 CF_FIONBIO
 CF_REMOVE_BROKEN

@@ -180,15 +180,15 @@ PRIVATE char *sprint_bytes ARGS3(
 #ifdef EXP_READPROGRESS
 #define TIME_HMS_LENGTH (16)
 PRIVATE char *sprint_tbuf ARGS2(
-       char *,         s,
-       long,           t)
+	char *,	       s,
+	long,	       t)
 {
     if (t > 3600)
-       sprintf (s, "%ldh%ldm%lds", t / 3600, (t / 60) % 60, t % 60);
+	sprintf (s, "%ldh%ldm%lds", t / 3600, (t / 60) % 60, t % 60);
     else if (t > 60)
-       sprintf (s, "%ldm%lds", t / 60, t % 60);
+	sprintf (s, "%ldm%lds", t / 60, t % 60);
     else
-       sprintf (s, "%ld sec", t);
+	sprintf (s, "%ld sec", t);
     return s;
 }
 #endif /* EXP_READPROGRESS */
@@ -244,15 +244,18 @@ PUBLIC void HTReadProgress ARGS2(
 	total_last = total;
 
 	/*
-	 * Optimal refresh time:  every 0.2 sec, use interpolation.  Transfer
-	 * rate is not constant when we have partial content in a proxy, so
-	 * interpolation lies - will check every second at least for sure.
+	 * Optimal refresh time:  every 0.2 sec
 	 */
-#ifdef HAVE_GETTIMEOFDAY
+#if defined(HAVE_GETTIMEOFDAY) || (defined(HAVE_FTIME) && defined(HAVE_SYS_TIMEB_H))
 	if (now >= last + 0.2)
 	    renew = 1;
 #else
-	if (((bytes - bytes_last) > (transfer_rate / 5)) || (now != last)) {
+	/*
+	 * Use interpolation.  (The transfer rate may be not constant
+	 * when we have partial content in a proxy.  We adjust transfer_rate
+	 * once a second to minimize interpolation error below.)
+	 */
+	if ((now != last) || ((bytes - bytes_last) > (transfer_rate / 5))) {
 	    renew = 1;
 	    bytes_last += (transfer_rate / 5);	/* until we got next second */
 	}
@@ -263,7 +266,7 @@ PUBLIC void HTReadProgress ARGS2(
 		if (bytes_last != bytes)
 		    last_active = now;
 		bytes_last = bytes;
-		transfer_rate = (long)(bytes / (now - first)); /* more accurate here */
+		transfer_rate = (long)(bytes / (now - first)); /* more accurate value */
 	    }
 
 	    if (total > 0)
@@ -286,13 +289,13 @@ PUBLIC void HTReadProgress ARGS2(
 #ifdef EXP_READPROGRESS
 	    if (LYTransferRate == rateEtaBYTES
 	     || LYTransferRate == rateEtaKB) {
-                char tbuf[TIME_HMS_LENGTH];
+		char tbuf[TIME_HMS_LENGTH];
 		if (now - last_active >= 5)
-                    HTSprintf (&line,
+		    HTSprintf (&line,
 			       gettext(" (stalled for %s)"),
 			       sprint_tbuf (tbuf, (long)(now - last_active)));
 		if (total > 0 && transfer_rate)
-                    HTSprintf (&line,
+		    HTSprintf (&line,
 			       gettext(", ETA %s"),
 			       sprint_tbuf (tbuf, (long)((total - bytes)/transfer_rate)));
 	    }

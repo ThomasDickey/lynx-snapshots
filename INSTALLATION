@@ -345,6 +345,8 @@ II. Compile instructions -- UNIX
         Note that this flag is ignored if the CFLAGS environment
         variable is set, in that case "-g" (or whatever) has to
         be included in the CFLAGS value to get debugging.
+	Autoconf normally adds -g and -O options to CFLAGS if CFLAGS
+	was not set, and if the compiler supports those options.
 
   --enable-default-colors		(define USE_DEFAULT_COLORS)
   	Enable use of default-color background (ncurses/slang).  Either
@@ -466,6 +468,10 @@ II. Compile instructions -- UNIX
   --with-charsets=list			(define ALL_CHARSETS)
  	Limit the number of charsets that are compiled-in to the specified
 	list of comma-separated MIME names.
+
+  --with-curses-dir
+	Specify directory under which curses/ncurses is installed.  This
+	assumes a standard install, e.g., with an include and lib subdirectory.
 
   --with-dbmalloc
 	use Conor Cahill's dbmalloc library
@@ -770,32 +776,32 @@ Visual C++:
 
 V. Compile instructions -- 386 DOS
 
-    Compiling for DOS with DJGPP has traditionally been a multistep     
-    procedure. Now, if you have a full installation of DJGPP you can    
-    also install using the configure script, just as in the UNIX        
-    section. This needs to be done under a BASH shell. Use a shell      
-    script to run configure as in the example at the end of this        
-    section. Otherwise you can follow the below instructions. The       
-    multistep procedure for DOS may not be supported in the future      
-    and use of the configure script is recommended. The information     
-    about required libraries and unpacking applies to both methods of   
-    compiling.                                                          
+    Compiling for DOS with DJGPP has traditionally been a multistep
+    procedure. Now, if you have a full installation of DJGPP you can
+    also install using the configure script, just as in the UNIX
+    section. This needs to be done under a BASH shell. Use a shell
+    script to run configure as in the example at the end of this
+    section. Otherwise you can follow the below instructions. The
+    multistep procedure for DOS may not be supported in the future
+    and use of the configure script is recommended. The information
+    about required libraries and unpacking applies to both methods of
+    compiling.
 
     First install the C compiler and its libraries (see readme.1st from
     DJGPP distribution).
 
-    Originally, lynx makefiles come with the initial -O2 optimization   
-    level. If you experience compilation process too slow due to paging 
-    to the disk (DPMI server provide virtual memory, when in lack of    
-    RAM), you may change optimization to -O1 or turn the optimization   
-    off entirely.                                                       
+    Originally, lynx makefiles come with the initial -O2 optimization
+    level. If you experience compilation process too slow due to paging
+    to the disk (DPMI server provide virtual memory, when in lack of
+    RAM), you may change optimization to -O1 or turn the optimization
+    off entirely.
 
-    If using optimization level -O2 or -O3 with older versions of DJGPP   
-    and GCC, you may need to "stubedit" your "cc1.exe" file to enlarge    
-    compiler stack size. For instance, if using DJGPP 2.02 and GCC 2.8.1, 
-    to compile with -O3 optimization, the stub needs to be edited to give 
-    a larger stack. To do this go into djgpp\lib\gcc-lib\djgpp\2.81 and   
-    either type the command:                                              
+    If using optimization level -O2 or -O3 with older versions of DJGPP
+    and GCC, you may need to "stubedit" your "cc1.exe" file to enlarge
+    compiler stack size. For instance, if using DJGPP 2.02 and GCC 2.8.1,
+    to compile with -O3 optimization, the stub needs to be edited to give
+    a larger stack. To do this go into djgpp\lib\gcc-lib\djgpp\2.81 and
+    either type the command:
    	 "stubedit cc1.exe bufsize=63k minstack=2M",
     or edit interactively with: "stubedit cc1.exe". Current versions of
     DJGPP and GCC generally work with the standard stack.
@@ -812,7 +818,7 @@ V. Compile instructions -- 386 DOS
 
     If you wish to compile with "USE_ZLIB" (recommended), you must have the
     zlib library.  Get the source from
-	    http://www.gzip.org/zlib/ 
+	    http://www.gzip.org/zlib/
     and compile it.  Put libz.a in the lib subdirectory of DJGPP, and put
     zlib.h and zconf.h in the include subdirectory.
 
@@ -846,12 +852,12 @@ V. Compile instructions -- 386 DOS
      	setcbrk(setting);
      # else
 
-    If you wish to compile with SSL enabled, you need to get and          
-    compile openssl. The DJGPP port has been successfully compiled with   
-    openssl-0.9.6b. After obtaining the source file, unpack it with       
-    DJTARX, then apply the patch for DOS before compiling. This will      
-    create a file "install.djgpp" which gives further details. The patch  
-    can be obtained from the openssl-dev archives at:                     
+    If you wish to compile with SSL enabled, you need to get and
+    compile openssl. The DJGPP port has been successfully compiled with
+    openssl-0.9.6b. After obtaining the source file, unpack it with
+    DJTARX, then apply the patch for DOS before compiling. This will
+    create a file "install.djgpp" which gives further details. The patch
+    can be obtained from the openssl-dev archives at:
     "http://www.mail-archive.com/openssl-dev@openssl.org/msg09104/096b.pch.gz"
 
     In order for lynx to be able to break out of a stuck nameserver
@@ -863,7 +869,7 @@ V. Compile instructions -- 386 DOS
     @@ -74,6 +74,11 @@
           longjmp (sig_jmp, 1);
      }
-     
+
     +void sig_handler_watt (int sig)
     +{
     +   sig_handler (sig);

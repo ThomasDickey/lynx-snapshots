@@ -30,9 +30,6 @@
 #include <LYCharSets.h>
 #include <LYLeaks.h>
 
-extern BOOL HTPassEightBitRaw;
-extern BOOL HTPassHighCtrlRaw;
-
 PUBLIC int HTPlain_lastraw = -1;
 PRIVATE int HTPlain_bs_pending = 0; /* 1:bs 2:underline 3:underline+bs - kw */
 

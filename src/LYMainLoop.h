@@ -10,7 +10,7 @@ extern int LYGetNewline NOPARAMS;
 extern int mainloop NOPARAMS;
 extern void HTAddGotoURL PARAMS((char *url));
 extern void LYCloseTracelog NOPARAMS;
-extern void LYMainLoop_pageDisplay PARAMS((int line_num));
+extern BOOL LYMainLoop_pageDisplay PARAMS((int line_num));
 extern void LYSetNewline PARAMS((int value));
 extern void handle_LYK_TRACE_TOGGLE NOPARAMS;
 extern void handle_LYK_WHEREIS PARAMS((int cmd, BOOLEAN *refresh_screen));
