@@ -1339,12 +1339,12 @@
  * the version definition with the Project Version on checkout.  Just
  * ignore it. - kw */
 /* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
-#define LYNX_VERSION "2.8.3pre.6"
+#define LYNX_VERSION "2.8.3pre.7"
 #define LYNX_WWW_HOME "http://lynx.browser.org/"
 #define LYNX_WWW_DIST "http://lynx.isc.org/current/"
 #define LYNX_RELEASE FALSE
 /* $Format: "#define LYNX_DATE \"$ProjectDate$\""$ */
-#define LYNX_DATE "Mon, 17 Apr 2000 03:59:17 -0700"
+#define LYNX_DATE "Wed, 19 Apr 2000 18:57:56 -0700"
 #define LYNX_DATE_OFF 5		/* truncate the automatically-generated date */
 #define LYNX_DATE_LEN 11	/* truncate the automatically-generated date */
 #define LYNX_RELEASE_DATE "1999"
@@ -1388,9 +1388,21 @@
 #else
 
 #ifdef DOSPATH
-/*  Something has to be defined for this or we don't compile. */
+
+#ifdef _WINDOWS
+#ifdef USE_ALT_BLAT_MAILER
+#define SYSTEM_MAIL		"BLAT"
+#define SYSTEM_MAIL_FLAGS	""
+#else
+#define SYSTEM_MAIL		"BLATJ"
+#define SYSTEM_MAIL_FLAGS	""
+#endif
+#else
+/* have to define something... */
 #define SYSTEM_MAIL "sendmail"
 #define SYSTEM_MAIL_FLAGS "-t -oi"
+#endif
+
 /*
 **  The following executables may be used at run time.  Unless you change
 **  the definitions to include the full directories, they will be sought

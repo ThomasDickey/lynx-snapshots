@@ -942,7 +942,7 @@ PRIVATE int HTML_start_element ARGS6(
     char *I_value = NULL;
     char *I_name = NULL;
     char *temp = NULL;
-    int dest_char_set = UCLYhndl_for_unrec;
+    int dest_char_set = -1;
     HTParentAnchor *dest = NULL;	     /* An anchor's destination */
     BOOL dest_ismap = FALSE;		     /* Is dest an image map script? */
     BOOL UseBASE = TRUE;		     /* Resolved vs. BASE if present? */
@@ -1598,16 +1598,18 @@ PRIVATE int HTML_start_element ARGS6(
 				      )) != NULL) {
 		if (pdoctitle && !HTAnchor_title(dest))
 		    HTAnchor_setTitle(dest, *pdoctitle);
-		dest = NULL;
+
+		/* Don't allow CHARSET attribute to change *this* document's
+		   charset assumption. - kw */
+		if (dest == me->node_anchor)
+		    dest = NULL;
 		if (present[HTML_LINK_CHARSET] &&
 		    value[HTML_LINK_CHARSET] && *value[HTML_LINK_CHARSET] != '\0') {
 		    dest_char_set = UCGetLYhndl_byMIME(value[HTML_LINK_CHARSET]);
 		    if (dest_char_set < 0)
 			dest_char_set = UCLYhndl_for_unrec;
-		    if (dest_char_set < 0)  /* recover if not defined :-( */
-			dest_char_set = UCLYhndl_for_unspec; /* always >= 0 */
 		}
-		if (dest)
+		if (dest && dest_char_set >= 0)
 		    HTAnchor_setUCInfoStage(dest, dest_char_set,
 					    UCT_STAGE_PARSER,
 					    UCT_SETBY_LINK);
@@ -3153,8 +3155,6 @@ PRIVATE int HTML_start_element ARGS6(
 		dest_char_set = UCGetLYhndl_byMIME(temp);
 		if (dest_char_set < 0) {
 			dest_char_set = UCLYhndl_for_unrec;
-		if (dest_char_set < 0) /* recover if not defined :-( */
-			dest_char_set = UCLYhndl_for_unspec; /* always >= 0 */
 		}
 	    }
 	    if (title != NULL || dest_ismap == TRUE || dest_char_set >= 0) {
@@ -3166,7 +3166,9 @@ PRIVATE int HTML_start_element ARGS6(
 		HTAnchor_setTitle(dest, title);
 	    if (dest && dest_ismap)
 		dest->isISMAPScript = TRUE;
-	    if (dest) {
+	    /* Don't allow CHARSET attribute to change *this* document's
+	       charset assumption. - kw */
+	    if (dest && dest != me->node_anchor && dest_char_set >= 0) {
 		/*
 		**  Load the anchor's chartrans structures.
 		**  This should be done more intelligently
@@ -4939,7 +4941,7 @@ PRIVATE int HTML_start_element ARGS6(
 				       (I.value[i] ==  ' ' ?
 					HT_NON_BREAK_SPACE : I.value[i]));
 		}
-		while (i < chars) {
+		while (i++ < chars) {
 		    HTML_put_character(me, HT_NON_BREAK_SPACE);
 		}
 	    }
@@ -5373,7 +5375,7 @@ PRIVATE int HTML_start_element ARGS6(
 		 *  ignore them.  Note that if we somehow get tripped
 		 *  up and a wrap still does occur before all 6 of the
 		 *  underscores are output, the wrapped ones won't be
-		 *   treated as part of the editing window, nor be
+		 *  treated as part of the editing window, nor be
 		 *  highlighted when not editing (Yuk!). - FM
 		 */
 		for (i = 0; i < 6; i++) {
@@ -5436,7 +5438,7 @@ PRIVATE int HTML_start_element ARGS6(
 			HTML_put_character(me,
 					   (I.value[i] ==  ' ' ?
 					    HT_NON_BREAK_SPACE : I.value[i]));
-		    while (i < chars)
+		    while (i++ < chars)
 			HTML_put_character(me, HT_NON_BREAK_SPACE);
 		}
 		if (HTCJK == JAPANESE) {

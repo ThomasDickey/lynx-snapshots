@@ -8,9 +8,7 @@
 #ifndef HTALERT_H
 #define HTALERT_H 1
 
-#ifndef HTUTILS_H
-#include <HTUtils.h>
-#endif
+#include <LYCookie.h>
 
 #define ALERT_PREFIX_LEN 5
 
@@ -129,7 +127,7 @@ extern void HTPromptUsernameAndPassword PARAMS((
 **		TRUE if the cookie should be set.
 */
 extern BOOL HTConfirmCookie PARAMS((
-	void *		dp,
+	domain_entry *	dp,
 	CONST char *	server,
 	CONST char *	name,
 	CONST char *	value));

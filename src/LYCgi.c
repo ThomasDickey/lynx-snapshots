@@ -214,7 +214,12 @@ PRIVATE int LYLoadCGI ARGS4(
 	} else {
 	    /* Found PATH_INFO data.  Strip it off of pgm and into path_info. */
 	    StrAllocCopy(path_info, pgm + strlen(pgm_buff));
-	    StrAllocCopy(pgm, pgm_buff);
+	    /* The following is safe since pgm_buff was derived from pgm
+	       by stripping stuff off its end and by HTUnEscaping, so we
+	       know we have enough memory allocated for pgm.  Note that
+	       pgm_args may still point into that memory, so we cannot
+	       reallocate pgm here. - kw */
+	    strcpy(pgm, pgm_buff);
 	    CTRACE((tfp, "LYNXCGI: stat() of %s succeeded, path_info=\"%s\".\n",
 			pgm_buff, path_info));
 	}

@@ -4,16 +4,22 @@ Ideally you would never have to read this, but inevitably problems
 do arise.  As implementation and installation problems become known
 they will be outlined in this file.
 
+---------
+
     Control-Z on Unix can cause aberrant behavior.  If you encounter
     problems, use -restrictions=suspend to disable it, and only '!'
     for escapes to shell (on VMS control-Z is unconditional 'Q'uit,
     with no attempt to suspend the Lynx process only temporarily).
     Control-Z on Unix often works better with slang.
 
+---------
+
     Screen resizing can be a bit funny.  If you resize the screen,
     documents that have been cached will be out of whack.  Any further
     documents will look fine.  You can reload documents to the current
     window size with CTRL-R
+
+---------
 
     If the configure script dies when it discovers that gcc is broken,
     despite the fact there is a perfectly good ANSI cc in the PATH,
@@ -23,9 +29,13 @@ they will be outlined in this file.
       setenv CC cc   (or   set CC=cc; export CC  , depending on the shell)
       ./configure
 
-    If you run into a problem compiling LYMainLoop.c or GridText.c, try
-    omitting -O from the compiler flags; these are very big files and may not
-    compile successfully if you include optimisation.
+---------
+
+    If you run into a problem compiling GridText.c, try omitting -O from the
+    compiler flags; these are very big files and may not compile successfully
+    if you include optimization.
+
+---------
 
     On a Sun system, the message:
         "Alert!:  Unable to connect to remote host"
@@ -39,6 +49,8 @@ they will be outlined in this file.
     Makefile define it and build Lynx again, or vice versa.  Also, if
     you have upgraded to the bind-8.1 or later library, you should try
     changing -lresolv to -lbind.
+
+---------
 
     On Sun systems when accessing sites that use multiple IPs for one URL,
     you may experience a core dump.  It's a bug in the resolver library,
@@ -67,6 +79,8 @@ they will be outlined in this file.
     for the boldStyle resource/Bold_style default, all of which begin
     with "Offset_". (helpful hint from kevin@traffic.den.mmc.com)
 
+---------
+
     Directory browsing has been implemented for VMS, but there are no
     plans to port additional DIRED support, because Lynx must handle files
     as streams, and this precludes "serious" Directory/File Management on
@@ -74,15 +88,21 @@ they will be outlined in this file.
     available from ftp://narnia.memst.edu), or define CSWING_PATH in
     userdefs.h or lynx.cfg to invoke CSwing via the DIRED_MENU command.
 
+---------
+
     If one switches between K)eypad "Numbers act as arrows" versus "Links
     are numbered" in the 'o'ptions menu when the current document is a
     DIRED menu in which links have been tagged, the tagging can be trashed
     (so don't switch at such times 8-).
 
+---------
+
     When "Links are numbered" is on, if a line is split on an anchor (to
     obey right margin restrictions), and there is no space in the bolded
     string such that the entire "[#]string" must be moved down, the "[#]"
     becomes bolded, instead on only "string".
+
+---------
 
     The Mosaic v2.5 hostlist uses HTML similar to that of Lynx's bookmark
     file, but with </UL></HTML> at the bottom, such that it is not fully
@@ -93,8 +113,12 @@ they will be outlined in this file.
     to the Lynx file in your Mosaic file, so that you can access both files
     with both clients.
 
+---------
+
     SOCKSification and the -socks switch have not yet been integrated with
     the slang library support.
+
+---------
 
     There is an apparently broken version of select() in libcurses.a
     of HP/UX 10.10.  It also breaks tn3270, ncftp, emacs, and xemacs.
@@ -102,7 +126,7 @@ they will be outlined in this file.
     		LIBS="-lc -lcurses -ltermcap \
                       ^^^
     (i.e, adding -lc *before* the -lcurses) in the snake3 and snake3-slang
-    targets of the top level Makefile yields a useable image, but with
+    targets of the top level Makefile yields a usable image, but with
     inappropriate video attributes on the Lynx displays (reverse video and
     underscores on everything).  Using "-lc -lHcurses" instead fixes the
                                             ^^^^^^^^^
@@ -119,6 +143,8 @@ they will be outlined in this file.
     Updated NOTE (1997-12-15): PHCO_8086 & PHCO_8947 are very old and are
 	  no longer available.  The current patch to install if running
 	  under HP-UX 10.20 is PHCO_11342.
+
+---------
 
     Lynx juggles variable abilities of curses packages or emulations to
     display bolding and underlining simultaneously.  This may fail if
@@ -156,6 +182,8 @@ they will be outlined in this file.
     but if it fails (for instance, you are running under "screen"), try
     setting the -noreverse commandline option.
 
+---------
+
     On VMS, Lynx, and other TCP-IP software, have been experiencing chronic
     problems of incompatibilities between DECC and MultiNet headers whenever
     new versions of either DECC or MultiNet are released.  The Lynx build
@@ -190,3 +218,27 @@ they will be outlined in this file.
        http://alder.cc.kcl.ac.uk/fileserv/zip/socketshr_src_09d-2.zip
        ftp://ftp2.kcl.ac.uk/zip/socketshr_src_09d-2.zip
 
+---------
+
+    On Linux, glibc 2.1.3 (first reported 3 March 2000) has an error which
+    interferes with ncurses.  The file <sys/ucontext.h>, which is included by
+    <signal.h>, contains these lines:
+
+		# define TRAPNO TRAPNO 
+		  ERR, 
+		# define ERR    ERR 
+		  EIP, 
+
+    while ncurses' header curses.h contains this:
+
+		#if	!defined(ERR) || ((ERR) != -1)
+		#define ERR     (-1)
+		#endif
+
+    which fails to compile because of the redefinition.
+
+    Quick fix: modify <sys/ucontext.h>, for instance, changing ERR to
+    GLIBC_BUG (the symbol is not used).
+
+    Better fix: upgrade to a better version of glibc which presumably
+    has been tested with normal applications.

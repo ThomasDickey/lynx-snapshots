@@ -41,14 +41,6 @@ Blat <filename> -t <recipient> [optional switches (see below)]
 
 */
 
-static char bl_cmd_file[512];
-
-PRIVATE void blat_clean(void)
-{
-    if (bl_cmd_file[0]) {
-	bl_cmd_file[0] = '\0';
-    }
-}
 
 PRIVATE char *blat_cmd(
 	char *mail_cmd,
@@ -58,12 +50,30 @@ PRIVATE char *blat_cmd(
 	char *ccaddr,
 	char *mail_addr)
 {
-    FILE *fp;
     static char *b_cmd;
+
+#ifdef USE_ALT_BLAT_MAILER
+
+    HTSprintf0(&b_cmd, "%s %s -t %s -s \"%s\" %s %s %s %s %s",
+		mail_cmd,
+		filename,
+		address,
+		subject,
+		system_mail_flags,
+		ccaddr? "-c" : "",
+		ccaddr? ccaddr : "",
+		mail_addr? (mail_addr[0]? "-f" : "") : "",
+		mail_addr? (mail_addr[0]? mail_addr : "") : "");
+
+#else /* !USE_ALT_BLAT_MAILER */
+
+    static char bl_cmd_file[512];
+    FILE *fp;
 #ifdef __CYGWIN__
     char dosname[LY_MAXPATH];
 #endif
 
+    bl_cmd_file[0] = '\0';
     if ((fp = LYOpenTemp(bl_cmd_file, ".blt", "w")) == NULL) {
 	HTAlert(FORM_MAILTO_FAILED);
 	return NULL;
@@ -93,10 +103,12 @@ PRIVATE char *blat_cmd(
     HTSprintf0(&b_cmd, "%s @%s", mail_cmd, bl_cmd_file);
 #endif
 
+#endif /* USE_ALT_BLAT_MAILER */
+
     return b_cmd;
 }
 
-#endif	/* SH_EX */
+#endif /* USE_BLAT_MAILER */
 
 /* HTUnEscape with control-code nuking */
 PRIVATE void SafeHTUnEscape ARGS1(
@@ -656,11 +668,6 @@ PUBLIC void mailform ARGS4(
     LYSleepMsg();
     start_curses();
     LYRemoveTemp(my_tmpfile);
-
-#if USE_BLAT_MAILER
-    if (mail_is_blat)
-	blat_clean();
-#endif
 #endif
 #endif /* VMS */
 
@@ -956,10 +963,6 @@ PUBLIC void mailmsg ARGS4(
     FREE(cmd);
 
     LYRemoveTemp(my_tmpfile);
-#if USE_BLAT_MAILER
-    if (mail_is_blat)
-	blat_clean();
-#endif
 #endif
 #endif /* VMS */
 
@@ -2001,10 +2004,6 @@ PUBLIC void reply_by_mail ARGS4(
 	    LYSleepMsg();
 	    start_curses();
 	    LYRemoveTemp(tmpfile2);	/* Delete the tmpfile. */
-#if USE_BLAT_MAILER
-	    if (mail_is_blat)
-		blat_clean();
-#endif
 #endif /* CAN_PIPE_TO_MAILER */
 	    fclose(fd); /* Close the tmpfile. */
 	}

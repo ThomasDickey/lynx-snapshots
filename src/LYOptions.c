@@ -901,7 +901,7 @@ draw_options:
 			UCLYhndl_for_unspec = LYChoosePopup(curval,
 							   L_ASSUME_CHARSET, -1,
 							   assume_list,
-    						           0, FALSE, FALSE);
+							   0, FALSE, FALSE);
 #endif
 #if defined(VMS) || defined(USE_SLANG)
 			move(L_ASSUME_CHARSET, COL_OPTION_VALUES);
@@ -1336,9 +1336,9 @@ draw_options:
 						 choices);
 		} else {
 		    keypad_mode = LYChoosePopup(keypad_mode,
-					       L_Keypad, -1,
-					       choices,
-					       3, FALSE, FALSE);
+						L_Keypad, -1,
+						choices,
+						3, FALSE, FALSE);
 #if defined(VMS) || defined(USE_SLANG)
 		    move(L_Keypad, COL_OPTION_VALUES);
 		    clrtoeol();
@@ -1459,14 +1459,14 @@ draw_options:
 		choices[3] = NULL;
 		if (!LYSelectPopups) {
 		    user_mode = LYChooseBoolean(user_mode,
-					       L_User_Mode, -1,
-					       choices);
+						L_User_Mode, -1,
+						choices);
 		    use_assume_charset = (BOOL) (user_mode >= 2);
 		} else {
 		    user_mode = LYChoosePopup(user_mode,
-					     L_User_Mode, -1,
-					     choices,
-					     3, FALSE, FALSE);
+					      L_User_Mode, -1,
+					      choices,
+					      3, FALSE, FALSE);
 		    use_assume_charset = (BOOL) (user_mode >= 2);
 #if defined(VMS) || defined(USE_SLANG)
 		    if (use_assume_charset == old_use_assume_charset) {
@@ -3696,7 +3696,7 @@ PUBLIC int postoptions ARGS1(
 	    int j;
 	    /* prevent spoofing attempt */
 	    for (j = 0; LYLineeditNames[j]; j++) {
-	       if (j==newval)  current_lineedit = newval;
+		if (j==newval)	current_lineedit = newval;
 	    }
 	}
 
@@ -3707,7 +3707,7 @@ PUBLIC int postoptions ARGS1(
 	    int j;
 	    /* prevent spoofing attempt */
 	    for (j = 0; LYKbLayoutNames[j]; j++) {
-	       if (j==newval)  current_layout = newval;
+		if (j==newval)	current_layout = newval;
 	    }
 	}
 #endif /* EXP_KEYBOARD_LAYOUT */
@@ -3983,7 +3983,7 @@ PUBLIC int postoptions ARGS1(
      */
     CTRACE((tfp, "\nLYOptions.c/postoptions(): exiting...\n"));
     CTRACE((tfp, "                            need_reload = %s\n",
-                    need_reload ? "TRUE" : "FALSE"));
+		    need_reload ? "TRUE" : "FALSE"));
     CTRACE((tfp, "                            need_end_reload = %s\n",
 		    need_end_reload ? "TRUE" : "FALSE"));
 
@@ -4184,14 +4184,14 @@ PRIVATE int gen_options ARGS1(
     /*
      * I do C, not HTML.  Feel free to pretty this up.
      */
-    fprintf(fp0,"<form action=\"LYNXOPTIONS:\" method=\"post\">\n");
+    fprintf(fp0, "<form action=\"LYNXOPTIONS:\" method=\"post\">\n");
     /*
      * use following with some sort of one shot secret key akin to NCSA
      * (or was it CUTE?) telnet one shot password to allow ftp to self.
      * to prevent spoofing.
      */
-    fprintf(fp0,"<input name=\"%s\" type=\"hidden\" value=\"%s\">\n",
-	    secure_string, NewSecureValue());
+    fprintf(fp0, "<input name=\"%s\" type=\"hidden\" value=\"%s\">\n",
+		 secure_string, NewSecureValue());
 
     /*
      * visible text begins here
@@ -4212,7 +4212,7 @@ PRIVATE int gen_options ARGS1(
 	if (!disable_all) {
 	    fprintf(fp0, "<p align=center>%s: ", SAVE_OPTIONS);
 	    fprintf(fp0, "<input type=\"checkbox\" name=\"%s\">\n",
-		    save_options_string);
+			 save_options_string);
 	}
 	fprintf(fp0, "<br>(options marked with (!) will not be saved)\n");
     }
@@ -4221,7 +4221,15 @@ PRIVATE int gen_options ARGS1(
      * preformatted text follows
      */
     fprintf(fp0,"<pre>\n");
-    fprintf(fp0,"\n  <em>%s</em>\n", gettext("Personal Preferences"));
+
+    fprintf(fp0,"\n  <em>%s</em>\n", gettext("General Preferences"));
+    /*****************************************************************/
+
+    /* User Mode: SELECT */
+    PutLabel(fp0, gettext("User mode"));
+    BeginSelect(fp0, user_mode_string);
+    PutOptValues(fp0, user_mode, user_mode_values);
+    EndSelect(fp0);
 
     /* Cookies: SELECT */
     /* @@@ This is inconsistent - LYAcceptAllCookies gets saved to RC file
@@ -4229,20 +4237,35 @@ PRIVATE int gen_options ARGS1(
     PutLabelNotSaved(fp0, gettext("Cookies"));
     BeginSelect(fp0, cookies_string);
     PutOption(fp0, !LYSetCookies,
-	      cookies_ignore_all_string,
-	      cookies_ignore_all_string);
+		   cookies_ignore_all_string,
+		   cookies_ignore_all_string);
     PutOption(fp0, LYSetCookies && !LYAcceptAllCookies,
-	      cookies_up_to_user_string,
-	      cookies_up_to_user_string);
+		   cookies_up_to_user_string,
+		   cookies_up_to_user_string);
     PutOption(fp0, LYSetCookies && LYAcceptAllCookies,
-	      cookies_accept_all_string,
-	      cookies_accept_all_string);
+		   cookies_accept_all_string,
+		   cookies_accept_all_string);
     EndSelect(fp0);
+
+       /* Search Type: SELECT */
+    PutLabel(fp0, gettext("Searching type"));
+    BeginSelect(fp0, search_type_string);
+    PutOptValues(fp0, case_sensitive, search_type_values);
+    EndSelect(fp0);
+
+    fprintf(fp0,"\n  <em>%s</em>\n", gettext("Keyboard Input"));
+    /*****************************************************************/
 
     /* Editor: INPUT */
     PutLabel(fp0, gettext("Editor"));
     PutTextInput(fp0, editor_string, NOTEMPTY(editor), text_len,
-		DISABLED(no_editor || system_editor));
+		      DISABLED(no_editor || system_editor));
+
+    /* Keypad Mode: SELECT */
+    PutLabel(fp0, gettext("Keypad mode"));
+    BeginSelect(fp0, keypad_mode_string);
+    PutOptValues(fp0, keypad_mode, keypad_mode_values);
+    EndSelect(fp0);
 
     /* Emacs keys: ON/OFF */
     PutLabel(fp0, gettext("Emacs keys"));
@@ -4250,10 +4273,10 @@ PRIVATE int gen_options ARGS1(
     PutOptValues(fp0, emacs_keys, bool_values);
     EndSelect(fp0);
 
-    /* Keypad Mode: SELECT */
-    PutLabel(fp0, gettext("Keypad mode"));
-    BeginSelect(fp0, keypad_mode_string);
-    PutOptValues(fp0, keypad_mode, keypad_mode_values);
+    /* VI Keys: ON/OFF */
+    PutLabel(fp0, gettext("VI keys"));
+    BeginSelect(fp0, vi_keys_string);
+    PutOptValues(fp0, vi_keys, bool_values);
     EndSelect(fp0);
 
     /* Line edit style: SELECT */
@@ -4275,71 +4298,16 @@ PRIVATE int gen_options ARGS1(
     for (i = 0; LYKbLayoutNames[i]; i++) {
 	char temp[16];
 	sprintf(temp, "%d", i);
-	PutOption(fp0, i==current_layout, temp, LYKbLayoutNames[i]);
+	PutOption(fp0, i == current_layout, temp, LYKbLayoutNames[i]);
     }
     EndSelect(fp0);
 #endif /* EXP_KEYBOARD_LAYOUT */
 
-    /* Mail Address: INPUT */
-    PutLabel(fp0, gettext("Personal mail address"));
-    PutTextInput(fp0, mail_address_string,
-		NOTEMPTY(personal_mail_address), text_len, "");
-
-    /* Search Type: SELECT */
-    PutLabel(fp0, gettext("Searching type"));
-    BeginSelect(fp0, search_type_string);
-    PutOptValues(fp0, case_sensitive, search_type_values);
-    EndSelect(fp0);
-
-    /* Show Color: SELECT */
-#if defined(USE_SLANG) || defined(COLOR_CURSES)
-    SetupChosenShowColor();
-    PutLabel(fp0, gettext("Show color"));
-    if (no_option_save) {
-	MaybeSelect(fp0, !can_do_colors, show_color_string);
-	if (LYShowColor == SHOW_COLOR_NEVER) {
-	    LYShowColor = SHOW_COLOR_OFF;
-	} else if (LYShowColor == SHOW_COLOR_ALWAYS) {
-	    LYShowColor = SHOW_COLOR_ON;
-	}
-	PutOptValues(fp0, LYShowColor - SHOW_COLOR_OFF, bool_values);
-    } else {
-	BeginSelect(fp0, show_color_string);
-	if (can_do_colors) {
-	    show_color_values[2].HtmlName = on_string;
-	    show_color_values[3].LongName = always_string;
-	} else {
-	    show_color_values[2].HtmlName = NULL; /* suppress "ON" - kw */
-	    show_color_values[3].LongName = "Always try";
-	}
-	PutOptValues(fp0, LYChosenShowColor, show_color_values);
-    }
-    EndSelect(fp0);
-#endif /* USE_SLANG || COLOR_CURSES */
-
-    /* Show cursor: ON/OFF */
-    PutLabel(fp0, gettext("Show cursor"));
-    BeginSelect(fp0, show_cursor_string);
-    PutOptValues(fp0, LYShowCursor, bool_values);
-    EndSelect(fp0);
-
-    /* User Mode: SELECT */
-    PutLabel(fp0, gettext("User mode"));
-    BeginSelect(fp0, user_mode_string);
-    PutOptValues(fp0, user_mode, user_mode_values);
-    EndSelect(fp0);
-
-    /* VI Keys: ON/OFF */
-    PutLabel(fp0, gettext("VI keys"));
-    BeginSelect(fp0, vi_keys_string);
-    PutOptValues(fp0, vi_keys, bool_values);
-    EndSelect(fp0);
-
-    /* Visited Pages: SELECT */
-    PutLabel(fp0, gettext("Visited Pages"));
-    BeginSelect(fp0, visited_pages_type_string);
-    PutOptValues(fp0, Visited_Links_As, visited_pages_type_values);
-    EndSelect(fp0);
+    /*
+     * Display and Character Set
+     */
+    fprintf(fp0,"\n  <em>%s</em>\n", gettext("Display and Character Set"));
+    /*****************************************************************/
 
     /* Display Character Set: SELECT */
     PutLabel(fp0, gettext("Display character set"));
@@ -4348,7 +4316,7 @@ PRIVATE int gen_options ARGS1(
 	char temp[10];
 	size_t len = strlen(LYchar_set_names[i]);
 	if (len > cset_len)
-	   cset_len = len;
+	    cset_len = len;
 	sprintf(temp, "%d", i);
 #ifdef EXP_CHARSET_CHOICE
 	if (!charset_subsets[i].hide_display)
@@ -4356,15 +4324,6 @@ PRIVATE int gen_options ARGS1(
 	PutOption(fp0, i==current_char_set, temp, LYchar_set_names[i]);
     }
     EndSelect(fp0);
-
-    /* X Display: INPUT */
-    PutLabelNotSaved(fp0, gettext("X Display"));
-    PutTextInput(fp0, x_display_string, NOTEMPTY(x_display), text_len, "");
-
-    /*
-     * Document Layout
-     */
-    fprintf(fp0,"\n  <em>%s</em>\n", gettext("Document Layout"));
 
     /* Assume Character Set: SELECT */
     /* if (user_mode==ADVANCED_MODE) */
@@ -4378,18 +4337,18 @@ PRIVATE int gen_options ARGS1(
 	 * or bad?  I don't know.  MRC
 	 */
 	if (curval == current_char_set) {
-	    /* ok, LYRawMode, so use UCAssume_MIMEcharset */
+		/* ok, LYRawMode, so use UCAssume_MIMEcharset */
 	    curval = safeUCGetLYhndl_byMIME(UCAssume_MIMEcharset);
 	}
 	PutLabelNotSaved(fp0, gettext("Assumed document character set"));
 	BeginSelect(fp0, assume_char_set_string);
 	for (i = 0; i < LYNumCharsets; i++) {
 #ifdef EXP_CHARSET_CHOICE
-	    if (!charset_subsets[i].hide_assumed)
+    if (!charset_subsets[i].hide_assumed)
 #endif
-	    PutOption(fp0, i==curval,
-		      LYCharSet_UC[i].MIMEname,
-		      LYCharSet_UC[i].MIMEname);
+	    PutOption(fp0, i == curval,
+			   LYCharSet_UC[i].MIMEname,
+			   LYCharSet_UC[i].MIMEname);
 	}
 	EndSelect(fp0);
     }
@@ -4410,13 +4369,47 @@ PRIVATE int gen_options ARGS1(
     PutOptValues(fp0, LYRawMode, bool_values);
     EndSelect(fp0);
 
-#ifndef SH_EX	/* 1999/01/19 (Tue) */
-    /* HTML error recovery: SELECT */
-    PutLabelNotSaved(fp0, gettext("HTML error recovery"));
-    BeginSelect(fp0, DTD_recovery_string);
-    PutOptValues(fp0, Old_DTD, DTD_type_values);
+    /* X Display: INPUT */
+    PutLabelNotSaved(fp0, gettext("X Display"));
+    PutTextInput(fp0, x_display_string, NOTEMPTY(x_display), text_len, "");
+
+    /*
+     * Document Appearance
+     */
+    fprintf(fp0,"\n  <em>%s</em>\n", gettext("Document Apperance"));
+    /*****************************************************************/
+
+    /* Show Color: SELECT */
+#if defined(USE_SLANG) || defined(COLOR_CURSES)
+    SetupChosenShowColor();
+    PutLabel(fp0, gettext("Show color"));
+    if (no_option_save) {
+       MaybeSelect(fp0, !can_do_colors, show_color_string);
+       if (LYShowColor == SHOW_COLOR_NEVER) {
+	   LYShowColor = SHOW_COLOR_OFF;
+       } else if (LYShowColor == SHOW_COLOR_ALWAYS) {
+	   LYShowColor = SHOW_COLOR_ON;
+       }
+       PutOptValues(fp0, LYShowColor - SHOW_COLOR_OFF, bool_values);
+    } else {
+       BeginSelect(fp0, show_color_string);
+       if (can_do_colors) {
+	   show_color_values[2].HtmlName = on_string;
+	   show_color_values[3].LongName = always_string;
+       } else {
+	   show_color_values[2].HtmlName = NULL; /* suppress "ON" - kw */
+	   show_color_values[3].LongName = "Always try";
+       }
+       PutOptValues(fp0, LYChosenShowColor, show_color_values);
+    }
     EndSelect(fp0);
-#endif
+#endif /* USE_SLANG || COLOR_CURSES */
+
+    /* Show cursor: ON/OFF */
+    PutLabel(fp0, gettext("Show cursor"));
+    BeginSelect(fp0, show_cursor_string);
+    PutOptValues(fp0, LYShowCursor, bool_values);
+    EndSelect(fp0);
 
     /* Select Popups: ON/OFF */
     PutLabel(fp0, gettext("Popups for select fields"));
@@ -4424,18 +4417,26 @@ PRIVATE int gen_options ARGS1(
     PutOptValues(fp0, LYSelectPopups, bool_values);
     EndSelect(fp0);
 
+#ifndef SH_EX  /* 1999/01/19 (Tue) */
+    /* HTML error recovery: SELECT */
+    PutLabelNotSaved(fp0, gettext("HTML error recovery"));
+    BeginSelect(fp0, DTD_recovery_string);
+    PutOptValues(fp0, Old_DTD, DTD_type_values);
+    EndSelect(fp0);
+#endif
+
     /* Show Images: SELECT */
     PutLabelNotSaved(fp0, gettext("Show images"));
     BeginSelect(fp0, images_string);
     PutOption(fp0, !pseudo_inline_alts && !clickable_images,
-       images_ignore_all_string,
-       images_ignore_all_string);
+		   images_ignore_all_string,
+		   images_ignore_all_string);
     PutOption(fp0, pseudo_inline_alts && !clickable_images,
-       images_use_label_string,
-       images_use_label_string);
+		   images_use_label_string,
+		   images_use_label_string);
     PutOption(fp0, clickable_images,
-       images_use_links_string,
-       images_use_links_string);
+		   images_use_links_string,
+		   images_use_links_string);
     EndSelect(fp0);
 
     /* Verbose Images: ON/OFF */
@@ -4445,43 +4446,38 @@ PRIVATE int gen_options ARGS1(
     EndSelect(fp0);
 
     /*
-     * Bookmark Options
+     * Headers Transferred to Remote Servers
      */
-    fprintf(fp0,"\n  <em>%s</em>\n", gettext("Bookmark Options"));
+    fprintf(fp0,"\n  <em>%s</em>\n", gettext("Headers Transferred to Remote Servers"));
+    /*****************************************************************/
 
-    /* Multi-Bookmark Mode: SELECT */
-    if (!LYMBMBlocked) {
-       PutLabel(fp0, gettext("Multi-bookmarks"));
-       BeginSelect(fp0, mbm_string);
-       PutOption(fp0, !LYMultiBookmarks,
-	   mbm_off_string,
-	   mbm_off_string);
-       PutOption(fp0, LYMultiBookmarks && !LYMBMAdvanced,
-	   mbm_standard_string,
-	   mbm_standard_string);
-       PutOption(fp0, LYMultiBookmarks && LYMBMAdvanced,
-	   mbm_advanced_string,
-	   mbm_advanced_string);
-       EndSelect(fp0);
-    }
+    /* Mail Address: INPUT */
+    PutLabel(fp0, gettext("Personal mail address"));
+    PutTextInput(fp0, mail_address_string,
+		      NOTEMPTY(personal_mail_address), text_len, "");
 
-    /* Bookmarks File Menu: LINK/INPUT */
-    if (LYMultiBookmarks) {
+    /* Preferred Document Character Set: INPUT */
+    PutLabel(fp0, gettext("Preferred document character set"));
+    PutTextInput(fp0, preferred_doc_char_string,
+		      NOTEMPTY(pref_charset), cset_len+2, "");
 
-	PutLabel(fp0, gettext("Review/edit Bookmarks files"));
-	fprintf(fp0, "<a href=\"LYNXOPTIONS://MBM_MENU\">%s</a>\n",
-		gettext("Goto multi-bookmark menu"));
+    /* Preferred Document Language: INPUT */
+    PutLabel(fp0, gettext("Preferred document language"));
+    PutTextInput(fp0, preferred_doc_lang_string,
+		      NOTEMPTY(language), cset_len+2, "");
 
-    } else {
-	PutLabel(fp0, gettext("Bookmarks file"));
-	PutTextInput(fp0, single_bookmark_string,
-		NOTEMPTY(bookmark_page), text_len, "");
+    /* User Agent: INPUT */
+    if (!no_useragent) {
+       PutLabelNotSaved(fp0, gettext("User-Agent header"));
+       PutTextInput(fp0, user_agent_string,
+			 NOTEMPTY(LYUserAgent), text_len, "");
     }
 
     /*
-     * File Management Options
+     * Listing and Accessing Files
      */
-    fprintf(fp0,"\n  <em>%s</em>\n", DIRED_MENU_TITLE);
+    fprintf(fp0,"\n  <em>%s</em>\n", gettext("Listing and Accessing Files"));
+    /*****************************************************************/
 
     /* FTP sort: SELECT */
     PutLabel(fp0, gettext("FTP sort criteria"));
@@ -4515,41 +4511,57 @@ PRIVATE int gen_options ARGS1(
 		      : (local_exec_on_local_files
 			  ? EXEC_LOCAL
 			  : EXEC_NEVER),
-	       exec_links_values);
+		      exec_links_values);
 #else
     PutOptValues(fp0, local_exec_on_local_files
 		      ? EXEC_LOCAL
 		      : EXEC_NEVER,
-	       exec_links_values);
+		      exec_links_values);
 #endif /* !NEVER_ALLOW_REMOTE_EXEC */
     EndSelect(fp0);
 #endif /* ENABLE_OPTS_CHANGE_EXEC */
 
     /*
-     * Headers transferred to remote server
+     * Special Files and Screens
      */
-    fprintf(fp0,"\n  <em>%s</em>\n", gettext("Headers transferred to remote server"));
+    fprintf(fp0,"\n  <em>%s</em>\n", gettext("Special Files and Screens"));
+    /*****************************************************************/
 
-    /* Preferred Document Character Set: INPUT */
-    PutLabel(fp0, gettext("Preferred document character set"));
-    PutTextInput(fp0, preferred_doc_char_string,
-	    NOTEMPTY(pref_charset), cset_len+2, "");
-
-    /* Preferred Document Language: INPUT */
-    PutLabel(fp0, gettext("Preferred document language"));
-    PutTextInput(fp0, preferred_doc_lang_string,
-	    NOTEMPTY(language), cset_len+2, "");
-
-    /* User Agent: INPUT */
-    if (!no_useragent) {
-	PutLabelNotSaved(fp0, gettext("User-Agent header"));
-	PutTextInput(fp0, user_agent_string,
-		     NOTEMPTY(LYUserAgent), text_len, "");
+    /* Multi-Bookmark Mode: SELECT */
+    if (!LYMBMBlocked) {
+       PutLabel(fp0, gettext("Multi-bookmarks"));
+       BeginSelect(fp0, mbm_string);
+       PutOption(fp0, !LYMultiBookmarks,
+		      mbm_off_string,
+		      mbm_off_string);
+       PutOption(fp0, LYMultiBookmarks && !LYMBMAdvanced,
+		      mbm_standard_string,
+		      mbm_standard_string);
+       PutOption(fp0, LYMultiBookmarks && LYMBMAdvanced,
+		      mbm_advanced_string,
+		      mbm_advanced_string);
+       EndSelect(fp0);
     }
 
+    /* Bookmarks File Menu: LINK/INPUT */
+    if (LYMultiBookmarks) {
+       PutLabel(fp0, gettext("Review/edit Bookmarks files"));
+       fprintf(fp0, "<a href=\"LYNXOPTIONS://MBM_MENU\">%s</a>\n",
+		    gettext("Goto multi-bookmark menu"));
+    } else {
+       PutLabel(fp0, gettext("Bookmarks file"));
+       PutTextInput(fp0, single_bookmark_string,
+			 NOTEMPTY(bookmark_page), text_len, "");
+    }
+
+    /* Visited Pages: SELECT */
+    PutLabel(fp0, gettext("Visited Pages"));
+    BeginSelect(fp0, visited_pages_type_string);
+    PutOptValues(fp0, Visited_Links_As, visited_pages_type_values);
+    EndSelect(fp0);
+
     if (!no_lynxcfg_info) {
-	fprintf(fp0,
-		"\n  Check your <a href=\"LYNXCFG:\">lynx.cfg</a> here\n");
+	fprintf(fp0, "\n  Check your <a href=\"LYNXCFG:\">lynx.cfg</a> here\n");
     }
 
     fprintf(fp0,"\n</pre>\n");
