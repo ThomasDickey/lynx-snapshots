@@ -264,6 +264,10 @@
   -partial
        display partial pages while downloading.
 
+  -partial_thres=NUMBER
+       number of lines to render before repainting display
+       with partial-display logic
+
   -pauth=ID:PASSWD
        set authorization ID and password for a protected proxy
        server at startup.  Be sure to protect any script files

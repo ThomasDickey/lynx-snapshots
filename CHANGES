@@ -1,7 +1,24 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
-1999-05-28 (2.8.2pre.7)
+1999-05-29 (2.8.2pre.9)
+* use StrAllocCopy rather than HTSprintf in LYstore_message() because no
+  formatting is done there; the message may contain formatting controls such as
+  %s (related to bug report by Frederic L W Meunier <fredlwm@urbi.com.br>) -TD
+* add/use function LYRenamedTemp() to update our record of temporary filename
+  when using external decompression program, so we will remove the decompressed
+  file correctly on exit.  This is the usual case if we do not link with zlib
+  (reported by HN) -TD
+* modify LYValidateFilename() to derive original directory preferably from
+  Current_Dir() rather than environment variable $PWD, since the $PWD directory
+  may not be writable if Lynx is invoked from another application rather than
+  directly from the command line -TD
+* add/use function Current_Dir(), to check for failure in getcwd/getwd -TD
+* change ALL_LINGUAS assignment in configure script to use the .po file which
+  actually reside in the po directory, making it simpler to drop/add message
+  files from a distribution of Lynx.  Also, make the assignment contigent on
+  ALL_LINGUAS not being set externally, making it simple to override -TD
+1999-05-28 (2.8.2pre.8)
 * when reloading/reparsing the document with forms, issue a warning only when
   user input is detected (forms content is changed from its default so
   information will be lost).  New function HText_HaveUserChangedForms() is

@@ -11,8 +11,8 @@ AC_CONFIG_HEADER(lynx_cfg.h:config.hin)
 
 CF_CHECK_CACHE
 
-dnl Set of available languages (wishful thinking :-).
-ALL_LINGUAS="de es fr it ko nl no pl pt sl sv"
+dnl Set of available languages (based on source distribution)
+test -z "$ALL_LINGUAS" && ALL_LINGUAS=`test -d $srcdir/po && cd $srcdir/po && echo *.po|sed -e 's/\.po//g' -e 's/*//'`
 
 AC_PREFIX_DEFAULT(/usr/local)
 
@@ -127,7 +127,7 @@ SUB_MAKEFILE=
 CF_OUR_MESSAGES
 if test "$USE_INCLUDED_LIBINTL" = yes ; then
         if test "$nls_cv_force_use_gnu_gettext" = yes ; then
-		AC_MSG_WARN(Using included gettext anyway, since none was found)
+		AC_MSG_WARN(Using included gettext anyway[,] since none was found)
 		SUB_MAKEFILE="intl/makefile"
 	else
 		INTLDIR_MAKE="#"

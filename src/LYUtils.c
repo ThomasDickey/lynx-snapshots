@@ -3865,7 +3865,7 @@ PUBLIC void LYConvertToURL ARGS2(
 	 *  Not a SHELL pathspec.  Get the full VMS spec and convert it.
 	 */
 	char *cur_dir = NULL;
-	static char url_file[256], file_name[256], dir_name[256];
+	static char url_file[LY_MAXPATH], file_name[LY_MAXPATH], dir_name[LY_MAXPATH];
 	unsigned long context = 0;
 	$DESCRIPTOR(url_file_dsc, url_file);
 	$DESCRIPTOR(file_name_dsc, file_name);
@@ -4017,8 +4017,7 @@ have_VMS_URL:
 	     *	They want .
 	     */
 	    char curdir[LY_MAXPATH];
-	    getcwd (curdir, sizeof(curdir));
-	    StrAllocCopy(temp, wwwName(curdir));
+	    StrAllocCopy(temp, wwwName(Current_Dir(curdir)));
 	    StrAllocCat(*AllocatedString, temp);
 	    FREE(temp);
 	    CTRACE(tfp, "Converted '%s' to '%s'\n",
@@ -4050,11 +4049,7 @@ have_VMS_URL:
 	    char curdir[LY_MAXPATH];
 	    char *temp2 = NULL;
 	    BOOL is_local = FALSE;
-#if HAVE_GETCWD
-	    getcwd (curdir, sizeof(curdir));
-#else
-	    getwd (curdir);
-#endif /* NO_GETCWD */
+	    Current_Dir (curdir);
 	    /*
 	     *	Concatenate and simplify, trimming any
 	     *	residual relative elements. - FM
@@ -4844,6 +4839,20 @@ PRIVATE void LYHomeDir_free NOARGS
     FREE(HomeDir);
 }
 #endif /* LY_FIND_LEAKS */
+
+PUBLIC char * Current_Dir ARGS1(
+	char *,	pathname)
+{
+    char *result;
+#if HAVE_GETCWD
+    result = getcwd (pathname, LY_MAXPATH);
+#else
+    result = getwd (pathname);
+#endif /* NO_GETCWD */
+    if (result == 0)
+	strcpy(pathname, ".");
+    return pathname;
+}
 
 PUBLIC CONST char * Home_Dir NOARGS
 {
@@ -5954,6 +5963,7 @@ PUBLIC void LYCloseTempFP ARGS1(
 	if (p->file == fp) {
 	    fclose(p->file);
 	    p->file = 0;
+	    CTRACE(tfp, "...LYCloseTempFP(%s)\n", p->name);
 	    break;
 	}
     }
@@ -5999,6 +6009,24 @@ PUBLIC void LYCleanupTemp NOARGS
 {
     while (ly_temp != 0) {
 	LYRemoveTemp(ly_temp->name);
+    }
+}
+
+/*
+ * We renamed a temporary file.  Keep track so we can remove it on exit.
+ */
+PUBLIC void LYRenamedTemp ARGS2(
+	char *,		oldname,
+	char *,		newname)
+{
+    LY_TEMP *p;
+
+    CTRACE(tfp, "LYRenamedTemp(old=%s, new=%s)\n", oldname, newname);
+    for (p = ly_temp; p != 0; p = p->next) {
+	if (!strcmp(oldname, p->name)) {
+	    StrAllocCopy((p->name), newname);
+	    break;
+	}
     }
 }
 
@@ -6089,7 +6117,7 @@ PUBLIC BOOLEAN LYValidateFilename ARGS2(
 	cp = NULL;
     else
 #endif /*  __DJGPP__ || _WINDOWS */
-	cp = getenv("PWD");
+	cp = original_dir;
     }
     else
 #endif /* __EMX__*/
@@ -6179,7 +6207,7 @@ PUBLIC int LYOpenInternalPage ARGS2(
 	FILE **,  fp0,
 	char **, newfile)
 {
-    static char tempfile[256];
+    static char tempfile[LY_MAXPATH];
 
     LYRemoveTemp(tempfile);
     if ((*fp0 = LYOpenTemp(tempfile, HTML_SUFFIX, "w")) == NULL) {
@@ -6376,6 +6404,7 @@ PUBLIC int LYSystem ARGS1(
 
     fflush(stdout);
     fflush(stderr);
+    CTRACE(tfp, "LYSystem(%s)\n", command);
     CTRACE_FLUSH(tfp);
 
 #ifdef __DJGPP__

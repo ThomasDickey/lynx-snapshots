@@ -746,29 +746,20 @@ PUBLIC void LYstore_message2 ARGS2(
 	CONST char *,	message,
 	CONST char *,	argument)
 {
-    char *temp = NULL;
 
-    if (message == NULL)
-	return;
-
-    HTSprintf(&temp, message, (argument == 0) ? "" : argument);
-
-    to_stack(temp);
-
-    return;
+    if (message != NULL) {
+	char *temp = NULL;
+	HTSprintf(&temp, message, (argument == 0) ? "" : argument);
+	to_stack(temp);
+    }
 }
+
 PUBLIC void LYstore_message ARGS1(
 	CONST char *,	message)
 {
-    char *temp = NULL;
-
-    if (message == NULL)
-	return;
-
-    HTSprintf(&temp, message);
-
-    to_stack(temp);
-
-    return;
+    if (message != NULL) {
+	char *temp = NULL;
+	StrAllocCopy(temp, message);
+	to_stack(temp);
+    }
 }
-

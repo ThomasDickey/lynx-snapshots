@@ -134,6 +134,7 @@ extern char *checked_radio;  /* form radio buttons */
 extern char *unchecked_radio;  /* form radio buttons */
 extern char *empty_string;
 extern char *LynxHome;
+extern char *original_dir;
 extern char *startfile;
 extern char *helpfile;
 extern char *helpfilepath;

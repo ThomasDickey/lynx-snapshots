@@ -234,6 +234,7 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 #endif /* FNAMES_8_3 */
 		    LYLocalFileToURL (&addr, path);
 		    if (!use_gzread) {
+			LYRenamedTemp(me->anchor->FileCache, path);
 			StrAllocCopy(me->anchor->FileCache, path);
 			StrAllocCopy(me->anchor->content_encoding, "binary");
 		    }
