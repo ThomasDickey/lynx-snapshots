@@ -4373,8 +4373,6 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		/*
 		 * Convert any HTML entities or decimal escaping.  - FM
 		 */
-		int len;
-
 		StrAllocCopy(I_value, value[HTML_BUTTON_VALUE]);
 		me->UsePlainSpace = TRUE;
 		TRANSLATE_AND_UNESCAPE_ENTITIES(&I_value, TRUE, me->HiddenValue);
@@ -4384,12 +4382,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		 * Convert any newlines or tabs to spaces, and trim any lead or
 		 * trailing spaces.  - FM
 		 */
-		convert_to_spaces(I.value, FALSE);
-		while (I.value && I.value[0] == ' ')
-		    I.value++;
-		len = strlen(I.value) - 1;
-		while (len > 0 && I.value[len] == ' ')
-		    I.value[len--] = '\0';
+		LYReduceBlanks(I.value);
 	    }
 
 	    if (present && present[HTML_BUTTON_DISABLED])
@@ -4707,7 +4700,6 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		BOOL CurrentEightBitRaw = HTPassEightBitRaw;
 		BOOLEAN CurrentUseDefaultRawMode = LYUseDefaultRawMode;
 		HTCJKlang CurrentHTCJK = HTCJK;
-		int len;
 
 		if (I.type && !strcasecomp(I.type, "hidden")) {
 		    me->HiddenValue = TRUE;
@@ -4751,12 +4743,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		     * Convert any newlines or tabs to spaces, and trim any
 		     * lead or trailing spaces.  - FM
 		     */
-		    convert_to_spaces(I.value, FALSE);
-		    while (I.value && I.value[0] == ' ')
-			I.value++;
-		    len = strlen(I.value) - 1;
-		    while (len > 0 && I.value[len] == ' ')
-			I.value[len--] = '\0';
+		    LYReduceBlanks(I.value);
 		}
 		me->UsePlainSpace = FALSE;
 

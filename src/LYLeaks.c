@@ -564,7 +564,7 @@ void *LYLeakRealloc(void *vp_Alloced,
 	auto AllocationList *ALp_new = typecalloc(AllocationList);
 
 	if (ALp_new == NULL) {
-	    exit(EXIT_FAILURE);
+	    exit_immediately(EXIT_FAILURE);
 	}
 
 	/*
@@ -580,7 +580,7 @@ void *LYLeakRealloc(void *vp_Alloced,
 	 * Add the item to the list.  Exit.
 	 */
 	AddToList(ALp_new);
-	exit(EXIT_FAILURE);
+	exit_immediately(EXIT_FAILURE);
     }
 
     /*
@@ -696,7 +696,7 @@ void LYLeakFree(void *vp_Alloced,
 	AllocationList *ALp_new = typecalloc(AllocationList);
 
 	if (ALp_new == NULL) {
-	    exit(EXIT_FAILURE);
+	    exit_immediately(EXIT_FAILURE);
 	}
 
 	/*
@@ -874,7 +874,7 @@ static char *LYLeakSAVsprintf(char **dest,
 	    auto AllocationList *ALp_new = typecalloc(AllocationList);
 
 	    if (ALp_new == NULL) {
-		exit(EXIT_FAILURE);
+		exit_immediately(EXIT_FAILURE);
 	    }
 
 	    /*
@@ -890,7 +890,7 @@ static char *LYLeakSAVsprintf(char **dest,
 	     * Add the item to the list.  Exit.
 	     */
 	    AddToList(ALp_new);
-	    exit(EXIT_FAILURE);
+	    exit_immediately(EXIT_FAILURE);
 	}
 
 	old_cp_File = ALp_old->SL_memory.cp_FileName;

@@ -2184,6 +2184,7 @@ static OptValues keypad_mode_values[] =
 };
 static const char *lineedit_mode_string = RC_LINEEDIT_MODE;
 static const char *mail_address_string = RC_PERSONAL_MAIL_ADDRESS;
+static const char *anonftp_password_string = RC_ANONFTP_PASSWORD;
 static const char *search_type_string = RC_CASE_SENSITIVE_SEARCHING;
 static OptValues search_type_values[] =
 {
@@ -2786,6 +2787,12 @@ int postoptions(DocInfo *newdoc)
 	if (!strcmp(data[i].tag, mail_address_string)) {
 	    FREE(personal_mail_address);
 	    StrAllocCopy(personal_mail_address, data[i].value);
+	}
+
+	/* Anonymous FTP Password: INPUT */
+	if (!strcmp(data[i].tag, anonftp_password_string)) {
+	    FREE(anonftp_password);
+	    StrAllocCopy(anonftp_password, data[i].value);
 	}
 
 	/* Search Type: SELECT */
@@ -3702,6 +3709,11 @@ static int gen_options(char **newfile)
     PutLabel(fp0, gettext("Personal mail address"), mail_address_string);
     PutTextInput(fp0, mail_address_string,
 		 NonNull(personal_mail_address), text_len, "");
+
+    /* Mail Address: INPUT */
+    PutLabel(fp0, gettext("Password for anonymous ftp"), mail_address_string);
+    PutTextInput(fp0, anonftp_password_string,
+		 NonNull(anonftp_password), text_len, "");
 
     /* Preferred media type: SELECT */
     PutLabel(fp0, gettext("Preferred media type"), preferred_media_string);

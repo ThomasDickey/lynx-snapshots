@@ -547,7 +547,7 @@ static int HTVMSclosedir(DIR *dirp)
 
     status = lib$find_file_end(&(dirp->context));
     if (!(status & 0x01))
-	exit(status);
+	exit_immediately(status);
     dirp->context = 0;
     return (0);
 }

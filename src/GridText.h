@@ -161,6 +161,7 @@ extern int HText_PreviousLineSize(HText *me, BOOL IgnoreSpaces);
 extern int HText_getCurrentColumn(HText *text);
 extern int HText_getLines(HText *text);
 extern int HText_getMaximumColumn(HText *text);
+extern int HText_getNumOfBytes(void);
 extern int HText_getNumOfLines(void);
 extern int HText_getTabIDColumn(HText *text, const char *name);
 extern int HText_getTopOfScreen(void);

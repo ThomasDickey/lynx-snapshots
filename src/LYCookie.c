@@ -70,10 +70,6 @@
 
 #include <LYLeaks.h>
 
-#define max_cookies_domain 50
-#define max_cookies_global 500
-#define max_cookies_buffer 4096
-
 /* default for new domains, one of the invcheck_behaviour_t values: */
 #define DEFAULT_INVCHECK_BV INVCHECK_QUERY
 

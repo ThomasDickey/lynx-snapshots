@@ -167,33 +167,45 @@ char *HTDOS_short_name(char *path)
 }
 #endif
 
-#if defined(DJGPP) && defined(DJGPP_KEYHANDLER)
-/* PUBLIC       getxkey()
- *              Replaces libc's getxkey() with polling of tcp/ip
- *              library (WatTcp or Watt-32). This is required to
- *              be able to finish off dead sockets, answer pings etc.
- *
- * ON EXIT:
- *      returns extended keypress.
+#if defined(DJGPP)
+/*
+ * Poll tcp/ip lib and yield to DPMI-host while nothing in
+ * keyboard buffer (head = tail) (simpler than kbhit).
+ * This is required to be able to finish off dead sockets,
+ * answer pings etc.
  */
-
-/* Copyright (C) 1995 DJ Delorie, see COPYING.DJ for details */
 #include <pc.h>
 #include <dpmi.h>
 #include <libc/farptrgs.h>
 #include <go32.h>
 
-int getxkey(void)
+void djgpp_idle_loop(void)
 {
-    __dpmi_regs r;
-
-    /* poll tcp/ip lib and yield to DPMI-host while nothing in
-     * keyboard buffer (head = tail) (simpler than kbhit).
-     */
     while (_farpeekw(_dos_ds, 0x41a) == _farpeekw(_dos_ds, 0x41c)) {
 	tcp_tick(NULL);
 	__dpmi_yield();
+#if defined(USE_SLANG)
+	if (SLang_input_pending(1))
+	    break;
+#endif
     }
+}
+
+/* PUBLIC       getxkey()
+ *              Replaces libc's getxkey() with polling of tcp/ip
+ *              library (WatTcp or Watt-32). *
+ * ON EXIT:
+ *      returns extended keypress.
+ */
+
+/* Copyright (C) 1995 DJ Delorie, see COPYING.DJ for details */
+
+int getxkey(void)
+{
+#if defined(DJGPP_KEYHANDLER)
+    __dpmi_regs r;
+
+    djgpp_idle_loop();
 
     r.h.ah = 0x10;
     __dpmi_int(0x16, &r);
@@ -203,5 +215,12 @@ int getxkey(void)
     if (r.h.al == 0xe0)
 	return 0x0200 | r.h.ah;
     return r.h.al;
+
+#elif defined(USE_SLANG)
+    djgpp_idle_loop();
+    return SLkp_getkey();
+#else
+    /* PDcurses uses myGetChar() in LYString.c */
+#endif
 }
-#endif /* DJGPP && DJGPP_KEYHANDLER */
+#endif /* DJGPP */

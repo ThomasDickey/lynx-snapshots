@@ -29,7 +29,7 @@
 #include <LYLeaks.h>
 #include <HTCJK.h>
 
-HTList *Visited_Links = NULL;	/* List of safe popped docs. */
+static HTList *Visited_Links = NULL;	/* List of safe popped docs. */
 int Visited_Links_As = VISITED_LINKS_AS_LATEST | VISITED_LINKS_REVERSE;
 static VisitedLink *PrevVisitedLink = NULL;	/* NULL on auxillary */
 static VisitedLink *PrevActiveVisitedLink = NULL;	/* Last non-auxillary */
@@ -79,7 +79,7 @@ static void trace_history(const char *tag)
 {
     if (TRACE) {
 	CTRACE((tfp, "HISTORY %s %d/%d (%d extra)\n",
-		tag, nhist, MAXHIST, nhist_extra));
+		tag, nhist, size_history, nhist_extra));
 	CTRACE_FLUSH(tfp);
     }
 }
@@ -332,6 +332,30 @@ static int are_identical(HistInfo * doc, DocInfo *doc1)
 	    && doc1->isHEAD == doc->hdoc.isHEAD);
 }
 
+void LYAllocHistory(int entries)
+{
+    CTRACE((tfp, "FIXME LYAllocHistory %d vs %d\n", entries, size_history));
+    if (entries + 1 >= size_history) {
+	unsigned want;
+	int save = size_history;
+
+	size_history = (entries + 2) * 2;
+	want = size_history * sizeof(*history);
+	if (history == 0) {
+	    history = (HistInfo *) malloc(want);
+	} else {
+	    history = (HistInfo *) realloc(history, want);
+	}
+	if (history == 0)
+	    outofmem(__FILE__, "LYAllocHistory");
+	while (save < size_history) {
+	    CTRACE((tfp, "FIXME ...LYAllocHistory clearing %d\n", save));
+	    memset(&history[save++], 0, sizeof(history[0]));
+	}
+    }
+    CTRACE((tfp, "FIXME ...LYAllocHistory %d vs %d\n", entries, size_history));
+}
+
 /*
  * Push the current filename, link and line number onto the history list.
  */
@@ -377,6 +401,7 @@ int LYpush(DocInfo *doc, BOOLEAN force_push)
 	HDOC(nhist).link = doc->link;
 	HDOC(nhist).line = doc->line;
 	nhist_extra--;
+	LYAllocHistory(nhist);
 	nhist++;
 	trace_history("LYpush: just move the cursor");
 	return 1;
@@ -391,129 +416,121 @@ int LYpush(DocInfo *doc, BOOLEAN force_push)
 #endif
 
     /*
-     * OK, push it if we have stack space.
+     * OK, push it...
      */
-    if (nhist < MAXHIST) {
-	HDOC(nhist).link = doc->link;
-	HDOC(nhist).line = doc->line;
+    LYAllocHistory(nhist);
+    HDOC(nhist).link = doc->link;
+    HDOC(nhist).line = doc->line;
 
-	HDOC(nhist).title = NULL;
-	LYformTitle(&(HDOC(nhist).title), doc->title);
+    HDOC(nhist).title = NULL;
+    LYformTitle(&(HDOC(nhist).title), doc->title);
 
-	HDOC(nhist).address = NULL;
-	StrAllocCopy(HDOC(nhist).address, doc->address);
+    HDOC(nhist).address = NULL;
+    StrAllocCopy(HDOC(nhist).address, doc->address);
 
-	HDOC(nhist).post_data = NULL;
-	BStrCopy(HDOC(nhist).post_data, doc->post_data);
+    HDOC(nhist).post_data = NULL;
+    BStrCopy(HDOC(nhist).post_data, doc->post_data);
 
-	HDOC(nhist).post_content_type = NULL;
-	StrAllocCopy(HDOC(nhist).post_content_type, doc->post_content_type);
+    HDOC(nhist).post_content_type = NULL;
+    StrAllocCopy(HDOC(nhist).post_content_type, doc->post_content_type);
 
-	HDOC(nhist).bookmark = NULL;
-	StrAllocCopy(HDOC(nhist).bookmark, doc->bookmark);
+    HDOC(nhist).bookmark = NULL;
+    StrAllocCopy(HDOC(nhist).bookmark, doc->bookmark);
 
-	HDOC(nhist).isHEAD = doc->isHEAD;
-	HDOC(nhist).safe = doc->safe;
+    HDOC(nhist).isHEAD = doc->isHEAD;
+    HDOC(nhist).safe = doc->safe;
 
-	HDOC(nhist).internal_link = FALSE;	/* by default */
-	history[nhist].intern_seq_start = -1;	/* by default */
-	if (doc->internal_link) {
-	    /* Now some tricky stuff: if the caller thinks that the doc
-	       to push was the result of following an internal
-	       (fragment) link, we check whether we believe it.
-	       It is only accepted as valid if the immediately preceding
-	       item on the history stack is actually the same document
-	       except for fragment and location info.  I.e. the Parent
-	       Anchors are the same.
-	       Also of course this requires that this is not the first
-	       history item. - kw */
-	    if (nhist > 0) {
-		DocAddress WWWDoc;
-		HTParentAnchor *thisparent, *thatparent = NULL;
+    HDOC(nhist).internal_link = FALSE;	/* by default */
+    history[nhist].intern_seq_start = -1;	/* by default */
+    if (doc->internal_link) {
+	/* Now some tricky stuff: if the caller thinks that the doc
+	   to push was the result of following an internal
+	   (fragment) link, we check whether we believe it.
+	   It is only accepted as valid if the immediately preceding
+	   item on the history stack is actually the same document
+	   except for fragment and location info.  I.e. the Parent
+	   Anchors are the same.
+	   Also of course this requires that this is not the first
+	   history item. - kw */
+	if (nhist > 0) {
+	    DocAddress WWWDoc;
+	    HTParentAnchor *thisparent, *thatparent = NULL;
 
-		WWWDoc.address = doc->address;
-		WWWDoc.post_data = doc->post_data;
-		WWWDoc.post_content_type = doc->post_content_type;
-		WWWDoc.bookmark = doc->bookmark;
-		WWWDoc.isHEAD = doc->isHEAD;
-		WWWDoc.safe = doc->safe;
-		thisparent =
-		    HTAnchor_findAddress(&WWWDoc);
-		/* Now find the ParentAnchor for the previous history
-		 * item - kw
+	    WWWDoc.address = doc->address;
+	    WWWDoc.post_data = doc->post_data;
+	    WWWDoc.post_content_type = doc->post_content_type;
+	    WWWDoc.bookmark = doc->bookmark;
+	    WWWDoc.isHEAD = doc->isHEAD;
+	    WWWDoc.safe = doc->safe;
+	    thisparent =
+		HTAnchor_findAddress(&WWWDoc);
+	    /* Now find the ParentAnchor for the previous history
+	     * item - kw
+	     */
+	    if (thisparent) {
+		/* If the last-pushed item is a LYNXIMGMAP but THIS one
+		 * isn't, compare the physical URLs instead. - kw
 		 */
-		if (thisparent) {
-		    /* If the last-pushed item is a LYNXIMGMAP but THIS one
-		     * isn't, compare the physical URLs instead. - kw
+		if (isLYNXIMGMAP(HDOC(nhist - 1).address) &&
+		    !isLYNXIMGMAP(doc->address)) {
+		    WWWDoc.address = HDOC(nhist - 1).address + LEN_LYNXIMGMAP;
+		    /*
+		     * If THIS item is a LYNXIMGMAP but the last-pushed one
+		     * isn't, fake it by using THIS item's address for
+		     * thatparent... - kw
 		     */
-		    if (isLYNXIMGMAP(HDOC(nhist - 1).address) &&
-			!isLYNXIMGMAP(doc->address)) {
-			WWWDoc.address = HDOC(nhist - 1).address + LEN_LYNXIMGMAP;
-			/*
-			 * If THIS item is a LYNXIMGMAP but the last-pushed one
-			 * isn't, fake it by using THIS item's address for
-			 * thatparent... - kw
-			 */
-		    } else if (isLYNXIMGMAP(doc->address) &&
-			       !isLYNXIMGMAP(HDOC(nhist - 1).address)) {
-			char *temp = NULL;
+		} else if (isLYNXIMGMAP(doc->address) &&
+			   !isLYNXIMGMAP(HDOC(nhist - 1).address)) {
+		    char *temp = NULL;
 
-			StrAllocCopy(temp, STR_LYNXIMGMAP);
-			StrAllocCat(temp, doc->address + LEN_LYNXIMGMAP);
-			WWWDoc.address = temp;
-			WWWDoc.post_content_type = HDOC(nhist - 1).post_content_type;
-			WWWDoc.bookmark = HDOC(nhist - 1).bookmark;
-			WWWDoc.isHEAD = HDOC(nhist - 1).isHEAD;
-			WWWDoc.safe = HDOC(nhist - 1).safe;
-			thatparent =
-			    HTAnchor_findAddress(&WWWDoc);
-			FREE(temp);
-		    } else {
-			WWWDoc.address = HDOC(nhist - 1).address;
-		    }
-		    if (!thatparent) {	/* if not yet done */
-			WWWDoc.post_data = HDOC(nhist - 1).post_data;
-			WWWDoc.post_content_type = HDOC(nhist - 1).post_content_type;
-			WWWDoc.bookmark = HDOC(nhist - 1).bookmark;
-			WWWDoc.isHEAD = HDOC(nhist - 1).isHEAD;
-			WWWDoc.safe = HDOC(nhist - 1).safe;
-			thatparent =
-			    HTAnchor_findAddress(&WWWDoc);
-		    }
-		    /* In addition to equality of the ParentAnchors, require
-		     * that IF we have a HTMainText (i.e., it wasn't just
-		     * HTuncache'd by mainloop), THEN it has to be consistent
-		     * with what we are trying to push.
-		     *
-		     * This may be overkill...  - kw
-		     */
-		    if (thatparent == thisparent &&
-			(!HTMainText || HTMainAnchor == thisparent)
-			) {
-			HDOC(nhist).internal_link = TRUE;
-			history[nhist].intern_seq_start =
-			    history[nhist - 1].intern_seq_start >= 0 ?
-			    history[nhist - 1].intern_seq_start : nhist - 1;
-			CTRACE((tfp, "\nLYpush: pushed as internal link, OK\n"));
-		    }
+		    StrAllocCopy(temp, STR_LYNXIMGMAP);
+		    StrAllocCat(temp, doc->address + LEN_LYNXIMGMAP);
+		    WWWDoc.address = temp;
+		    WWWDoc.post_content_type = HDOC(nhist - 1).post_content_type;
+		    WWWDoc.bookmark = HDOC(nhist - 1).bookmark;
+		    WWWDoc.isHEAD = HDOC(nhist - 1).isHEAD;
+		    WWWDoc.safe = HDOC(nhist - 1).safe;
+		    thatparent =
+			HTAnchor_findAddress(&WWWDoc);
+		    FREE(temp);
+		} else {
+		    WWWDoc.address = HDOC(nhist - 1).address;
+		}
+		if (!thatparent) {	/* if not yet done */
+		    WWWDoc.post_data = HDOC(nhist - 1).post_data;
+		    WWWDoc.post_content_type = HDOC(nhist - 1).post_content_type;
+		    WWWDoc.bookmark = HDOC(nhist - 1).bookmark;
+		    WWWDoc.isHEAD = HDOC(nhist - 1).isHEAD;
+		    WWWDoc.safe = HDOC(nhist - 1).safe;
+		    thatparent =
+			HTAnchor_findAddress(&WWWDoc);
+		}
+		/* In addition to equality of the ParentAnchors, require
+		 * that IF we have a HTMainText (i.e., it wasn't just
+		 * HTuncache'd by mainloop), THEN it has to be consistent
+		 * with what we are trying to push.
+		 *
+		 * This may be overkill...  - kw
+		 */
+		if (thatparent == thisparent &&
+		    (!HTMainText || HTMainAnchor == thisparent)
+		    ) {
+		    HDOC(nhist).internal_link = TRUE;
+		    history[nhist].intern_seq_start =
+			history[nhist - 1].intern_seq_start >= 0 ?
+			history[nhist - 1].intern_seq_start : nhist - 1;
+		    CTRACE((tfp, "\nLYpush: pushed as internal link, OK\n"));
 		}
 	    }
-	    if (!HDOC(nhist).internal_link) {
-		CTRACE((tfp, "\nLYpush: push as internal link requested, %s\n",
-			"but didn't check out!"));
-	    }
 	}
-	CTRACE((tfp, "\nLYpush[%d]: address:%s\n        title:%s\n",
-		nhist, doc->address, doc->title));
-	nhist++;
-    } else {
-	if (LYCursesON) {
-	    HTAlert(MAXHIST_REACHED);
+	if (!HDOC(nhist).internal_link) {
+	    CTRACE((tfp, "\nLYpush: push as internal link requested, %s\n",
+		    "but didn't check out!"));
 	}
-	CTRACE((tfp,
-		"\nLYpush: MAXHIST reached for:\n        address:%s\n        title:%s\n",
-		doc->address, doc->title));
     }
+    CTRACE((tfp, "\nLYpush[%d]: address:%s\n        title:%s\n",
+	    nhist, doc->address, doc->title));
+    nhist++;
     return 1;
 }
 
@@ -545,7 +562,7 @@ void LYpop(DocInfo *doc)
 void LYhist_prev(DocInfo *doc)
 {
     trace_history("LYhist_prev");
-    if (nhist > 0 && (nhist_extra || nhist < MAXHIST)) {
+    if (nhist > 0 && (nhist_extra || nhist < size_history)) {
 	nhist--;
 	nhist_extra++;
 	LYpop_num(nhist, doc);
@@ -564,11 +581,9 @@ void LYhist_prev_register(DocInfo *doc)
 	    /* Store the new position */
 	    HDOC(nhist).link = doc->link;
 	    HDOC(nhist).line = doc->line;
-	} else if (nhist < MAXHIST) {	/* push will fail */
-	    if (LYpush(doc, 0)) {
-		nhist--;
-		nhist_extra++;
-	    }
+	} else if (LYpush(doc, 0)) {
+	    nhist--;
+	    nhist_extra++;
 	}
 	trace_history("...LYhist_prev_register");
     }
@@ -584,6 +599,7 @@ int LYhist_next(DocInfo *doc, DocInfo *newdoc)
     /* Store the new position */
     HDOC(nhist).link = doc->link;
     HDOC(nhist).line = doc->line;
+    LYAllocHistory(nhist);
     nhist++;
     nhist_extra--;
     LYpop_num(nhist, newdoc);

@@ -477,6 +477,8 @@ char *HTParse(const char *aName,
 	    strcpy(tail, given.absolute);
 	    CTRACE((tfp, "HTParse: (ABS)\n"));
 	} else if (related.absolute) {	/* Adopt path not name */
+	    char *base = tail;
+
 	    *tail++ = '/';
 	    strcpy(tail, related.absolute);
 	    if (given.relative) {
@@ -498,7 +500,9 @@ char *HTParse(const char *aName,
 		    p[1] = '\0';	/* Remove filename */
 		    strcat(p, given.relative);	/* Add given one */
 		}
-		HTSimplify(result);
+		HTSimplify(base);
+		if (*base == '\0')
+		    strcpy(base, "/");
 	    }
 	    CTRACE((tfp, "HTParse: (Related-ABS)\n"));
 	} else if (given.relative) {

@@ -94,7 +94,6 @@ static char *render_item ( const char *	s,
 	int		bufsize,
 	BOOLEAN		url_syntax);
 
-static struct dired_menu *menu_head = NULL;
 struct dired_menu {
     int cond;
 #define DE_TAG     1
@@ -106,7 +105,10 @@ struct dired_menu {
     char *rest;
     char *href;
     struct dired_menu *next;
-} defmenu[] = {
+};
+
+static struct dired_menu *menu_head = NULL;
+static struct dired_menu defmenu[] = {
 
 /*
  * The following initializations determine the contents of the f)ull menu

@@ -44,7 +44,7 @@
 
 #ifdef USE_PRETTYSRC
 
-char *entity_string;		/* this is used for printing entity name.
+static char *entity_string;	/* this is used for printing entity name.
 
 				   Unconditionally added since redundant assigments don't hurt much */
 
@@ -916,7 +916,7 @@ static void handle_sgmlatt(HTStream *context)
 #define ALT_TAGNUM(e) ((e == HTML_OBJECT) ? HTML_ALT_OBJECT : e)
 
 /* return 'TAGNUM' of the normal mode for 'TAGNUM' e which may be alt. */
-#define NORMAL_TAGNUM(e) ((e >= HTML_ELEMENTS) ? HTML_OBJECT : e)
+#define NORMAL_TAGNUM(e) (((int)(e) >= HTML_ELEMENTS) ? HTML_OBJECT : e)
 
 /* More convenience stuff. - kw */
 #define ALT_TAGP_OF_TAGNUM(e) TAGP_OF_TAGNUM(ALT_TAGNUM(e))
@@ -1106,7 +1106,7 @@ static void end_element(HTStream *context, HTTag * old_tag)
 	}
 
 	e = NORMAL_TAGNUM(TAGNUM_OF_TAGP(t));
-	CTRACE2(TRACE_SGML, (tfp, "tagnum(%p) = %d\n", t, e));
+	CTRACE2(TRACE_SGML, (tfp, "tagnum(%p) = %d\n", t, (int) e));
 #ifdef USE_PRETTYSRC
 	if (!psrc_view)		/* Don't actually pass call on if viewing psrc - kw */
 #endif
@@ -4504,7 +4504,7 @@ History:
 ///////////////////////////////////////////////////////////////////////
 */
 
-int TREAT_SJIS = 1;
+static int TREAT_SJIS = 1;
 
 void JISx0201TO0208_EUC(unsigned char IHI,
 			unsigned char ILO,
@@ -4766,7 +4766,7 @@ unsigned char *EUC_TO_JIS(unsigned char *src,
 #define SO		('N'-0x40)
 #define SI		('O'-0x40)
 
-int repair_JIS = 0;
+static int repair_JIS = 0;
 
 static const unsigned char *repairJIStoEUC(const unsigned char *src,
 					   unsigned char **dstp)

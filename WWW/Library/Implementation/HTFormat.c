@@ -16,9 +16,7 @@
 */
 #include <HTFormat.h>
 
-float HTMaxSecs = 1e10;		/* No effective limit */
-float HTMaxLength = 1e10;	/* No effective limit */
-long int HTMaxBytes = 0;	/* No effective limit */
+static float HTMaxSecs = 1e10;	/* No effective limit */
 
 #ifdef UNIX
 #ifdef NeXT
@@ -1134,7 +1132,7 @@ static int HTZzFileCopy(FILE *zzfp, HTStream *sink)
     status = inflateInit(&s);
     if (status != Z_OK) {
 	CTRACE((tfp, "HTZzFileCopy inflateInit() %s\n", zError(status)));
-	exit(1);
+	exit_immediately(1);
     }
     s.avail_in = 0;
     s.next_out = (Bytef *) output_buffer;

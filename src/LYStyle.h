@@ -14,9 +14,6 @@ extern const SGML_dtd HTML_dtd;
 /* array of currently set styles */
 extern HTCharStyle displayStyles[DSTYLE_ELEMENTS];
 
-/* Can we do colour? - RP */
-extern int lynx_has_color;
-
 /* Set all the buckets in the hash table to be empty */
 extern void parse_userstyles(void);
 
@@ -67,5 +64,7 @@ extern void FastTrimColorClass(const char *tag_name,
 			       int *hcode);
 
 #endif /* USE_COLOR_STYLE */
+
+extern int lynx_has_color;
 
 #endif /* LYSTYLE_H */

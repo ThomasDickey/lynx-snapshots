@@ -1,4 +1,4 @@
-1
+1 LYNX
 2 Name
        lynx  - a general purpose distributed information browser for the World
        Wide Web
@@ -559,6 +559,9 @@
 
        -syslog=text
               information for syslog call.
+
+       -syslog-urls
+              log requested URLs with syslog.
 
        -tagsoup
               initialize parser, using Tag Soup DTD rather than SortaSGML.

@@ -122,7 +122,7 @@ const char *HTAppVersion = LYNX_VERSION;	/* Application version */
 
 static int HTFormNumber = 0;
 static int HTFormFields = 0;
-char *HTCurSelectGroup = NULL;	/* Form select group name */
+static char *HTCurSelectGroup = NULL;	/* Form select group name */
 static int HTCurSelectGroupCharset = -1;	/* ... and name's charset */
 int HTCurSelectGroupType = F_RADIO_TYPE;	/* Group type */
 char *HTCurSelectGroupSize = NULL;	/* Length of select */
@@ -337,7 +337,9 @@ typedef struct _line {
 
 #define LINE_SIZE(size) (sizeof(HTLine)+(size))		/* Allow for terminator */
 
+#ifndef HTLINE_NOT_IN_POOL
 #define HTLINE_NOT_IN_POOL 0	/* debug with this set to 1 */
+#endif
 
 #if HTLINE_NOT_IN_POOL
 #define allocHTLine(ptr, size)  { ptr = (HTLine *)calloc(1, LINE_SIZE(size)); }
@@ -477,7 +479,7 @@ struct _HText {
 
 #ifdef USE_SOURCE_CACHE
     /*
-       * Parse settings when this HText was generated.
+     * Parse settings when this HText was generated.
      */
     BOOL clickable_images;
     BOOL pseudo_inline_alts;
@@ -728,7 +730,8 @@ static void LYClearHiText(TextAnchor *a)
 /*
  * Set the initial highlight information for a given anchor.
  */
-static void LYSetHiText(TextAnchor *a, const char *text,
+static void LYSetHiText(TextAnchor *a,
+			const char *text,
 			int len)
 {
     if (text != NULL) {
@@ -743,7 +746,8 @@ static void LYSetHiText(TextAnchor *a, const char *text,
 /*
  * Add highlight information for the next line of a anchor.
  */
-static void LYAddHiText(TextAnchor *a, const char *text,
+static void LYAddHiText(TextAnchor *a,
+			const char *text,
 			int x)
 {
     HiliteInfo *have = a->lites.hl_info;
@@ -918,6 +922,16 @@ static void FormList_delete(HTList *forms)
 	PerFormInfo_free(form);
     HTList_delete(forms);
 }
+
+#ifdef DISP_PARTIAL
+static void ResetPartialLinenos(HText *text)
+{
+    if (text != 0) {
+	text->first_lineno_last_disp_partial = -1;
+	text->last_lineno_last_disp_partial = -1;
+    }
+}
+#endif
 
 /*			Creation Method
  *			---------------
@@ -1142,8 +1156,7 @@ HText *HText_new(HTParentAnchor *anchor)
      * is just so that the FIRST display_page AFTER that can avoid
      * repainting the same lines on the screen.  - kw
      */
-    self->first_lineno_last_disp_partial =
-	self->last_lineno_last_disp_partial = -1;
+    ResetPartialLinenos(self);
 #endif
 
 #ifdef EXP_JUSTIFY_ELTS
@@ -1590,7 +1603,6 @@ static void display_title(HText *text)
 {
     char *title = NULL;
     char percent[20];
-    char *cp = NULL;
     unsigned char *tmp = NULL;
     int i = 0, j = 0, toolbar = 0;
     int limit;
@@ -1617,17 +1629,7 @@ static void display_title(HText *text)
     StrAllocCopy(title,
 		 (HTAnchor_title(text->node_anchor) ?
 		  HTAnchor_title(text->node_anchor) : " "));	/* "" -> " " */
-
-    /*
-     * There shouldn't be any \n in the title field,
-     * but if there is, lets kill it now.  Also trim
-     * any trailing spaces.  -FM
-     */
-    if ((cp = strchr(title, '\n')) != NULL)
-	*cp = '\0';
-    i = (*title ? (strlen(title) - 1) : 0);
-    while ((i >= 0) && title[i] == ' ')
-	title[i--] = '\0';
+    LYReduceBlanks(title);
 
     /*
      * Generate the page indicator (percent) string.
@@ -1931,8 +1933,7 @@ static void display_page(HText *text, int line_number,
 #ifdef DISP_PARTIAL
     if (display_partial || recent_sizechange || text->stale) {
 	/*  Reset them, will be set near end if all is okay. - kw */
-	text->first_lineno_last_disp_partial =
-	    text->last_lineno_last_disp_partial = -1;
+	ResetPartialLinenos(text);
     }
 #endif /* DISP_PARTIAL */
 
@@ -2244,8 +2245,9 @@ static void display_page(HText *text, int line_number,
 			LYSetHilite(nlinks, s);
 		    if (s == NULL)
 			break;
-		    if (count != 0)
+		    if (count != 0) {
 			LYAddHilite(nlinks, s, LYGetHiTextPos(Anchor_ptr, count));
+		    }
 		}
 
 		links[nlinks].inUnderline = Anchor_ptr->inUnderline;
@@ -2413,8 +2415,7 @@ static void display_page(HText *text, int line_number,
 	text->first_lineno_last_disp_partial = text->top_of_screen;
 	text->last_lineno_last_disp_partial = last_disp_partial;
     } else {
-	text->first_lineno_last_disp_partial =
-	    text->last_lineno_last_disp_partial = -1;
+	ResetPartialLinenos(text);
     }
 #endif /* DISP_PARTIAL */
 
@@ -3386,7 +3387,8 @@ static void split_line(HText *text, unsigned split)
 	     */
 	    if (line->size && !text->stbl) {
 		CTRACE((tfp,
-			"BUG: justification: shouldn't happen - new line is not empty!\n"));
+			"BUG: justification: shouldn't happen - new line is not empty!\n\t'%.*s'\n",
+			line->size, line->data));
 	    }
 
 	    for (p2 = previous->data; *p2; ++p2)
@@ -4629,8 +4631,7 @@ static int HText_insertBlanksInStblLines(HText *me, int ncols)
 	     */
 	    if (me->first_lineno_last_disp_partial >= 0) {
 		if (me->first_lineno_last_disp_partial >= lineno) {
-		    me->first_lineno_last_disp_partial =
-			me->last_lineno_last_disp_partial = -1;
+		    ResetPartialLinenos(me);
 		} else if (me->last_lineno_last_disp_partial >= lineno) {
 		    me->last_lineno_last_disp_partial = lineno - 1;
 		}
@@ -4737,8 +4738,7 @@ static int HText_insertBlanksInStblLines(HText *me, int ncols)
 	    /*  As above make sure modified lines get fully re-displayed */
 	    if (me->first_lineno_last_disp_partial >= 0) {
 		if (me->first_lineno_last_disp_partial >= lineno) {
-		    me->first_lineno_last_disp_partial =
-			me->last_lineno_last_disp_partial = -1;
+		    ResetPartialLinenos(me);
 		} else if (me->last_lineno_last_disp_partial >= lineno) {
 		    me->last_lineno_last_disp_partial = lineno - 1;
 		}
@@ -5883,6 +5883,8 @@ static void HText_trimHightext(HText *text, BOOLEAN final,
 		}
 		if (non_empty(hi_string)) {
 		    LYAddHiText(anchor_ptr, hi_string, hi_offset);
+		} else if (actual_len > hilite_len) {
+		    LYAddHiText(anchor_ptr, "", hi_offset);
 		}
 		FREE(hi_string);
 	    }
@@ -6692,6 +6694,25 @@ int HText_getNumOfLines(void)
 }
 
 /*
+ * HText_getNumOfBytes returns the size of the document, as rendered.  This
+ * may be different from the original filesize.
+ */
+int HText_getNumOfBytes(void)
+{
+    int result = -1;
+    HTLine *line = NULL;
+
+    if (HTMainText != 0) {
+	for (line = FirstHTLine(HTMainText);
+	     line != HTMainText->last_line;
+	     line = line->next) {
+	    result += 1 + strlen(line->data);
+	}
+    }
+    return result;
+}
+
+/*
  * HText_getTitle returns the title of the
  * current document.
  */
@@ -7084,12 +7105,8 @@ BOOL HText_select(HText *text)
 
 #ifdef DISP_PARTIAL
 	/* Reset these for the previous and current text. - kw */
-	text->first_lineno_last_disp_partial =
-	    text->last_lineno_last_disp_partial = -1;
-	if (HTMainText) {
-	    HTMainText->first_lineno_last_disp_partial =
-		HTMainText->last_lineno_last_disp_partial = -1;
-	}
+	ResetPartialLinenos(text);
+	ResetPartialLinenos(HTMainText);
 #endif /* DISP_PARTIAL */
 
 #ifdef CAN_SWITCH_DISPLAY_CHARSET
@@ -7189,9 +7206,7 @@ BOOL HTFindPoundSelector(const char *selector)
 	    }
 	}
     }
-
     return (NO);
-
 }
 
 BOOL HText_selectAnchor(HText *text, HTChildAnchor *anchor)
@@ -7530,9 +7545,9 @@ int do_www_search(DocInfo *doc)
     StrAllocCat(tmpaddress, "?");
     StrAllocCat(tmpaddress, searchstring);
     user_message(WWW_WAIT_MESSAGE, tmpaddress);
-#if !defined(VMS) && defined(SYSLOG_REQUESTED_URLS)
+#ifdef SYSLOG_REQUESTED_URLS
     LYSyslog(tmpaddress);
-#endif /* !VMS && SYSLOG_REQUESTED_URLS */
+#endif
     FREE(tmpaddress);
     if (cp)
 	*cp = '?';
@@ -7597,17 +7612,53 @@ static void write_hyphen(FILE *fp)
 }
 
 /*
+ * Returns the length after trimming trailing blanks.  Modify the string as
+ * needed so that any special character which follows a trailing blank is moved
+ * before the (trimmed) blank, so the result which will be dumped has no
+ * trailing blanks.
+ */
+static int TrimmedLength(char *string)
+{
+    int result = strlen(string);
+    int adjust = result;
+    int ch;
+
+    while (adjust > 0) {
+	ch = UCH(string[adjust - 1]);
+	if (isspace(ch) || IsSpecialAttrChar(ch)) {
+	    --adjust;
+	} else {
+	    break;
+	}
+    }
+    if (result != adjust) {
+	char *dst = string + adjust;
+	char *src = dst;
+
+	for (;;) {
+	    src = LYSkipBlanks(src);
+	    if ((*dst++ = *src++) == '\0')
+		break;
+	}
+	result = (dst - string - 1);
+    }
+    return result;
+}
+
+/*
  * Print the contents of the file in HTMainText to
  * the file descriptor fp.
  * If is_email is TRUE add ">" before each "From " line.
  * If is_reply is TRUE add ">" to the beginning of each
  * line to specify the file is a reply to message.
  */
-void print_wwwfile_to_fd(FILE *fp, BOOLEAN is_email,
+void print_wwwfile_to_fd(FILE *fp,
+			 BOOLEAN is_email,
 			 BOOLEAN is_reply)
 {
     register int i;
     int first = TRUE;
+    int limit;
     HTLine *line;
 
 #ifndef NO_DUMP_WITH_BACKSPACES
@@ -7650,25 +7701,28 @@ void print_wwwfile_to_fd(FILE *fp, BOOLEAN is_email,
 	/*
 	 * Add data.
 	 */
-	for (i = 0; line->data[i] != '\0'; i++) {
-	    if (!IsSpecialAttrChar(line->data[i])) {
+	limit = TrimmedLength(line->data);
+	for (i = 0; i < limit; i++) {
+	    int ch = UCH(line->data[i]);
+
+	    if (!IsSpecialAttrChar(ch)) {
 #ifndef NO_DUMP_WITH_BACKSPACES
 		if (in_b) {
-		    fputc(line->data[i], fp);
+		    fputc(ch, fp);
 		    fputc('\b', fp);
-		    fputc(line->data[i], fp);
+		    fputc(ch, fp);
 		} else if (in_u) {
 		    fputc('_', fp);
 		    fputc('\b', fp);
-		    fputc(line->data[i], fp);
+		    fputc(ch, fp);
 		} else
 #endif
-		    fputc(line->data[i], fp);
-	    } else if (line->data[i] == LY_SOFT_HYPHEN &&
-		       line->data[i + 1] == '\0') {	/* last char on line */
+		    fputc(ch, fp);
+	    } else if (ch == LY_SOFT_HYPHEN &&
+		       (i + 1) >= limit) {	/* last char on line */
 		write_hyphen(fp);
 	    } else if (dump_output_immediately && use_underscore) {
-		switch (line->data[i]) {
+		switch (ch) {
 		case LY_UNDERLINE_START_CHAR:
 		case LY_UNDERLINE_END_CHAR:
 		    fputc('_', fp);
@@ -7680,7 +7734,7 @@ void print_wwwfile_to_fd(FILE *fp, BOOLEAN is_email,
 	    }
 #ifndef NO_DUMP_WITH_BACKSPACES
 	    else if (bs) {
-		switch (line->data[i]) {
+		switch (ch) {
 		case LY_UNDERLINE_START_CHAR:
 		    if (!in_b)
 			in_u = TRUE;	/*favor bold over underline */
@@ -7723,6 +7777,7 @@ void print_crawl_to_fd(FILE *fp, char *thelink,
 {
     register int i;
     int first = TRUE;
+    int limit;
     HTLine *line;
 
     if (!HTMainText)
@@ -7743,11 +7798,14 @@ void print_crawl_to_fd(FILE *fp, char *thelink,
 	/*
 	 * Add data.
 	 */
-	for (i = 0; line->data[i] != '\0'; i++) {
-	    if (!IsSpecialAttrChar(line->data[i])) {
-		fputc(line->data[i], fp);
-	    } else if (line->data[i] == LY_SOFT_HYPHEN &&
-		       line->data[i + 1] == '\0') {	/* last char on line */
+	limit = TrimmedLength(line->data);
+	for (i = 0; limit; i++) {
+	    int ch = UCH(line->data[i]);
+
+	    if (!IsSpecialAttrChar(ch)) {
+		fputc(ch, fp);
+	    } else if (ch == LY_SOFT_HYPHEN &&
+		       (i + 1) >= limit) {	/* last char on line */
 		write_hyphen(fp);
 	    }
 	}

@@ -2122,7 +2122,7 @@ static void exitAction(long error GCC_UNUSED)
     long i;
 
     for (i = 0; i < 100000; i++) ;
-    exit(0);
+    exit_immediately(0);
 }
 
 /*----------------------------------------------------------------------*/

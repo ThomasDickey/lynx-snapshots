@@ -136,9 +136,9 @@ void LYexit(int status)
      * Close syslog before doing atexit-cleanup, since it may use a string
      * that would be freed there.
      */
-#if !defined(VMS) && defined(SYSLOG_REQUESTED_URLS)
+#ifdef SYSLOG_REQUESTED_URLS
     LYCloselog();
-#endif /* !VMS && SYSLOG_REQUESTED_URLS */
+#endif
 
     /*
      * Do functions registered with LYatexit.  - GAB

@@ -1,6 +1,6 @@
 /* character level styles for Lynx
  * (c) 1996 Rob Partington -- donated to the Lyncei (if they want it :-)
- * @Id: LYStyle.c 1.57 Wed, 30 Jun 2004 16:55:04 -0700 dickey @
+ * @Id: LYStyle.c 1.58 Thu, 30 Dec 2004 04:11:59 -0800 dickey @
  */
 #include <HTUtils.h>
 #include <HTML.h>
@@ -289,10 +289,7 @@ Syntax Error parsing style in lss file:\n\
 The line must be of the form:\n\
 OBJECT:MONO:COLOR (ie em:bold:brightblue:white)\n\
 where OBJECT is one of EM,STRONG,B,I,U,BLINK etc.\n\n"), buffer);
-	if (!dump_output_immediately) {
-	    exit_immediately(EXIT_FAILURE);
-	}
-	exit(1);
+	exit_immediately(EXIT_FAILURE);
     }
     strtolower(buffer);
     *tmp = '\0';

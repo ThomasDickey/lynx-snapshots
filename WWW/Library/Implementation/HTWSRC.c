@@ -105,11 +105,8 @@ struct _HTStream {
     int param_count;
 };
 
-const char *hex = "0123456789ABCDEF";
-
 /*	Decode one hex character
 */
-
 char from_hex(char c)
 {
     return (char) ((c >= '0') && (c <= '9') ? c - '0'
@@ -446,7 +443,7 @@ static void WSRCParser_abort(HTStream *me, HTError e GCC_UNUSED)
  *		---------------
  */
 
-HTStreamClass WSRCParserClass =
+static HTStreamClass WSRCParserClass =
 {
     "WSRCParser",
     WSRCParser_free,
@@ -454,7 +451,6 @@ HTStreamClass WSRCParserClass =
     WSRCParser_put_character,
     WSRCParser_put_string,
     WSRCParser_write
-
 };
 
 /*		Converter from WAIS Source to whatever

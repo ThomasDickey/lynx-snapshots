@@ -1450,7 +1450,6 @@ void toggle_novice_line(void)
 
 void noviceline(int more_flag GCC_UNUSED)
 {
-
     if (dump_output_immediately)
 	return;
 
@@ -2007,6 +2006,8 @@ int LYCheckForProxyURL(char *filename)
      * see if we have proxying set up.
      */
     if ((cp1 = strchr((cp + 1), ':')) != NULL) {
+	if ((cp2 = strchr((cp + 1), '/')) != NULL && cp2 < cp1)
+	    return (NOT_A_URL_TYPE);
 	*cp1 = '\0';
 	StrAllocCopy(cp2, cp);
 	*cp1 = ':';
@@ -3584,7 +3585,7 @@ void parse_restrictions(const char *s)
 	}
 	if (!found) {
 	    printf("%s: %.*s\n", gettext("unknown restriction"), p - word, word);
-	    exit(EXIT_FAILURE);
+	    exit_immediately(EXIT_FAILURE);
 	}
 	if (*p)
 	    p++;
@@ -4999,7 +5000,7 @@ const char *Home_Dir(void)
     }
     if (homedir == NULL) {
 	printf("%s\n", gettext("Cannot find HOME directory"));
-	exit(EXIT_FAILURE);
+	exit_immediately(EXIT_FAILURE);
     }
     return homedir;
 }
@@ -5975,7 +5976,7 @@ FILE *LYOpenTemp(char *result,
 	    StrAllocCat(lynx_temp_space, "lynxXXXXXXXXXX");
 	    if (mkdtemp(lynx_temp_space) == 0) {
 		printf("%s: %s\n", lynx_temp_space, LYStrerror(errno));
-		exit(EXIT_FAILURE);
+		exit_immediately(EXIT_FAILURE);
 	    }
 	    umask(old_mask);
 	    lynx_temp_subspace = 1;
@@ -7500,7 +7501,7 @@ void LYmsec_delay(unsigned msec)
 
 #if defined(WIN_EX)		/* 1997/10/16 (Thu) 20:13:28 */
 
-int put_clip(char *szBuffer)
+int put_clip(const char *szBuffer)
 {
     HANDLE hWnd;
     HANDLE m_hLogData;
@@ -7664,22 +7665,25 @@ char *w32_strerror(DWORD ercode)
 
 #endif
 
-#if !defined(VMS) && defined(SYSLOG_REQUESTED_URLS)
+#if defined(SYSLOG_REQUESTED_URLS)
 /*
  * syslog() interface
  */
 void LYOpenlog(const char *banner)
 {
+    if (syslog_requested_urls) {
+	CTRACE((tfp, "LYOpenlog(%s)\n", NONNULL(banner)));
 #if defined(DJGPP)
-    openlog("lynx", LOG_PID | LOG_NDELAY, LOG_LOCAL5);
+	openlog("lynx", LOG_PID | LOG_NDELAY, LOG_LOCAL5);
 #else
-    openlog("lynx", LOG_PID, LOG_LOCAL5);
+	openlog("lynx", LOG_PID, LOG_LOCAL5);
 #endif
 
-    if (banner) {
-	syslog(LOG_INFO, "Session start:%s", banner);
-    } else {
-	syslog(LOG_INFO, "Session start");
+	if (banner) {
+	    syslog(LOG_INFO, "Session start:%s", banner);
+	} else {
+	    syslog(LOG_INFO, "Session start");
+	}
     }
 }
 
@@ -7706,35 +7710,40 @@ void LYSyslog(char *arg)
     char *colon2;
     char *atsign;
 
-    CTRACE((tfp, "LYSyslog %s\n", arg));
+    if (syslog_requested_urls) {
 
-    if (is_url(arg)) {		/* proto://user:password@host/path:port */
-	/*      ^this colon                 */
-	if ((colon1 = strchr(arg, ':')) != 0
-	    && !strncmp(colon1, "://", 3)
-	    && (colon2 = strchr(colon1 + 3, ':')) != 0
-	    && (atsign = strchr(colon1, '@')) != 0
-	    && (colon2 < atsign)
-	    && looks_like_password(colon2 + 1, atsign - 1)) {
-	    char *buf = NULL;
+	CTRACE((tfp, "LYSyslog %s\n", arg));
 
-	    StrAllocCopy(buf, arg);
-	    buf[colon2 - arg + 1] = 0;
-	    StrAllocCat(buf, "******");
-	    StrAllocCat(buf, atsign);
-	    syslog(LOG_INFO | LOG_LOCAL5, "%s", buf);
-	    CTRACE((tfp, "...alter %s\n", buf));
-	    FREE(buf);
-	    return;
+	if (is_url(arg)) {	/* proto://user:password@host/path:port */
+	    /*      ^this colon                 */
+	    if ((colon1 = strchr(arg, ':')) != 0
+		&& !strncmp(colon1, "://", 3)
+		&& (colon2 = strchr(colon1 + 3, ':')) != 0
+		&& (atsign = strchr(colon1, '@')) != 0
+		&& (colon2 < atsign)
+		&& looks_like_password(colon2 + 1, atsign - 1)) {
+		char *buf = NULL;
+
+		StrAllocCopy(buf, arg);
+		buf[colon2 - arg + 1] = 0;
+		StrAllocCat(buf, "******");
+		StrAllocCat(buf, atsign);
+		syslog(LOG_INFO | LOG_LOCAL5, "%s", buf);
+		CTRACE((tfp, "...alter %s\n", buf));
+		FREE(buf);
+		return;
+	    }
 	}
+	syslog(LOG_INFO | LOG_LOCAL5, "%s", NONNULL(arg));
     }
-    syslog(LOG_INFO | LOG_LOCAL5, "%s", NONNULL(arg));
 }
 
 void LYCloselog(void)
 {
-    syslog(LOG_INFO, "Session over");
-    closelog();
+    if (syslog_requested_urls) {
+	syslog(LOG_INFO, "Session over");
+	closelog();
+    }
 }
 
-#endif /* !VMS && SYSLOG_REQUESTED_URLS */
+#endif /* SYSLOG_REQUESTED_URLS */

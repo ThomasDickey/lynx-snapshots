@@ -658,6 +658,9 @@ read the startfile from standard input
 .B \-syslog\fR=\fItext
 information for syslog call.
 .TP
+.B \-syslog-urls
+log requested URLs with syslog.
+.TP
 .B \-tagsoup
 initialize parser, using Tag Soup DTD rather than SortaSGML.
 .TP

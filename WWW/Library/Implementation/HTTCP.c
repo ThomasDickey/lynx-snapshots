@@ -1817,7 +1817,7 @@ int HTDoConnect(const char *url,
 		     * EALREADY.
 		     *
 		     * For some reason, UCX pre 3 apparently returns errno =
-		     * 18242 instead the EALREADY or EISCONN.
+		     * 18242 instead of EALREADY or EISCONN.
 		     */
 #ifdef INET6
 		    status = connect(*s, res->ai_addr, res->ai_addrlen);

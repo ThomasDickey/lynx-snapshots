@@ -108,7 +108,6 @@ static void dt_Number(FILE *fp0,
  * the cursor is on.
  */
 int LYShowInfo(DocInfo *doc,
-	       int size_of_file,
 	       DocInfo *newdoc,
 	       char *owner_address)
 {
@@ -357,6 +356,10 @@ int LYShowInfo(DocInfo *doc,
 		ADD_NN(gettext("Content-Length:"),
 		       HTMainAnchor->content_length,
 		       gettext("bytes"));
+	    } else {
+		ADD_NN(gettext("Length:"),
+		       HText_getNumOfBytes(),
+		       gettext("bytes"));
 	    }
 	    if (HTMainAnchor && HTMainAnchor->content_language) {
 		ADD_SS(gettext("Language:"), HTMainAnchor->content_language);
@@ -378,7 +381,7 @@ int LYShowInfo(DocInfo *doc,
 		: NO_NOTHING));
 
 	ADD_NN(gettext("size:"),
-	       size_of_file,
+	       HText_getNumOfLines(),
 	       gettext("lines"));
 
 	StrAllocCopy(temp,

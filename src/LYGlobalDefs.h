@@ -222,6 +222,7 @@ extern BOOLEAN number_fields_on_left;
 extern BOOLEAN number_links_on_left;
 extern BOOLEAN recent_sizechange;
 extern BOOLEAN rlogin_ok;
+extern BOOLEAN syslog_requested_urls;
 extern BOOLEAN system_editor;	/* True if locked-down editor */
 extern BOOLEAN telnet_ok;
 extern BOOLEAN verbose_img;	/* display filenames of images?     */
@@ -250,10 +251,12 @@ extern char *lynxlistfile;
 extern char *original_dir;
 extern char *pref_charset;	/* Lynx's preferred character set - MM */
 extern char *startfile;
+extern char *syslog_txt;	/* syslog arb text for session */
 extern char *system_mail;
 extern char *system_mail_flags;
 extern char *x_display;
 extern char empty_string[];
+
 extern const char *checked_box;	/* form boxes */
 extern const char *checked_radio;	/* form radio buttons */
 extern const char *unchecked_box;	/* form boxes */
@@ -266,6 +269,9 @@ extern int display_lines;	/* number of lines in the display */
 extern int dump_output_width;
 extern int keypad_mode;		/* NUMBERS_AS_ARROWS or LINKS_ARE_NUMBERED */
 extern int lynx_temp_subspace;
+extern int max_cookies_buffer;
+extern int max_cookies_domain;
+extern int max_cookies_global;
 extern int user_mode;		/* novice or advanced */
 extern int www_search_result;
 
@@ -331,6 +337,7 @@ extern BOOLEAN local_host_only;
 extern BOOLEAN override_no_download;
 extern BOOLEAN show_dotfiles;	/* From rcfile if no_dotfiles is false */
 extern char *indexfile;
+extern char *anonftp_password;
 extern char *personal_mail_address;
 extern char *homepage;		/* startfile or command line argument */
 extern char *editor;		/* if non empty it enables edit mode with
@@ -437,6 +444,7 @@ extern int LYStatusLine;	/* Line for statusline() or -1   */
 extern BOOLEAN LYCollapseBRs;	/* Collapse serial BRs?          */
 extern BOOLEAN LYSetCookies;	/* Process Set-Cookie headers?   */
 extern BOOLEAN LYAcceptAllCookies;	/* accept ALL cookies?           */
+
 extern char *LYCookieAcceptDomains;	/* domains to accept all cookies */
 extern char *LYCookieRejectDomains;	/* domains to reject all cookies */
 extern char *LYCookieStrictCheckDomains;	/* domains to check strictly    */

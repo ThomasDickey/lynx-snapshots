@@ -1077,7 +1077,7 @@ static BOOL HTLoadDocument(const char *full_address,	/* may include #fragment */
 	fprintf(stderr,
 		gettext("**** HTAccess: Internal software error.  Please mail lynx-dev@nongnu.org!\n"));
 	fprintf(stderr, gettext("**** HTAccess: Status returned was: %d\n"), status);
-	exit(EXIT_FAILURE);
+	exit_immediately(EXIT_FAILURE);
     }
 
     /* Failure in accessing a document */

@@ -287,6 +287,7 @@ extern void LYEscapeStartfile(char **buffer);
 extern void LYLowerCase(char *buffer);
 extern void LYUpperCase(char *buffer);
 extern BOOLEAN LYRemoveNewlines(char *buffer);
+extern char *LYReduceBlanks(char *buffer);
 extern char *LYRemoveBlanks(char *buffer);
 extern char *LYSkipBlanks(char *buffer);
 extern char *LYSkipNonBlanks(char *buffer);

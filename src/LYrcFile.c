@@ -322,6 +322,12 @@ prompt for each cookie.  Set accept_all_cookies to \"TRUE\" to accept\n\
 all cookies.\n\
 ")),
     MAYBE_FUN(RC_ASSUME_CHARSET,        get_assume_charset, put_assume_charset, MSG_ENABLE_LYNXRC),
+    PARSE_STR(RC_ANONFTP_PASSWORD,      anonftp_password, N_("\
+anonftp_password allows the user to tell Lynx to use the personal\n\
+email address as the password for anonymous ftp.  If no value is given,\n\
+Lynx will use the personal email address.  Set anonftp_password\n\
+to a different value if you choose.\n\
+")),
     PARSE_STR(RC_BOOKMARK_FILE,         bookmark_page,     N_("\
 bookmark_file specifies the name and location of the default bookmark\n\
 file into which the user can paste links for easy access at a later\n\

@@ -135,10 +135,10 @@ static int getunicode(char **p0)
 /*
  *  Massive overkill, but who cares?
  */
-unicode unitable[MAX_FONTLEN][255];
-int unicount[MAX_FONTLEN];
+static unicode unitable[MAX_FONTLEN][255];
+static int unicount[MAX_FONTLEN];
 
-struct unimapdesc_str themap_str =
+static struct unimapdesc_str themap_str =
 {0, NULL, 0, 0};
 
 static const char *tblname;
@@ -239,12 +239,12 @@ static void addpair(int fp, int un)
     /* otherwise: ignore */
 }
 
-char this_MIMEcharset[UC_MAXLEN_MIMECSNAME + 1];
-char this_LYNXcharset[UC_MAXLEN_LYNXCSNAME + 1];
-char id_append[UC_MAXLEN_ID_APPEND + 1] = "_";
-int this_isDefaultMap = -1;
-int useDefaultMap = 1;
-int lowest_eight = 999;
+static char this_MIMEcharset[UC_MAXLEN_MIMECSNAME + 1];
+static char this_LYNXcharset[UC_MAXLEN_LYNXCSNAME + 1];
+static char id_append[UC_MAXLEN_ID_APPEND + 1] = "_";
+static int this_isDefaultMap = -1;
+static int useDefaultMap = 1;
+static int lowest_eight = 999;
 
 int main(int argc, char **argv)
 {

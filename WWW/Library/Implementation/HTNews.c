@@ -41,7 +41,6 @@ int HTNewsMaxChunk = 40;	/* Largest number of articles in one window */
 #endif /* NEWS_AUTH_FILE */
 
 #ifdef USE_SSL
-extern SSL_CTX *ssl_ctx;
 static SSL *Handle = NULL;
 static int channel_s = 1;
 

@@ -692,27 +692,21 @@ int LYmbcsstrlen(const char *str,
 #undef GetChar
 
 #ifdef USE_SLANG
-#ifdef VMS
+#if defined(VMS)
 #define GetChar() ttgetc()
-#else
-#ifdef __DJGPP__
-#ifdef DJGPP_KEYHANDLER
-#define GetChar getxkey
-#else
-#define GetChar SLkp_getkey
-#endif /* DJGPP_KEYHANDLER */
-#else
-#ifdef __CYGWIN__
+#elif defined(__DJGPP__)
+#define GetChar() getxkey()	/* HTDos.c */
+#elif defined(__CYGWIN__)
 #define GetChar SLkp_getkey
 #else
 #define GetChar (int)SLang_getkey
-#endif /* __CYGWIN__ */
-#endif /* __DJGPP__ */
-#endif /* VMS */
-#endif /* USE_SLANG */
-
-#if !defined(GetChar) && defined(NCURSES)
+#endif
+#else /* curses */
+#if defined(DJGPP)
+#define GetChar() (djgpp_idle_loop(), wgetch(LYtopwindow()))
+#elif defined(NCURSES)
 #define GetChar() wgetch(LYtopwindow())
+#endif
 #endif
 
 #if !defined(GetChar) && defined(PDCURSES) && defined(PDC_BUILD) && PDC_BUILD >= 2401
@@ -2570,6 +2564,20 @@ BOOLEAN LYRemoveNewlines(char *buffer)
 	}
     }
     return FALSE;
+}
+
+/*
+ * Remove leading/trailing whitespace from a string, reduce runs of embedded
+ * whitespace to single blanks.
+ */
+char *LYReduceBlanks(char *buffer)
+{
+    if (non_empty(buffer)) {
+	LYTrimLeading(buffer);
+	LYTrimTrailing(buffer);
+	convert_to_spaces(buffer, TRUE);
+    }
+    return buffer;
 }
 
 /*
@@ -5759,7 +5767,7 @@ int LYReadCmdKey(int mode)
 	    switch (len = (tmp - src)) {
 	    case 4:
 		if (!strncasecomp(src, "exit", 4))
-		    exit(0);
+		    exit_immediately(0);
 		break;
 	    case 3:
 		if (!strncasecomp(src, "key", 3)) {

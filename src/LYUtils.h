@@ -477,14 +477,14 @@ extern HTList *sug_filenames;
 /*
  * syslog() facility
  */
-#if !defined(VMS) && defined(SYSLOG_REQUESTED_URLS)
+#if defined(SYSLOG_REQUESTED_URLS)
 #include <syslog.h>
 
 extern void LYOpenlog(const char *banner);
 extern void LYSyslog(char *arg);
 extern void LYCloselog(void);
 
-#endif /* !VMS && SYSLOG_REQUESTED_URLS */
+#endif /* SYSLOG_REQUESTED_URLS */
 
 /*
  *  Miscellaneous.
