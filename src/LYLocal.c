@@ -280,8 +280,7 @@ PRIVATE BOOLEAN remove_tagged NOARGS
 		sprintf(tmpbuf,
 			"System error - failed to get status of '%s'.",
 			testpath);
-		_statusline(tmpbuf);
-		sleep(AlertSecs);
+		HTAlert(tmpbuf);
 		return count;
 	    } else {
 		args[0] = "rm";
@@ -373,8 +372,7 @@ PRIVATE BOOLEAN modify_tagged ARGS1(
 	HTUnEscape(savepath);
 	if (stat(savepath, &dir_info) == -1) {
 	    sprintf(tmpbuf, "Unable to get status of '%s'.", savepath);
-	    _statusline(tmpbuf);
-	    sleep(AlertSecs);
+	    HTAlert(tmpbuf);
 	    FREE(savepath);
 	    return 0;
 	}
@@ -396,8 +394,7 @@ PRIVATE BOOLEAN modify_tagged ARGS1(
 	    StrAllocCat(cp1, (tmpbuf + 1));
 	    if (strlen(cp1) > (sizeof(tmpbuf) - 1)) {
 		sprintf(tmpbuf, "%s", "Path too long");
-		_statusline(tmpbuf);
-		sleep(AlertSecs);
+		HTAlert(tmpbuf);
 		FREE(savepath);
 		FREE(cp1);
 		return 0;
@@ -422,8 +419,7 @@ PRIVATE BOOLEAN modify_tagged ARGS1(
 	 */
 	if (stat(savepath, &dir_info) == -1) {
 	    sprintf(tmpbuf,"Unable to get status of '%s'.",savepath);
-	    _statusline(tmpbuf);
-	    sleep(AlertSecs);
+	    HTAlert(tmpbuf);
 	    FREE(savepath);
 	    return 0;
 	}
@@ -432,9 +428,7 @@ PRIVATE BOOLEAN modify_tagged ARGS1(
 	 *  Make sure the source and target locations are not the same place.
 	 */
 	if (dev == dir_info.st_dev && inode == dir_info.st_ino) {
-	    _statusline(
-	   "Source and destination are the same location - request ignored!");
-	    sleep(AlertSecs);
+	    HTAlert("Source and destination are the same location - request ignored!");
 	    FREE(savepath);
 	    return 0;
 	}
@@ -477,17 +471,13 @@ PRIVATE BOOLEAN modify_tagged ARGS1(
 		clear_tags();
 		return count;
 	    } else {
-		_statusline(
-			"Destination has different owner! Request denied.");
-		sleep(AlertSecs);
+		HTAlert("Destination has different owner! Request denied.");
 		FREE(srcpath);
 		FREE(savepath);
 		return 0;
 	    }
 	} else {
-	    _statusline(
-		   "Destination is not a valid directory! Request denied.");
-	    sleep(AlertSecs);
+	    HTAlert("Destination is not a valid directory! Request denied.");
 	    FREE(savepath);
 	    return 0;
 	}
@@ -515,8 +505,7 @@ PRIVATE BOOLEAN modify_name ARGS1(
 
     if (stat(testpath, &dir_info) == -1) {
 	sprintf(tmpbuf, "Unable to get status of '%s'.", testpath);
-	_statusline(tmpbuf);
-	sleep(AlertSecs);
+	HTAlert(tmpbuf);
     } else {
 	/*
 	 *  Change the name of the file or directory.
@@ -526,9 +515,7 @@ PRIVATE BOOLEAN modify_name ARGS1(
 	} else if (S_ISREG(dir_info.st_mode)) {
 	     cp = "Enter new name for file: ";
 	} else {
-	     _statusline(
-	 "The selected item is not a file or a directory! Request ignored.");
-	     sleep(AlertSecs);
+	     HTAlert("The selected item is not a file or a directory! Request ignored.");
 	     return 0;
 	}
 	if (filename(cp, tmpbuf, sizeof(tmpbuf)) == NULL)
@@ -538,8 +525,7 @@ PRIVATE BOOLEAN modify_name ARGS1(
 	 *  Do not allow the user to also change the location at this time.
 	 */
 	if (strchr(tmpbuf, '/') != NULL) {
-	    _statusline("Illegal character \"/\" found! Request ignored.");
-	    sleep(AlertSecs);
+	    HTAlert("Illegal character \"/\" found! Request ignored.");
 	} else if (strlen(tmpbuf) &&
 		   (cp = strrchr(testpath, '/')) != NULL) {
 	    strcpy(savepath,testpath);
@@ -554,8 +540,7 @@ PRIVATE BOOLEAN modify_name ARGS1(
 		if (errno != ENOENT) {
 		    sprintf(tmpbuf,
 			    "Unable to determine status of '%s'.", newpath);
-		    _statusline(tmpbuf);
-		    sleep(AlertSecs);
+		    HTAlert(tmpbuf);
 		} else {
 		    sprintf(tmpbuf, "move %s to %s", savepath, newpath);
 		    args[0] = "mv";
@@ -567,17 +552,11 @@ PRIVATE BOOLEAN modify_name ARGS1(
 		    return 1;
 		}
 	    } else if (S_ISDIR(dir_info.st_mode)) {
-		_statusline(
-	    "There is already a directory with that name! Request ignored.");
-		sleep(AlertSecs);
+		HTAlert("There is already a directory with that name! Request ignored.");
 	    } else if (S_ISREG(dir_info.st_mode)) {
-		_statusline(
-		 "There is already a file with that name! Request ignored.");
-		sleep(AlertSecs);
+		HTAlert("There is already a file with that name! Request ignored.");
 	    } else {
-		_statusline(
-		   "The specified name is already in use! Request ignored.");
-		sleep(AlertSecs);
+		HTAlert("The specified name is already in use! Request ignored.");
 	    }
 	}
     }
@@ -608,8 +587,7 @@ PRIVATE BOOLEAN modify_location ARGS1(
 
     if (stat(testpath, &dir_info) == -1) {
 	sprintf(tmpbuf, "Unable to get status of '%s'.", testpath);
-	_statusline(tmpbuf);
-	sleep(AlertSecs);
+	HTAlert(tmpbuf);
 	return 0;
     }
 
@@ -621,9 +599,7 @@ PRIVATE BOOLEAN modify_location ARGS1(
     } else if (S_ISREG(dir_info.st_mode)) {
 	cp = "Enter new location for file: ";
     } else {
-	_statusline(
-	"The specified item is not a file or a directory - request ignored.");
-	sleep(AlertSecs);
+	HTAlert("The specified item is not a file or a directory - request ignored.");
 	return 0;
     }
     if (filename(cp, tmpbuf, sizeof(tmpbuf)) == NULL)
@@ -645,8 +621,7 @@ PRIVATE BOOLEAN modify_location ARGS1(
 		*++cp = '\0';
 		strcat(newpath,tmpbuf);
 	    } else {
-	    _statusline("Unexpected failure - unable to find trailing \"/\"");
-		sleep(AlertSecs);
+		HTAlert("Unexpected failure - unable to find trailing \"/\"");
 		return 0;
 	    }
 	} else {
@@ -662,14 +637,11 @@ PRIVATE BOOLEAN modify_location ARGS1(
 	owner = dir_info.st_uid;
 	if (stat(newpath, &dir_info) == -1) {
 	    sprintf(tmpbuf,"Unable to get status of '%s'.",newpath);
-	    _statusline(tmpbuf);
-	    sleep(AlertSecs);
+	    HTAlert(tmpbuf);
 	    return 0;
 	}
 	if (S_ISDIR(dir_info.st_mode)) {
-	    _statusline(
-		"Destination is not a valid directory! Request denied.");
-	    sleep(AlertSecs);
+	    HTAlert("Destination is not a valid directory! Request denied.");
 	    return 0;
 	}
 
@@ -677,9 +649,7 @@ PRIVATE BOOLEAN modify_location ARGS1(
 	 *  Make sure the source and target are not the same location.
 	 */
 	if (dev == dir_info.st_dev && inode == dir_info.st_ino) {
-	    _statusline(
-	   "Source and destination are the same location! Request ignored!");
-	    sleep(AlertSecs);
+	    HTAlert("Source and destination are the same location! Request ignored!");
 	    return 0;
 	}
 	if (dir_info.st_uid == owner) {
@@ -692,8 +662,7 @@ PRIVATE BOOLEAN modify_location ARGS1(
 		return (-1);
 	    return 1;
 	} else {
-	 _statusline("Destination has different owner! Request denied.");
-	    sleep(AlertSecs);
+	    HTAlert("Destination has different owner! Request denied.");
 	    return 0;
 	}
     }
@@ -774,8 +743,7 @@ PUBLIC BOOLEAN local_modify ARGS2(
 	    /*
 	     *	Code for changing ownership needed here.
 	     */
-	     _statusline("This feature not yet implemented!");
-	    sleep(AlertSecs);
+	    HTAlert("This feature not yet implemented!");
 	}
     }
     return 0;
@@ -803,8 +771,7 @@ PRIVATE BOOLEAN create_file ARGS1(
     }
 
     if (strstr(tmpbuf, "//") != NULL) {
-	_statusline("Illegal redirection \"//\" found! Request ignored.");
-	sleep(AlertSecs);
+	HTAlert("Illegal redirection \"//\" found! Request ignored.");
     } else if (strlen(tmpbuf) && strchr(bad_chars, tmpbuf[0]) == NULL) {
 	strcpy(testpath,current_location);
 	if (testpath[(strlen(testpath) - 1)] != '/') {
@@ -823,8 +790,7 @@ PRIVATE BOOLEAN create_file ARGS1(
 	    if (errno != ENOENT) {
 		sprintf(tmpbuf,
 			"Unable to determine status of '%s'.", testpath);
-		_statusline(tmpbuf);
-		sleep(AlertSecs);
+		HTAlert(tmpbuf);
 		return 0;
 	    }
 	    sprintf(tmpbuf,"create %s",testpath);
@@ -835,17 +801,11 @@ PRIVATE BOOLEAN create_file ARGS1(
 		return (-1);
 	    return 1;
 	} else if (S_ISDIR(dir_info.st_mode)) {
-	    _statusline(
-	   "There is already a directory with that name! Request ignored.");
-	    sleep(AlertSecs);
+	    HTAlert("There is already a directory with that name! Request ignored.");
 	} else if (S_ISREG(dir_info.st_mode)) {
-	    _statusline(
-		"There is already a file with that name! Request ignored.");
-	    sleep(AlertSecs);
+	    HTAlert("There is already a file with that name! Request ignored.");
 	} else {
-	    _statusline(
-		  "The specified name is already in use! Request ignored.");
-	    sleep(AlertSecs);
+	    HTAlert("The specified name is already in use! Request ignored.");
 	}
     }
     return 0;
@@ -873,8 +833,7 @@ PRIVATE BOOLEAN create_directory ARGS1(
     }
 
     if (strstr(tmpbuf, "//") != NULL) {
-	_statusline("Illegal redirection \"//\" found! Request ignored.");
-	sleep(AlertSecs);
+	HTAlert("Illegal redirection \"//\" found! Request ignored.");
     } else if (strlen(tmpbuf) && strchr(bad_chars, tmpbuf[0]) == NULL) {
 	strcpy(testpath,current_location);
 	if (testpath[(strlen(testpath) - 1)] != '/') {
@@ -889,8 +848,7 @@ PRIVATE BOOLEAN create_directory ARGS1(
 	    if (errno != ENOENT) {
 		sprintf(tmpbuf,
 			"Unable to determine status of '%s'.", testpath);
-		_statusline(tmpbuf);
-		sleep(AlertSecs);
+		HTAlert(tmpbuf);
 		return 0;
 	    }
 	    sprintf(tmpbuf,"make directory %s",testpath);
@@ -901,17 +859,11 @@ PRIVATE BOOLEAN create_directory ARGS1(
 		return (-1);
 	    return 1;
 	} else if (S_ISDIR(dir_info.st_mode)) {
-	    _statusline(
-	   "There is already a directory with that name! Request ignored.");
-	    sleep(AlertSecs);
+	    HTAlert("There is already a directory with that name! Request ignored.");
 	} else if (S_ISREG(dir_info.st_mode)) {
-	    _statusline(
-		"There is already a file with that name! Request ignored.");
-	    sleep(AlertSecs);
+	    HTAlert("There is already a file with that name! Request ignored.");
 	} else {
-	    _statusline(
-		  "The specified name is already in use! Request ignored.");
-	    sleep(AlertSecs);
+	    HTAlert("The specified name is already in use! Request ignored.");
 	}
     }
     return 0;
@@ -968,8 +920,7 @@ PRIVATE BOOLEAN remove_single ARGS1(
 	stat(testpath, &dir_info) == -1) {
 	sprintf(tmpbuf,
 		"System error - failed to get status of '%s'.", testpath);
-	_statusline(tmpbuf);
-	sleep(AlertSecs);
+	HTAlert(tmpbuf);
 	return 0;
     }
 
@@ -1005,8 +956,7 @@ PRIVATE BOOLEAN remove_single ARGS1(
 #endif
     } else {
 	sprintf(tmpbuf, "Unable to determine status of '%s'.", testpath);
-	_statusline(tmpbuf);
-	sleep(AlertSecs);
+	HTAlert(tmpbuf);
 	return 0;
     }
     _statusline(tmpbuf);
@@ -1109,8 +1059,7 @@ PRIVATE BOOLEAN permit_location ARGS3(
 	char **,	newpath)
 {
 #ifndef UNIX
-    _statusline("Sorry, don't know how to permit non-UNIX files yet.");
-    sleep(AlertSecs);
+    HTAlert("Sorry, don't know how to permit non-UNIX files yet.");
     return(0);
 #else
     static char tempfile[256] = "\0";
@@ -1135,14 +1084,11 @@ PRIVATE BOOLEAN permit_location ARGS3(
 	    srcpath += 16;
 	if (lstat(srcpath, &dir_info) == -1) {
 	    sprintf(tmpbuf, "Unable to get status of '%s'.", srcpath);
-	    _statusline(tmpbuf);
-	    sleep(AlertSecs);
+	    HTAlert(tmpbuf);
 	    return 0;
 	} else if (!S_ISDIR(dir_info.st_mode) &&
 	           !S_ISREG(dir_info.st_mode)) {
-	    _statusline(
-	"The specified item is not a file nor a directory - request ignored.");
-	    sleep(AlertSecs);
+	    HTAlert("The specified item is not a file nor a directory - request ignored.");
 	    return(0);
 	}
 
@@ -1154,8 +1100,7 @@ PRIVATE BOOLEAN permit_location ARGS3(
 
 	LYRemoveTemp(tempfile);
 	if ((fp0 = LYOpenTemp(tempfile, HTML_SUFFIX, "w")) == NULL) {
-	    _statusline("Unable to open permit options file");
-	    sleep(AlertSecs);
+	    HTAlert("Unable to open permit options file");
 	    return(0);
 	}
 
@@ -1301,14 +1246,11 @@ form to permit %s %s.\n</Ol>\n</Form>\n",
 	destpath = strip_trailing_slash(destpath);
 	if (stat(destpath, &dir_info) == -1) {
 	    sprintf(tmpbuf, "Unable to get status of '%s'.", destpath);
-	    _statusline(tmpbuf);
-	    sleep(AlertSecs);
+	    HTAlert(tmpbuf);
 	    return 0;
 	} else if (!S_ISDIR(dir_info.st_mode) &&
 	           !S_ISREG(dir_info.st_mode)) {
-	    _statusline(
-	"The specified item is not a file nor a directory - request ignored.");
-	    sleep(AlertSecs);
+	    HTAlert("The specified item is not a file nor a directory - request ignored.");
 	    return 0;
 	}
 
@@ -1341,13 +1283,11 @@ form to permit %s %s.\n</Ol>\n</Form>\n",
 		    }
 		}
 		if (permissions[i].string_mode == NULL) {
-		    _statusline("Invalid mode format.");
-		    sleep(AlertSecs);
+		    HTAlert("Invalid mode format.");
 		    return 0;
 		}
 	    } else {
-		_statusline("Invalid syntax format.");
-		sleep(AlertSecs);
+		HTAlert("Invalid syntax format.");
 		return 0;
 	    }
 
@@ -1531,9 +1471,7 @@ PUBLIC int local_dired ARGS1(
 	} else if (!strncmp(line, "LYNXDIRED://UUDECODE", 20)) {
 	    tp = quote_pathname(line + 20);
 	    sprintf(buffer,"%s %s", UUDECODE_PATH, tp);
-	    _statusline(
-      "Warning! UUDecoded file will exist in the directory you started Lynx.");
-	    sleep(AlertSecs);
+	    HTAlert("Warning! UUDecoded file will exist in the directory you started Lynx.");
 	    FREE(tp);
 #endif /* OK_UUDECODE && !ARCHIVE_ONLY */
 
@@ -1692,8 +1630,7 @@ PUBLIC int dired_options ARGS2(
 
     LYRemoveTemp(tempfile);
     if ((fp0 = LYOpenTemp(tempfile, HTML_SUFFIX, "w")) == NULL) {
-	_statusline("Unable to open file management menu file.");
-	sleep(AlertSecs);
+	HTAlert("Unable to open file management menu file.");
 	return(0);
     }
 
@@ -1735,8 +1672,7 @@ PUBLIC int dired_options ARGS2(
 
 	if (lstat(path, &dir_info) == -1 && stat(path, &dir_info) == -1) {
 	    sprintf(tmpbuf, "Unable to get status of '%s'.", path);
-	    _statusline(tmpbuf);
-	    sleep(AlertSecs);
+	    HTAlert(tmpbuf);
 	    LYCloseTempFP(fp0);
 	    FREE(dir_url);
 	    FREE(path_url);
@@ -1874,8 +1810,7 @@ PRIVATE char *filename ARGS3(
     *buf = '\0';
     LYgetstr(buf, VISIBLE, bufsize, NORECALL);
     if (strstr(buf, "../") != NULL) {
-	_statusline("Illegal filename; request ignored.");
-	sleep(AlertSecs);
+	HTAlert("Illegal filename; request ignored.");
 	return NULL;
     }
 
@@ -1886,8 +1821,7 @@ PRIVATE char *filename ARGS3(
 	else
 	    cp = buf;
 	if (*cp == '.') {
-	    _statusline("Illegal filename; request ignored.");
-	    sleep(AlertSecs);
+	    HTAlert("Illegal filename; request ignored.");
 	    return NULL;
 	}
     }
@@ -1920,14 +1854,11 @@ PUBLIC BOOLEAN local_install ARGS3(
 	    srcpath += 16;
 	if (stat(srcpath, &dir_info) == -1) {
 	    sprintf(tmpbuf, "Unable to get status of '%s'.", srcpath);
-	    _statusline(tmpbuf);
-	    sleep(AlertSecs);
+	    HTAlert(tmpbuf);
 	    return 0;
 	} else if (!S_ISDIR(dir_info.st_mode) &&
 		   !S_ISREG(dir_info.st_mode)) {
-	    _statusline(
-	  "The selected item is not a file or a directory! Request ignored.");
-	    sleep(AlertSecs);
+	    HTAlert("The selected item is not a file or a directory! Request ignored.");
 	    return 0;
 	}
 	strcpy(savepath, srcpath);
@@ -1943,17 +1874,13 @@ PUBLIC BOOLEAN local_install ARGS3(
 
     if (stat(destpath,&dir_info) == -1) {
 	sprintf(tmpbuf,"Unable to get status of '%s'.",destpath);
-	_statusline(tmpbuf);
-	sleep(AlertSecs);
+	HTAlert(tmpbuf);
 	return 0;
     } else if (!S_ISDIR(dir_info.st_mode)) {
-	_statusline(
-		"The selected item is not a directory! Request ignored.");
-	sleep(AlertSecs);
+	HTAlert("The selected item is not a directory! Request ignored.");
 	return 0;
     } else if (0 /*directory not writable*/) {
-	_statusline("Install in the selected directory not permitted.");
-	sleep(AlertSecs);
+	HTAlert("Install in the selected directory not permitted.");
 	return 0;
     }
 
@@ -1986,8 +1913,7 @@ PUBLIC BOOLEAN local_install ARGS3(
 	}
 	clear_tags();
     }
-    statusline("Installation complete");
-    sleep(InfoSecs);
+    HTInfoMsg("Installation complete");
     return count;
 }
 
@@ -2169,8 +2095,7 @@ PRIVATE char * render_item ARGS6(
     }
     if (overrun & url_syntax) {
 	sprintf(buf,"Temporary URL or list would be too long.");
-	_statusline(buf);
-	sleep(AlertSecs);
+	HTAlert(buf);
 	bp = buf;	/* set to start, will return empty string as URL */
     }
     *bp = '\0';
@@ -2245,8 +2170,7 @@ PRIVATE int LYExecv ARGS3(
     }
     start_curses();
     if (tmpbuf[0]) {
-	_statusline(tmpbuf);
-	sleep(AlertSecs);
+	HTAlert(tmpbuf);
     }
 
     return(rc);

@@ -7,6 +7,9 @@
 #include <LYHistory.h>
 #include <LYPrint.h>
 #include <LYDownload.h>
+#ifdef EXP_FORMS_OPTIONS
+#include <LYOptions.h>
+#endif
 #include <LYKeymap.h>
 #include <LYList.h>
 #include <LYShowInfo.h>
@@ -67,6 +70,9 @@ PUBLIC void LYAddVisitedLink ARGS1(
 	!strcmp((doc->title ? doc->title : ""), HISTORY_PAGE_TITLE) ||
 	!strcmp((doc->title ? doc->title : ""), PRINT_OPTIONS_TITLE) ||
 	!strcmp((doc->title ? doc->title : ""), DOWNLOAD_OPTIONS_TITLE) ||
+#ifdef EXP_FORMS_OPTIONS
+       !strcmp((doc->title ? doc->title : ""), OPTIONS_TITLE) ||
+#endif
 #ifdef DIRED_SUPPORT
 	!strcmp((doc->title ? doc->title : ""), DIRED_MENU_TITLE) ||
 	!strcmp((doc->title ? doc->title : ""), UPLOAD_OPTIONS_TITLE) ||
@@ -314,8 +320,7 @@ PUBLIC void LYpush ARGS2(
 		    doc->address, doc->title);
     } else {
 	if (LYCursesON) {
-	    _statusline(MAXHIST_REACHED);
-	    sleep(AlertSecs);
+	    HTAlert(MAXHIST_REACHED);
 	}
 	CTRACE(tfp, "\nLYpush: MAXHIST reached for:\n        address:%s\n        title:%s\n",
 		    doc->address, doc->title);
@@ -506,8 +511,7 @@ PUBLIC BOOLEAN historytarget ARGS1(
 	    LYforce_no_cache = FALSE;
 	    LYoverride_no_cache = TRUE;
 	} else {
-	    _statusline(CANCELLED);
-	    sleep(InfoSecs);
+	    HTInfoMsg(CANCELLED);
 	    return(FALSE);
 	}
     }

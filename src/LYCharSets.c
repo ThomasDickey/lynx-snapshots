@@ -684,13 +684,16 @@ PRIVATE void HTMLSetDisplayCharsetMatchLocale ARGS1(int,i)
     }
 
 #if !defined(LOCALE)
-       DisplayCharsetMatchLocale = FALSE;
-#endif
-#if defined(EXP_8BIT_TOUPPER)
 	/*
-	** Force disable locale,
-	** but we have no intention to pass CJK via UCTransChar if that happened.
+	** But we have no intention to pass CJK via UCTransChar if that happened.
 	** Let someone from CJK correct this if necessary.
+	*/
+	if  (!LYHaveCJKCharacterSet)
+	    DisplayCharsetMatchLocale = FALSE;
+#endif
+#if defined(LOCALE) && defined(EXP_8BIT_TOUPPER)
+	/*
+	** Force disable locale
 	*/
 	if  (!LYHaveCJKCharacterSet)
 	    DisplayCharsetMatchLocale = FALSE;
@@ -944,7 +947,7 @@ PUBLIC UCode_t HTMLGetEntityUCValue ARGS1(
 PUBLIC void HTMLUseCharacterSet ARGS1(int,i)
 {
     p_entity_values = LYCharSets[i];
-    HTMLSetCharacterHandling(i);
+    HTMLSetCharacterHandling(i);  /* deals with assume_char_set and LYRawMode */
     HTMLSetHaveCJKCharacterSet(i);
     HTMLSetDisplayCharsetMatchLocale(i);
     return;

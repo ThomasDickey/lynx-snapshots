@@ -615,19 +615,32 @@ return to Lynx or the '<em>&gt;</em>' command to save the options to a
 
    <dt>Raw 8-bit or CJK Mode
 	<dd>Whether 8-bit characters are assumed to correspond with the
-	    selected character set and therefore are processed without
+	    display character set and therefore are processed without
 	    translation via the chartrans conversion tables.  Should be ON
-	    by default when the selected character set is one of the Asian
-	    (CJK) sets and the 8-bit characters are Kanji multibytes.
-	    Should be OFF for the other character sets, but can be turned ON
+	    by default when the display character set is one of the
+	    Asian (CJK) sets and the 8-bit characters are Kanji multibytes.
+	    Should be OFF for the other display character sets, but can be turned ON
 	    when the document's charset is unknown (e.g., is not ISO-8859-1
 	    and no charset parameter was specified in a reply header from
 	    an HTTP server to indicate what it is) but you know by some
 	    means that you have the matching display character set selected.
 	    Should be OFF when an Asian (CJK) set is selected but the document
-	    is ISO-8859-1.  The setting also can be toggled via the RAW_TOGGLE
+	    is ISO-8859-1 or another 'assumed document character set'.
+	    The setting also can be toggled via the RAW_TOGGLE
 	    command, normally mapped to '<em>@</em>', and at startup via the
 	    <em>-raw</em> switch.
+
+   <dt>Assumed document character set
+	<dd>This option changes the handling of documents which do not
+	    explicitly specify a charset.  Normally Lynx assumes that 8-bit
+	    characters in those documents are encoded according to iso-8859-1
+	    (the official default for the HTTP protocol).  Unfortunately,
+	    many non-English web pages "forget" to include proper charset info;
+	    this option helps you to browse those broken pages if you know
+	    by some means what the charset is.  When the value
+	    given here or by an -assume_charset command line flag is in effect,
+	    Lynx will treat documents as if they were encoded accordingly.
+	    This option active when 'Raw 8-bit or CJK Mode' is OFF.
 
    <dt>Show color.
 	<dd>This option will be present if color support is available.

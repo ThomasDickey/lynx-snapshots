@@ -46,6 +46,10 @@
 
 #include <LYLeaks.h>
 
+#ifdef HAVE_SYS_WAIT_H
+#include <sys/wait.h>
+#endif
+
 struct _HTStream 
 {
   HTStreamClass * isa;
@@ -118,7 +122,7 @@ PRIVATE int LYLoadCGI ARGS4(
 	HTFormat,		format_out,
 	HTStream*,		sink)
 {
-    int status;
+    int status = 0;
 #ifdef LYNXCGI_LINKS
 #ifndef VMS
     char *cp;
@@ -249,8 +253,7 @@ PRIVATE int LYLoadCGI ARGS4(
 	status = HT_NOT_LOADED;
 
     } else if (no_lynxcgi) {
-	_statusline(CGI_DISABLED);
-	sleep(MessageSecs);
+	HTUserMsg(CGI_DISABLED);
 	status = HT_NOT_LOADED;
 
     } else if (no_bookmark_exec &&
@@ -265,8 +268,7 @@ PRIVATE int LYLoadCGI ARGS4(
 	 *  no_bookmark_exec is TRUE an we are not now coming from a
 	 *  bookmark page. - kw
 	 */
-	_statusline(BOOKMARK_EXEC_DISABLED);
-	sleep(MessageSecs);
+	HTUserMsg(BOOKMARK_EXEC_DISABLED);
 	status = HT_NOT_LOADED;
 
     } else if (anAnchor != HTMainAnchor &&
@@ -312,8 +314,7 @@ PRIVATE int LYLoadCGI ARGS4(
 	if (!target || target == NULL) {
 	    sprintf(buf, CANNOT_CONVERT_I_TO_O,
 		    HTAtom_name(format_in), HTAtom_name(format_out));
-	    _statusline(buf);
-	    sleep(AlertSecs);
+	    HTAlert(buf);
 	    status = HT_NOT_LOADED;
 
 	} else if (anAnchor->post_data && pipe(fd1) < 0) {
@@ -426,7 +427,7 @@ PRIVATE int LYLoadCGI ARGS4(
 		char post_len[32];
 		int argv_cnt = 3; /* name, one arg and terminator */
 		char **cur_argv = NULL;
-		char buf[BUFSIZ];
+		char buf2[BUFSIZ];
 
 		/* Set up output pipe */
 		close(fd2[0]);
@@ -434,10 +435,10 @@ PRIVATE int LYLoadCGI ARGS4(
 		dup2(fd2[1], fileno(stderr));
 		close(fd2[1]);
 
-		sprintf(buf, "HTTP_ACCEPT_LANGUAGE=%.*s",
-			     (int)(sizeof(buf) - 22), language);
-		buf[(sizeof(buf) - 1)] = '\0';
-		add_environment_value(buf);
+		sprintf(buf2, "HTTP_ACCEPT_LANGUAGE=%.*s",
+			     (int)(sizeof(buf2) - 22), language);
+		buf2[(sizeof(buf2) - 1)] = '\0';
+		add_environment_value(buf2);
 
 		if (pref_charset) {
 		    cp = NULL;
@@ -618,8 +619,7 @@ PRIVATE int LYLoadCGI ARGS4(
 	status = HT_LOADED;
 #endif /* VMS */
 #else /* LYNXCGI_LINKS */
-    _statusline(CGI_NOT_COMPILED);
-    sleep(MessageSecs);
+    HTUserMsg(CGI_NOT_COMPILED);
     status = HT_NOT_LOADED;
 #endif /* LYNXCGI_LINKS */
     return(status);

@@ -330,8 +330,7 @@ check_recall:
 	}
 	SecondS = TRUE;
 
-	_statusline(SAVING);
-	sleep(InfoSecs);
+	HTInfoMsg(SAVING);
 #ifdef VMS
 	/*
 	 *  Try rename() first. - FM
@@ -537,8 +536,7 @@ check_recall:
 #endif /* VMS */
 
 	} else {
-	    _statusline(MISCONF_DOWNLOAD_COMMAND);
-	    sleep(AlertSecs);
+	    HTAlert(MISCONF_DOWNLOAD_COMMAND);
 	    goto failed;
 	}
 
@@ -572,14 +570,12 @@ check_recall:
     return;
 
 failed:
-    _statusline(CANNOT_DOWNLOAD_FILE);
-    sleep(AlertSecs);
+    HTAlert(CANNOT_DOWNLOAD_FILE);
     FREE(Line);
     return;
 
 cancelled:
-    _statusline(CANCELLING);
-    sleep(InfoSecs);
+    HTInfoMsg(CANCELLING);
     FREE(Line);
     return;
 }

@@ -276,8 +276,7 @@ PUBLIC void mailform ARGS4(
 	/*
 	 * User cancelled via ^G. - FM
 	 */
-	_statusline(FORM_MAILTO_CANCELLED);
-	sleep(InfoSecs);
+	HTInfoMsg(FORM_MAILTO_CANCELLED);
 	FREE(address);
 	FREE(ccaddr);
 	FREE(keywords);
@@ -297,8 +296,7 @@ PUBLIC void mailform ARGS4(
 	    /*
 	     * User cancelled via ^G. - FM
 	     */
-	    _statusline(FORM_MAILTO_CANCELLED);
-	    sleep(InfoSecs);
+	    HTInfoMsg(FORM_MAILTO_CANCELLED);
 	    FREE(address);
 	    FREE(ccaddr);
 	    FREE(keywords);
@@ -1334,8 +1332,7 @@ PUBLIC void reply_by_mail ARGS3(
     if (LYgetstr(user_input, VISIBLE, sizeof(user_input), NORECALL) < 0 ||
 	term_letter) {
 	addstr("\n");
-	_statusline(COMMENT_REQUEST_CANCELLED);
-	sleep(InfoSecs);
+	HTInfoMsg(COMMENT_REQUEST_CANCELLED);
 	LYCloseTempFP(fd);	/* Close the tmpfile. */
 	scrollok(stdscr,FALSE); /* Stop scrolling.    */
 	goto cleanup;
@@ -1377,8 +1374,7 @@ PUBLIC void reply_by_mail ARGS3(
     if (LYgetstr(user_input, VISIBLE, sizeof(user_input), NORECALL) < 0 ||
 	term_letter) {
 	addstr("\n");
-	_statusline(COMMENT_REQUEST_CANCELLED);
-	sleep(InfoSecs);
+	HTInfoMsg(COMMENT_REQUEST_CANCELLED);
 	LYCloseTempFP(fd);	/* Close the tmpfile. */
 	scrollok(stdscr,FALSE); /* Stop scrolling.    */
 	goto cleanup;
@@ -1424,8 +1420,7 @@ PUBLIC void reply_by_mail ARGS3(
     if (LYgetstr(user_input, VISIBLE, 71, NORECALL) < 0 ||
 	term_letter) {
 	addstr("\n");
-	_statusline(COMMENT_REQUEST_CANCELLED);
-	sleep(InfoSecs);
+	HTInfoMsg(COMMENT_REQUEST_CANCELLED);
 	LYCloseTempFP(fd);	/* Close the tmpfile. */
 	scrollok(stdscr,FALSE); /* Stop scrolling.    */
 	goto cleanup;
@@ -1458,8 +1453,7 @@ PUBLIC void reply_by_mail ARGS3(
 	if (LYgetstr(user_input, VISIBLE, sizeof(user_input), NORECALL) < 0 ||
 	    term_letter) {
 	    addstr("\n");
-	    _statusline(COMMENT_REQUEST_CANCELLED);
-	    sleep(InfoSecs);
+	    HTInfoMsg(COMMENT_REQUEST_CANCELLED);
 	    LYCloseTempFP(fd); 		/* Close the tmpfile. */
 	    scrollok(stdscr, FALSE);	/* Stop scrolling.    */
 	    goto cleanup;
@@ -1571,8 +1565,7 @@ PUBLIC void reply_by_mail ARGS3(
 	stop_curses();
 	if (system(user_input)) {
 	    start_curses();
-	    _statusline(ERROR_SPAWNING_EDITOR);
-	    sleep(AlertSecs);
+	    HTAlert(ERROR_SPAWNING_EDITOR);
 	} else {
 	    start_curses();
 	}
@@ -1629,8 +1622,7 @@ PUBLIC void reply_by_mail ARGS3(
 	*user_input = '\0';
 	if (LYgetstr(user_input, VISIBLE, sizeof(user_input), NORECALL) < 0 ||
 	    term_letter || STREQ(user_input, ".")) {
-	    _statusline(COMMENT_REQUEST_CANCELLED);
-	    sleep(InfoSecs);
+	    HTInfoMsg(COMMENT_REQUEST_CANCELLED);
 	    LYCloseTempFP(fd); 		/* Close the tmpfile. */
 	    scrollok(stdscr,FALSE);	/* Stop scrolling.    */
 	    goto cleanup;
@@ -1643,8 +1635,7 @@ PUBLIC void reply_by_mail ARGS3(
 	    *user_input = '\0';
 	    if (LYgetstr(user_input, VISIBLE,
 			 sizeof(user_input), NORECALL) < 0) {
-		_statusline(COMMENT_REQUEST_CANCELLED);
-		sleep(InfoSecs);
+		HTInfoMsg(COMMENT_REQUEST_CANCELLED);
 		LYCloseTempFP(fd);	/* Close the tmpfile. */
 		scrollok(stdscr,FALSE); /* Stop scrolling.    */
 		goto cleanup;
@@ -1831,15 +1822,13 @@ PUBLIC void reply_by_mail ARGS3(
     signal(SIGINT, SIG_IGN);
     fp = popen(cmd, "w");
     if (fp == NULL) {
-	_statusline(COMMENT_REQUEST_CANCELLED);
-	sleep(InfoSecs);
+	HTInfoMsg(COMMENT_REQUEST_CANCELLED);
 	goto cleanup;
     }
 #endif /* DOSPATH */
     fd = fopen(my_tmpfile, "r");
     if (fd == NULL) {
-	_statusline(COMMENT_REQUEST_CANCELLED);
-	sleep(InfoSecs);
+	HTInfoMsg(COMMENT_REQUEST_CANCELLED);
 	pclose(fp);
 	goto cleanup;
     }

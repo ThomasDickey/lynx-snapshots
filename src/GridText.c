@@ -112,8 +112,8 @@ typedef struct _stylechange {
 typedef struct _line {
 	struct _line	*next;
 	struct _line	*prev;
-	int unsigned	offset;		/* Implicit initial spaces */
-	int unsigned	size;		/* Number of characters */
+	unsigned	offset;		/* Implicit initial spaces */
+	unsigned	size;		/* Number of characters */
 	BOOL	split_after;		/* Can we split after? */
 	BOOL	bullet;			/* Do we bullet? */
 #if defined(USE_COLOR_STYLE)
@@ -1489,8 +1489,7 @@ PRIVATE void display_page ARGS3(
 	     *  to use half-page or two-line scrolling. - FM
 	     */
 	    if (LYCursesON) {
-		_statusline(MAXLINKS_REACHED);
-		sleep(AlertSecs);
+		HTAlert(MAXLINKS_REACHED);
 	    }
 	    CTRACE(tfp, "\ndisplay_page: MAXLINKS reached.\n");
 	    break;
@@ -2021,6 +2020,8 @@ PUBLIC void HText_appendCharacter ARGS2(
     HTStyle * style;
     int indent;
 
+    CTRACE(tfp, "add(%c) %d/%d\n", ch,
+		HTisDocumentSource(), HTOutputFormat != WWW_SOURCE);
     /*
      *  Make sure we don't crash on NULLs.
      */
@@ -2343,16 +2344,17 @@ PUBLIC void HText_appendCharacter ARGS2(
 	    line->data[--line->size] = '\0';
 	    ctrl_chars_on_this_line--;
 	}
-	here = (((int)line->size + (int)line->offset) + indent)
+	here = ((int)(line->size + line->offset) + indent)
 		- ctrl_chars_on_this_line; /* Consider special chars GAB */
 	if (style->tabs) {	/* Use tab table */
 	    for (Tab = style->tabs;
 		Tab->position <= here;
-		Tab++)
+		Tab++) {
 		if (!Tab->position) {
 		    new_line(text);
 		    return;
 		}
+	    }
 	    target = Tab->position;
 	} else if (text->in_line_1) {	/* Use 2nd indent */
 	    if (here >= (int)style->leftIndent) {
@@ -2374,7 +2376,6 @@ PUBLIC void HText_appendCharacter ARGS2(
 	if (target > (LYcols-1) - (int)style->rightIndent &&
 	    HTOutputFormat != WWW_SOURCE) {
 	    new_line(text);
-	    return;
 	} else {
 	    /*
 	     *  Can split here. - FM
@@ -2389,10 +2390,24 @@ PUBLIC void HText_appendCharacter ARGS2(
 		    line->data[line->size] = '\0';
 	        }
 	    }
-	    return;
 	}
-	/*NOTREACHED*/
+	return;
     } /* if tab */
+    else {
+	/*
+	 * If we're displaying document source, wrap long lines to keep all of
+	 * the source visible.  Note that we splice the pieces together with
+	 * a recursion on this function to supply the character that is removed
+	 * by 'split_line'.
+	 */
+	int target = (int)(line->offset + line->size);
+	if ((target > (LYcols-1) - style->rightIndent) &&
+		HTisDocumentSource()) {
+	    int gap = line->data[line->size - 1];
+	    new_line(text);
+	    HText_appendCharacter (text, gap);
+	}
+    }
 
 
     if (ch == ' ') {
@@ -4509,8 +4524,7 @@ get_query:
 	/*
 	 *  Search cancelled.
 	 */
-	_statusline(CANCELLED);
-	sleep(InfoSecs);
+	HTInfoMsg(CANCELLED);
 	return(NULLFILE);
     }
 
@@ -4519,8 +4533,7 @@ get_query:
      */
     LYTrimLeading(searchstring);
     if (!(*searchstring)) {
-	_statusline(CANCELLED);
-	sleep(InfoSecs);
+	HTInfoMsg(CANCELLED);
 	return(NULLFILE);
     }
     LYTrimTrailing(searchstring);
@@ -4529,8 +4542,7 @@ get_query:
      *  Don't resubmit the same query unintentionally.
      */
     if (!LYforce_no_cache && 0 == strcmp(temp, searchstring)) {
-	_statusline(USE_C_R_TO_RESUB_CUR_QUERY);
-	sleep(MessageSecs);
+	HTUserMsg(USE_C_R_TO_RESUB_CUR_QUERY);
 	return(NULLFILE);
     }
 
@@ -5154,8 +5166,7 @@ PUBLIC void www_user_search ARGS3(
 	        tentative_result = count;
 		break;
 	    } else if (count > start_line) {  /* next line */
-		_user_message(STRING_NOT_FOUND, target);
-		sleep(MessageSecs);
+		HTUserMsg2(STRING_NOT_FOUND, target);
 	        return;			/* end */
 	    } else {
 	        line = line->next;
@@ -7716,7 +7727,7 @@ PUBLIC void HText_SubmitForm ARGS4(
     FREE(previous_blanks);
 
     if (submit_item->submit_method == URL_MAIL_METHOD) {
-	_user_message("Submitting %s", submit_item->submit_action);
+	HTUserMsg2("Submitting %s", submit_item->submit_action);
 	CTRACE(tfp, "\nGridText - mailto_address: %s\n",
 			    (submit_item->submit_action+7));
 	CTRACE(tfp, "GridText - mailto_subject: %s\n",
@@ -7726,7 +7737,6 @@ PUBLIC void HText_SubmitForm ARGS4(
 					(HText_getTitle() ?
 				         HText_getTitle() : "")));
 	CTRACE(tfp,"GridText - mailto_content: %s\n",query);
-	sleep(MessageSecs);
 	mailform((submit_item->submit_action+7),
 		 ((submit_item->submit_title &&
 		   *submit_item->submit_title) ?

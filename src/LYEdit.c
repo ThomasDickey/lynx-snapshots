@@ -40,8 +40,7 @@ PUBLIC int edit_current_file ARGS3(
      *  If its a remote file then we can't edit it.
      */
     if (!LYisLocalFile(newfile)) {
-	_statusline(CANNOT_EDIT_REMOTE_FILES);
-	sleep(MessageSecs);
+	HTUserMsg(CANNOT_EDIT_REMOTE_FILES);
 	return FALSE;
     }
 
@@ -103,8 +102,7 @@ PUBLIC int edit_current_file ARGS3(
 #endif /* VMS */
 #endif /* DOSPATH */
     {
-	_statusline(NOAUTH_TO_EDIT_FILE);
-	sleep(MessageSecs);
+	HTUserMsg(NOAUTH_TO_EDIT_FILE);
 	goto failure;
     }
     fclose(fp);
@@ -154,10 +152,8 @@ PUBLIC int edit_current_file ARGS3(
 #endif /* DOSPATH */
 #endif /* __DJGPP__ */
 #endif /* VMS */
-    if (TRACE) {
-	fprintf(tfp, "LYEdit: %s\n", command);
-	sleep(MessageSecs);
-    }
+    CTRACE(tfp, "LYEdit: %s\n", command);
+    CTRACE_SLEEP(MessageSecs);
 #ifndef __EMX__
     FREE(filename);
 #endif

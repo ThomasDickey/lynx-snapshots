@@ -2041,9 +2041,8 @@ PUBLIC int HTCheckForInterrupt NOARGS
 	if (TRACE) {
 	    fprintf(tfp, "\r *** Got simulated 'Z' ***\n");
 	    fflush(tfp);
-	    if (!LYTraceLogFP)
-		sleep(AlertSecs);
 	}
+	CTRACE_SLEEP(AlertSecs);
 	return((int)TRUE);
     }
 
@@ -2159,9 +2158,8 @@ PUBLIC int HTCheckForInterrupt NOARGS
 	if (TRACE) {
 	    fprintf(tfp, "\r *** Got simulated 'Z' ***\n");
 	    fflush(tfp);
-	    if (!LYTraceLogFP)
-		sleep(AlertSecs);
 	}
+	CTRACE_SLEEP(AlertSecs);
 	return((int)TRUE);
     }
 
@@ -3499,7 +3497,7 @@ typedef struct _VMSMailItemList
   long *return_length_address;
 } VMSMailItemList;
 
-PUBLIC int LYCheckMail NOARGS
+PUBLIC void LYCheckMail NOARGS
 {
     static BOOL firsttime = TRUE, failure = FALSE;
     static char user[13], dir[252];
@@ -3523,7 +3521,7 @@ PUBLIC int LYCheckMail NOARGS
     extern long mail$user_end();
 
     if (failure)
-	return 0;
+	return;
 
     if (firsttime) {
 	firsttime = FALSE;
@@ -3531,7 +3529,7 @@ PUBLIC int LYCheckMail NOARGS
 	status = sys$getjpiw(0,0,0,jpi_list,0,0,0);
 	if (!(status & 1)) {
 	    failure = TRUE;
-	    return 0;
+	    return;
 	}
 	user[userlen] = '\0';
 	LYTrimTrailing(user);
@@ -3540,42 +3538,42 @@ PUBLIC int LYCheckMail NOARGS
     /* Minimum report interval is 60 sec. */
     time(&now);
     if (now - lastcheck < 60)
-	return 0;
+	return;
     lastcheck = now;
 
     /* Get the current newmail count. */
     status = mail$user_begin(&ucontext,null_list,null_list);
     if (!(status & 1)) {
 	failure = TRUE;
-	return 0;
+	return;
     }
     uilist[0].buffer_length = strlen(user);
     uilist[0].buffer_address = user;
     status = mail$user_get_info(&ucontext,uilist,uolist);
     if (!(status & 1)) {
 	failure = TRUE;
-	return 0;
+	return;
     }
 
     /* Should we report anything to the user? */
     if (new > 0) {
 	if (lastcount == 0)
 	    /* Have newmail at startup of Lynx. */
-	    _statusline(HAVE_UNREAD_MAIL_MSG);
+	    HTUserMsg(HAVE_UNREAD_MAIL_MSG);
 	else if (new > lastcount)
 	    /* Have additional mail since last report. */
-	    _statusline(HAVE_NEW_MAIL_MSG);
+	    HTUserMsg(HAVE_NEW_MAIL_MSG);
 	lastcount = new;
-	return 1;
+	return;
     }
     lastcount = new;
 
     /* Clear the context */
     mail$user_end((long *)&ucontext,null_list,null_list);
-    return 0;
+    return;
 }
 #else
-PUBLIC int LYCheckMail NOARGS
+PUBLIC void LYCheckMail NOARGS
 {
     static BOOL firsttime = TRUE;
     static char *mf;
@@ -3590,29 +3588,29 @@ PUBLIC int LYCheckMail NOARGS
     }
 
     if (mf == NULL)
-	return 0;
+	return;
 
     time(&now);
     if (now - lastcheck < 60)
-	return 0;
+	return;
     lastcheck = now;
 
     if (stat(mf,&st) < 0) {
 	mf = NULL;
-	return 0;
+	return;
     }
 
     if (st.st_size > 0) {
 	if (st.st_mtime > st.st_atime ||
 	    (lastsize && st.st_size > lastsize))
-	    _statusline(HAVE_NEW_MAIL_MSG);
+	    HTUserMsg(HAVE_NEW_MAIL_MSG);
 	else if (lastsize == 0)
-	    _statusline(HAVE_MAIL_MSG);
+	    HTUserMsg(HAVE_MAIL_MSG);
 	lastsize = st.st_size;
-	return 1;
+	return;
     }
     lastsize = st.st_size;
-    return 0;
+    return;
 }
 #endif /* VMS */
 
@@ -4113,11 +4111,8 @@ have_VMS_URL:
 		    old_string, *AllocatedString);
     }
     FREE(old_string);
-    if (TRACE) {
-	/* Pause so we can read the messages before invoking curses */
-	if (!LYTraceLogFP)
-	    sleep(AlertSecs);
-    }
+    /* Pause so we can read the messages before invoking curses */
+    CTRACE_SLEEP(AlertSecs);
 }
 
 /*

@@ -3229,9 +3229,8 @@ PUBLIC void LYHandleSELECT ARGS5(
 		fprintf(tfp,
 			"Bad HTML: SELECT start tag not within FORM tag\n");
 	    } else if (!me->inBadHTML) {
-		_statusline(BAD_HTML_USE_TRACE);
+		HTUserMsg(BAD_HTML_USE_TRACE);
 		me->inBadHTML = TRUE;
-		sleep(MessageSecs);
 	    }
 
 	    /*
@@ -3252,9 +3251,8 @@ PUBLIC void LYHandleSELECT ARGS5(
 	    if (TRACE) {
 		fprintf(tfp, "Bad HTML: Missing TEXTAREA end tag\n");
 	    } else if (!me->inBadHTML) {
-		_statusline(BAD_HTML_USE_TRACE);
+		HTUserMsg(BAD_HTML_USE_TRACE);
 		me->inBadHTML = TRUE;
-		sleep(MessageSecs);
 	    }
 	}
 
@@ -3337,9 +3335,8 @@ PUBLIC void LYHandleSELECT ARGS5(
 	    if (TRACE) {
 		fprintf(tfp, "Bad HTML: Unmatched SELECT end tag\n");
 	    } else if (!me->inBadHTML) {
-		_statusline(BAD_HTML_USE_TRACE);
+		HTUserMsg(BAD_HTML_USE_TRACE);
 		me->inBadHTML = TRUE;
-		sleep(MessageSecs);
 	    }
 	    return;
 	}
@@ -3541,9 +3538,8 @@ PUBLIC int LYLegitimizeHREF ARGS4(
 		    fprintf(tfp,
 			 "                  Stripping lead dots.\n");
 		} else if (!me->inBadHREF) {
-		    _statusline(BAD_PARTIAL_REFERENCE);
+		    HTAlert(BAD_PARTIAL_REFERENCE);
 		    me->inBadHREF = TRUE;
-		    sleep(AlertSecs);
 		}
 	    }
 	    if (*cp == '\0') {

@@ -225,8 +225,7 @@ PUBLIC char *LYJump ARGS1(int, key)
 	/*
 	 * User cancelled the Jump via ^G. - FM
 	 */
-	_statusline(CANCELLED);
-	sleep(InfoSecs);
+	HTInfoMsg(CANCELLED);
 	return NULL;
     }
 
@@ -242,8 +241,7 @@ check_recall:
 	 */
 	*buf = '\0';
 	StrAllocCopy(jtp->shortcut, buf);
-	_statusline(CANCELLED);
-	sleep(InfoSecs);
+	HTInfoMsg(CANCELLED);
 	return NULL;
     }
 #ifdef PERMIT_GOTO_FROM_JUMP
@@ -254,8 +252,7 @@ check_recall:
 	if (no_goto) {
 	    *buf = '\0';
 	    StrAllocCopy(jtp->shortcut, buf);
-	    _statusline(RANDOM_URL_DISALLOWED);
-	    sleep(MessageSecs);
+	    HTUserMsg(RANDOM_URL_DISALLOWED);
 	    return NULL;
 	}
 	StrAllocCopy(temp, "Go ");
@@ -301,8 +298,7 @@ check_recall:
 		/*
 		 * User cancelled the jump via ^G.
 		 */
-		_statusline(CANCELLED);
-		sleep(InfoSecs);
+		HTInfoMsg(CANCELLED);
 		return NULL;
 	    }
 	    goto check_recall;
@@ -342,8 +338,7 @@ check_recall:
 		/*
 		 * User cancelled the jump via ^G.
 		 */
-		_statusline(CANCELLED);
-		sleep(InfoSecs);
+		HTInfoMsg(CANCELLED);
 		return NULL;
 	    }
 	    goto check_recall;

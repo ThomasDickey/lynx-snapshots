@@ -273,6 +273,7 @@ extern BOOLEAN LYUseDefaultRawMode;
 extern char *UCAssume_MIMEcharset;
 extern char *UCAssume_localMIMEcharset;
 extern char *UCAssume_unrecMIMEcharset;
+extern BOOLEAN LYSaveBookmarksInUnicode; /* in titles,  chars >127 save as &#xUUUU */
 extern BOOLEAN LYisConfiguredForX;
 extern char *URLDomainPrefixes;
 extern char *URLDomainSuffixes;

@@ -848,6 +848,7 @@ PUBLIC void HTFileInit NOARGS
     HTSetSuffix(".ht3",		"text/html", "8bit", 1.0);
     HTSetSuffix(".phtml",	"text/html", "8bit", 1.0);
     HTSetSuffix(".shtml",	"text/html", "8bit", 1.0);
+    HTSetSuffix(".sht",		"text/html", "8bit", 1.0);
     HTSetSuffix(".htmlx",	"text/html", "8bit", 1.0);
     HTSetSuffix(".htm",		"text/html", "8bit", 1.0);
     HTSetSuffix(".html",	"text/html", "8bit", 1.0);

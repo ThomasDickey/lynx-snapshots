@@ -851,6 +851,10 @@ PUBLIC void lynx_enable_mouse ARGS1(int,state)
 {
 
 #ifdef __BORLANDC__
+/* modify lynx_enable_mouse() for pdcurses configuration so that mouse support
+   is disabled unless -use_mouse is specified.  This is ifdef'd with
+   __BORLANDC__ for the time being (WB).
+*/
     HANDLE hConIn = INVALID_HANDLE_VALUE;
     hConIn = GetStdHandle(STD_INPUT_HANDLE);
     if (LYUseMouse == 0)
@@ -1314,8 +1318,7 @@ PUBLIC void VMSexit NOARGS
 		(void) getchar();
 	    }
 	} else if (LYCursesON) {
-	    _statusline(MEMORY_EXHAUSTED_ABORT);
-	    sleep(AlertSecs);
+	    HTAlert(MEMORY_EXHAUSTED_ABORT);
 	}
 	cleanup();
     }

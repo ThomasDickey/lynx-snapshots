@@ -546,6 +546,12 @@ CF_ARG_ENABLE(font-switch,
 AC_MSG_RESULT($use_setfont)
 test $use_setfont = yes && AC_DEFINE(EXP_CHARTRANS_AUTOSWITCH)
 
+AC_MSG_CHECKING(if you want cgi-link support)
+CF_ARG_ENABLE(cgi-links,
+[  --enable-cgi-links      support cgi links w/o a http daemon],
+	[AC_DEFINE(LYNXCGI_LINKS)])
+AC_MSG_RESULT($enableval)
+
 AC_MSG_CHECKING(if you want internal-links feature)
 CF_ARG_ENABLE(internal-links,
 [  --enable-internal-links handle following links to same doc differently],

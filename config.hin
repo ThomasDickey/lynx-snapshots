@@ -66,6 +66,7 @@
 #undef LINUX			/* FIXME: make tests? */
 #undef LOCALE			/* for locale support */
 #undef LONG_LIST		/* CF_ARG_DISABLE(long-list) */
+#undef LYNXCGI_LINKS		/* CF_ARG_ENABLE(cgi-links) */
 #undef LYNX_CFG_FILE		/* $libdir/lynx.cfg */
 #undef LYNX_LSS_FILE		/* $libdir/lynx.lss */
 #undef LY_FIND_LEAKS		/* configure --disable-leaks */
@@ -138,7 +139,7 @@
 /* FIXME:SVR4_BSDSELECT */
 
 /* Some older socks libraries, especially AIX need special definitions */
-#if defined(_AIX) || !defined(USE_SOCKS5)
+#if defined(_AIX) && !defined(USE_SOCKS5)
 #undef accept
 #undef bind
 #undef connect

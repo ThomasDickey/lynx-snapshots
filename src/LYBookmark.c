@@ -7,7 +7,8 @@
 #include <LYSignal.h>
 #include <LYSystem.h>
 #include <LYKeymap.h>
-#include <LYCharUtils.h>
+#include <LYCharUtils.h> /* need for META charset */
+#include <LYCharSets.h>  /* need for LYHaveCJKCharacterSet */
 #include <LYCurses.h>
 #include <GridText.h>
 
@@ -64,8 +65,7 @@ PUBLIC char * get_bookmark_filename ARGS1(
 	sprintf(string_buffer,
 		BOOKMARK_FILE_NOT_DEFINED,
 		key_for_func(LYK_OPTIONS));
-	_statusline(string_buffer);
-	sleep(AlertSecs);
+	HTAlert(string_buffer);
 	/*
 	 *  Space flags an undefined selection. - FMG
 	 */
@@ -178,6 +178,9 @@ PRIVATE char * convert_mosaic_bookmark_file ARGS1(
     return(newfile);
 }
 
+PRIVATE  BOOLEAN have8bit PARAMS((char *Title));
+PRIVATE  char* title_convert8bit PARAMS((char *Title));
+
 /*
  *  Adds a link to a bookmark file, creating the file
  *  if it doesn't already exist, and making sure that
@@ -279,9 +282,16 @@ PUBLIC void save_bookmark_link ARGS2(
      *	Create the Title with any left-angle-brackets
      *	converted to &lt; entities and any ampersands
      *	converted to &amp; entities.  - FM
+     *
+     *  Convert 8-bit letters to &#xUUUU to avoid dependencies
+     *  from display character set which may need changing.
+     *  Do NOT convert any 8-bit chars if we have CJK display. - LP
      */
     StrAllocCopy(Title, string_buffer);
     LYEntify(&Title, TRUE);
+    if (LYSaveBookmarksInUnicode &&
+		have8bit(Title) && (!LYHaveCJKCharacterSet))
+	StrAllocCopy(Title, title_convert8bit(Title));
 
     /*
      *	Create the bookmark file, if it doesn't exist already,
@@ -315,6 +325,7 @@ PUBLIC void save_bookmark_link ARGS2(
 
     /*
      *	If we created a new bookmark file, write the headers. - FM
+     *  Once and forever...
      */
     if (first_time) {
 	fprintf(fp,"<head>\n");
@@ -325,8 +336,13 @@ PUBLIC void save_bookmark_link ARGS2(
      the 'R' key but may have been remapped by you or your system\n\
      administrator.<br>\n\
      This file also may be edited with a standard text editor to delete\n\
-     outdated or invalid links, or to change their order, but you should\n\
-     not change the format within the lines or add other HTML markup.\n\n\
+     outdated or invalid links, or to change their order.\n\n\
+<!--\n\
+Note: if you edit this file manually\n\
+      you should not change the format within the lines\n\
+      or add other HTML markup.\n\
+      Make sure any bookmark link saved as a single line\n\
+-->\n\n\
      <p>\n<ol>\n");
     }
 
@@ -419,16 +435,14 @@ PUBLIC void remove_bookmark_link ARGS2(
     CTRACE(tfp, "\nremove_bookmark_link: SEEKING %s\n   AS %s\n\n",
 		cur_bookmark_page, filename_buffer);
     if ((fp = fopen(filename_buffer, "r")) == NULL) {
-	_statusline(BOOKMARK_OPEN_FAILED_FOR_DEL);
-	sleep(AlertSecs);
+	HTAlert(BOOKMARK_OPEN_FAILED_FOR_DEL);
 	return;
     }
 
     LYAddPathToHome(homepath, sizeof(homepath), "");
     if ((nfp = LYOpenScratch(newfile, homepath)) == 0) {
 	fclose(fp);
-	_statusline(BOOKSCRA_OPEN_FAILED_FOR_DEL);
-	sleep(AlertSecs);
+	HTAlert(BOOKSCRA_OPEN_FAILED_FOR_DEL);
 	return;
     }
 
@@ -441,8 +455,7 @@ PUBLIC void remove_bookmark_link ARGS2(
 	(void) chmod(newfile, mode);
 	if ((nfp = LYReopenTemp(newfile)) == NULL) {
 	    (void) fclose(fp);
-	    _statusline(BOOKTEMP_REOPEN_FAIL_FOR_DEL);
-	    sleep(AlertSecs);
+	    HTAlert(BOOKTEMP_REOPEN_FAIL_FOR_DEL);
 	    return;
 	}
     }
@@ -474,8 +487,7 @@ PUBLIC void remove_bookmark_link ARGS2(
 		if (++n == cur) {
 		    if (seen != 1 || !LYstrstr(buf, "</a>") ||
 			LYstrstr((cp + 1), "<a href=")) {
-			_statusline(BOOKMARK_LINK_NOT_ONE_LINE);
-			sleep(AlertSecs);
+			HTAlert(BOOKMARK_LINK_NOT_ONE_LINE);
 			goto failure;
 		    }
 		    CTRACE(tfp, "remove_bookmark_link: skipping link %d\n", n);
@@ -514,8 +526,7 @@ PUBLIC void remove_bookmark_link ARGS2(
 
 	CTRACE(tfp, "remove_bookmark_link: %s\n", buffer);
 	if( system( buffer ) ) {
-	    _statusline(BOOKTEMP_COPY_FAIL);
-	    sleep(AlertSecs);
+	    HTAlert(BOOKTEMP_COPY_FAIL);
 	} else {
 	    return;
 	}
@@ -558,19 +569,17 @@ PUBLIC void remove_bookmark_link ARGS2(
 #endif /* !VMS */
 
 #ifdef VMS
-	_statusline(ERROR_RENAMING_SCRA);
+	HTAlert(ERROR_RENAMING_SCRA);
 #else
-	_statusline(ERROR_RENAMING_TEMP);
+	HTAlert(ERROR_RENAMING_TEMP);
 #endif /* VMS */
 	if (TRACE)
 	    perror("renaming the file");
-	sleep(AlertSecs);
     }
 #endif /* UNIX */
 
 failure:
-    _statusline(BOOKMARK_DEL_FAILED);
-    sleep(AlertSecs);
+    HTAlert(BOOKMARK_DEL_FAILED);
     LYCloseTempFP(nfp);
     if (fp != NULL)
 	fclose(fp);
@@ -707,8 +716,7 @@ PUBLIC int select_menu_multi_bookmarks NOARGS
 	/*
 	 *  Too small.
 	 */
-	_statusline(MULTIBOOKMARKS_SMALL);
-	sleep(AlertSecs);
+	HTAlert(MULTIBOOKMARKS_SMALL);
 	return (-2);
     }
     /*
@@ -880,7 +888,7 @@ PUBLIC BOOLEAN LYHaveSubBookmarks NOARGS
  *  _statusline() so that any multibyte/CJK characters in the
  *  string will be handled properly. - FM
  */
- PUBLIC void LYMBM_statusline  ARGS1(
+PUBLIC void LYMBM_statusline  ARGS1(
 	char *, 	text)
 {
     if (LYMultiBookmarks == TRUE && user_mode == NOVICE_MODE) {
@@ -890,4 +898,84 @@ PUBLIC BOOLEAN LYHaveSubBookmarks NOARGS
     } else {
 	_statusline(text);
     }
+}
+
+/*
+ * Check whether string have 8 bit chars.
+ */
+PRIVATE  BOOLEAN have8bit ARGS1(char *, Title)
+{
+    CONST char *p = Title;
+
+    for ( ; *p; p++) {
+	if ((unsigned char)*p > 127)
+	return(TRUE);
+    }
+    return(FALSE); /* if we came here */
+}
+
+/*
+ *  Ok, title have 8-bit characters and they are in display charset.
+ *  Bookmarks is a permanent file. To avoid dependencies from display
+ *  character set which may be changed with time
+ *  we store 8-bit characters as numeric character reference (NCR),
+ *  so where the character encoded as unicode number in form of &#xUUUU;
+ *
+ *  To make bookmarks more readable for human (&#xUUUU certainly not)
+ *  we add a comment with '7-bit approximation' from the converted string.
+ *  This is a valid HTML and bookmarks code.
+ *
+ *  We do not want use META charset tag in bookmarks file:
+ *  it will never be changed later :-(
+ *  NCR's translation is part of I18N and HTML4.0
+ *  supported starting with Lynx 2.7.2,
+ *  Netscape 4.0 and MSIE 4.0.
+ *  Older versions fail.
+ *
+ */
+PRIVATE  char* title_convert8bit ARGS1(char *, Title)
+{
+    CONST char *p = Title;
+    char temp[256];
+    char *q = temp;
+    char *comment = NULL;
+    char *ncr     = NULL;
+    char *buf = NULL;
+
+    for ( ; *p; p++) {
+	LYstrncpy(q, p, 1);
+	if ((unsigned char)*q <= 127) {
+	    StrAllocCat(comment, q);
+	    StrAllocCat(ncr, q);
+	} else {
+	int charset_in, charset_out, uck;
+	long unicode;
+	char replace_buf [10], replace_buf2 [10];
+
+	charset_in  = current_char_set;
+	charset_out = UCGetLYhndl_byMIME("us-ascii");
+
+	uck = UCTransCharStr(replace_buf, sizeof(replace_buf), *q,
+			      charset_in, charset_out, YES);
+	if (uck >0)
+	StrAllocCat(comment, replace_buf);
+
+	unicode = UCTransToUni( *q, charset_in);
+
+	StrAllocCat(ncr, "&#");
+	sprintf(replace_buf2, "%ld", unicode);
+	StrAllocCat(ncr, replace_buf2);
+	StrAllocCat(ncr, ";");
+	}
+    }
+
+    /*
+     * valid bookmark should be a single line (no linebreaks!).
+     */
+    StrAllocCat(buf, "<!-- ");
+    StrAllocCat(buf, comment);
+    StrAllocCat(buf, " -->");
+    StrAllocCat(buf, ncr);
+
+    return(buf);
 }

@@ -183,22 +183,13 @@ LYK_PIPE,               0,              0,          LYK_HISTORY,
    0,                  0,              0,             0,
 
 /* 100..10E function key definitions in LYStrings.h */
-#if defined(__DJGPP__) && defined(USE_SLANG) && !defined(DJGPP_KEYHANDLER)
-   0,             LYK_PREV_LINK,    LYK_NEXT_LINK,  LYK_PREV_DOC,
-                  /* UPARROW */     /* DNARROW */   /* LTARROW */
-
-LYK_ACTIVATE,    LYK_PREV_PAGE,    LYK_NEXT_PAGE,     LYK_HOME,
-/* RTARROW */    /* PGUP */        /* PGDOWN */       /* HOME */
-
-#else
 LYK_PREV_LINK,    LYK_NEXT_LINK,    LYK_ACTIVATE,   LYK_PREV_DOC,
 /* UPARROW */     /* DNARROW */     /* RTARROW */   /* LTARROW */
 
 LYK_NEXT_PAGE,    LYK_PREV_PAGE,    LYK_HOME,       LYK_END,
 /* PGDOWN */      /* PGUP */        /* HOME */      /* END */
 
-#endif /* __DJGPP__ && USE_SLANG && !DJGPP_KEYHANDLER */
-#ifdef __DJGPP__
+#if defined(__DJGPP__) ||  defined(_WINDOWS)
 #ifdef USE_SLANG
 LYK_END,          LYK_HOME,         LYK_PREV_PAGE,     0,
 /* END */ 	  /* HOME */          /* PGUP */       /* B2 Key */
@@ -222,7 +213,7 @@ LYK_UP_TWO,       LYK_DOWN_TWO,
 
 LYK_DO_NOTHING,
 /* DO_NOTHING*/
-#endif /* __DJGPP__ */
+#endif /* __DJGPP__ || _WINDOWS */
 /* 10F..18F */
 
    0,
@@ -253,21 +244,10 @@ LYK_DO_NOTHING,
 #endif /* DJGPP_KEYHANDLER */
    0,                  0,              0,             0,
    0,                  0,              0,             0,
-#ifdef DJGPP_KEYHANDLER
-   0,                  0,              0,             LYK_HOME,
-                                                      /* HOME */
-LYK_PREV_LINK,         LYK_PREV_PAGE,  0,             LYK_PREV_DOC,
-/* UPARROW */          /* Page Up */                  /* LEFTARROW */
-   0,                  LYK_ACTIVATE,   0,             LYK_END,
-                       /* RTARROW */                  /* END */
-LYK_NEXT_LINK,         LYK_NEXT_PAGE,  0,             0,
-/* DNARROW */          /* Page Down */
-#else
    0,                  0,              0,             0,
    0,                  0,              0,             0,
    0,                  0,              0,             0,
    0,                  0,              0,             0,
-#endif /* DJGPP_KEYHANDLER */
    0,                  0,              0,             0,
    0,                  0,              0,             0,
    0,                  0,              0,             0,
@@ -341,21 +321,10 @@ LYK_NEXT_LINK,         LYK_NEXT_PAGE,  0,             0,
    0,                  0,              0,             0,
    0,                  0,              0,             0,
    0,                  0,              0,             0,
-#ifdef DJGPP_KEYHANDLER
-   0,                  0,              0,             LYK_HOME,
-                                                      /* HOME */
-LYK_PREV_LINK,         LYK_PREV_PAGE,  0,             LYK_PREV_DOC,
-/* UPARROW */          /* Page Up */                  /* LEFTARROW */
-   0,                  LYK_ACTIVATE,   0,             LYK_END,
-                       /* RTARROW */                  /* END */
-LYK_NEXT_LINK,         LYK_NEXT_PAGE,  0,             0,
-/* DNARROW */          /* Page Down */
-#else
    0,                  0,              0,             0,
    0,                  0,              0,             0,
    0,                  0,              0,             0,
    0,                  0,              0,             0,
-#endif /* DJGPP_KEYHANDLER */
    0,                  0,              0,             0,
    0,                  0,              0,             0,
    0,                  0,              0,             0,
