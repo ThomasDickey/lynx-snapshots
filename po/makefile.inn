@@ -11,7 +11,7 @@ PACKAGE = lynx
 # VERSION = @VERSION@
 VERSION = 2.8.1
 
-SHELL = /bin/sh
+SHELL = @CONFIG_SHELL@
 @SET_MAKE@
 
 srcdir = @srcdir@
@@ -20,7 +20,7 @@ VPATH = @srcdir@
 
 prefix = @prefix@
 exec_prefix = @exec_prefix@
-datadir = $(prefix)/@DATADIRNAME@
+datadir = @NLS_DATADIR@
 localedir = $(datadir)/locale
 gnulocaledir = $(prefix)/share/locale
 gettextsrcdir = $(prefix)/share/gettext/po

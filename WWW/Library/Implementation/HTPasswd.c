@@ -7,7 +7,7 @@
 **	MD	Mark Donszelmann    duns@vxdeop.cern.ch
 **
 ** HISTORY:
-**	 7 Nov 93 	MD 	free for crypt taken out (static data returned) 
+**	 7 Nov 93 	MD 	free for crypt taken out (static data returned)
 **
 **
 ** BUGS:
@@ -40,7 +40,7 @@ PRIVATE char salt_chars [65] =
 **	fp	is the password file from which records are read from.
 **
 ** ON EXIT:
-**	returns	nothing. File read pointer is located at the beginning
+**	returns	nothing.  File read pointer is located at the beginning
 **		of the next record.
 */
 PRIVATE void next_rec ARGS1(FILE *, fp)
@@ -71,7 +71,7 @@ PRIVATE void next_rec ARGS1(FILE *, fp)
 ** NOTE:
 **	Uses currently the C library function crypt(), which
 **	only accepts at most 8 characters long strings and produces
-**	always 13 characters long strings. This function is
+**	always 13 characters long strings.  This function is
 **	called repeatedly so that longer strings can be encrypted.
 **	This is of course not as safe as encrypting the entire
 **	string at once, but then again, we are not that paranoid
@@ -199,7 +199,7 @@ PUBLIC BOOL HTAA_passwdMatch ARGS2(CONST char *, password,
 ** ON EXIT:
 **	returns		EOF on end of file,
 **			otherwise the number of read fields
-**			(i.e. in a correct case returns 2).
+**			(i.e., in a correct case returns 2).
 **	out_username	contains the null-terminated read username.
 **	out_password	contains the null-terminated read password.
 **
@@ -215,7 +215,7 @@ PUBLIC int HTAAFile_readPasswdRec ARGS3(FILE *, fp,
 					char *, out_password)
 {
     int terminator;
-    
+
     terminator = HTAAFile_readField(fp, out_username, MAX_USERNAME_LEN);
 
     if (terminator == EOF) {				/* End of file */
@@ -257,7 +257,7 @@ PUBLIC BOOL HTAA_checkPassword ARGS3(CONST char *, username,
     char user[MAX_USERNAME_LEN+1];
     char pw[MAX_PASSWORD_LEN+1];
     int status;
-    
+
     if (filename && *filename)  fp = fopen(filename,"r");
     else			fp = fopen(PASSWD_FILE,"r");
 
@@ -285,7 +285,7 @@ PUBLIC BOOL HTAA_checkPassword ARGS3(CONST char *, username,
     } while (status != EOF);
 
     fclose(fp);
-    
+
     CTRACE(tfp, "HTAAFile_checkPassword: (%s,%s) %scorrect\n",
 		       username, password, ((status != EOF) ? "" : "in"));
 

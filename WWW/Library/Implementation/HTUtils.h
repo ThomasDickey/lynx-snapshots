@@ -1,14 +1,14 @@
 /*                                       Utility macros for the W3 code library
                                   MACROS FOR GENERAL USE
-                                             
+
    See also: the system dependent file "tcp.h", which is included here.
-   
+
  */
 
 #ifndef DEBUG
 #define DEBUG   /* Noone ever turns this off as trace is too important */
 #endif          /* Keep option for really small memory applications tho */
-                
+
 #ifndef HTUTILS_H
 #define HTUTILS_H
 
@@ -82,7 +82,7 @@
 #define HAVE_UTMP 1
 #endif
 
-#endif /* HAVE_CONFIG_H */ 
+#endif /* HAVE_CONFIG_H */
 
 #ifndef LY_MAXPATH
 #define LY_MAXPATH 256
@@ -100,15 +100,15 @@
 #define popen _popen
 #define pclose _pclose
 #endif /* _WINDOWS */
- 
-#ifdef __EMX__ 
-#include <unistd.h> /* should be re-include protected under EMX */ 
-#include <stdlib.h> /* should be re-include protected under EMX */ 
-#define getcwd _getcwd2 
-#define chdir _chdir2 
- 
-#endif 
- 
+
+#ifdef __EMX__
+#include <unistd.h> /* should be re-include protected under EMX */
+#include <stdlib.h> /* should be re-include protected under EMX */
+#define getcwd _getcwd2
+#define chdir _chdir2
+
+#endif
+
 
 #ifdef SHORT_NAMES
 #define WWW_TraceFlag HTTrFlag
@@ -132,11 +132,11 @@ Debug message control.
 /*
 
   ERROR TYPE
-  
+
    This is passed back when streams are aborted. It might be nice to have some structure
-   of error messages, numbers, and recursive pointers to reasons. Curently this is a
+   of error messages, numbers, and recursive pointers to reasons.  Curently this is a
    placeholder for something more sophisticated.
-   
+
  */
 typedef void * HTError;                 /* Unused at present -- best definition? */
 
@@ -250,8 +250,8 @@ Macros for declarations
                 t a; u b; v c; w d; x e; y f; z g; s h; r i;
 #define ARGS10(t,a,u,b,v,c,w,d,x,e,y,f,z,g,s,h,r,i,q,j) (a,b,c,d,e,f,g,h,i,j) \
                 t a; u b; v c; w d; x e; y f; z g; s h; r i; q j;
-                
-        
+
+
 #endif /* __STDC__ (ANSI) */
 
 #ifndef NULL
@@ -276,9 +276,9 @@ Booleans
 #define FALSE   (BOOLEAN)0
 #endif
 #endif   /*  CURSES  */
-#endif   /* _WINDOWS */
+#endif	 /*  BOOLEAN_DEFINED */
 #define BOOLEAN_DEFINED
-#endif
+#endif   /* _WINDOWS */
 
 #ifndef BOOL
 #define BOOL BOOLEAN
@@ -319,7 +319,9 @@ Sucess (>=0) and failure (<0) codes
 #define HT_CANNOT_TRANSLATE -4
 #define HT_NO_ACCESS    -10             /* Access not available */
 #define HT_FORBIDDEN    -11             /* Access forbidden */
-#define HT_INTERNAL     -12             /* Weird -- should never happen. */
+#define HT_NO_DATA		-204	/* OK but no data was loaded - */
+					/* possibly other app started or forked */
+#define HT_INTERNAL             -900    /* Weird -- should never happen. */
 #define HT_BAD_EOF      -12             /* Premature EOF */
 
 #ifndef va_arg
@@ -370,8 +372,8 @@ Upper- and Lowercase macros
 
    The problem here is that toupper(x) is not defined officially unless isupper(x) is.
    These macros are CERTAINLY needed on #if defined(pyr) || define(mips) or BDSI
-   platforms. For safefy, we make them mandatory.
-   
+   platforms.  For safefy, we make them mandatory.
+
  */
 #include <ctype.h>
 #include <string.h>
@@ -389,9 +391,9 @@ Upper- and Lowercase macros
 The local equivalents of CR and LF
 
    We can check for these after net ascii text has been converted to the local
-   representation. Similarly, we include them in strings to be sent as net ascii after
+   representation.  Similarly, we include them in strings to be sent as net ascii after
    translation.
-   
+
  */
 #define LF   FROMASCII('\012')  /* ASCII line feed LOCAL EQUIVALENT */
 #define CR   FROMASCII('\015')  /* Will be converted to ^M for transmission */
@@ -416,7 +418,7 @@ extern FILE *TraceFP NOPARAMS;
 #include <socks.h>
 
 /*
- * The AIX- and SOCKS4-specific definitions in socks.h are inconsistent. 
+ * The AIX- and SOCKS4-specific definitions in socks.h are inconsistent.
  * Repair them so they're consistent (and usable).
  */
 #if defined(_AIX) && !defined(USE_SOCKS4_PREFIX)

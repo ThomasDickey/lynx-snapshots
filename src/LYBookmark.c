@@ -4,6 +4,7 @@
 #include <LYStrings.h>
 #include <LYBookmark.h>
 #include <LYGlobalDefs.h>
+#include <LYClean.h>
 #include <LYSignal.h>
 #include <LYKeymap.h>
 #include <LYCharUtils.h> /* need for META charset */
@@ -14,7 +15,6 @@
 
 #ifdef VMS
 #include <nam.h>
-extern BOOLEAN HadVMSInterrupt; /* Flag from cleanup_sig() AST */
 #endif /* VMS */
 
 #include <LYLeaks.h>
@@ -928,7 +928,7 @@ PRIVATE  BOOLEAN have8bit ARGS1(CONST char *, Title)
 
 /*
  *  Ok, title have 8-bit characters and they are in display charset.
- *  Bookmarks is a permanent file. To avoid dependencies from display
+ *  Bookmarks is a permanent file.  To avoid dependencies from display
  *  character set which may be changed with time
  *  we store 8-bit characters as numeric character reference (NCR),
  *  so where the character encoded as unicode number in form of &#xUUUU;

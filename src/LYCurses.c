@@ -879,7 +879,7 @@ PUBLIC void lynx_enable_mouse ARGS1(int,state)
      * to translate other events to single-clicks.
      * Compensate for small value of maxclick in ncurses.  */
     if (state) {
-	static was = 0;
+	static int was = 0;
 
 	if (!was) {
 	    int old = mouseinterval(-1);
@@ -1081,7 +1081,7 @@ PUBLIC BOOLEAN setup ARGS1(
 	    strcpy(buffer,"vt100");
 
 	sprintf(term_putenv,"TERM=%s", buffer);
-	putenv(term_putenv);
+	(void) putenv(term_putenv);
 	printf("\n%s%s\n", gettext("TERMINAL TYPE IS SET TO"), getenv("TERM"));
 	sleep(MESSAGESECS);
     }

@@ -108,7 +108,7 @@ all be used to display an arbitrary ASCII text or HTML file:
 <p>When executed, Lynx will clear the screen and display as much of the
 specified file as will fit on the screen.  Pressing a <em>down-arrow</em>
 will bring up the next screen, and pressing an <em>up-arrow</em> will bring
-up the previous screen. If no file is specified at startup, a default file
+up the previous screen.  If no file is specified at startup, a default file
 will be displayed.  (The default is configured by the system administrator
 when the command is installed.)
 
@@ -136,9 +136,9 @@ selected link when a <em>right-arrow</em> or a <em>Return</em> key is
 pressed.  To select a particular link, press the <em>up-arrow</em> or
 <em>down-arrow</em> keys until the desired link becomes "highlighted,"
 and then press the <em>right-arrow</em> or <em>Return</em> key to view
-the linked information. Information included in the HTML file tells Lynx
+the linked information.  Information included in the HTML file tells Lynx
 where to find the linked file and what kind of server will provide it
-(i.e.  HTTP, Gopher, etc.).
+(i.e., HTTP, Gopher, etc.).
 
 <p>Lynx renders HTML files and saves the rendition, not the source,
 for initial display and should you select the link again.  If you do
@@ -150,19 +150,19 @@ of the currently displayed document via the RELOAD command, normally mapped
 to <EM>Control-R</em>.
 
 <p>When a binary file is encountered Lynx will ask the user if he/she
-wishes to download the file or cancel. If the user selects '<em>D'</em>
+wishes to download the file or cancel.  If the user selects '<em>D'</em>
 for download, Lynx will transfer the file into a temporary location and
-present the user with a list of options. The only default option is
+present the user with a list of options.  The only default option is
 <em>Save to disk</em>, which is disabled if Lynx is running in anonymous
-mode. Additional download methods may be defined in the
-<A HREF="#lynx.cfg">lynx.cfg</A> file. Programs like kermit, zmodem
+mode.  Additional download methods may be defined in the
+<A HREF="#lynx.cfg">lynx.cfg</A> file.  Programs like kermit, zmodem
 and FTP are some possible options. [<A HREF="#ToC-Local">ToC</A>]
 
 <h2 ID="Leaving"><A NAME="Leaving"><em>Leaving Lynx</em></A></h2>
 
 To exit Lynx use the '<em>q</em>' command.  You will be asked whether
 you really want to quit.  Answering '<em>y</em>' will exit and '<em>n</em>'
-will return you to the current document. Use '<em>Q</em>' or
+will return you to the current document.  Use '<em>Q</em>' or
 <em>Control-D</em> to quit without verification. [<A HREF="#ToC-Leaving">ToC</A>]
 
 <h2 ID="Remote"><A NAME="Remote"><em>Starting Lynx with a Remote File</em></A></h2>
@@ -556,7 +556,7 @@ compiled into Lynx, and is accessed by setting FORMS_OPTIONS true in your
 </pre>
 
 An option can be changed by entering the capital letter or character in
-parentheses for the option you wish to change (e.g. '<em>E</em>' for Editor
+parentheses for the option you wish to change (e.g., '<em>E</em>' for Editor
 or '<em>@</em>' for show cursor).  For fields where text must be entered,
 simply enter the text by typing on the keyboard.  The <a
 href="keystrokes/edit_help.html">Line Editor</a> can be used to
@@ -674,7 +674,7 @@ return to Lynx or the '<em>&gt;</em>' command to save the options to a
 	    (e.g., ISO-8859-2) and do not include ISO-8859-1 or US-ASCII,
 	    since those values are always assumed by default.  Can be a
 	    comma-separated list, which may be interpreted by servers as
-	    descending order of preferences. You can also make your order
+	    descending order of preferences.  You can also make your order
 	    of preference explicit by using q factors as defined by the
 	    HTTP protocol, for servers which understand it, for example:
 	    iso-8859-5,&nbsp;utf-8;q=0.8
@@ -734,7 +734,7 @@ return to Lynx or the '<em>&gt;</em>' command to save the options to a
 	    cause Lynx to set color mode on at startup if supported.
 	    If Lynx is built with the slang library, this is equivalent to
 	    having included the <em>-color</em> command line switch or having the
-	    <em>COLORTERM</em> environment variable set. If color support is
+	    <em>COLORTERM</em> environment variable set.  If color support is
 	    provided by curses or ncurses, this is equivalent to the default
 	    behavior of using color when the terminal type supports it.
 	    If (n)curses color support is available but cannot be used for
@@ -763,16 +763,16 @@ return to Lynx or the '<em>&gt;</em>' command to save the options to a
 	    uppercase H, J, K, and L keys remain mapped to their configured
 	    bindings (normally HELP, JUMP, KEYMAP, and LIST, respectively).
 
-         <p>Note: this has no effect on the line-editor's key bindings. 
- 
+         <p>Note: this has no effect on the line-editor's key bindings.
+
    <dt>Emacs keys
 	<dd>If set to ON then the CTRL-P, CTRL-N, CTRL-F, and CTRL-B keys
 	    will be mapped to up-arrow, down-arrow, right-arrow, and
 	    left-arrow, respectively.  Otherwise, they remain mapped to
 	    their configured bindings (normally UP_TWO lines, DOWN_TWO
 	    lines, NEXT_PAGE, and PREV_PAGE, respectively).
- 
-         <p>Note: this has no effect on the line-editor's key bindings. 
+
+         <p>Note: this has no effect on the line-editor's key bindings.
 
    <dt>Show dot files
 	<dd>If display/creation of hidden (dot) files/directories is
@@ -862,7 +862,7 @@ return to Lynx or the '<em>&gt;</em>' command to save the options to a
 	    the <em>-restrictions</em> switch.	Otherwise, the header can be
 	    changed temporarily to a string such as <em>L_y_n_x/2.8.1</em>
 	    for access to sites which discriminate against Lynx based on
-	    checks for the presence of &quot;Lynx&quot; in the header. If
+	    checks for the presence of &quot;Lynx&quot; in the header.  If
 	    changed during a Lynx session, the default User-Agent header can
 	    be restored by deleting the modified string in the
 	    Options Menu.  Whenever the User-Agent header is
@@ -897,7 +897,7 @@ return to Lynx or the '<em>&gt;</em>' command to save the options to a
 	  </dl>
 
 	<dd>If the users options permit the script to be executed Lynx will
-	    spawn a shell and run the script. If the script cannot be
+	    spawn a shell and run the script.  If the script cannot be
 	    executed Lynx will show the script within the Lynx window and
 	    inform the user that the script is not allowed to be executed
 	    and will ask the user to check his/her options.
@@ -922,7 +922,7 @@ address, and the subject of the message.  If you have filled in the
 address will be filled in automatically.  After entering the above
 information, if you have an editor defined in the <em>Options Menu</em>
 and you are not an anonymous user then your specified editor will be
-spawned for you so  that you can enter your message. If you do not have
+spawned for you so  that you can enter your message.  If you do not have
 an editor defined or you are an anonymous user, a simple line mode input
 scheme will allow you to enter your message.
 
@@ -1021,7 +1021,7 @@ href="#InteractiveOptions">Options Menu</a>) is OFF, you will
 always view or add links to the default bookmark file.  When it
 is STANDARD, a menu of up to 26 bookmark files will be invoked,
 and you select the bookmark file by entering its letter
-token. When it is ADVANCED, you will be prompted for the letter
+token.  When it is ADVANCED, you will be prompted for the letter
 token, but can enter '<em>=</em>' to invoke the STANDARD
 selection menu, or <em>RETURN</em> for the default bookmark file.
 [<A HREF="#ToC-Bookmarks">ToC</A>]
@@ -1251,7 +1251,7 @@ commands.
 	    href="keystrokes/cookie_help.html">Cookie Jar Page</a>
 	    if it contains cookies.
    <dt><em>z</em>
-	<dd>Lynx supports completely interruptible I/O processes. Press the
+	<dd>Lynx supports completely interruptible I/O processes.  Press the
 	    '<em>z</em>' key at any time during a connect or transfer process
 	    and the process will be halted.  If any data was transferred
 	    before the interrupt, it will be displayed.
@@ -1281,7 +1281,7 @@ options from a list, and fields for entering text.
 <dl>
 <dt>Buttons:
 <dd>Buttons are displayed in the same way that Lynx displays links in
-    a document. To "push" the button press the <em>right-arrow</em> or
+    a document.  To "push" the button press the <em>right-arrow</em> or
     <em>Return</em> key.  If it is a form submission button, you also can
     use the RESUBMIT ('<em>x</em>') or DOWNLOAD ('<em>d</em>') keystroke
     commands to "push" the button (see below).
@@ -1340,7 +1340,7 @@ options from a list, and fields for entering text.
 
 In general, you can move around the form using the standard Lynx navigation
 keys.  The <em>up-arrow</em> and <em>down-arrow</em> keys, respectively,
-select the previous or next field, box, or button. The <em>TAB</em> key
+select the previous or next field, box, or button.  The <em>TAB</em> key
 selects the next field (or next page of a TEXTAREA if it extends onto the
 next page), box, or button.
 
@@ -1675,7 +1675,7 @@ have an ID attribute, which will be treated as a named <em>A</em>nchor, as
 for <a href="#Footnotes">HTML Footnotes</a>,
 but the NOTE block need not be placed
 at the bottom of the document.	The content of a NOTE block can be any HTML
-markup that is valid in the BODY of the document. This is an example:<BR>
+markup that is valid in the BODY of the document.  This is an example:<BR>
 <tab indent="12"><em>&lt;NOTE CLASS="warning" ID="too-bad"&gt;<BR>
 <tab indent="14">&lt;p&gt;The W3C vendors did not retain
 NOTE in the HTML 3.2 draft.&lt;/p&gt;<BR>
@@ -1989,7 +1989,7 @@ where
 	   <dl>
 	     <dt><code>-</code>
 		<dd>If the argument is only '<code>-</code>' (dash), then Lynx
-		    expects to receive the arguments from stdin. This is to
+		    expects to receive the arguments from stdin.  This is to
 		    allow for the potentially very long command line that can
 		    be associated with the <em>-get_data</em> or
 		    <em>-post_data</em> arguments (see below).	On VMS, it
@@ -2093,7 +2093,7 @@ where
 		<dd>disable ftp access.
 	    <dt><code>-get_data</code>
 		<dd>properly formatted data for a get form are read in from
-		    stdin and passed to the form. Input is terminated by a
+		    stdin and passed to the form.  Input is terminated by a
 		    line that starts with '---'.
 	     <dt><code>-head</code>
 		<dd>send a HEAD request for the mime headers.
@@ -2178,7 +2178,7 @@ where
 		    The command line switch toggles the default.
 	     <dt><code>-post_data</code>
 		<dd>properly formatted data for a post form are read in from
-		    stdin and passed to the form. Input is terminated by a
+		    stdin and passed to the form.  Input is terminated by a
 		    line that starts with '---'.
 	     <dt><code>-preparsed</code>
 		<dd>show source preparsed and reformatted when used with
@@ -2388,7 +2388,7 @@ It may be copied to your shell account and included with -cfg command line
 switch or via an environment variable LYNX_CFG (if you have shell access).
 Starting with version 2.8.1 Lynx has an include facility so you can
 load the system-wide configuration file and easily add one or more settings
-from your local add-on configuration file. It is really cool to read
+from your local add-on configuration file.  It is really cool to read
 lynx.cfg with its comments for hundreds of options,
 most of them commented out because they are built-in defaults.
 

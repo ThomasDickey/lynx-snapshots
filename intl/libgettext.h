@@ -15,7 +15,7 @@
    along with this program; if not, write to the Free Software Foundation,
    Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
 
-/* Because on some systems (e.g. Solaris) we sometimes have to include
+/* Because on some systems (e.g., Solaris) we sometimes have to include
    the systems libintl.h as well as this file we have more complex
    include protection above.  But the systems header might perhaps also
    define _LIBINTL_H and therefore we have to protect the definition here.  */

@@ -56,7 +56,7 @@ PRIVATE HTAAUser *decompose_auth_string ARGS2(char *,		authstring,
 				/*	      \/	      */
     FREE(cleartext);	/* From previous call.				*/
 			/* NOTE: parts of this memory are pointed to by */
-			/* pointers in HTAAUser structure. Therefore,	*/
+			/* pointers in HTAAUser structure.  Therefore,	*/
 			/* this also frees all the strings pointed to	*/
 			/* by the static 'user'.			*/
 

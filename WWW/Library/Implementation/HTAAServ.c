@@ -14,7 +14,7 @@
 **
 **	Therefore also all the strings returned by this package
 **	are only valid until the next call to the same function
-**	is made. This approach is selected, because of the nature
+**	is made.  This approach is selected, because of the nature
 **	of access authorization: no string returned by the package
 **	needs to be valid longer than until the next call.
 **
@@ -169,12 +169,12 @@ PRIVATE char *status_name ARGS1(HTAAFailReasonType, reason)
 }
 
 
-/* PRIVATE						check_uthorization()
+/* PRIVATE						check_authorization()
 **		CHECK IF USER IS AUTHORIZED TO ACCESS A FILE
 ** ON ENTRY:
 **	pathname	is the physical file pathname
 **			to access.
-**	method		method, e.g. METHOD_GET, METHOD_PUT, ...
+**	method		method, e.g., METHOD_GET, METHOD_PUT, ...
 **	scheme		authentication scheme.
 **	scheme_specifics authentication string (or other
 **			scheme specific parameters, like
@@ -369,7 +369,7 @@ PRIVATE HTAAFailReasonType check_authorization ARGS4(CONST char *,  pathname,
 **		CHECK IF USER IS AUTHORIZED TO ACCESS A FILE
 ** ON ENTRY:
 **	url		is the document to be accessed.
-**	method_name	name of the method, e.g. "GET"
+**	method_name	name of the method, e.g., "GET"
 **	scheme_name	authentication scheme name.
 **	scheme_specifics authentication string (or other
 **			scheme specific parameters, like

@@ -548,6 +548,222 @@ of key-stroke commands.
 .br
 o Type \fB"K"\fR for a complete list of the current key-stroke
 command mappings.
+.SH ENVIRONMENT
+In addition to various "standard" environment variables such as
+\fBHOME\fR, \fBPATH\fR, \fBUSER\fR, \fBDISPLAY\fR, \fBTMPDIR\fR, \fBetc\fR,
+\fILynx\fR utilizes several Lynx-specific environment variables, if they
+exist.
+.PP
+Others may be created or modified by \fILynx\fR to pass data to an external
+program, or for other reasons.  These are listed separately below.
+.PP
+See also the sections on \fBSIMULATED CGI SUPPORT\fR and
+\fBNATIVE LANGUAGE SUPPORT\fR, below.
+.PP
+Note:  Not all environment variables apply to all types of platforms
+supported by \fILynx\fR, though most do.  Feedback on platform
+dependencies is solicited.
+.PP
+Environment Variables Used By \fILynx\fR:
+.TP 20
+.B COLORTERM
+If set, color capability for the terminal is forced on at startup time.
+The actual value assigned to the variable is ignored.  This variable is
+only meaningful if \fILynx\fR was built using the \fBslang\fR
+screen-handling library.
+.TP 20
+.B LYNX_CFG
+This variable, if set, will override the default location and name of
+the global configuration file (normally, \fBlynx.cfg\fR) that was defined
+by the LYNX_CFG_FILE constant in the userdefs.h file, during installation.
+See the userdefs.h file for more information.
+.TP 20
+.B LYNX_LSS
+This variable, if set, specifies the location of the default \fILynx\fR
+character style sheet file.  [Currently only meaningful if \fILynx\fR was
+built using experimental color style support.]
+.TP 20
+.B LYNX_SAVE_SPACE
+This variable, if set, will override the default path prefix for files
+saved to disk that is defined in the \fBlynx.cfg SAVE_SPACE:\fR statement.
+See the \fBlynx.cfg\fR file for more information.
+.TP 20
+.B LYNX_TEMP_SPACE
+This variable, if set, will override the default path prefix for temporary
+files that was defined during installation, as well as any value that may
+be assigned to the \fBTMPDIR\fR variable.
+.TP 20
+.B MAIL
+This variable specifies the default inbox \fILynx\fR will check for new
+mail, if such checking is enabled in the \fBlynx.cfg\fR file.
+.TP 20
+.B NEWS_ORGANIZATION
+This variable, if set, provides the string used in the \fBOrganization:\fR
+header of \fBUSENET\fR news postings.  It will override the setting of the
+ORGANIZATION environment variable, if it is also set (and, on \fBUNIX\fR,
+the contents of an /etc/organization file, if present).
+.TP 20
+.B NNTPSERVER
+If set, this variable specifies the default NNTP server that will be used
+for \fBUSENET\fR news reading and posting with \fILynx\fR, via news: URL's.
+.TP 20
+.B ORGANIZATION
+This variable, if set, provides the string used in the \fBOrganization:\fR
+header of \fBUSENET\fR news postings.  On \fBUNIX\fR, it will override the
+contents of an /etc/organization file, if present.
+.TP 20
+.B PROTOCOL_proxy
+\fILynx\fR supports the use of proxy servers that can act as firewall
+gateways and caching servers.  They are preferable to the older gateway
+servers (see WWW_access_GATEWAY, below).  Each protocol used by \fILynx\fR,
+(http, ftp, gopher, etc), can be mapped separately by setting environment
+variables of the form PROTOCOL_proxy (literally: http_proxy, ftp_proxy,
+gopher_proxy, etc), to "http://some.server.dom:port/".
+See the \fBINSTALLATION\fR file in the \fILynx\fR distribution for additional
+details, and examples.
+.TP 20
+.B WWW_access_GATEWAY
+\fILynx\fR still supports use of gateway servers, with the servers specified
+via "WWW_access_GATEWAY" variables (where "access" is lower case and can be
+"http", "ftp", "gopher" or "wais"), however most gateway servers have been
+discontinued.  Note that you do not include a terminal '/' for gateways, but
+do for proxies specified by PROTOCOL_proxy environment variables.
+See the \fBINSTALLATION\fR file in the \fILynx\fR distribution for details.
+.TP 20
+.B WWW_HOME
+This variable, if set, will override the default startup URL specified
+in any of the \fILynx\fR configuration files.
+.PP
+Environment Variables \fBSet\fR or \fBModified\fR By \fILynx\fR:
+.TP 20
+.B LYNX_PRINT_DATE
+This variable is set by the \fILynx\fR p(rint) function, to the
+\fBDate:\fR
+string seen in the document's "\fBInformation about\fR" page (= cmd),
+if any.
+It is created for use by an external program, as defined in a
+\fBlynx.cfg PRINTER:\fR definition statement.
+If the field does not exist for the document, the variable is set to a
+null string under \fBUNIX\fR, or "No Date" under \fBVMS\fR.
+.TP 20
+.B LYNX_PRINT_LASTMOD
+This variable is set by the \fILynx\fR p(rint) function, to the
+\fBLast Mod:\fR
+string seen in the document's "\fBInformation about\fR" page (= cmd),
+if any.
+It is created for use by an external program, as defined in a
+\fBlynx.cfg PRINTER:\fR definition statement.
+If the field does not exist for the document, the variable is set to a
+null string under \fBUNIX\fR, or "No LastMod" under \fBVMS\fR.
+.TP 20
+.B LYNX_PRINT_TITLE
+This variable is set by the \fILynx\fR p(rint) function, to the
+\fBLinkname:\fR
+string seen in the document's "\fBInformation about\fR" page (= cmd),
+if any.
+It is created for use by an external program, as defined in a
+\fBlynx.cfg PRINTER:\fR definition statement.
+If the field does not exist for the document, the variable is set to a
+null string under \fBUNIX\fR, or "No Title" under \fBVMS\fR.
+.TP 20
+.B LYNX_PRINT_URL
+This variable is set by the \fILynx\fR p(rint) function, to the
+\fBURL:\fR
+string seen in the document's "\fBInformation about\fR" page (= cmd),
+if any.
+It is created for use by an external program, as defined in a
+\fBlynx.cfg PRINTER:\fR definition statement.
+If the field does not exist for the document, the variable is set to a
+null string under \fBUNIX\fR, or "No URL" under \fBVMS\fR.
+.TP 20
+.B LYNX_VERSION
+This variable is always set by \fILynx\fR, and may be used by an external
+program to determine if it was invoked by \fILynx\fR.  See also the comments
+in the distribution's sample \fBmailcap\fR file, for notes on usage in such
+a file.
+.TP 20
+.B TERM
+Normally, this variable is used by \fILynx\fR to determine the terminal type
+being used to invoke \fILynx\fR.  If, however, it is unset at startup time
+(or has the value "unknown"),
+or if the \fB-term\fR command-line option is used (see \fBOPTIONS\fR section
+above), \fILynx\fR will set or modify its value to the user specified
+terminal type (for the \fILynx\fR execution environment).
+Note: If set/modified by \fILynx\fR, the values of the \fBLINES\fR and/or
+\fBCOLUMNS\fR environment variables may also be changed.
+.SH SIMULATED CGI SUPPORT
+If built with the \fBcgi-links\fR option enabled, \fILynx\fR allows access
+to a cgi script directly without the need for an http daemon.
+.PP
+When executing such "lynxcgi scripts" (if enabled), the following variables
+may be set for simulating a CGI environment:
+.PP
+.B CONTENT_LENGTH
+.PP
+.B CONTENT_TYPE
+.PP
+.B DOCUMENT_ROOT
+.PP
+.B HTTP_ACCEPT_CHARSET
+.PP
+.B HTTP_ACCEPT_LANGUAGE
+.PP
+.B HTTP_USER_AGENT
+.PP
+.B PATH_INFO
+.PP
+.B PATH_TRANSLATED
+.PP
+.B QUERY_STRING
+.PP
+.B REMOTE_ADDR
+.PP
+.B REMOTE_HOST
+.PP
+.B REQUEST_METHOD
+.PP
+.B SERVER_SOFTWARE
+.PP
+Other environment variables are not inherited by the script, unless they
+are provided via a LYNXCGI_ENVIRONMENT statement in the configuration file.
+See the \fBlynx.cfg\fR file, and the (draft) CGI 1.1 Specification
+<http://Web.Golux.Com/coar/cgi/draft-coar-cgi-v11-00.txt> for the
+definition and usage of these variables.
+.PP
+The CGI Specification, and other associated documentation, should be consulted
+for general information on CGI script programming.
+.SH NATIVE LANGUAGE SUPPORT
+If configured and installed with \fBNative Language Support\fR, \fILynx\fR
+will display status and other messages in your local language.  See the
+file \fBABOUT_NLS\fR in the source distribution, or at your local \fBGNU\fR
+site, for more information about internationalization.
+.PP
+The following environment variables may be used to alter default settings:
+.TP 20
+.B LANG
+This variable, if set, will override the default message language.  It
+is an \fBISO 639\fR two-letter code identifying the language.  Language
+codes are \fBNOT\fR the same as the country codes given in \fBISO 3166\fR.
+.TP 20
+.B LANGUAGE
+This variable, if set, will override the default message language.
+This is a \fBGNU\fR extension that has higher priority for setting
+the message catalog than \fBLANG\fR or \fBLC_ALL\fR.
+.TP 20
+.B LC_ALL
+and
+.TP 20
+.B LC_MESSAGES
+These variables, if set, specify the notion of native language
+formatting style.  They are \fBPOSIXly\fR correct.
+.TP 20
+.B LINGUAS
+This variable, if set prior to configuration, limits the installed
+languages to specific values.  It is a space-separated list of two-letter
+codes.  Currently, it is hard-coded to a wish list.
+.TP 20
+.B NLSPATH
+This variable, if set, is used as the path prefix for message catalogs.
 .SH NOTES
 This is the Lynx v2.8.1 Release
 .PP
@@ -562,6 +778,16 @@ after subscribing.
 Unsubscribe by sending email to <majordomo@sig.net> with
 "unsubscribe lynx-dev" as the only line in the body of your message.
 Do not send the unsubscribe message to the lynx-dev list, itself.
+.SH SEE ALSO
+\fIenviron\fR(7),
+\fIexecve\fR(2),
+\fIftp\fR(1),
+\fIgettext\fR(GNU),
+\fIlocaleconv\fR(3),
+\fIsetlocale\fR(3),
+\fItermcap\fR(5),
+\fIterminfo\fR(5),
+\fIwget\fR(GNU)
 .SH ACKNOWLEDGMENTS
 Lynx has incorporated code from a variety of sources along the way.
 The earliest versions of Lynx included code from Earl Fogel of Computing

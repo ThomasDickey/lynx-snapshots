@@ -22,7 +22,7 @@
 #define PARSE_ALL               31
 
 /*
-**  The following are valid mask values. The terms are the BNF names
+**  The following are valid mask values.  The terms are the BNF names
 **  in the URL document.
 */
 #define URL_XALPHAS     (unsigned char) 1
@@ -81,7 +81,7 @@ extern void HTSimplify PARAMS((
 **	-------------------
 **
 ** This function creates and returns a string which gives an expression of
-** one address as related to another. Where there is no relation, an absolute
+** one address as related to another.  Where there is no relation, an absolute
 ** address is retured.
 **
 **  On entry,

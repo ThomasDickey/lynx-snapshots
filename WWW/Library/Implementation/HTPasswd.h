@@ -1,5 +1,5 @@
 /*                                   PASSWORD FILE ROUTINES
-                                             
+
  */
 
 #ifndef HTPASSWD_H
@@ -8,10 +8,10 @@
 #include <HTList.h>
 
 #ifdef SHORT_NAMES
-#define HTAAenPw        HTAA_encryptPasswd
-#define HTAApwMa        HTAA_passwdMatch
-#define HTAAFrPR        HTAAFile_readPasswdRec
-#define HTAAchPw        HTAA_checkPasswd
+#define HTAA_encryptPasswd	HTAAenPw
+#define HTAA_passwdMatch	HTAApwMa
+#define HTAAFile_readPasswdRec	HTAAFrPR
+#define HTAA_checkPasswd	HTAAchPw
 #endif /* SHORT_NAMES */
 
 /*
@@ -19,12 +19,12 @@
 User Authentication
 
    HTAA_checkPassword(username,password,passwdfile)opens the password file, and checks if
-   the username-password pair is correct. Return value is YES, if and only if they are
-   correct. Otherwise, and also if the open fails, returns NO.
-   
+   the username-password pair is correct.  Return value is YES, if and only if they are
+   correct.  Otherwise, and also if the open fails, returns NO.
+
    If the given password file name is NULL or an empty string, the default password file
    name is used (macro PASSWD_FILE).
-   
+
  */
 
 /* PUBLIC                                               HTAA_checkPassword()
@@ -63,7 +63,7 @@ Password File Maintenance Routines
 ** NOTE:
 **      Uses currently the C library function crypt(), which
 **      only accepts at most 8 characters long strings and produces
-**      always 13 characters long strings. This function is
+**      always 13 characters long strings.  This function is
 **      called repeatedly so that longer strings can be encrypted.
 **      This is of course not as safe as encrypting the entire
 **      string at once, but then again, we are not that paranoid
@@ -102,7 +102,7 @@ PUBLIC BOOL HTAA_passwdMatch PARAMS((CONST char * password,
 ** ON EXIT:
 **      returns         EOF on end of file,
 **                      otherwise the number of read fields
-**                      (i.e. in a correct case returns 2).
+**                      (i.e., in a correct case returns 2).
 **      out_username    contains the null-terminated read username.
 **      out_password    contains the null-terminated read password.
 **

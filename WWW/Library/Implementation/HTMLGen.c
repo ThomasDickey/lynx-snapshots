@@ -107,11 +107,11 @@ PRIVATE void allow_break ARGS3(
 **	------------------
 **
 **	The tricky bits are the line break handling.  This attempts
-**	to synchrononise line breaks on sentence or phrase ends. This
+**	to synchrononise line breaks on sentence or phrase ends.  This
 **	is important if one stores SGML files in a line-oriented code
 **	repository, so that if a small change is made, line ends don't
 **	shift in a ripple-through to apparently change a large part of the
-**	file. We give extra "cleanness" to spaces appearing directly
+**	file.  We give extra "cleanness" to spaces appearing directly
 **	after periods (full stops), [semi]colons and commas.
 **	   This should make the source files easier to read and modify
 **	by hand, too, though this is not a primary design consideration. TBL

@@ -58,7 +58,7 @@ HTAnchor * HTHistory_moveBy
     return NULL;  /* No last visited node */
   if (last != (HTAnchor *) last->parent) {  /* Was a child */
     HTList * kids = last->parent->children;
-    int i = HTList_indexOf (kids, last); 
+    int i = HTList_indexOf (kids, last);
     HTAnchor * nextOne = (HTAnchor *)HTList_objectAt (kids, i - offset);
     if (nextOne) {
       HTAnchor * destination = HTAnchor_followMainLink (nextOne);
@@ -87,7 +87,7 @@ BOOL HTHistory_canMoveBy
     return NO;  /* No last visited node */
   if (last != (HTAnchor *) last->parent) {  /* Was a child */
     HTList * kids = last->parent->children;
-    int i = HTList_indexOf (kids, last); 
+    int i = HTList_indexOf (kids, last);
     return (HTList_objectAt (kids, i - offset) != NULL);
   } else {  /* Was a parent */
     return NO;  /* FIXME we could possibly follow the next link... */
@@ -130,7 +130,7 @@ HTAnchor * HTHistory_recall
 **
 **	This is needed in order to check the validity of certain commands
 **	for menus, etc.
-(not needed for now. Use canBacktrack, etc.)
+(not needed for now.  Use canBacktrack, etc.)
 int HTHistory_count
   NOARGS
 {

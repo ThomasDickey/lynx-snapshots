@@ -28,6 +28,7 @@
 #include <LYStructs.h>
 #include <LYGlobalDefs.h>
 #include <LYGetFile.h>
+#include <LYClean.h>
 #include <LYSignal.h>
 #include <LYMail.h>
 #include <LYList.h>
@@ -429,7 +430,7 @@ PUBLIC HText *	HText_new ARGS1(
     }
 
     /*
-     *  Links between anchors & documents are a 1-1 relationship. If
+     *  Links between anchors & documents are a 1-1 relationship.  If
      *  an anchor is already linked to a document we didn't call
      *  HTuncache_current_document(), e.g., for the showinfo, options,
      *  download, print, etc., temporary file URLs, so we'll check now
@@ -1654,7 +1655,7 @@ PUBLIC void HText_beginAppend ARGS1(
 **		may be set to indicate direct output of the finished line.
 ** On exit,
 **		A new line has been made, justified according to the
-**		current style. Text after the split (if split nonzero)
+**		current style.  Text after the split (if split nonzero)
 **		is taken over onto the next line.
 **
 **		If display_on_the_fly is set, then it is decremented and
@@ -2469,7 +2470,7 @@ PUBLIC void HText_appendCharacter ARGS2(
      *  I'm going to cheat here in a BIG way.  Since I know that all
      *  \r's will be trapped by HTML_put_character I'm going to use
      *  \r to mean go down a line but don't start a new paragraph.
-     *  i.e. use the second line indenting.
+     *  i.e., use the second line indenting.
      */
     if (ch == '\r') {
 	new_line(text);
@@ -3026,7 +3027,7 @@ PUBLIC void HText_endAnchor ARGS2(
 	     * Well, let's do this only if -hiddenlinks=merged is not in
 	     * effect, or if we can be reasonably sure that
 	     * this is the result of an intentional non-generation of
-	     * anchor text via NO_ISMAP_IF_USEMAP. In other cases it can
+	     * anchor text via NO_ISMAP_IF_USEMAP.  In other cases it can
 	     * actually be a feature that numbered links alert the viewer
 	     * to the presence of a link which is otherwise not selectable -
 	     * possibly caused by HTML errors. - kw
@@ -4271,7 +4272,7 @@ PUBLIC void HText_pageDisplay ARGS2(
 	CTRACE(tfp, "GridText: HText_pageDisplay at line %d started\n", line_num);
     }
 
-    if (display_partial && detected_forms_input_partial) {
+    if (display_partial) {
 	/*
 	**  Garbage is reported from forms input fields in incremental mode.
 	**  So we start HText_trimHightext() to forget this side effect.
@@ -4283,7 +4284,6 @@ PUBLIC void HText_pageDisplay ARGS2(
 	*/
 	HText_trimHightext(HTMainText, FALSE);
     }
-    detected_forms_input_partial = FALSE;
 #endif
 
     display_page(HTMainText, line_num-1, target);
@@ -4571,7 +4571,7 @@ PUBLIC BOOL HText_selectAnchor ARGS2(
 /*		Editing functions		- NOT IMPLEMENTED
 **		=================
 **
-**	These are called from the application. There are many more functions
+**	These are called from the application.  There are many more functions
 **	not included here from the original text object.
 */
 
@@ -4944,9 +4944,6 @@ PUBLIC void print_wwwfile_to_fd ARGS2(
     register int i;
     int first = TRUE;
     HTLine * line;
-#ifdef VMS
-    extern BOOLEAN HadVMSInterrupt;
-#endif /* VMS */
 
     if (!HTMainText)
 	return;
@@ -5028,9 +5025,6 @@ PUBLIC void print_crawl_to_fd ARGS3(
     register int i;
     int first = TRUE;
     HTLine * line;
-#ifdef VMS
-    extern BOOLEAN HadVMSInterrupt;
-#endif /* VMS */
 
     if (!HTMainText)
 	return;
@@ -6548,11 +6542,6 @@ PUBLIC int HText_beginInput ARGS3(
     int i, j;
 
     CTRACE(tfp,"Entering HText_beginInput\n");
-
-#ifdef DISP_PARTIAL
-    if (display_partial)
-	detected_forms_input_partial = TRUE; /* trimHightext temp fix */
-#endif
 
     if (a == NULL || f == NULL)
 	outofmem(__FILE__, "HText_beginInput");

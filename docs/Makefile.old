@@ -6,7 +6,7 @@ SHELL = /bin/sh
 #MAKE= make
 
 ##this is the name of the directory the lynx source code is in.
-##(e.g. lynx2-7-1, not the full path)
+##(e.g., lynx2-7-1, not the full path)
 lynxdir= lynx2-7-1
 
 ##this is the filename for .zip, .tar and .tar.Z archives.
@@ -145,7 +145,7 @@ DIRED_UUDECODE   =   -DOK_UUDECODE
 DIRED_OVERRIDE   =   -DOK_OVERRIDE
 #
 # To prevent DirEd from changing the permissions on directories or files
-# (i.e. from doing what the Unix chmod command or the DOS attrib command
+# (i.e., from doing what the Unix chmod command or the DOS attrib command
 # does), prepend "#" to this line:
 DIRED_PERMIT   =   -DOK_PERMIT
 #
@@ -665,7 +665,7 @@ bsdi:
 		WWWLIB="../WWW/Library/svr4/libwww.a"
 
 #IMPORTANT: To compile you need ncurses package (version 1.9.4 or later)
-#     installed on your system. You can download ncurses package from
+#     installed on your system.  You can download ncurses package from
 #     ftp://ftp.netcom.com/pub/zm/zmbenhal/ncurses
 bsdi-ncurses:
 	cd WWW/Library/Implementation; $(MAKE) -f BSDI_Makefile CC="gcc" \
@@ -690,7 +690,7 @@ bsdi-slang:
 
 # define RESOLVLIB (above) for the "LIBS" entry if needed
 # Solaris2 doesn't have or need ranlib. (ignore the error message about that :)
-# (Solaris 2.5 and later actually have a ranlib program - but it does 
+# (Solaris 2.5 and later actually have a ranlib program - but it does
 #  nothing and is only there to make Makefiles like this one happy)
 solaris2:
 	cd WWW/Library/solaris2; $(MAKE) CC="gcc" LYFLAGS="-DNSL_FORK \
@@ -782,7 +782,7 @@ solaris2-slangcc:
 		WWWLIB="../WWW/Library/solaris2/libwww.a" \
 		SLANGLIB="$(SLANGLIB) $(SLANGRRLIB) -lslang -lm" \
 		SLANGINC="$(SLANGINC)"
-  
+
 osf:
 	cd WWW/Library/osf; $(MAKE) LYFLAGS="-Olimit 2000 -DNSL_FORK \
 		$(SITE_LYDEFS)"

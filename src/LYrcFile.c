@@ -766,7 +766,7 @@ PUBLIC int save_rc NOPARAMS
 # A value of \"default\" will yield the behavior of assuming\n\
 # a monochrome terminal unless color capability is inferred at startup\n\
 # based on the terminal type, or the -color command line switch is used, or\n\
-# the COLORTERM environment variable is set. The default behavior always is\n\
+# the COLORTERM environment variable is set.  The default behavior always is\n\
 # used in anonymous accounts or if the \"option_save\" restriction is set.\n\
 # The effect of the saved value can be overridden via\n\
 # the -color and -nocolor command line switches.\n\
@@ -878,7 +878,7 @@ PUBLIC int save_rc NOPARAMS
     fprintf(fp, gettext("\
 # partial_thres specifies the number of lines Lynx should download and render\n\
 # before we redraw the screen in Partial Display logic\n\
-# e.g. partial_thres=2\n\
+# e.g., partial_thres=2\n\
 # would have Lynx redraw every 2 lines that it renders\n\
 # partial_thres=-1 would use the entire screensize\n"));
     fprintf(fp, "partial_thres=%d\n\n", partial_threshold);

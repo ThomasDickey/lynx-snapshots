@@ -260,7 +260,6 @@ extern int Newline_partial;          /* -//- "current" newline position */
 extern int NumOfLines_partial;       /* -//- "current" number of lines */
 extern int partial_threshold;
 extern BOOLEAN debug_display_partial;  /* show with MessageSecs delay */
-extern BOOLEAN detected_forms_input_partial; /* trimHightext temp fix */
 #endif
 extern char *form_post_data;         /* User data for post form */
 extern char *form_get_data;          /* User data for get form */

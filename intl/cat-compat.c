@@ -44,7 +44,7 @@ char *getenv ();
      setting of `local'.''
    However it does not specify the exact format.  And even worse: POSIX
    defines this not at all.  So we can use this feature only on selected
-   system (e.g. those using GNU C Library).  */
+   system (e.g., those using GNU C Library).  */
 #ifdef _LIBC
 # define HAVE_LOCALE_NULL
 #endif

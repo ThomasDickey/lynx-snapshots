@@ -9,9 +9,9 @@
 #include <HTGroup.h>
 
 #ifdef SHORT_NAMES
-#define HTAAoACL	HTAA_openAcl
-#define HTAAcACL	HTAA_closeAcl
-#define HTAAgAEn	HTAA_getAclEntry
+#define HTAA_openAcl		HTAAoACL
+#define HTAA_closeAcl		HTAAcACL
+#define HTAA_getAclEntry	HTAAgAEn
 #endif /* SHORT_NAMES */
 
 /*
@@ -63,7 +63,7 @@ Getting ACL Entry
 **	template : method, method, ... : group@addr, user, group, ...
 **
 **	The last item is in fact in exactly the same format as
-**	group definition in group file, i.e. everything that
+**	group definition in group file, i.e., everything that
 **	follows the 'groupname:' part,
 **	e.g.
 **		user, group, user@address, group@address,
@@ -87,7 +87,7 @@ Getting ACL Entry
 **
 ** NOTE:
 **	The returned group definition may well contain references
-**	to groups defined in group file. Therefore these references
+**	to groups defined in group file.  Therefore these references
 **	must be resolved according to that rule file by function
 **	HTAA_resolveGroupReferences() (group file is read in by
 **	HTAA_readGroupFile()) and after that access authorization

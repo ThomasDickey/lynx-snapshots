@@ -13,7 +13,7 @@
 **	It seems that an attempt by the server to connect to a port which has
 **	been used recently by a listen on the same socket, or by another
 **	socket this or another process causes a hangup of (almost exactly)
-**	one minute. Therefore, we have to use a rotating port number.
+**	one minute.  Therefore, we have to use a rotating port number.
 **	The problem remains that if the application is run twice in quick
 **	succession, it will hang for what remains of a minute.
 **
@@ -63,10 +63,10 @@
 /*
 BUGS:	@@@	Limit connection cache size!
 		Error reporting to user.
-		400 & 500 errors are acked by user with windows.
+		400 & 500 errors are ack'ed by user with windows.
 		Use configuration file for user names
 
-**		Note for portablility this version does not use select() and
+**		Note for portability this version does not use select() and
 **		so does not watch the control and data channels at the
 **		same time.
 */
@@ -239,9 +239,9 @@ PUBLIC char * HTMake_VMS_name ARGS2(
 	CONST char *,	fn)
 {
 
-/*	We try converting the filename into Files-11 syntax. That is, we assume
-**	first that the file is, like us, on a VMS node. We try remote
-**	(or local) DECnet access. Files-11, VMS, VAX and DECnet
+/*	We try converting the filename into Files-11 syntax.  That is, we assume
+**	first that the file is, like us, on a VMS node.  We try remote
+**	(or local) DECnet access.  Files-11, VMS, VAX and DECnet
 **	are trademarks of Digital Equipment Corporation.
 **	The node is assumed to be local if the hostname WITHOUT DOMAIN
 **	matches the local one. @@@
@@ -257,7 +257,7 @@ PUBLIC char * HTMake_VMS_name ARGS2(
     if (!filename || !nodename)
 	outofmem(__FILE__, "HTVMSname");
     strcpy(filename, fn);
-    strcpy(nodename, "");	/* On same node? Yes if node names match */
+    strcpy(nodename, "");	/* On same node?  Yes if node names match */
     if (strncmp(nn, "localhost", 9)) {
 	CONST char *p;
 	CONST char *q;
@@ -2092,7 +2092,7 @@ PRIVATE EntryInfo * parse_dir_entry ARGS2(
 	default:
 	    /*
 	    **	We can't tell if it is a directory since we only
-	    **	did an NLST :(	List bad file types anyways? NOT!
+	    **	did an NLST :(	List bad file types anyways?  NOT!
 	    */
 	    StrAllocCopy(entry_info->filename, entry);
 	    return(entry_info); /* mostly empty info */
@@ -2810,7 +2810,7 @@ PUBLIC int HTFTPLoad ARGS4(
 	}
 	if (binary != control->binary) {
 	    /*
-	    **	Act on our setting if not alread set. - FM
+	    **	Act on our setting if not already set. - FM
 	    */
 	    char * mode = binary ? "I" : "A";
 	    sprintf(command, "TYPE %s%c%c", mode, CR, LF);
@@ -3123,7 +3123,7 @@ PUBLIC int HTFTPLoad ARGS4(
 	    sprintf(command, "CWD %s%c%c", filename, CR, LF);
 	    status = response(command);
 
-	    if (status == 2) {	/* Successed : let's NAME LIST it */
+	    if (status == 2) {	/* Succeeded : let's NAME LIST it */
 		isDirectory = YES;
 	    if (use_list)
 		sprintf(command, "LIST%c%c", CR, LF);

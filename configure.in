@@ -29,7 +29,7 @@ AC_CHECK_PROGS(LINT, lint alint lclint tdlint, [])
 
 AC_AIX
 AC_ISC_POSIX
-  
+
 dnl --------------------------------------------------------------------------
 dnl Debug/development/test
 dnl --------------------------------------------------------------------------
@@ -107,6 +107,12 @@ Basic Configuration Options:)
 dnl internationalization macros
 AM_GNU_GETTEXT
 
+CF_WITH_PATH(nls-datadir,
+[  --with-nls-datadir=DIR  NLS data, parent of locale],
+NLS_DATADIR,
+[PREFIX/DATADIR],
+[$prefix/$DATADIRNAME])
+
 INTLDIR_MAKE=
 MSG_DIR_MAKE=
 SUB_MAKEFILE=
@@ -163,6 +169,7 @@ CF_PATH_PROG(TAR,	tar)
 CF_PATH_PROG(TOUCH,	touch)
 CF_PATH_PROG(UNCOMPRESS,gunzip)
 CF_PATH_PROG(UNZIP,	unzip)
+CF_PATH_PROG(BZIP2,	bzip2)
 CF_PATH_PROG(UUDECODE,	uudecode)
 CF_PATH_PROG(ZCAT,	zcat)
 CF_PATH_PROG(ZIP,	zip)
@@ -429,6 +436,8 @@ AC_CHECK_FUNCS( \
 	cuserid \
 	getcwd \
 	getgroups \
+	gettimeofday \
+	popen \
 	putenv \
 	readdir \
 	strerror \
@@ -781,6 +790,9 @@ if test -n "$srcdir" ; then
 	test "$USE_INCLUDED_LIBINTL" = yes && $srcdir/mkdirs.sh intl
 	test "$srcdir" != "." && SRCDIR_CLEAN=""
 fi
+
+test -z "$CONFIG_SHELL" && CONFIG_SHELL=/bin/sh
+AC_SUBST(CONFIG_SHELL)
 
 AC_SUBST(SRCDIR_CLEAN)
 AC_OUTPUT(

@@ -5,7 +5,7 @@ Lynx Version 2.8.1 is the latest release.  This release is based on the
 lynx2.8pre.11 development code set, and includes bug fixes through October 24,
 1998.  See the CHANGES file for a complete record of all changes and bug fixes
 in this release.  New releases are announced on the lynx-dev mailing list (see
-below). 
+below).
 
 
 WHAT IS LYNX?
@@ -13,7 +13,7 @@ WHAT IS LYNX?
    Lynx is a fully-featured World Wide Web (WWW) client for users running
    cursor-addressable, character-cell display devices such as vt100
    terminals, vt100 emulators running on PCs or Macs, or any other
-   character-cell display. It will display Hypertext Markup Language
+   character-cell display.  It will display Hypertext Markup Language
    (HTML) documents containing links to files on the local system, as
    well as files on remote systems running http, gopher, ftp, wais, nntp,
    finger, or cso/ph/qi servers, and services accessible via logins to
@@ -21,7 +21,7 @@ WHAT IS LYNX?
    Unix, VMS, Windows95/NT, 386DOS and OS/2 EMX.
 
    Lynx can be used to access information on the WWW, or to establish
-   information systems intended primarily for local access. Lynx has been
+   information systems intended primarily for local access.  Lynx has been
    used to build several Campus Wide Information Systems (CWIS).  Lynx can
    also be used to build systems isolated within a single LAN.
 
@@ -56,17 +56,17 @@ YEAR 2000 COMPLIANCE
 DOCUMENTATION
 
    A users guide is included in this distribution along with a man page
-   for Unix systems and a help file for VMS systems. All documentation is
+   for Unix systems and a help file for VMS systems.  All documentation is
    contained in the top directory and the docs, samples and lynx_help
    subdirectories.
 
    While running Lynx, type 'h', 'H', or '?' to invoke the help menu
-   system. From the help menu you may access several useful documents
-   pertaining to Lynx and the World Wide Web. The most important of
-   these is the Lynx Users Guide. By default, Lynx will use the Lynx
+   system.  From the help menu you may access several useful documents
+   pertaining to Lynx and the World Wide Web.  The most important of
+   these is the Lynx Users Guide.  By default, Lynx will use the Lynx
    Enhanced Pages, which includes http links for help and FAQs concerning
-   Lynx. It is recommended that you install your own help menu system at
-   your site in order to lessen the load on http servers. This also will
+   Lynx.  It is recommended that you install your own help menu system at
+   your site in order to lessen the load on http servers.  This also will
    allow you to customize the help menu system for your site and greatly
    speed up access for those using Lynx over a slow connection.
 

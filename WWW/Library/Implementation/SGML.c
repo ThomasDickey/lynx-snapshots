@@ -1,8 +1,8 @@
 /*			General SGML Parser code		SGML.c
 **			========================
 **
-**	This module implements an HTStream object. To parse an
-**	SGML file, create this object which is a parser. The object
+**	This module implements an HTStream object.  To parse an
+**	SGML file, create this object which is a parser.  The object
 **	is (currently) created by being passed a DTD structure,
 **	and a target HTStructured object at which to throw the parsed stuff.
 **
@@ -928,7 +928,7 @@ PRIVATE void start_element ARGS1(
 	(CONST char**) context->value,	/* coerce type for think c */
 	context->current_tag_charset,
 	(char **)&context->include);
-    if (new_tag->contents != SGML_EMPTY) {		/* i.e. tag not empty */
+    if (new_tag->contents != SGML_EMPTY) {		/* i.e., tag not empty */
 	HTElement * N = (HTElement *)malloc(sizeof(HTElement));
 	if (N == NULL)
 	    outofmem(__FILE__, "start_element");

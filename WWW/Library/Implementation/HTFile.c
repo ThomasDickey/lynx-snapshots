@@ -636,7 +636,7 @@ PUBLIC char * HTnameOfFile_WWW ARGS3(
 **
 **  Bugs:
 **	At present, only the names of two network root nodes are hand-coded
-**	in and valid for the NeXT only. This should be configurable in
+**	in and valid for the NeXT only.  This should be configurable in
 **	the general case.
 */
 PUBLIC char * WWW_nameOfFile ARGS1(

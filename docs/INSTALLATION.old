@@ -4,7 +4,7 @@ For a description of Lynx please read the README file.
 
         Last Updated February 1997
 
-UNIX & VMS Step 1a. 
+UNIX & VMS Step 1a.
     Most of the variables that you are likely to change are in the
     userdefs.h file.  There are a few that you must change or verify,
     and a few more that you will probably want to change.  The variables
@@ -57,9 +57,9 @@ UNIX Step 1d.  (WAIS support is built into Lynx for VMS, skip to step 1e)
     Adding Direct WAIS support.
     Get the freeWAIS distribution from:
     	ftp://ftp.cnidr.org/pub/NIDR.tools/freewais
-    and compile it.  The compile process will create some libraries, you will 
-    need wais.a and client.a.  Edit the Makefile in the top level  directory 
-    and add the library locations under the DIRECT WAIS ACCESS heading.  
+    and compile it.  The compile process will create some libraries, you will
+    need wais.a and client.a.  Edit the Makefile in the top level  directory
+    and add the library locations under the DIRECT WAIS ACCESS heading.
     Edit the Makefile for the WWW Library in the
     WWW/Library/Implementation/CommonMakefile to make the WAIS.c sources
     in the library.  If everything goes well you should
@@ -106,20 +106,20 @@ UNIX Step 2.
     VMS users skip to 'VMS step 2'
 
     Check the top level Makefile for any site-specific definitions
-    you require or desire. Then, you should be ready to compile!
+    you require or desire.  Then, you should be ready to compile!
 
-    If you type "make" with no arguments you will see a list of 
+    If you type "make" with no arguments you will see a list of
     supported systems.  If your system type IS listed you just
     need to type "make SYSTEM_TYPE".  For instance, if you are
     running under IBM's RS/6000 AIX 3.2 you would just type
     "make aix32".  If you were running Ultrix you would type
     "make ultrix".
 
-    If you are on a SUN workstation and do not have 'gcc' you 
+    If you are on a SUN workstation and do not have 'gcc' you
     may change 'gcc' to '/usr/5bin/cc' in the Makefile
 
     If you are on a system that is not listed in the makefile it may be
-    more difficult. The first thing you should try is just "make generic",
+    more difficult.  The first thing you should try is just "make generic",
     this will compile with the "fancy_curses" option, and will give a much
     nicer screen display.  If it doesn't compile or if the screen display
     looks strange (real strange), try compiling with the "low_curses" option.
@@ -128,7 +128,7 @@ UNIX Step 2.
     systems, but we don't know what they might be at this point.  If you
     are running on a currently unsupported system please contact us via
     the lynx-dev email list (see RELEASE_STATEMENT).  If there are any
-    problems we will try to fix them as soon as possible.  
+    problems we will try to fix them as soon as possible.
 
 VMS step 2.
     Lynx uses the VMS port of gzip for uncompressing streams which have
@@ -219,7 +219,7 @@ UNIX Step 3.
 	    uses the -cfg switch and specifies the startfile, rather than
 	    relying on the LYNX_CFG, LYNX_CFG_FILE, or WWW_HOME variables.
 
-VMS Step 3. 
+VMS Step 3.
     Go ahead and test it out with the [.about_lynx]about_lynx.html file.
     You shouldn't need to install Lynx to test it.
     Once you are satisfied that it works, go ahead and install it.
@@ -239,12 +239,12 @@ VMS Step 3.
 
 
 UNIX Step 4. (Installation)
-    Lynx is very easy to install, if you want Lynx installed anywhere 
-    besides "/usr/local/bin", with the man files in "/usr/man/man1", you 
+    Lynx is very easy to install, if you want Lynx installed anywhere
+    besides "/usr/local/bin", with the man files in "/usr/man/man1", you
     need to edit the Makefile and change the "exec" and "doc" defines.
     Otherwise just "su" to root and type "make install" and make will
-    copy "lynx", "lynx.cfg" and  "lynx.1" to the specified directories.  
-    Those are the only two files necessary to run Lynx.  
+    copy "lynx", "lynx.cfg" and  "lynx.1" to the specified directories.
+    Those are the only two files necessary to run Lynx.
     lynx.1 isn't really necessary, but it should be available.
     lynx.cfg isn't absolutely necessary either but is the only way
     to configure printers and downloaders (and uploaders if DIRED_SUPPORT
@@ -265,13 +265,13 @@ VMS Step 4.
 
 UNIX and VMS Step 5.
     Lynx uses some environment variables to regulate it's behavior.
-    
+
     The variable "NNTPSERVER" is used to specify the host which will
     be used as the default for news URLs.
-    
+
 	UNIX
 		setenv NNTPSERVER "news.server.dom"
-	
+
 	VMS
 		define/system NNTPSERVER "news.server.dom"
 
@@ -312,7 +312,7 @@ UNIX and VMS Step 5.
     act as firewall gateways and caching servers.  They are preferable to
     the older gateway servers.  Each protocol used by Lynx can be mapped
     separately using PROTOCOL_proxy environment variables of the form:
-    
+
         UNIX
                 setenv http_proxy "http://some.server.dom:port/"
                 setenv https_proxy "http://some.server.dom:port/"
@@ -328,7 +328,7 @@ UNIX and VMS Step 5.
                 setenv wais_proxy "http://some.server.dom:port/"
                 setenv finger_proxy "http://some.server.dom:port/"
                 setenv cso_proxy "http://some.server.dom:port/"
-                
+
         VMS
                 define "http_proxy" "http://some.server.dom:port/"
                 define "https_proxy" "http://some.server.dom:port/"
@@ -350,12 +350,12 @@ UNIX and VMS Step 5.
 		 proxying for all clients on your system.)
 
     If you wish to override the use of a proxy server for specific hosts or
-    entire domains you may use the "no_proxy" environment variable. Here is
+    entire domains you may use the "no_proxy" environment variable.  Here is
     an example use of "no_proxy":
-          
+
         UNIX
                 setenv no_proxy "host.domain.dom, domain1.dom, domain2"
-                
+
         VMS
                 define "no_proxy" "host.domain.dom, domain1.dom, domain2"
 
@@ -388,12 +388,12 @@ UNIX and VMS Step 5.
     subdirectory tree and should be made accessible in response to
     the Lynx 'h'elp command by defining HELPFILE in userdefs.h and/or
     lynx.cfg to an appropriate file://localhost/path URL.
-    
+
 
 UNIX & VMS Step 6. (Hopefully Optional)
     If something doesn't work, or you can't get it to compile at all, or
     you can't figure out what one of the defines means, or if you just
     want to make a comment, send an email message to the Lynx-Dev mailing
     list (see the README file about subscribing to Lynx-Dev).  Until Lynx
-    has been ported to all the world's operating systems, we expect there 
+    has been ported to all the world's operating systems, we expect there
     will be some compatibility problems, but we'll do our best to help you.

@@ -666,7 +666,7 @@
  * as the preferred language.  If available, the document will be
  * transmitted in that language.  This definition can be overridden via
  * lynx.cfg.  Users also can change it via the 'o'ptions menu and save
- * that preference in their RC file. This may be a comma-separated list
+ * that preference in their RC file.  This may be a comma-separated list
  * of languages in decreasing preference.
  */
 #define PREFERRED_LANGUAGE "en"
@@ -681,7 +681,7 @@
  * values are always assumed by default.
  * If a file in that character set is available, the server will send it.
  * If no Accept-Charset header is present, the default is that any
- * character set is acceptable. If an Accept-Charset header is present,
+ * character set is acceptable.  If an Accept-Charset header is present,
  * and if the server cannot send a response which is acceptable
  * according to the Accept-Charset header, then the server SHOULD send
  * an error response with the 406 (not acceptable) status code, though
@@ -881,10 +881,11 @@
 #define SHOW_CURSOR FALSE
 
 /******************************
-* VERBOSE_IMAGES controls whether or not Lynx replaces the [LINK], [INLINE] and
-* [IMAGE] comments (for images without ALT) with filenames of these images.
-* This is extremely useful because now we can determine immediately what images
-* are just decorations (button.gif, line.gif) and what images are important.
+* VERBOSE_IMAGES controls whether or not Lynx replaces the [LINK], [INLINE]
+* and [IMAGE] comments (for images without ALT) with filenames of these
+* images.  This is extremely useful because now we can determine immediately
+* what images are just decorations (button.gif, line.gif) and what images are
+* important.
 *
 * The default defined here can be changed in lynx.cfg.
 */
@@ -980,17 +981,17 @@
 /**********
  * UNIX:
  * =====
- * CGI script support. Defining LYNXCGI_LINKS allows you to use the
+ * CGI script support.  Defining LYNXCGI_LINKS allows you to use the
  *
  *   lynxcgi:path
  *
  * URL which allows lynx to access a cgi script directly without the need for
- * a http daemon. Redirection or mime support is not supported but just about
- * everything else is. If the path is not an executable file then the URL is
- * rewritten as file://localhost and passed to the file loader. This means that
- * if your http:html files are currently set up to use relative addressing, you
- * should be able to fire up your main page with lynxcgi:path and everything
- * should work as if you were talking to the http daemon.
+ * a http daemon.  Redirection or mime support is not supported but just about
+ * everything else is.  If the path is not an executable file then the URL is
+ * rewritten as file://localhost and passed to the file loader.  This means
+ * that if your http:html files are currently set up to use relative
+ * addressing, you should be able to fire up your main page with lynxcgi:path
+ * and everything should work as if you were talking to the http daemon.
  *
  * Note that TRUSTED_LYNXCGI directives must be defined in your lynx.cfg file
  * if you wish to place restrictions on source documents and/or paths for
@@ -1213,15 +1214,15 @@
 
 #define LYNX_NAME "Lynx"
 /* The strange-looking comments on the next line tell PRCS to replace
- * the version definition with the Project Version on checkout. Just
+ * the version definition with the Project Version on checkout.  Just
  * ignore it. - kw */
 /* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
-#define LYNX_VERSION "2.8.2dev.8"
+#define LYNX_VERSION "2.8.2dev.9"
 #define LYNX_WWW_HOME "http://lynx.browser.org/"
 #define LYNX_WWW_DIST "http://www.slcc.edu/lynx/current/"
 #define LYNX_RELEASE FALSE
 /* $Format: "#define LYNX_DATE \"$ProjectDate$\""$ */
-#define LYNX_DATE "Thu, 03 Dec 1998 11:28:20 -0700"
+#define LYNX_DATE "Sat, 12 Dec 1998 21:10:36 -0700"
 #define LYNX_DATE_OFF 5		/* truncate the automatically-generated date */
 #define LYNX_DATE_LEN 11	/* truncate the automatically-generated date */
 #define LYNX_RELEASE_DATE "1998"
@@ -1260,7 +1261,8 @@
 **  Use the VMS port of gzip for uncompressing both .Z and .gz files.
 */
 #define UNCOMPRESS_PATH  "gzip -d"
-#define GZIP_PATH "gzip"
+#define GZIP_PATH       "gzip"
+#define BZIP2_PATH      "bzip2"
 
 #else
 
@@ -1270,7 +1272,7 @@
 #define SYSTEM_MAIL_FLAGS "-t -oi"
 /*
 **  Following executables may be sought from your PATH at run-time.
-**  To get those programs look for GNU-port stuff elsewhere. Currently,
+**  To get those programs look for GNU-port stuff elsewhere.  Currently,
 **  if compiled with -DUSE_ZLIB and without -DDIRED_SUPPORT (default),
 **  you need only "cp.exe" from the list below.
 **
@@ -1282,6 +1284,7 @@
 #define UUDECODE_PATH   "uudecode"
 #define ZCAT_PATH       "zcat"
 #define GZIP_PATH       "gzip"
+#define BZIP2_PATH      "bzip2"
 #define INSTALL_PATH    "install"
 #define TAR_PATH        "tar"
 #define TOUCH_PATH      "touch"

@@ -6,7 +6,7 @@
 **
 **	A StyleSheet is a collection of styles, defining the
 **	translation necessary to
-**	represent a document. It is a linked list of styles.
+**	represent a document.  It is a linked list of styles.
 */
 
 #include <HTUtils.h>
@@ -141,7 +141,7 @@ HTStyle * HTStyleDump (HTStyle * style)
 {
     int tab;
     NXTextStyle *p = style->paragraph;
-    printf(gettext("Style %d `%s' SGML:%s. Font %s %.1f point.\n"),
+    printf(gettext("Style %d `%s' SGML:%s.  Font %s %.1f point.\n"),
 	style,
 	style->name,
 	style->SGMLTag,
@@ -201,7 +201,7 @@ HTStyle * HTStyleMatching (HTStyleSheet * self, HTStyle *style)
 **	------------------------------------------
 **
 **	This heuristic is used for guessing the style for a run of
-**	text which has been pasted in. In order, we try:
+**	text which has been pasted in.  In order, we try:
 **
 **	A style whose paragraph structure is actually used by the run.
 **	A style matching in font

@@ -37,7 +37,7 @@
 	actively removing cookies and/or domains based on age or frequency
 	of use.
       * If a cookie has the secure flag set, we presently treat only SSL
-	connections as secure.	This may need to be expanded for other
+	connections as secure.  This may need to be expanded for other
 	secure communication protocols that become standardized.
 */
 
@@ -180,19 +180,6 @@ PRIVATE void LYCookieJar_free NOARGS
 	}
 	dl = dl->next;
     }
-    if (dump_output_immediately) {
-	cl = cookie_list;
-	while (cl) {
-	    next = cl->next;
-	    co = cl->object;
-	    if (co) {
-		HTList_removeObject(cookie_list, co);
-		freeCookie(co);
-	    }
-	    cl = next;
-	}
-	HTList_delete(cookie_list);
-    }
     cookie_list = NULL;
     HTList_delete(domain_list);
     domain_list = NULL;
@@ -209,7 +196,7 @@ PRIVATE BOOLEAN host_matches ARGS2(
 {
     /*
      *	The following line will handle both numeric IP addresses and
-     *	FQDNs.	Do numeric addresses require special handling?
+     *	FQDNs.  Do numeric addresses require special handling?
      */
     if (*B != '.' && !strcmp(A, B))
 	return YES;
@@ -382,46 +369,41 @@ PRIVATE void store_cookie ARGS3(
      *	Look through domain_list to see if the cookie's domain
      *	is already listed.
      */
-    if (dump_output_immediately) { /* Non-interactive, can't respond */
-	if (cookie_list == NULL)
-	    cookie_list = HTList_new();
-    } else {
-	cookie_list = NULL;
-	for (hl = domain_list; hl != NULL; hl = hl->next) {
-	    de = (domain_entry *)hl->object;
-	    if ((de != NULL && de->domain != NULL) &&
-		!strcmp(co->domain, de->domain)) {
-		cookie_list = de->cookie_list;
-		break;
-	    }
+    cookie_list = NULL;
+    for (hl = domain_list; hl != NULL; hl = hl->next) {
+	de = (domain_entry *)hl->object;
+	if ((de != NULL && de->domain != NULL) &&
+	    !strcmp(co->domain, de->domain)) {
+	    cookie_list = de->cookie_list;
+	    break;
 	}
-	if (hl == NULL) {
-	    /*
-	     *	Domain not found; add a new entry for this domain.
-	     */
-	    de = (domain_entry *)calloc(1, sizeof(domain_entry));
-	    if (de == NULL)
-		outofmem(__FILE__, "store_cookie");
+    }
+    if (hl == NULL) {
+	/*
+	 *	Domain not found; add a new entry for this domain.
+	 */
+	de = (domain_entry *)calloc(1, sizeof(domain_entry));
+	if (de == NULL)
+	    outofmem(__FILE__, "store_cookie");
 #ifdef EXP_PERSISTENT_COOKIES
-	    /*
-	     * Ok, this is a problem.  The first cookie for a domain
-	     * effectively sets the policy for that whole domain - for
-	     * something like Netlink, where there are lots of websites
-	     * under www.netlink.co.uk, this isn't sensible.  However,
-	     * taking this sort of decision down to cookie level also
-	     * isn't sensible.	Perhaps something based on the domain
-	     * and the path in conjunction makes more sense?  - RP
-	     */
-	    if (persistent_cookies
-	     && (co->flags & COOKIE_FLAG_PERSISTENT))
-		de->bv = FROM_FILE;
-	    else
+	/*
+	 * Ok, this is a problem.  The first cookie for a domain
+	 * effectively sets the policy for that whole domain - for
+	 * something like Netlink, where there are lots of websites
+	 * under www.netlink.co.uk, this isn't sensible.  However,
+	 * taking this sort of decision down to cookie level also
+	 * isn't sensible.  Perhaps something based on the domain
+	 * and the path in conjunction makes more sense?  - RP
+	 */
+	if (persistent_cookies
+	 && (co->flags & COOKIE_FLAG_PERSISTENT))
+	    de->bv = FROM_FILE;
+	else
 #endif
-		de->bv = QUERY_USER;
-	    cookie_list = de->cookie_list = HTList_new();
-	    StrAllocCopy(de->domain, co->domain);
-	    HTList_addObject(domain_list, de);
-	}
+	    de->bv = QUERY_USER;
+	cookie_list = de->cookie_list = HTList_new();
+	StrAllocCopy(de->domain, co->domain);
+	HTList_addObject(domain_list, de);
     }
 
     /*
@@ -513,7 +495,7 @@ PRIVATE void store_cookie ARGS3(
 	 * If the cookie domain came from persistent cookie file,
 	 * we want to add new cookies to the end of the cookie list
 	 * to maintain their order for servers that need cookies in
-	 * a particular order. This is a hack.
+	 * a particular order.  This is a hack.
 	 */
 	if (persistent_cookies) {
 	    if ((de->bv = FROM_FILE) != 0) {
@@ -634,7 +616,7 @@ PRIVATE char * scan_cookie_sublist ARGS6(
 		 *
 		 *  HTTP/1.0 headers may be folded onto multiple lines
 		 *  if each continuation line begins with a space or
-		 *  horizontal tab. All linear whitespace, including
+		 *  horizontal tab.  All linear whitespace, including
 		 *  folding, has the same semantics as SP.
 		 *  [...]
 		 *  However, folding of header lines is not expected by
@@ -1154,8 +1136,8 @@ PRIVATE void LYProcessSetCookies ARGS6(
 	    /* if (!known_attr && value_end > value_start) */
 
 	    /* Is there any reason we don't want to accept cookies with
-	     * no value? This seems to be needed for sites that reset a
-	     * cookie by nulling out the value. If this causes problems,
+	     * no value?  This seems to be needed for sites that reset a
+	     * cookie by nulling out the value.  If this causes problems,
 	     * we can go back to the original behavior above.  - BJP
 	     */
 	    if (!known_attr) {
@@ -1625,8 +1607,8 @@ PRIVATE void LYProcessSetCookies ARGS6(
 	    /* if (!known_attr && value_end > value_start) */
 
 	    /* Is there any reason we don't want to accept cookies with
-	     * no value? This seems to be needed for sites that reset a
-	     * cookie by nulling out the value. If this causes problems,
+	     * no value?  This seems to be needed for sites that reset a
+	     * cookie by nulling out the value.  If this causes problems,
 	     * we can go back to the original behavior above.  - BJP
 	     */
 	    if (!known_attr) {
@@ -1907,6 +1889,8 @@ PUBLIC void LYLoadCookies ARGS1 (
     if (!cookie_handle)
 	return;
 
+    CTRACE(tfp, "LYLoadCookies: reading cookies from %s\n", cookie_file);
+
     while (!feof(cookie_handle)) {
 	cookie *moo;
 	unsigned i = 0;
@@ -1919,7 +1903,6 @@ PUBLIC void LYLoadCookies ARGS1 (
 	if((j == NULL) || (buf[0] == '\0' || buf[0] == '\n' || buf[0] == '#')) {
 	    continue;
 	}
-
 
 	/*
 	 * Strip out the newline that fgets() puts at the end of a
@@ -1941,11 +1924,12 @@ PUBLIC void LYLoadCookies ARGS1 (
 	 * 'fixed' by using strsep instead of strtok.  No idea
 	 * what kind of platform problems this might introduce. - RP
 	 */
+	CTRACE(tfp, "LYLoadCookies: tokenising %s\n", buf);
 	tok_ptr = buf;
 	tok_out = LYstrsep(&tok_ptr, "\t");
 	for (tok_loop = 0; tok_out && tok_values[tok_loop].s; tok_loop++) {
-	CTRACE(tfp, ">%d:%p:%p:[%s]:%s\n",
-	    tok_loop, tok_values[tok_loop].s, tok_out, tok_out, buf);
+	    CTRACE(tfp, "\t%d:%p:%p:[%s]\n",
+	        tok_loop, tok_values[tok_loop].s, tok_out, tok_out);
 	    LYstrncpy(tok_values[tok_loop].s, tok_out, tok_values[tok_loop].n);
 	    /*
 	     * It looks like strtok ignores a leading delimiter,
@@ -1956,7 +1940,6 @@ PUBLIC void LYLoadCookies ARGS1 (
 	    tok_out = LYstrsep(&tok_ptr, "\t");
 	}
 	expires = atol(expires_a);
-	CTRACE(tfp, "COOKIE: expires %s\n", ctime(&expires));
 
 	/*
 	 * This fails when the path is blank
@@ -1965,8 +1948,9 @@ PUBLIC void LYLoadCookies ARGS1 (
 	 *  domain, what, path, secure, &expires, name, value);
 	 */
 
-	CTRACE(tfp, "%s\t%s\t%s\t%s\t%ld\t%s\t%s\tREADCOOKIE\n",
-	    domain, what, path, secure, (long) expires, name, value);
+	CTRACE(tfp, "expires:\t%s\n", ctime(&expires));
+/* 	CTRACE(tfp, "%s\t%s\t%s\t%s\t%ld\t%s\t%s\tREADCOOKIE\n", */
+/* 	    domain, what, path, secure, (long) expires, name, value); */
 	moo = newCookie();
 	StrAllocCopy(moo->domain, domain);
 	StrAllocCopy(moo->path, path);
@@ -1997,9 +1981,6 @@ PUBLIC void LYStoreCookies ARGS1 (
     domain_entry *de;
     cookie *co;
     FILE *cookie_handle;
-#ifdef VMS
-    extern BOOLEAN HadVMSInterrupt;
-#endif /* VMS */
     time_t now = time(NULL); /* system specific? - RP */
 
     /*
@@ -2047,7 +2028,7 @@ PUBLIC void LYStoreCookies ARGS1 (
 	    if ((co = (cookie *)cl->object) == NULL)
 		continue;
 
-	    CTRACE(tfp, "COOKIE: %ld cf %ld\n", (long) now, (long) co->expires);
+	    CTRACE(tfp, "LYStoreCookies: %ld cf %ld\n", (long) now, (long) co->expires);
 	    fprintf(cookie_handle, "%s\t%s\t%s\t%s\t%ld\t%s\t%s\n",
 		de->domain,
 		"FALSE", co->path,
@@ -2096,9 +2077,6 @@ PRIVATE int LYHandleCookies ARGS4 (
     char *name = NULL, *value = NULL, *path = NULL;
     char *comment = NULL, *Address = NULL, *Title = NULL;
     int ch;
-#ifdef VMS
-    extern BOOLEAN HadVMSInterrupt;
-#endif /* VMS */
 
     /*
      *	Check whether we have something to do. - FM
@@ -2529,7 +2507,7 @@ PUBLIC void cookie_add_acceptlist ARGS1(
 {
     domain_entry *de = NULL;
     domain_entry *de2 = NULL;
-    HTList *hl;
+    HTList *hl = NULL;
     char **str = (char **)calloc(1, sizeof(acceptstr));
     char *astr = NULL;
     char *strsmall = NULL;
@@ -2550,9 +2528,7 @@ PUBLIC void cookie_add_acceptlist ARGS1(
 
     *str = astr;
 
-    for(; (strsmall = LYstrsep(str, ","));) {
-	if(strsmall == NULL)
-	    break;
+    while ((strsmall = LYstrsep(str, ",")) != 0) {
 
 	/*
 	 * Check the list of existing cookies to see if this is a
@@ -2607,7 +2583,7 @@ PUBLIC void cookie_add_rejectlist ARGS1(
 {
     domain_entry *de = NULL;
     domain_entry *de2 = NULL;
-    HTList *hl;
+    HTList *hl = NULL;
     char **str = (char **)calloc(1, sizeof(rejectstr));
     char *rstr = NULL;
     char *strsmall = NULL;
@@ -2628,9 +2604,7 @@ PUBLIC void cookie_add_rejectlist ARGS1(
 
     *str = rstr;
 
-    for(; (strsmall = LYstrsep(str, ","));) {
-	if(strsmall == NULL)
-	    break;
+    while ((strsmall = LYstrsep(str, ",")) != 0) {
 
 	/*
 	 * Check the list of existing cookies to see if this is a

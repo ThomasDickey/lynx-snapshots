@@ -3,11 +3,11 @@
 **
 *
 *	Whole entities[] thing (and much more) now present
-*	in this kind of structure. The structured streams to which
+*	in this kind of structure.  The structured streams to which
 *	the SGML modules sends its output could then easily have access
 *	to both entity names and unicode values for each (special)
 *	character.  Probably the whole translation to display characters
-*	should be done at that later stage (e.g. in HTML.c).
+*	should be done at that later stage (e.g., in HTML.c).
 *	What's missing is a way for the later stage to return info
 *	to SGML whether the entity could be displayed or not.
 *	(like between SGML_character() and handle_entity() via FoundEntity.)

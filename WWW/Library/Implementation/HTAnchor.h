@@ -12,7 +12,7 @@
 #define HTANCHOR_H
 
 /* Version 0 (TBL) written in Objective-C for the NeXT browser */
-/* Version 1 of 24-Oct-1991 (JFG), written in C, browser-independant */
+/* Version 1 of 24-Oct-1991 (JFG), written in C, browser-independent */
 
 #include <HTList.h>
 #include <HTAtom.h>
@@ -70,7 +70,7 @@ struct _HTAnchor {		/* Generic anchor : just links */
   HTLink	mainLink;	/* Main (or default) destination of this */
   HTList *	links;		/* List of extra links from this, if any */
   /* We separate the first link from the others to avoid too many small mallocs
-     involved by a list creation. Most anchors only point to one place. */
+     involved by a list creation.  Most anchors only point to one place. */
   HTParentAnchor * parent;	/* Parent of this anchor (self for adults) */
 };
 
@@ -87,7 +87,7 @@ struct _HTParentAnchor {
   char *	address;	/* Absolute address of this node */
   char *	post_data;	/* Posting data */
   char *	post_content_type;  /* Type of post data */
-  char *	bookmark;	/* Bookmark filname */
+  char *	bookmark;	/* Bookmark filename */
   HTFormat	format; 	/* Pointer to node format descriptor */
   char *	charset;	/* Pointer to character set (kludge, for now */
   BOOL		isIndex;	/* Acceptance of a keyword search */
@@ -115,7 +115,7 @@ struct _HTParentAnchor {
   char *	content_language;	/* Content-Language */
   char *	content_encoding;	/* Compression algorithm */
   char *	content_base;		/* Content-Base */
-  char *	content_disposition;	/* Content-Dispositon */
+  char *	content_disposition;	/* Content-Disposition */
   char *	content_location;	/* Content-Location */
   char *	content_md5;		/* Content-MD5 */
   int		content_length; 	/* Content-Length */
@@ -160,7 +160,7 @@ typedef struct _DocAddress {
 **	---------------------------------
 **
 **	This one is for a new anchor being edited into an existing
-**	document. The parent anchor must already exist.
+**	document.  The parent anchor must already exist.
 */
 extern HTChildAnchor * HTAnchor_findChild PARAMS((
 	HTParentAnchor *	parent,

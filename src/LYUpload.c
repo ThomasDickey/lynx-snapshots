@@ -6,7 +6,7 @@
 **	Reread the upload menu page every time, in case the "upload" directory
 **	  has changed (make the current directory that for the upload process).
 **	Prompt for the upload file name if there is no "%s" in the command
-**	  string. Most protocols allow the user to specify the file name
+**	  string.  Most protocols allow the user to specify the file name
 **	  from the client side.  Xmodem appears to be the only that can't
 **	  figure out the filename from the transfer data so it needs the
 **	  information from lynx (or an upload script which prompts for it).
@@ -33,6 +33,8 @@
 
 PUBLIC char LYUploadFileURL[LY_MAXPATH] = "\0";
 
+#define SUBDIR_COMMAND "cd %s ; "
+
 /*
  *  LYUpload uploads a file to a given location using a
  *  specified upload method.  It parses an incoming link
@@ -42,19 +44,15 @@ PUBLIC char LYUploadFileURL[LY_MAXPATH] = "\0";
 PUBLIC int LYUpload ARGS1(
 	char *, 	line)
 {
-    char *method, *directory, *dir;
+    char *method, *directory;
     int method_number;
     int count;
+    char *the_upload = 0;
     char tmpbuf[LY_MAXPATH];
     char buffer[LY_MAXPATH];
     lynx_html_item_type *upload_command = 0;
-    int c;
-    char *cp;
     FILE *fp;
-    char cmd[20 + (LY_MAXPATH*2)];
-#ifdef VMS
-    extern BOOLEAN HadVMSInterrupt;
-#endif /* VMS */
+    char *the_command = 0;
 
     /*
      *	Use configured upload commands.
@@ -88,7 +86,7 @@ PUBLIC int LYUpload ARGS1(
     /*
      *	Care about the local name?
      */
-    if (strstr(upload_command->command, "%s")) {
+    if (HTCountCommandArgs (upload_command->command)) {
 	/*
 	 *  Commands have the form "command %s [etc]"
 	 *  where %s is the filename.
@@ -114,43 +112,20 @@ retry:
 	}
 	sprintf(buffer, "%s/%s", directory, tmpbuf);
 
-	if (no_dotfiles || !show_dotfiles) {
-	    if (*LYPathLeaf(buffer) == '.') {
-		HTAlert(FILENAME_CANNOT_BE_DOT);
-		_statusline(NEW_FILENAME_PROMPT);
-		goto retry;
-	    }
+#if HAVE_POPEN
+	if (LYIsPipeCommand(buffer)) {
+	    HTAlert(CANNOT_WRITE_TO_FILE);
+	    _statusline(NEW_FILENAME_PROMPT);
+	    goto retry;
 	}
-
-	/*
-	 *  See if it already exists.
-	 */
-	if ((fp = fopen(buffer, "r")) != NULL) {
-	    fclose(fp);
-
-#ifdef VMS
-	    _statusline(FILE_EXISTS_HPROMPT);
-#else
-	    _statusline(FILE_EXISTS_OPROMPT);
-#endif /* VMS */
-	    c = 0;
-	    while (TOUPPER(c) != 'Y' && TOUPPER(c) != 'N' && c != 7 && c != 3)
-		c = LYgetch();
-#ifdef VMS
-	    if (HadVMSInterrupt) {
-		HadVMSInterrupt = FALSE;
-		goto cancelled;
-	    }
-#endif /* VMS */
-
-	    if (c == 7 || c == 3) { /* Control-G or Control-C */
-		goto cancelled;
-	    }
-
-	    if (TOUPPER(c) == 'N') {
-		_statusline(NEW_FILENAME_PROMPT);
-		goto retry;
-	    }
+#endif
+	switch (LYValidateOutput(buffer)) {
+	case 'Y':
+	    break;
+	case 'N':
+	    goto retry;
+	default:
+	    goto cancelled;
 	}
 
 	/*
@@ -167,24 +142,24 @@ retry:
 	    goto retry;
 	}
 
-#if defined (VMS) || defined (__EMX__) || defined(__DJGPP__)
-	sprintf(tmpbuf, upload_command->command, buffer, "", "", "", "", "");
-#else
-	cp = quote_pathname(buffer); /* to prevent spoofing of the shell */
-	sprintf(tmpbuf, upload_command->command, cp, "", "", "", "", "");
-	FREE(cp);
-#endif /* VMS */
+	HTAddParam(&the_upload, upload_command->command, 1, buffer);
+	HTEndParam(&the_upload, upload_command->command, 1);
     } else {			/* No substitution, no changes */
-	strcpy(tmpbuf, upload_command->command);
+	StrAllocCopy(the_upload, upload_command->command);
     }
 
-    dir = quote_pathname(directory);
-    sprintf(cmd, "cd %s ; %s", dir, tmpbuf);
-    FREE(dir);
+    HTAddParam(&the_command, SUBDIR_COMMAND, 1, directory);
+    HTEndParam(&the_command, SUBDIR_COMMAND, 1);
+    StrAllocCat(the_command, the_upload);
+
+    CTRACE(tfp, "command: %s\n", the_command);
+
     stop_curses();
-    CTRACE(tfp, "command: %s\n", cmd);
-    LYSystem(cmd);
+    LYSystem(the_command);
     start_curses();
+
+    FREE(the_command);
+    FREE(the_upload);
 #ifdef UNIX
     chmod(buffer, HIDE_CHMOD);
 #endif /* UNIX */

@@ -280,7 +280,7 @@ PRIVATE char * WWW_from_WAIS ARGS1(
 	 (p < docid->bytes+docid->size) && (q < &buf[BIG]);) {
 	CTRACE(tfp, "    Record type %d, length %d\n", p[0], p[1]);
 	if (*p > 10) {
-	    CTRACE(tfp, "Eh? DOCID record type of %d!\n", *p);
+	    CTRACE(tfp, "Eh?  DOCID record type of %d!\n", *p);
 	    return 0;
 	}
 	{	/* Bug fix -- allow any byte value 15 Apr 93 */
@@ -433,7 +433,7 @@ PRIVATE void output_text_record ARGS4(
 
   for (count = 0; count < record->DocumentText->size; count++){
     long ch = (unsigned char)record->DocumentText->bytes[count];
-    if (ch == 27) {	/* What is this in for? Tim */
+    if (ch == 27) {	/* What is this in for?  Tim */
 	    /* then we have an escape code */
 	    /* if the next letter is '(' or ')', then ignore two letters */
 	    if ('(' == record->DocumentText->bytes[count + 1] ||
@@ -747,7 +747,7 @@ PUBLIC int HTLoadWAIS ARGS4(
 
     /*
     **	If keyword search is performed but there are no keywords,
-    **	the user has followed a link to the index itself. It would be
+    **	the user has followed a link to the index itself.  It would be
     **	appropriate at this point to send him the .SRC file - how?
     */
     if (key && !*key) { 			/* I N D E X */

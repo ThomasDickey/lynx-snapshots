@@ -116,7 +116,7 @@ PUBLIC BOOL HTRegisterProtocol ARGS1(
 **	-----------------------------
 **
 **	Add to or subtract from this list if you add or remove protocol
-**	modules. This routine is called the first time the protocol list
+**	modules.  This routine is called the first time the protocol list
 **	is needed, unless any protocols are already registered, in which
 **	case it is not called.	Therefore the application can override
 **	this list.
@@ -774,7 +774,7 @@ PRIVATE BOOL HTLoadDocument ARGS4(
 	*    doesn't guarantee that the resource from which the MAP element
 	*    is taken will be read again (reloaded) when the list of links
 	*    for a client-side image map is regenerated, when in some cases
-	*    it should (e.g. user requested RELOAD, or HTTP response with
+	*    it should (e.g., user requested RELOAD, or HTTP response with
 	*    no-cache header and we are not overriding).
 	*
 	*    If DONT_TRACK_INTERNAL_LINKS is undefined, a target address that
@@ -965,7 +965,7 @@ PRIVATE BOOL HTLoadDocument ARGS4(
 	fprintf(stderr,
  gettext("**** HTAccess: socket or file number returned by obsolete load routine!\n"));
 	fprintf(stderr,
- gettext("**** HTAccess: Internal software error. Please mail lynx_dev@sig.net!\n"));
+ gettext("**** HTAccess: Internal software error.  Please mail lynx_dev@sig.net!\n"));
 	fprintf(stderr, gettext("**** HTAccess: Status returned was: %d\n"),status);
 	exit(-1);
     }
@@ -1317,7 +1317,7 @@ PUBLIC HTParentAnchor * HTHomeAnchor NOARGS
 		  "file:",
 		  PARSE_ACCESS|PARSE_HOST|PARSE_PATH|PARSE_PUNCTUATION);
     if (my_home_document) {
-	CTRACE(tfp, "HTAccess: Using custom home page %s i.e. address %s\n",
+	CTRACE(tfp, "HTAccess: Using custom home page %s i.e., address %s\n",
 		    my_home_document, ref);
 	FREE(my_home_document);
     }

@@ -131,7 +131,7 @@ PUBLIC int fancy_mouse ARGS3(
 	    cmd = LYX_TOGGLE;
 #endif
 	} else if (event.bstate & (BUTTON_ALT | BUTTON_SHIFT | BUTTON_CTRL)) {
-	    /* Probably some unrelated activity, such as selecting some text. 
+	    /* Probably some unrelated activity, such as selecting some text.
 	     * Select, but do nothing else.
 	     */
 	    *position += delta;
@@ -1785,7 +1785,7 @@ PUBLIC void LYRefreshEdit ARGS1(
  *  Figure out new display starting point.
  *
  *   The first "if" below makes Lynx scroll several columns at a time when
- *   extending the string. Looks awful, but that way we can keep up with
+ *   extending the string.  Looks awful, but that way we can keep up with
  *   data entry at low baudrates.
  */
     if ((DspStart + DspWdth) <= length)

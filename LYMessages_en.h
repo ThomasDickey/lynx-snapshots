@@ -124,7 +124,7 @@
 #define SOURCE_HELP \
  gettext("Currently viewing document source.  Press '\\' to return to rendered version.")
 #define NOVICE_LINE_ONE \
- gettext("  Arrow keys: Up and Down to move. Right to follow a link; Left to go back.  \n")
+ gettext("  Arrow keys: Up and Down to move.  Right to follow a link; Left to go back.  \n")
 #define NOVICE_LINE_TWO \
  gettext(" H)elp O)ptions P)rint G)o M)ain screen Q)uit /=search [delete]=history list \n")
 #define NOVICE_LINE_TWO_A \
@@ -140,7 +140,7 @@
 
 /* mailto */
 #define BAD_FORM_MAILTO gettext("Malformed mailto form submission!  Cancelled!")
-#define MAILTO_SQUASH_CTL gettext("Warning! Control codes in mail address replaced by ?")
+#define MAILTO_SQUASH_CTL gettext("Warning!  Control codes in mail address replaced by ?")
 #define FORM_MAILTO_DISALLOWED gettext("Mail disallowed!  Cannot submit.")
 #define FORM_MAILTO_FAILED gettext("Mailto form submission failed!")
 #define FORM_MAILTO_CANCELLED gettext("Mailto form submission Cancelled!!!")
@@ -299,7 +299,7 @@
 #define PREV_DOC_QUERY gettext("Do you want to go back to the previous document? [N]")
 #define ARROWS_OR_TAB_TO_MOVE gettext("Use arrows or tab to move off of field.")
 #define ENTER_TEXT_ARROWS_OR_TAB \
- gettext("Enter text. Use arrows or tab to move off of field.")
+ gettext("Enter text.  Use arrows or tab to move off of field.")
 #define NO_FORM_ACTION gettext("** Bad HTML!!  No form action defined. **")
 #define BAD_HTML_NO_POPUP gettext("Bad HTML!!  Unable to create popup window!")
 #define POPUP_FAILED gettext("Unable to create popup window!")
@@ -395,7 +395,7 @@
 #define CANNOT_OPEN_OUTPUT gettext("Can't open output file!  Cancelling!")
 #define EXECUTION_DISABLED gettext("Execution is disabled.")
 #define EXECUTION_DISABLED_FOR_FILE \
- gettext("Execution is not enabled for this file. See the Options menu (use %s).")
+ gettext("Execution is not enabled for this file.  See the Options menu (use %s).")
 #define EXECUTION_NOT_COMPILED \
  gettext("Execution capabilities are not compiled into this version.")
 #define CANNOT_DISPLAY_FILE gettext("This file cannot be displayed on this terminal.")
@@ -411,9 +411,9 @@
 #define NEW_FILENAME_PROMPT gettext("Enter a new filename: ")
 #define FILENAME_CANNOT_BE_DOT gettext("File name may not begin with a dot.")
 #ifdef VMS
-#define FILE_EXISTS_HPROMPT gettext("File exists. Create higher version? (y/n)")
+#define FILE_EXISTS_HPROMPT gettext("File exists.  Create higher version? (y/n)")
 #else
-#define FILE_EXISTS_OPROMPT gettext("File exists. Overwrite? (y/n)")
+#define FILE_EXISTS_OPROMPT gettext("File exists.  Overwrite? (y/n)")
 #endif /* VMS */
 #define CANNOT_WRITE_TO_FILE gettext("Cannot write to file.")
 #define MISCONF_DOWNLOAD_COMMAND gettext("ERROR! - download command is misconfigured.")
@@ -561,9 +561,9 @@
 #define	PROCEED_GET_CANCEL gettext("P)roceed, use G)ET or C)ancel ")
 #define	PROCEED_OR_CANCEL gettext("P)roceed, or C)ancel ")
 #define	ADVANCED_POST_GET_REDIRECT \
- gettext("Redirection of POST content. P)roceed, see U)RL, use G)ET or C)ancel")
+ gettext("Redirection of POST content.  P)roceed, see U)RL, use G)ET or C)ancel")
 #define	ADVANCED_POST_REDIRECT \
- gettext("Redirection of POST content. P)roceed, see U)RL, or C)ancel")
+ gettext("Redirection of POST content.  P)roceed, see U)RL, or C)ancel")
 #define CONFIRM_POST_RESUBMISSION \
  gettext("Document from Form with POST content.  Resubmit?")
 #define CONFIRM_POST_RESUBMISSION_TO \
@@ -677,7 +677,7 @@
 #define PORT_INVALID gettext("Port %lu not permitted in URLs.")
 #define URL_PORT_BAD gettext("URL has a bad port field.")
 #define HTML_STACK_OVERRUN gettext("Maximum nesting of HTML elements exceeded.")
-#define BAD_PARTIAL_REFERENCE gettext("Bad partial reference! Stripping lead dots.")
+#define BAD_PARTIAL_REFERENCE gettext("Bad partial reference!  Stripping lead dots.")
 #define TRACELOG_OPEN_FAILED gettext("Trace Log open failed.  Trace off!.")
 #define LYNX_TRACELOG_TITLE gettext("Lynx Trace Log")
 #define NO_TRACELOG_STARTED gettext("No trace log has been started for this session.")

@@ -534,7 +534,7 @@ PUBLIC HTAAProt *HTAA_getCurrentProtection NOARGS
 **	returns	a HTAAProt structure representing the
 **		default protection setup of the HTTranslate()'d
 **		file (if HTAA_getCurrentProtection() returned
-**		NULL, i.e. if there is no "protect" rule
+**		NULL, i.e., if there is no "protect" rule
 **		but ACL exists, and we need to know default
 **		protection settings).
 **		This must not be free()'d.

@@ -63,4 +63,20 @@ extern char * HTSprintf () GCC_PRINTFLIKE(2,3);
 extern char * HTSprintf0 () GCC_PRINTFLIKE(2,3);
 #endif
 
+#if defined(VMS) || defined(DOSPATH) || defined(__EMX__)
+#define USE_QUOTED_PARAMETER 0
+#else
+#define USE_QUOTED_PARAMETER 1
+#endif
+
+#if USE_QUOTED_PARAMETER
+extern char *HTQuoteParameter PARAMS((CONST char *parameter));
+#else
+#define HTQuoteParameter(parameter) parameter	/* simplify ifdef'ing */
+#endif
+
+extern int HTCountCommandArgs PARAMS((CONST char * command));
+extern void HTAddParam PARAMS((char ** result, CONST char * command, int number, CONST char * parameter));
+extern void HTEndParam PARAMS((char ** result, CONST char * command, int number));
+
 #endif /* HTSTRING_H */

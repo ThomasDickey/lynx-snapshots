@@ -23,6 +23,7 @@
 #include <LYStrings.h>
 #include <LYUtils.h>
 #include <LYGlobalDefs.h>
+#include <LYClean.h>
 #include <LYSignal.h>
 #include <GridText.h>
 #include <LYexit.h>
@@ -35,7 +36,6 @@ PUBLIC char * WWW_Download_File=NULL; /* contains the name of the temp file
 PUBLIC char LYCancelDownload=FALSE;   /* exported to HTFormat.c in libWWW */
 
 #ifdef VMS
-extern BOOLEAN HadVMSInterrupt;      /* flag from cleanup_sig() 	*/
 PRIVATE char * FIXED_RECORD_COMMAND = NULL;
 #ifdef USE_COMMAND_FILE 	     /* Keep this as an option. - FM	*/
 #define FIXED_RECORD_COMMAND_MASK "@Lynx_Dir:FIXED512 %s"
@@ -156,8 +156,11 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 		 *  and remove any previous uncompressed copy. - FM
 		 */
 		StrAllocCopy(path, me->anchor->FileCache);
-		if ((len = strlen(path)) > 2) {
-		    if (!strcasecomp(&path[len-2], "gz")) {
+		if ((len = strlen(path)) > 3) {
+		    if (!strcasecomp(&path[len-3], "bz2")) {
+			    path[len-4] = '\0';
+			    remove(path);
+		    } else if (!strcasecomp(&path[len-2], "gz")) {
 #ifdef USE_ZLIB
 			if (!skip_loadfile) {
 			    use_gzread = YES;
@@ -283,16 +286,10 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 			 *  created. - kw
 			 */
 			FREE(me->end_command);
-			me->end_command = (char *)calloc (
-			    (strlen (me->viewer_command) + 10 +
-			     strlen(me->anchor->FileCache))
-			    * sizeof (char),1);
-			if (me->end_command == NULL)
-			    outofmem(__FILE__, "HTFWriter_free (HTCompressed)");
 
-			sprintf(me->end_command,
-				me->viewer_command, me->anchor->FileCache,
-				"", "", "", "", "", "");
+			HTAddParam(&(me->end_command), me->viewer_command, 1, me->anchor->FileCache);
+			HTEndParam(&(me->end_command), me->viewer_command, 1);
+
 			if (!dump_output_immediately) {
 			    /*
 			     *	Tell user what's happening. - FM
@@ -441,7 +438,6 @@ PUBLIC HTStream* HTFWriter_new ARGS1(FILE *, fp)
 **
 **	See mailcap spec for description of template.
 */
-/* @@ to be written.  sprintfs will do for now.  */
 
 #ifndef VMS
 #define REMOVE_COMMAND "/bin/rm -f %s"
@@ -488,11 +484,12 @@ PUBLIC HTStream* HTSaveAndExecute ARGS3(
 		 !strncmp(anchor->address,"file://localhost",16))) {
 		/* allow it to continue */
 	    } else {
-		char buf[512];
+		char *buf = 0;
 
-		sprintf(buf, EXECUTION_DISABLED_FOR_FILE,
-			     key_for_func(LYK_OPTIONS));
+		HTSprintf0(&buf, EXECUTION_DISABLED_FOR_FILE,
+			   key_for_func(LYK_OPTIONS));
 		HTAlert(buf);
+		FREE(buf);
 		return HTPlainPresent(pres, anchor, sink);
 	    }
     }
@@ -542,24 +539,16 @@ PUBLIC HTStream* HTSaveAndExecute ARGS3(
     /*
      *	Make command to process file.
      */
-    me->end_command = (char *)calloc (
-			(strlen (pres->command) + 10 + strlen(fnam))
-			 * sizeof (char),1);
-    if (me->end_command == NULL)
-	outofmem(__FILE__, "HTSaveAndExecute");
-
-    sprintf(me->end_command, pres->command, fnam, "", "", "", "", "", "");
+    me->end_command = 0;
+    HTAddParam(&(me->end_command), pres->command, 1, fnam);
+    HTEndParam(&(me->end_command), pres->command, 1);
 
     /*
      *	Make command to delete file.
      */
-    me->remove_command = (char *)calloc (
-			(strlen (REMOVE_COMMAND) + 10 + strlen(fnam))
-			 * sizeof (char),1);
-    if (me->remove_command == NULL)
-	outofmem(__FILE__, "HTSaveAndExecute");
-
-    sprintf(me->remove_command, REMOVE_COMMAND, fnam);
+    me->remove_command = 0;
+    HTAddParam(&(me->remove_command), REMOVE_COMMAND, 1, fnam);
+    HTEndParam(&(me->remove_command), REMOVE_COMMAND, 1);
 
     StrAllocCopy(anchor->FileCache, fnam);
     return me;
@@ -715,32 +704,20 @@ PUBLIC HTStream* HTSaveToFile ARGS3(
     /*
      *	Make command to delete file.
      */
-    ret_obj->remove_command = (char *)calloc (
-			(strlen (REMOVE_COMMAND) + 10+ strlen(fnam))
-			 * sizeof (char),1);
-    if (ret_obj->remove_command == NULL)
-	outofmem(__FILE__, "HTSaveToFile");
-
-    sprintf(ret_obj->remove_command, REMOVE_COMMAND, fnam);
+    ret_obj->remove_command = 0;
+    HTAddParam(&(ret_obj->remove_command), REMOVE_COMMAND, 1, fnam);
+    HTEndParam(&(ret_obj->remove_command), REMOVE_COMMAND, 1);
 
 #ifdef VMS
     if (IsBinary && UseFixedRecords) {
-	ret_obj->end_command = (char *)calloc (sizeof(char)*20,1);
-	if (ret_obj->end_command == NULL)
-	    outofmem(__FILE__, "HTSaveToFile");
-	sprintf(ret_obj->end_command, "SaveVMSBinaryFile");
-	FIXED_RECORD_COMMAND = (char *)calloc (
-		(strlen (FIXED_RECORD_COMMAND_MASK) + 10 + strlen(fnam))
-		* sizeof (char),1);
-	if (FIXED_RECORD_COMMAND == NULL)
-	    outofmem(__FILE__, "HTSaveToFile");
-	sprintf(FIXED_RECORD_COMMAND, FIXED_RECORD_COMMAND_MASK, fnam);
+	StrAllocCopy(ret_obj->end_command, "SaveVMSBinaryFile");
+	FIXED_RECORD_COMMAND = 0;
+	HTAddParam(&FIXED_RECORD_COMMAND, FIXED_RECORD_COMMAND_MASK, 1, fnam);
+	HTEndParam(&FIXED_RECORD_COMMAND, FIXED_RECORD_COMMAND_MASK, 1);
+
     } else {
 #endif /* VMS */
-    ret_obj->end_command = (char *)calloc (sizeof(char)*12,1);
-    if (ret_obj->end_command == NULL)
-	outofmem(__FILE__, "HTSaveToFile");
-    sprintf(ret_obj->end_command, "SaveToFile");
+    StrAllocCopy(ret_obj->end_command, "SaveToFile");
 #ifdef VMS
     }
 #endif /* VMS */
@@ -856,7 +833,12 @@ PUBLIC HTStream* HTCompressed ARGS3(
 	     *	We have a presentation mapping for it. - FM
 	     */
 	    can_present = TRUE;
-	    if (!strcasecomp(anchor->content_encoding, "x-gzip") ||
+	    if (!strcasecomp(anchor->content_encoding, "x-bzip2") ||
+		!strcasecomp(anchor->content_encoding, "bzip")) {
+		StrAllocCopy(uncompress_mask, BZIP2_PATH);
+		StrAllocCat(uncompress_mask, " -d %s");
+		compress_suffix = "bz2";
+	    } else if (!strcasecomp(anchor->content_encoding, "x-gzip") ||
 		!strcasecomp(anchor->content_encoding, "gzip")) {
 		/*
 		 *  It's compressed with the modern gzip. - FM
@@ -1010,22 +992,18 @@ PUBLIC HTStream* HTCompressed ARGS3(
     } else
 #endif /* USE_ZLIB */
     {
-	me->end_command = (char *)calloc(1, (strlen(uncompress_mask) + 10 +
-					     strlen(fnam)) * sizeof(char));
-	if (me->end_command == NULL)
-	    outofmem(__FILE__, "HTCompressed");
-	sprintf(me->end_command, uncompress_mask, fnam, "", "", "", "", "", "");
+	me->end_command = 0;
+	HTAddParam(&(me->end_command), uncompress_mask, 1, fnam);
+	HTEndParam(&(me->end_command), uncompress_mask, 1);
     }
     FREE(uncompress_mask);
 
     /*
      *	Make command to delete file. - FM
      */
-    me->remove_command = (char *)calloc(1, (strlen(REMOVE_COMMAND) + 10 +
-					    strlen(fnam)) * sizeof(char));
-    if (me->remove_command == NULL)
-	outofmem(__FILE__, "HTCompressed");
-    sprintf(me->remove_command, REMOVE_COMMAND, fnam);
+    me->remove_command = 0;
+    HTAddParam(&(me->remove_command), REMOVE_COMMAND, 1, fnam);
+    HTEndParam(&(me->remove_command), REMOVE_COMMAND, 1);
 
     /*
      *	Save the filename and return the structure. - FM

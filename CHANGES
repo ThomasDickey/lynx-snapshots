@@ -1,6 +1,67 @@
 Changes since Lynx 2.8.1 release
 ================================================================================
 
+1998-12-12 (2.8.2dev.9)
+* change location-not-absolute message from an alert to user-message - TD
+* Check for EINTR from read() call in HTDoRead, and retry if necessary.  This
+  change only for Unix.  Interrupted read() system calls should be rare (or
+  impossible, depending on the system implementation?) since the read() is only
+  done after a successful select(), but checking can't hurt - KW
+* Check for read read() errors in HTDoRead and HTCopy, and generate alert
+  messages for unexpected errors.  HTCopy still returns HT_LOADED to indicate
+  success if any data have been received before an unexpected error or
+  disconnection.  Previously this happened without any indication to the user
+  that something was wrong and a document or file might be incomplete.  These
+  changes currently only for Unix - KW
+* Added/enhanced comments in HTFormat.c to document current behavior of HTCopy,
+  HTFileCopy, HTGzFileCopy, HTParseSocket, HTParseFile, and HTParseGzFile - KW
+* Moved definition of HT_NO_DATA to HTUtils.h, changed value of some status
+  codes to libwww5-like values while we're at it - KW
+* correct uninitialized de variable in LYCookie.c when dump_output_immediately
+  is set.  Also, made a slight change to this mode in LYMain.c, so that cookies
+  received will also be written to the cookie file; cleanup() is not called in
+  -dump mode (reported by Elwin Oost) - BJP
+* correct include-path for chrtrans makefile to allow builds outside the
+  source tree (Masashi Fujita)
+* minor cleanup of LYCookie.c, add some traces - BJP
+* add support for content encoding for x-bzip2, bzip2 for suffix "bz2" - HN
+* add po directory to install-bin and uninstall rules - TD
+* modify the environment variable logic to avoid freeing string given to putenv
+  until after giving it a new string - TD 
+* add several environment variables to LYPrint.c - KED
+* add ENVIRONMENT section to lynx.man and lynx.hlp - KED
+* add installation note about --enable-gzip-help - KED
+* update installation notes for WAIS - DK
+* add/use new functions for building up command-string for shell commands,
+  which quote parameters as needed:  HTAddParam(), HTEndParam().  Moved the
+  logic in quote_pathname to HTQuoteParameter, extending that function to quote
+  the parameter only if it contains characters which are problems with various
+  shells (e.g., wildcards), and to escape backslashes.  In particular, use
+  these functions to ensure that the user and port strings in HTTelnet.c are
+  quoted (fixes a hole reported by Art Mulder <art@openbsd.org> - TD
+* modify print-to-file logic to permit writing to pipe, provided that the
+  user does not have no-shell restriction - TD
+* split-out logic for LYValidateFilename() from printfile() and LYDownload - TD
+* whitespace fixes - BJP
+* add configure option --with-nls-datadir, to allow installer to specify
+  alternate locale data directory.  A separate option from --datadir is
+  required because the GNU gettext code is usually installed under
+  $(prefix)/share rather $(prefix)/lib - TD
+* add configure check for gettimeofday, to implement 0.1 second interval
+  for skipping HTCheckForInterrupt() - TD
+* modify configure script to generate references to $CONFIG_SHELL rather than
+  /bin/sh, to allow some testing with alternate shells.  Autoconf uses this
+  variable for a similar purpose - TD
+* correct missing case for 'o', octal in StrAllocVsprintf (reported by IC) - TD
+* fix -restrictions=bookmark check in forms-based options menu (reported by KW
+  & Rodiger Geys) - LP
+* fix memory leaks in LYPrint.c and UCdomap.c - KW
+* when printing HEAD to email use URL in the subject, was title.  (it was
+  especially annoying when we have 8bit title being sent as 7bit:  no charset
+  information is supplied for letters with 7bit message body) - LP
+* remove "temp fix for HText_trimHightext side effect from partial mode by
+  introducing a flag in HText_beginInput()" from 1998-09-12 since it is now not
+  needed after KW's changes in HText_trimHightext.  - LP
 1998-12-03 (2.8.2dev.8)
 * use HTSprintf/HTSprintf0 in LYCookie.c, LYLocal.c - TD
 * correct logic in OpenHiddenFile, which did not check if a failure to open a
@@ -10,7 +71,7 @@ Changes since Lynx 2.8.1 release
   2.8.1rel.2) - TD
 * fixed line number removal code in HText_endAnchor in several places, it was
   modifying the wrong line which could lead to memory corruption - KW
-* tweaks in HText_startAnchor and HText_endAnchor for handling link numbers: 
+* tweaks in HText_startAnchor and HText_endAnchor for handling link numbers:
   don't swallow space after number if line was split, find link number on
   previous line even it it is at the very end, adjust line split position after
   number removal.  Generate TRACE output in interesting cases - KW
@@ -37,7 +98,7 @@ Changes since Lynx 2.8.1 release
      (single=byline, double=bypage, triple=beg/end), or above/below menu
      (single=bypage, double=beg/end)) mouse-3 ==> quit;
   e) Double-click-1 on the first and last row are interpreted as goto-
-     start/end/main-window (depending on the location of the click). 
+     start/end/main-window (depending on the location of the click).
   Other Changes:
   a) Ask ncurses for all mouse events, but increase mouseinterval() to simulate
      current behavior (which is effectively an infinite mouseinterval() +
@@ -49,17 +110,16 @@ Changes since Lynx 2.8.1 release
   called repeatedly if partial display is enabled.  Some other changes in this
   function, to interact better with the other GridText.c functions, especially
   for partial display mode.  We don't have to handle all anchors if the new
-  parameter "final" is not set. 
+  parameter "final" is not set.
   Also empty anchors should now generally not any more move down over empty
   lines, if they happen at a line end.  Made some trace messages give more
-  information - KW, LP
+  information - KW
 * color styles:  reset screen style cache to avoid random coloring when a link
-  is unhighlighted - KW, LP
+  is unhighlighted - KW
 * Tweak in HText_setLastOptionValue:  if an OPTION tag was directly followed by
-  several newlines, characters could be dropped - KW, LP
-* modify havevisible() function in LYBookmark.c to compare against Unicode
-  value rather than ASCII.  Optimize title_convert8bit() by moving character
-  translation out of loop - LP
+  several newlines, characters could be dropped - KW
+* Tweak havevisible() function in LYBookmark.c to compare against Unicode
+  value rather than ASCII when checking for blanks. - LP
 * ifdef user/group function caching calls so that this builds with djgpp, which
   doesn't need/support this (patch by Gisle Vanem)
 * documentation updates for NLS - HN
@@ -121,7 +181,7 @@ Changes since Lynx 2.8.1 release
   activated by placing lines in the WATTCP.CFG file for:
     DEBUG.MODE= (choices are HEADERS, DUMP, or ALL)
     DEBUG.PROTO= (choices are TCP, UDP, or  ALL)
-    DEBUG.FILE= (name of log file. Defaults to WATTCP.DBG)
+    DEBUG.FILE= (name of log file.  Defaults to WATTCP.DBG)
   This adds about 2K to the size of the stripped, compressed executable.  You
   get a log of the headers and/or a binary dump of the packets sent and
   received.  Maybe this will help in determining where ftp is failing in this
@@ -221,7 +281,7 @@ Changes since Lynx 2.8.1 release
     ^X = LYE_DELPW  delete previous word
     ^^ = LYE_UPPER  upper case line (not active when kbd-layout binding is)
     ^_ = LYE_LOWER  lower case line
-  (Kim DeVaughn <kimdv@best.com>).
+  KED ((Kim DeVaughn <kimdv@best.com>)).
 * modify to show address to submit to on the statusline when in advanced user
   mode.  Also fixes one small typo in LYMainLoop.c.  (suggested by
   <erisson@sw-tech.com>) - BJP
@@ -250,7 +310,7 @@ Changes since Lynx 2.8.1 release
   remove the remaining generated files - TD
 + add preliminary changes from PG (pg@sweng.stortek.com) to support port to
   OS/390, some ifdef'd with __MVS__, some with EBCDIC and NOT_ASCII.
-* modify LYCookies.c to accept cookies with no value, in case the site resets a
+* modify LYCookie.c to accept cookies with no value, in case the site resets a
   cookie by nulling out the value (reported by Larry Virden) - BJP
 * modify cookie parsing to ignore comment lines beginning with a '#' (reported
   by Jonathan Bobin indicates that Netscape adds comments back, confusing Lynx)
@@ -306,7 +366,7 @@ Changes since Lynx 2.8.1 release
 1998-08-27 (2.8.1dev.21-intl)
 * add hooks to GNU gettext for international language support - JES
   (This is an experimental modification that will be patched into
-  the main Lynx release after other platform testing. I've only done
+  the main Lynx release after other platform testing.  I've only done
   NetBSD.)
 
 1998-11-05 (2.8.2dev.1)
@@ -320,12 +380,12 @@ Changes since Lynx 2.8.1 release
   <m9235159@grz08u.unileoben.ac.at>)
 * Fix core dump which may happen after printing-to-email. - LP
 * Move read_rc() before parsing any command-line arguments (except -help)
-  so the latter will override any .lynxrc settings. In particular, the problem
+  so the latter will override any .lynxrc settings.  In particular, the problem
   was detected with -cookie_file= which was ignored after saving values
   from Options menu. - LP
 * Chartrans bug: LYNXIMGMAP now shows the text in right charset.
   (The page was converted twice, fixed by adding META charset to this internal
-  page. The bug was in all versions of Lynx starting from 2.7.1ac) - LP
+  page.  The bug was in all versions of Lynx starting from 2.7.1ac) - LP
 * Oops, my typo from pre3 back to 27-09-98: windows-1252 appears twice
   in the list of character sets in options menu, was also typo in docs. - LP
 * modify HTDOS.c to permit compile with K&R compiler - TD
@@ -437,7 +497,7 @@ Changes since Lynx 2.8.1 release
   Also remove changes from 1998-06-11 (case LYK_DOWNLOAD) since this is now
   protected by HText_new() which never starts.  - LP
 * tweak suggested filename for download menu: now it we have URL
-  terminated with "/" (e.g. a directory or possibly root) do one more try -
+  terminated with "/" (e.g., a directory or possibly root) do one more try -
   remove terminating "/" - LP
 * download menu: do not show "Suggested file name" when "save to disk disabled"
   (requested by HN) - LP
@@ -667,7 +727,7 @@ Changes since Lynx 2.8.1 release
   documents with forms input mixed with normal href= link.  - LP
 * print menu: fixed document URL near the top (was temp file name) - LP
 * forms-options menu: fixed screen size in Novice mode - LP
-* limit length of strings copied via tok_values[] in LYCookies.c - TD
+* limit length of strings copied via tok_values[] in LYCookie.c - TD
 * clean up a few memory leaks in cookie_add_acceptlist() and
   cookie_add_rejectlist() in LYCookie.c.  These were leaking 4 bytes for each
   entry in COOKIE_ACCEPT_DOMAINS - BJP
@@ -707,7 +767,7 @@ Changes since Lynx 2.8.1 release
 * modify quote_pathname() so that for DJGPP it does not put single-quotes
   around the result - DK
 * correct a missing assignment to turn bold off in split_line (GridText.c) - LE
-* Fixed: forms input in display_partial mode! Previously hightext was printed
+* Fixed: forms input in display_partial mode!  Previously hightext was printed
   at wrong positions while loading was in process (try -debug_partial to see
   the bug).  Fix made in HText_pageDisplay:  we call HText_trimHightext() which
   was the main part of HText_endAppend() before.  Seems no more problems
@@ -849,9 +909,9 @@ Changes since Lynx 2.8.1 release
   and rerender the page with Cntrl-R to see what is happening in fact. - LP
 * Serious bug fixed for DISP_PARTIAL: two asynchronous processes synchronized.
   HTDisplayPartial() synchronized by flag against HText_new() which create
-  the new HTMainText object. Otherwise HTDisplayPartial() sometimes was
+  the new HTMainText object.  Otherwise HTDisplayPartial() sometimes was
   matching old HTMainText (with its own line counter) and repaint previous doc,
-  not a new one. TRACE log now got a message from HText_pageDisplay - LP
+  not a new one.  TRACE log now got a message from HText_pageDisplay - LP
 * fixed last chartrans changes, lines such as
       #0x99    #NOTDEFINED
   should not be commented with leading comment symbol because they are ignored
@@ -881,7 +941,7 @@ Changes since Lynx 2.8.1 release
   makefile.dos, fixes some of the unusual background color handling that was
   present in the PDCurses DOS port - DK
 * correct ifdef:  LYOptions.c fails to build with -DEXP_FORMS_OPTIONS but
-  _without_ -DDIRED_SUPPORT (e.g.  djgpp) - LP
+  _without_ -DDIRED_SUPPORT (e.g., djgpp) - LP
 * redesigned cookie_add_{accept,reject}list in LYCookie.c -- they work now - BJP
 * added COOKIE_{ACCEPT,REJECT}_DOMAINS in .lynxrc handling to LYrcFile.c - BJP
 * slight spacing fix in lynx.cfg - BJP

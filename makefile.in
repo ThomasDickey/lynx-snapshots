@@ -1,6 +1,6 @@
 ##makefile for lynx
 
-SHELL		= /bin/sh
+SHELL		= @CONFIG_SHELL@
 
 x		= @PROG_EXT@
 
@@ -28,7 +28,7 @@ INSTALL_DATA	= @INSTALL_DATA@
 VERSION		= 2-8-1
 
 ##this is the name of the directory the lynx source code is in.
-##(e.g. lynx2-8-1, not the full path) 
+##(e.g., lynx2-8-1, not the full path) 
 lynxdir= lynx$(VERSION)
 lynxname= lynx$(VERSION)
 
@@ -174,7 +174,7 @@ SITE_DEFS = # Your defines here
 
 # TESTED: Linux FreeBSD SunOS Solaris IRIX CLIX HP-UX AIX SCO
 all lynx$x: cfg_defs.h LYHelp.h
-	@MSG_DIR_MAKE@sh $(srcdir)/fixtext.sh $(srcdir)/LYMessages_en.h >LYMessages.c
+	@MSG_DIR_MAKE@$(SHELL) $(srcdir)/fixtext.sh $(srcdir)/LYMessages_en.h >LYMessages.c
 	@INTLDIR_MAKE@cd intl && $(MAKE) CC="$(CC)"
 	@MSG_DIR_MAKE@cd po && $(MAKE) CC="$(CC)"
 	cd WWW/Library/unix && $(MAKE) CC="$(CC)" \
@@ -270,6 +270,7 @@ install-full: install install-help install-doc
 	@echo Full installation complete.
 
 install-bin: $(bindir)
+	@MSG_DIR_MAKE@cd po && $(MAKE) CC="$(CC)" install
 	-mv -f $(bindir)/lynx$x $(bindir)/lynx.old
 	$(INSTALL_PROGRAM) lynx$x $(bindir)/
 
@@ -303,7 +304,7 @@ install-help : $(helpdir)
 		$(srcdir)/lynx_help/help_files.txt | $(FIX_SED) >> \
 		$(helpdir)/help_files.sed
 	@echo Translating/copying html files
-	@ECHO_CC@sh -c	'cd $(srcdir)/lynx_help && ( \
+	@ECHO_CC@$(SHELL) -c 'cd $(srcdir)/lynx_help && ( \
 		dirs=keystrokes; \
 		(cd $(helpdir) && mkdir $$dirs 2>/dev/null ) ; \
 		files="*.html */*.html" ; \
@@ -316,7 +317,7 @@ install-help : $(helpdir)
 		)'
 	-rm -f $(helpdir)/help_files.sed
 	@echo Updating $(libdir)/lynx.cfg 
-	sh -c 'if test -f $(libdir)/lynx.cfg ; then \
+	$(SHELL) -c 'if test -f $(libdir)/lynx.cfg ; then \
 		mv $(libdir)/lynx.cfg $(libdir)/lynx.tmp ; \
 	else \
 		cp $(srcdir)/lynx.cfg $(libdir)/lynx.tmp ; \
@@ -345,7 +346,7 @@ LYHelp.h : LYHelp.hin
 	-@rm -f help_files.sed
 	@echo '**********************************************'
 	@echo
-	@sh -c 'if test "$(COMPRESS_PROG)" = "" ; then \
+	@$(SHELL) -c 'if test "$(COMPRESS_PROG)" = "" ; then \
 		echo "       Help files will NOT be gzipped."; \
 	else \
 		echo "       Help links point to compressed files"; \
@@ -357,7 +358,7 @@ LYHelp.h : LYHelp.hin
 
 cfg_defs.h : $(srcdir)/cfg_defs.sh
 	@rm -f $@
-	sh $(srcdir)/cfg_defs.sh >$@
+	$(SHELL) $(srcdir)/cfg_defs.sh >$@
 
 install-cfg : $(libdir)
 	-mv -f $(libdir)/lynx.cfg $(libdir)/lynx.oldcfg
@@ -368,6 +369,7 @@ install-lss : $(libdir)
 	$(INSTALL_DATA) $(srcdir)/samples/lynx.lss $(libdir)/lynx.lss
 
 uninstall:
+	@MSG_DIR_MAKE@cd po && $(MAKE) CC="$(CC)" uninstall
 	-rm -f $(bindir)/lynx$x
 	-rm -f $(mandir)/lynx.1
 	-rm -f $(libdir)/lynx.cfg

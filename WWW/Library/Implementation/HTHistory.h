@@ -91,7 +91,7 @@ extern HTAnchor * HTHistory_recall
 **
 **      This is needed in order to check the validity of certain commands
 **      for menus, etc.
-(not needed for now. Use canBacktrack, etc.)
+(not needed for now.  Use canBacktrack, etc.)
 extern int HTHistory_count NOPARAMS;
 */
 

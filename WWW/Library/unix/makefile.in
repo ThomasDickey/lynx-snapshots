@@ -1,6 +1,9 @@
 #  Make WWW under unix for a.n.other unix system (bsd)
 #   Use this as a template
 
+#  If this env var is set to something else Some makes will use that instead
+SHELL		= @CONFIG_SHELL@
+
 # For W3 distribution, machine type for subdirectories
 WWW_MACH = unix
 

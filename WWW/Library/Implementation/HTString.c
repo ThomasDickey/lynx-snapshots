@@ -449,6 +449,7 @@ PRIVATE char * StrAllocVsprintf ARGS4(
 			done = FALSE;
 			type = *fmt;
 			break;
+		    case 'o': /* FALLTHRU */
 		    case 'i': /* FALLTHRU */
 		    case 'd': /* FALLTHRU */
 		    case 'u': /* FALLTHRU */
@@ -599,4 +600,157 @@ PUBLIC char * HTSprintf0 (va_alist)
     va_end(ap);
 
     return (result);
+}
+
+/*
+ * Returns a quoted or escaped form of the given parameter, suitable for use in
+ * a command string.
+ */
+#if USE_QUOTED_PARAMETER
+#define S_QUOTE '\''
+#define D_QUOTE '"'
+PUBLIC char *HTQuoteParameter ARGS1(
+    CONST char *,	parameter)
+{
+    size_t i;
+    size_t last = strlen(parameter);
+    size_t n = 0;
+    size_t quoted = 0;
+    char * result;
+
+    for (i=0; i < last; ++i)
+	if (strchr("\\&#$^*?(){}<>\"';`|", parameter[i]) != 0
+	 || isspace(parameter[i]))
+	    ++quoted;
+
+    result = (char *)malloc(last + 5*quoted + 3);
+    if (result == NULL)
+	outofmem(__FILE__, "HTQuoteParameter");
+
+    n = 0;
+    if (quoted)
+	result[n++] = S_QUOTE;
+    for (i = 0; i < last; i++) {
+	if (parameter[i] == S_QUOTE) {
+	    result[n++] = S_QUOTE;
+	    result[n++] = D_QUOTE;
+	    result[n++] = parameter[i];
+	    result[n++] = D_QUOTE;
+	    result[n++] = S_QUOTE;
+	} else if (parameter[i] == '\\') {
+	    result[n++] = parameter[i];
+	    result[n++] = parameter[i];
+	} else {
+	    result[n++] = parameter[i];
+	}
+    }
+    if (quoted)
+	result[n++] = S_QUOTE;
+    result[n] = '\0';
+    return result;
+}
+#endif
+
+#define HTIsParam(string) ((string[0] == '%' && string[1] == 's'))
+
+/*
+ * Returns the number of "%s" tokens in a system command-template.
+ */
+PUBLIC int HTCountCommandArgs ARGS1(
+    CONST char *,	command)
+{
+    int number = 0;
+    while (command[0] != 0) {
+	if (HTIsParam(command))
+	    number++;
+	command++;
+    }
+    return number;
+}
+
+/*
+ * Returns a pointer into the given string after the given parameter number
+ */
+PRIVATE CONST char *HTAfterCommandArg ARGS2(
+    CONST char *,	command,
+    int,		number)
+{
+    while (number > 0) {
+	if (command[0] != 0) {
+	    if (HTIsParam(command)) {
+		number--;
+		command++;
+	    }
+	    command++;
+	} else {
+	    break;
+	}
+    }
+    return command;
+}
+
+/*
+ * Append string-parameter to a system command that we are constructing.  The
+ * string is a complete parameter (which is a necessary assumption so we can
+ * quote it properly).  We're given the index of the newest parameter we're
+ * processing.  Zero indicates none, so a value of '1' indicates that we copy
+ * from the beginning of the command string up to the first parameter,
+ * substitute the quoted parameter and return the resul.
+ *
+ * Parameters are substituted at "%s" tokens, like printf.  Other printf-style
+ * tokens are not substituted; they are passed through without change.
+ */
+PUBLIC void HTAddParam ARGS4(
+    char **,		result,
+    CONST char *,	command,
+    int,		number,
+    CONST char *,	parameter)
+{
+    CONST char *last = HTAfterCommandArg(command, number - 1);
+    CONST char *next = last;
+    char *quoted;
+
+    if (number > 0) {
+	if (number <= 1) {
+	    FREE(*result);
+	}
+	if (parameter == 0)
+	    parameter = "";
+	while (next[0] != 0) {
+	    if (HTIsParam(next)) {
+		if (next != last) {
+		    size_t len = (next - last)
+		    		+ ((*result != 0) ? strlen(*result) : 0);
+		    HTSACat(result, last);
+		    (*result)[len] = 0;
+		}
+#if USE_QUOTED_PARAMETER
+		quoted = HTQuoteParameter(parameter);
+		HTSACat(result, quoted);
+		FREE(quoted);
+#else
+		HTSACat(result, parameter);
+#endif
+		CTRACE(tfp, "PARAM-ADD:%s\n", *result);
+		return;
+	    }
+	    next++;
+	}
+    }
+}
+
+/*
+ * Append the remaining command-string to a system command (compare with
+ * HTAddParam).  Any remaining "%s" tokens are copied as-is.
+ */
+PUBLIC void HTEndParam ARGS3(
+    char **,		result,
+    CONST char *,	command,
+    int,		number)
+{
+    CONST char *last = HTAfterCommandArg(command, number);
+    if (last[0] != 0) {
+	HTSACat(result, last);
+    }
+    CTRACE(tfp, "PARAM-END:%s\n", *result);
 }

@@ -6,8 +6,8 @@
 **
 ** History
 **      15 Jun 95   Created as way to provide a lynx based service with
-**                  dynamic pages without the need for a http daemon. GL
-**      27 Jun 95   Added <index> (command line) support. Various cleanup
+**                  dynamic pages without the need for a http daemon.  GL
+**      27 Jun 95   Added <index> (command line) support.  Various cleanup
 **                  and bug fixes. GL
 **	04 Sep 97   Added support for PATH_INFO scripts.  JKT
 **
@@ -17,7 +17,7 @@
 **
 **      Should do something about SIGPIPE, (but then it should never happen)
 **
-**      No support for redirection. Or mime-types.
+**      No support for redirection.  Or mime-types.
 **
 **      Should try and parse for a HTTP 1.1 header in case we are "calling" a
 **      nph- script.
@@ -187,7 +187,7 @@ PRIVATE int LYLoadCGI ARGS4(
 	    if (TRACE)
 		perror("LYNXCGI: stat() of pgm_buff failed");
 	} else {
-	    /* Found PATH_INFO data. Strip it off of pgm and into path_info. */
+	    /* Found PATH_INFO data.  Strip it off of pgm and into path_info. */
 	    StrAllocCopy(path_info, pgm+strlen(pgm_buff));
 	    strcpy(pgm, pgm_buff);
 	    CTRACE(tfp, "LYNXCGI: stat() of %s succeeded, path_info=\"%s\".\n",

@@ -124,7 +124,7 @@ HOW TO INSTALL:
      (A general `make clean' should not be necessary, but make sure
      the ...uni.h file in src/chrtrans gets regenerated.)
 
-     Note that definition of new character entities (if e.g. you want
+     Note that definition of new character entities (if e.g., you want
      Lynx to recognize &Zcaron;) are not covered by these table files,
      they have to be listed in entities.h.
 

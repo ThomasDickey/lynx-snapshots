@@ -577,7 +577,7 @@ PUBLIC void HTSimplify ARGS1(
 **	-------------------
 **
 ** This function creates and returns a string which gives an expression of
-** one address as related to another. Where there is no relation, an absolute
+** one address as related to another.  Where there is no relation, an absolute
 ** address is retured.
 **
 **  On entry,
@@ -774,7 +774,7 @@ PUBLIC char * HTUnEscape ARGS1(
 	        *q = from_hex(*p++) * 16;
 	    if (*p)
 		/*
-		** Careful! FROMASCII() may evaluate its arg more than once!
+		** Careful!  FROMASCII() may evaluate its arg more than once!
 		*/  /* S/390 -- gil -- 0221 */
 		*q =           *q + from_hex(*p++) ;
 		*q = FROMASCII(*q                 );

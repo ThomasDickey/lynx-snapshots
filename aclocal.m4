@@ -4,7 +4,7 @@ dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
 dnl and Philippe De Muyter <phdm@macqel.be>
 dnl
 dnl Created: 1997/1/28
-dnl Updated: 1997/12/23
+dnl Updated: 1998/12/11
 dnl
 dnl ---------------------------------------------------------------------------
 dnl ---------------------------------------------------------------------------
@@ -681,6 +681,9 @@ hpux10.*)
 		ac_cv_func_initscr=yes
 		])])
 	;;
+linux*) # Suse Linux does not follow /usr/lib convention
+	$1="[$]$1 /lib"
+	;;
 esac
 
 if test ".$With5lib" != ".no" ; then
@@ -1203,7 +1206,7 @@ do
 	for cf_quote in '' '"'
 	do
 		cat >$cf_dir/makefile <<CF_EOF
-SHELL=/bin/sh
+SHELL=${CONFIG_SHELL-/bin/sh} 
 ${cf_include} ${cf_quote}../$cf_inc${cf_quote}
 all :
 	@echo 'cf_make_include=\$(RESULT)'
@@ -1563,6 +1566,31 @@ IFS="$cf_save_ifs"
 
 AC_DEFINE_UNQUOTED($1_PATH,"$cf_path_prog")
 test -n "$cf_path_args" && AC_DEFINE_UNQUOTED($1_ARGS,"$cf_path_args")
+])dnl
+dnl ---------------------------------------------------------------------------
+dnl Check the argument to see that it looks like a pathname.  Rewrite it if it
+dnl begins with one of the prefix/exec_prefix variables, and then again if the
+dnl result begins with 'NONE'.  This is necessary to workaround autoconf's
+dnl delayed evaluation of those symbols.
+AC_DEFUN([CF_PATH_SYNTAX],[
+case ".[$]$1" in #(vi
+./*) #(vi
+  ;;
+.\[$]{*prefix}*) #(vi
+  eval $1="[$]$1"
+  case ".[$]$1" in #(vi
+  .NONE/*)
+    $1=`echo [$]$1 | sed -e s@NONE@$ac_default_prefix@`
+    ;;
+  esac
+  ;; #(vi
+.NONE/*)
+  $1=`echo [$]$1 | sed -e s@NONE@$ac_default_prefix@`
+  ;;
+*)
+  AC_ERROR(expected a pathname)
+  ;;
+esac
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl Re-check on a function to see if we can pick it up by adding a library.
@@ -2079,4 +2107,21 @@ cf_wait_headers="$cf_wait_headers
 "
 fi
 fi
+])dnl
+dnl ---------------------------------------------------------------------------
+dnl Wrapper for AC_ARG_WITH to ensure that user supplies a pathname, not just
+dnl defaulting to yes/no.
+dnl
+dnl $1 = option name
+dnl $2 = help-text
+dnl $3 = environment variable to set
+dnl $4 = default value, shown in the help-message, must be a constant
+dnl $5 = default value, if it's an expression & cannot be in the help-message
+dnl
+AC_DEFUN([CF_WITH_PATH],
+[AC_ARG_WITH($1,[$2 ](default: ifelse($4,,empty,$4)),,
+ifelse($4,,[withval="${$3}"],[withval="${$3-ifelse($5,,$4,$5)}"]))dnl
+CF_PATH_SYNTAX(withval)
+eval $3="$withval"
+AC_SUBST($3)dnl
 ])dnl

@@ -736,8 +736,8 @@ try_again:
   } /* Scope of loop variables */
 
 
-  /*	We now have a terminated unfolded line. Parse it.
-  **	-------------------------------------------------
+  /*	We now have a terminated unfolded line.  Parse it.
+  **	--------------------------------------------------
   */
   CTRACE(tfp, "HTTP: Rx: %s\n", line_buffer);
 
@@ -802,7 +802,7 @@ try_again:
 	server_version[3] != 'P' || server_version[4] != '/' ||
 	server_version[6] != '.') {
 	/*
-	 *  Ugh! An HTTP0 reply,
+	 *  Ugh!  An HTTP0 reply,
 	 */
 	HTAtom * encoding;
 
@@ -1105,9 +1105,9 @@ try_again:
 		       *  Don't make the redirection permanent
 		       *  if we have POST content. - FM
 		       */
-		      CTRACE(tfp, "HTTP: Have POST content. Treating 301 (Permanent) as Temporary.\n");
+		      CTRACE(tfp, "HTTP: Have POST content.  Treating 301 (Permanent) as Temporary.\n");
 		      HTAlert(
-	 gettext("Have POST content. Treating Permanent Redirection as Temporary.\n"));
+	 gettext("Have POST content.  Treating Permanent Redirection as Temporary.\n"));
 		  } else {
 		      permanent_redirection = TRUE;
 		  }

@@ -31,7 +31,7 @@
 **	fp	is the file from which records are read from.
 **
 ** ON EXIT:
-**	returns	nothing. File read pointer is located at the beginning
+**	returns	nothing.  File read pointer is located at the beginning
 **		of the next record. Handles continuation lines
 **		(lines ending in comma indicate a following
 **		continuation line).
@@ -60,19 +60,19 @@ PUBLIC void HTAAFile_nextRec ARGS1(FILE *, fp)
 /* PRIVATE							read_item()
 **		READ AN ITEM FROM A PASSWORD, GROUP
 **		OR ACCESS CONTROL LIST FILE
-**		i.e. either a field, or a list item.
+**		i.e., either a field, or a list item.
 ** ON ENTRY:
 **	fp		is the file to read the characters from
 **	contents	is the character array to put the characters
 **	reading_list	if TRUE, read a list item (ends either in
-**			acomma or acolon),
+**			a comma or a colon),
 **			if FALSE, read a field (ends in acolon).
 **	max_len		is the maximum number of characters that may
-**			be read (i.e. the size of dest minus one for
+**			be read (i.e., the size of dest minus one for
 **			terminating null).
 ** ON EXIT:
 **	returns		the terminating character
-**			(i.e. either separator or CR or LF or EOF).
+**			(i.e., either separator or CR or LF or EOF).
 **	contents	contains a null-terminated string representing
 **			the read field.
 ** NOTE 1:
@@ -132,17 +132,17 @@ PRIVATE int read_item ARGS4(FILE *,	fp,
 /* PUBLIC						HTAAFile_readField()
 **		READ A FIELD FROM A PASSWORD, GROUP
 **		OR ACCESS CONTROL LIST FILE
-**		i.e. an item terminated by colon,
+**		i.e., an item terminated by colon,
 **		end-of-line, or end-of-file. 
 ** ON ENTRY:
 **	fp		is the file to read the characters from
 **	contents	is the character array to put the characters
 **	max_len		is the maximum number of characters that may
-**			be read (i.e. the size of dest minus one for
+**			be read (i.e., the size of dest minus one for
 **			terminating null).
 ** ON EXIT:
 **	returns		the terminating character
-**			(i.e. either separator or CR or LF or EOF).
+**			(i.e., either separator or CR or LF or EOF).
 **	contents	contains a null-terminated string representing
 **			the read field.
 ** NOTE 1:
