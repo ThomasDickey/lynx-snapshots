@@ -48,7 +48,6 @@
 #include <HTAAUtil.h>	/* Implemented here	*/
 #include <HTAssoc.h>	/* Assoc list		*/
 #include <HTTCP.h>
-#include <HTTP.h>
 
 #include <LYStrings.h>
 #include <LYLeaks.h>

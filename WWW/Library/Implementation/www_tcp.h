@@ -61,6 +61,10 @@ typedef struct sockaddr_in SockA;  /* See netinet/in.h */
 #ifndef VMS
 #include <sys/types.h>
 
+#if defined(__BORLANDC__)
+#define DECL_ERRNO
+#endif
+
 #if defined(__DJGPP__) || defined(__BORLANDC__)
 #undef HAVE_DIRENT_H
 #define HAVE_DIRENT_H

@@ -1,6 +1,6 @@
 /* character level styles for Lynx
  * (c) 1996 Rob Partington -- donated to the Lyncei (if they want it :-)
- * @Id: LYStyle.c 1.33 Wed, 29 Sep 1999 05:40:39 -0600 dickey @
+ * @Id: LYStyle.c 1.34 Wed, 13 Oct 1999 08:24:23 -0600 dickey @
  */
 #include <HTUtils.h>
 #include <HTML.h>
@@ -22,7 +22,6 @@
 #include <LYexit.h>
 #include <LYLeaks.h>
 #include <LYStrings.h>
-#include <LYUtils.h>
 
 #ifdef USE_COLOR_STYLE
 

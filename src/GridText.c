@@ -10662,6 +10662,7 @@ PRIVATE void insert_new_textarea_anchor ARGS2(
     f->maxlength       = anchor->input_field->maxlength;
     f->no_cache        = anchor->input_field->no_cache;
     f->disabled        = anchor->input_field->disabled;
+    f->value_cs        = current_char_set; 
 
     /*  Init all the fields in the new HTLine (but see the #if).   */
     l->next	       = htline->next;
@@ -11386,6 +11387,7 @@ PUBLIC int HText_InsertFile ARGS1(
     f->maxlength       = anchor_ptr->input_field->maxlength;
     f->no_cache        = anchor_ptr->input_field->no_cache;
     f->disabled        = anchor_ptr->input_field->disabled;
+    f->value_cs        = current_char_set; 
 
     /*  Init all the fields in the new HTLine (but see the #if).   */
     l->offset	       = htline->offset;

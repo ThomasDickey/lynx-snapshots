@@ -958,8 +958,8 @@ PRIVATE int parse_charset_choice ARGS2(
     if (p[len-1] == '*') {
 	--len;
 	for (i = 0 ;i < LYNumCharsets; ++i) {
-	    if ((!strncasecmp(p, LYchar_set_names[i], len)) ||
-		(!strncasecmp(p, LYCharSet_UC[i].MIMEname, len)) ) {
+	    if ((!strncasecomp(p, LYchar_set_names[i], len)) ||
+		(!strncasecomp(p, LYCharSet_UC[i].MIMEname, len)) ) {
 		++matches;
 		matched_charset_choice(display_charset, i);
 	    }
@@ -968,8 +968,8 @@ PRIVATE int parse_charset_choice ARGS2(
 	return 0;
     } else {
 	for (i = 0; i < LYNumCharsets; ++i) {
-	    if ((!strcasecmp(p,LYchar_set_names[i])) ||
-		(!strcasecmp(p,LYCharSet_UC[i].MIMEname)) ) {
+	    if ((!strcasecomp(p,LYchar_set_names[i])) ||
+		(!strcasecomp(p,LYCharSet_UC[i].MIMEname)) ) {
 		matched_charset_choice(display_charset, i);
 		CTRACE((tfp," - OK\n"));
 		++matches;

@@ -491,8 +491,6 @@ PRIVATE void UC_con_set_trans ARGS3(
     }
     /*
      *	The font is always 256 characters - so far.
-     *  (this function preserved by num_uni==0 so unicount=NULL for built-in
-     *  charsets like CJK or x-transparent should not be a problem?)
      */
     con_clear_unimap();
 #endif
@@ -755,7 +753,6 @@ PRIVATE void con_set_default_unimap NOARGS
 
     /*
      *	The default font is always 256 characters.
-     *  (default font can not be a fake one, so unicout!=NULL for sure.)
      */
     con_clear_unimap(1);
 
@@ -790,6 +787,7 @@ PUBLIC int UCLYhndl_for_unrec = -1;
 PUBLIC int LATIN1 = -1;        /* UCGetLYhndl_byMIME("iso-8859-1") */
 PUBLIC int US_ASCII = -1;      /* UCGetLYhndl_byMIME("us-ascii")   */
 PUBLIC int UTF8 = -1;          /* UCGetLYhndl_byMIME("utf-8")      */
+PUBLIC int TRANSPARENT = -1;   /* UCGetLYhndl_byMIME("x-transparent")  */
 
 
 PRIVATE int UC_con_set_unimap ARGS2(
@@ -813,11 +811,10 @@ PRIVATE int UC_con_set_unimap ARGS2(
 
     /*
      *	The font is always 256 characters - so far.
-     *  (fake 0 for built-in charsets like CJK or x-transparent, add a check)
      */
     con_clear_unimap(0);
 
-    for (i = 0; i < 256 && UCInfo[UC_charset_out_hndl].unicount != NULL; i++) {
+    for (i = 0; i < 256; i++) {
 	for (j = UCInfo[UC_charset_out_hndl].unicount[i]; j; j--) {
 	    con_insert_unipair(*(p++), (u16)i, 0);
 	}
@@ -2235,15 +2232,16 @@ PUBLIC void UCInit NOARGS
  *  check function UCGetLYhndl_byMIME in this file.
  */
 
-/* easy to type: */
+/* for coding/performance - easy to type: */
     LATIN1   = UCGetLYhndl_byMIME("iso-8859-1");
     US_ASCII = UCGetLYhndl_byMIME("us-ascii");
     UTF8     = UCGetLYhndl_byMIME("utf-8");
+    TRANSPARENT = UCGetLYhndl_byMIME("x-transparent");
 }
 
 /*
  *  Safe variant of UCGetLYhndl_byMIME, with blind recovery from typo
- *  in user input: lynx.cfg, userdefs.h, switches from command line.
+ *  in user input: lynx.cfg, userdefs.h, command line switches.
  */
 PUBLIC int safeUCGetLYhndl_byMIME ARGS1 (CONST char *, value)
 {

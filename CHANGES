@@ -1,6 +1,48 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+1999-10-13 (2.8.3dev.11)
+* restructured LYMainLoop.c, so the main switch statement calls functions
+  rather than doing everything inline.  This greatly reduces memory required
+  to compile that module, as well as making the compile 3-4 times faster -TD
+* tweak CJK_EX code for incorrect x-transparent charset handler - it now
+  depends on --with-charsets= configure flag -LP
+* tweak comments in UCDomap.c to be consistent with KW changes as of
+  2.8.3dev7 -LP
+* define DECL_ERRNO for Borland compiler, so errno will be declared (report
+  by JS) -TD
+* add definition for DJGPP so truncate() function is used there, needed for
+  LYOpenTempRewrite() function -LP
+* correct character set for lines added in an external editor (Marek Kubita
+  <kubitovi@mbox.lantanet.cz>, KW, KED)
+* remove a couple more duplicate includes -LP
+* remove a couple of duplicate includes (JB - John Bley <jbley@cs.cmu.edu>)
+* fix some missing ifdef's for win32 versus DOS, as well as change calls to
+  strcasecomp() to strncasecmp() -Hiroyuki
+* undo spurious change from win32 integration in dev.5 to HTSprint0() which
+  causes a memory leak (reported by John Bley, analysis KW) -TD
+* prevent embedded "%s" in generated messages from causing a core dump in
+  exit_immediately_with_error_message by using fputs rather than fprintf/printf
+  (reported by KW) -TD
+* Changes in UCAuto.c for --enable-font-switch:  Support some more code pages
+  if available.  Check return code from setfont invocation, and use it to
+  determine whether font and/or translation map loading was successful. 
+  Warning, this is not based on any documented interface but on
+  experimentation, so may not work for long or for anyone but me; it shouldn't
+  be worse than before though.  Better logic for keeping track of state, some
+  parts just didn't work right.  Workaround for wrong data in some distributed
+  font files.  Minor memory leak removed -KW
+* modify test/c1.html to use tabs for better formatting, added comments -KW
+* modify HTFTP.c for better conformance with RFC959.  Among other things, one
+  major purpose was ending the control conversation cleanly, at least in the
+  normal case, to get rid of the "221 You could at least say goodbye.."
+  responses from wu-ftpd servers and resulting RST traffic.  In response to the
+  problem with ftp.wu-ftpd.org, made one small change to when the data_soc is
+  closed.  This was done early for some specially code server types, apparently
+  those that has caused the same type of problem in the past; just changed it
+  to close data_soc at that point independent of server type -KW
+* set CDPATH to . in the makefile.in's that use cd, in case user has set
+  CDPATH without . at the beginning -TD
 1999-09-29 (2.8.3dev.10)
 * change CTRACE macro to double-parenthesis form, to allow ifdef'ing most
   trace statements -TD

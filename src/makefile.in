@@ -1,6 +1,7 @@
 # template-makefile for Lynx src directory
 
 SHELL		= @CONFIG_SHELL@
+CDPATH		= .
 
 x		= @PROG_EXT@
 

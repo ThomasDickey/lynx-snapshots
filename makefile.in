@@ -1,6 +1,7 @@
 ##makefile for lynx
 
 SHELL		= @CONFIG_SHELL@
+CDPATH		= .
 
 x		= @PROG_EXT@
 
