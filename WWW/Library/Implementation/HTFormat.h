@@ -48,6 +48,14 @@ typedef HTAtom * HTFormat;
  */
 #define WWW_PRESENT HTAtom_for("www/present")   /* The user's perception */
 
+#define WWW_DEBUG       HTAtom_for("www/debug")
+/*
+
+   WWW_DEBUG represents the user's perception of debug information, for example sent as a
+   HTML document in a HTTP redirection message.
+
+ */
+
 /*
 
    The message/rfc822 format means a MIME message or a plain text message with no MIME
@@ -55,6 +63,11 @@ typedef HTAtom * HTFormat;
 
  */
 #define WWW_MIME HTAtom_for("www/mime")         /* A MIME message */
+
+/*
+  For parsing only the header. - kw
+  */
+#define WWW_MIME_HEAD   HTAtom_for("message/x-rfc822-head")
 
 /*
 

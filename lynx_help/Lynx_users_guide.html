@@ -1378,7 +1378,8 @@ options from a list, and fields for entering text.
     only non-hidden field in the form.
 
     If <A NAME="tna">"Textfields Need Activation"</A> mode is turned on
-    (with the <kbd>-tna</kbd> command-line option),
+    (with the <kbd>-tna</kbd> command-line option or in <A HREF="#lynx.cfg"
+    >lynx.cfg</A>),
     then text entry fields do not become active immediately upon being
     selected, as normally.  Keystrokes have their normal command meaning
     unless the Line Editor gets activated with <em>Return</em> or <em>Right
@@ -1414,14 +1415,18 @@ options from a list, and fields for entering text.
     (i.e., SWITCH_DTD).
     To avoid confusion, either of these separate functions could be changed
     (mapped away) with a KEYMAP directive in <em>lynx.cfg</em>.  For
-    example,<br>
+    example,
+    <p>
     &nbsp;&nbsp;KEYMAP:^V:DO_NOTHING<br>
-    &nbsp;&nbsp;KEYMAP:#:SWITCH_DTD<br>
+    &nbsp;&nbsp;KEYMAP:#:SWITCH_DTD
+    <p>
     would map SWITCH_DTD away from <em>^V</em> to <em>#</em>, while leaving
     its default Line Editor function as a command escape in place.  On the
-    other hand,<br>
+    other hand,
+    <p>
     &nbsp;&nbsp;KEYMAP:^V::NOP:1<br>
-    &nbsp;&nbsp;KEYMAP:^_::LKCMD:1<br>
+    &nbsp;&nbsp;KEYMAP:^_::LKCMD:1
+    <p>
     would move <em>^V</em>'s Line Editor binding as command escape to
     <em>^_</em> for the first Line Edit style, letting <em>^V</em> still
     act as SWITCH_DTD
@@ -1488,7 +1493,7 @@ options from a list, and fields for entering text.
     adds a new line to the TEXTAREA, with the cursor on it.<p>
 
     If you have some single keys (or control keys) to spare that you
-    do not need for their normal purposes, you can dedicated those keys
+    do not need for their normal purposes, you can dedicate those keys
     to invoke the special functions (without requiring a prefix key).
     For example, to use
     the <em>^E</em> key for the DWIMEDIT action, and

@@ -96,10 +96,13 @@ extern int LYcols;
 struct _HTStream {
     CONST HTStreamClass *	isa;
 #ifdef SOURCE_CACHE
+    HTParentAnchor *		anchor;
     FILE *			fp;
+    char *			filename;
     HTChunk *			chunk;
     CONST HTStreamClass *	actions;
     HTStream *			target;
+    int				status;
 #else
     /* .... */
 #endif
@@ -3104,7 +3107,8 @@ PRIVATE int HTML_start_element ARGS6(
 	    StrAllocCopy(temp, value[HTML_A_TYPE]);
 	    if (!intern_flag && href &&
 		!strcasecomp(value[HTML_A_TYPE], HTAtom_name(LINK_INTERNAL)) &&
-		0 != strcmp(me->node_anchor->address, LYlist_temp_url()) &&
+		!LYIsUIPage3(me->node_anchor->address, UIP_LIST_PAGE, 0) &&
+		!LYIsUIPage3(me->node_anchor->address, UIP_ADDRLIST_PAGE, 0) &&
 		0 != strncmp(me->node_anchor->address, "LYNXIMGMAP:", 11)) {
 		/* Some kind of spoof?
 		** Found TYPE="internal link" but not in a valid context
@@ -3200,7 +3204,7 @@ PRIVATE int HTML_start_element ARGS6(
 #else
 	/*Close an HREF-less NAMED-ed now if force_empty_hrefless_a was
 	    requested - VH*/
-	if (href == NULL) {
+	if (href == NULL && force_empty_hrefless_a) { 
 	    SET_SKIP_STACK(HTML_A);
 	    HTML_end_element(me, HTML_A, include);
 	}
@@ -6360,7 +6364,8 @@ PRIVATE int HTML_end_element ARGS3(
 
     case HTML_HEAD:
 	if (me->inBASE &&
-	    !strcmp(me->node_anchor->address, LYlist_temp_url())) {
+	    (LYIsUIPage3(me->node_anchor->address, UIP_LIST_PAGE, 0) ||
+	     LYIsUIPage3(me->node_anchor->address, UIP_ADDRLIST_PAGE, 0))) {
 	    /*	If we are parsing the List Page, and have a BASE after
 	     *	we are done with the HEAD element, propagate it back
 	     *	to the node_anchor object.  The base should have been
@@ -8365,6 +8370,16 @@ PUBLIC HTStructured* HTML_new ARGS3(
 }
 
 #ifdef SOURCE_CACHE
+
+/*
+ *  A flag set by a file write error.  Used for only generating an alert
+ *  the first time such an error happens, since Lynx should still be usable
+ *  if the temp space becomes full, and an alert each time a cache file
+ *  cannot be written would be annoying.  Reset when  lynx.cfg is being
+ *  reloaded (user may change SOURCE_CACHE setting). - kw
+ */
+PUBLIC BOOLEAN source_cache_file_error = FALSE;
+
 /*
  * Pass-thru cache HTStream
  */
@@ -8372,8 +8387,51 @@ PUBLIC HTStructured* HTML_new ARGS3(
 PRIVATE void CacheThru_free ARGS1(
 	HTStream *,	me)
 {
-    if (me->fp)
+    if (me->anchor->source_cache_file) {
+	CTRACE((tfp, "SourceCacheWriter: Removing previous file %s\n",
+		me->anchor->source_cache_file));
+	LYRemoveTemp(me->anchor->source_cache_file);
+	FREE(me->anchor->source_cache_file);
+    }
+    if (me->anchor->source_cache_chunk) {
+	CTRACE((tfp, "SourceCacheWriter: Removing previous memory chunk %p\n",
+		(void *)me->anchor->source_cache_chunk));
+	HTChunkFree(me->anchor->source_cache_chunk);
+	me->anchor->source_cache_chunk = NULL;
+    }
+    if (me->fp) {
+	fflush(me->fp);
+	if (ferror(me->fp))
+	    me->status = HT_ERROR;
 	LYCloseTempFP(me->fp);
+	if (me->status == HT_OK) {
+	    me->anchor->source_cache_file = me->filename;
+	    CTRACE((tfp,
+		    "SourceCacheWriter: Committing file %s for URL %s to anchor\n",
+		    me->filename, HTAnchor_address((HTAnchor *)me->anchor)));
+	} else {
+	    if (source_cache_file_error == FALSE) {
+		HTAlert(gettext("Source cache error - disk full?"));
+		source_cache_file_error = TRUE;
+	    }
+	    LYRemoveTemp(me->filename);
+	    me->anchor->source_cache_file = NULL;
+	}
+    } else if (me->status != HT_OK) {
+	if (me->chunk) {
+	    CTRACE((tfp, "SourceCacheWriter: memory chunk %p had errors.\n",
+		    me->chunk));
+	    HTChunkFree(me->chunk);
+	    me->chunk = NULL;
+	}
+	HTAlert(gettext("Source cache error - not enough memory!"));
+    }
+    if (me->chunk) {
+	me->anchor->source_cache_chunk = me->chunk;
+	CTRACE((tfp,
+		"SourceCacheWriter: Committing memory chunk %p for URL %s to anchor\n",
+		(void *)me->chunk, HTAnchor_address((HTAnchor *)me->anchor)));
+    }
     (*me->actions->_free)(me->target);
     FREE(me);
 }
@@ -8384,6 +8442,17 @@ PRIVATE void CacheThru_abort ARGS2(
 {
     if (me->fp)
 	LYCloseTempFP(me->fp);
+    if (me->filename) {
+	CTRACE((tfp, "SourceCacheWriter: Removing active file %s\n",
+		me->filename));
+	LYRemoveTemp(me->filename);
+	FREE(me->filename);
+    }
+    if (me->chunk) {
+	CTRACE((tfp, "SourceCacheWriter: Removing active memory chunk %p\n",
+		(void *)me->chunk));
+	HTChunkFree(me->chunk);
+    }
     (*me->actions->_abort)(me->target, e);
     FREE(me);
 }
@@ -8392,10 +8461,15 @@ PRIVATE void CacheThru_put_character ARGS2(
 	HTStream *,	me,
 	char,		c_in)
 {
-    if (me->fp)
-	fputc(c_in, me->fp);
-    else
-	HTChunkPutc(me->chunk, c_in);
+    if (me->status == HT_OK) {
+	if (me->fp) {
+	    fputc(c_in, me->fp);
+	} else if (me->chunk) {
+	    HTChunkPutc(me->chunk, c_in);
+	    if (me->chunk->allocated == 0)
+		me->status = HT_ERROR;
+	}
+    }
     (*me->actions->put_character)(me->target, c_in);
 }
 
@@ -8403,10 +8477,15 @@ PRIVATE void CacheThru_put_string ARGS2(
 	HTStream *,	me,
 	CONST char *,	str)
 {
-    if (me->fp)
-	fputs(str, me->fp);
-    else
-	HTChunkPuts(me->chunk, str);
+    if (me->status == HT_OK) {
+	if (me->fp) {
+	    fputs(str, me->fp);
+	} else if (me->chunk) {
+	    HTChunkPuts(me->chunk, str);
+	    if (me->chunk->allocated == 0 && *str)
+		me->status = HT_ERROR;
+	}
+    }
     (*me->actions->put_string)(me->target, str);
 }
 
@@ -8415,10 +8494,17 @@ PRIVATE void CacheThru_write ARGS3(
 	CONST char *,	str,
 	int,		l)
 {
-    if (me->fp)
-	fwrite(str, 1, l, me->fp);
-    else
-	HTChunkPutb(me->chunk, str, l);
+    if (me->status == HT_OK) {
+	if (me->fp) {
+	    fwrite(str, 1, l, me->fp);
+	    if (ferror(me->fp))
+		me->status = HT_ERROR;
+	} else if (me->chunk) {
+	    HTChunkPutb(me->chunk, str, l);
+	    if (me->chunk->allocated == 0 && l != 0)
+		me->status = HT_ERROR;
+	}
+    }
     (*me->actions->put_block)(me->target, str, l);
 }
 
@@ -8450,7 +8536,7 @@ PRIVATE HTStream* CacheThru_new ARGS2(
     /*  Only remote HTML documents may benefits from HTreparse_document(), */
     /*  oh, assume http protocol:                                          */
     if (strcmp(p->name, "http") != 0) {
-	CTRACE((tfp, "Protocol is \"%s\"; not caching\n", p->name));
+	CTRACE((tfp, "SourceCacheWriter: Protocol is \"%s\"; not caching\n", p->name));
 	return target;
     }
 #else
@@ -8462,17 +8548,22 @@ PRIVATE HTStream* CacheThru_new ARGS2(
 	outofmem(__FILE__, "CacheThru_new");
 
     stream->isa = &PassThruCache;
+    stream->anchor = anchor;
     stream->fp = NULL;
+    stream->filename = NULL;
     stream->chunk = NULL;
     stream->target = target;
     stream->actions = target->isa;
+    stream->status = HT_OK;
 
     if (LYCacheSource == SOURCE_CACHE_FILE) {
 	if (anchor->source_cache_file) {
-	    CTRACE((tfp, "Reusing source cache file %s\n",
-		   anchor->source_cache_file));
+	    CTRACE((tfp, "SourceCacheWriter: If successful, will replace source cache file %s\n",
+		    anchor->source_cache_file));
+#if 0 /* No, let's NOT do this. - kw 1999-12-05 */
 	    FREE(stream);
 	    return target;
+#endif
 	}
 
 	/*
@@ -8482,29 +8573,38 @@ PRIVATE HTStream* CacheThru_new ARGS2(
 	 * contain exactly what came in from the network.
 	 */
 	if (!(stream->fp = LYOpenTemp(filename, HTML_SUFFIX, "wb"))) {
-	    CTRACE((tfp, "Cannot get source cache file for URL %s\n",
+	    CTRACE((tfp, "SourceCacheWriter: Cannot open source cache file for URL %s\n",
 		   HTAnchor_address((HTAnchor *)anchor)));
 	    FREE(stream);
 	    return target;
 	}
 
-	StrAllocCopy(anchor->source_cache_file, filename);
+	StrAllocCopy(stream->filename, filename);
 
-	CTRACE((tfp, "Caching source for URL %s in file %s\n",
+	CTRACE((tfp, "SourceCacheWriter: Caching source for URL %s in file %s\n",
 		     HTAnchor_address((HTAnchor *)anchor), filename));
     }
 
     if (LYCacheSource == SOURCE_CACHE_MEMORY) {
 	if (anchor->source_cache_chunk) {
-	    CTRACE((tfp, "Reusing source memory cache %p\n",
-		   (void *)anchor->source_cache_chunk));
+	    CTRACE((tfp,
+		    "SourceCacheWriter: If successful, will replace memory chunk %p\n",
+		    (void *)anchor->source_cache_chunk));
+#if 0 /* No, let's NOT do this. - kw 1999-12-05 */
 	    FREE(stream);
 	    return target;
+#endif
 	}
 
-	/* I think this is right... */
-	anchor->source_cache_chunk = stream->chunk = HTChunkCreate(128);
-	CTRACE((tfp, "Caching source for URL %s in memory cache %p\n",
+#ifdef SAVE_TIME_NOT_SPACE
+	stream->chunk = HTChunkCreateMayFail(4096, 1);
+#else
+	stream->chunk = HTChunkCreateMayFail(128, 1);
+#endif
+	if (!stream->chunk)	/* failed already? pretty bad... - kw */
+	    stream->status = HT_ERROR;
+
+	CTRACE((tfp, "SourceCacheWriter: Caching source for URL %s in memory chunk %p\n",
 	       HTAnchor_address((HTAnchor *)anchor), (void *)stream->chunk));
 
     }

@@ -28,6 +28,7 @@
 #endif /* DIRED_SUPPORT */
 #include <LYReadCFG.h>
 #include <LYHistory.h>
+#include <LYPrettySrc.h>
 
 #include <LYexit.h>
 #include <LYLeaks.h>
@@ -62,7 +63,7 @@ PUBLIC int HTNoDataOK = 0;
  *                  to show for it either.
  *     NULLFILE   - requested document not loaded into HTMainText, either
  *                  some interactive protocol was requested (like telnet),
- *                  or lynx does not allow access,
+ *                  or lynx does not allow access.
  *  The distinction between NOT_FOUND and NULLFILE is not very crucial,
  *  but getting it right prevents mainloop from exiting with the wrong
  *  message if it happens for the first file, and from logging (or not
@@ -270,9 +271,8 @@ Try_Redirected_URL:
 		    url_type != PROXY_URL_TYPE &&
 		    url_type != LYNXOPTIONS_URL_TYPE &&
 		    !(url_type == FILE_URL_TYPE &&
-		      *(LYlist_temp_url()) &&
-		      !strncmp(WWWDoc.address, LYlist_temp_url(),
-			       strlen(LYlist_temp_url())))) {
+		      (LYIsUIPage(WWWDoc.address, UIP_LIST_PAGE) ||
+		       LYIsUIPage(WWWDoc.address, UIP_ADDRLIST_PAGE)))) {
 		    CTRACE((tfp, "getfile: dropping post_data!\n"));
 		    HTAlert(IGNORED_POST);
 		    FREE(doc->post_data);
@@ -1076,6 +1076,42 @@ Try_Redirected_URL:
 	      CTRACE((tfp,"\n"));
 	      return(NULLFILE);
 	  }
+}
+
+/*
+ *  Set source mode for the next retrieval via getfile or HTreparse_document.
+ *  mode == -1: force normal presentation
+ *  mode ==  1: force source presentation
+ *  mode ==  0: reset to normal if it was set to source
+ *  - kw
+ */
+PUBLIC void srcmode_for_next_retrieval ARGS1(
+    int,	mode)
+{
+    if (mode < 0) {
+	HTOutputFormat = WWW_PRESENT;
+#ifdef USE_PSRC
+	psrc_view = FALSE;
+#endif
+
+    } else if (mode == 0) {
+	if (HTOutputFormat == WWW_SOURCE)
+	    HTOutputFormat = WWW_PRESENT;
+#ifdef USE_PSRC
+	else if (LYpsrc)
+	    psrc_view = FALSE;
+#endif
+
+    } else {
+#ifdef USE_PSRC
+	if (LYpsrc)
+	    psrc_view = TRUE;
+	else
+	    HTOutputFormat = WWW_SOURCE;
+#else
+	HTOutputFormat = WWW_SOURCE;
+#endif
+    }
 }
 
 /*

@@ -46,10 +46,6 @@
 
 #undef DEBUG_APPCH
 
-#ifdef DISP_PARTIAL
-#include <LYMainLoop.h>
-#endif
-
 #ifdef SOURCE_CACHE
 #include <HTFile.h>
 #endif
@@ -136,7 +132,6 @@ PUBLIC BOOLEAN bold_on      = OFF;
 
 #ifdef SOURCE_CACHE
 PUBLIC int LYCacheSource = SOURCE_CACHE_NONE;
-PUBLIC BOOLEAN from_source_cache = FALSE;  /* mutable */
 #endif
 
 #ifdef USE_SCROLLBAR
@@ -339,7 +334,6 @@ typedef struct _HTTabID {
 struct _HText {
 	HTParentAnchor *	node_anchor;
 #ifdef SOURCE_CACHE
-#undef	lines			/* FIXME */
 	/*
 	 * Parse settings when this HText was generated.
 	 */
@@ -352,8 +346,8 @@ struct _HText {
 	BOOLEAN			soft_dquotes;
 	BOOLEAN			old_dtd;
 	int			keypad_mode;
-	int			lines;		/* Screen size */
-	int			cols;
+	int			disp_lines;		/* Screen size */
+	int			disp_cols;
 #endif
 	HTLine *		last_line;
 	int			Lines;		/* Number of them */
@@ -785,8 +779,8 @@ PUBLIC HText *	HText_new ARGS1(
     self->soft_dquotes = soft_dquotes;
     self->old_dtd = Old_DTD;
     self->keypad_mode = keypad_mode;
-    self->lines = LYlines;
-    self->cols = LYcols;
+    self->disp_lines = LYlines;
+    self->disp_cols = LYcols;
 #endif
     /*
      *  If we are going to render the List Page, always merge in hidden
@@ -798,7 +792,8 @@ PUBLIC HText *	HText_new ARGS1(
      *	contain any entries with empty titles, but it might happen. - kw
      */
     if (anchor->bookmark ||
-	(anchor->address && !strcmp(anchor->address, LYlist_temp_url())))
+	LYIsUIPage3(anchor->address, UIP_LIST_PAGE, 0) ||
+	LYIsUIPage3(anchor->address, UIP_ADDRLIST_PAGE, 0))
 	self->hiddenlinkflag = HIDDENLINKS_MERGE;
     else
 	self->hiddenlinkflag = LYHiddenLinks;
@@ -1041,6 +1036,15 @@ PUBLIC void HText_free ARGS1(
 				  UCT_SETBY_NONE);
 	HTAnchor_resetUCInfoStage(self->node_anchor, -1, UCT_STAGE_HTEXT,
 				  UCT_SETBY_NONE);
+#ifdef SOURCE_CACHE
+	/* Remove source cache files and chunks always, even if the
+	 * HTAnchor_delete call does not actually remove the anchor.
+	 * Keeping them would just be a waste of space - they won't
+	 * be used any more after the anchor has been disassociated
+	 * from a HText structure. - kw
+	 */
+	HTAnchor_clearSourceCache(self->node_anchor);
+#endif
 	if (HTAnchor_delete(self->node_anchor))
 	    /*
 	     *  Make sure HTMainAnchor won't point
@@ -4675,6 +4679,12 @@ PUBLIC void HText_endStblTABLE ARGS1(
     if (ncols > 0) {
 	lines_changed = HText_insertBlanksInStblLines(me, ncols);
 	CTRACE((tfp, "endStblTABLE: changed %d lines, done.\n", lines_changed));
+#ifdef DISP_PARTIAL
+       /* allow HTDisplayPartial() to redisplay the changed lines.
+        * There is no harm if we got several stbl in the document, hope so.
+        */
+       NumOfLines_partial -= lines_changed;  /* fake */
+#endif  /* DISP_PARTIAL */
     }
     Stbl_free(me->stbl);
     me->stbl = NULL;
@@ -8033,9 +8043,15 @@ PUBLIC void HTuncache_current_document NOARGS
 }
 
 #ifdef SOURCE_CACHE
+
+PRIVATE HTProtocol scm = { "source-cache-mem", 0, 0 }; /* dummy - kw */
+
 PUBLIC BOOLEAN HTreparse_document NOARGS
 {
     BOOLEAN ok = FALSE;
+#if 0
+    char *source_url = NULL;	/* unused - see comments below */
+#endif
 
     if (!HTMainAnchor || LYCacheSource == SOURCE_CACHE_NONE ||
 	(LYCacheSource == SOURCE_CACHE_FILE &&
@@ -8049,7 +8065,7 @@ PUBLIC BOOLEAN HTreparse_document NOARGS
 	HTFormat format;
 	int ret;
 
-	CTRACE((tfp, "Reparsing source cache file %s\n",
+	CTRACE((tfp, "SourceCache: Reparsing file %s\n",
 	      HTMainAnchor->source_cache_file));
 
 	/*
@@ -8079,22 +8095,35 @@ PUBLIC BOOLEAN HTreparse_document NOARGS
 	fp = fopen(HTMainAnchor->source_cache_file, "r");
 	if (!fp) {
 	    CTRACE((tfp, "  Cannot read file %s\n", HTMainAnchor->source_cache_file));
+	    LYRemoveTemp(HTMainAnchor->source_cache_file);
 	    FREE(HTMainAnchor->source_cache_file);
 	    return FALSE;
 	}
-#ifdef DISP_PARTIAL
-	display_partial = display_partial_flag;  /* restore */
-	Newline_partial = LYGetNewline();  /* initialize */
-#endif
+
 	if (HText_HaveUserChangedForms()) {
 	    /*
 	     * Issue a warning.  Will not restore changed forms, currently.
 	     */
 	    HTAlert(RELOADING_FORM);
 	}
+	/* Set HTMainAnchor->protocol or HTMainAnchor->physical to convince
+	 * the SourceCacheWriter to not regenerate the cache file (which
+	 * would be an unnecessary "loop"). - kw
+	 */
+#if 0 /* If cache writer looked at physical not protocol, we could use this: */
+	LYLocalFileToURL(&source_url, HTMainAnchor->source_cache_file);
+	HTAnchor_setPhysical(HTMainAnchor, source_url);
+	FREE(source_url);
+#endif /* 0 */
+	HTAnchor_setProtocol(HTMainAnchor, &HTFile);
 	ret = HTParseFile(format, HTOutputFormat, HTMainAnchor, fp, NULL);
 	fclose(fp);
-	ok = (BOOL) (ret == HT_LOADED);
+	if (ret == HT_PARTIAL_CONTENT) {
+	    HTInfoMsg(gettext("Loading incomplete."));
+	    CTRACE((tfp, "SourceCache: `%s' has been accessed, partial content.\n",
+		    HTLoadedDocumentURL()));
+	}
+	ok = (BOOL) (ret == HT_LOADED || ret == HT_PARTIAL_CONTENT);
     }
 
     if (LYCacheSource == SOURCE_CACHE_MEMORY &&
@@ -8102,7 +8131,7 @@ PUBLIC BOOLEAN HTreparse_document NOARGS
 	HTFormat format = WWW_HTML;
 	int ret;
 
-	CTRACE((tfp, "Reparsing from source memory cache %p\n",
+	CTRACE((tfp, "SourceCache: Reparsing from memory chunk %p\n",
 		    (void *)HTMainAnchor->source_cache_chunk));
 
 	/*
@@ -8125,26 +8154,30 @@ PUBLIC BOOLEAN HTreparse_document NOARGS
 					 UCLYhndl_for_unspec);
 	/* not UCLYhndl_HTFile_for_unspec - we are talking about remote documents... */
 
-#ifdef DISP_PARTIAL
-	display_partial = display_partial_flag;  /* restore */
-	Newline_partial = LYGetNewline();  /* initialize */
-#endif
 	if (HText_HaveUserChangedForms()) {
 	    /*
 	     * Issue a warning.  Will not restore changed forms, currently.
 	     */
 	    HTAlert(RELOADING_FORM);
 	}
+	/* Set HTMainAnchor->protocol or HTMainAnchor->physical to convince
+	 * the SourceCacheWriter to not regenerate the cache chunk (which
+	 * would be an unnecessary "loop"). - kw
+	 */
+	HTAnchor_setProtocol(HTMainAnchor, &scm); /* cheating -
+				   anything != &HTTP or &HTTPS would do - kw */
+#if 0 /* If cache writer looked at physical not protocol, we could use this: */
+	HTSprintf0(&source_url, "source-cache-mem:%p",
+		   HTMainAnchor->source_cache_chunk);
+	HTAnchor_setPhysical(HTMainAnchor, source_url);
+	FREE(source_url);
+#endif /* 0 */
 	ret = HTParseMem(format, HTOutputFormat, HTMainAnchor,
 			HTMainAnchor->source_cache_chunk, NULL);
 	ok = (BOOL) (ret == HT_LOADED);
     }
 
     CTRACE((tfp, "Reparse %s\n", (ok ? "succeeded" : "failed")));
-
-    if (ok)  {
-	from_source_cache = TRUE;  /* flag for mainloop events */
-    }
 
     return ok;
 }
@@ -8224,10 +8257,10 @@ PUBLIC BOOLEAN HTdocument_settings_changed NOARGS
 	trace_setting_change("OLD_DTD", HTMainText->old_dtd, Old_DTD);
 	trace_setting_change("KEYPAD_MODE",
 			     HTMainText->keypad_mode, keypad_mode);
-	if (HTMainText->lines != LYlines || HTMainText->cols != LYcols)
+	if (HTMainText->disp_lines != LYlines || HTMainText->disp_cols != LYcols)
 	    CTRACE((tfp,
 		   "HTdocument_settings_changed: Screen size has changed (was %dx%d, now %dx%d)\n",
-		   HTMainText->cols, HTMainText->lines, LYcols, LYlines));
+		   HTMainText->disp_cols, HTMainText->disp_lines, LYcols, LYlines));
     }
 
     return (HTMainText->clickable_images != clickable_images ||
@@ -8235,12 +8268,12 @@ PUBLIC BOOLEAN HTdocument_settings_changed NOARGS
 	    HTMainText->verbose_img != verbose_img ||
 	    HTMainText->raw_mode != LYUseDefaultRawMode ||
 	    HTMainText->historical_comments != historical_comments ||
-	    HTMainText->minimal_comments != minimal_comments ||
+	    (HTMainText->minimal_comments != minimal_comments &&
+	     !historical_comments) ||
 	    HTMainText->soft_dquotes != soft_dquotes ||
 	    HTMainText->old_dtd != Old_DTD ||
 	    HTMainText->keypad_mode != keypad_mode ||
-	    HTMainText->lines != LYlines ||
-	    HTMainText->cols != LYcols);
+	    HTMainText->disp_cols != LYcols);
 }
 #endif
 

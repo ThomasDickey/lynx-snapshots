@@ -92,11 +92,8 @@ PRIVATE int LYExecv PARAMS((
 	char *		msg));
 
 #ifdef DIRED_SUPPORT
-PUBLIC char LYPermitFileURL[LY_MAXPATH] = "\0";
-PUBLIC char LYDiredFileURL[LY_MAXPATH] = "\0";
 
 #ifdef OK_INSTALL
-PUBLIC char LYInstallFileURL[LY_MAXPATH] = "\0";
 #ifdef FNAMES_8_3
 #define INSTALLDIRS_FILE "instdirs.htm"
 #else
@@ -1135,7 +1132,7 @@ PRIVATE BOOLEAN permit_location ARGS3(
 	 * Make the tempfile a URL.
 	 */
 	LYLocalFileToURL(newpath, tempfile);
-	strcpy(LYPermitFileURL, *newpath);
+	LYRegisterUIPage(*newpath, UIP_PERMIT_OPTIONS);
 
 	group_name = HTAA_GidToName (dir_info.st_gid);
 	LYstrncpy(LYValidPermitFile,
@@ -1733,7 +1730,7 @@ PUBLIC int dired_options ARGS2(
      *  Make the tempfile a URL.
      */
     LYLocalFileToURL(newfile, tempfile);
-    strcpy(LYDiredFileURL, *newfile);
+    LYRegisterUIPage(*newfile, UIP_DIRED_MENU);
 
     if (doc->link > -1 && doc->link < (nlinks+1)) {
 	path = HTfullURL_toFile(links[doc->link].lname);
@@ -2003,9 +2000,7 @@ PUBLIC BOOLEAN local_install ARGS3(
 	LYLocalFileToURL(newpath, Home_Dir());
 	LYAddHtmlSep(newpath);
 	StrAllocCat(*newpath, INSTALLDIRS_FILE);
-	LYstrncpy(LYInstallFileURL,
-		  *newpath,
-		  (sizeof(LYInstallFileURL) - 1));
+	LYRegisterUIPage(*newpath, UIP_INSTALL);
 	return 0;
     }
 
@@ -2215,6 +2210,22 @@ PUBLIC void add_menu_item ARGS1(
 	mp->next = new;
     } else
 	menu_head = new;
+}
+
+PUBLIC void reset_dired_menu NOARGS
+{
+    if (menu_head != defmenu) {
+	struct dired_menu *mp, *mp_next = NULL;
+	for (mp = menu_head; mp != NULL; mp = mp_next) {
+	    FREE(mp->sfx);
+	    FREE(mp->link);
+	    FREE(mp->rest);
+	    FREE(mp->href);
+	    mp_next = mp_next;
+	    FREE(mp);
+	}
+	menu_head = NULL;
+    }
 }
 
 /*

@@ -20,10 +20,17 @@ DIRED_DEFS = \
  -DOK_ZIP \
  -DOK_OVERRIDE 
 
+# Use this option to enable optional and *experimental* color style.
+#ENABLE_COLOR_STYLE = \
+ -DUSE_COLOR_STYLE \
+ -DUSE_HASH \
+ -DLINKEDSTYLES
+
 CC = gcc
 
 MCFLAGS = -O2 \
  $(DIRED_DEFS) \
+ $(ENABLE_COLOR_STYLE) \
  -DACCESS_AUTH \
  -DCOLOR_CURSES \
  -DDISP_PARTIAL \

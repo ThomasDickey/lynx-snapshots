@@ -564,7 +564,14 @@ PUBLIC HTStream* HTSaveAndExecute ARGS3(
     me->sink = sink;
 
     if (LYCachedTemp(fnam, &(anchor->FileCache))) {
-	me->fp = LYNewBinFile (fnam);
+	/*  This used to be LYNewBinFile(fnam); changed to a different call
+	 *  so that the open fp gets registered in the list keeping track of
+	 *  temp files, equivalent to when LYOpenTemp() gets called below.
+	 *  This avoids a file descriptor leak caused by LYCloseTempFP()
+	 *  not being able to find the fp.  The ".bin" suffix is expected
+	 *  to not be used, it's only for fallback in unusual error cases. - kw
+	 */
+	me->fp = LYOpenTempRewrite(fnam, ".bin", "wb");
     } else {
 #if defined(WIN_EX) && !defined(__CYGWIN__)	/* 1998/01/04 (Sun) */
 	if (!strncmp(anchor->address,"file://localhost",16)) {
@@ -759,7 +766,14 @@ PUBLIC HTStream* HTSaveToFile ARGS3(
      *	Set up a 'D'ownload.
      */
     if (LYCachedTemp(fnam, &(anchor->FileCache))) {
-	ret_obj->fp = LYNewBinFile (fnam);
+	/*  This used to be LYNewBinFile(fnam); changed to a different call
+	 *  so that the open fp gets registered in the list keeping track of
+	 *  temp files, equivalent to when LYOpenTemp() gets called below.
+	 *  This avoids a file descriptor leak caused by LYCloseTempFP()
+	 *  not being able to find the fp.  The ".bin" suffix is expected
+	 *  to not be used, it's only for fallback in unusual error cases. - kw
+	 */
+	ret_obj->fp = LYOpenTempRewrite(fnam, ".bin", "wb");
     } else {
 	/*
 	 *  Check for a suffix.

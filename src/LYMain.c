@@ -102,6 +102,7 @@ PUBLIC BOOLEAN no_change_exec_perms = TRUE;
 PUBLIC BOOLEAN no_change_exec_perms = FALSE;
 #endif /* NO_CHANGE_EXECUTE_PERMS */
 #endif /* OK_PERMIT */
+PUBLIC int LYAutoUncacheDirLists = 2; /* default dired uncaching behavior */
 #endif /* DIRED_SUPPORT */
 
 	   /* Number of docs cached in memory */
@@ -411,7 +412,8 @@ PUBLIC char *LYCookieSLooseCheckDomains = NULL;  /* check loosely   */
 PUBLIC char *LYCookieSQueryCheckDomains = NULL;  /* check w/a query */
 #ifdef EXP_PERSISTENT_COOKIES
 BOOLEAN persistent_cookies = FALSE; 	/* disabled by default! */
-PUBLIC char *LYCookieFile = NULL;	   /* default cookie file */
+PUBLIC char *LYCookieFile = NULL;	   /* cookie read file */
+PUBLIC char *LYCookieSaveFile = NULL;	   /* cookie save file */
 #endif /* EXP_PERSISTENT_COOKIES */
 PUBLIC char *XLoadImageCommand = NULL;	/* Default image viewer for X */
 PUBLIC BOOLEAN LYNoISMAPifUSEMAP = FALSE; /* Omit ISMAP link if MAP present? */
@@ -601,6 +603,7 @@ PRIVATE void free_lynx_globals NOARGS
     FREE(system_mail_flags);
 #ifdef EXP_PERSISTENT_COOKIES
     FREE(LYCookieFile);
+    FREE(LYCookieSaveFile);
 #endif
     FREE(LYCookieAcceptDomains);
     FREE(LYCookieRejectDomains);
@@ -639,13 +642,7 @@ PRIVATE void free_lynx_globals NOARGS
     FREE(lynx_lss_file);
 #endif
     FREE(UCAssume_MIMEcharset);
-    {
-	char *p = LYlist_temp_url();
-	if (p && *p) {
-	    *p = '\0';
-	    FREE(p);
-	}
-    }
+    LYUIPages_free();
     for (i = 0; i < nlinks; i++) {
 	FREE(links[i].lname);
     }
@@ -1588,6 +1585,8 @@ PUBLIC int main ARGS2(
     /*
      * Sod it, this looks like a reasonable place to load the
      * cookies file, probably.  - RP
+     *
+     * And to set LYCookieSaveFile. - BJP
      */
     if (persistent_cookies) {
 	if(LYCookieFile == NULL) {
@@ -1604,6 +1603,31 @@ PUBLIC int main ARGS2(
 	    }
 	}
 	LYLoadCookies(LYCookieFile);
+    }
+
+    /*
+     * In dump_output_immediately mode, LYCookieSaveFile defaults to
+     * /dev/null, otherwise it defaults to LYCookieFile.
+     */
+
+    if (dump_output_immediately) {
+	if (LYCookieSaveFile != NULL) {
+	    if (LYCookieSaveFile[0] == '~' && LYCookieSaveFile[1] == '/' &&
+		LYCookieSaveFile[2] != '\0') {
+		temp = NULL;
+		StrAllocCopy(temp, LYCookieSaveFile + 2);
+		StrAllocCopy(LYCookieSaveFile, wwwName(Home_Dir()));
+		LYAddPathSep(&LYCookieSaveFile);
+		StrAllocCat(LYCookieSaveFile, temp);
+		FREE(temp);
+	    }
+	} else {
+	    StrAllocCopy(LYCookieSaveFile, "/dev/null");
+	}
+    } else {
+	if (LYCookieSaveFile == NULL) {
+	    StrAllocCopy(LYCookieSaveFile, LYCookieFile);
+	}
     }
 #endif
 
@@ -2015,7 +2039,7 @@ PUBLIC int main ARGS2(
 	 *  this one. - BJP
 	 */
 	if (persistent_cookies)
-	    LYStoreCookies(LYCookieFile);
+	    LYStoreCookies(LYCookieSaveFile);
 #endif /* EXP_PERSISTENT_COOKIES */
 	cleanup_files();	/* if someone starts with LYNXfoo: page */
 	exit_immediately(status);
@@ -2151,7 +2175,11 @@ PUBLIC void reload_read_cfg NOARGS
 #ifdef EXP_PERSISTENT_COOKIES
 	BOOLEAN persistent_cookies_flag = persistent_cookies;
 	char * LYCookieFile_flag = NULL;
-	StrAllocCopy(LYCookieFile_flag, LYCookieFile);
+	char * LYCookieSaveFile_flag = NULL;
+	if (persistent_cookies) {
+	    StrAllocCopy(LYCookieFile_flag, LYCookieFile);
+	    StrAllocCopy(LYCookieSaveFile_flag, LYCookieSaveFile);
+	}
 #endif
 
 #ifdef EXP_CHARSET_CHOICE
@@ -2163,7 +2191,12 @@ PUBLIC void reload_read_cfg NOARGS
 #ifdef USE_PSRC
 	html_src_on_lynxcfg_reload();
 #endif
-	free_lynx_cfg(); /* free downloaders, printers, environments */
+	/* free downloaders, printers, environments, dired menu */
+	free_lynx_cfg();
+#ifdef SOURCE_CACHE
+	source_cache_file_error = FALSE; /* reset flag */
+#endif
+
 	/*
 	 *  Process the configuration file.
 	 */
@@ -2213,11 +2246,18 @@ PUBLIC void reload_read_cfg NOARGS
 	    persistent_cookies = persistent_cookies_flag;
 	    HTAlert(gettext("persistent cookies state will be changed in next session only."));
 	}
-	if (strcmp(LYCookieFile, LYCookieFile_flag)) {
-	    StrAllocCopy(LYCookieFile, LYCookieFile_flag);
-	    CTRACE((tfp, "cookies file can be changed in next session only, restored.\n"));
+	if (persistent_cookies) {
+	    if (strcmp(LYCookieFile, LYCookieFile_flag)) {
+		StrAllocCopy(LYCookieFile, LYCookieFile_flag);
+		CTRACE((tfp, "cookie file can be changed in next session only, restored.\n"));
+	    }
+	    if (strcmp(LYCookieSaveFile, LYCookieSaveFile_flag)) {
+		StrAllocCopy(LYCookieSaveFile, LYCookieSaveFile_flag);
+		CTRACE((tfp, "cookie save file can be changed in next session only, restored.\n"));
+	    }
+	    FREE(LYCookieFile_flag);
+	    FREE(LYCookieSaveFile_flag);
 	}
-	FREE(LYCookieFile_flag);
 #endif
 
     }
@@ -3111,16 +3151,20 @@ static Parse_Args_Type Arg_Table [] =
       "=FORMAT\nconvert input, FORMAT is in MIME type notation (experimental)"
    ),
 #endif
-#ifdef EXP_PERSISTENT_COOKIES
-   PARSE_STR(
-      "cookie_file",	LYSTRING_ARG,		&LYCookieFile,
-      "=FILENAME\nspecifies a file to use to store cookies"
-   ),
-#endif /* EXP_PERSISTENT_COOKIES */
    PARSE_SET(
       "cookies",	TOGGLE_ARG,		&LYSetCookies,
       "toggles handling of Set-Cookie headers"
    ),
+#ifdef EXP_PERSISTENT_COOKIES
+   PARSE_STR(
+      "cookie_file",	LYSTRING_ARG,		&LYCookieFile,
+      "=FILENAME\nspecifies a file to use to read cookies"
+   ),
+   PARSE_STR(
+      "cookie_save_file",	LYSTRING_ARG,	&LYCookieSaveFile,
+      "=FILENAME\nspecifies a file to use to store cookies"
+   ),
+#endif /* EXP_PERSISTENT_COOKIES */
 #ifndef VMS
    PARSE_SET(
       "core",		TOGGLE_ARG,		&LYNoCore,
@@ -3190,7 +3234,7 @@ keys (may be incompatible with some curses packages)"
 #endif
    PARSE_SET(
       "force_empty_hrefless_a",	SET_ARG,	&force_empty_hrefless_a,
-      "force HREF-less 'A' elements to be empy (close them as soon as they are seen)"
+      "force HREF-less 'A' elements to be empty (close them as soon as they are seen)"
    ),
    PARSE_SET(
       "force_html",	SET_ARG,		&LYforce_HTML_mode,
@@ -3208,7 +3252,7 @@ keys (may be incompatible with some curses packages)"
 #endif
    PARSE_SET(
       "from",		TOGGLE_ARG,		&LYNoFromHeader,
-      "toggle transmissions of From headers"
+      "toggle transmission of From headers"
    ),
    PARSE_SET(
       "ftp",		UNSET_ARG,		&ftp_ok,
@@ -3326,7 +3370,7 @@ keys (may be incompatible with some curses packages)"
 #endif /* EXEC_LINKS || EXEC_SCRIPTS */
    PARSE_SET(
       "nofilereferer",	SET_ARG,		&no_filereferer,
-      "disable transmissions of Referer headers for file URLs"
+      "disable transmission of Referer headers for file URLs"
    ),
    PARSE_SET(
       "nolist",		SET_ARG,		&nolist,
@@ -3356,7 +3400,7 @@ keys (may be incompatible with some curses packages)"
    ),
    PARSE_SET(
       "noreferer",	SET_ARG,		&LYNoRefererHeader,
-      "disable transmissions of Referer headers"
+      "disable transmission of Referer headers"
    ),
    PARSE_FUN(
       "noreverse",	FUNCTION_ARG,		noreverse_fun,

@@ -1163,6 +1163,7 @@ PUBLIC int LYEditKeyForAction ARGS2(
 	if ((editaction & LYE_DF) && mod3found < 0)
 	    mod3found = i;
     }
+#ifdef EXP_ALT_BINDINGS
     if (mod3found >= 0) {
 	for (i = mod3found; i >= 0; i = NEXT_I(i,LAST_MOD3_LKC)) {
 	    editaction = LYLineEditors[current_lineedit][i];
@@ -1277,6 +1278,7 @@ PUBLIC int LYEditKeyForAction ARGS2(
 	    }
 	}
     }
+#endif  /* EXP_ALT_BINDINGS */
     if (pmodkey)
 	*pmodkey = -1;
     return (-1);

@@ -47,7 +47,7 @@ by two simple transformations applied line by line:
 And that's exactly what TRST does.  An implementation based on the
 simple observation above is relatively straightforward, for simple
 tables.  On encountering the start of a TABLE element, Lynx generates
-output as unusual for LMTS.  But it also keeps track of cell positions
+output as usual for LMTS.  But it also keeps track of cell positions
 and lengths in parallel.  If all goes well, that additional information
 is used to fix up the already formatted output lines when the TABLE
 ends.  If not all goes well, the table was not 'simple' enough, the

@@ -2330,6 +2330,8 @@ PUBLIC int HTCheckForInterrupt NOARGS
 	{
 	    BOOLEAN do_refresh;
 	    int res;
+	    int Newline_partial = LYGetNewline();
+
 	    switch (cmd)
 	    {
 	    case LYK_WHEREIS: /* search within the document */
@@ -6757,6 +6759,155 @@ PUBLIC void LYRenamedTemp ARGS2(
 	    StrAllocCopy((p->name), newname);
 	    break;
 	}
+    }
+}
+
+/*
+ *  Management of User Interface Pages. - kw
+ *
+ *  These are mostly temp files.  Pages which can be recognized by their
+ *  special URL (after having been loaded) need not be tracked here.
+ *
+ *  First some private stuff:
+ */
+typedef struct uipage_entry {
+    UIP_t	type;
+    unsigned	flags;
+    char *	url;
+    HTList *	alturls;
+    char *	file;
+} uip_entry;
+
+#define UIP_F_MULTI	0x0001	/* flag: track multiple instances */
+#define UIP_F_LIMIT	0x0002	/* flag: limit size of alturl list */
+#define UIP_F_LMULTI   (UIP_F_MULTI | UIP_F_LIMIT)
+
+static uip_entry ly_uip[] =
+{
+    { UIP_HISTORY		, UIP_F_LMULTI, NULL, NULL, NULL }
+  , { UIP_DOWNLOAD_OPTIONS	, 0	      , NULL, NULL, NULL }
+  , { UIP_PRINT_OPTIONS		, 0	      , NULL, NULL, NULL }
+  , { UIP_SHOWINFO		, UIP_F_LMULTI, NULL, NULL, NULL }
+  , { UIP_LIST_PAGE		, UIP_F_LMULTI, NULL, NULL, NULL }
+  , { UIP_VLINKS		, UIP_F_LMULTI, NULL, NULL, NULL }
+#if !defined(NO_OPTION_FORMS)
+  , { UIP_OPTIONS_MENU		, UIP_F_LMULTI, NULL, NULL, NULL }
+#endif
+#ifdef DIRED_SUPPORT
+  , { UIP_DIRED_MENU		, 0	      , NULL, NULL, NULL }
+  , { UIP_PERMIT_OPTIONS	, 0	      , NULL, NULL, NULL }
+  , { UIP_UPLOAD_OPTIONS	, UIP_F_LMULTI, NULL, NULL, NULL }
+#endif
+#ifdef EXP_ADDRLIST_PAGE
+  , { UIP_ADDRLIST_PAGE		, UIP_F_LMULTI, NULL, NULL, NULL }
+#endif
+  , { UIP_LYNXCFG		, UIP_F_LMULTI, NULL, NULL, NULL }
+#if !defined(NO_CONFIG_INFO)
+  , { UIP_CONFIG_DEF		, UIP_F_LMULTI, NULL, NULL, NULL }
+#endif
+/* The following are not generated tempfiles: */
+  , { UIP_TRACELOG		, 0	     , NULL, NULL, NULL }
+#if defined(DIRED_SUPPORT) && defined(OK_INSTALL)
+  , { UIP_INSTALL		, 0	     , NULL, NULL, NULL }
+#endif
+
+};
+
+/*  Public entry points for User Interface Page mamagement: */
+
+PUBLIC BOOL LYIsUIPage3 ARGS3(
+    CONST char *,	url,
+    UIP_t,		type,
+    int,		flagparam)
+{
+    unsigned int i;
+    size_t l;
+    if (!url)
+	return NO;
+    for (i = 0; i < TABLESIZE(ly_uip); i++) {
+	if (ly_uip[i].type == type) {
+	    if (!ly_uip[i].url) {
+		return NO;
+	    } else if ((flagparam & UIP_P_FRAG) ?
+		       (!strncmp(ly_uip[i].url, url, (l=strlen(ly_uip[i].url)))
+			&& (url[l] == '\0' || url[l] == '#')) :
+		       !strcmp(ly_uip[i].url, url)) {
+		return YES;
+	    } else if (ly_uip[i].flags & UIP_F_MULTI) {
+		char *p;
+		HTList *l0 = ly_uip[i].alturls;
+
+		while ((p = HTList_nextObject(l0)) != NULL) {
+		    if ((flagparam & UIP_P_FRAG) ?
+		       (!strncmp(p, url, (l=strlen(p)))
+			&& (url[l] == '\0' || url[l] == '#')) :
+			!strcmp(p, url))
+			return YES;
+		}
+	    }
+	    return NO;
+	}
+    }
+    return NO;
+}
+
+PUBLIC void LYRegisterUIPage ARGS2(
+    CONST char *,	url,
+    UIP_t,		type)
+{
+    unsigned int i;
+    for (i = 0; i < TABLESIZE(ly_uip); i++) {
+	if (ly_uip[i].type == type) {
+	    if (ly_uip[i].url && url &&
+		!strcmp(ly_uip[i].url, url)) {
+
+	    } else if (!ly_uip[i].url || !url ||
+		       !(ly_uip[i].flags & UIP_F_MULTI)) {
+		StrAllocCopy(ly_uip[i].url, url);
+
+	    } else {
+		char *p;
+		int n = 0;
+		HTList *l0 = ly_uip[i].alturls;
+
+		while ((p = HTList_nextObject(l0)) != NULL) {
+		    if (!strcmp(p, url))
+			return;
+		    if (!strcmp(p, ly_uip[i].url)) {
+			StrAllocCopy(ly_uip[i].url, url);
+			return;
+		    }
+		    n++;
+		}
+		if (!ly_uip[i].alturls)
+		    ly_uip[i].alturls = HTList_new();
+
+		if (n >= HTCacheSize && (ly_uip[i].flags & UIP_F_LIMIT))
+		    HTList_removeFirstObject(ly_uip[i].alturls);
+		HTList_addObject(ly_uip[i].alturls, ly_uip[i].url);
+		ly_uip[i].url = NULL;
+		StrAllocCopy(ly_uip[i].url, url);
+	    }
+
+	    return;
+	}
+    }
+}
+
+PUBLIC void LYUIPages_free NOARGS
+{
+    unsigned int i;
+    char *p;
+    HTList *l0;
+    for (i = 0; i < TABLESIZE(ly_uip); i++) {
+	FREE(ly_uip[i].url);
+	FREE(ly_uip[i].file);
+	l0 = ly_uip[i].alturls;
+	while ((p = HTList_nextObject(l0)) != NULL) {
+	    FREE(p);
+	}
+	HTList_delete(ly_uip[i].alturls);
+	ly_uip[i].alturls = NULL;
     }
 }
 

@@ -184,7 +184,7 @@
               toggles forcing of the secure flag for SSL cookies.
 
        -forms_options
-              toggles the style of options (menu or forms).
+              toggles whether the Options Menu is key-based or form-based.
 
        -from  toggles transmissions of From headers.
 

@@ -516,6 +516,7 @@ PUBLIC void HTDisplayPartial NOARGS
 	/*
 	**  HText_getNumOfLines() = "current" number of complete lines received
 	**  NumOfLines_partial = number of lines at the moment of last repaint.
+	**  (we update NumOfLines_partial only when we repaint the display.)
 	**
 	**  display_partial could only be enabled in HText_new()
 	**  so a new HTMainText object available - all HText_ functions use it,
@@ -528,11 +529,13 @@ PUBLIC void HTDisplayPartial NOARGS
 	**
 	**  So repaint the page only when necessary:
 	*/
-	if (((Newline_partial + display_lines) > NumOfLines_partial)
+	int Newline_partial = LYGetNewline();
+
+	if (((Newline_partial + display_lines) - 1 >= NumOfLines_partial)
 		/* current page not complete... */
 	&& (partial_threshold > 0 ?
-		((Newline_partial + partial_threshold) < HText_getNumOfLines()) :
-		((Newline_partial + display_lines) < HText_getNumOfLines()))
+		((Newline_partial + partial_threshold) -1 <= HText_getNumOfLines()) :
+		((Newline_partial + display_lines) - 1 <= HText_getNumOfLines()))
 		/*
 		 * Originally we rendered by increments of 2 lines,
 		 * but that got annoying on slow network connections.
@@ -598,6 +601,7 @@ PUBLIC int HTCopy ARGS4(
 	HTStream*,		sink)
 {
     HTStreamClass targetClass;
+    BOOL suppress_readprogress = NO;
     int bytes;
     int rv = 0;
 #ifdef _WINDOWS	/* 1997/11/11 (Tue) 15:18:16 */
@@ -715,6 +719,16 @@ PUBLIC int HTCopy ARGS4(
 	    break;
 	}
 
+	/*
+	 *  Suppress ReadProgress messages when collecting a redirection
+	 *  message, at least initially (unless/until anchor->content_type
+	 *  gets changed, probably by the MIME message parser).  That way
+	 *  messages put up by the HTTP module or elsewhere can linger in
+	 *  the statusline for a while. - kw
+	 */
+	suppress_readprogress = (anchor && anchor->content_type &&
+				 !strcmp(anchor->content_type,
+					 "message/x-http-redirection"));
 #ifdef NOT_ASCII
 	{
 	    char * p;
@@ -726,7 +740,8 @@ PUBLIC int HTCopy ARGS4(
 
 	(*targetClass.put_block)(sink, input_buffer, status);
 	bytes += status;
-	HTReadProgress(bytes, anchor ? anchor->content_length : 0);
+	if (!suppress_readprogress)
+	    HTReadProgress(bytes, anchor ? anchor->content_length : 0);
 	HTDisplayPartial();
 
     } /* next bufferload */
@@ -795,7 +810,11 @@ PUBLIC int HTFileCopy ARGS2(
 	(*targetClass.put_block)(sink, input_buffer, status);
 	bytes += status;
 	HTReadProgress(bytes, 0);
-	HTDisplayPartial();
+	/*  Suppress last screen update in partial mode - a regular update
+	 *  under control of mainloop() should follow anyway. - kw
+	 */
+	if (display_partial && bytes != HTMainAnchor->content_length)
+	    HTDisplayPartial();
 
 	if (HTCheckForInterrupt()) {
 	    _HTProgress (TRANSFER_INTERRUPTED);
@@ -1151,7 +1170,7 @@ PUBLIC int HTParseFile ARGS5(
 **	-501		Stream stack failed (cannot present or convert).
 **	HT_LOADED	All data sent.
 **
-**  Stat of memory and target stream on return:
+**  State of memory and target stream on return:
 **	always		chunk unchanged; target freed, aborted, or NULL.
 */
 PUBLIC int HTParseMem ARGS5(
@@ -1350,4 +1369,55 @@ PUBLIC HTStream * HTNetToText ARGS1(HTStream *, sink)
     me->had_cr = NO;
     me->sink = sink;
     return me;
+}
+
+PRIVATE HTStream	HTBaseStreamInstance;		      /* Made static */
+/*
+**	ERROR STREAM
+**	------------
+**	There is only one error stream shared by anyone who wants a
+**	generic error returned from all stream methods.
+*/
+PRIVATE void HTErrorStream_put_character ARGS2(HTStream *, me GCC_UNUSED, char, c GCC_UNUSED)
+{
+    LYCancelDownload = TRUE;
+}
+
+PRIVATE void HTErrorStream_put_string ARGS2(HTStream *, me GCC_UNUSED, CONST char *, s)
+{
+    if (s && *s)
+	LYCancelDownload = TRUE;
+}
+
+PRIVATE void HTErrorStream_write ARGS3(HTStream *, me GCC_UNUSED, CONST char *, s, int, l)
+{
+    if (l && s)
+	LYCancelDownload = TRUE;
+}
+
+PRIVATE void HTErrorStream_free ARGS1(HTStream *, me GCC_UNUSED)
+{
+    return;
+}
+
+PRIVATE void HTErrorStream_abort ARGS2(HTStream *, me GCC_UNUSED, HTError, e GCC_UNUSED)
+{
+    return;
+}
+
+PRIVATE CONST HTStreamClass HTErrorStreamClass =
+{
+    "ErrorStream",
+    HTErrorStream_free,
+    HTErrorStream_abort,
+    HTErrorStream_put_character,
+    HTErrorStream_put_string,
+    HTErrorStream_write
+};
+
+PUBLIC HTStream * HTErrorStream (void)
+{
+    CTRACE((tfp, "ErrorStream. Created\n"));
+    HTBaseStreamInstance.isa = &HTErrorStreamClass;    /* The rest is random */
+    return &HTBaseStreamInstance;
 }

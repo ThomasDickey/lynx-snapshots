@@ -573,6 +573,7 @@ PUBLIC int LYdownload_options ARGS2(
     fprintf(fp0, "</pre>\n");
     EndInternalPage(fp0);
     LYCloseTempFP(fp0);
+    LYRegisterUIPage(*newfile, UIP_DOWNLOAD_OPTIONS);
 
     /*
      *	Free off temp copy.

@@ -15,6 +15,9 @@
 #include <LYStrings.h>
 #include <LYCharUtils.h>
 #include <LYCharSets.h>
+#ifdef DISP_PARTIAL
+#include <LYMainLoop.h>
+#endif
 
 #ifdef DIRED_SUPPORT
 #include <LYUpload.h>
@@ -88,28 +91,28 @@ PUBLIC void LYAddVisitedLink ARGS1(
 	  !strncmp(doc->address, "file://localhost/", 17)))) {
 	int related = 1;	/* First approximation only */
 
-	if (	!strcmp(title, HISTORY_PAGE_TITLE) ||
-		!strcmp(title, VISITED_LINKS_TITLE) ||
-		!strcmp(title, SHOWINFO_TITLE) ||
-		!strcmp(title, STATUSLINES_TITLE) ||
+	if (	LYIsUIPage(doc->address, UIP_HISTORY) ||
+		LYIsUIPage(doc->address, UIP_VLINKS) ||
+		LYIsUIPage(doc->address, UIP_SHOWINFO) ||
+		!strncmp(doc->address, "LYNXMESSAGES:", 13) ||
 			(related = 0)	||
 #ifdef DIRED_SUPPORT
-		!strcmp(title, DIRED_MENU_TITLE) ||
-		!strcmp(title, UPLOAD_OPTIONS_TITLE) ||
-		!strcmp(title, PERMIT_OPTIONS_TITLE) ||
+		LYIsUIPage(doc->address, UIP_DIRED_MENU) ||
+		LYIsUIPage(doc->address, UIP_UPLOAD_OPTIONS) ||
+		LYIsUIPage(doc->address, UIP_PERMIT_OPTIONS) ||
 #endif /* DIRED_SUPPORT */
-		!strcmp(title, PRINT_OPTIONS_TITLE) ||
-		!strcmp(title, DOWNLOAD_OPTIONS_TITLE) ||
-		!strcmp(title, OPTIONS_TITLE) ||
-		!strcmp(title, CURRENT_KEYMAP_TITLE) ||
-		!strcmp(title, LIST_PAGE_TITLE) ||
+		LYIsUIPage(doc->address, UIP_PRINT_OPTIONS) ||
+		LYIsUIPage(doc->address, UIP_DOWNLOAD_OPTIONS) ||
+		LYIsUIPage(doc->address, UIP_OPTIONS_MENU) ||
+		!strncmp(doc->address, "LYNXKEYMAP:", 11) ||
+		LYIsUIPage(doc->address, UIP_LIST_PAGE) ||
 #ifdef EXP_ADDRLIST_PAGE
-		!strcmp(title, ADDRLIST_PAGE_TITLE) ||
+		LYIsUIPage(doc->address, UIP_ADDRLIST_PAGE) ||
 #endif
-		!strcmp(title, CONFIG_DEF_TITLE) ||
-		!strcmp(title, LYNXCFG_TITLE) ||
-		!strcmp(title, COOKIE_JAR_TITLE) ||
-		!strcmp(title, LYNX_TRACELOG_TITLE)	) {
+		LYIsUIPage(doc->address, UIP_CONFIG_DEF) ||
+		LYIsUIPage(doc->address, UIP_LYNXCFG) ||
+		!strncmp(doc->address, "LYNXCOOKIE:", 11) ||
+		LYIsUIPage(doc->address, UIP_TRACELOG)	) {
 	    if (!related)
 		PrevVisitedLink = NULL;
 	    return;
@@ -222,17 +225,31 @@ PUBLIC BOOLEAN LYwouldPush ARGS2(
 	    return TRUE;
     }
 
-    return (!strcmp(title, HISTORY_PAGE_TITLE)
-	 || !strcmp(title, PRINT_OPTIONS_TITLE)
-	 || !strcmp(title, DOWNLOAD_OPTIONS_TITLE)
+    if (docurl) {
+	return (LYIsUIPage(docurl, UIP_HISTORY)
+		|| LYIsUIPage(docurl, UIP_PRINT_OPTIONS)
+		|| LYIsUIPage(docurl, UIP_DOWNLOAD_OPTIONS)
 #ifdef DIRED_SUPPORT
-	 || !strcmp(title, DIRED_MENU_TITLE)
-	 || !strcmp(title, UPLOAD_OPTIONS_TITLE)
-	 || !strcmp(title, PERMIT_OPTIONS_TITLE)
+		|| LYIsUIPage(docurl, UIP_DIRED_MENU)
+		|| LYIsUIPage(docurl, UIP_UPLOAD_OPTIONS)
+		|| LYIsUIPage(docurl, UIP_PERMIT_OPTIONS)
 #endif /* DIRED_SUPPORT */
-	 )
-	 ? FALSE
-	 : TRUE;
+	    )
+	    ? FALSE
+	    : TRUE;
+    } else {
+	return (!strcmp(title, HISTORY_PAGE_TITLE)
+		|| !strcmp(title, PRINT_OPTIONS_TITLE)
+		|| !strcmp(title, DOWNLOAD_OPTIONS_TITLE)
+#ifdef DIRED_SUPPORT
+		|| !strcmp(title, DIRED_MENU_TITLE)
+		|| !strcmp(title, UPLOAD_OPTIONS_TITLE)
+		|| !strcmp(title, PERMIT_OPTIONS_TITLE)
+#endif /* DIRED_SUPPORT */
+	    )
+	    ? FALSE
+	    : TRUE;
+    }
 }
 
 /*
@@ -426,7 +443,7 @@ PUBLIC void LYpop ARGS1(
 	doc->internal_link = history[nhist].internal_link;
 #ifdef DISP_PARTIAL
 	/* assume we pop the 'doc' to show it soon... */
-	Newline_partial = doc->line;	/* reinitialize */
+	LYSetNewline(doc->line);	/* reinitialize */
 #endif /* DISP_PARTIAL */
 	CTRACE((tfp, "LYpop[%d]: address:%s\n     title:%s\n",
 		    nhist, doc->address, doc->title));
@@ -455,7 +472,7 @@ PUBLIC void LYpop_num ARGS2(
 	doc->internal_link = history[number].internal_link; /* ?? */
 #ifdef DISP_PARTIAL
 	/* assume we pop the 'doc' to show it soon... */
-	Newline_partial = doc->line;	/* reinitialize */
+	LYSetNewline(doc->line);	/* reinitialize */
 #endif /* DISP_PARTIAL */
     }
 }
@@ -568,7 +585,7 @@ PUBLIC BOOLEAN historytarget ARGS1(
      */
     if (HTMainText && nhist > 0 &&
 	!strcmp(HTLoadedDocumentTitle(), HISTORY_PAGE_TITLE) &&
-	!LYwouldPush(HTLoadedDocumentURL(), HTLoadedDocumentTitle()) &&
+	LYIsUIPage3(HTLoadedDocumentURL(), UIP_HISTORY, 0) &&
 	strcmp(HTLoadedDocumentURL(), history[nhist-1].address)) {
 	HTuncache_current_document();  /* don't waste the cache */
     }
@@ -659,6 +676,7 @@ PUBLIC int LYShowVisitedLinks ARGS1(
     }
 
     LYLocalFileToURL(newfile, tempfile);
+    LYRegisterUIPage(*newfile, UIP_VLINKS);
 
     LYforce_HTML_mode = TRUE;	/* force this file to be HTML */
     LYforce_no_cache = TRUE;	/* force this file to be new */

@@ -7,8 +7,16 @@ WWW_MACH = djgpp
 # The ASIS repository's name for the machine we are on
 #ASIS_MACH = hardware/os
 
+# Use this option to enable optional and *experimental* color style.
+#ENABLE_COLOR_STYLE = \
+ -DUSE_COLOR_STYLE \
+ -DUSE_HASH \
+ -DLINKEDSTYLES
+
+
 CFLAGS = -O2 -DUSE_ZLIB -DDOSPATH -DNOUSERS -DDISP_PARTIAL \
 -DDIRED_SUPPORT -DSOURCE_CACHE -DUSE_PSRC \
+ $(ENABLE_COLOR_STYLE) \
 -DEXP_FILE_UPLOAD \
 -DWATT32 \
 -I../Implementation \

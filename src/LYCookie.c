@@ -2186,6 +2186,11 @@ PUBLIC void LYStoreCookies ARGS1 (
     FILE *cookie_handle;
     time_t now = time(NULL); /* system specific? - RP */
 
+    if (!strcmp(cookie_file, "/dev/null")) {
+	/* We give /dev/null the Unix meaning, regardless of OS */
+	return;
+    }
+
     /*
      *	Check whether we have something to do. - FM
      */

@@ -1080,7 +1080,11 @@ PRIVATE int setkey_cmd (char *parse)
 		*t = '\0';
 	    if (map_string_to_keysym (s, &keysym) >= 0
 	     && unescape_string(parse, buf)) {
-		CTRACE((tfp, "KEYMAP(DEF) keysym=%#x, seq='%s'\n", keysym, buf));
+		if (LYTraceLogFP == 0) {
+		    CTRACE((tfp, "KEYMAP(DEF) keysym=%#x\n", keysym));
+		} else {
+		    CTRACE((tfp, "KEYMAP(DEF) keysym=%#x, seq='%s'\n", keysym, buf));
+		}
 		return define_key(buf, keysym);
 	    }
 	    else {

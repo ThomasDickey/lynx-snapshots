@@ -22,9 +22,7 @@
 
 #include <LYLeaks.h>
 
-#if defined(WIN_EX) && defined(UNUSED_CODE)
 #include <HTParse.h>
-#endif
 
 /*	Issue a message about a problem.		HTAlert()
 **	--------------------------------
@@ -542,6 +540,88 @@ PUBLIC int HTConfirmDefault ARGS2(CONST char *, Msg, int, Dft)
 PUBLIC BOOL HTConfirm ARGS1(CONST char *, Msg)
 {
     return (BOOL) HTConfirmDefault(Msg, DFT_CONFIRM);
+}
+
+/*
+ *  Ask a post resubmission prompt with some indication of what would
+ *  be resubmitted, useful especially for going backward in history.
+ *  Try to use parts of the address or, if given, the title, depending
+ *  on how much fits on the statusline.
+ *  if_imgmap and if_file indicate how to handle an address that is
+ *  a "LYNXIMGMAP:", or a "file:" URL (presumably the List Page file),
+ *  respectively: 0: auto-deny, 1: auto-confirm, 2: prompt.
+ *  - kw
+ */
+
+PUBLIC BOOL confirm_post_resub ARGS4(
+    CONST char*,	address,
+    CONST char*,	title,
+    int,		if_imgmap,
+    int,		if_file)
+{
+    size_t len1;
+    CONST char *msg = CONFIRM_POST_RESUBMISSION_TO;
+    char buf[240];
+    char *temp = NULL;
+    BOOL res;
+    size_t maxlen = LYcols - 6;
+    if (!address) {
+	return(NO);
+    } else if (!strncmp(address, "LYNXIMGMAP:", 11)) {
+	if (if_imgmap <= 0)
+	    return(NO);
+	else if (if_imgmap == 1)
+	    return(YES);
+	else
+	    msg = CONFIRM_POST_LIST_RELOAD;
+    } else if (!strncmp(address, "file:", 5)) {
+	if (if_file <= 0)
+	    return(NO);
+	else if (if_file == 1)
+	    return(YES);
+	else
+	    msg = CONFIRM_POST_LIST_RELOAD;
+    } else if (dump_output_immediately) {
+	return(NO);
+    }
+    if (maxlen >= sizeof(buf))
+	maxlen = sizeof(buf) - 1;
+    if ((len1 = strlen(msg)) +
+	strlen(address) <= maxlen) {
+	sprintf(buf, msg, address);
+	return HTConfirm(buf);
+    }
+    if (len1 + strlen(temp = HTParse(address, "",
+				     PARSE_ACCESS+PARSE_HOST+PARSE_PATH
+				     +PARSE_PUNCTUATION)) <= maxlen) {
+	sprintf(buf, msg, temp);
+	res = HTConfirm(buf);
+	FREE(temp);
+	return(res);
+    }
+    FREE(temp);
+    if (title && (len1 + strlen(title) <= maxlen)) {
+	sprintf(buf, msg, title);
+	return HTConfirm(buf);
+    }
+    if (len1 + strlen(temp = HTParse(address, "",
+				     PARSE_ACCESS+PARSE_HOST
+				     +PARSE_PUNCTUATION)) <= maxlen) {
+	sprintf(buf, msg, temp);
+	res = HTConfirm(buf);
+	FREE(temp);
+	return(res);
+    }
+    FREE(temp);
+    if ((temp = HTParse(address, "", PARSE_HOST)) && *temp &&
+	len1 + strlen(temp) <= maxlen) {
+	sprintf(buf, msg, temp);
+	res = HTConfirm(buf);
+	FREE(temp);
+	return(res);
+    }
+    FREE(temp);
+    return HTConfirm(CONFIRM_POST_RESUBMISSION);
 }
 
 /*	Prompt for answer and get text back.		HTPrompt()

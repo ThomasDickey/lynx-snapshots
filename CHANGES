@@ -1,7 +1,222 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+1999-12-15 (2.8.3dev.17)
++ add a caution to jumpsUnix.html -PW
++ ifdef LYEditKeyForAction() to compile when EXP_ALT_BINDINGS is not defined
+  (reported by VH) -TD
++ add 3-valued DEFAULT_KEYPAD_MODE to lynx.cfg -TD
++ revert DEFAULT_KEYPAD_MODE to NUMBERS_AS_ARROWS (consensus) -TD
++ add COOKIE_SAVE_FILE lynx.cfg and corresponding command-line option, default
+  it to /dev/null, which is recognized on all systems -BJP
++ correct typo in declaration of LYLeakSAVsprintf() -Michael Warner
++ remove from_source_cache_p parameters in LYMainLoop.c (request by LP) -TD
++ documentation updates covering the Options Menu & other changes omitted
+  previously -PW
++ small correction in TRSTable.c:  One of my previous changes for TRST broke
+  inheritance of alignment for cell contents from TR elements -KW
++ new functions for keeping track of temp files (and some other files) for user
+  interface pages:  LYRegisterUIPage(), LYIsUIPage().  Most checks that look at
+  the loaded document's title have been replaced by this mechanism.  This also
+  replaces various mechanism that were implemented for some specific pages -KW
++ also replaced some more checks that looked at the document's title by checks
+  of the address, for pages that are always identified by a special URL scheme
+  (LYNXCOOKIE:, LYNXKEYMAP:, LYNXMESSAGES:) -KW
++ now check directly in postoptions() whether the loaded document is one from
+  which submission of option changes can be accepted, using the new tracking
+  mechanism.  Only the form-based Options Menu and Visited Links are allowed. 
+  Relying on a good random generator to prevent spoofing is not necessary. 
+  Kept the secure_string check, but it should be only regarded as an aid to the
+  user, it prevents changing options from an instance of the form-based Options
+  Menu that is not the most recent one (this can happen if an Options Menu page
+  is pushed on the history stack and later returned to) -KW
++ honor REUSE_TEMPFILES for some more user interface pages.
++ prevent an obscure LYNXOPTIONS://MBM_MENU crash.
++ other minor additions and corrections to checks for special pages -KW
++ changed INSTALLATION text for --enable-internal-links -KW, HN
++ changes to build dev16 with color styles on DJGPP/PDCurses 2.3
+  (you must uncomment a line in makefiles to build lynx that way) -LP
++ correct a missing check in HTML.c HTML_A case against force_empty_hrefless_a
+  (reported by KW) -VH
++ changed lines -> disp_lines, cols -> disp_cols in GridText.c -KW
++ don't reparse with SOURCE_CACHE if screen size changed only
+  vertically (disp_lines).  Also don't reparse unnecessarily in
+  some cases of LYK_MINIMAL -KW
++ don't append (HEAD) to title for INFO screen if already present -KW
++ set newdoc.title to curdoc.title in LYMainLoop.c for SOURCE command.
+  Otherwise INFO could show the wrong document's title -KW
++ made global from_source_cache PRIVATE to LYMainLoop.c -KW
++ reset DIRED_MENU item list when lynx.cfg is reloaded -KW
++ new lynx.cfg option AUTO_UNCACHE_DIRLISTS for Dired mode, see lynx.cfg -KW
++ prevent filedescriptor and inode leak in HTFWriter.c that occurred if
+  the same resource is repeatedly downloaded (for 'd' or for passing to
+  a viewer) -KW
++ corrected logic for suppressing last HTDisplayPartial call at end of file,
+  after discussion with LP -KW
++ corrected line counting in HTDisplayPartial, taking into account offsets used
+  for the various variables being compared -KW
++ added confirmation prompt for reloading non-safe post_data documents in
+  form-based Options Menu change handling.  Before this change, the prompt
+  would be issued after returning to mainloop() instead, with different
+  behavior if confirmation was denied:  The document would be popped instead of
+  keeping the current instance -KW
++ function confirm_post_resub made PUBLIC and moved to HTAlert.c.  New function
+  srcmode_for_next_retrieval in LYGetFile.c.  Both used for the above and in
+  LYMainLoop.c -KW
++ fixed behavior for various post_data confirmation prompts in connection with
+  SOURCE_CACHE in LYMainLoop.c.  Before this change, the user would be prompted
+  to confirm reloading, yet on confirmation reparsing from the source cache
+  would be attempted.  So prompts were unnecessary and misleading -KW
++ try to handle some failures of errors in source cache reparsing better.  Try
+  to make sure that unsafe post_data documents don't get reloaded accidentally
+  without confirmation if source cache reparsing fails.  Treat partial data
+  (i.e.  loading from source cache probably 'z'apped by user) as successful, as
+  HTLoadDocument does.  (Various error conditions are currently only passed on
+  to the caller by HTParseFile, not by HTParseMem.  I left this apparent design
+  decision unchanged.) -KW
++ source cache reparsing did not rewrite a previous cache copy when the
+  document was reloaded from the net.  This means that e.g. NOCACHE or RELOAD
+  would force reloading from the network, but then on the next non-forced
+  loading of the document (e.g.  by toggling to SOURCE view) the old (and
+  possibly stale) copy would again be used.  Now the newer copy replaces the
+  old copy if loading is successful (and not interrupted or aborted with 'z').
+  (Note that RELOAD while in source view, at least in the normal one without
+  -preparsed or -prettysrc, does not have this effect since the document does
+  not get pushed through the cache writer at all in that case.) -KW
++ if a source cache copy for a document exists, we need a way to ensure that
+  reparsing from that copy does not try to rewrite that same copy "under our
+  feet" while still reading from it.  Previously that was done by just never
+  rewriting an existing source cache.  After changing that (see previous item),
+  a different approach is needed to prevent such collisions.  This is now
+  solved in two ways:  (a) Bse a temporary new file or memory chunk for
+  writing, and only commit it to the doc's ParentAnchor object (replacing the
+  previous copy) at the end of the incoming data stream.  This is done in
+  CacheThru_free(), but not in CacheThru_abort(), meaning that an interrupted
+  or otherwise aborted transmission will not replace an existing cached copy
+  with a truncated now version - as long as such interruption gets detected and
+  properly indicated, which is not the case for reading from the source cache
+  with SOURCE_CACHE:MEMORY in effect, see above.  (b) Change the
+  HTParentAnchor's protocol field to indicate a non-HTTP protocol, before
+  starting to load from source cache in HTreparse_document().  Normally, as
+  long as DEBUG_SOURCE_CACHE is not defined, this prevents the cache writer
+  from (re)generating a cache copy.  Mechanism (b) isn't necessary (everything
+  still works when DEBUG_SOURCE_CACHE is defined), it just avoids unnecessary
+  work -KW
++ source cache files and chunks were not always being removed when they should,
+  probably since change of 1999-06-18.  A large number of cache copies could be
+  kept around unnecessarily wasting disk or memory space.  Now make sure that
+  the source cache copy gets removed when a document is removed from the cache
+  of rendered docs.  They would never be reused anyway.  New function
+  HTAnchor_clearSourceCache.  Note to other developers:  HTAnchor_delete()
+  doesn't always remove the HTParentAnchor object, see its implementation -KW
++ detect errors during appending to the cache copy.  Previously, memory
+  allocation errors (for SOURCE_CACHE:MEMORY) would cause program exit, and
+  file write errors (SOURCE_CACHE:FILE, e.g. if the temp disk space was full)
+  would go undetected and leave the cache file corrupt or truncated.  Now allow
+  the program to continue normally, just cancel the source cache generation for
+  the current document (which may free up enough memory or disk space to remedy
+  the immediate problem).  Produce an alert message.  In the case of a file
+  error, produce the alert only once until a possibly re-reading of lynx.cfg,
+  since Lynx should remain otherwise functional in the face of cache file
+  writing errors -KW
++ extended HTChunk: added a variant for which memory allocation errors
+  are not fatal.  Used for changes described in previous item -KW
++ don't write raw escape sequences to trace output for lynx-keymaps if
+  not using trace log file -KW
++ protect echo() in stop_curses, it could crash if stop_curses gets called
+  without preceding start_curses -KW
++ save size for regular files in anchor structure (we do the stat() anyway).
+  It shows up on INFO page as Content-Length.  Also use it in partial display
+  mode to prevent the last call to HTDisplayPartial from HTFileCopy, since a
+  call to HText_pageDisplay will follow immediately.  (But note that nothing
+  important depends on the correct size; should it be wrong, we lose at most
+  one partial display screen update.  An equivalent suppression of the last
+  partial update for network protocols is not recommended, since (a) the size
+  is more unreliable and (b) the socket FIN may be delayed by the network.) -KW
++ split HTMIME_put_character into three functions -KW
++ made HTMIME.c handle folded header lines correctly (long-standing bug,
+  reported in February by Devid Coles) -KW
+  [ reference: http://www.flora.org/lynx-dev/html/month0299/msg00135.html ]
++ changed how HTTP redirection messages are handled.  Don't read full message
+  and parse buffer for some header fields in HTLoadHTTP.  Use common HTMIME.c
+  header parsing instead.  Functions added/modified in HTMIME.c for storing
+  away the Location URL (if requested and found) and for stopping after the
+  headers.  New private MIME types "message/x-http-redirection" and "www/debug"
+  to control this via HTStreamStack.  Basic approach taken from newer W3C
+  libwww.  Benefits:
+  - Removes actual bug that was reported: "Content-Location:" was falsely
+    recognized as "Location:". (long-standing bug)
+  [ reference: http://www.flora.org/lynx-dev/html/month1199/msg00370.html ]
+  - Removes potential other bugs caused by inferior header parsing in HTTP.c
+    (including Set-Cookie/Set-Cookie2).
+  - Should more header fields be needed in the future (also) for redirection
+    messages, we now get them automatically instead of having to add extra
+    code.
+  - Trace output now shows the same kind of info as for other responses.
+    In particular, Set-Cookie/Set-Cookie2 header fields will normally be
+    visible.
+  - Statusline progress messages now actually show the HTTP response line
+    as intended, and it is recorded for LYNXMESSAGES:. (Long-standing error,
+    previously what was shown could be an empty string, or arbitrary parts
+    of the response, including HTML markup from the message body.)
+  - Adding redirection support for lynxcgi would now be simpler (although
+    currently not done) -KW
++ HTErrorStream(), similar to W3C libwww, used in some cases for the above -KW
++ remove check in HTParse() dated 98/09/08 which prevented unescaping of 8-bit
+  data (reported by KW)
+* refresh screen for TRST changes in partial display mode as early as possible.
+  This fixes a problem when the table finished below the screen bottom -LP
+* remove global Newline_partial, use LYGetNewline() instead -LP
+* adapt idea by VH as a Perl script cfg-html.pl which generates HTML form of
+  the lynx.cfg documentation -TD
 1999-11-30 (2.8.3dev.16)
+* added -nozap command line option -KW
+  - In its basic form, it disables all checks for 'z' or ^G or other
+  "immediate" keys that otherwise happen while processing a request (for name
+  lookups, before or during loading of a document).  Note that it also disables
+  paging through an incompletely loaded document during "partial display".
+  Normally, i.e. without this option, key input gets "swallowed" or "used up"
+  by the quasi-asynchronous checks even if they are not 'z' etc.  or keys that
+  have meaning during partial display (meaningless keys just get ignored).
+  With this option, key input only gets read when lynx is ready to act on it.
+  - This can be used (a) by people who like to always have predictable
+  type-ahead (and don't care for 'z'apping and partial display scrolling), (b)
+  to achieve predictable reaction to keys if lynx is used under some scripting
+  environment that feeds it input like expect, and (c) for scripting a lynx
+  session by feeding it keyboard-like character input via input redirection
+  from a file or pipe (a simpler alternative to b, without the need for expect
+  or similar).
+  - Point (c) could be called "poor man's scripting".  Note that the input has
+  to be provided in a raw form (as lynx would see it when it is actually sent
+  by keys), including raw control characters and escape sequences if necessary.
+  This patch does not change anything in the way such input is read and parsed,
+  other that what is explicitly described here.  (This paragraph is only here
+  to explain the context, it does not describe new features.) P.m.s.  will only
+  work as expected if lynx, on a given platform and with the display library
+  chosen, uses standard input for reading keyboard input.  This is the case
+  with ncurses and possibly other curses implementations, but not with slang,
+  on Unix-like platforms, and cannot work on platforms where lynx gets keyboard
+  input in the form of platform- or implementation-specific keycodes (DOS,
+  Windows - except with cygwin?) instead of as an octet stream.
+  - The -nozap option takes an argument.  The basic functionality as already
+  described gets invoked if the argument is not a specially recognized keyword
+  (it is suggested that -nozap=full or -nozap=all be used).  The only
+  recognized keyword is "initially".  With -nozap=initially, additional special
+  behavior is invoked the first time (and *only* the first time) when lynx
+  encounters an error or EOF when reading key input.  (Currently this will not
+  get detected if slang with USE_KEYMAPS is used.) In this, case, -nozap
+  reverts to the default state ('z' will be ckecked for again).  Under some
+  conditions are true (key input was taken from stdin, and stdin was not
+  connected to a terminal), lynx will then attempt to reopen stdin, connecting
+  it to a terminal (stdout, stderr, and the process's controlling tty are
+  tried, in that order - this is subject to change if something would be more
+  reasonable).
+  - The -nozap=initially special behavior will get triggered if input comes
+  from a file or pipe (p.m.s.  above) when the provided characters are "used
+  up".  Normally lynx should then just exit.  The special behavior hands
+  control of the session to the interactive user instead at that point.  All
+  code for -nozap is only compiled in if preprocessor symbol MISC_EXP is
+  explicitly defined.
 * ifdef'd some places for MINGW32 (diffs from Victor Schneider)
 * remove 'host' variable in LYGetHostByName() that obscured module-level
   'host[]' array in HTTCP.c for _WINDOWS_NSL configuration (patch by HS,

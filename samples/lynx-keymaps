@@ -131,7 +131,7 @@ setkey "^(up)"		UPARROW
 #setkey "\033e"          Meta-'e'
 #setkey "\033\033[28~"   Meta-F1
 #
-# The following extensions, introduced after lynx2.8.2, allow you to map
+# The following extensions, introduced after lynx2.8.2, allow mapping
 # escape sequences directly to key commands (lynxactioncodes).
 #
 #       setkey ESC-SEQUENCE  LAC:LYNX_ACTION

@@ -579,6 +579,20 @@ static int default_editor_fun ARGS1(
     return 0;
 }
 
+static int default_keypad_mode_fun ARGS1(
+	char *,		value)
+{
+    if (!strcasecomp(value, "NUMBERS_AS_ARROWS"))
+	keypad_mode = NUMBERS_AS_ARROWS;
+    else if (!strcasecomp(value, "LINKS_ARE_NUMBERED"))
+	keypad_mode = LINKS_ARE_NUMBERED;
+    else if (!strcasecomp(value, "LINKS_AND_FIELDS_ARE_NUMBERED")
+     || !strcasecomp(value, "LINKS_AND_FORM_FIELDS_ARE_NUMBERED"))
+	keypad_mode = LINKS_AND_FIELDS_ARE_NUMBERED;
+
+   return 0;
+}
+
 static int numbers_as_arrows_fun ARGS1(
 	char *,		value)
 {
@@ -1255,6 +1269,9 @@ static Config_Type Config_Table [] =
 #ifdef EXP_CHARSET_CHOICE
      PARSE_FUN("assumed_doc_charset_choice",CONF_FUN,parse_assumed_doc_charset_choice),
 #endif
+#ifdef DIRED_SUPPORT
+     PARSE_ENV("auto_uncache_dirlists", CONF_INT, &LYAutoUncacheDirLists),
+#endif
      PARSE_SET("block_multi_bookmarks", CONF_BOOL, &LYMBMBlocked),
      PARSE_SET("bold_h1", CONF_BOOL, &bold_H1),
      PARSE_SET("bold_headers", CONF_BOOL, &bold_headers),
@@ -1269,6 +1286,7 @@ static Config_Type Config_Table [] =
      PARSE_STR("cookie_accept_domains", CONF_STR, &LYCookieSAcceptDomains),
 #ifdef EXP_PERSISTENT_COOKIES
      PARSE_STR("cookie_file", CONF_STR, &LYCookieFile),
+     PARSE_STR("cookie_save_file", CONF_STR, &LYCookieSaveFile),
 #endif /* EXP_PERSISTENT_COOKIES */
      PARSE_STR("cookie_loose_invalid_domains", CONF_STR, &LYCookieSLooseCheckDomains),
      PARSE_STR("cookie_query_invalid_domains", CONF_STR, &LYCookieSQueryCheckDomains),
@@ -1282,6 +1300,7 @@ static Config_Type Config_Table [] =
      PARSE_FUN("default_cache_size", CONF_FUN, default_cache_size_fun),
      PARSE_FUN("default_editor", CONF_FUN, default_editor_fun),
      PARSE_STR("default_index_file", CONF_STR, &indexfile),
+     PARSE_FUN("default_keypad_mode", CONF_FUN, default_keypad_mode_fun),
      PARSE_FUN("default_keypad_mode_is_numbers_as_arrows", CONF_FUN, numbers_as_arrows_fun),
      PARSE_FUN("default_user_mode", CONF_FUN, default_user_mode_fun),
 #if defined(VMS) && defined(VAXC) && !defined(__DECC)
@@ -1544,6 +1563,9 @@ PUBLIC void free_lynx_cfg NOARGS
     }
     free_item_list();
     free_printer_item_list();
+#ifdef DIRED_SUPPORT
+    reset_dired_menu();		/* frees and resets dired menu items - kw */
+#endif
     FREE(lynxcfginfo_url);
 #if defined(HAVE_CONFIG_H) && !defined(NO_CONFIG_INFO)
     FREE(configinfo_url);
@@ -2024,6 +2046,7 @@ PUBLIC int lynx_cfg_infopage ARGS1(
 	if (HTMainText && nhist > 0 &&
 	    !strcmp(HTLoadedDocumentTitle(), LYNXCFG_TITLE) &&
 	    !strcmp(HTLoadedDocumentURL(), history[nhist-1].address) &&
+	    LYIsUIPage(history[nhist-1].address, UIP_LYNXCFG) &&
 	    (!lynxcfginfo_url ||
 	     strcmp(HTLoadedDocumentURL(), lynxcfginfo_url))) {
 	    /*  the page was pushed, so pop-up. */
@@ -2049,6 +2072,7 @@ PUBLIC int lynx_cfg_infopage ARGS1(
 		return(NOT_FOUND);
 
 	    HTuncache_current_document();  /* will never use again */
+	    LYUnRegisterUIPage(UIP_LYNXCFG);
 	}
 
 	/*  now set up the flag and fall down to create a new LYNXCFG:/ page */
@@ -2168,6 +2192,7 @@ PUBLIC int lynx_cfg_infopage ARGS1(
 	fprintf(fp0, "</pre>\n");
 	EndInternalPage(fp0);
 	LYCloseTempFP(fp0);
+	LYRegisterUIPage(lynxcfginfo_url, UIP_LYNXCFG);
     }
 
     /* return to getfile() cycle */
@@ -2255,6 +2280,7 @@ PUBLIC int lynx_compile_opts ARGS1(
 	fprintf(fp0, "</pre>\n");
 	EndInternalPage(fp0);
 	LYCloseTempFP(fp0);
+	LYRegisterUIPage(configinfo_url, UIP_CONFIG_DEF);
     }
 
     /* exit to getfile() cycle */

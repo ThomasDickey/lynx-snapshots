@@ -32,13 +32,6 @@
 /* Special return code for LYMainLoop.c */
 #define PERMIT_FORM_RESULT (-99)
 
-extern char LYPermitFileURL[];
-extern char LYDiredFileURL[];
-extern char LYUploadFileURL[];
-#ifdef OK_INSTALL
-extern char LYInstallFileURL[];
-#endif
-
 extern BOOLEAN local_create PARAMS((document *doc));
 extern BOOLEAN local_modify PARAMS((document *doc, char **newpath));
 extern BOOLEAN local_remove PARAMS((document *doc));
@@ -66,6 +59,7 @@ extern int local_dired PARAMS((document *doc));
 extern int dired_options PARAMS ((document *doc, char ** newfile));
 
 extern void add_menu_item PARAMS((char *str));
+extern void reset_dired_menu NOPARAMS;
 
 #endif /* DIRED_SUPPORT */
 

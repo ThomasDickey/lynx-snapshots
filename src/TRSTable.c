@@ -445,6 +445,8 @@ PRIVATE int Stbl_addCellToRow ARGS9(
     else {
 	if (ncolinfo >= me->ncells + 1) 
 	    me->cells[me->ncells].alignment = colinfo[me->ncells].alignment;
+	else
+	    me->cells[me->ncells].alignment = me->alignment;
 	if (me->cells[me->ncells].alignment==HT_ALIGN_NONE)
 	    me->cells[me->ncells].alignment = me->alignment;
 	if (me->cells[me->ncells].alignment==HT_ALIGN_NONE)

@@ -295,7 +295,8 @@ PRIVATE int HTLoadHTTP ARGS4 (
   BOOL auth_proxy = NO; 	/* Generate a proxy authorization. - AJL */
 
   int length, rawlength, rv;
-  BOOL doing_redirect, already_retrying = FALSE, bad_location = FALSE;
+  int server_status;
+  BOOL doing_redirect, already_retrying = FALSE;
   int len = 0;
 
   void * handle = NULL;
@@ -993,7 +994,6 @@ try_again:
   {
     int fields;
     char server_version[VERSION_LENGTH+1];
-    int server_status;
 
     server_version[0] = 0;
 
@@ -1278,8 +1278,6 @@ try_again:
 	     *	previous document. - FM
 	     */
 	    {
-	      char *cp;
-
 	      if ((dump_output_immediately || traversal) &&
 		  do_post &&
 		  server_status != 303 &&
@@ -1298,36 +1296,8 @@ try_again:
 		  goto clean_up;
 	      }
 
-	      /*
-	       *  Get the rest of the headers and data, if
-	       *  any, and then close the connection. - FM
-	       */
-	      while ((status = HTTP_NETREAD(s, line_buffer,
-					    (INIT_LINE_SIZE - 1),
-					    handle)) > 0) {
-#ifdef    NOT_ASCII  /* S/390 -- gil -- 0581 */
-	      {   char *p;
-
-		  for ( p = line_buffer; p < line_buffer + status; p++ )
-		      *p = FROMASCII(*p);
-	      }
-#endif /* NOT_ASCII */
-		  line_buffer[status] = '\0';
-		  StrAllocCat(line_kept_clean, line_buffer);
-	      }
-	      HTTP_NETCLOSE(s, handle);
-	      if (status == HT_INTERRUPTED) {
-		  /*
-		   *  Impatient user. - FM
-		   */
-		  CTRACE((tfp, "HTTP: Interrupted followup read.\n"));
-		  _HTProgress (CONNECTION_INTERRUPTED);
-		  status = HT_INTERRUPTED;
-		  goto clean_up;
-	      }
-	      doing_redirect = TRUE;
+	      HTProgress(line_buffer);
 	      if (server_status == 301) { /* Moved Permanently */
-		  HTProgress(line_buffer);
 		  if (do_post) {
 		      /*
 		       *  Don't make the redirection permanent
@@ -1340,341 +1310,8 @@ try_again:
 		      permanent_redirection = TRUE;
 		  }
 	      }
+	      doing_redirect = TRUE;
 
-	      /*
-	      **  Look for "Set-Cookie:" and "Set-Cookie2:" headers. - FM
-	      */
-	      if (LYSetCookies == TRUE) {
-		  char *value = NULL;
-		  char *SetCookie = NULL;
-		  char *SetCookie2 = NULL;
-		  cp = line_kept_clean;
-		  while (*cp) {
-		      /*
-		      **  Assume a CRLF pair terminates
-		      **  the header section. - FM
-		      */
-		      if (*cp == CR) {
-			  if (*(cp+1) == LF &&
-			      *(cp+2) == CR && *(cp+3) == LF) {
-			      break;
-			  }
-		      }
-		      if (TOUPPER(*cp) != 'S') {
-			  cp++;
-		      } else if (!strncasecomp(cp, "Set-Cookie:", 11))	{
-			  char *cp1 = NULL, *cp2 = NULL;
-			  cp += 11;
-Cookie_continuation:
-			  /*
-			   *  Trim leading spaces. - FM
-			   */
-			  while (isspace((unsigned char)*cp))
-			      cp++;
-			  /*
-			  **  Accept CRLF, LF, or CR as end of line. - FM
-			  */
-			  if (((cp1 = strchr(cp, LF)) != NULL) ||
-			      (cp2 = strchr(cp, CR)) != NULL) {
-			      if (*cp1) {
-				  *cp1 = '\0';
-				  if ((cp2 = strchr(cp, CR)) != NULL)
-				      *cp2 = '\0';
-			      } else {
-				  *cp2 = '\0';
-			      }
-			  }
-			  if (*cp == '\0') {
-			      if (cp1)
-				  *cp1 = LF;
-			      if (cp2)
-				  *cp2 = CR;
-			      if (value != NULL) {
-				  HTMIME_TrimDoubleQuotes(value);
-				  if (SetCookie == NULL) {
-				      StrAllocCopy(SetCookie, value);
-				  } else {
-				      StrAllocCat(SetCookie, ", ");
-				      StrAllocCat(SetCookie, value);
-				  }
-				  FREE(value);
-			      }
-			      break;
-			  }
-			  StrAllocCat(value, cp);
-			  cp += strlen(cp);
-			  if (cp1) {
-			      *cp1 = LF;
-			      cp1 = NULL;
-			  }
-			  if (cp2) {
-			      *cp2 = CR;
-			      cp2 = NULL;
-			  }
-			  cp1 = cp;
-			  if (*cp1 == CR)
-			     cp1++;
-			  if (*cp1 == LF)
-			     cp1++;
-			  if (*cp1 == ' ' || *cp1 == '\t') {
-			      StrAllocCat(value, " ");
-			      cp = cp1;
-			      cp++;
-			      cp1 = NULL;
-			      goto Cookie_continuation;
-			  }
-			  HTMIME_TrimDoubleQuotes(value);
-			  if (SetCookie == NULL) {
-			      StrAllocCopy(SetCookie, value);
-			  } else {
-			      StrAllocCat(SetCookie, ", ");
-			      StrAllocCat(SetCookie, value);
-			  }
-			  FREE(value);
-		      } else if (!strncasecomp(cp, "Set-Cookie2:", 12))  {
-			  char *cp1 = NULL, *cp2 = NULL;
-			  cp += 12;
-Cookie2_continuation:
-			  /*
-			   *  Trim leading spaces. - FM
-			   */
-			  while (isspace((unsigned char)*cp))
-			      cp++;
-			  /*
-			  **  Accept CRLF, LF, or CR as end of line. - FM
-			  */
-			  if (((cp1 = strchr(cp, LF)) != NULL) ||
-			      (cp2 = strchr(cp, CR)) != NULL) {
-			      if (*cp1) {
-				  *cp1 = '\0';
-				  if ((cp2 = strchr(cp, CR)) != NULL)
-				      *cp2 = '\0';
-			      } else {
-				  *cp2 = '\0';
-			      }
-			  }
-			  if (*cp == '\0') {
-			      if (cp1)
-				  *cp1 = LF;
-			      if (cp2)
-				  *cp2 = CR;
-			      if (value != NULL) {
-				  HTMIME_TrimDoubleQuotes(value);
-				  if (SetCookie2 == NULL) {
-				      StrAllocCopy(SetCookie2, value);
-				  } else {
-				      StrAllocCat(SetCookie2, ", ");
-				      StrAllocCat(SetCookie2, value);
-				  }
-				  FREE(value);
-			      }
-			      break;
-			  }
-			  StrAllocCat(value, cp);
-			  cp += strlen(cp);
-			  if (cp1) {
-			      *cp1 = LF;
-			      cp1 = NULL;
-			  }
-			  if (cp2) {
-			      *cp2 = CR;
-			      cp2 = NULL;
-			  }
-			  cp1 = cp;
-			  if (*cp1 == CR)
-			     cp1++;
-			  if (*cp1 == LF)
-			     cp1++;
-			  if (*cp1 == ' ' || *cp1 == '\t') {
-			      StrAllocCat(value, " ");
-			      cp = cp1;
-			      cp++;
-			      cp1 = NULL;
-			      goto Cookie2_continuation;
-			  }
-			  HTMIME_TrimDoubleQuotes(value);
-			  if (SetCookie2 == NULL) {
-			      StrAllocCopy(SetCookie2, value);
-			  } else {
-			      StrAllocCat(SetCookie2, ", ");
-			      StrAllocCat(SetCookie2, value);
-			  }
-			  FREE(value);
-		      } else {
-			  cp++;
-		      }
-		  }
-		  FREE(value);
-		  if (SetCookie != NULL || SetCookie2 != NULL) {
-		      LYSetCookie(SetCookie, SetCookie2, anAnchor->address);
-		      FREE(SetCookie);
-		      FREE(SetCookie2);
-		  }
-	      }
-
-	      /*
-	       *  Look for the "Location:" in the headers. - FM
-	       */
-	      cp = line_kept_clean;
-	      while (*cp) {
-		if (TOUPPER(*cp) != 'L') {
-		    cp++;
-		} else if (!strncasecomp(cp, "Location:", 9)) {
-		    char *cp1 = NULL, *cp2 = NULL;
-		    cp += 9;
-		    /*
-		     *	Trim leading spaces. - FM
-		     */
-		    while (isspace((unsigned char)*cp))
-			cp++;
-		    /*
-		     *	Accept CRLF, LF, or CR as end of header. - FM
-		     */
-		    if (((cp1 = strchr(cp, LF)) != NULL) ||
-			(cp2 = strchr(cp, CR)) != NULL) {
-			if (*cp1) {
-			    *cp1 = '\0';
-			    if ((cp2 = strchr(cp, CR)) != NULL)
-				*cp2 = '\0';
-			} else {
-			    *cp2 = '\0';
-			}
-			/*
-			 *  Load the new URL into redirecting_url,
-			 *  and make sure it's not zero-length. - FM
-			 */
-			StrAllocCopy(redirecting_url, cp);
-			HTMIME_TrimDoubleQuotes(redirecting_url);
-			if (*redirecting_url == '\0') {
-			    /*
-			     *	The "Location:" value is zero-length, and
-			     *	thus is probably something in the body, so
-			     *	we'll show the user what was returned. - FM
-			     */
-			    CTRACE((tfp, "HTTP: 'Location:' is zero-length!\n"));
-			    if (cp1)
-				*cp1 = LF;
-			    if (cp2)
-				*cp2 = CR;
-			    bad_location = TRUE;
-			    FREE(redirecting_url);
-			    HTAlert(
-			       gettext("Got redirection with a bad Location header."));
-			    HTProgress(line_buffer);
-			    break;
-			}
-
-			/*
-			 *  Set up for checking redirecting_url in
-			 *  LYGetFile.c for restrictions before we
-			 *  seek the document at that Location. - FM
-			 */
-			HTProgress(line_buffer);
-			CTRACE((tfp, "HTTP: Picked up location '%s'\n",
-				    redirecting_url));
-			if (cp1)
-			    *cp1 = LF;
-			if (cp2)
-			    *cp2 = CR;
-			if (server_status == 305) { /* Use Proxy */
-			    /*
-			     *	Make sure the proxy field ends with
-			     *	a slash. - FM
-			     */
-			    if (redirecting_url[strlen(redirecting_url)-1]
-				!= '/')
-				StrAllocCat(redirecting_url, "/");
-			    /*
-			     *	Append our URL. - FM
-			     */
-			    StrAllocCat(redirecting_url, anAnchor->address);
-			    CTRACE((tfp, "HTTP: Proxy URL is '%s'\n",
-					redirecting_url));
-			}
-			if (!do_post ||
-			    server_status == 303 ||
-			    server_status == 302) {
-			    /*
-			     *	We don't have POST content (nor support PUT
-			     *	or DELETE), or the status is "See Other"  or
-			     *	"General Redirection" and we can convert to
-			     *	GET, so go back and check out the new URL. - FM
-			     */
-			    status = HT_REDIRECTING;
-			    goto clean_up;
-			}
-			/*
-			 *  Make sure the user wants to redirect
-			 *  the POST content, or treat as GET - FM & DK
-			 */
-			switch (HTConfirmPostRedirect(redirecting_url,
-						      server_status)) {
-			    /*
-			     *	User failed to confirm.
-			     *	Abort the fetch.
-			     */
-			    case 0:
-				doing_redirect = FALSE;
-				FREE(redirecting_url);
-				status = HT_NO_DATA;
-				goto clean_up;
-
-			    /*
-			     *	User wants to treat as GET with no content.
-			     *	Go back to check out the URL.
-			     */
-			    case 303:
-				status = HT_REDIRECTING;
-				goto clean_up;
-
-			    /*
-			     *	Set the flag to retain the POST
-			     *	content and go back to check out
-			     *	the URL. - FM
-			     */
-			    default:
-				status = HT_REDIRECTING;
-				redirect_post_content = TRUE;
-				goto clean_up;
-			}
-		    }
-		    break;
-		} else {
-		    /*
-		     *	Keep looking for the Location header. - FM
-		     */
-		    cp++;
-		}
-	      }
-
-	      /*
-	       *  If we get to here, we didn't find the Location
-	       *  header, so we'll show the user what we got, if
-	       *  anything. - FM
-	       */
-	      CTRACE((tfp, "HTTP: Failed to pick up location.\n"));
-	      doing_redirect = FALSE;
-	      permanent_redirection = FALSE;
-	      start_of_data = line_kept_clean;
-	      length = rawlength;
-	      if (!bad_location) {
-		  HTAlert(gettext("Got redirection with no Location header."));
-		  HTProgress(line_buffer);
-	      }
-	      if (traversal) {
-		  HTTP_NETCLOSE(s, handle);
-		  status = -1;
-		  goto clean_up;
-	      }
-	      if (!dump_output_immediately &&
-		  format_out == HTAtom_for("www/download")) {
-		  /*
-		   *  Convert a download request to
-		   *  a presentation request for
-		   *  interactive users. - FM
-		   */
-		  format_out = WWW_PRESENT;
-	      }
 	      break;
 	   }
 
@@ -1901,6 +1538,13 @@ Cookie2_continuation:
   */
   if (HTCheckForInterrupt()) {
       HTTP_NETCLOSE(s, handle);
+      if (doing_redirect) {
+	  /*
+	   *  Impatient user. - FM
+	   */
+	  CTRACE((tfp, "HTTP: Interrupted followup read.\n"));
+	  _HTProgress (CONNECTION_INTERRUPTED);
+      }
       status = HT_INTERRUPTED;
       goto clean_up;
   }
@@ -1919,6 +1563,24 @@ Cookie2_continuation:
       length = rawlength;
 #endif
       format_in = HTAtom_for("text/plain");
+
+  } else if (doing_redirect) {
+
+      format_in = HTAtom_for("message/x-http-redirection");
+      StrAllocCopy(anAnchor->content_type, HTAtom_name(format_in));
+      if (traversal) {
+	  format_out = WWW_DEBUG;
+	  if (!sink)
+	      sink = HTErrorStream();
+      } else if (!dump_output_immediately &&
+	  format_out == HTAtom_for("www/download")) {
+	  /*
+	   *  Convert a download request to
+	   *  a presentation request for
+	   *  interactive users. - FM
+	   */
+	  format_out = WWW_PRESENT;
+      }
   }
 
   target = HTStreamStack(format_in,
@@ -1946,12 +1608,23 @@ Cookie2_continuation:
   */
   rv = HTCopy(anAnchor, s, (void *)handle, target);
 
+  /*
+  **  If we get here with doing_redirect set, it means that we were
+  **  looking for a Location header.  We either have got it now in
+  **  redirecting_url - in that case the stream should not have loaded
+  **  any data.  Or we didn't get it, in that case the stream may have
+  **  presented the message body normally. - kw
+  */
+
   if (rv == -1) {
       /*
       **  Intentional interrupt before data were received, not an error
       */
       /* (*target->isa->_abort)(target, NULL); */ /* already done in HTCopy */
-      status = HT_INTERRUPTED;
+      if (doing_redirect && traversal)
+	  status = -1;
+      else
+	  status = HT_INTERRUPTED;
       HTTP_NETCLOSE(s, handle);
       goto clean_up;
   }
@@ -1961,21 +1634,29 @@ Cookie2_continuation:
       **  Aw hell, a REAL error, maybe cuz it's a dumb HTTP0 server
       */
       (*target->isa->_abort)(target, NULL);
-      HTTP_NETCLOSE(s, handle);
-      if (!already_retrying && !do_post) {
-	  CTRACE((tfp, "HTTP: Trying again with HTTP0 request.\n"));
+      if (doing_redirect && redirecting_url) {
 	  /*
-	  **  May as well consider it an interrupt -- right?
+	  **  Got a location before the error occurred?  Then consider it
+	  **  an interrupt but proceed below as normal. - kw
 	  */
-	  FREE(line_buffer);
-	  FREE(line_kept_clean);
-	  extensions = NO;
-	  already_retrying = TRUE;
-	  _HTProgress (RETRYING_AS_HTTP0);
-	  goto try_again;
+	  /* do nothing here */
       } else {
-	  status = HT_NOT_LOADED;
-	  goto clean_up;
+	  HTTP_NETCLOSE(s, handle);
+	  if (!doing_redirect && !already_retrying && !do_post) {
+	      CTRACE((tfp, "HTTP: Trying again with HTTP0 request.\n"));
+	      /*
+	      **  May as well consider it an interrupt -- right?
+	      */
+	      FREE(line_buffer);
+	      FREE(line_kept_clean);
+	      extensions = NO;
+	      already_retrying = TRUE;
+	      _HTProgress (RETRYING_AS_HTTP0);
+	      goto try_again;
+	  } else {
+	      status = HT_NOT_LOADED;
+	      goto clean_up;
+	  }
       }
   }
 
@@ -1983,23 +1664,107 @@ Cookie2_continuation:
   **  Free if complete transmission (socket was closed before return).
   **  Close socket if partial transmission (was freed on abort).
   */
-  if (rv != HT_INTERRUPTED) {
+  if (rv != HT_INTERRUPTED && rv != -2) {
       (*target->isa->_free)(target);
   } else {
       HTTP_NETCLOSE(s, handle);
   }
 
   if (doing_redirect) {
-      /*
-      **  We already jumped over all this if the "case 3:" code worked
-      **  above, but we'll check here as a backup in case it fails. - FM
-      */
-      /* Lou's old comment:  - FM */
-      /* OK, now we've got the redirection URL temporarily stored
-	 in external variable redirecting_url, exported from HTMIME.c,
-	 since there's no straightforward way to do this in the library
-	 currently.  Do the right thing. */
-      status = HT_REDIRECTING;
+      if (redirecting_url) {
+	  /*
+	   *  Set up for checking redirecting_url in
+	   *  LYGetFile.c for restrictions before we
+	   *  seek the document at that Location. - FM
+	   */
+	  CTRACE((tfp, "HTTP: Picked up location '%s'\n",
+		  redirecting_url));
+	  if (rv == HT_INTERRUPTED) {
+	      /*
+	      **  Intentional interrupt after data were received, not an
+	      **  error (probably).  We take it as a user request to
+	      **  abandon the redirection chain.
+	      **  This could reasonably be changed (by just removing this
+	      **  block), it would make sense if there are redirecting
+	      **  resources that "hang" after sending the headers. - kw
+	      */
+	      FREE(redirecting_url);
+	      CTRACE((tfp, "HTTP: Interrupted followup read.\n"));
+	      status = HT_INTERRUPTED;
+	      goto clean_up;
+	  }
+	  HTProgress(line_buffer);
+	  if (server_status == 305) { /* Use Proxy */
+	      /*
+	       *	Make sure the proxy field ends with
+	       *	a slash. - FM
+	       */
+	      if (redirecting_url[strlen(redirecting_url)-1]
+		  != '/')
+		  StrAllocCat(redirecting_url, "/");
+	      /*
+	       *	Append our URL. - FM
+	       */
+	      StrAllocCat(redirecting_url, anAnchor->address);
+	      CTRACE((tfp, "HTTP: Proxy URL is '%s'\n",
+		      redirecting_url));
+	  }
+	  if (!do_post ||
+	      server_status == 303 ||
+	      server_status == 302) {
+	      /*
+	       *	We don't have POST content (nor support PUT
+	       *	or DELETE), or the status is "See Other"  or
+	       *	"General Redirection" and we can convert to
+	       *	GET, so go back and check out the new URL. - FM
+	       */
+	      status = HT_REDIRECTING;
+	      goto clean_up;
+	  }
+	  /*
+	   *  Make sure the user wants to redirect
+	   *  the POST content, or treat as GET - FM & DK
+	   */
+	  switch (HTConfirmPostRedirect(redirecting_url,
+					server_status)) {
+	      /*
+	       *	User failed to confirm.
+	       *	Abort the fetch.
+	       */
+	  case 0:
+	      doing_redirect = FALSE;
+	      FREE(redirecting_url);
+	      status = HT_NO_DATA;
+	      goto clean_up;
+
+	      /*
+	       *	User wants to treat as GET with no content.
+	       *	Go back to check out the URL.
+	       */
+	  case 303:
+	      break;
+
+	      /*
+	       *	Set the flag to retain the POST
+	       *	content and go back to check out
+	       *	the URL. - FM
+	       */
+	  default:
+	      redirect_post_content = TRUE;
+	  }
+
+	  /* Lou's old comment:  - FM */
+	  /* OK, now we've got the redirection URL temporarily stored
+	     in external variable redirecting_url, exported from HTMIME.c,
+	     since there's no straightforward way to do this in the library
+	     currently.  Do the right thing. */
+
+	  status = HT_REDIRECTING;
+
+      } else {
+	  status = traversal ? -1 : HT_LOADED;
+      }
+
   } else {
       /*
       **  If any data were received, treat as a complete transmission

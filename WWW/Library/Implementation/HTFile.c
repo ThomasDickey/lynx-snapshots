@@ -2510,7 +2510,14 @@ PUBLIC int HTLoadFile ARGS4(
 		FREE(nodename);
 		return status;	/* document loaded, maybe partial */
 
-	   } /* end if localname is a directory */
+	    } /* end if localname is a directory */
+
+	    if (S_ISREG(dir_info.st_mode)) {
+#ifdef INT_MAX
+		if (dir_info.st_size <= INT_MAX)
+#endif
+		    anchor->content_length = dir_info.st_size;
+	    }
 
 	} /* end if file stat worked */
 
