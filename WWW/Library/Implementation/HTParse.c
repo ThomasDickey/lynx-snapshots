@@ -322,8 +322,7 @@ PUBLIC char * HTParse ARGS3(
 		    }
 		} else if (p2 != result) {
 		    h = p2;
-		    if (h != result)
-			h--;		/* End of hostname */
+		    h--;		/* End of hostname */
 		    if (*h == '.') {
 			/*
 			**  Slide p2 over h.

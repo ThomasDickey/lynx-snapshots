@@ -81,6 +81,14 @@ extern char * HTSprintf () GCC_PRINTFLIKE(2,3);
 extern char * HTSprintf0 () GCC_PRINTFLIKE(2,3);
 #endif
 
+#if defined(LY_FIND_LEAKS)	/* private otherwise */
+extern char * StrAllocVsprintf PARAMS((
+        char **		pstr,
+        size_t		len,
+        CONST char *	fmt,
+        va_list *	ap));
+#endif
+
 #if (defined(VMS) || defined(DOSPATH) || defined(__EMX__)) && !defined(__CYGWIN__)
 #define USE_QUOTED_PARAMETER 0
 #else

@@ -337,7 +337,7 @@ PUBLIC void highlight ARGS3(
 			  utf_flag);
 	    hlen = strlen(buffer);
 	    hLen = ((HTCJK != NOCJK || utf_flag) ?
-		  LYmbcsstrlen(buffer, utf_flag) : hlen);
+		  LYmbcsstrlen(buffer, utf_flag, YES) : hlen);
 
 	    /*
 	     *	Break out if the first hit in the line
@@ -359,12 +359,12 @@ PUBLIC void highlight ARGS3(
 		if ((case_sensitive ?
 		     (cp = LYno_attr_mbcs_strstr(data,
 						 target,
-						 utf_flag,
+						 utf_flag, YES,
 						 &HitOffset,
 						 &LenNeeded)) != NULL :
 		     (cp = LYno_attr_mbcs_case_strstr(data,
 						 target,
-						 utf_flag,
+						 utf_flag, YES,
 						 &HitOffset,
 						 &LenNeeded)) != NULL) &&
 		    (offset + LenNeeded) < LYcols) {
@@ -607,12 +607,12 @@ PUBLIC void highlight ARGS3(
 		if ((case_sensitive ?
 		     (cp = LYno_attr_mbcs_strstr(data,
 						 target,
-						 utf_flag,
+						 utf_flag, YES,
 						 &HitOffset,
 						 &LenNeeded)) != NULL :
 		     (cp = LYno_attr_mbcs_case_strstr(data,
 						 target,
-						 utf_flag,
+						 utf_flag, YES,
 						 &HitOffset,
 						 &LenNeeded)) != NULL) &&
 		    (offset + LenNeeded) < LYcols) {
@@ -886,12 +886,12 @@ highlight_hit_within_hightext:
 	    if ((case_sensitive ?
 		 (cp = LYno_attr_mbcs_strstr(data,
 					     target,
-					     utf_flag,
+					     utf_flag, YES,
 					     &HitOffset,
 					     &LenNeeded)) != NULL :
 		 (cp = LYno_attr_mbcs_case_strstr(data,
 					     target,
-					     utf_flag,
+					     utf_flag, YES,
 					     &HitOffset,
 					     &LenNeeded)) != NULL) &&
 		(offset + LenNeeded) < LYcols) {
@@ -1067,7 +1067,7 @@ highlight_search_hightext2:
 			  utf_flag);
 	    hlen = strlen(buffer);
 	    hLen = ((HTCJK != NOCJK || utf_flag) ?
-		  LYmbcsstrlen(buffer, utf_flag) : hlen);
+		  LYmbcsstrlen(buffer, utf_flag, YES) : hlen);
 
 	    /*
 	     *	Break out if the first hit in the line
@@ -1089,12 +1089,12 @@ highlight_search_hightext2:
 		if ((case_sensitive ?
 		     (cp = LYno_attr_mbcs_strstr(data,
 						 target,
-						 utf_flag,
+						 utf_flag, YES,
 						 &HitOffset,
 						 &LenNeeded)) != NULL :
 		     (cp = LYno_attr_mbcs_case_strstr(data,
 						 target,
-						 utf_flag,
+						 utf_flag, YES,
 						 &HitOffset,
 						 &LenNeeded)) != NULL) &&
 		    (offset + LenNeeded) < LYcols) {
@@ -1336,12 +1336,12 @@ highlight_search_hightext2:
 		if ((case_sensitive ?
 		     (cp = LYno_attr_mbcs_strstr(data,
 						 target,
-						 utf_flag,
+						 utf_flag, YES,
 						 &HitOffset,
 						 &LenNeeded)) != NULL :
 		     (cp = LYno_attr_mbcs_case_strstr(data,
 						 target,
-						 utf_flag,
+						 utf_flag, YES,
 						 &HitOffset,
 						 &LenNeeded)) != NULL) &&
 		    (offset + LenNeeded) < LYcols) {
@@ -1615,12 +1615,12 @@ highlight_hit_within_hightext2:
 	    if ((case_sensitive ?
 		 (cp = LYno_attr_mbcs_strstr(data,
 					     target,
-					     utf_flag,
+					     utf_flag, YES,
 					     &HitOffset,
 					     &LenNeeded)) != NULL :
 		 (cp = LYno_attr_mbcs_case_strstr(data,
 					     target,
-					     utf_flag,
+					     utf_flag, YES,
 					     &HitOffset,
 					     &LenNeeded)) != NULL) &&
 		(offset + LenNeeded) < LYcols) {
@@ -4665,6 +4665,9 @@ have_VMS_URL:
 		} else if (fixit) {
 		  /* RW 1998Mar16  Restore AllocatedString to 'old_string' */
 		    StrAllocCopy(*AllocatedString, old_string);
+		} else {
+		    /* Return file URL for the file that does not exist */
+		    StrAllocCat(*AllocatedString, temp);
 		}
 #ifdef WIN_EX
 	Retry:
@@ -6478,10 +6481,10 @@ PUBLIC FILE *LYOpenTempRewrite ARGS3(
     if (registered) {
 #ifndef NO_GROUPS
 	writable_exists = HTEditable(fname); /* existing, can write */
-#define CTRACE_EXISTS "exists and is writable"
+#define CTRACE_EXISTS "exists and is writable, "
 #else
 	writable_exists = (BOOL) (stat(fname, &stat_buf) == 0); /* existing, assume can write */
-#define CTRACE_EXISTS "exists"
+#define CTRACE_EXISTS "exists, "
 #endif
 
 	if (writable_exists) {
@@ -6508,46 +6511,25 @@ PUBLIC FILE *LYOpenTempRewrite ARGS3(
 	 * This should probably not happen.  Make a new one.
 	 */
 	return (LYOpenTemp(fname, suffix, mode));
-    } else if (is_ours) {
-	/*
-	 *  Yes, it exists, is writable if we checked, and everything
-	 *  looks ok so far.  This should be the most regular case.
-	 *  We truncate and then append, this avoids having a small
-	 *  window in which the file doesn't exist. - kw
-	 */
-#if HAVE_TRUNCATE
-	if (truncate(fname, 0) != 0) {
-	    CTRACE((tfp, "... truncate(%s,0) failed: %s\n",
-		   fname, LYStrerror(errno)));
-	    return (LYOpenTemp(fname, suffix, mode));
-	}
-#endif
-	return (LYReopenTemp(fname));
-    } else if (writable_exists) {
-	/*
-	 *  File exists, writable if we checked, but something is wrong
-	 *  with it.
-	 */
-	return (LYOpenTemp(fname, suffix, mode));
-#ifndef NO_GROUPS
-    } else if (registered && (lstat(fname, &stat_buf) == 0)) {
-	/*
-	 *  Exists but not writable, and something is wrong with it.
-	 */
-	return (LYOpenTemp(fname, suffix, mode));
-#endif
     } else if (!registered) {
 	/*
 	 *  Not registered.  It should have been registered at one point
 	 *  though, otherwise we wouldn't be called like this.
 	 */
 	return (LYOpenTemp(fname, suffix, mode));
-    } else {
+    } else if (writable_exists && !is_ours) {
 	/*
-	 *  File does not exist, but is registered as a temp file.
-	 *  It must have been removed by some means other than
-	 *  LYRemoveTemp.  Reuse the name!
+	 *  File exists, writable if we checked, but something is wrong
+	 *  with it.
 	 */
+	return (LYOpenTemp(fname, suffix, mode));
+#ifndef NO_GROUPS
+    } else if (!is_ours && (lstat(fname, &stat_buf) == 0)) {
+	/*
+	 *  Exists but not writable, and something is wrong with it.
+	 */
+	return (LYOpenTemp(fname, suffix, mode));
+#endif
     }
 
     while (*mode != '\0') {
@@ -6560,6 +6542,38 @@ PUBLIC FILE *LYOpenTempRewrite ARGS3(
 		return fp;
 	}
     }
+
+    if (is_ours) {
+	/*
+	 *  Yes, it exists, is writable if we checked, and everything
+	 *  looks ok so far.  This should be the most regular case. - kw
+	 */
+#if HAVE_TRUNCATE
+	if (txt == TRUE) {	/* limitation of LYReopenTemp.  shrug */
+	    /*
+	     *  We truncate and then append, this avoids having a small
+	     *  window in which the file doesn't exist. - kw
+	     */
+	    if (truncate(fname, 0) != 0) {
+		CTRACE((tfp, "... truncate(%s,0) failed: %s\n",
+			fname, LYStrerror(errno)));
+		return (LYOpenTemp(fname, suffix, mode));
+	    } else {
+		return (LYReopenTemp(fname));
+	    }
+	}
+#endif
+	remove(fname);
+
+    }
+
+	/*  We come here in two cases: either the file existed and was
+	 *  ours and we just got rid of it.
+	 *  Or the file did and does not exist, but is registered as a
+	 *  temp file.  It must have been removed by some means other than
+	 *  LYRemoveTemp.
+	 *  In both cases, reuse the name! - kw
+	 */
 
     if (txt) {
 	switch (wrt) {

@@ -440,6 +440,32 @@ PUBLIC BOOL HTLastConfirmCancelled NOARGS
 */
 PUBLIC int HTConfirmDefault ARGS2(CONST char *, Msg, int, Dft)
 {
+/* Meta-note: don't move the following note from its place right
+   in front of the first gettext().  As it is now, it should
+   automatically appear in generated lynx.pot files. - kw
+ */
+
+/*  NOTE TO TRANSLATORS:  If you provide a translation for "yes", lynx
+ *  will take the first byte of the translation as a positive response
+ *  to Yes/No questions.  If you provide a translation for "no", lynx
+ *  will take the first byte of the translation as a negative response
+ *  to Yes/No questions.  For both, lynx will also try to show the
+ *  first byte in the prompt as a character, instead of (y) or (n),
+ *  respectively.  This will not work right for multibyte charsets!
+ *  Don't translate "yes" and "no" for CJK character sets (or translate
+ *  them to "yes" and "no").  For a translation using UTF-8, don't
+ *  translate if the translation would begin with anything but a 7-bit
+ *  (US_ASCII) character.  That also means do not translate if the
+ *  translation would begin with anything but a 7-bit character, if
+ *  you use a single-byte character encoding (a charset like ISO-8859-n)
+ *  but anticipate that the message catalog may be used re-encoded in
+ *  UTF-8 form.
+ *  For translations using other character sets, you may also wish to
+ *  leave "yes" and "no" untranslated, if using (y) and (n) is the
+ *  preferred behavior.
+ *  Lynx will also accept y Y n N as responses unless there is a conflict
+ *  with the first letter of the "yes" or "no" translation.
+ */
     char *msg_yes = gettext("yes");
     char *msg_no  = gettext("no");
     int result = -1;
@@ -455,6 +481,13 @@ PUBLIC int HTConfirmDefault ARGS2(CONST char *, Msg, int, Dft)
 	result = NO;
     } else {
 	char *msg = NULL;
+	char fallback_y = 'y';	/* English letter response as fallback */
+	char fallback_n = 'n';	/* English letter response as fallback */
+
+	if (fallback_y == *msg_yes || fallback_y == *msg_no)
+	    fallback_y = '\0';	/* conflict or duplication, don't use */
+	if (fallback_n == *msg_yes || fallback_n == *msg_no)
+	    fallback_n = '\0';	/* conflict or duplication, don't use */
 
 	if (Dft == DFT_CONFIRM)
 	    HTSprintf0(&msg, "%s (%c/%c) ", Msg, *msg_yes, *msg_no);
@@ -480,6 +513,10 @@ PUBLIC int HTConfirmDefault ARGS2(CONST char *, Msg, int, Dft)
 	    } else if (TOUPPER(c) == TOUPPER(*msg_yes)) {
 		result = YES;
 	    } else if (TOUPPER(c) == TOUPPER(*msg_no)) {
+		result = NO;
+	    } else if (fallback_y && TOLOWER(c) == fallback_y) {
+		result = YES;
+	    } else if (fallback_n && TOLOWER(c) == fallback_n) {
 		result = NO;
 	    } else if (Dft != DFT_CONFIRM) {
 		result = Dft;

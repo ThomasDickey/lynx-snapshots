@@ -770,12 +770,13 @@ PRIVATE void send_file_to_mail ARGS3(
     if (keypad_mode)
 	printlist(outfile_fp, FALSE);
 
+#if defined(WIN_EX) || defined(__DJGPP__)
 #if defined(WIN_EX)	/* 1998/08/17 (Mon) 16:29:49 */
-    buffer = NULL;
     if (mail_is_blat)
 	HTSprintf0(&buffer, "%s %s -t \"%s\"",
 		system_mail, my_temp, user_response);
     else
+#endif /* WIN_EX */
 	HTSprintf0(&buffer, "%s -t \"%s\" -F %s",
 			system_mail, user_response, my_temp);
     LYCloseTempFP(outfile_fp);	/* Close the tmpfile. */
@@ -789,9 +790,9 @@ PRIVATE void send_file_to_mail ARGS3(
     SetOutputMode( O_BINARY );
 
     LYRemoveTemp(my_temp); /* Delete the tmpfile. */
-#else /* !WIN_EX */
+#else /* !WIN_EX && !__DJGPP__ */
     pclose(outfile_fp);
-#endif
+#endif /* WIN_EX || __DJGPP__ */
 #endif /* VMS */
 
 done:	/* send_file_to_mail() */

@@ -158,7 +158,8 @@ incremental display stages with MessageSecs delay
 set the display variable for X rexec-ed programs.
 .TP
 .B -dont_wrap_pre
-inhibit wrapping of text in <pre> when -dump'ing and -crawl'ing.
+inhibit wrapping of text in <pre> when -dump'ing and -crawl'ing, mark
+wrapped lines in interactive session.
 .TP
 .B -dump
 dumps the formatted output of the default document or one

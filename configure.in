@@ -356,6 +356,8 @@ ultrix*)
 esac
 AC_SUBST(PROG_EXT)
 
+CF_GNU_SOURCE
+
 dnl Collect tests for compiler options into one place
 if test -n "$TRY_CFLAGS" ; then
 	cf_save_CFLAGS="$CFLAGS"
@@ -529,6 +531,7 @@ AC_CHECK_FUNCS( \
 	readdir \
 	strerror \
 	truncate \
+	vasprintf \
 	unsetenv \
 	waitpid \
 )

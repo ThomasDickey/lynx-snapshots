@@ -2738,7 +2738,7 @@ Send_NNTP_command:
 	 *  to occur in normal use, break from the loop without retrying
 	 *  and without closing the connection.  It is unlikely that
 	 *  these are leftovers from a timed-out connection (but we do
-	 *  some checks to see whether the response rorresponds to the
+	 *  some checks to see whether the response corresponds to the
 	 *  last command), or that they will give anything else when
 	 *  automatically retried.  - kw
 	 */

@@ -659,6 +659,20 @@ static int keymap_fun ARGS1(
 		BOOLEAN success = FALSE;
 		int lkc = lkcstring_to_lkc(key);
 		int lec = -1;
+		/*
+		 *  PASS! tries to enter the key into the LYLineEditors
+		 *  bindings in a different way from PASS, namely as
+		 *  binding that maps to the specific lynx actioncode
+		 *  (rather than to LYE_FORM_PASS).  That only works
+		 *  for lynx keycodes with modifier bit set, and we
+		 *  have no documented/official way to specify this
+		 *  in the KEYMAP directive, although it can be made
+		 *  to work e.g. by specifying a hex value that has the
+		 *  modifier bit set.  But knowledge about the bit
+		 *  pattern of modifiers should remain in internal
+		 *  matter subject to change...  At any rate, if
+		 *  PASS! fails try it the same way as for PASS. - kw
+		 */
 		if (strcasecomp(efunc, "PASS!") == 0) {
 		    if (func) {
 			lec = LYE_FORM_LAC|lacname_to_lac(func);
@@ -1090,7 +1104,7 @@ static void html_src_bad_syntax ARGS2(
 
 
 static int parse_html_src_spec ARGS3(
-	    HTlexem, lexem_code,
+	    HTlexeme, lexeme_code,
 	    char*, value,
 	    char*, option_name)
 {
@@ -1109,16 +1123,17 @@ static int parse_html_src_spec ARGS3(
 	BS();
     *ts2 = '\0';
 
-    if ( html_src_parse_tagspec(value, lexem_code, TRUE, TRUE)
-	|| html_src_parse_tagspec(ts2, lexem_code, TRUE, TRUE) )
+    CTRACE((tfp,"ReadCFG - parsing tagspec '%s:%s' for option '%s'\n",value,ts2,option_name));
+    html_src_clean_item(lexeme_code);
+    if ( html_src_parse_tagspec(value, lexeme_code, FALSE, TRUE)
+	|| html_src_parse_tagspec(ts2, lexeme_code, FALSE, FALSE) )
     {
 	*ts2 = ':';
 	BS();
     }
 
     *ts2 = ':';
-    HTL_tagspecs[lexem_code] = NULL;
-    StrAllocCopy(HTL_tagspecs[lexem_code],value);
+    StrAllocCopy(HTL_tagspecs[lexeme_code],value);
 #undef BS
     return 0;
 }
@@ -1253,9 +1268,7 @@ static Config_Type Config_Table [] =
      PARSE_SET("focus_window", CONF_BOOL, &focus_window),
 #endif
      PARSE_SET("force_8bit_toupper", CONF_BOOL, &UCForce8bitTOUPPER),
-#ifndef NO_EMPTY_HREFLESS_A
      PARSE_SET("force_empty_hrefless_a", CONF_BOOL, &force_empty_hrefless_a),
-#endif
      PARSE_SET("force_ssl_cookies_secure", CONF_BOOL, &LYForceSSLCookiesSecure),
 #if !defined(NO_OPTION_FORMS) && !defined(NO_OPTION_MENU)
      PARSE_SET("forms_options", CONF_BOOL, &LYUseFormsOptions),

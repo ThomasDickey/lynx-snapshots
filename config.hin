@@ -112,6 +112,7 @@
 #undef HAVE_UTMP
 #undef HAVE_VALUES_H		/* defined by AM_GNU_GETTEXT */
 #undef HAVE_VARARGS_H		/* CF_VARARGS */
+#undef HAVE_VASPRINTF
 #undef HAVE_WAITPID
 #undef HAVE_WBORDER
 #undef HAVE___ARGZ_COUNT	/* defined by AM_GNU_GETTEXT */

@@ -48,7 +48,7 @@ char * HTDOS_wwwName ARGS1(char *, dosname)
 	    break;
       default:
 	    *cp_url++ = ch;
-	    break;;
+	    break;
       }
       dosname++;
     }

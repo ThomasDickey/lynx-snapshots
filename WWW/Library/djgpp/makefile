@@ -7,16 +7,18 @@ WWW_MACH = djgpp
 # The ASIS repository's name for the machine we are on
 #ASIS_MACH = hardware/os
 
-CFLAGS = -O3 -DUSE_ZLIB -DDOSPATH -DNOUSERS -DDISP_PARTIAL \
--DSOURCE_CACHE -DUSE_PSRC -DNOPORT \
+CFLAGS = -O2 -DUSE_ZLIB -DDOSPATH -DNOUSERS -DDISP_PARTIAL \
+-DDIRED_SUPPORT -DSOURCE_CACHE -DUSE_PSRC \
+-DEXP_FILE_UPLOAD \
+-DWATT32 \
 -I../Implementation \
--I../../../djgpp/tcplib/include \
--I../../../djgpp/tcplib/include/tcp \
--I../../../curses \
+-I../../../djgpp/watt32/inc -I../../../djgpp/watt32/inc/sys \
 -I../../../src \
--I../../..
+-I../../../curses \
+-I../../.. $(INTLFLAGS)
 LFLAGS =
 CC = gcc
+#INTLFLAGS = -DHAVE_GETTEXT -DHAVE_LIBINTL_H
 
 # Directory for installed binary:
 !BINDIR = /usr/local/bin

@@ -110,6 +110,8 @@ clean:
 
 distclean: clean
 
+CMN=$(top_srcdir)/WWW/Library/Implementation/
+
 HTFWriter.o:	$(top_srcdir)/userdefs.h
 HTInit.o:	$(top_srcdir)/userdefs.h
 LYCharSets.o:	$(top_srcdir)/userdefs.h
@@ -124,6 +126,7 @@ LYShowInfo.o:	$(top_builddir)/cfg_defs.h
 LYTraversal.o:	$(top_srcdir)/userdefs.h
 LYUtils.o:	$(top_srcdir)/userdefs.h
 LYrcFile.o:	$(top_srcdir)/userdefs.h
+LYLeaks.o:	$(CMN)LYLeaks.h $(CMN)HTString.h
 
 CHRTR= chrtrans/
 
@@ -166,8 +169,6 @@ TABLES= \
  $(CHRTR)rfc_suni.h \
  $(CHRTR)utf8_uni.h \
  $(CHRTR)viscii_uni.h
-
-CMN=$(top_srcdir)/WWW/Library/Implementation/
 
 $(TABLES):
 	-cd chrtrans && $(MAKE) tables

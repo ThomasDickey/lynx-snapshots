@@ -86,11 +86,6 @@ PUBLIC char *syslog_txt = NULL;		/* syslog arb text for session */
 PUBLIC char *LYCSwingPath = NULL;
 #endif /* VMS */
 
-#if HAVE_CUSERID && !defined(_XOPEN_SOURCE)
-/*extern char *cuserid();*/		/* workaround for Redhat 6.0 */
-		/* for the price of screwing up legitimate systems? Nah. */
-#endif
-
 #ifdef DIRED_SUPPORT
 PUBLIC BOOLEAN lynx_edit_mode = FALSE;
 PUBLIC BOOLEAN no_dired_support = FALSE;
@@ -444,15 +439,13 @@ PUBLIC BOOL ok_justify = TRUE;
 PUBLIC BOOLEAN with_backspaces = FALSE;
 #endif
 
-#ifndef NO_EMPTY_HREFLESS_A
 PUBLIC BOOL force_empty_hrefless_a = FALSE;
-#endif
 
 #ifndef NO_NONSTICKY_INPUTS
 PUBLIC BOOL sticky_inputs = TRUE;
+PUBLIC BOOL textfield_stop_at_left_edge=FALSE;
 #endif
 
-PUBLIC BOOL textfield_stop_at_left_edge=TRUE;
 
 #ifdef DISP_PARTIAL
 PUBLIC BOOLEAN display_partial_flag = TRUE; /* Display document during download */
@@ -1872,8 +1865,12 @@ PUBLIC int main ARGS2(
      *  interruptible (terminal is in raw mode, select() works).  -BL
      */
 #ifdef USE_PSRC
-    if (!dump_output_immediately)
-	HTMLSRC_init_caches(); /* do it before terminal is initialized*/
+    if (!dump_output_immediately) {
+	HTMLSRC_init_caches(FALSE); /* do it before terminal is initialized*/
+#ifdef LY_FIND_LEAKS
+	atexit(html_src_clean_data);
+#endif
+    }
 #endif
 
     if (!dump_output_immediately) {
@@ -2126,6 +2123,10 @@ PUBLIC void reload_read_cfg NOARGS
 	custom_assumed_doc_charset = FALSE;
 	custom_display_charset = FALSE;
 	memset((char*)charset_subsets, 0, sizeof(charset_subset_t)*MAXCHARSETS);
+#endif
+
+#ifdef USE_PSRC
+	html_src_on_lynxcfg_reload();
 #endif
 	free_lynx_cfg(); /* free downloaders, printers, environments */
 	/*
@@ -2447,6 +2448,7 @@ static int convert_to_fun ARGS1(
 	    }
 	}
 	HTOutputFormat = HTAtom_for(outformat);
+	FREE(outformat);
     } else {
 	HTOutputFormat = NULL;
     }
@@ -3090,7 +3092,8 @@ with -dump, format output as with -traversal, but to stdout"
    ),
    PARSE_SET(
       "dont_wrap_pre",	SET_ARG,		&dont_wrap_pre,
-      "inhibit wrapping of text in <pre> when -dump'ing and -crawl'ing"
+      "inhibit wrapping of text in <pre> when -dump'ing and \n"
+      "-crawl'ing, mark wrapped lines in interactive session"
    ),
    PARSE_FUN(
       "dump",		FUNCTION_ARG,		dump_output_fun,
@@ -3147,12 +3150,10 @@ keys (may be incompatible with some curses packages)"
       "from",		TOGGLE_ARG,		&LYNoFromHeader,
       "toggle transmissions of From headers"
    ),
-#ifndef NO_EMPTY_HREFLESS_A
    PARSE_SET(
       "force_empty_hrefless_a",	SET_ARG,	&force_empty_hrefless_a,
       "force HREF-less 'A' elements to be empy (close them as soon as they are seen)"
    ),
-#endif
 #if !defined(NO_OPTION_FORMS) && !defined(NO_OPTION_MENU)
    PARSE_SET(
       "forms_options",	TOGGLE_ARG,		&LYUseFormsOptions,

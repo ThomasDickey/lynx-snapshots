@@ -92,6 +92,7 @@ struct _HTStream {			/* only know it as object */
 #define TITLE_LINES  1
 #define IS_UTF_EXTRA(ch) (text->T.output_utf8 && \
 			  ((unsigned char)(ch)&0xc0) == 0x80)
+/* a test in compact form: how many extra UTF-8 chars after initial? - kw */
 #define UTF8_XNEGLEN(c) (c&0xC0? 0 :c&32? 1 :c&16? 2 :c&8? 3 :c&4? 4 :c&2? 5:0)
 #define UTF_XLEN(c) UTF8_XNEGLEN(((char)~(c)))
 
@@ -144,12 +145,22 @@ PUBLIC int LYsb_end = -1;
 #if defined(USE_COLOR_STYLE)
 #define MAX_STYLES_ON_LINE 64
 
+#ifdef OLD_HTSTYLECHANGE
 typedef struct _stylechange {
 	int	horizpos;	/* horizontal position of this change */
 	int	style;		/* which style to change to */
 	int	direction;	/* on or off */
 	int	previous;	/* previous style */
 } HTStyleChange;
+#else
+    /*try to fit in 2 shorts*/
+typedef struct _stylechange {
+	unsigned int	direction:2;	/* on or off */
+	unsigned int	horizpos: (sizeof(short)*CHAR_BIT-2);
+	    /* horizontal position of this change */
+	unsigned short	style;		/* which style to change to */
+} HTStyleChange;
+#endif
 #endif
 
 typedef struct _line {
@@ -161,11 +172,133 @@ typedef struct _line {
 	BOOL	bullet;			/* Do we bullet? */
 	BOOL	expansion_line;		/* TEXTAREA edit new line flag */
 #if defined(USE_COLOR_STYLE)
+#ifdef OLD_HTSTYLECHANGE
 	HTStyleChange	styles[MAX_STYLES_ON_LINE];
+#else
+	HTStyleChange* styles;
+#endif
 	int	numstyles;
 #endif
 	char	data[1];		/* Space for terminator at least! */
 } HTLine;
+
+#if defined(USE_COLOR_STYLE) && !defined(OLD_HTSTYLECHANGE)
+typedef struct _HTStyleChangePool {
+	HTStyleChange	data[4092];
+	struct _HTStyleChangePool* next;
+	int free_items;
+} HTStyleChangePool;
+
+/*these are used when current line is being aggregated. */
+HTStyleChange stylechanges_buffers[2][MAX_STYLES_ON_LINE];
+int stylechanges_buffers_free;/*this is an index of the free buffer.
+    Can be 0 or 1*/
+
+/* These are generic macors for any pools (provided those structures have the
+same members as HTStyleChangePool).  Pools are used for allocation of groups of
+objects of the same type T.  Pools are represented as a list of structures of
+type P (called pool chunks here).  Structure P has an array of N objects of
+type T named 'data' (the number N in the array can be chosen arbitrary),
+pointer to the next pool chunk named 'pool', and the number of free items in
+that pool chunk named 'free_items'.  Here is a definition of the structure P:
+	struct P
+	{
+	    T data[N];
+	    struct P* next;
+	    int free_items;
+	};
+ It's recommended that sizeof(P) be memory page size minus 32 in order malloc'd
+chunks to fit in machine page size.
+ Allocation of 'n' items in the pool is implemented by decrementing member
+'free_items' by 'n' if 'free_items' >= 'n', or allocating a new pool chunk and
+allocating 'n' items in that new chunk.  It's the task of the programmer to
+assert that 'n' is <= N.  Only entire pool may be freed - this limitation makes
+allocation algorithms trivial and fast - so the use of pools is limited to
+objects that are freed in batch, that are not deallocated not in the batch, and
+not reallocated.
+ Pools greatly reduce memory fragmentation and memory allocation/deallocation
+speed due to the simple algorithms used.  Due to the fact that memory is
+'allocated' in array, alignment overhead is minimal.  Allocating strings in a
+pool provided their length will never exceed N and is much smaller than N seems
+to be very efficient.
+
+ Pool are referenced by pointer to the chunk that contains free slots. Macros
+that allocate memory in pools update that pointer if needed.
+ There are 3 macros that deal with pools - POOL_NEW, POOL_FREE and
+ALLOC_IN_POOL.
+ Here is a description of those macros as C++ functions (with names mentioned
+above and with use of C++ references)
+
+void ALLOC_IN_POOL( P*& pool, pool_type, int toalloc, T*& ptr)
+    - allocates 'toalloc' items in the pool of type 'pool_type' pointed by
+    'pool', sets the pointer 'ptr' to the "allocated" memory and updates 'pool'
+    if necessary. Sets 'ptr' to NULL if fails.
+
+void POOL_NEW( pool_type  , P*& ptr)
+    Initializes a pool of type 'pool_type' pointed by 'ptr', updating 'ptr'.
+    Sets 'ptr' to NULL if fails.
+
+void POOL_FREE( pool_type , P* ptr)
+    Frees a pool of type 'pool_type' pointed by ptr.
+
+      - VH */
+
+/*
+void ALLOC_IN_POOL( P*& pool, pool_type, int toalloc, T*& ptr)
+    - allocates 'toalloc' items in the pool of type 'pool_type' pointed by
+    'pool', sets the pointer 'ptr' to the "allocated" memory and updates 'pool'
+    if necessary. Sets 'ptr' to NULL if fails.
+*/
+#define ALLOC_IN_POOL(pool,pool_type,toalloc,ptr)     \
+if (!pool)  \
+    ptr = NULL; \
+else { \
+    if ((pool)->free_items > toalloc) { \
+	(pool)->free_items -= toalloc; \
+	ptr = (pool)->data + (pool)->free_items; \
+    } else { \
+	pool_type* newpool = (pool_type*)malloc(sizeof(pool_type)); \
+	if (!newpool) { \
+	    ptr = NULL; \
+	} else { \
+	    newpool->next = pool; \
+	    newpool->free_items = sizeof newpool->data/ \
+		    sizeof newpool->data[0] - toalloc; \
+	    pool = newpool; \
+	    ptr = newpool->data + sizeof newpool->data/sizeof newpool->data[0] - toalloc; \
+	} \
+    } \
+}
+/*
+void POOL_NEW( pool_type  , P*& ptr)
+    Initializes a pool of type 'pool_type' pointed by 'ptr', updating 'ptr'.
+    Sets 'ptr' to NULL if fails.
+*/
+#define POOL_NEW(pool_type,ptr) \
+    { \
+	pool_type* newpool = (pool_type*)malloc(sizeof(pool_type)); \
+	if (!newpool) { \
+	    ptr = NULL; \
+	} else { \
+	    newpool->next = NULL; \
+	    newpool->free_items = sizeof newpool->data/sizeof newpool->data[0]; \
+	    ptr = newpool; \
+	} \
+    }
+/*
+void POOL_FREE( pool_type , P* ptr)
+    Frees a pool of type 'pool_type' pointed by ptr.
+*/
+#define POOL_FREE(pool_type,xptr) \
+    { \
+	pool_type* ptr = xptr; \
+	do { \
+	    pool_type* prevpool = ptr; \
+	    ptr = ptr->next; \
+	    FREE(prevpool); \
+	} while (ptr); \
+    }
+#endif
 
 #define LINE_SIZE(l) (sizeof(HTLine)+(l))	/* Allow for terminator */
 
@@ -245,6 +378,7 @@ struct _HText {
 	BOOL			stale;			/* Must refresh */
 	BOOL			page_has_target; /* has target on screen */
 	BOOL			has_utf8; /* has utf-8 on screen or line */
+	BOOL			had_utf8; /* had utf-8 when last displayed */
 #ifdef DISP_PARTIAL
 	int			first_lineno_last_disp_partial;
 	int			last_lineno_last_disp_partial;
@@ -267,6 +401,9 @@ struct _HText {
 
 	HTStream *		target;			/* Output stream */
 	HTStreamClass		targetClass;		/* Output routines */
+#if defined(USE_COLOR_STYLE) && !defined(OLD_HTSTYLECHANGE)
+	HTStyleChangePool*	styles_pool;
+#endif
 };
 
 PRIVATE void HText_AddHiddenLink PARAMS((HText *text, TextAnchor *textanchor));
@@ -552,6 +689,22 @@ PUBLIC HText *	HText_new ARGS1(
     CTRACE((tfp, "GridText: VMTotal = %d\n", VMTotal));
 #endif /* VMS && VAXC && !__DECC */
 
+    /*
+     *  If the previously shown text had UTF-8 characters on screen,
+     *  remember this in the newly created object.  Do this now, before
+     *  the previous object may become invalid. - kw
+     */
+    if (HTMainText) {
+	if (HText_hasUTF8OutputSet(HTMainText) &&
+	    HTLoadedDocumentEightbit() &&
+	    LYCharSet_UC[current_char_set].enc == UCT_ENC_UTF8) {
+	    self->had_utf8 = HTMainText->has_utf8;
+	} else {
+	    self->had_utf8 = HTMainText->has_utf8;
+	}
+	HTMainText->has_utf8 = NO;
+    }
+
     if (!loaded_texts)	{
 	loaded_texts = HTList_new();
 #ifdef LY_FIND_LEAKS
@@ -597,6 +750,13 @@ PUBLIC HText *	HText_new ARGS1(
     line->offset = line->size = 0;
 #ifdef USE_COLOR_STYLE
     line->numstyles = 0;
+#ifndef  OLD_HTSTYLECHANGE
+    POOL_NEW(HTStyleChangePool,self->styles_pool);
+    if (!self->styles_pool)
+	outofmem(__FILE__, "HText_New");
+    stylechanges_buffers_free = 0;
+    line->styles = stylechanges_buffers[0];
+#endif
 #endif
     self->Lines = self->chars = 0;
     self->first_anchor = self->last_anchor = NULL;
@@ -757,7 +917,9 @@ PUBLIC void HText_free ARGS1(
 	return;
 
     HTAnchor_setDocument(self->node_anchor, (HyperDoc *)0);
-
+#if defined(USE_COLOR_STYLE) && !defined(OLD_HTSTYLECHANGE)
+    POOL_FREE(HTStyleChangePool,self->styles_pool);
+#endif
     while (YES) {	/* Free off line array */
 	HTLine * l = self->last_line;
 	if (l) {
@@ -967,13 +1129,13 @@ PRIVATE int display_line ARGS4(
 	if (case_sensitive)
 	    cp_tgt = LYno_attr_mbcs_strstr(data,
 					   target,
-					   text->T.output_utf8,
+					   text->T.output_utf8, YES,
 					   &HitOffset,
 					   &LenNeeded);
 	else
 	    cp_tgt = LYno_attr_mbcs_case_strstr(data,
 						target,
-						text->T.output_utf8,
+						text->T.output_utf8, YES,
 						&HitOffset,
 						&LenNeeded);
 	if (cp_tgt) {
@@ -1001,13 +1163,13 @@ PRIVATE int display_line ARGS4(
 		if (case_sensitive)
 		    cp_tgt = LYno_attr_mbcs_strstr(data,
 						target,
-						text->T.output_utf8,
+						text->T.output_utf8, YES,
 						&HitOffset,
 						&LenNeeded);
 		else
 		    cp_tgt = LYno_attr_mbcs_case_strstr(data,
 						     target,
-						text->T.output_utf8,
+						text->T.output_utf8, YES,
 						&HitOffset,
 						&LenNeeded);
 		if (cp_tgt) {
@@ -1135,7 +1297,7 @@ PRIVATE int display_line ARGS4(
 #endif /* SHOW_WHEREIS_TARGETS */
 #endif /* USE_COLOR_STYLE */
 		i++;
-		if (text->T.output_utf8 && !isascii(buffer[0])) {
+		if (text->T.output_utf8 && !isascii((unsigned char)buffer[0])) {
 		    text->has_utf8 = YES;
 		    if ((*buffer & 0xe0) == 0xc0) {
 			utf_extra = 1;
@@ -1168,7 +1330,7 @@ PRIVATE int display_line ARGS4(
 		    buffer[1] = '\0';
 		    data += utf_extra;
 		    utf_extra = 0;
-		} else if (HTCJK != NOCJK && !isascii(buffer[0])) {
+		} else if (HTCJK != NOCJK && !isascii((unsigned char)buffer[0])) {
 		    /*
 		     *  For CJK strings, by Masanobu Kimura.
 		     */
@@ -1677,7 +1839,14 @@ PRIVATE void display_page ARGS3(
     if (line) {
 #if defined(USE_COLOR_STYLE) && defined(SHOW_WHEREIS_TARGETS)
 	char *data;
-	int offset, HitOffset, LenNeeded;
+	int offset, LenNeeded;
+#endif
+#ifdef DISP_PARTIAL
+	if (display_partial ||
+	    line_number != text->first_lineno_last_disp_partial)
+	    text->has_utf8 = NO;
+#else
+	text->has_utf8 = NO;
 #endif
 	for (i = 0; i < (display_lines); i++)  {
 	    /*
@@ -1722,13 +1891,13 @@ PRIVATE void display_page ARGS3(
 		   (case_sensitive ?
 		    (cp = LYno_attr_mbcs_strstr(data,
 						target,
-						text->T.output_utf8,
-						&HitOffset,
+						text->T.output_utf8, YES,
+						NULL,
 						&LenNeeded)) != NULL :
 		    (cp = LYno_attr_mbcs_case_strstr(data,
 						     target,
-						text->T.output_utf8,
-						&HitOffset,
+						text->T.output_utf8, YES,
+						NULL,
 						&LenNeeded)) != NULL) &&
 		   ((int)line->offset + LenNeeded) < LYcols) {
 		int itmp = 0;
@@ -1767,7 +1936,7 @@ PRIVATE void display_page ARGS3(
 			/*
 			 *  Output all the printable target chars.
 			 */
-			if (text->T.output_utf8 && !isascii(tmp[0])) {
+			if (text->T.output_utf8 && !isascii((unsigned char)tmp[0])) {
 			    if ((*tmp & 0xe0) == 0xc0) {
 				utf_extra = 1;
 			    } else if ((*tmp & 0xf0) == 0xe0) {
@@ -1799,7 +1968,7 @@ PRIVATE void display_page ARGS3(
 			    tmp[1] = '\0';
 			    written += (utf_extra + 1);
 			    utf_extra = 0;
-			} else if (HTCJK != NOCJK && !isascii(tmp[0])) {
+			} else if (HTCJK != NOCJK && !isascii((unsigned char)tmp[0])) {
 			    /*
 			     *  For CJK strings, by Masanobu Kimura.
 			     */
@@ -2072,11 +2241,12 @@ PRIVATE void display_page ARGS3(
     }
 #endif /* DISP_PARTIAL */
 
-    if (text->has_utf8) {
+    if (text->has_utf8 || text->had_utf8) {
 	/*
 	 *  For other than ncurses, repainting is taken care of
 	 *  by touching lines in display_line and highlight. - kw 1999-10-07
 	 */
+	text->had_utf8 = text->has_utf8;
 	clearok(curscr, TRUE);
     } else if (HTCJK != NOCJK) {
 	/*
@@ -2087,7 +2257,6 @@ PRIVATE void display_page ARGS3(
 	/*clearok(curscr, TRUE);*/
     }
     refresh();
-
 }
 
 
@@ -2107,13 +2276,18 @@ PUBLIC void HText_beginAppend ARGS1(
 
 /* LYcols_cu is the notion that the display library has of the screen
    width.  Normally it is the same as LYcols, but there may be a
-   difference via SLANG_MBCS_HACK.  LYcols_cu is used to try to prevent
-   that the display library wraps or truncates a line with UTF-8 chars
-   when it shouldn't. - kw */
+   difference via SLANG_MBCS_HACK.  Checks of the line length (as the
+   non-UTF-8-aware display library would see it) against LYcols_cu are
+   is used to try to prevent that lines with UTF-8 chars get wrapped
+   by the library when they shouldn't.
+   If there is no display library involved, i.e. dump_output_immediately,
+   no such limit should be imposed.  LYcols*6 should be just as good
+   as any other large value.  (But don't use INT_MAX or something close
+   to it to, avoid over/underflow.) - kw */
 #ifdef USE_SLANG
-#define LYcols_cu SLtt_Screen_Cols
+#define LYcols_cu (dump_output_immediately ? LYcols*6 : SLtt_Screen_Cols)
 #else
-#define LYcols_cu LYcols
+#define LYcols_cu (dump_output_immediately ? LYcols*6 : LYcols)
 #endif
 
 /*	Add a new line of text
@@ -2147,6 +2321,7 @@ PRIVATE void split_line ARGS2(
 #endif
     int indent = text->in_line_1 ?
 	  text->style->indent1st : text->style->leftIndent;
+    short alignment;
     TextAnchor * a;
     int CurLine = text->Lines;
     int HeadTrim = 0;
@@ -2166,7 +2341,9 @@ PRIVATE void split_line ARGS2(
     HTLine * line = (HTLine *)LY_CALLOC(1, LINE_SIZE(MAX_LINE)+2);
     if (line == NULL)
 	outofmem(__FILE__, "split_line_1");
-
+#if defined(USE_COLOR_STYLE) && !defined(OLD_HTSTYLECHANGE)
+    line->styles = stylechanges_buffers[stylechanges_buffers_free = (stylechanges_buffers_free + 1) &1];
+#endif
     ctrl_chars_on_this_line = 0; /*reset since we are going to a new line*/
     utfxtra_on_this_line = 0;	/*reset too, we'll count them*/
     text->LastChar = ' ';
@@ -2219,6 +2396,7 @@ PRIVATE void split_line ARGS2(
 	ctrl_chars_on_this_line++;
     }
 
+    alignment = style->alignment;
     /*
      *  Split at required point
      */
@@ -2251,9 +2429,9 @@ PRIVATE void split_line ARGS2(
 
 		(HeadTrim || text->first_anchor ||
 		 underline_on || bold_on ||
-		 text->style->alignment != HT_LEFT ||
-		 text->style->wordWrap || text->style->freeFormat ||
-		 text->style->spaceBefore || text->style->spaceAfter)) ||
+		 alignment != HT_LEFT ||
+		 style->wordWrap || style->freeFormat ||
+		 style->spaceBefore || style->spaceAfter)) ||
 	       *p == LY_SOFT_HYPHEN) {
 	    p++;
 	    HeadTrim++;
@@ -2383,9 +2561,9 @@ PRIVATE void split_line ARGS2(
 #endif
 	   (ctrl_chars_on_this_line || HeadTrim || text->first_anchor ||
 	    underline_on || bold_on ||
-	    text->style->alignment != HT_LEFT ||
-	    text->style->wordWrap || text->style->freeFormat ||
-	    text->style->spaceBefore || text->style->spaceAfter)) {
+	    alignment != HT_LEFT ||
+	    style->wordWrap || style->freeFormat ||
+	    style->spaceBefore || style->spaceAfter)) {
 	/*
 	 *  Strip trailers.
 	 */
@@ -2562,6 +2740,12 @@ PRIVATE void split_line ARGS2(
     if (temp == NULL)
 	outofmem(__FILE__, "split_line_2");
     memcpy(temp, previous, LINE_SIZE(previous->size));
+#if defined(USE_COLOR_STYLE) && !defined(OLD_HTSTYLECHANGE)
+    ALLOC_IN_POOL((text->styles_pool),HTStyleChangePool,previous->numstyles,temp->styles);
+    memcpy(temp->styles, previous->styles, sizeof(HTStyleChange)*previous->numstyles);
+    if (!temp->styles)
+	outofmem(__FILE__, "split_line_2");
+#endif
     FREE(previous);
     previous = temp;
 
@@ -2581,8 +2765,8 @@ PRIVATE void split_line ARGS2(
 #ifdef EXP_JUSTIFY_ELTS
 	this_line_was_splitted ||
 #endif
-	(style->alignment == HT_CENTER ||
-	 style->alignment == HT_RIGHT) || text->stbl) {
+	(alignment == HT_CENTER ||
+	 alignment == HT_RIGHT) || text->stbl) {
 	/* Calculate spare character positions if needed */
 	for (cp = previous->data; *cp; cp++) {
 	    if (*cp == LY_UNDERLINE_START_CHAR ||
@@ -2600,7 +2784,9 @@ PRIVATE void split_line ARGS2(
 	spare =  (LYcols-1) -
 	    (int)style->rightIndent - indent +
 	    ctrl_chars_on_previous_line - previous->size;
-	if (spare > 0 && text->T.output_utf8 && ctrl_chars_on_previous_line) {
+
+	if (spare > 0 && !dump_output_immediately &&
+	    text->T.output_utf8 && ctrl_chars_on_previous_line) {
 	    utfxtra_on_previous_line -= utfxtra_on_this_line;
 	    if (utfxtra_on_previous_line) {
 		int spare_cu = (LYcols_cu-1) -
@@ -2611,13 +2797,30 @@ PRIVATE void split_line ARGS2(
 		     *  mishandled by the display library towards the left
 		     *  if this would make them fit.  The resulting display
 		     *  will not be as intended, but this is better than
-		     *  having them split by curses.  (But that may still
-		     *  happen anyway by curses space movement optimization).
+		     *  having them split by curses.  (Curses cursor movement
+		     *  optimization may still cause wrong positioning within
+		     *  the line, in particular after a sequence of spaces).
 		     * - kw
 		     */
 		if (spare_cu < spare) {
 		    if (spare_cu >= 0) {
-			spare = spare_cu;
+			if (alignment == HT_CENTER &&
+			    (int)(previous->offset + indent + spare/2 +
+				  previous->size)
+			    - ctrl_chars_on_previous_line
+			    + utfxtra_on_previous_line <= (LYcols_cu - 1))
+			    /* do nothing - it still fits - kw */;
+			else {
+			    spare = spare_cu;
+			    if (alignment == HT_CENTER) {
+				/*
+				 *  Can't move towars center all the way,
+				 *  but at least make line contents appear
+				 *  as far right as possible. - kw
+				 */
+				alignment = HT_RIGHT;
+			    }
+			}
 		    } else if (indent + (int)previous->offset + spare_cu >= 0)
 		    { /* subtract overdraft from effective indentation */
 			indent += (int)previous->offset + spare_cu;
@@ -2636,7 +2839,10 @@ PRIVATE void split_line ARGS2(
 	 *  its row should really end here, or on one of the following
 	 *  lines with no more characters added after the break.
 	 *  We don't know whether a cell has been started, so ignore
-	 *  errors here. - kw
+	 *  errors here.
+	 *  This call is down here because we need the
+	 *  ctrl_chars_on_previous_line, which have just been re-
+	 *  counted above. - kw
 	 */
 	Stbl_lineBreak(text->stbl,
 		       text->Lines - 1,
@@ -2848,7 +3054,7 @@ PRIVATE void split_line ARGS2(
 		*jp = ' ';	/* substitute it */
 		continue;
 	    }
-	    if (text->T.output_utf8 && !isascii(c)) {
+	    if (text->T.output_utf8 && !isascii((unsigned char)c)) {
 		int utf_extra = 0;
 		if ((c & 0xe0) == 0xc0) {
 		    utf_extra = 1;
@@ -2877,7 +3083,9 @@ PRIVATE void split_line ARGS2(
 	    jline = (HTLine *)LY_CALLOC(1, LINE_SIZE(previous->size+spare));
 	    if (jline == NULL)
 		outofmem(__FILE__, "split_line_1");
-
+#if defined(USE_COLOR_STYLE) && !defined(OLD_HTSTYLECHANGE)
+	    jline->styles = previous->styles;
+#endif
 	    jdata = jline->data;
 
 	    /*
@@ -2943,8 +3151,9 @@ PRIVATE void split_line ARGS2(
 
 		jline->styles[i].style = previous->styles[i].style;
 		jline->styles[i].direction = previous->styles[i].direction;
+#ifdef OLD_HTSTYLECHANGE
 		jline->styles[i].previous = previous->styles[i].previous;
-
+#endif
 		/*there are stylechanges with hpos > line length */
 		jline->styles[i].horizpos = (hpos > previous->size)
 			? previous->size + spare
@@ -3539,10 +3748,15 @@ PUBLIC void HText_appendCharacter ARGS2(
     }
 
     if (text->T.output_utf8) {
+	/*
+	 *  Some extra checks for UTF-8 output here to make sure
+	 *  memory is not overrun.  For a non-first char, append
+	 *  to the line here and return. - kw
+	 */
 	if (IS_UTF_EXTRA(ch)) {
 	    if ((line->size > (MAX_LINE-1))
 		|| (indent + (int)(line->offset + line->size) +
-		    utfx - ctrl_chars_on_this_line +
+		    utfxtra_on_this_line - ctrl_chars_on_this_line +
 		    ((line->size > 0) &&
 		     (int)(line->data[line->size-1] ==
 				LY_SOFT_HYPHEN ?
@@ -3570,11 +3784,11 @@ PUBLIC void HText_appendCharacter ARGS2(
 	    utfxtra_on_this_line++;
 	    ctrl_chars_on_this_line++;
 	    return;
-	} else if (ch & 0x80) {
+	} else if (ch & 0x80) {	/* a first char of UTF-8 sequence - kw */
 	    if ((line->size > (MAX_LINE-7))
-#if 0	/* the equivalent should already happen below */
+#if 0	/* the equivalent check should already happen below */
 		|| (indent + (int)(line->offset + line->size) +
-		    utfx - ctrl_chars_on_this_line +
+		    utfxtra_on_this_line - ctrl_chars_on_this_line +
 		    ((line->size > 0) &&
 		     (int)(line->data[line->size-1] ==
 				LY_SOFT_HYPHEN ?
@@ -3722,7 +3936,7 @@ PUBLIC void HText_appendCharacter ARGS2(
 	}
 	return;
     } /* if tab */
-    else if (text->source && text == HTMainText) {
+    else if ( (text->source || dont_wrap_pre) && text == HTMainText) {
 	/*
 	 * If we're displaying document source, wrap long lines to keep all of
 	 * the source visible.
@@ -4440,6 +4654,7 @@ PUBLIC void HText_cancelStbl ARGS1(
     Stbl_free(me->stbl);
     me->stbl = NULL;
 }
+
 /*	Start simple table handling
 */
 PUBLIC void HText_startStblTABLE ARGS2(
@@ -4458,6 +4673,7 @@ PUBLIC void HText_startStblTABLE ARGS2(
 	CTRACE((tfp, "startStblTABLE: failed.\n"));
     }
 }
+
 /*	Finish simple table handling
 */
 PUBLIC void HText_endStblTABLE ARGS1(
@@ -4478,6 +4694,7 @@ PUBLIC void HText_endStblTABLE ARGS1(
     Stbl_free(me->stbl);
     me->stbl = NULL;
 }
+
 /*	Start simple table row
 */
 PUBLIC void HText_startStblTR ARGS2(
@@ -4489,6 +4706,7 @@ PUBLIC void HText_startStblTR ARGS2(
     if (Stbl_addRowToTable(me->stbl, alignment, me->Lines) < 0)
 	HText_cancelStbl(me);	/* give up */
 }
+
 /*	Finish simple table row
 */
 PUBLIC void HText_endStblTR ARGS1(
@@ -4498,11 +4716,13 @@ PUBLIC void HText_endStblTR ARGS1(
 	return;
     /* should this do something?? */
 }
-/*	Finish simple table cell
+
+/*	Start simple table cell
 */
-PUBLIC void HText_startStblTD ARGS4(
+PUBLIC void HText_startStblTD ARGS5(
 	HText *,	me,
 	int,		colspan,
+	int,		rowspan,
 	short,		alignment,
 	BOOL,		isheader)
 {
@@ -4510,10 +4730,11 @@ PUBLIC void HText_startStblTD ARGS4(
 	return;
     if (colspan <= 0)
 	colspan = 1;
-    if (Stbl_addCellToTable(me->stbl, colspan, alignment, isheader,
+    if (Stbl_addCellToTable(me->stbl, colspan, rowspan, alignment, isheader,
 			    me->Lines, HText_LastLineSize(me,FALSE)) < 0)
 	HText_cancelStbl(me);	/* give up */
 }
+
 /*	Finish simple table cell
 */
 PUBLIC void HText_endStblTD ARGS1(
@@ -4523,6 +4744,45 @@ PUBLIC void HText_endStblTD ARGS1(
 	return;
     if (Stbl_finishCellInTable(me->stbl, YES,
 			       me->Lines, HText_LastLineSize(me,FALSE)) < 0)
+	HText_cancelStbl(me);	/* give up */
+}
+
+/*	Remember COL info / Start a COLGROUP and remember info
+*/
+PUBLIC void HText_startStblCOL ARGS4(
+	HText *,	me,
+	int,		span,
+	short,		alignment,
+	BOOL,		isgroup)
+{
+    if (!me || !me->stbl)
+	return;
+    if (span <= 0)
+	span = 1;
+    if (Stbl_addColInfo(me->stbl, span, alignment, isgroup) < 0)
+	HText_cancelStbl(me);	/* give up */
+}
+
+/*	Finish a COLGROUP
+*/
+PUBLIC void HText_endStblCOLGROUP ARGS1(
+	HText *,	me)
+{
+    if (!me || !me->stbl)
+	return;
+    if (Stbl_finishColGroup(me->stbl) < 0)
+	HText_cancelStbl(me);	/* give up */
+}
+
+/*	Start a THEAD / TFOOT / TBODY - remember its alignment info
+*/
+PUBLIC void HText_startStblRowGroup ARGS2(
+	HText *,	me,
+	short,		alignment)
+{
+    if (!me || !me->stbl)
+	return;
+    if (Stbl_addRowGroup(me->stbl, alignment) < 0)
 	HText_cancelStbl(me);	/* give up */
 }
 
@@ -6091,12 +6351,12 @@ PUBLIC BOOL HText_getFirstTargetInLine ARGS7(
     if ((case_sensitive ?
 	 (cp = LYno_attr_mbcs_strstr(LineData,
 				     target,
-				     utf_flag,
+				     utf_flag, YES,
 				     &HitOffset,
 				     &LenNeeded)) != NULL :
 	 (cp = LYno_attr_mbcs_case_strstr(LineData,
 				     target,
-				     utf_flag,
+				     utf_flag, YES,
 				     &HitOffset,
 				     &LenNeeded)) != NULL) &&
 	(LineOffset + LenNeeded) < LYcols) {
@@ -6560,9 +6820,6 @@ PUBLIC BOOL HText_select ARGS1(
 	HText *,	text)
 {
     if (text != HTMainText) {
-	HTMainText = text;
-	HTMainAnchor = text->node_anchor;
-
 	/*
 	 *  Reset flag for whereis search string - cannot be true here
 	 *  since text is not our HTMainText. - kw
@@ -6579,6 +6836,21 @@ PUBLIC BOOL HText_select ARGS1(
 		HTMainText->last_lineno_last_disp_partial = -1;
 	}
 #endif /* DISP_PARTIAL */
+
+	if (HTMainText) {
+	    if (HText_hasUTF8OutputSet(HTMainText) &&
+		HTLoadedDocumentEightbit() &&
+		LYCharSet_UC[current_char_set].enc == UCT_ENC_UTF8) {
+		text->had_utf8 = HTMainText->has_utf8;
+	    } else {
+		text->had_utf8 = NO;
+	    }
+	    HTMainText->has_utf8 = NO;
+	    text->has_utf8 = NO;
+	}
+
+	HTMainText = text;
+	HTMainAnchor = text->node_anchor;
 
 	/*
 	 *  Make this text the most current in the loaded texts list. - FM
@@ -7094,17 +7366,18 @@ PUBLIC void print_wwwfile_to_fd ARGS2(
     line = HTMainText->last_line->next;
     for (;; line = line->next) {
 	if (!first
-	 && line->data[0] != LY_SOFT_NEWLINE)
+	 && line->data[0] != LY_SOFT_NEWLINE && line->data[1] != LY_SOFT_NEWLINE) {
+	    /* data[0] can be LY_*START_CHAR, so LY_SOFT_NEWLINE can be in [1] - VH */
 	    fputc('\n',fp);
-	first = FALSE;
-
-	/*
-	 *  Add news-style quotation if requested. - FM
-	 */
-	if (is_reply) {
-	    fputc('>',fp);
+	    /*
+	     *  Add news-style quotation if requested. - FM
+	     */
+	    if (is_reply) {
+		fputc('>',fp);
+	    }
 	}
 
+	first = FALSE;
 	/*
 	 *  Add offset.
 	 */
@@ -7218,7 +7491,8 @@ PUBLIC void print_crawl_to_fd ARGS3(
 
     for (;; line = line->next) {
 	if (!first
-	 && line->data[0] != LY_SOFT_NEWLINE)
+	 && line->data[0] != LY_SOFT_NEWLINE && line->data[1] != LY_SOFT_NEWLINE)
+	    /* data[0] can be LY_*START_CHAR, so LY_SOFT_NEWLINE can be in [1] - VH */
 	    fputc('\n',fp);
 	first = FALSE;
 	/*
@@ -7611,7 +7885,7 @@ PUBLIC void user_message ARGS2(
 	return;
     }
 
-    HTSprintf(&temp, message, (argument == 0) ? "" : argument);
+    HTSprintf0(&temp, message, (argument == 0) ? "" : argument);
 
     statusline(temp);
 
@@ -9492,6 +9766,7 @@ PUBLIC int HText_SubmitForm ARGS4(
     BOOLEAN SemiColon = FALSE;
     char *Boundary = NULL;
     char *MultipartContentType = NULL;
+    char *content_type_out = NULL;
     int target_cs = -1;
     CONST char *out_csname;
     CONST char *target_csname = NULL;
@@ -9731,20 +10006,21 @@ PUBLIC int HText_SubmitForm ARGS4(
     } else {
 	/*
 	 *  We are submitting POST content to a server,
-	 *  so load the post_content_type element. - FM
+	 *  so load content_type_out.  This will be put in
+	 *  the post_content_type element if all goes well. - FM, kw
 	 */
 	if (SemiColon == TRUE) {
-	    StrAllocCopy(doc->post_content_type,
+	    StrAllocCopy(content_type_out,
 			 "application/sgml-form-urlencoded");
 	} else if (PlainText == TRUE) {
-	    StrAllocCopy(doc->post_content_type,
+	    StrAllocCopy(content_type_out,
 			 "text/plain");
 	} else if (Boundary != NULL) {
-	    StrAllocCopy(doc->post_content_type,
+	    StrAllocCopy(content_type_out,
 			 "multipart/form-data; boundary=");
-	    StrAllocCat(doc->post_content_type, Boundary);
+	    StrAllocCat(content_type_out, Boundary);
 	} else {
-	    StrAllocCopy(doc->post_content_type,
+	    StrAllocCopy(content_type_out,
 			 "application/x-www-form-urlencoded");
 	}
 
@@ -9775,8 +10051,8 @@ PUBLIC int HText_SubmitForm ARGS4(
 			  strcmp(target_csname, "iso-8859-1"))) ||
 			(!HTMainText->node_anchor->charset &&
 			 target_cs != UCLYhndl_for_unspec)) {
-			StrAllocCat(doc->post_content_type, "; charset=");
-			StrAllocCat(doc->post_content_type, target_csname);
+			StrAllocCat(content_type_out, "; charset=");
+			StrAllocCat(content_type_out, target_csname);
 		    }
 		}
 	    } else {
@@ -10097,7 +10373,7 @@ PUBLIC int HText_SubmitForm ARGS4(
 		    if ((fd = fopen(val_used, "rb")) == 0) {
 			/* We can't open the file, what do we do? */
 			HTAlert("Can't open file for uploading");
-			return 0;
+			goto exit_disgracefully;
 		    }
 		    StrAllocCopy(escaped2, "");
 		    while ((bytes = fread(buffer, sizeof(char), 45, fd)) != 0) {
@@ -10109,12 +10385,12 @@ PUBLIC int HText_SubmitForm ARGS4(
 			/* We got an error reading the file, what do we do? */
 			HTAlert("Short read from file, problem?");
 			fclose(fd);
-			return 0;
+			goto exit_disgracefully;
 		    }
 		    fclose(fd);
-		    /* we need to modify the mime-type here */
-		    /* could use LYGetFileInfo for that and for other
-		       headers that should be transmitted - kw */
+		    /* we need to modify the mime-type here - rp */
+		    /* Note: could use LYGetFileInfo for that and for
+		       other headers that should be transmitted - kw */
 
 		    HTSprintf(&query,
 				   "%s%s%s%s%s",
@@ -10486,9 +10762,9 @@ PUBLIC int HText_SubmitForm ARGS4(
 			     (HText_getTitle() ?
 			      HText_getTitle() : "")),
 		 query,
-		 doc->post_content_type);
+		 content_type_out);
 	FREE(query);
-	FREE(doc->post_content_type);
+	FREE(content_type_out);
 	return 0;
     } else {
 	_statusline(SUBMITTING_FORM);
@@ -10496,6 +10772,8 @@ PUBLIC int HText_SubmitForm ARGS4(
 
     if (submit_item->submit_method == URL_POST_METHOD || Boundary) {
 	StrAllocCopy(doc->post_data, query);
+	FREE(doc->post_content_type);
+	doc->post_content_type = content_type_out; /* don't free c_t_out */
 	CTRACE((tfp,"GridText - post_data: %s\n",doc->post_data));
 	StrAllocCopy(doc->address, submit_item->submit_action);
 	FREE(query);
@@ -10504,9 +10782,22 @@ PUBLIC int HText_SubmitForm ARGS4(
 	StrAllocCopy(doc->address, query);
 	FREE(doc->post_data);
 	FREE(doc->post_content_type);
+	FREE(content_type_out);
 	FREE(query);
 	return 1;
     }
+#ifdef EXP_FILE_UPLOAD
+exit_disgracefully:
+    FREE(escaped1);
+    FREE(escaped2);
+    FREE(previous_blanks);
+    FREE(copied_name_used);
+    FREE(copied_val_used);
+    FREE(MultipartContentType);
+    FREE(query);
+    FREE(content_type_out);
+    return 0;
+#endif
 }
 
 PUBLIC void HText_DisableCurrentForm NOARGS
@@ -11640,6 +11931,7 @@ PUBLIC int HText_ExtEditForm ARGS1(
     TextAnchor *start_anchor  = NULL;
     TextAnchor *end_anchor    = NULL;
     BOOLEAN	firstanchor   = TRUE;
+    BOOLEAN wrapalert = FALSE;
 
     char	ed_offset[10];
     int		start_line    = 0;
@@ -11661,7 +11953,10 @@ PUBLIC int HText_ExtEditForm ARGS1(
     char       *cp;
     int         match_tag = 0;
     int		newlines  = 0;
-    int		len;
+    int		len, len0, len_in;
+    int		wanted_fieldlen_wrap = -1; /* not yet asked; 0 means don't. */
+    char       *skip_at = NULL;
+    int		skip_num = 0, i;
 
     CTRACE((tfp, "GridText: entered HText_ExtEditForm()\n"));
 
@@ -11780,15 +12075,27 @@ PUBLIC int HText_ExtEditForm ARGS1(
 	((size = stat_info.st_size) == 0)) {
 	size = 0;
 	ebuf = (char *) calloc (1, 1);
+	if (!ebuf)
+	    outofmem(__FILE__, "HText_ExtEditForm");
     } else {
 	ebuf = (char *) calloc (size + 1, (sizeof(char)));
+	if (!ebuf) {
+	    /*
+	     *  This could be huge - don't exit if we don't have enough
+	     *  memory for it.  With some luck, the user may be even able
+	     *  to recover the file manually from the temp space while
+	     *  the lynx session is not over. - kw
+	     */
+	    free(ed_temp);
+	    HTAlwaysAlert(NULL, MEMORY_EXHAUSTED_FILE);
+	    return 0;
+	}
 
 	fp = fopen (ed_temp, "r");
 	size = fread (ebuf, 1, size, fp);
 	fclose (fp);
+	ebuf[size] = '\0';	/* Terminate! - kw */
     }
-    if (ebuf == 0)
-	outofmem(__FILE__, "HText_ExtEditForm");
 
     /*
      *	Nuke any blank lines from the end of the edited data.
@@ -11805,24 +12112,111 @@ PUBLIC int HText_ExtEditForm ARGS1(
 	outofmem(__FILE__, "HText_ExtEditForm");
 
     anchor_ptr = start_anchor;
+    if (anchor_ptr->input_field->size <= 4 ||
+	anchor_ptr->input_field->size >= MAX_LINE)
+	wanted_fieldlen_wrap = 0;
 
-    len = 0;
+    len = len_in = 0;
     lp  = ebuf;
 
     while ((line_cnt <= orig_cnt) || (*lp) || ((len != 0) && (*lp == '\0'))) {
 
+	if (skip_at) {
+	    len0 = skip_at - lp;
+	    strncpy(line, lp, len0);
+	    line[len0] = '\0';
+	    lp = skip_at + skip_num;
+	    skip_at = NULL;
+	    skip_num = 0;
+	} else {
+	    len0 = 0;
+	}
+	line[len0] = '\0';
+
 	if ((cp = strchr (lp, '\n')) != 0)
-	   len = cp - lp;
+	   len = len_in = cp - lp;
 	else
-	   len = strlen (lp);
+	   len = len_in = strlen (lp);
 
-	if (len >= MAX_LINE - 1)
-	    len = MAX_LINE - 1;
 
-	strncpy (line, lp, len);
-	*(line + len) = '\0';
+	if (wanted_fieldlen_wrap < 0 && !wrapalert &&
+	    len0+len >= anchor_ptr->input_field->size &&
+	    (cp = strchr(lp, ' ')) != NULL &&
+	    (cp-lp) < anchor_ptr->input_field->size - 1) {
+	    LYFixCursesOn("ask for confirmation:");
+	    erase();		/* don't show previous state */
+	    if (HTConfirmDefault(gettext("Wrap lines to fit displayed area?"),
+				 NO)) {
+		wanted_fieldlen_wrap = anchor_ptr->input_field->size - 1;
+	    } else {
+		wanted_fieldlen_wrap = 0;
+	    }
+	}
+	if (wanted_fieldlen_wrap > 0 && len0+len > wanted_fieldlen_wrap) {
+	    for (i = wanted_fieldlen_wrap-len0;
+		 i+len0 >= wanted_fieldlen_wrap/4; i--) {
+		if (isspace((unsigned char)lp[i])) {
+		    len = i + 1;
+		    cp = lp + i;
+		    if (cp[1] != '\n' &&
+			isspace((unsigned char)cp[1]) &&
+			!isspace((unsigned char)cp[2])) {
+			len++;
+			cp++;
+		    }
+		    if (!isspace((unsigned char)cp[1])) {
+			while (*cp && *cp != '\r' && *cp != '\n' &&
+			       (cp - lp) <= len + (3 * wanted_fieldlen_wrap/4))
+			    cp++;	/* search for next line break */
+			if (*cp == '\r' && cp[1] == '\n')
+			    cp++;
+			if (*cp == '\n' &&
+			    (cp[1] == '\r' || cp[1] == '\n' ||
+			     !isspace((unsigned char)cp[1]))) {
+			    *cp = ' ';
+			    while (isspace((unsigned char)*(cp-1))) {
+				skip_num++;
+				cp--;
+			    }
+			    skip_at = cp;
+			}
+		    }
+		    break;
+		}
+	    }
+	}
+	if (wanted_fieldlen_wrap > 0 && len0+len > wanted_fieldlen_wrap) {
+	    i = len-1;
+	    while (len0+i+1 > wanted_fieldlen_wrap &&
+		   isspace((unsigned char)lp[i]))
+		i--;
+	    if (len0+i+1 > wanted_fieldlen_wrap)
+		len = wanted_fieldlen_wrap - len0;
+	}
 
-	cleanup_line_for_textarea (line, len);
+	if (len0+len >= MAX_LINE) {
+	    if (!wrapalert) {
+		LYFixCursesOn("show alert:");
+		HTAlert(gettext("Very long lines have been wrapped!"));
+		wrapalert = TRUE;
+	    }
+	    /*
+	     *  First try to find a space character for wrapping - kw
+	     */
+	    for (i = MAX_LINE - len0 - 1; i > 0; i--) {
+		if (isspace((unsigned char)lp[i])) {
+		    len = i;
+		    break;
+		}
+	    }
+	    if (len0+len >= MAX_LINE)
+		len = MAX_LINE - len0 - 1;
+	}
+
+	strncat (line, lp, len);
+	*(line + len0+len) = '\0';
+
+	cleanup_line_for_textarea (line, len0+len);
 
 	/*
 	 *  If there are more lines in the edit buffer than were in the
@@ -11844,7 +12238,7 @@ PUBLIC int HText_ExtEditForm ARGS1(
 	 *  Keep track of 1st blank line in any trailing blank lines, for
 	 *  later cursor repositioning.
 	 */
-	if (len > 0)
+	if (len0+len > 0)
 	    exit_line = 0;
 	else if (exit_line == 0)
 	    exit_line = anchor_ptr->line_num;
@@ -11853,7 +12247,7 @@ PUBLIC int HText_ExtEditForm ARGS1(
 	 *  And do the next line of edited text, for the next anchor ...
 	 */
 	lp += len;
-	if (*lp) lp++;
+	if (*lp && isspace((unsigned char)*lp)) lp++;
 
 	end_anchor = anchor_ptr;
 	anchor_ptr = anchor_ptr->next;
@@ -12013,6 +12407,7 @@ PUBLIC int HText_InsertFile ARGS1(
     TextAnchor *prev_anchor = NULL;
     TextAnchor *end_anchor  = NULL;
     BOOLEAN	firstanchor = TRUE;
+    BOOLEAN truncalert = FALSE;
 
     FormInfo   *form	 = form_link->form;
     char       *areaname = form->name;
@@ -12096,6 +12491,7 @@ PUBLIC int HText_InsertFile ARGS1(
 	size = fread (fbuf, 1, size, fp);
 	fclose (fp);
 	FREE(fn);
+	fbuf[size] = '\0';	/* Terminate! - kw */
     }
 
 
@@ -12248,6 +12644,15 @@ PUBLIC int HText_InsertFile ARGS1(
 	else
 	   len = strlen (lp);
 
+	if (len >= MAX_LINE) {
+	    if (!truncalert) {
+		HTAlert(gettext("Very long lines have been truncated!"));
+		truncalert = TRUE;
+	    }
+	    len = MAX_LINE - 1;
+	    if (lp[len])
+		lp[len+1] = '\0'; /* prevent next iteration */
+	}
 	strncpy (line, lp, len);
 	*(line + len) = '\0';
 
@@ -12422,7 +12827,7 @@ PRIVATE void redraw_part_of_line ARGS4(
 
 	    default:
 		i++;
-		if (text->T.output_utf8 && !isascii(buffer[0])) {
+		if (text->T.output_utf8 && !isascii((unsigned char)buffer[0])) {
 		    if ((*buffer & 0xe0) == 0xc0) {
 			utf_extra = 1;
 		    } else if ((*buffer & 0xf0) == 0xe0) {
@@ -12454,7 +12859,7 @@ PRIVATE void redraw_part_of_line ARGS4(
 		    buffer[1] = '\0';
 		    data += utf_extra;
 		    utf_extra = 0;
-		} else if (HTCJK != NOCJK && !isascii(buffer[0])) {
+		} else if (HTCJK != NOCJK && !isascii((unsigned char)buffer[0])) {
 		    /*
 		     *  For CJK strings, by Masanobu Kimura.
 		     */
@@ -12574,7 +12979,7 @@ PRIVATE void move_to_glyph ARGS10(
     if (i > (int)LYcols - 1)
 	i = (int)LYcols - 1;
 
-    linkvlen = hightext ? LYmbcsstrlen(hightext, utf_flag) : 0;
+    linkvlen = hightext ? LYmbcsstrlen(hightext, utf_flag, YES) : 0;
 
     /*
      *  Scan through the data, making sure that we do not
@@ -12593,13 +12998,13 @@ PRIVATE void move_to_glyph ARGS10(
 	if (case_sensitive)
 	    cp_tgt = LYno_attr_mbcs_strstr(sdata,
 					   target,
-					   utf_flag,
+					   utf_flag, YES,
 					   &HitOffset,
 					   &LenNeeded);
 	else
 	    cp_tgt = LYno_attr_mbcs_case_strstr(sdata,
 						target,
-						utf_flag,
+						utf_flag, YES,
 						&HitOffset,
 						&LenNeeded);
 	if (cp_tgt) {
@@ -12629,9 +13034,9 @@ PRIVATE void move_to_glyph ARGS10(
 	if (data && hightext && i >= XP && !incurlink) {
 
 	/*
-	 *  We reached the position of link itself, and highlight is
+	 *  We reached the position of link itself, and hightext is
 	 *  non-NULL.  We switch data from being a pointer into the HTLine
-	 *  to be a pointer into hightext.  Normally (as long as this
+	 *  to being a pointer into hightext.  Normally (as long as this
 	 *  routine is applied to normal hyperlink anchors) the text in
 	 *  hightext will be identical to that part of the HTLine that
 	 *  data was already pointing to, except that special attribute
@@ -12648,7 +13053,7 @@ PRIVATE void move_to_glyph ARGS10(
 	    data = hightext;
 	    len = strlen(hightext);
 	    end_of_data = hightext + len;
-	    XP += linkvlen;
+	    XP += linkvlen;	/* from now on XP includes hightext chars */
 	    incurlink = YES;
 	    if (cp_tgt) {
 		if (flag && i_after_tgt >= XP)
@@ -12725,13 +13130,13 @@ PRIVATE void move_to_glyph ARGS10(
 		else if (case_sensitive)
 		    cp_tgt = LYno_attr_mbcs_strstr(sdata,
 						   target,
-						   utf_flag,
+						   utf_flag, YES,
 						   &HitOffset,
 						   &LenNeeded);
 		else
 		    cp_tgt = LYno_attr_mbcs_case_strstr(sdata,
 							target,
-							utf_flag,
+							utf_flag, YES,
 							&HitOffset,
 							&LenNeeded);
 		if (cp_tgt) {
@@ -12852,10 +13257,21 @@ PRIVATE void move_to_glyph ARGS10(
 		 *  drawing needs to be turned on now. - kw
 		 */
 #if defined(SHOW_WHEREIS_TARGETS)
-		if (incurlink) {
-		    if (intarget && flag && i == XP - 1 &&
-			i_after_tgt > i)
+		if (incurlink && intarget && flag && i_after_tgt > i) {
+		    if (i == XP - 1) {
 			i_after_tgt = i;
+		    } else if (i == XP - 2 && HTCJK != NOCJK &&
+			       !isascii((unsigned char)buffer[0])) {
+			i_after_tgt = i;
+			cp_tgt = NULL;
+			if (drawing) {
+			    if (drawingtarget) {
+				LYstopTargetEmphasis();
+				drawingtarget = NO;
+				lynx_start_link_color (flag, inU);
+			    }
+			}
+		    }
 		}
 		if (cp_tgt && i >= i_start_tgt && sdata > cp_tgt) {
 		    if (!intarget ||
@@ -12952,7 +13368,7 @@ PRIVATE void move_to_glyph ARGS10(
 		    buffer[1] = '\0';
 		    sdata += utf_extra; data += utf_extra;
 		    utf_extra = 0;
-		} else if (HTCJK != NOCJK && !isascii(buffer[0])) {
+		} else if (HTCJK != NOCJK && !isascii((unsigned char)buffer[0])) {
 		    /*
 		     *  For CJK strings, by Masanobu Kimura.
 		     */
@@ -13006,10 +13422,12 @@ PRIVATE void move_to_glyph ARGS10(
 	if (hadutf8) {
 #ifdef USE_SLANG
 	    SLsmg_touch_lines(YP, 1);
-#elif defined(NCURSES_VERSION)
-	    touchline(stdscr, YP, 1);
 #else
-	    touchwin(stdscr);
+#if defined(NCURSES_VERSION)
+	    wredrawln(stdscr, YP, 1);
+#else
+	    touchline(stdscr, YP, 1); /* or something else? */
+#endif
 #endif
 	}
     }

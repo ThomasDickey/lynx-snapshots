@@ -17,6 +17,9 @@
 #define ROWS_GROWBY 2
 #define MAX_STBL_POS (LYcols-1)
 
+/* must be different from HT_ALIGN_NONE and HT_LEFT, HT_CENTER etc.: */
+#define RESERVEDCELL (-2)  /* cell's alignment field is overloaded, this
+			      value means cell was reserved by ROWSPAN */
 typedef enum {
     CS_invalid = -1,
     CS_new     =  0,
@@ -48,7 +51,8 @@ typedef struct _STable_cellinfo {
 	int	pos;		/* column where cell starts */
 	int	len;		/* number of character positions */
 	int	colspan;	/* number of columns to span */
-	short	alignment;	/* one of HT_LEFT, HT_CENTER, HT_RIGHT */
+	short	alignment;	/* one of HT_LEFT, HT_CENTER, HT_RIGHT,
+				   or RESERVEDCELL */
 } STable_cellinfo;
 
 typedef struct _STable_rowinfo {
@@ -69,9 +73,13 @@ struct _STable_info {
 	int	maxpos;		/* max. of max. cell pos's of any row */
 	int	allocated_rows; /* number of rows allocated */
 	int	allocated_sumcols;	/* number of sumcols allocated */
+	int	ncolinfo;		/* number of COL info collected */
 	STable_cellinfo * sumcols; /* for summary (max len/pos) col info */
 	STable_rowinfo * rows;
 	short	alignment;	/* global align attribute for this table */
+	short	rowgroup_align;	/* align default for current group of rows */
+	short	pending_colgroup_align;
+	int	pending_colgroup_next;
 	STable_states s;
 };
 
@@ -103,14 +111,14 @@ struct _STable_info {
 **    ("justify" is treated as "left")
 **  - Inheritance of horizontal alignment according to HTML 4.0 (with the
 **    exception of COLGROUP/COL)
-**  - COLSPAN >1 (nearly untested)
+**  - COLSPAN >1 (may work incorrectly for some tables?)
+**  - ROWSPAN >1 (reserving cells in following rows)
 **  - Line breaks at start of first cell or at end of last cell are treated
 **    as if they were not part of the cell and row.  This allows us to
 **    cooperate with one way in which tables have been made friendly to
 **    browsers without any table support.
 **  Missing, but can be added:
 **  - Support for COLGROUP/COL
-**  - ROWSPAN >1 (reserving cells in following rows)
 **  - Tables wider than display.  The limitation is not here but in GridText.c
 **    etc.  If horizontal scrolling were implemented there, the mechanisms
 **    here coudl deal with wide tables (just change MAX_STBL_POS code).
@@ -140,6 +148,8 @@ PUBLIC struct _STable_info * Stbl_startTABLE ARGS1(
     STable_info *me = (STable_info *) calloc(1, sizeof(STable_info));
     if (me) {
 	me->alignment = alignment;
+	me->rowgroup_align = HT_ALIGN_NONE;
+	me->pending_colgroup_align = HT_ALIGN_NONE;
 	me->s.x_td = -1;
 	me->s.icell_core = -1;
     }
@@ -159,9 +169,9 @@ PUBLIC void Stbl_free ARGS1(
 {
     if (me && me->allocated_rows && me->rows) {
 	int i;
-	for (i = 0; i <= me->nrows; i++)
+	for (i = 0; i < me->allocated_rows; i++)
 	    free_rowinfo(me->rows + i);
-	free(me->rows);
+	FREE(me->rows);
     }
     if (me)
 	FREE(me->sumcols);
@@ -171,8 +181,10 @@ PUBLIC void Stbl_free ARGS1(
 /*
  * Returns -1 on error, otherwise index of just-added table cell.
  */
-PRIVATE int Stbl_addCellToRow ARGS7(
+PRIVATE int Stbl_addCellToRow ARGS9(
     STable_rowinfo *,	me,
+    STable_cellinfo *,	colinfo,
+    int,		ncolinfo,
     STable_states *,	s,
     int,		colspan,
     short,		alignment,
@@ -386,6 +398,10 @@ PRIVATE int Stbl_addCellToRow ARGS7(
     if (me->ncells > 0 && me->cells[me->ncells - 1].colspan > 1) {
 	me->ncells += me->cells[me->ncells-1].colspan - 1;
     }
+    while (me->ncells < me->allocated &&
+	   me->cells[me->ncells].alignment == RESERVEDCELL) {
+	me->ncells++;
+    }
     {
 	int growby = 0;
 	while (me->ncells + colspan + 1 > me->allocated + growby)
@@ -413,8 +429,17 @@ PRIVATE int Stbl_addCellToRow ARGS7(
     me->cells[me->ncells].colspan = colspan;
     me->cells[me->ncells].alignment =
 	(alignment==HT_ALIGN_NONE) ? me->alignment : alignment;
-    if (me->cells[me->ncells].alignment==HT_ALIGN_NONE)
-	me->cells[me->ncells].alignment = isheader ? HT_CENTER : HT_LEFT;
+
+    if (alignment != HT_ALIGN_NONE)
+	    me->cells[me->ncells].alignment = alignment;
+    else {
+	if (ncolinfo >= me->ncells + 1) 
+	    me->cells[me->ncells].alignment = colinfo[me->ncells].alignment;
+	if (me->cells[me->ncells].alignment==HT_ALIGN_NONE)
+	    me->cells[me->ncells].alignment = me->alignment;
+	if (me->cells[me->ncells].alignment==HT_ALIGN_NONE)
+	    me->cells[me->ncells].alignment = isheader ? HT_CENTER : HT_LEFT;
+    }
     for (i = me->ncells + 1; i < me->ncells + colspan; i++) {
 	me->cells[i].Line = lineno;
 	me->cells[i].pos = *ppos;
@@ -425,6 +450,38 @@ PRIVATE int Stbl_addCellToRow ARGS7(
     me->cells[me->ncells + colspan].pos = -1; /* not yet used */
     me->ncells++;
     return (me->ncells - 1);
+}
+
+/* returns -1 on error, 0 otherwise */
+/* assumes cells have already been allocated (but may need more) */
+PRIVATE int Stbl_reserveCellsInRow ARGS3(
+    STable_rowinfo *,	me,
+    int,		icell,
+    int,		colspan)
+{
+    STable_cellinfo *cells;
+    int i;
+    int growby = icell + colspan - me->allocated;
+    if (growby > 0) {
+	cells = realloc(me->cells,
+			(me->allocated + growby)
+			* sizeof(STable_cellinfo));
+	if (cells) {
+	    me->allocated += growby;
+	    me->cells = cells;
+	} else {
+	    return -1;
+	}
+    }
+    for (i = icell; i < icell + colspan; i++) {
+	me->cells[i].Line = -1;
+	me->cells[i].pos = -1;
+	me->cells[i].len = -1;
+	me->cells[i].colspan = 0;
+	me->cells[i].alignment = RESERVEDCELL;
+    }
+    me->cells[icell].colspan = colspan;
+    return 0;
 }
 
 PRIVATE int Stbl_finishCellInRow ARGS5(
@@ -827,6 +884,52 @@ PRIVATE int Stbl_finishCellInRow ARGS5(
 }
 
 /*
+ *  Reserve cells, of colspan=spolspan each, in (rowspan-1) rows after
+ *  the current row.
+ */
+PRIVATE int Stbl_reserveCellsInTable ARGS4(
+    STable_info *,	me,
+    int,		icell,
+    int,		colspan,
+    int,		rowspan)
+{
+    STable_rowinfo *rows, *row;
+    int growby;
+    int i;
+    if (me->nrows <= 0)
+	return -1;		/* must already have at least one row */
+    growby = me->nrows + rowspan - 1 - me->allocated_rows;
+    if (growby > 0) {
+	rows = realloc(me->rows,
+		       (me->allocated_rows + growby)
+		       * sizeof(STable_rowinfo));
+	if (!rows)
+	    return 0; /* ignore silently, maybe someone said ROWSPAN=9999999 */
+	for (i = 0; i < growby; i++) {
+	    row = rows + me->allocated_rows + i;
+	    row->allocated = 0;
+	    row->ncells = 0;
+	    row->fixed_line = NO;
+	    row->cells = NULL;
+	    row->alignment = HT_ALIGN_NONE;
+	}
+	me->allocated_rows += growby;
+	me->rows = rows;
+    }
+    for (i = me->nrows; i < me->nrows + rowspan - 1; i++) {
+	if (!me->rows[i].allocated) {
+	    me->rows[i].cells = calloc(icell + colspan, sizeof(STable_cellinfo));
+	    if (!me->rows[i].cells)
+		return 0;	/* fail silently */
+	    else
+		me->rows[i].allocated = icell + colspan;
+	}
+	Stbl_reserveCellsInRow(me->rows + i, icell, colspan);
+    }
+    return 0;
+}
+
+/*
  * Returns -1 on error, otherwise index of just-added table row.
  */
 PUBLIC int Stbl_addRowToTable ARGS3(
@@ -891,9 +994,17 @@ PUBLIC int Stbl_addRowToTable ARGS3(
     me->rows[me->nrows].Line = lineno;
     if (me->nrows == 0)
 	me->startline = lineno;
-    me->rows[me->nrows].alignment =
-	(alignment==HT_ALIGN_NONE) ? me->alignment : alignment;
+    if (alignment != HT_ALIGN_NONE)
+	me->rows[me->nrows].alignment = alignment;
+    else
+	me->rows[me->nrows].alignment =
+	    (me->rowgroup_align==HT_ALIGN_NONE) ?
+				  me->alignment : me->rowgroup_align;
     me->nrows++;
+    if (me->pending_colgroup_next > me->ncolinfo) {
+	me->ncolinfo = me->pending_colgroup_next;
+	me->pending_colgroup_next = 0;
+    }
     me->rows[me->nrows].Line = -1; /* not yet used */
     return (me->nrows - 1);
 }
@@ -977,9 +1088,10 @@ PRIVATE void update_sumcols0 ARGS7(
 /*
  * Returns -1 on error, otherwise 0.
  */
-PUBLIC int Stbl_addCellToTable ARGS6(
+PUBLIC int Stbl_addCellToTable ARGS7(
     STable_info *,	me,
     int,		colspan,
+    int,		rowspan,
     short,		alignment,
     BOOL,		isheader,
     int,		lineno,
@@ -1000,13 +1112,19 @@ PUBLIC int Stbl_addCellToTable ARGS6(
 			   lineno, pos);
     lastrow = me->rows + (me->nrows - 1);
     ncells = lastrow->ncells;	/* remember what it was before adding cell. */
-    icell = Stbl_addCellToRow(lastrow, s,
+    icell = Stbl_addCellToRow(lastrow, me->sumcols, me->ncolinfo, s,
 			      colspan, alignment, isheader,
 			      lineno, &pos);
     if (icell < 0)
 	return icell;
     if (me->nrows == 1 && me->startline < lastrow->Line)
 	me->startline = lastrow->Line;
+
+    if (rowspan > 1) {
+	Stbl_reserveCellsInTable(me, icell, colspan, rowspan);
+	/* me->rows may now have been realloc'd, make lastrow valid pointer */
+	lastrow = me->rows + (me->nrows - 1);
+    }
 
     {
 	int growby = 0;
@@ -1209,6 +1327,89 @@ PUBLIC int Stbl_finishCellInTable ARGS4(
     return 0;
 }
 
+/*
+ * Returns -1 on error, otherwise 0.
+ */
+PUBLIC int Stbl_addColInfo ARGS4(
+    STable_info *,	me,
+    int,		colspan,
+    short,		alignment,
+    BOOL,		isgroup)
+{
+    STable_cellinfo *sumcols, *sumcol;
+    int i, icolinfo;
+
+    if (isgroup) {
+	if (me->pending_colgroup_next > me->ncolinfo)
+	    me->ncolinfo = me->pending_colgroup_next;
+	me->pending_colgroup_next = me->ncolinfo + colspan;
+	me->pending_colgroup_align = alignment;
+    } else {
+	for (i = me->pending_colgroup_next - 1;
+	     i >= me->ncolinfo + colspan; i--)
+	    me->sumcols[i].alignment = HT_ALIGN_NONE;
+	me->pending_colgroup_next = me->ncolinfo + colspan;
+    }
+    icolinfo = me->ncolinfo;
+    if (!isgroup)
+	me->ncolinfo += colspan;
+
+    {
+	int growby = 0;
+	while (icolinfo + colspan + 1 > me->allocated_sumcols + growby)
+	    growby += CELLS_GROWBY;
+	if (growby) {
+	    if (me->allocated_sumcols == 0) {
+		sumcols = calloc(growby, sizeof(STable_cellinfo));
+	    } else {
+		sumcols = realloc(me->sumcols,
+				  (me->allocated_sumcols + growby)
+				  * sizeof(STable_cellinfo));
+		for (i = 0; sumcols && i < growby; i++) {
+		    sumcol = sumcols + me->allocated_sumcols + i;
+		    sumcol->pos = sumcols[me->allocated_sumcols-1].pos;
+		    sumcol->len = 0;
+		    sumcol->colspan = 0;
+		}
+	    }
+	    if (sumcols) {
+		me->allocated_sumcols += growby;
+		me->sumcols = sumcols;
+	    } else {
+		return -1;
+	    }
+	}
+    }
+
+    if (alignment==HT_ALIGN_NONE)
+	alignment = me->pending_colgroup_align;
+    for (i = icolinfo; i < icolinfo + colspan; i++) {
+	me->sumcols[i].alignment = alignment;
+    }
+    return 0;
+}
+
+/*
+ * Returns -1 on error, otherwise 0.
+ */
+PUBLIC int Stbl_finishColGroup ARGS1(
+    STable_info *,	me)
+{
+    if (me->pending_colgroup_next > me->ncolinfo)
+	me->ncolinfo = me->pending_colgroup_next;
+    me->pending_colgroup_next = 0;
+    me->pending_colgroup_align = HT_ALIGN_NONE;
+    return 0;
+}
+
+PUBLIC int Stbl_addRowGroup ARGS2(
+    STable_info *,	me,
+    short,		alignment)
+{
+    me->rowgroup_align = alignment;
+    return 0;			/* that's all! */
+}
+
 PUBLIC int Stbl_finishTABLE ARGS1(
     STable_info *,	me)
 {
@@ -1285,9 +1486,9 @@ PRIVATE int get_fixup_positions ARGS4(
 	    newlen = HTMAX(newlen, sumcols[i].len);
 	    if (me->cells[i].len < newlen) {
 		if (me->cells[i].alignment == HT_RIGHT) {
-		    newpos[i] += newlen - me->cells[i].len;
+		    newpos[ip] += newlen - me->cells[i].len;
 		} else {
-		    newpos[i] += (newlen - me->cells[i].len) / 2;
+		    newpos[ip] += (newlen - me->cells[i].len) / 2;
 		}
 	    }
 	}

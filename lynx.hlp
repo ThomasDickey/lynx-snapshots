@@ -140,7 +140,8 @@
 
        -dont_wrap_pre
               inhibit wrapping of text in  <pre>  when  -dump'ing
-              and -crawl'ing.
+              and  -crawl'ing,  mark wrapped lines in interactive
+              session.
 
        -dump  dumps  the formatted output of the default document
               or one specified on the command  line  to  standard

@@ -1332,7 +1332,7 @@ PUBLIC int UCReverseTransChar ARGS3(
 
 #ifndef UC_NO_SHORTCUTS
     if (charset_in == charset_out)
-	return ch_out;
+	return (unsigned char)ch_out;
 #endif /* UC_NO_SHORTCUTS */
     if (charset_in < 0)
 	return -11;

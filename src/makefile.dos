@@ -11,15 +11,23 @@ LYStyle.o LYHash.o LYPrettySrc.o TRSTable.o
 
 CFLAGS= $(MCFLAGS) -I. -I.. $(SLANGINC)
 
+# comment this line to suppress DIRED support
+DIRED_DEFS = -DDIRED_SUPPORT -DOK_UUDECODE -DOK_TAR -DOK_GZIP -DOK_ZIP
+
 CC = gcc
 MCFLAGS = -O2 -DHAVE_GETBKGD -DDISP_PARTIAL -DUSE_ZLIB \
  -DSOURCE_CACHE -DUSE_PSRC \
  -DUSE_EXTERNALS -DCOLOR_CURSES -DNCURSES -DFANCY_CURSES \
  -DACCESS_AUTH -DNO_CUSERID -DNOUSERS -DDOSPATH -DNO_TTYTYPE -DNO_UTMP \
- -Ichrtrans -I../WWW/library/implementation \
- -I../curses  -I../djgpp/tcplib/include -I../djgpp/tcplib/include/tcp
-WWWLIB = ../WWW/library/djgpp/libwww.a ../curses/pdcurses.a ../djgpp/tcplib/obj/libtcp.a
-LIBS=-lz
+ -DEXP_PERSISTENT_COOKIES -DEXP_ADDRLIST_PAGE -DEXP_ALT_BINDINGS \
+ -DEXP_FILE_UPLOAD \
+ -DWATT32 \
+ $(DIRED_DEFS) \
+ -I./chrtrans -I../WWW/Library/Implementation \
+ -I../curses -I../djgpp/watt32/inc -I../djgpp/watt32/inc/sys
+WWWLIB = ../WWW/Library/djgpp/libwww.a ../curses/pdcurses.a ../djgpp/watt32/lib/libwatt.a
+LIBS= -lz # -lintl
+#INTLFLAGS = -DHAVE_GETTEXT -DHAVE_LIBINTL_H
 
 all: lynx
 

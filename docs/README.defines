@@ -121,6 +121,7 @@ Other general
 # -DNSL_FORK       For fork-based name server lookups that can be 'z'apped.
 # -DSYSLOG_REQUESTED_URLS
 # 	if you would like logging of client requests via syslog()
+# -DUSE_VASPRINT   Use vasprintf() function
 # -DUSE_ZLIB       (see INSTALLATION)
 # -DDECLARE_WAIS_LOGFILES   see comments in makefile.in
 # -DNO_RULES	   Disables code for CERN-style rules files
@@ -141,6 +142,7 @@ They may directly affect several source files.  Filenames show where
 they are set.  Normally installers shouldn't have to care about these
 symbols.
 
+SAVE_TIME_NOT_SPACE	HTString.c	minmize number of some malloc calls
 SHOW_WHEREIS_TARGETS	LYCurses.h	whereis search highlighting
 USE_KEYMAPS		LYCurses.h	use of .lynx-keymaps files
 
@@ -161,9 +163,11 @@ DUPLICATE_ANCHOR_NAME_WORKAROUND	HTAnchor.c
 EXTENDED_OPTION_LOGIC			LYMain.c
 EXTENDED_STARTFILE_RECALL		LYMain.c
 OPTNAME_ALLOW_DASHES			LYMain.c
+OVERLAP					HTNews.c
 RESTRICT_NM_ALLOW_DASHES		LYUtils.c
 SOCKET_DEBUG_TRACE			HTTCP.c
 TRADITIONAL_SUFFIXES			HTInit.c
+USE_XHDR				HTNews.c
 max_cookies_buffer			LYCookie.c
 max_cookies_domain			LYCookie.c
 max_cookies_global			LYCookie.c

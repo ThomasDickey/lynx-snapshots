@@ -263,17 +263,32 @@ PRIVATE int XYdist ARGS5(
     int,	y2,
     int,	dx2)
 {
-    int xerr = x2 - x1, yerr = y2 - y1;
+    int xerr = 3 * (x2 - x1), yerr = 9 * (y2 - y1);
 
     if (xerr < 0)
-	xerr = x1 - x2 - dx2;
+	xerr = 3 * (x1 - x2 - dx2) + 1;	/* pos after string not really in it */
     if (xerr < 0)
 	xerr = 0;
     if (yerr < 0)
 	yerr = -yerr;
-    if (xerr < 3 && yerr)	/* x-distance of 3 better than y-dist of 1 */
-	return yerr + 1;
-    return (xerr + 2)/3 + yerr;	/* Subjective factor of distance */
+    if (!yerr)			/* same line is good */
+	return (xerr > 0) ? (xerr*2 - 1) : 0;
+    if (xerr < 9 && yerr)   /* x-dist of 3 cell better than y-dist of 1 cell */
+	yerr += (9 - xerr);
+    return 2 * xerr + yerr; /* Subjective factor; ratio -> approx. 6 / 9 */
+/*
+old: (IZ 1999-07-30)
+ 3  2  2  2  1  1  1 XX XX XX XX XX  0  1  1  1  2  2  2  3  3
+ 4\ 3  3  3  2  2  2  2  2  2  2  2  2  2  2  2  3  3  3/ 4  4
+ 5  4  4  4\ 3  3  3  3  3  3  3  3  3  3  3  3/ 4  4  4  5  5
+ 6  5  5  5  4  4  4  4  4  4  4  4  4  4  4  4  5  5  5  6  5
+now: (kw 1999-10-23)
+41 35 29|23 17 11  5 XX XX XX XX XX  1  7 13 19 25|31 37 43 49
+   45 39 33\27 24 21 18 18 18 18 18 19 22 25 28/34 40 46 50
+      48 42 36 33 30\27 27 27 27 27 28/31 34 37 43 49
+         51 45 42 39 36 36 36 36 36 37 40 43 46 49
+               51 48 45 45 45 45 45 46 49 52
+*/
 }
 
 /* Given X and Y coordinates of a mouse event, set mouse_link to the
@@ -312,9 +327,9 @@ PRIVATE int set_clicked_link ARGS4(
 	mouse_link = -2;
 	y -= 1 + (LYsb_arrow != 0);
 	if (y < 0)
-	    return INSERT_KEY;
+	    return LAC_TO_LKC0(LYK_UP_TWO);
 	if (y >= h)
-	    return REMOVE_KEY;
+	    return LAC_TO_LKC0(LYK_DOWN_TWO);
 #ifdef DISP_PARTIAL			/* Newline is not defined otherwise */
 	if (clicks >= 2) {
 	    double frac = (1. * y)/(h - 1);
@@ -327,13 +342,13 @@ PRIVATE int set_clicked_link ARGS4(
 	}
 #endif
 	if (y < LYsb_begin)
-	    return PGUP;
+	    return LAC_TO_LKC0(LYK_PREV_PAGE);
 	if (y >= LYsb_end)
-	    return PGDOWN;
+	    return LAC_TO_LKC0(LYK_NEXT_PAGE);
 	mouse_link = -1;		/* No action in edit fields */
 #endif
     } else {
-	int mouse_err = 4, /* subjctv-dist better than this for approx stuff */
+	int mouse_err = 29, /* subjctv-dist better than this for approx stuff */
 	    cur_err;
 
 	/* Loop over the links and see if we can get a match */
@@ -355,6 +370,18 @@ PRIVATE int set_clicked_link ARGS4(
 	    /* Check the first line of the link */
 	    if ( links[i].hightext != NULL) {
 		cur_err = XYdist(x, y, links[i].lx, links[i].ly, len);
+		/* Check the second line */
+		if (cur_err > 0 && links[i].hightext2 != NULL) {
+		    /* Note that there is never hightext2 if is_text */
+		    int cur_err_2 = XYdist(x, y,
+					   links[i].hightext2_offset,
+					   links[i].ly+1,
+					   strlen(links[i].hightext2));
+		    cur_err = HTMIN(cur_err, cur_err_2);
+		}
+		if (cur_err > 0 && is_text)
+		    cur_err--;	/* a bit of preference for text fields,
+				   enter field if hit exactly at end - kw */
 		if (cur_err == 0) {
 		    int cury, curx;
 
@@ -390,6 +417,7 @@ PRIVATE int set_clicked_link ARGS4(
 		    mouse_link = i;
 		}
 	    }
+#if 0	/* should not have second line if no first - kw */
 	    /* Check the second line */
 	    if (links[i].hightext2 != NULL) {
 		cur_err = XYdist(x, y,
@@ -405,6 +433,7 @@ PRIVATE int set_clicked_link ARGS4(
 		    mouse_link = i;
 		}
 	    }
+#endif
 	}
 	/*
 	 * If a link was hit, we must look for a key which will activate
@@ -525,10 +554,13 @@ PUBLIC char * LYmbcs_skip_glyphs ARGS3(
  *  LYmbcsstrlen() returns the printable length of a string
  *  that might contain IsSpecial or multibyte (CJK or UTF8)
  *  characters. - FM
+ *  Counts glyph cells if count_gcells is set. (Full-width
+ *  characters in CJK mode count as two.)
  */
-PUBLIC int LYmbcsstrlen ARGS2(
-	char *,		str,
-	BOOL,		utf_flag)
+PUBLIC int LYmbcsstrlen ARGS3(
+	char *, 	str,
+	BOOL,		utf_flag,
+	BOOL,		count_gcells)
 {
     int i, j, len = 0;
 
@@ -550,10 +582,6 @@ PUBLIC int LYmbcsstrlen ARGS2(
 		i++;
 		j++;
 	    }
-	} else if (!utf_flag && HTCJK != NOCJK && !isascii(str[i]) &&
-		    str[(i + 1)] != '\0' &&
-		    !IsSpecialAttrChar(str[(i + 1)])) {
-	    i++;
 	}
     }
 
@@ -1129,26 +1157,43 @@ PRIVATE int read_keymap_file NOARGS
 PRIVATE void setup_vtXXX_keymap NOARGS
 {
     static Keysym_String_List table[] = {
-	EXTERN_KEY( "\033[A",	"^(ku)", UPARROW,	KEY_UP ),
-	EXTERN_KEY( "\033OA",	"^(ku)", UPARROW,	KEY_UP ),
-	EXTERN_KEY( "\033[B",	"^(kd)", DNARROW,	KEY_DOWN ),
-	EXTERN_KEY( "\033OB",	"^(kd)", DNARROW,	KEY_DOWN ),
-	EXTERN_KEY( "\033[C",	"^(kr)", RTARROW,	KEY_RIGHT ),
-	EXTERN_KEY( "\033OC",	"^(kr)", RTARROW,	KEY_RIGHT ),
-	EXTERN_KEY( "\033[D",	"^(kl)", LTARROW,	KEY_LEFT ),
-	EXTERN_KEY( "\033OD",	"^(kl)", LTARROW,	KEY_LEFT ),
-	EXTERN_KEY( "\033[1~",	"^(@0)", FIND_KEY,	KEY_FIND ),
-	EXTERN_KEY( "\033[2~",	"^(kI)", INSERT_KEY,	KEY_IC ),
-	EXTERN_KEY( "\033[3~",	"^(kD)", REMOVE_KEY,	KEY_DC ),
-	EXTERN_KEY( "\033[4~",	"^(*6)", SELECT_KEY,	KEY_SELECT ),
-	EXTERN_KEY( "\033[5~",	"^(kP)", PGUP,		KEY_PPAGE ),
-	EXTERN_KEY( "\033[6~",	"^(kN)", PGDOWN,	KEY_NPAGE ),
-	EXTERN_KEY( "\033[8~",	"^(@7)", END_KEY,	KEY_END ),
-	EXTERN_KEY( "\033[7~",	"^(kh)", HOME,		KEY_HOME),
-	EXTERN_KEY( "\033[28~",	"^(k1)", F1,		KEY_F(1) ),
-	EXTERN_KEY( "\033OP",	"^(k1)", F1,		KEY_F(1) ),
-	EXTERN_KEY( "\033[OP",	"^(k1)", F1,		KEY_F(1) ),
-	EXTERN_KEY( "\033[29~",	"^(F6)", DO_KEY,	KEY_F(16) ),
+	INTERN_KEY( "\033[A",	UPARROW,	KEY_UP ),
+	INTERN_KEY( "\033OA",	UPARROW,	KEY_UP ),
+	INTERN_KEY( "\033[B",	DNARROW,	KEY_DOWN ),
+	INTERN_KEY( "\033OB",	DNARROW,	KEY_DOWN ),
+	INTERN_KEY( "\033[C",	RTARROW,	KEY_RIGHT ),
+	INTERN_KEY( "\033OC",	RTARROW,	KEY_RIGHT ),
+	INTERN_KEY( "\033[D",	LTARROW,	KEY_LEFT ),
+	INTERN_KEY( "\033OD",	LTARROW,	KEY_LEFT ),
+	INTERN_KEY( "\033[1~",	FIND_KEY,	KEY_FIND ),
+	INTERN_KEY( "\033[2~",	INSERT_KEY,	KEY_IC ),
+	INTERN_KEY( "\033[3~",	REMOVE_KEY,	KEY_DC ),
+	INTERN_KEY( "\033[4~",	SELECT_KEY,	KEY_SELECT ),
+	INTERN_KEY( "\033[5~",	PGUP,		KEY_PPAGE ),
+	INTERN_KEY( "\033[6~",	PGDOWN,		KEY_NPAGE ),
+	INTERN_KEY( "\033[7~",	HOME,		KEY_HOME),
+	INTERN_KEY( "\033[8~",	END_KEY,	KEY_END ),
+	INTERN_KEY( "\033[11~",	F1,		KEY_F(1) ),
+	INTERN_KEY( "\033[28~",	F1,		KEY_F(1) ),
+	INTERN_KEY( "\033OP",	F1,		KEY_F(1) ),
+	INTERN_KEY( "\033[OP",	F1,		KEY_F(1) ),
+	INTERN_KEY( "\033[29~",	DO_KEY,		KEY_F(16) ),
+#if defined(USE_SLANG) && !defined(VMS)
+	INTERN_KEY(	"^(ku)", UPARROW,	KEY_UP ),
+	INTERN_KEY(	"^(kd)", DNARROW,	KEY_DOWN ),
+	INTERN_KEY(	"^(kr)", RTARROW,	KEY_RIGHT ),
+	INTERN_KEY(	"^(kl)", LTARROW,	KEY_LEFT ),
+	INTERN_KEY(	"^(@0)", FIND_KEY,	KEY_FIND ),
+	INTERN_KEY(	"^(kI)", INSERT_KEY,	KEY_IC ),
+	INTERN_KEY(	"^(kD)", REMOVE_KEY,	KEY_DC ),
+	INTERN_KEY(	"^(*6)", SELECT_KEY,	KEY_SELECT ),
+	INTERN_KEY(	"^(kP)", PGUP,		KEY_PPAGE ),
+	INTERN_KEY(	"^(kN)", PGDOWN,	KEY_NPAGE ),
+	INTERN_KEY(	"^(@7)", END_KEY,	KEY_END ),
+	INTERN_KEY(	"^(kh)", HOME,		KEY_HOME),
+	INTERN_KEY(	"^(k1)", F1,		KEY_F(1) ),
+	INTERN_KEY(	"^(F6)", DO_KEY,	KEY_F(16) ),
+#endif /* SLANG && !VMS */
     };
     size_t n;
     for (n = 0; n < TABLESIZE(table); n++)
@@ -3475,8 +3520,13 @@ PUBLIC char * LYno_attr_char_strstr ARGS2(
  * LYno_attr_mbcs_case_strstr will find the first occurrence of the string
  * pointed to by tarptr in the string pointed to by chptr.
  * It takes account of MultiByte Character Sequences (UTF8).
- * The physical length of the displayed string up to the end of the target
- * string is returned in *nendp if the search is successful.
+ * The physical lengths of the displayed string up to the start and
+ * end (= next position after) of the target string are returned in *nstartp
+ * and *nendp if the search is successful.
+ *   These lengths count glyph cells if count_gcells is set. (Full-width
+ *   characters in CJK mode count as two.)  Normally that's what we want.
+ *   They count actual glyphs if count_gcells is unset. (Full-width
+ *   characters in CJK mode count as one.)
  * It ignores the characters: LY_UNDERLINE_START_CHAR and
  *			      LY_UNDERLINE_END_CHAR
  *			      LY_BOLD_START_CHAR
@@ -3486,10 +3536,11 @@ PUBLIC char * LYno_attr_char_strstr ARGS2(
  * It assumes UTF8 if utf_flag is set.
  *  It is a case insensitive search. - KW & FM
  */
-PUBLIC char * LYno_attr_mbcs_case_strstr ARGS5(
+PUBLIC char * LYno_attr_mbcs_case_strstr ARGS6(
 	char *,		chptr,
 	CONST char *,	tarptr,
 	BOOL,		utf_flag,
+	BOOL,		count_gcells,
 	int *,		nstartp,
 	int *,		nendp)
 {
@@ -3547,6 +3598,7 @@ PUBLIC char * LYno_attr_mbcs_case_strstr ARGS5(
 		     */
 		    tmpchptr++;
 		    tmptarptr++;
+		    if (count_gcells) tarlen++;
 		    if (*tmptarptr == '\0') {
 			/*
 			 *  One character match. - FM
@@ -3555,13 +3607,13 @@ PUBLIC char * LYno_attr_mbcs_case_strstr ARGS5(
 			if (nendp)	*nendp = len + tarlen;
 			return(chptr);
 		    }
-		    tarlen++;
 		} else {
 		    /*
 		     *	It's not a match, so go back to
 		     *	seeking a first target match. - FM
 		     */
 		    chptr++;
+		    if (count_gcells) len++;
 		    continue;
 		}
 	    }
@@ -3576,6 +3628,7 @@ PUBLIC char * LYno_attr_mbcs_case_strstr ARGS5(
 			    !IsSpecialAttrChar(*(tmpchptr + 1))) {
 			    tmpchptr++;
 			    tmptarptr++;
+			    if (count_gcells) tarlen++;
 			} else {
 			    break;
 			}
@@ -3607,6 +3660,7 @@ PUBLIC char * LYno_attr_mbcs_case_strstr ARGS5(
 		*(chptr + 1) != '\0' &&
 		!IsSpecialAttrChar(*(chptr + 1))) {
 		chptr++;
+		if (count_gcells) len++;
 	    }
 	    len++;
 	}
@@ -3620,8 +3674,12 @@ PUBLIC char * LYno_attr_mbcs_case_strstr ARGS5(
  * pointed to by tarptr in the string pointed to by chptr.
  *  It takes account of CJK and MultiByte Character Sequences (UTF8).
  *  The physical lengths of the displayed string up to the start and
- *  end of the target string are returned in *nstartp and *nendp if
- *  the search is successful.
+ *  end (= next position after) the target string are returned in *nstartp
+ *  and *nendp if the search is successful.
+ *    These lengths count glyph cells if count_gcells is set. (Full-width
+ *    characters in CJK mode count as two.)  Normally that's what we want.
+ *    They count actual glyphs if count_gcells is unset. (Full-width
+ *    characters in CJK mode count as one.)
  * It ignores the characters: LY_UNDERLINE_START_CHAR and
  *			      LY_UNDERLINE_END_CHAR
  *			      LY_BOLD_START_CHAR
@@ -3631,10 +3689,11 @@ PUBLIC char * LYno_attr_mbcs_case_strstr ARGS5(
  * It assumes UTF8 if utf_flag is set.
  *  It is a case sensitive search. - KW & FM
  */
-PUBLIC char * LYno_attr_mbcs_strstr ARGS5(
+PUBLIC char * LYno_attr_mbcs_strstr ARGS6(
 	char *,		chptr,
 	CONST char *,	tarptr,
 	BOOL,		utf_flag,
+	BOOL,		count_gcells,
 	int *,		nstartp,
 	int *,		nendp)
 {
@@ -3672,7 +3731,7 @@ PUBLIC char * LYno_attr_mbcs_strstr ARGS5(
 		 *  One char target.
 		 */
 		if (nstartp)	*nstartp = offset;
-		if (nendp)	*nendp = len + 1;
+		if (nendp)	*nendp = len;
 		return(chptr);
 	    }
 	    if (!utf_flag && HTCJK != NOCJK && !isascii(*chptr) &&
@@ -3687,6 +3746,7 @@ PUBLIC char * LYno_attr_mbcs_strstr ARGS5(
 		     */
 		    tmpchptr++;
 		    tmptarptr++;
+		    if (count_gcells) tarlen++;
 		    if (*tmptarptr == '\0') {
 			/*
 			 *  One character match. - FM
@@ -3695,13 +3755,13 @@ PUBLIC char * LYno_attr_mbcs_strstr ARGS5(
 			if (nendp)	*nendp = len + tarlen;
 			return(chptr);
 		    }
-		    tarlen++;
 		} else {
 		    /*
 		     *	It's not a match, so go back to
 		     *	seeking a first target match. - FM
 		     */
 		    chptr++;
+		    if (count_gcells) len++;
 		    continue;
 		}
 	    }
@@ -3716,6 +3776,7 @@ PUBLIC char * LYno_attr_mbcs_strstr ARGS5(
 			    !IsSpecialAttrChar(*(tmpchptr + 1))) {
 			    tmpchptr++;
 			    tmptarptr++;
+			    if (count_gcells) tarlen++;
 			} else {
 			    break;
 			}
@@ -3746,6 +3807,7 @@ PUBLIC char * LYno_attr_mbcs_strstr ARGS5(
 		*(chptr + 1) != '\0' &&
 		!IsSpecialAttrChar(*(chptr + 1))) {
 		chptr++;
+		if (count_gcells) len++;
 	    }
 	    len++;
 	}

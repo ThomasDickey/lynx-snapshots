@@ -5,9 +5,9 @@
 #include <HTUtils.h>
 #endif
 
-extern BOOLEAN LYisNonAlnumKeyname PARAMS((int ch, int key_name));
+extern BOOLEAN LYisNonAlnumKeyname PARAMS((int ch, int KeyName));
 extern char *key_for_func PARAMS((int func));
-extern int LYReverseKeymap PARAMS((int key_name));
+extern int LYReverseKeymap PARAMS((int KeyName));
 extern int lookup_keymap PARAMS((int code));
 extern int lacname_to_lac PARAMS((CONST char *func));
 extern int lkcstring_to_lkc PARAMS((CONST char *src));

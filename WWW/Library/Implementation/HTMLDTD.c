@@ -1325,7 +1325,7 @@ static attr ulist_attr[] = {			/* UL attributes */
  /* { "TD"	, td_attr,	HTML_TD_ATTRIBUTES,	SGML_EMPTY }, */
 #define T_TD		0x0400, 0x0FBCF,0x8FFFF,0x00020,0xB7FB7,0x8C75F,0x00001
  /* { "TEXTAREA", textarea_attr,HTML_TEXTAREA_ATTRIBUTES, SGML_LITTERAL }, */
-#define T_TEXTAREA	0x0040, 0x00000,0x00000,0x07F8F,0x33FBF,0x80F5F,0x00000
+#define T_TEXTAREA	0x0040, 0x00000,0x00000,0x07F8F,0x33FBF,0x80F5F,0x00040
  /* { "TEXTFLOW", bodytext_attr,HTML_BODYTEXT_ATTRIBUTES, SGML_MIXED }, */
 #define T_TEXTFLOW	0x20000,0x8FBFF,0x9FFFF,0x977B0,0xB7FB7,0x9B00F,0x00003
  /* { "TFOOT"	, tr_attr,	HTML_TR_ATTRIBUTES,	SGML_EMPTY }, */
@@ -1383,7 +1383,7 @@ static attr ulist_attr[] = {			/* UL attributes */
 #define NULL_HTTag NULL_HTTag_
 #endif
 
-static CONST HTTag tags_old[HTML_ELEMENTS] = {
+static CONST HTTag tags_old[HTML_ALL_ELEMENTS] = {
  { P("A")	, a_attr,	HTML_A_ATTRIBUTES,	SGML_EMPTY,T_A},
  { P("ABBREV")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_ABBREV},
  { P("ACRONYM") , gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_ACRONYM},
@@ -1473,7 +1473,7 @@ static CONST HTTag tags_old[HTML_ELEMENTS] = {
  { P0("PRE")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_PRE},
  { P("Q")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_Q},
  { P("S")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_S},
- { P0("SAMP")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_SAMP},
+ { P("SAMP")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_SAMP},
  { P("SCRIPT")	, script_attr,	HTML_SCRIPT_ATTRIBUTES, SGML_LITTERAL,T_SCRIPT},
  { P("SELECT")	, select_attr,	HTML_SELECT_ATTRIBUTES, SGML_MIXED,T_SELECT},
  { P("SHY")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_EMPTY,T_SHY},
@@ -1502,9 +1502,13 @@ static CONST HTTag tags_old[HTML_ELEMENTS] = {
  { P("VAR")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_VAR},
  { P("WBR")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_EMPTY,T_WBR},
  { P0("XMP")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_LITTERAL,T_XMP},
+ /*  additional (alternative variants), not counted in HTML_ELEMENTS: */
+/* This one will be used as a temporary substitute within the parser when
+   it has been signalled to parse OBJECT content as MIXED. - kw */
+ { P("OBJECT")	, object_attr,	HTML_OBJECT_ATTRIBUTES, SGML_MIXED,T_OBJECT_PCDATA},
 };
 
-static CONST HTTag tags_new[HTML_ELEMENTS] = {
+static CONST HTTag tags_new[HTML_ALL_ELEMENTS] = {
  { P("A")	, a_attr,	HTML_A_ATTRIBUTES,	SGML_MIXED,T_A},
  { P("ABBREV")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_ABBREV},
  { P("ACRONYM") , gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_ACRONYM},
@@ -1594,7 +1598,7 @@ static CONST HTTag tags_new[HTML_ELEMENTS] = {
  { P0("PRE")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_PRE},
  { P("Q")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_Q},
  { P("S")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_S},
- { P0("SAMP")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_SAMP},
+ { P("SAMP")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_SAMP},
  { P("SCRIPT")	, script_attr,	HTML_SCRIPT_ATTRIBUTES, SGML_CDATA,T_SCRIPT},
  { P("SELECT")	, select_attr,	HTML_SELECT_ATTRIBUTES, SGML_ELEMENT,T_SELECT},
  { P("SHY")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_EMPTY,T_SHY},
@@ -1623,12 +1627,11 @@ static CONST HTTag tags_new[HTML_ELEMENTS] = {
  { P("VAR")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_VAR},
  { P("WBR")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_EMPTY,T_WBR},
  { P0("XMP")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_LITTERAL,T_XMP},
-};
-
+ /*  additional (alternative variants), not counted in HTML_ELEMENTS: */
 /* This one will be used as a temporary substitute within the parser when
-   it has been signalled to parse OBJECT content (again) as MIXED. - kw */
-PUBLIC HTTag HTTag_mixedObject =
- { P("OBJECT")	, object_attr,	HTML_OBJECT_ATTRIBUTES, SGML_MIXED,T_OBJECT_PCDATA};
+   it has been signalled to parse OBJECT content as MIXED. - kw */
+ { P("OBJECT")	, object_attr,	HTML_OBJECT_ATTRIBUTES, SGML_MIXED,T_OBJECT_PCDATA},
+};
 
 #undef P
 #undef P0
@@ -1637,7 +1640,7 @@ PUBLIC HTTag HTTag_mixedObject =
 /* Dummy space, will be filled with the contents of either tags_new
    or tags_old on calling HTSwitchDTD - kw */
 
-static HTTag tags[HTML_ELEMENTS];
+static HTTag tags[HTML_ALL_ELEMENTS];
 
 PUBLIC CONST SGML_dtd HTML_dtd = {
 	tags,
@@ -1659,12 +1662,12 @@ PUBLIC void HTSwitchDTD ARGS1(
     if (TRACE)
 	CTRACE((tfp,"HTMLDTD: Copying DTD element info of size %d, %d * %d\n",
 		(int) (new ? sizeof(tags_new) : sizeof(tags_old)),
-		HTML_ELEMENTS,
+		HTML_ALL_ELEMENTS,
 		(int) sizeof(HTTag)));
     if (new)
-	memcpy(tags, tags_new, HTML_ELEMENTS * sizeof(HTTag));
+	memcpy(tags, tags_new, HTML_ALL_ELEMENTS * sizeof(HTTag));
     else
-	memcpy(tags, tags_old, HTML_ELEMENTS * sizeof(HTTag));
+	memcpy(tags, tags_old, HTML_ALL_ELEMENTS * sizeof(HTTag));
 }
 
 PUBLIC HTTag HTTag_unrecognized =

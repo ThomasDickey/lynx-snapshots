@@ -1678,17 +1678,18 @@ PUBLIC char ** LYUCFullyTranslateString ARGS9(
     /*
     **	Don't do byte translation
     **	if original AND target character sets
-    **	are both iso-8859-1,
+    **	are both iso-8859-1 (and we are not called to back-translate),
     **	or if we are in CJK mode.
     */
-    no_bytetrans = (BOOL) ((cs_to <= 0 && cs_from == cs_to) ||
-		    HTCJK != NOCJK);
-
+    if (HTCJK != NOCJK) {
+	no_bytetrans = TRUE;
+    } else if (cs_to <= 0 && cs_from == cs_to && (!Back || cs_to < 0)) {
+	no_bytetrans = TRUE;
+    } else {
     /* No need to translate or examine the string any further */
-    if (!no_bytetrans)
 	no_bytetrans = (BOOL) (!use_lynx_specials && !Back &&
-			UCNeedNotTranslate(cs_from, cs_to));
-
+			       UCNeedNotTranslate(cs_from, cs_to));
+    }
     /*
     **	Save malloc/calloc overhead in simple case - kw
     */
@@ -1898,21 +1899,31 @@ PUBLIC char ** LYUCFullyTranslateString ARGS9(
 			state = S_got_outchar;
 			break;
 		    } else {
-			*(unsigned char *)p = (unsigned char)160;
 			code = 160;
 			if (LYCharSet_UC[cs_to].enc == UCT_ENC_8859 ||
 			    (LYCharSet_UC[cs_to].like8859 & UCT_R_8859SPECL)) {
 			    state = S_got_outchar;
 			    break;
+			} else if (!(LYCharSet_UC[cs_from].enc == UCT_ENC_8859
+			||(LYCharSet_UC[cs_from].like8859 & UCT_R_8859SPECL))) {
+			    state = S_check_uni;
+			    break;
+			} else {
+			    *(unsigned char *)p = (unsigned char)160;
 			}
 		    }
 		} else if ((*p) == LY_SOFT_HYPHEN) {
-		    *(unsigned char *)p = (unsigned char)173;
 		    code = 173;
 		    if (LYCharSet_UC[cs_to].enc == UCT_ENC_8859 ||
 			(LYCharSet_UC[cs_to].like8859 & UCT_R_8859SPECL)) {
 			state = S_got_outchar;
 			break;
+		    } else if (!(LYCharSet_UC[cs_from].enc == UCT_ENC_8859
+			||(LYCharSet_UC[cs_from].like8859 & UCT_R_8859SPECL))) {
+			state = S_check_uni;
+			break;
+		    } else {
+			*(unsigned char *)p = (unsigned char)173;
 		    }
 		} else if (code < 127 || T.transp) {
 		    state = S_got_outchar;

@@ -288,7 +288,7 @@ compress: tar
 REFDIR=orig/$(lynxdir)
 
 lynx.patch: $(top_srcdir) $(top_srcdir)/CHANGES
-	cd  $(top_srcdir)/.. && cd $(REFDIR) && { rm -f \
+	- cd $(top_srcdir)/.. && cd $(REFDIR) && { rm -f \
 		config.log \
 		config.status \
 		lynx_cfg.h \
@@ -297,10 +297,12 @@ lynx.patch: $(top_srcdir) $(top_srcdir)/CHANGES
 			( set -x; cd $$I && rm -f *.orig *.rej makefile ); : ); \
 		done; }
 	( cd $(top_srcdir)/..; echo "%%% Created `date` by target $@. %%%"; \
-			diff -brc $(REFDIR) $(lynxdir) ) \
+	   if diff -bru /dev/null /dev/null;		     \
+		   then diff -bru $(REFDIR) $(lynxdir);	     \
+		   else diff -brc $(REFDIR) $(lynxdir); fi ) \
 		| grep -v '^Common' \
 		| grep -v '^Binary files ' \
-		| grep -v '^Only ' | tee $@ | grep '^--- $(lynxdir)'
+		| grep -v '^Only ' | tee $@ | egrep '^\-\-\- .*$(lynxdir)'
 
 install: install-bin install-man install-cfg @INSTALL_LSS@
 	@echo
