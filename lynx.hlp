@@ -582,6 +582,13 @@
        -trace turns  on  Lynx  trace  mode.  Destination of trace
               output depends on -tlog.
 
+       -trace_mask=value
+              turn on optional traces, which may result  in  very
+              large  trace  files.   Logically  OR  the values to
+              combine options:
+              2=color-style
+              4=TRST (table layout)
+
        -traversal
               traverse all http  links  derived  from  startfile.
               When  used  with -crawl, each link that begins with
@@ -643,13 +650,13 @@
        o Left Arrow will retreat from a link.
        o Type "H" or "?" for online help and descriptions of key-
        stroke commands.
+
        o  Type  "K" for a complete list of the current key-stroke
        command mappings.
 
 2 Environment
        In addition to various  "standard"  environment  variables
        such  as  HOME,  PATH,  USER,  DISPLAY,  TMPDIR, etc, Lynx
-
        utilizes several Lynx-specific environment  variables,  if
        they exist.
 
@@ -704,7 +711,6 @@
                            variable.
 
        MAIL                This  variable  specifies  the default
-
                            inbox Lynx will check for new mail, if
                            such   checking   is  enabled  in  the
                            lynx.cfg file.
@@ -753,6 +759,7 @@
                            discontinued.  Note that  you  do  not
                            include  a  terminal '/' for gateways,
                            but  do  for  proxies   specified   by
+
                            PROTOCOL_proxy  environment variables.
                            See Lynx Users Guide for details.
 
@@ -916,13 +923,13 @@
                            a wish list.
 
        NLSPATH             This  variable, if set, is used as the
+
                            path prefix for message catalogs.
 
 2 Notes
        This is the Lynx v2.8.3 Release
 
        If you wish to contribute to the  further  development  of
-
        Lynx,  subscribe  to  our  mailing  list.   Send  email to
        <majordomo@sig.net> with "subscribe lynx-dev" as the  only
        line in the body of your message.
@@ -970,6 +977,7 @@
        of its development since the departures  of  Lou  Montulli
        and  Garrett  Blythe  from the University of Kansas in the
        summer of 1994 through the release of v2.7.2, and  to  ev-
+
        eryone  on  the net who has contributed to Lynx's develop-
        ment either directly (through patches, comments or bug re-
        ports)  or indirectly (through inspiration and development

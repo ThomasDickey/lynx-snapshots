@@ -1,18 +1,86 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2001-02-26 (2.8.4dev.19)
+* add experimental configure option for post-dev.16 TRST changes by IZ
+  (--enable-nested-tables), ifdef'd with EXP_NESTED_TABLES -TD
+* correct a couple of places that used attrset() rather than wattrset(), which
+  caused the status line to lose color when configured for curses pads but not
+  using color-style (report by Fr3dY <fr3dy@retemail.es>) -TD
+* add a restriction for the chdir command, so it is not normally enabled in
+  anonymous mode -TD
+* reduce putenv logic for presetting $LINES and $COLUMNS to a special case
+  for MVS -PG
+* enable pasting an URL into Lynx (similar to 'g'), and improves the code to
+  copy an URL from Lynx -IZ
+* remove arbitrary restrictions on the size of text to be pasted.  It also
+  makes a quadratic algorithm into a linear one.  Also, it may remove many bugs
+  when the text to paste contains non-printable chars.  Not tested with Unicode
+  and on Win* -IZ
+* implement an action NEXT_DOC, which undoes what PREV_DOC (usually on the
+  Left-arrow key) does -IZ
+  Possible enhancements:
+  a) make HISTORY show the position on the (no more!) "stack".
+  b) several places in the source use the value of nhist (they scan
+     history?).  Make nhist_extra public, and check whether these
+     places want nhist + nhist_extra instead.
+  c) Currently LYpop() and (some) LYpush() erases "the tail" of the
+     stack.  Maybe some callers would prefer a different semantic...
+* correct some logic related to EXP_READPROGRESS -IZ
+* change LYE_xxx symbols to an enum LYEditCodes -TD
+* replace some WIN_EX ifdef's by CAN_CUT_AND_PASTE.  Enable cut and paste on
+  OS/2 -IZ
+  For example, in the keymap file:
+    setkey "\200\4"		LAC:DO_NOTHING:PASTE	# S-insert
+    setkey "^(kIC)"		LAC:DO_NOTHING:PASTE	# S-insert
+* enable automatic switching of display charsets -IZ
+  Currently, it is supported under OS/2 only.  A couple of lines should make it
+  work in LINUX too:  express the semantic of _Switch_Display_Charset() in
+  terms of the existing UCChangeTerminalCodepage.
+  For example, in lynx.cfg:
+    CHARSETS_DIRECTORY:I:/get/tfont10/dir1
+    CHARSET_SWITCH_RULES: koi8-r ISO-8859-5 windows-1251 cp866u KOI8-U :cp866, iso-8859-1 windows-1252:cp850
+  The first variable may be not needed outside of OS/2 (the directory which
+  contains glyph tables, as generated/usable with tfont).  [Used for
+  full-screen sessions only.] The second variables may go at the future, when
+  Lynx knows how to auto-deduce it itself.  Format of CHARSET_SWITCH_RULES
+    source1 source2 source3 : dest1, source4 source5 : dest2
+* move a call for _scrsize() from LYSystem() to size_change(), to fix problem
+  with OS/2 EMX related to screen-size changes -IZ
+* correct a bug in TRSTable.c which left a pointer into a chunk which was
+  reallocated elsewhere (report by Robert Mognet <rmgnt@surfree.com>) -TD
+* make parse_restrictions() warn about keywords it does not recognize -TD
+* rewrote restrictions_fun() in LYMain.c, making it use print_help_strings(),
+  to show the actual restriction values, and listing restrictions that are not
+  documented in the -restrictions message -TD
+* if find-leaks if enabled, free the 'line' variable in HTReadProgress() -TD
+* if find-leaks is enabled, undefine SAVE_TIME_NOT_SPACE in HTString.c to avoid
+  seeing spurious leaks in HTSprintf/HTSprintf0 -TD
+* add command-line option -trace-mask to specify optional traces.  Defined
+  these: 2=color-style, 4=TRST -TD
+* improve ifdef's for --disable-trace configure option, eliminating more unused
+  code when NO_LYNX_TRACE is defined -TD
+* make ifdef's for NCURSES and resizeterm consistent -TD
+* add a call to wresize() after resizeterm() in case user resizes screen in
+  ncurses pad configuration (report by IZ) -TD
+* change entry for "bibp" restriction to "goto_bibp" for consistency with the
+  other goto_xxx restrictions, and use CAN_ANONYMOUS_GOTO_BIBP (report by
+  Robert Cameron) -TD
+* add table entries for goto_xxx restrictions, which replace assignments
+  overlooked in conversion to table in dev.18 (report by Robert Cameron) -TD
+
 2001-02-12 (2.8.4dev.18)
-+ change LYLineEditors[] to unsigned char since values are out of range for
+* change LYLineEditors[] to unsigned char since values are out of range for
   signed chars on Solaris -TD
-+ correct a memory leak in HTStat() from mis-patch for Win32 -TD
+* correct a memory leak in HTStat() from mis-patch for Win32 -TD
 * modify fancy_mouse() logic for ncurses to allow the user to quit a menu by
   clicking outside the menu -IZ
 * allow a different approach to the problem:  how to enter a keyboard
   navigation command when you are in an editing mode.  A new EDIT-time action
   is introduced:  LYE_STOP.  I use it like this:
 	KEYMAP:^[:INTERRUPT:STOP
-  The action behaves as if -tna is temporary switched on:  your edit is
-  commited, and you go into the non-edit mode - until you press Enter on an
+  The action behaves as if -tna is temporarily switched on:  your edit is
+  committed, and you go into the non-edit mode - until you press Enter on an
   edit field again (or switch to a different document), when this temporary
   switch to -tna is terminated.  If the "current" edit field has a different
   style than the "active" edit field, you get an additional feedback.  Anyway,

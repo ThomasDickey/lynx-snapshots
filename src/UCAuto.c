@@ -23,8 +23,28 @@
 #include <LYGlobalDefs.h>
 #include <LYClean.h>
 #include <LYLeaks.h>
+#include <LYCharSets.h>
 
 #ifdef EXP_CHARTRANS_AUTOSWITCH
+
+#  ifdef CAN_SWITCH_DISPLAY_CHARSET
+char *charset_switch_rules;
+char *charsets_directory;
+int auto_other_display_charset = -1;
+int codepages[2];
+int real_charsets[2] = {-1, -1};	/* Non "auto-" charsets for the cps */
+int switch_display_charsets;
+#  endif
+
+#  ifdef __EMX__
+/* If we "just include" <os2.h>, BOOLEAN conflicts. */
+#  define BOOLEAN OS2_BOOLEAN		/* This file doesn't use it, conflicts */
+#  define INCL_VIO			/* I want some Vio functions.. */
+#  define INCL_DOSPROCESS			/* TIB PIB. */
+#  define INCL_DOSNLS			/* DosQueryCp. */
+#  include <os2.h>			/* Misc stuff.. */
+#  include <os2thunk.h>			/* 32 bit to 16 bit pointer conv */
+#  endif
 
 #ifdef LINUX
 typedef enum {
@@ -440,15 +460,217 @@ PUBLIC void UCChangeTerminalCodepage ARGS2(
 #ifdef __EMX__
     int res = 0;
 
-    if (p->codepage > 0) {
-	res = VioSetCp(0, p->codepage, 0);
-	CTRACE((tfp, "UCChangeTerminalCodepage: VioSetCp(%d) returned %d\n", p->codepage, res));
-    }
+    if (newcs < 0)
+	newcs = auto_display_charset;
+    res = Switch_Display_Charset(newcs, 1);
+    CTRACE((tfp, "UCChangeTerminalCodepage: Switch_Display_Charset(%d) returned %d\n", newcs, res));
 #else
     CTRACE((tfp, "UCChangeTerminalCodepage: Called, but not implemented!"));
 #endif
 }
 #endif /* LINUX */
+
+#ifdef CAN_SWITCH_DISPLAY_CHARSET
+
+PUBLIC int Find_Best_Display_Charset ARGS1 (int, ord)
+{
+    CONST char *name = LYCharSet_UC[ord].MIMEname;
+    char *s = charset_switch_rules, *r;
+    char buf[160];
+    static int lowercase;
+    int n = strlen(name), source = 1;
+
+    if (!s || !n)
+	return ord;
+    if (!lowercase++)
+	LYLowerCase(charset_switch_rules);
+    while (1) {
+	while (*s && strchr(" \t,", *s))
+	    s++;			/* Go to start of a name or ':' */
+	if (!*s && source)
+	    return ord;			/* OK to find nothing */
+	if (!*s) {
+	    sprintf(buf, "No destination for '%.80s' in CHARSET_SWITCH_RULES",
+		    name);
+	    HTInfoMsg(buf);
+	    return ord;
+	}
+	if (*s == ':') {
+	    /* Before the replacement name */
+	    while (*s && strchr(" \t:", *s))
+		s++;			/* Go to the replacement */
+	    /* At start of the replacement name */
+	    r = s;
+	    while (*s && !strchr(" \t,:", *s))
+		s++;			/* Skip the replacement */
+	    if (source)
+		continue;
+	    break;
+	}
+	/* At start of the source name */
+	if (source && !strnicmp(name, s, n) && strchr(" \t,", s[n])) {/* Found! */
+	    source = 0;
+	    s += n;
+	    continue;			/* Look for the replacement */
+	}
+	while (*s && !strchr(" \t,:", *s))
+	    s++;			/* Skip the other source names */
+    }
+    /* Here r point to the replacement, s to the end of the replacement. */
+    if (s >= r + sizeof(buf)) {
+	HTInfoMsg("Charset name in CHARSET_SWITCH_RULES too long");
+	return ord;
+    }
+    strncpy(buf, r, s-r);
+    buf[s-r] = '\0';
+    n = UCGetLYhndl_byMIME(buf);
+    if (n < 0) {
+	sprintf(buf, "Unknown charset name '%.*s' in CHARSET_SWITCH_RULES",
+		s-r, r);
+	HTInfoMsg(buf);
+	return ord;
+    }
+    return n;
+}
+
+#  ifdef __EMX__
+/* Switch display for the best fit for LYCharSet_UC[ord].
+   If !REALLY, the switch is tentative only, another switch may happen
+   before the actual display.
+
+   Returns the charset we switched to.  */
+PRIVATE int _Switch_Display_Charset ARGS2 (int, ord, int, really)
+{
+    CONST char *name;
+    unsigned short cp;
+    static int font_loaded_for = -1;
+    int rc, ord1;
+    UCHAR msgbuf[MAXPATHLEN + 80];
+
+    CTRACE((tfp, "_Switch_Display_Charset(cp=%d, really=%d).\n", ord, really));
+    /* Do not trust current_char_set if really, we fake it without really! */
+    if (ord == current_char_set && !really)
+	return ord;
+    if (ord == auto_other_display_charset
+	|| ord == auto_display_charset || ord == font_loaded_for) {
+	if (!really)
+	    return ord; /* Report success, to avoid flicker, switch later */
+    } else	/* Currently supports only koi8-r to cp866 translation */
+	ord = Find_Best_Display_Charset(ord);
+
+    if (ord == real_charsets[0] || ord == real_charsets[1]) {
+	ord1 = (ord == real_charsets[1]
+	       ? auto_other_display_charset : auto_display_charset);
+	if (!really)
+	    return ord; /* Can switch later, report success to avoid flicker */
+    } else
+	ord1 = ord;
+    if (ord == current_char_set && !really)
+	return ord;
+
+    name = LYCharSet_UC[ord1].MIMEname;
+    if (ord1 == auto_other_display_charset || ord1 == auto_display_charset) {
+      retry:
+	rc = VioSetCp(0,codepages[ord1 == auto_other_display_charset],0);
+	if (rc == 0)
+	    goto report;
+      err:
+	sprintf(msgbuf, "Can't change to '%s': err=%#lx=%ld", name, rc, rc);
+	HTInfoMsg(msgbuf);
+	return -1;
+    }
+
+    /* Not a "prepared" codepage.  Need to load the user font. */
+    if (ord1 == font_loaded_for) {	/* The same as the previous font */
+	if ((rc = VioSetCp(0, -1, 0)))	/* -1: User font */
+	    goto err;
+    } else if (charsets_directory) {
+	TIB *tib;			/* Can't load font in a windowed-VIO */
+	PIB *pib;
+	VIOFONTINFO f[2];
+	VIOFONTINFO *font;
+	UCHAR b[1<<17];
+	UCHAR *buf = b;
+	UCHAR fnamebuf[MAXPATHLEN];
+	FILE  *file;
+	APIRET rc;
+	long i, j;
+
+	/* 0 means a FS protected-mode session */
+	if (DosGetInfoBlocks(&tib, &pib) || pib->pib_ultype != 0) {
+	    ord = ord1 = auto_display_charset;
+	    goto retry;
+	}
+	/* Should not cross 64K boundaries: */
+	font = f;
+	if (((((ULONG)(char*)f) + sizeof(*font)) & 0xFFFF) < sizeof(*font))
+	    font++;
+	if (((ULONG)buf) & 0xFFFF)
+	    buf += 0x10000 - (((ULONG)buf) & 0xFFFF);
+	font->cb = sizeof(*font);	/* How large is this structure */
+	font->type=0;			/* Not the BIOS, the loaded font. */
+	font->cbData = 65535;		/* How large is my buffer? */
+	font->pbData = _emx_32to16(buf); /* Wants an 16:16 pointer */
+
+	rc = VioGetFont(font,0);	/* Retrieve data for current font */
+	if (rc) {
+	    sprintf(msgbuf, "Can't fetch current font info: err=%#lx=%ld", rc, rc);
+	    HTInfoMsg(msgbuf);
+	    ord = ord1 = auto_display_charset;
+	    goto retry;
+	}
+	sprintf(fnamebuf, "%s/%dx%d/%s.fnt",
+		charsets_directory, font->cyCell, font->cxCell, name);
+	file = fopen(fnamebuf,"rb");
+	if (!file) {
+	    sprintf(msgbuf, "Can't open font file '%s'", fnamebuf);
+	    HTInfoMsg(msgbuf);
+	    ord = ord1 = auto_display_charset;
+	    goto retry;
+	}
+	i = ftell(file);
+	fseek(file, 0, SEEK_END);
+	if (ftell(file) - i != font->cbData) {
+	    fclose(file);
+	    sprintf(msgbuf, "Mismatch of size of font file '%s'", fnamebuf);
+	    HTAlert(msgbuf);
+	    ord = ord1 = auto_display_charset;
+	    goto retry;
+	}
+	fseek(file, i, SEEK_SET);
+	fread(buf, 1, font->cbData,file);
+	fclose(file);
+	rc = VioSetFont(font,0);	/* Put it all back.. */
+	if (rc) {
+	    sprintf(msgbuf, "Can't set font: err=%#lx=%ld", rc, rc);
+	    HTInfoMsg(msgbuf);
+	    ord = ord1 = auto_display_charset;
+	    goto retry;
+	}
+	font_loaded_for = ord1;
+    }
+  report:
+    CTRACE((tfp, "Display font set to '%s'.\n", name));
+    return ord;
+}
+#  endif /* __EMX__ */
+
+PUBLIC int Switch_Display_Charset ARGS2 (CONST int, ord, CONST int, really)
+{
+    int prev = current_char_set;
+    int res;
+
+    if (!switch_display_charsets && !really)
+	return 0;
+    res = _Switch_Display_Charset(ord, really);
+    if (res < 0 || prev == res)		/* No change */
+	return 0;
+    /* Register the change */
+    current_char_set = res;
+    HTMLUseCharacterSet(current_char_set);
+    return 1;
+}
+#endif /* CAN_SWITCH_DISPLAY_CHARSET */
 
 #else /* EXP_CHARTRANS_AUTOSWITCH not defined: */
 /*

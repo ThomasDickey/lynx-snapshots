@@ -24,6 +24,7 @@ extern int Stbl_getFixupPositions PARAMS((
     int *		newpos));
 extern short Stbl_getAlignment PARAMS((STable_info *));
 
+#ifdef EXP_NESTED_TABLES
 extern void Stbl_update_enclosing PARAMS((
     STable_info *	me,
     int			max_width,
@@ -34,5 +35,6 @@ extern void Stbl_set_enclosing PARAMS(( STable_info *me,
 					struct _TextAnchor *last_anchor));
 extern STable_info * Stbl_get_enclosing PARAMS((STable_info *	me));
 extern struct _TextAnchor * Stbl_get_last_anchor_before PARAMS((STable_info *	me));
+#endif
 
 #endif /* TRSTABLE_H */

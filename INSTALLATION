@@ -410,7 +410,11 @@ II. Compile instructions -- UNIX
   	Disabled by default; used for ifdef'ing JavaScript interface.
 	Currently dummy: no JavaScript support implemented in Lynx yet.
 
-  --enable-nls
+  --enable-nested-tables
+	Extends TRST to format nested tables, as well as be smarter about
+	<BR> and <P> tags in table cells.
+
+  --enable-nls				(several definitions)
 	use Native Language Support (i.e., gettext).
 
   --enable-nsl-fork			(define NSL_FORK)

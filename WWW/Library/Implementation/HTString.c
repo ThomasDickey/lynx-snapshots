@@ -13,7 +13,10 @@
 #include <LYLeaks.h>
 #include <LYStrings.h>
 
-PUBLIC int WWW_TraceFlag = 0;	/* Global trace flag for ALL W3 code */
+#ifndef NO_LYNX_TRACE
+PUBLIC BOOLEAN WWW_TraceFlag = 0;	/* Global trace flag for ALL W3 code */
+PUBLIC unsigned WWW_TraceMask = 0;	/* Global trace flag for ALL W3 code */
+#endif
 
 #ifndef VC
 #define VC "unknown"
@@ -501,7 +504,7 @@ PRIVATE char *HTAlloc ARGS2(char *, ptr, size_t, length)
  * in each invocation.  They only grow and never shrink, and won't be
  * cleaned up on exit. - kw
  */
-#if defined(_REENTRANT) || defined(_THREAD_SAFE)
+#if defined(_REENTRANT) || defined(_THREAD_SAFE) || defined(LY_FIND_LEAKS)
 #undef SAVE_TIME_NOT_SPACE
 #endif
 

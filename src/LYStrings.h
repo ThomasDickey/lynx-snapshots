@@ -207,68 +207,70 @@ typedef struct _EditFieldData {
 
 /* line-edit action encoding */
 
-#define LYE_NOP 0		  /* Do Nothing            */
-#define LYE_CHAR  (LYE_NOP   +1)  /* Insert printable char */
-#define LYE_ENTER (LYE_CHAR  +1)  /* Input complete, return char/lynxkeycode */
-#define LYE_TAB   (LYE_ENTER +1)  /* Input complete, return TAB  */
-#define LYE_STOP  (LYE_TAB   +1)  /* Input complete, deactivate  */
-#define LYE_ABORT (LYE_STOP  +1)  /* Input cancelled       */
+typedef enum {
+    LYE_NOP = 0			/* Do Nothing		 */
+    ,LYE_CHAR			/* Insert printable char */
+    ,LYE_ENTER			/* Input complete, return char/lynxkeycode */
+    ,LYE_TAB			/* Input complete, return TAB  */
+    ,LYE_STOP			/* Input complete, deactivate  */
+    ,LYE_ABORT			/* Input cancelled	 */
 
-#define LYE_FORM_PASS (LYE_ABORT +1)  /* In form fields: input complete,
-					 return char / lynxkeycode;
-					 Elsewhere: Do Nothing */
+    ,LYE_FORM_PASS		/* In form fields: input complete,
+				   return char / lynxkeycode;
+				   Elsewhere: Do Nothing */
 
-#define LYE_DELN  (LYE_FORM_PASS +1)  /* Delete next/curr char */
-#define LYE_DELC  (LYE_DELN)      /* Obsolete (DELC case was equiv to DELN) */
-#define LYE_DELP  (LYE_DELN  +1)  /* Delete prev      char */
-#define LYE_DELNW (LYE_DELP  +1)  /* Delete next word      */
-#define LYE_DELPW (LYE_DELNW +1)  /* Delete prev word      */
+    ,LYE_DELN			/* Delete next/curr char */
+    ,LYE_DELC			/* Obsolete (DELC case was equiv to DELN) */
+    ,LYE_DELP			/* Delete prev	    char */
+    ,LYE_DELNW			/* Delete next word	 */
+    ,LYE_DELPW			/* Delete prev word	 */
 
-#define LYE_ERASE (LYE_DELPW +1)  /* Erase the line        */
+    ,LYE_ERASE			/* Erase the line	 */
 
-#define LYE_BOL   (LYE_ERASE +1)  /* Go to begin of line   */
-#define LYE_EOL   (LYE_BOL   +1)  /* Go to end   of line   */
-#define LYE_FORW  (LYE_EOL   +1)  /* Cursor forwards       */
-#define LYE_FORW_RL (LYE_FORW +1) /* Cursor forwards or right link */
-#define LYE_BACK  (LYE_FORW_RL+1) /* Cursor backwards      */
-#define LYE_BACK_LL (LYE_BACK+1)  /* Cursor backwards or left link */
-#define LYE_FORWW (LYE_BACK_LL+1) /* Word forward          */
-#define LYE_BACKW (LYE_FORWW +1)  /* Word back             */
+    ,LYE_BOL			/* Go to begin of line	 */
+    ,LYE_EOL			/* Go to end   of line	 */
+    ,LYE_FORW			/* Cursor forwards	 */
+    ,LYE_FORW_RL		/* Cursor forwards or right link */
+    ,LYE_BACK			/* Cursor backwards	 */
+    ,LYE_BACK_LL		/* Cursor backwards or left link */
+    ,LYE_FORWW			/* Word forward		 */
+    ,LYE_BACKW			/* Word back		 */
 
-#define LYE_LOWER (LYE_BACKW +1)  /* Lower case the line   */
-#define LYE_UPPER (LYE_LOWER +1)  /* Upper case the line   */
+    ,LYE_LOWER			/* Lower case the line	 */
+    ,LYE_UPPER			/* Upper case the line	 */
 
-#define LYE_LKCMD (LYE_UPPER +1)  /* Invoke command prompt */
+    ,LYE_LKCMD			/* Invoke command prompt */
 
-#define LYE_AIX   (LYE_LKCMD +1)  /* Hex 97                */
+    ,LYE_AIX			/* Hex 97		 */
 
-#define LYE_DELBL (LYE_AIX   +1)  /* Delete back to BOL    */
-#define LYE_DELEL (LYE_DELBL +1)  /* Delete thru EOL       */
+    ,LYE_DELBL			/* Delete back to BOL	 */
+    ,LYE_DELEL			/* Delete thru EOL	 */
 
-#define LYE_SWMAP (LYE_DELEL +1)  /* Switch input keymap   */
+    ,LYE_SWMAP			/* Switch input keymap	 */
 
-#define LYE_TPOS  (LYE_SWMAP +1)  /* Transpose characters  */
+    ,LYE_TPOS			/* Transpose characters	 */
 
-#define LYE_SETM1 (LYE_TPOS  +1)  /* Set modifier 1 flag   */
-#define LYE_SETM2 (LYE_SETM1 +1)  /* Set modifier 2 flag   */
-#define LYE_UNMOD (LYE_SETM2 +1)  /* Fall back to no-modifier command */
+    ,LYE_SETM1			/* Set modifier 1 flag	 */
+    ,LYE_SETM2			/* Set modifier 2 flag	 */
+    ,LYE_UNMOD			/* Fall back to no-modifier command */
 
-#define LYE_C1CHAR  (LYE_UNMOD   +1)  /* Insert C1 char if printable */
+    ,LYE_C1CHAR			/* Insert C1 char if printable */
 
-#define LYE_SETMARK (LYE_C1CHAR  +1)  /* emacs-like set-mark-command */
-#define LYE_XPMARK  (LYE_SETMARK +1)  /* emacs-like exchange-point-and-mark */
-#define LYE_KILLREG (LYE_XPMARK  +1)  /* emacs-like kill-region */
-#define LYE_YANK    (LYE_KILLREG +1)  /* emacs-like yank */
-#if defined(WIN_EX)
-#define LYE_PASTE (LYE_YANK +1)	  /* ClipBoard to Lynx	   */
+    ,LYE_SETMARK		/* emacs-like set-mark-command */
+    ,LYE_XPMARK			/* emacs-like exchange-point-and-mark */
+    ,LYE_KILLREG		/* emacs-like kill-region */
+    ,LYE_YANK			/* emacs-like yank */
+#ifdef CAN_CUT_AND_PASTE
+    ,LYE_PASTE			/* ClipBoard to Lynx	   */
 #endif
+} LYEditCodes;
 /* All preceding values must be within 0x00..0x7f - kw */
 
 /*  The following are meant to be bitwise or-ed:  */
-#define LYE_DF       0x80         /* Flag to set modifier 3 AND do other
-				     action */
-#define LYE_FORM_LAC 0x1000       /* Flag to pass lynxactioncode given by
-				     lower bits.  Doesn't fit in a char! */
+#define LYE_DF       0x80       /* Flag to set modifier 3 AND do other
+				   action */
+#define LYE_FORM_LAC 0x1000     /* Flag to pass lynxactioncode given by
+				   lower bits.  Doesn't fit in a char! */
 
 
 #if defined(USE_KEYMAPS)
@@ -343,5 +345,7 @@ extern int escape_bound;
 
 /* Dummy initializer for LYEditmap.c */
 extern int LYEditmapDeclared NOPARAMS;
+
+int LYEditInsert PARAMS((EditFieldData *edit, unsigned char *s,	int len, int map_active, BOOL maxMessage));
 
 #endif /* LYSTRINGS_H */

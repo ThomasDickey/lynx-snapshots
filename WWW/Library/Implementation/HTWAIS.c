@@ -87,9 +87,6 @@
 
 #define HEX_ESCAPE '%'
 
-extern int WWW_TraceFlag;	/* Control diagnostic output */
-extern FILE * logfile;		/* Log file output */
-
 PRIVATE BOOL	as_gate;	/* Client is using us as gateway */
 
 PRIVATE char	line[2048];	/* For building strings to display */

@@ -614,6 +614,14 @@ turns on "Textfields Need Activation" mode.
 turns on Lynx trace mode.  Destination of trace output depends
 on -tlog.
 .TP
+.B -trace_mask\fR=\fIvalue
+turn on optional traces, which may result in very large trace files.
+Logically OR the values to combine options:
+.br
+2=color-style
+.br
+4=TRST (table layout)
+.TP
 .B -traversal
 traverse all http links derived from startfile.  When used with
 -crawl, each link that begins with the same string as startfile

@@ -11,8 +11,6 @@
 #include <HTUtils.h>
 #endif /* HTUTILS_H */
 
-extern int WWW_TraceFlag;       /* Global flag for all W3 trace */
-
 extern CONST char * HTLibraryVersion;   /* String for help screen etc */
 
 /*

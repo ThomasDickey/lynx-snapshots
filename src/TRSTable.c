@@ -28,16 +28,16 @@
 			      value means cell was reserved by ROWSPAN */
 #define EOCOLG (-2)	/* sumcols' Line field isn't used for line info, this
 			      special value means end of COLGROUP */
-#ifndef NO_AGRESSIVE_NEWROW
-#  define NO_AGRESSIVE_NEWROW	0
+#ifndef NO_AGGRESSIVE_NEWROW
+#  define NO_AGGRESSIVE_NEWROW	0
 #endif
 
 typedef enum {
     CS_invalid = -1,		/* cell "before the first",
 				   or empty lines after [ce]bc,
 				   or TRST aborted */
-    CS__0new   = 0,		/* starts at BOL, new */
-    CS__new,			/* new */
+    CS__new     =  0,
+    CS__0new,			/* new, at BOL */
     CS__0eb,			/* starts at BOL, empty, break */
     CS__eb,			/* empty, break */
     CS__0cb,			/* starts at BOL, content, break */
@@ -49,22 +49,6 @@ typedef enum {
     CS__ebc,			/* empty, break, more content (maybe @BOL) */
     CS__cbc			/* content, break, more content (maybe @BOL) */
 } cellstate_t;
-
-const char * const cellstate_s[] = {	/* Should be indexed by cellstate+1 */
-    "CS_invalid",
-    "CS__new",
-    "CS__0new",
-    "CS__0eb",
-    "CS__eb",
-    "CS__0cb",
-    "CS__cb",
-    "CS__0ef",
-    "CS__ef",
-    "CS__0cf",
-    "CS__cf",
-    "CS__ebc",
-    "CS__cbc"
-};
 
 typedef struct _STable_states {
     cellstate_t	prev_state;	/* Contents type of the previous cell */
@@ -125,8 +109,10 @@ typedef struct _STable_rowinfo {
 } STable_rowinfo;
 
 struct _STable_info {
+#ifdef EXP_NESTED_TABLES
 	struct _STable_info *enclosing;	/* The table which contain us */
 	struct _TextAnchor  *enclosing_last_anchor_before_stbl;
+#endif
 	int	startline;	/* lineno where table starts (zero-based) */
 	int	nrows;		/* number of rows */
 	int	ncols;		/* number of rows */
@@ -202,20 +188,45 @@ PRIVATE int Stbl_finishCellInRow PARAMS((
 PRIVATE int Stbl_finishRowInTable PARAMS((
     STable_info *	me));
 
+PRIVATE CONST char * cellstate_s ARGS1(
+	cellstate_t,	state)
+{
+    CONST char *result = "?";
+
+    switch (state) {
+    case CS_invalid:	result = "CS_invalid";	break;
+    case CS__new:	result = "CS__new";	break;
+    case CS__0new:	result = "CS__0new";	break;
+    case CS__0eb:	result = "CS__0eb";	break;
+    case CS__eb:	result = "CS__eb";	break;
+    case CS__0cb:	result = "CS__0cb";	break;
+    case CS__cb:	result = "CS__cb";	break;
+    case CS__0ef:	result = "CS__0ef";	break;
+    case CS__ef:	result = "CS__ef";	break;
+    case CS__0cf:	result = "CS__0cf";	break;
+    case CS__cf:	result = "CS__cf";	break;
+    case CS__ebc:	result = "CS__ebc";	break;
+    case CS__cbc:	result = "CS__cbc";	break;
+    }
+    return result;
+}
 
 PUBLIC struct _STable_info * Stbl_startTABLE ARGS1(
     short,		alignment)
 {
     STable_info *me = typecalloc(STable_info);
 
-    CTRACE((tfp, "TRST:Stbl_startTABLE(align=%d)\n", (int)alignment));
+    CTRACE2(TRACE_TRST,
+	    (tfp, "TRST:Stbl_startTABLE(align=%d)\n", (int)alignment));
     if (me) {
 	me->alignment = alignment;
 	me->rowgroup_align = HT_ALIGN_NONE;
 	me->pending_colgroup_align = HT_ALIGN_NONE;
 	me->s.x_td = -1;
 	me->s.icell_core = -1;
+#ifdef EXP_NESTED_TABLES
 	me->enclosing = 0;
+#endif
     }
     return me;
 }
@@ -231,7 +242,8 @@ PRIVATE void free_rowinfo ARGS1(
 PUBLIC void Stbl_free ARGS1(
     STable_info *,	me)
 {
-    CTRACE((tfp, "TRST:Stbl_free()\n"));
+    CTRACE2(TRACE_TRST,
+	    (tfp, "TRST:Stbl_free()\n"));
     if (me && me->allocated_rows && me->rows) {
 	int i;
 	for (i = 0; i < me->allocated_rows; i++)
@@ -265,11 +277,13 @@ PRIVATE int Stbl_addCellToRow ARGS9(
     cellstate_t newstate;
     int ret;
 
-    CTRACE((tfp, "TRST:Stbl_addCellToRow, line=%d, pos=%d, colspan=%d\n",
-	   lineno, *ppos, colspan));
-    CTRACE((tfp, " ncells=%d, stateLine=%d, pending_len=%d, pstate=%s, state=%s\n",
-	    me->ncells, s->lineno, s->pending_len,
-	    cellstate_s[s->prev_state+1], cellstate_s[s->state+1]));
+    CTRACE2(TRACE_TRST,
+	    (tfp, "TRST:Stbl_addCellToRow, line=%d, pos=%d, colspan=%d\n",
+		   lineno, *ppos, colspan));
+    CTRACE2(TRACE_TRST,
+	    (tfp, " ncells=%d, stateLine=%d, pending_len=%d, pstate=%s, state=%s\n",
+		   me->ncells, s->lineno, s->pending_len,
+		   cellstate_s(s->prev_state), cellstate_s(s->state)));
     if (me->ncells == 0)
 	s->prev_state = CS_invalid;
     else if (s->prev_state == CS_invalid ||
@@ -461,7 +475,7 @@ PRIVATE int Stbl_addCellToRow ARGS9(
 	    }
 	}
 	if (i < me->ncells && me->cells[i].cLine != lineno)
-	    return -1;
+	    goto trace_and_fail;
 	me->Line = lineno;
 #endif
     }
@@ -528,8 +542,9 @@ PRIVATE int Stbl_addCellToRow ARGS9(
 
     ret = me->ncells - 1;
   trace_and_return:
-    CTRACE((tfp, " => prev_state=%s, state=%s, ret=%d\n",
-	    cellstate_s[s->prev_state+1], cellstate_s[s->state+1], ret));
+    CTRACE2(TRACE_TRST,
+	    (tfp, " => prev_state=%s, state=%s, ret=%d\n",
+		  cellstate_s(s->prev_state), cellstate_s(s->state), ret));
     return (ret);
 
   trace_and_fail:
@@ -548,8 +563,9 @@ PRIVATE int Stbl_reserveCellsInRow ARGS3(
     int i;
     int growby = icell + colspan - me->allocated;
 
-    CTRACE((tfp, "TRST:Stbl_reserveCellsInRow(icell=%d, colspan=%d\n",
-	   icell, colspan));
+    CTRACE2(TRACE_TRST,
+	    (tfp, "TRST:Stbl_reserveCellsInRow(icell=%d, colspan=%d\n",
+		  icell, colspan));
     if (growby > 0) {
 	cells = realloc(me->cells,
 			(me->allocated + growby)
@@ -588,8 +604,9 @@ PRIVATE int Stbl_finishCellInRow ARGS5(
     BOOL multiline = NO, empty;
     int ret;
 
-    CTRACE((tfp, "TRST:Stbl_finishCellInRow line=%d pos=%d end_td=%d ncells=%d pnd_len=%d\n",
-	   lineno, pos, (int)end_td, me->ncells, s->pending_len));
+    CTRACE2(TRACE_TRST,
+	    (tfp, "TRST:Stbl_finishCellInRow line=%d pos=%d end_td=%d ncells=%d pnd_len=%d\n",
+		  lineno, pos, (int)end_td, me->ncells, s->pending_len));
 
     if (me->ncells <= 0)
 	return -1;
@@ -597,9 +614,10 @@ PRIVATE int Stbl_finishCellInRow ARGS5(
     multiline = (lineno != lastcell->cLine || lineno != s->lineno);
     empty = multiline ? (pos == 0) : (pos <= s->x_td);
 
-    CTRACE((tfp, " [lines: lastCell=%d state=%d multi=%d] empty=%d (prev)state=(%s) %s\n",
-	   lastcell->cLine, s->lineno, multiline, empty,
-	    cellstate_s[s->prev_state+1], cellstate_s[s->state+1]));
+    CTRACE2(TRACE_TRST,
+	    (tfp, " [lines: lastCell=%d state=%d multi=%d] empty=%d (prev)state=(%s) %s\n",
+		  lastcell->cLine, s->lineno, multiline, empty,
+		  cellstate_s(s->prev_state), cellstate_s(s->state)));
 
     if (multiline) {
 	if (!end_td) {			/* processing line-break */
@@ -999,13 +1017,16 @@ PRIVATE int Stbl_finishCellInRow ARGS5(
 #endif /* MEGA_COMMENTOUT */
     s->state = newstate;
     ret = lastcell->len;
+#ifdef EXP_NESTED_TABLES
     if (ret == -1 && pos == 0)
 	ret = 0; /* XXXX Hack to allow trailing <P> in multiline cells. */
+#endif
 
 /*    lastcell->len = pos - lastcell->pos; */
   trace_and_return:
-    CTRACE((tfp, " => prev_state=%s, state=%s, return=%d\n",
-	    cellstate_s[s->prev_state+1], cellstate_s[s->state+1], ret));
+    CTRACE2(TRACE_TRST,
+	    (tfp, " => prev_state=%s, state=%s, return=%d\n",
+		  cellstate_s(s->prev_state), cellstate_s(s->state), ret));
     return ret;
 }
 
@@ -1024,11 +1045,13 @@ PRIVATE int Stbl_reserveCellsInTable ARGS4(
     STable_rowinfo *rows, *row;
     int growby;
     int i;
+
     if (me->nrows <= 0)
 	return -1;		/* must already have at least one row */
 
-    CTRACE((tfp, "TRST:Stbl_reserveCellsInTable(icell=%d, colspan=%d, rowspan=%d)\n",
-	   icell, colspan, rowspan));
+    CTRACE2(TRACE_TRST,
+	    (tfp, "TRST:Stbl_reserveCellsInTable(icell=%d, colspan=%d, rowspan=%d)\n",
+		  icell, colspan, rowspan));
     if (rowspan == 0) {
 	if (!me->rowspans2eog.cells) {
 	    me->rowspans2eog.cells = typecallocn(STable_cellinfo, icell + colspan);
@@ -1089,7 +1112,8 @@ PRIVATE void Stbl_cancelRowSpans ARGS1(
     STable_info *,	me)
 {
     int i;
-    CTRACE((tfp, "TRST:Stbl_cancelRowSpans()"));
+
+    CTRACE2(TRACE_TRST, (tfp, "TRST:Stbl_cancelRowSpans()"));
     for (i = me->nrows; i < me->allocated_rows; i++) {
 	if (!me->rows[i].ncells) { /* should always be the case */
 	    FREE(me->rows[i].cells);
@@ -1111,8 +1135,9 @@ PUBLIC int Stbl_addRowToTable ARGS3(
     STable_rowinfo *rows, *row;
     STable_states * s = &me->s;
 
-    CTRACE((tfp, "TRST:Stbl_addRowToTable(alignment=%d, lineno=%d)\n",
-	   alignment, lineno));
+    CTRACE2(TRACE_TRST,
+	    (tfp, "TRST:Stbl_addRowToTable(alignment=%d, lineno=%d)\n",
+		  alignment, lineno));
     if (me->nrows > 0 && me->rows[me->nrows-1].ncells > 0) {
 	if (s->pending_len > 0)
 	    me->rows[me->nrows-1].cells[me->rows[me->nrows-1].ncells - 1].len = s->pending_len;
@@ -1206,7 +1231,7 @@ PRIVATE int Stbl_finishRowInTable ARGS1(
     STable_states * s = &me->s;
     int ncells;
 
-    CTRACE((tfp, "TRST:Stbl_finishRowInTable()\n"));
+    CTRACE2(TRACE_TRST, (tfp, "TRST:Stbl_finishRowInTable()\n"));
     if (!me->rows || !me->nrows)
 	return -1;		/* no row started! */
     lastrow = me->rows + (me->nrows - 1);
@@ -1297,6 +1322,7 @@ PRIVATE int get_remaining_colspan ARGS5(
     return colspan;
 }
 
+#ifdef EXP_NESTED_TABLES
 /* Returns -1 on failure, 1 if faking was performed, 0 if not needed. */
 PRIVATE int Stbl_fakeFinishCellInTable ARGS4(
     STable_info *,	me,
@@ -1343,36 +1369,45 @@ PRIVATE int Stbl_fakeFinishCellInTable ARGS4(
 	int end_td = 1;
 	int need_reserved = 0;
 	int prev_reserved_last = -1;
-	STable_rowinfo *prev_row = lastrow;
+	STable_rowinfo *prev_row;
+	int prev_row_n2 = lastrow - me->rows;
 
-	CTRACE((tfp, "TRST:Stbl_fakeFinishCellInTable(lineno=%d, finishing=%d) START FAKING\n",
-		lineno, finishing));
+	CTRACE2(TRACE_TRST,
+		(tfp, "TRST:Stbl_fakeFinishCellInTable(lineno=%d, finishing=%d) START FAKING\n",
+		      lineno, finishing));
 
 	/* Although here we use pos=0, this may commit the previous
 	   cell which had <BR> as a last element.  This may overflow
 	   the screen width, so the additional checks performed in
 	   Stbl_finishCellInTable (comparing to Stbl_finishCellInRow)
 	   are needed. */
-	if (finishing)
+	if (finishing) {
 	    /* Fake </TD> at BOL */
-	    if (Stbl_finishCellInTable(me, end_td, lineno, 0) < 0)
+	    if (Stbl_finishCellInTable(me, end_td, lineno, 0) < 0) {
 		return -1;
+	    }
+	}
 
 	/* Fake </TR> at BOL */
 	/* Stbl_finishCellInTable(lineno, 0, 0);*/ /* Needed? */
 
 	/* Fake <TR> at BOL */
-	if (Stbl_addRowToTable(me, al, lineno) < 0)
+	if (Stbl_addRowToTable(me, al, lineno) < 0) {
 	    return -1;
+	}
 	lastrow = me->rows + (me->nrows - 1);
-	for (i = 0; i < lastrow->allocated; i++)
+	for (i = 0; i < lastrow->allocated; i++) {
 	    if (lastrow->cells[i].alignment == RESERVEDCELL) {
 		need_reserved = 1;
 		break;
 	    }
-	for (i = ncells; i < prev_row->allocated; i++)
+	}
+
+	prev_row = me->rows + prev_row_n2;
+	for (i = ncells; i < prev_row->allocated; i++) {
 	    if (prev_row->cells[i].alignment == RESERVEDCELL)
 		prev_reserved_last = i;
+	}
 	if (need_reserved || prev_reserved_last >= 0) {
 	    /* Oups, we are going to stomp over a line which somebody
 	       cares about already, or the previous line had reserved
@@ -1390,7 +1425,8 @@ PRIVATE int Stbl_fakeFinishCellInTable ARGS4(
 	    if (!rows)
 		return -1; /* ignore silently, no free memory, may be recoverable */
 
-	    CTRACE((tfp, "TRST:Stbl_fakeFinishCellInTable REALLOC ROWSPAN\n"));
+	    CTRACE2(TRACE_TRST,
+		    (tfp, "TRST:Stbl_fakeFinishCellInTable REALLOC ROWSPAN\n"));
 	    me->rows = rows;
 	    lastrow = me->rows + (me->nrows - 1);
 	    prev_row = me->rows + prev_row_n;
@@ -1406,8 +1442,9 @@ PRIVATE int Stbl_fakeFinishCellInTable ARGS4(
 	    if (need_cells) {
 		lastrow->cells = typecallocn(STable_cellinfo, need_cells);
 		/* ignore silently, no free memory, may be recoverable */
-		if (!lastrow->cells)
+		if (!lastrow->cells) {
 		    return -1;
+		}
 		lastrow->allocated = need_cells;
 		memcpy(lastrow->cells, prev_row->cells,
 		       lastrow->allocated * sizeof(STable_cellinfo));
@@ -1425,26 +1462,32 @@ PRIVATE int Stbl_fakeFinishCellInTable ARGS4(
 	}
 
 	/* Fake <TD></TD>...<TD> (and maybe a </TD>) at BOL. */
-	CTRACE((tfp, "TRST:Stbl_fakeFinishCellInTable FAKE %d elts%s\n",
-		ncells, (finishing ? ", last unfinished" : "")));
+	CTRACE2(TRACE_TRST,
+		(tfp, "TRST:Stbl_fakeFinishCellInTable FAKE %d elts%s\n",
+		      ncells, (finishing ? ", last unfinished" : "")));
 	i = 0;
 	while (++i <= ncells) {
 	    /* XXXX A lot of args may be wrong... */
 	    if (Stbl_addCellToTable(me, (i==ncells ? cs : 1), rs, al,
-				    ih, lineno, 0) < 0)
+				    ih, lineno, 0) < 0) {
 		return -1;
+	    }
 	    /* We cannot run out of width here, so it is safe to not
 	       call Stbl_finishCellInTable(), but Stbl_finishCellInRow. */
-	    if (!finishing || (i != ncells))
-		if (Stbl_finishCellInRow(lastrow, s, end_td, lineno, 0) < 0)
+	    if (!finishing || (i != ncells)) {
+		if (Stbl_finishCellInRow(lastrow, s, end_td, lineno, 0) < 0) {
 		    return -1;
+		}
+	    }
 	}
-	CTRACE((tfp, "TRST:Stbl_fakeFinishCellInTable(lineno=%d) FINISH FAKING\n",
-		lineno));
+	CTRACE2(TRACE_TRST,
+		(tfp, "TRST:Stbl_fakeFinishCellInTable(lineno=%d) FINISH FAKING\n",
+		      lineno));
 	return 1;
     }
     return 0;
 }
+#endif
 
 /*
  * Returns -1 on error, otherwise 0.
@@ -1466,18 +1509,19 @@ PUBLIC int Stbl_addCellToTable ARGS7(
     int prevsumpos, advance;
 #endif
 
-    CTRACE((tfp, "TRST:Stbl_addCellToTable(lineno=%d, pos=%d, isheader=%d, cs=%d, rs=%d, al=%d)\n",
-	   lineno, pos, (int)isheader, colspan,rowspan,alignment));
+    CTRACE2(TRACE_TRST,
+	    (tfp, "TRST:Stbl_addCellToTable(lineno=%d, pos=%d, isheader=%d, cs=%d, rs=%d, al=%d)\n",
+		  lineno, pos, (int)isheader, colspan, rowspan, alignment));
     if (!me->rows || !me->nrows)
 	return -1;		/* no row started! */
 				/* ##850_fail_if_fail?? */
-    Stbl_finishCellInTable(me, YES,
-			   lineno, pos);
+    Stbl_finishCellInTable(me, YES, lineno, pos);
     lastrow = me->rows + (me->nrows - 1);
 
+#ifdef EXP_NESTED_TABLES
     /* If the last cell was finished by <BR></TD>, we need to fake an
        appropriate amount of cells */
-    if (!NO_AGRESSIVE_NEWROW && pos == 0 && lastrow->ncells > 0
+    if (!NO_AGGRESSIVE_NEWROW && pos == 0 && lastrow->ncells > 0
 	&& lastrow->cells[lastrow->ncells-1].cLine != lineno) {
 	int rc = Stbl_fakeFinishCellInTable(me, lastrow, lineno, 0);
 
@@ -1486,6 +1530,7 @@ PUBLIC int Stbl_addCellToTable ARGS7(
 	if (rc)
 	    lastrow = me->rows + (me->nrows - 1);
     }
+#endif
     if (colspan == 0) {
 	colspan = get_remaining_colspan(lastrow, me->sumcols, me->ncolinfo,
 					colspan, me->ncols);
@@ -1596,8 +1641,9 @@ PUBLIC int Stbl_finishCellInTable ARGS4(
     int len, xlen, icell;
     int i;
 
-    CTRACE((tfp, "TRST:Stbl_finishCellInTable(lineno=%d, pos=%d, end_td=%d)\n",
-	   lineno, pos, (int)end_td));
+    CTRACE2(TRACE_TRST,
+	    (tfp, "TRST:Stbl_finishCellInTable(lineno=%d, pos=%d, end_td=%d)\n",
+		  lineno, pos, (int)end_td));
     if (me->nrows == 0)
 	return -1;
     lastrow = me->rows + (me->nrows - 1);
@@ -1607,8 +1653,9 @@ PUBLIC int Stbl_finishCellInTable ARGS4(
     if (s->x_td == -1)
 	return end_td ? -1 : 0;
 
+#ifdef EXP_NESTED_TABLES
     /* This check for pos saves us from infinite recursion... */
-    if (!NO_AGRESSIVE_NEWROW && pos) {
+    if (!NO_AGGRESSIVE_NEWROW && pos) {
 	int rc = Stbl_fakeFinishCellInTable(me, lastrow, lineno, 1);
 
 	if (rc) {
@@ -1618,6 +1665,7 @@ PUBLIC int Stbl_finishCellInTable ARGS4(
 	    icell = lastrow->ncells - 1;
 	}
     }
+#endif
     len = Stbl_finishCellInRow(lastrow, s, end_td, lineno, pos);
     if (len == -1)
 	return len;
@@ -1710,7 +1758,7 @@ PUBLIC int Stbl_finishCellInTable ARGS4(
     }
 #endif
 
-#if 0	/* maxlen may already include contribution of a cell in this column */
+#ifndef EXP_NESTED_TABLES /* maxlen may already include contribution of a cell in this column */
     if (me->maxlen + (xlen - len) > MAX_STBL_POS)
 	return -1;
 #endif
@@ -1737,8 +1785,9 @@ PUBLIC int Stbl_addColInfo ARGS4(
     STable_cellinfo *sumcols, *sumcol;
     int i, icolinfo;
 
-    CTRACE((tfp, "TRST:Stbl_addColInfo(cs=%d, al=%d, isgroup=%d)\n",
-	   colspan, alignment, (int)isgroup));
+    CTRACE2(TRACE_TRST,
+	    (tfp, "TRST:Stbl_addColInfo(cs=%d, al=%d, isgroup=%d)\n",
+		  colspan, alignment, (int)isgroup));
     if (isgroup) {
 	if (me->pending_colgroup_next > me->ncolinfo)
 	    me->ncolinfo = me->pending_colgroup_next;
@@ -1798,7 +1847,7 @@ PUBLIC int Stbl_addColInfo ARGS4(
 PUBLIC int Stbl_finishColGroup ARGS1(
     STable_info *,	me)
 {
-    CTRACE((tfp, "TRST:Stbl_finishColGroup()\n"));
+    CTRACE2(TRACE_TRST, (tfp, "TRST:Stbl_finishColGroup()\n"));
     if (me->pending_colgroup_next >= me->ncolinfo) {
 	me->ncolinfo = me->pending_colgroup_next;
 	if (me->ncolinfo > 0)
@@ -1813,7 +1862,7 @@ PUBLIC int Stbl_addRowGroup ARGS2(
     STable_info *,	me,
     short,		alignment)
 {
-    CTRACE((tfp, "TRST:Stbl_addRowGroup()\n"));
+    CTRACE2(TRACE_TRST, (tfp, "TRST:Stbl_addRowGroup()\n"));
     Stbl_cancelRowSpans(me);
     me->rowgroup_align = alignment;
     return 0;			/* that's all! */
@@ -1826,7 +1875,7 @@ PUBLIC int Stbl_finishTABLE ARGS1(
     int i;
     int curpos = 0;
 
-    CTRACE((tfp, "TRST:Stbl_finishTABLE()\n"));
+    CTRACE2(TRACE_TRST, (tfp, "TRST:Stbl_finishTABLE()\n"));
     if (!me || me->nrows <= 0 || me->ncols <= 0) {
 	return -1;
     }
@@ -1945,6 +1994,8 @@ PUBLIC int Stbl_getStartLine ARGS1(
 	return me->startline;
 }
 
+#ifdef EXP_NESTED_TABLES
+
 PUBLIC void Stbl_update_enclosing ARGS3(
     STable_info *,	me,
     int,		max_width,
@@ -1954,24 +2005,25 @@ PUBLIC void Stbl_update_enclosing ARGS3(
 
     if (!me || !me->enclosing || !max_width)
 	return;
-    CTRACE((tfp, "TRST:Stbl_update_enclosing, width=%d, lines=%d...%d.\n",
+    CTRACE2(TRACE_TRST, (tfp, "TRST:Stbl_update_enclosing, width=%d, lines=%d...%d.\n",
 	    max_width, me->startline, last_lineno));
-    for (l = me->startline; l <= last_lineno; l++)
+    for (l = me->startline; l <= last_lineno; l++) {
 	/* Fake <BR> in appropriate positions */
 	if (Stbl_finishCellInTable(me->enclosing, 0, l, max_width) < 0) {
 	    /* It is not handy to let the caller delete me->enclosing,
 	       and it does not buy us anything.  Do it directly. */
 	    STable_info *stbl = me->enclosing;
 
-	    CTRACE((tfp, "TRST:Stbl_update_enclosing: width too large, aborting enclosing\n"));
+	    CTRACE2(TRACE_TRST, (tfp, "TRST:Stbl_update_enclosing: width too large, aborting enclosing\n"));
 	    me->enclosing = 0;
 	    while (stbl) {
 		STable_info *enclosing = stbl->enclosing;
 		Stbl_free(stbl);
 		stbl = enclosing;
 	    }
-	    return;
+	    break;
 	}
+    }
     return;
 }
 
@@ -2001,3 +2053,4 @@ PUBLIC struct _TextAnchor * Stbl_get_last_anchor_before ARGS1(
 	return 0;
     return me->enclosing_last_anchor_before_stbl;
 }
+#endif

@@ -41,6 +41,7 @@
 #undef EXP_JUSTIFY_ELTS		/* CF_ARG_ENABLE(justify-elts) */
 #undef EXP_KEYBOARD_LAYOUT	/* CF_ARG_ENABLE(kbd-layout) */
 #undef EXP_LIBJS		/* CF_ARG_ENABLE(libjs) */
+#undef EXP_NESTED_TABLES	/* CF_ARG_ENABLE(nested-tables) */
 #undef EXP_PERSISTENT_COOKIES	/* CF_ARG_ENABLE(persistent-cookies) */
 #undef EXP_READPROGRESS		/* CF_ARG_ENABLE(read-eta) */
 #undef FANCY_CURSES		/* defined by CF_FANCY_CURSES */

@@ -2834,6 +2834,29 @@ PUBLIC void LYHandleMETA ARGS4(
 	    *cp4 = '\0';
 	    cp4 = cp3;
 	    chndl = UCGetLYhndl_byMIME(cp3);
+
+#ifdef CAN_SWITCH_DISPLAY_CHARSET
+	    /* Allow a switch to a more suitable display charset */
+	    if (Switch_Display_Charset (chndl, 0)) {
+		/* UCT_STAGE_STRUCTURED and UCT_STAGE_HTEXT
+		   should have the same setting for UCInfoStage. */
+		int structured = HTAnchor_getUCInfoStage(me->node_anchor,
+							 UCT_STAGE_STRUCTURED);
+		me->outUCLYhndl = current_char_set;
+		HTAnchor_setUCInfoStage(me->node_anchor,
+					current_char_set,
+					UCT_STAGE_HTEXT,
+					UCT_SETBY_MIME); /* highest priorty! */
+		HTAnchor_setUCInfoStage(me->node_anchor,
+					current_char_set,
+					UCT_STAGE_STRUCTURED,
+					UCT_SETBY_MIME); /* highest priorty! */
+		me->outUCI = HTAnchor_getUCInfoStage(me->node_anchor,
+						     UCT_STAGE_HTEXT);
+		/* The SGML stage will be reset in change_chartrans_handling */
+	    }
+#endif
+
 	    if (UCCanTranslateFromTo(chndl, current_char_set)) {
 		chartrans_ok = YES;
 		StrAllocCopy(me->node_anchor->charset, cp4);
@@ -3595,16 +3618,15 @@ PUBLIC int LYLegitimizeHREF ARGS4(
 	    !strncmp(path, "/..", 3)) {
 	    cp = (path + 3);
 	    if (LYIsHtmlSep(*cp) || *cp == '\0') {
-		if ((me->inBASE ?
-	       me->base_href[4] : me->node_anchor->address[4]) == 's') {
+		if ((me->inBASE
+		   ? me->base_href[4]
+		   : me->node_anchor->address[4]) == 's') {
 		    str = "s";
 		}
 		if (TRACE) {
-		    fprintf(tfp,
-			 "LYLegitimizeHREF: Bad value '%s' for http%s URL.\n",
-			   *href, str);
-		    fprintf(tfp,
-			 "                  Stripping lead dots.\n");
+		    CTRACE((tfp, "LYLegitimizeHREF: Bad value '%s' for http%s URL.\n",
+				 *href, str);)
+		    CTRACE((tfp, "                  Stripping lead dots.\n"));
 		} else if (!me->inBadHREF) {
 		    HTUserMsg(BAD_PARTIAL_REFERENCE);
 		    me->inBadHREF = TRUE;

@@ -1,9 +1,9 @@
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <UCAux.h>
+#include <LYGlobalDefs.h>
 #include <LYUtils.h>
 #include <LYStrings.h>
-#include <LYGlobalDefs.h>
 #include <GridText.h>
 #include <LYKeymap.h>
 #include <LYClean.h>
@@ -805,7 +805,6 @@ static SLKeyMap_List_Type *Keymap_List;
 /* This value should be larger than anything in LYStrings.h */
 #define MOUSE_KEYSYM 0x0400
 #endif
-
 
 #define SQUOTE '\''
 #define DQUOTE '"'
@@ -2014,34 +2013,34 @@ re_read:
 		 */
 		goto re_read;
 	    }
-	   /*
-	    *  Yep, we agree there was a change.  Return now so that
-	    *  the caller can react to it. - kw
-	    */
-	   c = DO_NOTHING;
-	   break;
+	    /*
+	     *  Yep, we agree there was a change.  Return now so that
+	     *  the caller can react to it. - kw
+	     */
+	    c = DO_NOTHING;
+	    break;
 #endif /* KEY_RESIZE */
 
 /* The following maps PDCurses keys away from lynx reserved values */
 #if (defined(_WINDOWS) || defined(__DJGPP__)) && !defined(USE_SLANG)
 	case KEY_F(2):
-	   c = 0x213;
-	   break;
+	    c = 0x213;
+	    break;
 	case KEY_F(3):
-	   c = 0x214;
-	   break;
+	    c = 0x214;
+	    break;
 	case KEY_F(4):
-	   c = 0x215;
-	   break;
+	    c = 0x215;
+	    break;
 	case KEY_F(5):
-	   c = 0x216;
-	   break;
+	    c = 0x216;
+	    break;
 	case KEY_F(6):
-	   c = 0x217;
-	   break;
+	    c = 0x217;
+	    break;
 	case KEY_F(7):
-	   c = 0x218;
-	   break;
+	    c = 0x218;
+	    break;
 #endif /* PDCurses */
 
 #if defined(USE_MOUSE)
@@ -2128,7 +2127,7 @@ re_read:
 #endif
 		    }
 		    if (lac == LYK_ACTIVATE && mouse_link == -1) {
-			HTAlert("No link chosen");
+			HTAlert(gettext("No link chosen"));
 			lac = LYK_REFRESH;
 		    }
 		    c = LAC_TO_LKC(lac);
@@ -2195,7 +2194,7 @@ re_read:
 			}
 		    }
 		} else {
-		/* for Windows 95 */
+		    /* for Windows 95 */
 		    tick_count = GetTickCount();
 
 		    /* Guard Mouse button miss click */
@@ -2661,6 +2660,123 @@ PRIVATE int prev_pos ARGS2(
 }
 #endif /* SUPPORT_MULTIBYTE_EDIT */
 
+#ifdef EXP_KEYBOARD_LAYOUT
+static int map_active = 0;
+#else
+#define map_active 0
+#endif
+
+PUBLIC int LYEditInsert ARGS5(
+	EDREC *,	edit,
+	unsigned char *,s,
+	int,		len,
+	int,		map,
+	BOOL,		maxMessage)
+{
+    int length = strlen(Buf);
+    int remains = MaxLen - (length + len);
+    int edited = 0, overflow = 0;
+
+    /*
+     *  ch is (presumably) printable character.
+     */
+    if (remains < 0) {
+	overflow = 1;
+	len = 0;
+	if (MaxLen > length)	/* Insert as much as we can */
+	    len = MaxLen - length;
+	else
+	    goto finish;
+    }
+    Buf[length + len] = '\0';
+    for(; length >= Pos; length--)    /* Make room */
+	Buf[length + len] = Buf[length];
+#ifdef EXP_KEYBOARD_LAYOUT
+    if (map < 0)
+	map = map_active;
+    if (map && LYCharSet_UC[current_char_set].enc == UCT_ENC_UTF8) {
+	unsigned char *e = s + len, *t = Buf + Pos;
+	char *tail = 0;
+
+	while (s < e) {
+	    char utfbuf[8];
+	    int l = 1;
+
+	    utfbuf[0] = *s;
+	    if ( *s < 128 && LYKbLayouts[current_layout][*s] ) {
+		UCode_t ucode = LYKbLayouts[current_layout][*s];
+
+		if (ucode > 127) {
+		    if (UCConvertUniToUtf8(ucode, utfbuf)) {
+			l = strlen(utfbuf);
+			remains -= l - 1;
+			if (remains < 0) {
+			    if (tail)
+				strcpy(t, tail);
+			    FREE(tail);
+			    len = (char*)t - Buf;
+			    overflow = 1;
+			    goto finish;
+			}
+			if (l > 1 && !tail)
+			    StrAllocCopy((char*)tail, Buf + Pos + len);
+		    } else
+			utfbuf[0] = '?';
+		} else
+		    utfbuf[0] = UCH(ucode);
+	    }
+	    strncpy(t, utfbuf, l);
+	    edited = 1;
+	    t += l;
+	    s++;
+	}
+	if (tail)
+	    strcpy(t, tail);
+	len = (char*)t - (Buf + Pos);
+	FREE(tail);
+    } else if (map) {
+	unsigned char *e = s + len, *t = Buf + Pos;
+
+	while (s < e) {
+	    int ch;
+
+	    if ( *s < 128 && LYKbLayouts[current_layout][*s] ) {
+		ch = UCTransUniChar(LYKbLayouts[current_layout][*s],
+				    current_char_set);
+		if (ch < 0)
+		    ch = '?';
+	    } else
+		ch = *s;
+	    *t = UCH(ch);
+	    t++, s++;
+	}
+	edited = 1;
+    }
+    else
+#endif	/* defined EXP_KEYBOARD_LAYOUT */
+	{
+	    strncpy(Buf + Pos, (char *) s, len);
+	    edited = 1;
+	}
+
+  finish:
+    Pos += len;
+    StrLen += len;
+    if (edited)
+	edit->dirty = TRUE;
+    if (overflow && maxMessage)
+	_statusline(MAXLEN_REACHED_DEL_OR_MOV);
+#ifdef ENHANCED_LINEEDIT
+    if (Mark > Pos)
+	Mark += len;
+    else if (Mark < -1 - Pos)
+	Mark -= len;
+    if (Mark >= 0)
+	Mark = -1 - Mark;		/* Disable it */
+#endif
+    return edited;
+}
+
 PUBLIC int LYEdit1 ARGS4(
 	EDREC *,	edit,
 	int,		ch,
@@ -2672,9 +2788,6 @@ PUBLIC int LYEdit1 ARGS4(
      */
     int i;
     int length;
-#ifdef EXP_KEYBOARD_LAYOUT
-    static int map_active = 0;
-#endif
 
     if (MaxLen <= 0)
 	return(0); /* Be defensive */
@@ -2703,64 +2816,13 @@ PUBLIC int LYEdit1 ARGS4(
 	    return(ch);
 	/* FALLTHRU */
 #endif
-    case LYE_CHAR:
-#ifdef EXP_KEYBOARD_LAYOUT
-	if (map_active && ch < 128 && ch >= 0 &&
-	    LYKbLayouts[current_layout][ch]) {
-	    UCode_t ucode = LYKbLayouts[current_layout][ch];
-	    if (LYCharSet_UC[current_char_set].enc == UCT_ENC_UTF8) {
-		if (ucode > 127) {
-		    char utfbuf[8];
-		    utfbuf[0] = 0;
-		    if (UCConvertUniToUtf8(ucode, utfbuf)) {
-			int ulen = strlen(utfbuf);
-			i = 0;
-			if (ulen > 1) {
-			    if (Pos + ulen - 1 <= (MaxLen) &&
-				StrLen + ulen - 1 < (MaxLen)) {
-				for (i = 0; i < ulen-1; i++)
-				    LYEdit1(edit, utfbuf[i], LYE_CHAR, FALSE);
-				length = strlen(&Buf[0]);
-				StrLen = length;
-			    } else {
-				if (maxMessage)
-				    _statusline(MAXLEN_REACHED_DEL_OR_MOV);
-				return 0;
-			    }
-			}
-			ch = UCH(utfbuf[i]);
-		    }
-		} else {
-		    ch = UCH(ucode);
-		}
-	    } else {
-		ch = UCTransUniChar(ucode, current_char_set);
-		if (ch < 0)
-		    ch = '?';
-	    }
-	}
-#endif
-	/*
-	 *  ch is (presumably) printable character.
-	 */
-	if (Pos <= (MaxLen) && StrLen < (MaxLen)) {
-#ifdef ENHANCED_LINEEDIT
-	    if (Mark > Pos)
-		Mark++;
-	    else if (Mark < -1 - Pos)
-		Mark--;
-	    if (Mark >= 0)
-		Mark = -1 - Mark;		/* Disable it */
-#endif
-	    for(i = length; i >= Pos; i--)    /* Make room */
-		Buf[i+1] = Buf[i];
-	    Buf[length+1]='\0';
-	    Buf[Pos] = UCH(ch);
-	    Pos++;
-	} else if (maxMessage) {
-	    _statusline(MAXLEN_REACHED_DEL_OR_MOV);
-	}
-	break;
+    case LYE_CHAR: {
+	unsigned char uch = UCH(ch);
+
+	LYEditInsert(edit, &uch, 1, map_active, maxMessage);
+	return 0;			/* All changes already registered */
+    }
+    break;
 
     case LYE_C1CHAR:
 	/*
@@ -2984,10 +3046,10 @@ PUBLIC int LYEdit1 ARGS4(
 		Buf[i] = Buf[i + offset];
 	    i -= offset;
 #ifdef ENHANCED_LINEEDIT
-            if (Mark >= 0)
-                Mark = -1 - Mark;		/* Disable it */
-            if (Mark <= -1 - Pos)
-                Mark += offset;
+	    if (Mark >= 0)
+		Mark = -1 - Mark;		/* Disable it */
+	    if (Mark <= -1 - Pos)
+		Mark += offset;
 #endif
 	}
 #endif /* SUPPORT_MULTIBYTE_EDIT */
@@ -3326,8 +3388,9 @@ PUBLIC void LYRefreshEdit ARGS1(
 	estyle = s_prompt_edit;
     else
 	estyle = s_aedit;
-    CTRACE((tfp, "STYLE.getstr: switching to <edit.%s>.\n",
-	    prompting ? "prompt" : "active"));
+    CTRACE2(TRACE_STYLE,
+	    (tfp, "STYLE.getstr: switching to <edit.%s>.\n",
+		  prompting ? "prompt" : "active"));
     if (estyle != NOSTYLE)
 	curses_style(estyle, STACK_ON);
     else
@@ -4688,28 +4751,39 @@ again:
 	    CTRACE((tfp, "LYgetstr(%s) LYE_ENTER\n", inputline));
 	    return(ch);
 
-#if defined(WIN_EX)
+#ifdef CAN_CUT_AND_PASTE
 	/* 1998/10/01 (Thu) 15:05:49 */
-
-#define PASTE_MAX	512
 
 	case LYE_PASTE:
 	    {
-		unsigned char buff[PASTE_MAX];
-		int i, len;
+		unsigned char *s = get_clip_grab(), *e;
+		int len;
 
-		len = get_clip(buff, PASTE_MAX);
+		if (!s)
+		    break;
+		len = strlen(s);
+		e = s + len;
 
 		if (len > 0) {
-		    i = 0;
-		    while ((ch = buff[i]) != '\0') {
-			if (ch == '\r' || ch == '\n')
-			    break;
-			if (ch >= ' ')
-			    LYLineEdit(&MyEdit, ch, FALSE);
-			i++;
+		    unsigned char *e1 = s;
+
+		    while (e1 < e) {
+			if (*e1 < ' ') { /* Stop here? */
+			    if (e1 > s)
+				LYEditInsert(&MyEdit, s, e1 - s, map_active, TRUE);
+			    s = e1;
+			    if (*e1 == '\t') { /* Replace by space */
+				LYEditInsert(&MyEdit, " ", 1, map_active, TRUE);
+				s = ++e1;
+			    } else
+				break;
+			} else
+			    ++e1;
 		    }
+		    if (e1 > s)
+			LYEditInsert(&MyEdit, s, e1 - s, map_active, TRUE);
 		}
+		get_clip_release();
 		break;
 	    }
 #endif

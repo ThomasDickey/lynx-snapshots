@@ -346,17 +346,17 @@ PRIVATE int HTMLGen_start_element ARGS6(
 	hcode = hash_code(myHash);
 	strtolower(Style_className);
 
-	if (TRACE)
+	if (TRACE_STYLE)
 	{
 	    fprintf(tfp, "CSSTRIM:%s -> %d", myHash, hcode);
 	    if (hashStyles[hcode].code!=hcode)
 	    {
-		char *rp=strrchr(myHash, '.');
+		char *rp = strrchr(myHash, '.');
 		fprintf(tfp, " (undefined) %s\n", myHash);
 		if (rp)
 		{
 		    int hcd;
-		    *rp='\0'; /* trim the class */
+		    *rp = '\0'; /* trim the class */
 		    hcd = hash_code(myHash);
 		    fprintf(tfp, "CSS:%s -> %d", myHash, hcd);
 		    if (hashStyles[hcd].code!=hcd)
@@ -371,8 +371,9 @@ PRIVATE int HTMLGen_start_element ARGS6(
 
 	if (displayStyles[element_number + STARTAT].color > -2) /* actually set */
 	{
-	    CTRACE((tfp, "CSSTRIM: start_element: top <%s>\n",
-		   HTML_dtd.tags[element_number].name));
+	    CTRACE2(TRACE_STYLE,
+		    (tfp, "CSSTRIM: start_element: top <%s>\n",
+			  HTML_dtd.tags[element_number].name));
 	    do_cstyle_flush(me);
 	    HText_characterStyle(me->text, hcode, 1);
 	}
@@ -411,7 +412,8 @@ PRIVATE int HTMLGen_start_element ARGS6(
 		    if (title && *title) {
 			HTSprintf0(&title_tmp, "link.%s.%s",
 				   value[HTML_LINK_CLASS], title);
-			CTRACE((tfp, "CSSTRIM:link=%s\n", title_tmp));
+			CTRACE2(TRACE_STYLE,
+				(tfp, "CSSTRIM:link=%s\n", title_tmp));
 
 			do_cstyle_flush(me);
 			HText_characterStyle(me->text, hash_code(title_tmp), 1);
@@ -488,7 +490,8 @@ PRIVATE int HTMLGen_start_element ARGS6(
     /* end really empty tags straight away */
     if (LYPreparsedSource && ReallyEmptyTagNum(element_number))
     {
-	CTRACE((tfp, "STYLE:begin_element:ending EMPTY element style\n"));
+	CTRACE2(TRACE_STYLE,
+		(tfp, "STYLE:begin_element:ending EMPTY element style\n"));
 	do_cstyle_flush(me);
 	HText_characterStyle(me->text, hcode, STACK_OFF);
 	TrimColorClass(HTML_dtd.tags[element_number].name,
@@ -555,7 +558,8 @@ PRIVATE int HTMLGen_end_element ARGS3(
 		   Style_className, &hcode);
 
     if (LYPreparsedSource && !ReallyEmptyTagNum(element_number)) {
-	CTRACE((tfp, "STYLE:end_element: ending non-EMPTY style\n"));
+	CTRACE2(TRACE_STYLE,
+		(tfp, "STYLE:end_element: ending non-EMPTY style\n"));
 	do_cstyle_flush(me);
 	HText_characterStyle(me->text, hcode, STACK_OFF);
     }
