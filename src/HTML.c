@@ -1573,7 +1573,7 @@ PRIVATE int HTML_start_element ARGS6(
 				   : INTERN_LT);	/* Type */
 	    FREE(temp);
 	    if ((dest = HTAnchor_parent(
-			    HTAnchor_followMainLink((HTAnchor*)me->CurrentA)
+			    HTAnchor_followLink(me->CurrentA)
 				      )) != NULL) {
 		if (pdoctitle && !HTAnchor_title(dest))
 		    HTAnchor_setTitle(dest, *pdoctitle);
@@ -3125,7 +3125,7 @@ PRIVATE int HTML_start_element ARGS6(
 	    }
 	    if (title != NULL || dest_ismap == TRUE || dest_char_set >= 0) {
 		dest = HTAnchor_parent(
-			HTAnchor_followMainLink((HTAnchor*)me->CurrentA)
+			HTAnchor_followLink(me->CurrentA)
 				      );
 	    }
 	    if (dest && title != NULL && HTAnchor_title(dest) == NULL)
@@ -3187,7 +3187,7 @@ PRIVATE int HTML_start_element ARGS6(
 	 */
 	if (me->inA && me->CurrentA) {
 	    if ((dest = HTAnchor_parent(
-			HTAnchor_followMainLink((HTAnchor*)me->CurrentA)
+			HTAnchor_followLink(me->CurrentA)
 				      )) != NULL) {
 		if (dest->isISMAPScript == TRUE) {
 		    dest_ismap = TRUE;
@@ -3476,7 +3476,7 @@ PRIVATE int HTML_start_element ARGS6(
 				INTERN_LT);		/* Type */
 		    if (me->CurrentA && title) {
 			if ((dest = HTAnchor_parent(
-				HTAnchor_followMainLink((HTAnchor*)me->CurrentA)
+				HTAnchor_followLink(me->CurrentA)
 						  )) != NULL) {
 			    if (!HTAnchor_title(dest))
 				HTAnchor_setTitle(dest, title);
@@ -3538,7 +3538,7 @@ PRIVATE int HTML_start_element ARGS6(
 				INTERN_LT);		/* Type */
 		if (me->CurrentA && title) {
 		    if ((dest = HTAnchor_parent(
-				HTAnchor_followMainLink((HTAnchor*)me->CurrentA)
+				HTAnchor_followLink(me->CurrentA)
 					      )) != NULL) {
 			if (!HTAnchor_title(dest))
 			    HTAnchor_setTitle(dest, title);
@@ -3642,7 +3642,7 @@ PRIVATE int HTML_start_element ARGS6(
 				INTERN_LT);		/* Type */
 	    if (me->CurrentA && title) {
 		if ((dest = HTAnchor_parent(
-				HTAnchor_followMainLink((HTAnchor*)me->CurrentA)
+				HTAnchor_followLink(me->CurrentA)
 					  )) != NULL) {
 		    if (!HTAnchor_title(dest))
 			HTAnchor_setTitle(dest, title);
@@ -4596,7 +4596,7 @@ PRIVATE int HTML_start_element ARGS6(
 						   NULL,
 						   action,
 						   (HTLinkType*)0);
-		if ((link_dest = HTAnchor_followMainLink((HTAnchor *)source)) != NULL) {
+		if ((link_dest = HTAnchor_followLink(source)) != NULL) {
 		    /*
 		     *	Memory leak fixed.
 		     *	05-28-94 Lynx 2-3-1 Garrett Arch Blythe

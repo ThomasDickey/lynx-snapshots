@@ -337,7 +337,8 @@ typedef enum {
 
 #define STR_FILE_URL         "file:"
 #define LEN_FILE_URL         5
-#define isFILE_URL(addr)     !strncasecomp(addr, STR_FILE_URL, LEN_FILE_URL)
+#define isFILE_URL(addr)     ((*addr == 'f' || *addr == 'F') &&\
+                             !strncasecomp(addr, STR_FILE_URL, LEN_FILE_URL))
 
 #define STR_FINGER_URL       "finger:"
 #define LEN_FINGER_URL       7
@@ -402,7 +403,8 @@ typedef enum {
 
 #define STR_LYNXCGI          "lynxcgi:"
 #define LEN_LYNXCGI          8
-#define isLYNXCGI(addr)      !strncasecomp(addr, STR_LYNXCGI, LEN_LYNXCGI)
+#define isLYNXCGI(addr)      ((*addr == 'l' || *addr == 'L') &&\
+                             !strncasecomp(addr, STR_LYNXCGI, LEN_LYNXCGI))
 
 #define STR_LYNXCOOKIE       "LYNXCOOKIE:"
 #define LEN_LYNXCOOKIE       11
@@ -414,7 +416,8 @@ typedef enum {
 
 #define STR_LYNXEXEC         "lynxexec:"
 #define LEN_LYNXEXEC         9
-#define isLYNXEXEC(addr)     !strncasecomp(addr, STR_LYNXEXEC, LEN_LYNXEXEC)
+#define isLYNXEXEC(addr)     ((*addr == 'l' || *addr == 'L') &&\
+                             !strncasecomp(addr, STR_LYNXEXEC, LEN_LYNXEXEC))
 
 #define STR_LYNXDOWNLOAD     "LYNXDOWNLOAD:"
 #define LEN_LYNXDOWNLOAD     13
@@ -446,7 +449,8 @@ typedef enum {
 
 #define STR_LYNXPROG         "lynxprog:"
 #define LEN_LYNXPROG         9
-#define isLYNXPROG(addr)     !strncasecomp(addr, STR_LYNXPROG, LEN_LYNXPROG)
+#define isLYNXPROG(addr)     ((*addr == 'l' || *addr == 'L') &&\
+                             !strncasecomp(addr, STR_LYNXPROG, LEN_LYNXPROG))
 
 /*
  *  For change_sug_filename().

@@ -601,19 +601,29 @@ use_tunnel:
 
       X509_NAME_oneline(X509_get_subject_name(SSL_get_peer_certificate(handle)),
 		        ssl_dn, sizeof(ssl_dn));
-      cert_host = strstr(ssl_dn, "/CN=") + 4;
-      if ((p = strchr(cert_host, '/')) != NULL)
-	  *p = '\0';
-      ssl_host = HTParse(url, "", PARSE_HOST);
-      if (strcmp(ssl_host, cert_host)) {
+      if ((cert_host = strstr(ssl_dn, "/CN=")) == NULL) {
 	  HTSprintf0(&msg,
-		     gettext("SSL error:host(%s)!=cert(%s)-Continue?"),
-		     ssl_host,
-		     cert_host);
+		     gettext("SSL error:Can't find common name in certificate-Continue?"));
 	  if (! HTConfirmDefault(msg, TRUE)) {
 	      status = HT_NOT_LOADED;
 	      FREE(msg);
 	      goto done;
+	  }
+      } else {
+	  cert_host += 4;
+	  if ((p = strchr(cert_host, '/')) != NULL)
+	      *p = '\0';
+	  ssl_host = HTParse(url, "", PARSE_HOST);
+	  if (strcmp(ssl_host, cert_host)) {
+	      HTSprintf0(&msg,
+			 gettext("SSL error:host(%s)!=cert(%s)-Continue?"),
+			 ssl_host,
+			 cert_host);
+	      if (! HTConfirmDefault(msg, TRUE)) {
+		  status = HT_NOT_LOADED;
+		  FREE(msg);
+		  goto done;
+	      }
 	  }
       }
 

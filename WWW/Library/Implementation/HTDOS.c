@@ -7,6 +7,8 @@
 #include <HTDOS.h>
 #include <LYStrings.h>
 
+#include <LYLeaks.h>
+
 /*
  * Make a copy of the source argument in the result, allowing some extra
  * space so we can append directly onto the result without reallocating.
@@ -76,7 +78,7 @@ char * HTDOS_wwwName ARGS1(CONST char *, dosname)
 /*
  * Convert slashes from Unix to DOS
  */
-char * HTDOS_slashes (char * path)
+char * HTDOS_slashes ARGS1(char *, path)
 {
     char *s;
 

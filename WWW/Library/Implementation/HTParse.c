@@ -182,7 +182,7 @@ PUBLIC char * HTParse ARGS3(
 	int,		wanted)
 {
     char * result = NULL;
-    char *tail = NULL; /* a pointer within 'result' string */
+    char * tail = NULL;  /* a pointer to the end of the 'result' string */
     char * return_value = NULL;
     int len, len1, len2;
     char * name = NULL;
@@ -363,9 +363,9 @@ PUBLIC char * HTParse ARGS3(
 
     /*
      * Trim any blanks from the result so far - there's no excuse for blanks
-     * in a hostname.
+     * in a hostname.  Also update the tail here.
      */
-    LYRemoveBlanks(result);
+    tail = LYRemoveBlanks(result);
 
     /*
     **	If host in given or related was ended directly with a '?' (no
@@ -424,7 +424,6 @@ PUBLIC char * HTParse ARGS3(
 	    }
 	}
 
-	tail = result + strlen(result);
 	if (given.absolute) {			/* All is given */
 	    if (wanted & PARSE_PUNCTUATION)
 		*tail++ = '/';
