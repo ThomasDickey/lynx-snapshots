@@ -1,13 +1,14 @@
 ;; -*- Lisp -*-
 (Created-By-Prcs-Version 1 2 0)
 (Project-Description "PRCS Project for The Lynx browser")
-(Project-Version Lynx 2.7.1ac-0 47)
-(Parent-Version Lynx 2.7.1ac-0 46)
+(Project-Version Lynx 2.7.1ac-0 48)
+(Parent-Version Lynx 2.7.1ac-0 47)
 
-(Version-Log "DJGPP hacks")
+(Version-Log "several minor fixes to configure script and makefiles
+")
 (New-Version-Log "")
-(Checkin-Time "Thu, 07 Aug 1997 07:26:14 -0600")
-(Checkin-Login buttles)
+(Checkin-Time "Thu, 07 Aug 1997 13:59:33 -0600")
+(Checkin-Login dickey)
 (Populate-Ignore ("\\.o$" "\\.a$" "~$" "^a.out$" "^core$"
                   "\\.dvi$" "\\.aux$" "^\\..*_aux$" "\\.log"
                   "\\.zip$" "^obsolete" "/obsolete"
@@ -103,7 +104,7 @@
   (src/LYMainLoop.h (Lynx/d/19_LYMainLoop 1.2 644))
   (src/LYStrings.h (Lynx/d/20_LYStrings. 1.1.1.4 644))
   (src/LYHistory.c (Lynx/d/21_LYHistory. 1.1.2.1.4.1.1.1.1.3 644))
-  (src/LYCurses.h (Lynx/d/22_LYCurses.h 1.1.4.1.1.1.1.6 644))
+  (src/LYCurses.h (Lynx/d/22_LYCurses.h 1.1.4.1.1.1.1.7 644))
   (src/LYSignal.h (Lynx/d/23_LYSignal.h 1.1 644))
   (src/LYClean.h (Lynx/d/24_LYClean.h 1.1.2.1 644))
   (src/LYGlobalDefs.h (Lynx/d/25_LYGlobalDe 1.1.3.1.2.1.1.1.1.1.1.2.1.4 644))
@@ -376,7 +377,7 @@
   (src/chrtrans/cp850_uni.tbl (Lynx/i/19_cp850_uni. 1.2 644))
   (src/UCdomap.c (Lynx/b/14_UCdomap.c 1.4 644))
   (WWW/Library/Implementation/UCDefs.h (Lynx/e/0_UCDefs.h 1.1 644))
-  (WWW/Library/Implementation/UCMap.h (Lynx/i/22_UCMap.h 1.3 644))
+  (WWW/Library/Implementation/UCMap.h (Lynx/i/22_UCMap.h 1.4 644))
   (WWW/Library/Implementation/UCAux.h (Lynx/f/0_UCAux.h 1.1 644))
 
   (WWW/Library/djgpp/makefile (Lynx/0_makefile 1.5 644))
@@ -390,19 +391,19 @@
 
 ;; Files added by populate at Mon, 03 Mar 1997 06:05:56 -0600:
 
-  (CHANGES.new (Lynx/6_CHANGES.ne 1.18.1.4.1.1.2.1.1.2.2.2.1.2.1.1.1.1.1.4.2.7.1.3.1.4.1.9 644))
+  (CHANGES.new (Lynx/6_CHANGES.ne 1.18.1.4.1.1.2.1.1.2.2.2.1.2.1.1.1.1.1.4.2.7.1.3.1.4.1.10 644))
 
 ;; Files added by populate at Tue, 11 Mar 1997 04:22:39 -0600:
 
   (newfiles.configure (Lynx/7_newfiles.c 1.4 644))
-  (makefile.in (Lynx/8_makefile.i 1.1.1.9 644))
+  (makefile.in (Lynx/8_makefile.i 1.1.1.10 644))
   (install.sh (Lynx/9_install.sh 1.1 755))
-  (configure.in (Lynx/10_configure. 1.10 644))
+  (configure.in (Lynx/10_configure. 1.11 644))
   (config.hin (Lynx/11_config.hin 1.10 644))
-  (aclocal.m4 (Lynx/12_aclocal.m4 1.12 644))
-  (configure (Lynx/13_configure 1.12 755))
-  (README.configure (Lynx/14_README.con 1.5 644))
-  (CHANGES.configure (Lynx/15_CHANGES.co 1.1.1.6 644))
+  (aclocal.m4 (Lynx/12_aclocal.m4 1.13 644))
+  (configure (Lynx/13_configure 1.13 755))
+  (README.configure (Lynx/14_README.con 1.6 644))
+  (CHANGES.configure (Lynx/15_CHANGES.co 1.1.1.7 644))
 
 ;; Files added by populate at Wed, 09 Apr 1997 06:18:01 -0600:
 
@@ -412,7 +413,7 @@
 
 
   (WWW/Library/unix/makefile.in (Lynx/16_makefile.i 1.4 644))
-  (src/makefile.in (Lynx/17_makefile.i 1.7 644))
+  (src/makefile.in (Lynx/17_makefile.i 1.8 644))
   (src/chrtrans/makefile.in (Lynx/18_makefile.i 1.4 644))
 
   (src/chrtrans/koi8r_uni.tbl (Lynx/24_koi8r_uni. 1.1 644))
@@ -436,12 +437,12 @@
   (src/LYStyle.h (Lynx/b/5_LYStyle.h 1.2 644))
 ;; Files added by populate at Tue, 08 Jul 1997 20:40:02 -0600:
 
-  (src/LYCurses.c (Lynx/d/51_LYCurses.c 1.1.5.1.1.8.1.4.1.4 644))
+  (src/LYCurses.c (Lynx/d/51_LYCurses.c 1.1.5.1.1.8.1.4.1.5 644))
   (src/LYCharUtils.c (Lynx/c/22_LYCharUtil 1.2.1.1.2.1.2.2.1.2.1.1.1.2.1.1.1.1.1.3 644))
 
 ;; Files added by populate at Wed, 09 Jul 1997 05:12:01 -0600:
 
-  (src/LYUtils.c (Lynx/d/27_LYUtils.c 1.1.4.1.2.2.1.1.1.1.1.1.1.1.4.3 644))
+  (src/LYUtils.c (Lynx/d/27_LYUtils.c 1.1.4.1.2.2.1.1.1.1.1.1.1.1.4.4 644))
 
 
   (src/chrtrans/build-chrtrans.com (Lynx/b/22_build-chrt 1.2 644))

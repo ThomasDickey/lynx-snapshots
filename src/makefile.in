@@ -8,13 +8,22 @@ exec_prefix	= @exec_prefix@
 srcdir		= @srcdir@
 VPATH		= $(srcdir)
 
-WWWINC		= WWW/Library/Implementation
-SITE_DEFS	= # FIXME: set in parent makefile
 MCFLAGS		= # FIXME: set in parent makefile
+RESOLVLIB	= # FIXME: set in parent makefile
+SITE_DEFS	= # FIXME: set in parent makefile
+SITE_LIBS	= # FIXME: set in parent makefile
+SOCKSLIB	= # FIXME: set in parent makefile
+WAISLIB		= # FIXME: set in parent makefile
+
+WWWINC		= WWW/Library/Implementation
+WWWLIB		= ../WWW/Library/unix/libwww.a
 
 CC		= @CC@
 CPPOPTS		= @DEFS@ @CPPFLAGS@ -I.. -I../$(WWWINC) $(MCFLAGS) $(SITE_DEFS)
 CFLAGS		= $(CPPOPTS) @CFLAGS@
+
+LIBS		= @LIBS@ $(RESOLVLIB) $(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)
+LDFLAGS		= @LDFLAGS@
 
 CHARTRANS_OBJS=UCdomap.o UCAux.o UCAuto.o
 OBJS=  LYClean.o LYShowInfo.o LYEdit.o LYStrings.o \
@@ -33,7 +42,7 @@ all: lynx
 
 .c.o:
 @SHOW_CC@
-	@ECHO_CC@$(CC) $(CPPOPTS) $(CFLAGS) -c $(srcdir)/$*.c
+	@ECHO_CC@$(CC) $(CFLAGS) -c $(srcdir)/$*.c
 
 .c.i:
 @SHOW_CC@
@@ -41,8 +50,8 @@ all: lynx
 
 lynx:   message @EXTRA_DEPS@ $(OBJS) $(WWWLIB)
 	@echo "Linking and creating Lynx executable"
-	$(CC) $(CFLAGS) -o lynx  $(OBJS) $(WWWLIB) $(LIBS)
-	@echo "Copying Lynx executable into this directory"
+	$(CC) $(CFLAGS) $(LDFLAGS) -o lynx  $(OBJS) $(WWWLIB) $(LIBS)
+	@echo "Copying Lynx executable into top-level directory"
 	cp lynx ..
 	@echo "Welcome to Lynx!"
 
@@ -56,7 +65,7 @@ do_chartrans_stuff:
 		CC="$(CC)" tables
 
 lint:
-	lint $(CPPFLAGS) *.c  > ../lint.out
+	lint $(CPPOPTS) *.c  > ../lint.out
 
 clean:
 	rm -f lynx core *.[ob]

@@ -64,30 +64,30 @@ Here's an alphabetical listing of the Lynx-specific options.  The actual
 order shown by the -help option is different due to the requirements of
 the script:
 
-  --disable-dired-archive
+  --disable-dired-archive		(define ARCHIVE_ONLY)
 	Use this option to prevent DirEd from extracting files from an
 	archive file,
 
-  --disable-dired-gzip
+  --disable-dired-gzip			(prevent defining OK_GZIP)
 	Use this option to prevent DirEd from using gzip and gunzip.
 
-  --disable-dired-override
+  --disable-dired-override		(prevent defining OK_OVERRIDE)
 	Lynx users can customize their keymaps by creating private
 	versions of lynx.cfg and modifying them, overriding the default
 	keymap.  Use this option to prevent DirEd keymap overriding.
 
-  --disable-dired-permit
+  --disable-dired-permit		(prevent defining OK_PERMIT)
 	Use this option to prevent DirEd from changing the permissions
 	on directories or files (i.e., from doing what the Unix chmod
 	command or the DOS attrib command does).
 
-  --disable-dired-tar
+  --disable-dired-tar			(prevent defining OK_TAR)
 	Use this option to prevent DirEd from using the tar program.
 
-  --disable-dired-uudecode
+  --disable-dired-uudecode		(prevent defining OK_UUDECODE)
 	Use this option to prevent DirEd from using uudecode.
 
-  --disable-dired-xpermit
+  --disable-dired-xpermit		(define NO_CHANGE_EXECUTE_PERMS)
 	Use this option if you do not disable out the dired-permit
 	option, but want to restrict changes of the eXecute permission
 	to directories (i.e., not allow it to be changed for files).  If
@@ -95,7 +95,7 @@ the script:
 	permission for files but not directories via the
 	"change_exec_perms" command line restriction.
 
-  --disable-dired-zip
+  --disable-dired-zip			(prevent defining OK_ZIP)
 	Use this option to prevent DirEd from using zip and unzip.
 
   --disable-echo
@@ -106,29 +106,31 @@ the script:
   	Use this option to control whether full utility pathnames are used.
 	By default, configure substitutes full pathnames.
 
-  --disable-long-list
+  --disable-long-list			(prevent defining LONG_LIST)
   	Use this option to disable long "ls -l" directory listings.
 
-  --disable-parent-dir-refs
+  --disable-parent-dir-refs		(define NO_PARENT_DIR_REFERENCE)
   	Use this option to disable "Up-to" parent-links in directory listings.
 
   --enable-debug
-  	Use this option to compile-in logic for traces/debugging.
+  	Use this option to compile-in support for debugging.
+	(The symbol DEBUG is always defined).
 
-  --enable-find-leaks
+  --enable-find-leaks			(defines LY_FIND_LEAKS)
   	Use this option to compile-in logic for testing memory leaks.
 
   --enable-warnings
   	Use this option to turn on GCC compiler warnings.
 
-  --with-char-trans
+  --with-char-trans			(defines EXP_CHARTRANS)
   	Use this option to enable optional character-translations with
 	new charsets, UTF8 mode, etc.
 
-  --with-color-style
+  --with-color-style			(define USE_COLOR_STYLE)
   	Use this option to enable optional/experimental color style.
+	(Also defines USEHASH, UNPAINT_CACHE, LINKEDSTYLES)
 
-  --with-dired
+  --with-dired				(defines DIRED_SUPPORT)
 	Use this option to enable or disable the optional
 	directory-editor.
 
@@ -157,6 +159,9 @@ the script:
 	Specifying a screen type causes the configure script to look in
 	standard locations for the associated header and library files,
 	unless you have preset the $CFLAGS and $LIBS variables.
+
+	--with-screen=ncurses		(defines NCURSES)
+	--with-screen=slang		(defines USE_SLANG)
 
 --------------------------------------------------------------------------------
 

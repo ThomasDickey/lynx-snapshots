@@ -79,9 +79,7 @@ AC_MSG_CHECKING([if curses supports alternate-character set])
 AC_CACHE_VAL(cf_cv_alt_char_set,[
 	AC_TRY_LINK([
 #include <$cf_cv_ncurses_header>
-	],[
-	chtype x = acs_map['l']
-	],
+	],[chtype x = acs_map['l']; acs_map['m'] = 0],
 	[cf_cv_alt_char_set=yes],  
 	[cf_cv_alt_char_set=no])])
 AC_MSG_RESULT($cf_cv_alt_char_set)
@@ -162,6 +160,11 @@ dnl Look for the curses libraries.  Older curses implementations may require
 dnl termcap/termlib to be linked as well.
 AC_DEFUN([CF_CURSES_LIBS],[
 AC_CHECK_FUNC(initscr,,[
+case $host_os in #(vi
+freebsd*)
+	AC_CHECK_LIB(mytinfo,tgoto,[LIBS="-lmytinfo $LIBS"])
+	;;
+esac
 if test -d /usr/5lib ; then
 	# SunOS 3.x or 4.x
 	CPPFLAGS="$CPPFLAGS -I/usr/5include"
@@ -170,7 +173,12 @@ if test -d /usr/5lib ; then
 # 	# Solaris 5.x
 # 	LIBS="$LIBS -L/usr/ccs/lib -R/usr/ccs/lib"
 fi
+
 cf_save_LIBS="$LIBS"
+AC_CHECK_FUNC(tgoto,[
+	AC_CHECK_LIB(curses,initscr,,[
+		AC_ERROR(cannot link curses)])
+],[
 AC_CHECK_LIB(termcap, tgoto,[
 	LIBS="-ltermcap $cf_save_LIBS"
 	AC_CHECK_LIB(curses,initscr,,[
@@ -180,6 +188,7 @@ AC_CHECK_LIB(termcap, tgoto,[
 	],[
 	AC_CHECK_LIB(curses,initscr,,[
 		AC_ERROR(cannot link curses)])])
+])
 ])])
 dnl ---------------------------------------------------------------------------
 dnl Solaris 2.x curses provides a "performance" tradeoff according to whether
@@ -488,7 +497,16 @@ AC_CHECK_LIB(gpm,Gpm_Open,[
 				[AC_ERROR(cannot link -lncurses)])])
 		AC_MSG_RESULT($cf_need_gpm)
 		])],
-	[AC_CHECK_LIB(ncurses,initscr)])
+	[AC_TRY_LINK([#include <$cf_cv_ncurses_header>],
+		[initscr()],,[
+		case $host_os in #(vi
+		freebsd*)
+			AC_CHECK_LIB(mytinfo,tgoto,[LIBS="-lmytinfo $LIBS"])
+			;;
+		esac
+		LIBS="-lncurses $LIBS"
+		AC_TRY_LINK([#include <$cf_cv_ncurses_header>],
+			[initscr()],,[AC_ERROR(cannot link -lncurses)])])])
 ])])
 dnl ---------------------------------------------------------------------------
 dnl Check for the version of ncurses, to aid in reporting bugs, etc.
@@ -870,7 +888,7 @@ AC_DEFUN([CF_TTYTYPE],
 AC_MSG_CHECKING(if ttytype is declared in curses library)
 AC_CACHE_VAL(cf_cv_have_ttytype,[
 	AC_TRY_LINK([#include <$cf_cv_ncurses_header>],
-	[char *x = &ttytype[1]],
+	[char *x = &ttytype[1]; *x = 1],
 	[cf_cv_have_ttytype=yes],
 	[cf_cv_have_ttytype=no])
 	])
@@ -891,7 +909,9 @@ AC_DEFUN([CF_UTMP],
 [
 AC_MSG_CHECKING(if struct utmp is declared)
 AC_CACHE_VAL(cf_cv_have_utmp,[
-	AC_TRY_COMPILE([#include <utmp.h>],
+	AC_TRY_COMPILE([
+#include <sys/types.h>
+#include <utmp.h>],
 	[struct utmp x; char *y = &x.ut_host[0]],
 	[cf_cv_have_utmp=yes],
 	[AC_TRY_COMPILE([#include <utmpx.h>],

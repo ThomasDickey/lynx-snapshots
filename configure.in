@@ -148,7 +148,7 @@ sunos4*)
 	;;
 ultrix*)
 	# Increase the maximum size of functions that will be optimized.
-	test -z "$GCC" && CFLAGS="$CFLAGS -O -Olimit 600"
+	test -z "$GCC" && CFLAGS="$CFLAGS -O -Olimit 600 -G 7"
 	CFLAGS="$CFLAGS -DULTRIX" 
 	;;
 esac
@@ -313,9 +313,9 @@ AC_MSG_RESULT($cf_cv_dired)
 if test ".$cf_cv_dired" != ".no" ; then
 	AC_DEFINE(DIRED_SUPPORT)
 
-	AC_MSG_CHECKING(if you wish to extracting from archives via DirEd)
+	AC_MSG_CHECKING(if you wish to allow extracting from archives via DirEd)
 	CF_ARG_DISABLE(dired-archive,
-	[  --disable-dired-archive DirEd: disable dearchiving commands],,[AC_DEFINE(ARCHIVE_ONLY)])
+	[  --disable-dired-archive  DirEd: disable dearchiving commands],[AC_DEFINE(ARCHIVE_ONLY)])
 	AC_MSG_RESULT($enableval)
 
 	AC_MSG_CHECKING(if you wish to allow users to redefine DirEd keys)
@@ -396,10 +396,10 @@ CF_ARG_ENABLE(debug,
 	[with_debug=yes],
 	[with_debug=no])
 AC_MSG_RESULT($with_debug)
-if test "$with_debug" = "yes" ; then
-	AC_DEFINE(DEBUG)
-elif test -n "$GCC" ; then
+if test "$with_debug" != "yes" ; then
+if test -n "$GCC" ; then
 	CF_STRIP_G_OPT(CFLAGS)
+fi
 fi
 
 if test -n "$GCC"
