@@ -55,7 +55,9 @@ PUBLIC void LYLeaks NOARGS	{
 	if(Fp_leakagesink == NULL)	{
 		return;
 	}
+#ifndef __DJGPP__    
 	chmod(LEAKAGE_SINK, 0600);
+#endif /* __DJGPP__ */ 
 
 	while(ALp_RunTimeAllocations != NULL)	{
 		/*

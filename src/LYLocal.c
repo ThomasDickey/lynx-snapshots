@@ -1147,7 +1147,9 @@ PRIVATE BOOLEAN permit_location ARGS3(
 	    sleep(AlertSecs);
 	    return(0);
 	}
+#ifndef __DJGPP__    
 	chmod(tempfile, 0600);
+#endif /* __DJGPP__ */ 
 	
 	if (first) {
 	    /*
@@ -1348,7 +1350,8 @@ form to permit %s %s.\n</Ol>\n</Form>\n",
 	    
 	    cp = cr;
 	}
-	
+
+#ifndef __DJGPP__ 	
 	/*
 	 *  Call chmod().
 	 */
@@ -1361,6 +1364,7 @@ form to permit %s %s.\n</Ol>\n</Form>\n",
 	if (LYExecv(CHMOD_PATH, args, tmpbuf) <= 0) {
 	    return (-1);
 	}
+#endif /* __DJGPP__ */ 
 	LYforce_no_cache = TRUE;	/* Force update of dired listing. */
 	return 1;
     }
@@ -1703,7 +1707,9 @@ PUBLIC int dired_options ARGS2(
 	sleep(AlertSecs);
 	return(0);
     }
+#ifndef __DJGPP__
     chmod(tempfile, 0600);
+#endif /* __DJGPP__ */   
     
     if (first) {
 	/*

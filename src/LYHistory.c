@@ -425,7 +425,9 @@ PUBLIC int showhistory ARGS1(
 	HTAlert(CANNOT_OPEN_TEMP);
 	return(-1);
     }
+#ifndef __DJGPP__  
     chmod(tempfile, 0600);
+#endif /* __DJGPP__ */   
 
     StrAllocCopy(*newfile, hist_filename);
     LYforce_HTML_mode = TRUE;	/* force this file to be HTML */
@@ -587,7 +589,9 @@ PUBLIC int LYShowVisitedLinks ARGS1(
 	HTAlert(CANNOT_OPEN_TEMP);
 	return(-1);
     }
+#ifndef __DJGPP__   
     chmod(tempfile, 0600);
+#endif /* __DJGPP__ */   
 
     StrAllocCopy(*newfile, vl_filename);
     LYforce_HTML_mode = TRUE;	/* force this file to be HTML */

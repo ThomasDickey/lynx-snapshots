@@ -532,7 +532,9 @@ PUBLIC int save_rc NOPARAMS
     if ((fp = fopen(rcfile, "w")) == NULL) {
 	return FALSE;
     }
+#ifndef __DJGPP__ 
     chmod(rcfile, 0600);
+#endif /* __DJGPP__ */
 
     /*
      *  Header.

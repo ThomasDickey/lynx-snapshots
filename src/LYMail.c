@@ -194,7 +194,9 @@ PUBLIC void mailform ARGS4(
 	FREE(address);
 	return;
     }
+#ifndef __DJGPP__    
     chmod(tmpfile, 0600);
+#endif /* __DJGPP__ */
     if (*self) {
         cp = self;
 	while (*cp == ' ' || *cp == ',')
@@ -389,7 +391,9 @@ PUBLIC void mailmsg ARGS4(int,cur, char *,owner_address,
 	FREE(address);
 	return;
     }
+#ifndef __DJGPP__    
     chmod(tmpfile, 0600);
+#endif /* __DJGPP__ */
 #endif /* VMS */
 
     fprintf(fd, "The link   %s :?: %s \n",
@@ -462,7 +466,9 @@ PUBLIC void mailmsg ARGS4(int,cur, char *,owner_address,
 #endif /* SIGTSTP */
 		exit(-1);
             }
+#ifndef __DJGPP__    
 	    chmod(TRAVERSE_ERRORS, 0600);
+#endif /* __DJGPP__ */
 	}
 
 	fprintf(ofp, "%s\t%s \tin %s\n",
@@ -529,7 +535,9 @@ PUBLIC void reply_by_mail ARGS3(
 	HTAlert(MAILTO_URL_TEMPOPEN_FAILED);
 	return;
     }
+#ifndef __DJGPP__     
     chmod(my_tempfile, 0600);
+#endif /* __DJGPP__ */
     subject[0] = '\0';
 
     /*

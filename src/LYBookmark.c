@@ -477,7 +477,9 @@ PUBLIC void remove_bookmark_link ARGS2(
 	mode = ((stat_buf.st_mode & 0777) | 0600);
 	(void) fclose(nfp);
 	nfp = NULL;
+#ifndef __DJGPP__
 	(void) chmod(newfile, mode);
+#endif /* __DJGPP__ */ 
 	if ((nfp = fopen(newfile, "a")) == NULL) {
 	    (void) fclose(fp);
 	    _statusline(BOOKTEMP_REOPEN_FAIL_FOR_DEL);

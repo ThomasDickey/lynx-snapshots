@@ -385,7 +385,9 @@ check_recall:
 	fflush(stderr);
         start_curses();
 #endif /* VMS */
+#ifndef __DJGPP__ 
 	chmod(buffer, 0600);
+#endif /* __DJGPP__ */ 
 
     } else {
 	/*

@@ -70,7 +70,9 @@ PUBLIC int showinfo ARGS4(
         HTAlert(CANNOT_OPEN_TEMP);
         return(0);
     }
+#ifndef __DJGPP__   
     chmod(tempfile, 0600);
+#endif /* __DJGPP__ */ 
 
     /*
      *  Point the address pointer at this Url
