@@ -574,20 +574,12 @@ SaveAndExecute_tempname:
 	}
     }
     
-#ifdef VMS
-    me->fp = fopen (fnam, "wb", "mbc=32");
-#else
-    me->fp = fopen (fnam, "wb");
-#endif /* VMS */
-
+    me->fp = LYNewBinFile (fnam);
     if (!me->fp) {
 	HTAlert(CANNOT_OPEN_TEMP);
 	FREE(me);
 	return NULL;
     }
-#ifndef __DJGPP__ 
-    chmod(fnam, 0600);
-#endif /* __DJGPP__ */ 
 
     StrAllocCopy(me->viewer_command, pres->command);
     /*
@@ -776,20 +768,12 @@ SaveToFile_tempname:
 	 */
 	IsBinary = FALSE;
 
-#ifdef VMS
-    ret_obj->fp = fopen (fnam, "wb", "mbc=32");
-#else
-    ret_obj->fp = fopen (fnam, "wb");
-#endif /* VMS */
-
+    ret_obj->fp = LYNewBinFile (fnam);
     if (!ret_obj->fp) {
         HTAlert(CANNOT_OPEN_OUTPUT);
         FREE(ret_obj);
         return NULL;
     }
-#ifndef __DJGPP__ 
-    chmod(fnam, 0600);
-#endif /* __DJGPP__ */ 
 
     /*
      *  Any "application/foo" or other non-"text/foo" types that
@@ -1041,20 +1025,13 @@ Compressed_tempname:
     /*
      *  Open the file for receiving the compressed input stream. - FM
      */
-#ifdef VMS
-    me->fp = fopen (fnam, "wb", "mbc=32");
-#else
-    me->fp = fopen (fnam, "wb");
-#endif /* VMS */
+    me->fp = LYNewBinFile (fnam);
     if (!me->fp) {
 	HTAlert(CANNOT_OPEN_TEMP);
 	FREE(uncompress_mask);
 	FREE(me);
 	return NULL;
     }
-#ifndef __DJGPP__ 
-    chmod(fnam, 0600);
-#endif /* __DJGPP__ */
 
     /*
      *  me->viewer_command will be NULL if the converter Pres found above

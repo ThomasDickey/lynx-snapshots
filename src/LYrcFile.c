@@ -529,12 +529,9 @@ PUBLIC int save_rc NOPARAMS
     /*
      *  Open the file for write.
      */
-    if ((fp = fopen(rcfile, "w")) == NULL) {
+    if ((fp = LYNewTxtFile(rcfile)) == NULL) {
 	return FALSE;
     }
-#ifndef __DJGPP__ 
-    chmod(rcfile, 0600);
-#endif /* __DJGPP__ */
 
     /*
      *  Header.

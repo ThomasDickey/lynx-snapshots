@@ -16,12 +16,12 @@ to replace the top-level Makefile of Lynx.
 
 To use the configure script, simply type
 
-	configure
-or	configure --with-screen=ncurses
-or	configure --with-screen=slang
+	./configure
+or	./configure --with-screen=ncurses
+or	./configure --with-screen=slang
 
 and
-	make lynx
+	make
 
 --------------------------------------------------------------------------------
 
@@ -55,7 +55,7 @@ Options
 
 To get a list of the configure script's options, type
 
-	configure --help
+	./configure --help
 
 The form of the options is determined by the autoconf package.  We can
 use either boolean (enable/disable) or value (with) options.
@@ -63,6 +63,33 @@ use either boolean (enable/disable) or value (with) options.
 Here's an alphabetical listing of the Lynx-specific options.  The actual
 order shown by the -help option is different due to the requirements of
 the script:
+
+  --disable-char-trans			(defines EXP_CHARTRANS)
+  	Use this option to enable optional character-translations with
+	new charsets, UTF8 mode, etc.
+
+  --disable-dired			(defines DIRED_SUPPORT)
+	Use this option to enable or disable the optional
+	directory-editor.
+
+	Lynx supports directory editing (DirEd) for local directories. 
+	This allows users to do things like view, copy and remove files
+	using a tabular display of the directory and single-keystroke
+	commands instead of using the command line.  From inside Lynx,
+	the keystroke sequence "g.<enter>" switches Lynx to DirEd mode
+	on the current directory.  If you're building a Lynx that is to
+	be used as a kind of restricted shell for users who do not have
+	access to the command line and should not have access to
+	equivalent capabilities, you must disable DirEd with this
+	option.  You can also disable some DirEd functions while
+	allowing others.
+
+	All DirEd functions that were enabled on compilation can be
+	disabled or modified at run time via DIRED_MENU symbols in
+	lynx.cfg.
+
+	If you have disabled DirEd completely, you can ignore all the
+	other DirEd options.
 
   --disable-dired-archive		(define ARCHIVE_ONLY)
 	Use this option to prevent DirEd from extracting files from an
@@ -112,6 +139,10 @@ the script:
   --disable-parent-dir-refs		(define NO_PARENT_DIR_REFERENCE)
   	Use this option to disable "Up-to" parent-links in directory listings.
 
+  --enable-color-style			(define USE_COLOR_STYLE)
+  	Use this option to enable optional/experimental color style.
+	(Also defines USEHASH, UNPAINT_CACHE, LINKEDSTYLES)
+
   --enable-debug
   	Use this option to compile-in support for debugging.
 	(The symbol DEBUG is always defined).
@@ -122,36 +153,11 @@ the script:
   --enable-warnings
   	Use this option to turn on GCC compiler warnings.
 
-  --with-char-trans			(defines EXP_CHARTRANS)
-  	Use this option to enable optional character-translations with
-	new charsets, UTF8 mode, etc.
-
-  --with-color-style			(define USE_COLOR_STYLE)
-  	Use this option to enable optional/experimental color style.
-	(Also defines USEHASH, UNPAINT_CACHE, LINKEDSTYLES)
-
-  --with-dired				(defines DIRED_SUPPORT)
-	Use this option to enable or disable the optional
-	directory-editor.
-
-	Lynx supports directory editing (DirEd) for local directories. 
-	This allows users to do things like view, copy and remove files
-	using a tabular display of the directory and single-keystroke
-	commands instead of using the command line.  From inside Lynx,
-	the keystroke sequence "g.<enter>" switches Lynx to DirEd mode
-	on the current directory.  If you're building a Lynx that is to
-	be used as a kind of restricted shell for users who do not have
-	access to the command line and should not have access to
-	equivalent capabilities, you must disable DirEd with this
-	option.  You can also disable some DirEd functions while
-	allowing others.
-
-	All DirEd functions that were enabled on compilation can be
-	disabled or modified at run time via DIRED_MENU symbols in
-	lynx.cfg.
-
-	If you have disabled DirEd completely, you can ignore all the
-	other DirEd options.
+  --with-cfg-file=XXX			(defines LYNX_CFG_FILE)
+	Use this option to override the location of the site
+	configuration file's pathname.  It defaults to $libdir/lynx.cfg,
+	where $libdir is set in the configure script, e.g., to
+	/usr/local/lib.
 
   --with-screen=XXX
 	Use this option to select the screen type.  The option value,
@@ -162,6 +168,9 @@ the script:
 
 	--with-screen=ncurses		(defines NCURSES)
 	--with-screen=slang		(defines USE_SLANG)
+
+   --with-zlib				(defines USE_ZLIB)
+	Use zlib for decompression of some gzip files.
 
 --------------------------------------------------------------------------------
 

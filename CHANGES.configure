@@ -1,3 +1,21 @@
+97-09-04
+--------
+* Correct ifdef'ing for getbkgd function calls. - TD
+* Correct ifdef'ing for remaining inline chmod calls. - TD
+* Consolidate various logic for opening secure files into utility
+  functions, correcting portability problems as well.  - TD
+* Add configure option --with-cfg-file to override default location of
+  Lynx configuration file (requested by Laura Eaves).  - TD
+* Strip -g option from CFLAGS for the non-debug version of Ultrix
+  configuration (requested by Hynek Med).  - TD
+* Add configure test for HP "color" curses (noting that this cannot
+  possibly comply with XPG4 due to naming conventions, we'll expect
+  other problems with it). - TD
+* Add checks to configure test for COLOR_CURSES to work around bug
+  report for HP-UX.  - TD
+* Don't cache configure options except where essential (e.g., the
+  setting of 'screen').  - TD
+* Change some configure options to disable/enable for consistency.  - TD
 1997-08-28
 ----------
 * Correct a quoting error in CF_RECHECK_FUNC macro. - TD

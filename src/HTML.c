@@ -4166,9 +4166,6 @@ PRIVATE void HTML_start_element ARGS5(
 		 *  Convert any HTML entities or decimal escaping. - FM
 		 */
 		int CurrentCharSet = current_char_set;
-		BOOL CurrentEightBitRaw = HTPassEightBitRaw;
-		BOOLEAN CurrentUseDefaultRawMode = LYUseDefaultRawMode;
-		HTCJKlang CurrentHTCJK = HTCJK;
 		int len;
 
 		me->UsePlainSpace = TRUE;

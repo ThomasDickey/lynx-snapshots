@@ -13,6 +13,7 @@
 #include "tcp.h"
 #include "LYexit.h"
 #include "LYLeaks.h"
+#include "LYUtils.h"
 #include <ctype.h>
 /*#include <stdio.h> included by HTUtils.h -- FM */
 
@@ -51,13 +52,10 @@ PUBLIC void LYLeaks NOARGS	{
 	 *	Recreate the file each time.
 	 *	Do nothing if unable to open the file.
 	 */
-	Fp_leakagesink = fopen(LEAKAGE_SINK, "w");
-	if(Fp_leakagesink == NULL)	{
+	Fp_leakagesink = LYNewTxtFile(LEAKAGE_SINK);
+	if(Fp_leakagesink == NULL) {
 		return;
 	}
-#ifndef __DJGPP__    
-	chmod(LEAKAGE_SINK, 0600);
-#endif /* __DJGPP__ */ 
 
 	while(ALp_RunTimeAllocations != NULL)	{
 		/*

@@ -393,14 +393,7 @@ try_again:
 			fflush(stderr);
 			fclose(LYTraceLogFP);
 			*stderr = LYOrigStderr;
-#ifdef VMS
-			if ((LYTraceLogFP = fopen(LYTraceLogPath,
-						  "a+", "shr=get")) == NULL)
-#else
-			if ((LYTraceLogFP = fopen(LYTraceLogPath,
-						  "a+")) == NULL)
-#endif /* VMS */
-			{
+			if ((LYTraceLogFP = LYAppendToTxtFile(LYTraceLogPath)) == NULL) {
 			    WWW_TraceFlag = FALSE;
 			    _statusline(TRACELOG_OPEN_FAILED);
 			    sleep(MessageSecs);
@@ -507,8 +500,8 @@ try_again:
 		    if (traversal && !first_file && !LYCancelledFetch) {
 		        FILE *ofp;
 
-		        if ((ofp = fopen(TRAVERSE_ERRORS,"a+")) == NULL) {
- 			    if ((ofp = fopen(TRAVERSE_ERRORS,"w")) == NULL) {
+		        if ((ofp = LYAppendToTxtFile(TRAVERSE_ERRORS)) == NULL) {
+ 			    if ((ofp = LYNewTxtFile(TRAVERSE_ERRORS)) == NULL) {
 			        perror(NOOPEN_TRAV_ERR_FILE);
 #ifndef NOSIGHUP
 				(void) signal(SIGHUP, SIG_DFL);
@@ -523,9 +516,6 @@ try_again:
 #endif /* SIGTSTP */
 			        exit(-1);
 			    }
-#ifndef __DJGPP__  
-			    chmod(TRAVERSE_ERRORS, 0600);
-#endif /* __DJGPP__ */
 		        }
 		        fprintf(ofp, "%s %s\tin %s\n",
 		       		     links[curdoc.link].lname, 
@@ -1338,10 +1328,7 @@ try_again:
 	        crawl_ok = FALSE;
 	        sprintf(cfile,"lnk%08d.dat",ccount);
 	        ccount = ccount + 1;
-	        if ((cfp = fopen(cfile,"w"))  != NULL) {
-#ifndef __DJGPP__  
-		    chmod(cfile, 0600);
-#endif /* __DJGPP__ */
+	        if ((cfp = LYNewTxtFile(cfile))  != NULL) {
 	            print_crawl_to_fd(cfp,curdoc.address,curdoc.title);
 	            fclose(cfp);
 	        } else {
@@ -4538,7 +4525,7 @@ check_add_bookmark_to_self:
 		 *  attempting to read the log via the TRACE_LOG
 		 *  command. - FM
 		 */
-	        if ((LYTraceLogFP = fopen(LYTraceLogPath, "w")) == NULL) {
+	        if ((LYTraceLogFP = LYNewTxtFile(LYTraceLogPath)) == NULL) {
 		    WWW_TraceFlag = FALSE;
 		    _statusline(TRACELOG_OPEN_FAILED);
 		    sleep(MessageSecs);
@@ -4548,17 +4535,13 @@ check_add_bookmark_to_self:
 		fclose(LYTraceLogFP);
 		while (remove(LYTraceLogPath) == 0)
 		    ;
-		if ((LYTraceLogFP = fopen(LYTraceLogPath, "w",
-					  "shr=get")) == NULL) {
+		if ((LYTraceLogFP = LYNewTxtFile(LYTraceLogPath)) == NULL) {
 		    WWW_TraceFlag == FALSE;
 		    _statusline(TRACELOG_OPEN_FAILED);
 		    sleep(MessageSecs);
 		    break;
 		}
 #endif /* VMS */
-#ifndef __DJGPP__  
-		chmod(LYTraceLogPath, 0600);
-#endif /* __DJGPP__ */
 		*stderr = *LYTraceLogFP;
 		fprintf(stderr, "\t\t%s\n\n", LYNX_TRACELOG_TITLE);
 	    }
@@ -4598,14 +4581,7 @@ check_add_bookmark_to_self:
 	    fflush(stderr);
 	    fclose(LYTraceLogFP);
 	    *stderr = LYOrigStderr;
-#ifdef VMS
-	    if ((LYTraceLogFP = fopen(LYTraceLogPath,
-				      "a+", "shr=get")) == NULL)
-#else
-	    if ((LYTraceLogFP = fopen(LYTraceLogPath,
-				      "a+")) == NULL)
-#endif /* VMS */
-	    {
+	    if ((LYTraceLogFP = LYAppendToTxtFile(LYTraceLogPath)) == NULL) {
 		WWW_TraceFlag = FALSE;
 		_statusline(TRACELOG_OPEN_FAILED);
 		sleep(MessageSecs);

@@ -163,6 +163,7 @@ dnl --------------------------------------------------------------------------
 CF_NETLIBS
 
 AC_MSG_CHECKING(for screen type)
+dnl This has to be cached, since there's a lot of interdependent tests.
 AC_CACHE_VAL(cf_cv_screen,[
 AC_ARG_WITH(screen,
 [  --with-screen=XXX       select screen type
@@ -194,6 +195,11 @@ slang)
 	CF_SLANG_LIBS
 	;;
 esac
+
+CF_WITH_PATH(cfg-file,
+[  --with-cfg-file=XXXX    specify config-pathname],
+LYNX_CFG_FILE,[$]ac_default_prefix/lib/lynx.cfg)
+AC_DEFINE_UNQUOTED(LYNX_CFG_FILE,"$LYNX_CFG_FILE")
 
 dnl --------------------------------------------------------------------------
 dnl Checks for standard headers
@@ -263,26 +269,25 @@ AC_SUBST(EXTRA_OBJS)
 AC_SUBST(EXTRA_DEPS)
 
 AC_MSG_CHECKING(if character-translation code should be used)
-AC_CACHE_VAL(cf_cv_char_trans,[
-AC_ARG_WITH(char-trans,
-[  --with-char-trans       enable optional character-translations],
-	[cf_cv_char_trans=$withval],
-	[cf_cv_char_trans=yes])])
-AC_MSG_RESULT($cf_cv_char_trans)
-if test ".$cf_cv_char_trans" != ".no" ; then
+CF_ARG_DISABLE(char-trans,
+[  --disable-char-trans    enable optional character-translations],
+	[use_char_trans=$withval],
+	[use_char_trans=yes])
+AC_MSG_RESULT($use_char_trans)
+
+if test ".$use_char_trans" != ".no" ; then
 	AC_DEFINE(EXP_CHARTRANS)
 	EXTRA_OBJS="$EXTRA_OBJS \$(CHARTRANS_OBJS)"
 	EXTRA_DEPS="$EXTRA_DEPS do_chartrans_stuff"
 fi
 
 AC_MSG_CHECKING(if color-style code should be used)
-AC_CACHE_VAL(cf_cv_color_style,[
-AC_ARG_WITH(color-style,
-[  --with-color-style      enable optional/experimental color style],
-	[cf_cv_color_style=$withval],
-	[cf_cv_color_style=no])])
+CF_ARG_ENABLE(color-style,
+[  --enable-color-style    use optional/experimental color style],
+	[use_color_style=$enableval],
+	[use_color_style=no])
 
-if test $cf_cv_color_style != no ; then
+if test $use_color_style != no ; then
 	if test .$cf_cv_color_curses != .yes ; then
 		AC_ERROR(Configuration does not support color-styles)
 	fi
@@ -294,7 +299,7 @@ if test $cf_cv_color_style != no ; then
 	AC_DEFINE(LINKEDSTYLES)
 fi
 
-case $cf_cv_color_style in
+case $use_color_style in
 no)
 	AC_MSG_RESULT(no)
 	;;
@@ -304,14 +309,14 @@ no)
 	;;
 esac
 
-AC_MSG_CHECKING(if you want to use zlib for compression/decompression)
-AC_CACHE_VAL(cf_cv_zlib,[
+AC_MSG_CHECKING(if you want to use zlib for decompression of some gzip files)
 AC_ARG_WITH(zlib,
-[  --with-zlib             use zlib for compression/decompression],
-	[cf_cv_zlib=$withval],
-	[cf_cv_zlib=no])])
-AC_MSG_RESULT($cf_cv_zlib)
-if test ".$cf_cv_zlib" != ".no" ; then
+[  --with-zlib             use zlib for decompression of some gzip files],
+	[use_zlib=$withval],
+	[use_zlib=no])
+AC_MSG_RESULT($use_zlib)
+
+if test ".$use_zlib" != ".no" ; then
 	CF_FIND_LIBRARY(z,
 		[#include <zlib.h>],
 		[gzopen("name","mode")],
@@ -322,13 +327,13 @@ fi
 # All DirEd functions that were enabled on compilation can be disabled
 # or modified at run time via DIRED_MENU symbols in lynx.cfg.
 AC_MSG_CHECKING(if directory-editor code should be used)
-AC_CACHE_VAL(cf_cv_dired,[
-AC_ARG_WITH(dired,
-[  --with-dired            enable optional directory-editor, DirEd (default)],
-	[cf_cv_dired=$withval],
-	[cf_cv_dired=yes])])
-AC_MSG_RESULT($cf_cv_dired)
-if test ".$cf_cv_dired" != ".no" ; then
+CF_ARG_DISABLE(dired,
+[  --disable-dired          enable optional directory-editor, DirEd],
+	[use_dired=$enableval],
+	[use_dired=yes])
+AC_MSG_RESULT($use_dired)
+
+if test ".$use_dired" != ".no" ; then
 	AC_DEFINE(DIRED_SUPPORT)
 
 	AC_MSG_CHECKING(if you wish to allow extracting from archives via DirEd)
@@ -417,16 +422,23 @@ AC_MSG_RESULT($with_debug)
 if test "$with_debug" = "yes" ; then
 	case $host_os in
 	ultrix*)
+		CF_STRIP_O_OPT(CFLAGS)
 		if test -z "$GCC" ; then
-			CF_STRIP_O_OPT(CFLAGS)
 			CFLAGS="$CFLAGS -g3"
 		fi
 		;;
 	esac
 else
-if test -n "$GCC" ; then
-	CF_STRIP_G_OPT(CFLAGS)
-fi
+	case $host_os in
+	ultrix*) #(vi
+		CF_STRIP_G_OPT(CFLAGS)
+		;;
+	*)
+		if test -n "$GCC" ; then
+			CF_STRIP_G_OPT(CFLAGS)
+		fi
+		;;
+	esac
 fi
 
 if test -n "$GCC"

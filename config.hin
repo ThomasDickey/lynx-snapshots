@@ -21,6 +21,7 @@
 #undef HAVE_CUSERID
 #undef HAVE_DIRENT_H		/* defined by AC_HEADER_DIRENT */
 #undef HAVE_FCNTL_H		/* have <fcntl.h> */
+#undef HAVE_GETBKGD		/* defined by CF_COLOR_CURSES */
 #undef HAVE_GETCWD
 #undef HAVE_KEYPAD
 #undef HAVE_LIMITS_H
@@ -44,6 +45,7 @@
 #undef LOCALE			/* for locale support */
 #undef LONG_LIST		/* CF_ARG_DISABLE(long-list) */
 #undef LY_FIND_LEAKS		/* configure --disable-leaks */
+#undef LYNX_CFG_FILE		/* CF_WITH_PATH(cfg-file) */
 #undef MKDIR_PATH		/* CF_PATH_PROG(mkdir) */
 #undef MV_PATH			/* CF_PATH_PROG(mv) */
 #undef NCURSES			/* defined for ncurses support */

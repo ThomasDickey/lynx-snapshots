@@ -458,7 +458,7 @@ PUBLIC void remove_bookmark_link ARGS2(
 #else
     tempname(newfile, NEW_FILE);
 #endif /* VMS */
-    if ((nfp = fopen(newfile, "w")) == NULL) {
+    if ((nfp = LYNewTxtFile(newfile)) == NULL) {
 	fclose(fp);
 #ifdef VMS
 	_statusline(BOOKSCRA_OPEN_FAILED_FOR_DEL);
@@ -469,17 +469,15 @@ PUBLIC void remove_bookmark_link ARGS2(
 	return;
     }
 
-#ifndef VMS
+#ifdef UNIX
     /*
      *  Explicitly preserve bookmark file mode on Unix. - DSL
      */
     if (stat(filename_buffer, &stat_buf) == 0) {
-	mode = ((stat_buf.st_mode & 0777) | 0600);
+	mode = ((stat_buf.st_mode & 0777) | HIDE_CHMOD);
 	(void) fclose(nfp);
 	nfp = NULL;
-#ifndef __DJGPP__
 	(void) chmod(newfile, mode);
-#endif /* __DJGPP__ */ 
 	if ((nfp = fopen(newfile, "a")) == NULL) {
 	    (void) fclose(fp);
 	    _statusline(BOOKTEMP_REOPEN_FAIL_FOR_DEL);
@@ -487,7 +485,7 @@ PUBLIC void remove_bookmark_link ARGS2(
 	    return;
 	}
     }
-#endif /* !VMS */
+#endif /* UNIX */
 
     if (is_mosaic_hotlist) {
 	int del_line = cur*2;  /* two lines per entry */

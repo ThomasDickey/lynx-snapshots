@@ -30,6 +30,7 @@
 
 #include "HTUtils.h"
 #include "tcp.h"
+#include "HTAlert.h"
 #include "HTParse.h"
 #include "LYCurses.h"
 #include "LYGlobalDefs.h"
@@ -1142,15 +1143,12 @@ PRIVATE BOOLEAN permit_location ARGS3(
 	 *  protection in case this wasn't done via an
 	 *  external umask. - FM
 	 */
-	if ((fp0 = fopen(tempfile, "w")) == NULL) {
+	if ((fp0 = LYNewTxtFile(tempfile)) == NULL) {
 	    _statusline("Unable to open permit options file");
 	    sleep(AlertSecs);
 	    return(0);
 	}
-#ifndef __DJGPP__    
-	chmod(tempfile, 0600);
-#endif /* __DJGPP__ */ 
-	
+
 	if (first) {
 	    /*
 	     *  Make the tempfile a URL.
@@ -1351,7 +1349,7 @@ form to permit %s %s.\n</Ol>\n</Form>\n",
 	    cp = cr;
 	}
 
-#ifndef __DJGPP__ 	
+#ifdef UNIX
 	/*
 	 *  Call chmod().
 	 */
@@ -1364,7 +1362,7 @@ form to permit %s %s.\n</Ol>\n</Form>\n",
 	if (LYExecv(CHMOD_PATH, args, tmpbuf) <= 0) {
 	    return (-1);
 	}
-#endif /* __DJGPP__ */ 
+#endif /* UNIX */ 
 	LYforce_no_cache = TRUE;	/* Force update of dired listing. */
 	return 1;
     }
@@ -1702,15 +1700,12 @@ PUBLIC int dired_options ARGS2(
      *  protection in case this wasn't done via an
      *  external umask. - FM
      */
-    if ((fp0 = fopen(tempfile,"w")) == NULL) {
+    if ((fp0 = LYNewTxtFile(tempfile)) == NULL) {
 	_statusline("Unable to open file management menu file.");
 	sleep(AlertSecs);
 	return(0);
     }
-#ifndef __DJGPP__
-    chmod(tempfile, 0600);
-#endif /* __DJGPP__ */   
-    
+
     if (first) {
 	/*
 	 *  Make the tempfile a URL.

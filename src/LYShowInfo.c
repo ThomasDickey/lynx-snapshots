@@ -66,13 +66,10 @@ PUBLIC int showinfo ARGS4(
 #endif /* VMS */
     }
 
-    if ((fp0 = fopen(tempfile, "w")) == NULL) {
+    if ((fp0 = LYNewTxtFile(tempfile)) == NULL) {
         HTAlert(CANNOT_OPEN_TEMP);
         return(0);
     }
-#ifndef __DJGPP__   
-    chmod(tempfile, 0600);
-#endif /* __DJGPP__ */ 
 
     /*
      *  Point the address pointer at this Url

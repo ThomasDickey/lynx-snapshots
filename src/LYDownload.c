@@ -42,7 +42,7 @@ PRIVATE char LYValidDownloadFile[256] = "\0";
 PUBLIC void LYDownload ARGS1(
 	char *,		line) 
 {
-    char *Line = NULL, *method, *file, *theFile, *sug_file = NULL;
+    char *Line = NULL, *method, *file, *sug_file = NULL;
     int method_number;
     int count;
     char buffer[512];
@@ -385,9 +385,9 @@ check_recall:
 	fflush(stderr);
         start_curses();
 #endif /* VMS */
-#ifndef __DJGPP__ 
-	chmod(buffer, 0600);
-#endif /* __DJGPP__ */ 
+#if defined(VMS) || defined(UNIX)
+	chmod(buffer, HIDE_CHMOD);
+#endif /*  defined(VMS) || defined(UNIX) */
 
     } else {
 	/*
@@ -631,13 +631,10 @@ PUBLIC int LYdownload_options ARGS2(
     StrAllocCopy(sug_filename, *newfile);
     change_sug_filename(sug_filename);
 
-    if ((fp0 = fopen(tempfile, "w")) == NULL) {
+    if ((fp0 = LYNewTxtFile(tempfile)) == NULL) {
 	HTAlert(CANNOT_OPEN_TEMP);
 	return(-1);
     }
-#ifndef DOSPATH
-    chmod(tempfile, 0600);
-#endif /* DOSPATH */
 
     LYstrncpy(LYValidDownloadFile,
 	      data_file,

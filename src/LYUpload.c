@@ -198,9 +198,9 @@ retry:
     system(cmd);
     fflush(stdout);
     start_curses();
-#ifndef __DJGPP__ 
-    chmod(buffer, 0600);
-#endif /* __DJGPP__ */ 
+#ifdef UNIX 
+    chmod(buffer, HIDE_CHMOD);
+#endif /* UNIX */ 
     /* don't remove(file); */
 
     return 1;
@@ -250,13 +250,10 @@ PUBLIC int LYUpload_options ARGS2(
      *  protection in case this wasn't done via an
      *  external umask. - FM
      */
-    if ((fp0 = fopen(tempfile, "w")) == NULL) {
+    if ((fp0 = LYNewTxtFile(tempfile)) == NULL) {
 	HTAlert(CANNOT_OPEN_TEMP);
 	return(-1);
     }
-#ifndef __DJGPP__ 
-    chmod(tempfile, 0600);
-#endif /* __DJGPP__ */ 
 
 #ifdef VMS
     strcpy(curloc, "/sys$login");
