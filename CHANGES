@@ -1,6 +1,11 @@
 Changes since Lynx 2.8 release
 ================================================================================
 
+1998-10-04 (2.8.1pre.8)
+* modify HTTCP.c to copy soc_in from phost in HTParseInet, making Lynx/32 do
+  lookups again - WB
+* modify LYCurses.c to compile mouse-code with Borland C and PDCURSES 2.3 - WB
+* correct backward logic in CF_TERMIOS_AND_CURSES (reported by LE) - TD
 1998-10-04 (2.8.1pre.7)
 * add special-case CF_TERMIOS_AND_CURSES configure macro (fixes problem reported
   by Philippe De Muyter) - TD

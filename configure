@@ -8558,7 +8558,7 @@ fi
 
 echo "$ac_t""$cf_cv_termio_and_curses" 1>&6
 
-test $cf_cv_termio_and_curses = no && cat >> confdefs.h <<\EOF
+test $cf_cv_termio_and_curses = yes && cat >> confdefs.h <<\EOF
 #define TERMIO_AND_CURSES 1
 EOF
 
