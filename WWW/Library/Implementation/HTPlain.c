@@ -65,34 +65,33 @@ struct _HTStream {
 
 PRIVATE char replace_buf [61];        /* buffer for replacement strings */
 
-PRIVATE void htplain_get_chartrans_info ARGS2(HTStream *, me,
-					      HTParentAnchor *, anchor)
+PRIVATE void HTPlain_getChartransInfo ARGS2(
+	HTStream *,		me,
+	HTParentAnchor *,	anchor)
 {
     if (me->in_char_set < 0) {
 	HTAnchor_copyUCInfoStage(anchor, UCT_STAGE_PARSER, UCT_STAGE_MIME,
-				 	UCT_SETBY_PARSER);
-	me->in_char_set = HTAnchor_getUCLYhndl(anchor,UCT_STAGE_PARSER);
+				 	 UCT_SETBY_PARSER);
+	me->in_char_set = HTAnchor_getUCLYhndl(anchor, UCT_STAGE_PARSER);
     }
     if (me->htext_char_set < 0) {
 	int chndl = HTAnchor_getUCLYhndl(anchor, UCT_STAGE_HTEXT);
 	if (chndl < 0) {
 	    chndl = current_char_set;
-	    HTAnchor_setUCInfoStage(anchor, chndl, UCT_STAGE_HTEXT,
-			    UCT_SETBY_DEFAULT);
+	    HTAnchor_setUCInfoStage(anchor, chndl,
+				    UCT_STAGE_HTEXT, UCT_SETBY_DEFAULT);
 	}
-	HTAnchor_setUCInfoStage(anchor, chndl, UCT_STAGE_HTEXT,
-			    UCT_SETBY_DEFAULT);
-	me->htext_char_set = HTAnchor_getUCLYhndl(anchor,
-					    UCT_STAGE_HTEXT);
+	HTAnchor_setUCInfoStage(anchor, chndl,
+				UCT_STAGE_HTEXT, UCT_SETBY_DEFAULT);
+	me->htext_char_set = HTAnchor_getUCLYhndl(anchor, UCT_STAGE_HTEXT);
     }
-    me->UCI = HTAnchor_getUCInfoStage(anchor,UCT_STAGE_PARSER);
+    me->UCI = HTAnchor_getUCInfoStage(anchor, UCT_STAGE_PARSER);
 }
 #endif /* EXP_CHARTRANS */
 
 /*	Write the buffer out to the socket
 **	----------------------------------
 */
-
 
 /*_________________________________________________________________________
 **
@@ -104,17 +103,24 @@ PRIVATE void htplain_get_chartrans_info ARGS2(HTStream *, me,
 #ifdef _WINDOWS
 PRIVATE void HTPlain_write (HTStream * me, CONST char* s, int l);
 #else
-PRIVATE void HTPlain_write PARAMS((HTStream * me, CONST char* s, int l));
+PRIVATE void HTPlain_write PARAMS((
+	HTStream *		me,
+	CONST char *		s,
+	int			l));
 #endif /* _WINDOWS */
 #endif /* EXP_CHARTRANS */
 
 /*	Character handling
 **	------------------
 */
-PRIVATE void HTPlain_put_character ARGS2(HTStream *, me, char, c)
+PRIVATE void HTPlain_put_character ARGS2(
+	HTStream *,		me,
+	char,			c)
 {
 #ifdef REMOVE_CR_ONLY
-    /* throw away \r's */
+    /*
+    **  Throw away \r's.
+    */
     if (c != '\r') {
        HText_appendCharacter(me->text, c);
     }
@@ -153,18 +159,19 @@ PRIVATE void HTPlain_put_character ARGS2(HTStream *, me, char, c)
     } else if ((unsigned char)c > 160) {
 	if (!HTPassEightBitRaw &&
 	    strncmp(LYchar_set_names[current_char_set], "ISO Latin 1", 11)) {
-	    int len, high, low, i, diff=1;
+	    int len, high, low, i, diff = 1;
 	    CONST char * name;
 	    int value = (int)((unsigned char)c - 160);
+
 	    name = HTMLGetEntityName(value);
 	    len =  strlen(name);
-	    for(low=0, high = HTML_dtd.number_of_entities;
+	    for (low = 0, high = HTML_dtd.number_of_entities;
 		high > low;
 		diff < 0 ? (low = i+1) : (high = i)) {
 		/* Binary search */
 		i = (low + (high-low)/2);
 		diff = strncmp(HTML_dtd.entity_names[i], name, len);
-		if (diff==0) {
+		if (diff == 0) {
 		    HText_appendText(me->text,
 		    		     LYCharSets[current_char_set][i]);
 		    break;
@@ -244,10 +251,12 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 	c_p = *p;
 
 	if (me->T.decode_utf8) {
-      		    /* Combine UTF-8 into Unicode */
-		    /* Incomplete characters silently ignored */
-                    /* from Linux kernel's console.c */
-	    if((unsigned char)(*p) > 0x7f) {
+	    /*
+	    **  Combine UTF-8 into Unicode.
+	    **  Incomplete characters silently ignored.
+	    **  from Linux kernel's console.c
+	    */
+	    if ((unsigned char)(*p) > 0x7f) {
 		if (me->utf_count > 0 && (*p & 0xc0) == 0x80) {
 		    me->utf_char = (me->utf_char << 6) | (*p & 0x3f);
 		    me->utf_count--;
@@ -290,7 +299,6 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 	    }
 	}
 	
-	
 	if (me->T.trans_to_uni && unsign_c >= 127) {
 	    unsign_c = UCTransToUni(c_p, me->in_char_set);
 	    if (unsign_c > 0) {
@@ -299,10 +307,11 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 		}
 	    }
 	}
-
-    /* At this point we have either unsign_c in Unicode
-       (and c in latin1 if unsign_c is in the latin1 range),
-       or unsign_c and c will have to be passed raw. */
+	/*
+	**  At this point we have either unsign_c in Unicode
+	**  (and c in latin1 if unsign_c is in the latin1 range),
+	**  or unsign_c and c will have to be passed raw.
+	*/
 
 #else
 #define unsign_c (unsigned char)*p	
@@ -321,9 +330,11 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 #define PASS8859SPECL HTPassHighCtrlRaw
 #define PASSHI8BIT HTPassEightBitRaw
 #else
-#define PASSHICTRL (me->T.transp || unsign_c >= LYlowest_eightbit[me->in_char_set])
+#define PASSHICTRL (me->T.transp || \
+		    unsign_c >= LYlowest_eightbit[me->in_char_set])
 #define PASS8859SPECL me->T.pass_160_173_raw
-#define PASSHI8BIT (HTPassEightBitRaw || (me->T.do_8bitraw && !me->T.trans_from_uni))
+#define PASSHI8BIT (HTPassEightBitRaw || \
+		    (me->T.do_8bitraw && !me->T.trans_from_uni))
 #endif /* EXP_CHARTRANS */
 
 	/*
@@ -332,7 +343,7 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 	**  doesn't match, the user should toggle raw/CJK mode off. - FM
 	*/
 	} else if (unsign_c >= 127 && unsign_c < 161 &&
-		    PASSHICTRL && PASS8859SPECL) {
+		   PASSHICTRL && PASS8859SPECL) {
 	    HText_appendCharacter(me->text, *p);
 	} else if (unsign_c == 173 && PASS8859SPECL) {
 	    HText_appendCharacter(me->text, *p);
@@ -352,7 +363,10 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 	} else if (me->T.strip_raw_char_in &&
 		   (unsigned char)*p >= 0xc0 &&
 		   (unsigned char)*p < 255) {
-	    /* KOI special: strip high bit, gives (somewhat) readable ASCII */
+	    /*
+	    **  KOI special: strip high bit, gives
+	    **  (somewhat) readable ASCII.
+	    */
 	    HText_appendCharacter(me->text, (char)(*p & 0x7f));
 #endif /* EXP_CHARTRANS */
 	/*
@@ -372,33 +386,37 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
  *   I. LATIN-1 OR UCS2  TO  DISPLAY CHARSET
  ******************************************************************/  
 	} else if ((chk = (me->T.trans_from_uni && unsign_c >= 160)) &&
-		   (uck = UCTransUniChar(unsign_c, me->htext_char_set)) >= 32 &&
+		   (uck = UCTransUniChar(unsign_c,
+					 me->htext_char_set)) >= 32 &&
 		   uck < 256) {
-	    if (TRACE)
-	      fprintf(stderr,"UCTransUniChar returned 0x%lx:'%c'.\n",uck,(char)uck);
+	    if (TRACE) {
+		fprintf(stderr,
+			"UCTransUniChar returned 0x%lx:'%c'.\n",
+			uck, (char)uck);
+	    }
 	    HText_appendCharacter(me->text, (char)(uck & 0xff));
 	} else if (chk && (uck == -4) &&
-		                 /* Not found; look for replacement string */
-		(uck = UCTransUniCharStr(replace_buf,60, unsign_c,
-					 me->htext_char_set, 0) >= 0 ) ) { 
-	      /* No further tests for valididy - assume that whoever
-		 defined replacement strings knew what she was doing. */
-
-	      HText_appendText(me->text, replace_buf);
-
+		   /*
+		   **  Not found; look for replacement string.
+		   */
+		   (uck = UCTransUniCharStr(replace_buf,60, unsign_c,
+					    me->htext_char_set, 0) >= 0)) { 
+	    /*
+	    **  No further tests for valididy - assume that whoever
+	    **  defined replacement strings knew what she was doing.
+	    */
+	    HText_appendText(me->text, replace_buf);
 	/*
-	**  If we get to here, and should have translated, translation has
-	**  failed so far.  
+	**  If we get to here, and should have translated,
+	**  translation has failed so far.  
 	*/
 	} else if (chk && unsign_c > 127 && me->T.output_utf8 &&
-	    *me->utf_buf) {
+		   *me->utf_buf) {
 	    HText_appendText(me->text, me->utf_buf);
 	    me->utf_buf_p = me->utf_buf;
 	    *(me->utf_buf_p) = '\0';
-
-	    
 	} else if (me->T.trans_from_uni && unsign_c > 255) {
-	    sprintf(replace_buf,"U%.2lx",unsign_c);
+	    sprintf(replace_buf, "U%.2lx", unsign_c);
 	    HText_appendText(me->text, replace_buf);
 #endif /* EXP_CHARTRANS */
 
@@ -420,13 +438,13 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 		int value = (int)(unsign_c - 160);
 		name = HTMLGetEntityName(value);
 		len =  strlen(name);
-		for(low=0, high = HTML_dtd.number_of_entities;
+		for(low = 0, high = HTML_dtd.number_of_entities;
 		    high > low;
 		    diff < 0 ? (low = i+1) : (high = i)) {
 		    /* Binary search */
 		    i = (low + (high-low)/2);
 		    diff = strncmp(HTML_dtd.entity_names[i], name, len);
-		    if (diff==0) {
+		    if (diff == 0) {
 			HText_appendText(me->text,
 					 LYCharSets[current_char_set][i]);
 			break;
@@ -483,26 +501,26 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
     }
 }
 
-
 /*	Free an HTML object
 **	-------------------
 **
 **	Note that the SGML parsing context is freed, but the created object is
 **	not, as it takes on an existence of its own unless explicitly freed.
 */
-PRIVATE void HTPlain_free ARGS1(HTStream *, me)
+PRIVATE void HTPlain_free ARGS1(
+	HTStream *,	me)
 {
     FREE(me);
 }
 
-
 /*	End writing
 */
-PRIVATE void HTPlain_abort ARGS2(HTStream *, me, HTError, e)
+PRIVATE void HTPlain_abort ARGS2(
+	HTStream *,	me,
+	HTError,	e)
 {
     HTPlain_free(me);
 }
-
 
 /*		Structured Object Class
 **		-----------------------
@@ -514,7 +532,6 @@ PUBLIC CONST HTStreamClass HTPlain =
 	HTPlain_abort,
 	HTPlain_put_character, 	HTPlain_put_string, HTPlain_write,
 }; 
-
 
 /*		New object
 **		----------
@@ -540,7 +557,7 @@ PUBLIC HTStream* HTPlainPresent ARGS3(
     me->htext_char_set =
 		      HTAnchor_getUCLYhndl(anchor,UCT_STAGE_HTEXT);
     me->in_char_set = HTAnchor_getUCLYhndl(anchor,UCT_STAGE_PARSER);
-    htplain_get_chartrans_info(me, anchor);
+    HTPlain_getChartransInfo(me, anchor);
     UCSetTransParams(&me->T,
 		     me->in_char_set, me->UCI,
 		     me->htext_char_set,

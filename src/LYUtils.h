@@ -8,7 +8,7 @@
 #include "HTList.h"
 #endif /* HTLIST_H */
 
-extern void highlight PARAMS((int flag, int cur));
+extern void highlight PARAMS((int flag, int cur, char *target));
 extern void free_and_clear PARAMS((char **obj));
 extern void collapse_spaces PARAMS((char *string));
 extern void convert_to_spaces PARAMS((char *string, BOOL condense));
@@ -52,7 +52,7 @@ extern CONST char *Home_Dir NOPARAMS;
 extern BOOLEAN LYPathOffHomeOK PARAMS((char *fbuffer, int fbuffer_size));
 extern void LYAddPathToHome PARAMS((
 	char *fbuffer, int fbuffer_size, char *fname));
-extern time_t LYmktime PARAMS((char *string));
+extern time_t LYmktime PARAMS((char *string, BOOL absolute));
 #if ! HAVE_PUTENV
 extern int putenv PARAMS((CONST char *string));
 #endif /* HAVE_PUTENV */

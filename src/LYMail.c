@@ -1,5 +1,7 @@
 #include "HTUtils.h"
 #include "tcp.h"
+#include "HTParse.h"
+#include "LYGlobalDefs.h"
 #include "HTAlert.h"
 #include "LYCurses.h"
 #include "LYSignal.h"
@@ -8,8 +10,6 @@
 #include "LYStrings.h"
 #include "GridText.h"
 #include "LYSystem.h"
-#include "LYGlobalDefs.h"
-#include "HTParse.h"
 #include "LYMail.h"
 #ifdef EXP_CHARTRANS
 #include "LYCharSets.h"  /* to get current charset for mail header */
@@ -188,6 +188,7 @@ PUBLIC void mailform ARGS4(
 	FREE(address);
 	return;
     }
+    chmod(tmpfile, 0600);
     if (*self) {
         cp = self;
 	while (*cp == ' ' || *cp == ',')
@@ -328,6 +329,7 @@ PUBLIC void mailmsg ARGS4(int,cur, char *,owner_address,
     FILE *fd, *fp;
     char *address = NULL;
     char cmd[512], *cp, *cp0, *cp1;
+    int i;
 #if defined(VMS) || defined(DOSPATH)
     char my_tempfile[256];
     char *address_ptr1, *address_ptr2;
@@ -382,6 +384,7 @@ PUBLIC void mailmsg ARGS4(int,cur, char *,owner_address,
 	FREE(address);
 	return;
     }
+    chmod(tmpfile, 0600);
 #endif /* VMS */
 
     fprintf(fd, "The link   %s :?: %s \n",
@@ -454,6 +457,7 @@ PUBLIC void mailmsg ARGS4(int,cur, char *,owner_address,
 #endif /* SIGTSTP */
 		exit(-1);
             }
+	    chmod(TRAVERSE_ERRORS, 0600);
 	}
 
 	fprintf(ofp, "%s	%s 	in %s\n",
@@ -520,6 +524,7 @@ PUBLIC void reply_by_mail ARGS3(
 	HTAlert(MAILTO_URL_TEMPOPEN_FAILED);
 	return;
     }
+    chmod(my_tempfile, 0600);
     subject[0] = '\0';
 
     /*
@@ -727,17 +732,22 @@ PUBLIC void reply_by_mail ARGS3(
      *  as display character set...
      *  Don't send a charset if we have a CJK character set
      *  selected, since it may not be appropriate for mail...
-     *  Also don't use an inofficial "x-" charset. - kw
+     *  Also don't use an inofficial "x-" charset.
+     *  Also if the charset would be "us-ascii" (7-bit replacements
+     *  selected, don't send any MIME headers. - kw
      */
-    StrAllocCat(header, "Mime-Version: 1.0\n");
-    if (!LYHaveCJKCharacterSet &&
-	strncasecomp(LYCharSet_UC[current_char_set].MIMEname, "x-", 2)
-	!= 0) {
-	sprintf(buf,"Content-Type: text/plain; charset=%s\n",
-		LYCharSet_UC[current_char_set].MIMEname);
-	StrAllocCat(header, buf);
+    if (strncasecomp(LYCharSet_UC[current_char_set].MIMEname,
+		     "us-ascii", 8) != 0) {
+	StrAllocCat(header, "Mime-Version: 1.0\n");
+	if (!LYHaveCJKCharacterSet &&
+	    strncasecomp(LYCharSet_UC[current_char_set].MIMEname, "x-", 2)
+	    != 0) {
+	    sprintf(buf,"Content-Type: text/plain; charset=%s\n",
+		    LYCharSet_UC[current_char_set].MIMEname);
+	    StrAllocCat(header, buf);
+	}
+	StrAllocCat(header, "Content-Transfer-Encoding: 8bit\n");
     }
-    StrAllocCat(header, "Content-Transfer-Encoding: 8bit\n");
 #endif
     /*
      *  Put the X-URL and X-Mailer lines in the header.
@@ -966,7 +976,9 @@ PUBLIC void reply_by_mail ARGS3(
 	           !term_letter && c != 7   && c != 3)
                 c = LYgetch();
             if (TOUPPER(c) == 'Y') {
-                /* the 1 will add the reply ">" in front of every line */
+                /*
+		 *  The 1 will add the reply "> " in front of every line.
+		 */
                 print_wwwfile_to_fd(fd, 1);
 	    }
         }

@@ -53,7 +53,8 @@ extern BOOLEAN LYHaveCJKCharacterSet;
 PRIVATE int remove_quotes PARAMS((char *string));
 #endif /* VMS */
 
-PUBLIC int printfile ARGS1(document *,newdoc) 
+PUBLIC int printfile ARGS1(
+	document *,	newdoc) 
 {
     static char tempfile[256];
     static BOOLEAN first = TRUE;
@@ -330,6 +331,21 @@ PUBLIC int printfile ARGS1(document *,newdoc)
 			goto retry;
 		    }
 		}
+		/*
+		 *  Cancel if the user entered "/dev/null" on Unix,
+		 *  or an "nl:" path (case-insensitive) on VMS. - FM
+		 */
+#ifdef VMS
+		if (!strncasecomp(filename, "nl:", 3) ||
+		    !strncasecomp(filename, "/nl/", 4))
+#else
+		if (!strcmp(filename, "/dev/null"))
+#endif /* VMS */
+		{
+		    _statusline(SAVE_REQUEST_CANCELLED);
+		    sleep(InfoSecs);
+		    break;
+		}
 		if ((cp = strchr(filename, '~'))) {
 		    *(cp++) = '\0';
 		    strcpy(buffer, filename);
@@ -367,9 +383,9 @@ PUBLIC int printfile ARGS1(document *,newdoc)
 		    cp = NULL;
 		if (cp)
 #ifdef DOSPATH
-						  sprintf(buffer,"%s/%s", cp, HTDOS_name(filename));
+		    sprintf(buffer,"%s/%s", cp, HTDOS_name(filename));
 #else
-                    sprintf(buffer,"%s/%s", cp, filename);
+                    sprintf(buffer, "%s/%s", cp, filename);
 #endif
 		else
 #ifdef DOSPATH
@@ -379,8 +395,10 @@ PUBLIC int printfile ARGS1(document *,newdoc)
 #endif
 #endif /* VMS */
 
-		/* see if it already exists */
-		if ((outfile_fp = fopen(buffer,"r")) != NULL) {
+		/*
+		 *  See if it already exists.
+		 */
+		if ((outfile_fp = fopen(buffer, "r")) != NULL) {
 		    fclose(outfile_fp);
 #ifdef VMS
 		    _statusline(FILE_EXISTS_HPROMPT);
@@ -419,6 +437,7 @@ PUBLIC int printfile ARGS1(document *,newdoc)
 		    FnameNum = FnameTotal;
 		    goto retry;
                 }
+		chmod(buffer, 0600);
 
 		if (HTisDocumentSource()) {
 		    /*
@@ -498,6 +517,7 @@ PUBLIC int printfile ARGS1(document *,newdoc)
 		    HTAlert(UNABLE_TO_OPEN_TEMPFILE);
 		    break;
 		}
+		chmod(tempfile, 0600);
 
 		/*
 		 *  Write the contents to a temp file.
@@ -553,11 +573,16 @@ PUBLIC int printfile ARGS1(document *,newdoc)
 		
 		/*
 		 *  Determine which mail headers should be sent.
+		 *  Use Content-Type and MIME-Version headers only
+		 *  if needed.  We need them if we are mailing HTML
+		 *  source, or if we have 8-bit characters and will
+		 *  be sending Content-Transfer-Encoding to indicate
+		 *  this.
+		 *
 		 *  Send Content-Transfer-Encoding only if the document
 		 *  has 8-bit characters.  Send a charset parameter only
 		 *  if the document has 8-bit characters and we we seem
-		 *  to have a valid charset.  Also use Content-Type
-		 *  and MIME-Version headers only if needed.  - kw
+		 *  to have a valid charset.  - kw
 		 */
 		use_cte = HTLoadedDocumentEightbit();
 #ifdef EXP_CHARTRANS
@@ -568,10 +593,11 @@ PUBLIC int printfile ARGS1(document *,newdoc)
 		 *  Also don't use an inofficial "x-" charset. - kw
 		 */
 		if (!use_cte || LYHaveCJKCharacterSet ||
-		    strncasecomp(disp_charset, "x-", 2) == 0)
+		    strncasecomp(disp_charset, "x-", 2) == 0) {
 		    disp_charset = NULL;
+		}
 #else
-		disp_charset = HTLoadedDocumentCharset();
+		disp_charset = NULL;
 #endif /* EXP_CHARTRANS */
 		use_type =  (disp_charset || HTisDocumentSource());
 		use_mime = (use_cte || use_type);
@@ -600,19 +626,22 @@ PUBLIC int printfile ARGS1(document *,newdoc)
 		    			content_location);
 		} else {
 		    /*
-                     * Add Content-Type: text/plain if we have 8-bit
-		     * characters and a valid charset for non-source
-		     * documents. - kw
-                     */
+		     *  Add Content-Type: text/plain if we have 8-bit
+		     *  characters and a valid charset for non-source
+		     *  documents. - KW
+		     */
 		    if (disp_charset != NULL) {
 			fprintf(outfile_fp,
 				"Content-Type: text/plain; charset=%s\n",
 				disp_charset);
 		    }
 		}
-		fprintf(outfile_fp, "X-URL: %s\n", newdoc->address);
-		fprintf(outfile_fp, "To: %s\nSubject:%s\n\n",
+		/*
+		 *  Add the To, Subject, and X-URL headers. - FM
+		 */
+		fprintf(outfile_fp, "To: %s\nSubject: %s\n",
 				     user_response, sug_filename);
+		fprintf(outfile_fp, "X-URL: %s\n\n", newdoc->address);
 		if (HTisDocumentSource()) {
 		    /*
 		     *  Added the document's base as a BASE tag to
@@ -774,6 +803,7 @@ PUBLIC int printfile ARGS1(document *,newdoc)
 	            HTAlert(FILE_ALLOC_FAILED);
 		    break;
                 }
+		chmod(tempfile, 0600);
 
 		if (HTisDocumentSource()) {
 		    /*
@@ -926,17 +956,34 @@ PUBLIC int printfile ARGS1(document *,newdoc)
 			        goto again;
 			    }
 		        }
+			/*
+			 *  Cancel if the user entered "/dev/null" on Unix,
+			 *  or an "nl:" path (case-insensitive) on VMS. - FM
+			 */
+#ifdef VMS
+			if (!strncasecomp(filename, "nl:", 3) ||
+			    !strncasecomp(filename, "/nl/", 4))
+#else
+			if (!strcmp(filename, "/dev/null"))
+#endif /* VMS */
+			{
+			    _statusline(PRINT_REQUEST_CANCELLED);
+			    sleep(InfoSecs);
+			    break;
+			}
 			HTAddSugFilename(filename);
 		    }
 
 #ifdef VMS
-		    sprintf(buffer, cur_printer->command, tempfile, filename);
+		    sprintf(buffer, cur_printer->command, tempfile, filename,
+				    "", "", "", "", "", "", "", "", "", "");
 #else /* Unix: */
 		    /*
 		     *  Prevent spoofing of the shell.
 		     */
 		    cp = quote_pathname(filename);
-		    sprintf(buffer, cur_printer->command, tempfile, cp);
+		    sprintf(buffer, cur_printer->command, tempfile, cp,
+				    "", "", "", "", "", "", "", "", "", "");
 		    FREE(cp);
 #endif /* !VMS */
 
@@ -975,17 +1022,18 @@ PUBLIC int printfile ARGS1(document *,newdoc)
 }	
 
 #ifdef VMS
-PRIVATE int remove_quotes ARGS1(char *,string)
+PRIVATE int remove_quotes ARGS1(
+	char *,		string)
 {
    int i;
 
-   for(i=0;string[i]!='\0';i++)
-	if(string[i]=='"')
-	   string[i]=' ';
-	else if(string[i]=='&')
-	   string[i]=' ';
-	else if(string[i]=='|')
-	   string[i]=' ';
+   for(i = 0; string[i] != '\0'; i++)
+	if(string[i] == '"')
+	   string[i] = ' ';
+	else if(string[i] == '&')
+	   string[i] = ' ';
+	else if(string[i] == '|')
+	   string[i] = ' ';
 
    return(0);
 }
@@ -1001,12 +1049,13 @@ PRIVATE int remove_quotes ARGS1(char *,string)
  *  LYNXPRINT://MAIL_FILE/lines=#   	     mail the file
  *  LYNXPRINT://PRINTER/lines=#/number=#   print to printer number #
  */
-
-PUBLIC int print_options ARGS2(char **,newfile, int,lines_in_file)
+PUBLIC int print_options ARGS2(
+	char **,	newfile,
+	int,		lines_in_file)
 {
     static char tempfile[256];
     static BOOLEAN first = TRUE;
-    char *print_filename = NULL;
+    static char print_filename[256];
     char buffer[LINESIZE];
     int count;
     int pages;
@@ -1016,7 +1065,12 @@ PUBLIC int print_options ARGS2(char **,newfile, int,lines_in_file)
     pages = lines_in_file/66 + 1;
 
     if (first) {
-        tempname(tempfile,NEW_FILE);
+        tempname(tempfile, NEW_FILE);
+#if defined (VMS) || defined (DOSPATH)
+	sprintf(print_filename, "file://localhost/%s", tempfile);
+#else
+	sprintf(print_filename, "file://localhost%s", tempfile);
+#endif /* VMS */
 	first = FALSE;
 #ifdef VMS
     } else {
@@ -1028,13 +1082,7 @@ PUBLIC int print_options ARGS2(char **,newfile, int,lines_in_file)
         HTAlert(UNABLE_TO_OPEN_PRINTOP_FILE);
 	return(-1);
     }
-
-#if defined (VMS) || defined (DOSPATH)
-    StrAllocCopy(print_filename, "file://localhost/");
-#else
-    StrAllocCopy(print_filename, "file://localhost");
-#endif /* VMS */
-    StrAllocCat(print_filename, tempfile);
+    chmod(tempfile, 0600);
 
     StrAllocCopy(*newfile, print_filename);
     LYforce_no_cache = TRUE;

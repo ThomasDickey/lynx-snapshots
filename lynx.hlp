@@ -28,18 +28,28 @@
  Lynx.  Then follow the link titled, "Help on URLs."
 
   -
-       If the only argument is '-', then Lynx expects to receive
-       the arguments from stdin. This is to allow for the
-       potentially very long command line that can be associated
-       with the -get_data or -post_data arguments (see below).
-       Encase it in double-quotes ("-").
+       If the argument is only '-', then Lynx expects to receive
+       arguments from stdin.  This is to allow for the potentially
+       very long command line that can be associated with the
+       -get_data or -post_data arguments (see below).  Encase it
+       in double-quotes ("-").
 
   -anonymous
        used to specify the anonymous account.
 
+  -assume_charset=MIMEname
+       charset for documents that don't specify it.
+
+  -assume_local_charset=MIMEname
+       charset assumed for local files.
+
+  -assume_unrec_charset=MIMEname
+       use this instead of unrecognized charsets.
+
   -auth=ID:PASSWD
        set authorization ID and password for protected documents
-       at startup.
+       at startup.  Be sure to protect any script files which use
+       this switch.
 
   -base
        prepend a request URL comment and BASE tag to text/html
@@ -102,6 +112,9 @@
 
   -force_html
        forces the first document to be interpreted as HTML.
+
+  -force_secure
+       toggles forcing of the secure flag for SSL cookies.
 
   -from
        toggles transmissions of From headers.
@@ -193,6 +206,11 @@
 
   -number_links
        force numbering of links.
+
+  -pauth=ID:PASSWD
+       set authorization ID and password for a protected proxy
+       server at startup.  Be sure to protect any script files
+       which use this switch.
 
   -popup
        toggles handling of single-choice SELECT options via

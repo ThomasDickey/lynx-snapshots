@@ -179,12 +179,13 @@ PUBLIC void LYpush ARGS2(
 	}
     }
 
-#ifdef NOT_USED
-    /* The following segment not used any more - What's it good for,
-       anyway??  Doing a pop when a push is requested is confusing,
-       also to the user.  Moreover, the way it was done seems to cause
-       a memory leak. - kw */
-    /*
+#ifdef NOTDEFINED
+/*
+**  The following segment not used any more - What's it good for,
+**  anyway??  Doing a pop when a push is requested is confusing,
+**  also to the user.  Moreover, the way it was done seems to cause
+**  a memory leak. - KW
+*/  /*
      *  If file is identical to one two before it, don't push it.
      */
     if (nhist > 2 &&
@@ -204,7 +205,7 @@ PUBLIC void LYpush ARGS2(
 	nhist--;
         return;
     }
-#endif	/* NOT_USED */
+#endif /* NOTDEFINED */
 
     /*
      *  OK, push it if we have stack space.
@@ -317,8 +318,8 @@ PUBLIC void LYpush ARGS2(
 	    }
 	}
 	nhist++;
-	if (TRACE) {
-	    fprintf(stderr,
+   	if (TRACE) {
+    	    fprintf(stderr,
 		    "\nLYpush: address:%s\n        title:%s\n",
 		    doc->address, doc->title);
 	}
@@ -404,6 +405,14 @@ PUBLIC int showhistory ARGS1(
 
     if (first) {
 	tempname(tempfile, NEW_FILE);
+	/*
+	 *  Make the file a URL now.
+	 */
+#if defined (VMS) || defined (DOSPATH)
+	sprintf(hist_filename,"file://localhost/%s", tempfile);
+#else
+	sprintf(hist_filename,"file://localhost%s", tempfile);
+#endif /* VMS */
 	first = FALSE;
 #ifdef VMS
     } else {
@@ -415,26 +424,18 @@ PUBLIC int showhistory ARGS1(
 	HTAlert(CANNOT_OPEN_TEMP);
 	return(-1);
     }
+    chmod(tempfile, 0600);
 
-    /*
-     *  Make the file a URL now.
-     */
-#if defined (VMS) || defined (DOSPATH)
-    sprintf(hist_filename,"file://localhost/%s", tempfile);
-#else
-    sprintf(hist_filename,"file://localhost%s", tempfile);
-#endif /* VMS */
     StrAllocCopy(*newfile, hist_filename);
     LYforce_HTML_mode = TRUE;	/* force this file to be HTML */
     LYforce_no_cache = TRUE;	/* force this file to be new */
 
     fprintf(fp0, "<head>\n");
 #ifdef EXP_CHARTRANS
-    add_META_charset_to_fd(fp0, -1);
+    LYAddMETAcharsetToFD(fp0, -1);
 #endif
     fprintf(fp0, "<title>%s</title>\n</head>\n<body>\n",
 		 HISTORY_PAGE_TITLE);
-
     fprintf(fp0, "<h1>You have reached the History Page</h1>\n");
     fprintf(fp0, "<h2>%s Version %s</h2>\n<pre>", LYNX_NAME, LYNX_VERSION);
     fprintf(fp0, "<em>You selected:</em>\n");
@@ -501,7 +502,8 @@ PUBLIC BOOLEAN historytarget ARGS1(
 
     LYpop_num(number, newdoc);
     if (newdoc->internal_link &&
-	history[number].intern_seq_start == history[nhist-1].intern_seq_start) {
+	history[number].intern_seq_start == history[nhist-1].intern_seq_start
+	&& !(LYforce_no_cache == TRUE && LYoverride_no_cache == FALSE)) {
 	LYforce_no_cache = FALSE;
 	LYoverride_no_cache = TRUE;
 	treat_as_intern = TRUE;
@@ -567,6 +569,14 @@ PUBLIC int LYShowVisitedLinks ARGS1(
 
     if (first) {
 	tempname(tempfile, NEW_FILE);
+	/*
+	 *  Make the file a URL now.
+	 */
+#if defined (VMS) || defined (DOSPATH)
+	sprintf(vl_filename,"file://localhost/%s", tempfile);
+#else
+	sprintf(vl_filename,"file://localhost%s", tempfile);
+#endif /* VMS */
 	first = FALSE;
 #ifdef VMS
     } else {
@@ -578,26 +588,18 @@ PUBLIC int LYShowVisitedLinks ARGS1(
 	HTAlert(CANNOT_OPEN_TEMP);
 	return(-1);
     }
+    chmod(tempfile, 0600);
 
-    /*
-     *  Make the file a URL now.
-     */
-#if defined (VMS) || defined (DOSPATH)
-    sprintf(vl_filename,"file://localhost/%s", tempfile);
-#else
-    sprintf(vl_filename,"file://localhost%s", tempfile);
-#endif /* VMS */
     StrAllocCopy(*newfile, vl_filename);
     LYforce_HTML_mode = TRUE;	/* force this file to be HTML */
     LYforce_no_cache = TRUE;	/* force this file to be new */
 
     fprintf(fp0, "<head>\n");
 #ifdef EXP_CHARTRANS
-    add_META_charset_to_fd(fp0, -1);
+    LYAddMETAcharsetToFD(fp0, -1);
 #endif
     fprintf(fp0, "<title>%s</title>\n</head>\n<body>\n",
 		 VISITED_LINKS_TITLE);
-
     fprintf(fp0, "<h1>You have reached the Visited Links Page</h1>\n");
     fprintf(fp0, "<h2>%s Version %s</h2>\n<pre>", LYNX_NAME, LYNX_VERSION);
     fprintf(fp0, 

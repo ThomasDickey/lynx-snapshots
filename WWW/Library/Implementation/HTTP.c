@@ -51,7 +51,6 @@ extern BOOL LYNoFromHeader;	/* Never send From header? */
 extern BOOL LYSetCookies;	/* Act on Set-Cookie headers? */
 
 extern BOOL using_proxy;	/* Are we using an HTTP gateway? */
-PUBLIC BOOL auth_proxy = NO;	/* Generate a proxy authentication. - AJL */
 PUBLIC BOOL reloading = FALSE;	/* Reloading => send no-cache pragma to proxy */
 PUBLIC char * redirecting_url = NULL;	    /* Location: value. */
 PUBLIC BOOL permanent_redirection = FALSE;  /* Got 301 status? */
@@ -68,7 +67,8 @@ extern BOOL dump_output_immediately;  /* TRUE if no interactive user */
 extern char * HTLoadedDocumentURL NOPARAMS;
 extern int HTCheckForInterrupt NOPARAMS;
 extern void LYSetCookie PARAMS((
-	CONST char *	header,
+	CONST char *	SetCookie,
+	CONST char *	SetCookie2,
 	CONST char *	address));
 extern char * LYCookie PARAMS((
 	CONST char *	hostname,
@@ -106,7 +106,7 @@ PUBLIC int HTLoadHTTP ARGS4 (
 {
   int s;			/* Socket number for returned data */
   char *url = (char *)arg;	/* The URL which get_physical() returned */
-  char *command=NULL;		/* The whole command */
+  char *command = NULL;		/* The whole command */
   char *eol;			/* End of line if found */
   char *start_of_data;		/* Start of body of reply */
   int status;			/* tcp return */
@@ -126,6 +126,8 @@ PUBLIC int HTLoadHTTP ARGS4 (
   char temp[80];
   BOOL first_Accept = TRUE;
   BOOL show_401 = FALSE;
+  BOOL show_407 = FALSE;
+  BOOL auth_proxy = NO;		/* Generate a proxy authorization. - AJL */
 
   int length, rv;
   BOOL doing_redirect, already_retrying = FALSE;
@@ -421,7 +423,8 @@ try_again:
 	    **  the ultimate target of the request. - AJL
 	    */
 	    auth_proxy = NO;
-	    if ((auth = HTAA_composeAuth(host2, port2, path2)) != NULL &&
+	    if ((auth = HTAA_composeAuth(host2, port2, path2,
+					 auth_proxy)) != NULL &&
 		*auth != '\0') {
 		/*
 		**  If auth is not NULL nor zero-length, it's
@@ -501,7 +504,9 @@ try_again:
 	**  Authorization header. - FM & AJL
 	*/
         if ((auth = HTAA_composeAuth(hostname,
-				     portnumber, docname)) != NULL &&
+				     portnumber,
+				     docname,
+				     auth_proxy)) != NULL &&
 	    *auth != '\0') {
 	    /*
 	    **  If auth is not NULL nor zero-length, it's
@@ -512,7 +517,7 @@ try_again:
             StrAllocCat(command, line);
 	    if (TRACE)
                 fprintf(stderr,
-			(using_proxy ?
+			(auth_proxy ?
 			 "HTTP: Sending proxy authorization: %s\n" :
 			 "HTTP: Sending authorization: %s\n"),
 			auth);
@@ -524,7 +529,11 @@ try_again:
 	    */
 	    if (!(traversal || dump_output_immediately) &&
 	    	HTConfirm("Proceed without a username and password?")) {
-	        show_401 = TRUE;
+		if (auth_proxy == TRUE) {
+		    show_407 = TRUE;
+		} else {
+		    show_401 = TRUE;
+		}
 	    } else {
 	        if (traversal || dump_output_immediately)
 		    HTAlert("Can't proceed without a username and password.");
@@ -537,13 +546,14 @@ try_again:
         } else {
 	    if (TRACE)
                 fprintf(stderr,
-			(using_proxy ?
+			(auth_proxy ?
 			 "HTTP: Not sending proxy authorization (yet).\n" :
 			 "HTTP: Not sending authorization (yet).\n"));
         }
         FREE(hostname);
         FREE(docname);
       }
+      auth_proxy = NO;
   }
 
   if (do_post)
@@ -1062,10 +1072,12 @@ try_again:
 	      }
 
 	      /*
-	      **  Look for "Set-Cookie:" headers. - FM
+	      **  Look for "Set-Cookie:" and "Set-Cookie2:" headers. - FM
 	      */
 	      if (LYSetCookies == TRUE) {
 	          char *value = NULL;
+		  char *SetCookie = NULL;
+		  char *SetCookie2 = NULL;
 	          cp = line_kept_clean;
 		  while (*cp) {
 		      /*
@@ -1087,7 +1099,7 @@ Cookie_continuation:
 			  /*
 			   *  Trim leading spaces. - FM
 			   */
-			  while (*cp == ' ')
+			  while (isspace((unsigned char)*cp))
 			      cp++;
 			  /*
 			  **  Accept CRLF, LF, or CR as end of line. - FM
@@ -1108,7 +1120,13 @@ Cookie_continuation:
 			      if (cp2)
 				  *cp2 = CR;
 			      if (value != NULL) {
-			          LYSetCookie(value, anAnchor->address);
+				  HTMIME_TrimDoubleQuotes(value);
+				  if (SetCookie == NULL) {
+				      StrAllocCopy(SetCookie, value);
+				  } else {
+				      StrAllocCat(SetCookie, ", ");
+				      StrAllocCat(SetCookie, value);
+				  }
 				  FREE(value);
 			      }
 			      break;
@@ -1121,20 +1139,107 @@ Cookie_continuation:
 			  }
 			  if (cp2) {
 			      *cp2 = CR;
-			      cp1 = NULL;
+			      cp2 = NULL;
 			  }
-			  if (*cp == ' ' || *cp == '\t') {
+			  cp1 = cp;
+			  if (*cp1 == CR)
+			     cp1++;
+			  if (*cp1 == LF)
+			     cp1++;
+			  if (*cp1 == ' ' || *cp1 == '\t') {
 			      StrAllocCat(value, " ");
+			      cp = cp1;
 			      cp++;
+			      cp1 = NULL;
 			      goto Cookie_continuation;
 			  }
-			  LYSetCookie(value, anAnchor->address);
+			  HTMIME_TrimDoubleQuotes(value);
+			  if (SetCookie == NULL) {
+			      StrAllocCopy(SetCookie, value);
+			  } else {
+			      StrAllocCat(SetCookie, ", ");
+			      StrAllocCat(SetCookie, value);
+			  }
+			  FREE(value);
+		      } else if (!strncasecomp(cp, "Set-Cookie2:", 12))  {
+		          char *cp1 = NULL, *cp2 = NULL;
+			  cp += 12;
+Cookie2_continuation:
+			  /*
+			   *  Trim leading spaces. - FM
+			   */
+			  while (isspace((unsigned char)*cp))
+			      cp++;
+			  /*
+			  **  Accept CRLF, LF, or CR as end of line. - FM
+			  */
+			  if (((cp1 = strchr(cp, LF)) != NULL) ||
+			      (cp2 = strchr(cp, CR)) != NULL) {
+			      if (*cp1) {
+			          *cp1 = '\0';
+				  if ((cp2 = strchr(cp, CR)) != NULL)
+				      *cp2 = '\0';
+			      } else {
+			          *cp2 = '\0';
+			      }
+			  }
+			  if (*cp == '\0') {
+			      if (cp1)
+				  *cp1 = LF;
+			      if (cp2)
+				  *cp2 = CR;
+			      if (value != NULL) {
+			          HTMIME_TrimDoubleQuotes(value);
+				  if (SetCookie2 == NULL) {
+				      StrAllocCopy(SetCookie2, value);
+				  } else {
+				      StrAllocCat(SetCookie2, ", ");
+				      StrAllocCat(SetCookie2, value);
+				  }
+				  FREE(value);
+			      }
+			      break;
+			  }
+			  StrAllocCat(value, cp);
+			  cp += strlen(cp);
+			  if (cp1) {
+			      *cp1 = LF;
+			      cp1 = NULL;
+			  }
+			  if (cp2) {
+			      *cp2 = CR;
+			      cp2 = NULL;
+			  }
+			  cp1 = cp;
+			  if (*cp1 == CR)
+			     cp1++;
+			  if (*cp1 == LF)
+			     cp1++;
+			  if (*cp1 == ' ' || *cp1 == '\t') {
+			      StrAllocCat(value, " ");
+			      cp = cp1;
+			      cp++;
+			      cp1 = NULL;
+			      goto Cookie2_continuation;
+			  }
+			  HTMIME_TrimDoubleQuotes(value);
+			  if (SetCookie2 == NULL) {
+			      StrAllocCopy(SetCookie2, value);
+			  } else {
+			      StrAllocCat(SetCookie2, ", ");
+			      StrAllocCat(SetCookie2, value);
+			  }
 			  FREE(value);
 		      } else {
 		          cp++;
 		      }
 		  }
 		  FREE(value);
+		  if (SetCookie != NULL || SetCookie2 != NULL) {
+		      LYSetCookie(SetCookie, SetCookie2, anAnchor->address);
+		      FREE(SetCookie);
+		      FREE(SetCookie2);
+		  }
 	      }
 
 	      /*
@@ -1145,12 +1250,13 @@ Cookie_continuation:
 	        if (TOUPPER(*cp) != 'L') {
 		    cp++;
 	        } else if (!strncasecomp(cp, "Location:", 9)) {
+		    char *value = NULL;
 	            char *cp1 = NULL, *cp2 = NULL;
 	            cp += 9;
 		    /*
 		     *  Trim leading spaces. - FM
 		     */
-		    while (*cp == ' ')
+		    while (isspace((unsigned char)*cp))
 		        cp++;
 		    /*
 		     *  Accept CRLF, LF, or CR as end of header. - FM
@@ -1164,7 +1270,13 @@ Cookie_continuation:
 			} else {
 			    *cp2 = '\0';
 			}
-			if (*cp == '\0') {
+			/*
+			 *  Load the new URL into redirecting_url,
+			 *  and make sure it's not zero-length. - FM
+			 */
+			StrAllocCopy(redirecting_url, cp);
+			HTMIME_TrimDoubleQuotes(redirecting_url);
+			if (*redirecting_url == '\0') {
 			    /*
 			     *  The "Location:" value is zero-length, and
 			     *  thus is probably something in the body, so
@@ -1177,6 +1289,7 @@ Cookie_continuation:
 			        *cp1 = LF;
 			    if (cp2)
 			        *cp2 = CR;
+			    FREE(redirecting_url);
 			    doing_redirect = FALSE;
 			    permanent_redirection = FALSE;
 			    start_of_data = line_kept_clean;
@@ -1188,16 +1301,15 @@ Cookie_continuation:
 			}
 
 			/*
-			 *  Load the new URL into redirecting_url,
-			 *  which will be checked in LYGetFile.c
-			 *  for restrictions before seeking the
-			 *  document at that Location. - FM
+			 *  Set up for checking redirecting_url in
+			 *  LYGetFile.c for restrictions before we
+			 *  seek the document at that Location. - FM
 			 */
-		        StrAllocCopy(redirecting_url, cp);
 			HTProgress(line_buffer);
                         if (TRACE)
                             fprintf(stderr,
-			    	    "HTTP: Picked up location '%s'\n", cp);
+			    	    "HTTP: Picked up location '%s'\n",
+				    redirecting_url);
 			if (cp1)
 		            *cp1 = LF;
 		        if (cp2)
@@ -1304,11 +1416,10 @@ Cookie_continuation:
 		 *  to show the 401 body or restore the current
 		 *  document. - FM
 		 */
-		auth_proxy = NO;
 		if (show_401)
 		    break;
 		if (HTAA_shouldRetryWithAuth(start_of_data, length,
-					     (void *)handle, s)) {
+					     (void *)handle, s, NO)) {
  		    extern char *authentication_info[2];
 
                     HTTP_NETCLOSE(s, handle);
@@ -1349,7 +1460,7 @@ Cookie_continuation:
 	        /*
 		 *  Authorization for proxy server required.
 		 *  If we are not in fact using a proxy, or
-		 *  show_401 is set, proceed to showing the
+		 *  show_407 is set, proceed to showing the
 		 *  407 body.  Otherwise, if we can set up
 		 *  authorization based on the Proxy-Authenticate
 		 *  header, and the user provides a username and
@@ -1357,19 +1468,18 @@ Cookie_continuation:
 		 *  to show the 401 body or restore the current
 		 *  document. - FM & AJL
 		 */
-		if (!using_proxy || show_401)
+		if (!using_proxy || show_407)
 		    break;
-		auth_proxy = YES;
 		if (HTAA_shouldRetryWithAuth(start_of_data, length,
-					     (void *)handle, s)) {
- 		    extern char *authentication_info[2];
+					     (void *)handle, s, YES)) {
+ 		    extern char *proxyauth_info[2];
 
                     HTTP_NETCLOSE(s, handle);
-                    if (dump_output_immediately && !authentication_info[0]) {
+                    if (dump_output_immediately && !proxyauth_info[0]) {
                         fprintf(stderr,
 		      		"HTTP: Proxy authorization required.\n");
                         fprintf(stderr,
-		      		"       Use the -auth=id:pw parameter.\n");
+		      		"       Use the -pauth=id:pw parameter.\n");
                         status = HT_NO_DATA;
                         goto clean_up;
                     }
@@ -1391,7 +1501,7 @@ Cookie_continuation:
                 } else {
 		    if (traversal || dump_output_immediately)
 		        HTAlert(
-	"Can't retry with proxy authorization!  Contact the server's WebMaster.");
+    "Can't retry with proxy authorization!  Contact the server's WebMaster.");
 		    HTTP_NETCLOSE(s, handle);
                     status = -1;
                     goto clean_up;

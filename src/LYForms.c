@@ -6,7 +6,7 @@
 #include "LYCurses.h"
 #include "GridText.h"
 #include "LYUtils.h"
-#include "LYStructs.h"  /* includes HTForms.h */
+#include "LYStructs.h"	/* includes HTForms.h */
 #include "LYStrings.h"
 #include "LYGlobalDefs.h"
 #include "LYKeymap.h"
@@ -33,18 +33,29 @@
 
 extern HTCJKlang HTCJK;
 
-PRIVATE int form_getstr PARAMS((struct link * form_link));
-PRIVATE int popup_options PARAMS((int cur_selection, OptionType *list, 
-				  int ly, int lx, int width,
-				  int i_length, int disabled));
+PRIVATE int form_getstr PARAMS((
+	struct link *	form_link));
+PRIVATE int popup_options PARAMS((
+	int		cur_selection,
+	OptionType *	list, 
+	int		ly,
+	int		lx,
+	int		width,
+	int		i_length,
+	int		disabled));
 
-PUBLIC int change_form_link ARGS6(struct link *, form_link, int, mode, 
-				  document *,newdoc, BOOLEAN *,refresh_screen,
-				  char *,link_name, char *,link_value)
+PUBLIC int change_form_link ARGS6(
+	struct link *,	form_link,
+	int,		mode, 
+	document *,	newdoc,
+	BOOLEAN *,	refresh_screen,
+	char *,		link_name,
+	char *,		link_value)
 {
     extern BOOL reloading;
     FormInfo *form = form_link->form;
-    int c=DO_NOTHING;
+    int c = DO_NOTHING;
+    int OrigNumValue;
 
 	/*
 	 *  If there is no form to perform action on, don't do anything.
@@ -53,13 +64,15 @@ PUBLIC int change_form_link ARGS6(struct link *, form_link, int, mode,
 	    return(c);
 	}
 
-    /* move to the link position */
+    /*
+     *  Move to the link position.
+     */
     move(form_link->ly, form_link->lx);
 
     switch(form->type) {
 	case F_CHECKBOX_TYPE:
 	    if (form->disabled == YES)
-	        break;
+		break;
 	    if (form->num_value) {
 		form_link->hightext = unchecked_box;
 		form->num_value = 0;
@@ -71,66 +84,99 @@ PUBLIC int change_form_link ARGS6(struct link *, form_link, int, mode,
 
 	case F_OPTION_LIST_TYPE:
 	    if (!form->select_list) {
-	        HTAlert(BAD_HTML_NO_POPUP);
+		HTAlert(BAD_HTML_NO_POPUP);
 		c = DO_NOTHING;
 		break;
 	    }
 
 	    if (form->disabled == YES) {
-	        int dummy;
+		int dummy;
 		dummy = popup_options(form->num_value, form->select_list,
 				form_link->ly, form_link->lx, form->size,
 				form->size_l, form->disabled);
-	        c = 12;  /* CTRL-L for repaint */
-	        break;
+#if defined(FANCY_CURSES) || defined(USE_SLANG)
+		if (!enable_scrollback)
+#if defined(VMS) && !defined(USE_SLANG)
+		    c = DO_NOTHING;
+#else
+		    c = 23;  /* CTRL-W for repaint */
+#endif /* VMS && !USE_SLANG */
+		else
+#endif /* FANCY_CURSES || USE_SLANG */
+		    c = 12;  /* CTRL-L for repaint */
+		break;
 	    }
+	    OrigNumValue = form->num_value;
 	    form->num_value = popup_options(form->num_value, form->select_list,
 				form_link->ly, form_link->lx, form->size,
 				form->size_l, form->disabled);
 
 	    {
-    	        OptionType * opt_ptr=form->select_list;
+    	        OptionType * opt_ptr = form->select_list;
 		int i;
-    	        for (i = 0; i < form->num_value; i++, opt_ptr = opt_ptr->next) 
+		for (i = 0; i < form->num_value; i++, opt_ptr = opt_ptr->next)
 		    ; /* null body */
-		form->value = opt_ptr->name;   /* set the name */
-		form->cp_submit_value = opt_ptr->cp_submit_value; /* set the value */
+		/*
+		 *  Set the name.
+		 */
+		form->value = opt_ptr->name;
+		/*
+		 *  Set the value.
+		 */
+		form->cp_submit_value = opt_ptr->cp_submit_value;
 	    }
-	    c = 12;  /* CTRL-L for repaint */
+#if defined(FANCY_CURSES) || defined(USE_SLANG)
+	    if (!enable_scrollback && form->num_value == OrigNumValue)
+#if defined(VMS) && !defined(USE_SLANG)
+		c = DO_NOTHING;
+#else
+		c = 23;  /* CTRL-W for repaint */
+#endif /* VMS && !USE_SLANG */
+	    else
+#endif /* FANCY_CURSES || USE_SLANG */
+		c = 12;  /* CTRL-L for repaint */
 	    break;
 
 	case F_RADIO_TYPE:
 	    if (form->disabled == YES)
-	        break;
-		/* radio buttons must have one and
-		 * only one down at a time! 
+		break;
+		/*
+		 *  Radio buttons must have one and
+		 *  only one down at a time!
 		 */
 	    if (form->num_value) {
 		_statusline(NEED_CHECKED_RADIO_BUTTON);
 		sleep(MessageSecs);
 
-	    } else {	
+	    } else {
 		int i;
-		/* run though list of the links on the screen and
-		 * unselect any that are selected. :) 
+		/*
+		 *  Run though list of the links on the screen and
+		 *  unselect any that are selected. :)
 		 */
 		lynx_start_radio_color ();
-		for (i = 0; i < nlinks; i++)
-		   if (links[i].type == WWW_FORM_LINK_TYPE &&
-		       links[i].form->type == F_RADIO_TYPE &&
-		        links[i].form->number == form->number &&
-   		         /* if it has the same name and its on */
-                          !strcmp(links[i].form->name, form->name) &&
-                            links[i].form->num_value ) 
-		     {
+		for (i = 0; i < nlinks; i++) {
+		    if (links[i].type == WWW_FORM_LINK_TYPE &&
+		        links[i].form->type == F_RADIO_TYPE &&
+			links[i].form->number == form->number &&
+			/*
+			 *  If it has the same name and its on...
+			 */
+			!strcmp(links[i].form->name, form->name) &&
+			links[i].form->num_value) {
 			move(links[i].ly, links[i].lx);
 			addstr(unchecked_radio);
 			links[i].hightext = unchecked_radio;
 		     }
+		}
 		lynx_stop_radio_color ();
-		/* will unselect other button and select this one */
+		/*
+		 *  Will unselect other button and select this one.
+		 */
 		HText_activateRadioButton(form);
-		/* now highlight this one */
+		/*
+		 *  Now highlight this one.
+		 */
 		form_link->hightext = checked_radio;
 	    }
 	    break;
@@ -139,28 +185,28 @@ PUBLIC int change_form_link ARGS6(struct link *, form_link, int, mode,
 	case F_TEXTAREA_TYPE:
 	case F_PASSWORD_TYPE:
 	    c = form_getstr(form_link);
-	    if (form->type == F_PASSWORD_TYPE) 
-        	form_link->hightext = STARS(strlen(form->value));
+	    if (form->type == F_PASSWORD_TYPE)
+		form_link->hightext = STARS(strlen(form->value));
 	    else
-	    	form_link->hightext = form->value;
+		form_link->hightext = form->value;
 	    break;
 
 	case F_RESET_TYPE:
 	    if (form->disabled == YES)
-	        break;
+		break;
 	    HText_ResetForm(form);
-            *refresh_screen = TRUE;
+	    *refresh_screen = TRUE;
 	    break;
-	
+
 	case F_TEXT_SUBMIT_TYPE:
 	    c = form_getstr(form_link);
 	    if (form->disabled == YES &&
-	        (c == '\r' || c == '\n')) {
-	        c = '\t';
+		(c == '\r' || c == '\n')) {
+		c = '\t';
 		break;
 	    }
 	    if (c == '\r' || c == '\n') {
-	        form_link->hightext = form->value;
+		form_link->hightext = form->value;
 		if (!form->submit_action || *form->submit_action == '\0') {
 		    _statusline(NO_FORM_ACTION);
 		    sleep(MessageSecs);
@@ -172,41 +218,43 @@ PUBLIC int change_form_link ARGS6(struct link *, form_link, int, mode,
 		    break;
 		} else {
 		    if (form->no_cache &&
-		        form->submit_method != URL_MAIL_METHOD) {
-		        LYforce_no_cache = TRUE;
+			form->submit_method != URL_MAIL_METHOD) {
+			LYforce_no_cache = TRUE;
 			reloading = TRUE;
 		    }
-	            HText_SubmitForm(form, newdoc, link_name, form->value);
+		    HText_SubmitForm(form, newdoc, link_name, form->value);
 		}
-		if (form->submit_method == URL_MAIL_METHOD)
+		if (form->submit_method == URL_MAIL_METHOD) {
 		    *refresh_screen = TRUE;
-		else {
-	            /* returns new document URL */
-	            newdoc->link = 0;
+		} else {
+		    /*
+		     *  Returns new document URL.
+		     */
+		    newdoc->link = 0;
 		    newdoc->internal_link = FALSE;
 		}
 		c = DO_NOTHING;
 		break;
 	    } else {
-	    	form_link->hightext = form->value;
+		form_link->hightext = form->value;
 	    }
 	    break;
 
 	case F_SUBMIT_TYPE:
 	case F_IMAGE_SUBMIT_TYPE:
 	    if (form->disabled == YES)
-	        break;
+		break;
 	    if (form->no_cache &&
-	        form->submit_method != URL_MAIL_METHOD) {
+		form->submit_method != URL_MAIL_METHOD) {
 		LYforce_no_cache = TRUE;
 		reloading = TRUE;
 	    }
 	    HText_SubmitForm(form, newdoc, link_name, link_value);
 	    if (form->submit_method == URL_MAIL_METHOD)
-                *refresh_screen = TRUE;
+		*refresh_screen = TRUE;
 	    else {
-	        /* returns new document URL */
-	        newdoc->link = 0;
+		/* returns new document URL */
+		newdoc->link = 0;
 		newdoc->internal_link = FALSE;
 	    }
 	    break;
@@ -215,76 +263,116 @@ PUBLIC int change_form_link ARGS6(struct link *, form_link, int, mode,
 
     return(c);
 
-} 
-
-#ifdef USE_SLANG
-#define GetYX(y,x)   y = SLsmg_get_row(), x = SLsmg_get_column()
-#else
-#ifdef getyx
-#define GetYX(y,x)   getyx(stdscr,y,x)
-#else
-#define GetYX(y,x)   y = stdscr->_cury, x = stdscr->_curx
-#endif /* getyx */
-#endif /* USE_SLANG */
-
-PRIVATE int form_getstr ARGS1(struct link *, form_link)
+}
+PRIVATE int form_getstr ARGS1(
+	struct link *,	form_link)
 {
     FormInfo *form = form_link->form;
+    char *value = form->value;
     int ch;
     int far_col;
-    int max_length = (form->maxlength ? form->maxlength : 1023);
+    int max_length;
     int startcol, startline;
     BOOL HaveMaxlength = FALSE;
+    int action;
 
 #ifdef VMS
-    extern BOOLEAN HadVMSInterrupt;/* Flag from cleanup_sig() AST       */
+    extern BOOLEAN HadVMSInterrupt;	/* Flag from cleanup_sig() AST */
 #endif
 
     EditFieldData MyEdit;
-    BOOLEAN Edited = FALSE;       /* Value might be updated? */
+    BOOLEAN Edited = FALSE;		/* Value might be updated? */
 
-    /* get the initial position of the cursor */
-    GetYX(startline, startcol);
-
-    if (startcol + form->size > LYcols-1)
-	far_col = LYcols-1;
+    /*
+     *  Get the initial position of the cursor.
+     */
+    LYGetYX(startline, startcol);
+    if ((startcol + form->size) > (LYcols - 1))
+	far_col = (LYcols - 1);
     else
-	far_col = startcol + form->size;
+	far_col = (startcol + form->size);
 
-    /* Print panned line */
+    /*
+     *  Make sure the form field value does not exceed our buffer. - FM
+     */
+    max_length = ((form->maxlength > 0 &&
+		   form->maxlength < sizeof(MyEdit.buffer)) ?
+					    form->maxlength :
+					    (sizeof(MyEdit.buffer) - 1));
+    if (strlen(form->value) > max_length) {
+	/*
+	 *  We can't fit the entire value into the editing buffer,
+	 *  so enter as much of the tail as fits. - FM
+	 */
+	value += (strlen(form->value) - max_length);
+	if (!form->disabled &&
+	    !(form->submit_method == URL_MAIL_METHOD && no_mail)) {
+	    /*
+	     *  If we can edit it, report that we are using the tail. - FM
+	     */
+	    _statusline(FORM_VALUE_TOO_LONG);
+	    sleep(MessageSecs);
+	    switch(form->type) {
+		case F_PASSWORD_TYPE:
+		    statusline(FORM_LINK_PASSWORD_MESSAGE);
+		    break;
+		case F_TEXT_SUBMIT_TYPE:
+		    if (form->submit_method == URL_MAIL_METHOD) {
+			statusline(FORM_LINK_TEXT_SUBMIT_MAILTO_MSG);
+		    } else if (form->no_cache) {
+			statusline(FORM_LINK_TEXT_RESUBMIT_MESSAGE);
+		    } else {
+			statusline(FORM_LINK_TEXT_SUBMIT_MESSAGE);
+		    }
+		    break;
+		case F_TEXT_TYPE:
+		case F_TEXTAREA_TYPE:
+		    statusline(FORM_LINK_TEXT_MESSAGE);
+		    break;
+		default:
+		    break;
+	    }
+	    move(startline, startcol);
+	}
+    }
 
-    LYSetupEdit(&MyEdit, form->value, max_length, far_col-startcol);
-    MyEdit.pad='_';
+    /*
+     *  Print panned line
+     */
+    LYSetupEdit(&MyEdit, value, max_length, (far_col - startcol));
+    MyEdit.pad = '_';
     MyEdit.hidden = (form->type == F_PASSWORD_TYPE);
     LYRefreshEdit(&MyEdit);
 
-    /* And go for it.. */
-
+    /*
+     *  And go for it!
+     */
     for (;;) {
 again:
-        ch = LYgetch();
+	ch = LYgetch();
 #ifdef VMS
-        if (HadVMSInterrupt) {
+	if (HadVMSInterrupt) {
 	    HadVMSInterrupt = FALSE;
 	    ch = 7;
 	}
 #endif /* VMS */
 
 	/*
-	 * Filter out global navigation keys that should not be passed
-	 * to line editor, and LYK_REFRESH.
+	 *  Filter out global navigation keys that should not be passed
+	 *  to line editor, and LYK_REFRESH.
 	 */
-	if (EditBinding(ch) == LYE_ENTER)
+	action = EditBinding(ch);
+	if (action == LYE_ENTER)
 	    break;
-	if (EditBinding(ch) == LYE_AIX && HTCJK == NOCJK)
+	if (action == LYE_AIX && HTCJK == NOCJK)
 	    break;
-        if (EditBinding(ch) == LYE_TAB)
-	  {
+	if (action == LYE_TAB) {
 	    ch = (int)('\t');
 	    break;
-	  }
-	if (EditBinding(ch) == LYE_ABORT)
+	}
+	if (action == LYE_ABORT) {
 	    return(DO_NOTHING);
+	}
 	if (keymap[ch + 1] == LYK_REFRESH)
 	    goto breakfor;
 	switch (ch) {
@@ -298,31 +386,24 @@ again:
 	    case FIND_KEY:
 	    case SELECT_KEY:
 #endif /* NOTDEFINED */
-                goto breakfor;
+		goto breakfor;
 
 	    /*
-	     * Left arrrow in column 0 deserves special treatment here,
-	     * else you can get trapped in a form without submit button!
+	     *  Left arrrow in column 0 deserves special treatment here,
+	     *  else you can get trapped in a form without submit button!
 	     */
 	    case LTARROW:
-	        if (MyEdit.pos==0) {
-		    int c='Y';	/* Go back immediately if no changes */
-		    if (strcmp(MyEdit.buffer, form->value)) {
-		        _statusline(PREV_DOC_QUERY);
-			c=LYgetch();
+		if (MyEdit.pos == 0) {
+		    int c = 'Y';    /* Go back immediately if no changes */
+		    if (strcmp(MyEdit.buffer, value)) {
+			_statusline(PREV_DOC_QUERY);
+			c = LYgetch();
 		    }
 		    if (TOUPPER(c) == 'Y') {
-#ifdef NOTDEFINED
-			/*
-			 * Why not just keep what we have??
-			 * We don't erase the other fields either??
-			 */
-			StrAllocCopy(form->value, "");
-#endif /* NOTDEFINED */
 			return(ch);
 		    } else {
-		        if (form->disabled == YES)
-		            _statusline(ARROWS_OR_TAB_TO_MOVE);
+			if (form->disabled == YES)
+			    _statusline(ARROWS_OR_TAB_TO_MOVE);
 			else
 			    _statusline(ENTER_TEXT_ARROWS_OR_TAB);
 		    }
@@ -332,9 +413,10 @@ again:
 	    default:
 		if (form->disabled == YES)
 		    goto again;
-		/* Make sure the statusline uses editmode help... */
-		Edited = TRUE;
-		LYLineEdit(&MyEdit,ch,TRUE);
+		/*
+		 *  Make sure the statusline uses editmode help.
+		 */
+		LYLineEdit(&MyEdit, ch, TRUE);
 		if (MyEdit.strlen >= max_length) {
 		    HaveMaxlength = TRUE;
 		} else if (HaveMaxlength &&
@@ -342,30 +424,91 @@ again:
 		    HaveMaxlength = FALSE;
 		    _statusline(ENTER_TEXT_ARROWS_OR_TAB);
 		}
+		if (strcmp(value, MyEdit.buffer)) {
+		    Edited = TRUE;
+		}
 		LYRefreshEdit(&MyEdit);
 	}
     }
 breakfor:
     if (Edited) {
-        char  *p;
-	StrAllocCopy(form->value, MyEdit.buffer);
+	char  *p;
 
 	/*
-	 * Remove trailing spaces
+	 *  Load the new value.
+	 */
+	if (value == form->value) {
+	    /*
+	     *  The previous value did fit in the line buffer,
+	     *  so replace it with the new value. - FM
+	     */
+	    StrAllocCopy(form->value, MyEdit.buffer);
+	} else {
+	    /*
+	     *  Combine the modified tail with the unmodified head. - FM
+	     */
+	    form->value[(strlen(form->value) - strlen(value))] = '\0';
+	    StrAllocCat(form->value, MyEdit.buffer);
+	    _statusline(FORM_TAIL_COMBINED_WITH_HEAD);
+	    sleep(MessageSecs);
+	}
+
+	/*
+	 *  Remove trailing spaces
 	 *
-	 * Do we really need to do that here? Trailing spaces will only
-	 * be there if user keyed them in. Rather rude to throw away
-	 * their hard earned spaces. Better deal with trailing spaces
-	 * when submitting the form????
+	 *  Do we really need to do that here? Trailing spaces will only
+	 *  be there if user keyed them in. Rather rude to throw away
+	 *  their hard earned spaces. Better deal with trailing spaces
+	 *  when submitting the form????
 	 */
 	p = &(form->value[strlen(form->value)]);
-	while ((p != form->value) && (p[-1]==' '))
+	while ((p != form->value) && (p[-1] == ' '))
 	    p--;
 	*p = '\0';
     }
     return(ch);
 }
 
+/*
+**  This function prompts for an option or page number.
+**  If a 'g' or 'p' suffix is included, that will be
+**  loaded into c.  Otherwise, c is zeroed. - FM & LE
+*/
+PRIVATE int get_popup_option_number ARGS1(
+	int *,		c)
+{
+    char temp[120];
+
+    /*
+     *  Load the c argument into the prompt buffer.
+     */
+    temp[0] = *c;
+    temp[1] = '\0';
+    _statusline(SELECT_OPTION_NUMBER);
+
+    /*
+     *  Get the number, possibly with a suffix, from the user.
+     */
+    if (LYgetstr(temp, VISIBLE, sizeof(temp), NORECALL) < 0 || *temp == 0) {
+	_statusline(CANCELLED);
+	sleep(InfoSecs);
+	*c = '\0';
+	return(0);
+    }
+
+    /*
+     *  If we had a 'g' or 'p' suffix, load it into c.
+     *  Otherwise, zero c.  Then return the number.
+     */
+    if (strchr(temp, 'g') != NULL || strchr(temp, 'G') != NULL) {
+	*c = 'g';
+    } else if (strchr(temp, 'p') != NULL || strchr(temp, 'P') != NULL) {
+	*c = 'p';
+    } else {
+	*c = '\0';
+    }
+    return(atoi(temp));
+}
 
 /* Use this rather than the 'wprintw()' function to write a blank-padded
  * string to the given window, since someone's asserted that printw doesn't
@@ -378,7 +521,7 @@ breakfor:
 PRIVATE void paddstr ARGS3(
 	WINDOW *,	the_window,
 	int,		width,
-	char *,		the_string)
+	char *, 	the_string)
 {
 	width -= strlen(the_string);
 	waddstr(the_window, the_string);
@@ -411,10 +554,11 @@ PRIVATE int popup_options ARGS7(
     OptionType * opt_ptr = list;
     int window_offset = 0;
     int display_lines;
+    int npages;
 #ifdef VMS
     extern BOOLEAN HadVMSInterrupt; /* Flag from cleanup_sig() AST */
 #endif /* VMS */
-    static char prev_target[512]; 		/* Search string buffer */
+    static char prev_target[512];		/* Search string buffer */
     static char prev_target_buffer[512];	/* Next search buffer */
     static BOOL first = TRUE;
     char *cp;
@@ -424,6 +568,8 @@ PRIVATE int popup_options ARGS7(
     BOOLEAN FirstRecall = TRUE;
     OptionType * tmp_ptr;
     BOOLEAN ReDraw = FALSE;
+    int number;
+    char buffer[512];
 
     /*
      * Initialize the search string buffer. - FM
@@ -440,17 +586,17 @@ PRIVATE int popup_options ARGS7(
     /*
      *  Set display_lines based on the user_mode global.
      */
-    if (user_mode==NOVICE_MODE)
+    if (user_mode == NOVICE_MODE)
         display_lines = LYlines-4;
     else
-        display_lines = LYlines-2;
+	display_lines = LYlines-2;
 
     /*
      *  Counting the number of options to be displayed.
      *   num_options ranges 0...n
      */
     for (; opt_ptr->next; num_options++, opt_ptr = opt_ptr->next)
-         ; /* null body */
+	 ; /* null body */
 
     /*
      *  Let's assume for the sake of sanity that ly is the number
@@ -473,8 +619,7 @@ PRIVATE int popup_options ARGS7(
      */
     if (!i_length) {
         i_length = num_options;
-    }
-    else {
+    } else {
         /*
 	 *  Otherwise, it is really one number too high.
 	 */
@@ -489,18 +634,18 @@ PRIVATE int popup_options ARGS7(
     bottom = top + i_length + 3;
 
     /*
-     *  Hmm...  If the bottom goes beyond the number of lines available,
+     *  Hmm...	If the bottom goes beyond the number of lines available,
      */
     if (bottom > display_lines) {
-        /*
+	/*
 	 *  Position the window at the top if we have more
 	 *  options than will fit in the window.
 	 */
 	if (i_length+3 > display_lines) {
 	    top = 0;
-            bottom = top + i_length+3;
+	    bottom = top + i_length+3;
 	    if (bottom > display_lines)
-	        bottom = display_lines + 1;
+		bottom = display_lines + 1;
 	} else {
 	    /*
 	     *  Try to position the window so that the selected option will
@@ -522,7 +667,7 @@ PRIVATE int popup_options ARGS7(
      *  Move the window down if it's too high.
      */
     if (bottom < ly + 2) {
-        bottom = ly + 2;
+	bottom = ly + 2;
 	if (bottom > display_lines + 1)
 	    bottom = display_lines + 1;
 	top = bottom - length - 2;
@@ -532,11 +677,13 @@ PRIVATE int popup_options ARGS7(
      *  Set up the overall window, including the boxing characters ('*'),
      *  if it all fits.  Otherwise, set up the widest window possible. - FM
      */
-#ifndef USE_SLANG
-    if (!(form_window = newwin(bottom - top, width+4, top, lx - 1)) &&
+#ifdef USE_SLANG
+    SLsmg_fill_region(top, lx - 1, bottom - top, width + 4, ' ');
+#else
+    if (!(form_window = newwin(bottom - top, width + 4, top, lx - 1)) &&
         !(form_window = newwin(bottom - top, 0, top, 0))) {
 	HTAlert(POPUP_FAILED);
-        return(orig_selection);
+	return(orig_selection);
     }
     scrollok(form_window, TRUE);
 #ifdef NCURSES
@@ -548,9 +695,7 @@ PRIVATE int popup_options ARGS7(
     wbkgd(form_window, getbkgd(stdscr));
 #endif
 #endif
-#else
-    SLsmg_fill_region (top, lx - 1, bottom - top, width + 4, ' ');
-#endif /* !USE_SLANG */
+#endif /* USE_SLANG */
 
     /*
      *  Set up the window_offset for options.
@@ -558,14 +703,20 @@ PRIVATE int popup_options ARGS7(
      *   length ranges from 0...m
      */
     if (cur_selection >= length) {
-        window_offset = cur_selection - length + 1;
+	window_offset = cur_selection - length + 1;
     }
 
+    /*
+     *  Compute the number of popup window pages. - FM
+     */
+    npages = ((num_options + 1) > length) ?
+		(((num_options + 1) + (length - 1))/(length))
+					  : 1;
 /*
- * OH!  I LOVE GOTOs! hack hack hack
- *        07-11-94 GAB
- *      MORE hack hack hack
- *        09-05-94 FM
+ * OH!	I LOVE GOTOs! hack hack hack
+ *    07-11-94 GAB
+ *  MORE hack hack hack
+ *    09-05-94 FM
  */
 redraw:
     opt_ptr = list;
@@ -574,17 +725,19 @@ redraw:
      *  Display the boxed options.
      */
     for (i = 0; i <= num_options; i++, opt_ptr = opt_ptr->next) {
-        if (i >= window_offset && i - window_offset < length) {
-#ifndef USE_SLANG
-	    wmove(form_window,(i+1)-window_offset,2);
-	    paddstr(form_window, width, opt_ptr->name);
+	if (i >= window_offset && i - window_offset < length) {
+#ifdef USE_SLANG
+	    SLsmg_gotorc(top + ((i + 1) - window_offset), (lx - 1 + 2));
+	    SLsmg_write_nstring(opt_ptr->name, width);
 #else
-	    SLsmg_gotorc (top + (i+1)-window_offset, lx - 1 + 2);
-	    SLsmg_write_nstring (opt_ptr->name, width);
-#endif /* !USE_SLANG */
+	    wmove(form_window, ((i + 1) - window_offset), 2);
+	    paddstr(form_window, width, opt_ptr->name);
+#endif /* USE_SLANG */
 	}
     }
-#ifndef USE_SLANG
+#ifdef USE_SLANG
+    SLsmg_draw_box(top, (lx - 1), (bottom - top), (width + 4));
+#else
 #ifdef VMS
     VMSbox(form_window, (bottom - top), (width + 4));
 #else
@@ -597,9 +750,7 @@ redraw:
 #endif
 #endif /* VMS */
     wrefresh(form_window);
-#else
-    SLsmg_draw_box (top, lx - 1, bottom - top, width + 4);
-#endif /* !USE_SLANG */
+#endif /* USE_SLANG */
     opt_ptr = NULL;
 
     /*
@@ -607,39 +758,68 @@ redraw:
      */
     while (cmd != LYK_ACTIVATE) {
 
-        /*
+	/*
 	 *  Unreverse cur selection.
 	 */
 	if (opt_ptr != NULL) {
-#ifndef USE_SLANG
-	    wmove(form_window,(i+1)-window_offset,2);
-            paddstr(form_window, width, opt_ptr->name);
+#ifdef USE_SLANG
+	    SLsmg_gotorc((top + ((i + 1) - window_offset)), (lx - 1 + 2));
+	    SLsmg_write_nstring(opt_ptr->name, width);
 #else
-	    SLsmg_gotorc (top + (i+1)-window_offset, lx - 1 + 2);
-	    SLsmg_write_nstring (opt_ptr->name, width);
-#endif /* !USE_SLANG */
+	    wmove(form_window, ((i + 1) - window_offset), 2);
+	    paddstr(form_window, width, opt_ptr->name);
+#endif /* USE_SLANG */
 	}
 
-        opt_ptr = list;
+	opt_ptr = list;
 
-        for (i = 0; i < cur_selection; i++, opt_ptr = opt_ptr->next) 
+	for (i = 0; i < cur_selection; i++, opt_ptr = opt_ptr->next)
 	    ; /* null body */
 
-#ifndef USE_SLANG
-        wstart_reverse(form_window);
-        wmove(form_window,(i+1)-window_offset,2);
-        paddstr(form_window, width, opt_ptr->name);
-        wstop_reverse(form_window);
-        wrefresh(form_window);
+#ifdef USE_SLANG
+	SLsmg_set_color(2);
+	SLsmg_gotorc((top + ((i + 1) - window_offset)), (lx - 1 + 2));
+	SLsmg_write_nstring(opt_ptr->name, width);
+	SLsmg_set_color(0);
+	/*
+	 *  If LYShowCursor is ON, move the cursor to the left
+	 *  of the current option, so that blind users, who are
+	 *  most likely to have LYShowCursor ON, will have it's
+	 *  string spoken or passed to the braille interface as
+	 *  each option is made current.  Otherwise, move it to
+	 *  the bottom, right column of the screen, to "hide"
+	 *  the cursor as for the main document, and let sighted
+	 *  users rely on the current option's highlighting or
+	 *  color without the distraction of a blinking cursor
+	 *  in the window. - FM
+	 */
+	if (LYShowCursor)
+	    SLsmg_gotorc((top + ((i + 1) - window_offset)), (lx - 1 + 1));
+	else
+	    SLsmg_gotorc((LYlines - 1), (LYcols - 1));
+	SLsmg_refresh();
 #else
-        SLsmg_set_color (2);
-        SLsmg_gotorc (top + (i+1)-window_offset, lx - 1 + 2);
-        SLsmg_write_nstring (opt_ptr->name, width);
-        SLsmg_set_color (0);
-        SLsmg_refresh ();
-#endif /* !USE_SLANG  */
+	wstart_reverse(form_window);
+	wmove(form_window, ((i + 1) - window_offset), 2);
+	paddstr(form_window, width, opt_ptr->name);
+	wstop_reverse(form_window);
+	/*
+	 *  If LYShowCursor is ON, move the cursor to the left
+	 *  of the current option, so that blind users, who are
+	 *  most likely to have LYShowCursor ON, will have it's
+	 *  string spoken or passed to the braille interface as
+	 *  each option is made current.  Otherwise, leave it to
+	 *  the right of the current option, since we can't move
+	 *  it out of the window, and let sighted users rely on
+	 *  the highlighting of the current option without the
+	 *  distraction of a blinking cursor preceding it. - FM
+	 */
+	if (LYShowCursor)
+	    wmove(form_window, ((i + 1) - window_offset), 1);
+	wrefresh(form_window);
+#endif /* USE_SLANG  */
 
-        c = LYgetch();
+	c = LYgetch();
 	if (c == 3 || c == 7)	/* Control-C or Control-G */
 	    cmd = LYK_QUIT;
 	else
@@ -651,35 +831,220 @@ redraw:
 	}
 #endif /* VMS */
 
-        switch(cmd) {
-            case LYK_PREV_LINK:
+	switch(cmd) {
+	    case LYK_F_LINK_NUM:
+		c = '\0';
+	    case LYK_1:
+	    case LYK_2:
+	    case LYK_3:
+	    case LYK_4:
+	    case LYK_5:
+	    case LYK_6:
+	    case LYK_7:
+	    case LYK_8:
+	    case LYK_9:
+		/*
+		 *  Get a number from the user, possibly with
+		 *  a 'g' or 'p' suffix (which will be loaded
+		 *  into c). - FM & LE
+		 */
+		number = get_popup_option_number((int *)&c);
+
+		/*
+		 *  Check for a 'p' suffix. - FM
+		 */
+		if (c == 'p') {
+		    /*
+		     *  Treat 1 or less as the first page. - FM
+		     */
+		    if (number <= 1) {
+			if (window_offset == 0) {
+			    _statusline(ALREADY_AT_OPTION_BEGIN);
+			    sleep(MessageSecs);
+			    if (disabled) {
+				_statusline(FORM_LINK_OPTION_LIST_UNM_MSG);
+			    } else {
+				_statusline(FORM_LINK_OPTION_LIST_MESSAGE);
+			    }
+			    break;
+			}
+			window_offset = 0;
+			cur_selection = 0;
+			if (disabled) {
+			    _statusline(FORM_LINK_OPTION_LIST_UNM_MSG);
+			} else {
+			    _statusline(FORM_LINK_OPTION_LIST_MESSAGE);
+			}
+			goto redraw;
+		    }
+
+		    /*
+		     *  Treat a number equal to or greater than the
+		     *  number of pages as the last page. - FM
+		     */
+		    if (number >= npages) {
+			if (window_offset >= ((num_options - length) + 1)) {
+			    _statusline(ALREADY_AT_OPTION_END);
+			    sleep(MessageSecs);
+			    if (disabled) {
+				_statusline(FORM_LINK_OPTION_LIST_UNM_MSG);
+			    } else {
+				_statusline(FORM_LINK_OPTION_LIST_MESSAGE);
+			    }
+			    break;
+			}
+			window_offset = ((npages - 1) * length);
+			if (window_offset > (num_options - length)) {
+			    window_offset = (num_options - length + 1);
+			}
+			if (cur_selection < window_offset)
+			    cur_selection = window_offset;
+			if (disabled) {
+			    _statusline(FORM_LINK_OPTION_LIST_UNM_MSG);
+			} else {
+			    _statusline(FORM_LINK_OPTION_LIST_MESSAGE);
+			}
+			goto redraw;
+		    }
+
+		    /*
+		     *  We want an intermediate page. - FM
+		     */
+		    if (((number - 1) * length) == window_offset) {
+			sprintf(buffer, ALREADY_AT_OPTION_PAGE, number);
+			_statusline(buffer);
+			sleep(MessageSecs);
+			if (disabled) {
+			    _statusline(FORM_LINK_OPTION_LIST_UNM_MSG);
+			} else {
+			    _statusline(FORM_LINK_OPTION_LIST_MESSAGE);
+			}
+			break;
+		    }
+		    cur_selection = window_offset = ((number - 1) * length);
+		    if (disabled) {
+			_statusline(FORM_LINK_OPTION_LIST_UNM_MSG);
+		    } else {
+			_statusline(FORM_LINK_OPTION_LIST_MESSAGE);
+		    }
+		    goto redraw;
+
+		}
+
+		/*
+		 *  Check for a positive number, which signifies
+		 *  that an option should be sought. - FM
+		 */
+		if (number > 0) {
+		    /*
+		     *  Decrement the number so as to correspond
+		     *  with our cur_selection values. - FM
+		     */
+		    number--;
+
+		    /*
+		     *  If the number is in range and had no legal
+		     *  suffix, select the indicated option. - FM
+		     */
+		    if (number <= num_options && c == '\0') {
+			cur_selection = number;
+			cmd = LYK_ACTIVATE;
+			break;
+		    }
+
+		    /*
+		     *  Verify that we had a 'g' suffix,
+		     *  and act on the number. - FM
+		     */
+		    if (c == 'g') {
+			if (cur_selection == number) {
+			    /*
+			     *  The option already is current. - FM
+			     */
+			    sprintf(buffer,
+				    OPTION_ALREADY_CURRENT, (number + 1));
+			    _statusline(buffer);
+			    sleep(MessageSecs);
+			    if (disabled) {
+				_statusline(FORM_LINK_OPTION_LIST_UNM_MSG);
+			    } else {
+				_statusline(FORM_LINK_OPTION_LIST_MESSAGE);
+			    }
+			    break;
+			}
+
+			if (number <= num_options) {
+			    /*
+			     *  The number is in range and had a 'g'
+			     *  suffix, so make it the current option,
+			     *  scrolling if needed. - FM
+			     */
+			    j = (number - cur_selection);
+			    cur_selection = number;
+			    if ((j > 0) &&
+				(cur_selection - window_offset) >= length) {
+				window_offset += j;
+				if (window_offset > (num_options - length + 1))
+				    window_offset = (num_options - length + 1);
+			    } else if ((cur_selection - window_offset) < 0) {
+				window_offset -= abs(j);
+				if (window_offset < 0)
+				    window_offset = 0;
+			    }
+			    if (disabled) {
+				_statusline(FORM_LINK_OPTION_LIST_UNM_MSG);
+			    } else {
+				_statusline(FORM_LINK_OPTION_LIST_MESSAGE);
+			    }
+			    goto redraw;
+			}
+
+			/*
+			 *  Not in range. - FM
+			 */
+			_statusline(BAD_OPTION_NUM_ENTERED);
+			sleep(MessageSecs);
+		    }
+		}
+
+		/*
+		 *  Restore the popup statusline. - FM
+		 */
+		if (disabled) {
+		    _statusline(FORM_LINK_OPTION_LIST_UNM_MSG);
+		} else {
+		    _statusline(FORM_LINK_OPTION_LIST_MESSAGE);
+		}
+		break;
+
+	    case LYK_PREV_LINK:
 	    case LYK_UP_LINK:
 
 		if (cur_selection > 0)
 		    cur_selection--;
 
 		/*
-		 *  Scroll the window up if neccessary.
+		 *  Scroll the window up if necessary.
 		 */
 		if ((cur_selection - window_offset) < 0) {
 		    window_offset--;
 		    goto redraw;
 		}
-                break;
+		break;
 
-            case LYK_NEXT_LINK:
+	    case LYK_NEXT_LINK:
 	    case LYK_DOWN_LINK:
 		if (cur_selection < num_options)
-                    cur_selection++;
+		    cur_selection++;
 
 		/*
-		 *  Scroll the window down if neccessary
+		 *  Scroll the window down if necessary
 		 */
 		if ((cur_selection - window_offset) >= length) {
 		    window_offset++;
 		    goto redraw;
 		}
-                break;
+		break;
 
 	    case LYK_NEXT_PAGE:
 		/*
@@ -700,7 +1065,7 @@ redraw:
 		     */
 		    window_offset += length;
 		    if (window_offset > (num_options - length)) {
-		        window_offset = (num_options - length + 1);
+			window_offset = (num_options - length + 1);
 		    }
 
 		    /*
@@ -738,7 +1103,7 @@ redraw:
 		     */
 		    window_offset -= length;
 		    if (window_offset < 0) {
-		        window_offset = 0;
+			window_offset = 0;
 		    }
 
 		    /*
@@ -756,7 +1121,7 @@ redraw:
 		break;
 
 	    case LYK_HOME:
-	        cur_selection = 0;
+		cur_selection = 0;
 		if (window_offset > 0) {
 		    window_offset = 0;
 		    goto redraw;
@@ -764,80 +1129,80 @@ redraw:
 		break;
 
 	    case LYK_END:
-	        cur_selection = num_options;
+		cur_selection = num_options;
 		if (window_offset != (num_options - length + 1)) {
 		    window_offset = (num_options - length + 1);
 		    goto redraw;
 		}
 		break;
 
-            case LYK_DOWN_TWO:
-	        cur_selection += 2;
+	    case LYK_DOWN_TWO:
+		cur_selection += 2;
 		if (cur_selection > num_options)
-                    cur_selection = num_options;
+		    cur_selection = num_options;
 
 		/*
-		 *  Scroll the window down if neccessary.
+		 *  Scroll the window down if necessary.
 		 */
 		if ((cur_selection - window_offset) >= length) {
 		    window_offset += 2;
 		    if (window_offset > (num_options - length + 1))
-		        window_offset = (num_options - length + 1);
+			window_offset = (num_options - length + 1);
 		    goto redraw;
 		}
-                break;
+		break;
 
 	    case LYK_UP_TWO:
-	        cur_selection -= 2;
+		cur_selection -= 2;
 		if (cur_selection < 0)
 		    cur_selection = 0;
 
 		/*
-		 *  Scroll the window up if neccessary.
+		 *  Scroll the window up if necessary.
 		 */
 		if ((cur_selection - window_offset) < 0) {
 		    window_offset -= 2;
 		    if (window_offset < 0)
-		        window_offset = 0;
+			window_offset = 0;
 		    goto redraw;
 		}
-                break;
+		break;
 
-            case LYK_DOWN_HALF:
-	        cur_selection += (length/2);
+	    case LYK_DOWN_HALF:
+		cur_selection += (length/2);
 		if (cur_selection > num_options)
-                    cur_selection = num_options;
+		    cur_selection = num_options;
 
 		/*
-		 *  Scroll the window down if neccessary.
+		 *  Scroll the window down if necessary.
 		 */
 		if ((cur_selection - window_offset) >= length) {
 		    window_offset += (length/2);
 		    if (window_offset > (num_options - length + 1))
-		        window_offset = (num_options - length + 1);
+			window_offset = (num_options - length + 1);
 		    goto redraw;
 		}
-                break;
+		break;
 
 	    case LYK_UP_HALF:
-	        cur_selection -= (length/2);
+		cur_selection -= (length/2);
 		if (cur_selection < 0)
 		    cur_selection = 0;
 
 		/*
-		 *  Scroll the window up if neccessary.
+		 *  Scroll the window up if necessary.
 		 */
 		if ((cur_selection - window_offset) < 0) {
 		    window_offset -= (length/2);
 		    if (window_offset < 0)
-		        window_offset = 0;
+			window_offset = 0;
 		    goto redraw;
 		}
-                break;
+		break;
 
 	    case LYK_REFRESH:
-	        clearok(curscr, TRUE);
-	        refresh();
+		clearok(curscr, TRUE);
+		refresh();
 		break;
 
 	    case LYK_NEXT:
@@ -857,18 +1222,18 @@ redraw:
 		     *  of a popup window. - FM
 		     */
 		    if ((cp = (char *)HTList_objectAt(search_queries,
-	    					      0)) != NULL) {
+						      0)) != NULL) {
 			strcpy(prev_target_buffer, cp);
 			QueryNum = 0;
 			FirstRecall = FALSE;
 		    }
 		}
-	        strcpy(prev_target, prev_target_buffer);
+		strcpy(prev_target, prev_target_buffer);
 	    case LYK_WHEREIS:
-	        if (*prev_target == '\0' ) {
+		if (*prev_target == '\0' ) {
 		    _statusline(ENTER_WHEREIS_QUERY);
 		    if ((ch = LYgetstr(prev_target, VISIBLE,
-	    		 	       sizeof(prev_target_buffer),
+				       sizeof(prev_target_buffer),
 				       recall)) < 0) {
 			/*
 			 *  User cancelled the search via ^G. - FM
@@ -885,14 +1250,14 @@ check_recall:
 		    /*
 		     *  No entry.  Simply break.   - FM
 		     */
-	            _statusline(CANCELLED);
+		    _statusline(CANCELLED);
 		    sleep(InfoSecs);
 		    goto restore_popup_statusline;
 		}
 
 		if (recall && ch == UPARROW) {
 		    if (FirstRecall) {
-		        /*
+			/*
 			 *  Use the current string or
 			 *  last query in the list. - FM
 			 */
@@ -900,7 +1265,8 @@ check_recall:
 			if (*prev_target_buffer) {
 			    for (QueryNum = (QueryTotal - 1);
 			         QueryNum > 0; QueryNum--) {
-				if ((cp=(char *)HTList_objectAt(search_queries,
+				if ((cp = (char *)HTList_objectAt(
+							search_queries,
 	    						QueryNum)) != NULL &&
 				    !strcmp(prev_target_buffer, cp)) {
 				    break;
@@ -920,8 +1286,8 @@ check_recall:
 			 *  Roll around to the last query in the list. - FM
 			 */
 			QueryNum = 0;
-		    if ((cp=(char *)HTList_objectAt(search_queries,
-	    					    QueryNum)) != NULL) {
+		    if ((cp = (char *)HTList_objectAt(search_queries,
+	    					      QueryNum)) != NULL) {
 			strcpy(prev_target, cp);
 			if (*prev_target_buffer &&
 			    !strcmp(prev_target_buffer, prev_target)) {
@@ -933,7 +1299,7 @@ check_recall:
 			} else {
 			    _statusline(EDIT_A_PREV_QUERY);
 			}
-			if ((ch=LYgetstr(prev_target, VISIBLE,
+			if ((ch = LYgetstr(prev_target, VISIBLE,
 				sizeof(prev_target_buffer), recall)) < 0) {
 			    /*
 			     *  User cancelled the search via ^G. - FM
@@ -954,14 +1320,15 @@ check_recall:
 		    if (*prev_target_buffer) {
 			for (QueryNum = 0;
 			     QueryNum < (QueryTotal - 1); QueryNum++) {
-			    if ((cp=(char *)HTList_objectAt(search_queries,
-	    					    QueryNum)) != NULL &&
+			    if ((cp = (char *)HTList_objectAt(
+							search_queries,
+	    						QueryNum)) != NULL &&
 				!strcmp(prev_target_buffer, cp)) {
 				    break;
 			    }
 			}
 		    } else {
-			QueryNum = QueryTotal - 1;
+			QueryNum = (QueryTotal - 1);
 		    }
 		} else {
 		    /*
@@ -973,9 +1340,9 @@ check_recall:
 		    /*
 		     *  Roll around to the first query in the list. - FM
 		     */
-		    QueryNum = QueryTotal - 1;
-		    if ((cp=(char *)HTList_objectAt(search_queries,
-	    				QueryNum)) != NULL) {
+		    QueryNum = (QueryTotal - 1);
+		    if ((cp = (char *)HTList_objectAt(search_queries,
+	    					      QueryNum)) != NULL) {
 			strcpy(prev_target, cp);
 			if (*prev_target_buffer &&
 			    !strcmp(prev_target_buffer, prev_target)) {
@@ -997,10 +1364,10 @@ check_recall:
 			    _statusline(CANCELLED);
 			    sleep(InfoSecs);
 			    goto restore_popup_statusline;
-	    		}
+			}
 			goto check_recall;
 		    }
- 		}
+		}
 		/*
 		 *  Replace the search string buffer with the new target. - FM
 		 */
@@ -1026,10 +1393,10 @@ check_recall:
 		     */
 		    cur_selection += j;
 		    /*
-		     *  Scroll the window down if neccessary.
+		     *  Scroll the window down if necessary.
 		     */
 		    if ((cur_selection - window_offset) >= length) {
-		        window_offset += j;
+			window_offset += j;
 			if (window_offset > (num_options - length + 1))
 			    window_offset = (num_options - length + 1);
 			ReDraw = TRUE;
@@ -1066,10 +1433,10 @@ check_recall:
 		    j = (cur_selection - j);
 		    cur_selection -= j;
 		    /*
-		     *  Scroll the window up if neccessary.
+		     *  Scroll the window up if necessary.
 		     */
 		    if ((cur_selection - window_offset) < 0) {
-		        window_offset -= j;
+			window_offset -= j;
 			if (window_offset < 0)
 			    window_offset = 0;
 			ReDraw = TRUE;
@@ -1090,7 +1457,7 @@ restore_popup_statusline:
 		 */
 		if (disabled)
 		    _statusline(FORM_LINK_OPTION_LIST_UNM_MSG);
-   		else
+		else
 		    _statusline(FORM_LINK_OPTION_LIST_MESSAGE);
 		*prev_target = '\0';
 		QueryTotal = (search_queries ? HTList_count(search_queries)
@@ -1109,7 +1476,7 @@ restore_popup_statusline:
 		cur_selection = orig_selection;
 		cmd = LYK_ACTIVATE; /* to exit */
 		break;
-        }
+	}
 
     }
 #ifndef USE_SLANG
@@ -1118,7 +1485,6 @@ restore_popup_statusline:
     LYsubwindow(0);
 #endif
 #endif /* !USE_SLANG */
-    refresh();
 
-    return(cur_selection);
+    return(disabled ? orig_selection : cur_selection);
 }

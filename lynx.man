@@ -54,17 +54,27 @@ Then follow the link titled, "Help on URLs."
 .PP
 .TP
 .B -
-If the only argument is '-', then Lynx expects to receive
-the arguments from stdin. This is to allow for the
+If the argument is only '-', then Lynx expects to receive
+the arguments from stdin.  This is to allow for the
 potentially very long command line that can be associated
 with the -get_data or -post_data arguments (see below).
 .TP
 .B -anonymous
 used to specify the anonymous account.
 .TP
+.B -assume_charset\fR=\fIID\fR:\fIMIMEname
+charset for documents that don't specify it.
+.TP
+.B -assume_local_charset\fR=\fIID\fR:\fIMIMEname
+charset assumed for local files.
+.TP
+.B -assume_unrec_charset\fR=\fIID\fR:\fIMIMEname
+use this instead of unrecognized charsets.
+.TP
 .B -auth\fR=\fIID\fR:\fIPASSWD
-set authorization ID and password for protected documents at
-startup.
+set authorization ID and password for protected documents
+at startup.  Be sure to protect any script files which use
+this switch.
 .TP
 .B -base
 prepend a request URL comment and BASE tag to text/html
@@ -128,8 +138,11 @@ define a file where Lynx will report HTTP access codes.
 .B -fileversions 
 include all versions of files in local VMS directory listings.
 .TP
-.B -force_html 
+.B -force_html
 forces the first document to be interpreted as HTML.
+.TP
+.B -force_secure
+toggles forcing of the secure flag for SSL cookies.
 .TP
 .B -from
 toggles transmissions of From headers.
@@ -221,6 +234,11 @@ disable the retrieval status messages.
 .TP
 .B -number_links
 force numbering of links.
+.TP
+.B -pauth\fR=\fIID\fR:\fIPASSWD
+set authorization ID and password for a protected proxy
+server at startup.  Be sure to protect any script files
+which use this switch.
 .TP
 .B -popup
 toggles handling of single-choice SELECT options via

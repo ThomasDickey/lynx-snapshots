@@ -154,7 +154,7 @@ PUBLIC BOOL LYAddMapElement ARGS4(
 	char *,		map,
 	char *,		address,
 	char *,		title,
-				  BOOL,	intern_flag)
+	BOOL,		intern_flag)
 {
     LYMapElement *new = NULL;
     LYImageMap *theMap = NULL;
@@ -207,7 +207,6 @@ PUBLIC BOOL LYAddMapElement ARGS4(
  *  with a given address already exists in the LynxMaps
  *  structure. - FM
  */
-#if UNUSED
 PUBLIC BOOL LYHaveImageMap ARGS1(
 	char *,		address)
 {
@@ -225,7 +224,6 @@ PUBLIC BOOL LYHaveImageMap ARGS1(
 
     return FALSE;
 }
-#endif
 
 /* 	LYLoadIMGmap - F.Macrides (macrides@sci.wfeb.edu)
 **	------------
@@ -373,8 +371,8 @@ PRIVATE int LYLoadIMGmap ARGS4 (
     sprintf(buf,"<h2><em>MAP:</em>&nbsp;%s</h2>\n", MapAddress);
     (*target->isa->put_block)(target, buf, strlen(buf));
 
-    sprintf(buf, "<%s compact>\n", (keypad_mode == LINKS_ARE_NUMBERED) ?
-    				   "ul" : "ol");
+    sprintf(buf, "<%s compact>\n", ((keypad_mode == NUMBERS_AS_ARROWS) ?
+    				    "ol" : "ul"));
     (*target->isa->put_block)(target, buf, strlen(buf));
     cur = theMap->elements;
     while (NULL != (new=(LYMapElement *)HTList_nextObject(cur))) {
@@ -391,8 +389,8 @@ PRIVATE int LYLoadIMGmap ARGS4 (
 	(*target->isa->put_block)(target, MapTitle, strlen(MapTitle));
 	(*target->isa->put_block)(target, "</a>\n", 5);
     }
-    sprintf(buf,"</%s>\n</body>\n", (keypad_mode == LINKS_ARE_NUMBERED) ?
-    				      "ul" : "ol");
+    sprintf(buf,"</%s>\n</body>\n", ((keypad_mode == NUMBERS_AS_ARROWS) ?
+    				     "ol" : "ul"));
     (*target->isa->put_block)(target, buf, strlen(buf));
 
     (*target->isa->_free)(target);

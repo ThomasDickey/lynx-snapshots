@@ -52,10 +52,14 @@ PRIVATE int Current_Attr;
 
 #ifdef USE_SLANG
 PUBLIC unsigned int Lynx_Color_Flags = 0;
+PRIVATE int Current_Attr;
 PUBLIC BOOLEAN FullRefresh = FALSE;
 PUBLIC int curscr = 0;
 #ifdef SLANG_MBCS_HACK
-PUBLIC int PHYSICAL_SLtt_Screen_Cols = 10;/* will be set by size_change - kw */
+/*
+ *  Will be set by size_change. - KW
+ */
+PUBLIC int PHYSICAL_SLtt_Screen_Cols = 10;
 #endif /* SLANG_MBCS_HACK */
 
 PUBLIC void LY_SLrefresh NOARGS
@@ -84,14 +88,14 @@ PUBLIC void VTHome NOARGS
 }
 #endif /* VMS */
 
-PUBLIC void lynx_add_attr ARGS1(
+PUBLIC void LYaddAttr ARGS1(
 	int,		a)
 {
     Current_Attr |= a;
     SLsmg_set_color(Current_Attr);
 }
 
-PUBLIC void lynx_sub_attr ARGS1(
+PUBLIC void LYsubAttr ARGS1(
 	int,		a)
 {
     Current_Attr &= ~a;
@@ -264,6 +268,14 @@ PUBLIC void curses_w_style ARGS4(WINDOW*,win,int,style,int,dir,int,previous)
 		return;
 
 	case STACK_ON: /* remember the current attributes */
+	    	if (last_ptr > 127) {
+		    if (TRACE)
+			fprintf(stderr,"........... %s (0x%x) %s\r\n",
+				"attribute cache FULL, dropping last",
+				last_styles[last_ptr],
+				"in LynxChangStyle(curses_w_style)");
+		    last_ptr--;
+		}
 #ifndef _NCURSES_H
 		last_styles[last_ptr++] = getattrs(stdscr);
 #else
@@ -334,7 +346,7 @@ PUBLIC void curses_style ARGS3(int,style,int,dir,int,previous)
         curses_w_style(stdscr, style, dir, previous);
 }
 
-#if UNUSED
+#ifdef NOT_USED
 void attribute ARGS2(int,style,int,dir)
 {
         curses_style(style, dir, 0);
@@ -380,7 +392,7 @@ PRIVATE struct {
  * Map the SGR attributes (0-7) into ANSI colors, modified with the actual BOLD
  * attribute we'll get 16 colors.
  */
-PRIVATE void lynx_set_wattr ARGS1(WINDOW *, win)
+PRIVATE void LYsetWAttr ARGS1(WINDOW *, win)
 {
     if (lynx_uses_color) {
 	int code = 0;
@@ -484,31 +496,9 @@ PUBLIC void lynx_set_color ARGS1(int, a)
 PUBLIC void lynx_standout ARGS1(int, flag)
 {
     if (flag)
-	lynx_add_attr(A_REVERSE);
+	LYaddAttr(A_REVERSE);
     else
-	lynx_sub_attr(A_REVERSE);
-}
-
-PUBLIC void lynx_add_wattr ARGS2(WINDOW *, win, int, a)
-{
-    Current_Attr |= a;
-    lynx_set_wattr(win);
-}
-
-PUBLIC void lynx_add_attr ARGS1(int, a)
-{
-    lynx_add_wattr (stdscr, a);
-}
-
-PUBLIC void lynx_sub_wattr ARGS2(WINDOW *, win, int, a)
-{
-    Current_Attr &= ~a;
-    lynx_set_wattr(win);
-}
-
-PUBLIC void lynx_sub_attr ARGS1(int, a)
-{
-    lynx_sub_wattr (stdscr, a);
+	LYsubAttr(A_REVERSE);
 }
 
 PRIVATE void lynx_init_colors NOARGS
@@ -619,8 +609,8 @@ PUBLIC void start_curses NOARGS
    SLtty_set_suspend_state(1);
 #endif /* _WINDOWS */
 #ifdef SIGTSTP
-   if (!no_suspend)
-       signal(SIGTSTP, sl_suspend);
+    if (!no_suspend)
+	signal(SIGTSTP, sl_suspend);
 #endif /* SIGTSTP */
     signal(SIGINT, cleanup_sig);
 #endif /* !VMS */
@@ -631,7 +621,7 @@ PUBLIC void start_curses NOARGS
 
 #ifdef VMS
     /*
-     *  If we are VMS then do initscr() everytime start_curses()
+     *  If we are VMS then do initsrc() everytime start_curses()
      *  is called!
      */
     initscr();  /* start curses */
@@ -743,10 +733,6 @@ PUBLIC void stop_curses NOARGS
 #endif
 #if defined (DOSPATH) && !defined (USE_SLANG)
 	 clrscr();
-/*
-		  clear();
-		  refresh();
-*/
 #else
 
     /*
@@ -764,15 +750,17 @@ PUBLIC void stop_curses NOARGS
 
     LYCursesON = FALSE;
 
+#if defined(SIGTSTP) && defined(USE_SLANG)
 #ifndef VMS
-#ifdef SIGTSTP
    if (!no_suspend)
        signal(SIGTSTP, SIG_DFL);
-#endif /* SIGTSTP */
+#endif /* !VMS */
+#endif /* SIGTSTP && USE_SLANG */
+
+#ifndef VMS
     signal(SIGINT, SIG_DFL);
 #endif /* !VMS */
 }
-
 
 #ifdef VMS
 /*
@@ -807,7 +795,8 @@ PUBLIC BOOLEAN setup ARGS1(
 	 */
 	dump_output_immediately = TRUE;
         LYcols = 80;
-	keypad_mode = LINKS_ARE_NUMBERED;
+	if (keypad_mode == NUMBERS_AS_ARROWS)
+	    keypad_mode = LINKS_ARE_NUMBERED;
 	status = mainloop();
         (void) signal (SIGHUP, SIG_DFL);
         (void) signal (SIGTERM, SIG_DFL);
@@ -841,6 +830,10 @@ PUBLIC BOOLEAN setup ARGS1(
 
     LYlines = LINES;
     LYcols = COLS;
+    if (LYlines <= 0)
+        LYlines = 24;
+    if (LYcols <= 0)
+        LYcols = 80;
 
     return(TRUE);
 }
@@ -903,6 +896,10 @@ PUBLIC BOOLEAN setup ARGS1(
 
     LYlines = LINES;
     LYcols = COLS;
+    if (LYlines <= 0)
+        LYlines = 24;
+    if (LYcols <= 0)
+        LYcols = 80;
 
     return(1);
 }
@@ -926,7 +923,59 @@ PRIVATE int dumbterm ARGS1(
 	dumb = TRUE;
     return(dumb);
 }
+
+#ifdef FANCY_CURSES
+#ifndef USE_COLOR_STYLE
+#if USE_COLOR_TABLE
+PUBLIC void LYaddWAttr ARGS2(
+	WINDOW *,	win,
+	int,		a)
+{
+    Current_Attr |= a;
+    LYsetWAttr(win);
+}
+
+PUBLIC void LYaddAttr ARGS1(
+	int,		a)
+{
+    LYaddWAttr(stdscr, a);
+}
+
+PUBLIC void LYsubWAttr ARGS2(
+	WINDOW *,	win,
+	int,		a)
+{
+    Current_Attr &= ~a;
+    LYsetWAttr(win);
+}
+
+PUBLIC void LYsubAttr ARGS1(
+	int,		a)
+{
+    LYsubWAttr(stdscr, a);
+}
+#endif
+#endif /* USE_COLOR_STYLE */
+#endif /* FANCY_CURSES */
 #endif /* VMS */
+
+PUBLIC void LYstartTargetEmphasis NOARGS
+{
+#if defined(FANCY_CURSES) || defined(USE_SLANG)
+    start_bold();
+    start_reverse();
+#endif /* FANCY_CURSES || USE_SLANG */
+    start_underline();
+}
+
+PUBLIC void LYstopTargetEmphasis NOARGS
+{
+    stop_underline();
+#if defined(FANCY_CURSES) || defined(USE_SLANG)
+    stop_reverse();
+    stop_bold();
+#endif /* FANCY_CURSES || USE_SLANG */
+}
 
 #ifdef VMS
 /*
@@ -1471,7 +1520,9 @@ PUBLIC void lynx_stop_title_color NOARGS
 {
 }
 
-PUBLIC void lynx_start_link_color ARGS1(int, flag)
+PUBLIC void lynx_start_link_color ARGS2(
+	int,	flag,
+	int,	pending)
 {
     if (flag) {
 	/* makes some terminals work wrong because
@@ -1480,26 +1531,48 @@ PUBLIC void lynx_start_link_color ARGS1(int, flag)
 	 */
 	/* start_bold();  */
 	start_reverse();
-#if defined(USE_SLANG) || defined(FANCY_CURSES)
+#if defined(USE_SLANG)
+	if (SLtt_Use_Ansi_Colors)
+	    start_underline ();
+#endif /* USE_SLANG */
+#if defined(FANCY_CURSES)
 	start_underline ();
 #endif /* USE_SLANG */
      } else {
 	start_bold();
+	/*
+	 *  Make sure when flag is OFF that "unhighlighted" links
+	 *  will be underlined if appropriate. - LE & FM
+	 */
+	if (pending)
+	    start_underline();
      }
 }
 
-PUBLIC void lynx_stop_link_color ARGS1(int, flag)
+PUBLIC void lynx_stop_link_color ARGS2(
+	int,	flag,
+	int,	pending)
 {
 #ifdef USE_COLOR_STYLE
     LynxChangeStyle(flag == ON ? s_alink : s_a, ABS_OFF, 0);
 #else
     if (flag) {
 	stop_reverse();
-#if defined(USE_SLANG) || defined(FANCY_CURSES)
+#if defined(USE_SLANG)
+	if (SLtt_Use_Ansi_Colors)
 	stop_underline ();
 #endif /* USE_SLANG */
-    } else
+#if defined(FANCY_CURSES)
+	stop_underline ();
+#endif /* USE_SLANG */
+    } else {
 	stop_bold();
+	/*
+	 *  If underlining was turned on above, turn it off. - LE & FM
+	 */
+	if (pending)
+	    stop_underline();
+    }
 #endif
 }
 

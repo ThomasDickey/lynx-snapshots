@@ -12,7 +12,7 @@
 
 PUBLIC int hash_table[HASHSIZE]; /* 32K should be big enough */
 
-#if UNUSED
+#ifdef NOT_USED
 PUBLIC int hash_code_rp ARGS1(char*,string)
 {
 	char* hash_ptr = string;
@@ -27,7 +27,20 @@ PUBLIC int hash_code_rp ARGS1(char*,string)
 }
 #endif
 
+/*
+ *	This is the same function as the private HASH_FUNCTION() in HTAnchor.c,
+ *      but with a different value for HASH_SIZE.
+ */ 
+
+#define HASH_SIZE 8193		/* Arbitrary prime. Memory/speed tradeoff */
+
 PUBLIC int hash_code ARGS1 (char*, string)
 {
-	return HASH_FUNCTION(string);
+    int hash;
+    unsigned char *p;
+
+    for (p = (unsigned char *)string, hash = 0; *p; p++)
+    	hash = (int) (hash * 3 + (*(unsigned char *)p)) % HASH_SIZE;
+
+    return hash;
 }

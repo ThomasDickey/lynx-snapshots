@@ -30,7 +30,7 @@
 
 #ifdef VMS
 #define FANCY_CURSES
-#endif
+#endif /* VMS */
 
 /*
  *	CR may be defined before the curses.h include occurs.
@@ -108,6 +108,8 @@ extern int LYcols;   /* replaces COLS */
 extern void start_curses NOPARAMS;
 extern void stop_curses NOPARAMS;
 extern BOOLEAN setup PARAMS((char *terminal));
+extern void LYstartTargetEmphasis NOPARAMS;
+extern void LYstopTargetEmphasis NOPARAMS;
 
 #ifdef VMS
 extern void VMSexit();
@@ -121,21 +123,21 @@ extern void VMSbox PARAMS((WINDOW *win, int height, int width));
 #endif /* VMS */
 
 #if defined(USE_COLOR_STYLE)
-extern void curses_css PARAMS((char * name,int dir));
-extern void curses_style PARAMS((int style,int dir,int previous));
-extern void curses_w_style PARAMS((WINDOW* win,int style,int dir,int previous));
-extern void setHashStyle PARAMS((int style,int color,int cattr,int mono,char* element));
-extern void setStyle PARAMS((int style,int color,int cattr,int mono));
-extern void wcurses_css PARAMS((WINDOW * win,char* name,int dir));
+extern void curses_css PARAMS((char * name, int dir));
+extern void curses_style PARAMS((int style, int dir, int previous));
+extern void curses_w_style PARAMS((WINDOW* win, int style, int dir, int previous));
+extern void setHashStyle PARAMS((int style, int color, int cattr, int mono, char* element));
+extern void setStyle PARAMS((int style, int color, int cattr, int mono));
+extern void wcurses_css PARAMS((WINDOW * win, char* name, int dir));
 #define LynxChangeStyle curses_style
 #else
-extern int slang_style PARAMS((int style,int dir,int previous));
+extern int slang_style PARAMS((int style, int dir, int previous));
 #define LynxChangeStyle slang_style
 #endif /* USE_COLOR_STYLE */
 
 #if USE_COLOR_TABLE
-extern void lynx_add_attr PARAMS((int a));
-extern void lynx_sub_attr PARAMS((int a));
+extern void LYaddAttr PARAMS((int a));
+extern void LYsubAttr PARAMS((int a));
 extern void lynx_setup_colors NOPARAMS;
 extern unsigned int Lynx_Color_Flags;
 #endif
@@ -147,18 +149,20 @@ extern unsigned int Lynx_Color_Flags;
 
 #define SL_LYNX_USE_COLOR	1
 #define SL_LYNX_USE_BLINK	2
-#define start_bold()      lynx_add_attr(1)
-#define start_reverse()   lynx_add_attr(2)
-#define start_underline() lynx_add_attr(4)
-#define stop_bold()       lynx_sub_attr(1)
-#define stop_reverse()    lynx_sub_attr(2)
-#define stop_underline()  lynx_sub_attr(4)
+#define start_bold()      	LYaddAttr(1)
+#define start_reverse()   	LYaddAttr(2)
+#define start_underline() 	LYaddAttr(4)
+#define stop_bold()       	LYsubAttr(1)
+#define stop_reverse()    	LYsubAttr(2)
+#define stop_underline()  	LYsubAttr(4)
 
 #ifdef FANCY_CURSES
 #undef FANCY_CURSES
 #endif /* FANCY_CURSES */
 
-/* Map some curses functions to slang functions. */
+/*
+ *  Map some curses functions to slang functions.
+ */
 #define stdscr NULL
 #ifdef SLANG_MBCS_HACK
 extern int PHYSICAL_SLtt_Screen_Cols;
@@ -203,78 +207,107 @@ extern void VTHome NOPARAMS;
 #ifdef FANCY_CURSES
 
 #ifdef VMS
+/*
+ *  For VMS curses, [w]setattr() and [w]clrattr()
+ *  add and subtract, respectively, the attributes
+ *  _UNDERLINE, _BOLD, _REVERSE, and _BLINK. - FM
+ */
 #ifdef UNDERLINE_LINKS
-#define start_bold()      setattr(_UNDERLINE)
-#define stop_bold()       clrattr(_UNDERLINE)
-#define start_underline() setattr(_BOLD)
-#define stop_underline()  clrattr(_BOLD)
+#define start_bold()		setattr(_UNDERLINE)
+#define stop_bold()		clrattr(_UNDERLINE)
+#define start_underline()	setattr(_BOLD)
+#define stop_underline()	clrattr(_BOLD)
 #else /* not UNDERLINE_LINKS */
-#define start_bold()      setattr(_BOLD)
-#define stop_bold()       clrattr(_BOLD)
-#define start_underline() setattr(_UNDERLINE)
-#define stop_underline()  clrattr(_UNDERLINE)
+#define start_bold()		setattr(_BOLD)
+#define stop_bold()		clrattr(_BOLD)
+#define start_underline()	setattr(_UNDERLINE)
+#define stop_underline()	clrattr(_UNDERLINE)
 #endif /* UNDERLINE_LINKS */
-#define start_reverse()   setattr(_REVERSE)
-#define wstart_reverse(a)   wsetattr(a,_REVERSE)
-#define wstop_underline(a)  wclrattr(a,_UNDERLINE)
-#define stop_reverse()    clrattr(_REVERSE)
-#define wstop_reverse(a)    wclrattr(a,_REVERSE)
+#define start_reverse()		setattr(_REVERSE)
+#define wstart_reverse(a)	wsetattr(a, _REVERSE)
+#define wstop_underline(a)	wclrattr(a, _UNDERLINE)
+#define stop_reverse()		clrattr(_REVERSE)
+#define wstop_reverse(a)	wclrattr(a, _REVERSE)
 
-#else /* NOT VMS: */
+#else /* Not VMS: */
 
+/*
+ *  For Unix FANCY_FANCY curses we interpose
+ *  our own functions to add or subtract the
+ *  A_foo attributes. - FM
+ */
 #if USE_COLOR_TABLE
-extern void lynx_add_wattr PARAMS((WINDOW *, int));
-extern void lynx_sub_wattr PARAMS((WINDOW *, int));
-extern void lynx_set_color PARAMS((int));
-extern void lynx_standout  PARAMS((int));
+extern void LYaddWAttr PARAMS((WINDOW *win, int a));
+extern void LYaddAttr PARAMS((int a));
+extern void LYsubWAttr PARAMS((WINDOW *win, int a));
+extern void LYsubAttr PARAMS((int a));
+extern void LYaddWAttr PARAMS((WINDOW *win, int a));
+extern void LYsubWAttr PARAMS((WINDOW *win, int a));
+extern void lynx_set_color PARAMS((int a));
+extern void lynx_standout  PARAMS((int a));
 extern int  lynx_chg_color PARAMS((int, int, int));
 #undef  standout
-#define standout() lynx_standout(TRUE)
+#define standout() 		lynx_standout(TRUE)
 #undef  standend
-#define standend() lynx_standout(FALSE)
+#define standend() 		lynx_standout(FALSE)
 #else
-#define lynx_add_attr	attrset
-#define lynx_add_wattr	wattrset
-#define lynx_sub_attr	attroff
-#define lynx_sub_wattr	wattroff
+#define LYaddAttr		attrset
+#define LYaddWAttr		wattrset
+#define LYsubAttr		attroff
+#define LYsubWAttr		wattroff
 #endif
 
 #ifdef UNDERLINE_LINKS
-#define start_bold()      lynx_add_attr(A_UNDERLINE)
-#define stop_bold()       lynx_sub_attr(A_UNDERLINE)
-#define start_underline() lynx_add_attr(A_BOLD)
-#define stop_underline()  lynx_sub_attr(A_BOLD)
+#define start_bold()		LYaddAttr(A_UNDERLINE)
+#define stop_bold()		LYsubAttr(A_UNDERLINE)
+#define start_underline()	LYaddAttr(A_BOLD)
+#define stop_underline()	LYsubAttr(A_BOLD)
 #else /* not UNDERLINE_LINKS: */
-#define start_bold()      lynx_add_attr(A_BOLD)
-#define stop_bold()       lynx_sub_attr(A_BOLD)
-#define start_underline() lynx_add_attr(A_UNDERLINE)
-#define stop_underline()  lynx_sub_attr(A_UNDERLINE)
+#define start_bold()		LYaddAttr(A_BOLD)
+#define stop_bold()		LYsubAttr(A_BOLD)
+#define start_underline()	LYaddAttr(A_UNDERLINE)
+#define stop_underline()	LYsubAttr(A_UNDERLINE)
 #endif /* UNDERLINE_LINKS */
 #if defined(SNAKE) && defined(HP_TERMINAL)
-#define start_reverse()   lynx_add_wattr(stdscr,A_DIM)
-#define wstart_reverse(a) lynx_add_wattr(a,A_DIM)
-#define stop_reverse()    lynx_sub_wattr(stdscr,A_DIM)
-#define wstop_reverse(a)  lynx_sub_wattr(a,A_DIM)
+#define start_reverse()		LYaddWAttr(stdscr, A_DIM)
+#define wstart_reverse(a)	LYaddWAttr(a, A_DIM)
+#define stop_reverse()		LYsubWAttr(stdscr, A_DIM)
+#define wstop_reverse(a)	LYsubWAttr(a, A_DIM)
 #else
-#define start_reverse()   lynx_add_attr(A_REVERSE)
-#define wstart_reverse(a) lynx_add_wattr(a,A_REVERSE)
-#define stop_reverse()    lynx_sub_attr(A_REVERSE)
-#define wstop_reverse(a)  lynx_sub_wattr(a,A_REVERSE)
+#define start_reverse()		LYaddAttr(A_REVERSE)
+#define wstart_reverse(a)	LYaddWAttr(a, A_REVERSE)
+#define stop_reverse()		LYsubAttr(A_REVERSE)
+#define wstop_reverse(a)	LYsubWAttr(a, A_REVERSE)
 #endif /* SNAKE && HP_TERMINAL */
 #endif /* VMS */
 
 #else /* Not FANCY_CURSES: */
 
-#define start_bold()      standout()  
-#define start_underline() /* nothing */
-#define start_reverse()   standout()
-#define wstart_reverse(a)   wstandout(a)
-#define stop_bold()       standend()  
-#define stop_underline()  /* nothing */
-#define stop_reverse()    standend()
-#define wstop_reverse(a)    wstandend(a)
+/*
+ *  We only have [w]standout() and [w]standin(),
+ *  so we'll use them synonymously for bold and
+ *  reverse, and ignore underline. - FM
+ */
+#define start_bold()		standout()  
+#define start_underline()	1  /* nothing */
+#define start_reverse()		standout()
+#define wstart_reverse(a)	wstandout(a)
+#define stop_bold()		standend()  
+#define stop_underline()	1  /* nothing */
+#define stop_reverse()		standend()
+#define wstop_reverse(a)	wstandend(a)
 
 #endif /* FANCY_CURSES */
+#endif /* USE_SLANG */
+
+#ifdef USE_SLANG
+#define LYGetYX(y, x)   y = SLsmg_get_row(), x = SLsmg_get_column()
+#else
+#ifdef getyx
+#define LYGetYX(y, x)   getyx(stdscr, y, x)
+#else
+#define LYGetYX(y, x)   y = stdscr->_cury, x = stdscr->_curx
+#endif /* getyx */
 #endif /* USE_SLANG */
 
 extern void lynx_enable_mouse PARAMS((int));
@@ -284,8 +317,8 @@ extern void lynx_start_bold_color NOPARAMS;
 extern void lynx_stop_bold_color NOPARAMS;
 extern void lynx_start_title_color NOPARAMS;
 extern void lynx_stop_title_color NOPARAMS;
-extern void lynx_start_link_color PARAMS((int));
-extern void lynx_stop_link_color PARAMS((int));
+extern void lynx_start_link_color PARAMS((int flag, int pending));
+extern void lynx_stop_link_color PARAMS((int flag, int pending));
 extern void lynx_stop_target_color NOPARAMS;
 extern void lynx_start_target_color NOPARAMS;
 extern void lynx_start_status_color NOPARAMS;
@@ -297,6 +330,5 @@ extern void lynx_stop_prompt_color NOPARAMS;
 extern void lynx_start_radio_color NOPARAMS;
 extern void lynx_stop_radio_color NOPARAMS;
 extern void lynx_stop_all_colors NOPARAMS;
-
 
 #endif /* LYCURSES_H */

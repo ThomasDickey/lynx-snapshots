@@ -151,8 +151,11 @@ extern void HText_appendHorizontalRule PARAMS((HText * text));
    nested.
    
  */
-extern void HText_beginAnchor PARAMS((HText * text, HTChildAnchor * anc));
-extern void HText_endAnchor PARAMS((HText * text));
+extern int HText_beginAnchor PARAMS((
+	HText *		text,
+	BOOL		underline,
+	HTChildAnchor *	anc));
+extern void HText_endAnchor PARAMS((HText * text, int number));
 
 
 /*

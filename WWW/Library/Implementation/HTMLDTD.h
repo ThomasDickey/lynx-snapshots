@@ -51,6 +51,7 @@ typedef enum _HTMLElement {
 	HTML_BODYTEXT,
 	HTML_BQ,
 	HTML_BR,
+	HTML_BUTTON,
         HTML_CAPTION,
 	HTML_CENTER,
 	HTML_CITE,
@@ -87,6 +88,7 @@ typedef enum _HTMLElement {
 	HTML_HTML,
 	HTML_HY,
         HTML_I,
+        HTML_IFRAME,
 	HTML_IMG,
 	HTML_INPUT,
         HTML_INS,
@@ -94,6 +96,7 @@ typedef enum _HTMLElement {
         HTML_KBD,
         HTML_KEYGEN,
 	HTML_LABEL,
+	HTML_LEGEND,
 	HTML_LH,
 	HTML_LI,
 	HTML_LINK,
@@ -146,7 +149,7 @@ typedef enum _HTMLElement {
         HTML_WBR,
 	HTML_XMP } HTMLElement;
 
-#define HTML_ELEMENTS 115
+#define HTML_ELEMENTS 118
 
 /*
 
@@ -194,7 +197,8 @@ Attribute numbers
 #define HTML_ADDRESS_LANG       4
 #define HTML_ADDRESS_NOWRAP     5
 #define HTML_ADDRESS_STYLE      6
-#define HTML_ADDRESS_ATTRIBUTES 7
+#define HTML_ADDRESS_TITLE      7
+#define HTML_ADDRESS_ATTRIBUTES 8
 
 #define	HTML_APPLET_ALIGN       0
 #define	HTML_APPLET_ALT         1
@@ -237,7 +241,8 @@ Attribute numbers
 
 #define HTML_BASE_HREF          0
 #define	HTML_BASE_TARGET        1
-#define HTML_BASE_ATTRIBUTES    2
+#define HTML_BASE_TITLE         2
+#define HTML_BASE_ATTRIBUTES    3
 
 #define HTML_BGSOUND_CLASS      0
 #define HTML_BGSOUND_CLEAR      1
@@ -247,31 +252,8 @@ Attribute numbers
 #define HTML_BGSOUND_LOOP       5
 #define HTML_BGSOUND_SRC        6
 #define HTML_BGSOUND_STYLE      7
-#define HTML_BGSOUND_ATTRIBUTES 8
-
-#define HTML_BQ_CLASS           0
-#define HTML_BQ_CLEAR           1
-#define HTML_BQ_DIR             2
-#define HTML_BQ_ID              3
-#define HTML_BQ_LANG            4
-#define HTML_BQ_NOWRAP          5
-#define HTML_BQ_STYLE           6
-#define HTML_BQ_ATTRIBUTES      7
-
-#define HTML_BODYTEXT_CLASS     0
-#define HTML_BODYTEXT_CLEAR     1
-#define HTML_BODYTEXT_DATA      2
-#define HTML_BODYTEXT_DIR       3
-#define HTML_BODYTEXT_ID        4
-#define HTML_BODYTEXT_LANG      5
-#define HTML_BODYTEXT_NAME      6
-#define HTML_BODYTEXT_OBJECT    7
-#define HTML_BODYTEXT_REF       8
-#define HTML_BODYTEXT_STYLE     9
-#define HTML_BODYTEXT_TYPE     10
-#define HTML_BODYTEXT_VALUE    11
-#define HTML_BODYTEXT_VALUETYPE  12
-#define HTML_BODYTEXT_ATTRIBUTES 13
+#define HTML_BGSOUND_TITLE      8
+#define HTML_BGSOUND_ATTRIBUTES 9
 
 #define HTML_BODY_ALINK         0
 #define HTML_BODY_BACKGROUND    1
@@ -286,8 +268,51 @@ Attribute numbers
 #define HTML_BODY_ONUNLOAD     10
 #define HTML_BODY_STYLE        11
 #define HTML_BODY_TEXT         12
-#define HTML_BODY_VLINK        13
-#define HTML_BODY_ATTRIBUTES   14
+#define HTML_BODY_TITLE        13
+#define HTML_BODY_VLINK        14
+#define HTML_BODY_ATTRIBUTES   15
+
+#define HTML_BODYTEXT_CLASS     0
+#define HTML_BODYTEXT_CLEAR     1
+#define HTML_BODYTEXT_DATA      2
+#define HTML_BODYTEXT_DIR       3
+#define HTML_BODYTEXT_ID        4
+#define HTML_BODYTEXT_LANG      5
+#define HTML_BODYTEXT_NAME      6
+#define HTML_BODYTEXT_OBJECT    7
+#define HTML_BODYTEXT_REF       8
+#define HTML_BODYTEXT_STYLE     9
+#define HTML_BODYTEXT_TITLE    10
+#define HTML_BODYTEXT_TYPE     11
+#define HTML_BODYTEXT_VALUE    12
+#define HTML_BODYTEXT_VALUETYPE  13
+#define HTML_BODYTEXT_ATTRIBUTES 14
+
+#define HTML_BQ_CLASS           0
+#define HTML_BQ_CLEAR           1
+#define HTML_BQ_DIR             2
+#define HTML_BQ_ID              3
+#define HTML_BQ_LANG            4
+#define HTML_BQ_NOWRAP          5
+#define HTML_BQ_STYLE           6
+#define HTML_BQ_TITLE           7
+#define HTML_BQ_ATTRIBUTES      8
+
+#define HTML_BUTTON_CLASS      0
+#define HTML_BUTTON_CLEAR      1
+#define HTML_BUTTON_DIR        2
+#define HTML_BUTTON_DISABLED   3
+#define HTML_BUTTON_ID         4
+#define HTML_BUTTON_LANG       5
+#define HTML_BUTTON_NAME       6
+#define HTML_BUTTON_ONFOCUS    7
+#define HTML_BUTTON_ONBLUR     8
+#define HTML_BUTTON_STYLE      9
+#define HTML_BUTTON_TABINDEX  10
+#define HTML_BUTTON_TITLE     11
+#define HTML_BUTTON_TYPE      12
+#define HTML_BUTTON_VALUE     13
+#define HTML_BUTTON_ATTRIBUTES 14
 
 #define HTML_CAPTION_ACCESSKEY  0
 #define HTML_CAPTION_ALIGN      1
@@ -297,7 +322,8 @@ Attribute numbers
 #define HTML_CAPTION_ID         5
 #define HTML_CAPTION_LANG       6
 #define HTML_CAPTION_STYLE      7
-#define HTML_CAPTION_ATTRIBUTES 8
+#define HTML_CAPTION_TITLE      8
+#define HTML_CAPTION_ATTRIBUTES 9
 
 #define HTML_COL_ALIGN          0
 #define HTML_COL_CHAR           1
@@ -309,9 +335,10 @@ Attribute numbers
 #define HTML_COL_LANG           7
 #define HTML_COL_SPAN           8
 #define HTML_COL_STYLE          9
-#define HTML_COL_VALIGN        10
-#define HTML_COL_WIDTH         11
-#define HTML_COL_ATTRIBUTES    12
+#define HTML_COL_TITLE         10
+#define HTML_COL_VALIGN        11
+#define HTML_COL_WIDTH         12
+#define HTML_COL_ATTRIBUTES    13
 
 #define HTML_CREDIT_CLASS       0
 #define HTML_CREDIT_CLEAR       1
@@ -319,7 +346,8 @@ Attribute numbers
 #define HTML_CREDIT_ID          3
 #define HTML_CREDIT_LANG        4
 #define HTML_CREDIT_STYLE       5
-#define HTML_CREDIT_ATTRIBUTES  6
+#define HTML_CREDIT_TITLE       6
+#define HTML_CREDIT_ATTRIBUTES  7
 
 #define HTML_DIV_ALIGN          0
 #define HTML_DIV_CLASS          1
@@ -328,7 +356,8 @@ Attribute numbers
 #define HTML_DIV_ID             4
 #define HTML_DIV_LANG           5
 #define HTML_DIV_STYLE          6
-#define HTML_DIV_ATTRIBUTES     7
+#define HTML_DIV_TITLE          7
+#define HTML_DIV_ATTRIBUTES     8
 
 #define HTML_DL_CLASS           0
 #define HTML_DL_CLEAR           1
@@ -337,7 +366,8 @@ Attribute numbers
 #define HTML_DL_ID              4
 #define HTML_DL_LANG            5
 #define HTML_DL_STYLE           6
-#define HTML_DL_ATTRIBUTES      7
+#define HTML_DL_TITLE           7
+#define HTML_DL_ATTRIBUTES      8
 
 #define HTML_EMBED_ALIGN        0
 #define HTML_EMBED_ALT          1
@@ -356,10 +386,11 @@ Attribute numbers
 #define HTML_EMBED_PARAMS      14
 #define HTML_EMBED_SRC         15
 #define HTML_EMBED_STYLE       16
-#define HTML_EMBED_UNITS       17
-#define HTML_EMBED_USEMAP      18
-#define HTML_EMBED_WIDTH       19
-#define HTML_EMBED_ATTRIBUTES  20
+#define HTML_EMBED_TITLE       17
+#define HTML_EMBED_UNITS       18
+#define HTML_EMBED_USEMAP      19
+#define HTML_EMBED_WIDTH       20
+#define HTML_EMBED_ATTRIBUTES  21
 
 #define HTML_FIELDSET_CLASS     0
 #define HTML_FIELDSET_CLEAR     1
@@ -384,9 +415,10 @@ Attribute numbers
 #define HTML_FIG_NOFLOW        11
 #define HTML_FIG_SRC           12
 #define HTML_FIG_STYLE         13
-#define HTML_FIG_UNITS         14
-#define HTML_FIG_WIDTH         15
-#define HTML_FIG_ATTRIBUTES    16
+#define HTML_FIG_TITLE         14
+#define HTML_FIG_UNITS         15
+#define HTML_FIG_WIDTH         16
+#define HTML_FIG_ATTRIBUTES    17
 
 #define HTML_FN_CLASS           0
 #define HTML_FN_CLEAR           1
@@ -394,7 +426,8 @@ Attribute numbers
 #define HTML_FN_ID              3
 #define HTML_FN_LANG            4
 #define HTML_FN_STYLE           5
-#define HTML_FN_ATTRIBUTES      6
+#define HTML_FN_TITLE           6
+#define HTML_FN_ATTRIBUTES      7
 
 #define HTML_FONT_CLASS         0
 #define HTML_FONT_CLEAR         1
@@ -424,13 +457,14 @@ Attribute numbers
 #define HTML_FORM_TITLE        13
 #define HTML_FORM_ATTRIBUTES   14
 
-#define HTML_FRAME_MARGINHEIGHT 0
-#define HTML_FRAME_MARGINWIDTH  1
-#define HTML_FRAME_NAME         2
-#define HTML_FRAME_NORESIZE     3
-#define HTML_FRAME_SCROLLING    4
-#define HTML_FRAME_SRC          5
-#define HTML_FRAME_ATTRIBUTES   6
+#define HTML_FRAME_ID           0
+#define HTML_FRAME_MARGINHEIGHT 1
+#define HTML_FRAME_MARGINWIDTH  2
+#define HTML_FRAME_NAME         3
+#define HTML_FRAME_NORESIZE     4
+#define HTML_FRAME_SCROLLING    5
+#define HTML_FRAME_SRC          6
+#define HTML_FRAME_ATTRIBUTES   7
 
 #define HTML_FRAMESET_COLS      0
 #define HTML_FRAMESET_ROWS      1
@@ -442,7 +476,8 @@ Attribute numbers
 #define HTML_GEN_ID             3
 #define HTML_GEN_LANG           4
 #define HTML_GEN_STYLE          5
-#define HTML_GEN_ATTRIBUTES     6
+#define HTML_GEN_TITLE          6
+#define HTML_GEN_ATTRIBUTES     7
 
 #define HTML_H_ALIGN            0
 #define HTML_H_CLASS            1
@@ -457,7 +492,8 @@ Attribute numbers
 #define HTML_H_SKIP            10
 #define HTML_H_SRC             11
 #define HTML_H_STYLE           12
-#define HTML_H_ATTRIBUTES      13
+#define HTML_H_TITLE           13
+#define HTML_H_ATTRIBUTES      14
 
 #define HTML_HR_ALIGN           0
 #define HTML_HR_CLASS           1
@@ -469,8 +505,22 @@ Attribute numbers
 #define HTML_HR_SIZE            7
 #define HTML_HR_SRC             8
 #define HTML_HR_STYLE           9
-#define HTML_HR_WIDTH          10
-#define HTML_HR_ATTRIBUTES     11
+#define HTML_HR_TITLE          10
+#define HTML_HR_WIDTH          11
+#define HTML_HR_ATTRIBUTES     12
+
+#define HTML_IFRAME_ALIGN       0
+#define HTML_IFRAME_FRAMEBORDER 1
+#define HTML_IFRAME_HEIGHT      2
+#define HTML_IFRAME_ID          3
+#define HTML_IFRAME_MARGINHEIGHT 4
+#define HTML_IFRAME_MARGINWIDTH  5
+#define HTML_IFRAME_NAME        6
+#define HTML_IFRAME_SCROLLING   7
+#define HTML_IFRAME_SRC         8
+#define HTML_IFRAME_STYLE       9
+#define HTML_IFRAME_WIDTH      10
+#define HTML_IFRAME_ATTRIBUTES 11
 
 #define HTML_IMG_ALIGN          0
 #define HTML_IMG_ALT            1
@@ -528,9 +578,11 @@ Attribute numbers
 #define HTML_ISINDEX_ACTION     0  /* Treat as synonym for HREF. - FM */
 #define HTML_ISINDEX_DIR        1
 #define HTML_ISINDEX_HREF       2  /* HTML 3.0 "action". - FM */
-#define HTML_ISINDEX_LANG       3
-#define HTML_ISINDEX_PROMPT     4  /* HTML 3.0 "prompt". - FM */
-#define HTML_ISINDEX_ATTRIBUTES 5
+#define HTML_ISINDEX_ID         3
+#define HTML_ISINDEX_LANG       4
+#define HTML_ISINDEX_PROMPT     5  /* HTML 3.0 "prompt". - FM */
+#define HTML_ISINDEX_TITLE      6
+#define HTML_ISINDEX_ATTRIBUTES 7
 
 #define HTML_KEYGEN_CHALLENGE   0
 #define HTML_KEYGEN_CLASS       1
@@ -539,18 +591,8 @@ Attribute numbers
 #define HTML_KEYGEN_LANG        4
 #define HTML_KEYGEN_NAME        5
 #define HTML_KEYGEN_STYLE       6
-#define HTML_KEYGEN_ATTRIBUTES  7
-
-#define HTML_LINK_CLASS         0
-#define HTML_LINK_HREF          1
-#define HTML_LINK_ID            2
-#define HTML_LINK_REL           3
-#define HTML_LINK_REV           4
-#define HTML_LINK_STYLE         5
-#define	HTML_LINK_TARGET        6
-#define HTML_LINK_TITLE         7
-#define HTML_LINK_TYPE          8
-#define HTML_LINK_ATTRIBUTES    9
+#define HTML_KEYGEN_TITLE       7
+#define HTML_KEYGEN_ATTRIBUTES  8
 
 #define HTML_LABEL_ACCESSKEY    0
 #define HTML_LABEL_CLASS        1
@@ -564,6 +606,17 @@ Attribute numbers
 #define HTML_LABEL_TITLE        9
 #define HTML_LABEL_ATTRIBUTES  10
 
+#define HTML_LEGEND_ACCESSKEY   0
+#define HTML_LEGEND_ALIGN       1
+#define HTML_LEGEND_CLASS       2
+#define HTML_LEGEND_CLEAR       3
+#define HTML_LEGEND_DIR         4
+#define HTML_LEGEND_ID          5
+#define HTML_LEGEND_LANG        6
+#define HTML_LEGEND_STYLE       7
+#define HTML_LEGEND_TITLE       8
+#define HTML_LEGEND_ATTRIBUTES  9
+
 #define HTML_LI_CLASS           0
 #define HTML_LI_CLEAR           1
 #define HTML_LI_DINGBAT         2
@@ -574,9 +627,22 @@ Attribute numbers
 #define HTML_LI_SKIP            7
 #define HTML_LI_SRC             8
 #define HTML_LI_STYLE           9
-#define HTML_LI_TYPE           10
-#define HTML_LI_VALUE          11
-#define HTML_LI_ATTRIBUTES     12
+#define HTML_LI_TITLE          10
+#define HTML_LI_TYPE           11
+#define HTML_LI_VALUE          12
+#define HTML_LI_ATTRIBUTES     13
+
+#define HTML_LINK_CLASS         0
+#define HTML_LINK_HREF          1
+#define HTML_LINK_ID            2
+#define HTML_LINK_MEDIA         3
+#define HTML_LINK_REL           4
+#define HTML_LINK_REV           5
+#define HTML_LINK_STYLE         6
+#define	HTML_LINK_TARGET        7
+#define HTML_LINK_TITLE         8
+#define HTML_LINK_TYPE          9
+#define HTML_LINK_ATTRIBUTES   10
 
 #define HTML_MAP_CLASS          0
 #define HTML_MAP_CLEAR          1
@@ -595,7 +661,8 @@ Attribute numbers
 #define HTML_MATH_ID            4
 #define HTML_MATH_LANG          5
 #define HTML_MATH_STYLE         6
-#define HTML_MATH_ATTRIBUTES    7
+#define HTML_MATH_TITLE         7
+#define HTML_MATH_ATTRIBUTES    8
 
 #define HTML_META_CONTENT       0
 #define HTML_META_HTTP_EQUIV    1  /* For parsing in HTML.c - FM */
@@ -613,7 +680,8 @@ Attribute numbers
 #define HTML_NOTE_ROLE          6 /* Old name for CLASS - FM */
 #define HTML_NOTE_SRC           7
 #define HTML_NOTE_STYLE         8
-#define HTML_NOTE_ATTRIBUTES    9
+#define HTML_NOTE_TITLE         9
+#define HTML_NOTE_ATTRIBUTES   10
 
 #define HTML_OBJECT_ALIGN       0
 #define HTML_OBJECT_BORDER      1
@@ -652,8 +720,9 @@ Attribute numbers
 #define HTML_OL_SEQNUM          7
 #define HTML_OL_START           8
 #define HTML_OL_STYLE           9
-#define HTML_OL_TYPE           10
-#define HTML_OL_ATTRIBUTES     11
+#define HTML_OL_TITLE          10
+#define HTML_OL_TYPE           11
+#define HTML_OL_ATTRIBUTES     12
 
 #define HTML_OPTION_CLASS       0
 #define HTML_OPTION_CLEAR       1
@@ -665,8 +734,9 @@ Attribute numbers
 #define HTML_OPTION_SELECTED    7
 #define HTML_OPTION_SHAPE       8
 #define HTML_OPTION_STYLE       9
-#define HTML_OPTION_VALUE      10
-#define HTML_OPTION_ATTRIBUTES 11
+#define HTML_OPTION_TITLE      10
+#define HTML_OPTION_VALUE      11
+#define HTML_OPTION_ATTRIBUTES 12
 
 #define HTML_OVERLAY_CLASS      0
 #define HTML_OVERLAY_HEIGHT     1
@@ -675,11 +745,12 @@ Attribute numbers
 #define HTML_OVERLAY_MD         4
 #define HTML_OVERLAY_SRC        5
 #define HTML_OVERLAY_STYLE      6
-#define HTML_OVERLAY_UNITS      7
-#define HTML_OVERLAY_WIDTH      8
-#define HTML_OVERLAY_X          9
-#define HTML_OVERLAY_Y         10
-#define HTML_OVERLAY_ATTRIBUTES 11
+#define HTML_OVERLAY_TITLE      7
+#define HTML_OVERLAY_UNITS      8
+#define HTML_OVERLAY_WIDTH      9
+#define HTML_OVERLAY_X         10
+#define HTML_OVERLAY_Y         11
+#define HTML_OVERLAY_ATTRIBUTES 12
 
 #define HTML_P_ALIGN            0
 #define HTML_P_CLASS            1
@@ -689,7 +760,8 @@ Attribute numbers
 #define HTML_P_LANG             5
 #define HTML_P_NOWRAP           6
 #define HTML_P_STYLE            7
-#define HTML_P_ATTRIBUTES       8
+#define HTML_P_TITLE            8
+#define HTML_P_ATTRIBUTES       9
 
 #define HTML_PARAM_ACCEPT       0
 #define HTML_PARAM_ACCEPT_CHARSET  1
@@ -704,11 +776,12 @@ Attribute numbers
 #define HTML_PARAM_OBJECT      10
 #define HTML_PARAM_REF         11
 #define HTML_PARAM_STYLE       12
-#define HTML_PARAM_TYPE        13
-#define HTML_PARAM_VALUE       14
-#define HTML_PARAM_VALUEREF    15  /* Use VALUETYPE (DATA|REF|OBJECT). - FM */
-#define HTML_PARAM_VALUETYPE   16
-#define HTML_PARAM_ATTRIBUTES  17
+#define HTML_PARAM_TITLE       13
+#define HTML_PARAM_TYPE        14
+#define HTML_PARAM_VALUE       15
+#define HTML_PARAM_VALUEREF    16  /* Use VALUETYPE (DATA|REF|OBJECT). - FM */
+#define HTML_PARAM_VALUETYPE   17
+#define HTML_PARAM_ATTRIBUTES  18
 
 #define HTML_SCRIPT_CLASS       0
 #define HTML_SCRIPT_CLEAR       1
@@ -722,8 +795,9 @@ Attribute numbers
 #define HTML_SCRIPT_SCRIPTENGINE 9
 #define HTML_SCRIPT_SRC        10
 #define HTML_SCRIPT_STYLE      11
-#define HTML_SCRIPT_TYPE       12
-#define HTML_SCRIPT_ATTRIBUTES 13
+#define HTML_SCRIPT_TITLE      12
+#define HTML_SCRIPT_TYPE       13
+#define HTML_SCRIPT_ATTRIBUTES 14
 
 #define HTML_SELECT_ALIGN       0
 #define HTML_SELECT_CLASS       1
@@ -764,8 +838,9 @@ Attribute numbers
 #define HTML_TAB_INDENT         6
 #define HTML_TAB_LANG           7
 #define HTML_TAB_STYLE          8
-#define HTML_TAB_TO             9
-#define HTML_TAB_ATTRIBUTES    10
+#define HTML_TAB_TITLE          9
+#define HTML_TAB_TO            10
+#define HTML_TAB_ATTRIBUTES    11
 
 #define HTML_TABLE_ALIGN        0
 #define HTML_TABLE_BORDER       1
@@ -784,9 +859,10 @@ Attribute numbers
 #define HTML_TABLE_NOWRAP      14
 #define HTML_TABLE_RULES       15
 #define HTML_TABLE_STYLE       16
-#define HTML_TABLE_UNITS       17
-#define HTML_TABLE_WIDTH       18
-#define HTML_TABLE_ATTRIBUTES  19
+#define HTML_TABLE_TITLE       17
+#define HTML_TABLE_UNITS       18
+#define HTML_TABLE_WIDTH       19
+#define HTML_TABLE_ATTRIBUTES  20
 
 #define HTML_TD_ALIGN           0
 #define HTML_TD_AXES            1
@@ -803,8 +879,9 @@ Attribute numbers
 #define HTML_TD_NOWRAP         12
 #define HTML_TD_ROWSPAN        13
 #define HTML_TD_STYLE          14
-#define HTML_TD_VALIGN         15
-#define HTML_TD_ATTRIBUTES     16
+#define HTML_TD_TITLE          15
+#define HTML_TD_VALIGN         16
+#define HTML_TD_ATTRIBUTES     17
 
 #define HTML_TEXTAREA_ALIGN     0
 #define HTML_TEXTAREA_CLASS     1
@@ -838,8 +915,9 @@ Attribute numbers
 #define HTML_TR_LANG            8
 #define HTML_TR_NOWRAP          9
 #define HTML_TR_STYLE          10
-#define HTML_TR_VALIGN         11
-#define HTML_TR_ATTRIBUTES     12
+#define HTML_TR_TITLE          11
+#define HTML_TR_VALIGN         12
+#define HTML_TR_ATTRIBUTES     13
 
 #define HTML_UL_CLASS           0
 #define HTML_UL_CLEAR           1
@@ -852,9 +930,10 @@ Attribute numbers
 #define HTML_UL_PLAIN           8
 #define HTML_UL_SRC             9
 #define HTML_UL_STYLE          10
-#define HTML_UL_TYPE           11
-#define HTML_UL_WRAP           12
-#define HTML_UL_ATTRIBUTES     13
+#define HTML_UL_TITLE          11
+#define HTML_UL_TYPE           12
+#define HTML_UL_WRAP           13
+#define HTML_UL_ATTRIBUTES     14
 
 extern CONST SGML_dtd HTML_dtd;
 

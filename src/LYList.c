@@ -29,7 +29,7 @@
 **  	Create a temporary text/html file with a list of links to
 **	HyperText References in the current document.
 **
-** On entry
+**  On entry
 **	titles		Set:	if we want titles where available
 **			Clear:  we only get addresses.
 */
@@ -41,7 +41,9 @@ PUBLIC char * LYlist_temp_url NOARGS
     return list_filename;
 }
 
-PUBLIC int showlist ARGS2(char **, newfile, BOOLEAN, titles)
+PUBLIC int showlist ARGS2(
+	char **,	newfile,
+	BOOLEAN,	titles)
 {
     int cnt;
     int refs, hidden_links;
@@ -49,6 +51,7 @@ PUBLIC int showlist ARGS2(char **, newfile, BOOLEAN, titles)
     static BOOLEAN first = TRUE;
     FILE *fp0;
     char *Address = NULL, *Title = NULL, *cp = NULL;
+    char *desc = "unknown field or link";
 
     refs = HText_sourceAnchors(HTMainText);
     hidden_links = HText_HiddenLinkCount(HTMainText);
@@ -65,7 +68,15 @@ PUBLIC int showlist ARGS2(char **, newfile, BOOLEAN, titles)
     }
 
     if (first) {
-	tempname(tempfile,NEW_FILE);
+	tempname(tempfile, NEW_FILE);
+	/*
+	 *  Make the file a URL now.
+	 */
+#if defined (VMS) || defined (DOSPATH)
+	sprintf(list_filename, "file://localhost/%s", tempfile);
+#else
+	sprintf(list_filename, "file://localhost%s", tempfile);
+#endif /* VMS */
 	first = FALSE;
 #ifdef VMS
     } else {
@@ -78,48 +89,64 @@ PUBLIC int showlist ARGS2(char **, newfile, BOOLEAN, titles)
 	sleep(MessageSecs);
 	return(-1);
     }
+    chmod(tempfile, 0600);
 
-    /*
-     *  Make the file a URL now.
-     */
-#if defined (VMS) || defined (DOSPATH)
-    sprintf(list_filename, "file://localhost/%s", tempfile);
-#else
-    sprintf(list_filename, "file://localhost%s", tempfile);
-#endif /* VMS */
     StrAllocCopy(*newfile, list_filename);
-    LYforce_HTML_mode = TRUE; /* force this file to be HTML */
-    LYforce_no_cache = TRUE; /* force this file to be new */
+    LYforce_HTML_mode = TRUE;	/* force this file to be HTML */
+    LYforce_no_cache = TRUE;	/* force this file to be new */
 
 
     fprintf(fp0, "<head>\n");
 #ifdef EXP_CHARTRANS
-    add_META_charset_to_fd(fp0, -1);
+    LYAddMETAcharsetToFD(fp0, -1);
 #endif
     fprintf(fp0, "<title>%s</title>\n</head>\n<body>\n",
 		 LIST_PAGE_TITLE);
-
     fprintf(fp0, "<h1>You have reached the List Page</h1>\n");
     fprintf(fp0, "<h2>%s Version %s</h2>\n", LYNX_NAME, LYNX_VERSION);
 
     fprintf(fp0, "  References in this document:<p>\n");
-    fprintf(fp0, "<%s compact>\n", (keypad_mode == LINKS_ARE_NUMBERED) ?
-    				   "ul" : "ol");
+    if (refs > 0) {
+	fprintf(fp0, "<%s compact>\n", ((keypad_mode == NUMBERS_AS_ARROWS) ?
+    				       "ol" : "ul"));
+	if (hidden_links > 0)
+	    fprintf(fp0, "<lh><em>Visible links:</em>\n");
+    }
     if (hidden_links > 0) {
-        fprintf(fp0, "<lh><em>Visible links:</em>\n");
 	if (LYHiddenLinks == HIDDENLINKS_IGNORE)
 	    hidden_links = 0;
     }
-    for (cnt=1; cnt<=refs; cnt++) {
+    for (cnt = 1; cnt <= refs; cnt++) {
 	HTChildAnchor *child = HText_childNumber(cnt);
-	HTAnchor *dest_intl = HTAnchor_followTypedLink((HTAnchor *)child,
-						       LINK_INTERNAL);
-	HTAnchor *dest = dest_intl ?
-	    dest_intl : HTAnchor_followMainLink((HTAnchor *)child);
-	HTParentAnchor *parent = HTAnchor_parent(dest);
-	char *address =  HTAnchor_address(dest);
-	CONST char *title = titles ? HTAnchor_title(parent) : NULL;
+	HTAnchor *dest_intl;
+	HTAnchor *dest;
+	HTParentAnchor *parent;
+	char *address;
+	CONST char *title;
 
+	if (child == 0) {
+	    /*
+	     *  child should not be 0 unless form field numbering is on
+	     *  and cnt is the number of a form input field.
+	     *  HText_FormDescNumber() will set desc to a description
+	     *  of what type of input field this is.  We'll list it to
+	     *  ensure that the link numbers on the list page match the
+	     *  numbering in the original document, but won't create a
+	     *  forward link to the form. - FM && LE
+	     */
+	    if (keypad_mode == LINKS_AND_FORM_FIELDS_ARE_NUMBERED) {
+		HText_FormDescNumber(cnt, (char **)&desc);
+		fprintf(fp0, "<li>[%d](<em>%s</em>)</a>\n", cnt, desc);
+	    }
+	    continue;
+	}
+	dest_intl = HTAnchor_followTypedLink((HTAnchor *)child,
+						       LINK_INTERNAL);
+	dest = dest_intl ?
+	    dest_intl : HTAnchor_followMainLink((HTAnchor *)child);
+	parent = HTAnchor_parent(dest);
+	address =  HTAnchor_address(dest);
+	title = titles ? HTAnchor_title(parent) : NULL;
 	StrAllocCopy(Address, address);
 	FREE(address);
 	LYEntify(&Address, TRUE);
@@ -147,10 +174,10 @@ PUBLIC int showlist ARGS2(char **, newfile, BOOLEAN, titles)
     if (hidden_links > 0) {
         if (refs > 0)
 	    fprintf(fp0, "\n</%s>\n\n<p>\n",
-	    		 (keypad_mode == LINKS_ARE_NUMBERED) ?
-							"ul" : "ol");
-        fprintf(fp0, "<%s compact>\n", (keypad_mode == LINKS_ARE_NUMBERED) ?
-    				       "ul" : "ol continue");
+	    		 ((keypad_mode == NUMBERS_AS_ARROWS) ?
+						        "ol" : "ul"));
+        fprintf(fp0, "<%s compact>\n", ((keypad_mode == NUMBERS_AS_ARROWS) ?
+    				        "ol continue" : "ul"));
         fprintf(fp0, "<lh><em>Hidden links:</em>\n");
     }
 
@@ -166,24 +193,22 @@ PUBLIC int showlist ARGS2(char **, newfile, BOOLEAN, titles)
 	FREE(Address);
     }
 
-    fprintf(fp0,"\n</%s>\n</body>\n", (keypad_mode == LINKS_ARE_NUMBERED) ?
-    				      "ul" : "ol");
+    fprintf(fp0,"\n</%s>\n</body>\n", ((keypad_mode == NUMBERS_AS_ARROWS) ?
+    				       "ol" : "ul"));
 
     fclose(fp0);
     return(0);
 }      
-
 
 /* 	printlist - F.Macrides (macrides@sci.wfeb.edu)
 **	---------
 **  	Print a text/plain list of HyperText References
 **	in the current document.
 **
-** On entry
+**  On entry
 **	titles		Set:	if we want titles where available
 **			Clear:  we only get addresses.
 */
-
 PUBLIC void printlist ARGS2(
 	FILE *,		fp,
 	BOOLEAN,	titles)
@@ -194,6 +219,7 @@ PUBLIC void printlist ARGS2(
     int cnt;
     int refs, hidden_links;
     char *address = NULL;
+    char *desc = "unknown field or link";
 
     refs = HText_sourceAnchors(HTMainText);
     if (refs <= 0 && LYHiddenLinks != HIDDENLINKS_SEPARATE)
@@ -209,12 +235,29 @@ PUBLIC void printlist ARGS2(
 		hidden_links = 0;
 	}
 	for (cnt = 1; cnt <= refs; cnt++) {
-	    HTAnchor *dest =
-		HTAnchor_followMainLink((HTAnchor *)
-					HText_childNumber(cnt));
-	    HTParentAnchor * parent = HTAnchor_parent(dest);
-	    CONST char * title = titles ? HTAnchor_title(parent) : NULL;
+	    HTChildAnchor *child = HText_childNumber(cnt);
+	    HTAnchor *dest;
+	    HTParentAnchor *parent;
+	    CONST char *title;
 
+	    if (child == 0) {
+		/*
+		 *  child should not be 0 unless form field numbering is on
+		 *  and cnt is the number of a form intput field.
+		 *  HText_FormDescNumber() will set desc to a description
+		 *  of what type of input field this is.  We'll list it to
+		 *  ensure that the link numbers on the list page match the
+		 *  numbering in the original document. - FM && LE
+		 */
+		if (keypad_mode == LINKS_AND_FORM_FIELDS_ARE_NUMBERED) {
+		    HText_FormDescNumber(cnt, (char **)&desc);
+		    fprintf(fp, "%4d. (%s)\n", cnt, desc);
+		}
+		continue;
+	    }
+	    dest = HTAnchor_followMainLink((HTAnchor *)child);
+	    parent = HTAnchor_parent(dest);
+	    title = titles ? HTAnchor_title(parent) : NULL;
 	    address =  HTAnchor_address(dest);
 	    fprintf(fp, "%4d. %s%s\n", cnt,
 		    ((HTAnchor*)parent != dest) && title ? "in " : "",

@@ -17,6 +17,9 @@
 #include "tcp.h"
 #include "HTFormat.h"
 #include "HTStream.h"
+#include "UCDefs.h"
+#include "UCMap.h"
+#include "UCAux.h"
 #include "HTVMSUtils.h"
 /*#include <stdio.h> included by HTUtils.h -- FM */
 /*#include <unixlib.h> included by HTUtils.h -- FM */
@@ -918,6 +921,12 @@ PUBLIC int HTVMSBrowseDir ARGS4(
      *  Set up the output stream.
      */
     _HTProgress ("Building directory listing...");
+    if (UCLYhndl_HTFile_for_unspec >= 0) {
+	HTAnchor_setUCInfoStage(anchor,
+				UCLYhndl_HTFile_for_unspec,
+				UCT_STAGE_PARSER,
+				UCT_SETBY_DEFAULT);
+    }
     target = HTML_new(anchor, format_out, sink);
     targetClass = *(target->isa);
 

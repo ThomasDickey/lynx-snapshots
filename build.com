@@ -5,6 +5,8 @@ $!   Command file to build LYNX.EXE on VMS systems.
 $!   Also invokes build of the WWWLibrary if its
 $!    object library does not already exist.
 $!
+$!   28-Jun-1997	F.Macrides		macrides@sci.wfeb.edu
+$!	Added chartrans support.
 $!   29-Feb-1996	F.Macrides		macrides@sci.wfeb.edu
 $!	Added LYMap to the compilation and link lists.
 $!   26-Jul-1995	F.Macrides		macrides@sci.wfeb.edu
@@ -104,7 +106,7 @@ $   Else
 $	read sys$command/prompt="  Update it [default Y]? " reply
 $	if reply .nes. "" .and. -
 	   f$extract(0,1,f$edit(reply, "TRIM, UPCASE")) .nes. "Y" then -
-$	   goto Compile_SRC
+$	   goto Compile_CHRTRANS
 $   EndIf
 $ ENDIF
 $ v1 = f$verify(1)
@@ -117,6 +119,37 @@ $ @libmake 'option' 'cc_opts'
 $ v1 = f$verify(1)
 $ set default [-.-.-]
 $ v1 = 'f$verify(0)'
+$ ON CONTROL_Y THEN GOTO CLEANUP
+$ ON ERROR THEN GOTO CLEANUP
+$!
+$Compile_CHRTRANS:
+$ IF f$search("[.src.chrtrans]makeuctb.exe") .nes. ""
+$ THEN
+$   write sys$output "  [.src.chrtrans]makeuctb.exe already exists."
+$   If f$mode() .eqs. "BATCH" 
+$   Then 
+$	write sys$output "  Updating makeuctb.exe and chrtrans header files."
+$   Else
+$	read sys$command -
+	   /prompt="  Update it and chrtrans header files [default Y]? " reply
+$	if reply .nes. "" .and. -
+	   f$extract(0,1,f$edit(reply, "TRIM, UPCASE")) .nes. "Y" then -
+$	   goto Compile_SRC
+$   EndIf
+$ ENDIF
+$!
+$ v1 = f$verify(1)
+$!
+$!	Build the chrtrans modules.
+$!
+$ set default [.src.chrtrans]
+$ v1 = 'f$verify(0)'
+$ @build-chrtrans 'cc_opts'
+$ v1 = f$verify(1)
+$ set default [-.-]
+$ v1 = 'f$verify(0)'
+$ ON CONTROL_Y THEN GOTO CLEANUP
+$ ON ERROR THEN GOTO CLEANUP
 $!
 $Compile_SRC:
 $ v1 = f$verify(1)
@@ -201,6 +234,9 @@ $ cc LYStrings
 $ cc LYTraversal
 $ cc LYUpload
 $ cc LYUtils
+$ cc UCAuto
+$ cc UCAux
+$ cc UCdomap
 $!
 $!	Link the objects and libaries.
 $!
@@ -244,6 +280,9 @@ LYStrings.obj, -
 LYTraversal.obj, -
 LYUpload.obj, -
 LYUtils.obj, -
+UCAuto.obj, -
+UCAux.obj, -
+UCdomap.obj, -
 [-.WWW.Library.Implementation]WWWLib_'option'.olb/library, -
 sys$disk:[]'optfile'.opt/opt, sys$disk:[]'compiler'.opt/opt
 $!
@@ -264,6 +303,7 @@ $ write sys$output ""
 $!
 $ CLEANUP:
 $    v1 = 'f$verify(0)'
+$    set default 'where'
 $    write sys$output "Default directory:"
 $    show default
 $    v1 = f$verify(v)

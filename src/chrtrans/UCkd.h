@@ -1,19 +1,22 @@
 #ifndef _UC_KD_H
 #define _UC_KD_H
-#include <sys/types.h>
+#ifdef NOTDEFINED
+#include <sys/types.h>	/* Included via tcp.h. */
+#endif /* NOTDEFINED */
 
-/* NOTE: THE FOLLOWING #define MAY NEED ADJUSTMENT.
-   u16 should be an unsigned type of 16 bit length (two octets).
-   u8  should be an unsigned type of 8  bit length (one octet).
-   */
+/*
+ *  NOTE: THE FOLLOWING #define MAY NEED ADJUSTMENT.
+ *  u16 should be an unsigned type of 16 bit length (two octets).
+ *  u8  should be an unsigned type of 8  bit length (one octet).
+ */
 #ifndef u16
 #define u16 unsigned short
-#endif
+#endif /* u16 */
 
 
 #ifndef u8
 #define u8 unsigned char
-#endif
+#endif /* u8 */
 
 #ifdef NOTDEFINED
 struct consolefontdesc {
@@ -21,7 +24,7 @@ struct consolefontdesc {
 	u_short charheight;	/* scan lines per character (1-32) */
 	char *chardata;		/* font data in expanded form */
 };
-#endif
+#endif /* NOTDEFINED */
 typedef char scrnmap_t;
 #define		E_TABSZ		256
 

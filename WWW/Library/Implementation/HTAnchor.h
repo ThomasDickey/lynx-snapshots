@@ -159,9 +159,6 @@ typedef struct _DocAddress {
 
 #define LINK_INTERNAL HTAtom_for("internal link")
 
-extern int HASH_FUNCTION PARAMS((
-	CONST char * 	cp_address));
-
 /*      Create new or find old sub-anchor
 **      ---------------------------------
 **

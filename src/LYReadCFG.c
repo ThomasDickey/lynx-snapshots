@@ -653,6 +653,9 @@ PUBLIC void read_cfg ARGS1(
 #endif /* VMS */
 	    }
 
+	} else if (!strncasecomp(buffer, "FORCE_SSL_COOKIES_SECURE:", 25)) {
+	    LYForceSSLCookiesSecure = is_true(buffer+25);
+
 	} else if (!strncasecomp(buffer, "ftp_proxy:", 10)) {
 	    if (getenv("ftp_proxy") == NULL) {
 #ifdef VMS
@@ -1007,6 +1010,12 @@ PUBLIC void read_cfg ARGS1(
 
 	} else if (!strncasecomp(buffer, "SCAN_FOR_BURIED_NEWS_REFS:", 26)) {
 	    scan_for_buried_news_references = is_true(buffer+26);
+
+	} else if (!strncasecomp(buffer, "SEEK_FRAG_AREA_IN_CUR:", 22)) {
+	    LYSeekFragAREAinCur = is_true(buffer+22);
+
+	} else if (!strncasecomp(buffer, "SEEK_FRAG_MAP_IN_CUR:", 21)) {
+	    LYSeekFragMAPinCur = is_true(buffer+21);
 
 	} else if (!strncasecomp(buffer, "SET_COOKIES:", 12)) {
 	    LYSetCookies = is_true(buffer+12);

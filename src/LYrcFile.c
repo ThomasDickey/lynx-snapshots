@@ -352,6 +352,21 @@ PUBLIC void read_rc NOPARAMS
 	        LYSelectPopups = TRUE;
 
 	/*
+	 *  Show cursor.
+	 */
+	} else if ((cp = LYstrstr(line_buffer, "show_cursor")) != NULL &&
+		   cp-line_buffer < number_sign) {
+
+	    if ((cp2 = (char * )strchr(cp, '=')) != NULL)
+		cp = cp2 + 1;
+	    while (isspace(*cp))
+	        cp++;  /* get rid of spaces */
+	    if (!strncasecomp(cp, "off", 3))
+	        LYShowCursor = FALSE;
+	    else
+	        LYShowCursor = TRUE;
+
+	/*
 	 *  Keypad mode.
 	 */
 	} else if ((cp = LYstrstr(line_buffer, "keypad_mode")) != NULL &&
@@ -361,8 +376,10 @@ PUBLIC void read_rc NOPARAMS
 		cp = cp2 + 1;
 	    while (isspace(*cp))
 	        cp++;  /* get rid of spaces */
-	    if (LYstrstr(cp,"LINKS_ARE_NUMBERED"))
+	    if (LYstrstr(cp, "LINKS_ARE_NUMBERED"))
 	        keypad_mode = LINKS_ARE_NUMBERED;
+	    else if (LYstrstr(cp, "LINKS_AND_FORM_FIELDS_ARE_NUMBERED"))
+		keypad_mode = LINKS_AND_FORM_FIELDS_ARE_NUMBERED;
 	    else
 	        keypad_mode = NUMBERS_AS_ARROWS;
 
@@ -491,6 +508,7 @@ PUBLIC int save_rc NOPARAMS
     if ((fp = fopen(rcfile, "w")) == NULL) {
 	return FALSE;
     }
+    chmod(rcfile, 0600);
 
     /*
      *  Header.
@@ -680,6 +698,21 @@ PUBLIC int save_rc NOPARAMS
     fprintf(fp, "select_popups=%s\n\n", (LYSelectPopups ? "on" : "off"));
 
     /*
+     *  Show cursor.
+     */
+    fprintf(fp, "\
+# show_cursor specifies whether to 'hide' the cursor to the right (and\n\
+# bottom, if possible) of the screen, or to place it to the left of the\n\
+# current link in documents, or current option in select popup windows.\n\
+# Positioning the cursor to the left of the current link or option is\n\
+# helpful for speech or braille interfaces, and when the terminal is\n\
+# one which does not distingish the current link based on highlighting\n\
+# or color.  A value of \"on\" will set positioning to the left as the\n\
+# default while a value of \"off\" will set 'hiding' of the cursor.\n\
+# The default can be overridden via the -show_cursor command line toggle.\n");
+    fprintf(fp, "show_cursor=%s\n\n", (LYShowCursor ? "on" : "off"));
+
+    /*
      *  Keypad mode.
      */
     fprintf(fp, "\
@@ -688,14 +721,28 @@ PUBLIC int save_rc NOPARAMS
 #             8 = Up Arrow\n\
 #   4 = Left Arrow    6 = Right Arrow\n\
 #             2 = Down Arrow\n\
+# and the corresponding keyboard numbers will act as arrow keys,\n\
+# regardless of whether numlock is on.\n");
+    fprintf(fp, "\
 # If keypad_mode is set to \"LINKS_ARE_NUMBERED\", then numbers will\n\
-# appear next to each link and numbers are used to select links.\n\
+# appear next to each link and numbers are used to select links.\n");
+    fprintf(fp, "\
+# If keypad_mode is set to \"LINKS_AND_FORM_FIELDS_ARE_NUMBERED\", then\n\
+# numbers will appear next to each link and visible form input field.\n\
+# Numbers are used to select links, or to move the \"current link\" to a\n\
+# form input field or button.  In addition, options in popup menus are\n\
+# indexed so that the user may type an option number to select an option in\n\
+# a popup menu, even if the option isn't visible on the screen.  Reference\n\
+# lists and output from the list command also enumerate form inputs.\n");
+    fprintf(fp, "\
 # NOTE: Some fixed format documents may look disfigured when\n\
-# \"LINKS_ARE_NUMBERED\" is enabled.\n");
+# \"LINKS_ARE_NUMBERED\" or \"LINKS_AND_FORM_FIELDS_ARE_NUMBERED\" are\n\
+# enabled.\n");
     fprintf(fp, "keypad_mode=%s\n\n",
-    		(keypad_mode==NUMBERS_AS_ARROWS ? 
-			    "NUMBERS_AS_ARROWS" : "LINKS_ARE_NUMBERED"));
- 
+		((keypad_mode == NUMBERS_AS_ARROWS) ?  "NUMBERS_AS_ARROWS" :
+	       ((keypad_mode == LINKS_ARE_NUMBERED) ? "LINKS_ARE_NUMBERED" :
+				      "LINKS_AND_FORM_FIELDS_ARE_NUMBERED")));
+
     /*
      *  Lineedit mode.
      */

@@ -113,9 +113,10 @@ PUBLIC char * HTPromptPassword ARGS1(CONST char *, Msg)
 **	are NOT freed.
 **	
 */
-PUBLIC void HTPromptUsernameAndPassword ARGS3(CONST char *,	Msg,
+PUBLIC void HTPromptUsernameAndPassword ARGS4(CONST char *,	Msg,
 					      char **,		username,
-					      char **,		password)
+					      char **,		password,
+					      BOOL,		IsProxy)
 {
     if (Msg)
 	fprintf(stderr, "WWW: %s\n", Msg);

@@ -32,6 +32,7 @@ PUBLIC BOOLEAN lookup ARGS1(char *,target)
             exit(-1);
 	} else {
             fclose(ifp);
+	    chmod(TRAVERSE_FILE, 0600);
             return(FALSE);
         }
     }
@@ -69,6 +70,7 @@ PUBLIC void add_to_table ARGS1(char *,target)
 #endif /* SIGTSTP */
 	exit(-1);
     }
+    chmod(TRAVERSE_FILE, 0600);
 
     fprintf(ifp,"%s\n",target);
 
@@ -95,6 +97,7 @@ PUBLIC void add_to_traverse_list ARGS2(char *,fname, char *,prev_link_name)
 #endif /* SIGTSTP */
 	exit(-1);
     }
+    chmod(TRAVERSE_FOUND_FILE, 0600);
 
     fprintf(ifp,"%s	%s\n",fname, prev_link_name);
 
@@ -113,6 +116,7 @@ PUBLIC void dump_traversal_history NOARGS
         perror("unable to open traversal file");
 	return;
     }
+    chmod(TRAVERSE_FILE, 0600);
 
     fprintf(ifp, "\n\nTRAVERSAL WAS INTERUPTED\n\n\
 	    here is a list of the history stack so that you may rebuild\n\n");
@@ -144,6 +148,7 @@ PUBLIC void add_to_reject_list ARGS1(char *,target)
 #endif /* SIGTSTP */
 	exit(-1);
     }
+    chmod(TRAVERSE_REJECT_FILE, 0600);
 
     fprintf(ifp,"%s\n",target);
 

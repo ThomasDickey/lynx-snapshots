@@ -16,11 +16,13 @@ typedef struct link {
     char *hightext;
     char *hightext2;
     int hightext2_offset;
+    BOOL inUnderline;	/* TRUE when this link is in underlined context. */
     int lx;
     int ly;
-    int type;      /* type of link, Forms, WWW, etc */
-    int anchor_number;   /* the anchor number within the Gridtext structure */
-    struct _FormInfo *form;  /* pointer to form info */
+    int type;		/* Type of link, Forms, WWW, etc. */
+    int anchor_number;	/* The anchor number within the HText structure.  */
+    int anchor_line_num;/* The anchor line number in the HText structure. */
+    struct _FormInfo *form;	/* Pointer to form info. */
 } linkstruct; 
 extern linkstruct links[MAXLINKS];
 extern int nlinks;

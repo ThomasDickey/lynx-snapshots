@@ -361,13 +361,13 @@ distclean: clean
 	-rm -rf src/obsolete
 	-cd src; $(MAKE) clean
 	-cd src/chrtrans; $(MAKE) distclean
-	-rm -f *~ *.bak *.sav .*_aux
+	-rm -f *~ *.bak *.sav
 	-rm -f makefile lynx_cfg.h config.status config.log config.cache
 	-rm -f lynx
 
 maintainer-clean: distclean
 	-rm -rf WWW/Library/*/obsolete
-	-rm -f Lynx.prj
+	-rm -f Lynx.prj .*_aux
 
 tar:  clean
 	rm -f lynx

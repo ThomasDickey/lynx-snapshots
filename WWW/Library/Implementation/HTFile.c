@@ -791,40 +791,38 @@ PUBLIC HTFormat HTCharsetFormat ARGS3(
 	while (*cp2 == ' ' || *cp2 == '=')
 	    cp2++;
 #ifdef EXP_CHARTRANS
-			    StrAllocCopy(cp3, cp2); /* copy to mutilate more */
-			    for (cp4=cp3; (*cp4 != '\0' && *cp4 != '"' &&
-					   *cp4 != ';'  && *cp4 != ':' &&
-					   !WHITE(*cp4));	cp4++)
-				/* nothing */ ;
-			    *cp4 = '\0';
-			    cp4 = cp3;
-			    chndl = UCGetLYhndl_byMIME(cp3);
-			    if (chndl < 0) {
-				if (0==strcmp(cp4, "cn-big5")) {
-				    cp4 += 3;
-				    chndl = UCGetLYhndl_byMIME(cp4);
-				}
-				else if (0==strncmp(cp4, "cn-gb", 5)) {
-				    StrAllocCopy(cp3, "gb2312");
-				    cp4 = cp3;
-				    chndl = UCGetLYhndl_byMIME(cp4);
-				}
-			    }
-			    if (UCCanTranslateFromTo(chndl, current_char_set))
-			    {
+	StrAllocCopy(cp3, cp2); /* copy to mutilate more */
+	for (cp4=cp3; (*cp4 != '\0' && *cp4 != '"' &&
+		       *cp4 != ';'  && *cp4 != ':' &&
+		       !WHITE(*cp4)); cp4++) {
+	    ; /* do nothing */
+	}
+	*cp4 = '\0';
+	cp4 = cp3;
+	chndl = UCGetLYhndl_byMIME(cp3);
+	if (chndl < 0) {
+	    if (!strcmp(cp4, "cn-big5")) {
+		cp4 += 3;
+		chndl = UCGetLYhndl_byMIME(cp4);
+	    } else if (!strncmp(cp4, "cn-gb", 5)) {
+		StrAllocCopy(cp3, "gb2312");
+		cp4 = cp3;
+		chndl = UCGetLYhndl_byMIME(cp4);
+	    }
+	}
+	if (UCCanTranslateFromTo(chndl, current_char_set)) {
 				chartrans_ok = YES;
 				*cp1 = '\0';
 				format = HTAtom_for(cp);
 				StrAllocCopy(anchor->charset, cp4);
 				HTAnchor_setUCInfoStage(anchor, chndl,
 				   UCT_STAGE_MIME, UCT_SETBY_MIME);
-			    }
-			    else if (chndl < 0)	{/* got something but we don't
-						 recognize it */
+	} else if (chndl < 0) {
+	    /*
+	    **  Got something but we don't recognize it.
+	    */
 				chndl = UCLYhndl_for_unrec;
-				if (UCCanTranslateFromTo(chndl,
-							 current_char_set))
-				{
+	    if (UCCanTranslateFromTo(chndl, current_char_set)) {
 				    chartrans_ok = YES;
 				    HTAnchor_setUCInfoStage(anchor, chndl,
 				       UCT_STAGE_MIME, UCT_SETBY_DEFAULT);
@@ -832,43 +830,46 @@ PUBLIC HTFormat HTCharsetFormat ARGS3(
 			    }
 			    FREE(cp3);
 			    if (chartrans_ok) {
-				LYUCcharset * p_in =
-				    HTAnchor_getUCInfoStage(anchor,
+	    LYUCcharset *p_in = HTAnchor_getUCInfoStage(anchor,
 							     UCT_STAGE_MIME);
-				LYUCcharset * p_out =
-				    HTAnchor_setUCInfoStage(anchor,
+	    LYUCcharset *p_out = HTAnchor_setUCInfoStage(anchor,
 							    current_char_set,
-					 UCT_STAGE_HTEXT, UCT_SETBY_DEFAULT);
-				if (!p_out) /* try again */
-				    p_out =
-				      HTAnchor_getUCInfoStage(anchor,
-							     UCT_STAGE_HTEXT);
-
-				if (0==strcmp(p_in->MIMEname,"x-transparent"))
-				{
-				    HTPassEightBitRaw = TRUE;
-				    HTAnchor_setUCInfoStage(anchor,
-				       HTAnchor_getUCLYhndl(anchor,
-							    UCT_STAGE_HTEXT),
-				       UCT_STAGE_MIME, UCT_SETBY_DEFAULT);
-				}
-				if (0==strcmp(p_out->MIMEname,"x-transparent"))
-				{
-				    HTPassEightBitRaw = TRUE;
-				    HTAnchor_setUCInfoStage(anchor,
-				       HTAnchor_getUCLYhndl(anchor,
-							    UCT_STAGE_MIME),
-				       UCT_STAGE_HTEXT, UCT_SETBY_DEFAULT);
-				}
-				if (!(p_in->enc & UCT_ENC_CJK) &&
-				    (p_in->codepoints & UCT_CP_SUBSETOF_LAT1)){
-				    HTCJK = NOCJK;
-				} else if (chndl == current_char_set) {
-				HTPassEightBitRaw = TRUE;
-				}
-			} else  /* Fall through to old behavior */
+							 UCT_STAGE_HTEXT,
+							 UCT_SETBY_DEFAULT);
+	    if (!p_out) {
+		/*
+		**  Try again.
+		*/
+		p_out = HTAnchor_getUCInfoStage(anchor, UCT_STAGE_HTEXT);
+	    }
+	    if (!strcmp(p_in->MIMEname, "x-transparent")) {
+		HTPassEightBitRaw = TRUE;
+		HTAnchor_setUCInfoStage(anchor,
+					HTAnchor_getUCLYhndl(anchor,
+							     UCT_STAGE_HTEXT),
+					UCT_STAGE_MIME,
+					UCT_SETBY_DEFAULT);
+	    }
+	    if (!strcmp(p_out->MIMEname, "x-transparent")) {
+		HTPassEightBitRaw = TRUE;
+		HTAnchor_setUCInfoStage(anchor,
+					HTAnchor_getUCLYhndl(anchor,
+							     UCT_STAGE_MIME),
+					UCT_STAGE_HTEXT,
+					UCT_SETBY_DEFAULT);
+	    }
+	    if (!(p_in->enc & UCT_ENC_CJK) &&
+		(p_in->codepoints & UCT_CP_SUBSETOF_LAT1)){
+		HTCJK = NOCJK;
+	    } else if (chndl == current_char_set) {
+		HTPassEightBitRaw = TRUE;
+	    }
+	/*
+	**  Fall through to old behavior.
+	*/
+	} else
 #endif /* EXP_CHARTRANS */
-	if (!strncmp(cp2, "us-ascii", 8) ||
+	    if (!strncmp(cp2, "us-ascii", 8) ||
 	    !strncmp(cp2, "iso-8859-1", 10)) {
 	    *cp1 = '\0';
 	    format = HTAtom_for(cp);
@@ -953,6 +954,14 @@ PUBLIC HTFormat HTCharsetFormat ARGS3(
 	    format = HTAtom_for(cp);
 	    StrAllocCopy(anchor->charset, "iso-2022-cn");
 	}
+    } else if (cp1 != NULL) {
+	/*
+	**  No charset parameter is present.
+	**  Ignore all other parameters, as
+	**  we do when charset is present. - FM
+	*/
+	*cp1 = '\0';
+	format = HTAtom_for(cp);
     }
     FREE(cp);
 

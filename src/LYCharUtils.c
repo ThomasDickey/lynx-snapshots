@@ -195,18 +195,35 @@ PUBLIC char * LYUnEscapeEntities ARGS3(
 	**  Check for a numeric or named entity. - FM
 	*/
         if (*p == '&') {
+	    BOOL isHex = FALSE;
+	    BOOL isDecimal = FALSE;
 	    p++;
 	    len = strlen(p);
 	    /*
 	    **  Check for a numeric entity. - FM
 	    */
 	    if (*p == '#' && len > 2 &&
-	        (unsigned char)*(p+1) < 127 &&
-		isdigit((unsigned char)*(p+1))) {
-		cp = ++p;
+	        (unsigned char)*(p+1) == 'x' &&
+		(unsigned char)*(p+2) < 127 && 
+		isxdigit((unsigned char)*(p+2))) {
+		isHex = TRUE;
+	    } else if (*p == '#' && len > 2 &&
+		       (unsigned char)*(p+1) < 127 &&
+		       isdigit((unsigned char)*(p+1))) {
+		isDecimal = TRUE;
+	    }
+	    if (isHex || isDecimal) {
+		if (isHex) {
+		    p += 2;
+		    cp = p;
+		} else {
+		    cp = ++p;
+		}
 		while (*p && (unsigned char)*p < 127 &&
-		       isdigit((unsigned char)*p))
+		       (isHex ? isxdigit((unsigned char)*p) :
+				isdigit((unsigned char)*p))) {
 		    p++;
+		}
 		/*
 		**  Save the terminator and isolate the digit(s). - FM
 		*/
@@ -222,7 +239,8 @@ PUBLIC char * LYUnEscapeEntities ARGS3(
 		**	or HTCJK set.
 		**  (4) Is 128 - 159 and we don't have HTPassHighCtrlNum set.
 		*/
-		if ((sscanf(cp, "%d", &value) != 1) ||
+		if (((isHex ? sscanf(cp, "%x", &value) :
+			      sscanf(cp, "%d", &value)) != 1) ||
 		    (value > 255 &&
 		     value != 8194 && value != 8195 && value != 8201 &&
 		     value != 8211 && value != 8212 && value != 8482) ||
@@ -240,6 +258,8 @@ PUBLIC char * LYUnEscapeEntities ARGS3(
 		    */
 		    *q++ = '&';
 		    *q++ = '#';
+		    if (isHex)
+		        *q++ = 'x';
 		    if (cpe != '\0')
 		       *(p-1) = cpe;
 		    p = cp;
@@ -292,6 +312,8 @@ PUBLIC char * LYUnEscapeEntities ARGS3(
 		    if (hidden) {
 		        *q++ = '&';
 		        *q++ = '#';
+			if (isHex)
+			    *q++ = 'x';
 			if (cpe != '\0')
 			    *(p-1) = cpe;
 			p = cp;
@@ -315,6 +337,8 @@ PUBLIC char * LYUnEscapeEntities ARGS3(
 		    if (hidden) {
 		        *q++ = '&';
 		        *q++ = '#';
+			if (isHex)
+			    *q++ = 'x';
 			if (cpe != '\0')
 			    *(p-1) = cpe;
 			p = cp;
@@ -330,11 +354,13 @@ PUBLIC char * LYUnEscapeEntities ARGS3(
 		/*
 		**  For 8482 (trade) use the character reference if it's
 		**  a hidden INPUT, otherwise use whatever the tables have
-		**  for &trade;. - FM, kw
+		**  for &trade;. - FM & KW
 		*/
 	        } else if (value == 8482 && hidden) {
 		        *q++ = '&';
 		        *q++ = '#';
+			if (isHex)
+			    *q++ = 'x';
 			if (cpe != '\0')
 			    *(p-1) = cpe;
 			p = cp;
@@ -345,9 +371,10 @@ PUBLIC char * LYUnEscapeEntities ARGS3(
 		**  use it's value. - FM
 		*/
 		} else if (value < 161 || 
-			   (value < 256 && (HTPassEightBitNum ||
-			   !strncmp(LYchar_set_names[current_char_set],
-			   	    "ISO Latin 1", 11)))) {
+			   (value < 256 &&
+			    (HTPassEightBitNum ||
+			     !strncmp(LYchar_set_names[current_char_set],
+				      "ISO Latin 1", 11)))) {
 		    /*
 		    **  No conversion needed.
 		    */
@@ -363,16 +390,21 @@ PUBLIC char * LYUnEscapeEntities ARGS3(
 		*/
 		} else {
 		    CONST char * name;
-		    if (value == 8482) { /* trade mark sign falls through to here -kw */
-		      name = "trade";
+		    if (value == 8482) {
+			/*
+			**  Trade mark sign falls through to here. - KW
+			*/
+			name = "trade";
 		    } else {
-		      value -= 160;
-		      name = HTMLGetEntityName(value);
+			value -= 160;
+			name = HTMLGetEntityName(value);
 		    }
-		    for(low = 0, high = HTML_dtd.number_of_entities;
-		        high > low;
-			diff < 0 ? (low = i+1) : (high = i)) {
-			/* Binary search */
+		    for (low = 0, high = HTML_dtd.number_of_entities;
+			 high > low;
+			 diff < 0 ? (low = i+1) : (high = i)) {
+			/*
+			**  Binary search.
+			*/
 			i = (low + (high-low)/2);
 			diff = strcmp(HTML_dtd.entity_names[i], name);
 			if (diff == 0) {
@@ -413,7 +445,9 @@ PUBLIC char * LYUnEscapeEntities ARGS3(
 		for (low = 0, high = HTML_dtd.number_of_entities;
 		     high > low ;
 		     diff < 0 ? (low = i+1) : (high = i)) {
-		    /* Binary search */
+		    /*
+		    **  Binary search.
+		    */
 		    i = (low + (high-low)/2);
 		    diff = strcmp(HTML_dtd.entity_names[i], p);
 		    if (diff == 0) {
@@ -738,7 +772,9 @@ PUBLIC void LYUnEscapeToLatinOne ARGS2(
 		for (low = 0, high = HTML_dtd.number_of_entities;
 		     high > low ;
 		     diff < 0 ? (low = i+1) : (high = i)) {
-		    /* Binary search */
+		    /*
+		    **  Binary search.
+		    */
 		    i = (low + (high-low)/2);
 		    diff = strcmp(HTML_dtd.entity_names[i], p);
 		    if (diff == 0) {
@@ -752,31 +788,42 @@ PUBLIC void LYUnEscapeToLatinOne ARGS2(
 			buf[0] = HTMLGetLatinOneValue(i);
                         if (buf[0] == '\0') {
                             /*
-                            **  The entity does not have an 8859-1 representation
-                            **  of exactly one char length.  Try to deal with it
-                            **  anyway - either HTEscape the whole mess, or pass
-                            **  through raw.  So make sure the ISO_Latin1 table,
-                            **  which is the first table in LYCharSets, has resonable
-			    **  substitution strings! (if it really must have any
-			    **  longer than one char..) -kw
+                            **  The entity does not have an 8859-1
+			    **  representation of exactly one char length.
+			    **  Try to deal with it anyway - either HTEscape
+			    **  the whole mess, or pass through raw.  So
+			    **  make sure the ISO_Latin1 table, which is the
+			    **  first table in LYCharSets, has reasonable
+			    **  substitution strings! (if it really must
+			    **  have any longer than one char) - KW
                             */
-			    if (!LYCharSets[0][i][0]) /* totally empty, skip - kw */
-			        /* do nothing */ ;
-			    else if (isURL) {
-			      /* *All* will be HTEscape'd - kw */
-			      esc = HTEscape(LYCharSets[0][i], URL_XALPHAS);
-			      for (e = 0; esc[e]; e++)
-				*q++ = esc[e];
-			      FREE(esc);
+			    if (!LYCharSets[0][i][0]) {
+				/*
+				**  Totally empty, skip. - KW
+				*/
+			        ; /* do nothing */
+			    } else if (isURL) {
+				/*
+				**  All will be HTEscape'd. - KW
+				*/
+				esc = HTEscape(LYCharSets[0][i], URL_XALPHAS);
+				for (e = 0; esc[e]; e++)
+				    *q++ = esc[e];
+				FREE(esc);
 			    } else {
-			      /* *Nothing* will be HTEscape'd - kw */
-			      for (e = 0; LYCharSets[0][i][e]; e++)
-                                *q++ = (unsigned char)(LYCharSets[0][i][e]);
+				/*
+				**  Nothing will be HTEscape'd. - KW 
+				*/
+				for (e = 0; LYCharSets[0][i][e]; e++) {
+				    *q++ =
+					(unsigned char)(LYCharSets[0][i][e]);
+				}
 			    }
-                        } else if ((unsigned char)buf[0] > 159 && isURL == TRUE) {
+		        } else if ((unsigned char)buf[0] > 159 &&
+				   isURL == TRUE) {
 			    esc = HTEscape(buf, URL_XALPHAS);
 			    for (e = 0; esc[e]; e++)
-			    *q++ = esc[e];
+				*q++ = esc[e];
 			    FREE(esc);
 			} else {
 			    *q++ = buf[0];
@@ -1225,6 +1272,67 @@ PUBLIC void LYFillLocalFileURL ARGS2(
     return;
 }
 
+#ifdef EXP_CHARTRANS
+/*
+**  This function writes a line with a META tag to an open file,
+**  which will specify a charset parameter to use when the file is
+**  read back in.  It is meant for temporary HTML files used by the
+**  various special pages which may show titles of documents.  When those
+**  files are created, the title strings normally have been translated and
+**  expanded to the display character set, so we have to make sure they
+**  don't get translated again.
+**  If the user has changed the display character set during the lifetime
+**  of the Lynx session (or, more exactly, during the time the title
+**  strings to be written were generated), they may now have different
+**  character encodings and there is currently no way to get it all right.
+**  To change this, we would have to add a variable for each string which
+**  keeps track of its character encoding...
+**  But at least we can try to ensure that reading the file after future
+**  display character set changes will give reasonable output.
+**
+**  The META tag is not written if the display character set (passed as
+**  disp_chndl) already corresponds to the charset assumption that
+**  would be made when the file is read. - KW
+*/
+PUBLIC void LYAddMETAcharsetToFD ARGS2(
+	FILE *,		fd,
+	int,		disp_chndl)
+{
+    if (disp_chndl == -1)
+	/*
+	 *  -1 means use current_char_set.
+	 */
+	disp_chndl = current_char_set;
+
+    if (fd == NULL || disp_chndl < 0)
+	/*
+	 *  Should not happen.
+	 */
+	return;
+
+    if (UCLYhndl_HTFile_for_unspec == disp_chndl)
+	/*
+	 *  Not need to do, so we don't.
+	 */
+	return;
+
+    if (LYCharSet_UC[disp_chndl].enc == UCT_ENC_7BIT)
+	/*
+	 *  There shouldn't be any 8-bit characters in this case.
+	 */
+	return;
+
+    /*
+     *  In other cases we don't know because UCLYhndl_for_unspec may
+     *  change during the lifetime of the file (by toggling raw mode
+     *  or changing the display character set), so proceed.
+     */
+    fprintf(fd, "<META %s content=\"text/html;charset=%s\">\n",
+		"http-equiv=\"content-type\"",
+		LYCharSet_UC[disp_chndl].MIMEname);
+}
+#endif /* EXP_CHARTRANS */
+
 /*
 ** This function returns OL TYPE="A" strings in
 ** the range of " A." (1) to "ZZZ." (18278). - FM
@@ -1583,72 +1691,28 @@ PUBLIC void LYZero_OL_Counter ARGS1(
 /*
 **  This function is used by the HTML Structured object. - kw
 */
-PUBLIC void html_get_chartrans_info ARGS1(HTStructured *, me)
+PUBLIC void LYGetChartransInfo ARGS1(
+	HTStructured *,		me)
 {
-    me->UCLYhndl = HTAnchor_getUCLYhndl(me->node_anchor,UCT_STAGE_STRUCTURED);
+    me->UCLYhndl = HTAnchor_getUCLYhndl(me->node_anchor,
+					UCT_STAGE_STRUCTURED);
     if (me->UCLYhndl < 0) {
 	int chndl = HTAnchor_getUCLYhndl(me->node_anchor, UCT_STAGE_HTEXT);
+
 	if (chndl < 0) {
 	    chndl = current_char_set;
 	    HTAnchor_setUCInfoStage(me->node_anchor, chndl, UCT_STAGE_HTEXT,
-			    UCT_SETBY_STRUCTURED);
+				    UCT_SETBY_STRUCTURED);
 	}
 	HTAnchor_setUCInfoStage(me->node_anchor, chndl,
 				UCT_STAGE_STRUCTURED, UCT_SETBY_STRUCTURED);
 	me->UCLYhndl = HTAnchor_getUCLYhndl(me->node_anchor,
 					    UCT_STAGE_STRUCTURED);
     }
-    me->UCI = HTAnchor_getUCInfoStage(me->node_anchor,UCT_STAGE_STRUCTURED);
-}
-
-/*
-**  This function writes a line with a META tag to an open file,
-**  which will specify a charset parameter to use when the file is
-**  read back in.  It is meant for temporary HTML files used by the
-**  various special pages which may show titles of documents.  When those
-**  files are created, the title strings normally have been translated and
-**  expanded to the display character set, so we have to make sure the
-**  don't get translated again.
-**  If the user has changed the display character set during the lifetime
-**  of the Lynx session (or, more exactly, during the time the title
-**  strings to be written were generated), the may now have different
-**  character encodings and there is currently no way to get it all right.
-**  To change this, we would have to add a variable for each string which
-**  keeps track of its character encoding...
-**  But at least we can try to ensure that reading the file after future
-**  display character set changes will give reasonable output.
-**
-**  The META tag is not written if the display character set (passed as
-**  disp_chndl) already corresponds to the charset assumption that
-**  would be made when the file is read. -kw
-*/
-PUBLIC void add_META_charset_to_fd ARGS2(
-    FILE *,	fp,
-    int,	disp_chndl
-    )
-{
-    if (disp_chndl == -1)	/* -1 means use current_char_set */
-	disp_chndl = current_char_set;
-    if (fp == NULL || disp_chndl < 0)
-	return;			/* should not happen */
-    if (UCLYhndl_HTFile_for_unspec == disp_chndl)
-	return;			/* not need to do, so we don't */
-    if (LYCharSet_UC[disp_chndl].enc == UCT_ENC_7BIT)
-	return;			/* There shouldn't be any 8-bit characters
-				 in this case. */
-    /*
-     * In other cases we don't know because UCLYhndl_for_unspec may
-     * change during the lifetime of the file (by toggling raw mode
-     * or changing the display character set), so proceed.
-     */
-
-    fprintf(fp,"<META %s content=\"text/html;charset=%s\">\n",
-	    "http-equiv=\"content-type\"",
-	    LYCharSet_UC[disp_chndl].MIMEname);
+    me->UCI = HTAnchor_getUCInfoStage(me->node_anchor, UCT_STAGE_STRUCTURED);
 }
 
 #endif /* EXP_CHARTRANS */
-
 /*
 **  This function processes META tags in HTML streams. - FM
 */
@@ -1800,15 +1864,40 @@ PUBLIC void LYHandleMETA ARGS4(
 	 *  If we didn't get an Expires MIME header,
 	 *  store it in the anchor element, and if we
 	 *  haven't yet set no_cache, check whether we
-	 *  should. - FM
+	 *  should.  Note that we don't accept a Date
+	 *  header via META tags, because it's likely
+	 *  to be untrustworthy, but do check for a
+	 *  Date header from a server when making the
+	 *  comparsion. - FM
 	 */
 	LYUnEscapeToLatinOne(&content, FALSE);
 	LYTrimHead(content);
 	LYTrimTail(content);
 	StrAllocCopy(me->node_anchor->expires, content);
 	if (me->node_anchor->no_cache == FALSE) {
-	    if ((content[0] == '0' && content[1] == '\0') ||
-		LYmktime(content) <= 0) {
+	    if (!strcmp(content, "0")) {
+		/*
+		 *  The value is zero, which we treat as
+		 *  an absolute no-cache directive. - FM
+		 */
+		me->node_anchor->no_cache = TRUE;
+		HText_setNoCache(me->text);
+	    } else if (me->node_anchor->date != NULL) {
+	        /*
+		 *  We have a Date header, so check if
+		 *  the value is less than or equal to
+		 *  that. - FM
+		 */
+		if (LYmktime(content, TRUE) <=
+		    LYmktime(me->node_anchor->date, TRUE)) {
+		    me->node_anchor->no_cache = TRUE;
+		    HText_setNoCache(me->text);
+		}
+	    } else if (LYmktime(content, FALSE) <= 0) {
+	        /*
+		 *  We don't have a Date header, and
+		 *  the value is in past for us. - FM
+		 */
 		me->node_anchor->no_cache = TRUE;
 		HText_setNoCache(me->text);
 	    }
@@ -1833,88 +1922,91 @@ PUBLIC void LYHandleMETA ARGS4(
 	if ((cp = strstr(content, "text/html;")) != NULL &&
 	    (cp1 = strstr(content, "charset")) != NULL &&
 	    cp1 > cp) {
-			BOOL chartrans_ok = NO;
-			char *cp3 = NULL, *cp4;
-			int chndl;
+	    BOOL chartrans_ok = NO;
+	    char *cp3 = NULL, *cp4;
+	    int chndl;
 
 	    cp1 += 7;
-			while (*cp1 == ' ' || *cp1 == '=' || *cp1 == '"')
+	    while (*cp1 == ' ' || *cp1 == '=' || *cp1 == '"')
 	        cp1++;
 #ifdef EXP_CHARTRANS
-			    StrAllocCopy(cp3, cp1); /* copy to mutilate more */
-			    for (cp4=cp3; (*cp4 != '\0' && *cp4 != '"' &&
-					   *cp4 != ';'  && *cp4 != ':' &&
-					   !WHITE(*cp4));	cp4++)
-				/* nothing */ ;
-			    *cp4 = '\0';
-			    cp4 = cp3;
-			    chndl = UCGetLYhndl_byMIME(cp3);
-			    if (chndl < 0) {
-				if (0==strcmp(cp4, "cn-big5")) {
-				    cp4 += 3;
-				    chndl = UCGetLYhndl_byMIME(cp4);
-				}
-				else if (0==strncmp(cp4, "cn-gb", 5)) {
-				    StrAllocCopy(cp3, "gb2312");
-				    cp4 = cp3;
-				    chndl = UCGetLYhndl_byMIME(cp4);
-				}
-			    }
-			    if (UCCanTranslateFromTo(chndl, current_char_set))
-			    {
-				chartrans_ok = YES;
-				StrAllocCopy(me->node_anchor->charset, cp4);
-				HTAnchor_setUCInfoStage(me->node_anchor, chndl,
-				   UCT_STAGE_PARSER, UCT_SETBY_STRUCTURED);
-			    }
-			    else if (chndl < 0)	{/* got something but we don't
-						 recognize it */
-				chndl = UCLYhndl_for_unrec;
-				if (UCCanTranslateFromTo(chndl,
-							 current_char_set))
-				{
-				    chartrans_ok = YES;
-				    HTAnchor_setUCInfoStage(me->node_anchor,
-							    chndl,
-				       UCT_STAGE_PARSER, UCT_SETBY_STRUCTURED);
-				}
-			    }
-			    FREE(cp3);
-			    if (chartrans_ok) {
-				LYUCcharset * p_in =
-				    HTAnchor_getUCInfoStage(me->node_anchor,
-							     UCT_STAGE_PARSER);
-				LYUCcharset * p_out =
-				    HTAnchor_setUCInfoStage(me->node_anchor,
-							    current_char_set,
-					 UCT_STAGE_HTEXT, UCT_SETBY_DEFAULT);
-				if (!p_out) /* try again */
-				    p_out =
-				      HTAnchor_getUCInfoStage(me->node_anchor,
-							     UCT_STAGE_HTEXT);
-				if (0==strcmp(p_in->MIMEname,"x-transparent"))
-				{
-				    HTPassEightBitRaw = TRUE;
-				    HTAnchor_setUCInfoStage(me->node_anchor,
-				       HTAnchor_getUCLYhndl(me->node_anchor,
-							    UCT_STAGE_HTEXT),
-				       UCT_STAGE_PARSER, UCT_SETBY_DEFAULT);
-				}
-				if (0==strcmp(p_out->MIMEname,"x-transparent"))
-				{
-				    HTPassEightBitRaw = TRUE;
-				    HTAnchor_setUCInfoStage(me->node_anchor,
-				       HTAnchor_getUCLYhndl(me->node_anchor,
-							    UCT_STAGE_PARSER),
-				       UCT_STAGE_HTEXT, UCT_SETBY_DEFAULT);
-				}
-				if (!(p_in->enc & UCT_ENC_CJK) &&
-				    (p_in->codepoints & UCT_CP_SUBSETOF_LAT1)){
-				    HTCJK = NOCJK;
-				} else if (chndl == current_char_set) {
-				HTPassEightBitRaw = TRUE;
-				}
-				html_get_chartrans_info(me);
+	    StrAllocCopy(cp3, cp1); /* copy to mutilate more */
+	    for (cp4 = cp3; (*cp4 != '\0' && *cp4 != '"' &&
+			     *cp4 != ';'  && *cp4 != ':' &&
+			     !WHITE(*cp4)); cp4++) {
+		; /* do nothing */
+	    }
+	    *cp4 = '\0';
+	    cp4 = cp3;
+	    chndl = UCGetLYhndl_byMIME(cp3);
+	    if (chndl < 0) {
+		if (!strcmp(cp4, "cn-big5")) {
+		    cp4 += 3;
+		    chndl = UCGetLYhndl_byMIME(cp4);
+		} else if (!strncmp(cp4, "cn-gb", 5)) {
+		    StrAllocCopy(cp3, "gb2312");
+		    cp4 = cp3;
+		    chndl = UCGetLYhndl_byMIME(cp4);
+		}
+	    }
+	    if (UCCanTranslateFromTo(chndl, current_char_set)) {
+		chartrans_ok = YES;
+		StrAllocCopy(me->node_anchor->charset, cp4);
+		HTAnchor_setUCInfoStage(me->node_anchor, chndl,
+					UCT_STAGE_PARSER,
+					UCT_SETBY_STRUCTURED);
+	    } else if (chndl < 0) {
+		/*
+		 *  Got something but we don't recognize it.
+		 */
+		chndl = UCLYhndl_for_unrec;
+		if (UCCanTranslateFromTo(chndl, current_char_set)) {
+		    chartrans_ok = YES;
+		    HTAnchor_setUCInfoStage(me->node_anchor, chndl,
+					    UCT_STAGE_PARSER,
+					    UCT_SETBY_STRUCTURED);
+		}
+	    }
+	    FREE(cp3);
+	    if (chartrans_ok) {
+		LYUCcharset * p_in =
+				HTAnchor_getUCInfoStage(me->node_anchor,
+							UCT_STAGE_PARSER);
+		LYUCcharset * p_out =
+				HTAnchor_setUCInfoStage(me->node_anchor,
+							current_char_set,
+							UCT_STAGE_HTEXT,
+							UCT_SETBY_DEFAULT);
+		if (!p_out) {
+		    /*
+		     *  Try again.
+		     */
+		    p_out = HTAnchor_getUCInfoStage(me->node_anchor,
+						    UCT_STAGE_HTEXT);
+		}
+		if (!strcmp(p_in->MIMEname, "x-transparent")) {
+		    HTPassEightBitRaw = TRUE;
+		    HTAnchor_setUCInfoStage(me->node_anchor,
+				HTAnchor_getUCLYhndl(me->node_anchor,
+						     UCT_STAGE_HTEXT),
+						     UCT_STAGE_PARSER,
+						     UCT_SETBY_DEFAULT);
+		}
+		if (!strcmp(p_out->MIMEname, "x-transparent")) {
+		    HTPassEightBitRaw = TRUE;
+		    HTAnchor_setUCInfoStage(me->node_anchor,
+				HTAnchor_getUCLYhndl(me->node_anchor,
+						     UCT_STAGE_PARSER),
+						     UCT_STAGE_HTEXT,
+						     UCT_SETBY_DEFAULT);
+		}
+		if (!(p_in->enc & UCT_ENC_CJK) &&
+		    (p_in->codepoints & UCT_CP_SUBSETOF_LAT1)) {
+		    HTCJK = NOCJK;
+		} else if (chndl == current_char_set) {
+		    HTPassEightBitRaw = TRUE;
+		}
+		LYGetChartransInfo(me);
 			} else  /* Fall through to old behavior */
 #endif /* EXP_CHARTRANS */
 	    if (!strncmp(cp1, "us-ascii", 8) ||
@@ -2089,6 +2181,20 @@ PUBLIC void LYHandleMETA ARGS4(
 		StrAllocCopy(id_string, cp);
 		*cp = '\0';
 	    }
+	    if (me->inA) {
+	        /*
+		 *  Ugh!  The META tag, which is a HEAD element,
+		 *  is in an Anchor, which is BODY element.  All
+		 *  we can do is close the Anchor and cross our
+		 *  fingers. - FM
+		 */
+		if (me->inBoldA == TRUE && me->inBoldH == FALSE)
+		    HText_appendCharacter(me->text, LY_BOLD_END_CHAR);
+		me->inBoldA = FALSE;
+	        HText_endAnchor(me->text, me->CurrentANum);
+		me->inA = FALSE;
+		me->CurrentANum = 0;
+	    }
 	    me->CurrentA = HTAnchor_findChildAndLink(
 				me->node_anchor,	/* Parent */
 				id_string,		/* Tag */
@@ -2108,14 +2214,14 @@ PUBLIC void LYHandleMETA ARGS4(
 		HText_appendCharacter(me->text, LY_UNDERLINE_END_CHAR);
 	    HTML_put_character(me, ' ');
 	    me->in_word = NO;
-	    HText_beginAnchor(me->text, me->CurrentA);
+	    HText_beginAnchor(me->text, me->inUnderline, me->CurrentA);
 	    if (me->inBoldH == FALSE)
 		HText_appendCharacter(me->text, LY_BOLD_START_CHAR);
 	    HTML_put_string(me, href);
 	    FREE(href);
 	    if (me->inBoldH == FALSE)
 		HText_appendCharacter(me->text, LY_BOLD_END_CHAR);
-	    HText_endAnchor(me->text);
+	    HText_endAnchor(me->text, 0);
 	    LYEnsureSingleSpace(me);
 	}
 
@@ -2169,6 +2275,333 @@ free_META_copies:
     FREE(content);
 }
 
+#ifdef NOTUSED_FOTEMODS
+/*  next two functions done in HTML.c instead in this code set -
+    see there. - kw */
+/*
+**  This function handles P elements in HTML streams.
+**  If start is TRUE it handles a start tag, and if
+**  FALSE, an end tag.  We presently handle start
+**  and end tags identically, but this can lead to
+**  a different number of blank lines between the
+**  current paragraph and subsequent text when a P
+**  end tag is present or not in the markup. - FM
+*/
+PUBLIC void LYHandleP ARGS5(
+	HTStructured *,		me,
+	CONST BOOL*,	 	present,
+	CONST char **,		value,
+	char **,		include,
+	BOOL,			start)
+{
+    if (TRUE) {
+	/*
+	 *  FIG content should be a true block, which like P inherits
+	 *  the current style.  APPLET is like character elements or
+	 *  an ALT attribute, unless it content contains a block element.
+	 *  If we encounter a P in either's content, we set flags to treat
+	 *  the content as a block.  - FM
+	 */
+	if (me->inFIG)
+	    me->inFIGwithP = TRUE;
+
+	if (me->inAPPLET)
+	    me->inAPPLETwithP = TRUE;
+
+	UPDATE_STYLE;
+	if (me->List_Nesting_Level >= 0) {
+	    /*
+	     *  We're in a list.  Treat P as an instruction to
+	     *  create one blank line, if not already present,
+	     *  then fall through to handle attributes, with
+	     *  the "second line" margins. - FM
+	     */
+	    if (me->inP) {
+	        if (me->inFIG || me->inAPPLET ||
+		    me->inCAPTION || me->inCREDIT ||
+		    me->sp->style->spaceAfter > 0 ||
+		    me->sp->style->spaceBefore > 0) {
+	            LYEnsureDoubleSpace(me);
+		} else {
+	            LYEnsureSingleSpace(me);
+		}
+	    }
+	} else if (me->sp[0].tag_number == HTML_ADDRESS) {
+	    /*
+	     *  We're in an ADDRESS. Treat P as an instruction 
+	     *  to start a newline, if needed, then fall through
+	     *  to handle attributes. - FM
+	     */
+	    if (HText_LastLineSize(me->text, FALSE)) {
+		HText_setLastChar(me->text, ' ');  /* absorb white space */
+	        HText_appendCharacter(me->text, '\r');
+	    }
+	} else if (!(me->inLABEL && !me->inP)) {
+	    HText_appendParagraph(me->text);
+	    me->inLABEL = FALSE;
+	}
+	me->in_word = NO;
+
+	if (LYoverride_default_alignment(me)) {
+	    me->sp->style->alignment = styles[me->sp[0].tag_number]->alignment;
+	} else if (me->List_Nesting_Level >= 0 ||
+		   ((me->Division_Level < 0) &&
+		    (!strcmp(me->sp->style->name, "Normal") ||
+		     !strcmp(me->sp->style->name, "Preformatted")))) {
+	        me->sp->style->alignment = HT_LEFT;
+	} else {
+	    me->sp->style->alignment = me->current_default_alignment;
+	}
+	if (present && present[HTML_P_ALIGN] && value[HTML_P_ALIGN]) {
+	    if (!strcasecomp(value[HTML_P_ALIGN], "center") &&
+	        !(me->List_Nesting_Level >= 0 && !me->inP))
+	        me->sp->style->alignment = HT_CENTER;
+	    else if (!strcasecomp(value[HTML_P_ALIGN], "right") &&
+	        !(me->List_Nesting_Level >= 0 && !me->inP))
+	        me->sp->style->alignment = HT_RIGHT;
+	    else if (!strcasecomp(value[HTML_P_ALIGN], "left") ||
+	    	     !strcasecomp(value[HTML_P_ALIGN], "justify"))
+	        me->sp->style->alignment = HT_LEFT;
+	}
+
+	LYCheckForID(me, present, value, (int)HTML_P_ID);
+
+	/*
+	 *  Mark that we are starting a new paragraph
+	 *  and don't have any of it's text yet. - FM
+	 *
+	 */
+	me->inP = FALSE;
+    }
+
+    return;
+}
+
+/*
+**  This function handles SELECT elements in HTML streams.
+**  If start is TRUE it handles a start tag, and if FALSE,
+**  an end tag. - FM
+*/
+PUBLIC void LYHandleSELECT ARGS5(
+	HTStructured *,		me,
+	CONST BOOL*,	 	present,
+	CONST char **,		value,
+	char **,		include,
+	BOOL,			start)
+{
+    int i;
+
+    if (start == TRUE) {
+	char *name = NULL;
+	BOOLEAN multiple = NO;
+	char *size = NULL;
+
+        /*
+	 *  Initialize the disable attribute.
+	 */
+	me->select_disabled = FALSE;
+
+	/*
+	 *  Make sure we're in a form.
+	 */
+	if (!me->inFORM) {
+	    if (TRACE) {
+		fprintf(stderr,
+			"HTML: SELECT start tag not within FORM tag\n");
+	    } else if (!me->inBadHTML) {
+		_statusline(BAD_HTML_USE_TRACE);
+		me->inBadHTML = TRUE;
+		sleep(MessageSecs);
+	    }
+
+	    /*
+	     *  Too likely to cause a crash, so we'll ignore it. - FM
+	     */
+	    return;
+	}
+
+	/*
+	 *  Check for unclosed TEXTAREA.
+	 */
+	if (me->inTEXTAREA) {
+	    if (TRACE) {
+		fprintf(stderr, "HTML: Missing TEXTAREA end tag\n");
+	    } else if (!me->inBadHTML) {
+		_statusline(BAD_HTML_USE_TRACE);
+		me->inBadHTML = TRUE;
+		sleep(MessageSecs);
+	    }
+	}
+
+	/*
+	 *  Set to know we are in a select tag.
+	 */
+	me->inSELECT = TRUE;
+
+	if (!me->text)
+	    UPDATE_STYLE;
+	if (present && present[HTML_SELECT_NAME] &&
+	    value[HTML_SELECT_NAME] && *value[HTML_SELECT_NAME])  
+	    StrAllocCopy(name, value[HTML_SELECT_NAME]);
+	else
+	    StrAllocCopy(name, "");
+	if (present && present[HTML_SELECT_MULTIPLE])  
+	    multiple=YES;
+	if (present && present[HTML_SELECT_DISABLED])  
+	    me->select_disabled = TRUE;
+	if (present && present[HTML_SELECT_SIZE] &&
+	    value[HTML_SELECT_SIZE] && *value[HTML_SELECT_SIZE]) {
+#ifdef NOTDEFINED
+	    StrAllocCopy(size, value[HTML_SELECT_SIZE]);
+#else
+	    /*
+	     *  Let the size be determined by the number of OPTIONs. - FM
+	     */
+	    if (TRACE)
+		fprintf(stderr,
+			"HTML: Ignoring SIZE=\"%s\" for SELECT.\n",
+			(char *)value[HTML_SELECT_SIZE]);
+#endif /* NOTDEFINED */
+	}
+
+	if (me->inBoldH == TRUE &&
+	    (multiple == NO || LYSelectPopups == FALSE)) {
+	    HText_appendCharacter(me->text, LY_BOLD_END_CHAR);
+	    me->inBoldH = FALSE;
+	    me->needBoldH = TRUE;
+	}
+	if (me->inUnderline == TRUE &&
+	    (multiple == NO || LYSelectPopups == FALSE)) {
+	    HText_appendCharacter(me->text, LY_UNDERLINE_END_CHAR);
+	    me->inUnderline = FALSE;
+	}
+
+	if ((multiple == NO && LYSelectPopups == TRUE) &&
+	    me->sp[0].tag_number == HTML_PRE &&
+	        HText_LastLineSize(me->text, FALSE) > (LYcols - 8)) {
+		/*
+		 *  Force a newline when we're using a popup in
+		 *  a PRE block and are within 7 columns from the
+		 *  right margin.  This will allow for the '['
+		 *  popup designater and help avoid a wrap in the
+		 *  underscore placeholder for the retracted popup
+		 *  entry in the HText structure. - FM
+		 */
+		HTML_put_character(me, '\n');
+		me->in_word = NO;
+	    }
+
+	LYCheckForID(me, present, value, (int)HTML_SELECT_ID);
+
+	HText_beginSelect(name, multiple, size);
+	FREE(name);
+	FREE(size);
+
+	me->first_option = TRUE;
+    } else {
+        /*
+	 *  Handle end tag.
+	 */
+	char *ptr;
+	if (!me->text)
+	    UPDATE_STYLE;
+
+	/*
+	 *  Make sure we had a select start tag.
+	 */
+	if (!me->inSELECT) {
+	    if (TRACE) {
+		fprintf(stderr, "HTML: Unmatched SELECT end tag\n");
+	    } else if (!me->inBadHTML) {
+		_statusline(BAD_HTML_USE_TRACE);
+		me->inBadHTML = TRUE;
+		sleep(MessageSecs);
+	    }
+	    return;
+	}
+
+	/*
+	 *  Set to know that we are no longer in a select tag.
+	 */
+	me->inSELECT = FALSE;
+
+	/*
+	 *  Clear the disable attribute.
+	 */
+	me->select_disabled = FALSE;
+
+	/*
+	 *  Finish the data off.
+	 */
+       	HTChunkTerminate(&me->option);
+	/*
+	 *  Finish the previous option.
+	 */
+	ptr = HText_setLastOptionValue(me->text,
+				       me->option.data,
+				       me->LastOptionValue,
+				       LAST_ORDER,
+				       me->LastOptionChecked);
+	FREE(me->LastOptionValue);
+
+	me->LastOptionChecked = FALSE;
+
+	if (HTCurSelectGroupType == F_CHECKBOX_TYPE ||
+	    LYSelectPopups == FALSE) {
+	    /*
+	     *  Start a newline after the last checkbox/button option.
+	     */
+	    LYEnsureSingleSpace(me);
+	} else {
+	    /*
+	     *  Output popup box with the default option to screen,
+	     *  but use non-breaking spaces for output.
+	     */
+	    if (ptr &&
+		me->sp[0].tag_number == HTML_PRE && strlen(ptr) > 6) {
+	        /*
+		 *  The code inadequately handles OPTION fields in PRE tags.
+		 *  We'll put up a minimum of 6 characters, and if any
+		 *  more would exceed the wrap column, we'll ignore them.
+		 */
+		for (i = 0; i < 6; i++) {
+		    if (*ptr == ' ')
+	                HText_appendCharacter(me->text, HT_NON_BREAK_SPACE); 
+		    else
+	    	        HText_appendCharacter(me->text, *ptr);
+		    ptr++;
+		}
+		HText_setIgnoreExcess(me->text, TRUE);
+	    }
+	    for (; ptr && *ptr != '\0'; ptr++) {
+		if (*ptr == ' ')
+	            HText_appendCharacter(me->text, HT_NON_BREAK_SPACE); 
+		else
+	    	    HText_appendCharacter(me->text, *ptr);
+	    }
+	    /*
+	     *  Add end option character.
+	     */
+	    HText_appendCharacter(me->text, ']');
+	    HText_setLastChar(me->text, ']');
+	    me->in_word = YES;
+	    HText_setIgnoreExcess(me->text, FALSE); 
+	}
+    	HTChunkClear(&me->option);
+
+	if (me->Underline_Level > 0 && me->inUnderline == FALSE) {
+	    HText_appendCharacter(me->text, LY_UNDERLINE_START_CHAR);
+	    me->inUnderline = TRUE;
+	}
+	if (me->needBoldH == TRUE && me->inBoldH == FALSE) {
+	    HText_appendCharacter(me->text, LY_BOLD_START_CHAR);
+	    me->inBoldH = TRUE;
+	    me->needBoldH = FALSE;
+	}
+    }
+}
+#endif /* NOTUSED_FOTEMODS */
+
 /*
 **  This function strips white characters and
 **  generally fixes up attribute values that
@@ -2183,6 +2616,8 @@ PUBLIC int LYLegitimizeHREF ARGS4(
 	BOOL,			strip_dots)
 {
     int url_type = 0;
+    char *pound = NULL;
+    char *fragment = NULL;
 
     if (!me || !href || *href == NULL || *(*href) == '\0')
         return(url_type);
@@ -2200,7 +2635,23 @@ PUBLIC int LYLegitimizeHREF ARGS4(
 	HTUnEscapeSome(*href, " \r\n\t");
 	convert_to_spaces(*href, TRUE);
     } else {
+        /*
+	 *  Collapse spaces in the actual URL, but just
+	 *  protect against tabs or newlines in the
+	 *  fragment, if present.  This seeks to cope
+	 *  with atrocities inflicted on the Web by
+	 *  authoring tools such as Frontpage. - FM
+	 */
+	if ((pound = strchr(*href, '#')) != NULL) {
+	    StrAllocCopy(fragment, pound);
+	    *pound = '\0';
+	    convert_to_spaces(fragment, FALSE);
+	}
         collapse_spaces(*href);
+	if (fragment != NULL) {
+	    StrAllocCat(*href, fragment);
+	    FREE(fragment);
+	}
     }
     if (*(*href) == '\0')
         return(url_type);
@@ -2245,10 +2696,10 @@ PUBLIC int LYLegitimizeHREF ARGS4(
 	char *temp = NULL, *str = "";
 
 	if (((temp = HTParse((me->inBASE ?
-			  me->base_href : me->node_anchor->address),
-			     "", PARSE_PATH + PARSE_PUNCTUATION)) == NULL) ||
-	    *temp == '\0' ||
-	    strchr(&temp[1], '/') == NULL) {
+			   me->base_href : me->node_anchor->address),
+			     "", PARSE_PATH+PARSE_PUNCTUATION)) == NULL) ||
+	    temp[0] == '\0' ||
+	    !strchr((char *)&temp[1], '/')) {
 	    FREE(temp);
 	    temp = *href;
 	    if ((me->inBASE ?
@@ -2382,8 +2833,8 @@ PUBLIC void LYCheckForID ARGS4(
 				temp,			/* Tag */
 				NULL,			/* Addresss */
 				(void *)0))) {		/* Type */
-	    HText_beginAnchor(me->text, ID_A);
-	    HText_endAnchor(me->text);
+	    HText_beginAnchor(me->text, me->inUnderline, ID_A);
+	    HText_endAnchor(me->text, 0);
 	}
 	FREE(temp);
     }
@@ -2412,8 +2863,8 @@ PUBLIC void LYHandleID ARGS2(
 				id,			/* Tag */
 				NULL,			/* Addresss */
 				(void *)0)) != NULL) {	/* Type */
-	HText_beginAnchor(me->text, ID_A);
-	HText_endAnchor(me->text);
+	HText_beginAnchor(me->text, me->inUnderline, ID_A);
+	HText_endAnchor(me->text, 0);
     }
 }
 
@@ -2456,10 +2907,12 @@ PUBLIC void LYEnsureDoubleSpace ARGS1(
     if (!me || !me->text)
         return;
 
-    if (HText_LastLineSize(me->text)) {
+    if (HText_LastLineSize(me->text, FALSE)) {
+	HText_setLastChar(me->text, ' ');  /* absorb white space */
 	HText_appendCharacter(me->text, '\r');
 	HText_appendCharacter(me->text, '\r');
-    } else if (HText_PreviousLineSize(me->text)) {
+    } else if (HText_PreviousLineSize(me->text, FALSE)) {
+	HText_setLastChar(me->text, ' ');  /* absorb white space */
 	HText_appendCharacter(me->text, '\r');
     } else if (me->List_Nesting_Level >= 0) {
 	HText_NegateLineOne(me->text);
@@ -2479,7 +2932,8 @@ PUBLIC void LYEnsureSingleSpace ARGS1(
     if (!me || !me->text)
         return;
 
-    if (HText_LastLineSize(me->text)) {
+    if (HText_LastLineSize(me->text, FALSE)) {
+	HText_setLastChar(me->text, ' ');  /* absorb white space */
 	HText_appendCharacter(me->text, '\r');
     } else if (me->List_Nesting_Level >= 0) {
 	HText_NegateLineOne(me->text);

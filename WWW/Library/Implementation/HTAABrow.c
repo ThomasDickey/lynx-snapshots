@@ -64,7 +64,6 @@
 #include "LYLeaks.h"
 
 extern BOOL using_proxy;	/* Are we using an HTTP gateway? */
-extern BOOL auth_proxy;		/* Generate a proxy authorization - AJL */
 
 /*
 **  Local datatype definitions
@@ -75,6 +74,7 @@ typedef struct {
 
     char *	hostname;	/* Host's name			*/
     int		portnumber;	/* Port number			*/
+    BOOL	IsProxy;	/* Is it a proxy?		*/
     HTList *	setups;		/* List of protection setups	*/
                                 /* on this server; i.e. valid	*/
                                 /* authentication schemes and	*/
@@ -136,8 +136,9 @@ PRIVATE int proxy_portnumber	= 80;
 
 /*** HTAAForwardAuth for enabling gateway-httpds to forward Authorization ***/
 
-PUBLIC void HTAAForwardAuth_set ARGS2(CONST char *, scheme_name,
-				      CONST char *, scheme_specifics)
+PUBLIC void HTAAForwardAuth_set ARGS2(
+	CONST char *,	scheme_name,
+	CONST char *,	scheme_specifics)
 {
     int len = 20 + (scheme_name      ? strlen(scheme_name)      : 0) 
 	         + (scheme_specifics ? strlen(scheme_specifics) : 0);
@@ -173,6 +174,7 @@ PRIVATE void HTAASetup_delete PARAMS((HTAASetup * killme));	/* Forward */
 **	hostname	is the name of the host that the server
 **			is running in.
 **	portnumber	is the portnumber which the server listens.
+**	IsProxy		should be TRUE if this is a proxy.
 **
 ** ON EXIT:
 **	returns		the newly-allocated node with all the strings
@@ -181,8 +183,10 @@ PRIVATE void HTAASetup_delete PARAMS((HTAASetup * killme));	/* Forward */
 **			the function HTAAServer_delete(), which also
 **			frees the node itself.
 */
-PRIVATE HTAAServer *HTAAServer_new ARGS2(CONST char*,	hostname,
-					 int,		portnumber)
+PRIVATE HTAAServer *HTAAServer_new ARGS3(
+	CONST char*,	hostname,
+	int,		portnumber,
+	BOOL,		IsProxy)
 {
     HTAAServer *server;
 
@@ -191,6 +195,7 @@ PRIVATE HTAAServer *HTAAServer_new ARGS2(CONST char*,	hostname,
 
     server->hostname	= NULL;
     server->portnumber	= (portnumber > 0 ? portnumber : 80);
+    server->IsProxy	= IsProxy;
     server->setups	= HTList_new();
     server->realms	= HTList_new();
 
@@ -217,7 +222,8 @@ PRIVATE HTAAServer *HTAAServer_new ARGS2(CONST char*,	hostname,
 ** ON EXIT:
 **	returns		nothing.
 */
-PRIVATE void HTAAServer_delete ARGS1(HTAAServer *, killme)
+PRIVATE void HTAAServer_delete ARGS1(
+	HTAAServer *,	killme)
 {
     int n, i;
     HTAASetup *setup;
@@ -260,6 +266,7 @@ PRIVATE void HTAAServer_delete ARGS1(HTAAServer *, killme)
 ** ON ENTRY:
 **	hostname	obvious.
 **	portnumber	if non-positive defaults to 80.
+**	IsProxy		should be TRUE if this is a proxy.
 **
 **	Looks up the server in the module-global server_table.
 **
@@ -268,8 +275,10 @@ PRIVATE void HTAAServer_delete ARGS1(HTAAServer *, killme)
 **			representing the looked-up server.
 **			NULL, if not found.
 */
-PRIVATE HTAAServer *HTAAServer_lookup ARGS2(CONST char *, hostname,
-					    int,	  portnumber)
+PRIVATE HTAAServer *HTAAServer_lookup ARGS3(
+	CONST char *,	hostname,
+	int,		portnumber,
+	BOOL,		IsProxy)
 {
     if (hostname) {
 	HTList *cur = server_table;
@@ -280,7 +289,8 @@ PRIVATE HTAAServer *HTAAServer_lookup ARGS2(CONST char *, hostname,
 
 	while (NULL != (server = (HTAAServer*)HTList_nextObject(cur))) {
 	    if (server->portnumber == portnumber  &&
-		0==strcmp(server->hostname, hostname))
+		0==strcmp(server->hostname, hostname) &&
+		server->IsProxy == IsProxy)
 		return server;
 	}
     }
@@ -299,6 +309,7 @@ PRIVATE HTAAServer *HTAAServer_lookup ARGS2(CONST char *, hostname,
 **	portnumber	is the port that the server is running in.
 **	docname		is the (URL-)pathname of the document we
 **			are trying to access.
+**	IsProxy		should be TRUE if this is a proxy.
 **
 ** 	This function goes through the information known about
 **	all the setups of the server, and finds out if the given
@@ -311,9 +322,11 @@ PRIVATE HTAAServer *HTAAServer_lookup ARGS2(CONST char *, hostname,
 **			document tree.
 **			
 */
-PRIVATE HTAASetup *HTAASetup_lookup ARGS3(CONST char *, hostname,
-					  int,		portnumber,
-					  CONST char *, docname)
+PRIVATE HTAASetup *HTAASetup_lookup ARGS4(
+	CONST char *,	hostname,
+	int,		portnumber,
+	CONST char *,	docname,
+	BOOL,		IsProxy)
 {
     HTAAServer *server;
     HTAASetup *setup;
@@ -322,13 +335,16 @@ PRIVATE HTAASetup *HTAASetup_lookup ARGS3(CONST char *, hostname,
         portnumber = 80;
 
     if (hostname && docname && *hostname && *docname &&
-	NULL != (server = HTAAServer_lookup(hostname, portnumber))) {
+	NULL != (server = HTAAServer_lookup(hostname,
+					    portnumber,
+					    IsProxy))) {
 
 	HTList *cur = server->setups;
 
 	if (TRACE)
-	    fprintf(stderr, "%s (%s:%d:%s)\n",
+	    fprintf(stderr, "%s %s (%s:%d:%s)\n",
 			    "HTAASetup_lookup: resolving setup for",
+			    (IsProxy ? "proxy" : "server"),
 			    hostname, portnumber, docname);
 
 	while (NULL != (setup = (HTAASetup*)HTList_nextObject(cur))) {
@@ -374,10 +390,11 @@ PRIVATE HTAASetup *HTAASetup_lookup ARGS3(CONST char *, hostname,
 **	returns		a new HTAASetup node, and also adds it as
 **			part of the HTAAServer given as parameter.
 */
-PRIVATE HTAASetup *HTAASetup_new ARGS4(HTAAServer *,	server,
-				       char *,		template,
-				       HTList *,	valid_schemes,
-				       HTAssocList **,	scheme_specifics)
+PRIVATE HTAASetup *HTAASetup_new ARGS4(
+	HTAAServer *,	server,
+	char *,		template,
+	HTList *,	valid_schemes,
+	HTAssocList **,	scheme_specifics)
 {
     HTAASetup *setup;
 
@@ -408,7 +425,8 @@ PRIVATE HTAASetup *HTAASetup_new ARGS4(HTAAServer *,	server,
 ** ON EXIT:
 **	returns		nothing.
 */
-PRIVATE void HTAASetup_delete ARGS1(HTAASetup *, killme)
+PRIVATE void HTAASetup_delete ARGS1(
+	HTAASetup *,	killme)
 {
     int scheme;
 
@@ -438,14 +456,15 @@ PRIVATE void HTAASetup_delete ARGS1(HTAASetup *, killme)
 ** ON EXIT:
 **	returns		nothing.
 */
-PRIVATE void HTAASetup_updateSpecifics ARGS2(HTAASetup *,	setup,
-					     HTAssocList **,	specifics)
+PRIVATE void HTAASetup_updateSpecifics ARGS2(
+	HTAASetup *,	setup,
+	HTAssocList **,	specifics)
 {
     int scheme;
 
     if (setup) {
 	if (setup->scheme_specifics) {
-	    for (scheme=0; scheme < HTAA_MAX_SCHEMES; scheme++) {
+	    for (scheme = 0; scheme < HTAA_MAX_SCHEMES; scheme++) {
 		if (setup->scheme_specifics[scheme])
 		    HTAssocList_delete(setup->scheme_specifics[scheme]);
 	    }
@@ -467,8 +486,9 @@ PRIVATE void HTAASetup_updateSpecifics ARGS2(HTAASetup *,	setup,
 ** ON EXIT:
 **	returns		the realm.  NULL, if not found.
 */
-PRIVATE HTAARealm *HTAARealm_lookup ARGS2(HTList *,	realm_table,
-					  CONST char *, realmname)
+PRIVATE HTAARealm *HTAARealm_lookup ARGS2(
+	HTList *,	realm_table,
+	CONST char *,	realmname)
 {
     if (realm_table && realmname) {
 	HTList *cur = realm_table;
@@ -497,10 +517,11 @@ PRIVATE HTAARealm *HTAARealm_lookup ARGS2(HTList *,	realm_table,
 ** ON EXIT:
 **	returns		the created realm.
 */
-PRIVATE HTAARealm *HTAARealm_new ARGS4(HTList *,	realm_table,
-				       CONST char *,	realmname,
-				       CONST char *,	username,
-				       CONST char *,	password)
+PRIVATE HTAARealm *HTAARealm_new ARGS4(
+	HTList *,	realm_table,
+	CONST char *,	realmname,
+	CONST char *,	username,
+	CONST char *,	password)
 {
     HTAARealm *realm;
 
@@ -534,7 +555,8 @@ PRIVATE HTAARealm *HTAARealm_new ARGS4(HTList *,	realm_table,
 **
 ** ON ENTRY:
 **	scheme		is either HTAA_BASIC or HTAA_PUBKEY.
-**	realmname	is the password domain name.
+**	setup		is the current server setup.
+**	IsProxy		should be TRUE if this is a proxy.
 **
 ** ON EXIT:
 **	returns		a newly composed authorization string,
@@ -547,8 +569,10 @@ PRIVATE HTAARealm *HTAARealm_new ARGS4(HTList *,	realm_table,
 **	returned by AA package needs to (or should) be freed.
 **
 */
-PRIVATE char *compose_auth_string ARGS2(HTAAScheme,	scheme,
-					HTAASetup *,	setup)
+PRIVATE char *compose_auth_string ARGS3(
+	HTAAScheme,	scheme,
+	HTAASetup *,	setup,
+	BOOL,		IsProxy)
 {
     char *cleartext = NULL;	/* Cleartext presentation */
     char *ciphertext = NULL;	/* Encrypted presentation */
@@ -559,6 +583,7 @@ PRIVATE char *compose_auth_string ARGS2(HTAAScheme,	scheme,
     char *realmname = NULL;
     char *theHost = NULL;
     char *proxiedHost = NULL;
+    char *thePort = NULL;
     HTAARealm *realm;
     char *inet_addr = "0.0.0.0";	/* Change... @@@@ */
     char *timestamp = "42";		/* ... these @@@@ */
@@ -584,28 +609,60 @@ PRIVATE char *compose_auth_string ARGS2(HTAAScheme,	scheme,
 	        fprintf(stderr, "%s `%s' %s\n",
 			        "compose_auth_string: realm:", realmname,
 			        "not found -- creating");
-	    realm = HTAARealm_new(setup->server->realms, realmname, NULL,NULL);
+	    realm = HTAARealm_new(setup->server->realms,
+				  realmname, NULL, NULL);
 	}
-	len = strlen(realm->realmname) +
-	      strlen(setup->server->hostname ?
-	      	     setup->server->hostname : "??") + 40;
-	if (!(msg = (char*)calloc(1, sizeof(char) * len)))
-	    outofmem(__FILE__, "compose_auth_string");
-	if ((!auth_proxy) && using_proxy && setup->template) {
+	/*
+	 *  The template should be either the '*' global
+	 *  for everthing on the server (always true for
+	 *  proxy authorization setups), or a path for
+	 *  the start of a protected limb, with no host
+	 *  field, but we'll check for a host anyway in
+	 *  case a WWW-Protection-Template header set an
+	 *  absolute URL instead of a path.  If we do get
+	 *  a host from this, it will include the port. - FM
+	 */
+	if ((!IsProxy) && using_proxy && setup->template) {
 	    proxiedHost = HTParse(setup->template, "", PARSE_HOST);
 	    if (proxiedHost && *proxiedHost != '\0') {
 	        theHost = proxiedHost;
 	    }
 	}
+	/*
+	 *  If we didn't get a host field from the
+	 *  template, set up the host name and port
+	 *  from the setup->server elements. - FM
+	 */
 	if (!theHost)
 	    theHost = setup->server->hostname;
-	sprintf(msg, "Enter username for %s at %s:",
+	    if (setup->server->portnumber > 0 &&
+		setup->server->portnumber != 80) {
+		if (!(thePort = (char *)calloc(1, sizeof(char) * 40)))
+		    outofmem(__FILE__, "compose_auth_string");
+		sprintf(thePort, ":%d", setup->server->portnumber);
+	    }
+	/*
+	 *  Set up the message for the username prompt,
+	 *  and then issue the prompt.  The default
+	 *  username is included in the call to the
+	 *  prompting function, but the password is
+	 *  NULL-ed and always replaced. - FM
+	 */
+	len = strlen(realm->realmname) +
+	      strlen(theHost ?
+	      	     theHost : "??") + 50;
+	if (!(msg = (char *)calloc(1, sizeof(char) * len)))
+	    outofmem(__FILE__, "compose_auth_string");
+	sprintf(msg, "Username for '%s' at %s '%s%s':",
 		     realm->realmname,
-		     theHost ? theHost : "??");
+		     (IsProxy ? "proxy" : "server"),
+		     (theHost ? theHost : "??"),
+		     (thePort ? thePort : ""));
 	FREE(proxiedHost);
+	FREE(thePort);
 	username = realm->username;
 	password = NULL;
-	HTPromptUsernameAndPassword(msg, &username, &password);
+	HTPromptUsernameAndPassword(msg, &username, &password, IsProxy);
 
 	FREE(msg);
 	FREE(realm->username);
@@ -704,12 +761,13 @@ PRIVATE char *compose_auth_string ARGS2(HTAAScheme,	scheme,
 ** ON EXIT:
 **	returns	the authentication scheme to use.
 */
-PRIVATE HTAAScheme HTAA_selectScheme ARGS1(HTAASetup *, setup)
+PRIVATE HTAAScheme HTAA_selectScheme ARGS1(
+	HTAASetup *,	setup)
 {
     HTAAScheme scheme;
 
     if (setup && setup->valid_schemes) {
-	for (scheme=HTAA_BASIC; scheme < HTAA_MAX_SCHEMES; scheme++)
+	for (scheme = HTAA_BASIC; scheme < HTAA_MAX_SCHEMES; scheme++)
 	    if (-1 < HTList_indexOf(setup->valid_schemes, (void*)scheme))
 		return scheme;
     }
@@ -763,6 +821,7 @@ PRIVATE void free_HTAAGlobals NOARGS
 **	hostname	is the hostname of the server.
 **	portnumber	is the portnumber in which the server runs.
 **	docname		is the pathname of the document (as in URL)
+**	IsProxy		should be TRUE if this is a proxy.
 **
 ** ON EXIT:
 **	returns	NULL, if no authorization seems to be needed, or
@@ -772,9 +831,11 @@ PRIVATE void free_HTAAGlobals NOARGS
 **
 **		As usual, this string is automatically freed.
 */
-PUBLIC char *HTAA_composeAuth ARGS3(CONST char *,	hostname,
-				    CONST int,		portnumber,
-				    CONST char *,	docname)
+PUBLIC char *HTAA_composeAuth ARGS4(
+	CONST char *,	hostname,
+	CONST int,	portnumber,
+	CONST char *,	docname,
+	BOOL,		IsProxy)
 {
     char *auth_string;
     BOOL retry;
@@ -809,7 +870,7 @@ PUBLIC char *HTAA_composeAuth ARGS3(CONST char *,	hostname,
 
     FREE(HTAA_composeAuthResult);	/* From previous call */
 
-    if (auth_proxy) {
+    if (IsProxy) {
         /*
 	**  Proxy Authorization required. - AJL
 	*/
@@ -843,7 +904,8 @@ PUBLIC char *HTAA_composeAuth ARGS3(CONST char *,	hostname,
 	}
 
 	if (!proxy_setup || !retry)
-	    proxy_setup = HTAASetup_lookup(hostname, portnumber, docname);
+	    proxy_setup = HTAASetup_lookup(hostname, portnumber,
+					   docname, IsProxy);
 
 	if (!proxy_setup)
 	    return NULL;
@@ -851,7 +913,7 @@ PUBLIC char *HTAA_composeAuth ARGS3(CONST char *,	hostname,
     	switch (scheme = HTAA_selectScheme(proxy_setup)) {
 	  case HTAA_BASIC:
 	  case HTAA_PUBKEY:
-	    auth_string = compose_auth_string(scheme, proxy_setup);
+	    auth_string = compose_auth_string(scheme, proxy_setup, IsProxy);
 	    break;
 	  case HTAA_KERBEROS_V4:
 	    /* OTHER AUTHENTICATION ROUTINES ARE CALLED HERE */
@@ -859,8 +921,9 @@ PUBLIC char *HTAA_composeAuth ARGS3(CONST char *,	hostname,
 	    {
 		char msg[100];
 		sprintf(msg, "%s %s `%s'",
-			"This client doesn't know how to compose proxy authentication",
-			"information for scheme", HTAAScheme_name(scheme));
+			     "This client doesn't know how to compose proxy",
+			     "authorization information for scheme",
+			     HTAAScheme_name(scheme));
 		HTAlert(msg);
 		auth_string = NULL;
 	    }
@@ -918,7 +981,8 @@ PUBLIC char *HTAA_composeAuth ARGS3(CONST char *,	hostname,
 	}
 
 	if (!current_setup || !retry)
-	    current_setup = HTAASetup_lookup(hostname, portnumber, docname);
+	    current_setup = HTAASetup_lookup(hostname, portnumber,
+					     docname, IsProxy);
 
 	if (!current_setup)
 	    return NULL;
@@ -926,7 +990,7 @@ PUBLIC char *HTAA_composeAuth ARGS3(CONST char *,	hostname,
 	switch (scheme = HTAA_selectScheme(current_setup)) {
 	  case HTAA_BASIC:
 	  case HTAA_PUBKEY:
-	    auth_string = compose_auth_string(scheme, current_setup);
+	    auth_string = compose_auth_string(scheme, current_setup, IsProxy);
 	    break;
 	  case HTAA_KERBEROS_V4:
 	    /* OTHER AUTHENTICATION ROUTINES ARE CALLED HERE */
@@ -934,8 +998,9 @@ PUBLIC char *HTAA_composeAuth ARGS3(CONST char *,	hostname,
 	    {
 		char msg[100];
 		sprintf(msg, "%s %s `%s'",
-			"This client doesn't know how to compose authentication",
-			"information for scheme", HTAAScheme_name(scheme));
+			"This client doesn't know how to compose",
+			"authoritzation information for scheme",
+			HTAAScheme_name(scheme));
 		HTAlert(msg);
 		auth_string = NULL;
 	    }
@@ -980,6 +1045,7 @@ PUBLIC char *HTAA_composeAuth ARGS3(CONST char *,	hostname,
 **			start of the header section.
 **	length		is the remaining length of the first block.
 **	soc		is the socket to read the rest of server reply.
+**	IsProxy		should be TRUE if this is a proxy.
 **
 **			This function should only be called when
 **			server has replied with a 401 (Unauthorized)
@@ -995,10 +1061,12 @@ PUBLIC char *HTAA_composeAuth ARGS3(CONST char *,	hostname,
 **				  field (in function HTAA_composeAuth()).
 **			NO, otherwise.
 */
-PUBLIC BOOL HTAA_shouldRetryWithAuth ARGS4(char *, start_of_headers,
-					   int,	   length,
-					   void *, handle,
-					   int,	   soc)
+PUBLIC BOOL HTAA_shouldRetryWithAuth ARGS5(
+	char *,		start_of_headers,
+	int,		length,
+	void *,		handle,
+	int,		soc,
+	BOOL,		IsProxy)
 {
     HTAAScheme scheme;
     char *line = NULL;
@@ -1034,9 +1102,9 @@ PUBLIC BOOL HTAA_shouldRetryWithAuth ARGS4(char *, start_of_headers,
 	    char *arg1 = HTNextField(&p);
 	    char *args = p;
 
-	    if ((auth_proxy &&
+	    if ((IsProxy &&
 		 0==strcasecomp(fieldname, "Proxy-Authenticate:")) ||
-	        (!auth_proxy &&
+	        (!IsProxy &&
 		 0==strcasecomp(fieldname, "WWW-Authenticate:"))) {
 	        if (!(arg1 && *arg1 && args && *args)) {
 		    temp = (char *)calloc(1, strlen(line) +
@@ -1069,13 +1137,13 @@ PUBLIC BOOL HTAA_shouldRetryWithAuth ARGS4(char *, start_of_headers,
 		else if (TRACE) {
 		    fprintf(stderr, "Unknown scheme `%s' %s\n",
 			    (arg1 ? arg1 : "(null)"),
-			    (auth_proxy ?
+			    (IsProxy ?
 			     "in Proxy-Authenticate: field" :
 			     "in WWW-Authenticate: field"));
 		}
 	    }
 
-	    else if (!auth_proxy &&
+	    else if (!IsProxy &&
 		     0==strcasecomp(fieldname, "WWW-Protection-Template:")) {
 		if (TRACE)
 		    fprintf(stderr, "Protection template set to `%s'\n", arg1);
@@ -1095,10 +1163,10 @@ PUBLIC BOOL HTAA_shouldRetryWithAuth ARGS4(char *, start_of_headers,
     /*
     **  So should we retry with authorization?
     */
-    if (auth_proxy) {
+    if (IsProxy) {
 	if (num_schemes == 0) {
 	    /*
-	    **  No proxy authentication valid
+	    **  No proxy authorization valid
 	    */
 	    proxy_setup = NULL;
 	    return NO;
@@ -1135,10 +1203,12 @@ PUBLIC BOOL HTAA_shouldRetryWithAuth ARGS4(char *, start_of_headers,
 	    **  than we expected so far.
 	    */
 	    HTAAServer *server = HTAAServer_lookup(proxy_hostname,
-						   proxy_portnumber);
+						   proxy_portnumber,
+						   IsProxy);
 	    if (!server) {
 		server = HTAAServer_new(proxy_hostname,
-					proxy_portnumber);
+					proxy_portnumber,
+					IsProxy);
 	    }
 	    if (!template)	/* Proxy matches everything  -AJL */
 		StrAllocCopy(template, "*");
@@ -1148,7 +1218,7 @@ PUBLIC BOOL HTAA_shouldRetryWithAuth ARGS4(char *, start_of_headers,
 					  scheme_specifics);
 	    FREE(template);
 
-	    HTAlert("Proxy authentication required -- retrying");
+	    HTAlert("Proxy authorization required -- retrying");
 	    return YES;
 	}
 	/* Never reached */
@@ -1158,7 +1228,7 @@ PUBLIC BOOL HTAA_shouldRetryWithAuth ARGS4(char *, start_of_headers,
     */
     if (num_schemes == 0) {
 	/*
-	**  No authentication valid.
+	**  No authorization valid.
 	*/
 	current_setup = NULL;
 	return NO;
@@ -1192,10 +1262,12 @@ PUBLIC BOOL HTAA_shouldRetryWithAuth ARGS4(char *, start_of_headers,
 	**  than we expected so far.
 	*/
 	HTAAServer *server = HTAAServer_lookup(current_hostname,
-					       current_portnumber);
+					       current_portnumber,
+					       IsProxy);
 	if (!server) {
 	    server = HTAAServer_new(current_hostname,
-				    current_portnumber);
+				    current_portnumber,
+				    IsProxy);
 	}
 	if (!template)
 	    template = HTAA_makeProtectionTemplate(current_docname);

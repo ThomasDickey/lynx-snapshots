@@ -27,6 +27,16 @@
 #include "HTAnchor.h"
 
 /*
+**  This function is for trimming off any paired
+**  open- and close-double quotes from header values.
+**  It does not parse the string for embedded quotes,
+**  and will not modify the string unless both the
+**  first and last characters are double-quotes. - FM
+*/
+extern void HTMIME_TrimDoubleQuotes PARAMS((
+	char *		value));
+
+/*
 
   INPUT: LOCAL TEXT
   

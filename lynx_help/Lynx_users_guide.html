@@ -464,7 +464,7 @@ options.
      preferred document lan(G)uage: en
      preferred document c(H)arset : NONE
      V)I keys: OFF    e(M)acs keys: OFF     sho(W) dot files: OFF
-     popups for selec(T) fields   : ON
+     popups for selec(T) fields   : ON      show cursor (@) : OFF
      K)eypad mode                 : Numbers act as arrows
      li(N)e edit style            : Default Binding
      l(I)st directory style	  : Mixed style
@@ -473,11 +473,12 @@ options.
      local e(X)ecution links	  : FOR LOCAL FILES ONLY
 </pre>
 
-An option can be changed by entering the capital letter of the option
-you want to change (i.e.  '<em>E</em>' for Editor). For fields where text
-must be entered, simply enter the text by typing on the keyboard.  The
-<a href="keystroke_commands/edit_help.html">Line Editor</a> can be used
-to correct mistakes, and <em>Control-U</em> can be used to erase the whole
+An option can be changed by entering the capital letter or character in
+parentheses for the option you wish to change (e.g. '<em>E</em>' for Editor
+or '<em>@</em>' for show cursor).  For fields where text must be entered,
+simply enter the text by typing on the keyboard.  The <a
+href="keystroke_commands/edit_help.html">Line Editor</a> can be used to
+correct mistakes, and <em>Control-U</em> can be used to erase the whole
 line.  When you are done entering a change press the <em>Return</em> key
 to get back to the <em>Command?</em> prompt.
 
@@ -567,23 +568,25 @@ return to Lynx or the '<em>&gt;</em>' command to save the options to a
    <dt>Display Character set
 	<dd>This option allows you to set up the default character set for
 	    your specific terminal.  The character set provides a mapping
-	    of 8-bit ISO Latin character entities and/or Asian (CJK)
-	    characters into viewable characters and should be set in
+	    of 8-bit ISO Latin character entities and/or Asian (CJK) or
+	    UTF-8 characters into viewable characters and should be set in
 	    relation to your terminal's character set if you will be
 	    viewing such characters with Lynx.  You must have the selected
 	    character set installed on your terminal.
 
    <dt>Raw 8-bit or CJK Mode
-	<dd>Whether 8-bit characters are are assumed to correspond with
-	    the selected character set and therefore are processed without
-	    translation via the ISO Latin 1 conversion tables.  Should be
-	    ON by default when the selected character set is ISO Latin 1,
-	    or is one of the Asian (CJK) sets and the 8-bit characters are
-	    Kanji multibytes.  Should be OFF for the other character sets,
-	    but can be turned ON when there's a match, e.g., the document's
-	    charset is ISO-8859-2 and ISO Latin 2 has been selected.  Should
-	    be OFF when an Asian (CJK) set is selected but the document is
-	    ISO-8850-1.  The setting also can be toggled via the RAW_TOGGLE
+	<dd>Whether 8-bit characters are assumed to correspond with the
+	    selected character set and therefore are processed without
+	    translation via the chartrans conversion tables.  Should be ON
+	    by default when the selected character set is one of the Asian
+	    (CJK) sets and the 8-bit characters are Kanji multibytes.
+	    Should be OFF for the other character sets, but can be turned ON
+	    when the document's charset is unknown (e.g., is not ISO-8859-1
+	    and no charset parameter was included in a reply header from
+	    an HTTP server to indicate what it is) but you know by some
+	    means that you have the matching display character set selected.
+	    Should be OFF when an Asian (CJK) set is selected but the document
+	    is ISO-8850-1.  The setting also can be toggled via the RAW_TOGGLE
 	    command, normally mapped to '<em>@</em>', and at startup via the
 	    <em>-raw</em> switch.
 
@@ -619,19 +622,38 @@ return to Lynx or the '<em>&gt;</em>' command to save the options to a
 
    <dt>Popups for select fields
 	<dd>Lynx normally uses a popup window for the OPTIONs in form
-	SELECT fields when the field does not have the MULTIPLE attribute
-	specified, and thus only one OPTION can be selected.  The use of
-	popup windows can be disabled by changing this setting to OFF, in
-	which case the OPTIONs will be rendered as a list of radio buttons.
-	Note that if the SELECT field does have the MULTIPLE attribute
-	specified, the OPTIONs always are rendered as a list of checkboxes. 
+	    SELECT fields when the field does not have the MULTIPLE
+	    attribute specified, and thus only one OPTION can be selected.
+	    The use of popup windows can be disabled by changing this setting
+	    to OFF, in which case the OPTIONs will be rendered as a list of
+	    radio buttons.  Note that if the SELECT field does have the
+	    MULTIPLE attribute specified, the OPTIONs always are rendered
+	    as a list of checkboxes. 
 
-   <dt>Keypad as arrows or numbered links
-	<dd>This option gives the choice between navigating with the arrow
-	    keys or having every link numbered so that the links may be
-	    selected by numbers as well as using the arrow keys.  See the
-	    <a href="keystroke_commands/follow_help.html"
-	    >Follow link (or goto link or page) number:</a> help for more information.
+   <dt>Show cursor for current link or option.
+	<dd>Lynx normally hides the cursor by positioning it to the right
+	    and if possible the very bottom of the screen, so that the
+	    current link or OPTION is indicated solely by its highlighting
+	    or color.  If show cursor is set to ON, the cursor will be
+	    positioned at the left of the current link or OPTION.  This
+	    is helpful when Lynx is being used with a speech or braille
+	    interface.  It also is useful for sighted users when the
+	    terminal cannot distinguish the character attributes used
+	    to distinguish the current link or OPTION from the others in
+	    the screen display.
+
+   <dt>Keypad as arrows, numbered links, or numbered links and form fields
+	<dd>This option gives the choice among navigating with the arrow
+	    keys, or having every link numbered so that the links may be
+	    selected or made current by numbers as well as using the arrow
+	    keys, or having every link as well as every form field numbered
+	    so that they can be selected or sought by numbers.  See the<br>
+	    &nbsp;&nbsp<a href="keystroke_commands/follow_help.html"
+	    >Follow link (or page) number:</a> and<br>
+	    &nbsp;&nbsp<a
+	    href="keystroke_commands/follow_help.html#select-option"
+	    >Select option (or page) number:</a><br>
+	    help for more information.
 
    <dt>Line edit style
    	<dd>This option allows you to set alternate key bindings for the
@@ -1054,7 +1076,11 @@ commands.
 	<dd>Lynx offers other, advanced navigation features when numbers
 	    are used to invoke the <a
 	    href="keystroke_commands/follow_help.html"
-	    >Follow link (or goto link or page) number:</a> prompt.
+	    >Follow link (or goto link or page) number:</a> or<br>
+	    &nbsp;&nbsp;<a
+	    href="keystroke_commands/follow_help.html#select-option"
+	    >Select option (or page) number:</a><br>
+	    prompts.
 	    [<A HREF="#TOC">ToC</A>]
 </dl>
 
@@ -1746,8 +1772,8 @@ where
   	<dd>can be selected from the following list, where items in
 	    all-caps indicate that a substitution must be made.
   	   <dl>
-   	      <dt><code>-</code>
-    		<dd>If the only argument is '<code>-</code>' (dash), then Lynx
+   	     <dt><code>-</code>
+    		<dd>If the argument is only '<code>-</code>' (dash), then Lynx
 		    expects to receive the arguments from stdin. This is to
 		    allow for the potentially very long command line that can
 		    be associated with the <em>-get_data</em> or
@@ -1755,11 +1781,20 @@ where
 		    must be encased in double-quotes (&quot;-&quot;) and the
 		    keyboard input terminated with <em>Control-Z</em> or the
 		    command file input terminated by a line that begins
-		    with '<em>$</em>'.
-   	      <dt><code>-anonymous</code>
+		    with '<em>$</em>'.  On Unix, the keyboard input terminator
+		    is <em>Control-D</em>.
+   	     <dt><code>-anonymous</code>
     		<dd>used to specify the anonymous account.
+   	     <dt><code>-assume_charset=MIMEname</code>
+    		<dd>charset for documents that don't specify it.
+   	     <dt><code>-assume_local_charset=MIMEname</code>
+    		<dd>charset assumed for local files.
+   	     <dt><code>-assume_unrec_charset=MIMEname</code>
+    		<dd>use this instead of unrecognized charsets.
 	     <dt><code>-auth=ID:PW</code>
-		<dd>id and password for protected pages.
+		<dd>set authorization ID and password for protected documents
+		    at startup.  Be sure to protect any script files which use
+		    this switch.
 	     <dt><code>-base</code>
 		<dd>prepend a request URL comment and BASE tag to text/html
 		    outputs for -source or -mime_header dumps.
@@ -1817,6 +1852,8 @@ where
 		    listings.
 	     <dt><code>-force_html</code> 
 		<dd>forces the first document to be interpreted as HTML.
+	     <dt><code>-force_secure</code> 
+		<dd>toggles forcing of the secure flag for SSL cookies.
              <dt><code>-from</code>
     		<dd>toggles transmissions of From headers to HTTP or HTTPS
 		    servers.
@@ -1887,9 +1924,16 @@ where
     		<dd>disable the retrieval status messages.
              <dt><code>-number_links</code>
     		<dd>force numbering of links.
+	     <dt><code>-pauth=ID:PW</code>
+		<dd>set authorization ID and password for a protected proxy
+		    server at startup.  Be sure to protect any script files
+		    which use this switch.
 	     <dt><code>-popup</code>
 		<dd>toggles handling of single-choice SELECT options via
-		    popup windows or as lists of radio buttons.
+		    popup windows or as lists of radio buttons.  The default
+          	    configuration can be changed in userdefs.h or lynx.cfg.
+		    It also can be set and saved via the 'o'ptions menu.
+                    The command line switch toggles the default.
 	     <dt><code>-post_data</code>
 		<dd>properly formatted data for a post form are read in from
 		    stdin and passed to the form. Input is terminated by a
@@ -2012,6 +2056,7 @@ where
           	    currently selected link.  Show cursor is the default for
 		    systems without FANCY_CURSES capabilities.  The default
           	    configuration can be changed in userdefs.h or lynx.cfg.
+		    It also can be set and saved via the 'o'ptions menu.
                     The command line switch toggles the default.
              <dt><code>-soft_dquotes</code>
     		<dd>toggles emulation of the old Netscape and Mosaic bug which

@@ -52,8 +52,7 @@ PRIVATE int check_for_target_in_links ARGS2(
 	 *  Search the relevant form fields, taking the
 	 *  case_sensitive setting into account. - FM
 	 */
-	if ((links[i].form != NULL && links[i].type == WWW_FORM_LINK_TYPE &&
-	     links[i].form->value != NULL) &&
+	if ((links[i].form != NULL && links[i].form->value != NULL) &&
 	    links[i].form->type != F_HIDDEN_TYPE) {
 	    if (links[i].form->type == F_PASSWORD_TYPE) {
 	        /*
@@ -168,7 +167,8 @@ PRIVATE int check_for_target_in_links ARGS2(
  *
  */
 		
-PUBLIC BOOL textsearch ARGS3(document *,cur_doc,
+PUBLIC BOOL textsearch ARGS3(
+	document *,	cur_doc,
 	char *,		prev_target,
 	BOOL,		next)
 {
@@ -358,7 +358,7 @@ check_recall:
 	/*
 	 *  Found in link, changed cur, we're done.
 	 */
-	highlight(OFF, oldcur);
+	highlight(OFF, oldcur, prev_target);
 	return(TRUE); 
     }
 	
@@ -374,11 +374,11 @@ check_recall:
     /*
      *  Resume search, this time for all text.
      *  Set www_search_result if string found,
-     *  and position the hit at top of screen.
+     *  and position the hit near top of screen.
      */
-    www_user_search(cur_doc->line+offset, cur_doc, prev_target);
+    www_user_search((cur_doc->line + offset), cur_doc, prev_target);
     if (cur_doc->link != oldcur) {
-	highlight(OFF, oldcur);
+	highlight(OFF, oldcur, prev_target);
 	return(TRUE);
     }
     return(www_search_result > 0);

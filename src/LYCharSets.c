@@ -3,6 +3,8 @@
 #include "HTCJK.h"
 
 #include "LYGlobalDefs.h"
+#include "UCMap.h"
+#include "UCDefs.h"
 #include "LYCharSets.h"
 #include "LYCharUtils.h"
 #ifdef EXP_CHARTRANS
@@ -27,11 +29,11 @@ PUBLIC BOOLEAN LYHaveCJKCharacterSet = FALSE;
 extern void UCInit NOARGS;
 extern int UCInitialized;
 #else 
-#ifndef MAX_CHARSETS
-#define MAX_CHARSETS
+#ifndef MAXCHARSETS
+#define MAXCHARSETS
 #endif
-#ifndef MAX_CHARSETSP
-#define MAX_CHARSETSP
+#ifndef MAXCHARSETSP
+#define MAXCHARSETSP
 #endif
 #endif /* EXP_CHARTRANS */
 
@@ -2044,7 +2046,7 @@ PUBLIC char * SevenBitApproximations[] = {
 /* 
  *  Add the array name to LYCharSets
  */
-PUBLIC char ** LYCharSets[MAX_CHARSETS]={
+PUBLIC char ** LYCharSets[MAXCHARSETS]={
 	ISO_Latin1,
 	ISO_Latin2,
 	ISO_LatinN,
@@ -2060,14 +2062,14 @@ PUBLIC char ** LYCharSets[MAX_CHARSETS]={
 	Korean,
 	Taipei,
 	SevenBitApproximations,
-	ISO_Latin1		/* maybe... - kw */
+	ISO_Latin1		/* Maybe... - KW */
 };
 
 /*
  *  Add the name that the user will see below.
  *  The order of LYCharSets and char_set_names MUST be the same
  */
-PUBLIC char * LYchar_set_names[MAX_CHARSETSP]={
+PUBLIC char * LYchar_set_names[MAXCHARSETSP]={
 	"ISO Latin 1         ",
 	"ISO Latin 2         ",
 	"Other ISO Latin     ",
@@ -2090,20 +2092,19 @@ PUBLIC char * LYchar_set_names[MAX_CHARSETSP]={
 
 PUBLIC int LYNumCharsets = 0; /* will be initialized later by UC_Register... */
 
-#include <UCDefs.h>
 /*
  *  Associate additional pieces of info with each of the charsets listed
  *  above.
  *  Will be automatically modified (and extended) by charset translations
- *  which are loaded using the EXP_CHARTRANS mechanism.
+ *  which are loaded using the chartrans mechanism.
  *  Most important piece of info to put here is a MIME charset name.
- *  Used for EXP_CHARTRANS.
+ *  Used for chartrans.
  *  The order of LYCharSets and LYCharSet_UC MUST be the same.
  *
  *  Note that most of the charsets added by the new mechanism in src/chrtrans
  *  don't show up here at all.  They don't have to.
  */
-PUBLIC LYUCcharset LYCharSet_UC[MAX_CHARSETS]=
+PUBLIC LYUCcharset LYCharSet_UC[MAXCHARSETS]=
 {
   {-1,"iso-8859-1",    UCT_ENC_8BIT,UCT_REP_IS_LAT1,UCT_CP_IS_LAT1,UCT_R_LAT1,
                                                                    UCT_R_LAT1},
@@ -2116,14 +2117,16 @@ PUBLIC LYUCcharset LYCharSet_UC[MAX_CHARSETS]=
   {-1,"macintosh",	UCT_ENC_8BIT,0,0,	UCT_R_8BIT,UCT_R_ASCII},
   {-1,"x-next",		UCT_ENC_8BIT,0,0,	UCT_R_8BIT,UCT_R_ASCII},
   {-1,"koi8-r",		UCT_ENC_8BIT,0,0,	UCT_R_8BIT,UCT_R_ASCII},
-/* There is no strict correlation for the next five, since the tranfer
- * charset gets decoded into Display Char Set by the CJK code (separate
- * from EXP_CHARTRANS mechanism).  For now, just put something there for
- * MIME charset name. */
-  {-1,"iso-2022-cn",	UCT_ENC_CJK,0,0,	UCT_R_8BIT,UCT_R_ASCII},
+  /*
+   *  There is no strict correlation for the next five, since the tranfer
+   *  charset gets decoded into Display Char Set by the CJK code (separate
+   *  from EXP_CHARTRANS mechanism).  For now, just put something there for
+   *  MIME charset name.
+   */
+  {-1,"euc-cn",		UCT_ENC_CJK,0,0,	UCT_R_8BIT,UCT_R_ASCII},
   {-1,"euc-jp",		UCT_ENC_CJK,0,0,	UCT_R_8BIT,UCT_R_ASCII},
   {-1,"shift_jis",	UCT_ENC_CJK,0,0,	UCT_R_8BIT,UCT_R_ASCII},
-  {-1,"iso-2022-kr",	UCT_ENC_CJK,0,0,	UCT_R_8BIT,UCT_R_ASCII},
+  {-1,"euc-kr",		UCT_ENC_CJK,0,0,	UCT_R_8BIT,UCT_R_ASCII},
   {-1,"big5",		UCT_ENC_CJK,0,0,	UCT_R_8BIT,UCT_R_ASCII},
   {-1,"us-ascii",	UCT_ENC_7BIT,UCT_REP_SUBSETOF_LAT1,
                                      UCT_CP_SUBSETOF_LAT1,
@@ -2133,13 +2136,14 @@ PUBLIC LYUCcharset LYCharSet_UC[MAX_CHARSETS]=
 #endif
 
 #if defined(USE_SLANG) || defined(EXP_CHARTRANS)
+
 /*
  *  Add the code of the the lowest character with the high bit set
  *  that can be directly displayed.
  *  Used by SLANG and for EXP_CHARTRANS.
  *  The order of LYCharSets and LYlowest_eightbit MUST be the same.
  */
-PUBLIC int LYlowest_eightbit[MAX_CHARSETS]={
+PUBLIC int LYlowest_eightbit[MAXCHARSETS]={
 	160,	/* ISO Latin 1 */
 	160,	/* ISO Latin 2 */
 	160,	/* Other ISO Latin */
@@ -2179,31 +2183,35 @@ PUBLIC void HTMLSetCharacterHandling ARGS1(int,i)
 #ifdef EXP_CHARTRANS
     if (LYCharSet_UC[i].enc != UCT_ENC_CJK) {
 	int chndl = 0;
+
 	if (UCAssume_MIMEcharset)
 	    chndl = UCGetLYhndl_byMIME(UCAssume_MIMEcharset);
 	HTCJK = NOCJK;
 	kanji_code = NOKANJI;
-	if (i == (chndl < 0 ? 0 : chndl))
+	if (i == (chndl < 0 ? 0 : chndl)) {
 	    LYRawMode = LYUseDefaultRawMode ? TRUE : FALSE;
-	else
+	} else {
 	    LYRawMode = LYUseDefaultRawMode ? FALSE : TRUE;
-	if (LYRawMode)
+	}
+	if (LYRawMode) {
 	    HTPassEightBitRaw = (LYlowest_eightbit[i] <= 160);
-	else
+	} else {
 	    HTPassEightBitRaw = FALSE;
+	}
 
 	HTPassEightBitNum =
 	    ((LYCharSet_UC[i].codepoints & UCT_CP_SUPERSETOF_LAT1) ||
 		(LYCharSet_UC[i].like8859 & UCT_R_HIGH8BIT));
 	
-	if (LYRawMode || i == chndl)
+	if (LYRawMode || i == chndl) {
 	    HTPassHighCtrlRaw = (LYlowest_eightbit[i] <= 130);
-	else
+	} else {
 	    HTPassHighCtrlRaw = FALSE;
+	}
 
 	HTPassHighCtrlNum = FALSE;
     } else
-#endif
+#endif /* EXP_CHARTRANS */
     if (!strncmp(LYchar_set_names[i], "ISO Latin 1", 11)) {
 	HTCJK = NOCJK;
 	kanji_code = NOKANJI;
@@ -2295,11 +2303,14 @@ PUBLIC void HTMLSetCharacterHandling ARGS1(int,i)
 #endif /* EXP_CHARTRANS */
 
 #ifdef USE_SLANG
-    if (LYlowest_eightbit[i] > 191)
-      /* higher than this may output cntrl chars to screen - kw */
+    if (LYlowest_eightbit[i] > 191) {
+	/*
+	 *  Higher than this may output cntrl chars to screen. - KW
+	 */
 	SLsmg_Display_Eight_Bit = 191;
-    else
+    } else {
 	SLsmg_Display_Eight_Bit = LYlowest_eightbit[i];
+    }
 #endif /* USE_SLANG */
 
     return;
@@ -2343,11 +2354,11 @@ PUBLIC void HTMLSetUseDefaultRawMode ARGS2(int,i, BOOLEAN,modeflag)
     } else
 #endif /* EXP_CHARTRANS */
     if (!strncmp(LYchar_set_names[i], "ISO Latin 1", 11) ||
-    	!strncmp(LYchar_set_names[i], "Chinese", 7) ||
-	!strncmp(LYchar_set_names[i], "Japanese (EUC)", 14) ||
-	!strncmp(LYchar_set_names[i], "Japanese (SJIS)", 15) ||
-	!strncmp(LYchar_set_names[i], "Korean", 6) ||
-	!strncmp(LYchar_set_names[i], "Taipei (Big5)", 13)) {
+	       !strncmp(LYchar_set_names[i], "Chinese", 7) ||
+	       !strncmp(LYchar_set_names[i], "Japanese (EUC)", 14) ||
+	       !strncmp(LYchar_set_names[i], "Japanese (SJIS)", 15) ||
+	       !strncmp(LYchar_set_names[i], "Korean", 6) ||
+	       !strncmp(LYchar_set_names[i], "Taipei (Big5)", 13)) {
 	if (modeflag == TRUE) {
 	    LYUseDefaultRawMode = TRUE;
 	} else {
@@ -2497,13 +2508,10 @@ PUBLIC CONST char * HTMLGetEntityName ARGS1(int,i)
 }
 
 /*
- *  Function to return the values of the
- *  ISO_Latin1 Character Set.  It assumes
- *  the strings have only one character,
- *  and restores nbsp to 160 and shy to
- *  173, but keeps our substitutions for
- *  characters that are not part of the
- *  ISO-8859-1 charset. - FM
+ *  Function to return the values of the ISO_Latin1 Character Set.
+ *  It assumes the strings have only one character, and restores
+ *  nbsp to 160 and shy to 173, but keeps our substitutions for
+ *  characters that are not part of the ISO-8859-1 charset. - FM
  *
  *  Return '\0' to signal that there isn't a one-character
  *  equivalent.  Caller must check! and do whatever additional
@@ -2527,8 +2535,12 @@ PUBLIC char HTMLGetLatinOneValue ARGS1(int,i)
 	    break;
 
 	default:
-	    if (ch && ISO_Latin1[i][1])	/* Got a string longer than 1 char */
-	      return '\0';
+	    if (ch && ISO_Latin1[i][1]) {
+		/*
+		 *  Got a string longer than 1 char.
+		 */
+		return '\0';
+	    }
 	    break;
      }
 
@@ -2546,12 +2558,10 @@ PUBLIC void HTMLUseCharacterSet ARGS1(int,i)
     HTMLSetHaveCJKCharacterSet(i);
     return;
 }
+
 /*
- * Initializer, calls initialization function for the
- * CHARTRANS handling if compiled in. - kw
- * (Also to ensure this module is linked
- * if the external model is common block, and the
- * module is ever placed in a library. - FM) ??
+ *  Initializer, calls initialization function for the
+ *  CHARTRANS handling if compiled in. - KW
  */
 PUBLIC int LYCharSetsDeclared NOPARAMS
 {

@@ -2,13 +2,13 @@ The translation table files in this directory are _examples only_.
 They were collected from several sources (among them Linux kbd package, 
 ftp://dkuug.dk/, ftp://unicode.org/) and automatically comverted (if
 applicable), but not checked in detail.  The Unicode/UCS2 values
-for some of the RFC1345 Mnemonic codes are out of date, a cleanup and
+for some of the RFC 1345 Mnemonic codes are out of date, a cleanup and
 update would be needed for serious use (including removing the mappings
 from the "private zone" U+E000 etc.).
 
 More tranlation files can be easily provided (and new character entities
 added to HTMLDTD.c), this set is just to test whether the system works 
-in principle (and also how it behaves with of incomplete data...)
+in principle (and also how it behaves with incomplete data...)
 
 See the file README.format for a brief explanation of what's in the
 table files.
@@ -18,8 +18,10 @@ doesn't really matter.  The auxiliary program makeuctb (MAKE UniCode
 TaBle) is used to "compile" them into C header files, which can be
 included by UCdomap.c.
 
-Ideally this should be taken care of by the Makefiles..
-
+Ideally, this should be taken care of by the Makefiles.  On VMS, use
+build-chrtrans.com to compile and link makeuctb.exe and create the
+set of .h files from the current set of .tlb files.  Thereafter, use
+build-header.com to update particular .h files.
 
 To make a new chartrans table available to Lynx (and thereby make a new
 charset known to Lynx) you currently have to manually edit UCdomap.c, in
@@ -27,7 +29,11 @@ two places:
 
 a) Near the top, you will find a bunch of lines (some may be commented out)
   
+  #ifdef VMS
+  #include "[.chrtrans]<fn>.h"
+  #else
   #include "chrtrans/<fn>.h"
+  #endif /* VMS */
 
 Add or comment out as you wish. (But it's probably safest to leave the
 first one, referring to "chrtrans/iso01_uni.h", in place...)
@@ -50,5 +56,9 @@ named makefile.in before running ./configure, or makefile after running
 ./configure.  (That may be inconvenient, but I didn't want to depend
 on features than not all makes may have.)  Note that for recompiling
 Lynx, a `make clean' should not be necessary if you have *only* made
-changes to the files in src/chrtrans.
+changes to the files in src/chrtrans.  On VMS, add entries for new
+tables to build-chrtrans.com, but you can update the particular file
+with build-header.com, then use the top directory's build.com and
+answer 'n' to it's prompts about whether to update the WWWlibrary
+and chrtrans modules.
 

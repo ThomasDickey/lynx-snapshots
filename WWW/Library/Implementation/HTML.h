@@ -50,6 +50,7 @@ struct _HTStructured {
     HTStreamClass		targetClass;		/* Output routines */
 
     HTChildAnchor *		CurrentA;	/* current HTML_A anchor */
+    int				CurrentANum;	/* current HTML_A number */
     char *			base_href;	/* current HTML_BASE href */
     char *			map_address;	/* current HTML_MAP address */
 

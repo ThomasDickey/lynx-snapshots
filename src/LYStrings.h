@@ -15,13 +15,21 @@ extern int LYgetstr PARAMS((char *inputline, int hidden,
 extern char * LYstrstr PARAMS((char *chptr, char *tarptr));
 extern char * LYno_attr_char_strstr PARAMS((char *chptr, char *tarptr));
 extern char * LYno_attr_char_case_strstr PARAMS((char *chptr, char *tarptr));
-#ifdef EXP_CHARTRANS
 extern char * LYmbcsstrncpy PARAMS((char *dst, char *src, int n_bytes,
 				    int n_glyphs,	int enc));
-extern char * LYno_attr_mbcs_strstr PARAMS((char *chptr, char *tarptr,
-					    BOOL utf_flag, int *nendp));
-extern char * LYno_attr_mbcs_case_strstr PARAMS((char *chptr, char *tarptr,
-					    BOOL utf_flag, int *nendp));
+#ifdef EXP_CHARTRANS
+extern char * LYno_attr_mbcs_strstr PARAMS((
+	char *		chptr,
+	char *		tarptr,
+	BOOL		utf_flag,
+	int *		nstartp,
+	int *		nendp));
+extern char * LYno_attr_mbcs_case_strstr PARAMS((
+	char *		chptr,
+	char *		tarptr,
+	BOOL		utf_flag,
+	int *		nstartp,
+	int *		nendp));
 #endif
 
 extern char * SNACopy PARAMS((char **dest, CONST char *src, int n));
