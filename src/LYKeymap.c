@@ -89,7 +89,7 @@ LYK_DIRED_MENU,
 #endif /* DIRED_SUPPORT || VMS */
 /* F */        
 
-LYK_GOTO,
+LYK_ECGOTO,
 /* G */
 
 LYK_HELP,            LYK_INDEX,      LYK_JUMP,      LYK_KEYMAP,
@@ -420,6 +420,7 @@ PRIVATE struct rmap revmap[] = {
 { "PREV_DOC",		"go back to the previous document" },
 { "ACTIVATE",		"go to the document given by the current link" },
 { "GOTO",		"go to a document given as a URL" },
+{ "ECGOTO",		"edit the current document's URL and go to it" },
 { "HELP",		"display help on using the browser" },
 { "INDEX",		"display an index of potentially useful documents" },
 { "NOCACHE",		"force submission of form or link with no-cache" },

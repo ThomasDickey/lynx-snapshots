@@ -654,10 +654,10 @@
 
 /*************************
  * Define LYNX_SIG_FILE to the name of a file containing a signature which
- * can be appended to news postings or followups.  The user will be prompted
- * whether to append it.  It is sought in the home directory.  If it is in
- * a subdirectory, begin it with a dot-slash (e.g., ./lynx/.lynxsig).  The
- * definition here can be changed in lynx.cfg.
+ * can be appended to email messages and news postings or followups.  The
+ * user will be prompted whether to append it.  It is sought in the home
+ * directory.  If it is in a subdirectory, begin it with a dot-slash
+ * (e.g., ./lynx/.lynxsig).  The definition here can be changed in lynx.cfg.
  */
 #define LYNX_SIG_FILE ".lynxsig"
 

@@ -55,57 +55,58 @@ extern char override[];
 #define       LYK_PREV_DOC      31
 #define       LYK_ACTIVATE      32
 #define       LYK_GOTO  	33
-#define       LYK_HELP  	34
-#define       LYK_INDEX 	35
-#define       LYK_NOCACHE       36
-#define       LYK_INTERRUPT     37
-#define       LYK_MAIN_MENU     38
-#define       LYK_OPTIONS       39
-#define       LYK_INDEX_SEARCH  40
-#define       LYK_WHEREIS       41
-#define       LYK_NEXT  	42
-#define       LYK_COMMENT       43
-#define       LYK_EDIT  	44
-#define       LYK_INFO  	45
-#define       LYK_PRINT 	46
-#define       LYK_ADD_BOOKMARK  47
-#define       LYK_DEL_BOOKMARK  48
-#define       LYK_VIEW_BOOKMARK 49
-#define       LYK_VLINKS	50
-#define       LYK_SHELL 	51
-#define       LYK_DOWNLOAD      52
-#define       LYK_TRACE_TOGGLE  53
-#define       LYK_IMAGE_TOGGLE  54
-#define       LYK_INLINE_TOGGLE 55
-#define       LYK_HEAD          56
-#define       LYK_DO_NOTHING    57
-#define       LYK_TOGGLE_HELP	58
-#define       LYK_JUMP		59
-#define       LYK_KEYMAP	60
-#define       LYK_LIST		61
-#define       LYK_TOOLBAR	62
-#define       LYK_HISTORICAL	63
-#define       LYK_MINIMAL	64
-#define       LYK_SOFT_DQUOTES	65
-#define       LYK_RAW_TOGGLE	66
-#define       LYK_COOKIE_JAR    67
+#define       LYK_ECGOTO  	34
+#define       LYK_HELP  	35
+#define       LYK_INDEX 	36
+#define       LYK_NOCACHE       37
+#define       LYK_INTERRUPT     38
+#define       LYK_MAIN_MENU     39
+#define       LYK_OPTIONS       40
+#define       LYK_INDEX_SEARCH  41
+#define       LYK_WHEREIS       42
+#define       LYK_NEXT  	43
+#define       LYK_COMMENT       44
+#define       LYK_EDIT  	45
+#define       LYK_INFO  	46
+#define       LYK_PRINT 	47
+#define       LYK_ADD_BOOKMARK  48
+#define       LYK_DEL_BOOKMARK  49
+#define       LYK_VIEW_BOOKMARK 50
+#define       LYK_VLINKS	51
+#define       LYK_SHELL 	52
+#define       LYK_DOWNLOAD      53
+#define       LYK_TRACE_TOGGLE  54
+#define       LYK_IMAGE_TOGGLE  55
+#define       LYK_INLINE_TOGGLE 56
+#define       LYK_HEAD          57
+#define       LYK_DO_NOTHING    58
+#define       LYK_TOGGLE_HELP	59
+#define       LYK_JUMP		60
+#define       LYK_KEYMAP	61
+#define       LYK_LIST		62
+#define       LYK_TOOLBAR	63
+#define       LYK_HISTORICAL	64
+#define       LYK_MINIMAL	65
+#define       LYK_SOFT_DQUOTES	66
+#define       LYK_RAW_TOGGLE	67
+#define       LYK_COOKIE_JAR    68
 
 #ifdef VMS
-#define       LYK_DIRED_MENU    68
+#define       LYK_DIRED_MENU    69
 #endif /* VMS */
 #ifdef DIRED_SUPPORT
-#define       LYK_DIRED_MENU    68
-#define       LYK_CREATE        69
-#define       LYK_REMOVE        70
-#define       LYK_MODIFY        71
-#define       LYK_TAG_LINK      72
-#define       LYK_UPLOAD        73
-#define       LYK_INSTALL       74
+#define       LYK_DIRED_MENU    69
+#define       LYK_CREATE        70
+#define       LYK_REMOVE        71
+#define       LYK_MODIFY        72
+#define       LYK_TAG_LINK      73
+#define       LYK_UPLOAD        74
+#define       LYK_INSTALL       75
 #endif /* DIRED_SUPPORT */
 #ifdef NOT_USED
-#define       LYK_VERSION	75
-#define       LYK_FORM_UP       76
-#define       LYK_FORM_DOWN     77
+#define       LYK_VERSION	76
+#define       LYK_FORM_UP       77
+#define       LYK_FORM_DOWN     78
 #endif /* NOT_USED */
 
 #endif /* LYKEYMAP_H */

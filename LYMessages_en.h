@@ -288,6 +288,8 @@
 #define EDIT_CURRENT_GOTO "Edit the current Goto URL: "
 #define EDIT_THE_PREV_GOTO "Edit the previous Goto URL: "
 #define EDIT_A_PREV_GOTO "Edit a previous Goto URL: "
+#define CURRENT_DOC_HAS_POST_DATA "Current document has POST data."
+#define EDIT_CURDOC_URL "Edit this document's URL: "
 #define ENTER_DATABASE_QUERY "Enter a database query: "
 #define ENTER_WHEREIS_QUERY "Enter a whereis query: "
 #define EDIT_CURRENT_QUERY "Edit the current query: "

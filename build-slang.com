@@ -9,7 +9,7 @@ $!    object library does not already exist.
 $!=========================================================================
 $!   NOTE:  Set SLANGINC to the location of your slang.h and slcurses.h,
 $!   ====   and SLANGLIB to the location of your slang.olb (can be relative
-$!          to the lynx2-6.src subdirectory of this distribution):
+$!          to the lynx2-7.src subdirectory of this distribution):
 $!
 $! SLANGINC = "[-.slang.src]"
 $! SLANGLIB = "[-.slang.src]"
@@ -194,6 +194,7 @@ $ cc LYCgi
 $ cc LYCharSets
 $ cc LYCharUtils
 $ cc LYClean
+$ cc LYCookie
 $ cc LYCurses
 $ cc LYDownload
 $ cc LYEdit
@@ -236,6 +237,7 @@ LYCgi.obj, -
 LYCharSets.obj, -
 LYCharUtils.obj, -
 LYClean.obj, -
+LYCookie.obj, -
 LYCurses.obj, -
 LYDownload.obj, -
 LYEdit.obj, -

@@ -113,6 +113,7 @@ struct _HTStructured {
     BOOL		inA;
     BOOL		inAPPLET;
     BOOL		inAPPLETwithP;
+    BOOL		inBadBASE;
     BOOL		inBadHTML;
     BOOL		inBASE;
     BOOL		inBoldA;

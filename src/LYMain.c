@@ -2047,7 +2047,7 @@ Output_Help_List:
     printf("                     with the PREV_DOC command or from the History List\n");
     printf("    -rlogin          disable rlogins\n");
     printf("    -selective       require .www_browsable files to browse directories\n");
-    printf("    -show_cursor     toggles hiding of the curser in the lower right corner\n");
+    printf("    -show_cursor     toggles hiding of the cursor in the lower right corner\n");
     printf("    -soft_dquotes    toggles emulation of the old Netscape and Mosaic bug which\n");
     printf("                     treated '>' as a co-terminator for double-quotes and tags\n");
     printf("    -source          dump the source of the first file to stdout and exit\n");

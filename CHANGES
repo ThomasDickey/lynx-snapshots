@@ -1,3 +1,43 @@
+---      Release of Lynx2-6FM as Lynx v2.7 (February 15, 1997)      ---
+=======================================================================
+1997-02-15
+* Release of Lynx2-6FM as Lynx v2.7. - FM
+* Included -Ae when compiling the Implementation modules for the snake3
+  target. - FM
+1997-02-14
+* Mods to issue an alert about a BASE tag not having an absolute URL only
+  once per document. - FM
+* Added code for appending LYNX_SIG_FILE to email messages as well as to
+  news posts or followups, and updated the Users Guide accordingly. - FM
+* Updated build-slang.com. - FM
+1997-02-12
+* Fixed some problems in the code for using a hookless Lynx image with
+  snew_proxy, snewspost_proxy, and snewsreply_proxy set to
+  "nntp://host:port/" so that it uses Tom Zerucha's (tz@execpc.com)
+  daemon which handles the SSL communications on behalf of the Lynx
+  image.  Also polished up all of the news gateway code, and added
+  comments for the benefit of new developers. - FM
+* Added an ECGOTO command mapped by default to 'G', complementary to the
+  GOTO command (default 'g'), to edit the current document's URL and then
+  go to it.  Using case-sensitive letters with different command definitions
+  ensures that both will appear with their brief explanations in the 'k'eymap
+  listing.  For ECGOTO, Control-G, failure to modify the URL, or complete
+  deletion of it, all act as a cancel.  If the current document has POST
+  content associated with it, a warning will be issued before offering the
+  URL to edit.  The POST content is retained if the modification merely
+  involves a change in fragment for the URL.  Otherwise, the modified URL
+  (if it has an http scheme) will be submitted with method GET and no POST
+  content.  If the ECGOTO command is not cancelled, or not simply a fragment
+  change, the modified URL will be added to the 'g'oto buffer, and can be
+  re-accessed, to edit further, via the GOTO command.  See the updated online
+  'h'elp for more information. - FM
+1997-02-10
+* Amplified the comments concerning deletion of prototypes for MultiNet
+  socket library functions as they get added to MultiNet's own headers
+  in newer versions of it's socket library. - FM
+* Added a missing fclose() in post_article() of HTNews.c, and added code
+  to delete the temporary file there, so it's gone as soon as we're done
+  with it. - FM
 02-09-97
 * Enhanced the Set-Cookie header parser to handle values that contain
   spaces but were not enclosed in double-quotes, and to use such

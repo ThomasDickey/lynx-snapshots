@@ -22,9 +22,6 @@
 /* this define should be in HTFont.h :( */
 #define HT_NON_BREAK_SPACE ((char)1)   /* For now */
 
-#define CR   FROMASCII('\015')	/* Must be converted to ^M for transmission */
-#define LF   FROMASCII('\012')	/* Must be converted to ^J for transmission */
-
 #define NEWS_PORT 119		/* See rfc977 */
 #define SNEWS_PORT 563		/* See Lou Montulli */
 #define APPEND			/* Use append methods */
@@ -65,6 +62,7 @@ extern BOOLEAN LYListNewsNumbers;
 extern BOOLEAN LYListNewsDates;
 extern HTCJKlang HTCJK;
 extern int interrupted_in_htgetcharacter;
+extern BOOL using_proxy;	/* Are we using an NNTP proxy? */
 
 /*
 **  Module-wide variables.
@@ -85,6 +83,13 @@ PRIVATE int	diagnostic;			/* level: 0=none 2=source */
 #define PUTS(s) (*targetClass.put_string)(target, s)
 #define START(e) (*targetClass.start_element)(target, e, 0, 0, 0)
 #define END(e) (*targetClass.end_element)(target, e, 0)
+
+PRIVATE void free_news_globals NOARGS
+{
+    FREE(HTNewsHost);
+    FREE(NewsHost);
+    FREE(NewsHREF);
+}
 
 PUBLIC CONST char * HTGetNewsHost NOARGS
 {
@@ -117,13 +122,21 @@ PUBLIC void HTSetNewsHost ARGS1(CONST char *, value)
 PRIVATE BOOL initialized = NO;
 PRIVATE BOOL initialize NOARGS
 {
+    char *cp = NULL;
+
     /*
     **  Get name of Host.
     */
 #ifdef NeXTStep
-    if ((HTNewsHost = NXGetDefaultValue("WorldWideWeb","NewsHost"))==0)
-        if ((HTNewsHost = NXGetDefaultValue("News","NewsHost")) == 0)
-	    HTNewsHost = DEFAULT_NEWS_HOST;
+    if ((cp = NXGetDefaultValue("WorldWideWeb","NewsHost"))==0) {
+        if ((cp = NXGetDefaultValue("News","NewsHost")) == 0) {
+	    StrAllocCopy(HTNewsHost, DEFAULT_NEWS_HOST);
+	}
+    }
+    if (cp) {
+        StrAllocCopy(HTNewsHost, cp);
+	cp = NULL;
+    }
 #else
     if (getenv("NNTPSERVER")) {
         StrAllocCopy(HTNewsHost, (char *)getenv("NNTPSERVER"));
@@ -143,11 +156,11 @@ PRIVATE BOOL initialize NOARGS
 	}
     }
     if (!HTNewsHost)
-        HTNewsHost = DEFAULT_NEWS_HOST;
+        StrAllocCopy(HTNewsHost, DEFAULT_NEWS_HOST);
 #endif /* NeXTStep */
 
     s = -1;		/* Disconnected */
-    
+    atexit(free_news_globals);
     return YES;
 }
 
@@ -291,7 +304,7 @@ PRIVATE char * author_name ARGS1 (char *,email)
 **
 ** For example, returns "montulli@spaced.out.galaxy.net" if given any of
 **      " Lou Montulli <montulli@spaced.out.galaxy.net> "
-**  or  " montulli@spacedout.galaxy.net ( Lou "The Stud" Montulli ) "
+**  or  " montulli@spaced.out.galaxy.net ( Lou "The Stud" Montulli ) "
 */
 PRIVATE char * author_address ARGS1(char *,email)
 {
@@ -407,7 +420,7 @@ PRIVATE void start_list ARGS1(int, seqnum)
 ** On entry,
 **	HT 	has a selection of zero length at the end.
 **	text 	points to the text to be put into the file, 0 terminated.
-**	addr	points to the hypertext refernce address,
+**	addr	points to the hypertext reference address,
 **		terminated by white space, comma, NULL or '>' 
 */
 PRIVATE void write_anchor ARGS2(CONST char *,text, CONST char *,addr)
@@ -609,6 +622,13 @@ PRIVATE void post_article ARGS1(
 	    blen = llen;
 	}
     }
+    fclose(fd);
+#ifdef VMS
+    while (remove(postfile) == 0)
+	; /* loop through all versions */
+#else
+    remove(postfile);
+#endif /* VMS */
 
     /*
     **  Send the nntp EOF and get the server's response. - FM
@@ -983,18 +1003,22 @@ PRIVATE int read_article NOARGS
 			    p += 7;
 			    *p = 0;
 			    while (*l) {
-			        if (strncmp (l, "news:", 5) &&
-				    strncmp (l, "snews://", 8) &&
-				    strncmp (l, "nntp://", 7) &&
-				    strncmp (l, "ftp://", 6) &&
-				    strncmp (l, "file:/", 6) &&
-				    strncmp (l, "finger://", 9) &&
-				    strncmp (l, "http://", 7) &&
-				    strncmp (l, "https://", 8) &&
-				    strncmp (l, "wais://", 7) &&
-				    strncmp (l, "mailto:", 7) &&
-				    strncmp (l, "cso://", 6) &&
-				    strncmp (l, "gopher://", 9)) 
+			        if (strncmp(l, "news:", 5) &&
+				    strncmp(l, "snews://", 8) &&
+				    strncmp(l, "nntp://", 7) &&
+				    strncmp(l, "snewspost:", 10) &&
+				    strncmp(l, "snewsreply:", 11) &&
+				    strncmp(l, "newspost:", 9) &&
+				    strncmp(l, "newsreply:", 10) &&
+				    strncmp(l, "ftp://", 6) &&
+				    strncmp(l, "file:/", 6) &&
+				    strncmp(l, "finger://", 9) &&
+				    strncmp(l, "http://", 7) &&
+				    strncmp(l, "https://", 8) &&
+				    strncmp(l, "wais://", 7) &&
+				    strncmp(l, "mailto:", 7) &&
+				    strncmp(l, "cso://", 6) &&
+				    strncmp(l, "gopher://", 9)) 
 				    PUTC (*l++);
 				else {
 				    StrAllocCopy(href, l);
@@ -1018,18 +1042,22 @@ PRIVATE int read_article NOARGS
 			}
 		    }
 		    while (*l) {		/* Last bit of the line */
-			if (strncmp (l, "news:", 5) &&
-			    strncmp (l, "snews://", 8) &&
-			    strncmp (l, "nntp://", 7) &&
-			    strncmp (l, "ftp://", 6) &&
-			    strncmp (l, "file:/", 6) &&
-			    strncmp (l, "finger://", 9) &&
-			    strncmp (l, "http://", 7) &&
-			    strncmp (l, "https://", 8) &&
-			    strncmp (l, "wais://", 7) &&
-			    strncmp (l, "mailto:", 7) &&
-			    strncmp (l, "cso://", 6) &&
-			    strncmp (l, "gopher://", 9)) 
+			if (strncmp(l, "news:", 5) &&
+			    strncmp(l, "snews://", 8) &&
+			    strncmp(l, "nntp://", 7) &&
+			    strncmp(l, "snewspost:", 10) &&
+			    strncmp(l, "snewsreply:", 11) &&
+			    strncmp(l, "newspost:", 9) &&
+			    strncmp(l, "newsreply:", 10) &&
+			    strncmp(l, "ftp://", 6) &&
+			    strncmp(l, "file:/", 6) &&
+			    strncmp(l, "finger://", 9) &&
+			    strncmp(l, "http://", 7) &&
+			    strncmp(l, "https://", 8) &&
+			    strncmp(l, "wais://", 7) &&
+			    strncmp(l, "mailto:", 7) &&
+			    strncmp(l, "cso://", 6) &&
+			    strncmp(l, "gopher://", 9)) 
 			    PUTC (*l++);
 			else {
 			    StrAllocCopy(href, l);
@@ -1091,10 +1119,10 @@ PRIVATE int read_list ARGS1(char *, arg)
     }
 
     /*
-    **  Read in the HEADer of the article.
+    **  Read the server's reply.
     **
-    **  The header fields are either ignored,
-    **  or formatted and put into the text.
+    **  The lines are scanned for newsgroup
+    **  names and descriptions.
     */
     START(HTML_HEAD);
     PUTC('\n');
@@ -1140,6 +1168,9 @@ PRIVATE int read_list ARGS1(char *, arg)
 		    START(HTML_DT);
 		    PUTS(&line[1]);
 		}
+	    } else if (line[0] == '#') {	/* Comment? */
+	        p = line;			/* Restart at beginning */
+	        continue;
 	    } else {
 		/*
 		**  Normal lines are scanned for references to newsgroups.
@@ -1613,6 +1644,8 @@ PUBLIC int HTLoadNews ARGS4(
     int first, last;		/* First and last articles asked for */
     char *cp;
     char *ListArg = NULL;
+    char *ProxyHost = NULL;
+    char *ProxyHREF = NULL;
     char *postfile = NULL;
 
     diagnostic = (format_out == WWW_SOURCE ||	/* set global flag */
@@ -1644,18 +1677,20 @@ PUBLIC int HTLoadNews ARGS4(
 	**  	xxxxx			News group (no "@")
 	**  	group/n1-n2		Articles n1 to n2 in group
 	*/
-	post_wanted = (strstr(arg, "newspost:") != NULL);
-	reply_wanted = ((!post_wanted) &&
+	spost_wanted = (strstr(arg, "snewspost:") != NULL);
+	sreply_wanted = (!(spost_wanted) &&
+			 strstr(arg, "snewsreply:") != NULL);
+	post_wanted = (!(spost_wanted || sreply_wanted) &&
+			strstr(arg, "newspost:") != NULL);
+	reply_wanted = (!(spost_wanted || sreply_wanted ||
+			  post_wanted) &&
 			strstr(arg, "newsreply:") != NULL);
-	spost_wanted = (!(post_wanted || reply_wanted) &&
-			strstr(arg, "snewspost:") != NULL);
-	sreply_wanted = (!(post_wanted || reply_wanted ||
-			   spost_wanted) &&
-			 strstr(arg, "newsreply:") != NULL);
-	group_wanted = (!(post_wanted || reply_wanted ||
-			  spost_wanted || sreply_wanted) &&
+	group_wanted = (!(spost_wanted || sreply_wanted ||
+			  post_wanted || reply_wanted) &&
 			strchr(arg, '@') == NULL) && (strchr(arg, '*') == NULL);
-	list_wanted  = (!(post_wanted || reply_wanted) &&
+	list_wanted  = (!(spost_wanted || sreply_wanted ||
+			  post_wanted || reply_wanted ||
+			  group_wanted) &&
 			strchr(arg, '@') == NULL) && (strchr(arg, '*') != NULL);
 
 	if (!strncasecomp(arg, "snewspost:", 10) ||
@@ -1806,12 +1841,15 @@ PUBLIC int HTLoadNews ARGS4(
 	**  or followups.  - TZ & FM
 	*/
  	if (!strncasecomp(p1, "snews:", 6) ||
-	    !strncasecomp(p1, "snewpost:", 10) ||
+	    !strncasecomp(p1, "snewspost:", 10) ||
 	    !strncasecomp(p1, "snewsreply:", 11)) {
-	    if ((cp = HTParse(p1, "", PARSE_HOST)) != NULL && *cp != '\0')
+	    StrAllocCopy(ProxyHost, NewsHost);
+	    if ((cp = HTParse(p1, "", PARSE_HOST)) != NULL && *cp != '\0') {
 		sprintf(command, "snews://%.250s", cp);
-	    else
+		StrAllocCopy(NewsHost, cp);
+	    } else {
 		sprintf(command, "snews://%.250s", NewsHost);
+	    }
 	    command[258] = '\0';
 	    FREE(cp);
 	    sprintf(proxycmd, "GET %.251s%c%c%c%c", command, CR, LF, CR, LF);
@@ -1820,6 +1858,7 @@ PUBLIC int HTLoadNews ARGS4(
 	      		"HTNews: Proxy command is '%.*s'\n",
 			(strlen(proxycmd) - 4), proxycmd);
 	    strcat(command, "/");
+	    StrAllocCopy(ProxyHREF, NewsHREF);
 	    StrAllocCopy(NewsHREF, command);
 	    if (spost_wanted || sreply_wanted) {
 	        /*
@@ -1890,7 +1929,7 @@ PUBLIC int HTLoadNews ARGS4(
         {
 	    char * p = command + strlen(command);
 	    /*
-	    **  Teminate command with CRLF, as in RFC 977.
+	    **  Terminate command with CRLF, as in RFC 977.
 	    */
 	    *p++ = CR;		/* Macros to be correct on Mac */
 	    *p++ = LF;
@@ -1901,6 +1940,8 @@ PUBLIC int HTLoadNews ARGS4(
     
     if (!*arg) {
         FREE(NewsHREF);
+	FREE(ProxyHost);
+	FREE(ProxyHREF);
 	FREE(ListArg);
         return NO;			/* Ignore if no name */
     }
@@ -1921,10 +1962,13 @@ PUBLIC int HTLoadNews ARGS4(
         if (s < 0) {
 	    /* CONNECTING to news host */
             char url[260];
-	    if (!strcmp(NewsHREF, "news:"))
+	    if (!strcmp(NewsHREF, "news:")) {
                 sprintf (url, "lose://%.251s/", NewsHost);
-	    else
+	    } else if (ProxyHREF) {
+                sprintf (url, "%.259s", ProxyHREF);
+	    } else {
                 sprintf (url, "%.259s", NewsHREF);
+	    }
             if (TRACE)
                 fprintf (stderr, "News: doing HTDoConnect on '%s'\n", url);
 
@@ -1944,6 +1988,8 @@ PUBLIC int HTLoadNews ARGS4(
 		    (*targetClass._abort)(target, NULL);
 		FREE(NewsHost);
 		FREE(NewsHREF);
+		FREE(ProxyHost);
+		FREE(ProxyHREF);
 		FREE(ListArg);
 		if (postfile) {
 #ifdef VMS
@@ -1968,6 +2014,8 @@ PUBLIC int HTLoadNews ARGS4(
 		sprintf(message, "Could not access %s.", NewsHost);
 		FREE(NewsHost);
 		FREE(NewsHREF);
+		FREE(ProxyHost);
+		FREE(ProxyHREF);
 		FREE(ListArg);
 		if (postfile) {
 #ifdef VMS
@@ -2002,6 +2050,8 @@ PUBLIC int HTLoadNews ARGS4(
 			        (*targetClass._abort)(target, NULL);
 			    FREE(NewsHost);
 			    FREE(NewsHREF);
+			    FREE(ProxyHost);
+			    FREE(ProxyHREF);
 			    FREE(ListArg);
 			    if (postfile) {
 #ifdef VMS
@@ -2029,6 +2079,11 @@ PUBLIC int HTLoadNews ARGS4(
 		        spost_wanted || sreply_wanted) {
 			HTAlert("Cannot POST to this host.");
 			FREE(NewsHREF);
+			if (ProxyHREF) {
+			    StrAllocCopy(NewsHost, ProxyHost);
+			    FREE(ProxyHost);
+			    FREE(ProxyHREF);
+			}
 			FREE(ListArg);
 			if (postfile) {
 #ifdef VMS
@@ -2050,6 +2105,11 @@ PUBLIC int HTLoadNews ARGS4(
 	    if (!HTCanPost) {
 		HTAlert("Cannot POST to this host.");
 		FREE(NewsHREF);
+		if (ProxyHREF) {
+		    StrAllocCopy(NewsHost, ProxyHost);
+		    FREE(ProxyHost);
+		    FREE(ProxyHREF);
+		}
 		FREE(ListArg);
 		if (postfile) {
 #ifdef VMS
@@ -2070,6 +2130,11 @@ PUBLIC int HTLoadNews ARGS4(
 	    if (postfile == NULL) {
 		HTProgress("Cancelled!");
 		FREE(NewsHREF);
+		if (ProxyHREF) {
+		    StrAllocCopy(NewsHost, ProxyHost);
+		    FREE(ProxyHost);
+		    FREE(ProxyHREF);
+		}
 		FREE(ListArg);
 		return(HT_NOT_LOADED);
 	    }
@@ -2077,9 +2142,9 @@ PUBLIC int HTLoadNews ARGS4(
 	    /*
 	    **  Ensure reader mode, but don't bother checking the
 	    **  status for anything but HT_INERRUPTED, because if
-	    **  if the reader mode command is not needed, the server
-	    **  probably return a 500, which is irrelevant at this
-	    **  point. - FM
+	    **  the reader mode command is not needed, the server
+	    **  probably return a 500, which is irrelevant at
+	    **  this point. - FM
 	    */
 	    char buffer[20];
 
@@ -2112,7 +2177,8 @@ Send_NNTP_command:
 	    s = -1;
 	    /*
 	    **  Message might be a leftover "Timeout-disconnected",
-	    **  so try again if retries is not exhausted.
+	    **  so try again if the retries maximum has not been
+	    **  reached.
 	    */
 	    continue;
 	}
@@ -2123,9 +2189,18 @@ Send_NNTP_command:
 	if (post_wanted || reply_wanted || spost_wanted || sreply_wanted) {
 	    if (status != 340) {
 		HTAlert("Cannot POST to this host.");
+		if (postfile) {
+#ifdef VMS
+		    while (remove(postfile) == 0)
+			; /* loop through all versions */
+#else
+		    remove(postfile);
+#endif /* VMS */
+		}
 	    } else {
 	        post_article(postfile);
 	    }
+	    FREE(postfile);
 	    status = HT_NOT_LOADED;
 	} else if (list_wanted) {
 	    _HTProgress("Reading list of available newsgroups.");
@@ -2159,6 +2234,11 @@ Send_NNTP_command:
 	      spost_wanted || sreply_wanted))
 	    (*targetClass._free)(target);
 	FREE(NewsHREF);
+	if (ProxyHREF) {
+	    StrAllocCopy(NewsHost, ProxyHost);
+	    FREE(ProxyHost);
+	    FREE(ProxyHREF);
+	}
 	FREE(ListArg);
 	if (postfile) {
 #ifdef VMS
@@ -2181,6 +2261,11 @@ Send_NNTP_command:
 	  spost_wanted || sreply_wanted))
         (*targetClass._abort)(target, NULL);
     FREE(NewsHREF);
+    if (ProxyHREF) {
+	StrAllocCopy(NewsHost, ProxyHost);
+	FREE(ProxyHost);
+	FREE(ProxyHREF);
+    }
     FREE(ListArg);
     if (postfile) {
 #ifdef VMS

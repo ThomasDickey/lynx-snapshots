@@ -212,18 +212,22 @@ PRIVATE int response ARGS5(
 	     */
 	    p = l = line;
 	    while (*l) {
-		if (strncmp (l, "news:", 5) &&
-		    strncmp (l, "snews://", 8) &&
-		    strncmp (l, "nntp://", 7) &&
-		    strncmp (l, "ftp://", 6) &&
-		    strncmp (l, "file:/", 6) &&
-		    strncmp (l, "finger://", 9) &&
-		    strncmp (l, "http://", 7) &&
-		    strncmp (l, "https://", 8) &&
-		    strncmp (l, "wais://", 7) &&
-		    strncmp (l, "mailto:", 7) &&
-		    strncmp (l, "cso://", 6) &&
-		    strncmp (l, "gopher://", 9)) 
+		if (strncmp(l, "news:", 5) &&
+		    strncmp(l, "snews://", 8) &&
+		    strncmp(l, "nntp://", 7) &&
+		    strncmp(l, "snewspost:", 10) &&
+		    strncmp(l, "snewsreply:", 11) &&
+		    strncmp(l, "newspost:", 9) &&
+		    strncmp(l, "newsreply:", 10) &&
+		    strncmp(l, "ftp://", 6) &&
+		    strncmp(l, "file:/", 6) &&
+		    strncmp(l, "finger://", 9) &&
+		    strncmp(l, "http://", 7) &&
+		    strncmp(l, "https://", 8) &&
+		    strncmp(l, "wais://", 7) &&
+		    strncmp(l, "mailto:", 7) &&
+		    strncmp(l, "cso://", 6) &&
+		    strncmp(l, "gopher://", 9)) 
 		    PUTC(*l++);
 		else {
 		    StrAllocCopy(href, l);
