@@ -479,6 +479,7 @@
 #define FAILED_CLEAR_SET_DISPLAY "Failed to clear DISPLAY variable!"
 #define BOOKMARK_CHANGE_DISALLOWED \
  "You are not allowed to change the bookmark file!"
+#define COLOR_TOGGLE_DISABLED "Terminal does not support color"
 #define DOTFILE_ACCESS_DISABLED "Access to dot files is disabled!"
 #define UA_COPYRIGHT_WARNING \
  "WARNING: Misrepresentation of the User-Agent may be a copyright violation!"

@@ -335,6 +335,24 @@ PUBLIC void read_rc NOPARAMS
 	        show_dotfiles = TRUE;
 	    else
 	        show_dotfiles = FALSE;
+#if 0	/* UNUSED */
+#if defined(USE_SLANG) || defined(COLOR_CURSES)
+	/*
+	 *  Show color.
+	 */
+	} else if ((cp = LYstrstr(line_buffer, "show_color")) != NULL &&
+		   cp-line_buffer < number_sign) {
+
+	    if ((cp2 = (char * )strchr(cp, '=')) != NULL)
+		cp = cp2 + 1;
+	    while (isspace(*cp))
+		cp++;  /* get rid of spaces */
+	    if (!strncasecomp(cp, "off", 3))
+		LYShowColor = FALSE;
+	    else
+		LYShowColor = TRUE;
+#endif /* USE_SLANG || COLOR_CURSES */
+#endif /* UNUSED */
 
 	/*
 	 *  Select popups.
@@ -650,6 +668,19 @@ PUBLIC int save_rc NOPARAMS
 # US-ASCII.\n");
     fprintf(fp, "preferred_charset=%s\n\n",
     		(pref_charset ? pref_charset : ""));
+
+#if defined(USE_SLANG) || defined(COLOR_CURSES)
+    /*
+     *  Show color.
+     */
+    fprintf(fp, "\
+# show_color specifies whether to show colors when available, or assume a\n\
+# monochrome terminal.  A value of \"on\" will force color mode on, while\n\
+# a value of \"off\" will force it off.  The default can be overridden via\n\
+# the -color and -nocolor command line switches or (if built with slang) the\n\
+# COLORTERM environment variable.\n");
+    fprintf(fp, "show_color=%s\n\n", (LYShowColor ? "on" : "off"));
+#endif /* USE_SLANG || COLOR_CURSES */
 
     /*
      *  VI keys.

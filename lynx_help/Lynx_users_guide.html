@@ -460,9 +460,9 @@ options.
      P)ersonal mail address       : montulli@ukanaix.cc.ukans.edu
      S)earching type              : CASE INSENSITIVE
      display (C)haracter set      : ISO Latin 1
-     raw 8-bit or CJK m(O)de      : ON
      preferred document lan(G)uage: en
      preferred document c(H)arset : NONE
+     raw 8-bit or CJK m(O)de      : ON      show color (&)  : OFF
      V)I keys: OFF    e(M)acs keys: OFF     sho(W) dot files: OFF
      popups for selec(T) fields   : ON      show cursor (@) : OFF
      K)eypad mode                 : Numbers act as arrows
@@ -482,9 +482,17 @@ correct mistakes, and <em>Control-U</em> can be used to erase the whole
 line.  When you are done entering a change press the <em>Return</em> key
 to get back to the <em>Command?</em> prompt.
 
-<p>For fields where you must choose from a list of choices, press any key
+<p>For fields where you must choose one of two choices, press any key
 to toggle the choices and press the <em>Return</em> key to finish the
 change.
+
+<p>For fields where you potentially have more than two choices, popup
+windows may be evoked which function homologously to those for select
+fields in <a href="#19">HTML Forms</a>.  The popup windows will be invoked
+only if you have popups for select fields set to ON (see below).  Otherwise,
+your cursor will be positioned at the current choice, and you can press any
+key to cycle through the choices, then press the <em>Return</em> key to
+finish the change.
 
 <p>When you are done changing options use the '<em>r</em>' command to
 return to Lynx or the '<em>&gt;</em>' command to save the options to a 
@@ -574,6 +582,19 @@ return to Lynx or the '<em>&gt;</em>' command to save the options to a
 	    viewing such characters with Lynx.  You must have the selected
 	    character set installed on your terminal.
 
+   <dt>Preferred Document Language
+	<dd>The language you prefer if multi-language files are available
+	    from servers.  Use MIME abbreviations, e.g., en for English,
+	    fr for French, etc.  Can be a comma-separated list in descending
+	    order of preferences.
+	
+   <dt>Preferred Document Charset
+	<dd>The character set you prefer if sets in addition to ISO-8859-1
+	    and US-ASCII are available from servers.  Use MIME notation
+	    (e.g., ISO-8859-2) and do not include ISO-8859-1 or US-ASCII,
+	    since those values are always assumed by default.  Can be a
+	    comma-separated list in descending order of preferences.
+	
    <dt>Raw 8-bit or CJK Mode
 	<dd>Whether 8-bit characters are assumed to correspond with the
 	    selected character set and therefore are processed without
@@ -590,19 +611,15 @@ return to Lynx or the '<em>&gt;</em>' command to save the options to a
 	    command, normally mapped to '<em>@</em>', and at startup via the
 	    <em>-raw</em> switch.
 
-   <dt>Preferred Document Language
-	<dd>The language you prefer if multi-language files are available
-	    from servers.  Use MIME abbreviations, e.g., en for English,
-	    fr for French, etc.  Can be a comma-separated list in descending
-	    order of preferences.
-	
-   <dt>Preferred Document Charset
-	<dd>The character set you prefer if sets in addition to ISO-8859-1
-	    and US-ASCII are available from servers.  Use MIME notation
-	    (e.g., ISO-8859-2) and do not include ISO-8859-1 or US-ASCII,
-	    since those values are always assumed by default.  Can be a
-	    comma-separated list in descending order of preferences.
-	
+   <dt>Show color.
+	<dd>This option will be present if color support is available.  If set
+	    to ON, color mode will be forced on.  If set to OFF, a monochrome
+	    terminal will be assumed.  If saved to a <em>.lynxrc</em> file,
+	    that setting will be used as the default on startups of Lynx.  If
+	    the default is OFF, it can be overridden via the <em>-color</em> or
+	    <em>-nocolor</em> command line switches or (if built with the
+	    slang library) <em>COLORTERM</em> environment variable.
+
    <dt>VI keys
 	<dd>If set to ON then the lowercase h, j, k, and l keys will be
 	    mapped to left, down, up, and right arrow, respectively.  The
@@ -931,14 +948,14 @@ commands.
    <dt><em>^A</em>
   	<dd><em>Control-A</em> jumps you to the beginning of the current
 	    document.  It is a synonym for the Keypad <em>Home</em> key, and
-	    can be used also when <em>Links are numbered</em> mode is on.  The
+	    can be used when <em>Links are numbered</em> mode is on.  The
 	    <em>Find</em> Function key also is a synonym, and ideally the
 	    latter has been mapped to the Function key labeled <em>Home</em>
 	    if you are using an IBM Enhanced Keyboard.
    <dt><em>^E</em>
   	<dd><em>Control-E</em> jumps you to the end of the current document.
 	    It is a synonym for the Keypad <em>End</em> key, and can be used
-	    also when <em>Links are numbered</em> mode is on.  The <em>Select</em>
+	    when <em>Links are numbered</em> mode is on.  The <em>Select</em>
 	    Function key also is a synonym, and ideally the latter has been
 	    mapped to the Function key labeled <em>End</em> if you are using
 	    an IBM Enhanced Keyboard.
@@ -1074,9 +1091,9 @@ commands.
 	    before the interrupt, it will be displayed.
    <dt><em>numbers</em>
 	<dd>Lynx offers other, advanced navigation features when numbers
-	    are used to invoke the <a
-	    href="keystroke_commands/follow_help.html"
-	    >Follow link (or goto link or page) number:</a> or<br>
+	    are used to invoke the<br>
+	    &nbsp;&nbsp;<a href="keystroke_commands/follow_help.html"
+	    >Follow link (or page) number:</a> or<br>
 	    &nbsp;&nbsp;<a
 	    href="keystroke_commands/follow_help.html#select-option"
 	    >Select option (or page) number:</a><br>

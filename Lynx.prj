@@ -1,14 +1,17 @@
 ;; -*- Lisp -*-
 (Created-By-Prcs-Version 1 2 0)
 (Project-Description "PRCS Project for The Lynx browser")
-(Project-Version Lynx 2.7.1ac-0 38)
-(Parent-Version Lynx 2.7.1ac-0 37)
+(Project-Version Lynx 2.7.1ac-0 39)
+(Parent-Version Lynx 2.7.1ac-0 38)
 
-(Version-Log "Several small changes: statusline attributes without color,
- small fixes from fotemods")
+(Version-Log "reduced top-level makefile.in (removed special cases for HP-UX, SEQUENT,
+since these are now in the configure.in), minor fixes (IRIX compiler options,
+slang include-path, repeated -lsocket in $NETLIBS).  Some polishing of the
+\"show cursor (&)\" toggle.  Fixed popup backgrounds for SVr4 curses.
+")
 (New-Version-Log "")
-(Checkin-Time "Tue, 22 Jul 1997 01:54:17 -0600")
-(Checkin-Login kweide)
+(Checkin-Time "Tue, 22 Jul 1997 19:01:43 -0600")
+(Checkin-Login dickey)
 (Populate-Ignore ("\\.o$" "\\.a$" "~$" "^a.out$" "^core$"
                   "\\.dvi$" "\\.aux$" "^\\..*_aux$" "\\.log"
                   "\\.zip$" "^obsolete" "/obsolete"
@@ -55,7 +58,7 @@
   
   (src/LYEditmap.c (Lynx/c/23_LYEditmap. 1.1 644))
   (src/LYTraversal.h (Lynx/c/24_LYTraversa 1.1 644))
-  (src/LYTraversal.c (Lynx/c/25_LYTraversa 1.1.2.3 644))
+  (src/LYTraversal.c (Lynx/c/25_LYTraversa 1.1.2.4 644))
   (src/LYList.h (Lynx/c/26_LYList.h 1.2 644))
   (src/LYCgi.h (Lynx/c/27_LYCgi.h 1.1 644))
   (src/LYCgi.c (Lynx/c/28_LYCgi.c 1.1.1.3 644))
@@ -97,9 +100,9 @@
   (src/gnuc.opt (Lynx/d/12_gnuc.opt 1.1 644))
   (src/decc.opt (Lynx/d/13_decc.opt 1.1 644))
   (src/cmu_tcp.opt (Lynx/d/14_cmu_tcp.op 1.1 644))
-  (src/LYrcFile.c (Lynx/d/15_LYrcFile.c 1.1.3.2 644))
+  (src/LYrcFile.c (Lynx/d/15_LYrcFile.c 1.1.3.3 644))
   (src/LYEdit.h (Lynx/d/16_LYEdit.h 1.1 644))
-  (src/LYOptions.h (Lynx/d/17_LYOptions. 1.1.2.3 644))
+  (src/LYOptions.h (Lynx/d/17_LYOptions. 1.1.2.4 644))
   (src/LYGetFile.h (Lynx/d/18_LYGetFile. 1.1.2.2.1.2 644))
   (src/LYMainLoop.h (Lynx/d/19_LYMainLoop 1.2 644))
   (src/LYStrings.h (Lynx/d/20_LYStrings. 1.1.1.4 644))
@@ -121,17 +124,17 @@
   (src/LYStrings.c (Lynx/d/36_LYStrings. 1.1.3.3.2.7 644))
   (src/LYShowInfo.c (Lynx/d/37_LYShowInfo 1.1.2.1.2.7 644))
   (src/LYSearch.c (Lynx/d/38_LYSearch.c 1.2.2.5 644))
-  (src/LYReadCFG.c (Lynx/d/39_LYReadCFG. 1.1.1.1.3.2.3.1.1.3 644))
+  (src/LYReadCFG.c (Lynx/d/39_LYReadCFG. 1.1.1.1.3.2.3.1.1.4 644))
   (src/LYPrint.c (Lynx/d/40_LYPrint.c 1.1.1.1.1.1.1.1.1.1.1.2 644))
-  (src/LYOptions.c (Lynx/d/41_LYOptions. 1.1.2.1.1.1.1.4 644))
-  (src/LYNews.c (Lynx/d/42_LYNews.c 1.6 644))
-  (src/LYMainLoop.c (Lynx/d/43_LYMainLoop 1.2.4.2.2.1.2.6.1.2.1.1.1.1.1.1.1.1.1.3 644))
-  (src/LYMain.c (Lynx/d/44_LYMain.c 1.1.2.1.1.1.1.1.1.2.2.1.1.1.1.1.1.1.1.1.1.3 644))
-  (src/LYMail.c (Lynx/d/45_LYMail.c 1.1.1.1.1.1.3.5 644))
+  (src/LYOptions.c (Lynx/d/41_LYOptions. 1.1.2.1.1.1.1.5 644))
+  (src/LYNews.c (Lynx/d/42_LYNews.c 1.7 644))
+  (src/LYMainLoop.c (Lynx/d/43_LYMainLoop 1.2.4.2.2.1.2.6.1.2.1.1.1.1.1.1.1.1.1.4 644))
+  (src/LYMain.c (Lynx/d/44_LYMain.c 1.1.2.1.1.1.1.1.1.2.2.1.1.1.1.1.1.1.1.1.1.4 644))
+  (src/LYMail.c (Lynx/d/45_LYMail.c 1.1.1.1.1.1.3.6 644))
   (src/LYLocal.c (Lynx/d/46_LYLocal.c 1.2.3.2 644))
   (src/LYJump.c (Lynx/d/47_LYJump.c 1.3 644))
   (src/LYGetFile.c (Lynx/d/48_LYGetFile. 1.5.2.3.2.1.1.1.1.3 644))
-  (src/LYForms.c (Lynx/d/49_LYForms.c 1.1.4.1.2.1.1.1.1.3 644))
+  (src/LYForms.c (Lynx/d/49_LYForms.c 1.1.4.1.2.1.1.1.1.4 644))
   (src/LYEdit.c (Lynx/d/50_LYEdit.c 1.1.2.1.1.2 644))
   
   (src/LYClean.c (Lynx/e/0_LYClean.c 1.1.4.1.1.4 644))
@@ -148,7 +151,7 @@
   (samples/mailcap (Lynx/e/11_mailcap 1.1 644))
   (samples/lynx.cfg (Lynx/e/12_lynx.cfg 1.2.1.2.1.1.2.1.1.1.1.2 644))
   (lynx_help/lynx_url_support.html (Lynx/e/13_lynx_url_s 1.2 644))
-  (lynx_help/Lynx_users_guide.html (Lynx/e/14_Lynx_users 1.8.1.1.1.1.1.2 644))
+  (lynx_help/Lynx_users_guide.html (Lynx/e/14_Lynx_users 1.8.1.1.1.1.1.3 644))
   (lynx_help/keystroke_commands/cookie_help.html (Lynx/e/15_cookie_hel 1.1 644))
   (lynx_help/keystroke_commands/visited_help.html (Lynx/e/16_visited_he 1.1 644))
   (lynx_help/keystroke_commands/edit_help.html (Lynx/e/17_edit_help. 1.1 644))
@@ -327,7 +330,7 @@
   (README (Lynx/h/34_README 1.1 644))
   (PROBLEMS (Lynx/h/35_PROBLEMS 1.3 644))
   (Makefile (Lynx/h/36_Makefile 1.1.1.1.1.1.1.2.3.3 644))
-  (LYMessages_en.h (Lynx/h/37_LYMessages 1.4.1.4.1.2.1.1.1.1.1.2 644))
+  (LYMessages_en.h (Lynx/h/37_LYMessages 1.4.1.4.1.2.1.1.1.1.1.3 644))
   (INSTALLATION (Lynx/h/38_INSTALLATI 1.1 644))
   (IBMPC-charsets.announce (Lynx/h/39_IBMPC-char 1.1 644))
   (FM.announce (Lynx/h/40_FM.announc 1.1 644))
@@ -391,19 +394,19 @@
 
 ;; Files added by populate at Mon, 03 Mar 1997 06:05:56 -0600:
 
-  (CHANGES.new (Lynx/6_CHANGES.ne 1.18.1.4.1.1.2.1.1.2.2.2.1.2.1.1.1.1.1.4.2.7.1.3.1.2 644))
+  (CHANGES.new (Lynx/6_CHANGES.ne 1.18.1.4.1.1.2.1.1.2.2.2.1.2.1.1.1.1.1.4.2.7.1.3.1.3 644))
 
 ;; Files added by populate at Tue, 11 Mar 1997 04:22:39 -0600:
 
   (newfiles.configure (Lynx/7_newfiles.c 1.4 644))
-  (makefile.in (Lynx/8_makefile.i 1.1.1.7 644))
+  (makefile.in (Lynx/8_makefile.i 1.1.1.8 644))
   (install.sh (Lynx/9_install.sh 1.1 755))
-  (configure.in (Lynx/10_configure. 1.8 644))
-  (config.hin (Lynx/11_config.hin 1.8 644))
-  (aclocal.m4 (Lynx/12_aclocal.m4 1.10 644))
-  (configure (Lynx/13_configure 1.10 755))
-  (README.configure (Lynx/14_README.con 1.3 644))
-  (CHANGES.configure (Lynx/15_CHANGES.co 1.1.1.4 644))
+  (configure.in (Lynx/10_configure. 1.9 644))
+  (config.hin (Lynx/11_config.hin 1.9 644))
+  (aclocal.m4 (Lynx/12_aclocal.m4 1.11 644))
+  (configure (Lynx/13_configure 1.11 755))
+  (README.configure (Lynx/14_README.con 1.4 644))
+  (CHANGES.configure (Lynx/15_CHANGES.co 1.1.1.5 644))
 
 ;; Files added by populate at Wed, 09 Apr 1997 06:18:01 -0600:
 
@@ -437,7 +440,7 @@
   (src/LYStyle.h (Lynx/b/5_LYStyle.h 1.2 644))
 ;; Files added by populate at Tue, 08 Jul 1997 20:40:02 -0600:
 
-  (src/LYCurses.c (Lynx/d/51_LYCurses.c 1.1.5.1.1.8.1.2 644))
+  (src/LYCurses.c (Lynx/d/51_LYCurses.c 1.1.5.1.1.8.1.3 644))
   (src/LYCharUtils.c (Lynx/c/22_LYCharUtil 1.2.1.1.2.1.2.2.1.2.1.1.1.2.1.1.1.1.1.2 644))
 
 ;; Files added by populate at Wed, 09 Jul 1997 05:12:01 -0600:
@@ -447,11 +450,5 @@
 
   (src/chrtrans/build-chrtrans.com (Lynx/b/0_build-chrt 1.1 644))
   (src/chrtrans/build-header.com (Lynx/c/0_build-head 1.1 644)))
-(Merge-Parents
-  (2.7.1acfm-0.11 complete
-    (src/LYexit.c src/LYexit.c src/LYexit.c r) (WWW/Library/Implementation/HTAtom.c WWW/Library/Implementation/HTAtom.c WWW/Library/Implementation/HTAtom.c r)
-    (CHANGES.new CHANGES.new CHANGES.new m) (src/LYCurses.c src/LYCurses.c src/LYCurses.c m)
-    (src/LYUtils.c src/LYUtils.c src/LYUtils.c m) 
-  )
-)
+(Merge-Parents)
 (New-Merge-Parents)

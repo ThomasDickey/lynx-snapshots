@@ -521,7 +521,7 @@ try_again:
 			    }
 			    chmod(TRAVERSE_ERRORS, 0600);
 		        }
-		        fprintf(ofp, "%s %s	in %s\n",
+		        fprintf(ofp, "%s %s\tin %s\n",
 		       		     links[curdoc.link].lname, 
 				     links[curdoc.link].target,
 				     history[nhist-1].address);

@@ -119,7 +119,7 @@ PUBLIC char *LYNewsPost ARGS2(
     move(2,0);
     scrollok(stdscr, TRUE);	/* Enable scrolling. */
     addstr("You will be posting to:");
-    addstr("\n	");
+    addstr("\n\t");
     addstr(NewsGroups);
     addch('\n');
 
