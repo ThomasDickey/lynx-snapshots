@@ -330,10 +330,10 @@ PUBLIC CONST char * HTInetString ARGS1(
 **	returns 1 if valid, otherwise 0.
 */
 PUBLIC BOOL valid_hostname ARGS1(
-	CONST char *,	name)
+	char *,	name)
 {
     int i=1, iseg = 0;
-    CONST char *cp = name;
+    char *cp = name;
     if (!(name && *name))
 	return NO;
     for (; (*cp && i <= 253); cp++, i++) {
@@ -623,10 +623,10 @@ extern int h_errno;
 **	HT_INTERNAL		Internal error
 */
 PUBLIC struct hostent * LYGetHostByName ARGS1(
-	CONST char *,	str)
+	char *,	str)
 {
 #ifndef _WINDOWS_NSL
-    CONST char *host = str;
+    char *host = str;
 #endif
 #ifdef NSL_FORK
     /* for transfer of result between from child to parent: */
@@ -720,10 +720,10 @@ PUBLIC struct hostent * LYGetHostByName ARGS1(
 	*/
 	pid_t fpid, waitret;
 	int pfd[2], selret, readret, waitstat = 0;
-	time_t start_time = time(NULL);
+	time_t start_time = time((time_t *)0);
 	fd_set readfds;
 	struct timeval timeout;
-	int dns_patience = 30; /* how many seconds will we wait for DNS? */
+	long dns_patience = 30; /* how many seconds will we wait for DNS? */
 	int child_exited = 0;
 
 	    /*
@@ -894,7 +894,7 @@ PUBLIC struct hostent * LYGetHostByName ARGS1(
 		goto failed;
 	}
 
-	while (child_exited || time(NULL) - start_time < dns_patience) {
+	while (child_exited || (long)(time((time_t *)0) - start_time) < dns_patience) {
 
 	    FD_ZERO(&readfds);
 	    /*
@@ -1074,11 +1074,11 @@ PUBLIC struct hostent * LYGetHostByName ARGS1(
 
 	if (!system_is_NT) {	/* for Windows9x */
 	    unsigned long t;
-	    t = (unsigned long)inet_addr((char *)host);
+	    t = (unsigned long)inet_addr(host);
 	    if ((int)t != -1)
 		phost = gethostbyaddr((char *)&t, sizeof (t), AF_INET);
 	    else
-		phost = gethostbyname((char *)host);
+		phost = gethostbyname(host);
 	} else {		/* for Windows NT */
 	    phost = (struct hostent *) NULL;
 	    hThread = CreateThread((void *)NULL, 4096UL,
@@ -1114,7 +1114,7 @@ PUBLIC struct hostent * LYGetHostByName ARGS1(
 #else /* !NSL_FORK, !_WINDOWS_NSL: */
     {
 	struct hostent  *phost;
-	phost = gethostbyname((char *)host);	/* See netdb.h */
+	phost = gethostbyname(host);	/* See netdb.h */
 #ifdef MVS
 	CTRACE((tfp, "LYGetHostByName: gethostbyname() returned %d\n", phost));
 #endif /* MVS */
@@ -1405,7 +1405,7 @@ PRIVATE void get_host_details NOARGS
 
 #ifndef DECNET	/* Decnet ain't got no damn name server 8#OO */
 #ifdef NEED_HOST_ADDRESS		/* no -- needs name server! */
-    phost = gethostbyname((CONST char *)name);	/* See netdb.h */
+    phost = gethostbyname(name);	/* See netdb.h */
     if (!OK_HOST(phost)) {
 	CTRACE((tfp, "TCP: Can't find my own internet node address for `%s'!!\n",
 		    name));
@@ -1471,7 +1471,7 @@ PUBLIC int HTDoConnect ARGS4(
     }
     FREE(p1);
 
-    HTSprintf0 (&line, gettext("Looking up %s."), host);
+    HTSprintf0 (&line, "%s%s", WWW_FIND_MESSAGE, host);
     _HTProgress (line);
     status = HTParseInet(soc_in, host);
     if (status) {
@@ -1494,7 +1494,7 @@ PUBLIC int HTDoConnect ARGS4(
 	return status;
     }
 
-    HTSprintf0 (&line, gettext("Making %s connection to %s."), protocol, host);
+    HTSprintf0 (&line, gettext("Making %s connection to %s"), protocol, host);
     _HTProgress (line);
     FREE(host);
     FREE(line);

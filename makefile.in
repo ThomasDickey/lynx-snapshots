@@ -230,6 +230,7 @@ clean:
 @INTLDIR_MAKE@	cd intl && $(MAKE) $@
 @MSG_DIR_MAKE@	cd po && $(MAKE) $@
 	rm -f *.b src/lynx$x *.leaks cfg_defs.h LYHelp.h lint.*
+@LYNXCFG_MAKE@	-rm -f alphatoc.html body.html cattoc.html
 	rm -f help_files.sed
 	rm -f core *.core
 
@@ -337,8 +338,11 @@ help_files.sed : makefile $(srcdir)/lynx_help/help_files.txt
 	@echo Constructing sed-script $@
 	@-rm -f $@ help_files.tmp
 	@cat $(srcdir)/lynx_help/help_files.txt > help_files.tmp
-@LYNXCFG_MAKE@	@echo 's!http://www.hippo.ru/%7Ehvv/lynxcfg_toc.html#alphatoc!alphatoc.html$(COMPRESS_EXT)!' >> help_files.tmp
-@LYNXCFG_MAKE@	@echo 's!http://www.hippo.ru/%7Ehvv/lynxcfg_toc.html!cattoc.html$(COMPRESS_EXT)!' >> help_files.tmp
+@LYNXCFG_MAKE@	@echo 's!http://www.hippo.ru/%7Ehvv/lynxcfg_toc.html#alphatoc!alphatoc.html!g' >> help_files.tmp
+@LYNXCFG_MAKE@	@echo 's!http://www.hippo.ru/%7Ehvv/lynxcfg_toc.html!cattoc.html!g' >> help_files.tmp
+@LYNXCFG_MAKE@	@echo 's!alphatoc\.html!alphatoc.html$(COMPRESS_EXT)!g' >> help_files.tmp
+@LYNXCFG_MAKE@	@echo 's!cattoc\.html!cattoc.html$(COMPRESS_EXT)!g' >> help_files.tmp
+@LYNXCFG_MAKE@	@echo 's!body\.html!body.html$(COMPRESS_EXT)!g' >> help_files.tmp
 	@ECHO_CC@sed	-e '/^#/d' -e '/^$$/d' \
 		-e 's%\(.*\)=\(.*\@.*\)$$%s=@\1@=\2=g%' \
 		-e 's%\(.*\)=\(http:.*\)$$%s=@\1@=\2=g%' \
@@ -358,9 +362,11 @@ install-help : help_files.sed $(HELPDIR)
 @LYNXCFG_MAKE@	@echo 'Making htmlized lynx.cfg'
 @LYNXCFG_MAKE@	@-rm -f alphatoc.html body.html cattoc.html
 @LYNXCFG_MAKE@	perl $(srcdir)/scripts/cfg2html.pl $(srcdir)/lynx.cfg
-@LYNXCFG_MAKE@	mv alphatoc.html body.html cattoc.html $(HELPDIR)
 	@echo Translating/copying html files
 	@cat help_files.sed > $(HELPDIR)/help_files.sed
+@LYNXCFG_MAKE@	@$(SHELL) -c 'for f in alphatoc.html body.html cattoc.html ; do \
+@LYNXCFG_MAKE@		sed -f $(HELPDIR)/help_files.sed $$f > $(HELPDIR)/$$f ; \
+@LYNXCFG_MAKE@		done'
 	@ECHO_CC@$(SHELL) -c 'cd $(srcdir)/lynx_help && ( \
 		dirs=keystrokes; \
 		(cd $(HELPDIR) && mkdir $$dirs 2>/dev/null ) ; \

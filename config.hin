@@ -12,7 +12,6 @@
 #undef CJK_EX			/* CF_ARG_ENABLE(cjk) */
 #undef COLOR_CURSES		/* defined by CF_COLOR_CURSES */
 #undef COMPRESS_PATH		/* CF_PATH_PROG(compress) */
-#undef CONV_JISX0201KANA_JISX0208KANA /* CF_ARG_ENABLE(kanji) */
 #undef COPY_PATH		/* CF_PATH_PROG(cp) */
 #undef CURS_PERFORMANCE		/* CF_CURS_PERFORMANCE */
 #undef DEBUG			/* configure --enable-debug */
@@ -132,7 +131,6 @@
 #undef IGNORE_CTRL_C		/* FIXME: make tests? */
 #undef INSTALL_ARGS		/* CF_PATH_PROG(install) */
 #undef INSTALL_PATH		/* CF_PATH_PROG(install) */
-#undef KANJI_CODE_OVERRIDE	/* CF_ARG_ENABLE(kanji) */
 #undef LINKEDSTYLES		/* see USE_COLOR_STYLE */
 #undef LINUX			/* FIXME: make tests? */
 #undef LOCALE			/* for locale support */
@@ -195,7 +193,6 @@
 #undef USE_SLANG		/* AC_ARG_WITH(screen=slang) */
 #undef USE_SOCKS4_PREFIX	/* CF_SOCKS5 */
 #undef USE_SOCKS5		/* CF_SOCKS5 */
-#undef USE_TH_JP_AUTO_DETECT	/* CF_ARG_ENABLE(kanji) */
 #undef USE_ZLIB			/* AC_ARG_WITH(zlib) */
 #undef UTMPX_FOR_UTMP		/* use <utmpx.h> since <utmp.h> not found */
 #undef UUDECODE_PATH		/* CF_PATH_PROG(uudecode) */

@@ -3526,7 +3526,7 @@ PUBLIC void HText_appendCharacter ARGS2(
     if ((HTCJK == JAPANESE) && (text->detected_kcode != DET_MIXED) &&
 	(text->specified_kcode != SJIS) && (text->specified_kcode != EUC)) {
 	unsigned char c;
-	int save_d_kcode;
+	enum _detected_kcode save_d_kcode;
 
 	c = ch;
 	save_d_kcode = text->detected_kcode;
@@ -3611,6 +3611,9 @@ PUBLIC void HText_appendCharacter ARGS2(
 		break;
 	    case DET_MIXED:
 		CTRACE((tfp, "TH_JP_AUTO_DETECT: This document's kcode seems mixed!\n"));
+		break;
+	    default:
+		CTRACE((tfp, "TH_JP_AUTO_DETECT: This document's kcode is unexpected!\n"));
 		break;
 	    }
 	}

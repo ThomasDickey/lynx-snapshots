@@ -837,7 +837,7 @@ PRIVATE void to_stack ARGS1(char *, str)
     /*
      *  Cycle buffer:
      */
-    if (topOfStack == STATUSBUFSIZE) {
+    if (topOfStack >= STATUSBUFSIZE) {
 	topOfStack = 0;
     }
 
@@ -853,6 +853,9 @@ PRIVATE void to_stack ARGS1(char *, str)
 	atexit(free_messages_stack);
     }
 #endif
+    if (topOfStack >= STATUSBUFSIZE) {
+	topOfStack = 0;
+    }
 }
 
 
@@ -873,7 +876,7 @@ PUBLIC void LYstatusline_messages_on_exit ARGS1(
      * probably a single message but let's do it.
      */
     i = topOfStack - 1;
-    while (++i <= STATUSBUFSIZE) {
+    while (++i < STATUSBUFSIZE) {
 	if (buffstack[i] != NULL) {
 	    StrAllocCat(*buf, buffstack[i]);
 	    StrAllocCat(*buf, "\n");

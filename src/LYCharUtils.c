@@ -1661,9 +1661,9 @@ PUBLIC char ** LYUCFullyTranslateString ARGS9(
 	} what = P_text;
 #ifdef KANJI_CODE_OVERRIDE
     static unsigned char sjis_1st = '\0';
-#endif
 #ifdef CONV_JISX0201KANA_JISX0208KANA
     unsigned char sjis_str[3];
+#endif
 #endif
 
     /*
@@ -2789,7 +2789,7 @@ PUBLIC void LYHandleMETA ARGS4(
 		    me->node_anchor->no_cache = TRUE;
 		    HText_setNoCache(me->text);
 		}
-	    } else if (LYmktime(content, FALSE) <= 0) {
+	    } else if (LYmktime(content, FALSE) == 0) {
 		/*
 		 *  We don't have a Date header, and
 		 *  the value is in past for us. - FM

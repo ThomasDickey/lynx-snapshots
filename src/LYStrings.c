@@ -15,7 +15,7 @@
 #include <HTString.h>
 #include <LYCharUtils.h>
 #include <HTParse.h>
-#if defined(NCURSES_MOUSE_VERSION) || defined(PDCURSES) || defined(USE_SLANG_MOUSE)
+#if defined(NCURSES_MOUSE_VERSION) || defined(PDCURSES_MOUSE_VERSION) || defined(USE_SLANG_MOUSE)
 #include <LYMainLoop.h>
 #endif
 
@@ -115,7 +115,7 @@ PUBLIC int fancy_mouse ARGS3(
 {
     int cmd = LYK_DO_NOTHING;
 
-#if defined(WIN_EX) && defined(PDCURSES)
+#if defined(WIN_EX) && defined(PDCURSES_MOUSE_VERSION)
 
     request_mouse_pos();
 
@@ -1263,7 +1263,7 @@ PUBLIC int lynx_initialize_keymaps NOARGS
 
 #endif				       /* USE_KEYMAPS */
 
-#if defined(NCURSES_MOUSE_VERSION) || defined(PDCURSES)
+#if defined(NCURSES_MOUSE_VERSION) || defined(PDCURSES_MOUSE_VERSION)
 PRIVATE int LYmouse_menu ARGS4(int, x, int, y, int, atlink, int, code)
 {
     static char *choices[] = {
@@ -1954,13 +1954,13 @@ re_read:
 	   c = 0x218;
 	   break;
 #endif /* PDCurses */
-#if defined(NCURSES_MOUSE_VERSION) || defined(PDCURSES)
+#if defined(NCURSES_MOUSE_VERSION) || defined(PDCURSES_MOUSE_VERSION)
 	case KEY_MOUSE:
 	    CTRACE((tfp, "KEY_MOUSE\n"));
 	    if (code == FOR_CHOICE) {
 		c = MOUSE_KEY;		/* Will be processed by the caller */
 	    }
-#if !defined(_WINDOWS)	/* 1999/07/15 (Thu) 08:40:18 */
+#if defined(NCURSES_MOUSE_VERSION)
 	    else if (code == FOR_SINGLEKEY) {
 		MEVENT event;
 		getmouse(&event);	/* Completely ignore event - kw */
@@ -1968,7 +1968,7 @@ re_read:
 	    }
 #endif
 	    else {
-#if !(defined(WIN_EX) && defined(PDCURSES))
+#if defined(NCURSES_MOUSE_VERSION)
 		MEVENT event;
 		int err;
 		int lac = LYK_UNKNOWN;

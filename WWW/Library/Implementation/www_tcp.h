@@ -362,7 +362,9 @@ extern char *vms_errno_string();
 #define __TIME 1  /* to avoid double definitions in in.h */
 #endif /* __TIME_LOADED */
 #include "multinet_root:[multinet.include.sys]time.h"
+#define MULTINET_NO_PROTOTYPES	/* DECC is compatible-but-different */
 #include "multinet_root:[multinet.include.sys]socket.h"
+#undef MULTINET_NO_PROTOTYPES
 #include "multinet_root:[multinet.include.netinet]in.h"
 #include "multinet_root:[multinet.include.arpa]inet.h"
 #include "multinet_root:[multinet.include]netdb.h"

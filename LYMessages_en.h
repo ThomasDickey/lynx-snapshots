@@ -576,7 +576,7 @@
 #define CONTENT_TYPE_MSG gettext("Content-type: %s")
 #define COMMAND_PROMPT gettext("Command: ")
 #define VERSION_SEGMENT gettext(" Version ")
-#define FIRST_SEGMENT gettext(" first.")
+#define FIRST_SEGMENT gettext(" first")
 #define GUESSING_SEGMENT gettext(", guessing...")
 #define PERMISSIONS_SEGMENT gettext("Permissions for ")
 #define SELECT_SEGMENT gettext("Select ")

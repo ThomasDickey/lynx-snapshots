@@ -35,8 +35,6 @@
 #include <LYLeaks.h>
 #include <LYStrings.h>
 
-#define INFINITY 512			/* File name length @@ FIXME */
-
 PUBLIC BOOL HTVMSFileVersions=FALSE; /* Include version numbers in listing? */
 
 typedef struct {
@@ -454,6 +452,7 @@ long status;
 struct dsc$descriptor_s entryname_desc;
 struct dsc$descriptor_s dirname_desc;
 static char *DirEntry;
+char Actual[256];
 char VMSentry[256];
 char UnixEntry[256];
 int index;
@@ -502,12 +501,14 @@ char *dot;
       *dot = ']';
       StrAllocCat(DirEntry,".dir");
    }
+   /* lib$find_file needs a fixed-size buffer */
+   LYstrncpy(Actual, DirEntry, sizeof(Actual)-1);
 
    dir.context = 0;
-   dirname_desc.dsc$w_length = strlen(DirEntry);
+   dirname_desc.dsc$w_length = strlen(Actual);
    dirname_desc.dsc$b_dtype = DSC$K_DTYPE_T;
    dirname_desc.dsc$b_class = DSC$K_CLASS_S;
-   dirname_desc.dsc$a_pointer = (char *)&(DirEntry);
+   dirname_desc.dsc$a_pointer = (char *)&(Actual);
 
    /* look for the directory */
    entryname_desc.dsc$w_length = 255;

@@ -463,7 +463,7 @@ PUBLIC void HTSetSuffix5 ARGS5(
 	CONST char *,	representation,
 	CONST char *,	encoding,
 	CONST char *,	desc,
-	float,		value)
+	double,		value)
 {
     HTSuffix * suff;
     BOOL trivial_enc = (BOOL) IsUnityEncStr(encoding);
@@ -516,7 +516,7 @@ PUBLIC void HTSetSuffix5 ARGS5(
 
     StrAllocCopy(suff->desc, desc);
 
-    suff->quality = value;
+    suff->quality = (float) value;
 }
 
 #ifdef LY_FIND_LEAKS

@@ -66,7 +66,7 @@ extern unsigned int HTCardinal PARAMS((int *pstatus,
 **	-------------------------------------------------
 */
 
-extern BOOL valid_hostname PARAMS((CONST char * name));
+extern BOOL valid_hostname PARAMS((char * name));
 
 /*	Resolve an internet hostname, like gethostbyname
 **	------------------------------------------------
@@ -87,8 +87,7 @@ extern int lynx_nsl_status;
 #if defined(__DJGPP__) && !defined(WATT32)
 #define LYGetHostByName(host) resolv(host) /* we'll use it the same way */
 #else
-extern struct hostent * LYGetHostByName PARAMS((
-	CONST char *	str));
+extern struct hostent * LYGetHostByName PARAMS((char * str));
 #endif
 
 

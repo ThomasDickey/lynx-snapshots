@@ -127,7 +127,7 @@ extern void HTSetSuffix5 PARAMS((
         CONST char *    representation,
         CONST char *    encoding,
         CONST char *    desc,
-        float           quality));
+        double          quality));
 
 #define HTSetSuffix(suff,rep,enc,q) HTSetSuffix5(suff, rep, enc, NULL, q)
 

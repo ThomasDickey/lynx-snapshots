@@ -210,9 +210,9 @@ HTSetPresentation: Register a system command to present a format
 extern void HTSetPresentation PARAMS((
         CONST char *	representation,
         CONST char *	command,
-        float		quality,
-        float		secs,
-        float		secs_per_byte,
+        double		quality,
+        double		secs,
+        double		secs_per_byte,
 	long int	maxbytes
 ));
 

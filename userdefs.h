@@ -1339,12 +1339,12 @@
  * the version definition with the Project Version on checkout.  Just
  * ignore it. - kw */
 /* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
-#define LYNX_VERSION "2.8.3dev.23"
+#define LYNX_VERSION "2.8.3pre.1"
 #define LYNX_WWW_HOME "http://lynx.browser.org/"
 #define LYNX_WWW_DIST "http://lynx.isc.org/current/"
 #define LYNX_RELEASE FALSE
 /* $Format: "#define LYNX_DATE \"$ProjectDate$\""$ */
-#define LYNX_DATE "Sun, 26 Mar 2000 19:14:00 -0800"
+#define LYNX_DATE "Fri, 31 Mar 2000 16:33:40 -0800"
 #define LYNX_DATE_OFF 5		/* truncate the automatically-generated date */
 #define LYNX_DATE_LEN 11	/* truncate the automatically-generated date */
 #define LYNX_RELEASE_DATE "1999"
@@ -1440,6 +1440,37 @@
 #endif /* DOSPATH */
 #endif /* VMS */
 
+
+/***************************** 
+ * USE_TH_JP_AUTO_DETECT, CONV_JISX0201KANA_JISX0208KANA,  
+ * and KANJI_CODE_OVERRIDE are the macros for Japanese. - TH 
+ */ 
+/***************************** 
+ * USE_TH_JP_AUTO_DETECT enables a new Japanese charset detection routine. 
+ * With the old detection strategy, Lynx always thought a document was 
+ * written in mixture of three kanji codes (JIS, EUC and SJIS).  The new 
+ * strategy is for Lynx to first assume the document is written in one code 
+ * or JIS + one other kanji code (JIS, EUC, SJIS, EUC+JIS and SJIS+JIS). 
+ * The first assumption is usually correct, but if the assumption is wrong, 
+ * Lynx falls back to the old assumption of the three kanji codes mixed. 
+ */ 
+#define USE_TH_JP_AUTO_DETECT 
+ 
+/***************************** 
+ * If CONV_JISX0201KANA_JISX0208KANA is set, Lynx will convert 
+ * JIS X0201 Kana to JIS X0208 Kana, i.e., convert half-width kana 
+ * to full-width. 
+ */ 
+#define CONV_JISX0201KANA_JISX0208KANA 
+ 
+/***************************** 
+ * Uncomment the following line to enable the kanji code override routine. 
+ * The code can be changed by pressing ^L.  More precisely, this allows 
+ * the user to override the assumption about the kanji code for the document 
+ * which Lynx has made on the basis of a META tag and HTTP response. 
+ */ 
+/*#define KANJI_CODE_OVERRIDE */ 
+ 
 
 /****************************************************************
  *  Section 4.  Things you MUST check only if you plan to use Lynx
