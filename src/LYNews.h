@@ -7,7 +7,7 @@
 #include "LYStructs.h"
 #endif /* LYSTRUCTS_H */
 
-extern int LYNewsPost PARAMS((document *newdoc, BOOLEAN followup));
+extern char *LYNewsPost PARAMS((char *newsgroups, BOOLEAN followup));
 
 #endif /* LYNEWSPOST_H */
 

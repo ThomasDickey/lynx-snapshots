@@ -655,12 +655,9 @@ PUBLIC void read_cfg ARGS1(
 	break;
 
 	case 'I':
-	if (!strncasecomp(buffer, "INEWS:", 6)) {
-	    StrAllocCopy(inews_path, buffer+6);
-	    if (*inews_path == '\0' || !strcasecomp(inews_path, "none"))
-		no_newspost = TRUE;
-	    else
-		no_newspost = FALSE;
+	if (!strncasecomp(buffer, "NEWS_POSTING:", 13)) {
+	    LYNewsPosting = is_true(buffer+13);
+	    no_newspost = (LYNewsPosting == FALSE);
 
 	} else if (!strncasecomp(buffer, "INFOSECS:", 9)) {
 	    strcpy(temp, buffer+9);
@@ -743,6 +740,21 @@ PUBLIC void read_cfg ARGS1(
 
 	} else if (!strncasecomp(buffer, "LYNX_HOST_NAME:", 15)) {
 	    StrAllocCopy(LYHostName, buffer+15);
+
+	} else if (!strncasecomp(buffer, "LYNX_SIG_FILE:", 14)) {
+	    strcpy(temp, (buffer+14));
+	    if (LYPathOffHomeOK(temp, 256)) {
+	        StrAllocCopy(LynxSigFile, temp);
+		LYAddPathToHome(temp, 256, LynxSigFile);
+		StrAllocCopy(LynxSigFile, temp);
+		if (TRACE)
+		    fprintf(stderr,
+		    	    "LYNX_SIG_FILE set to '%s'\n", LynxSigFile);
+    	    } else {
+	        if (TRACE)
+		    fprintf(stderr, "LYNX_SIG_FILE '%s' is bad. Ignoring.\n",
+	    			    LYNX_SIG_FILE);
+	    }
 	}
 	break;
 
@@ -812,6 +824,32 @@ PUBLIC void read_cfg ARGS1(
 		StrAllocCopy(news_proxy_putenv_cmd, temp);
 		StrAllocCat(news_proxy_putenv_cmd, (char *)&buffer[11]);
 		putenv(news_proxy_putenv_cmd);
+#endif /* VMS */
+	    }
+
+	} else if (!strncasecomp(buffer, "newspost_proxy:", 15)) {
+	    if (getenv("newspost_proxy") == NULL) {
+#ifdef VMS
+		strcpy(temp, "newspost_proxy");
+		Define_VMSLogical(temp, (char *)&buffer[15]);
+#else
+		strcpy(temp, "newspost_proxy=");
+		StrAllocCopy(newspost_proxy_putenv_cmd, temp);
+		StrAllocCat(newspost_proxy_putenv_cmd, (char *)&buffer[15]);
+		putenv(newspost_proxy_putenv_cmd);
+#endif /* VMS */
+	    }
+
+	} else if (!strncasecomp(buffer, "newsreply_proxy:", 16)) {
+	    if (getenv("newsreply_proxy") == NULL) {
+#ifdef VMS
+		strcpy(temp, "newsreply_proxy");
+		Define_VMSLogical(temp, (char *)&buffer[16]);
+#else
+		strcpy(temp, "newsreply_proxy=");
+		StrAllocCopy(newsreply_proxy_putenv_cmd, temp);
+		StrAllocCat(newsreply_proxy_putenv_cmd, (char *)&buffer[16]);
+		putenv(newsreply_proxy_putenv_cmd);
 #endif /* VMS */
 	    }
 
@@ -909,6 +947,32 @@ PUBLIC void read_cfg ARGS1(
 		StrAllocCopy(snews_proxy_putenv_cmd, temp);
 		StrAllocCat(snews_proxy_putenv_cmd, (char *)&buffer[12]);
 		putenv(snews_proxy_putenv_cmd);
+#endif /* VMS */
+	    }
+
+	} else if (!strncasecomp(buffer, "snewspost_proxy:", 16)) {
+	    if (getenv("snewspost_proxy") == NULL) {
+#ifdef VMS
+		strcpy(temp, "snewspost_proxy");
+		Define_VMSLogical(temp, (char *)&buffer[16]);
+#else
+		strcpy(temp, "snewspost_proxy=");
+		StrAllocCopy(snewspost_proxy_putenv_cmd, temp);
+		StrAllocCat(snewspost_proxy_putenv_cmd, (char *)&buffer[16]);
+		putenv(snewspost_proxy_putenv_cmd);
+#endif /* VMS */
+	    }
+
+	} else if (!strncasecomp(buffer, "snewsreply_proxy:", 17)) {
+	    if (getenv("snewsreply_proxy") == NULL) {
+#ifdef VMS
+		strcpy(temp, "snewsreply_proxy");
+		Define_VMSLogical(temp, (char *)&buffer[17]);
+#else
+		strcpy(temp, "snewsreply_proxy=");
+		StrAllocCopy(snewsreply_proxy_putenv_cmd, temp);
+		StrAllocCat(snewsreply_proxy_putenv_cmd, (char *)&buffer[17]);
+		putenv(snewsreply_proxy_putenv_cmd);
 #endif /* VMS */
 	    }
 

@@ -14,6 +14,7 @@
 <a href="#ftp">ftp</a> <em>|</em>
 <a href="#wais">wais</a> <em>|</em>
 <a href="#news">news, nntp, snews</a> <em>|</em>
+<a href="#newspost">newspost, newsreply, snewspost, snewsreply</a> <em>|</em>
 <a href="#mailto">mailto</a> <em>|</em>
 <a href="#finger">finger</a> <em>|</em>
 <a href="#cso">cso</a> <em>|</em>
@@ -296,10 +297,10 @@ hierarchies or sub-hierarchies, e.g.:<BR>
 (snews same as nntp, but the default port is <em>:563</em>)<BR>
 This is not in RFC1738 and may not be supported by all other clients.
 
-<p>For news URLs, Lynx allows you both to <em>reply</em> to the author
-of a message via email, and, if news posting has been enabled, to send
-a <em>followup</em> message to the newsgroup.  Only email replies to the
-author are permitted via nntp URLs.
+<p>Lynx allows you both to <em>reply</em> to the author of a news message
+via email, and, if news posting has been enabled, to send a <em>followup</em>
+message to the newsgroup (see <a href="#newspost">newspost, newsreply,
+snewspost, snewsreply</a>).
 
 <p>Lynx converts any strings in news messages which appear to be a URL
 with a supported scheme into a link for accessing that URL.
@@ -315,6 +316,48 @@ to="ngno">(retrieves the message by number)<BR>
 Use of this scheme is not recommended, because the message numbers
 are specific to each nntp server, unlike the unique identifiers for
 news messages.
+<HR WIDTH="100%">
+
+<H2><a name="newspost"
+>The <em>newspost</em>, <em>newsreply</em>, <em>snewspost</em>, and
+<em>snewsreply</em> URLs:</a></H2>
+
+When Lynx receives group listings or articles via <em>news</em>,
+<em>nntp</em> or <em>snews</em> URLs, it also checks whether the
+nntp server supports posting from the Lynx user's site, and if so,
+includes links for posting new messages to that server, or for posting
+followups (replies) to previously posted messages.  RFC1738, and IETF
+URL drafts through this release of Lynx, do not include any schemes
+for posting to news groups.  Lynx has long supported newspost and
+newreply URL schemes for posting new messages or sending followups,
+respectively, to standard nntp servers, with default port <em>:119</em>.
+Lynx now also supports homologous snewspost and snewsreply URLs for use
+with SSL capable nntp servers, but the latter requires patches for built
+in SSL support, or use of a daemon which handles the secure communications
+on behalf of Lynx. 
+
+<p>The formats are:<BR>
+<tab indent="12"><em>newspost://host:port/newsgroup(s)</em>&nbsp;&nbsp;<tab
+id="ngp">(post a new message)<BR>
+<tab indent="12"><em>newsreply://host:port/newsgroup(s)</em> <tab
+to="ngp">(post a followup message)<BR>
+(snewspost and snewsreply have the same formats, but the default port is
+<em>:563</em>)
+
+<p>If the host field is omitted, it defaults to that pointed to by the
+NNTPSERVER configuration or environmental variable.  Inclusion of at
+least one newsgroup in the URL is required, and additional groups can
+be specified as a comma-separated list.  Wildcarding of newgroup names
+is not supported for these URLs.  For newsreply and snewsreply URLs, the
+user is offered the option to include the currently displayed document,
+which presumeably is a news article with a <em>followup</em> link that
+was activated, and if confirmed, each line of that document is prefixed
+with a right-angle-bracket.  These URLs can be used as command line
+startfiles (in which case, Lynx will exit after posting the message,
+and the newreply or snewsreply URLs degrade to newspost or snewpost
+URLs, respectively).  They also can be used as HREF attribute values
+in any HTML document homologously to <a href="#mailto">mailto</a> URLs,
+with the qualification that they presently are supported only by Lynx. 
 <HR WIDTH="100%">
 
 <H2><a name="mailto">The <em>mailto</em> URL:</a></H2>

@@ -392,6 +392,8 @@
 #define SPAWNING_EDITOR_FOR_NEWS \
  "Spawning your selected editor to edit news message"
 #define POST_MSG_PROMPT "Post this message? (y/n) "
+#define APPEND_SIG_FILE "Append '%s'?  (y/n) "
+#define POSTING_TO_NEWS "Posting to newsgroup(s)..."
 #ifdef VMS
 #define HAVE_UNREAD_MAIL_MSG "*** You have unread mail. ***"
 #else

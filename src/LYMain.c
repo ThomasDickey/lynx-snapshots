@@ -70,7 +70,11 @@ PUBLIC char *ftp_proxy_putenv_cmd = NULL;    /* lynx.cfg defined ftp_proxy */
 PUBLIC char *gopher_proxy_putenv_cmd = NULL; /* lynx.cfg defined gopher_proxy */
 PUBLIC char *cso_proxy_putenv_cmd = NULL;    /* lynx.cfg defined cso_proxy */
 PUBLIC char *news_proxy_putenv_cmd = NULL;   /* lynx.cfg defined news_proxy */
+PUBLIC char *newspost_proxy_putenv_cmd = NULL;
+PUBLIC char *newsreply_proxy_putenv_cmd = NULL;
 PUBLIC char *snews_proxy_putenv_cmd = NULL;  /* lynx.cfg defined snews_proxy */
+PUBLIC char *snewspost_proxy_putenv_cmd = NULL;
+PUBLIC char *snewsreply_proxy_putenv_cmd = NULL;
 PUBLIC char *nntp_proxy_putenv_cmd = NULL;   /* lynx.cfg defined nntp_proxy */
 PUBLIC char *wais_proxy_putenv_cmd = NULL;   /* lynx.cfg defined wais_proxy */
 PUBLIC char *finger_proxy_putenv_cmd = NULL; /* lynx.cfg defined finger_proxy */
@@ -247,10 +251,11 @@ PUBLIC char *global_extension_map = NULL;  /* global mime.types */
 PUBLIC char *personal_extension_map = NULL;/* .mime.types */
 PUBLIC char *language = NULL;	    /* preferred language */
 PUBLIC char *pref_charset = NULL;   /* preferred character set */
-PUBLIC char *inews_path = NULL;	    /* the path for posting to news */
-PUBLIC char *system_mail = NULL;    /* the path for sending mail */
-PUBLIC char *lynx_temp_space = NULL; /* the prefix for temporary file paths */
-PUBLIC char *lynx_save_space = NULL; /* the prefix for save to disk paths */
+PUBLIC BOOLEAN LYNewsPosting = NEWS_POSTING; /* News posting supported? */
+PUBLIC char *LynxSigFile = NULL;    /* Signature file, in or off home */
+PUBLIC char *system_mail = NULL;    /* The path for sending mail */
+PUBLIC char *lynx_temp_space = NULL; /* The prefix for temporary file paths */
+PUBLIC char *lynx_save_space = NULL; /* The prefix for save to disk paths */
 PUBLIC char *LYHostName = NULL;		/* treat as a local host name */
 PUBLIC char *LYLocalDomain = NULL;	/* treat as a local domain tail */
 PUBLIC BOOLEAN clickable_images = MAKE_LINKS_FOR_ALL_IMAGES;
@@ -348,7 +353,11 @@ PRIVATE void free_lynx_globals NOARGS
     FREE(gopher_proxy_putenv_cmd);
     FREE(cso_proxy_putenv_cmd);
     FREE(news_proxy_putenv_cmd);
+    FREE(newspost_proxy_putenv_cmd);
+    FREE(newsreply_proxy_putenv_cmd);
     FREE(snews_proxy_putenv_cmd);
+    FREE(snewspost_proxy_putenv_cmd);
+    FREE(snewsreply_proxy_putenv_cmd);
     FREE(nntp_proxy_putenv_cmd);
     FREE(wais_proxy_putenv_cmd);
     FREE(finger_proxy_putenv_cmd);
@@ -375,7 +384,7 @@ PRIVATE void free_lynx_globals NOARGS
     FREE(personal_extension_map);
     FREE(language);
     FREE(pref_charset);
-    FREE(inews_path);
+    FREE(LynxSigFile);
     FREE(system_mail);
     FREE(LYUserAgent);
     FREE(LYUserAgentDefault);
@@ -422,6 +431,7 @@ PUBLIC int main ARGS2(
     char *temp = NULL;
     char *cp;
     FILE *fp;
+    char filename[256];
 
     /*
      *  Set up the argument list.
@@ -519,7 +529,6 @@ PUBLIC int main ARGS2(
     StrAllocCopy(personal_extension_map, PERSONAL_EXTENSION_MAP);
     StrAllocCopy(language, PREFERRED_LANGUAGE);
     StrAllocCopy(pref_charset, PREFERRED_CHARSET);
-    StrAllocCopy(inews_path, INEWS);
     StrAllocCopy(system_mail, SYSTEM_MAIL);
     if ((cp = getenv("LYNX_TEMP_SPACE")) != NULL)
         StrAllocCopy(lynx_temp_space, cp);
@@ -609,6 +618,14 @@ PUBLIC int main ARGS2(
     if (!LYchar_set_names[i])
         current_char_set = i = 0;
     HTMLSetRawModeDefault(i);
+
+    /*
+     *  Disable news posting if the compilation-based
+     *  LYNewsPosting value is FALSE.  This may be changed
+     *  further down via lynx.cfg or the -restriction
+     *  command line switch. - FM
+     */
+    no_newspost = (LYNewsPosting == FALSE);
 
     /*
      *  Set up trace, the anonymous account defaults, and/or
@@ -725,6 +742,22 @@ PUBLIC int main ARGS2(
      */
     lynx_setup_colors();
 #endif /* USE_SLANG */
+
+    /*
+     *  Set the compilation default signature file. - FM
+     */
+    strcpy(filename, LYNX_SIG_FILE);
+    if (LYPathOffHomeOK(filename, sizeof(filename))) {
+    	StrAllocCopy(LynxSigFile, filename);
+	LYAddPathToHome(filename, sizeof(filename), LynxSigFile);
+	StrAllocCopy(LynxSigFile, filename);
+	if (TRACE)
+	    fprintf(stderr, "LYNX_SIG_FILE set to '%s'\n", LynxSigFile);
+    } else {
+	if (TRACE)
+	    fprintf(stderr, "LYNX_SIG_FILE '%s' is bad. Ignoring.\n",
+	    		    LYNX_SIG_FILE);
+    }
 
     /*
      *  Process the configuration file.
@@ -906,12 +939,6 @@ PUBLIC int main ARGS2(
 	else
 	    LYSelectPopups = TRUE;
     }
-
-    /*
-     *  Disable news posting if no posting command.
-     */
-    if (*inews_path == '\0' || !strcasecomp(inews_path,"none"))
-        no_newspost = TRUE;
 
     /*
      *  Disable multiple bookmark support if not interactive,
@@ -1781,7 +1808,7 @@ PRIVATE void parse_arg ARGS3(
    jump            disable the 'j' (jump) command\n\
    mail            disallow mail\n\
    multibook       disallow multiple bookmark files\n\
-   news_post       disallow USENET News posting setting in the O)ptions menu\n\
+   news_post       disallow USENET News posting.\n\
    option_save     disallow saving options in .lynxrc\n");
 #if defined(NO_UTMP) || defined(VMS) /* not selective */
 	        printf("\

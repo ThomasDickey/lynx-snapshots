@@ -36,7 +36,11 @@ extern char *ftp_proxy_putenv_cmd;
 extern char *gopher_proxy_putenv_cmd;
 extern char *cso_proxy_putenv_cmd;
 extern char *news_proxy_putenv_cmd;
+extern char *newspost_proxy_putenv_cmd;
+extern char *newsreply_proxy_putenv_cmd;
 extern char *snews_proxy_putenv_cmd;
+extern char *snewspost_proxy_putenv_cmd;
+extern char *snewsreply_proxy_putenv_cmd;
 extern char *nntp_proxy_putenv_cmd;
 extern char *wais_proxy_putenv_cmd;
 extern char *finger_proxy_putenv_cmd;
@@ -115,8 +119,9 @@ extern char *lynxlistfile;
 extern char *lynxlinksfile;
 extern char *display;
 extern char *language;
-extern char *pref_charset; /* Lynx's preferred character set - MM */
-extern char *inews_path;
+extern char *pref_charset;	/* Lynx's preferred character set - MM */
+extern BOOLEAN LYNewsPosting;	/* News posting supported if TRUE */
+extern char *LynxSigFile;	/* Signature file, in or off home */
 extern char *system_mail;
 extern char *lynx_temp_space;
 extern char *lynx_save_space;

@@ -311,7 +311,7 @@ PUBLIC BOOL HTConfirmCookie ARGS6(
     }
     sprintf(message, ADVANCED_COOKIE_CONFIRMATION,
     	    server, namelen, name, valuelen, value);
-    _user_message(message, "");
+    _statusline(message);
     while (1) {
 	ch = LYgetch();
 #ifdef VMS

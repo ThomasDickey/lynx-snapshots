@@ -33,10 +33,10 @@ PUBLIC int HTNewsMaxChunk = 40;	/* Largest number of articles in one window */
 
 #ifndef DEFAULT_NEWS_HOST
 #define DEFAULT_NEWS_HOST "news"
-#endif
+#endif /* DEFAULE_NEWS_HOST */
 #ifndef SERVER_FILE
 #define SERVER_FILE "/usr/local/lib/rn/server"
-#endif
+#endif /* SERVER_FILE */
 
 #define NEWS_NETWRITE  NETWRITE
 #define NEWS_NETCLOSE  NETCLOSE
@@ -69,10 +69,11 @@ extern int interrupted_in_htgetcharacter;
 /*
 **  Module-wide variables.
 */
-PUBLIC  char * HTNewsHost = NULL;
-PRIVATE char * NewsHost = NULL;
-PRIVATE char * NewsHREF = NULL;
+PUBLIC  char * HTNewsHost = NULL;		/* Default host */
+PRIVATE char * NewsHost = NULL;			/* Current host */
+PRIVATE char * NewsHREF = NULL;			/* Current HREF prefix */
 PRIVATE int s;					/* Socket for NewsHost */
+PRIVATE HTCanPost = FALSE;			/* Current POST permission */
 PRIVATE char response_text[LINE_LENGTH+1];	/* Last response */
 /* PRIVATE HText *	HT;	*/		/* the new hypertext */
 PRIVATE HTStructured * target;			/* The output sink */
@@ -182,7 +183,7 @@ PRIVATE int response ARGS1(CONST char *,command)
 	}
 #else
         status = NEWS_NETWRITE(s, (char *)command, length);
-#endif
+#endif /* NOT_ASCII */
 	if (status < 0){
 	    if (TRACE) fprintf(stderr,
 	        "HTNews: Unable to send command. Disconnecting.\n");
@@ -479,9 +480,166 @@ PRIVATE void abort_socket NOARGS
     s = -1;		/* End of file on response */
 }
 
+/*
+**  Determine if a line is a valid header line.			valid_header
+**  -------------------------------------------
+*/
+PRIVATE BOOLEAN valid_header ARGS1(
+	char *,		line)
+{
+    char *colon, *space;
+
+    /*
+    **  Blank or tab in first position implies
+    **  this is a continuation header.
+    */
+    if (line[0] == ' ' || line[0] == '\t')
+	return(TRUE);
+
+    /*
+    **  Just check for initial letter, colon, and space to make
+    **  sure we discard only invalid headers.
+    */
+    colon = strchr(line, ':');
+    space = strchr(line, ' ');
+    if (isalpha(line[0]) && colon && space == colon + 1)
+        return(TRUE);
+
+    /*
+    **  Anything else is a bad header -- it should be ignored.
+    */
+    return(FALSE);
+}
+
+/*	post in an Article					post_article
+**	------------------
+**  			(added by FM, modeled on Lynx's previous mini inews)
+**
+**	Note the termination condition of a single dot on a line by itself.
+**
+**  On entry,
+**	s		Global socket number is OK
+**	postfile	file with header and article to post.
+*/ 
+PRIVATE void post_article ARGS1(
+	char *,		postfile)
+{
+    char line[512];
+    char buf[512];
+    char crlf[3];
+    char *cp;
+    int status;
+    FILE *fd;
+    int in_header = 1, seen_header = 0, seen_fromline = 0;
+    int blen = 0, llen = 0;
+
+
+    /*
+    **  Open the temporary file with the
+    **  nntp headers and message body. - FM
+    */
+    if ((fd = fopen((postfile ? postfile : ""), "r")) == NULL) {
+	HTAlert("Cannot open temporary file for news POST.");
+	return;
+    }
+
+    /*
+    **  Read the temporary file and post
+    **  in maximum 512 byte chunks. - FM
+    */
+    buf[0] = '\0';
+    sprintf(crlf, "%c%c", CR, LF);
+    while (fgets(line, sizeof(line), fd) != NULL) {
+	if ((cp = strchr(line, '\n')) != NULL)
+	    *cp = '\0';
+	if (line[0] == '.') {
+	    /*
+	    **  A single '.' means end of transmission
+	    **  for nntp.  Lead dots on lines normally
+	    **  are trimmed and the EOF is not registered
+	    **  if the dot was not followed by CRLF.
+	    **  We prepend an extra dot for any line
+	    **  beginning with one, to retain the one
+	    **  intended, as well as avoid a false EOF
+	    **  signal.  We know we have room for it in
+	    **  the buffer, because we normally send when
+	    **  it would exceed 510. - FM
+	    */
+	    strcat(buf, ".");
+	    blen++;
+	}
+	llen = strlen(line);
+	if (in_header && !strncasecomp(line, "From:", 5)) {
+	    seen_header = 1;
+	    seen_fromline = 1;
+	}
+	if (in_header && line[0] == '\0') {
+	    if (seen_header) {
+		in_header = 0;
+		if (!seen_fromline) {
+		    if (blen < 475) {
+		        strcat(buf, "From: anonymous@nowhere.you.know");
+			strcat(buf, crlf);
+			blen += 34;
+		    } else {
+			NEWS_NETWRITE(s, buf, blen);
+			sprintf(buf,
+				"From: anonymous@nowhere.you.know%s", crlf);
+			blen = 34;
+		    }
+		}
+	     } else {
+		continue;
+	    }
+	} else if (in_header) {
+	    if (valid_header(line)) {
+		seen_header = 1;
+	    } else {
+		continue;
+	    }
+	}
+	strcat(line, crlf);
+	llen += 2;
+	if ((blen + llen) < 511) {
+	    strcat(buf, line);
+	    blen += llen;
+	} else {
+	    NEWS_NETWRITE(s, buf, blen);
+	    strcpy(buf, line);
+	    blen = llen;
+	}
+    }
+
+    /*
+    **  Send the nntp EOF and get the server's response. - FM
+    */
+    if (blen < 508) {
+        strcat(buf, ".");
+	strcat(buf, crlf);
+	blen += 3;
+	NEWS_NETWRITE(s, buf, blen);
+    } else {
+        NEWS_NETWRITE(s, buf, blen);
+	sprintf(buf, ".%s", crlf);
+	blen = 3;
+	NEWS_NETWRITE(s, buf, blen);
+    }
+    status = response(NULL);
+    if (status == 240) {
+        /*
+	**  Successful post. - FM
+	*/
+        HTProgress(response_text);
+    } else {
+        /*
+	**  Shucks, something went wrong. - FM
+	*/
+        HTAlert(response_text);
+    }
+}
+
 /*	Read in an Article					read_article
 **	------------------
-**
 **
 **	Note the termination condition of a single dot on a line by itself.
 **	RFC 977 specifies that the line "folding" of RFC850 is not used, so we
@@ -698,9 +856,18 @@ PRIVATE int read_article NOARGS
 	    FREE(organization);
 	}
 
-	if (newsgroups && !strncmp(NewsHREF, "news:", 5)) {
-	    /* make posting possible */
-	    StrAllocCopy(href,"newsreply:");
+	if (newsgroups && HTCanPost) {
+	    /*
+	    **  We have permission to POST to this host,
+	    **  so add a link for posting followups for
+	    **  this article. - FM
+	    */
+	    if (!strncasecomp(NewsHREF, "snews:", 6))
+	        StrAllocCopy(href,"snewsreply://");
+	    else
+	        StrAllocCopy(href,"newsreply://");
+	    StrAllocCat(href, NewsHost);
+	    StrAllocCat(href, "/");
 	    StrAllocCat(href, (followupto ? followupto : newsgroups));
 
 	    START(HTML_DT);
@@ -1223,7 +1390,7 @@ PRIVATE int read_group ARGS3(
 		sprintf(buffer, "HEAD %d%c%c", art+1, CR, LF);
 		status = response(buffer);
 	    }
-#else	/* NOT OVERLAP: */
+#else	/* Not OVERLAP: */
 	    sprintf(buffer, "HEAD %d%c%c", art, CR, LF);
 	    status = response(buffer);
 #endif	/* OVERLAP */
@@ -1394,11 +1561,22 @@ PRIVATE int read_group ARGS3(
     }
 
 add_post:
-    if (!strncmp(NewsHREF, "news:", 5)) {
+    if (HTCanPost) {
+	/*
+	**  We have permission to POST to this host,
+	**  so add a link for posting messages to
+	**  this newsgroup. - FM
+	*/
 	char *href = NULL;
+
 	START(HTML_HR);
 	PUTC('\n');
-	StrAllocCopy(href,"newspost:");
+	if (!strncasecomp(NewsHREF, "snews:", 6))
+	    StrAllocCopy(href,"snewspost://");
+	else
+	    StrAllocCopy(href,"newspost://");
+	StrAllocCat(href, NewsHost);
+	StrAllocCat(href, "/");
 	StrAllocCat(href,groupName);
 	start_anchor(href);
 	PUTS("Post to ");
@@ -1428,9 +1606,14 @@ PUBLIC int HTLoadNews ARGS4(
     int retries;			/* A count of how hard we have tried */ 
     BOOL group_wanted;		/* Flag: group was asked for, not article */
     BOOL list_wanted;		/* Flag: list was asked for, not article */
+    BOOL post_wanted;		/* Flag: new post to group was asked for */
+    BOOL reply_wanted;		/* Flag: followup post was asked for */
+    BOOL spost_wanted;		/* Flag: new SSL post to group was asked for */
+    BOOL sreply_wanted;		/* Flag: followup SSL post was asked for */
     int first, last;		/* First and last articles asked for */
     char *cp;
     char *ListArg = NULL;
+    char *postfile = NULL;
 
     diagnostic = (format_out == WWW_SOURCE ||	/* set global flag */
     		  format_out == HTAtom_for("www/download") ||
@@ -1461,8 +1644,71 @@ PUBLIC int HTLoadNews ARGS4(
 	**  	xxxxx			News group (no "@")
 	**  	group/n1-n2		Articles n1 to n2 in group
 	*/
-	group_wanted = (strchr(arg, '@') == NULL) && (strchr(arg, '*') == NULL);
-	list_wanted  = (strchr(arg, '@') == NULL) && (strchr(arg, '*') != NULL);
+	post_wanted = (strstr(arg, "newspost:") != NULL);
+	reply_wanted = ((!post_wanted) &&
+			strstr(arg, "newsreply:") != NULL);
+	spost_wanted = (!(post_wanted || reply_wanted) &&
+			strstr(arg, "snewspost:") != NULL);
+	sreply_wanted = (!(post_wanted || reply_wanted ||
+			   spost_wanted) &&
+			 strstr(arg, "newsreply:") != NULL);
+	group_wanted = (!(post_wanted || reply_wanted ||
+			  spost_wanted || sreply_wanted) &&
+			strchr(arg, '@') == NULL) && (strchr(arg, '*') == NULL);
+	list_wanted  = (!(post_wanted || reply_wanted) &&
+			strchr(arg, '@') == NULL) && (strchr(arg, '*') != NULL);
+
+	if (!strncasecomp(arg, "snewspost:", 10) ||
+	    !strncasecomp(arg, "snewsreply:", 11)) {
+	    HTAlert(
+	"This client does not contain support for posting to news with SSL.");
+	    return HT_NOT_LOADED;
+	}
+	if (post_wanted || reply_wanted || spost_wanted || sreply_wanted) {
+	    /*
+	    **  Make sure we have a non-zero path for the newsgroup(s). - FM
+	    */
+	    if ((p1 = strrchr(arg, '/')) != NULL) {
+	        p1++;
+	    } else if ((p1 = strrchr(arg, ':')) != NULL) {
+	        p1++;
+	    }
+	    if (!(p1 && *p1)) {
+	    	HTAlert("Invalid URL!");
+		return(HT_NO_DATA);
+	    }
+	    if (!(cp = HTParse(arg, "", PARSE_HOST)) || *cp == '\0') {
+		if (s >= 0 && NewsHost && strcasecomp(NewsHost, HTNewsHost)) {
+		    NEWS_NETCLOSE(s);
+		    s = -1;
+		}
+		StrAllocCopy(NewsHost, HTNewsHost);
+	    } else {
+		if (s >= 0 && NewsHost && strcasecomp(NewsHost, cp)) {
+		    NEWS_NETCLOSE(s);
+		    s = -1;
+		}
+		StrAllocCopy(NewsHost, cp);
+	    }
+	    FREE(cp);
+	    sprintf(command, "%s://%.245s/",
+	    		     (post_wanted ?
+			       "newspost" :
+			    (reply_wanted ?
+			       "newreply" :
+			    (spost_wanted ?
+			      "snewspost" : "snewsreply"))), NewsHost);
+	    StrAllocCopy(NewsHREF, command);
+
+	    /*
+	    **  If the SSL daemon is being used as a proxy,
+	    **  reset p1 to the start of the proxied URL
+	    **  rather than to the start of the newsgroup(s). - FM
+	    */
+	    if (spost_wanted && strncasecomp(arg, "snewspost:", 10))
+	        p1 = strstr(arg, "snewspost:");
+	    if (sreply_wanted && strncasecomp(arg, "snewsreply:", 11))
+	        p1 = strstr(arg, "snewsreply:");
 
 	/* p1 = HTParse(arg, "", PARSE_PATH | PARSE_PUNCTUATION); */
 	/*
@@ -1470,7 +1716,7 @@ PUBLIC int HTLoadNews ARGS4(
 	**  rules. For instance, if the article reference contains a '#',
 	**  the rest of it is lost -- JFG 10/7/92, from a bug report
 	*/
- 	if (!strncasecomp (arg, "nntp:", 5)) {
+ 	} else if (!strncasecomp (arg, "nntp:", 5)) {
 	    if (((*(arg + 5) == '\0') ||
 	         (!strcmp((arg + 5), "/") ||
 		  !strcmp((arg + 5), "//") ||
@@ -1556,9 +1802,12 @@ PUBLIC int HTLoadNews ARGS4(
 	/*
 	**  Set up any proxy for snews URLs that returns NNTP
 	**  responses for Lynx to convert to HTML, instead of
-	**  doing the conversion itself. - TZ & FM
+	**  doing the conversion itself, and for handling posts
+	**  or followups.  - TZ & FM
 	*/
- 	if (!strncasecomp (p1, "snews:", 6)) {
+ 	if (!strncasecomp(p1, "snews:", 6) ||
+	    !strncasecomp(p1, "snewpost:", 10) ||
+	    !strncasecomp(p1, "snewsreply:", 11)) {
 	    if ((cp = HTParse(p1, "", PARSE_HOST)) != NULL && *cp != '\0')
 		sprintf(command, "snews://%.250s", cp);
 	    else
@@ -1572,19 +1821,36 @@ PUBLIC int HTLoadNews ARGS4(
 			(strlen(proxycmd) - 4), proxycmd);
 	    strcat(command, "/");
 	    StrAllocCopy(NewsHREF, command);
-	    if (!(cp = strrchr((p1 + 6), '/')) || *(cp + 1) == '\0') {
-	        p1 = "*";
-	        group_wanted = FALSE;
-	        list_wanted = TRUE;
+	    if (spost_wanted || sreply_wanted) {
+	        /*
+		**  Reset p1 so that it points to the newsgroup(s).
+		*/
+		if ((p1 = strrchr(arg, '/')) != NULL) {
+		    p1++;
+		} else {
+		    p1 = (strrchr(arg, ':') + 1);
+		}
 	    } else {
-	        p1 = (cp + 1);
+	        /*
+		**  Reset p1 so that it points to the newgroup
+		**  (or a wildcard), or the article.
+		*/
+		if (!(cp = strrchr((p1 + 6), '/')) || *(cp + 1) == '\0') {
+		    p1 = "*";
+		    group_wanted = FALSE;
+		    list_wanted = TRUE;
+		} else {
+		    p1 = (cp + 1);
+		}
 	    }
 	}
 
 	/*
-	**  Set up command for a listing or article request. - FM
+	**  Set up command for a post, listing, or article request. - FM
 	*/
-	if (list_wanted) {
+	if (post_wanted || reply_wanted || spost_wanted || sreply_wanted) {
+	    strcpy(command, "POST");
+	} else if (list_wanted) {
 	    strcpy(command, "LIST NEWSGROUPS");
 	} else if (group_wanted) {
 	    char * slash = strchr(p1, '/');
@@ -1642,9 +1908,11 @@ PUBLIC int HTLoadNews ARGS4(
     /*
     **  Make a hypertext object with an anchor list.
     */
-    node_anchor = anAnchor;
-    target = HTML_new(anAnchor, format_out, stream);
-    targetClass = *target->isa;	/* Copy routine entry points */
+    if (!(post_wanted || reply_wanted || spost_wanted || sreply_wanted)) {
+        node_anchor = anAnchor;
+	target = HTML_new(anAnchor, format_out, stream);
+	targetClass = *target->isa;	/* Copy routine entry points */
+    }
 
     /*
     **  Now, let's get a stream setup up from the NewsHost.
@@ -1671,10 +1939,21 @@ PUBLIC int HTLoadNews ARGS4(
 		    fprintf(stderr,
 		     "HTNews: Interrupted on connect; recovering cleanly.\n");
 		_HTProgress("Connection interrupted.");
-		(*targetClass._abort)(target, NULL);
+		if (!(post_wanted || reply_wanted ||
+		      spost_wanted || sreply_wanted))
+		    (*targetClass._abort)(target, NULL);
 		FREE(NewsHost);
 		FREE(NewsHREF);
 		FREE(ListArg);
+		if (postfile) {
+#ifdef VMS
+		    while (remove(postfile) == 0)
+			; /* loop through all versions */
+#else
+		    remove(postfile);
+#endif /* VMS */
+		    FREE(postfile);
+		}
                 return HT_NOT_LOADED;
             }
 	    if (status < 0) {
@@ -1690,6 +1969,15 @@ PUBLIC int HTLoadNews ARGS4(
 		FREE(NewsHost);
 		FREE(NewsHREF);
 		FREE(ListArg);
+		if (postfile) {
+#ifdef VMS
+		    while (remove(postfile) == 0)
+			; /* loop through all versions */
+#else
+		    remove(postfile);
+#endif /* VMS */
+		    FREE(postfile);
+		}
 		return HTLoadError(stream, 500, message);
 	    } else {
 		if (TRACE)
@@ -1709,10 +1997,21 @@ PUBLIC int HTLoadNews ARGS4(
 			s = -1;
 			if (status == HT_INTERRUPTED) {
 			    _HTProgress("Connection interrupted.");
-			    (*targetClass._abort)(target, NULL);
+			    if (!(post_wanted || reply_wanted ||
+				  spost_wanted || sreply_wanted))
+			        (*targetClass._abort)(target, NULL);
 			    FREE(NewsHost);
 			    FREE(NewsHREF);
 			    FREE(ListArg);
+			    if (postfile) {
+#ifdef VMS
+			        while (remove(postfile) == 0)
+				    ; /* loop through all versions */
+#else
+			        remove(postfile);
+#endif /* VMS */
+			        FREE(postfile);
+			    }
 			    return(HT_NOT_LOADED);
 			}
 			if (retries < 1)
@@ -1722,18 +2021,68 @@ PUBLIC int HTLoadNews ARGS4(
 		  		NewsHost, response_text);
 		        return HTLoadError(stream, 500, message);
 		}
+		if (status == 200) {
+		    HTCanPost = TRUE;
+		} else {
+		    HTCanPost = FALSE;
+		    if (post_wanted || reply_wanted ||
+		        spost_wanted || sreply_wanted) {
+			HTAlert("Cannot POST to this host.");
+			FREE(NewsHREF);
+			FREE(ListArg);
+			if (postfile) {
+#ifdef VMS
+			    while (remove(postfile) == 0)
+				; /* loop through all versions */
+#else
+			    remove(postfile);
+#endif /* VMS */
+			    FREE(postfile);
+			}
+			return(HT_NOT_LOADED);
+		    }
+		}
 	    }
 	} /* If needed opening */
 	
-        /*
-	**  Ensure reader mode, but don't bother checking the
-	**  status for anything but HT_INERRUPTED, because if
-	**  if the reader mode command is not needed, the server
-	**  probably return a 500, which is irrelevant at this
-	**  point. - FM
-	*/
-	{
+	if (post_wanted || reply_wanted ||
+	     spost_wanted || sreply_wanted) {
+	    if (!HTCanPost) {
+		HTAlert("Cannot POST to this host.");
+		FREE(NewsHREF);
+		FREE(ListArg);
+		if (postfile) {
+#ifdef VMS
+		    while (remove(postfile) == 0)
+			; /* loop through all versions */
+#else
+		    remove(postfile);
+#endif /* VMS */
+		    FREE(postfile);
+		}
+		return(HT_NOT_LOADED);
+	    }
+	    if (postfile == NULL) {
+	        extern char *LYNewsPost PARAMS((char *newsgroups,
+						BOOLEAN followup));
+		postfile = LYNewsPost(ListArg, (reply_wanted || sreply_wanted));
+	    }
+	    if (postfile == NULL) {
+		HTProgress("Cancelled!");
+		FREE(NewsHREF);
+		FREE(ListArg);
+		return(HT_NOT_LOADED);
+	    }
+        } else {
+	    /*
+	    **  Ensure reader mode, but don't bother checking the
+	    **  status for anything but HT_INERRUPTED, because if
+	    **  if the reader mode command is not needed, the server
+	    **  probably return a 500, which is irrelevant at this
+	    **  point. - FM
+	    */
 	    char buffer[20];
+
 	    sprintf(buffer, "mode reader%c%c", CR, LF);
 	    if ((status = response(buffer)) == HT_INTERRUPTED) {
 		_HTProgress("Connection interrupted.");
@@ -1753,7 +2102,8 @@ Send_NNTP_command:
 	        break;
 	    }
 	}
-	if ((status/100) != 2) {
+	if ((status/100) != 2 &&
+	    status != 340) {
 	    if (retries)
 	        HTAlert(response_text);
 	    else
@@ -1768,9 +2118,16 @@ Send_NNTP_command:
 	}
   
 	/*
-	**  Load a group, article, etc
+	**  Post or load a group, article, etc
 	*/
-	if (list_wanted) {
+	if (post_wanted || reply_wanted || spost_wanted || sreply_wanted) {
+	    if (status != 340) {
+		HTAlert("Cannot POST to this host.");
+	    } else {
+	        post_article(postfile);
+	    }
+	    status = HT_NOT_LOADED;
+	} else if (list_wanted) {
 	    _HTProgress("Reading list of available newsgroups.");
 	    status = read_list(ListArg);
 	} else if (group_wanted) {
@@ -1798,9 +2155,20 @@ Send_NNTP_command:
 	    _HTProgress("Connection interrupted.");
 	    status = HT_LOADED;
 	}
-	(*targetClass._free)(target);
+	if (!(post_wanted || reply_wanted ||
+	      spost_wanted || sreply_wanted))
+	    (*targetClass._free)(target);
 	FREE(NewsHREF);
 	FREE(ListArg);
+	if (postfile) {
+#ifdef VMS
+	    while (remove(postfile) == 0)
+		; /* loop through all versions */
+#else
+	    remove(postfile);
+#endif /* VMS */
+	    FREE(postfile);
+	}
 	return status;
     } /* Retry loop */
     
@@ -1809,9 +2177,20 @@ Send_NNTP_command:
 /*    NXRunAlertPanel(NULL, "Sorry, could not load `%s'.",
 	    NULL,NULL,NULL, arg);No -- message earlier wil have covered it */
 
-    (*targetClass._abort)(target, NULL);
+    if (!(post_wanted || reply_wanted ||
+	  spost_wanted || sreply_wanted))
+        (*targetClass._abort)(target, NULL);
     FREE(NewsHREF);
     FREE(ListArg);
+    if (postfile) {
+#ifdef VMS
+	while (remove(postfile) == 0)
+	    ; /* loop through all versions */
+#else
+	remove(postfile);
+#endif /* VMS */
+	FREE(postfile);
+    }
     return HT_NOT_LOADED;
 }
 
@@ -1820,10 +2199,22 @@ Send_NNTP_command:
 GLOBALDEF (HTProtocol,HTNews,_HTNEWS_C_1_INIT);
 #define _HTNEWS_C_2_INIT { "nntp", HTLoadNews, NULL }
 GLOBALDEF (HTProtocol,HTNNTP,_HTNEWS_C_2_INIT);
-#define _HTNEWS_C_3_INIT { "snews", HTLoadNews, NULL }
-GLOBALDEF (HTProtocol,HTSNews,_HTNEWS_C_1_INIT);
+#define _HTNEWS_C_3_INIT { "newspost", HTLoadNews, NULL }
+GLOBALDEF (HTProtocol,HTNewsPost,_HTNEWS_C_3_INIT);
+#define _HTNEWS_C_4_INIT { "newsreply", HTLoadNews, NULL }
+GLOBALDEF (HTProtocol,HTNewsReply,_HTNEWS_C_4_INIT);
+#define _HTNEWS_C_5_INIT { "snews", HTLoadNews, NULL }
+GLOBALDEF (HTProtocol,HTSNews,_HTNEWS_C_5_INIT);
+#define _HTNEWS_C_6_INIT { "snewspost", HTLoadNews, NULL }
+GLOBALDEF (HTProtocol,HTSNewsPost,_HTNEWS_C_6_INIT);
+#define _HTNEWS_C_7_INIT { "snewsreply", HTLoadNews, NULL }
+GLOBALDEF (HTProtocol,HTSNewsReply,_HTNEWS_C_7_INIT);
 #else
 GLOBALDEF PUBLIC HTProtocol HTNews = { "news", HTLoadNews, NULL };
 GLOBALDEF PUBLIC HTProtocol HTNNTP = { "nntp", HTLoadNews, NULL };
+GLOBALDEF PUBLIC HTProtocol HTNewsPost = { "newspost", HTLoadNews, NULL };
+GLOBALDEF PUBLIC HTProtocol HTNewsReply = { "newsreply", HTLoadNews, NULL };
 GLOBALDEF PUBLIC HTProtocol HTSNews = { "snews", HTLoadNews, NULL };
+GLOBALDEF PUBLIC HTProtocol HTSNewsPost = { "snewspost", HTLoadNews, NULL };
+GLOBALDEF PUBLIC HTProtocol HTSNewsReply = { "snewsreply", HTLoadNews, NULL };
 #endif /* GLOBALDEF_IS_MACRO */

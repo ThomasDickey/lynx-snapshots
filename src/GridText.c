@@ -2032,8 +2032,13 @@ PUBLIC HTChildAnchor * HText_childNumber ARGS1(
 	int,		number)
 {
     TextAnchor * a;
+
+    if (!HTMainText)
+        return (HTChildAnchor *)0;	/* Fail */
+
     for (a = HTMainText->first_anchor; a; a = a->next) {
-        if (a->number == number) return(a->anchor);
+        if (a->number == number)
+	    return(a->anchor);
     }
     return (HTChildAnchor *)0;	/* Fail */
 }
@@ -2048,6 +2053,9 @@ PUBLIC int HTGetLinkInfo ARGS3(
 {
     TextAnchor * a;
     HTAnchor *link_dest;
+
+    if (!HTMainText)
+        return(NO);
 
     for (a = HTMainText->first_anchor; a; a = a->next) {
         if (a->number == number) {
@@ -2079,7 +2087,7 @@ PUBLIC int HTGetLinkInfo ARGS3(
  */
 PUBLIC int HText_getNumOfLines NOARGS
 {
-     return(HTMainText->Lines);
+     return(HTMainText ? HTMainText->Lines : 0);
 }
 
 /*
@@ -2088,7 +2096,8 @@ PUBLIC int HText_getNumOfLines NOARGS
  */
 PUBLIC char * HText_getTitle NOARGS
 {
-   return((char *) HTAnchor_title(HTMainText->node_anchor));
+   return(HTMainText ?
+   	  (char *) HTAnchor_title(HTMainText->node_anchor) : NULL);
 }
 
 /*
@@ -2098,7 +2107,8 @@ PUBLIC char * HText_getTitle NOARGS
  */
 PUBLIC char * HText_getSugFname NOARGS
 {
-   return((char *) HTAnchor_SugFname(HTMainText->node_anchor));
+   return(HTMainText ?
+   	  (char *) HTAnchor_SugFname(HTMainText->node_anchor) : NULL);
 }
 
 /*
@@ -2107,7 +2117,8 @@ PUBLIC char * HText_getSugFname NOARGS
  */
 PUBLIC char * HText_getLastModified NOARGS
 {
-   return((char *) HTAnchor_last_modified(HTMainText->node_anchor));
+   return(HTMainText ?
+   	  (char *) HTAnchor_last_modified(HTMainText->node_anchor) : NULL);
 }
 
 /*
@@ -2116,7 +2127,8 @@ PUBLIC char * HText_getLastModified NOARGS
  */
 PUBLIC char * HText_getDate NOARGS
 {
-   return((char *) HTAnchor_date(HTMainText->node_anchor));
+   return(HTMainText ?
+   	  (char *) HTAnchor_date(HTMainText->node_anchor) : NULL);
 }
 
 /*
@@ -2125,7 +2137,8 @@ PUBLIC char * HText_getDate NOARGS
  */
 PUBLIC char * HText_getServer NOARGS
 {
-   return((char *) HTAnchor_server(HTMainText->node_anchor));
+   return(HTMainText ?
+   	  (char *)HTAnchor_server(HTMainText->node_anchor) : NULL);
 }
 
 /*
@@ -2773,11 +2786,15 @@ PUBLIC void print_wwwfile_to_fd ARGS2(
 	int,		is_reply)
 {
       register int i;
-      HTLine * line = HTMainText->last_line->next;
+      HTLine * line;
 #ifdef VMS
       extern BOOLEAN HadVMSInterrupt;
 #endif /* VMS */
 
+      if (!HTMainText)
+          return;
+
+      line = HTMainText->last_line->next;
       for (;; line = line->next) {
 
 	  if (is_reply)
@@ -2828,11 +2845,15 @@ PUBLIC void print_crawl_to_fd ARGS3(
 	char *,		thetitle)
 {
     register int i;
-    HTLine * line = HTMainText->last_line->next;
+    HTLine * line;
 #ifdef VMS
     extern BOOLEAN HadVMSInterrupt;
 #endif /* VMS */
 
+    if (!HTMainText)
+        return;
+
+    line = HTMainText->last_line->next;
     fprintf(fp,"THE_URL:%s\n",thelink);
     if (thetitle != NULL)fprintf(fp,"THE_TITLE:%s\n",thetitle);;
       
@@ -2866,11 +2887,18 @@ PUBLIC void www_user_search ARGS2(
 	int,		start_line,
 	char *,		target)
 {
-    register HTLine * line = HTMainText->last_line->next;
+    register HTLine * line;
     register int count;
     extern BOOLEAN case_sensitive;
 
-    /* advance to the start line */
+    if (!HTMainText) {
+        return;
+    }
+
+    /*
+     *  Advance to the start line.
+     */
+    line = HTMainText->last_line->next;
     for (count = 1; count <= start_line; line = line->next, count++) {
         if (line == HTMainText->last_line) {
 	    line = HTMainText->last_line->next; /* set to first line */
@@ -2916,8 +2944,6 @@ PUBLIC void www_user_search ARGS2(
 		count++;
 	    }
     }
-
-
 }
 
 PUBLIC void user_message ARGS2(
@@ -2952,7 +2978,8 @@ PUBLIC void user_message ARGS2(
  */
 PUBLIC char * HText_getOwner NOARGS
 {
-    return((char *)HTAnchor_owner(HTMainText->node_anchor));
+    return(HTMainText ?
+    	   (char *)HTAnchor_owner(HTMainText->node_anchor) : NULL);
 }
 
 /*
@@ -2975,7 +3002,8 @@ PUBLIC void HText_setMainTextOwner ARGS1(
  */
 PUBLIC char * HText_getRevTitle NOARGS
 {
-    return((char *)HTAnchor_RevTitle(HTMainText->node_anchor));
+    return(HTMainText ?
+    	   (char *)HTAnchor_RevTitle(HTMainText->node_anchor) : NULL);
 }
 
 /*
@@ -2984,7 +3012,8 @@ PUBLIC char * HText_getRevTitle NOARGS
  */
 PUBLIC char * HText_getContentBase NOARGS
 {
-    return((char *)HTAnchor_content_base(HTMainText->node_anchor));
+    return(HTMainText ?
+    	   (char *)HTAnchor_content_base(HTMainText->node_anchor) : NULL);
 }
 
 /*
@@ -2993,15 +3022,20 @@ PUBLIC char * HText_getContentBase NOARGS
  */
 PUBLIC char * HText_getContentLocation NOARGS
 {
-    return((char *)HTAnchor_content_location(HTMainText->node_anchor));
+    return(HTMainText ?
+	   (char *)HTAnchor_content_location(HTMainText->node_anchor) : NULL);
 }
 
 PUBLIC void HTuncache_current_document NOARGS
 {
-    /* should remove current document from memory */
-    HTList_removeObject(loaded_texts, HTMainText);
-    HText_free(HTMainText);
-    HTMainText = NULL;
+    /*
+     *  Should remove current document from memory.
+     */
+    if (HTMainText) {
+        HTList_removeObject(loaded_texts, HTMainText);
+	HText_free(HTMainText);
+	HTMainText = NULL;
+    }
 }
 
 PUBLIC int HTisDocumentSource NOARGS
@@ -3955,7 +3989,7 @@ PUBLIC void HText_SubmitForm ARGS4(
 	char *,		link_name,
 	char *,		link_value)
 {
-    TextAnchor *anchor_ptr = HTMainText->first_anchor;
+    TextAnchor *anchor_ptr;
     int form_number = submit_item->number;
     FormInfo *form_ptr;
     int len, i;
@@ -3968,6 +4002,9 @@ PUBLIC void HText_SubmitForm ARGS4(
     BOOLEAN SemiColon = FALSE;
     char *Boundary = NULL;
     char *MultipartContentType = NULL;
+
+    if (!HTMainText)
+        return;
 
     if (submit_item->submit_action) {
         /*
@@ -4020,6 +4057,7 @@ PUBLIC void HText_SubmitForm ARGS4(
     /*
      *  Go through list of anchors and get size first.
      */
+    anchor_ptr = HTMainText->first_anchor;
     while (anchor_ptr) {
         if (anchor_ptr->link_type == INPUT_ANCHOR) {
    	    if (anchor_ptr->input_field->number == form_number) {
@@ -4674,13 +4712,16 @@ PUBLIC void HText_SubmitForm ARGS4(
 
 PUBLIC void HText_DisableCurrentForm NOARGS
 {
-    TextAnchor * anchor_ptr = HTMainText->first_anchor;
+    TextAnchor * anchor_ptr;
 
     HTFormDisabled = TRUE;
+    if (!HTMainText)
+        return;
 
     /*
      *  Go through list of anchors and set the disabled flag.
      */
+    anchor_ptr = HTMainText->first_anchor;
     while (anchor_ptr) {
         if (anchor_ptr->link_type == INPUT_ANCHOR &&
             anchor_ptr->input_field->number == HTFormNumber) {
@@ -4701,13 +4742,16 @@ PUBLIC void HText_DisableCurrentForm NOARGS
 PUBLIC void HText_ResetForm ARGS1(
 	FormInfo *,	form)
 {
-    TextAnchor * anchor_ptr = HTMainText->first_anchor;
+    TextAnchor * anchor_ptr;
 
     _statusline(RESETTING_FORM);
+    if (!HTMainText)
+        return;
 
     /*
      *  Go through list of anchors and reset values.
      */
+    anchor_ptr = HTMainText->first_anchor;
     while (anchor_ptr) {
         if (anchor_ptr->link_type == INPUT_ANCHOR) {
             if (anchor_ptr->input_field->number == form->number) {
@@ -4749,9 +4793,12 @@ PUBLIC void HText_ResetForm ARGS1(
 PUBLIC void HText_activateRadioButton ARGS1(
 	FormInfo *,	form)
 {
-    TextAnchor * anchor_ptr = HTMainText->first_anchor;
+    TextAnchor * anchor_ptr;
     int form_number = form->number;
 
+    if (!HTMainText)
+        return;
+    anchor_ptr = HTMainText->first_anchor;
     while (anchor_ptr) {
         if (anchor_ptr->link_type == INPUT_ANCHOR &&
                 anchor_ptr->input_field->type == F_RADIO_TYPE) {

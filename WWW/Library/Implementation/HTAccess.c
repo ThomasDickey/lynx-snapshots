@@ -135,7 +135,11 @@ extern GLOBALREF (HTProtocol, HTRlogin);
 extern GLOBALREF (HTProtocol, HTFTP);
 extern GLOBALREF (HTProtocol, HTNews);
 extern GLOBALREF (HTProtocol, HTNNTP);
+extern GLOBALREF (HTProtocol, HTNewsPost);
+extern GLOBALREF (HTProtocol, HTNewsReply);
 extern GLOBALREF (HTProtocol, HTSNews);
+extern GLOBALREF (HTProtocol, HTSNewsPost);
+extern GLOBALREF (HTProtocol, HTSNewsReply);
 extern GLOBALREF (HTProtocol, HTGopher);
 extern GLOBALREF (HTProtocol, HTCSO);
 extern GLOBALREF (HTProtocol, HTFinger);
@@ -146,8 +150,9 @@ extern GLOBALREF (HTProtocol, HTWAIS);
 #else
 GLOBALREF HTProtocol HTTP, HTTPS, HTFile, HTTelnet, HTTn3270, HTRlogin;
 #ifndef DECNET
-GLOBALREF  HTProtocol HTFTP, HTNews, HTNNTP, HTSNews, HTGopher, HTCSO;
-GLOBALREF HTProtocol HTFinger;
+GLOBALREF HTProtocol HTFTP, HTNews, HTNNTP, HTNewsPost, HTNewsReply;
+GLOBALREF HTProtocol HTSNews, HTSNewsPost, HTSNewsReply;
+GLOBALREF HTProtocol HTGopher, HTCSO, HTFinger;
 #ifdef DIRECT_WAIS
 GLOBALREF  HTProtocol HTWAIS;
 #endif /* DIRECT_WAIS */
@@ -163,7 +168,11 @@ GLOBALREF  HTProtocol HTWAIS;
     HTRegisterProtocol(&HTFTP);
     HTRegisterProtocol(&HTNews);
     HTRegisterProtocol(&HTNNTP);
+    HTRegisterProtocol(&HTNewsPost);
+    HTRegisterProtocol(&HTNewsReply);
     HTRegisterProtocol(&HTSNews);
+    HTRegisterProtocol(&HTSNewsPost);
+    HTRegisterProtocol(&HTSNewsReply);
     HTRegisterProtocol(&HTGopher);
     HTRegisterProtocol(&HTCSO);
     HTRegisterProtocol(&HTFinger);
@@ -254,16 +263,20 @@ PRIVATE BOOL override_proxy ARGS1(
     } else {					/* Use default port */
         access = HTParse(addr, "", PARSE_ACCESS);
         if (access != NULL) {
-            if      (!strcmp(access, "http"))	port = 80;
-            else if (!strcmp(access, "https"))	port = 443;
-            else if (!strcmp(access, "ftp"))	port = 21;
-            else if (!strcmp(access, "gopher"))	port = 70;
-            else if (!strcmp(access, "cso"))	port = 105;
-	    else if (!strcmp(access, "news"))	port = 119;
-	    else if (!strcmp(access, "snews"))	port = 563;
-	    else if (!strcmp(access, "nntp"))	port = 119;
-	    else if (!strcmp(access, "wais"))	port = 210;
-	    else if (!strcmp(access, "finger"))	port = 79;
+            if      (!strcmp(access, "http"))		port = 80;
+            else if (!strcmp(access, "https"))		port = 443;
+            else if (!strcmp(access, "ftp"))		port = 21;
+            else if (!strcmp(access, "gopher"))		port = 70;
+            else if (!strcmp(access, "cso"))		port = 105;
+	    else if (!strcmp(access, "news"))		port = 119;
+	    else if (!strcmp(access, "nntp"))		port = 119;
+	    else if (!strcmp(access, "newspost"))	port = 119;
+	    else if (!strcmp(access, "newsreply"))	port = 119;
+	    else if (!strcmp(access, "snews"))		port = 563;
+	    else if (!strcmp(access, "snewspost"))	port = 563;
+	    else if (!strcmp(access, "snewsreply"))	port = 563;
+	    else if (!strcmp(access, "wais"))		port = 210;
+	    else if (!strcmp(access, "finger"))		port = 79;
             FREE(access);
         }
     }

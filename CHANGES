@@ -1,3 +1,30 @@
+02-09-97
+* Enhanced the Set-Cookie header parser to handle values that contain
+  spaces but were not enclosed in double-quotes, and to use such
+  quoting or not when sending Cookie headers, depending on whether
+  this was done in the Set-Cookie header.  Also added anti-crash
+  checks should the parser's efforts to handle both historical (a.k.a.
+  original Netscape) cookies and Version 1 cookies go awry (does deal
+  successfully now with all the cookies which had been reported as
+  problematic). - FM
+* Mods of the screen handling in LYNews.c for cleaning up any screen
+  trash created by the external editor. - FM
+* Tracked down an uninitialized pointer in LYNews.c that probably was
+  behind reports of crashes when posting to newsgroups. - FM
+* Plugged a memory leak in LYMainLoop.c. - TJC
+* Added posting ability to the news gateway, in lieu of the previous,
+  variably reliable, use of a spawned news client for posting.  The
+  news, nntp, and snews URLs now all return links for posting new
+  messages or followups (replies) to the server from which a newsgroup
+  listing or news article was retrieved, unless the server indicates
+  that it does not accept posts from the site at which Lynx is running.
+  See the updated INSTALLATION, userdefs.h, and lynx.cfg files, the
+  "USENET News posting" section of the Users Guide, and "Supported URLs"
+  page of the online 'h'elp for more information.
+* Fixed typo for e-dieresis in the KOI8-R charset. - AJF
+* Replaced an inappropriate _user_message() call in HTConfirmCookie()
+  of HTAlert.c with a _statusline() call.  The original code could
+  cause crashes with some cookie values. - FM
 02-06-97
 * Added support for both hex escaped and unescaped white characters
   in lynxexec and lynxprog URLs.  Normally, Lynx strips out any white

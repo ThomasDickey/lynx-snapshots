@@ -775,8 +775,8 @@ try_again:
 		} else if (check_realm) {
 		    StrAllocCopy(traversal_host, startrealm);
 		} else {
-		    char *temp = HTParse(curdoc.address, "",
-		    		 PARSE_ACCESS+PARSE_HOST+PARSE_PUNCTUATION);
+		    temp = HTParse(curdoc.address, "",
+		    		   PARSE_ACCESS+PARSE_HOST+PARSE_PUNCTUATION);
 		    if (!temp || *temp == '\0') {
 		        StrAllocCopy(traversal_host, "None");
 		    } else {
@@ -2196,7 +2196,7 @@ check_recall:
 	    if (!strncasecomp(user_input_buffer, "lynxexec:", 9) ||
 	        !strncasecomp(user_input_buffer, "lynxprog:", 9)) {
 		/*
-		 *  The original implementions of these schemes expected
+		 *  The original implementations of these schemes expected
 		 *  white space without hex escaping, and did not check
 		 *  for hex escaping, so we'll continue to support that,
 		 *  until that code is redone in conformance with SGML
@@ -2774,29 +2774,30 @@ check_recall:
 			 *  and offer it to the user. - FM
 			 */
 		        char *address = NULL;
-			char *path = HTParse(curdoc.address, "", PARSE_PATH);
+			temp = HTParse(curdoc.address, "", PARSE_PATH);
 
-			if (path != NULL) {
-			    HTUnEscape(path);
-			    if (*path == '~' && strlen(path) > 1) {
+			if (temp != NULL) {
+			    HTUnEscape(temp);
+			    if (*temp == '~' && strlen(temp) > 1) {
 			        /*
 				 *  It's a ~user URL so guess user@host. - FM
 				 */
-			        if ((cp = strchr((path+1), '/')) != NULL)
+			        if ((cp = strchr((temp+1), '/')) != NULL)
 				    *cp = '\0';
 				StrAllocCopy(address, "mailto:");
-				StrAllocCat(address, (path+1));
+				StrAllocCat(address, (temp+1));
 				StrAllocCat(address, "@");
 			    }
-			    FREE(path);
+			    FREE(temp);
 			}
 			if (address == NULL)
 			    /*
 			     *  Wasn't a ~user URL so guess WebMaster@host. - FM
 			     */
 		            StrAllocCopy(address, "mailto:WebMaster@");
-		        StrAllocCat(address,
-		       		    HTParse(curdoc.address, "", PARSE_HOST));
+			temp = HTParse(curdoc.address, "", PARSE_HOST);
+		        StrAllocCat(address, temp);
+			FREE(temp);
 			_user_message(NO_OWNER_USE, address);
 			c = LYgetch();
 			if (TOUPPER(c) == 'Y') {
