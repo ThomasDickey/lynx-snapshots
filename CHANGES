@@ -1,6 +1,8 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+1999-06-01 (2.8.2rel.1)
+-----------------------
 1999-06-01 (2.8.2pre.11)
 * minor fixes from W3C HTML validation -TD
 * update links to HTML'ized lynxcfg in users' guide -VH
@@ -1772,7 +1774,9 @@ Changes since Lynx 2.8 release
 1998-10-27 (2.8.1rel.2)
 * tidy up version numbers - TD
 * modify HTDOS.h to permit compile with K&R compiler - TD
+
 1998-10-24 (2.8.1rel.1)
+-----------------------
 * reorganize lynx_help_main.html - PW
 * minor change to WWW/.../tcp.h to eliminate redefinition warning by DEC C - TD
 * move checking for command-line "-head" and related options before curses
