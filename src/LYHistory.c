@@ -1,5 +1,6 @@
 #include "HTUtils.h"
 #include "tcp.h"
+#include "HTTP.h"
 #include "HTAlert.h"
 #include "HText.h"
 #include "LYGlobalDefs.h"
@@ -475,8 +476,6 @@ PUBLIC int showhistory ARGS1(
     FREE(Title);
     return(0);
 }
-
-extern BOOL reloading;
 
 /* 
  *  This function makes the history page seem like any other type of

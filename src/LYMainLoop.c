@@ -56,8 +56,6 @@
 #include "LYexit.h"
 #include "LYLeaks.h"
 
-extern BOOL reloading;		/* For Flushing Cache on Proxy Server */
-
 PRIVATE int are_different PARAMS((document *doc1, document *doc2));
 PRIVATE int are_phys_different PARAMS((document *doc1, document *doc2));
 PUBLIC void HTGotoURLs_free NOPARAMS;
@@ -1748,7 +1746,7 @@ new_cmd:  /*
 #endif /* NO_ASSUME_SAME_DOC */
 	    FREE(curdoc.address); /* so it doesn't get pushed */
 #ifdef VMS
-	    clearok(curscr, TRUE);
+	    lynx_force_repaint();
 #endif /* VMS */
 	    /*
 	     *  Reload should force a cache refresh on a proxy.
@@ -2009,7 +2007,7 @@ new_cmd:  /*
 	case LYK_REFRESH:
 	   refresh_screen = TRUE;
 #if defined(VMS) || defined(USE_SLANG)
-	   clearok(curscr, TRUE);
+	   lynx_force_repaint();
 #endif /* VMS || USE_SLANG */
 	   break;
 

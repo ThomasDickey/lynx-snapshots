@@ -50,7 +50,7 @@ PUBLIC void cleanup_sig ARGS1(
         /*
 	 *  Refresh screen to get rid of "cancel" message, then query.
 	 */
-	clearok(curscr, TRUE);
+	lynx_force_repaint();
 	refresh();
 
 	/*

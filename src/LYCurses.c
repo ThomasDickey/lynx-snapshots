@@ -65,7 +65,7 @@ PUBLIC int PHYSICAL_SLtt_Screen_Cols = 10;
 PUBLIC void LY_SLrefresh NOARGS
 {
     if (FullRefresh) {
-        SLsmg_touch_lines(0, LYlines);
+	SLsmg_touch_lines(0, LYlines);
 	FullRefresh = FALSE;
     }
     SLsmg_refresh();
@@ -136,10 +136,10 @@ PRIVATE void sl_suspend ARGS1(
 #ifdef SIGSTOP
 #ifndef VMS
     int r, c;
-   
+
     lynx_enable_mouse (0);
     if (sig == SIGTSTP)
-        SLsmg_suspend_smg();
+	SLsmg_suspend_smg();
     SLang_reset_tty();
     kill(getpid(),SIGSTOP);
 #if SLANG_VERSION > 9929
@@ -152,7 +152,7 @@ PRIVATE void sl_suspend ARGS1(
     SLtty_set_suspend_state(1);
 #endif
     if (sig == SIGTSTP)
-        SLsmg_resume_smg();
+	SLsmg_resume_smg();
     /*
      *  Get new window size in case it changed.
      */
@@ -169,7 +169,7 @@ PRIVATE void sl_suspend ARGS1(
 }
 #endif /* USE_SLANG */
 
-#if defined(USE_COLOR_STYLE) || defined(SLCS)
+#if defined(USE_COLOR_STYLE)
 PRIVATE int last_styles[128];
 PRIVATE int last_ptr=0;
 #endif
@@ -193,15 +193,15 @@ PUBLIC void setStyle ARGS4(int,style,int,color,int,cattr,int,mono)
 
 PUBLIC void setHashStyle ARGS5(int,style,int,color,int,cattr,int,mono,char*,element)
 {
-        bucket* ds=&hashStyles[style];
-        if (TRACE)
-                fprintf(stderr, "CSS(SET): <%s> hash=%d, ca=%d, ma=%d\n", element, style, color, mono);
-        ds->color=color;
-        ds->cattr=cattr;
-        ds->mono=mono;
-        ds->code=style;
-        ds->name=malloc(sizeof(char)*(strlen(element)+2));
-        strcpy(ds->name, element);
+    bucket* ds=&hashStyles[style];
+    if (TRACE)
+	fprintf(stderr, "CSS(SET): <%s> hash=%d, ca=%d, ma=%d\n", element, style, color, mono);
+    ds->color=color;
+    ds->cattr=cattr;
+    ds->mono=mono;
+    ds->code=style;
+    ds->name=malloc(sizeof(char)*(strlen(element)+2));
+    strcpy(ds->name, element);
 }
 
 /*
@@ -211,7 +211,7 @@ PRIVATE int LYAttrset ARGS3(WINDOW*,win,int,color,int,mono)
 {
 	if (TRACE)
 		fprintf(stderr, "CSS:LYAttrset (%d, %d)\n", color, mono);
-	if (has_color && color > -1)
+	if (has_color && LYShowColor && color > -1)
 	{
 		wattrset(win,color);
 #if 0
@@ -268,7 +268,7 @@ PUBLIC void curses_w_style ARGS4(WINDOW*,win,int,style,int,dir,int,previous)
 		return;
 
 	case STACK_ON: /* remember the current attributes */
-	    	if (last_ptr > 127) {
+		if (last_ptr > 127) {
 		    if (TRACE)
 			fprintf(stderr,"........... %s (0x%x) %s\r\n",
 				"attribute cache FULL, dropping last",
@@ -327,7 +327,7 @@ PUBLIC void wcurses_css ARGS3(WINDOW *,win,char*,name,int,dir)
 			char *class=strrchr(name, '.');
 			if (TRACE) fprintf(stderr, "undefined, trimming at %p\n", class);
 			if (class)	*class='\0';
-			else 		try_again=0;
+			else		try_again=0;
 		} else {
 			if (TRACE) fprintf(stderr, "ok (%d)\n", hash_code(name));
 			curses_w_style(win, hash_code(name), dir, 0);
@@ -343,13 +343,13 @@ PUBLIC void curses_css ARGS2(char *,name,int,dir)
 
 PUBLIC void curses_style ARGS3(int,style,int,dir,int,previous)
 {
-        curses_w_style(stdscr, style, dir, previous);
+    curses_w_style(stdscr, style, dir, previous);
 }
 
 #ifdef NOT_USED
 void attribute ARGS2(int,style,int,dir)
 {
-        curses_style(style, dir, 0);
+    curses_style(style, dir, 0);
 }
 #endif
 #endif /* USE_COLOR_STYLE */
@@ -394,7 +394,7 @@ PRIVATE struct {
  */
 PRIVATE void LYsetWAttr ARGS1(WINDOW *, win)
 {
-    if (lynx_uses_color) {
+    if (lynx_uses_color && LYShowColor) {
 	int code = 0;
 	int attr = A_NORMAL;
 	int offs = 1;
@@ -405,7 +405,7 @@ PRIVATE void LYsetWAttr ARGS1(WINDOW *, win)
 #ifndef DOSPATH
 		have_underline = tigetstr("smul") != 0;
 #else
-                have_underline = 1;
+		have_underline = 1;
 #endif /* DOSPATH */
 	}
 
@@ -462,7 +462,7 @@ PRIVATE void lynx_map_color ARGS1(int, n)
 		lynx_color_pairs[n+m+1].fg,
 		lynx_color_pairs[n+m+1].bg);
 	}
-	if (n == 0)
+	if (n == 0 && LYShowColor)
 	    bkgd(COLOR_PAIR(9));
     }
 }
@@ -488,7 +488,7 @@ PUBLIC int lynx_chg_color ARGS3(
 
 PUBLIC void lynx_set_color ARGS1(int, a)
 {
-    if (lynx_uses_color) {
+    if (lynx_uses_color && LYShowColor) {
 	attrset(lynx_color_cfg[a].attr | COLOR_PAIR(a+1));
     }
 }
@@ -517,7 +517,7 @@ PRIVATE void lynx_init_colors NOARGS
 			lynx_color_pairs[n+m+1].fg,
 			lynx_color_pairs[n+m+1].bg);
 	    }
-	    if (n == 0)
+	    if (n == 0 && LYShowColor)
 		bkgd(COLOR_PAIR(9));
 	}
     }
@@ -549,8 +549,8 @@ PUBLIC void start_curses NOARGS
 		  keypad(stdscr, TRUE);
 		  fflush(stdin);
 		  fflush(stdout);
-                  lynx_init_colors();
-                  lynx_called_initscr = TRUE;
+		  lynx_init_colors();
+		  lynx_called_initscr = TRUE;
 
  /* Inform pdcurses that we're interested in knowing when mouse
     buttons are clicked.  Maybe someday pdcurses will support it.
@@ -570,7 +570,7 @@ PUBLIC void start_curses NOARGS
     static int slinit;
 
     if (LYCursesON)
-        return;
+	return;
 
     if (slinit == 0) {
 	SLtt_get_terminfo();
@@ -585,7 +585,7 @@ PUBLIC void start_curses NOARGS
 	 *  intensity background (rxvt and maybe Linux console).
 	 */
 	if (Lynx_Color_Flags & SL_LYNX_USE_BLINK)
-	    SLtt_Blink_Mode = 1;	       
+	    SLtt_Blink_Mode = 1;
 	else
 	    SLtt_Blink_Mode = 0;
     }
@@ -634,13 +634,13 @@ PUBLIC void start_curses NOARGS
 	 *  and one time only!
 	 */
 	if (initscr() == NULL) {  /* start curses */
-	    fprintf(stderr, 
+	    fprintf(stderr,
 	        "Terminal initialisation failed - unknown terminal type?\n");
 #ifndef NOSIGHUP
-            (void) signal(SIGHUP, SIG_DFL);
+	    (void) signal(SIGHUP, SIG_DFL);
 #endif /* NOSIGHUP */
-            (void) signal(SIGTERM, SIG_DFL);
-            (void) signal(SIGINT, SIG_DFL);
+	    (void) signal(SIGTERM, SIG_DFL);
+	    (void) signal(SIGINT, SIG_DFL);
 #ifdef SIGTSTP
 	    if (no_suspend)
 	        (void) signal(SIGTSTP,SIG_DFL);
@@ -651,9 +651,9 @@ PUBLIC void start_curses NOARGS
 	has_color = has_colors();
 	if (has_color)
 		start_color();
-	parse_userstyles();	
+	parse_userstyles();
 #endif
-        first_time = FALSE;
+	first_time = FALSE;
 #if USE_COLOR_TABLE
 	lynx_init_colors();
 	lynx_called_initscr = TRUE;
@@ -698,7 +698,7 @@ PUBLIC void start_curses NOARGS
 
 PUBLIC void lynx_enable_mouse ARGS1(int,state)
 {
-   if (LYUseMouse == 0) 
+   if (LYUseMouse == 0)
      return;
 
 #ifdef USE_SLANG_MOUSE
@@ -740,8 +740,8 @@ PUBLIC void stop_curses NOARGS
      *	05-28-94 Lynx 2-3-1 Garrett Arch Blythe
      */
     if(LYCursesON == TRUE)	{
-         lynx_enable_mouse (0);
-         endwin();	/* stop curses */
+	 lynx_enable_mouse (0);
+	 endwin();	/* stop curses */
     }
 
     fflush(stdout);
@@ -781,7 +781,7 @@ PUBLIC BOOLEAN setup ARGS1(
      *  see if it is available from the environment.
      */
     if ((display = getenv(DISPLAY)) != NULL && *display == '\0')
-        display = NULL;
+	display = NULL;
 
     /*
      *  Get terminal type, and convert to lower case.
@@ -789,17 +789,17 @@ PUBLIC BOOLEAN setup ARGS1(
     term[0] = '\0';
     longname(dummy, term);
     if (term[0] == '\0' && (form_get_data || form_post_data)) {
-        /*
+	/*
 	 *  Some yoyo used these under conditions which require
 	 *  -dump, so force that mode here. - FM
 	 */
 	dump_output_immediately = TRUE;
-        LYcols = 80;
+	LYcols = 80;
 	if (keypad_mode == NUMBERS_AS_ARROWS)
 	    keypad_mode = LINKS_ARE_NUMBERED;
 	status = mainloop();
-        (void) signal (SIGHUP, SIG_DFL);
-        (void) signal (SIGTERM, SIG_DFL);
+	(void) signal (SIGHUP, SIG_DFL);
+	(void) signal (SIGTERM, SIG_DFL);
 #ifdef SIGTSTP
 	if (no_suspend)
 	  (void) signal(SIGTSTP,SIG_DFL);
@@ -813,7 +813,7 @@ PUBLIC BOOLEAN setup ARGS1(
     printf("Terminal = %s\n", term);
     sleep(InfoSecs);
     if ((strlen(term) < 5) ||
-        strncmp(term, "vt", 2) || !isdigit(term[2])) {
+	strncmp(term, "vt", 2) || !isdigit(term[2])) {
 	printf(
 	    "You must use a vt100, 200, etc. terminal with this program.\n");
 	printf("Proceed (n/y)? ");
@@ -831,9 +831,9 @@ PUBLIC BOOLEAN setup ARGS1(
     LYlines = LINES;
     LYcols = COLS;
     if (LYlines <= 0)
-        LYlines = 24;
+	LYlines = 24;
     if (LYcols <= 0)
-        LYcols = 80;
+	LYcols = 80;
 
     return(TRUE);
 }
@@ -854,7 +854,7 @@ PUBLIC BOOLEAN setup ARGS1(
     *  see if it is available from the environment .
     */
     if ((display = getenv(DISPLAY)) != NULL && *display == '\0')
-        display = NULL;
+	display = NULL;
 
     if (terminal != NULL) {
 	sprintf(term_putenv,"TERM=%s",terminal);
@@ -875,8 +875,8 @@ PUBLIC BOOLEAN setup ARGS1(
 	    *s = '\0';
 
 	if (strlen(buffer) == 0)
-	    strcpy(buffer,"vt100"); 
-	
+	    strcpy(buffer,"vt100");
+
 	sprintf(term_putenv,"TERM=%s", buffer);
 	putenv(term_putenv);
 	printf("\nTERMINAL TYPE IS SET TO %s\n",getenv("TERM"));
@@ -897,9 +897,9 @@ PUBLIC BOOLEAN setup ARGS1(
     LYlines = LINES;
     LYcols = COLS;
     if (LYlines <= 0)
-        LYlines = 24;
+	LYlines = 24;
     if (LYcols <= 0)
-        LYcols = 80;
+	LYcols = 80;
 
     return(1);
 }
@@ -1088,8 +1088,8 @@ PUBLIC void VMSexit NOARGS
      *  attempt a cleanup and reset the terminal.
      */
     if (!DidCleanup) {
-        if (LYOutOfMemory == FALSE) {
-            fprintf(stderr,
+	if (LYOutOfMemory == FALSE) {
+	    fprintf(stderr,
 "\nA Fatal error has occured in %s Ver. %s\n", LYNX_NAME, LYNX_VERSION);
 	    fprintf(stderr,
 "\nPlease notify your system administrator to confirm a bug, and if\n");
@@ -1110,13 +1110,14 @@ PUBLIC void VMSexit NOARGS
 	    _statusline(MEMORY_EXHAUSTED_ABORT);
 	    sleep(AlertSecs);
 	}
-        cleanup();
+	cleanup();
     }
     if (LYOutOfMemory == TRUE) {
 	printf("\r\n%s\r\n\r\n", MEMORY_EXHAUSTED_ABORT);
 	fflush(stdout);
 	fflush(stderr);
     }
+    *stderr = LYOrigStderr;
 }
 
 /*
@@ -1238,14 +1239,14 @@ PUBLIC int ttgetc NOARGS
     unsigned short iosb[4];
 
     if (in_pos < in_len)
-        return(buffer[in_pos++]);
+	return(buffer[in_pos++]);
 
     status = sys$qiow(EFN, iochan,
 		      IO$_READVBLK|IO$M_NOECHO|IO$M_NOFILTR,
 		      &iosb, 0, 0,
 		      &buffer, 1, 0, 0, 0, 0);
     if ((status&1) == 1)
-        status = iosb[0];
+	status = iosb[0];
     if (status == SS$_PARTESCAPE) {
 	/*
 	 *  Escape sequence in progress.  Fake a successful read.
@@ -1253,7 +1254,7 @@ PUBLIC int ttgetc NOARGS
 	status = 1;
     }
     if ((status&1) != 1 && status != SS$_DATAOVERUN)
-        exit(status);
+	exit(status);
     in_pos = 1;
     in_len = iosb[1] + iosb[3];
     return(buffer[0]);
@@ -1270,10 +1271,10 @@ PUBLIC int typeahead NOARGS
     unsigned short iosb[4];
 
     if (dump_output_immediately)
-        return -1;
+	return -1;
 
     if (in_pos < in_len)
-        return(buffer[in_pos++]);
+	return(buffer[in_pos++]);
 
 again:
     status = sys$qiow (EFN, iochan,
@@ -1281,7 +1282,7 @@ again:
 		       &iosb, 0, 0,
 		       &buffer, 1, 0, 0, 0, 0);
     if ((status&1) == 1)
-        status = iosb[0];
+	status = iosb[0];
     if (status == SS$_PARTESCAPE) {
 	/*
 	 *  Escape sequence in progress, finish reading it.
@@ -1292,7 +1293,7 @@ again:
     in_pos = 1;
     in_len = iosb[1] + iosb[3];
     if (status == SS$_TIMEOUT || status == SS$_DATAOVERUN)
-        return(-1);
+	return(-1);
     return (buffer[0]);
 }
 
@@ -1389,7 +1390,7 @@ PRIVATE int DCLspawn_exception ARGS2(
 {
 #endif /* __DECC */
      int status;
-     
+
      status = lib$sig_to_ret(sigarr, mecharr);
      return(SS$_UNWIND);
 }
@@ -1412,7 +1413,7 @@ PRIVATE int spawn_DCLprocess ARGS1(
 
 #ifdef __ALPHA /** OpenVMS/AXP lacked the TRUSTED flag before v6.1 **/
      if (VersionVMS[1] > '6' ||
-         (VersionVMS[1] == '6' && VersionVMS[2] == '.' &&
+	 (VersionVMS[1] == '6' && VersionVMS[2] == '.' &&
 	  VersionVMS[3] >= '1')) {
 #else
      if (VersionVMS[1] >= '6') {
@@ -1421,22 +1422,22 @@ PRIVATE int spawn_DCLprocess ARGS1(
 	  *  Include TRUSTED flag.
 	  */
 	 unsigned long trusted = CLI$M_TRUSTED;
-         status = lib$spawn(&command_desc,0,0,&trusted,
-	 		    0,0,&Status);
+	 status = lib$spawn(&command_desc,0,0,&trusted,
+			    0,0,&Status);
 	 /*
 	  *  If it was invalid, try again without the flag.
 	  */
-         if (status == LIB$_INVARG)
-            status = lib$spawn(&command_desc,0,0,0,
-	    		       0,0,&Status );
+	 if (status == LIB$_INVARG)
+	    status = lib$spawn(&command_desc,0,0,0,
+			       0,0,&Status );
      } else
 	 status = lib$spawn(&command_desc,0,0,0,
-	 		    0,0,&Status);
+			    0,0,&Status);
      /*
       *  Return -1 on error.
       */
      if ((status&1) != 1 || (Status&1) != 1)
-         return(-1);
+	 return(-1);
      /*
       *  Return 0 on success.
       */
@@ -1448,7 +1449,7 @@ PUBLIC int DCLsystem ARGS1(
 {
      int status;
      extern void controlc();
-     
+
      VMSsignal(SIGINT, SIG_IGN);
      status = spawn_DCLprocess(command);
      VMSsignal(SIGINT, cleanup_sig);
@@ -1476,9 +1477,9 @@ PUBLIC void VMSbox ARGS3(
        waddch(win, 'q');
     waddch(win, 'k');
     for (i = 1; i < height-1; i++) {
-        wmove(win, i, 0);
+	wmove(win, i, 0);
 	waddch(win, 'x');
-        wmove(win, i, width-1);
+	wmove(win, i, width-1);
 	waddch(win, 'x');
     }
     wmove(win, i, 0);
@@ -1490,26 +1491,34 @@ PUBLIC void VMSbox ARGS3(
 #endif /* !USE_SLANG */
 #endif /* VMS */
 
-
+PUBLIC void lynx_force_repaint NOARGS
+{
+#if defined(COLOR_CURSES)
+    chtype a = (LYShowColor) ? COLOR_PAIR(9) : A_NORMAL;
+    bkgd(a | ' ');
+    attrset(a);
+#endif
+    clearok(curscr, TRUE);
+}
 
 PUBLIC void lynx_start_underline_color NOARGS
 {
-   start_underline ();
+    start_underline ();
 }
 
 PUBLIC void lynx_stop_underline_color NOARGS
 {
-   stop_underline ();
+    stop_underline ();
 }
 
 PUBLIC void lynx_start_bold_color NOARGS
 {
-   start_bold ();
+    start_bold ();
 }
 
 PUBLIC void lynx_stop_bold_color NOARGS
 {
-   stop_bold ();
+    stop_bold ();
 }
 
 PUBLIC void lynx_start_title_color NOARGS
@@ -1526,7 +1535,7 @@ PUBLIC void lynx_start_link_color ARGS2(
 {
     if (flag) {
 	/* makes some terminals work wrong because
-	 * they can't handle two attributes at the 
+	 * they can't handle two attributes at the
 	 * same time
 	 */
 	/* start_bold();  */
@@ -1595,19 +1604,21 @@ PUBLIC void lynx_start_target_color NOARGS
 PUBLIC void lynx_start_status_color NOARGS
 {
 #if USE_COLOR_TABLE && defined(COLOR_CURSES)
-   lynx_set_color (2);
-#else
-   start_reverse ();
+    if (lynx_uses_color && LYShowColor)
+	lynx_set_color (2);
+    else
 #endif
+	start_reverse ();
 }
 
 PUBLIC void lynx_stop_status_color NOARGS
 {
 #if USE_COLOR_TABLE && defined(COLOR_CURSES)
-   lynx_set_color (0);
-#else
-   stop_reverse ();
+    if (lynx_uses_color && LYShowColor)
+	lynx_set_color (0);
+    else
 #endif
+	stop_reverse ();
 }
 
 PUBLIC void lynx_start_h1_color NOARGS
@@ -1648,5 +1659,3 @@ PUBLIC void lynx_stop_all_colors NOARGS
    stop_reverse ();
    stop_bold ();
 }
-   
-	

@@ -112,6 +112,7 @@ PUBLIC void LYexit ARGS1(
 	printf("\r\n%s\r\n\r\n", MEMORY_EXHAUSTED_ABORT);
 	fflush(stdout);
     }
+    *stderr = LYOrigStderr;
 #endif /* !VMS */
     exit(status);
 }

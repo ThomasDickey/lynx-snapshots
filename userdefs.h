@@ -801,6 +801,15 @@
 #define ANONYMOUS_USER ""
 
 /******************************
+ * SHOW_COLOR controls whether the program displays in color by default.
+ */
+#if defined(USE_SLANG) || defined(COLOR_CURSES)
+#define SHOW_COLOR TRUE
+#else
+#define SHOW_COLOR FALSE
+#endif
+
+/******************************
  * SHOW_CURSOR controls whether or not the cursor is hidden or appears
  * over the current link, or current option in select popup windows.
  * Showing the cursor is handy if you are a sighted user with a poor
@@ -1237,7 +1246,7 @@
  * the version definition with the Project Version on checkout. Just
  * ignore it. - kw */
 /* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
-#define LYNX_VERSION "2.7.1ac-0.36"
+#define LYNX_VERSION "2.7.1ac-0.38"
 
 /****************************************************************
  * The LYMessages_en.h header defines default, English strings

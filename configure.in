@@ -58,6 +58,7 @@ dnl --------------------------------------------------------------------------
 dnl If we're able to run this script, this is true!
 AC_DEFINE(UNIX)
 
+CF_ANSI_CC
 AC_C_CONST
 
 case $host_os in
@@ -89,7 +90,10 @@ isc*)
 	LIBS="$LIBS -linet -lnsl_s -lcposix"
 	;;
 irix*)
-	CFLAGS="$CFLAGS -cckr" 
+	# The original makefile used the $CFLAGS option -cckr for some form
+	# of K&R compatibility.  However, this causes compilation warnings for
+	# varargs on IRIX 5.2, and does not appear to be needed.
+	#removed: CFLAGS="$CFLAGS -cckr" 
 	;;
 linux*)
 	CFLAGS="$CFLAGS -DLINUX" 
@@ -226,12 +230,15 @@ dnl --------------------------------------------------------------------------
 AC_MSG_CHECKING(if color-style code should be used)
 AC_CACHE_VAL(cf_cv_color_style,[
 AC_ARG_WITH(color-style,
-[  --with-color-style=XXX  enable color style (types are ncurses, slang)],
+[  --with-color-style      enable color style],
 	[cf_cv_color_style=$withval],
 	[cf_cv_color_style=no])])
 
 if test $cf_cv_color_style != no ; then
 	if test .$cf_cv_color_curses != .yes ; then
+		AC_ERROR(Configuration does not support color-styles)
+	fi
+	if test $cf_cv_screen = slang ; then
 		AC_ERROR(Configuration does not support color-styles)
 	fi
 	AC_DEFINE(USEHASH)
@@ -242,10 +249,6 @@ fi
 case $cf_cv_color_style in
 no)
 	AC_MSG_RESULT(no)
-	;;
-slang)
-	AC_DEFINE(SLCS)
-	AC_MSG_RESULT(slang-style)
 	;;
 *)
 	AC_DEFINE(USE_COLOR_STYLE)

@@ -1,5 +1,6 @@
 #include "HTUtils.h"
 #include "tcp.h"
+#include "HTTP.h"
 #include "HTParse.h"
 #include "HTAccess.h"
 #include "HTList.h"
@@ -153,6 +154,7 @@ PUBLIC lynx_html_item_type *externals = NULL;
 #endif
 PUBLIC lynx_html_item_type *uploaders = NULL;
 PUBLIC int port_syntax = 1;
+PUBLIC BOOLEAN LYShowColor = SHOW_COLOR; /* to show or not to show */
 PUBLIC BOOLEAN LYShowCursor = SHOW_CURSOR; /* to show or not to show */
 PUBLIC BOOLEAN LYUseDefShoCur = TRUE;	/* Command line -show_cursor toggle */
 PUBLIC BOOLEAN LYforce_no_cache = FALSE;
@@ -362,7 +364,6 @@ PUBLIC char *log_file_name = NULL; /* for WAIS log file name    in libWWW */
 PUBLIC FILE *logfile = NULL;	   /* for WAIS log file output  in libWWW */
 #endif /* DECLARE_WAIS_LOGFILES */
 
-extern BOOL reloading;	    /* For Flushing Cache on Proxy Server (HTTP.c)  */
 extern int HTNewsChunkSize; /* Number of news articles per chunk (HTNews.c) */
 extern int HTNewsMaxChunk;  /* Max news articles before chunking (HTNews.c) */
 
@@ -875,14 +876,14 @@ PUBLIC int main ARGS2(
 		 */
 		while (fgets(buf, sizeof(buf), stdin) &&
 		       strncmp(buf, "---", 3) != 0) {
-		    int j;
+		    int j2;
 
 		    /*
 		     *  Strip line terminators.
 		     */
-		    for (j = strlen(buf) - 1; j >= 0 &&
-			 (buf[j] == CR || buf[j] == LF); j--) {
-			buf[j] = '\0';
+		    for (j2 = strlen(buf) - 1; j2 >= 0 &&
+			 (buf[j2] == CR || buf[j2] == LF); j2--) {
+			buf[j2] = '\0';
 		    }
 		    StrAllocCat(*get_data, buf);
 		}
@@ -913,14 +914,14 @@ PUBLIC int main ARGS2(
 		 */
 		while (fgets(buf, sizeof(buf), stdin) &&
 		       strncmp(buf, "---", 3) != 0) {
-		    int j;
+		    int j2;
 
 		     /*
 		      *  Strip line terminators.
 		      */
-		    for (j = strlen(buf) - 1; j >= 0 &&
-			 (buf[j] == CR || buf[j] == LF); j--) {
-			buf[j] = '\0';
+		    for (j2 = strlen(buf) - 1; j2 >= 0 &&
+			 (buf[j2] == CR || buf[j2] == LF); j2--) {
+			buf[j2] = '\0';
 		    }
 		    StrAllocCat(*post_data, buf);
 		}
@@ -2164,6 +2165,9 @@ PRIVATE void parse_arg ARGS3(
 
     } else if (strncmp(argv[0], "-nobrowse", 9) == 0) {
 	HTDirAccess = HT_DIR_FORBID;
+
+    } else if (strncmp(argv[0], "-nocolor", 8) == 0) {
+	LYShowColor = FALSE;
 
 #if defined(EXEC_LINKS) || defined(EXEC_SCRIPTS)
     } else if (strncmp(argv[0], "-noexec", 7) == 0) {

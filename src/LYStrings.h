@@ -1,4 +1,3 @@
-
 #ifndef LYSTRINGS_H
 #define LYSTRINGS_H
 
@@ -15,8 +14,7 @@ extern int LYgetstr PARAMS((char *inputline, int hidden,
 extern char * LYstrstr PARAMS((char *chptr, char *tarptr));
 extern char * LYno_attr_char_strstr PARAMS((char *chptr, char *tarptr));
 extern char * LYno_attr_char_case_strstr PARAMS((char *chptr, char *tarptr));
-extern char * LYmbcsstrncpy PARAMS((char *dst, char *src, int n_bytes,
-				    int n_glyphs,	int enc));
+
 #ifdef EXP_CHARTRANS
 extern char * LYno_attr_mbcs_strstr PARAMS((
 	char *		chptr,
@@ -30,6 +28,18 @@ extern char * LYno_attr_mbcs_case_strstr PARAMS((
 	BOOL		utf_flag,
 	int *		nstartp,
 	int *		nendp));
+extern int LYmbcsstrlen PARAMS((
+	char *		str,
+	BOOL		utf_flag));
+extern char * LYmbcsstrncpy PARAMS((
+	char *		dst,
+	char *		src,
+	int		n_bytes,
+	int		n_glyphs,
+	int		enc));
+#else
+#define LYmbcsstrlen(str,utf_flag) strlen(str)
+#define LYmbcsstrncpy(dest,src,n,n_glyphs,enc) LYstrncpy(dest, src, n)
 #endif
 
 extern char * SNACopy PARAMS((char **dest, CONST char *src, int n));

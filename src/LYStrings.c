@@ -10,6 +10,7 @@
 #include "LYSignal.h"
 #include "LYClean.h"
 #include "LYMail.h"
+#include "LYNews.h"
 #include "LYOptions.h"
 
 #include <ctype.h>
@@ -967,12 +968,6 @@ PUBLIC int LYgetstr ARGS4(
 	int,		bufsize,
 	int,		recall)
 {
-    extern BOOLEAN term_letter;     /* Flag from terminate_letter() AST  */
-    extern BOOLEAN term_options;    /* Flag from terminate_options() AST */
-    extern BOOLEAN term_message;    /* Flag from terminate_message() AST */
-#ifdef VMS
-    extern BOOLEAN HadVMSInterrupt; /* Flag from cleanup_sig() AST       */
-#endif
     int x, y, MaxStringSize;
     int ch;
     EditFieldData MyEdit;

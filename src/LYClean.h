@@ -1,6 +1,9 @@
-
 #ifndef LYCLEAN_H
 #define LYCLEAN_H
+
+#ifdef VMS
+extern BOOLEAN HadVMSInterrupt;
+#endif
 
 extern void cleanup_sig PARAMS((int sig));
 extern BOOLEAN setup PARAMS((char *terminal));

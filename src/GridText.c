@@ -109,7 +109,7 @@ PUBLIC char * unchecked_radio = "( )";
 PUBLIC BOOLEAN underline_on = OFF;
 PUBLIC BOOLEAN bold_on      = OFF;
 
-#if defined(USE_COLOR_STYLE) || defined(SLCS)
+#if defined(USE_COLOR_STYLE)
 #define MAX_STYLES_ON_LINE 64
 
 typedef struct _stylechange {
@@ -127,7 +127,7 @@ typedef struct _line {
 	int unsigned	size;		/* Number of characters */
 	BOOL	split_after;		/* Can we split after? */
 	BOOL	bullet;			/* Do we bullet? */
-#if defined(USE_COLOR_STYLE) || defined(SLCS)
+#if defined(USE_COLOR_STYLE)
 	HTStyleChange	styles[MAX_STYLES_ON_LINE];
 	int	numstyles;
 #endif
@@ -992,7 +992,7 @@ PRIVATE void display_page ARGS3(
      */
     if (line) {
 	char *data;
-	int offset, LineOffset, HitOffset, LenNeeded;
+	int offset, HitOffset, LenNeeded;
 	for (i = 0; i < (display_lines); i++)  {
 	    /*
 	     *  Verify and display each line.
@@ -1404,7 +1404,7 @@ PRIVATE void display_page ARGS3(
 	/*
 	 *  For non-multibyte curses.
 	 */
-        clearok(curscr, TRUE);
+        lynx_force_repaint();
     }
     refresh();
 
@@ -1480,7 +1480,7 @@ PRIVATE void split_line ARGS2(
     previous->next->prev = line;
     line->prev = previous;
     line->next = previous->next;
-#if defined(USE_COLOR_STYLE) || defined(SLCS)
+#if defined(USE_COLOR_STYLE)
 #define LastStyle (previous->numstyles-1)
     line->numstyles = 0;
     inew = MAX_STYLES_ON_LINE - 1;

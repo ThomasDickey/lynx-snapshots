@@ -1,5 +1,6 @@
 #include "HTUtils.h"
 #include "tcp.h"
+#include "HTTP.h"
 #include "HTAnchor.h"       /* Anchor class */
 #include "HTAccess.h"
 #include "HTParse.h"
@@ -46,13 +47,11 @@
 
 PRIVATE int fix_http_urls PARAMS((document *doc));
 extern char * WWW_Download_File;
-extern BOOL redirect_post_content;
-extern BOOL reloading;
 #ifdef VMS
 extern BOOLEAN LYDidRename;
 #endif /* VMS */
 
-
+#if 0 /* UNUSED */
 #ifdef DIRED_SUPPORT
 PRIVATE char * LYSanctify ARGS1(
 	char *,		href) 
@@ -84,6 +83,7 @@ PRIVATE char * LYSanctify ARGS1(
     return href;
 }
 #endif /* DIRED_SUPPORT */
+#endif
 
 
 PUBLIC BOOLEAN getfile ARGS1(

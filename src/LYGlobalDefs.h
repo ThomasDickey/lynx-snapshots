@@ -98,6 +98,7 @@ extern char star_string[MAX_LINE + 1]; /* from GridText.c */
  ((n) >= MAX_LINE ? star_string : &star_string[(MAX_LINE-1)] - (n))
 #define DIRNAMESIZE 256
 
+extern BOOLEAN LYShowColor;	/* Show color or monochrome?	    */
 extern BOOLEAN LYShowCursor;	/* Show the cursor or hide it?	    */
 extern BOOLEAN LYUseDefShoCur;	/* Command line -show_cursor toggle */
 extern BOOLEAN LYCursesON;  /* start_curses()->TRUE, stop_curses()->FALSE */

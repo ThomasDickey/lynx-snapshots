@@ -420,7 +420,7 @@ PUBLIC BOOL HTConfirmCookie ARGS6(
 **	----------------------------
 **
 **  On entry,
-**      redirecting_url             is the Location.
+**      Redirecting_url             is the Location.
 **
 **  On exit,
 **      Returns 0 on cancel,
@@ -428,7 +428,7 @@ PUBLIC BOOL HTConfirmCookie ARGS6(
 **	303 for redirect as GET without content
 */
 PUBLIC int HTConfirmPostRedirect ARGS1(
-	CONST char *,	redirecting_url)
+	CONST char *,	Redirecting_url)
 {
     char *show_POST_url = NULL;
     char url[256];
@@ -449,13 +449,13 @@ PUBLIC int HTConfirmPostRedirect ARGS1(
 	clrtoeol();
         move(LYlines-1, 0);
 	sprintf(url, "URL: %.*s",
-		    (LYcols < 250 ? LYcols-6 : 250), redirecting_url);
+		    (LYcols < 250 ? LYcols-6 : 250), Redirecting_url);
         addstr(url);
 	clrtoeol();
         _statusline(PROCEED_GET_CANCEL);
     } else {
 	StrAllocCopy(show_POST_url, LOCATION_HEADER);
-	StrAllocCat(show_POST_url, redirecting_url);
+	StrAllocCat(show_POST_url, Redirecting_url);
     }
     while (1) {
 	int c;  
