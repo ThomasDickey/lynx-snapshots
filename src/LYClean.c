@@ -26,12 +26,12 @@ PUBLIC void cleanup_sig ARGS1(
 
 #ifdef IGNORE_CTRL_C
     if (sig == SIGINT)	{
-    /*
-     *	Need to rearm the signal.
-     */
-    signal(SIGINT, cleanup_sig);
-    sigint = TRUE;
-    return;
+	/*
+	 * Need to rearm the signal.
+	 */
+	signal(SIGINT, cleanup_sig);
+	sigint = TRUE;
+	return;
     }
 #endif /* IGNORE_CTRL_C */
 

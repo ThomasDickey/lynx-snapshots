@@ -1258,6 +1258,9 @@ PUBLIC BOOLEAN setup ARGS1(
     }
 #endif /* HAVE_TTYTYPE */
 
+    LYlines = LINES;
+    LYcols = COLS;
+
 #if defined(PDCURSES_EXP) && defined(WIN_EX) && defined(CJK_EX) /* 1999/08/26 (Thu) 17:53:38 */
     {
 	extern int current_codepage;	/* PDCurses lib. */

@@ -810,6 +810,19 @@ PRIVATE BOOL GetStdin ARGS1(
     return FALSE;
 }
 
+#ifdef WIN32
+PRIVATE BOOL cleanup_win32(DWORD fdwCtrlType)
+{
+    switch (fdwCtrlType) {
+    case CTRL_CLOSE_EVENT:
+	cleanup_sig(-1);
+    	return TRUE;
+    default:
+	return FALSE;
+    }
+}
+#endif
+
 /*
  * Wow!  Someone wants to start up Lynx.
  */
@@ -1450,17 +1463,21 @@ PUBLIC int main ARGS2(
     }
 
 #undef TTY_DEVICE
+#undef NUL_DEVICE
 
 #ifdef VMS
 #define TTY_DEVICE "tt:"
+#define NUL_DEVICE "nl:"
 #endif
 
 #ifdef _WINDOWS
 #define TTY_DEVICE "con"
+#define NUL_DEVICE "nul"
 #endif
 
 #ifndef TTY_DEVICE
 #define TTY_DEVICE "/dev/tty"
+#define NUL_DEVICE "/dev/null"
 #endif
 
 #if defined (TTY_DEVICE) || defined(HAVE_TTYNAME)
@@ -1476,9 +1493,9 @@ PUBLIC int main ARGS2(
 	tty = ttyname(fileno(stderr));
 # endif
 	if (tty == NULL)
-	    tty = TTY_DEVICE;
+	    tty = isatty(fileno(stdin)) ? TTY_DEVICE : NUL_DEVICE;
 
-	CTRACE((tfp, "processing stdin startfile\n"));
+	CTRACE((tfp, "processing stdin startfile, tty=%s\n", tty));
 	if ((fp = LYOpenTemp (result, HTML_SUFFIX, "w")) != 0) {
 	    StrAllocCopy(startfile, result);
 	    while (GetStdin(&buf)) {
@@ -1489,8 +1506,7 @@ PUBLIC int main ARGS2(
 	    LYCloseTempFP(fp);
 	}
 	CTRACE((tfp, "...done stdin startfile\n"));
-	if ((freopen(tty, "r", stdin)) == 0
-	 || !isatty(fileno(stdin))) {
+	if ((freopen(tty, "r", stdin)) == 0) {
 	    CTRACE((tfp, "cannot open a terminal (%s)\n", tty));
 	    if (!dump_output_immediately) {
 		fprintf(stderr, "cannot open a terminal (%s)\n", tty);
@@ -1740,13 +1756,17 @@ PUBLIC int main ARGS2(
 #endif  /* __DJGPP__ */
 
     /* trap interrupts */
+#ifdef WIN32
+    SetConsoleCtrlHandler((PHANDLER_ROUTINE) cleanup_win32, TRUE);
+#endif
     if (!dump_output_immediately)
 #ifndef NOSIGHUP
 	(void) signal(SIGHUP, cleanup_sig);
 #endif /* NOSIGHUP */
+
     (void) signal(SIGTERM, cleanup_sig);
 #ifdef SIGWINCH
-	LYExtSignal(SIGWINCH, size_change);
+    LYExtSignal(SIGWINCH, size_change);
 #endif /* SIGWINCH */
 #ifndef VMS
     if (!TRACE && !dump_output_immediately && !stack_dump) {

@@ -4483,6 +4483,7 @@ PUBLIC int LYgetstr ARGS4(
     LYSetupEdit(&MyEdit, inputline, MaxStringSize, (LYcols-1)-x);
     MyEdit.hidden = hidden ;
 
+    CTRACE((tfp, "called LYgetstr\n"));
     for (;;) {
 again:
 #ifndef SUPPORT_MULTIBYTE_EDIT
@@ -4522,6 +4523,7 @@ again:
 	if (recall != NORECALL && (ch == UPARROW || ch == DNARROW)) {
 	    LYstrncpy(inputline, MyEdit.buffer, (int)bufsize);
 	    LYAddToCloset(MyEdit.buffer);
+	    CTRACE((tfp, "LYgetstr(%s) recall\n", inputline));
 	    return(ch);
 	}
 	ch |= CurModif;
@@ -4626,6 +4628,7 @@ again:
 	    LYstrncpy(inputline, MyEdit.buffer, (int)bufsize);
 	    if (!hidden)
 		LYAddToCloset(MyEdit.buffer);
+	    CTRACE((tfp, "LYgetstr(%s) LYE_ENTER\n", inputline));
 	    return(ch);
 
 #if defined(WIN_EX)
@@ -4659,6 +4662,7 @@ again:
 	     *	Control-C or Control-G aborts.
 	     */
 	    inputline[0] = '\0';
+	    CTRACE((tfp, "LYgetstr LYE_ABORT\n"));
 	    return(-1);
 
 	case LYE_LKCMD:
@@ -5533,10 +5537,18 @@ PUBLIC void LYOpenCmdLogfile ARGS2(
     }
 }
 
+PUBLIC BOOL LYHaveCmdScript NOARGS
+{
+    return cmd_script != 0;
+}
+
 PUBLIC void LYOpenCmdScript NOARGS
 {
     if (lynx_cmd_script != 0) {
 	cmd_script = fopen(lynx_cmd_script, "r");
+	CTRACE((tfp, "LYOpenCmdScript(%s) %s\n",
+		lynx_cmd_script,
+		cmd_script != 0 ? "SUCCESS" : "FAIL"));
     }
 }
 
@@ -5567,6 +5579,7 @@ PUBLIC int LYReadCmdKey ARGS1(
     } else {
 	ch = LYgetch_for(mode);
     }
+    CTRACE((tfp, "LYReadCmdKey(%d) ->%c (%#x)\n", mode, ch, ch));
     LYWriteCmdKey(ch);
     return ch;
 }

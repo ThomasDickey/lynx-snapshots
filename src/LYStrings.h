@@ -94,12 +94,14 @@ extern char * SNACat PARAMS((
 extern char *LYSafeGets PARAMS((char ** src, FILE * fp));
 
 #ifdef EXP_CMD_LOGGING
+extern BOOL LYHaveCmdScript NOPARAMS;
 extern int LYReadCmdKey PARAMS((int mode));
 extern void LYCloseCmdLogfile NOPARAMS;
 extern void LYOpenCmdLogfile PARAMS((int argc, char **argv));
 extern void LYOpenCmdScript NOPARAMS;
 extern void LYWriteCmdKey PARAMS((int ch));
 #else
+#define LYHaveCmdScript() FALSE
 #define LYReadCmdKey(mode) LYgetch_for(mode)
 #define LYCloseCmdLogfile() /* nothing */
 #endif
