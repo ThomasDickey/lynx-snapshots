@@ -5,6 +5,7 @@ SHELL = /bin/sh
 @SET_MAKE@
 prefix		= @prefix@
 exec_prefix	= @exec_prefix@
+top_srcdir	= @top_srcdir@
 srcdir		= @srcdir@
 VPATH		= $(srcdir)
 
@@ -28,7 +29,12 @@ WAISLIB		= # FIXME: set in parent makefile
 WWWINC		= WWW/Library/Implementation
 WWWLIB		= ../WWW/Library/unix/libwww.a
 
-CPP_OPTS	= $(DEFS) $(CPPFLAGS) -I.. -I../$(WWWINC) $(SITE_DEFS)
+CPP_OPTS	= $(DEFS) $(CPPFLAGS) \
+		-I. \
+		-I.. \
+		-I$(top_srcdir) \
+		-I$(top_srcdir)/$(WWWINC) \
+		$(SITE_DEFS)
 CC_OPTS		= $(CPP_OPTS) $(CFLAGS)
 
 LINT		= @LINT@
@@ -100,9 +106,28 @@ LYCharSets.o: ../userdefs.h
 
 CHRTR= chrtrans/
 
-TABLES= $(CHRTR)iso02_uni.h \
- $(CHRTR)iso01_uni.h \
+TABLES= $(CHRTR)iso01_uni.h \
  $(CHRTR)def7_uni.h \
+ $(CHRTR)iso02_uni.h \
+ $(CHRTR)cp1252_uni.h \
+ $(CHRTR)dmcs_uni.h \
+ $(CHRTR)mac_uni.h \
+ $(CHRTR)next_uni.h \
+ $(CHRTR)koi8r_uni.h \
+ $(CHRTR)viscii_uni.h \
+ $(CHRTR)cp437_uni.h \
+ $(CHRTR)cp850_uni.h \
+ $(CHRTR)cp852_uni.h \
+ $(CHRTR)cp866_uni.h \
+ $(CHRTR)cp737_uni.h \
+ $(CHRTR)cp869_uni.h \
+ $(CHRTR)cp864_uni.h \
+ $(CHRTR)cp862_uni.h \
+ $(CHRTR)cp1250_uni.h \
+ $(CHRTR)cp1251_uni.h \
+ $(CHRTR)cp1253_uni.h \
+ $(CHRTR)cp1255_uni.h \
+ $(CHRTR)cp1256_uni.h \
  $(CHRTR)iso03_uni.h \
  $(CHRTR)iso04_uni.h \
  $(CHRTR)iso05_uni.h \
@@ -111,15 +136,6 @@ TABLES= $(CHRTR)iso02_uni.h \
  $(CHRTR)iso08_uni.h \
  $(CHRTR)iso09_uni.h \
  $(CHRTR)iso10_uni.h \
- $(CHRTR)koi8r_uni.h \
- $(CHRTR)cp437_uni.h \
- $(CHRTR)cp850_uni.h \
- $(CHRTR)cp852_uni.h \
- $(CHRTR)cp866_uni.h \
- $(CHRTR)cp1250_uni.h \
- $(CHRTR)cp1251_uni.h \
- $(CHRTR)cp1252_uni.h \
- $(CHRTR)viscii_uni.h \
  $(CHRTR)utf8_uni.h \
  $(CHRTR)rfc_suni.h \
  $(CHRTR)mnemonic_suni.h \

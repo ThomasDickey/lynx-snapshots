@@ -24,6 +24,9 @@
 #if defined(UNIX) && !defined(unix)
 #define unix
 #endif /* UNIX && !unix */
+#ifdef va_start
+#undef va_start	 /* not used, undef to avoid warnings on some systems */
+#endif /* va_start */
 #include <slang.h>
 
 #else /* Using curses: */
@@ -74,6 +77,11 @@ extern void LYsubwindow PARAMS((WINDOW * param));
 # endif /* VMS && __GNUC__ */
 #endif /* HAVE_CONFIG_H */
 
+#ifdef VMS
+extern void VMSbox PARAMS((WINDOW *win, int height, int width));
+#else
+extern void LYbox PARAMS((WINDOW *win, BOOLEAN formfield));
+#endif /* VMS */
 #endif /* USE_SLANG */
 
 
@@ -120,9 +128,6 @@ extern int ttopen();
 extern int ttclose();
 extern int ttgetc();
 extern void *VMSsignal PARAMS((int sig, void (*func)()));
-#ifndef USE_SLANG
-extern void VMSbox PARAMS((WINDOW *win, int height, int width));
-#endif /* !USE_SLANG */
 #endif /* VMS */
 
 #if defined(USE_COLOR_STYLE)

@@ -11,6 +11,7 @@ LFLAGS =
 
 prefix		= @prefix@
 exec_prefix	= @exec_prefix@
+top_srcdir	= @top_srcdir@
 srcdir		= @srcdir@
 VPATH		= $(srcdir)
 
@@ -28,7 +29,7 @@ LIBDIR = $(WWW)/Library/Implementation/$(WWW_MACH)
 
 #_________________ OK if normal W3 distribution
 # Where is the WWW source root?
-WWW = ../..
+WWW = $(top_srcdir)/WWW
 
 #  Where should temporary (object) files go?
 WTMP = ../..

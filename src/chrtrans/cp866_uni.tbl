@@ -23,7 +23,7 @@ ODosCyrillic (cp866)
 #
 0x20-0x40       idem
 
-# some mapppings of greek capital letters to latin letters added - kw
+# Some mapppings of Greek capital letters to Latin letters added. - KW
 0x41	U+0041	U+0391	#LATIN CAPITAL LETTER A
 0x42	U+0042	U+0392	#LATIN CAPITAL LETTER B
 0x43	U+0043	#LATIN CAPITAL LETTER C

@@ -20,7 +20,9 @@ typedef enum {
 extern UCTQ_t UCCanUniTranslateFrom PARAMS((int from));
 extern UCTQ_t UCCanTranslateUniTo PARAMS((int to));
 extern UCTQ_t UCCanTranslateFromTo PARAMS((int from, int to));
-extern BOOL UCNeedNotTranslate PARAMS((int from, int to));
+extern BOOL UCNeedNotTranslate PARAMS((
+	int		from,
+	int		to));
 
 struct _UCTransParams
 {
@@ -68,9 +70,17 @@ typedef void putc_func_t PARAMS((
 	HTStream *	me,
 	char		ch));
 
+#ifndef UCMAP_H
+#include "UCMap.h"
+#endif /* UCMAP_H */
+
 extern BOOL UCPutUtf8_charstring PARAMS((
 	HTStream *	target,
 	putc_func_t *	actions,
-	long	code));
+	UCode_t		code));
     
+extern BOOL UCConvertUniToUtf8 PARAMS((
+	UCode_t		code,
+	char *		buffer));
+
 #endif /* UCAUX_H */

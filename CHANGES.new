@@ -7,7 +7,76 @@ platforms see also README.win-386, for some changes for auto-configure and
 simple curses color see also README.configure).  Note that the 2.7 -> 2.7.1
 changes are included here. - KW]
 
-97-11-07
+1997-11-17
+* Changed the default ASCII BOXVERT and BOXHORI definitions from '*' to
+  to '|' and '-', and new function LYbox() for non-VMS (n)curses. - FM
+* Use explicitly specified characters for drawing the corners of popup
+  boxes with non-VMS (n)curses if we have also specified characters for
+  vertical and horizontal lines. - KW
+* Mods in HTTP.c to trim any "LYNXIMGMAP:" leader from Referer header
+  values and strip the #fragment when making http(s) requests via links
+  in the pseudo-documents constructed for MAP elements. - FM & KW
+* Mods of SGML parsing to better handle SELECT blocks with invalid markup,
+  in effect for both TagSoup and SortaSGML parsing (for the latter just
+  in case it doesn't already prevent invalid markup from being passed on). 
+  Only OPTION elements are accepted in SELECT blocks.
+  Otherwise, if the element is a form-related start tag, the
+  SELECT block is closed and the new form-related element is started.
+  All other elements are ignored.  A FORM end or start tag ends any open
+  SELECT block and the current FORM (before starting another FORM if
+  it is a start tag).  Note that we now support SELECT blocks outside
+  of FORM blocks, which some providers are using for "informational"
+  popups, but no Lynx user would do anything that awful, right? - FM
+* Tweak in LYMainLoop.c to override an LYresubmit_posts flag if we are
+  reloading a popped document due to a NOT_FOUND or NULLFILE return
+  value from getfile(). - FM
+  (But if the document that would be loaded after such a failure has POST
+  data and is not in memory, still jump to the PREV_DOC code, see enttry
+  for 1997-11-03. - KW)
+* Worked in a variant of AJL's suggestion of setting LINES and COLUMNS
+  artificially high before the initscr() call with Unix curses, then
+  using a dummy call to size_change() for setting LYlines and LYcols
+  to the actual screen dimensions, so that increases in the screen size
+  during the Lynx session, and not just decreases, can be handled.
+  Note that one still needs to do a RELOAD (^R) overtly to create a
+  new HText structure based on the current screen size. - FM
+  (The new code can be disabled by defining NO_SIZECHANGEHACK, in case
+  some curses version or terminal cannot deal with it. - KW)
+* Tweaks of the chartrans code. - FM & KW
+* Change in HTNews.c to ignore very long bogus newsgroup names when listing
+  available groups. - KW
+* Tweaks in code for highlighting search text in anchors, to better deal with
+  terminals in UTF-8 mode. - KW
+1997-11-15
+* Mods of the TagSoup parser to restore support for the TABLE-in-PRE-block
+  HTML kludge described in http://ppewww.ph.gla.ac.uk/~flavell/tablejob.html,
+  which stopped working in conjunction with the 1997-05-21 mods (see below)
+  for treating TABLEs as DIVisions to support ALIGNment attributes in TABLE
+  markup.  The PRE-in-TABLE-block HTML kludge was not affected by those mods
+  but works only with the TagSoup parsing mode. - FM & KW
+* Added an LINKN command key in the line editor, mapped to Ctrl-V, for
+  invoking the F_LINK_NUM prompt when in form text fields.  Ctrl-V is
+  still a dead key under other circumstances in the line editor. - FM
+1997-11-12
+* Made handling of the 'x' in hexadecimal character references (&#xH;)
+  case insensitive, as for the "alphabetic digits" (a-f, A-F). - FM
+* Added an LINKN command key in the line editor, mapped to Ctrl-V, for
+  invoking the F_LINK_NUM prompt when in form text fields.  Ctrl-V is
+  still a dead key under other circumstances in the line editor. - FM
+* remove options --with-lss-file and --with-cfg-file, since the corresponding
+  files will always be installed under $(libdir), reported by Hynek Med. - TD
+* modify configure script and makefile templates to permit builds with the
+  --srcdir option, noted by Philippe De Muyter. - TD
+1997-11-08
+* Added Unicode support for "DosArabic (cp864)", "WinArabic (cp1256)",
+  "DosGreek (cp737)", "DosGreek2 (cp869)", "WinGreek (cp1253)",
+  "DosHebrew (cp862)", and "WinHebrew (cp1255)".  Note that we still
+  have no code for taking DIR attributes, or directionality in general,
+  into account. - FM
+* Mods to handle "cp-#" charset names as synonyms for "cp#", and some
+  cp# names as synonyms for "windows-#". FM & KW
+1997-11-07
+* Change of of LY_SLrefresh() in LYCurses.c as suggested by JED - FM
 * add logic to make install-directories as needed. - TD
 * remove --disable-char-trans option (ifdef's still remain). - TD
 * correct type used in first compile-test for union wait. - TD
@@ -40,6 +109,7 @@ changes are included here. - KW]
   and DOWNLOAD. - KW
 * Changes (untested) in the code dealing with reading of compressed files in
   HTFile.c, in parallel to the code for other systems. - KW
+* Mods to avoid va_start redefinition warnings when building with slang. - FM
 1997-11-05
 * Change in LYForms.c to avoid full screen repaint after popup is retracted
   for slang. - KW & FM
@@ -193,16 +263,31 @@ changes are included here. - KW]
   neeeded.  Note that the code is not appropriate for handling large
   amounts of POST data, since it still first does all the writing and
   then all the reading. - KW
+1997-11-01
+* Added support for presentation of text/plain files in SOURCE ('\') mode,
+  homologously to text/html files, rather than treating the command as a
+  synonym for 'd'ownload when viewing a text/plain file.  Note that if the
+  text/plain file has no long lines, the display of it will not change,
+  but otherwise, the long lines will not be wrapped in SOURCE mode, and
+  thus can be 'p'rinted without line wrapping.  One still should use
+  'd'ownload for a faithful copy of the file, i.e., without charset
+  conversions and expansions of TABs. - FM
 1997-10-30
 * Get numbering of links on List Page right, by faking hidden links for
   form fields which get counted but are not selectable. - KW
 * Allow LYNXHIST: links in List Page since the History Page may get 
   'L'isted... - KW
+* Mods of HTML.c parsing to close any open Anchor or emphasis elements
+  at the starts of TABLE elements, as the Big Two's TABLE handlers appear
+  to do now. - FM
+* Tweaks of charset handling via META elements and CHARSET attributes. - FM
 1997-10-29
 * Tweak of SortaSGML DTD for insane HTML with FORM start before HEAD. - KW
 * Prevent memory leaks from HTChunks for option and textarea with very
   bad markup, added TRACE and BAD_HTML_USE_TRACE warnings for those. - KW
 * Don't call tigetnum("ncv") for _WINDOWS - BD
+* Added Unicode tables for the "DEC Multinational", "Macintosh (8 bit)",
+  and "NeXT character set" display character sets. - FM 
 1997-10-28
 * Disable setting of the `reloading' flag in HTLoadDocument which would
   generate no-cache headers for request where this is not appropriate. - KW
@@ -212,6 +297,9 @@ changes are included here. - KW]
 * Changes to INSTALLATION file. - NHE
 * Fix in HTMIME.c to recognize Content-location. - KW
 1997-10-27
+* Don't disable FORMs that have INPUTs with TYPE="file" or TYPE="range"
+  since those fields may be optional and the rest of the FORM may be
+  valid to submit. - FM
 * Updated links to www.w3.org in help files. - KW
 * Some changes for DOS compilation. - DK
 * Changes to INSTALLATION file. - NHE

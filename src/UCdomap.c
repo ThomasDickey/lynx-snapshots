@@ -33,56 +33,76 @@
  *  Include tables & parameters.
  */
 #ifdef VMS
-#include "[.chrtrans]def7_uni.h"
-#include "[.chrtrans]iso01_uni.h"
-#include "[.chrtrans]iso02_uni.h"
-#include "[.chrtrans]cp437_uni.h"
-#include "[.chrtrans]cp850_uni.h"
-#include "[.chrtrans]koi8r_uni.h"
-#include "[.chrtrans]cp852_uni.h"
-#include "[.chrtrans]cp866_uni.h"
-#include "[.chrtrans]cp1252_uni.h"
-#include "[.chrtrans]cp1250_uni.h"
-#include "[.chrtrans]cp1251_uni.h"
-#include "[.chrtrans]viscii_uni.h"
-#include "[.chrtrans]iso03_uni.h"
-#include "[.chrtrans]iso04_uni.h"
-#include "[.chrtrans]iso05_uni.h"
-#include "[.chrtrans]iso06_uni.h"
-#include "[.chrtrans]iso07_uni.h"
-#include "[.chrtrans]iso08_uni.h"
-#include "[.chrtrans]iso09_uni.h"
-#include "[.chrtrans]iso10_uni.h"
-#include "[.chrtrans]utf8_uni.h"
-#include "[.chrtrans]rfc_suni.h"
-#include "[.chrtrans]mnemonic_suni.h"
+#include "[.chrtrans]def7_uni.h"	/* 7 bit approximations */
+#include "[.chrtrans]iso01_uni.h"	/* ISO Latin 1		*/
+#include "[.chrtrans]iso02_uni.h"	/* ISO Latin 2		*/
+#include "[.chrtrans]cp1252_uni.h"	/* WinLatin1 (cp1252)	*/
+#include "[.chrtrans]dmcs_uni.h"	/* DEC Multinational	*/
+#include "[.chrtrans]mac_uni.h"		/* Macintosh (8 bit)	*/
+#include "[.chrtrans]next_uni.h"	/* NeXT character set	*/
+#include "[.chrtrans]koi8r_uni.h"	/* KOI8-R Cyrillic	*/
+#include "[.chrtrans]viscii_uni.h"	/* Vietnamese (VISCII)	*/
+#include "[.chrtrans]cp437_uni.h"	/* DosLatinUS (cp437)	*/
+#include "[.chrtrans]cp850_uni.h"	/* DosLatin1 (cp850)	*/
+#include "[.chrtrans]cp852_uni.h"	/* DosLatin2 (cp852)	*/
+#include "[.chrtrans]cp866_uni.h"	/* DosCyrillic (cp866)	*/
+#include "[.chrtrans]cp737_uni.h"	/* DosGreek (cp737)	*/
+#include "[.chrtrans]cp869_uni.h"	/* DosGreek2 (cp869)	*/
+#include "[.chrtrans]cp864_uni.h"	/* DosArabic (cp864)	*/
+#include "[.chrtrans]cp862_uni.h"	/* DosHebrew (cp862)	*/
+#include "[.chrtrans]cp1250_uni.h"	/* WinLatin2 (cp1250)	*/
+#include "[.chrtrans]cp1251_uni.h"	/* WinCyrillic (cp1251)	*/
+#include "[.chrtrans]cp1253_uni.h"	/* WinGreek (cp1253)	*/
+#include "[.chrtrans]cp1255_uni.h"	/* WinHebrew (cp1255)	*/
+#include "[.chrtrans]cp1256_uni.h"	/* WinArabic (cp1256)	*/
+#include "[.chrtrans]iso03_uni.h"	/* ISO Latin 3		*/
+#include "[.chrtrans]iso04_uni.h"	/* ISO Latin 4		*/
+#include "[.chrtrans]iso05_uni.h"	/* ISO Latin 5 Cyrillic	*/
+#include "[.chrtrans]iso06_uni.h"	/* ISO 8859-6 Arabic	*/
+#include "[.chrtrans]iso07_uni.h"	/* ISO 8859-7 Greek	*/
+#include "[.chrtrans]iso08_uni.h"	/* ISO 8859-8 Hebrew	*/
+#include "[.chrtrans]iso09_uni.h"	/* ISO 8859-9 (Latin 5)	*/
+#include "[.chrtrans]iso10_uni.h"	/* ISO 8859-10		*/
+#include "[.chrtrans]utf8_uni.h"	/* UNICODE UTF 8	*/
+#include "[.chrtrans]rfc_suni.h"	/* RFC 1345 w/o Intro	*/
+#include "[.chrtrans]mnemonic_suni.h"	/* RFC 1345 Mnemonic	*/
 #ifdef NOTDEFINED 
 #include "[.chrtrans]mnem_suni.h"
 #endif /* NOTDEFINED */
 #else
-#include "chrtrans/def7_uni.h"
-#include "chrtrans/iso01_uni.h"
-#include "chrtrans/iso02_uni.h"
-#include "chrtrans/cp437_uni.h"
-#include "chrtrans/cp850_uni.h"
-#include "chrtrans/koi8r_uni.h"
-#include "chrtrans/cp852_uni.h"
-#include "chrtrans/cp866_uni.h"
-#include "chrtrans/cp1250_uni.h"
-#include "chrtrans/cp1251_uni.h"
-#include "chrtrans/cp1252_uni.h"
-#include "chrtrans/viscii_uni.h"
-#include "chrtrans/iso03_uni.h"
-#include "chrtrans/iso04_uni.h"
-#include "chrtrans/iso05_uni.h"
-#include "chrtrans/iso06_uni.h"
-#include "chrtrans/iso07_uni.h"
-#include "chrtrans/iso08_uni.h"
-#include "chrtrans/iso09_uni.h"
-#include "chrtrans/iso10_uni.h"
-#include "chrtrans/utf8_uni.h"
-#include "chrtrans/rfc_suni.h"
-#include "chrtrans/mnemonic_suni.h"
+#include "chrtrans/def7_uni.h"		/* 7 bit approximations */
+#include "chrtrans/iso01_uni.h"		/* ISO Latin 1		*/
+#include "chrtrans/iso02_uni.h"		/* ISO Latin 2		*/
+#include "chrtrans/cp1252_uni.h"	/* WinLatin1 (cp1252)	*/
+#include "chrtrans/dmcs_uni.h"		/* DEC Multinational	*/
+#include "chrtrans/mac_uni.h"		/* Macintosh (8 bit)	*/
+#include "chrtrans/next_uni.h"		/* NeXT character set	*/
+#include "chrtrans/koi8r_uni.h"		/* KOI8-R Cyrillic	*/
+#include "chrtrans/viscii_uni.h"	/* Vietnamese (VISCII)	*/
+#include "chrtrans/cp437_uni.h"		/* DosLatinUS (cp437)	*/
+#include "chrtrans/cp850_uni.h"		/* DosLatin1 (cp850)	*/
+#include "chrtrans/cp852_uni.h"		/* DosLatin2 (cp852)	*/
+#include "chrtrans/cp866_uni.h" 	/* DosCyrillic (cp866)	*/
+#include "chrtrans/cp737_uni.h"		/* DosGreek (cp737)	*/
+#include "chrtrans/cp869_uni.h"		/* DosGreek2 (cp869)	*/
+#include "chrtrans/cp864_uni.h"		/* DosArabic (cp864)	*/
+#include "chrtrans/cp862_uni.h"		/* DosHebrew (cp862)	*/
+#include "chrtrans/cp1250_uni.h"	/* WinLatin2 (cp1250)	*/
+#include "chrtrans/cp1251_uni.h"	/* WinCyrillic (cp1251)	*/
+#include "chrtrans/cp1253_uni.h"	/* WinGreek (cp1253)	*/
+#include "chrtrans/cp1255_uni.h"	/* WinHebrew (cp1255)	*/
+#include "chrtrans/cp1256_uni.h"	/* WinArabic (cp1256)	*/
+#include "chrtrans/iso03_uni.h"		/* ISO Latin 3		*/
+#include "chrtrans/iso04_uni.h"		/* ISO Latin 4		*/
+#include "chrtrans/iso05_uni.h"		/* ISO Latin 5 Cyrillic	*/
+#include "chrtrans/iso06_uni.h"		/* ISO 8859-6 Arabic	*/
+#include "chrtrans/iso07_uni.h"		/* ISO 8859-7 Greek	*/
+#include "chrtrans/iso08_uni.h"		/* ISO 8859-8 Hebrew	*/
+#include "chrtrans/iso09_uni.h"		/* ISO 8859-9 (Latin 5)	*/
+#include "chrtrans/iso10_uni.h"		/* ISO 8859-10		*/
+#include "chrtrans/utf8_uni.h"		/* UNICODE UTF 8	*/
+#include "chrtrans/rfc_suni.h"		/* RFC 1345 w/o Intro	*/
+#include "chrtrans/mnemonic_suni.h"	/* RFC 1345 Mnemonic	*/
 #ifdef NOTDEFINED
 #include "chrtrans/mnem_suni.h"
 #endif /* NOTDEFINED */
@@ -1001,7 +1021,7 @@ PUBLIC int UCTransUniChar ARGS2(
 {
     int rc;
     int UChndl_out;
-    int isdefault, trydefault;
+    int isdefault, trydefault = 0;
     u16 * ut;
 
     if ((UChndl_out = LYCharSet_UC[charset_out].UChndl) < 0) {
@@ -1049,9 +1069,9 @@ PUBLIC int UCTransUniCharStr ARGS5(
 	int,		charset_out,
 	int,		chk_single_flag)
 {
-  int rc, src = 0, ignore_err;
+  int rc = -14, src = 0, ignore_err;
   int UChndl_out;
-  int isdefault, trydefault;
+  int isdefault, trydefault = 0;
   struct unimapdesc_str * repl;
   u16 * ut;
 
@@ -1162,9 +1182,11 @@ PRIVATE int UC_MapGN ARGS2(
 	UCInfo[UChndl].GN = Gn;
 	UC_GNhandles[Gn] = UChndl;
     }
-    if (TRACE)
-	fprintf(stderr,"UC_Map...... Using %i <- %i (%s)\n",
+    if (TRACE) {
+	fprintf(stderr,
+		"UC_MapGN: Using %i <- %i (%s)\n",
 		Gn, UChndl, UCInfo[UChndl].MIMEname);
+    }
     UC_con_set_trans(UChndl,Gn,update_flag);
     return Gn;
 }
@@ -1177,7 +1199,7 @@ PUBLIC int UCTransChar ARGS3(
     int unicode, Gn;
     int rc = -4;
     int UChndl_in, UChndl_out;
-    int isdefault, trydefault;
+    int isdefault, trydefault = 0;
     u16 * ut;
     int upd = 0;
 
@@ -1276,7 +1298,10 @@ PUBLIC long int UCTransToUni ARGS2(
   return unicode;
 }
 
-PUBLIC int UCReverseTransChar ARGS3(char, ch_out, int, charset_in, int, charset_out)
+PUBLIC int UCReverseTransChar ARGS3(
+	char,		ch_out,
+	int,		charset_in,
+	int,		charset_out)
 {
     int Gn;
     int rc;
@@ -1332,7 +1357,7 @@ PUBLIC int UCReverseTransChar ARGS3(char, ch_out, int, charset_in, int, charset_
     }
     return UCTransChar(ch_out, charset_out, charset_in);
 }
-  
+
 /*
  *  Returns string length, or negative value for error.
  */
@@ -1345,9 +1370,9 @@ PUBLIC int UCTransCharStr ARGS6(
 	int,		chk_single_flag)
 {
     int unicode, Gn;
-    int rc, src = 0, ignore_err;
+    int rc = -14, src = 0, ignore_err;
     int UChndl_in, UChndl_out;
-    int isdefault, trydefault;
+    int isdefault, trydefault = 0;
     struct unimapdesc_str * repl;
     u16 * ut;
     int upd = 0;
@@ -1494,7 +1519,7 @@ PUBLIC int UCGetLYhndl_byMIME ARGS1(
     }
     if (LYhndl < 0) {
 	/*
-	 *  Not yet found, special treatment for several CJK charsets etc...
+	 *  Not yet found, special treatment for several CJK charsets, etc.
 	 *  Cheating here.  Also recognize UTF-8 as synonym for
 	 *  UNICODE-1-1-UTF-8 (The example file for now still uses the
 	 *  long name, so that's what will be used internally.).
@@ -1504,30 +1529,38 @@ PUBLIC int UCGetLYhndl_byMIME ARGS1(
 	}
 	if (!strncmp(UC_MIMEcharset, "iso-2022-jp", 11) ||
 	    !strcmp(UC_MIMEcharset, "x-euc-jp")) {
-	  return UCGetLYhndl_byMIME("euc-jp");
+	    return UCGetLYhndl_byMIME("euc-jp");
 	} else if (!strcmp(UC_MIMEcharset, "iso-2022-kr")) {
-	  return UCGetLYhndl_byMIME("euc-kr");
+	    return UCGetLYhndl_byMIME("euc-kr");
 	} else if (!strcmp(UC_MIMEcharset, "gb2312") ||
-		   !strncmp(UC_MIMEcharset, "cn-gb", 5)) {
-	  return UCGetLYhndl_byMIME("euc-cn");
-	} else if (!strcmp(UC_MIMEcharset, "iso-2022-cn")) {
+		   !strncmp(UC_MIMEcharset, "cn-gb", 5) ||
+		   !strcmp(UC_MIMEcharset, "iso-2022-cn")) {
 	    return UCGetLYhndl_byMIME("euc-cn");
 	} else if (!strcmp(UC_MIMEcharset, "cn-big5")) {
 	    return UCGetLYhndl_byMIME("big5");
+	} else if (!strcmp(UC_MIMEcharset, "x-mac-roman") ||
+		   !strcmp(UC_MIMEcharset, "mac-roman")) {
+	    return UCGetLYhndl_byMIME("macintosh");
+	} else if (!strcmp(UC_MIMEcharset, "next") ||
+		   !strcmp(UC_MIMEcharset, "nextstep") ||
+		   !strcmp(UC_MIMEcharset, "x-nextstep")) {
+	    return UCGetLYhndl_byMIME("x-next");
 	} else if (!strcmp(UC_MIMEcharset, "windows-1252")) {
 	    /*
 	     *  It's not my fault that Microsoft hasn't registered
 	     *  the name people are using. - KW
 	     */
 	    return UCGetLYhndl_byMIME("iso-8859-1-windows-3.1-latin-1");
-	} else if (!strncmp(UC_MIMEcharset, "ibm", 3)) {
+	} else if (!strncmp(UC_MIMEcharset, "ibm", 3) ||
+		   !strncmp(UC_MIMEcharset, "cp-", 3)) {
 	    CONST char * cp = UC_MIMEcharset + 3;
 	    char * cptmp = NULL;
 	    if (*cp && isdigit(*cp) &&
 		*(cp++) && isdigit(*cp) &&
 		*(cp++) && isdigit(*cp)) {
 		/*
-		 *  For "ibmNNN<...>", try "cpNNN<...>" if not yet found. - KW
+		 *  For "ibmNNN<...>" or "cp-NNN", try "cpNNN<...>"
+		 *  if not yet found. - KW & FM
 		 */
 		StrAllocCopy(cptmp, UC_MIMEcharset + 1);
 		cptmp[0] = 'c';
@@ -1535,6 +1568,20 @@ PUBLIC int UCGetLYhndl_byMIME ARGS1(
 		LYhndl = UCGetLYhndl_byMIME(cptmp);
 		FREE(cptmp);
 	    }
+	} else if (UC_MIMEcharset[0] == 'c' &&
+		   UC_MIMEcharset[1] == 'p' &&
+		   UC_MIMEcharset[2] == '1' &&
+		   strlen(UC_MIMEcharset) == 6 &&
+		   isdigit((unsigned char)UC_MIMEcharset[3]) &&
+		   isdigit((unsigned char)UC_MIMEcharset[4]) &&
+		   isdigit((unsigned char)UC_MIMEcharset[5])) {
+	    char tmp[16];
+	    /*
+	     *  For "cpNNNN", try "windows-NNNN"
+	     *  if not yet found. - kw
+	     */
+	    sprintf(tmp, "windows-%s", UC_MIMEcharset + 2);
+	    return UCGetLYhndl_byMIME(tmp);
 	} else if (!strcmp(UC_MIMEcharset, "koi-8")) { /* accentsoft bogosity */
 	  return UCGetLYhndl_byMIME("koi8-r");
   }
@@ -1545,7 +1592,7 @@ PUBLIC int UCGetLYhndl_byMIME ARGS1(
 /*
  *  Function UC_setup_LYCharSets_repl() tries to set up a subtable in
  *  LYCharSets[] appropriate for this new charset, for compatibility
- *  with the "old method".  Maybe not nice (maybe not evene necessary
+ *  with the "old method".  Maybe not nice (maybe not even necessary
  *  any more), but it works (as far as it goes..).
  *
  *  We try to be conservative and only allocate new memory for this
@@ -1910,31 +1957,46 @@ PUBLIC void UCInit NOARGS
     atexit(UCcleanup_mem);
     UCconsole_map_init();
 
-    UC_CHARSET_SETUP;
-    UC_CHARSET_SETUP_iso_8859_1;
-    UC_CHARSET_SETUP_iso_8859_2;
-    UC_CHARSET_SETUP_cp437;
-    UC_CHARSET_SETUP_cp850;
-    UC_CHARSET_SETUP_koi8_r;
+    UC_CHARSET_SETUP;	/* us-ascii */	  /* 7 bit approximations */
 
-    UC_CHARSET_SETUP_cp852;
-    UC_CHARSET_SETUP_cp866;
-    UC_CHARSET_SETUP_iso_8859_1_windows_;
-    UC_CHARSET_SETUP_windows_1250;
-    UC_CHARSET_SETUP_windows_1251;
-    UC_CHARSET_SETUP_viscii;
-    UC_CHARSET_SETUP_iso_8859_3;
-    UC_CHARSET_SETUP_iso_8859_4;
-    UC_CHARSET_SETUP_iso_8859_5;
-    UC_CHARSET_SETUP_iso_8859_6;
-    UC_CHARSET_SETUP_iso_8859_7;
-    UC_CHARSET_SETUP_iso_8859_8;
-    UC_CHARSET_SETUP_iso_8859_9;
-    UC_CHARSET_SETUP_iso_8859_10;
+    UC_CHARSET_SETUP_iso_8859_1;	  /* ISO Latin 1	  */
+    UC_CHARSET_SETUP_iso_8859_2;	  /* ISO Latin 2	  */
 
-    UC_CHARSET_SETUP_unicode_1_1_utf_8;
-    UC_CHARSET_SETUP_mnemonic_ascii_0;
-    UC_CHARSET_SETUP_mnemonic;
+    UC_CHARSET_SETUP_iso_8859_1_windows_; /* WinLatin1 (cp1252)	  */
+    UC_CHARSET_SETUP_dec_mcs;		  /* DEC Multinational    */
+    UC_CHARSET_SETUP_macintosh;		  /* Macintosh (8 bit)    */
+    UC_CHARSET_SETUP_x_next;		  /* NeXT character set   */
+    UC_CHARSET_SETUP_koi8_r;		  /* KOI8-5 Cyrillic	  */
+
+    UC_CHARSET_SETUP_viscii;		  /* Vietnamese (VISCII)  */
+
+    UC_CHARSET_SETUP_cp437;		  /* DosLatinUS (cp437)	  */
+    UC_CHARSET_SETUP_cp850;		  /* DosLatin1 (cp850)	  */
+
+    UC_CHARSET_SETUP_cp852;		  /* DosLatin2 (cp852)	  */
+    UC_CHARSET_SETUP_cp866;		  /* DosCyrillic (cp866)  */
+    UC_CHARSET_SETUP_cp864;		  /* DosArabic (cp864)	  */
+    UC_CHARSET_SETUP_cp737;		  /* DosGreek (cp737)	  */
+    UC_CHARSET_SETUP_cp869;		  /* DosGreek2 (cp869)	  */
+    UC_CHARSET_SETUP_cp862;		  /* DosHebrew (cp862)	  */
+
+    UC_CHARSET_SETUP_windows_1250;	  /* WinLatin1 (cp1251)	  */
+    UC_CHARSET_SETUP_windows_1251;	  /* WinCyrillic (cp1251) */
+    UC_CHARSET_SETUP_windows_1253;		  /* WinGreek (cp1253)	  */
+    UC_CHARSET_SETUP_windows_1255;		  /* WinHebrew (cp1255)	  */
+    UC_CHARSET_SETUP_windows_1256;		  /* WinArabic (cp1256)	  */
+    UC_CHARSET_SETUP_iso_8859_3;	  /* ISO Latin 3	  */
+    UC_CHARSET_SETUP_iso_8859_4;	  /* ISO Latin 4	  */
+    UC_CHARSET_SETUP_iso_8859_5;	  /* ISO 8859-5 Cyrillic  */
+    UC_CHARSET_SETUP_iso_8859_6;	  /* ISO 8869-6 Arabic	  */
+    UC_CHARSET_SETUP_iso_8859_7;	  /* ISO 8859-7 Greek	  */
+    UC_CHARSET_SETUP_iso_8859_8;	  /* ISO 8859-8 Hebrew	  */
+    UC_CHARSET_SETUP_iso_8859_9;	  /* ISO 8859-9 (Latin 5) */
+    UC_CHARSET_SETUP_iso_8859_10;	  /* ISO 8859-10	  */
+
+    UC_CHARSET_SETUP_unicode_1_1_utf_8;	  /* UNICODE UTF 8	  */
+    UC_CHARSET_SETUP_mnemonic_ascii_0;	  /* RFC 1345 w/o Intro	  */
+    UC_CHARSET_SETUP_mnemonic;		  /* RFC 1345 Mnemonic	  */
 #ifdef NOTDEFINED
     UC_CHARSET_SETUP_mnem;
 #endif /* NOTDEFINED */

@@ -149,18 +149,6 @@ the script:
   --enable-warnings
   	Use this option to turn on GCC compiler warnings.
 
-  --with-cfg-file=XXX			(defines LYNX_CFG_FILE)
-	Use this option to override the location of the site
-	configuration file's pathname.  It defaults to $libdir/lynx.cfg,
-	where $libdir is set in the configure script, e.g., to
-	/usr/local/lib.
-
-  --with-lss-file=XXX			(defines LYNX_LSS_FILE)
-	Use this option to override the location of the site
-	style-sheet file's pathname.  It defaults to $libdir/lynx.lss,
-	where $libdir is set in the configure script, e.g., to
-	/usr/local/lib.
-
   --with-screen=XXX
 	Use this option to select the screen type.  The option value,
 	XXX must be one of curses (the default), ncurses or slang.

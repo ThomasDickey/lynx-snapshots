@@ -249,11 +249,14 @@ esac],
 	[cf_cv_screen=curses])])
 AC_MSG_RESULT($cf_cv_screen)
 
-case $cf_cv_screen in
-curses)
+if test $cf_cv_screen != ncurses ; then
 	if eval "test \"`echo '$''{'cf_cv_ncurses_header'+set}'`\" != set"; then
 		cf_cv_ncurses_header=curses.h
 	fi
+fi
+
+case $cf_cv_screen in
+curses)
 	CF_CURSES_LIBS
 	CF_CURS_PERFORMANCE
 	;;
@@ -268,10 +271,13 @@ slang)
 	;;
 esac
 
+dnl Get the actual value for $libdir, which we will compile into Lynx as part of
+dnl the config pathnames.
+eval cf_libdir=$libdir
+cf_libdir=`echo $cf_libdir | sed -e s@'^NONE/'@$ac_default_prefix/@`
+
 AC_MSG_CHECKING(for location of config-file)
-CF_WITH_PATH(cfg-file,
-[  --with-cfg-file=XXXX    specify config-file path],
-LYNX_CFG_FILE,LIBDIR/lynx.cfg,[$]libdir/lynx.cfg)
+LYNX_CFG_FILE=$cf_libdir/lynx.cfg
 AC_DEFINE_UNQUOTED(LYNX_CFG_FILE,"$LYNX_CFG_FILE")
 AC_MSG_RESULT($LYNX_CFG_FILE)
 
@@ -388,9 +394,7 @@ no)
 	AC_MSG_RESULT(curses-style)
 
 	AC_MSG_CHECKING(for location of style-sheet file)
-	CF_WITH_PATH(lss-file,
-	[  --with-lss-file=XXXX    specify style-sheet path],
-	LYNX_LSS_FILE,LIBDIR/lynx.lss,[$]libdir/lynx.lss)
+	LYNX_LSS_FILE=$cf_libdir/lynx.lss
 	AC_DEFINE_UNQUOTED(LYNX_LSS_FILE,"$LYNX_LSS_FILE")
 	AC_MSG_RESULT($LYNX_LSS_FILE)
 	;;
@@ -486,9 +490,15 @@ AC_MSG_RESULT($enableval)
 
 ### Finally, build config.h and the makefiles
 CFLAGS="$CFLAGS $EXTRA_CFLAGS"
+srcdir="$srcdir"
+if test -n "$srcdir" ; then
+	echo srcdir is $srcdir
+	$srcdir/mkdirs.sh WWW/Library/unix
+	$srcdir/mkdirs.sh src/chrtrans
+fi
 AC_OUTPUT(
 	makefile \
 	WWW/Library/unix/makefile \
 	src/makefile \
 	src/chrtrans/makefile \
-	)
+)

@@ -21,6 +21,7 @@ PUBLIC UCTQ_t UCCanUniTranslateFrom ARGS1(
 	return TQ_EXCELLENT;
     return ((LYCharSet_UC[from].UChndl >= 0) ? TQ_GOOD : TQ_NO);
 }
+
 PUBLIC UCTQ_t UCCanTranslateUniTo ARGS1(
 	int,		to)
 {
@@ -36,6 +37,7 @@ PUBLIC UCTQ_t UCCanTranslateUniTo ARGS1(
 	return TQ_GOOD;
     return TQ_GOOD;	/* at least some characters, we don't know more */
 }
+
 PUBLIC UCTQ_t UCCanTranslateFromTo ARGS2(
 	int,		from,
 	int,		to)
@@ -59,14 +61,28 @@ PUBLIC UCTQ_t UCCanTranslateFromTo ARGS2(
 	    return TQ_GOOD;
 	}
 	if (LYCharSet_UC[from].enc == UCT_ENC_CJK) {
-	    if (HTCJK == NOCJK)	/* use that global flag, for now */
+	    /*
+	    **  CJK mode may be off (i.e., HTCJK == NOCJK) because
+	    **  the current document is not CJK, but the check may
+	    **  be for capability in relation to another document,
+	    **  for which CJK mode might be turned on when retrieved.
+	    **  Thus, when the from charset is CJK, check if the to
+	    **  charset is CJK, and return TQ_NO or TQ_GOOD depending on
+	    **  that. - FM
+	    */
+	    if (LYCharSet_UC[to].enc != UCT_ENC_CJK)
 		return TQ_NO;
-	    if (HTCJK == JAPANESE &&
+	    if ((!strcmp(toname, "euc-jp") ||
+		 !strcmp(toname, "shift_jis")) &&
 		(!strcmp(fromname, "euc-jp") ||
-		 !strncmp(fromname, "iso-2022-jp",11) ||
 		 !strcmp(fromname, "shift_jis")))
 		return TQ_GOOD;
-	    return TQ_NO;	/* if not handled by (from == to) above */
+	    /*
+	    **  The other charsets for CJK were handled
+	    **  by the (from == to) above, so we need not
+	    **  check those. - FM
+	    **/
+	    return TQ_NO;
 	}
 	if (!strcmp(fromname, "koi8-r")) {
 	    /*
@@ -90,70 +106,78 @@ PUBLIC UCTQ_t UCCanTranslateFromTo ARGS2(
     }
 }
 
-/* Returns YES if no tranlation necessary (because charsets
-** are equal, are equivalent, etc.)
+/*
+**  Returns YES if no tranlation necessary (because
+**  charsets are equal, are equivalent, etc.).
 */
-PUBLIC BOOL UCNeedNotTranslate ARGS2(int, from, int, to)
+PUBLIC BOOL UCNeedNotTranslate ARGS2(
+	int,		from,
+	int,		to)
 {
     CONST char *fromname;
     CONST char *toname;
-    if (from==to)
+    if (from == to)
 	return YES;
     if (from < 0)
 	return NO;		/* ??? */
     if (LYCharSet_UC[from].enc == UCT_ENC_7BIT) {
-	return YES;		/* only 7bit chars */
+	return YES;		/* Only 7bit chars. */
     }
     fromname = LYCharSet_UC[from].MIMEname;
-    if (0==strcmp(fromname,"x-transparent") ||
-	0==strcmp(fromname,"us-ascii")) {
+    if (!strcmp(fromname, "x-transparent") ||
+	!strcmp(fromname, "us-ascii")) {
 	    return YES;
     }
     if (to < 0)
 	return NO;		/* ??? */
-    if (to==0) {
+    if (to == 0) {
 	if (LYCharSet_UC[from].codepoints & (UCT_CP_SUBSETOF_LAT1))
 	    return YES;
     }
     toname = LYCharSet_UC[to].MIMEname;
-    if (0==strcmp(toname,"x-transparent")) {
+    if (!strcmp(toname, "x-transparent")) {
 	return YES;
     }
     if (LYCharSet_UC[to].enc == UCT_ENC_UTF8) {
 	return NO;
     }
-    if (from==0) {
+    if (from == 0) {
 	if (LYCharSet_UC[from].codepoints & (UCT_CP_SUPERSETOF_LAT1))
 	    return YES;
     }
     if (LYCharSet_UC[from].enc == UCT_ENC_CJK) {
-	if (HTCJK == NOCJK)	/* use that global flag, for now */
+	if (HTCJK == NOCJK)	/* Use that global flag, for now. */
 	    return NO;
-	if (HTCJK == JAPANESE && (
-	    0==strcmp(fromname,"euc-jp") ||
-	    0==strncmp(fromname,"iso-2022-jp",11) ||
-	    0==strcmp(fromname,"shift_jis")
-	    ))
+	if (HTCJK == JAPANESE &&
+	    /*
+	    **  Always strip the "x-" from "x-euc-jp",
+	    **  or convert "x-shift-jis" to "shift_jis",
+	    **  before calling this function, and so
+	    **  don't check for them here. - FM
+	    */
+	    (!strcmp(fromname, "euc-jp") ||
+	     !strncmp(fromname, "iso-2022-jp",11) ||
+	     !strcmp(fromname, "shift_jis")))
 	    return YES;	/* ??? */
-	return NO;	/* if not handled by (from==to) above */
+	return NO;	/* If not handled by (from == to) above. */
     }
     return NO;
 }
 
 /*
- *  The idea here is that any stage of the stream pipe which is interested
- *  in some charset dependent processing will call this function.
- *  Given input and ouptput charsets, this function will set various flags
- *  in a UCTransParams structure that _suggest_ to the caller what to do.
- *
- *  Should be called once when a stage starts processing text (and the
- *  input and output charsets are known), or whenever one of input or
- *  output charsets has changed (e.g. by SGML.c stage after HTML.c stage
- *  has processed a META tag).
- *  The global flags (LYRawMode, HTPassEightBitRaw etc.) are currently
- *  not taken into account here (except for HTCJK, somewhat), it's still
- *  up to the caller to do something about them.
- */
+**  The idea here is that any stage of the stream pipe which is interested
+**  in some charset dependent processing will call this function.
+**  Given input and ouptput charsets, this function will set various flags
+**  in a UCTransParams structure that _suggest_ to the caller what to do.
+**
+**  Should be called once when a stage starts processing text (and the
+**  input and output charsets are known), or whenever one of input or
+**  output charsets has changed (e.g. by SGML.c stage after HTML.c stage
+**  has processed a META tag).
+**  The global flags (LYRawMode, HTPassEightBitRaw etc.) are currently
+**  not taken into account here (except for HTCJK, somewhat), it's still
+**  up to the caller to do something about them. - KW
+*/
 PUBLIC void UCSetTransParams ARGS5(
     UCTransParams *, 	pT,
     int,		cs_in,
@@ -161,13 +185,26 @@ PUBLIC void UCSetTransParams ARGS5(
     int,		cs_out,
     CONST LYUCcharset*,	p_out)
 {
+    /*
+    **  Initialize this element to FALSE, and set it TRUE
+    **  below if we're dealing with VISCII. - FM
+    */
     pT->trans_C0_to_uni = FALSE;
+
+    /*
+    **  The "transparent" display character set is a
+    **  "super raw mode". - FM
+    */
     pT->transp = (!strcmp(p_in->MIMEname, "x-transparent") ||
 		  !strcmp(p_out->MIMEname, "x-transparent"));
+
     if (pT->transp) {
+	/*
+	**  Set up the structure for "transparent". - FM
+	*/
 	pT->do_cjk = FALSE;
 	pT->decode_utf8 = FALSE;
-	pT->output_utf8 = FALSE;	/* we may, but won't know about it */
+	pT->output_utf8 = FALSE;  /* We may, but won't know about it. - KW */
 	pT->do_8bitraw = TRUE;
 	pT->use_raw_char_in = TRUE;
 	pT->strip_raw_char_in = FALSE;
@@ -176,41 +213,120 @@ PUBLIC void UCSetTransParams ARGS5(
 	pT->trans_C0_to_uni = (p_in->enc == UCT_ENC_8BIT_C0 ||
 			       p_out->enc == UCT_ENC_8BIT_C0);
     } else {
+        /*
+	**  Initialize local flags. - FM
+	*/
 	BOOL intm_ucs = FALSE;
 	BOOL use_ucs = FALSE;
+	/*
+	**  Set this element if we want to treat
+	**  the input as CJK. - FM
+	*/
 	pT->do_cjk = ((p_in->enc == UCT_ENC_CJK) && (HTCJK != NOCJK));
+	/*
+	**  Set these elements based on whether
+	**  we are dealing with UTF-8. - FM
+	*/
 	pT->decode_utf8 = (p_in->enc == UCT_ENC_UTF8);
 	pT->output_utf8 = (p_out->enc == UCT_ENC_UTF8);
 	if (pT->do_cjk) {
+	    /*
+	    **  Set up the structure for a CJK input with
+	    **  a CJK output (HTCJK != NOCJK). - FM
+	    */
 	    intm_ucs = FALSE;
 	    pT->trans_to_uni = FALSE;
 	    use_ucs = FALSE;
 	    pT->do_8bitraw = FALSE;
 	    pT->pass_160_173_raw = TRUE;
-	    pT->use_raw_char_in = FALSE; /* not used for CJK */
+	    pT->use_raw_char_in = FALSE; /* Not used for CJK. - KW */
 	    pT->repl_translated_C0 = FALSE;
-	    pT->trans_from_uni = FALSE; /* not used for CJK */
+	    pT->trans_from_uni = FALSE;	 /* Not used for CJK. - KW */
 	} else {
+	    /*
+	    **  Set up for all other charset combinations.
+	    **  The intm_ucs flag is set TRUE if the input
+	    **  charset is iso-8859-1 or UTF-8, or largely
+	    **  equivalent to them, i.e. if we have UCS without
+	    **  having to do a table translation.
+	    */
 	    intm_ucs = (cs_in == 0 || pT->decode_utf8 ||
 			(p_in->codepoints &
 			 (UCT_CP_SUBSETOF_LAT1|UCT_CP_SUBSETOF_UCS2)));
+	    /*
+	    **  pT->trans_to_uni is set TRUE if we do not have that as
+	    **  input already, and we can translate to Unicode.  Note
+	    **  that UTF-8 always is converted to Unicode in functions
+	    **  that use the transformation structure, so it is
+	    **  treated as already Unicode here.
+	    */
 	    pT->trans_to_uni = (!intm_ucs &&
 				UCCanUniTranslateFrom(cs_in));
+	    /*
+	    **  We set this if we are translating to Unicode and
+	    **  what normally are low value control characters in
+	    **  fact are encoding octets for the input charset
+	    **  (presently, this applies to VISCII). - FM
+	    */
 	    pT->trans_C0_to_uni = (pT->trans_to_uni &&
 				   p_in->enc == UCT_ENC_8BIT_C0);
+	    /*
+	    **  We set this, presently, for VISCII. - FM
+	    */
 	    pT->repl_translated_C0 = (p_out->enc == UCT_ENC_8BIT_C0);
+	    /*
+	    **  This is a flag for whether we are dealing with koi8-r
+	    **  as the input, and could do 8th-bit stripping for other
+	    **  output charsets.  Note that this always sets 8th-bit
+	    **  stripping if the input charset is KOI8-R and the output
+	    **  charset needs it, i.e., regardless of the RawMode and
+	    **  consequent HTPassEightBitRaw setting, so you can't look
+	    **  at raw koi8-r without selecting that as the display
+	    **  character set (or transparent).  That's just as well,
+	    **  but worth noting for developers - FM
+	    */
 	    pT->strip_raw_char_in = ((!intm_ucs ||
 				      (p_out->enc == UCT_ENC_7BIT) ||
-				       (p_out->repertoire &
-				        UCT_REP_SUBSETOF_LAT1)) &&
+				      (p_out->repertoire &
+				       UCT_REP_SUBSETOF_LAT1)) &&
 				     cs_in != cs_out &&
 				     !strcmp(p_in->MIMEname, "koi8-r"));
+	    /*
+	    **  use_ucs should be set TRUE if we have or will create
+	    **  Unicode values for input octets or UTF multibytes. - FM
+	    */
 	    use_ucs = (intm_ucs || pT->trans_to_uni);
+	    /*
+	    **  This is set TRUE if use_ucs was set FALSE.  It is
+	    **  parallel to the HTPassEightBitRaw flag, which
+	    **  is set TRUE or FALSE elsewhere based on the raw mode
+	    **  setting in relation to the current Display Character
+	    **  Set. - FM
+	    */
 	    pT->do_8bitraw = (!use_ucs);
+	    /*
+	    **  This is set TRUE when 160 and 173 should not be treated
+	    **  specially as nbsp and shy, respectively. - FM
+	    */
 	    pT->pass_160_173_raw = (!use_ucs &&
 				    !(p_in->like8859 & UCT_R_8859SPECL));
-	    pT->use_raw_char_in = (!pT->output_utf8 && cs_in == cs_out &&
+	    /*
+	    **  This is set when the input and output charsets match,
+	    **  and they are not ones which should go through a Unicode
+	    **  translation process anyway. - FM
+	    */
+	    pT->use_raw_char_in = (!pT->output_utf8 &&
+				   cs_in == cs_out &&
 		                   !pT->trans_C0_to_uni);
+	    /*
+	    **  This should be set TRUE when we expect to have
+	    **  done translation to Unicode or had the equivalent
+	    **  as input, can translate it to our output charset,
+	    **  and normally want to do so.  The latter depends on
+	    **  the pT->do_8bitraw and pT->use_raw_char_in values set
+	    **  above, but also on HTPassEightBitRaw in any functions
+	    **  which use the transformation structure.. - FM
+	    */
 	    pT->trans_from_uni = (use_ucs && !pT->do_8bitraw &&
 				  !pT->use_raw_char_in &&
 				  UCCanTranslateUniTo(cs_out));
@@ -218,6 +334,11 @@ PUBLIC void UCSetTransParams ARGS5(
     }
 }
 
+/*
+**  This function initalizes the transformation
+**  structure by setting all its elements to
+**  FALSE. - KW
+*/
 PUBLIC void UCTransParams_clear ARGS1(
     UCTransParams *,    pT)
 {
@@ -306,5 +427,62 @@ PUBLIC BOOL UCPutUtf8_charstring ARGS3(
 	PUTC2(code);
     } else
 	return NO;
+    return YES;
+}
+
+/*
+**  This function converts a Unicode (UCode_t) value
+**  to a multibyte UTF-8 character, which is loaded
+**  into the buffer received as an argument.  The
+**  buffer should be large enough to hold at least
+**  seven characters (but should be declared as 8
+**  to minimize byte alignment problems with some
+**  compilers). - FM
+*/
+PUBLIC BOOL UCConvertUniToUtf8 ARGS2(
+	UCode_t,	code,
+	char *,		buffer)
+{
+    char *ch = buffer;
+
+    if (!ch)
+	return NO;
+
+    if (code <= 0 || code > 0x7fffffffL) {
+	*ch = '\0';
+        return NO;
+    }
+
+    if (code < 0x800L) {
+	*ch++ = (char)(0xc0 | (code>>6));
+	*ch++ = (char)(0x80 | (0x3f & (code)));
+	*ch = '\0';
+    } else if (code < 0x10000L) {
+	*ch++ = (char)(0xe0 | (code>>12));
+	*ch++ = (char)(0x80 | (0x3f & (code>>6)));
+	*ch++ = (char)(0x80 | (0x3f & (code)));
+	*ch = '\0';
+    } else if (code < 0x200000L) {
+	*ch++ = (char)(0xf0 | (code>>18));
+	*ch++ = (char)(0x80 | (0x3f & (code>>12)));
+	*ch++ = (char)(0x80 | (0x3f & (code>>6)));
+	*ch++ = (char)(0x80 | (0x3f & (code)));
+	*ch = '\0';
+    } else if (code < 0x4000000L) {
+	*ch++ = (char)(0xf8 | (code>>24));
+	*ch++ = (char)(0x80 | (0x3f & (code>>18)));
+	*ch++ = (char)(0x80 | (0x3f & (code>>12)));
+	*ch++ = (char)(0x80 | (0x3f & (code>>6)));
+	*ch++ = (char)(0x80 | (0x3f & (code)));
+	*ch = '\0';
+    } else {
+	*ch++ = (char)(0xfc | (code>>30));
+	*ch++ = (char)(0x80 | (0x3f & (code>>24)));
+	*ch++ = (char)(0x80 | (0x3f & (code>>18)));
+	*ch++ = (char)(0x80 | (0x3f & (code>>12)));
+	*ch++ = (char)(0x80 | (0x3f & (code>>6)));
+	*ch++ = (char)(0x80 | (0x3f & (code)));
+	*ch = '\0';
+    }
     return YES;
 }

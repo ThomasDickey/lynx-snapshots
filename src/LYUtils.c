@@ -526,6 +526,13 @@ PUBLIC void highlight ARGS3(
 		 *  within the hightext. - FM
 		 */
 		data = (Data + (offset - Offset));
+		if (!utf_flag) {
+		    data = Data + (offset - Offset);
+		} else {
+		    data = LYmbcs_skip_glyphs(Data,
+					      (offset - Offset),
+					      utf_flag);
+		}
 		if ((case_sensitive ?
 		     (cp = LYno_attr_mbcs_strstr(data,
 						 target,
@@ -574,7 +581,14 @@ highlight_hit_within_hightext:
 		(flag == ON ? (hLen - 1) : hLen))  {
 		goto highlight_search_hightext2;
 	    }
-	    data += (Offset - offset);
+	    if (!utf_flag) {
+		data += (Offset - offset);
+	    } else {
+		refresh();
+		data = LYmbcs_skip_glyphs(data,
+					  (Offset - offset),
+					  utf_flag);
+	    }
 	    offset = Offset;
 	    itmp = 0;
 	    written = 0;
@@ -793,7 +807,13 @@ highlight_hit_within_hightext:
 	     *  See if we have another hit that starts
 	     *  within the hightext. - FM
 	     */
-	    data = (Data + (offset - Offset));
+	    if (!utf_flag) {
+		data = Data + (offset - Offset);
+	    } else {
+		data = LYmbcs_skip_glyphs(Data,
+					  (offset - Offset),
+					  utf_flag);
+	    }
 	    if ((case_sensitive ?
 		 (cp = LYno_attr_mbcs_strstr(data,
 					     target,
@@ -826,7 +846,14 @@ highlight_hit_within_hightext:
 		if ((HitOffset + (offset + tLen)) >=
 		    (hoffset + hLen)) {
 		    offset = (HitOffset + offset);
-		    data = (buffer + (offset - hoffset));
+		    if (!utf_flag) {
+			data = buffer + (offset - hoffset);
+		    } else {
+			refresh();
+			data = LYmbcs_skip_glyphs(buffer,
+						  (offset - hoffset),
+						  utf_flag);
+		    }
 		    move(hLine, offset);
 		    itmp = 0;
 		    written = 0;
@@ -1233,6 +1260,13 @@ highlight_search_hightext2:
 		 *  See if we have another hit that starts
 		 *  within the hightext2. - FM
 		 */
+		if (!utf_flag) {
+		    data = Data + (offset - Offset);
+		} else {
+		    data = LYmbcs_skip_glyphs(Data,
+					      (offset - Offset),
+					      utf_flag);
+		}
 		data = (Data + (offset - Offset));
 		if ((case_sensitive ?
 		     (cp = LYno_attr_mbcs_strstr(data,
@@ -1282,7 +1316,14 @@ highlight_hit_within_hightext2:
 		(flag == ON ? (hLen - 1) : hLen))  {
 		goto highlight_search_done;
 	    }
-	    data += (Offset - offset);
+	    if (!utf_flag) {
+		data += (Offset - offset);
+	    } else {
+		refresh();
+		data = LYmbcs_skip_glyphs(data,
+					  (Offset - offset),
+					  utf_flag);
+	    }
 	    offset = Offset;
 	    itmp = 0;
 	    written = 0;
@@ -1501,7 +1542,13 @@ highlight_hit_within_hightext2:
 	     *  See if we have another hit that starts
 	     *  within the hightext2. - FM
 	     */
-	    data = (Data + (offset - Offset));
+	    if (!utf_flag) {
+		data = (Data + (offset - Offset));
+	    } else {
+		data = LYmbcs_skip_glyphs(Data,
+					  (offset - Offset),
+					  utf_flag);
+	    }
 	    if ((case_sensitive ?
 		 (cp = LYno_attr_mbcs_strstr(data,
 					     target,
@@ -1534,7 +1581,14 @@ highlight_hit_within_hightext2:
 		if ((HitOffset + (offset + tLen)) >=
 		    (hoffset + hLen)) {
 		    offset = (HitOffset + offset);
-		    data = (buffer + (offset - hoffset));
+		    if (!utf_flag) {
+			data = buffer + (offset - hoffset);
+		    } else {
+			refresh();
+			data = LYmbcs_skip_glyphs(buffer,
+						  (offset - hoffset),
+						  utf_flag);
+		    }
 		    move(hLine, offset);
 		    itmp = 0;
 		    written = 0;
@@ -1851,7 +1905,13 @@ PUBLIC void statusline ARGS1(
 	FREE(temp);
     } else {
         /*
-	 *  Strip any escapes, and shorten text if necessary. - FM
+	 *  Strip any escapes, and shorten text if necessary.  Note
+	 *  that we don't deal with the possibility of UTF-8 characters
+	 *  in the string.  This is unlikely, but if strings with such
+	 *  characters are used in LYMessages_en.h, a compilation
+	 *  symbol of HAVE_UTF8_STATUSLINES could be added there, and
+	 *  code added here for determining the displayed string length,
+	 *  as we do above for CJK. - FM
 	 */
 	for (i = 0, len = 0; text[i] != '\0' && len < max_length; i++) {
 	    if (text[i] != '\033') {
@@ -1881,12 +1941,12 @@ PUBLIC void statusline ARGS1(
         move(LYlines-1, 0);
     }
     clrtoeol();
-    if (text != NULL) {
-#ifdef EXP_CHARTRANS
+    if (text != NULL && text[0] != '\0') {
+#ifdef HAVE_UTF8_STATUSLINES
 	if (LYCharSet_UC[current_char_set].enc == UCT_ENC_UTF8) {
 	    refresh();
 	}
-#endif
+#endif /* HAVE_UTF8_STATUSLINES */
 #ifndef USE_COLOR_STYLE
 	lynx_start_status_color ();
 	addstr (buffer);
@@ -2576,6 +2636,7 @@ PUBLIC int is_url ARGS1(
 	    for (i = 0; i < 10; i++)
 	        cp[i] = TOUPPER(cp[i]);
 	}
+	(void)is_url(&cp[11]);
 	return(LYNXIMGMAP_URL_TYPE);
 
     } else if (!strncasecomp(cp, "LYNXCOOKIE:", 11)) {
@@ -2873,6 +2934,9 @@ PUBLIC BOOLEAN inlocaldomain NOARGS
 PUBLIC void size_change ARGS1(
 	int,		sig)
 {
+    int old_lines = LYlines;
+    int old_cols = LYcols;
+
 #ifdef USE_SLANG
     SLtt_get_screen_size();
     LYlines = SLtt_Screen_Rows;
@@ -2925,7 +2989,17 @@ PUBLIC void size_change ARGS1(
         LYcols = 80;
 #endif /* USE_SLANG */
 
-    recent_sizechange = TRUE; 
+    /*
+     *  Check if the screen size has actually changed. - AJL
+     */
+    if (LYlines != old_lines || LYcols != old_cols) {
+	recent_sizechange = TRUE;
+    }
+    if (TRACE) {
+	fprintf(stderr,
+		"Window size changed from (%d,%d) to (%d,%d)\n",
+		old_lines, old_cols, LYlines, LYcols);
+    }
 #ifdef SIGWINCH
     (void)signal (SIGWINCH, size_change);
 #endif /* SIGWINCH */

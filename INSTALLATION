@@ -45,6 +45,13 @@ Step 3. (You can skip this step only if you only use English and are not
     character set) and ASSUME_LOCAL_CHARSET to work correctly for them
     before starting to create bookmark files et cetera.  Please read
     "lynx.cfg" for detailed instructions.
+    Additional character sets and some of their properties may be defined with 
+    tables in the src/chrtrans directory.  It is not necessary to change 
+    src/LYCharSets.c to make these new character sets known to Lynx, (although 
+    definitions for the "older" character sets are still there), but the new
+    ones have to be listed in src/UCdomap.c and, currently, the makefiles in
+    src/ and src/chrtrans to be automatically used.  See the README.* files
+    in src/chrtrans/ for details.
 
 Step 4. (optional -- news for UNIX and VMS)
     Set NNTPSERVER in "lynx.cfg" to your site's NNTP server, or set the
@@ -130,35 +137,29 @@ II. Compile instructions -- UNIX
 	   ./configure --help
 
     Here's an alphabetical listing of the Lynx-specific options.  The actual
-    order shown by the -help option is different due to the requirements of
-    the script:
+    order shown by the -help option is different.
 
   --disable-dired			(defines DIRED_SUPPORT)
-	Use this option to enable or disable the optional
-	directory-editor.
+	Use this option to disable the optional directory-editor.
 
 	Lynx supports directory editing (DirEd) for local directories. 
 	This allows users to do things like view, copy and remove files
 	using a tabular display of the directory and single-keystroke
-	commands instead of using the command line.  From inside Lynx,
-	the keystroke sequence "g.<enter>" switches Lynx to DirEd mode
-	on the current directory.  If you're building a Lynx that is to
-	be used as a kind of restricted shell for users who do not have
-	access to the command line and should not have access to
-	equivalent capabilities, you must disable DirEd with this
-	option.  You can also disable some DirEd functions while
-	allowing others.
+	commands instead of using the command line.  From inside Lynx, the
+	keystroke sequence "g.<enter>" switches Lynx to DirEd mode on the
+	current directory.  If you're building a Lynx that is to be used as
+	a kind of restricted shell for users who do not have access to the
+	command line and should not have access to equivalent capabilities,
+	you must disable DirEd with this option.  You can also disable some
+	DirEd functions while allowing others.  If you have disabled DirEd
+	completely, you can ignore all the other DirEd options.
 
-	All DirEd functions that were enabled on compilation can be
-	disabled or modified at run time via DIRED_MENU symbols in
-	lynx.cfg.
-
-	If you have disabled DirEd completely, you can ignore all the
-	other DirEd options.
+	All DirEd functions that were enabled on compilation can be disabled
+	or modified at run time via DIRED_MENU symbols in lynx.cfg.
 
   --disable-dired-archive		(define ARCHIVE_ONLY)
 	Use this option to prevent DirEd from extracting files from an
-	archive file,
+	archive file.
 
   --disable-dired-gzip			(prevent defining OK_GZIP)
 	Use this option to prevent DirEd from using gzip and gunzip.
@@ -213,23 +214,15 @@ II. Compile instructions -- UNIX
 	(The symbol DEBUG is always defined).
 
   --enable-find-leaks			(defines LY_FIND_LEAKS)
-  	Use this option to compile-in logic for testing memory leaks.
+	Use this option to compile-in logic for testing memory leaks.
 
   --enable-warnings
-  	Use this option to turn on GCC compiler warnings.
+	Use this option to turn on GCC compiler warnings.
 
-  --with-cfg-file=XXX			(defines LYNX_CFG_FILE)
-	Use this option to override the location of the site
-	configuration file's pathname.  It defaults to $libdir/lynx.cfg,
-	where $libdir is set in the configure script, e.g., to
-	/usr/local/lib.
-
-  --with-lss-file=XXX			(defines LYNX_LSS_FILE)
-	Only for optional and *experimental* color style code.
-	Use this option to override the location of the site
-	style-sheet file's pathname.  It defaults to $libdir/lynx.lss,
-	where $libdir is set in the configure script, e.g., to
-	/usr/local/lib.
+  --libdir
+	Defines the location where you want the lynx.cfg file installed.
+	Usually this would be the same location as the LYNX_CFG_FILE
+	define in userdefs.h.
 
   --with-screen=XXX
 	Use this option to select the screen type.  The option value,
@@ -244,8 +237,7 @@ II. Compile instructions -- UNIX
    --with-zlib				(defines USE_ZLIB)
 	Use zlib for decompression of some gzip files.
 
-1d. Environment (documented in great detail in the autoconf package)
-
+1d. Environment variables
     The configure script looks for programs and libraries in known/standard
     locations.  You can override the behavior of the script by presetting
     environment variables.  If they are set, the script will try to use these
@@ -273,14 +265,39 @@ II. Compile instructions -- UNIX
 
 -- 1997/7/27 - T. Dickey <dickey@clark.net>
 
+1e. Example
+    I use the following csh shell script to set environment variables and
+    configure options rather than type them at the command line each time.
+
+	#!/bin/csh -f
+	setenv RESOLVLIB -lbind
+	setenv CPPFLAGS "-DNSL_FORK -I$HOME/.slang/src -I$HOME/.usr/include"
+	setenv LIBS "-L$HOME/.slang/lib -L$HOME/.usr/lib"
+	./configure --exec-prefix=$HOME --bindir=$HOME/.lynx \
+		--mandir=$HOME/.usr/man --libdir=$HOME/.usr/lib \
+		--with-screen=slang --with-zlib
+
+    The syntax for setting environment variables depends upon your shell.
+    I have installed the libbind.a resolver library on this particular SunOS
+    machine, and prefer to use it to the old libresolv.a.  Setting the
+    environment variable RESOLVLIB to -lbind predefines it for the configure
+    script.  CPPFLAGS in this example defines NSL_FORK, which is not defined
+    by default, and for which there is no option switch.  (Check under the
+    "SITE_DEFS" heading in "makefile.in" for other minor defines for which
+    there are no options.)  CPPFLAGS also defines the full path to the slang
+    and zlib header files, which are not kept in standard directories.
+    Likewise, LIBS defines the nonstandard locations of libslang.a and libz.a.
+    Setting the option --bindir tells the configure script where I want to
+    install the lynx binary; setting --mandir tells it where to put the lynx.1
+    man page, and setting --libdir tells it where to put the configuration
+    file "lynx.cfg", when I type "make install".  The --with-screen=slang and
+    --with-zlib options are explained above.
+
 2. Manual compile
     If auto-configure does not work for you, or you prefer to compile
     Lynx manually, "docs/Makefile.old" will serve as a template for the
     top-level Makefile, and instructions on how to compile are given in
-    "docs/INSTALLATION.old".  Compilation symbols for which there are no
-    configure options are listed and explained in "docs/Makefile.old".
-    However, rather than maintain two types of build-mechanisms, we prefer
-    to fix bugs in the autoconf script.
+    "docs/INSTALLATION.old".
 
 
 III. Compile instructions -- VMS
@@ -327,21 +344,21 @@ Step 3a.
            CMU_TCP
 	   SOCKETSHR_TCP
 	   TCPWARE
-    It will autosense whether you have VAXC, DECC or GNUC on VAX or AXP
-    and build appropriately.  If a WWWLib already exists for that TCP-IP
-    software, it will prompt you for whether you want to rebuild it.  If
-    you want to build a WWWLib separately, you can type "@libmake.com"
-    with your default directory set to [.WWW.Library.vms] instead doing
-    it via "build.com" in the top directory.  You may need to modify
-    "build-slang.com", as described in its header, so that it can find
-    slang.olb on your system.  If you have both DECC and VAXC, it will
-    use DECC to benefit from the newer and more efficient memory management
-    functions.
+    It will autosense whether you have VAXC, DECC or GNUC on VAX or AXP and
+    build appropriately.  If a WWWLib already exists for that TCP-IP software,
+    it will prompt you for whether you want to rebuild it.  If you want to
+    build a WWWLib separately, you can type "@libmake.com" with your default
+    directory set to [.WWW.Library.vms] instead doing it via "build.com" in
+    the top directory.  You may need to modify "build-slang.com", as described
+    in its header, so that it can find slang.olb on your system.  If you have
+    both DECC and VAXC, it will use DECC to benefit from the newer and more
+    efficient memory management functions.
 
 Step 3b.  (optional compilation method)
-    If you have and want to use MMS, read the header of descrip.mms
-    in the top directory and be sure you include the appropriate macro
-    definitions when you invoke it:
+    If you have and want to use MMS, read the header of descrip.mms in the
+    top directory and be sure you include the appropriate macro definitions
+    when you invoke it:
+
 	$ MMS /Macro = (MULTINET=1)		for VAXC - MultiNet
 	$ MMS /Macro = (WIN_TCP=1)		for VAXC - Wollongong TCP/IP
 	$ MMS /Macro = (UCX=1)			for VAXC - UCX
@@ -363,11 +380,11 @@ Step 3b.  (optional compilation method)
 	$ MMS /Macro = (SOCKETSHR_TCP=1,GNU_C=1) for GNUC - SOCKETSHR/NETLIB
 	$ MMS /Macro = (TCPWARE=1, GNU_C=1)	for GNUC - TCPWare TCP/IP
 
-        If you just type "MMS" it will default to the MULTINET and VAXC
-	configuration.  MMS will build the WWW library and Lynx sources,
-	and link the executable.  However, not all of the header dependencies
-	are specified.  If you are not a developer, and need a clean build,
-	you should use build.com instead of the MMS utility.
+    If you just type "MMS" it will default to the MULTINET and VAXC
+    configuration.  MMS will build the WWW library and Lynx sources, and
+    link the executable.  However, not all of the header dependencies are
+    specified.  If you are not a developer, and need a clean build, you
+    should use build.com instead of the MMS utility.
 
     If you want SOCKS support on VMS, you must add SOCKS as a compilation
     definition, and the SOCKS library to the link command.  However, instead
@@ -378,13 +395,6 @@ Step 3b.  (optional compilation method)
 
 
 IV. Compile instructions -- Win32 (Windows95/NT)
-
-    Ports have been added for Win32 (95/NT) and 386 DOS systems (see
-    below).  I created the following four defines to accomplish this:
-        _WINDOWS Defined for Win32 specific code (Mostly TCP related)
-        DJGPP    Defined for 386 specific code (Mostly TCP related)
-        DOSPATH  Defined for any DOS'ish computer
-        NOSIGHUP Defined for computers not supporting sighup signal calls.
 
     The original Win32 port was built with Borland C++ 4.52.  Later versions
     of Borland C++ reportedly can be used, but no other compilers have been
@@ -405,7 +415,7 @@ IV. Compile instructions -- Win32 (Windows95/NT)
     check for new .tbl files; hand edit in any new ones, and then do "makew32".
     Jump into Borland C++, load the project (IDE file) and compile Lynx.
     Alternately, after compiling the chartrans tables, you can come back to
-    the top directory and do "make -f makefile.w32".
+    the top directory and compile manually, i.e., do "make -f makefile.w32".
 
     I also have a binary available at "http://www.fdisk.com/doslynx/".  This
     binary was compiled with pdcurses 2.3, hacked so win32 mouse support works,
@@ -446,7 +456,7 @@ V. Compile instructions -- 386 DOS
     curses package and a TCP package.  You can use PDCurses (available at 
     "http://www.lightlink.com/hessling/") and the DJGPP port of WATTCP 
     (available in two different versions at "ftp://neonatal.sm.ic.ac.uk/" 
-    and at "http://lab1.psy.univie.ac.at/~michael/tcplib-dj200.html").  
+    and in "http://www.fdisk.com/doslynx/wlynx/source/djgpp.zip").
     You can also use slang ("ftp://space.mit.edu/pub/davis/slang") as your
     curses library.  It has not been fully ported to DOS yet, however.
     See "http://www.flora.org/lynx-dev/html/month1097/msg00390.html".  You
@@ -457,12 +467,15 @@ V. Compile instructions -- 386 DOS
     ("http://www.simtel.net/pub/simtelnet/gnu/djgpp/v2gnu/pat25b.zip").  To
     read the Unix man style documentation, use, for example, "less"
     ("http://www.simtel.net/pub/simtelnet/gnu/djgpp/v2gnu/lss332b.zip").
+    Compile or place your compiled PDCurses library in lynx2-*/curses, and
+    compile or place your compiled WATTCP library in lynx2-*/djgpp/tcplib.
 
-    Move to the "lynx2-*/WWW/Library/djgpp" directory and do "make". This
+    Move to the "lynx2-*/WWW/Library/djgpp" directory and do "make".  This
     should compile libwww.a.  Next move to the "lynx2-*/src/chrtrans"
     directory and do "make -f makefile.dos" to compile the character tables.
     Then move to the "lynx2-*/src" directory and do "make -f makefile.dos".
-    If all goes well, you will have a lynx.exe file.
+    If all goes well, you will have a lynx.exe file.  If you have trouble,
+    check to be sure djgpp.env is the way it came in the original package.  
 
     You probably want to test lynx now, but lynx_386 won't work without a
     packet driver installed.  For testing purposes, you can use
@@ -474,7 +487,25 @@ V. Compile instructions -- 386 DOS
     "ftp://ftp.klos.com/demo/pppshare.exe").
 
     See "http://www.fdisk.com/doslynx/lynxport.htm" for more hints and some
-    precompiled libraries.
+    precompiled libraries.  If you compile lynx regularly, you may automate
+    the procedure by creating a batch file such as the following.
+
+	cd djgpp\tcplib\obj
+	make
+	cd ..\..\www\library\djgpp
+	make
+	cd ..\..\..\src\chrtrans
+	make -f makefile.dos
+	cd ..\..\..\src
+	make -f makefile.dos
+	strip lynx.exe
+	cd ..
+
+    This batch file expects the DJGPP port of WATTCP to be installed in the
+    lynx2-* directory.  Place a copy of this batch file, named "djgpp.bat",
+    in the lynx2-* directory, move to that directory and type "djgpp".  A more
+    complete batch file with error checking and annotation can be found at:
+    "http://www.flora.org/lynx-dev/html/month1197/msg00250.html".
 
 -- 1997/9/29 - D. Kaufman <dkaufman@rahul.net>
 -- 1997/10/3 - B. Schiavo <Wschiavo@concentric.net>
@@ -518,8 +549,8 @@ VI. General installation instructions
     If something doesn't work, or you can't get it to compile at all, or
     you can't figure out what one of the defines means, read the PROBLEMS
     file and *.announce files in the docs subdirectory.  The docs/CHANGES*
-    files record the complete history of Lynx development and are an invaluable
-    resource for understanding how Lynx should perform.
+    files record the complete history of Lynx development and are an
+    invaluable resource for understanding how Lynx should perform.
 
     If you still have difficulties, send an email message to the Lynx-Dev
     mailing list (see the README file).  Try to include pertinent information
@@ -655,9 +686,8 @@ VII. Setting environment variables before running Lynx (optional)
     USER         Tells Lynx you are real instead of an anonymous user(?)
 
     386 version only:
-    WATCONF      Where to find the wattcp.cfg file.
     WATTCP.CFG   Where to find the wattcp.cfg file.
-    (only one applies, depending on how you compiled your tcp library)
+    (Depending on how you compiled libtcp.a, you may have to use WATCONF.)
 
     Define these in your batch file for running Lynx.  For example, if your
     application line is "D:\win32\lynx.bat", lynx.bat may look like:
@@ -673,4 +703,4 @@ VIII. Acknowledgment
    Thanks to the many volunteers who offered suggestions for making this
    installation manual as accurate and complete as possible.
 
--- 1997/10/28 - H. Nelson <lynx-admin@irm.nara.kindai.ac.jp>
+-- 1997/11/14 - H. Nelson <lynx-admin@irm.nara.kindai.ac.jp>

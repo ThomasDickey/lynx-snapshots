@@ -119,14 +119,14 @@ PUBLIC int change_form_link ARGS6(
 		form->value_cs = opt_ptr->value_cs;
 	    }
 #if defined(FANCY_CURSES) || defined(USE_SLANG)
-            if (!enable_scrollback)
+	    if (!enable_scrollback)
 #if defined(VMS) && !defined(USE_SLANG)
-                if (form->num_value == OrigNumValue)
-                    c = DO_NOTHING;
-                else
+		if (form->num_value == OrigNumValue)
+		    c = DO_NOTHING;
+		else
 #endif /* VMS && !USE_SLANG*/
 		c = 23;	 /* CTRL-W refresh without clearok */
-            else
+	    else
 #endif /* FANCY_CURSES || USE_SLANG */
                 c = 12;  /* CTRL-L for repaint */
             break;
@@ -358,6 +358,12 @@ again:
 	action = EditBinding(ch);
 	if (action == LYE_ENTER)
 	    break;
+	if (action == LYE_LINKN) {
+	    if ((ch = LYReverseKeymap(LYK_F_LINK_NUM)) <= 0) {
+		ch = DO_NOTHING;
+	    }
+	    break;
+	}
 	if (action == LYE_AIX &&
 	    (HTCJK == NOCJK && LYlowest_eightbit[current_char_set] > 0x97))
 	    break;
@@ -369,7 +375,7 @@ again:
 	    return(DO_NOTHING);
 	}
 	if (keymap[ch + 1] == LYK_REFRESH)
-	    goto breakfor;
+	    break;
 	switch (ch) {
 	    case DNARROW:
 	    case UPARROW:
@@ -749,17 +755,7 @@ redraw:
 #ifdef VMS
     VMSbox(form_window, (bottom - top), (width + 4));
 #else
-    {
-	int boxvert, boxhori;
-	UCSetBoxChars(current_char_set, &boxvert, &boxhori, BOXVERT, BOXHORI);
-#ifdef CSS
-	wcurses_css(form_window, "frame", ABS_ON);
-	box(form_window, boxvert, boxhori);
-	wcurses_css(form_window, "frame", ABS_OFF);
-#else
-	box(form_window, boxvert, boxhori);
-#endif
-    }
+    LYbox(form_window, TRUE);
 #endif /* VMS */
     wrefresh(form_window);
 #endif /* USE_SLANG */

@@ -8,6 +8,7 @@
 **		strings written must be less than buffer size.
 */
 #include "HTUtils.h"
+#include "tcp.h"
 
 #include "HTPlain.h"
 
@@ -32,10 +33,8 @@ extern HTStyleSheet * styleSheet;
 extern int current_char_set;
 extern CONST char * LYchar_set_names[];
 extern CONST char **LYCharSets[];
-#ifdef EXP_CHARTRANS
 extern int LYlowest_eightbit[];
 extern BOOLEAN LYRawMode;
-#endif /* EXP_CHARTRANS */
 extern CONST char * HTMLGetEntityName PARAMS((int i));
 extern BOOL HTPassEightBitRaw;
 extern BOOL HTPassHighCtrlRaw;
@@ -47,24 +46,19 @@ PUBLIC int HTPlain_lastraw = -1;
 **		-----------
 */
 struct _HTStream {
-	CONST HTStreamClass *	isa;
-
-	HText * 		text;
-#ifdef EXP_CHARTRANS
+    CONST HTStreamClass *	isa;
+    HText *			text;
     LYUCcharset	* UCI;	/* pointer to node_anchor's UCInfo */
     int	in_char_set;		/* tells us what charset we are fed */
-    int	htext_char_set;		/* what charset feed to HText */
-    char                utf_count;
-    long                utf_char;
-    char	utf_buf[7];
-    char *	utf_buf_p;
-    UCTransParams T;
-#endif /* EXP_CHARTRANS */
+    int	htext_char_set;		/* what charset we feed to HText */
+    char			utf_count;
+    UCode_t			utf_char;
+    char 			utf_buf[8];
+    char *			utf_buf_p;
+    UCTransParams		T;
 };
 
-#ifdef EXP_CHARTRANS
-
-PRIVATE char replace_buf [61];        /* buffer for replacement strings */
+PRIVATE char replace_buf [64];        /* buffer for replacement strings */
 
 PRIVATE void HTPlain_getChartransInfo ARGS2(
 	HTStream *,		me,
@@ -88,7 +82,6 @@ PRIVATE void HTPlain_getChartransInfo ARGS2(
     }
     me->UCI = HTAnchor_getUCInfoStage(anchor, UCT_STAGE_PARSER);
 }
-#endif /* EXP_CHARTRANS */
 
 /*	Write the buffer out to the socket
 **	----------------------------------
@@ -140,13 +133,14 @@ PRIVATE void HTPlain_put_character ARGS2(
     HTPlain_lastraw = c;
     if (c == '\r') {
 	HText_appendCharacter(me->text, '\n');
-#ifdef EXP_CHARTRANS
-      /* for now don't repeat everything here that has been done below - kw*/
-    } else if ((unsigned char)c >= 127) {
-	HTPlain_write(me, &c, 1);
-#endif
     } else if (HTCJK != NOCJK) {
 	HText_appendCharacter(me->text, c);
+    } else if ((unsigned char)c >= 127) {
+	/*
+	**  For now, don't repeat everything here
+	**  that has been done below - KW
+	*/
+	HTPlain_write(me, &c, 1);
     } else if ((unsigned char)c >= 127 && (unsigned char)c < 161 &&
     	       HTPassHighCtrlRaw) {
 	HText_appendCharacter(me->text, c);
@@ -159,7 +153,7 @@ PRIVATE void HTPlain_put_character ARGS2(
 	HText_appendCharacter(me->text, c);
     } else if ((unsigned char)c > 160) {
 	if (!HTPassEightBitRaw &&
-	    strncmp(LYchar_set_names[current_char_set], "ISO Latin 1", 11)) {
+	    current_char_set != 0) {
 	    int len, high, low, i, diff = 1;
 	    CONST char * name;
 	    int value = (int)((unsigned char)c - 160);
@@ -217,11 +211,10 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 {
     CONST char * p;
     CONST char * e = s+l;
-#ifdef EXP_CHARTRANS
     BOOL chk;
-    long unsign_c, uck;
+    UCode_t code;
+    long uck;
     char c_p;
-#endif /* EXP_CHARTRANS */
 
     for (p = s; p < e; p++) {
 #ifdef REMOVE_CR_ONLY
@@ -247,8 +240,7 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 	    HText_appendCharacter(me->text, '\n');
 	    continue;
 	}
-#ifdef EXP_CHARTRANS
-	unsign_c = (unsigned char)(*p);
+	code = (unsigned char)*p;
 	c_p = *p;
 
 	if (me->T.decode_utf8) {
@@ -257,20 +249,31 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 	    **  Incomplete characters silently ignored.
 	    **  from Linux kernel's console.c
 	    */
-	    if ((unsigned char)(*p) > 0x7f) {
+	    if ((unsigned char)(*p) > 127) {
 		if (me->utf_count > 0 && (*p & 0xc0) == 0x80) {
 		    me->utf_char = (me->utf_char << 6) | (*p & 0x3f);
 		    me->utf_count--;
-		    *(me->utf_buf_p++) = *p;
+		    *(me->utf_buf_p) = *p;
+		    (me->utf_buf_p)++;
 		    if (me->utf_count == 0) {
+		        /*
+			**  Got a complete multibyte character.
+			*/
 			*(me->utf_buf_p) = '\0';
-			unsign_c = me->utf_char;
-			if (unsign_c<256) c_p = (char)unsign_c;
+			code = me->utf_char;
+			if (code < 256) {
+			    c_p = FROMASCII((char)code);
+			}
+		    } else {
+			continue;  /* iterate for more */
 		    }
-		    else continue;  /* iterate for more */
 		} else {
+		    /*
+		    **  Accumulate a multibyte character.
+		    */
 		    me->utf_buf_p = me->utf_buf;
-		    *(me->utf_buf_p++) = *p;
+		    *(me->utf_buf_p) = *p;
+		    (me->utf_buf_p)++;
 		    if ((*p & 0xe0) == 0xc0) {
 			me->utf_count = 1;
 			me->utf_char = (*p & 0x1f);
@@ -286,14 +289,20 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 		    } else if ((*p & 0xfe) == 0xfc) {
 			me->utf_count = 5;
 			me->utf_char = (*p & 0x01);
-		    } else { /* garbage */
+		    } else {
+			/*
+			 *  Garbage.
+			 */
 			me->utf_count = 0;
 			me->utf_buf_p = me->utf_buf;
 			*(me->utf_buf_p) = '\0';
 		    }
 		    continue; /* iterate for more */
 		}
-	    } else {	/* got an ASCII char */
+	    } else {
+	        /*
+		**  Got an ASCII character.
+		*/
 		me->utf_count = 0;
 		me->utf_buf_p = me->utf_buf;
 		*(me->utf_buf_p) = '\0';
@@ -301,25 +310,21 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 	}
 	
 	if (me->T.trans_to_uni &&
-	    (unsign_c >= 127 ||
-	     (unsign_c < 32 && unsign_c != 0 && me->T.trans_C0_to_uni))) {
-	    unsign_c = UCTransToUni(c_p, me->in_char_set);
-	    if (unsign_c > 0) {
-		if (unsign_c < 256) {
-		    c_p = (char)unsign_c;
+	    (code >= 127 ||
+	     (code < 32 && code != 0 && me->T.trans_C0_to_uni))) {
+	    code = UCTransToUni(c_p, me->in_char_set);
+	    if (code > 0) {
+		if (code < 256) {
+		    c_p = FROMASCII((char)code);
 		}
 	    }
 	}
 	/*
-	**  At this point we have either unsign_c in Unicode
-	**  (and c in latin1 if unsign_c is in the latin1 range),
-	**  or unsign_c and c will have to be passed raw.
+	**  At this point we have either code in Unicode
+	**  (and c in latin1 if code is in the latin1 range),
+	**  or code and c will have to be passed raw.
 	*/
 
-#else
-#define unsign_c (unsigned char)*p	
-#define c_p *p
-#endif /* EXP_CHARTRANS */
 	/*
 	**  If CJK mode is on, we'll assume the document matches
 	**  the user's selected character set, and if not, the
@@ -334,7 +339,7 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 #define PASSHI8BIT HTPassEightBitRaw
 #else
 #define PASSHICTRL (me->T.transp || \
-		    unsign_c >= LYlowest_eightbit[me->in_char_set])
+		    code >= LYlowest_eightbit[me->in_char_set])
 #define PASS8859SPECL me->T.pass_160_173_raw
 #define PASSHI8BIT (HTPassEightBitRaw || \
 		    (me->T.do_8bitraw && !me->T.trans_from_uni))
@@ -345,47 +350,75 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 	**  document matches and pass 127-160 8-bit characters.  If it
 	**  doesn't match, the user should toggle raw/CJK mode off. - FM
 	*/
-	} else if (unsign_c >= 127 && unsign_c < 161 &&
+	} else if (code >= 127 && code < 161 &&
 		   PASSHICTRL && PASS8859SPECL) {
 	    HText_appendCharacter(me->text, *p);
-	} else if (unsign_c == 173 && PASS8859SPECL) {
+	} else if (code == 173 && PASS8859SPECL) {
 	    HText_appendCharacter(me->text, *p);
 	/*
 	**  If neither HTPassHighCtrlRaw nor CJK is set, play it safe
 	**  and treat 160 (nbsp) as an ASCII space (32). - FM
 	*/
-	} else if (unsign_c == 160) {
+	} else if (code == 160) {
 	    HText_appendCharacter(me->text, ' ');
 	/*
 	**  If neither HTPassHighCtrlRaw nor CJK is set, play it safe
 	**  and ignore 173 (shy). - FM
 	*/
-	} else if (unsign_c == 173) {
+	} else if (code == 173) {
 	    continue;
 	/*
 	**  If we get to here, pass the displayable ASCII characters. - FM
 	*/
-	} else if ((unsign_c >= 32 && unsign_c < 127) ||
-#ifdef EXP_CHARTRANS
-		   (PASSHI8BIT && c_p>=LYlowest_eightbit[me->htext_char_set])||
-#endif
+	} else if ((code >= 32 && code < 127) ||
+		   (PASSHI8BIT &&
+		    c_p >= LYlowest_eightbit[me->htext_char_set]) ||
 		   *p == '\n' || *p == '\t') {
 	    HText_appendCharacter(me->text, c_p);
 
-#ifdef EXP_CHARTRANS
 	} else if (me->T.use_raw_char_in) {
 	    HText_appendCharacter(me->text, *p);
+#ifdef NOTUSED_FOTEMODS
+	/*
+	**  Use an ASCII space (32) for ensp, emsp or thinsp. - FM 
+	*/
+	} else if (code == 8194 || code == 8195 || code == 8201) {
+	    HText_appendCharacter(me->text, ' ');
+	/*
+	**  Use ASCII hyphen for 8211 (ndash/endash)
+	**  or 8212 (mdash/emdash). - FM
+	*/
+	} else if (code == 8211 || code == 8212) {
+	    HText_appendCharacter(me->text, '-');
+	/*
+	**  Ignore 8204 (zwnj) or 8205 (zwj), for now. - FM
+	*/
+	} else if (code == 8204 || code == 8205) {
+	    if (TRACE) {
+		fprintf(stderr,
+			"HTPlain_write: Ignoring '%ld'.\n", code);
+	    }
+	/*
+	**  Ignore 8206 (lrm) or 8207 (rlm), for now. - FM
+	*/
+	} else if (code == 8206 || code == 8207) {
+	    if (TRACE) {
+		fprintf(stderr,
+			"HTPlain_write: Ignoring '%ld'.\n", code);
+	    }
+#endif /* NOTUSED_FOTEMODS */
+
 /******************************************************************
  *   I. LATIN-1 OR UCS2  TO  DISPLAY CHARSET
  ******************************************************************/  
-	} else if ((chk = (me->T.trans_from_uni && unsign_c >= 160)) &&
-		   (uck = UCTransUniChar(unsign_c,
+	} else if ((chk = (me->T.trans_from_uni && code >= 160)) &&
+		   (uck = UCTransUniChar(code,
 					 me->htext_char_set)) >= 32 &&
 		   uck < 256) {
 	    if (TRACE) {
 		fprintf(stderr,
-			"UCTransUniChar returned 0x%lx:'%c'.\n",
-			uck, (char)uck);
+			"UCTransUniChar returned 0x%.2lX:'%c'.\n",
+			uck, FROMASCII((char)uck));
 	    }
 	    HText_appendCharacter(me->text, (char)(uck & 0xff));
 	} else if (chk &&
@@ -394,7 +427,7 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 		   /*
 		   **  Not found; look for replacement string.
 		   */
-		   (uck = UCTransUniCharStr(replace_buf,60, unsign_c,
+		   (uck = UCTransUniCharStr(replace_buf, 60, code,
 					    me->htext_char_set, 0) >= 0)) { 
 	    /*
 	    **  No further tests for valididy - assume that whoever
@@ -405,11 +438,20 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 	**  If we get to here, and should have translated,
 	**  translation has failed so far.  
 	*/
-	} else if (chk && unsign_c > 127 && me->T.output_utf8 &&
-		   *me->utf_buf) {
-	    HText_appendText(me->text, me->utf_buf);
-	    me->utf_buf_p = me->utf_buf;
-	    *(me->utf_buf_p) = '\0';
+	} else if (chk && code > 127 && me->T.output_utf8) {
+	    /*
+	    **  We want UTF-8 output, so do it now. - FM
+	    */
+	    if (*me->utf_buf) {
+		HText_appendText(me->text, me->utf_buf);
+		me->utf_buf_p = me->utf_buf;
+		*(me->utf_buf_p) = '\0';
+	    } else if (UCConvertUniToUtf8(code, replace_buf)) {
+		HText_appendText(me->text, replace_buf);
+	    } else {
+		sprintf(replace_buf, "U%.2lX", code);
+		HText_appendText(me->text, replace_buf);
+	    }
 	} else if (me->T.strip_raw_char_in &&
 		   (unsigned char)*p >= 0xc0 &&
 		   (unsigned char)*p < 255) {
@@ -418,32 +460,30 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 	    **  (somewhat) readable ASCII.
 	    */
 	    HText_appendCharacter(me->text, (char)(*p & 0x7f));
-	} else if (me->T.trans_from_uni && unsign_c > 255) {
+	} else if (me->T.trans_from_uni && code > 255) {
 	    if (PASSHI8BIT && PASSHICTRL && LYRawMode &&
 		(unsigned char)*p >= LYlowest_eightbit[me->htext_char_set]) {
 		HText_appendCharacter(me->text, *p);
 	    } else {
-		sprintf(replace_buf, "U%.2lx", unsign_c);
+		sprintf(replace_buf, "U%.2lX", code);
 		HText_appendText(me->text, replace_buf);
 	    }
-#endif /* EXP_CHARTRANS */
-
 	/*
 	**  If we get to here and HTPassEightBitRaw or the
 	**  selected character set is not "ISO Latin 1",
 	**  use the translation tables for 161-255 8-bit
 	**  characters (173 was handled above). - FM
 	*/
-	} else if (unsign_c > 160) {
-	    if (!HTPassEightBitRaw && unsign_c <= 255 &&
-		strncmp(LYchar_set_names[current_char_set],
-		   	"ISO Latin 1", 11)) {
+	} else if (code > 160) {
+	    if (!HTPassEightBitRaw && code <= 255 &&
+		me->htext_char_set != 0) {
 		/*
 		**  Attempt to translate. - FM
 		*/
 		int len, high, low, i, diff=1;
 		CONST char * name;
-		int value = (int)(unsign_c - 160);
+		int value = (int)(code - 160);
+
 		name = HTMLGetEntityName(value);
 		len =  strlen(name);
 		for(low = 0, high = HTML_dtd.number_of_entities;
@@ -454,7 +494,7 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 		    diff = strncmp(HTML_dtd.entity_names[i], name, len);
 		    if (diff == 0) {
 			HText_appendText(me->text,
-					 LYCharSets[current_char_set][i]);
+					 LYCharSets[me->htext_char_set][i]);
 			break;
 		    }
 		}
@@ -466,7 +506,7 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 		    */
 #ifdef EXP_CHARTRANS
 		    if (!PASSHI8BIT)
-			c_p = (char)unsign_c;
+			c_p = FROMASCII((char)code);
 		    if (me->T.output_utf8 &&
 			*me->utf_buf) {
 			HText_appendText(me->text, me->utf_buf);
@@ -474,7 +514,7 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 			*(me->utf_buf_p) = '\0';
 
 		    } else if (me->T.trans_from_uni) {
-			sprintf(replace_buf,"U%.2lx",unsign_c);
+			sprintf(replace_buf, "U%.2lX", code);
 			HText_appendText(me->text, replace_buf);
 		    } else
 #endif /* EXP_CHARTRANS */
@@ -484,15 +524,12 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 	        /*
 		**  Didn't attempt a translation. - FM
 		*/
-#ifdef EXP_CHARTRANS
-		    /*  either output as UTF8 or a hex representation or
-		    **  pass the raw character and hope it's OK.
-		    */
-		if (unsign_c <= 255 && !PASSHI8BIT)
-		    c_p = (char)unsign_c;
-		if (unsign_c > 127 &&
-		    me->T.output_utf8 &&
-		    *me->utf_buf) {
+		/*  Either output as UTF8 or a hex representation or
+		**  pass the raw character and hope it's OK.
+		*/
+		if (code <= 255 && !PASSHI8BIT)
+		    c_p = FROMASCII((char)code);
+		if (code > 127 && me->T.output_utf8 && *me->utf_buf) {
 		    HText_appendText(me->text, me->utf_buf);
 		    me->utf_buf_p = me->utf_buf;
 		    *(me->utf_buf_p) = '\0';
@@ -503,11 +540,10 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 			   (unsigned char)c_p >=
 			             LYlowest_eightbit[me->htext_char_set]) {
 		    HText_appendCharacter(me->text, c_p);
-		} else if (me->T.trans_from_uni && unsign_c >= 127) {
-		    sprintf(replace_buf,"U%.2lx",unsign_c);
+		} else if (me->T.trans_from_uni && code >= 127) {
+		    sprintf(replace_buf, "U%.2lX", code);
 		    HText_appendText(me->text, replace_buf);
 		} else
-#endif /* EXP_CHARTRANS */
 	        HText_appendCharacter(me->text, c_p);
 	    }
 	}
@@ -541,7 +577,7 @@ PRIVATE void HTPlain_abort ARGS2(
 */
 PUBLIC CONST HTStreamClass HTPlain =
 {		
-	"SocketWriter",
+	"PlainPresenter",
 	HTPlain_free,
 	HTPlain_abort,
 	HTPlain_put_character, 	HTPlain_put_string, HTPlain_write,
@@ -566,7 +602,7 @@ PUBLIC HTStream* HTPlainPresent ARGS3(
 #ifdef EXP_CHARTRANS
     me->utf_count = 0;
     me->utf_char = 0;
-    me->utf_buf[0] = me->utf_buf[6] = '\0';
+    me->utf_buf[0] = me->utf_buf[6] =me->utf_buf[7] = '\0';
     me->utf_buf_p = me->utf_buf;
     me->htext_char_set =
 		      HTAnchor_getUCLYhndl(anchor,UCT_STAGE_HTEXT);

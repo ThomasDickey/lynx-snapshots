@@ -440,9 +440,8 @@ static CONST UC_entity_info extra_entities[] = {
   {"zcaron",	0x017e},  /* z with caron */
   {"zdot",	0x017c},  /* z with dot above */
   {"zeta",	0x03b6},  /* greek small letter zeta,  u+03B6 ISOgrk3 -- */
-  {"zwj",	 8205},	/* zero width joiner */ 
-  {"zwnj",	 8204},	/* zero width non-joiner */ 
-
+  {"zwj",	  8205},  /* zero width joiner */ 
+  {"zwnj",	  8204},  /* zero width non-joiner */ 
 };
 #endif /* EXP_CHARTRANS */
 

@@ -65,7 +65,7 @@ PRIVATE void scan ARGS2(
     char * p;
 #ifdef NOTDEFINED
     int length = strlen(name);
-#endif
+#endif /* NOTDEFINED */
     
     parts->access = NULL;
     parts->host = NULL;
@@ -89,7 +89,7 @@ PRIVATE void scan ARGS2(
     }
     
 #ifdef NOTDEFINED
-    for (p = (name + length-1); p >= name; p--) {
+    for (p = (name + length-1); p >= name; p--) {}
 #endif /* NOTDEFINED */
     /*
     **  Scan left-to-right for a fragment (anchor).
@@ -699,7 +699,10 @@ PUBLIC char * HTUnEscape ARGS1(
 
     while (*p != '\0') {
         if (*p == HEX_ESCAPE &&
-	    p[1] && p[2] &&	/* tests shouldn't be needed, but.. */
+	    /*
+	     *  Tests shouldn't be needed, but better safe than sorry.
+	     */
+	    p[1] && p[2] &&
 	    isxdigit((unsigned char)p[1]) &&
 	    isxdigit((unsigned char)p[2])) {
 	    p++;

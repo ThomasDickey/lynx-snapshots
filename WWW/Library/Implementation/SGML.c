@@ -44,6 +44,8 @@ PUBLIC BOOL HTPassEightBitNum = FALSE;	/* Pass ^ numeric entities raw.	*/
 PUBLIC BOOL HTPassHighCtrlRaw = FALSE;	/* Pass 127-160,173,&#127; raw.	*/
 PUBLIC BOOL HTPassHighCtrlNum = FALSE;	/* Pass &#128;-&#159; raw.	*/
 
+extern UCode_t HTMLGetEntityUCValue PARAMS((CONST char *name));
+extern int LYlowest_eightbit[];
 
 /*	The State (context) of the parser
 **
@@ -79,6 +81,7 @@ struct _HTStream {
 
     HTTag 			*current_tag;
     CONST HTTag 		*unknown_tag;
+    BOOL			inSELECT;
     int 			current_attribute_number;
     HTChunk			*string;
     HTElement			*element_stack;
@@ -109,7 +112,6 @@ struct _HTStream {
     BOOL			second_bracket;
     BOOL			isHex;
 
-#ifdef EXP_CHARTRANS
     HTParentAnchor *		node_anchor;
     LYUCcharset	*		UCI;		/* pointer to anchor UCInfo */
     int				in_char_set;	/* charset we are fed	    */
@@ -121,7 +123,6 @@ struct _HTStream {
     char *			utf_buf_p;
     UCTransParams		T;
     int			current_tag_charset; /* charset to pass attributes */
-#endif /* EXP_CHARTRANS */
 
     char *			recover;
     int				recover_index;
@@ -168,7 +169,8 @@ PRIVATE void set_chartrans_handling ARGS3(
     } else if (context->T.do_8bitraw ||
 	       context->T.use_raw_char_in) {
 	context->current_tag_charset = context->in_char_set;
-    } else if (context->T.trans_from_uni || context->T.output_utf8) {
+    } else if (context->T.output_utf8 ||
+    	       context->T.trans_from_uni) {
 	context->current_tag_charset = UCGetLYhndl_byMIME("unicode-1-1-utf-8");
     } else {
 	context->current_tag_charset = 0;
@@ -321,6 +323,23 @@ PRIVATE BOOL put_special_unicodes ARGS2(
 	**  Use ASCII hyphen for ndash/endash or mdash/emdash.
 	*/
 	PUTC('-');
+#ifdef NOTUSED_FOTEMODS
+    } else if (code == 8204 || code == 8205) {
+	/*
+	**  Ignore zwnj or zwj, for now.  Note that zwnj may have
+	**  been handled as <WBR> by the calling function. - FM
+	*/
+	if (TRACE) {
+	    fprintf(stderr, "put_special_unicodes: Ignoring '%ld'.\n", code);
+	}
+    } else if (code == 8206 || code == 8207) {
+	/*
+	**  Ignore lrm or rlm, for now.
+	*/
+	if (TRACE) {
+	    fprintf(stderr, "put_special_unicodes: Ignoring '%ld'.\n", code);
+	}
+#endif /* NOTUSED_FOTEMODS */
     } else {
 	/*
 	**  Return NO if nothing done.
@@ -348,28 +367,31 @@ PRIVATE BOOL put_special_unicodes ARGS2(
 **
 ** Modified more (for use with Lynx character translation code):
 */
-
-#ifdef EXP_CHARTRANS
 PRIVATE char replace_buf [64];        /* buffer for replacement strings */
-#endif
-
 PRIVATE BOOL FoundEntity = FALSE;
+
+#define IncludesLatin1Enc(cs) \
+		(cs == 0 || \
+		 (context->htmlUCI && \
+		  (context->htmlUCI->enc & (UCT_CP_SUPERSETOF_LAT1))))
 
 PRIVATE void handle_entity ARGS2(
 	HTStream *,	context,
 	char,		term)
 {
     CONST char ** entities = context->dtd->entity_names;
+#ifdef NOTDEFINED
     CONST UC_entity_info * extra_entities = context->dtd->extra_entity_info;
-    extern int current_char_set;
     int rc;
+#endif /* NOTDEFINED */
+    UCode_t code;
+    long uck;
     CONST char *s = context->string->data;
     int high, low, i, diff;
 
     /*
-    **  Use Lynx special characters directly for nbsp, ensp, emsp,
-    **  thinsp, and shy so we go through the HTML_put_character()
-    **  filters instead of using HTML_put_string(). - FM
+    **  Use Lynx special characters for nbsp (160), ensp (8194),
+    **  emsp (8195), thinsp (8201), and shy (173). - FM
     */
     if (!strcmp(s, "nbsp")) {
         PUTC(HT_NON_BREAK_SPACE);
@@ -387,13 +409,122 @@ PRIVATE void handle_entity ARGS2(
 	return;
     }
 
+#ifdef NOTUSED_FOTEMODS
+    /*
+    **  For ndash or endash (8211), and mdash or emdash (8212),
+    **  use an ASCII hyphen (32). - FM
+    */
+    if (!strcmp(s, "ndash") ||
+	!strcmp(s, "endash") ||
+	!strcmp(s, "mdash") ||
+	!strcmp(s, "endash")) {
+	PUTC('-');
+	FoundEntity = TRUE;
+	return;
+    }
+
+    /*
+    **  Ignore zwnj (8204) and zwj (8205), for now.
+    **  Note that zwnj may have been handled as <WBR>
+    **  by the calling function. - FM
+    */
+    if (!strcmp(s, "zwnj") ||
+	!strcmp(s, "zwnj")) {
+	if (TRACE) {
+	    fprintf(stderr, "handle_entity: Ignoring '%s'.\n", s);
+	}
+	FoundEntity = TRUE;
+	return;
+    }
+
+    /*
+    **  Ignore lrm (8206), and rln (8207), for now. - FM
+    */
+    if (!strcmp(s, "lrm") ||
+	!strcmp(s, "rlm")) {
+	if (TRACE) {
+	    fprintf(stderr, "handle_entity: Ignoring '%s'.\n", s);
+	}
+	FoundEntity = TRUE;
+	return;
+    }
+#endif /* NOTUSED_FOTEMODS */
+
     /*
     **  Handle all other entities normally. - FM
     */
     FoundEntity = FALSE;
+    if ((code = HTMLGetEntityUCValue(s)) != 0) {
+        /*
+	**  We got a Unicode value for the entity name.
+	**  Check for special Unicodes. - FM
+	*/
+	if (put_special_unicodes(context, code)) {  
+	    FoundEntity = TRUE;
+	    return;
+	}
+	/*
+	**  Seek a translation from the chartrans tables.
+	*/
+	if ((uck = UCTransUniChar(code, context->html_char_set)) >= 32 &&
+	    uck < 256 &&
+	    (uck < 127 ||
+	     uck >= LYlowest_eightbit[context->html_char_set])) {
+	    if (uck == 160 && IncludesLatin1Enc(context->html_char_set)) {
+		/*
+		**  Would only happen if some other Unicode
+		**  is mapped to Latin-1 160.
+		*/
+		PUTC(HT_NON_BREAK_SPACE);
+	    } else if (uck == 173 && IncludesLatin1Enc(context->html_char_set)) {
+		/*
+		**  Would only happen if some other Unicode
+		**  is mapped to Latin-1 173.
+		*/
+		PUTC(LY_SOFT_HYPHEN);
+	    } else {
+		PUTC(FROMASCII((char)uck));
+	    }
+	    FoundEntity = TRUE;
+	    return;
+	} else if ((uck == -4 ||
+		    (context->T.repl_translated_C0 &&
+		     uck > 0 && uck < 32)) &&
+		   /*
+		   **  Not found; look for replacement string.
+		   */
+		   (uck = UCTransUniCharStr(replace_buf, 60, code,
+					    context->html_char_set, 0) >= 0)) {
+	    CONST char *p;
+	    for (p = replace_buf; *p; p++)
+		PUTC(*p);
+	    FoundEntity = TRUE;
+	    return;
+	}
+	/*
+	**  If we're displaying UTF-8, try that now. - FM
+	*/
+	if (context->T.output_utf8 && PUTUTF8(code)) {
+	    FoundEntity = TRUE;
+	    return;
+	}
+	/*
+	**  If it's safe ASCII, use it. - FM
+	*/
+        if (code >= 32 && code < 127) {
+	    PUTC(FROMASCII((char)code));
+	    FoundEntity = TRUE;
+	    return;
+	}
+    }
+
+    /*
+    **  We haven't succeeded yet, so try the old LYCharSets
+    **  arrays for translation strings. - FM
+    */
     for (low = 0, high = context->dtd->number_of_entities;
     	 high > low;
-	 diff < 0 ? (low = i+1) : (high = i)) {  /* Binary serach */
+	 diff < 0 ? (low = i+1) : (high = i)) {  /* Binary search */
 	i = (low + (high-low)/2);
 	diff = strcmp(entities[i], s);	/* Case sensitive! */
 	if (diff == 0) {		/* success: found it */
@@ -402,38 +533,43 @@ PRIVATE void handle_entity ARGS2(
 	    return;
 	}
     }
-#ifdef EXP_CHARTRANS
+
+#ifdef NOTDEFINED
     /* repeat for extra entities if not found... hack... -kw */
     if (TRACE)
 	fprintf(stderr,
 		"SGML: Unknown entity %s so far, checking extra...\n", s); 
     for (low = 0, high = context->dtd->number_of_extra_entities;
     	 high > low;
-	 diff < 0 ? (low = i+1) : (high = i)) {  /* Binary serach */
-	i = (low + (high-low)/2);
-	diff = strcmp(extra_entities[i].name, s);	/* Case sensitive! */
-	if (diff==0) {			/* success: found it */
-	  if (put_special_unicodes(context, extra_entities[i].code)) {  
-	    FoundEntity = TRUE;
-	    return;
-	  } else if (context->T.output_utf8 &&
-		     PUTUTF8(extra_entities[i].code)) {
-	    FoundEntity = TRUE;
-	    return;
-	  }
+	 diff < 0 ? (low = i+1) : (high = i)) {   /* Binary search */
+	i = (low + (high - low)/2);
+	diff = strcmp(extra_entities[i].name, s); /* Case sensitive! */
+	if (diff == 0) {		/* success: found it */
+	    if (put_special_unicodes(context, extra_entities[i].code)) {  
+		FoundEntity = TRUE;
+		return;
+	    } else if (context->T.output_utf8 &&
+		       PUTUTF8(extra_entities[i].code)) {
+		FoundEntity = TRUE;
+		return;
+	    }
 	    if ((rc = UCTransUniChar(extra_entities[i].code,
-				     current_char_set)) > 0) {
+				     context->html_char_set)) > 0 &&
+		rc < 256) {
 		/*
-		 *  Could do further checks here... - KW
-		 */
-	    PUTC(rc);
-	    FoundEntity = TRUE;
-	    return;
+		**  Could do further checks here... - KW
+		*/
+		PUTC(FROMASCII((char)rc));
+		FoundEntity = TRUE;
+		return;
 	    } else if ((rc == -4) &&
-		       /* Not found; look for replacement string */
+		       /*
+		       **  Not found; look for replacement string.
+		       */
 		       (rc = UCTransUniCharStr(replace_buf, 60,
 					       extra_entities[i].code,
-					       current_char_set, 0) >= 0)) {
+					       context->html_char_set,
+					       0) >= 0)) {
 		CONST char *p;
 		for (p = replace_buf; *p; p++)
 		    PUTC(*p);
@@ -442,13 +578,14 @@ PRIVATE void handle_entity ARGS2(
 	    } 
 	    rc = (*context->actions->put_entity)(context->target,
 					  i+context->dtd->number_of_entities);
-	  if (rc != HT_CANNOT_TRANSLATE) {
-	      FoundEntity = TRUE;
-	      return;
-	  }
+	    if (rc != HT_CANNOT_TRANSLATE) {
+		FoundEntity = TRUE;
+		return;
+	    }
 	}
     }
-#endif
+#endif /* NOTDEFINED */
+
     /*
     **  If entity string not found, display as text.
     */
@@ -625,6 +762,9 @@ PRIVATE void do_close_stacked ARGS1(
     HTElement * stacked = context->element_stack;
     if (!stacked)
 	return;			/* stack was empty */
+    if (context->inSELECT && !strcasecomp(stacked->tag->name, "SELECT")) {
+	context->inSELECT = FALSE;
+    }
     (*context->actions->end_element)(
         context->target,
         stacked->tag - context->dtd->tags,
@@ -635,8 +775,8 @@ PRIVATE void do_close_stacked ARGS1(
 PRIVATE int is_on_stack ARGS2(
 	HTStream *,	context,
 	HTTag *,	old_tag)
-{
-    HTElement * stacked = context->element_stack;
+{ 
+   HTElement * stacked = context->element_stack;
     int i = 1;
     for (; stacked; stacked = stacked->next, i++) {
 	if (stacked->tag == old_tag)
@@ -700,10 +840,36 @@ PRIVATE void end_element ARGS2(
 	    return;
 	}
     }
-    /* Now let the old code deal with the rest... - kw */
+    /* Now let the non-extended code deal with the rest. - kw */
 
 #endif /* EXTENDED_HTMLDTD */
 
+    /*
+    **  If we are in a SELECT block, ignore anything
+    **  but a SELECT end tag. - FM
+    */
+    if (context->inSELECT) {
+	if (!strcasecomp(old_tag->name, "SELECT")) {
+	    /*
+	    **  Turn off the inSELECT flag and fall through. - FM
+	    */
+	    context->inSELECT = FALSE;
+	} else {
+	    /*
+	    **  Ignore the end tag. - FM
+	    */
+	    if (TRACE) {
+		fprintf(stderr,
+			"SGML: Ignoring end tag </%s> in SELECT block.\n",
+	    		old_tag->name);
+	    }
+	    return;
+	}
+    }
+
+    /*
+    **  Handle the end tag. - FM
+    */
     if (TRACE)
         fprintf(stderr, "SGML: End </%s>\n", old_tag->name);
     if (old_tag->contents == SGML_EMPTY) {
@@ -832,10 +998,67 @@ PRIVATE void start_element ARGS1(
 			new_tag->name);
 	}
     }
-    /* fall through to the old code - kw */
+    /* Fall through to the non-extended code - kw */
 
 #endif /* EXTENDED_HTMLDTD */
 
+    /*
+    **  If we are not in a SELECT block, check if this is
+    **  a SELECT start tag.  Otherwise (i.e., we are in a
+    **  SELECT block) accept only OPTION as valid, terminate
+    **  the SELECT block if it is any other form-related
+    **  element, and otherwise ignore it. - FM
+    */
+    if (!context->inSELECT) {
+        /*
+	**  We are not in a SELECT block, so check if this starts one. - FM
+	*/
+	if (!strcasecomp(new_tag->name, "SELECT")) {
+	    /*
+	    **  Set the inSELECT flag and fall through. - FM
+	    */
+	    context->inSELECT = TRUE;
+	}
+    } else {
+        /*
+	**  We are in a SELECT block. - FM
+	*/
+        if (strcasecomp(new_tag->name, "OPTION")) {
+	    /*
+	    **  Ugh, it is not an OPTION. - FM
+	    */
+	    if (!strcasecomp(new_tag->name, "INPUT") ||
+	        !strcasecomp(new_tag->name, "TEXTAREA") ||
+		!strcasecomp(new_tag->name, "SELECT") ||
+		!strcasecomp(new_tag->name, "BUTTON") ||
+		!strcasecomp(new_tag->name, "FIELDSET") ||
+		!strcasecomp(new_tag->name, "LABEL") ||
+		!strcasecomp(new_tag->name, "LEGEND") ||
+		!strcasecomp(new_tag->name, "FORM")) {
+		/*
+		**  It is another form-related start tag, so terminate
+		**  the current SELECT block and fall through. - FM
+		*/
+		if (TRACE)
+		    fprintf(stderr,
+		       "SGML: Faking SELECT end tag before <%s> start tag.\n",
+			    new_tag->name);
+		end_element(context, SGMLFindTag(context->dtd, "SELECT"));
+	    } else {
+	        /*
+		**  Ignore the start tag. - FM
+		*/
+		if (TRACE)
+		    fprintf(stderr,
+			  "SGML: Ignoring start tag <%s> in SELECT block.\n",
+			    new_tag->name);
+		return;
+	    }
+	}
+    }
+    /*
+    **  Handle the start tag. - FM
+    */
     if (TRACE)
         fprintf(stderr, "SGML: Start <%s>\n", new_tag->name);
     (*context->actions->start_element)(
@@ -1016,11 +1239,7 @@ PUBLIC void SGML_character ARGS2(
     CONST SGML_dtd *dtd	=	context->dtd;
     HTChunk	*string = 	context->string;
     CONST char * EntityName;
-    extern int current_char_set;
     extern CONST char * HTMLGetEntityName PARAMS((int i));
-
-#ifdef EXP_CHARTRANS
-    extern int LYlowest_eightbit[];
     char * p;
     BOOLEAN chk;	/* Helps (?) walk through all the else ifs... */
     UCode_t clong, uck;	/* Enough bits for UCS4 ... */
@@ -1033,12 +1252,6 @@ PUBLIC void SGML_character ARGS2(
     */
 #define unsign_c clong
 
-#else
-#define c c_in
-#define unsign_c (unsigned char)c
-#endif    
-
-#ifdef EXP_CHARTRANS
     c = c_in;
     clong = (unsigned char)c;	/* a.k.a. unsign_c */
 
@@ -1119,7 +1332,7 @@ PUBLIC void SGML_character ARGS2(
 	if (clong > 0) {
 	    saved_char_in = c;
 	    if (clong < 256) {
-		c = (char)clong;
+		c = FROMASCII((char)clong);
 	    }
 	}
 	goto top1;
@@ -1134,7 +1347,7 @@ PUBLIC void SGML_character ARGS2(
 	      (clong = UCTransToUni(c, context->in_char_set)) > 0))) {
 	    saved_char_in = c;
 	    if (clong < 256) {
-		c = (char)clong;
+		c = FROMASCII((char)clong);
 	    }
 	    goto top1;
 	} else {
@@ -1169,13 +1382,11 @@ PUBLIC void SGML_character ARGS2(
 	goto top0a;
     }
 
-    /* At this point we have either unsign_c a.k.a. clong in Unicode
-       (and c in latin1 if clong is in the latin1 range),
-       or unsign_c and c will have to be passed raw. */
-
-#endif /* EXP_CHARTRANS */
-
-
+    /*
+    **  At this point we have either unsign_c a.k.a. clong in
+    **  Unicode (and c in latin1 if clong is in the latin1 range),
+    **  or unsign_c and c will have to be passed raw. - KW
+    */
 top:
 #ifdef EXP_CHARTRANS
     saved_char_in = '\0';
@@ -1283,7 +1494,6 @@ top1:
 		   !(PASS8859SPECL || HTCJK != NOCJK)) {
             PUTC(LY_SOFT_HYPHEN);
 
-#ifdef EXP_CHARTRANS
 	} else if (context->T.use_raw_char_in && saved_char_in) {
 	    /*
 	    **  Only if the original character is still in saved_char_in,
@@ -1300,8 +1510,8 @@ top1:
 		   uck < 256) {
 	    if (TRACE) {
 		fprintf(stderr,
-			"UCTransUniChar returned 0x%lx:'%c'.\n",
-			uck, (char)uck);
+			"UCTransUniChar returned 0x%.2lX:'%c'.\n",
+			uck, FROMASCII((char)uck));
 	    }
 	    c = (char)(uck & 0xff);
 	    PUTC(c);
@@ -1325,8 +1535,6 @@ top1:
 	*/
 	} else if (context->T.output_utf8 && PUTUTF8(clong)) {
 	    ; /* do nothing more */
-#endif /* EXP_CHARTRANS */
-
 	/*
 	**  If it's any other (> 160) 8-bit chararcter, and
 	**  we have not set HTPassEightBitRaw nor HTCJK, nor
@@ -1337,14 +1545,10 @@ top1:
 #define PASSHI8BIT HTPassEightBitRaw
 #else
 #define PASSHI8BIT (HTPassEightBitRaw || (context->T.do_8bitraw && !context->T.trans_from_uni))
-#define IncludesLatin1Enc(cs) \
-		(cs == 0 || \
-		 (context->htmlUCI && \
-		  (context->htmlUCI->enc & (UCT_CP_SUPERSETOF_LAT1))))
 #endif /* EXP_CHARTRANS */
 	} else if (unsign_c > 160 && unsign_c < 256 &&
 		   !(PASSHI8BIT || HTCJK != NOCJK) &&
-		   !IncludesLatin1Enc(current_char_set)) {
+		   !IncludesLatin1Enc(context->html_char_set)) {
 	    int i;
 	    int value;
 
@@ -1514,7 +1718,7 @@ top1:
     **  Check for a numeric entity.
     */
     case S_cro:
-	if (unsign_c < 127 && (unsigned char)c == 'x') {
+	if (unsign_c < 127 && TOLOWER((unsigned char)c) == 'x') {
 	    context->isHex = TRUE;
 	    context->state = S_incro;
 	} else if (unsign_c < 127 && isdigit((unsigned char)c)) {
@@ -1628,17 +1832,20 @@ top1:
 		/*
 		 *  Seek a translation from the chartrans tables.
 		 */
-	      if ((uck = UCTransUniChar(value,current_char_set)) >= 32 &&
+		if ((uck = UCTransUniChar(value,
+					  context->html_char_set)) >= 32 &&
 		    uck < 256 &&
 		    (uck < 127 ||
 		     uck >= LYlowest_eightbit[context->html_char_set])) {
-		    if (uck == 160 && current_char_set == 0) {
+		    if (uck == 160 &&
+			IncludesLatin1Enc(context->html_char_set)) {
 			/*
 			**  Would only happen if some other Unicode
 			**  is mapped to Latin-1 160.
 			*/
 			PUTC(HT_NON_BREAK_SPACE);
-		    } else if (uck == 173 && current_char_set == 0) {
+		    } else if (uck == 173 &&
+			IncludesLatin1Enc(context->html_char_set)) {
 			/*
 			**  Would only happen if some other Unicode
 			**  is mapped to Latin-1 173.
@@ -1653,8 +1860,9 @@ top1:
 			   /*
 			   **  Not found; look for replacement string.
 			   */
-		(uck = UCTransUniCharStr(replace_buf,60,value,
-				      current_char_set, 0)   >= 0 ) ) { 
+			   (uck = UCTransUniCharStr(replace_buf, 60, value,
+						    context->html_char_set,
+						    0) >= 0)) { 
 		    for (p = replace_buf; *p; p++) {
 			PUTC(*p);
 		    }
@@ -1676,6 +1884,34 @@ top1:
 		    context->isHex = FALSE;
 		    context->state = S_entity;
 		    goto top1;
+#ifdef NOTUSED_FOTEMODS
+		/*
+		**  If the value is greater than 255 and we do not
+		**  have the "7-bit approximations" as our output
+		**  character set (in which case we did it already)
+		**  seek a translation for that. - FM
+		*/
+		} else if ((chk = ((code > 255) &&
+				   context->html_char_set !=
+				   UCGetLYhndl_byMIME("us-ascii"))) &&
+			   (uck = UCTransUniChar(code,
+				   UCGetLYhndl_byMIME("us-ascii")))
+				  >= 32 && uck < 127) {
+		    /*
+		    **  Got an ASCII character (yippey). - FM
+		    */
+		    PUTC(((char)(uck & 0xff)));
+		} else if ((chk && uck == -4) &&
+			   (uck = UCTransUniCharStr(replace_buf,
+						    60, code,
+						UCGetLYhndl_byMIME("us-ascii"),
+						    0) >= 0)) {
+		    /*
+		    **  Got a replacement string (yippey). - FM
+		    */
+		    for (p = replace_buf; *p; p++)
+			PUTC(*p);
+#endif /* NOTUSED_FOTEMODS */
 	        /*
 		**  Show the numeric entity if we get to here
 		**  and the value:
@@ -1690,13 +1926,13 @@ top1:
 		**  - FM
 		*/
 		} else if ((value > 255) ||
-		    (value < 32 &&
-		     value != 9 && value != 10 && value != 13 &&
-		     HTCJK == NOCJK) ||
-		    (value == 127 &&
-		     !(HTPassHighCtrlRaw || HTCJK != NOCJK)) ||
-		    (value > 127 && value < 160 &&
-		     !HTPassHighCtrlNum)) {
+			   (value < 32 &&
+			    value != 9 && value != 10 && value != 13 &&
+			    HTCJK == NOCJK) ||
+			   (value == 127 &&
+			    !(HTPassHighCtrlRaw || HTCJK != NOCJK)) ||
+			   (value > 127 && value < 160 &&
+			    !HTPassHighCtrlNum)) {
 		    if (value == 8194 || value == 8195 || value == 8201) {
 		        /*
 			**  ensp, emsp or thinsp. - FM
@@ -1728,7 +1964,7 @@ top1:
 			goto top1;
 		    }
 		} else if (value < 161 || HTPassEightBitNum ||
-			   IncludesLatin1Enc(current_char_set)) {
+			   IncludesLatin1Enc(context->html_char_set)) {
 		    /*
 		    **  No conversion needed. - FM
 		    */
@@ -2283,11 +2519,13 @@ top1:
 	} else if (HTCJK == NOCJK && (context->T.output_utf8 ||
 				      context->T.trans_from_uni)) {
 	    if (clong == 0xfffd && saved_char_in && HTPassEightBitRaw &&
-		(unsigned char)saved_char_in >= LYlowest_eightbit[current_char_set])
+		(unsigned char)saved_char_in >=
+		LYlowest_eightbit[context->html_char_set]) {
 		HTChunkPutUtf8Char(string,
 				   (0xf000 | (unsigned char)saved_char_in));
-	    else
+	    } else {
 		HTChunkPutUtf8Char(string, clong);
+	    }
 	} else if (saved_char_in && context->T.use_raw_char_in) {
 	    HTChunkPutc(string, saved_char_in);
 #endif /* EXP_CHARTRANS */
@@ -2318,11 +2556,13 @@ top1:
 	} else if (HTCJK == NOCJK && (context->T.output_utf8 ||
 				      context->T.trans_from_uni)) {
 	    if (clong == 0xfffd && saved_char_in && HTPassEightBitRaw &&
-		(unsigned char)saved_char_in >= LYlowest_eightbit[current_char_set])
+		(unsigned char)saved_char_in >=
+		LYlowest_eightbit[context->html_char_set]) {
 		HTChunkPutUtf8Char(string,
 				   (0xf000 | (unsigned char)saved_char_in));
-	    else
+	    } else {
 		HTChunkPutUtf8Char(string, clong);
+	    }
 	} else if (saved_char_in && context->T.use_raw_char_in) {
 	    HTChunkPutc(string, saved_char_in);
 #endif /* EXP_CHARTRANS */
@@ -2357,11 +2597,13 @@ top1:
 	} else if (HTCJK == NOCJK && (context->T.output_utf8 ||
 				      context->T.trans_from_uni)) {
 	    if (clong == 0xfffd && saved_char_in && HTPassEightBitRaw &&
-		(unsigned char)saved_char_in >= LYlowest_eightbit[current_char_set])
+		(unsigned char)saved_char_in >=
+		LYlowest_eightbit[context->html_char_set]) {
 		HTChunkPutUtf8Char(string,
 				   (0xf000 | (unsigned char)saved_char_in));
-	    else
+	    } else {
 		HTChunkPutUtf8Char(string, clong);
+	    }
 	} else if (saved_char_in && context->T.use_raw_char_in) {
 	    HTChunkPutc(string, saved_char_in);
 #endif /* EXP_CHARTRANS */
@@ -2425,34 +2667,6 @@ top1:
 		    }
 		    break;
 		} else if (tag_OK &&
-			   !strcasecomp(string->data, "P")) {
-		    /*
-		    **  Treat a P end tag like a P start tag (Ugh,
-		    **  what a hack! 8-). - FM
-		    */
-		    if (TRACE)
-		        fprintf(stderr,
-				"SGML: `</%s%c' found!  Treating as '<%s%c'.\n",
-				string->data, c, string->data, c);
-		    {
-		        int i;
-			for (i = 0;
-			     i < context->current_tag->number_of_attributes;
-			     i++) {
-			    context->present[i] = NO;
-			}
-		    }
-		    string->size = 0;
-		    context->current_attribute_number = INVALID;
-		    if (context->current_tag->name)
-			start_element(context);
-		    if (c != '>') {
-			context->state = S_junk_tag;
-		    } else {
-			context->state = S_text;
-		    }
-		    break;
-		} else if (tag_OK &&
 			   (!strcasecomp(string->data, "A") ||
 			    !strcasecomp(string->data, "B") ||
 			    !strcasecomp(string->data, "BLINK") ||
@@ -2461,6 +2675,7 @@ top1:
 			    !strcasecomp(string->data, "FONT") ||
 			    !strcasecomp(string->data, "FORM") ||
 			    !strcasecomp(string->data, "I") ||
+			    !strcasecomp(string->data, "P") ||
 			    !strcasecomp(string->data, "STRONG") ||
 			    !strcasecomp(string->data, "TT") ||
 			    !strcasecomp(string->data, "U"))) {
@@ -2471,12 +2686,69 @@ top1:
 		    **  with checks there to avoid throwing the HTML.c stack
 		    **  out of whack (Ugh, what a hack! 8-). - FM
 		    */
-		    if (TRACE)
-		        fprintf(stderr, "SGML: End </%s>\n", string->data);
-		    (*context->actions->end_element)
-			(context->target,
-			 (context->current_tag - context->dtd->tags),
-			 (char **)&context->include);
+		    if (context->inSELECT) {
+		        /*
+			**  We are in a SELECT block. - FM
+			*/
+			if (strcasecomp(string->data, "FORM")) {
+			    /*
+			    **  It is not at FORM end tag, so ignore it. - FM
+			    */
+			    if (TRACE) {
+				fprintf(stderr,
+			    "SGML: Ignoring end tag </%s> in SELECT block.\n",
+	    				string->data);
+			    }
+			} else {
+			    /*
+			    **  End the SELECT block and then
+			    **  handle the FORM end tag. - FM
+			    */
+			    if (TRACE) {
+				fprintf(stderr,
+			"SGML: Faking SELECT end tag before </%s> end tag.\n",
+					string->data);
+			    }
+			    end_element(context,
+			    		SGMLFindTag(context->dtd, "SELECT"));
+			    if (TRACE) {
+				fprintf(stderr,
+					"SGML: End </%s>\n", string->data);
+			    }
+			    (*context->actions->end_element)
+				(context->target,
+			 	 (context->current_tag - context->dtd->tags),
+				 (char **)&context->include);
+			}
+		    } else if (!strcasecomp(string->data, "P")) {
+			/*
+			**  Treat a P end tag like a P start tag (Ugh,
+			**  what a hack! 8-). - FM
+			*/
+			if (TRACE)
+			    fprintf(stderr,
+				    "SGML: `</%s%c' found!  Treating as '<%s%c'.\n",
+				    string->data, c, string->data, c);
+			{
+			    int i;
+			    for (i = 0;
+				 i < context->current_tag->number_of_attributes;
+				 i++) {
+				context->present[i] = NO;
+			    }
+			}
+			if (context->current_tag->name)
+			    start_element(context);
+		    } else {
+			if (TRACE) {
+			    fprintf(stderr,
+				    "SGML: End </%s>\n", string->data);
+			}
+			(*context->actions->end_element)
+			    (context->target,
+			     (context->current_tag - context->dtd->tags),
+			     (char **)&context->include);
+		    }
 		    string->size = 0;
 		    context->current_attribute_number = INVALID;
 		    if (c != '>') {
@@ -2764,6 +3036,7 @@ PUBLIC HTStream* SGML_new  ARGS3(
     context->unknown_tag = &HTTag_unrecognized;
     context->state = S_text;
     context->element_stack = 0;			/* empty */
+    context->inSELECT = FALSE;
 #ifdef CALLERDATA		  
     context->callerData = (void*) callerData;
 #endif /* CALLERDATA */

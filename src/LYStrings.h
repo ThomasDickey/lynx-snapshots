@@ -38,6 +38,10 @@ extern char * LYno_attr_mbcs_case_strstr PARAMS((
 extern int LYmbcsstrlen PARAMS((
 	char *		str,
 	BOOL		utf_flag));
+extern char * LYmbcs_skip_glyphs PARAMS((
+	char *		data,
+	int		n_glyphs,
+	BOOL		utf_flag));
 extern char * LYmbcsstrncpy PARAMS((
 	char *		dst,
 	CONST char *	src,
@@ -140,7 +144,9 @@ typedef struct _EditFieldData {
 #define LYE_LOWER (LYE_BACKW +1)  /* Lower case the line   */
 #define LYE_UPPER (LYE_LOWER +1)  /* Upper case the line   */
 
-#define LYE_AIX   (LYE_UPPER +1)  /* Hex 97		   */
+#define LYE_LINKN (LYE_UPPER +1)  /* Invoke F_LINK_NUM	   */
+
+#define LYE_AIX   (LYE_LINKN +1)  /* Hex 97		   */
 
 extern void LYSetupEdit PARAMS((
 	EditFieldData *	edit,

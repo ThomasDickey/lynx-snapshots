@@ -582,26 +582,26 @@ return to Lynx or the '<em>&gt;</em>' command to save the options to a
 	    q factors as defined by the HTTP protocol, for servers which
 	    understand it, for example:
 	    da,&nbsp;en-gb;q=0.8,&nbsp;en;q=0.7
-	
+
    <dt>Preferred Document Charset
 	<dd>The character set you prefer if sets in addition to ISO-8859-1
 	    and US-ASCII are available from servers.  Use MIME notation
 	    (e.g., ISO-8859-2) and do not include ISO-8859-1 or US-ASCII,
 	    since those values are always assumed by default.  Can be a
 	    comma-separated list, which may be interpreted by servers as 
-	    descending order of preferences.
-	    You can also make your order of preference explicit by using
-	    q factors as defined by the HTTP protocol, for servers which
-	    understand it, for example:
+	    descending order of preferences. You can also make your order
+	    of preference explicit by using q factors as defined by the
+	    HTTP protocol, for servers which understand it, for example:
 	    iso-8859-5,&nbsp;utf-8;q=0.8
 	
    <dt>Display Character set
 	<dd>This option allows you to set up the default character set for
-	    your specific terminal.  The character set provides a mapping
-	    of 8-bit ISO Latin character entities and/or Asian (CJK) or
-	    Unicode characters into viewable characters and should be set
-	    according to your terminal's character set if you will be
-	    viewing such characters with Lynx.  You must have the selected
+	    your specific terminal.  The display character set provides a
+            mapping from the character encodings of viewed documents and 
+            from HTML entities into viewable characters.  It should be set
+	    according to your terminal's character set so that characters
+            other than 7-bit ASCII can be displayed correctly, using
+	    approximations if necessary.  You must have the selected
 	    character set installed on your terminal.
 
    <dt>Raw 8-bit or CJK Mode
@@ -612,7 +612,7 @@ return to Lynx or the '<em>&gt;</em>' command to save the options to a
 	    (CJK) sets and the 8-bit characters are Kanji multibytes.
 	    Should be OFF for the other character sets, but can be turned ON
 	    when the document's charset is unknown (e.g., is not ISO-8859-1
-	    and no charset parameter was included in a reply header from
+	    and no charset parameter was specified in a reply header from
 	    an HTTP server to indicate what it is) but you know by some
 	    means that you have the matching display character set selected.
 	    Should be OFF when an Asian (CJK) set is selected but the document

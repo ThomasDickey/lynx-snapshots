@@ -139,8 +139,10 @@ PRIVATE void actually_set_style ARGS1(HTStructured *, me)
 	LYGetChartransInfo(me);
 	UCSetTransParams(&me->T,
 		     me->UCLYhndl, me->UCI,
-		     HTAnchor_getUCLYhndl(me->node_anchor,UCT_STAGE_HTEXT),
-		     HTAnchor_getUCInfoStage(me->node_anchor,UCT_STAGE_HTEXT));
+			 HTAnchor_getUCLYhndl(me->node_anchor,
+			 		      UCT_STAGE_HTEXT),
+			 HTAnchor_getUCInfoStage(me->node_anchor,
+			 			 UCT_STAGE_HTEXT));
 #endif /* EXP_CHARTRANS */
 	me->text = HText_new2(me->node_anchor, me->target);
 	HText_beginAppend(me->text);
@@ -2793,7 +2795,15 @@ PRIVATE void HTML_start_element ARGS6(
 		HTAnchor_setTitle(dest, title);
 	    if (dest && dest_ismap)
 		dest->isISMAPScript = TRUE;
-    	    if (dest && dest_char_set >= 0) {
+	    if (dest && dest_char_set >= 0) {
+	        /*
+		**  Load the anchor's chartrans structures.
+		**  This should be done more intelligently
+		**  when setting up the structured object. - FM
+		*/
+		HTAnchor_setUCInfoStage(dest, dest_char_set,
+					UCT_STAGE_MIME,
+					UCT_SETBY_DEFAULT);
 		HTAnchor_setUCInfoStage(dest, dest_char_set,
 					UCT_STAGE_PARSER,
 					UCT_SETBY_LINK);
@@ -4636,8 +4646,10 @@ PRIVATE void HTML_start_element ARGS6(
 		     *  Not yet implemented.
 		     */
 		    HTML_put_string(me,"[RANGE Input] (Not yet implemented.)");
+#ifdef NOTDEFINED
 		    if (me->inFORM)
 			HText_DisableCurrentForm();
+#endif /* NOTDEFINED */
 		    if (TRACE)
 		        fprintf(stderr, "HTML: Ignoring TYPE=\"range\"\n");
 		    break;
@@ -4657,8 +4669,10 @@ PRIVATE void HTML_start_element ARGS6(
 		        HText_appendCharacter(me->text,
 					      LY_UNDERLINE_END_CHAR);
 		    }
+#ifdef NOTDEFINED
 		    if (me->inFORM)
 			HText_DisableCurrentForm();
+#endif /* NOTDEFINED */
 		    if (TRACE)
 		        fprintf(stderr, "HTML: Ignoring TYPE=\"file\"\n");
 		    break;
@@ -5537,9 +5551,23 @@ PRIVATE void HTML_start_element ARGS6(
 	/*
 	 *  Not implemented.  Just treat as a division
 	 *  with respect to any ALIGN attribute, with
-	 *  a default of HT_LEFT. - FM
+	 *  a default of HT_LEFT, or leave as a PRE
+	 *  block if we are presently in one. - FM
 	 */
+	if (me->inA) {
+	    SET_SKIP_STACK(HTML_A);
+	    HTML_end_element(me, HTML_A, (char **)&include);
+	}
+	if (me->Underline_Level > 0) {
+	    SET_SKIP_STACK(HTML_U);
+	    HTML_end_element(me, HTML_U, (char **)&include);
+	}
 	me->inTABLE = TRUE;
+	if (me->sp[0].tag_number == HTML_PRE) {
+	    UPDATE_STYLE;
+	    LYCheckForID(me, present, value, (int)HTML_TABLE_ID);
+	    break;
+	}
 	if (me->Division_Level < (MAX_NESTING - 1)) {
 	    me->Division_Level++;
 	} else if (TRACE) {
@@ -5580,6 +5608,14 @@ PRIVATE void HTML_start_element ARGS6(
 	 *  if needed, act on an ALIGN attribute if present,
 	 *  and check for an ID link. - FM
 	 */
+	if (me->inA) {
+	    SET_SKIP_STACK(HTML_A);
+	    HTML_end_element(me, HTML_A, (char **)&include);
+	}
+	if (me->Underline_Level > 0) {
+	    SET_SKIP_STACK(HTML_U);
+	    HTML_end_element(me, HTML_U, (char **)&include);
+	}
         UPDATE_STYLE;
 	if (HText_LastLineSize(me->text, FALSE)) {
 	    HText_setLastChar(me->text, ' ');  /* absorb white space */
@@ -5619,6 +5655,14 @@ PRIVATE void HTML_start_element ARGS6(
         /*
 	 *  Not yet implemented.  Just check for an ID link. - FM
 	 */
+	if (me->inA) {
+	    SET_SKIP_STACK(HTML_A);
+	    HTML_end_element(me, HTML_A, (char **)&include);
+	}
+	if (me->Underline_Level > 0) {
+	    SET_SKIP_STACK(HTML_U);
+	    HTML_end_element(me, HTML_U, (char **)&include);
+	}
         UPDATE_STYLE;
 	CHECK_ID(HTML_TR_ID);
         break;
@@ -5628,11 +5672,27 @@ PRIVATE void HTML_start_element ARGS6(
         /*
 	 *  Not yet implemented.  Just check for an ID link. - FM
 	 */
+	if (me->inA) {
+	    SET_SKIP_STACK(HTML_A);
+	    HTML_end_element(me, HTML_A, (char **)&include);
+	}
+	if (me->Underline_Level > 0) {
+	    SET_SKIP_STACK(HTML_U);
+	    HTML_end_element(me, HTML_U, (char **)&include);
+	}
         UPDATE_STYLE;
 	CHECK_ID(HTML_COL_ID);
         break;
     
     case HTML_TH:
+	if (me->inA) {
+	    SET_SKIP_STACK(HTML_A);
+	    HTML_end_element(me, HTML_A, (char **)&include);
+	}
+	if (me->Underline_Level > 0) {
+	    SET_SKIP_STACK(HTML_U);
+	    HTML_end_element(me, HTML_U, (char **)&include);
+	}
         UPDATE_STYLE;
 	CHECK_ID(HTML_TD_ID);
         /*
@@ -5643,6 +5703,14 @@ PRIVATE void HTML_start_element ARGS6(
         break;
 
     case HTML_TD:
+	if (me->inA) {
+	    SET_SKIP_STACK(HTML_A);
+	    HTML_end_element(me, HTML_A, (char **)&include);
+	}
+	if (me->Underline_Level > 0) {
+	    SET_SKIP_STACK(HTML_U);
+	    HTML_end_element(me, HTML_U, (char **)&include);
+	}
         UPDATE_STYLE;
 	CHECK_ID(HTML_TD_ID);
         /*
@@ -6120,8 +6188,8 @@ PRIVATE void HTML_end_element ARGS3(
 	     *  paragraph style's spaceAfter.  Don't insert
 	     *  spacing required for starting the next paragraph
 	     *  as required by its style->spaceBefore, since we
-	     *  don't know yet whether the next structure element
-	     *  (if any) will be.  If it is a another P, it will
+	     *  don't know yet what the next structure element
+	     *  (if any) will be.  If it is another P, it will
 	     *  take care of its leading space on its own.  - kw
 	     */
 	if (me->List_Nesting_Level >= 0) {
@@ -7107,6 +7175,9 @@ End_Object:
 
     case HTML_TABLE:
         me->inTABLE = FALSE;
+	if (me->sp[0].tag_number == HTML_PRE) {
+	    break;
+	}
 	if (me->Division_Level >= 0)
 	    me->Division_Level--;
 	if (me->Division_Level >= 0)
@@ -7816,9 +7887,97 @@ PUBLIC HTStructured* HTML_new ARGS3(
 #endif
 
 #ifdef EXP_CHARTRANS
+
+#ifdef NOTUSED_FOTEMODS
+    /*
+    **  If the anchor already has stage info, make sure that it is
+    **  appropriate for the current display charset.  HTMIMEConvert()
+    **  does this for the http and https schemes, and HTCharsetFormat()
+    **  does it for the file and and ftp schemes, be we need to do it,
+    **  if necessary, for the gateway schemes. - FM
+    */
+    if (me->node_anchor->UCStages) {
+	if (HTAnchor_getUCLYhndl(me->node_anchor,
+				 UCT_STAGE_STRUCTURED) != current_char_set) {
+	    /*
+	    **  We are reloading due to a change in the display character
+	    **  set.  Free the stage info and let the stage info creation
+	    **  mechanisms create a new UCStages structure appropriate for
+	    **  the current display character set. - FM
+	    */
+
+	    FREE(anchor->UCStages);
+	} else if (HTAnchor_getUCLYhndl(me->node_anchor,
+					UCT_STAGE_MIME) == current_char_set) {
+	    /*
+	    **  The MIME stage is set to the current display character
+	    **  set.  If it is CJK, and HTCJK does not point to a CJK
+	    **  character set, assume we are reloading due to a raw
+	    **  mode toggle and reset the MIME and PARSER stages to
+	    **  an ISO Latin 1 default. - FM
+	    */
+	    LYUCcharset *p_in = HTAnchor_getUCInfoStage(me->node_anchor,
+							UCT_STAGE_MIME);
+	    if (p_in->enc == UCT_ENC_CJK && HTCJK == NOCJK) {
+		HTAnchor_resetUCInfoStage(me->node_anchor, 0,
+					  UCT_STAGE_MIME,
+					  UCT_SETBY_DEFAULT);
+		HTAnchor_setUCInfoStage(me->node_anchor, 0,
+					UCT_STAGE_MIME,
+					UCT_SETBY_DEFAULT);
+		HTAnchor_resetUCInfoStage(me->node_anchor, 0,
+					  UCT_STAGE_PARSER,
+					  UCT_SETBY_DEFAULT);
+		HTAnchor_setUCInfoStage(me->node_anchor, 0,
+					UCT_STAGE_PARSER,
+					UCT_SETBY_DEFAULT);
+	    }
+	}
+    }
+#endif /* NOTUSED_FOTEMODS */
+
+    /*
+    **  Create a chartrans stage info structure for the anchor,
+    **  if it does not exist already (in which case the default
+    **  MIME stage info will be loaded as well), and load the
+    **  HTML stage info into me->UCI and me->UCLYhndl. - FM
+    */
     LYGetChartransInfo(me);
     UCTransParams_clear(&me->T);
 #endif /* EXP_CHARTRANS */
+
+    /*
+    **  Load the existing or default input charset info
+    **  into the holding elements.  We'll believe what
+    **  is indicated for UCT_STAGE_PARSER. - FM
+    */
+    me->inUCLYhndl = HTAnchor_getUCLYhndl(me->node_anchor,
+			 		  UCT_STAGE_PARSER);
+    if (me->inUCLYhndl < 0) {
+    	me->inUCLYhndl = HTAnchor_getUCLYhndl(me->node_anchor,
+			 		      UCT_STAGE_MIME);
+	me->inUCI = HTAnchor_getUCInfoStage(me->node_anchor,
+			 		    UCT_STAGE_MIME);
+    } else {
+	me->inUCI = HTAnchor_getUCInfoStage(me->node_anchor,
+			 		    UCT_STAGE_PARSER);
+    }
+
+    /*
+    **  Load the existing or default output charset info
+    **  into the holding elements, UCT_STAGE_STRUCTURED
+    **  should be the same as UCT_STAGE_TEXT at this point,
+    **  but we could check, perhaps. - FM
+    */
+    me->outUCI = HTAnchor_getUCInfoStage(me->node_anchor,
+			 		 UCT_STAGE_STRUCTURED);
+    me->outUCLYhndl = HTAnchor_getUCLYhndl(me->node_anchor,
+			 		   UCT_STAGE_STRUCTURED);
+#ifdef NOTUSED_FOTEMODS
+    UCSetTransParams(&me->T,
+    		     me->inUCLYhndl, me->inUCI,
+		     me->outUCLYhndl, me->outUCI);
+#endif
 
     me->target = stream;
     if (stream)

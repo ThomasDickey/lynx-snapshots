@@ -1032,7 +1032,7 @@ PRIVATE char ** LYUCFullyTranslateString_1 ARGS9(
     char * cp = 0;
     char cpe = 0;
     char *esc = NULL;
-    char replace_buf[64];
+    char replace_buf [64];
     int uck;
     int lowest_8;
     UCode_t code = 0;
@@ -1042,15 +1042,15 @@ PRIVATE char ** LYUCFullyTranslateString_1 ARGS9(
     int high, low, diff = 0, i;
     CONST char ** entities = HTML_dtd.entity_names;
     CONST UC_entity_info * extra_entities = HTML_dtd.extra_entity_info;
-    CONST char * name = 0;
+    CONST char * name = NULL;
     BOOLEAN no_bytetrans;
     UCTransParams T;
     BOOL from_is_utf8 = FALSE;
     char * puni;
     enum _state
         { S_text, S_esc, S_dollar, S_paren, S_nonascii_text, S_dollar_paren,
-	S_trans_byte, S_check_ent, S_ncr, S_check_uni, S_check_name, S_named,
-	S_recover,
+	S_trans_byte, S_check_ent, S_ncr, S_check_uni, S_named, S_check_name,
+	S_check_name_trad, S_recover,
 	S_got_oututf8, S_got_outstring, S_put_urlstring,
 	S_got_outchar, S_put_urlchar, S_next_char, S_done} state = S_text;
     enum _parsing_what
@@ -1261,11 +1261,11 @@ PRIVATE char ** LYUCFullyTranslateString_1 ARGS9(
 	case S_trans_byte:
 	    /*  character translation goes here  */
 	    /*
-    **  Don't do anything if we have no string,
-    **  or if original AND target character sets
-    **  are both iso-8859-1,
-    **  or if we are in CJK mode.
-    */
+	    **  Don't do anything if we have no string,
+	    **  or if original AND target character sets
+	    **  are both iso-8859-1,
+	    **  or if we are in CJK mode.
+	    */
 	    if (*p == '\0' || no_bytetrans) {
 		state = S_got_outchar;
 		break;
@@ -1370,7 +1370,7 @@ PRIVATE char ** LYUCFullyTranslateString_1 ARGS9(
 		**  Check for a numeric entity. - FM
 		*/
 		if (*pp == '#' && len > 2 &&
-		    (unsigned char)*(pp+1) == 'x' &&
+		    (*(pp+1) == 'x' || *(pp+1) == 'X') &&
 		    (unsigned char)*(pp+2) < 127 && 
 		    isxdigit((unsigned char)*(pp+2))) {
 		    what = P_hex;
@@ -1596,6 +1596,21 @@ PRIVATE char ** LYUCFullyTranslateString_1 ARGS9(
 		    }
 		    break;
 		    /*
+		    **  Ignore 8204 (zwnj), 8205 (zwj)
+		    **  8206 (lrm), and 8207 (rlm),
+		    **  for now, if we got this far without
+		    **  finding a representation for them.
+		    */
+		} else if (code == 8204 || code == 8205 ||
+			   code == 8206 || code == 8207) {
+		    if (TRACE) {
+			fprintf(stderr,
+				"LYUCFullyTranslateString: Ignoring '%ld'.\n", code);
+		    }
+		    replace_buf[0] = '\0';
+		    state = S_got_outstring;
+		    break;
+		    /*
 		    **  Show the numeric entity if the value:
 		    **  (1) Is greater than 255 and unhandled Unicode.
 		    */
@@ -1635,7 +1650,7 @@ PRIVATE char ** LYUCFullyTranslateString_1 ARGS9(
 		    } else {
 			name = HTMLGetEntityName(code - 160);
 		    }
-		    state = S_check_name;
+		    state = S_check_name_trad;
 		    break;
 		}
 		
@@ -1689,7 +1704,11 @@ PRIVATE char ** LYUCFullyTranslateString_1 ARGS9(
 	    state = S_check_name;
 	    break;
 
-	case S_check_name:
+	case S_check_name_trad:
+	    /*
+	     *  Check for an entity name in the traditional (LYCharSets.c)
+	     *  table.
+	     */
 	    for (low = 0, high = HTML_dtd.number_of_entities;
 		 high > low;
 		 diff < 0 ? (low = i+1) : (high = i)) {
@@ -1704,53 +1723,6 @@ PRIVATE char ** LYUCFullyTranslateString_1 ARGS9(
 			    LYCharSets[cs_to][i] : LYCharSets[0][i],
 			    sizeof(replace_buf));
 		    replace_buf[sizeof(replace_buf) - 1] = '\0';
-		    if (hidden) {
-			/*
-			**  If it's hidden, use 160 for nbsp. - FM
-			*/
-			if (!strcmp("nbsp", entities[i]) ||
-			    (replace_buf[1] == '\0' &&
-			     replace_buf[0] == HT_NON_BREAK_SPACE)) {
-			    replace_buf[0] = 160;
-			    replace_buf[1] = '\0';
-			    state = S_got_outstring;
-			    break;
-			    /*
-			    **  If it's hidden, use 173 for shy. - FM
-			    */
-			} else if (!strcmp("shy", entities[i]) ||
-				   (replace_buf[1] == '\0' &&
-				    replace_buf[0] == LY_SOFT_HYPHEN)) {
-			    replace_buf[0] = 173;
-			    replace_buf[1] = '\0';
-			    state = S_got_outstring;
-			    break;
-			}
-			/*
-			**  Check whether we want a plain space for nbsp,
-			**  ensp, emsp or thinsp. - FM
-			*/
-		    } else if (plain_space) {
-			if (!strcmp("nbsp", entities[i]) ||
-			    !strcmp("emsp", entities[i]) ||
-			    !strcmp("ensp", entities[i]) ||
-			    !strcmp("thinsp", entities[i]) ||
-			    (replace_buf[1] == '\0' &&
-			     replace_buf[0] == HT_EM_SPACE)) {
-			    code = ' ';
-			    state = S_got_outchar;
-			    break;
-			    /*
-			    **  If plain_space is set, ignore shy. - FM
-			    */
-			} else if (!strcmp("shy", entities[i]) ||
-				   (replace_buf[1] == '\0' &&
-				    replace_buf[0] == LY_SOFT_HYPHEN)) {
-			    replace_buf[0] = '\0';
-			    state = S_got_outstring;
-			    break;
-			}
-		    }
 		    /*
 		    **  Found the entity.  If the length
 		    **  of the value exceeds the length of
@@ -1765,19 +1737,65 @@ PRIVATE char ** LYUCFullyTranslateString_1 ARGS9(
 	    }
 	    /*
 	    **  Entity name lookup failed (diff != 0).
-	    **  No point in repeating for extra entities. - kw
+	    **  Recover and continue.
 	    */
-	    if (what != P_named) {
+	    state = S_recover;
+	    break;
+
+	case S_check_name:
+	    /*
+	     *  Check for a name that was really given as a named
+	     *  entity. - kw
+	     */
+	    if (hidden) {
 		/*
-		**  Didn't find the entity.
-		**  Recover the "&#" and continue
-		**  from there. - FM
+		**  If it's hidden, use 160 for nbsp. - FM
 		*/
-		state = S_recover;
-		break;
+		if (!strcmp("nbsp", name) ||
+		    (replace_buf[1] == '\0' &&
+		     replace_buf[0] == HT_NON_BREAK_SPACE)) {
+		    replace_buf[0] = 160;
+		    replace_buf[1] = '\0';
+		    state = S_got_outstring;
+		    break;
+		    /*
+		    **  If it's hidden, use 173 for shy. - FM
+		    */
+		} else if (!strcmp("shy", name) ||
+			   (replace_buf[1] == '\0' &&
+			    replace_buf[0] == LY_SOFT_HYPHEN)) {
+		    replace_buf[0] = 173;
+		    replace_buf[1] = '\0';
+		    state = S_got_outstring;
+		    break;
+		}
+		/*
+		**  Check whether we want a plain space for nbsp,
+		**  ensp, emsp or thinsp. - FM
+		*/
+	    } else if (plain_space) {
+		if (!strcmp("nbsp", name) ||
+		    !strcmp("emsp", name) ||
+		    !strcmp("ensp", name) ||
+		    !strcmp("thinsp", name) ||
+		    (replace_buf[1] == '\0' &&
+		     replace_buf[0] == HT_EM_SPACE)) {
+		    code = ' ';
+		    state = S_got_outchar;
+		    break;
+		    /*
+		    **  If plain_space is set, ignore shy. - FM
+		    */
+		} else if (!strcmp("shy", name) ||
+			   (replace_buf[1] == '\0' &&
+			    replace_buf[0] == LY_SOFT_HYPHEN)) {
+		    replace_buf[0] = '\0';
+		    state = S_got_outstring;
+		    break;
+		}
 	    }
 	    /*
-	    **  Not found, repeat for extra entities. - FM
+	    **  Not recognized specially, look up in extra entities table.
 	    */
 	    for (low = 0, high = HTML_dtd.number_of_extra_entities;
 		 high > low;
@@ -1802,11 +1820,21 @@ PRIVATE char ** LYUCFullyTranslateString_1 ARGS9(
 	    }
 	    if (diff == 0)
 		break;
+
+	    /*
+	    **  Seek the Unicode value for the entity.
+	    **  This could possibly replace all the rest of
+	    **  `case S_check_name'. - kw
+	    */
+	    if ((code = HTMLGetEntityUCValue(name)) > 0) {
+		state = S_check_uni;
+		break;
+	    }
 	    /*
 	    **  Didn't find the entity.
-	    **  Recover.
+	    **  Check the traditional tables.
 	    */
-	    state = S_recover;
+	    state = S_check_name_trad;
 	    break;
 
 				/* * * O U T P U T   S T A T E S * * */
@@ -2003,7 +2031,7 @@ PRIVATE char ** LYUCFullyTranslateString_1 ARGS9(
 	    **  Check for a numeric entity. - FM
 	    */
 	    if (*p == '#' && len > 2 &&
-	        (unsigned char)*(p+1) == 'x' &&
+	        TOLOWER((unsigned char)*(p+1)) == 'x' &&
 		(unsigned char)*(p+2) < 127 && 
 		isxdigit((unsigned char)*(p+2))) {
 		isHex = TRUE;
@@ -2302,7 +2330,6 @@ PRIVATE char ** LYUCFullyTranslateString_1 ARGS9(
 		    **  the character as a named entity. - FM
 		    */
 		} else {
-		    CONST char * name;
 		    if (code == 8482) {
 			/*
 			**  Trade mark sign falls through to here. - KW
@@ -2322,11 +2349,7 @@ PRIVATE char ** LYUCFullyTranslateString_1 ARGS9(
 			diff = strcmp(entities[i], name);
 			if (diff == 0) {
 			    /*
-			    **  Found the entity.  Assume that the length
-			    **  of the value does not exceed the length of
-			    **  the raw entity, so that the overall string
-			    **  does not need to grow.  Make sure this stays
-			    **  true in the LYCharSets arrays. - FM
+			    **  Found the entity.
 			    */
 			    int j;
 			    for (j = 0; p_entity_values[i][j]; j++)
@@ -3361,16 +3384,6 @@ PUBLIC void LYHandleMETA ARGS4(
 	    *cp4 = '\0';
 	    cp4 = cp3;
 	    chndl = UCGetLYhndl_byMIME(cp3);
-	    if (chndl < 0) {
-		if (!strcmp(cp4, "cn-big5")) {
-		    cp4 += 3;
-		    chndl = UCGetLYhndl_byMIME(cp4);
-		} else if (!strncmp(cp4, "cn-gb", 5)) {
-		    StrAllocCopy(cp3, "gb2312");
-		    cp4 = cp3;
-		    chndl = UCGetLYhndl_byMIME(cp4);
-		}
-	    }
 	    if (UCCanTranslateFromTo(chndl, current_char_set)) {
 		chartrans_ok = YES;
 		StrAllocCopy(me->node_anchor->charset, cp4);
@@ -3482,7 +3495,7 @@ PUBLIC void LYHandleMETA ARGS4(
 
 	    } else if (!strncmp(cp1, "koi8-r", 6) &&
 		       !strncmp(LYchar_set_names[current_char_set],
-				"KOI8-R character set", 20)) {
+				"KOI8-R Cyrillic", 15)) {
 		StrAllocCopy(me->node_anchor->charset, "koi8-r");
 		HTPassEightBitRaw = TRUE;
 
@@ -3884,9 +3897,14 @@ PUBLIC void LYHandleSELECT ARGS5(
 	    }
 
 	    /*
-	     *  Too likely to cause a crash, so we'll ignore it. - FM
-	     */
+	     *  We should have covered all crash possibilities with the
+	     *  current TagSoup parser, so we'll allow it because some
+	     *  people with other browsers use SELECT for "information"
+	     *  popups, outside of FORM blocks, though no Lynx user
+	     *  would do anything that awful, right? - FM
+	     *//***
 	    return;
+		***/
 	}
 
 	/*
@@ -4051,9 +4069,11 @@ PUBLIC void LYHandleSELECT ARGS5(
 	    /*
 	     *  Add end option character.
 	     */
-	    HText_appendCharacter(me->text, ']');
-	    HText_setLastChar(me->text, ']');
-	    me->in_word = YES;
+	    if (!me->first_option) {
+		HText_appendCharacter(me->text, ']');
+		HText_setLastChar(me->text, ']');
+		me->in_word = YES;
+	    }
 	    HText_setIgnoreExcess(me->text, FALSE); 
 	}
     	HTChunkClear(&me->option);

@@ -1251,37 +1251,3 @@ cf_wait_headers="$cf_wait_headers
 fi
 fi
 ])dnl
-dnl ---------------------------------------------------------------------------
-dnl Wrapper for AC_ARG_WITH to ensure that user supplies a pathname, not just
-dnl defaulting to yes/no.
-dnl
-dnl $1 = option name
-dnl $2 = help-text
-dnl $3 = environment variable to set
-dnl $4 = default value, shown in the help-message, must be a constant
-dnl $5 = default value, if it's an expression & cannot be in the help-message
-dnl
-AC_DEFUN([CF_WITH_PATH],
-[AC_ARG_WITH($1,[$2 ](default: ifelse($4,,empty,$4)),,
-ifelse($4,,[withval="${$3}"],[withval="${$3-ifelse($5,,$4,$5)}"]))dnl
-case ".$withval" in #(vi
-./*) #(vi
-  ;;
-.\[$]{*prefix}*) #(vi
-  eval withval="$withval"
-  case ".$withval" in #(vi
-  .NONE/*)
-    withval=`echo $withval | sed -e s@NONE@$ac_default_prefix@`
-    ;;
-  esac
-  ;; #(vi
-.NONE/*)
-  withval=`echo $withval | sed -e s@NONE@$ac_default_prefix@`
-  ;;
-*)
-  AC_ERROR(expected a pathname for $1)
-  ;;
-esac
-eval $3="$withval"
-AC_SUBST($3)dnl
-])dnl

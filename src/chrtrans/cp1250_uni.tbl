@@ -2,7 +2,7 @@
 Mwindows-1250
 
 #Name as a Display Charset (used on Options screen)
-O MS Windows CP 1250
+OptionName WinLatin2 (cp1250)
 
 #
 #    Name:     cp1250_WinLatin2 to Unicode table

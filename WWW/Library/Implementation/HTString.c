@@ -180,8 +180,11 @@ PUBLIC char * HTNextField ARGS1(
 **      found   points to the delimiter found unless it was NULL.
 **	Returns	a pointer to the first word or NULL on error
 */
-PUBLIC char * HTNextTok (char ** pstr,
-		      const char * delims, const char * bracks, char * found)
+PUBLIC char * HTNextTok ARGS4(
+	char **,	pstr,
+	const char *,	delims,
+	const char *,	bracks,
+	char *,		found)
 {
     char * p = *pstr;
     char * start = NULL;

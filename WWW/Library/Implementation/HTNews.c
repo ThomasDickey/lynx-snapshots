@@ -1010,11 +1010,11 @@ PRIVATE int read_article NOARGS
 		}
 
 		if (full_line[0] == '.') {	
-		    if (full_line[1] < ' ') {		/* End of article? */
+		    if ((unsigned char)full_line[1] < ' ') {		/* End of article? */
 			done = YES;
 			break;
 		    }
-		} else if (full_line[0] < ' ') {
+		} else if ((unsigned char)full_line[0] < ' ') {
 		    break;		/* End of Header? */
 
 		} else if (match(full_line, "SUBJECT:")) {
@@ -1273,7 +1273,7 @@ PRIVATE int read_article NOARGS
 	    if (TRACE)
 	        fprintf(stderr, "B %s", line);
 	    if (line[0] == '.') {
-		if (line[1] < ' ') {		/* End of article? */
+		if ((unsigned char)line[1] < ' ') {		/* End of article? */
 		    done = YES;
 		    break;
 		} else {			/* Line starts with dot */
@@ -1411,6 +1411,7 @@ PRIVATE int read_list ARGS1(char *, arg)
     BOOL done = NO;
     BOOL head = NO;
     BOOL tail = NO;
+    BOOL skip_this_line = NO, skip_rest_of_line = NO;
     int listing = 0;
     char *pattern = NULL;
     int len = 0;
@@ -1455,7 +1456,7 @@ PRIVATE int read_list ARGS1(char *, arg)
     START(HTML_DLC);
     PUTC('\n');
     while (!done) {
-	char ch = *p++ = NEXT_CHAR;
+	char ch = NEXT_CHAR;
 	if (ch == (char)EOF) {
 	    if (interrupted_in_htgetcharacter) {
 		interrupted_in_htgetcharacter = 0;
@@ -1470,13 +1471,47 @@ PRIVATE int read_list ARGS1(char *, arg)
 	    abort_socket();	/* End of file, close socket */
 	    FREE(pattern);
 	    return(HT_LOADED);	/* End of file on response */
+	} else if (skip_this_line) {
+	    if (ch == LF) {
+		skip_this_line = skip_rest_of_line = NO;
+		p = line;
+	    }
+	    continue;
+	} else if (skip_rest_of_line) {
+	    if (ch != LF) {
+		continue;
+	    }
+	} else if (p == &line[LINE_LENGTH]) {
+	    if (TRACE) {
+	        fprintf(stderr, "b %.*s%c[...]\n", (LINE_LENGTH), line, ch);
+	    }
+	    *p = '\0';
+	    if (ch == LF) {
+		;		/* Will be dealt with below */
+	    } else if (WHITE(ch)) {
+		ch = LF;	/* May treat as line without description */
+		skip_this_line = YES; /* ...and ignore until LF */
+	    } else if (strchr(line, ' ') == NULL &&
+		       strchr(line, '\t') == NULL) {
+		/* No separator found */
+		if (TRACE)
+		    fprintf(stderr,
+			    "HTNews..... group name too long, discarding.\n");
+		skip_this_line = YES; /* ignore whole line */
+		continue;
+	    } else {
+		skip_rest_of_line = YES; /* skip until ch == LF found */
+	    }
+	} else {
+	    *p++ = ch;
 	}
-	if ((ch == LF) || (p == &line[LINE_LENGTH])) {
-	    *p++ = '\0';			/* Terminate the string */
+	if (ch == LF) {
+	    skip_rest_of_line = NO; /* done, reset flag */
+	    *p = '\0';			/* Terminate the string */
 	    if (TRACE)
 	        fprintf(stderr, "B %s", line);
 	    if (line[0] == '.') {
-		if ((unsigned char)line[1] < ' ') {		/* End of article? */
+		if ((unsigned char)line[1] < ' ') {		/* End of list? */
 		    done = YES;
 		    break;
 		} else {			/* Line starts with dot */
@@ -1670,11 +1705,11 @@ PRIVATE int read_group ARGS3(
 		    return(HT_LOADED);	/* End of file on response */
 		}
 		if ((ch == '\n') || (p == &line[LINE_LENGTH])) {
-		    *p++ = '\0';		/* Terminate the string */
+		    *p = '\0';		/* Terminate the string */
 		    if (TRACE)
 		        fprintf(stderr, "X %s", line);
 		    if (line[0] == '.') {
-			if (line[1] < ' ') {	/* End of article? */
+			if (line[1] < ' ') {	/* End of response? */
 			    done = YES;
 			    break;
 			} else {		/* Line starts with dot */
@@ -1782,7 +1817,7 @@ PRIVATE int read_group ARGS3(
 			switch(line[0]) {
 
 			case '.':
-			    done = (line[1] < ' ');	/* End of article? */
+			    done = ((unsigned char)line[1] < ' ');  /* End of response? */
 			    break;
 
 			case 'S':
