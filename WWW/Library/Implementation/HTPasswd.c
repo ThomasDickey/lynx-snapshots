@@ -138,7 +138,7 @@ PUBLIC BOOL HTAA_passwdMatch ARGS2(CONST char *, password,
 				   CONST char *, encrypted)
 {
     char *result;
-    int len;
+    size_t len;
     int status;
 
     if (!password || !encrypted)
@@ -152,7 +152,7 @@ PUBLIC BOOL HTAA_passwdMatch ARGS2(CONST char *, password,
 	outofmem(__FILE__, "HTAA_encryptPasswd");
 
     *result = (char)0;
-    while (len > 0) {
+    while (len != 0) {
 	char salt[3];
 	char chunk[9];
 	CONST char *cur1 = password;

@@ -1606,7 +1606,7 @@ PUBLIC void HTSwitchDTD ARGS1(
 	memcpy(tags, tags_old, HTML_ELEMENTS * sizeof(HTTag));
 }
 
-PUBLIC CONST HTTag HTTag_unrecognized =
+PUBLIC HTTag HTTag_unrecognized =
     { NULL,    NULL,		0,	SGML_EMPTY,T__UNREC_};
 
 /*

@@ -380,7 +380,7 @@ check_recall:
 	FREE(cp1);
 #else
 	sprintf(command, "%s %s %s", COPY_PATH, file, buffer);
-#endif __EMX__
+#endif /* __EMX__ */
 	CTRACE(tfp, "command: %s\n", command);
 	fflush(stderr);
 	fflush(stdout);

@@ -1231,16 +1231,16 @@ PUBLIC BOOL HTSearch ARGS2(
 **	the new address.
 **
 **  On Entry,
-**	 *keywords	space-separated keyword list or similar search list
-**	*addres 	is name of object search is to be done on.
+**	*keywords	space-separated keyword list or similar search list
+**	*indexname	is name of object search is to be done on.
 */
 PUBLIC BOOL HTSearchAbsolute ARGS2(
 	CONST char *,	keywords,
-	CONST char *,	indexname)
+	char *,		indexname)
 {
     DocAddress abs_doc;
     HTParentAnchor * anchor;
-    abs_doc.address = (char *)indexname;
+    abs_doc.address = indexname;
     abs_doc.post_data = NULL;
     abs_doc.post_content_type = NULL;
     abs_doc.bookmark = NULL;

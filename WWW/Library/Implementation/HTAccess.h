@@ -263,7 +263,7 @@ Search Given Indexname
  */
 extern BOOL HTSearchAbsolute PARAMS((
         CONST char *    keywords,
-        CONST char *    indexname));
+        char *    	indexname));
 
 
 /*

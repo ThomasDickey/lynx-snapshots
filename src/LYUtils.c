@@ -1818,9 +1818,9 @@ PUBLIC void statusline ARGS1(
 	if ((temp = (unsigned char *)calloc(1, strlen(text) + 1)) == NULL)
 	    outofmem(__FILE__, "statusline");
 	if (kanji_code == EUC) {
-	    TO_EUC(text, temp);
+	    TO_EUC((CONST unsigned char *)text, temp);
 	} else if (kanji_code == SJIS) {
-	    TO_SJIS(text, temp);
+	    TO_SJIS((CONST unsigned char *)text, temp);
 	} else {
 	    for (i = 0, j = 0; text[i]; i++) {
 		if (text[i] != '\033') {
@@ -3194,6 +3194,7 @@ PRIVATE char *fmt_tempname ARGS3(
 	"%sL%u-%uTMP%s",
 #endif
 	lynx_temp_space, (unsigned)getpid(), counter, suffix);
+    CTRACE(tfp, "-> '%s'\n", result);
     return result;
 }
 
@@ -3235,6 +3236,7 @@ PUBLIC void tempname ARGS2(
 	/*
 	 *  Remove all temporary files with .txt or .html suffixes. - FM
 	 */
+	CTRACE(tfp, "tempname REMOVE_FILES (%d)\n", counter);
 	for (; counter != 0; counter--) {
 	    remove(fmt_tempname(namebuffer, counter-1, ".txt"));
 	    remove(fmt_tempname(namebuffer, counter-1, HTML_SUFFIX));
@@ -3243,6 +3245,7 @@ PUBLIC void tempname ARGS2(
 	/*
 	 *  Load a tentative temporary file name into namebuffer. - FM
 	 */
+	CTRACE(tfp, "tempname NEW_FILE (%d)\n", counter);
 	while (counter < LYMaxTempCount) {
 	    /*
 	     *	Create names with .txt, then .bin, then
@@ -3274,6 +3277,7 @@ PUBLIC void tempname ARGS2(
 	     *	Lynx, the spoof attempt will be apparent, and the user
 	     *	can take appropriate action. - FM
 	     */
+	    counter++;
 	    return;
 	}
 	/*
@@ -3685,7 +3689,7 @@ PUBLIC void LYConvertToURL ARGS1(
     if (!old_string || *old_string == '\0')
 	return;
 
-#ifdef DOSPATH /* should EMX version do this too? */
+#if defined(DOSPATH) || defined(__EMX__)
     {
 	 char *cp_url = *AllocatedString;
 	 for(; *cp_url != '\0'; cp_url++)
@@ -3705,7 +3709,7 @@ PUBLIC void LYConvertToURL ARGS1(
 
     if (*old_string != '/') {
 	char *fragment = NULL;
-#ifdef DOSPATH /* Should EMX version do this? */
+#if defined(DOSPATH) || defined(__EMX__)
 	StrAllocCat(*AllocatedString,"/");
 #endif /* DOSPATH */
 #ifdef VMS
@@ -3908,11 +3912,7 @@ have_VMS_URL:
 	     *	Concatenate and simplify, trimming any
 	     *	residual relative elements. - FM
 	     */
-#ifndef DOSPATH /* Should EMX version do this? */
-	    StrAllocCopy(temp, curdir);
-	    StrAllocCat(temp, "/");
-	    StrAllocCat(temp, old_string);
-#else
+#if defined (DOSPATH) || defined (__EMX__)
 	    if (old_string[1] != ':' && old_string[1] != '|') {
 		StrAllocCopy(temp, HTDOS_wwwName(curdir));
 		if(curdir[strlen(curdir)-1] != '/')
@@ -3923,6 +3923,10 @@ have_VMS_URL:
 		curdir[0] = '\0';
 		StrAllocCopy(temp, old_string);
 	    }
+#else
+	    StrAllocCopy(temp, curdir);
+	    StrAllocCat(temp, "/");
+	    StrAllocCat(temp, old_string);
 #endif /* DOSPATH */
 	    LYTrimRelFromAbsPath(temp);
 	    CTRACE(tfp, "Converted '%s' to '%s'\n", old_string, temp);
