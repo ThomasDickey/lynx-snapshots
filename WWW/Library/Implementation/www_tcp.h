@@ -56,8 +56,17 @@ Default values
 #define INVSOC (-1)             /* Unix invalid socket */
 		/* NB: newer libwww has something different for Windows */
 
+/* IPv6 support */
+#if defined(HAVE_GETADDRINFO) && defined(HAVE_GAI_STRERROR) && defined(ENABLE_IPV6)
+#	define INET6
+#endif /* HAVE_GETADDRINFO && HAVE_GAI_STRERROR && ENABLE_IPV6 */
+
 #if !defined(__MINGW32__)
+#ifdef INET6
+typedef struct sockaddr_storage SockA;  /* See netinet/in.h */
+#else
 typedef struct sockaddr_in SockA;  /* See netinet/in.h */
+#endif /* INET6 */
 #endif
 
 #ifndef VMS

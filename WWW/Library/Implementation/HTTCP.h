@@ -18,8 +18,11 @@
 **           returns a pointer to a static string which must be copied if
 **                it is to be kept.
 */
+#ifdef INET6
+extern CONST char * HTInetString PARAMS((SockA* mysin));
+#else
 extern CONST char * HTInetString PARAMS((struct sockaddr_in* mysin));
-
+#endif /* INET6 */
 
 /*      Encode INET status (as in sys/errno.h)                    inet_status()
 **      ------------------
@@ -100,11 +103,19 @@ extern struct hostent * LYGetHostByName PARAMS((char * str));
 **               sin points to the binary internet or decnet address field.
 **
 ** On exit:
+**         Regular case:
 **               *sin is filled in.  If no port is specified in str, that
 **               field is left unchanged in *sin.
+**         INET6 case:
+**               *sin is filled in.  If no port is specified in str,
+**               default_port is used
 */
 #if defined(__STDC__) || defined(__BORLANDC__) || defined(_MSC_VER)
+#ifdef INET6
+        extern int HTParseInet(SockA * mysin, CONST char * str, int default_port);
+#else
         extern int HTParseInet(struct sockaddr_in * mysin, CONST char * str);
+#endif /* INET6 */
         /*!! had to change this to get it to compile. CTB */
 #else
         extern int HTParseInet();

@@ -28,6 +28,7 @@
 #undef DISP_PARTIAL		/* CF_ARG_ENABLE(partial) */
 #undef DONT_TRACK_INTERNAL_LINKS /* CF_ARG_DISABLE(internal-links) */
 #undef EBCDIC			/* CF_EBCDIC */
+#undef ENABLE_IPV6		/* CF_CHECK_IPV6 */
 #undef ENABLE_NLS		/* defined if NLS is requested */
 #undef ENABLE_OPTS_CHANGE_EXEC	/* CF_ARG_ENABLE(change-exec) */
 #undef EXEC_LINKS		/* CF_ARG_ENABLE(exec-links) */
@@ -61,6 +62,8 @@
 #undef HAVE_DEFINE_KEY
 #undef HAVE_DIRENT_H		/* defined by AC_HEADER_DIRENT */
 #undef HAVE_FCNTL_H		/* have <fcntl.h> */
+#undef HAVE_GAI_STRERROR	/* CF_CHECK_IPV6 */
+#undef HAVE_GETADDRINFO		/* CF_CHECK_IPV6 */
 #undef HAVE_GETATTRS
 #undef HAVE_GETBEGX
 #undef HAVE_GETBEGY

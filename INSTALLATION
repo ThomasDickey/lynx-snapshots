@@ -378,6 +378,9 @@ II. Compile instructions -- UNIX
 	generate an HTMLized copy of lynx.cfg which will be installed with
 	the other help files.
 
+  --enable-ipv6         		(define ENABLE_IPV6)
+	use experimental IPV6 (with IPV4) logic.
+
   --enable-justify-elts			(define EXP_JUSTIFY_ELTS)
 	use experimental element-justification logic.
 

@@ -32,7 +32,8 @@ dnl --------------------------------------------------------------------------
 dnl Only add to this case statement when a system has a compiler that is not
 dnl detected by AC_PROG_CC. 
 case $host_os in
-os390)	: ${CFLAGS="-D_ALL_SOURCE -Wl,EDIT=NO"}
+openedition)
+	: ${CFLAGS="-D_ALL_SOURCE -Wl,EDIT=NO"}
 	: ${CC=c89}
 	;;
 esac
@@ -709,6 +710,17 @@ if test $use_exp_htmlized_cfg = no ; then
 fi
 AC_SUBST(LYNXCFG_MAKE)
 AC_SUBST(LYNXCFG_URL)
+
+### check for ipv6 support
+AC_MSG_CHECKING([whether to enable ipv6])
+CF_ARG_ENABLE(ipv6,
+	[  --enable-ipv6           use experimental ipv6 (with ipv4) support],
+[AC_DEFINE(ENABLE_IPV6)])
+AC_MSG_RESULT($enableval)
+if test "$enableval" = "yes"; then
+	CF_CHECK_IPV6
+fi
+dnl AC_REPLACE_FUNCS(getaddrinfo getnameinfo)
 
 AC_MSG_CHECKING(if experimental element-justification logic should be used)
 CF_ARG_ENABLE(justify-elts,

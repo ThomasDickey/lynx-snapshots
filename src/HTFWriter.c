@@ -749,7 +749,7 @@ PUBLIC HTStream* HTSaveToFile ARGS3(
 	    _statusline(CANNOT_DISPLAY_FILE_D_OR_C);
 	}
 
-	while (c != 'D' && c != 'C') {
+	while (c != 'D' && c != 'C' && c != 7) {
 	    c = LYgetch_single();
 #ifdef VMS
 	    /*

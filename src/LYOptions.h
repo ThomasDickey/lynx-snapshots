@@ -2,6 +2,7 @@
 #define LYOPTIONS_H
 
 #include <LYStructs.h>
+#include <LYStrings.h>
 
 extern BOOLEAN term_options; /* for LYgetstr() */
 
@@ -14,6 +15,7 @@ extern  int popup_choice PARAMS((
 	int		length,
 	int		disabled,
 	BOOLEAN		mouse));
+
 #define LYChoosePopup(cur, line, column, choices, length, disabled, mouse) \
 	popup_choice(cur, line, column, (CONST char **)choices, length, disabled, mouse)
 

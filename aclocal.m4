@@ -589,6 +589,8 @@ CF_OUR_MESSAGES
 if test "$USE_INCLUDED_LIBINTL" = yes ; then
         if test "$nls_cv_force_use_gnu_gettext" = yes ; then
 		SUB_MAKEFILE="intl/$cf_makefile"
+	elif test "$nls_cv_use_gnu_gettext" = yes ; then
+		SUB_MAKEFILE="intl/$cf_makefile"
 	else
 		INTLDIR_MAKE="#"
 	fi
@@ -782,6 +784,28 @@ CF_CHECK_FUNCDECL([$1], $ac_func,
 done
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl Check for IPV6 configuration.
+AC_DEFUN([CF_CHECK_IPV6],[
+CF_FIND_IPV6_TYPE
+CF_FIND_IPV6_LIBS
+
+CF_FUNC_GETADDRINFO
+
+if test "$cf_cv_getaddrinfo" != "yes"; then
+	if test "$cf_cv_ipv6type" != "linux"; then
+		AC_MSG_ERROR(
+[You must get working getaddrinfo() function,
+or you can specify "--disable-ipv6"])
+	else
+		AC_MSG_WARN(
+[The getaddrinfo() implementation on your system seems be buggy.
+You should upgrade your system library to the newest version
+of GNU C library (aka glibc).])
+	fi
+fi
+
+])dnl
+dnl ---------------------------------------------------------------------------
 dnl Check if curses supports color.  (Note that while SVr3 curses supports
 dnl color, it does this differently from SVr4 curses; more work would be needed
 dnl to accommodate SVr3).
@@ -923,6 +947,8 @@ if test ".$ac_cv_func_initscr" != .yes ; then
 			[cf_result=no])
 		AC_MSG_RESULT($cf_result)
 		test $cf_result = no && AC_ERROR(Cannot link curses library)
+	elif test "$cf_curs_lib" = "$cf_term_lib" ; then
+		:
 	elif test "$cf_term_lib" != predefined ; then
 		AC_MSG_CHECKING(if we need both $cf_curs_lib and $cf_term_lib libraries)
 		AC_TRY_LINK([#include <${cf_cv_ncurses_header-curses.h}>],
@@ -1071,6 +1097,163 @@ AC_MSG_RESULT($cf_cv_fancy_curses)
 test $cf_cv_fancy_curses = yes && AC_DEFINE(FANCY_CURSES)
 ])
 dnl ---------------------------------------------------------------------------
+dnl Based on the IPV6 stack type, look for the corresponding library.
+AC_DEFUN([CF_FIND_IPV6_LIBS],[
+AC_REQUIRE([CF_FIND_IPV6_TYPE])
+
+cf_ipv6lib=none
+cf_ipv6dir=none
+
+AC_MSG_CHECKING(for ipv6 library if required)
+case $cf_cv_ipv6type in #(vi
+solaris) #(vi
+	;;
+inria) #(vi
+	;;
+kame) #(vi
+	dnl http://www.kame.net/
+	cf_ipv6lib=inet6
+	cf_ipv6dir=v6
+	;;
+linux-glibc) #(vi
+	;;
+linux-libinet6) #(vi
+	dnl http://www.v6.linux.or.jp/
+	cf_ipv6lib=inet6
+	cf_ipv6dir=inet6
+	;;
+toshiba) #(vi
+	cf_ipv6lib=inet6
+	cf_ipv6dir=v6
+	;;
+v6d) #(vi
+	cf_ipv6lib=v6
+	cf_ipv6dir=v6
+	;;
+zeta)
+	cf_ipv6lib=inet6
+	cf_ipv6dir=v6
+	;;
+esac
+AC_MSG_RESULT($cf_ipv6lib)
+
+if test "$cf_ipv6lib" != "none"; then
+
+	AC_TRY_LINK([
+#include <sys/types.h>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <netinet/ip6.h>],
+	[getaddrinfo(0, 0, 0, 0)],,[
+	CF_HEADER_PATH(cf_search,$cf_ipv6dir)
+	for cf_incdir in $cf_search
+	do
+		cf_header=$cf_incdir/netinet/ip6.h
+		if test -f $cf_header
+		then
+			CFLAGS="$CFLAGS -I$cf_incdir"
+			test -n "$verbose" && echo "	... found $cf_header" 1>&AC_FD_MSG
+			break
+		fi
+		test -n "$verbose" && echo "	... tested $cf_header" 1>&AC_FD_MSG
+	done
+	])
+
+	CF_FIND_LIBRARY([$cf_ipv6lib],[$cf_ipv6dir],[
+#include <sys/types.h>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <netinet/ip6.h>],
+	[getaddrinfo(0, 0, 0, 0)],
+	[getaddrinfo],
+	noexit)
+	if test $cf_found_library = no ; then
+		AC_MSG_ERROR(
+[No $cf_ipv6lib library found, cannot continue.  You must fetch lib$cf_ipv6lib.a
+from an appropriate ipv6 kit and compile beforehand.])
+	fi
+fi
+
+])dnl
+dnl ---------------------------------------------------------------------------
+AC_DEFUN([CF_FIND_IPV6_TYPE],[
+AC_CACHE_CHECK(ipv6 stack type, cf_cv_ipv6type, [
+cf_cv_ipv6type=unknown
+for i in solaris inria kame linux-glibc linux-libinet6 toshiba v6d zeta
+do
+	case $i in #(vi
+	solaris) #(vi
+		if test "SunOS" = "`uname -s`"
+		then
+		  if test -f /usr/include/netinet/ip6.h
+		  then
+			cf_cv_ipv6type=$i
+		  fi
+		fi
+		;;
+	inria) #(vi
+		dnl http://www.kame.net/
+		AC_EGREP_CPP(yes, [dnl
+#include <netinet/in.h>
+#ifdef IPV6_INRIA_VERSION
+yes
+#endif],	[cf_cv_ipv6type=$i])
+		;;
+	kame) #(vi
+		dnl http://www.kame.net/
+		AC_EGREP_CPP(yes, [dnl
+#include <netinet/in.h>
+#ifdef __KAME__
+yes
+#endif],	[cf_cv_ipv6type=$i])
+		;;
+	linux-glibc) #(vi
+		dnl http://www.v6.linux.or.jp/
+		AC_EGREP_CPP(yes, [dnl
+#include <features.h>
+#if defined(__GLIBC__) && __GLIBC__ >= 2 && __GLIBC_MINOR__ >= 1
+yes
+#endif],	[cf_cv_ipv6type=$i])
+		;;
+	linux-libinet6) #(vi
+		dnl http://www.v6.linux.or.jp/
+		if test -d /usr/inet6
+		then
+			cf_cv_ipv6type=$i
+		elif test -f /usr/include/netinet/ip6.h
+		then
+			cf_cv_ipv6type=$i
+		fi
+		;;
+	toshiba) #(vi
+		AC_EGREP_CPP(yes, [dnl
+#include <sys/param.h>
+#ifdef _TOSHIBA_INET6
+yes
+#endif],	[cf_cv_ipv6type=$i])
+		;;
+	v6d) #(vi
+		AC_EGREP_CPP(yes, [dnl
+#include </usr/local/v6/include/sys/v6config.h>
+#ifdef __V6D__
+yes
+#endif],	[cf_cv_ipv6type=$i])
+		;;
+	zeta)
+		AC_EGREP_CPP(yes, [dnl
+#include <sys/param.h>
+#ifdef _ZETA_MINAMI_INET6
+yes
+#endif],	[cf_cv_ipv6type=$i])
+		;;
+	esac
+	if test "$cf_cv_ipv6type" != "unknown"; then
+		break
+	fi
+done
+])
+])dnl
+dnl ---------------------------------------------------------------------------
 dnl Look for a non-standard library, given parameters for AC_TRY_LINK.  We
 dnl prefer a standard location, and use -L options only if we do not find the
 dnl library in the standard library location(s).
@@ -1145,6 +1328,89 @@ AC_TRY_LINK([
 	[cf_cv_fionbio=unknown])])
 ])
 test "$cf_cv_fionbio" = "fcntl" && AC_DEFINE(USE_FCNTL)
+])dnl
+dnl ---------------------------------------------------------------------------
+dnl Look for a working version of getaddrinfo(), for IPV6 support.
+AC_DEFUN([CF_FUNC_GETADDRINFO],[
+AC_CACHE_CHECK(working getaddrinfo, cf_cv_getaddrinfo,[
+AC_TRY_RUN([
+#include <sys/types.h>
+#include <netdb.h>
+#include <string.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+
+#define expect(a,b) if (strcmp(a,b) != 0) goto bad
+
+int main()
+{
+   int passive, gaierr, inet4 = 0, inet6 = 0;
+   struct addrinfo hints, *ai, *aitop;
+   char straddr[INET6_ADDRSTRLEN], strport[16];
+
+   for (passive = 0; passive <= 1; passive++) {
+     memset(&hints, 0, sizeof(hints));
+     hints.ai_family = AF_UNSPEC;
+     hints.ai_flags = passive ? AI_PASSIVE : 0;
+     hints.ai_socktype = SOCK_STREAM;
+     if ((gaierr = getaddrinfo(NULL, "54321", &hints, &aitop)) != 0) {
+       (void)gai_strerror(gaierr);
+       goto bad;
+     }
+     for (ai = aitop; ai; ai = ai->ai_next) {
+       if (ai->ai_addr == NULL ||
+           ai->ai_addrlen == 0 ||
+           getnameinfo(ai->ai_addr, ai->ai_addrlen,
+                       straddr, sizeof(straddr), strport, sizeof(strport),
+                       NI_NUMERICHOST|NI_NUMERICSERV) != 0) {
+         goto bad;
+       }
+       switch (ai->ai_family) {
+       case AF_INET:
+         expect(strport, "54321");
+         if (passive) {
+           expect(straddr, "0.0.0.0");
+         } else {
+           expect(straddr, "127.0.0.1");
+         }
+         inet4++;
+         break;
+       case AF_INET6:
+         expect(strport, "54321");
+         if (passive) {
+           expect(straddr, "::");
+         } else {
+           expect(straddr, "::1");
+         }
+         inet6++;
+         break;
+       case AF_UNSPEC:
+         goto bad;
+         break;
+       default:
+         /* another family support? */
+         break;
+       }
+     }
+   }
+
+   if (inet6 != 2 || inet4 != 2)
+     goto bad;
+
+   if (aitop)
+     freeaddrinfo(aitop);
+   exit(0);
+
+  bad:
+   if (aitop)
+     freeaddrinfo(aitop);
+   exit(1);
+}
+],
+[cf_cv_getaddrinfo=yes],
+[cf_cv_getaddrinfo=no],
+[cf_cv_getaddrinfo=unknown])
+])
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl A conventional existence-check for 'lstat' won't work with the Linux
@@ -2024,6 +2290,7 @@ dnl Check for definitions & structures needed for window size-changing
 dnl FIXME: check that this works with "snake" (HP-UX 10.x)
 AC_DEFUN([CF_SIZECHANGE],
 [
+AC_REQUIRE([CF_STRUCT_TERMIOS])
 AC_MSG_CHECKING([declaration of size-change])
 AC_CACHE_VAL(cf_cv_sizechange,[
     cf_cv_sizechange=unknown
@@ -2254,6 +2521,40 @@ $1=`echo ${$1} | sed -e 's/-O[1-9]\? //' -e 's/-O[1-9]\?$//'`
 changequote([,])dnl
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl Some machines require _POSIX_SOURCE to completely define struct termios.
+dnl If so, define SVR4_TERMIO
+AC_DEFUN([CF_STRUCT_TERMIOS],[
+AC_CHECK_HEADERS( \
+termio.h \
+termios.h \
+unistd.h \
+)
+if test "$ISC" = yes ; then
+	AC_CHECK_HEADERS( sys/termio.h )
+fi
+if test $ac_cv_header_termios_h = yes ; then
+	case "$CFLAGS" in
+	*-D_POSIX_SOURCE*)
+		termios_bad=dunno ;;
+	*)	termios_bad=maybe ;;
+	esac
+	if test $termios_bad = maybe ; then
+	AC_MSG_CHECKING(whether termios.h needs _POSIX_SOURCE)
+	AC_TRY_COMPILE([#include <termios.h>],
+		[struct termios foo; int x = foo.c_iflag],
+		termios_bad=no, [
+		AC_TRY_COMPILE([
+#define _POSIX_SOURCE
+#include <termios.h>],
+			[struct termios foo; int x = foo.c_iflag],
+			termios_bad=unknown,
+			termios_bad=yes AC_DEFINE(SVR4_TERMIO))
+			])
+	AC_MSG_RESULT($termios_bad)
+	fi
+fi
+])dnl
+dnl ---------------------------------------------------------------------------
 AC_DEFUN([CF_SYSTEM_MAIL_FLAGS],
 [
 AC_MSG_CHECKING([system mail flags])
@@ -2457,7 +2758,7 @@ dnl $1=uppercase($2)
 AC_DEFUN([CF_UPPER],
 [
 changequote(,)dnl
-$1=`echo $2 | tr '[a-z]' '[A-Z]'`
+$1=`echo "$2" | sed y%abcdefghijklmnopqrstuvwxyz./-%ABCDEFGHIJKLMNOPQRSTUVWXYZ___%`
 changequote([,])dnl
 ])dnl
 dnl ---------------------------------------------------------------------------
@@ -2733,7 +3034,8 @@ cf_x_athena_lib=""
 for cf_path in default \
 	/usr/contrib/X11R6 \
 	/usr/contrib/X11R5 \
-	/usr/lib/X11R5
+	/usr/lib/X11R5 \
+	/usr/local
 do
 
 	if test -z "$cf_x_athena_include" ; then

@@ -241,6 +241,9 @@ EOF
     wgrisc:OpenBSD:*:*)
 	echo mipsel-unknown-openbsd${UNAME_RELEASE}
 	exit 0 ;;
+    *:OS/390:*:*)
+	echo i370-ibm-openedition
+	exit 0 ;;
     arm:RISC*:1.[012]*:*|arm:riscix:1.[012]*:*)
 	echo arm-acorn-riscix${UNAME_RELEASE}
 	exit 0;;
@@ -428,10 +431,6 @@ EOF
     *:IRIX*:*:*)
 	echo mips-sgi-irix`echo ${UNAME_RELEASE}|sed -e 's/-/_/g'`
 	exit 0 ;;
-    *:MVS:*:* | *:OS390:*:*|*:OS/390:*:*)
-			       # uname -m gives a processor model number  /* S/390 -- gil -- 1389 */
-	echo s390-ibm-os390    # on R1 and R2, uname -s reports OS390
-	exit 0 ;;              # on R3, uname -s reports OS/390
     ????????:AIX?:[12].1:2)    # AIX 2.2.1 or AIX 2.1.1 is RT/PC AIX.
 	echo romp-ibm-aix      # uname -m gives an 8 hex-code CPU id
 	exit 0 ;;              # Note that: echo "'`uname -s`'" gives 'AIX '

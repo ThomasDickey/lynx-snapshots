@@ -423,23 +423,14 @@
 #define TRAV_WAS_INTERRUPTED gettext("TRAVERSAL WAS INTERRUPTED")
 #define FOLLOW_LINK_NUMBER gettext("Follow link (or goto link or page) number: ")
 #define SELECT_OPTION_NUMBER gettext("Select option (or page) number: ")
-#define OPTION_CHOICE_NUMBER gettext("Option choice (or page) number: ")
 #define OPTION_ALREADY_CURRENT gettext("Option number %d already is current.")
-#define CHOICE_ALREADY_CURRENT gettext("Choice number %d already is current.")
 #define ALREADY_AT_OPTION_END \
  gettext("You are already at the end of this option list.")
-#define ALREADY_AT_CHOICE_END \
- gettext("You are already at the end of this choice list.")
 #define ALREADY_AT_OPTION_BEGIN \
  gettext("You are already at the beginning of this option list.")
-#define ALREADY_AT_CHOICE_BEGIN \
- gettext("You are already at the beginning of this choice list.")
 #define ALREADY_AT_OPTION_PAGE \
  gettext("You are already at page %d of this option list.")
-#define ALREADY_AT_CHOICE_PAGE \
- gettext("You are already at page %d of this choice list.")
 #define BAD_OPTION_NUM_ENTERED gettext("You have entered an invalid option number.")
-#define BAD_CHOICE_NUM_ENTERED gettext("You have entered an invalid choice number.")
 #define BAD_HTML_USE_TRACE gettext("** Bad HTML!!  Use -trace to diagnose. **")
 #define GIVE_FILENAME gettext("Give name of file to save in")
 #define CANNOT_SAVE_REMOTE gettext("Can't save data to file -- please run WWW locally")
