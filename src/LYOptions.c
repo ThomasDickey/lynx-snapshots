@@ -33,7 +33,7 @@ PRIVATE int boolean_choice PARAMS((
 	int		status,
 	int		line,
 	int		column,
-	char ** 	choices));
+	char **		choices));
 
 #define MAXCHOICES 10
 
@@ -3230,8 +3230,8 @@ static CONST char off_string[]	    = "OFF";
 static CONST char never_string[]    = "NEVER";
 static CONST char always_string[]   = "ALWAYS";
 static OptValues bool_values[] = {
-	{ FALSE,	     "OFF",		  "OFF" 	},
-	{ TRUE, 	     "ON",		  "ON"		},
+	{ FALSE,	     "OFF",		  "OFF"		},
+	{ TRUE,		     "ON",		  "ON"		},
 	{ 0, 0, 0 }};
 
 static char * secure_string		= "secure";
@@ -3247,13 +3247,13 @@ static char * cookies_up_to_user_string = "ask user";
 static char * cookies_accept_all_string = "accept all";
 static char * x_display_string		= "display";
 static char * editor_string		= "editor";
-static char * emacs_keys_string 	= "emacs_keys";
+static char * emacs_keys_string		= "emacs_keys";
 
 #ifdef ALLOW_USERS_TO_CHANGE_EXEC_WITHIN_OPTIONS
 #define EXEC_ALWAYS 2
 #define EXEC_LOCAL  1
 #define EXEC_NEVER  0
-static char * exec_links_string 	= "exec_options";
+static char * exec_links_string		= "exec_options";
 static OptValues exec_links_values[]	= {
 	{ EXEC_NEVER,	"ALWAYS OFF",		"ALWAYS OFF" },
 	{ EXEC_LOCAL,	"FOR LOCAL FILES ONLY",	"FOR LOCAL FILES ONLY" },
@@ -3279,15 +3279,15 @@ static char * mail_address_string	= "mail_address";
 static char * search_type_string	= "search_type";
 static OptValues search_type_values[] = {
 	{ FALSE,	    "Case insensitive",  "case_insensitive" },
-	{ TRUE, 	    "Case sensitive",	 "case_sensitive" },
+	{ TRUE,		    "Case sensitive",	 "case_sensitive" },
 	{ 0, 0, 0 }};
 #if defined(USE_SLANG) || defined(COLOR_CURSES)
 static char * show_color_string		= "show_color";
 static OptValues show_color_values[] = {
-	{ SHOW_COLOR_NEVER,  	never_string,	never_string },
-	{ SHOW_COLOR_OFF,    	off_string,	off_string },
-	{ SHOW_COLOR_ON,     	on_string, 	on_string },
-	{ SHOW_COLOR_ALWAYS, 	always_string,	always_string },
+	{ SHOW_COLOR_NEVER,	never_string,	never_string },
+	{ SHOW_COLOR_OFF,	off_string,	off_string },
+	{ SHOW_COLOR_ON,	on_string,	on_string },
+	{ SHOW_COLOR_ALWAYS,	always_string,	always_string },
 	{ 0, 0, 0 }};
 #endif
 static char * show_cursor_string	= "show_cursor";
@@ -3305,8 +3305,8 @@ static char * vi_keys_string		= "vi_keys";
 static char * DTD_recovery_string      = "DTD";
 static OptValues DTD_type_values[] = {
 	/* Old_DTD variable */
-	{ TRUE, 	    "relaxed (TagSoup mode)",	 "tagsoup" },
-	{ FALSE, 	    "strict (SortaSGML mode)",	 "sortasgml" },
+	{ TRUE,		    "relaxed (TagSoup mode)",	 "tagsoup" },
+	{ FALSE,	    "strict (SortaSGML mode)",	 "sortasgml" },
 	{ 0, 0, 0 }};
 static char * select_popups_string     = "select_popups";
 static char * images_string            = "images";
@@ -3317,7 +3317,7 @@ static char * verbose_images_string    = "verbose_images";
 static OptValues verbose_images_type_values[] = {
 	/* verbose_img variable */
 	{ FALSE,	    "OFF",		 "OFF" },
-	{ TRUE, 	    "show filename",	 "ON" },
+	{ TRUE,		    "show filename",	 "ON" },
 	{ 0, 0, 0 }};
 
 /*
@@ -3341,7 +3341,7 @@ static char * raw_mode_string		= "raw_mode";
  */
 static char * show_dotfiles_string	= "show_dotfiles";
 #ifdef DIRED_SUPPORT
-static char * dired_sort_string 	= "dired_sort";
+static char * dired_sort_string		= "dired_sort";
 static OptValues dired_values[] = {
 	{ 0,			"Directories first",	"dired_dir" },
 	{ FILES_FIRST,		"Files first",		"dired_files" },
@@ -3350,10 +3350,10 @@ static OptValues dired_values[] = {
 #endif /* DIRED_SUPPORT */
 static char * ftp_sort_string = "ftp_sort";
 static OptValues ftp_sort_values[] = {
-	{ FILE_BY_NAME, 	"By Name",		"ftp_by_name" },
-	{ FILE_BY_TYPE, 	"By Type",		"ftp_by_type" },
-	{ FILE_BY_SIZE, 	"By Size",		"ftp_by_size" },
-	{ FILE_BY_DATE, 	"By Date",		"ftp_by_date" },
+	{ FILE_BY_NAME,		"By Name",		"ftp_by_name" },
+	{ FILE_BY_TYPE,		"By Type",		"ftp_by_type" },
+	{ FILE_BY_SIZE,		"By Size",		"ftp_by_size" },
+	{ FILE_BY_DATE,		"By Date",		"ftp_by_date" },
 	{ 0, 0, 0 }};
 
 /*
@@ -3384,7 +3384,7 @@ static char * user_agent_string		= "user_agent";
 	fprintf(fp,"</select>\n")
 
 PRIVATE void PutOptValues ARGS3(
-	FILE *, 	fp,
+	FILE *,		fp,
 	int,		value,
 	OptValues *,	table)
 {
@@ -3399,7 +3399,7 @@ PRIVATE void PutOptValues ARGS3(
 
 PRIVATE BOOLEAN GetOptValues ARGS3(
 	OptValues *,	table,
-	char *, 	value,
+	char *,		value,
 	int *,		result)
 {
     while (table->LongName != 0) {
@@ -3525,7 +3525,7 @@ PRIVATE PostPair * break_data ARGS1(
  */
 
 PUBLIC int postoptions ARGS1(
-    document *, 	newdoc)
+    document *,		newdoc)
 {
     PostPair *data = 0;
     DocAddress WWWDoc;  /* need on exit */
@@ -3922,12 +3922,19 @@ PUBLIC int postoptions ARGS1(
     WWWDoc.bookmark = newdoc->bookmark;
     WWWDoc.isHEAD = newdoc->isHEAD;
     WWWDoc.safe = newdoc->safe;
+    LYforce_no_cache = FALSE;   /* ! */
+    LYoverride_no_cache = TRUE; /* ! */
+    /*
+     * Working out of getfile() cycle we reset *no_cache manually here so
+     * HTLoadAbsolute() will return "Document already in memory":  it was
+     * forced reloading Options Menu again without this (overhead).
+     *
+     * Probably *no_cache was set in a wrong position because of
+     * the internal page...
+     */
     if (!HTLoadAbsolute(&WWWDoc))
 	return(NOT_FOUND);
 
-    /*** two HTLoadAbsolute() here allow things work correctly,
-     *** sorry for overhead (probably only seen in trace log).
-     ***/
 
     /*
      *  Return to previous doc, not to options menu!
@@ -3941,6 +3948,15 @@ PUBLIC int postoptions ARGS1(
     WWWDoc.bookmark = newdoc->bookmark;
     WWWDoc.isHEAD = newdoc->isHEAD;
     WWWDoc.safe = newdoc->safe;
+    LYforce_no_cache = FALSE;   /* see below */
+    LYoverride_no_cache = TRUE; /* see below */
+    /*
+     * Re-setting of *no_cache is probably not required here but this is a
+     * guarantee against _double_ reloading over the net in case prev document
+     * has its own "no cache" attribute and options menu set "need_reload"
+     * also.  Force this HTLoadAbsolute() to return "Document already in
+     * memory".
+     */
     if (!HTLoadAbsolute(&WWWDoc))
        return(NOT_FOUND);
 
@@ -4389,8 +4405,7 @@ PUBLIC int gen_options ARGS1(
 
     if (!LYRestricted) {
 	fprintf(fp0,
-		"\n  Check your <a href=\"%s\">lynx.cfg</a> here\n",
-		lynx_cfg_infopage());
+		"\n  Check your <a href=\"LYNXCFG:\">lynx.cfg</a> here\n");
     }
 
     fprintf(fp0,"\n</pre>\n");

@@ -91,6 +91,7 @@ PRIVATE HTParentAnchor * HTParentAnchor_new NOARGS
     newAnchor->date = NULL;		/* Date. - FM */
     newAnchor->expires = NULL;		/* Expires. - FM */
     newAnchor->last_modified = NULL;	/* Last-Modified. - FM */
+    newAnchor->ETag = NULL;		/* ETag (HTTP/1.1 cache validator) */
     newAnchor->server = NULL;		/* Server. - FM */
     return(newAnchor);
 }
@@ -279,6 +280,7 @@ PUBLIC HTChildAnchor * HTAnchor_findChildAndLink ARGS4(
     return(child);
 }
 
+#ifdef LY_FIND_LEAKS
 /*
 **  Function for freeing the adult hash table. - FM
 */
@@ -315,6 +317,7 @@ PRIVATE void free_adult_table NOARGS
     }
     FREE(adult_table);
 }
+#endif /* LY_FIND_LEAKS */
 
 /*	Create new or find old named anchor
 **	-----------------------------------
@@ -706,6 +709,7 @@ PUBLIC BOOL HTAnchor_delete ARGS1(
     FREE(me->date);
     FREE(me->expires);
     FREE(me->last_modified);
+    FREE(me->ETag);
     FREE(me->server);
 #ifdef USE_HASH
     FREE(me->style);

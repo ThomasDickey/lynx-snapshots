@@ -1,16 +1,31 @@
 
                       Lynx Installation Guide
 
-This file describes how to compile and install Lynx.  A description of
-Lynx can be found in the README file.  Lynx has been ported to UN*X, VMS,
+This file describes how to compile and install Lynx.  A description of Lynx
+can be found in the README file.  Lynx has been ported to UN*X, VMS,
 Win32 and 386DOS.  The procedures for compiling these ports are quite
-divergent, and are detailed respectively in Sections II, III, IV and V.
+divergent and are detailed respectively in Sections II, III, IV and V.
+General installation, problem solving and environment variables are covered
+in Sections VI and VII.  There is also a PROBLEMS file in the same directory
+as this INSTALLATION: it contains advice for a lot of special problems
+people have encountered, esp for particular machines & operating systems.
 
-First, however, you must configure Lynx for your system regardless of the
-port you will be using.  Follow the instructions given immediately below to
-configure for your system, and then go to the respective section concerning
-the port you wish to compile.  General installation, problem solving, and
-environment variables are covered in Sections VI and VII.
+If you don't understand what one of the defines means, try the README.defines
+and *.announce files in the docs subdirectory.  The docs/CHANGES* files record
+the entire development history of Lynx and are an invaluable resource for
+understanding how Lynx should perform.
+
+If you still have difficulties, send an e-mail message to the Lynx-Dev mailing
+list lynx-dev@sig.net (see the README file).  Try to include information about
+your system, the name and version of your compiler, which curses library you
+are using and the compile-time errors.  Be sure to say what version and
+image-number of Lynx you are trying to build (alternately the top date of the
+CHANGES file).
+
+First, you must configure Lynx for your system regardless of the port you will
+be using.  Follow the instructions given immediately below to configure for
+your system, and then go to the respective section concerning the port you wish
+to compile.
 
 
 I. General configuration instructions (all ports).
@@ -226,6 +241,9 @@ II. Compile instructions -- UNIX
 
   --disable-finger			(define DISABLE_FINGER)
 	Do not compile-in code used to connect to "finger" URLs.
+
+  --disable-ftp				(define DISABLE_FTP)
+	Do not compile-in code used to connect to "ftp" URLs.
 
   --disable-forms-options		(define NO_OPTION_FORMS)
 	Disable the forms-based options screen.  (See --disable-menu-options).
@@ -766,11 +784,11 @@ V. Compile instructions -- 386 DOS
 
 	cd djgpp\tcplib\obj
 	make
-	cd ..\..\www\library\djgpp
+	cd ..\..\..\www\library\djgpp
 	make
 	cd ..\..\..\src\chrtrans
 	make -f makefile.dos
-	cd ..\..\..\src
+	cd ..\..\src
 	make -f makefile.dos
 	strip lynx.exe
 	cd ..
@@ -816,19 +834,6 @@ VI. General installation instructions
     After applying patches or editing files to correct for an unsuccessful
     build, be certain to do a "make clean" (or "make distclean" for those
     using auto-configure) before attempting to compile again.
-
-    If something doesn't work, or you can't get Lynx to even compile, or you
-    don't understand what one of the defines means, read the PROBLEMS file,
-    and the README.defines and *.announce files in the docs subdirectory.
-    The docs/CHANGES* files record the entire development history of Lynx
-    and are an invaluable resource for understanding how Lynx should perform.
-
-    If you still have difficulties, send an email message to the Lynx-Dev
-    mailing list (see the README file).  Try to include pertinent information
-    about your system, the OS you are using, the name and version of your
-    compiler, which curses library you are using and the compile-time errors.
-    Be sure to say what version and image-number (alternately the top date
-    of the CHANGES file) of Lynx you are trying to build.
 
 
 VII. Setting environment variables before running Lynx (optional)

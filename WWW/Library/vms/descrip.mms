@@ -79,7 +79,7 @@ DEBUGFLAGS = /Debug /NoOptimize
 INCLUDES = /Include=([-.Implementation],[---.src],[---])
 
 ! defines valid for all compilations
-EXTRADEFINES = DEBUG, ACCESS_AUTH, VC="""$(VC)"""
+EXTRADEFINES = ACCESS_AUTH, VC="""$(VC)"""
 
 ! DECC flags for all compilations
 .ifdef DEC_C
@@ -171,18 +171,18 @@ CC = gcc
 !	HTAtom.h, HTAnchor.h, HTStyle.h, -
 !	HTList.h, HTString.h, HTAlert.h, -
 !	HTRules.h, HTFormat.h, HTInit.h, -
-!	HTMIME.h, HTHistory.h, HTTelnet.h, -
-!	HTFinger.h, HTAABrow.h, HTAAFile.h, -
-!	HTAAProt.h, HTAAServ.h,  HTAAUtil.h, -
-!	HTAssoc.h, HTPasswd.h, HTAuth.h, HTUU.h, -
+!	HTMIME.h, HTTelnet.h, -
+!	HTFinger.h, HTAABrow.h, -
+!	HTAAProt.h, HTAAUtil.h, -
+!	HTAssoc.h, HTUU.h, -
 !	HTVMSUtils.h, ufc-crypt.h, patchlevel.h
 
 MODULES = HTParse, HTAccess, HTTP, HTFile, HTBTree, HTFTP, HTTCP, HTString, -
 	SGML, HTMLDTD, HTChunk, HTPlain, HTWriter, HTMLGen, -
 	HTAtom, HTAnchor, HTStyle, HTList, HTRules, HTFormat, -
-	HTMIME, HTHistory, HTNews, HTGopher, HTTelnet, HTFinger, -
-	HTWSRC, HTAAUtil, HTAABrow, HTAAServ, HTAAFile, HTPasswd, HTGroup, -
-	HTACL, HTAuth, HTAAProt, HTAssoc, HTLex, HTUU, HTVMSUtils, getpass, -
+	HTMIME, HTNews, HTGopher, HTTelnet, HTFinger, -
+	HTWSRC, HTAAUtil, HTAABrow, HTGroup, -
+	HTAAProt, HTAssoc, HTLex, HTUU, HTVMSUtils, getpass, -
 	getline, crypt, crypt_util, HTWAIS, HTVMS_WaisUI, HTVMS_WaisProt
 
 !.ifdef DECNET  ! Strip FTP, Gopher, News, WAIS
@@ -233,7 +233,6 @@ clean :
 !HTFTP.obj :	HTFTP.c HTFTP.h HTUtils.h
 !HTGopher.obj :	HTGopher.c HTGopher.h HTUtils.h HTList.h
 !HTFinger.obj :	HTFinger.c HTFinger.h HTUtils.h HTList.h
-!HTHistory.obj :	HTHistory.c HTHistory.h HTUtils.h HTList.h
 !HTNews.obj :	HTNews.c HTNews.h HTUtils.h HTList.h
 !HTParse.obj :	HTParse.c HTParse.h HTUtils.h
 !HTStyle.obj :	HTStyle.c HTStyle.h HTUtils.h
@@ -241,16 +240,11 @@ clean :
 !HTTP.obj :	HTTP.c HTTP.h HTUtils.h
 !SGML.obj :	SGML.c SGML.h HTUtils.h
 !HTAABrow.obj :	HTAABrow.c HTUtils.h
-!HTAAFile.obj :	HTAAFile.c HTUtils.h
 !HTAAProt.obj :	HTAAProt.c HTUtils.h
-!HTAAServ.obj :	HTAAServ.c HTUtils.h
 !HTAAUtil.obj :	HTAAUtil.c HTUtils.h
-!HTACL.obj :	HTACL.c HTUtils.h
 !HTGroup.obj :	HTGroup.c HTUtils.h
 !HTLex.obj :	HTLex.c HTUtils.h
 !HTAssoc.obj :	HTAssoc.c HTAssoc.h HTAAUtil.h HTString.h
-!HTPasswd.obj :	HTPasswd.c HTPasswd.h HTUtils.h HTAAUtil.h HTFile.h tcp.h
-!HTAuth.obj :	HTAuth.c HTAuth.h HTUtils.h HTPasswd.h HTAssoc.h HTUU.h
 !HTUU.obj :	HTUU.c HTUU.h HTUtils.h
 !crypt.obj :	crypt.c ufc-crypt.h
 !HTVMSUtils.obj :	HTVMSUtils.c HTVMSUtils.h HTUtils.h

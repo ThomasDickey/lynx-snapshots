@@ -57,17 +57,15 @@ PUBLIC void cleanup_sig ARGS1(
 	 *  Ask if exit is intended.
 	 */
 	if (LYQuitDefaultYes == TRUE) {
-	    _statusline(REALLY_EXIT_Y);
+	    c = HTConfirmDefault(REALLY_EXIT_Y, YES);
 	} else {
-	    _statusline(REALLY_EXIT_N);
+	    c = HTConfirmDefault(REALLY_EXIT_N, NO);
 	}
-	c = LYgetch();
 	if (LYQuitDefaultYes == TRUE) {
-	    if (TOUPPER(c) == 'N' ||
-		c == 7) {
+	    if (c == NO) {
 		return;
 	    }
-	} else if (TOUPPER(c) != 'Y') {
+	} else if (c != YES) {
 	    return;
 	}
     }

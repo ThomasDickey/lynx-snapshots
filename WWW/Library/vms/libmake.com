@@ -86,13 +86,13 @@ $  v1 = f$verify(1)
 $!
 $ cc/decc/prefix=all /nomember 'cc_opts'-
     /warning=(disable=implicitfunc)-
-    /DEFINE=(DEBUG,ACCESS_AUTH,'transport''extra',VC="""2.14""")-
+    /DEFINE=(ACCESS_AUTH,'transport''extra',VC="""2.14""")-
     /INCLUDE=([-.Implementation],[---.src],[---.src.chrtrans],[---]) -
     [-.Implementation]HTString.c
 $!
 $ cc := cc/decc/prefix=all /nomember 'cc_opts'-
 	  /warning=(disable=implicitfunc)-
-	  /DEFINE=(DEBUG,ACCESS_AUTH,'transport''extra')-
+	  /DEFINE=(ACCESS_AUTH,'transport''extra')-
 	  /INCLUDE=([-.Implementation],[---.src],[---.src.chrtrans],[---])
 $!
 $  v1 = 'f$verify(0)'
@@ -103,13 +103,13 @@ $  v1 = f$verify(1)
 $!
 $ cc/decc/prefix=all /nomember 'cc_opts'-
     /warning=(disable=implicitfunc)-
-    /DEFINE=(DEBUG,ACCESS_AUTH,'transport''extra',VC="""2.14""")-
+    /DEFINE=(ACCESS_AUTH,'transport''extra',VC="""2.14""")-
     /INCLUDE=([-.Implementation],[---.src],[---.src.chrtrans],[---]) -
     [-.Implementation]HTString.c
 $!
 $ cc := cc/decc/prefix=all /nomember 'cc_opts'-
 	  /warning=(disable=implicitfunc)-
-	  /DEFINE=(DEBUG,ACCESS_AUTH,'transport''extra')-
+	  /DEFINE=(ACCESS_AUTH,'transport''extra')-
 	  /INCLUDE=([-.Implementation],[---.src],[---.src.chrtrans],[---])
 $!
 $  v1 = 'f$verify(0)'
@@ -120,11 +120,11 @@ $  THEN
 $   v1 = f$verify(1)
 $! GNUC:
 $!
-$   gcc/DEFINE=(DEBUG,ACCESS_AUTH,'transport''extra',VC="""2.14""") 'cc_opts'-
+$   gcc/DEFINE=(ACCESS_AUTH,'transport''extra',VC="""2.14""") 'cc_opts'-
        /INCLUDE=([-.Implementation],[---.src],[---.src.chrtrans],[---]) -
        [-.Implementation]HTString.c
 $!
-$   cc := gcc/DEFINE=(DEBUG,ACCESS_AUTH,'transport''extra') 'cc_opts'-
+$   cc := gcc/DEFINE=(ACCESS_AUTH,'transport''extra') 'cc_opts'-
 	     /INCLUDE=([-.Implementation],[---.src],[---.src.chrtrans],[---])
 $!
 $   v1 = 'f$verify(0)'
@@ -132,11 +132,11 @@ $  ELSE
 $   v1 = f$verify(1)
 $! VAXC:
 $!
-$   cc/DEFINE=(DEBUG,ACCESS_AUTH,'transport''extra',VC="""2.14""") 'cc_opts'-
+$   cc/DEFINE=(ACCESS_AUTH,'transport''extra',VC="""2.14""") 'cc_opts'-
       /INCLUDE=([-.Implementation],[---.src],[---.src.chrtrans],[---]) -
       [-.Implementation]HTString.c
 $!
-$   cc := cc/DEFINE=(DEBUG,ACCESS_AUTH,'transport''extra') 'cc_opts'-
+$   cc := cc/DEFINE=(ACCESS_AUTH,'transport''extra') 'cc_opts'-
 	    /INCLUDE=([-.Implementation],[---.src],[---.src.chrtrans],[---])
 $!
 $   v1 = 'f$verify(0)'
@@ -163,7 +163,6 @@ $ cc [-.Implementation]HTList.c
 $ cc [-.Implementation]HTRules.c
 $ cc [-.Implementation]HTFormat.c
 $ cc [-.Implementation]HTMIME.c
-$ cc [-.Implementation]HTHistory.c
 $ cc [-.Implementation]HTNews.c
 $ cc [-.Implementation]HTGopher.c
 $ cc [-.Implementation]HTTelnet.c
@@ -171,12 +170,7 @@ $ cc [-.Implementation]HTFinger.c
 $ cc [-.Implementation]HTWSRC.c
 $ cc [-.Implementation]HTAAUtil.c
 $ cc [-.Implementation]HTAABrow.c
-$ cc [-.Implementation]HTAAServ.c
-$ cc [-.Implementation]HTAAFile.c
-$ cc [-.Implementation]HTPasswd.c
 $ cc [-.Implementation]HTGroup.c
-$ cc [-.Implementation]HTACL.c
-$ cc [-.Implementation]HTAuth.c
 $ cc [-.Implementation]HTAAProt.c
 $ cc [-.Implementation]HTAssoc.c
 $ cc [-.Implementation]HTLex.c
@@ -189,7 +183,7 @@ $ cc [-.Implementation]crypt_util.c
 $ cc [-.Implementation]HTWAIS.c
 $ cc [-.Implementation]HTVMS_WaisUI.c
 $ cc [-.Implementation]HTVMS_WaisProt.c
-$!    
+$!
 $ If f$search("[-.Implementation]WWWLib_''transport'.olb") .eqs. "" Then -
     LIBRARY/Create [-.Implementation]WWWLib_'transport'.olb
 $ LIBRARY/Replace [-.Implementation]WWWLib_'transport'.olb *.obj

@@ -165,6 +165,7 @@ PRIVATE void freeCookie ARGS1(
     }
 }
 
+#ifdef LY_FIND_LEAKS
 PRIVATE void LYCookieJar_free NOARGS
 {
     HTList *dl = domain_list;
@@ -195,6 +196,7 @@ PRIVATE void LYCookieJar_free NOARGS
     HTList_delete(domain_list);
     domain_list = NULL;
 }
+#endif /* LY_FIND_LEAKS */
 
 /*
 **  Compare two hostnames as specified in Section 2 of:

@@ -88,12 +88,14 @@ PUBLIC char *use_this_url_instead = NULL;
 PRIVATE int pushed_assume_LYhndl = -1; /* see LYUC* functions below - kw */
 PRIVATE char * pushed_assume_MIMEname = NULL;
 
+#ifdef LY_FIND_LEAKS
 PRIVATE void free_protocols NOARGS
 {
     HTList_delete(protocols);
     protocols = NULL;
     FREE(pushed_assume_MIMEname); /* shouldn't happen, just in case - kw */
 }
+#endif /* LY_FIND_LEAKS */
 
 /*	Register a Protocol.				HTRegisterProtocol()
 **	--------------------
@@ -131,7 +133,9 @@ extern GLOBALREF (HTProtocol, HTTelnet);
 extern GLOBALREF (HTProtocol, HTTn3270);
 extern GLOBALREF (HTProtocol, HTRlogin);
 #ifndef DECNET
+#ifndef DISABLE_FTP
 extern GLOBALREF (HTProtocol, HTFTP);
+#endif /* DISABLE_FTP */
 #ifndef DISABLE_NEWS
 extern GLOBALREF (HTProtocol, HTNews);
 extern GLOBALREF (HTProtocol, HTNNTP);
@@ -155,7 +159,9 @@ extern GLOBALREF (HTProtocol, HTWAIS);
 #else
 GLOBALREF HTProtocol HTTP, HTTPS, HTFile, HTTelnet, HTTn3270, HTRlogin;
 #ifndef DECNET
+#ifndef DISABLE_FTP
 GLOBALREF HTProtocol HTFTP;
+#endif /* DISABLE_FTP */
 #ifndef DISABLE_NEWS
 GLOBALREF HTProtocol HTNews, HTNNTP, HTNewsPost, HTNewsReply;
 GLOBALREF HTProtocol HTSNews, HTSNewsPost, HTSNewsReply;
@@ -181,8 +187,10 @@ PRIVATE void HTAccessInit NOARGS			/* Call me once */
     HTRegisterProtocol(&HTTn3270);
     HTRegisterProtocol(&HTRlogin);
 #ifndef DECNET
-#ifndef DISABLE_NEWS
+#ifndef DISABLE_FTP
     HTRegisterProtocol(&HTFTP);
+#endif /* DISABLE_FTP */
+#ifndef DISABLE_NEWS
     HTRegisterProtocol(&HTNews);
     HTRegisterProtocol(&HTNNTP);
     HTRegisterProtocol(&HTNewsPost);
@@ -319,7 +327,7 @@ PUBLIC BOOL override_proxy ARGS1(
 	int t_len;
 
 	while (*no_proxy && (WHITE(*no_proxy) || *no_proxy == ','))
-	    no_proxy++; 	    /* Skip whitespace and separators */
+	    no_proxy++;		    /* Skip whitespace and separators */
 
 	end = no_proxy;
 	while (*end && !WHITE(*end) && *end != ',') {	/* Find separator */
@@ -337,7 +345,7 @@ PUBLIC BOOL override_proxy ARGS1(
 
 	if ((!templ_port || templ_port == port)  &&
 	    (t_len > 0	&&  t_len <= h_len  &&
-             !strncasecomp(Host + h_len - t_len, no_proxy, t_len))) {
+	     !strncasecomp(Host + h_len - t_len, no_proxy, t_len))) {
 	    FREE(host);
 	    return YES;
 	}
@@ -359,7 +367,7 @@ PUBLIC BOOL override_proxy ARGS1(
 **	anchor		a parent anchor with whose address is addr
 **
 **  On exit,
-**	returns 	HT_NO_ACCESS		Error has occurred.
+**	returns		HT_NO_ACCESS		Error has occurred.
 **			HT_OK			Success
 */
 PRIVATE int get_physical ARGS2(
@@ -387,7 +395,7 @@ PRIVATE int get_physical ARGS2(
 	StrAllocCat(physical, "?0,0");
 	CTRACE(tfp, "HTAccess: Appending '?0,0' coordinate pair.\n");
 	HTAnchor_setPhysical(anchor, physical);
-	FREE(physical); 		/* free our copy */
+	FREE(physical);			/* free our copy */
     } else {
 	HTAnchor_setPhysical(anchor, addr);
     }
@@ -595,7 +603,7 @@ PRIVATE int LYUCPopAssumed NOARGS
     return -1;
 }
 
-/*	Load a document 				HTLoad()
+/*	Load a document					HTLoad()
 **	---------------
 **
 **	This is an internal routine, which has an address AND a matching
@@ -606,7 +614,7 @@ PRIVATE int LYUCPopAssumed NOARGS
 **	anchor		a parent anchor with whose address is addr
 **
 **  On exit,
-**	returns 	<0		Error has occurred.
+**	returns		<0		Error has occurred.
 **			HT_LOADED	Success
 **			HT_NO_DATA	Success, but no document loaded.
 **					(telnet session started etc)
@@ -671,7 +679,7 @@ PRIVATE BOOL HTLoadDocument ARGS4(
 	HTFormat,		format_out,
 	HTStream*,		sink)
 {
-    int 	status;
+    int		status;
     HText *	text;
     CONST char * address_to_load = full_address;
     char *cp;
@@ -1148,7 +1156,7 @@ PUBLIC BOOL HTLoadAnchor ARGS1(
 
 } /* HTLoadAnchor */
 
-/*	Search. 					HTSearch()
+/*	Search.						HTSearch()
 **	-------
 **
 **	Performs a keyword search on word given by the user.  Adds the
@@ -1236,7 +1244,7 @@ PUBLIC BOOL HTSearch ARGS2(
     return result;
 }
 
-/*	Search Given Indexname. 		HTSearchAbsolute()
+/*	Search Given Indexname.			HTSearchAbsolute()
 **	-----------------------
 **
 **	Performs a keyword search on word given by the user.  Adds the

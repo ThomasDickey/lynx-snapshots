@@ -27,6 +27,7 @@
 #ifdef DIRED_SUPPORT
 #include <LYLocal.h>
 #endif /* DIRED_SUPPORT */
+#include <LYReadCFG.h>
 
 #include <LYexit.h>
 #include <LYLeaks.h>
@@ -178,6 +179,8 @@ Try_Redirected_URL:
 			  url_type == LYNXCOOKIE_URL_TYPE ||
 			  url_type == LYNXPRINT_URL_TYPE ||
 			  url_type == LYNXOPTIONS_URL_TYPE ||
+			  url_type == LYNXCFG_URL_TYPE ||
+			  url_type == LYNXCOMPILE_OPTS_URL_TYPE ||
 			  url_type == LYNXDOWNLOAD_URL_TYPE ||
 			  url_type == MAILTO_URL_TYPE ||
 			  url_type == NEWSPOST_URL_TYPE ||
@@ -242,8 +245,38 @@ Try_Redirected_URL:
 
 #ifndef NO_OPTION_FORMS
 		} else if (url_type == LYNXOPTIONS_URL_TYPE) {
-		    /* forms-based options menu */
+		    /* proceed forms-based options menu */
 		    return(postoptions(doc));
+#endif
+
+		} else if (url_type == LYNXCFG_URL_TYPE) {
+		    /* show lynx.cfg settings */
+		    StrAllocCopy(doc->address, lynx_cfg_infopage());
+		    WWWDoc.address = doc->address;
+		    WWWDoc.post_data = doc->post_data;
+		    WWWDoc.post_content_type = doc->post_content_type;
+		    WWWDoc.bookmark = doc->bookmark;
+		    WWWDoc.isHEAD = doc->isHEAD;
+		    WWWDoc.safe = doc->safe;
+
+		    if (!HTLoadAbsolute(&WWWDoc))
+			 return(NOT_FOUND);
+		    return(NORMAL);
+
+#ifdef HAVE_CFG_DEFS_H
+		} else if (url_type == LYNXCOMPILE_OPTS_URL_TYPE) {
+		    /* show compile-time settings */
+		    StrAllocCopy(doc->address, (char *)lynx_compile_opts());
+		    WWWDoc.address = doc->address;
+		    WWWDoc.post_data = doc->post_data;
+		    WWWDoc.post_content_type = doc->post_content_type;
+		    WWWDoc.bookmark = doc->bookmark;
+		    WWWDoc.isHEAD = doc->isHEAD;
+		    WWWDoc.safe = doc->safe;
+
+		    if (!HTLoadAbsolute(&WWWDoc))
+			 return(NOT_FOUND);
+		    return(NORMAL);
 #endif
 
 #ifndef DISABLE_NEWS
@@ -711,6 +744,8 @@ Try_Redirected_URL:
 #endif /* DIRED_SUPPORT */
 				url_type == LYNXPRINT_URL_TYPE ||
 				url_type == LYNXOPTIONS_URL_TYPE ||
+				url_type == LYNXCFG_URL_TYPE ||
+				url_type == LYNXCOMPILE_OPTS_URL_TYPE ||
 				url_type == LYNXHIST_URL_TYPE ||
 				url_type == LYNXCOOKIE_URL_TYPE ||
 				(LYValidate &&
@@ -1086,6 +1121,7 @@ static struct trust *trusted_exec = &trusted_exec_default;
 static struct trust *always_trusted_exec = &always_trusted_exec_default;
 static struct trust *trusted_cgi = &trusted_cgi_default;
 
+#ifdef LY_FIND_LEAKS
 PRIVATE void LYTrusted_free NOARGS
 {
     struct trust *cur;
@@ -1126,9 +1162,10 @@ PRIVATE void LYTrusted_free NOARGS
 
     return;
 }
+#endif /* LY_FIND_LEAKS */
 
 PUBLIC void add_trusted ARGS2(
-	char *, 	str,
+	char *,		str,
 	int,		type)
 {
     struct trust *tp;

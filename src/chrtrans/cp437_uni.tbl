@@ -2,7 +2,7 @@
 #There has to be exactly one table marked as "default".
 D0
 #
-#The MIME name of this charset. 
+#The MIME name of this charset.
 Mcp437
 
 #Name as a Display Charset (used on Options screen)

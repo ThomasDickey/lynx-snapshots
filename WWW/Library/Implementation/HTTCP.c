@@ -571,6 +571,11 @@ PRIVATE size_t fill_rehostent ARGS3(
 
 #define REHOSTENT_SIZE 128		/* not bigger than pipe buffer! */
 
+#ifndef HAVE_H_ERRNO
+#define h_errno my_errno
+static int my_errno;
+#endif
+
 /*	Resolve an internet hostname, like gethostbyname
 **	------------------------------------------------
 **
@@ -752,8 +757,8 @@ PUBLIC struct hostent * LYGetHostByName ARGS1(
 	    signal(SIGILL, SIG_DFL);
 
 	    /*
-		**  Child won't use read side.  -BL
-		*/
+	    **  Child won't use read side.  -BL
+	    */
 	    close(pfd[0]);
 	    phost = gethostbyname(host);
 	    statuses.child_h_errno = h_errno;
@@ -1223,6 +1228,7 @@ failed:
 }
 }
 
+#ifdef LY_FIND_LEAKS
 /*	Free our name for the host on which we are - FM
 **	-------------------------------------------
 **
@@ -1231,6 +1237,7 @@ PRIVATE void free_HTTCP_hostname NOARGS
 {
     FREE(hostname);
 }
+#endif /* LY_FIND_LEAKS */
 
 /*	Derive the name of the host on which we are
 **	-------------------------------------------

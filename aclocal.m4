@@ -504,11 +504,11 @@ fi
 dnl ---------------------------------------------------------------------------
 dnl Allow user to disable a normally-on option.
 AC_DEFUN([CF_ARG_DISABLE],
-[CF_ARG_OPTION($1,[$2 (default: on)],[$3],[$4],yes)])dnl
+[CF_ARG_OPTION($1,[$2],[$3],[$4],yes)])dnl
 dnl ---------------------------------------------------------------------------
 dnl Allow user to enable a normally-off option.
 AC_DEFUN([CF_ARG_ENABLE],
-[CF_ARG_OPTION($1,[$2 (default: off)],[$3],[$4],no)])dnl
+[CF_ARG_OPTION($1,[$2],[$3],[$4],no)])dnl
 dnl ---------------------------------------------------------------------------
 dnl Restricted form of AC_ARG_ENABLE that ensures user doesn't give bogus
 dnl values.
@@ -1615,8 +1615,8 @@ if test "$with_full_paths" = yes ; then
 else
 	AC_MSG_CHECKING(for $2)
 	AC_MSG_RESULT([$]$1)
+	eval 'ac_cv_path_'$1'="'$2'"'
 fi
-
 cf_path_prog=""
 cf_path_args=""
 IFS="${IFS= 	}"; cf_save_ifs="$IFS"

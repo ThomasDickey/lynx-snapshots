@@ -311,7 +311,6 @@ PRIVATE int UC_MapGN PARAMS((
 PRIVATE int UC_FindGN_byMIME PARAMS((
 	CONST char *	UC_MIMEcharset));
 PRIVATE void UCreset_allocated_LYCharSets NOPARAMS;
-PRIVATE void UCfree_allocated_LYCharSets NOPARAMS;
 PRIVATE CONST char ** UC_setup_LYCharSets_repl PARAMS((
 	int		UC_charset_in_hndl,
 	unsigned	lowest8));
@@ -320,7 +319,10 @@ PRIVATE int UC_Register_with_LYCharSets PARAMS((
 	CONST char *	UC_MIMEcharset,
 	CONST char *	UC_LYNXcharset,
 	int		lowest_eightbit));
+#ifdef LY_FIND_LEAKS
+PRIVATE void UCfree_allocated_LYCharSets NOPARAMS;
 PRIVATE void UCcleanup_mem NOPARAMS;
+#endif
 
 PRIVATE int default_UChndl = -1;
 
@@ -474,9 +476,9 @@ PRIVATE void UC_con_set_trans ARGS3(
 	int,		Gn,
 	int,		update_flag)
 {
-  int i, j;
-  CONST u16 *p;
-  u16 *ptrans;
+    int i, j;
+    CONST u16 *p;
+    u16 *ptrans;
 
     if (!UC_valid_UC_charset(UC_charset_in_hndl)) {
 	CTRACE(tfp, "UC_con_set_trans: Invalid charset handle %d.\n",
@@ -486,15 +488,15 @@ PRIVATE void UC_con_set_trans ARGS3(
     ptrans = translations[Gn];
     p = UCInfo[UC_charset_in_hndl].unitable;
 #if(0)
-  if (p == UC_current_unitable) {    /* test whether pointers are equal */
-    return;			/* nothing to be done */
-  }
+    if (p == UC_current_unitable) {    /* test whether pointers are equal */
+	return;			/* nothing to be done */
+    }
     /*
      *	The font is always 256 characters - so far.
      *  (this function preserved by num_uni==0 so unicount=NULL for built-in
      *  charsets like CJK or x-transparent should not be a problem?)
      */
-  con_clear_unimap();
+    con_clear_unimap();
 #endif
     for (i = 0; i < 256; i++) {
 	if ((j = UCInfo[UC_charset_in_hndl].unicount[i])) {
@@ -1680,6 +1682,7 @@ PRIVATE void UCreset_allocated_LYCharSets NOARGS
     }
 }
 
+#ifdef LY_FIND_LEAKS
 PRIVATE void UCfree_allocated_LYCharSets NOARGS
 {
     int i = 0;
@@ -1690,6 +1693,7 @@ PRIVATE void UCfree_allocated_LYCharSets NOARGS
 	}
     }
 }
+#endif
 
 PRIVATE CONST char ** UC_setup_LYCharSets_repl ARGS2(
 	int,		UC_charset_in_hndl,
@@ -2000,6 +2004,7 @@ PUBLIC void UC_Charset_Setup ARGS9(
     return;
 }
 
+#ifdef LY_FIND_LEAKS
 PRIVATE void UCcleanup_mem NOARGS
 {
     int i;
@@ -2013,6 +2018,7 @@ PRIVATE void UCcleanup_mem NOARGS
 	FREE(inverse_translations[i]);
     }
 }
+#endif /* LY_FIND_LEAKS */
 
 PUBLIC void UCInit NOARGS
 {

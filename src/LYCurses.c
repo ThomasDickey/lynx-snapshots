@@ -1331,10 +1331,10 @@ PUBLIC void VMSexit NOARGS
 gettext("\nA Fatal error has occurred in %s Ver. %s\n"), LYNX_NAME, LYNX_VERSION);
 	    fprintf(stderr,
 gettext("\nPlease notify your system administrator to confirm a bug, and if\n\
-"confirmed, to notify the lynx-dev list.  Bug reports should have concise\n\
-"descriptions of the command and/or URL which causes the problem, the\n\
-"operating system name with version number, the TCPIP implementation, the\n\
-"TRACEBACK if it can be captured, and any other relevant information.\n"));
+confirmed, to notify the lynx-dev list.  Bug reports should have concise\n\
+descriptions of the command and/or URL which causes the problem, the\n\
+operating system name with version number, the TCPIP implementation, the\n\
+TRACEBACK if it can be captured, and any other relevant information.\n"));
 
 	    if (LYTraceLogFP == NULL) {
 		fprintf(stderr,RETURN_TO_CLEANUP);

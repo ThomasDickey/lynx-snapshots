@@ -34,6 +34,7 @@
 #define NO_KEYPAD
 #define NO_UTMP
 #define NO_FILIO_H
+#define NOUSERS
 #endif
 
 #if defined(__STDC__) || defined(VMS)

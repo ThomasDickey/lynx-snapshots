@@ -104,7 +104,6 @@ BUGS:	@@@	Limit connection cache size!
 #include <HTFile.h>	/* For HTFileFormat() */
 #include <HTBTree.h>
 #include <HTChunk.h>
-#include <HTAlert.h>
 #ifndef IPPORT_FTP
 #define IPPORT_FTP	21
 #endif /* !IPORT_FTP */
@@ -114,9 +113,9 @@ BUGS:	@@@	Limit connection cache size!
 #include <LYLeaks.h>
 
 typedef struct _connection {
-    struct _connection *	next;	/* Link on list 	*/
+    struct _connection *	next;	/* Link on list		*/
     u_long			addr;	/* IP address		*/
-    int 			socket; /* Socket number for communication */
+    int				socket; /* Socket number for communication */
     BOOL			binary; /* Binary mode? */
 } connection;
 
@@ -143,6 +142,7 @@ struct _HTStructured {
 **	---------------------
 */
 PUBLIC int HTfileSortMethod = FILE_BY_NAME;
+#ifndef DISABLE_FTP /*This disables everything to end-of-file */
 PRIVATE char ThisYear[8];
 PRIVATE char LastYear[8];
 PRIVATE int TheDate;
@@ -209,6 +209,7 @@ PRIVATE int close_connection PARAMS((
 	connection *	con));
 
 
+#ifdef LY_FIND_LEAKS
 /*
 **  This function frees module globals. - FM
 */
@@ -222,6 +223,7 @@ PRIVATE void free_FTPGlobals NOARGS
 	FREE(control);
     }
 }
+#endif /* LY_FIND_LEAKS */
 
 /* PUBLIC						HTMake_VMS_name()
 **		CONVERTS WWW name into a VMS name
@@ -230,7 +232,7 @@ PRIVATE void free_FTPGlobals NOARGS
 **	fn		WWW file name
 **
 ** ON EXIT:
-**	returns 	vms file specification
+**	returns		vms file specification
 **
 ** Bug: Returns pointer to static -- non-reentrant
 */
@@ -250,7 +252,7 @@ PUBLIC char * HTMake_VMS_name ARGS2(
     char * filename = (char*)malloc(strlen(fn)+1);
     char * nodename = (char*)malloc(strlen(nn)+2+1);	/* Copies to hack */
     char *second;		/* 2nd slash */
-    char *last; 		/* last slash */
+    char *last;			/* last slash */
 
     CONST char * hostname = HTHostName();
 
@@ -269,7 +271,7 @@ PUBLIC char * HTMake_VMS_name ARGS2(
 		r = strchr(nodename, '.');	/* Mismatch */
 		if (r)
 		    *r = '\0';			/* Chop domain */
-		strcat(nodename, "::"); 	/* Try decnet anyway */
+		strcat(nodename, "::");		/* Try decnet anyway */
 		break;
 	    }
 	}
@@ -281,12 +283,12 @@ PUBLIC char * HTMake_VMS_name ARGS2(
     if (!second) {				/* Only one slash */
 	sprintf(vmsname, "%s%s", nodename, filename + 1);
     } else if (second == last) {		/* Exactly two slashes */
-	*second = '\0'; 	/* Split filename from disk */
+	*second = '\0';		/* Split filename from disk */
 	sprintf(vmsname, "%s%s:%s", nodename, filename+1, second+1);
 	*second = '/';	/* restore */
     } else {				/* More than two slashes */
 	char * p;
-	*second = '\0'; 	/* Split disk from directories */
+	*second = '\0';		/* Split disk from directories */
 	*last = '\0';		/* Split dir from filename */
 	sprintf(vmsname, "%s%s:[%s]%s",
 		nodename, filename+1, second+1, last+1);
@@ -365,7 +367,7 @@ PRIVATE void init_help_message_cache NOARGS
 }
 
 PRIVATE void help_message_cache_add ARGS1(
-	char *, 	string)
+	char *,		string)
 {
     if (help_message_buffer)
 	StrAllocCat(help_message_buffer, string);
@@ -406,9 +408,9 @@ PRIVATE char *help_message_cache_contents NOARGS
 **		  or negative for communication failure.
 */
 PRIVATE int response ARGS1(
-	char *, 	cmd)
+	char *,		cmd)
 {
-    int result; 			/* Three-digit decimal code */
+    int result;				/* Three-digit decimal code */
     int continuation_response = -1;
     int status;
 
@@ -670,7 +672,7 @@ PRIVATE int get_connection ARGS2(
 
 	if (p2 != NULL) {
 	    username = p1;
-	    *p2 = '\0'; 		/* terminate */
+	    *p2 = '\0';			/* terminate */
 	    p1 = p2+1;			/* point to host */
 	    pw = strchr(username, ':');
 	    if (pw != NULL) {
@@ -966,7 +968,7 @@ PRIVATE int get_connection ARGS2(
 	CTRACE(tfp, "HTFTP: Port defined.\n");
     }
 #endif /* NOTREPEAT_PORT */
-    return con->socket; 		/* Good return */
+    return con->socket;			/* Good return */
 }
 
 
@@ -1002,7 +1004,7 @@ PRIVATE int close_master_socket NOARGS
 ** On entry,
 **	master_socket	Must be negative if not set up already.
 ** On exit,
-**	Returns 	socket number if good
+**	Returns		socket number if good
 **			less than zero if error.
 **	master_socket	is socket number if good, else negative.
 **	port_number	is valid if good.
@@ -1133,7 +1135,7 @@ PRIVATE int get_listen_socket NOARGS
 
 /*	Now we must find out who we are to tell the other guy
 */
-    (void)HTHostName(); 	/* Make address valid - doesn't work*/
+    (void)HTHostName();		/* Make address valid - doesn't work*/
     sprintf(port_command, "PORT %d,%d,%d,%d,%d,%d%c%c",
 		    (int)*((unsigned char *)(&soc_in->sin_addr)+0),
 		    (int)*((unsigned char *)(&soc_in->sin_addr)+1),
@@ -1241,7 +1243,7 @@ PRIVATE void free_entryinfo_struct_contents ARGS1(
  *		"FCv 23 1990  " ...
  */
 PRIVATE BOOLEAN is_ls_date ARGS1(
-	char *, 	s)
+	char *,		s)
 {
     /* must start with three alpha characters */
     if (!isalpha(*s++) || !isalpha(*s++) || !isalpha(*s++))
@@ -1310,7 +1312,7 @@ PRIVATE BOOLEAN is_ls_date ARGS1(
  *	Extract the name, size, and date from an EPLF line. - 08-06-96 DJB
  */
 PRIVATE void parse_eplf_line ARGS2(
-	char *, 	line,
+	char *,		line,
 	EntryInfo *,	info)
 {
     char *cp = line;
@@ -1366,7 +1368,7 @@ PRIVATE void parse_eplf_line ARGS2(
  *	Extract the name, size, and date from an ls -l line.
  */
 PRIVATE void parse_ls_line ARGS2(
-	char *, 	line,
+	char *,		line,
 	EntryInfo *,	entry_info)
 {
     short  i, j;
@@ -1405,7 +1407,7 @@ PRIVATE void parse_ls_line ARGS2(
  *	into the EntryInfo structure - FM
  */
 PRIVATE void parse_vms_dir_entry ARGS2(
-	char *, 	line,
+	char *,		line,
 	EntryInfo *,	entry_info)
 {
     int i, j;
@@ -1527,15 +1529,15 @@ PRIVATE void parse_vms_dir_entry ARGS2(
 	/* We just initialized on the version number */
 	/* Now let's hunt for a lone, size number    */
 	while ((cps=strtok(NULL, sp)) != NULL) {
-	   cpd = cps;
-	   while (isdigit(*cpd))
-	       cpd++;
-	   if (*cpd == '\0') {
-	       /* Assume it's blocks */
-	       entry_info->size = atoi(cps) * 512;
-	       break;
-	   }
-       }
+	    cpd = cps;
+	    while (isdigit(*cpd))
+		cpd++;
+	    if (*cpd == '\0') {
+		/* Assume it's blocks */
+		entry_info->size = atoi(cps) * 512;
+		break;
+	    }
+	}
     }
 
     /** Wrap it up **/
@@ -1552,7 +1554,7 @@ PRIVATE void parse_vms_dir_entry ARGS2(
  *	the EntryInfo structure (assumes Chameleon NEWT format). - FM
  */
 PRIVATE void parse_ms_windows_dir_entry ARGS2(
-	char *, 	line,
+	char *,		line,
 	EntryInfo *,	entry_info)
 {
     char *cp = line;
@@ -1626,7 +1628,7 @@ PRIVATE void parse_ms_windows_dir_entry ARGS2(
  */
 #ifdef NOTDEFINED
 PRIVATE void parse_windows_nt_dir_entry ARGS2(
-	char *, 	line,
+	char *,		line,
 	EntryInfo *,	entry_info)
 {
     char *cp = line;
@@ -1680,7 +1682,7 @@ PRIVATE void parse_windows_nt_dir_entry ARGS2(
 	isdigit(*(cp+3)) && isdigit(*(cp+4)) && *(cp+5) == '-') {
 	*(cp+2)  = '\0';	/* Month */
 	i = atoi(cp) - 1;
-	*(cp+5) = '\0'; 	/* Day */
+	*(cp+5) = '\0';		/* Day */
 	sprintf(date, "%s %s", months[i], (cp+3));
 	if (date[4] == '0')
 	    date[4] = ' ';
@@ -1737,7 +1739,7 @@ PRIVATE void parse_windows_nt_dir_entry ARGS2(
  *	the EntryInfo structure. - FM
  */
 PRIVATE void parse_cms_dir_entry ARGS2(
-	char *, 	line,
+	char *,		line,
 	EntryInfo *,	entry_info)
 {
     char *cp = line;
@@ -1837,7 +1839,7 @@ PRIVATE void parse_cms_dir_entry ARGS2(
 	    *(cpd+8) = '\0';	/* Year */
 	    cps -= 5;		/* Time */
 	    if (*cpd == ' ')
-	       *cpd = '0';
+		*cpd = '0';
 	    i = atoi(cpd) - 1;
 	    sprintf(date, "%s %s", months[i], (cpd+3));
 	    if (date[4] == '0')
@@ -1881,7 +1883,7 @@ PRIVATE void parse_cms_dir_entry ARGS2(
  */
 
 PRIVATE EntryInfo * parse_dir_entry ARGS2(
-	char *, 	entry,
+	char *,		entry,
 	BOOLEAN *,	first)
 {
     EntryInfo *entry_info;
@@ -2284,9 +2286,9 @@ PRIVATE int compare_EntryInfo_structs ARGS2(
 **
 ** On entry,
 **	anchor		Parent anchor to link the this node to
-**	address 	Address of the directory
+**	address		Address of the directory
 ** On exit,
-**	returns 	HT_LOADED if OK
+**	returns		HT_LOADED if OK
 **			<0 if error.
 */
 PRIVATE int read_directory ARGS4(
@@ -2378,7 +2380,7 @@ PRIVATE int read_directory ARGS4(
 
 	    /*	 read directory entry
 	     */
-	    for (;;) {		       /* Read in one line as filename */
+	    for (;;) {			/* Read in one line as filename */
 		ic = NEXT_DATA_CHAR;
 AgainForMultiNet:
 		if (interrupted_in_next_data_char) {
@@ -2420,10 +2422,10 @@ AgainForMultiNet:
 				break;
 			}
 			else
-			    break;	      /* finish getting one entry */
+			    break;	/* finish getting one entry */
 		    }
 		} else if (ic == EOF) {
-		    break;	       /* End of file */
+		    break;		/* End of file */
 		} else {
 		    HTChunkPutc(chunk, (char)ic);
 		}
@@ -2558,7 +2560,7 @@ unload_btree:
 ** On entry,
 **	name		WWW address of a file: document, including hostname
 ** On exit,
-**	returns 	Socket number for file if good.
+**	returns		Socket number for file if good.
 **			<0 if bad.
 */
 PUBLIC int HTFTPLoad ARGS4(
@@ -2613,7 +2615,7 @@ PUBLIC int HTFTPLoad ARGS4(
 	    if (status != 2) {		/* Could have timed out */
 		if (status < 0)
 		    continue;		/* try again - net error*/
-		return -status; 	/* bad reply */
+		return -status;		/* bad reply */
 	    }
 	    CTRACE(tfp, "HTFTP: Port defined.\n");
 	}
@@ -2631,7 +2633,7 @@ PUBLIC int HTFTPLoad ARGS4(
 	    if (status != 2) {
 		if (status < 0)
 		    continue;		/* retry or Bad return */
-		return -status; 	/* bad reply */
+		return -status;		/* bad reply */
 	    }
 	    for (p = response_text; *p && *p != ','; p++)
 		; /* null body */
@@ -3122,7 +3124,7 @@ PUBLIC int HTFTPLoad ARGS4(
 	if (!(type) || (type && *type != 'D')) {
 	    status = send_cmd_2("RETR", filename);
 	} else {
-	    status = 5; 	/* Failed status set as flag. - FM */
+	    status = 5;		/* Failed status set as flag. - FM */
 	}
 	if (status != 1) {	/* Failed : try to CWD to it */
 	    /** Clear any login messages if this isn't the login directory **/
@@ -3282,3 +3284,5 @@ PUBLIC void HTClearFTPPassword NOARGS
     */
     FREE(user_entered_password);
 }
+
+#endif /* ifndef DISABLE_FTP */

@@ -15,20 +15,72 @@
 #endif /* !VMS */
 
 /*
+ *  Flag for outofmem macro. - FM
+ */
+PUBLIC BOOL LYOutOfMemory = FALSE;
+
+#ifdef LY_FIND_LEAKS
+
+/*
  *  Stack of functions to call upon exit.
  */
 PRIVATE void (*callstack[ATEXITSIZE]) NOPARAMS;
 PRIVATE int topOfStack = 0;
 
 /*
- *  Flag for outofmem macro. - FM
+ *  Purpose:		Registers termination function.
+ *  Arguments:		function	The function to register.
+ *  Return Value:	int	0	registered
+ *				!0	no more space to register
+ *  Remarks/Portability/Dependencies/Restrictions:
+ *  Revision History:
+ *	06-15-94	created Lynx 2-3-1 Garrett Arch Blythe
  */
-PUBLIC BOOL LYOutOfMemory = FALSE;
+
+#ifdef __STDC__
+PUBLIC int LYatexit(void (*function)(void))
+#else /* Not ANSI, ugh! */
+PUBLIC int LYatexit(function)
+void (*function)();
+#endif /* __STDC__ */
+{
+    /*
+     *  Check for available space.
+     */
+    if (topOfStack == ATEXITSIZE) {
+	CTRACE(tfp, "(LY)atexit: Too many functions, ignoring one!\n");
+	return(-1);
+    }
+
+    /*
+     *  Register the function.
+     */
+    callstack[topOfStack] = function;
+    topOfStack++;
+    return(0);
+}
 
 /*
- *  Forward declarations.
+ *  Purpose:		Call the functions registered with LYatexit
+ *  Arguments:		void
+ *  Return Value:	void
+ *  Remarks/Portability/Dependencies/Restrictions:
+ *  Revision History:
+ *	06-15-94	created Lynx 2-3-1 Garrett Arch Blythe
  */
-PRIVATE void LYCompleteExit NOPARAMS;
+PRIVATE void LYCompleteExit NOPARAMS
+{
+    /*
+     *  Just loop through registered functions.
+     *  This is reentrant if more exits occur in the registered functions.
+     */
+    while (--topOfStack >= 0) {
+	callstack[topOfStack]();
+    }
+}
+#else
+#define LYCompleteExit() /*nothing*/
+#endif /* LY_FIND_LEAKS */
 
 /*
  *  Purpose:		Terminates program.
@@ -114,57 +166,6 @@ PUBLIC void LYexit ARGS1(
     LYCloseTracelog();
 #endif /* !VMS */
     exit(status);
-}
-
-/*
- *  Purpose:		Registers termination function.
- *  Arguments:		function	The function to register.
- *  Return Value:	int	0	registered
- *				!0	no more space to register
- *  Remarks/Portability/Dependencies/Restrictions:
- *  Revision History:
- *	06-15-94	created Lynx 2-3-1 Garrett Arch Blythe
- */
-#ifdef __STDC__
-PUBLIC int LYatexit(void (*function)(void))
-#else /* Not ANSI, ugh! */
-PUBLIC int LYatexit(function)
-void (*function)();
-#endif /* __STDC__ */
-{
-    /*
-     *  Check for available space.
-     */
-    if (topOfStack == ATEXITSIZE) {
-	CTRACE(tfp, "(LY)atexit: Too many functions, ignoring one!\n");
-	return(-1);
-    }
-
-    /*
-     *  Register the function.
-     */
-    callstack[topOfStack] = function;
-    topOfStack++;
-    return(0);
-}
-
-/*
- *  Purpose:		Call the functions registered with LYatexit
- *  Arguments:		void
- *  Return Value:	void
- *  Remarks/Portability/Dependencies/Restrictions:
- *  Revision History:
- *	06-15-94	created Lynx 2-3-1 Garrett Arch Blythe
- */
-PRIVATE void LYCompleteExit NOPARAMS
-{
-    /*
-     *  Just loop through registered functions.
-     *  This is reentrant if more exits occur in the registered functions.
-     */
-    while (--topOfStack >= 0) {
-	callstack[topOfStack]();
-    }
 }
 
 PUBLIC void outofmem ARGS2(

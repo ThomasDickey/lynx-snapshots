@@ -48,5 +48,6 @@ extern void free_lynx_cfg NOPARAMS;
 extern BOOLEAN have_read_cfg;
 
 extern char *lynx_cfg_infopage NOPARAMS;
+extern char *lynx_compile_opts NOPARAMS;
 
 #endif /* LYREADCFG_H */

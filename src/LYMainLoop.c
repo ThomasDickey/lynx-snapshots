@@ -54,10 +54,10 @@
 #include <LYLeaks.h>
 
 PRIVATE BOOL confirm_post_resub PARAMS((
-    CONST char* 	address,
-    CONST char* 	title,
-    int 		if_imgmap,
-    int 		if_file));
+    CONST char*		address,
+    CONST char*		title,
+    int			if_imgmap,
+    int			if_file));
 PRIVATE int are_different PARAMS((document *doc1, document *doc2));
 PUBLIC void HTGotoURLs_free NOPARAMS;
 PUBLIC void HTAddGotoURL PARAMS((char *url));
@@ -69,8 +69,8 @@ PRIVATE int are_phys_different PARAMS((document *doc1, document *doc2));
 #define FASTTAB
 
 PRIVATE int sametext ARGS2(
-	char *, 	een,
-	char *, 	twee)
+	char *,		een,
+	char *,		twee)
 {
     if (een && twee)
 	return (strcmp(een, twee) == 0);
@@ -94,6 +94,7 @@ PRIVATE char *CurrentUserAgent = NULL;
 PRIVATE char *CurrentNegoLanguage = NULL;
 PRIVATE char *CurrentNegoCharset = NULL;
 
+#ifdef LY_FIND_LEAKS
 /*
  *  Function for freeing allocated mainloop() variables. - FM
  */
@@ -124,6 +125,7 @@ PRIVATE void free_mainloop_variables NOARGS
 
     return;
 }
+#endif /* LY_FIND_LEAKS */
 
 PUBLIC FILE *TraceFP NOARGS
 {
@@ -620,7 +622,7 @@ try_again:
 		     *	Do any error logging, if appropriate.
 		     */
 		    LYoverride_no_cache = FALSE; /* Was TRUE if popped. - FM */
-		    popped_doc = FALSE; 	 /* Was TRUE if popped. - FM */
+		    popped_doc = FALSE;		 /* Was TRUE if popped. - FM */
 		    LYinternal_flag = FALSE;	 /* Reset to default. - kw */
 		    if (trace_mode_flag == TRUE) {
 			WWW_TraceFlag = TRUE;
@@ -695,7 +697,7 @@ try_again:
 		     *	Not supposed to return any file.
 		     */
 		    LYoverride_no_cache = FALSE; /* Was TRUE if popped. - FM */
-		    popped_doc = FALSE; 	 /* Was TRUE if popped. - FM */
+		    popped_doc = FALSE;		 /* Was TRUE if popped. - FM */
 		    LYinternal_flag = FALSE;	 /* Reset to default. - kw */
 		    if (trace_mode_flag == TRUE) {
 			WWW_TraceFlag = TRUE;
@@ -724,15 +726,15 @@ try_again:
 			    FREE(traversal_link_to_add);
 			}
 		    }
-		   /*
-		    *  Make sure the first file was found and
-		    *  has not gone missing.
-		    */
-		   if (!nhist) {
-		       /*
-			*  If nhist = 0 then it must be the first file.
-			*/
-		       if (first_file && homepage &&
+		    /*
+		     *  Make sure the first file was found and
+		     *  has not gone missing.
+		     */
+		    if (!nhist) {
+			/*
+			 *  If nhist = 0 then it must be the first file.
+			 */
+			if (first_file && homepage &&
 #ifdef VMS
 			   strcasecomp(homepage, startfile) != 0
 #else
@@ -758,7 +760,7 @@ try_again:
 			   newdoc.safe = FALSE;
 			   newdoc.internal_link = FALSE;
 			   goto try_again;
-		       } else {
+			} else {
 			   if (!dump_output_immediately)
 			       cleanup();
 #ifdef UNIX
@@ -781,7 +783,7 @@ try_again:
 			       exit_immediately(-1);
 			   }
 			   return(-1);
-		       }
+			}
 		    }
 
 		   /*
@@ -1080,7 +1082,7 @@ try_again:
 	   LYNoRefererForThis = FALSE;	/* always reset on return here */
 	   reloading = FALSE;		/* only set for RELOAD and RESUBMIT */
 	   HEAD_request = FALSE;	/* only set for HEAD requests */
-	   LYPermitURL = FALSE; 	/* only set for LYValidate */
+	   LYPermitURL = FALSE;		/* only set for LYValidate */
 	   ForcePush = FALSE;		/* only set for some PRINT requests. */
 	   LYforce_HTML_mode = FALSE;
 	   popped_doc = FALSE;
@@ -2245,26 +2247,24 @@ new_cmd:  /*
 
 	case LYK_QUIT:	/* quit */
 	    if (LYQuitDefaultYes == TRUE) {
-		_statusline(REALLY_QUIT_Y);
+		c = HTConfirmDefault(REALLY_QUIT_Y, YES);
 	    } else {
-		_statusline(REALLY_QUIT_N);
+		c = HTConfirmDefault(REALLY_QUIT_N, NO);
 	    }
-	    c = LYgetch();
 	    if (LYQuitDefaultYes == TRUE) {
-		if (TOUPPER(c) != 'N' &&
-		    c != 7) {
+		if (c != NO) {
 		    return(0);
 		} else {
 		    HTInfoMsg(NO_CANCEL);
 		}
-	    } else if (TOUPPER(c) == 'Y') {
+	    } else if (c == YES) {
 		return(0);
 	    } else {
 		HTInfoMsg(NO_CANCEL);
 	    }
 	    break;
 
-	case LYK_ABORT: 	/* don't ask the user about quitting */
+	case LYK_ABORT:		/* don't ask the user about quitting */
 	    return(0);
 
 	case LYK_NEXT_PAGE:	/* next page */
@@ -3217,7 +3217,7 @@ new_cmd:  /*
 			 *  List Page is about. - kw
 			 */
 			if ( 0==strcmp(curdoc.address, LYlist_temp_url()) &&
-			    (LIsListpageTitle(curdoc.title ? curdoc.title : ""))) {
+			    (LYIsListpageTitle(curdoc.title ? curdoc.title : ""))) {
 			    if (!curdoc.post_data ||
 				/*
 				 *  Normal case - List Page is not associated
@@ -3770,6 +3770,8 @@ check_goto_URL:
 		       !strncmp(user_input_buffer, "LYNXDIRED:", 10) ||
 		       !strncmp(user_input_buffer, "LYNXDOWNLOAD:", 13) ||
 		       !strncmp(user_input_buffer, "LYNXOPTIONS:", 12) ||
+		       !strncmp(user_input_buffer, "LYNXCFG:", 8) ||
+		       !strncmp(user_input_buffer, "LYNXCOMPILEOPTS:", 16) ||
 		       !strncmp(user_input_buffer, "LYNXPRINT:", 10)) {
 		HTUserMsg(GOTO_SPECIAL_DISALLOWED);
 
@@ -3851,9 +3853,7 @@ check_goto_URL:
 	     */
 	    if (!STREQ(curdoc.address,homepage)) {
 
-		_statusline(CONFIRM_MAIN_SCREEN);
-		c = LYgetch();
-		if (TOUPPER(c)=='Y') {
+		if (HTConfirmDefault(CONFIRM_MAIN_SCREEN, NO) == YES) {
 		    StrAllocCopy(newdoc.address, homepage);
 		    StrAllocCopy(newdoc.title, gettext("Entry into main screen"));
 		    FREE(newdoc.post_data);
@@ -3868,10 +3868,6 @@ check_goto_URL:
 		      HTuncache_current_document();
 #endif /* DIRED_SUPPORT */
 		}
-#ifdef VMS
-		if (HadVMSInterrupt)
-		    HadVMSInterrupt = FALSE;
-#endif /* VMS */
 	    } else {
 		if (old_c != real_c)	{
 			old_c = real_c;
@@ -4012,7 +4008,7 @@ if (!LYUseFormsOptions) {
 		 * before the 'options menu' only when (few) important options
 		 * were changed.
 		 */
-/*             HTuncache_current_document(); */
+/*	       HTuncache_current_document(); */
 	    }
 #endif /* !NO_OPTION_FORMS */
 	    break;
@@ -4174,9 +4170,7 @@ if (!LYUseFormsOptions) {
 		    HTUserMsg(MAIL_DISALLOWED);
 		}
 	    } else {
-		_statusline(CONFIRM_COMMENT);
-		c = LYgetch();
-		if (TOUPPER(c) == 'Y') {
+		if (HTConfirmDefault(CONFIRM_COMMENT, NO)) {
 		    if (!owner_address) {
 			/*
 			 *  No owner defined, so make a guess and
@@ -4206,10 +4200,10 @@ if (!LYUseFormsOptions) {
 			    StrAllocCopy(address, "mailto:WebMaster@");
 			temp = HTParse(curdoc.address, "", PARSE_HOST);
 			StrAllocCat(address, temp);
+			HTSprintf0(&temp, NO_OWNER_USE, address);
+			c = HTConfirmDefault(temp, NO);
 			FREE(temp);
-			_user_message(NO_OWNER_USE, address);
-			c = LYgetch();
-			if (TOUPPER(c) == 'Y') {
+			if (c == YES) {
 			    StrAllocCopy(owner_address, address);
 			    FREE(address);
 			} else {
@@ -4254,10 +4248,10 @@ if (!LYUseFormsOptions) {
 
 			FREE(tmptitle);
 			refresh_screen = TRUE;	/* to force a showpage */
-		   }
-	       }
-	   }
-	   break;
+		    }
+		}
+	    }
+	    break;
 
 #ifdef DIRED_SUPPORT
 	case LYK_TAG_LINK:	/* tag or untag the current link */
@@ -4366,8 +4360,8 @@ if (!LYUseFormsOptions) {
 	     */
 	    if (links[curdoc.link].type       == WWW_FORM_LINK_TYPE &&
 		links[curdoc.link].form->type == F_TEXTAREA_TYPE)   {
-	       cmd = LYK_EDIT_TEXTAREA;
-	       goto new_cmd;
+		cmd = LYK_EDIT_TEXTAREA;
+		goto new_cmd;
 	    }
 
 	    /*
@@ -4469,16 +4463,14 @@ if (!LYUseFormsOptions) {
 	case LYK_DEL_BOOKMARK:	/* remove a bookmark file link */
 #ifdef DIRED_SUPPORT
 	case LYK_REMOVE:	/* remove files and directories */
-	    c = 'N';
+	    c = NO;
 	    if (lynx_edit_mode && nlinks > 0 && !no_dired_support) {
 		local_remove(&curdoc);
-		c = 'Y';
+		c = YES;
 	    } else
 #endif /* DIRED_SUPPORT */
 	    if (curdoc.bookmark != NULL) {
-		_statusline(CONFIRM_BOOKMARK_DELETE);
-		c = LYgetch();
-		if (TOUPPER(c) != 'Y')
+		if ((c = HTConfirmDefault(CONFIRM_BOOKMARK_DELETE,NO)) != YES)
 		    break;
 		remove_bookmark_link(links[curdoc.link].anchor_number-1,
 				     curdoc.bookmark);
@@ -4490,7 +4482,7 @@ if (!LYUseFormsOptions) {
 		}
 		break;
 	    }
-	    if (TOUPPER(c) == 'Y') {
+	    if (c == YES) {
 		HTuncache_current_document();
 		StrAllocCopy(newdoc.address, curdoc.address);
 		FREE(curdoc.address);
@@ -4791,7 +4783,7 @@ if (!LYUseFormsOptions) {
 	    break;
 
 #if defined(DIRED_SUPPORT) || defined(VMS)
-       case LYK_DIRED_MENU:  /* provide full file management menu */
+	case LYK_DIRED_MENU:  /* provide full file management menu */
 #ifdef VMS
 	    /*
 	     *	Check if the CSwing Directory/File Manager is available.
@@ -4927,8 +4919,8 @@ if (!LYUseFormsOptions) {
 	case LYK_EXTERN:  /* use external program on url */
 	    if  ((nlinks > 0) && (links[curdoc.link].lname != NULL))
 	    {
-	       run_external(links[curdoc.link].lname);
-	       refresh_screen = TRUE;
+		run_external(links[curdoc.link].lname);
+		refresh_screen = TRUE;
 	    }
 	    break;
 #endif /* USE_EXTERNALS */
@@ -5297,6 +5289,10 @@ check_add_bookmark_to_self:
 				    "LYNXPRINT:", 10) ||
 			   !strncmp(links[curdoc.link].lname,
 				    "LYNXOPTIONS:", 12) ||
+			   !strncmp(links[curdoc.link].lname,
+				    "LYNXCFG:", 8) ||
+			   !strncmp(links[curdoc.link].lname,
+				    "LYNXCOMPILEOPTS:", 16) ||
 			   !strncmp(links[curdoc.link].lname,
 				    "lynxexec:", 9) ||
 			   !strncmp(links[curdoc.link].lname,
@@ -5716,7 +5712,9 @@ check_add_bookmark_to_self:
 #ifndef DISABLE_NEWS
 		    HTClearNNTPAuthInfo();
 #endif
+#ifndef DISABLE_FTP
 		    HTClearFTPPassword();
+#endif
 		    HTUserMsg(AUTH_INFO_CLEARED);
 		} else {
 		    HTUserMsg(CANCELLED);
@@ -5989,7 +5987,7 @@ PUBLIC void HTGotoURLs_free NOARGS
  *  repeated URLs the most current in the list. - FM
  */
 PUBLIC void HTAddGotoURL ARGS1(
-	char *, 	url)
+	char *,		url)
 {
     char *new;
     char *old;

@@ -147,10 +147,6 @@ extern void LYbox PARAMS((WINDOW *win, BOOLEAN formfield));
 extern int LYlines;  /* replaces LINES */
 extern int LYcols;   /* replaces COLS */
 
-#ifndef HTUTILS_H
-#include <HTUtils.h>
-#endif /* HTUTILS_H */
-
 extern void start_curses NOPARAMS;
 extern void stop_curses NOPARAMS;
 extern BOOLEAN setup PARAMS((char *terminal));

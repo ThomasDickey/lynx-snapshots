@@ -147,7 +147,7 @@ typedef struct _TextAnchor {
 	int			number;		/* For user interface */
 	int			start;		/* Characters */
 	int			line_pos;	/* Position in text */
-	int			extent; 	/* Characters */
+	int			extent;		/* Characters */
 	int			line_num;	/* Place in document */
 	char *			hightext;	/* The link text */
 	char *			hightext2;	/* A second line*/
@@ -173,7 +173,7 @@ typedef struct _HTTabID {
 */
 struct _HText {
 	HTParentAnchor *	node_anchor;
-	HTLine * 		last_line;
+	HTLine *		last_line;
 	int			Lines;		/* Number of them */
 	int			chars;		/* Number of them */
 	TextAnchor *		first_anchor;	/* Singly linked list */
@@ -204,21 +204,21 @@ struct _HText {
 	int			last_lineno_last_disp_partial;
 #endif
 
-	HTkcode 		kcode;			/* Kanji code? */
+	HTkcode			kcode;			/* Kanji code? */
 	enum grid_state       { S_text, S_esc, S_dollar, S_paren,
 				S_nonascii_text, S_dollar_paren,
 				S_jisx0201_text }
 				state;			/* Escape sequence? */
 	int			kanji_buf;		/* Lead multibyte */
 	int			in_sjis;		/* SJIS flag */
-	int			halted; 		/* emergency halt */
+	int			halted;			/* emergency halt */
 
 	BOOL			have_8bit_chars;   /* Any non-ASCII chars? */
 	LYUCcharset *		UCI;		   /* node_anchor UCInfo */
 	int			UCLYhndl;	   /* charset we are fed */
 	UCTransParams		T;
 
-	HTStream *		target; 		/* Output stream */
+	HTStream *		target;			/* Output stream */
 	HTStreamClass		targetClass;		/* Output routines */
 };
 
@@ -250,7 +250,9 @@ PRIVATE HTStyle default_style =
 
 PRIVATE HTList * loaded_texts = NULL;	 /* A list of all those in memory */
 PUBLIC  HTList * search_queries = NULL;  /* isindex and whereis queries   */
+#ifdef LY_FIND_LEAKS
 PRIVATE void free_all_texts NOARGS;
+#endif
 PRIVATE int HText_TrueLineSize PARAMS((
 	HTLine *	line,
 	HText *		text,
@@ -621,7 +623,7 @@ PUBLIC void HText_free ARGS1(
 	    l = self->last_line = NULL;
 	    break;
 	}
-    };
+    }
 
     while (self->first_anchor) {		/* Free off anchor array */
 	TextAnchor * l = self->first_anchor;
@@ -2353,7 +2355,7 @@ PUBLIC void HText_setStyle ARGS2(
     int after, before;
 
     if (!style)
-	return; 			/* Safety */
+	return;				/* Safety */
     after = text->style->spaceAfter;
     before = style->spaceBefore;
 
@@ -6066,7 +6068,7 @@ PUBLIC void www_user_search ARGS3(
 		break;
 	    } else if (count > start_line) {  /* next line */
 		HTUserMsg2(STRING_NOT_FOUND, target);
-		return; 		/* end */
+		return;			/* end */
 	    } else {
 		line = line->next;
 		count++;
@@ -8762,6 +8764,7 @@ PUBLIC void HText_activateRadioButton ARGS1(
    form->num_value = 1;
 }
 
+#ifdef LY_FIND_LEAKS
 /*
  *	Purpose:	Free all currently loaded HText objects in memory.
  *	Arguments:	void
@@ -8811,6 +8814,7 @@ PRIVATE void free_all_texts NOARGS
 
     return;
 }
+#endif /* LY_FIND_LEAKS */
 
 /*
 **  stub_HTAnchor_address is like HTAnchor_address, but it returns the
@@ -9346,16 +9350,16 @@ PRIVATE int increment_tagged_htline ARGS6(
 	     *  We use lxbuf[] to deal with the two lines involved.
 	     */
 	    if (plx) {
-		strcpy (lx, p);      /* <- 1st part of a possible lx'ing tag  */
-		pre_n = strlen (p);  /* count of 1st part chars in this line  */
-		strcat (lx, ht->next->data);   /* tack on NEXT line	      */
+		strcpy (lx, p);      /* <- 1st part of a possible lx'ing tag */
+		pre_n = strlen (p);  /* count of 1st part chars in this line */
+		strcat (lx, ht->next->data);   /* tack on NEXT line	     */
 
 		t     = lx;
 		n     = 0;
 		valid = TRUE;
 
 		/*
-		 *  Go hunting again for just digits, followed by a tag end ']'.
+		 *  Go hunting again for just digits, followed by tag end ']'.
 		 */
 		while (*t != ']') {
 		    if (isdigit (*t++) != 0) {
@@ -9576,8 +9580,8 @@ PRIVATE void update_subsequent_anchors ARGS4(
      *
      *  [We bypass bumping ->number if it has a value of 0, which takes care
      *   of the ->input_field->type == F_HIDDEN_TYPE (as well as any other
-     *   "hidden" anchors (if such things exist).  Seems like the "right
-     *   thing" to do.  I think.
+     *   "hidden" anchors, if such things exist).  Seems like the "right
+     *   thing" to do.  I think.]
      */
     anchor = start_anchor->next;   /* begin updating with the NEXT anchor */
     while (anchor) {
@@ -9596,8 +9600,8 @@ PRIVATE void update_subsequent_anchors ARGS4(
      *   boundary, this fixup only partially works.  While the tag
      *   numbering is done properly across the pair of lines, the
      *   horizontal positioning on *either* side of the split, can get
-     *   out of sync by a char or two when it gets selected.  See [com
-     *   ments] in  increment_tagged_htline()  for some more detail.
+     *   out of sync by a char or two when it gets selected.  See the
+     *   [comments] in  increment_tagged_htline()  for some more detail.
      *
      *   I suppose THE fix is to prevent such tag-breaking in the first
      *   place (dunno where yet, though).  Ah well ... at least the tag
@@ -9719,15 +9723,15 @@ PUBLIC int HText_ExtEditForm ARGS1(
     BOOLEAN	firstanchor   = TRUE;
 
     char	ed_offset[10];
-    int 	start_line    = 0;
-    int 	entry_line    = form_link->anchor_line_num;
-    int 	exit_line     = 0;
-    int 	orig_cnt      = 0;
-    int 	line_cnt      = 1;
+    int		start_line    = 0;
+    int		entry_line    = form_link->anchor_line_num;
+    int		exit_line     = 0;
+    int		orig_cnt      = 0;
+    int		line_cnt      = 1;
 
     FormInfo   *form	 = form_link->form;
     char       *areaname = form->name;
-    int 	form_num = form->number;
+    int		form_num = form->number;
 
     HTLine     *htline	 = NULL;
 
@@ -9737,9 +9741,11 @@ PUBLIC int HText_ExtEditForm ARGS1(
     char       *lp;
     char       *cp;
     int         match_tag = 0;
-    int         newlines  = 0;
-    int 	len;
+    int		newlines  = 0;
+    int		len;
 
+
+    ed_offset[0] = 0; /* pre-ANSI compilers don't initialize aggregates - TD */
 
     CTRACE(tfp, "GridText: entered HText_ExtEditForm()\n");
 
@@ -10068,7 +10074,7 @@ PUBLIC int HText_InsertFile ARGS1(
 
     FormInfo   *form	 = form_link->form;
     char       *areaname = form->name;
-    int 	form_num = form->number;
+    int		form_num = form->number;
 
     HTLine     *htline	 = NULL;
 
@@ -10080,11 +10086,11 @@ PUBLIC int HText_InsertFile ARGS1(
     char       *line;
     char       *lp;
     char       *cp;
-    int 	entry_line = form_link->anchor_line_num;
-    int         match_tag  = 0;
-    int         newlines   = 0;
-    int 	len;
-    int 	i;
+    int		entry_line = form_link->anchor_line_num;
+    int		match_tag  = 0;
+    int		newlines   = 0;
+    int		len;
+    int		i;
 
 
     CTRACE(tfp, "GridText: entered HText_InsertFile()\n");
@@ -10162,7 +10168,7 @@ PUBLIC int HText_InsertFile ARGS1(
      *   along with a flag to indicate "insert before" as we do here,
      *   or the "normal" mode of operation (add after "current" anchor/
      *   line).  Beware of the differences ... some are a bit subtle to
-     *   notice.
+     *   notice.]
      */
     for (htline = HTMainText->last_line->next, i = 0;
 	 anchor_ptr->line_num != i;            i++) {
@@ -10318,4 +10324,239 @@ PUBLIC int HText_InsertFile ARGS1(
     CTRACE(tfp, "GridText: exiting HText_InsertFile()\n");
 
     return (newlines);
+}
+
+/*
+ * This function draws the part of line 'line', pointed by 'str' (which can be
+ * non terminated with null - i.e., is line->data+N) drawing 'len' bytes (not
+ * characters) of it.  It doesn't check whether the 'len' bytes crosses a
+ * character boundary (if multibyte chars are in string).  Assumes that the
+ * cursor is positioned in the place where the 1st char of string should be
+ * drawn.  Currently used only in redraw_lines_of_link when
+ *    defined(USE_COLOR_STYLE) && !defined(NO_HILIT_FIX)
+ * This code is based on display_line.  This code was tested with ncurses only
+ * (since no support for lss is availble for Slang) and with
+ * defined(USE_COLOR_STYLE).
+ * -HV.
+ */
+#if defined(USE_COLOR_STYLE) && !defined(NO_HILIT_FIX)
+PRIVATE void redraw_part_of_line ARGS4(
+	HTLine *,	line,
+	char*,		str,
+	int,		len,
+	HText *,	text)
+{
+    register int i;
+    char buffer[7];
+    char *data,*end_of_data;
+    size_t utf_extra = 0;
+#ifdef USE_COLOR_STYLE
+    int current_style = 0;
+#endif
+    char LastDisplayChar = ' ';
+    int YP,XP;
+
+    LYGetYX(YP,XP);
+
+    i = XP;
+
+    /* Set up the multibyte character buffer  */
+    buffer[0] = buffer[1] = buffer[2] = '\0';
+
+    data = str;
+    end_of_data = data + len;
+    i++;
+
+    /* this assumes that the part of line to be drawn fits in the screen*/
+    while (  data < end_of_data ) {
+	buffer[0] = *data;
+	data++;
+
+#if defined(USE_COLOR_STYLE) || defined(SLSC)
+#define CStyle line->styles[current_style]
+
+	while (current_style < line->numstyles &&
+	       i >= (int) (CStyle.horizpos + line->offset + 1))
+	{
+		LynxChangeStyle (CStyle.style,CStyle.direction,CStyle.previous);
+		current_style++;
+	}
+#endif
+	switch (buffer[0]) {
+
+#ifndef USE_COLOR_STYLE
+	    case LY_UNDERLINE_START_CHAR:
+		if (dump_output_immediately && use_underscore) {
+		    addch('_');
+		    i++;
+		} else {
+		    start_underline();
+		}
+		break;
+
+	    case LY_UNDERLINE_END_CHAR:
+		if (dump_output_immediately && use_underscore) {
+		    addch('_');
+		    i++;
+		} else {
+		    stop_underline();
+		}
+		break;
+
+	    case LY_BOLD_START_CHAR:
+		start_bold();
+		break;
+
+	    case LY_BOLD_END_CHAR:
+		stop_bold ();
+		break;
+
+#endif
+	    case LY_SOFT_NEWLINE:
+		if (!dump_output_immediately)
+		    addch('+');
+		break;
+
+	    case LY_SOFT_HYPHEN:
+		if (*data != '\0' ||
+		    isspace((unsigned char)LastDisplayChar) ||
+		    LastDisplayChar == '-') {
+		    /*
+		     *  Ignore the soft hyphen if it is not the last
+		     *  character in the line.  Also ignore it if it
+		     *  first character following the margin, or if it
+		     *  is preceded by a white character (we loaded 'M'
+		     *  into LastDisplayChar if it was a multibyte
+		     *  character) or hyphen, though it should have
+		     *  been excluded by HText_appendCharacter() or by
+		     *  split_line() in those cases. - FM
+		     */
+		    break;
+		} else {
+		    /*
+		     *  Make it a hard hyphen and fall through. - FM
+		     */
+		    buffer[0] = '-';
+		    i++;
+		}
+
+	    default:
+		i++;
+		if (text->T.output_utf8 && !isascii(buffer[0])) {
+		    if ((*buffer & 0xe0) == 0xc0) {
+			utf_extra = 1;
+		    } else if ((*buffer & 0xf0) == 0xe0) {
+			utf_extra = 2;
+		    } else if ((*buffer & 0xf8) == 0xf0) {
+			utf_extra = 3;
+		    } else if ((*buffer & 0xfc) == 0xf8) {
+			utf_extra = 4;
+		    } else if ((*buffer & 0xfe) == 0xfc) {
+			utf_extra = 5;
+		    } else {
+			 /*
+			  *  Garbage.
+			  */
+			utf_extra = 0;
+		    }
+		    if (strlen(data) < utf_extra) {
+			/*
+			 *  Shouldn't happen.
+			 */
+			utf_extra = 0;
+		    }
+		    LastDisplayChar = 'M';
+		}
+		if (utf_extra) {
+		    strncpy(&buffer[1], data, utf_extra);
+		    buffer[utf_extra+1] = '\0';
+		    addstr(buffer);
+		    buffer[1] = '\0';
+		    data += utf_extra;
+		    utf_extra = 0;
+		} else if (HTCJK != NOCJK && !isascii(buffer[0])) {
+		    /*
+		     *  For CJK strings, by Masanobu Kimura.
+		     */
+		    buffer[1] = *data;
+		    data++;
+		    addstr(buffer);
+		    buffer[1] = '\0';
+		    /*
+		     *  For now, load 'M' into LastDisplayChar,
+		     *  but we should check whether it's white
+		     *  and if so, use ' '.  I don't know if
+		     *  there actually are white CJK characters,
+		     *  and we're loading ' ' for multibyte
+		     *  spacing characters in this code set,
+		     *  but this will become an issue when
+		     *  the development code set's multibyte
+		     *  character handling is used. - FM
+		     */
+		    LastDisplayChar = 'M';
+		} else {
+		    addstr(buffer);
+		    LastDisplayChar = buffer[0];
+		}
+	} /* end of switch */
+    } /* end of while */
+
+#ifndef USE_COLOR_STYLE
+    stop_underline();
+    stop_bold();
+#else
+
+    while (current_style < line->numstyles)
+    {
+	LynxChangeStyle (CStyle.style, CStyle.direction, CStyle.previous);
+	current_style++;
+    }
+
+#undef CStyle
+#endif
+    return;
+}
+#endif /* defined(USE_COLOR_STYLE) && !defined(NO_HILIT_FIX)  */
+
+/*
+  This is used only if compiled with lss support. It's called to draw
+  regular link (1st two lines of link) when it's being unhighlighted in
+  highlight:LYUtils.
+*/
+
+PUBLIC void redraw_lines_of_link ARGS1(
+	int,		cur GCC_UNUSED)
+{
+#if defined(USE_COLOR_STYLE) && !defined(NO_HILIT_FIX)
+#define pvtTITLE_HEIGHT 1
+    HTLine* todr1, *todr2;
+    int lines_back;
+
+    if (HTMainText->next_line == HTMainText->last_line) {
+    /* we are at the last page - that is partially filled */
+	lines_back = HTMainText->Lines - ( links[cur].ly-pvtTITLE_HEIGHT+
+	HTMainText->top_of_screen);
+    } else {
+	lines_back = display_lines - (links[cur].ly-pvtTITLE_HEIGHT);
+    }
+    todr1 = HTMainText->next_line;
+    while (lines_back--)
+	todr1 = todr1->prev;
+    todr2 = (links[cur].hightext2 && links[cur].ly < display_lines) ?
+	    todr1->next : 0;
+
+    move(links[cur].ly,  links[cur].lx);
+    redraw_part_of_line (todr1, links[cur].hightext,
+			 strlen(links[cur].hightext),  HTMainText);
+    if (todr2) {
+	move(links[cur].ly+1,links[cur].hightext2_offset);
+	redraw_part_of_line (todr2, links[cur].hightext2,
+			     strlen(links[cur].hightext2),  HTMainText);
+    }
+
+#undef pvtTITLE_HEIGHT
+#else
+    /* no dead code !*/
+#endif
+    return;
 }

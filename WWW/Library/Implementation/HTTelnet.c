@@ -38,7 +38,7 @@ PRIVATE void do_system ARGS1(char *, command)
 {
     CTRACE(tfp, "HTTelnet: Command is: %s\n\n", command);
     system(command);
-    free(command);
+    FREE(command);
 }
 
 /*	Telnet or "rlogin" access
@@ -480,7 +480,7 @@ PRIVATE int remote_session ARGS2(char *, acc_method, char *, host)
 #define SIMPLE_TELNET
 #endif
 #ifdef SIMPLE_TELNET
-	if (login_protocol == telnet) { 		/* telnet only */
+	if (login_protocol == telnet) {			/* telnet only */
 	    HTSprintf0(&command, "TELNET  %s",	/* @@ Bug: port ignored */
 		hostname);
 	    do_system(command);
@@ -521,7 +521,7 @@ PRIVATE int remote_session ARGS2(char *, acc_method, char *, host)
 **	addr		must point to the fully qualified hypertext reference.
 **
 ** On exit,
-**	returns 	<0	Error has occured.
+**	returns		<0	Error has occured.
 **			>=0	Value of file descriptor or socket to be used
 **				 to read data.
 **	*pFormat	Set to the format of the file, if known.

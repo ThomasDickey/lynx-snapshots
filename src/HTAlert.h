@@ -50,6 +50,19 @@ extern void HTReadProgress PARAMS((long bytes, long total));
  */
 extern BOOL HTLastConfirmCancelled NOPARAMS;
 
+/*      Display a message, then wait for 'yes' or 'no', allowing default
+**	response if a return or left-arrow is used.
+**
+**      On entry,
+**              Takes a list of parameters for printf.
+**
+**      On exit,
+**              If the user enters 'YES', returns TRUE, returns FALSE
+**              otherwise.
+*/
+extern BOOL HTConfirmDefault PARAMS ((CONST char * Msg, int Dft));
+
+
 /*      Display a message, then wait for 'yes' or 'no'.
 **
 **      On entry,

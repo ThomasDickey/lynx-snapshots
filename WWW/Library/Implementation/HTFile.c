@@ -148,7 +148,9 @@ int exists(char *filename)
 /*	To free up the suffixes at program exit.
 **	----------------------------------------
 */
+#ifdef LY_FIND_LEAKS
 PRIVATE void free_suffixes NOPARAMS;
+#endif
 
 #ifdef LONG_LIST
 PRIVATE char *FormatStr ARGS3(
@@ -183,11 +185,11 @@ PRIVATE char *FormatNum ARGS3(
 }
 
 PRIVATE void LYListFmtParse ARGS5(
-	char *, 	fmtstr,
-	char *, 	file,
+	char *,		fmtstr,
+	char *,		file,
 	HTStructured *, target,
-	char *, 	entry,
-	char *, 	tail)
+	char *,		entry,
+	char *,		tail)
 {
 	char c;
 	char *s;
@@ -246,7 +248,7 @@ PRIVATE void LYListFmtParse ARGS5(
 		while (isdigit(*s) || *s == '.' || *s == '-' || *s == ' ' ||
 		    *s == '#' || *s == '+' || *s == '\'')
 			s++;
-		c = *s; 	/* the format char. or \0 */
+		c = *s;		/* the format char. or \0 */
 		*s = '\0';
 
 		switch (c) {
@@ -347,7 +349,7 @@ PRIVATE void LYListFmtParse ARGS5(
 			case S_IFLNK: type = 'l'; break;
 #endif
 #ifdef S_IFSOCK
-# ifdef S_IFIFO 	/* some older machines (e.g., apollo) have a conflict */
+# ifdef S_IFIFO		/* some older machines (e.g., apollo) have a conflict */
 #  if S_IFIFO != S_IFSOCK
 			case S_IFSOCK: type = 's'; break;
 #  endif
@@ -480,6 +482,7 @@ PUBLIC void HTSetSuffix5 ARGS5(
     suff->quality = value;
 }
 
+#ifdef LY_FIND_LEAKS
 /*
 **	Purpose:	Free all added suffixes.
 **	Arguments:	void
@@ -511,6 +514,7 @@ PRIVATE void free_suffixes NOARGS
     HTList_delete(HTSuffixes);
     HTSuffixes = NULL;
 }
+#endif /* LY_FIND_LEAKS */
 
 /*	Send README file.
 **	-----------------
@@ -1074,7 +1078,7 @@ PUBLIC float HTFileValue ARGS1(
 	    return suff->quality;		/* OK -- found */
 	}
     }
-    return 0.3; 	/* Dunno! */
+    return 0.3;		/* Dunno! */
 }
 
 /*	Determine write access to a file.
@@ -1119,9 +1123,9 @@ PUBLIC BOOL HTEditable ARGS1(
 #else
     GETGROUPS_T groups[NGROUPS];
     uid_t	myUid;
-    int 	ngroups;			/* The number of groups  */
+    int		ngroups;			/* The number of groups	 */
     struct stat fileStatus;
-    int 	i;
+    int		i;
 
     if (stat(filename, &fileStatus))		/* Get details of filename */
 	return NO;				/* Can't even access file! */
@@ -1467,7 +1471,7 @@ PUBLIC BOOL HTDirTitles ARGS3(
 **			This is the physical address of the file
 **
 **  On exit:
-**	returns 	<0		Error has occurred.
+**	returns		<0		Error has occurred.
 **			HTLOADED	OK
 **
 */
@@ -1516,7 +1520,11 @@ PUBLIC int HTLoadFile ARGS4(
 	FREE(filename);
 	FREE(nodename);
 	FREE(acc_method);
+#ifndef DISABLE_FTP
 	return HTFTPLoad(addr, anchor, format_out, sink);
+#else
+	return -1;
+#endif /* DISABLE_FTP */
     } else {
 	FREE(newname);
 	FREE(acc_method);
@@ -1792,7 +1800,7 @@ PUBLIC int HTLoadFile ARGS4(
 	    if (!base || base == localname) {
 		forget_multi = YES;
 	    } else {
-		*base++ = '\0'; 	/* Just got directory name */
+		*base++ = '\0';		/* Just got directory name */
 		baselen = strlen(base)- strlen(MULTI_SUFFIX);
 		base[baselen] = '\0';	/* Chop off suffix */
 
@@ -1873,7 +1881,7 @@ PUBLIC int HTLoadFile ARGS4(
 			    best_enc = enc;
 			    best = value;
 			    StrAllocCopy(best_name, dirbuf->d_name);
-		       }
+			}
 		    }	/* if best so far */
 		 } /* if match */
 
@@ -1883,7 +1891,7 @@ PUBLIC int HTLoadFile ARGS4(
 	    if (best_rep) {
 		format = best_rep;
 		myEncoding = best_enc;
-		base[-1] = '/'; 	/* Restore directory name */
+		base[-1] = '/';		/* Restore directory name */
 		base[0] = '\0';
 		StrAllocCat(localname, best_name);
 		FREE(best_name);
@@ -1910,7 +1918,7 @@ PUBLIC int HTLoadFile ARGS4(
 	if (stat(localname,&dir_info) == -1)	   /* get file information */
 #endif
 	{
-				       /* if can't read file information */
+				/* if can't read file information */
 	    CTRACE(tfp, "HTLoadFile: can't stat %s\n", localname);
 
 	}  else {		/* Stat was OK */
@@ -2416,7 +2424,11 @@ PUBLIC int HTLoadFile ARGS4(
 			     * is file://localhost
 			     */
 	    } else {
+#ifndef DISABLE_FTP
 		return HTFTPLoad(addr, anchor, format_out, sink);
+#else
+		return -1;
+#endif /* DISABLE_FTP */
 	    }
 	}
 	FREE(nodename);

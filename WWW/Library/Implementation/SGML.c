@@ -34,7 +34,7 @@
 
 #define INVALID (-1)
 
-PUBLIC HTCJKlang HTCJK = NOCJK; 	/* CJK enum value.		*/
+PUBLIC HTCJKlang HTCJK = NOCJK;		/* CJK enum value.		*/
 PUBLIC BOOL HTPassEightBitRaw = FALSE;	/* Pass 161-172,174-255 raw.	*/
 PUBLIC BOOL HTPassEightBitNum = FALSE;	/* Pass ^ numeric entities raw. */
 PUBLIC BOOL HTPassHighCtrlRaw = FALSE;	/* Pass 127-160,173,&#127; raw. */
@@ -75,9 +75,9 @@ struct _HTStream {
     HTStructured		*target;	/* target object */
 
     HTTag			*current_tag;
-    CONST HTTag 		*unknown_tag;
+    CONST HTTag			*unknown_tag;
     BOOL			inSELECT;
-    int 			current_attribute_number;
+    int				current_attribute_number;
     HTChunk			*string;
     HTElement			*element_stack;
     enum sgml_state { S_text, S_litteral,
@@ -109,23 +109,23 @@ struct _HTStream {
 
     HTParentAnchor *		node_anchor;
     LYUCcharset *		inUCI;		/* pointer to anchor UCInfo */
-    int 			inUCLYhndl;	/* charset we are fed	    */
-    LYUCcharset *		outUCI; 	/* anchor UCInfo for target */
-    int 			outUCLYhndl;	/* charset for target	    */
+    int				inUCLYhndl;	/* charset we are fed	    */
+    LYUCcharset *		outUCI;		/* anchor UCInfo for target */
+    int				outUCLYhndl;	/* charset for target	    */
     char			utf_count;
     UCode_t			utf_char;
     char			utf_buf[8];
     char *			utf_buf_p;
     UCTransParams		T;
-    int 			current_tag_charset; /* charset to pass attributes */
+    int				current_tag_charset; /* charset to pass attributes */
 
     char *			recover;
-    int 			recover_index;
+    int				recover_index;
     char *			include;
-    int 			include_index;
+    int				include_index;
     char *			url;
     char *			csi;
-    int 			csi_index;
+    int				csi_index;
 } ;
 
 PRIVATE void set_chartrans_handling ARGS3(
@@ -360,7 +360,7 @@ PRIVATE BOOL put_special_unicodes ARGS2(
 	/*
 	**  Use Lynx special character for emsp.
 	*/
-	PUTC(HT_EN_SPACE);
+	/* PUTC(HT_EN_SPACE);  let's stay with a single space :) */
 	PUTC(HT_EN_SPACE);
     } else {
 	/*
@@ -642,7 +642,7 @@ PRIVATE void do_close_stacked ARGS1(
 {
     HTElement * stacked = context->element_stack;
     if (!stacked)
-	return; 		/* stack was empty */
+	return;			/* stack was empty */
     if (context->inSELECT && !strcasecomp(stacked->tag->name, "SELECT")) {
 	context->inSELECT = FALSE;
     }
@@ -766,7 +766,7 @@ PRIVATE void end_element ARGS2(
 	    } else {			/* last level */
 		CTRACE(tfp, "SGML: Found </%s> when expecting </%s>. </%s> ***Ignored.\n",
 			    old_tag->name, t->name, old_tag->name);
-		return; 		/* Ignore */
+		return;			/* Ignore */
 	    }
 	}
 
@@ -2148,7 +2148,7 @@ top1:
     /*
     **	Tag
     */
-    case S_tag: 				/* new tag */
+    case S_tag:					/* new tag */
 	if (TOASCII(unsign_c) < 127 && (string->size ?  /* S/390 -- gil -- 1179 */
 		  isalnum((unsigned char)c) : isalpha((unsigned char)c))) {
 	    /*
@@ -2523,7 +2523,7 @@ top1:
     case S_tag_gap:		/* Expecting attribute or '>' */
 	if (WHITE(c))
 	    break;		/* Gap between attributes */
-	if (c == '>') { 	/* End of tag */
+	if (c == '>') {		/* End of tag */
 	    if (context->current_tag->name)
 		start_element(context);
 	    context->state = S_text;
@@ -2554,7 +2554,7 @@ top1:
     case S_attr_gap:		/* Expecting attribute or '=' or '>' */
 	if (WHITE(c))
 	    break;		/* Gap after attribute */
-	if (c == '>') { 	/* End of tag */
+	if (c == '>') {		/* End of tag */
 	    if (context->current_tag->name)
 		start_element(context);
 	    context->state = S_text;
@@ -2570,7 +2570,7 @@ top1:
     case S_equals:		/* After attr = */
 	if (WHITE(c))
 	    break;		/* Before attribute value */
-	if (c == '>') { 	/* End of tag */
+	if (c == '>') {		/* End of tag */
 	    CTRACE(tfp, "SGML: found = but no value\n");
 	    if (context->current_tag->name)
 		start_element(context);
@@ -2662,7 +2662,7 @@ top1:
 	break;
 
     case S_dquoted:		/* Quoted attribute value */
-	if (c == '"' || 	/* Valid end of attribute value */
+	if (c == '"' ||		/* Valid end of attribute value */
 	    (soft_dquotes &&	/*  If emulating old Netscape bug, treat '>' */
 	     c == '>')) {	/*  as a co-terminator of dquoted and tag    */
 	    HTChunkTerminate(string) ;
@@ -2702,7 +2702,7 @@ top1:
 	}
 	break;
 
-    case S_end: 				/* </ */
+    case S_end:					/* </ */
 	if (TOASCII(unsign_c) < 127 && isalnum((unsigned char)c)) {  /* S/390 -- gil -- 1247 */
 	    HTChunkPutc(string, c);
 	} else {				/* End of end tag name */
@@ -2854,7 +2854,7 @@ top1:
 	break;
 
 
-    case S_esc: 	/* Expecting '$'or '(' following CJK ESC. */
+    case S_esc:		/* Expecting '$'or '(' following CJK ESC. */
 	if (c == '$') {
 	    context->state = S_dollar;
 	} else if (c == '(') {
@@ -3089,14 +3089,14 @@ PUBLIC CONST HTStreamClass SGMLParser =
 **
 ** On entry,
 **	dtd		represents the DTD, along with
-**	actions 	is the sink for the data as a set of routines.
+**	actions		is the sink for the data as a set of routines.
 **
 */
 
 PUBLIC HTStream* SGML_new  ARGS3(
 	CONST SGML_dtd *,	dtd,
 	HTParentAnchor *,	anchor,
-	HTStructured *, 	target)
+	HTStructured *,		target)
 {
     int i;
     HTStream* context = (HTStream *) malloc(sizeof(*context));
@@ -3111,7 +3111,7 @@ PUBLIC HTStream* SGML_new  ARGS3(
 					/* Ugh: no OO */
     context->unknown_tag = &HTTag_unrecognized;
     context->state = S_text;
-    context->element_stack = 0; 		/* empty */
+    context->element_stack = 0;			/* empty */
     context->inSELECT = FALSE;
 #ifdef CALLERDATA
     context->callerData = (void*) callerData;
@@ -3179,7 +3179,7 @@ WITHOUT ANY EXPRESS OR IMPLIED WARRANTIES.
 /////////////////////////////////////////////////////////////////////////
 Content-Type:	program/C; charset=US-ASCII
 Program:	SJIS.c
-Author: 	Yutaka Sato <ysato@etl.go.jp>
+Author:		Yutaka Sato <ysato@etl.go.jp>
 Description:
 History:
 	930923	extracted from codeconv.c of cosmos
@@ -3189,8 +3189,8 @@ History:
 PUBLIC int TREAT_SJIS = 1;
 
 PUBLIC void JISx0201TO0208_EUC ARGS4(
-	register unsigned char, 	IHI,
-	register unsigned char, 	ILO,
+	register unsigned char,		IHI,
+	register unsigned char,		ILO,
 	register unsigned char *,	OHI,
 	register unsigned char *,	OLO)
 {
@@ -3270,8 +3270,8 @@ PUBLIC void JISx0201TO0208_EUC ARGS4(
 }
 
 PUBLIC unsigned char * SJIS_TO_JIS1 ARGS3(
-	register unsigned char, 	HI,
-	register unsigned char, 	LO,
+	register unsigned char,		HI,
+	register unsigned char,		LO,
 	register unsigned char *,	JCODE)
 {
     HI -= (HI <= 0x9F) ? 0x71 : 0xB1;
@@ -3290,8 +3290,8 @@ PUBLIC unsigned char * SJIS_TO_JIS1 ARGS3(
 }
 
 PUBLIC unsigned char * JIS_TO_SJIS1 ARGS3(
-	register unsigned char, 	HI,
-	register unsigned char, 	LO,
+	register unsigned char,		HI,
+	register unsigned char,		LO,
 	register unsigned char *,	SJCODE)
 {
     if (HI & 1)
@@ -3320,7 +3320,7 @@ PUBLIC unsigned char * EUC_TO_SJIS1 ARGS3(
 }
 
 PUBLIC void JISx0201TO0208_SJIS ARGS3(
-	register unsigned char, 	I,
+	register unsigned char,		I,
 	register unsigned char *,	OHI,
 	register unsigned char *,	OLO)
 {

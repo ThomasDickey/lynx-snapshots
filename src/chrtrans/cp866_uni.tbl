@@ -1,10 +1,10 @@
 #
-#The MIME name of this charset. 
+#The MIME name of this charset.
 Mcp866
 
 #Name as a Display Charset (used on Options screen)
 OCyrillic (cp866)
- 
+
 #Codepage number
 C866
 

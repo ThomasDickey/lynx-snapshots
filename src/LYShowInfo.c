@@ -32,7 +32,7 @@
 /*
  *  Compile-time definitions info, returns local url
  */
-PRIVATE char *lynx_compile_opts NOARGS
+PUBLIC char *lynx_compile_opts NOARGS
 {
     char tempfile[LY_MAXPATH];
 #include <cfg_defs.h>
@@ -50,10 +50,9 @@ PRIVATE char *lynx_compile_opts NOARGS
 	BeginInternalPage (fp0, CONFIG_DEF_TITLE, NULL);
 	fprintf(fp0, "<pre>\n");
 
-	fprintf(fp0, "%s %s<a href=\"%s\"> lynx.cfg</a> %s\n\n",
+	fprintf(fp0, "%s %s<a href=\"LYNXCFG:\"> lynx.cfg</a> %s\n\n",
 	    SEE_ALSO,
 	    YOUR_SEGMENT,
-	    lynx_cfg_infopage(),
 	    RUNTIME_OPT_SEGMENT);
 
 	fprintf(fp0, "\n%s<br>\n<em>config.cache</em>\n", AUTOCONF_CONFIG_CACHE);
@@ -137,12 +136,10 @@ PUBLIC int showinfo ARGS4(
 
     if (!LYRestricted) {
 #ifdef HAVE_CFG_DEFS_H
-	fprintf(fp0, " - <a href=\"%s\">%s</a>\n",
-	    lynx_compile_opts(),
-	    COMPILE_OPT_SEGMENT);
+	fprintf(fp0, " - <a href=\"LYNXCOMPILEOPTS:\">%s</a>\n",
+		COMPILE_OPT_SEGMENT);
 #else
-	fprintf(fp0, " - <a href=\"%s\">%s lynx.cfg</a>\n",
-		lynx_cfg_infopage(),
+	fprintf(fp0, " - <a href=\"LYNXCFG:\">%s lynx.cfg</a>\n",
 		YOUR_SEGMENT);
 #endif
     }

@@ -366,6 +366,7 @@ PRIVATE HTStyleSheet sheet = { "default.style",
 
 PRIVATE HTStyleSheet *result = NULL;
 
+#ifdef LY_FIND_LEAKS
 PRIVATE void FreeDefaultStyle NOARGS
 {
     HTStyle * style;
@@ -375,6 +376,7 @@ PRIVATE void FreeDefaultStyle NOARGS
     }
     FREE(result);
 }
+#endif /* LY_FIND_LEAKS */
 
 PUBLIC HTStyleSheet * DefaultStyle NOARGS
 {

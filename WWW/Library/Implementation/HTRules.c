@@ -24,9 +24,8 @@
 #include <HTRules.h>
 
 #include <HTFile.h>
-#include <HTAAServ.h>	/* Access Authorization */
-
 #include <LYLeaks.h>
+#include <HTAAProt.h>
 
 #define LINE_LENGTH 256
 

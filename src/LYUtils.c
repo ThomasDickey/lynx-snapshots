@@ -15,14 +15,11 @@
 #include <LYCharSets.h>
 #include <LYCharUtils.h>
 #include <LYMainLoop.h>
+#include <LYKeymap.h>
 
 #ifdef DJGPP_KEYHANDLER
 #include <bios.h>
 #endif /* DJGPP_KEYHANDLER */
-
-#ifdef DISP_PARTIAL
-#include <LYKeymap.h>
-#endif /* DISP_PARTIAL */
 
 #ifdef VMS
 #include <descrip.h>
@@ -91,11 +88,7 @@ extern int BSDselect PARAMS((int nfds, fd_set * readfds, fd_set * writefds,
 #endif /* __FreeBSD__ || __bsdi__ */
 #endif /* !UTMP_FILE */
 
-#ifdef VMS
-#define COPY_COMMAND "copy/nolog/noconf %s %s"
-#else
 #define COPY_COMMAND "%s %s %s"
-#endif /* VMS */
 
 extern HTkcode kanji_code;
 extern BOOLEAN LYHaveCJKCharacterSet;
@@ -111,7 +104,7 @@ PUBLIC	HTList * sug_filenames = NULL;		/* Suggested filenames	 */
 PUBLIC void highlight ARGS3(
 	int,		flag,
 	int,		cur,
-	char *, 	target)
+	char *,		target)
 {
     char buffer[200];
     int i;
@@ -125,7 +118,10 @@ PUBLIC void highlight ARGS3(
     BOOL TargetEmphasisON = FALSE;
 #endif
     BOOL utf_flag = (LYCharSet_UC[current_char_set].enc == UCT_ENC_UTF8);
-
+#if defined(USE_COLOR_STYLE) && !defined(NO_HILIT_FIX)
+    BOOL hl2_drawn=FALSE;	/* whether links[cur].hightext2 is already drawn
+				   properly */
+#endif
     tmp[0] = tmp[1] = tmp[2] = '\0';
 
     /*
@@ -138,6 +134,11 @@ PUBLIC void highlight ARGS3(
 	cur = 0;
 
     if (nlinks > 0) {
+#if  defined(USE_COLOR_STYLE) && !defined(NO_HILIT_FIX)
+	if (flag == ON || links[cur].type == WWW_FORM_LINK_TYPE)
+#endif
+	{
+
 #ifdef USE_COLOR_STYLE
 #define LXP (links[cur].lx)
 #define LYP (links[cur].ly)
@@ -179,6 +180,8 @@ PUBLIC void highlight ARGS3(
 	    LynxChangeStyle(s, STACK_ON, 0);
 	}
 #endif
+	}
+
 
 	if (links[cur].type == WWW_FORM_LINK_TYPE) {
 	    int len;
@@ -196,6 +199,13 @@ PUBLIC void highlight ARGS3(
 		addch('_');
 
 	} else {
+#if defined(USE_COLOR_STYLE) && !defined(NO_HILIT_FIX)
+	    if (flag == OFF) {
+		hl2_drawn = TRUE;
+		redraw_lines_of_link(cur);
+	    } else
+#endif
+	    {
 	    /*
 	     *	Copy into the buffer only what will fit
 	     *	within the width of the screen.
@@ -207,12 +217,17 @@ PUBLIC void highlight ARGS3(
 			  ((LYcols - 1) - links[cur].lx),
 			  utf_flag);
 	    addstr(buffer);
+	    }
 	}
 
 	/*
 	 *  Display a second line as well.
 	 */
-	if (links[cur].hightext2 && links[cur].ly < display_lines) {
+	if ( links[cur].hightext2 && links[cur].ly < display_lines
+#if defined(USE_COLOR_STYLE) && !defined(NO_HILIT_FIX)
+	  && hl2_drawn == FALSE
+#endif
+	) {
 	    lynx_stop_link_color (flag == ON, links[cur].inUnderline);
 	    move((links[cur].ly + 1), links[cur].hightext2_offset);
 #ifndef USE_COLOR_STYLE
@@ -237,6 +252,9 @@ PUBLIC void highlight ARGS3(
 		 }
 	    }
 	}
+#if defined(USE_COLOR_STYLE) && !defined(NO_HILIT_FIX)
+	if ( hl2_drawn == FALSE )
+#endif
 	lynx_stop_link_color (flag == ON, links[cur].inUnderline);
 
 #if defined(FANCY_CURSES) || defined(USE_SLANG)
@@ -1754,7 +1772,7 @@ PUBLIC void free_and_clear ARGS1(
  *  or tabs to one space. - FM
  */
 PUBLIC void convert_to_spaces ARGS2(
-	char *, 	string,
+	char *,		string,
 	BOOL,		condense)
 {
     char *s = string;
@@ -1796,7 +1814,7 @@ PUBLIC void convert_to_spaces ARGS2(
  *  Strip trailing slashes from directory paths.
  */
 PUBLIC char * strip_trailing_slash ARGS1(
-	char *, 	dirname)
+	char *,		dirname)
 {
     int i;
 
@@ -1966,7 +1984,7 @@ PUBLIC void statusline ARGS1(
 }
 
 PRIVATE char *novice_lines ARGS1(
-    	int,		lineno)
+	int,		lineno)
 {
     switch (lineno) {
     case 0:
@@ -2223,38 +2241,38 @@ PUBLIC int HTCheckForInterrupt NOARGS
     default :
 
 #ifdef DISP_PARTIAL
-        if (display_partial && (NumOfLines_partial > 2))
-        /* OK, we got several lines from new document and want to scroll... */
-        {
+	if (display_partial && (NumOfLines_partial > 2))
+	/* OK, we got several lines from new document and want to scroll... */
+	{
 	    int res;
 	    switch (keymap[c+1])
 	    {
 	    case LYK_FASTBACKW_LINK :
-	        if (Newline_partial <= (display_lines)+1) {
+		if (Newline_partial <= (display_lines)+1) {
 		    Newline_partial -= display_lines ;
-	        } else if ((res =
+		} else if ((res =
 			    HTGetLinkOrFieldStart(-1,
-					          &Newline_partial, NULL,
-					          -1, TRUE)) == LINK_LINE_FOUND) {
+						  &Newline_partial, NULL,
+						  -1, TRUE)) == LINK_LINE_FOUND) {
 		    Newline_partial++;
-	        } else if (res == LINK_DO_ARROWUP) {
+		} else if (res == LINK_DO_ARROWUP) {
 		    Newline_partial -= display_lines ;
-	        }
-	        break;
+		}
+		break;
 	    case LYK_FASTFORW_LINK :
-	        if (HText_canScrollDown()) {
+		if (HText_canScrollDown()) {
 		    /* This is not an exact science... - kw */
 		    if ((res =
-		        HTGetLinkOrFieldStart(HText_LinksInLines(HTMainText,
-							         Newline_partial,
-							         display_lines)
+			HTGetLinkOrFieldStart(HText_LinksInLines(HTMainText,
+								 Newline_partial,
+								 display_lines)
 					      - 1,
 					      &Newline_partial, NULL,
 					      1, TRUE)) == LINK_LINE_FOUND) {
-		        Newline_partial++;
+			Newline_partial++;
 		    }
-	        }
-	        break;
+		}
+		break;
 	    case LYK_PREV_PAGE :
 		if (Newline_partial > 1)
 		    Newline_partial -= display_lines ;
@@ -2291,7 +2309,7 @@ PUBLIC int HTCheckForInterrupt NOARGS
 	    case LYK_REFRESH :
 		break ;
 	    default :
-	        /** Other or no keystrokes **/
+		/** Other or no keystrokes **/
 		return ((int)FALSE) ;
 	    } /* end switch */
 	    if (Newline_partial < 1)
@@ -2310,7 +2328,7 @@ PUBLIC int HTCheckForInterrupt NOARGS
  *  Return YES only if we're certain it's a local file. - FM
  */
 PUBLIC BOOLEAN LYisLocalFile ARGS1(
-	char *, 	filename)
+	char *,		filename)
 {
     char *host = NULL;
     char *acc_method = NULL;
@@ -2353,7 +2371,7 @@ PUBLIC BOOLEAN LYisLocalFile ARGS1(
  *  Return YES only if we're certain it's the local host. - FM
  */
 PUBLIC BOOLEAN LYisLocalHost ARGS1(
-	char *, 	filename)
+	char *,		filename)
 {
     char *host = NULL;
     char *cp;
@@ -2411,7 +2429,7 @@ PUBLIC void LYLocalhostAliases_free NOARGS
  *  Utility for listing hosts to be treated as local aliases. - FM
  */
 PUBLIC void LYAddLocalhostAlias ARGS1(
-	char *, 	alias)
+	char *,		alias)
 {
     char *LocalAlias;
 
@@ -2436,7 +2454,7 @@ PUBLIC void LYAddLocalhostAlias ARGS1(
  *  Return YES only if we've listed the host as a local alias. - FM
  */
 PUBLIC BOOLEAN LYisLocalAlias ARGS1(
-	char *, 	filename)
+	char *,		filename)
 {
     char *host = NULL;
     char *alias;
@@ -2483,7 +2501,7 @@ PUBLIC BOOLEAN LYisLocalAlias ARGS1(
 **  0 (not a URL). - FM
 */
 PUBLIC int LYCheckForProxyURL ARGS1(
-	char *, 	filename)
+	char *,		filename)
 {
     char *cp = filename;
     char *cp1;
@@ -2537,9 +2555,9 @@ PUBLIC int LYCheckForProxyURL ARGS1(
  * matches (and return true in that case).
  */
 static BOOLEAN compare_type ARGS3(
-	char *, 	tst,
-	CONST char *, 	cmp,
-	size_t, 	len)
+	char *,		tst,
+	CONST char *,	cmp,
+	size_t,		len)
 {
     if (!strncasecomp(tst, cmp, len)) {
 	if (strncmp(tst, cmp, len)) {
@@ -2565,7 +2583,7 @@ static BOOLEAN compare_type ARGS3(
 **  is present but the type is not recognized.
 */
 PUBLIC int is_url ARGS1(
-	char *, 	filename)
+	char *,		filename)
 {
     char *cp = filename;
     char *cp1;
@@ -2678,6 +2696,18 @@ PUBLIC int is_url ARGS1(
 	 *  Special Internal Lynx type.
 	 */
 	return(LYNXOPTIONS_URL_TYPE);
+
+    } else if (compare_type(cp, "LYNXCFG:", 8)) {
+	/*
+	 *  Special Internal Lynx type.
+	 */
+	return(LYNXCFG_URL_TYPE);
+
+    } else if (compare_type(cp, "LYNXCOMPILEOPTS:", 16)) {
+	/*
+	 *  Special Internal Lynx type.
+	 */
+	return(LYNXCOMPILE_OPTS_URL_TYPE);
 
     } else if (compare_type(cp, "LYNXDOWNLOAD:", 13)) {
 	/*
@@ -2829,7 +2859,7 @@ PUBLIC BOOLEAN LYCanDoHEAD ARGS1(
  *  Remove backslashes from any string.
  */
 PUBLIC void remove_backslashes ARGS1(
-	char *, 	buf)
+	char *,		buf)
 {
     char *cp;
 
@@ -3019,7 +3049,7 @@ PUBLIC void HTSugFilenames_free NOARGS
  *  repeated filenames the most current in the list. - FM
  */
 PUBLIC void HTAddSugFilename ARGS1(
-	char *, 	fname)
+	char *,		fname)
 {
     char *new;
     char *old;
@@ -3057,7 +3087,7 @@ PUBLIC void HTAddSugFilename ARGS1(
  *	Upgraded for use with Lynx2.2 - FM 17-Jan-1994
  */
 PUBLIC void change_sug_filename ARGS1(
-	char *, 	fname)
+	char *,		fname)
 {
     char *temp, *cp, *cp1, *end;
 #ifdef VMS
@@ -3340,8 +3370,8 @@ PUBLIC void change_sug_filename ARGS1(
  * Construct a temporary-filename.  Assumes result is LY_MAXPATH chars long.
  */
 PRIVATE int fmt_tempname ARGS3(
-	char *, 	result,
-	CONST char *, 	prefix,
+	char *,		result,
+	CONST char *,	prefix,
 	CONST char *,	suffix)
 {
     static unsigned counter;
@@ -3521,7 +3551,7 @@ PRIVATE BOOLEAN *restrict_flag[] = {
        (BOOLEAN *) 0  };
 
 PUBLIC void parse_restrictions ARGS1(
-	CONST char *, 	s)
+	CONST char *,	s)
 {
       CONST char *p;
       CONST char *word;
@@ -3752,7 +3782,7 @@ PUBLIC void LYCheckMail NOARGS
 */
 PUBLIC void LYEnsureAbsoluteURL ARGS2(
 	char **,	href,
-	CONST char *, 	name)
+	CONST char *,	name)
 {
     char *temp = NULL;
 
@@ -4062,7 +4092,7 @@ have_VMS_URL:
 		if ((fragment = strchr(cp, '#')) != NULL)
 		    *fragment = '\0';	/* keep as pointer into cp string */
 		HTUnEscape(cp);   /* unescape given path without fragment */
-		StrAllocCat(temp2, cp); 	/* append to current dir  */
+		StrAllocCat(temp2, cp);		/* append to current dir  */
 		StrAllocCopy(cp2, temp2);	/* keep a copy in cp2	  */
 		LYTrimRelFromAbsPath(temp2);
 
@@ -4249,8 +4279,8 @@ have_VMS_URL:
  */
 PUBLIC BOOLEAN LYExpandHostForURL ARGS3(
 	char **,	AllocatedString,
-	char *, 	prefix_list,
-	char *, 	suffix_list)
+	char *,		prefix_list,
+	char *,		suffix_list)
 {
     char DomainPrefix[80], *StartP, *EndP;
     char DomainSuffix[80], *StartS, *EndS;
@@ -4404,7 +4434,7 @@ PUBLIC BOOLEAN LYExpandHostForURL ARGS3(
     }
     EndP = StartP;
     while (*EndP && !WHITE(*EndP) && *EndP != ',') {
-	EndP++; 	/* Find separator */
+	EndP++;		/* Find separator */
     }
     LYstrncpy(DomainPrefix, StartP, (EndP - StartP));
 
@@ -4563,7 +4593,7 @@ PUBLIC BOOLEAN LYExpandHostForURL ARGS3(
   */
 PUBLIC BOOLEAN LYAddSchemeForURL ARGS2(
 	char **,	AllocatedString,
-	char *, 	default_scheme)
+	char *,		default_scheme)
 {
     char *Str = NULL;
     BOOLEAN GotScheme = FALSE;
@@ -4666,7 +4696,7 @@ PUBLIC BOOLEAN LYAddSchemeForURL ARGS2(
  *  links when a terminal slash is present. - FM
  */
 PUBLIC void LYTrimRelFromAbsPath ARGS1(
-	char *, 	path)
+	char *,		path)
 {
     char *cp;
     int i;
@@ -4742,7 +4772,7 @@ PUBLIC void LYTrimRelFromAbsPath ARGS1(
  *  kind of thing seriously, someday. - FM
  */
 PUBLIC void LYDoCSI ARGS3(
-	char *, 	url,
+	char *,		url,
 	CONST char *,	comment,
 	char **,	csi)
 {
@@ -4770,8 +4800,8 @@ PUBLIC void LYDoCSI ARGS3(
  *	Define VMS logicals in the process table.
  */
 PUBLIC void Define_VMSLogical ARGS2(
-	char *, 	LogicalName,
-	char *, 	LogicalValue)
+	char *,		LogicalName,
+	char *,		LogicalValue)
 {
     $DESCRIPTOR(lname, "");
     $DESCRIPTOR(lvalue, "");
@@ -4795,10 +4825,12 @@ PUBLIC void Define_VMSLogical ARGS2(
 }
 #endif /* VMS */
 
+#ifdef LY_FIND_LEAKS
 PRIVATE void LYHomeDir_free NOARGS
 {
     FREE(HomeDir);
 }
+#endif /* LY_FIND_LEAKS */
 
 PUBLIC CONST char * Home_Dir NOARGS
 {
@@ -4906,8 +4938,8 @@ PUBLIC char *LYPathLeaf ARGS1(char *, pathname)
  *  with "./", that is prefixed to make the situation clear. - FM
  */
 PUBLIC BOOLEAN LYPathOffHomeOK ARGS2(
-	char *, 	fbuffer,
-	size_t, 	fbuffer_size)
+	char *,		fbuffer,
+	size_t,		fbuffer_size)
 {
     char *file = NULL;
     char *cp, *cp1;
@@ -5082,9 +5114,9 @@ PUBLIC BOOLEAN LYPathOffHomeOK ARGS2(
  *  and filename are converted to VMS syntax. - FM
  */
 PUBLIC void LYAddPathToHome ARGS3(
-	char *, 	fbuffer,
-	size_t, 	fbuffer_size,
-	char *, 	fname)
+	char *,		fbuffer,
+	size_t,		fbuffer_size,
+	char *,		fname)
 {
     char *home = NULL;
     char *file = fname;
@@ -5193,7 +5225,7 @@ PUBLIC void LYAddPathToHome ARGS3(
  *  when parsing the expected patterns, we still return 0. - FM
  */
 PUBLIC time_t LYmktime ARGS2(
-	char *, 	string,
+	char *,		string,
 	BOOL,		absolute)
 {
     char *s;
@@ -5723,8 +5755,8 @@ PUBLIC void LYRelaxFilePermissions ARGS1(CONST char *, name)
  * Check if the given anchor has an associated file-cache.
  */
 PUBLIC BOOLEAN LYCachedTemp ARGS2(
-	char *, 	result,
-	char **, 	cached)
+	char *,		result,
+	char **,	cached)
 {
     FILE *fp;
 
@@ -5759,7 +5791,7 @@ static LY_TEMP *ly_temp;
  * The mode can be one of: "w", "a", "wb".
  */
 PUBLIC FILE *LYOpenTemp ARGS3(
-	char *, 	result,
+	char *,		result,
 	CONST char *,	suffix,
 	CONST char *,	mode)
 {
@@ -5770,7 +5802,7 @@ PUBLIC FILE *LYOpenTemp ARGS3(
 
     CTRACE(tfp, "LYOpenTemp(,%s,%s)\n", suffix, mode);
     if (result == 0)
-    	return 0;
+	return 0;
 
     while (*mode != '\0') {
 	switch (*mode++) {
@@ -5829,7 +5861,7 @@ PUBLIC FILE *LYOpenTemp ARGS3(
  * Reopen a temporary file
  */
 PUBLIC FILE *LYReopenTemp ARGS1(
-	char *, 	name)
+	char *,		name)
 {
     LY_TEMP *p;
     FILE *fp = 0;
@@ -5849,7 +5881,7 @@ PUBLIC FILE *LYReopenTemp ARGS1(
  * renaming.
  */
 PUBLIC FILE *LYOpenScratch ARGS2(
-	char *, 	result,
+	char *,		result,
 	CONST char *,	prefix)
 {
     FILE *fp;
@@ -5983,7 +6015,7 @@ PUBLIC  char * wwwName ARGS1(
  * allow pipes if the user can spawn shell commands.
  */
 PUBLIC BOOLEAN LYValidateFilename ARGS2(
-    	char *,		result,
+	char *,		result,
 	char *,		given)
 {
     char *cp;
@@ -6068,7 +6100,7 @@ PUBLIC BOOLEAN LYValidateFilename ARGS2(
  *	3   (cancel)
  */
 PUBLIC int LYValidateOutput ARGS1(
-    	char *,		filename)
+	char *,		filename)
 {
     FILE *fp;
     int c;
@@ -6094,25 +6126,14 @@ PUBLIC int LYValidateOutput ARGS1(
     if ((fp = fopen(filename, "r")) != NULL) {
 	fclose(fp);
 #ifdef VMS
-	_statusline(FILE_EXISTS_HPROMPT);
+	c = HTConfirm(FILE_EXISTS_HPROMPT);
 #else
-	_statusline(FILE_EXISTS_OPROMPT);
+	c = HTConfirm(FILE_EXISTS_OPROMPT);
 #endif /* VMS */
-	c = 0;
-	while (TOUPPER(c)!='Y' && TOUPPER(c)!='N' &&
-	       TOUPPER(c)!='A' && c != 7 && c != 3)
-	    c = LYgetch();
-#ifdef VMS
-	if (HadVMSInterrupt) {
-	    HadVMSInterrupt = FALSE;
-	    c = 3;
-	}
-#endif /* VMS */
-	if (c == 7 || c == 3) { /* Control-G or Control-C */
+	if (HTLastConfirmCancelled()) {
 	    HTInfoMsg(SAVE_REQUEST_CANCELLED);
 	    return 3;
-	}
-	if (TOUPPER(c) == 'N') {
+	} else if (c == NO) {
 	    return 'N';
 	}
     }
@@ -6432,7 +6453,7 @@ PUBLIC char *LYgetXDisplay NOARGS
 {
     char *cp;
     if ((cp = getenv(DISPLAY)) == NULL || *cp == '\0')
- 	cp = 0;
+	cp = 0;
     return cp;
 }
 

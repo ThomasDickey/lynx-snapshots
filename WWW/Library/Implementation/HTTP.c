@@ -1687,6 +1687,20 @@ Cookie2_continuation:
   } /* scope of fields */
 
   /*
+  **  The user may have pressed the 'z'ap key during the pause caused
+  **  by one of the HTAlerts above if the server reported an error,
+  **  to skip loading of the error response page.  Checking here before
+  **  setting up the stream stack and feeding it data avoids doing
+  **  unnecessary work, it also can avoid unnecessarily pushing a
+  **  loaded document out of the cache to make room for the unwanted
+  **  error page. - kw
+  */
+  if (HTCheckForInterrupt()) {
+      HTTP_NETCLOSE(s, handle);
+      status = HT_INTERRUPTED;
+      goto clean_up;
+  }
+  /*
   **  Set up the stream stack to handle the body of the message.
   */
   if (do_head || keep_mime_headers) {
