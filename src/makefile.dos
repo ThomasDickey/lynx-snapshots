@@ -22,9 +22,7 @@ DIRED_DEFS = \
 
 # Use this option to enable optional and *experimental* color style.
 #ENABLE_COLOR_STYLE = \
- -DUSE_COLOR_STYLE \
- -DUSE_HASH \
- -DLINKEDSTYLES
+ -DUSE_COLOR_STYLE
 
 CC = gcc
 

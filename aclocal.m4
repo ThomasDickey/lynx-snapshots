@@ -2825,7 +2825,7 @@ if test "$cf_cv_termlib" = none; then
 fi
 ])
 if test "$cf_cv_termlib" = none; then
-	AC_ERROR([Can't find -ltermlib, -lcurses, or -ltermcap])
+	AC_MSG_WARN([Cannot find -ltermlib, -lcurses, or -ltermcap])
 fi
 ])])dnl
 dnl ---------------------------------------------------------------------------

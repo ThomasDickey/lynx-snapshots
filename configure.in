@@ -109,6 +109,14 @@ CF_ARG_DISABLE(trace,
 AC_MSG_RESULT($with_trace)
 test $with_trace = no && AC_DEFINE(NO_LYNX_TRACE)
 
+AC_MSG_CHECKING(if you want verbose trace code)
+CF_ARG_ENABLE(vertrace,
+	[  --enable-vertrace       verbose trace code],
+	[with_vertrace=yes],
+	[with_vertrace=no])
+AC_MSG_RESULT($with_vertrace)
+test $with_vertrace = yes && AC_DEFINE(LY_TRACELINE,__LINE__)
+
 if test -n "$GCC"
 then
 AC_MSG_CHECKING(if you want to turn on gcc warnings)

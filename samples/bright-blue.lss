@@ -1,0 +1,57 @@
+# From: Ilya Zakharevich <ilya@math.ohio-state.edu>
+#
+# Colors: black, red, green, brown, blue, magenta, cyan,
+# lightgray, gray, brightred, brightgreen, yellow, brightblue,
+# brightmagenta, brightcyan, white.
+#
+# On some terminals combination of background and foreground of different
+# brightness is not supported.
+#
+# Normal type styles correspond to HTML tags.
+#
+# default should be the *last* line
+#
+# The next line (beginning with "h1") means:  use bold if mono, otherwise
+# yellow on black (use 'default' for <defaultbackground>/<defaultforeground>)
+default:normal:brightcyan:blue
+# match "link":
+input:normal:green
+input.type.submit:normal:blue:black
+textarea:normal:white:cyan
+# type-less input is the same as type=text (similar to textarea)
+input.type.:normal:white:cyan
+input.type.text:normal:white:cyan
+edit.current:normal:yellow:white
+edit.active:normal:black:white
+edit.active.marked:normal:white:black
+edit.prompt:normal:green:cyan
+edit.prompt.marked:normal:black:white
+edit.active.arrow:normal:red:white
+edit.prompt.arrow:normal:yellow:gray
+edit.active.pad:normal:red:white
+edit.prompt.pad:normal:white:black
+option:normal:red:black
+#alink:normal:red:green
+scroll.arrow:bold:white:default
+scroll.noarrow:normal:black:default
+scroll.bar:bold:white
+#scroll.back:reverse:green:red
+status:reverse:yellow:black
+h1:bold:yellow:black
+em:bold:white
+em.a:reverse:black:blue
+em.b:reverse:white:black
+font.letter:normal:default:black
+link.blue:bold:white:brightblue
+link.blue.prev:bold:yellow:brightblue
+title:normal:magenta:black
+i:bold:white
+table:normal:white
+blockquote:normal:white
+li.blue:bold:blue:black
+link.blue.next:bold:blue:black
+normal:normal:default:default
+INCLUDE:lynx.lss
+default:normal:brightcyan:blue
+#default:normal:cyan:blue
+scroll.noarrow:normal:black:default

@@ -805,7 +805,7 @@ PRIVATE void send_file_to_printer ARGS4(
     char my_file[LY_MAXPATH];
     char my_temp[LY_MAXPATH];
     int FnameTotal, FnameNum = -1;
-    lynx_printer_item_type *cur_printer;
+    lynx_list_item_type *cur_printer;
 
     outfile_fp = LYOpenTemp(my_temp,
 			    (HTisDocumentSource())
@@ -1115,7 +1115,7 @@ PUBLIC int printfile ARGS1(
     /*
      *	Get the number of lines in the file.
      */
-    if ((cp = (char *)strstr(link_info, "lines=")) != NULL) {
+    if ((cp = strstr(link_info, "lines=")) != NULL) {
 	/*
 	 *  Terminate prev string here.
 	 */
@@ -1143,12 +1143,12 @@ PUBLIC int printfile ARGS1(
     } else if (strstr(link_info, "PRINTER")) {
 	type = PRINTER;
 
-	if ((cp = (char *)strstr(link_info, "number=")) != NULL) {
+	if ((cp = strstr(link_info, "number=")) != NULL) {
 	    /* number of characters in "number=" */
 	    cp += 7;
 	    printer_number = atoi(cp);
 	}
-	if ((cp = (char *)strstr(link_info, "pagelen=")) != NULL) {
+	if ((cp = strstr(link_info, "pagelen=")) != NULL) {
 	    /* number of characters in "pagelen=" */
 	    cp += 8;
 	    pagelen = atoi(cp);
@@ -1271,7 +1271,7 @@ PUBLIC int print_options ARGS3(
     int count;
     int pages;
     FILE *fp0;
-    lynx_printer_item_type *cur_printer;
+    lynx_list_item_type *cur_printer;
 
     if (LYReuseTempfiles) {
 	fp0 = LYOpenTempRewrite(my_temp, HTML_SUFFIX, "w");
@@ -1464,7 +1464,7 @@ check_recall:
      *   "invalid pointer" reported in the Lynx.leaks file (if compiled
      *   with  --enable-find-leaks  turned on.  Dumb.]
      */
-    if ((fn = (char *) calloc (1, (strlen (tbuf) + 1))) == NULL)
+    if ((fn = typecallocn(char, strlen (tbuf) + 1)) == NULL)
 	outofmem(__FILE__, "GetFileName");
     return (strcpy (fn, tbuf));
 

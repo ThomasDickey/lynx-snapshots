@@ -472,7 +472,7 @@ PUBLIC void HTSetSuffix5 ARGS5(
 		break;
 	}
 	if (!suff) { /* Not found -- create a new node */
-	    suff = (HTSuffix *) calloc(1, sizeof(HTSuffix));
+	    suff = typecalloc(HTSuffix);
 	    if (suff == NULL)
 		outofmem(__FILE__, "HTSetSuffix");
 
@@ -1301,7 +1301,7 @@ PUBLIC HTStream * HTFileSaveStream ARGS1(
     CONST char * addr = HTAnchor_address((HTAnchor*)anchor);
     char *  localname = HTLocalName(addr);
 
-    FILE* fp = fopen(localname, "wb");
+    FILE* fp = fopen(localname, BIN_W);
     if (!fp)
 	return NULL;
 
@@ -1604,7 +1604,7 @@ PRIVATE void do_readme ARGS2(HTStructured *, target, CONST char *, localname)
 
     HTSprintf0(&readme_file_name, "%s/%s", localname, HT_DIR_README_FILE);
 
-    fp = fopen(readme_file_name,  "r");
+    fp = fopen(readme_file_name,  TXT_R);
 
     if (fp) {
 	HTStructuredClass targetClass;
@@ -1767,13 +1767,14 @@ PRIVATE int print_local_dir ARGS5(
 
 	    StrAllocCat(tmpfilename, dirbuf->d_name);
 	    stat(tmpfilename, &file_info);
-	    if (S_ISDIR(file_info.st_mode))
 #ifndef DIRED_SUPPORT
+	    if (S_ISDIR(file_info.st_mode))
 		HTSprintf0(&dirname, "D%s",dirbuf->d_name);
 	    else
 		HTSprintf0(&dirname, "F%s",dirbuf->d_name);
 		/* D & F to have first directories, then files */
 #else
+	    if (S_ISDIR(file_info.st_mode))
 	    {
 		if (dir_list_style == MIXED_STYLE)
 		    HTSprintf0(&dirname, " %s/", dirbuf->d_name);
@@ -2024,8 +2025,9 @@ PUBLIC int HTStat ARGS2(
      * directory on Windows.
      */
     if (access(temp_name, 0) == 0) {
-	if (stat(temp_name, data) == -1) data->st_mode = S_IFDIR;
-	    result = 0;
+	if (stat(temp_name, data) == -1)
+	    data->st_mode = S_IFDIR;
+	result = 0;
     }
 #else
     result = stat(temp_name, data);
@@ -2092,15 +2094,15 @@ PUBLIC int HTLoadFile ARGS4(
 	strcmp(nodename, HTHostName()) != 0
 #endif /* VMS */
     )) {
+	status = -1;
 	FREE(newname);
 	FREE(filename);
 	FREE(nodename);
 	FREE(acc_method);
 #ifndef DISABLE_FTP
-	return HTFTPLoad(addr, anchor, format_out, sink);
-#else
-	return -1;
+	status = HTFTPLoad(addr, anchor, format_out, sink);
 #endif /* DISABLE_FTP */
+	return status;
     } else {
 	FREE(newname);
 	FREE(acc_method);
@@ -2182,7 +2184,7 @@ PUBLIC int HTLoadFile ARGS4(
 	FILE * fp;
 	char * vmsname = strchr(filename + 1, '/') ?
 		    HTVMS_name(nodename, filename) : filename + 1;
-	fp = fopen(vmsname, "r", "shr=put", "shr=upd");
+	fp = fopen(vmsname, TXT_R, "shr=put", "shr=upd");
 
 	/*
 	**  If the file wasn't VMS syntax, then perhaps it is Ultrix.
@@ -2191,7 +2193,7 @@ PUBLIC int HTLoadFile ARGS4(
 	    char * ultrixname = 0;
 	    CTRACE((tfp, "HTLoadFile: Can't open as %s\n", vmsname));
 	    HTSprintf0(&ultrixname, "%s::\"%s\"", nodename, filename);
-	    fp = fopen(ultrixname, "r", "shr=put", "shr=upd");
+	    fp = fopen(ultrixname, TXT_R, "shr=put", "shr=upd");
 	    if (!fp) {
 		CTRACE((tfp, "HTLoadFile: Can't open as %s\n",
 			    ultrixname));
@@ -2231,7 +2233,7 @@ PUBLIC int HTLoadFile ARGS4(
 		    fclose(fp);
 		    if (semicolon != NULL)
 			*semicolon = ';';
-		    gzfp = gzopen(vmsname, "rb");
+		    gzfp = gzopen(vmsname, BIN_R);
 
 		    CTRACE((tfp, "HTLoadFile: gzopen of `%s' gives %p\n",
 				vmsname, (void*)gzfp));
@@ -2271,7 +2273,7 @@ PUBLIC int HTLoadFile ARGS4(
 			fclose(fp);
 			if (semicolon != NULL)
 			    *semicolon = ';';
-			gzfp = gzopen(vmsname, "rb");
+			gzfp = gzopen(vmsname, BIN_R);
 
 			CTRACE((tfp, "HTLoadFile: gzopen of `%s' gives %p\n",
 				    vmsname, (void*)gzfp));
@@ -2560,12 +2562,8 @@ PUBLIC int HTLoadFile ARGS4(
 */
 #endif /* HAVE_READDIR */
 	{
-#  if defined(__EMX__) || defined(WIN_EX)
 	    int bin = HTCompressFileType(localname, ".", &dot) != cftNone;
-	    FILE * fp = fopen(localname, (bin ? "rb" : "r"));
-#  else	/* !( defined __EMX__ ) */
-	    FILE * fp = fopen(localname, "r");
-#  endif
+	    FILE * fp = fopen(localname, (bin ? BIN_R : TXT_R));
 
 	    CTRACE((tfp, "HTLoadFile: Opening `%s' gives %p\n",
 				 localname, (void*)fp));
@@ -2591,7 +2589,7 @@ PUBLIC int HTLoadFile ARGS4(
 			(!strcmp(HTAtom_name(myEncoding), "gzip") ||
 			 !strcmp(HTAtom_name(myEncoding), "x-gzip"))) {
 			fclose(fp);
-			gzfp = gzopen(localname, "rb");
+			gzfp = gzopen(localname, BIN_R);
 
 			CTRACE((tfp, "HTLoadFile: gzopen of `%s' gives %p\n",
 				    localname, (void*)gzfp));
@@ -2628,7 +2626,7 @@ PUBLIC int HTLoadFile ARGS4(
 #ifdef USE_ZLIB
 			if (strcmp(format_out->name, "www/download") != 0) {
 			    fclose(fp);
-			    gzfp = gzopen(localname, "rb");
+			    gzfp = gzopen(localname, BIN_R);
 
 			    CTRACE((tfp, "HTLoadFile: gzopen of `%s' gives %p\n",
 					localname, (void*)gzfp));
@@ -2707,18 +2705,17 @@ PUBLIC int HTLoadFile ARGS4(
 	if (strcmp(nodename, HTHostName()) != 0)
 #endif /* VMS */
 	{
+	    status = -1;
 	    FREE(nodename);
-	    if (!strncmp(addr, "file://localhost", 16)) {
-		return -1;  /* never go to ftp site when URL
-			     * is file://localhost
-			     */
-	    } else {
+	    if (strncmp(addr, "file://localhost", 16)) {
+		/* never go to ftp site when URL
+		 * is file://localhost
+		 */
 #ifndef DISABLE_FTP
-		return HTFTPLoad(addr, anchor, format_out, sink);
-#else
-		return -1;
+		status = HTFTPLoad(addr, anchor, format_out, sink);
 #endif /* DISABLE_FTP */
 	    }
+	    return status;
 	}
 	FREE(nodename);
     }

@@ -2438,7 +2438,7 @@ PRIVATE PostPair * break_data ARGS1(
 
     CTRACE((tfp, "break_data %s\n", data));
 
-    q = calloc(sizeof(PostPair), 1);
+    q = typecalloc(PostPair);
     if (q==NULL)
 	outofmem(__FILE__, "break_data(calloc)");
 

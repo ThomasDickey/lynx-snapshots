@@ -13,7 +13,7 @@ ETC_LIB = lib
 
 # Uncomment the CS_DEFS and CS_OBJS lines if you wish to build the color-style
 # configuration.
-#CS_DEFS = /D "CHAR_BIT=8" /D "USE_HASH" /D "USE_COLOR_STYLE" /D "LINKEDSTYLES"
+#CS_DEFS = /D "CHAR_BIT=8" /D "USE_COLOR_STYLE"
 #CS_OBJS = "LYHash.obj" "LYStyle.obj"
 
 # Uncomment SOCK_DEFS if you wish to build with winsock2.

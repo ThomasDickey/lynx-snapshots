@@ -13,7 +13,7 @@
 */
 PUBLIC HTChunk * HTChunkCreate ARGS1 (int,grow)
 {
-    HTChunk * ch = (HTChunk *) calloc(1, sizeof(HTChunk));
+    HTChunk * ch = typecalloc(HTChunk);
     if (ch == NULL)
 	outofmem(__FILE__, "creation of chunk");
 
@@ -25,7 +25,7 @@ PUBLIC HTChunk * HTChunkCreate ARGS1 (int,grow)
 }
 PUBLIC HTChunk * HTChunkCreateMayFail ARGS2 (int,grow, int,failok)
 {
-    HTChunk * ch = (HTChunk *) calloc(1, sizeof(HTChunk));
+    HTChunk * ch = typecalloc(HTChunk);
     if (ch == NULL) {
 	if (!failok) {
 	    outofmem(__FILE__, "creation of chunk");
@@ -46,7 +46,7 @@ PUBLIC HTChunk * HTChunkCreateMayFail ARGS2 (int,grow, int,failok)
 */
 PUBLIC HTChunk * HTChunkCreate2 ARGS2 (int,grow, size_t, needed)
 {
-    HTChunk * ch = (HTChunk *) calloc(1, sizeof(HTChunk));
+    HTChunk * ch = typecalloc(HTChunk);
     if (ch == NULL)
 	outofmem(__FILE__, "HTChunkCreate2");
 
@@ -56,7 +56,7 @@ PUBLIC HTChunk * HTChunkCreate2 ARGS2 (int,grow, size_t, needed)
 	    + ch->growby; /* Round up */
 	CTRACE((tfp, "HTChunkCreate2: requested %d, allocate %d\n",
 	       needed, ch->allocated));
-	ch->data = (char *)calloc(1, ch->allocated);
+	ch->data = typecallocn(char, ch->allocated);
 	if (!ch->data)
 	    outofmem(__FILE__, "HTChunkCreate2 data");
     }
@@ -97,7 +97,7 @@ PUBLIC void HTChunkPutc ARGS2 (HTChunk *,ch, char,c)
 	char *data;
 	ch->allocated = ch->allocated + ch->growby;
 	data = ch->data ? (char *)realloc(ch->data, ch->allocated)
-			: (char *)calloc(1, ch->allocated);
+			: typecallocn(char, ch->allocated);
 	if (data) {
 	    ch->data = data;
 	} else if (ch->failok) {
@@ -120,7 +120,7 @@ PUBLIC void HTChunkEnsure ARGS2 (HTChunk *,ch, int,needed)
     ch->allocated = needed-1 - ((needed-1) % ch->growby)
 			     + ch->growby; /* Round up */
     ch->data = ch->data ? (char *)realloc(ch->data, ch->allocated)
-			: (char *)calloc(1, ch->allocated);
+			: typecallocn(char, ch->allocated);
     if (ch->data == NULL)
 	outofmem(__FILE__, "HTChunkEnsure");
 }
@@ -134,7 +134,7 @@ PUBLIC void HTChunkPutb ARGS3 (HTChunk *,ch, CONST char *,b, int,l)
 	ch->allocated = needed-1 - ((needed-1) % ch->growby)
 	    + ch->growby; /* Round up */
 	data = ch->data ? (char *)realloc(ch->data, ch->allocated)
-			: (char *)calloc(1, ch->allocated);
+			: typecallocn(char, ch->allocated);
 	if (data) {
 	    ch->data = data;
 	} else if (ch->failok) {
@@ -157,7 +157,7 @@ PUBLIC void HTChunkPutUtf8Char ARGS2(
 {
     int utflen;
 
-    if (code < 128)
+    if (TOASCII(code) < 128)
 	utflen = 1;
     else if   (code <     0x800L) {
 	utflen = 2;
@@ -177,7 +177,7 @@ PUBLIC void HTChunkPutUtf8Char ARGS2(
 	int growby = (ch->growby >= utflen) ? ch->growby : utflen;
 	ch->allocated = ch->allocated + growby;
 	data = ch->data ? (char *)realloc(ch->data, ch->allocated)
-			: (char *)calloc(1, ch->allocated);
+			: typecallocn(char, ch->allocated);
 	if (data) {
 	    ch->data = data;
 	} else if (ch->failok) {

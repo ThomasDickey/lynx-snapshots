@@ -338,7 +338,7 @@ II. Compile instructions -- UNIX
   --enable-color-style			(define USE_COLOR_STYLE)
   	Use this option to enable optional and *experimental* color style.
 	This is implemented for curses (if it supports color), ncurses and
-	PDCurses, but not slang.  (Also defines USE_HASH, LINKEDSTYLES)
+	PDCurses, but not slang.
 
   --enable-debug			(The symbol DEBUG is always defined.)
         Use this option to compile-in support for debugging.
@@ -445,6 +445,10 @@ II. Compile instructions -- UNIX
 
   --enable-underlines			(define UNDERLINE_LINKS)
 	Use this option to underline links rather than using boldface.
+
+  --enable-vertrace			(define LY_TRACELINE)
+	Turn on code that prefixes trace output lines with source filename
+	and line number.
 
   --enable-warnings
 	Use this option to turn on GCC compiler warnings.

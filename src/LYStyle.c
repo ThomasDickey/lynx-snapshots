@@ -1,6 +1,6 @@
 /* character level styles for Lynx
  * (c) 1996 Rob Partington -- donated to the Lyncei (if they want it :-)
- * @Id: LYStyle.c 1.43 Mon, 26 Feb 2001 18:41:57 -0800 dickey @
+ * @Id: LYStyle.c 1.44 Sun, 01 Apr 2001 17:51:46 -0700 dickey @
  */
 #include <HTUtils.h>
 #include <HTML.h>
@@ -58,6 +58,7 @@ PUBLIC int s_aedit_sel		= NOSTYLE;
 PUBLIC int s_alert		= NOSTYLE;
 PUBLIC int s_alink		= NOSTYLE;
 PUBLIC int s_curedit		= NOSTYLE;
+PUBLIC int s_forw_backw		= NOSTYLE;
 PUBLIC int s_normal		= NOSTYLE;
 PUBLIC int s_prompt_edit	= NOSTYLE;
 PUBLIC int s_prompt_edit_arr	= NOSTYLE;
@@ -207,6 +208,7 @@ PRIVATE void parse_style ARGS1(char*,buffer)
 	{ "edit.prompt.arrow",	DSTYLE_ELEMENTS,	&s_prompt_edit_arr },
 	{ "edit.prompt.marked",	DSTYLE_ELEMENTS,	&s_prompt_sel },
 	{ "edit.prompt",	DSTYLE_ELEMENTS,	&s_prompt_edit },
+	{ "forwbackw.arrow",	DSTYLE_ELEMENTS,	&s_forw_backw },
     };
     unsigned n;
     BOOL found = FALSE;
@@ -434,24 +436,24 @@ PUBLIC void style_deleteStyleList NOARGS
     lss_styles = NULL;
 }
 
-PRIVATE int style_readFromFileREC ARGS2(char*, file, int, toplevel)
+PRIVATE int style_readFromFileREC ARGS2(
+    char *,	lss_filename,
+    char *,	parent_filename)
 {
     FILE *fh;
     char *buffer = NULL;
     int len;
 
-    CTRACE2(TRACE_STYLE, (tfp, "CSS:Reading styles from file: %s\n", file ? file : "?!? empty ?!?"));
-    if (file == NULL || *file == '\0')
+    CTRACE2(TRACE_STYLE, (tfp, "CSS:Reading styles from file: %s\n", lss_filename ? lss_filename : "?!? empty ?!?"));
+    if (lss_filename == NULL || *lss_filename == '\0')
 	return -1;
-    fh = fopen(file, TXT_R);
-    if (!fh)
-    {
+    if ((fh = LYOpenCFG(lss_filename, parent_filename, LYNX_LSS_FILE)) == 0) {
 	/* this should probably be an alert or something */
-	CTRACE2(TRACE_STYLE, (tfp, "CSS:Can't open style file '%s', using defaults\n", file));
+	CTRACE2(TRACE_STYLE, (tfp, "CSS:Can't open style file '%s', using defaults\n", lss_filename));
 	return -1;
     }
 
-    if (toplevel) {
+    if (parent_filename == 0) {
 	style_initialiseHashTable();
 	style_deleteStyleList();
     }
@@ -461,20 +463,20 @@ PRIVATE int style_readFromFileREC ARGS2(char*, file, int, toplevel)
 	LYTrimTail(buffer);
 	LYTrimHead(buffer);
 	if (!strncasecomp(buffer,"include:",8))
-	    style_readFromFileREC(buffer+8, 0);
+	    style_readFromFileREC(buffer+8, lss_filename);
 	else if (buffer[0] != '#' && (len = strlen(buffer)) > 0)
 	    HStyle_addStyle(buffer);
     }
 
     LYCloseInput (fh);
-    if (toplevel && LYCursesON)
+    if ((parent_filename == 0) && LYCursesON)
 	parse_userstyles();
     return 0;
 }
 
-PUBLIC int style_readFromFile ARGS1(char*, file)
+PUBLIC int style_readFromFile ARGS1(char*, filename)
 {
-    return style_readFromFileREC(file, 1);
+    return style_readFromFileREC(filename, (char *)0);
 }
 
 /* Used in HTStructured methods: - kw */

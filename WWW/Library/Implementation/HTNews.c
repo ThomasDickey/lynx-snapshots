@@ -209,7 +209,7 @@ PRIVATE BOOL initialize NOARGS
 		    HTNewsHost));
     } else {
 	char server_name[256];
-	FILE* fp = fopen(SERVER_FILE, "r");
+	FILE* fp = fopen(SERVER_FILE, TXT_R);
 	if (fp) {
 	    if (fscanf(fp, "%s", server_name)==1) {
 		StrAllocCopy(HTNewsHost, server_name);
@@ -407,8 +407,7 @@ PRIVATE NNTPAuthResult HTHandleAuthInfo ARGS1(
 		/*
 		**  Store the accepted username and no password. - FM
 		*/
-		if ((auth =
-		    (NNTPAuth *)calloc(1, sizeof(NNTPAuth))) != NULL) {
+		if ((auth = typecalloc(NNTPAuth)) != NULL) {
 		    StrAllocCopy(auth->host, host);
 		    auth->user = UserName;
 		    HTList_appendObject(NNTP_AuthInfo, auth);
@@ -515,8 +514,7 @@ PRIVATE NNTPAuthResult HTHandleAuthInfo ARGS1(
 			auth->pass = PassWord;
 		    }
 		} else {
-		    if ((auth =
-			(NNTPAuth *)calloc(1, sizeof(NNTPAuth))) != NULL) {
+		    if ((auth = typecalloc(NNTPAuth)) != NULL) {
 			StrAllocCopy(auth->host, host);
 			auth->user = UserName;
 			auth->pass = PassWord;
@@ -847,12 +845,7 @@ PRIVATE void post_article ARGS1(
     **	Open the temporary file with the
     **	nntp headers and message body. - FM
     */
-#ifdef DOSPATH
-    if ((fd = fopen((postfile ? postfile : ""), "rt")) == NULL)
-#else
-    if ((fd = fopen((postfile ? postfile : ""), "r")) == NULL)
-#endif
-    {
+    if ((fd = fopen((postfile ? postfile : ""), TXT_R)) == NULL) {
 	HTAlert(FAILED_CANNOT_OPEN_POST);
 	return;
     }
@@ -970,12 +963,6 @@ void debug_print(unsigned char *p)
 }
 #endif
 
-#ifdef NOTUSED_CHARTRANS
-static char *decode_mime(char *str)
-{
-    return HTmmdecode(str, str);
-}
-#else
 static char *decode_mime(char *str)
 {
     char temp[LINE_LENGTH];	/* FIXME: what determines the actual size? */
@@ -1006,17 +993,12 @@ static char *decode_mime(char *str)
 
     return str;
 }
-#endif /* NOTUSED_CHARTRANS */
 #else /* !SH_EX */
 static char *decode_mime ARGS1(char *, str)
 {
-#ifdef NOTUSED_CHARTRANS
-    return HTmmdecode(str, str);
-#else
     HTmmdecode(str, str);
     HTrjis(str, str);
     return str;
-#endif
 }
 #endif
 

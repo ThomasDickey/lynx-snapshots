@@ -75,7 +75,7 @@ extern BOOLEAN LYExpandHostForURL PARAMS((char **AllocatedString, char *prefix_l
 extern BOOLEAN LYFixCursesOnForAccess PARAMS((CONST char* addr, CONST char* physical));
 extern BOOLEAN LYPathOffHomeOK PARAMS((char *fbuffer, size_t fbuffer_size));
 extern BOOLEAN LYValidateFilename PARAMS((char * result, char * given));
-extern BOOLEAN LYisAbsPath PARAMS((char *path));
+extern BOOLEAN LYisAbsPath PARAMS((CONST char *path));
 extern BOOLEAN LYisLocalAlias PARAMS((char *filename));
 extern BOOLEAN LYisLocalFile PARAMS((char *filename));
 extern BOOLEAN LYisLocalHost PARAMS((char *filename));
@@ -311,5 +311,9 @@ extern void LYCloselog NOPARAMS;
 #define TXT_W	"w"
 #define TXT_A	"a+"
 #endif
+
+#define BIN_R	"rb"
+#define BIN_W	"wb"
+#define BIN_A	"ab+"
 
 #endif /* LYUTILS_H */

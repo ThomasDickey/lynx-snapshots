@@ -78,46 +78,35 @@ PRIVATE char *find_colon ARGS1(
     return NULL;
 }
 
+PRIVATE void free_item_list ARGS1(
+    lynx_list_item_type **,	ptr)
+{
+    lynx_list_item_type *cur = *ptr;
+    lynx_list_item_type *next;
+
+    while (cur) {
+	next = cur->next;
+	FREE(cur->name);
+	FREE(cur->command);
+	FREE(cur);
+	cur = next;
+    }
+    *ptr = NULL;
+}
+
 /*
  *  Function for freeing the DOWNLOADER and UPLOADER menus list. - FM
  */
-PRIVATE void free_item_list NOARGS
+PRIVATE void free_all_item_lists NOARGS
 {
-    lynx_html_item_type *cur;
-    lynx_html_item_type *next;
-
-    cur = downloaders;
-    while (cur) {
-	next = cur->next;
-	FREE(cur->name);
-	FREE(cur->command);
-	FREE(cur);
-	cur = next;
-    }
-    downloaders = NULL;
-
+    free_item_list(&printers);
+    free_item_list(&downloaders);
 #ifdef DIRED_SUPPORT
-    cur = uploaders;
-    while (cur) {
-	next = cur->next;
-	FREE(cur->name);
-	FREE(cur->command);
-	FREE(cur);
-	cur = next;
-    }
-    uploaders = NULL;
+    free_item_list(&uploaders);
 #endif /* DIRED_SUPPORT */
 
 #ifdef USE_EXTERNALS
-    cur = externals;
-    while (cur) {
-	next = cur->next;
-	FREE(cur->name);
-	FREE(cur->command);
-	FREE(cur);
-	cur = next;
-    }
-    externals = NULL;
+    free_item_list(&externals);
 #endif /* USE_EXTERNALS */
 
     return;
@@ -126,12 +115,13 @@ PRIVATE void free_item_list NOARGS
 /*
  *  Process string buffer fields for DOWNLOADER or UPLOADER menus.
  */
-PRIVATE void add_item_to_list ARGS2(
+PRIVATE void add_item_to_list ARGS3(
 	char *,			buffer,
-	lynx_html_item_type **, list_ptr)
+	lynx_list_item_type **, list_ptr,
+	int,			special)
 {
     char *colon, *next_colon;
-    lynx_html_item_type *cur_item, *prev_item;
+    lynx_list_item_type *cur_item, *prev_item;
 
     /*
      *	Make a linked list
@@ -140,12 +130,12 @@ PRIVATE void add_item_to_list ARGS2(
 	/*
 	 *  First item.
 	 */
-	cur_item = typecalloc(lynx_html_item_type);
+	cur_item = typecalloc(lynx_list_item_type);
 	if (cur_item == NULL)
 	    outofmem(__FILE__, "read_cfg");
 	*list_ptr = cur_item;
 #ifdef LY_FIND_LEAKS
-	atexit(free_item_list);
+	atexit(free_all_item_lists);
 #endif
     } else {
 	/*
@@ -155,7 +145,7 @@ PRIVATE void add_item_to_list ARGS2(
 	     prev_item->next != NULL;
 	     prev_item = prev_item->next)
 	    ;  /* null body */
-	cur_item = typecalloc(lynx_html_item_type);
+	cur_item = typecalloc(lynx_list_item_type);
 	if (cur_item == NULL)
 	    outofmem(__FILE__, "read_cfg");
 	else
@@ -166,6 +156,7 @@ PRIVATE void add_item_to_list ARGS2(
     cur_item->command = NULL;
     cur_item->always_enabled = FALSE;
     cur_item->override_primary_action = FALSE;
+    cur_item->pagelen = 66;
 
     /*
      *	Find first unescaped colon and process fields
@@ -174,7 +165,7 @@ PRIVATE void add_item_to_list ARGS2(
 	/*
 	 *  Process name field
 	 */
-	cur_item->name = typecallocn(char,colon-buffer+1);
+	cur_item->name = typecallocn(char, colon-buffer+1);
 	if (cur_item->name == NULL)
 	    outofmem(__FILE__, "read_cfg");
 	LYstrncpy(cur_item->name, buffer, (int)(colon-buffer));
@@ -202,113 +193,36 @@ PRIVATE void add_item_to_list ARGS2(
 		*next_colon++ = '\0';
 	    cur_item->always_enabled = is_true(colon);
 	    if (next_colon) {
-		cur_item->override_primary_action = is_true(next_colon);
+		if (special) {
+		    cur_item->pagelen = atoi(next_colon);
+		} else {
+		    cur_item->override_primary_action = is_true(next_colon);
+		}
 	    }
 	}
     }
 }
 
-
-/*
- *  Function for freeing the PRINTER menus list. - FM
- */
-PRIVATE void free_printer_item_list NOARGS
+PUBLIC lynx_list_item_type *find_item_by_number ARGS2(
+	lynx_list_item_type *,	list_ptr,
+	char *,			number)
 {
-    lynx_printer_item_type *cur = printers;
-    lynx_printer_item_type *next;
-
-    while (cur) {
-	next = cur->next;
-	FREE(cur->name);
-	FREE(cur->command);
-	FREE(cur);
-	cur = next;
+    int value = atoi(number);
+    while (value-- >= 0 && list_ptr != 0) {
+	list_ptr = list_ptr->next;
     }
-    printers = NULL;
-
-    return;
+    return list_ptr;
 }
 
-/*
- *  Process string buffer fields for PRINTER menus.
- */
-PRIVATE void add_printer_to_list ARGS2(
-	char *,				buffer,
-	lynx_printer_item_type **,	list_ptr)
+PUBLIC int match_item_by_name ARGS3(
+    lynx_list_item_type *,	ptr,
+    char *,			name,
+    BOOLEAN,			only_overriders)
 {
-    char *colon, *next_colon;
-    lynx_printer_item_type *cur_item, *prev_item;
-
-    /*
-     *	Make a linked list.
-     */
-    if (*list_ptr == NULL) {
-	/*
-	 *  First item.
-	 */
-	cur_item = typecalloc(lynx_printer_item_type);
-	if (cur_item == NULL)
-	    outofmem(__FILE__, "read_cfg");
-	*list_ptr = cur_item;
-#ifdef LY_FIND_LEAKS
-	atexit(free_printer_item_list);
-#endif
-    } else {
-	/*
-	 *  Find the last item.
-	 */
-	for (prev_item = *list_ptr;
-	     prev_item->next != NULL;
-	     prev_item = prev_item->next)
-	    ;  /* null body */
-
-	cur_item = typecalloc(lynx_printer_item_type);
-	if (cur_item == NULL)
-	    outofmem(__FILE__, "read_cfg");
-	else
-	    prev_item->next = cur_item;
-    }
-    cur_item->next = NULL;
-    cur_item->name = NULL;
-    cur_item->command = NULL;
-    cur_item->always_enabled = FALSE;
-
-    /*
-     *	Find first unescaped colon and process fields.
-     */
-    if ((colon = find_colon(buffer)) != NULL) {
-	/*
-	 *  Process name field.
-	 */
-	cur_item->name = typecallocn(char, colon-buffer+1);
-	if (cur_item->name == NULL)
-	    outofmem(__FILE__, "read_cfg");
-	LYstrncpy(cur_item->name, buffer, (int)(colon-buffer));
-	remove_backslashes(cur_item->name);
-
-	/*
-	 *  Process TRUE/FALSE field.
-	 */
-	if ((next_colon = find_colon(colon+1)) != NULL) {
-	    cur_item->command = typecallocn(char, next_colon-colon);
-	    if (cur_item->command == NULL)
-		outofmem(__FILE__, "read_cfg");
-	    LYstrncpy(cur_item->command, colon+1, (int)(next_colon-(colon+1)));
-	    remove_backslashes(cur_item->command);
-	    cur_item->always_enabled = is_true(next_colon+1);
-	}
-
-	/*
-	 *  Process pagelen field.
-	 */
-	if (next_colon != NULL
-	 && (next_colon = find_colon(next_colon+1)) != NULL) {
-	    cur_item->pagelen = atoi(next_colon+1);
-	} else {
-	    /* default to 66 lines */
-	    cur_item->pagelen = 66;
-	}
-    }
+    return
+	(ptr->command != 0
+	&& !strncasecomp(ptr->name, name, strlen(ptr->name))
+	&& (only_overriders ? ptr->override_primary_action : 1));
 }
 
 #if defined(USE_COLOR_STYLE) || defined(USE_COLOR_TABLE)
@@ -483,7 +397,7 @@ PRIVATE void parse_color ARGS1(
 typedef int (*ParseFunc) PARAMS((char *));
 
 typedef union {
-	lynx_html_item_type ** add_value;
+	lynx_list_item_type ** add_value;
 	BOOLEAN * set_value;
 	int *	  int_value;
 	char **   str_value;
@@ -493,7 +407,7 @@ typedef union {
 
 #ifdef	PARSE_DEBUG
 #define ParseData \
-	lynx_html_item_type** add_value; \
+	lynx_list_item_type** add_value; \
 	BOOLEAN *set_value; \
 	int *int_value; \
 	char **str_value; \
@@ -971,7 +885,7 @@ static int cern_rulesfile_fun ARGS1(
 static int printer_fun ARGS1(
 	char *,		value)
 {
-    add_printer_to_list(value, &printers);
+    add_item_to_list(value, &printers, TRUE);
     return 0;
 }
 
@@ -1710,8 +1624,7 @@ PUBLIC void free_lynx_cfg NOARGS
 	    break;
 	}
     }
-    free_item_list();
-    free_printer_item_list();
+    free_all_item_lists();
 #ifdef DIRED_SUPPORT
     reset_dired_menu();		/* frees and resets dired menu items - kw */
 #endif
@@ -1737,6 +1650,60 @@ PRIVATE Config_Type *lookup_config ARGS1(
 	tbl++;
     }
     return tbl;
+}
+
+/*
+ * If the given value is an absolute path (by syntax), or we can read it, use
+ * the value as given.  Otherwise, assume it must be in the same place we read
+ * the parent configuration file from.
+ *
+ * Note:  only read files from the current directory if there's no parent
+ * filename, otherwise it leads to user surprise.
+ */
+PRIVATE char *actual_filename ARGS3(
+    char *,	cfg_filename,
+    char *,	parent_filename,
+    char *,	dft_filename)
+{
+    static char *my_filename;
+
+    if (my_filename != 0) {
+	FREE(my_filename);
+    }
+    if (!LYisAbsPath(cfg_filename)
+     && !(parent_filename == 0 && LYCanReadFile(cfg_filename))) {
+	if (!strncmp(cfg_filename, "~/", 2)) {
+	    HTSprintf0(&my_filename, "%s%s", Home_Dir(), cfg_filename+1);
+	    cfg_filename = my_filename;
+	} else {
+	    if (parent_filename != 0) {
+		StrAllocCopy(my_filename, parent_filename);
+		*LYPathLeaf (my_filename) = '\0';
+		StrAllocCat(my_filename, cfg_filename);
+	    }
+	    if (my_filename != 0 && LYCanReadFile(my_filename)) {
+		cfg_filename = my_filename;
+	    } else {
+		StrAllocCopy(my_filename, dft_filename);
+		*LYPathLeaf (my_filename) = '\0';
+		StrAllocCat(my_filename, cfg_filename);
+		if (LYCanReadFile(my_filename)) {
+		    cfg_filename = my_filename;
+		}
+	    }
+	}
+    }
+    return cfg_filename;
+}
+
+PUBLIC FILE *LYOpenCFG ARGS3(
+    char *,	cfg_filename,
+    char *,	parent_filename,
+    char *,	dft_filename)
+{
+    cfg_filename = actual_filename(cfg_filename, parent_filename, dft_filename);
+    CTRACE((tfp, "opening config file %s\n", cfg_filename));
+    return fopen(cfg_filename, TXT_R);
 }
 
 #define NOPTS_ ( TABLESIZE(Config_Table) - 1 )
@@ -1765,7 +1732,6 @@ PRIVATE void do_read_cfg ARGS5(
 	FILE *,	fp0,
 	optidx_set_t*, allowed)
 {
-    static char *mypath = NULL;
     FILE *fp;
     char *buffer = 0;
 
@@ -1790,11 +1756,7 @@ PRIVATE void do_read_cfg ARGS5(
 	CTRACE((tfp,"No filename following -cfg switch!\n"));
 	return;
     }
-    if (!strncmp(cfg_filename, "~/", 2)) {
-	HTSprintf0(&mypath, "%s%s", Home_Dir(), cfg_filename+1);
-	cfg_filename = mypath;
-    }
-    if ((fp = fopen(cfg_filename, TXT_R)) == 0) {
+    if ((fp = LYOpenCFG(cfg_filename, parent_filename, LYNX_CFG_FILE)) == 0) {
 	CTRACE((tfp, "lynx.cfg file not found as '%s'\n", cfg_filename));
 	return;
     }
@@ -1954,7 +1916,7 @@ PRIVATE void do_read_cfg ARGS5(
 
 #ifndef NO_CONFIG_INFO
 	    if (fp0 != 0  &&  !no_lynxcfg_xinfo) {
-		LYLocalFileToURL(&url, value);
+		LYLocalFileToURL(&url, actual_filename(value, cfg_filename, LYNX_CFG_FILE));
 		StrAllocCopy(cp1, value);
 		if (strchr(value, '&') || strchr(value, '<')) {
 		    LYEntify(&cp1, TRUE);
@@ -2043,7 +2005,7 @@ PRIVATE void do_read_cfg ARGS5(
 
 	case CONF_ADD_ITEM:
 	    if (q->add_value != 0)
-		add_item_to_list (value, q->add_value);
+		add_item_to_list (value, q->add_value, FALSE);
 	    break;
 
 #if defined(EXEC_LINKS) || defined(LYNXCGI_LINKS)
@@ -2076,7 +2038,7 @@ PRIVATE void do_read_cfg ARGS5(
      *	with those always_enabled options still available. - FM
      */
     if (downloaders != 0) {
-	lynx_html_item_type *cur_download;
+	lynx_list_item_type *cur_download;
 
 	cur_download = downloaders;
 	while (cur_download != 0) {

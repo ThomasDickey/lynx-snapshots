@@ -1,4 +1,4 @@
-/* @Id: Xsystem.c 1.9 Mon, 26 Feb 2001 18:41:57 -0800 dickey @
+/* @Id: Xsystem.c 1.10 Sun, 01 Apr 2001 17:51:46 -0700 dickey @
  *	like system("cmd") but return with exit code of "cmd"
  *	for Turbo-C/MS-C/LSI-C
  *  This code is in the public domain.
@@ -86,7 +86,7 @@ xmalloc(size_t n)
 {
     char *bp;
 
-    if ((bp = calloc(1, n)) == (char *) 0) {
+    if ((bp = typecallocn(char, n)) == 0) {
 	write(2, "xsystem: Out of memory.!\n", 25);
 	exit(1);
     }

@@ -1,6 +1,132 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2001-04-01 (2.8.4dev.20)
+* rename KEYMAP 'EXTERN' to 'EXTERN_LINK', adding 'EXTERN_PAGE'.  Existing
+  keymaps should work since 'EXTERN_LINK' matches first.  EXTERN_PAGE runs the
+  external command on the current page.  Map comma (,) to EXTERN_PAGE -TD
+* replace most calloc calls with typecalloc or typecallocn -TD
+* modify LYExtern.c to recognize if more than one EXTERN command has been
+  defined in lynx.cfg for a given name, and allow the user to select one
+  command from a popup menu -TD
+* split-out code that opens lynx.cfg and lynx.lss as LYOpenCFG() function,
+  making that check if the given pathname is absolute.  If not, it attempts
+  to look in the same directory as the parent file (when processing includes),
+  or the directory of the default config file -TD
+* replace some explicit "r", "w", and "a+" fopen modes with TXT_R, TXT_W and
+  TXT_A, add/use corresponding BIN_R, BIN_W, BIN_A definitions.  Correction to
+  OpenHiddenFile(), which would have appended text to a binary file -TD
+* combined lynx_html_item_type and lynx_printer_item_type structs as
+  lynx_list_item_type to simplify LYReadCFG.c and incidentally fixing a bug in
+  add_printer_to_list by merging it with add_item_to_list -TD
+* implement a simple workaround for staircased messages from running xli as an
+  external viewer, with lynx_nl2crlf() function -TD
+* add bright-blue.lss sample (from IZ) -TD
+* modify makefile.in's to use symbol _O for object suffix to allow simple
+  override for OS/2 EMX -Zomf compiler option (request by IZ) -TD
+* add HAVE_LYHELP_H definition in config.hin and use that in LYGlobalDefs.h
+  to workaround misuse of HAVE_CONFIG_H in makelynx.bat -TD
+* work-around in LYrefresh() when curses pads are used, for special case where
+  cursor is not set properly when prompting with long subject line for mailto
+  URL -TD
+* eliminate some pointer mismatch compiler warnings in LYEditInsert() for
+  EXP_KEYBOARD_LAYOUT configuration -TD
+* improve handling of tables with respect to bad HTML.  Also took an
+  opportunity to macroize a couple of places which missed in
+  unobfuscation-of-faking <td></td> (this faking happens when line break
+  happens in a non-first column of a table) -IZ
+  For example:
+    <TR>
+      <TD>
+             <FORM ACTION="FrameWork.class" METHOD="post">
+          y
+      </TD>
+      <TD>
+         <DIV>
+              x
+         </DIV></FORM>
+      </TD>
+    </TR>
+  Note FORM which spans cells.  -trace'ing it gives very unintuitive
+  results: it skips </TD> inside FORM, but not <TD>.  Then it supplied
+  </TD> when the FORM ends.
+* repair treatment of colspans in TRST, making it work again in one of the
+  special cases it worked before.  Another bug was in interaction of
+  justification and tables -IZ
+* marked more TRACEs in TRST as "BUG"s -IZ
+* TRST would sometimes produce non-intuitive results if <td> follows </tr>. 
+  Add error recovery for this case -IZ
+* corrections for nested-table configuration -IZ
+  + make trailing <BR> in table cells "behave well" again (the following cell
+    would not be horizontally offset).
+  + fix highlighting of multiline links inside tables, and a "80M tracelog" bug
+    (due to a misprint update of the enclosing table was performed once-per-row
+    instead of once-per-table).  Extra updates would not hurt, but led to
+    slowdowns and quadratic-size logs.
+  + fix a special case with table-in-table for partial-display
+* resizing a window on a console may lead to a switch of the character-cell
+  size.  The "downloaded font" loaded during an auto-switch of display-charset
+  may be no longer valid.  In this case, force a re-download of the suitable
+  font for the current charcell size -IZ
+* add reverse-video style for forwbackw.arrow to lynx.lss -TD
+* while an error in .lynx-keymaps is fatal, but a more or less equivalent error
+  in the KEYMAP section of lynx.cfg is benign.  Make them both benign -IZ
+* change remaining uses of lookup_keymap(LYK_xxx) to LAC_TO_LKC0(LYK_xxx) -TD
+* modify set_clicked_link() to return lynx keycodes rather than character
+  values -IZ
+* remove line_for_char() function since it is used for HTLine.start
+  computations -TD
+* several changes to GridText.c -IZ
+  + '#' (shown at the UL corner when there is a toolbar) is shown even at the
+    beginning-of-the document.
+  + with mouse enabled, the first 6 chars in the UL corner were "always"
+    sensitive to Click-1, behaving as PREV_DOC (usually on Left).  This patch
+    changes this logic (for color-style):
+       If '#' is shown there, clicking on it behaves as pressing #;
+       Clicking on the next 6 chars behaves as PREV_DOC/NEXT_DOC (3+3);
+  + if you define a style for forwbackw.arrow, then suitable arrows are shown
+    in these 3+3 positions; in fact they are shown only if it makes sense to do
+    PREV_DOC/NEXT_DOC, providing additional feedback.
+  + remove the first empty line shown on any HTML document.
+  + correct an off-by-one error in the removal-of-zero-length-markup logic. 
+    Due to this bug, zero-length markup was never removed, which led to
+    accumulation of style change entries, eventually to a buffer overflow.  At
+    this moment lynx color-style engine would give up, resulting in
+    incomprehensible ocean of colors on the display.  To demonstrate, make a
+    select entry with more than 46 entries.  [My auto-display-charset logic
+    added 2 new encodings to the table of Lynx, bringing the number to 46 on
+    the 'o'ption form.  ;-]
+  + fixes a bug with incorrectly calculated width of a numeric tag [12]
+    as far as 12 is 10 or more (still fixes Debian #68542).
+  + remove unused members from HTLine struct.
+  + make variables underline_on and bold_on private.
+  + rewrote insert_blanks_in_line(), splitting out move_anchors_in_region().
+  + make split_line() easier to maintain by adding variables to represent
+    common subexpressions, e.g., s_post, s_pre.
+  + use set_style_by_embedded_chars() in split_line() to simplify/improve test
+    for whether lynx should add a bold/underline control.
+  + recode to eliminate HTLine.start
+  + recode to eliminate HTLine.chars
+  + several changes to split_line(), using pointers to HTChangeStyle structs
+    rather than array indices.
+* adjust some ifdef's to make configure --disable-trace compile -TD
+* correct allocation size in mailcap_substitute(), which did not count the
+  trailing null -TD
+* add configure --enable-vertrace option, to put __FILE__ and __LINE__ into
+  trace log -PG
+* improve description of USE_MOUSE in lynx.cfg -PW
+* fix a few warnings from antic (unreached statements due to quirks of ifdef's,
+  incorrectly-indented code) -TD
+* eliminate a few references to USE_HASH and LINKEDSTYLES in documentation -TD
+* fix a couple of compiler warnings for SCO (report by BL)
+* fix a comparison in HTChunkPutUtf8Char() to work with EBCDIC -PG
+* fix a typo in LYCharUtils.c CTRACE macro, amend tracing to avoid suppressing
+  a related user message -PG
+* change CF_TERMCAP_LIBS configure macro to warn rather than exit with an error
+  if it cannot find the libraries it is looking for.  This allows one to
+  configure with the slang library on systems without a termcap library (report
+  by Atsuhito Kohda) -TD
+
 2001-02-26 (2.8.4dev.19)
 * add experimental configure option for post-dev.16 TRST changes by IZ
   (--enable-nested-tables), ifdef'd with EXP_NESTED_TABLES -TD
@@ -77,7 +203,7 @@ Changes since Lynx 2.8 release
   clicking outside the menu -IZ
 * allow a different approach to the problem:  how to enter a keyboard
   navigation command when you are in an editing mode.  A new EDIT-time action
-  is introduced:  LYE_STOP.  I use it like this:
+  is introduced:  LYE_STOP.  Use it like this:
 	KEYMAP:^[:INTERRUPT:STOP
   The action behaves as if -tna is temporarily switched on:  your edit is
   committed, and you go into the non-edit mode - until you press Enter on an

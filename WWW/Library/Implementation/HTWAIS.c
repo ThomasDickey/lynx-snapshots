@@ -115,9 +115,9 @@ struct _HTStream {
 /* ------------------------------------------------------------------------ */
 /* Returns 1 on success, 0 on fail, -1 on interrupt. */
 PRIVATE int fd_mosaic_connect_to_server ARGS3(
-	char *, 	host_name,
+	char *,		host_name,
 	long,		port,
-	long *, 	fd)
+	long *,		fd)
 {
     char *dummy = NULL;
     int status;
@@ -140,12 +140,12 @@ PRIVATE int fd_mosaic_connect_to_server ARGS3(
 /* Returns 1 on success, 0 on fail, -1 on interrupt. */
 #ifdef VMS
 PRIVATE int mosaic_connect_to_server ARGS3(
-	char *, 	host_name,
+	char *,		host_name,
 	long,		port,
-	long *, 	fdp)
+	long *,		fdp)
 #else
 PRIVATE int mosaic_connect_to_server ARGS3(
-	char *, 	host_name,
+	char *,		host_name,
 	long,		port,
 	FILE **,	fp)
 #endif /* VMS */
@@ -222,18 +222,18 @@ PRIVATE void init_acceptable NOARGS
 **
 **
 ** On exit,
-**	returns 	nil if error
+**	returns		nil if error
 **			pointer to malloced string (must be freed) if ok
 */
 PRIVATE char * WWW_from_archie ARGS1(
-	char *, 	file)
+	char *,		file)
 {
     char * end;
     char * result;
     char * colon;
     for(end=file; *end > ' '; end++);	/* assumes ASCII encoding*/
     result = (char *)malloc(10 + (end-file));
-    if (!result) return result; 	/* Malloc error */
+    if (!result) return result;		/* Malloc error */
     strcpy(result, "file://");
     strncat(result, file, end-file);
     colon = strchr(result+7, ':');	/* Expect colon after host */
@@ -250,7 +250,7 @@ PRIVATE char * WWW_from_archie ARGS1(
 **	The format of the docid MUST be good!
 **
 **  On exit,
-**	returns 	nil if error
+**	returns		nil if error
 **			pointer to malloced string (must be freed) if ok
 */
 PRIVATE char hex [17] = "0123456789ABCDEF";
@@ -317,7 +317,7 @@ PRIVATE char * WWW_from_WAIS ARGS1(
 **	-------------------------------------------
 **
 **  On entry,
-**	docname 	points to valid name produced originally by
+**	docname		points to valid name produced originally by
 **			WWW_from_WAIS
 **  On exit,
 **	docid->size	is valid
@@ -325,7 +325,7 @@ PRIVATE char * WWW_from_WAIS ARGS1(
 */
 PRIVATE any * WAIS_from_WWW ARGS2(
 	any *,		docid,
-	char *, 	docname)
+	char *,		docname)
 {
     char *z;	/* Output pointer */
     char *sor;	/* Start of record - points to size field. */
@@ -351,7 +351,7 @@ PRIVATE any * WAIS_from_WWW ARGS2(
     for (p = docname; *p; ) {	/* Convert of strings */
 				/* Record type */
 
-	*z = 0; 		/* Initialize record type */
+	*z = 0;			/* Initialize record type */
 	while (*p >= '0' && *p <= '9') {
 	    *z = *z*10 + (*p++ - '0');	/* Decode decimal record type */
 	}
@@ -407,8 +407,8 @@ PRIVATE any * WAIS_from_WWW ARGS2(
 **	--------------------------------------
 */
 PRIVATE void output_text_record ARGS4(
-    HTStream *, 		target,
-    WAISDocumentText *, 	record,
+    HTStream *,			target,
+    WAISDocumentText *,		record,
     boolean,			quote_string_quotes,
     boolean,			binary)
 {
@@ -432,7 +432,7 @@ PRIVATE void output_text_record ARGS4(
 	    /* if the next letter is '(' or ')', then ignore two letters */
 	    if ('(' == record->DocumentText->bytes[count + 1] ||
 		')' == record->DocumentText->bytes[count + 1])
-	    count += 1; 	    /* it is a term marker */
+	    count += 1;		    /* it is a term marker */
 	    else count += 4;		/* it is a paragraph marker */
     } else if (ch == '\n' || ch == '\r') {
 	    PUTC('\n');
@@ -442,7 +442,7 @@ PRIVATE void output_text_record ARGS4(
   }
 } /* output text record */
 
-/*	Format A Search response for the client 	display_search_response
+/*	Format A Search response for the client		display_search_response
 **	---------------------------------------
 */
 /* modified from tracy shen's version in wutil.c
@@ -491,7 +491,7 @@ PRIVATE void display_search_response ARGS4(
 		WAISDocumentHeader* head = info->DocHeaders[k];
 		char * headline = trim_junk(head->Headline);
 		any * docid = head->DocumentID;
-		char * docname; 	/* printable version of docid */
+		char * docname;		/* printable version of docid */
 
 		i++;
 		/*
@@ -615,15 +615,15 @@ PUBLIC int HTLoadWAIS ARGS4(
 {
     static CONST char * error_header =
 "<h1>Access error</h1>\nThe following error occured in accesing a WAIS server:<P>\n";
-    char * key; 		  /* pointer to keywords in URL */
+    char * key;			  /* pointer to keywords in URL */
     char* request_message = NULL; /* arbitrary message limit */
     char* response_message = NULL; /* arbitrary message limit */
     long request_buffer_length; /* how of the request is left */
     SearchResponseAPDU	*retrieval_response = 0;
     char keywords[MAX_KEYWORDS_LENGTH + 1];
     char *server_name;
-    char *wais_database = NULL; 	/* name of current database */
-    char *www_database; 		/* Same name escaped */
+    char *wais_database = NULL;		/* name of current database */
+    char *www_database;			/* Same name escaped */
     char *service;
     char *doctype;
     char *doclength;
@@ -731,11 +731,9 @@ PUBLIC int HTLoadWAIS ARGS4(
     **	This below fixed size stuff is terrible.
     */
 #ifdef VMS
-    if (!(request_message =
-	  (char*)calloc((size_t)MAX_MESSAGE_LEN*sizeof(char),1)))
+    if ((request_message = typecallocn(char, MAX_MESSAGE_LEN)) == 0)
 	outofmem(__FILE__, "HTLoadWAIS");
-    if (!(response_message =
-	  (char*)calloc((size_t)MAX_MESSAGE_LEN*sizeof(char),1)))
+    if ((response_message = typecallocn(char, MAX_MESSAGE_LEN)) == 0)
 	outofmem(__FILE__, "HTLoadWAIS");
 #else
     request_message = (char*)s_malloc((size_t)MAX_MESSAGE_LEN * sizeof(char));
@@ -747,7 +745,7 @@ PUBLIC int HTLoadWAIS ARGS4(
     **	the user has followed a link to the index itself.  It would be
     **	appropriate at this point to send him the .SRC file - how?
     */
-    if (key && !*key) { 			/* I N D E X */
+    if (key && !*key) {				/* I N D E X */
 #ifdef CACHE_FILE_PREFIX
 	char * filename = NULL;
 	FILE * fp;
@@ -790,7 +788,7 @@ PUBLIC int HTLoadWAIS ARGS4(
 		CACHE_FILE_PREFIX,
 		server_name, service, www_database);
 
-	fp = fopen(filename, "r");	/* Have we found this already? */
+	fp = fopen(filename, TXT_R);	/* Have we found this already? */
 	CTRACE((tfp, "HTWAIS: Description of server %s %s.\n",
 		    filename,
 		    fp ? "exists already" : "does NOT exist!"));

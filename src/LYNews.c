@@ -35,7 +35,7 @@ PRIVATE BOOLEAN message_has_content ARGS2(
 
     *nonspaces = FALSE;
 
-    if (!filename || (fp = fopen(filename, "r")) == NULL) {
+    if (!filename || (fp = fopen(filename, TXT_R)) == NULL) {
 	CTRACE((tfp, "Failed to open file %s for reading!\n",
 	       NONNULL(filename)));
 	return FALSE;
@@ -136,7 +136,7 @@ PUBLIC char *LYNewsPost ARGS2(
      *  and message body. - FM
      */
 #ifdef __DJGPP__
-    if ((fd = LYOpenTemp(my_tempfile, HTML_SUFFIX, "wb")) == NULL)
+    if ((fd = LYOpenTemp(my_tempfile, HTML_SUFFIX, BIN_W)) == NULL)
 #else
     if ((fd = LYOpenTemp(my_tempfile, HTML_SUFFIX, "w")) == NULL)
 #endif /* __DJGPP__ */
@@ -240,11 +240,11 @@ PUBLIC char *LYNewsPost ARGS2(
 	    CJKinput[0] = '\0';
 	    switch(kanji_code) {
 	    case EUC:
-		TO_EUC((CONST unsigned char *)kp, CJKinput);
+		TO_EUC((CONST unsigned char *)kp, (unsigned char *)CJKinput);
 		kp = CJKinput;
 		break;
 	    case SJIS:
-		TO_SJIS((CONST unsigned char *)kp, CJKinput);
+		TO_SJIS((CONST unsigned char *)kp, (unsigned char *)CJKinput);
 		kp = CJKinput;
 		break;
 	    default:
@@ -280,7 +280,7 @@ PUBLIC char *LYNewsPost ARGS2(
 	StrAllocCat(cp, org);
     }
 #ifdef UNIX
-    else if ((fp = fopen("/etc/organization", "r")) != NULL) {
+    else if ((fp = fopen("/etc/organization", TXT_R)) != NULL) {
 	char *buffer = 0;
 	if (LYSafeGets(&buffer, fp) != NULL) {
 	    if ((org = strchr(buffer, '\n')) != NULL) {

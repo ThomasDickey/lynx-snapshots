@@ -33,6 +33,7 @@
 #include <LYPrint.h>
 #include <LYPrettySrc.h>
 #include <TRSTable.h>
+#include <LYHistory.h>
 #ifdef EXP_CHARTRANS_AUTOSWITCH
 #include <UCAuto.h>
 #endif /* EXP_CHARTRANS_AUTOSWITCH */
@@ -59,7 +60,6 @@ unsigned int cached_styles[CACHEH][CACHEW];
 #endif
 
 #include <LYJustify.h>
-
 
 #ifdef USE_COLOR_STYLE_UNUSED
 void LynxClearScreenCache NOARGS
@@ -128,8 +128,8 @@ PUBLIC char * unchecked_box = "[ ]";
 PUBLIC char * checked_radio = "(*)";
 PUBLIC char * unchecked_radio = "( )";
 
-PUBLIC BOOLEAN underline_on = OFF;
-PUBLIC BOOLEAN bold_on      = OFF;
+PRIVATE BOOLEAN underline_on = OFF;
+PRIVATE BOOLEAN bold_on      = OFF;
 
 #ifdef SOURCE_CACHE
 PUBLIC int LYCacheSource = SOURCE_CACHE_NONE;
@@ -160,9 +160,6 @@ typedef struct _line {
 	struct _line	*prev;
 	unsigned	offset;		/* Implicit initial spaces */
 	unsigned	size;		/* Number of characters */
-	BOOL	split_after;		/* Can we split after? */
-	BOOL	bullet;			/* Do we bullet? */
-	BOOL	expansion_line;		/* TEXTAREA edit new line flag */
 #if defined(USE_COLOR_STYLE)
 	HTStyleChange* styles;
 	int	numstyles;
@@ -294,9 +291,8 @@ void POOL_FREE( pool_type , P* ptr)
 typedef struct _TextAnchor {
 	struct _TextAnchor *	next;
 	int			number;		/* For user interface */
-	int			start;		/* Characters */
-	int			line_pos;	/* Position in text */
-	int			extent;		/* Characters */
+	int			line_pos;	/* Bytes/chars - extent too */
+	int			extent;		/* (see HText_trimHightext) */
 	int			line_num;	/* Place in document */
 	char *			hightext;	/* The link text */
 	char *			hightext2;	/* A second line*/
@@ -336,11 +332,10 @@ struct _HText {
 	BOOLEAN			old_dtd;
 	int			keypad_mode;
 	int			disp_lines;	/* Screen size */
-	int			disp_cols;
+	int			disp_cols;	/* Used for reports only */
 #endif
 	HTLine *		last_line;
 	int			Lines;		/* Number of them */
-	int			chars;		/* Number of them */
 	TextAnchor *		first_anchor;	/* Singly linked list */
 	TextAnchor *		last_anchor;
 	TextAnchor *		last_anchor_before_stbl;
@@ -406,7 +401,6 @@ struct _HText {
 
 PRIVATE void HText_AddHiddenLink PARAMS((HText *text, TextAnchor *textanchor));
 
-
 #ifdef EXP_JUSTIFY_ELTS
 PUBLIC BOOL can_justify_here;
 PUBLIC BOOL can_justify_here_saved;
@@ -436,10 +430,6 @@ static int ht_num_runs;/*the number of runs filled*/
 static ht_run_info ht_runs[MAX_LINE];
 static BOOL this_line_was_split;
 static TextAnchor* last_anchor_of_previous_line;
-static int justified_text_map[MAX_LINE]; /* this is a map - for each index i
-    it tells to which position j=justified_text_map[i] in justified text
-    i-th character is mapped - it's used for anchor positions fixup and for
-    color style's positions adjustment. */
 static BOOL have_raw_nbsps = FALSE;
 
 PUBLIC void ht_justify_cleanup NOARGS
@@ -472,6 +462,8 @@ PUBLIC void mark_justify_start_position ARGS1(void*,text)
 	HTCJK == NOCJK && !in_DT && \
 	can_justify_here && can_justify_this_line && !form_in_htext )
 
+#else
+#define last_anchor_of_previous_line (TextAnchor*)0
 #endif /* EXP_JUSTIFY_ELTS */
 
 
@@ -588,7 +580,7 @@ PRIVATE void * LY_check_calloc ARGS2(
 	if (t == HTMainText)
 	    t = NULL;		/* shouldn't happen */
 	{
-	CTRACE((tfp, "\r *** Emergency freeing document %d/%d for '%s'%s!\n",
+	CTRACE((tfp, "\nBUG *** Emergency freeing document %d/%d for '%s'%s!\n",
 		    i + 1, n,
 		    ((t && t->node_anchor &&
 		      t->node_anchor->address) ?
@@ -754,7 +746,7 @@ PUBLIC HText *	HText_new ARGS1(
     stylechanges_buffers_free = 0;
     line->styles = stylechanges_buffers[0];
 #endif
-    self->Lines = self->chars = 0;
+    self->Lines = 0;
     self->first_anchor = self->last_anchor = NULL;
     self->style = &default_style;
     self->top_of_screen = 0;
@@ -1430,7 +1422,7 @@ PRIVATE void display_title ARGS1(
     char percent[20];
     char *cp = NULL;
     unsigned char *tmp = NULL;
-    int i = 0, j = 0;
+    int i = 0, j = 0, toolbar = 0;
     int limit;
 
     /*
@@ -1530,9 +1522,26 @@ PRIVATE void display_title ARGS1(
 #if defined(SH_EX) && defined(KANJI_CODE_OVERRIDE)
     LYaddstr(str_kcode(last_kcode));
 #endif
-    if (text->top_of_screen > 0 && HText_hasToolbar(text)) {
+    if (HText_hasToolbar(text)) {
 	LYaddch('#');
+	toolbar = 1;
     }
+#ifdef USE_COLOR_STYLE
+    if (s_forw_backw != NOSTYLE && (nhist || nhist_extra > 1)) {
+	int c = nhist ? ACS_LARROW : ' ';
+
+	/* turn the FORWBACKW.ARROW style on */
+	LynxChangeStyle(s_forw_backw, STACK_ON);
+	if (nhist) {
+	    LYaddch(c); LYaddch(c); LYaddch(c);
+	} else
+	    LYmove(0, 3 + toolbar);
+	if (nhist_extra > 1) {
+	    LYaddch(ACS_RARROW); LYaddch(ACS_RARROW); LYaddch(ACS_RARROW);
+	}
+	LynxChangeStyle(s_forw_backw, STACK_OFF);
+    }
+#endif /* USE_COLOR_STYLE */
     i = (limit - 1) - strlen(percent) - strlen(title);
     if (i >= CHAR_WIDTH) {
 	LYmove(0, i);
@@ -1844,7 +1853,7 @@ PRIVATE void display_page ARGS3(
 
 #ifdef DISP_PARTIAL
     if (display_partial && text->stbl) {
-	stop_before_for_anchors = Stbl_getStartLine(text->stbl);
+	stop_before_for_anchors = Stbl_getStartLineDeep(text->stbl);
 	if (stop_before_for_anchors > line_number+(display_lines))
 	    stop_before_for_anchors = line_number+(display_lines);
     } else
@@ -2337,6 +2346,232 @@ PUBLIC void HText_beginAppend ARGS1(
 #define CTRACE_SPLITLINE(p)	/*nothing*/
 #endif
 
+PRIVATE int set_style_by_embedded_chars ARGS4(
+	char *,		s,
+	char *,		e,
+	unsigned char,	start_c,
+	unsigned char,	end_c)
+{
+    int ret = NO;
+
+    while (--e >= s) {
+	if (*e == end_c)
+	    break;
+	if (*e == start_c) {
+	    ret = YES;
+	    break;
+	}
+    }
+    return ret;
+}
+
+PRIVATE void move_anchors_in_region ARGS7(
+    HTLine *,		line,
+    int,		line_number,
+    TextAnchor **,	prev_anchor,
+    int *,		prev_head_processed,
+    int,		sbyte,
+    int,		ebyte,
+    int,		shift)		/* Likewise */
+{
+    /*
+     *  Update anchor positions for anchors that start on this line.
+     *  Note: we rely on a->line_pos counting bytes, not
+     *  characters.  That's one reason why HText_trimHightext
+     *  has to be prevented from acting on these anchors in
+     *  partial display mode before we get a chance to
+     *  deal with them here.
+     */
+    TextAnchor *a;
+    int head_processed = *prev_head_processed;
+
+    /* We need to know whether (*prev_anchor)->line_pos is "in new
+       coordinates" or in old ones.  If prev_anchor' head was touched
+       on the previous iteraction, we set head_processed.  The tail
+       may need to be treated now. */
+    for (a = *prev_anchor;
+	 a && a->line_num <= line_number;
+	 a = a->next, head_processed = 0) {
+	/* extent==0 needs to be special-cased; happens if no text for
+	   the anchor was processed yet.  */
+	/* Subtract one so that the space is not inserted at the end
+	   of the anchor... */
+	int last = a->line_pos + (a->extent ? a->extent - 1 : 0);
+
+	/* Include the anchors started on the previous line */
+	if (a->line_num < line_number - 1)
+	    continue;
+	if (a->line_num == line_number - 1)
+	    last -= line->prev->size + 1; /* Fake "\n" "between" lines counted too */
+	if (last < sbyte)		/* Completely before the start */
+	    continue;
+
+	if ( !head_processed		/* a->line_pos is not edited yet */
+	     && a->line_num == line_number
+	     && a->line_pos >= ebyte)	/* Completely after the end */
+	    break;
+	/* Now we know that the anchor context intersects the chunk */
+
+	/* Fix the start */
+	if ( !head_processed && a->line_num == line_number
+	     && a->line_pos >= sbyte ) {
+	    a->line_pos += shift;
+	    a->extent -= shift;
+	    head_processed = 1;
+	}
+	/* Fix the end */
+	if ( last < ebyte )
+	    a->extent += shift;
+	else
+	    break;			/* Keep this `a' for the next step */
+    }
+    *prev_anchor = a;
+    *prev_head_processed = head_processed;
+}
+
+/*
+ *  Given a line and two int arrays of old/now position, this function
+ *  creates a new line where spaces have been inserted/removed
+ *  in appropriate places - so that characters at/after the old
+ *  position end up at/after the new position, for each pair, if possible.
+ *  Some necessary changes for anchors starting on this line are also done
+ *  here if needed.
+ *  Returns a newly allocated HTLine* if changes were made
+ *    (caller has to free the old one).
+ *  Returns NULL if no changes needed.  (Remove-spaces code may be buggy...)
+ * - kw
+ */
+PRIVATE HTLine * insert_blanks_in_line ARGS7(
+    HTLine *,		line,
+    int,		line_number,
+    HText *,		text,
+    TextAnchor *,	prev_anchor,
+    int,		ninserts,
+    int *,		oldpos,		/* Measured in cells */
+    int *,		newpos)		/* Likewise */
+{
+    int ioldc = 0;			/* count visible characters */
+    int ip;				/* count insertion pairs */
+#if defined(USE_COLOR_STYLE)
+    int istyle = 0;
+#endif
+    int added_chars = 0;
+    int shift = 0;
+    int head_processed;
+    HTLine * mod_line;
+    char *newdata;
+    char *s = line->data;
+    char *copied = line->data, *t;
+
+    if (!(line && line->size && ninserts))
+	return NULL;
+    for (ip = 0; ip < ninserts; ip++)
+	if (newpos[ip] > oldpos[ip] &&
+	    (newpos[ip] - oldpos[ip]) > added_chars)
+	    added_chars = newpos[ip] - oldpos[ip];
+    if (line->size + added_chars > MAX_LINE - 2)
+	return NULL;
+    if (line == text->last_line)
+	mod_line = allocHTLine(MAX_LINE);
+    else
+	mod_line = allocHTLine(line->size + added_chars);
+    if (!mod_line)
+	return NULL;
+    if (!prev_anchor)
+	prev_anchor = text->first_anchor;
+    head_processed = (prev_anchor && prev_anchor->line_num < line_number);
+    memcpy(mod_line, line, LINE_SIZE(1));
+    t = newdata = mod_line->data;
+    ip = 0;
+    while (ip <= ninserts) {
+	/* line->size is in bytes, so it may be larger than needed... */
+	int curlim = (ip < ninserts
+		      ? oldpos[ip]
+		      /* Include'em all! */
+		      : (line->size <= MAX_LINE ? MAX_LINE+1 : line->size+1));
+	char *pre = s;
+
+	/* Fast forward to char==curlim or EOL.  Stop *before* the
+	   style-change chars. */
+	while (*s) {
+	    if ( text && text->T.output_utf8
+		 && UCH(*s) >= 0x80 && UCH(*s) <  0xC0 )
+		pre = s + 1;
+	    else if (!IsSpecialAttrChar(*s)) {	/* At a "displayed" char */
+		if (ioldc >= curlim)
+		    break;
+		ioldc++;
+		pre = s + 1;
+	    }
+	    s++;
+	}
+
+	/* Now s is at the "displayed" char, pre is before the style change */
+	if (ip)				/* Fix anchor positions */
+	    move_anchors_in_region(line, line_number, &prev_anchor,
+				   &head_processed,
+				   copied - line->data, pre - line->data,
+				   shift);
+#if defined(USE_COLOR_STYLE)		/* Move styles too */
+#define NStyle mod_line->styles[istyle]
+	for (; istyle < line->numstyles && NStyle.horizpos < curlim ; istyle++)
+	    /* Should not we include OFF-styles at curlim? */
+	    NStyle.horizpos += shift;
+#endif
+	while (copied < pre)	/* Copy verbatim to byte == pre */
+	    *t++ = *copied++;
+	if (ip < ninserts) {		/* Insert spaces */
+	    int delta = newpos[ip] - oldpos[ip] - shift;
+
+	    if (delta < 0) {		/* Not used yet? */
+		while (delta++ < 0 && t > newdata && t[-1] == ' ')
+		    t--, shift--;
+	    } else
+		shift = newpos[ip] - oldpos[ip];
+	    while (delta-- > 0)
+		*t++ = ' ';
+	}
+	ip++;
+    }
+    /* Check whether the last anchor continues on the next line */
+    if (head_processed && prev_anchor && prev_anchor->line_num == line_number)
+	prev_anchor->extent += shift;
+    *t = '\0';
+    mod_line->size = t - newdata;
+    return mod_line;
+}
+
+#if defined(USE_COLOR_STYLE)
+PRIVATE HTStyleChange * skip_matched_and_correct_offsets ARGS3(
+	HTStyleChange *,	end,
+	HTStyleChange *,	start,
+	unsigned,		split_pos)
+{ /* Found an OFF change not part of an adjacent matched pair.
+   * Walk backward looking for the corresponding ON change.
+   * Move everything after split_pos to be at split_pos.
+   * This can only work correctly if all changes are correctly
+   * nested!  If this fails, assume it is safer to leave whatever
+   * comes before the OFF on the previous line alone. */
+    int level = 0;
+    HTStyleChange *tmp = end;
+
+    for (; tmp >= start; tmp--) {
+	if (tmp->style == end->style) {
+	    if (tmp->direction == STACK_OFF)
+		level--;
+	    else if (tmp->direction == STACK_ON) {
+		if (++level == 0)
+		    return tmp;
+	    } else
+		return 0;
+	}
+	if (tmp->horizpos > split_pos)
+	    tmp->horizpos = split_pos;
+    }
+    return 0;
+}
+#endif /* USE_COLOR_STYLE */
+
 PRIVATE void split_line ARGS2(
 	HText *,	text,
 	unsigned,	split)
@@ -2344,9 +2579,6 @@ PRIVATE void split_line ARGS2(
     HTStyle * style = text->style;
     HTLine * temp;
     int spare;
-#if defined(USE_COLOR_STYLE)
-    int inew;
-#endif
     int indent = text->in_line_1 ?
 	  text->style->indent1st : text->style->leftIndent;
     short alignment;
@@ -2355,22 +2587,20 @@ PRIVATE void split_line ARGS2(
     int HeadTrim = 0;
     int SpecialAttrChars = 0;
     int TailTrim = 0;
-    int s;
-
-    /*
-     *  Make new line.
-     */
+    int s, s_post, s_pre, t_underline = underline_on, t_bold = bold_on;
+    char *p;
     HTLine * previous = text->last_line;
     int ctrl_chars_on_previous_line = 0;
     int utfxtra_on_previous_line = utfxtra_on_this_line;
     char * cp;
     /* can't wrap in middle of multibyte sequences, so allocate 2 extra */
     HTLine * line = (HTLine *)LY_CALLOC(1, LINE_SIZE(MAX_LINE)+2);
+
+    /*
+     *  Make new line.
+     */
     if (line == NULL)
 	outofmem(__FILE__, "split_line_1");
-#if defined(USE_COLOR_STYLE)
-    line->styles = stylechanges_buffers[stylechanges_buffers_free = (stylechanges_buffers_free + 1) &1];
-#endif
     ctrl_chars_on_this_line = 0; /*reset since we are going to a new line*/
     utfxtra_on_this_line = 0;	/*reset too, we'll count them*/
     text->LastChar = ' ';
@@ -2381,6 +2611,7 @@ PRIVATE void split_line ARGS2(
 #endif
 
     cp = previous->data;
+    /* Float LY_SOFT_NEWLINE to the start */
     if (cp[0] == LY_BOLD_START_CHAR
      || cp[0] == LY_UNDERLINE_START_CHAR) {
 	switch (cp[1]) {
@@ -2423,36 +2654,42 @@ PRIVATE void split_line ARGS2(
     text->permissible_split = 0;  /* 12/13/93 */
     line->data[0] = '\0';
 
-    /*
-     *  If we are not splitting and need an underline char, add it now. - FM
-     */
-    if ((split < 1) &&
-	!(dump_output_immediately && use_underscore) && underline_on) {
+    alignment = style->alignment;
+
+    if (split > 0) { /* Restore flags to the value at the splitting point */
+	if (!(dump_output_immediately && use_underscore))
+	    t_underline = set_style_by_embedded_chars(
+		previous->data, previous->data + split,
+		LY_UNDERLINE_START_CHAR, LY_UNDERLINE_END_CHAR);
+
+	t_bold = set_style_by_embedded_chars(
+	    previous->data, previous->data + split,
+	    LY_BOLD_START_CHAR, LY_BOLD_END_CHAR);
+
+    }
+
+    if (!(dump_output_immediately && use_underscore) && t_underline) {
 	line->data[line->size++] = LY_UNDERLINE_START_CHAR;
 	line->data[line->size] = '\0';
 	ctrl_chars_on_this_line++;
+	SpecialAttrChars++;
     }
-    /*
-     *  If we are not splitting and need a bold char, add it now. - FM
-     */
-    if ((split < 1) && bold_on) {
+    if (t_bold) {
 	line->data[line->size++] = LY_BOLD_START_CHAR;
 	line->data[line->size] = '\0';
 	ctrl_chars_on_this_line++;
+	SpecialAttrChars++;
     }
 
-    alignment = style->alignment;
     /*
      *  Split at required point
      */
     if (split > 0) {	/* Delete space at "split" splitting line */
-	char *p, *prevdata = previous->data, *linedata = line->data;
+	char *prevdata = previous->data, *linedata = line->data;
 	unsigned plen;
 	int i;
 
-	/*
-	 *  Split the line. - FM
-	 */
+	/* Split the line. - FM */
 	prevdata[previous->size] = '\0';
 	previous->size = split;
 
@@ -2462,160 +2699,76 @@ PRIVATE void split_line ARGS2(
 	 */
 	p = prevdata + split;
 	while ((
+		(*p == ' '
 #ifdef EXP_JUSTIFY_ELTS
 		/* if justification is allowed for prev line, then raw
 		 * HT_NON_BREAK_SPACE are still present in data[] (they'll be
 		 * substituted at the end of this function with ' ') - VH
 		 */
-		(*p == ' ' || *p == HT_NON_BREAK_SPACE ) &&
-#else
-		(*p == ' ') &&
+		 || *p == HT_NON_BREAK_SPACE
 #endif
-
-		(HeadTrim || text->first_anchor ||
-		 underline_on || bold_on ||
-		 alignment != HT_LEFT ||
-		 style->wordWrap || style->freeFormat ||
-		 style->spaceBefore || style->spaceAfter)) ||
+		)
+		&& (HeadTrim || text->first_anchor ||
+		    underline_on || bold_on ||
+		    alignment != HT_LEFT ||
+		    style->wordWrap || style->freeFormat ||
+		    style->spaceBefore || style->spaceAfter)) ||
 		*p == LY_SOFT_HYPHEN) {
 	    p++;
 	    HeadTrim++;
 	}
+
 	plen = strlen(p);
-
-	/*
-	 *  Add underline char if needed. - FM
-	 */
-	if (!(dump_output_immediately && use_underscore)) {
-	    /*
-	     * Make sure our global flag is correct. - FM
-	     */
-	    underline_on = NO;
-	    for (i = (split-1); i >= 0; i--) {
-		if (prevdata[i] == LY_UNDERLINE_END_CHAR) {
-		    break;
-		}
-		if (prevdata[i] == LY_UNDERLINE_START_CHAR) {
-		    underline_on = YES;
-		    break;
-		}
-	    }
-	    /*
-	     *  Act on the global flag if set above. - FM
-	     */
-	    if (underline_on && *p != LY_UNDERLINE_END_CHAR) {
-		linedata[line->size++] = LY_UNDERLINE_START_CHAR;
-		linedata[line->size] = '\0';
-		ctrl_chars_on_this_line++;
-		SpecialAttrChars++;
-	    }
-	    if (plen) {
-		for (i = (plen - 1); i >= 0; i--) {
-		    if (p[i] == LY_UNDERLINE_START_CHAR) {
-			underline_on = YES;
-			break;
-		    }
-		    if (p[i] == LY_UNDERLINE_END_CHAR) {
-			underline_on = NO;
-			break;
-		    }
-		}
-		for (i = (plen - 1); i >= 0; i--) {
-		    if (p[i] == LY_UNDERLINE_START_CHAR ||
-			p[i] == LY_UNDERLINE_END_CHAR) {
-			ctrl_chars_on_this_line++;
-		    }
-		}
-	    }
-	}
-
-	/*
-	 *  Add bold char if needed, first making
-	 *  sure that our global flag is correct. - FM
-	 */
-	bold_on = NO;
-	for (i = (split - 1); i >= 0; i--) {
-	    if (prevdata[i] == LY_BOLD_END_CHAR) {
-		break;
-	    }
-	    if (prevdata[i] == LY_BOLD_START_CHAR) {
-		bold_on = YES;
-		break;
-	    }
-	}
-	/*
-	 *  Act on the global flag if set above. - FM
-	 */
-	if (bold_on && *p != LY_BOLD_END_CHAR) {
-	    linedata[line->size++] = LY_BOLD_START_CHAR;
-	    linedata[line->size] = '\0';
-	    ctrl_chars_on_this_line++;
-	    SpecialAttrChars++;
-	}
-	if (plen) {
+	if (plen) {			/* Count funny characters */
 	    for (i = (plen - 1); i >= 0; i--) {
-		if (p[i] == LY_BOLD_START_CHAR) {
-		    bold_on = YES;
-		    break;
-		}
-		if (p[i] == LY_BOLD_END_CHAR) {
-		    bold_on = NO;
-		    break;
-		}
-	    }
-	    for (i = (plen - 1); i >= 0; i--) {
-		if (p[i] == LY_BOLD_START_CHAR ||
+		if (p[i] == LY_UNDERLINE_START_CHAR ||
+		    p[i] == LY_UNDERLINE_END_CHAR ||
+		    p[i] == LY_BOLD_START_CHAR ||
 		    p[i] == LY_BOLD_END_CHAR ||
-		    p[i] == LY_SOFT_HYPHEN) {
+		    p[i] == LY_SOFT_HYPHEN)
 		    ctrl_chars_on_this_line++;
-		} else if (IS_UTF_EXTRA(p[i])) {
+		else if (IS_UTF_EXTRA(p[i]))
 		    utfxtra_on_this_line++;
-		}
-		if (p[i] == LY_SOFT_HYPHEN && (int)text->permissible_split < i) {
+		if (p[i] == LY_SOFT_HYPHEN && (int)text->permissible_split < i)
 		    text->permissible_split = i + 1;
-		}
 	    }
 	    ctrl_chars_on_this_line += utfxtra_on_this_line;
-	}
 
-	/*
-	 *  Add the data to the new line. - FM
-	 */
-	strcat(linedata, p);
-	line->size += plen;
+	    /* Add the data to the new line. - FM */
+	    strcat(linedata, p);
+	    line->size += plen;
+	}
     }
 
     /*
      *  Economize on space.
      */
-    while ((previous->size > 0) &&
+    p = previous->data + previous->size - 1;
+    while (p >= previous->data
+	   && (*p == ' '
 #ifdef EXP_JUSTIFY_ELTS
 	    /* if justification is allowed for prev line, then raw
 	     * HT_NON_BREAK_SPACE are still present in data[] (they'll be
 	     * substituted at the end of this function with ' ') - VH
 	     */
-	   ((previous->data[previous->size-1] == ' ') ||
-	    (previous->data[previous->size-1] == HT_NON_BREAK_SPACE)) &&
-#else
-	   (previous->data[previous->size-1] == ' ') &&
+	       || *p == HT_NON_BREAK_SPACE
 #endif
+	      )
 #ifdef USE_PRETTYSRC
-	    !psrc_view && /*don't strip trailing whites - since next line can
+	   && !psrc_view /*don't strip trailing whites - since next line can
 		start with LY_SOFT_NEWLINE - so we don't lose spaces when
 		'p'rinting this text to file -VH */
 #endif
-	   (ctrl_chars_on_this_line || HeadTrim || text->first_anchor ||
-	    underline_on || bold_on ||
-	    alignment != HT_LEFT ||
-	    style->wordWrap || style->freeFormat ||
-	    style->spaceBefore || style->spaceAfter)) {
-	/*
-	 *  Strip trailers.
-	 */
-	previous->data[previous->size-1] = '\0';
-	previous->size--;
-	TailTrim++;
-    }
+	   && (ctrl_chars_on_this_line || HeadTrim || text->first_anchor ||
+	       underline_on || bold_on ||
+	       alignment != HT_LEFT ||
+	       style->wordWrap || style->freeFormat ||
+	       style->spaceBefore || style->spaceAfter))
+	p--;	/*  Strip trailers. */
+    TailTrim = previous->data + previous->size - 1 - p;	/*  Strip trailers. */
+    previous->size -= TailTrim;
+    p[1] = '\0';
+
     /*
      *  s is the effective split position, given by either a non-zero
      *  value of split or by the size of the previous line before
@@ -2626,6 +2779,9 @@ PRIVATE void split_line ARGS2(
     } else {
 	s = split;
     }
+    s_post = s + HeadTrim;
+    s_pre  = s - TailTrim;
+
 #ifdef DEBUG_SPLITLINE
 #ifdef DEBUG_APPCH
     if (s != (int)split)
@@ -2634,150 +2790,98 @@ PRIVATE void split_line ARGS2(
 #endif
 
 #if defined(USE_COLOR_STYLE)
-#define LastStyle (previous->numstyles-1)
+    line->styles = stylechanges_buffers[stylechanges_buffers_free = (stylechanges_buffers_free + 1) &1];
     line->numstyles = 0;
-    inew = MAX_STYLES_ON_LINE - 1;
-    /*
-     *  Color style changes after the split position + possible trimmed
-     *  head characters are transferred to the new line.  Ditto for changes
-     *  within the trimming region, but we stop when we reach an OFF change.
-     *  The second while loop below may then handle remaining changes. - kw
-     */
-    while (previous->numstyles && inew >= 0) {
-	if (previous->styles[LastStyle].horizpos > s + HeadTrim) {
-	    line->styles[inew].horizpos =
-		previous->styles[LastStyle].horizpos
-		- (s + HeadTrim) + SpecialAttrChars;
-	    line->styles[inew].direction = previous->styles[LastStyle].direction;
-	    line->styles[inew].style = previous->styles[LastStyle].style;
-	    inew --;
-	    line->numstyles ++;
-	    previous->numstyles --;
-	} else if (previous->styles[LastStyle].horizpos > s - TailTrim &&
-		   (previous->styles[LastStyle].direction == STACK_ON ||
-		    previous->styles[LastStyle].direction == ABS_ON)) {
-	    line->styles[inew].horizpos =
-		(previous->styles[LastStyle].horizpos < s) ?
-		0 : SpecialAttrChars;
-	    line->styles[inew].direction = previous->styles[LastStyle].direction;
-	    line->styles[inew].style = previous->styles[LastStyle].style;
-	    inew --;
-	    line->numstyles ++;
-	    previous->numstyles --;
-	} else
-	    break;
-    }
-    spare = previous->numstyles;
-    while (previous->numstyles && inew >= 0) {
-	if (previous->numstyles >= 2 &&
-	    previous->styles[LastStyle].style
-	    == previous->styles[previous->numstyles-2].style &&
-	    previous->styles[LastStyle].horizpos
-	    == previous->styles[previous->numstyles-2].horizpos &&
-	    ((previous->styles[LastStyle].direction == STACK_OFF &&
-	      previous->styles[previous->numstyles-2].direction == STACK_ON) ||
-	     (previous->styles[LastStyle].direction == ABS_OFF &&
-	      previous->styles[previous->numstyles-2].direction == ABS_ON) ||
-	     (previous->styles[LastStyle].direction == ABS_ON &&
-	      previous->styles[previous->numstyles-2].direction == ABS_OFF)
-		)) {
-	    /*
-	     *  Discard pairs of ON/OFF for the same color style, but only
-	     *  if they appear at the same position. - kw
-	     */
-	    previous->numstyles -= 2;
-	    if (spare > previous->numstyles)
-		spare = previous->numstyles;
-	} else if (spare > 0 && previous->styles[spare - 1].direction &&
-		   previous->numstyles < MAX_STYLES_ON_LINE) {
-	    /*
-	     *  The index variable spare walks backwards through the
-	     *  list of color style changes on the previous line, trying
-	     *  to find an ON change which isn't followed by a
-	     *  corresponding OFF.  When it finds one, the missing OFF
-	     *  change is appended to the end, and an ON change is added
-	     *  at the beginning of the current line.  The OFF change
-	     *  appended to the previous line may get removed again in
-	     *  the next iteration. - kw
-	     */
-	    line->styles[inew].horizpos = 0;
-	    line->styles[inew].direction = ON;
-	    line->styles[inew].style = previous->styles[spare - 1].style;
-	    inew --;
-	    line->numstyles ++;
-	    previous->styles[previous->numstyles].style = line->styles[inew + 1].style;
+    {
+	HTStyleChange *from = previous->styles + previous->numstyles - 1;
+	HTStyleChange *to = line->styles + MAX_STYLES_ON_LINE - 1;
+	HTStyleChange *scan, *at_end;
 
-	    previous->styles[previous->numstyles].direction = ABS_OFF;
-	    previous->styles[previous->numstyles].horizpos = previous->size;
-	    previous->numstyles++;
-	    spare --;
-	} else if (spare >= 2 &&
-		   previous->styles[spare - 1].style == previous->styles[spare - 2].style &&
-		   ((previous->styles[spare - 1].direction == STACK_OFF &&
-		     previous->styles[spare - 2].direction == STACK_ON) ||
-		    (previous->styles[spare - 1].direction == ABS_OFF &&
-		     previous->styles[spare - 2].direction == ABS_ON) ||
-		    (previous->styles[spare - 1].direction == STACK_ON &&
-		     previous->styles[spare - 2].direction == STACK_OFF) ||
-		    (previous->styles[spare - 1].direction == ABS_ON &&
-		     previous->styles[spare - 2].direction == ABS_OFF)
-		       )) {
-		/*
-		 *  Skip pairs of adjacent ON/OFF or OFF/ON changes.
-		 */
-	    spare -= 2;
-	} else if (spare && !previous->styles[spare - 1].direction) {
-	    /*
-	     *  Found an OFF change not part of an adjacent matched pair.
-	     *  Walk backward looking for the corresponding ON change.
-	     *  If we find it, skip the ON/OFF and everything in between.
-	     *  This can only work correctly if all changes are correctly
-	     *  nested!  If this fails, assume it is safer to leave whatever
-	     *  comes before the OFF on the previous line alone.  Setting
-	     *  spare to 0 ensures that it won't be used in a following
-	     *  iteration. - kw
+	/*  Color style changes after the split position
+	 *  are transferred to the new line.  Ditto for changes
+	 *  in the trimming region, but we stop when we reach an OFF change.
+	 *  The second loop below may then handle remaining changes. - kw */
+	while (from >= previous->styles && to >= line->styles) {
+	    *to = *from;
+	    if (to->horizpos > s_post)
+		to->horizpos += - s_post + SpecialAttrChars;
+	    else if (to->horizpos > s_pre &&
+		     (to->direction == STACK_ON ||
+		      to->direction == ABS_ON))
+		to->horizpos = (to->horizpos < s) ? 0 : SpecialAttrChars;
+	    else
+		break;
+	    to--;
+	    from--;
+	}
+	/* FROM may be invalid, otherwise it is either an ON change at or
+	   before s_pre, or is an OFF change at or before s_post.  */
+
+	scan = from;
+	at_end = from;
+	/* Now on the previous line we have a correctly nested but
+	   possibly non-terminated sequence of style changes.
+	   Terminate it, and duplicate unterminated changes at the
+	   beginning of the new line. */
+	while (scan >= previous->styles && at_end >= previous->styles) {
+	    /* The algorithm: scan back though the styles on the previous line.
+	       a) If OFF, skip the matched group.
+	          Report a bug on failure.
+	       b) If ON, (try to) cancel the corresponding ON at at_end,
+		  and the corresponding OFF at to;
+		  If not, put the corresponding OFF at at_end, and copy to to;
 	     */
-	    int level=-1;
-	    int itmp;
-	    for (itmp = spare-1; itmp > 0; itmp--) {
-		if (previous->styles[itmp - 1].style
-		    == previous->styles[spare - 1].style) {
-		    if (previous->styles[itmp - 1].direction == STACK_OFF) {
-			level--;
-		    } else if (previous->styles[itmp - 1].direction == STACK_ON) {
-			if (++level == 0)
-			    break;
-		    } else
-			break;
+	    if (scan->direction == STACK_OFF) {
+		scan = skip_matched_and_correct_offsets(scan, previous->styles,
+							s_pre);
+		if (!scan) {
+		    CTRACE((tfp, "BUG: styles improperly nested.\n"));
+		    break;
+		}
+	    } else if (scan->direction == STACK_ON) {
+		if ( at_end->direction == STACK_ON
+		     && at_end->style == scan->style
+		     && at_end->horizpos >= s_pre )
+		    at_end--;
+		else if (at_end >= previous->styles + MAX_STYLES_ON_LINE - 1) {
+		    CTRACE((tfp, "BUG: style overflow before split_line.\n"));
+		    break;
+		} else {
+		    at_end++;
+		    at_end->direction = STACK_OFF;
+		    at_end->style = scan->style;
+		    at_end->horizpos = s_pre;
+		}
+		if ( to < line->styles + MAX_STYLES_ON_LINE - 1
+		     && to[1].direction == STACK_OFF
+		     && to[1].horizpos <= SpecialAttrChars
+		     && to[1].style == scan->style )
+		    to++;
+		else if (to >= line->styles) {
+		    *to = *scan;
+		    to->horizpos = SpecialAttrChars;
+		    to--;
+		} else {
+		    CTRACE((tfp, "BUG: style overflow after split_line.\n"));
+		    break;
 		}
 	    }
-	    if (level == 0)
-		spare = itmp - 1;
-	    else
-		spare = 0;
-	} else {
-	    /*
-	     *  Nothing applied, so we are done with the loop. - kw
-	     */
-	    break;
+	    if (scan->horizpos > s_pre)
+		scan->horizpos = s_pre;
+	    scan--;
 	}
-    }
-    if (previous->numstyles > 0 && previous->styles[LastStyle].direction) {
+	line->numstyles = line->styles + MAX_STYLES_ON_LINE - 1 - to;
+	if (line->numstyles > 0 && line->numstyles < MAX_STYLES_ON_LINE) {
+	    int n;
 
-	CTRACE((tfp, "%s\n%s%s\n",
-		    "........... Too many character styles on line:",
-		    "........... ", previous->data));
+	    for (n = 0; n < line->numstyles; n++)
+		line->styles[n] = to[n + 1];
+	} else if (line->numstyles == 0)
+	    line->styles[0].horizpos = ~0; /* ?!!! */
+	previous->numstyles = at_end - previous->styles + 1;
+	if (previous->numstyles == 0)
+	    previous->styles[0].horizpos = ~0;	/* ?!!! */
     }
-    if (line->numstyles > 0 && line->numstyles < MAX_STYLES_ON_LINE) {
-	int n;
-	inew ++;
-	for (n = 0; n < line->numstyles; n++)
-		line->styles[n] = line->styles[n + inew];
-    } else if (line->numstyles == 0) {
-	line->styles[0].horizpos = ~0;
-    }
-    if (previous->numstyles == 0)
-	previous->styles[0].horizpos = ~0;
 #endif /*USE_COLOR_STYLE*/
 
     temp = (HTLine *)LY_CALLOC(1, LINE_SIZE(previous->size));
@@ -2907,7 +3011,6 @@ PRIVATE void split_line ARGS2(
 	    break;
     } /* switch */
 
-    text->chars = text->chars + previous->size + 1;	/* 1 for the line */
     text->in_line_1 = NO;		/* unless caller sets it otherwise */
 
     /*
@@ -2915,126 +3018,73 @@ PRIVATE void split_line ARGS2(
      *  structure values for the new line. - FM
      */
 
-    if (split > 0 || s > 0) {		/* if not completely empty */
+    if (s > 0) {			/* if not completely empty */
 	TextAnchor * prev_a = NULL;
+	int moved = 0;
+
+	/* In the algorithm below we move or not move anchors between
+	   lines using some heuristic criteria.  However, it is
+	   desirable not to have two consequent anchors on different
+	   lines *in a wrong order*!  (How can this happen?)
+	   So when the "reasonable choice" is not unique, we use the
+	   MOVED flag to choose one.
+	 */
+	/* Our operations can make a non-empty all-whitespace link
+	   empty.  So what? */
 	for (a = text->first_anchor; a; prev_a = a, a = a->next) {
 	    if (a->line_num == CurLine) {
-		int old_e = a->extent;
-		int a0 = a->line_pos, a1 = a->line_pos + a->extent;
-		int S, d, new_pos, new_ext;
-		if (a->link_type == INPUT_ANCHOR) {
-		    if (a->line_pos >= s) {
-			a->start += (1 + SpecialAttrChars - HeadTrim - TailTrim);
-			a->line_pos -= (s - SpecialAttrChars + HeadTrim);
-			a->line_num = text->Lines;
+		int len = a->extent, n = a->number, start = a->line_pos;
+		int end = start + len;
+
+		/* Which anchors do we leave on the previous line?
+		   a) empty finished (We need a cut-off value.
+		      "Just because": those before s;
+		      this is the only case when we use s, not s_pre/s_post);
+		   b) Those which start before s_pre;
+		 */
+		if (start < s_pre) {
+		    if (end <= s_pre)
+			continue;	/* No problem */
+
+		    CTRACE_SPLITLINE((tfp, "anchor %d: no relocation", n));
+		    if (end > s_post) {
+			CTRACE_SPLITLINE((tfp, " of the start.\n"));
+			a->extent += -(TailTrim + HeadTrim) - SpecialAttrChars;
+		    } else {
+			CTRACE_SPLITLINE((tfp, ", cut the end.\n"));
+			a->extent = s_pre - start;
 		    }
 		    continue;
-		}
-		if (a0 < s - TailTrim && a1 <= s - TailTrim) {
-		    continue;	/* unaffected, leave it where it is. */
-		}
-		S = s + a->start - a->line_pos;
-		d = S - s;	/* == a->start - a->line_pos */
-		new_ext = old_e = a->extent;
-
-		if (!old_e &&
-		    (!a->number || a->show_anchor) &&
-		    a0 <= s + HeadTrim) {
-		    CTRACE_SPLITLINE((tfp, "anchor %d case %d: ", a->number,1));
-		    /*
-		     *  It is meant to be empty, and/or endAnchor
-		     *  has seen it and recognized it as empty.
-		     */
-		    new_pos = (a0 <= s) ? s - TailTrim :
-			s - TailTrim + 1;
-		    if (prev_a && new_pos + d < prev_a->start) {
-			if (prev_a->start <= S - TailTrim + 1 + SpecialAttrChars)
-			    new_pos = prev_a->start - d;
-			else
-			    new_pos = s - TailTrim + 1 + SpecialAttrChars;
-		    }
-		} else if (old_e &&
-		     a0 >= s - TailTrim && a0 <= s + HeadTrim &&
-		     a1 <= s + HeadTrim) {
-		    CTRACE_SPLITLINE((tfp, "anchor %d case %d: ", a->number,2));
-		    /*
-		     *  endAnchor has seen it, it is effectively empty
-		     *  after our trimming, but endAnchor has for some
-		     *  reason not recognized this.  In other words,
-		     *  this should not happen.
-		     *  Should we not adjust the extent and let it "leak"
-		     *  into the new line?
-		     */
-		    new_pos = (a0 < s) ? s - TailTrim :
-			s - TailTrim + 1;
-		    if (prev_a && new_pos + d < prev_a->start) {
-			if (prev_a->start <= S - TailTrim + 1 + SpecialAttrChars)
-			    new_pos = prev_a->start - d;
-			else
-			    new_pos = s - TailTrim + 1 + SpecialAttrChars;
-		    }
-		    new_ext = 0;
-		} else if (a0 >= s + HeadTrim) {
-		    CTRACE_SPLITLINE((tfp, "anchor %d case %d: ", a->number,3));
-		    /*
-		     *  Completely after split, just shift.
-		     */
-		    new_pos = a0 - TailTrim + 1 - HeadTrim + SpecialAttrChars;
-		} else if (!old_e) {
-		    CTRACE_SPLITLINE((tfp, "anchor %d case %d: ", a->number,4));
-		    /*
-		     *  No extent set, we may still be growing it.
-		     */
-		    new_pos = s - TailTrim + 1 + SpecialAttrChars;
-
-		    /*
-		     *  Ok, it's neither empty, nor is it completely
-		     *  before or after the split region (including trimmed
-		     *  stuff).  So the anchor is either being split in
-		     *  the middle, with stuff remaining on both lines,
-		     *  or something is being nibbled off, either at
-		     *  the end (anchor stays on previous line) or at
-		     *  the beginning (anchor is on new line).  Let's
-		     *  try in that order.
-		     */
-		} else if (a0 < s - TailTrim &&
-			   a1 > s + HeadTrim) {
-		    CTRACE_SPLITLINE((tfp, "anchor %d case %d: ", a->number,5));
-		    new_pos = a0;
-		    new_ext = old_e - TailTrim - HeadTrim + SpecialAttrChars;
-		} else if (a0 < s - TailTrim) {
-		    CTRACE_SPLITLINE((tfp, "anchor %d case %d: ", a->number,6));
-		    new_pos = a0;
-		    new_ext = s - TailTrim - a0;
-		} else if (a1 > s + HeadTrim) {
-		    CTRACE_SPLITLINE((tfp, "anchor %d case %d: ", a->number,7));
-		    new_pos = s - TailTrim + 1 + SpecialAttrChars;
-		    new_ext = old_e - (s + HeadTrim - a0);
-		} else {
-		    CTRACE((tfp, "split_line anchor %d line %d: This should not happen!\n",
-			   a->number, a->line_num));
-		    CTRACE((tfp,
-			   "anchor %d: (T,H,S)=(%d,%d,%d); (line,start,pos,ext):(%d,%d,%d,%d)!\n",
-			   a->number,
-			   TailTrim,HeadTrim,SpecialAttrChars,
-			   a->line_num,a->start,a->line_pos,a->extent));
+		} else if (start < s && !len
+			   && (!n || (a->show_anchor && !moved))) {
+		    CTRACE_SPLITLINE((tfp, "anchor %d: no relocation, empty-finished",
+				      n));
+		    a->line_pos = s_pre; /* Leave at the end of line */
 		    continue;
 		}
-		CTRACE_SPLITLINE((tfp, "(T,H,S)=(%d,%d,%d); (line,start,pos,ext):(%d,%d,%d,%d",
-		       TailTrim,HeadTrim,SpecialAttrChars,
-		       a->line_num,a->start,a->line_pos,a->extent));
-		if (new_pos != a->line_pos)
-		    a->start = new_pos + d;
-		if (new_pos > s - TailTrim) {
-		    new_pos -= s - TailTrim + 1;
-		    a->line_num = text->Lines;
-		}
-		a->line_pos = new_pos;
-		a->extent = new_ext;
 
-		CTRACE_SPLITLINE((tfp, "))->(%d,%d,%d,%d)\n",
-		       a->line_num,a->start,a->line_pos,a->extent));
-	    }
+		/* The rest we relocate */
+		moved = 1;
+		a->line_num++;
+		CTRACE_SPLITLINE((tfp, "anchor %d: (T,H,S)=(%d,%d,%d); (line,pos,ext):(%d,%d,%d), ",
+		       n, TailTrim,HeadTrim,SpecialAttrChars,
+		       a->line_num,a->line_pos,a->extent));
+		if (end < s_post) {	/* Move the end to s_post */
+		    CTRACE_SPLITLINE((tfp, "Move end +%d, ", s_post - end));
+		    len += s_post - end;
+		}
+		if (start < s_post) {	/* Move the start to s_post */
+		    CTRACE_SPLITLINE((tfp, "Move start +%d, ", s_post - start));
+		    len -= s_post - start;
+		    start = s_post;
+		}
+		a->line_pos = start - s_post + SpecialAttrChars;
+		a->extent = len;
+
+		CTRACE_SPLITLINE((tfp, "->(%d,%d,%d)\n",
+		       a->line_num,a->line_pos,a->extent));
+	    } else if (a->line_num > CurLine)
+		break;
 	}
     }
 
@@ -3043,6 +3093,7 @@ PRIVATE void split_line ARGS2(
 
     if (this_line_was_split
      && spare
+     && !text->stbl	/* We don't inform TRST on the cell width change yet */
      && justify_max_void_percent > 0
      && justify_max_void_percent <= 100
      && justify_max_void_percent >= ((100*spare)
@@ -3055,10 +3106,8 @@ PRIVATE void split_line ARGS2(
 	ht_run_info* r = ht_runs;
 	char c;
 	int total_byte_len = 0, total_cell_len = 0;
-	int d_, r_, i, j, cur_byte_num, *m;
+	int d_, r_;
 	HTLine * jline;
-	char *jdata;
-	char *prevdata = previous->data;
 
 	ht_num_runs = 0;
 	r->byte_len = r->cell_len = 0;
@@ -3106,183 +3155,46 @@ PRIVATE void split_line ARGS2(
 	++ht_num_runs;
 
 	if (ht_num_runs != 1) {
+	    int *oldpos = (int*)malloc(sizeof(int)*2*(ht_num_runs - 1));
+	    int *newpos = oldpos + ht_num_runs - 1;
+	    int i = 1;
 
-	    jline = allocHTLine(previous->size+spare);
-	    if (jline == NULL)
-		outofmem(__FILE__, "split_line_1");
-#if defined(USE_COLOR_STYLE)
-	    jline->styles = previous->styles;
-#endif
-	    jdata = jline->data;
+	    if (oldpos == NULL)
+		outofmem(__FILE__, "split_line_3");
 
-	    /*
-	     * we have to spread num_spaces among (ht_num_runs-1) runs - we
-	     * fill justified_text_map in order to apply changes caused by
-	     * justification to anchor data and color styles, and justify
-	     * original string on the fly
-	     */
 	    d_ = spare/(ht_num_runs-1);
 	    r_ = spare % (ht_num_runs-1);
 
-	    m = justified_text_map;
-	    for(jp = previous->data, i = 0; i < justify_start_position; ++i) {
-		*m++ = i;
-		*jdata++ = ( *prevdata == HT_NON_BREAK_SPACE ? ' ' : *prevdata);
-		++prevdata;
+	    /* The first run is not moved, proceed to the second one */
+	    oldpos[0] = justify_start_position + ht_runs[0].cell_len + 1;
+	    newpos[0] = oldpos[0] + ( d_ + ( r_--  > 0 ) );
+	    while (i < ht_num_runs - 1) {
+		int delta = ht_runs[i].cell_len + 1;
+
+		oldpos[i] = oldpos[i-1] + delta;
+		newpos[i] = newpos[i-1] + delta + ( d_ + ( r_--  > 0 ) );
+		i++;
 	    }
-
-	    cur_byte_num = i;
-
-	    for (r = ht_runs; r < ht_runs + ht_num_runs; ++r ) {
-
-		/* copy the reference to run content */
-		for(i=0; i < r->byte_len;  ++i) {
-		    *m++ = cur_byte_num++;
-		    *jdata++ = *prevdata++;
-		}
-		if ( r - ht_runs  == ht_num_runs - 1 ) { /* nop on last run */
-		    *jdata++ = '\0';
-		    break;
-		}
-
-		/* the space that was in original string */
-		*m++ = cur_byte_num++;
-		*jdata++ = ' ';
-		prevdata++;/* skip that space */
-
-		cur_byte_num += j=( d_ + ( r_--  > 0 ) );
-		for (i=0; i<j; ++i)
-		    *jdata++ = ' ';
-	    }
-	    *m++ = previous->size + spare; /*map the end */
-
-	    text->chars += spare;
-
-	    jline->offset = previous->offset;
-	    jline->size = previous->size + spare;
-	    jline->split_after = previous->split_after;
-	    jline->bullet = previous->bullet;
-	    jline->expansion_line = previous->expansion_line;
-
-	    jline->prev = previous->prev;
-	    jline->next = previous->next;
+	    jline = insert_blanks_in_line(previous, CurLine, text,
+					  last_anchor_of_previous_line,
+					  ht_num_runs - 1, oldpos, newpos);
+	    free((char*)oldpos);
+	    if (jline == NULL)
+		outofmem(__FILE__, "split_line_4");
 	    previous->next->prev = jline;
 	    previous->prev->next = jline;
 
-#if defined(USE_COLOR_STYLE)
-	    jline->numstyles = previous->numstyles;
-
-	    /* now copy and fix colorstyles */
-	    for(i = 0; i < jline->numstyles; ++i) {
-		int hpos = previous->styles[i].horizpos;
-
-		jline->styles[i].style = previous->styles[i].style;
-		jline->styles[i].direction = previous->styles[i].direction;
-		/*there are stylechanges with hpos > line length */
-		jline->styles[i].horizpos = (hpos > previous->size)
-			? previous->size + spare
-			: justified_text_map[hpos];
-	    }
-#endif
-	    /* we have to fix anchors*/
-	    {
-		/*a2 is the last anchor on the line preceding 'previous'*/
-		TextAnchor* a2 = last_anchor_of_previous_line;
-
-		if (!a2)
-		    a2 = text->first_anchor;
-		else if (a2 == text->last_anchor)
-		    a2 = NULL;
-		else
-		    a2 = a2->next; /*1st anchor on line we justify */
-
-		if (a2) {
-		    for (; a2 /*&& a2->line_num == text->Lines-1*/;
-			    last_anchor_of_previous_line = a2, a2 = a2->next) {
-			int oldpos = a2->line_pos,
-			    newpos = justified_text_map[a2->line_pos],
-			    shift = newpos - oldpos;
-
-			if (a2->line_num == text->Lines)
-			    break;/*new line not yet completed*/
-
-			if (a2->line_num == text->Lines-1) {
-			    a2->line_pos = newpos;
-			    a2->start += shift;
-
-			    if (!a2->extent && a2->number &&
-				(a2->link_type & HYPERTEXT_ANCHOR) &&
-				!a2->show_anchor &&
-				a2->number == text->last_anchor_number)
-				/* seems endAnchor wasn't called for it */ {
-				a2 = a2->next; /*don't allow .start to be incremented
-				    by 'spare' once more */
-				break;
-			    }
-
-			    if ( a2->extent + oldpos > (int) previous->size)
-				/*anchor content wrapped to new line */
-				a2->extent += (jline->size - newpos) -
-				    (previous->size - oldpos);
-			    else
-				a2->extent = justified_text_map[oldpos+a2->extent]
-				    - newpos;
-
-			} else {
-			    /* This is the anchor that was started on previous
-			     * line.  Its .line_pos and .start were updated.
-			     * So we have to update only extent.  If anchor
-			     * text is longer than two lines, we don't bother
-			     * setting it to correct value.
-			     */
-			    if (a2->line_num != text->Lines-2)
-				continue; /* don't bother */
-			    if (!a2->extent && a2->number &&
-				(a2->link_type & HYPERTEXT_ANCHOR) &&
-				!a2->show_anchor &&
-				a2->number == text->last_anchor_number)
-				/* seems endAnchor wasn't called for it */
-				continue;
-			    /* anchor is started at text->Lines-2, and there
-			     * are two cases - either it was wrapped to newline
-			     * or it ended in previous text->Lines-1.
-			     */
-			    {
-				int p2sz = previous->prev->size,
-				    p1sz = previous->size,
-				    onp2sz = p2sz - a2->line_pos,
-				    onp1sz = a2->extent - 1 - onp2sz;
-
-				if (onp1sz >= p1sz)
-				    /* this anchor will be skipped at the next
-				     * split_line here, since its line_num will
-				     * be text->Lines-3
-				     */
-				    a2->extent += spare;
-				else if (onp2sz < a2->extent)
-				    a2->extent += justified_text_map[onp1sz-1]
-					 - onp1sz + 1;
-			    }
-
-			}
-
-		    }
-
-		    /* iterate on anchors in the last line */
-		    for (; a2; a2 = a2->next)
-			a2->start += spare;
-		}
-	    }
-
 	    FREE(previous);
 
-	} else { /* (ht_num_runs==1) */
+	    previous = jline;
+	}
+	{ /* (ht_num_runs==1) */
 	    /* keep maintaining 'last_anchor_of_previous_line' */
 	    TextAnchor* a2 = last_anchor_of_previous_line;
 	    if (justify_start_position) {
-		char* p = previous->data;
-		for( ; p < previous->data + justify_start_position; ++p)
-		    *p = (*p == HT_NON_BREAK_SPACE ? ' ' : *p);
+		char* p2 = previous->data;
+		for( ; p2 < previous->data + justify_start_position; ++p2)
+		    *p2 = (*p2 == HT_NON_BREAK_SPACE ? ' ' : *p2);
 	    }
 
 	    if (!a2)
@@ -3298,23 +3210,23 @@ PRIVATE void split_line ARGS2(
 	}
     } else {
 	if (REALLY_CAN_JUSTIFY(text) ) {
-	    char* p;
+	    char* p2;
 
 	    /* it was permitted to justify line, but this function was called
 	     * to end paragraph - we must substitute HT_NON_BREAK_SPACEs with
 	     * spaces in previous line
 	     */
-	    if (line->size) {
-		  CTRACE((tfp,"justification: shouldn't happen - new line is not empty!\n"));
+	    if (line->size && !text->stbl) {
+		  CTRACE((tfp,"BUG: justification: shouldn't happen - new line is not empty!\n"));
 	    }
 
-	    for (p=previous->data;*p;++p)
-		if (*p == HT_NON_BREAK_SPACE)
-		    *p = ' ';
+	    for (p2=previous->data;*p2;++p2)
+		if (*p2 == HT_NON_BREAK_SPACE)
+		    *p2 = ' ';
 	} else if (have_raw_nbsps) {
 	    /* this is very rare case, that can happen in forms placed in
 	       table cells*/
-	    int i;
+	    unsigned i;
 
 	    for (i = 0; i< previous->size; ++i)
 		if (previous->data[i] == HT_NON_BREAK_SPACE)
@@ -3349,6 +3261,13 @@ PRIVATE void blank_lines ARGS2(
 
     if (!HText_LastLineSize(text, IgnoreSpaces)) { /* No text on current line */
 	HTLine * line = text->last_line->prev;
+
+#ifdef USE_COLOR_STYLE
+	/* Style-change petty requests at the start of the document: */
+	if (line == text->last_line && newlines == 1)
+	    return;			/* Do not add a blank line at start */
+#endif
+
 	while ((line != text->last_line) &&
 	       (HText_TrueLineSize(line, text, IgnoreSpaces) == 0)) {
 	    if (newlines == 0)
@@ -4411,9 +4330,9 @@ PUBLIC void _internal_HTC ARGS3(HText *,text, int,style, int,dir)
 	line = text->last_line;
 
 	if (line->numstyles > 0 && dir == 0 &&
-	    line->styles[line->numstyles].direction &&
-	    line->styles[line->numstyles].style == style &&
-	    (int) line->styles[line->numstyles].horizpos
+	    line->styles[line->numstyles-1].direction &&
+	    line->styles[line->numstyles-1].style == style &&
+	    (int) line->styles[line->numstyles-1].horizpos
 	    == (int)line->size - ctrl_chars_on_this_line) {
 	    /*
 	     *  If this is an OFF change directly preceded by an
@@ -4483,138 +4402,6 @@ PUBLIC void HText_setIgnoreExcess ARGS2(
 */
 
 /*
- *  Given a line and two int arrays of old/now position, this function
- *  does the actual work of creating a new line where spaces have been
- *  inserted in appropriate places - so that characters at/after the old
- *  position end up at/after the new position, for each pair, if possible.
- *  Some necessary changes for anchors starting on this line are also done
- *  here if needed.
- *  Returns a newly allocated HTLine* if changes were made
- *    (caller has to free the old one).
- *  Returns NULL if no changes needed.
- * - kw
- */
-PRIVATE HTLine * insert_blanks_in_line ARGS6(
-    HTLine *,		line,
-    int,		line_number,
-    HText *,		text,
-    int,		ninserts,
-    int *,		oldpos,
-    int *,		newpos)
-{
-    int i;
-    int ioldb, inewb;		/* count bytes */
-    int ioldc = 0, inewc = 0;	/* count visible characters (positions) */
-    int ip = 0;			/* count oldpos,newpos insertion pairs */
-    int acurshift, ashift = 0;	/* for shifting of anchors in this line */
-#if defined(USE_COLOR_STYLE)
-    int stcurshift, stshift = 0; /* for shifting of styles in this line */
-    int istyle;
-#endif
-    int added_chars = 0;
-    HTLine * mod_line;
-    char * newdata;
-    TextAnchor * a;
-    if (!(line && line->size && ninserts))
-	return NULL;
-    for (i = 0; i < ninserts; i++)
-	if (newpos[i] > oldpos[i] &&
-	    (newpos[i] - oldpos[i]) > added_chars)
-	    added_chars = newpos[i] - oldpos[i];
-    if (line->size + added_chars > MAX_LINE - 2)
-	return NULL;
-    if (line == text->last_line)
-	mod_line = allocHTLine(MAX_LINE);
-    else
-	mod_line = allocHTLine(line->size + added_chars);
-    if (!mod_line)
-	return NULL;
-    memcpy(mod_line, line, LINE_SIZE(1));
-    newdata = mod_line->data;
-    for (ioldb = 0, inewb = 0; ioldb < (int)line->size; ioldb++) {
-	if ((line->data[ioldb] == LY_BOLD_START_CHAR ||
-	     line->data[ioldb] == LY_UNDERLINE_START_CHAR ||
-	     !IsSpecialAttrChar(line->data[ioldb])) &&
-	    (!(text && text->T.output_utf8) ||
-	     UCH(line->data[ioldb]) < 128 ||
-	     (UCH((line->data[ioldb] & 0xc0)) == 0xc0))) {
-	    /*
-	     *  A new displayable character starts here.  Time to check
-	     *  whether this is a position to insert spaces.
-	     */
-	    while (ip < ninserts && oldpos[ip] <= ioldc) {
-		if (inewc < newpos[ip]) {
-		    /*
-		     *  Yup, spaces to insert.  We also have to update
-		     *  anchor positions for anchors that start on the
-		     *  same line, this is a pain.  Let's do it first.
-		     *  Note: we rely on a->line_pos counting bytes, not
-		     *  characters.  That's one reason why HText_trimHightext
-		     *  has to be prevented from acting on these anchors in
-		     *  partial display mode before we get a chance to
-		     *  deal with them here.
-		     */
-		    acurshift = 0;
-		    for (a = text->last_anchor_before_stbl ?
-			     text->last_anchor_before_stbl->next :
-			     text->first_anchor;
-			 a && a->line_num <= line_number; a = a->next) {
-			if (a->line_num == line_number)
-			    if (a->line_pos - ashift >= ioldb) {
-				acurshift = newpos[ip] - inewc;
-				a->line_pos += acurshift;
-				a->start += acurshift;
-			    }
-		    }
-		    ashift += acurshift;
-
-		    /*  doing something for color styles here.
-		     *  we rely on horizpos counting characters
-		     *  (display positions), not bytes. */
-#if defined(USE_COLOR_STYLE)
-#define NStyle mod_line->styles[istyle]
-		    stcurshift = 0;
-		    for (istyle = 0; istyle < line->numstyles;
-			 istyle++) {
-			if (NStyle.horizpos - stshift >= ioldc) {
-			    stcurshift = newpos[ip] - inewc;
-			    NStyle.horizpos += stcurshift;
-			}
-		    }
-		    stshift += stcurshift;
-#endif
-		    /*
-		     *  Now insert the spaces.
-		     */
-		    for (; inewc < newpos[ip]; inewc++) {
-			newdata[inewb++] = ' ';
-		    }
-		}
-		ip++;	/* done with this oldpos[ip],newpos[ip] pair. */
-	    }
-	    /*
-	     *  Copy character data over, advance position pointers.
-	     */
-	    newdata[inewb++] = line->data[ioldb];
-	    if (!(line->data[ioldb] == LY_BOLD_START_CHAR ||
-		  line->data[ioldb] == LY_UNDERLINE_START_CHAR)) {
-		ioldc++;
-		inewc++;
-	    }
-	} else {
-	    /*
-	     *  Just copy special attribute chars and utf-8 additional
-	     *  bytes over, don't advance position pointers.
-	     */
-	    newdata[inewb++] = line->data[ioldb];
-	}
-    }
-    newdata[inewb] = '\0';
-    mod_line->size = inewb;
-    return mod_line;
-}
-
-/*
  *  HText_insertBlanksInStblLines fixes up table lines when simple table
  *  processing is closed, by calling insert_blanks_in_line for lines
  *  that need fixup.  Also recalculates alignment for those lines,
@@ -4636,7 +4423,6 @@ PRIVATE int HText_insertBlanksInStblLines ARGS2(
     int		last_nonempty = -1;
 #endif
     int		added_chars_before = 0;
-    TextAnchor * a;
     int lines_changed = 0;
     int max_width = 0, indent, spare, table_offset;
     HTStyle *style;
@@ -4662,14 +4448,6 @@ PRIVATE int HText_insertBlanksInStblLines ARGS2(
     }
     first_lineno_pass2 = last_lineno = me->Lines;
     for (; line && lineno <= last_lineno; line = line->next, lineno++) {
-	if (added_chars_before) {
-	    for (a = me->last_anchor_before_stbl ?
-		     me->last_anchor_before_stbl->next : me->first_anchor;
-		 a && a->line_num <= lineno; a = a->next) {
-		if (a->line_num == lineno)
-		    a->start += added_chars_before;
-	    }
-	}
 	ninserts = Stbl_getFixupPositions(me->stbl, lineno, oldpos, newpos);
 	if (ninserts < 0)
 	    continue;
@@ -4712,12 +4490,12 @@ PRIVATE int HText_insertBlanksInStblLines ARGS2(
 	    continue;
 	}
 	mod_line = insert_blanks_in_line(line, lineno, me,
+					 me->last_anchor_before_stbl,
 					 ninserts, oldpos, newpos);
 	if (mod_line) {
 	    if (line == me->last_line) {
 		me->last_line = mod_line;
 	    } else {
-		me->chars += (mod_line->size - line->size);
 		added_chars_before += (mod_line->size - line->size);
 	    }
 	    line->prev->next = mod_line;
@@ -4807,7 +4585,7 @@ PRIVATE int HText_insertBlanksInStblLines ARGS2(
 	 *  Still not enough.  Something went wrong.  Try the best we
 	 *  can do.
 	 */
-	CTRACE((tfp, "insertBlanks: resulting table too wide by %d positions!",
+	CTRACE((tfp, "BUG: insertBlanks: resulting table too wide by %d positions!\n",
 	       -spare));
 	indent = spare = 0;
     }
@@ -4848,11 +4626,11 @@ PRIVATE int HText_insertBlanksInStblLines ARGS2(
 	    CTRACE((tfp, " %d:%d", lineno, table_offset - line->offset));
 	    line->offset = table_offset;
 	}
-#ifdef EXP_NESTED_TABLES
-	if (max_width)
-	    Stbl_update_enclosing(me->stbl, max_width, last_nonempty);
-#endif
     }
+#ifdef EXP_NESTED_TABLES
+    if (max_width)
+	Stbl_update_enclosing(me->stbl, max_width, last_nonempty);
+#endif
     CTRACE((tfp, " %d:done\n", lineno));
     free(oldpos);
     return lines_changed;
@@ -4867,19 +4645,19 @@ PRIVATE int HText_insertBlanksInStblLines ARGS2(
 PUBLIC void HText_cancelStbl ARGS1(
 	HText *,	me)
 {
-    STable_info *stbl;
-
     if (!me || !me->stbl) {
 	CTRACE((tfp, "cancelStbl: ignored.\n"));
 	return;
     }
     CTRACE((tfp, "cancelStbl: ok, will do.\n"));
 #ifdef EXP_NESTED_TABLES
-    stbl = me->stbl;
+    {
+    STable_info *stbl = me->stbl;
     while (stbl) {
 	STable_info *enclosing = Stbl_get_enclosing(stbl);
 	Stbl_free(stbl);
 	stbl = enclosing;
+    }
     }
 #else
     Stbl_free(me->stbl);
@@ -5012,7 +4790,7 @@ PUBLIC void HText_endStblTD ARGS1(
 {
     if (!me || !me->stbl)
 	return;
-    if (Stbl_finishCellInTable(me->stbl, YES,
+    if (Stbl_finishCellInTable(me->stbl, TRST_ENDCELL_ENDTD,
 			       me->Lines, HText_LastLineSize(me,FALSE)) < 0)
 	HText_cancelStbl(me);	/* give up */
 }
@@ -5079,7 +4857,6 @@ PUBLIC int HText_beginAnchor ARGS3(
 	outofmem(__FILE__, "HText_beginAnchor");
     a->hightext  = NULL;
     a->hightext2 = NULL;
-    a->start = text->chars + text->last_line->size;
     a->inUnderline = underline;
 
     a->line_num = text->Lines;
@@ -5122,7 +4899,6 @@ PUBLIC int HText_beginAnchor ARGS3(
 	HText_appendText(text, marker);
 	if (saved_linenum && text->Lines && saved_lastchar != ' ')
 	    text->LastChar = ']'; /* if marker not after space caused split */
-	a->start = text->chars + text->last_line->size;
 	a->line_num = text->Lines;
 	a->line_pos = text->last_line->size;
     }
@@ -5130,15 +4906,11 @@ PUBLIC int HText_beginAnchor ARGS3(
     return(a->number);
 }
 
-/*
-    This returns whether the given anchor has blank content. Shamelessly copied
-    from HText_endAnchor. The values returned are meaningful only for "normal"
-    links - like ones produced by <a href=".">foo</a>, no inputs, etc. - VH
-*/
-#ifdef MARK_HIDDEN_LINKS
-PUBLIC BOOL HText_isAnchorBlank ARGS2(
+/* If !really, report whether the anchor is empty. */
+PRIVATE int HText_endAnchor0 ARGS3(
 	HText *,	text,
-	int,		number)
+	int,		number,
+	int,		really)
 {
     TextAnchor *a;
 
@@ -5170,7 +4942,7 @@ PUBLIC BOOL HText_isAnchorBlank ARGS2(
 	}
     }
 
-    CTRACE((tfp, "GridText:HText_isAnchorBlank: number:%d link_type:%d\n",
+    CTRACE((tfp, "GridText:HText_endAnchor0: number:%d link_type:%d\n",
 			a->number, a->link_type));
     if (a->link_type == INPUT_ANCHOR) {
 	/*
@@ -5178,22 +4950,39 @@ PUBLIC BOOL HText_isAnchorBlank ARGS2(
 	 */
 
 	CTRACE((tfp,
-	   "HText_isAnchorBlank: internal error: last anchor was input field!\n"));
+	   "BUG: HText_endAnchor0: internal error: last anchor was input field!\n"));
 	return 0;
     }
     if (a->number) {
 	/*
 	 *  If it goes somewhere...
 	 */
-	int i, j, k;
+	int i, j, k, l;
+	BOOL remove_numbers_on_empty = (BOOL) (
+	    ((keypad_mode == LINKS_ARE_NUMBERED ||
+	      keypad_mode == LINKS_AND_FIELDS_ARE_NUMBERED) &&
+	     (text->hiddenlinkflag != HIDDENLINKS_MERGE ||
+	      (LYNoISMAPifUSEMAP &&
+	       !(text->node_anchor && text->node_anchor->bookmark) &&
+	       HTAnchor_isISMAPScript(
+		   HTAnchor_followMainLink((HTAnchor *)a->anchor))))));
 	HTLine *last = text->last_line;
 	HTLine *prev = text->last_line->prev;
 	HTLine *start = last;
 	int CurBlankExtent = 0;
 	int BlankExtent = 0;
+	int extent_adjust = 0;
 
-	int extent_adjust = (text->chars + last->size) - a->start -
-		     (text->Lines - a->line_num);
+	/* Find the length taken by the anchor */
+	l = text->Lines;		/* lineno of last */
+	while (l > a->line_num) {
+	    extent_adjust += start->size;
+	    start = start->prev;
+	    l--;
+	}
+	/* Now start is the start line of the anchor */
+	extent_adjust += start->size - a->line_pos;
+	start = last;			/* Used later */
 
 	/*
 	 *  Check if the anchor content has only
@@ -5308,191 +5097,9 @@ PUBLIC BOOL HText_isAnchorBlank ARGS2(
 		}
 	    }
 	}
-	a->extent -= extent_adjust;
-	return i==0;
-    } else
-	return 0;
-}
-#endif /* MARK_HIDDEN_LINKS */
-
-
-PUBLIC void HText_endAnchor ARGS2(
-	HText *,	text,
-	int,		number)
-{
-    TextAnchor *a;
-
-    /*
-     *  The number argument is set to 0 in HTML.c and
-     *  LYCharUtils.c when we want to end the anchor
-     *  for the immediately preceding HText_beginAnchor()
-     *  call.  If it's greater than 0, we want to handle
-     *  a particular anchor.  This allows us to set links
-     *  for positions indicated by NAME or ID attributes,
-     *  without needing to close any anchor with an HREF
-     *  within which that link might be embedded. - FM
-     */
-    if (number <= 0 || number == text->last_anchor->number) {
-	a = text->last_anchor;
-    } else {
-	for (a = text->first_anchor; a; a = a->next) {
-	    if (a->number == number) {
-		break;
-	    }
-	}
-	if (a == NULL) {
-	    /*
-	     *  There's no anchor with that number,
-	     *  so we'll default to the last anchor,
-	     *  and cross our fingers. - FM
-	     */
-	    a = text->last_anchor;
-	}
-    }
-
-    CTRACE((tfp, "GridText:HText_endAnchor: number:%d link_type:%d\n",
-			a->number, a->link_type));
-    if (a->link_type == INPUT_ANCHOR) {
-	/*
-	 *  Shouldn't happen, but put test here anyway to be safe. - LE
-	 */
-
-	CTRACE((tfp,
-	   "HText_endAnchor: internal error: last anchor was input field!\n"));
-	return;
-    }
-    if (a->number) {
-	/*
-	 *  If it goes somewhere...
-	 */
-	int i, j, k, l;
-	BOOL remove_numbers_on_empty = (BOOL) (
-	    ((keypad_mode == LINKS_ARE_NUMBERED ||
-	      keypad_mode == LINKS_AND_FIELDS_ARE_NUMBERED) &&
-	     (text->hiddenlinkflag != HIDDENLINKS_MERGE ||
-	      (LYNoISMAPifUSEMAP &&
-	       !(text->node_anchor && text->node_anchor->bookmark) &&
-	       HTAnchor_isISMAPScript(
-		   HTAnchor_followMainLink((HTAnchor *)a->anchor))))));
-	HTLine *last = text->last_line;
-	HTLine *prev = text->last_line->prev;
-	HTLine *start = last;
-	int CurBlankExtent = 0;
-	int BlankExtent = 0;
-
-	/*
-	 *  Check if the anchor content has only
-	 *  white and special characters, starting
-	 *  with the content on the last line. - FM
-	 */
-	a->extent += (text->chars + last->size) - a->start -
-		     (text->Lines - a->line_num);
-	if (a->extent > (int)last->size) {
-	    /*
-	     *  The anchor extends over more than one line,
-	     *  so set up to check the entire last line. - FM
-	     */
-	    i = last->size;
-	} else {
-	    /*
-	     *  The anchor is restricted to the last line,
-	     *  so check from the start of the anchor. - FM
-	     */
-	    i = a->extent;
-	}
-	k = j = (last->size - i);
-	while (j < (int)last->size) {
-	    if (!IsSpecialAttrChar(last->data[j]) &&
-		!isspace(UCH(last->data[j])) &&
-		last->data[j] != HT_NON_BREAK_SPACE &&
-		last->data[j] != HT_EN_SPACE)
-		break;
-	    i--;
-	    j++;
-	}
-	if (i == 0) {
-	    if (a->extent > (int)last->size) {
-		/*
-		 *  The anchor starts on a preceding line, and
-		 *  the last line has only white and special
-		 *  characters, so declare the entire extent
-		 *  of the last line as blank. - FM
-		 */
-		CurBlankExtent = BlankExtent = last->size;
-	    } else {
-		/*
-		 *  The anchor starts on the last line, and
-		 *  has only white or special characters, so
-		 *  declare the anchor's extent as blank. - FM
-		 */
-		CurBlankExtent = BlankExtent = a->extent;
-	    }
-	}
-	/*
-	 *  While the anchor starts on a line preceding
-	 *  the one we just checked, and the one we just
-	 *  checked has only white and special characters,
-	 *  check whether the anchor's content on the
-	 *  immediately preceding line also has only
-	 *  white and special characters. - FM
-	 */
-	while (i == 0 &&
-	       (a->extent > CurBlankExtent ||
-		(a->extent == CurBlankExtent &&
-		 k == 0 &&
-		 prev != text->last_line &&
-		 (prev->size == 0 ||
-		  prev->data[prev->size - 1] == ']')))) {
-	    start = prev;
-	    k = j = prev->size - a->extent + CurBlankExtent;
-	    if (j < 0) {
-		/*
-		 *  The anchor starts on a preceding line,
-		 *  so check all of this line. - FM
-		 */
-		j = 0;
-		i = prev->size;
-	    } else {
-		/*
-		 *  The anchor starts on this line. - FM
-		 */
-		i = a->extent - CurBlankExtent;
-	    }
-	    while (j < (int)prev->size) {
-		if (!IsSpecialAttrChar(prev->data[j]) &&
-		    !isspace(UCH(prev->data[j])) &&
-		    prev->data[j] != HT_NON_BREAK_SPACE &&
-		    prev->data[j] != HT_EN_SPACE)
-		    break;
-		i--;
-		j++;
-	    }
-	    if (i == 0) {
-		if (a->extent > (CurBlankExtent + (int)prev->size) ||
-		    (a->extent == CurBlankExtent + (int)prev->size &&
-		     k == 0 &&
-		     prev->prev != text->last_line &&
-		     (prev->prev->size == 0 ||
-		      prev->prev->data[prev->prev->size - 1] == ']'))) {
-		    /*
-		     *  This line has only white and special
-		     *  characters, so treat its entire extent
-		     *  as blank, and decrement the pointer for
-		     *  the line to be analyzed. - FM
-		     */
-		    CurBlankExtent += prev->size;
-		    BlankExtent = CurBlankExtent;
-		    prev = prev->prev;
-		} else {
-		    /*
-		     *  The anchor starts on this line, and it
-		     *  has only white or special characters, so
-		     *  declare the anchor's extent as blank. - FM
-		     */
-		    BlankExtent = a->extent;
-		    break;
-		}
-	    }
+	if (!really) {			/* Just report whether it is empty */
+	    a->extent -= extent_adjust;
+	    return i==0;
 	}
 	if (i == 0) {
 	    /*
@@ -5503,8 +5110,8 @@ PUBLIC void HText_endAnchor ARGS2(
 	    a->show_anchor = NO;
 
 	    CTRACE((tfp,
-		   "HText_endAnchor: hidden (line,start,pos,ext,BlankExtent):(%d,%d,%d,%d,%d)",
-		   a->line_num,a->start,a->line_pos,a->extent,
+		   "HText_endAnchor0: hidden (line,pos,ext,BlankExtent):(%d,%d,%d,%d)",
+		   a->line_num,a->line_pos,a->extent,
 		   BlankExtent));
 
 	    /*
@@ -5579,10 +5186,7 @@ PUBLIC void HText_endAnchor ARGS2(
 			k = j + NumSize;
 			while (k < (int)start->size)
 			    start->data[j++] = start->data[k++];
-			if (start != last)
-			    text->chars -= NumSize;
 			for (anc = a; anc; anc = anc->next) {
-			    anc->start -= NumSize;
 			    if (anc->line_num == a->line_num &&
 				anc->line_pos >= NumSize) {
 			    anc->line_pos -= NumSize;
@@ -5617,10 +5221,6 @@ PUBLIC void HText_endAnchor ARGS2(
 			    l = (i - j);
 			    while (i < (int)prev->size)
 				prev->data[j++] = prev->data[i++];
-			    text->chars -= l;
-			    for (anc = a; anc; anc = anc->next) {
-				anc->start -= l;
-			    }
 			    prev->size = j;
 			    prev->data[j] = '\0';
 			    while (j < i)
@@ -5635,10 +5235,7 @@ PUBLIC void HText_endAnchor ARGS2(
 			    i = k;
 			    while (k < (int)start->size)
 				start->data[j++] = start->data[k++];
-			    if (start != last)
-				text->chars -= i;
 			    for (anc = a; anc; anc = anc->next) {
-				anc->start -= i;
 				if (anc->line_num == a->line_num &&
 				    anc->line_pos >= i) {
 				    anc->line_pos -= i;
@@ -5694,10 +5291,6 @@ PUBLIC void HText_endAnchor ARGS2(
 			    k = j + NumSize;
 			    while (k < (int)prev->size)
 				prev->data[j++] = prev->data[k++];
-			    text->chars -= NumSize;
-			    for (anc = a; anc; anc = anc->next) {
-				anc->start -= NumSize;
-			    }
 			    prev->size = j;
 			    prev->data[j++] = '\0';
 			    while (j < k)
@@ -5733,8 +5326,8 @@ PUBLIC void HText_endAnchor ARGS2(
 	    a->show_anchor = YES;
 	    if (BlankExtent) {
 		CTRACE((tfp,
-		   "HText_endAnchor: blanks (line,start,pos,ext,BlankExtent):(%d,%d,%d,%d,%d)",
-		   a->line_num,a->start,a->line_pos,a->extent,
+		   "HText_endAnchor0: blanks (line,pos,ext,BlankExtent):(%d,%d,%d,%d)",
+		   a->line_num,a->line_pos,a->extent,
 		   BlankExtent));
 	    }
 	}
@@ -5764,12 +5357,14 @@ PUBLIC void HText_endAnchor ARGS2(
 	}
 	if (BlankExtent || a->extent <= 0 || a->number <= 0) {
 	    CTRACE((tfp,
-		   "->[%d](%d,%d,%d,%d,%d)\n",
+		   "->[%d](%d,%d,%d,%d)\n",
 		   a->number,
-		   a->line_num,a->start,a->line_pos,a->extent,
+		   a->line_num,a->line_pos,a->extent,
 		   BlankExtent));
 	}
     } else {
+	if (!really)			/* Just report whether it is empty */
+	    return 0;
 	/*
 	 *  It's a named anchor without an HREF, so it
 	 *  should be registered but not shown as a
@@ -5778,8 +5373,29 @@ PUBLIC void HText_endAnchor ARGS2(
 	a->show_anchor = NO;
 	a->extent = 0;
     }
+    return 0;
 }
 
+PUBLIC void HText_endAnchor ARGS2(
+	HText *,	text,
+	int,		number)
+{
+    HText_endAnchor0(text, number, 1);
+}
+
+/*
+    This returns whether the given anchor has blank content. Shamelessly copied
+    from HText_endAnchor. The values returned are meaningful only for "normal"
+    links - like ones produced by <a href=".">foo</a>, no inputs, etc. - VH
+*/
+#ifdef MARK_HIDDEN_LINKS
+PUBLIC BOOL HText_isAnchorBlank ARGS2(
+	HText *,	text,
+	int,		number)
+{
+    return HText_endAnchor0(text, number, 0);
+}
+#endif /* MARK_HIDDEN_LINKS */
 
 PUBLIC void HText_appendText ARGS2(
 	HText *,	text,
@@ -5921,7 +5537,7 @@ PUBLIC void HText_trimHightext ARGS3(
 	BOOLEAN,	final,
 	int,		stop_before)
 {
-    int cur_line, cur_char, cur_shift;
+    int cur_line, cur_shift;
     TextAnchor *anchor_ptr;
     TextAnchor *prev_a = NULL;
     HTLine *line_ptr;
@@ -5944,7 +5560,6 @@ PUBLIC void HText_trimHightext ARGS3(
      *  Get the first line.
      */
     line_ptr = text->last_line->next;
-    cur_char = line_ptr->size;
     cur_line = 0;
 
     /*
@@ -5959,10 +5574,8 @@ re_parse:
 	/*
 	 *  Find the right line.
 	 */
-	for (; anchor_ptr->start > cur_char;
-	       line_ptr = line_ptr->next,
-	       cur_char += line_ptr->size+1,
-	       cur_line++) {
+	for (; anchor_ptr->line_num > cur_line;
+	       line_ptr = line_ptr->next, cur_line++) {
 	    ; /* null body */
 	}
 
@@ -5974,7 +5587,8 @@ re_parse:
 	     */
 	    if (cur_line >= stop_before)
 		break;
-	    if (anchor_ptr->start >= text->chars - 1)
+	    if ( anchor_ptr->line_num >= text->Lines - 1
+		 && anchor_ptr->line_pos >= (int) text->last_line->prev->size )
 		break;
 	    /*
 	     *  Also skip this anchor if it looks like HText_endAnchor
@@ -5995,14 +5609,10 @@ re_parse:
 	if (anchor_ptr->hightext)
 	    continue;
 
-	if (anchor_ptr->start == cur_char) {
+	if (anchor_ptr->line_pos > (int) line_ptr->size) {
 	    anchor_ptr->line_pos = line_ptr->size;
-	} else {
-	    anchor_ptr->line_pos = anchor_ptr->start -
-				   (cur_char - line_ptr->size);
 	}
 	if (anchor_ptr->line_pos < 0) {
-	    anchor_ptr->start -= anchor_ptr->line_pos;
 	    anchor_ptr->line_pos = 0;
 	    anchor_ptr->line_num = cur_line;
 	}
@@ -6029,7 +5639,6 @@ re_parse:
 	if (anchor_ptr->extent < 0) {
 	    anchor_ptr->extent = 0;
 	}
-	anchor_ptr->start += cur_shift;
 
 	CTRACE((tfp, "anchor text: '%s'\n", line_ptr->data));
 	/*
@@ -6043,8 +5652,10 @@ re_parse:
 	    if (cur_line < text->Lines &&
 		(anchor_ptr->extent ||
 		 anchor_ptr->line_pos != (int)line_ptr->size ||
-		 (prev_a && prev_a->start > anchor_ptr->start))) {
-		anchor_ptr->start++;
+		 (prev_a && /* How could this happen? */
+		  (prev_a->line_num > anchor_ptr->line_num)))) {
+		anchor_ptr->line_num++;
+		anchor_ptr->line_pos = 0;
 		CTRACE((tfp, "found anchor at end of line\n"));
 		goto re_parse;
 	    } else {
@@ -6369,8 +5980,8 @@ PUBLIC int HTGetLinkInfo ARGS6(
 	 *  and don't count towards nlinks. - KW
 	 */
 	if ((a->show_anchor) &&
-	    (a->link_type != INPUT_ANCHOR ||
-	     a->input_field->type != F_HIDDEN_TYPE)) {
+	    !(a->link_type == INPUT_ANCHOR
+	      && a->input_field->type == F_HIDDEN_TYPE)) {
 	    if (a->line_num == prev_anchor_line) {
 		anchors_this_line++;
 	    } else {
@@ -6645,8 +6256,8 @@ PUBLIC int HTGetLinkOrFieldStart ARGS5(
 	 *  and don't count towards nlinks. - KW
 	 */
 	if ((a->show_anchor) &&
-	    (a->link_type != INPUT_ANCHOR ||
-	     a->input_field->type != F_HIDDEN_TYPE)) {
+	    !(a->link_type == INPUT_ANCHOR
+	      && a->input_field->type == F_HIDDEN_TYPE)) {
 	    if (a->line_num == prev_anchor_line) {
 		anchors_this_line++;
 	    } else {
@@ -7141,7 +6752,7 @@ PUBLIC void HText_pageDisplay ARGS2(
 	**  Multiple calls of HText_trimHightext works without problem now.
 	*/
 	if (HTMainText && HTMainText->stbl)
-	    stop_before = Stbl_getStartLine(HTMainText->stbl);
+	    stop_before = Stbl_getStartLineDeep(HTMainText->stbl);
 	HText_trimHightext(HTMainText, FALSE, stop_before);
     }
 #endif
@@ -7197,8 +6808,8 @@ PUBLIC int HText_LinksInLines ARGS3(
 	if (Anchor_ptr->line_num >= start &&
 	    Anchor_ptr->line_num < end &&
 	    Anchor_ptr->show_anchor &&
-	    (Anchor_ptr->link_type != INPUT_ANCHOR ||
-	     Anchor_ptr->input_field->type != F_HIDDEN_TYPE))
+	    !(Anchor_ptr->link_type == INPUT_ANCHOR
+	      && Anchor_ptr->input_field->type == F_HIDDEN_TYPE))
 	    ++total;
 	if (Anchor_ptr == text->last_anchor)
 	    break;
@@ -7273,22 +6884,6 @@ PUBLIC void HText_scrollBottom ARGS1(
 
 /* Bring to front and highlight it
 */
-PRIVATE int line_for_char ARGS2(
-	HText *,	text,
-	int,		char_num)
-{
-    int line_number = 0;
-    int characters = 0;
-    HTLine * line = text->last_line->next;
-    for (;;) {
-	if (line == text->last_line) return 0;	/* Invalid */
-	characters = characters + line->size + 1;
-	if (characters > char_num) return line_number;
-	line_number ++;
-	line = line->next;
-    }
-}
-
 PUBLIC BOOL HText_select ARGS1(
 	HText *,	text)
 {
@@ -7400,8 +6995,8 @@ PUBLIC BOOL HTFindPoundSelector ARGS1(
 		www_search_result = a->line_num+1;
 
 		CTRACE((tfp,
-		       "HText: Selecting anchor [%d] at character %d, line %d\n",
-				     a->number, a->start, www_search_result));
+		       "HText: Selecting anchor [%d] at line %d\n",
+				     a->number, www_search_result));
 		if (!strcmp(selector, LYToolbarName)) {
 		    --www_search_result;
 		}
@@ -7440,10 +7035,10 @@ PUBLIC BOOL HText_selectAnchor ARGS2(
     }
 
     {
-	 int l = line_for_char(text, a->start);
+	 int l = a->line_num;
 	 CTRACE((tfp,
-	    "HText: Selecting anchor [%d] at character %d, line %d\n",
-	    a->number, a->start, l));
+	    "HText: Selecting anchor [%d] at line %d\n",
+	    a->number, l));
 
 	if ( !text->stale &&
 	     (l >= text->top_of_screen) &&
@@ -8119,8 +7714,8 @@ PRIVATE int www_user_search_internals ARGS8(
     for (;;) {
 	while ((a != NULL) && a->line_num == (*count - 1)) {
 	    if (a->show_anchor &&
-		(a->link_type != INPUT_ANCHOR ||
-		 a->input_field->type != F_HIDDEN_TYPE)) {
+		!(a->link_type == INPUT_ANCHOR
+		  && a->input_field->type == F_HIDDEN_TYPE)) {
 		if (((a->hightext != NULL && case_sensitive == TRUE) &&
 		     LYno_attr_char_strstr(a->hightext, target)) ||
 		    ((a->hightext != NULL && case_sensitive == FALSE) &&
@@ -8491,7 +8086,7 @@ PUBLIC BOOLEAN HTreparse_document NOARGS
 	}
 	CTRACE((tfp, "  Content type is \"%s\"\n", format->name));
 
-	fp = fopen(HTMainAnchor->source_cache_file, "r");
+	fp = fopen(HTMainAnchor->source_cache_file, TXT_R);
 	if (!fp) {
 	    CTRACE((tfp, "  Cannot read file %s\n", HTMainAnchor->source_cache_file));
 	    LYRemoveTemp(HTMainAnchor->source_cache_file);
@@ -8873,8 +8468,6 @@ PUBLIC void HText_RemovePreviousLine ARGS1(
     previous = line->prev;
     previous->next = text->last_line;
     text->last_line->prev = previous;
-    text->chars -= ((data && *data == '\0') ?
-					  1 : strlen(line->data) + 1);
     text->Lines--;
     FREE(line);
 }
@@ -9486,7 +9079,7 @@ PUBLIC char * HText_setLastOptionValue ARGS7(
 	cp[j] = '\0';
 	if (HTCJK != NOCJK) {
 	    if (cp &&
-		(tmp = (unsigned char *)calloc(1, strlen(cp)+1))) {
+		(tmp = typecallocn(unsigned char, strlen(cp)+1)) != 0) {
 #ifdef SH_EX
 		if (tmp == NULL)
 		    outofmem(__FILE__, "HText_setLastOptionValue");
@@ -9608,27 +9201,6 @@ PUBLIC char * HText_setLastOptionValue ARGS7(
 }
 
 /*
- * Count the number of anchors on the current line so we can allow for the
- * length of numbered fields.
- */
-PRIVATE int AnchorsOnThisLine ARGS2(
-	HText *,	txt,
-	TextAnchor *,	ank)
-{
-    TextAnchor *chk = txt->first_anchor;
-    int count = 1;
-
-    while (chk != 0
-    	&& chk != txt->last_anchor
-	&& chk != ank) {
-	if (chk->line_num == ank->line_num)
-	    count++;
-	chk = chk->next;
-    }
-    return count;
-}
-
-/*
  *  Assign a form input anchor.
  *  Returns the number of characters to leave
  *  blank so that the input field can fit.
@@ -9650,7 +9222,6 @@ PUBLIC int HText_beginInput ARGS3(
     if (a == NULL || f == NULL)
 	outofmem(__FILE__, "HText_beginInput");
 
-    a->start = text->chars + text->last_line->size;
     a->inUnderline = underline;
     a->line_num = text->Lines;
     a->line_pos = text->last_line->size;
@@ -9728,11 +9299,7 @@ PUBLIC int HText_beginInput ARGS3(
     if (I->value)
 	StrAllocCopy(IValue, I->value);
     if (IValue && HTCJK != NOCJK) {
-	if ((tmp = (unsigned char *)calloc(1, (strlen(IValue) + 1)))) {
-#ifdef SH_EX
-	    if (tmp == NULL)
-		outofmem(__FILE__, "HText_beginInput");
-#endif
+	if ((tmp = typecallocn(unsigned char, strlen(IValue) + 1)) != 0) {
 	    if (kanji_code == EUC) {
 		TO_EUC((unsigned char *)IValue, tmp);
 		I->value_cs = current_char_set;
@@ -10018,7 +9585,6 @@ PUBLIC int HText_beginInput ARGS3(
 	     *  Add option list designation char.
 	     */
 	    HText_appendCharacter(text, '[');
-	a->start = text->chars + text->last_line->size;
 	a->line_num = text->Lines;
 	a->line_pos = text->last_line->size;
     }
@@ -10047,12 +9613,14 @@ PUBLIC int HText_beginInput ARGS3(
 			  (int)text->style->leftIndent -
 			  (int)text->style->rightIndent;
 
-	    /*
-	     *  If we are numbering form links, take that into
-	     *  account as well. - FM
-	     */
+	    /*  If we are numbering form links, place is taken by [nn]  */
 	    if (keypad_mode == LINKS_AND_FIELDS_ARE_NUMBERED)
-		MaximumSize -= AnchorsOnThisLine(text, a) / 10 + 3;
+		MaximumSize -= (a->number >= 10	/*Buggy if 1e6 links, sowhat?*/
+				? (a->number >= 100
+				   ? (a->number >= 1000
+				      ? (a->number >= 10000
+					 ? (a->number >= 100000
+					    ? 6 : 5) : 4) : 3) : 2) : 1) + 2;
 	    if (f->size > MaximumSize)
 		f->size = MaximumSize;
 
@@ -10858,7 +10426,7 @@ PUBLIC int HText_SubmitForm ARGS4(
 			escaped1 = HTEscapeSP(name_used, URL_XALPHAS);
 		    }
 
-		    if ((fd = fopen(val_used, "rb")) == 0) {
+		    if ((fd = fopen(val_used, BIN_R)) == 0) {
 			/* We can't open the file, what do we do? */
 			HTAlert(gettext("Can't open file for uploading"));
 			goto exit_disgracefully;
@@ -12189,7 +11757,6 @@ PRIVATE void insert_new_textarea_anchor ARGS2(
     /*  [anything "special" needed based on ->show_anchor value ?] */
     a->next	       = anchor->next;
     a->number	       = anchor->number;
-    a->start	       = anchor->start + anchor->input_field->size + 1;
     a->line_pos	       = anchor->line_pos;
     a->extent	       = anchor->extent;
     a->line_num	       = anchor->line_num + 1;
@@ -12220,9 +11787,6 @@ PRIVATE void insert_new_textarea_anchor ARGS2(
     l->prev	       = htline;
     l->offset	       = htline->offset;
     l->size	       = htline->size;
-    l->split_after     = htline->split_after;
-    l->bullet	       = htline->bullet;
-    l->expansion_line  = TRUE;
 #if defined(USE_COLOR_STYLE)
     /* dup styles[] if needed [no need in TEXTAREA (?); leave 0's] */
     l->numstyles       = htline->numstyles;
@@ -12276,13 +11840,12 @@ PRIVATE void insert_new_textarea_anchor ARGS2(
 PRIVATE void update_subsequent_anchors ARGS4(
 	int,		 n,
 	TextAnchor *,	 start_anchor,
-	HTLine *,        start_htline,
+	HTLine *,	 start_htline,
 	int,		 start_tag)
 {
     TextAnchor *anchor;
     HTLine     *htline = start_htline;
 
-    int form_chars_added = (start_anchor->input_field->size + 1) * n;
     int		line_adj = 0;
     int		tag_adj	 = 0;
     int		lx	 = 0;
@@ -12306,7 +11869,6 @@ PRIVATE void update_subsequent_anchors ARGS4(
 	    (anchor->number != 0))
 	    anchor->number += n;
 	anchor->line_num  += n;
-	anchor->start	  += form_chars_added;
 	anchor = anchor->next;
     }
 
@@ -12395,7 +11957,6 @@ finish:
     nlinks                         += n;
     HTMainText->Lines              += n;
     HTMainText->last_anchor_number += n;
-    HTMainText->chars              += (form_chars_added + tag_adj);
 
     more = HText_canScrollDown();
 
@@ -12456,7 +12017,7 @@ PUBLIC int HText_ExtEditForm ARGS1(
     char       *line;
     char       *lp;
     char       *cp;
-    int         match_tag = 0;
+    int		match_tag = 0;
     int		newlines  = 0;
     int		len, len0, len_in;
     int		wanted_fieldlen_wrap = -1; /* not yet asked; 0 means don't. */
@@ -12596,7 +12157,7 @@ PUBLIC int HText_ExtEditForm ARGS1(
 	    return 0;
 	}
 
-	fp = fopen (ed_temp, "r");
+	fp = fopen (ed_temp, TXT_R);
 	size = fread (ebuf, 1, size, fp);
 	LYCloseInput (fp);
 	ebuf[size] = '\0';	/* Terminate! - kw */
@@ -12801,7 +12362,7 @@ PUBLIC int HText_ExtEditForm ARGS1(
  */
 PUBLIC void HText_ExpandTextarea ARGS2(
 	    struct link *,  form_link,
-	    int,            newlines)
+	    int,	    newlines)
 {
     TextAnchor *anchor_ptr;
     TextAnchor *end_anchor    = NULL;
@@ -12986,7 +12547,7 @@ PUBLIC int HText_InsertFile ARGS1(
 	 */
 	LYGetFileInfo(fn, 0, 0, 0, 0, 0, &file_cs);
 
-	fp   = fopen (fn, "r");
+	fp   = fopen (fn, TXT_R);
 	if (!fp) {
 	    free(fbuf);
 	    free(fn);
@@ -13059,7 +12620,6 @@ PUBLIC int HText_InsertFile ARGS1(
     /*  [anything "special" needed based on ->show_anchor value ?] */
     a->next	       = anchor_ptr;
     a->number	       = anchor_ptr->number;
-    a->start	       = anchor_ptr->start;
     a->line_pos	       = anchor_ptr->line_pos;
     a->extent	       = anchor_ptr->extent;
     a->line_num	       = anchor_ptr->line_num;
@@ -13088,9 +12648,6 @@ PUBLIC int HText_InsertFile ARGS1(
     /*  Init all the fields in the new HTLine (but see the #if).   */
     l->offset	       = htline->offset;
     l->size	       = htline->size;
-    l->split_after     = htline->split_after;
-    l->bullet	       = htline->bullet;
-    l->expansion_line  = TRUE;
 #if defined(USE_COLOR_STYLE)
     /* dup styles[] if needed [no need in TEXTAREA (?); leave 0's] */
     l->numstyles       = htline->numstyles;
@@ -13112,11 +12669,11 @@ PUBLIC int HText_InsertFile ARGS1(
     if (prev_anchor)
 	prev_anchor->next = a;
 
-    htline             = htline->prev;
-    l->next	       = htline->next;
-    l->prev	       = htline;
-    htline->next->prev = l;
-    htline->next       = l;
+    htline		= htline->prev;
+    l->next		= htline->next;
+    l->prev		= htline;
+    htline->next->prev	= l;
+    htline->next	= l;
 
     /*
      *  update_subsequent_anchors() expects htline to point to 1st potential

@@ -486,6 +486,7 @@ The local equivalents of CR and LF
 #ifdef NO_LYNX_TRACE
 #define WWW_TraceFlag   0
 #define WWW_TraceMask   0
+#define LYTraceLogFP    0
 #else
 extern BOOLEAN WWW_TraceFlag;
 extern unsigned WWW_TraceMask;
@@ -496,8 +497,14 @@ extern unsigned WWW_TraceMask;
 #define TRACE_STYLE     (TRACE_bit(1))
 #define TRACE_TRST      (TRACE_bit(2))
 
-#define CTRACE(p)          if (TRACE) fprintf p
-#define CTRACE2(m,p)       if (m)     fprintf p
+#if defined(LY_TRACELINE)
+#define LY_SHOWWHERE fprintf( tfp, "%s: %d: ", __FILE__, LY_TRACELINE );
+#else
+#define LY_SHOWWHERE /* nothing */
+#endif
+
+#define CTRACE(p)          if (TRACE) { LY_SHOWWHERE fprintf p; }
+#define CTRACE2(m,p)       if (m)     { LY_SHOWWHERE fprintf p; }
 #define tfp TraceFP()
 #define CTRACE_SLEEP(secs) if (TRACE && LYTraceLogFP == 0) sleep(secs)
 #define CTRACE_FLUSH(fp)   if (TRACE) fflush(fp)

@@ -139,10 +139,10 @@ extern void base64_encode PARAMS((char * dest, char * src, int len));
       have to be changed/reviewed, AS WELL AS the lineedit binding
       tables in LYEditmap.c !
     - KEYMAP_SIZE, defined in LYKeymap.h, may need to be changed !
-    - See also table funckey[] in LYKeymap.c for 'pretty' strings
+    - See also table named_keys[] in LYKeymap.c for 'pretty' strings
       for the keys with codes >= 256 (to appear on the 'K'eymap page).
       New keycodes should probably be assigned consecutively, so their
-      key names can be easily added to funckey[] (but see next point).
+      key names can be easily added to named_keys[] (but see next point).
       They should also be documented in lynx.cfg.
     - The DOS port uses its own native codes for some keys, unless
       they are remapped by the code in LYgetch().  See *.key files

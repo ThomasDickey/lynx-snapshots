@@ -769,7 +769,6 @@ static WINDOW *LYscreen = NULL;
 
 PUBLIC void start_curses NOARGS
 {
-    int keypad_on = 0;
 #ifdef USE_SLANG
     static int slinit;
 
@@ -882,10 +881,10 @@ PUBLIC void start_curses NOARGS
     signal(SIGINT, cleanup_sig);
 #endif /* !VMS */
 
-   lynx_enable_mouse (1);
+    lynx_enable_mouse (1);
 
 #else /* USE_SLANG; Now using curses: */
-
+    int keypad_on = 0;
 
 #ifdef VMS
     /*
@@ -1152,6 +1151,56 @@ PUBLIC void lynx_enable_mouse ARGS1(int,state)
 #endif /* USE_MOUSE */
 }
 
+/*
+ * SVr4 curses (and ncurses) initialize the terminal I/O to raw mode, and
+ * simulate other modes in the library.  This means that when running, it
+ * simulates the OCRNL setting.  Normally that is not a problem.  However, when
+ * spawning a subprocess (e.g., xli), the subprocess may write to the screen. 
+ * Fine so far - curses resets the terminal I/O to the normal state on exit. 
+ * But the subprocess's messages can still be coming to the screen when lynx
+ * returns to the screen mode.  This function delays restoring OCRNL until
+ * after the first getch() call.
+ *
+ * The OCRNL setting is controlled by nl()/nonl() of course - but we do not
+ * want to give up that optimization since it would be a bit slower.  (Note -
+ * slang does not use this optimization; if it did, the same screen glitch
+ * would occur).
+ *
+ * FIXME:  for simplicity, only ncurses is implemented here - the TTY and
+ * SET_TTY definitions are ncurses-specific.  The same effect could be done for
+ * other curses implementations, since the "cur_term->Nttyb" part is common to
+ * SVr4 curses.
+ */
+PUBLIC void lynx_nl2crlf ARGS1(int, normal GCC_UNUSED)
+{
+    
+#if defined(NCURSES_VERSION) && defined(SET_TTY) && defined(TERMIOS) && defined(ONLCR)
+    static TTY saved_tty;
+    static int did_save = FALSE;
+    static int waiting = FALSE;
+
+    if (!did_save) {
+	saved_tty = cur_term->Nttyb;
+	did_save = TRUE;
+    }
+    if (normal) {
+	if (!waiting) {
+	    cur_term->Nttyb.c_oflag |= ONLCR;
+	    waiting = TRUE;
+	    nonl();
+	}
+    } else {
+	if (waiting) {
+	    cur_term->Nttyb = saved_tty;
+	    SET_TTY(fileno(stdout), &saved_tty);
+	    waiting = FALSE;
+	    nl();
+	    LYrefresh();
+	}
+    }
+#endif
+}
+
 PUBLIC void stop_curses NOARGS
 {
     if (LYCursesON)
@@ -1172,6 +1221,7 @@ PUBLIC void stop_curses NOARGS
      *	05-28-94 Lynx 2-3-1 Garrett Arch Blythe
      */
     if(LYCursesON == TRUE)	{
+	lynx_nl2crlf(TRUE);
 	lynx_enable_mouse (0);
 #if (!defined(WIN_EX) || defined(__CYGWIN__))	/* @@@ */
 	if(LYscreen) {
@@ -1293,10 +1343,10 @@ PUBLIC BOOLEAN setup ARGS1(
     char *buffer = NULL;
     char *cp;
 
-   /*
-    *  If the display was not set by a command line option then
-    *  see if it is available from the environment .
-    */
+    /*
+     *  If the display was not set by a command line option then
+     *  see if it is available from the environment .
+     */
     if ((cp = LYgetXDisplay()) != NULL) {
 	StrAllocCopy(x_display, cp);
     } else {
@@ -1350,7 +1400,7 @@ PUBLIC BOOLEAN setup ARGS1(
      *  the current link is indistinguishable from all other links.
      *  The workaround here is to disable the 'rev' capability.
      */
-    if ((strncmp(ttytype, "sun", 3) == 0)) {
+    if ((strncmp((CONST char *)ttytype, "sun", 3) == 0)) {
 	LYnoVideo(2);
     }
 #endif /* HAVE_TTYTYPE */
@@ -2090,6 +2140,19 @@ PUBLIC void LYrefresh NOARGS
 {
 #ifdef USE_CURSES_PADS
     if (LYwin != stdscr) {
+	/*
+	 * Workaround for special case where lynx is prompting for a mailto,
+	 * and has a subject line that is wider than the screen.  The 
+	 * wnoutrefresh() call resets newscr's position to match stdscr's,
+	 * which happens to be the window's origin because we were not updating
+	 * that, and other stray wmove's in lynx fail because the coordinate
+	 * is on/after the right margin.  Force things to look ok here.
+	 */
+	int y, x;
+	getyx(LYwin, y, x);
+	if (x >= LYcols) x = LYcols-1;
+	wmove(stdscr, y, x);
+
 	wnoutrefresh(stdscr);
 	pnoutrefresh(LYwin, 0, LYshiftWin, 0, 0, LYlines, LYscreenWidth()-1);
 	doupdate();
@@ -2199,16 +2262,16 @@ PUBLIC void lynx_stop_link_color ARGS2(
 
 PUBLIC void lynx_stop_target_color NOARGS
 {
-   stop_underline();
-   stop_reverse();
-   stop_bold();
+    stop_underline();
+    stop_reverse();
+    stop_bold();
 }
 
 PUBLIC void lynx_start_target_color NOARGS
 {
-   start_bold();
-   start_reverse();
-   start_underline();
+    start_bold();
+    start_reverse();
+    start_underline();
 }
 
 
@@ -2234,41 +2297,41 @@ PUBLIC void lynx_stop_status_color NOARGS
 
 PUBLIC void lynx_start_h1_color NOARGS
 {
-   if (bold_H1 || bold_headers)
-     start_bold();
+    if (bold_H1 || bold_headers)
+	start_bold();
 }
 
 PUBLIC void lynx_stop_h1_color NOARGS
 {
-   if (bold_H1 || bold_headers)
-     stop_bold();
+    if (bold_H1 || bold_headers)
+	stop_bold();
 }
 
 PUBLIC void lynx_start_prompt_color NOARGS
 {
-   start_reverse ();
+    start_reverse ();
 }
 
 PUBLIC void lynx_stop_prompt_color NOARGS
 {
-   stop_reverse ();
+    stop_reverse ();
 }
 
 PUBLIC void lynx_start_radio_color NOARGS
 {
-   start_bold ();
+    start_bold ();
 }
 
 PUBLIC void lynx_stop_radio_color NOARGS
 {
-   stop_bold ();
+    stop_bold ();
 }
 
 PUBLIC void lynx_stop_all_colors NOARGS
 {
-   stop_underline ();
-   stop_reverse ();
-   stop_bold ();
+    stop_underline ();
+    stop_reverse ();
+    stop_bold ();
 }
 
 /*

@@ -69,7 +69,7 @@
 
 PRIVATE int LYExecv PARAMS((
 	char *		path,
-	char ** 	argv,
+	char **		argv,
 	char *		msg));
 
 #ifdef DIRED_SUPPORT
@@ -91,7 +91,7 @@ PRIVATE char *get_filename PARAMS((
 PRIVATE BOOLEAN permit_location PARAMS((
 	char *		destpath,
 	char *		srcpath,
-	char ** 	newpath));
+	char **		newpath));
 #endif /* OK_PERMIT */
 
 PRIVATE char *render_item PARAMS((
@@ -100,7 +100,7 @@ PRIVATE char *render_item PARAMS((
 	CONST char *	dir,
 	char *		buf,
 	int		bufsize,
-	BOOLEAN 	url_syntax));
+	BOOLEAN		url_syntax));
 
 PRIVATE struct dired_menu *menu_head = NULL;
 struct dired_menu {
@@ -240,7 +240,7 @@ struct dired_menu {
 
 #ifdef OK_GZIP
 { DE_FILE,	      "", "Compress",
-	  "(using gzip)", "LYNXDIRED://GZIP%p", 		NULL },
+	  "(using gzip)", "LYNXDIRED://GZIP%p",			NULL },
 #endif /* OK_GZIP */
 
 #ifdef OK_ZIP
@@ -263,7 +263,7 @@ struct dired_menu {
 		      "", "LYNXDIRED://CLEAR_TAGGED",		NULL },
 
 { 0,		    NULL, NULL,
-		    NULL, NULL, 				NULL }
+		    NULL, NULL,					NULL }
 };
 
 PRIVATE BOOLEAN cannot_stat ARGS1(CONST char *, name)
@@ -451,7 +451,7 @@ PRIVATE BOOLEAN remove_tagged NOARGS
  *   uid with Lynx & dired can do the same thing.
  */
 PRIVATE BOOLEAN modify_tagged ARGS1(
-	char *, 	testpath)
+	char *,		testpath)
 {
     char *cp;
     dev_t dev;
@@ -607,7 +607,7 @@ PRIVATE BOOLEAN modify_tagged ARGS1(
  *  Modify the name of the specified item.
  */
 PRIVATE BOOLEAN modify_name ARGS1(
-	char *, 	testpath)
+	char *,		testpath)
 {
     char *cp;
     char tmpbuf[DIRED_MAXBUF];
@@ -662,7 +662,7 @@ PRIVATE BOOLEAN modify_name ARGS1(
  *  Change the location of a file or directory.
  */
 PRIVATE BOOLEAN modify_location ARGS1(
-	char *, 	testpath)
+	char *,		testpath)
 {
     char *cp;
     dev_t dev;
@@ -822,7 +822,7 @@ PUBLIC BOOLEAN local_modify ARGS2(
  *  Create a new empty file in the current directory.
  */
 PRIVATE BOOLEAN create_file ARGS1(
-	char *, 	current_location)
+	char *,		current_location)
 {
     int code = FALSE;
     char tmpbuf[DIRED_MAXBUF];
@@ -871,7 +871,7 @@ PRIVATE BOOLEAN create_file ARGS1(
  *  Create a new directory in the current directory.
  */
 PRIVATE BOOLEAN create_directory ARGS1(
-	char *, 	current_location)
+	char *,		current_location)
 {
     int code = FALSE;
     char tmpbuf[DIRED_MAXBUF];
@@ -947,7 +947,7 @@ PUBLIC BOOLEAN local_create ARGS1(
  *  Remove a single file or directory.
  */
 PRIVATE BOOLEAN remove_single ARGS1(
-	char *, 	testpath)
+	char *,		testpath)
 {
     int code = 0;
     char *cp;
@@ -1079,8 +1079,8 @@ PRIVATE char LYValidPermitFile[LY_MAXPATH] = "\0";
  *  Handle DIRED permissions.
  */
 PRIVATE BOOLEAN permit_location ARGS3(
-	char *, 	destpath,
-	char *, 	srcpath,
+	char *,		destpath,
+	char *,		srcpath,
 	char **,	newpath)
 {
 #ifndef UNIX
@@ -1479,7 +1479,7 @@ PUBLIC int local_dired ARGS1(
     StrAllocCopy(line, line_url);
     HTUnEscape(line);	/* _file_ (not URL) syntax, for those functions
 			   that need it.  Don't forget to FREE it. */
-    if ((arg = match_op("CHDIR", line)) != 0) {    
+    if ((arg = match_op("CHDIR", line)) != 0) {
 #ifdef SUPPORT_CHDIR
 	handle_LYK_CHDIR();
 	do_pop_doc = FALSE;
@@ -1717,7 +1717,7 @@ PUBLIC int dired_options ARGS2(
     static char tempfile[LY_MAXPATH];
     char *path;
     char *dir;
-    lynx_html_item_type *nxt;
+    lynx_list_item_type *nxt;
     struct stat dir_info;
     FILE *fp0;
     char *dir_url;
@@ -1870,9 +1870,9 @@ PUBLIC int dired_options ARGS2(
  *  Check DIRED filename.
  */
 PRIVATE char *get_filename ARGS3(
-	char *, 	prompt,
-	char *, 	buf,
-	size_t, 	bufsize)
+	char *,		prompt,
+	char *,		buf,
+	size_t,		bufsize)
 {
     char *cp;
 
@@ -1904,7 +1904,7 @@ PRIVATE char *get_filename ARGS3(
 #define LYEXECV_MAX_ARGC 15
 /* these are quasi-constant once they have been allocated: */
 static char ** install_argp = NULL;	/* args for execv install */
-static char * install_path = NULL; 	/* auxiliary */
+static char * install_path = NULL;	/* auxiliary */
 #ifdef LY_FIND_LEAKS
 PRIVATE void clear_install_path NOARGS
 {
@@ -1936,7 +1936,7 @@ PRIVATE int fill_argv_for_execv ARGS5(
     char **args;
     char *cp;
     if (*argvp == NULL) {
-	*argvp = (char **)calloc(LYEXECV_MAX_ARGC+1, sizeof(char *));
+	*argvp = typecallocn(char *, LYEXECV_MAX_ARGC+1);
 	if (!*argvp)
 	    return(-1);
 #ifdef LY_FIND_LEAKS
@@ -1969,8 +1969,8 @@ PRIVATE int fill_argv_for_execv ARGS5(
  *  Install the specified file or directory.
  */
 PUBLIC BOOLEAN local_install ARGS3(
-	char *, 	destpath,
-	char *, 	srcpath,
+	char *,		destpath,
+	char *,		srcpath,
 	char **,	newpath)
 {
     char *tmpbuf = NULL;
@@ -2159,7 +2159,7 @@ PUBLIC void clear_tags NOARGS
  *  Handle DIRED menu item.
  */
 PUBLIC void add_menu_item ARGS1(
-	char *, 	str)
+	char *,		str)
 {
     struct dired_menu *new, *mp;
     char *cp;
@@ -2171,7 +2171,7 @@ PUBLIC void add_menu_item ARGS1(
     if (menu_head == defmenu)
 	menu_head = NULL;
 
-    new = (struct dired_menu *)calloc(1, sizeof(*new));
+    new = typecalloc(struct dired_menu);
     if (new == NULL)
 	outofmem(__FILE__, "add_menu_item");
 
@@ -2240,10 +2240,10 @@ PUBLIC void reset_dired_menu NOARGS
  *  Create URL for DIRED HREF value.
  */
 PRIVATE char * render_item ARGS6(
-	CONST char *, 	s,
-	CONST char *, 	path,
-	CONST char *, 	dir,
-	char *, 	buf,
+	CONST char *,	s,
+	CONST char *,	path,
+	CONST char *,	dir,
+	char *,		buf,
 	int,		bufsize,
 	BOOLEAN,	url_syntax)
 {
@@ -2338,18 +2338,18 @@ PRIVATE char * render_item ARGS6(
  *  Execute DIRED command, return -1 or 0 on failure, 1 success.
  */
 PRIVATE int LYExecv ARGS3(
-	char *, 	path,
+	char *,		path,
 	char **,	argv,
-	char *, 	msg)
+	char *,		msg)
 {
+    int rc = 0;
 #if defined(VMS)
     CTRACE((tfp, "LYExecv:  Called inappropriately!\n"));
-    return(0);
 #else
 #if defined(_WINDOWS)
     if (!strcmp(path, TOUCH_PATH)) {
-#if defined(__BORLANDC__) || defined(__MINGW32__) 
-	int fd = _creat(argv[1], S_IREAD | S_IWRITE); 
+#if defined(__BORLANDC__) || defined(__MINGW32__)
+	int fd = _creat(argv[1], S_IREAD | S_IWRITE);
 #else /* Visual C++ */
 	int fd = _creat(argv[1], _S_IREAD | _S_IWRITE);
 #endif
@@ -2358,12 +2358,11 @@ PRIVATE int LYExecv ARGS3(
 	    return(1);
 	}
     } else if (!strcmp(path, RM_PATH)) {
-	return remove(argv[2]);
+	rc = remove(argv[2]);
+    } else {
+	CTRACE((tfp, "LYExecv:  Called inappropriately! (path=%s)\n", path));
     }
-    CTRACE((tfp, "LYExecv:  Called inappropriately! (path=%s)\n", path));
-    return(0);
 #else
-    int rc;
     int n;
     char *tmpbuf = 0;
 #ifdef __DJGPP__
@@ -2390,11 +2389,13 @@ PRIVATE int LYExecv ARGS3(
     rc = 1;		/* It will work */
     stop_curses();
     pid = fork();	/* fork and execute command */
+
     switch (pid) {
 	case -1:
 	    HTSprintf0(&tmpbuf, gettext("Unable to %s due to system error!"), msg);
 	    rc = 0;
 	    break;	/* don't fall thru! - KW */
+
 	case 0:  /* child */
 #ifdef USE_EXECVP
 	    execvp(path, argv);	/* this uses our $PATH */
@@ -2402,6 +2403,8 @@ PRIVATE int LYExecv ARGS3(
 	    execv(path, argv);
 #endif
 	    exit(EXIT_FAILURE);	/* execv failed, give wait() something to look at */
+	    /*NOTREACHED*/
+
 	default:  /* parent */
 #if !HAVE_WAITPID
 	    while (wait(&wstatus) != pid)
@@ -2442,7 +2445,7 @@ PRIVATE int LYExecv ARGS3(
 	FREE(tmpbuf);
     }
 
-    return(rc);
 #endif /* _WINDOWS */
 #endif /* VMS */
+    return(rc);
 }

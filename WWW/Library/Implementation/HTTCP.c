@@ -126,9 +126,7 @@ static unsigned long _fork_func (void *arglist)
 **  A routine to mimic the ioctl function for UCX.
 **  Bjorn S. Nilsson, 25-Nov-1993. Based on an example in the UCX manual.
 */
-#include <iodef.h>
-#define IOC_OUT (int)0x40000000
-extern int vaxc$get_sdc(), sys$qiow();
+#include <HTioctl.h>
 
 PUBLIC int HTioctl ARGS3(
 	int,		d,
@@ -152,9 +150,6 @@ PUBLIC int HTioctl ARGS3(
 	set_errno(EBADF);
 	return -1;
     }
-#ifndef UCX$C_IOCTL
-#define UCX$C_IOCTL TCPIP$C_IOCTL
-#endif
     ioctl_desc.opt  = UCX$C_IOCTL;
     ioctl_desc.len  = sizeof(struct comm);
     ioctl_desc.addr = &ioctl_comm;
@@ -191,6 +186,7 @@ PUBLIC int HTioctl ARGS3(
 PUBLIC int HTInetStatus ARGS1(
 	char *,		where)
 {
+    int status;
     int saved_errno = errno;
 #ifdef VMS
 #ifdef MULTINET
@@ -246,13 +242,14 @@ PUBLIC int HTInetStatus ARGS1(
     **	uerrno and errno happen to be zero if vmserrno <> 0
     */
 #ifdef MULTINET
-    return -vmserrno;
+    status = -vmserrno;
 #else
-    return -vaxc$errno;
+    status = -vaxc$errno;
 #endif /* MULTINET */
 #else
-    return -SOCKET_ERRNO;
+    status = -SOCKET_ERRNO;
 #endif /* VMS */
+    return status;
 }
 
 /*	Parse a cardinal value				       parse_cardinal()

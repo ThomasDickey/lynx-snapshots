@@ -129,7 +129,7 @@ PUBLIC int edit_current_file ARGS3(
     /*
      *  Don't allow editing if user lacks append access.
      */
-    if ((fp = fopen(filename, "a")) == NULL)
+    if ((fp = fopen(filename, TXT_A)) == NULL)
     {
 	HTUserMsg(NOAUTH_TO_EDIT_FILE);
 	goto done;

@@ -15,7 +15,7 @@
    be removed (at least):
    CURRENT_KEYMAP_HELP
 */
-#ifdef HAVE_CONFIG_H
+#if defined(HAVE_CONFIG_H) && defined(HAVE_LYHELP_H)
 #include <LYHelp.h>
 #else
 #define ALT_EDIT_HELP		"keystrokes/alt_edit_help.html"
@@ -446,10 +446,10 @@ extern BOOLEAN with_backspaces;
 #endif
 
 #ifndef NO_LYNX_TRACE
-extern BOOLEAN LYUseTraceLog;		/* Use a TRACE log?		 */
 extern FILE *LYTraceLogFP;		/* Pointer for TRACE log	 */
 extern char *LYTraceLogPath;		/* Path for TRACE log		 */
 #endif
+extern BOOLEAN LYUseTraceLog;		/* Use a TRACE log?		 */
 
 extern BOOL force_empty_hrefless_a;
 extern int connect_timeout;

@@ -69,11 +69,11 @@ PRIVATE rule * rule_tail = 0;	/* Pointer to last on list */
 **	--------------------
 **
 **  On entry,
-**	pattern 	points to 0-terminated string containing a single "*"
+**	pattern		points to 0-terminated string containing a single "*"
 **	equiv		points to the equivalent string with * for the
 **			place where the text matched by * goes.
 **  On exit,
-**	returns 	0 if success, -1 if error.
+**	returns		0 if success, -1 if error.
 */
 
 PUBLIC int HTAddRule ARGS5(
@@ -86,7 +86,7 @@ PUBLIC int HTAddRule ARGS5(
     rule *	temp;
     char *	pPattern = NULL;
 
-    temp = (rule *)calloc(1, sizeof(*temp));
+    temp = typecalloc(rule);
     if (temp==NULL)
 	outofmem(__FILE__, "HTAddRule");
     if (equiv) {		/* Two operands */
@@ -135,7 +135,7 @@ PUBLIC int HTAddRule ARGS5(
 }
 
 
-/*	Clear all rules 					HTClearRules()
+/*	Clear all rules						HTClearRules()
 **	---------------
 **
 ** On exit,
@@ -194,7 +194,7 @@ PRIVATE BOOL rule_cond_ok ARGS1(
 ** On entry,
 **	required	points to a string whose equivalent value is neeed
 ** On exit,
-**	returns 	the address of the equivalent string allocated from
+**	returns		the address of the equivalent string allocated from
 **			the heap which the CALLER MUST FREE. If no translation
 **			occured, then it is a copy of te original.
 ** NEW FEATURES:
@@ -332,11 +332,11 @@ char * HTTranslate ARGS1(
 				   r->equiv,
 				   m,
 				   q,
-				   ins + 1); 	
+				   ins + 1);
 			CTRACE((tfp, "For `%s' using `%s'\n",
 				    current, temp));
 			FREE(current);
-			current = temp; 		/* Use this */
+			current = temp;			/* Use this */
 
 		    } else {	/* No insertion point */
 			char * temp = NULL;
@@ -345,7 +345,7 @@ char * HTTranslate ARGS1(
 			CTRACE((tfp, "For `%s' using `%s'\n",
 						current, temp));
 			FREE(current);
-			current = temp; 		/* Use this */
+			current = temp;			/* Use this */
 		    } /* If no insertion point exists */
 		}
 		if (r->op == HT_Pass) {
@@ -475,7 +475,7 @@ PUBLIC int  HTSetConfiguration ARGS1(
 	HTSetPresentation(word2, word3,
 		    status >= 1 ? quality		: 1.0,
 		    status >= 2 ? secs			: 0.0,
-		    status >= 3 ? secs_per_byte 	: 0.0,
+		    status >= 3 ? secs_per_byte		: 0.0,
 		    status >= 4 ? maxbytes		: 0 );
 
     } else if (0==strncasecomp(word1, "htbin", 5) ||
@@ -619,7 +619,7 @@ PUBLIC int  HTSetConfiguration ARGS1(
 ** On exit,
 **	Any existing rules will have been kept.
 **	Any new rules will have been loaded.
-**	Returns 	0 if no error, 0 if error!
+**	Returns		0 if no error, 0 if error!
 **
 ** Bugs:
 **	The strings may not contain spaces.
@@ -628,7 +628,7 @@ PUBLIC int  HTSetConfiguration ARGS1(
 int HTLoadRules ARGS1(
     CONST char *,	filename)
 {
-    FILE * fp = fopen(filename, "r");
+    FILE * fp = fopen(filename, TXT_R);
     char line[LINE_LENGTH+1];
 
     if (!fp) {

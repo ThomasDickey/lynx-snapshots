@@ -146,15 +146,15 @@ PUBLIC char *empty_string = "\0";
 PUBLIC int display_lines;  /* number of lines in display */
 PUBLIC int www_search_result= -1;
 			       /* linked list of printers */
-PUBLIC lynx_printer_item_type *printers = NULL;
+PUBLIC lynx_list_item_type *printers = NULL;
 			    /* linked list of download options */
-PUBLIC lynx_html_item_type *downloaders = NULL;
+PUBLIC lynx_list_item_type *downloaders = NULL;
 			    /* linked list of upload options */
 #ifdef USE_EXTERNALS
-PUBLIC lynx_html_item_type *externals = NULL;
+PUBLIC lynx_list_item_type *externals = NULL;
 			    /* linked list of external options */
 #endif
-PUBLIC lynx_html_item_type *uploaders = NULL;
+PUBLIC lynx_list_item_type *uploaders = NULL;
 PUBLIC int port_syntax = 1;
 PUBLIC int LYShowColor = SHOW_COLOR_UNKNOWN; /* to show or not to show */
 PUBLIC int LYChosenShowColor = SHOW_COLOR_UNKNOWN; /* whether to show and save */
@@ -436,18 +436,22 @@ BOOLEAN persistent_cookies = FALSE;	/* disabled by default! */
 PUBLIC char *LYCookieFile = NULL;	/* cookie read file */
 PUBLIC char *LYCookieSaveFile = NULL;	/* cookie save file */
 #endif /* EXP_PERSISTENT_COOKIES */
+
 PUBLIC int LYTransferRate = rateEtaKB_maybe;
 PUBLIC char *XLoadImageCommand = NULL;	/* Default image viewer for X */
 PUBLIC BOOLEAN LYNoISMAPifUSEMAP = FALSE; /* Omit ISMAP link if MAP present? */
 PUBLIC int LYHiddenLinks = HIDDENLINKS_SEPARATE; /* Show hidden links? */
 
 PUBLIC BOOL Old_DTD = NO;
+
+#ifndef NO_LYNX_TRACE
 PUBLIC FILE *LYTraceLogFP = NULL;		/* Pointer for TRACE log  */
+#endif
 PUBLIC char *LYTraceLogPath = NULL;		/* Path for TRACE log	   */
 PUBLIC BOOLEAN LYUseTraceLog = USE_TRACE_LOG;	/* Use a TRACE log?	   */
+
 PUBLIC BOOLEAN LYSeekFragMAPinCur = TRUE;
 PUBLIC BOOLEAN LYSeekFragAREAinCur = TRUE;
-
 PUBLIC BOOLEAN LYStripDotDotURLs = TRUE;	/* Try to fix ../ in some URLs? */
 PUBLIC BOOLEAN LYForceSSLCookiesSecure = FALSE;
 PUBLIC BOOLEAN LYNoCc = FALSE;
@@ -2139,7 +2143,7 @@ PUBLIC void reload_read_cfg NOARGS
      *  no_option_save restriction may thus be unnecessarily restrictive,
      *  but the check is currently still left in place. - kw
      */
-    tempfile = calloc(1, LY_MAXPATH);
+    tempfile = typecallocn(char, LY_MAXPATH);
     if (!tempfile) {
 	HTAlwaysAlert(NULL, NOT_ENOUGH_MEMORY);
 	return;
@@ -2196,7 +2200,7 @@ PUBLIC void reload_read_cfg NOARGS
 	/*
 	 *  Process the temporary RC file.
 	 */
-	rcfp = fopen(tempfile, "r");
+	rcfp = fopen(tempfile, TXT_R);
 	read_rc(rcfp);
 	LYRemoveTemp(tempfile);
 	FREE(tempfile);		/* done with it - kw */

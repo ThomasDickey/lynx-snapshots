@@ -232,9 +232,9 @@ PUBLIC int change_form_link_ex ARGS8(
 	    if (form->disabled == YES &&
 		(c == '\r' || c == '\n' || immediate_submit)) {
 		if (peek_mouse_link() >= 0)
-		    c = lookup_keymap(LYK_ACTIVATE);
+		    c = LAC_TO_LKC0(LYK_ACTIVATE);
 		else
-		c = '\t';
+		    c = '\t';
 		break;
 	    }
 	    /*

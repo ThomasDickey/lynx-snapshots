@@ -378,7 +378,7 @@ PRIVATE unsigned LYRead_Jumpfile ARGS1(struct JumpTable *,jtp)
     }
 
     /* allocate storage to read entire file */
-    if ((mp=(char *)calloc(1, st.st_size + 1)) == NULL) {
+    if ((mp= typecallocn(char, st.st_size + 1)) == NULL) {
 	HTAlert(OUTOF_MEM_FOR_JUMP_FILE);
 	return 0;
     }
@@ -387,7 +387,7 @@ PRIVATE unsigned LYRead_Jumpfile ARGS1(struct JumpTable *,jtp)
     if (st.st_fab_rfm != (char)FAB$C_STMLF) {
 	/** It's a record-oriented file. **/
 	IsStream_LF = FALSE;
-	if ((fp = fopen(jtp->file, "r", "mbc=32")) == NULL) {
+	if ((fp = fopen(jtp->file, TXT_R, "mbc=32")) == NULL) {
 	    HTAlert(CANNOT_OPEN_JUMP_FILE);
 	    FREE(mp);
 	    return 0;

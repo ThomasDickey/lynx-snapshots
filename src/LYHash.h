@@ -41,6 +41,7 @@ extern int	s_aedit_sel;
 extern int	s_alert;
 extern int	s_alink;
 extern int	s_curedit;
+extern int	s_forw_backw;
 extern int	s_normal;
 extern int	s_prompt_edit;
 extern int	s_prompt_edit_arr;

@@ -111,8 +111,8 @@ PUBLIC void LYEntify ARGS2(
     /*
      *	Allocate space and convert. - FM
      */
-    q = (char *)calloc(1,
-		     (strlen(*str) + (4 * amps) + (3 * lts) + (3 * gts) + 1));
+    q = typecallocn(char,
+		    (strlen(*str) + (4 * amps) + (3 * lts) + (3 * gts) + 1));
     if ((cp = q) == NULL)
 	outofmem(__FILE__, "LYEntify");
     for (p = *str; *p; p++) {
@@ -3623,11 +3623,10 @@ PUBLIC int LYLegitimizeHREF ARGS4(
 		   : me->node_anchor->address[4]) == 's') {
 		    str = "s";
 		}
-		if (TRACE) {
-		    CTRACE((tfp, "LYLegitimizeHREF: Bad value '%s' for http%s URL.\n",
-				 *href, str);)
-		    CTRACE((tfp, "                  Stripping lead dots.\n"));
-		} else if (!me->inBadHREF) {
+		CTRACE((tfp, "LYLegitimizeHREF: Bad value '%s' for http%s URL.\n",
+			*href, str));
+		CTRACE((tfp, "                  Stripping lead dots.\n"));
+		if (!me->inBadHREF) {
 		    HTUserMsg(BAD_PARTIAL_REFERENCE);
 		    me->inBadHREF = TRUE;
 		}

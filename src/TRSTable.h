@@ -15,7 +15,13 @@ extern int Stbl_finishCellInTable PARAMS((STable_info *, BOOL, int, int));
 extern int Stbl_addColInfo PARAMS((STable_info *, int, short, BOOL));
 extern int Stbl_finishColGroup PARAMS((STable_info *));
 extern int Stbl_addRowGroup PARAMS((STable_info *, short));
-#define Stbl_lineBreak(stbl,l,pos) Stbl_finishCellInTable(stbl, NO, l, pos)
+
+#define TRST_ENDCELL_ENDTD	1
+#define TRST_ENDCELL_LINEBREAK	0
+#define TRST_ENDCELL_MASK	1
+#define TRST_FAKING_CELLS	2
+#define Stbl_lineBreak(stbl,l,pos) Stbl_finishCellInTable(stbl, TRST_ENDCELL_LINEBREAK, l, pos)
+
 extern int Stbl_getStartLine PARAMS((STable_info *));
 extern int Stbl_getFixupPositions PARAMS((
     STable_info *	me,
@@ -35,6 +41,9 @@ extern void Stbl_set_enclosing PARAMS(( STable_info *me,
 					struct _TextAnchor *last_anchor));
 extern STable_info * Stbl_get_enclosing PARAMS((STable_info *	me));
 extern struct _TextAnchor * Stbl_get_last_anchor_before PARAMS((STable_info *	me));
+extern int Stbl_getStartLineDeep PARAMS((STable_info *));
+#else
+#define Stbl_getStartLineDeep(t) Stbl_getStartLine(t)
 #endif
 
 #endif /* TRSTABLE_H */
