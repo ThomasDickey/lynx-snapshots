@@ -121,7 +121,11 @@
 #undef HAVE_UNISTD_H		/* have <unistd.h> */
 #undef HAVE_UNSETENV
 #undef HAVE_USE_DEFAULT_COLORS	/* ncurses extension */
-#undef HAVE_UTMP
+#undef HAVE_UTMP		/* CF_UTMP */
+#undef HAVE_UTMP_UT_HOST	/* CF_UTMP_UT_HOST */
+#undef HAVE_UTMP_UT_SESSION	/* CF_UTMP_UT_SESSION */
+#undef HAVE_UTMP_UT_XSTATUS	/* CF_UTMP_UT_XSTATUS */
+#undef HAVE_UTMP_UT_XTIME	/* CF_UTMP_UT_XTIME */
 #undef HAVE_VALUES_H		/* defined by AM_GNU_GETTEXT */
 #undef HAVE_VARARGS_H		/* CF_VARARGS */
 #undef HAVE_VASPRINTF
@@ -198,6 +202,7 @@
 #undef USE_SLANG		/* AC_ARG_WITH(screen=slang) */
 #undef USE_SOCKS4_PREFIX	/* CF_SOCKS5 */
 #undef USE_SOCKS5		/* CF_SOCKS5 */
+#undef USE_SYSV_UTMP		/* CF_UTMP */
 #undef USE_ZLIB			/* AC_ARG_WITH(zlib) */
 #undef UTMPX_FOR_UTMP		/* use <utmpx.h> since <utmp.h> not found */
 #undef UUDECODE_PATH		/* CF_PATH_PROG(uudecode) */
@@ -212,6 +217,9 @@
 #undef off_t			/* defined by AC_TYPE_OFF_T */
 #undef pid_t			/* defined by AC_TYPE_PID_T */
 #undef uid_t			/* defined by AC_TYPE_UID_T */
+#undef ut_name			/* CF_UTMP */
+#undef ut_xstatus		/* CF_UTMP_UT_XSTATUS */
+#undef ut_xtime			/* CF_UTMP_UT_XTIME */
 #undef vfork			/* defined by AC_FUNC_FORK */
 
 /* 'const' may be defined externally by the compiler-wrapper, as in 'unproto'

@@ -113,75 +113,20 @@ CF_HELP_MESSAGE(
 Basic Configuration Options:)
 
 dnl internationalization macros
-AM_GNU_GETTEXT
+CF_BUNDLED_INTL(makefile)
+
+INTLDIR_CPPFLAGS="#"
+if test -z "$INTLDIR_MAKE" ; then
+	INTLDIR_CPPFLAGS=
+fi
+
+AC_SUBST(INTLDIR_CPPFLAGS)
 
 CF_WITH_PATH(nls-datadir,
 [  --with-nls-datadir=DIR  NLS data, parent of locale],
 NLS_DATADIR,
 [PREFIX/DATADIR],
 [$prefix/$DATADIRNAME])
-
-INTLDIR_CPPFLAGS="#"
-INTLDIR_MAKE=
-MSG_DIR_MAKE=
-SUB_MAKEFILE=
-CF_OUR_MESSAGES
-if test "$USE_INCLUDED_LIBINTL" = yes ; then
-        if test "$nls_cv_force_use_gnu_gettext" = yes ; then
-		AC_MSG_WARN(Using included gettext anyway[,] since none was found)
-		SUB_MAKEFILE="intl/makefile"
-	else
-		INTLDIR_MAKE="#"
-	fi
-	if test $use_our_messages = no ; then
-		MSG_DIR_MAKE="#"
-		SUB_MAKEFILE=
-	fi
-	if test "$use_our_messages" = yes ; then
-		SUB_MAKEFILE="$SUB_MAKEFILE po/makefile.in:po/makefile.inn"
-	else
-		MSG_DIR_MAKE="#"
-	fi
-elif test "$USE_NLS" = yes ; then
-	AC_CHECK_HEADERS(libintl.h)
-	INTLDIR_MAKE="#"
-	SUB_MAKEFILE="po/makefile.in:po/makefile.inn"
-else
-	INTLDIR_MAKE="#"
-	MSG_DIR_MAKE="#"
-fi
-
-dnl We might want to use a preinstalled message library rather than the one
-dnl which is bundled with this program.
-if test -z "$MSG_DIR_MAKE" ; then
-	if test $use_our_messages = no ; then
-		MSG_DIR_MAKE="#"
-		SUB_MAKEFILE=
-	fi
-fi
-
-if test -z "$INTLDIR_MAKE" ; then
-	INTLDIR_CPPFLAGS=
-fi
-
-AC_SUBST(INTLDIR_CPPFLAGS)
-AC_SUBST(INTLDIR_MAKE)
-AC_SUBST(MSG_DIR_MAKE)
-
-dnl FIXME:  the underlying AM_GNU_GETTEXT macro either needs some fixes or a
-dnl little documentation.  It doesn't define anything so that we can ifdef our
-dnl own code, except ENABLE_NLS, which is too vague to be of any use.
-
-if test "$USE_INCLUDED_LIBINTL" = yes ; then
-	if test "$nls_cv_force_use_gnu_gettext" = yes ; then
-		AC_DEFINE(HAVE_GETTEXT)
-	elif test "$nls_cv_use_gnu_gettext" = yes ; then
-		AC_DEFINE(HAVE_GETTEXT)
-	fi
-	if test -n "$nls_cv_header_intl" ; then
-		AC_DEFINE(HAVE_LIBINTL_H)
-	fi
-fi
 
 AC_MSG_CHECKING(if you want full utility pathnames)
 CF_ARG_DISABLE(full-paths,
@@ -967,7 +912,7 @@ if test ".$use_zlib" != ".no" ; then
 		CF_VERBOSE(... tested $cf_incdir)
 	done
 	])
-	CF_FIND_LIBRARY(z,
+	CF_FIND_LIBRARY(z,z,
 		[#include <zlib.h>],
 		[gzopen("name","mode")],
 		gzopen)

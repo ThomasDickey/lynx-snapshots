@@ -1,6 +1,39 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2000-05-21 (2.8.4dev.2)
+* minor changes to HTInit.c to make it more tolerant of leading whitespace
+  in mailcap entries (reported by Sven Guckes <guckes@math.fu-berlin.de>) -TD
+* add option -stdin, which tells Lynx to read the startfile from standard
+  input -TD
+* simplify argument parsing in LYMain.c, moving the special cases into the
+  table-driven logic by adding a flag that denotes the argument parsing phase
+  that applies -TD
+* correct duplicate description of JUMPFILE in lynx.cfg -TD
+* refine cfg2html.pl changes to use command-line options to control the
+  sorting and marking features, as well as make the script work properly if
+  the markup data is not given -TD
+* moved entry for lynx.cfg setting "viewer" according to the alphabet in
+  LYReadCFG.c:Config_Table -VH
+* modify cfg2html.pl to mark unavailable options, and to provide for sorting
+  the options in body.html -VH
+* update NLS configure script macros using CF_BUNDLED_INTL from tin, etc. -TD
+* update utmp configure script macros from xterm -TD
+* fix (from tin) to autoconf macro AM_WITH_NLS to fix a case where it would
+  refuse to build with non-GNU gettext -TD
+* modified autoconf macros CF_HEADER_PATH and CF_LIBRARY_PATH, to look in more
+  places for the specified files, including $HOME -TD
+* remove intl/libintl.h since it is overwritten by a symbolic link (reported
+  by Atsuhito Kohda <kohda@pm.tokushima-u.ac.jp>) -TD
+* correct a few tests in configure script which must allow inclusion of either
+  ncurses.h or curses.h, otherwise color-style cannot be configured (reported
+  by Frederick Bruckman <fb@enteract.com>) -TD
+* move logic that makes subdirectory for more-secure temporary files into
+  LYOpenTemp() where it can perform that action on demand rather than for all
+  invocations of lynx.  Further refine this logic by ensuring that the umask is
+  set to allow execution permissions on the subdirectory (fixes problems
+  reported by Michael Abraham Shulman <mas@kurukshetra.cjb.net> and KW) -TD
+
 2000-05-05 (2.8.4dev.1)
 * use built-in LYCopyFile logic for CYGWIN rather than external cp program -DK
 * minor refinement to  LYValidateFilename() to avoid prepending a drive

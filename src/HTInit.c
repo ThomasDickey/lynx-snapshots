@@ -234,6 +234,7 @@ PRIVATE char *GetCommand ARGS2(
     char *s2;
     int quoted = 0;
 
+    s = LYSkipBlanks(s);
     /* marca -- added + 1 for error case -- oct 24, 1993. */
     s2 = malloc(strlen(s)*2 + 1); /* absolute max, if all % signs */
     if (!s2)
@@ -315,7 +316,7 @@ PRIVATE int ProcessMailcapEntry ARGS2(
 	FREE(rawentry);
 	return(0);
     }
-    s = strchr(rawentry, ';');
+    t = s = strchr(rawentry, ';');
     if (s == NULL) {
 	CTRACE((tfp, "ProcessMailcapEntry: Ignoring invalid mailcap entry: %s\n",
 		    rawentry));
@@ -323,8 +324,8 @@ PRIVATE int ProcessMailcapEntry ARGS2(
 	return(0);
     }
     *s++ = '\0';
-    if (!strncasecomp(rawentry, "text/html", 9) ||
-	!strncasecomp(rawentry, "text/plain", 10)) {
+    if (!strncasecomp(t, "text/html", 9) ||
+	!strncasecomp(t, "text/plain", 10)) {
 	--s;
 	*s = ';';
 	CTRACE((tfp, "ProcessMailcapEntry: Ignoring mailcap entry: %s\n",
@@ -358,6 +359,7 @@ PRIVATE int ProcessMailcapEntry ARGS2(
 	eq = strchr(arg, '=');
 	if (eq) {
 	    *eq++ = '\0';
+	    eq = LYSkipBlanks(eq);
 	}
 	if (arg && *arg) {
 	    arg = Cleanse(arg);

@@ -352,7 +352,7 @@ PUBLIC BOOLEAN traversal = FALSE;    /* Do traversals? */
 PUBLIC BOOLEAN check_realm = FALSE;  /* Restrict to the starting realm? */
 	       /* Links beyond a displayed page with no links? */
 PUBLIC BOOLEAN more_links = FALSE;
-PUBLIC BOOLEAN lynx_temp_subspace = FALSE; /* true if we made temp-directory */
+PUBLIC int lynx_temp_subspace = 0;	/* > 0 if we made temp-directory */
 PUBLIC int     ccount = 0; /* Starting number for lnk#.dat files in crawls */
 PUBLIC BOOLEAN LYCancelledFetch = FALSE; /* TRUE if cancelled binary fetch */
 	       /* Include mime headers with source dump */
@@ -397,6 +397,7 @@ PUBLIC BOOLEAN LYisConfiguredForX = FALSE;
 PUBLIC char *URLDomainPrefixes = NULL;
 PUBLIC char *URLDomainSuffixes = NULL;
 PUBLIC BOOLEAN startfile_ok = FALSE;
+PUBLIC BOOLEAN startfile_stdin = FALSE;
 PUBLIC BOOLEAN LYSelectPopups = USE_SELECT_POPUPS;
 PUBLIC BOOLEAN LYUseDefSelPop = TRUE;	/* Command line -popup toggle */
 PUBLIC BOOLEAN LYMultiBookmarks = MULTI_BOOKMARK_SUPPORT;
@@ -517,8 +518,7 @@ PRIVATE HTList *LYStdinArgs = NULL;
 PRIVATE BOOLEAN no_options_further=FALSE; /* set to TRUE after '--' argument */
 #endif
 
-
-PRIVATE void parse_arg PARAMS((char **arg, int *i));
+PRIVATE BOOL parse_arg PARAMS((char **arg, unsigned mask, int *i));
 PRIVATE void print_help_and_exit PARAMS((int exit_status));
 
 #ifndef VMS
@@ -528,7 +528,7 @@ PRIVATE void FatalProblem PARAMS((int sig));
 #endif /* !VMS */
 
 #if defined(USE_HASH)
-    char *lynx_lss_file=NULL;
+PUBLIC char *lynx_lss_file = NULL;
 #endif
 
 #ifdef __DJGPP__
@@ -719,7 +719,7 @@ unsigned char IBM1047[ 256 ] = /* ATOE OEMVS311 */
 0x8c,0x49,0xcd,0xce,0xcb,0xcf,0xcc,0xe1,0x70,0xdd,0xde,0xdb,0xdc,0x8d,0x8e,0xdf
 } ;
 
-static void FixCharacters(void)
+PRIVATE void FixCharacters(void)
 {
     int c;
     int work1[256],
@@ -736,26 +736,6 @@ static void FixCharacters(void)
     }
 }
 #endif /* EBCDIC */
-
-/* these are used for matching commandline options. */
-PRIVATE int argcmp ARGS2(
-	char*,		str,
-	char*,		what)
-{
-    if (str[0] == '-' && str[1] == '-' ) ++str;
-#if !OPTNAME_ALLOW_DASHES
-    return strcmp(str, what);
-#else
-    ++str; ++what; /*skip leading dash in both strings*/
-    {
-	int l1 = strlen(str);
-	int l2 = strlen(what);
-	if (l1 != l2)
-	    return 1; /* this function simulates strcmp!*/
-	return !strn_dash_equ(str, what, l2);
-    }
-#endif
-}
 
 PRIVATE int argncmp ARGS2(
 	char*,		str,
@@ -800,6 +780,17 @@ PRIVATE void tildeExpand ARGS2(
 	    StrAllocCopy(*pathname, wwwName(Home_Dir()));
 	}
     }
+}
+
+PRIVATE BOOL GetStdin ARGS1(
+	char **,	buf)
+{
+    if (LYSafeGets(buf, stdin) != 0
+     && strncmp(*buf, "---", 3) != 0) {
+	LYTrimTrailing(*buf);
+	return TRUE;
+    }
+    return FALSE;
 }
 
 /*
@@ -920,7 +911,7 @@ PUBLIC int main ARGS2(
      */
     for (i = 1; i < argc; i++) {
 	if (argncmp(argv[i], "-help") == 0) {
-	    parse_arg(&argv[i], &i);
+	    parse_arg(&argv[i], 1, &i);
 	}
 #ifdef SH_EX
 	if (strncmp(argv[i], "-show_cfg", 9) == 0) {
@@ -1055,32 +1046,6 @@ PUBLIC int main ARGS2(
 	    FREE(temp);
 	}
     }
-    /*
-     * Verify if the given space looks secure enough.  Otherwise, make a
-     * secure subdirectory of that.  
-     */
-#if defined(UNIX) && defined(HAVE_MKTEMP)
-    {
-	struct stat sb;
-
-	if (lstat(lynx_temp_space, &sb) == 0
-	 && S_ISDIR(sb.st_mode)) {
-	    if (sb.st_uid != getuid()
-	     || (sb.st_mode & (S_IWOTH | S_IWGRP)) != 0)
-		lynx_temp_subspace = TRUE;
-	} else {
-	     lynx_temp_subspace = TRUE;
-	}
-	if (lynx_temp_subspace) {
-	    StrAllocCat(lynx_temp_space, "/XXXXXX");
-	    if (mktemp(lynx_temp_space) == 0
-	     || mkdir(lynx_temp_space, 0700) < 0) {
-		printf("%s: %s\n", lynx_temp_space, LYStrerror(errno));
-		exit(-1);
-	    }
-	}
-    }
-#endif
 #ifdef VMS
     LYLowerCase(lynx_temp_space);
     if (strchr(lynx_temp_space, '/') != NULL) {
@@ -1134,48 +1099,7 @@ PUBLIC int main ARGS2(
      *	the help menu, output that and exit. - FM
      */
     for (i = 1; i < argc; i++) {
-	if (argncmp(argv[i], "-trace") == 0) {
-	    WWW_TraceFlag = TRUE;
-	} else if (argncmp(argv[i], "-tlog") == 0) {
-	    if (LYUseTraceLog) {
-		LYUseTraceLog = FALSE;
-	    } else {
-		LYUseTraceLog = TRUE;
-	    }
-	} else if (argncmp(argv[i], "-anonymous") == 0) {
-	    if (!LYValidate)
-		parse_restrictions("default");
-	    LYRestricted = TRUE;
-	} else if (argcmp(argv[i], "-validate") == 0) {
-	    /*
-	     *	Follow only http URLs.
-	     */
-	    LYValidate = TRUE;
-#ifdef SOCKS
-	} else if (argncmp(argv[i], "-nosocks") == 0) {
-	    socks_flag = FALSE;
-#endif /* SOCKS */
-	} else if (argncmp(argv[i], "-cfg") == 0) {
-	    if (((cp = strchr(argv[i], '=')) != NULL)
-	     || ((cp = strchr(argv[i], ':')) != NULL))
-		StrAllocCopy(lynx_cfg_file, cp+1);
-	    else {
-		StrAllocCopy(lynx_cfg_file, argv[i+1]);
-		i++;
-	    }
-
-#if defined(USE_HASH)
-	} else if (argncmp(argv[i], "-lss") == 0) {
-	    if ((cp=strchr(argv[i], '=')) != NULL)
-		StrAllocCopy(lynx_lss_file, cp+1);
-	    else {
-		StrAllocCopy(lynx_lss_file, argv[i+1]);
-		i++;
-	    }
-	    CTRACE((tfp, "LYMain found -lss flag, lss file is %s\n",
-		    lynx_lss_file ? lynx_lss_file : "<NONE>"));
-#endif
-	}
+	parse_arg(&argv[i], 2, &i);
     }
 
     /*
@@ -1190,146 +1114,27 @@ PUBLIC int main ARGS2(
      *	arguments.  When interactive, the stdin input is terminated by
      *	by Control-D on Unix or Control-Z on VMS, and each argument
      *	is terminated by a RETURN.  When the argument is -get_data or
-     *	-post_data, the data are terminate by a "___" string, alone
+     *	-post_data, the data are terminated by a "---" string, alone
      *	on the line (also terminated by RETURN). - FM
      */
     for (i = 1; i < argc; i++) {
 	if (strcmp(argv[i], "-") == 0) {
 	    LYGetStdinArgs = TRUE;
+	    break;
 	}
     }
     if (LYGetStdinArgs == TRUE) {
 	char *buf = NULL;
 
 	while (LYSafeGets(&buf, stdin) != 0) {
-	    int j;
+	    char *noargv[2];
 
-	    for (j = strlen(buf) - 1; j > 0 &&
-		(buf[j] == CR || buf[j] == LF); j--) {
-		buf[j] = '\0';
-	    }
+	    noargv[0] = buf;
+	    noargv[1] = NULL;
+	    LYTrimTrailing(buf);
 
-	    if (argncmp(buf, "-trace") == 0) {
-		WWW_TraceFlag = TRUE;
-	    } else if (argncmp(buf, "-tlog") == 0) {
-		if (LYUseTraceLog) {
-		    LYUseTraceLog = FALSE;
-		} else {
-		    LYUseTraceLog = TRUE;
-		}
-	    } else if (argncmp(buf, "-anonymous") == 0) {
-		if (!LYValidate && !LYRestricted)
-		    parse_restrictions("default");
-		LYRestricted = TRUE;
-	    } else if (argcmp(buf, "-validate") == 0) {
-		/*
-		 *  Follow only http URLs.
-		 */
-		LYValidate = TRUE;
-#ifdef SOCKS
-	    } else if (argncmp(buf, "-nosocks") == 0) {
-		socks_flag = FALSE;
-#endif /* SOCKS */
-	    } else if (argncmp(buf, "-cfg") == 0) {
-		if ((cp = strchr(buf, '=')) != NULL) {
-		    StrAllocCopy(lynx_cfg_file, cp+1);
-		} else {
-		    cp = LYSkipNonBlanks(buf);
-		    cp = LYSkipBlanks(cp);
-		    if (*cp)
-			StrAllocCopy(lynx_cfg_file, cp);
-		}
-#if defined(USE_HASH)
-	    } else if (argncmp(buf, "-lss") == 0) {
-		if ((cp = strchr(buf, '=')) != NULL) {
-		    StrAllocCopy(lynx_lss_file, cp+1);
-		} else {
-		    cp = LYSkipNonBlanks(buf);
-		    cp = LYSkipBlanks(cp);
-		    if (*cp)
-			StrAllocCopy(lynx_lss_file, cp);
-		}
-		CTRACE((tfp, "LYMain found -lss flag, lss file is %s\n",
-			lynx_lss_file ? lynx_lss_file : "<NONE>"));
-#endif
-	    } else if (argcmp(buf, "-get_data") == 0) {
-		/*
-		 *  User data for GET form.
-		 */
-		char **get_data;
-
-		/*
-		 *  On Unix, conflicts with curses when interactive
-		 *  so let's force a dump.  - CL
-		 *
-		 *  On VMS, mods have been made in LYCurses.c to deal
-		 *  with potential conflicts, so don't force the dump
-		 *  here. - FM
-		 */
-#ifndef VMS
-		dump_output_immediately = TRUE;
-		LYcols = 80;
-#endif /* VMS */
-
-		StrAllocCopy(form_get_data, "?");   /* Prime the pump */
-		get_data = &form_get_data;
-
-		/*
-		 *  Build GET data for later.  Stop reading when we see
-		 *  a line with "---" as its first three characters.
-		 */
-		while (LYSafeGets(&buf, stdin) != 0 &&
-		       strncmp(buf, "---", 3) != 0) {
-		    int j2;
-
-		    /*
-		     *	Strip line terminators.
-		     */
-		    for (j2 = strlen(buf) - 1; j2 >= 0 &&
-			 (buf[j2] == CR || buf[j2] == LF); j2--) {
-			buf[j2] = '\0';
-		    }
-		    StrAllocCat(*get_data, buf);
-		}
-	    } else if (argcmp(buf, "-post_data") == 0) {
-		/*
-		 *  User data for POST form.
-		 */
-		char **post_data;
-
-		/*
-		 *  On Unix, conflicts with curses when interactive
-		 *  so let's force a dump.  - CL
-		 *
-		 *  On VMS, mods have been made in LYCurses.c to deal
-		 *  with potential conflicts, so don't force a dump
-		 *  here. - FM
-		 */
-#ifndef VMS
-		dump_output_immediately = TRUE;
-		LYcols = 80;
-#endif /* VMS */
-
-		post_data = &form_post_data;
-
-		/*
-		 *  Build post data for later.	Stop reading when we see
-		 *  a line with "---" as its first three characters.
-		 */
-		while (LYSafeGets(&buf, stdin) != 0 &&
-		       strncmp(buf, "---", 3) != 0) {
-		    int j2;
-
-		     /*
-		      *  Strip line terminators.
-		      */
-		    for (j2 = strlen(buf) - 1; j2 >= 0 &&
-			 (buf[j2] == CR || buf[j2] == LF); j2--) {
-			buf[j2] = '\0';
-		    }
-		    StrAllocCat(*post_data, buf);
-		}
-	    } else if (buf[0] != '\0') {
+	    if (parse_arg(&noargv[0], 2, (int *)0) == FALSE
+	     &&  buf[0] != '\0') {
 		char *argument = NULL;
 
 		if (LYStdinArgs == NULL) {
@@ -1583,7 +1388,7 @@ PUBLIC int main ARGS2(
      *  Process any command line arguments not already handled. - FM
      */
     for (i = 1; i < argc; i++) {
-	parse_arg(&argv[i], &i);
+	parse_arg(&argv[i], 4, &i);
     }
 
     /*
@@ -1596,10 +1401,40 @@ PUBLIC int main ARGS2(
 
 	my_args[1] = NULL;
 	while (NULL != (my_args[0] = (char *)HTList_nextObject(cur))) {
-	     parse_arg(my_args, (int *)0);
+	    parse_arg(my_args, 4, (int *)0);
 	}
 	LYStdinArgs_free();
     }
+
+#if defined (UNIX)
+    /*
+     *	If we are told to read the startfile from standard input, do it now,
+     *	after we have read all of the option data from standard input.
+     */
+    if (startfile_stdin) {
+	char result[LY_MAXPATH];
+	char *buf = NULL;
+# if HAVE_TTYNAME
+	char *tty = ttyname(fileno(stderr));
+# else
+	char *tty = "/dev/tty";
+# endif
+
+	if ((fp = LYOpenTemp (result, HTML_SUFFIX, "w")) != 0) {
+	    StrAllocCopy(startfile, result);
+	    while (GetStdin(&buf)) {
+		fputs(buf, fp);
+	    }
+	    FREE(buf);
+	    LYCloseTempFP(fp);
+	}
+	if ((freopen(tty, "r", stdin)) == 0
+	 || !isatty(fileno(stdin))) {
+	    fprintf(stderr, "cannot open a terminal (%s)\n", tty);
+	    exit(1);
+	}
+    }
+#endif
 
     /*
      *  Initialize other things based on the configuration read.
@@ -2329,16 +2164,16 @@ typedef struct parse_args_type
 {
    CONST char *name;
    int type;
-#define IGNORE_ARG		0x000
-#define TOGGLE_ARG		0x001
-#define SET_ARG			0x002
-#define UNSET_ARG		0x003
-#define FUNCTION_ARG		0x004
-#define LYSTRING_ARG		0x005
-#define INT_ARG			0x006
-#define STRING_ARG		0x007
-#define ARG_TYPE_MASK		0x0FF
-#define NEED_NEXT_ARG		0x100
+
+#define TOGGLE_ARG		0x0010
+#define SET_ARG			0x0020
+#define UNSET_ARG		0x0030
+#define FUNCTION_ARG		0x0040
+#define LYSTRING_ARG		0x0050
+#define INT_ARG			0x0060
+#define STRING_ARG		0x0070
+#define ARG_TYPE_MASK		0x0FF0
+#define NEED_NEXT_ARG		0x1000
 
 #define NEED_INT_ARG		(NEED_NEXT_ARG | INT_ARG)
 #define NEED_LYSTRING_ARG	(NEED_NEXT_ARG | LYSTRING_ARG)
@@ -2355,7 +2190,7 @@ typedef struct parse_args_type
 Parse_Args_Type;
 
 /* -auth, -pauth */
-static int parse_authentication ARGS2(
+PRIVATE int parse_authentication ARGS2(
 	char *,			next_arg,
 	char **,		result)
 {
@@ -2387,32 +2222,17 @@ static int parse_authentication ARGS2(
 }
 
 /* -anonymous */
-static int anonymous_fun ARGS1(
+PRIVATE int anonymous_fun ARGS1(
 	char *,			next_arg GCC_UNUSED)
 {
-   /*
-    *  Should already have been set, so we don't
-    *  override or replace any additional
-    *  restrictions from the command line. - FM
-    */
-    if (!LYRestricted) {
-	/* This should not happen unless the option parsing logic
-	   is broken. - kw */
-	fprintf(stderr, "Lynx: internal error parsing -anonymous!\n");
-#ifndef VMS
-	if (LYNoCore)		/* not worth a core dump, I think - kw */
-	    FatalProblem(0);
-	else
-	    exit(70);	/* EX_SOFTWARE in sysexits.h */
-#else
-	exit(-1);
-#endif
-    }
-   return 0;
+    if (!LYValidate && !LYRestricted)
+	parse_restrictions("default");
+    LYRestricted = TRUE;
+    return 0;
 }
 
 /* -assume_charset */
-static int assume_charset_fun ARGS1(
+PRIVATE int assume_charset_fun ARGS1(
 	char *,			next_arg)
 {
     UCLYhndl_for_unspec = safeUCGetLYhndl_byMIME(next_arg);
@@ -2426,7 +2246,7 @@ static int assume_charset_fun ARGS1(
 }
 
 /* -assume_local_charset */
-static int assume_local_charset_fun ARGS1(
+PRIVATE int assume_local_charset_fun ARGS1(
 	char *,			next_arg)
 {
     UCLYhndl_HTFile_for_unspec = safeUCGetLYhndl_byMIME(next_arg);
@@ -2434,7 +2254,7 @@ static int assume_local_charset_fun ARGS1(
 }
 
 /* -assume_unrec_charset */
-static int assume_unrec_charset_fun ARGS1(
+PRIVATE int assume_unrec_charset_fun ARGS1(
 	char *,			next_arg)
 {
     UCLYhndl_for_unrec = safeUCGetLYhndl_byMIME(next_arg);
@@ -2442,7 +2262,7 @@ static int assume_unrec_charset_fun ARGS1(
 }
 
 /* -auth */
-static int auth_fun ARGS1(
+PRIVATE int auth_fun ARGS1(
 	char *,			next_arg)
 {
     parse_authentication(next_arg, authentication_info);
@@ -2450,7 +2270,7 @@ static int auth_fun ARGS1(
 }
 
 /* -base */
-static int base_fun ARGS1(
+PRIVATE int base_fun ARGS1(
 	char *,			next_arg GCC_UNUSED)
 {
     /*
@@ -2470,7 +2290,7 @@ static int base_fun ARGS1(
 
 #ifdef USE_SLANG
 /* -blink */
-static int blink_fun ARGS1(
+PRIVATE int blink_fun ARGS1(
 	char *,			next_arg GCC_UNUSED)
 {
     Lynx_Color_Flags |= SL_LYNX_USE_BLINK;
@@ -2479,7 +2299,7 @@ static int blink_fun ARGS1(
 #endif
 
 /* -cache */
-static int cache_fun ARGS1(
+PRIVATE int cache_fun ARGS1(
 	char *,			next_arg)
 {
     if (next_arg != 0)
@@ -2493,7 +2313,7 @@ static int cache_fun ARGS1(
 }
 
 /* -child */
-static int child_fun ARGS1(
+PRIVATE int child_fun ARGS1(
 	char *,			next_arg GCC_UNUSED)
 {
     child_lynx = TRUE;
@@ -2503,7 +2323,7 @@ static int child_fun ARGS1(
 
 #ifdef USE_SLANG
 /* -color */
-static int color_fun ARGS1(
+PRIVATE int color_fun ARGS1(
 	char *,			next_arg GCC_UNUSED)
 {
     Lynx_Color_Flags |= SL_LYNX_USE_COLOR;
@@ -2517,7 +2337,7 @@ static int color_fun ARGS1(
 
 #ifdef MISC_EXP
 /* -convert_to */
-static int convert_to_fun ARGS1(
+PRIVATE int convert_to_fun ARGS1(
 	char *,			next_arg)
 {
     if (next_arg != 0) {
@@ -2560,7 +2380,7 @@ static int convert_to_fun ARGS1(
 #endif
 
 /* -crawl */
-static int crawl_fun ARGS1(
+PRIVATE int crawl_fun ARGS1(
 	char *,			next_arg GCC_UNUSED)
 {
     crawl = TRUE;
@@ -2569,7 +2389,7 @@ static int crawl_fun ARGS1(
 }
 
 /* -display */
-static int display_fun ARGS1(
+PRIVATE int display_fun ARGS1(
 	char *,			next_arg)
 {
     if (next_arg != 0) {
@@ -2584,7 +2404,7 @@ static int display_fun ARGS1(
 }
 
 /* -dump */
-static int dump_output_fun ARGS1(
+PRIVATE int dump_output_fun ARGS1(
 	char *,			next_arg GCC_UNUSED)
 {
     dump_output_immediately = TRUE;
@@ -2593,7 +2413,7 @@ static int dump_output_fun ARGS1(
 }
 
 /* -editor */
-static int editor_fun ARGS1(
+PRIVATE int editor_fun ARGS1(
 	char *,			next_arg)
 {
     if (next_arg != 0)
@@ -2603,7 +2423,7 @@ static int editor_fun ARGS1(
 }
 
 /* -error_file */
-static int error_file_fun ARGS1(
+PRIVATE int error_file_fun ARGS1(
 	char *,			next_arg)
 {
     /*
@@ -2617,7 +2437,7 @@ static int error_file_fun ARGS1(
 
 #if defined(EXEC_LINKS) || defined(EXEC_SCRIPTS)
 /* -exec */
-static int exec_fun ARGS1(
+PRIVATE int exec_fun ARGS1(
 	char *,			next_arg GCC_UNUSED)
 {
 #ifndef NEVER_ALLOW_REMOTE_EXEC
@@ -2630,7 +2450,7 @@ static int exec_fun ARGS1(
 #endif
 
 /* -get_data */
-static int get_data_fun ARGS1(
+PRIVATE int get_data_fun ARGS1(
 	char *,			next_arg GCC_UNUSED)
 {
     /*
@@ -2658,14 +2478,7 @@ static int get_data_fun ARGS1(
      *  Build GET data for later.  Stop reading when we see a line
      *  with "---" as its first three characters.
      */
-    while (LYSafeGets(&buf, stdin) != 0 &&
-	  strncmp(buf, "---", 3) != 0) {
-	int j;
-
-	for (j = strlen(buf) - 1; j >= 0 && /* Strip line terminators */
-	    (buf[j] == CR || buf[j] == LF); j--)
-	    buf[j] = '\0';
-
+    while (GetStdin(&buf)) {
 	StrAllocCat(*get_data, buf);
     }
 
@@ -2673,7 +2486,7 @@ static int get_data_fun ARGS1(
 }
 
 /* -help */
-static int help_fun ARGS1(
+PRIVATE int help_fun ARGS1(
 	char *,			next_arg GCC_UNUSED)
 {
     print_help_and_exit (0);
@@ -2681,7 +2494,7 @@ static int help_fun ARGS1(
 }
 
 /* -hiddenlinks */
-static int hiddenlinks_fun ARGS1(
+PRIVATE int hiddenlinks_fun ARGS1(
 	char *,			next_arg)
 {
     if (next_arg != 0) {
@@ -2701,7 +2514,7 @@ static int hiddenlinks_fun ARGS1(
 }
 
 /* -homepage */
-static int homepage_fun ARGS1(
+PRIVATE int homepage_fun ARGS1(
 	char *,			next_arg)
 {
     if (next_arg != 0) {
@@ -2712,7 +2525,7 @@ static int homepage_fun ARGS1(
 }
 
 /* -mime_header */
-static int mime_header_fun ARGS1(
+PRIVATE int mime_header_fun ARGS1(
 	char *,			next_arg GCC_UNUSED)
 {
     /*
@@ -2728,7 +2541,7 @@ static int mime_header_fun ARGS1(
 
 #ifndef DISABLE_NEWS
 /* -newschunksize */
-static int newschunksize_fun ARGS1(
+PRIVATE int newschunksize_fun ARGS1(
 	char *,			next_arg)
 {
     if (next_arg != 0) {
@@ -2744,7 +2557,7 @@ static int newschunksize_fun ARGS1(
 }
 
 /* -newsmaxchunk */
-static int newsmaxchunk_fun ARGS1(
+PRIVATE int newsmaxchunk_fun ARGS1(
 	char *,			next_arg)
 {
     if (next_arg) {
@@ -2761,7 +2574,7 @@ static int newsmaxchunk_fun ARGS1(
 #endif /* not DISABLE_NEWS */
 
 /* -nobold */
-static int nobold_fun ARGS1(
+PRIVATE int nobold_fun ARGS1(
 	char *,			next_arg GCC_UNUSED)
 {
    LYnoVideo(1);
@@ -2769,7 +2582,7 @@ static int nobold_fun ARGS1(
 }
 
 /* -nobrowse */
-static int nobrowse_fun ARGS1(
+PRIVATE int nobrowse_fun ARGS1(
 	char *,			next_arg GCC_UNUSED)
 {
    HTDirAccess = HT_DIR_FORBID;
@@ -2777,7 +2590,7 @@ static int nobrowse_fun ARGS1(
 }
 
 /* -nocolor */
-static int nocolor_fun ARGS1(
+PRIVATE int nocolor_fun ARGS1(
 	char *,			next_arg GCC_UNUSED)
 {
     LYShowColor = SHOW_COLOR_NEVER;
@@ -2789,7 +2602,7 @@ static int nocolor_fun ARGS1(
 }
 
 /* -nopause */
-static int nopause_fun ARGS1(
+PRIVATE int nopause_fun ARGS1(
 	char *,			next_arg GCC_UNUSED)
 {
     InfoSecs = 0;
@@ -2799,7 +2612,7 @@ static int nopause_fun ARGS1(
 }
 
 /* -noreverse */
-static int noreverse_fun ARGS1(
+PRIVATE int noreverse_fun ARGS1(
 	char *,			next_arg GCC_UNUSED)
 {
    LYnoVideo(2);
@@ -2807,7 +2620,7 @@ static int noreverse_fun ARGS1(
 }
 
 /* -nounderline */
-static int nounderline_fun ARGS1(
+PRIVATE int nounderline_fun ARGS1(
 	char *,			next_arg GCC_UNUSED)
 {
    LYnoVideo(4);
@@ -2816,7 +2629,7 @@ static int nounderline_fun ARGS1(
 
 #ifdef MISC_EXP
 /* -nozap */
-static int nozap_fun ARGS1(
+PRIVATE int nozap_fun ARGS1(
 	char *,			next_arg)
 {
     LYNoZapKey = 1; /* everything but "initially" treated as "full" - kw */
@@ -2830,7 +2643,7 @@ static int nozap_fun ARGS1(
 #endif /* MISC_EXP */
 
 /* -pauth */
-static int pauth_fun ARGS1(
+PRIVATE int pauth_fun ARGS1(
 	char *,			next_arg)
 {
     parse_authentication(next_arg, proxyauth_info);
@@ -2838,7 +2651,7 @@ static int pauth_fun ARGS1(
 }
 
 /* -post_data */
-static int post_data_fun ARGS1(
+PRIVATE int post_data_fun ARGS1(
 	char *,			next_arg GCC_UNUSED)
 {
     /*
@@ -2865,21 +2678,14 @@ static int post_data_fun ARGS1(
      * Build post data for later.  Stop reading when we see a line with "---"
      * as its first three characters.
      */
-    while (LYSafeGets(&buf, stdin) != 0 &&
-	  strncmp(buf, "---", 3) != 0) {
-	int j;
-
-	for (j = strlen(buf) - 1; j >= 0 && /* Strip line terminators */
-	    (buf[j] == CR || buf[j] == LF); j--) {
-	    buf[j] = '\0';
-	}
+    while (GetStdin(&buf)) {
 	StrAllocCat(*post_data, buf);
     }
     return 0;
 }
 
 /* -restrictions */
-static int restrictions_fun ARGS1(
+PRIVATE int restrictions_fun ARGS1(
 	char *,			next_arg)
 {
     static CONST char *Usage[] = {
@@ -2990,7 +2796,7 @@ static int restrictions_fun ARGS1(
 }
 
 /* -selective */
-static int selective_fun ARGS1(
+PRIVATE int selective_fun ARGS1(
 	char *,			next_arg GCC_UNUSED)
 {
    HTDirAccess = HT_DIR_SELECTIVE;
@@ -2998,7 +2804,7 @@ static int selective_fun ARGS1(
 }
 
 /* -source */
-static int source_fun ARGS1(
+PRIVATE int source_fun ARGS1(
 	char *,			next_arg GCC_UNUSED)
 {
     dump_output_immediately = TRUE;
@@ -3009,7 +2815,7 @@ static int source_fun ARGS1(
 }
 
 /* -traversal */
-static int traversal_fun ARGS1(
+PRIVATE int traversal_fun ARGS1(
 	char *,			next_arg GCC_UNUSED)
 {
     traversal = TRUE;
@@ -3023,7 +2829,7 @@ static int traversal_fun ARGS1(
 }
 
 /* -version */
-static int version_fun ARGS1(
+PRIVATE int version_fun ARGS1(
 	char *,			next_arg GCC_UNUSED)
 {
     SetOutputMode( O_TEXT );
@@ -3078,7 +2884,7 @@ static int version_fun ARGS1(
 }
 
 /* -width */
-static int width_fun ARGS1(
+PRIVATE int width_fun ARGS1(
 	char *,			next_arg)
 {
     if (next_arg != 0) {
@@ -3091,581 +2897,587 @@ static int width_fun ARGS1(
 }
 
 /* NOTE: This table is sorted by name to make the help message useful */
-static Parse_Args_Type Arg_Table [] =
+PRIVATE Parse_Args_Type Arg_Table [] =
 {
    PARSE_SET(
-      "accept_all_cookies", SET_ARG,		&LYAcceptAllCookies,
+      "accept_all_cookies", 4|SET_ARG,		&LYAcceptAllCookies,
       "\naccept cookies without prompting if Set-Cookie handling is on"
    ),
    PARSE_FUN(
-      "anonymous",	FUNCTION_ARG,	anonymous_fun,
+      "anonymous",	2|FUNCTION_ARG,		anonymous_fun,
       "apply restrictions for anonymous account,\nsee also -restrictions"
    ),
    PARSE_FUN(
-      "assume_charset", NEED_FUNCTION_ARG, assume_charset_fun,
+      "assume_charset", 4|NEED_FUNCTION_ARG,	assume_charset_fun,
       "=MIMEname\ncharset for documents that don't specify it"
    ),
    PARSE_FUN(
-      "assume_local_charset",	NEED_FUNCTION_ARG,assume_local_charset_fun,
+      "assume_local_charset",	4|NEED_FUNCTION_ARG,assume_local_charset_fun,
       "=MIMEname\ncharset assumed for local files"
    ),
    PARSE_FUN(
-      "assume_unrec_charset",	NEED_FUNCTION_ARG,assume_unrec_charset_fun,
+      "assume_unrec_charset",	4|NEED_FUNCTION_ARG,assume_unrec_charset_fun,
       "=MIMEname\nuse this instead of unrecognized charsets"
    ),
    PARSE_FUN(
-      "auth",		NEED_FUNCTION_ARG,	auth_fun,
+      "auth",		4|NEED_FUNCTION_ARG,	auth_fun,
       "=id:pw\nauthentication information for protected documents"
    ),
    PARSE_FUN(
-      "base",		FUNCTION_ARG,		base_fun,
+      "base",		4|FUNCTION_ARG,		base_fun,
       "prepend a request URL comment and BASE tag to text/html\noutputs for -source dumps"
    ),
 #ifdef USE_SLANG
    PARSE_FUN(
-      "blink",		FUNCTION_ARG,		blink_fun,
+      "blink",		4|FUNCTION_ARG,		blink_fun,
       "force high intensity bg colors in color mode"
    ),
 #endif
    PARSE_SET(
-      "book",		SET_ARG,		&bookmark_start,
+      "book",		4|SET_ARG,		&bookmark_start,
       "use the bookmark page as the startfile"
    ),
    PARSE_SET(
-      "buried_news",	TOGGLE_ARG,		&scan_for_buried_news_references,
+      "buried_news",	4|TOGGLE_ARG,		&scan_for_buried_news_references,
       "toggles scanning of news articles for buried references"
    ),
    PARSE_FUN(
-      "cache",		NEED_FUNCTION_ARG,	cache_fun,
+      "cache",		4|NEED_FUNCTION_ARG,	cache_fun,
       "=NUMBER\nNUMBER of documents cached in memory"
    ),
    PARSE_SET(
-      "case",		SET_ARG,		&case_sensitive,
+      "case",		4|SET_ARG,		&case_sensitive,
       "enable case sensitive user searching"
    ),
 #ifdef SH_EX
    PARSE_SET(
-      "center",		TOGGLE_ARG,	&no_table_center,
+      "center",		4|TOGGLE_ARG,		&no_table_center,
       "Toggle center alignment in HTML TABLE"
    ),
 #endif
    PARSE_STR(
-      "cfg",		IGNORE_ARG|NEED_NEXT_ARG,	0,
+      "cfg",		2|NEED_LYSTRING_ARG,	&lynx_cfg_file,
       "=FILENAME\nspecifies a lynx.cfg file other than the default"
    ),
    PARSE_FUN(
-      "child",		FUNCTION_ARG,		child_fun,
+      "child",		4|FUNCTION_ARG,		child_fun,
       "exit on left-arrow in startfile, and disable save to disk"
    ),
 #ifdef USE_SLANG
    PARSE_FUN(
-      "color",		FUNCTION_ARG,		color_fun,
+      "color",		4|FUNCTION_ARG,		color_fun,
       "force color mode on with standard bg colors"
    ),
 #endif
 #ifndef __DJGPP__
    PARSE_SET(
-      "connect_timeout", NEED_INT_ARG,		&connect_timeout,
+      "connect_timeout", 4|NEED_INT_ARG,	&connect_timeout,
       "=N\nset the N-second connection timeout"
    ),
 #endif
 #ifdef MISC_EXP
    PARSE_SET(
-      "convert_to",	FUNCTION_ARG,		convert_to_fun,
+      "convert_to",	4|FUNCTION_ARG,		convert_to_fun,
       "=FORMAT\nconvert input, FORMAT is in MIME type notation (experimental)"
    ),
 #endif
 #ifdef EXP_PERSISTENT_COOKIES
    PARSE_STR(
-      "cookie_file",	LYSTRING_ARG,		&LYCookieFile,
+      "cookie_file",	4|LYSTRING_ARG,		&LYCookieFile,
       "=FILENAME\nspecifies a file to use to read cookies"
    ),
    PARSE_STR(
-      "cookie_save_file",	LYSTRING_ARG,	&LYCookieSaveFile,
+      "cookie_save_file",	4|LYSTRING_ARG,	&LYCookieSaveFile,
       "=FILENAME\nspecifies a file to use to store cookies"
    ),
 #endif /* EXP_PERSISTENT_COOKIES */
    PARSE_SET(
-      "cookies",	TOGGLE_ARG,		&LYSetCookies,
+      "cookies",	4|TOGGLE_ARG,		&LYSetCookies,
       "toggles handling of Set-Cookie headers"
    ),
 #ifndef VMS
    PARSE_SET(
-      "core",		TOGGLE_ARG,		&LYNoCore,
+      "core",		4|TOGGLE_ARG,		&LYNoCore,
       "toggles forced core dumps on fatal errors"
    ),
 #endif
    PARSE_FUN(
-      "crawl",		FUNCTION_ARG,		crawl_fun,
+      "crawl",		4|FUNCTION_ARG,		crawl_fun,
       "with -traversal, output each page to a file\n\
 with -dump, format output as with -traversal, but to stdout"
    ),
 #ifdef DISP_PARTIAL
    PARSE_SET(
-      "debug_partial",	TOGGLE_ARG,		&debug_display_partial,
+      "debug_partial",	4|TOGGLE_ARG,		&debug_display_partial,
       "incremental display stages with MessageSecs delay"
    ),
 #endif
 #if defined(SH_EX) && defined(WIN_EX)
    PARSE_SET(
-      "delay",		NEED_INT_ARG,		&debug_delay,
+      "delay",		4|NEED_INT_ARG,		&debug_delay,
       "=NNN\nset the NNN msec delay at statusline message"
    ),
 #endif
    PARSE_FUN(
-      "display",	NEED_FUNCTION_ARG,	display_fun,
+      "display",	4|NEED_FUNCTION_ARG,	display_fun,
       "=DISPLAY\nset the display variable for X exec'ed programs"
    ),
    PARSE_SET(
-      "dont_wrap_pre",	SET_ARG,		&dont_wrap_pre,
+      "dont_wrap_pre",	4|SET_ARG,		&dont_wrap_pre,
       "inhibit wrapping of text in <pre> when -dump'ing and \n\
 -crawl'ing, mark wrapped lines in interactive session"
    ),
    PARSE_FUN(
-      "dump",		FUNCTION_ARG,		dump_output_fun,
+      "dump",		4|FUNCTION_ARG,		dump_output_fun,
       "dump the first file to stdout and exit"
    ),
    PARSE_FUN(
-      "editor",		NEED_FUNCTION_ARG,	editor_fun,
+      "editor",		4|NEED_FUNCTION_ARG,	editor_fun,
       "=EDITOR\nenable edit mode with specified editor"
    ),
    PARSE_SET(
-      "emacskeys",	SET_ARG,		&emacs_keys,
+      "emacskeys",	4|SET_ARG,		&emacs_keys,
       "enable emacs-like key movement"
    ),
    PARSE_SET(
-      "enable_scrollback", TOGGLE_ARG,		&enable_scrollback,
+      "enable_scrollback", 4|TOGGLE_ARG,	&enable_scrollback,
       "\ntoggles compatibility with comm programs' scrollback\n\
 keys (may be incompatible with some curses packages)"
    ),
    PARSE_FUN(
-      "error_file",	NEED_FUNCTION_ARG,	error_file_fun,
+      "error_file",	4|NEED_FUNCTION_ARG,	error_file_fun,
       "=FILE\nwrite the HTTP status code here"
    ),
 #if defined(EXEC_LINKS) || defined(EXEC_SCRIPTS)
 #ifndef NEVER_ALLOW_REMOTE_EXEC
    PARSE_FUN(
-      "exec",		FUNCTION_ARG,		exec_fun,
+      "exec",		4|FUNCTION_ARG,		exec_fun,
       "enable local program execution"
    ),
 #endif
 #endif /* EXEC_LINKS || EXEC_SCRIPTS */
 #ifdef VMS
    PARSE_SET(
-      "fileversions",	SET_ARG,		&HTVMSFileVersions,
+      "fileversions",	4|SET_ARG,		&HTVMSFileVersions,
       "include all versions of files in local VMS directory\nlistings"
    ),
 #endif
    PARSE_SET(
-      "force_empty_hrefless_a",	SET_ARG,	&force_empty_hrefless_a,
+      "force_empty_hrefless_a",	4|SET_ARG,	&force_empty_hrefless_a,
       "force HREF-less 'A' elements to be empty (close them as soon as they are seen)"
    ),
    PARSE_SET(
-      "force_html",	SET_ARG,		&LYforce_HTML_mode,
+      "force_html",	4|SET_ARG,		&LYforce_HTML_mode,
       "forces the first document to be interpreted as HTML"
    ),
    PARSE_SET(
-      "force_secure",	TOGGLE_ARG,		&LYForceSSLCookiesSecure,
+      "force_secure",	4|TOGGLE_ARG,		&LYForceSSLCookiesSecure,
       "toggles forcing of the secure flag for SSL cookies"
    ),
 #if !defined(NO_OPTION_FORMS) && !defined(NO_OPTION_MENU)
    PARSE_SET(
-      "forms_options",	TOGGLE_ARG,		&LYUseFormsOptions,
+      "forms_options",	4|TOGGLE_ARG,		&LYUseFormsOptions,
       "toggles forms-based vs old-style options menu"
    ),
 #endif
    PARSE_SET(
-      "from",		TOGGLE_ARG,		&LYNoFromHeader,
+      "from",		4|TOGGLE_ARG,		&LYNoFromHeader,
       "toggle transmission of From headers"
    ),
    PARSE_SET(
-      "ftp",		UNSET_ARG,		&ftp_ok,
+      "ftp",		4|UNSET_ARG,		&ftp_ok,
       "disable ftp access"
    ),
    PARSE_FUN(
-      "get_data",	FUNCTION_ARG,		get_data_fun,
+      "get_data",	6|FUNCTION_ARG,		get_data_fun,
       "user data for get forms, read from stdin,\nterminated by '---' on a line"
    ),
    PARSE_SET(
-      "head",		SET_ARG,		&HEAD_request,
+      "head",		4|SET_ARG,		&HEAD_request,
       "send a HEAD request"
    ),
    PARSE_FUN(
-      "help",		FUNCTION_ARG,		help_fun,
+      "help",		5|FUNCTION_ARG,		help_fun,
       "print this usage message"
    ),
    PARSE_FUN(
-      "hiddenlinks",	NEED_FUNCTION_ARG,	hiddenlinks_fun,
+      "hiddenlinks",	4|NEED_FUNCTION_ARG,	hiddenlinks_fun,
       "=[option]\nhidden links: options are merge, listonly, or ignore"
    ),
    PARSE_SET(
-      "historical",	TOGGLE_ARG,		&historical_comments,
+      "historical",	4|TOGGLE_ARG,		&historical_comments,
       "toggles use of '>' or '-->' as a terminator for comments"
    ),
    PARSE_FUN(
-      "homepage",	NEED_FUNCTION_ARG,	homepage_fun,
+      "homepage",	4|NEED_FUNCTION_ARG,	homepage_fun,
       "=URL\nset homepage separate from start page"
    ),
    PARSE_SET(
-      "image_links",	TOGGLE_ARG,		&clickable_images,
+      "image_links",	4|TOGGLE_ARG,		&clickable_images,
       "toggles inclusion of links for all images"
    ),
    PARSE_STR(
-      "index",		NEED_LYSTRING_ARG,	&indexfile,
+      "index",		4|NEED_LYSTRING_ARG,	&indexfile,
       "=URL\nset the default index file to URL"
    ),
    PARSE_SET(
-      "ismap",		TOGGLE_ARG,		&LYNoISMAPifUSEMAP,
+      "ismap",		4|TOGGLE_ARG,		&LYNoISMAPifUSEMAP,
       "toggles inclusion of ISMAP links when client-side\nMAPs are present"
    ),
 #ifdef EXP_JUSTIFY_ELTS
    PARSE_SET(
-      "justify",	SET_ARG,		&ok_justify,
+      "justify",	4|SET_ARG,		&ok_justify,
       "do justification of text"
    ),
 #endif
    PARSE_INT(
-      "link",		NEED_INT_ARG,		&ccount,
+      "link",		4|NEED_INT_ARG,		&ccount,
       "=NUMBER\nstarting count for lnk#.dat files produced by -crawl"
    ),
    PARSE_SET(
-      "localhost",	SET_ARG,		&local_host_only,
+      "localhost",	4|SET_ARG,		&local_host_only,
       "disable URLs that point to remote hosts"
    ),
 #if defined(EXEC_LINKS) || defined(EXEC_SCRIPTS)
    PARSE_SET(
-      "locexec",	SET_ARG,		&local_exec_on_local_files,
+      "locexec",	4|SET_ARG,		&local_exec_on_local_files,
       "enable local program execution from local files only"
    ),
 #endif /* EXEC_LINKS || EXEC_SCRIPTS */
 #if defined(USE_HASH)
    PARSE_STR(
-      "lss",		IGNORE_ARG|NEED_NEXT_ARG,	0,
+      "lss",		2|NEED_LYSTRING_ARG,	&lynx_lss_file,
       "=FILENAME\nspecifies a lynx.lss file other than the default"
    ),
 #endif
    PARSE_FUN(
-      "mime_header",	FUNCTION_ARG,		mime_header_fun,
+      "mime_header",	4|FUNCTION_ARG,		mime_header_fun,
       "include mime headers and force source dump"
    ),
    PARSE_SET(
-      "minimal",	TOGGLE_ARG,		&minimal_comments,
+      "minimal",	4|TOGGLE_ARG,		&minimal_comments,
       "toggles minimal versus valid comment parsing"
    ),
 #ifndef DISABLE_NEWS
 #endif
 #ifndef DISABLE_NEWS
    PARSE_FUN(
-      "newschunksize",	NEED_FUNCTION_ARG,	newschunksize_fun,
+      "newschunksize",	4|NEED_FUNCTION_ARG,	newschunksize_fun,
       "=NUMBER\nnumber of articles in chunked news listings"
    ),
    PARSE_FUN(
-      "newsmaxchunk",	NEED_FUNCTION_ARG,	newsmaxchunk_fun,
+      "newsmaxchunk",	4|NEED_FUNCTION_ARG,	newsmaxchunk_fun,
       "=NUMBER\nmaximum news articles in listings before chunking"
    ),
 #endif
 #if USE_BLAT_MAILER
    PARSE_SET(
-      "noblat",		TOGGLE_ARG,		&mail_is_blat,
+      "noblat",		4|TOGGLE_ARG,		&mail_is_blat,
       "select mail tool (`BLAT' ==> `sendmail')"
    ),
 #endif
    PARSE_FUN(
-      "nobold",		FUNCTION_ARG,		nobold_fun,
+      "nobold",		4|FUNCTION_ARG,		nobold_fun,
       "disable bold video-attribute"
    ),
    PARSE_FUN(
-      "nobrowse",	FUNCTION_ARG,		nobrowse_fun,
+      "nobrowse",	4|FUNCTION_ARG,		nobrowse_fun,
       "disable directory browsing"
    ),
    PARSE_SET(
-      "nocc",		SET_ARG,		&LYNoCc,
+      "nocc",		4|SET_ARG,		&LYNoCc,
       "disable Cc: prompts for self copies of mailings"
    ),
    PARSE_FUN(
-      "nocolor",	FUNCTION_ARG,		nocolor_fun,
+      "nocolor",	4|FUNCTION_ARG,		nocolor_fun,
       "turn off color support"
    ),
 #if defined(EXEC_LINKS) || defined(EXEC_SCRIPTS)
    PARSE_SET(
-      "noexec",		UNSET_ARG,		&local_exec,
+      "noexec",		4|UNSET_ARG,		&local_exec,
       "disable local program execution (DEFAULT)"
    ),
 #endif /* EXEC_LINKS || EXEC_SCRIPTS */
    PARSE_SET(
-      "nofilereferer",	SET_ARG,		&no_filereferer,
+      "nofilereferer",	4|SET_ARG,		&no_filereferer,
       "disable transmission of Referer headers for file URLs"
    ),
    PARSE_SET(
-      "nolist",		SET_ARG,		&nolist,
+      "nolist",		4|SET_ARG,		&nolist,
       "disable the link list feature in dumps"
    ),
    PARSE_SET(
-      "nolog",		UNSET_ARG,		&error_logging,
+      "nolog",		4|UNSET_ARG,		&error_logging,
       "disable mailing of error messages to document owners"
    ),
 #if HAVE_SIGACTION && defined(SIGWINCH)
    PARSE_SET(
-      "nonrestarting_sigwinch", SET_ARG,	&LYNonRestartingSIGWINCH,
+      "nonrestarting_sigwinch", 4|SET_ARG,	&LYNonRestartingSIGWINCH,
       "make window size change handler non-restarting"
    ),
 #endif /* HAVE_SIGACTION */
    PARSE_FUN(
-      "nopause",	FUNCTION_ARG,		nopause_fun,
+      "nopause",	4|FUNCTION_ARG,		nopause_fun,
       "disable forced pauses for statusline messages"
    ),
    PARSE_SET(
-      "noprint",	SET_ARG,		&no_print,
+      "noprint",	4|SET_ARG,		&no_print,
       "disable some print functions, like -restrictions=print"
    ),
    PARSE_SET(
-      "noredir",	SET_ARG,		&no_url_redirection,
+      "noredir",	4|SET_ARG,		&no_url_redirection,
       "don't follow Location: redirection"
    ),
    PARSE_SET(
-      "noreferer",	SET_ARG,		&LYNoRefererHeader,
+      "noreferer",	4|SET_ARG,		&LYNoRefererHeader,
       "disable transmission of Referer headers"
    ),
    PARSE_FUN(
-      "noreverse",	FUNCTION_ARG,		noreverse_fun,
+      "noreverse",	4|FUNCTION_ARG,		noreverse_fun,
       "disable reverse video-attribute"
    ),
 #ifdef SOCKS
    PARSE_SET(
-      "nosocks",	UNSET_ARG,		&socks_flag,
+      "nosocks",	6|UNSET_ARG,		&socks_flag,
       "don't use SOCKS proxy for this session"
    ),
 #endif
    PARSE_SET(
-      "nostatus",	SET_ARG,		&no_statusline,
+      "nostatus",	4|SET_ARG,		&no_statusline,
       "disable the miscellaneous information messages"
    ),
    PARSE_FUN(
-      "nounderline",	FUNCTION_ARG,		nounderline_fun,
+      "nounderline",	4|FUNCTION_ARG,		nounderline_fun,
       "disable underline video-attribute"
    ),
 #ifdef MISC_EXP
    PARSE_FUN(
-      "nozap",		FUNCTION_ARG,		nozap_fun,
+      "nozap",		4|FUNCTION_ARG,		nozap_fun,
       "=DURATION (\"initially\" or \"full\") disable checks for 'z' key"
    ),
 #endif
    PARSE_SET(
-      "number_fields",	SET_ARG,		&number_fields,
+      "number_fields",	4|SET_ARG,		&number_fields,
       "force numbering of links as well as form input fields"
    ),
    PARSE_SET(
-      "number_links",	SET_ARG,		&number_links,
+      "number_links",	4|SET_ARG,		&number_links,
       "force numbering of links"
    ),
 #ifdef DISP_PARTIAL
    PARSE_SET(
-      "partial",	TOGGLE_ARG,		&display_partial_flag,
+      "partial",	4|TOGGLE_ARG,		&display_partial_flag,
       "toggles display partial pages while downloading"
    ),
    PARSE_INT(
-      "partial_thres",	NEED_INT_ARG,		&partial_threshold,
+      "partial_thres",	4|NEED_INT_ARG,		&partial_threshold,
       "[=NUMBER]\nnumber of lines to render before repainting display\n\
 with partial-display logic"
    ),
 #endif
    PARSE_FUN(
-      "pauth",		NEED_FUNCTION_ARG,	pauth_fun,
+      "pauth",		4|NEED_FUNCTION_ARG,	pauth_fun,
       "=id:pw\nauthentication information for protected proxy server"
    ),
    PARSE_SET(
-      "popup",		UNSET_ARG,		&LYUseDefSelPop,
+      "popup",		4|UNSET_ARG,		&LYUseDefSelPop,
       "toggles handling of single-choice SELECT options via\npopup windows or as lists of radio buttons"
    ),
    PARSE_FUN(
-      "post_data",	FUNCTION_ARG,		post_data_fun,
+      "post_data",	6|FUNCTION_ARG,		post_data_fun,
       "user data for post forms, read from stdin,\nterminated by '---' on a line"
    ),
    PARSE_SET(
-      "preparsed",	SET_ARG,		&LYPreparsedSource,
+      "preparsed",	4|SET_ARG,		&LYPreparsedSource,
       "show parsed text/html with -source and in source view\n\
 to visualize how lynx behaves with invalid HTML"
    ),
 #ifdef USE_PRETTYSRC
    PARSE_SET(
-      "prettysrc",	SET_ARG,		&LYpsrc,
+      "prettysrc",	4|SET_ARG,		&LYpsrc,
       "do syntax highlighting and hyperlink handling in source view"
    ),
 #endif
    PARSE_SET(
-      "print",		UNSET_ARG,		&no_print,
+      "print",		4|UNSET_ARG,		&no_print,
       "enable print functions (DEFAULT), opposite of -noprint"
    ),
    PARSE_SET(
-      "pseudo_inlines", TOGGLE_ARG,		&pseudo_inline_alts,
+      "pseudo_inlines", 4|TOGGLE_ARG,		&pseudo_inline_alts,
       "toggles pseudo-ALTs for inlines with no ALT string"
    ),
    PARSE_SET(
-      "raw",		UNSET_ARG,		&LYUseDefaultRawMode,
+      "raw",		4|UNSET_ARG,		&LYUseDefaultRawMode,
       "toggles default setting of 8-bit character translations\n\
 or CJK mode for the startup character set"
    ),
    PARSE_SET(
-      "realm",		SET_ARG,		&check_realm,
+      "realm",		4|SET_ARG,		&check_realm,
       "restricts access to URLs in the starting realm"
    ),
    PARSE_SET(
-      "reload",		SET_ARG,		&reloading,
+      "reload",		4|SET_ARG,		&reloading,
       "flushes the cache on a proxy server\n(only the first document affected)"
    ),
    PARSE_FUN(
-      "restrictions",	FUNCTION_ARG,		restrictions_fun,
+      "restrictions",	4|FUNCTION_ARG,		restrictions_fun,
       "=[options]\nuse -restrictions to see list"
    ),
    PARSE_SET(
-      "resubmit_posts", TOGGLE_ARG,		&LYresubmit_posts,
+      "resubmit_posts", 4|TOGGLE_ARG,		&LYresubmit_posts,
       "toggles forced resubmissions (no-cache) of forms with\n\
 method POST when the documents they returned are sought\n\
 with the PREV_DOC command or from the History List"
    ),
    PARSE_SET(
-      "rlogin",		UNSET_ARG,		&rlogin_ok,
+      "rlogin",		4|UNSET_ARG,		&rlogin_ok,
       "disable rlogins"
    ),
 #ifdef USE_SCROLLBAR
    PARSE_SET(
-      "scrollbar",	TOGGLE_ARG,		&LYsb,
+      "scrollbar",	4|TOGGLE_ARG,		&LYsb,
       "toggles showing scrollbar (requires color styles)"
    ),
    PARSE_SET(
-      "scrollbar_arrow", TOGGLE_ARG,		&LYsb_arrow,
+      "scrollbar_arrow", 4|TOGGLE_ARG,		&LYsb_arrow,
       "toggles showing arrows at ends of the scrollbar"
    ),
 #endif
    PARSE_FUN(
-      "selective",	FUNCTION_ARG,		selective_fun,
+      "selective",	4|FUNCTION_ARG,		selective_fun,
       "require .www_browsable files to browse directories"
    ),
    PARSE_SET(
-      "short_url",	SET_ARG,		&long_url_ok,
+      "short_url",	4|SET_ARG,		&long_url_ok,
       "enables examination of beginning and end of long URL in status line"
    ),
 #ifdef SH_EX
    PARSE_SET(
-      "show_cfg",	SET_ARG,		&show_cfg,
+      "show_cfg",	4|SET_ARG,		&show_cfg,
       "Show `LYNX.CFG' setting"
    ),
 #endif
    PARSE_SET(
-      "show_cursor",	TOGGLE_ARG,		&LYUseDefShoCur,
+      "show_cursor",	4|TOGGLE_ARG,		&LYUseDefShoCur,
       "toggles hiding of the cursor in the lower right corner"
    ),
    PARSE_SET(
-      "soft_dquotes",	TOGGLE_ARG,		&soft_dquotes,
+      "soft_dquotes",	4|TOGGLE_ARG,		&soft_dquotes,
       "toggles emulation of the old Netscape and Mosaic bug which\n\
 treated '>' as a co-terminator for double-quotes and tags"
    ),
    PARSE_FUN(
-      "source",		FUNCTION_ARG,		source_fun,
+      "source",		4|FUNCTION_ARG,		source_fun,
       "dump the source of the first file to stdout and exit"
    ),
    PARSE_SET(
-      "stack_dump",	SET_ARG,		&stack_dump,
+      "stack_dump",	4|SET_ARG,		&stack_dump,
       "disable SIGINT cleanup handler"
    ),
    PARSE_SET(
-      "startfile_ok",	SET_ARG,		&startfile_ok,
+      "startfile_ok",	4|SET_ARG,		&startfile_ok,
       "allow non-http startfile and homepage with -validate"
    ),
+#if defined (UNIX)
+   PARSE_SET(
+      "stdin",		4|SET_ARG,		&startfile_stdin,
+      "read startfile from standard input"
+   ),
+#endif
 #ifndef VMS
 #ifdef SYSLOG_REQUESTED_URLS
    PARSE_STR(
-      "syslog",		NEED_LYSTRING_ARG,	&syslog_txt,
+      "syslog",		4|NEED_LYSTRING_ARG,	&syslog_txt,
       "=text\ninformation for syslog call"
    ),
 #endif
 #endif
    PARSE_SET(
-      "tagsoup",	SET_ARG,		&Old_DTD,
+      "tagsoup",	4|SET_ARG,		&Old_DTD,
       "use TagSoup rather than SortaSGML parser"
    ),
    PARSE_SET(
-      "telnet",		UNSET_ARG,		&telnet_ok,
+      "telnet",		4|UNSET_ARG,		&telnet_ok,
       "disable telnets"
    ),
    PARSE_STR(
-      "term",		NEED_STRING_ARG,	&terminal,
+      "term",		4|NEED_STRING_ARG,	&terminal,
       "=TERM\nset terminal type to TERM"
    ),
 #ifdef _WINDOWS
    PARSE_SET(
-      "timeout",	SET_ARG,		&lynx_timeout,
+      "timeout",	4|SET_ARG,		&lynx_timeout,
       "set TCP/IP timeout"
    ),
 #endif
    PARSE_SET(
-      "tlog",		IGNORE_ARG,		0,
+      "tlog",		2|TOGGLE_ARG,		&LYUseTraceLog,
       "toggles use of a Lynx Trace Log for the current session"
    ),
 #ifdef TEXTFIELDS_MAY_NEED_ACTIVATION
    PARSE_SET(
-      "tna",		SET_ARG,		&textfields_need_activation,
+      "tna",		4|SET_ARG,		&textfields_need_activation,
       "turn on \"Textfields Need Activation\" mode"
    ),
 #endif
    PARSE_SET(
-      "trace",		IGNORE_ARG,		0,
+      "trace",		2|SET_ARG,		&WWW_TraceFlag,
       "turns on Lynx trace mode"
    ),
    PARSE_FUN(
-      "traversal",	FUNCTION_ARG,		traversal_fun,
+      "traversal",	4|FUNCTION_ARG,		traversal_fun,
       "traverse all http links derived from startfile"
    ),
    PARSE_SET(
-      "underscore",	TOGGLE_ARG,		&use_underscore,
+      "underscore",	4|TOGGLE_ARG,		&use_underscore,
       "toggles use of _underline_ format in dumps"
    ),
 #if defined(USE_MOUSE)
    PARSE_SET(
-      "use_mouse",	SET_ARG,		&LYUseMouse,
+      "use_mouse",	4|SET_ARG,		&LYUseMouse,
       "turn on mouse support"
    ),
 #endif
    PARSE_STR(
-      "useragent",	NEED_LYSTRING_ARG,	&LYUserAgent,
+      "useragent",	4|NEED_LYSTRING_ARG,	&LYUserAgent,
       "=Name\nset alternate Lynx User-Agent header"
    ),
    PARSE_SET(
-      "validate",	IGNORE_ARG,		0,
+      "validate",	2|SET_ARG,		&LYValidate,
       "accept only http URLs (meant for validation)\nimplies more restrictions than -anonymous, but\ngoto is allowed for http and https"
    ),
    PARSE_SET(
-      "verbose",	TOGGLE_ARG,		&verbose_img,
+      "verbose",	4|TOGGLE_ARG,		&verbose_img,
       "toggles [LINK], [IMAGE] and [INLINE] comments \nwith filenames of these images"
    ),
    PARSE_FUN(
-      "version",	FUNCTION_ARG,		version_fun,
+      "version",	4|FUNCTION_ARG,		version_fun,
       "print Lynx version information"
    ),
    PARSE_SET(
-      "vikeys",		SET_ARG,		&vi_keys,
+      "vikeys",		4|SET_ARG,		&vi_keys,
       "enable vi-like key movement"
    ),
 #ifdef __DJGPP__
    PARSE_SET(
-      "wdebug",		TOGGLE_ARG,		&watt_debug,
+      "wdebug",		4|TOGGLE_ARG,		&watt_debug,
       "enables Waterloo tcp/ip packet debug. Prints to watt debugfile"
   ),
 #endif /* __DJGPP__ */
    PARSE_FUN(
-      "width",		NEED_FUNCTION_ARG,	width_fun,
+      "width",		4|NEED_FUNCTION_ARG,	width_fun,
       "=NUMBER\nscreen width for formatting of dumps (default is 80)"
    ),
 #ifndef NO_DUMP_WITH_BACKSPACES
    PARSE_SET(
-      "with_backspaces",	SET_ARG,		&with_backspaces,
+      "with_backspaces", 4|SET_ARG,		&with_backspaces,
       "emit backspaces in output if -dumping or -crawling (like 'man' does)"
    ),
 #endif
    {NULL, 0, 0, NULL}
 };
 
-static void print_help_strings ARGS3(
+PRIVATE void print_help_strings ARGS3(
 	CONST char *,	name,
 	CONST char *,	help,
 	CONST char *,	value)
@@ -3716,7 +3528,7 @@ static void print_help_strings ARGS3(
     fputc ('\n', stdout);
 }
 
-static void print_help_and_exit ARGS1(int, exit_status)
+PRIVATE void print_help_and_exit ARGS1(int, exit_status)
 {
     Parse_Args_Type *p;
 
@@ -3777,7 +3589,7 @@ in double-quotes (\"-\") on VMS)", NULL);
  * be pointed to that character.  (+/- added for toggle processing - BL.)
  * If a and b match, it returns 1.  Otherwise 0 is returned.
  */
-static int arg_eqs_parse ARGS3(
+PRIVATE int arg_eqs_parse ARGS3(
 	CONST char *,	a,
 	char *,		b,
 	char **,	c)
@@ -3817,8 +3629,9 @@ static int arg_eqs_parse ARGS3(
 #define is_true(s)  (*s == '1' || *s == '+' || !strcmp(s, "on"))
 #define is_false(s) (*s == '0' || *s == '-' || !strcmp(s, "off"))
 
-PRIVATE void parse_arg ARGS2(
+PRIVATE BOOL parse_arg ARGS3(
 	char **,	argv,
+	unsigned,	mask,
 	int *,		i)
 {
     Parse_Args_Type *p;
@@ -3858,12 +3671,12 @@ PRIVATE void parse_arg ARGS2(
 	    }
 	}
 #endif
-	return;
+	return TRUE;
     }
 #if EXTENDED_OPTION_LOGIC
     if (strcmp(arg_name,"--") == 0) {
 	no_options_further = TRUE;
-	return;
+	return TRUE;
     }
 #endif
 
@@ -3876,7 +3689,7 @@ PRIVATE void parse_arg ARGS2(
      *	special handling. - FM
      */
     if (*arg_name == 0)
-	return;
+	return TRUE;
 
     /* allow GNU-style options with -- prefix*/
     if (*arg_name == '-') ++arg_name;
@@ -3903,6 +3716,10 @@ PRIVATE void parse_arg ARGS2(
 	    if ((i != 0) && (next_arg != 0))
 		(*i)++;
 	}
+
+	/* ignore option if it's not our turn */
+	if ((p->type & mask) == 0)
+	    return FALSE;
 
 	switch (p->type & ARG_TYPE_MASK) {
 	case TOGGLE_ARG:	/* FALLTHRU */
@@ -3952,18 +3769,16 @@ PRIVATE void parse_arg ARGS2(
 	     if ((q->str_value != 0) && (next_arg != 0))
 		*(q->str_value) = next_arg;
 	     break;
-
-	case IGNORE_ARG:
-	     break;
 	}
 
-	return;
+	return TRUE;
     }
 
     if (pgm == 0) pgm = "LYNX";
 
     fprintf (stderr, gettext("%s: Invalid Option: %s\n"), pgm, argv[0]);
     print_help_and_exit (-1);
+    return FALSE;
 }
 
 #ifndef VMS

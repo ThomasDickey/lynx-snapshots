@@ -1567,9 +1567,9 @@ static Config_Type Config_Table [] =
      PARSE_SET("use_mouse", CONF_BOOL, &LYUseMouse),
 #endif
      PARSE_SET("use_select_popups", CONF_BOOL, &LYSelectPopups),
-     PARSE_FUN("viewer", CONF_FUN, viewer_fun),
      PARSE_SET("verbose_images", CONF_BOOL, &verbose_img),
      PARSE_SET("vi_keys_always_on", CONF_BOOL, &vi_keys),
+     PARSE_FUN("viewer", CONF_FUN, viewer_fun),
      PARSE_ENV("wais_proxy", CONF_ENV, 0 ),
      PARSE_STR("xloadimage_command", CONF_STR, &XLoadImageCommand),
 

@@ -177,7 +177,6 @@ extern BOOLEAN is_www_index;
 extern BOOLEAN jump_buffer;     /* TRUE if offering default shortcut */
 extern BOOLEAN long_url_ok;
 extern BOOLEAN lynx_mode;
-extern BOOLEAN lynx_temp_subspace;
 extern BOOLEAN news_ok;
 extern BOOLEAN recent_sizechange;
 extern BOOLEAN rlogin_ok;
@@ -213,6 +212,7 @@ extern char *x_display;
 extern int display_lines;	/* number of lines in the display */
 extern int dump_output_width;
 extern int keypad_mode;		/* NUMBERS_AS_ARROWS or LINKS_ARE_NUMBERED */
+extern int lynx_temp_subspace;
 extern int more;		/* is there more document to display? */
 extern int user_mode;		/* novice or advanced */
 extern int www_search_result;
