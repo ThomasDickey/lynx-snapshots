@@ -223,6 +223,7 @@ typedef enum {
     HTTP_URL_TYPE,
     FILE_URL_TYPE,
     FTP_URL_TYPE,
+    NCFTP_URL_TYPE,
     WAIS_URL_TYPE,
     NEWS_URL_TYPE,
     NNTP_URL_TYPE,

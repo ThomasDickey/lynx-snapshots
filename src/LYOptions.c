@@ -509,11 +509,13 @@ draw_options:
 
     LYmove(L_Keypad, 5);
     addlbl("(K)eypad mode                : ");
-    LYaddstr((keypad_mode == NUMBERS_AS_ARROWS) ?
-				"Numbers act as arrows             " :
-	 ((keypad_mode == LINKS_ARE_NUMBERED) ?
-				"Links are numbered                " :
-				"Links and form fields are numbered"));
+    LYaddstr(fields_are_numbered() && links_are_numbered()
+		? "Links and form fields are numbered"
+		: links_are_numbered()
+		? "Links are numbered                "
+		: fields_are_numbered()
+		? "Form fields are numbered          "
+		: "Numbers act as arrows             ");
 
     LYmove(L_Lineed, 5);
     addlbl("li(N)e edit style            : ");
@@ -2146,6 +2148,9 @@ static OptValues keypad_mode_values[]	= {
 	{ LINKS_AND_FIELDS_ARE_NUMBERED,
 			      "Links and form fields are numbered",
 			      "links_and_forms" },
+	{ FIELDS_ARE_NUMBERED,
+			      "Form fields are numbered",
+			      "forms_numbered" },
 	{ 0, 0, 0 }};
 static char * lineedit_mode_string	= "lineedit_mode";
 static char * mail_address_string	= "personal_mail_address";
@@ -2154,6 +2159,7 @@ static OptValues search_type_values[] = {
 	{ FALSE,	    "Case insensitive",  "case_insensitive" },
 	{ TRUE,		    "Case sensitive",	 "case_sensitive" },
 	{ 0, 0, 0 }};
+
 #if defined(USE_SLANG) || defined(COLOR_CURSES)
 static char * show_color_string		= "show_color";
 static OptValues show_color_values[] = {
@@ -2163,7 +2169,13 @@ static OptValues show_color_values[] = {
 	{ SHOW_COLOR_ALWAYS,	always_string,	always_string },
 	{ 0, 0, 0 }};
 #endif
+
 static char * show_cursor_string	= "show_cursor";
+
+#if USE_SCROLLBAR
+static char * show_scrollbar_string	= "show_scrollbar";
+#endif
+
 static char * user_mode_string		= "user_mode";
 static OptValues user_mode_values[] = {
 	{ NOVICE_MODE,		"Novice",	"Novice" },
@@ -2678,6 +2690,14 @@ PUBLIC int postoptions ARGS1(
 	 && GetOptValues(bool_values, data[i].value, &code)) {
 	    LYShowCursor = (BOOL) code;
 	}
+
+#ifdef USE_SCROLLBAR
+	/* Show Scrollbar: ON/OFF */
+	if (!strcmp(data[i].tag, show_scrollbar_string)
+	 && GetOptValues(bool_values, data[i].value, &code)) {
+	    LYShowScrollbar = (BOOL) code;
+	}
+#endif
 
 	/* User Mode: SELECT */
 	if (!strcmp(data[i].tag, user_mode_string)
@@ -3391,6 +3411,14 @@ PRIVATE int gen_options ARGS1(
     BeginSelect(fp0, show_cursor_string);
     PutOptValues(fp0, LYShowCursor, bool_values);
     EndSelect(fp0);
+
+#ifdef USE_SCROLLBAR
+    /* Show scrollbar: ON/OFF */
+    PutLabel(fp0, gettext("Show scrollbar"), show_scrollbar_string);
+    BeginSelect(fp0, show_scrollbar_string);
+    PutOptValues(fp0, LYShowScrollbar, bool_values);
+    EndSelect(fp0);
+#endif
 
     /* Select Popups: ON/OFF */
     PutLabel(fp0, gettext("Popups for select fields"), select_popups_string);

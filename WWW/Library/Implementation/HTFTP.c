@@ -363,6 +363,7 @@ PRIVATE char *help_message_cache_non_empty NOARGS
 {
   return(help_message_buffer);
 }
+
 PRIVATE char *help_message_cache_contents NOARGS
 {
    return(help_message_buffer);
@@ -795,8 +796,8 @@ PRIVATE int get_connection ARGS2(
 	return status;			/* Bad return */
     }
 
-    CTRACE((tfp, "FTP connected, socket %d  control %ld\n",
-		con->socket, (long)con));
+    CTRACE((tfp, "FTP connected, socket %d  control %p\n",
+		con->socket, con));
     control = con;		/* Current control connection */
 
     /* Initialise buffering for control connection */
@@ -2935,6 +2936,8 @@ PUBLIC int HTFTPLoad ARGS4(
 				   that we are willing to wait for, if we
 				   get to the point of reading data - kw */
     HTFormat format;
+
+    CTRACE((tfp, "HTFTPLoad(%s) %s connection\n", name, ftp_passive ? "passive" : "normal"));
 
     /* set use_list to NOT since we don't know what kind of server
      * this is yet.  And set the type to GENERIC

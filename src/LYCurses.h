@@ -252,8 +252,10 @@ typedef struct {
 
 #ifdef USE_SLANG
 #define LYstopPopup() /* nothing */
+#define LYtopwindow() LYwin
 #else
 extern void LYsubwindow PARAMS((WINDOW * param));
+extern WINDOW * LYtopwindow NOPARAMS;
 #define LYstopPopup() LYsubwindow(0)
 #endif /* NCURSES */
 

@@ -5265,6 +5265,7 @@ PRIVATE int HTML_start_element ARGS6(
 		 *  expected to follow. - FM
 		 */
 		HTML_put_string(me, "(_)");
+		HText_endInput(me->text);
 		chars = 0;
 		me->in_word = YES;
 		if (me->sp[0].tag_number != HTML_PRE &&
@@ -5280,6 +5281,7 @@ PRIVATE int HTML_start_element ARGS6(
 		 *  expected to follow. - FM
 		 */
 		HTML_put_string(me, "[_]");
+		HText_endInput(me->text);
 		chars = 0;
 		me->in_word = YES;
 		if (me->sp[0].tag_number != HTML_PRE &&
@@ -5322,8 +5324,11 @@ PRIVATE int HTML_start_element ARGS6(
 		 *  so output the rest of the underscore
 		 *  placeholders, if any more are needed. - FM
 		 */
-		for (; chars > 0; chars--)
-		    HTML_put_character(me, '_');
+		if (chars > 0) {
+		    for (; chars > 0; chars--)
+			HTML_put_character(me, '_');
+		    HText_endInput(me->text);
+		}
 	    } else {
 		if (HTCJK == JAPANESE) {
 		    kcode = HText_getKcode(me->text);
@@ -5375,6 +5380,9 @@ PRIVATE int HTML_start_element ARGS6(
 		    HText_updateKcode(me->text, kcode);
 		    HText_updateSpecifiedKcode(me->text, specified_kcode);
 		}
+	    }
+	    if (chars != 0) {
+		HText_endInput(me->text);
 	    }
 	    HText_setIgnoreExcess(me->text, FALSE);
 	    FREE(ImageSrc);
@@ -5539,7 +5547,7 @@ PRIVATE int HTML_start_element ARGS6(
 	    }
 
 	    /*
-	     *	If its not a multiple option list and select popups
+	     *	If it's not a multiple option list and select popups
 	     *	are enabled, then don't use the checkbox/button method,
 	     *	and don't put anything on the screen yet.
 	     */
@@ -5655,7 +5663,6 @@ PRIVATE int HTML_start_element ARGS6(
 		me->LastOptionChecked = FALSE;
 	    me->first_option = FALSE;
 
-
 	    if (present && present[HTML_OPTION_VALUE] &&
 		value[HTML_OPTION_VALUE]) {
 		if (!I_value) {
@@ -5682,7 +5689,7 @@ PRIVATE int HTML_start_element ARGS6(
 	     */
 	    if (HTCurSelectGroupType == F_RADIO_TYPE &&
 		LYSelectPopups &&
-		keypad_mode == LINKS_AND_FIELDS_ARE_NUMBERED) {
+		fields_are_numbered()) {
 		char marker[8];
 		int opnum = HText_getOptionNum(me->text);
 
@@ -7518,6 +7525,7 @@ End_Object:
 		 */
 		if (!me->first_option) {
 		    HText_appendCharacter(me->text, ']');
+		    HText_endInput(me->text);
 		    HText_setLastChar(me->text, ']');
 		    me->in_word = YES;
 		}

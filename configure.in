@@ -4,12 +4,10 @@ dnl by T.E.Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
 
 AC_PREREQ(2.12.971222)
-rm -f config.cache
-
 AC_INIT(userdefs.h)
+rm -f config.cache; touch config.cache
 CONFIG_H=lynx_cfg.h
 AC_CONFIG_HEADER($CONFIG_H:config.hin)
-
 CF_CHECK_CACHE
 
 PACKAGE=lynx
@@ -554,7 +552,6 @@ AC_CHECK_FUNCS( \
 	getgroups \
 	gettimeofday \
 	getuid \
-	mkstemp \
 	mktemp \
 	popen \
 	putenv \
@@ -572,6 +569,7 @@ AC_REPLACE_FUNCS( \
 	strstr \
 )
 
+CF_MKSTEMP
 CF_SRAND(lynx_)
 CF_CHECK_FUNCDECLS([#include <string.h>], strstr)
 CF_CHECK_FUNCDECLS([

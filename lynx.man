@@ -654,6 +654,8 @@ Logically OR the values to combine options:
 2=color-style
 .br
 4=TRST (table layout)
+.br
+8=config (lynx.cfg and .lynxrc contents)
 .TP
 .B -traversal
 traverse all http links derived from startfile.  When used with

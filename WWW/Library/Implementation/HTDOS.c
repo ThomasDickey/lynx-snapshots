@@ -67,8 +67,10 @@ char * HTDOS_wwwName ARGS1(CONST char *, dosname)
     if (wwwname_len > 1)
 	cp_url--;	/* point last char */
 
-    if (wwwname_len > 3 && *cp_url == '/')
+    if (wwwname_len > 3 && *cp_url == '/') {
+	cp_url++;
 	*cp_url = '\0';
+    }
 
 #ifdef NOTUSED
     if(*cp_url == ':') {
@@ -99,6 +101,16 @@ char * HTDOS_name ARGS1(char *, wwwname)
     int joe;
 
     copy_plus(&result, wwwname);
+#ifdef __DJGPP__
+    if (result[0] == '/'
+     && result[1] == 'd'
+     && result[2] == 'e'
+     && result[3] == 'v'
+     && result[4] == '/'
+     && isalpha(result[5])) {
+	return(result);
+    }
+#endif /* __DJGPP__ */
 
     for (joe = 0; result[joe] != '\0'; joe++)	{
 	if (result[joe] == '/')	{

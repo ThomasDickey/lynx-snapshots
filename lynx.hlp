@@ -39,7 +39,7 @@
        intermixed in option names (in the reference below options
        are with one dash before them and with underscores).
 
-       -      If  the  argument is only '-', then Lynx expects to
+       -      If  the  argument is only `-', then Lynx expects to
               receive the arguments from stdin.  This is to allow
               for the potentially very long command line that can
               be associated  with  the  -get_data  or  -post_data
@@ -210,7 +210,7 @@
               directory listings.
 
        -force_empty_hrefless_a
-              force HREF-less 'A' elements  to  be  empty  (close
+              force HREF-less `A' elements  to  be  empty  (close
               them as soon as they are seen).
 
        -force_html
@@ -232,7 +232,7 @@
        -get_data
               properly formatted data for a get form are read  in
               from  stdin  and  passed  to  the  form.   Input is
-              terminated by a line that starts with '---'.
+              terminated by a line that starts with `---'.
 
        -head  send a HEAD request for the mime headers.
 
@@ -253,7 +253,7 @@
               ignore hidden links do not appear even in listings.
 
        -historical
-              toggles use of '>' or '-->'  as  a  terminator  for
+              toggles use of `>' or `-->'  as  a  terminator  for
               comments.
 
        -homepage=URL
@@ -385,7 +385,7 @@
        -post_data
               properly formatted data for a post form are read in
               from  stdin  and  passed  to  the  form.   Input is
-              terminated by a line that starts with '---'.
+              terminated by a line that starts with `---'.
 
        -preparsed
               show HTML source  preparsed  and  reformatted  when
@@ -467,7 +467,7 @@
               file_url  -  disallow  using G)oto, served links or
               bookmarks for file: URLs.
 
-              goto - disable the 'g' (goto) command.
+              goto - disable the `g' (goto) command.
 
               inside_ftp - disallow ftps for people  coming  from
               inside your domain (utmp required for selectivity).
@@ -484,7 +484,7 @@
               from   inside   your   domain  (utmp  required  for
               selectivity).
 
-              jump - disable the 'j' (jump) command.
+              jump - disable the `j' (jump) command.
 
               multibook - disallow multiple bookmarks.
               mail - disallow mail.
@@ -568,7 +568,7 @@
 
        -soft_dquotes
               toggles  emulation  of  the old Netscape and Mosaic
-              bug  which  treated  '>'  as  a  co-terminator  for
+              bug  which  treated  `>'  as  a  co-terminator  for
               double-quotes and tags.
 
        -source
@@ -620,6 +620,7 @@
               1=SGML character parsing states
               2=color-style
               4=TRST (table layout)
+              8=config (lynx.cfg and .lynxrc contents)
 
        -traversal
               traverse all http  links  derived  from  startfile.
@@ -675,7 +676,7 @@
 
        -with_backspaces
               emit  backspaces in output if -dumping or -crawling
-              (like 'man' does)
+              (like `man' does)
 
 2 Commands
        o Use Up arrow and Down arrow to scroll through  hypertext
@@ -792,7 +793,7 @@
                            be "http", "ftp", "gopher" or "wais"),
                            however most gateway servers have been
                            discontinued.  Note that  you  do  not
-                           include  a  terminal '/' for gateways,
+                           include  a  terminal `/' for gateways,
                            but  do  for  proxies   specified   by
                            PROTOCOL_proxy  environment variables.
                            See Lynx Users Guide for details.

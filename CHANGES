@@ -1,6 +1,54 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2001-10-06 (2.8.5dev.3)
+* add CF_MKSTEMP configure macro, from vile, to check for a working mkstemp().
+  This will quiet some bogus warning messages in recent runtime support, but
+  (see 2.8.3) does not affect the security of temporary files in lynx -TD
+* updated CF_PATH_SYNTAX configure macro, from vile, to handle leading "\\" in
+  a win32 pathname -TD
+* for configurations that provide scrollbar, add a checkbox to the Options menu
+  to enable or disable it -TD
+* modify LYGetHostByName() in HTTCP.c to use the threaded _WINDOWS_NSL code for
+  all Cygwin machines.  The ability to interrupt nameserver lookup has not
+  worked in Win98 using the Cygwin port, despite defining _WINDOWS_NSL.  It
+  looks like the threaded code was only for WinNT.  At least under Cygwin, that
+  code also seems to work fine under Win98 -DK
+* add FIELDS_ARE_NUMBERED as a possible value for DEFAULT_KEYPAD_MODE in
+  lynx.cfg as well as keypad_mode in .lynxrc -TD
+* add NUMBER_FIELDS_ON_LEFT and NUMBER_LINKS_ON_LEFT to lynx.cfg, use these to
+  control where field- and link-numbering is placed.  Caveat:  there are some
+  cases where fields that do popup's are truncated, e.g., in the Options menu,
+  when right-alignment is used -TD
+* support for DJGPP's two forms of file addressing, [a-zA-Z]:[/\\] and
+  /dev/[a-zA-z]/ -DK
+* add samples/lynxdump script, to illustrate how to use lynx -dump with no
+  link references (prompted by discussion with LV) -TD
+* add samples/keepviewer script, to illustrate how to retain a temporary file
+  for use in an external viewer -TD
+* add ifdef's in is_url() to avoid recognizing URLs if they are disabled in the
+  given configuration, i.e., bibp, finger, ftp, gopher, news (report by
+  Frederic L W Meunier) -TD
+* modify LYrefresh() to take into account whether a popup window exists, so
+  that a search prompt will not overwrite a popup.  This bug was introduced by
+  the curses pads (reported by Felicia Neff <neff@panix.com> and Fr3dY
+  <fr3dy@retemail.es>) -TD
+* add note in keystroke_help.html about CTRL-V as literal-next (lnext) for
+  users who are unfamiliar with stty -TD
+* add NcFTP-style ftp-URLs which are supported by Netscape and wget (request
+  by Martin Mokrejs) -TD
+* add traces in LYReadCFG.c and LYrcFile.c to report lines which are not found
+  in the symbol table, to help diagnose when a user adds lynx.cfg information
+  to .lynxrc -TD
+* define additional -trace-mask option, 8=config -TD
+* modify LYtouchline() to avoid using wredrawln() for ncurses, since the
+  LYwin variable may be a pad much wider than the screen, which is not handled
+  properly (report by Karl Eichwalder <keichwa@gmx.net>) -TD
+* correct beginning configure script, which was supposed to remove
+  config.cache, but did not, due to a misplaced line when it was added
+  1998-06-04 (prompted by a report by Fr3dY <fr3dy@retemail.es> that the
+  checks for srand/rand did not work) -TD
+
 2001-08-15 (2.8.5dev.2)
 * several small fixes to HTFile.c to make directory listings work properly on
   win32, e.g., stat'ing a directory with a trailing slash fails (reported by

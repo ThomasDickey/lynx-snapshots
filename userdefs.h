@@ -353,17 +353,6 @@
 #define EXP_RAND_TEMPNAME 1
 
 /********************************
- * Uncomment this line to use 'mkstemp()' in preference to lynx's own code
- * in fmt_tempname().  Caution: on a few older systems, mkstemp() is less
- * secure than you would like.  For this reason, we do not auto-configure it.
- *
- * Some things to watch out for:  some broken implementations of mkstemp() may
- * not necessarily try a different filename when they are called, making it
- * impossible to rename the file.  Others make world-writable files.
- */
-/*#define USE_MKSTEMP */
-
-/********************************
  * Comment this line out to let the user enter his/her email address
  * when sending a message.  There should be no need to do this unless
  * your mailer agent does not put in the From: field for you.  (If your
@@ -1351,11 +1340,11 @@
  * the version definition with the Project Version on checkout.  Just
  * ignore it. - kw */
 /* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
-#define LYNX_VERSION "2.8.5dev.2"
+#define LYNX_VERSION "2.8.5dev.3"
 #define LYNX_WWW_HOME "http://lynx.browser.org/"
 #define LYNX_WWW_DIST "http://lynx.isc.org/current/"
 /* $Format: "#define LYNX_DATE \"$ProjectDate$\""$ */
-#define LYNX_DATE "Wed, 15 Aug 2001 15:09:52 -0700"
+#define LYNX_DATE "Sat, 06 Oct 2001 15:02:28 -0700"
 #define LYNX_DATE_OFF 5		/* truncate the automatically-generated date */
 #define LYNX_DATE_LEN 11	/* truncate the automatically-generated date */
 
