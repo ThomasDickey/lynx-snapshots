@@ -337,7 +337,7 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 	}
 
 	if (me->T.trans_to_uni &&
-	    (code >= 127 ||
+	    (code >= LYlowest_eightbit[me->inUCLYhndl] ||
 	     (code < 32 && code != 0 &&
 	     me->T.trans_C0_to_uni))) {
 		/*

@@ -16,6 +16,9 @@
 #ifdef DOSPATH
 #include <HTDOS.h>
 #endif
+#ifdef DISP_PARTIAL
+#include <LYKeymap.h>
+#endif /* DISP_PARTIAL */
 #ifdef VMS
 #include <descrip.h>
 #include <libclidef.h>
@@ -2093,6 +2096,43 @@ PUBLIC int HTCheckForInterrupt NOARGS
 #endif /* DOSPATH */
     if (TOUPPER(c) == 'Z' || c == 7 || c == 3)
 	return((int)TRUE);
+#ifdef DISP_PARTIAL
+    else if (display_partial)
+    {
+	switch (keymap[c+1])
+	{
+	case LYK_PREV_PAGE :
+	    if (Newline > 1)
+		Newline -= display_lines ;
+	    break ;
+	case LYK_NEXT_PAGE :
+	    if (HText_canScrollDown())
+		Newline += display_lines ;
+	    break ;
+	case LYK_UP_TWO :
+	    if (Newline > 1)
+		Newline -= 2 ;
+	    break ;
+	case LYK_DOWN_TWO :
+	    if (HText_canScrollDown())
+		Newline += 2 ;
+	    break ;
+	case LYK_HOME:
+	    if (Newline > 1)
+		Newline = 1;
+	    break;
+	case LYK_END:
+	    if (HText_canScrollDown())
+		Newline = MAXINT;
+	    break;
+	case LYK_REFRESH :
+	    break ;
+	default :
+	    return ((int)FALSE) ;
+	}
+	HText_pageDisplay(Newline, "");
+    }
+#endif /* DISP_PARTIAL */
 
     /** Other keystrokes **/
     return((int)FALSE);
@@ -2778,7 +2818,9 @@ PUBLIC void size_change ARGS1(
     int old_cols = LYcols;
 
 #ifdef USE_SLANG
+#if defined(VMS) || defined(UNIX) 
     SLtt_get_screen_size();
+#endif /* VMS || UNIX */ 
     LYlines = SLtt_Screen_Rows;
     LYcols  = SLtt_Screen_Cols;
 #ifdef SLANG_MBCS_HACK
@@ -3914,7 +3956,11 @@ have_VMS_URL:
 	     */
 #if defined (DOSPATH) || defined (__EMX__)
 	    if (old_string[1] != ':' && old_string[1] != '|') {
+#ifdef DOSPATH
 		StrAllocCopy(temp, HTDOS_wwwName(curdir));
+#else
+		StrAllocCopy(temp, curdir);
+#endif
 		if(curdir[strlen(curdir)-1] != '/')
 		    StrAllocCat(temp, "/");
 		LYstrncpy(curdir, temp, (DIRNAMESIZE - 1));

@@ -121,9 +121,6 @@ Debug message control.
 #define PROGRESS(str) /* nothing for now */
 #endif
 
-#define CTRACE if(TRACE)fprintf
-#define tfp stderr
-
 /*
 
   ERROR TYPE
@@ -376,6 +373,11 @@ The local equivalents of CR and LF
  */
 #define LF   FROMASCII('\012')  /* ASCII line feed LOCAL EQUIVALENT */
 #define CR   FROMASCII('\015')  /* Will be converted to ^M for transmission */
+
+#define CTRACE if(TRACE)fprintf
+#define tfp TraceFP()
+
+extern FILE *TraceFP NOPARAMS;
 
 #endif /* HTUTILS_H */
 

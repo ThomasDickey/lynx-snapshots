@@ -418,7 +418,7 @@ PUBLIC void LYFillLocalFileURL ARGS2(
 **  Currently this function is used for temporary files like "Lynx Info Page"
 **  and for one permanent - bookmarks (so it may be a problem if you change
 **  the display charset later: new bookmark entries may be mistranslated).
-** 								 - LP
+**								 - LP
 */
 PUBLIC void LYAddMETAcharsetToFD ARGS2(
 	FILE *, 	fd,
@@ -1055,7 +1055,7 @@ PUBLIC void LYExpandString ARGS2(
 		saved_char_in = c;
 #endif /* NOTDEFINED */
 	    if (me->T.trans_to_uni &&
-		(code >= 127 ||
+		(code >= LYlowest_eightbit[me->inUCLYhndl] ||
 		 (code < 32 && code != 0 &&
 		  me->T.trans_C0_to_uni))) {
 		/*
@@ -1983,6 +1983,135 @@ PRIVATE char ** LYUCFullyTranslateString_1 ARGS9(
 		    break;
 		} else {
 		    code = lcode;
+		    if ((code == 1) ||
+		       (code > 129 && code < 156)) {
+			/*
+			** Assume these are Microsoft code points, inflicted on
+			** us by FrontPage.  - FM
+			**
+			** MS FrontPage uses syntax like &#153; in 128-159
+			** range and doesn't follow Unicode standards for this
+			** area.  Windows-1252 codepoints are assumed here.
+			*/
+			switch (code) {
+			case 1:
+			    /*
+			    **	WHITE SMILING FACE
+			    */
+			    code = 0x263a;
+			    break;
+			case 130:
+			    /*
+			    **	SINGLE LOW-9 QUOTATION MARK (sbquo)
+			    */
+			    code = 0x201a;
+			    break;
+			case 132:
+			    /*
+			    **	DOUBLE LOW-9 QUOTATION MARK (bdquo)
+			    */
+			    code = 0x201e;
+			    break;
+			case 133:
+			    /*
+			    **	HORIZONTAL ELLIPSIS (hellip)
+			    */
+			    code = 0x2026;
+			    break;
+			case 134:
+			    /*
+			    **	DAGGER (dagger)
+			    */
+			    code = 0x2020;
+			    break;
+			case 135:
+			    /*
+			    **	DOUBLE DAGGER (Dagger)
+			    */
+			    code = 0x2021;
+			    break;
+			case 137:
+			    /*
+			    **	PER MILLE SIGN (permil)
+			    */
+			    code = 0x2030;
+			    break;
+			case 139:
+			    /*
+			    **	SINGLE LEFT-POINTING ANGLE QUOTATION MARK
+			    **	(lsaquo)
+			    */
+			    code = 0x2039;
+			    break;
+			case 145:
+			    /*
+			    **	LEFT SINGLE QUOTATION MARK (lsquo)
+			    */
+			    code = 0x2018;
+			    break;
+			case 146:
+			    /*
+			    **	RIGHT SINGLE QUOTATION MARK (rsquo)
+			    */
+			    code = 0x2019;
+			    break;
+			case 147:
+			    /*
+			    **	LEFT DOUBLE QUOTATION MARK (ldquo)
+			    */
+			    code = 0x201c;
+			    break;
+			case 148:
+			    /*
+			    **	RIGHT DOUBLE QUOTATION MARK (rdquo)
+			    */
+			    code = 0x201d;
+			    break;
+			case 149:
+			    /*
+			    **	BULLET (bull)
+			    */
+			    code = 0x2022;
+			    break;
+			case 150:
+			    /*
+			    **	EN DASH (ndash)
+			    */
+			    code = 0x2013;
+			    break;
+			case 151:
+			    /*
+			    **	EM DASH (mdash)
+			    */
+			    code = 0x2014;
+			    break;
+			case 152:
+			    /*
+			    **	SMALL TILDE (tilde)
+			    */
+			    code = 0x02dc;
+			    break;
+			case 153:
+			    /*
+			    **	TRADE MARK SIGN (trade)
+			    */
+			    code = 0x2122;
+			    break;
+			case 155:
+			    /*
+			    **	SINGLE RIGHT-POINTING ANGLE QUOTATION MARK
+			    **	(rsaquo)
+			    */
+			    code = 0x203a;
+			    break;
+			default:
+			    /*
+			    **	Do not attempt a conversion
+			    **	to valid Unicode values.
+			    */
+			    break;
+		       }
+		    }
 		    state = S_check_uni;
 		}
 		break;
@@ -2210,7 +2339,7 @@ PRIVATE char ** LYUCFullyTranslateString_1 ARGS9(
 	    **	is commonly found on query to CGI-scripts
 	    **	enclosed as href= URLs like  "somepath/?x=1&yz=2"
 	    **	Without this dirty fix, submission of such URLs was broken
-	    **	if &yz string happend to be a recognized entity name. - LP
+	    **	if &yz string happened to be a recognized entity name. - LP
 	    */
 	   if ( ((code = HTMLGetEntityUCValue(name)) > 0) &&
 		!((cpe == '=') && (stype == st_URL)) ) {

@@ -232,7 +232,11 @@ PUBLIC int LYmbcsstrlen ARGS2(
 #ifdef VMS
 #define GetChar() ttgetc()
 #else
+#ifdef __DJGPP__
+#define GetChar SLkp_getkey
+#else
 #define GetChar (int)SLang_getkey
+#endif /* __DJGPP__ */
 #endif /* VMS */
 #endif /* USE_SLANG */
 
@@ -315,12 +319,248 @@ PRIVATE int map_function_to_key ARGS1(char, keysym)
 }
 #endif
 
+#if defined(USE_SLANG_MOUSE)
+PRIVATE int sl_read_mouse_event NOARGS
+{
+   int mouse_x, mouse_y, button;
+
+   mouse_link = -1;
+   if (-1 != sl_parse_mouse_event (&mouse_x, &mouse_y, &button))
+     {
+	if (button == 0)  /* left */
+	  return set_clicked_link (mouse_x, mouse_y);
+
+	if (button == 2)   /* right */
+	  {
+	     /* Right button: go back to prev document.
+	      * The problem is that we need to determine
+	      * what to return to achieve this.
+	      */
+	     return map_function_to_key (LYK_PREV_DOC);
+	  }
+     }
+   return -1;
+}
+#endif
+
 PRIVATE BOOLEAN csi_is_csi = TRUE;
 PUBLIC void ena_csi ARGS1(
     BOOLEAN,	flag)
 {
     csi_is_csi = flag;
 }
+
+#if defined(USE_SLANG_KEYMAPS)
+static SLKeyMap_List_Type *Keymap_List;
+
+/* This value should be larger than anything in LYStrings.h */
+#define MOUSE_KEYSYM 0x1000
+
+typedef struct
+{
+   char *name;
+   int keysym;
+}
+Keysym_String_List;
+
+static Keysym_String_List Keysym_Strings [] =
+{
+   {"UPARROW",		UPARROW},
+   {"DNARROW",		DNARROW},
+   {"RTARROW",		RTARROW},
+   {"LTARROW",		LTARROW},
+   {"PGDOWN",		PGDOWN},
+   {"PGUP",		PGUP},
+   {"HOME",		HOME},
+   {"END",		END_KEY},
+   {"F1",		F1},
+   {"DO_KEY",		DO_KEY},
+   {"FIND_KEY",		FIND_KEY},
+   {"SELECT_KEY",	SELECT_KEY},
+   {"INSERT_KEY",	INSERT_KEY},
+   {"REMOVE_KEY",	REMOVE_KEY},
+   {"DO_NOTHING",	DO_NOTHING},
+   {NULL, -1}
+};
+
+static int map_string_to_keysym (char *str, int *keysym)
+{
+   Keysym_String_List *k;
+
+   k = Keysym_Strings;
+   while (k->name != NULL)
+     {
+	if (0 == strcmp (k->name, str))
+	  {
+	     *keysym = k->keysym;
+	     return 0;
+	  }
+	k++;
+     }
+   fprintf (stderr, "Keysym %s is unknown\n", str);
+   *keysym = -1;
+   return -1;
+}
+
+
+/* The second argument may either be a string or and integer */
+static int setkey_cmd (int argc GCC_UNUSED, SLcmd_Cmd_Table_Type *table)
+{
+   char *keyseq;
+   int keysym;
+
+   keyseq = table->string_args [1];
+   switch (table->arg_type[2])
+     {
+      case SLANG_INT_TYPE:
+	keysym = table->int_args[2];
+	break;
+
+      case SLANG_STRING_TYPE:
+        if (-1 == map_string_to_keysym (table->string_args[2], &keysym))
+	  return -1;
+	break;
+
+      default:
+	return -1;
+     }
+
+   return SLkm_define_keysym (keyseq, keysym, Keymap_List);
+}
+
+static int unsetkey_cmd (int argc GCC_UNUSED, SLcmd_Cmd_Table_Type *table)
+{
+   SLang_undefine_key (table->string_args[1], Keymap_List);
+   if (SLang_Error) return -1;
+   return 0;
+}
+
+static SLcmd_Cmd_Type Keymap_Cmd_Table [] =
+{
+   {setkey_cmd,   "setkey",   "SG"},
+   {unsetkey_cmd, "unsetkey", "S"},
+   {NULL}
+};
+
+static int read_keymap_file NOARGS
+{
+   char line[1024];
+   FILE *fp;
+   char file[1024];
+   char *home;
+   char *keymap_file;
+   int ret;
+   SLcmd_Cmd_Table_Type tbl;
+   int linenum;
+
+#ifdef VMS
+   keymap_file = "lynx.keymaps";
+   home = "SYS$LOGIN:";
+#else
+   keymap_file = "/.lynx-keymaps";
+   home = getenv ("HOME");
+   if (home == NULL) home = "";
+#endif
+
+   sprintf (file, "%s%s", home, keymap_file);
+
+   if (NULL == (fp = fopen (file, "r")))
+     return 0;
+
+   tbl.table = Keymap_Cmd_Table;
+
+   linenum = 0;
+   ret = 0;
+   while (NULL != fgets (line, sizeof (line), fp))
+     {
+	char *s = LYSkipBlanks(line);
+
+	linenum++;
+
+	if ((*s == 0) || (*s == '#'))
+	  continue;
+
+	if (-1 == SLcmd_execute_string (s, &tbl))
+	  {
+	     ret = -1;
+	     break;
+	  }
+     }
+
+   fclose (fp);
+
+   if (ret == -1)
+     fprintf (stderr, "Error processing line %d of %s\n", linenum, file);
+
+   return ret;
+}
+
+int lynx_initialize_keymaps NOARGS
+{
+   int i;
+   char keybuf[2];
+
+   if (NULL == (Keymap_List = SLang_create_keymap ("Lynx", NULL)))
+     return -1;
+
+   keybuf[1] = 0;
+   for (i = 1; i < 256; i++)
+     {
+	keybuf[0] = (char) i;
+	SLkm_define_keysym (keybuf, i, Keymap_List);
+     }
+
+   SLkm_define_keysym ("\033[A",   UPARROW,    Keymap_List);
+   SLkm_define_keysym ("\033OA",   UPARROW,    Keymap_List);
+   SLkm_define_keysym ("\033[B",   DNARROW,    Keymap_List);
+   SLkm_define_keysym ("\033OB",   DNARROW,    Keymap_List);
+   SLkm_define_keysym ("\033[C",   RTARROW,    Keymap_List);
+   SLkm_define_keysym ("\033OC",   RTARROW,    Keymap_List);
+   SLkm_define_keysym ("\033[D",   LTARROW,    Keymap_List);
+   SLkm_define_keysym ("\033OD",   LTARROW,    Keymap_List);
+   SLkm_define_keysym ("\033[1~",  FIND_KEY,   Keymap_List);
+   SLkm_define_keysym ("\033[2~",  INSERT_KEY, Keymap_List);
+   SLkm_define_keysym ("\033[3~",  REMOVE_KEY, Keymap_List);
+   SLkm_define_keysym ("\033[4~",  SELECT_KEY, Keymap_List);
+   SLkm_define_keysym ("\033[5~",  PGUP,       Keymap_List);
+   SLkm_define_keysym ("\033[6~",  PGDOWN,     Keymap_List);
+   SLkm_define_keysym ("\033[8~",  END_KEY,    Keymap_List);
+   SLkm_define_keysym ("\033[7~",  HOME,       Keymap_List);
+   SLkm_define_keysym ("\033[28~", F1,         Keymap_List);
+   SLkm_define_keysym ("\033[29~", DO_KEY,     Keymap_List);
+
+   SLkm_define_keysym ("\033[M", MOUSE_KEYSYM, Keymap_List);
+
+   if (SLang_Error
+       || (-1 == read_keymap_file ()))
+     SLang_exit_error ("Unable to initialize keymaps");
+
+   return 0;
+}
+
+int LYgetch (void)
+{
+   SLang_Key_Type *key;
+   int keysym;
+
+   key = SLang_do_key (Keymap_List, (int (*)(void)) GetChar);
+   if ((key == NULL) || (key->type != SLKEY_F_KEYSYM))
+     return DO_NOTHING;
+
+   keysym = key->f.keysym;
+
+#if defined (USE_SLANG_MOUSE)
+   if (keysym == MOUSE_KEYSYM)
+     return sl_read_mouse_event ();
+#endif
+
+   if ((keysym > DO_NOTHING) || (keysym < 0))
+     return 0;
+
+   return keysym;
+}
+#else
+
 /*
  *  LYgetch() translates some escape sequences and may fake noecho.
  */
@@ -352,6 +592,10 @@ re_read:
 	}
    }
 #endif /* !USE_SLANG || VMS */
+
+/* The RAWDOSKEYHACK takes key definitions from curses.h (when using
+ * PDCURSES) or from the DJGPP file keys.h (when using SLANG) and maps
+ * them to the values used by the lynx file LYKeymap.c. */
 
 #ifdef RAWDOSKEYHACK
     if (raw_dos_key_hack) {
@@ -444,23 +688,7 @@ re_read:
 #ifdef USE_SLANG_MOUSE
 	   if ((c == 27) && (b == '['))
 	     {
-		int mouse_x, mouse_y, button;
-
-		mouse_link = -1;
-		c = -1;
-		if (-1 != sl_parse_mouse_event (&mouse_x, &mouse_y, &button))
-		  {
-		     if (button == 0)  /* left */
-		       c = set_clicked_link (mouse_x, mouse_y);
-		     else if (button == 2)   /* right */
-		       {
-			  /* Right button: go back to prev document.
-			   * The problem is that we need to determine
-			   * what to return to achieve this.
-			   */
-			  c = map_function_to_key (LYK_PREV_DOC);
-		       }
-		  }
+		c = sl_read_mouse_event ();
 	     }
 	   else
 #endif
@@ -554,6 +782,49 @@ re_read:
 	if (isdigit(a) && (b == '[' || c == 155) && d != -1 && d != '~')
 	    d = GetChar();
     }
+#if defined(__DJGPP__) && defined(USE_SLANG)
+    else { /* SLang keypad interface */
+	switch (c) {
+	case SL_KEY_UP:
+	    c = UPARROW;
+	    break;
+	case SL_KEY_DOWN:
+	    c = DNARROW;
+	    break;
+	case SL_KEY_RIGHT:
+	    c = RTARROW;
+	    break;
+	case SL_KEY_B2:
+	    c = DO_NOTHING;
+	    break;
+	case SL_KEY_LEFT:
+	    c = LTARROW;
+	    break;
+	case SL_KEY_PPAGE:
+	case SL_KEY_A3:
+	    c = PGUP;
+	    break;
+	case SL_KEY_NPAGE:
+	case SL_KEY_C3:
+	    c = PGDOWN;
+	    break;
+	case SL_KEY_HOME:
+	case SL_KEY_A1:
+	    c = HOME;
+	    break;
+	case SL_KEY_END:
+	case SL_KEY_C1:
+	    c = END_KEY;
+	    break;
+	case SL_KEY_F(1):
+	    c = F1;
+	    break;
+	case SL_KEY_BACKSPACE:
+	    c = 127;
+	    break;
+	}
+    }
+#endif
 #if HAVE_KEYPAD
     else {
 	/*
@@ -708,11 +979,13 @@ re_read:
     }
 }
 
+#endif				       /* NOT USE_SLANG_KEYMAPS */
+
 /*
  * Convert a null-terminated string to lowercase
  */
 PUBLIC void LYLowerCase ARGS1(
-	char *,		buffer)
+	char *, 	buffer)
 {
     size_t i;
     for (i = 0; buffer[i]; i++)
@@ -723,7 +996,7 @@ PUBLIC void LYLowerCase ARGS1(
  * Convert a null-terminated string to uppercase
  */
 PUBLIC void LYUpperCase ARGS1(
-	char *,		buffer)
+	char *, 	buffer)
 {
     size_t i;
     for (i = 0; buffer[i]; i++)
@@ -734,7 +1007,7 @@ PUBLIC void LYUpperCase ARGS1(
  * Remove ALL whitespace from a string (including embedded blanks).
  */
 PUBLIC void LYRemoveBlanks ARGS1(
-	char *,		buffer)
+	char *, 	buffer)
 {
     if (buffer != 0) {
 	size_t i, j;
@@ -749,10 +1022,10 @@ PUBLIC void LYRemoveBlanks ARGS1(
  * Skip whitespace
  */
 PUBLIC char * LYSkipBlanks ARGS1(
-	char *,		buffer)
+	char *, 	buffer)
 {
     while (isspace((unsigned char)(*buffer)))
-    	buffer++;
+	buffer++;
     return buffer;
 }
 
@@ -760,10 +1033,10 @@ PUBLIC char * LYSkipBlanks ARGS1(
  * Skip non-whitespace
  */
 PUBLIC char * LYSkipNonBlanks ARGS1(
-	char *,		buffer)
+	char *, 	buffer)
 {
     while (*buffer != 0 && !isspace((unsigned char)(*buffer)))
-    	buffer++;
+	buffer++;
     return buffer;
 }
 
@@ -774,7 +1047,7 @@ PUBLIC CONST char * LYSkipCBlanks ARGS1(
 	CONST char *,	buffer)
 {
     while (isspace((unsigned char)(*buffer)))
-    	buffer++;
+	buffer++;
     return buffer;
 }
 
@@ -785,7 +1058,7 @@ PUBLIC CONST char * LYSkipCNonBlanks ARGS1(
 	CONST char *,	buffer)
 {
     while (*buffer != 0 && !isspace((unsigned char)(*buffer)))
-    	buffer++;
+	buffer++;
     return buffer;
 }
 
@@ -793,22 +1066,22 @@ PUBLIC CONST char * LYSkipCNonBlanks ARGS1(
  * Trim leading blanks from a string
  */
 PUBLIC void LYTrimLeading ARGS1(
-	char *,		buffer)
+	char *, 	buffer)
 {
     char *skipped = LYSkipBlanks(buffer);
     while ((*buffer++ = *skipped++) != 0)
-    	;
+	;
 }
 
 /*
  * Trim trailing blanks from a string
  */
 PUBLIC void LYTrimTrailing ARGS1(
-	char *,		buffer)
+	char *, 	buffer)
 {
     size_t i = strlen(buffer);
     while (i != 0 && isspace((unsigned char)buffer[i-1]))
-    	buffer[--i] = 0;
+	buffer[--i] = 0;
 }
 
 /*
@@ -1700,7 +1973,6 @@ PUBLIC char * SNACat ARGS3(
     }
     return *dest;
 }
-
 
 /*
 **   UPPER8 ?

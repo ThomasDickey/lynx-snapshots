@@ -188,6 +188,10 @@ extern unsigned int Lynx_Color_Flags;
 #define USE_SLANG_MOUSE		1
 #endif /* USE_SLANG */
 
+#if SLANG_VERSION >= 10000
+#define USE_SLANG_KEYMAPS	1
+#endif
+
 #define SL_LYNX_USE_COLOR	1
 #define SL_LYNX_USE_BLINK	2
 #define SL_LYNX_OVERRIDE_COLOR	4

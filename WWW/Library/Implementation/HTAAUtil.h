@@ -328,7 +328,6 @@ Header Line Reader
 */
 PUBLIC void HTAA_setupReader PARAMS((char *     start_of_headers,
                                      int        length,
-				     void *	handle,
                                      int        soc));
 
 

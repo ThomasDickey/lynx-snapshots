@@ -90,6 +90,8 @@ PUBLIC	HTList * Goto_URLs = NULL;  /* List of Goto URLs */
 
 PUBLIC char * LYRequestTitle = NULL; /* newdoc.title in calls to getfile() */
 
+PUBLIC int Newline = 0; /* HText_pageDisplay() requires it */
+
 PRIVATE document newdoc;
 PRIVATE document curdoc;
 PRIVATE char *traversal_host = NULL;
@@ -129,6 +131,46 @@ PRIVATE void free_mainloop_variables NOARGS
     return;
 }
 
+PUBLIC FILE *TraceFP NOARGS
+{
+    if (LYTraceLogFP != 0) {
+	return LYTraceLogFP;
+    }
+    return stderr;
+}
+
+PRIVATE void TracelogOpenFailed NOARGS
+{
+    WWW_TraceFlag = FALSE;
+    _statusline(TRACELOG_OPEN_FAILED);
+    sleep(MessageSecs);
+}
+
+PUBLIC void LYCloseTracelog NOARGS
+{
+    if (LYTraceLogFP != 0) {
+	fflush(stdout);
+	fflush(stderr);
+	fclose(LYTraceLogFP);
+	LYTraceLogFP = 0;
+    }
+}
+
+PRIVATE BOOLEAN LYReopenTracelog ARGS1(BOOLEAN *, trace_flag_ptr)
+{
+    CTRACE(tfp, "\nTurning off TRACE for fetch of log.\n");
+    LYCloseTracelog();
+    if ((LYTraceLogFP = LYAppendToTxtFile(LYTraceLogPath)) == NULL) {
+	TracelogOpenFailed();
+	return FALSE;
+    }
+    if (TRACE) {
+	WWW_TraceFlag = FALSE;
+	*trace_flag_ptr = TRUE;
+    }
+    return TRUE;
+}
+
 /*
  *  Here's where we do all the work.
  *  mainloop is basically just a big switch dependent on the users input.
@@ -145,7 +187,6 @@ int mainloop NOARGS
     int getresult;
     int arrowup = FALSE, show_help = FALSE;
     int lines_in_file = -1;
-    int Newline = 0;
     char prev_target[512];
     char user_input_buffer[1024];
     char *owner_address = NULL;  /* Holds the responsible owner's address     */
@@ -164,6 +205,8 @@ int mainloop NOARGS
     BOOLEAN user_mode_flag = user_mode;
     BOOLEAN HTfileSortMethod_flag = HTfileSortMethod;
     int CurrentCharSet_flag = current_char_set;
+    int CurrentAssumeCharSet_flag = UCLYhndl_for_unspec;
+    int CurrentAssumeLocalCharSet_flag = UCLYhndl_HTFile_for_unspec;
     BOOLEAN show_dotfiles_flag = show_dotfiles;
     BOOLEAN LYRawMode_flag = LYRawMode;
     BOOLEAN LYSelectPopups_flag = LYSelectPopups;
@@ -430,23 +473,10 @@ try_again:
 		    WWWDoc.safe = newdoc.safe;
 		    tmpanchor = HTAnchor_parent(HTAnchor_findAddress(&WWWDoc));
 		    if ((HText *)HTAnchor_document(tmpanchor) == NULL) {
-			CTRACE(tfp, "\nTurning off TRACE for fetch of log.\n");
-			fflush(stdout);
-			fflush(stderr);
-			fclose(LYTraceLogFP);
-			*stderr = LYOrigStderr;
-			if ((LYTraceLogFP = LYAppendToTxtFile(LYTraceLogPath)) == NULL) {
-			    WWW_TraceFlag = FALSE;
-			    _statusline(TRACELOG_OPEN_FAILED);
-			    sleep(MessageSecs);
+			if (!LYReopenTracelog(&trace_mode_flag)) {
 			    old_c = 0;
 			    cmd = LYK_PREV_DOC;
 			    goto new_cmd;
-			}
-			*stderr = *LYTraceLogFP;
-			if (TRACE) {
-			    WWW_TraceFlag = FALSE;
-			    trace_mode_flag = TRUE;
 			}
 		    }
 		}
@@ -3744,6 +3774,8 @@ check_goto_URL:
 		 (!strncmp(curdoc.address, "file:", 5) ||
 		  !strncmp(curdoc.address, "ftp:", 4))) ||
 		CurrentCharSet_flag != current_char_set ||
+		CurrentAssumeCharSet_flag != UCLYhndl_for_unspec ||
+		CurrentAssumeLocalCharSet_flag != UCLYhndl_HTFile_for_unspec ||
 		LYRawMode_flag != LYRawMode ||
 		LYSelectPopups_flag != LYSelectPopups ||
 		((strcmp(CurrentUserAgent, (LYUserAgent ?
@@ -3815,6 +3847,8 @@ check_goto_URL:
 	    user_mode_flag = user_mode;
 	    HTfileSortMethod_flag = HTfileSortMethod;
 	    CurrentCharSet_flag = current_char_set;
+	    CurrentAssumeCharSet_flag = UCLYhndl_for_unspec;
+	    CurrentAssumeLocalCharSet_flag = UCLYhndl_HTFile_for_unspec;
 	    show_dotfiles_flag = show_dotfiles;
 	    LYRawMode_flag = LYRawMode;
 	    LYSelectPopups_flag = LYSelectPopups;
@@ -4803,12 +4837,6 @@ check_add_bookmark_to_self:
 		printf(SPAWNING_MSG);
 		fflush(stdout);
 		fflush(stderr);
-		if (LYTraceLogFP)
-		    /*
-		     *	Set stderr back to its original value
-		     *	during the shell escape. - FM
-		     */
-		    *stderr = LYOrigStderr;
 #ifdef DOSPATH
 #ifdef __DJGPP__
 		__djgpp_set_ctrl_c(0);
@@ -4838,12 +4866,6 @@ check_add_bookmark_to_self:
 #endif /* __EMX__ */
 #endif /* VMS */
 #endif /* DOSPATH */
-		if (LYTraceLogFP)
-		    /*
-		     *	Set stderr back to the log file on
-		     *	return from the shell escape. - FM
-		     */
-		    *stderr = *LYTraceLogFP;
 		start_curses();
 		refresh_screen = TRUE;	/* for an HText_pageDisplay() */
 	    } else {
@@ -5098,24 +5120,19 @@ check_add_bookmark_to_self:
 		 *  command. - FM
 		 */
 		if ((LYTraceLogFP = LYNewTxtFile(LYTraceLogPath)) == NULL) {
-		    WWW_TraceFlag = FALSE;
-		    _statusline(TRACELOG_OPEN_FAILED);
-		    sleep(MessageSecs);
+		    TracelogOpenFailed();
 		    break;
 		}
 #ifdef VMS
-		fclose(LYTraceLogFP);
+		LYCloseTracelog();
 		while (remove(LYTraceLogPath) == 0)
 		    ;
 		if ((LYTraceLogFP = LYNewTxtFile(LYTraceLogPath)) == NULL) {
-		    WWW_TraceFlag == FALSE;
-		    _statusline(TRACELOG_OPEN_FAILED);
-		    sleep(MessageSecs);
+		    TracelogOpenFailed();
 		    break;
 		}
 #endif /* VMS */
-		*stderr = *LYTraceLogFP;
-		fprintf(stderr, "\t\t%s\n\n", LYNX_TRACELOG_TITLE);
+		fprintf(tfp, "\t\t%s\n\n", LYNX_TRACELOG_TITLE);
 	    }
 	    break;
 
@@ -5148,22 +5165,9 @@ check_add_bookmark_to_self:
 	     *	and open it again, to make sure all stderr messages thus
 	     *	far will be in the log. - FM
 	     */
-	    CTRACE(tfp, "\nTurning off TRACE for fetch of log.\n");
-	    fflush(stdout);
-	    fflush(stderr);
-	    fclose(LYTraceLogFP);
-	    *stderr = LYOrigStderr;
-	    if ((LYTraceLogFP = LYAppendToTxtFile(LYTraceLogPath)) == NULL) {
-		WWW_TraceFlag = FALSE;
-		_statusline(TRACELOG_OPEN_FAILED);
-		sleep(MessageSecs);
+	    if (!LYReopenTracelog(&trace_mode_flag))
 		break;
-	    }
-	    *stderr = *LYTraceLogFP;
-	    if (TRACE) {
-		WWW_TraceFlag = FALSE;
-		trace_mode_flag = TRUE;
-	    }
+
 	    StrAllocCopy(newdoc.address, "file://localhost");
 #ifdef VMS
 	    StrAllocCat(newdoc.address, HTVMS_wwwName(LYTraceLogPath));

@@ -888,6 +888,9 @@ static Config_Type Config_Table [] =
      PARSE_SET("no_ismap_if_usemap", CONF_BOOL, LYNoISMAPifUSEMAP),
      PARSE_STR("no_proxy", CONF_ENV, no_proxy_putenv_cmd ),
      PARSE_SET("no_referer_header", CONF_BOOL, LYNoRefererHeader),
+#ifdef DISP_PARTIAL
+     PARSE_SET("partial", CONF_BOOL, display_partial),
+#endif
      PARSE_STR("personal_mailcap", CONF_STR, personal_type_map),
      PARSE_STR("personal_extension_map", CONF_STR, personal_extension_map),
      PARSE_STR("preferred_charset", CONF_STR, pref_charset),

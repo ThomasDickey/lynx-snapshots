@@ -67,8 +67,6 @@ extern char * SNACat PARAMS((
 #define StrnAllocCopy(dest, src, n)  SNACopy (&(dest), src, n)
 #define StrnAllocCat(dest, src, n)   SNACat  (&(dest), src, n)
 
-#define printable(c) (((c)>31 && (c)<=255) || (c)==9 || (c)==10 || (c)<0 )
-
 /* values for LYgetch */
 #define UPARROW		256	/* 0x100 */
 #define DNARROW		257	/* 0x101 */

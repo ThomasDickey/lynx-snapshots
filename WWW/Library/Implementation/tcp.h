@@ -294,7 +294,6 @@ extern int socket_ioctl();
 */
 extern int multinet_accept();
 extern int multinet_bind();
-extern int bzero();
 extern int multinet_connect();
 extern int multinet_gethostname();
 extern int multinet_getsockname();

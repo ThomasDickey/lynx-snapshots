@@ -435,6 +435,14 @@ no)
 esac
 AC_SUBST(INSTALL_LSS)
 
+AC_MSG_CHECKING(if experimental partial-display should be used)
+CF_ARG_ENABLE(partial,
+[  --enable-partial        use experimental partial-display logic],
+	[use_partial_display=$enableval],
+	[use_partial_display=no])
+AC_MSG_RESULT($use_partial_display)
+test $use_partial_display != no && AC_DEFINE(DISP_PARTIAL)
+
 use_dft_colors=no
 test ".$cf_cv_screen" = ".slang"                && use_dft_colors=maybe
 test ".$ac_cv_func_use_default_colors" = ".yes" && use_dft_colors=maybe
