@@ -509,6 +509,20 @@ PUBLIC void read_rc NOPARAMS
 	     else
 		local_exec = FALSE;
 
+#ifdef DISP_PARTIAL
+	/*
+	 * Partial display logic--set the threshold # of lines before
+	 * Lynx redraws the screen
+	 */
+	} else if ((cp = LYstrstr(line_buffer, "partial_thres")) != NULL &&
+		   cp-line_buffer < number_sign) {
+	    if ((cp2 = (char *)strchr(cp, '=')) != NULL)
+	        cp = cp2 + 1;
+	    cp = LYSkipBlanks(cp);
+	    if (atoi(cp) != 0)
+	        partial_threshold = atoi(cp);
+#endif /* DISP_PARTIAL */
+
 	/*
 	 *  Local execution mode - only links in local files.
 	 */
@@ -835,6 +849,19 @@ PUBLIC int save_rc NOPARAMS
 		((keypad_mode == NUMBERS_AS_ARROWS) ?  "NUMBERS_AS_ARROWS" :
 	       ((keypad_mode == LINKS_ARE_NUMBERED) ? "LINKS_ARE_NUMBERED" :
 				      "LINKS_AND_FORM_FIELDS_ARE_NUMBERED")));
+
+#ifdef DISP_PARTIAL
+    /*
+     * Partial display threshold
+     */
+    fprintf(fp, "\
+# partial_thres specifies the number of lines Lynx should download and render
+# before we redraw the screen in Partial Display logic
+# e.g. partial_thres=2
+# would have Lynx redraw every 2 lines that it renders
+# partial_thres=-1 would use the entire screensize\n");
+    fprintf(fp, "partial_thres=%d\n\n", partial_threshold);
+#endif /* DISP_PARTIAL */
 
     /*
      *  Lineedit mode.

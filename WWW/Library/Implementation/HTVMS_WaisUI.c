@@ -58,18 +58,13 @@ log_write(char *s GCC_UNUSED)
    if it overflows, then NULL is returned
  */
 char *
-generate_search_apdu(buff,
-		     buff_len,
-		     seed_words,
-		     database_name,
-		     docobjs,
-		     maxDocsRetrieved)
-char* buff;     /* buffer to hold the apdu */
-long *buff_len;    /* length of the buffer changed to reflect new data written */
-char *seed_words;    /* string of the seed words */
-char *database_name;
-DocObj** docobjs;
-long maxDocsRetrieved;
+generate_search_apdu(
+char* buff,     /* buffer to hold the apdu */
+long *buff_len,    /* length of the buffer changed to reflect new data written */
+char *seed_words,    /* string of the seed words */
+char *database_name,
+DocObj** docobjs,
+long maxDocsRetrieved)
 {
   /* local variables */
 
@@ -116,22 +111,15 @@ long maxDocsRetrieved;
  */
 
 char *
-generate_retrieval_apdu(buff,
-			buff_len,
-			docID,
-			chunk_type,
-			start,
-			end,
-			type,
-			database_name)
-char *buff;
-long *buff_len;    /* length of the buffer changed to reflect new data written */
-any *docID;
-long chunk_type;
-long start;
-long end;
-char *type;
-char *database_name;
+generate_retrieval_apdu(
+char *buff,
+long *buff_len,    /* length of the buffer changed to reflect new data written */
+any *docID,
+long chunk_type,
+long start,
+long end,
+char *type,
+char *database_name)
 {
   SearchAPDU *search;
   char  *end_ptr;
@@ -381,8 +369,7 @@ static __const void *__const ctype_dummy[] = { &_ctype_, &ctype_dummy };
 #endif /* VMS && __GNUC__ */
 
 /* returns a pointer to a string with good stuff */
-char *trim_junk(headline)
-char *headline;
+char *trim_junk(char *headline)
 {
   long length = strlen(headline) + 1; /* include the trailing null */
   size_t i;
@@ -430,34 +417,21 @@ char *headline;
 /*----------------------------------------------------------------------*/
 
 InitResponseAPDU*
-makeInitResponseAPDU(result,
-		     search,
-		     present,
-		     deleteIt,
-		     accessControl,
-		     resourceControl,
-		     prefSize,
-		     maxMsgSize,
-		     auth,
-		     id,
-		     name,
-		     version,
-		     refID,
-		     userInfo)
-boolean result;
-boolean search;
-boolean present;
-boolean deleteIt;
-boolean accessControl;
-boolean resourceControl;
-long prefSize;
-long maxMsgSize;
-char* auth;
-char* id;
-char* name;
-char* version;
-any* refID;
-void* userInfo;
+makeInitResponseAPDU(
+boolean result,
+boolean search,
+boolean present,
+boolean deleteIt,
+boolean accessControl,
+boolean resourceControl,
+long prefSize,
+long maxMsgSize,
+char* auth,
+char* id,
+char* name,
+char* version,
+any* refID,
+void* userInfo)
 /* build an initResponse APDU with user specified information */
 {
   InitResponseAPDU* init = (InitResponseAPDU*)s_malloc((size_t)sizeof(InitResponseAPDU));
@@ -484,8 +458,7 @@ void* userInfo;
 /*----------------------------------------------------------------------*/
 
 void
-freeInitResponseAPDU(init)
-InitResponseAPDU* init;
+freeInitResponseAPDU(InitResponseAPDU* init)
 /* free an initAPDU */
 {
   s_free(init->IDAuthentication);
@@ -499,10 +472,7 @@ InitResponseAPDU* init;
 /*----------------------------------------------------------------------*/
 
 char*
-writeInitResponseAPDU(init,buffer,len)
-InitResponseAPDU* init;
-char* buffer;
-long* len;
+writeInitResponseAPDU(InitResponseAPDU* init, char* buffer, long* len)
 /* write the initResponse to a buffer, adding system information */
 {
   char* buf = buffer + HEADER_LEN; /* leave room for the header-length-indicator */
@@ -543,9 +513,7 @@ long* len;
 /*----------------------------------------------------------------------*/
 
 char*
-readInitResponseAPDU(init,buffer)
-InitResponseAPDU** init;
-char* buffer;
+readInitResponseAPDU(InitResponseAPDU** init, char* buffer)
 {
   char* buf = buffer;
   boolean search,present,delete,accessControl,resourceControl;
@@ -641,10 +609,7 @@ char* buffer;
 /*----------------------------------------------------------------------*/
 
 InitResponseAPDU*
-replyToInitAPDU(init,result,userInfo)
-InitAPDU* init;
-boolean result;
-void* userInfo;
+replyToInitAPDU(InitAPDU* init, boolean result, void* userInfo)
 /* respond to an init message in the default way - echoing back
    the init info
  */
@@ -663,26 +628,17 @@ void* userInfo;
 /*----------------------------------------------------------------------*/
 
 SearchAPDU*
-makeSearchAPDU(small,
-	       large,
-	       medium,
-	       replace,
-	       name,
-	       databases,
-	       type,
-	       elements,
-	       refID,
-	       queryInfo)
-long small;
-long large;
-long medium;
-boolean replace;
-char* name;
-char** databases;
-char* type;
-char** elements;
-any* refID;
-void* queryInfo;
+makeSearchAPDU(
+long small,
+long large,
+long medium,
+boolean replace,
+char* name,
+char** databases,
+char* type,
+char** elements,
+any* refID,
+void* queryInfo)
 {
   char* ptr = NULL;
   long i;
@@ -726,8 +682,7 @@ void* queryInfo;
 /*----------------------------------------------------------------------*/
 
 void
-freeSearchAPDU(query)
-SearchAPDU* query;
+freeSearchAPDU(SearchAPDU* query)
 {
   s_free(query->ResultSetName);
   s_free(query->QueryType);
@@ -746,10 +701,7 @@ SearchAPDU* query;
 #define ES_DELIMITER_2 	"\036" 	/* hex 1E separates <db,es> groups from one another */
 
 char*
-writeSearchAPDU(query,buffer,len)
-SearchAPDU* query;
-char* buffer;
-long* len;
+writeSearchAPDU(SearchAPDU* query, char* buffer, long* len)
 {
   char* buf = buffer + HEADER_LEN; /* leave room for the header-length-indicator */
   long size,i;
@@ -827,16 +779,15 @@ long* len;
 /*----------------------------------------------------------------------*/
 
 SearchResponseAPDU*
-makeSearchResponseAPDU(result,count,recordsReturned,nextPos,resultStatus,
-		       presentStatus,refID,records)
-long result;
-long count;
-long recordsReturned;
-long nextPos;
-long resultStatus;
-long presentStatus;
-any* refID;
-void* records;
+makeSearchResponseAPDU(
+long result,
+long count,
+long recordsReturned,
+long nextPos,
+long resultStatus,
+long presentStatus,
+any* refID,
+void* records)
 {
   SearchResponseAPDU* query = (SearchResponseAPDU*)s_malloc((size_t)sizeof(SearchResponseAPDU));
   query->PDUType = searchResponseAPDU;
@@ -854,8 +805,7 @@ void* records;
 /*----------------------------------------------------------------------*/
 
 void
-freeSearchResponseAPDU(queryResponse)
-SearchResponseAPDU* queryResponse;
+freeSearchResponseAPDU(SearchResponseAPDU* queryResponse)
 {
   freeAny(queryResponse->ReferenceID);
   s_free(queryResponse);
@@ -864,10 +814,7 @@ SearchResponseAPDU* queryResponse;
 /*----------------------------------------------------------------------*/
 
 char*
-writeSearchResponseAPDU(queryResponse,buffer,len)
-SearchResponseAPDU* queryResponse;
-char* buffer;
-long* len;
+writeSearchResponseAPDU(SearchResponseAPDU* queryResponse, char* buffer, long* len)
 {
   char* buf = buffer + HEADER_LEN; /* leave room for the header-length-indicator */
   long size;
@@ -897,9 +844,7 @@ long* len;
 /*----------------------------------------------------------------------*/
 
 char*
-readSearchResponseAPDU(queryResponse,buffer)
-SearchResponseAPDU** queryResponse;
-char* buffer;
+readSearchResponseAPDU(SearchResponseAPDU** queryResponse, char* buffer)
 {
   char* buf = buffer;
   long size;
@@ -991,10 +936,7 @@ char* readErrorPosition = NULL; /* pos where buf stoped making sense */
 /*----------------------------------------------------------------------*/
 
 diagnosticRecord*
-makeDiag(surrogate,code,addInfo)
-boolean surrogate;
-char* code;
-char* addInfo;
+makeDiag(boolean surrogate, char* code, char* addInfo)
 {
   diagnosticRecord* diag =
     (diagnosticRecord*)s_malloc((size_t)sizeof(diagnosticRecord));
@@ -1009,8 +951,7 @@ char* addInfo;
 /*----------------------------------------------------------------------*/
 
 void
-freeDiag(diag)
-diagnosticRecord* diag;
+freeDiag(diagnosticRecord* diag)
 {
   if (diag != NULL)
     { if (diag->ADDINFO != NULL)
@@ -1024,10 +965,7 @@ diagnosticRecord* diag;
 #define END_OF_RECORD	0x1D
 
 char*
-writeDiag(diag,buffer,len)
-diagnosticRecord* diag;
-char* buffer;
-long* len;
+writeDiag(diagnosticRecord* diag, char* buffer, long* len)
 /* diagnostics (as per Appendix D) have a very weird format - this changes
    in SR-1
  */
@@ -1080,9 +1018,7 @@ long* len;
 /*----------------------------------------------------------------------*/
 
 char*
-readDiag(diag,buffer)
-diagnosticRecord** diag;
-char* buffer;
+readDiag(diagnosticRecord** diag, char* buffer)
 {
   char* buf = buffer;
   diagnosticRecord* d
@@ -1120,10 +1056,7 @@ char* buffer;
 #define dataBits	7
 
 char*
-writeCompressedInteger(num,buf,len)
-unsigned long num;
-char* buf;
-long* len;
+writeCompressedInteger(unsigned long num, char* buf, long* len)
 /* write a binary integer in the format described on p. 40.
    this might be sped up
 */
@@ -1149,9 +1082,7 @@ long* len;
 /*----------------------------------------------------------------------*/
 
 char*
-readCompressedInteger(num,buf)
-unsigned long *num;
-char* buf;
+readCompressedInteger(unsigned long *num, char* buf)
 /* read a binary integer in the format described on p. 40.
    this might be sped up
 */
@@ -1176,11 +1107,11 @@ char* buf;
 #define pad	128 /* high bit is set */
 
 char*
-writeCompressedIntWithPadding(num,size,buffer,len)
-unsigned long num;
-unsigned long size;
-char* buffer;
-long* len;
+writeCompressedIntWithPadding(
+unsigned long num,
+unsigned long size,
+char* buffer,
+long* len)
 /* Like writeCompressedInteger, except writes padding (128) to make
    sure that size bytes are used.  This can be read correctly by
    readCompressedInteger()
@@ -1208,8 +1139,7 @@ long* len;
 /*----------------------------------------------------------------------*/
 
 unsigned long
-writtenCompressedIntSize(num)
-unsigned long num;
+writtenCompressedIntSize(unsigned long num)
 /* return the number of bytes needed to represnet the value num in
    compressed format.  curently limited to 4 bytes
  */
@@ -1227,10 +1157,7 @@ unsigned long num;
 /*----------------------------------------------------------------------*/
 
 char*
-writeTag(tag,buf,len)
-data_tag tag;
-char* buf;
-long* len;
+writeTag(data_tag tag, char* buf, long* len)
 /* write out a data tag */
 {
   return(writeCompressedInteger(tag,buf,len));
@@ -1239,9 +1166,7 @@ long* len;
 /*----------------------------------------------------------------------*/
 
 char*
-readTag(tag,buf)
-data_tag* tag;
-char* buf;
+readTag(data_tag* tag, char* buf)
 /* read a data tag */
 {
   return(readCompressedInteger(tag,buf));
@@ -1250,8 +1175,7 @@ char* buf;
 /*----------------------------------------------------------------------*/
 
 unsigned long
-writtenTagSize(tag)
-data_tag tag;
+writtenTagSize(data_tag tag)
 {
   return(writtenCompressedIntSize(tag));
 }
@@ -1259,8 +1183,7 @@ data_tag tag;
 /*----------------------------------------------------------------------*/
 
 data_tag
-peekTag(buf)
-char* buf;
+peekTag(char* buf)
 /* read a data tag without advancing the buffer */
 {
   data_tag tag;
@@ -1271,9 +1194,7 @@ char* buf;
 /*----------------------------------------------------------------------*/
 
 any*
-makeAny(size,data)
-unsigned long size;
-char* data;
+makeAny(unsigned long size, char* data)
 {
   any* a = (any*)s_malloc((size_t)sizeof(any));
   a->size = size;
@@ -1284,8 +1205,7 @@ char* data;
 /*----------------------------------------------------------------------*/
 
 void
-freeAny(a)
-any* a;
+freeAny(any* a)
 /* destroy an any and its associated data. Assumes a->bytes was
    allocated using the s_malloc family of libraries
  */
@@ -1300,8 +1220,7 @@ any* a;
 /*----------------------------------------------------------------------*/
 
 any*
-duplicateAny(a)
-any* a;
+duplicateAny(any* a)
 {
   any* copy = NULL;
 
@@ -1322,11 +1241,7 @@ any* a;
 /*----------------------------------------------------------------------*/
 
 char*
-writeAny(a,tag,buffer,len)
-any* a;
-data_tag tag;
-char* buffer;
-long* len;
+writeAny(any* a, data_tag tag, char* buffer, long* len)
 /* write an any + tag and size info */
 {
   char* buf = buffer;
@@ -1348,9 +1263,7 @@ long* len;
 /*----------------------------------------------------------------------*/
 
 
-char *readAny(anAny,buffer)
-any** anAny;
-char* buffer;
+char *readAny(any** anAny, char* buffer)
 /* read an any + tag and size info */
 {
   char *buf;
@@ -1378,9 +1291,7 @@ a=(any*)s_malloc((size_t)sizeof(any));
 /*----------------------------------------------------------------------*/
 
 unsigned long
-writtenAnySize(tag,a)
-data_tag tag;
-any* a;
+writtenAnySize(data_tag tag, any* a)
 {
   unsigned long size;
 
@@ -1396,8 +1307,7 @@ any* a;
 /*----------------------------------------------------------------------*/
 
 any*
-stringToAny(s)
-char* s;
+stringToAny(char* s)
 {
   any* a = NULL;
 
@@ -1414,8 +1324,7 @@ char* s;
 /*----------------------------------------------------------------------*/
 
 char*
-anyToString(a)
-any* a;
+anyToString(any* a)
 {
   char* s = NULL;
 
@@ -1431,11 +1340,7 @@ any* a;
 /*----------------------------------------------------------------------*/
 
 char*
-writeString(s,tag,buffer,len)
-char* s;
-data_tag tag;
-char* buffer;
-long* len;
+writeString(char* s, data_tag tag, char* buffer, long* len)
 /* Write a C style string.  The terminating null is not written.
    This function is not part of the Z39.50 spec.  It is provided
    for the convienience of those wishing to pass C strings in
@@ -1457,9 +1362,7 @@ long* len;
 /*----------------------------------------------------------------------*/
 
 char*
-readString(s ,buffer)
-char** s ;
-char* buffer;
+readString(char** s, char* buffer)
 /* Read an any and convert it into a C style string.
    This function is not part of the Z39.50 spec.  It is provided
    for the convienience of those wishing to pass C strings in
@@ -1476,9 +1379,7 @@ char* buffer;
 /*----------------------------------------------------------------------*/
 
 unsigned long
-writtenStringSize(tag,s)
-data_tag tag;
-char* s;
+writtenStringSize(data_tag tag, char* s)
 {
   unsigned long size;
 
@@ -1494,8 +1395,7 @@ char* s;
 /*----------------------------------------------------------------------*/
 
 any*
-longToAny(num)
-long num;
+longToAny(long num)
 /* a convienience function */
 {
   char s[40];
@@ -1508,8 +1408,7 @@ long num;
 /*----------------------------------------------------------------------*/
 
 long
-anyToLong(a)
-any* a;
+anyToLong(any* a)
 /* a convienience function */
 {
   long num;
@@ -1530,7 +1429,7 @@ makeBitMap(unsigned long numBits, ...)
 /* construct and return a bitmap with numBits elements */
 {
   va_list ap;
-  long i,j;
+  unsigned long i,j;
   bit_map* bm = NULL;
 
   LYva_start(ap,numBits);
@@ -1562,8 +1461,7 @@ makeBitMap(unsigned long numBits, ...)
 /*----------------------------------------------------------------------*/
 
 void
-freeBitMap(bm)
-bit_map* bm;
+freeBitMap(bit_map* bm)
 /* destroy a bit map created by makeBitMap() */
 {
   s_free(bm->bytes);
@@ -1578,9 +1476,7 @@ bit_map* bm;
  */
 
 boolean
-bitAtPos(pos,bm)
-long pos;
-bit_map* bm;
+bitAtPos(unsigned long pos, bit_map* bm)
 {
   if (pos > bm->size*bitsPerByte)
     return false;
@@ -1593,11 +1489,7 @@ bit_map* bm;
 /*----------------------------------------------------------------------*/
 
 char*
-writeBitMap(bm,tag,buffer,len)
-bit_map* bm;
-data_tag tag;
-char* buffer;
-long* len;
+writeBitMap(bit_map* bm, data_tag tag, char* buffer, long* len)
 /* write a bitmap + type and size info */
 {
   return(writeAny((any*)bm,tag,buffer,len));
@@ -1606,27 +1498,18 @@ long* len;
 /*----------------------------------------------------------------------*/
 
 char*
-readBitMap(bm,buffer)
-bit_map** bm;
-char* buffer;
+readBitMap(bit_map** bm, char* buffer)
 /* read a bitmap + type and size info */
 {
-	char *c;
-
-
-
-c=readAny((any**)bm,buffer);
-
-  return(c);
+    char *c;
+    c = readAny((any**)bm,buffer);
+    return(c);
 }
 
 /*----------------------------------------------------------------------*/
 
 char*
-writeByte(byte,buf,len)
-unsigned long byte;
-char* buf;
-long* len;
+writeByte(unsigned long byte, char* buf, long* len)
 {
   CHECK_FOR_SPACE_LEFT(1,len);
   buf[0] = byte & 0xFF; /* we really only want the first byte */
@@ -1636,9 +1519,7 @@ long* len;
 /*----------------------------------------------------------------------*/
 
 char*
-readByte(byte,buf)
-unsigned char* byte;
-char* buf;
+readByte(unsigned char* byte, char* buf)
 {
   *byte = buf[0];
   return(buf + 1);
@@ -1647,10 +1528,7 @@ char* buf;
 /*----------------------------------------------------------------------*/
 
 char*
-writeBoolean(flag,buf,len)
-boolean flag;
-char* buf;
-long* len;
+writeBoolean(boolean flag, char* buf, long* len)
 {
   return(writeByte(flag,buf,len));
 }
@@ -1658,9 +1536,7 @@ long* len;
 /*----------------------------------------------------------------------*/
 
 char*
-readBoolean(flag,buffer)
-boolean* flag;
-char* buffer;
+readBoolean(boolean* flag, char* buffer)
 {
   unsigned char byte;
   char* buf = readByte(&byte,buffer);
@@ -1671,10 +1547,7 @@ char* buffer;
 /*----------------------------------------------------------------------*/
 
 char*
-writePDUType(pduType,buf,len)
-pdu_type pduType;
-char* buf;
-long* len;
+writePDUType(pdu_type pduType, char* buf, long* len)
 /* PDUType is a single byte */
 {
   return(writeBinaryInteger((long)pduType,(unsigned long)1,buf,len));
@@ -1683,9 +1556,7 @@ long* len;
 /*----------------------------------------------------------------------*/
 
 char*
-readPDUType(pduType,buf)
-pdu_type* pduType;
-char* buf;
+readPDUType(pdu_type* pduType, char* buf)
 /* PDUType is a single byte */
 {
   return(readBinaryInteger((long*)pduType,(unsigned long)1,buf));
@@ -1694,8 +1565,7 @@ char* buf;
 /*----------------------------------------------------------------------*/
 
 pdu_type
-peekPDUType(buf)
-char* buf;
+peekPDUType(char* buf)
 /* read the next pdu without advancing the buffer, Note that this
    function is to be used on a buffer that is known to contain an
    APDU.  The pdu_type is written HEADER_LEN bytes into the buffer
@@ -1711,11 +1581,7 @@ char* buf;
 #define BINARY_INTEGER_BYTES	sizeof(long) /* the number of bytes used by
 						a "binary integer" */
 char*
-writeBinaryInteger(num,size,buf,len)
-long num;
-unsigned long size;
-char* buf;
-long* len;
+writeBinaryInteger(long num, unsigned long size, char* buf, long* len)
 /* write out first size bytes of num - no type info
   XXX should this take unsigned longs instead ???  */
 {
@@ -1739,14 +1605,11 @@ long* len;
 /*----------------------------------------------------------------------*/
 
 char*
-readBinaryInteger(num,size,buf)
-long* num;
-unsigned long size;
-char* buf;
+readBinaryInteger(long* num, unsigned long size, char* buf)
 /* read in first size bytes of num - no type info
   XXX this should take unsigned longs instead !!! */
 {
-  long i;
+  unsigned long i;
   unsigned char byte;
 
   if (size < 1 || size > BINARY_INTEGER_BYTES)
@@ -1765,8 +1628,7 @@ char* buf;
 /*----------------------------------------------------------------------*/
 
 unsigned long
-writtenCompressedBinIntSize(num)
-long num;
+writtenCompressedBinIntSize(long num)
 /* return the number of bytes needed to represent the value num.
    currently limited to max of 4 bytes
    Only compresses for positive nums - negatives get whole 4 bytes
@@ -1787,11 +1649,7 @@ long num;
 /*----------------------------------------------------------------------*/
 
 char*
-writeNum(num,tag,buffer,len)
-long num;
-data_tag tag;
-char* buffer;
-long* len;
+writeNum(long num, data_tag tag, char* buffer, long* len)
 /* write a binary integer + size and tag info */
 {
   char* buf = buffer;
@@ -1809,9 +1667,7 @@ long* len;
 /*----------------------------------------------------------------------*/
 
 char*
-readNum(num,buffer)
-long* num;
-char* buffer;
+readNum(long* num, char* buffer)
 /* read a binary integer + size and tag info */
 {
   char* buf = buffer;
@@ -1829,9 +1685,7 @@ char* buffer;
 /*----------------------------------------------------------------------*/
 
 unsigned long
-writtenNumSize(tag,num)
-data_tag tag;
-long num;
+writtenNumSize(data_tag tag, long num)
 {
   long dataSize = writtenCompressedBinIntSize(num);
   long size;
@@ -1848,9 +1702,7 @@ long num;
 typedef void (voidfunc)(void *);
 
 void
-doList(list,func)
-void** list;
-voidfunc *func;
+doList(void** list, voidfunc *func)
 /* call func on each element of the NULL terminated list of pointers */
 {
   register long i;
@@ -1864,9 +1716,7 @@ voidfunc *func;
 /*----------------------------------------------------------------------*/
 
 char*
-writeProtocolVersion(buf,len)
-char* buf;
-long* len;
+writeProtocolVersion(char* buf, long* len)
 /* write a bitmap describing the protocols available */
 {
   static bit_map* version = NULL;
@@ -1881,7 +1731,7 @@ long* len;
 /*----------------------------------------------------------------------*/
 
 char*
-defaultImplementationID()
+defaultImplementationID(void)
 {
   static char	ImplementationID[] = "TMC";
   return(ImplementationID);
@@ -1890,7 +1740,7 @@ defaultImplementationID()
 /*----------------------------------------------------------------------*/
 
 char*
-defaultImplementationName()
+defaultImplementationName(void)
 {
   static char ImplementationName[] = "Thinking Machines Corporation Z39.50";
   return(ImplementationName);
@@ -1899,7 +1749,7 @@ defaultImplementationName()
 /*----------------------------------------------------------------------*/
 
 char*
-defaultImplementationVersion()
+defaultImplementationVersion(void)
 {
   static char	ImplementationVersion[] = "2.0A";
   return(ImplementationVersion);
@@ -1922,20 +1772,14 @@ defaultImplementationVersion()
 /*----------------------------------------------------------------------*/
 
 query_term*
-makeAttributeTerm(use,
-		  relation,
-		  position,
-		  structure,
-		  truncation,
-		  completeness,
-		  term)
-char* use;
-char* relation;
-char* position;
-char* structure;
-char* truncation;
-char* completeness;
-any* term;
+makeAttributeTerm(
+char* use,
+char* relation,
+char* position,
+char* structure,
+char* truncation,
+char* completeness,
+any* term)
 {
   query_term* qt = (query_term*)s_malloc((size_t)sizeof(query_term));
 
@@ -1959,8 +1803,7 @@ any* term;
 /*----------------------------------------------------------------------*/
 
 query_term*
-makeResultSetTerm(resultSet)
-any* resultSet;
+makeResultSetTerm(any* resultSet)
 {
   query_term* qt = (query_term*)s_malloc((size_t)sizeof(query_term));
 
@@ -1976,8 +1819,7 @@ any* resultSet;
 /*----------------------------------------------------------------------*/
 
 query_term*
-makeOperatorTerm(operatorCode)
-char* operatorCode;
+makeOperatorTerm(char* operatorCode)
 {
   query_term* qt = (query_term*)s_malloc((size_t)sizeof(query_term));
 
@@ -1994,8 +1836,7 @@ char* operatorCode;
 /*----------------------------------------------------------------------*/
 
 void
-freeTerm(param)
-void* param;
+freeTerm(void* param)
 {
   query_term* qt = (query_term*)param;
   switch (qt->TermType)
@@ -2022,10 +1863,7 @@ void* param;
 #define AT_DELIMITER	" "
 
 char*
-writeQueryTerm(qt,buffer,len)
-query_term* qt;
-char* buffer;
-long* len;
+writeQueryTerm(query_term* qt, char* buffer, long* len)
 {
   char* buf = buffer;
   char attributes[ATTRIBUTE_LIST_SIZE];
@@ -2064,9 +1902,7 @@ long* len;
 /*----------------------------------------------------------------------*/
 
 char*
-readQueryTerm(qt,buffer)
-query_term** qt;
-char* buffer;
+readQueryTerm(query_term** qt, char* buffer)
 {
   char* buf = buffer;
   char  *attributeList = NULL;
@@ -2122,8 +1958,7 @@ char* buffer;
 static unsigned long getQueryTermSize PARAMS((query_term* qt));
 
 static unsigned long
-getQueryTermSize(qt)
-query_term* qt;
+getQueryTermSize(query_term* qt)
 /* figure out how many bytes it will take to write this query */
 {
   unsigned long size = 0;
@@ -2158,8 +1993,7 @@ query_term* qt;
    the user information field. */
 
 any*
-writeQuery(terms)
-query_term** terms;
+writeQuery(query_term** terms)
 {
   any* info = NULL;
   char* writePos = NULL;
@@ -2192,8 +2026,7 @@ query_term** terms;
 /*----------------------------------------------------------------------*/
 
 query_term**
-readQuery(info)
-any *info;
+readQuery(any *info)
 {
   char* readPos = info->bytes;
   query_term** terms = NULL;
@@ -2292,8 +2125,7 @@ panic(char *format, ...)
 /*----------------------------------------------------------------------*/
 
 void
-fs_checkPtr(ptr)
-void* ptr;
+fs_checkPtr(void* ptr)
 /* If the ptr is NULL, give an error */
 {
   if (ptr == NULL)
@@ -2303,8 +2135,7 @@ void* ptr;
 /*----------------------------------------------------------------------*/
 
 void*
-fs_malloc(size)
-size_t size;
+fs_malloc(size_t size)
 /* does safety checks and optional accounting */
 {
   register void* ptr = NULL;
@@ -2318,9 +2149,7 @@ size_t size;
 /*----------------------------------------------------------------------*/
 
 void*
-fs_realloc(ptr,size)
-void* ptr;
-size_t size;
+fs_realloc(void* ptr, size_t size)
 /* does safety checks and optional accounting
    note - we don't know how big ptr's memory is, so we can't ensure
    that any new memory allocated is NULLed!
@@ -2340,8 +2169,7 @@ size_t size;
 /*----------------------------------------------------------------------*/
 
 void
-fs_free(ptr)
-void* ptr;
+fs_free(void* ptr)
 /* does safety checks and optional accounting */
 {
   if (ptr != NULL)		/* some non-ansi compilers/os's cant handle freeing null */
@@ -2354,8 +2182,7 @@ void* ptr;
 /*----------------------------------------------------------------------*/
 
 char*
-s_strdup(s)
-char* s;
+s_strdup(char* s)
 
 /* return a copy of s.  This is identical to the standard library routine
    strdup(), except that it is safe.  If s == NULL or malloc fails,
@@ -2377,11 +2204,7 @@ char* s;
 /*----------------------------------------------------------------------*/
 
 char*
-fs_strncat(dst,src,maxToAdd,maxTotal)
-char* dst;
-   char* src;
-   size_t maxToAdd;
-   size_t maxTotal;
+fs_strncat(char* dst, char* src, size_t maxToAdd, size_t maxTotal)
 
 /* like strncat, except the fourth argument limits the maximum total
    length of the resulting string
@@ -2405,16 +2228,14 @@ char* dst;
 
 /*----------------------------------------------------------------------*/
 
-char char_downcase(long_ch)
-unsigned long long_ch;
+char char_downcase(unsigned long long_ch)
 {
   unsigned char ch = long_ch & 0xFF; /* just want one byte */
   /* when ansi is the way of the world, this can be tolower */
   return (((ch >= 'A') && (ch <= 'Z')) ? (ch + 'a' -'A') : ch);
 }
 
-char *string_downcase(word)
-char *word;
+char *string_downcase(char *word)
 {
   long i = 0;
   while(word[i] != '\0'){

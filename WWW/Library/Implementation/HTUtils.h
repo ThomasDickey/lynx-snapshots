@@ -321,7 +321,7 @@ Sucess (>=0) and failure (<0) codes
 #include <HTString.h>   /* String utilities */
 
 #ifndef va_arg
-#ifdef __STDC__
+#if defined(__STDC__) || defined(VMS)
 #include <stdarg.h>
 #define LYva_start(ap,format) va_start(ap,format)
 #else

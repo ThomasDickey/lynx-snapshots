@@ -375,6 +375,9 @@ $(LOB)/HTAccess.o : $(OE)  $(CMN)HTAccess.c $(CMN)HTUtils.h
 $(LOB)/HTParse.o : $(OE) $(CMN)HTParse.c $(CMN)HTUtils.h
 	$(COMPILE) $(CMN)HTParse.c
 
+$(LOB)/HTVMS_WaisUI.o : $(OE) $(CMN)HTVMS_WaisUI.c $(CMN)HTUtils.h
+	$(COMPILE) $(CMN)HTVMS_WaisUI.c
+
 $(LOB)/HTDOS.o : $(OE) $(CMN)HTDOS.c $(CMN)HTUtils.h
 	$(COMPILE) $(CMN)HTDOS.c
 

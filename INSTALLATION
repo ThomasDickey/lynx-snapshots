@@ -367,8 +367,7 @@ II. Compile instructions -- UNIX
 	setenv RESOLVLIB -lbind
 
 	#!/bin/csh -f
-	setenv CPPFLAGS "-DSYSLOG_REQUESTED_URLS -I$HOME/slang \
-		-I$HOME/.usr/include"
+	setenv CPPFLAGS "-I$HOME/slang -I$HOME/.usr/include"
 	setenv LIBS "-L$HOME/.slang/lib -L$HOME/.usr/lib"
 	./configure --exec-prefix=$HOME --bindir=$HOME/.lynx \
 		--mandir=$HOME/.usr/man --libdir=$HOME/.usr/lib \
@@ -378,16 +377,14 @@ II. Compile instructions -- UNIX
     use the libbind.a resolver library, not libresolv.a.  Setting RESOLVLIB to
     -lbind defines this environment variable for `make', and thus must be set
     in the same shell that `make' will be run.  CPPFLAGS in this example
-    predefines SYSLOG_REQUESTED_URLS for the configure script, since it is not
-    defined by default, and has no option switch (see "docs/README.defines").
-    CPPFLAGS also defines the full path to the slang and zlib header files,
-    which are not kept in standard directories.  Likewise, LIBS defines the
-    nonstandard locations of libslang.a and libz.a.  Setting the option
-    --bindir tells the configure script where I want to install the lynx
-    binary; setting --mandir tells it where to put the lynx.1 man page, and
-    setting --libdir tells it (while at the same time defining LYNX_CFG_FILE)
-    where to put the configuration file "lynx.cfg", when I type "make install".
-    The --with-screen=slang and --with-zlib options are explained above.
+    defines the full path to the slang and zlib header files, which are not
+    kept in standard directories.  Likewise, LIBS defines the nonstandard
+    locations of libslang.a and libz.a.  Setting the option --bindir tells
+    the configure script where I want to install the lynx binary; setting
+    --mandir tells it where to put the lynx.1 man page, and setting --libdir
+    tells it (while at the same time defining LYNX_CFG_FILE) where to put the
+    configuration file "lynx.cfg", when I type "make install".  The
+    --with-screen=slang and --with-zlib options are explained above.
 
 2. Manual compile
     If auto-configure does not work for you, or you prefer to compile
@@ -563,7 +560,7 @@ V. Compile instructions -- 386 DOS
     In addition to the files in the Lynx distribution, you will need a
     curses package and a TCP package.  You can use PDCurses (available at
     "http://www.lightlink.com/hessling/") and the DJGPP port of WATTCP
-    (available in two different versions at "ftp://neonatal.sm.ic.ac.uk/"
+    (available in two different versions at "ftp://neonatal.sm.med.ic.ac.uk/"
     and in "http://www.fdisk.com/doslynx/wlynx/source/djgpp.zip"). You
     can also use slang ("ftp://space.mit.edu/pub/davis/slang") as your
     curses library. You need to compile these before you go any further.
@@ -697,8 +694,7 @@ VI. General installation instructions
     need to do is type "make install-help."  If you are installing manually,
     copy the files "COPYHEADER" and "COPYING" into the lynx_help directory
     BEFORE moving the lynx_help tree to its final location.  These files are
-    referenced hypertextually from help documents.  Find tips for installing
-    the help files at "http://www.irm.nara.kindai.ac.jp/lynxdev/README.help".
+    referenced hypertextually from help documents.
 
     If you have old, pre-existing bookmark files from earlier versions of
     Lynx, those files may have to be updated.  Conversion may just consist

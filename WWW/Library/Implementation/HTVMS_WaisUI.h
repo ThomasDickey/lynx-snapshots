@@ -315,7 +315,7 @@ char* readString PARAMS((char** s,char* buffer));
 bit_map* makeBitMap (unsigned long numBits,...);
 
 void freeBitMap PARAMS((bit_map* bm));
-boolean bitAtPos PARAMS((long pos,bit_map* bm));
+boolean bitAtPos PARAMS((unsigned long pos,bit_map* bm));
 char* writeBitMap PARAMS((bit_map* bm,data_tag tag,char* buffer,long* len));
 char* readBitMap PARAMS((bit_map** bm,char* buffer));
 

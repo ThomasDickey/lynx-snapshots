@@ -495,7 +495,7 @@ PRIVATE void HTDisplayPartial NOARGS
 	**  Otherwise HTMainText holds info from the previous document
 	**  and we may repaint it instead of the new one:
 	**  prev doc scrolled to the first line (=Newline_partial)
-	**  is not good looking :-)       23 Aug 1998 Leonid Pauzner
+	**  is not good looking :-)	  23 Aug 1998 Leonid Pauzner
 	**
 	**  So repaint the page only when necessary:
 	*/
@@ -503,16 +503,13 @@ PRIVATE void HTDisplayPartial NOARGS
 		/* new hypertext document available  */
 	&& ((Newline_partial + display_lines) > NumOfLines_partial)
 		/* current page not complete... */
-	&& ((Newline_partial +
-		((min_lines_partial < 1) ?
-		display_lines : min_lines_partial))
-		< HText_getNumOfLines())) {
-		/*
-		 * and we MAY display certain amount of lines (from lynx.cfg)
-		 * 
-		 * By default, wait for complete screen:
-		 * incremental rendering of the first screen reported annoying
-		 * on slow network connection.
+	&& (partial_threshold > 0 ? ((Newline_partial + partial_threshold)  < HText_getNumOfLines()) : 
+		 ((Newline_partial + display_lines) < HText_getNumOfLines()))) { 
+		/* 
+		 * Originally we rendered by increments of 2 lines, 
+		 * but that got annoying on slow network connections. 
+		 * Then we switched to full-pages.  Now it's configurable. 
+		 * If partial_threshold < 0, then it's a full page 
 		 */
 	    NumOfLines_partial = HText_getNumOfLines();
 	    HText_pageDisplay(Newline_partial, "");

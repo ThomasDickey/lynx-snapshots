@@ -1,14 +1,44 @@
 Changes since Lynx 2.8 release
 ================================================================================
 
+1998-09-29 (2.8.1pre.5)
+* force compile on VMS to use stdarg.h; it was ifdef'd for __STDC__ which
+  VAX C does not define, though it does support stdarg.h (reported by Tony
+  Bolton).  Test-compile HTVMS_WaisUI.c on Linux to check... - TD
+* update url for tcplib in INSTALLATION - DK
+* fix HTDOS_name trace massage - LP 
+* expand "~" in include-statements in lynx.cfg (reported by LP) - TD
+* remove some obsolete stuff from INSTALLATION - HN
+* DOSPATH fix: user input URL like c:/path/file.ext (begins with drive letter)
+  now resolved as local path and will not be passed to DNS search in any case
+  (was running URL guessing process for host "c:" if file.ext not found...)
+  fix LYFillLocalFileURL() - LP
+* fix HTUserMsg2 trace massage - LP
+* add user's guide documentation for COOKIE_ACCEPT_DOMAINS and
+  COOKIE_REJECT_DOMAINS - BJP
+* change default Unix cookie-file name to "~/.lynx_cookies" - BJP
+* customize incremental rendering:
+  - add -partial_thres[=NUMBER] option to set the number of lines
+  - add PARTIAL_THRES config variable in lynx.cfg to set the number of lines
+  - add partial_thres variable in .lynxrc to set the number of lines.
+    Selecting save to disk and hitting Accept Changes in options menu will save
+    this variable to the current value.  Haven't looked into making a form
+    entry for this yet.  With -partial_thres command line option, probably not
+    necessary (patch by Eric <erbrun@bellatlantic.net>).
+* fix some text in lynx.man and Lynx_user_guide.html.  The man change includes
+  changes to "h" and "k" so they work whether or not vi keys are on - DK
+* workaround for inconsistency between slang ports to DOS and other platforms
+  by suppressing test of SLtt_Use_Ansi_Colors.  This fixes a problem where
+  colors change in the slang DOS port when the forms_based option menu is
+  accepted - DK
 1998-09-28 (2.8.1pre.4)
 * tentative fix for HPUX sed problems (reported by jones.peter@uqam.ca) - TD
 * update lynx.man and lynx.hlp to reflect new command-line options - TD
-* add PARTIAL_MIN_LINES switch in lynx.cfg to customize incremental rendering 
-  with smaller chunks (requested by Eric <erbrun@bellatlantic.net>) - LP 
-* minor documentation fix - LP 
+* add PARTIAL_MIN_LINES switch in lynx.cfg to customize incremental rendering
+  with smaller chunks (requested by Eric <erbrun@bellatlantic.net>) - LP
+* minor documentation fix - LP
 * miscellaneous fixes for build on VMS (reported by Tony Bolton) - TD
-* tweak 'const' assignment for VMS (in LYReadCFG.c and LYPrint.c) - LP 
+* tweak 'const' assignment for VMS (in LYReadCFG.c and LYPrint.c) - LP
 * clarify discussion of download in Lynx user's guide (Al Gilman).
 * trim trailing newline from lines read from cookie file so that Lynx does
   not send embedded newlines in the cookie list - BJP
