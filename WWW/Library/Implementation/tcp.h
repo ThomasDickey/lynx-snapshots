@@ -59,6 +59,7 @@ typedef struct sockaddr_in SockA;  /* See netinet/in.h */
 #include <sys/types.h>
 
 #if defined(__DJGPP__) || defined(__BORLANDC__)
+#undef HAVE_DIRENT_H
 #define HAVE_DIRENT_H
 #undef HAVE_SYS_FILIO_H
 #endif /* DJGPP or __BORLANDC__ */

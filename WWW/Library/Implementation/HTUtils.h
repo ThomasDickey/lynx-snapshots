@@ -19,6 +19,10 @@
 
 #else
 
+#ifdef DJGPP
+#include <sys/config.h>	/* pseudo-autoconf values for DJGPP libc/headers */
+#endif /* DJGPP */
+
 #include <stdio.h>
 
 #define DONT_TRACK_INTERNAL_LINKS 1
@@ -34,6 +38,7 @@
 
 #if defined(__STDC__) || defined(VMS)
 #define ANSI_VARARGS 1
+#undef HAVE_STDARG_H
 #define HAVE_STDARG_H 1
 #endif
 
@@ -75,6 +80,7 @@
 #endif
 
 #ifndef NO_UNISTD_H
+#undef  HAVE_UNISTD_H
 #define HAVE_UNISTD_H 1
 #endif
 

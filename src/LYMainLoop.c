@@ -166,6 +166,18 @@ PRIVATE BOOLEAN LYReopenTracelog ARGS1(BOOLEAN *, trace_flag_ptr)
     return TRUE;
 }
 
+PRIVATE void do_change_link ARGS1(
+	char *,		prev_target)
+{
+    /* Is there a mouse-clicked link waiting? */
+    int mouse_tmp = get_mouse_link();
+    /* If yes, use it as the link */
+    if (mouse_tmp != -1) {
+	highlight(OFF, curdoc.link, prev_target);
+	curdoc.link = mouse_tmp;
+    }
+}
+
 /*
  *  Here's where we do all the work.
  *  mainloop is basically just a big switch dependent on the users input.
@@ -2459,6 +2471,10 @@ new_cmd:  /*
 		old_c = real_c;
 		HTInfoMsg(ALREADY_AT_END);
 	    }
+	    break;
+
+	case LYK_CHANGE_LINK:
+	    do_change_link(prev_target);
 	    break;
 
 	case LYK_RIGHT_LINK:

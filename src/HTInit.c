@@ -471,6 +471,52 @@ PRIVATE void BuildCommand ARGS5(
     *to = '\0';
 }
 
+#define RTR_forget      0
+#define RTR_lookup      1
+#define RTR_add         2
+
+PRIVATE int RememberTestResult ARGS3(
+	int,		mode,
+	char *,		cmd,
+	int,		result)
+{
+    struct cmdlist_s {
+	char *cmd;
+	int result;
+	struct cmdlist_s *next;
+    };
+    static struct cmdlist_s *cmdlist = NULL;
+    struct cmdlist_s *cur;
+
+    switch(mode) {
+	case RTR_forget:
+	    while(cmdlist) {
+		cur = cmdlist->next;
+		FREE(cmdlist->cmd);
+		FREE(cmdlist);
+		cmdlist = cur;
+	    }
+	    break;
+	case RTR_lookup:
+	    for(cur = cmdlist; cur; cur = cur->next)
+		if(!strcmp(cmd, cur->cmd))
+		    return cur->result;
+	    return -1;
+	case RTR_add:
+	    cur = calloc(1, sizeof(struct cmdlist_s));
+	    cur->next = cmdlist;
+	    cur->cmd = (char *)malloc(strlen(cmd) + 1);
+	    if(cur->cmd)
+		strcpy(cur->cmd, cmd);
+	    else
+		ExitWithError("Out of memory");
+	    cur->result = result;
+	    cmdlist = cur;
+	    break;
+    }
+    return 0;
+}
+
 PRIVATE int PassesTest ARGS1(
 	struct MailcapEntry *,	mc)
 {
@@ -528,28 +574,32 @@ PRIVATE int PassesTest ARGS1(
 	return(-1 == 0);
     }
 
-    /*
-     *  Build the command and execute it.
-     */
-    if (strchr(mc->testcommand, '%')) {
-	if (LYOpenTemp(TmpFileName, HTML_SUFFIX, "w") == 0)
-	    ExitWithError(CANNOT_OPEN_TEMP);
-	LYCloseTemp(TmpFileName);
-    } else {
-	/* We normally don't need a temp file name - kw */
-	TmpFileName[0] = '\0';
+    result = RememberTestResult(RTR_lookup, mc->testcommand, 0);
+    if(result == -1) {
+	/*
+	 *  Build the command and execute it.
+	 */
+	if (strchr(mc->testcommand, '%')) {
+	    if (LYOpenTemp(TmpFileName, HTML_SUFFIX, "w") == 0)
+		ExitWithError(CANNOT_OPEN_TEMP);
+	    LYCloseTemp(TmpFileName);
+	} else {
+	    /* We normally don't need a temp file name - kw */
+	    TmpFileName[0] = '\0';
+	}
+	cmd = (char *)malloc(1024);
+	if (!cmd)
+	    ExitWithError(MEMORY_EXHAUSTED_ABORT);
+	BuildCommand(&cmd, 1024,
+		     mc->testcommand,
+		     TmpFileName,
+		     strlen(TmpFileName));
+	CTRACE(tfp, "PassesTest: Executing test command: %s\n", cmd);
+	result = LYSystem(cmd);
+	FREE(cmd);
+	LYRemoveTemp(TmpFileName);
+	RememberTestResult(RTR_add, mc->testcommand, result ? 1 : 0);
     }
-    cmd = (char *)malloc(1024);
-    if (!cmd)
-	ExitWithError(MEMORY_EXHAUSTED_ABORT);
-    BuildCommand(&cmd, 1024,
-		 mc->testcommand,
-		 TmpFileName,
-		 strlen(TmpFileName));
-    CTRACE(tfp, "PassesTest: Executing test command: %s\n", cmd);
-    result = LYSystem(cmd);
-    FREE(cmd);
-    LYRemoveTemp(TmpFileName);
 
     /*
      *  Free the test command as well since
@@ -584,6 +634,7 @@ PRIVATE int ProcessMailcapFile ARGS1(
 	ProcessMailcapEntry(fp, &mc);
     }
     fclose(fp);
+    RememberTestResult(RTR_forget, NULL, 0);
     return(0 == 0);
 }
 

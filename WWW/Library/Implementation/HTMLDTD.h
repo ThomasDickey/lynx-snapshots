@@ -871,10 +871,11 @@ Attribute numbers
 #define HTML_TABLE_NOWRAP      14
 #define HTML_TABLE_RULES       15
 #define HTML_TABLE_STYLE       16
-#define HTML_TABLE_TITLE       17
-#define HTML_TABLE_UNITS       18
-#define HTML_TABLE_WIDTH       19
-#define HTML_TABLE_ATTRIBUTES  20
+#define HTML_TABLE_SUMMARY     17
+#define HTML_TABLE_TITLE       18
+#define HTML_TABLE_UNITS       19
+#define HTML_TABLE_WIDTH       20
+#define HTML_TABLE_ATTRIBUTES  21
 
 #define HTML_TD_ALIGN           0
 #define HTML_TD_AXES            1

@@ -11,6 +11,7 @@ CFLAGS = -O3 -DUSE_ZLIB -DDOSPATH -DNOUSERS -DDEBUG -DDISP_PARTIAL \
 -I../Implementation \
 -I../../../djgpp/tcplib/include \
 -I../../../djgpp/tcplib/include/tcp \
+-I../../../curses \
 -I../../../src \
 -I../../..
 LFLAGS =

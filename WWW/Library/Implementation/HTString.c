@@ -695,7 +695,7 @@ PRIVATE CONST char *HTAfterCommandArg ARGS2(
  * quote it properly).  We're given the index of the newest parameter we're
  * processing.  Zero indicates none, so a value of '1' indicates that we copy
  * from the beginning of the command string up to the first parameter,
- * substitute the quoted parameter and return the resul.
+ * substitute the quoted parameter and return the result.
  *
  * Parameters are substituted at "%s" tokens, like printf.  Other printf-style
  * tokens are not substituted; they are passed through without change.

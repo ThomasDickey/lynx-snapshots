@@ -33,13 +33,6 @@ PRIVATE int boolean_choice PARAMS((
 	int		line,
 	int		column,
 	char ** 	choices));
-PRIVATE int popup_choice PARAMS((
-	int		cur_choice,
-	int		line,
-	int		column,
-	char ** 	choices,
-	int		i_length,
-	int		disabled));
 
 #define MAXCHOICES 10
 
@@ -2217,7 +2210,7 @@ PRIVATE int get_popup_choice_number ARGS1(
  *  option via a popup window which functions like
  *  that for selection of options in a form. - FM
  */
-PRIVATE int popup_choice ARGS6(
+PUBLIC int popup_choice ARGS6(
 	int,		cur_choice,
 	int,		line,
 	int,		column,

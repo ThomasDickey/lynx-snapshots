@@ -1102,6 +1102,18 @@ PUBLIC int HTDoRead ARGS3(
     int nb;
 #endif /* UCX, BSN */
 
+#ifdef UNIX
+    if (fildes == 0) {
+	/*
+	 *  0 can be a valid socket fd, but if it's a tty something must
+	 *  have gone wrong. - kw
+	 */
+	if (isatty(fildes)) {
+	    CTRACE(tfp, "HTDoRead - refusing to read fd 0 which is a tty!\n");
+	    return -1;
+	}
+    } else
+#endif
     if (fildes <= 0)
 	return -1;
 

@@ -11,7 +11,6 @@
 **   Being Overidden
 **
 */
-#define DICKEY_TEST
 
 #include <HTUtils.h>
 
@@ -5217,10 +5216,7 @@ PRIVATE void HTML_start_element ARGS6(
 
     } /* end switch */
 
-#if defined(DICKEY_TEST)
-    if (HTML_dtd.tags[ElementNumber].contents != SGML_EMPTY)
-#endif
-    {
+    if (HTML_dtd.tags[ElementNumber].contents != SGML_EMPTY) {
 	if (me->skip_stack > 0) {
 	    CTRACE(tfp, "HTML:begin_element: internal call (level %d), leaving on stack - %s\n",
 			me->skip_stack, me->sp->style->name);
@@ -5250,9 +5246,12 @@ PRIVATE void HTML_start_element ARGS6(
 	me->sp[0].tag_number = ElementNumber;
     }
 
-#if defined(DICKEY_TEST) && defined(USE_COLOR_STYLE)
-/* end empty tags straight away */
-	if (HTML_dtd.tags[ElementNumber].contents == SGML_EMPTY)
+#if defined(USE_COLOR_STYLE)
+/* end really empty tags straight away */
+#define REALLY_EMPTY(e) ((HTML_dtd.tags[e].contents == SGML_EMPTY) && \
+			 !(HTML_dtd.tags[e].flags & Tgf_nreie))
+
+	if (REALLY_EMPTY(element_number))
 	{
 		CTRACE(tfp, "STYLE:begin_element:ending EMPTY element style\n");
 #if !defined(USE_HASH)
@@ -6651,9 +6650,7 @@ End_Object:
 	CTRACE(tfp, "CSS:%s (trimmed %s, END_ELEMENT)\n", Style_className, tmp);
     }
 
-#if defined(DICKEY_TEST)
-    if (HTML_dtd.tags[element_number].contents != SGML_EMPTY)
-#endif
+    if (!REALLY_EMPTY(element_number))
     {
 	CTRACE(tfp, "STYLE:end_element: ending non-EMPTY style\n");
 #if !defined(USE_HASH)

@@ -50,7 +50,7 @@ PRIVATE int remote_session ARGS2(char *, acc_method, char *, host)
 	char * cp;
 	char * hostname;
 	char * port;
-	char * command;
+	char * command = NULL;
 	enum _login_protocol { telnet, rlogin, tn3270 } login_protocol =
 		strcmp(acc_method, "rlogin") == 0 ? rlogin :
 		strcmp(acc_method, "tn3270") == 0 ? tn3270 : telnet;
@@ -140,7 +140,7 @@ PRIVATE int remote_session ARGS2(char *, acc_method, char *, host)
 #define FMT_TELNET "%s%s%s %s %s"
 
 	HTAddParam(&command, FMT_TELNET, 1, TELNET_COMMAND);
-	HTAddParam(&command, FMT_TELNET, 2, user ? " -l " : "");
+	HTOptParam(&command, FMT_TELNET, 2, user ? " -l " : "");
 	HTAddParam(&command, FMT_TELNET, 3, user);
 	HTAddParam(&command, FMT_TELNET, 4, hostname);
 	HTAddParam(&command, FMT_TELNET, 5, port);
@@ -163,7 +163,7 @@ PRIVATE int remote_session ARGS2(char *, acc_method, char *, host)
 
 	    HTAddParam(&command, FMT_RLOGIN, 1, RLOGIN_COMMAND);
 	    HTAddParam(&command, FMT_RLOGIN, 2, hostname);
-	    HTAddParam(&command, FMT_RLOGIN, 3, user ? " -l " : "");
+	    HTOptParam(&command, FMT_RLOGIN, 3, user ? " -l " : "");
 	    HTAddParam(&command, FMT_RLOGIN, 4, user);
 	    HTEndParam(&command, FMT_RLOGIN, 4);
 

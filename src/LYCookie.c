@@ -16,7 +16,20 @@
 **   ftp://ds.internic.net/internet-drafts/draft-ietf-http-state-man-mec-03.txt
 **		- FM					1997-08-02
 **
+**	Partially checked against:
+**   http://www.ietf.org/internet-drafts/draft-ietf-http-state-man-mec-10.txt
+**		- kw					1998-12-11
+**
 **  TO DO: (roughly in order of decreasing priority)
+      * Persistent cookies are still experimental.  Presently cookies
+	lose many pieces of information that distinguish
+	version 1 from version 0 cookies.  There is no easy way around
+	that with the current cookie file format.  Ports are currently
+	not stored persistently at all which is clearly wrong.
+      * We currently don't do anything special for unverifiable
+	transactions to third-party hosts.
+      * We currently don't use effective host names or check for
+	Domain=.local.
       * Hex escaping isn't considered at all.  Any semi-colons, commas,
 	or spaces actually in cookie names or values (i.e., not serving
 	as punctuation for the overall Set-Cookie value) should be hex
@@ -92,7 +105,6 @@ struct _cookie {
     int flags;	   /* Various flags */
     time_t expires;/* The time when this cookie expires */
     BOOL quoted;   /* Was a value quoted in the Set-Cookie header? */
-    BOOL from_file; /* Was this cookie loaded from the file jar? - RP */
 };
 typedef struct _cookie cookie;
 
@@ -101,7 +113,7 @@ typedef struct _cookie cookie;
 #define COOKIE_FLAG_EXPIRES_SET 4  /* If set, an expiry date was set */
 #define COOKIE_FLAG_DOMAIN_SET 8   /* If set, an non-default domain was set */
 #define COOKIE_FLAG_PATH_SET 16    /* If set, an non-default path was set */
-#define COOKIE_FLAG_PERSISTENT 32  /* If set, this cookie was persistent */
+#define COOKIE_FLAG_FROM_FILE 32  /* If set, this cookie was persistent */
 
 struct _HTStream
 {
@@ -177,6 +189,7 @@ PRIVATE void LYCookieJar_free NOARGS
 	    FREE(de->domain);
 	    HTList_delete(de->cookie_list);
 	    de->cookie_list = NULL;
+	    FREE(dl->object);
 	}
 	dl = dl->next;
     }
@@ -203,9 +216,9 @@ PRIVATE BOOLEAN host_matches ARGS2(
 
     /*
      *	The following will pass a "dotted tail" match to "a.b.c.e"
-     *	as described in Section 2 of the -05 draft.
+     *	as described in Section 2 of draft-ietf-http-state-man-mec-10.txt.
      */
-    if (*B == '.') {
+    if (*B == '.' && B[1] != '\0' && B[1] != '.' && *A != '.') {
 	int diff = (strlen(A) - strlen(B));
 	if (diff > 0) {
 	    if (!strcmp((A + diff), B))
@@ -385,7 +398,7 @@ PRIVATE void store_cookie ARGS3(
 	de = (domain_entry *)calloc(1, sizeof(domain_entry));
 	if (de == NULL)
 	    outofmem(__FILE__, "store_cookie");
-#ifdef EXP_PERSISTENT_COOKIES
+#if 0	/* was: ifdef EXP_PERSISTENT_COOKIES */
 	/*
 	 * Ok, this is a problem.  The first cookie for a domain
 	 * effectively sets the policy for that whole domain - for
@@ -396,7 +409,7 @@ PRIVATE void store_cookie ARGS3(
 	 * and the path in conjunction makes more sense?  - RP
 	 */
 	if (persistent_cookies
-	 && (co->flags & COOKIE_FLAG_PERSISTENT))
+	 && (co->flags & COOKIE_FLAG_FROM_FILE))
 	    de->bv = FROM_FILE;
 	else
 #endif
@@ -419,7 +432,7 @@ PRIVATE void store_cookie ARGS3(
 	 */
 	if ((c2 != NULL) &&
 	    (c2->flags & COOKIE_FLAG_EXPIRES_SET) &&
-	    c2->expires < now) {
+	    c2->expires <= now) {
 	    HTList_removeObject(cookie_list, c2);
 	    freeCookie(c2);
 	    c2 = NULL;
@@ -438,7 +451,23 @@ PRIVATE void store_cookie ARGS3(
 	    total_cookies--;
 	    Replacement = TRUE;
 
-	} else if ((c2) && (c2->pathlen) > (co->pathlen)) {
+	} else if ((c2) && (c2->pathlen) >= (co->pathlen)) {
+	    /*
+	     *  This comparison determines the (tentative) position
+	     *  of the new cookie in the list such that it comes
+	     *  before existing cookies with a less specific path,
+	     *  but after existing cookies of equal (or greater)
+	     *  path length.  Thus it should normally preserve
+	     *  the order of new cookies with the same path as
+	     *  they are received, although this is not required.
+	     *  From RFC 2109 4.3.4:
+
+   If multiple cookies satisfy the criteria above, they are ordered in
+   the Cookie header such that those with more specific Path
+   attributes precede those with less specific.  Ordering with respect
+   to other attributes (e.g., Domain) is unspecified.
+
+	     */
 	    pos++;
 	}
 	hl = next;
@@ -447,7 +476,7 @@ PRIVATE void store_cookie ARGS3(
     /*
      *	Don't bother to add the cookie if it's already expired.
      */
-    if ((co->flags & COOKIE_FLAG_EXPIRES_SET) && co->expires < now) {
+    if ((co->flags & COOKIE_FLAG_EXPIRES_SET) && co->expires <= now) {
 	freeCookie(co);
 	co = NULL;
 
@@ -487,26 +516,21 @@ PRIVATE void store_cookie ARGS3(
     /*
      *	Get confirmation if we need it, and add cookie
      *	if confirmed or 'allow' is set to always. - FM
+     *
+     *  Cookies read from file are accepted without confirmation
+     *  prompting.  (Prompting may actually not be possible if
+     *  LYLoadCookies is called before curses is setup.)  Maybe
+     *  this should instead depend on LYSetCookies and/or
+     *  LYCookieAcceptDomains and/or LYCookieRejectDomains and/or
+     *  LYAcceptAllCookies and/or some other settings. -kw
      */
-    } else if (HTConfirmCookie(de, hostname, co->name, co->value)) {
-
-#ifdef EXP_PERSISTENT_COOKIES
+    } else if ((persistent_cookies && (co->flags & COOKIE_FLAG_FROM_FILE))
+	       || HTConfirmCookie(de, hostname, co->name, co->value)) {
 	/*
-	 * If the cookie domain came from persistent cookie file,
-	 * we want to add new cookies to the end of the cookie list
-	 * to maintain their order for servers that need cookies in
-	 * a particular order.  This is a hack.
+	 * Insert the new cookie so that more specific paths (longer
+	 * pathlen) come first in the list. - kw
 	 */
-	if (persistent_cookies) {
-	    if ((de->bv = FROM_FILE) != 0) {
-		HTList_appendObject(cookie_list, co);
-	    } else {
-		HTList_insertObjectAt(cookie_list, co, pos);
-	    }
-	}
-#else
 	HTList_insertObjectAt(cookie_list, co, pos);
-#endif /* EXP_PERSISTENT_COOKIES */
 	total_cookies++;
     } else {
 	freeCookie(co);
@@ -542,7 +566,7 @@ PRIVATE char * scan_cookie_sublist ARGS6(
 			    (long)hl,
 			    (co->name ? co->name : "(no name)"),
 			    (co->value ? co->value : "(no value)"));
-	    CTRACE(tfp, "%s %s %d %s %s %d%s\n",
+	    CTRACE(tfp, "\t%s %s %d %s %s %d%s\n",
 			    hostname,
 			    (co->domain ? co->domain : "(no domain)"),
 			    host_matches(hostname, co->domain),
@@ -555,7 +579,7 @@ PRIVATE char * scan_cookie_sublist ARGS6(
 	 *  Check if this cookie has expired, and if so, delete it.
 	 */
 	if (((co) && (co->flags & COOKIE_FLAG_EXPIRES_SET)) &&
-	    co->expires < now) {
+	    co->expires <= now) {
 	    HTList_removeObject(sublist, co);
 	    freeCookie(co);
 	    co = NULL;
@@ -708,6 +732,7 @@ PRIVATE void LYProcessSetCookies ARGS6(
     int NumCookies = 0;
     BOOL MaxAgeAttrSet = FALSE;
     BOOL Quoted = FALSE;
+    BOOLEAN invalidport = FALSE;
 
     if (!(SetCookie && *SetCookie) &&
 	!(SetCookie2 && *SetCookie2)) {
@@ -1052,7 +1077,10 @@ PRIVATE void LYProcessSetCookies ARGS6(
 			    *cp == ',' || *cp == ' ')) {
 			cp++;
 		    }
-		    if (*cp == '\0') {
+		    if (*cp == '\0' && !port_matches(port, value)) {
+			invalidport = TRUE;
+			known_attr = YES;
+		    } else if (*cp == '\0') {
 			StrAllocCopy(cur_cookie->PortList, value);
 			length += strlen(cur_cookie->PortList);
 			known_attr = YES;
@@ -1112,7 +1140,6 @@ PRIVATE void LYProcessSetCookies ARGS6(
 		known_attr = YES;
 		if ((cur_cookie != NULL && !MaxAgeAttrSet) &&
 		     !(cur_cookie->flags & COOKIE_FLAG_EXPIRES_SET)) {
-		    known_attr = YES;
 		    if (value) {
 			cur_cookie->flags |= COOKIE_FLAG_EXPIRES_SET;
 			cur_cookie->expires = LYmktime(value, FALSE);
@@ -1145,7 +1172,8 @@ PRIVATE void LYProcessSetCookies ARGS6(
 		 *  If we've started a cookie, and it's not too big,
 		 *  save it in the CombinedCookies list. - FM
 		 */
-		if (length <= max_cookies_buffer && cur_cookie != NULL) {
+		if (length <= max_cookies_buffer && cur_cookie != NULL &&
+		    !invalidport) {
 		    /*
 		     *	Assume version 1 if not set to that or higher. - FM
 		     */
@@ -1161,7 +1189,12 @@ PRIVATE void LYProcessSetCookies ARGS6(
 				(cur_cookie->value ?
 				 cur_cookie->value : "[no value]"));
 		    CTRACE(tfp,
-			   "                     due to excessive length!\n");
+			   invalidport ?
+			   "                     due to excessive length!\n"
+			 : "                     due to invalid port!\n");
+		    if (invalidport) {
+			NumCookies --;
+		    }
 		    freeCookie(cur_cookie);
 		    cur_cookie = NULL;
 		}
@@ -1169,6 +1202,7 @@ PRIVATE void LYProcessSetCookies ARGS6(
 		 *  Start a new cookie. - FM
 		 */
 		cur_cookie = newCookie();
+		invalidport = FALSE;
 		length = 0;
 		NumCookies++;
 		MemAllocCopy(&(cur_cookie->name), attr_start, attr_end);
@@ -1193,12 +1227,12 @@ PRIVATE void LYProcessSetCookies ARGS6(
      */
     if (NumCookies <= max_cookies_domain
      && length <= max_cookies_buffer
-     && cur_cookie != NULL) {
+     && cur_cookie != NULL && !invalidport) {
 	if (cur_cookie->version < 1) {
 	    cur_cookie->version = 1;
 	}
 	HTList_appendObject(CombinedCookies, cur_cookie);
-    } else if (cur_cookie != NULL) {
+    } else if (cur_cookie != NULL && !invalidport) {
 	CTRACE(tfp, "LYProcessSetCookies: Rejecting Set-Cookie2: %s=%s\n",
 		    (cur_cookie->name ? cur_cookie->name : "[no name]"),
 		    (cur_cookie->value ? cur_cookie->value : "[no value]"));
@@ -1209,6 +1243,14 @@ PRIVATE void LYProcessSetCookies ARGS6(
 			? " and "
 			: ""),
 		    (NumCookies > max_cookies_domain ? "number!\n" : "!\n"));
+	freeCookie(cur_cookie);
+	cur_cookie = NULL;
+    } else if (cur_cookie != NULL) {			/* invalidport */
+	CTRACE(tfp, "LYProcessSetCookies: Rejecting Set-Cookie2: %s=%s\n",
+		    (cur_cookie->name ? cur_cookie->name : "[no name]"),
+		    (cur_cookie->value ? cur_cookie->value : "[no value]"));
+	CTRACE(tfp, "                     due to invalid port!\n");
+	NumCookies --;
 	freeCookie(cur_cookie);
 	cur_cookie = NULL;
     }
@@ -1536,7 +1578,7 @@ PRIVATE void LYProcessSetCookies ARGS6(
 			    *cp == ',' || *cp == ' ')) {
 			cp++;
 		    }
-		    if (*cp == '\0') {
+		    if (*cp == '\0' && port_matches(port, value)) {
 			StrAllocCopy(cur_cookie->PortList, value);
 			length += strlen(cur_cookie->PortList);
 			known_attr = YES;
@@ -1559,7 +1601,7 @@ PRIVATE void LYProcessSetCookies ARGS6(
 		    /*
 		     *	Don't process a repeat version. - FM
 		     */
-		    cur_cookie->version < 0) {
+		    cur_cookie->version < 1) {
 		    int temp = strtol(value, NULL, 10);
 		    if (errno != -ERANGE) {
 			cur_cookie->version = temp;
@@ -1839,7 +1881,7 @@ PUBLIC char * LYCookie ARGS4(
 		HTList_delete(de->cookie_list);
 		de->cookie_list = NULL;
 		HTList_removeObject(domain_list, de);
-		de = NULL;
+		FREE(de);
 	    }
 	}
 	hl = next;
@@ -1847,21 +1889,12 @@ PUBLIC char * LYCookie ARGS4(
     if (header)
 	return(header);
 
-    /*
-     *	If we didn't set a header, perhaps all the cookies have
-     *	expired and we deleted the last of them above, so check
-     *	if we should delete and NULL the domain_list. - FM
-     */
-    if (domain_list) {
-	if (HTList_isEmpty(domain_list)) {
-	    HTList_delete(domain_list);
-	    domain_list = NULL;
-	}
-    }
     return(NULL);
 }
 
 #ifdef EXP_PERSISTENT_COOKIES
+PRIVATE int number_of_file_cookies = 0;
+
 /* rjp - experiment cookie loading */
 PUBLIC void LYLoadCookies ARGS1 (
 	char *,		cookie_file)
@@ -1891,6 +1924,7 @@ PUBLIC void LYLoadCookies ARGS1 (
 
     CTRACE(tfp, "LYLoadCookies: reading cookies from %s\n", cookie_file);
 
+    number_of_file_cookies = 0;
     while (!feof(cookie_handle)) {
 	cookie *moo;
 	unsigned i = 0;
@@ -1901,8 +1935,12 @@ PUBLIC void LYLoadCookies ARGS1 (
 	j = fgets(buf, sizeof(buf)-1, cookie_handle);
 
 	if((j == NULL) || (buf[0] == '\0' || buf[0] == '\n' || buf[0] == '#')) {
+	    if (j == NULL && ferror(cookie_handle))
+		break;
 	    continue;
 	}
+
+	number_of_file_cookies ++;
 
 	/*
 	 * Strip out the newline that fgets() puts at the end of a
@@ -1929,7 +1967,7 @@ PUBLIC void LYLoadCookies ARGS1 (
 	tok_out = LYstrsep(&tok_ptr, "\t");
 	for (tok_loop = 0; tok_out && tok_values[tok_loop].s; tok_loop++) {
 	    CTRACE(tfp, "\t%d:%p:%p:[%s]\n",
-	        tok_loop, tok_values[tok_loop].s, tok_out, tok_out);
+		tok_loop, tok_values[tok_loop].s, tok_out, tok_out);
 	    LYstrncpy(tok_values[tok_loop].s, tok_out, tok_values[tok_loop].n);
 	    /*
 	     * It looks like strtok ignores a leading delimiter,
@@ -1957,13 +1995,51 @@ PUBLIC void LYLoadCookies ARGS1 (
 	StrAllocCopy(moo->name, name);
 	StrAllocCopy(moo->value, value);
 	moo->pathlen = strlen(moo->path);
-	moo->flags |= COOKIE_FLAG_PERSISTENT;
+	/*
+	 *  Justification for following flags:
+	 *  COOKIE_FLAG_FROM_FILE    So we know were it comes from.
+	 *  COOKIE_FLAG_EXPIRES_SET  It must have had an explicit
+	 *			     expiration originally, otherwise
+	 *			     it would not be in the file.
+	 *  COOKIE_FLAG_DOMAN_SET,   We don't know whether these were
+	 *   COOKIE_FLAG_PATH_SET    explicit or implicit, but this
+	 *			     only matters for sending version 1
+	 *			     cookies; the cookies read from the
+	 *			     file are currently treated all like
+	 *			     version 0 (we don't set moo->version)
+	 *			     so $Domain= and $Path= will normally
+	 *			     not be sent to the server.  But if
+	 *			     these cookies somehow get mixed with
+	 *			     new version 1 cookies we may end up
+	 *			     sending version 1 to the server, and
+	 *			     in that case we should send $Domain
+	 *			     and $Path.  The state-man-mec drafts
+	 *			     and RFC 2109 say that $Domain and
+	 *			     $Path SHOULD be omitted if they were
+	 *			     not given explicitly, but not that
+	 *			     they MUST be omitted.
+	 *			     See 8.2 Cookie Spoofing in draft -10
+	 *			     for a good reason to send them.
+	 *			     However, an explicit domain should be
+	 *			     now prefixed with a dot (unless it is
+	 *			     for a single host), so we check for
+	 *			     that.
+	 *  COOKIE_FLAG_SECURE	     Should have "FALSE" for normal,
+	 *			     otherwise set it.
+	 */
+	moo->flags |= COOKIE_FLAG_FROM_FILE | COOKIE_FLAG_EXPIRES_SET |
+	    		COOKIE_FLAG_PATH_SET;
+	if (domain[0] == '.')
+	    moo->flags |= COOKIE_FLAG_DOMAIN_SET;
+	if (secure[0] != 'F')
+	    moo->flags |= COOKIE_FLAG_SECURE;
+	/* @@@ Should we set port to 443 if secure is set? @@@ */
 	moo->expires = expires;
 	/*
 	 * I don't like using this to store the cookies because it's
 	 * designed to store cookies that have been received from an
 	 * HTTP request, not from a persistent cookie jar.  Hence the
-	 * mucking about with the COOKIE_FLAG_PERSISTENT above. - RP
+	 * mucking about with the COOKIE_FLAG_FROM_FILE above. - RP
 	 */
 	store_cookie(moo, domain, path);
     }
@@ -1986,10 +2062,15 @@ PUBLIC void LYStoreCookies ARGS1 (
     /*
      *	Check whether we have something to do. - FM
      */
-    if (HTList_isEmpty(domain_list)) {
-	/* No cookies, so don't bother updating the file */
+    if (HTList_isEmpty(domain_list) &&
+	number_of_file_cookies == 0) {
+	/* No cookies now, and haven't read any,
+	 * so don't bother updating the file.
+	 */
 	return;
     }
+
+    CTRACE(tfp, "LYStoreCookies: save cookies to %s on exit\n", cookie_file);
 
     cookie_handle = LYNewTxtFile (cookie_file);
     for (dl = domain_list; dl != NULL; dl = dl->next) {
@@ -2011,7 +2092,7 @@ PUBLIC void LYStoreCookies ARGS1 (
 	case (QUERY_USER):
 	    HTSprintf0(&buf, COOKIES_ALLOWED_VIA_PROMPT);
 	    break;
-	case (FROM_FILE):
+	case (FROM_FILE):	/* not used any more - kw */
 	    HTSprintf0(&buf, gettext("(From Cookie Jar)"));
 	    break;
 	}
@@ -2028,12 +2109,26 @@ PUBLIC void LYStoreCookies ARGS1 (
 	    if ((co = (cookie *)cl->object) == NULL)
 		continue;
 
-	    CTRACE(tfp, "LYStoreCookies: %ld cf %ld\n", (long) now, (long) co->expires);
+	    CTRACE(tfp, "LYStoreCookies: %ld cf %ld ", (long) now, (long) co->expires);
+
+	    if ((co->flags & COOKIE_FLAG_DISCARD)) {
+		CTRACE(tfp, "not stored - DISCARD\n");
+		continue;
+	    } else if (!(co->flags & COOKIE_FLAG_EXPIRES_SET)) {
+		CTRACE(tfp, "not stored - no expiration time\n");
+		continue;
+	    } else if (co->expires <= now) {
+		CTRACE(tfp, "not stored - EXPIRED\n");
+		continue;
+	    }
+
 	    fprintf(cookie_handle, "%s\t%s\t%s\t%s\t%ld\t%s\t%s\n",
 		de->domain,
 		"FALSE", co->path,
 		co->flags & COOKIE_FLAG_SECURE ? "TRUE" : "FALSE",
 		(long) co->expires, co->name, co->value);
+
+	    CTRACE(tfp, "STORED\n");
 	}
     }
     fclose(cookie_handle);
@@ -2081,7 +2176,7 @@ PRIVATE int LYHandleCookies ARGS4 (
     /*
      *	Check whether we have something to do. - FM
      */
-    if (domain_list == NULL) {
+    if (HTList_isEmpty(domain_list)) {
 	HTProgress(COOKIE_JAR_IS_EMPTY);
 	sleep(MessageSecs);
 	return(HT_NO_DATA);
@@ -2120,6 +2215,7 @@ PRIVATE int LYHandleCookies ARGS4 (
 		 */
 		continue;
 	    if (!strcmp(domain, de->domain)) {
+		FREE(domain);
 		/*
 		 *  We found the domain.  Check
 		 *  whether a lynxID is present. - FM
@@ -2159,7 +2255,7 @@ PRIVATE int LYHandleCookies ARGS4 (
 				HTList_delete(de->cookie_list);
 				de->cookie_list = NULL;
 				HTList_removeObject(domain_list, de);
-				de = NULL;
+				FREE(de);
 				HTProgress(DOMAIN_EATEN);
 			    } else {
 				HTProgress(COOKIE_EATEN);
@@ -2194,7 +2290,7 @@ PRIVATE int LYHandleCookies ARGS4 (
 				 *  Set to accept all cookies
 				 *  from this domain. - FM
 				 */
-				de->bv = QUERY_USER;
+				de->bv = ACCEPT_ALWAYS;
 				HTUserMsg2(ALWAYS_ALLOWING_COOKIES,
 					      de->domain);
 				return(HT_NO_DATA);
@@ -2218,7 +2314,7 @@ PRIVATE int LYHandleCookies ARGS4 (
 				    HTList_delete(de->cookie_list);
 				    de->cookie_list = NULL;
 				    HTList_removeObject(domain_list, de);
-				    de = NULL;
+				    FREE(de);
 				    HTProgress(DOMAIN_EATEN);
 				    sleep(MessageSecs);
 				    break;
@@ -2258,7 +2354,7 @@ Delete_all_cookies_in_domain:
 				    HTList_delete(de->cookie_list);
 				    de->cookie_list = NULL;
 				    HTList_removeObject(domain_list, de);
-				    de = NULL;
+				    FREE(de);
 				    HTProgress(DOMAIN_EATEN);
 				    sleep(MessageSecs);
 				}
@@ -2298,14 +2394,14 @@ Delete_all_cookies_in_domain:
 	}
 	if (HTList_isEmpty(domain_list)) {
 	    /*
-	     *	There are no more domains left,
-	     *	so delete the domain_list. - FM
+	     *	There are no more domains left.
+	     *	Don't delete the domain_list, otherwise
+	     *  atexit may be called multiple times. - kw
 	     */
-	    HTList_delete(domain_list);
-	    domain_list = NULL;
 	    HTProgress(ALL_COOKIES_EATEN);
 	    sleep(MessageSecs);
 	}
+	FREE(domain);
 	return(HT_NO_DATA);
     }
 
@@ -2336,7 +2432,7 @@ Delete_all_cookies_in_domain:
     (*target->isa->put_block)(target, buf, strlen(buf));
     HTSprintf0(&buf, "<h1>%s (%s)%s<a href=\"%s%s\">%s</a></h1>\n",
 	LYNX_NAME, LYNX_VERSION,
-        HELP_ON_SEGMENT,
+	HELP_ON_SEGMENT,
 	helpfilepath, COOKIE_JAR_HELP, COOKIE_JAR_TITLE);
     (*target->isa->put_block)(target, buf, strlen(buf));
 
@@ -2372,7 +2468,9 @@ Delete_all_cookies_in_domain:
 		HTSprintf0(&buf, COOKIES_ALLOWED_VIA_PROMPT);
 		break;
 	    case (FROM_FILE):
+#if 0 /* not used any more - kw */
 		HTSprintf0(&buf, COOKIES_READ_FROM_FILE);
+#endif
 		break;
 	}
 	(*target->isa->put_block)(target, buf, strlen(buf));
@@ -2409,6 +2507,11 @@ Delete_all_cookies_in_domain:
 	    FREE(name);
 	    FREE(value);
 	    (*target->isa->put_block)(target, buf, strlen(buf));
+
+	    if (co->flags & COOKIE_FLAG_FROM_FILE) {
+		HTSprintf0(&buf, "%s\n", gettext("(from a previous session)"));
+		(*target->isa->put_block)(target, buf, strlen(buf));
+	    }
 
 	    /*
 	     *	Show the path, port, secure and discard setting. - FM
@@ -2467,12 +2570,10 @@ Delete_all_cookies_in_domain:
 	     */
 	    HTSprintf0(&buf, "<DD><EM>%s</EM> %s%s",
 	    		 gettext("Maximum Gobble Date:"),
-			 ((co->expires > 0 &&
-			   !(co->flags & COOKIE_FLAG_DISCARD))
+			 ((co->flags & COOKIE_FLAG_EXPIRES_SET)
 					    ?
 			ctime(&co->expires) : END_OF_SESSION),
-			 ((co->expires > 0 &&
-			   !(co->flags & COOKIE_FLAG_DISCARD))
+			 ((co->flags & COOKIE_FLAG_EXPIRES_SET)
 					    ?
 					 "" : "\n"));
 	    (*target->isa->put_block)(target, buf, strlen(buf));

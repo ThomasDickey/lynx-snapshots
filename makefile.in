@@ -16,6 +16,7 @@ CC		= @CC@
 CFLAGS		= @CFLAGS@
 DEFS		= @DEFS@
 CPPFLAGS	= @CPPFLAGS@
+LINT		= @LINT@
 
 LIBS		= @LIBS@
 
@@ -25,10 +26,10 @@ INSTALL_DATA	= @INSTALL_DATA@
 
 ## This is the version which we are developing (or, upon release, make this
 ## the same).  Use no dots in the name, since it must work on VMS and MS-DOS.
-VERSION		= 2-8-1
+VERSION		= 2-8-2
 
 ##this is the name of the directory the lynx source code is in.
-##(e.g., lynx2-8-1, not the full path) 
+##(e.g., lynx2-8-2, not the full path)
 lynxdir= lynx$(VERSION)
 lynxname= lynx$(VERSION)
 
@@ -189,6 +190,19 @@ all lynx$x: cfg_defs.h LYHelp.h
 		WWWINC=$(WWWINC) \
 		WWWLIB="../WWW/Library/unix/libwww.a"
 
+lint:
+	cd WWW/Library/unix && $(MAKE) LINT="$(LINT)" CC="$(CC)" \
+		LY_CFLAGS="$(CFLAGS)" \
+		CPPFLAGS="$(CPPFLAGS)" \
+		LYFLAGS="$(SITE_LYDEFS)" lint
+	cd src && $(MAKE) all LINT="$(LINT)" CC="$(CC)" \
+		CFLAGS="$(CFLAGS)" \
+		CPPFLAGS="$(CPPFLAGS)" \
+		LIBS="$(LIBS) $(RESOLVLIB) $(WAISLIB) $(SITE_LIBS)" \
+		SITE_DEFS="$(SITE_DEFS)" \
+		WWWINC=$(WWWINC) \
+		WWWLIB="../WWW/Library/unix/libwww.a" lint
+
 help:
 	@echo
 	@echo "Please run make with one of the following arguments"
@@ -208,7 +222,7 @@ clean:
 	@MSG_DIR_MAKE@rm -f LYMessages.c
 	@INTLDIR_MAKE@cd intl && $(MAKE) $@
 	@MSG_DIR_MAKE@cd po && $(MAKE) $@
-	rm -f *.b src/lynx$x core Lynx.leaks cfg_defs.h LYHelp.h
+	rm -f *.b src/lynx$x core Lynx.leaks cfg_defs.h LYHelp.h lint.*
 
 depend: cfg_defs.h LYHelp.h
 	cd WWW/Library/unix && $(MAKE) $@
@@ -316,7 +330,7 @@ install-help : $(helpdir)
 		fi ; \
 		)'
 	-rm -f $(helpdir)/help_files.sed
-	@echo Updating $(libdir)/lynx.cfg 
+	@echo Updating $(libdir)/lynx.cfg
 	$(SHELL) -c 'if test -f $(libdir)/lynx.cfg ; then \
 		mv $(libdir)/lynx.cfg $(libdir)/lynx.tmp ; \
 	else \

@@ -11,6 +11,7 @@
 #include <LYNews.h>
 #include <LYOptions.h>
 #include <LYCharSets.h>
+#include <HTAlert.h>
 #include <HTString.h>
 
 #ifdef DJGPP_KEYHANDLER
@@ -157,6 +158,24 @@ PUBLIC int fancy_mouse ARGS3(
     return cmd;
 }
 
+PRIVATE int XYdist ARGS5(
+    int,	x1,
+    int,	y1,
+    int,	x2,
+    int,	y2,
+    int,	dx2)
+{
+    int xerr = x2 - x1, yerr = y2 - y1;
+
+    if (xerr < 0)
+	xerr = x1 - x2 - dx2;
+    if (xerr < 0)
+	xerr = 0;
+    if (yerr < 0)
+	yerr = -yerr;
+    return xerr + yerr;
+}
+
 /* Given X and Y coordinates of a mouse event, set mouse_link to the
 ** index of the corresponding hyperlink, or set mouse_link to -1 if no
 ** link matches the event.  Returns -1 if no link matched the click,
@@ -164,7 +183,10 @@ PUBLIC int fancy_mouse ARGS3(
 ** link.
 **/
 
-PRIVATE int set_clicked_link ARGS3(int,x,int,y,int,code)
+PRIVATE int set_clicked_link ARGS3(
+    int,	x,
+    int,	y,
+    int,	code)
 {
     int left = 6;
     int right = LYcols-6;
@@ -183,6 +205,8 @@ PRIVATE int set_clicked_link ARGS3(int,x,int,y,int,code)
 	else if (x > right) c = '\b';
 	else c = PGUP;
     } else {
+	int mouse_err = -1, cur_err;
+
 	/* Loop over the links and see if we can get a match */
 	for (i = 0; i < nlinks; i++) {
 	    int len, lx = links[i].lx, is_text = 0;
@@ -199,26 +223,41 @@ PRIVATE int set_clicked_link ARGS3(int,x,int,y,int,code)
 		len = strlen(links[i].hightext );
 
 	    /* Check the first line of the link */
-	    if ( links[i].hightext != NULL &&
-		links[i].ly == y && (x - lx) < len && (x >= lx)) {
-		int cury, curx;
+	    if ( links[i].hightext != NULL) {
+		cur_err = XYdist(x, y, links[i].lx, links[i].ly, len);
+		if (cur_err == 0) {
+		    int cury, curx;
 
-		if (code != FOR_INPUT
-		    /* Do not pick up the current input field */
-		    || !(LYGetYX(cury,curx),
-			 (cury == y && (curx >= lx) && ((curx - lx) <= len)))) {
-		    if (is_text)
-			have_levent = 1;
+		    if (code != FOR_INPUT
+			/* Do not pick up the current input field */
+			|| !(LYGetYX(cury,curx),
+			     (cury == y && (curx >= lx) && ((curx - lx) <= len)))) {
+			if (is_text)
+			    have_levent = 1;
+			mouse_link = i;
+		    } else
+			mouse_link = -1;
+		    mouse_err = 0;
+		    break;
+		} else if (cur_err < mouse_err) {
+		    mouse_err = cur_err;
 		    mouse_link = i;
 		}
-		break;
 	    }
 	    /* Check the second line */
-	    if (links[i].hightext2 != NULL &&
-		1+links[i].ly == y &&
-		(x - links[i].hightext2_offset) < (int)strlen(links[i].hightext2) ) {
-		mouse_link = i;
-		break;
+	    if (links[i].hightext2 != NULL) {
+		cur_err = XYdist(x, y,
+				 links[i].hightext2_offset,
+				 links[i].ly+1,
+				 strlen(links[i].hightext2));
+		if (cur_err == 0) {
+		    mouse_link = i;
+		    mouse_err = 0;
+		    break;
+		} else if (cur_err < mouse_err) {
+		    mouse_err = cur_err;
+		    mouse_link = i;
+		}
 	    }
 	}
 	/*
@@ -226,8 +265,12 @@ PRIVATE int set_clicked_link ARGS3(int,x,int,y,int,code)
 	 * LYK_ACTIVATE We expect to find LYK_ACTIVATE (it's usually mapped to
 	 * the Enter key).
 	 */
-	if (mouse_link >= 0)
-	    c = lookup_keymap(LYK_ACTIVATE);
+	if (mouse_link >= 0) {
+	    if (mouse_err == 0)
+		c = lookup_keymap(LYK_ACTIVATE);
+	    else if (mouse_err >= 0)
+		c = lookup_keymap(LYK_CHANGE_LINK);
+	}
     }
     return c;
 }
@@ -911,6 +954,89 @@ PUBLIC int lynx_initialize_keymaps NOARGS
 
 #endif				       /* USE_KEYMAPS */
 
+#ifdef NCURSES_MOUSE_VERSION
+PRIVATE int LYmouse_menu ARGS3(int, x, int, y, int, atlink)
+{
+    char *choices[] = {
+	"Quit",
+	"Home page",
+	"Previous document",
+	"Beginning of document",
+	"Page up",
+	"Half page up",
+	"Two lines up",
+	"History",
+	"Help",
+	"Do nothing (refresh)",
+	"Load again",
+	"Edit URL and load",
+	"Show info",
+	"Search",
+	"Print",
+	"Two lines down",
+	"Half page down",
+	"Page down",
+	"End of document",
+	"Bookmarks",
+ 	"Cookie jar",
+	"Search index",
+	"Set Options",
+	NULL
+    };
+    char *choices_link[] = {
+	"Help",
+	"Do nothing",
+	"Activate this link",
+	"Show info",
+	"Download",
+	NULL
+    };
+    int actions[] = {
+	LYK_ABORT,
+	LYK_MAIN_MENU,
+	LYK_PREV_DOC,
+	LYK_HOME,
+	LYK_PREV_PAGE,
+	LYK_UP_HALF,
+	LYK_UP_TWO,
+	LYK_HISTORY,
+	LYK_HELP,
+	LYK_REFRESH,
+	LYK_RELOAD,
+	LYK_ECGOTO,
+	LYK_INFO,
+	LYK_WHEREIS,
+	LYK_PRINT,
+	LYK_DOWN_TWO,
+	LYK_DOWN_HALF,
+	LYK_NEXT_PAGE,
+	LYK_END,
+	LYK_VIEW_BOOKMARK,
+ 	LYK_COOKIE_JAR,
+	LYK_INDEX_SEARCH,
+	LYK_OPTIONS
+    };
+    int actions_link[] = {
+	LYK_HELP,
+	LYK_REFRESH,
+	LYK_ACTIVATE,
+	LYK_INFO,
+	LYK_DOWNLOAD
+    };
+    int c;
+
+    /* Somehow the mouse is over the number instead of being over the
+       name, so we decrease x. */
+    c = popup_choice((atlink ? 2 : 9) - 1, y, (x >= 5 ? x-5 : 0),
+		     (atlink ? choices_link : choices),
+		     (atlink
+		      ? (sizeof(actions_link)/sizeof(int))
+		      : (sizeof(actions)/sizeof(int))), FALSE);
+
+    return atlink ? (actions_link[c]) : (actions[c]);
+}
+#endif
+
 #if defined(USE_KEYMAPS) && defined(USE_SLANG)
 
 /* We cannot guarantee the type for 'GetChar', and should not use a cast. */
@@ -1274,6 +1400,23 @@ re_read:
 			c = LYReverseKeymap(LYK_MAIN_MENU);
 		} else if (event.bstate & BUTTON3_CLICKED) {
 		    c = LYReverseKeymap (LYK_PREV_DOC);
+		} else if (event.bstate & BUTTON2_CLICKED) {
+		    int atlink;
+
+		    c = set_clicked_link(event.x, event.y, code);
+		    atlink = c == LYReverseKeymap (LYK_ACTIVATE);
+		    if (!atlink)
+			mouse_link = -1; /* Forget about approx stuff. */
+
+		    c = LYmouse_menu(event.x, event.y, atlink);
+		    if (c == LYK_ACTIVATE && mouse_link == -1) {
+			HTAlert("No link chosen");
+			c = LYK_DO_NOTHING;
+			c = LYK_REFRESH; /* refresh() below does not work... */
+		    }
+		    c = LYReverseKeymap(c);
+		    lynx_force_repaint();
+		    refresh();
 		}
 		if (code == FOR_INPUT && mouse_link == -1) {
 		    ungetmouse(&event);	/* Caller will process this. */
@@ -1369,12 +1512,7 @@ re_read:
     }
 #endif /* USE_SLANG && __DJGPP__ && !DJGPP_KEYHANDLER && !USE_KEYMAPS */
 
-#if (defined(__DJGPP__) || defined(_WINDOWS))
-    if (c > 659)
-#else
-    if (c > DO_NOTHING)
-#endif /* __DJGPP__ || _WINDOWS */
-    {
+    if ((c+1) >= KEYMAP_SIZE) {
 	/*
 	 *  Don't return raw values for KEYPAD symbols which we may have
 	 *  missed in the switch above if they are obviously invalid when
@@ -2425,6 +2563,44 @@ PUBLIC char * SNACat ARGS3(
     return *dest;
 }
 
+#include <caselower.h>
+
+/*
+ * Returns lowercase equivalent for unicode,
+ * transparent output if no equivalent found.
+ */
+PRIVATE long UniToLowerCase ARGS1(long, upper)
+{
+    size_t i, high, low;
+    long diff = 0;
+
+    /*
+     *	Make check for sure.
+     */
+    if (upper <= 0)
+	return(upper);
+
+    /*
+     *	Try unicode_to_lower_case[].
+     */
+    low = 0;
+    high = sizeof(unicode_to_lower_case)/sizeof(unicode_to_lower_case[0]);
+    while (low < high) {
+	/*
+	**  Binary search.
+	*/
+	i = (low + (high-low)/2);
+	diff = (unicode_to_lower_case[i].upper - upper);
+	if (diff < 0)
+	    low = i+1;
+	if (diff > 0)
+	    high = i;
+	if (diff == 0)
+	    return (unicode_to_lower_case[i].lower);
+    }
+
+    return(upper); /* if we came here */
+}
 
 /*
 **   UPPER8 ?
@@ -2432,11 +2608,40 @@ PUBLIC char * SNACat ARGS3(
 **
 **   It was realized that case-insensitive user search
 **   got information about upper/lower mapping from TOUPPER
-**   (precisely from "(TOUPPER(a) - TOUPPER(b))==0").
-**   This function depends on locale in its 8bit mapping
-**   and usually fails with DOS/WINDOWS display charsets
+**   (precisely from "(TOUPPER(a) - TOUPPER(b))==0")
+**   and depends on locale in its 8bit mapping. -
+**   Usually fails with DOS/WINDOWS display charsets
 **   as well as on non-UNIX systems.
 **
+**   So use unicode case mapping.
+*/
+PUBLIC int UPPER8 ARGS2(int,ch1, int,ch2)
+{
+
+    /* case-insensitive match for us-ascii */
+    if ((unsigned char)TOASCII(ch1) < 128 && (unsigned char)TOASCII(ch2) < 128)
+	return(TOUPPER(ch1) - TOUPPER(ch2));
+
+    /* case-insensitive match for upper half */
+    if ((unsigned char)TOASCII(ch1) > 127 &&  /* S/390 -- gil -- 2066 */
+	(unsigned char)TOASCII(ch2) > 127)
+    {
+	if (DisplayCharsetMatchLocale)
+	   return(TOUPPER(ch1) - TOUPPER(ch2)); /* old-style */
+	else
+	{
+	long uni_ch1 = UCTransToUni(ch1, current_char_set);
+	long uni_ch2 = UCTransToUni(ch2, current_char_set);
+	return(UniToLowerCase(uni_ch1) - UniToLowerCase(uni_ch2));
+	}
+    }
+
+    return(-10);  /* mismatch, if we come to here */
+}
+
+
+#ifdef NOTUSED
+/*
 **   We extend this function for 8bit letters
 **   using Lynx internal chartrans feature:
 **   we assume that upper/lower case letters
@@ -2496,3 +2701,4 @@ PUBLIC int UPPER8 ARGS2(int,ch1, int,ch2)
 
     return(-10);  /* mismatch, if we come to here */
 }
+#endif /* NOTUSED */

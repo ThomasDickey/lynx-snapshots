@@ -79,4 +79,7 @@ extern int HTCountCommandArgs PARAMS((CONST char * command));
 extern void HTAddParam PARAMS((char ** result, CONST char * command, int number, CONST char * parameter));
 extern void HTEndParam PARAMS((char ** result, CONST char * command, int number));
 
+/* Force an option, with leading blanks, to be appended without quoting them */
+#define HTOptParam(result, command, number, parameter) HTSACat(result, parameter)
+
 #endif /* HTSTRING_H */

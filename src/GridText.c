@@ -1680,7 +1680,9 @@ PRIVATE void split_line ARGS2(
     int HeadTrim = 0;
     int SpecialAttrChars = 0;
     int TailTrim = 0;
+    int s;
 
+#define DEBUG_SPLITLINE
     /*
      *  Make new line.
      */
@@ -1700,15 +1702,248 @@ PRIVATE void split_line ARGS2(
     CTRACE(tfp,"   bold_on=%d, underline_on=%d\n", bold_on, underline_on);
 #endif
 
+    if (split > previous->size) {
+	CTRACE(tfp,
+	       "*** split_line: split==%d greater than last_line->size==%d !\n",
+	       split, previous->size);
+	if (split > MAX_LINE) {
+	    split = previous->size;
+	    if ((cp = strrchr(previous->data, ' ')) &&
+		cp - previous->data > 1)
+		split = cp - previous->data;
+	    CTRACE(tfp, "                split adjusted to %d.\n", split);
+	}
+    }
+
     text->Lines++;
 
     previous->next->prev = line;
     line->prev = previous;
     line->next = previous->next;
+    previous->next = line;
+    text->last_line = line;
+    line->size = 0;
+    line->offset = 0;
+    text->permissible_split = 0;  /* 12/13/93 */
+    line->data[0] = '\0';
+
+    /*
+     *  If we are not splitting and need an underline char, add it now. - FM
+     */
+    if ((split < 1) &&
+	!(dump_output_immediately && use_underscore) && underline_on) {
+	line->data[line->size++] = LY_UNDERLINE_START_CHAR;
+	line->data[line->size] = '\0';
+	ctrl_chars_on_this_line++;
+    }
+    /*
+     *  If we are not splitting and need a bold char, add it now. - FM
+     */
+    if ((split < 1) && bold_on) {
+	line->data[line->size++] = LY_BOLD_START_CHAR;
+	line->data[line->size] = '\0';
+	ctrl_chars_on_this_line++;
+    }
+
+    /*
+     *  Split at required point
+     */
+    if (split > 0) {	/* Delete space at "split" splitting line */
+	char *p, *prevdata = previous->data, *linedata = line->data;
+	unsigned plen;
+	int i;
+
+	/*
+	 *  Split the line. - FM
+	 */
+	prevdata[previous->size] = '\0';
+	previous->size = split;
+
+	/*
+	 *  Trim any spaces or soft hyphens from the beginning
+	 *  of our new line. - FM
+	 */
+	p = prevdata + split;
+	while ((*p == ' ' &&
+		(HeadTrim || text->first_anchor ||
+		 underline_on || bold_on ||
+		 text->style->alignment != HT_LEFT ||
+		 text->style->wordWrap || text->style->freeFormat ||
+		 text->style->spaceBefore || text->style->spaceAfter)) ||
+	       *p == LY_SOFT_HYPHEN) {
+	    p++;
+	    HeadTrim++;
+	}
+	plen = strlen(p);
+
+	/*
+	 *  Add underline char if needed. - FM
+	 */
+	if (!(dump_output_immediately && use_underscore)) {
+	    /*
+	     * Make sure our global flag is correct. - FM
+	     */
+	    underline_on = NO;
+	    for (i = (split-1); i >= 0; i--) {
+		if (prevdata[i] == LY_UNDERLINE_END_CHAR) {
+		    break;
+		}
+		if (prevdata[i] == LY_UNDERLINE_START_CHAR) {
+		    underline_on = YES;
+		    break;
+		}
+	    }
+	    /*
+	     *  Act on the global flag if set above. - FM
+	     */
+	    if (underline_on && *p != LY_UNDERLINE_END_CHAR) {
+		linedata[line->size++] = LY_UNDERLINE_START_CHAR;
+		linedata[line->size] = '\0';
+		ctrl_chars_on_this_line++;
+		SpecialAttrChars++;
+	    }
+	    if (plen) {
+		for (i = (plen - 1); i >= 0; i--) {
+		    if (p[i] == LY_UNDERLINE_START_CHAR) {
+			underline_on = YES;
+			break;
+		    }
+		    if (p[i] == LY_UNDERLINE_END_CHAR) {
+			underline_on = NO;
+			break;
+		    }
+		}
+		for (i = (plen - 1); i >= 0; i--) {
+		    if (p[i] == LY_UNDERLINE_START_CHAR ||
+			p[i] == LY_UNDERLINE_END_CHAR) {
+			ctrl_chars_on_this_line++;
+		    }
+		}
+	    }
+	}
+
+	/*
+	 *  Add bold char if needed, first making
+	 *  sure that our global flag is correct. - FM
+	 */
+	bold_on = NO;
+	for (i = (split - 1); i >= 0; i--) {
+	    if (prevdata[i] == LY_BOLD_END_CHAR) {
+		break;
+	    }
+	    if (prevdata[i] == LY_BOLD_START_CHAR) {
+		bold_on = YES;
+		break;
+	    }
+	}
+	/*
+	 *  Act on the global flag if set above. - FM
+	 */
+	if (bold_on && *p != LY_BOLD_END_CHAR) {
+	    linedata[line->size++] = LY_BOLD_START_CHAR;
+	    linedata[line->size] = '\0';
+	    ctrl_chars_on_this_line++;
+	    SpecialAttrChars++;;
+	}
+	if (plen) {
+	    for (i = (plen - 1); i >= 0; i--) {
+		if (p[i] == LY_BOLD_START_CHAR) {
+		    bold_on = YES;
+		    break;
+		}
+		if (p[i] == LY_BOLD_END_CHAR) {
+		    bold_on = NO;
+		    break;
+		}
+	    }
+	    for (i = (plen - 1); i >= 0; i--) {
+		if (p[i] == LY_BOLD_START_CHAR ||
+		    p[i] == LY_BOLD_END_CHAR ||
+		    IS_UTF_EXTRA(p[i]) ||
+		    p[i] == LY_SOFT_HYPHEN) {
+		    ctrl_chars_on_this_line++;
+		}
+		if (p[i] == LY_SOFT_HYPHEN && (int)text->permissible_split < i) {
+		    text->permissible_split = i + 1;
+		}
+	    }
+	}
+
+	/*
+	 *  Add the data to the new line. - FM
+	 */
+	strcat(linedata, p);
+	line->size += plen;
+    }
+
+    /*
+     *  Economize on space.
+     */
+    while ((previous->size > 0) &&
+	   (previous->data[previous->size-1] == ' ') &&
+	   (ctrl_chars_on_this_line || HeadTrim || text->first_anchor ||
+	    underline_on || bold_on ||
+	    text->style->alignment != HT_LEFT ||
+	    text->style->wordWrap || text->style->freeFormat ||
+	    text->style->spaceBefore || text->style->spaceAfter)) {
+	/*
+	 *  Strip trailers.
+	 */
+	previous->data[previous->size-1] = '\0';
+	previous->size--;
+	TailTrim++;
+    }
+    /*
+     *  s is the effective split position, given by either a non-zero
+     *  value of split or by the size of the previous line before
+     *  trimming. - kw
+     */
+    if (split == 0) {
+	s = previous->size + TailTrim; /* the original size */
+    } else {
+	s = split;
+    }
+#ifdef DEBUG_SPLITLINE
+#ifdef DEBUG_APPCH
+    if (s != (int)split)
+#endif
+	CTRACE(tfp,"GridText: split_line(%d [now:%d]) called\n", split, s);
+#endif
+
 #if defined(USE_COLOR_STYLE)
 #define LastStyle (previous->numstyles-1)
     line->numstyles = 0;
     inew = MAX_STYLES_ON_LINE - 1;
+    /*
+     *  Color style changes after the split position + possible trimmed
+     *  head characters are transferred to the new line.  Ditto for changes
+     *  within the trimming region, but be stop when we reach an OFF change.
+     *  The second while loop below may then handle remaining changes. - kw
+     */
+    while (previous->numstyles && inew >= 0) {
+	if (previous->styles[LastStyle].horizpos > s + HeadTrim) {
+	    line->styles[inew].horizpos =
+		previous->styles[LastStyle].horizpos
+		- (s + HeadTrim) + SpecialAttrChars;
+	    line->styles[inew].direction = previous->styles[LastStyle].direction;
+	    line->styles[inew].style = previous->styles[LastStyle].style;
+	    inew --;
+	    line->numstyles ++;
+	    previous->numstyles --;
+	} else if (previous->styles[LastStyle].horizpos > s - TailTrim &&
+		   (previous->styles[LastStyle].direction == STACK_ON ||
+		    previous->styles[LastStyle].direction == ABS_ON)) {
+	    line->styles[inew].horizpos =
+		(previous->styles[LastStyle].horizpos < s) ?
+		0 : SpecialAttrChars;
+	    line->styles[inew].direction = previous->styles[LastStyle].direction;
+	    line->styles[inew].style = previous->styles[LastStyle].style;
+	    inew --;
+	    line->numstyles ++;
+	    previous->numstyles --;
+	} else
+	    break;
+    }
     spare = previous->numstyles;
     while (previous->numstyles && inew >= 0) {
 	if (previous->numstyles >= 2 &&
@@ -1802,183 +2037,7 @@ PRIVATE void split_line ARGS2(
     if (previous->numstyles == 0)
 	previous->styles[0].horizpos = 0xffffffff;
 #endif /*USE_COLOR_STYLE*/
-    previous->next = line;
-    text->last_line = line;
-    line->size = 0;
-    line->offset = 0;
-    text->permissible_split = 0;  /* 12/13/93 */
-    line->data[0] = '\0';
 
-    /*
-     *  If we are not splitting and need an underline char, add it now. - FM
-     */
-    if ((split < 1) &&
-	!(dump_output_immediately && use_underscore) && underline_on) {
-	line->data[line->size++] = LY_UNDERLINE_START_CHAR;
-	line->data[line->size] = '\0';
-	ctrl_chars_on_this_line++;
-    }
-    /*
-     *  If we are not splitting and need a bold char, add it now. - FM
-     */
-    if ((split < 1) && bold_on) {
-	line->data[line->size++] = LY_BOLD_START_CHAR;
-	line->data[line->size] = '\0';
-	ctrl_chars_on_this_line++;
-    }
-
-    /*
-     *  Split at required point
-     */
-    if (split > 0) {	/* Delete space at "split" splitting line */
-	char *p, *prevdata = previous->data, *linedata = line->data;
-	unsigned plen;
-	int i;
-
-	/*
-	 *  Split the line. - FM
-	 */
-	prevdata[previous->size] = '\0';
-	previous->size = split;
-
-	/*
-	 *  Trim any spaces or soft hyphens from the beginning
-	 *  of our new line. - FM
-	 */
-	p = prevdata + split;
-	while ((*p == ' ' &&
-		(HeadTrim || text->first_anchor ||
-		 underline_on || bold_on ||
-		 text->style->alignment != HT_LEFT ||
-		 text->style->wordWrap || text->style->freeFormat ||
-		 text->style->spaceBefore || text->style->spaceAfter)) ||
-	       *p == LY_SOFT_HYPHEN) {
-	    p++;
-	    HeadTrim++;
-	}
-	plen = strlen(p);
-
-	/*
-	 *  Add underline char if needed. - FM
-	 */
-	if (!(dump_output_immediately && use_underscore)) {
-	    /*
-	     * Make sure our global flag is correct. - FM
-	     */
-	    underline_on = NO;
-	    if (split) {
-		for (i = (split-1); i >= 0; i--) {
-		    if (prevdata[i] == LY_UNDERLINE_END_CHAR) {
-			break;
-		    }
-		    if (prevdata[i] == LY_UNDERLINE_START_CHAR) {
-			underline_on = YES;
-			break;
-		    }
-		}
-	    }
-	    /*
-	     *  Act on the global flag if set above. - FM
-	     */
-	    if (underline_on && *p != LY_UNDERLINE_END_CHAR) {
-		linedata[line->size++] = LY_UNDERLINE_START_CHAR;
-		linedata[line->size] = '\0';
-		ctrl_chars_on_this_line++;
-		SpecialAttrChars++;
-	    }
-	    if (plen) {
-		for (i = (plen - 1); i >= 0; i--) {
-		    if (p[i] == LY_UNDERLINE_START_CHAR) {
-			underline_on = YES;
-			break;
-		    }
-		    if (p[i] == LY_UNDERLINE_END_CHAR) {
-			underline_on = NO;
-			break;
-		    }
-		}
-		for (i = (plen - 1); i >= 0; i--) {
-		    if (p[i] == LY_UNDERLINE_START_CHAR ||
-			p[i] == LY_UNDERLINE_END_CHAR) {
-			ctrl_chars_on_this_line++;
-		    }
-		}
-	    }
-	}
-
-	/*
-	 *  Add bold char if needed, first making
-	 *  sure that our global flag is correct. - FM
-	 */
-	bold_on = NO;
-	if (split) {
-	    for (i = (split - 1); i >= 0; i--) {
-		if (prevdata[i] == LY_BOLD_END_CHAR) {
-		    break;
-		}
-		if (prevdata[i] == LY_BOLD_START_CHAR) {
-		    bold_on = YES;
-		    break;
-		}
-	    }
-	}
-	/*
-	 *  Act on the global flag if set above. - FM
-	 */
-	if (bold_on && *p != LY_BOLD_END_CHAR) {
-	    linedata[line->size++] = LY_BOLD_START_CHAR;
-	    linedata[line->size] = '\0';
-	    ctrl_chars_on_this_line++;
-	    SpecialAttrChars++;;
-	}
-	if (plen) {
-	    for (i = (plen - 1); i >= 0; i--) {
-		if (p[i] == LY_BOLD_START_CHAR) {
-		    bold_on = YES;
-		    break;
-		}
-		if (p[i] == LY_BOLD_END_CHAR) {
-		    bold_on = NO;
-		    break;
-		}
-	    }
-	    for (i = (plen - 1); i >= 0; i--) {
-		if (p[i] == LY_BOLD_START_CHAR ||
-		    p[i] == LY_BOLD_END_CHAR ||
-		    IS_UTF_EXTRA(p[i]) ||
-		    p[i] == LY_SOFT_HYPHEN) {
-		    ctrl_chars_on_this_line++;
-		}
-		if (p[i] == LY_SOFT_HYPHEN && (int)text->permissible_split < i) {
-		    text->permissible_split = i + 1;
-		}
-	    }
-	}
-
-	/*
-	 *  Add the data to the new line. - FM
-	 */
-	strcat(linedata, p);
-	line->size += plen;
-    }
-
-    /*
-     *  Economize on space.
-     */
-    while ((previous->size > 0) &&
-	   (previous->data[previous->size-1] == ' ') &&
-	   (ctrl_chars_on_this_line || HeadTrim || text->first_anchor ||
-	    underline_on || bold_on ||
-	    text->style->alignment != HT_LEFT ||
-	    text->style->wordWrap || text->style->freeFormat ||
-	    text->style->spaceBefore || text->style->spaceAfter)) {
-	/*
-	 *  Strip trailers.
-	 */
-	previous->data[previous->size-1] = '\0';
-	previous->size--;
-	TailTrim++;
-    }
     temp = (HTLine *)LY_CALLOC(1, LINE_SIZE(previous->size));
     if (temp == NULL)
 	outofmem(__FILE__, "split_line_2");
@@ -2041,20 +2100,152 @@ PRIVATE void split_line ARGS2(
      *  If we split the line, adjust the anchor
      *  structure values for the new line. - FM
      */
-    if (split > 0) {
-	for (a = text->first_anchor; a; a = a->next) {
+
+    if (split > 0 || s > 0) {		/* if not completely empty */
+	TextAnchor * prev_a = NULL;
+	for (a = text->first_anchor; a; prev_a = a, a = a->next) {
 	    if (a->line_num == CurLine) {
-		if ((unsigned)a->line_pos >= split) {
-		    a->start += (1 + SpecialAttrChars - HeadTrim - TailTrim);
-		    a->line_pos -= (split - SpecialAttrChars + HeadTrim);
-		    a->line_num = text->Lines;
-		} else if ((a->link_type & HYPERTEXT_ANCHOR) &&
-			   (unsigned)(a->line_pos + a->extent) >= split) {
-		    a->extent -= (TailTrim + HeadTrim);
-		    if (a->extent < 0) {
-			a->extent = 0;
+		int old_e = a->extent;
+		int a0 = a->line_pos, a1 = a->line_pos + a->extent;
+		int S, d, new_pos, new_ext;
+		if (a->link_type == INPUT_ANCHOR) {
+		    if (a->line_pos >= s) {
+			a->start += (1 + SpecialAttrChars - HeadTrim - TailTrim);
+			a->line_pos -= (s - SpecialAttrChars + HeadTrim);
+			a->line_num = text->Lines;
 		    }
+		    continue;
 		}
+		if (a0 < s - TailTrim && a1 <= s - TailTrim) {
+		    continue;	/* unaffected, leave it where it is. */
+		}
+		S = s + a->start - a->line_pos;
+		d = S - s;	/* == a->start - a->line_pos */
+		new_ext = old_e = a->extent;
+
+		if (!old_e &&
+		    (!a->number || a->show_anchor) &&
+		    a0 <= s + HeadTrim) {
+#ifdef DEBUG_SPLITLINE
+		CTRACE(tfp, "anchor %d case %d: ",
+		       a->number,1);
+#endif
+		    /*
+		     *  It is meant to be empty, and/or endAnchor
+		     *  has seen it and recognized it as empty.
+		     */
+		    new_pos = (a0 <= s) ? s - TailTrim :
+			s - TailTrim + 1;
+		    if (prev_a && new_pos + d < prev_a->start) {
+			if (prev_a->start <= S - TailTrim + 1 + SpecialAttrChars)
+			    new_pos = prev_a->start - d;
+			else
+			    new_pos = s - TailTrim + 1 + SpecialAttrChars;
+		    }
+		} else if (old_e &&
+		     a0 >= s - TailTrim && a0 <= s + HeadTrim &&
+		     a1 <= s + HeadTrim) {
+#ifdef DEBUG_SPLITLINE
+		CTRACE(tfp, "anchor %d case %d: ",
+		       a->number,2);
+#endif
+		    /*
+		     *  endAnchor has seen it, it is effectively empty
+		     *  after our trimming, but endAnchor has for some
+		     *  reason not recognized this.  In other words,
+		     *  this should not happen.
+		     *  Should we not adjust the extent and let it "leak"
+		     *  into the new line?
+		     */
+		    new_pos = (a0 < s) ? s - TailTrim :
+			s - TailTrim + 1;
+		    if (prev_a && new_pos + d < prev_a->start) {
+			if (prev_a->start <= S - TailTrim + 1 + SpecialAttrChars)
+			    new_pos = prev_a->start - d;
+			else
+			    new_pos = s - TailTrim + 1 + SpecialAttrChars;
+		    }
+		    new_ext = 0;
+		} else if (a0 >= s + HeadTrim) {
+#ifdef DEBUG_SPLITLINE
+		CTRACE(tfp, "anchor %d case %d: ",
+		       a->number,3);
+#endif
+		    /*
+		     *  Completely after split, just shift.
+		     */
+		    new_pos = a0 - TailTrim + 1 - HeadTrim + SpecialAttrChars;
+		} else if (!old_e) {
+#ifdef DEBUG_SPLITLINE
+		CTRACE(tfp, "anchor %d case %d: ",
+		       a->number,4);
+#endif
+		    /*
+		     *  No extent set, we may still be growing it.
+		     */
+		    new_pos = s - TailTrim + 1 + SpecialAttrChars;
+
+		    /*
+		     *  Ok, it's neither empty, nor is it completely
+		     *  before or after the split region (including trimmed
+		     *  stuff).  So the anchor is either being split in
+		     *  the middle, with stuff remaining on both lines,
+		     *  or something is being nibbled off, either at
+		     *  the end (anchor stays on previous line) or at
+		     *  the beginning (anchor is on new line).  Let's
+		     *  try in that order.
+		     */
+		} else if (a0 < s - TailTrim &&
+			   a1 > s + HeadTrim) {
+#ifdef DEBUG_SPLITLINE
+		CTRACE(tfp, "anchor %d case %d: ",
+		       a->number,5);
+#endif
+		    new_pos = a0;
+		    new_ext = old_e - TailTrim - HeadTrim + SpecialAttrChars;
+		} else if (a0 < s - TailTrim) {
+#ifdef DEBUG_SPLITLINE
+		CTRACE(tfp, "anchor %d case %d: ",
+		       a->number,6);
+#endif
+		    new_pos = a0;
+		    new_ext = s - TailTrim - a0;
+		} else if (a1 > s + HeadTrim) {
+#ifdef DEBUG_SPLITLINE
+		CTRACE(tfp, "anchor %d case %d: ",
+		       a->number,7);
+#endif
+		    new_pos = s - TailTrim + 1 + SpecialAttrChars;
+		    new_ext = old_e - (s + HeadTrim - a0);
+		} else {
+		    CTRACE(tfp, "split_line anchor %d line %d: This should not happen!\n",
+			   a->number, a->line_num);
+		    CTRACE(tfp,
+			   "anchor %d: (T,H,S)=(%d,%d,%d); (line,start,pos,ext):(%d,%d,%d,%d)!\n",
+			   a->number,
+			   TailTrim,HeadTrim,SpecialAttrChars,
+			   a->line_num,a->start,a->line_pos,a->extent);
+		    continue;
+		}
+#ifdef DEBUG_SPLITLINE
+		CTRACE(tfp, "(T,H,S)=(%d,%d,%d); (line,start,pos,ext):(%d,%d,%d,%d",
+		       TailTrim,HeadTrim,SpecialAttrChars,
+		       a->line_num,a->start,a->line_pos,a->extent);
+#endif
+		if (new_pos != a->line_pos)
+		    a->start = new_pos + d;
+		if (new_pos > s - TailTrim) {
+		    new_pos -= s - TailTrim + 1;
+		    a->line_num = text->Lines;
+		}
+		a->line_pos = new_pos;
+		a->extent = new_ext;
+
+#ifdef DEBUG_SPLITLINE
+		CTRACE(tfp, ")->(%d,%d,%d,%d)\n",
+		       a->line_num,a->start,a->line_pos,a->extent);
+#endif
+
 	    }
 	}
     }
@@ -2177,6 +2368,7 @@ PUBLIC void HText_appendCharacter ARGS2(
 	    CTRACE(tfp, "add(%c) %d/%d\n", ch,
 		   HTisDocumentSource(), HTOutputFormat != WWW_SOURCE);
 	}
+	FREE(special);
     } /* trace only */
 #endif /* DEBUG_APPCH */
 
@@ -3467,9 +3659,9 @@ re_parse:
 	     *  The last line is probably still not finished. - kw
 	     */
 	    if (cur_line >= text->Lines)
-	        break;
+		break;
 	    if (anchor_ptr->start >= text->chars - 1)
-	        break;
+		break;
 	    /*
 	     *  Also skip this anchor if it looks like HText_endAnchor
 	     *  is not yet done with it. - kw
@@ -6548,6 +6740,7 @@ PUBLIC int HText_beginInput ARGS3(
 
     a->start = text->chars + text->last_line->size;
     a->inUnderline = underline;
+    a->line_num = text->Lines;
     a->line_pos = text->last_line->size;
 
 
@@ -6907,6 +7100,7 @@ PUBLIC int HText_beginInput ARGS3(
 	     */
 	    HText_appendCharacter(text, '[');
 	a->start = text->chars + text->last_line->size;
+	a->line_num = text->Lines;
 	a->line_pos = text->last_line->size;
     }
 

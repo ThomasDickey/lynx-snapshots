@@ -394,6 +394,10 @@ PUBLIC int showhistory ARGS1(
 	if (history[x].title != NULL) {
 	    StrAllocCopy(Title, history[x].title);
 	    LYEntify(&Title, TRUE);
+	    LYTrimLeading(Title);
+	    LYTrimTrailing(Title);
+	    if (*Title == '\0')
+		StrAllocCopy(Title , gettext("(no title)"));
 	} else {
 	    StrAllocCopy(Title, gettext("(no title)"));
 	}
@@ -542,6 +546,10 @@ PUBLIC int LYShowVisitedLinks ARGS1(
 	if (vl->title != NULL && *vl->title != '\0') {
 	    StrAllocCopy(Title, vl->title);
 	    LYEntify(&Title, TRUE);
+	    LYTrimLeading(Title);
+	    LYTrimTrailing(Title);
+	    if (*Title == '\0')
+		StrAllocCopy(Title , gettext("(no title)"));
 	} else {
 	    StrAllocCopy(Title , gettext("(no title)"));
 	}
