@@ -46,7 +46,6 @@
 #include <GridText.h>
 #endif
 
-#define INFINITY 512		/* file name length @@ FIXME */
 #define MULTI_SUFFIX ".multi"	/* Extension for scanning formats */
 
 #include <HTParse.h>
@@ -1205,6 +1204,42 @@ PUBLIC float HTFileValue ARGS1(
     return (float)0.3;		/* Dunno! */
 }
 
+/*
+**  Determine compression type from file name, by looking at its suffix.
+**  Sets as side-effect a pointer to the "dot" that begins the suffix.
+*/
+PUBLIC CompressFileType HTCompressFileType ARGS3(
+	char *,		filename,
+	char *,		dots,
+	char **,	suffix)
+{
+    CompressFileType result = cftNone;
+    size_t len = strlen(filename);
+    char *ftype = filename + len;
+
+    if ((len > 4)
+     && !strcasecomp((ftype - 3), "bz2")
+     && strchr(dots, ftype[-4]) != 0) {
+	result = cftBzip2;
+	ftype -= 4;
+    } else if ((len > 3)
+     && !strcasecomp((ftype - 2), "gz")
+     && strchr(dots, ftype[-3]) != 0) {
+	result = cftGzip;
+	ftype -= 3;
+    } else if ((len > 2)
+     && !strcmp((ftype - 1), "Z")
+     && strchr(dots, ftype[-2]) != 0) {
+	result = cftCompress;
+	ftype -= 2;
+    }
+
+    *suffix = ftype;
+    CTRACE((tfp, "HTCompressFileType(%s) returns %d:%s\n",
+		 filename, result, *suffix));
+    return result;
+}
+
 /*	Determine write access to a file.
 **	---------------------------------
 **
@@ -2007,6 +2042,7 @@ PUBLIC int HTLoadFile ARGS4(
     HTAtom * encoding;		/* @@ not used yet */
     HTAtom * myEncoding = NULL; /* enc of this file, may be gzip etc. */
     int status;
+    char *dot;
 #ifdef VMS
     struct stat stat_info;
 #endif /* VMS */
@@ -2141,8 +2177,6 @@ PUBLIC int HTLoadFile ARGS4(
 	    FREE(ultrixname);
 	}
 	if (fp) {
-	    int len;
-	    char *cp = NULL;
 	    char *semicolon = NULL;
 
 	    if (HTEditable(vmsname)) {
@@ -2187,50 +2221,50 @@ PUBLIC int HTLoadFile ARGS4(
 		    StrAllocCopy(anchor->content_encoding, HTAtom_name(myEncoding));
 		    format = HTAtom_for("www/compressed");
 		}
-	    } else if ((len = strlen(vmsname)) > 2) {
-		if ((vmsname[len - 1] == 'Z') &&
-		    (vmsname[len - 2] == '.' ||
-		     vmsname[len - 2] == '-' ||
-		     vmsname[len - 2] == '_') &&
-		    vmsname[len - 3] != ']' &&
-		    vmsname[len - 3] != ':') {
+	    } else {
+		/* FIXME: should we check if suffix is after ']' or ':' ? */
+		CompressFileType cft = HTCompressFileType(vmsname, "._-", &dot);
+
+		if (cft != cftNone) {
+		    char *cp = NULL;
+
 		    StrAllocCopy(cp, vmsname);
-		    cp[len - 2] = '\0';
+		    cp[dot - vmsname] = '\0';
 		    format = HTFileFormat(cp, &encoding, NULL);
 		    FREE(cp);
 		    format = HTCharsetFormat(format, anchor,
 					     UCLYhndl_HTFile_for_unspec);
 		    StrAllocCopy(anchor->content_type, format->name);
+		}
+
+		switch (cft) {
+		case cftCompress:
 		    StrAllocCopy(anchor->content_encoding, "x-compress");
 		    format = HTAtom_for("www/compressed");
-		} else if ((len > 3) &&
-			   !strcasecomp(&vmsname[len - 2], "gz")) {
-		    if (vmsname[len - 3] == '.' ||
-			vmsname[len - 3] == '-' ||
-			vmsname[len - 3] == '_') {
-			StrAllocCopy(cp, vmsname);
-			cp[len - 3] = '\0';
-			format = HTFileFormat(cp, &encoding, NULL);
-			FREE(cp);
-			format = HTCharsetFormat(format, anchor,
-						 UCLYhndl_HTFile_for_unspec);
-			StrAllocCopy(anchor->content_type, format->name);
-			StrAllocCopy(anchor->content_encoding, "x-gzip");
+		    break;
+		case cftGzip:
+		    StrAllocCopy(anchor->content_encoding, "x-gzip");
 #ifdef USE_ZLIB
-			if (strcmp(format_out->name, "www/download") != 0) {
-			    fclose(fp);
-			    if (semicolon != NULL)
-				*semicolon = ';';
-			    gzfp = gzopen(vmsname, "rb");
+		    if (strcmp(format_out->name, "www/download") != 0) {
+			fclose(fp);
+			if (semicolon != NULL)
+			    *semicolon = ';';
+			gzfp = gzopen(vmsname, "rb");
 
-			    CTRACE((tfp, "HTLoadFile: gzopen of `%s' gives %p\n",
-					vmsname, (void*)gzfp));
-			    use_gzread = YES;
-			}
-#else  /* USE_ZLIB */
-			format = HTAtom_for("www/compressed");
-#endif	/* USE_ZLIB */
+			CTRACE((tfp, "HTLoadFile: gzopen of `%s' gives %p\n",
+				    vmsname, (void*)gzfp));
+			use_gzread = YES;
 		    }
+#else  /* USE_ZLIB */
+		    format = HTAtom_for("www/compressed");
+#endif	/* USE_ZLIB */
+		    break;
+		case cftBzip2:
+		    StrAllocCopy(anchor->content_encoding, "x-bzip2");
+		    format = HTAtom_for("www/compressed");
+		    break;
+		case cftNone:
+		    break;
 		}
 	    }
 	    if (semicolon != NULL)
@@ -2350,40 +2384,38 @@ PUBLIC int HTLoadFile ARGS4(
 						filevalue,
 						0L  /* @@@@@@ */);
 		    if (value <= 0.0) {
+			char *atomname = NULL;
+			CompressFileType cft = HTCompressFileType(dirbuf->d_name, ".", &dot);
 			char * cp = NULL;
-			int len = strlen(dirbuf->d_name);
+
 			enc = NULL;
-			if (len > 2 &&
-			    dirbuf->d_name[len - 1] == 'Z' &&
-			    dirbuf->d_name[len - 2] == '.') {
+			if (cft != cftNone) {
 			    StrAllocCopy(cp, dirbuf->d_name);
-			    cp[len - 2] = '\0';
+			    cp[dot - dirbuf->d_name] = '\0';
 			    format = HTFileFormat(cp, NULL, NULL);
 			    FREE(cp);
 			    value = HTStackValue(format, format_out,
 						 filevalue, 0);
-			    if (value <= 0.0) {
-				format = HTAtom_for("application/x-compressed");
-				value = HTStackValue(format, format_out,
-						     filevalue, 0);
+			    switch (cft) {
+			    case cftCompress:
+				atomname = "application/x-compressed";
+				break;
+			    case cftGzip:
+				atomname = "application/x-gzip";
+				break;
+			    case cftBzip2:
+				atomname = "application/x-bzip2";
+				break;
+			    case cftNone:
+				break;
 			    }
-			    if (value <= 0.0) {
-				format = HTAtom_for("www/compressed");
-				value = HTStackValue(format, format_out,
-						     filevalue, 0);
-			    }
-			} else if ((len > 3) &&
-				   !strcasecomp((char *)&dirbuf->d_name[len - 2],
-						"gz") &&
-				   dirbuf->d_name[len - 3] == '.') {
-			    StrAllocCopy(cp, dirbuf->d_name);
-			    cp[len - 3] = '\0';
-			    format = HTFileFormat(cp, NULL, NULL);
-			    FREE(cp);
+			}
+
+			if (atomname != NULL) {
 			    value = HTStackValue(format, format_out,
 						 filevalue, 0);
 			    if (value <= 0.0) {
-				format = HTAtom_for("application/x-gzip");
+				format = HTAtom_for(atomname);
 				value = HTStackValue(format, format_out,
 						     filevalue, 0);
 			    }
@@ -2515,8 +2547,7 @@ PUBLIC int HTLoadFile ARGS4(
 #endif /* HAVE_READDIR */
 	{
 #  if defined(__EMX__) || defined(WIN_EX)
-	    int len = strlen(localname);
-	    int bin = ((len > 3) && !strcasecomp(localname + len - 3, ".gz"));
+	    int bin = HTCompressFileType(localname, ".", &dot) != cftNone;
 	    FILE * fp = fopen(localname, (bin ? "rb" : "r"));
 #  else	/* !( defined __EMX__ ) */
 	    FILE * fp = fopen(localname, "r");
@@ -2525,9 +2556,6 @@ PUBLIC int HTLoadFile ARGS4(
 	    CTRACE((tfp, "HTLoadFile: Opening `%s' gives %p\n",
 				 localname, (void*)fp));
 	    if (fp) {		/* Good! */
-		int len2;
-		char *cp = NULL;
-
 		if (HTEditable(localname)) {
 		    HTAtom * put = HTAtom_for("PUT");
 		    HTList * methods = HTAnchor_methods(anchor);
@@ -2561,29 +2589,27 @@ PUBLIC int HTLoadFile ARGS4(
 			StrAllocCopy(anchor->content_encoding, HTAtom_name(myEncoding));
 			format = HTAtom_for("www/compressed");
 		    }
-		} else if ((len2 = strlen(localname)) > 2) {
-		    if (localname[len2 - 1] == 'Z' &&
-			localname[len2 - 2] == '.') {
+		} else {
+		    CompressFileType cft = HTCompressFileType(localname, ".", &dot);
+
+		    if (cft != cftNone) {
+			char *cp = NULL;
+
 			StrAllocCopy(cp, localname);
-			cp[len2 - 2] = '\0';
+			cp[dot - localname] = '\0';
 			format = HTFileFormat(cp, &encoding, NULL);
 			FREE(cp);
 			format = HTCharsetFormat(format, anchor,
 						 UCLYhndl_HTFile_for_unspec);
 			StrAllocCopy(anchor->content_type, format->name);
+		    }
+
+		    switch (cft) {
+		    case cftCompress:
 			StrAllocCopy(anchor->content_encoding, "x-compress");
 			format = HTAtom_for("www/compressed");
-		    } else if ((len2 > 3) &&
-			       !strcasecomp((char *)&localname[len2 - 2],
-					    "gz") &&
-			       localname[len2 - 3] == '.') {
-			StrAllocCopy(cp, localname);
-			cp[len2 - 3] = '\0';
-			format = HTFileFormat(cp, &encoding, NULL);
-			FREE(cp);
-			format = HTCharsetFormat(format, anchor,
-						 UCLYhndl_HTFile_for_unspec);
-			StrAllocCopy(anchor->content_type, format->name);
+			break;
+		    case cftGzip:
 			StrAllocCopy(anchor->content_encoding, "x-gzip");
 #ifdef USE_ZLIB
 			if (strcmp(format_out->name, "www/download") != 0) {
@@ -2597,6 +2623,13 @@ PUBLIC int HTLoadFile ARGS4(
 #else  /* USE_ZLIB */
 			format = HTAtom_for("www/compressed");
 #endif	/* USE_ZLIB */
+			break;
+		    case cftBzip2:
+			StrAllocCopy(anchor->content_encoding, "x-bzip2");
+			format = HTAtom_for("www/compressed");
+			break;
+		    case cftNone:
+			break;
 		    }
 		}
 		FREE(localname);

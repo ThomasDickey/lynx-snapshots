@@ -1301,8 +1301,13 @@ gettext("Enctype multipart/form-data not yet supported!  Cannot submit."));
 		    return 0;
 		}
 
+#ifdef USE_EXTERNALS
 	    if (run_external(links[curdoc.link].lname, TRUE))
+	    {
+		*refresh_screen = TRUE;
 		return 0;
+	    }
+#endif /* USE_EXTERNALS */
 
 	    /*
 	     *	Follow a normal link or anchor.

@@ -1085,7 +1085,7 @@ PRIVATE int display_line ARGS4(
 	HTLine *,	line,
 	HText *,	text,
 	int,		scrline GCC_UNUSED,
-	CONST char*,	target)
+	CONST char*,	target GCC_UNUSED)
 {
     register int i, j;
     char buffer[7];
@@ -2788,12 +2788,11 @@ PRIVATE void split_line ARGS2(
 	inew ++;
 	for (n = 0; n < line->numstyles; n++)
 		line->styles[n] = line->styles[n + inew];
-    } else
-	if (line->numstyles == 0)
-	/* FIXME: RJP - shouldn't use 0xffffffff for largest integer */
-	line->styles[0].horizpos = 0xffffffff;
+    } else if (line->numstyles == 0) {
+	line->styles[0].horizpos = ~0;
+    }
     if (previous->numstyles == 0)
-	previous->styles[0].horizpos = 0xffffffff;
+	previous->styles[0].horizpos = ~0;
 #endif /*USE_COLOR_STYLE*/
 
     temp = (HTLine *)LY_CALLOC(1, LINE_SIZE(previous->size));
@@ -6906,25 +6905,23 @@ PUBLIC void HTCheckFnameForCompression ARGS3(
 {
     char *fn = *fname;
     char *dot = NULL, *cp = NULL;
+    char *suffix;
     CONST char *ct = NULL;
     CONST char *ce = NULL;
-    BOOLEAN method = 0;
+    CompressFileType method = cftNone;
+    CompressFileType second;
 
     /*
      *  Make sure we have a string and anchor. - FM
      */
-    if (!(fn && *fn && anchor))
+    if (!(fn && anchor))
 	return;
 
     /*
      *  Make sure we have a file, not directory, name. -FM
      */
-    if ((cp = strrchr(fn, '/')) != NULL) {
-	fn = (cp +1);
-	if (*fn == '\0') {
-	    return;
-	}
-    }
+    if (*(fn = LYPathLeaf(fn)) == '\0')
+	return;
 
     /*
      *  Check the anchor's content_type and content_encoding
@@ -6932,32 +6929,32 @@ PUBLIC void HTCheckFnameForCompression ARGS3(
      */
     ct = HTAnchor_content_type(anchor);
     ce = HTAnchor_content_encoding(anchor);
-    if (ce == NULL) {
+    if (ce == NULL && ct != 0) {
 	/*
 	 *  No Content-Encoding, so check
 	 *  the Content-Type. - FM
 	 */
-	if (!strncasecomp((ct ? ct : ""), "application/gzip", 16) ||
-	    !strncasecomp((ct ? ct : ""), "application/x-gzip", 18)) {
-	    method = 1;
-	} else if (!strncasecomp((ct ? ct : ""),
-				 "application/compress", 20) ||
-		   !strncasecomp((ct ? ct : ""),
-				 "application/x-compress", 22)) {
-	    method = 2;
+	if (!strncasecomp(ct, "application/gzip", 16) ||
+	    !strncasecomp(ct, "application/x-gzip", 18)) {
+	    method = cftGzip;
+	} else if (!strncasecomp(ct, "application/compress", 20) ||
+		   !strncasecomp(ct, "application/x-compress", 22)) {
+	    method = cftCompress;
+	} else if (!strncasecomp(ct, "application/bzip2", 17) ||
+		   !strncasecomp(ct, "application/x-bzip2", 19)) {
+	    method = cftBzip2;
 	}
-    } else if (!strcasecomp(ce, "gzip") ||
-	       !strcasecomp(ce, "x-gzip")) {
-	    /*
-	     *  It's gzipped. - FM
-	     */
-	    method = 1;
-    } else if (!strcasecomp(ce, "compress") ||
-	       !strcasecomp(ce, "x-compress")) {
-	    /*
-	     *  It's Unix compressed. - FM
-	     */
-	    method = 2;
+    } else if (ce != 0) {
+	if (!strcasecomp(ce, "gzip") ||
+	    !strcasecomp(ce, "x-gzip")) {
+	    method = cftGzip;
+	} else if (!strcasecomp(ce, "compress") ||
+		   !strcasecomp(ce, "x-compress")) {
+	    method = cftCompress;
+	} else if (!strcasecomp(ce, "bzip2") ||
+		   !strcasecomp(ce, "x-bzip2")) {
+	    method = cftBzip2;
+	}
     }
 
     /*
@@ -6965,121 +6962,96 @@ PUBLIC void HTCheckFnameForCompression ARGS3(
      *  pointer, but strip_ok is not set, there is nothing left
      *  to do. - kw
      */
-    if (method == 0 && !strip_ok)
+    if ((method == cftNone) && !strip_ok)
 	return;
+
+    /*
+     * Treat .tgz specially
+     */
+    if ((dot = strrchr(fn, '.')) != NULL
+     && !strcasecomp(dot, ".tgz")) {
+	if (method == cftNone) {
+	    strcpy(dot, ".tar");
+	}
+	return;
+    }
 
     /*
      *  Seek the last dot, and check whether
      *  we have a gzip or compress suffix. - FM
      */
     if ((dot = strrchr(fn, '.')) != NULL) {
-	if (!strcasecomp(dot, ".tgz") ||
-	    !strcasecomp(dot, ".gz") ||
-	    !strcasecomp(dot, ".Z")) {
-	    if (!method) {
+	if (HTCompressFileType(fn, ".", &cp) != cftNone) {
+	    if (method == cftNone) {
 		/*
 		 *  It has a suffix which signifies a gzipped
 		 *  or compressed file for us, but the anchor
 		 *  claims otherwise, so tweak the suffix. - FM
 		 */
-		cp = (dot + 1);
 		*dot = '\0';
-		if (!strcasecomp(cp, "tgz")) {
-		    StrAllocCat(*fname, ".tar");
-		}
 	    }
 	    return;
 	}
-	if (strlen(dot) > 4) {
-	    cp = ((dot + strlen(dot)) - 3);
-	    if (!strcasecomp(cp, "-gz") ||
-		!strcasecomp(cp, "_gz")) {
-		if (!method) {
-		    /*
-		     *  It has a tail which signifies a gzipped
-		     *  file for us, but the anchor claims otherwise,
-		     *  so tweak the suffix. - FM
-		     */
-		    if (cp == dot+1)
-			cp--;
-		    *cp = '\0';
-		} else {
-		    /*
-		     *  The anchor claims it's gzipped, and we
-		     *  believe it, so force this tail to the
-		     *  conventional suffix. - FM
-		     */
+	if ((second = HTCompressFileType(fn, "-_", &cp)) != cftNone) {
+	    if (method == cftNone) {
+		/*
+		 *  It has a tail which signifies a gzipped
+		 *  file for us, but the anchor claims otherwise,
+		 *  so tweak the suffix. - FM
+		 */
+		if (cp == dot+1)
+		    cp--;
+		*cp = '\0';
+	    } else {
+		/*
+		 *  The anchor claims it's gzipped, and we
+		 *  believe it, so force this tail to the
+		 *  conventional suffix. - FM
+		 */
 #ifdef VMS
-		    *cp = '-';
+		*cp = '-';
 #else
-		    *cp = '.';
+		*cp = '.';
 #endif /* VMS */
-		    cp++;
-		    *cp = (char) TOLOWER(*cp);
-		    cp++;
-		    *cp = (char) TOLOWER(*cp);
-		}
-		return;
+		if (second == cftCompress)
+		    LYUpperCase(cp);
+		else
+		    LYLowerCase(cp);
 	    }
-	}
-	if (strlen(dot) > 3) {
-	    cp = ((dot + strlen(dot)) - 2);
-	    if (!strcasecomp(cp, "-Z") ||
-		!strcasecomp(cp, "_Z")) {
-		if (!method) {
-		    /*
-		     *  It has a tail which signifies a compressed
-		     *  file for us, but the anchor claims otherwise,
-		     *  so tweak the suffix. - FM
-		     */
-		    if (cp == dot+1)
-			cp--;
-		    *cp = '\0';
-		} else {
-		    /*
-		     *  The anchor claims it's compressed, and
-		     *  we believe it, so force this tail to the
-		     *  conventional suffix. - FM
-		     */
-#ifdef VMS
-		    *cp = '-';
-#else
-		    *cp = '.';
-#endif /* VMS */
-		    cp++;
-		    *cp = (char) TOUPPER(*cp);
-		}
-		return;
-	    }
+	    return;
 	}
     }
-    if (!method) {
-	/*
-	 *  Don't know what compression method
-	 *  was used, if any, so we won't do
-	 *  anything. - FM
-	 */
-	return;
+
+    switch (method) {
+    default:
+	suffix = "";
+	break;
+    case cftCompress:
+	suffix = ".Z";
+	break;
+    case cftGzip:
+	suffix = ".gz";
+	break;
+    case cftBzip2:
+	suffix = ".bz2";
+	break;
     }
 
     /*
      *  Add the appropriate suffix. - FM
      */
-    if (!dot) {
-	StrAllocCat(*fname, ((method == 1) ? ".gz" : ".Z"));
-	return;
-    }
-    dot++;
-    if (*dot == '\0') {
-	StrAllocCat(*fname, ((method == 1) ? "gz" : "Z"));
-	return;
-    }
+    if (*suffix) {
+	if (!dot) {
+	    StrAllocCat(*fname, suffix);
+	} else if (*++dot == '\0') {
+	    StrAllocCat(*fname, suffix + 1);
+	} else {
+	    StrAllocCat(*fname, suffix);
 #ifdef VMS
-    StrAllocCat(*fname, ((method == 1) ? "-gz" : "-Z"));
-#else
-    StrAllocCat(*fname, ((method == 1) ? ".gz" : ".Z"));
+	    (*fname)[strlen(*fname) - strlen(suffix)] = '-';
 #endif /* !VMS */
-    return;
+	}
+    }
 }
 
 /*

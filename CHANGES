@@ -1,11 +1,41 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2000-09-21 (2.8.4dev.10)
+* modified www_tcp.h and makefile.msc to allow compile with winsock2 if
+  USE_WINSOCK2_H is defined -TD
+* fix:  the recently added code to enable external programs to replace normal
+  lynx handling of individual URL types was not refreshing the screen after the
+  external program finished (EXTERNAL set TRUE:TRUE) -DK
+* fixed two URLs in lynx_help_main.html -DK
+* add symbol USE_VMS_MAILER, use to distinguish VMS mail ifdef's for test
+  compiles -TD
+* use new function LYSendMailFile() to consolidate details of non-VMS/non-piped
+  email, e.g., DOS or Win32, and eliminate some minor inconsistencies in that
+  area -TD
+* correct order of ifdef's in send_file_to_mail() which could leave unsent
+  email on some systems without popen/pclose -TD
+* add some checks in LYhandlePopupList() to prevent popup of an empty list -TD
+* change a few messages written to stderr to end lines with \r\n rather than
+  \n, since Lynx may already be in screen mode when they are written -TD
+* treat .Z, .gz and .bz2 suffixes more symmetrically using new function
+  HTCompressFileType() for parsing them -TD
+* change mime type for bzip2 files to bzip2, x-bzip2 -HN
+* move IPV6 definitions in www_tcp.h to the end, to build on FreeBSD 4.1, since
+  SIN6_LEN must not be checked before including netinet/in.h (patch by
+  Munechika SUMIKAWA @ KAME Project <sumikawa@ebina.hitachi.co.jp>)
+* make HTParseInet() private, simplify some ifdef's -TD
+* change shell expression used to process stdin for mailcap to "(command)<file"
+  form, which is a little more robust than "cat file|command" (suggested by PG)
+  -TD
+* update URLs in about_lynx.html -DK
+* remove spurious 'FREE(leaf);' from LYLocalFileToURL() introduced in dev.5 -DK
+
 2000-09-01 (2.8.4dev.9)
 * improve ifdef's for endwin/newterm logic, making a fallback for LYscreen
   variable -PG
 * modify CF_CURSES_LIBS to check if both initscr() and tgoto() are in the
-  $LIBS list before deciding not to try to look for them -T
+  $LIBS list before deciding not to try to look for them -TD
 * add %s substitution to mailcap_substitute(), overlooked when implementing
   the logic to read from stdin when %s is omitted (reported by IC) -TD
 * restore endwin/newterm code for ncurses (as PG notes it really is needed).
@@ -145,7 +175,7 @@ Changes since Lynx 2.8 release
   invoked in dired mode, the listing of destination directory will be
   automatically loaded.  Dired file operations menu lists this command too as
   the first item.  To disable it, comment the line
-      #define SUPPORT_CHDIR 
+      #define SUPPORT_CHDIR
   in userdefs.h -VH
 * add definitions to allow slang configuration to implement scrollbars.  This
   will not work for any termcap/terminfo-based systems, appears specific to
@@ -165,7 +195,7 @@ Changes since Lynx 2.8 release
   copied -TD
 
 2000-06-02 (2.8.4dev.3)
-* initial support for SOURCE_CACHE_FOR_ABORTED -VH 
+* initial support for SOURCE_CACHE_FOR_ABORTED -VH
 * change default_keypad_mode_fun() to use config_enum() -TD
 * modify config_enum() to check if the given name in lynx.cfg is ambiguous,
   matching more than one name -TD
@@ -247,7 +277,7 @@ Changes since Lynx 2.8 release
 * correct an overlooked change of ifdef's from
   CONV_JISX0201KANA_TO_JISX0208KANA to CONV_JISX0201KANA_JISX0208KANA -TH
 * move include of LYClean.h in LYexit.c to ensure that cleanup_files() is
-  prototyped on VMS (report by Jerome Lauret) 
+  prototyped on VMS (report by Jerome Lauret)
 * move assignment of HadVMSInterrupt in cleanup_sig() to avoid interaction with
   logic in HTConfirmDefault() on VMS (reported/tested by Jerome Lauret) -KW
 * minor fixes to lynx.man / lynx.hlp for descriptions of -get_data, -post_data,

@@ -3692,7 +3692,9 @@ PUBLIC int LYhandlePopupList ARGS9(
      *  Set up the overall window, including the boxing characters ('*'),
      *  if it all fits.  Otherwise, set up the widest window possible. - FM
      */
-    if ((form_window = LYstartPopup(top, lx, bottom - top, Lnum + width)) == 0)
+    if (num_choices <= 0
+     || cur_choice > num_choices
+     || (form_window = LYstartPopup(top, lx, bottom - top, Lnum + width)) == 0)
 	return(orig_choice);
 
     /*
@@ -4515,7 +4517,7 @@ again:
 	    CurModif |= LKC_MOD2;
 	    break;
 	case LYE_TAB:
-	    if (xlec == last_xlec) {
+	    if (xlec == last_xlec && recall != NORECALL) {
 		HTList *list = whichRecall(recall);
 		if (!HTList_isEmpty(list)) {
 		    char **data = sortedList(list, recall == RECALL_CMD);

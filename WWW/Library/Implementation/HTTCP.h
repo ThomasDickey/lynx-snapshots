@@ -93,34 +93,6 @@ extern int lynx_nsl_status;
 extern struct hostent * LYGetHostByName PARAMS((char * str));
 #endif
 
-
-/*      Parse an internet node address and port
-**      ---------------------------------------
-**
-** On entry:
-**               str points to a string with a node name or number,
-**               with optional trailing colon and port number.
-**               sin points to the binary internet or decnet address field.
-**
-** On exit:
-**         Regular case:
-**               *sin is filled in.  If no port is specified in str, that
-**               field is left unchanged in *sin.
-**         INET6 case:
-**               *sin is filled in.  If no port is specified in str,
-**               default_port is used
-*/
-#if defined(__STDC__) || defined(__BORLANDC__) || defined(_MSC_VER)
-#ifdef INET6
-        extern int HTParseInet(SockA * mysin, CONST char * str, int default_port);
-#else
-        extern int HTParseInet(struct sockaddr_in * mysin, CONST char * str);
-#endif /* INET6 */
-        /*!! had to change this to get it to compile. CTB */
-#else
-        extern int HTParseInet();
-#endif
-
 /*      Get Name of This Machine
 **      ------------------------
 **

@@ -1055,7 +1055,7 @@ PUBLIC HTList *LYcommandList NOARGS
 	myList = HTList_new();
 	for (j = 0; revmap[j].name != 0; j++) {
 	    if (revmap[j].doc != 0)
-		HTList_addObject(myList, revmap[j].name);
+		HTList_addObject(myList, (char *)revmap[j].name);
 	}
     }
     return myList;

@@ -1489,7 +1489,7 @@ static Config_Type Config_Table [] =
      PARSE_STR("lynx_host_name", CONF_STR, &LYHostName),
      PARSE_FUN("lynx_sig_file", CONF_FUN, lynx_sig_file_fun),
      PARSE_SET("mail_system_error_logging", CONF_BOOL, &error_logging),
-#ifdef VMS
+#if USE_VMS_MAILER
      PARSE_STR("mail_adrs", CONF_STR, &mail_adrs),
 #endif
      PARSE_SET("make_links_for_all_images", CONF_BOOL, &clickable_images),

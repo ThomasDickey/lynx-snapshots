@@ -76,8 +76,11 @@ PUBLIC BOOLEAN sigint = FALSE;
 char init_ctrl_break[1];
 #endif /* __DJGPP__ */
 
-#ifdef VMS
+#if USE_VMS_MAILER
 PUBLIC char *mail_adrs = NULL;	/* the mask for a VMS mail transport */
+#endif
+
+#ifdef VMS
 	       /* create FIXED 512 binaries */
 PUBLIC BOOLEAN UseFixedRecords = USE_FIXED_RECORDS;
 #endif /* VMS */
@@ -593,9 +596,12 @@ PRIVATE void free_lynx_globals NOARGS
 
 #ifdef VMS
     Define_VMSLogical("LYNX_VERSION", "");
-    FREE(mail_adrs);
     FREE(LYCSwingPath);
 #endif /* VMS */
+
+#if USE_VMS_MAILER
+    FREE(mail_adrs);
+#endif
 
     FREE(LynxHome);
     FREE(homepage);
@@ -1076,12 +1082,20 @@ PUBLIC int main ARGS2(
 #else
     LYAddPathSep(&lynx_temp_space);
 #endif /* VMS */
+
 #ifdef VMS
-    StrAllocCopy(mail_adrs, MAIL_ADRS);
 #ifdef CSWING_PATH
     StrAllocCopy(LYCSwingPath, CSWING_PATH);
 #endif /* CSWING_PATH */
 #endif /* VMS */
+
+#if USE_VMS_MAILER
+#ifndef MAIL_ADRS
+#define MAIL_ADRS "\"IN%%\"\"%s\"\"\""
+#endif
+    StrAllocCopy(mail_adrs, MAIL_ADRS);
+#endif
+
 #ifdef LYNX_HOST_NAME
     StrAllocCopy(LYHostName, LYNX_HOST_NAME);
 #else

@@ -908,8 +908,7 @@ PRIVATE int get_connection ARGS2(
 	status = response(command);
 	FREE(command);
 	if (status == HT_INTERRUPTED) {
-	    CTRACE((tfp,
-		       "HTFTP: Interrupted while sending password.\n"));
+	    CTRACE((tfp, "HTFTP: Interrupted while sending password.\n"));
 	    _HTProgress (CONNECTION_INTERRUPTED);
 	    NETCLOSE(control->socket);
 	    control->socket = -1;
@@ -997,10 +996,10 @@ PRIVATE int get_connection ARGS2(
 	    CTRACE((tfp, "HTFTP: Treating as Window_NT server.\n"));
 	    set_unix_dirstyle(&server_type, &use_list);
 
-        } else if (strncmp(response_text+4, "Windows2000", 11) == 0) {
-            server_type = WINDOWS_2K_SERVER;
-            CTRACE((tfp, "HTFTP: Treating as Window_2K server.\n"));
-            set_unix_dirstyle(&server_type, &use_list);
+	} else if (strncmp(response_text+4, "Windows2000", 11) == 0) {
+	    server_type = WINDOWS_2K_SERVER;
+	    CTRACE((tfp, "HTFTP: Treating as Window_2K server.\n"));
+	    set_unix_dirstyle(&server_type, &use_list);
 
 	} else if (strncmp(response_text+4, "MS Windows", 10) == 0) {
 	    server_type = MS_WINDOWS_SERVER;
@@ -1202,9 +1201,9 @@ PRIVATE int get_listen_socket NOARGS
 	if (status<0) return HTInetStatus("getsockname");
 #ifdef INET6
 	CTRACE((tfp, "HTFTP: This host is %s\n",
- 	    HTInetString((SockA *)soc_in)));
-  
- 	soc_in->sin_port = 0;	/* Unspecified: please allocate */
+	    HTInetString((SockA *)soc_in)));
+
+	soc_in->sin_port = 0;	/* Unspecified: please allocate */
 #else
 	CTRACE((tfp, "HTFTP: This host is %s\n",
 	    HTInetString(soc_in)));
@@ -1252,7 +1251,7 @@ PRIVATE int get_listen_socket NOARGS
 #ifdef INET6
     CTRACE((tfp, "HTFTP: bound to port %d on %s\n",
 		(int)ntohs(soc_in->sin_port),
- 		HTInetString((SockA *)soc_in)));
+		HTInetString((SockA *)soc_in)));
 #else
     CTRACE((tfp, "HTFTP: bound to port %d on %s\n",
 		(int)ntohs(soc_in->sin_port),
@@ -1572,16 +1571,16 @@ PRIVATE void parse_dls_line ARGS3(
     int    len;
     char *cps = NULL;
 
-    /* README              763  Information about this server\0
-       bin/                  -  \0
-       etc/                  =  \0
-       ls-lR                 0  \0
-       ls-lR.Z               3  \0
-       pub/                  =  Public area\0
-       usr/                  -  \0
-       morgan               14  -> ../real/morgan\0
+    /* README		   763	Information about this server\0
+       bin/		     -	\0
+       etc/		     =	\0
+       ls-lR		     0	\0
+       ls-lR.Z		     3	\0
+       pub/		     =	Public area\0
+       usr/		     -	\0
+       morgan		    14	-> ../real/morgan\0
        TIMIT.mostlikely.Z\0
-                         79215  \0
+			 79215	\0
 	*/
 
     len = strlen(line);
@@ -2202,7 +2201,7 @@ PRIVATE EntryInfo * parse_dir_entry ARGS3(
 	case MACHTEN_SERVER:
 	case MSDOS_SERVER:
 	case WINDOWS_NT_SERVER:
-        case WINDOWS_2K_SERVER:
+	case WINDOWS_2K_SERVER:
 	case APPLESHARE_SERVER:
 	case NETPRESENZ_SERVER:
 	    /*
@@ -2960,7 +2959,7 @@ PUBLIC int HTFTPLoad ARGS4(
 		NETCLOSE (control->socket);
 		control->socket = -1;
 #ifdef INET6
-	        if (master_socket >= 0)
+		if (master_socket >= 0)
 		    (void)close_master_socket ();
 #else
 		close_master_socket ();
@@ -3005,9 +3004,9 @@ PUBLIC int HTFTPLoad ARGS4(
 		if (status < 0)	/* retry or Bad return */
 		    continue;
 		else if (status != 2) {
-		    return -status; 	/* bad reply */
+		    return -status;	/* bad reply */
 		}
- 	    }
+	    }
 
 	    if (strncmp(command, "PASV", 4) == 0) {
 		for (p = response_text; *p && *p != ','; p++)
@@ -3042,7 +3041,7 @@ PUBLIC int HTFTPLoad ARGS4(
 		h2 = c2;
 		h3 = c3;
 		passive_port = p0;
- 	    }
+	    }
 #else
 	    status = send_cmd_1("PASV");
 	    if (status != 2) {
@@ -3566,7 +3565,7 @@ listen:
     if(!ftp_passive) {
 	/* Wait for the connection */
 #ifdef INET6
- 	struct sockaddr_storage soc_address;
+	struct sockaddr_storage soc_address;
 #else
 	struct sockaddr_in soc_address;
 #endif /* INET6 */
@@ -3626,7 +3625,6 @@ listen:
 	status = final_status;
     } else {
 	int rv;
-	int len;
 	char *FileName = HTParse(name, "", PARSE_PATH + PARSE_PUNCTUATION);
 
 	/** Clear any login messages **/
@@ -3644,29 +3642,29 @@ listen:
 	    StrAllocCopy(anchor->content_encoding, HTAtom_name(encoding));
 	    format = HTAtom_for("www/compressed");
 
-	} else if ((len = strlen(FileName)) > 2) {
-	    if ((FileName[len - 1] == 'Z') &&
-		(FileName[len - 2] == '.' ||
-		 FileName[len - 2] == '-' ||
-		 FileName[len - 2] == '_')) {
+	} else {
+	    char *dot;
+	    CompressFileType cft = HTCompressFileType(FileName, "._-", &dot);
 
-		FileName[len - 2] = '\0';
+	    if (cft != cftNone) {
+		*dot = '\0';
 		format = HTFileFormat(FileName, &encoding, NULL);
 		format = HTCharsetFormat(format, anchor, -1);
 		StrAllocCopy(anchor->content_type, format->name);
-		StrAllocCopy(anchor->content_encoding, "x-compress");
 		format = HTAtom_for("www/compressed");
-	    } else if ((len > 3) &&
-		       !strcasecomp((char *)&FileName[len - 2], "gz")) {
-		if (FileName[len - 3] == '.' ||
-		    FileName[len - 3] == '-' ||
-		    FileName[len - 3] == '_') {
-		    FileName[len - 3] = '\0';
-		    format = HTFileFormat(FileName, &encoding, NULL);
-		    format = HTCharsetFormat(format, anchor, -1);
-		    StrAllocCopy(anchor->content_type, format->name);
+
+		switch (cft) {
+		case cftCompress:
+		    StrAllocCopy(anchor->content_encoding, "x-compress");
+		    break;
+		case cftGzip:
 		    StrAllocCopy(anchor->content_encoding, "x-gzip");
-		    format = HTAtom_for("www/compressed");
+		    break;
+		case cftBzip2:
+		    StrAllocCopy(anchor->content_encoding, "x-bzip2");
+		    break;
+		default:
+		    break;
 		}
 	    }
 	}
@@ -3674,11 +3672,6 @@ listen:
 
 	_HTProgress (gettext("Receiving FTP file."));
 	rv = HTParseSocket(format, format_out, anchor, data_soc, sink);
-
-#if 0				/* already done in HTCopy - kw */
-	if (rv == HT_INTERRUPTED)
-	     _HTProgress(TRANSFER_INTERRUPTED);
-#endif
 
 	HTInitInput(control->socket);
 	/* Reset buffering to control connection DD 921208 */

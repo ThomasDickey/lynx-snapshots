@@ -579,8 +579,9 @@ PRIVATE char *mailcap_substitute ARGS3(
     /* if we don't have a "%s" token, expect to provide the file via stdin */
     if (strstr(pres->command, "%s") == 0) {
 	char *prepend = 0;
-	HTAddParam(&prepend, "cat %s", 1, fnam); /* ...to quote if needed */
-	HTSprintf(&prepend, "|%s", pres->command); /* ...avoid quoting */
+	char *format = "( %s ) < %s";
+	HTSprintf(&prepend, "( %s", pres->command); /* ...avoid quoting */
+	HTAddParam(&prepend, format, 2, fnam); /* ...to quote if needed */
 	FREE(result);
 	result = prepend;
     }
@@ -706,7 +707,7 @@ PUBLIC HTStream* HTSaveAndExecute ARGS3(
 
 	    StrAllocCopy(me->viewer_command, pres->command);
 
-	    me->end_command = mailcap_substitute(anchor, pres, view_fnam);
+	    me->end_command = mailcap_substitute(anchor, pres, view_fname);
 	    me->remove_command = NULL;
 
 	    return me;
@@ -1029,6 +1030,7 @@ PUBLIC HTStream* HTCompressed ARGS3(
      *	or a download request, in which case we won't bother to
      *	uncompress the file. - FM
      */
+    CTRACE((tfp, "FIXME %s @%d\n", __FILE__, __LINE__));
     if (!(anchor && anchor->content_encoding && anchor->content_type)) {
 	/*
 	 *  We have no idea what we're dealing with,
@@ -1039,10 +1041,16 @@ PUBLIC HTStream* HTCompressed ARGS3(
 	return me;
     }
     n = HTList_count(HTPresentations);
+    CTRACE((tfp, "FIXME %s @%d\n", __FILE__, __LINE__));
     for (i = 0; i < n; i++) {
 	Pres = (HTPresentation *)HTList_objectAt(HTPresentations, i);
+	CTRACE((tfp, "FIXME %s @%d '%s', '%s' (%s)\n", __FILE__, __LINE__,
+	    Pres->rep->name,
+	    anchor->content_type,
+	    anchor->content_encoding));
 	if (!strcasecomp(Pres->rep->name, anchor->content_type) &&
 	    Pres->rep_out == WWW_PRESENT) {
+    CTRACE((tfp, "FIXME %s @%d\n", __FILE__, __LINE__));
 	    /*
 	     *	We have a presentation mapping for it. - FM
 	     */
@@ -1057,7 +1065,7 @@ PUBLIC HTStream* HTCompressed ARGS3(
 		compress_suffix = "gz";
 #ifdef BZIP2_PATH
 	    } else if (!strcasecomp(anchor->content_encoding, "x-bzip2") ||
-		!strcasecomp(anchor->content_encoding, "bzip")) {
+		!strcasecomp(anchor->content_encoding, "bzip2")) {
 		StrAllocCopy(uncompress_mask, BZIP2_PATH);
 		StrAllocCat(uncompress_mask, " -d %s");
 		compress_suffix = "bz2";

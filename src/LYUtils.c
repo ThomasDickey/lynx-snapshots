@@ -5059,7 +5059,7 @@ PUBLIC BOOLEAN LYExpandHostForURL ARGS3(
 	StrAllocCat(MsgStr, FIRST_SEGMENT);
 	HTProgress(MsgStr);
     } else if (Startup && !dump_output_immediately) {
-	fprintf(stdout, "%s '%s'%s\n", WWW_FIND_MESSAGE, host, FIRST_SEGMENT);
+	fprintf(stdout, "%s '%s'%s\r\n", WWW_FIND_MESSAGE, host, FIRST_SEGMENT);
     }
 
 #ifdef INET6
@@ -7266,8 +7266,6 @@ PUBLIC void LYLocalFileToURL ARGS2(
     if (!LYIsHtmlSep(*leaf))
 	LYAddHtmlSep(target);
     StrAllocCat(*target, leaf);
-    if (leaf != source)
-    	FREE(leaf);
 }
 
 #ifdef NOTDEFINED

@@ -38,30 +38,7 @@
 #include <HTChunk.h>
 #endif
 
-/*
- * Ifdef's in case we have a working popen/pclose, useful for piping to the
- * mail program.
- */
-#if !defined(HAVE_POPEN) || defined(VMS) || defined(DOSPATH) || defined(__CYGWIN__)
-#define CAN_PIPE_TO_MAILER 0
-#else
-#define CAN_PIPE_TO_MAILER 1
-#endif
-
-/*
- * Ifdef's for specific mailers:
- */
-#ifdef VMS
-#define USE_PMDF_MAILER 1
-#else
-#define USE_PMDF_MAILER 0
-#endif
-
-#ifdef SH_EX
-#define USE_BLAT_MAILER 1
-#else
-#define USE_BLAT_MAILER 0
-#endif
+#include <LYMail.h>		/* to get ifdef's for mail-variables */
 
 #ifdef SOCKS
 extern BOOLEAN socks_flag;
@@ -71,7 +48,7 @@ extern BOOLEAN socks_flag;
 extern BOOLEAN sigint;
 #endif /* IGNORE_CTRL_C */
 
-#ifdef VMS
+#if USE_VMS_MAILER
 extern char *mail_adrs;
 extern BOOLEAN UseFixedRecords; /* convert binary files to FIXED 512 records */
 #endif /* VMS */
