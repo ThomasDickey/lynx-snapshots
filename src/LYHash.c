@@ -5,24 +5,6 @@
 
 #ifdef USE_COLOR_STYLE
 
-#ifdef NOT_USED
-
-PUBLIC int hash_table[CSHASHSIZE]; /* 32K should be big enough */
-
-PUBLIC int hash_code_rp ARGS1(char*,string)
-{
-    char* hash_ptr = string;
-    int hash_tmp = 0xC00A | ((*hash_ptr) << 4);
-
-    while (*hash_ptr++)
-    {
-	hash_tmp ^= (((*hash_ptr)<<4) ^ ((*hash_ptr)<<12));
-	hash_tmp >>= 1;
-    }
-    return (hash_tmp % CSHASHSIZE);
-}
-#endif
-
 /*
  *  This is the same function as the private HASH_FUNCTION() in HTAnchor.c,
  *  but with a different value for HASH_SIZE.

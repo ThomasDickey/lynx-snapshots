@@ -193,7 +193,7 @@ PRIVATE void sl_suspend ARGS1(
     lynx_enable_mouse (1);
 #endif /* !VMS */
 #endif /* SIGSTOP */
-   return;
+    return;
 }
 
 #else  /* Not slang: */
@@ -289,24 +289,21 @@ PUBLIC HTCharStyle displayStyles[DSTYLE_ELEMENTS];
  */
 PUBLIC void setStyle ARGS4(int,style,int,color,int,cattr,int,mono)
 {
-	displayStyles[style].color=color;
-	displayStyles[style].cattr=cattr;
-	displayStyles[style].mono=mono;
+    displayStyles[style].color = color;
+    displayStyles[style].cattr = cattr;
+    displayStyles[style].mono = mono;
 }
 
 PUBLIC void setHashStyle ARGS5(int,style,int,color,int,cattr,int,mono,char*,element)
 {
-    bucket* ds=&hashStyles[style];
+    bucket* ds = &hashStyles[style];
     CTRACE((tfp, "CSS(SET): <%s> hash=%d, ca=%d, ma=%d\n", element, style, color, mono));
-    ds->color=color;
-    ds->cattr=cattr;
-    ds->mono=mono;
-    ds->code=style;
+    ds->color = color;
+    ds->cattr = cattr;
+    ds->mono = mono;
+    ds->code = style;
     FREE(ds->name);
-    ds->name=malloc(sizeof(char)*(strlen(element)+2));
-    if(!ds->name)
-	outofmem(__FILE__, "setHashStyle");
-    strcpy(ds->name, element);
+    StrAllocCopy(ds->name, element);
 }
 
 /*
@@ -729,8 +726,10 @@ PUBLIC void start_curses NOARGS
 	size_change(0);
 
 #if (defined(VMS) || defined(UNIX)) && !defined(__CYGWIN__)
-	SLtt_add_color_attribute(4, SLTT_ULINE_MASK);
-	SLtt_add_color_attribute(5, SLTT_ULINE_MASK);
+	if ((Masked_Attr & SLTT_ULINE_MASK) == 0) {
+	    SLtt_add_color_attribute(4, SLTT_ULINE_MASK);
+	    SLtt_add_color_attribute(5, SLTT_ULINE_MASK);
+	}
 	/*
 	 *  If set, the blink escape sequence will turn on high
 	 *  intensity background (rxvt and maybe Linux console).
@@ -837,19 +836,14 @@ PUBLIC void start_curses NOARGS
 	    lynx_has_color = TRUE;
 	    start_color();
 #if USE_DEFAULT_COLORS
-#if HAVE_USE_DEFAULT_COLORS	/* ncurses 4.1 */
-#if HAVE_ASSUME_DEFAULT_COLORS	/* ncurses 5.1 */
-#if !defined(USE_COLOR_STYLE)
+#ifdef EXP_ASSUMED_COLOR
 	    /*
-	     * If no "default" color was specified in the cfg file, adjust the
-	     * color mapping table so we'll not use the codes that would work
-	     * if we had called use_default_colors().
+	     * Adjust the color mapping table to match the ASSUMED_COLOR
+	     * setting in lynx.cfg
 	     */
-	    if (default_fg < 0 || default_bg < 0) {
-		if (assume_default_colors(default_fg, default_bg) != OK) {
-		    default_fg = COLOR_WHITE;
-		    default_bg = COLOR_BLACK;
-		}
+	    if (assume_default_colors(default_fg, default_bg) != OK) {
+		default_fg = COLOR_WHITE;
+		default_bg = COLOR_BLACK;
 	    }
 	    if (default_fg >= 0 || default_bg >= 0) {
 		unsigned n;
@@ -864,11 +858,9 @@ PUBLIC void start_curses NOARGS
 		}
 		lynx_setup_colors();
 	    }
-#endif
 #else
 	    lynx_default_colors();
-#endif /* HAVE_ASSUME_DEFAULT_COLORS */
-#endif /* HAVE_USE_DEFAULT_COLORS */
+#endif /* EXP_ASSUMED_COLOR */
 #endif /* USE_DEFAULT_COLORS */
 	}
 #endif /* USE_COLOR_STYLE || USE_COLOR_TABLE */
@@ -910,7 +902,7 @@ PUBLIC void start_curses NOARGS
     keypad(stdscr,TRUE);
 #endif /* HAVE_KEYPAD */
 
-   lynx_enable_mouse (1);
+    lynx_enable_mouse (1);
 
     fflush(stdin);
     fflush(stdout);
@@ -952,7 +944,6 @@ PUBLIC void lynx_enable_mouse ARGS1(int,state)
     SLtt_flush_output ();
 #else
 
-#ifdef NCURSES_MOUSE_VERSION
 #if defined(WIN_EX) && defined(PDCURSES)
     if (state)
     {
@@ -960,6 +951,7 @@ PUBLIC void lynx_enable_mouse ARGS1(int,state)
 	FlushConsoleInputBuffer(hConIn);
     }
 #else
+#ifdef NCURSES_MOUSE_VERSION
     if (state) {
 	/* Compensate for small value of maxclick in ncurses.  */
 	static int was = 0;
@@ -991,12 +983,15 @@ PUBLIC void lynx_enable_mouse ARGS1(int,state)
 		  NULL);
     } else
 	mousemask(0, NULL);
-#endif /* WIN_EX and PDCURSES */
 #endif /* NCURSES_MOUSE_VERSION */
+#endif /* WIN_EX and PDCURSES */
 
-#if defined(DJGPP) && !defined(USE_SLANG)
+#if defined(PDCURSES)
     if (state)
-	mouse_set(BUTTON1_CLICKED | BUTTON2_CLICKED | BUTTON3_CLICKED);
+	mouse_set(
+	    	BUTTON1_CLICKED | BUTTON1_PRESSED | BUTTON1_RELEASED |
+		BUTTON2_CLICKED | BUTTON2_PRESSED | BUTTON2_RELEASED |
+		BUTTON3_CLICKED | BUTTON3_PRESSED | BUTTON3_RELEASED);
 #endif
 #endif				/* NOT USE_SLANG_MOUSE */
 }
@@ -1022,7 +1017,7 @@ PUBLIC void stop_curses NOARGS
      */
     if(LYCursesON == TRUE)	{
 	 lynx_enable_mouse (0);
-#ifndef WIN_EX	/* @@@ */
+#if (!defined(WIN_EX) || defined(__CYGWIN__))	/* @@@ */
 	 endwin();	/* stop curses */
 #endif
     }

@@ -30,6 +30,10 @@
 #include <LYCookie.h>
 #include <LYPrettySrc.h>
 
+#ifdef VMS
+#include <HTFTP.h>
+#endif /* !DECNET */
+
 #ifdef __DJGPP__
 #include <dos.h>
 #include <dpmi.h>
@@ -351,6 +355,7 @@ PUBLIC BOOLEAN traversal = FALSE;    /* Do traversals? */
 PUBLIC BOOLEAN check_realm = FALSE;  /* Restrict to the starting realm? */
 	       /* Links beyond a displayed page with no links? */
 PUBLIC BOOLEAN more_links = FALSE;
+PUBLIC BOOLEAN lynx_temp_subspace = FALSE; /* true if we made temp-directory */
 PUBLIC int     ccount = 0; /* Starting number for lnk#.dat files in crawls */
 PUBLIC BOOLEAN LYCancelledFetch = FALSE; /* TRUE if cancelled binary fetch */
 	       /* Include mime headers with source dump */
@@ -786,6 +791,14 @@ PUBLIC int main ARGS2(
     WSADATA WSAData;
 #endif /* _WINDOWS */
 
+    /*
+     * Just in case someone has the idea to install lynx set-uid, let's try
+     * to discourage it.
+     */
+#if defined(GETUID) && defined(SETUID)
+    setuid(getuid());
+#endif
+
 #ifdef    NOT_ASCII
     FixCharacters();
 #endif /* NOT_ASCII */
@@ -1021,6 +1034,32 @@ PUBLIC int main ARGS2(
 	    FREE(temp);
 	}
     }
+    /*
+     * Verify if the given space looks secure enough.  Otherwise, make a
+     * secure subdirectory of that.  
+     */
+#if defined(UNIX) && defined(HAVE_MKTEMP)
+    {
+	struct stat sb;
+
+	if (lstat(lynx_temp_space, &sb) == 0
+	 && S_ISDIR(sb.st_mode)) {
+	    if (sb.st_uid != getuid()
+	     || (sb.st_mode & (S_IWOTH | S_IWGRP)) != 0)
+		lynx_temp_subspace = TRUE;
+	} else {
+	     lynx_temp_subspace = TRUE;
+	}
+	if (lynx_temp_subspace) {
+	    StrAllocCat(lynx_temp_space, "/XXXXXX");
+	    if (mktemp(lynx_temp_space) == 0
+	     || mkdir(lynx_temp_space, 0700) < 0) {
+		printf("%s: %s\n", lynx_temp_space, LYStrerror(errno));
+		exit(-1);
+	    }
+	}
+    }
+#endif
 #ifdef VMS
     LYLowerCase(lynx_temp_space);
     if (strchr(lynx_temp_space, '/') != NULL) {
@@ -1505,7 +1544,7 @@ PUBLIC int main ARGS2(
     /*
      *	Set the compilation default signature file. - FM
      */
-    strcpy(filename, LYNX_SIG_FILE);
+    LYstrncpy(filename, LYNX_SIG_FILE, sizeof(filename)-1);
     if (LYPathOffHomeOK(filename, sizeof(filename))) {
 	StrAllocCopy(LynxSigFile, filename);
 	LYAddPathToHome(filename, sizeof(filename), LynxSigFile);
@@ -3615,7 +3654,7 @@ treated '>' as a co-terminator for double-quotes and tags"
       "underscore",	TOGGLE_ARG,		&use_underscore,
       "toggles use of _underline_ format in dumps"
    ),
-#if defined(NCURSES_MOUSE_VERSION) || defined(USE_SLANG_MOUSE)
+#if defined(NCURSES_MOUSE_VERSION) || defined(PDCURSES) || defined(USE_SLANG_MOUSE)
    PARSE_SET(
       "use_mouse",	SET_ARG,		&LYUseMouse,
       "turn on mouse support"

@@ -57,7 +57,7 @@ PUBLIC int edit_current_file ARGS3(
     char *format = "%s %s";
     char *command = NULL;
     char *filename = NULL;
-#if (!(defined(VMS) || defined(DOSPATH) || defined(__EMX__)) || defined(SH_EX))
+#if !(defined(VMS) || defined(DOSPATH) || defined(__EMX__))
     char *colon;
 #endif
     char *number_sign;

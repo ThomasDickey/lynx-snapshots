@@ -13,6 +13,9 @@
 #include <HTAccess.h>
 #include <HTAnchor.h>
 
+extern int HTNewsChunkSize;
+extern int HTNewsMaxChunk;
+
 #ifdef GLOBALREF_IS_MACRO
 extern GLOBALREF(HTProtocol, HTNews);
 extern GLOBALREF(HTProtocol, HTNNTP);

@@ -105,6 +105,13 @@
 #define USE_KEYMAPS		1
 #endif
 
+#ifndef getbegx
+#define getbegx(win) ((win)->_begx)
+#endif
+#ifndef getbegy
+#define getbegy(win) ((win)->_begy)
+#endif
+
 #else
 # if defined(VMS) && defined(__GNUC__)
 #  include <LYGCurses.h>
@@ -406,6 +413,16 @@ FANCY_CURSES.  Check your config.log to see why the FANCY_CURSES test failed.
 #define LYGetYX(y, x)   y = stdscr->_cury, x = stdscr->_curx
 #endif /* getyx */
 #endif /* USE_SLANG */
+
+/*
+ * If the screen library allows us to specify "default" color, allow user to 
+ * control it.
+ */
+#if USE_DEFAULT_COLORS
+#if USE_SLANG || (HAVE_ASSUME_DEFAULT_COLORS && !defined(USE_COLOR_STYLE))
+#define EXP_ASSUMED_COLOR 1
+#endif
+#endif
 
 extern void lynx_enable_mouse PARAMS((int));
 extern void lynx_force_repaint NOPARAMS;

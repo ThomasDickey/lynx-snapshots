@@ -5,9 +5,7 @@
 #include <UCDefs.h>
 #include <HTStream.h>
 #include <UCAux.h>
-
-extern HTCJKlang HTCJK;
-extern LYUCcharset LYCharSet_UC[];
+#include <LYCharSets.h>
 
 PUBLIC BOOL UCCanUniTranslateFrom ARGS1(
 	int,		from)

@@ -142,7 +142,7 @@ PRIVATE void MemAllocCopy ARGS3(
 
 PRIVATE cookie * newCookie NOARGS
 {
-    cookie *p = (cookie *)calloc(1, sizeof(cookie));
+    cookie *p = typecalloc(cookie);
 
     if (p == NULL)
 	outofmem(__FILE__, "newCookie");
@@ -458,7 +458,7 @@ PRIVATE void store_cookie ARGS3(
 	/*
 	 *	Domain not found; add a new entry for this domain.
 	 */
-	de = (domain_entry *)calloc(1, sizeof(domain_entry));
+	de = typecalloc(domain_entry);
 	if (de == NULL)
 	    outofmem(__FILE__, "store_cookie");
 #if 0	/* was: ifdef EXP_PERSISTENT_COOKIES */
@@ -2030,11 +2030,7 @@ PUBLIC void LYLoadCookies ARGS1 (
 	};
     time_t expires;
 
-#ifdef DOSPATH	/* 1998/12/19 (Sat) 08:10:57 */
-    cookie_handle = fopen(cookie_file, "rt+");
-#else
-    cookie_handle = fopen(cookie_file, "r+");
-#endif
+    cookie_handle = fopen(cookie_file, TXT_R);
     if (!cookie_handle)
 	return;
 
@@ -2751,7 +2747,7 @@ PUBLIC void cookie_domain_flag_set ARGS2(
     domain_entry *de = NULL;
     domain_entry *de2 = NULL;
     HTList *hl = NULL;
-    char **str = (char **)calloc(1, sizeof(domainstr));
+    char **str = typecalloc(char *);
     char *dstr = NULL;
     char *strsmall = NULL;
     int isexisting = FALSE;
@@ -2804,7 +2800,7 @@ PUBLIC void cookie_domain_flag_set ARGS2(
 	}
 
 	if(!isexisting) {
-	    de = (domain_entry *)calloc(1, sizeof(domain_entry));
+	    de = typecalloc(domain_entry);
 
 	    if (de == NULL)
 		    outofmem(__FILE__, "cookie_domain_flag_set");

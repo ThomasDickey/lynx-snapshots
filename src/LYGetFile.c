@@ -460,7 +460,7 @@ Try_Redirected_URL:
 			       exec_ok(HTLoadedDocumentURL(),
 				       doc->address+9, EXEC_PATH))) {
 
-			char *p, addressbuf[1024];
+			char *p = NULL;
 
 			/*
 			 *  Bug puts slash on end if none is in the string.
@@ -470,17 +470,17 @@ Try_Redirected_URL:
 			 == (int)strlen(doc->address) - 1)
 			    doc->address[strlen(doc->address)-1] = '\0';
 
-			p = doc->address;
 			/*
 			 *  Convert '~' to $HOME.
 			 */
 			if ((cp = strchr(doc->address, '~'))) {
-			    strncpy(addressbuf, doc->address, cp-doc->address);
-			    addressbuf[cp - doc->address] = '\0';
-			    p = wwwName(Home_Dir());
-			    strcat(addressbuf, p);
-			    strcat(addressbuf, cp+1);
-			    p = addressbuf;
+			    HTSprintf0(&p, "%.*s%s%s",
+					   cp - doc->address,
+					   doc->address,
+					   wwwName(Home_Dir()),
+					   cp + 1);
+			} else {
+			    StrAllocCopy(p, doc->address);
 			}
 			/*
 			 *  Show URL before executing it.
@@ -494,6 +494,8 @@ Try_Redirected_URL:
 			    LYSystem(p+11);
 			else
 			    LYSystem(p+9);
+			FREE(p);
+
 			if (url_type != LYNXPROG_URL_TYPE) {
 			    /*
 			     *	Make sure user gets to see screen output.

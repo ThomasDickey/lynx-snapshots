@@ -19,6 +19,7 @@
 #include <UCDefs.h>
 #include <UCMap.h>
 #include <UCAux.h>
+#include <HTFTP.h>
 #include <HTVMSUtils.h>
 #include <ssdef.h>
 #include <jpidef.h>
@@ -324,7 +325,7 @@ PUBLIC int HTStat ARGS2(
 int Result;
 int Len;
 char *Ptr, *Ptr2;
-char Name[256];
+static char *Name;
 
    /* try normal stat... */
    Result = stat((char *)filename,info);
@@ -332,32 +333,7 @@ char Name[256];
       return(Result);
 
    /* make local copy */
-   strcpy(Name,filename);
-
-#ifdef NOT_USED
-   /* if filename contains a node specification (! or ::), we will try to access
-      the file via DECNET, but we do not stat it..., just return success
-      with some fake information... */
-   if (HTVMS_checkDecnet(Name))
-   {
-      /* set up fake info, only the one we use... */
-      info->st_dev = NULL;
-      info->st_ino[0] = 0;
-      info->st_ino[1] = 0;
-      info->st_ino[2] = 0;
-      info->st_mode = S_IFREG | S_IREAD;	/* assume it is a regular Readable file */
-      info->st_nlink = NULL;
-      info->st_uid = 0;
-      info->st_gid = 0;
-      info->st_rdev = 0;
-      info->st_size = 0;
-      info->st_atime = time(NULL);
-      info->st_mtime = time(NULL);
-      info->st_ctime = time(NULL);
-
-      return(0);
-   }
-#endif /* NOT_USED */
+   StrAllocCopy(Name,filename);
 
    /* failed,so do device search in case root is requested */
    if (!strcmp(Name,"/"))
@@ -374,7 +350,7 @@ char Name[256];
    Ptr = strchr(Name+1,'/');
    if ((Ptr == NULL) && (Name[0] == '/'))
    {  /* device only... */
-      strcat(Name,"/000000/000000");
+      StrAllocCat(Name, "/000000/000000");
    }
 
    if (Ptr != NULL)
@@ -383,10 +359,10 @@ char Name[256];
       if ((Ptr2 == NULL) && (Name[0] == '/'))
       {
 	 char End[256];
-	 strcpy(End,Ptr);
+	 LYstrncpy(End, Ptr, sizeof(End) - 1);
 	 *(Ptr+1) = '\0';
-	 strcat(Name,"000000");
-	 strcat(Name,End);
+	 StrAllocCat(Name, "000000");
+	 StrAllocCat(Name, End);
       }
    }
 
@@ -396,7 +372,7 @@ char Name[256];
       return(Result);
 
    /* add .DIR and try again */
-   strcat(Name,".dir");
+   StrAllocCat(Name, ".dir");
    Result = stat(Name,info);
    return(Result);
 }
@@ -477,7 +453,7 @@ char *closebracket;
 long status;
 struct dsc$descriptor_s entryname_desc;
 struct dsc$descriptor_s dirname_desc;
-char DirEntry[256];
+static char *DirEntry;
 char VMSentry[256];
 char UnixEntry[256];
 int index;
@@ -488,11 +464,13 @@ char *dot;
    /* or like               /disk$user/duns/www/test/multi/   */
    /* DirEntry should look like     disk$user:[duns.www.test]multi in both cases */
    /* dir.dirname should look like  disk$user:[duns.www.test.multi] */
-   strcpy(UnixEntry,dirname);
+   sprintf(UnixEntry, "%.*s", sizeof(UnixEntry) - 2, dirname);
    if (UnixEntry[strlen(UnixEntry)-1] != '/')
       strcat(UnixEntry,"/");
 
-   strcpy(DirEntry, HTVMS_name("",UnixEntry));
+   StrAllocCopy(DirEntry, HTVMS_name("",UnixEntry));
+   if (strlen(DirEntry) > sizeof(dir.dirname) - 1)
+      return (NULL);
    strcpy(dir.dirname, DirEntry);
    index = strlen(DirEntry) - 1;
 
@@ -504,24 +482,25 @@ char *dot;
       char *openbr = strrchr(DirEntry,'[');
       if (!openbr)
       { /* convert disk$user: into disk$user:[000000]000000.dir */
-	 strcpy(dir.dirname, DirEntry);
-	 strcat(dir.dirname, "[000000]");
-	 strcat(DirEntry,"[000000]000000.dir");
+         if (strlen(dir.dirname) > sizeof(dir.dirname) - 10)
+            return (NULL);
+         sprintf(dir.dirname, "%.*s[000000]", sizeof(dir.dirname) - 9, DirEntry);
+	 StrAllocCat(DirEntry,"[000000]000000.dir");
       }
       else
       {
 	 char End[256];
 	 strcpy(End,openbr+1);
 	 *(openbr+1) = '\0';
-	 strcat(DirEntry,"000000]");
-	 strcat(DirEntry,End);
-	 strcat(DirEntry,".dir");
+	 StrAllocCat(DirEntry,"000000]");
+	 StrAllocCat(DirEntry,End);
+	 StrAllocCat(DirEntry,".dir");
       }
    }
    else
    {
       *dot = ']';
-      strcat(DirEntry,".dir");
+      StrAllocCat(DirEntry,".dir");
    }
 
    dir.context = 0;
@@ -545,16 +524,8 @@ char *dot;
       return(NULL);
    }
 
-#if 0
-   /* now correct dirname, which looks like disk$user:[duns.www.test]multi */
-   /* and should look like disk$user:[duns.www.test.multi] */
-   closebracket = strchr(dir.dirname,']');
-   *closebracket = '.';
-   closebracket = strstr(dir.dirname,".dir");
-   *closebracket = '\0';
-   strcat(dir.dirname,"]");
-#endif
-
+   if (strlen(dir.dirname) > sizeof(dir.dirname) - 10)
+       return (NULL);
    if (HTVMSFileVersions)
        strcat(dir.dirname,"*.*;*");
    else
@@ -662,12 +633,6 @@ PRIVATE void free_VMSEntryInfo_contents ARGS1(VMSEntryInfo *,entry_info)
     }
    /* dont free the struct */
 }
-
-#define FILE_BY_NAME 0
-#define FILE_BY_TYPE 1
-#define FILE_BY_SIZE 2
-#define FILE_BY_DATE 3
-extern BOOLEAN HTfileSortMethod;  /* specifies the method of sorting */
 
 PUBLIC int compare_VMSEntryInfo_structs ARGS2(VMSEntryInfo *,entry1,
 					      VMSEntryInfo *,entry2)

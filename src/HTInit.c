@@ -341,10 +341,8 @@ PRIVATE int ProcessMailcapEntry ARGS2(
     mc->testcommand = NULL;
     mc->label = NULL;
     mc->printcommand = NULL;
-    mc->contenttype = (char *)malloc(1 + strlen(rawentry));
-    if (!mc->contenttype)
-	ExitWithError(MEMORY_EXHAUSTED_ABORT);
-    strcpy(mc->contenttype, rawentry);
+    mc->contenttype = NULL;
+    StrAllocCopy(mc->contenttype, rawentry);
     mc->quality = 1.0;
     mc->maxbytes = 0;
     t = GetCommand(s, &mc->command);
@@ -507,15 +505,11 @@ PRIVATE int RememberTestResult ARGS3(
 		    return cur->result;
 	    return -1;
 	case RTR_add:
-	    cur = calloc(1, sizeof(struct cmdlist_s));
+	    cur = typecalloc(struct cmdlist_s);
 	    if (cur == NULL)
 		outofmem(__FILE__, "RememberTestResult");
 	    cur->next = cmdlist;
-	    cur->cmd = (char *)malloc(strlen(cmd) + 1);
-	    if(cur->cmd)
-		strcpy(cur->cmd, cmd);
-	    else
-		ExitWithError("Out of memory");
+	    StrAllocCopy(cur->cmd, cmd);
 	    cur->result = result;
 	    cmdlist = cur;
 	    break;
@@ -1150,10 +1144,8 @@ PRIVATE int HTLoadExtensionsConfigFile ARGS1(
 	HTGetWord(word, line, ' ', '\t');
 	if (line[0] == '\0' || word[0] == '#')
 	    continue;
-	ct = (char *)malloc(sizeof(char) * (strlen(word) + 1));
-	if (!ct)
-	    outofmem(__FILE__, "HTLoadExtensionsConfigFile");
-	strcpy(ct,word);
+	ct = NULL;
+	StrAllocCopy(ct, word);
 	LYLowerCase(ct);
 
 	while(line[0]) {

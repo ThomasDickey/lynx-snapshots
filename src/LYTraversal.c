@@ -20,7 +20,7 @@ PRIVATE void final_perror ARGS2(CONST char *,msg, BOOLEAN, clean_flag)
 	else
 	    stop_curses();
     }
-    errno = saved_errno;
+    set_errno(saved_errno);
     perror(msg);
 }
 

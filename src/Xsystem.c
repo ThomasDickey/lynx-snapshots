@@ -1,4 +1,4 @@
-/* @Id: Xsystem.c 1.5 Tue, 30 Nov 1999 20:33:02 -0700 dickey @
+/* @Id: Xsystem.c 1.6 Sun, 26 Mar 2000 19:14:00 -0800 dickey @
  *	like system("cmd") but return with exit code of "cmd"
  *	for Turbo-C/MS-C/LSI-C
  *  This code is in the public domain.
@@ -304,17 +304,17 @@ try3(char *cnm, PRO * p, int flag)
     char cmdb[STR_MAX];
     int rc;
 
-    strcat(strcpy(cmdb, cnm), ".com");
+    sprintf(cmdb, "%.*s.com", sizeof(cmdb) - 5, cnm);
     if ((rc = open(cmdb, O_RDONLY)) >= 0) {
 	close(rc);
 	return spawnl(flag, cmdb, cmdb, p->arg, (char *) 0);
     }
-    strcat(strcpy(cmdb, cnm), ".exe");
+    sprintf(cmdb, "%.*s.exe", sizeof(cmdb) - 5, cnm);
     if ((rc = open(cmdb, O_RDONLY)) >= 0) {
 	close(rc);
 	return spawnl(flag, cmdb, cmdb, p->arg, (char *) 0);
     }
-    strcat(strcpy(cmdb, cnm), ".bat");
+    sprintf(cmdb, "%.*s.bat", sizeof(cmdb) - 5, cnm);
     if ((rc = open(cmdb, O_RDONLY)) >= 0) {
 	close(rc);
 	return csystem(p, flag);
@@ -346,7 +346,7 @@ prog_go(PRO * p, int flag)
 
     if (s < p->cmd) {		/* cmd has no PATH nor Drive */
 	ep = getenv("PATH");
-	strcpy(cmdb, p->cmd);
+	LYstrncpy(cmdb, p->cmd, sizeof(cmdb) - 1);
 	for (;;) {
 	    if (extp) {		/* has extension */
 		if ((rc = open(cmdb, O_RDONLY)) >= 0) {
@@ -368,7 +368,7 @@ prog_go(PRO * p, int flag)
 		if (i > 0 && lc != ':' && lc != '\\' && lc != '/')
 		    cmdb[i++] = '\\';
 		cmdb[i] = 0;
-		strcat(cmdb, p->cmd);
+		LYstrncpy(cmdb + i, p->cmd, sizeof(cmdb) - 1 - i);
 	    } else {
 		if (rc == -2)
 		    return rc;
@@ -396,7 +396,7 @@ tmpf(char *tp)
     int i;
 
     if ((ev = getenv("TMP")) != 0) {
-	strcpy(tplate, ev);
+	LYstrncpy(tplate, ev, sizeof(tplate) - 2 - strlen(tp));
 	i = strlen(ev);
 	if (i && ev[i - 1] != '\\' && ev[i - 1] != '/')
 	    strcat(tplate, "\\");
@@ -498,7 +498,7 @@ xsystem(char *cmd)
 	if (!getenv("NOCMDLINE")) {
 	    oldcmdline = cmdline;
 	    cmdline = xmalloc(strlen(p->cmd) + strlen(p->arg) + 10);
-	    strcat(strcat(strcat(strcpy(cmdline, "CMDLINE="), p->cmd), " "), p->arg);
+	    sprintf(cmdline, "CMDLINE=%s %s", p->cmd, p->arg);
 	    putenv(cmdline);
 	    if (oldcmdline)
 		free(oldcmdline);

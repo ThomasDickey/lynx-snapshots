@@ -63,7 +63,6 @@ struct _HTStream
 extern BOOLEAN scan_for_buried_news_references;
 extern BOOLEAN LYListNewsNumbers;
 extern BOOLEAN LYListNewsDates;
-extern HTCJKlang HTCJK;
 extern int interrupted_in_htgetcharacter;
 extern BOOL keep_mime_headers;	 /* Include mime headers and force raw text */
 extern BOOL using_proxy;	/* Are we using an NNTP proxy? */
@@ -568,8 +567,9 @@ PRIVATE char * author_name ARGS1 (char *,email)
     }
 
     if ((p = strrchr(name, '<')) && (e = strrchr(name, '>'))) {
-	if (e > p) {
-	    strcpy(p, e+1);		/* Remove <...> */
+	if (e++ > p) {
+	    while ((*p++ = *e++) != 0)	/* Remove <...> */
+		;
 	    return HTStrip(name);	/* Remove leading and trailing spaces */
 	}
     }
@@ -966,7 +966,7 @@ static char *decode_mime(char *str)
 #else
 static char *decode_mime(char *str)
 {
-    char temp[LINE_LENGTH+256];	/* FIXME: what determines the actual size? */
+    char temp[LINE_LENGTH];	/* FIXME: what determines the actual size? */
     char *p, *q;
 
     if (str == NULL)
@@ -975,7 +975,7 @@ static char *decode_mime(char *str)
     if (HTCJK != JAPANESE)
 	return str;
 
-    strcpy(temp, str);
+    LYstrncpy(temp, str, sizeof(temp) - 1);
     q = temp;
     while ((p = strchr(q, '=')) != 0) {
 	if (p[1] == '?') {
@@ -1953,7 +1953,7 @@ PRIVATE int read_group ARGS3(
 			case 'S':
 			case 's':
 			    if (match(line, "SUBJECT:")) {
-				strcpy(subject, line+9);/* Save subject */
+				LYstrncpy(subject, line+9, sizeof(subject)-1);/* Save subject */
 				decode_mime(subject);
 			    }
 			    break;
@@ -2052,7 +2052,7 @@ PRIVATE int read_group ARGS3(
 		START(HTML_LI);
 		START(HTML_I);
 		if (LYListNewsNumbers)
-		    strcpy(buffer, "Status:");
+		    LYstrncpy(buffer, "Status:", sizeof(buffer) - 1);
 		else
 		    sprintf(buffer, "Status (ARTICLE %d):", art);
 		PUTS(buffer);
@@ -2410,7 +2410,7 @@ PRIVATE int HTLoadNews ARGS4(
 		    HTAlert(URL_TOO_LONG);
 		    return -400;
 		}
-		strcpy(groupName, p1);
+		LYstrncpy(groupName, p1, sizeof(groupName) - 1);
 		*slash = '/';
 		(void)sscanf(slash+1, "%d-%d", &first, &last);
 		if ((first > 0) && (isdigit(*(slash+1))) &&
@@ -2432,7 +2432,7 @@ PRIVATE int HTLoadNews ARGS4(
 		    HTAlert(URL_TOO_LONG);
 		    return -400;
 		}
-		strcpy(groupName, p1);
+		LYstrncpy(groupName, p1, sizeof(groupName) - 1);
 	    }
 	    SnipIn(command, "GROUP %.*s", 9, groupName);
 	} else {

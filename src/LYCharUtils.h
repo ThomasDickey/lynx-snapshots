@@ -52,6 +52,9 @@ extern void LYFillLocalFileURL PARAMS((
 extern void LYAddMETAcharsetToFD PARAMS((
 	FILE *		fd,
 	int		disp_chndl));
+extern void LYformTitle PARAMS((
+	char **		dst,
+	CONST char *	src));
 
 #ifdef Lynx_HTML_Handler
 extern int OL_CONTINUE;		/* flag for whether CONTINUE is set */

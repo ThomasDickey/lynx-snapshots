@@ -474,7 +474,7 @@ PUBLIC HTStream* HTFWriter_new ARGS1(FILE *, fp)
     if (!fp)
 	return NULL;
 
-    me = (HTStream*)calloc(sizeof(*me),1);
+    me = typecalloc(HTStream);
     if (me == NULL)
 	outofmem(__FILE__, "HTFWriter_new");
     me->isa = &HTFWriter;
@@ -555,7 +555,7 @@ PUBLIC HTStream* HTSaveAndExecute ARGS3(
 	return(HTSaveToFile(pres, anchor, sink));
     }
 
-    me = (HTStream*)calloc(sizeof(*me),1);
+    me = typecalloc(HTStream);
     if (me == NULL)
 	outofmem(__FILE__, "HTSaveAndExecute");
     me->isa = &HTFWriter;
@@ -586,7 +586,7 @@ PUBLIC HTStream* HTSaveAndExecute ARGS3(
 	    me->fp = NULL;
 
 	    view_fname = fnam + 3;
-	    strcpy(view_fname, anchor->address + 17);
+	    LYstrncpy(view_fname, anchor->address + 17, sizeof(fnam) - 5);
 	    HTUnEscape(view_fname);
 
 	    if (strchr(view_fname, ':')==NULL) {
@@ -612,9 +612,8 @@ PUBLIC HTStream* HTSaveAndExecute ARGS3(
 
 	    StrAllocCopy(me->viewer_command, pres->command);
 
-	    me->end_command = (char *)calloc (
-			(strlen (pres->command) + 10 + strlen(view_fname))
-				 * sizeof (char),1);
+	    me->end_command = typecallocn(char,
+			strlen (pres->command) + 10 + strlen(view_fname));
 	    if (me->end_command == NULL)
 		outofmem(__FILE__, "HTSaveAndExecute");
 	    sprintf(me->end_command, pres->command, view_fname);
@@ -697,7 +696,7 @@ PUBLIC HTStream* HTSaveToFile ARGS3(
     int c = 0;
     BOOL IsBinary = TRUE;
 
-    ret_obj = (HTStream*)calloc(sizeof(* ret_obj),1);
+    ret_obj = typecalloc(HTStream);
     if (ret_obj == NULL)
 	outofmem(__FILE__, "HTSaveToFile");
     ret_obj->isa = &HTFWriter;
@@ -876,9 +875,16 @@ Prepend_BASE:
 
 	fprintf(ret_obj->fp,
 		"<!-- X-URL: %s -->\n", anchor->address);
-	if (anchor->date && *anchor->date)
-	     fprintf(ret_obj->fp,
+	if (anchor->date && *anchor->date) {
+	    fprintf(ret_obj->fp,
 		"<!-- Date: %s -->\n", anchor->date);
+	    if (anchor->last_modified && *anchor->last_modified
+			&& !strcmp(anchor->last_modified, anchor->date)
+			&& !strcmp(anchor->last_modified, ctime((time_t)0))) {
+		fprintf(ret_obj->fp,
+		    "<!-- Last-Modified: %s -->\n", anchor->last_modified);
+	    }
+	}
 	fprintf(ret_obj->fp,
 		"<BASE HREF=\"%s\">\n\n", (temp ? temp : anchor->address));
 	FREE(temp);
@@ -1017,7 +1023,7 @@ PUBLIC HTStream* HTCompressed ARGS3(
      *	Set up the stream structure for uncompressing and then
      *	handling based on the uncompressed Content-Type.- FM
      */
-    me = (HTStream*)calloc(sizeof(*me),1);
+    me = typecalloc(HTStream);
     if (me == NULL)
 	outofmem(__FILE__, "HTCompressed");
     me->isa = &HTFWriter;
@@ -1149,7 +1155,7 @@ PUBLIC HTStream* HTDumpToStdout ARGS3(
 	HTStream *,		sink GCC_UNUSED)
 {
     HTStream * ret_obj;
-    ret_obj = (HTStream*)calloc(sizeof(* ret_obj),1);
+    ret_obj = typecalloc(HTStream);
     if (ret_obj == NULL)
 	outofmem(__FILE__, "HTDumpToStdout");
     ret_obj->isa = &HTFWriter;

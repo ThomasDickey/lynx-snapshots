@@ -25,10 +25,6 @@
 BOOLEAN term_message = FALSE;
 PRIVATE void terminate_message  PARAMS((int sig));
 
-#ifdef CJK_EX	/* 1998/05/15 (Fri) 09:10:38 */
-extern HTCJKlang HTCJK;
-#endif
-
 PRIVATE BOOLEAN message_has_content ARGS2(
     CONST char *,	filename,
     BOOLEAN *,		nonspaces)
@@ -108,6 +104,7 @@ PUBLIC char *LYNewsPost ARGS2(
     char *cp = NULL;
     CONST char *kp = NULL;
     int c = 0;  /* user input */
+    int len;
     FILE *fd = NULL;
     char my_tempfile[LY_MAXPATH];
     FILE *fc = NULL;
@@ -213,9 +210,8 @@ PUBLIC char *LYNewsPost ARGS2(
      *  offering personal_mail_address as default.
      */
     addstr(gettext("\n\n Please provide your mail address for the From: header\n"));
-    strcpy(user_input, "From: ");
-    if (personal_mail_address)
-	strcat(user_input, personal_mail_address);
+    sprintf(user_input, "From: %.*s", (int)sizeof(user_input) - 8,
+	    (personal_mail_address != NULL) ? personal_mail_address : "");
     if (LYgetstr(user_input, VISIBLE,
 		 sizeof(user_input), NORECALL) < 0 ||
 	term_message) {
@@ -259,7 +255,8 @@ PUBLIC char *LYNewsPost ARGS2(
 	if (strncasecomp(kp, "Re:", 3)) {
 	    strcat(user_input, "Re: ");
 	}
-	strcat(user_input, kp);
+	len = strlen(user_input);
+	LYstrncpy(user_input + len, kp, sizeof(user_input) - len - 1);
     }
     cp = NULL;
     if (LYgetstr(user_input, VISIBLE,
@@ -299,11 +296,11 @@ PUBLIC char *LYNewsPost ARGS2(
 #else
 #ifdef _WINDOWS	/* 1998/05/14 (Thu) 17:47:01 */
     else {
-	char *p, fname[256];
+	char *p, fname[LY_MAXPATH];
 
 	strcpy(fname, LynxSigFile);
 	p = strrchr(fname, '/');
-	if (p) {
+	if (p != 0 && (p - fname) < sizeof(fname) - 15) {
 	    strcpy(p + 1, "LYNX_ETC.TXT");
 	    if ((fp = fopen(fname, TXT_R)) != NULL) {
 		if (fgets(user_input, sizeof(user_input), fp) != NULL) {

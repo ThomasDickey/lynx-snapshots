@@ -57,16 +57,14 @@ PUBLIC void LYJumpTable_free NOARGS
  */
 PUBLIC void LYAddJumpShortcut ARGS2(HTList *, historyp, char *,shortcut)
 {
-    char *new;
+    char *new = NULL;
     char *old;
     HTList *cur =  historyp;
 
     if (!historyp || !(shortcut && *shortcut))
 	return;
 
-    if ((new = (char *)calloc(1, (strlen(shortcut) + 1))) == NULL)
-	outofmem(__FILE__, "LYAddJumpShortcut");
-    strcpy(new, shortcut);
+    StrAllocCopy(new, shortcut);
 
     while (NULL != (old = (char *)HTList_nextObject(cur))) {
 	if (!strcmp(old, new)) {
@@ -88,7 +86,7 @@ PUBLIC BOOL LYJumpInit ARGS1 (char *, config)
     /*
      * Create a JumpTable structure.
      */
-    jtp = (struct JumpTable *) calloc(1, sizeof(*jtp));
+    jtp = typecalloc(struct JumpTable);
     if (jtp == NULL) {
 	outofmem(__FILE__, "LYJumpInit");
     }
@@ -148,7 +146,7 @@ PUBLIC BOOL LYJumpInit ARGS1 (char *, config)
 	StrAllocCopy(JThead->msg, jumpprompt);
 	if (!jumpfile)
 	    StrAllocCopy(jumpfile, JThead->file);
-	jtp = (struct JumpTable *) calloc(1, sizeof(*jtp));
+	jtp = typecalloc(struct JumpTable);
 	if (jtp == NULL) {
 	    outofmem(__FILE__, "LYJumpInit");
 	}
@@ -259,11 +257,8 @@ check_recall:
 	    HTUserMsg(RANDOM_URL_DISALLOWED);
 	    return NULL;
 	}
-	StrAllocCopy(temp, "Go ");
-	StrAllocCat(temp, bp);
-	strcpy(buf, temp);
-	FREE(temp);
-	return(bp=buf);
+	sprintf(buf, "Go %.*s", (int)sizeof(buf) - 4, bp);
+	return (bp = buf);
     }
 #endif /* PERMIT_GOTO_FROM_JUMP */
 
@@ -287,7 +282,7 @@ check_recall:
 	    ShortcutNum = 0;
 	if ((cp=(char *)HTList_objectAt(jtp->history,
 					ShortcutNum)) != NULL) {
-	    strcpy(buf, cp);
+	    LYstrncpy(buf, cp, sizeof(buf)-1);
 	    if (jump_buffer && jtp->shortcut &&
 		!strcmp(buf, jtp->shortcut)) {
 		_statusline(EDIT_CURRENT_SHORTCUT);
@@ -327,7 +322,7 @@ check_recall:
 	    ShortcutNum = ShortcutTotal - 1;
 	if ((cp=(char *)HTList_objectAt(jtp->history,
 					ShortcutNum)) != NULL) {
-	    strcpy(buf, cp);
+	    LYstrncpy(buf, cp, sizeof(buf)-1);
 	    if (jump_buffer && jtp->shortcut &&
 		!strcmp(buf, jtp->shortcut)) {
 		_statusline(EDIT_CURRENT_SHORTCUT);

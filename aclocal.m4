@@ -1817,6 +1817,28 @@ AC_MSG_RESULT($cf_cv_baddef_remove)
 test "$cf_cv_baddef_remove" != no && AC_DEFINE(NEED_REMOVE)
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl Check if 'errno' is declared in a fashion that lets us set it.
+AC_DEFUN([CF_SET_ERRNO],
+[
+AC_CACHE_CHECK(if we can set errno,cf_cv_set_errno,[
+AC_TRY_RUN([
+#include <errno.h>
+int main()
+{
+	errno = 255;
+	exit(errno != 255);
+}],
+	[cf_cv_set_errno=yes],
+	[cf_cv_set_errno=no],
+	[AC_TRY_LINK(
+		[#include <errno.h>],
+		[errno = 255],
+		[cf_cv_set_errno=maybe],
+		[cf_cv_set_errno=no])])
+])
+test "$cf_cv_set_errno" != no && AC_DEFINE(CAN_SET_ERRNO)
+])dnl
+dnl ---------------------------------------------------------------------------
 dnl Check for definitions & structures needed for window size-changing
 dnl FIXME: check that this works with "snake" (HP-UX 10.x)
 AC_DEFUN([CF_SIZECHANGE],

@@ -341,6 +341,23 @@
 #define TEMP_SPACE "/tmp/"
 
 /********************************
+ * Comment this line out to disable code that randomizes the names given to
+ * temporary files.
+ */
+#define EXP_RAND_TEMPNAME 1
+
+/********************************
+ * Uncomment this line to use 'mkstemp()' in preference to lynx's own code
+ * in fmt_tempname().  Caution: on a few older systems, mkstemp() is less
+ * secure than you would like.  For this reason, we do not auto-configure it.
+ *
+ * Some things to watch out for:  some broken implementations of mkstemp() may
+ * not necessarily try a different filename when they are called, making it
+ * impossible to rename the file.  Others make world-writable files.
+ */
+/*#define USE_MKSTEMP */
+
+/********************************
  * Comment this line out to let the user enter his/her email address
  * when sending a message.  There should be no need to do this unless
  * your mailer agent does not put in the From: field for you.  (If your
@@ -1322,26 +1339,16 @@
  * the version definition with the Project Version on checkout.  Just
  * ignore it. - kw */
 /* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
-#define LYNX_VERSION "2.8.3dev.22"
+#define LYNX_VERSION "2.8.3dev.23"
 #define LYNX_WWW_HOME "http://lynx.browser.org/"
 #define LYNX_WWW_DIST "http://lynx.isc.org/current/"
 #define LYNX_RELEASE FALSE
 /* $Format: "#define LYNX_DATE \"$ProjectDate$\""$ */
-#define LYNX_DATE "Sun, 12 Mar 2000 16:38:38 -0800"
+#define LYNX_DATE "Sun, 26 Mar 2000 19:14:00 -0800"
 #define LYNX_DATE_OFF 5		/* truncate the automatically-generated date */
 #define LYNX_DATE_LEN 11	/* truncate the automatically-generated date */
 #define LYNX_RELEASE_DATE "1999"
 
-#if 0	/* unused */
-#ifndef MAXINT
-#define MAXINT 2147483647	/* max integer */
-#endif /* !MAXINT */
-#define MAXBASE 100		/* max length of base directory */
-#define MAXHIGHLIGHT 160	/* max length of highlighted text */
-#define MAXTARGET 130		/* max length of target string */
-#define MAXFNAME 1280		/* max filename length DDD/FILENAME.EXT */
-#define MAXCOMMAND MAXFNAME	/* max length of command should be the same */
-#endif /* unused */
 #define LINESIZE 1024		/* max length of line to read from file */
 #define MAXHIST  1024		/* max links we remember in history */
 #define MAXLINKS 1024		/* max links on one screen */

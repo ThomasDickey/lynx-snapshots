@@ -11,20 +11,58 @@ WWW_DIR = WWW\Library\Implementation
 # pdcurses.lib panel.lib dirent.obj curses.h panel.h dirent.h
 ETC_LIB = lib
 
-INCLUDES = /I "." /I "$(SRC_DIR)" /I "$(SRC_DIR)\chrtrans" /I "$(WWW_DIR)" /I "$(ETC_LIB)"
-DEFS = /D "NDEBUG" /D\
- "__WIN32__" /D "WIN32" /D "_CONSOLE" /D "_MBCS" /D "NO_UNISTD_H" /D VC="2.14FM" /D\
- "_WINDOWS" /D "XMOSAIC_HACK" /D "ACCESS_AUTH" /D "NO_FILIO_H" /D "NO_UTMP" /D\
- "NO_CUSERID" /D "NO_TTYTYPE" /D "NOSIGHUP" /D "DOSPATH" /D "NOUSERS" /D\
- "EXP_CHARTRANS" /D "NCURSES" /D "FANCY_CURSES" /D "COLOR_CURSES" /D\
- "USE_COLOR_TABLE" /D "HAVE_KEYPAD" /D "NCURSES_VERSION" /D "USE_EXTERNALS" /D\
- "PDCURSES" /D "SUPPORT_MULTIBYTE_EDIT" /D "USE_MULTIBYTE_CURSES" \
- /D "LONG_LIST" /D "DISP_PARTIAL" /D\
- "EXP_PERSISTENT_COOKIES" /D "NO_CONFIG_INFO" /D\
- "EXP_ALT_BINDINGS" /D LY_MAXPATH="1024" /D _WIN_CC="1" /D "CJK_EX" /D "SH_EX" /D "WIN_EX" /D "USE_ZLIB"
+INCLUDES = \
+ /I "." \
+ /I "$(SRC_DIR)" \
+ /I "$(SRC_DIR)\chrtrans" \
+ /I "$(WWW_DIR)" \
+ /I "$(ETC_LIB)"
+DEFS = \
+ /D "__WIN32__" \
+ /D "_CONSOLE" \
+ /D "_MBCS" \
+ /D "_WINDOWS" \
+ /D "ACCESS_AUTH" \
+ /D "CJK_EX" \
+ /D "COLOR_CURSES" \
+ /D "DIRED_SUPPORT" \
+ /D "DISP_PARTIAL" \
+ /D "DOSPATH" \
+ /D "EXP_ALT_BINDINGS" \
+ /D "EXP_CHARTRANS" \
+ /D "EXP_PERSISTENT_COOKIES" \
+ /D "FANCY_CURSES" \
+ /D "HAVE_KEYPAD" \
+ /D "LONG_LIST" \
+ /D "NCURSES" \
+ /D "NCURSES_VERSION" \
+ /D "NDEBUG" \
+ /D "NO_CONFIG_INFO" \
+ /D "NO_CUSERID" \
+ /D "NO_FILIO_H" \
+ /D "NO_TTYTYPE" \
+ /D "NO_UNISTD_H" \
+ /D "NO_UTMP" \
+ /D "NOSIGHUP" \
+ /D "NOUSERS" \
+ /D "PDCURSES" \
+ /D "SH_EX" \
+ /D "SUPPORT_MULTIBYTE_EDIT" \
+ /D "USE_COLOR_TABLE" \
+ /D "USE_EXTERNALS" \
+ /D "USE_MULTIBYTE_CURSES" \
+ /D "USE_ZLIB" \
+ /D "WIN_EX" \
+ /D "WIN32" \
+ /D "XMOSAIC_HACK" \
+ /D _WIN_CC="1" \
+ /D LY_MAXPATH="1024"  \
+ /D VC="2.14FM"
 CFLAGS   = /nologo /MT /W3 /GX /O2 /c
+#CFLAGS   = /nologo /MT /W3 /GX /Zi /c
 
 LDFLAGS  = /nologo /subsystem:console /incremental:no /machine:I386
+#LDFLAGS  = /debug /nologo /subsystem:console /incremental:no /machine:I386
 LIBS     = kernel32.lib user32.lib wsock32.lib /NODEFAULTLIB:libc\
  $(ETC_LIB)\pdcurses.lib $(ETC_LIB)\zlib.lib dirent.obj
 
@@ -32,10 +70,7 @@ COMPILE = $(CC) $(CFLAGS) $(INCLUDES) $(DEFS)
 LINK    = $(LD) $(LDFLAGS) /out:$@
 
 OBJS = \
-	"crypt.obj" \
-	"crypt_util.obj" \
 	"DefaultStyle.obj" \
-	"getline.obj" \
 	"GridText.obj" \
 	"HTAABrow.obj" \
 	"HTAAProt.obj" \
@@ -276,20 +311,8 @@ UCdomap.obj : $(SRC_DIR)\UCdomap.c
 Xsystem.obj : $(SRC_DIR)\Xsystem.c
 	$(COMPILE) $(SRC_DIR)\Xsystem.c
 
-crypt.obj : $(WWW_DIR)\crypt.c
-	$(COMPILE) $(WWW_DIR)\crypt.c
-
-crypt_util.obj : $(WWW_DIR)\crypt_util.c
-	$(COMPILE) $(WWW_DIR)\crypt_util.c
-
 dirent.obj : $(ETC_LIB)\dirent.c
 	$(COMPILE) $(ETC_LIB)\dirent.c
-
-getline.obj : $(WWW_DIR)\getline.c
-	$(COMPILE) $(WWW_DIR)\getline.c
-
-getpass.obj : $(WWW_DIR)\getpass.c
-	$(COMPILE) $(WWW_DIR)\getpass.c
 
 HTAABrow.obj : $(WWW_DIR)\HTAABrow.c
 	$(COMPILE) $(WWW_DIR)\HTAABrow.c

@@ -1,6 +1,8 @@
 #ifndef TRSTABLE_H
 #define TRSTABLE_H
 
+#include <HTUtils.h>
+
 /* TRST_MAXCOLSPAN and TRST_MAXCOLSPAN are defined in userdefs.h */
 
 typedef struct _STable_info STable_info;

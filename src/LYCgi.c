@@ -137,14 +137,7 @@ PUBLIC void add_lynxcgi_environment ARGS1(
     if (env_value != NULL) {
 	char *add_value = NULL;
 
-	add_value = (char *)malloc(strlen(variable_name) +
-				   strlen(env_value) + 2);
-	if (add_value == NULL) {
-	    outofmem(__FILE__, "LYCgi");
-	}
-	strcpy(add_value, variable_name);
-	strcat(add_value, "=");
-	strcat(add_value, env_value);
+	HTSprintf0(&add_value, "%s=%s", variable_name, env_value);
 	add_environment_value(add_value);
 	remember_alloced(add_value);
     }
@@ -220,8 +213,8 @@ PRIVATE int LYLoadCGI ARGS4(
 	    PERROR("stat() of pgm_buff failed");
 	} else {
 	    /* Found PATH_INFO data.  Strip it off of pgm and into path_info. */
-	    StrAllocCopy(path_info, pgm+strlen(pgm_buff));
-	    strcpy(pgm, pgm_buff);
+	    StrAllocCopy(path_info, pgm + strlen(pgm_buff));
+	    StrAllocCopy(pgm, pgm_buff);
 	    CTRACE((tfp, "LYNXCGI: stat() of %s succeeded, path_info=\"%s\".\n",
 			pgm_buff, path_info));
 	}

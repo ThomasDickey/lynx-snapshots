@@ -108,53 +108,6 @@ PUBLIC void HTUserMsg2 ARGS2(
     }
 }
 
-#if defined(WIN_EX) && defined(UNUSED_CODE)	/* 1997/10/28 (Tue) 17:19:43 */
-
-#define MAX_LEN	512
-
-void ws_title(CONST char *str)
-{
-    char buff[MAX_LEN];
-    char *p;
-    int len;
-
-#define TITLE_CUT 32
-
-    p = (char *)str;
-    len = strlen(p);
-    if (len > (MAX_LEN - 1)) {
-	strncpy(buff, p, (MAX_LEN - 1));
-	len = MAX_LEN - 1;
-	buff[MAX_LEN - 1] = '\0';
-    } else {
-	strcpy(buff, p);
-    }
-
-    if (len > LYcols) {
-	buff[TITLE_CUT] = '.';
-	buff[TITLE_CUT+1] = '.';
-	strcpy(buff + TITLE_CUT + 2, (buff + len) - LYcols + TITLE_CUT + 1);
-    }
-    if (strchr(buff, '%')) {
-	HTUnEscape(buff);
-    }
-
-    p = buff;
-    while (*p++) {
-	if (*p == '\r') {
-	    *p = '\0';
-	    break;
-	} else if (*p ==  '\n') {
-	    *p = '\0';
-	    break;
-	}
-    }
-
-    /* Quick hack. buff is SJIS only ??? */
-    SetConsoleTitle(buff);
-}
-#endif
-
 /*	Issue a progress message.			HTProgress()
 **	-------------------------
 */
@@ -253,7 +206,7 @@ PUBLIC void HTReadProgress ARGS2(
 	    int n;
 	    n = strlen(line);
 	    if (LYshow_kb_rate) {
-		sprintf (line + n, " %6.2lf KB/sec.", transfer_rate / 1024.0);
+		sprintf (line + n, " %6.2f KB/sec.", transfer_rate / 1024.0);
 	    } else {
 		int t_rate;
 
@@ -275,7 +228,8 @@ PUBLIC void HTReadProgress ARGS2(
 #ifdef EXP_READPROGRESS
     static long bytes_last, total_last;
     static long transfer_rate = 0;
-    char line[300], bytesp[80], totalp[80], transferp[80];
+    static char *line = NULL;
+    char bytesp[80], totalp[80], transferp[80];
     int renew = 0;
     char *was_units;
 #if HAVE_GETTIMEOFDAY
@@ -291,7 +245,6 @@ PUBLIC void HTReadProgress ARGS2(
     if (bytes == 0) {
 	first = last = last_active = now;
 	bytes_last = bytes;
-	line[0] = 0;
     } else if (bytes < 0) {	/* stalled */
 	bytes = bytes_last;
 	total = total_last;
@@ -334,18 +287,18 @@ PUBLIC void HTReadProgress ARGS2(
 	    sprint_bytes(transferp, transfer_rate, 0);
 
 	    if (total > 0)
-		sprintf (line, gettext("Read %s of %s of data"), bytesp, totalp);
+		HTSprintf0 (&line, gettext("Read %s of %s of data"), bytesp, totalp);
 	    else
-		sprintf (line, gettext("Read %s of data"), bytesp);
+		HTSprintf0 (&line, gettext("Read %s of data"), bytesp);
 	    if (transfer_rate > 0)
-		sprintf (line + strlen(line), gettext(", %s/sec"), transferp);
+		HTSprintf (&line, gettext(", %s/sec"), transferp);
 	    if (now - last_active >= 5)
-		sprintf (line + strlen(line), gettext(" (stalled for %ld sec)"), (long)(now - last_active));
+		HTSprintf (&line, gettext(" (stalled for %ld sec)"), (long)(now - last_active));
 	    if (total > 0 && transfer_rate)
-		sprintf (line + strlen(line), gettext(", ETA %ld sec"), (long)((total - bytes)/transfer_rate));
-	    sprintf (line + strlen(line), ".");
+		HTSprintf (&line, gettext(", ETA %ld sec"), (long)((total - bytes)/transfer_rate));
+	    StrAllocCat (line, ".");
 	    if (total < -1)
-		strcat(line, gettext(" (Press 'z' to abort)"));
+		StrAllocCat(line, gettext(" (Press 'z' to abort)"));
 
 	    /* do not store the message for history page. */
 	    statusline(line);
@@ -357,8 +310,8 @@ PUBLIC void HTReadProgress ARGS2(
     static time_t first, last;
     static long bytes_last;
     static long transfer_rate = 0;
+    static char *line = NULL;
     long divisor;
-    char line[80];
     time_t now = time((time_t *)0);  /* once per second */
     static char *units = "bytes";
 
@@ -397,17 +350,17 @@ PUBLIC void HTReadProgress ARGS2(
 	    }
 
 	    if (total >  0)
-		sprintf (line, gettext("Read %ld of %ld %s of data"), bytes, total, units);
+		HTSprintf0 (&line, gettext("Read %ld of %ld %s of data"), bytes, total, units);
 	    else
-		sprintf (line, gettext("Read %ld %s of data"), bytes, units);
+		HTSprintf0 (&line, gettext("Read %ld %s of data"), bytes, units);
 	    if ((transfer_rate > 0)
 		  && (!LYshow_kb_rate || (bytes * divisor >= kb_units)))
-		sprintf (line + strlen(line), gettext(", %ld %s/sec."), transfer_rate / divisor, units);
+		HTSprintf (&line, gettext(", %ld %s/sec."), transfer_rate / divisor, units);
 	    else
-		sprintf (line + strlen(line), ".");
+		HTSprintf (&line, ".");
 	    if (total <  0) {
 		if (total < -1)
-		    strcat(line, gettext(" (Press 'z' to abort)"));
+		    StrAllocCat(line, gettext(" (Press 'z' to abort)"));
 	    }
 
 	    /* do not store the message for history page. */

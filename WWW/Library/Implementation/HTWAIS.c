@@ -87,8 +87,6 @@
 
 #define HEX_ESCAPE '%'
 
-extern HTCJKlang HTCJK;
-
 extern int WWW_TraceFlag;	/* Control diagnostic output */
 extern FILE * logfile;		/* Log file output */
 
@@ -266,7 +264,9 @@ PRIVATE char * WWW_from_WAIS ARGS1(
     static char buf[BIG];
     char * q = buf;
     char * p = (docid->bytes);
+    char * result = NULL;
     int i, l;
+
     if (TRACE) {
 	char *p;
 	fprintf(tfp, "WAIS id (%d bytes) is ", (int)docid->size);
@@ -312,13 +312,8 @@ PRIVATE char * WWW_from_WAIS ARGS1(
     }
     *q++ = 0;			/* Terminate string */
     CTRACE((tfp, "WWW form of id: %s\n", buf));
-    {
-	char * result = (char *)malloc(strlen(buf)+1);
-	if (!result)
-	    outofmem(__FILE__, "WWW_from_WAIS");
-	strcpy(result, buf);
-	return result;
-    }
+    StrAllocCopy(result, buf);
+    return result;
 } /* WWW_from_WAIS */
 
 /*	Transform URL into WAIS document identifier

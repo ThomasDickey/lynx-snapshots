@@ -15,9 +15,9 @@
 #include <HTString.h>
 #include <LYCharUtils.h>
 #include <HTParse.h>
-#if defined(NCURSES_MOUSE_VERSION) || defined(USE_SLANG_MOUSE)
+#if defined(NCURSES_MOUSE_VERSION) || defined(PDCURSES) || defined(USE_SLANG_MOUSE)
 #include <LYMainLoop.h>
-#endif /* NCURSES_MOUSE_VERSION || USE_SLANG_MOUSE */
+#endif
 
 #ifdef DJGPP_KEYHANDLER
 #include <pc.h>
@@ -37,13 +37,13 @@
 
 extern unsigned short *LYKbLayout;
 extern BOOL HTPassHighCtrlRaw;
-extern HTCJKlang HTCJK;
 
 #ifdef SUPPORT_MULTIBYTE_EDIT
 #define IS_KANA(c)	(0xa0 <= c && c <= 0xdf)
 #endif
 
 #if defined(WIN_EX)
+#undef  BUTTON_CTRL
 #define BUTTON_CTRL	0	/* Quick hack */
 #endif
 
@@ -55,7 +55,7 @@ static int LYClosetTop = 0;		/*Points to the next empty shelf */
 
 PRIVATE char *LYFindInCloset PARAMS((
 	char*		base));
-PRIVATE int LYAddToCloset PARAMS((
+PRIVATE void LYAddToCloset PARAMS((
 	char*		str));
 
 /* If you want to add mouse support for some new platform, it's fairly
@@ -74,14 +74,14 @@ static int mouse_link = -1;
 
 static int have_levent;
 
-#if defined(NCURSES_MOUSE_VERSION) && !defined(WIN_EX)
+#if defined(NCURSES_MOUSE_VERSION)
 static MEVENT levent;
 #endif
 
 /* Return the value of mouse_link */
 PUBLIC int peek_mouse_levent NOARGS
 {
-#if defined(NCURSES_MOUSE_VERSION) && !defined(WIN_EX)
+#if defined(NCURSES_MOUSE_VERSION)
     if (have_levent > 0) {
 	ungetmouse(&levent);
 	have_levent--;
@@ -114,15 +114,8 @@ PUBLIC int fancy_mouse ARGS3(
     int *,	position)
 {
     int cmd = LYK_DO_NOTHING;
-#if defined(NCURSES_MOUSE_VERSION)
-#ifndef getbegx
-#define getbegx(win) ((win)->_begx)
-#endif
-#ifndef getbegy
-#define getbegy(win) ((win)->_begy)
-#endif
 
-#if defined(WIN_EX)	/* 1998/12/05 (Sat) 08:10:42 */
+#if defined(WIN_EX) && defined(PDCURSES)
 
     request_mouse_pos();
 
@@ -178,6 +171,7 @@ PUBLIC int fancy_mouse ARGS3(
 	cmd = LYK_QUIT;
     }
 #else
+#if defined(NCURSES_MOUSE_VERSION)
     MEVENT	event;
 
     getmouse(&event);
@@ -258,8 +252,8 @@ PUBLIC int fancy_mouse ARGS3(
     } else if (event.bstate & (BUTTON3_CLICKED | BUTTON3_DOUBLE_CLICKED | BUTTON3_TRIPLE_CLICKED)) {
 	cmd = LYK_QUIT;
     }
+#endif	/* defined(NCURSES_MOUSE_VERSION) */
 #endif	/* _WINDOWS */
-#endif
     return cmd;
 }
 
@@ -739,7 +733,7 @@ PUBLIC void ena_csi ARGS1(
 #ifdef USE_SLANG
 #define define_key(string, code) \
 	SLkm_define_keysym (string, code, Keymap_List)
-#define expand_substring(dst, first, last) \
+#define expand_substring(dst, first, last, final) \
 	SLexpand_escaped_string(dst, (char *)first, (char *)last)
 static SLKeyMap_List_Type *Keymap_List;
 /* This value should be larger than anything in LYStrings.h */
@@ -812,7 +806,7 @@ PRIVATE int lookup_tiname (char *name, NCURSES_CONST char *CONST *names)
     return -1;
 }
 
-PRIVATE CONST char *expand_tiname (CONST char *first, size_t len, char **result)
+PRIVATE CONST char *expand_tiname (CONST char *first, size_t len, char **result, char *final)
 {
     char name[BUFSIZ];
     int code;
@@ -822,14 +816,14 @@ PRIVATE CONST char *expand_tiname (CONST char *first, size_t len, char **result)
     if ((code = lookup_tiname(name, strnames)) >= 0
      || (code = lookup_tiname(name, strfnames)) >= 0) {
 	if (cur_term->type.Strings[code] != 0) {
-	    strcpy(*result, cur_term->type.Strings[code]);
+	    LYstrncpy(*result, cur_term->type.Strings[code], final - *result);
 	    (*result) += strlen(*result);
 	}
     }
     return first + len;
 }
 
-PRIVATE CONST char *expand_tichar (CONST char *first, char **result)
+PRIVATE CONST char *expand_tichar (CONST char *first, char **result, char *final)
 {
     int ch;
     int limit = 0;
@@ -869,7 +863,7 @@ PRIVATE CONST char *expand_tichar (CONST char *first, char **result)
     }
 
     if (name != 0) {
-	(void) expand_tiname(name, strlen(name), result);
+	(void) expand_tiname(name, strlen(name), result, final);
     } else {
 	**result = value;
 	(*result) += 1;
@@ -878,13 +872,13 @@ PRIVATE CONST char *expand_tichar (CONST char *first, char **result)
     return first;
 }
 
-PRIVATE void expand_substring (char* dst, CONST char* first, CONST char* last)
+PRIVATE void expand_substring (char* dst, CONST char* first, CONST char* last, char *final)
 {
     int ch;
     while (first < last) {
 	switch (ch = *first++) {
 	case ESCAPE:
-	    first = expand_tichar(first, &dst);
+	    first = expand_tichar(first, &dst, final);
 	    break;
 	case '^':
 	    ch = *first++;
@@ -892,7 +886,7 @@ PRIVATE void expand_substring (char* dst, CONST char* first, CONST char* last)
 		CONST char *s = strchr(first, RPAREN);
 		if (s == 0)
 		    s = first + strlen(first);
-		first = expand_tiname(first, s-first, &dst);
+		first = expand_tiname(first, s-first, &dst, final);
 		if (*first)
 		    first++;
 	    } else if (ch == '?') {		/* ASCII delete? */
@@ -922,13 +916,13 @@ PRIVATE void unescaped_char ARGS2(CONST char*, parse, int*,keysym)
     char buf[BUFSIZ];
 
     if (len >= 3) {
-	expand_substring(buf, parse + 1, parse + len - 1);
+	expand_substring(buf, parse + 1, parse + len - 1, buf + sizeof(buf) - 1);
 	if (strlen(buf) == 1)
 	    *keysym = *buf;
     }
 }
 
-PRIVATE BOOLEAN unescape_string ARGS2(char*, src, char *, dst)
+PRIVATE BOOLEAN unescape_string ARGS3(char*, src, char *, dst, char *, final)
 {
     BOOLEAN ok = FALSE;
 
@@ -941,7 +935,7 @@ PRIVATE BOOLEAN unescape_string ARGS2(char*, src, char *, dst)
 	    ok = TRUE;
 	}
     } else if (*src == DQUOTE) {
-	expand_substring(dst, src + 1, src + strlen(src) - 1);
+	expand_substring(dst, src + 1, src + strlen(src) - 1, final);
 	ok = TRUE;
     }
     return ok;
@@ -991,7 +985,7 @@ PUBLIC int map_string_to_keysym ARGS2(CONST char*, str, int*,keysym)
 		return (*keysym = CH_DEL|modifier);
 	    if (*str == '^' || *str == '\\') {
 		char buf[BUFSIZ];
-		expand_substring(buf, str, str + HTMIN(len, 28));
+		expand_substring(buf, str, str + HTMIN(len, 28), buf + sizeof(buf) - 1);
 		if (strlen(buf) <= 1)
 		    return (*keysym = ((unsigned char)buf[0])|modifier);
 	    }
@@ -1079,7 +1073,7 @@ PRIVATE int setkey_cmd (char *parse)
 	    if (t != s)
 		*t = '\0';
 	    if (map_string_to_keysym (s, &keysym) >= 0
-	     && unescape_string(parse, buf)) {
+	     && unescape_string(parse, buf, buf + sizeof(buf) - 1)) {
 		if (LYTraceLogFP == 0) {
 		    CTRACE((tfp, "KEYMAP(DEF) keysym=%#x\n", keysym));
 		} else {
@@ -1269,7 +1263,7 @@ PUBLIC int lynx_initialize_keymaps NOARGS
 
 #endif				       /* USE_KEYMAPS */
 
-#ifdef NCURSES_MOUSE_VERSION
+#if defined(NCURSES_MOUSE_VERSION) || defined(PDCURSES)
 PRIVATE int LYmouse_menu ARGS4(int, x, int, y, int, atlink, int, code)
 {
     static char *choices[] = {
@@ -1475,7 +1469,7 @@ re_read:
 #endif /* IGNORE_CTRL_C || USE_GETCHAR etc. */
 #if !defined(UCX) || !defined(VAXC) /* errno not modifiable ? */
     if (errno == EINTR)
-	errno = 0;		/* reset - kw */
+	set_errno(0);		/* reset - kw */
 #endif  /* UCX && VAXC */
 #ifndef USE_SLANG
     clearerr(stdin); /* needed here for ultrix and SOCKETSHR, but why? - FM */
@@ -1561,7 +1555,7 @@ re_read:
 		  recent_sizechange));
 #endif /* HAVE_SIZECHANGE || USE_SLANG */
 #if !defined(UCX) || !defined(VAXC) /* errno not modifiable ? */
-	errno = 0;		/* reset - kw */
+	set_errno(0);		/* reset - kw */
 #endif  /* UCX && VAXC */
 	return(DO_NOTHING);
     }
@@ -1960,8 +1954,9 @@ re_read:
 	   c = 0x218;
 	   break;
 #endif /* PDCurses */
-#ifdef NCURSES_MOUSE_VERSION
+#if defined(NCURSES_MOUSE_VERSION) || defined(PDCURSES)
 	case KEY_MOUSE:
+	    CTRACE((tfp, "KEY_MOUSE\n"));
 	    if (code == FOR_CHOICE) {
 		c = MOUSE_KEY;		/* Will be processed by the caller */
 	    }
@@ -1973,7 +1968,7 @@ re_read:
 	    }
 #endif
 	    else {
-#if !defined(WIN_EX)
+#if !(defined(WIN_EX) && defined(PDCURSES))
 		MEVENT event;
 		int err;
 		int lac = LYK_UNKNOWN;
@@ -2081,7 +2076,7 @@ re_read:
 		/* for Windows NT */
 		  request_mouse_pos();
 
-		  if (BUTTON_STATUS(1) & BUTTON_CLICKED) {
+		  if (BUTTON_STATUS(1) & BUTTON_PRESSED) {
 			if (MOUSE_Y_POS > (LYlines - V_CMD_AREA)) {
 			    /* Screen BOTTOM */
 			    if (MOUSE_X_POS < left) {
@@ -2475,7 +2470,6 @@ PUBLIC void LYSetupEdit ARGS4(
     edit->panon = FALSE;
     edit->current_modifiers = 0;
 
-    StrLen  = strlen(old);
     MaxLen  = maxstr;
     DspWdth = maxdsp;
     Margin  = 0;
@@ -2500,21 +2494,8 @@ PUBLIC void LYSetupEdit ARGS4(
 	    Margin = 10;
     }
 
-    /*
-     *	We expect the called function to pass us a default (old) value
-     *	with a length that is less than or equal to maxstr, and to
-     *	handle any messaging associated with actions to achieve that
-     *	requirement.  However, in case the calling function screwed
-     *	up, we'll check it here, and ensure that no buffer overrun can
-     *	occur by loading only as much of the head as fits. - FM
-     */
-    if (strlen(old) >= (unsigned)maxstr) {
-	strncpy(edit->buffer, old, maxstr);
-	edit->buffer[maxstr] = '\0';
-	StrLen = maxstr;
-    } else {
-	strcpy(edit->buffer, old);
-    }
+    LYstrncpy(edit->buffer, old, maxstr);
+    StrLen = strlen(edit->buffer);
 }
 
 #ifdef SUPPORT_MULTIBYTE_EDIT
@@ -3246,7 +3227,7 @@ again:
 	}
 
 	if (recall && (ch == UPARROW || ch == DNARROW)) {
-	    strcpy(inputline, MyEdit.buffer);
+	    LYstrncpy(inputline, MyEdit.buffer, (int)bufsize);
 	    LYAddToCloset(MyEdit.buffer);
 	    return(ch);
 	}
@@ -3318,7 +3299,7 @@ again:
 	    /*
 	     *	Terminate the string and return.
 	     */
-	    strcpy(inputline, MyEdit.buffer);
+	    LYstrncpy(inputline, MyEdit.buffer, (int)bufsize);
 	    if (!hidden)
 		LYAddToCloset(MyEdit.buffer);
 	    return(ch);
@@ -3564,18 +3545,13 @@ PRIVATE char * LYFindInCloset ARGS1(char*, base)
     return(0);
 }
 
-PRIVATE int LYAddToCloset ARGS1(char*, str)
+PRIVATE void LYAddToCloset ARGS1(char*, str)
 {
-    unsigned len = strlen(str);
-
-    LYCloset[LYClosetTop] = malloc(len+1);
-    if (!LYCloset[LYClosetTop])
-	outofmem(__FILE__, "LYAddToCloset");
-    strcpy(LYCloset[LYClosetTop], str);
+    LYCloset[LYClosetTop] = NULL;
+    StrAllocCopy(LYCloset[LYClosetTop], str);
 
     LYClosetTop = (LYClosetTop + 1) % LYClosetSize;
     FREE(LYCloset[LYClosetTop]);
-    return(1);
 }
 
 /*
@@ -4054,11 +4030,11 @@ PUBLIC int UPPER8 ARGS2(int,ch1, int,ch2)
 	   return(TOUPPER(ch1) - TOUPPER(ch2)); /* old-style */
 	else
 	{
-	    long uni_ch2 = UCTransToUni(ch2, current_char_set);
+	    long uni_ch2 = UCTransToUni((char)ch2, current_char_set);
 	    long uni_ch1;
 	    if (uni_ch2 < 0)
 		return (unsigned char)ch1;
-	    uni_ch1 = UCTransToUni(ch1, current_char_set);
+	    uni_ch1 = UCTransToUni((char)ch1, current_char_set);
 	    return(UniToLowerCase(uni_ch1) - UniToLowerCase(uni_ch2));
 	}
     }

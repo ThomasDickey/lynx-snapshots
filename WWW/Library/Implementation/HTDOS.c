@@ -95,49 +95,48 @@ char * HTDOS_name ARGS1(char *, wwwname)
     extern char windows_drive[];
     char temp_buff[LY_MAXPATH];
 #endif
-    static char *cp_url = NULL;
-    char *result, *ret;
+    static char *result = NULL;
     int joe;
 
-    CTRACE((tfp, "HTDOS_name changed `%s'\n", wwwname));
-    copy_plus(&cp_url, wwwname);
+    copy_plus(&result, wwwname);
 
-    for (joe = 0; cp_url[joe] != '\0'; joe++)	{
-	if (cp_url[joe] == '/')	{
-	    cp_url[joe] = '\\';	/* convert slashes to dos-style */
+    for (joe = 0; result[joe] != '\0'; joe++)	{
+	if (result[joe] == '/')	{
+	    result[joe] = '\\';	/* convert slashes to dos-style */
 	}
     }
 
     /* pesky leading slash, rudiment from file://localhost/  */
     /* the rest of path may be with or without drive letter  */
-    if((cp_url[1] == '\\') || (cp_url[0]  != '\\')) {
-	result = cp_url;
-    } else {
-	result = cp_url+1;
+    if((result[1] != '\\') && (result[0]  == '\\')) {
+	for (joe = 0; (result[joe] = result[joe+1]) != 0; joe++)
+	    ;
     }
 
 #ifdef _WINDOWS	/* 1998/04/02 (Thu) 08:59:48 */
-    if (strchr(result, '\\') && strchr(result, ':')==NULL) {
+    if (strchr(result, '\\') != NULL
+     && strchr(result, ':') == NULL) {
 	sprintf(temp_buff, "%.3s\\%.*s", windows_drive,
-		(int)(sizeof(temp_buff) - sizeof(windows_drive) - 2), result);
-	ret = NULL;
-	StrAllocCopy(ret, temp_buff);
-	free(cp_url);
+		(int)(sizeof(temp_buff) - 5), result);
+	StrAllocCopy(result, temp_buff);
     } else {
-	char *p;
-	p = strchr(result, ':');
+	char *p = strchr(result, ':');
 	if (p && (strcmp(p, ":\\") == 0)) {
 	    p[2] = '.';
 	    p[3] = '\0';
 	}
-	ret = result;
     }
-#else
-    ret = result;
 #endif
+    /*
+     * If we have only a device, add a trailing slash.  Otherwise it just
+     * refers to the current directory on the given device.
+     */
+    if (strchr(result, '\\') == 0
+     && result[1] == ':')
+	StrAllocCat(result, "\\");
 
-    CTRACE((tfp, "HTDOS_name changed `%s' to `%s'\n", wwwname, ret));
-    return (ret);
+    CTRACE((tfp, "HTDOS_name changed `%s' to `%s'\n", wwwname, result));
+    return (result);
 }
 
 #if defined(DJGPP) && defined(DJGPP_KEYHANDLER)

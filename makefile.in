@@ -115,7 +115,6 @@ SITE_DEFS = # Your defines here
 # defines for which there are no configure options:
 # -DHP_TERMINAL    For DIM workaround to REVERSE problems on HP terminals.
 # -DIGNORE_CTRL_C  Define if Control-C shouldn't exit lynx.
-# -DNOPORT         if you must use PASV instead of PORT for FTP
 # -DNO_CPU_LIMIT   Disables Max CPU timeout (includes CLOCKS_PER_SECOND)
 # -DNO_RULES       Disables CERN-style access rules (see lynx.cfg).
 # -DSHORTENED_RBIND  For a SOCKSified lynx with the short version of Rbind.
@@ -338,8 +337,8 @@ help_files.sed : makefile $(srcdir)/lynx_help/help_files.txt
 	@echo Constructing sed-script $@
 	@-rm -f $@ help_files.tmp
 	@cat $(srcdir)/lynx_help/help_files.txt > help_files.tmp
-@LYNXCFG_MAKE@	@echo 's!http://www.hippo.ru/%7Ehvv/lynxcfg_toc.html#alphatoc!alphatoc.html\$(COMPRESS_EXT)!' >> help_files.tmp
-@LYNXCFG_MAKE@	@echo 's!http://www.hippo.ru/%7Ehvv/lynxcfg_toc.html!cattoc.html\$(COMPRESS_EXT)!' >> help_files.tmp
+@LYNXCFG_MAKE@	@echo 's!http://www.hippo.ru/%7Ehvv/lynxcfg_toc.html#alphatoc!alphatoc.html$(COMPRESS_EXT)!' >> help_files.tmp
+@LYNXCFG_MAKE@	@echo 's!http://www.hippo.ru/%7Ehvv/lynxcfg_toc.html!cattoc.html$(COMPRESS_EXT)!' >> help_files.tmp
 	@ECHO_CC@sed	-e '/^#/d' -e '/^$$/d' \
 		-e 's%\(.*\)=\(.*\@.*\)$$%s=@\1@=\2=g%' \
 		-e 's%\(.*\)=\(http:.*\)$$%s=@\1@=\2=g%' \

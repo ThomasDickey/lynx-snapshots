@@ -84,20 +84,15 @@ PUBLIC int HTAddRule ARGS5(
     CONST char *,	cond)
 { /* BYTE_ADDRESSING removed and memory check - AS - 1 Sep 93 */
     rule *	temp;
-    char *	pPattern;
+    char *	pPattern = NULL;
 
     temp = (rule *)calloc(1, sizeof(*temp));
     if (temp==NULL)
 	outofmem(__FILE__, "HTAddRule");
-    pPattern = (char *)malloc(strlen(pattern)+1);
-    if (pPattern==NULL)
-	outofmem(__FILE__, "HTAddRule");
     if (equiv) {		/* Two operands */
-	char *	pEquiv = (char *)malloc(strlen(equiv)+1);
-	if (pEquiv==NULL)
-	    outofmem(__FILE__, "HTAddRule");
+	char *	pEquiv = NULL;
+	StrAllocCopy(pEquiv, equiv);
 	temp->equiv = pEquiv;
-	strcpy(pEquiv, equiv);
     } else {
 	temp->equiv = 0;
     }
@@ -105,10 +100,10 @@ PUBLIC int HTAddRule ARGS5(
 	StrAllocCopy(temp->condition_op, cond_op);
 	StrAllocCopy(temp->condition, cond);
     }
+    StrAllocCopy(pPattern, pattern);
     temp->pattern = pPattern;
     temp->op = op;
 
-    strcpy(pPattern, pattern);
     if (equiv) {
 	CTRACE((tfp, "Rule: For `%s' op %d `%s'", pattern, op, equiv));
     } else {
@@ -330,24 +325,23 @@ char * HTTranslate ARGS1(
 	    } else {
 		  char * ins = strchr(r->equiv, '*');	/* Insertion point */
 		  if (ins) {	/* Consistent rule!!! */
-			char * temp = (char *)malloc(
-				strlen(r->equiv)-1 + m + 1);
-			if (temp==NULL)
-			    outofmem(__FILE__, "HTTranslate"); /* NT & AS */
-			strncpy(temp,	r->equiv, ins-r->equiv);
-			/* Note: temp may be unterminated now! */
-			strncpy(temp+(ins-r->equiv), q, m);  /* Matched bit */
-			strcpy (temp+(ins-r->equiv)+m, ins+1);	/* Last bit */
+			char * temp = NULL;
+
+			HTSprintf0(&temp, "%.*s%.*s%s",
+				   ins - r->equiv,
+				   r->equiv,
+				   m,
+				   q,
+				   ins + 1); 	
 			CTRACE((tfp, "For `%s' using `%s'\n",
 				    current, temp));
 			FREE(current);
 			current = temp; 		/* Use this */
 
 		    } else {	/* No insertion point */
-			char * temp = (char *)malloc(strlen(r->equiv)+1);
-			if (temp==NULL)
-			    outofmem(__FILE__, "HTTranslate"); /* NT & AS */
-			strcpy(temp, r->equiv);
+			char * temp = NULL;
+
+			StrAllocCopy(temp, r->equiv);
 			CTRACE((tfp, "For `%s' using `%s'\n",
 						current, temp));
 			FREE(current);

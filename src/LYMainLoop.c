@@ -41,11 +41,6 @@
 
 #ifdef KANJI_CODE_OVERRIDE
 #include <HTCJK.h>
-extern HTCJKlang HTCJK;
-#endif
-
-#if defined(CJK_EX)	/* 1999/05/25 (Tue) 11:10:45 */
-extern char *string_short(char *str, int cut_pos);	/* LYExtern.c */
 #endif
 
 #ifdef KANJI_CODE_OVERRIDE
@@ -97,7 +92,6 @@ PUBLIC char *str_kcode(HTkcode code)
 }
 #endif
 
-#ifdef CJK_EX
 #ifdef WIN_EX
 
 PRIVATE char *str_sjis(char *to, char *from)
@@ -123,8 +117,6 @@ PRIVATE void set_ws_title(char * str)
 
 #endif /* WIN_EX */
 
-#endif /* CJK_EX */
-
 
 #ifdef SH_EX  /* 1998/10/30 (Fri) 10:06:47 */
 
@@ -149,7 +141,7 @@ PRIVATE int str_n_cmp(const char *p, const char *q, int n)
 
 #endif	/* SH_EX */
 
-#ifdef USE_EXTERNALS
+#if defined(USE_EXTERNALS) || defined(WIN_EX)
 #include <LYExtern.h>
 #endif
 
@@ -667,7 +659,10 @@ PRIVATE BOOL do_check_recall ARGS7(
 	    last_1 = user_input_buffer[len - 2];
 	    last = user_input_buffer[len - 1];
 
-	    if (last_2 == '/' && isalpha(last_1) && last == ':')
+	    if (len < MAX_LINE - 1
+	     && last_2 == '/'
+	     && isalpha(last_1)
+	     && last == ':')
 		LYAddHtmlSep0(user_input_buffer);
 
 	} else if (len == 2 && user_input_buffer[1] == ':') {
@@ -675,7 +670,7 @@ PRIVATE BOOL do_check_recall ARGS7(
 		LYAddHtmlSep0(user_input_buffer);
 	    } else {
 		HTUserMsg2(WWW_ILLEGAL_URL_MESSAGE, user_input_buffer);
-		strcpy(user_input_buffer, *old_user_input);
+		LYstrncpy(user_input_buffer, *old_user_input, MAX_LINE - 1);
 		FREE(*old_user_input);
 		ret = FALSE;
 		break;
@@ -690,7 +685,7 @@ PRIVATE BOOL do_check_recall ARGS7(
 	}
 	if (*user_input_buffer == '\0' &&
 	    !(recall && (ch == UPARROW || ch == DNARROW))) {
-	    strcpy(user_input_buffer, *old_user_input);
+	    LYstrncpy(user_input_buffer, *old_user_input, MAX_LINE - 1);
 	    FREE(*old_user_input);
 	    HTInfoMsg(CANCELLED);
 	    ret = FALSE;
@@ -716,7 +711,7 @@ PRIVATE BOOL do_check_recall ARGS7(
 		*URLNum = 0;
 	    if ((cp = (char *)HTList_objectAt(Goto_URLs,
 					      *URLNum)) != NULL) {
-		strcpy(user_input_buffer, cp);
+		LYstrncpy(user_input_buffer, cp, MAX_LINE - 1);
 		if (goto_buffer
 		 && **old_user_input
 		 && !strcmp(*old_user_input, user_input_buffer)) {
@@ -734,7 +729,7 @@ PRIVATE BOOL do_check_recall ARGS7(
 		     *  User cancelled the Goto via ^G.
 		     *  Restore user_input_buffer and break. - FM
 		     */
-		    strcpy(user_input_buffer, *old_user_input);
+		    LYstrncpy(user_input_buffer, *old_user_input, MAX_LINE - 1);
 		    FREE(*old_user_input);
 		    HTInfoMsg(CANCELLED);
 		    ret = FALSE;
@@ -761,7 +756,7 @@ PRIVATE BOOL do_check_recall ARGS7(
 		 */
 		*URLNum = URLTotal - 1;
 	    if ((cp=(char *)HTList_objectAt(Goto_URLs, *URLNum)) != NULL) {
-		strcpy(user_input_buffer, cp);
+		LYstrncpy(user_input_buffer, cp, MAX_LINE - 1);
 		if (goto_buffer && **old_user_input &&
 		    !strcmp(*old_user_input, user_input_buffer)) {
 		    _statusline(EDIT_CURRENT_GOTO);
@@ -778,7 +773,7 @@ PRIVATE BOOL do_check_recall ARGS7(
 		     *  User cancelled the Goto via ^G.
 		     *  Restore user_input_buffer and break. - FM
 		     */
-		    strcpy(user_input_buffer, *old_user_input);
+		    LYstrncpy(user_input_buffer, *old_user_input, MAX_LINE - 1);
 		    FREE(*old_user_input);
 		    HTInfoMsg(CANCELLED);
 		    ret = FALSE;
@@ -2375,7 +2370,7 @@ PRIVATE int handle_LYK_ECGOTO ARGS5(
      *	or not modifying the URL. - FM
      */
     HTInfoMsg(CANCELLED);
-    strcpy(user_input_buffer, *old_user_input);
+    LYstrncpy(user_input_buffer, *old_user_input, MAX_LINE - 1);
     FREE(*old_user_input);
     return 0;
 }
@@ -2639,7 +2634,7 @@ PRIVATE int handle_LYK_ELGOTO ARGS5(
      *	or not modifying the URL. - FM
      */
     HTInfoMsg(CANCELLED);
-    strcpy(user_input_buffer, *old_user_input);
+    LYstrncpy(user_input_buffer, *old_user_input, MAX_LINE - 1);
     FREE(*old_user_input);
     return 0;
 }
@@ -2888,7 +2883,7 @@ PRIVATE BOOLEAN handle_LYK_GOTO ARGS9(
 	 *  User cancelled the Goto via ^G.
 	 *  Restore user_input_buffer and break. - FM
 	 */
-	strcpy(user_input_buffer, *old_user_input);
+	LYstrncpy(user_input_buffer, *old_user_input, MAX_LINE - 1);
 	FREE(*old_user_input);
 	HTInfoMsg(CANCELLED);
 	return FALSE;
@@ -3448,7 +3443,7 @@ PRIVATE BOOLEAN handle_LYK_JUMP ARGS10(
 		    return FALSE;
 		}
 		ret = HTParse((ret+3), startfile, PARSE_ALL);
-		strcpy(user_input_buffer, ret);
+		LYstrncpy(user_input_buffer, ret, MAX_LINE - 1);
 		FREE(ret);
 		return TRUE;
 	    }
@@ -4815,7 +4810,7 @@ PUBLIC void handle_LYK_WHEREIS ARGS2(
 	 *  is entered by the user.
 	 */
 	*prev_target = '\0';
-	found = textsearch(&curdoc, prev_target, FALSE);
+	found = textsearch(&curdoc, prev_target, sizeof(prev_target)-1, FALSE);
     } else {
 	/*
 	 *  When the third argument is TRUE, the previous
@@ -4827,7 +4822,7 @@ PUBLIC void handle_LYK_WHEREIS ARGS2(
 	 *  after prev_target was reset on fetch of that
 	 *  document.
 	 */
-	found = textsearch(&curdoc, prev_target, TRUE);
+	found = textsearch(&curdoc, prev_target, sizeof(prev_target)-1, TRUE);
     }
 
     /*
@@ -4998,7 +4993,7 @@ PRIVATE void handle_LYK_digit ARGS6(
 		    sprintf(user_input_buffer,
 			    LINK_ALREADY_CURRENT, number);
 		    HTUserMsg(user_input_buffer);
-		    strcpy(user_input_buffer, temp);
+		    LYstrncpy(user_input_buffer, temp, MAX_LINE - 1);
 		    FREE(temp);
 		} else {
 		    /*
@@ -5032,7 +5027,7 @@ PRIVATE void handle_LYK_digit ARGS6(
 		sprintf(user_input_buffer,
 			ALREADY_AT_PAGE, number);
 		HTUserMsg(user_input_buffer);
-		strcpy(user_input_buffer, temp);
+		LYstrncpy(user_input_buffer, temp, MAX_LINE - 1);
 		FREE(temp);
 	    }
 	}
@@ -6307,7 +6302,7 @@ try_again:
 		}
 	    }
 	} else {
-	    if (strlen(curdoc.address) < 1000) {
+	    if (strlen(curdoc.address) < sizeof(temp_buff)-1) {
 		if (user_mode == ADVANCED_MODE) {
 		    str_sjis(temp_buff, curdoc.title);
 		} else {
@@ -7340,16 +7335,14 @@ PRIVATE void HTGotoURLs_free NOARGS
 PUBLIC void HTAddGotoURL ARGS1(
 	char *,		url)
 {
-    char *new;
+    char *new = NULL;
     char *old;
     HTList *cur;
 
     if (!(url && *url))
 	return;
 
-    if ((new = (char *)calloc(1, (strlen(url) + 1))) == NULL)
-	outofmem(__FILE__, "HTAddGotoURL");
-    strcpy(new, url);
+    StrAllocCopy(new, url);
 
     if (!Goto_URLs) {
 	Goto_URLs = HTList_new();

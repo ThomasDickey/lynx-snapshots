@@ -652,11 +652,6 @@ PUBLIC_IF_FIND_LEAKS char * StrAllocVsprintf ARGS4(
 		    case 'E': /* FALLTHRU */
 		    case 'g': /* FALLTHRU */
 		    case 'G': /* FALLTHRU */
-#if 0	/* we don't need this, it doesn't work on SunOS 4.x */
-			if (type == 'L')
-			    VA_FLOAT(long double);
-			else
-#endif
 			    VA_FLOAT(double);
 			used = 'f';
 			break;

@@ -121,7 +121,6 @@ PUBLIC int HTDirReadme = HT_DIR_README_TOP;
 #endif /* DIRED_SUPPORT */
 
 extern BOOL HTPassEightBitRaw;
-extern HTCJKlang HTCJK;
 
 PRIVATE char *HTMountRoot = "/Net/";		/* Where to find mounts */
 #ifdef VMS
@@ -715,6 +714,9 @@ PUBLIC char * HTnameOfFile_WWW ARGS3(
     FREE(host);
     FREE(path);
     FREE(acc_method);
+
+    CTRACE((tfp, "HTnameOfFile_WWW(%s,%d,%d) = %s\n",
+	    name, WWW_prefix, expand_all, result));
 
     return result;
 }
@@ -1445,6 +1447,9 @@ PUBLIC BOOL HTDirTitles ARGS3(
     /*
     **	Make link back to parent directory.
     */
+#ifdef DOSPATH
+    if (current != path)	/* leave "/c:" alone */
+#endif
     if (current && current[1]) {   /* was a slash AND something else too */
 	char * parent = NULL;
 	char * relative = NULL;
@@ -1466,15 +1471,14 @@ PUBLIC BOOL HTDirTitles ARGS3(
 
 #ifdef DOSPATH
 	if (local_link) {
-	    if (strlen(parent) == 3 )
+	    if (parent != 0 && strlen(parent) == 3 ) {
 		StrAllocCat(relative, "/.");
+	    }
 	}
+	else
 #endif
 
 #if !defined (VMS)
-#ifdef DOSPATH
-	if(!local_link)
-#endif
 	{
 	    /*
 	    **	On Unix, if it's not ftp and the directory cannot
@@ -1571,13 +1575,9 @@ PUBLIC BOOL HTDirTitles ARGS3(
 PRIVATE void do_readme ARGS2(HTStructured *, target, CONST char *, localname)
 {
     FILE * fp;
-    char * readme_file_name =
-	malloc(strlen(localname)+ 1 + strlen(HT_DIR_README_FILE) + 1);
-    if (readme_file_name == NULL)
-	outofmem(__FILE__, "do_readme");
-    strcpy(readme_file_name, localname);
-    strcat(readme_file_name, "/");
-    strcat(readme_file_name, HT_DIR_README_FILE);
+    char * readme_file_name = NULL;
+
+    HTSprintf0(&readme_file_name, "%s/%s", localname, HT_DIR_README_FILE);
 
     fp = fopen(readme_file_name,  "r");
 
@@ -1635,6 +1635,7 @@ PRIVATE int print_local_dir ARGS5(
     BOOL need_parent_link = FALSE;
     struct stat file_info;
     int status;
+    int i;
 
     CTRACE((tfp, "print_local_dir() started\n"));
 
@@ -1675,10 +1676,8 @@ PRIVATE int print_local_dir ARGS5(
     target = HTML_new(anchor, format_out, sink);
     targetClass = *target->isa;	    /* Copy routine entry points */
 
-    { int i;
-	   for (i = 0; i < HTML_A_ATTRIBUTES; i++)
-		   present[i] = (BOOL) (i == HTML_A_HREF);
-    }
+    for (i = 0; i < HTML_A_ATTRIBUTES; i++)
+	present[i] = (BOOL) (i == HTML_A_HREF);
 
     /*
     **	The need_parent_link flag will be set if an
@@ -2100,14 +2099,9 @@ PUBLIC int HTLoadFile ARGS4(
 	    }
 
 	    if (HTDirAccess == HT_DIR_SELECTIVE) {
-		char * enable_file_name =
-		    malloc(strlen(filename)+ 1 +
-		    strlen(HT_DIR_ENABLE_FILE) + 1);
-		if (enable_file_name == NULL)
-		    outofmem(__FILE__, "HTLoadFile");
-		strcpy(enable_file_name, filename);
-		strcat(enable_file_name, "/");
-		strcat(enable_file_name, HT_DIR_ENABLE_FILE);
+		char * enable_file_name = NULL;
+
+		HTSprintf0(&enable_file_name, "%s/%s", filename, HT_DIR_ENABLE_FILE);
 		if (HTStat(enable_file_name, &stat_info) == -1) {
 		    FREE(filename);
 		    FREE(nodename);
@@ -2476,14 +2470,9 @@ PUBLIC int HTLoadFile ARGS4(
 
 
 		if (HTDirAccess == HT_DIR_SELECTIVE) {
-		    char * enable_file_name =
-			malloc(strlen(localname)+ 1 +
-				      strlen(HT_DIR_ENABLE_FILE) + 1);
-		    if (enable_file_name == NULL)
-			outofmem(__FILE__, "HTLoadFile");
-		    strcpy(enable_file_name, localname);
-		    strcat(enable_file_name, "/");
-		    strcat(enable_file_name, HT_DIR_ENABLE_FILE);
+		    char * enable_file_name = NULL;
+
+		    HTSprintf0(&enable_file_name, "%s/%s", localname, HT_DIR_ENABLE_FILE);
 		    if (stat(enable_file_name, &file_info) != 0) {
 			FREE(localname);
 			FREE(nodename);
@@ -2492,6 +2481,7 @@ PUBLIC int HTLoadFile ARGS4(
 		    }
 		}
 
+		CTRACE((tfp, "Opening directory %s\n", localname));
 		dp = opendir(localname);
 		if (!dp) {
 		    FREE(localname);
@@ -2535,7 +2525,7 @@ PUBLIC int HTLoadFile ARGS4(
 	    CTRACE((tfp, "HTLoadFile: Opening `%s' gives %p\n",
 				 localname, (void*)fp));
 	    if (fp) {		/* Good! */
-		int len;
+		int len2;
 		char *cp = NULL;
 
 		if (HTEditable(localname)) {
@@ -2571,11 +2561,11 @@ PUBLIC int HTLoadFile ARGS4(
 			StrAllocCopy(anchor->content_encoding, HTAtom_name(myEncoding));
 			format = HTAtom_for("www/compressed");
 		    }
-		} else if ((len = strlen(localname)) > 2) {
-		    if (localname[len - 1] == 'Z' &&
-			localname[len - 2] == '.') {
+		} else if ((len2 = strlen(localname)) > 2) {
+		    if (localname[len2 - 1] == 'Z' &&
+			localname[len2 - 2] == '.') {
 			StrAllocCopy(cp, localname);
-			cp[len - 2] = '\0';
+			cp[len2 - 2] = '\0';
 			format = HTFileFormat(cp, &encoding, NULL);
 			FREE(cp);
 			format = HTCharsetFormat(format, anchor,
@@ -2583,12 +2573,12 @@ PUBLIC int HTLoadFile ARGS4(
 			StrAllocCopy(anchor->content_type, format->name);
 			StrAllocCopy(anchor->content_encoding, "x-compress");
 			format = HTAtom_for("www/compressed");
-		    } else if ((len > 3) &&
-			       !strcasecomp((char *)&localname[len - 2],
+		    } else if ((len2 > 3) &&
+			       !strcasecomp((char *)&localname[len2 - 2],
 					    "gz") &&
-			       localname[len - 3] == '.') {
+			       localname[len2 - 3] == '.') {
 			StrAllocCopy(cp, localname);
-			cp[len - 3] = '\0';
+			cp[len2 - 3] = '\0';
 			format = HTFileFormat(cp, &encoding, NULL);
 			FREE(cp);
 			format = HTCharsetFormat(format, anchor,

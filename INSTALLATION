@@ -681,11 +681,12 @@ Cygwin:
     to use the configure script described above for Unix.  Type, for example,
     "./configure --with-screen=ncurses --with-libz" in a Dos window running the
     cygwin bash$ shell.  You also have the choice of using either pdcurses or
-    slang.  See "http://www.flora.org/lynx-dev/html/month1097/msg00559.html"
-    and "http://www.flora.org/lynx-dev/html/month1097/msg00186.html", and other
-    messages along those threads.  You will have to make a minor alteration to
-    HTTCP.c (change delay to 30 seconds) and modify HTFILE.c (concerning
-    getgroups).  You will need a launch program to call helper applications.
+    slang.  You will need a launch program such as sh.exe to call helper
+    applications. Paths may need to be in cygwin style, rather than Windows
+    style (e.g., TMPDIR=/d/cygwin/tmp, rather than TMPDIR=d:\cygwin\tmp).  You
+    will not be able to use the cygwin1.dll that comes with the standard b20
+    distribution of cygwin. Substitute the cygwin1.dll from:
+    "ftp://sourceware.cygnus.com/pub/cygwin/snapshot-19990115/cygwin1-19990115.dll.gz"
 
 Visual C++:
     You must have compiled zlib and PDCurses with the -MT (threaded code)

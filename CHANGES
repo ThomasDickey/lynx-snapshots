@@ -1,6 +1,68 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2000-03-26 (2.8.3dev.23)
+* make -nounderline option apply to overloading of colors 4 & 5 with
+  underlines, in slang configuration -TD
+* on initialization, check if the LYNX_TEMP_SPACE denotes a directory which
+  we cannot easily determine if someone could alter our temp-files.  If so,
+  make a subdirectory of that, with appropriate permissions -TD
+* disable setuid on initialization -TD
+* add a definition USE_MKSTEMP in userdefs.h which supercedes EXP_RAND_TEMPNAME
+  for sys-admins who believe in mkstemp() -TD
+* change logic for EXP_RAND_TEMPNAME to avoid allowing fmt_tempname() to return
+  the same name during a session.  Define EXP_NAME_TEMPNAME in userdefs.h -TD
+* add Last-Modified header into the printed/downloaded source, in addition to
+  the Date header (it is there for years).  (Last-Modified field will not be
+  printed if it is vanished from Date or equal to 1 Jan 1970 (i.e., ctime(0)),
+  a common mistake in scripts) -LP
+* defined DIRED_SUPPORT in makefile.msc -TD
+* several small fixes in LYLocal.c for dired support, mostly win32-specific -TD
+* modify PDCurses mouse logic to use BUTTON_PRESSED mask rather than
+  BUTTON_CLICKED, since the latter appears to not work in PDCurses 2.4 -TD
+* modify HTDirTitles() to fix a couple of cases for device-only pathnames,
+  e.g., for DOS -TD
+* modify HTDOS_name() to put a trailing '\' on the result if only a device
+  is given.  Fix a memory leak in HTDOS_name() -TD
+* simplify local_dired() using new function match_op(), adding DOSPATH
+  and __EMX__ to special case of stripping a leading '/' from parameter so
+  dired mode works properly on Win32 and OS/2 EMX -TD
+* minor cleanup using new function LYformTitle() -TD
+* modify LYUCPushAssumed to push original assume_charset insted of
+  anchor_UCI->MIMEname when HTCJK is JAPANESE.  If this modification isn't
+  done, Japanese strings may be mishandled when charset is not specified or
+  assumed as Japanese charset.  On the other hand, if this modification IS
+  done, the specified charset is ignored when HTCJK is JAPANESE.
+  # I think it's long way to improve this completely. It rarely
+  # causes small problem in source view mode for Japanese document.
+  # I think it can be ignored -TH
+* improve handling of Japanese titles in List Page, LYNXIMGMAP Page and
+  ShowInfo Page -TH
+* remove spurious backslashes in sed script for adjusting link to htmlized
+  lynx.cfg -Michael Warner
+* add -luser32 library for cygwin configuration, needed for WIN_EX ifdefs -DK
+* correct some screen handling problems when built with SLang -DK
+* updated the INSTALLATION file to reflect building under cygwin -DK
+* define WIN_EX and _WINDOWS_NSL for cygwin configuration -DK
+* use select_s() from WATT-32 for the DJGPP port, rather than select() from
+  DJGPP (suggested by Gisle Vanem, to make it faster) -DK
+* add a configure check CF_SET_ERRNO to check if we really can set errno,
+  even if it has been #define'd -TD
+* remove a redundant call to HTQuoteParameter() from LYExtern.c, which resulted
+  in quoted-quotes (reported by Michael Warner) -TD
+* add configure check for syslog.h, in case --enable-syslog is given for a
+  machine that doesn't support it -TD
+* add ASSUMED_COLOR variable to lynx.cfg, making the use of
+  assume_default_colors() optional (addresses reports by LV, IC) -TD
+* add a configure check for the compiler option needed to find zlib.h, e.g.,
+  if it is in /usr/local/include and the compiler is not gcc -TD
+* disentangle some of the PDCurses ifdef's from ncurses, including the mouse
+  handling.  The symbol PDCURSES should be used for PDCurses, not NCURSES*
+  or DOSPATH -TD
+* remove unused getline.c, getpass.c, crypt.c and crypt_util.c -TD
+* change ifdef's in LYisAbsPath() and LYisRootPath to make OS/2 EMX treated the
+  same as DOSPATH -TD
+* review use of strcat/strcpy, changing as needed to avoid buffer overflows -TD
 2000-03-12 (2.8.3dev.22)
 * modify Home_Dir() so that on DOS & Windows, if the $HOMEDRIVE variable is
   set, it may be used to specify the drive on which $HOME is located -TD

@@ -85,7 +85,6 @@
 #define STACKLEVEL(me) ((me->stack + MAX_NESTING - 1) - me->sp)
 
 extern BOOL HTPassEightBitRaw;
-extern HTCJKlang HTCJK;
 
 extern BOOLEAN HT_Is_Gopher_URL;
 
@@ -991,7 +990,7 @@ PRIVATE int HTML_start_element ARGS6(
 	    if (tagname_transform!=0)
 		PUTS(tag->name);
 	    else {
-		strcpy(buf,tag->name);
+		LYstrncpy(buf, tag->name, sizeof(buf)-1);
 		LYLowerCase(buf);
 		PUTS(buf);
 	    }
@@ -1003,7 +1002,7 @@ PRIVATE int HTML_start_element ARGS6(
 			if (attrname_transform!=0)
 			    PUTS(tag->attributes[i].name);
 			else {
-			    strcpy(buf,tag->attributes[i].name);
+			    LYstrncpy(buf, tag->attributes[i].name, sizeof(buf)-1);
 			    LYLowerCase(buf);
 			    PUTS(buf);
 			}
@@ -1084,7 +1083,6 @@ PRIVATE int HTML_start_element ARGS6(
 #else
 # if !OMIT_SCN_KEEPING
     *Style_className_end=';';
-    /*strcpy(Style_className_end+1,HTML_dtd.tags[element_number].name);*/
     memcpy(Style_className_end+1,
 	   HTML_dtd.tags[element_number].name,
 	   HTML_dtd.tags[element_number].name_len+1);
@@ -1107,18 +1105,17 @@ PRIVATE int HTML_start_element ARGS6(
 #if !OPT_SCN
 	strcpy (myHash, HTML_dtd.tags[element_number].name);
 #else
-	hcode=hash_code_lowercase_on_fly(HTML_dtd.tags[element_number].name);
+	hcode = hash_code_lowercase_on_fly(HTML_dtd.tags[element_number].name);
 #endif
 	if (class_name[0])
 	{
 #if !OPT_SCN
+	    int len = strlen(myHash);
+	    sprintf(myHash, ".%.*s", (int)sizeof(myHash) - len - 2, class_name);
 	    HTSprintf (&Style_className, ".%s", class_name);
-	    strcat (myHash, ".");
-	    strcat (myHash, class_name);
 #else
-
 #   if !OMIT_SCN_KEEPING
-	    int l=strlen(class_name);
+	    int l = strlen(class_name);
 	    *Style_className_end = '.';
 	    memcpy(Style_className_end+1, class_name, l+1 );
 	    Style_className_end += l+1;
@@ -1140,7 +1137,7 @@ PRIVATE int HTML_start_element ARGS6(
 	fprintf(tfp, "CSSTRIM:%s -> %d", myHash, hcode);
 	if (hashStyles[hcode].code!=hcode)
 	{
-	    char *rp=strrchr(myHash, '.');
+	    char *rp = strrchr(myHash, '.');
 	    fprintf(tfp, " (undefined) %s\n", myHash);
 	    if (rp)
 	    {
@@ -1168,15 +1165,15 @@ PRIVATE int HTML_start_element ARGS6(
     } else { /* (current_tag_style!=-1)	 */
 	if (class_name[0]) {
 #if !OPT_SCN
+	    int len = strlen(myHash);
+	    sprintf(myHash, ".%.*s", (int)sizeof(myHash) - len - 2, class_name);
 	    HTSprintf (&Style_className, ".%s", class_name);
-	    strcat (myHash, ".");
-	    strcat (myHash, class_name);
 #else
 #     if !OMIT_SCN_KEEPING
 	    int l = strlen(class_name);
-	    *Style_className_end='.';
-	    memcpy(Style_className_end+1,class_name, l+1 );
-	    Style_className_end+=l+1;
+	    *Style_className_end = '.';
+	    memcpy(Style_className_end+1,class_name, l + 1 );
+	    Style_className_end += l + 1;
 #     endif
 #endif
 	    class_string[0] = '\0';
@@ -6158,7 +6155,7 @@ PRIVATE int HTML_end_element ARGS3(
 	    if (tagname_transform!=0)
 		PUTS(tag->name);
 	    else {
-		strcpy(buf,tag->name);
+		LYstrncpy(buf, tag->name, sizeof(buf)-1);
 		LYLowerCase(buf);
 		PUTS(buf);
 	    }

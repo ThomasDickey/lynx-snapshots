@@ -112,6 +112,11 @@ typedef struct sockaddr_in SockA;  /* See netinet/in.h */
 #define AIX
 #endif /* _AIX */
 
+#ifdef __CYGWIN__
+#define _WINDOWS_NSL
+#define WIN_EX
+#endif /* __CYGWIN__ */
+
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
 #else
@@ -522,6 +527,7 @@ extern int errno;
 #ifdef word
 #undef word
 #endif /* word */
+#define select select_s
 #endif /* WATT32 */
 
 #undef NETWRITE
@@ -779,7 +785,7 @@ typedef unsigned int fd_set;
 /*
  * Macro for setting errno - only define this if you really can do it.
  */
-#if !defined(errno) && (!defined(VMS) || defined(UCX))
+#if defined(CAN_SET_ERRNO) || (!defined(errno) && (!defined(VMS) || defined(UCX)))
 #define set_errno(value) errno = value
 #else
 #define set_errno(value) /* we do not know how */

@@ -8,6 +8,7 @@
 #endif /* HTLIST_H */
 
 #ifdef VMS
+#include <HTFTP.h>
 #include <HTVMSUtils.h>
 #define HTSYS_name(path)   HTVMS_name("", path)
 #define HTSYS_purge(path)  HTVMS_purge(path)

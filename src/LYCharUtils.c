@@ -42,7 +42,6 @@ extern BOOL HTPassEightBitRaw;
 extern BOOL HTPassEightBitNum;
 extern BOOL HTPassHighCtrlRaw;
 extern BOOL HTPassHighCtrlNum;
-extern HTCJKlang HTCJK;
 
 /*
  *  Used for nested lists. - FM
@@ -614,11 +613,12 @@ PUBLIC char *LYLowercaseA_OL_String ARGS1(
 /*
 ** This function returns OL TYPE="I" strings in the
 ** range of " I." (1) to "MMM." (3000).- FM
+** Maximum length: 16 -TD
 */
 PUBLIC char *LYUppercaseI_OL_String ARGS1(
 	int, seqnum)
 {
-    static char OLstring[8];
+    static char OLstring[20];
     int Arabic = seqnum;
 
     if (Arabic >= 3000) {
@@ -748,11 +748,12 @@ PUBLIC char *LYUppercaseI_OL_String ARGS1(
 /*
 ** This function returns OL TYPE="i" strings in
 ** range of " i." (1) to "mmm." (3000).- FM
+** Maximum length: 16 -TD
 */
 PUBLIC char *LYLowercaseI_OL_String ARGS1(
 	int, seqnum)
 {
-    static char OLstring[8];
+    static char OLstring[20];
     int Arabic = seqnum;
 
     if (Arabic >= 3000) {
@@ -4024,4 +4025,40 @@ PUBLIC BOOLEAN LYCommentHacks ARGS2(
     }
 
     return FALSE;
+}
+
+    /*
+     *	Create the Title with any left-angle-brackets
+     *	converted to &lt; entities and any ampersands
+     *	converted to &amp; entities.  - FM
+     *
+     *  Convert 8-bit letters to &#xUUUU to avoid dependencies
+     *  from display character set which may need changing.
+     *  Do NOT convert any 8-bit chars if we have CJK display. - LP
+     */
+void LYformTitle ARGS2(
+	char **,	dst,
+	CONST char *,	src)
+{
+    if (HTCJK == JAPANESE) {
+	char *tmp_buffer = NULL;
+	if ((tmp_buffer = (char *) malloc (strlen(src)+1)) == 0)
+	    outofmem(__FILE__, "LYformTitle");
+	switch(kanji_code) {	/* 1997/11/22 (Sat) 09:28:00 */
+	case EUC:
+	    TO_EUC((CONST unsigned char *) src, (unsigned char *) tmp_buffer);
+	    break;
+	case SJIS:
+	    TO_SJIS((CONST unsigned char *) src, (unsigned char *) tmp_buffer);
+	    break;
+	default:
+	    CTRACE((tfp, "\nLYformTitle: kanji_code is an unexpected value."));
+	    strcpy(tmp_buffer, src);
+	    break;
+	}
+	StrAllocCopy(*dst, tmp_buffer);
+	FREE(tmp_buffer);
+    } else {
+	StrAllocCopy(*dst, src);
+    }
 }

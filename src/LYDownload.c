@@ -165,7 +165,7 @@ check_recall:
 		} else if ((cp = (char *)HTList_objectAt(
 						sug_filenames,
 						FnameNum)) != NULL) {
-		    strcpy(buffer, cp);
+		    LYstrncpy(buffer, cp, sizeof(buffer)-1);
 		    if (FnameTotal == 1) {
 			_statusline(EDIT_THE_PREV_FILENAME);
 		    } else {
@@ -198,7 +198,7 @@ check_recall:
 		} else if ((cp = (char *)HTList_objectAt(
 						sug_filenames,
 						FnameNum)) != NULL) {
-		    strcpy(buffer, cp);
+		    LYstrncpy(buffer, cp, sizeof(buffer)-1);
 		    if (FnameTotal == 1) {
 			_statusline(EDIT_THE_PREV_FILENAME);
 		    } else {
@@ -346,7 +346,7 @@ check_recall:
 			} else if ((cp = (char *)HTList_objectAt(
 							sug_filenames,
 							FnameNum)) != NULL) {
-			    strcpy(buffer, cp);
+			    LYstrncpy(buffer, cp, sizeof(buffer)-1);
 			    if (FnameTotal == 1) {
 				_statusline(EDIT_THE_PREV_FILENAME);
 			    } else {
@@ -379,7 +379,7 @@ check_recall:
 			} else if ((cp = (char *)HTList_objectAt(
 							sug_filenames,
 							FnameNum)) != NULL) {
-			    strcpy(buffer, cp);
+			    LYstrncpy(buffer, cp, sizeof(buffer)-1);
 			    if (FnameTotal == 1) {
 				_statusline(EDIT_THE_PREV_FILENAME);
 			    } else {

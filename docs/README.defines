@@ -58,7 +58,6 @@ Network related, specific protocols
        			see comments in makefile.in
 # -DSHORTENED_RBIND  For a SOCKSified lynx with the short version of Rbind.
                		see comments in makefile.in
-# -DNOPORT         if you must use PASV instead of PORT for FTP
 
 Related to DirEd code - probably only usable for UNIX or similar
 ----------------------------------------------------------------

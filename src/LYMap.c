@@ -194,7 +194,7 @@ PUBLIC BOOL LYAddImageMap ARGS3(
     }
 
     new = (old != NULL) ?
-		    old : (LYImageMap *)calloc(1, sizeof(LYImageMap));
+		    old : typecalloc(LYImageMap);
     if (new == NULL) {
 	outofmem(__FILE__, "LYAddImageMap");
 	return FALSE;
@@ -276,7 +276,7 @@ PUBLIC BOOL LYAddMapElement ARGS5(
 	}
     }
 
-    new = (LYMapElement *)calloc(1, sizeof(LYMapElement));
+    new = typecalloc(LYMapElement);
     if (new == NULL) {
 	perror("Out of memory in LYAddMapElement");
 	return FALSE;
@@ -598,7 +598,7 @@ PRIVATE int LYLoadIMGmap ARGS4 (
 	    PUTS(" TYPE=\"internal link\"");
 #endif
 	PUTS("\n>");
-	StrAllocCopy(MapTitle, new->title);
+	LYformTitle(&MapTitle, new->title);
 	LYEntify(&MapTitle, TRUE);
 	PUTS(MapTitle);
 	PUTS("</a>\n");

@@ -142,7 +142,7 @@ PRIVATE void addpair_str ARGS2(
 	char *,		str,
 	int,		un)
 {
-   int i;
+   int i = 0;
 
     if (un <= 0xfffe) {
 	if (!themap_str.entry_ct) {

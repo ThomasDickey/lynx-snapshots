@@ -97,7 +97,6 @@ struct _HTStream {			/* only know it as object */
 #define UTF_XLEN(c) UTF8_XNEGLEN(((char)~(c)))
 
 extern BOOL HTPassHighCtrlRaw;
-extern HTCJKlang HTCJK;
 
 #ifdef KANJI_CODE_OVERRIDE
 PUBLIC HTkcode last_kcode = NOKANJI;	/* 1997/11/14 (Fri) 09:09:26 */
@@ -7389,35 +7388,33 @@ PUBLIC void HTSearchQueries_free NOARGS
 PUBLIC void HTAddSearchQuery ARGS1(
 	char *,		query)
 {
-    char *new;
+    char *new_query = NULL;
     char *old;
     HTList *cur;
 
     if (!(query && *query))
 	return;
 
-    if ((new = (char *)calloc(1, (strlen(query) + 1))) == NULL)
-	outofmem(__FILE__, "HTAddSearchQuery");
-    strcpy(new, query);
+    StrAllocCopy(new_query, query);
 
     if (!search_queries) {
 	search_queries = HTList_new();
 #ifdef LY_FIND_LEAKS
 	atexit(HTSearchQueries_free);
 #endif
-	HTList_addObject(search_queries, new);
+	HTList_addObject(search_queries, new_query);
 	return;
     }
 
     cur = search_queries;
     while (NULL != (old = (char *)HTList_nextObject(cur))) {
-	if (!strcmp(old, new)) {
+	if (!strcmp(old, new_query)) {
 	    HTList_removeObject(search_queries, old);
 	    FREE(old);
 	    break;
 	}
     }
-    HTList_addObject(search_queries, new);
+    HTList_addObject(search_queries, new_query);
 
     return;
 }
@@ -7440,7 +7437,7 @@ PUBLIC int do_www_search ARGS1(
 	 *  Use its query as the default.
 	 */
 	PreviousSearch = TRUE;
-	strcpy(searchstring, ++cp);
+	LYstrncpy(searchstring, ++cp, sizeof(searchstring)-1);
 	for (cp=searchstring; *cp; cp++)
 	    if (*cp == '+')
 		*cp = ' ';
@@ -7496,7 +7493,7 @@ get_query:
 		QueryNum = 0;
 	    if ((cp=(char *)HTList_objectAt(search_queries,
 					    QueryNum)) != NULL) {
-		strcpy(searchstring, cp);
+		LYstrncpy(searchstring, cp, sizeof(searchstring)-1);
 		if (*temp && !strcmp(temp, searchstring)) {
 		    _statusline(EDIT_CURRENT_QUERY);
 		} else if ((*temp && QueryTotal == 2) ||
@@ -7527,7 +7524,7 @@ get_query:
 		QueryNum = QueryTotal - 1;
 	    if ((cp=(char *)HTList_objectAt(search_queries,
 					    QueryNum)) != NULL) {
-		strcpy(searchstring, cp);
+		LYstrncpy(searchstring, cp, sizeof(searchstring)-1);
 		if (*temp && !strcmp(temp, searchstring)) {
 		    _statusline(EDIT_CURRENT_QUERY);
 		} else if ((*temp && QueryTotal == 2) ||
@@ -12352,7 +12349,7 @@ PUBLIC int HText_ExtEditForm ARGS1(
 #endif
 
 #ifdef UNIX
-    errno = 0;
+    set_errno(0);
 #endif
     rv = LYSystem (tbuf);	/* finally the editor is called */
     if (rv) {

@@ -94,9 +94,6 @@ Dep_lynxdexe = \
    $(OBJ)/HTFwriter.obj\
    $(OBJ)/HTInit.obj\
    $(OBJ)/HTTcp.obj\
-   $(OBJ)/crypt.obj\
-   $(OBJ)/crypt_util.obj\
-   $(OBJ)/getline.obj\
    $(OBJ)/HTAABrow.obj\
    $(OBJ)/HTAAProt.obj\
    $(OBJ)/HTAAUtil.obj\
@@ -215,21 +212,6 @@ $(OBJ)/HTInit.obj :  src/HTInit.c
 $(OBJ)/HTTcp.obj :  $(WWW_LIB)/HTTcp.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ $(WWW_LIB)/HTTcp.c
-|
-
-$(OBJ)/crypt.obj :  $(WWW_LIB)/crypt.c
-  $(BCC32) -P- -c @&&|
- $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ $(WWW_LIB)/crypt.c
-|
-
-$(OBJ)/crypt_util.obj :  $(WWW_LIB)/crypt_util.c
-  $(BCC32) -P- -c @&&|
- $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ $(WWW_LIB)/crypt_util.c
-|
-
-$(OBJ)/getline.obj :  $(WWW_LIB)/getline.c
-  $(BCC32) -P- -c @&&|
- $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ $(WWW_LIB)/getline.c
 |
 
 $(OBJ)/HTAABrow.obj :  $(WWW_LIB)/HTAABrow.c
