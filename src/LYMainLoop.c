@@ -39,6 +39,107 @@
 #include <LYMainLoop.h>
 #include <LYPrettySrc.h>
 
+#if defined(CJK_EX)	/* 1999/05/25 (Tue) 11:10:45 */
+#include <HTCJK.h>
+extern HTCJKlang HTCJK;
+extern char *string_short(char *str, int cut_pos);	/* LYExtern.c */
+
+#define CHARSET_TRANS 14	/* "Transparent" in LYCharSets.c */
+
+PRIVATE char *str_sjis(char *to, char *from)
+{
+    if (!LYRawMode) {
+	strcpy(to, from);
+    } else if (last_kcode == EUC) {
+	EUC_TO_SJIS(from, to);
+    } else if (last_kcode == SJIS) {
+	strcpy(to, from);
+    } else {
+	TO_SJIS(from, to);
+    }
+    return to;
+}
+
+PUBLIC char *str_kcode(HTkcode code)
+{
+    char *p;
+    static char buff[8];
+
+    if (current_char_set == CHARSET_TRANS) {
+	    p = "THRU";
+    } else {
+	if (!LYRawMode) {
+	    p = "RAW";
+	} else {
+	    switch (code) {
+	    case NOKANJI:
+		p = "AUTO";
+		break;
+
+	    case EUC:
+		p = "EUC+";
+		break;
+
+	    case SJIS:
+		p = "SJIS";
+		break;
+
+	    case JIS:
+		p = " JIS";
+		break;
+
+	    default:
+		p = " ???";
+		break;
+	    }
+	}
+    }
+
+#ifdef SH_EX	/* 1999/05/25 (Tue) 11:12:05 */
+    if (no_table_center) {
+	buff[0] = '!';
+	strcpy(buff + 1, p);
+    } else {
+	strcpy(buff, p);
+    }
+#else
+    strcpy(buff, p);
+#endif
+
+    return buff;
+}
+
+
+PUBLIC void set_ws_title(char * str)
+{
+#ifdef WIN_EX
+    SetConsoleTitle(str);
+#endif
+}
+
+/* 1998/10/30 (Fri) 10:06:47 */
+
+#define NOT_EQU	1
+
+PRIVATE int str_n_cmp(const char *p, const char *q, int n)
+{
+    if (n == 0)
+	return 0;
+    
+    if (p == NULL)
+	return NOT_EQU;
+
+    if (q == NULL)
+	return NOT_EQU;
+
+    return strncmp(p, q, n);
+}
+
+#undef strncmp
+#define	strncmp(p, q, r)	str_n_cmp(p, q, r)
+
+#endif	/* SH_EX */
+
 #ifdef USE_EXTERNALS
 #include <LYExtern.h>
 #endif
@@ -239,9 +340,9 @@ PRIVATE int do_change_link ARGS1(
     int mouse_tmp = get_mouse_link();
     /* If yes, use it as the link */
     if (mouse_tmp != -1) {
-	if (curdoc.link >= 0 && curdoc.link < nlinks &&
-	    curdoc.link != mouse_tmp) {
-	highlight(OFF, curdoc.link, prev_target);
+	if (curdoc.link >= 0 && curdoc.link < nlinks
+	 && curdoc.link != mouse_tmp) {
+	    highlight(OFF, curdoc.link, prev_target);
 	}
 	if (mouse_tmp < 0 || mouse_tmp >= nlinks) {
 	    char *msgtmp = NULL;
@@ -268,6 +369,15 @@ PRIVATE int do_change_link ARGS1(
 
 int mainloop NOARGS
 {
+#if defined(SH_EX)	/* 1997/10/08 (Wed) 14:52:06 */
+#undef	STRING_MAX
+#define	STRING_MAX	4096
+    char title_buff[STRING_MAX];
+    char temp_buff[STRING_MAX];
+
+#define	BUFF_MAX	1024
+    char sjis_buff[BUFF_MAX];
+#endif
     int c = 0, real_c = 0, old_c = 0;
     int cmd = LYK_DO_NOTHING, real_cmd = LYK_DO_NOTHING;
     int getresult;
@@ -1155,22 +1265,22 @@ try_again:
 	     *  WINDOW structures are already filled based on the old size.
 	     *  So we notify the ncurses library directly here. - kw
 	     */
-#ifdef NCURSES_VERSION		/* FIXME: check for specific version? */
+#if defined(NCURSES_VERSION) && !defined(PDCURSES) /* FIXME: check for specific version? */
 	    resizeterm(LYlines, LYcols);
 #else
-		stop_curses();
-		start_curses();
-		clear();
+	    stop_curses();
+	    start_curses();
+	    clear();
 #endif
-		refresh_screen = TRUE; /* to force a redraw */
-		if (HTMainText)	/* to REALLY force it... - kw */
-		    HText_setStale(HTMainText);
-		recent_sizechange = FALSE;
-		if (user_mode == NOVICE_MODE) {
-		    display_lines = LYlines-4;
-		} else {
-		    display_lines = LYlines-2;
-		}
+	    refresh_screen = TRUE; /* to force a redraw */
+	    if (HTMainText)	/* to REALLY force it... - kw */
+		HText_setStale(HTMainText);
+	    recent_sizechange = FALSE;
+	    if (user_mode == NOVICE_MODE) {
+		display_lines = LYlines-4;
+	    } else {
+		display_lines = LYlines-2;
+	    }
 	}
 
 	if (www_search_result != -1) {
@@ -1445,6 +1555,74 @@ try_again:
 	    refresh_screen = FALSE;
 
 	}
+
+#if defined(SH_EX)	/* 1997/10/08 (Wed) 14:52:06 */
+	if (nlinks > 0) {
+	    char *p = "LYNX (unknown link type)";
+
+	    /* Show the URL & kanji code . */
+	    if (strlen(links[curdoc.link].lname) == 0) {
+
+	       if (links[curdoc.link].type == WWW_FORM_LINK_TYPE)
+
+		    switch(links[curdoc.link].form->type) {
+		    case F_TEXT_SUBMIT_TYPE:
+		    case F_SUBMIT_TYPE:
+		    case F_IMAGE_SUBMIT_TYPE:
+			p = "[SUBMIT]";
+			break;
+		    case F_PASSWORD_TYPE:
+			p = "Password";
+			break;
+		    case F_OPTION_LIST_TYPE:
+			p = "Option list";
+			break;
+		    case F_CHECKBOX_TYPE:
+			p = "Check box";
+			break;
+		    case F_RADIO_TYPE:
+			p = "[Radio]";
+			break;
+		    case F_RESET_TYPE:
+			p = "[Reset]";
+			break;
+		    case F_TEXT_TYPE:
+			p = "Text input";
+			break;
+		    case F_TEXTAREA_TYPE:
+			p = "Text input lines";
+			break;
+		    default:
+			break;
+		    }
+		    set_ws_title(p);
+	    } else {
+		if (user_mode == ADVANCED_MODE) {
+		    p = curdoc.title;
+		} else {
+		    p = links[curdoc.link].lname;
+		}
+
+		if (strlen(p) < 500) {
+		    strcpy(temp_buff, p);
+		    if (strchr(temp_buff, '%')) {
+			HTUnEscape(temp_buff);
+		    }
+		    str_sjis(sjis_buff, temp_buff);
+		    SetConsoleTitle(string_short(sjis_buff, 10));
+		}
+	    }
+	} else {
+	    if (strlen(curdoc.address) < 1000) {
+		if (user_mode == ADVANCED_MODE) {
+		    str_sjis(temp_buff, curdoc.title);
+		} else {
+		    strcpy(temp_buff, curdoc.address);
+		}
+		set_ws_title(HTUnEscape(temp_buff));
+	    }
+	}
+#endif /* SH_EX */
 
 	/*
 	 *  Report unread or new mail, if appropriate.
@@ -1749,6 +1927,11 @@ new_keyboard_input:
 	    } /* right link not NULL or link to another site*/
 	} /* traversal */
 
+#ifdef WIN_EX
+	if (c == DO_NOTHING)
+	    cmd = LYK_DO_NOTHING;
+	else 
+#endif
 	cmd = LKC_TO_LAC(keymap,c);  /* adds 1 to map EOF to 0 */
 
 #if defined(DIRED_SUPPORT) && defined(OK_OVERRIDE)
@@ -1778,9 +1961,9 @@ new_cmd:  /*
 		
 		show_main_statusline(links[curdoc.link]);
 	    else if (more)
-		_statusline(MOREHELP);
+		HTInfoMsg(MOREHELP);
 	    else
-		_statusline(HELP);
+		HTInfoMsg(HELP);
 	    show_help = TRUE;
 
 	    if (TRACE) {
@@ -2071,6 +2254,18 @@ new_cmd:  /*
 	    LYforce_no_cache = TRUE;
 	    break;
 
+#ifdef SH_EX		/* 1999/01/01 (Fri) */
+	case LYK_CHG_CENTER:	/* ^Q */
+
+	    if (no_table_center) {
+		no_table_center = FALSE;
+		HTInfoMsg("TABLE center enable.");
+	    } else {
+		no_table_center = TRUE;
+		HTInfoMsg("TABLE center disable.");
+	    }
+	    /* goto RELOAD */
+#endif
 	case LYK_RELOAD:  /* control-R to reload and refresh */
 	    /*
 	     *	Check if this is a reply from a POST, and if so,
@@ -2447,6 +2642,43 @@ new_cmd:  /*
 		HTInfoMsg(ALREADY_AT_END);
 	    }
 	    break;
+
+#if defined(SH_EX) && defined(DOSPATH)	/*1997/12/22 (Mon) 09:28:56 */
+	case LYK_TO_CLIPBOARD:	/* ^S */
+	    {
+		if (put_clip(links[curdoc.link].lname) == 0) {
+		    HTInfoMsg("URL to Clip Borad.");
+		} else {
+		    HTInfoMsg("Current URL is empty.");
+		}
+	    }
+	    break;
+#endif
+
+#if defined(CJK_EX) && defined(SH_EX)	/* 1999/02/25 (Thu) 15:29:05 */
+	case LYK_CHG_KCODE:	/* ^L */
+	    if (LYRawMode && (HTCJK == JAPANESE)) {
+		switch(last_kcode) {
+		case NOKANJI:
+		    last_kcode = SJIS;
+		    break;
+		case SJIS:
+		    last_kcode = EUC;
+		    break;
+		case EUC:
+		    last_kcode = NOKANJI;
+		    break;
+		default:
+		    break;
+		}
+	    }
+	    move(0, 0);
+	    lynx_start_title_color ();
+	    addstr(str_kcode(last_kcode));
+	    lynx_stop_title_color ();
+
+	    break;
+#endif
 
 	case LYK_REFRESH:
 	   refresh_screen = TRUE;
@@ -3045,7 +3277,7 @@ new_cmd:  /*
 		}
 	    } /* fall through to LYK_ACTIVATE */
 
-	case LYK_ACTIVATE:			/* follow a link */
+	case LYK_ACTIVATE:	/* follow a link */
 	case LYK_SUBMIT:	/* follow a link, submit TEXT_SUBMIT input */
 	    if (do_change_link(prev_target) == -1) {
 		LYforce_no_cache = FALSE;
@@ -3739,6 +3971,37 @@ new_cmd:  /*
 	    }
 
 check_recall:
+#ifdef WIN_EX	/* 1998/10/11 (Sun) 10:41:05 */
+	    {
+		int len;
+		char last_2, last_1, last;
+
+		len = strlen(user_input_buffer);
+
+		if (len >= 3) {
+
+		    last_2 = user_input_buffer[len - 3];
+		    last_1 = user_input_buffer[len - 2];
+		    last = user_input_buffer[len - 1];
+
+		    if (last_2 == '/' && isalpha(last_1) && last == ':')
+			LYAddHtmlSep0(user_input_buffer);
+
+		} else if (len == 2) {
+		    if (user_input_buffer[1] == ':') {
+			if (isalpha(user_input_buffer[0]))
+			    LYAddHtmlSep0(user_input_buffer);
+			else {
+			    HTUserMsg2(WWW_ILLEGAL_URL_MESSAGE,
+			    			user_input_buffer);
+			    strcpy(user_input_buffer, temp);
+			    FREE(temp);
+			    break;
+			}
+		    }
+		}
+	    }
+#endif
 	    /*
 	     *	Get rid of leading spaces (and any other spaces).
 	     */
@@ -4042,6 +4305,11 @@ check_goto_URL:
 			}
 
 		} else {
+#ifdef CJK_EX	/* 1997/12/13 (Sat) 15:20:18 */
+		    if (HTCJK == JAPANESE) {
+			last_kcode = NOKANJI;	/* AUTO */
+		    }
+#endif
 		    StrAllocCopy(newdoc.address, indexfile);
 		    StrAllocCopy(newdoc.title, gettext("System Index")); /* name it */
 		    FREE(newdoc.post_data);
@@ -4593,6 +4861,15 @@ if (!LYUseFormsOptions) {
 		links[curdoc.link].form->type == F_TEXTAREA_TYPE)   {
 		cmd = LYK_EDIT_TEXTAREA;
 		goto new_cmd;
+	    }
+
+	    /*
+	     *  If we're in a forms TEXTAREA, invoke the editor on it.
+	     */
+	    if (links[curdoc.link].type       == WWW_FORM_LINK_TYPE &&
+		links[curdoc.link].form->type == F_TEXTAREA_TYPE)   {
+	       cmd = LYK_EDIT_TEXTAREA;
+	       goto new_cmd;
 	    }
 
 	    /*
@@ -5389,6 +5666,11 @@ check_add_bookmark_to_self:
 			refresh_screen = TRUE;
 		    break;
 		}
+#if defined(CJK_EX)	/* 1997/12/13 (Sat) 15:20:18 */
+		if (HTCJK == JAPANESE) {
+		    last_kcode = NOKANJI;	/* AUTO */
+		}
+#endif
 		LYforce_no_cache = TRUE;  /*force the document to be reloaded*/
 		StrAllocCopy(newdoc.title, BOOKMARK_TITLE);
 		StrAllocCopy(newdoc.bookmark, BookmarkPage);
@@ -5409,11 +5691,15 @@ check_add_bookmark_to_self:
 	    }
 	    break;
 
-	case LYK_SHELL:  /* shell escape */
+	case LYK_SHELL:  /* (!) shell escape */
 	    if (!no_shell) {
 		stop_curses();
 		printf("%s\r\n", SPAWNING_MSG);
+#if defined(__CYGWIN_) && defined(DOSPATH)
+		Cygwin_Shell();
+#else
 		LYSystem(LYSysShell());
+#endif
 		start_curses();
 		refresh_screen = TRUE;	/* for an HText_pageDisplay() */
 	    } else {
@@ -6409,9 +6695,9 @@ PRIVATE void show_main_statusline ARGS1(
 	_statusline(buf);
     } else if (more) {
 	if (user_mode == NOVICE_MODE)
-		_statusline(MORE);
+	    _statusline(MORE);
 	else
-		_statusline(MOREHELP);
+	    _statusline(MOREHELP);
     } else {
 	_statusline(HELP);
     }

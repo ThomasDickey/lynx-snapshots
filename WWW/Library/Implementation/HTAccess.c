@@ -355,6 +355,15 @@ PUBLIC BOOL override_proxy ARGS1(
 	    FREE(host);
 	    return YES;
 	}
+#ifdef CJK_EX	/* ASATAKU PROXY HACK */
+	if ((!templ_port || templ_port == port)	 &&
+	    (t_len > 0	&&  t_len <= h_len  &&
+	     isdigit(*no_proxy) && !strncmp(host, no_proxy, t_len))) {
+	    FREE(host);
+	    return YES;
+	}
+#endif	/* ASATAKU PROXY HACK */
+
 	if (*end)
 	    no_proxy = (end + 1);
 	else

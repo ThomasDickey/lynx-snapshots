@@ -15,8 +15,8 @@ CC = gcc
 MCFLAGS = -O3 -DDOSPATH -DNO_TTYTYP \
 -I. \
 -I../../WWW/Library/Implementation \
--I../../djgpp/tcplib/include \
--I../../djgpp/tcplib/include/tcp \
+-I../../djgpp/watt32/inc \
+-I../../djgpp/watt32/inc/sys \
 -I../..
 
 .SUFFIXES: .tbl

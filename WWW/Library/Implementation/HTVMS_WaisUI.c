@@ -40,7 +40,7 @@
 #include <HTVMS_WaisProt.h>
 #include <HTTCP.h>
 
-#undef MAXINT	/* we don't need it here, and tcp.h may conflict */
+#undef MAXINT	/* we don't need it here, and www_tcp.h may conflict */
 #include <math.h>
 
 #include <LYexit.h>

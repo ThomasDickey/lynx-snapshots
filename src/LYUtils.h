@@ -128,6 +128,15 @@ extern void remove_backslashes PARAMS((char *buf));
 extern void size_change PARAMS((int sig));
 extern void statusline PARAMS((CONST char *text));
 extern void toggle_novice_line NOPARAMS;
+extern BOOL strn_dash_equ PARAMS((CONST char* p1,CONST char* p2,int len));
+
+
+#if defined(WIN_EX)	/* 1997/10/16 (Thu) 20:13:28 */
+extern int put_clip(char *szBuffer);
+extern int get_clip(char *szBuffer, int size);
+extern char *HTDOS_short_name(char *path);
+extern char *w32_strerror(DWORD ercode);
+#endif
 
 #ifdef VMS
 extern void Define_VMSLogical PARAMS((char *LogicalName, char *LogicalValue));
@@ -219,5 +228,15 @@ extern HTList *sug_filenames;
 
 #define HIDE_CHMOD 0600
 #define HIDE_UMASK 0077
+
+#if defined(DOSPATH) || defined(WIN_EX) || defined(__CYGWIN__)
+#define TXT_R	"rt"
+#define TXT_W	"wt"
+#define TXT_A	"at+"
+#else
+#define TXT_R	"r"
+#define TXT_W	"w"
+#define TXT_A	"a+"
+#endif
 
 #endif /* LYUTILS_H */

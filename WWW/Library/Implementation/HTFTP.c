@@ -78,6 +78,8 @@ BUGS:	@@@	Limit connection cache size!
 #include <HTUtils.h>
 
 #include <HTAlert.h>
+#include <HTTCP.h>
+#include <HTTP.h>
 
 #include <HTFTP.h>	/* Implemented here */
 
@@ -2631,7 +2633,14 @@ AgainForMultiNet:
 
 	    BytesReceived += chunk->size;
 	    if (BytesReceived > BytesReported + 1024) {
+#ifdef _WINDOWS
+		extern int ws_read_per_sec;
+
+		sprintf(NumBytes,gettext("Transferred %d bytes (%5d)"),
+				BytesReceived, ws_read_per_sec);
+#else
 		sprintf(NumBytes, TRANSFERRED_X_BYTES, BytesReceived);
+#endif
 		HTProgress(NumBytes);
 		BytesReported = BytesReceived;
 	    }
@@ -2682,6 +2691,14 @@ unload_btree:
 	/* Run through tree printing out in order
 	 */
 	{
+#ifdef SH_EX	/* 1997/10/18 (Sat) 14:14:28 */
+	    char *p, name_buff[256];
+	    int  name_len, dot_len;
+
+#define	FNAME_WIDTH	30
+#define	FILE_GAP	2
+
+#endif
 	    HTBTElement * ele;
 	    int i;
 	    for (ele = HTBTree_next(bt, NULL);
@@ -2705,16 +2722,44 @@ unload_btree:
 
 		/* start the anchor */
 		HTDirEntry(target, lastpath, entry_info->filename);
+#ifdef SH_EX	/* 1997/10/18 (Sat) 16:00 */
+		name_len = strlen(entry_info->filename);
+
+		sprintf(name_buff, "%-30s", entry_info->filename);
+
+		if (name_len < FNAME_WIDTH) {
+		    dot_len = FNAME_WIDTH - FILE_GAP - name_len;
+		    if (dot_len > 0) {
+			p = name_buff + name_len + 1;
+			while (dot_len--)
+			    *p++ = '.';
+		    }
+		} else {
+		    name_buff[FNAME_WIDTH] = '\0';
+		}
+
+		PUTS(name_buff);
+#else
 		PUTS(entry_info->filename);
+#endif
 		END(HTML_A);
 
 		if (entry_info->size) {
+#ifdef SH_EX	/* 1998/02/02 (Mon) 16:34:52 */
+		    if (entry_info->size < 1024)
+			sprintf(string_buffer, "%6d bytes",
+					       entry_info->size);
+		    else
+			sprintf(string_buffer, "%6d Kb",
+					        entry_info->size/1024);
+#else
 		    if (entry_info->size < 1024)
 			sprintf(string_buffer, "  %d bytes",
 					       entry_info->size);
 		    else
 			sprintf(string_buffer, "  %dKb",
 						entry_info->size/1024);
+#endif
 		    PUTS(string_buffer);
 		}
 

@@ -11,6 +11,7 @@
 #include <LYCharSets.h>  /* need for LYHaveCJKCharacterSet */
 #include <LYCurses.h>
 #include <GridText.h>
+#include <HTCJK.h>
 
 #ifdef VMS
 #include <nam.h>
@@ -23,6 +24,8 @@ PUBLIC char *MBM_A_subdescript[MBM_V_MAXFILES+1];
 
 PRIVATE BOOLEAN is_mosaic_hotlist = FALSE;
 PRIVATE char * convert_mosaic_bookmark_file PARAMS((char *filename_buffer));
+
+extern HTCJKlang HTCJK;
 
 PRIVATE void
 show_bookmark_not_defined NOARGS
@@ -93,7 +96,7 @@ PUBLIC char * get_bookmark_filename ARGS1(
 		    BookmarkPage);
     CTRACE(tfp, "\nget_bookmark_filename: SEEKING %s\n   AS %s\n\n",
 		BookmarkPage, filename_buffer);
-    if ((fp = fopen(filename_buffer,"r")) != NULL) {
+    if ((fp = fopen(filename_buffer, TXT_R)) != NULL) {
 	goto success;
     }
 
@@ -147,7 +150,7 @@ PRIVATE char * convert_mosaic_bookmark_file ARGS1(
 	return ("");
     }
 
-    if ((fp = fopen(filename_buffer, "r")) == NULL)
+    if ((fp = fopen(filename_buffer, TXT_R)) == NULL)
 	return ("");  /* should always open */
 
     fprintf(nfp,"<head>\n<title>%s</title>\n</head>\n",MOSAIC_BOOKMARK_TITLE);
@@ -162,6 +165,11 @@ PRIVATE char * convert_mosaic_bookmark_file ARGS1(
 	    endline = &buf[strlen(buf)-1];
 	    if(*endline == '\n')
 		*endline = '\0';
+#ifdef DOSPATH	/* 1998/01/10 (Sat) 15:41:35 */
+	    endline = strchr(buf, '\r');
+	    if (endline == NULL)
+		*endline = '\0';
+#endif
 	    if((line % 2) == 0) { /* even lines */
 		if(*buf != '\0') {
 		    strtok(buf," "); /* kill everything after the space */
@@ -200,6 +208,7 @@ PUBLIC void save_bookmark_link ARGS2(
     char *bookmark_URL = NULL;
     char filename_buffer[LY_MAXPATH];
     char string_buffer[BUFSIZ];
+    char tmp_buffer[BUFSIZ];
     char *Address = NULL;
     char *Title = NULL;
     int i, c;
@@ -269,7 +278,21 @@ PUBLIC void save_bookmark_link ARGS2(
      *	Allow user to change the title. - FM
      */
     do {
-	LYstrncpy(string_buffer, title, sizeof(string_buffer)-1);
+	if (HTCJK == JAPANESE) {
+	    switch(kanji_code) {
+	    case EUC:
+		TO_EUC(title, tmp_buffer);
+		break;
+	    case SJIS:
+		TO_SJIS(title, tmp_buffer);
+		break;
+	    default:
+		break;
+	    }
+	    LYstrncpy(string_buffer, tmp_buffer, sizeof(string_buffer)-1);
+	} else {
+	    LYstrncpy(string_buffer, title, sizeof(string_buffer)-1);
+	}
 	convert_to_spaces(string_buffer, FALSE);
 	LYMBM_statusline(TITLE_PROMPT);
 	LYgetstr(string_buffer, VISIBLE, sizeof(string_buffer), NORECALL);
@@ -290,7 +313,22 @@ PUBLIC void save_bookmark_link ARGS2(
      *  from display character set which may need changing.
      *  Do NOT convert any 8-bit chars if we have CJK display. - LP
      */
-    StrAllocCopy(Title, string_buffer);
+    if (HTCJK == JAPANESE) {
+	switch(kanji_code) {	/* 1997/11/22 (Sat) 09:28:00 */
+	case EUC:
+	    TO_EUC(string_buffer, tmp_buffer);
+	    break;
+	case SJIS:
+	    TO_SJIS(string_buffer, tmp_buffer);
+	    break;
+	default:
+	    TO_JIS(string_buffer, tmp_buffer);
+	    break;
+	}
+	StrAllocCopy(Title, tmp_buffer);
+    } else {
+	StrAllocCopy(Title, string_buffer);
+    }
     LYEntify(&Title, TRUE);
     if (UCSaveBookmarksInUnicode &&
 	have8bit(Title) && (!LYHaveCJKCharacterSet)) {
@@ -334,8 +372,21 @@ PUBLIC void save_bookmark_link ARGS2(
      */
     if (first_time) {
 	fprintf(fp,"<head>\n");
+#if defined(SH_EX) && !defined(_WINDOWS)	/* 1997/12/11 (Thu) 19:13:40 */
+	if (HTCJK != JAPANESE)
+	    LYAddMETAcharsetToFD(fp, -1);
+	else
+	    fprintf(fp, "<META %s %s>\n",
+		    "http-equiv=\"content-type\"",
+		    "conetnt=\"text/html;charset=iso-2022-jp\""); 
+#else
 	LYAddMETAcharsetToFD(fp, -1);
+#endif	/* !_WINDOWS */
 	fprintf(fp,"<title>%s</title>\n</head>\n", BOOKMARK_TITLE);
+#ifdef _WINDOWS
+	fprintf(fp,
+	    gettext("     You can delete links by the 'R' key<br>\n<ol>\n"));
+#else
 	fprintf(fp, "%s<br>\n%s\n\n<!--\n%s\n-->\n\n<p>\n<ol>",
 		    gettext("\
      You can delete links using the remove bookmark command.  It is usually\n\
@@ -349,6 +400,7 @@ Note: if you edit this file manually\n\
       you should not change the format within the lines\n\
       or add other HTML markup.\n\
       Make sure any bookmark link is saved as a single line."));
+#endif	/* _WINDOWS */
     }
 
     /*
@@ -423,8 +475,10 @@ PUBLIC void remove_bookmark_link ARGS2(
 #else
     char filename_buffer[LY_MAXPATH];
     char newfile[LY_MAXPATH];
+#ifdef UNIX
     struct stat stat_buf;
     mode_t mode;
+#endif /* UNIX */
 #endif /* VMS */
     char homepath[LY_MAXPATH];
 
@@ -437,7 +491,7 @@ PUBLIC void remove_bookmark_link ARGS2(
 		    cur_bookmark_page);
     CTRACE(tfp, "\nremove_bookmark_link: SEEKING %s\n   AS %s\n\n",
 		cur_bookmark_page, filename_buffer);
-    if ((fp = fopen(filename_buffer, "r")) == NULL) {
+    if ((fp = fopen(filename_buffer, TXT_R)) == NULL) {
 	HTAlert(BOOKMARK_OPEN_FAILED_FOR_DEL);
 	return;
     }
@@ -535,12 +589,20 @@ PUBLIC void remove_bookmark_link ARGS2(
 	 *  Check if this is the case and do something appropriate.
 	 *  Used to be ODD_RENAME
 	 */
-#ifdef _WINDOWS
+#if defined(_WINDOWS) || defined(WIN_EX)
+#if defined(WIN_EX)
+	if (GetLastError() == ERROR_NOT_SAME_DEVICE)
+#else /* !_WIN_CC */
 	if (errno == ENOTSAM)
-#else
-	if (errno == EXDEV)
-#endif /* WINDOWS */
+#endif /* _WIN_CC */
 	{
+	    if (rename(newfile, filename_buffer) != 0) {
+		if (LYCopyFile(newfile, filename_buffer) == 0)
+		    remove(newfile);
+	    }
+	}
+#else
+	if (errno == EXDEV) {
 	    static CONST char MV_FMT[] = "%s %s %s";
 	    char *buffer = 0;
 	    HTAddParam(&buffer, MV_FMT, 1, MV_PATH);
@@ -551,6 +613,7 @@ PUBLIC void remove_bookmark_link ARGS2(
 	    FREE(buffer);
 	    return;
 	}
+#endif /* _WINDOWS */
 #endif /* !VMS */
 
 #ifdef VMS

@@ -1,7 +1,7 @@
 /*                                       Utility macros for the W3 code library
                                   MACROS FOR GENERAL USE
 
-   See also: the system dependent file "tcp.h", which is included here.
+   See also: the system dependent file "www_tcp.h", which is included here.
 
  */
 
@@ -40,7 +40,7 @@
 #define DISP_PARTIAL	/* experimental */
 #endif
 
-#if defined(__STDC__) || defined(VMS)
+#if defined(__STDC__) || defined(VMS) || defined(_WINDOWS)
 #define ANSI_VARARGS 1
 #undef HAVE_STDARG_H
 #define HAVE_STDARG_H 1
@@ -102,13 +102,24 @@
 #define	GCC_UNUSED /* nothing */
 #endif
 
-#ifdef _WINDOWS                         /* SCW */
-#include <windef.h>
+#if defined(__CYGWIN__)			/* 1998/12/31 (Thu) 16:13:46 */
+#include <windows.h>		/* #include "windef.h" */
 #define BOOLEAN_DEFINED
-#define va_arg
+#endif
+
+#if defined(_WINDOWS) && !defined(__CYGWIN__)	/* SCW */
+#include <windows.h>		/* #include "windef.h" */
+#define BOOLEAN_DEFINED
 #include <dos.h>
+#undef sleep			/* 1998/06/23 (Tue) 16:54:53 */
+extern void sleep(unsigned __seconds);
 #define popen _popen
 #define pclose _pclose
+
+#if defined(_MSC_VER)
+typedef unsigned short mode_t;
+#endif
+
 #endif /* _WINDOWS */
 
 #ifdef __EMX__
@@ -201,7 +212,7 @@ Macros for declarations
 #define PUBLIC                  /* Accessible outside this module     */
 #define PRIVATE static          /* Accessible only within this module */
 
-#ifdef __STDC__
+#if defined(__STDC__) || defined(__BORLANDC__) || defined(_MSC_VER)
 #define CONST const             /* "const" only exists in STDC */
 #define NOPARAMS (void)
 #define PARAMS(parameter_list) parameter_list
@@ -268,7 +279,7 @@ Macros for declarations
 OFTEN USED INTEGER MACROS
 
   Min and Max functions
-  
+
  */
 #ifndef HTMIN
 #define HTMIN(a,b) ((a) <= (b) ? (a) : (b))
@@ -412,7 +423,7 @@ Upper- and Lowercase macros
 #define TOUPPER(c) (islower((unsigned char)c) ? toupper((unsigned char)c) : ((unsigned char)c))
 #endif /* TOLOWER */
 
-#define FREE(x) if (x) {free(x); x = NULL;}
+#define FREE(x) if (x != 0) {free((char *)x); x = NULL;}
 
 /*
 
@@ -433,7 +444,7 @@ The local equivalents of CR and LF
 
 extern FILE *TraceFP NOPARAMS;
 
-#include <tcp.h>
+#include <www_tcp.h>
 
 /*
  * We force this include-ordering since socks.h contains redefinitions of

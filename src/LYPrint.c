@@ -21,6 +21,10 @@
 #define CancelPrint(msg) HTInfoMsg(msg); goto done
 #define CannotPrint(msg) HTAlert(msg); goto done
 
+#ifdef WIN_EX
+static BOOLEAN mail_is_blat = FALSE;
+#endif
+
 /*
  *  printfile prints out the current file minus the links and targets
  *  to a variety of places
@@ -362,7 +366,7 @@ check_recall:
      */
     CTRACE(tfp, "LYPrint: filename is %s, action is `%c'\n", buffer, c);
 
-#if HAVE_POPEN
+#if HAVE_POPEN || !defined(__CYGWIN__)
     if (*buffer == '|') {
 	if (no_shell) {
 	    HTUserMsg(SPAWNING_DISABLED);
@@ -435,11 +439,11 @@ check_recall:
 	}
     }
 
-    print_wwwfile_to_fd(outfile_fp,0);
+    print_wwwfile_to_fd(outfile_fp, 0);	/* FILE */
     if (keypad_mode)
 	printlist(outfile_fp,FALSE);
 
-#if HAVE_POPEN
+#if HAVE_POPEN || !defined(__CYGWIN__)
     if (LYIsPipeCommand(buffer))
 	pclose(outfile_fp);
     else
@@ -476,7 +480,7 @@ PRIVATE void send_file_to_mail ARGS3(
     char hdrfile[LY_MAXPATH];
     char my_temp[LY_MAXPATH];
 #endif
-#ifdef DOSPATH
+#if defined(DOSPATH) || defined(WIN_EX)
     char my_temp[LY_MAXPATH];
 #endif
 
@@ -615,11 +619,12 @@ PRIVATE void send_file_to_mail ARGS3(
     } else if (!isPMDF) {
 	fprintf(outfile_fp, "X-URL: %s\n\n", newdoc->address);
     }
-    print_wwwfile_to_fd(outfile_fp, 0);
+    print_wwwfile_to_fd(outfile_fp, 0);	/* MAIL */
     if (keypad_mode)
 	printlist(outfile_fp, FALSE);
     LYCloseTempFP(outfile_fp);
 
+    buffer = NULL;
     if (isPMDF) {
 	/*
 	 * For PMDF, put the subject in the header file and close it.  - FM
@@ -651,6 +656,9 @@ PRIVATE void send_file_to_mail ARGS3(
     }
 
     stop_curses();
+#ifdef SH_EX
+    SetOutputMode(O_TEXT);
+#endif
     printf(MAILING_FILE);
     LYSystem(buffer);
     sleep(AlertSecs);
@@ -658,9 +666,9 @@ PRIVATE void send_file_to_mail ARGS3(
     if (isPMDF)
 	LYRemoveTemp(hdrfile);
     LYRemoveTemp(my_temp);
-#else /* Unix or DOS */
+#else /* !VMS (Unix or DOS) */
 
-#ifdef DOSPATH
+#if defined(DOSPATH) || defined(WIN_EX)
     outfile_fp = LYOpenTemp(my_temp, ".txt", "w");
 #else
     HTSprintf0(&buffer, "%s %s", system_mail, system_mail_flags);
@@ -758,25 +766,37 @@ PRIVATE void send_file_to_mail ARGS3(
 		"<!-- X-URL: %s -->\n<BASE HREF=\"%s\">\n\n",
 		newdoc->address, content_base);
     }
-    print_wwwfile_to_fd(outfile_fp, 0);
+    print_wwwfile_to_fd(outfile_fp, 0);	/* MAIL */
     if (keypad_mode)
 	printlist(outfile_fp, FALSE);
 
-#ifdef DOSPATH
-    HTSprintf0(&buffer, "%s -t \"%s\" -F %s", system_mail, user_response, my_temp);
+#if defined(WIN_EX)	/* 1998/08/17 (Mon) 16:29:49 */
+    buffer = NULL;
+    if (mail_is_blat)
+	HTSprintf0(&buffer, "%s %s -t \"%s\"",
+		system_mail, my_temp, user_response);
+    else
+	HTSprintf0(&buffer, "%s -t \"%s\" -F %s",
+			system_mail, user_response, my_temp);
     LYCloseTempFP(outfile_fp);	/* Close the tmpfile. */
     stop_curses();
+#ifdef SH_EX
+    SetOutputMode(O_TEXT);
+#endif
     printf("%s\n\n$ %s\n\n%s", gettext("Sending"), buffer, PLEASE_WAIT);
     LYSystem(buffer);
     sleep(MessageSecs);
     start_curses();
+#ifdef SH_EX
+    SetOutputMode( O_BINARY );
+#endif
     LYRemoveTemp(my_temp); /* Delete the tmpfile. */
 #else
     pclose(outfile_fp);
 #endif
 #endif /* VMS */
 
-done:
+done:	/* send_file_to_mail() */
     FREE(buffer);
     FREE(subject);
     return;
@@ -816,7 +836,7 @@ PRIVATE void send_file_to_printer ARGS4(
 		"<!-- X-URL: %s -->\n<BASE HREF=\"%s\">\n\n",
 		newdoc->address, content_base);
     }
-    print_wwwfile_to_fd(outfile_fp, 0);
+    print_wwwfile_to_fd(outfile_fp, 0);	/* PRINTER */
     if (keypad_mode)
 	printlist(outfile_fp, FALSE);
 
@@ -877,17 +897,34 @@ check_again:
 	if (!strncasecomp(my_file, "nl:", 3) ||
 	    !strncasecomp(my_file, "/nl/", 4))
 #else
+#if defined(DOSPATH)	/* 1997/10/15 (Wed) 16:41:30 */
+	if (!strcmp(my_file, "nul"))
+#else
 	if (!strcmp(my_file, "/dev/null"))
+#endif /* DOSPATH */
 #endif /* VMS */
 	{
 	    CancelPrint(PRINT_REQUEST_CANCELLED);
 	}
 	HTAddSugFilename(my_file);
     }
+#ifdef SH_EX	/* 1999/01/04 (Mon) 09:37:03 */
+    else {
+	my_file[0] = '\0';
+    }
 
+    HTAddParam (&the_command, cur_printer->command, 1, my_temp);
+    if (my_file[0]) {
+	HTAddParam (&the_command, cur_printer->command, 2, my_file);
+	HTEndParam (&the_command, cur_printer->command, 3);
+    } else {
+	HTEndParam (&the_command, cur_printer->command, 2);
+    }
+#else
     HTAddParam (&the_command, cur_printer->command, 1, my_temp);
     HTAddParam (&the_command, cur_printer->command, 2, my_file);
     HTEndParam (&the_command, cur_printer->command, 2);
+#endif
 
     /*
      * Move the cursor to the top of the screen so that output from system'd
@@ -897,6 +934,9 @@ check_again:
 
     stop_curses();
     CTRACE(tfp, "command: %s\n", the_command);
+#ifdef SH_EX
+    SetOutputMode( O_TEXT );
+#endif
     printf(PRINTING_FILE);
     /*
      * Set various bits of document information as environment variables, for
@@ -926,10 +966,15 @@ check_again:
 #ifndef VMS
     signal(SIGINT, cleanup_sig);
 #endif /* !VMS */
+#ifdef SH_EX
+    fprintf(stdout," Print job complite.\n");
+    fflush(stdout);
+    SetOutputMode( O_BINARY );
+#endif
     sleep(MessageSecs);
     start_curses();
 
-done:
+done:	/* send_file_to_printer() */
     return;
 }
 
@@ -955,6 +1000,10 @@ PRIVATE void send_file_to_screen ARGS3(
     outfile_fp = stdout;
 
     stop_curses();
+#ifdef SH_EX
+    SetOutputMode( O_TEXT );
+#endif
+
 #ifndef VMS
     signal(SIGINT, SIG_IGN);
 #endif /* !VMS */
@@ -972,7 +1021,7 @@ PRIVATE void send_file_to_screen ARGS3(
     }
     if (Lpansi)
 	printf("\033[5i");
-    print_wwwfile_to_fd(outfile_fp, 0);
+    print_wwwfile_to_fd(outfile_fp, 0);	/* SCREEN */
     if (keypad_mode)
 	printlist(outfile_fp, FALSE);
 
@@ -996,9 +1045,13 @@ PRIVATE void send_file_to_screen ARGS3(
 	HadVMSInterrupt = FALSE;
 #endif /* VMS */
     }
+#ifdef SH_EX
+    fprintf(stdout,"\n");
+    SetOutputMode( O_BINARY );
+#endif
     start_curses();
 
-done:
+done:	/* send_file_to_screen() */
     return;
 }
 

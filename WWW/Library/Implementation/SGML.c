@@ -39,6 +39,10 @@
 # include <LYPrettySrc.h>
 #endif
 
+#ifdef CJK_EX	/* 1997/12/12 (Fri) 16:54:58 */
+extern HTkcode last_kcode;
+#endif
+
 #define INVALID (-1)
 
 #ifdef USE_PSRC
@@ -224,8 +228,13 @@ PRIVATE void HTMLSRC_apply_markup ARGS3(
     }
 }
 
+#ifdef __STDC__
 #  define PSRCSTART(x)	HTMLSRC_apply_markup(context,HTL_##x,START)
 #  define PSRCSTOP(x)  HTMLSRC_apply_markup(context,HTL_##x,STOP)
+#else
+#  define PSRCSTART(x)	HTMLSRC_apply_markup(context,HTL_/**/x,START)
+#  define PSRCSTOP(x)  HTMLSRC_apply_markup(context,HTL_/**/x,STOP)
+#endif
 
 PRIVATE BOOL cur_attr_is_href;
 PRIVATE BOOL cur_attr_is_name;
@@ -1132,7 +1141,7 @@ PRIVATE void start_element ARGS1(
 		!strcasecomp(new_tag->name, "FIELDSET") ||
 		!strcasecomp(new_tag->name, "LABEL") ||
 		!strcasecomp(new_tag->name, "LEGEND") ||
-		!strcasecomp(new_tag->name, "FORM")) {
+		!strcasecomp(new_tag->name, "FORM"))
 #else
 	    switch (e) {
 		case HTML_INPUT:  case HTML_TEXTAREA: case HTML_SELECT:
@@ -1143,8 +1152,9 @@ PRIVATE void start_element ARGS1(
 		default:
 		    break;
 	    }
-	    if (ok) {
+	    if (ok)
 #endif
+	    {
 		/*
 		**  It is another form-related start tag, so terminate
 		**  the current SELECT block and fall through. - FM
@@ -1180,10 +1190,10 @@ PRIVATE void start_element ARGS1(
 	N->next = context->element_stack;
 	N->tag = new_tag;
 	context->element_stack = N;
-#if !OPT
-    } else if (!strcasecomp(new_tag->name, "META")) {
-#else
+#if OPT
     } else if (e == HTML_META ) {
+#else
+    } else if (!strcasecomp(new_tag->name, "META")) {
 #endif
 	/*
 	**  Check for result of META tag. - KW & FM
@@ -1360,7 +1370,11 @@ PRIVATE void SGML_character ARGS2(
     char * p;
     BOOLEAN chk;	/* Helps (?) walk through all the else ifs... */
     UCode_t clong, uck = 0; /* Enough bits for UCS4 ... */
+#ifdef CJK_EX
+    unsigned char c;
+#else
     char c;
+#endif
     char saved_char_in = '\0';
 
     /*
@@ -1369,6 +1383,10 @@ PRIVATE void SGML_character ARGS2(
     **	we can revert back to the unchanged c_in. - KW
     */
 #define unsign_c clong
+#ifdef CJK_EX	/* 1997/12/12 (Fri) 18:08:48 */
+    static unsigned char sjis_1st = '\0';
+    unsigned char sjis_hi, sjis_lo;
+#endif
 
     c = c_in;
     clong = (unsigned char)c;	/* a.k.a. unsign_c */
@@ -1578,6 +1596,25 @@ top1:
 	c != '\t' && c != '\n' && c != '\r' &&
 	HTCJK == NOCJK)
 	return;
+
+#ifdef CJK_EX	/* 1998/11/24 (Tue) 17:02:31 */
+    if (HTCJK == JAPANESE && last_kcode == SJIS) {
+	if (sjis_1st == '\0' && (IS_SJIS_HI1(c) || IS_SJIS_HI2(c))) {
+	    sjis_1st = c;
+	} else if (sjis_1st && IS_SJIS_LO(c)) {
+	    sjis_1st = '\0';
+	} else {
+	    if (context->state == S_text) {
+		if (0xA1 <= (unsigned char)c && (unsigned char)c <= 0xDF) {
+		    JISx0201TO0208_SJIS(c, &sjis_hi, &sjis_lo);
+		    PUTC(sjis_hi);
+		    PUTC(sjis_lo);
+		    return;
+		}
+	    }
+	}
+    }
+#endif
 
     /*
     **	Ignore 127 if we don't have HTPassHighCtrlRaw
@@ -3276,6 +3313,17 @@ top1:
 		PSRCSTOP(attrval);
 	    } else
 #endif
+#ifdef CJK_EX	/* Quick hack. - JH7AYN */
+	    {   char jis_buf[512];
+		if (string->data[0] == '$') {
+		  if (string->data[1] == 'B' || string->data[1] == '@') {
+		    jis_buf[0] = '\033';
+		    strcpy(jis_buf + 1, string->data);
+		    TO_EUC(jis_buf, string->data);
+		  }
+		}
+	    }
+#endif
 	    handle_attribute_value(context, string->data);
 	    string->size = 0;
 	    if (c == '>') {		/* End of tag */
@@ -3494,11 +3542,11 @@ top1:
 #endif
 		context->current_tag = t;
 #if OPT
+		if (tag_OK
 #ifdef EXTENDED_HTMLDTD
-		if (tag_OK && Old_DTD) {
-#else
-		if (tag_OK) {
+		 && Old_DTD
 #endif
+		 ) {
 		   switch (e) {
 		     case HTML_DD: case HTML_DT: case HTML_LI: case HTML_LH :
 		     case HTML_TD: case HTML_TH: case HTML_TR: case HTML_THEAD:
@@ -3524,9 +3572,10 @@ top1:
 		} else
 #endif /* EXTENDED_HTMLDTD */
 
-
-#if !OPT
 		if (tag_OK &&
+#if OPT
+		    (branch == 0)
+#else
 		    (!strcasecomp(string->data, "DD") ||
 		     !strcasecomp(string->data, "DT") ||
 		     !strcasecomp(string->data, "LI") ||
@@ -3537,10 +3586,9 @@ top1:
 		     !strcasecomp(string->data, "THEAD") ||
 		     !strcasecomp(string->data, "TFOOT") ||
 		     !strcasecomp(string->data, "TBODY") ||
-		     !strcasecomp(string->data, "COLGROUP"))) {
-#else
-		if (tag_OK && branch == 0) {
+		     !strcasecomp(string->data, "COLGROUP"))
 #endif
+		 ) {
 		    /*
 		    **	Don't treat these end tags as invalid,
 		    **	nor act on them. - FM
@@ -3555,8 +3603,10 @@ top1:
 			context->state = S_text;
 		    }
 		    break;
-#if !OPT
 		} else if (tag_OK &&
+#if OPT
+			   (branch == 1)
+#else
 			   (!strcasecomp(string->data, "A") ||
 			    !strcasecomp(string->data, "B") ||
 			    !strcasecomp(string->data, "BLINK") ||
@@ -3568,10 +3618,9 @@ top1:
 			    !strcasecomp(string->data, "P") ||
 			    !strcasecomp(string->data, "STRONG") ||
 			    !strcasecomp(string->data, "TT") ||
-			    !strcasecomp(string->data, "U"))) {
-#else
-		} else if (tag_OK && branch == 1) {
+			    !strcasecomp(string->data, "U"))
 #endif
+		) {
 		    /*
 		    **	Handle end tags for container elements declared
 		    **	as SGML_EMPTY to prevent "expected tag substitution"
@@ -3844,10 +3893,10 @@ top1:
 		if (!WHITE(c)) {
 		    seen_letter_in_junk_tag = TRUE;
 		    PUTC(c);
-		};
+		}
 	    } else
 		PUTC(c);
-	};
+	}
 #endif
 
     } /* switch on context->state */
@@ -4009,8 +4058,8 @@ PUBLIC HTStream* SGML_new  ARGS3(
 #ifdef USE_PSRC
     if (psrc_view) {
 	psrc_view = FALSE;
-	SGML_string(context, "<HTML><HEAD><TITLE>source</TITLE></HEAD>"
-			     "<BODY><PRE>") ;
+	SGML_string(context,
+		    "<HTML><HEAD><TITLE>source</TITLE></HEAD><BODY><PRE>");
 	psrc_view = TRUE;
 	psrc_convert_string = FALSE;
 	sgml_in_psrc_was_initialized = TRUE;
@@ -4132,6 +4181,21 @@ PUBLIC void JISx0201TO0208_EUC ARGS4(
     }
 }
 
+PRIVATE int IS_SJIS_STR ARGS1(CONST unsigned char *, str)
+{
+    CONST unsigned char *s;
+    unsigned char ch;
+    int is_sjis = 0;
+
+    s = str;
+    while ((ch = *s++) != '\0') {
+	if (ch & 0x80)
+	    if (IS_SJIS(ch, *s, is_sjis))
+		return 1;
+    }
+    return 0;
+}
+
 PUBLIC unsigned char * SJIS_TO_JIS1 ARGS3(
 	register unsigned char,		HI,
 	register unsigned char,		LO,
@@ -4177,8 +4241,9 @@ PUBLIC unsigned char * EUC_TO_SJIS1 ARGS3(
 	unsigned char,			LO,
 	register unsigned char *,	SJCODE)
 {
-    if (HI == 0x8E) JISx0201TO0208_EUC(HI, LO, &HI, &LO);
-    JIS_TO_SJIS1(HI&0x7F, LO&0x7F, SJCODE);
+    if (HI == 0x8E)
+	JISx0201TO0208_EUC(HI, LO, &HI, &LO);
+    JIS_TO_SJIS1(HI & 0x7F, LO & 0x7F, SJCODE);
     return SJCODE;
 }
 
@@ -4189,8 +4254,8 @@ PUBLIC void JISx0201TO0208_SJIS ARGS3(
 {
     unsigned char SJCODE[2];
 
-    JISx0201TO0208_EUC(216, I, OHI, OLO);
-    JIS_TO_SJIS1(*OHI&0x7F, *OLO&0x7F, SJCODE);
+    JISx0201TO0208_EUC(0x8E, I, OHI, OLO);
+    JIS_TO_SJIS1(*OHI & 0x7F, *OLO & 0x7F, SJCODE);
     *OHI = SJCODE[0];
     *OLO = SJCODE[1];
 }
@@ -4213,17 +4278,17 @@ PUBLIC unsigned char * SJIS_TO_EUC ARGS2(
     register unsigned char hi, lo, *sp, *dp;
     register int in_sjis = 0;
 
-    for (sp = src, dp = dst; (0 != (hi = sp[0]));) {
+    in_sjis = IS_SJIS_STR(src);
+    for (sp = src, dp = dst; (hi = sp[0]) != '\0';) {
 	lo = sp[1];
 	if (TREAT_SJIS && IS_SJIS(hi, lo, in_sjis)) {
-	    SJIS_TO_JIS1(hi,lo,dp);
+	    SJIS_TO_JIS1(hi, lo, dp);
 	    dp[0] |= 0x80;
 	    dp[1] |= 0x80;
 	    dp += 2;
 	    sp += 2;
-	} else {
+	} else
 	    *dp++ = *sp++;
-	}
     }
     *dp = 0;
     return dst;
@@ -4238,7 +4303,7 @@ PUBLIC unsigned char * EUC_TO_SJIS ARGS2(
     for (sp = src, dp = dst; *sp;) {
 	if (*sp & 0x80) {
 	    if (sp[1] && (sp[1] & 0x80)) {
-		JIS_TO_SJIS1(sp[0]&0x7F, sp[1]&0x7F, dp);
+		JIS_TO_SJIS1(sp[0] & 0x7F, sp[1] & 0x7F, dp);
 		dp += 2;
 		sp += 2;
 	    } else {
@@ -4252,7 +4317,9 @@ PUBLIC unsigned char * EUC_TO_SJIS ARGS2(
     return dst;
 }
 
-PUBLIC unsigned char * EUC_TO_JIS ARGS4(
+#define Strcpy(a,b)	(strcpy((char*)a,(CONST char*)b),&a[strlen((CONST char*)a)])
+
+PUBLIC unsigned char *EUC_TO_JIS ARGS4(
 	unsigned char *,	src,
 	unsigned char *,	dst,
 	CONST char *,		toK,
@@ -4262,15 +4329,20 @@ PUBLIC unsigned char * EUC_TO_JIS ARGS4(
     register unsigned char cch;
     register unsigned char *sp = src;
     register unsigned char *dp = dst;
-    register int i;
+    int is_JIS = 0;
 
-    while (0 != (cch = *sp++)) {
+    while ((cch = *sp++) != '\0') {
 	if (cch & 0x80) {
+	    if (!IS_EUC(cch, *sp)) {
+		if (cch == 0xA0 && is_JIS)	/* ignore NBSP */
+		    continue;
+		is_JIS++;
+		*dp++ = cch;
+		continue;
+	    }
 	    if (!kana_mode) {
 		kana_mode = ~kana_mode;
-		for (i = 0; toK[i]; i++) {
-		    *dp++ = (unsigned char)toK[i];
-		}
+		dp = Strcpy(dp, toK);
 	    }
 	    if (*sp & 0x80) {
 		*dp++ = cch & ~0x80;
@@ -4279,70 +4351,244 @@ PUBLIC unsigned char * EUC_TO_JIS ARGS4(
 	} else {
 	    if (kana_mode) {
 		kana_mode = ~kana_mode;
-		for (i = 0; toA[i]; i++) {
-		    *dp++ = (unsigned char)toA[i];
-		    *dp = '\0';
-		}
+		dp = Strcpy(dp, toA);
 	    }
 	    *dp++ = cch;
 	}
     }
-    if (kana_mode) {
-	for (i = 0; toA[i]; i++) {
-	    *dp++ = (unsigned char)toA[i];
-	}
-    }
+    if (kana_mode)
+	dp = Strcpy(dp, toA);
 
     if (dp)
 	*dp = 0;
     return dst;
 }
 
-PUBLIC unsigned char * TO_EUC ARGS2(
+#define	IS_JIS7(c1,c2)	(0x20<(c1)&&(c1)<0x7F && 0x20<(c2)&&(c2)<0x7F)
+#define SO		('N'-0x40)
+#define SI		('O'-0x40)
+
+PUBLIC int repair_JIS = 0;
+
+PRIVATE CONST unsigned char *repairJIStoEUC ARGS2(
+	CONST unsigned char *,	src,
+	unsigned char **,	dstp)
+{
+    CONST unsigned char *s;
+    unsigned char *d, ch1, ch2;
+
+    d = *dstp;
+    s = src;
+    while ((ch1 = s[0]) && (ch2 = s[1])) {
+	s += 2;
+	if (ch1 == '(')
+	    if (ch2 == 'B' || ch2 == 'J') {
+		*dstp = d;
+		return s;
+	    }
+	if (!IS_JIS7(ch1, ch2))
+	    return 0;
+
+	*d++ = 0x80 | ch1;
+	*d++ = 0x80 | ch2;
+    }
+    return 0;
+}
+
+#if 0	/* NOTUSED */
+
+static struct {
+    char *ee;
+    char de;
+} entities[] = {
+    {"&lt;", '<' },
+    {"&gt;", '>' },
+    {"&amp;", '&'},
+    {"&quot;", '"'},
+    {NULL, 0}
+};
+
+PRIVATE int isHTMLentity ARGS2(
+	char *, str,
+	int *, chp)
+{
+    int ei, ej;
+    char *es, ec;
+    int off;
+
+    off = *str == '&' ? 0 : 1;
+    for (ei = 0; (es = entities[ei].ee) != '\0'; ei++) {
+	for (ej = 0; (ec = es[off + ej]) != '\0'; ej++) {
+	    if (ec != str[ej])
+		break;
+	    if (ec == ';') {
+		*chp = entities[ei].de;
+		return ej + 1;
+	    }
+	}
+    }
+    return 0;
+}
+
+#define sputc(sp,ch)	(sp?(*sp++ = ch):ch)
+
+PUBLIC int FIX_2022 ARGS3(
+	char *, src,
+	char *, dst,
+	char *, ctype)
+{
+    int in2B;
+    char ch1, ch2, *sp, *dp;
+    int bad;
+    int isHTML, len, ech;
+
+    in2B = 0;
+    sp = src;
+    dp = dst;
+    bad = 0;
+
+    isHTML = strcasecomp(ctype, "text/html") == 0;
+
+    while ((ch1 = *sp++) != '\0') {
+	if (ch1 == ESC) {
+	    if (*sp == TO_2BCODE) {
+		if (sp[1] == 'B' || sp[1] == '@') {
+		    in2B = 1;
+		    sputc(dp, ch1);
+		    sputc(dp, *sp++);
+		    sputc(dp, *sp++);
+		    continue;
+		}
+	    } else if (*sp == TO_1BCODE) {
+		if (sp[1] == 'B' || sp[1] == 'J') {
+		    in2B = 0;
+		    sputc(dp, ch1);
+		    sputc(dp, *sp++);
+		    sputc(dp, *sp++);
+		    continue;
+		}
+	    }
+	}
+	if (in2B) {
+	    if ((ch1 <= 0x20)
+		|| (sp[0] <= 0x20)
+		|| (ch1 == '<' && sp[0] == '/')
+		|| (sp[0] == '<' && sp[1] == '/')) {
+		in2B = 0;
+		sputc(dp, ESC);
+		sputc(dp, TO_1BCODE);
+		sputc(dp, 'B');
+		sputc(dp, ch1);
+		bad = 1;
+		continue;
+	    }
+	    if (isHTML && ch1 == '&')
+		if ((len = isHTMLentity(sp, &ech)) != '\0')
+		    if (sp[len] != 0) {
+			ch1 = ech;
+			sp += len;
+			bad = 1;
+		    }
+	    ch2 = *sp++;
+
+	    if (isHTML && ch2 == '&')
+		if ((len = isHTMLentity(sp, &ech)) != '\0')
+		    if (sp[len] != 0) {
+			ch2 = ech;
+			sp += len;
+			bad = 1;
+		    }
+	    sputc(dp, ch1);
+	    sputc(dp, ch2);
+	} else {
+	    sputc(dp, ch1);
+	}
+    }
+    sputc(dp, 0);
+    return bad;
+}
+
+#endif
+
+PUBLIC unsigned char *TO_EUC ARGS2(
 	CONST unsigned char *,	jis,
 	unsigned char *,	euc)
 {
     register CONST unsigned char *s;
-    register unsigned char *d, c, jis_stat;
+    register unsigned char c, jis_stat;
+    unsigned char *d;
     register int to1B, to2B;
     register int in_sjis = 0;
+    static int nje;
+    int n8bits;
+    int is_JIS;
 
+    nje++;
+    n8bits = 0;
     s = jis;
     d = euc;
     jis_stat = 0;
     to2B = TO_2BCODE;
     to1B = TO_1BCODE;
+    in_sjis = IS_SJIS_STR(jis);
+    is_JIS = 0;
 
-    while (0 != (c = *s++)) {
-	if (c == ESC) {
-	    if (*s == to2B) {
-		if ((s[1] == 'B') || (s[1] == '@') || (s[1] == 'A')) {
-		    jis_stat = 0x80;
-		    s += 2;
+    while ((c = *s++) != '\0') {
+	if (c == 0x80)
+	    continue;		/* ignore it */
+	if (c == 0xA0 && is_JIS)
+	    continue;		/* ignore Non-breaking space */
+
+	if (c == to2B && jis_stat == 0 && repair_JIS) {
+	    if (*s == 'B' || *s == '@') {
+		CONST unsigned char *ts;
+		if ((ts = repairJIStoEUC(s + 1, &d)) != NULL) {
+		    s = ts;
 		    continue;
-		} else if ((s[1] == '(') && s[2] && (s[2] == 'C')) {
-		    jis_stat = 0x80;
-		    s += 3;
-		    continue;
-		}
-	    } else {
-		if (*s == to1B) {
-		    if ((s[1]=='B') || (s[1]=='J') ||
-			(s[1]=='H') || (s[1]=='T')) {
-			jis_stat = 0;
-			s += 2;
-			continue;
-		    }
 		}
 	    }
 	}
-	if (IS_SJIS(c,*s,in_sjis)) {
+	if (c == ESC) {
+	    if (*s == to2B) {
+		if ((s[1] == 'B') || (s[1] == '@')) {
+		    jis_stat = 0x80;
+		    s += 2;
+		    is_JIS++;
+		    continue;
+		}
+		jis_stat = 0;
+	    } else if (*s == to1B) {
+		jis_stat = 0;
+		if ((s[1] == 'B') || (s[1] == 'J') || (s[1] == 'H')) {
+		    s += 2;
+		    continue;
+		}
+	    } else if (*s == ',') {	/* MULE */
+		jis_stat = 0;
+	    }
+	}
+	if (c & 0x80)
+	    n8bits++;
+
+	if (IS_SJIS(c, *s, in_sjis)) {
 	    SJIS_TO_EUC1(c, *s, d);
 	    d += 2;
 	    s++;
+	    is_JIS++;
+	} else if (jis_stat) {
+	    if (c <= 0x20 || 0x7F <= c) {
+		*d++ = c;
+		if (c == '\n')
+		    jis_stat = 0;
+	    } else {
+		if (IS_JIS7(c, *s)) {
+		    *d++ = jis_stat | c;
+		    *d++ = jis_stat | *s++;
+		} else
+		    *d++ = c;
+	    }
 	} else {
-	    if (jis_stat && (0x20 < c)) {
-		*d++ = jis_stat | c;
+	    if (n8bits == 0 && (c == SI || c == SO)) {
 	    } else {
 		*d++ = c;
 	    }
@@ -4352,22 +4598,47 @@ PUBLIC unsigned char * TO_EUC ARGS2(
     return euc;
 }
 
+#define non94(ch) ((ch) <= 0x20 || (ch) == 0x7F)
+
+PRIVATE int is_EUC_JP ARGS1(unsigned char *, euc)
+{
+    unsigned char *cp;
+    int ch1, ch2;
+
+    for (cp = euc; (ch1 = *cp) != '\0'; cp++) {
+	if (ch1 & 0x80) {
+	    ch2 = cp[1] & 0xFF;
+	    if ((ch2 & 0x80) == 0) {
+		/* sv1log("NOT_EUC1[%x][%x]\n",ch1,ch2); */
+		return 0;
+	    }
+	    if (non94(ch1 & 0x7F) || non94(ch2 & 0x7F)) {
+		/* sv1log("NOT_EUC2[%x][%x]\n",ch1,ch2); */
+		return 0;
+	    }
+	    cp++;
+	}
+    }
+    return 1;
+}
+
 PUBLIC void TO_SJIS ARGS2(
 	CONST unsigned char *,	any,
 	unsigned char *,	sjis)
 {
     unsigned char *euc;
 
-    if (!any || !sjis)
-	return;
-
-    euc = (unsigned char*)malloc(strlen((CONST char *)any)+1);
-    if (euc == NULL)
+    euc = malloc(strlen(any) + 1);
+#ifdef CJK_EX
+    if (!euc)
 	outofmem(__FILE__, "TO_SJIS");
-
+#endif
     TO_EUC(any, euc);
-    EUC_TO_SJIS(euc, sjis);
-    FREE(euc);
+    if (is_EUC_JP(euc))
+	EUC_TO_SJIS(euc, sjis);
+    else
+	strcpy(sjis, any);
+    free(euc);
 }
 
 PUBLIC void TO_JIS ARGS2(
@@ -4376,14 +4647,24 @@ PUBLIC void TO_JIS ARGS2(
 {
     unsigned char *euc;
 
-    if (!any || !jis)
+    if (any[0] == 0) {
+	jis[0] = 0;
 	return;
-
-    euc = (unsigned char*)malloc(strlen((CONST char *)any)+1);
-    if (euc == NULL)
+    }
+    euc = malloc(strlen(any) + 1);
+#ifdef CJK_EX
+    if (!euc)
 	outofmem(__FILE__, "TO_JIS");
-
+#endif
     TO_EUC(any, euc);
+#if 0
+    if (is_EUC_JP(euc))
+	EUC_TO_JIS(euc, jis, TO_KANJI, TO_ASCII);
+    else
+	strcpy(jis, any);
+#endif
+    is_EUC_JP(euc);
     EUC_TO_JIS(euc, jis, TO_KANJI, TO_ASCII);
-    FREE(euc);
+
+    free(euc);
 }

@@ -88,7 +88,7 @@ PUBLIC void LYDownload ARGS1(
 	goto failed;
     }
 
-#ifdef DIRED_SUPPORT
+#if defined(DIRED_SUPPORT)
     /* FIXME: use HTLocalName */
     if (!strncmp(file, "file://localhost", 16))
 #ifdef __DJGPP__
@@ -102,6 +102,14 @@ PUBLIC void LYDownload ARGS1(
     else if (!strncmp(file, "file:", 5))
 	file += 5;
     HTUnEscape(file);
+#else
+#if defined(_WINDOWS)	/* 1997/10/15 (Wed) 16:27:38 */
+    if (!strncmp(file, "file://localhost/", 17))
+	file += 17;
+    else if (!strncmp(file, "file:/", 6))
+	file += 6;
+    HTUnEscape(file);
+#endif /* _WINDOWS */
 #endif /* DIRED_SUPPORT */
 
     if ((method = (char *)strstr(Line, "Method=")) == NULL)
@@ -403,7 +411,11 @@ check_recall:
 		if (!strncasecomp(buffer, "nl:", 3) ||
 		    !strncasecomp(buffer, "/nl/", 4))
 #else
+#if defined(DOSPATH)	/* 1997/10/15 (Wed) 16:41:30 */
+		if (!strcmp(buffer, "nul"))
+#else
 		if (!strcmp(buffer, "/dev/null"))
+#endif /* DOSPATH */
 #endif /* VMS */
 		{
 		    goto cancelled;
@@ -490,10 +502,10 @@ PUBLIC int LYdownload_options ARGS2(
     change_sug_filename(sug_filename);
 
     if (LYReuseTempfiles) {
-	fp0 = LYOpenTempRewrite(tempfile, HTML_SUFFIX, "w");
+	fp0 = LYOpenTempRewrite(tempfile, HTML_SUFFIX, "wb");
     } else {
 	LYRemoveTemp(tempfile);
-	fp0 = LYOpenTemp(tempfile, HTML_SUFFIX, "w");
+	fp0 = LYOpenTemp(tempfile, HTML_SUFFIX, "wb");
     }
     if (fp0 == NULL) {
 	HTAlert(CANNOT_OPEN_TEMP);
@@ -526,7 +538,7 @@ PUBLIC int LYdownload_options ARGS2(
 	    : gettext("Download options:"));
 
     if (!no_disk_save && !child_lynx) {
-#ifdef DIRED_SUPPORT
+#if defined(DIRED_SUPPORT)
 	/*
 	 *  Disable save to disk option for local files.
 	 */

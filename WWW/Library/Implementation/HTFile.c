@@ -140,10 +140,7 @@ PRIVATE HTSuffix unknown_suffix = { "*.*", NULL, NULL, NULL, 1.0};
 
 
 #ifdef _WINDOWS
-int exists(char *filename)
-{
- return (access(filename,0)==0);
-}
+#define exists(p)	(access(p,0)==0)
 #endif
 
 
@@ -207,12 +204,22 @@ PRIVATE void LYListFmtParse ARGS5(
 	char *datestr;
 	int len;
 #define SEC_PER_YEAR	(60 * 60 * 24 * 365)
+
+#ifdef _WINDOWS	/* 1998/01/06 (Tue) 21:20:53 */
+	static char *pbits[] = {
+		"---", "--x", "-w-", "-wx",
+		"r--", "r-x", "rw-", "rwx", 
+		0 };
+#define PBIT(a, n, s)  pbits[((a) >> (n)) & 0x7] 
+
+#else
 	static char *pbits[] = { "---", "--x", "-w-", "-wx",
 		"r--", "r-x", "rw-", "rwx", 0 };
 	static char *psbits[] = { "--S", "--s", "-wS", "-ws",
 		"r-S", "r-s", "rwS", "rws", 0 };
 #define PBIT(a, n, s)  (s) ? psbits[((a) >> (n)) & 0x7] : \
 	pbits[((a) >> (n)) & 0x7]
+#endif
 #ifdef S_ISVTX
 	static char *ptbits[] = { "--T", "--t", "-wT", "-wt",
 		"r-T", "r-t", "rwT", "rwt", 0 };
@@ -221,8 +228,13 @@ PRIVATE void LYListFmtParse ARGS5(
 #define PTBIT(a, s)  PBIT(a, 0, 0)
 #endif
 
+#ifdef _WINDOWS
+	if (stat(file, &st) < 0)
+		fmtstr = "    %a";	/* can't stat so just do anchor */
+#else
 	if (lstat(file, &st) < 0)
 		fmtstr = "    %a";	/* can't stat so just do anchor */
+#endif
 
 	StrAllocCopy(str, fmtstr);
 	s = str;
@@ -340,7 +352,11 @@ PRIVATE void LYListFmtParse ARGS5(
 
 		case 'p':	/* unix-style permission bits */
 			switch(st.st_mode & S_IFMT) {
+#if defined(_MSC_VER) && defined(_S_IFIFO)
+			case _S_IFIFO: type = 'p'; break;
+#else
 			case S_IFIFO: type = 'p'; break;
+#endif
 			case S_IFCHR: type = 'c'; break;
 			case S_IFDIR: type = 'd'; break;
 			case S_IFREG: type = '-'; break;
@@ -361,13 +377,23 @@ PRIVATE void LYListFmtParse ARGS5(
 #endif /* S_IFSOCK */
 			default: type = '?'; break;
 			}
+#ifdef _WINDOWS
+			sprintf(tmp, "%c%s", type, 
+				PBIT(st.st_mode, 6, st.st_mode & S_IRWXU));
+#else
 			sprintf(tmp, "%c%s%s%s", type,
 				PBIT(st.st_mode, 6, st.st_mode & S_ISUID),
 				PBIT(st.st_mode, 3, st.st_mode & S_ISGID),
 				PTBIT(st.st_mode,   st.st_mode & S_ISVTX));
+#endif
 			FormatStr(&buf, start, tmp);
 			break;
 
+#ifdef _WINDOWS
+		case 'o':	/* owner */
+		case 'g':	/* group */
+			break;
+#else
 		case 'o':	/* owner */
 			name = HTAA_UidToName (st.st_uid);
 			if (*name) {
@@ -385,6 +411,7 @@ PRIVATE void LYListFmtParse ARGS5(
 				FormatNum(&buf, start, (int) st.st_gid);
 			}
 			break;
+#endif
 
 		case 'l':	/* link count */
 			FormatNum(&buf, start, (int) st.st_nlink);
@@ -665,7 +692,12 @@ PUBLIC char * HTnameOfFile_WWW ARGS3(
 	else
 	    home = HTVMS_wwwName(home);
 #else
-	if ((home = getenv("HOME")) == 0)
+#if defined(_WINDOWS)	/* 1997/10/16 (Thu) 20:42:51 */
+	home =  (char *)Home_Dir();
+#else
+	home = getenv("HOME");
+#endif
+	if (home == 0)
 	    home = "/tmp";
 #endif /* VMS */
 	HTSprintf0(&result, "%s/WWW/%s/%s%s", home, acc_method, host, path);
@@ -1078,7 +1110,7 @@ PUBLIC float HTFileValue ARGS1(
 	    return suff->quality;		/* OK -- found */
 	}
     }
-    return 0.3;		/* Dunno! */
+    return (float)0.3;		/* Dunno! */
 }
 
 /*	Determine write access to a file.
@@ -1178,7 +1210,7 @@ PUBLIC HTStream * HTFileSaveStream ARGS1(
     CONST char * addr = HTAnchor_address((HTAnchor*)anchor);
     char *  localname = HTLocalName(addr);
 
-    FILE* fp = fopen(localname, "w");
+    FILE* fp = fopen(localname, "wb");
     if (!fp)
 	return NULL;
 
@@ -1369,9 +1401,10 @@ PUBLIC BOOL HTDirTitles ARGS3(
 	HTSprintf0(&relative, "%s/..", current);
 
 #ifdef DOSPATH
-	if (local_link)
+	if (local_link) {
 	    if (strlen(parent) == 3 )
 		StrAllocCat(relative, "/.");
+	}
 #endif
 
 #if !defined (VMS)
@@ -1951,7 +1984,7 @@ PUBLIC int HTLoadFile ARGS4(
 	FREE(newname);
 	FREE(acc_method);
     }
-#ifdef VMS
+#if defined(VMS) || defined(DOSPATH)
     HTUnEscape(filename);
 #endif /* VMS */
 
@@ -2420,7 +2453,7 @@ PUBLIC int HTLoadFile ARGS4(
 */
 #endif /* HAVE_READDIR */
 	{
-#  ifdef __EMX__
+#  if defined(__EMX__) || defined(WIN_EX)
 	    int len = strlen(localname);
 	    int bin = ((len > 3) && !strcasecomp(localname + len - 3, ".gz"));
 	    FILE * fp = fopen(localname, (bin ? "rb" : "r"));

@@ -43,7 +43,6 @@ extern BOOL HTPassEightBitRaw;
 extern BOOL HTPassEightBitNum;
 extern BOOL HTPassHighCtrlRaw;
 extern BOOL HTPassHighCtrlNum;
-extern HTkcode kanji_code;
 extern HTCJKlang HTCJK;
 
 /*
@@ -65,6 +64,12 @@ PUBLIC void LYEntify ARGS2(
     char *p = *str;
     char *q = NULL, *cp = NULL;
     int amps = 0, lts = 0, gts = 0;
+#ifdef CJK_EX
+    enum _state
+        { S_text, S_esc, S_dollar, S_paren,
+          S_nonascii_text, S_dollar_paren } state = S_text;
+    int in_sjis = 0;
+#endif
 
     if (p == NULL || *p == '\0')
 	return;
@@ -113,6 +118,88 @@ PUBLIC void LYEntify ARGS2(
     if ((cp = q) == NULL)
 	outofmem(__FILE__, "LYEntify");
     for (p = *str; *p; p++) {
+#ifdef CJK_EX
+	if (HTCJK != NOCJK) {
+	    switch(state) {
+		case S_text:
+		    if (*p == '\033') {
+			state = S_esc;
+			*q++ = *p;
+			continue;
+                    }
+                    break;
+
+		case S_esc:
+		    if (*p == '$') {
+			state = S_dollar;
+			*q++ = *p;
+			continue;
+		    } else if (*p == '(') {
+			state = S_paren;
+			*q++ = *p;
+			continue;
+		    } else {
+			state = S_text;
+			*q++ = *p;
+			continue;
+		    }
+
+		case S_dollar:
+		    if (*p == '@' || *p == 'B' || *p == 'A') {
+			state = S_nonascii_text;
+			*q++ = *p;
+			continue;
+		    } else if (*p == '(') {
+			state = S_dollar_paren;
+			*q++ = *p;
+			continue;
+		    } else {
+			state = S_text;
+			*q++ = *p;
+			continue;
+		    }
+
+		case S_dollar_paren:
+		    if (*p == 'C') {
+			state = S_nonascii_text;
+			*q++ = *p;
+			continue;
+		    } else {
+			state = S_text;
+			*q++ = *p;
+			continue;
+		    }
+
+		case S_paren:
+		    if (*p == 'B' || *p == 'J' || *p =='T') {
+			state = S_text;
+			*q++ = *p;
+			continue;
+		    } else if (*p == 'I') {
+			state = S_nonascii_text;
+			*q++ = *p;
+			continue;
+		    }
+
+		case S_nonascii_text:
+		    if (*p == '\033') 
+			state = S_esc;
+		    *q++ = *p;
+		    continue;
+
+		default:
+		    break;
+	    }
+	    if (*(p+1) != '\0' &&
+		(IS_EUC((unsigned char)*p, (unsigned char)*(p+1)) ||
+		 IS_SJIS((unsigned char)*p, (unsigned char)*(p+1), in_sjis) ||
+		 IS_BIG5((unsigned char)*p, (unsigned char)*(p+1)))) {
+		*q++ = *p++;
+		*q++ = *p;
+		continue;
+	    }
+	}
+#endif
 	if (*p == '&') {
 	    *q++ = '&';
 	    *q++ = 'a';
@@ -133,6 +220,7 @@ PUBLIC void LYEntify ARGS2(
 	    *q++ = *p;
 	}
     }
+    *q = '\0';
     FREE(*str);
     *str = cp;
 }
@@ -1632,6 +1720,10 @@ PRIVATE char ** LYUCFullyTranslateString_1 ARGS9(
     enum _parsing_what
 	{ P_text, P_utf8, P_hex, P_decimal, P_named
 	} what = P_text;
+#ifdef CJK_EX	/* 1997/12/12 (Fri) 18:08:48 */
+    static unsigned char sjis_1st = '\0';
+    unsigned char sjis_str[3];
+#endif
 
     /*
     **	Make sure we have a non-empty string. - FM
@@ -1732,6 +1824,24 @@ PRIVATE char ** LYUCFullyTranslateString_1 ARGS9(
 	switch(state) {
 	case S_text:
 	    code = (unsigned char)(*p);
+#ifdef CJK_EX	/* 1997/12/13 (Sat) 14:41:53 */
+	    if (HTCJK == JAPANESE && last_kcode == SJIS) {
+		if (sjis_1st == '\0' && (IS_SJIS_HI1(code)||IS_SJIS_HI2(code))){
+		    sjis_1st = (unsigned char)code;
+		} else if (sjis_1st && IS_SJIS_LO(code)) {
+		    sjis_1st = '\0';
+		} else {
+		    if (0xA1 <= code && code <= 0xDF) {
+		        sjis_str[2] = '\0';
+			JISx0201TO0208_SJIS((unsigned char)code, 
+						sjis_str, sjis_str + 1);
+			REPLACE_STRING(sjis_str);
+			p++;
+			continue;
+		    }
+		}
+	    }
+#endif
 	    if (*p == '\033') {
 		if ((HTCJK != NOCJK && !hidden) || stype != st_HTML) {
 		    state = S_esc;
@@ -1850,7 +1960,7 @@ PRIVATE char ** LYUCFullyTranslateString_1 ARGS9(
 			state = S_got_outchar;
 			break;
 		    } else {
-			*p = 160;
+			*(unsigned char *)p = (unsigned char)160;
 			code = 160;
 			if (LYCharSet_UC[cs_to].enc == UCT_ENC_8859 ||
 			    (LYCharSet_UC[cs_to].like8859 & UCT_R_8859SPECL)) {
@@ -1859,7 +1969,7 @@ PRIVATE char ** LYUCFullyTranslateString_1 ARGS9(
 			}
 		    }
 		} else if ((*p) == LY_SOFT_HYPHEN) {
-		    *p = 173;
+		    *(unsigned char *)p = (unsigned char)173;
 		    code = 173;
 		    if (LYCharSet_UC[cs_to].enc == UCT_ENC_8859 ||
 			(LYCharSet_UC[cs_to].like8859 & UCT_R_8859SPECL)) {

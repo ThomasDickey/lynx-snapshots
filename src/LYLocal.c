@@ -348,6 +348,11 @@ PRIVATE BOOLEAN ok_localname ARGS2(char*, dst, CONST char*, src)
 PRIVATE int move_file ARGS2(char *, source, char *, target)
 {
     int code;
+#ifdef WIN_EX	/* 1999/01/02 (Sat) 23:24:20 */
+    if ((code = rename(source, target)) != 0)
+	if ((code = LYCopyFile(source, target)) >= 0)
+	    code = remove(source);
+#else
     char *msg = 0;
     char *args[5];
 
@@ -358,6 +363,7 @@ PRIVATE int move_file ARGS2(char *, source, char *, target)
     args[3] = (char *) 0;
     code = (LYExecv(MV_PATH, args, msg) <= 0) ? -1 : 1;
     FREE(msg);
+#endif
     return code;
 }
 
@@ -2318,7 +2324,7 @@ PRIVATE int LYExecv ARGS3(
 	char **,	argv,
 	char *, 	msg)
 {
-#if defined(VMS) || defined(_WINDOWS)
+#if defined(VMS) || defined(SH_EX) || defined(_WINDOWS)
     CTRACE(tfp, "LYExecv:  Called inappropriately!\n");
     return(0);
 #else

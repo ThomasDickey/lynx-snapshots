@@ -282,7 +282,7 @@ extern float HTStackValue PARAMS((
         float                   initial_value,
         long int                length));
 
-#define NO_VALUE_FOUND  -1e20           /* returned if none found */
+#define NO_VALUE_FOUND  -1e20	/* returned if none found */
 
 /*	Display the page while transfer in progress
 **	-------------------------------------------

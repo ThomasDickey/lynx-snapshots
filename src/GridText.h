@@ -47,6 +47,13 @@
 #define NOCHOP 0
 #define CHOP   1
 
+#define TABSTOP 8
+#define SPACES  "        "  /* must be at least TABSTOP spaces long */
+#define SPLAT   '.'
+
+#define NOCHOP 0
+#define CHOP   1
+
 /* just for information:
 US-ASCII control characters <32 which are not defined in Unicode standard
 =00	U+0000	NULL
@@ -285,5 +292,15 @@ extern void HTMark_asSource NOPARAMS;
 #endif
 
 extern int HTMainText_Get_UCLYhndl NOPARAMS;
+
+#ifdef CJK_EX
+
+#include <HTCJK.h>
+extern HTkcode last_kcode;
+
+extern HTkcode HText_getKcode PARAMS((HText * text));
+extern void HText_updateKcode PARAMS((HText * text, HTkcode kcode));
+
+#endif
 
 #endif /* LYGRIDTEXT_H */

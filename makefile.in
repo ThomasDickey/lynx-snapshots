@@ -23,6 +23,7 @@ LIBS		= @LIBS@
 INSTALL		= @INSTALL@
 INSTALL_PROGRAM	= @INSTALL_PROGRAM@
 INSTALL_DATA	= @INSTALL_DATA@
+LN_S		= @LN_S@
 
 ## This is the version which we are developing (or, upon release, make this
 ## the same).  Use no dots in the name, since it must work on VMS and MS-DOS.
@@ -372,11 +373,9 @@ install-help : $(DOCDIR) $(HELPDIR)
 		$(LIBDIR)/lynx.tmp >$(LIBDIR)/lynx.cfg
 	chmod 644 $(LIBDIR)/lynx.cfg
 	-rm -f $(LIBDIR)/lynx.tmp
-	$(INSTALL_DATA) $(srcdir)/COPYHEADER $(DOCDIR)/COPYHEADER
-	$(INSTALL_DATA) $(srcdir)/COPYING    $(DOCDIR)/COPYING
-	cd $(HELPDIR) && ( \
-		ln $(DOCDIR)/COPYHEADER . || cp $(DOCDIR)/COPYHEADER . ; \
-		ln $(DOCDIR)/COPYING    . || cp $(DOCDIR)/COPYING . )
+	$(SHELL) -c 'for name in COPYING COPYHEADER; do \
+		cd $(DOCDIR) && ( $(LN_S) $$name $(HELPDIR)/ || cp $$name $(HELPDIR)/ );\
+		done'
 
 LYHelp.h : LYHelp.hin
 	@echo Constructing sed-script

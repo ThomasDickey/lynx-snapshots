@@ -564,14 +564,14 @@ PRIVATE char * author_name ARGS1 (char *,email)
     StrAllocCopy(name, email);
     CTRACE(tfp,"Trying to find name in: %s\n",name);
 
-    if ((p = strchr(name, '(')) && (e = strchr(name, ')'))) {
+    if ((p = strrchr(name, '(')) && (e = strrchr(name, ')'))) {
 	if (e > p) {
 	    *e = '\0';			/* Chop off everything after the ')'  */
 	    return HTStrip(p+1);	/* Remove leading and trailing spaces */
 	}
     }
 
-    if ((p = strchr(name, '<')) && (e = strchr(name, '>'))) {
+    if ((p = strrchr(name, '<')) && (e = strrchr(name, '>'))) {
 	if (e > p) {
 	    strcpy(p, e+1);		/* Remove <...> */
 	    return HTStrip(name);	/* Remove leading and trailing spaces */
@@ -600,8 +600,8 @@ PRIVATE char * author_address ARGS1(char *,email)
     StrAllocCopy(address, email);
     CTRACE(tfp,"Trying to find address in: %s\n",address);
 
-    if ((p = strchr(address, '<'))) {
-	if ((e = strchr(p, '>')) && (at = strchr(p, '@'))) {
+    if ((p = strrchr(address, '<'))) {
+	if ((e = strrchr(p, '>')) && (at = strrchr(p, '@'))) {
 	    if (at < e) {
 		*e = '\0';		 /* Remove > */
 		return HTStrip(p+1);  /* Remove leading and trailing spaces */
@@ -609,15 +609,15 @@ PRIVATE char * author_address ARGS1(char *,email)
 	}
     }
 
-    if ((p = strchr(address, '(')) &&
-	(e = strchr(address, ')')) && (at = strchr(address, '@'))) {
+    if ((p = strrchr(address, '(')) &&
+	(e = strrchr(address, ')')) && (at = strchr(address, '@'))) {
 	if (e > p && at < e) {
 	    *p = '\0';			/* Chop off everything after the ')'  */
 	    return HTStrip(address);	/* Remove leading and trailing spaces */
 	}
     }
 
-    if ((at = strchr(address, '@')) && at > address) {
+    if ((at = strrchr(address, '@')) && at > address) {
 	p = (at - 1);
 	e = (at + 1);
 	while (p > address && !isspace((unsigned char)*p))
@@ -838,7 +838,12 @@ PRIVATE void post_article ARGS1(
     **	Open the temporary file with the
     **	nntp headers and message body. - FM
     */
-    if ((fd = fopen((postfile ? postfile : ""), "r")) == NULL) {
+#ifdef DOSPATH
+    if ((fd = fopen((postfile ? postfile : ""), "rt")) == NULL)
+#else
+    if ((fd = fopen((postfile ? postfile : ""), "r")) == NULL)
+#endif
+    {
 	HTAlert(FAILED_CANNOT_OPEN_POST);
 	return;
     }
@@ -940,6 +945,83 @@ PRIVATE void post_article ARGS1(
     }
 }
 
+#ifdef SH_EX	/* for MIME */
+#define NEWS_DEBUG 0
+#if NEWS_DEBUG
+/* for DEBUG 1997/11/07 (Fri) 17:20:16 */
+void debug_print(unsigned char *p)
+{
+    while (*p) {
+	if (*p == '\0')
+	    break;
+	if (*p == 0x1b)
+	   printf("[ESC]");
+	else if (*p == '\n')
+	   printf("[NL]");
+	else if (*p < ' ' || *p >= 0x80) 
+	   printf("(%02x)", *p);
+	else
+	   putchar(*p);
+       p++;
+    }
+    printf("]\n");
+}
+#endif
+
+#ifdef NOTUSED_CHARTRANS
+static char *decode_mime(char *str)
+{
+    return HTmmdecode(str, str);
+}
+#else
+static char *decode_mime(char *str)
+{
+    char temp[LINE_LENGTH+256];
+    char *p, *q;
+
+    if (str == NULL)
+	return "";
+
+    if (HTCJK != JAPANESE)
+	return str;
+
+    strcpy(temp, str);
+    q = temp;
+    for (;;) {
+	p = strchr(q, '=');
+	if (p == NULL)
+	    break;
+	if (p && p[1] == '?') {
+	    HTmmdecode(p, p);
+	    q = p + 2;
+	} else {
+	    q = p + 1;
+	}
+    }
+#if NEWS_DEBUG
+    printf("new=[");
+    debug_print(temp);
+#endif
+    HTrjis(temp, temp);
+    strcpy(str, temp);
+
+    return str;
+}
+#endif /* NOTUSED_CHARTRANS */
+#else /* !SH_EX */
+static char *decode_mime ARGS1(char *, str)
+{
+#ifdef NOTUSED_CHARTRANS
+    return HTmmdecode(str, str);
+#else
+    HTmmdecode(str, str);
+    HTrjis(str, str);
+    return str;
+#endif
+}
+#endif
+
+
 /*	Read in an Article					read_article
 **	------------------
 **
@@ -1025,38 +1107,22 @@ PRIVATE int read_article ARGS1(
 
 		} else if (match(full_line, "SUBJECT:")) {
 		    StrAllocCopy(subject, HTStrip(strchr(full_line,':')+1));
-		    if (HTCJK == JAPANESE) {
-			HTmmdecode(subject, subject);
-			HTrjis(subject, subject);
-		    }
-		    if (*subject) {
-			HTAnchor_setSubject(thisanchor, subject);
-		    }
-
+		    decode_mime(subject);
 		} else if (match(full_line, "DATE:")) {
 		    StrAllocCopy(date, HTStrip(strchr(full_line,':')+1));
 
 		} else if (match(full_line, "ORGANIZATION:")) {
 		    StrAllocCopy(organization,
 				 HTStrip(strchr(full_line,':')+1));
-		    if (HTCJK == JAPANESE) {
-			HTmmdecode(organization, organization);
-			HTrjis(organization, organization);
-		    }
+		    decode_mime(organization);
 
 		} else if (match(full_line, "FROM:")) {
 		    StrAllocCopy(from, HTStrip(strchr(full_line,':')+1));
-		    if (HTCJK == JAPANESE) {
-			HTmmdecode(from, from);
-			HTrjis(from, from);
-		    }
+		    decode_mime(from);
 
 		} else if (match(full_line, "REPLY-TO:")) {
 		    StrAllocCopy(replyto, HTStrip(strchr(full_line,':')+1));
-		    if (HTCJK == JAPANESE) {
-			HTmmdecode(replyto, replyto);
-			HTrjis(replyto, replyto);
-		    }
+		    decode_mime(replyto);
 
 		} else if (match(full_line, "NEWSGROUPS:")) {
 		    StrAllocCopy(newsgroups, HTStrip(strchr(full_line,':')+1));
@@ -1341,6 +1407,9 @@ PRIVATE int read_article ARGS1(
 	if (((char)ich == LF) || (p == &line[LINE_LENGTH])) {
 	    *p++ = '\0';			/* Terminate the string */
 	    CTRACE(tfp, "B %s", line);
+#if NEWS_DEBUG	/* 1997/11/09 (Sun) 15:56:11 */
+	    debug_print(line);	/* @@@ */
+#endif
 	    if (line[0] == '.') {
 		/*
 		**  End of article?
@@ -1379,8 +1448,8 @@ PRIVATE int read_article ARGS1(
 		    char *p2;
 
 		    while ((p2 = strstr(l, "rticle <")) != NULL) {
-			char *q  = strchr(p2,'>');
-			char *at = strchr(p2, '@');
+			char *q  = strrchr(p2,'>');
+			char *at = strrchr(p2, '@');
 			if (q && at && at<q) {
 			    char c = q[1];
 			    q[1] = 0;		/* chop up */
@@ -1892,11 +1961,8 @@ PRIVATE int read_group ARGS3(
 			case 's':
 			    if (match(line, "SUBJECT:")) {
 				strcpy(subject, line+9);/* Save subject */
-				if (HTCJK == JAPANESE) {
-				    HTmmdecode(subject, subject);
-				    HTrjis(subject, subject);
+				decode_mime(subject);
 				}
-			    }
 			    break;
 
 			case 'M':
@@ -1914,10 +1980,7 @@ PRIVATE int read_group ARGS3(
 				char * p2;
 				strcpy(author,
 					author_name(strchr(line,':')+1));
-				if (HTCJK == JAPANESE) {
-				    HTmmdecode(author, author);
-				    HTrjis(author, author);
-				}
+				decode_mime(author);
 				p2 = author + strlen(author) - 1;
 				if (*p2==LF)
 				    *p2 = '\0'; /* Chop off newline */
@@ -1938,7 +2001,11 @@ PRIVATE int read_group ARGS3(
 
 		PUTC('\n');
 		START(HTML_LI);
+#ifdef SH_EX	/* for MIME */
+		sprintf(buffer, "\"%s\"", decode_mime(subject));
+#else
 		sprintf(buffer, "\"%s\"", subject);
+#endif
 		if (reference) {
 		    write_anchor(buffer, reference);
 		    FREE(reference);
@@ -1949,7 +2016,11 @@ PRIVATE int read_group ARGS3(
 		     PUTS(" - ");
 		     if (LYListNewsDates)
 			 START(HTML_I);
+#ifdef SH_EX	/* for MIME */
+		     PUTS(decode_mime(author));
+#else
 		     PUTS(author);
+#endif
 		     if (LYListNewsDates)
 			 END(HTML_I);
 		     author[0] = '\0';
@@ -2349,10 +2420,10 @@ PRIVATE int HTLoadNews ARGS4(
 	    strcat(command, groupName);
 	} else {
 	    strcpy(command, "ARTICLE ");
-	    if (strchr(p1, '<') == 0)
+	    if (strrchr(p1, '<') == 0)
 		strcat(command,"<");
 	    strcat(command, p1);
-	    if (strchr(p1, '>') == 0)
+	    if (strrchr(p1, '>') == 0)
 		strcat(command,">");
 	}
 
@@ -2556,7 +2627,8 @@ PRIVATE int HTLoadNews ARGS4(
 		return(HT_NOT_LOADED);
 	    }
 	    if (postfile == NULL) {
-		postfile = LYNewsPost(ListArg, (reply_wanted || sreply_wanted));
+		postfile = LYNewsPost(ListArg,
+				(BOOLEAN)(reply_wanted || sreply_wanted));
 	    }
 	    if (postfile == NULL) {
 		HTProgress(CANCELLED);
@@ -2603,6 +2675,12 @@ PRIVATE int HTLoadNews ARGS4(
 	}
 
 Send_NNTP_command:
+#ifdef NEWS_DEB
+	if (postfile)
+	    printf("postfile = %s, command = %s", postfile, command);
+	else
+	    printf("command = %s", command);
+#endif
 	if ((status = response(command)) == HT_INTERRUPTED) {
 	    _HTProgress(CONNECTION_INTERRUPTED);
 	    break;
@@ -2763,10 +2841,11 @@ Send_NNTP_command:
 	return status;
     } /* Retry loop */
 
-    /* HTAlert(gettext("Sorry, could not load requested news.")); */
-
-/*    NXRunAlertPanel(NULL, "Sorry, could not load `%s'.",
-	    NULL,NULL,NULL, arg);No -- message earlier wil have covered it */
+#if 0
+    HTAlert(gettext("Sorry, could not load requested news."));
+    NXRunAlertPanel(NULL, "Sorry, could not load `%s'.", NULL,NULL,NULL, arg);
+    /* No -- message earlier wil have covered it */
+#endif
 
     if (!(post_wanted || reply_wanted ||
 	  spost_wanted || sreply_wanted)) {

@@ -18,7 +18,6 @@
 
 #define DONT_USE_SOCKS5
 #include <HTUtils.h>
-#include <tcp.h>
 /*
  *  Don't try to use LYexit().
  */

@@ -39,7 +39,11 @@ unsigned int len;
 
    if (lineptr == NULL || n == NULL)
    {
+#ifdef _WINDOWS
+      WSASetLastError(EINVAL);
+#else
       SOCKET_ERRNO = EINVAL;
+#endif
       return -1;
    }
 

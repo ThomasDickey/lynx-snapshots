@@ -130,8 +130,8 @@ PUBLIC int change_form_link ARGS7(
 		c = 23;	 /* CTRL-W refresh without clearok */
 	    else
 #endif /* FANCY_CURSES || USE_SLANG */
-                c = 12;  /* CTRL-L for repaint */
-            break;
+		c = 12;	 /* CTRL-L for repaint */
+	    break;
 
 	case F_RADIO_TYPE:
 	    if (form->disabled == YES)
@@ -327,6 +327,9 @@ PRIVATE int form_getstr ARGS2(
     BOOL HaveMaxlength = FALSE;
     int action, repeat;
     int last_xlkc = -1;
+#ifdef SUPPORT_MULTIBYTE_EDIT
+    BOOL refresh = TRUE;
+#endif
 
     EditFieldData MyEdit;
     BOOLEAN Edited = FALSE;		/* Value might be updated? */
@@ -420,6 +423,16 @@ again:
 	get_mouse_link();		/* Reset mouse_link. */
 
 	ch = LYgetch_for(FOR_INPUT);
+#ifdef SUPPORT_MULTIBYTE_EDIT
+#ifdef WIN_EX
+	if (!refresh && (EditBinding(ch) != LYE_CHAR))
+	    goto again;
+#else
+	if (!refresh &&
+	    (EditBinding(ch) != LYE_CHAR) && (EditBinding(ch) != LYE_AIX))
+	    goto again;
+#endif
+#endif /* SUPPORT_MULTIBYTE_EDIT */
 #ifdef VMS
 	if (HadVMSInterrupt) {
 	    HadVMSInterrupt = FALSE;
@@ -427,9 +440,23 @@ again:
 	}
 #endif /* VMS */
 #  ifdef NCURSES_MOUSE_VERSION
-	if (ch != -1 && (ch&LKC_ISLAC))	/* already lynxactioncode? */
+	if (ch != -1 && (ch & LKC_ISLAC)) /* already lynxactioncode? */
 	    break;	/* @@@ maybe move these 2 lines outside ifdef -kw */
 	if (ch == MOUSE_KEY) {		/* Need to process ourselves */
+#if defined(WIN_EX)
+	    int curx, cury;
+
+	    request_mouse_pos();
+	    LYGetYX(cury, curx);
+	    if (MOUSE_Y_POS == cury) {
+		repeat = MOUSE_X_POS - curx;
+		if (repeat < 0) {
+		    ch = LTARROW;
+		    repeat = - repeat;
+		} else
+		    ch = RTARROW;
+	    }
+#else
 	    MEVENT	event;
 	    int curx, cury;
 
@@ -442,7 +469,9 @@ again:
 		    repeat = - repeat;
 		} else
 		    ch = RTARROW;
-	    } else {
+	    }
+#endif /* WIN_EX */
+	    else {
 		/*  Mouse event passed to us as MOUSE_KEY, and apparently
 		 *  not on this field's line?  Something is not as it
 		 *  should be...
@@ -466,6 +495,7 @@ again:
 	}
 	if (peek_mouse_link() != -1)
 	    break;
+
 	action = EditBinding(ch);
 	if ((action & LYE_DF) && !(action & LYE_FORM_LAC)) {
 	    last_xlkc = ch;
@@ -473,6 +503,7 @@ again:
 	} else {
 	    last_xlkc = -1;
 	}
+
 	if (action == LYE_SETM1) {
 	    /*
 	     *  Set flag for modifier 1.
@@ -510,9 +541,61 @@ again:
 #endif /* VMS */
 	    break;
 	}
+
+#if defined(WIN_EX)	/* 1998/10/01 (Thu) 19:19:22 */
+
+#define FORM_PASTE_MAX	8192
+
+	if (action == LYE_PASTE) {
+	    unsigned char buff[FORM_PASTE_MAX];
+	    int i, len;
+
+	    len = get_clip(buff, FORM_PASTE_MAX);
+
+	    if (len > 0) {
+		i = 0;
+		while ((ch = buff[i]) != '\0') {
+
+		    if (ch == '\r') {
+			i++;
+			continue;
+		    }
+		    if (ch == '\n') {
+			i++;
+			len = strlen(buff + i);
+			if (len > 0) {
+			    put_clip(buff + i);
+			}
+			break;
+		    }
+
+		    LYLineEdit(&MyEdit, ch, TRUE);
+
+		    if (MyEdit.strlen >= max_length) {
+			HaveMaxlength = TRUE;
+		    } else if (HaveMaxlength &&
+			       MyEdit.strlen < max_length) {
+			HaveMaxlength = FALSE;
+			_statusline(ENTER_TEXT_ARROWS_OR_TAB);
+		    }
+		    i++;
+		}
+		if (strcmp(value, MyEdit.buffer) != 0) {
+		    Edited = TRUE;
+		}
+		LYRefreshEdit(&MyEdit);
+
+	    } else {
+		HTInfoMsg("Clipboard empty or Not text data.");
+		return(DO_NOTHING);
+	    }
+	    break;
+	}
+#else
 	if (action == LYE_AIX &&
 	    (HTCJK == NOCJK && LYlowest_eightbit[current_char_set] > 0x97))
 	    break;
+#endif
 	if (action == LYE_TAB) {
 	    ch = (int)('\t');
 	    break;
@@ -522,6 +605,13 @@ again:
 	}
 	if (LKC_TO_LAC(keymap,ch) == LYK_REFRESH)
 	    break;
+#ifdef SH_EX
+/* ASATAKU emacskey hack 1997/08/26 (Tue) 09:19:23 */
+	if (emacs_keys &&
+	    (EditBinding(ch) == LYE_FORWW || EditBinding(ch) == LYE_BACKW))
+	    goto breakfor;
+/* ASATAKU emacskey hack */
+#endif
 	switch (ch) {
 #ifdef NOTDEFINED	/* The first four are mapped to LYE_FORM_PASS now */
 	    case DNARROW:
@@ -539,7 +629,7 @@ again:
 	     *  Left arrrow in column 0 deserves special treatment here,
 	     *  else you can get trapped in a form without submit button!
 	     */
-	    case LTARROW:
+	    case LTARROW:	/* 1999/04/14 (Wed) 15:01:33 */
 		if (MyEdit.pos == 0 && repeat == -1) {
 		    int c = YES;    /* Go back immediately if no changes */
 		    if (strcmp(MyEdit.buffer, value)) {
@@ -564,8 +654,23 @@ again:
 		 */
 		if (repeat < 0)
 		    repeat = 1;
-		while (repeat--)
+		while (repeat--) {
+#ifndef SUPPORT_MULTIBYTE_EDIT
 		    LYLineEdit(&MyEdit, ch, TRUE);
+#else /* SUPPORT_MULTIBYTE_EDIT */
+		    if (LYLineEdit(&MyEdit, ch, TRUE) == 0) {
+			if (HTCJK != NOCJK && (0x80 <= ch)
+			&& (ch <= 0xfe) && refresh)
+			    refresh = FALSE;
+			else
+			    refresh = TRUE;
+		    } else {
+			if (!refresh) {
+			    LYEdit1(&MyEdit, 0, LYE_DELP, TRUE);
+			}
+		    }
+#endif /* SUPPORT_MULTIBYTE_EDIT */
+		}
 		if (MyEdit.strlen >= max_length) {
 		    HaveMaxlength = TRUE;
 		} else if (HaveMaxlength &&
@@ -576,11 +681,14 @@ again:
 		if (strcmp(value, MyEdit.buffer)) {
 		    Edited = TRUE;
 		}
+#ifdef SUPPORT_MULTIBYTE_EDIT
+		if (refresh)
+#endif
 		LYRefreshEdit(&MyEdit);
 		LYSetLastTFPos(MyEdit.pos);
 	}
     }
-#ifdef NOTDEFINED
+#if defined(NOTDEFINED) || defined(SH_EX)
 breakfor:
 #endif /* NOTDEFINED */
     if (Edited) {
@@ -705,7 +813,7 @@ PRIVATE int get_popup_option_number ARGS2(
 PRIVATE void paddstr ARGS3(
 	WINDOW *,	the_window,
 	int,		width,
-	char *, 	the_string)
+	char *,		the_string)
 {
     width -= strlen(the_string);
     waddstr(the_window, the_string);
@@ -869,10 +977,10 @@ PRIVATE int popup_options ARGS7(
 #ifdef PDCURSES
     keypad(form_window, TRUE);
 #endif /* PDCURSES */
-#ifdef NCURSES
+#if defined(NCURSES)
     LYsubwindow(form_window);
 #endif
-#if defined(HAVE_GETBKGD) /* not defined in ncurses 1.8.7 */
+#if defined(HAVE_GETBKGD) && !defined(PDCURSES)/* not defined in ncurses 1.8.7 */
     wbkgd(form_window, getbkgd(stdscr));
     wbkgdset(form_window, getbkgd(stdscr));
 #endif
@@ -895,9 +1003,9 @@ PRIVATE int popup_options ARGS7(
 					  : 1;
 /*
  * OH!  I LOVE GOTOs! hack hack hack
- *        07-11-94 GAB
+ *	  07-11-94 GAB
  *      MORE hack hack hack
- *        09-05-94 FM
+ *	  09-05-94 FM
  */
 redraw:
     opt_ptr = list;
@@ -975,9 +1083,17 @@ redraw:
 	SLsmg_refresh();
 #else
 	wmove(form_window, ((i + 1) - window_offset), 2);
+#if defined(WIN_EX)	/* FIX */
+	wattron(form_window, A_REVERSE);
+#else
 	wstart_reverse(form_window);
+#endif
 	paddstr(form_window, width, opt_ptr->name);
+#if defined(WIN_EX)	/* FIX */
+	wattroff(form_window, A_REVERSE);
+#else
 	wstop_reverse(form_window);
+#endif
 	/*
 	 *  If LYShowCursor is ON, move the cursor to the left
 	 *  of the current option, so that blind users, who are
@@ -1679,7 +1795,7 @@ restore_popup_statusline:
     }
 #ifndef USE_SLANG
     delwin(form_window);
-#ifdef NCURSES
+#if defined(NCURSES)
     LYsubwindow(0);
 #endif
 #endif /* !USE_SLANG */

@@ -2028,7 +2028,11 @@ PUBLIC void LYLoadCookies ARGS1 (
 	};
     time_t expires;
 
+#ifdef DOSPATH	/* 1998/12/19 (Sat) 08:10:57 */
+    cookie_handle = fopen(cookie_file, "rt+");
+#else
     cookie_handle = fopen(cookie_file, "r+");
+#endif
     if (!cookie_handle)
 	return;
 

@@ -19,6 +19,7 @@
 
 #include <HTStream.h>
 #include <HTAnchor.h>
+#include <LYJustify.h>
 
 /*
 
@@ -112,6 +113,9 @@ struct _tag{
     char *	name;			/* The name of the tag */
 #ifdef USE_COLOR_STYLE
     int		name_len;		/* The length of the name */
+#endif
+#ifdef EXP_JUSTIFY_ELTS
+    BOOL	can_justify;		/* justification allowed?*/
 #endif
     attr *	attributes;		/* The list of acceptable attributes */
     int		number_of_attributes;	/* Number of possible attributes */

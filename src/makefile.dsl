@@ -16,12 +16,13 @@ DIRED_DEFS = -DDIRED_SUPPORT -DOK_UUDECODE -DOK_TAR -DOK_GZIP -DOK_ZIP
 
 CC = gcc
 MCFLAGS = -O2 -DDISP_PARTIAL -DUSE_ZLIB -DUSE_EXTERNALS \
+-DWATT32 \
 $(DIRED_DEFS) \
 -DSOURCE_CACHE -DUSE_PSRC \
 -DUSE_SLANG -DDJGPP_KEYHANDLER -DACCESS_AUTH -DNO_CUSERID \
 -DNOUSERS -DDOSPATH -DNO_TTYTYPE -DNO_UTMP -I../WWW/Library/Implementation \
--I../djgpp/tcplib/include -I./chrtrans -I../djgpp/tcplib/include/tcp
-WWWLIB = ../WWW/Library/djgpp/libwww.a ../djgpp/tcplib/obj/libtcp.a
+-I../djgpp/watt32/inc -I./chrtrans -I../djgpp/watt32/inc/sys
+WWWLIB = ../WWW/Library/djgpp/libwww.a ../djgpp/watt32/lib/libwatt.a
 LIBS= -lslang -lz # -lintl
 CHRTR= ./chrtrans/
 #INTLFLAGS = -DHAVE_GETTEXT -DHAVE_LIBINTL_H

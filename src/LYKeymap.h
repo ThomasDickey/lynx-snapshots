@@ -32,7 +32,7 @@ extern LYKeymap_t keymap[KEYMAP_SIZE]; /* main keymap matrix */
 
 #ifdef EXP_KEYBOARD_LAYOUT
 extern int current_layout;
-extern unsigned short * LYKbLayouts[];
+extern LYKeymap_t * LYKbLayouts[];
 extern char * LYKbLayoutNames[];
 extern int LYSetKbLayout PARAMS((char *layout_id));
 #endif
@@ -58,9 +58,9 @@ extern LYKeymap_t key_override[];
 
 
 /*  Convert lynxkeycode to lynxactioncode.  Modifiers are dropped.  */
-#define LKC_TO_LAC(ktab,c) (((c)==-1) ? ktab[0] : \
-			    ((c)&LKC_ISLAC) ? ((c)&LAC_MASK) : \
-			    ktab[((c)&LKC_MASK)+1])
+#define LKC_TO_LAC(ktab,c) (((c) == -1) ? ktab[0] : \
+			    ((c) & LKC_ISLAC) ? ((c) & LAC_MASK) : \
+			    ktab[((c) & LKC_MASK) + 1])
 
 
 /*  Mask lynxactioncode as a lynxkeycode.  */
@@ -196,6 +196,12 @@ typedef enum {
 #else
 #define LYK_TAG_LINK      LYK_UNKNOWN
 #endif /* DIRED_SUPPORT */
+
+#ifdef SH_EX
+  , LYK_CHG_CENTER
+  , LYK_TO_CLIPBOARD
+  , LYK_CHG_KCODE
+#endif /* SH_EX */
 
 } LYKeymapCodes;
 

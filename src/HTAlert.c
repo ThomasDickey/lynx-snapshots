@@ -22,6 +22,10 @@
 
 #include <LYLeaks.h>
 
+#if _WIN_CC
+#include <HTParse.h>
+#endif
+
 /*	Issue a message about a problem.		HTAlert()
 **	--------------------------------
 */
@@ -106,6 +110,53 @@ PUBLIC void HTUserMsg2 ARGS2(
     }
 }
 
+#ifdef WIN_EX		/* 1997/10/28 (Tue) 17:19:43 */
+
+#define MAX_LEN	512
+
+void ws_title(CONST char *str)
+{
+    char buff[MAX_LEN];
+    char *p;
+    int len;
+
+#define TITLE_CUT 32
+
+    p = (char *)str;
+    len = strlen(p);
+    if (len > (MAX_LEN - 1)) {
+	strncpy(buff, p, (MAX_LEN - 1));
+	len = MAX_LEN - 1;
+	buff[MAX_LEN - 1] = '\0';
+    } else {
+	strcpy(buff, p);
+    }
+
+    if (len > LYcols) {
+	buff[TITLE_CUT] = '.';
+	buff[TITLE_CUT+1] = '.';
+	strcpy(buff + TITLE_CUT + 2, (buff + len) - LYcols + TITLE_CUT + 1);
+    }
+    if (strchr(buff, '%')) {
+	HTUnEscape(buff);
+    }
+
+    p = buff;
+    while (*p++) {
+	if (*p == '\r') {
+	    *p = '\0';
+	    break;
+	} else if (*p ==  '\n') {
+	    *p = '\0';
+	    break;
+	}
+    }
+
+    /* Quick hack. buff is SJIS only ??? */
+    SetConsoleTitle(buff);
+}
+#endif
+
 /*	Issue a progress message.			HTProgress()
 **	-------------------------
 */
@@ -115,6 +166,12 @@ PUBLIC void HTProgress ARGS1(
     statusline(Msg);
     LYstore_message(Msg);
     CTRACE(tfp, "%s\n", Msg);
+#if defined(SH_EX) && defined(WIN_EX)	/* 1997/10/11 (Sat) 12:51:02 */
+    {
+	if (debug_delay != 0)
+	    Sleep(debug_delay);	/* XXX msec */
+    }
+#endif
 }
 
 /*	Issue a read-progress message.			HTReadProgress()
@@ -124,6 +181,67 @@ PUBLIC void HTReadProgress ARGS2(
 	long,		bytes,
 	long,		total)
 {
+#ifdef WIN_EX	/* 1998/07/08 (Wed) 16:09:47 */
+
+#include <sys/timeb.h>
+#define	kb_units 1024L
+    static double now, first, last;
+    static long bytes_last;
+
+    double transfer_rate;
+    char line[80];
+    struct timeb tb;
+    char *units = "bytes";
+
+    ftime(&tb);
+    now = tb.time + (double)tb.millitm / 1000;
+
+    if (bytes == 0) {
+	first = last = now;
+	bytes_last = bytes;
+    } else if ((bytes > 0) && (now > first)) {
+	transfer_rate = (double)bytes / (now - first);   /* bytes/sec */
+
+	if (now != last) {
+	    last = now;
+	    bytes_last = bytes;
+	}
+	if (total >= kb_units || bytes >= kb_units) {
+	    if (total > 0)
+		total /= 1024;
+	    bytes /= 1024;
+	    units = "KB";
+	}
+
+	if (total >  0)
+	    sprintf (line, "Read %3d%%, %ld of %ld %s.",
+		(int) (bytes * 100 / total), bytes, total, units);
+	else
+	    sprintf (line, "Read %ld %s of data.", bytes, units);
+
+	if (transfer_rate > 0.0) {
+	    int n;
+	    n = strlen(line);
+	    if (LYshow_kb_rate) {
+		sprintf (line + n, " %6.2lf KB/sec.", transfer_rate / 1024.0);
+	    } else {
+		int t_rate;
+
+		t_rate = (int)transfer_rate;
+		if (t_rate < 1000)
+		    sprintf (line + n, " %6d bytes/sec.", t_rate);
+		else
+		    sprintf (line + n, " %6d,%03d bytes/sec.", 
+					t_rate / 1000, t_rate % 1000);
+	    }
+	}
+	if (total <  0) {
+	    if (total < -1)
+		strcat(line, " (Press 'z' to abort)");
+	}
+	_HTProgress(line);
+    }
+#else
     static long kb_units = 1024;
     static time_t first, last;
     static long bytes_last;
@@ -186,6 +304,7 @@ PUBLIC void HTReadProgress ARGS2(
 	    CTRACE(tfp, "%s\n", line);
 	}
     }
+#endif
 }
 
 PRIVATE BOOL conf_cancelled = NO; /* used by HTConfirm only - kw */

@@ -25,6 +25,10 @@
 BOOLEAN term_message = FALSE;
 PRIVATE void terminate_message  PARAMS((int sig));
 
+#ifdef CJK_EX	/* 1998/05/15 (Fri) 09:10:38 */
+extern HTCJKlang HTCJK;
+#endif
+
 PRIVATE BOOLEAN message_has_content ARGS1(
     CONST char *,		filename)
 {
@@ -213,6 +217,23 @@ PUBLIC char *LYNewsPost ARGS2(
 	 *  Add the default subject.
 	 */
 	kp = LYSkipCBlanks(kp);
+#ifdef CJK_EX	/* 1998/05/15 (Fri) 09:10:38 */
+	if (HTCJK == JAPANESE) {
+	    CJKinput[0] = '\0';
+	    switch(kanji_code) {
+	    case EUC:
+		TO_EUC(kp, CJKinput);
+		kp = CJKinput;
+		break;
+	    case SJIS:
+		TO_SJIS(kp, CJKinput);
+		kp = CJKinput;
+		break;
+	    default:
+		break;
+	    }
+	}
+#endif
 	if (strncasecomp(kp, "Re:", 3)) {
 	    strcat(user_input, "Re: ");
 	}
@@ -238,8 +259,9 @@ PUBLIC char *LYNewsPost ARGS2(
     } else if (((org = getenv("NEWS_ORGANIZATION")) != NULL) &&
 	       *org != '\0') {
 	StrAllocCat(cp, org);
-#ifndef VMS
-    } else if ((fp = fopen("/etc/organization", "r")) != NULL) {
+    }
+#ifdef UNIX
+    else if ((fp = fopen("/etc/organization", "r")) != NULL) {
 	char *buffer = 0;
 	if (LYSafeGets(&buffer, fp) != NULL) {
 	    if ((org = strchr(buffer, '\n')) != NULL) {
@@ -251,8 +273,31 @@ PUBLIC char *LYNewsPost ARGS2(
 	}
 	FREE(buffer);
 	fclose(fp);
-#endif /* !VMS */
     }
+#else
+#ifdef _WINDOWS	/* 1998/05/14 (Thu) 17:47:01 */
+    else {
+	char *p, fname[256];
+
+	strcpy(fname, LynxSigFile);
+	p = strrchr(fname, '/');
+	if (p) {
+	    strcpy(p + 1, "LYNX_ETC.TXT");
+	    if ((fp = fopen(fname, TXT_R)) != NULL) {
+		if (fgets(user_input, sizeof(user_input), fp) != NULL) {
+		    if ((org = strchr(user_input, '\n')) != NULL) {
+			*org = '\0';
+		    }
+		    if (user_input[0] != '\0') {
+			StrAllocCat(cp, user_input);
+		    }
+		}
+		fclose(fp);
+	    }
+	}
+    }
+#endif /* _WINDOWS */
+#endif /* !UNIX */
     LYstrncpy(user_input, cp, (sizeof(user_input) - 16));
     FREE(cp);
     addstr(gettext("\n\n Please provide or edit the Organization: header\n"));
@@ -375,7 +420,7 @@ PUBLIC char *LYNewsPost ARGS2(
 	clear();  /* clear the screen */
 	goto cleanup;
     }
-    if ((LynxSigFile != NULL) && (fp = fopen(LynxSigFile, "r")) != NULL) {
+    if ((LynxSigFile != NULL) && (fp = fopen(LynxSigFile, TXT_R)) != NULL) {
 	char *msg = NULL;
 	HTSprintf0(&msg, APPEND_SIG_FILE, LynxSigFile);
 
@@ -406,7 +451,7 @@ PUBLIC char *LYNewsPost ARGS2(
      *  use the temp file as is. - FM
      */
     if (CJKfile[0] != '\0') {
-	if ((fd = fopen(my_tempfile, "r")) != NULL) {
+	if ((fd = fopen(my_tempfile, TXT_R)) != NULL) {
 	    char *buffer = NULL;
 	    while (LYSafeGets(&buffer, fd) != NULL) {
 		TO_JIS((unsigned char *)buffer,

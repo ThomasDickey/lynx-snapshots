@@ -104,7 +104,7 @@ Related to *experimental* (unsupported) character style code
 Other general
 -------------
 # -DDONT_TRACK_INTERNAL_LINKS - Handle following links to same doc differently.
-# -DEXP_CHARTRANS_AUTOSWITCH (see INSTALLATION, Section II-1c) 
+# -DEXP_CHARTRANS_AUTOSWITCH (see INSTALLATION, Section II-1c)
 # -DIGNORE_CTRL_C  Define if Control-C shouldn't exit lynx.
 # -DLY_FIND_LEAKS  (see INSTALLATION, Section II-1c)
 # -DNO_CPU_LIMIT   Disables Max CPU timeout (includes CLOCKS_PER_SECOND)
@@ -126,17 +126,20 @@ Defined in the source files to which they apply.  Only filenames are listed,
 the files would have to be read and edited anyway to change the definition.
 Normally installers shouldn't have to care about any of these symbols.
 
-SOCKET_DEBUG_TRACE			HTTCP.c
-DEBUG_HOSTENT				HTTCP.c
-DEBUG_HOSTENT_CHILD			HTTCP.c
-DUPLICATE_ANCHOR_NAME_WORKAROUND	HTAnchor.c
-reverse_mailcap				HTInit.c
-EXTENDED_OPTION_LOGIC			LYMain.c
-EXTENDED_STARTFILE_RECALL		LYMain.c
-reverse_mailcap				HTInit.c
 ADVANCED_INFO				LYShowInfo.c
 CHECK_FREE_MEM				GridText.c
+DEBUG_HOSTENT				HTTCP.c
+DEBUG_HOSTENT_CHILD			HTTCP.c
+DEFAULT_INVCHECK_BV			LYCookie.c
+DUPLICATE_ANCHOR_NAME_WORKAROUND	HTAnchor.c
+EXTENDED_OPTION_LOGIC			LYMain.c
+EXTENDED_STARTFILE_RECALL		LYMain.c
+OPTNAME_ALLOW_DASHES			LYMain.c
+RESTRICT_NM_ALLOW_DASHES		LYUtils.c
+SOCKET_DEBUG_TRACE			HTTCP.c
+max_cookies_buffer			LYCookie.c
 max_cookies_domain			LYCookie.c
 max_cookies_global			LYCookie.c
-max_cookies_buffer			LYCookie.c
-DEFAULT_INVCHECK_BV			LYCookie.c
+reverse_mailcap				HTInit.c
+reverse_mailcap				HTInit.c
+

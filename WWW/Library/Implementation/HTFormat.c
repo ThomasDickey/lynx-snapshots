@@ -396,9 +396,11 @@ PUBLIC HTStream * HTStreamStack ARGS4(
 
     /* don't return on WWW_SOURCE some people might like
      * to make use of the source!!!!  LJM
-     *//*
+     */
+#if 0
     if (rep_out == WWW_SOURCE || rep_out == rep_in)
-	return sink;  LJM */
+	return sink;	/*  LJM */
+#endif
 
     if (rep_out == rep_in)
 	return sink;
@@ -594,6 +596,12 @@ PUBLIC int HTCopy ARGS4(
     HTStreamClass targetClass;
     int bytes;
     int rv = 0;
+#ifdef _WINDOWS	/* 1997/11/11 (Tue) 15:18:16 */
+    long file_length;
+    extern int bytes_already_read;
+    
+    file_length = anchor->content_length;
+#endif
 
     /*	Push the data down the stream
     */
@@ -638,6 +646,9 @@ PUBLIC int HTCopy ARGS4(
 		    rv = -1;
 		goto finished;
 	    } else if (SOCKET_ERRNO == ENOTCONN ||
+#ifdef _WINDOWS	/* 1997/11/10 (Mon) 16:57:18 */
+		       SOCKET_ERRNO == ETIMEDOUT || 
+#endif
 		       SOCKET_ERRNO == ECONNRESET ||
 		       SOCKET_ERRNO == EPIPE) {
 		/*
@@ -818,11 +829,12 @@ PUBLIC int HTMemCopy ARGS2(
 	HTChunk *,		chunk,
 	HTStream *,		sink)
 {
-    HTStreamClass targetClass = *(sink->isa);
+    HTStreamClass targetClass;
     int bytes = 0;
     CONST char *data = chunk->data;
     int rv = HT_OK;
 
+    targetClass = *(sink->isa);
     HTReadProgress(0, 0);
     for (;;) {
 	/* Push the data down the stream a piece at a time, in case we're
@@ -1078,9 +1090,12 @@ PUBLIC int HTParseFile ARGS5(
     HTStreamClass targetClass;
     int rv;
 
-    stream = HTStreamStack(rep_in,
-			format_out,
-			sink , anchor);
+#ifdef SH_EX		/* 1998/01/04 (Sun) 16:04:09 */
+    if (fp == NULL)
+	return HT_LOADED;
+#endif
+
+    stream = HTStreamStack(rep_in, format_out, sink, anchor);
 
     if (!stream) {
 	char *buffer = 0;
@@ -1211,9 +1226,7 @@ PUBLIC int HTParseGzFile ARGS5(
     HTStreamClass targetClass;
     int rv;
 
-    stream = HTStreamStack(rep_in,
-			format_out,
-			sink , anchor);
+    stream = HTStreamStack(rep_in, format_out, sink, anchor);
 
     if (!stream) {
 	char *buffer = 0;
@@ -1334,4 +1347,3 @@ PUBLIC HTStream * HTNetToText ARGS1(HTStream *, sink)
     me->sink = sink;
     return me;
 }
-

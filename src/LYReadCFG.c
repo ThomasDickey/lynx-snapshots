@@ -332,7 +332,7 @@ static CONST char *Color_Strings[16] =
     "white"
 };
 
-#ifdef DOSPATH
+#if defined(DOSPATH) || defined(WIN_EX)
 /*
  * PDCurses (and possibly some other implementations) use a non-ANSI set of
  * codes for colors.
@@ -898,7 +898,7 @@ static int viewer_fun ARGS1(
 }
 
 static int nonrest_sigwinch_fun ARGS1(
-	char *, 	value)
+	char *,		value)
 {
     if (!strncasecomp(value, "XWINDOWS", 8)) {
 	LYNonRestartingSIGWINCH = (LYgetXDisplay() != NULL);
@@ -957,8 +957,13 @@ static int parse_html_src_spec ARGS3(
     return 0;
 }
 
+#ifdef __STDC__
 #define defHTSRC_parse_fun(x) static int html_src_set_##x ARGS1( char*,str) \
  { parse_html_src_spec(HTL_##x,str,#x); return 0; }
+#else
+#define defHTSRC_parse_fun(x) static int html_src_set_/**/x ARGS1( char*,str) \
+ { parse_html_src_spec(HTL_/**/x,str,"x"); return 0; }
+#endif
 
 defHTSRC_parse_fun(comm)
 defHTSRC_parse_fun(tag)
@@ -1006,8 +1011,14 @@ static int read_htmlsrc_tagname_xform ARGS1( char*,str)
 }
 
 
+#ifdef __STDC__
 #define defHTSRC_option(x) \
     PARSE_FUN( "htmlsrc_" #x ,CONF_FUN, html_src_set_##x),
+#else
+#define defHTSRC_option(x) \
+    PARSE_FUN( "htmlsrc_" #x ,CONF_FUN, html_src_set_/**/x),
+    /*                    ^^ (cannot adapt to K&R) */
+#endif
 
 #endif
 
@@ -1066,7 +1077,13 @@ static Config_Type Config_Table [] =
      PARSE_ADD("external", CONF_ADD_ITEM, externals),
 #endif
      PARSE_ENV("finger_proxy", CONF_ENV, 0 ),
+#if defined(_WINDOWS)	/* 1998/10/05 (Mon) 17:34:15 */
+     PARSE_SET("focus_window", CONF_BOOL, &focus_window),
+#endif
      PARSE_SET("force_8bit_toupper", CONF_BOOL, &UCForce8bitTOUPPER),
+#ifndef NO_EMPTY_HREFLESS_A
+     PARSE_SET("force_empty_hrefless_a", CONF_BOOL, &force_empty_hrefless_a),
+#endif
      PARSE_SET("force_ssl_cookies_secure", CONF_BOOL, &LYForceSSLCookiesSecure),
 #if !defined(NO_OPTION_FORMS) && !defined(NO_OPTION_MENU)
      PARSE_SET("forms_options", CONF_BOOL, &LYUseFormsOptions),
@@ -1079,7 +1096,7 @@ static Config_Type Config_Table [] =
      PARSE_STR("helpfile", CONF_STR, &helpfile),
      PARSE_SET("historical_comments", CONF_BOOL, &historical_comments),
 
-#ifdef USE_PSRC
+#if defined(USE_PSRC) && defined(__STDC__)
 
      defHTSRC_option(abracket)
      defHTSRC_option(attrib)
@@ -1110,6 +1127,9 @@ static Config_Type Config_Table [] =
      PARSE_STR("jump_prompt", CONF_STR, &jumpprompt),
      PARSE_SET("jumpbuffer", CONF_BOOL, &jump_buffer),
      PARSE_FUN("jumpfile", CONF_FUN, jumpfile_fun),
+#ifdef EXP_JUSTIFY_ELTS
+     PARSE_SET("justify", CONF_BOOL, &ok_justify),
+#endif
 #ifdef EXP_KEYBOARD_LAYOUT
      PARSE_FUN("keyboard_layout", CONF_FUN, keyboard_layout_fun),
 #endif
@@ -1143,7 +1163,7 @@ static Config_Type Config_Table [] =
      PARSE_SET("make_pseudo_alts_for_inlines", CONF_BOOL, &pseudo_inline_alts),
      PARSE_INT("messagesecs", CONF_INT, &MessageSecs),
      PARSE_SET("minimal_comments", CONF_BOOL, &minimal_comments),
-     PARSE_SET("multi_bookmark_support", CONF_BOOL, &LYMultiBookmarks),
+     PARSE_INT("multi_bookmark_support", CONF_BOOL, &LYMultiBookmarks),
      PARSE_SET("ncr_in_bookmarks", CONF_BOOL, &UCSaveBookmarksInUnicode),
 #ifndef DISABLE_NEWS
      PARSE_FUN("news_chunk_size", CONF_FUN, news_chunk_size_fun),
@@ -1154,6 +1174,9 @@ static Config_Type Config_Table [] =
      PARSE_ENV("newsreply_proxy", CONF_ENV, 0),
      PARSE_ENV("nntp_proxy", CONF_ENV, 0),
      PARSE_ENV("nntpserver", CONF_ENV2, 0), /* actually NNTPSERVER */
+#endif
+#ifdef SH_EX
+     PARSE_SET("no_table_center", CONF_BOOL, &no_table_center),
 #endif
      PARSE_SET("no_dot_files", CONF_BOOL, &no_dotfiles),
      PARSE_SET("no_file_referer", CONF_BOOL, &no_filereferer),
@@ -1208,6 +1231,9 @@ static Config_Type Config_Table [] =
      PARSE_STR("system_mail", CONF_STR, &system_mail),
      PARSE_STR("system_mail_flags", CONF_STR, &system_mail_flags),
      PARSE_SET("tagsoup", CONF_BOOL, &Old_DTD),
+#if defined(_WINDOWS)
+     PARSE_INT("timeout", CONF_INT, &lynx_timeout),
+#endif
 #ifdef EXEC_LINKS
      PARSE_DEF("trusted_exec", CONF_ADD_TRUSTED, EXEC_PATH),
 #endif
@@ -1262,7 +1288,7 @@ PUBLIC void free_lynx_cfg NOARGS
 		    unsetenv(name);
 # else
 		    if (putenv(name))
-		    	break;
+			break;
 # endif
 #endif
 		}
@@ -1355,7 +1381,7 @@ PRIVATE void do_read_cfg ARGS5(
 	strcat(mypath, cfg_filename+1);
 	cfg_filename = mypath;
     }
-    if ((fp = fopen(cfg_filename,"r")) == 0) {
+    if ((fp = fopen(cfg_filename, TXT_R)) == 0) {
 	CTRACE(tfp,"lynx.cfg file not found as %s\n",cfg_filename);
 	return;
     }
@@ -1364,6 +1390,13 @@ PRIVATE void do_read_cfg ARGS5(
     /*
      *	Process each line in the file.
      */
+#ifdef SH_EX
+    if (show_cfg) {
+	time_t t;
+	time(&t);
+	printf("### Lynx %s, at %s", LYNX_VERSION, ctime(&t));
+    }
+#endif
     while (LYSafeGets(&buffer, fp) != 0) {
 	char *name, *value;
 	char *cp;
@@ -1415,6 +1448,10 @@ PRIVATE void do_read_cfg ARGS5(
 	    /* lynx ignores unknown keywords */
 	    continue;
 	}
+#ifdef SH_EX
+	if (show_cfg)
+	    printf("%s:%s\n", name, value);
+#endif
 
 	if ( allowed && (*allowed)[ tbl-Config_Table ] ) {
 	    if (fp0 == NULL)
@@ -1484,7 +1521,7 @@ PRIVATE void do_read_cfg ARGS5(
 
 	case CONF_INCLUDE: {
 	    /* include another file */
-	    optidx_set_t cur_set,anded_set;
+	    optidx_set_t cur_set, anded_set;
 	    optidx_set_t* resultant_set = NULL;
 	    char* p1, *p2, savechar;
 	    BOOL any_optname_found = FALSE;
@@ -1558,10 +1595,10 @@ PRIVATE void do_read_cfg ARGS5(
 	    }
 
 #ifndef NO_CONFIG_INFO
-	    /* 
+	    /*
 	     * Now list the opts that are allowed in included file.  If all
 	     * opts are allowed, then emit nothing, else emit an effective set
-	     * of allowed options in <ul>.  Option names will be uppercased. 
+	     * of allowed options in <ul>.  Option names will be uppercased.
 	     * FIXME:  uppercasing option names can be considered redundant.
 	     */
 	    if (fp0 != 0  &&  !no_lynxcfg_xinfo && resultant_set) {

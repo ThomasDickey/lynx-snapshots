@@ -256,7 +256,7 @@ PUBLIC HTStream* HTSaveAndExecute ARGS3(
     tmpnam (fnam);
     if (suffix) strcat(fnam, suffix);
 
-    me->fp = fopen (fnam, "w");
+    me->fp = fopen (fnam, "wb");
     if (!me->fp) {
 	HTAlert(CANNOT_OPEN_TEMP);
         FREE(fnam);
@@ -333,7 +333,7 @@ PUBLIC HTStream* HTSaveLocally ARGS3(
 
     FREE(fnam);
 
-    me->fp = fopen (answer, "w");
+    me->fp = fopen (answer, "wb");
     if (!me->fp) {
 	HTAlert(CANNOT_OPEN_OUTPUT);
         FREE(answer);

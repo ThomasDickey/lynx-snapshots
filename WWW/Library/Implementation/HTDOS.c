@@ -5,6 +5,12 @@
 #include <HTUtils.h>
 #include <HTDOS.h>
 
+#ifdef _WINDOWS
+#include <HTString.h>
+#include <stdio.h>
+#include <windows.h>
+#endif
+
 /*
  * Make a copy of the source argument in the result, allowing some extra
  * space so we can append directly onto the result without reallocating.
@@ -28,14 +34,42 @@ PRIVATE char * copy_plus ARGS2(char **, result, char *, source)
 */
 char * HTDOS_wwwName ARGS1(char *, dosname)
 {
-    static char *wwwname;
+    static char *wwwname = NULL;
     char *cp_url = copy_plus(&wwwname, dosname);
+    int wwwname_len;
 
+#ifdef SH_EX
+    char ch;
+
+    while ((ch = *dosname) != '\0') {
+	switch (ch) {
+	case '\\':
+	/* convert dos backslash to unix-style */
+	    *cp_url++ = '/';
+	    break;
+	case ' ':
+	    *cp_url++ = '%';
+	    *cp_url++ = '2';
+	    *cp_url++ = '0';
+	    break;
+      default:
+	    *cp_url++ = ch;
+	    break;;
+      }
+      dosname++;
+    }
+    *cp_url = '\0';
+#else
     for ( ; *cp_url != '\0' ; cp_url++)
 	if(*cp_url == '\\')
 	    *cp_url = '/';   /* convert dos backslash to unix-style */
+#endif
 
-    if(strlen(wwwname) > 3 && *cp_url == '/')
+    wwwname_len = strlen(wwwname);
+    if (wwwname_len > 1)
+	cp_url--;	/* point last char */
+
+    if (wwwname_len > 3 && *cp_url == '/')
 	*cp_url = '\0';
 
 #ifdef NOTUSED
@@ -59,10 +93,15 @@ char * HTDOS_wwwName ARGS1(char *, dosname)
 */
 char * HTDOS_name ARGS1(char *, wwwname)
 {
-    static char *cp_url;
-    char *result;
+#ifdef _WINDOWS	/* 1998/04/02 (Thu) 08:47:20 */
+    extern char windows_drive[];
+    char temp_buff[LY_MAXPATH];
+#endif
+    static char *cp_url = NULL;
+    char *result, *ret;
     int joe;
 
+    CTRACE(tfp, "HTDOS_name changed `%s'\n", wwwname);
     copy_plus(&cp_url, wwwname);
 
     for (joe = 0; cp_url[joe] != '\0'; joe++)	{
@@ -79,6 +118,26 @@ char * HTDOS_name ARGS1(char *, wwwname)
 	result = cp_url+1;
     }
 
-    CTRACE(tfp, "HTDOS_name changed `%s' to `%s'\n", wwwname, result);
-    return (result);
+#ifdef _WINDOWS	/* 1998/04/02 (Thu) 08:59:48 */
+    if (strchr(result, '\\') && strchr(result, ':')==NULL) {
+	sprintf(temp_buff, "%s\\%s", windows_drive, result);
+	ret = NULL;
+	StrAllocCopy(ret, temp_buff);
+	free(cp_url);
+    } else {
+	char *p;
+	p = strchr(result, ':');
+	if (p && (strcmp(p, ":\\") == 0)) {
+	    p[2] = '.';
+	    p[3] = '\0';
+	}
+	ret = result;
+    }
+#else
+    ret = result;
+#endif
+
+    CTRACE(tfp, "HTDOS_name changed `%s' to `%s'\n", wwwname, ret);
+    return (ret);
 }
+

@@ -13,6 +13,11 @@
 #include <HTFWriter.h>
 #include <HTSaveToFile.h>
 
+#if _WIN_CC
+#include <HTParse.h>
+extern int exec_command(char * cmd, int wait_flag); /* xsystem.c */
+#endif
+
 #include <HTFormat.h>
 #include <UCDefs.h>
 #include <HTAlert.h>
@@ -80,7 +85,8 @@ struct _HTStream {
 */
 PRIVATE void HTFWriter_put_character ARGS2(HTStream *, me, char, c)
 {
-    putc(c, me->fp);
+    if (me->fp)
+	putc(c, me->fp);
 }
 
 /*	String handling
@@ -90,7 +96,8 @@ PRIVATE void HTFWriter_put_character ARGS2(HTStream *, me, char, c)
 */
 PRIVATE void HTFWriter_put_string ARGS2(HTStream *, me, CONST char*, s)
 {
-    fputs(s, me->fp);
+    if (me->fp)
+	fputs(s, me->fp);
 }
 
 /*	Buffer write.  Buffers can (and should!) be big.
@@ -98,7 +105,8 @@ PRIVATE void HTFWriter_put_string ARGS2(HTStream *, me, CONST char*, s)
 */
 PRIVATE void HTFWriter_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 {
-    fwrite(s, 1, l, me->fp);
+    if (me->fp)
+	fwrite(s, 1, l, me->fp);
 }
 
 
@@ -119,8 +127,14 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
     char *addr = NULL;
     int status;
     BOOL use_gzread = NO;
+#ifdef WIN_EX
+    HANDLE cur_handle;
 
-    fflush(me->fp);
+    cur_handle = GetForegroundWindow();
+#endif
+
+    if (me->fp)
+	fflush(me->fp);
     if (me->end_command) {		/* Temp file */
 	LYCloseTempFP(me->fp);
 #ifdef VMS
@@ -294,16 +308,29 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 			     *	Tell user what's happening. - FM
 			     */
 			    HTProgress(me->end_command);
+#ifndef WIN_EX
 			    stop_curses();
+#endif
 			}
+#ifdef _WIN_CC
+			exec_command(me->end_command, FALSE);
+#else
 			LYSystem(me->end_command);
-
+#endif
 			if (me->remove_command) {
 			    /* NEVER REMOVE THE FILE unless during an abort!!!*/
 			    FREE(me->remove_command);
 			}
-			if (!dump_output_immediately)
+			if (!dump_output_immediately) {
+#ifdef WIN_EX
+			    if (focus_window) {
+				HTInfoMsg("Set focus1");
+				status = SetForegroundWindow(cur_handle);
+			    }
+#else
 			    start_curses();
+#endif
+			}
 		    } else
 		    status = HTLoadFile(addr,
 					me->anchor,
@@ -337,16 +364,30 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 		 *  Tell user what's happening. - FM
 		 */
 		_HTProgress(me->end_command);
+#ifndef WIN_EX
 		stop_curses();
+#endif
 	    }
+#ifdef _WIN_CC
+	    exec_command(me->end_command, FALSE);
+#else
 	    LYSystem(me->end_command);
+#endif
 
 	    if (me->remove_command) {
 		/* NEVER REMOVE THE FILE unless during an abort!!!*/
 		FREE(me->remove_command);
 	    }
-	    if (!dump_output_immediately)
+	    if (!dump_output_immediately) {
+#ifdef WIN_EX
+		if (focus_window) {
+		    HTInfoMsg("Set focus2");
+		    status = SetForegroundWindow(cur_handle);
+		}
+#else
 		start_curses();
+#endif
+	    }
 	} else {
 	    /*
 	     *	It's a file we saved to disk for handling
@@ -355,6 +396,16 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 	    if (me->remove_command) {
 		/* NEVER REMOVE THE FILE unless during an abort!!!*/
 		FREE(me->remove_command);
+	    }
+	    if (!dump_output_immediately) {
+#ifdef WIN_EX
+		if (focus_window) {
+		    HTInfoMsg("Set focus3");
+		    status = SetForegroundWindow(cur_handle);
+		}
+#else
+	        start_curses();
+#endif
 	    }
 	}
 	FREE(me->end_command);
@@ -466,7 +517,6 @@ PUBLIC HTStream* HTSaveAndExecute ARGS3(
 	LYCancelledFetch = TRUE;
 	return(NULL);
     }
-
 #if defined(EXEC_LINKS) || defined(EXEC_SCRIPTS)
     if (pres->quality == 999.0) { /* exec link */
 	if (dump_output_immediately) {
@@ -510,6 +560,56 @@ PUBLIC HTStream* HTSaveAndExecute ARGS3(
     if (LYCachedTemp(fnam, &(anchor->FileCache))) {
 	me->fp = LYNewBinFile (fnam);
     } else {
+#if defined(WIN_EX) && !defined(__CYGWIN__)	/* 1998/01/04 (Sun) */
+	if (!strncmp(anchor->address,"file://localhost",16)) {
+
+	    /* 1998/01/23 (Fri) 17:38:26 */
+	    extern char windows_drive[];
+	    unsigned char *cp, *view_fname;
+
+#define IS_SJIS_HI1(hi) ((0x81<=hi)&&(hi<=0x9F))	/* 1st lev. */
+#define IS_SJIS_HI2(hi) ((0xE0<=hi)&&(hi<=0xEF))	/* 2nd lev. */
+
+	    me->fp = NULL;
+
+	    view_fname = fnam + 3;
+	    strcpy(view_fname, anchor->address + 17);
+	    HTUnEscape(view_fname);
+
+	    if (strchr(view_fname, ':')==NULL) {
+		fnam[0] = windows_drive[0];
+		fnam[1] = windows_drive[1];
+		fnam[2] = '/';
+		view_fname = fnam;
+	    }
+
+	    /* 1998/04/21 (Tue) 11:04:16 */
+	    cp = view_fname;
+	    while (*cp) {
+		if (IS_SJIS_HI1(*cp) || IS_SJIS_HI2(*cp)) {
+		    cp += 2;
+		    continue;
+		} else if (*cp == '/') {
+		    *cp = '\\';
+		}
+		cp++;
+	    }
+	    if (strchr(view_fname, ' '))
+		view_fname = quote_pathname(view_fname);
+
+	    StrAllocCopy(me->viewer_command, pres->command);
+
+	    me->end_command = (char *)calloc (
+			(strlen (pres->command) + 10 + strlen(view_fname))
+				 * sizeof (char),1);
+	    if (me->end_command == NULL)
+		outofmem(__FILE__, "HTSaveAndExecute");
+	    sprintf(me->end_command, pres->command, view_fname);
+	    me->remove_command = NULL;
+
+	    return me;
+	}
+#endif
 	/*
 	 *  Check for a suffix.
 	 *  Save the file under a suitably suffixed name.
@@ -521,8 +621,10 @@ PUBLIC HTStream* HTSaveAndExecute ARGS3(
 	} else if (!strcasecomp(pres->rep->name,
 				"application/octet-stream")) {
 	    suffix = ".bin";
-	} else if ((suffix = HTFileSuffix(pres->rep, anchor->content_encoding)) == 0
-		   || *suffix != '.') {
+	} else if (
+	(suffix = HTFileSuffix(pres->rep, anchor->content_encoding)) == 0
+		   || *suffix != '.')
+	{
 	    suffix = HTML_SUFFIX;
 	}
 	me->fp = LYOpenTemp(fnam, suffix, "wb");

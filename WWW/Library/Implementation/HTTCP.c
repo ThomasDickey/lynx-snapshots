@@ -114,15 +114,24 @@ extern int sys_nerr;
 #endif	/* !PCNFS */
 
 #ifdef _WINDOWS_NSL
-	 char host[512];
-	 struct hostent  *phost;	/* Pointer to host - See netdb.h */
-	 int donelookup;
+char host[512];
+struct hostent  *phost;	/* Pointer to host - See netdb.h */
+int donelookup;
 
 unsigned long _fork_func (void *arglist)
 {
-	 phost = gethostbyname(host);
-	 donelookup = TRUE;
-	 return (unsigned long)(phost);
+#ifdef SH_EX
+    unsigned long addr;
+    addr = (unsigned long)inet_addr(host);
+    if ((int)addr != -1)
+	phost = gethostbyaddr((char *)&addr, sizeof (addr), AF_INET);
+    else
+	phost = gethostbyname(host);
+#else
+    phost = gethostbyname(host);
+#endif
+    donelookup = TRUE;
+    return (unsigned long)(phost);
 }
 #endif /* _WINDOWS_NSL */
 
@@ -674,7 +683,11 @@ PUBLIC struct hostent * LYGetHostByName ARGS1(
     if (!valid_hostname(host)) {
 	lynx_nsl_status = HT_NOT_ACCEPTABLE;
 #ifdef NO_RECOVERY
+#ifdef _WINDOWS
+	WSASetLastError(NO_RECOVERY);
+#else
 	h_errno = NO_RECOVERY;
+#endif
 #endif
 	return NULL;
     }
@@ -1061,43 +1074,51 @@ PUBLIC struct hostent * LYGetHostByName ARGS1(
 
 #ifdef _WINDOWS_NSL
     {
-#ifdef __BORLANDC__
-		HANDLE hThread, dwThreadID;
-#else
-		unsigned long hThread, dwThreadID;
-#endif /* __BORLANDC__ */
-		phost = (struct hostent *) NULL;
-		hThread = CreateThread((void *)NULL, 4096UL,
-#ifdef __BORLANDC__
-			 (LPTHREAD_START_ROUTINE)_fork_func,
-#else
-			 (unsigned long (*)())_fork_func,
-#endif /* __BORLANDC__ */
-			 (void *)NULL, 0UL, (unsigned long *)&dwThreadID);
-		if (!hThread)
-			 MessageBox((void *)NULL, "CreateThread",
-				"CreateThread Failed", 0L);
+	char buff[256];
+	LPSTR szIPAddr;	/* IP address as a dotted decimal string */
+	IN_ADDR addr;
+	IN_ADDR *p;
 
-		donelookup = FALSE;
-		while (!donelookup)
-			if (HTCheckForInterrupt())
-			 {
-			  /* Note that host is a character array and is not freed */
-			  /* to avoid possible subthread problems: */
-			  if (!CloseHandle(hThread))
-				 MessageBox((void *)NULL, "CloseHandle","CloseHandle Failed",
-						0L);
-			  lynx_nsl_status = HT_INTERRUPTED;
-			  return NULL;
-			};
-		if (phost) {
-		    lynx_nsl_status = HT_OK;
-		    result_phost = phost;
-		} else {
-		    lynx_nsl_status = HT_ERROR;
-		    goto failed;
+	HANDLE hThread, dwThreadID;
+
+	if (!system_is_NT) {	/* for Windows9x */
+	    unsigned long t;
+	    t = (unsigned long)inet_addr((char *)host);
+	    if ((int)t != -1)
+		phost = gethostbyaddr((char *)&t, sizeof (t), AF_INET);
+	    else
+		phost = gethostbyname((char *)host);
+	} else {		/* for Windows NT */
+	    phost = (struct hostent *) NULL;
+	    hThread = CreateThread((void *)NULL, 4096UL,
+		(LPTHREAD_START_ROUTINE)_fork_func,
+		(void *)NULL, 0UL, (unsigned long *)&dwThreadID);
+	    if (!hThread)
+		MessageBox((void *)NULL, "CreateThread",
+			   "CreateThread Failed", 0L);
+
+	    donelookup = FALSE;
+	    while (!donelookup) {
+		if (HTCheckForInterrupt()) {
+		    /* Note that host is a character array and is not freed */
+		    /* to avoid possible subthread problems: */
+		    if (!CloseHandle(hThread)) {
+			MessageBox((void *)NULL,
+				   "CloseHandle","CloseHandle Failed", 0L);
+		    }
+		    lynx_nsl_status = HT_INTERRUPTED;
+		    return NULL;
 		}
-    };
+	    }
+	}
+	if (phost) {
+	    lynx_nsl_status = HT_OK;
+	    result_phost = phost;
+	} else {
+	    lynx_nsl_status = HT_ERROR;
+	    goto failed;
+	}
+    }
 
 #else /* !NSL_FORK, !_WINDOWS_NSL: */
     {
@@ -1698,7 +1719,11 @@ PUBLIC int HTDoConnect ARGS4(
 	    if (HTCheckForInterrupt()) {
 		CTRACE(tfp, "*** INTERRUPTED in middle of connect.\n");
 		status = HT_INTERRUPTED;
+#ifdef _WINDOWS
+		WSASetLastError(EINTR);
+#else
 		SOCKET_ERRNO = EINTR;
+#endif
 		break;
 	    }
 	}
@@ -1771,7 +1796,11 @@ PUBLIC int HTDoRead ARGS3(
 	return -1;
 
     if (HTCheckForInterrupt()) {
+#ifdef _WINDOWS
+	WSASetLastError(EINTR);
+#else
 	SOCKET_ERRNO = EINTR;
+#endif
 	return (HT_INTERRUPTED);
     }
 
@@ -1786,7 +1815,11 @@ PUBLIC int HTDoRead ARGS3(
 	*/
 	if (tries++ >= 180000) {
 	    HTAlert(gettext("Socket read failed for 180,000 tries."));
+#ifdef _WINDOWS
+	    WSASetLastError(EINTR);
+#else
 	    SOCKET_ERRNO = EINTR;
+#endif
 	    return HT_INTERRUPTED;
 	}
 
@@ -1814,7 +1847,11 @@ PUBLIC int HTDoRead ARGS3(
 	} else if (ret > 0) {
 	    ready = 1;
 	} else if (HTCheckForInterrupt()) {
+#ifdef _WINDOWS
+	    WSASetLastError(EINTR);
+#else
 	    SOCKET_ERRNO = EINTR;
+#endif
 	    return HT_INTERRUPTED;
 	}
     }

@@ -484,7 +484,7 @@ PUBLIC void HTMLSetCharacterHandling ARGS1(int,i)
     }
 #endif /* USE_SLANG */
 
-    ena_csi((LYlowest_eightbit[current_char_set] > 155));
+    ena_csi((BOOLEAN)(LYlowest_eightbit[current_char_set] > 155));
 
     /* some diagnostics */
     if (TRACE) {

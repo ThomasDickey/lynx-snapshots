@@ -189,7 +189,7 @@ PRIVATE BOOL rule_cond_ok ARGS1(
 	return result;
     else
 	return (!result);
-	
+
 }
 /*	Translate by rules					HTTranslate()
 **	------------------
@@ -479,7 +479,7 @@ PUBLIC int  HTSetConfiguration ARGS1(
 			    &quality, &secs, &secs_per_byte, &maxbytes);
 	else status = 0;
 	HTSetPresentation(word2, word3,
-		    status >= 1? quality		: 1.0,
+		    status >= 1 ? quality		: 1.0,
 		    status >= 2 ? secs			: 0.0,
 		    status >= 3 ? secs_per_byte 	: 0.0,
 		    status >= 4 ? maxbytes		: 0 );

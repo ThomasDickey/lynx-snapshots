@@ -67,6 +67,11 @@ typedef struct sockaddr_in SockA;  /* See netinet/in.h */
 #undef HAVE_SYS_FILIO_H
 #endif /* DJGPP or __BORLANDC__ */
 
+#if defined(_MSC_VER)
+#define HAVE_DIRENT_H
+#undef HAVE_SYS_FILIO_H
+#endif /* _MSC_VER */
+
 #ifdef HAVE_DIRENT_H
 # include <dirent.h>
 # define D_NAMLEN(dirent) strlen((dirent)->d_name)
@@ -159,7 +164,7 @@ IBM-PC running Windows NT
 #undef NETWRITE
 #undef NETCLOSE
 #undef IOCTL
-#define NETREAD(s,b,l)  recv((s),(b),(l),0)
+#define NETREAD(s,b,l)  ws_netread((s),(b),(l))	/* 1997/11/06 (Thu) */
 #define NETWRITE(s,b,l) send((s),(b),(l),0)
 #define NETCLOSE(s)     closesocket(s)
 #define IOCTL				ioctlsocket
@@ -171,6 +176,13 @@ IBM-PC running Windows NT
 #include <direct.h>
 #include <winsock.h>
 typedef struct sockaddr_in SockA;  /* See netinet/in.h */
+
+#if defined(_MSC_VER)
+#undef EINTR
+#undef EAGAIN
+#endif /* _MSC_VER */
+
+#define EWOULDBLOCK          (WSABASEERR+35)	/* ADD by JH7AYN */
 #define EINPROGRESS          (WSABASEERR+36)
 #define EALREADY             (WSABASEERR+37)
 #define EISCONN              (WSABASEERR+56)
@@ -178,7 +190,10 @@ typedef struct sockaddr_in SockA;  /* See netinet/in.h */
 #define EAGAIN               (WSABASEERR+1002)
 #define ENOTCONN             (WSABASEERR+57)
 #define ECONNRESET           (WSABASEERR+54)
+#define ETIMEDOUT             WSAETIMEDOUT	/* 1997/11/10 (Mon) */
 #define EINVAL                22
+#undef  SOCKET_ERRNO	/* 1997/10/19 (Sun) 18:01:46 */
+#define SOCKET_ERRNO          WSAGetLastError()
 #define INCLUDES_DONE
 #define TCP_INCLUDES_DONE
 #endif  /* WINDOWS */
@@ -485,6 +500,7 @@ struct timeval {
 #undef SELECT
 #define TCP_INCLUDES_DONE
 #define NO_IOCTL
+#define DECL_ERRNO
 #include <errno.h>
 #include <sys/types.h>
 #include <socket.h>
@@ -495,7 +511,9 @@ struct timeval {
 #define NETREAD read_s
 #undef NETCLOSE
 #define NETCLOSE close_s
+#ifndef WATT32
 #define getsockname getsockname_s
+#endif /* WATT32 */
 #ifdef HAVE_GETTEXT
 #define gettext gettext__
 #endif

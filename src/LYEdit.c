@@ -45,6 +45,9 @@ PUBLIC int edit_current_file ARGS3(
     char *colon, *number_sign;
     char position[80];
     FILE *fp;
+#ifdef __CYGWIN__
+    unsigned char temp_buff[LY_MAXPATH];
+#endif
 
     /*
      *  If its a remote file then we can't edit it.
@@ -67,25 +70,41 @@ PUBLIC int edit_current_file ARGS3(
      *
      * On VMS, only try the path.
      */
-#if !defined (VMS) && !defined (DOSPATH) && !defined (__EMX__)
+#if defined (VMS) || defined (DOSPATH) || defined (__EMX__)
+    filename = HTParse(newfile, "", PARSE_PATH+PARSE_PUNCTUATION);
+    HTUnEscape(filename);
+    StrAllocCopy(filename, HTSYS_name(filename));
+    if ((fp = fopen(filename, "r")) == NULL)
+    {
+#ifdef SH_EX
+	HTUserMsg2(COULD_NOT_EDIT_FILE, filename);
+#else
+	HTAlert(COULD_NOT_ACCESS_FILE);
+#endif
+	CTRACE(tfp, "filename: '%s'\n", filename);
+	goto done;
+    }
+#else	/* !(VMS || !DOSPATH || !__EMX__) == UNIX */
+#ifdef SH_EX	/* Speed Up! */
+    if (strncmp(newfile, "file://localhost/", 16) == 0)
+	colon = newfile + 16;
+    else
+	colon = strchr(newfile, ':');
+#else
     colon = strchr(newfile, ':');
+#endif
     StrAllocCopy(filename, (colon + 1));
     HTUnEscape(filename);
     if ((fp = fopen(filename, "r")) == NULL) {
 	FREE(filename);
-#endif /* !VMS */
 	filename = HTParse(newfile, "", PARSE_PATH+PARSE_PUNCTUATION);
 	HTUnEscape(filename);
-	StrAllocCopy(filename, HTSYS_name(filename));
-	if ((fp = fopen(filename, "r")) == NULL)
-	{
+	if ((fp = fopen(HTSYS_name(filename), "r")) == NULL) {
 	    HTAlert(COULD_NOT_ACCESS_FILE);
-	    CTRACE(tfp, "filename: '%s'\n", filename);
 	    goto done;
 	}
-#if !defined (VMS) && !defined (DOSPATH) && !defined (__EMX__)
     }
-#endif /* !VMS */
+#endif /* !(VMS || !DOSPATH || !__EMX__) */
     fclose(fp);
 
 #if defined(VMS) || defined(CANT_EDIT_UNWRITABLE_FILES)
@@ -132,8 +151,40 @@ PUBLIC int edit_current_file ARGS3(
 	HTAddParam(&command, format, params++, filename);
 	HTEndParam(&command, format, params);
 #endif
-    } else {
+    }
+#ifdef DOSPATH
+    else if (strncmp(editor, "VZ", 2)==0) {
+    	/* for Vz editor */
+	format = "%s %s -%s";
 	HTAddXpand(&command, format, params++, editor);
+	HTAddParam(&command, format, params++, HTDOS_short_name(filename));
+	HTAddParam(&command, format, params++, position);
+	HTEndParam(&command, format, params);
+    } else if (strncmp(editor, "edit", 4)==0) {
+    	/* for standard editor */
+	HTAddXpand(&command, format, params++, editor);
+	HTAddParam(&command, format, params++, HTDOS_short_name(filename));
+	HTEndParam(&command, format, params);
+    }
+#endif
+    else {
+#ifdef _WINDOWS
+	if (strchr(editor, ' '))
+	    HTAddXpand(&command, format, params++, HTDOS_short_name(editor));
+	else
+	    HTAddXpand(&command, format, params++, editor);
+#else
+#if defined(__CYGWIN__) && defined(DOSPATH)
+	if (strchr(editor, ' ')) {
+	    cygwin_conv_to_full_posix_path(HTDOS_short_name(editor), temp_buff);
+	    HTAddXpand(&command, format, params++, temp_buff);
+	} else {
+	    HTAddXpand(&command, format, params++, editor);
+	}
+#else
+	HTAddXpand(&command, format, params++, editor);
+#endif /* __CYGWIN__ */
+#endif
 	HTAddParam(&command, format, params++, filename);
 	HTEndParam(&command, format, params);
     }
