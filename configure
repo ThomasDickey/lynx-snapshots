@@ -929,7 +929,7 @@ all :
 	@echo 'cf_make_include=\$(RESULT)'
 CF_EOF
 	cf_make_include=""
-	eval `cd $cf_dir && ${MAKE-make} 2>&5 | grep cf_make_include=OK`
+	eval `(cd $cf_dir && ${MAKE-make}) 2>&5 | grep cf_make_include=OK`
 	if test -n "$cf_make_include"; then
 		make_include_left="$cf_include"
 		make_include_quote="$cf_quote"
@@ -8520,6 +8520,49 @@ else
 fi
 
 echo "$ac_t""$enableval" 1>&6
+
+
+echo $ac_n "checking if we can include termio.h with curses""... $ac_c" 1>&6
+echo "configure:8527: checking if we can include termio.h with curses" >&5
+if eval "test \"`echo '$''{'cf_cv_termio_and_curses'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  
+    cf_save_CFLAGS="$CFLAGS"
+    CFLAGS="$CFLAGS -DHAVE_CONFIG_H -I. -I${srcdir-.} -I${srcdir-.}/src -I${srcdir-.}/WWW/Library/Implementation"
+    touch lynx_cfg.h
+    cat > conftest.$ac_ext <<EOF
+#line 8536 "configure"
+#include "confdefs.h"
+
+#include <LYCurses.h>
+#include <termio.h>
+int main() {
+putchar(0x0a)
+; return 0; }
+EOF
+if { (eval echo configure:8545: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+  rm -rf conftest*
+  cf_cv_termio_and_curses=yes
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+  rm -rf conftest*
+  cf_cv_termio_and_curses=no
+fi
+rm -f conftest*
+    CFLAGS="$cf_save_CFLAGS"
+    rm -f lynx_cfg.h
+
+fi
+
+echo "$ac_t""$cf_cv_termio_and_curses" 1>&6
+
+test $cf_cv_termio_and_curses = no && cat >> confdefs.h <<\EOF
+#define TERMIO_AND_CURSES 1
+EOF
+
+
 
 ### Finally, build config.h and the makefiles
 CFLAGS="$CFLAGS $EXTRA_CFLAGS"

@@ -514,70 +514,6 @@ Regular BSD unix versions
 #include <sys/param.h>
 #include <sys/file.h>       /* For open() etc */
 
-#ifndef S_ISLNK
-#define S_ISLNK(m)	(((m) & S_IFMT) == S_IFLNK)
-#endif /* S_ISLNK */
-
-#ifndef S_ISDIR
-#define S_ISDIR(m)	(((m) & S_IFMT) == S_IFDIR)
-#endif /* S_ISDIR */
-
-#ifndef S_ISREG
-#define S_ISREG(m)	(((m) & S_IFMT) == S_IFREG)
-#endif /* S_ISREG */
-
-#ifndef S_ISUID
-#define S_ISUID  0004000
-#endif
-#ifndef S_ISGID
-#define S_ISGID  0002000
-#endif
-#ifndef S_ISVTX
-#define S_ISVTX  0001000
-#endif
-
-#ifndef S_IRWXU
-#define S_IRWXU 00700
-#endif
-
-#ifndef S_IRUSR
-#define S_IRUSR 00400
-#endif
-#ifndef S_IWUSR
-#define S_IWUSR 00200
-#endif
-#ifndef S_IXUSR
-#define S_IXUSR 00100
-#endif
-
-#ifndef S_IRWXG
-#define S_IRWXG 00070
-#endif
-
-#ifndef S_IRGRP
-#define S_IRGRP 00040
-#endif
-#ifndef S_IWGRP
-#define S_IWGRP 00020
-#endif
-#ifndef S_IXGRP
-#define S_IXGRP 00010
-#endif
-
-#ifndef S_IRWXO
-#define S_IRWXO 00007
-#endif
-
-#ifndef S_IROTH
-#define S_IROTH 00004
-#endif
-#ifndef S_IWOTH
-#define S_IWOTH 00002
-#endif
-#ifndef S_IXOTH
-#define S_IXOTH 00001
-#endif
-
 #if defined(NeXT) || defined(sony_news)
 #ifndef mode_t
 typedef unsigned short mode_t;
@@ -672,6 +608,70 @@ Defaults
 #endif /* !__hpux */
 #include <netdb.h>
 #endif  /* TCP includes */
+
+#ifndef S_ISLNK
+#define S_ISLNK(m)	(((m) & S_IFMT) == S_IFLNK)
+#endif /* S_ISLNK */
+
+#ifndef S_ISDIR
+#define S_ISDIR(m)	(((m) & S_IFMT) == S_IFDIR)
+#endif /* S_ISDIR */
+
+#ifndef S_ISREG
+#define S_ISREG(m)	(((m) & S_IFMT) == S_IFREG)
+#endif /* S_ISREG */
+
+#ifndef S_ISUID
+#define S_ISUID  0004000
+#endif
+#ifndef S_ISGID
+#define S_ISGID  0002000
+#endif
+#ifndef S_ISVTX
+#define S_ISVTX  0001000
+#endif
+
+#ifndef S_IRWXU
+#define S_IRWXU 00700
+#endif
+
+#ifndef S_IRUSR
+#define S_IRUSR 00400
+#endif
+#ifndef S_IWUSR
+#define S_IWUSR 00200
+#endif
+#ifndef S_IXUSR
+#define S_IXUSR 00100
+#endif
+
+#ifndef S_IRWXG
+#define S_IRWXG 00070
+#endif
+
+#ifndef S_IRGRP
+#define S_IRGRP 00040
+#endif
+#ifndef S_IWGRP
+#define S_IWGRP 00020
+#endif
+#ifndef S_IXGRP
+#define S_IXGRP 00010
+#endif
+
+#ifndef S_IRWXO
+#define S_IRWXO 00007
+#endif
+
+#ifndef S_IROTH
+#define S_IROTH 00004
+#endif
+#ifndef S_IWOTH
+#define S_IWOTH 00002
+#endif
+#ifndef S_IXOTH
+#define S_IXOTH 00001
+#endif
 
 /*
 

@@ -564,13 +564,13 @@ PUBLIC int main ARGS2(
 #endif
 
     /*
-     * To prevent corrupting binary data with _WINDOWS and DJGPP
+     * To prevent corrupting binary data on DOS, MS-WINDOWS or OS/2
      * we open files and stdout in BINARY mode by default.
      * Where necessary we should open and (close!) TEXT mode.
      * (use LYNewTxtFile/LYAppendToTxtFile to open text files for writing)
      */
     SetDefaultMode(O_BINARY);
-    SetOutputMode( O_BINARY );
+    SetOutputMode(O_BINARY);
 
 #ifdef DOSPATH
     if (getenv("TERM")==NULL) putenv("TERM=vt100");

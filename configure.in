@@ -693,6 +693,11 @@ CF_ARG_DISABLE(parent-dir-refs,
 	[AC_DEFINE(NO_PARENT_DIR_REFERENCE)])
 AC_MSG_RESULT($enableval)
 
+dnl --------------------------------------------------------------------------
+dnl Test features that rely on configure-definitions
+dnl --------------------------------------------------------------------------
+CF_TERMIO_AND_CURSES(LYCurses.h)
+
 ### Finally, build config.h and the makefiles
 CFLAGS="$CFLAGS $EXTRA_CFLAGS"
 srcdir="$srcdir"

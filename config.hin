@@ -96,7 +96,8 @@
 #undef SYSTEM_MAIL		/* CF_DEFINE_PROG */
 #undef SYSTEM_MAIL_FLAGS	/* defined by CF_SYSTEM_MAIL_FLAGS */
 #undef TAR_PATH			/* CF_PATH_PROG(tar) */
-#undef TERMIO_AND_TERMIOS	/* termio.h and termios.h combo bug */
+#undef TERMIO_AND_CURSES	/* CF_TERMIO_AND_CURSES workaround */
+#undef TERMIO_AND_TERMIOS	/* CF_TERMIO_AND_TERMIOS workaround */
 #undef TOUCH_PATH		/* CF_PATH_PROG(touch) */
 #undef ULTRIX			/* config.sub */
 #undef UNCOMPRESS_PATH		/* CF_PATH_PROG(gunzip) */

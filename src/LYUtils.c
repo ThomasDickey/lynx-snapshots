@@ -2822,18 +2822,23 @@ PUBLIC BOOLEAN inlocaldomain NOARGS
 #include <sys/ioctl.h>
 #endif
 
-/* For systems that have both, but both can't be included, duh */
-#ifdef TERMIO_AND_TERMIOS
+/* For systems that have both, but both can't be included, duh (or neither) */
+/* FIXME: this whole chunk may be redundant */
+#ifdef TERMIO_AND_CURSES
 # include <termio.h>
-#else
-# ifdef HAVE_TERMIOS_H
-#  include <termios.h>
 # else
-#  ifdef HAVE_TERMIO_H
-#   include <termio.h>
-#  endif /* HAVE_TERMIO_H */
-# endif /* HAVE_TERMIOS_H */
-#endif	/* TERMIO_AND_TERMIOS */
+# ifdef TERMIO_AND_TERMIOS
+#  include <termio.h>
+# else
+#  ifdef HAVE_TERMIOS_H
+#   include <termios.h>
+#  else
+#   ifdef HAVE_TERMIO_H
+#    include <termio.h>
+#   endif /* HAVE_TERMIO_H */
+#  endif /* HAVE_TERMIOS_H */
+# endif	/* TERMIO_AND_TERMIOS */
+#endif /* USE_TERMIO_H */
 
 PUBLIC void size_change ARGS1(
 	int,		sig GCC_UNUSED)
@@ -3009,6 +3014,14 @@ PUBLIC void change_sug_filename ARGS1(
 	strcat(fname, temp);
     }
     FREE(temp);
+
+    if (fname[strlen(fname) - 1] == '/')
+    /*
+     *  Hmm... we have a directory name.
+     *  It is annoying to see a scheme+host+path name as a suggested one,
+     *  let's remove the last_slash and go ahead like we have a file name. - LP
+     */
+    fname[strlen(fname) - 1] = '\0';
 
     /*
      *	Remove everything up the the last_slash if there is one.
