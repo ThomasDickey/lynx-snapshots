@@ -22,9 +22,6 @@
 #ifdef VMS
 #include <HTVMSUtils.h>
 #endif /* VMS */
-#ifdef DOSPATH
-#include <HTDOS.h>
-#endif
 
 #include <LYStrings.h>
 #include <LYUtils.h>

@@ -37,9 +37,6 @@
 #include <LYCharUtils.h>
 #include <LYCookie.h>
 #include <LYMainLoop.h>
-#ifdef DOSPATH
-#include <HTDOS.h>
-#endif
 
 #ifdef USE_EXTERNALS
 #include <LYExtern.h>
@@ -230,9 +227,6 @@ int mainloop NOARGS
     char *temp = NULL;
     BOOLEAN ForcePush = FALSE;
     BOOLEAN override_LYresubmit_posts = FALSE;
-#ifdef EXP_FORMS_OPTIONS
-    BOOLEAN was_in_options = FALSE;
-#endif
     unsigned int len;
     int i;
 
@@ -682,12 +676,6 @@ try_again:
 			trace_mode_flag = FALSE;
 			fprintf(tfp, "Turning TRACE back on.\n\n");
 		    }
-#ifdef EXP_FORMS_OPTIONS
-		    if (newdoc.address) {
-			was_in_options =
-			    (!strncmp(newdoc.address, "LYNXOPTIONS:", 12));
-		    }
-#endif /* EXP_FORMS_OPTIONS */
 		    FREE(newdoc.address); /* to pop last doc */
 		    FREE(newdoc.bookmark);
 		    LYJumpFileURL = FALSE;
@@ -856,15 +844,7 @@ try_again:
 				  BOOKMARK_TITLE))) &&
 			(temp = HTParse(newdoc.address, "",
 				     PARSE_PATH+PARSE_PUNCTUATION)) != NULL) {
-#ifdef DOSPATH
-			cp = HTDOS_wwwName((char *)Home_Dir());
-#else
-#ifdef VMS
-			cp = HTVMS_wwwName((char *)Home_Dir());
-#else
-			cp = (char *)Home_Dir();
-#endif /* VMS */
-#endif /* DOSPATH */
+			cp = wwwName(Home_Dir());
 			len = strlen(cp);
 #ifdef VMS
 			if (!strncasecomp(temp, cp, len) &&
@@ -919,17 +899,8 @@ try_again:
 				    StrAllocCopy(newdoc.address, temp);
 				    HTuncache_current_document();
 				    FREE(curdoc.address);
-#ifdef DOSPATH
 				    StrAllocCat(newdoc.address,
-					    HTDOS_wwwName((char *)Home_Dir()));
-#else
-#ifdef VMS
-				    StrAllocCat(newdoc.address,
-					    HTVMS_wwwName((char *)Home_Dir()));
-#else
-				    StrAllocCat(newdoc.address, Home_Dir());
-#endif /* VMS */
-#endif /* DOSPATH */
+					    wwwName(Home_Dir()));
 				    StrAllocCat(newdoc.address, "/");
 				    StrAllocCat(newdoc.address,
 					(strncmp(BookmarkPage, "./", 2) ?
@@ -3742,6 +3713,7 @@ check_goto_URL:
 	    c = dir_list_style;
 #endif /* DIRED_SUPPORT */
 #ifndef EXP_FORMS_OPTIONS
+if (!LYUseFormsOptions) {
 
 	    LYoptions(); /* do the old-style options stuff */
 
@@ -3841,7 +3813,9 @@ check_goto_URL:
 	    StrAllocCopy(CurrentNegoCharset, (pref_charset ?
 					      pref_charset : ""));
 	    refresh_screen = TRUE; /* to repaint screen */
-#else /* EXP_FORMS_OPTIONS */
+	    break;
+} /* end if !LYUseFormsOptions */
+#endif /* !EXP_FORMS_OPTIONS */
 	    /*
 	     * FIXME: Blatantly stolen from LYK_PRINT below.
 	     * how much is really valid here?  I don't know the
@@ -3873,7 +3847,6 @@ check_goto_URL:
 		 */
 		HTuncache_current_document();
 	    }
-#endif /* EXP_FORMS_OPTIONS */
 	    break;
 
 	case LYK_INDEX_SEARCH: /* search for a user string */

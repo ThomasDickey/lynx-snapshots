@@ -662,6 +662,7 @@
 #define DOWNLOAD_OPTIONS_TITLE	"Download Options"
 #define HISTORY_PAGE_TITLE	"History Page"
 #define LIST_PAGE_TITLE		"List Page"
+#define LYNXCFG_TITLE		"Lynx.cfg Information"
 #define OPTIONS_TITLE		"Options Menu"
 #define PERMIT_OPTIONS_TITLE	"File Permission Options"
 #define PRINT_OPTIONS_TITLE	"Printing Options"

@@ -4165,7 +4165,8 @@ PUBLIC BOOL HText_canScrollDown NOARGS
 {
     HText * text = HTMainText;
 
-    return ((text->top_of_screen + display_lines) < text->Lines+1);
+    return (text != 0)
+     && ((text->top_of_screen + display_lines) < text->Lines+1);
 }
 
 /*		Scroll actions
@@ -4445,7 +4446,7 @@ PUBLIC HTAnchor * HText_referenceSelected ARGS1(
 PUBLIC int HText_getTopOfScreen NOARGS
 {
       HText * text = HTMainText;
-      return text->top_of_screen;
+      return text != 0 ? text->top_of_screen : 0;
 }
 
 PUBLIC int HText_getLines ARGS1(
@@ -5406,7 +5407,7 @@ PUBLIC void HTuncache_current_document NOARGS
 
 PUBLIC int HTisDocumentSource NOARGS
 {
-    return(HTMainText->source);
+    return (HTMainText != 0) ? HTMainText->source : FALSE;
 }
 
 PUBLIC char * HTLoadedDocumentURL NOARGS

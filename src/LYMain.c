@@ -29,9 +29,6 @@
 #include <LYJump.h>
 #include <LYMainLoop.h>
 #include <LYBookmark.h>
-#ifdef DOSPATH
-#include <HTDOS.h>
-#endif
 #include <LYCookie.h>
 
 #ifdef __DJGPP__
@@ -143,6 +140,9 @@ PUBLIC int port_syntax = 1;
 PUBLIC int LYShowColor = SHOW_COLOR_UNKNOWN; /* to show or not to show */
 PUBLIC int LYChosenShowColor = SHOW_COLOR_UNKNOWN; /* whether to show and save */
 PUBLIC int LYrcShowColor = SHOW_COLOR_UNKNOWN;	/* ... as last read or written */
+#ifndef EXP_FORMS_OPTIONS
+PUBLIC BOOLEAN LYUseFormsOptions = FALSE; /* use forms-based options menu */
+#endif
 PUBLIC BOOLEAN LYShowCursor = SHOW_CURSOR; /* to show or not to show */
 PUBLIC BOOLEAN verbose_img = VERBOSE_IMAGES;  /* show filenames or not */
 PUBLIC BOOLEAN LYUseDefShoCur = TRUE;	/* Command line -show_cursor toggle */
@@ -690,15 +690,7 @@ PUBLIC int main ARGS2(
 	*(cp++) = '\0';
 	StrAllocCopy(temp, lynx_temp_space);
 	LYTrimPathSep(temp);
-#ifdef DOSPATH
-	StrAllocCat(temp, HTDOS_wwwName((char *)Home_Dir()));
-#else
-#ifdef VMS
-	StrAllocCat(temp, HTVMS_wwwName((char *)Home_Dir()));
-#else
-	StrAllocCat(temp, Home_Dir());
-#endif /* VMS */
-#endif /* DOSPATH */
+	StrAllocCat(temp, wwwName(Home_Dir()));
 	StrAllocCat(temp, cp);
 	StrAllocCopy(lynx_temp_space, temp);
 	FREE(temp);
@@ -1237,7 +1229,7 @@ PUBLIC int main ARGS2(
     /*
      *	Process the configuration file.
      */
-    read_cfg(lynx_cfg_file, "main program", 1);
+    read_cfg(lynx_cfg_file, "main program", 1, (FILE *)0);
 
     HTSwitchDTD(New_DTD);
 
@@ -1260,15 +1252,7 @@ PUBLIC int main ARGS2(
 	    *(cp++) = '\0';
 	    StrAllocCopy(temp, lynx_save_space);
 	    LYTrimPathSep(temp);
-#ifdef DOSPATH
-	    StrAllocCat(temp, HTDOS_wwwName((char *)Home_Dir()));
-#else
-#ifdef VMS
-	    StrAllocCat(temp, HTVMS_wwwName((char *)Home_Dir()));
-#else
-	    StrAllocCat(temp, Home_Dir());
-#endif /* VMS */
-#endif /* DOSPATH */
+	    StrAllocCat(temp, wwwName(Home_Dir()));
 	    StrAllocCat(temp, cp);
 	    StrAllocCopy(lynx_save_space, temp);
 	    FREE(temp);
@@ -1505,16 +1489,7 @@ PUBLIC int main ARGS2(
 	    *(cp++) = '\0';
 	    StrAllocCopy(temp, cp);
 	    LYTrimPathSep(temp);
-#ifdef DOSPATH
-	    StrAllocCopy(LYCookieFile, HTDOS_wwwName((char *)Home_Dir()));
-#else
-#ifdef VMS
-	    StrAllocCopy(LYCookieFile, HTVMS_wwwName((char *)Home_Dir()));
-#else
-	    StrAllocCopy(LYCookieFile, Home_Dir());
-#endif /* VMS */
-#endif /* DOSPATH */
-
+	    StrAllocCopy(LYCookieFile, wwwName(Home_Dir()));
 	    StrAllocCat(LYCookieFile, temp);
 	    FREE(temp);
 	}
@@ -1660,7 +1635,7 @@ PUBLIC int main ARGS2(
     StrAllocCopy(helpfilepath, helpfile);
     if ((cp = LYPathLeaf(helpfilepath)) != helpfilepath)
         *cp = '\0';
-    LYAddPathSep(&helpfilepath);
+    LYAddHtmlSep(&helpfilepath);
 
     /*
      *	Make sure our bookmark default strings
@@ -2665,6 +2640,12 @@ keys (may be incompatible with some curses packages)"
       "from",		TOGGLE_ARG,		&LYNoFromHeader,
       "toggle transmissions of From headers"
    ),
+#ifndef EXP_FORMS_OPTIONS
+   PARSE_SET(
+      "forms_options",	TOGGLE_ARG,		&LYUseFormsOptions,
+      "toggles forcing of forms-based options menu style"
+   ),
+#endif
    PARSE_SET(
       "ftp",		UNSET_ARG,		&ftp_ok,
       "disable ftp access"

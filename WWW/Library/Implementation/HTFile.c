@@ -577,7 +577,8 @@ PUBLIC char * HTnameOfFile_WWW ARGS3(
     else
 	HTUnEscapeSome(path, "/");	/* Interpret % signs for path delims */
 
-    if (0 == strcmp(acc_method, "file")) { /* local file */
+    if (0 == strcmp(acc_method, "file")	/* local file */
+     || !*acc_method) {			/* implicitly local? */
 	if ((0 == strcasecomp(host, HTHostName())) ||
 	    (0 == strcasecomp(host, "localhost")) || !*host) {
 	    CTRACE(tfp, "Node `%s' means path `%s'\n", name, path);
@@ -1232,11 +1233,11 @@ PUBLIC BOOL HTDirTitles ARGS3(
       char * printable = NULL;
 
 #ifdef DIRED_SUPPORT
-      if (0 == strncasecomp(path, "/%2F", 4))
-	  StrAllocCopy(printable, (path+1));
-      else
-	  StrAllocCopy(printable, path);
-      if (0 == strncasecomp(printable, "/vmsysu%2b", 10) ||
+      printable = HTfullURL_toFile(
+	    (0 == strncasecomp(path, "/%2F", 4))	/* "//" ? */
+	    ? (path+1)
+	    : path);
+      if (0 == strncasecomp(printable, "/vmsysu:", 8) ||
 	  0 == strncasecomp(printable, "/anonymou.", 10)) {
 	  StrAllocCopy(cp, (printable+1));
 	  StrAllocCopy(printable, cp);
@@ -1244,11 +1245,11 @@ PUBLIC BOOL HTDirTitles ARGS3(
       }
 #else
       StrAllocCopy(printable, (current ? current + 1 : ""));
+      HTUnEscape(printable);
 #endif /* DIRED_SUPPORT */
 
       START(HTML_HEAD);
       PUTS("\n");
-      HTUnEscape(printable);
       START(HTML_TITLE);
       PUTS(*printable ? printable : "Welcome");
       PUTS(" directory");

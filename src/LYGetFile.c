@@ -27,9 +27,6 @@
 #ifdef VMS
 #include <HTVMSUtils.h>
 #endif /* VMS */
-#ifdef DOSPATH
-#include <HTDOS.h>
-#endif
 #ifdef DIRED_SUPPORT
 #include <LYLocal.h>
 #endif /* DIRED_SUPPORT */
@@ -245,10 +242,9 @@ Try_Redirected_URL:
 		} else if (url_type == LYNXPRINT_URL_TYPE) {
 		    return(printfile(doc));
 
-#ifdef EXP_FORMS_OPTIONS
 		} else if (url_type == LYNXOPTIONS_URL_TYPE) {
+		    /* forms-based options menu */
 		    return(postoptions(doc));
-#endif /* EXP_FORMS_OPTIONS */
 
 		} else if (url_type == NEWSPOST_URL_TYPE ||
 			   url_type == NEWSREPLY_URL_TYPE ||
@@ -369,15 +365,7 @@ Try_Redirected_URL:
 			if ((cp = strchr(doc->address, '~'))) {
 			    strncpy(addressbuf, doc->address, cp-doc->address);
 			    addressbuf[cp - doc->address] = '\0';
-#ifdef DOSPATH
-			    p = HTDOS_wwwName((char *)Home_Dir());
-#else
-#ifdef VMS
-			    p = HTVMS_wwwName((char *)Home_Dir());
-#else
-			    p = (char *)Home_Dir();
-#endif /* VMS */
-#endif /* DOSPATH */
+			    p = wwwName(Home_Dir());
 			    strcat(addressbuf, p);
 			    strcat(addressbuf, cp+1);
 			    p = addressbuf;
@@ -618,17 +606,8 @@ Try_Redirected_URL:
 			    *cp1 = '\0';
 			    cp1 += 2;
 			    StrAllocCopy(temp, doc->address);
-#ifdef DOSPATH
-			    StrAllocCat(temp, "/");
-			    StrAllocCat(temp, HTDOS_wwwName((char *)Home_Dir()));
-#else
-#ifdef VMS
-			    StrAllocCat(temp,
-					HTVMS_wwwName((char *)Home_Dir()));
-#else
-			    StrAllocCat(temp, Home_Dir());
-#endif /* VMS */
-#endif /* DOSPATH */
+			    LYAddHtmlSep(&temp);
+			    StrAllocCat(temp, wwwName(Home_Dir()));
 			    if ((cp2 = strchr(cp1, '/')) != NULL) {
 				LYTrimRelFromAbsPath(cp2);
 				StrAllocCat(temp, cp2);
@@ -712,9 +691,7 @@ Try_Redirected_URL:
 				url_type == LYNXDIRED_URL_TYPE ||
 #endif /* DIRED_SUPPORT */
 				url_type == LYNXPRINT_URL_TYPE ||
-#ifdef EXP_FORMS_OPTIONS
 				url_type == LYNXOPTIONS_URL_TYPE ||
-#endif
 				url_type == LYNXHIST_URL_TYPE ||
 				url_type == LYNXCOOKIE_URL_TYPE ||
 				(LYValidate &&

@@ -207,7 +207,7 @@ PUBLIC void VMSbox ARGS3(
 */
 PUBLIC void LYbox ARGS2(
 	WINDOW *,	win,
-	BOOLEAN,	formfield)
+	BOOLEAN,	formfield GCC_UNUSED)
 {
     /*
      *	If the terminal is in UTF-8 mode, it probably cannot understand

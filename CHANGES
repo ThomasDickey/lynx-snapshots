@@ -1,10 +1,35 @@
 Changes since Lynx 2.8 release
 ================================================================================
 
+1998-09-20 (2.8.1dev.29)
+* add checks/warnings for user agent string in forms-options menu - TD
+* change render_item to force a '/' before substituted path or directory strings
+  if (as in OS/2 EMX) absolute filenames do not normally begin with a '/' -TD
+* modify HTnameOfFile_WWW() to interpret an empty acc_method as a local file,
+  allowing its use in permit_location(), making OS/2 EMX dired-mode change
+  permissions work - TD
+* make download and print menus a little more compact in intermediate/advanced
+  user modes - TD
+* correct filename shown in download menu - LP
+* change behavior of configure --enable-forms-options switch so that both old
+  and new forms are available via a command-line toggle, "-forms_options" - LP
+* add more pointer-checks in GridText.c so that "lynx LYNXDOWNLOAD://" does
+  not crash (reported by Wilson Cheung) - TD
+* add special case to handle NNTPSERVER environment variable, which had been
+  lowercased as part of LYReadCFG.c cleanup (reported by Wilson Cheung
+  <wcheung@netcom.com>) - TD
+* modify info-page to add link to new internal page showing the noncomment
+  lines from lynx.cfg - LP, TD
+* use function wwwName to reduce clutter - LP
+* create "lynx.cfg Information" page, comments skipped, "include" OK.
+  The link is available from '='InfoPage and 'O'ptions menu.  It is assumed
+  that distribution's "lynx.cfg" now in lynx_help/ as most advanced info. - LP
+* tweak helpfilepath URL (for DOSPATH only) - LP
+* some cleanup of cp852, cp850, cp775 - LP
 1998-09-17 (2.8.1dev.28)
 * minor fix to make PRCS ProjectDate print in "dd mmm yyyy" form - TD
 1998-09-17 (2.8.1dev.27)
-* minor fixes for recent (dev24 and dev25) chartrans changes - LP 
+* minor fixes for recent (dev24 and dev25) chartrans changes - LP
 * add LYNX_DATE definitions in userdefs.h; Info Page now shows the date of your
   lynx along with version number and a link to the latest sources.  - LP
 * use ECHO_CC symbol in install-help rule to control whether the sed commands
