@@ -29,6 +29,7 @@
 #include <LYBookmark.h>
 #include <LYCookie.h>
 #include <LYPrettySrc.h>
+#include <LYShowInfo.h>
 
 #ifdef VMS
 #include <HTFTP.h>
@@ -3028,11 +3029,9 @@ static int version_fun ARGS1(
     SetOutputMode( O_TEXT );
 
     printf("\n");
-    printf(gettext("\n%s Version %s (%.*s)\n"),
+    printf(gettext("\n%s Version %s (%s)\n"),
 	  LYNX_NAME, LYNX_VERSION,
-	  LYNX_DATE_LEN,
-	  LYNX_RELEASE ? LYNX_RELEASE_DATE : &LYNX_DATE[LYNX_DATE_OFF]
-	  );
+	  LYVersionDate());
 #ifdef SYSTEM_NAME
 #ifndef __DATE__
 #define __DATE__ ""
