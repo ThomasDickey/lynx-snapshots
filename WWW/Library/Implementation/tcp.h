@@ -30,7 +30,7 @@
 #define TCP_H
 
 #ifndef HTUTILS_H
-#include "HTUtils.h"
+#include <HTUtils.h>
 #endif /* !HTUTILS_H */
 
 /*
@@ -68,30 +68,35 @@ typedef struct sockaddr_in SockA;  /* See netinet/in.h */
 #ifndef VMS
 #include <sys/types.h>
 
-#if HAVE_DIRENT_H
+#if defined(__DJGPP__) || defined(__BORLANDC__)
+#define HAVE_DIRENT_H
+#undef HAVE_SYS_FILIO_H
+#endif /* DJGPP or __BORLANDC__ */
+
+#ifdef HAVE_DIRENT_H
 # include <dirent.h>
 # define D_NAMLEN(dirent) strlen((dirent)->d_name)
 # define STRUCT_DIRENT struct dirent
 #else
 # define D_NAMLEN(dirent) (dirent)->d_namlen
 # define STRUCT_DIRENT struct direct
-# if HAVE_SYS_NDIR_H
+# ifdef HAVE_SYS_NDIR_H
 #  include <sys/ndir.h>
 # endif
-# if HAVE_SYS_DIR_H
+# ifdef HAVE_SYS_DIR_H
 #  include <sys/dir.h>
 # endif
-# if HAVE_NDIR_H
+# ifdef HAVE_NDIR_H
 #  include <ndir.h>
 # endif
 #endif /* HAVE_DIRENT_H */
 #endif /* !VMS */
 
-#if TIME_WITH_SYS_TIME
+#ifdef TIME_WITH_SYS_TIME
 # include <sys/time.h>
 # include <time.h>
 #else
-# if HAVE_SYS_TIME_H
+# ifdef HAVE_SYS_TIME_H
 #  include <sys/time.h>
 # else
 #  include <time.h>
@@ -105,15 +110,15 @@ typedef struct sockaddr_in SockA;  /* See netinet/in.h */
 #define unix
 #endif /* AIX */
 
-#if HAVE_FCNTL_H
+#ifdef HAVE_FCNTL_H
 #include <fcntl.h>
 #else
-#if HAVE_SYS_FCNTL_H
+#ifdef HAVE_SYS_FCNTL_H
 #include <sys/fcntl.h>
 #endif
 #endif
 
-#if HAVE_STRING_H
+#ifdef HAVE_STRING_H
 #include <string.h>             /* For bzero etc */
 #endif /* HAVE_STRING_H */
 
@@ -136,9 +141,9 @@ IBM-PC running Windows NT
 
 #ifdef _WINDOWS
 #define _WINDOWS_NSL
-#include "fcntl.h"                      /* For HTFile.c */
-#include "sys\types.h"                  /* For HTFile.c */
-#include "sys\stat.h"                   /* For HTFile.c */
+#include <fcntl.h>                      /* For HTFile.c */
+#include <sys\types.h>                  /* For HTFile.c */
+#include <sys\stat.h>                   /* For HTFile.c */
 #undef NETREAD
 #undef NETWRITE
 #undef NETCLOSE
@@ -348,10 +353,10 @@ struct timeval {
 #include <types.h>
 #include <errno.h>
 #include <time.h>
-#include "types.h"  /* for socket.h */
-#include "socket.h"
-#include "dn"
-#include "dnetdb"
+#include <types.h>  /* for socket.h */
+#include <socket.h>
+#include <dn>
+#include <dnetdb>
 /* #include "vms.h" */
 #define TCP_INCLUDES_DONE
 #endif /* DECNET */
@@ -485,11 +490,11 @@ struct timeval {
 #define NETCLOSE close_s
 #endif
 
-#if HAVE_UNISTD_H
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif /* HAVE_UNISTD_H */
 
-#if HAVE_SYS_FILIO_H
+#ifdef HAVE_SYS_FILIO_H
 #include <sys/filio.h>
 #endif /* HAVE_SYS_FILIO_H */
 
@@ -508,7 +513,7 @@ Regular BSD unix versions
  */
 #ifndef INCLUDES_DONE
 #include <sys/types.h>
-#if HAVE_STRING_H
+#ifdef HAVE_STRING_H
 #include <string.h>
 #endif /* HAVE_STRING_H */
 #include <errno.h>          /* independent */

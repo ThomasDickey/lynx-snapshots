@@ -3,7 +3,7 @@
 
 #ifdef USE_COLOR_STYLE
 
-#include "AttrList.h"
+#include <AttrList.h>
 
 /* list of elements */
 extern CONST SGML_dtd HTML_dtd;

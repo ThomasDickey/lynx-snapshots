@@ -1,7 +1,7 @@
 #ifndef LYCURSES_H
 #define LYCURSES_H
 
-#include "userdefs.h"
+#include <userdefs.h>
 
 /*
  * The simple color scheme maps the 8 combinations of bold/underline/reverse
@@ -100,7 +100,7 @@ extern void LYsubwindow PARAMS((WINDOW * param));
 
 #else
 # if defined(VMS) && defined(__GNUC__)
-#  include "LYGCurses.h"
+#  include <LYGCurses.h>
 # else
 #  include <curses.h>  /* everything else */
 # endif /* VMS && __GNUC__ */
@@ -146,7 +146,7 @@ extern int LYlines;  /* replaces LINES */
 extern int LYcols;   /* replaces COLS */
 
 #ifndef HTUTILS_H
-#include "HTUtils.h"
+#include <HTUtils.h>
 #endif /* HTUTILS_H */
 
 extern void start_curses NOPARAMS;

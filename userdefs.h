@@ -868,6 +868,16 @@
 #define SHOW_CURSOR FALSE
 
 /******************************
+* VERBOSE_IMAGES controls whether or not Lynx replaces the [LINK], [INLINE] and
+* [IMAGE] comments (for images without ALT) with filenames of these images. 
+* This is extremely useful because now we can determine immediately what images
+* are just decorations (button.gif, line.gif) and what images are important. 
+* 
+* The default defined here can be changed in lynx.cfg. 
+*/ 
+#define VERBOSE_IMAGES FALSE 
+ 
+/****************************** 
  * BOXVERT and BOXHORI control the layout of popup menus.  Set to 0 if your
  * curses supports line-drawing characters, set to '*' or any other character
  * to not use line-drawing (e.g., '|' for vertical and '-' for horizontal).
@@ -1192,7 +1202,7 @@
  * the version definition with the Project Version on checkout. Just
  * ignore it. - kw */
 /* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
-#define LYNX_VERSION "2.8.1dev.2"
+#define LYNX_VERSION "2.8.1dev.4"
 
 #ifndef MAXINT
 #define MAXINT 2147483647	/* max integer */
@@ -1214,7 +1224,7 @@
 #define MAXCHARSETSP 61		/* always one more than MAXCHARSETS */
 
 /* Win32 may support more, but old win16 helper apps may not. */
-#if defined(__DJGPP__) && defined(_WINDOWS)
+#if defined(__DJGPP__) || defined(_WINDOWS)
 #define FNAMES_8_3
 #endif
 
@@ -1234,6 +1244,9 @@
 #else
 
 #ifdef DOSPATH
+/*  Something has to be defined for this or we don't compile. */
+#define SYSTEM_MAIL "sendmail"
+#define SYSTEM_MAIL_FLAGS "-t -oi"
 /*
 **  Following executables may be sought from your PATH at run-time.
 **  To get those programs look for GNU-port stuff elsewhere.

@@ -9,18 +9,18 @@
 **
 */
 
-#include "HTUtils.h"
-#include "tcp.h"
-#include "HTAlert.h"
-#include "LYGlobalDefs.h"
-#include "LYCurses.h"
-#include "LYStrings.h"
-#include "LYUtils.h"
-#include "LYSignal.h"
-#include "GridText.h"
-#include "LYCookie.h"
+#include <HTUtils.h>
+#include <tcp.h>
+#include <HTAlert.h>
+#include <LYGlobalDefs.h>
+#include <LYCurses.h>
+#include <LYStrings.h>
+#include <LYUtils.h>
+#include <LYSignal.h>
+#include <GridText.h>
+#include <LYCookie.h>
 
-#include "LYLeaks.h"
+#include <LYLeaks.h>
 
 #define FREE(x) if (x) {free(x); x = NULL;}
 

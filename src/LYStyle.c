@@ -1,27 +1,27 @@
 /* character level styles for Lynx
  * (c) 1996 Rob Partington -- donated to the Lyncei (if they want it :-)
- * @Id: LYStyle.c 1.16 Fri, 27 Feb 1998 11:25:07 -0700 dickey @
+ * @Id: LYStyle.c 1.17 Wed, 25 Mar 1998 06:58:54 -0700 dickey @
  */
-#include "HTUtils.h"
-#include "HTML.h"
-#include "tcp.h"
-#include "LYSignal.h"
-#include "LYGlobalDefs.h"
+#include <HTUtils.h>
+#include <HTML.h>
+#include <tcp.h>
+#include <LYSignal.h>
+#include <LYGlobalDefs.h>
 
-#include "LYStructs.h"
-#include "LYReadCFG.h"
-#include "LYCurses.h"
-#include "LYCharUtils.h"
-#include "AttrList.h"
-#include "SGML.h"
-#include "HTMLDTD.h"
+#include <LYStructs.h>
+#include <LYReadCFG.h>
+#include <LYCurses.h>
+#include <LYCharUtils.h>
+#include <AttrList.h>
+#include <SGML.h>
+#include <HTMLDTD.h>
 
 /* Hash table definitions */
-#include "LYHash.h"
-#include "LYStyle.h"
+#include <LYHash.h>
+#include <LYStyle.h>
 
-#include "LYexit.h"
-#include "LYLeaks.h"
+#include <LYexit.h>
+#include <LYLeaks.h>
 
 #ifdef USE_COLOR_STYLE
 
@@ -77,13 +77,17 @@ PRIVATE void parse_attributes ARGS5(char*,mono,char*,fg,char*,bg,int,style,char*
     bA = check_color(bg, default_bg);
     if (fA == NO_COLOR) {
 	bA = NO_COLOR;
-    } else {
+    } else if (COLORS) {
 	if (fA >= COLORS || bA >= COLORS)
 	    cA = A_BOLD;
 	if (fA >= COLORS)
 	    fA %= COLORS;
 	if (bA > COLORS)
 	    bA %= COLORS;
+    } else {
+	cA = A_BOLD;
+	fA = NO_COLOR;
+	bA = NO_COLOR;
     }
 
     /*
@@ -145,8 +149,8 @@ where OBJECT is one of EM,STRONG,B,I,U,BLINK etc.\n\n", buffer);
     }
     {
 	char *i;
-	for (i = buffer; *i; *i++ = tolower(*i))
-	    ;
+	for (i = buffer; *i; i++)
+	    *i = tolower(*i);
     }
     *tmp = '\0';
     element = buffer;

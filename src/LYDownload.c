@@ -1,26 +1,26 @@
-#include "HTUtils.h"
-#include "tcp.h"
-#include "HTParse.h"
-#include "HTList.h"
-#include "HTAlert.h"
-#include "LYCurses.h"
-#include "LYUtils.h"
-#include "LYGlobalDefs.h"
-#include "LYSignal.h"
-#include "LYStrings.h"
-#include "LYClean.h"
-#include "LYGetFile.h"
-#include "LYDownload.h"
-#include "LYSystem.h"
+#include <HTUtils.h>
+#include <tcp.h>
+#include <HTParse.h>
+#include <HTList.h>
+#include <HTAlert.h>
+#include <LYCurses.h>
+#include <LYUtils.h>
+#include <LYGlobalDefs.h>
+#include <LYSignal.h>
+#include <LYStrings.h>
+#include <LYClean.h>
+#include <LYGetFile.h>
+#include <LYDownload.h>
+#include <LYSystem.h>
 #ifdef VMS
-#include "HTVMSUtils.h"
+#include <HTVMSUtils.h>
 #endif /* VMS */
 #ifdef DOSPATH
-#include "HTDOS.h"
+#include <HTDOS.h>
 #endif
 
-#include "LYexit.h"
-#include "LYLeaks.h"
+#include <LYexit.h>
+#include <LYLeaks.h>
 
 #define FREE(x) if (x) {free(x); x = NULL;}
 

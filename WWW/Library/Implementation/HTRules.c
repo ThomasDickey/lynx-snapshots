@@ -19,15 +19,15 @@
 */
 
 /* (c) CERN WorldWideWeb project 1990,91. See Copyright.html for details */
-#include "HTRules.h"
+#include <HTRules.h>
 
-#include "HTUtils.h"
-#include "tcp.h"
+#include <HTUtils.h>
+#include <tcp.h>
 /*#include <stdio.h> included by HTUtils.h -- FM */
-#include "HTFile.h"
-#include "HTAAServ.h"	/* Access Authorization */
+#include <HTFile.h>
+#include <HTAAServ.h>	/* Access Authorization */
 
-#include "LYLeaks.h"
+#include <LYLeaks.h>
 
 #define LINE_LENGTH 256
 

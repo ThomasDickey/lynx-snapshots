@@ -16,12 +16,12 @@
 **	16 Jul 95  S. Bjorndahl added kluge to deal with LIBCMU bug
 */
 
-#include "HTUtils.h"
-#include "tcp.h"		/* Defines SHORT_NAMES if necessary */
-#include "HTAccess.h"
-#include "HTParse.h"
-#include "HTAlert.h"
-#include "HTTCP.h"
+#include <HTUtils.h>
+#include <tcp.h>		/* Defines SHORT_NAMES if necessary */
+#include <HTAccess.h>
+#include <HTParse.h>
+#include <HTAlert.h>
+#include <HTTCP.h>
 
 #ifdef NSL_FORK
 #include <signal.h>
@@ -51,7 +51,7 @@ PUBLIC int BSDselect PARAMS((
 #endif /* SOCKS */
 #endif /* SVR4_BSDSELECT */
 
-#include "LYLeaks.h"
+#include <LYLeaks.h>
 
 #ifdef SHORT_NAMES
 #define HTInetStatus		HTInStat
@@ -637,10 +637,14 @@ PUBLIC int HTParseInet ARGS2(
 			"HTParseInet: Can't find internet node name `%s'.\n",
 			host);
 	    }
+#ifndef _WINDOWS_NSL
 	    FREE(host);
+#endif /* _WINDOWS_NSL */
 	    return -1;	/* Fail? */
 	}
+#ifndef _WINDOWS_NSL
 	FREE(host);
+#endif /* _WINDOWS_NSL */
 #if defined(VMS) && defined(CMU_TCP)
 	/*
 	**  In LIBCMU, phost->h_length contains not the length of one address

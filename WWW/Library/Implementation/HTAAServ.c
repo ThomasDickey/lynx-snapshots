@@ -41,26 +41,26 @@
 **
 */
 
-#include "HTUtils.h"
+#include <HTUtils.h>
 
 /*#include <stdio.h> included by HTUtils.h -- FM *//* FILE */
 #include <string.h>		/* strchr() */
 
-#include "HTString.h"
-#include "HTAccess.h"		/* HTSecure			*/
-#include "HTFile.h"		/* HTLocalName			*/
-#include "HTRules.h"		/*				*/
-#include "HTParse.h"		/* URL parsing function 	*/
-#include "HTList.h"		/* HTList object		*/
+#include <HTString.h>
+#include <HTAccess.h>		/* HTSecure			*/
+#include <HTFile.h>		/* HTLocalName			*/
+#include <HTRules.h>		/*				*/
+#include <HTParse.h>		/* URL parsing function 	*/
+#include <HTList.h>		/* HTList object		*/
 
-#include "HTAAUtil.h"		/* AA common parts		*/
-#include "HTAuth.h"		/* Authentication		*/
-#include "HTACL.h"		/* Access Control List		*/
-#include "HTGroup.h"		/* Group handling		*/
-#include "HTAAProt.h"		/* Protection file parsing	*/
-#include "HTAAServ.h"		/* Implemented here		*/
+#include <HTAAUtil.h>		/* AA common parts		*/
+#include <HTAuth.h>		/* Authentication		*/
+#include <HTACL.h>		/* Access Control List		*/
+#include <HTGroup.h>		/* Group handling		*/
+#include <HTAAProt.h>		/* Protection file parsing	*/
+#include <HTAAServ.h>		/* Implemented here		*/
 
-#include "LYLeaks.h"
+#include <LYLeaks.h>
 
 /*
 ** Global variables

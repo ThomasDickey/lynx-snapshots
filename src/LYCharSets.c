@@ -1,20 +1,20 @@
-#include "HTUtils.h"
-#include "tcp.h"
-#include "HTCJK.h"
-#include "HTMLDTD.h"
+#include <HTUtils.h>
+#include <tcp.h>
+#include <HTCJK.h>
+#include <HTMLDTD.h>
 
-#include "LYGlobalDefs.h"
-#include "UCMap.h"
-#include "UCDefs.h"
-#include "LYCharSets.h"
-#include "LYCharUtils.h"
-#include "HTFont.h"
-#include "GridText.h"
-#include "LYCurses.h"
-#include "LYStrings.h"
+#include <LYGlobalDefs.h>
+#include <UCMap.h>
+#include <UCDefs.h>
+#include <LYCharSets.h>
+#include <LYCharUtils.h>
+#include <HTFont.h>
+#include <GridText.h>
+#include <LYCurses.h>
+#include <LYStrings.h>
 
-#include "LYexit.h"
-#include "LYLeaks.h"
+#include <LYexit.h>
+#include <LYLeaks.h>
 
 extern BOOL HTPassEightBitRaw;
 extern BOOL HTPassEightBitNum;

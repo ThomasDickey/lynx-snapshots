@@ -13,14 +13,14 @@
 **
 */
 
-#include "HTUtils.h"
-#include "tcp.h"
-#include "HTFormat.h"
-#include "HTStream.h"
-#include "UCDefs.h"
-#include "UCMap.h"
-#include "UCAux.h"
-#include "HTVMSUtils.h"
+#include <HTUtils.h>
+#include <tcp.h>
+#include <HTFormat.h>
+#include <HTStream.h>
+#include <UCDefs.h>
+#include <UCMap.h>
+#include <UCAux.h>
+#include <HTVMSUtils.h>
 /*#include <stdio.h> included by HTUtils.h -- FM */
 /*#include <unixlib.h> included by HTUtils.h -- FM */
 #include <ssdef.h>
@@ -33,7 +33,7 @@
 #include <starlet.h>
 #include <rmsdef.h>
 
-#include "LYLeaks.h"
+#include <LYLeaks.h>
 
 #define FREE(x) if (x) {free(x); x = NULL;}
 
@@ -518,7 +518,7 @@ extern	void rewinddir(/* DIR *dirp */);
 #endif
 #endif /* not defined for VMS */
 
-/*** #include "sys_dirent.h" ***/
+/*** #include <sys_dirent.h> ***/
 /*** "sys_dirent.h" ***/
 struct	dirent {
 #if 0
@@ -700,15 +700,15 @@ long status;
    return(0);
 }
 
-#include "HTAnchor.h"
-#include "HTParse.h"
-#include "HTBTree.h"
-#include "HTFile.h"	/* For HTFileFormat() */
-#include "HTAlert.h"
+#include <HTAnchor.h>
+#include <HTParse.h>
+#include <HTBTree.h>
+#include <HTFile.h>	/* For HTFileFormat() */
+#include <HTAlert.h>
 /*
 **  Hypertext object building machinery.
 */
-#include "HTML.h"
+#include <HTML.h>
 #define PUTC(c) (*targetClass.put_character)(target, c)
 #define PUTS(s) (*targetClass.put_string)(target, s)
 #define START(e) (*targetClass.start_element)(target, e, 0, 0, -1, 0)

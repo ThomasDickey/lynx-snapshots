@@ -4,10 +4,10 @@
 #ifndef LYGRIDTEXT_H
 #define LYGRIDTEXT_H
 
-#include "HText.h"		/* Superclass */
+#include <HText.h>		/* Superclass */
 
 #ifndef HTFORMS_H
-#include "HTForms.h"
+#include <HTForms.h>
 #endif /* HTFORMS_H */
 
 #define LY_UNDERLINE_START_CHAR	'\003'

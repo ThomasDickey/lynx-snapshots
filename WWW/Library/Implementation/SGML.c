@@ -9,8 +9,8 @@
 **	 6 Feb 93  Binary seraches used. Intreface modified.
 */
 
-#include "HTUtils.h"
-#include "tcp.h"		/* For FROMASCII */
+#include <HTUtils.h>
+#include <tcp.h>		/* For FROMASCII */
 
 /* Remove the following to disable the experimental HTML DTD parsing.
    Currently only used in this source file. - kw */
@@ -19,19 +19,19 @@
 #define EXTENDED_HTMLDTD
 #endif
 
-#include "SGML.h"
-#include "HTMLDTD.h"
-#include "HTCJK.h"
-#include "UCMap.h"
-#include "UCDefs.h"
-#include "UCAux.h"
+#include <SGML.h>
+#include <HTMLDTD.h>
+#include <HTCJK.h>
+#include <UCMap.h>
+#include <UCDefs.h>
+#include <UCAux.h>
 
 #include <ctype.h>
 /*#include <stdio.h> included in HTUtils.h -- FM */
-#include "HTChunk.h"
+#include <HTChunk.h>
 
-#include "LYCharSets.h"
-#include "LYLeaks.h"
+#include <LYCharSets.h>
+#include <LYLeaks.h>
 
 #define INVALID (-1)
 
@@ -242,7 +242,7 @@ extern BOOL minimal_comments;
 extern BOOL soft_dquotes;
 
 #ifdef USE_COLOR_STYLE
-#include "AttrList.h"
+#include <AttrList.h>
 extern char class_string[TEMPSTRINGSIZE];
 int current_is_class=0;
 #endif

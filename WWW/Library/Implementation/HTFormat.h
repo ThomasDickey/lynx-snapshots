@@ -15,11 +15,11 @@ Preamble
 #define HTFORMAT_H
 
 #ifndef HTUTILS_H
-#include "HTUtils.h"
+#include <HTUtils.h>
 #endif /* HTUTILS_H */
-#include "HTStream.h"
-#include "HTAtom.h"
-#include "HTList.h"
+#include <HTStream.h>
+#include <HTAtom.h>
+#include <HTList.h>
 
 #ifdef SHORT_NAMES
 #define HTOutputSource HTOuSour
@@ -138,7 +138,7 @@ typedef HTAtom* HTEncoding;
         (enc)==WWW_ENC_8BIT || (enc)==WWW_ENC_BINARY || (enc)==WWW_ENC_7BIT)
 
 
-#include "HTAnchor.h"
+#include <HTAnchor.h>
 
 /*
 

@@ -1,26 +1,26 @@
-#include "HTUtils.h"
-#include "tcp.h"
+#include <HTUtils.h>
+#include <tcp.h>
 #include <ctype.h>
-#include "HTParse.h"
-#include "HTAccess.h"
-#include "HTCJK.h"
-#include "HTAlert.h"
-#include "LYCurses.h"
-#include "LYUtils.h"
-#include "LYStrings.h"
-#include "LYGlobalDefs.h"
-#include "LYSignal.h"
-#include "GridText.h"
-#include "LYCharSets.h"
+#include <HTParse.h>
+#include <HTAccess.h>
+#include <HTCJK.h>
+#include <HTAlert.h>
+#include <LYCurses.h>
+#include <LYUtils.h>
+#include <LYStrings.h>
+#include <LYGlobalDefs.h>
+#include <LYSignal.h>
+#include <GridText.h>
+#include <LYCharSets.h>
 
 #ifdef DOSPATH
-#include "HTDOS.h"
+#include <HTDOS.h>
 #endif
 #ifdef VMS
 #include <descrip.h>
 #include <libclidef.h>
 #include <lib$routines.h>
-#include "HTVMSUtils.h"
+#include <HTVMSUtils.h>
 #endif /* VMS */
 
 #if HAVE_UTMP
@@ -45,12 +45,12 @@
 #include	<sys/ptem.h>
 #endif
 
-#include "LYLeaks.h"
+#include <LYLeaks.h>
 
 #ifdef USE_COLOR_STYLE
-#include "AttrList.h"
-#include "LYHash.h"
-#include "LYStyle.h"
+#include <AttrList.h>
+#include <LYHash.h>
+#include <LYStyle.h>
 #endif
 
 #undef hline   /* FIXME: this is a curses feature used as a variable here */
@@ -4236,7 +4236,8 @@ have_VMS_URL:
 			StrAllocCopy(*AllocatedString, old_string);
 		    }
 		} else {
-		    StrAllocCat(*AllocatedString, temp);
+		  /* RW 1998Mar16  Restore AllocatedString to 'old_string' */ 
+		    StrAllocCopy(*AllocatedString, old_string); 
 		}
 		if (TRACE) {
 		    fprintf(stderr, "Trying: '%s'\n", *AllocatedString);

@@ -44,15 +44,15 @@
 **
 */
 
-#include "HTUtils.h"
-#include "tcp.h"	/* NETREAD() etc.	*/
+#include <HTUtils.h>
+#include <tcp.h>	/* NETREAD() etc.	*/
 #include <string.h>
-#include "HTAAUtil.h"	/* Implemented here	*/
-#include "HTAssoc.h"	/* Assoc list		*/
-#include "HTTCP.h"
-#include "HTAlert.h"
+#include <HTAAUtil.h>	/* Implemented here	*/
+#include <HTAssoc.h>	/* Assoc list		*/
+#include <HTTCP.h>
+#include <HTAlert.h>
 
-#include "LYLeaks.h"
+#include <LYLeaks.h>
 
 /* PUBLIC						HTAAScheme_enum()
 **		TRANSLATE SCHEME NAME INTO

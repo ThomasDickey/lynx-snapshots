@@ -48,22 +48,22 @@
    Brewster@think.com
 */
 
-#include "HTUtils.h"
-#include "tcp.h"
-#include "HTParse.h"
-#include "HTAccess.h"		/* We implement a protocol */
-#include "HTML.h"		/* The object we will generate */
-#include "HTWSRC.h"
-#include "HTTCP.h"
-#include "HTCJK.h"
-#include "HTAlert.h"
+#include <HTUtils.h>
+#include <tcp.h>
+#include <HTParse.h>
+#include <HTAccess.h>		/* We implement a protocol */
+#include <HTML.h>		/* The object we will generate */
+#include <HTWSRC.h>
+#include <HTTCP.h>
+#include <HTCJK.h>
+#include <HTAlert.h>
 
 /*			From WAIS
 **			---------
 */
 #ifdef VMS
-#include "HTVMS_WaisUI.h"
-#include "HTVMS_WaisProt.h"
+#include <HTVMS_WaisUI.h>
+#include <HTVMS_WaisProt.h>
 #else
 #include <ui.h>
 #endif /* VMS */
@@ -76,7 +76,7 @@
 /*			FROM WWW
 **			--------
 */
-#include "LYLeaks.h"
+#include <LYLeaks.h>
 
 #define FREE(x) if (x) {free(x); x = NULL;}
 

@@ -1,12 +1,12 @@
-#include "HTUtils.h"
-#include "tcp.h"
-#include "LYGlobalDefs.h"
-#include "LYUtils.h"
-#include "LYSignal.h"
-#include "LYTraversal.h"
+#include <HTUtils.h>
+#include <tcp.h>
+#include <LYGlobalDefs.h>
+#include <LYUtils.h>
+#include <LYSignal.h>
+#include <LYTraversal.h>
 
-#include "LYexit.h"
-#include "LYLeaks.h"
+#include <LYexit.h>
+#include <LYLeaks.h>
 
 /* routines to handle special traversal feature */
 

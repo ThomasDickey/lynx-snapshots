@@ -3,7 +3,7 @@
 #define HTFORMS_H
 
 #ifndef LYSTRUCTS_H
-#include "LYStructs.h"
+#include <LYStructs.h>
 #endif /* LYSTRUCTS_H */
 
 /* in LYForms.c */

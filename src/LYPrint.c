@@ -1,30 +1,30 @@
-#include "HTUtils.h"
-#include "tcp.h"
-#include "HTAccess.h"
-#include "HTList.h"
-#include "HTAlert.h"
-#include "HTFile.h"
-#include "LYCurses.h"
-#include "GridText.h"
-#include "LYUtils.h"
-#include "LYPrint.h"
-#include "LYGlobalDefs.h"
-#include "LYSignal.h"
-#include "LYStrings.h"
-#include "LYClean.h"
-#include "LYGetFile.h"
-#include "LYHistory.h"
-#include "LYSystem.h"
-#include "LYList.h"
-#include "LYCharSets.h"  /* To get current charset for mail header. */
+#include <HTUtils.h>
+#include <tcp.h>
+#include <HTAccess.h>
+#include <HTList.h>
+#include <HTAlert.h>
+#include <HTFile.h>
+#include <LYCurses.h>
+#include <GridText.h>
+#include <LYUtils.h>
+#include <LYPrint.h>
+#include <LYGlobalDefs.h>
+#include <LYSignal.h>
+#include <LYStrings.h>
+#include <LYClean.h>
+#include <LYGetFile.h>
+#include <LYHistory.h>
+#include <LYSystem.h>
+#include <LYList.h>
+#include <LYCharSets.h>  /* To get current charset for mail header. */
 #ifdef VMS
-#include "HTVMSUtils.h"
+#include <HTVMSUtils.h>
 #endif /* VMS */
 #ifdef DOSPATH
-#include "HTDOS.h"
+#include <HTDOS.h>
 #endif
 
-#include "LYLeaks.h"
+#include <LYLeaks.h>
 
 #define FREE(x) if (x) {free(x); x = NULL;}
 

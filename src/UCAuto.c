@@ -14,15 +14,15 @@
 **  Any ideas how to do this for other systems?
 */
 
-#include "HTUtils.h"
-#include "tcp.h"
+#include <HTUtils.h>
+#include <tcp.h>
 
-#include "UCMap.h"
-#include "UCDefs.h"
-#include "UCAuto.h"
-#include "LYGlobalDefs.h"
-#include "LYClean.h"
-#include "LYUtils.h"
+#include <UCMap.h>
+#include <UCDefs.h>
+#include <UCAuto.h>
+#include <LYGlobalDefs.h>
+#include <LYClean.h>
+#include <LYUtils.h>
 
 #ifdef EXP_CHARTRANS_AUTOSWITCH
 

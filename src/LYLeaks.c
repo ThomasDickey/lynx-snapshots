@@ -9,11 +9,11 @@
 */
 #define NO_MEMORY_TRACKING
 
-#include "HTUtils.h"
-#include "tcp.h"
-#include "LYexit.h"
-#include "LYLeaks.h"
-#include "LYUtils.h"
+#include <HTUtils.h>
+#include <tcp.h>
+#include <LYexit.h>
+#include <LYLeaks.h>
+#include <LYUtils.h>
 #include <ctype.h>
 /*#include <stdio.h> included by HTUtils.h -- FM */
 

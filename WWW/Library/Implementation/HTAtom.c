@@ -12,18 +12,18 @@
 **	(c) Copyright CERN 1991 - See Copyright.html
 **
 */
-#include "HTUtils.h"
+#include <HTUtils.h>
 
 #define HASH_SIZE	101		/* Tunable */
-#include "HTAtom.h"
+#include <HTAtom.h>
 
 /*#include <stdio.h> included by HTUtils.h -- FM *//* joe@athena, TBL 921019 */
 #include <string.h>
 
-#include "HTList.h"
+#include <HTList.h>
 
-#include "LYexit.h"
-#include "LYLeaks.h"
+#include <LYexit.h>
+#include <LYLeaks.h>
 
 #define FREE(x) if (x) {free(x); x = NULL;}
 

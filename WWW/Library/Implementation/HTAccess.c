@@ -35,33 +35,33 @@
 #define DIRECT_WAIS
 #endif /* VMS */
 
-#include "HTUtils.h"
-#include "HTTP.h"
-#include "HTAlert.h"
+#include <HTUtils.h>
+#include <HTTP.h>
+#include <HTAlert.h>
 /*
 **  Implements:
 */
-#include "HTAccess.h"
+#include <HTAccess.h>
 
 /*
 **  Uses:
 */
-#include "HTParse.h"
-#include "HTML.h"		/* SCW */
+#include <HTParse.h>
+#include <HTML.h>		/* SCW */
 
 #ifndef NO_RULES
-#include "HTRules.h"
+#include <HTRules.h>
 #endif
 
-#include "HTList.h"
-#include "HText.h"	/* See bugs above */
-#include "HTAlert.h"
-#include "HTCJK.h"
-#include "UCMap.h"
-#include "GridText.h"
+#include <HTList.h>
+#include <HText.h>	/* See bugs above */
+#include <HTAlert.h>
+#include <HTCJK.h>
+#include <UCMap.h>
+#include <GridText.h>
 
-#include "LYexit.h"
-#include "LYLeaks.h"
+#include <LYexit.h>
+#include <LYLeaks.h>
 
 #define FREE(x) if (x) {free(x); x = NULL;}
 

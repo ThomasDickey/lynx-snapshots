@@ -42,7 +42,7 @@
 **  Required includes
 */
 #include <stdlib.h>
-#include "HTUtils.h"
+#include <HTUtils.h>
 
 /*
 **	Constant defines

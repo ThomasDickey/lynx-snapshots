@@ -33,9 +33,9 @@ Overriding this module
 #define HTStyle_H
 
 #ifndef HTUTILS_H
-#include "HTUtils.h"
+#include <HTUtils.h>
 #endif /* HTUTILS_H */
-#include "HTAnchor.h"
+#include <HTAnchor.h>
 
 typedef long int HTFont;        /* Dummy definition instead */
 

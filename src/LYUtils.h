@@ -5,7 +5,7 @@
 #include <stdio.h>
 
 #ifndef HTLIST_H
-#include "HTList.h"
+#include <HTList.h>
 #endif /* HTLIST_H */
 
 extern void highlight PARAMS((int flag, int cur, char *target));

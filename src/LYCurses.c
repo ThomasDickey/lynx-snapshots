@@ -1,19 +1,19 @@
-#include "HTUtils.h"
-#include "tcp.h"
-#include "LYCurses.h"
-#include "LYStyle.h"
-#include "LYUtils.h"
-#include "LYGlobalDefs.h"
-#include "LYMainLoop.h"
-#include "LYSignal.h"
-#include "LYClean.h"
-#include "LYReadCFG.h"
-#include "LYStrings.h"
-#include "LYCharSets.h"
-#include "UCAux.h"
+#include <HTUtils.h>
+#include <tcp.h>
+#include <LYCurses.h>
+#include <LYStyle.h>
+#include <LYUtils.h>
+#include <LYGlobalDefs.h>
+#include <LYMainLoop.h>
+#include <LYSignal.h>
+#include <LYClean.h>
+#include <LYReadCFG.h>
+#include <LYStrings.h>
+#include <LYCharSets.h>
+#include <UCAux.h>
 
-#include "LYexit.h"
-#include "LYLeaks.h"
+#include <LYexit.h>
+#include <LYLeaks.h>
 
 #define FREE(x) if (x) {free(x); x = NULL;}
 
@@ -34,8 +34,8 @@ extern int _NOSHARE(COLS);
 #endif /* VMS && __GNUC__ */
 
 #ifdef USE_COLOR_STYLE
-#include "AttrList.h"
-#include "LYHash.h"
+#include <AttrList.h>
+#include <LYHash.h>
 #endif
 
 #if defined(COLOR_CURSES)
@@ -1242,7 +1242,7 @@ PUBLIC void LYstopTargetEmphasis NOARGS
 #undef system
 #endif /* system */
 #include <processes.h>
-#include "LYVMSdef.h"
+#include <LYVMSdef.h>
 
 #define EFN	0			/* Event flag			*/
 

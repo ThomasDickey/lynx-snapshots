@@ -8,12 +8,12 @@
 #define HTML_H
 
 #ifndef HTUTILS_H
-#include "HTUtils.h"
+#include <HTUtils.h>
 #endif /* HTUTILS_H */
-#include "UCDefs.h"
-#include "UCAux.h"
-#include "HTAnchor.h"
-#include "HTMLDTD.h"
+#include <UCDefs.h>
+#include <UCAux.h>
+#include <HTAnchor.h>
+#include <HTMLDTD.h>
 
 #ifdef SHORT_NAMES
 #define HTMLPresentation        HTMLPren

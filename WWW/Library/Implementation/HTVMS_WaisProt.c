@@ -31,12 +31,12 @@
 /*	This file implements the Z39.50 extensions required for WAIS 
 */
 
-#include "HTUtils.h"
-#include "tcp.h"
-#include "HTVMS_WaisUI.h"
-#include "HTVMS_WaisProt.h"
+#include <HTUtils.h>
+#include <tcp.h>
+#include <HTVMS_WaisUI.h>
+#include <HTVMS_WaisProt.h>
 
-#include "LYLeaks.h"
+#include <LYLeaks.h>
 
 
 /* very rough estimates of the size of an object */

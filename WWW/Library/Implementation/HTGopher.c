@@ -15,17 +15,17 @@
 **			  gateway.
 */
 
-#include "HTUtils.h"		/* Coding convention macros */
-#include "tcp.h"
-#include "HTAlert.h"
-#include "HTParse.h"
-#include "HTTCP.h"
-#include "HTFinger.h"
+#include <HTUtils.h>		/* Coding convention macros */
+#include <tcp.h>
+#include <HTAlert.h>
+#include <HTParse.h>
+#include <HTTCP.h>
+#include <HTFinger.h>
 
 /*
 **  Implements.
 */
-#include "HTGopher.h"
+#include <HTGopher.h>
 
 #define HT_EM_SPACE ((char)2)		/* For now */
 
@@ -63,18 +63,18 @@
 
 #include <ctype.h>
 
-#include "HTParse.h"
-#include "HTFormat.h"
-#include "HTTCP.h"
+#include <HTParse.h>
+#include <HTFormat.h>
+#include <HTTCP.h>
 
 #define FREE(x) if (x) {free(x); x = NULL;}
 
 /*
 **  Hypertext object building machinery.
 */
-#include "HTML.h"
+#include <HTML.h>
 
-#include "LYLeaks.h"
+#include <LYLeaks.h>
 
 #define PUTC(c) (*targetClass.put_character)(target, c)
 #define PUTS(s) (*targetClass.put_string)(target, s)

@@ -5,22 +5,22 @@
 **
 */
 
-#include "HTUtils.h"
-#include "tcp.h"
-#include "LYUtils.h"
-#include "GridText.h"
-#include "LYList.h"
-#include "LYSignal.h"
-#include "LYGlobalDefs.h"
-#include "LYCharUtils.h"
+#include <HTUtils.h>
+#include <tcp.h>
+#include <LYUtils.h>
+#include <GridText.h>
+#include <LYList.h>
+#include <LYSignal.h>
+#include <LYGlobalDefs.h>
+#include <LYCharUtils.h>
 
 #ifdef DIRED_SUPPORT
-#include "LYUpload.h"
-#include "LYLocal.h"
+#include <LYUpload.h>
+#include <LYLocal.h>
 #endif /* DIRED_SUPPORT */
 
-#include "LYexit.h"
-#include "LYLeaks.h"
+#include <LYexit.h>
+#include <LYLeaks.h>
 
 #define FREE(x) if (x) {free(x); x = NULL;}
 

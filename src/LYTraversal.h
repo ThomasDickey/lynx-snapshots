@@ -3,7 +3,7 @@
 #ifndef TRAVERSAL_H
 #define TRAVERSAL_H
 
-#include "HTUtils.h"            /* BOOL, PARAMS, ARGS */
+#include <HTUtils.h>            /* BOOL, PARAMS, ARGS */
 
 extern BOOLEAN lookup PARAMS((char * target));
 extern void add_to_table PARAMS((char * target));

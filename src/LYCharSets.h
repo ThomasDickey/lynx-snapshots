@@ -3,7 +3,7 @@
 #define LYCHARSETS_H
 
 #ifndef UCMAP_H
-#include "UCMap.h"
+#include <UCMap.h>
 #endif /* !UCMAP_H */
 
 extern BOOLEAN LYHaveCJKCharacterSet;

@@ -6,10 +6,10 @@
 ** 28 Apr 1997	AJL,FM Do Proxy Authorisation.
 */
 
-#include "HTUtils.h"
-#include "tcp.h"
+#include <HTUtils.h>
+#include <tcp.h>
 
-#include "HTTP.h"
+#include <HTTP.h>
 
 #define HTTP_VERSION	"HTTP/1.0"
 
@@ -21,19 +21,19 @@
 #define LINE_EXTEND_THRESH	256	/* Minimum read size */
 #define VERSION_LENGTH		20	/* for returned protocol version */
 
-#include "HTParse.h"
-#include "HTTCP.h"
-#include "HTFormat.h"
-#include "HTFile.h"
+#include <HTParse.h>
+#include <HTTCP.h>
+#include <HTFormat.h>
+#include <HTFile.h>
 #include <ctype.h>
-#include "HTAlert.h"
-#include "HTMIME.h"
-#include "HTML.h"
-#include "HTInit.h"
-#include "HTAABrow.h"
+#include <HTAlert.h>
+#include <HTMIME.h>
+#include <HTML.h>
+#include <HTInit.h>
+#include <HTAABrow.h>
 
-#include "LYGlobalDefs.h"
-#include "LYLeaks.h"
+#include <LYGlobalDefs.h>
+#include <LYLeaks.h>
 
 /* #define TRACE 1 */
 

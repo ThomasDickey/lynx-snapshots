@@ -27,14 +27,13 @@
 
 #ifdef DOSPATH
 #define HAVE_READDIR 1
-#include <dirent.h>
 #define USE_DIRENT
-#include "HTDOS.h"
+#include <HTDOS.h>
 #endif /* DOSPATH */
 
-#include "HTUtils.h"
-#include "tcp.h"
-#include "HTFile.h"		/* Implemented here */
+#include <HTUtils.h>
+#include <tcp.h>
+#include <HTFile.h>		/* Implemented here */
 #ifdef VMS
 #include <stat.h>
 #endif /* VMS */
@@ -58,31 +57,31 @@
 #define FREE(x) if (x) {free(x); x = NULL;}
 
 #ifdef VMS
-#include "HTVMSUtils.h"
+#include <HTVMSUtils.h>
 #endif /* VMS */
 
-#include "HTParse.h"
-#include "HTTCP.h"
+#include <HTParse.h>
+#include <HTTCP.h>
 #ifndef DECNET
-#include "HTFTP.h"
+#include <HTFTP.h>
 #endif /* !DECNET */
-#include "HTAnchor.h"
-#include "HTAtom.h"
-#include "HTWriter.h"
-#include "HTFWriter.h"
-#include "HTInit.h"
-#include "HTBTree.h"
-#include "HTAlert.h"
-#include "HTCJK.h"
-#include "UCDefs.h"
-#include "UCMap.h"
-#include "UCAux.h"
+#include <HTAnchor.h>
+#include <HTAtom.h>
+#include <HTWriter.h>
+#include <HTFWriter.h>
+#include <HTInit.h>
+#include <HTBTree.h>
+#include <HTAlert.h>
+#include <HTCJK.h>
+#include <UCDefs.h>
+#include <UCMap.h>
+#include <UCAux.h>
 
-#include "LYexit.h"
-#include "LYCharSets.h"
-#include "LYGlobalDefs.h"
-#include "LYUtils.h"
-#include "LYLeaks.h"
+#include <LYexit.h>
+#include <LYCharSets.h>
+#include <LYGlobalDefs.h>
+#include <LYUtils.h>
+#include <LYLeaks.h>
 
 typedef struct _HTSuffix {
 	char *		suffix;
@@ -100,7 +99,7 @@ typedef struct _HTSuffix {
 #endif /* NGROUPS_MAX */
 #endif /* NGROUPS */
 
-#include "HTML.h"		/* For directory object building */
+#include <HTML.h>		/* For directory object building */
 
 #define PUTC(c) (*target->isa->put_character)(target, c)
 #define PUTS(s) (*target->isa->put_string)(target, s)

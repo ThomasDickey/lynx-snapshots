@@ -1,42 +1,42 @@
-#include "HTUtils.h"
-#include "tcp.h"
-#include "HTTP.h"
-#include "HTAnchor.h"	    /* Anchor class */
-#include "HTAccess.h"
-#include "HTParse.h"
-#include "LYCurses.h"
-#include "GridText.h"
-#include "LYGlobalDefs.h"
-#include "LYUtils.h"
-#include "LYCharSets.h"
-#include "LYCharUtils.h"
-#include "HTAlert.h"
-#include "LYSignal.h"
-#include "LYGetFile.h"
-#include "LYPrint.h"
-#include "LYHistory.h"
-#include "LYStrings.h"
-#include "LYClean.h"
-#include "LYDownload.h"
-#include "LYNews.h"
-#include "LYMail.h"
-#include "LYSystem.h"
-#include "LYKeymap.h"
-#include "LYBookmark.h"
-#include "LYMap.h"
-#include "LYList.h"
+#include <HTUtils.h>
+#include <tcp.h>
+#include <HTTP.h>
+#include <HTAnchor.h>	    /* Anchor class */
+#include <HTAccess.h>
+#include <HTParse.h>
+#include <LYCurses.h>
+#include <GridText.h>
+#include <LYGlobalDefs.h>
+#include <LYUtils.h>
+#include <LYCharSets.h>
+#include <LYCharUtils.h>
+#include <HTAlert.h>
+#include <LYSignal.h>
+#include <LYGetFile.h>
+#include <LYPrint.h>
+#include <LYHistory.h>
+#include <LYStrings.h>
+#include <LYClean.h>
+#include <LYDownload.h>
+#include <LYNews.h>
+#include <LYMail.h>
+#include <LYSystem.h>
+#include <LYKeymap.h>
+#include <LYBookmark.h>
+#include <LYMap.h>
+#include <LYList.h>
 #ifdef VMS
-#include "HTVMSUtils.h"
+#include <HTVMSUtils.h>
 #endif /* VMS */
 #ifdef DOSPATH
-#include "HTDOS.h"
+#include <HTDOS.h>
 #endif
 #ifdef DIRED_SUPPORT
-#include "LYLocal.h"
+#include <LYLocal.h>
 #endif /* DIRED_SUPPORT */
 
-#include "LYexit.h"
-#include "LYLeaks.h"
+#include <LYexit.h>
+#include <LYLeaks.h>
 
 #ifndef VMS
 #ifdef SYSLOG_REQUESTED_URLS

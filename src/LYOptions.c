@@ -1,25 +1,25 @@
-#include "HTUtils.h"
-#include "tcp.h"
-#include "HTFTP.h"
-#include "HTML.h"
-#include "LYCurses.h"
-#include "LYUtils.h"
-#include "LYStrings.h"
-#include "LYGlobalDefs.h"
-#include "LYOptions.h"
-#include "LYSignal.h"
-#include "LYClean.h"
-#include "LYCharSets.h"
-#include "LYCharUtils.h"
-#include "UCMap.h"
-#include "UCAux.h"
-#include "LYKeymap.h"
-#include "LYrcFile.h"
-#include "HTAlert.h"
-#include "LYBookmark.h"
-#include "GridText.h"
+#include <HTUtils.h>
+#include <tcp.h>
+#include <HTFTP.h>
+#include <HTML.h>
+#include <LYCurses.h>
+#include <LYUtils.h>
+#include <LYStrings.h>
+#include <LYGlobalDefs.h>
+#include <LYOptions.h>
+#include <LYSignal.h>
+#include <LYClean.h>
+#include <LYCharSets.h>
+#include <LYCharUtils.h>
+#include <UCMap.h>
+#include <UCAux.h>
+#include <LYKeymap.h>
+#include <LYrcFile.h>
+#include <HTAlert.h>
+#include <LYBookmark.h>
+#include <GridText.h>
 
-#include "LYLeaks.h"
+#include <LYLeaks.h>
 
 #define FREE(x) if (x) {free(x); x = NULL;}
 

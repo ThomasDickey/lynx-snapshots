@@ -1,9 +1,9 @@
-#include "HTUtils.h"
-#include "tcp.h"		/* for standard io */
+#include <HTUtils.h>
+#include <tcp.h>		/* for standard io */
 
-#include "HTHistory.h"
+#include <HTHistory.h>
 
-#include "LYLeaks.h"
+#include <LYLeaks.h>
 
 static HTList * history;	/* List of visited anchors */
 

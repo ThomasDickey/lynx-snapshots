@@ -7,29 +7,29 @@
 **	Bugs:
 **		strings written must be less than buffer size.
 */
-#include "HTUtils.h"
-#include "tcp.h"
+#include <HTUtils.h>
+#include <tcp.h>
 
-#include "HTPlain.h"
+#include <HTPlain.h>
 
-#include "HTChunk.h"
-#include "HText.h"
-#include "HTStyle.h"
+#include <HTChunk.h>
+#include <HText.h>
+#include <HTStyle.h>
 #define Lynx_HTML_Handler
-#include "HTML.h"		/* styles[] */
+#include <HTML.h>		/* styles[] */
 
 #define BUFFER_SIZE 4096;	/* Tradeoff */
 
-#include "HText.h"
-#include "HTStyle.h"
-#include "HTMLDTD.h"
-#include "HTCJK.h"
-#include "UCMap.h"
-#include "UCDefs.h"
-#include "UCAux.h"
+#include <HText.h>
+#include <HTStyle.h>
+#include <HTMLDTD.h>
+#include <HTCJK.h>
+#include <UCMap.h>
+#include <UCDefs.h>
+#include <UCAux.h>
 
-#include "LYCharSets.h"
-#include "LYLeaks.h"
+#include <LYCharSets.h>
+#include <LYLeaks.h>
 
 #define FREE(x) if (x) {free(x); x = NULL;}
 

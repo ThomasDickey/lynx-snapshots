@@ -2,13 +2,13 @@
 ** (c) 1996 Rob Partington
 */
 
-#include "LYStructs.h"
-#include "LYCurses.h"
-#include "AttrList.h"
-#include "SGML.h"
-#include "HTMLDTD.h"
+#include <LYStructs.h>
+#include <LYCurses.h>
+#include <AttrList.h>
+#include <SGML.h>
+#include <HTMLDTD.h>
 
-#include "LYHash.h"
+#include <LYHash.h>
 
 #ifdef NOT_USED
 

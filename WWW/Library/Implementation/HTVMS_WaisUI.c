@@ -35,19 +35,19 @@
  *   
  */
 
-#include "HTUtils.h"
-#include "tcp.h"
-#include "HTVMS_WaisUI.h"
-#include "HTVMS_WaisProt.h"
-#include "HTTCP.h"
+#include <HTUtils.h>
+#include <tcp.h>
+#include <HTVMS_WaisUI.h>
+#include <HTVMS_WaisProt.h>
+#include <HTTCP.h>
 /*#include <stdio> included by HTUtils.h -- FM */
 #include <string.h>
 #include <ctype.h>
 #include <math.h>
 #include <stdarg.h>
 
-#include "LYexit.h"
-#include "LYLeaks.h"
+#include <LYexit.h>
+#include <LYLeaks.h>
 
 void
 log_write(s)

@@ -81,7 +81,7 @@
 #endif
 
 #ifdef _WINDOWS                         /* SCW */
-#include "windef.h"
+#include <windef.h>
 #define BOOLEAN_DEFINED
 #define va_arg
 #include <dos.h>
@@ -310,7 +310,7 @@ Sucess (>=0) and failure (<0) codes
 #define HT_BAD_EOF      -12             /* Premature EOF */
 
 
-#include "HTString.h"   /* String utilities */
+#include <HTString.h>   /* String utilities */
 
 #ifndef va_arg
 #ifdef __STDC__
@@ -330,7 +330,7 @@ Out Of Memory checking for malloc() return:
 #define __LINE__ ""
 #endif
 
-#include "LYexit.h"
+#include <LYexit.h>
 
 #define outofmem(file, func)\
  { fprintf(stderr,\

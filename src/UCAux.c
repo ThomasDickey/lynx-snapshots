@@ -1,10 +1,10 @@
-#include "HTUtils.h"
-#include "tcp.h"
+#include <HTUtils.h>
+#include <tcp.h>
 
-#include "HTCJK.h"
-#include "UCDefs.h"
-#include "HTStream.h"
-#include "UCAux.h"
+#include <HTCJK.h>
+#include <UCDefs.h>
+#include <HTStream.h>
+#include <UCAux.h>
 
 extern HTCJKlang HTCJK;
 extern LYUCcharset LYCharSet_UC[];

@@ -26,7 +26,7 @@ struct _UCTransParams
 typedef struct _UCTransParams UCTransParams;
 
 #ifndef UCDEFS_H
-#include "UCDefs.h"
+#include <UCDefs.h>
 #endif /* UCDEFS_H */
 
 extern void UCSetTransParams PARAMS((
@@ -47,7 +47,7 @@ extern void UCSetBoxChars PARAMS((
     int		hori_in));
 
 #ifndef HTSTREAM_H
-#include "HTStream.h"
+#include <HTStream.h>
 #endif /* HTSTREAM_H */
 
 typedef void putc_func_t PARAMS((
@@ -55,7 +55,7 @@ typedef void putc_func_t PARAMS((
 	char		ch));
 
 #ifndef UCMAP_H
-#include "UCMap.h"
+#include <UCMap.h>
 #endif /* UCMAP_H */
 
 extern BOOL UCPutUtf8_charstring PARAMS((

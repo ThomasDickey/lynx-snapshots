@@ -67,10 +67,11 @@ char * HTDOS_name(char *wwwname)
 		}
 	}
 
-/*	if(strlen(cp_url) < 4) cp_url[] = ':';
-	if(strlen(cp_url) == 3) cp_url[3] = '\\';
+	/* Needed to surf the root of a local drive. */
 
-	if(strlen(cp_url) == 4) cp_url[4] = '.'; */
+	if(strlen(cp_url) < 4) cp_url[2] = ':';
+	if(strlen(cp_url) == 3) cp_url[3] = '\\';
+	if(strlen(cp_url) == 4) cp_url[4] = '.';
 
 	if((strlen(cp_url) > 2) && (cp_url[1] == '|'))
 		cp_url[1] = ':';

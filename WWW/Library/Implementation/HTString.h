@@ -8,7 +8,7 @@
 #define HTSTRING_H
 
 #ifndef HTUTILS_H
-#include "HTUtils.h"
+#include <HTUtils.h>
 #endif /* HTUTILS_H */
 
 extern int WWW_TraceFlag;       /* Global flag for all W3 trace */

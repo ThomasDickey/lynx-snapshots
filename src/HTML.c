@@ -11,56 +11,56 @@
 **   Being Overidden
 **
 */
-#include "HTUtils.h"
-#include "tcp.h"
+#include <HTUtils.h>
+#include <tcp.h>
 
 #define Lynx_HTML_Handler
-#include "HTChunk.h"
-#include "HText.h"
-#include "HTStyle.h"
-#include "HTML.h"
+#include <HTChunk.h>
+#include <HText.h>
+#include <HTStyle.h>
+#include <HTML.h>
 
-#include "HTCJK.h"
-#include "HTAtom.h"
-#include "HTAnchor.h"
-#include "HTMLGen.h"
-#include "HTParse.h"
-#include "HTList.h"
-#include "UCMap.h"
-#include "UCDefs.h"
-#include "UCAux.h"
+#include <HTCJK.h>
+#include <HTAtom.h>
+#include <HTAnchor.h>
+#include <HTMLGen.h>
+#include <HTParse.h>
+#include <HTList.h>
+#include <UCMap.h>
+#include <UCDefs.h>
+#include <UCAux.h>
 
-#include "LYGlobalDefs.h"
-#include "LYCharUtils.h"
-#include "LYCharSets.h"
+#include <LYGlobalDefs.h>
+#include <LYCharUtils.h>
+#include <LYCharSets.h>
 
-#include "HTAlert.h"
-#include "HTFont.h"
-#include "HTForms.h"
-#include "HTNestedList.h"
-#include "GridText.h"
-#include "LYSignal.h"
-#include "LYUtils.h"
-#include "LYMap.h"
-#include "LYList.h"
-#include "LYBookmark.h"
+#include <HTAlert.h>
+#include <HTFont.h>
+#include <HTForms.h>
+#include <HTNestedList.h>
+#include <GridText.h>
+#include <LYSignal.h>
+#include <LYUtils.h>
+#include <LYMap.h>
+#include <LYList.h>
+#include <LYBookmark.h>
 
 #ifdef VMS
-#include "LYCurses.h"
-#include "HTVMSUtils.h"
+#include <LYCurses.h>
+#include <HTVMSUtils.h>
 #endif /* VMS */
 
 #ifdef USE_COLOR_STYLE
-#include "AttrList.h"
-#include "LYHash.h"
-#include "LYStyle.h"
+#include <AttrList.h>
+#include <LYHash.h>
+#include <LYStyle.h>
 #undef SELECTED_STYLES
 #define pHText_changeStyle(X,Y,Z) {}
 char Style_className[16384];
 #endif
 
-#include "LYexit.h"
-#include "LYLeaks.h"
+#include <LYexit.h>
+#include <LYLeaks.h>
 
 #define FREE(x) if (x) {free(x); x = NULL;}
 
@@ -81,7 +81,7 @@ PRIVATE HTStyleSheet * styleSheet;	/* Application-wide */
 
 /*	Module-wide style cache
 */
-PUBLIC  HTStyle *styles[HTML_ELEMENTS+31]; /* adding 24 nested list styles  */
+PUBLIC	HTStyle *styles[HTML_ELEMENTS+31]; /* adding 24 nested list styles  */
 					   /* and 3 header alignment styles */
 					   /* and 3 div alignment styles    */
 PRIVATE HTStyle *default_style;
@@ -104,6 +104,14 @@ PRIVATE void HTML_end_element PARAMS((HTStructured *me,
 PRIVATE void get_styles NOPARAMS;
 PRIVATE void change_paragraph_style PARAMS((HTStructured * me,
 					    HTStyle * style));
+
+/*
+ * If we have verbose_img set, display labels for images.
+ */
+#define VERBOSE_IMG(value,string) \
+      ((verbose_img) ? (newtitle = MakeNewTitle(value)): string)
+
+PRIVATE char * MakeNewTitle(CONST char ** value);
 
 /*	Set an internal flag that the next call to a stack-affecting method
 **	is only internal and the stack manipulation should be skipped. - kw
@@ -601,6 +609,7 @@ PRIVATE void HTML_start_element ARGS6(
 {
     char *alt_string = NULL;
     char *id_string = NULL;
+    char *newtitle = NULL;
     char *href = NULL;
     char *map_href = NULL;
     char *title = NULL;
@@ -1143,7 +1152,7 @@ PRIVATE void HTML_start_element ARGS6(
 
 	    /*
 	     *	Lynx was supporting ACTION, which never made it into
-	     *  the HTML 2.0 specs.  HTML 3.0 uses HREF, so we'll
+	     *	the HTML 2.0 specs.  HTML 3.0 uses HREF, so we'll
 	     *	use that too, but allow use of ACTION as an alternate
 	     *	until people have fully switched over. - FM
 	     */
@@ -2724,7 +2733,7 @@ PRIVATE void HTML_start_element ARGS6(
 	      *value[HTML_IMG_ALT] != '\0'))) {
 	    StrAllocCopy(alt_string, value[HTML_IMG_ALT]);
 	    TRANSLATE_AND_UNESCAPE_ENTITIES(&alt_string,
-						   me->UsePlainSpace, me->HiddenValue);
+					    me->UsePlainSpace, me->HiddenValue);
 	    /*
 	     *	If it's all spaces and we are making SRC or
 	     *	USEMAP links, treat it as zero-length. - FM
@@ -2739,14 +2748,19 @@ PRIVATE void HTML_start_element ARGS6(
 		    } else if (dest_ismap) {
 			StrAllocCopy(alt_string, (title ?
 						  title : "[ISMAP]"));
+
 		    } else if (me->inA == TRUE && dest) {
 			StrAllocCopy(alt_string, (title ?
-						  title : "[LINK]"));
+						  title :
+						  VERBOSE_IMG(value, "[LINK]")));
+
 		    } else {
 			StrAllocCopy(alt_string,
 					     (title ? title :
-				(present[HTML_IMG_ISOBJECT] ?
-						 "(OBJECT)" : "[INLINE]")));
+						  ((present &&
+						    present[HTML_IMG_ISOBJECT]) ?
+						    "(OBJECT)" :
+						    VERBOSE_IMG(value, "[INLINE]"))));
 		    }
 		}
 	    }
@@ -2762,14 +2776,16 @@ PRIVATE void HTML_start_element ARGS6(
 
 	} else if (me->inA == TRUE && dest) {
 	    StrAllocCopy(alt_string, (title ?
-				      title : "[LINK]"));
+				      title :
+				      VERBOSE_IMG(value, "[LINK]")));
 
 	} else {
 	    if (pseudo_inline_alts || clickable_images)
 		StrAllocCopy(alt_string, (title ? title :
 			  ((present &&
 			    present[HTML_IMG_ISOBJECT]) ?
-					     "(OBJECT)" : "[INLINE]")));
+					     "(OBJECT)" :
+					     VERBOSE_IMG(value, "[INLINE]"))));
 	    else
 		StrAllocCopy(alt_string, (title ?
 					  title : ""));
@@ -2900,7 +2916,8 @@ PRIVATE void HTML_start_element ARGS6(
 			     ((present &&
 			       present[HTML_IMG_ISOBJECT]) ?
 		   ((map_href || dest_ismap) ?
-				   "(IMAGE)" : "(OBJECT)") : "[IMAGE]"));
+				   "(IMAGE)" : "(OBJECT)") :
+				   VERBOSE_IMG(value, "[IMAGE]")));
 		if (id_string && !map_href) {
 		    if ((ID_A = HTAnchor_findChildAndLink(
 				  me->node_anchor,	/* Parent */
@@ -2954,7 +2971,8 @@ PRIVATE void HTML_start_element ARGS6(
 		StrAllocCopy(alt_string,
 			     ((present &&
 			       present[HTML_IMG_ISOBJECT]) ?
-						  "(IMAGE)" : "[IMAGE]"));
+						 "(IMAGE)" :
+						 VERBOSE_IMG(value, "[IMAGE]")));
 	    } else {
 		HTML_put_character(me, ' ');  /* space char may be ignored */
 		me->in_word = NO;
@@ -3080,6 +3098,7 @@ PRIVATE void HTML_start_element ARGS6(
 	FREE(alt_string);
 	FREE(id_string);
 	FREE(title);
+	FREE(newtitle);
 	dest = NULL;
 	dest_ismap = FALSE;
 	break;
@@ -4437,7 +4456,7 @@ PRIVATE void HTML_start_element ARGS6(
 		    HText_beginAnchor(me->text, me->inUnderline, me->CurrentA);
 		    if (me->inBoldH == FALSE)
 			HText_appendCharacter(me->text, LY_BOLD_START_CHAR);
-		    HTML_put_string(me, "[IMAGE]");
+		    HTML_put_string(me, VERBOSE_IMG(value, "[IMAGE]"));
 		    if (me->inBoldH == FALSE)
 			HText_appendCharacter(me->text, LY_BOLD_END_CHAR);
 		    HText_endAnchor(me->text, 0);
@@ -5636,7 +5655,7 @@ PRIVATE void HTML_end_element ARGS3(
 
     case HTML_P:
 	LYHandleP(me,
-	    	 (CONST BOOL*)0, (CONST char **)0,
+		 (CONST BOOL*)0, (CONST char **)0,
 		 (char **)&include,
 		 FALSE);
 	break;
@@ -7488,4 +7507,21 @@ PUBLIC int HTLoadError ARGS3(
 {
     HTAlert(message);		/* @@@@@@@@@@@@@@@@@@@ */
     return -number;
+}
+
+
+PRIVATE char * MakeNewTitle(CONST char ** value)
+{
+    char *ptr;
+    char *newtitle = NULL;
+
+    StrAllocCopy(newtitle, "[");
+    ptr = strrchr(value[HTML_IMG_SRC], '/');
+    if (!ptr) {
+	StrAllocCat(newtitle, value[HTML_IMG_SRC]);
+    } else {
+	StrAllocCat(newtitle, ptr + 1);
+    }
+    StrAllocCat(newtitle, "]");
+    return newtitle;
 }

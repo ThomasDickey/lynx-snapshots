@@ -16,16 +16,16 @@
 */
 
 
-#include "HTUtils.h"
+#include <HTUtils.h>
 
 /*#include <stdio.h> included by HTUtils.h -- FM *//* FILE */
 #include <string.h>
 
-#include "HTAAFile.h"	/* File routines	*/
-#include "HTGroup.h"	/* GroupDef		*/
-#include "HTACL.h"	/* Implemented here	*/
+#include <HTAAFile.h>	/* File routines	*/
+#include <HTGroup.h>	/* GroupDef		*/
+#include <HTACL.h>	/* Implemented here	*/
 
-#include "LYLeaks.h"
+#include <LYLeaks.h>
 
 /* PRIVATE						HTAA_getAclFilename()
 **	    RESOLVE THE FULL PATHNAME OF ACL FILE FOR A GIVEN FILE

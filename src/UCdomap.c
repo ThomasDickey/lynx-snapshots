@@ -14,57 +14,57 @@
  *
  * aeb, 950210
  */
-#include "HTUtils.h"
-#include "tcp.h"
-#include "HTMLDTD.h"
+#include <HTUtils.h>
+#include <tcp.h>
+#include <HTMLDTD.h>
 
-#include "LYGlobalDefs.h"
-#include "UCkd.h"
-#include "UCdomap.h"
-#include "UCMap.h"
-#include "UCDefs.h"
-#include "LYCharSets.h"
+#include <LYGlobalDefs.h>
+#include <UCkd.h>
+#include <UCdomap.h>
+#include <UCMap.h>
+#include <UCDefs.h>
+#include <LYCharSets.h>
 
 /*
  *  Include tables & parameters.
  */
-#include "cp1250_uni.h" 	/* WinLatin2 (cp1250)	*/
-#include "cp1251_uni.h" 	/* WinCyrillic (cp1251) */
-#include "cp1252_uni.h" 	/* WinLatin1 (cp1252)	*/
-#include "cp1253_uni.h" 	/* WinGreek (cp1253)	*/
-#include "cp1255_uni.h" 	/* WinHebrew (cp1255)	*/
-#include "cp1256_uni.h" 	/* WinArabic (cp1256)	*/
-#include "cp1257_uni.h" 	/* WinBaltRim (cp1257)	*/
-#include "cp437_uni.h"		/* DosLatinUS (cp437)	*/
-#include "cp737_uni.h"		/* DosGreek (cp737)	*/
-#include "cp775_uni.h"		/* DosBaltRim (cp775)	*/
-#include "cp850_uni.h"		/* DosLatin1 (cp850)	*/
-#include "cp852_uni.h"		/* DosLatin2 (cp852)	*/
-#include "cp862_uni.h"		/* DosHebrew (cp862)	*/
-#include "cp864_uni.h"		/* DosArabic (cp864)	*/
-#include "cp866_uni.h"		/* DosCyrillic (cp866)	*/
-#include "cp869_uni.h"		/* DosGreek2 (cp869)	*/
-#include "def7_uni.h"		/* 7 bit approximations */
-#include "dmcs_uni.h"		/* DEC Multinational	*/
-#include "iso01_uni.h"		/* ISO Latin 1		*/
-#include "iso02_uni.h"		/* ISO Latin 2		*/
-#include "iso03_uni.h"		/* ISO Latin 3		*/
-#include "iso04_uni.h"		/* ISO Latin 4		*/
-#include "iso05_uni.h"		/* ISO 8859-5 Cyrillic	*/
-#include "iso06_uni.h"		/* ISO 8859-6 Arabic	*/
-#include "iso07_uni.h"		/* ISO 8859-7 Greek	*/
-#include "iso08_uni.h"		/* ISO 8859-8 Hebrew	*/
-#include "iso09_uni.h"		/* ISO 8859-9 (Latin 5) */
-#include "iso10_uni.h"		/* ISO 8859-10		*/
-#include "koi8r_uni.h"		/* KOI8-R Cyrillic	*/
-#include "mac_uni.h"		/* Macintosh (8 bit)	*/
-#include "mnem2_suni.h" 	/* RFC 1345 Mnemonic	*/
-#include "next_uni.h"		/* NeXT character set	*/
-#include "rfc_suni.h"		/* RFC 1345 w/o Intro	*/
-#include "utf8_uni.h"		/* UNICODE UTF 8	*/
-#include "viscii_uni.h" 	/* Vietnamese (VISCII)	*/
+#include <cp1250_uni.h> 	/* WinLatin2 (cp1250)	*/
+#include <cp1251_uni.h> 	/* WinCyrillic (cp1251) */
+#include <cp1252_uni.h> 	/* WinLatin1 (cp1252)	*/
+#include <cp1253_uni.h> 	/* WinGreek (cp1253)	*/
+#include <cp1255_uni.h> 	/* WinHebrew (cp1255)	*/
+#include <cp1256_uni.h> 	/* WinArabic (cp1256)	*/
+#include <cp1257_uni.h> 	/* WinBaltRim (cp1257)	*/
+#include <cp437_uni.h>		/* DosLatinUS (cp437)	*/
+#include <cp737_uni.h>		/* DosGreek (cp737)	*/
+#include <cp775_uni.h>		/* DosBaltRim (cp775)	*/
+#include <cp850_uni.h>		/* DosLatin1 (cp850)	*/
+#include <cp852_uni.h>		/* DosLatin2 (cp852)	*/
+#include <cp862_uni.h>		/* DosHebrew (cp862)	*/
+#include <cp864_uni.h>		/* DosArabic (cp864)	*/
+#include <cp866_uni.h>		/* DosCyrillic (cp866)	*/
+#include <cp869_uni.h>		/* DosGreek2 (cp869)	*/
+#include <def7_uni.h>		/* 7 bit approximations */
+#include <dmcs_uni.h>		/* DEC Multinational	*/
+#include <iso01_uni.h>		/* ISO Latin 1		*/
+#include <iso02_uni.h>		/* ISO Latin 2		*/
+#include <iso03_uni.h>		/* ISO Latin 3		*/
+#include <iso04_uni.h>		/* ISO Latin 4		*/
+#include <iso05_uni.h>		/* ISO 8859-5 Cyrillic	*/
+#include <iso06_uni.h>		/* ISO 8859-6 Arabic	*/
+#include <iso07_uni.h>		/* ISO 8859-7 Greek	*/
+#include <iso08_uni.h>		/* ISO 8859-8 Hebrew	*/
+#include <iso09_uni.h>		/* ISO 8859-9 (Latin 5) */
+#include <iso10_uni.h>		/* ISO 8859-10		*/
+#include <koi8r_uni.h>		/* KOI8-R Cyrillic	*/
+#include <mac_uni.h>		/* Macintosh (8 bit)	*/
+#include <mnem2_suni.h> 	/* RFC 1345 Mnemonic	*/
+#include <next_uni.h>		/* NeXT character set	*/
+#include <rfc_suni.h>		/* RFC 1345 w/o Intro	*/
+#include <utf8_uni.h>		/* UNICODE UTF 8	*/
+#include <viscii_uni.h> 	/* Vietnamese (VISCII)	*/
 #ifdef NOTDEFINED
-#include "mnem_suni.h"
+#include <mnem_suni.h>
 #endif /* NOTDEFINED */
 
 #define FREE(x) if (x) {free(x); x = NULL;}

@@ -1,63 +1,63 @@
-#include "HTUtils.h"
-#include "tcp.h"
-#include "HTAccess.h"
-#include "HTParse.h"
-#include "HTList.h"
-#include "HTML.h"
-#include "HTFTP.h"
-#include "HTFile.h"
-#include "HTTP.h"
-#include "HTAABrow.h"
-#include "HTNews.h"
-#include "LYCurses.h"
-#include "LYStyle.h"
-#include "LYGlobalDefs.h"
-#include "HTAlert.h"
-#include "LYUtils.h"
-#include "GridText.h"
-#include "LYStrings.h"
-#include "LYOptions.h"
-#include "LYSignal.h"
-#include "LYGetFile.h"
-#include "HTForms.h"
-#include "LYSearch.h"
-#include "LYClean.h"
-#include "LYHistory.h"
-#include "LYPrint.h"
-#include "LYMail.h"
-#include "LYEdit.h"
-#include "LYShowInfo.h"
-#include "LYBookmark.h"
-#include "LYSystem.h"
-#include "LYKeymap.h"
-#include "LYJump.h"
-#include "LYDownload.h"
-#include "LYList.h"
-#include "LYMap.h"
-#include "LYTraversal.h"
-#include "LYCharSets.h"
-#include "LYCharUtils.h"
-#include "LYCookie.h"
-#include "LYMainLoop.h"
+#include <HTUtils.h>
+#include <tcp.h>
+#include <HTAccess.h>
+#include <HTParse.h>
+#include <HTList.h>
+#include <HTML.h>
+#include <HTFTP.h>
+#include <HTFile.h>
+#include <HTTP.h>
+#include <HTAABrow.h>
+#include <HTNews.h>
+#include <LYCurses.h>
+#include <LYStyle.h>
+#include <LYGlobalDefs.h>
+#include <HTAlert.h>
+#include <LYUtils.h>
+#include <GridText.h>
+#include <LYStrings.h>
+#include <LYOptions.h>
+#include <LYSignal.h>
+#include <LYGetFile.h>
+#include <HTForms.h>
+#include <LYSearch.h>
+#include <LYClean.h>
+#include <LYHistory.h>
+#include <LYPrint.h>
+#include <LYMail.h>
+#include <LYEdit.h>
+#include <LYShowInfo.h>
+#include <LYBookmark.h>
+#include <LYSystem.h>
+#include <LYKeymap.h>
+#include <LYJump.h>
+#include <LYDownload.h>
+#include <LYList.h>
+#include <LYMap.h>
+#include <LYTraversal.h>
+#include <LYCharSets.h>
+#include <LYCharUtils.h>
+#include <LYCookie.h>
+#include <LYMainLoop.h>
 #ifdef DOSPATH
-#include "HTDOS.h"
+#include <HTDOS.h>
 #endif
 
 #ifdef USE_EXTERNALS
-#include "LYExtern.h"
+#include <LYExtern.h>
 #endif
 
 #ifdef VMS
-#include "HTVMSUtils.h"
+#include <HTVMSUtils.h>
 #endif /* VMS */
 
 #ifdef DIRED_SUPPORT
-#include "LYLocal.h"
-#include "LYUpload.h"
+#include <LYLocal.h>
+#include <LYUpload.h>
 #endif /* DIRED_SUPPORT */
 
-#include "LYexit.h"
-#include "LYLeaks.h"
+#include <LYexit.h>
+#include <LYLeaks.h>
 
 PRIVATE BOOL confirm_post_resub PARAMS((
     CONST char* 	address,

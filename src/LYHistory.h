@@ -3,7 +3,7 @@
 #define LYHISTORY_H
 
 #ifndef LYSTRUCTS_H
-#include "LYStructs.h"
+#include <LYStructs.h>
 #endif /* LYSTRUCTS_H */
 
 extern void LYAddVisitedLink PARAMS((document *doc));

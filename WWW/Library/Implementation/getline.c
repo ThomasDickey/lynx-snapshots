@@ -22,11 +22,11 @@ Cambridge, MA 02139, USA.  */
  * <getline.c>
  */
 
-#include "HTUtils.h"
-#include "tcp.h"
+#include <HTUtils.h>
+#include <tcp.h>
 #include <stddef.h>
 
-#include "LYLeaks.h"
+#include <LYLeaks.h>
 
 /* Read up to (and including) a newline from STREAM into *LINEPTR
    (and null-terminate it). *LINEPTR is a pointer returned from malloc (or

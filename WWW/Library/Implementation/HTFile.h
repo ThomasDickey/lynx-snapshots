@@ -10,10 +10,10 @@
 #ifndef HTFILE_H
 #define HTFILE_H
 
-#include "HTFormat.h"
-#include "HTAccess.h"
+#include <HTFormat.h>
+#include <HTAccess.h>
 #ifndef HTML_H
-#include "HTML.h"               /* SCW */
+#include <HTML.h>               /* SCW */
 #endif /* HTML_H */
 
 /*

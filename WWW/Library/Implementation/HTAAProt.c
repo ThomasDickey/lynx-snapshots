@@ -17,7 +17,7 @@
 **
 */
 
-#include "HTUtils.h"
+#include <HTUtils.h>
 
 #include <string.h>
 #ifndef VMS
@@ -27,13 +27,13 @@
 #endif /* NOUSERS */
 #endif /* not VMS */
 
-#include "HTAAUtil.h"
-#include "HTAAFile.h"
-#include "HTLex.h"	/* Lexical analysor	*/
-#include "HTAssoc.h"	/* Association list	*/
-#include "HTAAProt.h"	/* Implemented here	*/
+#include <HTAAUtil.h>
+#include <HTAAFile.h>
+#include <HTLex.h>	/* Lexical analysor	*/
+#include <HTAssoc.h>	/* Association list	*/
+#include <HTAAProt.h>	/* Implemented here	*/
 
-#include "LYLeaks.h"
+#include <LYLeaks.h>
 
 /*
 ** Protection setup caching

@@ -6,30 +6,30 @@
 **	------------------------------------------------
 */
 
-#include "HTUtils.h"
-#include "tcp.h"
+#include <HTUtils.h>
+#include <tcp.h>
 
 /* Implements:
 */
-#include "HTInit.h"
+#include <HTInit.h>
 
-#include "HTML.h"
-#include "HTPlain.h"
-#include "HTMLGen.h"
-#include "HTFile.h"
-#include "HTFormat.h"
-#include "HTMIME.h"
-#include "HTWSRC.h"
+#include <HTML.h>
+#include <HTPlain.h>
+#include <HTMLGen.h>
+#include <HTFile.h>
+#include <HTFormat.h>
+#include <HTMIME.h>
+#include <HTWSRC.h>
 
-#include "HTSaveToFile.h"  /* LJM */
-#include "userdefs.h"
-#include "LYUtils.h"
-#include "LYGlobalDefs.h"
-#include "LYSignal.h"
-#include "LYSystem.h"
+#include <HTSaveToFile.h>  /* LJM */
+#include <userdefs.h>
+#include <LYUtils.h>
+#include <LYGlobalDefs.h>
+#include <LYSignal.h>
+#include <LYSystem.h>
 
-#include "LYexit.h"
-#include "LYLeaks.h"
+#include <LYexit.h>
+#include <LYLeaks.h>
 
 #define FREE(x) if (x) {free(x); x = NULL;}
 

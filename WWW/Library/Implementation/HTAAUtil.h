@@ -31,10 +31,10 @@
 #define HTAAUTIL_H
 
 #ifndef HTUTILS_H
-#include "HTUtils.h"            /* BOOL, PARAMS, ARGS */
+#include <HTUtils.h>            /* BOOL, PARAMS, ARGS */
 #endif /* HTUTILS_H */
-#include "tcp.h"
-#include "HTList.h"
+#include <tcp.h>
+#include <HTList.h>
 
 #ifdef SHORT_NAMES
 #define HTAASenu        HTAAScheme_enum

@@ -12,10 +12,10 @@
  */
 #ifndef HTEXT_H
 #define HTEXT_H
-#include "HTAnchor.h"
-#include "HTStyle.h"
-#include "HTStream.h"
-#include "SGML.h"
+#include <HTAnchor.h>
+#include <HTStyle.h>
+#include <HTStream.h>
+#include <SGML.h>
 
 #ifdef SHORT_NAMES
 #define HTMainText                      HTMaText

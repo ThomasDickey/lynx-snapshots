@@ -32,12 +32,12 @@
 #define HTAASERV_H
 
 #ifndef HTUTILS_H
-#include "HTUtils.h"            /* BOOL, PARAMS, ARGS   */
+#include <HTUtils.h>            /* BOOL, PARAMS, ARGS   */
 #endif /* HTUTILS_H */
 /*#include <stdio.h> included by HTUtils.h -- FM *//* FILE                */
-#include "HTRules.h"            /* This module interacts with rule system */
-#include "HTAAUtil.h"           /* Common parts of AA   */
-#include "HTAuth.h"             /* Authentication       */
+#include <HTRules.h>            /* This module interacts with rule system */
+#include <HTAAUtil.h>           /* Common parts of AA   */
+#include <HTAuth.h>             /* Authentication       */
 
 
 #ifdef SHORT_NAMES

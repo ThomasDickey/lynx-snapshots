@@ -34,10 +34,10 @@
 **
 */
 
-#include "HTUtils.h"
-#include "HTUU.h"
+#include <HTUtils.h>
+#include <HTUU.h>
 
-#include "LYLeaks.h"
+#include <LYLeaks.h>
 
 PRIVATE char six2pr[64] = {
     'A','B','C','D','E','F','G','H','I','J','K','L','M',

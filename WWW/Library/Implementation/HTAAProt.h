@@ -6,10 +6,10 @@
 #define HTAAPROT_H
 
 #ifndef HTUTILS_H
-#include "HTUtils.h"
+#include <HTUtils.h>
 #endif /* HTUTILS_H */
-#include "HTGroup.h"
-#include "HTAssoc.h"
+#include <HTGroup.h>
+#include <HTAssoc.h>
 
 #ifdef SHORT_NAMES
 #define HTAAgUid        HTAA_getUid

@@ -3,7 +3,7 @@
 #define LYCHARUTILS_H
 
 #ifndef HTUTILS_H
-#include "HTUtils.h"
+#include <HTUtils.h>
 #endif /* HTUTILS_H */
 
 #define CHECK_ID(code) LYCheckForID(me, present, value, (int)code)

@@ -2,9 +2,9 @@
    Keybindings for line and form editting.
 */
 
-#include "HTUtils.h"
-#include "tcp.h"
-#include "LYStrings.h"
+#include <HTUtils.h>
+#include <tcp.h>
+#include <LYStrings.h>
 
 PUBLIC int current_lineedit = 0;  /* Index into LYLineEditors[]   */
 

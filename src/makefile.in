@@ -162,7 +162,7 @@ UCdomap.o: UCdomap.c chrtrans/UCkd.h chrtrans/makeuctb chrtrans/makeuctb.c \
 UCAux.o : UCAux.c $(CMN)UCAux.h $(CMN)UCDefs.h
 LYCookie.o: ../userdefs.h
 
-depend :
+depend : $(TABLES)
 	makedepend -fmakefile -- $(CC_OPTS) -- $(C_SRC)
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.

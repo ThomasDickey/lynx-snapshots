@@ -2,11 +2,11 @@
 **		================================
 */
 
-#include "HTUtils.h"
-#include "tcp.h"
-#include "HTParse.h"
+#include <HTUtils.h>
+#include <tcp.h>
+#include <HTParse.h>
 
-#include "LYLeaks.h"
+#include <LYLeaks.h>
 
 #define FREE(x) if (x) {free(x); x = NULL;}
 

@@ -13,33 +13,28 @@
 **	 2 Feb 93 Split from HTAccess.c. Registration.(TBL)
 */
 
-#include "HTUtils.h"
-#include "tcp.h"
+#include <HTUtils.h>
+#include <tcp.h>
 
 /* Implements:
 */
-#include "HTTelnet.h"
+#include <HTTelnet.h>
 
-#include "HTParse.h"
-#include "HTAnchor.h"
-#include "HTTP.h"
-#include "HTFile.h"
+#include <HTParse.h>
+#include <HTAnchor.h>
+#include <HTTP.h>
+#include <HTFile.h>
 /*#include <errno.h> included by tcp.h -- FM */
 /*#include <stdio.h> included by HTUtils.h -- FM */
 
-#include "HText.h"
+#include <HText.h>
 
-#include "HTAccess.h"
-#include "HTAlert.h"
-#if !defined (VMS) && !defined (_WINDOWS)
-#include "../../../userdefs.h"	/* for TELNET_COMMAND and RLOGIN_COMMAND */
-#endif /* not VMS */
+#include <HTAccess.h>
+#include <HTAlert.h>
 
-#ifdef _WINDOWS /* ../../.. doesn't work for me */
-#include "userdefs.h"  /* for TELNET_COMMAND and RLOGIN_COMMAND */
-#endif
+#include <userdefs.h>  /* for TELNET_COMMAND and RLOGIN_COMMAND */
 
-#include "LYLeaks.h"
+#include <LYLeaks.h>
 
 #define FREE(x) if (x) {free(x); x = NULL;}
 

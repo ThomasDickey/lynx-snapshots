@@ -25,17 +25,17 @@
 **		     relayed from HTLoadGopher. - FM
 */
 
-#include "HTUtils.h"
-#include "tcp.h"
-#include "HTAlert.h"
-#include "HTML.h"
-#include "HTParse.h"
-#include "HTFormat.h"
-#include "HTTCP.h"
-#include "HTString.h"
-#include "HTFinger.h"
+#include <HTUtils.h>
+#include <tcp.h>
+#include <HTAlert.h>
+#include <HTML.h>
+#include <HTParse.h>
+#include <HTFormat.h>
+#include <HTTCP.h>
+#include <HTString.h>
+#include <HTFinger.h>
 
-#include "LYLeaks.h"
+#include <LYLeaks.h>
 
 /* #define TRACE 1 */
 

@@ -28,21 +28,21 @@
 **	Cast all code into the Lynx programming style. - FM
 */
 
-#include "HTUtils.h"
-#include "tcp.h"
-#include "HTAlert.h"
-#include "HTParse.h"
-#include "LYCurses.h"
-#include "LYGlobalDefs.h"
-#include "LYUtils.h"
-#include "LYStrings.h"
-#include "LYCharUtils.h"
-#include "LYStructs.h"
-#include "LYGetFile.h"
-#include "LYHistory.h"
-#include "LYUpload.h"
-#include "LYLocal.h"
-#include "LYSystem.h"
+#include <HTUtils.h>
+#include <tcp.h>
+#include <HTAlert.h>
+#include <HTParse.h>
+#include <LYCurses.h>
+#include <LYGlobalDefs.h>
+#include <LYUtils.h>
+#include <LYStrings.h>
+#include <LYCharUtils.h>
+#include <LYStructs.h>
+#include <LYGetFile.h>
+#include <LYHistory.h>
+#include <LYUpload.h>
+#include <LYLocal.h>
+#include <LYSystem.h>
 
 #ifndef VMS
 #ifndef _WINDOWS
@@ -70,7 +70,7 @@
 # endif
 #endif
 
-#include "LYLeaks.h"
+#include <LYLeaks.h>
 
 #define FREE(x) if (x) {free(x); x = NULL;}
 
