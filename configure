@@ -1204,7 +1204,7 @@ CFLAGS=`echo ${CFLAGS} | sed -e 's/-O[1-9]\? //' -e 's/-O[1-9]\?$//'`
 else
 	case $host_os in
 	osf*) #(vi
-		test -n "$GCC" && CFLAGS="$CFLAGS -std1"
+		test -z "$GCC" && CFLAGS="$CFLAGS -std1"
 		CFLAGS=`echo ${CFLAGS} | sed -e 's/-g //' -e 's/-g$//'`
 		;;
 	*)

@@ -71,7 +71,7 @@ PUBLIC void LYAddVisitedLink ARGS1(
 	!strcmp((doc->title ? doc->title : ""), PRINT_OPTIONS_TITLE) ||
 	!strcmp((doc->title ? doc->title : ""), DOWNLOAD_OPTIONS_TITLE) ||
 #ifdef EXP_FORMS_OPTIONS
-       !strcmp((doc->title ? doc->title : ""), OPTIONS_TITLE) ||
+	!strcmp((doc->title ? doc->title : ""), OPTIONS_TITLE) ||
 #endif
 #ifdef DIRED_SUPPORT
 	!strcmp((doc->title ? doc->title : ""), DIRED_MENU_TITLE) ||
@@ -178,7 +178,7 @@ PUBLIC void LYpush ARGS2(
 	    /* But it is nice to have the last position remembered!
 	       - kw */
 	    history[nhist-1].link = doc->link;
-	    history[nhist-1].page = doc->line;
+	    history[nhist-1].line = doc->line;
 	    return;
 	}
     }
@@ -216,7 +216,7 @@ PUBLIC void LYpush ARGS2(
      */
     if (nhist < MAXHIST)  {
 	history[nhist].link = doc->link;
-	history[nhist].page = doc->line;
+	history[nhist].line = doc->line;
 	history[nhist].title = NULL;
 	StrAllocCopy(history[nhist].title, doc->title);
 	history[nhist].address = NULL;
@@ -336,7 +336,7 @@ PUBLIC void LYpop ARGS1(
     if (nhist > 0) {
 	nhist--;
 	doc->link = history[nhist].link;
-	doc->line = history[nhist].page;
+	doc->line = history[nhist].line;
 	FREE(doc->title);
 	doc->title = history[nhist].title;	 /* will be freed later */
 	FREE(doc->address);
@@ -366,7 +366,7 @@ PUBLIC void LYpop_num ARGS2(
 {
     if (number >= 0 && nhist > number) {
 	doc->link = history[number].link;
-	doc->line = history[number].page;
+	doc->line = history[number].line;
 	StrAllocCopy(doc->title, history[number].title);
 	StrAllocCopy(doc->address, history[number].address);
 	StrAllocCopy(doc->post_data, history[number].post_data);

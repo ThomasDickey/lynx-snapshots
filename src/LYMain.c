@@ -1053,6 +1053,10 @@ PUBLIC int main ARGS2(
     StrAllocCat(LYTraceLogPath, "/Lynx.trace");
 #endif /* VMS */
     if (TRACE && LYUseTraceLog) {
+#if defined(__DJGPP__) || defined(_WINDOWS)
+	_fmode = O_TEXT;
+#endif /* __DJGPP__  or _WINDOWS */
+
 	/*
 	 *  If we can't open it for writing, give up.
 	 *  Otherwise, on VMS close it, delete it and any
@@ -1062,6 +1066,10 @@ PUBLIC int main ARGS2(
 	if ((LYTraceLogFP = LYNewTxtFile(LYTraceLogPath)) == NULL) {
 	    WWW_TraceFlag = FALSE;
 	    fprintf(stderr, "%s\n", TRACELOG_OPEN_FAILED);
+
+#if defined(__DJGPP__) || defined(_WINDOWS)
+		_fmode = O_BINARY;
+#endif /* __DJGPP__ or _WINDOWS */
 	    exit(-1);
 	}
 #ifdef VMS

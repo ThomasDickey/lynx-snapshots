@@ -1995,7 +1995,7 @@ PRIVATE char ** LYUCFullyTranslateString_1 ARGS9(
 		} else {
 		    code = lcode;
 		    if ((code == 1) ||
-		       (code > 129 && code < 156)) {
+		       (code > 127 && code < 156)) {
 			/*
 			** Assume these are Microsoft code points, inflicted on
 			** us by FrontPage.  - FM
@@ -2010,6 +2010,12 @@ PRIVATE char ** LYUCFullyTranslateString_1 ARGS9(
 			    **	WHITE SMILING FACE
 			    */
 			    code = 0x263a;
+			    break;
+			case 128:
+			    /*
+			    **	EURO currency sign
+			    */
+			    code = 0x20ac;
 			    break;
 			case 130:
 			    /*
@@ -3538,7 +3544,7 @@ PUBLIC int LYLegitimizeHREF ARGS4(
 		    fprintf(tfp,
 			 "                  Stripping lead dots.\n");
 		} else if (!me->inBadHREF) {
-		    HTAlert(BAD_PARTIAL_REFERENCE);
+		    HTUserMsg(BAD_PARTIAL_REFERENCE);
 		    me->inBadHREF = TRUE;
 		}
 	    }

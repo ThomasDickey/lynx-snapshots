@@ -845,7 +845,6 @@ PUBLIC UCode_t HTMLGetEntityUCValue ARGS1(
     UCode_t value = 0;
     size_t i, high, low;
     int diff = 0;
-/*  CONST char ** entities = HTML_dtd.entity_names;  */
     CONST UC_entity_info * unicode_entities = HTML_dtd.unicode_entity_info;
 
     /*
@@ -853,72 +852,6 @@ PUBLIC UCode_t HTMLGetEntityUCValue ARGS1(
      */
     if (!(name && *name))
 	return(value);
-
-
-#ifdef NOTDEFINED
-/*
-**  unicode_entities[] now handles all names from entities[], so disable latter.
-**  Let us keep this some sort of comment until we remove
-**  all calls to old-style entities[] from the code. - LP
-*/
-
-    /*
-     *	Handle names that have control characters
-     *	or strings in ISO_Latin1[]. - FM
-     */
-    if (!strcmp(name, "nbsp")) {
-	return(160);
-    }
-    if (!strcmp(name, "shy")) {
-	return(173);
-    }
-    if (!strcmp(name, "ensp")) {
-	return(8194);
-    }
-    if (!strcmp(name, "emsp")) {
-	return(8195);
-    }
-    if (!strcmp(name, "thinsp")) {
-	return(8201);
-    }
-    if (!strcmp(name, "ndash") ||
-	!strcmp(name, "endash")) {
-	return(8211);
-    }
-    if (!strcmp(name, "mdash") ||
-	!strcmp(name, "emdash")) {
-	return(8212);
-    }
-    if (!strcmp(name, "trade")) {
-	return(8482);
-    }
-
-    /*
-     *	Now try ISO_Latin1[]. - FM
-     */
-    for (low = 0, high = HTML_dtd.number_of_entities;
-	 high > low;
-	 diff < 0 ? (low = i+1) : (high = i)) {
-	/*
-	**  Binary search.
-	*/
-	i = (low + (high-low)/2);
-	diff = strcmp(entities[i], name);
-	if (diff == 0) {
-	    if (strlen(ISO_Latin1[i]) == 1) {
-		value = (unsigned char)(ISO_Latin1[i][0]);
-	    }
-	    break;
-	}
-    }
-    if (value > 0) {
-	return(value);
-    }
-
-    /*
-     *	Not yet found...    - FM
-     */
-#endif /* NOTDEFINED */
 
     /*
      *	Try UC_entity_info unicode_entities[].
@@ -947,7 +880,7 @@ PUBLIC UCode_t HTMLGetEntityUCValue ARGS1(
 PUBLIC void HTMLUseCharacterSet ARGS1(int,i)
 {
     p_entity_values = LYCharSets[i];
-    HTMLSetCharacterHandling(i);  /* deals with assume_char_set and LYRawMode */
+    HTMLSetCharacterHandling(i);     /* set LYRawMode and CJK attributes */
     HTMLSetHaveCJKCharacterSet(i);
     HTMLSetDisplayCharsetMatchLocale(i);
     return;

@@ -356,7 +356,7 @@ PRIVATE void store_cookie ARGS3(
 				1));
 
 	    if (msg == 0)
-	    	outofmem(__FILE__, "store_cookie");
+		outofmem(__FILE__, "store_cookie");
 	    sprintf(msg,
 		    INVALID_COOKIE_DOMAIN_CONFIRMATION,
 		    co->domain,
@@ -414,14 +414,14 @@ PRIVATE void store_cookie ARGS3(
 	     * something like Netlink, where there are lots of websites
 	     * under www.netlink.co.uk, this isn't sensible.  However,
 	     * taking this sort of decision down to cookie level also
-	     * isn't sensible.  Perhaps something based on the domain
+	     * isn't sensible.	Perhaps something based on the domain
 	     * and the path in conjunction makes more sense?  - RP
 	     */
 	    if (co->flags & COOKIE_FLAG_PERSISTENT)
-	        de->bv = FROM_FILE;
+		de->bv = FROM_FILE;
 	    else
 #endif
-	        de->bv = QUERY_USER;
+		de->bv = QUERY_USER;
 	    cookie_list = de->cookie_list = HTList_new();
 	    StrAllocCopy(de->domain, co->domain);
 	    HTList_addObject(domain_list, de);
@@ -1138,7 +1138,7 @@ PRIVATE void LYProcessSetCookies ARGS6(
 				(cur_cookie->value ?
 				 cur_cookie->value : "[no value]"));
 		    CTRACE(tfp,
-			"                     due to excessive length!\n");
+			   "                     due to excessive length!\n");
 		    freeCookie(cur_cookie);
 		    cur_cookie = NULL;
 		}
@@ -2428,17 +2428,25 @@ Delete_all_cookies_in_domain:
     return(HT_LOADED);
 }
 
+
 /* cookie_add_acceptlist
- *   is passed a comma delimited string of domains (with leading '.')
- *   to add to the "always accept" list for cookies.
+ *   is passed a string of domains (with leading '.', and comma
+ *   delimited) to add to the "always accept" list for cookies. -BJP
  */
 
 PUBLIC void cookie_add_acceptlist ARGS1(
-	char *,		acceptdomains)
+	char *, 	acceptstr)
 {
     domain_entry *de = NULL;
-    char **domain1 = 0;
-    char **origstr = 0;
+    domain_entry *de2 = NULL;
+    HTList *hl;
+    char **str = (char **)calloc(1, sizeof(acceptstr));
+    char *strsmall = (char *)calloc(1, sizeof(acceptstr));
+    int isexisting = FALSE;
+
+    /* is this the first cookie we're handling? if so, initialize the
+     * domain_list.
+     */
 
     if (domain_list == NULL) {
 	atexit(LYCookieJar_free);
@@ -2446,46 +2454,66 @@ PUBLIC void cookie_add_acceptlist ARGS1(
 	total_cookies = 0;
     }
 
-    *origstr = (char *)acceptdomains;
+    *str = acceptstr;
 
-    for(; (*domain1 = LYstrsep(origstr, ",")) != NULL;) {
-	if(**domain1 != '\0') {
+    for(; (strsmall = LYstrsep(str, ","));) {
+	if(strsmall == NULL)
+	    break;
+
+	/* check the list of existing cookies to see if this is a
+	 * re-setting of an already existing cookie -- if so, just
+	 * change the behavior, if not, create a new domain entry
+	 */
+
+	for (hl = domain_list; hl != NULL; hl = hl->next) {
+	    de2 = (domain_entry *)hl->object;
+	    if ((de2 != NULL && de2->domain != NULL) &&
+		!strcmp(strsmall, de2->domain)) {
+			isexisting = TRUE;
+			break;
+	    } else {
+		isexisting = FALSE;
+	    }
+	}
+
+	if(!isexisting) {
 	    de = (domain_entry *)calloc(1, sizeof(domain_entry));
 
 	    if (de == NULL)
-		    outofmem(__FILE__, "cookie_accept_domains");
+		    outofmem(__FILE__, "cookie_accept_domain");
 
 	    de->bv = ACCEPT_ALWAYS;
 
-	    StrAllocCopy(de->domain, *domain1);
+	    StrAllocCopy(de->domain, strsmall);
 	    HTList_addObject(domain_list, de);
+	} else {
+	    de2->bv = ACCEPT_ALWAYS;
 	}
     }
 
-    /* then one last one, cos that's how LYstrsep() works */
-
-    de = (domain_entry *)calloc(1, sizeof(domain_entry));
-
-    if (de == NULL)
-	    outofmem(__FILE__, "cookie_accept_domains");
-
-    de->bv = ACCEPT_ALWAYS;
-
-    StrAllocCopy(de->domain, *origstr);
-    HTList_addObject(domain_list, de);
+    FREE(str);
+    FREE(strsmall);
 }
 
+
 /* cookie_add_rejectlist
- *   is passed a comma delimited string of domains (with leading '.')
- *   to add to the "always reject" list for cookies.
+ *   is passed a string of domains (with leading '.', and comma
+ *   delimited) to add to the "always reject" list for cookies. -BJP
  */
 
 PUBLIC void cookie_add_rejectlist ARGS1(
-	char *,		rejectdomains)
+	char *, 	rejectstr)
 {
     domain_entry *de = NULL;
-    char **domain1 = 0;
-    char **origstr = 0;
+    domain_entry *de2 = NULL;
+    HTList *hl;
+    char **str = (char **)calloc(1, sizeof(rejectstr));
+    char *strsmall = (char *)calloc(1, sizeof(rejectstr));
+    int isexisting = FALSE;
+
+    /* is this the first cookie we're handling? if so, initialize the
+     * domain_list.
+     */
 
     if (domain_list == NULL) {
 	atexit(LYCookieJar_free);
@@ -2493,33 +2521,45 @@ PUBLIC void cookie_add_rejectlist ARGS1(
 	total_cookies = 0;
     }
 
-    *origstr = rejectdomains;
+    *str = rejectstr;
 
-    for(; (*domain1 = LYstrsep(origstr, ",")) != NULL;) {
-	if(**domain1 != '\0') {
+    for(; (strsmall = LYstrsep(str, ","));) {
+	if(strsmall == NULL)
+	    break;
+
+	/* check the list of existing cookies to see if this is a
+	 * re-setting of an already existing cookie -- if so, just
+	 * change the behavior, if not, create a new domain entry
+	 */
+
+	for (hl = domain_list; hl != NULL; hl = hl->next) {
+	    de2 = (domain_entry *)hl->object;
+	    if ((de2 != NULL && de2->domain != NULL) &&
+		!strcmp(strsmall, de2->domain)) {
+			isexisting = TRUE;
+			break;
+	    } else {
+		isexisting = FALSE;
+	    }
+	}
+
+	if(!isexisting) {
 	    de = (domain_entry *)calloc(1, sizeof(domain_entry));
 
 	    if (de == NULL)
-		    outofmem(__FILE__, "cookie_reject_domains");
+		    outofmem(__FILE__, "cookie_reject_domain");
 
 	    de->bv = REJECT_ALWAYS;
 
-	    StrAllocCopy(de->domain, *domain1);
+	    StrAllocCopy(de->domain, strsmall);
 	    HTList_addObject(domain_list, de);
+	} else {
+	    de2->bv = REJECT_ALWAYS;
 	}
     }
 
-    /* then one last one, cos that's how LYstrsep() works */
-
-    de = (domain_entry *)calloc(1, sizeof(domain_entry));
-
-    if (de == NULL)
-	    outofmem(__FILE__, "cookie_reject_domains");
-
-    de->bv = REJECT_ALWAYS;
-
-    StrAllocCopy(de->domain, *origstr);
-    HTList_addObject(domain_list, de);
+    FREE(str);
+    FREE(strsmall);
 }
 
 #ifdef GLOBALDEF_IS_MACRO

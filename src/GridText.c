@@ -4644,14 +4644,13 @@ PUBLIC void print_wwwfile_to_fd ARGS2(
 	 */
 	for (i = 0; line->data[i] != '\0'; i++) {
 	    if (!IsSpecialAttrChar(line->data[i])) {
-		fputc(line->data[i],fp);
+		fputc(line->data[i], fp);
 	    } else if (line->data[i] == LY_SOFT_HYPHEN &&
 		line->data[i + 1] == '\0') { /* last char on line */
 		if (dump_output_immediately &&
 		    LYRawMode &&
 		    LYlowest_eightbit[current_char_set] <= 173 &&
-		    (current_char_set == 0 ||
-		     LYCharSet_UC[current_char_set].enc == UCT_ENC_8859 ||
+		    (LYCharSet_UC[current_char_set].enc == UCT_ENC_8859 ||
 		     LYCharSet_UC[current_char_set].like8859 &
 				  UCT_R_8859SPECL)) {
 		    fputc(0xad, fp); /* the iso8859 byte for SHY */
@@ -4726,19 +4725,18 @@ PUBLIC void print_crawl_to_fd ARGS3(
 	for (i = 0; line->data[i] != '\0'; i++) {
 	    if (!IsSpecialAttrChar(line->data[i])) {
 		fputc(line->data[i], fp);
-	     } else if (line->data[i] == LY_SOFT_HYPHEN &&
-		 line->data[i + 1] == '\0') { /* last char on line */
-		 if (dump_output_immediately &&
-		     LYRawMode &&
-		     LYlowest_eightbit[current_char_set] <= 173 &&
-		     (current_char_set == 0 ||
-		      LYCharSet_UC[current_char_set].enc == UCT_ENC_8859 ||
-		      LYCharSet_UC[current_char_set].like8859 &
-				   UCT_R_8859SPECL)) {
-		     fputc(0xad, fp); /* the iso8859 byte for SHY */
-		 } else {
-		     fputc('-', fp);
-		 }
+	    } else if (line->data[i] == LY_SOFT_HYPHEN &&
+		line->data[i + 1] == '\0') { /* last char on line */
+		if (dump_output_immediately &&
+		    LYRawMode &&
+		    LYlowest_eightbit[current_char_set] <= 173 &&
+		    (LYCharSet_UC[current_char_set].enc == UCT_ENC_8859 ||
+		     LYCharSet_UC[current_char_set].like8859 &
+				  UCT_R_8859SPECL)) {
+		    fputc(0xad, fp); /* the iso8859 byte for SHY */
+		} else {
+		    fputc('-', fp);
+		}
 	     }
 	}
 

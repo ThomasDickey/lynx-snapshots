@@ -12,7 +12,7 @@ LYStyle.o LYHash.o
 CFLAGS= $(MCFLAGS) -I. -I.. $(SLANGINC)
 
 CC = gcc
-MCFLAGS = -O3 -DDISP_PARTIAL -DUSE_ZLIB -DUSE_EXTERNALS -DCOLOR_CURSES -DNCURSES -DFANCY_CURSES -DACCESS_AUTH -DNO_CUSERID -DNOUSERS -DDOSPATH -DNO_TTYTYPE -DNO_UTMP -Ichrtrans -I../WWW/library/implementation -I../curses  -I../djgpp/tcplib/include -I../djgpp/tcplib/include/tcp
+MCFLAGS = -O3 -DHAVE_GETBKGD -DDISP_PARTIAL -DUSE_ZLIB -DUSE_EXTERNALS -DCOLOR_CURSES -DNCURSES -DFANCY_CURSES -DACCESS_AUTH -DNO_CUSERID -DNOUSERS -DDOSPATH -DNO_TTYTYPE -DNO_UTMP -Ichrtrans -I../WWW/library/implementation -I../curses  -I../djgpp/tcplib/include -I../djgpp/tcplib/include/tcp
 WWWLIB = ../WWW/library/djgpp/libwww.a ../curses/pdcurses.a ../djgpp/tcplib/obj/libtcp.a
 LIBS=-lz
 

@@ -1742,7 +1742,7 @@ top1:
 	    if ((context->isHex ? sscanf(string->data, "%lx", &code) :
 				  sscanf(string->data, "%ld", &code)) == 1) {
 		if ((code == 1) ||
-		    (code > 129 && code < 156)) {
+		    (code > 127 && code < 156)) {
 		    /*
 		    **	Assume these are Microsoft code points,
 		    **	inflicted on us by FrontPage. - FM
@@ -1757,6 +1757,12 @@ top1:
 			    **	WHITE SMILING FACE
 			    */
 			    code = 0x263a;
+			    break;
+			case 128:
+			    /*
+			    **	EURO currency sign
+			    */
+			    code = 0x20ac;
 			    break;
 			case 130:
 			    /*

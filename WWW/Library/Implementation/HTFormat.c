@@ -488,13 +488,23 @@ PRIVATE void HTDisplayPartial NOARGS
 	**
 	**  Update NumOfLines_partial only if we repaint the display,
 	**  so it corresponds to real number of displayed lines.
-	**  Repaint the page only if Newline_partial
-	**  in our hand is fact:
+	**  Repaint the page only when necessary:
 	*/
-	if ((Newline_partial <= HText_getNumOfLines()) &&
-		((Newline_partial + display_lines) > NumOfLines_partial))  {
+	if ((Newline_partial + display_lines) > NumOfLines_partial) {
+		/* current page not complete... */
+	if ((Newline_partial + 2)  < HText_getNumOfLines()) {
+		/* and we MAY display at least a couple of lines on the top.
+		**
+		** Note: we check the lines in _rendered_ document
+		** and real HTML source may have several Kb of headers,
+		** Javascript applets etc., which are not visible in lynx
+		** and we got a delay (correct).
+		** We should NOT try to repaint at that early stage
+		** to avoid interfere with previously displayed document. - LP
+		*/
 	    NumOfLines_partial = HText_getNumOfLines();
 	    HText_pageDisplay(Newline_partial, "");
+	}
 	}
     }
 }

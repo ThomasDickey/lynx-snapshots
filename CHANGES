@@ -1,6 +1,37 @@
 Changes since Lynx 2.8 release
 ================================================================================
 
+1998-08-21 (2.8.1dev.22)
+* correct test for -std1 compiler option on Digital Unix (reported by Michael
+  Warner) - TD
+* modify treatment of COLLAPSE_BR_TAGS, so that if it is set TRUE, two or more
+  concurrent BRs will be collapsed into a single blank line.  Note that the
+  valid way to insert extra blank lines in HTML is via a PRE block with only
+  newlines in the block (David Henderson <davidh@psiphi.org>)
+* clarification in userdefs.h - HN
+* MS Windows codepages updated for EURO SIGN (0x20AC), from ftp.unicode.org - LP
+* minor fix for DISP_PARTIAL, solves problem of interfering with previously
+  displayed document - LP
+* ifdef DOS/WINDOWS to open lynx.trace in text mode - LP
+* rearrange text in lynx.cfg concerning character_set - LP 
+* correct miscellaneous typos - LP
+* Fixed:  Verbose images now work with [IMAGE]-Submit.  Also, fixed the core
+  dump when clickable_images is on.  The problem was an oversight in
+  MakeNewTitle() - LE
+* reviewed the INSTALLATION file as it relates to DOS and updated it for the
+  newly released version of PDCurses 2.3.  Added the HAVE_GETBKGD define to
+  makefile.dos, fixes some of the unusual background color handling that was
+  present in the PDCurses DOS port - DK
+* correct ifdef:  LYOptions.c fails to build with -DEXP_FORMS_OPTIONS but
+  _without_ -DDIRED_SUPPORT (e.g.  djgpp) - LP
+* redesigned cookie_add_{accept,reject}list in LYCookie.c -- they work now - BJP
+* added COOKIE_{ACCEPT,REJECT}_DOMAINS in .lynxrc handling to LYrcFile.c - BJP
+* slight spacing fix in lynx.cfg - BJP
+* added blurb in lynx.cfg about COOKIE_{ACCEPT,REJECT}_DOMAINS - BJP
+* -accept_all_cookies on the commandline works as a toggle now (against
+  lynx.cfg value -- NOT against .lynxrc value) - BJP
+* change HtAlert for bad partial reference to an HtUserMsg to make it less
+  annoying (request by Philip Webb, Jason McBrayer)
 1998-08-15 (2.8.1dev.21)
 * correct pathname for help file in forms-options screen - TD
 * reduce clutter in LYOptions.c with SELECTED, DISABLED, NOTEMPTY macros,
@@ -11,7 +42,7 @@ Changes since Lynx 2.8 release
 * add/use HTUserMsg to encapsulate most of the important messages - TD
 * add/use HTInfoMsg to encapsulate most of the informational messages - TD
 * make most of the alert messages use HTAlert, for consistency - TD
-* exclude forms-options pages from history page - LP
+* exclude forms-options pages from Visited Links page - LP
 * The current keymapping for the DOS Slang ports maps the keys directly to lynx
   actions via keymap.c.  There are several places in the code that test for
   arrow keys, page up or down, home and end for special handling that depend on
@@ -43,9 +74,9 @@ Changes since Lynx 2.8 release
 * Forms options menu:  add a link on option_help.html; synchronize
   option_help.html against Lynx_User_guide.html and lynx.cfg.  Rename label
   "raw 8-bit or CJK Mode" with "CJK Mode" for CJK people and "raw 8-bit" for
-  others.  Cleanup postoptions() by introducing flags.
-* Force HTuncache_current_document if gen_options() invoked.  - LP This is a
-  dirty fix until we uncache only when necessary.  - LP
+  others.  Cleanup postoptions() by introducing flags. - LP
+* Force HTuncache_current_document if gen_options() invoked. This is a
+  dirty fix until we uncache previous document only when necessary.  - LP
 * Add time/date in addition to X-URL and BASE (PrependBaseToSource), (request
   by Hans-Joachim Gurt <gurt@nacamar.net>) - LP
 * Turn partial_display off if we are not interactive (reported by Ari Moisio

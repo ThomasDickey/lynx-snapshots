@@ -110,10 +110,11 @@ PRIVATE void change_paragraph_style PARAMS((HTStructured * me,
 /*
  * If we have verbose_img set, display labels for images.
  */
-#define VERBOSE_IMG(value,string) \
-      ((verbose_img) ? (newtitle = MakeNewTitle(value)): string)
+#define VERBOSE_IMG(value,src_type,string) \
+      ((verbose_img) ? (newtitle = MakeNewTitle(value,src_type)): string)
 
-PRIVATE char * MakeNewTitle PARAMS((CONST char ** value));
+PRIVATE char * MakeNewTitle PARAMS((CONST char ** value, int src_type));
+PRIVATE char * MakeNewImageValue PARAMS((CONST char ** value));
 
 /*	Set an internal flag that the next call to a stack-affecting method
 **	is only internal and the stack manipulation should be skipped. - kw
@@ -1532,8 +1533,15 @@ PRIVATE void HTML_start_element ARGS6(
     case HTML_BR:
 	UPDATE_STYLE;
 	CHECK_ID(HTML_GEN_ID);
+	  /* Add a \r (new line) if one of these three scenarios are true: 
+	   *   1. We are not collapsing BR's, or 
+	   *   2. (we are collapsing and) This line has text on it, or 
+	   *   3. (we are collapsing and) The previous line has text on it. 
+	   * Otherwise, don't do anything. -DH 980814 
+	   */ 
 	if ((LYCollapseBRs == FALSE) ||
-	    HText_LastLineSize(me->text, FALSE)) {
+	    HText_LastLineSize(me->text, FALSE) || 
+	    HText_PreviousLineSize(me->text, FALSE)) { 
 	    HText_setLastChar(me->text, ' ');  /* absorb white space */
 	    HText_appendCharacter(me->text, '\r');
 	}
@@ -2718,7 +2726,7 @@ PRIVATE void HTML_start_element ARGS6(
 		    } else if (me->inA == TRUE && dest) {
 			StrAllocCopy(alt_string, (title ?
 						  title :
-						  VERBOSE_IMG(value, "[LINK]")));
+						  VERBOSE_IMG(value, HTML_IMG_SRC, "[LINK]")));
 
 		    } else {
 			StrAllocCopy(alt_string,
@@ -2726,7 +2734,7 @@ PRIVATE void HTML_start_element ARGS6(
 						  ((present &&
 						    present[HTML_IMG_ISOBJECT]) ?
 						    "(OBJECT)" :
-						    VERBOSE_IMG(value, "[INLINE]"))));
+						    VERBOSE_IMG(value, HTML_IMG_SRC, "[INLINE]"))));
 		    }
 		}
 	    }
@@ -2743,7 +2751,7 @@ PRIVATE void HTML_start_element ARGS6(
 	} else if (me->inA == TRUE && dest) {
 	    StrAllocCopy(alt_string, (title ?
 				      title :
-				      VERBOSE_IMG(value, "[LINK]")));
+				      VERBOSE_IMG(value, HTML_IMG_SRC, "[LINK]")));
 
 	} else {
 	    if (pseudo_inline_alts || clickable_images)
@@ -2751,7 +2759,7 @@ PRIVATE void HTML_start_element ARGS6(
 			  ((present &&
 			    present[HTML_IMG_ISOBJECT]) ?
 					     "(OBJECT)" :
-					     VERBOSE_IMG(value, "[INLINE]"))));
+					     VERBOSE_IMG(value, HTML_IMG_SRC, "[INLINE]"))));
 	    else
 		StrAllocCopy(alt_string, (title ?
 					  title : ""));
@@ -2880,7 +2888,7 @@ PRIVATE void HTML_start_element ARGS6(
 			       present[HTML_IMG_ISOBJECT]) ?
 		   ((map_href || dest_ismap) ?
 				   "(IMAGE)" : "(OBJECT)") :
-				   VERBOSE_IMG(value, "[IMAGE]")));
+				   VERBOSE_IMG(value, HTML_IMG_SRC, "[IMAGE]")));
 		if (id_string && !map_href) {
 		    if ((ID_A = HTAnchor_findChildAndLink(
 				  me->node_anchor,	/* Parent */
@@ -2935,7 +2943,7 @@ PRIVATE void HTML_start_element ARGS6(
 			     ((present &&
 			       present[HTML_IMG_ISOBJECT]) ?
 						 "(IMAGE)" :
-						 VERBOSE_IMG(value, "[IMAGE]")));
+						 VERBOSE_IMG(value, HTML_IMG_SRC, "[IMAGE]")));
 	    } else {
 		HTML_put_character(me, ' ');  /* space char may be ignored */
 		me->in_word = NO;
@@ -4203,6 +4211,7 @@ PRIVATE void HTML_start_element ARGS6(
 	    int chars;
 	    BOOL UseALTasVALUE = FALSE;
 	    BOOL HaveSRClink = FALSE;
+	    char* ImageSrc = NULL;
 	    BOOL IsSubmitOrReset = FALSE;
 
 	    /* init */
@@ -4359,7 +4368,12 @@ PRIVATE void HTML_start_element ARGS6(
 		 */
 		UseALTasVALUE = TRUE;
 	    }
-	    if (clickable_images == TRUE &&
+	    if (verbose_img && !clickable_images &&
+		present && present[HTML_INPUT_SRC] &&
+		value[HTML_INPUT_SRC] && *value[HTML_INPUT_SRC] &&
+		I.type && !strcasecomp(I.type, "image")) {
+		ImageSrc = MakeNewImageValue(value);
+	    } else if (clickable_images == TRUE &&
 		present && present[HTML_INPUT_SRC] &&
 		value[HTML_INPUT_SRC] && *value[HTML_INPUT_SRC] &&
 		I.type && !strcasecomp(I.type, "image")) {
@@ -4405,7 +4419,7 @@ PRIVATE void HTML_start_element ARGS6(
 		    HText_beginAnchor(me->text, me->inUnderline, me->CurrentA);
 		    if (me->inBoldH == FALSE)
 			HText_appendCharacter(me->text, LY_BOLD_START_CHAR);
-		    HTML_put_string(me, VERBOSE_IMG(value, "[IMAGE]"));
+		    HTML_put_string(me, VERBOSE_IMG(value,HTML_INPUT_SRC,"[IMAGE]"));
 		    if (me->inBoldH == FALSE)
 			HText_appendCharacter(me->text, LY_BOLD_END_CHAR);
 		    HText_endAnchor(me->text, 0);
@@ -4486,6 +4500,11 @@ PRIVATE void HTML_start_element ARGS6(
 		 */
 		StrAllocCopy(I_value, "Submit");
 		I.value = I_value;
+	    } else if ( ImageSrc ) {
+		/* [IMAGE]-Submit with verbose images and not clickable images.
+		 * Use ImageSrc if no other alt or value is supplied. --LE
+		 */
+		I.value = ImageSrc;
 	    }
 	    if (present && present[HTML_INPUT_CHECKED])
 		I.checked = YES;
@@ -7415,18 +7434,33 @@ PUBLIC int HTLoadError ARGS3(
 }
 
 
-PRIVATE char * MakeNewTitle ARGS1(CONST char **, value)
+PRIVATE char * MakeNewTitle ARGS2(CONST char **, value, int, src_type)
 {
     char *ptr;
     char *newtitle = NULL;
 
     StrAllocCopy(newtitle, "[");
-    ptr = strrchr(value[HTML_IMG_SRC], '/');
+    ptr = strrchr(value[src_type], '/');
     if (!ptr) {
-	StrAllocCat(newtitle, value[HTML_IMG_SRC]);
+	StrAllocCat(newtitle, value[src_type]);
     } else {
 	StrAllocCat(newtitle, ptr + 1);
     }
     StrAllocCat(newtitle, "]");
+    return newtitle;
+}
+PRIVATE char * MakeNewImageValue ARGS1(CONST char **, value)
+{
+    char *ptr;
+    char *newtitle = NULL;
+
+    StrAllocCopy(newtitle, "[");
+    ptr = strrchr(value[HTML_INPUT_SRC], '/');
+    if (!ptr) {
+	StrAllocCat(newtitle, value[HTML_INPUT_SRC]);
+    } else {
+	StrAllocCat(newtitle, ptr + 1);
+    }
+    StrAllocCat(newtitle, "]-Submit");
     return newtitle;
 }
