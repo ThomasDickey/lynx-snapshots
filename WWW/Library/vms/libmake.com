@@ -64,6 +64,7 @@ $ if agent .eq. 5 .or. p1 .eqs. "SOCKETSHR_TCP" then transport = "SOCKETSHR_TCP"
 $ if agent .eq. 6 .or. p1 .eqs. "TCPWARE" then transport = "TCPWARE"
 $ if agent .eq. 7 .or. p1 .eqs. "DECNET" then transport = "DECNET"
 $!
+$ if transport .eqs. "SOCKETSHR_TCP" then extra = extra + ",_DECC_V4_SOURCE"
 $ if transport .eqs. "TCPWARE" then extra = extra + ",UCX"
 $!
 $!	Compiler options can be specified here.  If there was

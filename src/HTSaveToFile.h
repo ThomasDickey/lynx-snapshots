@@ -1,7 +1,10 @@
 #ifndef HTSAVETOFILE_H
 #define HTSAVETOFILE_H
 
+#ifndef HTUTILS_H
 #include <HTUtils.h>
+#endif
+
 #include <HTStream.h>
 #include <HTFormat.h>
 

@@ -1,7 +1,9 @@
 #ifndef LYCURSES_H
 #define LYCURSES_H
 
+#ifndef HTUTILS_H
 #include <HTUtils.h>
+#endif
 
 /*
  * The simple color scheme maps the 8 combinations of bold/underline/reverse
@@ -342,6 +344,14 @@ extern int  lynx_chg_color PARAMS((int, int, int));
 #endif /* VMS */
 
 #else /* Not FANCY_CURSES: */
+
+#ifdef COLOR_CURSES
+#undef COLOR_CURSES
+Error FANCY_CURSES
+There is a problem with the configuration.  We expect to have FANCY_CURSES
+defined when COLOR_CURSES is defined, since we build on the attributes used in
+FANCY_CURSES.  Check your config.log to see why the FANCY_CURSES test failed.
+#endif
 
 /*
  *  We only have [w]standout() and [w]standin(),

@@ -1,6 +1,36 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+1999-05-12 (2.8.2pre.3)
+* add DEBUG_SOURCE_CACHE makefile flag so all documents will be cached in
+  SOURCE_CACHE mode, including local files.  Normally undef'ed so only http
+  served documents cached with sources -LP
+* in LYK_HISTORY, set newdoc.link = 1 so position at link #2 bypassing "recent
+  statusline messages" link -LP
+* comment out "partial_thres=" option in .lynxrc (it was coded so the changes
+  from lynx.cfg file could not be activated) -LP
+* add a sanity check to LYCurses.h to point out problems with the FANCY_CURSES
+  configure checks -TD
+* fix uninitialized pointer used in decoding of -term switch (patch by Sergey
+  Svishchev)
+* define _DECC_V4_SOURCE for VMS SOCKETSHR_TCP configuration, to fix conflict
+  with unistd.h versus non-POSIX prototypes in the other headers (report by
+  Andy Harper) -TD
+* ifdef'd includes for HTUtils.h to limit size of preprocessor listings with
+  DEC C; verify that all header files include definitions needed for their
+  contents -TD
+* add docs/OS-390.announce (Paul Gilmartin <pg@sweng.stortek.com>)
+* add fallback extern declaration for h_errno to HTTCP.c for systems that have
+  that variable but do not declare it (reported by Jean-Pierre Radley
+  <jpr@jpr.com> for SCO OpenServer 5.0.5) -BL
+* correct SortaSGML element info: SPAN can contain SPAN -KW
+* fix several small memory leaks (John Bley):
+  + minor (~ 7 bytes) leak in LYCookie.c
+  + leak in the warning message about invalid cookies
+  + obvious leak in do_readme
+  + small leak in dired_options (LYLocal.c)
+  + leak with -selective option in HTFile.c
+  + a few leaks and a minor cleanup in local_dired
 1999-05-08 (2.8.2pre.2)
 * substitute a few more free()s with FREE()s in files HTString.c and
   LYReadCFG.c (John Bley)

@@ -1,7 +1,9 @@
 #ifndef UCMAP_H
 #define UCMAP_H
 
+#ifndef HTUTILS_H
 #include <HTUtils.h>
+#endif
 
 typedef long UCode_t;
 

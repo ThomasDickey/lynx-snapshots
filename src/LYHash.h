@@ -1,7 +1,9 @@
 #if !defined(_LYHASH_H_)
 #define _LYHASH_H_ 1
 
+#ifndef HTUTILS_H
 #include <HTUtils.h>
+#endif
 
 struct _hashbucket {
 	char *name; /* name of this item */

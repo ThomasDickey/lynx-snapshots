@@ -217,7 +217,7 @@ help:
 
 ##Miscellaneous actions
 clean:
-	rm -f WWW/Library/*/*.[aob]
+	rm -f WWW/Library/*/*.[aoib]
 	rm -f WWW/Library/*/.created
 	cd src && $(MAKE) clean
 @MSG_DIR_MAKE@	rm -f LYMessages.c

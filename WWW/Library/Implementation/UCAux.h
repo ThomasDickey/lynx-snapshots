@@ -1,7 +1,9 @@
 #ifndef UCAUX_H
 #define UCAUX_H
 
+#ifndef HTUTILS_H
 #include <HTUtils.h>
+#endif
 
 extern BOOL UCCanUniTranslateFrom PARAMS((int from));
 extern BOOL UCCanTranslateUniTo PARAMS((int to));

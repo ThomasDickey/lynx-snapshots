@@ -7734,19 +7734,25 @@ PRIVATE HTStream* CacheThru_new ARGS2(
 {
     char filename[LY_MAXPATH];
     HTStream *stream = NULL;
-/*    HTProtocol *p = (HTProtocol *)anchor->protocol; */
+    HTProtocol *p = (HTProtocol *)anchor->protocol;
 
     /*
      * Neatly and transparently vanish if source caching is disabled.
      */
     if (LYCacheSource == SOURCE_CACHE_NONE)
 	return target;
-/*
+
+#ifndef DEBUG_SOURCE_CACHE
+    /*  Only remote HTML documents may benefits from HTreparse_document(), */
+    /*  oh, assume http protocol:                                          */
     if (strcmp(p->name, "http") != 0) {
 	CTRACE(tfp, "Protocol is \"%s\"; not caching\n", p->name);
 	return target;
     }
-*/
+#else
+    /* all HTStreams will be cached */
+#endif
+
     stream = (HTStream *) malloc(sizeof(*stream));
     if (!stream)
 	outofmem(__FILE__, "CacheThru_new");

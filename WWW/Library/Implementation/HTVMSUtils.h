@@ -5,7 +5,10 @@
 #ifndef HTVMSUTIL_H
 #define HTVMSUTIL_H
 
+#ifndef HTUTILS_H
 #include <HTUtils.h>
+#endif
+ 
 #include <HTAnchor.h>
 
 extern BOOL HTVMSFileVersions;	/* Include version numbers in listing? */

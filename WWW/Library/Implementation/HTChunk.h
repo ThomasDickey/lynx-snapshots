@@ -10,7 +10,10 @@
 #ifndef HTCHUNK_H
 #define HTCHUNK_H 1
 
+#ifndef HTUTILS_H
 #include <HTUtils.h>
+#endif
+ 
 #include <UCMap.h>
 
 typedef struct {

@@ -1,7 +1,9 @@
 #ifndef LYKEYMAP_H
 #define LYKEYMAP_H
 
+#ifndef HTUTILS_H
 #include <HTUtils.h>
+#endif
 
 extern BOOLEAN LYisNonAlnumKeyname PARAMS((int ch, int key_name));
 extern char *key_for_func PARAMS((int func));

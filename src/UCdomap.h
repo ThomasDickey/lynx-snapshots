@@ -1,7 +1,10 @@
 #ifndef UCDOMAP_H
 #define UCDOMAP_H
 
+#ifndef HTUTILS_H
 #include <HTUtils.h>
+#endif
+
 #include <UCkd.h>
 
 /*

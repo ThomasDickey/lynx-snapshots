@@ -6269,11 +6269,6 @@ PUBLIC BOOLEAN HTreparse_document NOARGS
 	}
     }
 
-    /*
-     * I have no idea what this does, but it seems to be necessary... -dsb
-     */
-    LYUCPopAssumed();
-
     CTRACE(tfp, "Reparse %s\n", (ok ? "succeeded" : "failed"));
 
     if (ok)  {

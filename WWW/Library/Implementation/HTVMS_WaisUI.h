@@ -8,7 +8,9 @@
 #ifndef HTVMSWAIS_H
 #define HTVMSWAIS_H
 
+#ifndef HTUTILS_H
 #include <HTUtils.h>
+#endif
 
 void	log_write PARAMS((char *));
 
