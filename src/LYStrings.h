@@ -94,7 +94,7 @@ extern char * SNACat PARAMS((
 /* EditFieldData preserves state between calls to LYEdit1
  */
 typedef struct _EditFieldData {
-	
+
         int  sx;        /* Origin of editfield                       */
         int  sy;
         int  dspwdth;   /* Screen real estate for editting           */
@@ -185,7 +185,11 @@ extern char * LYLineeditNames[];
 extern char * LYLineEditors[];
 
 /* Push a character through the lineedit machinery */
+#ifdef    NOT_ASCII  /* S/390 -- gil -- 2080 */
+#define EditBinding(c) (LYLineEditors[current_lineedit][(c)<256 ? TOASCII(c) : c])
+#else  /* NOT_ASCII */
 #define EditBinding(c) (LYLineEditors[current_lineedit][c])
+#endif /* NOT_ASCII */
 #define LYLineEdit(e,c,m) LYEdit1(e,c,EditBinding(c),m)
 
 /* Dummy initializer for LYEditmap.c */

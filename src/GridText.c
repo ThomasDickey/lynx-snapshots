@@ -984,7 +984,7 @@ PRIVATE void display_title ARGS1(
 		TO_SJIS((unsigned char *)title, tmp);
 	    } else {
 		for (i = 0, j = 0; title[i]; i++) {
-		    if (title[i] != '\033') {
+		    if (title[i] != CH_ESC) {  /* S/390 -- gil -- 1487 */
 			tmp[j++] = title[i];
 		    }
 		}
@@ -2114,7 +2114,7 @@ PUBLIC void HText_appendCharacter ARGS2(
     /*
      *  Make sure we don't hang on escape sequences.
      */
-    if (ch == '\033' && HTCJK == NOCJK)			/* decimal 27 */
+    if (ch == CH_ESC && HTCJK == NOCJK)			/* decimal 27  S/390 -- gil -- 1504 */
 	return;
 #ifndef USE_SLANG
     /*
@@ -2125,10 +2125,12 @@ PUBLIC void HText_appendCharacter ARGS2(
      *  They should have been filtered out or translated by an earlier
      *  processing stage anyway. - kw
      */
+#ifndef   EBCDIC  /* S/390 -- gil -- 1514 */
     if ((unsigned char)ch >= 128 && HTCJK == NOCJK &&
 	!text->T.transp && !text->T.output_utf8 &&
 	(unsigned char)ch < LYlowest_eightbit[current_char_set])
 	return;
+#endif /* EBCDIC */
 #endif /* !USE_SLANG */
     if ((unsigned char)ch == 155 && HTCJK == NOCJK) {	/* octal 233 */
 	if (!HTPassHighCtrlRaw &&
@@ -2146,7 +2148,7 @@ PUBLIC void HText_appendCharacter ARGS2(
     if (HTCJK != NOCJK) {
 	switch(text->state) {
 	    case S_text:
-		if (ch == '\033') {
+		if (ch == CH_ESC) {  /* S/390 -- gil -- 1536 */
 		    /*
 		    **  Setting up for CJK escape sequence handling (based on
 		    **  Takuya ASADA's (asada@three-a.co.jp) CJK Lynx). - FM
@@ -2225,7 +2227,7 @@ PUBLIC void HText_appendCharacter ARGS2(
 		/*
 		 *  Expecting CJK ESC after non-ASCII text.
 		 */
-		if (ch == '\033') {
+		if (ch == CH_ESC) {  /* S/390 -- gil -- 1553 */
 		    text->state = S_esc;
 		    text->kanji_buf = '\0';
 		    return;
@@ -2238,7 +2240,7 @@ PUBLIC void HText_appendCharacter ARGS2(
 		 *  JIS X0201 Kana in JIS support. - by ASATAKU
 		 */
 		case S_jisx0201_text:
-		if (ch == '\033') {
+		if (ch == CH_ESC) {  /* S/390 -- gil -- 1570 */
 		    text->state = S_esc;
 		    text->kanji_buf = '\0';
 		    return;
@@ -2276,7 +2278,7 @@ PUBLIC void HText_appendCharacter ARGS2(
 	} else {
 	    goto check_IgnoreExcess;
 	}
-    } else if (ch == '\033') {
+    } else if (ch == CH_ESC) {  /* S/390 -- gil -- 1587 */
 	return;
     }
 
@@ -2680,7 +2682,7 @@ PUBLIC int HText_beginAnchor ARGS3(
 	BOOL,			underline,
 	HTChildAnchor *,	anc)
 {
-    char marker[32]; 
+    char marker[32];
 
     TextAnchor * a = (TextAnchor *) calloc(1, sizeof(*a));
 
@@ -5303,22 +5305,13 @@ PUBLIC void user_message ARGS2(
 	CONST char *,	argument)
 {
     char *temp = NULL;
-    char temp_arg[256];
 
     if (message == NULL) {
 	mustshow = FALSE;
 	return;
     }
 
-    /*
-     *  Make sure we don't overrun any buffers.
-     */
-    LYstrncpy(temp_arg, ((argument == NULL) ? "" : argument), 255);
-    temp_arg[255] = '\0';
-    temp = (char *)malloc(strlen(message) + strlen(temp_arg) + 1);
-    if (temp == NULL)
-	outofmem(__FILE__, "user_message");
-    sprintf(temp, message, temp_arg);
+    HTSprintf(&temp, message, (argument == 0) ? "" : argument);
 
     statusline(temp);
 
@@ -6214,7 +6207,7 @@ PUBLIC char * HText_setLastOptionValue ARGS7(
 		    val_cs = current_char_set;
 		} else {
 		    for (i = 0, j = 0; cp[i]; i++) {
-			if (cp[i] != '\033') {
+			if (cp[i] != CH_ESC) {	/* S/390 -- gil -- 1604 */
 			    tmp[j++] = cp[i];
 			}
 		    }
@@ -6436,7 +6429,7 @@ PUBLIC int HText_beginInput ARGS3(
 		I->value_cs = current_char_set;
 	    } else {
 		for (i = 0, j = 0; IValue[i]; i++) {
-		    if (IValue[i] != '\033') {
+		    if (IValue[i] != CH_ESC) {  /* S/390 -- gil -- 1621 */
 			tmp[j++] = IValue[i];
 		    }
 		}
@@ -6926,7 +6919,6 @@ PUBLIC void HText_SubmitForm ARGS4(
     int form_number = submit_item->number;
     FormInfo *form_ptr;
     PerFormInfo *thisform;
-    int len;
     char *query = NULL;
     char *escaped1 = NULL, *escaped2 = NULL;
     int first_one = 1;
@@ -6951,6 +6943,7 @@ PUBLIC void HText_SubmitForm ARGS4(
     char *copied_val_used = NULL;
     char *copied_name_used = NULL;
 
+    CTRACE(tfp, "FIXME:SubmitForm\n");
     if (!HTMainText)
 	return;
 
@@ -6974,11 +6967,6 @@ PUBLIC void HText_SubmitForm ARGS4(
 	    HTAlert(BAD_FORM_MAILTO);
 	    return;
 	}
-
-	/*
-	 *  Set length plus breathing room.
-	 */
-	len = strlen(submit_item->submit_action) + 2048;
     } else {
 	return;
     }
@@ -7077,17 +7065,6 @@ PUBLIC void HText_SubmitForm ARGS4(
 		field_has_8bit = NO;
 		field_has_special = NO;
 
-		len += (strlen(form_ptr->name) + (Boundary ? 100 : 10));
-		/*
-		 *  Calculate by the option submit value if present.
-		 */
-		if (form_ptr->cp_submit_value != NULL) {
-		    len += (strlen(form_ptr->cp_submit_value) + 10);
-		} else {
-		    len += (strlen(form_ptr->value) + 10);
-		}
-		len += 32; /* plus and ampersand + safety net */
-
 		for (p = val;
 		     p && *p && !(field_has_8bit && field_has_special);
 		     p++)
@@ -7173,15 +7150,9 @@ PUBLIC void HText_SubmitForm ARGS4(
 	    target_csname = "us-ascii";
 	}
     }
-    /*
-     *  Get query ready.
-     */
-    query = (char *)calloc(1, len);
-    if (query == NULL)
-	outofmem(__FILE__, "HText_SubmitForm");
 
     if (submit_item->submit_method == URL_GET_METHOD && Boundary == NULL) {
-	strcpy (query, submit_item->submit_action);
+	StrAllocCopy(query, submit_item->submit_action);
 	/*
 	 *  Method is GET.  Clip out any anchor in the current URL.
 	 */
@@ -7193,9 +7164,8 @@ PUBLIC void HText_SubmitForm ARGS4(
 	/*
 	 *  Add the lead question mark for the new URL.
 	 */
-	strcat(query,"?");
+	StrAllocCat(query,"?");
     } else {
-	query[0] = '\0';
 	/*
 	 *  We are submitting POST content to a server,
 	 *  so load the post_content_type element. - FM
@@ -7527,20 +7497,18 @@ PUBLIC void HText_SubmitForm ARGS4(
 			int cdisp_name_startpos = 0;
 			if (first_one) {
 			    if (Boundary) {
-				sprintf(&query[strlen(query)],
-					"--%s\r\n", Boundary);
+				HTSprintf(&query, "--%s\r\n", Boundary);
 			    }
 			    first_one=FALSE;
 			} else {
 			    if (PlainText) {
-				strcat(query, "\n");
+				StrAllocCat(query, "\n");
 			    } else if (SemiColon) {
-				strcat(query, ";");
+				StrAllocCat(query, ";");
 			    } else if (Boundary) {
-				sprintf(&query[strlen(query)],
-					"\r\n--%s\r\n", Boundary);
+				HTSprintf(&query, "\r\n--%s\r\n", Boundary);
 			    } else {
-				strcat(query, "&");
+				StrAllocCat(query, "&");
 			    }
 			}
 
@@ -7574,13 +7542,13 @@ PUBLIC void HText_SubmitForm ARGS4(
 			     */
 			    if (Boundary) {
 				escaped1[cdisp_name_startpos] = '\0';
-				sprintf(&query[strlen(query)],
-				    "%s.x\r\n\r\n0\r\n--%s\r\n%s.y\r\n\r\n0",
+				HTSprintf(&query,
+					"%s.x\r\n\r\n0\r\n--%s\r\n%s.y\r\n\r\n0",
 					escaped1,
 					Boundary,
 					escaped1);
 			    } else {
-				sprintf(&query[strlen(query)],
+				HTSprintf(&query,
 					"%s.x=0%s%s.y=0%s",
 					escaped1,
 					(PlainText ?
@@ -7595,7 +7563,7 @@ PUBLIC void HText_SubmitForm ARGS4(
 			     *  It's a standard submit button.
 			     *  Use the name=value pair. = FM
 			     */
-			    sprintf(&query[strlen(query)],
+			    HTSprintf(&query,
 				    "%s%s%s%s%s",
 				    escaped1,
 				    (Boundary ?
@@ -7621,20 +7589,19 @@ PUBLIC void HText_SubmitForm ARGS4(
 		    if (form_ptr->num_value) {
 			if (first_one) {
 			    if (Boundary) {
-				sprintf(&query[strlen(query)],
+				HTSprintf(&query,
 					"--%s\r\n", Boundary);
 			    }
 			    first_one=FALSE;
 			} else {
 			    if (PlainText) {
-				strcat(query, "\n");
+				StrAllocCat(query, "\n");
 			    } else if (SemiColon) {
-				strcat(query, ";");
+				StrAllocCat(query, ";");
 			    } else if (Boundary) {
-				sprintf(&query[strlen(query)],
-					"\r\n--%s\r\n", Boundary);
+				HTSprintf(&query, "\r\n--%s\r\n", Boundary);
 			    } else {
-				strcat(query, "&");
+				StrAllocCat(query, "&");
 			    }
 			}
 
@@ -7659,7 +7626,7 @@ PUBLIC void HText_SubmitForm ARGS4(
 			    escaped2 = HTEscapeSP(val_used, URL_XALPHAS);
 			}
 
-			sprintf(&query[strlen(query)],
+			HTSprintf(&query,
 				"%s%s%s%s%s",
 				escaped1,
 				(Boundary ?
@@ -7700,20 +7667,18 @@ PUBLIC void HText_SubmitForm ARGS4(
 			}
 			if (first_one) {
 			    if (Boundary) {
-				sprintf(&query[strlen(query)],
-					"--%s\r\n", Boundary);
+				HTSprintf(&query, "--%s\r\n", Boundary);
 			    }
 			    first_one=FALSE;
 			} else {
 			    if (PlainText) {
-				strcat(query, "\n");
+				StrAllocCat(query, "\n");
 			    } else if (SemiColon) {
-				strcat(query, ";");
+				StrAllocCat(query, ";");
 			    } else if (Boundary) {
-				sprintf(&query[strlen(query)],
-					"\r\n--%s\r\n", Boundary);
+				HTSprintf(&query, "\r\n--%s\r\n", Boundary);
 			    } else {
-				strcat(query, "&");
+				StrAllocCat(query, "&");
 			    }
 			}
 			if (PlainText) {
@@ -7728,7 +7693,7 @@ PUBLIC void HText_SubmitForm ARGS4(
 			} else {
 			    escaped1 = HTEscapeSP(name_used, URL_XALPHAS);
 			}
-			sprintf(&query[strlen(query)],
+			HTSprintf(&query,
 				"%s%s%s%s%s",
 				escaped1,
 				(Boundary ?
@@ -7747,18 +7712,15 @@ PUBLIC void HText_SubmitForm ARGS4(
 			 */
 			if (escaped2[0] != '\0') {
 			    if (previous_blanks) {
-				strcat(query, previous_blanks);
+				StrAllocCat(query, previous_blanks);
 				FREE(previous_blanks);
 			    }
 			    if (PlainText) {
-				sprintf(&query[strlen(query)], "%s\n",
-							       escaped2);
+				HTSprintf(&query, "%s\n", escaped2);
 			    } else if (Boundary) {
-				sprintf(&query[strlen(query)], "%s\r\n",
-							       escaped2);
+				HTSprintf(&query, "%s\r\n", escaped2);
 			    } else {
-				sprintf(&query[strlen(query)], "%%0a%s",
-							       escaped2);
+				HTSprintf(&query, "%%0a%s", escaped2);
 			    }
 			} else {
 			    if (PlainText) {
@@ -7780,20 +7742,18 @@ PUBLIC void HText_SubmitForm ARGS4(
 		case F_HIDDEN_TYPE:
 		    if (first_one) {
 			if (Boundary) {
-			    sprintf(&query[strlen(query)],
-				    "--%s\r\n", Boundary);
+			    HTSprintf(&query, "--%s\r\n", Boundary);
 			}
 			first_one=FALSE;
 		    } else {
 			if (PlainText) {
-			    strcat(query, "\n");
+			    StrAllocCat(query, "\n");
 			} else if (SemiColon) {
-			    strcat(query, ";");
+			    StrAllocCat(query, ";");
 			} else if (Boundary) {
-			    sprintf(&query[strlen(query)],
-				    "\r\n--%s\r\n", Boundary);
+			    HTSprintf(&query, "\r\n--%s\r\n", Boundary);
 			} else {
-			    strcat(query, "&");
+			    StrAllocCat(query, "&");
 			}
 		    }
 
@@ -7818,7 +7778,7 @@ PUBLIC void HText_SubmitForm ARGS4(
 			escaped2 = HTEscapeSP(val_used, URL_XALPHAS);
 		    }
 
-		    sprintf(&query[strlen(query)],
+		    HTSprintf(&query,
 			    "%s%s%s%s%s",
 			    escaped1,
 			    (Boundary ?
@@ -7846,7 +7806,7 @@ PUBLIC void HText_SubmitForm ARGS4(
     }
     FREE(copied_name_used);
     if (Boundary) {
-	sprintf(&query[strlen(query)], "\r\n--%s--\r\n", Boundary);
+	HTSprintf(&query, "\r\n--%s--\r\n", Boundary);
     }
     FREE(previous_blanks);
 

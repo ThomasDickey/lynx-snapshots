@@ -151,7 +151,7 @@ PUBLIC void LYTrimHead ARGS1(
     if (!str || *str == '\0')
 	return;
 
-    while (str[i] != '\0' && WHITE(str[i]) && (unsigned char)str[i] != 27)
+    while (str[i] != '\0' && WHITE(str[i]) && (unsigned char)str[i] != (unsigned char)CH_ESC)   /* S/390 -- gil -- 1669 */
 	i++;
     if (i > 0) {
 	for (j = 0; str[i] != '\0'; i++) {
@@ -272,7 +272,7 @@ PUBLIC char *LYFindEndOfComment ARGS1(
 		    return cp;
 		if (*cp == '-') {
 		    state = start1;
-		} else if (!(WHITE(*cp) && (unsigned char)*cp != 27)) {
+		} else if (!(WHITE(*cp) && (unsigned char)*cp != (unsigned char)CH_ESC)) {  /* S/390 -- gil -- 1686 */
 		    /*
 		     *	Invalid comment, so return the first
 		     *	'>' from the start of the string. - FM
@@ -945,7 +945,7 @@ PUBLIC void LYExpandString ARGS2(
 	    **	Our input charset is UTF-8, so check
 	    **	for non-ASCII characters. - FM
 	    */
-	    if (c_unsign > 127) {
+	    if (TOASCII(c_unsign) > 127) {  /* S/390 -- gil -- 1703 */
 		/*
 		**  We have an octet from a multibyte character. - FM
 		*/
@@ -1063,14 +1063,14 @@ PUBLIC void LYExpandString ARGS2(
 			c_unsign = (unsigned char)c;
 		    }
 		}
-	    } else if (code < 32 && code != 0 &&
+	    } else if (code < ' ' && code != 0 &&  /* S/390 -- gil -- 1720 */
 		       me->T.trans_C0_to_uni) {
 		/*
 		**  Quote from SGML.c:
 		**	"This else if may be too ugly to keep. - KW"
 		*/
 		if (me->T.trans_from_uni &&
-		    (((code = UCTransToUni(c, me->inUCLYhndl)) >= 32) ||
+		    (((code = UCTransToUni(c, me->inUCLYhndl)) >= ' ') ||  /* S/390 -- gil -- 1737 */
 		     (me->T.transp &&
 		      (code = UCTransToUni(c, me->inUCLYhndl)) > 0))) {
 		    saved_char_in = c;
@@ -1115,7 +1115,7 @@ PUBLIC void LYExpandString ARGS2(
 	**  if they sneaked through (should have been
 	**  filtered by the parser). - FM
 	*/
-	if (code < 32 &&
+	if (code < ' ' &&  /* S/390 -- gil -- 1754 */
 	    c != 9 && c != 10 && c != 13) {
 	    continue;
 	}
@@ -1124,7 +1124,7 @@ PUBLIC void LYExpandString ARGS2(
 	**  and it sneaked through (should have been
 	**  filtered by the parser). - FM
 	*/
-	if (c == 127 &&
+	if (TOASCII(c) == 127 &&  /* S/390 -- gil -- 1771 */
 	    !(me->T.transp ||
 	      code >= LYlowest_eightbit[me->inUCLYhndl])) {
 	    continue;
@@ -1134,7 +1134,7 @@ PUBLIC void LYExpandString ARGS2(
 	**  have HTPassHighCtrlRaw set and they sneaked through
 	**  (should have been filtered by the parser). - FM
 	*/
-	if (code > 127 && code < 160 &&
+	if (TOASCII(code) > 127 && TOASCII(code) < 160 &&  /* S/390 -- gil -- 1788 */
 	    !(me->T.transp ||
 	      code >= LYlowest_eightbit[me->inUCLYhndl])) {
 	    continue;
@@ -1144,7 +1144,7 @@ PUBLIC void LYExpandString ARGS2(
 	**  (or a space if plain_space or hidden is set) if
 	**  HTPassHighCtrlRaw is not set. - FM
 	*/
-	if (code == 160) {
+	if (code == CH_NBSP) {  /* S/390 -- gil -- 1805 */
 	    if (!me->T.pass_160_173_raw) {
 		if (plain_space || hidden) {
 		    HTChunkPutc(s, ' ');
@@ -1167,7 +1167,7 @@ PUBLIC void LYExpandString ARGS2(
 	**  (or skip it if plain_space or hidden is set) if
 	**  HTPassHighCtrlRaw is not set. - FM
 	*/
-	if (code == 173) {
+	if (code == CH_SHY) {  /* S/390 -- gil -- 1822 */
 	    if (!me->T.pass_160_173_raw) {
 		if (!(plain_space || hidden)) {
 		    HTChunkPutc(s, LY_SOFT_HYPHEN);
@@ -1220,7 +1220,7 @@ PUBLIC void LYExpandString ARGS2(
 	} else if (chk &&
 		   (uck == -4 ||
 		    (me->T.repl_translated_C0 &&
-		     uck > 0 && uck < 32)) &&
+		     uck > 0 && uck < ' ')) &&  /* S/390 -- gil -- 1839 */
 		   /*
 		   **  Not found; look for replacement string.
 		   */
@@ -1238,7 +1238,7 @@ PUBLIC void LYExpandString ARGS2(
 	**  If we want raw UTF-8, output that now. - FM
 	*/
 	if (me->T.output_utf8 &&
-	    code > 127 && code <= 0x7fffffffL) {
+	    TOASCII(code) > 127 && code <= 0x7fffffffL) {  /* S/390 -- gil -- 1856 */
 	    if (me->T.decode_utf8 && *utf_buf) {
 		HTChunkPuts(s, utf_buf);
 		utf_buf[0] == '\0';
@@ -1280,7 +1280,7 @@ PUBLIC void LYExpandString ARGS2(
 	/*
 	**  If it's ASCII at this point, use it. - FM
 	*/
-	if (code < 127 && code > 0) {
+	if (TOASCII(code) < 127 && code > 0) {  /* S/390 -- gil -- 1873 */
 	    HTChunkPutc(s, ((char)(code & 0xff)));
 	    continue;
 	}
@@ -1343,7 +1343,7 @@ PUBLIC void LYExpandString ARGS2(
 			UCGetLYhndl_byMIME("us-ascii"))) &&
 		(uck = UCTransUniChar(code,
 				      UCGetLYhndl_byMIME("us-ascii")))
-				      >= 32 && uck < 127) {
+				      >= ' ' && TOASCII(uck) < 127) {  /* S/390 -- gil -- 1890 */
 		/*
 		**  Got an ASCII character (yippey). - FM
 		*/
@@ -1364,7 +1364,7 @@ PUBLIC void LYExpandString ARGS2(
 		/*
 		**  Out of luck, so use the UHHH notation (ugh). - FM
 		*/
-		sprintf(replace_buf, "U%.2lX", code);
+		sprintf(replace_buf, "U%.2lX", TOASCII(code));  /* S/390 -- gil -- 1907 */
 		HTChunkPuts(s, replace_buf);
 		continue;
 	    }
@@ -2421,8 +2421,8 @@ PRIVATE char ** LYUCFullyTranslateString_1 ARGS9(
 	    }
 	    if (stype == st_URL &&
 	    /*	Not a full HTEscape, only for 8bit and ctrl chars */
-		(code >= 127 ||
-		 (code < 32 && (code != 9 && code != 10)))) {
+		(TOASCII(code) >= 127 ||  /* S/390 -- gil -- 1925 */
+		 (code < ' ' && (code != '\t' && code != '\n')))) {
 		    state = S_put_urlchar;
 		    break;
 	    } else if (!hidden && code == 10 && *p == 10
@@ -2440,8 +2440,8 @@ PRIVATE char ** LYUCFullyTranslateString_1 ARGS9(
 	    break;
 	case S_put_urlchar:
 	    *q++ = '%';
-	    REPLACE_CHAR(hex[(code >> 4) & 15]);
-	    REPLACE_CHAR(hex[(code & 15)]);
+	    REPLACE_CHAR(hex[(TOASCII(code) >> 4) & 15]);  /* S/390 -- gil -- 1944 */
+	    REPLACE_CHAR(hex[(TOASCII(code) & 15)]);
 				/* fall through */
 	case S_next_char:
 	    p++;		/* fall through */

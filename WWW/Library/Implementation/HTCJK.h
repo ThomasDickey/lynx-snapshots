@@ -19,7 +19,7 @@
 #ifdef ESC
 #undef ESC
 #endif /* ESC */
-#define ESC		'\033'
+#define ESC		CH_ESC  /* S/390 -- gil -- 0098 */
 #define TO_2BCODE	'$'
 #define TO_1BCODE	'('
 

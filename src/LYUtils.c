@@ -36,7 +36,11 @@
 #ifdef UTMP_FILE
 #undef UTMP_FILE
 #endif /* UTMP_FILE */
+#ifdef    UTMPX_FILE
 #define UTMP_FILE UTMPX_FILE
+#else
+#define UTMP_FILE __UTMPX_FILE  /* at least in OS/390  S/390 -- gil -- 2100 */
+#endif /* UTMPX_FILE */
 #else
 #include <utmp.h>
 #endif /* UTMPX_FOR_UTMP */
@@ -1824,7 +1828,7 @@ PUBLIC void statusline ARGS1(
 	    TO_SJIS((CONST unsigned char *)text, temp);
 	} else {
 	    for (i = 0, j = 0; text[i]; i++) {
-		if (text[i] != '\033') {
+		if (text[i] != CH_ESC) {  /* S/390 -- gil -- 2119 */
 		    temp[j++] = text[i];
 		}
 	    }
@@ -1867,7 +1871,7 @@ PUBLIC void statusline ARGS1(
 	 *  as we do above for CJK. - FM
 	 */
 	for (i = 0, len = 0; text[i] != '\0' && len < max_length; i++) {
-	    if (text[i] != '\033') {
+	    if (text[i] != CH_ESC) {  /* S/390 -- gil -- 2136 */
 		buffer[len++] = text[i];
 	    }
 	}

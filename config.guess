@@ -298,6 +298,10 @@ EOF
     i?86:AIX:*:*)
 	echo i386-ibm-aix
 	exit 0 ;;
+    *:MVS:*:* | *:OS390:*:*|*:OS/390:*:*)
+			       # uname -m gives a processor model number  /* S/390 -- gil -- 1389 */
+	echo s390-ibm-os390    # on R1 and R2, uname -s reports OS390
+	exit 0 ;;              # on R3, uname -s reports OS/390
     *:AIX:2:3)
 	if grep bos325 /usr/include/stdio.h >/dev/null 2>&1; then
 		sed 's/^		//' << EOF >dummy.c
@@ -555,14 +559,14 @@ EOF
 			16)
 				UNAME_MACHINE="alphaev6"
 				;;
-			esac	
+			esac
 
 			objdump --private-headers dummy | \
 			  grep ld.so.1 > /dev/null
 			if test "$?" = 0 ; then
 				LIBC="libc1"
 			fi
-		fi	
+		fi
 		rm -f dummy.s dummy
 		echo ${UNAME_MACHINE}-unknown-linux-gnu${LIBC} ; exit 0
 	elif test "${UNAME_MACHINE}" = "mips" ; then

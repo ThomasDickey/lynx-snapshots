@@ -16,7 +16,7 @@ extern char *LYCookie PARAMS((
 extern void LYStoreCookies PARAMS((
 	CONST char *	cookie_file));
 extern void LYLoadCookies PARAMS((
-	CONST char * 	cookie_file));
+	char * 		cookie_file));
 extern void cookie_add_acceptlist PARAMS((
 	char *		acceptdomains));
 extern void cookie_add_rejectlist PARAMS((

@@ -317,18 +317,33 @@ Sucess (>=0) and failure (<0) codes
 #define HT_INTERNAL     -12             /* Weird -- should never happen. */
 #define HT_BAD_EOF      -12             /* Premature EOF */
 
-
-#include <HTString.h>   /* String utilities */
-
 #ifndef va_arg
 #if defined(__STDC__) || defined(VMS)
 #include <stdarg.h>
-#define LYva_start(ap,format) va_start(ap,format)
 #else
 #include <varargs.h>
+#endif
+#endif
+
+#if defined(__STDC__) || defined(VMS)
+#define LYva_start(ap,format) va_start(ap,format)
+#define USE_STDARG_H 1
+#else
 #define LYva_start(ap,format) va_start(ap)
+#define USE_STDARG_H 0
 #endif
+
+/*
+ * GCC can be told that some functions are like printf (and do type-checking on
+ * their parameters).
+ */
+#if	GCC_PRINTF
+#define GCC_PRINTFLIKE(fmt,var) __attribute__((format(printf,fmt,var)))
+#else
+#define GCC_PRINTFLIKE(fmt,var) /*nothing*/
 #endif
+
+#include <HTString.h>   /* String utilities */
 
 /*
 

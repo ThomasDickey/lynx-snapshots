@@ -1156,7 +1156,14 @@ PRIVATE void LYProcessSetCookies ARGS6(
 	     *	new, unknown attribute which doesn't take a value, and
 	     *	ignore it. - FM
 	     */
-	    if (!known_attr && value_end > value_start) {
+	    /* if (!known_attr && value_end > value_start) */
+
+	    /* Is there any reason we don't want to accept cookies with
+	     * no value? This seems to be needed for sites that reset a
+	     * cookie by nulling out the value. If this causes problems,
+	     * we can go back to the original behavior above.  - BJP
+	     */
+	    if (!known_attr) {
 		/*
 		 *  If we've started a cookie, and it's not too big,
 		 *  save it in the CombinedCookies list. - FM
@@ -1622,7 +1629,14 @@ PRIVATE void LYProcessSetCookies ARGS6(
 	     *	new, unknown attribute which doesn't take a value, and
 	     *	ignore it. - FM
 	     */
-	    if (!known_attr && value_end > value_start) {
+	    /* if (!known_attr && value_end > value_start) */
+
+	    /* Is there any reason we don't want to accept cookies with
+	     * no value? This seems to be needed for sites that reset a
+	     * cookie by nulling out the value. If this causes problems,
+	     * we can go back to the original behavior above.  - BJP
+	     */
+	    if (!known_attr) {
 		/*
 		 *  If we've started a cookie, and it's not too big,
 		 *  save it in the CombinedCookies list. - FM
@@ -1875,7 +1889,7 @@ PUBLIC char * LYCookie ARGS4(
 #ifdef EXP_PERSISTENT_COOKIES
 /* rjp - experiment cookie loading */
 PUBLIC void LYLoadCookies ARGS1 (
-	CONST char *,	cookie_file)
+	char *,		cookie_file)
 {
     FILE *cookie_handle;
     char buf[max_cookies_buffer+10]; /* should be long enough for a cookie line */
@@ -1909,7 +1923,7 @@ PUBLIC void LYLoadCookies ARGS1 (
 
 	j = fgets(buf, sizeof(buf)-1, cookie_handle);
 
-	if((j == NULL) || (buf[0] == '\0' || buf[0] == '\n')) {
+	if((j == NULL) || (buf[0] == '\0' || buf[0] == '\n' || buf[0] == '#')) {
 	    continue;
 	}
 

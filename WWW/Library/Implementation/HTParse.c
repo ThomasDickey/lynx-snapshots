@@ -773,7 +773,11 @@ PUBLIC char * HTUnEscape ARGS1(
 	    if (*p)
 	        *q = from_hex(*p++) * 16;
 	    if (*p)
-	        *q = FROMASCII(*q + from_hex(*p++));
+		/*
+		** Careful! FROMASCII() may evaluate its arg more than once!
+		*/  /* S/390 -- gil -- 0221 */
+		*q =           *q + from_hex(*p++) ;
+		*q = FROMASCII(*q                 );
 	    q++;
 	} else {
 	    *q++ = *p++;
@@ -854,7 +858,7 @@ PUBLIC void HTMake822Word ARGS1(
 	return;
     }
     for (p = *str; *p; p++) {
-	a = *p;
+	a = TOASCII(*p);  /* S/390 -- gil -- 0240 */
 	if (a < 32 || a >= 128 ||
 	    ((crfc[a-32]) & 1)) {
 	    if (!added)
@@ -873,13 +877,19 @@ PUBLIC void HTMake822Word ARGS1(
     if (result == NULL)
 	outofmem(__FILE__, "HTMake822Word");
     result[0] = '"';
+    /*
+    ** Having converted the character to ASCII, we can't use symbolic
+    ** escape codes, since they're in the host character set, which
+    ** is not necessarily ASCII.  Thus we use octal escape codes instead.
+    ** -- gil (Paul Gilmartin) <pg@sweng.stortek.com>
+    */  /* S/390 -- gil -- 0268 */
     for (q = result + 1, p = *str; *p; p++) {
 	a = TOASCII(*p);
-	if ((a != '\t') && ((a & 127) < 32 ||
+	if ((a != '\011') && ((a & 127) < 32 ||
 			    ( a < 128 && ((crfc[a-32]) & 2))))
-	    *q++ = '\\';
+	    *q++ = '\033';
 	*q++ = *p;
-	if (a == '\n' || (a == '\r' && (TOASCII(*(p+1)) != '\n')))
+	if (a == '\012' || (a == '\015' && (TOASCII(*(p+1)) != '\012')))
 	    *q++ = ' ';
     }
     *q++ = '"';

@@ -422,7 +422,7 @@ done
 dnl ---------------------------------------------------------------------------
 dnl Check for existence of alternate-character-set support in curses, so we
 dnl can decide to use it for box characters.
-dnl 
+dnl
 AC_DEFUN([CF_ALT_CHAR_SET],
 [
 AC_MSG_CHECKING([if curses supports alternate-character set])
@@ -433,7 +433,7 @@ do
 #include <${cf_cv_ncurses_header-curses.h}>
 	],[chtype x = $mapname['l']; $mapname['m'] = 0],
 	[cf_cv_alt_char_set=$mapname
-	 break],  
+	 break],
 	[cf_cv_alt_char_set=no])
 done
 	])
@@ -814,6 +814,32 @@ AC_SUBST(ECHO_LD)
 AC_SUBST(RULE_CC)
 AC_SUBST(SHOW_CC)
 AC_SUBST(ECHO_CC)
+])dnl
+dnl ---------------------------------------------------------------------------
+dnl Check whether character set is EBCDIC.
+AC_DEFUN(CF_EBCDIC,[
+AC_MSG_CHECKING(if character set is EBCDIC)
+AC_CACHE_VAL(cf_cv_ebcdic,[
+	AC_TRY_COMPILE([ ],
+[ /* TryCompile function for CharSet.
+   Treat any failure as ASCII for compatibility with existing art.
+   Use compile-time rather than run-time tests for cross-compiler
+   tolerance.  */
+#if '0'!=240
+#error "Character set is not EBCDIC"
+#endif ],
+[ # TryCompile action if true
+cf_cv_ebcdic=yes ],
+[ # TryCompile action if false
+cf_cv_ebcdic=no])
+# end of TryCompile ])
+# end of CacheVal CvEbcdic
+AC_MSG_RESULT($cf_cv_ebcdic)
+case "$cf_cv_ebcdic" in  #(vi
+    yes) AC_DEFINE(EBCDIC)
+         AC_DEFINE(NOT_ASCII);; #(vi
+    *)   ;;
+esac
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl Check if 'errno' is declared in <errno.h>
@@ -1668,7 +1694,7 @@ AC_CACHE_VAL(cf_cv_slang_header,[
 		do
 			echo trying $cf_incdir/$cf_header 1>&AC_FD_CC
 			if egrep "SLANG_VERSION" $cf_incdir/$cf_header 1>&AC_FD_CC 2>&1; then
-				cf_cv_slang_header=$cf_incdir/$cf_header 
+				cf_cv_slang_header=$cf_incdir/$cf_header
 				break
 			fi
 		done
@@ -1799,14 +1825,14 @@ $1=`echo ${$1} | sed -e 's/-O[1-9]\? //' -e 's/-O[1-9]\?$//'`
 changequote([,])dnl
 ])dnl
 dnl ---------------------------------------------------------------------------
-AC_DEFUN([CF_SYSTEM_MAIL_FLAGS], 
+AC_DEFUN([CF_SYSTEM_MAIL_FLAGS],
 [
 AC_MSG_CHECKING([system mail flags])
 AC_CACHE_VAL(cf_cv_system_mail_flags,[
 	case $cf_cv_SYSTEM_MAIL in
 	*/mmdf/*)
 		[cf_cv_system_mail_flags="-mlruxto,cc\\\\*"]
-        	;; 
+        	;;
 	*)
         	[cf_cv_system_mail_flags="-t -oi"]
 	esac

@@ -9,6 +9,7 @@
 */
 
 #include <HTUtils.h>
+#include <LYCharVals.h>  /* S/390 -- gil -- 0288 */
 
 #include <HTPlain.h>
 
@@ -135,7 +136,7 @@ PRIVATE void HTPlain_put_character ARGS2(
     HTPlain_lastraw = c;
     if (c == '\r') {
 	HText_appendCharacter(me->text, '\n');
-    } else if ((unsigned char)c >= 127) {
+    } else if (TOASCII((unsigned char)c) >= 127) {  /* S/390 -- gil -- 0305 */
 	/*
 	**  For now, don't repeat everything here
 	**  that has been done below - KW
@@ -143,23 +144,23 @@ PRIVATE void HTPlain_put_character ARGS2(
 	HTPlain_write(me, &c, 1);
     } else if (HTCJK != NOCJK) {
 	HText_appendCharacter(me->text, c);
-    } else if ((unsigned char)c >= 127 && (unsigned char)c < 161 &&
+    } else if (TOASCII((unsigned char)c) >= 127 && TOASCII((unsigned char)c) < 161 &&
 	       HTPassHighCtrlRaw) {
 	HText_appendCharacter(me->text, c);
-    } else if ((unsigned char)c == 160) {
+    } else if ((unsigned char)c == CH_NBSP) {  /* S/390 -- gil -- 0341 */
 	HText_appendCharacter(me->text, ' ');
-    } else if ((unsigned char)c == 173) {
+    } else if ((unsigned char)c == CH_SHY) {
 	return;
-    } else if (((unsigned char)c >= 32 && (unsigned char)c < 127) ||
+    } else if (((unsigned char)c >= ' ' && TOASCII((unsigned char)c) < 127) ||
 	       c == '\n' || c == '\t') {
 	HText_appendCharacter(me->text, c);
-    } else if ((unsigned char)c > 160) {
+    } else if (TOASCII((unsigned char)c) > 160) {
 	if (!HTPassEightBitRaw &&
 	    !((me->outUCLYhndl == LATIN1) ||
 	      (me->outUCI->enc & (UCT_CP_SUPERSETOF_LAT1)))) {
 	    int len, high, low, i, diff = 1;
 	    CONST char * name;
-	    UCode_t value = (UCode_t)((unsigned char)c - 160);
+	    UCode_t value = (UCode_t)FROMASCII((TOASCII((unsigned char)c) - 160));
 
 	    name = HTMLGetEntityName(value);
 	    len =  strlen(name);
@@ -262,7 +263,7 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 	    **	Incomplete characters silently ignored.
 	    **	from Linux kernel's console.c - KW
 	    */
-	    if (c_unsign > 127) {
+	    if (TOASCII(c_unsign) > 127) {  /* S/390 -- gil -- 0371 */
 		/*
 		**  We have an octet from a multibyte character. - FM
 		*/
@@ -356,8 +357,8 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 		saved_char_in = c;
 #endif /* NOTDEFINED */
 	if (me->T.trans_to_uni &&
-	    (code >= LYlowest_eightbit[me->inUCLYhndl] ||
-	     (code < 32 && code != 0 &&
+	    (TOASCII(code) >= LYlowest_eightbit[me->inUCLYhndl] ||  /* S/390 -- gil -- 0389 */
+	     (code < ' ' && code != 0 &&
 	     me->T.trans_C0_to_uni))) {
 		/*
 		**  Convert the octet to Unicode. - FM
@@ -441,27 +442,27 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 	**  document matches and pass 127-160 8-bit characters.  If it
 	**  doesn't match, the user should toggle raw/CJK mode off. - FM
 	*/
-	} else if (code >= 127 && code < 161 &&
+	} else if (TOASCII(code) >= 127 && TOASCII(code) < 161 &&  /* S/390 -- gil -- 0427 */
 		   PASSHICTRL && PASS8859SPECL) {
 	    HText_appendCharacter(me->text, c);
-	} else if (code == 173 && PASS8859SPECL) {
+	} else if (code == CH_SHY && PASS8859SPECL) {
 	    HText_appendCharacter(me->text, c);
 	/*
 	**  If neither HTPassHighCtrlRaw nor CJK is set, play it safe
 	**  and treat 160 (nbsp) as an ASCII space (32). - FM
 	*/
-	} else if (code == 160) {
+	} else if (code == CH_NBSP) {
 	    HText_appendCharacter(me->text, ' ');
 	/*
 	**  If neither HTPassHighCtrlRaw nor CJK is set, play it safe
 	**  and ignore 173 (shy). - FM
 	*/
-	} else if (code == 173) {
+	} else if (code == CH_SHY) {
 	    continue;
 	/*
 	**  If we get to here, pass the displayable ASCII characters. - FM
 	*/
-	} else if ((code >= 32 && code < 127) ||
+	} else if ((code >= ' ' && TOASCII(code) < 127) ||
 		   (PASSHI8BIT &&
 		    c >= LYlowest_eightbit[me->outUCLYhndl]) ||
 		   *p == '\n' || *p == '\t') {
@@ -481,14 +482,14 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
  ******************************************************************/
 	} else if ((chk = (me->T.trans_from_uni && code >= 160)) &&
 		   (uck = UCTransUniChar(code,
-					 me->outUCLYhndl)) >= 32 &&
+					 me->outUCLYhndl)) >= ' ' &&  /* S/390 -- gil -- 0464 */
 		   uck < 256) {
 	    CTRACE(tfp, "UCTransUniChar returned 0x%.2lX:'%c'.\n",
 			uck, FROMASCII((char)uck));
 	    HText_appendCharacter(me->text, ((char)(uck & 0xff)));
 	} else if (chk &&
 		   (uck == -4 ||
-		    (me->T.repl_translated_C0 && uck > 0 && uck < 32)) &&
+		    (me->T.repl_translated_C0 && uck > 0 && uck < ' ')) &&  /* S/390 -- gil -- 0481 */
 		   /*
 		   **  Not found; look for replacement string.
 		   */
@@ -503,7 +504,7 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 	**  If we get to here, and should have translated,
 	**  translation has failed so far.
 	*/
-	} else if (chk && code > 127 && me->T.output_utf8) {
+	} else if (chk && TOASCII(code) > 127 && me->T.output_utf8) {  /* S/390 -- gil -- 0498 */
 	    /*
 	    **	We want UTF-8 output, so do it now. - FM
 	    */
@@ -514,7 +515,10 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 	    } else if (UCConvertUniToUtf8(code, replace_buf)) {
 		HText_appendText(me->text, replace_buf);
 	    } else {
-		sprintf(replace_buf, "U%.2lX", code);
+		/*
+		**  Out of luck, so use the UHHH notation (ugh). - gil
+		*/  /* S/390 -- gil -- 0517 */
+		sprintf(replace_buf, "U%.2lX", TOASCII(code));
 		HText_appendText(me->text, replace_buf);
 	    }
 #ifdef NOTDEFINED
@@ -544,7 +548,7 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 			UCGetLYhndl_byMIME("us-ascii"))) &&
 		   (uck = UCTransUniChar(code,
 					 UCGetLYhndl_byMIME("us-ascii")))
-				      >= 32 && uck < 127) {
+				      >= ' ' && TOASCII(uck) < 127) {  /* S/390 -- gil -- 0535 */
 		/*
 		**  Got an ASCII character (yippey). - FM
 		*/

@@ -584,6 +584,13 @@ try_again:
 
   _HTProgress (gettext("Sending HTTP request."));
 
+#ifdef    NOT_ASCII  /* S/390 -- gil -- 0548 */
+  {   char *p;
+
+      for ( p = command; p < command + strlen(command); p++ )
+	  *p = TOASCII(*p);
+  }
+#endif /* NOT_ASCII */
   status = HTTP_NETWRITE(s, command, (int)strlen(command), handle);
   FREE(command);
   if (status <= 0) {
@@ -678,6 +685,14 @@ try_again:
 		goto clean_up;
 	    }
 	}
+
+#ifdef    NOT_ASCII  /* S/390 -- gil -- 0564 */
+	{   char *p;
+
+	    for ( p = line_buffer + length; p < line_buffer + length + status; p++ )
+		*p = FROMASCII(*p);
+	}
+#endif /* NOT_ASCII */
 
 	bytes_already_read += status;
 	HTReadProgress (bytes_already_read, 0);
@@ -1062,6 +1077,13 @@ try_again:
 	      while ((status = HTTP_NETREAD(s, line_buffer,
 					    (INIT_LINE_SIZE - 1),
 					    handle)) > 0) {
+#ifdef    NOT_ASCII  /* S/390 -- gil -- 0581 */
+	      {   char *p;
+
+		  for ( p = line_buffer; p < line_buffer + status; p++ )
+		      *p = FROMASCII(*p);
+	      }
+#endif /* NOT_ASCII */
 		  line_buffer[status] = '\0';
 		  StrAllocCat(line_kept_clean, line_buffer);
 	      }

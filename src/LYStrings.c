@@ -891,7 +891,7 @@ re_read:
     }
 #endif /* USE_SLANG */
 
-    if (c == 27 || (csi_is_csi && c == 155)) {	    /* handle escape sequence */
+    if (c == CH_ESC || (csi_is_csi && c == (unsigned char)CH_ESC_PAR)) { /* handle escape sequence  S/390 -- gil -- 2024 */
 	b = GetChar();
 
 	if (b == '[' || b == 'O') {
@@ -1072,7 +1072,7 @@ re_read:
 #endif /* KEY_HELP */
 #ifdef KEY_BACKSPACE
 	case KEY_BACKSPACE:
-	   c = 127;		   /* backspace key (delete, not Ctrl-H) */
+	   c = CH_DEL;		   /* backspace key (delete, not Ctrl-H)  S/390 -- gil -- 2041 */
 	   break;
 #endif /* KEY_BACKSPACE */
 #if defined(KEY_F) && !defined(__DJGPP__) && !defined(_WINDOWS)
@@ -2282,11 +2282,12 @@ PUBLIC int UPPER8 ARGS2(int,ch1, int,ch2)
 {
 
     /* case-insensitive match for us-ascii */
-    if ((unsigned char)ch1 < 128 && (unsigned char)ch2 < 128)
+    if ((unsigned char)TOASCII(ch1) < 128 && (unsigned char)TOASCII(ch2) < 128)
 	return(TOUPPER(ch1) - TOUPPER(ch2));
 
     /* case-insensitive match for upper half */
-    if ((unsigned char)ch1 > 127 && (unsigned char)ch2 >127)
+    if ((unsigned char)TOASCII(ch1) > 127 &&  /* S/390 -- gil -- 2066 */
+	(unsigned char)TOASCII(ch2) > 127)
     {
 	if (DisplayCharsetMatchLocale)
 	   return(TOUPPER(ch1) - TOUPPER(ch2)); /* old-style */

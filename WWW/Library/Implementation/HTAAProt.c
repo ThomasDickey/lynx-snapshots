@@ -127,7 +127,12 @@ PUBLIC int HTAA_getUid NOARGS
 		CTRACE(tfp, "%s(%s) returned (%s:%s:%d:%d:...)\n",
 			    "HTAA_getUid: getpwuid",
 			    current_prot->uid_name,
-			    pw->pw_name, pw->pw_passwd,
+				   pw->pw_name,
+#ifndef __MVS__  /* S/390 -- gil -- 0018 */
+				                pw->pw_passwd,
+#else
+				                "(none)",
+#endif /* __MVS __ */
 			    (int) pw->pw_uid, (int) pw->pw_gid);
 		return pw->pw_uid;
 	    }
@@ -137,7 +142,12 @@ PUBLIC int HTAA_getUid NOARGS
 		CTRACE(tfp, "%s(\"%s\") %s (%s:%s:%d:%d:...)\n",
 			    "HTAA_getUid: getpwnam",
 			    current_prot->uid_name, "returned",
-			    pw->pw_name, pw->pw_passwd,
+				   pw->pw_name,
+#ifndef __MVS__  /* S/390 -- gil -- 0040 */
+				                pw->pw_passwd,
+#else
+				                "(none)",
+#endif /* __MVS __ */
 			    (int) pw->pw_uid, (int) pw->pw_gid);
 		return pw->pw_uid;
 	    }
@@ -174,7 +184,7 @@ PUBLIC int HTAA_getGid NOARGS
     if (current_prot  &&  current_prot->gid_name) {
 	if (isNumber(current_prot->gid_name)) {
 	    if (NULL != (gr = getgrgid(atoi(current_prot->gid_name)))) {
-#ifndef __EMX__	/* no gr_passwd */
+#if !defined(__EMX__) && !defined(__MVS__)  /* no gr_passwd  S/390 -- gil -- 0061 */
 		CTRACE(tfp, "%s(%s) returned (%s:%s:%d:...)\n",
 			    "HTAA_getGid: getgrgid",
 			    current_prot->gid_name,
@@ -185,7 +195,7 @@ PUBLIC int HTAA_getGid NOARGS
 	}
 	else {	/* Group name (not number) */
 	    if (NULL != (gr = getgrnam(current_prot->gid_name))) {
-#ifndef __EMX__	/* no gr_passwd */
+#if !defined(__EMX__) && !defined(__MVS__)  /* no gr_passwd  S/390 -- gil -- 0078 */
 		CTRACE(tfp, "%s(\"%s\") returned (%s:%s:%d:...)\n",
 			    "HTAA_getGid: getgrnam",
 			    current_prot->gid_name,

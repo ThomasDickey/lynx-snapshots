@@ -119,6 +119,41 @@ PRIVATE int popup_choice PARAMS((
 #define L_User_Mode (use_assume_charset ? L_USER_MODE + 1 : L_USER_MODE)
 #define L_User_Agent (use_assume_charset ? L_USER_AGENT + 1 : L_USER_AGENT)
 
+#define LPAREN '('
+#define RPAREN ')'
+
+PRIVATE int add_it ARGS2(char *, text, int, len)
+{
+    if (len) {
+	text[len] = '\0';
+	addstr(text);
+    }
+    return 0;
+}
+
+PRIVATE void addlbl ARGS1(CONST char *, text)
+{
+    char actual[80];
+    int s, d;
+    BOOL b = FALSE;
+
+    for (s = d = 0; text[s]; s++) {
+	actual[d++] = text[s];
+	if (text[s] == LPAREN) {
+	    d = add_it(actual, d-1);
+	    start_bold();
+	    b = TRUE;
+	    actual[d++] = text[s];
+	} else if (text[s] == RPAREN) {
+	    d = add_it(actual, d);
+	    stop_bold();
+	    b = FALSE;
+	}
+    }
+    add_it(actual, d);
+    if (b)
+	stop_bold();
+}
 
 PUBLIC void LYoptions NOARGS
 {
@@ -235,58 +270,58 @@ draw_options:
     addch(')');
     lynx_stop_h1_color ();
     move(L_EDITOR, 5);
-    addstr("E)ditor                      : ");
+    addlbl("(E)ditor                     : ");
     addstr((editor && *editor) ? editor : "NONE");
 
     move(L_DISPLAY, 5);
-    addstr("D)ISPLAY variable            : ");
+    addlbl("(D)ISPLAY variable           : ");
     addstr((x_display && *x_display) ? x_display : "NONE");
 
     move(L_HOME, 5);
-    addstr("mu(L)ti-bookmarks: ");
+    addlbl("mu(L)ti-bookmarks: ");
     addstr((LYMultiBookmarks ?
 	      (LYMBMAdvanced ? "ADVANCED"
 			     : "STANDARD")
 			     : "OFF     "));
     move(L_HOME, B_BOOK);
     if (LYMultiBookmarks) {
-	addstr("review/edit B)ookmarks files");
+	addlbl("review/edit (B)ookmarks files");
     } else {
-	addstr("B)ookmark file: ");
+	addlbl("(B)ookmark file: ");
 	addstr((bookmark_page && *bookmark_page) ? bookmark_page : "NONE");
     }
 
     move(L_FTPSTYPE, 5);
-    addstr("F)TP sort criteria           : ");
+    addlbl("(F)TP sort criteria          : ");
     addstr((HTfileSortMethod == FILE_BY_NAME ? "By Filename" :
 	   (HTfileSortMethod == FILE_BY_SIZE ? "By Size    " :
 	   (HTfileSortMethod == FILE_BY_TYPE ? "By Type    " :
 					       "By Date    "))));
 
     move(L_MAIL_ADDRESS, 5);
-    addstr("P)ersonal mail address       : ");
+    addlbl("(P)ersonal mail address      : ");
     addstr((personal_mail_address && *personal_mail_address) ?
 				       personal_mail_address : "NONE");
 
     move(L_SSEARCH, 5);
-    addstr("S)earching type              : ");
+    addlbl("(S)earching type             : ");
     addstr(case_sensitive ? "CASE SENSITIVE  " : "CASE INSENSITIVE");
 
     move(L_Charset, 5);
-    addstr("display (C)haracter set      : ");
+    addlbl("display (C)haracter set      : ");
     addstr((char *)LYchar_set_names[current_char_set]);
 
     move(L_LANGUAGE, 5);
-    addstr("preferred document lan(G)uage: ");
+    addlbl("preferred document lan(G)uage: ");
     addstr((language && *language) ? language : "NONE");
 
     move(L_PREF_CHARSET, 5);
-    addstr("preferred document c(H)arset : ");
+    addlbl("preferred document c(H)arset : ");
     addstr((pref_charset && *pref_charset) ? pref_charset : "NONE");
 
     if (use_assume_charset) {
 	move(L_ASSUME_CHARSET, 5);
-	addstr("^A)ssume charset if unknown  : ");
+	addlbl("(^A)ssume charset if unknown : ");
 	if (UCAssume_MIMEcharset)
 	    addstr(UCAssume_MIMEcharset);
 	else
@@ -296,12 +331,12 @@ draw_options:
     }
 
     move(L_Rawmode, 5);
-    addstr("Raw 8-bit or CJK m(O)de      : ");
+    addlbl("Raw 8-bit or CJK m(O)de      : ");
     addstr(LYRawMode ? "ON " : "OFF");
 
 #if defined(USE_SLANG) || defined(COLOR_CURSES)
     move(L_Color, B_COLOR);
-    addstr("show color (&)  : ");
+    addlbl("show color (&)  : ");
     if (no_option_save) {
 	addstr((LYShowColor == SHOW_COLOR_OFF ? "OFF" :
 						"ON "));
@@ -328,27 +363,27 @@ draw_options:
 #endif /* USE_SLANG || COLOR_CURSES */
 
     move(L_Bool_A, B_VIKEYS);
-    addstr("V)I keys: ");
+    addlbl("(V)I keys: ");
     addstr(vi_keys ? "ON " : "OFF");
 
     move(L_Bool_A, B_EMACSKEYS);
-    addstr("e(M)acs keys: ");
+    addlbl("e(M)acs keys: ");
     addstr(emacs_keys ? "ON " : "OFF");
 
     move(L_Bool_A, B_SHOW_DOTFILES);
-    addstr("sho(W) dot files: ");
+    addlbl("sho(W) dot files: ");
     addstr((!no_dotfiles && show_dotfiles) ? "ON " : "OFF");
 
     move(L_Bool_B, B_SELECT_POPUPS);
-    addstr("popups for selec(T) fields   : ");
+    addlbl("popups for selec(T) fields   : ");
     addstr(LYSelectPopups ? "ON " : "OFF");
 
     move(L_Bool_B, B_SHOW_CURSOR);
-    addstr("show cursor (@) : ");
+    addlbl("show cursor (@) : ");
     addstr(LYShowCursor ? "ON " : "OFF");
 
     move(L_Keypad, 5);
-    addstr("K)eypad mode                 : ");
+    addlbl("(K)eypad mode                : ");
     addstr((keypad_mode == NUMBERS_AS_ARROWS) ?
 				"Numbers act as arrows             " :
 	 ((keypad_mode == LINKS_ARE_NUMBERED) ?
@@ -356,28 +391,28 @@ draw_options:
 				"Links and form fields are numbered"));
 
     move(L_Lineed, 5);
-    addstr("li(N)e edit style            : ");
+    addlbl("li(N)e edit style            : ");
     addstr(LYLineeditNames[current_lineedit]);
 
 #ifdef DIRED_SUPPORT
     move(L_Dired, 5);
-    addstr("l(I)st directory style       : ");
+    addlbl("l(I)st directory style       : ");
     addstr((dir_list_style == FILES_FIRST) ? "Files first      " :
 	  ((dir_list_style == MIXED_STYLE) ? "Mixed style      " :
 					     "Directories first"));
 #endif /* DIRED_SUPPORT */
 
     move(L_User_Mode, 5);
-    addstr("U)ser mode                   : ");
+    addlbl("(U)ser mode                  : ");
     addstr(  (user_mode == NOVICE_MODE) ? "Novice      " :
       ((user_mode == INTERMEDIATE_MODE) ? "Intermediate" :
 					  "Advanced    "));
 
-    addstr("  verbose images (!) : ");
+    addlbl("  verbose images (!) : ");
     addstr( verbose_img ? "ON " : "OFF" );
 
     move(L_User_Agent, 5);
-    addstr("user (A)gent                 : ");
+    addlbl("user (A)gent                 : ");
     addstr((LYUserAgent && *LYUserAgent) ? LYUserAgent : "NONE");
 
 #ifdef ALLOW_USERS_TO_CHANGE_EXEC_WITHIN_OPTIONS
@@ -3399,11 +3434,11 @@ PRIVATE PostPair * break_data ARGS1(
  * pointer.  MRC
  *
  * By changing the certain options value (like preferred language or
- * fake browser name) we need to inform the remote server and reload 
- * (uncache on a proxy) the document which was active just before 
- * the Options menu was invoked.  Another values (like display_char_set 
- * or assume_char_set) used by lynx initial rendering stages 
- * and can only be changed after reloading :-( 
+ * fake browser name) we need to inform the remote server and reload
+ * (uncache on a proxy) the document which was active just before
+ * the Options menu was invoked.  Another values (like display_char_set
+ * or assume_char_set) used by lynx initial rendering stages
+ * and can only be changed after reloading :-(
  * So we introduce boolean flag 'need_reload' (currently dummy).
  *
  * Options are processed in order according to gen_options(), we should not
@@ -3612,12 +3647,12 @@ PUBLIC int postoptions ARGS1(
 
 	/* Display Character Set: SELECT */
 	if (!strcmp(data[i].tag, display_char_set_string)) {
-           current_char_set = atoi(data[i].value); 
+           current_char_set = atoi(data[i].value);
 	}
 
 	/* Raw Mode: ON/OFF */
 	if (!strcmp(data[i].tag, raw_mode_string)) {
-           LYRawMode = GetOptValues(bool_values, data[i].value); 
+           LYRawMode = GetOptValues(bool_values, data[i].value);
 	}
 
 	/*
