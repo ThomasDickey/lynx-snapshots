@@ -8507,7 +8507,7 @@ PUBLIC BOOLEAN HTreparse_document NOARGS
 #endif /* 0 */
 	HTAnchor_setProtocol(HTMainAnchor, &HTFile);
 	ret = HTParseFile(format, HTOutputFormat, HTMainAnchor, fp, NULL);
-	fclose(fp);
+	LYCloseInput(fp);
 	if (ret == HT_PARTIAL_CONTENT) {
 	    HTInfoMsg(gettext("Loading incomplete."));
 	    CTRACE((tfp, "SourceCache: `%s' has been accessed, partial content.\n",
@@ -8586,14 +8586,7 @@ PUBLIC BOOLEAN HTcan_reparse_document NOARGS
 	return FALSE;
 
     if (LYCacheSource == SOURCE_CACHE_FILE && HTMainAnchor->source_cache_file) {
-	FILE * fp;
-
-	fp = fopen(HTMainAnchor->source_cache_file, "r");
-	if (!fp) {
-	    return FALSE;
-	}
-	fclose(fp);
-	return TRUE;
+	return LYCanReadFile(HTMainAnchor->source_cache_file);
     }
 
     if (LYCacheSource == SOURCE_CACHE_MEMORY &&
@@ -9606,6 +9599,27 @@ PUBLIC char * HText_setLastOptionValue ARGS7(
 }
 
 /*
+ * Count the number of anchors on the current line so we can allow for the
+ * length of numbered fields.
+ */
+PRIVATE int AnchorsOnThisLine ARGS2(
+	HText *,	txt,
+	TextAnchor *,	ank)
+{
+    TextAnchor *chk = txt->first_anchor;
+    int count = 1;
+
+    while (chk != 0
+    	&& chk != txt->last_anchor
+	&& chk != ank) {
+	if (chk->line_num == ank->line_num)
+	    count++;
+	chk = chk->next;
+    }
+    return count;
+}
+
+/*
  *  Assign a form input anchor.
  *  Returns the number of characters to leave
  *  blank so that the input field can fit.
@@ -9615,7 +9629,6 @@ PUBLIC int HText_beginInput ARGS3(
 	BOOL,			underline,
 	InputFieldData *,	I)
 {
-
     TextAnchor * a = typecalloc(TextAnchor);
     FormInfo * f = typecalloc(FormInfo);
     CONST char *cp_option = NULL;
@@ -10030,7 +10043,7 @@ PUBLIC int HText_beginInput ARGS3(
 	     *  account as well. - FM
 	     */
 	    if (keypad_mode == LINKS_AND_FIELDS_ARE_NUMBERED)
-		MaximumSize -= ((a->number/10) + 3);
+		MaximumSize -= AnchorsOnThisLine(text, a) / 10 + 3;
 	    if (f->size > MaximumSize)
 		f->size = MaximumSize;
 
@@ -10850,10 +10863,10 @@ PUBLIC int HText_SubmitForm ARGS4(
 		    if (ferror(fd)) {
 			/* We got an error reading the file, what do we do? */
 			HTAlert("Short read from file, problem?");
-			fclose(fd);
+			LYCloseInput(fd);
 			goto exit_disgracefully;
 		    }
-		    fclose(fd);
+		    LYCloseInput(fd);
 		    /* we need to modify the mime-type here - rp */
 		    /* Note: could use LYGetFileInfo for that and for
 		       other headers that should be transmitted - kw */
@@ -12581,7 +12594,7 @@ PUBLIC int HText_ExtEditForm ARGS1(
 
 	fp = fopen (ed_temp, "r");
 	size = fread (ebuf, 1, size, fp);
-	fclose (fp);
+	LYCloseInput (fp);
 	ebuf[size] = '\0';	/* Terminate! - kw */
     }
 
@@ -12977,7 +12990,7 @@ PUBLIC int HText_InsertFile ARGS1(
 	    return 0;
 	}
 	size = fread (fbuf, 1, size, fp);
-	fclose (fp);
+	LYCloseInput (fp);
 	FREE(fn);
 	fbuf[size] = '\0';	/* Terminate! - kw */
     }

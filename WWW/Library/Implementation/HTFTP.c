@@ -1166,21 +1166,9 @@ PRIVATE int get_listen_socket NOARGS
 		if ((status=Rbind(new_socket,
 			(struct sockaddr*)&soc_address,
 			    /* Cast to generic sockaddr */
-#ifdef INET6
-#ifdef SIN6_LEN
-			((struct sockaddr *)&soc_address)->sa_len,
-#else
-			SA_LEN((struct sockaddr *)&soc_address),
-#endif /* SIN6_LEN */
-#else
-			sizeof(soc_address)
-#endif /* INET6 */
+			SOCKADDR_LEN(soc_address)
 #ifndef SHORTENED_RBIND
-#ifdef INET6
-			socks_bind_remoteAddr
-#else
 			,socks_bind_remoteAddr
-#endif /* INET6 */
 #endif /* !SHORTENED_RBIND */
 						)) == 0) {
 		    break;
@@ -1189,16 +1177,8 @@ PRIVATE int get_listen_socket NOARGS
 	    if ((status=bind(new_socket,
 		    (struct sockaddr*)&soc_address,
 			    /* Cast to generic sockaddr */
-#ifdef INET6
-#ifdef SIN6_LEN
-		    ((struct sockaddr *)&soc_address)->sa_len
-#else
-		    SA_LEN((struct sockaddr *)&soc_address)
-#endif /* SIN6_LEN */
+		    SOCKADDR_LEN(soc_address)
 		    )) == 0) {
-#else
-		    sizeof(soc_address))) == 0) {
-#endif /* INET6 */
 		break;
 	    }
 	    CTRACE((tfp, "TCP bind attempt to port %d yields %d, errno=%d\n",
@@ -1250,16 +1230,8 @@ PRIVATE int get_listen_socket NOARGS
 	status=bind(new_socket,
 		    (struct sockaddr*)&soc_address,
 		    /* Cast to generic sockaddr */
-#ifdef INET6
-#ifdef SIN6_LEN
-		    ((struct sockaddr *)&soc_address)->sa_len
-#else
-		    SA_LEN((struct sockaddr *)&soc_address)
-#endif /* SIN6_LEN */
+		    SOCKADDR_LEN(soc_address)
 		    );
-#else
-		    sizeof(soc_address));
-#endif /* INET6 */
 	if (status<0) return HTInetStatus("bind");
 
 	address_length = sizeof(soc_address);
@@ -1300,10 +1272,8 @@ PRIVATE int get_listen_socket NOARGS
 #ifdef INET6
     switch (((struct sockaddr *)&soc_address)->sa_family) {
     case AF_INET:
-	sprintf(port_command, "PORT %d,%d,%d,%d,%d,%d%c%c",
-#else
-    sprintf(port_command, "PORT %d,%d,%d,%d,%d,%d%c%c",
 #endif /* INET6 */
+	sprintf(port_command, "PORT %d,%d,%d,%d,%d,%d%c%c",
 		    (int)*((unsigned char *)(&soc_in->sin_addr)+0),
 		    (int)*((unsigned char *)(&soc_in->sin_addr)+1),
 		    (int)*((unsigned char *)(&soc_in->sin_addr)+2),
@@ -1320,11 +1290,7 @@ PRIVATE int get_listen_socket NOARGS
 	char hostbuf[MAXHOSTNAMELEN];
 	char portbuf[MAXHOSTNAMELEN];
 	getnameinfo((struct sockaddr *)&soc_address,
-#ifdef SIN6_LEN
-	    ((struct sockaddr *)&soc_address)->sa_len,
-#else
-	    SA_LEN((struct sockaddr *)&soc_address),
-#endif /* SIN6_LEN */
+	    SOCKADDR_LEN(soc_address),
 	    hostbuf, sizeof(hostbuf), portbuf, sizeof(portbuf),
 	    NI_NUMERICHOST | NI_NUMERICSERV);
 	sprintf(port_command, "EPRT |%d|%s|%s|%c%c", 2, hostbuf, portbuf,
@@ -3049,15 +3015,15 @@ PUBLIC int HTFTPLoad ARGS4(
 
 		while (--p > response_text && '0' <= *p && *p <= '9')
 		    ; /* null body */
-	       status = sscanf(p+1, "%d,%d,%d,%d,%d,%d",
+		status = sscanf(p+1, "%d,%d,%d,%d,%d,%d",
 		       &h0, &h1, &h2, &h3, &p0, &p1);
-	       if (status < 4) {
-		   fprintf(tfp, "HTFTP: PASV reply has no inet address!\n");
-		   return -99;
-	       }
-	       passive_port = (p0<<8) + p1;
+		if (status < 4) {
+		    fprintf(tfp, "HTFTP: PASV reply has no inet address!\n");
+		    return -99;
+		}
+		passive_port = (p0<<8) + p1;
 	    } else if (strncmp(command, "EPSV", 4) == 0) {
-		char ch;
+		unsigned char c0, c1, c2, c3;
 		/*
 		 * EPSV |||port|
 		 */
@@ -3066,11 +3032,15 @@ PUBLIC int HTFTPLoad ARGS4(
 		for (p = response_text; *p && isspace(*p); p++)
 		    ; /* null body */
 		status = sscanf(p+1, "%c%c%c%d%c",
-		       &h0, &h1, &h2, &p0, &h3);
+		       &c0, &c1, &c2, &p0, &c3);
 		if (status != 5) {
 		    fprintf(tfp, "HTFTP: EPSV reply has invalid format!\n");
 		    return -99;
 		}
+		h0 = c0;
+		h1 = c1;
+		h2 = c2;
+		h3 = c3;
 		passive_port = p0;
  	    }
 #else

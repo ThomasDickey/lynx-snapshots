@@ -452,7 +452,7 @@ check_recall:
 	pclose(outfile_fp);
     else
 #endif
-    fclose(outfile_fp);
+    LYCloseOutput(outfile_fp);
 #ifdef VMS
     if (0 == strncasecomp(buffer, "sys$disk:", 9)) {
 	if (0 == strncmp((buffer+9), "[]", 2)) {
@@ -1383,8 +1383,6 @@ PUBLIC char * GetFileName NOARGS
 {
     struct stat stat_info;
 
-    FILE *fp;
-
     char  fbuf[LY_MAXPATH];
     char  tbuf[LY_MAXPATH];
     char *fn;
@@ -1459,14 +1457,12 @@ check_recall:
 	goto retry;
     }
 
-    if ((fp = fopen (tbuf, "r")) == NULL) {
+    if (!LYCanReadFile(tbuf)) {
 	HTInfoMsg (FILE_NOT_READABLE);
 	_statusline(FILE_NOT_READABLE_RE);
 	FirstRecall = TRUE;
 	FnameNum    = FnameTotal;
 	goto retry;
-    } else {
-	fclose (fp);
     }
 
     /*

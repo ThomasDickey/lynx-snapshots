@@ -577,7 +577,10 @@ if test $cf_cv_screen != slang ; then
 		getbegx \
 		getbegy \
 		keypad \
+		newterm \
 		resizeterm \
+		touchline \
+		touchwin \
 		use_default_colors \
 		wborder \
 		wredrawln )

@@ -550,7 +550,7 @@ PUBLIC void read_rc ARGS1(FILE *, fp)
 
     } /* end of while */
 
-    fclose(fp);
+    LYCloseInput(fp);
 } /* big end */
 
 /*
@@ -1080,7 +1080,7 @@ in the Visited Links Page.\n\
     if (is_tempfile) {
 	LYCloseTempFP(fp);
     } else {
-	fclose(fp);
+	LYCloseOutput(fp);
 	HTSYS_purge(rcfile);
     }
 

@@ -88,6 +88,7 @@
 #undef HAVE_MMAP		/* defined by AM_GNU_GETTEXT */
 #undef HAVE_MUNMAP		/* defined by AM_GNU_GETTEXT */
 #undef HAVE_NCURSES_H		/* defined if we include <ncurses.h> */
+#undef HAVE_NEWTERM
 #undef HAVE_NL_TYPES_H		/* defined by AM_GNU_GETTEXT */
 #undef HAVE_POPEN
 #undef HAVE_PUTENV
@@ -118,6 +119,8 @@
 #undef HAVE_SYS_WAIT_H		/* have <sys/wait.h> */
 #undef HAVE_TERMIOS_H		/* have <termios.h> */
 #undef HAVE_TERMIO_H		/* have <termio.h> */
+#undef HAVE_TOUCHLINE
+#undef HAVE_TOUCHWIN
 #undef HAVE_TRUNCATE
 #undef HAVE_TTYNAME
 #undef HAVE_TTYTYPE

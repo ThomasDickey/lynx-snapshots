@@ -93,7 +93,7 @@ PRIVATE char *blat_cmd(
     if (ccaddr && strlen(ccaddr) > 0) {
 	fprintf(fp, "-c\n%s\n", ccaddr);
     }
-    fclose(fp);
+    LYCloseOutput(fp);
 
 #ifdef __CYGWIN__
     cygwin_conv_to_full_win32_path(bl_cmd_file, dosname);
@@ -876,7 +876,7 @@ PUBLIC void mailmsg ARGS4(
 	fputs("-- \n", fd);
 	while (LYSafeGets(&cmd, fp) != NULL)
 	    fputs(cmd, fd);
-	fclose(fp);
+	LYCloseInput(fp);
     }
 #if defined(UNIX) && !defined(__CYGWIN__)
     pclose(fd);
@@ -977,7 +977,7 @@ PUBLIC void mailmsg ARGS4(
 
 	fprintf(ofp, "%s\t%s \tin %s\n",
 		     links[cur].lname, links[cur].target, filename);
-	fclose(ofp);
+	LYCloseOutput(ofp);
     }
 
     FREE(address);
@@ -1818,10 +1818,10 @@ PUBLIC void reply_by_mail ARGS4(
 		while (LYSafeGets(&buffer, fp) != NULL) {
 		    fputs(buffer, fd);
 		}
-		fclose(fd);
+		LYCloseOutput(fd);
 	    }
 	}
-	fclose(fp);
+	LYCloseInput(fp);
     }
     clear();  /* Clear the screen. */
 
@@ -1998,7 +1998,7 @@ PUBLIC void reply_by_mail ARGS4(
 	    start_curses();
 	    LYRemoveTemp(tmpfile2);	/* Delete the tmpfile. */
 #endif /* CAN_PIPE_TO_MAILER */
-	    fclose(fd); /* Close the tmpfile. */
+	    LYCloseInput(fd); /* Close the tmpfile. */
 	}
     }
 #endif /* VMS */

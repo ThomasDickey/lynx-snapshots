@@ -35,7 +35,6 @@ PUBLIC void LYDownload ARGS1(
     char command[LY_MAXPATH];
     char *cp;
     lynx_html_item_type *download_command = 0;
-    FILE *fp;
     int ch, recall;
     int FnameTotal;
     int FnameNum;
@@ -249,12 +248,7 @@ check_recall:
 	 */
 	CTRACE((tfp, "LYDownload: filename is %s\n", buffer));
 
-	if ((fp = fopen(buffer, "w")) != NULL) {
-	    fclose(fp);
-	    remove(buffer);
-	} else {
-	    HTAlert(CANNOT_WRITE_TO_FILE);
-	    _statusline(NEW_FILENAME_PROMPT);
+	if (! LYCanWriteFile(buffer)) {
 	    FirstRecall = TRUE;
 	    FnameNum = FnameTotal;
 	    goto retry;

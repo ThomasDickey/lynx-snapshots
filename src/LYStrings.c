@@ -1218,8 +1218,7 @@ PRIVATE int read_keymap_file NOARGS
 
     linenum = 0;
     ret = 0;
-    while (LYSafeGets(&line, fp) != 0 && (ret == 0))
-    {
+    while (LYSafeGets(&line, fp) != 0 && (ret == 0)) {
 	char *s = LYSkipBlanks(line);
 
 	linenum++;
@@ -1240,7 +1239,7 @@ PRIVATE int read_keymap_file NOARGS
     }
     FREE(line);
 
-    fclose (fp);
+    LYCloseInput (fp);
 
     if (ret == -1)
 	fprintf (stderr, FAILED_READING_KEYMAP, linenum, file);
@@ -1966,33 +1965,44 @@ re_read:
 #ifdef KEY_RESIZE
 	case KEY_RESIZE:	   /* size change detected by ncurses */
 #if HAVE_SIZECHANGE || defined(USE_SLANG)
-	   /* Make call to detect new size, if that may be implemented.
-	    * The call may set recent_sizechange (except for USE_SLANG),
-	    * which will tell mainloop() to refresh. - kw */
-	   CTRACE((tfp, "Got KEY_RESIZE, recent_sizechange so far is %d\n",
+	    /* Make call to detect new size, if that may be implemented.
+	     * The call may set recent_sizechange (except for USE_SLANG),
+	     * which will tell mainloop() to refresh. - kw
+	     */
+	    CTRACE((tfp, "Got KEY_RESIZE, recent_sizechange so far is %d\n",
 		  recent_sizechange));
-	   size_change(0);
-	   CTRACE((tfp, "Now recent_sizechange is %d\n", recent_sizechange));
+	    size_change(0);
+	    CTRACE((tfp, "Now recent_sizechange is %d\n", recent_sizechange));
 #else /* HAVE_SIZECHANGE || USE_SLANG */
-	   CTRACE((tfp, "Got KEY_RESIZE, recent_sizechange is %d\n",
+	    CTRACE((tfp, "Got KEY_RESIZE, recent_sizechange is %d\n",
 		  recent_sizechange));
 #endif /* HAVE_SIZECHANGE || USE_SLANG */
-	   if (!recent_sizechange) {
+	    if (!recent_sizechange) {
 #if 0			/* assumption seems flawed? */
-	       /*  Not detected by us or already processed by us.  It can
-		*  happens that ncurses lags behind us in detecting the
-		*  change, since its own SIGTSTP handler is not installed
-		*  so detecting happened *at the end* of the last refresh.
-		*  Tell it to refresh again... - kw */
-	       refresh();
+	        /*  Not detected by us or already processed by us.  It can
+		 *  happens that ncurses lags behind us in detecting the
+		 *  change, since its own SIGTSTP handler is not installed
+		 *  so detecting happened *at the end* of the last refresh.
+		 *  Tell it to refresh again... - kw
+		 */
+	        refresh();
 #endif
-	       /*
-		*  May be just the delayed effect of mainloop()'s call
-		*  to resizeterm().  Pretend we haven't read anything
-		*  yet, don't return. - kw
-		*/
-	       goto re_read;
-	   }
+#if defined(NCURSES)
+		/*
+		 * Work-around for scenario (Linux libc5) where we got a
+		 * recent sizechange before reading KEY_RESIZE.  If we do
+		 * not reset the flag, we'll next get an EOF read, which
+		 * causes Lynx to exit.
+		 */
+		recent_sizechange = TRUE;
+#endif
+	        /*
+		 *  May be just the delayed effect of mainloop()'s call
+		 *  to resizeterm().  Pretend we haven't read anything
+		 *  yet, don't return. - kw
+		 */
+	        goto re_read;
+	    }
 	   /*
 	    *  Yep, we agree there was a change.  Return now so that
 	    *  the caller can react to it. - kw
@@ -5533,11 +5543,11 @@ PUBLIC void LYWriteCmdKey ARGS1(
 PUBLIC void LYCloseCmdLogfile NOARGS
 {
     if (cmd_logfile != 0) {
-	fclose(cmd_logfile);
+	LYCloseOutput(cmd_logfile);
 	cmd_logfile = 0;
     }
     if (cmd_script != 0) {
-	fclose(cmd_script);
+	LYCloseInput(cmd_script);
 	cmd_script = 0;
     }
     FREE(lynx_cmd_logfile);

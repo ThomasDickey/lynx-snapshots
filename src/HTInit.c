@@ -33,8 +33,6 @@ PRIVATE int HTLoadExtensionsConfigFile PARAMS((char *fn));
 
 PUBLIC void HTFormatInit NOARGS
 {
- FILE *fp = NULL;
-
 #ifdef NeXT
   HTSetPresentation("application/postscript",   "open %s", 1.0, 2.0, 0.0, 0);
   HTSetPresentation("image/x-tiff",             "open %s", 2.0, 2.0, 0.0, 0);
@@ -159,8 +157,7 @@ PUBLIC void HTFormatInit NOARGS
  /*
   *  Load the local maps.
   */
- if ((fp = fopen(personal_type_map, TXT_R)) != NULL) {
-     fclose(fp);
+ if (LYCanReadFile(personal_type_map)) {
      /* These should override everything else. */
      HTLoadTypesConfigFile(personal_type_map);
  } else {
@@ -637,7 +634,7 @@ PRIVATE int ProcessMailcapFile ARGS1(
     while (fp && !feof(fp)) {
 	ProcessMailcapEntry(fp, &mc);
     }
-    fclose(fp);
+    LYCloseInput(fp);
     RememberTestResult(RTR_forget, NULL, 0);
     return(0 == 0);
 }
@@ -725,8 +722,6 @@ PRIVATE int HTLoadTypesConfigFile ARGS1(
  */
 PUBLIC void HTFileInit NOARGS
 {
-    FILE *fp;
-
 #ifdef BUILTIN_SUFFIX_MAPS
     if (LYUseBuiltinSuffixes)
     {
@@ -1049,8 +1044,7 @@ PUBLIC void HTFileInit NOARGS
     /* These should override the default extensions as necessary. */
     HTLoadExtensionsConfigFile(global_extension_map);
 
-    if ((fp = fopen(personal_extension_map, TXT_R)) != NULL) {
-	fclose(fp);
+    if (LYCanReadFile(personal_extension_map)) {
 	/* These should override everything else. */
 	HTLoadExtensionsConfigFile(personal_extension_map);
     } else {
@@ -1175,7 +1169,7 @@ PRIVATE int HTLoadExtensionsConfigFile ARGS1(
 	}
 	FREE(ct);
     }
-    fclose(f);
+    LYCloseInput(f);
 
     return count;
 }

@@ -1,6 +1,40 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2000-08-24 (2.8.4dev.8)
+* refine CJK-related suppress of refresh() in statusline() to do this only
+  when the status line does not contain CJK characters (Hataguchi Takeshi)
+* add po/da.po placeholder (request by JS)
+* implement %s, %t, %{charset} and %{encoding} substitutions for mailcap
+  commands in HTFWriter.c (addresses Debian #21096) -TD
+* use new function AnchorsOnThisLine() to obtain count of anchors on the
+  current line for correct computation of length required to fix Debian #68542:
+  Text entry field on http://lists.debian.org/ is hidden when "form fields are
+  numbered" (reported by H.Nanosecond) -TD
+* add OS/2 cases to config.guess, config.sub -TD
+* modify CF_FUNC_GETADDRINFO to supply missing definitions for
+  HAVE_GAI_STRERROR and HAVE_GETADDRINFO, needed to make IPV6 build (reported
+  by Wesley Morgan) -TD
+* reset recent_sizechange after reading KEY_RESIZE from ncurses to work around
+  a case with Linux libc5 which would be treated as an EOF, causing an exit -TD
+* suppress PG's endwin/newterm code for ncurses because it is not needed -TD
+* modify start_curses() function to preset environment variables $LINES and
+  $COLUMNS to make the curses library see the proper screen size.  After
+  calling endwin(), delete the current SCREEN object, to force curses library
+  to discard its cached values of LINES and COLS.  This requires using
+  newterm(), which may not be present in all versions of curses, so we check
+  for and ifdef accordingly.  Tested on os390 and Solaris -PG
+* cleanup IPV6 ifdef's using SOCKETADDR_LEN macro -TD
+* add error checks to LYCopyFile() and other places to report problems copying
+  the downloaded file, using new functions LYCloseOutput(), LYCanWriteFile()
+  (reported by H.Nanosecond <aldomel@ix.netcom.com> as Debian bug #63391) -TD
+* correct logic used to check for "Too many tempfiles", which resulted in
+  occasional misfires -TD
+* add configure checks for touchline() and touchwin(), use this info to work
+  with Ultrix V4.5 (report by Bernhard Simon <bs@bsws.zid.tuwien.ac.at>) -TD
+* reorganized CF_SIZECHANGE macro to work with autoconf 2.49a -TD
+* cleanup definitions for wait-status macros, moving them into www_wait.h -TD
+
 2000-08-03 (2.8.4dev.7)
 * add sample mailto-form.pl script to illustrate handling mailto URLs -KW
 * modify HTTCP.c to build on AIX 4.3 using HAVE_TYPE_UNIONWAIT as in LYLocal.c
@@ -442,7 +476,7 @@ Changes since Lynx 2.8 release
 * add configure option --enable-htmlized-cfg to install the htmlized lynx.cfg
   in the help directory (request by LP) -TD
 * suppress sleep's in crawl or traversal mode (request by LV) -TD
-+ cleanup LYReadCFG.c, LYrcFile.c a little, using new functions putBool,
+* cleanup LYReadCFG.c, LYrcFile.c a little, using new functions putBool,
   getBool, putEnum and getEnum -TD
 * change default mode for visited-links-page to match original behavior, add
   visited_links to .lynxrc file (requests by KD, LP) -TD

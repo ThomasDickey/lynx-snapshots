@@ -45,10 +45,7 @@
 #include <LYLocal.h>
 
 #include <LYLeaks.h>
-
-#ifdef HAVE_SYS_WAIT_H
-#include <sys/wait.h>
-#endif
+#include <www_wait.h>
 
 struct _HTStream
 {

@@ -41,7 +41,7 @@ PUBLIC BOOLEAN lookup ARGS1(char *,target)
 	if ((ifp = LYNewTxtFile(TRAVERSE_FILE)) == NULL) {
 	    exit_with_perror(CANNOT_OPEN_TRAV_FILE);
 	} else {
-	    fclose(ifp);
+	    LYCloseOutput(ifp);
 	    return(FALSE);
 	}
     }
@@ -57,7 +57,7 @@ PUBLIC BOOLEAN lookup ARGS1(char *,target)
     FREE(line);
     FREE(buffer);
 
-    fclose(ifp);
+    LYCloseInput(ifp);
     return (BOOL) (result);
 }
 
@@ -72,7 +72,7 @@ PUBLIC void add_to_table ARGS1(char *,target)
 
     fprintf(ifp,"%s\n",target);
 
-    fclose(ifp);
+    LYCloseOutput(ifp);
 }
 
 PUBLIC void add_to_traverse_list ARGS2(char *,fname, char *,prev_link_name)
@@ -86,7 +86,7 @@ PUBLIC void add_to_traverse_list ARGS2(char *,fname, char *,prev_link_name)
 
     fprintf(ifp,"%s\t%s\n",fname, prev_link_name);
 
-    fclose(ifp);
+    LYCloseOutput(ifp);
 }
 
 PUBLIC void dump_traversal_history NOARGS
@@ -110,7 +110,7 @@ PUBLIC void dump_traversal_history NOARGS
 	fprintf(ifp,"%s\t%s\n", history[x].title, history[x].address);
     }
 
-    fclose(ifp);
+    LYCloseOutput(ifp);
 }
 
 PUBLIC void add_to_reject_list ARGS1(char *,target)
@@ -124,7 +124,7 @@ PUBLIC void add_to_reject_list ARGS1(char *,target)
 
     fprintf(ifp,"%s\n",target);
 
-    fclose(ifp);
+    LYCloseOutput(ifp);
 }
 
 /* there need not be a reject file, so if it doesn't open, just return
@@ -168,6 +168,6 @@ PUBLIC BOOLEAN lookup_reject ARGS1(char *,target)
     FREE(buffer);
     FREE(line);
 
-    fclose(ifp);
+    LYCloseInput(ifp);
     return (BOOL) (result);
 }

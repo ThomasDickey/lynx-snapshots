@@ -95,36 +95,29 @@ PUBLIC char * get_bookmark_filename ARGS1(
     CTRACE((tfp, "\nget_bookmark_filename: SEEKING %s\n   AS %s\n\n",
 		BookmarkPage, filename_buffer));
     if ((fp = fopen(filename_buffer, TXT_R)) != NULL) {
-	goto success;
-    }
-
-    /*
-     *	Failure.
-     */
-    return(NULL);
-
-success:
-    /*
-     *	We now have the file open.
-     *	Check if it is a mosaic hotlist.
-     */
-    if (LYSafeGets(&string_buffer, fp) != 0
-     && !strncmp(string_buffer, "ncsa-xmosaic-hotlist-format-1", 29)) {
-	char *newname;
 	/*
-	 *  It is a mosaic hotlist file.
+	 * We now have the file open.
+	 * Check if it is a mosaic hotlist.
 	 */
-	is_mosaic_hotlist = TRUE;
-	newname = convert_mosaic_bookmark_file(filename_buffer);
-	LYLocalFileToURL(URL, newname);
-    } else {
-	is_mosaic_hotlist = FALSE;
-	LYLocalFileToURL(URL, filename_buffer);
-    }
-    FREE(string_buffer);
-    fclose(fp);
+	if (LYSafeGets(&string_buffer, fp) != 0
+	 && !strncmp(string_buffer, "ncsa-xmosaic-hotlist-format-1", 29)) {
+	    char *newname;
+	    /*
+	     *  It is a mosaic hotlist file.
+	     */
+	    is_mosaic_hotlist = TRUE;
+	    newname = convert_mosaic_bookmark_file(filename_buffer);
+	    LYLocalFileToURL(URL, newname);
+	} else {
+	    is_mosaic_hotlist = FALSE;
+	    LYLocalFileToURL(URL, filename_buffer);
+	}
+	FREE(string_buffer);
+	LYCloseInput(fp);
 
-    return(filename_buffer);  /* bookmark file exists */
+	return(filename_buffer);  /* bookmark file exists */
+    }
+    return(NULL);
 
 } /* big end */
 
@@ -181,7 +174,7 @@ PRIVATE char * convert_mosaic_bookmark_file ARGS1(
 	line++;
     }
     LYCloseTempFP(nfp);
-    fclose(fp);
+    LYCloseInput(fp);
     return(newfile);
 }
 
@@ -399,7 +392,7 @@ Note: if you edit this file manually\n\
     } else {
 	fprintf(fp,"<LI><a href=\"%s\">%s</a>\n", Address, Title);
     }
-    fclose(fp);
+    LYCloseOutput(fp);
 
     SetDefaultMode(O_BINARY);
     /*
@@ -484,7 +477,7 @@ PUBLIC void remove_bookmark_link ARGS2(
 
     LYAddPathToHome(homepath, sizeof(homepath), "");
     if ((nfp = LYOpenScratch(newfile, homepath)) == 0) {
-	fclose(fp);
+	LYCloseInput(fp);
 	HTAlert(BOOKSCRA_OPEN_FAILED_FOR_DEL);
 	return;
     }
@@ -498,7 +491,7 @@ PUBLIC void remove_bookmark_link ARGS2(
 	mode = ((stat_buf.st_mode & 0777) | 0600); /* make it writable */
 	(void) chmod(newfile, mode);
 	if ((nfp = LYReopenTemp(newfile)) == NULL) {
-	    (void) fclose(fp);
+	    (void) LYCloseInput(fp);
 	    HTAlert(BOOKTEMP_REOPEN_FAIL_FOR_DEL);
 	    return;
 	}
@@ -554,7 +547,7 @@ PUBLIC void remove_bookmark_link ARGS2(
     CTRACE((tfp, "remove_bookmark_link: files: %s %s\n",
 			newfile, filename_buffer));
 
-    fclose(fp);
+    LYCloseInput(fp);
     fp = NULL;
     if (fflush(nfp) == EOF) {
 	CTRACE((tfp, "fflush(nfp): %s", LYStrerror(errno)));
@@ -667,7 +660,7 @@ failure:
     if (nfp)
 	LYCloseTempFP(nfp);
     if (fp != NULL)
-	fclose(fp);
+	LYCloseInput(fp);
     if (keep_tempfile) {
 	HTUserMsg2(gettext("File may be recoverable from %s during this session"),
 		   newfile);

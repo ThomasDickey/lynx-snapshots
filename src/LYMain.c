@@ -1278,12 +1278,11 @@ PUBLIC int main ARGS2(
      *	If the configuration file is not available,
      *	inform the user and exit.
      */
-    if ((fp = fopen(lynx_cfg_file, "r")) == NULL) {
+    if (!LYCanReadFile(lynx_cfg_file)) {
 	fprintf(stderr, gettext("\nConfiguration file %s is not available.\n\n"),
 			lynx_cfg_file);
 	exit(-1);
     }
-    fclose(fp);
 
     /*
      * Make sure we have the character sets declared.
@@ -1342,13 +1341,12 @@ PUBLIC int main ARGS2(
      *	If the lynx-style file is not available,
      *	inform the user and exit.
      */
-    if ((fp = fopen(lynx_lss_file, "r")) == NULL) {
+    if (!LYCanReadFile(lynx_lss_file)) {
 	fprintf(stderr, gettext("\nLynx file %s is not available.\n\n"),
 			lynx_lss_file);
     }
     else
     {
-	fclose(fp);
 	style_readFromFile(lynx_lss_file);
     }
 #endif /* USE_HASH */
