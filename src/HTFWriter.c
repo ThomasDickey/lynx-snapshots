@@ -475,7 +475,7 @@ PRIVATE void HTFWriter_abort ARGS2(
 
 		sprintf(buf, "%.60s '%.400s': %.60s",
 			gettext("Error deleting file"),
-			me->remove_command, strerror(errno));
+			me->remove_command, LYStrerror(errno));
 		HTAlert(buf);
 	    }
 #endif

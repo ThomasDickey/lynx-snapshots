@@ -60,11 +60,6 @@
 #undef SELECTED_STYLES
 #define pHText_changeStyle(X,Y,Z) {}
 
-#define OPT_SCN 1
-#define OMIT_SCN_KEEPING 0 /* whether to omit keeping of Style_className
-    when lss support is on. 1 to increase performance. The value must
-    correspond to one in LYCurses.c. Should be 0 if OPT_SCN=0 */
-
 #if OMIT_SCN_KEEPING
 # define HCODE_TO_STACK_OFF(x) /*(CSHASHSIZE+1)*/ 88888  /*special value.*/
 #else
@@ -669,15 +664,49 @@ PUBLIC void HTML_write ARGS3(HTStructured *, me, CONST char*, s, int, l)
 
 
 #ifdef USE_COLOR_STYLE
-# if !OPT_SCN
-static char* Style_className = NULL;
-static char myHash[128];
-# else
-PRIVATE char Style_className[4096];/* i hope it's enough :) HV */
-PRIVATE char* Style_className_end=Style_className;/*this points to the
-		    end of string in Style_className (it points to '\0') */
-# endif
-static int hcode;
+PRIVATE char* Style_className = 0;
+PRIVATE char* Style_className_end = 0;
+PRIVATE unsigned Style_className_len = 0;
+PRIVATE int hcode;
+
+#ifdef LY_FIND_LEAKS
+PRIVATE void free_Style_className NOARGS
+{
+    FREE(Style_className);
+}
+#endif
+
+PRIVATE void addClassName ARGS3(
+	CONST char *,	prefix,
+	CONST char *,	actual,
+	int,		length)
+{
+    int offset = strlen(prefix);
+    unsigned have = (Style_className_end - Style_className);
+    unsigned need = (offset + length + 1);
+
+    if ((have + need) >= Style_className_len) {
+	Style_className_len += 1024 + 2 * (have + need);
+	if (Style_className == 0) {
+	    Style_className = malloc(Style_className_len);
+	} else {
+	    Style_className = realloc(Style_className, Style_className_len);
+	}
+	if (Style_className == NULL)
+	    outofmem(__FILE__, "addClassName");
+	Style_className_end = Style_className + have;
+    }
+    if (offset)
+	strcpy(Style_className_end, prefix);
+    if (length)
+	memcpy(Style_className_end + offset, actual, length);
+    Style_className_end[offset + length] = '\0';
+    strtolower(Style_className_end);
+
+    Style_className_end += (offset + length);
+}
+#else
+#define addClassName(prefix, actual, length) /* nothing */
 #endif
 
 
@@ -901,14 +930,8 @@ PRIVATE int HTML_start_element ARGS6(
     short stbl_align = HT_ALIGN_NONE;
     int status = HT_OK;
 #ifdef USE_COLOR_STYLE
-    char* class_name;
+    char *class_name;
     int class_used = 0;
-#  if OPT_SCN
-#    if !OMIT_SCN_KEEPING
-    char* Style_className_end_was = Style_className_end+1;
-#    endif
-    /* assume ';' will be appended*/
-#  endif
 #endif
 
 #ifdef USE_PRETTYSRC
@@ -1026,17 +1049,10 @@ PRIVATE int HTML_start_element ARGS6(
 /* this should be done differently */
 #if defined(USE_COLOR_STYLE)
 
-#if !OPT_SCN
-    HTSprintf (&Style_className, ";%s", HTML_dtd.tags[element_number].name);
-#else
-# if !OMIT_SCN_KEEPING
-    *Style_className_end=';';
-    memcpy(Style_className_end+1,
-	   HTML_dtd.tags[element_number].name,
-	   HTML_dtd.tags[element_number].name_len+1);
-    Style_className_end += HTML_dtd.tags[element_number].name_len+1;
-# endif
-#endif
+    addClassName(";", 
+	         HTML_dtd.tags[element_number].name,
+	         HTML_dtd.tags[element_number].name_len);
+
     class_name = (force_classname ? forced_classname : class_string);
     force_classname = FALSE;
 
@@ -1051,37 +1067,20 @@ PRIVATE int HTML_start_element ARGS6(
     CTRACE2(TRACE_STYLE, (tfp, "CSS.elt:<%s>\n", HTML_dtd.tags[element_number].name));
 
     if (current_tag_style == -1) {	/* Append class_name */
-#if !OPT_SCN
-	strcpy (myHash, HTML_dtd.tags[element_number].name);
-#else
 	hcode = hash_code_lowercase_on_fly(HTML_dtd.tags[element_number].name);
-#endif
-	if (class_name[0])
-	{
+	if (class_name[0]) {
 	    int ohcode = hcode;
-	    char *oend = Style_className_end;
-#if !OPT_SCN
-	    int len = strlen(myHash);
-	    sprintf(myHash, ".%.*s", (int)sizeof(myHash) - len - 2, class_name);
-	    HTSprintf (&Style_className, ".%s", class_name);
-#else
-#   if !OMIT_SCN_KEEPING
-	    int l = strlen(class_name);
-	    *Style_className_end = '.';
-	    memcpy(Style_className_end+1, class_name, l+1 );
-	    Style_className_end += l+1;
-#   endif
 
 	    hcode = hash_code_aggregate_char('.', hcode);
 	    hcode = hash_code_aggregate_lower_str(class_name, hcode);
-#endif
 	    if (!hashStyles[hcode].name) { /* None such -> classless version */
 		hcode = ohcode;
-		*oend = '\0';
 		CTRACE2(TRACE_STYLE,
 			(tfp, "STYLE.start_element: <%s> (class <%s> not configured), hcode=%d.\n",
 			HTML_dtd.tags[element_number].name, class_name, hcode));
 	    } else {
+		addClassName(".", class_name, strlen(class_name));
+
 		CTRACE2(TRACE_STYLE,
 			(tfp, "STYLE.start_element: <%s>.<%s>, hcode=%d.\n",
 			HTML_dtd.tags[element_number].name, class_name, hcode));
@@ -1089,48 +1088,11 @@ PRIVATE int HTML_start_element ARGS6(
 	    }
 	}
 
-#if !OPT_SCN
-	strtolower(myHash);
-	hcode = hash_code(myHash);
-#endif
 	class_string[0] = '\0';
 
-#if !OPT_SCN
-    if (TRACE)
-    {
-	CTRACE((tfp, "CSSTRIM:%s -> %d", myHash, hcode));
-	if (hashStyles[hcode].code != hcode) {
-	    char *rp = strrchr(myHash, '.');
-	    CTRACE((tfp, " (undefined) %s\n", myHash));
-	    if (rp) {
-		int hcd;
-		*rp = '\0'; /* trim the class */
-		hcd = hash_code(myHash);
-		CTRACE((tfp, "CSS:%s -> %d", myHash, hcd));
-		if (hashStyles[hcd].code!=hcd)
-		    CTRACE((tfp, " (undefined) %s\n", myHash));
-		else
-		    CTRACE((tfp, " ca=%d\n", hashStyles[hcd].color));
-	    }
-	} else {
-	    CTRACE((tfp, " ca=%d\n", hashStyles[hcode].color));
-	}
-    }
-#endif
     } else { /* (current_tag_style!=-1)	 */
 	if (class_name[0]) {
-#if !OPT_SCN
-	    int len = strlen(myHash);
-	    sprintf(myHash, ".%.*s", (int)sizeof(myHash) - len - 2, class_name);
-	    HTSprintf (&Style_className, ".%s", class_name);
-#else
-#     if !OMIT_SCN_KEEPING
-	    int l = strlen(class_name);
-	    *Style_className_end = '.';
-	    memcpy(Style_className_end+1,class_name, l + 1 );
-	    Style_className_end += l + 1;
-#     endif
-#endif
+	    addClassName(".", class_name, strlen(class_name));
 	    class_string[0] = '\0';
 	}
 	hcode = current_tag_style;
@@ -1140,44 +1102,30 @@ PRIVATE int HTML_start_element ARGS6(
 	current_tag_style = -1;
     }
 
-#if !OPT_SCN
-    strtolower(Style_className);
-#else
-#  if !OMIT_SCN_KEEPING
-    strtolower(Style_className_end_was);/*only the part that wasn't
-					  lowercased yet*/
-#   endif
-#endif
-
-#if OPT_SCN && !OMIT_SCN_KEEPING	/* Can be done in other cases too... */
+#if !OMIT_SCN_KEEPING		/* Can be done in other cases too... */
     if (!class_used && ElementNumber == HTML_INPUT) { /* For some other too? */
 	CONST char *type = "";
-	char *oend = Style_className_end;
-	int l, ohcode = hcode;
+	int ohcode = hcode;
 
 	if (present && present[HTML_INPUT_TYPE] && value[HTML_INPUT_TYPE])
 	    type = value[HTML_INPUT_TYPE];
-	l = strlen(type);
 
-	*Style_className_end = '.';
-	memcpy(Style_className_end+1, "type.", 5 );
-	memcpy(Style_className_end+6, type, l+1 );
-	Style_className_end += l+6;
 	hcode = hash_code_aggregate_lower_str(".type.", hcode);
 	hcode = hash_code_aggregate_lower_str(type, hcode);
 	if (!hashStyles[hcode].name) { /* None such -> classless version */
 	    hcode = ohcode;
-	    *oend = '\0';
 	    CTRACE2(TRACE_STYLE,
 		    (tfp, "STYLE.start_element: type <%s> not configured.\n",
 			   type));
 	} else {
+	    addClassName(".type.", type, strlen(type));
+
 	    CTRACE2(TRACE_STYLE,
 		    (tfp, "STYLE.start_element: <%s>.type.<%s>, hcode=%d.\n",
 			  HTML_dtd.tags[element_number].name, type, hcode));
 	}
     }
-#endif	/* OPT_SCN && !OMIT_SCN_KEEPING */
+#endif	/* !OMIT_SCN_KEEPING */
 
     HText_characterStyle(me->text, hcode, 1);
 #endif /* USE_COLOR_STYLE */
@@ -5676,17 +5624,12 @@ PRIVATE int HTML_start_element ARGS6(
 		(tfp, "STYLE.begin_element:ending \"EMPTY\" element style\n"));
 	HText_characterStyle(me->text, HCODE_TO_STACK_OFF(hcode), STACK_OFF);
 
-#if !OPT_SCN
-	TrimColorClass(HTML_dtd.tags[element_number].name,
-		       Style_className, &hcode);
-#else
 #  if !OMIT_SCN_KEEPING
 	FastTrimColorClass(HTML_dtd.tags[element_number].name,
 			   HTML_dtd.tags[element_number].name_len,
 			   Style_className,
 			   &Style_className_end, &hcode);
 #  endif
-#endif
     }
 #endif /* USE_COLOR_STYLE */
     return status;
@@ -7290,17 +7233,12 @@ End_Object:
 
 #ifdef USE_COLOR_STYLE
     if (!skip_stack_requested) { /*don't emit stylechanges if skipped stack element - VH*/
-#if !OPT_SCN
-	TrimColorClass(HTML_dtd.tags[element_number].name,
-		       Style_className, &hcode);
-#else
 # if !OMIT_SCN_KEEPING
 	FastTrimColorClass(HTML_dtd.tags[element_number].name,
 			   HTML_dtd.tags[element_number].name_len,
 			   Style_className,
 			   &Style_className_end, &hcode);
 #  endif
-#endif
 
 	if (!ReallyEmptyTagNum(element_number))
 	{
@@ -7514,11 +7452,6 @@ PRIVATE void HTML_free ARGS1(HTStructured *, me)
 	}
 	styles[HTML_PRE]->alignment = HT_LEFT;
     }
-#ifdef USE_COLOR_STYLE
-# if !OPT_SCN
-    FREE(Style_className);
-# endif
-#endif
     FREE(me->base_href);
     FREE(me->map_address);
     FREE(me->LastOptionValue);
@@ -7604,11 +7537,6 @@ PRIVATE void HTML_abort ARGS2(HTStructured *, me, HTError, e)
 	}
 	styles[HTML_PRE]->alignment = HT_LEFT;
     }
-#ifdef USE_COLOR_STYLE
-# if !OPT_SCN
-    FREE(Style_className);
-# endif
-#endif
     FREE(me->base_href);
     FREE(me->map_address);
     FREE(me->textarea_name);
@@ -7861,11 +7789,12 @@ PUBLIC HTStructured* HTML_new ARGS3(
     me->comment_end = NULL;
 
 #ifdef USE_COLOR_STYLE
-# if !OPT_SCN
-    FREE(Style_className);
-# else
-    Style_className_end = Style_className;
-# endif
+#ifdef LY_FIND_LEAKS
+    if (Style_className == 0) {
+	atexit(free_Style_className);
+    }
+#endif
+    addClassName("", "", 0);
     class_string[0] = '\0';
 #endif
 

@@ -457,7 +457,7 @@ PRIVATE int remove_file ARGS1(char *, path)
 	char *tmpbuf = NULL;
 
 	args[0] = "rm";
-	args[1] = "-rf";
+	args[1] = "-f";
 	args[2] = path;
 	args[3] = (char *) 0;
 	HTSprintf0(&tmpbuf, gettext("remove %s"), path);
@@ -465,6 +465,27 @@ PRIVATE int remove_file ARGS1(char *, path)
 	FREE(tmpbuf);
     } else {
 	code = remove(path) ? -1 : 1;
+    }
+    return (code);
+}
+
+PRIVATE int remove_directory ARGS1(char *, path)
+{
+    int code;
+    CONST char *program;
+
+    if ((program = HTGetProgramPath(ppRMDIR)) != NULL) {
+	char *args[5];
+	char *tmpbuf = NULL;
+
+	args[0] = "rmdir";
+	args[1] = path;
+	args[2] = (char *) 0;
+	HTSprintf0(&tmpbuf, gettext("remove %s"), path);
+	code = LYExecv(program, args, tmpbuf);
+	FREE(tmpbuf);
+    } else {
+	code = rmdir(path) ? -1 : 1;
     }
     return (code);
 }
@@ -1125,6 +1146,7 @@ PRIVATE int remove_single ARGS1(
     char *cp;
     char *tmpbuf = 0;
     struct stat dir_info;
+    BOOL is_directory = FALSE;
 
     if (!ok_lstat(testpath, &dir_info)) {
 	return 0;
@@ -1148,6 +1170,7 @@ PRIVATE int remove_single ARGS1(
 	    HTSprintf0(&tmpbuf,
 		       gettext("Remove directory and all of its contents?"));
 	}
+	is_directory = TRUE;
     } else if (S_ISREG(dir_info.st_mode)) {
 	if (strlen(cp) < 60) {
 	    HTSprintf0(&tmpbuf, gettext("Remove file '%s'?"), cp);
@@ -1169,7 +1192,9 @@ PRIVATE int remove_single ARGS1(
     }
 
     if (HTConfirm(tmpbuf) == YES) {
-	code = remove_file(testpath);
+	code = is_directory
+	     ? remove_directory(testpath)
+	     : remove_file(testpath);
     }
     FREE(tmpbuf);
     return code;

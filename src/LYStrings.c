@@ -4851,12 +4851,12 @@ again:
 
 	case LYE_PASTE:
 	    {
-		unsigned char *s = get_clip_grab(), *e;
+		unsigned char *s = (unsigned char *) get_clip_grab(), *e;
 		int len;
 
 		if (!s)
 		    break;
-		len = strlen(s);
+		len = strlen((const char *) s);
 		e = s + len;
 
 		if (len > 0) {
@@ -4868,7 +4868,7 @@ again:
 				LYEditInsert(&MyEdit, s, e1 - s, map_active, TRUE);
 			    s = e1;
 			    if (*e1 == '\t') { /* Replace by space */
-				LYEditInsert(&MyEdit, " ", 1, map_active, TRUE);
+				LYEditInsert(&MyEdit, (unsigned char * ) " ", 1, map_active, TRUE);
 				s = ++e1;
 			    } else
 				break;

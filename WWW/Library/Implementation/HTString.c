@@ -1213,7 +1213,8 @@ PUBLIC void HTSABFree ARGS1(
 #ifdef ANSI_VARARGS
 PUBLIC bstring * HTBprintf (bstring ** pstr, CONST char * fmt, ...)
 #else
-PUBLIC bstring * HTBprintf ()
+PUBLIC bstring * HTBprintf (va_alist)
+    va_dcl
 #endif
 {
     bstring *result = 0;
@@ -1223,7 +1224,7 @@ PUBLIC bstring * HTBprintf ()
     LYva_start(ap,fmt);
     {
 #if !ANSI_VARARGS
-	char **		pstr = va_arg(ap, char **);
+	bstring **	pstr = va_arg(ap, char **);
 	CONST char *	fmt  = va_arg(ap, CONST char *);
 #endif
 	temp = StrAllocVsprintf(&temp, 0, fmt, &ap);

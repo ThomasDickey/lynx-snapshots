@@ -1,6 +1,6 @@
 /* character level styles for Lynx
  * (c) 1996 Rob Partington -- donated to the Lyncei (if they want it :-)
- * @Id: LYStyle.c 1.53 Wed, 07 Jan 2004 18:03:09 -0800 dickey @
+ * @Id: LYStyle.c 1.54 Mon, 19 Jan 2004 04:16:02 -0800 dickey @
  */
 #include <HTUtils.h>
 #include <HTML.h>
@@ -28,7 +28,7 @@
 PRIVATE void style_initialiseHashTable NOPARAMS;
 
 /* stack of attributes during page rendering */
-PUBLIC int last_styles[128];
+PUBLIC int last_styles[128] = { 0 };
 PUBLIC int last_colorattr_ptr = 0;
 
 PUBLIC bucket hashStyles[CSHASHSIZE];
@@ -191,7 +191,7 @@ PRIVATE void parse_attributes ARGS5(
 	int iBold = !!(cA & A_BOLD);
 	int iBlink = !!(cA & M_BLINK);
 
-	CTRACE((tfp, "FIXME:%d/%d %d/%d %#x\n", fA, default_fg, bA, default_bg, cA));
+	CTRACE2(TRACE_STYLE, (tfp, "parse_attributes %d/%d %d/%d %#x\n", fA, default_fg, bA, default_bg, cA));
 	if (fA < MAX_COLOR
 	 && bA < MAX_COLOR
 #ifdef USE_CURSES_PAIR_0
@@ -269,7 +269,7 @@ PRIVATE void parse_style ARGS1(char*, param)
 
     if (param == 0)
 	return;
-    CTRACE((tfp, "FIXME parse_style(%s)\n", param));
+    CTRACE2(TRACE_STYLE, (tfp, "parse_style(%s)\n", param));
     StrAllocCopy(buffer, param);
     if (buffer == 0)
 	return;

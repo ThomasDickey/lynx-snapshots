@@ -1,6 +1,51 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2004-01-19 (2.8.5pre.2)
+* update URLs in docs/README.ssl (Stef Caunter, DK).
+* use http://search.lycos.com rather than the messy http://www.lycos.com -DK
+* update some URLs in lynx_help (Frederic L W Meunier)
+* remove a few unnecessary #include's (reported by Frederic L W Meunier) -TD
+* fix some compiler warnings with casts -PG
+* add docs/ directory to "make install-doc" rule.  If the help-files are
+  compressed, the same will apply to the non-README files in that directory
+  (reported by Frederic L W Meunier) -TD
+* minor fixes to allow compiling with K&R compiler, e.g.,SunOS 4.x with the
+  5lib curses -TD
+* split up remove_file() in LYLocal.c so directory removal is performed in a
+  separate function remove_directory().  Neither will perform an "rm -rf",
+  but only single operations "rm" and "rmdir".  The original behavior can be
+  obtained by setting RMDIR_PATH to point to a script which does "rm -rf"
+  in lynx.cfg (suggested by Pat Walsh).
+* modify configure script so NetBSD does not define _XOPEN_SOURCE, since that
+  makes the IPv6 code not compile.
+* modify configure script to prefer _SGI_SOURCE on IRIX6.5 to allow it to
+  compile IPv6 support (report by RobertM) -TD
+* replace fixed-buffer Style_className[] with a dynamically-allocated buffer,
+  needed for large pages which lack correctly-nested tags, e.g.,
+    http://www.aspas-nature.org/petitions/petition2.html
+  (reported by Frederic L W Meunier) -TD
+* move OMIT_SCN_KEEPING definition to LYHash.h, to avoid mismatch between the
+  LYCurses.c and HTML.c -TD
+* remove obsolete OPT_SCN ifdef from HTML.c since the inactive side does not
+  compile -TD
+* fix a few out-of-bounds errors in LYSetHiText() and related functions,
+  which were found by valgrind -TD
+
+2004-01-07 (2.8.5pre.1)
+This version has been test-built on
+* Linux (ncurses, ncursesw, PDCurses, slang),
+* FreeBSD 4.9, 5.1 (ncurses, ncursesw),
+* Tru64 4.0d, 5.1 (cc, curses),
+* OpenVMS,
+* OS/2 EMX,
+* win32 (Visual C++ 6.0 and Borland C++, cygwin),
+* AIX 4.3, 5.1,
+* HPUX 11,
+* Solaris 8, 9.
+Other recent builds include IRIX 6.5 (cc and gcc, curses/ncurses),
+FreeBSD 4.1, 4.8, NetBSD 1.5, 1.6 and OpenBSD 2.8 (curses/ncurses).
+
 2004-01-07 (2.8.5dev.17)
 * fix initialization of LYlines and LYcols for curses configurations other than
   ncurses which implement pads -TD

@@ -65,6 +65,7 @@ PRIVATE void fake_put_character ARGS2(
 			AS_casecomp(a,b) : \
 			(TOASCII(TOUPPER(*a)) - TOASCII(TOUPPER(*b))))
 
+#if ANSI_PREPRO
  /* will use partially inlined version */
 #define orig_HTChunkPutUtf8Char HTChunkPutUtf8Char
 #undef HTChunkPutUtf8Char
@@ -95,6 +96,7 @@ PRIVATE void fake_put_character ARGS2(
 #define HTChunkTerminate(ch) \
     HTChunkPutc(ch, (char)0)
 #endif /* */
+#endif	/* ANSI_PREPRO */
 
 #define PUTS(str) ((*context->actions->put_string)(context->target, str))
 #define PUTC(ch)  ((*context->actions->put_character)(context->target, ch))

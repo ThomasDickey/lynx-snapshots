@@ -2953,6 +2953,11 @@ PUBLIC void HTInitProgramPaths NOARGS
 	    path = RM_PATH;
 	    break;
 #endif
+#ifdef RMDIR_PATH
+	case ppRMDIR:
+	    path = RMDIR_PATH;
+	    break;
+#endif
 #ifdef TAR_PATH
 	case ppTAR:
 	    path = TAR_PATH;

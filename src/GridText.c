@@ -43,10 +43,6 @@
 
 /*#define DEBUG_APPCH 1*/
 
-#ifdef USE_SOURCE_CACHE
-#include <HTFile.h>
-#endif
-
 #ifdef USE_COLOR_STYLE
 #include <AttrList.h>
 #include <LYHash.h>
@@ -724,7 +720,7 @@ PRIVATE void LYSetHiText ARGS3(
 	int,		len)
 {
     if (text != NULL) {
-	POOLallocstring(a->lites.hl_base.hl_text, len);
+	POOLallocstring(a->lites.hl_base.hl_text, len + 1);
 	memcpy(a->lites.hl_base.hl_text, text, len);
 	*(a->lites.hl_base.hl_text + len) = '\0';
 
@@ -751,7 +747,7 @@ PRIVATE void LYAddHiText ARGS3(
     }
     a->lites.hl_info = have;
 
-    POOLallocstring(have[need].hl_text, strlen(text));
+    POOLallocstring(have[need].hl_text, strlen(text) + 1);
     strcpy(have[need].hl_text, text);
     have[need].hl_x = x;
 }
@@ -5848,10 +5844,13 @@ re_parse:
 	if (line_ptr->data
 	 && anchor_ptr->extent > 0
 	 && anchor_ptr->line_pos >= 0) {
+	    int size = (int) line_ptr->size - anchor_ptr->line_pos;
+	    if (size > anchor_ptr->extent)
+		size = anchor_ptr->extent;
 	    LYClearHiText(anchor_ptr);
 	    LYSetHiText(anchor_ptr,
 			&line_ptr->data[anchor_ptr->line_pos],
-			anchor_ptr->extent);
+			size);
 	} else {
 	    LYClearHiText(anchor_ptr);
 	    LYSetHiText(anchor_ptr, "", 0);

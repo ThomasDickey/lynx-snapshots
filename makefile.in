@@ -291,8 +291,11 @@ install-man : $(MANDIR)
 
 install-doc : $(DOCDIR) $(HELPDIR)
 	@echo Copying sample files
-	(cd $(srcdir) && tar cf - C[HO]* PROBLEMS README samples test ) | \
+	(cd $(srcdir) && tar cf - C[HO]* PROBLEMS README docs samples test ) | \
 			       ( cd $(DOCDIR) && chmod -R u+w . && tar xf - )
+	$(SHELL) -c 'if test "$(COMPRESS_PROG)" != "" ; then \
+		(cd $(DOCDIR) && $(COMPRESS_PROG) -f docs/CHANGES*.* docs/*.announce ) \
+	fi'
 	$(SHELL) -c 'for name in COPYING COPYHEADER; do \
 		cd $(HELPDIR) && rm -f $$name ;\
 		cd $(HELPDIR) && ( $(LN_S) $(DOCDIR)/$$name . || cp $(DOCDIR)/$$name . );\

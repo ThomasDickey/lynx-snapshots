@@ -5,6 +5,9 @@
 #include <HTUtils.h>
 #endif
 
+#define OMIT_SCN_KEEPING 0 /* whether to omit keeping of Style_className
+    in HTML.c when lss support is on. 1 to increase performance. */
+
 struct _hashbucket {
 	char *name; /* name of this item */
 	int	code; /* code of this item */
@@ -24,8 +27,6 @@ typedef struct _hashbucket bucket;
 
 extern bucket hashStyles[CSHASHSIZE];
 extern int hash_code PARAMS((CONST char* string));
-extern bucket special_bucket;/*it's used when OMIT_SCN_KEEPING is 1 in HTML.c
-    and LYCurses.c. */
 extern bucket nostyle_bucket;/*initialized properly - to be used in CTRACE when
             NOSTYLE is passed as 'style' to curses_w_style */
 
@@ -63,6 +64,10 @@ extern int	s_sb_aa;
 extern int	s_sb_bar;
 extern int	s_sb_bg;
 extern int	s_sb_naa;
+#endif
+
+#if OMIT_SCN_KEEPING
+extern bucket special_bucket;
 #endif
 
 #define CACHEW 128

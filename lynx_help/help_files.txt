@@ -45,7 +45,7 @@ LYNX_FAQ_O_MATIC=http://lynx.isc.org/cgi-bin/fom
 LYNX_HOME=http://lynx.isc.org/
 LYNX_SPEECH=http://leb.net/blinux/blynx/
 LYNX_SUBIR=http://www.subir.com/lynx.html
-WWW_NEWS=http://www.w3.org/hypertext/DataSources/News/Groups/Overview.html
+WWW_NEWS=http://www.w3.org/History/
 WWW_HTML2=http://www.w3.org/MarkUp/html-spec/html-spec_toc.html
 WWW_HTML3=http://www.w3.org/MarkUp/html3/Contents.html
 #

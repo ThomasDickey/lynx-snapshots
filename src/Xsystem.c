@@ -1,4 +1,4 @@
-/* @Id: Xsystem.c 1.11 Sun, 06 Oct 2002 17:43:28 -0700 dickey @
+/* @Id: Xsystem.c 1.12 Mon, 19 Jan 2004 04:16:02 -0800 dickey @
  *	like system("cmd") but return with exit code of "cmd"
  *	for Turbo-C/MS-C/LSI-C
  *  This code is in the public domain.
@@ -593,8 +593,6 @@ int exec_command(char * cmd, int wait_flag)
 
 
 #ifdef TEST
-#include <stdio.h>
-
 void
 main()
 {
