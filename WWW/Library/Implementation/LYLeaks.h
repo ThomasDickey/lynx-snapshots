@@ -130,6 +130,17 @@ AllocationList;
 #endif /* free */
 #define free(vp_alloced) LYLeakFree(vp_alloced, __FILE__, __LINE__)
 
+/*
+ *   Added the following two defines to track Lynx's frequent use
+ *   of those macros. - kw 1997-10-12
+ */
+#ifdef StrAllocCopy
+#undef StrAllocCopy
+#undef StrAllocCat
+#endif
+#define StrAllocCopy(dest, src) LYLeakSACopy (&(dest), src, __FILE__, __LINE__)
+#define StrAllocCat(dest, src)  LYLeakSACat  (&(dest), src, __FILE__, __LINE__)
+
 #endif /* LY_FIND_LEAKS && !NO_MEMORY_TRACKING */
 
 /*
@@ -145,5 +156,9 @@ PUBLIC void *LYLeakRealloc PARAMS((void *vp_alloced, size_t st_newbytes, CONST
 	char *cp_File, CONST short ssi_Line));
 PUBLIC void LYLeakFree PARAMS((void *vp_alloced, CONST char *cp_File, CONST
 	short ssi_Line));
+extern char * LYLeakSACopy PARAMS ((char **dest, CONST char *src, CONST char
+	*cp_File, CONST short ssi_Line));
+extern char * LYLeakSACat  PARAMS ((char **dest, CONST char *src, CONST char
+	*cp_File, CONST short ssi_Line));
 
 #endif /* __LYLEAKS_H */

@@ -653,7 +653,7 @@ try_again:
     BOOL end_of_file = NO;
     int buffer_length = INIT_LINE_SIZE;
 
-    line_buffer = (char *) malloc(buffer_length * sizeof(char));
+    line_buffer = (char *) calloc(1, buffer_length * sizeof(char));
 
     do {/* Loop to read in the first line */
         /*
@@ -1119,7 +1119,7 @@ try_again:
 	       *  any, and then close the connection. - FM
 	       */
 	      while ((status = HTTP_NETREAD(s, line_buffer,
-	      				    INIT_LINE_SIZE,
+					    (INIT_LINE_SIZE - 1),
 					    handle)) > 0) {
 	          line_buffer[status] = '\0';
 		  StrAllocCat(line_kept_clean, line_buffer);

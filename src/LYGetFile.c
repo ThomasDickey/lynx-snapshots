@@ -106,6 +106,11 @@ PUBLIC BOOLEAN getfile ARGS1(
 	    LYCancelDownload = FALSE;
 	}
 
+	/*
+	 *  Reset fake 'Z' to prevent unwanted delayed effect. - kw
+	 */
+	LYFakeZap(NO);
+
 Try_Redirected_URL:
 	/*
 	 *  Load the WWWDoc struct in case we need to use it.
@@ -824,7 +829,7 @@ Try_Redirected_URL:
 				}
 			        StrAllocCat(use_this_url_instead, pound);
 			    }
-			    if (TRACE)
+			    if (TRACE && LYTraceLogFP == NULL)
 			        sleep(MessageSecs);
 			    _user_message(WWW_USING_MESSAGE,
 			    		  use_this_url_instead);
@@ -963,7 +968,7 @@ Try_Redirected_URL:
                     }
 		}
 	  } else {
-	      if (TRACE)
+	      if (TRACE && LYTraceLogFP == NULL)
 	          sleep(MessageSecs);
 	      _user_message(WWW_BAD_ADDR_MESSAGE, doc->address);
 	      if (TRACE)
@@ -1340,7 +1345,8 @@ PRIVATE int fix_http_urls ARGS1(
 	doc->address[strlen(doc->address)-1] = '\0';
 	if (TRACE) {
 	    fprintf(stderr, "        changed to '%s'\n", doc->address);
-	    sleep(MessageSecs);
+	    if (!LYTraceLogFP)
+		sleep(MessageSecs);
 	}
     }
 
@@ -1357,7 +1363,8 @@ PRIVATE int fix_http_urls ARGS1(
     StrAllocCat(doc->address, "/");
     if (TRACE) {
         fprintf(stderr, "        changed to '%s'\n",doc->address);
-	sleep(MessageSecs);
+	if (!LYTraceLogFP)
+	    sleep(MessageSecs);
     }
 
     return(1);

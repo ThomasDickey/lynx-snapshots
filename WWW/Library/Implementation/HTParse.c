@@ -799,7 +799,7 @@ PUBLIC void HTMake822Word ARGS1(
     	a = TOASCII(*p);
 	if ((a != '\t') && ((a & 127) < 32 ||
 			    ( a < 128 && ((crfc[a-32]) & 2))))
-	    *q++ = '\'';
+	    *q++ = '\\';
 	*q++ = *p;
 	if (a == '\n' || (a == '\r' && (TOASCII(*(p+1)) != '\n')))
 	    *q++ = ' ';

@@ -743,7 +743,7 @@ PUBLIC HTFormat HTFileFormat ARGS3(
 #ifdef VMS
     char *semicolon = NULL;
 #endif /* VMS */
-    extern char LYforce_HTML_mode;
+    extern BOOLEAN LYforce_HTML_mode;
 
     if (pencoding)
 	*pencoding = NULL;
@@ -2370,6 +2370,7 @@ PUBLIC int HTLoadFile ARGS4(
 		}
 		return status;
 	    }  /* If succesfull open */
+	    FREE(localname);
 	}    /* scope of fp */
     }  /* local unix file system */    
 #endif /* !NO_UNIX_IO */

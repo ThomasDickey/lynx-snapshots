@@ -11,16 +11,22 @@ struct _hashbucket {
 };
 
 typedef struct _hashbucket bucket;
-	
-#if !defined(HASHSIZE)
-#define HASHSIZE 32768
+
+#if !defined(CSHASHSIZE)
+#ifdef NOT_USED	
+#define CSHASHSIZE 32768
+#else
+#define CSHASHSIZE 8193
+#endif
 #endif
 
 #define NOSTYLE -1
 
-extern bucket hashStyles[HASHSIZE];
+extern bucket hashStyles[CSHASHSIZE];
 extern int hash_code PARAMS((char* string));
-extern int hash_table[HASHSIZE]; /* 32K should be big enough */
+#ifdef NOT_USED
+extern int hash_table[CSHASHSIZE]; /* 32K should be big enough */
+#endif
 
 extern int	s_alink, s_a, s_status,
 		s_label, s_value, s_high,

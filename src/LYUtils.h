@@ -16,6 +16,7 @@ extern char * strip_trailing_slash PARAMS((char * dirname));
 extern void statusline PARAMS((CONST char *text));
 extern void toggle_novice_line NOPARAMS;
 extern void noviceline PARAMS((int more_flag));
+extern void LYFakeZap PARAMS((BOOL set));
 extern int HTCheckForInterrupt NOPARAMS;
 extern BOOLEAN LYisLocalFile PARAMS((char *filename));
 extern BOOLEAN LYisLocalHost PARAMS((char *filename));

@@ -9,62 +9,68 @@
 extern HTCJKlang HTCJK;
 extern LYUCcharset LYCharSet_UC[];
 
-PUBLIC BOOL UCCanUniTranslateFrom ARGS1(
+PUBLIC UCTQ_t UCCanUniTranslateFrom ARGS1(
 	int,		from)
 {
     if (from < 0)
-	return NO;
+	return TQ_NO;
     if (LYCharSet_UC[from].enc == UCT_ENC_7BIT ||
 	LYCharSet_UC[from].enc == UCT_ENC_UTF8)
-	return YES;
+	return TQ_EXCELLENT;
     if (LYCharSet_UC[from].codepoints & (UCT_CP_SUBSETOF_LAT1))
-	return YES;
-    return (LYCharSet_UC[from].UChndl >= 0);
+	return TQ_EXCELLENT;
+    return ((LYCharSet_UC[from].UChndl >= 0) ? TQ_GOOD : TQ_NO);
 }
-PUBLIC BOOL UCCanTranslateUniTo ARGS1(
+PUBLIC UCTQ_t UCCanTranslateUniTo ARGS1(
 	int,		to)
 {
     if (to < 0)
-	return NO;
-    return YES;			/* well at least some characters... */
+	return TQ_NO;
+    if (LYCharSet_UC[to].enc == UCT_ENC_7BIT)
+	return TQ_POOR;
+    if (LYCharSet_UC[to].enc == UCT_ENC_UTF8)
+	return TQ_EXCELLENT;
+    if (LYCharSet_UC[to].enc == UCT_ENC_CJK)
+	return TQ_POOR;
+    if (LYCharSet_UC[to].UChndl >= 0)
+	return TQ_GOOD;
+    return TQ_GOOD;	/* at least some characters, we don't know more */
 }
-PUBLIC BOOL UCCanTranslateFromTo ARGS2(
+PUBLIC UCTQ_t UCCanTranslateFromTo ARGS2(
 	int,		from,
 	int,		to)
 {
     if (from == to)
-	return YES;
+	return TQ_EXCELLENT;
     if (from < 0 || to < 0)
-	return NO;
+	return TQ_NO;
     if (from == 0)
 	return UCCanTranslateUniTo(to);
-    if (to == 0)
+    if (to == 0 || LYCharSet_UC[to].enc == UCT_ENC_UTF8)
 	return UCCanUniTranslateFrom(from);
-    if (LYCharSet_UC[to].enc == UCT_ENC_UTF8) {
-	return (LYCharSet_UC[from].UChndl >= 0);
-    }
     {
 	CONST char * fromname = LYCharSet_UC[from].MIMEname;
 	CONST char * toname = LYCharSet_UC[to].MIMEname;
+	UCTQ_t tqmin = TQ_NO, tqmax = TQ_GOOD;
 	if (!strcmp(fromname, "x-transparent") ||
 	    !strcmp(toname, "x-transparent")) {
-	    return YES;
+	    return TQ_GOOD;
 	}
 	if (LYCharSet_UC[from].enc == UCT_ENC_CJK) {
 	    if (HTCJK == NOCJK)	/* use that global flag, for now */
-		return NO;
+		return TQ_NO;
 	    if (HTCJK == JAPANESE &&
 		(!strcmp(fromname, "euc-jp") ||
 		 !strncmp(fromname, "iso-2022-jp",11) ||
 		 !strcmp(fromname, "shift_jis")))
-		return YES;
-	    return NO;	/* if not handled by (from == to) above */
+		return TQ_GOOD;
+	    return TQ_NO;	/* if not handled by (from == to) above */
 	}
 	if (!strcmp(fromname, "koi8-r")) {
 	    /*
 	     *  Will try to use stripping of high bit...
 	     */
-	    return YES;
+	    tqmin = TQ_POOR;
 	}
 
 	if (!strcmp(fromname, "koi8-r") || /* from cyrillic */
@@ -76,10 +82,10 @@ PUBLIC BOOL UCCanTranslateFromTo ARGS2(
 		strcmp(toname, "koi8-r") &&
 		strcmp(toname, "cp866") &&
 		strcmp(toname, "windows-1251"))
-		return NO;
+		tqmax = TQ_POOR;
 	}
+	return ((LYCharSet_UC[from].UChndl >= 0) ? tqmax : tqmin);
     }
-    return (LYCharSet_UC[from].UChndl >= 0);
 }
 
 /* Returns YES if no tranlation necessary (because charsets

@@ -177,7 +177,7 @@ CC = gcc
 
 MODULES = HTParse, HTAccess, HTTP, HTFile, HTBTree, HTFTP, HTTCP, HTString, -
 	SGML, HTMLDTD, HTChunk, HTPlain, HTWriter, HTMLGen, -
-	HTAtom, HTAnchor, HTStyle, HTList, HTAlert, HTRules, HTFormat, -
+	HTAtom, HTAnchor, HTStyle, HTList, HTRules, HTFormat, -
 	HTMIME, HTHistory, HTNews, HTGopher, HTTelnet, HTFinger, -
 	HTWSRC, HTAAUtil, HTAABrow, HTAAServ, HTAAFile, HTPasswd, HTGroup, -
 	HTACL, HTAuth, HTAAProt, HTAssoc, HTLex, HTUU, HTVMSUtils, getpass, -
@@ -219,7 +219,6 @@ clean :
 !HTPlain.obj :	HTPlain.c HTPlain.h HTStream.h
 !HTWriter.obj :	HTWriter.c HTWriter.h HTStream.h
 !HTMLGen.obj :	HTMLGen.c HTMLGen.h HTUtils.h HTMLDTD.h
-!HTAlert.obj :	HTAlert.c HTAlert.h HTUtils.h Version.make
 !HTRules.obj :	HTRules.c HTRules.h HTUtils.h Version.make
 !HTMIME.obj :	HTMIME.c HTMIME.h HTUtils.h HTList.h
 !HTTelnet.obj :	HTTelnet.c HTTelnet.h HTUtils.h

@@ -61,6 +61,8 @@
 #include "HText.h"	/* See bugs above */
 #include "HTAlert.h"
 #include "HTCJK.h"
+#include "UCMap.h"
+#include "LYGlobalDefs.h"
 
 #include "LYexit.h"
 #include "LYLeaks.h"
@@ -88,11 +90,14 @@ PRIVATE HTList * protocols = NULL; /* List of registered protocol descriptors */
 
 PUBLIC char *use_this_url_instead = NULL;
 
+PRIVATE int pushed_assume_LYhndl = -1; /* see LYUC* functions below - kw */
+PRIVATE char * pushed_assume_MIMEname = NULL;
 
 PRIVATE void free_protocols NOARGS
 {
     HTList_delete(protocols);
     protocols = NULL;
+    FREE(pushed_assume_MIMEname); /* shouldn't happen, just in case - kw */
 }
 
 /*	Register a Protocol.				HTRegisterProtocol()
@@ -241,11 +246,11 @@ PUBLIC BOOL override_proxy ARGS1(
         if (!strcmp("file", access) &&
 	    (!strcmp(Host, "localhost") ||
 #ifdef VMS
-             !strcasecomp(Host, HTHostName())))
+             !strcasecomp(Host, HTHostName())
 #else
-             !strcmp(Host, HTHostName())))
+             !strcmp(Host, HTHostName())
 #endif /* VMS */
-        {
+        )) {
 	    FREE(host);
 	    FREE(access);
 	    return YES;
@@ -524,6 +529,56 @@ PRIVATE int get_physical ARGS2(
     return HT_NO_ACCESS;
 }
 
+/*
+ *  Temporarily set the int UCLYhndl_for_unspec and string
+ *  UCLYhndl_for_unspec used for charset "assuming" to the values
+ *  implied by a HTParentAnchor's UCStages, after saving the current
+ *  values for later restoration. - kw
+ *  @@@ These functions may not really belong here, but where else?
+ *  I want the "pop" to occur as soon as possible after loading
+ *  has finished. - kw @@@   
+ */
+
+PUBLIC void LYUCPushAssumed ARGS1(
+    HTParentAnchor *,	anchor)
+{
+    int anchor_LYhndl = -1;
+    LYUCcharset * anchor_UCI = NULL;
+    if (anchor) {
+	anchor_LYhndl = HTAnchor_getUCLYhndl(anchor, UCT_STAGE_PARSER);
+	if (anchor_LYhndl >= 0)
+	    anchor_UCI = HTAnchor_getUCInfoStage(anchor,
+						 UCT_STAGE_PARSER);
+	if (anchor_UCI && anchor_UCI->MIMEname) {
+	    pushed_assume_LYhndl = anchor_LYhndl;
+	    UCLYhndl_for_unspec = anchor_LYhndl;
+	    pushed_assume_MIMEname = UCAssume_MIMEcharset;
+	    UCAssume_MIMEcharset = NULL;
+	    StrAllocCopy(UCAssume_MIMEcharset, anchor_UCI->MIMEname);
+	    return;
+	}
+    }
+    pushed_assume_LYhndl = -1;
+    FREE(pushed_assume_MIMEname);
+}
+/*
+ *  Restore the int UCLYhndl_for_unspec and string
+ *  UCLYhndl_for_unspec used for charset "assuming" from the values
+ *  saved by LYUCPushAssumed, if any. - kw
+ */
+PRIVATE int LYUCPopAssumed NOARGS
+{
+    if (pushed_assume_LYhndl >= 0) {
+	UCLYhndl_for_unspec = pushed_assume_LYhndl;
+	pushed_assume_LYhndl = -1;
+	FREE(UCAssume_MIMEcharset);
+	UCAssume_MIMEcharset = pushed_assume_MIMEname;
+	pushed_assume_MIMEname = NULL;
+	return UCLYhndl_for_unspec;
+    }
+    return -1;
+}
+
 /*	Load a document					HTLoad()
 **	---------------
 **
@@ -559,6 +614,7 @@ PRIVATE int HTLoad ARGS4(
     status= (*(p->load))(HTAnchor_physical(anchor),
     			anchor, format_out, sink);
     anchor->underway = FALSE;
+    LYUCPopAssumed();
     return status;
 }
 

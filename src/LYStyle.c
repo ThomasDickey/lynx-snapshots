@@ -1,6 +1,6 @@
 /* character level styles for Lynx
  * (c) 1996 Rob Partington -- donated to the Lyncei (if they want it :-)
- * $Id: LYStyle.c,v 1.3 1997/09/19 01:14:00 klaus Exp $
+ * @Id: LYStyle.c 1.7 Wed, 17 Sep 1997 17:34:13 -0600 dickey @
  */
 #include "HTUtils.h"
 #include "HTML.h"
@@ -20,10 +20,11 @@
 #include "LYStyle.h"
 
 #include "LYexit.h"
+#include "LYLeaks.h"
 
 #ifdef USE_COLOR_STYLE
 
-PUBLIC bucket hashStyles[HASHSIZE];
+PUBLIC bucket hashStyles[CSHASHSIZE];
 
 /* definitions for the mono attributes we can use */
 static int ncursesMono[7] = {
@@ -62,6 +63,8 @@ PUBLIC int	s_alink=NOSTYLE, s_a=NOSTYLE, s_status=NOSTYLE,
 
 /* start somewhere safe */ 
 PRIVATE int colorPairs=0;
+PRIVATE int last_fA=COLOR_WHITE, last_bA=COLOR_BLACK;
+
 
 #define FREE(x) if (x) {free(x); x = NULL;}
 
@@ -125,15 +128,21 @@ PRIVATE void parse_attributes ARGS5(char*,mono,char*,fg,char*,bg,int,style,char*
   */
  if (lynx_has_color && colorPairs < COLOR_PAIRS-1 && fA!=-1)
  {
-	colorPairs++;
-	init_pair(colorPairs, fA, bA);
-	setStyle(style, COLOR_PAIR(colorPairs)|cA, cA, mA);
+     if (colorPairs <= 0 || fA != last_fA || bA != last_bA) {
+	 colorPairs++;
+	 init_pair(colorPairs, fA, bA);
+	 last_fA = fA;
+	 last_bA = bA;
+     }
+	if (style < DSTYLE_ELEMENTS)
+	    setStyle(style, COLOR_PAIR(colorPairs)|cA, cA, mA);
 	setHashStyle(newstyle, COLOR_PAIR(colorPairs)|cA, cA, mA, element);
  }
  else
  {
 	/* only mono is set */
-	setStyle(style, -1, -1, mA);
+	if (style < DSTYLE_ELEMENTS)
+	    setStyle(style, -1, -1, mA);
 	setHashStyle(newstyle, -1, -1, mA, element);
  }
 }
@@ -251,9 +260,24 @@ where OBJECT is one of EM,STRONG,B,I,U,BLINK etc.\n\n", buffer);
 	 }
 	}
 #else
-	parse_attributes(mono,fg,bg,hash_code(element),element);
+	int element_number = -1;
+	HTTag * t = SGMLFindTag(&HTML_dtd, element);
+	if (t && t->name) {
+	    element_number = t - HTML_dtd.tags;
+	}
+	if (element_number >= HTML_A &&
+	    element_number < HTML_ELEMENTS)
+	    parse_attributes(mono,fg,bg, element_number+STARTAT,element);
+	else
+	    parse_attributes(mono,fg,bg, DSTYLE_ELEMENTS,element);
 #endif
  }
+}
+
+PRIVATE void free_colorstylestuff NOARGS
+{
+    style_initialiseHashTable();
+    style_deleteStyleList();
 }
 
 /*
@@ -268,13 +292,21 @@ PRIVATE void initialise_default_stylesheet NOARGS
 PUBLIC void style_initialiseHashTable NOARGS
 {
 	int i;
+	static int firsttime = 1;
 	
-	for (i=0; i<HASHSIZE; i++)
+	for (i=0; i<CSHASHSIZE; i++)
 	{
+	    if (firsttime)
 		hashStyles[i].name=NULL;
-		hashStyles[i].color=-1;
-		hashStyles[i].cattr=-1;
-		hashStyles[i].mono=-1;
+	    else
+		FREE(hashStyles[i].name);
+	    hashStyles[i].color=-1;
+	    hashStyles[i].cattr=-1;
+	    hashStyles[i].mono=-1;
+	}
+	if (firsttime) {
+	    firsttime = 0;
+	    atexit(free_colorstylestuff);
 	}
 	s_high=hash_code("high");
 	s_alink=hash_code("alink");

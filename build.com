@@ -5,6 +5,9 @@ $!   Command file to build LYNX.EXE on VMS systems.
 $!   Also invokes build of the WWWLibrary if its
 $!    object library does not already exist.
 $!
+$!   08-Oct-1997	F.Macrides		macrides@sci.wfeb.edu
+$!	Added comments and minor tweaks for convenient addition of
+$!	compiler definitions and compiler and linker options.
 $!   28-Jun-1997	F.Macrides		macrides@sci.wfeb.edu
 $!	Added chartrans support.
 $!   29-Feb-1996	F.Macrides		macrides@sci.wfeb.edu
@@ -50,8 +53,20 @@ $ write sys$output "Default directory:"
 $ show default
 $ write sys$output ""
 $!
-$ agent = 0
+$!	Compiler definitions can be added here as a comma separated
+$!	list with a lead comma, e.g., ",HAVE_FOO_H,DO_BLAH".  The
+$!	definitions will apply only to the LYfoo.c modules.  Ones
+$!	for the libwww-FM modules can be added equivalently in
+$!	[.WWW.Library.vms]libmake.com. - FM
+$!
 $ extra = ""
+$!
+$!	If no TCP/IP agent is specified (as the first argument),
+$!	prompt for a number from the list.   Note that the agent
+$!	must be the first argument if the debugger mode is to be
+$!	set via a second argument (see below). - FM
+$!
+$ agent = 0
 $ IF P1 .EQS. ""
 $ THEN
 $   If f$mode() .eqs. "BATCH"
@@ -82,18 +97,28 @@ $!
 $ if option .eqs. "TCPWARE"
 $ then
 $    write sys$output "Building Lynx for TCPWARE with UCX emulation..."
-$    extra   = ",UCX"
+$    extra = extra + ",UCX"
 $ endif
 $!
 $ optfile = "''option'"
 $!
+$!	Compiler and linker options can be specified here.  If
+$!	there was a second argument (with any value), then debugger
+$!	mode with no optimization will be specified as well.  The
+$!	compiler options will apply only to the LYfoo.c and UCfoo.c
+$!	modules.  Ones for the libwww-FM modules can be specified
+$!	in [.WWW.Library.vms]libmake.com. - FM
+$!
+$ cc_opts = ""
+$ link_opts = ""
+$!
 $ if p2 .nes. ""
 $   then
-$      cc_opts = "/DEBUG/NOOPT"
-$      link_opts = "/DEBUG"
+$      debug_arg = "DEBUG"
+$      cc_opts = cc_opts + "/DEBUG/NOOPT"
+$      link_opts = link_opts + "/DEBUG"
 $   else
-$      cc_opts = ""
-$      link_opts = ""
+$      debug_arg = ""
 $ endif
 $!
 $ IF f$search("[.WWW.Library.Implementation]WWWLib_''option'.olb") .nes. ""
@@ -115,7 +140,7 @@ $!	Build the WWWLibrary
 $!
 $ set default [.WWW.Library.VMS]
 $ v1 = 'f$verify(0)'
-$ @libmake 'option' 'cc_opts'
+$ @libmake 'option' 'debug_arg'
 $ v1 = f$verify(1)
 $ set default [-.-.-]
 $ v1 = 'f$verify(0)'
@@ -144,7 +169,7 @@ $!	Build the chrtrans modules.
 $!
 $ set default [.src.chrtrans]
 $ v1 = 'f$verify(0)'
-$ @build-chrtrans 'cc_opts'
+$ @build-chrtrans
 $ v1 = f$verify(1)
 $ set default [-.-]
 $ v1 = 'f$verify(0)'
@@ -166,10 +191,10 @@ $  compiler := "DECC"
 $  if option .eqs. "UCX" then optfile = "UCXSHR"
 $  if option .eqs. "TCPWARE" then optfile = "TCPWARESHR"
 $  if option .eqs. "MULTINET" then -
-	extra = ",_DECC_V4_SOURCE,__SOCKET_TYPEDEFS"
+	extra = extra + ",_DECC_V4_SOURCE,__SOCKET_TYPEDEFS"
 $  v1 = f$verify(1)
 $! DECC:
-$  cc := cc/decc/prefix=all /nomember 'cc_opts'-
+$  cc := cc/decc/prefix=all/nomember'cc_opts'-
 	   /DEFINE=(DEBUG,ACCESS_AUTH,'option''extra',__VMS_CURSES)-
 	   /INCLUDE=([-],[-.WWW.Library.Implementation]) 
 $  v1 = 'f$verify(0)'
@@ -181,14 +206,16 @@ $  THEN
 $   compiler := "GNUC"
 $   v1 = f$verify(1)
 $! GNUC:
-$   cc := gcc/DEFINE=(DEBUG,ACCESS_AUTH,'option''extra') 'cc_opts'-
+$   cc := gcc'cc_opts' -
+	     /DEFINE=(DEBUG,ACCESS_AUTH,'option''extra')-
 	     /INCLUDE=([-],[-.WWW.Library.Implementation]) 
 $   v1 = 'f$verify(0)'
 $  ELSE
 $   compiler := "VAXC"
 $   v1 = f$verify(1)
 $! VAXC:
-$   cc := cc/DEFINE=(DEBUG,ACCESS_AUTH,'option''extra') 'cc_opts'-
+$   cc := cc'cc_opts' -
+	    /DEFINE=(DEBUG,ACCESS_AUTH,'option''extra')-
 	    /INCLUDE=([-],[-.WWW.Library.Implementation]) 
 $   v1 = 'f$verify(0)'
 $  ENDIF
@@ -240,7 +267,7 @@ $ cc UCdomap
 $!
 $!	Link the objects and libaries.
 $!
-$ link/exe=lynx.exe 'link_opts' -
+$ link/exe=lynx.exe'link_opts' -
 DefaultStyle.obj, -
 GridText.obj, -
 HTAlert.obj, -

@@ -222,6 +222,13 @@ typedef struct _HTStructuredClass{
 }HTStructuredClass;
 
 /*
+  The following functions possibly should be generalised into
+  additional HTStructuredClass memebers. - kw
+  */
+extern BOOLEAN LYCheckForCSI PARAMS((HTStructured *target, char **url));
+extern void LYDoCSI PARAMS((char *url, CONST char *comment, char **csi));
+
+/*
 
 Find a Tag by Name
 

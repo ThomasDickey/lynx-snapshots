@@ -853,8 +853,10 @@ try_again:
 	  	    break;	
 		}  /* end switch */
 
-	    if (TRACE)
-	        sleep(AlertSecs); /* allow me to look at the results */
+	    if (TRACE) {
+		if (!LYTraceLogFP || trace_mode_flag)
+		    sleep(AlertSecs); /* allow me to look at the results */
+	    }
 
 	    /*
 	     *  Set the files the same.
@@ -1062,7 +1064,8 @@ try_again:
 	    }
 	    if (TRACE) {
 		refresh_screen = TRUE;
-		sleep(AlertSecs);
+		if (!LYTraceLogFP || trace_mode_flag)
+		    sleep(AlertSecs);
 	    }
 	}
 
@@ -1713,6 +1716,7 @@ new_cmd:  /*
 	    } else {
 	        if (HText_getOwner())
 		    StrAllocCopy(ownerS_address, HText_getOwner());
+		LYUCPushAssumed(HTMainAnchor);
 	        HTOutputFormat = WWW_SOURCE;
 	    }
 	    HTuncache_current_document();
@@ -1906,9 +1910,7 @@ new_cmd:  /*
 	    else
 	        New_DTD = YES;
 	    HTSwitchDTD(New_DTD);
-	    _statusline(New_DTD ?
-		"Now using the experimental DTD!" : "Now using the old Lynx DTD.");
-/*		SOFT_DOUBLE_QUOTE_ON : SOFT_DOUBLE_QUOTE_OFF);*/
+	    _statusline(New_DTD ? USING_DTD_0 : USING_DTD_1);
 	    sleep(MessageSecs);
 	    break;
 
@@ -1966,12 +1968,13 @@ new_cmd:  /*
 
 	case  LYK_UP_TWO:
 	    if (Newline > 1) {
-	        Newline -= 2;
+		int scrollamount = (Newline > 2 ? 2 : 1);
+	        Newline -= scrollamount;
 		if (nlinks > 0 && curdoc.link > -1) {
-		    if (links[curdoc.link].ly <= (display_lines - 2)) {
+		    if (links[curdoc.link].ly + scrollamount <= display_lines) {
 		        newdoc.link = curdoc.link +
 				      HText_LinksInLines(HTMainText,
-				      			 Newline, 2);
+				      			 Newline, scrollamount);
 		    } else {
 		        arrowup = TRUE;
 		    }
@@ -2001,13 +2004,16 @@ new_cmd:  /*
 
 	case  LYK_UP_HALF:
 	    if (Newline > 1) {
-	        Newline -= display_lines/2;
+		int scrollamount = display_lines/2;
+		if (Newline - scrollamount < 1)
+		    scrollamount = Newline - 1;
+	        Newline -= scrollamount;
 		if (nlinks > 0 && curdoc.link > -1) {
-		    if (links[curdoc.link].ly <= (display_lines/2)) {
+		    if (links[curdoc.link].ly + scrollamount <= display_lines) {
 		        newdoc.link = curdoc.link +
 				      HText_LinksInLines(HTMainText,
 				      			 Newline,
-							 (display_lines/2));
+							 scrollamount);
 		    } else {
 		        arrowup = TRUE;
 		    }
@@ -2084,8 +2090,18 @@ new_cmd:  /*
 		/*
 		 *  Go back to the previous page.
 		 */
-		Newline -= (display_lines);
-		arrowup = TRUE;
+		int scrollamount = (Newline > display_lines ?
+				    	      display_lines : Newline - 1);
+		Newline -= scrollamount;
+		if (scrollamount < display_lines &&
+		    nlinks > 0 && curdoc.link == 0 &&
+		    links[0].ly - 1 + scrollamount <= display_lines) {
+		        newdoc.link = HText_LinksInLines(HTMainText,
+				      			 1,
+							 scrollamount) - 1;
+		} else {
+		    arrowup = TRUE;
+		}
 
 	    } else if (old_c != real_c) {
 		old_c = real_c;
@@ -2138,7 +2154,11 @@ new_cmd:  /*
 	    break;
 
         case LYK_UP_LINK:
-            if (curdoc.link > 0) {  /* more links above? */
+            if (curdoc.link > 0 &&
+		(links[0].ly != links[curdoc.link].ly ||
+		 !HText_LinksInLines(HTMainText, 1, Newline - 1))) {
+		/* more links before this on screen, and first of them on
+		   a different line or no previous links before this screen? */
                 int newlink = -1;
                 for (i = curdoc.link; i >= 0; i--) {
                     if (links[i].ly < links[curdoc.link].ly) {
@@ -2155,14 +2175,13 @@ new_cmd:  /*
                     curdoc.link = (nlinks-1);
                 } else if (more) {  /* next page */
                         Newline += (display_lines);
-                }
 #else
 		} else if (old_c != real_c) {
 		    old_c = real_c;
 		    _statusline(NO_LINKS_ABOVE);
 		    sleep(MessageSecs);
-		}
 #endif /* NOTDEFINED */
+		}
 
 #ifdef NOTDEFINED
             /*
@@ -2175,8 +2194,18 @@ new_cmd:  /*
 #endif /* NOTDEFINED */
 
             } else if (curdoc.line > 1 && Newline > 1) {  /* previous page */
-                    Newline -= (display_lines);
+		int scrollamount = (Newline > display_lines ?
+				    	      display_lines : Newline - 1);
+		Newline -= scrollamount;
+		if (scrollamount < display_lines &&
+		    nlinks > 0 && curdoc.link > -1 &&
+		    links[0].ly -1 + scrollamount <= display_lines) {
+		        newdoc.link = HText_LinksInLines(HTMainText,
+				      			 1,
+							 scrollamount) - 1;
+		} else {
 		    arrowup = TRUE;
+		}
 
 	    } else if (old_c != real_c) {
 		old_c = real_c;

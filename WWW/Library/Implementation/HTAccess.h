@@ -316,6 +316,9 @@ For registering protocols supported by Lynx
 */
 extern void LYRegisterLynxProtocols NOARGS;
 
+extern void LYUCPushAssumed PARAMS((
+    HTParentAnchor *	anchor));
+
 #endif /* HTACCESS_H */
 /*
 

@@ -13,6 +13,7 @@
 #include "HTFont.h"
 #include "GridText.h"
 #include "LYCurses.h"
+#include "LYStrings.h"
 
 #include "LYexit.h"
 #include "LYLeaks.h"
@@ -2313,6 +2314,8 @@ PUBLIC void HTMLSetCharacterHandling ARGS1(int,i)
 	SLsmg_Display_Eight_Bit = LYlowest_eightbit[i];
     }
 #endif /* USE_SLANG */
+
+    ena_csi((LYlowest_eightbit[current_char_set] > 155));
 
     return;
 }

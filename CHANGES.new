@@ -10,6 +10,110 @@ README.configure), and miscellaneous other changes.  Note that the 2.7 ->
 2.7.1 changes (which are listed at the beginning of the current CHANGES
 file) are duplicated here. - KW]
 
+1997-10-16
+* Tweaks to recognition of Japanese (better recognize x-euc-*), and to
+  the mechanism in GridText.c keeping track of which encoding is used for
+  Japanese.  The state for this is now reset on explicit '\n' and '\r'
+  received by the HText object in addition to space chars. - KW
+* Tweaks in HTTP.c to avoid access to uninitialized memory and pacify
+  paranoid dbx. - KW
+* Try to more consistently remember the charset in effect for a document
+  when going to SOURCE view, using new LYUC{Push,Pop}Assumed functions.
+  Note that this is only in effect immediately when swithching to SOURCE
+  view; any later reloading while within SOURCE view (including those
+  caused by RELOAD, RAW_TOGGLE and other keys, or by Options Screen changes)
+  may still revert to the usual assumption about charset, which means a
+  charset specified in a META tag may be forgotten at that point; this may
+  be considered a feature... - KW
+* Refer to TagSoup and SortaSGML parsing (coinded by FM), rather than "old"
+  and "new" DTD. - KW
+* Made some of the changes concerning and removal and location changes of
+  files proposed by NHE. - KW
+* Restored LYCheckForCSI example function to its previous form, with a check
+  added and comments added. - KW 
+1997-10-15
+* Various fixes for color style code, should prevent memory corruption. - KW
+* Some LYCharUtils.c cleanup. - KW
+* Added some of the changes from fotemods to SGML.c, especially handling of
+  &zwnj; as allowing a line break, and conversion to UNICODE UTF-8. - KW
+* Mods in code handling mailcap lines, to avoid access to invalid memory. - KW
+1997-10-12
+* Added LYLeakSACopy and LYLeakSACat to LYLeaks.c.  Running Lynx compiled
+  with LY_FIND_LEAKS defined will now give the source locations where
+  StrAllocCopy and StrAllocCat are used, if those create leaks.  Added
+  missing incude of LYLeaks.h in LYCookie.c. - KW
+* More heavy tweaks in LYCharUtils.c.  Associated changes in HTChunk.c
+  (new functions), small change for -raw (in connection with attribute
+  values) in SGML_character.  LYCharUtils.c is still a work in
+  progress... - KW
+* Tweaks to allow some chars as data input (0x97, 0x9b, 0xa0) if the
+  current display character set seems to have those values as printable
+  charactes (by testing LYlowest_eightbit[]). - KW
+1997-10-11
+* Mods in HTFTP.c to recognize NetPresenz server (variation of AppleShare
+  claiming to be Peter Lewis server?, try current ftp://www.unicode.org/),
+  and to show server's identification from initial greeting on info
+  screen for FTP URLs.  Other cosmetic changes in HTFTP.c. - KW
+* Fixed various memory leaks. - KW
+* Some more minor cleanup tweaks for color style code. - KW
+* Avoid unnecessary pauses if TRACE is on and a Trace Log file is in use. - KW
+1997-10-10
+* Renamed lynx_help/keystroke_commands/ directory to lynx_help/keystrokes/
+  for the benefit of DOS, and changed references accordingly. - KW
+* Changed parsing of command line options for -lss file, it should now
+  be used and override the default from userdefs.h or environmetn variables
+  as advertised. - KW
+* More tweaks and cleanup in HText_SubmitForm. - KW
+* Code to recover from memory exhaustion, sometimes.  The requests for
+  dynamic memory which heuristically most often fail for lack of memory
+  when rndering large documents are the calloc() calls in split_line.
+  They are replaced by LY_check_calloc() which has the same calling
+  conventions as calloc() but additionally checks if "enough" memory is
+  available for the requested amount plus some margin and tries some
+  remedial action if this is not the case.  The additional safty margins
+  are required to make it likely that other allocation requests in other
+  places of the program won't fail before the next check.  The actions
+  which may be taken in order to avoid exiting if low memory is detected:
+  (1) Try to unload cached documents (other than the one currently being
+  loaded), until we seem to have enough memory.  (2) If that fails (or
+  there are no other documents cached in memory), try to fake a 'Z' key
+  interruption; this will have the same effect as if the user had pressed
+  'Z' so it will only detected if some other part of the program tests
+  HTCheckForInterrupt() and acts on it.  (3) If this seems not to be
+  sufficient to stop loading, halt appending of normal text data to the
+  document structure (A warning *** MEMORY EXHAUSTED *** is appended
+  instead). - KW
+* A tweak of color style memory allocation. - KW
+1997-10-09
+* Some more tweaks from FM for VMS build - KW
+* For DJGPP compilation, src/chrtrans/makefile.dos - Bill Schiavo
+  <Wschiavo@concentric.net>
+* Some cleanup in Hext_SubmitForm (needs more). Start using ACCEPT-CHARSET
+  (doesn't recognize list yet, only recognized if on the INPUT field that
+  causes submission). - KW
+* Added two test files for iso-8859-2 charset. - KW
+* Tweaks in LYMainLoop.c for various keys that page up, to better preserve
+  keep the current link selected if possible and to correct a glitch with
+  UP_LINK. - KW
+* Reorder text/html and text/plain to the beginning of HTPresentations list,
+  so they will be found more quickly and will appear at the beginning of
+  Accept request header fields. - KW
+1997-10-08
+* add logic to implement mouse button 2 "previous document" for
+  ncurses configuration. - TD
+* add dependencies on 'lynx' to top-level 'all' and 'install' rules
+  in makefile.in - TD
+* add osf4.0 to special case compiler options using -g3 in place of
+  -O -g, for Heikki Kantola <hezu@iki.fi>. - TD
+* correct some of the uninitialized-variable warnings. - TD
+* Removed the compilation of the old libwww-FM HTAlert.c module for VMS,
+  as previously removed for Unix. - FM
+* Added comments and tweaks of build.com, build-slang.com and libmake.com,
+  (and a complementary tweak of tcp.h) to make more clear how compiler
+  definitions and compiler and linker options can be added. - FM
+1997-10-07
+* Changed PROBLEMS file for ^Z and for "forgetting emphasis of link text"
+  problem (which shouldn't occur any more). - KW
 1997-10-05
 * Changed SGML.c parsing of unrecognized and invalid start tags. If the
   '<' character in HTML is followed by a 7-bit letter character, we now
@@ -44,14 +148,14 @@ file) are duplicated here. - KW]
   specifying a CJK charset as assumed is currently not very useful, since we
   cannot translate from that to other character sets. - KW
 * Oh, by the way: compilation without defining EXP_CHARTRANS won't work any
-  more.  Regard #ifdef EXP_CHARTRANS is some strange kind of comment for
+  more.  Regard #ifdef EXP_CHARTRANS as some strange kind of comment for
   now, until it goes away. - KW
 * Write comment at top of .lynxrc file to make clear that it is different
   from lynx.cfg, suggested by LWV. - KW 
 1997-09-30
 * Changed order of display character sets on options screen a bit, and
   corrected charset listings in lynx.cfg and userdefs.h files - KW
-* Added comment on lynx.lss in lynx.cfg, moved it. - KW
+* Added comment on lynx.lss in userdefs.h, moved it. - KW
 1997-09-27
 * Made TRACE messages which correspond to BAD_HTML_USE_TRACE warnings stand
   out more by decorating them with ***** characters, so that users who
@@ -1867,7 +1971,7 @@ file) are duplicated here. - KW]
   seeking a position in the currently loaded document. - FM
 * Commented out the above change in HTAccess.c.  There's a more complete
   mechanism for it already in this code... - KW
-* Fixed a typo in the bookmark file lead text. - DK (Doug Kaufmann
+* Fixed a typo in the bookmark file lead text. - DK (Doug Kaufman
   <dkaufman@rahul.net>)
 1997-04-19
 * Changed the inappropriate StrAllocCat() to StrAllocCopy() for

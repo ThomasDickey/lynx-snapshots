@@ -11,6 +11,7 @@ extern char * LYstrncpy PARAMS((
 	char *		dst,
 	CONST char *	src,
 	int		n));
+extern void ena_csi PARAMS((BOOLEAN flag));
 extern int LYgetch NOPARAMS;
 extern int LYgetstr PARAMS((
 	char *		inputline,

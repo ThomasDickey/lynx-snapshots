@@ -137,6 +137,8 @@ void (*function)();
      *  Check for available space.
      */
     if (topOfStack == ATEXITSIZE) {
+	if (TRACE)
+	    fprintf(stderr, "(LY)atexit: Too many functions, ignoring one!\n");
 	return(-1);
     }
 

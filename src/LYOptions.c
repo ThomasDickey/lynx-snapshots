@@ -271,7 +271,8 @@ draw_options:
 	    addstr(UCAssume_MIMEcharset);
 	else
 	    addstr((UCLYhndl_for_unspec >= 0) ?
-		   LYCharSet_UC[UCLYhndl_for_unspec].MIMEname : "NONE");
+		   (char *)LYCharSet_UC[UCLYhndl_for_unspec].MIMEname
+		   			      : "NONE");
     }
 
     move(L_Rawmode, 5);
@@ -813,7 +814,8 @@ draw_options:
 			move(L_ASSUME_CHARSET, COL_OPTION_VALUES);
 			clrtoeol();
 			if (UCLYhndl_for_unspec >= 0)
-			    addstr(LYCharSet_UC[UCLYhndl_for_unspec].MIMEname);
+			    addstr((char *)
+				   LYCharSet_UC[UCLYhndl_for_unspec].MIMEname);
 #endif /* VMS || USE_SLANG */
 		    }
 

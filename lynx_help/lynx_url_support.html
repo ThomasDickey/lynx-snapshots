@@ -125,7 +125,8 @@ The gopher URL takes the form:<BR>
 where <em>:port</em> is optional and defaults to <em>:70</em>, and the
 <em>/gopher-path</em> is opaque (not fully equivalent to the
 slash-separated series of symbolic elements of http paths) as explained
-in RFC1738.  Typically, the gopher-path consists of a <em>gophertype</em>
+in RFC1738.  Typically, the gopher-path consists of a
+<A HREF="keystrokes/gopher_types_help.html"><em>gophertype</em></A>
 indicating the file or service type (e.g., <em>0</em> or <em>I</em> for
 plain text or an image, respectively, <em>7</em> for a search, or <em>1</em>
 for a directory), followed by a platform-specific <em>selector</em>. Any
@@ -533,12 +534,13 @@ ACTION for a FORM, and if enabled in your Lynx image has the format:<BR>
 <tab indent="12"><em>ly<tab id="lh">
 nxcgi://localhost/path_to_CGI_script</em><BR>
 <tab to="lh">where <em>//localhost/</em> is optional and always implied.
-The output of the script must be text/html and is rendered and displayed
+The output of the script should be text/html and is rendered and displayed
 by Lynx. (Note that restrictions on acceptable paths can be imposed
 by the system administrator.)
 
 <p>This is a Lynxism and should be used only in local documents intended
-solely for Lynx.
+solely for Lynx, or for limited local testing of CGI scripts without a
+http server.
 
 <p>On VMS, you are advised to use the threaded OSU http server, available
 from <a href="ftp://osu.edu"

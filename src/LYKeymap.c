@@ -462,7 +462,7 @@ PRIVATE struct rmap revmap[] = {
 { "RAW_TOGGLE",		"toggle raw 8-bit translations or CJK mode ON or OFF" },
 { "COOKIE_JAR",		"examine the Cookie Jar" },
 { "F_LINK_NUM",		"invoke the 'Follow link (or page) number:' prompt" },
-{ "SWITCH_DTD",		"switch between old and new parsing of HTML" },
+{ "SWITCH_DTD",		"switch between two ways of parsing HTML" },
 #ifdef USE_EXTERNALS
 { "EXTERN",		"run external program with url" },
 #endif

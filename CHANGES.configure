@@ -1,3 +1,12 @@
+97-10-08
+--------
+* add logic to implement mouse button 2 "previous document" for
+  ncurses configuration. - TD
+* add dependencies on 'lynx' to top-level 'all' and 'install' rules
+  in makefile.in - TD
+* add osf4.0 to special case compiler options using -g3 in place of
+  -O -g, for Heikki Kantola <hezu@iki.fi>. - TD
+* correct some of the uninitialized-variable warnings. - TD
 97-09-19
 --------
 * minor ifdef/declaration fixes required to build on IRIX 6.2,

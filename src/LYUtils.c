@@ -1987,6 +1987,30 @@ PUBLIC void noviceline ARGS1(
     return;
 }
 
+PRIVATE int fake_zap = 0;
+
+PUBLIC void LYFakeZap ARGS1(
+    BOOL,	set)
+{
+    if (set && fake_zap < 1) {
+	if (TRACE) {
+	    fprintf(stderr, "\r *** Set simulated 'Z'");
+	    if (fake_zap)
+		fprintf(stderr, ", %d pending", fake_zap);
+	    fprintf(stderr, " ***\n");
+	}
+	fake_zap++;
+    } else if (!set && fake_zap) {
+	if (TRACE) {
+	    fprintf(stderr, "\r *** Unset simulated 'Z'");
+	    fprintf(stderr, ", %d pending", fake_zap);
+	    fprintf(stderr, " ***\n");
+	}
+	fake_zap = 0;
+    }
+    
+}
+
 PUBLIC int HTCheckForInterrupt NOARGS
 {
 #ifndef VMS /* UNIX stuff: */
@@ -1997,6 +2021,17 @@ PUBLIC int HTCheckForInterrupt NOARGS
     fd_set readfds;
 #endif /* !USE_SLANG */
 
+    if (fake_zap > 0) {
+	fake_zap--;
+	if (TRACE) {
+	    fprintf(stderr, "\r *** Got simulated 'Z' ***\n");
+	    fflush(stderr);
+	    if (!LYTraceLogFP)
+		sleep(AlertSecs);
+	}
+	return((int)TRUE);
+    }
+	
     /** Curses or slang setup was not invoked **/
     if (dump_output_immediately)
 	return((int)FALSE);
@@ -2053,6 +2088,17 @@ PUBLIC int HTCheckForInterrupt NOARGS
     extern BOOLEAN HadVMSInterrupt;
     extern int typeahead();
 
+    if (fake_zap > 0) {
+	fake_zap--;
+	if (TRACE) {
+	    fprintf(stderr, "\r *** Got simulated 'Z' ***\n");
+	    fflush(stderr);
+	    if (!LYTraceLogFP)
+		sleep(AlertSecs);
+	}
+	return((int)TRUE);
+    }
+	
     /** Curses or slang setup was not invoked **/
     if (dump_output_immediately)
 	  return((int)FALSE);
@@ -4121,8 +4167,8 @@ have_VMS_URL:
 	    }
 	} else {
 	    /*
-	     *  Normal absolute path.  Simplify, trim any
-	     *  residual relative elements, and append it. - FM
+	     *  Normal absolute path in URL syntax.  Simplify, trim
+	     *  any residual relative elements, and append it. - FM
 	     */
 	    StrAllocCopy(temp, old_string);
 	    LYTrimRelFromAbsPath(temp);
@@ -4137,7 +4183,8 @@ have_VMS_URL:
     FREE(old_string);
     if (TRACE) {
 	/* Pause so we can read the messages before invoking curses */
-	sleep(AlertSecs);
+	if (!LYTraceLogFP)
+	    sleep(AlertSecs);
     }
 }
 

@@ -180,6 +180,11 @@ PUBLIC void HTFormatInit NOARGS
      HTLoadTypesConfigFile(buffer);
  }
 
+ /*
+  *  Put text/html and text/plain at beginning of list. - kw
+  */
+ HTReorderPresentation(WWW_PLAINTEXT, WWW_PRESENT);
+ HTReorderPresentation(WWW_HTML, WWW_PRESENT);
 }
 
 PUBLIC void HTPreparsedFormatInit NOARGS
@@ -232,7 +237,7 @@ PRIVATE int ExitWithError PARAMS((char *txt));
 PRIVATE int PassesTest PARAMS((struct MailcapEntry *mc));
 
 #define LINE_BUF_SIZE       2000
-#define TMPFILE_NAME_SIZE 127
+#define TMPFILE_NAME_SIZE 256
 
 PRIVATE char *GetCommand ARGS2(char *,s, char **,t)
 {
@@ -282,8 +287,8 @@ PRIVATE char *Cleanse ARGS1(char *,s)
         *tmp = TOLOWER ((unsigned char)*tmp);
     }
     /* strip trailing white space */
-    while (*--tmp && isspace((unsigned char) *tmp))
-        *tmp = 0;
+    while ((tmp > news) && *--tmp && isspace((unsigned char) *tmp))
+        *tmp = '\0';
     return(news);
 }
 
@@ -444,13 +449,17 @@ assign_presentation:
     return(1);
 }
 
-PRIVATE void BuildCommand ARGS3(char *,Buf, char *,controlstring, 
-							char *,TmpFileName)
+PRIVATE void BuildCommand ARGS5(
+    char **, 	pBuf,
+    size_t,	Bufsize,
+    char *,	controlstring, 
+    char *,	TmpFileName,
+    size_t,	TmpFileLen)
 {
     char *from, *to;
     int prefixed = 0; 
 
-    for (from = controlstring, to = Buf; *from != '\0'; from++) {
+    for (from = controlstring, to = *pBuf; *from != '\0'; from++) {
         if (prefixed) {
             prefixed = 0;
             switch(*from) {
@@ -465,7 +474,17 @@ PRIVATE void BuildCommand ARGS3(char *,Buf, char *,controlstring,
 				controlstring);
 		    }
 		case 's':
-                    if (TmpFileName) {
+                    if (TmpFileLen && TmpFileName) {
+			if ((to - *pBuf) + TmpFileLen + 1 > Bufsize) {
+			    *to = '\0';
+			    if (TRACE) {
+				fprintf(stderr,
+			"Too long mailcap \"test\" clause, ignoring: %s%s...\n",
+					*pBuf, TmpFileName);
+			    }
+			    **pBuf = '\0';
+			    return;
+			}
                         strcpy(to, TmpFileName);
                         to += strlen(TmpFileName);
                     }
@@ -483,6 +502,16 @@ PRIVATE void BuildCommand ARGS3(char *,Buf, char *,controlstring,
         } else {
             *to++ = *from;
         }
+        if (to >= *pBuf + Bufsize) {
+	    (*pBuf)[Bufsize - 1] = '\0';
+	    if (TRACE) {
+		fprintf(stderr,
+			"Too long mailcap \"test\" clause, ignoring: %s...\n",
+			*pBuf);
+	    }
+            **pBuf = '\0';
+	    return;
+	}
     }
     *to = 0;
 }
@@ -561,7 +590,9 @@ PRIVATE int PassesTest ARGS1(struct MailcapEntry *,mc)
     cmd = (char *)malloc(1024);
     if (!cmd)
         ExitWithError("Out of memory");
-    BuildCommand(cmd, mc->testcommand, TmpFileName);
+    BuildCommand(&cmd, 1024,
+		 mc->testcommand,
+		 TmpFileName, strlen(TmpFileName));
     if (TRACE)
         fprintf(stderr,"Executing test command: %s\n", cmd);
     result = system(cmd);
@@ -882,23 +913,30 @@ PUBLIC void HTFileInit NOARGS
 
 /* The following is lifted from NCSA httpd 1.0a1, by Rob McCool;
    NCSA httpd is in the public domain, as is this code. */
+/* modified Oct 97 - kw */
 
 #define MAX_STRING_LEN 256
 
 PRIVATE int HTGetLine ARGS3(char *,s, int,n, FILE *,f) 
 {
-    register int i = 0;
+    register int i = 0, r;
 
     if (!f)
         return(1);
 
     while (1) {
-	s[i] = (char)fgetc(f);
+	r = fgetc(f);
+	s[i] = (char)r;
 
-	if (s[i] == CR)
-	    s[i] = fgetc(f);
+	if (s[i] == CR) {
+	    r = fgetc(f);
+	    if (r == LF)
+		s[i] = r;
+	    else if (r != EOF)
+		ungetc(r, f);
+	}
 
-	if ((s[i] == EOF) || (s[i] == LF) || (i == (n-1))) {
+	if ((r == EOF) || (s[i] == LF) || (s[i] == CR) || (i == (n-1))) {
 	    s[i] = '\0';
 	    return (feof(f) ? 1 : 0);
 	}
