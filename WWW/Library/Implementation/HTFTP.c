@@ -265,14 +265,15 @@ PUBLIC char * HTMake_VMS_name ARGS2(
     strcpy(nodename, "");	/* On same node? Yes if node names match */
     if (strncmp(nn, "localhost", 9)) {
 	CONST char *p;
-	char *q;
-	for (p = hostname, q = (char *)nn;
+	CONST char *q;
+	for (p = hostname, q = nn;
 	     *p && *p != '.' && *q && *q != '.'; p++, q++){
 	    if (TOUPPER(*p) != TOUPPER(*q)) {
+		char *r;
 		strcpy(nodename, nn);
-		q = strchr(nodename, '.');	/* Mismatch */
-		if (q)
-		    *q = '\0';			/* Chop domain */
+		r = strchr(nodename, '.');	/* Mismatch */
+		if (r)
+		    *r = '\0';			/* Chop domain */
 		strcat(nodename, "::"); 	/* Try decnet anyway */
 		break;
 	    }
@@ -1402,7 +1403,8 @@ PRIVATE void parse_vms_dir_entry ARGS2(
 	char *, 	line,
 	EntryInfo *,	entry_info)
 {
-    int i, j, ialloc;
+    int i, j;
+    unsigned int ialloc;
     char *cp, *cpd, *cps, date[16], *sp = " ";
 
     /**  Get rid of blank lines, and information lines.  **/

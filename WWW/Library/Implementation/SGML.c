@@ -74,7 +74,7 @@ struct _HTStream {
     CONST HTStreamClass *	isa;		/* inherited from HTStream */
 
     CONST SGML_dtd		*dtd;
-    HTStructuredClass		*actions;	/* target class  */
+    CONST HTStructuredClass	*actions;	/* target class  */
     HTStructured		*target;	/* target object */
 
     HTTag			*current_tag;
@@ -1034,7 +1034,7 @@ PUBLIC HTTag * SGMLFindTag ARGS2(
 	/*
 	**  Unrecognized, but may be valid. - KW
 	*/
-	return (HTTag *)&HTTag_unrecognized;
+	return &HTTag_unrecognized;
     }
     return NULL;
 }
@@ -3142,7 +3142,7 @@ PUBLIC HTStream* SGML_new  ARGS3(
     context->string = HTChunkCreate(128);	/* Grow by this much */
     context->dtd = dtd;
     context->target = target;
-    context->actions = (HTStructuredClass*)(((HTStream*)target)->isa);
+    context->actions = (CONST HTStructuredClass*)(((HTStream*)target)->isa);
 					/* Ugh: no OO */
     context->unknown_tag = &HTTag_unrecognized;
     context->state = S_text;

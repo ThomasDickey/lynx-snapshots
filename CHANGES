@@ -1,19 +1,21 @@
 Changes since Lynx 2.8 release
 ================================================================================
 
+1998-05-03 (2.8.1dev.9)
+* correct missing counter increment in tempname(), from cleanup. - TD
 1998-05-02 (2.8.1dev.8)
-+ Fix for CGI-related URLs processing (syntax:  ?x=1&yz=2).  To avoid interfere
+* Fix for CGI-related URLs processing (syntax:  ?x=1&yz=2).  To avoid interfere
   with SGML we restrict '=' as terminator for a named entity, this only applied
   for HREF= attribute translation (LYCharUtils.c).  (reported by Alex Matulich
   alex@unicorn.us.com & FM).  - LP
-+ restore information in the INSTALLATION file for the DOS port on patching
+* restore information in the INSTALLATION file for the DOS port on patching
   tcplib.  Also, clarifies the location of nullpkt.  It also clarifies
   that the PDCurses beta has incorporated some of the patches we made for 
   the lynx DOS port. - DK
-+ modify logic that updates bookmark file after removing a link to use copy
+* modify logic that updates bookmark file after removing a link to use copy
   rather than rename, to solve file-ownership problems (patch by Paul
   Gilmartin, though I kept the permissions check). - TD
-+ reduce a little of the clutter in tempname() with fmt_tempname, and
+* reduce a little of the clutter in tempname() with fmt_tempname, and
   bad_tempname functions.  Though this doesn't address the security problems it
   does fix the problem with signed getpid values.  - TD
 * simplify LYUtils.c with compare_type() function - TD
