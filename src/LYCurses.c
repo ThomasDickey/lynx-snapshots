@@ -1511,11 +1511,15 @@ PUBLIC void LYpaddstr ARGS3(
 	CONST char *,	the_string)
 {
     int y, x;
+    int actual = strlen(the_string);
+
     getyx(the_window, y, x);
     if (width + x >= LYcols)
 	width = LYcols - x - 1;
-    LYwaddnstr(the_window, the_string, width);
-    width -= strlen(the_string);
+    if (actual > width)
+	actual = width;
+    LYwaddnstr(the_window, the_string, actual);
+    width -= actual;
     while (width-- > 0)
 	waddstr(the_window, " ");
 }
@@ -1685,7 +1689,7 @@ PUBLIC void LYwaddnstr ARGS3(
      * have problems with combining-characters in this version of ncurses
      * (successive calls are not merged), so I'm using them for testing -TD
      */
-#ifdef WIDEC_CURSES
+#if defined(WIDEC_CURSES) && defined(HAVE_MBSTATE_T)
 #if 1	/* array of wchar_t's */
     {
 	static wchar_t *temp = 0;

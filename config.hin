@@ -87,6 +87,7 @@
 #undef HAVE_LOCALE_H
 #undef HAVE_LSTAT		/* CF_FUNC_LSTAT */
 #undef HAVE_MALLOC_H		/* AM_GNU_GETTEXT */
+#undef HAVE_MBSTATE_T		/* CF_WIDEC_CURSES */
 #undef HAVE_MKDTEMP
 #undef HAVE_MKSTEMP		/* CF_MKSTEMP */
 #undef HAVE_MKTEMP
@@ -186,13 +187,9 @@
 #undef NO_OPTION_MENU		/* CF_ARG_DISABLE(option-menu) */
 #undef NO_PARENT_DIR_REFERENCE	/* CF_ARG_DISABLE(parent-dir-refs) */
 #undef NSL_FORK			/* CF_ARG_ENABLE(nsl-fork) */
-#undef OK_GZIP			/* CF_ARG_DISABLE(dired-gzip) */
 #undef OK_INSTALL
 #undef OK_OVERRIDE		/* CF_ARG_DISABLE(dired-override) */
 #undef OK_PERMIT		/* CF_ARG_DISABLE(dired-permit) */
-#undef OK_TAR			/* CF_ARG_DISABLE(dired-tar) */
-#undef OK_UUDECODE		/* CF_ARG_DISABLE(dired-uudecode) */
-#undef OK_ZIP			/* CF_ARG_DISABLE(dired-zip) */
 #undef REAL_UNIX_SYSTEM		/* CF_SLANG_UNIX_DEFS */
 #undef RLOGIN_PATH		/* CF_PATH_PROG(rlogin) */
 #undef RM_PATH			/* CF_PATH_PROG(rm) */
@@ -246,6 +243,22 @@
 #undef ut_name			/* CF_UTMP */
 #undef ut_xstatus		/* CF_UTMP_UT_XSTATUS */
 #undef ut_xtime			/* CF_UTMP_UT_XTIME */
+
+#ifdef GZIP_PATH
+#undef OK_GZIP			/* CF_ARG_DISABLE(dired-gzip) */
+#endif
+
+#ifdef TAR_PATH
+#undef OK_TAR			/* CF_ARG_DISABLE(dired-tar) */
+#endif
+
+#ifdef UUDECODE_PATH
+#undef OK_UUDECODE		/* CF_ARG_DISABLE(dired-uudecode) */
+#endif
+
+#ifdef ZIP_PATH
+#undef OK_ZIP			/* CF_ARG_DISABLE(dired-zip) */
+#endif
 
 /*
  * U/Win defines vfork() as a macro in vfork.h, which is included from unistd.h.

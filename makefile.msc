@@ -54,6 +54,7 @@ DEFS = $(CS_DEFS) $(SOCK_DEFS) \
  /D "NO_UTMP" \
  /D "NOSIGHUP" \
  /D "NOUSERS" \
+ /D "OK_OVERRIDE" \
  /D "PDCURSES" \
  /D "SOURCE_CACHE" \
  /D "SH_EX" \

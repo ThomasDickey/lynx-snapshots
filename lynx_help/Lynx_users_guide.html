@@ -203,7 +203,7 @@ Here are some sample URLs.
 
 <dl>
    <dt>HTTP  (HyperText Transfer Protocol)
-	<dd><code>http://www.trill-home.com/lynx.html</code>
+        <dd><code>http://www.trill-home.com/lynx.html</code>
 
    <dt>Gopher
         <dd><code>gopher://gopher.micro.umn.edu/11/</code>
@@ -534,6 +534,7 @@ HREF="keystrokes/option_help.html">HELP!</A>
   Listing and Accessing Files
   FTP sort criteria                : [By Name]
   Local directory sort criteria    : [Mixed style......]
+  Local directory sort order       : [By name..........]
   Show dot files                   : [ON.]
   Execution links                  : [FOR LOCAL FILES ONLY]
 
@@ -863,6 +864,25 @@ return to Lynx or the '<em>&gt;</em>' command to save the options to a
              <dt>Files first
                 <dd>Files and directories are separated into two alphabetical
                     lists.  Files are listed first.
+          <p>
+          The Options Form also allows you to sort by the file attributes,
+          using the <em>Local directory sort order</em>:
+          <dl>
+             <dt>By name
+                <dd>by filename (the default)
+             <dt>By size
+                <dd>by file size, in descending order
+             <dt>By date
+                <dd>by file modification time, in descending order
+             <dt>By mode
+                <dd>by file protection
+             <dt>By type
+                <dd>by filename suffix, e.g., the text beginning with '.'
+             <dt>By user
+                <dd>by file owner's user-id
+             <dt>By group
+                <dd>by file owner's group-id
+          </dl>
           </dl>
 
    <dt>User Mode
@@ -2376,8 +2396,8 @@ where
              <dt><code>-display_charset=MIMEname</code>
                 <dd>set the charset for the terminal output.
              <dt><code>-dont_wrap_pre</code>
-		<dd>inhibit wrapping of text in &lt;pre&gt; when -dump'ing and
-		    -crawl'ing, mark wrapped lines in interactive session.
+                <dd>inhibit wrapping of text in &lt;pre&gt; when -dump'ing and
+                    -crawl'ing, mark wrapped lines in interactive session.
              <dt><code>-dump</code>
                 <dd>dumps the formatted output of the default document
                     or one specified on the command line to standard out.
@@ -2551,8 +2571,8 @@ where
                    <A HREF="keystrokes/option_help.html#tagsoup">recovery modes</A>,
                     switched by '<em>^V</em>'.
              <dt><code>-prettysrc</code>
-		<dd>do syntax highlighting and hyperlink handling in source
-		    view.
+                <dd>do syntax highlighting and hyperlink handling in source
+                    view.
              <dt><code>-print</code>
                 <dd>enable print functions. (default)
              <dt><code>-pseudo_inlines</code>
@@ -2644,8 +2664,8 @@ where
                 <dt>externals
                         <dd>disallow some "EXTERNAL" configuration lines,
                             if support for passing URLs to external
-			    applications (with the EXTERN_LINK or EXTERN_PAGE
-			    command) is compiled in.
+                            applications (with the EXTERN_LINK or EXTERN_PAGE
+                            command) is compiled in.
                 <dt>file_url
                         <dd>disallow using G)oto, served links or bookmarks
                             for file: URLs.
@@ -2721,10 +2741,10 @@ where
              <dt><code>-selective</code>
                 <dd>require .www_browsable files to browse directories.
              <dt><code>-short_url</code>
-		<dd>show very long URLs in the status line with "..." to
-		    represent the portion which cannot be displayed.  The
-		    beginning and end of the URL are displayed, rather than
-		    suppressing the end.
+                <dd>show very long URLs in the status line with "..." to
+                    represent the portion which cannot be displayed.  The
+                    beginning and end of the URL are displayed, rather than
+                    suppressing the end.
              <dt><code>-show_cursor </code>
                 <dd>If enabled the cursor will not be hidden in the right hand
                     corner but will instead be positioned at the start of the
@@ -2735,9 +2755,9 @@ where
                     It also can be set and saved via the 'o'ptions menu.
                     The command line switch toggles the default.
              <dt><code>-show_rate</code>
-		<dd>If enabled the transfer rate is shown in bytes/second.  If
-		    disabled, no transfer rate is shown.  Use lynx.cfg or the
-		    options menu to select KB/second and/or ETA.
+                <dd>If enabled the transfer rate is shown in bytes/second.  If
+                    disabled, no transfer rate is shown.  Use lynx.cfg or the
+                    options menu to select KB/second and/or ETA.
              <dt><code>-soft_dquotes</code>
                 <dd>toggles emulation of the old Netscape and Mosaic bug which
                     treated '<em>&gt;</em>' as a co-terminator for
@@ -2843,14 +2863,14 @@ where
              <dt><code>-vikeys</code>
                 <dd>enable vi-like key movement.
              <dt><code>-wdebug</code>
-		<dd>enable Waterloo tcp/ip packet debug (print to watt
-		    debugfile).  This applies only to DOS versions compiled
-		    with WATTCP or WATT-32.
+                <dd>enable Waterloo tcp/ip packet debug (print to watt
+                    debugfile).  This applies only to DOS versions compiled
+                    with WATTCP or WATT-32.
              <dt><code>-width=NUMBER</code>
                 <dd>number of columns for formatting of dumps, default is 80.
              <dt><code>-with_backspaces</code>
-		<dd>emit backspaces in output if -dumping or -crawling (like
-		<code>man</code> does).
+                <dd>emit backspaces in output if -dumping or -crawling (like
+                <code>man</code> does).
          </dl>
 </dl>
 

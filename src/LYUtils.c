@@ -3301,7 +3301,7 @@ PUBLIC void size_change ARGS1(
 #if defined(CAN_SWITCH_DISPLAY_CHARSET) && defined(CAN_AUTODETECT_DISPLAY_CHARSET)
 	/* May need to reload the font due to different char-box size */
 	if (current_char_set != auto_display_charset)
-	    Switch_Display_Charset(current_char_set, SWITCH_DISPLAY_CHARSET_SIZECHANGE);
+	    Switch_Display_Charset(current_char_set, SWITCH_DISPLAY_CHARSET_RESIZE);
 #endif
     }
 #ifdef SIGWINCH
@@ -3418,12 +3418,12 @@ PUBLIC void change_sug_filename ARGS1(
     FREE(temp);
 
     if (fname[strlen(fname) - 1] == '/')
-    /*
-     *  Hmm... we have a directory name.
-     *  It is annoying to see a scheme+host+path name as a suggested one,
-     *  let's remove the last_slash and go ahead like we have a file name. - LP
-     */
-    fname[strlen(fname) - 1] = '\0';
+	/*
+	 *  Hmm... we have a directory name.
+	 *  It is annoying to see a scheme+host+path name as a suggested one,
+	 *  let's remove the last_slash and go ahead like we have a file name. - LP
+	 */
+	fname[strlen(fname) - 1] = '\0';
 
     /*
      *	Remove everything up the the last_slash if there is one.
@@ -7305,7 +7305,7 @@ PUBLIC int LYCopyFile ARGS2(
 {
     int code;
 
-#if defined(DOSPATH) || defined(__CYGWIN__) /* thanks to Hiroyuki Senshu */
+#if !defined(COPY_PATH)
 
 #define BUF_SIZE	1024
 

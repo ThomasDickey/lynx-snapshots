@@ -548,7 +548,7 @@ PRIVATE int _Switch_Display_Charset ARGS2 (int, ord, enum switch_display_charset
 	ord = Find_Best_Display_Charset(ord);
 
     /* Ignore sizechange unless the font is loaded */
-    if (ord != font_loaded_for && really == SWITCH_DISPLAY_CHARSET_SIZECHANGE)
+    if (ord != font_loaded_for && really == SWITCH_DISPLAY_CHARSET_RESIZE)
 	return ord;
 
     if (ord == real_charsets[0] || ord == real_charsets[1]) {

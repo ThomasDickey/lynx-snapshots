@@ -1676,17 +1676,17 @@ re_read:
 
 	switch (a) {
 	case 'A': c = UPARROW; break;
-	case 'x': c = UPARROW; break;	/* keypad up on pc ncsa telnet */
 	case 'B': c = DNARROW; break;
-	case 'r': c = DNARROW; break;	/* keypad down on pc ncsa telnet */
 	case 'C': c = RTARROW; break;
-	case 'v': c = RTARROW; break;	/* keypad right on pc ncsa telnet */
 	case 'D': c = LTARROW; break;
-	case 't': c = LTARROW; break;	/* keypad left on pc ncsa telnet */
-	case 'y': c = PGUP;    break;	/* keypad on pc ncsa telnet */
-	case 's': c = PGDOWN;  break;	/* keypad on pc ncsa telnet */
-	case 'w': c = HOME;    break;	/* keypad on pc ncsa telnet */
-	case 'q': c = END_KEY; break;	/* keypad on pc ncsa telnet */
+	case 'q': c = END_KEY; break;	/* vt100 application keypad 1 */
+	case 'r': c = DNARROW; break;	/* vt100 application keypad 2 */
+	case 's': c = PGDOWN;  break;	/* vt100 application keypad 3 */
+	case 't': c = LTARROW; break;	/* vt100 application keypad 4 */
+	case 'v': c = RTARROW; break;	/* vt100 application keypad 6 */
+	case 'w': c = HOME;    break;	/* vt100 application keypad 7 */
+	case 'x': c = UPARROW; break;	/* vt100 application keypad 8 */
+	case 'y': c = PGUP;    break;	/* vt100 application keypad 9 */
 	case 'M':
 #if defined(USE_SLANG) && defined(USE_MOUSE)
 	   if (found_CSI(c,b))

@@ -21,6 +21,7 @@
 #include <LYGetFile.h>
 #include <LYReadCFG.h>
 #include <LYPrettySrc.h>
+#include <HTFile.h>
 
 #include <LYLeaks.h>
 
@@ -2116,13 +2117,13 @@ static char * save_options_string	= "save_options";
 /*
  * Personal Preferences
  */
-static char * cookies_string		= "set_cookies";
+static char * cookies_string		= RC_SET_COOKIES;
 static char * cookies_ignore_all_string = "ignore";
 static char * cookies_up_to_user_string = "ask user";
 static char * cookies_accept_all_string = "accept all";
-static char * x_display_string		= "display";
-static char * editor_string		= "file_editor";
-static char * emacs_keys_string		= "emacs_keys";
+static char * x_display_string		= RC_DISPLAY;
+static char * editor_string		= RC_FILE_EDITOR;
+static char * emacs_keys_string		= RC_EMACS_KEYS;
 
 #if defined(ENABLE_OPTS_CHANGE_EXEC) && (defined(EXEC_LINKS) || defined(EXEC_SCRIPTS))
 #define EXEC_ALWAYS 2
@@ -2139,9 +2140,9 @@ static OptValues exec_links_values[]	= {
 #endif /* ENABLE_OPTS_CHANGE_EXEC */
 
 #ifdef EXP_KEYBOARD_LAYOUT
-static char * kblayout_string		= "kblayout";
+static char * kblayout_string		= RC_KBLAYOUT;
 #endif
-static char * keypad_mode_string	= "keypad_mode";
+static char * keypad_mode_string	= RC_KEYPAD_MODE;
 static OptValues keypad_mode_values[]	= {
 	{ NUMBERS_AS_ARROWS,  "Numbers act as arrows", "number_arrows" },
 	{ LINKS_ARE_NUMBERED, "Links are numbered",    "links_numbered" },
@@ -2152,16 +2153,16 @@ static OptValues keypad_mode_values[]	= {
 			      "Form fields are numbered",
 			      "forms_numbered" },
 	{ 0, 0, 0 }};
-static char * lineedit_mode_string	= "lineedit_mode";
-static char * mail_address_string	= "personal_mail_address";
-static char * search_type_string	= "case_sensitive_searching";
+static char * lineedit_mode_string	= RC_LINEEDIT_MODE;
+static char * mail_address_string	= RC_PERSONAL_MAIL_ADDRESS;
+static char * search_type_string	= RC_CASE_SENSITIVE_SEARCHING;
 static OptValues search_type_values[] = {
 	{ FALSE,	    "Case insensitive",  "case_insensitive" },
 	{ TRUE,		    "Case sensitive",	 "case_sensitive" },
 	{ 0, 0, 0 }};
 
 #if defined(USE_SLANG) || defined(COLOR_CURSES)
-static char * show_color_string		= "show_color";
+static char * show_color_string		= RC_SHOW_COLOR;
 static OptValues show_color_values[] = {
 	{ SHOW_COLOR_NEVER,	never_string,	never_string },
 	{ SHOW_COLOR_OFF,	off_string,	off_string },
@@ -2170,22 +2171,22 @@ static OptValues show_color_values[] = {
 	{ 0, 0, 0 }};
 #endif
 
-static char * show_cursor_string	= "show_cursor";
+static char * show_cursor_string	= RC_SHOW_CURSOR;
 
 #ifdef USE_SCROLLBAR
-static char * show_scrollbar_string	= "show_scrollbar";
+static char * show_scrollbar_string	= RC_SCROLLBAR;
 #endif
 
-static char * user_mode_string		= "user_mode";
+static char * user_mode_string		= RC_USER_MODE;
 static OptValues user_mode_values[] = {
 	{ NOVICE_MODE,		"Novice",	"Novice" },
 	{ INTERMEDIATE_MODE,	"Intermediate", "Intermediate" },
 	{ ADVANCED_MODE,	"Advanced",	"Advanced" },
 	{ 0, 0, 0 }};
 
-static char * vi_keys_string		= "vi_keys";
+static char * vi_keys_string		= RC_VI_KEYS;
 
-static char * visited_links_string	= "visited_links";
+static char * visited_links_string	= RC_VISITED_LINKS;
 static OptValues visited_links_values[] = {
 	{ VISITED_LINKS_AS_FIRST_V, "By First Visit",	"first_visited" },
 	{ VISITED_LINKS_AS_FIRST_V | VISITED_LINKS_REVERSE,
@@ -2200,7 +2201,7 @@ static OptValues visited_links_values[] = {
  * Document Layout
  */
 #ifndef SH_EX	/* 1999/01/19 (Tue) */
-static char * DTD_recovery_string      = "DTD_recovery";
+static char * DTD_recovery_string      = RC_TAGSOUP;
 static OptValues DTD_type_values[] = {
 	/* Old_DTD variable */
 	{ TRUE,		    "relaxed (TagSoup mode)",	 "tagsoup" },
@@ -2208,12 +2209,12 @@ static OptValues DTD_type_values[] = {
 	{ 0, 0, 0 }};
 #endif
 
-static char * select_popups_string     = "select_popups";
+static char * select_popups_string     = RC_SELECT_POPUPS;
 static char * images_string            = "images";
-static char * images_ignore_all_string  = "ignore";
-static char * images_use_label_string   = "as labels";
-static char * images_use_links_string   = "as links";
-static char * verbose_images_string    = "verbose_images";
+static char * images_ignore_all_string = "ignore";
+static char * images_use_label_string  = "as labels";
+static char * images_use_links_string  = "as links";
+static char * verbose_images_string    = RC_VERBOSE_IMAGES;
 static OptValues verbose_images_type_values[] = {
 	/* verbose_img variable */
 	{ FALSE,	    "OFF",		 "OFF" },
@@ -2223,7 +2224,7 @@ static OptValues verbose_images_type_values[] = {
 /*
  * Bookmark Options
  */
-static char * mbm_string		= "multi_bookmark";
+static char * mbm_string		= RC_MULTI_BOOKMARK;
 static OptValues mbm_values[] = {
 	{ MBM_OFF,		"OFF",			"OFF" },
 	{ MBM_STANDARD,		"STANDARD",		"STANDARD" },
@@ -2235,25 +2236,39 @@ static char * single_bookmark_string	= "single_bookmark_name";
 /*
  * Character Set Options
  */
-static char * assume_char_set_string	= "assume_char_set";
-static char * display_char_set_string	= "character_set";
-static char * raw_mode_string		= "raw_mode";
+static char * assume_char_set_string	= RC_ASSUME_CHARSET;
+static char * display_char_set_string	= RC_CHARACTER_SET;
+static char * raw_mode_string		= RC_RAW_MODE;
 
 /*
  * File Management Options
  */
-static char * show_dotfiles_string	= "show_dotfiles";
+static char * show_dotfiles_string	= RC_SHOW_DOTFILES;
 
 #ifdef DIRED_SUPPORT
-static char * dired_sort_string		= "dir_list_style";
-static OptValues dired_values[] = {
-	{ 0,			"Directories first",	"dired_dir" },
+static char * dired_list_string		= RC_DIR_LIST_STYLE;
+static OptValues dired_list_values[] = {
+	{ DIRS_FIRST,		"Directories first",	"dired_dir" },
 	{ FILES_FIRST,		"Files first",		"dired_files" },
 	{ MIXED_STYLE,		"Mixed style",		"dired_mixed" },
 	{ 0, 0, 0 }};
+#ifdef LONG_LIST
+static char * dired_sort_string		= RC_DIR_LIST_ORDER;
+static OptValues dired_sort_values[] = {
+	{ ORDER_BY_NAME,	"By name",		"dired_by_name" },
+	{ ORDER_BY_TYPE,	"By type",		"dired_by_type" },
+	{ ORDER_BY_SIZE,	"By size",		"dired_by_size" },
+	{ ORDER_BY_DATE,	"By date",		"dired_by_date" },
+	{ ORDER_BY_MODE,	"By mode",		"dired_by_mode" },
+#ifndef NO_GROUPS
+	{ ORDER_BY_USER,	"By user",		"dired_by_user" },
+	{ ORDER_BY_GROUP,	"By group",		"dired_by_group" },
+#endif
+	{ 0, 0, 0 }};
+#endif /* LONG_LIST */
 #endif /* DIRED_SUPPORT */
 
-static char * ftp_sort_string		= "file_sorting_method";
+static char * ftp_sort_string		= RC_FILE_SORTING_METHOD;
 static OptValues ftp_sort_values[] = {
 	{ FILE_BY_NAME,		"By Name",		"ftp_by_name" },
 	{ FILE_BY_TYPE,		"By Type",		"ftp_by_type" },
@@ -2261,7 +2276,7 @@ static OptValues ftp_sort_values[] = {
 	{ FILE_BY_DATE,		"By Date",		"ftp_by_date" },
 	{ 0, 0, 0 }};
 
-static char * show_rate_string		= "show_rate";
+static char * show_rate_string		= RC_SHOW_KB_RATE;
 static OptValues rate_values[] = {
 	{ rateOFF,		"Do not show rate",	"rate_off" },
 	{ rateBYTES,		"Show Bytes/sec rate",	"rate_bytes" },
@@ -2275,9 +2290,9 @@ static OptValues rate_values[] = {
 /*
  * Headers transferred to remote server
  */
-static char * preferred_doc_char_string = "preferred_charset";
-static char * preferred_doc_lang_string = "preferred_language";
-static char * user_agent_string		= "user_agent";
+static char * preferred_doc_char_string = RC_PREFERRED_CHARSET;
+static char * preferred_doc_lang_string = RC_PREFERRED_LANGUAGE;
+static char * user_agent_string		= RC_USERAGENT;
 
 #define PutTextInput(fp, Name, Value, Size, disable) \
 	fprintf(fp,\
@@ -2805,10 +2820,16 @@ PUBLIC int postoptions ARGS1(
 	}
 
 #ifdef DIRED_SUPPORT
-	/* Local Directory Sort: SELECT */
-	if (!strcmp(data[i].tag, dired_sort_string)) {
-	    GetOptValues(dired_values, data[i].value, &dir_list_style);
+	/* Local Directory Style: SELECT */
+	if (!strcmp(data[i].tag, dired_list_string)) {
+	    GetOptValues(dired_list_values, data[i].value, &dir_list_style);
 	}
+#ifdef LONG_LIST
+	/* Local Directory Order: SELECT */
+	if (!strcmp(data[i].tag, dired_sort_string)) {
+	    GetOptValues(dired_sort_values, data[i].value, &dir_list_order);
+	}
+#endif /* LONG_LIST */
 #endif /* DIRED_SUPPORT */
 
 	/* Show dot files: ON/OFF */
@@ -3103,8 +3124,8 @@ PRIVATE char *check_if_write_lynxrc ARGS1(char **, table)
 PRIVATE char *will_save_cookies NOARGS
 {
     static char *table[] = {
-	"set_cookies",			/* LYSetCookies */
-	"accept_all_cookies",		/* LYAcceptAllCookies */
+	RC_SET_COOKIES,			/* LYSetCookies */
+	RC_ACCEPT_ALL_COOKIES,		/* LYAcceptAllCookies */
 	NULL
     };
     return check_if_write_lynxrc(table);
@@ -3118,8 +3139,8 @@ PRIVATE char *will_save_cookies NOARGS
 PRIVATE char *will_save_images NOARGS
 {
     static char *table[] = {
-	"make_pseudo_alts_for_inlines",	/* pseudo_inline_alts */
-	"make_links_for_all_images",	/* clickable_images */
+	RC_MAKE_PSEUDO_ALTS_FOR_INLINES, /* pseudo_inline_alts */
+	RC_MAKE_LINKS_FOR_ALL_IMAGES,	/* clickable_images */
 	NULL
     };
     return check_if_write_lynxrc(table);
@@ -3496,10 +3517,17 @@ PRIVATE int gen_options ARGS1(
 
 #ifdef DIRED_SUPPORT
     /* Local Directory Sort: SELECT */
-    PutLabel(fp0, gettext("Local directory sort criteria"), dired_sort_string);
-    BeginSelect(fp0, dired_sort_string);
-    PutOptValues(fp0, dir_list_style, dired_values);
+    PutLabel(fp0, gettext("Local directory sort criteria"), dired_list_string);
+    BeginSelect(fp0, dired_list_string);
+    PutOptValues(fp0, dir_list_style, dired_list_values);
     EndSelect(fp0);
+#ifdef LONG_LIST
+    /* Local Directory Order: SELECT */
+    PutLabel(fp0, gettext("Local directory sort order"), dired_sort_string);
+    BeginSelect(fp0, dired_sort_string);
+    PutOptValues(fp0, dir_list_order, dired_sort_values);
+    EndSelect(fp0);
+#endif /* LONG_LIST */
 #endif /* DIRED_SUPPORT */
 
     /* Show dot files: ON/OFF */

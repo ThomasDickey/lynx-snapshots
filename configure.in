@@ -301,38 +301,9 @@ CF_DEFINE_PROG(system mailer, SYSTEM_MAIL,
 	/usr/lib/sendmail  \
 	)
 CF_SYSTEM_MAIL_FLAGS
-
-CF_PATH_PROG(CHMOD,	chmod)
-CF_PATH_PROG(COMPRESS,	compress)
-CF_PATH_PROG(COPY,	cp)
-CF_PATH_PROG(GZIP,	gzip)
-CF_PATH_PROG(MKDIR,	mkdir)
-CF_PATH_PROG(MV,	mv)
-CF_PATH_PROG(RM,	rm)
-CF_PATH_PROG(TAR,	tar)
-CF_PATH_PROG(TOUCH,	touch)
-CF_PATH_PROG(UNCOMPRESS,gunzip)
-CF_PATH_PROG(UNZIP,	unzip)
-CF_PATH_PROG(BZIP2,	bzip2)
-CF_PATH_PROG(UUDECODE,	uudecode)
-CF_PATH_PROG(ZCAT,	zcat)
-CF_PATH_PROG(ZIP,	zip)
-CF_PATH_PROG(TELNET,	telnet)
-CF_PATH_PROG(TN3270,	tn3270)
-CF_PATH_PROG(RLOGIN,	rlogin)
-
-dnl 'INSTALL' is a special case, since the configure script has to find a
-dnl BSD-compatible one so the build/install works properly.
-case "$INSTALL" in
-$srcdir*) # (vi
-	AC_DEFINE_UNQUOTED(INSTALL_PATH,"install")
-	;;
-*) # (vi
-	cf_save_INSTALL="$INSTALL"
-	CF_PATH_PROG(INSTALL,	install)
-	INSTALL="$cf_save_INSTALL"
-	;;
-esac
+if test $with_full_paths = no ; then
+	SYSTEM_MAIL=`basename $SYSTEM_MAIL`
+fi
 
 CF_GNU_SOURCE
 
@@ -1118,9 +1089,47 @@ CF_ARG_DISABLE(parent-dir-refs,
 	[AC_DEFINE(NO_PARENT_DIR_REFERENCE)])
 AC_MSG_RESULT($enableval)
 
+CF_PATH_PROG(TELNET,	telnet)
+CF_PATH_PROG(TN3270,	tn3270)
+CF_PATH_PROG(RLOGIN,	rlogin)
+
+CF_PATH_PROG(MV,	mv)
+
+CF_PATH_PROG(UNCOMPRESS,gunzip)
+CF_PATH_PROG(UNZIP,	unzip)
+CF_PATH_PROG(BZIP2,	bzip2)
+
 dnl --------------------------------------------------------------------------
 dnl Test features that rely on configure-definitions
 dnl --------------------------------------------------------------------------
+if test ".$use_dired" != ".no" ; then
+
+CF_PATH_PROG(COMPRESS,	compress)
+CF_PATH_PROG(GZIP,	gzip)
+CF_PATH_PROG(RM,	rm)
+CF_PATH_PROG(TAR,	tar)
+CF_PATH_PROG(UUDECODE,	uudecode)
+CF_PATH_PROG(ZCAT,	zcat)
+CF_PATH_PROG(ZIP,	zip)
+dnl builtin: CF_PATH_PROG(CHMOD,	chmod)
+dnl builtin: CF_PATH_PROG(COPY,		cp)
+dnl builtin: CF_PATH_PROG(MKDIR,	mkdir)
+dnl builtin: CF_PATH_PROG(TOUCH,	touch)
+
+dnl 'INSTALL' is a special case, since the configure script has to find a
+dnl BSD-compatible one so the build/install works properly.
+case "$INSTALL" in
+$srcdir*) # (vi
+	AC_DEFINE_UNQUOTED(INSTALL_PATH,"install")
+	;;
+*) # (vi
+	cf_save_INSTALL="$INSTALL"
+	CF_PATH_PROG(INSTALL,	install)
+	INSTALL="$cf_save_INSTALL"
+	;;
+esac
+fi
+
 if test $cf_cv_screen = pdcurses ; then
 	CF_HELP_MESSAGE(Special Libraries for PDCurses X11:)
 	CF_PDCURSES_X11

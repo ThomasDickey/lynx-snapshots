@@ -1048,6 +1048,7 @@ PUBLIC HTStream* HTCompressed ARGS3(
 	     *	We have a presentation mapping for it. - FM
 	     */
 	    can_present = TRUE;
+#ifdef GZIP_PATH
 	    if (!strcasecomp(anchor->content_encoding, "x-gzip") ||
 		!strcasecomp(anchor->content_encoding, "gzip")) {
 		/*
@@ -1056,14 +1057,20 @@ PUBLIC HTStream* HTCompressed ARGS3(
 		StrAllocCopy(uncompress_mask, GZIP_PATH);
 		StrAllocCat(uncompress_mask, " -d --no-name %s");
 		compress_suffix = "gz";
+		break;
+	    }
+#endif /* GZIP_PATH */
 #ifdef BZIP2_PATH
-	    } else if (!strcasecomp(anchor->content_encoding, "x-bzip2") ||
+	    if (!strcasecomp(anchor->content_encoding, "x-bzip2") ||
 		!strcasecomp(anchor->content_encoding, "bzip2")) {
 		StrAllocCopy(uncompress_mask, BZIP2_PATH);
 		StrAllocCat(uncompress_mask, " -d %s");
 		compress_suffix = "bz2";
+		break;
+	    }
 #endif /* BZIP2_PATH */
-	    } else if (!strcasecomp(anchor->content_encoding, "x-compress") ||
+#ifdef UNCOMPRESS_PATH
+	    if (!strcasecomp(anchor->content_encoding, "x-compress") ||
 		       !strcasecomp(anchor->content_encoding, "compress")) {
 		/*
 		 *  It's compressed the old fashioned Unix way. - FM
@@ -1071,7 +1078,9 @@ PUBLIC HTStream* HTCompressed ARGS3(
 		StrAllocCopy(uncompress_mask, UNCOMPRESS_PATH);
 		StrAllocCat(uncompress_mask, " %s");
 		compress_suffix = "Z";
+		break;
 	    }
+#endif /* UNCOMPRESS_PATH */
 	    break;
 	}
     }

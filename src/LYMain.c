@@ -100,11 +100,15 @@ PUBLIC char *LYCSwingPath = NULL;
 #ifdef DIRED_SUPPORT
 PUBLIC BOOLEAN lynx_edit_mode = FALSE;
 PUBLIC BOOLEAN no_dired_support = FALSE;
-PUBLIC int dir_list_style = MIXED_STYLE;
 PUBLIC HTList *tagged = NULL;
+PUBLIC int LYAutoUncacheDirLists = 2; /* default dired uncaching behavior */
+PUBLIC int dir_list_order = ORDER_BY_NAME;
+PUBLIC int dir_list_style = MIXED_STYLE;
+
 #ifdef OK_OVERRIDE
 PUBLIC BOOLEAN prev_lynx_edit_mode = FALSE;
 #endif /* OK_OVERRIDE */
+
 #ifdef OK_PERMIT
 #ifdef NO_CHANGE_EXECUTE_PERMS
 PUBLIC BOOLEAN no_change_exec_perms = TRUE;
@@ -112,7 +116,7 @@ PUBLIC BOOLEAN no_change_exec_perms = TRUE;
 PUBLIC BOOLEAN no_change_exec_perms = FALSE;
 #endif /* NO_CHANGE_EXECUTE_PERMS */
 #endif /* OK_PERMIT */
-PUBLIC int LYAutoUncacheDirLists = 2; /* default dired uncaching behavior */
+
 #endif /* DIRED_SUPPORT */
 
 	   /* Number of docs cached in memory */

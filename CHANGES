@@ -1,6 +1,50 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2001-11-18 (2.8.5dev.5)
+* modify prompt for file- or directory-name in rename/move operation to provide
+  a default based on the selected file/directory -TD
+* add -DOK_OVERRIDE to makefile.msc, to allow rename/move of files in the local
+  directory editor -TD
+* correct delay time for win32's HTAlert, etc., which was in milliseconds
+  rather than seconds -TD
+* modify check for mbstate_t in CF_WIDEC_CURSES to define HAVE_MBSTATE_T if
+  that type is found, use this ifdef in LYwaddnstr() to make that compile
+  properly on Solaris 2.6 (report by PG) -TD
+* disable SUPPORT_MULTIBYTE_EDIT ifdef for EBCDIC (i.e., NOT_ASCII) -PG
+* collect names of lynx.cfg and .lynxrc variables into LYrcFile.h, to simplify
+  checks for matching spelling, e.g., against the values used in LYOptions.c
+* modify dired support to allow sorting by a variety of things in addition to
+  the existing sort into files versus directories.  This is saved in ~/lynxrc
+  as dir_sort_order -TD
+* if --disable-full-paths is specified, do not use full path for SYSTEM_MAIL
+  (report by IZ) -TD
+* modify configure script to reduce the number of xxx_PATH definitions compiled
+  into the code if --disable-dired was specified.  Change configure script so
+  that dired support for chmod, copy, mkdir, and touch to use built-in
+  functions rather than external programs -TD
+* modify configure script tests for program pathnames so that if full pathnames
+  are specified and the program is not found, no corresponding xxx_PATH symbol
+  is defined -TD
+* eliminate duplicate LYGetEnum() in LYrcFile.c, using the variant from
+  LYReadCFG.c which allows abbreviations -TD
+* change handling of tagsoup option in LYrcFile.c to invoke the corresponding
+  HTSwitchDTD() function, so saved tagsoup initializes properly from ~/.lynxrc
+  (report by Michel Such) -TD
+* modify some tag-names in LYOptions.c to correspond to the names used in
+  lynx.cfg to make the corresponding names work properly when used in ~/.lynxrc
+  via ENABLE_LYNXRC settings (report by Michel Such) -TD
+    old             new
+    ----------------------------
+    assume_char_set -> assume_charset
+    show_scrollbar  -> scrollbar
+    DTD_recovery    -> tagsoup
+    show_rate       -> show_kb_rate
+    user_agent      -> useragent
+    ----------------------------
+* correct length passed by LYpaddstr() to LYwaddnstr(), which could be larger
+  than allowed -TD
+
 2001-11-08 (2.8.5dev.4)
 * if file-upload code is configured, suppress message that indicates it is not
   implemented, i.e., "[FILE Input] (not implemented)" -TD
@@ -64,7 +108,7 @@ Changes since Lynx 2.8 release
   reportedly this is due to Redhat):  the -C option passes through comments as
   usual, but some comments expand on preprocessor lines, which causes the
   preprocessor to report an expression error.  This prevented "make
-  install-help" from running, though the -C option is not needed for that. 
+  install-help" from running, though the -C option is not needed for that.
   However, lacking a working -C option makes the C preprocessor useless for
   analyzing bugs -TD
 * modify configure script to accept --with-screen=ncursesw, to build with the

@@ -80,6 +80,12 @@ typedef struct _HTSuffix {
 	float		quality;
 } HTSuffix;
 
+typedef struct {
+    struct stat file_info;
+    char sort_tags;
+    char file_name[1];	/* on the end of the struct, since its length varies */
+} DIRED;
+
 #ifndef NGROUPS
 #ifdef NGROUPS_MAX
 #define NGROUPS NGROUPS_MAX
@@ -127,8 +133,6 @@ PRIVATE char *HTCacheRoot = "/WWW$SCRATCH";	/* Where to cache things */
 #else
 PRIVATE char *HTCacheRoot = "/tmp/W3_Cache_";	/* Where to cache things */
 #endif /* VMS */
-
-/*PRIVATE char *HTSaveRoot  = "$(HOME)/WWW/";*/ /* Where to save things */
 
 /*
 **  Suffix registration.
@@ -181,9 +185,9 @@ PRIVATE char *FormatNum ARGS3(
 
 PRIVATE void LYListFmtParse ARGS5(
 	char *,		fmtstr,
+	DIRED *,	data,
 	char *,		file,
 	HTStructured *, target,
-	char *,		entry,
 	char *,		tail)
 {
 	char c;
@@ -191,12 +195,10 @@ PRIVATE void LYListFmtParse ARGS5(
 	char *end;
 	char *start;
 	char *str = NULL;
-	struct stat st;
 	char *buf = NULL;
 	char tmp[LY_MAXPATH];
-	char tmp2[LY_MAXPATH];
 	char type;
-#ifndef _WINDOWS
+#ifndef NOUSERS
 	char *name;
 #endif
 	time_t now;
@@ -229,9 +231,7 @@ PRIVATE void LYListFmtParse ARGS5(
 #define PTBIT(a, s)  PBIT(a, 0, 0)
 #endif
 
-	strcpy(tmp2, file);
-	LYTrimPathSep (tmp2);
-	if (lstat(tmp2, &st) < 0)
+	if (data->file_info.st_mode == 0)
 		fmtstr = "    %a";	/* can't stat so just do anchor */
 
 	StrAllocCopy(str, fmtstr);
@@ -270,13 +270,13 @@ PRIVATE void LYListFmtParse ARGS5(
 
 		case 'A':
 		case 'a':	/* anchor */
-			HTDirEntry(target, tail, entry);
-			FormatStr(&buf, start, entry);
+			HTDirEntry(target, tail, data->file_name);
+			FormatStr(&buf, start, data->file_name);
 			PUTS(buf);
 			END(HTML_A);
 			*buf = '\0';
 #ifdef S_IFLNK
-			if (c != 'A' && S_ISLNK(st.st_mode) &&
+			if (c != 'A' && S_ISLNK(data->file_info.st_mode) &&
 			    (len = readlink(file, tmp, sizeof(tmp))) >= 0) {
 				PUTS(" -> ");
 				tmp[len] = '\0';
@@ -287,7 +287,7 @@ PRIVATE void LYListFmtParse ARGS5(
 
 		case 'T':	/* MIME type */
 		case 't':	/* MIME type description */
-		    if (S_ISDIR(st.st_mode)) {
+		    if (S_ISDIR(data->file_info.st_mode)) {
 			if (c != 'T') {
 			    FormatStr(&buf, start, ENTRY_IS_DIRECTORY);
 			} else {
@@ -318,8 +318,8 @@ PRIVATE void LYListFmtParse ARGS5(
 
 		case 'd':	/* date */
 			now = time(0);
-			datestr = ctime(&st.st_mtime);
-			if ((now - st.st_mtime) < SEC_PER_YEAR/2)
+			datestr = ctime(&data->file_info.st_mtime);
+			if ((now - data->file_info.st_mtime) < SEC_PER_YEAR/2)
 				/*
 				**  MMM DD HH:MM
 				*/
@@ -334,22 +334,22 @@ PRIVATE void LYListFmtParse ARGS5(
 			break;
 
 		case 's':	/* size in bytes */
-			FormatNum(&buf, start, (int) st.st_size);
+			FormatNum(&buf, start, (int) data->file_info.st_size);
 			break;
 
 		case 'K':	/* size in Kilobytes but not for directories */
-			if (S_ISDIR(st.st_mode)) {
+			if (S_ISDIR(data->file_info.st_mode)) {
 				FormatStr(&buf, start, "");
 				break;
 			}
 			/* FALL THROUGH */
 		case 'k':	/* size in Kilobytes */
-			FormatNum(&buf, start, (int)((st.st_size+1023)/1024));
+			FormatNum(&buf, start, (int)((data->file_info.st_size+1023)/1024));
 			StrAllocCat(buf, "K");
 			break;
 
 		case 'p':	/* unix-style permission bits */
-			switch(st.st_mode & S_IFMT) {
+			switch(data->file_info.st_mode & S_IFMT) {
 #if defined(_MSC_VER) && defined(_S_IFIFO)
 			case _S_IFIFO: type = 'p'; break;
 #else
@@ -377,42 +377,40 @@ PRIVATE void LYListFmtParse ARGS5(
 			}
 #ifdef _WINDOWS
 			sprintf(tmp, "%c%s", type,
-				PBIT(st.st_mode, 6, st.st_mode & S_IRWXU));
+				PBIT(data->file_info.st_mode, 6, data->file_info.st_mode & S_IRWXU));
 #else
 			sprintf(tmp, "%c%s%s%s", type,
-				PBIT(st.st_mode, 6, st.st_mode & S_ISUID),
-				PBIT(st.st_mode, 3, st.st_mode & S_ISGID),
-				PTBIT(st.st_mode,   st.st_mode & S_ISVTX));
+				PBIT(data->file_info.st_mode, 6, data->file_info.st_mode & S_ISUID),
+				PBIT(data->file_info.st_mode, 3, data->file_info.st_mode & S_ISGID),
+				PTBIT(data->file_info.st_mode,   data->file_info.st_mode & S_ISVTX));
 #endif
 			FormatStr(&buf, start, tmp);
 			break;
 
-#ifdef _WINDOWS
 		case 'o':	/* owner */
-		case 'g':	/* group */
-			break;
-#else
-		case 'o':	/* owner */
-			name = HTAA_UidToName (st.st_uid);
+#ifndef NOUSERS
+			name = HTAA_UidToName (data->file_info.st_uid);
 			if (*name) {
 				FormatStr(&buf, start, name);
 			} else {
-				FormatNum(&buf, start, (int) st.st_uid);
+				FormatNum(&buf, start, (int) data->file_info.st_uid);
 			}
+#endif
 			break;
 
 		case 'g':	/* group */
-			name = HTAA_GidToName(st.st_gid);
+#ifndef NOUSERS
+			name = HTAA_GidToName(data->file_info.st_gid);
 			if (*name) {
 				FormatStr(&buf, start, name);
 			} else {
-				FormatNum(&buf, start, (int) st.st_gid);
+				FormatNum(&buf, start, (int) data->file_info.st_gid);
 			}
-			break;
 #endif
+			break;
 
 		case 'l':	/* link count */
-			FormatNum(&buf, start, (int) st.st_nlink);
+			FormatNum(&buf, start, (int) data->file_info.st_nlink);
 			break;
 
 		case '%':	/* literal % with flags/width */
@@ -1606,6 +1604,7 @@ PRIVATE void do_readme ARGS2(HTStructured *, target, CONST char *, localname)
 {
     FILE * fp;
     char * readme_file_name = NULL;
+    int ch;
 
     HTSprintf0(&readme_file_name, "%s/%s", localname, HT_DIR_README_FILE);
 
@@ -1616,35 +1615,64 @@ PRIVATE void do_readme ARGS2(HTStructured *, target, CONST char *, localname)
 
 	targetClass =  *target->isa;	/* (Can't init agregate in K&R) */
 	START(HTML_PRE);
-	for (;;){
-	    int c = fgetc(fp);
-	    if (c == EOF) break;
-#ifdef NOTDEFINED
-	    switch (c) {
-		case '&':
-		case '<':
-		case '>':
-			PUTC('&');
-			PUTC('#');
-			PUTC((char)(c / 10));
-			PUTC((char) (c % 10));
-			PUTC(';');
-			break;
-/*		case '\n':
-			PUTC('\r');
-Bug removed thanks to joe@athena.mit.edu */
-		default:
-			PUTC((char)c);
-	    }
-#else
-	    PUTC((char)c);
-#endif /* NOTDEFINED */
+	while ((ch = fgetc(fp)) != EOF) {
+	    PUTC((char)ch);
 	}
 	END(HTML_PRE);
 	HTDisplayPartial();
 	fclose(fp);
     }
     FREE(readme_file_name);
+}
+
+#define DIRED_BLOK(obj) (((DIRED *)(obj))->sort_tags)
+#define DIRED_NAME(obj) (((DIRED *)(obj))->file_name)
+
+#define NM_cmp(a,b) ((a) < (b) ? -1 : ((a) > (b) ? 1 : 0))
+
+PRIVATE char *file_type ARGS1(char *, path)
+{
+    char *type = strchr(path, '.');
+    if (type == NULL)
+	type = "";
+    return type;
+}
+
+PRIVATE int dired_cmp ARGS2(void *, a, void *, b)
+{
+    DIRED *p = (DIRED *)a;
+    DIRED *q = (DIRED *)b;
+    int code = p->sort_tags - q->sort_tags;
+#ifdef LONG_LIST
+    if (code == 0) {
+	switch (dir_list_order) {
+	case ORDER_BY_SIZE:
+	    code = -NM_cmp(p->file_info.st_size, q->file_info.st_size);
+	    break;
+	case ORDER_BY_DATE:
+	    code = -NM_cmp(p->file_info.st_mtime, q->file_info.st_mtime);
+	    break;
+	case ORDER_BY_MODE:
+	    code = NM_cmp(p->file_info.st_mode, q->file_info.st_mode);
+	    break;
+	case ORDER_BY_USER:
+	    code = NM_cmp(p->file_info.st_uid, q->file_info.st_uid);
+	    break;
+	case ORDER_BY_GROUP:
+	    code = NM_cmp(p->file_info.st_gid, q->file_info.st_gid);
+	    break;
+	case ORDER_BY_TYPE:
+	    code = AS_cmp(file_type(p->file_name), file_type(q->file_name));
+	    break;
+	default:
+	    code = 0;
+	    break;
+	}
+    }
+#endif /* LONG_LIST */
+    if (code == 0)
+	code = AS_cmp(p->file_name, q->file_name);
+    return code;
 }
 
 PRIVATE int print_local_dir ARGS5(
@@ -1663,10 +1691,8 @@ PRIVATE int print_local_dir ARGS5(
     BOOL present[HTML_A_ATTRIBUTES];
     char * tmpfilename = NULL;
     BOOL need_parent_link = FALSE;
-    struct stat file_info;
     int status;
     int i;
-    int code;
 
     CTRACE((tfp, "print_local_dir() started\n"));
 
@@ -1732,7 +1758,7 @@ PRIVATE int print_local_dir ARGS5(
 
 
     {
-	HTBTree * bt = HTBTree_new((HTComparer)AS_cmp);
+	HTBTree * bt = HTBTree_new(dired_cmp);
 	int num_of_entries = 0;	    /* lines counter */
 
 	_HTProgress (READING_DIRECTORY);
@@ -1741,7 +1767,7 @@ PRIVATE int print_local_dir ARGS5(
 	    /*
 	    **	While there are directory entries to be read...
 	    */
-	    char * dirname = NULL;
+	    DIRED *data = NULL;
 
 #ifndef DOSPATH
 	    if (dirbuf->d_ino == 0)
@@ -1771,35 +1797,45 @@ PRIVATE int print_local_dir ARGS5(
 	    LYAddPathSep(&tmpfilename);
 
 	    StrAllocCat(tmpfilename, dirbuf->d_name);
-	    code = stat(tmpfilename, &file_info);
+	    data = malloc(sizeof(DIRED) + strlen(dirbuf->d_name) + 4);
+	    if (data == NULL) {
+		/* FIXME */
+	    }
+	    LYTrimPathSep (tmpfilename);
+	    if (lstat(tmpfilename, &(data->file_info)) < 0)
+		data->file_info.st_mode = 0;
+
+	    strcpy(data->file_name, dirbuf->d_name);
 #ifndef DIRED_SUPPORT
-	    if (S_ISDIR(file_info.st_mode))
-		HTSprintf0(&dirname, "D%s",dirbuf->d_name);
-	    else
-		HTSprintf0(&dirname, "F%s",dirbuf->d_name);
+	    if (S_ISDIR(data->file_info.st_mode)) {
+		data->sort_tags = 'D';
+	    } else {
+		data->sort_tags = 'F';
 		/* D & F to have first directories, then files */
+	    }
 #else
-	    if (S_ISDIR(file_info.st_mode)) {
+	    if (S_ISDIR(data->file_info.st_mode)) {
 		if (dir_list_style == MIXED_STYLE) {
-		    HTSprintf0(&dirname, " %s", dirbuf->d_name);
-		    LYAddPathSep(&dirname);
+		    data->sort_tags = ' ';
+		    LYAddPathSep0(data->file_name);
 		} else if (!strcmp(dirbuf->d_name, "..")) {
-		    HTSprintf0(&dirname, "A%s", dirbuf->d_name);
+		    data->sort_tags = 'A';
 		} else {
-		    HTSprintf0(&dirname, "D%s", dirbuf->d_name);
+		    data->sort_tags = 'D';
 		}
-	    } else if (dir_list_style == MIXED_STYLE)
-		HTSprintf0(&dirname, " %s", dirbuf->d_name);
-	    else if (dir_list_style == FILES_FIRST)
-		HTSprintf0(&dirname, "C%s", dirbuf->d_name);
+	    } else if (dir_list_style == MIXED_STYLE) {
+		data->sort_tags = ' ';
+	    } else if (dir_list_style == FILES_FIRST) {
+		data->sort_tags = 'C';
 		/* C & D to have first files, then directories */
-	    else
-		HTSprintf0(&dirname, "F%s", dirbuf->d_name);
+	    } else {
+		data->sort_tags = 'F';
+	    }
 #endif /* !DIRED_SUPPORT */
 	    /*
 	    **	Sort dirname in the tree bt.
 	    */
-	    HTBTree_add(bt, dirname);
+	    HTBTree_add(bt, data);
 
 #ifdef DISP_PARTIAL
 	    /* optimize for expensive operation: */
@@ -1841,7 +1877,7 @@ PRIVATE int print_local_dir ARGS5(
 	    state = 'I';
 
 	    while (next_element != NULL) {
-		char *entry, *file_extra;
+		DIRED *entry;
 
 #ifndef DISP_PARTIAL
 		if (num_of_entries_output % HTMAX(display_lines,10) == 0) {
@@ -1852,29 +1888,25 @@ PRIVATE int print_local_dir ARGS5(
 		    }
 		}
 #endif
-		StrAllocCopy(tmpfilename,localname);
+		StrAllocCopy(tmpfilename, localname);
 		/*
 		**	If filename is not root directory.
 		*/
 		LYAddPathSep(&tmpfilename);
 
-		entry = (char*)HTBTree_object(next_element)+1;
+		entry = (DIRED *)(HTBTree_object(next_element));
 		/*
 		**  Append the current entry's filename
 		**  to the path.
 		*/
-		StrAllocCat(tmpfilename, entry);
+		StrAllocCat(tmpfilename, entry->file_name);
 		HTSimplify(tmpfilename);
 		/*
 		**  Output the directory entry.
 		*/
-		if (strcmp((char *)
-			   (HTBTree_object(next_element)), "D..") &&
-		    strcmp((char *)
-			   (HTBTree_object(next_element)), "A.."))
-		{
+		if (strcmp(DIRED_NAME(HTBTree_object(next_element)), "..")) {
 #ifdef DIRED_SUPPORT
-		    test = (*(char *)(HTBTree_object(next_element))
+		    test = (DIRED_BLOK(HTBTree_object(next_element))
 			    == 'D' ? 'D' : 'F');
 		    if (state != test) {
 #ifndef LONG_LIST
@@ -1890,7 +1922,7 @@ PRIVATE int print_local_dir ARGS5(
 			    }
 #endif /* !LONG_LIST */
 			state =
-			   (char) (*(char *)(HTBTree_object(next_element))
+			   (char) (DIRED_BLOK(HTBTree_object(next_element))
 			    == 'D' ? 'D' : 'F');
 			START(HTML_H2);
 			if (dir_list_style != MIXED_STYLE) {
@@ -1908,8 +1940,7 @@ PRIVATE int print_local_dir ARGS5(
 #endif /* !LONG_LIST */
 		    }
 #else
-		    if (state != *(char *)(HTBTree_object(
-					     next_element))) {
+		    if (state != DIRED_BLOK(HTBTree_object(next_element))) {
 #ifndef LONG_LIST
 			if (state == 'D') {
 			    END(HTML_DIR);
@@ -1917,7 +1948,7 @@ PRIVATE int print_local_dir ARGS5(
 			}
 #endif /* !LONG_LIST */
 			state =
-			  (char) (*(char *)(HTBTree_object(next_element))
+			  (char) (DIRED_BLOK(HTBTree_object(next_element))
 			   == 'D' ? 'D' : 'F');
 			START(HTML_H2);
 			START(HTML_EM);
@@ -1937,19 +1968,13 @@ PRIVATE int print_local_dir ARGS5(
 		    START(HTML_LI);
 #endif /* !LONG_LIST */
 		}
-		file_extra = NULL;
 
 #ifdef LONG_LIST
-		LYListFmtParse(list_format, tmpfilename, target,
-		    entry, tail);
+		LYListFmtParse(list_format, entry, tmpfilename, target, tail);
 #else
-		HTDirEntry(target, tail, entry);
-		PUTS(entry);
+		HTDirEntry(target, tail, entry->file_name);
+		PUTS(entry->file_name);
 		END(HTML_A);
-		if (file_extra) {
-		    PUTS(file_extra);
-		    FREE(file_extra);
-		}
 		MAYBE_END(HTML_LI);
 		PUTC('\n');
 #endif /* LONG_LIST */
