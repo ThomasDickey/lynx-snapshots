@@ -785,7 +785,7 @@ PRIVATE char * LYLeakSAVsprintf ARGS6(
 
 /* Note: the following may need updating if HTSprintf in HTString.c
  * is changed. - kw */
-#if ANSI_VARARGS
+#ifdef ANSI_VARARGS
 PRIVATE char * LYLeakHTSprintf (char **pstr, CONST char *fmt, ...)
 #else
 PRIVATE char * LYLeakHTSprintf (va_alist)
@@ -797,7 +797,7 @@ PRIVATE char * LYLeakHTSprintf (va_alist)
     va_list ap;
     LYva_start(ap,fmt);
     {
-#if !ANSI_VARARGS
+#ifndef ANSI_VARARGS
 	char **		pstr = va_arg(ap, char **);
 	CONST char *	fmt  = va_arg(ap, CONST char *);
 #endif
@@ -812,7 +812,7 @@ PRIVATE char * LYLeakHTSprintf (va_alist)
 
 /* Note: the following may need updating if HTSprintf0 in HTString.c
  * is changed. - kw */
-#if ANSI_VARARGS
+#ifdef ANSI_VARARGS
 PRIVATE char * LYLeakHTSprintf0 (char **pstr, CONST char *fmt, ...)
 #else
 PRIVATE char * LYLeakHTSprintf0 (va_alist)
@@ -823,7 +823,7 @@ PRIVATE char * LYLeakHTSprintf0 (va_alist)
     va_list ap;
     LYva_start(ap,fmt);
     {
-#if !ANSI_VARARGS
+#ifndef ANSI_VARARGS
 	char **		pstr = va_arg(ap, char **);
 	CONST char *	fmt  = va_arg(ap, CONST char *);
 #endif

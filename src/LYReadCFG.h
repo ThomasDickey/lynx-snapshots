@@ -41,7 +41,7 @@ extern int default_fg;
 extern int default_bg;
 extern BOOL default_color_reset;
 
-#if HAVE_USE_DEFAULT_COLORS && USE_DEFAULT_COLORS
+#if defined(HAVE_USE_DEFAULT_COLORS) && defined(USE_DEFAULT_COLORS)
 extern int lynx_default_colors NOPARAMS;
 #endif
 

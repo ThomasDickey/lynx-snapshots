@@ -411,7 +411,7 @@ are generally not the response status from any specific protocol.
 #define HT_BAD_EOF      -12             /* Premature EOF */
 
 #ifndef va_arg
-# if HAVE_STDARG_H && ANSI_VARARGS
+# if defined(HAVE_STDARG_H) && defined(ANSI_VARARGS)
 #  include <stdarg.h>
 # else
 #  if HAVE_VARARGS_H
@@ -420,7 +420,7 @@ are generally not the response status from any specific protocol.
 # endif
 #endif
 
-#if ANSI_VARARGS
+#if defined(ANSI_VARARGS)
 #define LYva_start(ap,format) va_start(ap,format)
 #else
 #define LYva_start(ap,format) va_start(ap)
@@ -430,10 +430,12 @@ are generally not the response status from any specific protocol.
  * GCC can be told that some functions are like printf (and do type-checking on
  * their parameters).
  */
-#if	GCC_PRINTF
+#ifndef GCC_PRINTFLIKE
+#if defined(GCC_PRINTF) && !defined(printf)
 #define GCC_PRINTFLIKE(fmt,var) __attribute__((format(printf,fmt,var)))
 #else
 #define GCC_PRINTFLIKE(fmt,var) /*nothing*/
+#endif
 #endif
 
 #include <HTString.h>   /* String utilities */

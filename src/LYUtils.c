@@ -56,7 +56,7 @@ extern int exec_command(char * cmd, int wait_flag); /* xsystem.c */
 #include <lib$routines.h>
 #endif /* VMS */
 
-#if HAVE_UTMP
+#ifdef HAVE_UTMP
 #include <pwd.h>
 #ifdef UTMPX_FOR_UTMP
 #include <utmpx.h>
@@ -192,9 +192,46 @@ PRIVATE char *getenv_text ARGS1(char *, name)
 }
 
 /*
+ * Check for UTF-8 data, returning the length past the first character.
+ * Return zero if we found an ordinary character rather than UTF-8.
+ */
+PUBLIC size_t utf8_length ARGS2(
+	BOOL,		utf_flag,
+	CONST char *,	data)
+{
+    size_t utf_extra = 0;
+
+    if (utf_flag && is8bits(*data)) {
+	if ((*data & 0xe0) == 0xc0) {
+	    utf_extra = 1;
+	} else if ((*data & 0xf0) == 0xe0) {
+	    utf_extra = 2;
+	} else if ((*data & 0xf8) == 0xf0) {
+	    utf_extra = 3;
+	} else if ((*data & 0xfc) == 0xf8) {
+	    utf_extra = 4;
+	} else if ((*data & 0xfe) == 0xfc) {
+	    utf_extra = 5;
+	} else {
+	    /*
+	     *  Garbage.
+	     */
+	    utf_extra = 0;
+	}
+	if (strlen(data+1) < utf_extra) {
+	    /*
+	     *  Shouldn't happen.
+	     */
+	    utf_extra = 0;
+	}
+    }
+    return utf_extra;
+}
+
+/*
  *  Highlight (or unhighlight) a given link.
  */
-PUBLIC void highlight ARGS3(
+PUBLIC void LYhighlight ARGS3(
 	int,		flag,
 	int,		cur,
 	char *,		target)
@@ -214,7 +251,7 @@ PUBLIC void highlight ARGS3(
     BOOL utf_flag = (BOOL)(LYCharSet_UC[current_char_set].enc == UCT_ENC_UTF8);
     BOOL hl1_drawn = NO;
 #if defined(USE_COLOR_STYLE) && !defined(NO_HILIT_FIX)
-    BOOL hl2_drawn=FALSE;	/* whether links[cur].hightext2 is already drawn
+    BOOL hl2_drawn = FALSE;	/* whether links[cur].hightext2 is already drawn
 				   properly */
 #endif
     tmp[0] = tmp[1] = tmp[2] = '\0';
@@ -375,7 +412,7 @@ PUBLIC void highlight ARGS3(
 		    /*
 		     *	For CJK strings, by Masanobu Kimura.
 		     */
-		    if (HTCJK != NOCJK && !isascii(tmp[0])) {
+		    if (HTCJK != NOCJK && is8bits(tmp[0])) {
 			tmp[1] = links[cur].hightext2[++i];
 			LYaddstr(tmp);
 			tmp[1] = '\0';
@@ -486,30 +523,7 @@ PUBLIC void highlight ARGS3(
 		 */
 		LYmove(hLine, offset);
 		tmp[0] = data[itmp];
-		if (utf_flag && !isascii(tmp[0])) {
-		    if ((*tmp & 0xe0) == 0xc0) {
-			utf_extra = 1;
-		    } else if ((*tmp & 0xf0) == 0xe0) {
-			utf_extra = 2;
-		    } else if ((*tmp & 0xf8) == 0xf0) {
-			utf_extra = 3;
-		    } else if ((*tmp & 0xfc) == 0xf8) {
-			utf_extra = 4;
-		    } else if ((*tmp & 0xfe) == 0xfc) {
-			utf_extra = 5;
-		    } else {
-			/*
-			 *  Garbage.
-			 */
-			utf_extra = 0;
-		    }
-		    if (strlen(&data[itmp+1]) < utf_extra) {
-			/*
-			 *  Shouldn't happen.
-			 */
-			utf_extra = 0;
-		    }
-		}
+		utf_extra = utf8_length(utf_flag, data + itmp);
 		if (utf_extra) {
 		    LYstrncpy(&tmp[1], &data[itmp+1], utf_extra);
 		    itmp += utf_extra;
@@ -527,7 +541,7 @@ PUBLIC void highlight ARGS3(
 		    tmp[1] = '\0';
 		    written += (utf_extra + 1);
 		    utf_extra = 0;
-		} else if (HTCJK != NOCJK && !isascii(tmp[0])) {
+		} else if (HTCJK != NOCJK && is8bits(tmp[0])) {
 		    /*
 		     *	For CJK strings, by Masanobu Kimura.
 		     */
@@ -583,30 +597,7 @@ PUBLIC void highlight ARGS3(
 		     *	character of hightext and we are making
 		     *	the link current. - FM
 		     */
-		    if (utf_flag && !isascii(tmp[0])) {
-			if ((*tmp & 0xe0) == 0xc0) {
-			    utf_extra = 1;
-			} else if ((*tmp & 0xf0) == 0xe0) {
-			    utf_extra = 2;
-			} else if ((*tmp & 0xf8) == 0xf0) {
-			    utf_extra = 3;
-			} else if ((*tmp & 0xfc) == 0xf8) {
-			    utf_extra = 4;
-			} else if ((*tmp & 0xfe) == 0xfc) {
-			    utf_extra = 5;
-			} else {
-			    /*
-			     *	Garbage.
-			     */
-			    utf_extra = 0;
-			}
-			if (strlen(&data[itmp+1]) < utf_extra) {
-			    /*
-			     *	Shouldn't happen.
-			     */
-			    utf_extra = 0;
-			}
-		    }
+		    utf_extra = utf8_length(utf_flag, data + itmp);
 		    if (utf_extra) {
 			LYstrncpy(&tmp[1], &data[itmp+1], utf_extra);
 			itmp += utf_extra;
@@ -626,7 +617,7 @@ PUBLIC void highlight ARGS3(
 			tmp[1] = '\0';
 			written += (utf_extra + 1);
 			utf_extra = 0;
-		    } else if (HTCJK != NOCJK && !isascii(tmp[0])) {
+		    } else if (HTCJK != NOCJK && is8bits(tmp[0])) {
 			/*
 			 *  For CJK strings, by Masanobu Kimura.
 			 */
@@ -756,30 +747,7 @@ highlight_hit_within_hightext:
 	     */
 	    LYmove(hLine, offset);
 	    tmp[0] = data[itmp];
-	    if (utf_flag && !isascii(tmp[0])) {
-		if ((*tmp & 0xe0) == 0xc0) {
-		    utf_extra = 1;
-		} else if ((*tmp & 0xf0) == 0xe0) {
-		    utf_extra = 2;
-		} else if ((*tmp & 0xf8) == 0xf0) {
-		    utf_extra = 3;
-		} else if ((*tmp & 0xfc) == 0xf8) {
-		    utf_extra = 4;
-		} else if ((*tmp & 0xfe) == 0xfc) {
-		    utf_extra = 5;
-		} else {
-		    /*
-		     *	Garbage.
-		     */
-		    utf_extra = 0;
-		}
-		if (strlen(&data[itmp+1]) < utf_extra) {
-		    /*
-		     *	Shouldn't happen.
-		     */
-		    utf_extra = 0;
-		}
-	    }
+	    utf_extra = utf8_length(utf_flag, data + itmp);
 	    if (utf_extra) {
 		LYstrncpy(&tmp[1], &data[itmp+1], utf_extra);
 		itmp += utf_extra;
@@ -800,7 +768,7 @@ highlight_hit_within_hightext:
 		tmp[1] = '\0';
 		written += (utf_extra + 1);
 		utf_extra = 0;
-	    } else if (HTCJK != NOCJK && !isascii(tmp[0])) {
+	    } else if (HTCJK != NOCJK && is8bits(tmp[0])) {
 		/*
 		 *  For CJK strings, by Masanobu Kimura.
 		 */
@@ -859,30 +827,7 @@ highlight_hit_within_hightext:
 		 *  character of hightext and we are making
 		 *  the link current. - FM
 		 */
-		if (utf_flag && !isascii(tmp[0])) {
-		    if ((*tmp & 0xe0) == 0xc0) {
-			utf_extra = 1;
-		    } else if ((*tmp & 0xf0) == 0xe0) {
-			utf_extra = 2;
-		    } else if ((*tmp & 0xf8) == 0xf0) {
-			utf_extra = 3;
-		    } else if ((*tmp & 0xfc) == 0xf8) {
-			utf_extra = 4;
-		    } else if ((*tmp & 0xfe) == 0xfc) {
-			utf_extra = 5;
-		    } else {
-			/*
-			 *  Garbage.
-			 */
-			utf_extra = 0;
-		    }
-		    if (strlen(&data[itmp+1]) < utf_extra) {
-			/*
-			 *  Shouldn't happen.
-			 */
-			utf_extra = 0;
-		    }
-		}
+		utf_extra = utf8_length(utf_flag, data + itmp);
 		if (utf_extra) {
 		    LYstrncpy(&tmp[1], &data[itmp+1], utf_extra);
 		    itmp += utf_extra;
@@ -902,7 +847,7 @@ highlight_hit_within_hightext:
 		    tmp[1] = '\0';
 		    written += (utf_extra + 1);
 		    utf_extra = 0;
-		} else if (HTCJK != NOCJK && !isascii(tmp[0])) {
+		} else if (HTCJK != NOCJK && is8bits(tmp[0])) {
 		    /*
 		     *	For CJK strings, by Masanobu Kimura.
 		     */
@@ -1021,30 +966,7 @@ highlight_hit_within_hightext:
 			 *  character of hightext and we are making
 			 *  the link current. - FM
 			 */
-			if (utf_flag && !isascii(tmp[0])) {
-			    if ((*tmp & 0xe0) == 0xc0) {
-				utf_extra = 1;
-			    } else if ((*tmp & 0xf0) == 0xe0) {
-				utf_extra = 2;
-			    } else if ((*tmp & 0xf8) == 0xf0) {
-				utf_extra = 3;
-			    } else if ((*tmp & 0xfc) == 0xf8) {
-				utf_extra = 4;
-			    } else if ((*tmp & 0xfe) == 0xfc) {
-				utf_extra = 5;
-			    } else {
-				/*
-				 *  Garbage.
-				 */
-				utf_extra = 0;
-			    }
-			    if (strlen(&data[itmp+1]) < utf_extra) {
-				/*
-				 *  Shouldn't happen.
-				 */
-				utf_extra = 0;
-			    }
-			}
+			utf_extra = utf8_length(utf_flag, data);
 			if (utf_extra) {
 			    LYstrncpy(&tmp[1], &data[itmp+1], utf_extra);
 			    itmp += utf_extra;
@@ -1064,7 +986,7 @@ highlight_hit_within_hightext:
 			    tmp[1] = '\0';
 			    written += (utf_extra + 1);
 			    utf_extra = 0;
-			} else if (HTCJK != NOCJK && !isascii(tmp[0])) {
+			} else if (HTCJK != NOCJK && is8bits(tmp[0])) {
 			    /*
 			     *	For CJK strings, by Masanobu Kimura.
 			     */
@@ -1198,30 +1120,7 @@ highlight_search_hightext2:
 		 */
 		LYmove(hLine, offset);
 		tmp[0] = data[itmp];
-		if (utf_flag && !isascii(tmp[0])) {
-		    if ((*tmp & 0xe0) == 0xc0) {
-			utf_extra = 1;
-		    } else if ((*tmp & 0xf0) == 0xe0) {
-			utf_extra = 2;
-		    } else if ((*tmp & 0xf8) == 0xf0) {
-			utf_extra = 3;
-		    } else if ((*tmp & 0xfc) == 0xf8) {
-			utf_extra = 4;
-		    } else if ((*tmp & 0xfe) == 0xfc) {
-			utf_extra = 5;
-		    } else {
-			/*
-			 *  Garbage.
-			 */
-			utf_extra = 0;
-		    }
-		    if (strlen(&data[itmp+1]) < utf_extra) {
-			/*
-			 *  Shouldn't happen.
-			 */
-			utf_extra = 0;
-		    }
-		}
+		utf_extra = utf8_length(utf_flag, data + itmp);
 		if (utf_extra) {
 		    LYstrncpy(&tmp[1], &data[itmp+1], utf_extra);
 		    itmp += utf_extra;
@@ -1239,7 +1138,7 @@ highlight_search_hightext2:
 		    tmp[1] = '\0';
 		    written += (utf_extra + 1);
 		    utf_extra = 0;
-		} else if (HTCJK != NOCJK && !isascii(tmp[0])) {
+		} else if (HTCJK != NOCJK && is8bits(tmp[0])) {
 		    /*
 		     *	For CJK strings, by Masanobu Kimura.
 		     */
@@ -1295,30 +1194,7 @@ highlight_search_hightext2:
 		     *	character of hightext2 and we are making
 		     *	the link current. - FM
 		     */
-		    if (utf_flag && !isascii(tmp[0])) {
-			if ((*tmp & 0xe0) == 0xc0) {
-			    utf_extra = 1;
-			} else if ((*tmp & 0xf0) == 0xe0) {
-			    utf_extra = 2;
-			} else if ((*tmp & 0xf8) == 0xf0) {
-			    utf_extra = 3;
-			} else if ((*tmp & 0xfc) == 0xf8) {
-			    utf_extra = 4;
-			} else if ((*tmp & 0xfe) == 0xfc) {
-			    utf_extra = 5;
-			} else {
-			    /*
-			     *	Garbage.
-			     */
-			    utf_extra = 0;
-			}
-			if (strlen(&data[itmp+1]) < utf_extra) {
-			    /*
-			     *	Shouldn't happen.
-			     */
-			    utf_extra = 0;
-			}
-		    }
+		    utf_extra = utf8_length(utf_flag, data + itmp);
 		    if (utf_extra) {
 			LYstrncpy(&tmp[1], &data[itmp+1], utf_extra);
 			itmp += utf_extra;
@@ -1338,7 +1214,7 @@ highlight_search_hightext2:
 			tmp[1] = '\0';
 			written += (utf_extra + 1);
 			utf_extra = 0;
-		    } else if (HTCJK != NOCJK && !isascii(tmp[0])) {
+		    } else if (HTCJK != NOCJK && is8bits(tmp[0])) {
 			/*
 			 *  For CJK strings, by Masanobu Kimura.
 			 */
@@ -1467,30 +1343,7 @@ highlight_hit_within_hightext2:
 	     */
 	    LYmove(hLine, offset);
 	    tmp[0] = data[itmp];
-	    if (utf_flag && !isascii(tmp[0])) {
-		if ((*tmp & 0xe0) == 0xc0) {
-		    utf_extra = 1;
-		} else if ((*tmp & 0xf0) == 0xe0) {
-		    utf_extra = 2;
-		} else if ((*tmp & 0xf8) == 0xf0) {
-		    utf_extra = 3;
-		} else if ((*tmp & 0xfc) == 0xf8) {
-		    utf_extra = 4;
-		} else if ((*tmp & 0xfe) == 0xfc) {
-		    utf_extra = 5;
-		} else {
-		    /*
-		     *	Garbage.
-		     */
-		    utf_extra = 0;
-		}
-		if (strlen(&data[itmp+1]) < utf_extra) {
-		    /*
-		     *	Shouldn't happen.
-		     */
-		    utf_extra = 0;
-		}
-	    }
+	    utf_extra = utf8_length(utf_flag, data + itmp);
 	    if (utf_extra) {
 		LYstrncpy(&tmp[1], &data[itmp+1], utf_extra);
 		itmp += utf_extra;
@@ -1511,7 +1364,7 @@ highlight_hit_within_hightext2:
 		tmp[1] = '\0';
 		written += (utf_extra + 1);
 		utf_extra = 0;
-	    } else if (HTCJK != NOCJK && !isascii(tmp[0])) {
+	    } else if (HTCJK != NOCJK && is8bits(tmp[0])) {
 		/*
 		 *  For CJK strings, by Masanobu Kimura.
 		 */
@@ -1570,30 +1423,7 @@ highlight_hit_within_hightext2:
 		 *  character of hightext2 and we are making
 		 *  the link current. - FM
 		 */
-		if (utf_flag && !isascii(tmp[0])) {
-		    if ((*tmp & 0xe0) == 0xc0) {
-			utf_extra = 1;
-		    } else if ((*tmp & 0xf0) == 0xe0) {
-			utf_extra = 2;
-		    } else if ((*tmp & 0xf8) == 0xf0) {
-			utf_extra = 3;
-		    } else if ((*tmp & 0xfc) == 0xf8) {
-			utf_extra = 4;
-		    } else if ((*tmp & 0xfe) == 0xfc) {
-			utf_extra = 5;
-		    } else {
-			/*
-			 *  Garbage.
-			 */
-			utf_extra = 0;
-		    }
-		    if (strlen(&data[itmp+1]) < utf_extra) {
-			/*
-			 *  Shouldn't happen.
-			 */
-			utf_extra = 0;
-		    }
-		}
+		utf_extra = utf8_length(utf_flag, data + itmp);
 		if (utf_extra) {
 		    LYstrncpy(&tmp[1], &data[itmp+1], utf_extra);
 		    itmp += utf_extra;
@@ -1613,7 +1443,7 @@ highlight_hit_within_hightext2:
 		    tmp[1] = '\0';
 		    written += (utf_extra + 1);
 		    utf_extra = 0;
-		} else if (HTCJK != NOCJK && !isascii(tmp[0])) {
+		} else if (HTCJK != NOCJK && is8bits(tmp[0])) {
 		    /*
 		     *	For CJK strings, by Masanobu Kimura.
 		     */
@@ -1732,30 +1562,7 @@ highlight_hit_within_hightext2:
 			 *  character of hightext2 and we are making
 			 *  the link current. - FM
 			 */
-			if (utf_flag && !isascii(tmp[0])) {
-			    if ((*tmp & 0xe0) == 0xc0) {
-				utf_extra = 1;
-			    } else if ((*tmp & 0xf0) == 0xe0) {
-				utf_extra = 2;
-			    } else if ((*tmp & 0xf8) == 0xf0) {
-				utf_extra = 3;
-			    } else if ((*tmp & 0xfc) == 0xf8) {
-				utf_extra = 4;
-			    } else if ((*tmp & 0xfe) == 0xfc) {
-				utf_extra = 5;
-			    } else {
-				/*
-				 *  Garbage.
-				 */
-				utf_extra = 0;
-			    }
-			    if (strlen(&data[itmp+1]) < utf_extra) {
-				/*
-				 *  Shouldn't happen.
-				 */
-				utf_extra = 0;
-			    }
-			}
+			utf_extra = utf8_length(utf_flag, data + itmp);
 			if (utf_extra) {
 			    LYstrncpy(&tmp[1], &data[itmp+1], utf_extra);
 			    itmp += utf_extra;
@@ -1775,7 +1582,7 @@ highlight_hit_within_hightext2:
 			    tmp[1] = '\0';
 			    written += (utf_extra + 1);
 			    utf_extra = 0;
-			} else if (HTCJK != NOCJK && !isascii(tmp[0])) {
+			} else if (HTCJK != NOCJK && is8bits(tmp[0])) {
 			    /*
 			     *	For CJK strings, by Masanobu Kimura.
 			     */
@@ -3268,7 +3075,7 @@ PUBLIC void remove_backslashes ARGS1(
  */
 PUBLIC BOOLEAN inlocaldomain NOARGS
 {
-#if HAVE_UTMP
+#ifdef HAVE_UTMP
     int n;
     FILE *fp;
     struct utmp me;
@@ -3307,7 +3114,7 @@ PUBLIC BOOLEAN inlocaldomain NOARGS
 #endif /* HAVE_UTMP */
 }
 
-#if HAVE_SIGACTION
+#ifdef HAVE_SIGACTION
 /*
  *  An extended alternative for calling signal(), sets some flags for
  *  signal handler as we want them if that functionality is available.
@@ -3338,7 +3145,7 @@ PUBLIC void LYExtSignal ARGS2(
 #endif /* HAVE_SIGACTION */
 
 #if defined(SIGTSTP) && !defined(USE_SLANG)
-#if HAVE_SIGACTION
+#ifdef HAVE_SIGACTION
 /*
  *  For switching a signal's handling between SIG_DFL and something
  *  (possibly) different that may have been set up by lynx code or
@@ -3436,7 +3243,7 @@ PUBLIC void size_change ARGS1(
 	 */
 	return;
 #else /* Curses: */
-#if HAVE_SIZECHANGE
+#ifdef HAVE_SIZECHANGE
 #ifdef TIOCGSIZE
     struct ttysize win;
 #else
@@ -5600,7 +5407,7 @@ PUBLIC CONST char * Home_Dir NOARGS
 	    }
 	    StrAllocCopy(HomeDir, cp);
 #else
-#if HAVE_UTMP
+#ifdef HAVE_UTMP
 	    /*
 	     *	One could use getlogin() and getpwnam() here instead.
 	     */
@@ -6523,6 +6330,10 @@ PUBLIC BOOLEAN LYCachedTemp ARGS2(
     return FALSE;
 }
 
+#ifndef HAVE_MKDTEMP
+#define mkdtemp(path) ((mktemp(path) != 0) && (mkdir(path, 0700) == 0))
+#endif
+
 /*
  * Open a temp-file, ensuring that it is unique, and not readable by other
  * users.
@@ -6579,8 +6390,7 @@ PUBLIC FILE *LYOpenTemp ARGS3(
 	if (make_it) {
 	    int old_mask = umask(HIDE_UMASK);
 	    StrAllocCat(lynx_temp_space, "XXXXXX");
-	    if (mktemp(lynx_temp_space) == 0
-	     || mkdir(lynx_temp_space, 0700) < 0) {
+	    if (mkdtemp(lynx_temp_space) == 0) {
 		printf("%s: %s\n", lynx_temp_space, LYStrerror(errno));
 		exit(EXIT_FAILURE);
 	    }
@@ -7548,7 +7358,7 @@ PUBLIC int LYSystem ARGS1(
 {
     int code;
     int do_free = 0;
-#if HAVE_SIGACTION && defined(SIGTSTP) && !defined(USE_SLANG)
+#if defined(HAVE_SIGACTION) && defined(SIGTSTP) && !defined(USE_SLANG)
     struct sigaction saved_sigtstp_act;
     BOOLEAN sigtstp_saved = FALSE;
 #endif
@@ -7651,13 +7461,13 @@ PUBLIC int LYSystem ARGS1(
 #else
     if (restore_sigpipe_for_children)
 	signal(SIGPIPE, SIG_DFL); /* Some commands expect the default */
-#if HAVE_SIGACTION && defined(SIGTSTP) && !defined(USE_SLANG)
+#if defined(HAVE_SIGACTION) && defined(SIGTSTP) && !defined(USE_SLANG)
     if (!dump_output_immediately && !LYCursesON && !no_suspend)
 	sigtstp_saved = LYToggleSigDfl(SIGTSTP, &saved_sigtstp_act, 1);
 #endif
     code = system(command);
     saved_errno = errno;
-#if HAVE_SIGACTION && defined(SIGTSTP) && !defined(USE_SLANG)
+#if defined(HAVE_SIGACTION) && defined(SIGTSTP) && !defined(USE_SLANG)
     if (sigtstp_saved)
 	LYToggleSigDfl(SIGTSTP, &saved_sigtstp_act, 0);
 #endif

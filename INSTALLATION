@@ -478,18 +478,21 @@ II. Compile instructions -- UNIX
 	or native gettext is used.
 
   --with-screen=XXX
-	Use this option to select the screen type.  The option value,
-	XXX must be one of curses (the default), ncurses, pdcurses or slang.
-	Specifying a screen type causes the configure script to look in
-	standard locations for the associated header and library files,
-	unless you have preset the $CFLAGS and $LIBS variables.
+	Use this option to select the screen type.  The option value, XXX
+	must be one of curses (the default), ncurses, ncursesw, pdcurses or
+	slang.  Specifying a screen type causes the configure script to
+	look in standard locations for the associated header and library
+	files, unless you have preset the $CFLAGS and $LIBS variables.
 
+	--with-screen=ncursesw		(define NCURSES, WIDEC_CURSES)
 	--with-screen=ncurses		(define NCURSES)
+	--with-screen=pdcurses		(define PDCURSES)
 	--with-screen=slang		(define USE_SLANG)
 
 	Note that some systems may have a default curses library which
 	does not support color, while on others, ncurses is installed as
-	the curses library.
+	the curses library.  The variant ncursesw is the wide-character
+	version of ncurses.
 
   --with-socks[=XXX]			(define SOCKS)
 	Use this option to configure with the socks library.

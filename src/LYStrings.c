@@ -668,7 +668,7 @@ PUBLIC int LYmbcsstrlen ARGS3(
 		j++;
 	    }
 	} else if (!utf_flag && HTCJK != NOCJK && !count_gcells &&
-		   !isascii(str[i]) && str[(i + 1)] != '\0' &&
+		   is8bits(str[i]) && str[(i + 1)] != '\0' &&
 		    !IsSpecialAttrChar(str[(i + 1)])) {
 	    i++;
 	}
@@ -1613,7 +1613,7 @@ re_read:
 #else
     if (c == EOF && errno == EINTR) {
 
-#if HAVE_SIZECHANGE || defined(USE_SLANG)
+#if defined(HAVE_SIZECHANGE) || defined(USE_SLANG)
 	   CTRACE((tfp, "Got EOF with EINTR, recent_sizechange so far is %d\n",
 		  recent_sizechange));
 	   if (!recent_sizechange) { /* not yet detected by ourselves */
@@ -1971,7 +1971,7 @@ re_read:
 #endif /* KEY_BTAB */
 #ifdef KEY_RESIZE
 	case KEY_RESIZE:	   /* size change detected by ncurses */
-#if HAVE_SIZECHANGE || defined(USE_SLANG)
+#if defined(HAVE_SIZECHANGE) || defined(USE_SLANG)
 	    /* Make call to detect new size, if that may be implemented.
 	     * The call may set recent_sizechange (except for USE_SLANG),
 	     * which will tell mainloop() to refresh. - kw
@@ -2400,7 +2400,8 @@ PUBLIC void LYLowerCase ARGS1(
     for (i = 0; buffer[i]; i++)
 #ifdef SUPPORT_MULTIBYTE_EDIT	/* 1998/11/23 (Mon) 17:04:55 */
     {
-	if (buffer[i] & 0x80) {
+	if (buffer[i] & 0x80
+	 && buffer[i+1] != 0) {
 	    if ((kanji_code == SJIS) && IS_SJIS_X0201KANA(UCH((buffer[i])))) {
 		continue;
 	    }
@@ -2425,7 +2426,8 @@ PUBLIC void LYUpperCase ARGS1(
     for (i = 0; buffer[i]; i++)
 #ifdef SUPPORT_MULTIBYTE_EDIT	/* 1998/11/23 (Mon) 17:05:10 */
     {
-	if (buffer[i] & 0x80) {
+	if (buffer[i] & 0x80
+	 && buffer[i+1] != 0) {
 	    if ((kanji_code == SJIS) && IS_SJIS_X0201KANA(UCH((buffer[i])))) {
 		continue;
 	    }
@@ -2437,6 +2439,21 @@ PUBLIC void LYUpperCase ARGS1(
 #else
 	buffer[i] = UCH(TOUPPER(buffer[i]));
 #endif
+}
+
+/*
+ * Remove newlines from a string.
+ */
+PUBLIC void LYRemoveNewlines ARGS1(
+	char *,		buffer)
+{
+    if (buffer != 0) {
+	size_t i, j;
+	for (i = j = 0; buffer[i]; i++)
+	    if (buffer[i] != '\n' && buffer[i] != '\r')
+		buffer[j++] = buffer[i];
+	buffer[j] = 0;
+    }
 }
 
 /*
@@ -2668,8 +2685,8 @@ PRIVATE int prev_pos ARGS2(
 	while (i < pos - 1) {
 	    int c;
 	    c = Buf[i];
-	    if (!(isascii(c) ||
-		  ((kanji_code == SJIS) && IS_SJIS_X0201KANA(UCH(c))))) {
+	    if (is8bits(c) &&
+		  !((kanji_code == SJIS) && IS_SJIS_X0201KANA(UCH(c)))) {
 		i++;
 	    }
 	    i++;
@@ -2902,19 +2919,19 @@ PUBLIC int LYEdit1 ARGS4(
 
 	    pos0 = prev_pos(edit, Pos);
 	    while (Pos &&
-		   (HTCJK == NOCJK || isascii(Buf[pos0])) &&
+		   (HTCJK == NOCJK || !is8bits(Buf[pos0])) &&
 		   !isalnum(UCH(Buf[pos0]))) {
 		Pos = pos0;
 		pos0 = prev_pos(edit, Pos);
 	    }
-	    if (HTCJK != NOCJK && !isascii(Buf[pos0])) {
-		while (Pos && !isascii(Buf[pos0])) {
+	    if (HTCJK != NOCJK && is8bits(Buf[pos0])) {
+		while (Pos && is8bits(Buf[pos0])) {
 		    Pos = pos0;
 		    pos0 = prev_pos(edit, Pos);
 		}
 	    } else {
 		while (Pos
-		 && isascii(UCH(Buf[pos0]))
+		 && !is8bits(Buf[pos0])
 		 && isalnum(UCH(Buf[pos0]))) {
 		    Pos = pos0;
 		    pos0 = prev_pos(edit, Pos);
@@ -2934,14 +2951,14 @@ PUBLIC int LYEdit1 ARGS4(
 	while (!isalnum(Buf[Pos]) && Buf[Pos])
 	    Pos++ ;
 #else /* SUPPORT_MULTIBYTE_EDIT */
-	if (HTCJK != NOCJK && !isascii(Buf[Pos])) {
-	    while (!isascii(Buf[Pos]))
+	if (HTCJK != NOCJK && is8bits(Buf[Pos])) {
+	    while (is8bits(Buf[Pos]))
 		Pos += 2;
 	} else {
-	    while (isascii(UCH(Buf[Pos])) && isalnum(UCH(Buf[Pos])))
+	    while (!is8bits(Buf[Pos]) && isalnum(Buf[Pos]))
 		Pos++;	/* '\0' is not a/n */
 	}
-	while ((HTCJK == NOCJK || isascii(UCH(Buf[Pos]))) &&
+	while ((HTCJK == NOCJK || !is8bits(Buf[Pos])) &&
 	       !isalnum(UCH(Buf[Pos])) && Buf[Pos])
 	    Pos++;
 #endif /* SUPPORT_MULTIBYTE_EDIT */
@@ -3028,7 +3045,7 @@ PUBLIC int LYEdit1 ARGS4(
 	if (Pos >= length)
 	    break;
 #ifdef SUPPORT_MULTIBYTE_EDIT
-	if (HTCJK != NOCJK && !isascii(Buf[Pos]))
+	if (HTCJK != NOCJK && is8bits(Buf[Pos]))
 	    Pos++;
 #endif
 	Pos++;
@@ -3088,7 +3105,7 @@ PUBLIC int LYEdit1 ARGS4(
 #else /* SUPPORT_MULTIBYTE_EDIT */
 	if (Pos < length) {
 	    Pos++;
-	    if (HTCJK != NOCJK && !isascii(Buf[Pos-1]))
+	    if (HTCJK != NOCJK && is8bits(Buf[Pos-1]))
 		Pos++;
 	}
 #endif /* SUPPORT_MULTIBYTE_EDIT */
@@ -3345,7 +3362,7 @@ PUBLIC void LYRefreshEdit ARGS1(
 		int tmp = (Pos - DspWdth) + Margin;
 
 		while (DspStart < tmp) {
-		    if (!isascii(Buf[DspStart]))
+		    if (is8bits(Buf[DspStart]))
 			DspStart++;
 		    DspStart++;
 		}
@@ -3367,7 +3384,7 @@ PUBLIC void LYRefreshEdit ARGS1(
 
 	    DspStart = 0;
 	    while (DspStart < tmp) {
-		if (!isascii(Buf[DspStart]))
+		if (is8bits(Buf[DspStart]))
 		    DspStart++;
 		DspStart++;
 	    }
@@ -3381,7 +3398,7 @@ PUBLIC void LYRefreshEdit ARGS1(
 
     str = &Buf[DspStart];
 #ifdef SUPPORT_MULTIBYTE_EDIT
-    if (HTCJK != NOCJK && !isascii(str[0]))
+    if (HTCJK != NOCJK && is8bits(str[0]))
 	begin_multi = 1;
 #endif /* SUPPORT_MULTIBYTE_EDIT */
 
@@ -3439,16 +3456,22 @@ PUBLIC void LYRefreshEdit ARGS1(
 #endif /* SUPPORT_MULTIBYTE_EDIT */
 	    } else {
 		/* For CJK strings, by Masanobu Kimura */
-		if (HTCJK != NOCJK && !isascii(buffer[0])) {
-#ifndef SUPPORT_MULTIBYTE_EDIT
+		if (HTCJK != NOCJK && is8bits(buffer[0])) {
 		    if (i < (nrdisplayed - 1))
 			buffer[1] = str[++i];
-#else /* SUPPORT_MULTIBYTE_EDIT */
-		    if (i < (nrdisplayed - 1)) {
-			buffer[1] = str[++i];
-			end_multi = 1;
-		    } else
-			end_multi = 0;
+#ifdef SUPPORT_MULTIBYTE_EDIT
+		    end_multi = (i < nrdisplayed);
+#if !(defined(USE_SLANG) || defined(WIDEC_CURSES))
+		    {
+			int ii, yy, xx;
+
+			LYGetYX(yy, xx);
+			for (ii = 0; buffer[ii] != '\0'; ++ii)
+			    LYaddch(' ');
+			LYrefresh();
+			LYmove(yy, xx);
+		    }
+#endif /* USE_SLANG */
 #endif /* SUPPORT_MULTIBYTE_EDIT */
 		    LYaddstr(buffer);
 		    buffer[1] = '\0';
@@ -3511,12 +3534,6 @@ PUBLIC void LYRefreshEdit ARGS1(
     }
 
     LYmove(edit->sy, edit->sx + Pos - DspStart);
-#ifdef SUPPORT_MULTIBYTE_EDIT
-#if (!USE_SLANG && !defined(USE_MULTIBYTE_CURSES))
-    if (HTCJK != NOCJK)
-	lynx_force_repaint();
-#endif /* !USE_SLANG && !defined(USE_MULTIBYTE_CURSES) */
-#endif /* SUPPORT_MULTIBYTE_EDIT */
 
 #ifdef USE_COLOR_STYLE
     if (estyle != NOSTYLE)
@@ -5120,7 +5137,7 @@ PUBLIC char * LYno_attr_mbcs_case_strstr ARGS6(
      *	Seek a first target match. - FM
      */
     for (; *chptr != '\0'; chptr++) {
-	if ((!utf_flag && HTCJK != NOCJK && !isascii(*chptr) &&
+	if ((!utf_flag && HTCJK != NOCJK && is8bits(*chptr) &&
 	     *chptr == *tarptr &&
 	     *(chptr + 1) != '\0' &&
 	     !IsSpecialAttrChar(*(chptr + 1))) ||
@@ -5143,7 +5160,7 @@ PUBLIC char * LYno_attr_mbcs_case_strstr ARGS6(
 		if (nendp)	*nendp = len;
 		return(chptr);
 	    }
-	    if (!utf_flag && HTCJK != NOCJK && !isascii(*chptr) &&
+	    if (!utf_flag && HTCJK != NOCJK && is8bits(*chptr) &&
 		 *chptr == *tarptr &&
 		 *tmpchptr != '\0' &&
 		 !IsSpecialAttrChar(*tmpchptr)) {
@@ -5180,7 +5197,7 @@ PUBLIC char * LYno_attr_mbcs_case_strstr ARGS6(
 	     */
 	    while (1) {
 		if (!IsSpecialAttrChar(*tmpchptr)) {
-		    if (!utf_flag && HTCJK != NOCJK && !isascii(*tmpchptr)) {
+		    if (!utf_flag && HTCJK != NOCJK && is8bits(*tmpchptr)) {
 			if (*tmpchptr == *tmptarptr &&
 			    *(tmpchptr + 1) == *(tmptarptr + 1) &&
 			    !IsSpecialAttrChar(*(tmpchptr + 1))) {
@@ -5214,7 +5231,7 @@ PUBLIC char * LYno_attr_mbcs_case_strstr ARGS6(
 	    }
 	} else if (!(IS_UTF_EXTRA(*chptr) ||
 		      IsSpecialAttrChar(*chptr))) {
-	    if (!utf_flag && HTCJK != NOCJK && !isascii(*chptr) &&
+	    if (!utf_flag && HTCJK != NOCJK && is8bits(*chptr) &&
 		*(chptr + 1) != '\0' &&
 		!IsSpecialAttrChar(*(chptr + 1))) {
 		chptr++;
@@ -5292,7 +5309,7 @@ PUBLIC char * LYno_attr_mbcs_strstr ARGS6(
 		if (nendp)	*nendp = len;
 		return(chptr);
 	    }
-	    if (!utf_flag && HTCJK != NOCJK && !isascii(*chptr) &&
+	    if (!utf_flag && HTCJK != NOCJK && is8bits(*chptr) &&
 		 *tmpchptr != '\0' &&
 		 !IsSpecialAttrChar(*tmpchptr)) {
 		/*
@@ -5328,7 +5345,7 @@ PUBLIC char * LYno_attr_mbcs_strstr ARGS6(
 	     */
 	    while (1) {
 		 if (!IsSpecialAttrChar(*tmpchptr)) {
-		    if (!utf_flag && HTCJK != NOCJK && !isascii(*tmpchptr)) {
+		    if (!utf_flag && HTCJK != NOCJK && is8bits(*tmpchptr)) {
 			if (*tmpchptr == *tmptarptr &&
 			    *(tmpchptr + 1) == *(tmptarptr + 1) &&
 			    !IsSpecialAttrChar(*(tmpchptr + 1))) {
@@ -5361,7 +5378,7 @@ PUBLIC char * LYno_attr_mbcs_strstr ARGS6(
 	    }
 	} else if (!(IS_UTF_EXTRA(*chptr) ||
 		      IsSpecialAttrChar(*chptr))) {
-	    if (!utf_flag && HTCJK != NOCJK && !isascii(*chptr) &&
+	    if (!utf_flag && HTCJK != NOCJK && is8bits(*chptr) &&
 		*(chptr + 1) != '\0' &&
 		!IsSpecialAttrChar(*(chptr + 1))) {
 		chptr++;

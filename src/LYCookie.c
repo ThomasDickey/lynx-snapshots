@@ -359,7 +359,7 @@ PRIVATE void store_cookie ARGS3(
      */
     if (!is_prefix(co->path, path)) {
 	invcheck_behaviour_t invcheck_bv = (de ? de->invcheck_bv
-	    				       : DEFAULT_INVCHECK_BV);
+					       : DEFAULT_INVCHECK_BV);
 	switch (invcheck_bv) {
 	case INVCHECK_LOOSE:
 	    break;		/* continue as if nothing were wrong */
@@ -651,7 +651,7 @@ PRIVATE char * scan_cookie_sublist ARGS6(
 	char *,		path,
 	int,		port,
 	HTList *,	sublist,
-	char *, 	header,
+	char *,		header,
 	BOOL,		secure)
 {
     HTList *hl = sublist, *next = NULL;
@@ -830,8 +830,8 @@ PRIVATE void LYProcessSetCookies ARGS6(
 	CONST char *,	SetCookie,
 	CONST char *,	SetCookie2,
 	CONST char *,	address,
-	char *, 	hostname,
-	char *, 	path,
+	char *,		hostname,
+	char *,		path,
 	int,		port)
 {
     CONST char *p, *attr_start, *attr_end, *value_start, *value_end;
@@ -1932,7 +1932,15 @@ PUBLIC void LYSetCookie ARGS3(
     } else if (!strncasecomp(address, "https:", 6)) {
 	port = 443;
     }
-    path = HTParse(address, "", PARSE_PATH|PARSE_PUNCTUATION);
+    if (((path = HTParse(address, "",
+			 PARSE_PATH|PARSE_PUNCTUATION)) != NULL) &&
+	(ptr = strrchr(path, '/')) != NULL) {
+	if (ptr == path) {
+	    *(ptr+1) = '\0';	/* Leave a single '/' alone */
+	} else {
+	    *ptr = '\0';
+	}
+    }
     if (!(SetCookie && *SetCookie) &&
 	!(SetCookie2 && *SetCookie2)) {
 	/*
@@ -2119,8 +2127,8 @@ PUBLIC void LYLoadCookies ARGS1 (
 
 	expires = atol(expires_a);
 	CTRACE((tfp, "expires:\t%s\n", ctime(&expires)));
-/* 	CTRACE((tfp, "%s\t%s\t%s\t%s\t%ld\t%s\t%s\tREADCOOKIE\n", */
-/* 	    domain, what, path, secure, (long) expires, name, value)); */
+/*	CTRACE((tfp, "%s\t%s\t%s\t%s\t%ld\t%s\t%s\tREADCOOKIE\n", */
+/*	    domain, what, path, secure, (long) expires, name, value)); */
 	moo = newCookie();
 	StrAllocCopy(moo->domain, domain);
 	StrAllocCopy(moo->path, path);
@@ -2168,7 +2176,7 @@ PUBLIC void LYLoadCookies ARGS1 (
 	 *			     otherwise set it.
 	 */
 	moo->flags |= COOKIE_FLAG_FROM_FILE | COOKIE_FLAG_EXPIRES_SET |
-	    		COOKIE_FLAG_PATH_SET;
+			COOKIE_FLAG_PATH_SET;
 	if (domain[0] == '.')
 	    moo->flags |= COOKIE_FLAG_DOMAIN_SET;
 	if (secure[0] != 'F')
@@ -2646,7 +2654,7 @@ Delete_all_cookies_in_domain:
 
 	    if (co->flags & COOKIE_FLAG_FROM_FILE) {
 		HTSprintf0(&buf, "%s\n", gettext("(from a previous session)"));
-	        PUTS(buf);
+		PUTS(buf);
 	    }
 
 	    /*
@@ -2705,7 +2713,7 @@ Delete_all_cookies_in_domain:
 	     *	Show the Maximum Gobble Date. - FM
 	     */
 	    HTSprintf0(&buf, "<dd><em>%s</em> %s%s",
-	    		 gettext("Maximum Gobble Date:"),
+			 gettext("Maximum Gobble Date:"),
 			 ((co->flags & COOKIE_FLAG_EXPIRES_SET)
 					    ?
 			ctime(&co->expires) : END_OF_SESSION),
@@ -2738,8 +2746,8 @@ Delete_all_cookies_in_domain:
 */
 
 PUBLIC void cookie_domain_flag_set ARGS2(
-	char *, 	domainstr,
-	int, 		flag)
+	char *,		domainstr,
+	int,		flag)
 {
     domain_entry *de = NULL;
     domain_entry *de2 = NULL;
@@ -2850,7 +2858,7 @@ PUBLIC void cookie_domain_flag_set ARGS2(
 }
 
 /*
- * If any COOKIE_{ACCEPT,REJECT}_DOMAINS have been defined, process them. 
+ * If any COOKIE_{ACCEPT,REJECT}_DOMAINS have been defined, process them.
  * These are comma delimited lists of domains.  - BJP
  *
  * And for query/strict/loose invalid cookie checking.  - BJP

@@ -240,8 +240,6 @@ PRIVATE void put_editor ARGS2(FILE *, fp, struct config_type *, tbl)
 /* This table is searched ignoring case */
 static Config_Type Config_Table [] =
 {
-    MAYBE_ENU("DTD_recovery",          Old_DTD,            tbl_DTD_recovery,
-              MSG_ENABLE_LYNXRC),
     PARSE_SET("accept_all_cookies",    LYAcceptAllCookies, N_("\
 accept_all_cookies allows the user to tell Lynx to automatically\n\
 accept all cookies if desired.  The default is \"FALSE\" which will\n\
@@ -403,7 +401,7 @@ WARNING - This is potentially dangerous.  Since you may view\n\
           you are viewing trusted source information.\n\
 ")),
 #endif
-#if USE_SCROLLBAR
+#ifdef USE_SCROLLBAR
     MAYBE_SET("scrollbar",             LYShowScrollbar, MSG_ENABLE_LYNXRC),
 #endif
     PARSE_SET("select_popups",         LYSelectPopups, N_("\
@@ -452,7 +450,7 @@ restricted via a command line switch.  If display of hidden files\n\
 is disabled, creation of such files via Lynx also is disabled.\n\
 ")),
 #ifdef EXP_READPROGRESS
-    MAYBE_ENU("show_rate",             LYTransferRate,    tbl_transfer_rate,
+    MAYBE_ENU("show_kb_rate",          LYTransferRate,    tbl_transfer_rate,
 	      MSG_ENABLE_LYNXRC),
 #endif
     PARSE_ENU("sub_bookmarks",         LYMultiBookmarks,  tbl_multi_bookmarks, N_("\
@@ -466,7 +464,8 @@ statusline prompt instead of the menu seen in novice and intermediate\n\
 user modes.  When this option is set to \"standard\", the menu will be\n\
 presented regardless of user mode.\n\
 ")),
-    MAYBE_STR("user_agent",            LYUserAgent,        MSG_ENABLE_LYNXRC),
+    MAYBE_ENU("tagsoup",               Old_DTD,            tbl_DTD_recovery,
+              MSG_ENABLE_LYNXRC),
     PARSE_ENU("user_mode",             user_mode,          tbl_user_mode, N_("\
 user_mode specifies the users level of knowledge with Lynx.  The\n\
 default is \"NOVICE\" which displays two extra lines of help at the\n\
@@ -475,6 +474,7 @@ commands.  Set user_mode to \"INTERMEDIATE\" to turn off the extra info.\n\
 Use \"ADVANCED\" to see the URL of the currently selected link at the\n\
 bottom of the screen.\n\
 ")),
+    MAYBE_STR("useragent",             LYUserAgent,        MSG_ENABLE_LYNXRC),
     PARSE_SET("verbose_images",        verbose_img, N_("\
 If verbose_images is \"on\", lynx will print the name of the image\n\
 source file in place of [INLINE], [LINK] or [IMAGE]\n\

@@ -332,7 +332,7 @@ check_recall:
 	    /*
 	     *  Found in link, changed cur, we're done.
 	     */
-	    highlight(OFF, oldcur, prev_target);
+	    LYhighlight(OFF, oldcur, prev_target);
 	    return(TRUE);
 	}
     } else {
@@ -345,7 +345,7 @@ check_recall:
 	    /*
 	     *  Found in link, changed cur, we're done.
 	     */
-	    highlight(OFF, oldcur, prev_target);
+	    LYhighlight(OFF, oldcur, prev_target);
 	    return(TRUE);
 	}
 
@@ -366,7 +366,7 @@ check_recall:
      */
     www_user_search((cur_doc->line + offset), cur_doc, prev_target, direction);
     if (cur_doc->link != oldcur) {
-	highlight(OFF, oldcur, prev_target);
+	LYhighlight(OFF, oldcur, prev_target);
 	return(TRUE);
     }
     return (BOOL) (www_search_result > 0);

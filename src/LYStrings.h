@@ -10,6 +10,8 @@ typedef enum {
     , RECALL_MAIL
 } RecallType;
 
+#define is8bits(ch) (UCH(ch) >= 128)	/* isascii(ch) is not POSIX */
+
 /*  UPPER8(ch1,ch2) is an extension of (TOUPPER(ch1) - TOUPPER(ch2))  */
 extern int UPPER8  PARAMS((
 	int		ch1,
@@ -297,6 +299,8 @@ extern char *LYElideString PARAMS((
 extern void LYLowerCase PARAMS((
 	char *		buffer));
 extern void LYUpperCase PARAMS((
+	char *		buffer));
+extern void LYRemoveNewlines PARAMS((
 	char *		buffer));
 extern void LYRemoveBlanks PARAMS((
 	char *		buffer));

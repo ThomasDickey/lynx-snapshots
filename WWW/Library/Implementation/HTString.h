@@ -69,7 +69,7 @@ extern char * HTNextField PARAMS ((char** pstr));
 extern char * HTNextTok PARAMS((char ** pstr,
 		      CONST char * delims, CONST char * bracks, char * found));
 
-#if ANSI_VARARGS
+#ifdef ANSI_VARARGS
 extern char * HTSprintf (char ** pstr, CONST char * fmt, ...)
 			GCC_PRINTFLIKE(2,3);
 extern char * HTSprintf0 (char ** pstr, CONST char * fmt, ...)

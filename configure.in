@@ -396,7 +396,7 @@ AC_ARG_WITH(screen,
                           (XXX is curses (default), ncurses or slang)],
 	[
 case $withval in
-curses|ncurses|pdcurses|slang)
+curses|ncurses|ncursesw|pdcurses|slang)
 	cf_cv_screen=$withval
 	;;
 *)	AC_ERROR(Unexpected value)
@@ -405,7 +405,7 @@ esac],
 	[cf_cv_screen=curses])])
 
 case $cf_cv_screen in
-ncurses|slang)
+ncurses|ncursesw|slang)
 	;;
 pdcurses)
 	cf_cv_ncurses_header=xcurses.h
@@ -428,6 +428,12 @@ curses)
 ncurses)
 	CF_NCURSES_CPPFLAGS
 	CF_NCURSES_LIBS
+	CF_NCURSES_VERSION
+	;;
+ncursesw)
+	CF_UTF8_LIB
+	CF_NCURSES_CPPFLAGS(ncursesw)
+	CF_NCURSES_LIBS(ncursesw)
 	CF_NCURSES_VERSION
 	;;
 pdcurses)
@@ -553,6 +559,7 @@ AC_CHECK_FUNCS( \
 	gettimeofday \
 	getuid \
 	mktemp \
+	mkdtemp \
 	popen \
 	putenv \
 	readdir \
@@ -592,7 +599,7 @@ CF_CHECK_EXTERN_DATA(h_errno,int)
 ### These tests must be run after establishing the curses library.
 if test $cf_cv_screen != slang ; then
 	if test $cf_cv_screen != pdcurses ; then
-		AC_CHECK_HEADERS(ncurses/term.h term.h)
+		AC_CHECK_HEADERS($cf_cv_screen/term.h term.h)
 	fi
 	CF_ALT_CHAR_SET
 	CF_FANCY_CURSES
@@ -600,6 +607,7 @@ if test $cf_cv_screen != slang ; then
 	CF_COLOR_CURSES
 	CF_SIZECHANGE
 	CF_TTYTYPE
+	CF_WIDEC_CURSES
 	CF_CURSES_FUNCS( \
 		assume_default_colors \
 		cbreak \

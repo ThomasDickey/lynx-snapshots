@@ -8,8 +8,13 @@
 # Parameters:
 #	$1 is viewer
 #	$2 is filename
-chmod 600 $2
-myfile=`echo $2 | sed -e 's@\(.*/tmp/\)\([^/]*/\)\?\(.*\)@\1my\3@'`
-ln $2 $myfile || exit 1
-trap "rm -f $myfile" 0 1 2 5 15
-eval $1 $myfile
+if test $# = 2 ; then
+	chmod 600 $2
+	myfile=`echo $2 | sed -e 's@\(.*/tmp/\)\([^/]*/\)\?\(.*\)@\1my\3@'`
+	ln $2 $myfile || exit 1
+	trap "rm -f $myfile" 0 1 2 5 15
+	eval $1 $myfile
+else
+	echo "Usage: keepviewer <viewer> <filename>"
+	exit 1
+fi
