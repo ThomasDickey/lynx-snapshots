@@ -306,6 +306,19 @@ PUBLIC CONST char * HTInetString ARGS1(
 }
 #endif /* !DECNET */
 
+#ifdef NSL_FORK
+/*
+**  Function to allow us to be killed with a normal signal (not
+**  SIGKILL), but don't go through normal libc exit() processing, which
+**  would screw up parent's stdio.  -BL
+*/
+PRIVATE void quench ARGS1(
+	int,	sig GCC_UNUSED)
+{
+    _exit(2);
+}
+#endif /* NSL_FORK */
+
 /*	Parse a network node address and port
 **	-------------------------------------
 **
@@ -432,10 +445,25 @@ PUBLIC int HTParseInet ARGS2(
 	    **	Pipe, child pid, status buffers, cycle count, select()
 	    **	control variables.
 	    */
-	    pid_t fpid, waitret = (pid_t)0;
+	    pid_t fpid, waitret;
 	    int pfd[2], cstat, cst1 = 0, cycle = 0;
 	    fd_set readfds;
 	    struct timeval timeout;
+	    int dns_patience = 30; /* how many seconds will we wait for DNS? */
+
+	    /*
+	    **  Reap any children that have terminated since last time
+	    **  through.  This might include children that we killed,
+	    **  then waited with WNOHANG before they were actually ready
+	    **  to be reaped.  (Should be max of 1 in this state, but
+	    **  the loop is safe if waitpid() is implemented correctly:
+	    **  returns 0 when children exist but none have exited; -1
+	    **  with errno == ECHILD when no children.)  -BL
+	    */
+	    do {
+		waitret = waitpid(-1, 0, WNOHANG);
+	    } while (waitret > 0 || (waitret == -1 && errno == EINTR));
+	    waitret = 0;
 
 	    pipe(pfd);
 
@@ -443,6 +471,12 @@ PUBLIC int HTParseInet ARGS2(
 		struct hostent  *phost;	/* Pointer to host - See netdb.h */
 		/*
 		**  Child - for the long call.
+		**
+		**  Make sure parent can kill us at will.  -BL
+		*/
+		(void) signal(SIGTERM, quench);
+
+		/*
 		**  Child won't use read side.  -BL
 		*/
 		close(pfd[0]);
@@ -482,7 +516,7 @@ PUBLIC int HTParseInet ARGS2(
 
 	    close(pfd[1]);      /* parent won't use write side -BL */
 
-	    while (cycle < 50) {
+	    while (cycle < dns_patience) {
 		/*
 		**  Avoid infinite loop in the face of the unexpected.  -BL
 		*/
@@ -531,7 +565,7 @@ PUBLIC int HTParseInet ARGS2(
 		    */
 		    waitret = waitpid(fpid, &cst1, WNOHANG);
 		    if (!WIFEXITED(cst1) && !WIFSIGNALED(cst1)) {
-			kill(fpid, SIGKILL);
+			kill(fpid, SIGTERM);
 			waitret = waitpid(fpid, &cst1, WNOHANG);
 		    }
 		    break;
@@ -548,8 +582,8 @@ PUBLIC int HTParseInet ARGS2(
 		*/
 		if (HTCheckForInterrupt()) {
 		    CTRACE(tfp, "HTParseInet: INTERRUPTED gethostbyname.\n");
-		    kill(fpid , SIGKILL);
-		    waitpid(fpid, NULL, 0);
+		    kill(fpid, SIGTERM);
+		    waitpid(fpid, NULL, WNOHANG);
 		    FREE(host);
 		    close(pfd[0]);
 		    return HT_INTERRUPTED;
@@ -557,6 +591,7 @@ PUBLIC int HTParseInet ARGS2(
 	    }
 	    close(pfd[0]);
 	    if (waitret <= 0) {
+		kill(fpid, SIGTERM);
 		waitret = waitpid(fpid, &cst1, WNOHANG);
 	    }
 	    if (waitret > 0) {

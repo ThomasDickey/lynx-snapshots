@@ -26,7 +26,7 @@
 #ifdef HAVE_CONFIG_H
 #define HAVE_CFG_DEFS_H
 
-#define PutDefs(table, n) fprintf(fp0, "%-35s %s\n", table[n].name, table[n].value)
+#define PutDefs(table, N) fprintf(fp0, "%-35s %s\n", table[N].name, table[N].value)
 
 /*
  *  Compile-time definitions info, returns local url

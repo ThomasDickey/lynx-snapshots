@@ -140,7 +140,7 @@ PUBLIC void HTReadProgress ARGS2(
 		if (total < -1)
 		    strcat(line, " (Press 'z' to abort)");
 	    }
-	    _HTProgress(line);
+	    HTProgress(line);
 	}
     }
 }

@@ -43,8 +43,70 @@ PRIVATE int popup_choice PARAMS((
 
 #define MAXCHOICES 10
 
+/*
+ *  Values for the options menu. - FM
+ *
+ *  L_foo values are the Y coordinates for the menu item.
+ *  B_foo values are the X coordinates for the item's prompt string.
+ *  C_foo values are the X coordinates for the item's value string.
+ */
+#define L_EDITOR	 2
+#define L_DISPLAY	 3
+
+#define L_HOME		 4
+#define C_MULTI		24
+#define B_BOOK		34
+#define C_DEFAULT	50
+
+#define L_FTPSTYPE	 5
+#define L_MAIL_ADDRESS	 6
+#define L_SSEARCH	 7
+#define L_LANGUAGE	 8
+#define L_PREF_CHARSET	 9
+#define L_ASSUME_CHARSET (L_PREF_CHARSET + 1)
+#define L_CHARSET	10
+#define L_RAWMODE	11
+
+#define L_COLOR		L_RAWMODE
+#define B_COLOR		44
+#define C_COLOR		62
+
+#define L_BOOL_A	12
+#define B_VIKEYS	5
+#define C_VIKEYS	15
+#define B_EMACSKEYS	22
+#define C_EMACSKEYS	36
+#define B_SHOW_DOTFILES	44
+#define C_SHOW_DOTFILES	62
+
+#define L_BOOL_B	13
+#define B_SELECT_POPUPS	5
+#define C_SELECT_POPUPS	36
+#define B_SHOW_CURSOR	44
+#define C_SHOW_CURSOR	62
+
+#define L_KEYPAD	14
+#define L_LINEED	15
+
+#ifdef DIRED_SUPPORT
+#define L_DIRED		16
+#define L_USER_MODE	17
+#define L_USER_AGENT	18
+#define L_EXEC		19
+#else
+#define L_USER_MODE	16
+#define L_USER_AGENT	17
+#define L_EXEC		18
+#endif /* DIRED_SUPPORT */
+
+#define L_VERBOSE_IMAGES L_USER_MODE
+#define B_VERBOSE_IMAGES 50
+#define C_VERBOSE_IMAGES (B_VERBOSE_IMAGES + 21)
+
+
 #define COL_OPTION_VALUES 36  /* display column where option values start */
 
+/* a kludge to add assume_charset only in ADVANCED mode... */
 #define L_Bool_A (use_assume_charset ? L_BOOL_A + 1 : L_BOOL_A)
 #define L_Bool_B (use_assume_charset ? L_BOOL_B + 1 : L_BOOL_B)
 #define L_Exec (use_assume_charset ? L_EXEC + 1 : L_EXEC)
@@ -56,9 +118,8 @@ PRIVATE int popup_choice PARAMS((
 #define L_Dired (use_assume_charset ? L_DIRED + 1 : L_DIRED)
 #define L_User_Mode (use_assume_charset ? L_USER_MODE + 1 : L_USER_MODE)
 #define L_User_Agent (use_assume_charset ? L_USER_AGENT + 1 : L_USER_AGENT)
-#endif /* !EXP_FORMS_OPTIONS */
 
-#ifndef EXP_FORMS_OPTIONS
+
 PUBLIC void LYoptions NOARGS
 {
 #ifdef ALLOW_USERS_TO_CHANGE_EXEC_WITHIN_OPTIONS
@@ -72,7 +133,6 @@ PUBLIC void LYoptions NOARGS
     char *choices[MAXCHOICES];
     int CurrentCharSet = current_char_set;
     int CurrentAssumeCharSet = UCLYhndl_for_unspec;
-    int CurrentAssumeLocalCharSet = UCLYhndl_HTFile_for_unspec;
     int CurrentShowColor = LYShowColor;
     BOOLEAN CurrentRawMode = LYRawMode;
     BOOLEAN AddValueAccepted = FALSE;
@@ -785,7 +845,6 @@ draw_options:
 			HTMLSetUseDefaultRawMode(current_char_set, LYRawMode);
 			HTMLSetCharacterHandling(current_char_set);
 			CurrentAssumeCharSet = UCLYhndl_for_unspec;
-			CurrentAssumeLocalCharSet = UCLYhndl_HTFile_for_unspec;
 			CurrentRawMode = LYRawMode;
 #if !defined(VMS) && !defined(USE_SLANG)
 			if (!LYSelectPopups)
@@ -3210,10 +3269,10 @@ static char * user_agent_string		= "user_agent";
 #define PutLabel(fp, text) \
 	fprintf(fp,"  %-33s: ", text)
 
-#define PutTextInput(fp, name, value, size, disable) \
+#define PutTextInput(fp, Name, Value, Size, disable) \
 	fprintf(fp,\
 	"<input size=%d type=\"text\" name=\"%s\" value=\"%s\" %s>\n",\
-		(int) size, name, value, disable)
+		(int) Size, Name, Value, disable)
 
 #define PutOption(fp, flag, html, name) \
 	fprintf(fp,"<option value=\"%s\" %s>%s\n", html, SELECTED(flag), name)

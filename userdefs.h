@@ -476,7 +476,7 @@
  * with the Up-Arrow or Down-Arrow keys after entering the 'g'oto
  * command, whether or not a default is offered.
  */
-#define GOTOBUFFER	  FALSE
+#define GOTOBUFFER	  TRUE
 
 /*****************************
  * JUMPFILE is the default local file checked for shortcut URLs when
@@ -514,7 +514,7 @@
  * jumps files and corresponding key mappings, each will have its own
  * circular buffer.
  */
-#define JUMPBUFFER	  FALSE
+#define JUMPBUFFER	  TRUE
 
 /********************************
  * If PERMIT_GOTO_FROM_JUMP is defined, then a : or / in a jump target
@@ -888,7 +888,15 @@
 *
 * The default defined here can be changed in lynx.cfg.
 */
-#define VERBOSE_IMAGES FALSE
+#define VERBOSE_IMAGES TRUE
+
+/******************************
+* VERBOSE_LINKS controls whether Lynx precedes links with the string "(LINK)",
+* which is done to accommodate blind users.
+*
+* If this option is set here, it will override the setting in userdefs.h.
+*/
+#define VERBOSE_LINKS FALSE
 
 /******************************
  * BOXVERT and BOXHORI control the layout of popup menus.  Set to 0 if your
@@ -1184,7 +1192,7 @@
  * explicit Y or y to confirm.  The default defined here can be changed
  * in lynx.cfg.
  */
-#define QUIT_DEFAULT_YES	TRUE
+#define QUIT_DEFAULT_YES	FALSE
 
 /********************************
  * These definitions specify files created or used in conjunction
@@ -1216,12 +1224,12 @@
  * the version definition with the Project Version on checkout. Just
  * ignore it. - kw */
 /* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
-#define LYNX_VERSION "2.8.1pre.8"
+#define LYNX_VERSION "2.8.1pre.9"
 #define LYNX_WWW_HOME "http://lynx.browser.org/"
 #define LYNX_WWW_DIST "http://www.slcc.edu/lynx/current/"
 #define LYNX_RELEASE FALSE
 /* $Format: "#define LYNX_DATE \"$ProjectDate$\""$ */
-#define LYNX_DATE "Sun, 04 Oct 1998 19:27:15 -0600"
+#define LYNX_DATE "Sat, 10 Oct 1998 14:53:16 -0600"
 #define LYNX_DATE_OFF 5		/* truncate the automatically-generated date */
 #define LYNX_DATE_LEN 11	/* truncate the automatically-generated date */
 #define LYNX_RELEASE_DATE "1998"

@@ -535,6 +535,7 @@ PUBLIC int lynx_chg_color ARGS3(
 	int, bg
 	)
 {
+    if (fg == ERR_COLOR || bg == ERR_COLOR) return -1;
     if (color >= 0 && color < 8) {
 	lynx_color_cfg[color].fg = (fg > 7) ? (fg & 7) : fg;
 	lynx_color_cfg[color].bg = (bg > 7) ? (bg & 7) : bg;
