@@ -33,11 +33,11 @@
 #endif
 
 #if defined(__STDC__) || defined(VMS)
-#define ANSI_VARARGS
-#define HAVE_STDARGS_H
+#define ANSI_VARARGS 1
+#define HAVE_STDARG_H 1
 #endif
 
-/* FIXME: these will be removed after completing auto-configure script */
+/* FIXME: these should be removed after completing auto-configure script */
 
 /* Accommodate pre-autoconf Makefile */
 
