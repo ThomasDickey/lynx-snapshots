@@ -71,7 +71,6 @@ typedef struct sockaddr_in SockA;  /* See netinet/in.h */
 # include <dirent.h>
 # define D_NAMLEN(dirent) strlen((dirent)->d_name)
 # define STRUCT_DIRENT struct dirent
-# define GOT_READ_DIR 1    /* if directory reading functions are available */
 #else
 # define D_NAMLEN(dirent) (dirent)->d_namlen
 # define STRUCT_DIRENT struct direct
@@ -566,7 +565,7 @@ typedef int pid_t;
 
 /* FIXME: remove after completing configure-script */
 #ifdef unix                    /* if this is to compile on a UNIX machine */
-#define GOT_READ_DIR 1    /* if directory reading functions are available */
+#define HAVE_READDIR 1    /* if directory reading functions are available */
 #ifdef USE_DIRENT             /* sys v version */
 #include <dirent.h>
 #define direct dirent

@@ -1,13 +1,17 @@
 ;; -*- Lisp -*-
 (Created-By-Prcs-Version 1 2 0)
 (Project-Description "PRCS Project for The Lynx browser")
-(Project-Version Lynx 2.7.1ac-0 42)
-(Parent-Version Lynx 2.7.1acfm-0 14)
+(Project-Version Lynx 2.7.1ac-0 43)
+(Parent-Version Lynx 2.7.1ac-0 42)
 
-(Version-Log "4-way show color option, other fixes.  compared with fotemods up to 1997-07-25.")
+(Version-Log "first cut of reduction to single top-level target.  I added configure
+options for DirEd, char-trans stuff as well, and made some adjustments
+to make the src/makefile work by itself (so I can do \"make -n\" in that
+directory).  Last-minute fix for ncurses.h vs curses.h (!).
+")
 (New-Version-Log "")
-(Checkin-Time "Sat, 26 Jul 1997 09:06:19 -0600")
-(Checkin-Login kweide)
+(Checkin-Time "Sun, 27 Jul 1997 18:36:15 -0600")
+(Checkin-Login dickey)
 (Populate-Ignore ("\\.o$" "\\.a$" "~$" "^a.out$" "^core$"
                   "\\.dvi$" "\\.aux$" "^\\..*_aux$" "\\.log"
                   "\\.zip$" "^obsolete" "/obsolete"
@@ -32,7 +36,7 @@
   (utils/inews/version.c (Lynx/c/0_version.c 1.1 644))
   (utils/inews/nntp.h (Lynx/c/1_nntp.h 1.1 644))
   (utils/inews/inews.c (Lynx/c/2_inews.c 1.1 644))
-  (utils/inews/conf.h (Lynx/c/3_conf.h 1.1.1.1 644) :no-keywords)
+  (utils/inews/conf.h (Lynx/c/3_conf.h 1.1.1.2 644) :no-keywords)
   (utils/inews/clientlib.h (Lynx/c/4_clientlib. 1.1 644))
   (utils/inews/clientlib.c (Lynx/c/5_clientlib. 1.1 644))
   (utils/inews/README.NN (Lynx/c/6_README.NN 1.1 644))
@@ -121,7 +125,7 @@
   (src/LYShowInfo.c (Lynx/d/37_LYShowInfo 1.1.2.1.2.7 644))
   (src/LYSearch.c (Lynx/d/38_LYSearch.c 1.2.2.5 644))
   (src/LYReadCFG.c (Lynx/d/39_LYReadCFG. 1.1.1.1.3.2.3.1.1.6 644))
-  (src/LYPrint.c (Lynx/d/40_LYPrint.c 1.1.1.1.1.1.1.1.1.1.1.2 644))
+  (src/LYPrint.c (Lynx/d/40_LYPrint.c 1.1.1.1.1.1.1.1.1.1.1.3 644))
   (src/LYOptions.c (Lynx/d/41_LYOptions. 1.1.2.1.1.1.1.5.1.3 644))
   (src/LYNews.c (Lynx/d/42_LYNews.c 1.7 644))
   (src/LYMainLoop.c (Lynx/d/43_LYMainLoop 1.2.4.2.2.1.2.6.1.2.1.1.1.1.1.1.1.1.1.1.1.4 644))
@@ -138,7 +142,7 @@
   (src/HTML.c (Lynx/e/2_HTML.c 1.1.4.1.1.1.1.2.1.4.1.2.1.3.1.2.1.2.2.3 644))
   (src/HTInit.c (Lynx/e/3_HTInit.c 1.2.1.2 644))
   (src/HTAlert.c (Lynx/e/4_HTAlert.c 1.1.2.3 644))
-  (src/GridText.c (Lynx/e/5_GridText.c 1.1.3.1.1.1.1.1.1.2.2.2.1.2.1.2.1.1.1.1.1.3 644))
+  (src/GridText.c (Lynx/e/5_GridText.c 1.1.3.1.1.1.1.1.1.2.2.2.1.2.1.2.1.1.1.1.1.4 644))
   (src/descrip.mms (Lynx/e/6_descrip.mm 1.2 644))
   (samples/jumpsVMS.html (Lynx/e/7_jumpsVMS.h 1.1 644))
   (samples/jumpsUnix.html (Lynx/e/8_jumpsUnix. 1.1 644))
@@ -295,7 +299,7 @@
   (WWW/Library/Implementation/HTString.c (Lynx/h/3_HTString.c 1.1 644))
   (WWW/Library/Implementation/HTList.c (Lynx/h/4_HTList.c 1.1 644))
   (WWW/Library/Implementation/HTStyle.c (Lynx/h/5_HTStyle.c 1.3 644))
-  (WWW/Library/Implementation/HTAnchor.c (Lynx/h/6_HTAnchor.c 1.1.4.3 644))
+  (WWW/Library/Implementation/HTAnchor.c (Lynx/h/6_HTAnchor.c 1.1.4.4 644))
   (WWW/Library/Implementation/HTAtom.c (Lynx/h/7_HTAtom.c 1.1.2.1 644))
   (WWW/Library/Implementation/HTChunk.c (Lynx/h/8_HTChunk.c 1.1 644))
   (WWW/Library/Implementation/HTMLGen.c (Lynx/h/9_HTMLGen.c 1.1.2.2 644))
@@ -308,7 +312,7 @@
   (WWW/Library/Implementation/HTTP.c (Lynx/h/16_HTTP.c 1.1.1.1.1.1.1.1.1.3 644))
   (WWW/Library/Implementation/HTAccess.c (Lynx/h/17_HTAccess.c 1.5.2.1 644))
   (WWW/Library/Implementation/HTParse.c (Lynx/h/18_HTParse.c 1.3 644))
-  (WWW/Library/Implementation/tcp.h (Lynx/h/19_tcp.h 1.7 644))
+  (WWW/Library/Implementation/tcp.h (Lynx/h/19_tcp.h 1.8 644))
   (WWW/Library/Implementation/HTWSRC.c (Lynx/h/20_HTWSRC.c 1.1.1.1 644))
   (WWW/Library/Implementation/HTWriter.c (Lynx/h/21_HTWriter.c 1.1 644))
   (WWW/Library/Implementation/HTWAIS.c (Lynx/h/22_HTWAIS.c 1.1.1.1 644))
@@ -316,7 +320,7 @@
   (WWW/Library/Implementation/HTTelnet.c (Lynx/h/24_HTTelnet.c 1.4 644))
   (WWW/Library/Implementation/HTNews.c (Lynx/h/25_HTNews.c 1.1.2.2 644))  
   (WWW/Library/Implementation/HTMLDTD.c (Lynx/h/26_HTMLDTD.c 1.1.2.7 644))
-  (WWW/Library/Implementation/HTFile.c (Lynx/h/27_HTFile.c 1.1.3.4 644))
+  (WWW/Library/Implementation/HTFile.c (Lynx/h/27_HTFile.c 1.1.3.5 644))
   (WWW/Library/Implementation/HTAuth.c (Lynx/h/28_HTAuth.c 1.1 644))
   (VMSWAIS.announce (Lynx/h/29_VMSWAIS.an 1.1 644))
   (VMSPrint.com (Lynx/h/30_VMSPrint.c 1.1 644))
@@ -325,7 +329,7 @@
   (RELEASE_STATEMENT (Lynx/h/33_RELEASE_ST 1.2 644))
   (README (Lynx/h/34_README 1.1 644))
   (PROBLEMS (Lynx/h/35_PROBLEMS 1.3 644))
-  (Makefile (Lynx/h/36_Makefile 1.1.1.1.1.1.1.2.3.3 644))
+  (Makefile.old (Lynx/h/36_Makefile 1.1.1.1.1.1.1.2.3.4 644))
   (LYMessages_en.h (Lynx/h/37_LYMessages 1.4.1.4.1.2.1.1.1.1.1.5 644))
   (INSTALLATION (Lynx/h/38_INSTALLATI 1.1 644))
   (IBMPC-charsets.announce (Lynx/h/39_IBMPC-char 1.1 644))
@@ -390,19 +394,19 @@
 
 ;; Files added by populate at Mon, 03 Mar 1997 06:05:56 -0600:
 
-  (CHANGES.new (Lynx/6_CHANGES.ne 1.18.1.4.1.1.2.1.1.2.2.2.1.2.1.1.1.1.1.4.2.7.1.3.1.4.1.4 644))
+  (CHANGES.new (Lynx/6_CHANGES.ne 1.18.1.4.1.1.2.1.1.2.2.2.1.2.1.1.1.1.1.4.2.7.1.3.1.4.1.5 644))
 
 ;; Files added by populate at Tue, 11 Mar 1997 04:22:39 -0600:
 
   (newfiles.configure (Lynx/7_newfiles.c 1.4 644))
-  (makefile.in (Lynx/8_makefile.i 1.1.1.8 644))
+  (makefile.in (Lynx/8_makefile.i 1.1.1.9 644))
   (install.sh (Lynx/9_install.sh 1.1 755))
-  (configure.in (Lynx/10_configure. 1.9 644))
-  (config.hin (Lynx/11_config.hin 1.9 644))
-  (aclocal.m4 (Lynx/12_aclocal.m4 1.11 644))
-  (configure (Lynx/13_configure 1.11 755))
-  (README.configure (Lynx/14_README.con 1.4 644))
-  (CHANGES.configure (Lynx/15_CHANGES.co 1.1.1.5 644))
+  (configure.in (Lynx/10_configure. 1.10 644))
+  (config.hin (Lynx/11_config.hin 1.10 644))
+  (aclocal.m4 (Lynx/12_aclocal.m4 1.12 644))
+  (configure (Lynx/13_configure 1.12 755))
+  (README.configure (Lynx/14_README.con 1.5 644))
+  (CHANGES.configure (Lynx/15_CHANGES.co 1.1.1.6 644))
 
 ;; Files added by populate at Wed, 09 Apr 1997 06:18:01 -0600:
 
@@ -411,8 +415,8 @@
   (WWW/Library/Implementation/HTDOS.c (Lynx/28_HTDOS.C 1.1 644))
 
 
-  (WWW/Library/unix/makefile.in (Lynx/16_makefile.i 1.3 644))
-  (src/makefile.in (Lynx/17_makefile.i 1.6 644))
+  (WWW/Library/unix/makefile.in (Lynx/16_makefile.i 1.4 644))
+  (src/makefile.in (Lynx/17_makefile.i 1.7 644))
   (src/chrtrans/makefile.in (Lynx/18_makefile.i 1.4 644))
 
   (src/chrtrans/koi8r_uni.tbl (Lynx/24_koi8r_uni. 1.1 644))
@@ -448,12 +452,5 @@
   (src/chrtrans/build-header.com (Lynx/c/0_build-head 1.1 644))
 
   (src/chrtrans/cp1251_uni.tbl (Lynx/b/0_cp1251_uni 1.1 644)))
-(Merge-Parents
-  (2.7.1fm-0.34 incomplete
-    (userdefs.h userdefs.h userdefs.h n) (src/LYCharUtils.c src/LYCharUtils.c src/LYCharUtils.c n)
-    (src/LYrcFile.c src/LYrcFile.c src/LYrcFile.c n) (src/LYOptions.h src/LYOptions.h src/LYOptions.h n)
-    (src/LYGlobalDefs.h src/LYGlobalDefs.h src/LYGlobalDefs.h n) (src/Makefile src/Makefile src/Makefile n)
-    (src/LYUpload.c src/LYUpload.c src/LYUpload.c m) (src/LYReadCFG.c src/LYReadCFG.c src/LYReadCFG.c n)
-    (src/LYOptions.c src/LYOptions.c src/LYOptions.c n) (src/LYMainLoop.c src/LYMainLoop.c src/LYMainLoop.c m))
-)
+(Merge-Parents)
 (New-Merge-Parents)

@@ -28,7 +28,9 @@
 
 #define FREE(x) if (x) {free(x); x = NULL;}
 
+#ifdef EXP_CHARTRANS
 extern LYUCcharset LYCharSet_UC[];
+#endif
 
 #ifdef NOT_DEFINED
 /*

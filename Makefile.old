@@ -83,8 +83,8 @@ WWWINC= WWW/Library/Implementation
 # Rob Partington's Character Style color support code (which may currently
 # only work with ncurses, not other curses or the slang library).
 # Or modify and experiment...  -kw
-RP_LYDEFS = -I../../../src -DUSE_COLOR_STYLE -DUSEHASH
-RP_DEFS = -DUSE_COLOR_STYLE -DUNPAINT_CACHE -DTEST -DUSEHASH
+# RP_LYDEFS = -I../../../src -DUSE_COLOR_STYLE -DUSEHASH
+# RP_DEFS = -DUSE_COLOR_STYLE -DUNPAINT_CACHE -DTEST -DUSEHASH
 
 # !!!!!!!!!!! Lynx Local Directory Listing Formats !!!!!!!!!!!!!!!!!!!!!!!!!!!
 # Lynx supports "ls -l" format for local directory listings on Unix if the

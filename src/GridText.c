@@ -355,8 +355,8 @@ PUBLIC HText *	HText_new ARGS1(
     self->state = S_text;
     self->kanji_buf = '\0';
     self->in_sjis = 0;
-    self->have_8bit_chars = NO;
 #ifdef EXP_CHARTRANS
+    self->have_8bit_chars = NO;
     HText_getChartransInfo(self);
     UCSetTransParams(&self->T,
 		     self->UCLYhndl, self->UCI,
@@ -2252,8 +2252,10 @@ check_IgnoreExcess:
         ch = ' ';
     }
 
+#ifdef EXP_CHARTRANS
     if (ch & 0x80)
 	text->have_8bit_chars = YES;
+#endif
 
     {
         HTLine * line = text->last_line;	/* May have changed */
@@ -4911,6 +4913,7 @@ PUBLIC char * HTLoadedDocumentCharset NOARGS
 	return (NULL);
 }
 
+#ifdef EXP_CHARTRANS
 PUBLIC BOOL HTLoadedDocumentEightbit NOARGS
 {
     if (!HTMainText)
@@ -4918,6 +4921,7 @@ PUBLIC BOOL HTLoadedDocumentEightbit NOARGS
     else
 	return (HTMainText->have_8bit_chars);
 }
+#endif
 
 PUBLIC void HText_setNodeAnchorBookmark ARGS1(
 	CONST char *,	bookmark)
@@ -4976,9 +4980,11 @@ PRIVATE int HText_TrueLineSize ARGS3(
     if (IgnoreSpaces) {
 	for (i = 0; i < line->size; i++) {
 	    if (!IsSpecialAttrChar((unsigned char)line->data[i]) &&
+#ifdef EXP_CHARTRANS
 		(!(text && text->T.output_utf8) ||
 		 (unsigned char)line->data[i] < 128 ||
 		 ((unsigned char)(line->data[i] & 0xc0) == 0xc0)) &&
+#endif
 	        !isspace((unsigned char)line->data[i]) &&
 		(unsigned char)line->data[i] != HT_NON_BREAK_SPACE &&
 		(unsigned char)line->data[i] != HT_EM_SPACE) {
@@ -7021,11 +7027,13 @@ PUBLIC BOOL HText_hasNoCacheSet ARGS1(
     return ((text && text->no_cache) ? TRUE : FALSE);
 }
 
+#ifdef EXP_CHARTRANS
 PUBLIC BOOL HText_hasUTF8OutputSet ARGS1(
 	HText *,	text)
 {
     return ((text && text->T.output_utf8) ? TRUE : FALSE);
 }
+#endif
 
 /*
 **  Check charset and set the kcode element. - FM

@@ -25,7 +25,7 @@ LYForms.o LYPrint.o LYrcFile.o LYDownload.o LYNews.o LYKeymap.o \
 HTML.o HTFWriter.o HTInit.o DefaultStyle.o LYLocal.o LYUpload.o \
 LYLeaks.o LYexit.o LYJump.o LYList.o LYCgi.o LYTraversal.o \
 LYEditmap.o LYCharSets.o LYCharUtils.o LYMap.o LYCookie.o LYExtern.o \
-LYStyle.o LYHash.o $(CHARTRANS_OBJS)
+LYStyle.o LYHash.o @EXTRA_OBJS@
 
 all: lynx
 
@@ -39,9 +39,9 @@ all: lynx
 @SHOW_CC@
 	@ECHO_CC@$(CPP) -C $(CPPOPTS) $*.c >$@
 
-lynx:   message do_chartrans_stuff $(OBJS) $(WWWLIB)
+lynx:   message @EXTRA_DEPS@ $(OBJS) $(WWWLIB)
 	@echo "Linking and creating Lynx executable"
-	$(CC) $(CFLAGS) -o lynx  $(OBJS) $(WWWLIB) $(SLANGLIB) $(LIBS)
+	$(CC) $(CFLAGS) -o lynx  $(OBJS) $(WWWLIB) $(LIBS)
 	@echo "Copying Lynx executable into this directory"
 	cp lynx ..
 	@echo "Welcome to Lynx!"

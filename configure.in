@@ -61,6 +61,7 @@ AC_DEFINE(UNIX)
 CF_ANSI_CC
 AC_C_CONST
 
+dnl Only add to this case statement things that we cannot design tests for.
 case $host_os in
 aix4*)
 	CFLAGS="$CFLAGS -DAIX4 -D_BSD=44" 
@@ -74,6 +75,12 @@ apollo*)
 	;;
 bsdi*)
 	CFLAGS="$CFLAGS -DBSDI" 
+	;;
+clix*)
+	# Tested on CLIX 3.1 (T.Dickey).  The original makefile entry
+	# contributed by Alex Matulich (matuli_a@marlin.navsea.navy.mil) also
+	# references -lmalloc and -lbsd.
+	AC_CHECK_LIB(c_s,strcmp)
 	;;
 convex*)
 	CFLAGS="$CFLAGS -D__STDC__ -Dunix"
@@ -108,6 +115,21 @@ osf*)
 	# Increase the maximum size of functions that will be optimized.
 	test -z "$GCC" && CFLAGS="$CFLAGS -O -Olimit 4000"
 	CFLAGS="$CFLAGS -DDSYS5"
+	;;
+sco3.2v5*)
+	test $ac_cv_prog_gcc != yes && CC="cc -belf"
+	;;
+sco*)
+	LIBS="$LIBS -lmalloc"
+	# It's a little late to do much, but try to warn user if he's using
+	# SCO's cc (which is reported to have broken const/volatile).
+	case "$CC" in #(vi
+	cc|*/cc)
+		AC_MSG_WARN(You should consider using gcc or rcc if available)
+		unset ac_cv_prog_CC
+		AC_CHECK_PROGS(CC,gcc rcc,$CC)
+		;;
+	esac
 	;;
 sequent-ptx)
 	CFLAGS="$CFLAGS -DSVR4_BSDSELECT -DNO_IOCTL -DUSE_FCNTL"
@@ -157,6 +179,7 @@ case $cf_cv_screen in
 curses)
 	CF_CURSES_LIBS
 	CF_CURS_PERFORMANCE
+	cf_cv_ncurses_header=curses.h
 	;;
 ncurses)
 	CF_NCURSES_CPPFLAGS
@@ -201,6 +224,7 @@ AC_CHECK_FUNCS( \
 	cuserid \
 	getcwd \
 	putenv \
+	readdir \
 )
 
 dnl --------------------------------------------------------------------------
@@ -232,11 +256,26 @@ fi
 dnl --------------------------------------------------------------------------
 dnl Miscellaneous options that don't need to test system features
 dnl --------------------------------------------------------------------------
+AC_SUBST(EXTRA_OBJS)
+AC_SUBST(EXTRA_DEPS)
+
+AC_MSG_CHECKING(if character-translation code should be used)
+AC_CACHE_VAL(cf_cv_char_trans,[
+AC_ARG_WITH(char-trans,
+[  --with-char-trans       enable optional character-translations],
+	[cf_cv_char_trans=$withval],
+	[cf_cv_char_trans=yes])])
+AC_MSG_RESULT($cf_cv_char_trans)
+if test ".$cf_cv_char_trans" != ".no" ; then
+	AC_DEFINE(EXP_CHARTRANS)
+	EXTRA_OBJS="$EXTRA_OBJS \$(CHARTRANS_OBJS)"
+	EXTRA_DEPS="$EXTRA_DEPS do_chartrans_stuff"
+fi
 
 AC_MSG_CHECKING(if color-style code should be used)
 AC_CACHE_VAL(cf_cv_color_style,[
 AC_ARG_WITH(color-style,
-[  --with-color-style      enable color style],
+[  --with-color-style      enable optional/experimental color style],
 	[cf_cv_color_style=$withval],
 	[cf_cv_color_style=no])])
 
@@ -262,16 +301,71 @@ no)
 	;;
 esac
 
+# All DirEd functions that were enabled on compilation can be disabled
+# or modified at run time via DIRED_MENU symbols in lynx.cfg.
+AC_MSG_CHECKING(if directory-editor code should be used)
+AC_CACHE_VAL(cf_cv_dired,[
+AC_ARG_WITH(dired,
+[  --with-dired            enable optional directory-editor, DirEd (default)],
+	[cf_cv_dired=$withval],
+	[cf_cv_dired=yes])])
+AC_MSG_RESULT($cf_cv_dired)
+if test ".$cf_cv_dired" != ".no" ; then
+	AC_DEFINE(DIRED_SUPPORT)
+
+	AC_MSG_CHECKING(if you wish to extracting from archives via DirEd)
+	CF_ARG_DISABLE(dired-archive,
+	[  --disable-dired-archive DirEd: disable dearchiving commands],,[AC_DEFINE(ARCHIVE_ONLY)])
+	AC_MSG_RESULT($enableval)
+
+	AC_MSG_CHECKING(if you wish to allow users to redefine DirEd keys)
+	CF_ARG_DISABLE(dired-override,
+	[  --disable-dired-override DirEd: disable private keymaps],,[AC_DEFINE(OK_OVERRIDE)])
+	AC_MSG_RESULT($enableval)
+
+	AC_MSG_CHECKING(if you wish to allow permissions commands via DirEd)
+	CF_ARG_DISABLE(dired-permit,
+	[  --disable-dired-permit  DirEd: disable chmod/attrib commands],,[AC_DEFINE(OK_PERMIT)])
+	AC_MSG_RESULT($enableval)
+
+	AC_MSG_CHECKING(if you wish to allow executable-permission commands via DirEd)
+	CF_ARG_DISABLE(dired-xpermit,
+	[  --disable-dired-xpermit DirEd: disable chmod/attrib commands],[AC_DEFINE(NO_CHANGE_EXECUTE_PERMS)])
+	AC_MSG_RESULT($enableval)
+
+	AC_MSG_CHECKING(if you wish to allow \"tar\" commands from DirEd)
+	CF_ARG_DISABLE(dired-tar,
+	[  --disable-dired-tar     DirEd: disable \"tar\" command],,[AC_DEFINE(OK_TAR)])
+	AC_MSG_RESULT($enableval)
+
+	AC_MSG_CHECKING(if you wish to allow \"uudecode\" commands from DirEd)
+	CF_ARG_DISABLE(dired-uudecode,
+	[  --disable-dired-uudecode DirEd: disable \"uudecode\" command],,[AC_DEFINE(OK_UUDECODE)])
+	AC_MSG_RESULT($enableval)
+
+	AC_MSG_CHECKING(if you wish to allow \"zip\" and \"unzip\" commands from DirEd)
+	CF_ARG_DISABLE(dired-zip,
+	[  --disable-dired-zip     DirEd: disable \"zip\", \"unzip\"  commands],,[AC_DEFINE(OK_ZIP)])
+	AC_MSG_RESULT($enableval)
+
+	AC_MSG_CHECKING(if you wish to allow \"gzip\" and \"gunzip\" commands from DirEd)
+	CF_ARG_DISABLE(dired-gzip,
+	[  --disable-dired-gzip    DirEd: disable \"gzip\", \"gunzip\" commands],,[AC_DEFINE(OK_GZIP)])
+	AC_MSG_RESULT($enableval)
+fi
+
+AC_MSG_CHECKING(if you want long-directory listings)
+CF_ARG_DISABLE(long-list,
+[  --disable-long-list     disable long \"ls -l\" directory listings],,
+	[AC_DEFINE(LONG_LIST)])
+AC_MSG_RESULT($enableval)
+
 AC_MSG_CHECKING(if parent-directory references are permitted)
-AC_CACHE_VAL(cf_cv_parent_dir,[
-cf_cv_parent_dir=yes
-AC_ARG_ENABLE(parent-dir-refs,
+CF_ARG_DISABLE(parent-dir-refs,
 [  --disable-parent-dir-refs
-                          disable \"Up-to\" parent-links in directory listings],
-	[test "$enableval" = no && cf_cv_parent_dir=no])
-])
-AC_MSG_RESULT($cf_cv_parent_dir)
-test $cf_cv_parent_dir = no && AC_DEFINE(NO_PARENT_DIR_REFERENCE)
+                          disable \"Up-to\" links in directory listings],
+	[AC_DEFINE(NO_PARENT_DIR_REFERENCE)])
+AC_MSG_RESULT($enableval)
 
 dnl --------------------------------------------------------------------------
 dnl Debug/development/test
@@ -298,11 +392,15 @@ test "$with_leak_checks" = "yes" && AC_DEFINE(LY_FIND_LEAKS)
 
 AC_MSG_CHECKING(if you want to enable debug-code)
 CF_ARG_ENABLE(debug,
-	[  --enable-debug          develop: logic for testing memory leaks],
+	[  --enable-debug          develop: logic for traces/debugging],
 	[with_debug=yes],
 	[with_debug=no])
 AC_MSG_RESULT($with_debug)
-test "$with_debug" = "yes" && AC_DEFINE(DEBUG)
+if test "$with_debug" = "yes" ; then
+	AC_DEFINE(DEBUG)
+elif test -n "$GCC" ; then
+	CF_STRIP_G_OPT(CFLAGS)
+fi
 
 if test -n "$GCC"
 then
