@@ -1776,6 +1776,10 @@ PUBLIC int HTDoRead ARGS3(
     fd_set readfds;
     struct timeval timeout;
     int tries=0;
+#ifdef EXP_READPROGRESS
+    int otries = 0;
+    time_t otime = time((time_t *)0);
+#endif
 #if defined(UNIX) || defined(UCX)
     int nb;
 #endif /* UCX, BSN */
@@ -1822,6 +1826,18 @@ PUBLIC int HTDoRead ARGS3(
 #endif
 	    return HT_INTERRUPTED;
 	}
+
+#ifdef EXP_READPROGRESS
+	if (tries - otries > 10) {
+	    time_t t = time((time_t *)0);
+
+	    otries = tries;
+	    if (t - otime >= 5) {
+		otime = t;
+		HTReadProgress(-1, 0);	/* Put "stalled" message */
+	    }
+	}
+#endif
 
 	/*
 	**  If we suspend, then it is possible that select will be

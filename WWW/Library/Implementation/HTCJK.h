@@ -111,4 +111,6 @@ extern void TO_JIS PARAMS((
 	CONST unsigned char *	any,
 	unsigned char *		jis));
 
+extern char *str_kcode PARAMS((HTkcode code));
+
 #endif /* HTCJK_H */

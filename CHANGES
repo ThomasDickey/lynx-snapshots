@@ -1,6 +1,130 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+1999-07-30 (2.8.3dev.5)
+* add/use LYHideCursor() macro to accommodate position in older curses -TD
+* add configure option --enable-cjk to compile-in CJK_EX logic -TD
+* add -short_url option and associated logic to elide middle of long urls
+  (adapted from patch by Eduardo Chappa L <chappa@math.washington.edu>) -TD
+* ifdef'd read-progress changes with EXP_READPROGRESS, add configure option
+  --enable-read-eta to turn this on -TD
+* enhanced read-progress logic (Ilya Zakharevich)
+  a) makes size/transfer rate reports use format "8.3 KB" (instead
+     of "8 KB") if numbers are below 10 KB and reports are in KB;
+  b) makes transferred/expected/transfer-rate use bytes/KB independently
+     so "236 bytes of 56 KB" is possible, as is
+     "8.3 of 56 KB, 456 bytes/sec";
+  c) adds "ETA 23 sec" info if available;
+  d) adds " (stalled for 75 sec)" info if available (updated each 5
+     sec or so);
+  e) uses gettimeofday() if present (instead of current hacks) to get more
+     frequent updates.
+* fixes for OS/2 and ncurses from Ilya Zakharevich:
+  a) Makes lynx ignore mouse events which are not clicks (filtering through
+     ncurses does not work as expected).
+  b) Makes mouse-clicks "basin of attraction" of a link wider (the area where
+     clicks make the link a current link).  It was 2 units vertically and
+     horizontally, make it 2 units vertically, and 6 units horizontally.  This
+     leads to "more intuitive selection".
+  c) Make processing of .lynx-keymap write messages to trace buffer;
+  d) LAC-keybindings were not working;
+  e) Allow .lss files include one another via INCLUDE:/file/name
+  g) Allow a change of default color in .lss files (not the color of attributes
+     text, but colors for a style if "default" is specified); This (together
+     with "e") allows for a simple modification of a color scheme
+     Here is an example of a .lss file with a changed default
+     foreground/background and a handful of other declarations fine-tuned for
+     this change.  (It implements "Commander" style).  "Overriding"
+     declarations should be put before INCLUDE:, and the "default:" declaration
+     should be the last one.
+		status:reverse:yellow:black
+		h1:bold:yellow:black
+		em.a:reverse:black:blue
+		em.b:reverse:white:black
+		font.letter:normal:default:black
+		link.blue:bold:white:brightblue
+		link.blue.prev:bold:yellow:brightblue
+		title:normal:magenta:black
+		i:bold:white
+		table:normal:white
+		blockquote:normal:white
+		li.blue:bold:blue:black
+		link.blue.next:bold:blue:black
+		normal:normal:default:default
+		INCLUDE:F:/emx.add/lib/lynx.lss
+		default:normal:brightcyan:blue
+  h) Improve algorithm for allocation of color-pairs;
+  i) Lynx was not recognizing HOME directory on EMX;
+  j) UP_LINK and DOWN_LINK now actually move along a vertical line (as far as
+     it is possible), including an arbitrary sequence of such keypresses.
+* modify LYIsPathSep() macro to include '\' for OS/2 EMX -TD
+* correct a problem with spurious cookie names when reloading lynx.cfg (Michael
+  Warner & KW)
+* add check for too-long line in HText_ExtEditForm(), splitting it if needed
+  (reported by <yury.burkatovsky@telrad.co.il>) -TD
+* move NO_GROUPS definitions from HTFile.c to HTFile.h to make them available
+  for use in LYUtils.c on DOS -LP
+* correct several minor problems with integration of HS's changes in GridText.h,
+  HTAlert.c and LYPrint.c (reported by LP) -TD
+* restore dev.3 interface to LYLowerCase and LYUpperCase and do casts internally
+  to work on unsigned chars -PG
+* corrected typos in some messages (reported by Dmitry Sivachenko
+  <demon@gpad.ac.ru>).
+* changes for win32 -SH
+  + added ifdef's using _WIN_CC (for Borland C) to some places in prettysrc
+    definitions which use the __STDC__ symbol.
+  + renamed makefile.w32 to makefile.bcb
+  + renamed src/chrtrans/makefile.w32 to src/chrtrans/makefile.bcb
+* the DOS port compiled with WATT-32 now works in a DOS window under Windows
+  3.11 and Windows for Workgroups 3.11.  It still needs its own packet driver
+  and does not use any native winsocks and  has only been tested with Toni
+  Lopez's DOSPPP.  This does fill a void for those running Win3.x, who
+  previously had to close Windows and go back to plain DOS before they could
+  run lynx.  Updated the help files, reflecting current platform support -DK
+* corrected definitions in HTTP.c and HTDOS.h to build with old TCP library -LP
+* When keypad_mode was changed from forms options menu
+  set_numbers_as_arrows()/reset_numbers_as_arrows() was not reinitialized
+  (reported by KED). - LP
+* SOURCE_CACHE: add one more parse setting member (keypad_mode)
+  to HText structure -LP
+* SOURCE_CACHE:  fix updating the document when "display charset" was changed
+  from Options Menu by user:  FREE(anchor->UCStages) call from
+  HTuncache_current_document() now duplicated in HTreparse_document().
+  (problem reported by KW) - LP.
+* tweak trace message in scan_cookie_sublist():  limit trace output by trying
+  LYstrstr() as a first approximation before host_matches() -LP
+* open temp-file in LYNewsPost() in binary mode for DJGPP to avoid translation
+  of \r\n vs \n -DK
+* add note about potential conflicts with cookie files to description of
+  --disable-persistent-cookies -BJP
+* added status message to indicate state of text inputs -VH
+* added ability to make text inputs non-sticky (i.e., user will have to
+  activate them explicitly via an LYK_ACTIVATE action) - seems useful for
+  people navigating with alphanumeric keys.  Default is 'sticky' - i.e., old
+  behavior.  Behavior is controlled via command line option '--sticky-inputs'
+  and STICKY_INPUTS in lynx.cfg -VH
+* added conditionals to 'userdefs.h' that disable support for
+  force-empty-hrefless-a mode if lynx is configured without lss (it's not
+  useful for such setup) -VH
+* minor change to prettysrc mode, writing comments one character at a time
+  to avoid translation of \r\n to \n\n in HText_appendText() -VH
+* correct rendering of DL in EXP_JUSTIFY_ELTS, will inhibit justification of
+  DT's content -VH
+* other modifications to EXP_JUSTIFY_ELTS logic, to use information associated
+  with each element that indicates whether it can be justified -VH
+* modify HTMLDTD.c so that "center" is not treated with EXP_JUSTIFY_ELTS -VH
+* fix for core-dump in EXP_JUSTIFY_ELTS -VH
+* modify signal handling in LYSystem to workaround competing SIGTSTP handlers
+  when a subprocess is active.  This adds a new function LYToggleSigDfl(),
+  using sigaction as an alternative to signal to save/restore as much of the
+  signal state as possible -KW
+* add configure option --enable-justify-elts (request by VH) -TD
+* add configure test for sigaction function and related structs -TD
+* restore hardcoded escape sequences on Unix in setup_vtXXX_keymap()
+  inadvertantly dropped in dev.4, to accommodate users of slang library who
+  have their $TERM set incorrectly -TD
+* correct ifdef's for resizeterm() call to allow Lynx to build with old
+  versions of ncurses -TD
 1999-07-14 (2.8.3dev.4)
 * minor fixes to build with SunOS K&R compiler -TD
 * cleanup unbalanced curly braces from other recent experimental options -TD
@@ -45,14 +169,14 @@ Changes since Lynx 2.8 release
   commandline option is --force-empty-hrefless-a, and force_empty_hrefless_a in
   lynx.cfg, ifdef'd with NO_EMPTY_HREFLESS_A -VH
 * incorporate changes for win32 by Hiroyuki Senshu <senshu@shonai-cit.ac.jp>
-  from
+  (SH) from
     ftp://crab.it.osha.sut.ac.jp/pub/Win32/develope/senshu/Lynx/
   based on his patch against 2.8.2pre.6
   Most changes are ifdef'd
     #define _WIN_CC=    .... for Windows C Compiler
-    #define CJK_EX      .... CJK EXtention
-    #define SH_EX       .... Senshu Hiroyuki EXtention
-    #define WIN_EX      .... Windows EXtention
+    #define CJK_EX      .... CJK EXtension
+    #define SH_EX       .... Senshu Hiroyuki EXtension
+    #define WIN_EX      .... Windows EXtension
 * add missing null-pointer check in MakeNewMapValue(), for verbose-images
   (from Debian bug report #39596) -TD
 * test/build with gettext-0.10.35 -TD
@@ -78,7 +202,8 @@ Changes since Lynx 2.8 release
   some OS/2 servers.  Only one server was known and used for testing, so the
   heuristics used may not be quite general enough.  File date/time is not shown
   since it doesn't seem to be part of the basic format -KW
-* In lynx.man removed bogus "ID:" for -assume_charset, -assume_local_charset -KW
+* in lynx.man removed bogus "ID:" for -assume_charset,
+  -assume_local_charset -KW
 * in a list, render a <DIV> that doesn't have an ALIGN="center" or
   ALIGN="right" attribute like a <P> in that situation:  break the line if
   necessary but don't create an empty line, an keep list indentation.  This

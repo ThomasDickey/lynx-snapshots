@@ -480,7 +480,7 @@ PRIVATE void send_file_to_mail ARGS3(
     char hdrfile[LY_MAXPATH];
     char my_temp[LY_MAXPATH];
 #endif
-#if defined(DOSPATH) || defined(WIN_EX)
+#if defined(DOSPATH)
     char my_temp[LY_MAXPATH];
 #endif
 
@@ -656,19 +656,19 @@ PRIVATE void send_file_to_mail ARGS3(
     }
 
     stop_curses();
-#ifdef SH_EX
-    SetOutputMode(O_TEXT);
-#endif
+    SetOutputMode( O_TEXT );
     printf(MAILING_FILE);
     LYSystem(buffer);
     sleep(AlertSecs);
     start_curses();
+    SetOutputMode( O_BINARY );
+
     if (isPMDF)
 	LYRemoveTemp(hdrfile);
     LYRemoveTemp(my_temp);
 #else /* !VMS (Unix or DOS) */
 
-#if defined(DOSPATH) || defined(WIN_EX)
+#if defined(DOSPATH)
     outfile_fp = LYOpenTemp(my_temp, ".txt", "w");
 #else
     HTSprintf0(&buffer, "%s %s", system_mail, system_mail_flags);
@@ -779,19 +779,17 @@ PRIVATE void send_file_to_mail ARGS3(
 	HTSprintf0(&buffer, "%s -t \"%s\" -F %s",
 			system_mail, user_response, my_temp);
     LYCloseTempFP(outfile_fp);	/* Close the tmpfile. */
+
     stop_curses();
-#ifdef SH_EX
     SetOutputMode(O_TEXT);
-#endif
     printf("%s\n\n$ %s\n\n%s", gettext("Sending"), buffer, PLEASE_WAIT);
     LYSystem(buffer);
     sleep(MessageSecs);
     start_curses();
-#ifdef SH_EX
     SetOutputMode( O_BINARY );
-#endif
+
     LYRemoveTemp(my_temp); /* Delete the tmpfile. */
-#else
+#else /* !WIN_EX */
     pclose(outfile_fp);
 #endif
 #endif /* VMS */
@@ -934,9 +932,7 @@ check_again:
 
     stop_curses();
     CTRACE(tfp, "command: %s\n", the_command);
-#ifdef SH_EX
     SetOutputMode( O_TEXT );
-#endif
     printf(PRINTING_FILE);
     /*
      * Set various bits of document information as environment variables, for
@@ -967,10 +963,10 @@ check_again:
     signal(SIGINT, cleanup_sig);
 #endif /* !VMS */
 #ifdef SH_EX
-    fprintf(stdout," Print job complite.\n");
+    fprintf(stdout, gettext(" Print job complete.\n"));
     fflush(stdout);
-    SetOutputMode( O_BINARY );
 #endif
+    SetOutputMode( O_BINARY );
     sleep(MessageSecs);
     start_curses();
 
@@ -1000,9 +996,7 @@ PRIVATE void send_file_to_screen ARGS3(
     outfile_fp = stdout;
 
     stop_curses();
-#ifdef SH_EX
     SetOutputMode( O_TEXT );
-#endif
 
 #ifndef VMS
     signal(SIGINT, SIG_IGN);
@@ -1047,8 +1041,8 @@ PRIVATE void send_file_to_screen ARGS3(
     }
 #ifdef SH_EX
     fprintf(stdout,"\n");
-    SetOutputMode( O_BINARY );
 #endif
+    SetOutputMode( O_BINARY );
     start_curses();
 
 done:	/* send_file_to_screen() */

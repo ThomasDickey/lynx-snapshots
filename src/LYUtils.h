@@ -33,7 +33,7 @@
 
 #define LYIsPipeCommand(s) ((s)[0] == '|')
 
-#ifdef DOSPATH
+#if defined(DOSPATH) || defined(__EMX__)
 #define LYIsPathSep(ch) ((ch) == '/' || (ch) == '\\')
 #else
 #define LYIsPathSep(ch) ((ch) == '/')

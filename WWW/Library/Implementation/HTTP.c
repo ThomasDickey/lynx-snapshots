@@ -7,7 +7,7 @@
 */
 
 #include <HTUtils.h>
-#ifdef __DJGPP__
+#if defined(__DJGPP__) && defined (WATT32) 
 #include <tcp.h>
 #endif /* __DJGPP__ */
 #include <HTTP.h>

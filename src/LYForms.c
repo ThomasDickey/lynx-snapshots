@@ -24,7 +24,8 @@ extern HTCJKlang HTCJK;
 
 PRIVATE int form_getstr PARAMS((
 	struct link *	form_link,
-	BOOLEAN		use_last_tfpos));
+	BOOLEAN		use_last_tfpos,
+	BOOLEAN		redraw_only));
 PRIVATE int popup_options PARAMS((
 	int		cur_selection,
 	OptionType *	list,
@@ -34,14 +35,16 @@ PRIVATE int popup_options PARAMS((
 	int		i_length,
 	int		disabled));
 
-PUBLIC int change_form_link ARGS7(
+
+PUBLIC int change_form_link_ex ARGS8(
 	struct link *,	form_link,
 	document *,	newdoc,
 	BOOLEAN *,	refresh_screen,
 	char *,		link_name,
 	char *,		link_value,
 	BOOLEAN,	use_last_tfpos,
-	BOOLEAN,	immediate_submit)
+	BOOLEAN,	immediate_submit,
+	BOOLEAN,	redraw_only)
 {
     FormInfo *form = form_link->form;
     int newdoc_changed = 0;
@@ -179,7 +182,7 @@ PUBLIC int change_form_link ARGS7(
 	case F_TEXT_TYPE:
 	case F_TEXTAREA_TYPE:
 	case F_PASSWORD_TYPE:
-	    c = form_getstr(form_link, use_last_tfpos);
+	    c = form_getstr(form_link, use_last_tfpos, redraw_only);
 	    if (form->type == F_PASSWORD_TYPE)
 		form_link->hightext = STARS(strlen(form->value));
 	    else
@@ -194,8 +197,12 @@ PUBLIC int change_form_link ARGS7(
 	    break;
 
 	case F_TEXT_SUBMIT_TYPE:
+	    if (redraw_only) {
+		c = form_getstr(form_link, use_last_tfpos, TRUE);
+		break;
+	    }
 	    if (!immediate_submit)
-		c = form_getstr(form_link, use_last_tfpos);
+		c = form_getstr(form_link, use_last_tfpos, FALSE);
 	    if (form->disabled == YES &&
 		(c == '\r' || c == '\n' || immediate_submit)) {
 		if (peek_mouse_link() >= 0)
@@ -300,6 +307,20 @@ PUBLIC int change_form_link ARGS7(
     return(c);
 }
 
+PUBLIC int change_form_link ARGS7(
+	struct link *,	form_link,
+	document *,	newdoc,
+	BOOLEAN *,	refresh_screen,
+	char *,		link_name,
+	char *,		link_value,
+	BOOLEAN,	use_last_tfpos,
+	BOOLEAN,	immediate_submit)
+{
+    /*pass all our args and FALSE as last arg*/
+    return change_form_link_ex(form_link,newdoc,refresh_screen,link_name,
+	link_value,use_last_tfpos,immediate_submit, FALSE /*redraw_only*/ );
+}
+
 PRIVATE int LastTFPos = -1;	/* remember last text field position */
 
 PRIVATE void LYSetLastTFPos ARGS1(
@@ -307,16 +328,11 @@ PRIVATE void LYSetLastTFPos ARGS1(
 {
     LastTFPos = pos;
 }
-#if 0
-PRIVATE int LYLastTFPos NOARGS
-{
-    return(LastTFPos);
-}
-#endif /* 0 */
 
-PRIVATE int form_getstr ARGS2(
+PRIVATE int form_getstr ARGS3(
 	struct link *,	form_link,
-	BOOLEAN,	use_last_tfpos)
+	BOOLEAN,	use_last_tfpos,
+	BOOLEAN,	redraw_only)
 {
     FormInfo *form = form_link->form;
     char *value = form->value;
@@ -363,33 +379,6 @@ PRIVATE int form_getstr ARGS2(
 	     */
 	    HTUserMsg(FORM_VALUE_TOO_LONG);
 	    show_formlink_statusline(form);
-#if 0				/* using function above instead */
-	    switch(form->type) {
-		case F_PASSWORD_TYPE:
-		    statusline(FORM_LINK_PASSWORD_MESSAGE);
-		    break;
-		case F_TEXT_SUBMIT_TYPE:
-		    if (form->submit_method == URL_MAIL_METHOD) {
-			statusline(FORM_LINK_TEXT_SUBMIT_MAILTO_MSG);
-		    } else if (form->no_cache) {
-			statusline(FORM_LINK_TEXT_RESUBMIT_MESSAGE);
-		    } else {
-			statusline(FORM_LINK_TEXT_SUBMIT_MESSAGE);
-		    }
-		    break;
-		case F_FILE_TYPE:
-		    statusline(FORM_LINK_FILE_MESSAGE);
-		    break;
-		case F_TEXT_TYPE:
-		    statusline(FORM_LINK_TEXT_MESSAGE);
-		    break;
-		case F_TEXTAREA_TYPE:
-		    statusline(FORM_LINK_TEXTAREA_MESSAGE);
-		    break;
-		default:
-		    break;
-	    }
-#endif /* 0 - using function instead */
 	    move(startline, startcol);
 	}
     }
@@ -413,6 +402,8 @@ PRIVATE int form_getstr ARGS2(
 	    MyEdit.pos = 0;
     }
     LYRefreshEdit(&MyEdit);
+    if (redraw_only)
+	return 0;		/*return value won't be analysed*/
 
     /*
      *  And go for it!
@@ -420,7 +411,7 @@ PRIVATE int form_getstr ARGS2(
     for (;;) {
 again:
 	repeat = -1;
-	get_mouse_link();		/* Reset mouse_link. */
+	get_mouse_link();	/* Reset mouse_link. */
 
 	ch = LYgetch_for(FOR_INPUT);
 #ifdef SUPPORT_MULTIBYTE_EDIT

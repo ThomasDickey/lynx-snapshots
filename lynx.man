@@ -54,7 +54,7 @@ or \fB"H"\fR while running \fILynx\fR.
 Then follow the link titled, "Help on URLs."
 
 \fILynx\fR uses only long option names. Option
-names can begin with double dash as well, 
+names can begin with double dash as well,
 underscores and dashes can be intermixed in
 option names (in the reference below options
 are with one dash before them and with underscores).
@@ -298,10 +298,10 @@ disable the link list feature in dumps.
 disable mailing of error messages to document owners.
 .TP
 .B -nonrestarting_sigwinch
-This flag is not available on all systems, 
+This flag is not available on all systems,
 Lynx needs to be compiled with HAVE_SIGACTION defined.
 If available, this flag \fImay\fR cause Lynx to react
-more immediately to window changes when run within 
+more immediately to window changes when run within
 an \fBxterm\fR.
 .TP
 .B -nopause
@@ -401,7 +401,7 @@ inside_news, outside_news, telnet_port,
 jump, mail, print, exec, and goto.
 The settings for these,
 as well as additional goto restrictions for
-specific URL schemes that are also applied, 
+specific URL schemes that are also applied,
 are derived from definitions within userdefs.h.
 
 .I dired_support
@@ -518,6 +518,11 @@ disable recognition of rlogin commands.
 .B -selective
 require .www_browsable files to browse directories.
 .TP
+.B -short_url
+show very long URLs in the status line with "___" to represent the
+portion which cannot be displayed.
+The begining and end of the URL are displayed, rather than suppressing the end.
+.TP
 .B -show_cursor
 If enabled the cursor will not be hidden in the right hand
 corner but will instead be positioned at the start of the
@@ -539,6 +544,9 @@ disable SIGINT cleanup handler
 .TP
 .B -startfile_ok
 allow non-http startfile and homepage with -validate.
+.TP
+.B -sticky_inputs
+don't require activating inputs in order to edit them.
 .TP
 .B -tagsoup
 initialize parser, using Tag Soup DTD rather than SortaSGML.

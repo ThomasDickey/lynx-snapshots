@@ -121,7 +121,12 @@ PUBLIC char *LYNewsPost ARGS2(
      *  Open a temporary file for the headers
      *  and message body. - FM
      */
-    if ((fd = LYOpenTemp(my_tempfile, HTML_SUFFIX, "w")) == NULL) {
+#ifdef __DJGPP__
+    if ((fd = LYOpenTemp(my_tempfile, HTML_SUFFIX, "wb")) == NULL)
+#else
+    if ((fd = LYOpenTemp(my_tempfile, HTML_SUFFIX, "w")) == NULL)
+#endif /* __DJGPP__ */
+    {
 	HTAlert(CANNOT_OPEN_TEMP);
 	return(postfile);
     }

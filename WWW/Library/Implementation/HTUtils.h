@@ -130,6 +130,11 @@ typedef unsigned short mode_t;
 
 #endif
 
+#ifndef USE_COLOR_STYLE
+    /* it's useless for such setup */
+#  define NO_EMPTY_HREFLESS_A
+#endif
+
 /*
 
 Debug message control.

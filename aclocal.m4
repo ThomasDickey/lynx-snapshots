@@ -1026,6 +1026,25 @@ if test $ac_cv_func_lstat = yes; then
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl Check if we have the sigaction function and related structures.
+AC_DEFUN([CF_FUNC_SIGACTION],[
+AC_CACHE_CHECK(for sigaction and structs,cf_cv_func_sigaction,[
+AC_TRY_LINK([
+#include <sys/types.h>
+#include <signal.h>],
+	[struct sigaction act;
+	act.sa_handler = SIG_DFL;
+#ifdef SA_RESTART
+	act.sa_flags |= SA_RESTART;
+#endif /* SA_RESTART */
+	sigaction(1, &act, 0);
+	],
+	[cf_cv_func_sigaction=yes],
+	[cf_cv_func_sigaction=no])
+])
+test "$cf_cv_func_sigaction" = yes && AC_DEFINE(HAVE_SIGACTION)
+])dnl
+dnl ---------------------------------------------------------------------------
 dnl Test for the presence of <sys/wait.h>, 'union wait', arg-type of 'wait()'
 dnl and/or 'waitpid()'.
 dnl
@@ -1204,6 +1223,7 @@ test "$prefix" != NONE           && $1="[$]$1 $prefix/include $prefix/include/$2
 fi
 test "$prefix" != /usr/local     && $1="[$]$1 /usr/local/include /usr/local/include/$2"
 test "$prefix" != /usr           && $1="[$]$1 /usr/include /usr/include/$2"
+test "$prefix" != /opt           && $1="[$]$1 /opt/include /opt/include/$2"
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl Insert text into the help-message, for readability, from AC_ARG_WITH.
@@ -1278,6 +1298,7 @@ test "$prefix" != "$exec_prefix" && $1="[$]$1 $prefix/lib $prefix/lib/$2"
 fi
 test "$prefix" != /usr/local     && $1="[$]$1 /usr/local/lib /usr/local/lib/$2"
 test "$prefix" != /usr           && $1="[$]$1 /usr/lib /usr/lib/$2"
+test "$prefix" != /opt           && $1="[$]$1 /opt/lib /opt/lib/$2"
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl Check if we've got setlocale() and its header, <locale.h>

@@ -31,8 +31,10 @@ char * HTDOS_wwwName PARAMS((char * dosname));
 */
 char * HTDOS_name PARAMS((char * wwwname));
 
-#ifdef __WIN32__
+#ifdef WIN_EX 
 char * HTDOS_short_name (char * fn);
+#else 
+#define HTDOS_short_name(fn)  fn 
 #endif
 
 #endif /*  HTDOS_H */

@@ -197,6 +197,7 @@ PUBLIC BOOLEAN telnet_ok = TRUE;
 PUBLIC BOOLEAN news_ok = TRUE;
 #endif
 PUBLIC BOOLEAN rlogin_ok = TRUE;
+PUBLIC BOOLEAN long_url_ok = TRUE;
 PUBLIC BOOLEAN ftp_ok = TRUE;
 PUBLIC BOOLEAN system_editor = FALSE;
 
@@ -441,6 +442,10 @@ PUBLIC BOOLEAN with_backspaces = FALSE;
 
 #ifndef NO_EMPTY_HREFLESS_A
 PUBLIC BOOL force_empty_hrefless_a = FALSE;
+#endif
+
+#ifndef NO_NONSTICKY_INPUTS
+PUBLIC BOOL sticky_inputs = TRUE;
 #endif
 
 #ifdef DISP_PARTIAL
@@ -2066,7 +2071,8 @@ PUBLIC void reload_read_cfg NOARGS
 	/* set few safe flags: */
 #ifdef EXP_PERSISTENT_COOKIES
 	BOOLEAN persistent_cookies_flag = persistent_cookies;
-	char * LYCookieFile_flag = LYCookieFile;
+	char * LYCookieFile_flag = NULL;
+	StrAllocCopy(LYCookieFile_flag, LYCookieFile);
 #endif
 
 	free_lynx_cfg(); /* free downloaders, printers, not always environments */
@@ -2104,14 +2110,15 @@ PUBLIC void reload_read_cfg NOARGS
 		 */
 #ifdef EXP_PERSISTENT_COOKIES
 	/* restore old settings */
-	 if (persistent_cookies != persistent_cookies_flag) {
-	     persistent_cookies = persistent_cookies_flag;
-	     HTAlert(gettext("persistent cookies state will be changed in next session only."));
-	 }
-	 if (strcmp(LYCookieFile, LYCookieFile_flag)) {
-	     StrAllocCopy(LYCookieFile, LYCookieFile_flag);
-	     CTRACE(tfp, "cookies file can be changed in next session only, restored.\n");
-	 }
+	if (persistent_cookies != persistent_cookies_flag) {
+	    persistent_cookies = persistent_cookies_flag;
+	    HTAlert(gettext("persistent cookies state will be changed in next session only."));
+	}
+	if (strcmp(LYCookieFile, LYCookieFile_flag)) {
+	    StrAllocCopy(LYCookieFile, LYCookieFile_flag);
+	    CTRACE(tfp, "cookies file can be changed in next session only, restored.\n");
+	}
+	FREE(LYCookieFile_flag);
 #endif
 
     }
@@ -3239,6 +3246,10 @@ with the PREV_DOC command or from the History List"
       "selective",	FUNCTION_ARG,		selective_fun,
       "require .www_browsable files to browse directories"
    ),
+   PARSE_SET(
+      "short_url",	UNSET_ARG,		&long_url_ok,
+      "enables examination of beginning and end of long URL in status line"
+   ),
 #ifdef SH_EX
    PARSE_SET(
       "show_cfg",	SET_ARG,		&show_cfg,
@@ -3266,6 +3277,12 @@ treated '>' as a co-terminator for double-quotes and tags"
       "startfile_ok",	SET_ARG,		&startfile_ok,
       "allow non-http startfile and homepage with -validate"
    ),
+#ifndef NO_NONSTICKY_INPUTS
+   PARSE_SET(
+      "sticky_inputs",	SET_ARG,		&sticky_inputs,
+      "don't require activating inputs in order to edit them"
+   ),
+#endif
 #ifndef VMS
 #ifdef SYSLOG_REQUESTED_URLS
    PARSE_STR(

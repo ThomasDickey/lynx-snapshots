@@ -46,6 +46,7 @@ extern char *string_short(char *str, int cut_pos);	/* LYExtern.c */
 
 #define CHARSET_TRANS 14	/* "Transparent" in LYCharSets.c */
 
+#ifdef SH_EX
 PRIVATE char *str_sjis(char *to, char *from)
 {
     if (!LYRawMode) {
@@ -59,6 +60,7 @@ PRIVATE char *str_sjis(char *to, char *from)
     }
     return to;
 }
+#endif
 
 PUBLIC char *str_kcode(HTkcode code)
 {
@@ -110,12 +112,14 @@ PUBLIC char *str_kcode(HTkcode code)
 }
 
 
-PUBLIC void set_ws_title(char * str)
+#ifdef SH_EX
+PRIVATE void set_ws_title(char * str)
 {
 #ifdef WIN_EX
     SetConsoleTitle(str);
 #endif
 }
+#endif
 
 /* 1998/10/30 (Fri) 10:06:47 */
 
@@ -125,7 +129,7 @@ PRIVATE int str_n_cmp(const char *p, const char *q, int n)
 {
     if (n == 0)
 	return 0;
-    
+
     if (p == NULL)
 	return NOT_EQU;
 
@@ -158,6 +162,7 @@ PRIVATE int str_n_cmp(const char *p, const char *q, int n)
 
 
 PRIVATE void exit_immediately_with_error_message PARAMS((int state, BOOLEAN first_file));
+PRIVATE void status_link PARAMS((char *curlink_name, BOOLEAN show_more, BOOLEAN show_indx));
 PRIVATE void show_main_statusline PARAMS((CONST linkstruct curlink));
 PRIVATE BOOL confirm_post_resub PARAMS((
     CONST char*		address,
@@ -198,6 +203,12 @@ PRIVATE document newdoc;
 PRIVATE document curdoc;
 PRIVATE char *traversal_host = NULL;
 PRIVATE char *traversal_link_to_add = NULL;
+
+#ifndef NO_NONSTICKY_INPUTS
+PRIVATE BOOL textinput_activated = FALSE;
+PUBLIC BOOL textinput_drawn = FALSE;
+    /*must be public since used in highlight(..)*/
+#endif
 
 #ifdef LY_FIND_LEAKS
 /*
@@ -358,6 +369,36 @@ PRIVATE int do_change_link ARGS1(
     return(0);			/* indicates OK */
 }
 
+PRIVATE int find_link_near_col ARGS2(
+    	int,	col,
+	int,	delta)
+{
+    int i;
+
+    for (i = curdoc.link; delta > 0 ? (i < nlinks) : (i >= 0); i += delta) {
+       if ( (links[i].ly - links[curdoc.link].ly) * delta > 0 ) {
+            int cy = links[i].ly, best = -1, dist = 1000000;
+
+            while ((delta > 0 ? (i < nlinks) : (i >= 0)) && cy == links[i].ly) {
+                int cx = links[i].lx;
+
+                if (links[i].hightext)
+                    cx += strlen(links[i].hightext)/2;
+                cx -= col;
+                if (cx < 0)
+                    cx = -cx;
+                if (cx < dist) {
+                    dist = cx;
+                    best = i;
+                }
+                i += delta;
+            }
+            return(best);
+       }
+    }
+    return(-1);
+}
+
 /*
  *  Here's where we do all the work.
  *  mainloop is basically just a big switch dependent on the users input.
@@ -412,6 +453,7 @@ int mainloop NOARGS
     unsigned int len;
     int i;
     int n;
+    int follow_col = -1;
 
 #ifdef DIRED_SUPPORT
     char *tp = NULL;
@@ -530,7 +572,7 @@ initialize:
 
 		force_load = FALSE;  /* done */
 		if (TRACE && LYCursesON) {
-		    move(LYlines-1, LYcols-1);	/* make sure cursor is down */
+		    LYHideCursor();	/* make sure cursor is down */
 #ifdef USE_SLANG
 		    addstr("\n");
 #endif /* USE_SLANG */
@@ -741,6 +783,10 @@ try_again:
 #else  /* TRACK_INTERNAL_LINKS */
 		getresult = getfile(&newdoc);
 #endif /* TRACK_INTERNAL_LINKS */
+
+#ifndef NO_NOSTICKY_INPUTS
+		textinput_drawn = FALSE; /* for sure */
+#endif
 
 		switch(getresult) {
 
@@ -1265,7 +1311,7 @@ try_again:
 	     *  WINDOW structures are already filled based on the old size.
 	     *  So we notify the ncurses library directly here. - kw
 	     */
-#if defined(NCURSES_VERSION) && !defined(PDCURSES) /* FIXME: check for specific version? */
+#if defined(HAVE_RESIZETERM)
 	    resizeterm(LYlines, LYcols);
 #else
 	    stop_curses();
@@ -1453,7 +1499,9 @@ try_again:
 	 *  All display_partial calls ends here for final redraw.
 	 */
 	if (curdoc.line != Newline) {
-
+#ifndef NO_NONSTICKY_INPUTS
+	    textinput_drawn = FALSE;
+#endif
 	    refresh_screen = FALSE;
 
 	    HText_pageDisplay(Newline, prev_target);
@@ -1644,11 +1692,12 @@ try_again:
 	if (!(nlinks > 0 &&
 	      links[curdoc.link].type == WWW_FORM_LINK_TYPE &&
 	      (links[curdoc.link].form->type == F_TEXT_TYPE ||
-	       links[curdoc.link].form->type == F_TEXTAREA_TYPE)))
+	       links[curdoc.link].form->type == F_TEXTAREA_TYPE))) {
 	     /*
 	      *  Highlight current link.
 	      */
 	    highlight(ON, curdoc.link, prev_target);
+	}
 
 	if (traversal) {
 	    /*
@@ -1688,6 +1737,9 @@ try_again:
 	     *	Normal, non-traversal handling.
 	     */
 	    if (nlinks > 0 &&
+#ifndef NO_NONSTICKY_INPUTS
+		(textinput_activated || !textinput_drawn) &&
+#endif
 		links[curdoc.link].type == WWW_FORM_LINK_TYPE &&
 		(links[curdoc.link].form->type == F_TEXT_TYPE ||
 		 links[curdoc.link].form->type == F_TEXT_SUBMIT_TYPE ||
@@ -1695,6 +1747,23 @@ try_again:
 		 links[curdoc.link].form->type == F_TEXTAREA_TYPE)) {
 
 		BOOLEAN use_last_tfpos;
+		use_last_tfpos = (real_cmd == LYK_LPOS_PREV_LINK ||
+				  real_cmd == LYK_LPOS_NEXT_LINK);
+
+#ifndef NO_NONSTICKY_INPUTS
+		if (!sticky_inputs && !textinput_activated) {
+		    /*draw the text entry, but don't activate it*/
+    		    change_form_link_ex(&links[curdoc.link],
+				     &newdoc, &refresh_screen,
+				     links[curdoc.link].form->name,
+				      links[curdoc.link].form->value,
+				      use_last_tfpos, FALSE, TRUE);
+		    c = DO_NOTHING;
+		    textinput_drawn = TRUE;
+		} else
+#endif
+		{
+
 		/*
 		 *  Replace novice lines if in NOVICE_MODE.
 		 */
@@ -1704,13 +1773,15 @@ try_again:
 		    move(LYlines-1,0); clrtoeol();
 		    addstr(FORM_NOVICELINE_TWO);
 		}
-		use_last_tfpos = (real_cmd==LYK_LPOS_PREV_LINK ||
-				  real_cmd==LYK_LPOS_NEXT_LINK);
 		real_c = change_form_link(&links[curdoc.link],
 				     &newdoc, &refresh_screen,
 				     links[curdoc.link].form->name,
 					  links[curdoc.link].form->value,
 					  use_last_tfpos, FALSE);
+#ifndef NO_NONSTICKY_INPUTS
+		textinput_activated = FALSE;
+		textinput_drawn = FALSE;
+#endif
 
 		c = (real_c==LKC_DONE) ? DO_NOTHING : LKC_TO_C(real_c);
 		if (c != DO_NOTHING &&
@@ -1782,6 +1853,13 @@ try_again:
 				    newdoc.link++;
 			    }
 			}
+#ifndef NO_NONSTICKY_INPUTS
+			if (!sticky_inputs) {
+			    textinput_activated = TRUE;
+			    textinput_drawn = TRUE;
+			};
+#endif
+
 		   }
 #endif /* AUTOGROW */
 
@@ -1794,9 +1872,11 @@ try_again:
 		    c = LAC_TO_LKC0(LYK_NEXT_LINK);
 		    break;
 		default:
+
 		    if (old_c != c && old_c != real_c && c != real_c)
 			real_c = c;
 		}
+		} /*  !(!sticky_inputs && !textinput_activated)*/
 	    } else {
 		/*
 		 *  Get a keystroke from the user.
@@ -1930,7 +2010,7 @@ new_keyboard_input:
 #ifdef WIN_EX
 	if (c == DO_NOTHING)
 	    cmd = LYK_DO_NOTHING;
-	else 
+	else
 #endif
 	cmd = LKC_TO_LAC(keymap,c);  /* adds 1 to map EOF to 0 */
 
@@ -1949,6 +2029,9 @@ new_cmd:  /*
 	force_old_UCLYhndl_on_reload = FALSE;
 	CTRACE_FLUSH(tfp);
 
+	if (cmd != LYK_UP_LINK && cmd != LYK_DOWN_LINK)
+	    follow_col = -1;
+
 	switch(cmd) {
 	case 0: /* unmapped character */
 	default:
@@ -1958,7 +2041,7 @@ new_cmd:  /*
 		 links[curdoc.link].form->type == F_TEXT_SUBMIT_TYPE ||
 		 links[curdoc.link].form->type == F_PASSWORD_TYPE ||
 		 links[curdoc.link].form->type == F_TEXTAREA_TYPE))
-		
+
 		show_main_statusline(links[curdoc.link]);
 	    else if (more)
 		HTInfoMsg(MOREHELP);
@@ -2966,13 +3049,16 @@ new_cmd:  /*
 		 !HText_LinksInLines(HTMainText, 1, Newline - 1))) {
 		/* more links before this on screen, and first of them on
 		   a different line or no previous links before this screen? */
-		int newlink = -1;
-		for (i = curdoc.link; i >= 0; i--) {
-		    if (links[i].ly < links[curdoc.link].ly) {
-			newlink = i;
-			break;
-		    }
+		int newlink;
+
+		if (follow_col == -1) {
+		    follow_col = links[curdoc.link].lx;
+
+		    if (links[curdoc.link].hightext)
+			follow_col += strlen(links[curdoc.link].hightext)/2;
 		}
+
+		newlink = find_link_near_col(follow_col, -1);
 		if (newlink > -1) {
 		    highlight(OFF, curdoc.link, prev_target);
 		    curdoc.link = newlink;
@@ -3021,13 +3107,16 @@ new_cmd:  /*
 
 	case LYK_DOWN_LINK:
 	    if (curdoc.link < (nlinks-1)) {	/* more links? */
-		int newlink = -1;
-		for (i = curdoc.link; i < nlinks; i++)
-		   if (links[i].ly > links[curdoc.link].ly) {
-			newlink = i;
-			break;
-		   }
+		int newlink;
 
+		if (follow_col == -1) {
+		    follow_col = links[curdoc.link].lx;
+
+		    if (links[curdoc.link].hightext)
+			follow_col += strlen(links[curdoc.link].hightext)/2;
+		}
+
+		newlink = find_link_near_col(follow_col, 1);
 		if (newlink > -1) {
 		    highlight(OFF, curdoc.link, prev_target);
 		    curdoc.link = newlink;
@@ -3118,7 +3207,7 @@ new_cmd:  /*
 		 *  Pop the file afterwards to prevent multiple copies.
 		 */
 		if (TRACE && !LYUseTraceLog && LYCursesON) {
-		    move(LYlines-1, LYcols-1);	/* make sure cursor is down */
+		    LYHideCursor();	/* make sure cursor is down */
 #ifdef USE_SLANG
 		    addstr("\n");
 #endif /* USE_SLANG */
@@ -3279,6 +3368,21 @@ new_cmd:  /*
 
 	case LYK_ACTIVATE:	/* follow a link */
 	case LYK_SUBMIT:	/* follow a link, submit TEXT_SUBMIT input */
+#ifndef NO_NONSTICKY_INPUTS
+	    if (nlinks > 0 &&
+		links[curdoc.link].type == WWW_FORM_LINK_TYPE &&
+		(links[curdoc.link].form->type == F_TEXT_TYPE ||
+		 links[curdoc.link].form->type == F_TEXT_SUBMIT_TYPE ||
+		 links[curdoc.link].form->type == F_PASSWORD_TYPE ||
+		 links[curdoc.link].form->type == F_TEXTAREA_TYPE)) {
+
+		 textinput_activated = TRUE;
+		 textinput_drawn = FALSE;
+		 if (!sticky_inputs)
+		     show_main_statusline(links[curdoc.link]);
+		 break;
+	    }
+#endif
 	    if (do_change_link(prev_target) == -1) {
 		LYforce_no_cache = FALSE;
 		reloading = FALSE;
@@ -3438,7 +3542,7 @@ new_cmd:  /*
 			links[curdoc.link].form->type == F_TEXTAREA_TYPE) {
 			show_formlink_statusline(links[curdoc.link].form);
 		    }
- 
+
 		    c = change_form_link(&links[curdoc.link],
 					 &newdoc, &refresh_screen,
 					 links[curdoc.link].form->name,
@@ -4537,7 +4641,7 @@ if (!LYUseFormsOptions) {
 			/*
 			 *  Make sure cursor is down.
 			 */
-			move(LYlines-1, LYcols-1);
+			LYHideCursor();
 #ifdef USE_SLANG
 			addstr("\n");
 #endif /* USE_SLANG */
@@ -5156,7 +5260,7 @@ if (!LYUseFormsOptions) {
 		    }
 		    break;
 		}
-		
+
 		n = HText_InsertFile (&links[curdoc.link]);
 
 		/*
@@ -6655,9 +6759,10 @@ PRIVATE void show_main_statusline ARGS1(
 	 *  Let them know if it's an index -- very rare.
 	 */
 	if (is_www_index) {
-	    move(LYlines-1, LYcols-8);
+	    char *indx = gettext("-index-");
+	    move(LYlines-1, LYcols - strlen(indx) - 1);
 	    start_reverse();
-	    addstr("-index-");
+	    addstr(indx);
 	    stop_reverse();
 	}
 
@@ -6666,23 +6771,14 @@ PRIVATE void show_main_statusline ARGS1(
 	 *  Show the URL or, for some internal links, the fragment
 	 */
 	char *cp = NULL;
+
 	if (curlink.type == WWW_INTERN_LINK_TYPE &&
 	    strncmp(curlink.lname, "LYNXIMGMAP:", 11)) {
 	    cp = strchr(curlink.lname, '#');
 	}
 	if (!cp)
 	    cp = curlink.lname;
-	if (more) {
-	    if (is_www_index)
-		_user_message("-more- -index- %s", cp);
-	    else
-		_user_message("-more- %s", cp);
-	} else {
-	    if (is_www_index)
-		_user_message("-index- %s", cp);
-	    else
-		statusline(cp);
-	}
+	status_link(cp, more, is_www_index);
     } else if (is_www_index && more) {
 	char buf[128];
 
@@ -6701,8 +6797,14 @@ PRIVATE void show_main_statusline ARGS1(
     } else {
 	_statusline(HELP);
     }
+
+#ifndef NO_NOSTICKY_INPUTS
+    if (textinput_drawn) {
+	_statusline(gettext("Inactive text input, activate to edit (e.g., press ENTER)"));
+    }
+#endif
     /* turn off cursor since now it's probably on statusline -HV */
-    move((LYlines - 1), (LYcols - 1));
+    LYHideCursor();
 }
 
 /*
@@ -6772,4 +6874,73 @@ PRIVATE void exit_immediately_with_error_message ARGS2(
 	exit_immediately(-1);
     }
     /* else: return(-1) in mainloop */
+}
+
+
+PRIVATE void status_link ARGS3(
+	char *,		curlink_name,
+	BOOLEAN,	show_more,
+	BOOLEAN,	show_indx)
+{
+#define MAX_STATUS (LYcols - 2)
+#define MIN_STATUS MAX_STATUS / 2
+    char format[MAX_LINE];
+    int prefix;
+    int length;
+
+    *format = 0;
+    if (show_more)
+	sprintf(format, "%s ", gettext("-more-"));
+    if (show_indx)
+	sprintf(format + strlen(format), "%s ", gettext("-index-"));
+    prefix = strlen(format);
+    length = strlen(curlink_name);
+
+    if (prefix > MAX_STATUS) {
+	_user_message("%s", format);	/* no room for url */
+    } else {
+	sprintf(format + prefix, "%%.%ds", MAX_STATUS - prefix);
+
+	if ((length + prefix > MAX_STATUS) && long_url_ok) {
+	    char *buf = NULL;
+	    int j;
+	    int k;
+	    int cut_position;
+	    int link_position;
+
+	    StrAllocCopy(buf, curlink_name);
+
+	    /* Scan to find the final leaf of the url, put it in 'k'.
+	     * Ignore trailing '/'.
+	     */
+	    for (j = length; (j > 0) && buf[j] != '/'; --j)
+		;
+	    if (j >= (length - 3)) {
+		for (k = j - 1; (k > 0) && buf[k] != '/'; --k)
+		    ;
+	    } else {
+		k = j;
+	    }
+
+	    /* We assume that one can recognize the link from at least
+	     * MIN_STATUS characters.
+	     */
+	    cut_position = MAX_STATUS - prefix - (length - k);
+	    if (cut_position < MIN_STATUS){
+		cut_position = MIN_STATUS;
+		link_position = length - MIN_STATUS + 3;
+	    } else {
+		link_position = k;
+	    }
+	    for (j = 0; j < 3; j++)
+		buf[cut_position++] = '_';
+	    if (cut_position < link_position)
+		while ((buf[cut_position++] = buf[link_position++]) != 0)
+		    ;
+	    _user_message(format, buf);
+	    FREE(buf);
+	} else {	/* show (possibly truncated) url */
+	    _user_message(format, curlink_name);
+	}
+    }
 }

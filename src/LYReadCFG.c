@@ -957,7 +957,7 @@ static int parse_html_src_spec ARGS3(
     return 0;
 }
 
-#ifdef __STDC__
+#if defined(__STDC__) || defined(_WIN_CC)
 #define defHTSRC_parse_fun(x) static int html_src_set_##x ARGS1( char*,str) \
  { parse_html_src_spec(HTL_##x,str,#x); return 0; }
 #else
@@ -1224,6 +1224,9 @@ static Config_Type Config_Table [] =
      PARSE_SET("source_cache", CONF_FUN, source_cache_fun),
 #endif
      PARSE_STR("startfile", CONF_STR, &startfile),
+#ifndef NO_NONSTICKY_INPUTS
+     PARSE_SET("sticky_inputs", CONF_BOOL, &sticky_inputs),
+#endif
      PARSE_SET("strip_dotdot_urls", CONF_BOOL, &LYStripDotDotURLs),
      PARSE_SET("substitute_underscores", CONF_BOOL, &use_underscore),
      PARSE_FUN("suffix", CONF_FUN, suffix_fun),

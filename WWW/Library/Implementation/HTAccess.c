@@ -1044,7 +1044,7 @@ PRIVATE BOOL HTLoadDocument ARGS4(
 	fprintf(stderr,
  gettext("**** HTAccess: socket or file number returned by obsolete load routine!\n"));
 	fprintf(stderr,
- gettext("**** HTAccess: Internal software error.  Please mail lynx_dev@sig.net!\n"));
+ gettext("**** HTAccess: Internal software error.  Please mail lynx-dev@sig.net!\n"));
 	fprintf(stderr, gettext("**** HTAccess: Status returned was: %d\n"),status);
 	exit(-1);
     }

@@ -175,6 +175,30 @@ extern float HTFileValue PARAMS((
 **
 **   Isn't there a quicker way?
 */
+
+#if defined(HAVE_CONFIG_H)
+
+#ifndef HAVE_GETGROUPS
+#define NO_GROUPS
+#endif
+
+#else
+
+#ifdef VMS
+#define NO_GROUPS
+#endif /* VMS */
+#ifdef NO_UNIX_IO
+#define NO_GROUPS
+#endif /* NO_UNIX_IO */
+#ifdef PCNFS
+#define NO_GROUPS
+#endif /* PCNFS */
+#ifdef NOUSERS
+#define NO_GROUPS
+#endif /* PCNFS */
+
+#endif /* HAVE_CONFIG_H */
+
 extern BOOL HTEditable PARAMS((CONST char * filename));
 
 /*	Make a save stream.

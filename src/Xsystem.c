@@ -1,9 +1,12 @@
-/* $Id: Xsystem.c,v 1.1 1999/07/14 16:44:55 tom Exp $
+/* $Id: Xsystem.c,v 1.2 1999/07/30 16:06:54 tom Exp $
  *	like system("cmd") but return with exit code of "cmd"
  *	for Turbo-C/MS-C/LSI-C
  *  This code is in the public domain.
  *
  * $Log: Xsystem.c,v $
+ * Revision 1.2  1999/07/30 16:06:54  tom
+ * 2.8.3dev.3
+ *
  * Revision 1.1  1999/07/14 16:44:55  tom
  * Initial revision
  *
@@ -344,7 +347,7 @@ prog_go(PRO * p, int flag)
 	ep = getenv("PATH");
 	strcpy(cmdb, p->cmd);
 	for (;;) {
-	    if (extp) {		/* has extention */
+	    if (extp) {		/* has extension */
 		if ((rc = open(cmdb, O_RDONLY)) >= 0) {
 		    close(rc);
 		    rc = spawnl(flag, cmdb, cmdb, p->arg, (char *) 0);
@@ -372,7 +375,7 @@ prog_go(PRO * p, int flag)
 	    }
 	}
     } else {			/* has PATH or Drive */
-	if (extp) {		/* has extention */
+	if (extp) {		/* has extension */
 	    if ((rc = open(p->cmd, O_RDONLY)) >= 0) {
 		close(rc);
 		return spawnl(flag, p->cmd, p->cmd, p->arg, (char *) 0);

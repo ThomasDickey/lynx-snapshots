@@ -526,6 +526,18 @@ PUBLIC void HTML_put_string ARGS2(HTStructured *, me, CONST char *, s)
 	     *	by the cases above (HTML_PRE or similar may not be the
 	     *	last element pushed on the style stack). - kw
 	     */
+#ifdef USE_PSRC
+	    if (psrc_view) {
+		/*
+		 * We do this so that a raw '\r' in the string will not be
+		 * interpreted as an internal request to break a line - passing
+		 * '\r' to HText_appendText is treated by it as a request to
+		 * insert a blank line - VH
+		 */
+		for(; *s; ++s)
+		    HTML_put_character(me, *s);
+	    } else
+#endif
 	    HText_appendText(me->text, s);
 	    break;
 	} else {
@@ -734,7 +746,7 @@ PRIVATE void HTMLSRC_apply_markup ARGS4(
 #  define START TRUE
 #  define STOP FALSE
 
-#ifdef __STDC__
+#if defined(__STDC__) || _WIN_CC
 #  define PSRCSTART(x)	HTMLSRC_apply_markup(me,HTL_##x,START,tag_charset)
 #  define PSRCSTOP(x)  HTMLSRC_apply_markup(me,HTL_##x,STOP,tag_charset)
 #else
@@ -1631,6 +1643,7 @@ PRIVATE void HTML_start_element ARGS6(
 	    if (me->inUnderline == FALSE)
 		HText_appendCharacter(me->text, LY_UNDERLINE_END_CHAR);
 	    HTML_put_character(me, ' ');
+
 	    me->in_word = NO;
 	    CHECK_ID(HTML_FRAME_ID);
 	    HText_beginAnchor(me->text, me->inUnderline, me->CurrentA);
@@ -5709,11 +5722,18 @@ PRIVATE void HTML_start_element ARGS6(
 	me->sp[0].style = me->new_style;	/* Stack new style */
 	me->sp[0].tag_number = ElementNumber;
 #ifdef EXP_JUSTIFY_ELTS
-	if (wait_for_this_stacked_elt<0 &&
-		HTML_dtd.tags[ElementNumber].can_justify==FALSE)
-	    wait_for_this_stacked_elt=me->stack - me->sp;
+	if (wait_for_this_stacked_elt < 0 &&
+		HTML_dtd.tags[ElementNumber].can_justify == FALSE)
+	    wait_for_this_stacked_elt = me->stack - me->sp + MAX_NESTING;
 #endif
     }
+
+#ifdef EXP_JUSTIFY_ELTS
+    if (in_DT && ElementNumber == HTML_DD)
+	in_DT = FALSE;
+    else if (ElementNumber == HTML_DT)
+	in_DT = TRUE;
+#endif
 
 #if defined(USE_COLOR_STYLE)
 /* end really empty tags straight away */
@@ -5889,8 +5909,8 @@ PRIVATE void HTML_end_element ARGS3(
 	    return;
 	} else if (me->sp < (me->stack + MAX_NESTING - 1)) {
 #ifdef EXP_JUSTIFY_ELTS
-	    if (wait_for_this_stacked_elt==me->stack-me->sp)
-		reached_awaited_stacked_elt=TRUE;
+	    if (wait_for_this_stacked_elt == me->stack - me->sp + MAX_NESTING)
+		reached_awaited_stacked_elt = TRUE;
 #endif
 	    (me->sp)++;
 	    CTRACE(tfp, "HTML:end_element[%d]: Popped style off stack - %s\n",
@@ -6271,6 +6291,10 @@ PRIVATE void HTML_end_element ARGS3(
 	me->List_Nesting_Level--;
 	CTRACE(tfp, "HTML_end_element: Reducing List Nesting Level to %d\n",
 		    me->List_Nesting_Level);
+#ifdef EXP_JUSTIFY_ELTS
+	if (element_number == HTML_DL)
+	    in_DT = FALSE; /*close the term that was without definition. */
+#endif
 	change_paragraph_style(me, me->sp->style);  /* Often won't really change */
 	UPDATE_STYLE;
 	if (me->List_Nesting_Level >= 0)
@@ -7830,19 +7854,6 @@ PUBLIC HTStructured* HTML_new ARGS3(
     UCSetTransParams(&me->T,
 		     me->inUCLYhndl, me->inUCI,
 		     me->outUCLYhndl, me->outUCI);
-#endif
-
-#ifdef EXP_JUSTIFY_ELTS
-    wait_for_this_stacked_elt = !ok_justify
-#  ifdef USE_PSRC
-	|| psrc_view
-#  endif
-	? MAX_NESTING+2 /*some unreachable value*/ : -1;
-    can_justify_here = TRUE;
-    can_justify_this_line = TRUE;
-    form_in_htext = FALSE;
-
-    ht_justify_cleanup();
 #endif
 
     me->target = stream;

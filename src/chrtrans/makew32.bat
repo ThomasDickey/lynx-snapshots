@@ -1,7 +1,7 @@
 @echo If .tbl files are added or removed you will need to hand edit
 @echo this batch file.
-@echo .
-make -f makefile.w32
+@echo off
+make -l -f makefile.bcb
 makeuctb cp1250_uni.tbl > cp1250_uni.h
 makeuctb cp1251_uni.tbl > cp1251_uni.h
 makeuctb cp1252_uni.tbl > cp1252_uni.h
@@ -21,7 +21,7 @@ makeuctb cp866u_uni.tbl > cp866u_uni.h
 makeuctb cp869_uni.tbl > cp869_uni.h
 makeuctb def7_uni.tbl  > def7_uni.h
 makeuctb dmcs_uni.tbl > dmcs_uni.h
-makeuctb hp_uni.tbl > hp_uni.h 
+makeuctb hp_uni.tbl > hp_uni.h
 makeuctb iso01_uni.tbl > iso01_uni.h
 makeuctb iso02_uni.tbl > iso02_uni.h
 makeuctb iso03_uni.tbl > iso03_uni.h
@@ -32,7 +32,7 @@ makeuctb iso07_uni.tbl > iso07_uni.h
 makeuctb iso08_uni.tbl > iso08_uni.h
 makeuctb iso09_uni.tbl > iso09_uni.h
 makeuctb iso10_uni.tbl > iso10_uni.h
-makeuctb iso15_uni.tbl > iso15_uni.h 
+makeuctb iso15_uni.tbl > iso15_uni.h
 makeuctb koi8r_uni.tbl > koi8r_uni.h
 makeuctb koi8u_uni.tbl > koi8u_uni.h
 makeuctb mac_uni.tbl > mac_uni.h

@@ -157,7 +157,7 @@ PUBLIC int fancy_mouse ARGS3(
 	    cmd = LYX_TOGGLE;
 #endif
 	} else if (BUTTON_STATUS(1) & (BUTTON_ALT | BUTTON_SHIFT | BUTTON_CTRL)) {
-	    /* Probably some unrelated activity, such as selecting some text. 
+	    /* Probably some unrelated activity, such as selecting some text.
 	     * Select, but do nothing else.
 	     */
 	    *position += delta;
@@ -271,7 +271,9 @@ PRIVATE int XYdist ARGS5(
 	xerr = 0;
     if (yerr < 0)
 	yerr = -yerr;
-    return xerr + yerr;
+    if (xerr < 3 && yerr)	/* x-distance of 3 better than y-dist of 1 */
+	return yerr + 1;
+    return (xerr + 2)/3 + yerr;	/* Subjective factor of distance */
 }
 
 /* Given X and Y coordinates of a mouse event, set mouse_link to the
@@ -304,7 +306,7 @@ PRIVATE int set_clicked_link ARGS4(
 	else if (x > right) c = '\b';
 	else c = PGUP;
     } else {
-	int mouse_err = 3, /* must be closer than this for approx stuff */
+	int mouse_err = 4, /* subjctv-dist better than this for approx stuff */
 	    cur_err;
 
 	/* Loop over the links and see if we can get a match */
@@ -685,7 +687,7 @@ static SLKeyMap_List_Type *Keymap_List;
 # ifdef VMS
 #  define EXTERN_KEY(string,string1,lynx,curses) {string,lynx}
 # else
-#  define EXTERN_KEY(string,string1,lynx,curses) {string1,lynx}
+#  define EXTERN_KEY(string,string1,lynx,curses) {string,lynx},{string1,lynx}
 # endif
 # define INTERN_KEY(string,lynx,curses)          {string,lynx}
 #else
@@ -915,7 +917,7 @@ PUBLIC int map_string_to_keysym ARGS2(char*, str, int*,keysym)
 #ifndef USE_SLANG
 	    if (*keysym > 255)
 		*keysym |= LKC_ISLKC; /* caller should remove this flag - kw */
-#endif	    
+#endif
 	}
     } else {
 	Keysym_String_List *k;
@@ -975,19 +977,32 @@ PRIVATE int setkey_cmd (char *parse)
     int keysym;
     char buf[BUFSIZ];
 
+    CTRACE(tfp, "KEYMAP(PA): in=%s", parse);	/* \n-terminated */
     if ((s = skip_keysym(parse)) != 0) {
 	if (isspace(*s)) {
 	    *s++ = '\0';
 	    s = LYSkipBlanks(s);
-	    if ((t = skip_keysym(s)) == 0)
+	    if ((t = skip_keysym(s)) == 0) {
+		CTRACE(tfp, "KEYMAP(SKIP) no key expansion found\n");
 		return -1;
+	    }
 	    if (t != s)
 		*t = '\0';
 	    if (map_string_to_keysym (s, &keysym) >= 0
 	     && unescape_string(parse, buf)) {
+		CTRACE(tfp, "KEYMAP(DEF) keysym=%#x, seq='%s'\n", keysym, buf);
 		return define_key(buf, keysym);
 	    }
+	    else {
+		CTRACE(tfp, "KEYMAP(SKIP) could not map to keysym\n");
+	    }
 	}
+	else {
+	    CTRACE(tfp, "KEYMAP(SKIP) junk after key description: '%s'\n", s);
+	}
+    }
+    else {
+	CTRACE(tfp, "KEYMAP(SKIP) no key description\n");
     }
     return -1;
 }
@@ -1587,6 +1602,9 @@ re_read:
 	current_modifier = LKC_MOD2;
 	c &= LKC_MASK;
     }
+    if (c >= 0 && (c&LKC_ISLAC)) {
+	done_esc = TRUE; /* already a lynxactioncode, skip keypad switches - iz */
+    }
 #endif
     if (done_esc) {
 	/* don't do keypad() switches below, we already got it - kw */
@@ -1789,11 +1807,15 @@ re_read:
 	case KEY_MOUSE:
 	    if (code == FOR_CHOICE) {
 		c = MOUSE_KEY;		/* Will be processed by the caller */
-	    } else if (code == FOR_SINGLEKEY) {
+	    }
+#if !defined(_WINDOWS)	/* 1999/07/15 (Thu) 08:40:18 */
+	    else if (code == FOR_SINGLEKEY) {
 		MEVENT event;
 		getmouse(&event);	/* Completely ignore event - kw */
 		c = DO_NOTHING;
-	    } else {
+	    }
+#endif
+	    else {
 #if !defined(WIN_EX)
 		MEVENT event;
 		int err;
@@ -1827,7 +1849,12 @@ re_read:
 			lac = LYK_SUBMIT;
 		} else if (event.bstate & BUTTON3_CLICKED) {
 		    c = LAC_TO_LKC0(LYK_PREV_DOC);
-		} else if (code == FOR_PROMPT) {
+		} else if (code == FOR_PROMPT
+				 /* Cannot ignore: see LYCurses.c */
+			   || (event.bstate &
+				( BUTTON1_PRESSED | BUTTON1_RELEASED
+				  | BUTTON2_PRESSED | BUTTON2_RELEASED
+				  | BUTTON3_PRESSED | BUTTON3_RELEASED))) {
 		    /* Completely ignore - don't return anything, to
 		       avoid canceling the prompt - kw */
 		    goto re_read;
@@ -1908,7 +1935,7 @@ re_read:
 				c = PGUP;		p = "PGUP";
 			    }
 			} else {
-			    c = set_clicked_link(MOUSE_X_POS, MOUSE_Y_POS, FOR_PANEL);
+			    c = set_clicked_link(MOUSE_X_POS, MOUSE_Y_POS, FOR_PANEL, 1);
 			}
 		    }
 		} else {
@@ -1946,7 +1973,7 @@ re_read:
 			    c = PGUP;		p = "PGUP";
 			}
 		    } else {
-			c = set_clicked_link(MOUSE_X_POS, MOUSE_Y_POS, FOR_PANEL);
+			c = set_clicked_link(MOUSE_X_POS, MOUSE_Y_POS, FOR_PANEL, 1);
 		    }
 		}
 		if (p && c != -1) {
@@ -2067,6 +2094,8 @@ re_read:
     }
 #endif /* USE_SLANG && __DJGPP__ && !DJGPP_KEYHANDLER && !USE_KEYMAPS */
 
+    if (c&LKC_ISLAC)
+	return(c);
     if ((c+1) >= KEYMAP_SIZE) {
 	/*
 	 *  Don't return raw values for KEYPAD symbols which we may have
@@ -2090,8 +2119,9 @@ PUBLIC int LYgetch NOARGS
  * Convert a null-terminated string to lowercase
  */
 PUBLIC void LYLowerCase ARGS1(
-    unsigned char *, 	buffer)
+	 char *,	arg_buffer)
 {
+    register unsigned char *buffer = (unsigned char *) arg_buffer;
     size_t i;
     for (i = 0; buffer[i]; i++)
 #ifdef SUPPORT_MULTIBYTE_EDIT	/* 1998/11/23 (Mon) 17:04:55 */
@@ -2114,8 +2144,9 @@ PUBLIC void LYLowerCase ARGS1(
  * Convert a null-terminated string to uppercase
  */
 PUBLIC void LYUpperCase ARGS1(
-unsigned char *, 	buffer)
+	 char *,	arg_buffer)
 {
+    register unsigned char *buffer = (unsigned char *) arg_buffer;
     size_t i;
     for (i = 0; buffer[i]; i++)
 #ifdef SUPPORT_MULTIBYTE_EDIT	/* 1998/11/23 (Mon) 17:05:10 */
@@ -2336,7 +2367,7 @@ PRIVATE int prev_pos ARGS2(
 	while (i < pos - 1) {
 	    int c;
 	    c = Buf[i];
-	    
+
 	    if (!(isascii(c) || IS_KANA(c))) {
 		i++;
 	    }
@@ -2428,7 +2459,7 @@ PUBLIC int LYEdit1 ARGS4(
 	ch &= 0xFF;
 	if (ch + 64 >= LYlowest_eightbit[current_char_set])
 	    ch += 64;
-	
+
 	if (Pos <= (MaxLen) && StrLen < (MaxLen)) {
 #ifdef ENHANCED_LINEEDIT
 	    if (Mark > Pos)
@@ -2990,7 +3021,7 @@ again:
 	    LYRefreshEdit(&MyEdit);
 #endif /* SUPPORT_MULTIBYTE_EDIT */
 	ch = LYgetch_for(FOR_PROMPT);
-#ifdef SUPPORT_MULTIBYTE_EDIT 
+#ifdef SUPPORT_MULTIBYTE_EDIT
 #ifdef CJK_EX	/* for SJIS code */
 	if (!refresh
 	 && (EditBinding(ch) != LYE_CHAR))

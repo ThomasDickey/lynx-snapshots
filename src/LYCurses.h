@@ -111,7 +111,11 @@ extern void LYsubwindow PARAMS((WINDOW * param));
 # if defined(VMS) && defined(__GNUC__)
 #  include <LYGCurses.h>
 # else
-#  include <curses.h>  /* everything else */
+#  ifdef PDCURSES	/* 1999/07/15 (Thu) 08:27:48 */
+#   include <pdcurses.h> /* for PDCurses */
+#  else
+#   include <curses.h>  /* everything else */
+#  endif /* not PDCURSES */
 # endif /* VMS && __GNUC__ */
 #endif /* HAVE_CONFIG_H */
 
@@ -428,6 +432,16 @@ extern void lynx_stop_all_colors NOPARAMS;
 #define SetDefaultMode(mode) _fmode = mode
 #else
 #define SetDefaultMode(mode) /* nothing */
+#endif
+
+/*
+ * Very old versions of curses cannot put the cursor on the lower right corner.
+ * Adjust our "hidden" cursor position accordingly.
+ */
+#if defined(FANCY_CURSES) || defined(USE_SLANG)
+#define LYHideCursor() move((LYlines - 1), (LYcols - 1))
+#else
+#define LYHideCursor() move((LYlines - 1), (LYcols - 2))
 #endif
 
 #endif /* LYCURSES_H */
