@@ -257,14 +257,22 @@ install-help : $(helpdir)
 	(cd $(srcdir)/lynx_help && tar cf - . ) | ( cd $(helpdir) && tar xf - )
 	(cd $(srcdir) && tar cf - C[HO]* PROBLEMS README samples test ) | \
 			       ( cd $(helpdir) && tar xf - )
-
-install-cfg : $(libdir)
-	-mv -f $(libdir)/lynx.cfg $(libdir)/lynx.oldcfg
+	-rm -f $(libdir)/lynx.tmp
+	sh -c 'if test -f $(libdir)/lynx.cfg ; then \
+		mv $(libdir)/lynx.cfg $(libdir)/lynx.tmp ; \
+	else \
+		cp $(srcdir)/lynx.cfg $(libdir)/lynx.tmp ; \
+	fi'
 	sed	-e '/^HELPFILE:http/s@^@#@' \
 		-e '/^#HELPFILE:file/s@#@@' \
 		-e '/^HELPFILE:file/s@/PATH_TO/lynx_help@$(helpdir)@' \
-		$(srcdir)/lynx.cfg >$(libdir)/lynx.cfg
-	chmod 0644 $(libdir)/lynx.cfg
+		$(libdir)/lynx.tmp >$(libdir)/lynx.cfg
+	chmod 644 $(libdir)/lynx.cfg
+	-rm -f $(libdir)/lynx.tmp
+
+install-cfg : $(libdir)
+	-mv -f $(libdir)/lynx.cfg $(libdir)/lynx.oldcfg
+	$(INSTALL_DATA) $(srcdir)/lynx.cfg $(libdir)/lynx.cfg
 
 install-lss : $(libdir)
 	-mv -f $(libdir)/lynx.lss $(libdir)/lynx.oldlss

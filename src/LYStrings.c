@@ -1630,15 +1630,8 @@ PUBLIC char * SNACat ARGS3(
 **   Currently we enable new technique only for DOS/WINDOWS display charsets
 **   and also for EXP_8BIT_TOUPPER compilation symbol.
 */
-PUBLIC int UPPER8(int ch1, int ch2)
+PUBLIC int UPPER8 ARGS2(int,ch1, int,ch2)
 {
-
-#ifdef NOTUSED
-    /* Try case-Sensitive match for speed, but mostly for stability */
-    /* while doing experiments with the remainder of this function. */
-    if ((unsigned char)ch1==(unsigned char)ch2)
-       return(0);
-#endif /* NOTUSED */
 
     /* case-insensitive match for us-ascii */
     if ((unsigned char)ch1 < 128 && (unsigned char)ch2 < 128)
@@ -1675,6 +1668,11 @@ PUBLIC int UPPER8(int ch1, int ch2)
 
 	if ((uck1 > 0) && (uck2 > 0))  /* both replacement strings found */
 	    return (strcasecomp(replace_buf1, replace_buf2));
+
+	/* check to be sure we have not lost any strange characters */
+	/* which are not found in def7_uni.tbl but _equal_ in fact. */
+	if ((unsigned char)ch1==(unsigned char)ch2)
+	    return(0);	 /* match */
 	}
     }
 

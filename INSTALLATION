@@ -9,32 +9,35 @@ divergent, and are detailed respectively in Sections II, III, IV and V.
 First, however, you must configure Lynx for your system regardless of the
 port you will be using.  Follow the instructions given immediately below to
 configure for your system, and then go to the respective section concerning
-the port you wish to compile.  General installation and environment
-variables are covered in Sections VI and VII.
+the port you wish to compile.  General installation, problem solving, and
+environment variables are covered in Sections VI and VII.
 
 
 I. General configuration instructions (all ports).
 
-Step 1. (define compile-time variables)
-    There are a few variables that you MUST change or verify, and a few
-    more that you will probably want to change.  The variables that must be
-    changed are marked as such in the userdefs.h file.  Just edit it, and
-    the changes should be straight forward.  Check LYMessages_en.h for
-    tailoring the Lynx statusline prompts, messages and warnings to the
-    requirements of your site.  The strings in LYMessages_en.h may be
-    translated into a language of your choice.  If you rename the file,
+Step 1. (define compile-time variables -- See the userdefs.h file.)
+    There are a few variables that MUST be defined, or Lynx will not build.
+    There are a few more that you will probably want to change.  The variables
+    that must be changed are marked as such in the userdefs.h file.  Just edit
+    this file, and the changes should be straight forward.  Many of the
+    variables in "userdefs.h" are now configurable in the lynx.cfg file, so
+    you may set them at run-time if you wish.  If you compile using auto-
+    configure, you would not absolutely need to edit "userdefs.h".  Check
+    LYMessages_en.h for tailoring the Lynx statusline prompts, messages and
+    warnings to the requirements of your site.  The strings in LYMessages_en.h
+    may be translated into a language of your choice.  If you rename the file,
     be sure to change the definition in "userdefs.h".
 
 Step 2. (define run-time variables -- See the lynx.cfg file for details.)
     Set up local printers, downloaders, assumed character set, key mapping,
-    and colors in the lynx.cfg file.  Many of the variables in "userdefs.h"
-    are now configurable in the lynx.cfg file.  Please read "lynx.cfg"
-    thoroughly as many of the features of Lynx, and how to use them, are
-    explained.  Also see the example mime.types, mailcap and jumps files in
-    the samples subdirectory.  Lynx must be able to find the lynx.cfg file
-    at start-up.  The location of the lynx.cfg file may be compiled in using
-    the LYNX_CFG_FILE define in userdefs.h, specified with an environment
-    variable, LYNX_CFG, or specified with the "-cfg" command line option.
+    and colors in the lynx.cfg file.  Please read "lynx.cfg" thoroughly as
+    many of the features of Lynx, and how to use them, are explained.  Also
+    see the example mime.types, mailcap and jumps files in the samples
+    subdirectory.  Lynx must be able to find the lynx.cfg file at start-up.
+    The location of the lynx.cfg file may be compiled in with the LYNX_CFG_FILE
+    defined in userdefs.h (or with the configure option explained in the Unix
+    section below), specified with an environment variable, LYNX_CFG, or
+    specified with the "-cfg" command line option.
 
 Step 3. (You may skip this step if you only use English and are not
     interested in any special characters, or if your display and local files
@@ -103,11 +106,11 @@ II. Compile instructions -- UNIX
 	  the config.cache file before running configure; its options do NOT
 	  override the settings in that file.
     
-	+ The config.status file is a script which creates (or regenerates) the
-	  files created by the configure script.
+	+ The config.status file is a script which creates (or regenerates)
+	  the files created by the configure script.
 
-    Please report problems in the configure/make process by including a copy of
-    config.status, config.cache and config.log, as well as the pertinent
+    Please report problems in the configure/make process by including a copy
+    of config.status, config.cache and config.log, as well as the pertinent
     compiler diagnostics.
 
     NOTE:  Lynx is a curses-based application, so you must have a curses
@@ -339,9 +342,9 @@ II. Compile instructions -- UNIX
     nonstandard locations of libslang.a and libz.a.  Setting the option
     --bindir tells the configure script where I want to install the lynx
     binary; setting --mandir tells it where to put the lynx.1 man page, and
-    setting --libdir tells it where to put the configuration file "lynx.cfg",
-    when I type "make install".  The --with-screen=slang and --with-zlib
-    options are explained above.
+    setting --libdir tells it (while at the same time defining LYNX_CFG_FILE)
+    where to put the configuration file "lynx.cfg", when I type "make install".
+    The --with-screen=slang and --with-zlib options are explained above.
 
 2. Manual compile
     If auto-configure does not work for you, or you prefer to compile

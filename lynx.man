@@ -509,7 +509,7 @@ of key-stroke commands.
 o Type \fB"k"\fR for a complete list of the current key-stroke 
 command mappings.
 .SH NOTES
-This is the Lynx v2.8 Release for Unix/VMS
+This is the Lynx v2.8 Release
 .PP
 If you wish to contribute to the further development
 of \fILynx\fR, subscribe to our mailing list.  Send email to
