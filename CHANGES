@@ -1,6 +1,8 @@
 Changes since Lynx 2.8 release
 ================================================================================
 
+1999-03-04 (2.8.2dev.19)
+* forgot to update PRCS when renaming src/chrtrans/iso9945uni.tbl - TD
 1999-03-04 (2.8.2dev.18)
 * modify configure script to recover if the intl and po directories are
   missing, allow experimentation with --enable-nls --disable-included-msgs
