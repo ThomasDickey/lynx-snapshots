@@ -70,7 +70,7 @@ if test "$with_debug" = "yes" ; then
 else
 	case $host_os in
 	osf*) #(vi
-		test -n "$GCC" && CFLAGS="$CFLAGS -std1"
+		test -z "$GCC" && CFLAGS="$CFLAGS -std1"
 		CF_STRIP_G_OPT(CFLAGS)
 		;;
 	*)

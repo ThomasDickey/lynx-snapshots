@@ -2097,7 +2097,8 @@ PUBLIC int HTCheckForInterrupt NOARGS
     if (TOUPPER(c) == 'Z' || c == 7 || c == 3)
 	return((int)TRUE);
 #ifdef DISP_PARTIAL
-    else if (display_partial)
+    else if (display_partial && (NumOfLines_partial > 2))
+    /* OK, we got several lines from new document and want to scroll... */
     {
 	switch (keymap[c+1])
 	{
@@ -2132,13 +2133,15 @@ PUBLIC int HTCheckForInterrupt NOARGS
 	case LYK_END:
 	    if (HText_canScrollDown())
 		Newline_partial = HText_getNumOfLines() - display_lines + 1;
-		/* set "current" value */
+		/* calculate for "current" bottom value */
 	    break;
 	case LYK_REFRESH :
 	    break ;
 	default :
 	    return ((int)FALSE) ;
 	}
+	if (Newline_partial < 1)
+	    Newline_partial = 1;
 	NumOfLines_partial = HText_getNumOfLines();
 	HText_pageDisplay(Newline_partial, "");
     }

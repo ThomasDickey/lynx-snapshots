@@ -4,27 +4,29 @@ Mwindows-1253
 #Name as a Display Charset (used on Options screen)
 OWinGreek (cp1253)
 
-#    Name:     cp1253_WinGreek to Unicode table
+#
+#    Name:     cp1253 to Unicode table
 #    Unicode version: 2.0
 #    Table version: 2.00
 #    Table format:  Format A
-#    Date:          04/24/96
-#    Authors:       Lori Brownell <loribr@microsoft.com>
-#                   K.D. Chang    <a-kchang@microsoft.com>
+#    Date:          04/15/98
+#
+#    Contact:       cpxlate@microsoft.com
+#
 #    General notes: none
 #
 #    Format: Three tab-separated columns
-#        Column #1 is the cp1253_WinGreek code (in hex)
+#        Column #1 is the cp1253 code (in hex)
 #        Column #2 is the Unicode (in hex as 0xXXXX)
 #        Column #3 is the Unicode name (follows a comment sign, '#')
 #
-#    The entries are in cp1253_WinGreek order
+#    The entries are in cp1253 order
 #
 ##################
 
-0x20-0x7f       idem
+0x20-0x7e       idem
 #
-#0x80		#UNDEFINED
+0x80    U+20AC  #EURO SIGN
 #0x81		#UNDEFINED
 0x82	U+201A	#SINGLE LOW-9 QUOTATION MARK
 0x83	U+0192	#LATIN SMALL LETTER F WITH HOOK

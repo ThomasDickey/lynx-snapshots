@@ -510,18 +510,17 @@ try_again:
 		display_partial = display_partial_flag; /* restore */
 		Newline_partial = newdoc.line; /* initialize */
 		NumOfLines_partial = 0;        /* initialize */
-		/*
-		 *  Disable display_partial if requested URL has #fragment.
-		 *  Otherwise user got the new document from the first page and
-		 *  be moved to #fragment later after download completed, but
-		 *  only if user did not mess screen up by scrolling before...
-		 *  So fall down to old behavior here.
-		 */
-		if (display_partial && LYCursesON &&
-		    (strchr(newdoc.address, '#')==NULL))
-			display_partial = TRUE;
-		else
+		if (display_partial) {
+		    /*
+		     * Disable display_partial if requested URL has #fragment. 
+		     * Otherwise user got the new document from the first page
+		     * and be moved to #fragment later after download
+		     * completed, but only if user did not mess screen up by
+		     * scrolling before...  So fall down to old behavior here.
+		     */
+		    if (!LYCursesON || (strchr(newdoc.address, '#')))
 			display_partial = FALSE;
+		}
 #endif /* DISP_PARTIAL */
 
 #ifndef DONT_TRACK_INTERNAL_LINKS
@@ -2069,7 +2068,7 @@ new_cmd:  /*
 		reloading = TRUE;
 	    break;
 
-	case LYK_HISTORICAL:
+	case LYK_HISTORICAL:	/* toggle 'historical' comments parsing */
 	    /*
 	     *	Check if this is a reply from a POST, and if so,
 	     *	seek confirmation of reload if the safe element
@@ -2098,7 +2097,7 @@ new_cmd:  /*
 	    }
 	    break;
 
-	case LYK_MINIMAL:
+	case LYK_MINIMAL:	/* toggle 'minimal' comments parsing */
 	    if (!historical_comments) {
 		/*
 		 *  Check if this is a reply from a POST, and if so,
@@ -4970,6 +4969,9 @@ check_add_bookmark_to_self:
 			HTInfoMsg(CANCELLED);
 			break;
 		    }
+		    /*
+		     *  OK, we download from history page, restore URL from stack.
+		     */
 		    StrAllocCopy(newdoc.address, history[number].address);
 		    StrAllocCopy(newdoc.title, links[curdoc.link].hightext);
 		    StrAllocCopy(newdoc.bookmark, history[number].bookmark);
@@ -4984,6 +4986,7 @@ check_add_bookmark_to_self:
 		    newdoc.isHEAD = history[number].isHEAD;
 		    newdoc.safe = history[number].safe;
 		    newdoc.internal_link = FALSE;
+		    newdoc.line = curdoc.line;  /* need for display_partial ! */
 		    newdoc.link = 0;
 		    HTOutputFormat = HTAtom_for("www/download");
 		    LYUserSpecifiedURL = TRUE;
@@ -5043,7 +5046,7 @@ check_add_bookmark_to_self:
 			newdoc.safe = FALSE;
 		    }
 		    newdoc.internal_link = FALSE;
-		   newdoc.line = curdoc.line;  /* used for display_partial ! */
+		    newdoc.line = curdoc.line;  /* need for display_partial ! */
 		    newdoc.link = 0;
 		    HTOutputFormat = HTAtom_for("www/download");
 		    /*

@@ -608,7 +608,7 @@
  * via the 'o'ptions menu.  The 'o'ptions menu setting will be stored in
  * the user's RC file whenever those settings are saved, and thereafter
  * will be used as the default.  Also see lynx.cfg for information about
- * the -raw switch and LYE_RAW_TOGGLE command.
+ * the -raw switch and LYK_RAW_TOGGLE command.
  *
  * The default character sets include:
  *
@@ -802,8 +802,10 @@
 
 /********************************
  * If COLLAPSE_BR_TAGS is set FALSE, Lynx will not collapse serial
- * BR tags.  Note that the valid way to insert extra blank lines in
- * HTML is via a PRE block with only newlines in the block.
+ * BR tags.  If set TRUE, two or more concurrent BRs will be collapsed 
+ * into a single blank line.  Note that the valid way to insert extra 
+ * blank lines in HTML is via a PRE block with only newlines in the 
+ * block. 
  *
  * The default defined here can be changed in lynx.cfg.
  */
@@ -1139,7 +1141,7 @@
  * strings will be links for the resolved SRC rather than just text.  For
  * ISMAP or other graphic links, the ALT or pseudo-ALT ("[ISMAP]" or "[LINK]")
  * strings will have '-' and a link labeled "[IMAGE]" for the resolved SRC
- * appended.
+ * appended. See also VERBOSE_IMAGES flag.
  *
  * The default defined here can be changed in lynx.cfg, and the user can
  * use LYK_IMAGE_TOGGLE to toggle the feature on or off at run time.
@@ -1154,6 +1156,7 @@
  * i.e., they'll be treated as having ALT="".  If MAKE_LINKS_FOR_ALL_IMAGES
  * is defined or toggled to TRUE, however, the pseudo-ALTs will be created
  * for inlines, so that they can be used as links to the SRCs.
+ * See also VERBOSE_IMAGES flag.
  *
  * The default defined here can be changed in lynx.cfg, and the user can
  * use LYK_INLINE_TOGGLE to toggle the feature on or off at run time.
@@ -1211,7 +1214,7 @@
  * the version definition with the Project Version on checkout. Just
  * ignore it. - kw */
 /* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
-#define LYNX_VERSION "2.8.1dev.21"
+#define LYNX_VERSION "2.8.1dev.22"
 
 #ifndef MAXINT
 #define MAXINT 2147483647	/* max integer */
@@ -1286,7 +1289,11 @@
 #define CHMOD_PATH      "chmod"
 
 #else	/* Unix */
-	/* this is done via the configure script */
+	/* Standard locations are defined via the configure script.  When
+	 * helper applications are in your home directory or other nonstandard
+	 * locations, you probably will have to preset the path to them with
+	 * environment variables (see INSTALLATION, Section II-1d). 
+	 */ 
 #endif /* DOSPATH */
 #endif /* VMS */
 

@@ -1350,13 +1350,13 @@ U+208c:_=
 U+208d:(
 U+208e:)
 # Old euro currency sign glyph:
-U+20A0:CE
+#U+20A0:CE
 U+20a3:Ff
 U+20a4:Li
 U+20a7:Pt
 U+20a9:W=
-# New euro currency sign glyph ?
-# U+20AC:EUR
+# New euro currency sign glyph:
+U+20AC:EUR
 U+2103:oC
 U+2105:c/o
 U+2109:oF
@@ -2015,10 +2015,17 @@ U+3229:10c
 U+327f:KSC
 U+33c2:am
 U+33d8:pm
-#  end of CJK area (up to U+e000). 
- 
-#  Characters in Private Use Area (e000-f8ff) do not have unassigned numbers. 
- 
+#
+#
+#There are four special ranges of characters that are represented only by
+#their start and end characters <...>
+#
+#   The CJK Ideographs Area (U+4E00 - U+9FFF)
+#   The Hangul Syllables Area (U+AC00 - U+D7A3)
+#   The Surrogates Area (U+D800 - U+DFFF)
+#   The Private Use Area (U+E000 - U+F8FF)
+#
+# 
 U+fb00:ff
 U+fb01:fi
 U+fb02:fl
@@ -2177,7 +2184,7 @@ U+001d:GS
 U+001e:RS
 U+001f:US
 U+007f:DT
-# Most of these characters (82-9F) may be inflicted on us
+# Most of these characters (80-9F) may be inflicted on us
 # by MS FrontPages which uses Unicode notation such as &#153;
 # but there are no assigned letters in Unicode 128-159 range.
 # It is assumed in the code that those codepoints are from windows-1252.

@@ -6,6 +6,7 @@
 #include <LYGlobalDefs.h>
 #include <LYCharSets.h>
 #include <LYBookmark.h>
+#include <LYCookie.h>
 
 #include <LYLeaks.h>
 
@@ -440,7 +441,6 @@ PUBLIC void read_rc NOPARAMS
 		LYAcceptAllCookies = FALSE;
 	    }
 
-#ifdef THIS_DOESNT_WORK_YET_DONT_USE_IT
 
 	/*
 	 * Accept all cookies from certain domains?
@@ -451,9 +451,7 @@ PUBLIC void read_rc NOPARAMS
 		cp = cp2 + 1;
 	    while (isspace(*cp))
 		cp++; /* get rid of spaces */
-	    if (LYstrstr(cp,NULL) != NULL) {
-/*		   cookie_add_acceptlist(cp); */
-	    }
+            cookie_add_acceptlist(cp);
 
 
 	/*
@@ -465,11 +463,8 @@ PUBLIC void read_rc NOPARAMS
 		cp = cp2 + 1;
 	    while (isspace(*cp))
 		cp++; /* get rid of spaces */
-	    if (LYstrstr(cp,NULL) != NULL) {
-/*		   cookie_add_rejectlist(cp); */
-	    }
+	    cookie_add_rejectlist(cp);
 
-#endif
 
 	/*
 	 *  User mode.

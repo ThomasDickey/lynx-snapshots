@@ -2050,11 +2050,10 @@ PUBLIC int UPPER8 ARGS2(int,ch1, int,ch2)
 	/* BTW, if we remove the check for >127 above	   */
 	/* we get even more "relaxed" insensitive match... */
 
-	CONST char *disp_charset = LYCharSet_UC[current_char_set].MIMEname;
 	int charset_in, charset_out, uck1, uck2;
 	char replace_buf1 [10], replace_buf2 [10];
 
-	charset_in  = UCGetLYhndl_byMIME(disp_charset);
+	charset_in  = current_char_set;  /* display character set */
 	charset_out = UCGetLYhndl_byMIME("us-ascii");
 
 	uck1 = UCTransCharStr(replace_buf1, sizeof(replace_buf1), ch1,

@@ -302,6 +302,16 @@ II. Compile instructions -- UNIX
   --with-socks5				(define USE_SOCKS5, SOCKS)
 	Use this option to configure with the socks5 library.
 
+	If you make a SOCKSified lynx, note that you may have problems
+	accessing FTP servers.  Also, instead of SOCKSifying lynx for use
+	behind a firewall, you are better off if you make it normally, and set
+	it up to use a proxy server.  You can SOCKSify the proxy server, and it
+	will handle all clients, not just Lynx (see the INSTALLATION file in
+	this distribution).  If your SOCKS server was compiled to use the short
+	version of Rbind, also include -DSHORTENED_RBIND in your SITE_LYDEFS
+	and SITE_DEFS.  If you do SOCKSify lynx, you can turn off SOCKS proxy
+	usage via a -nosocks command line switch.
+
   --with-zlib				(define USE_ZLIB)
 	Use zlib for decompression of some gzip files.
 
@@ -516,11 +526,14 @@ IV. Compile instructions -- Win32 (Windows95/NT)
 V. Compile instructions -- 386 DOS
 
     Compiling for DOS with DJGPP is a multistep procedure.  First install
-    the c compiler and its libraries.  DJGPP, as distributed from the
-    usual DJGPP archives, will not successfully compile lynx.  You need to
-    "stubedit" your "cc1.exe" file.  The following parameters have worked
-    successfully:  minstack=800k, bufsize=64k.  To accomplish this, move to
-    the djgpp\bin directory and type the command:
+    the c compiler and its libraries.  Update the distribution with the
+    patched lib.c, to take care of bug fixes. It is available at:
+    "http://www.cartsys.com/eldredge/djgpp-patches.html".
+    DJGPP, as distributed from the usual DJGPP archives, will
+    not successfully compile lynx. You need to "stubedit" your
+    "cc1.exe" file. The following parameters have worked successfully:
+    minstack=800k, bufsize=64k. To accomplish this, move to the
+    djgpp\bin directory and type the command:
         "stubedit cc1.exe bufsize=64k minstack=800k".
     Or do it interactively with the command: "stubedit cc1.exe".
     (see "http://www.flora.org/lynx-dev/html/month0897/msg00145.html").
@@ -547,11 +560,23 @@ V. Compile instructions -- 386 DOS
     and in "http://www.fdisk.com/doslynx/wlynx/source/djgpp.zip"). You
     can also use slang ("ftp://space.mit.edu/pub/davis/slang") as your
     curses library. You need to compile these before you go any further.
-    If you wish to use the beta version of PDCurses 2.3, you need to
-    first apply a patch (available at
-    "http://www.flora.org/lynx-dev/html/month0997/msg00441.html").
-    Most of the patch has already been applied if you get the latest
-    beta version. If you have trouble applying the patch, we recommend
+    If you wish to use PDCurses 2.3, you need to first apply the
+    following patch:
+
+*** curses.h	Thu Jul  9 19:38:28 1998
+--- curses.h.new	Sat Aug 15 11:02:08 1998
+***************
+*** 1802,1807 ****
+--- 1802,1808 ----
+  #define getbegx(w)              (w)->_begx
+  #define getbegy(w)              (w)->_begy
+  #define getbegyx(w,y,x)         ( y = (w)->_begy, x = (w)->_begx )
++ #define getbkgd(w)              ((w)->_bkgd)
+  #define getch()                 wgetch(stdscr)
+  #define getmaxx(w)              (w)->_maxx
+  #define getmaxy(w)              (w)->_maxy
+
+    If you have trouble applying the patch, we recommend
     that you use the "patch" program,
     ("http://www.simtel.net/pub/simtelnet/gnu/djgpp/v2gnu/pat25b.zip"). The
     WATTCP TCPLIB sources also need to be patched prior to compilation. See

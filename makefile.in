@@ -52,20 +52,6 @@ WWWINC= WWW/Library/Implementation
 # See the PROBLEMS file for more information.
 #RESOLVLIB= -lresolv
 
-# !!!!!!!!!!! Alternate socket functions for SOCKS !!!!!!!!!!!!!!!!!!
-# To make a SOCKSified lynx, include -DSOCKS in your SITE_LYDEFS and
-# SITE_DEFS, below, and point SOCKSLIB to your SOCKS library.  Note
-# that you may have problems accessing FTP servers.  Also, instead of
-# SOCKSifying lynx for use behind a firewall, you are better off if
-# you make it normally, and set it up to use a proxy server.  You can
-# SOCKSify the proxy server, and it will handle all clients, not just
-# Lynx (see the INSTALLATION file in this distribution).  If your SOCKS
-# server was compiled to use the short version of Rbind, also include
-# -DSHORTENED_RBIND in your SITE_LYDEFS and SITE_DEFS.  If you do
-# SOCKSify lynx, you can turn off SOCKS proxy usage via a -nosocks
-# command line switch.
-#SOCKSLIB= /usr/local/lib/libsocks.a
-
 # !!!!!!!!!!!!!  DIRECT WAIS ACCESS !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 # If you are adding direct wais access you must fill in the
 # location of wais.a, client.a and the standard math library, libm.a.
@@ -107,7 +93,6 @@ SITE_DEFS = # Your defines here
 # -DNO_CPU_LIMIT   Disables Max CPU timeout (includes CLOCKS_PER_SECOND)
 # -DSHORTENED_RBIND  For a SOCKSified lynx with the short version of Rbind.
 # -DSLANG_MBCS_HACK prevent cutoff lines when using UTF8 console (slang only)
-# -DSOCKS          For making a SOCKSified lynx.
 #
 # if you are linking to freeWAIS-0.202 or older, you should define this
 # in SITE_DEFS
@@ -164,7 +149,7 @@ all lynx$x:
 	cd src && $(MAKE) all CC="$(CC)" \
 		CFLAGS="$(CFLAGS)" \
 		CPPFLAGS="$(CPPFLAGS)" \
-		LIBS="$(LIBS) $(RESOLVLIB) $(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)" \
+		LIBS="$(LIBS) $(RESOLVLIB) $(WAISLIB) $(SITE_LIBS)" \
 		SITE_DEFS="$(SITE_DEFS)" \
 		WWWINC=$(WWWINC) \
 		WWWLIB="../WWW/Library/unix/libwww.a"

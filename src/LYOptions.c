@@ -3115,12 +3115,14 @@ static OptValues bool_values[] = {
 	{ TRUE,              "ON",                "ON"          },
 	{ 0, 0, 0 }};
 
+#ifdef DIRED_SUPPORT 
 static OptValues dired_values[] = {
 	{ 0,                 "Directories first", "dired_dir"   },
 	{ FILES_FIRST,       "Files first",       "dired_files" },
 	{ MIXED_STYLE,       "Mixed style",       "dired_mixed" },
 	{ 0, 0, 0 }};
 static char * dired_sort_string = "dired_sort";
+#endif /* DIRED_SUPPORT */ 
 
 static OptValues ftp_sort_values[] = {
 	{ FILE_BY_NAME,      "By Name",           "ftp_by_name" },

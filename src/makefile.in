@@ -18,14 +18,13 @@ CFLAGS		= @CFLAGS@
 DEFS		= @DEFS@
 CPPFLAGS	= @CPPFLAGS@
 
-LIBS		= @LIBS@ $(RESOLVLIB) $(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)
+LIBS		= @LIBS@ $(RESOLVLIB) $(WAISLIB) $(SITE_LIBS)
 LDFLAGS		= @LDFLAGS@
 
 # Symbols inherited from the top-level makefile
 RESOLVLIB	= # FIXME: set in parent makefile
 SITE_DEFS	= # FIXME: set in parent makefile
 SITE_LIBS	= # FIXME: set in parent makefile
-SOCKSLIB	= # FIXME: set in parent makefile
 WAISLIB		= # FIXME: set in parent makefile
 
 WWWINC		= WWW/Library/Implementation
