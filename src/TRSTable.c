@@ -199,19 +199,19 @@ struct _STable_info {
 **    Anything that requires handling cell contents as paragraphs (block
 **    elements), like reflowing.  Vertical alignment.
 */
-PRIVATE int Stbl_finishCellInRow PARAMS((
+static int Stbl_finishCellInRow (
     STable_rowinfo *	me,
     STable_states *	s,
     int			end_td,
     int			lineno,
-    int			pos));
-PRIVATE int Stbl_finishRowInTable PARAMS((
-    STable_info *	me));
+    int			pos);
+static int Stbl_finishRowInTable (
+    STable_info *	me);
 
-PRIVATE CONST char * cellstate_s ARGS1(
-	cellstate_t,	state)
+static const char * cellstate_s (
+	cellstate_t	state)
 {
-    CONST char *result = "?";
+    const char *result = "?";
 
     switch (state) {
     case CS_invalid:	result = "CS_invalid";	break;
@@ -231,8 +231,8 @@ PRIVATE CONST char * cellstate_s ARGS1(
     return result;
 }
 
-PUBLIC struct _STable_info * Stbl_startTABLE ARGS1(
-    short,		alignment)
+struct _STable_info * Stbl_startTABLE (
+    short		alignment)
 {
     STable_info *me = typecalloc(STable_info);
 
@@ -252,16 +252,16 @@ PUBLIC struct _STable_info * Stbl_startTABLE ARGS1(
     return me;
 }
 
-PRIVATE void free_rowinfo ARGS1(
-    STable_rowinfo *,	me)
+static void free_rowinfo (
+    STable_rowinfo *	me)
 {
     if (me && me->allocated) {
 	FREE(me->cells);
     }
 }
 
-PUBLIC void Stbl_free ARGS1(
-    STable_info *,	me)
+void Stbl_free (
+    STable_info *	me)
 {
     CTRACE2(TRACE_TRST,
 	    (tfp, "TRST:Stbl_free()\n"));
@@ -280,16 +280,16 @@ PUBLIC void Stbl_free ARGS1(
 /*
  * Returns -1 on error, otherwise index of just-added table cell.
  */
-PRIVATE int Stbl_addCellToRow ARGS9(
-    STable_rowinfo *,	me,
-    STable_cellinfo *,	colinfo,
-    int,		ncolinfo,
-    STable_states *,	s,
-    int,		colspan,
-    int,		alignment,
-    int,		isheader,
-    int,		lineno,
-    int *,		ppos)
+static int Stbl_addCellToRow (
+    STable_rowinfo *	me,
+    STable_cellinfo *	colinfo,
+    int		ncolinfo,
+    STable_states *	s,
+    int		colspan,
+    int		alignment,
+    int		isheader,
+    int		lineno,
+    int *		ppos)
 {
     STable_cellinfo *cells;
     int i;
@@ -513,10 +513,10 @@ PRIVATE int Stbl_addCellToRow ARGS9(
 
 /* returns -1 on error, 0 otherwise */
 /* assumes cells have already been allocated (but may need more) */
-PRIVATE int Stbl_reserveCellsInRow ARGS3(
-    STable_rowinfo *,	me,
-    int,		icell,
-    int,		colspan)
+static int Stbl_reserveCellsInRow (
+    STable_rowinfo *	me,
+    int		icell,
+    int		colspan)
 {
     STable_cellinfo *cells;
     int i;
@@ -551,12 +551,12 @@ PRIVATE int Stbl_reserveCellsInRow ARGS3(
 }
 
 /* Returns -1 on failure. */
-PRIVATE int Stbl_finishCellInRow ARGS5(
-    STable_rowinfo *,	me,
-    STable_states *,	s,
-    int,		end_td,
-    int,		lineno,
-    int,		pos)
+static int Stbl_finishCellInRow (
+    STable_rowinfo *	me,
+    STable_states *	s,
+    int		end_td,
+    int		lineno,
+    int		pos)
 {
     STable_cellinfo *lastcell;
     cellstate_t newstate = CS_invalid;
@@ -942,11 +942,11 @@ PRIVATE int Stbl_finishCellInRow ARGS5(
  *  rowspans2eog to keep track of rowspans that are to remain in effect
  *  until the end of the row group (until next THEAD/TFOOT/TBODY) or table.
  */
-PRIVATE int Stbl_reserveCellsInTable ARGS4(
-    STable_info *,	me,
-    int,		icell,
-    int,		colspan,
-    int,		rowspan)
+static int Stbl_reserveCellsInTable (
+    STable_info *	me,
+    int		icell,
+    int		colspan,
+    int		rowspan)
 {
     STable_rowinfo *rows, *row;
     int growby;
@@ -1016,8 +1016,8 @@ PRIVATE int Stbl_reserveCellsInTable ARGS4(
 
 /* Remove reserved cells in trailing rows that were added for rowspan,
  * to be used when a THEAD/TFOOT/TBODY ends. */
-PRIVATE void Stbl_cancelRowSpans ARGS1(
-    STable_info *,	me)
+static void Stbl_cancelRowSpans (
+    STable_info *	me)
 {
     int i;
 
@@ -1035,10 +1035,10 @@ PRIVATE void Stbl_cancelRowSpans ARGS1(
 /*
  * Returns -1 on error, otherwise index of just-added table row.
  */
-PUBLIC int Stbl_addRowToTable ARGS3(
-    STable_info *,	me,
-    int,		alignment,
-    int,		lineno)
+int Stbl_addRowToTable (
+    STable_info *	me,
+    int		alignment,
+    int		lineno)
 {
     STable_rowinfo *rows, *row;
     STable_states * s = &me->s;
@@ -1124,8 +1124,8 @@ PUBLIC int Stbl_addRowToTable ARGS3(
 /*
  * Returns -1 on error, otherwise current number of rows.
  */
-PRIVATE int Stbl_finishRowInTable ARGS1(
-    STable_info *,	me)
+static int Stbl_finishRowInTable (
+    STable_info *	me)
 {
     STable_rowinfo *lastrow;
     STable_states * s = &me->s;
@@ -1152,14 +1152,14 @@ PRIVATE int Stbl_finishRowInTable ARGS1(
     return (me->nrows);
 }
 
-PRIVATE void update_sumcols0 ARGS7(
-    STable_cellinfo *,	sumcols,
-    STable_rowinfo *,	lastrow,
-    int,		pos,
-    int,		len,
-    int,		icell,
-    int,		ispan,
-    int,		allocated_sumcols)
+static void update_sumcols0 (
+    STable_cellinfo *	sumcols,
+    STable_rowinfo *	lastrow,
+    int		pos,
+    int		len,
+    int		icell,
+    int		ispan,
+    int		allocated_sumcols)
 {
     int i;
     if (len > 0) {
@@ -1197,12 +1197,12 @@ PRIVATE void update_sumcols0 ARGS7(
     }
 }
 
-PRIVATE int get_remaining_colspan ARGS5(
-    STable_rowinfo *,	me,
-    STable_cellinfo *,	colinfo,
-    int,		ncolinfo,
-    int,		colspan,
-    int,		ncols_sofar)
+static int get_remaining_colspan (
+    STable_rowinfo *	me,
+    STable_cellinfo *	colinfo,
+    int		ncolinfo,
+    int		colspan,
+    int		ncols_sofar)
 {
     int i;
     int last_colspan = me->ncells ?
@@ -1222,11 +1222,11 @@ PRIVATE int get_remaining_colspan ARGS5(
 
 #ifdef EXP_NESTED_TABLES
 /* Returns -1 on failure, 1 if faking was performed, 0 if not needed. */
-PRIVATE int Stbl_fakeFinishCellInTable ARGS4(
-    STable_info *,	me,
-    STable_rowinfo *,	lastrow,
-    int,		lineno,
-    int,		finishing)	/* Processing finish or start */
+static int Stbl_fakeFinishCellInTable (
+    STable_info *	me,
+    STable_rowinfo *	lastrow,
+    int		lineno,
+    int		finishing)	/* Processing finish or start */
 {
     STable_states * s = &me->s;
     int fake = 0;
@@ -1393,15 +1393,15 @@ PRIVATE int Stbl_fakeFinishCellInTable ARGS4(
 /*
  * Returns -1 on error, otherwise 0.
  */
-PUBLIC int Stbl_addCellToTable ARGS8(
-    STable_info *,	me,
-    int,		colspan,
-    int,		rowspan,
-    int,		alignment,
-    int,		isheader,
-    int,		lineno,
-    int,		offset_not_used_yet GCC_UNUSED,
-    int,		pos)
+int Stbl_addCellToTable (
+    STable_info *	me,
+    int		colspan,
+    int		rowspan,
+    int		alignment,
+    int		isheader,
+    int		lineno,
+    int		offset_not_used_yet GCC_UNUSED,
+    int		pos)
 {
     STable_states * s = &me->s;
     STable_rowinfo *lastrow;
@@ -1503,12 +1503,12 @@ PUBLIC int Stbl_addCellToTable ARGS8(
 /*
  * Returns -1 on error, otherwise 0.
  */
-PUBLIC int Stbl_finishCellInTable ARGS5(
-    STable_info *,	me,
-    int,		end_td,
-    int,		lineno,
-    int,		offset,
-    int,		pos)
+int Stbl_finishCellInTable (
+    STable_info *	me,
+    int		end_td,
+    int		lineno,
+    int		offset,
+    int		pos)
 {
     STable_states * s = &me->s;
     STable_rowinfo *lastrow;
@@ -1618,11 +1618,11 @@ PUBLIC int Stbl_finishCellInTable ARGS5(
 /*
  * Returns -1 on error, otherwise 0.
  */
-PUBLIC int Stbl_addColInfo ARGS4(
-    STable_info *,	me,
-    int,		colspan,
-    short,		alignment,
-    BOOL,		isgroup)
+int Stbl_addColInfo (
+    STable_info *	me,
+    int		colspan,
+    short		alignment,
+    BOOL		isgroup)
 {
     STable_cellinfo *sumcols, *sumcol;
     int i, icolinfo;
@@ -1686,8 +1686,8 @@ PUBLIC int Stbl_addColInfo ARGS4(
 /*
  * Returns -1 on error, otherwise 0.
  */
-PUBLIC int Stbl_finishColGroup ARGS1(
-    STable_info *,	me)
+int Stbl_finishColGroup (
+    STable_info *	me)
 {
     CTRACE2(TRACE_TRST, (tfp, "TRST:Stbl_finishColGroup()\n"));
     if (me->pending_colgroup_next >= me->ncolinfo) {
@@ -1700,9 +1700,9 @@ PUBLIC int Stbl_finishColGroup ARGS1(
     return 0;
 }
 
-PUBLIC int Stbl_addRowGroup ARGS2(
-    STable_info *,	me,
-    short,		alignment)
+int Stbl_addRowGroup (
+    STable_info *	me,
+    short		alignment)
 {
     CTRACE2(TRACE_TRST, (tfp, "TRST:Stbl_addRowGroup()\n"));
     Stbl_cancelRowSpans(me);
@@ -1710,8 +1710,8 @@ PUBLIC int Stbl_addRowGroup ARGS2(
     return 0;			/* that's all! */
 }
 
-PUBLIC int Stbl_finishTABLE ARGS1(
-    STable_info *,	me)
+int Stbl_finishTABLE (
+    STable_info *	me)
 {
     STable_states * s = &me->s;
     int i;
@@ -1835,17 +1835,17 @@ PUBLIC int Stbl_finishTABLE ARGS1(
     return (curpos > MAX_STBL_POS ? -1 : me->ncols);
 }
 
-PUBLIC short Stbl_getAlignment ARGS1(
-    STable_info *,	me)
+short Stbl_getAlignment (
+    STable_info *	me)
 {
     return (short)(me ? me->alignment : HT_ALIGN_NONE);
 }
 
-PRIVATE int get_fixup_positions ARGS4(
-    STable_rowinfo *,	me,
-    int *,		oldpos,
-    int *,		newpos,
-    STable_cellinfo *,	sumcols)
+static int get_fixup_positions (
+    STable_rowinfo *	me,
+    int *		oldpos,
+    int *		newpos,
+    STable_cellinfo *	sumcols)
 {
     int i = 0, ip = 0;
     int next_i, newlen;
@@ -1896,11 +1896,11 @@ PRIVATE int get_fixup_positions ARGS4(
  *           0 or greater (number of oldpos/newpos pairs) if we have
  *             a table row.
  */
-PUBLIC int Stbl_getFixupPositions ARGS4(
-    STable_info *,	me,
-    int,		lineno,
-    int *,		oldpos,
-    int *,		newpos)
+int Stbl_getFixupPositions (
+    STable_info *	me,
+    int		lineno,
+    int *		oldpos,
+    int *		newpos)
 {
     STable_rowinfo * row;
     int j;
@@ -1918,8 +1918,8 @@ PUBLIC int Stbl_getFixupPositions ARGS4(
     return ninserts;
 }
 
-PUBLIC int Stbl_getStartLine ARGS1(
-    STable_info *,	me)
+int Stbl_getStartLine (
+    STable_info *	me)
 {
     if (!me)
 	return -1;
@@ -1929,8 +1929,8 @@ PUBLIC int Stbl_getStartLine ARGS1(
 
 #ifdef EXP_NESTED_TABLES
 
-PUBLIC int Stbl_getStartLineDeep ARGS1(
-    STable_info *,	me)
+int Stbl_getStartLineDeep (
+    STable_info *	me)
 {
     if (!me)
 	return -1;
@@ -1939,10 +1939,10 @@ PUBLIC int Stbl_getStartLineDeep ARGS1(
     return me->startline;
 }
 
-PUBLIC void Stbl_update_enclosing ARGS3(
-    STable_info *,	me,
-    int,		max_width,
-    int,		last_lineno)
+void Stbl_update_enclosing (
+    STable_info *	me,
+    int		max_width,
+    int		last_lineno)
 {
     int l;
 
@@ -1970,10 +1970,10 @@ PUBLIC void Stbl_update_enclosing ARGS3(
     return;
 }
 
-PUBLIC void Stbl_set_enclosing ARGS3(
-    STable_info *,	me,
-    STable_info *,	enclosing,
-    struct _TextAnchor*,enclosing_last_anchor_before_stbl)
+void Stbl_set_enclosing (
+    STable_info *	me,
+    STable_info *	enclosing,
+    struct _TextAnchor*enclosing_last_anchor_before_stbl)
 {
     if (!me)
 	return;
@@ -1981,16 +1981,16 @@ PUBLIC void Stbl_set_enclosing ARGS3(
     me->enclosing_last_anchor_before_stbl = enclosing_last_anchor_before_stbl;
 }
 
-PUBLIC STable_info * Stbl_get_enclosing ARGS1(
-    STable_info *,	me)
+STable_info * Stbl_get_enclosing (
+    STable_info *	me)
 {
     if (!me)
 	return 0;
     return me->enclosing;
 }
 
-PUBLIC struct _TextAnchor * Stbl_get_last_anchor_before ARGS1(
-    STable_info *,	me)
+struct _TextAnchor * Stbl_get_last_anchor_before (
+    STable_info *	me)
 {
     if (!me)
 	return 0;

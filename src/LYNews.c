@@ -24,11 +24,11 @@
 **  Global variable for async i/o.
 */
 BOOLEAN term_message = FALSE;
-PRIVATE void terminate_message  PARAMS((int sig));
+static void terminate_message  (int sig);
 
-PRIVATE BOOLEAN message_has_content ARGS2(
-    CONST char *,	filename,
-    BOOLEAN *,		nonspaces)
+static BOOLEAN message_has_content (
+    const char *	filename,
+    BOOLEAN *		nonspaces)
 {
     FILE *fp;
     char *buffer = NULL;
@@ -79,14 +79,14 @@ PRIVATE BOOLEAN message_has_content ARGS2(
 **  a lead slash, and followup is TRUE for newsreply or
 **  snewsreply URLs.  - FM
 */
-PUBLIC char *LYNewsPost ARGS2(
-	char *,		newsgroups,
-	BOOLEAN,	followup)
+char *LYNewsPost (
+	char *		newsgroups,
+	BOOLEAN	followup)
 {
     char user_input[1024];
     char CJKinput[1024];
     char *cp = NULL;
-    CONST char *kp = NULL;
+    const char *kp = NULL;
     int c = 0;  /* user input */
     int len;
     FILE *fd = NULL;
@@ -224,11 +224,11 @@ PUBLIC char *LYNewsPost ARGS2(
 	    CJKinput[0] = '\0';
 	    switch(kanji_code) {
 	    case EUC:
-		TO_EUC((CONST unsigned char *)kp, (unsigned char *)CJKinput);
+		TO_EUC((const unsigned char *)kp, (unsigned char *)CJKinput);
 		kp = CJKinput;
 		break;
 	    case SJIS:
-		TO_SJIS((CONST unsigned char *)kp, (unsigned char *)CJKinput);
+		TO_SJIS((const unsigned char *)kp, (unsigned char *)CJKinput);
 		kp = CJKinput;
 		break;
 	    default:
@@ -491,8 +491,8 @@ cleanup:
     return(postfile);
 }
 
-PRIVATE void terminate_message ARGS1(
-	int,	sig GCC_UNUSED)
+static void terminate_message (
+	int	sig GCC_UNUSED)
 {
     term_message = TRUE;
     /*

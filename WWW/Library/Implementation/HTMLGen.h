@@ -13,15 +13,15 @@
 
 /* Subclass:
 */
-/* extern CONST HTStructuredClass HTMLGeneration; */
+/* extern const HTStructuredClass HTMLGeneration; */
 
 /* Special Creation:
 */
-extern HTStructured * HTMLGenerator PARAMS((HTStream * output));
+extern HTStructured * HTMLGenerator (HTStream * output);
 
-extern HTStream * HTPlainToHTML PARAMS((
+extern HTStream * HTPlainToHTML (
         HTPresentation *        pres,
         HTParentAnchor *        anchor,
-        HTStream *              sink));
+        HTStream *              sink);
 
 #endif /* HTMLGEN_H */

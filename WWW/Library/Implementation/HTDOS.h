@@ -16,12 +16,12 @@
 **	returns		WWW file specification
 **
 */
-char * HTDOS_wwwName PARAMS((CONST char * dosname));
+char * HTDOS_wwwName (const char * dosname);
 
 /*
  * Converts Unix slashes to DOS
  */
-char * HTDOS_slashes PARAMS((char * path));
+char * HTDOS_slashes (char * path);
 
 /* PUBLIC                                                       HTDOS_name()
 **              CONVERTS WWW name into a DOS name
@@ -33,7 +33,7 @@ char * HTDOS_slashes PARAMS((char * path));
 **
 ** Bug:	Returns pointer to static -- non-reentrant
 */
-char * HTDOS_name PARAMS((char * wwwname));
+char * HTDOS_name (char * wwwname);
 
 #ifdef WIN_EX 
 char * HTDOS_short_name (char * fn);

@@ -49,23 +49,23 @@ struct _HTStream
 extern char * HTAppName;	/* Application name: please supply */
 extern char * HTAppVersion;	/* Application version: please supply */
 
-PUBLIC BOOL reloading = FALSE;	/* Reloading => send no-cache pragma to proxy */
-PUBLIC char * redirecting_url = NULL;	    /* Location: value. */
-PUBLIC BOOL permanent_redirection = FALSE;  /* Got 301 status? */
-PUBLIC BOOL redirect_post_content = FALSE;  /* Don't convert to GET? */
+BOOL reloading = FALSE;	/* Reloading => send no-cache pragma to proxy */
+char * redirecting_url = NULL;	    /* Location: value. */
+BOOL permanent_redirection = FALSE;  /* Got 301 status? */
+BOOL redirect_post_content = FALSE;  /* Don't convert to GET? */
 
 #ifdef USE_SSL
-PUBLIC SSL_CTX * ssl_ctx = NULL;	/* SSL ctx */
-PUBLIC SSL * SSL_handle = NULL;
-PUBLIC int ssl_okay;
+SSL_CTX * ssl_ctx = NULL;	/* SSL ctx */
+SSL * SSL_handle = NULL;
+int ssl_okay;
 
-PRIVATE void free_ssl_ctx NOARGS
+static void free_ssl_ctx (void)
 {
     if (ssl_ctx != NULL)
 	SSL_CTX_free(ssl_ctx);
 }
 
-PRIVATE int HTSSLCallback(int preverify_ok, X509_STORE_CTX *x509_ctx)
+static int HTSSLCallback(int preverify_ok, X509_STORE_CTX *x509_ctx)
 {
     char *msg = NULL;
     int result = 1;
@@ -85,7 +85,7 @@ PRIVATE int HTSSLCallback(int preverify_ok, X509_STORE_CTX *x509_ctx)
     return result;
 }
 
-PUBLIC SSL * HTGetSSLHandle NOARGS
+SSL * HTGetSSLHandle (void)
 {
     if (ssl_ctx == NULL) {
 	/*
@@ -107,7 +107,7 @@ PUBLIC SSL * HTGetSSLHandle NOARGS
     return(SSL_new(ssl_ctx));
 }
 
-PUBLIC void HTSSLInitPRNG NOARGS
+void HTSSLInitPRNG (void)
 {
 #if SSLEAY_VERSION_NUMBER >= 0x00905100
     if (RAND_status() == 0) {
@@ -169,14 +169,14 @@ typedef struct {
 	int len;
 } recv_data_t;
 
-PUBLIC int ws_read_per_sec = 0;
-PRIVATE int ws_errno = 0;
+int ws_read_per_sec = 0;
+static int ws_errno = 0;
 
-PRIVATE DWORD g_total_times = 0;
-PRIVATE DWORD g_total_bytes = 0;
+static DWORD g_total_times = 0;
+static DWORD g_total_bytes = 0;
 
 
-PUBLIC char * str_speed(void)
+char * str_speed(void)
 {
     static char buff[32];
 
@@ -192,7 +192,7 @@ PUBLIC char * str_speed(void)
 /* The same like read, but takes care of EINTR and uses select to
    timeout the stale connections.  */
 
-PRIVATE int ws_read(int fd, char *buf, int len)
+static int ws_read(int fd, char *buf, int len)
 {
      int res;
      int retry = 3;
@@ -209,7 +209,7 @@ PRIVATE int ws_read(int fd, char *buf, int len)
      return res;
 }
 
-PRIVATE void _thread_func (void *p)
+static void _thread_func (void *p)
 {
     int i, val, ret;
     recv_data_t *q = (recv_data_t *)p;
@@ -237,7 +237,7 @@ PRIVATE void _thread_func (void *p)
 /* The same like read, but takes care of EINTR and uses select to
    timeout the stale connections.  */
 
-PUBLIC int ws_netread(int fd, char *buf, int len)
+int ws_netread(int fd, char *buf, int len)
 {
     int i;
     char buff[256];
@@ -334,8 +334,8 @@ PUBLIC int ws_netread(int fd, char *buf, int len)
  * Strip any username from the given string so we retain only the host.
  * If the
  */
-PRIVATE void strip_userid ARGS1(
-	char *,		host)
+static void strip_userid (
+	char *		host)
 {
     char *p1 = host;
     char *p2 = strchr(host, '@');
@@ -374,14 +374,14 @@ PRIVATE void strip_userid ARGS1(
 **	read.
 **
 */
-PRIVATE int HTLoadHTTP ARGS4 (
-	CONST char *,		arg,
-	HTParentAnchor *,	anAnchor,
-	HTFormat,		format_out,
-	HTStream*,		sink)
+static int HTLoadHTTP (
+	const char *		arg,
+	HTParentAnchor *	anAnchor,
+	HTFormat		format_out,
+	HTStream*		sink)
 {
   int s;			/* Socket number for returned data */
-  CONST char *url = arg;	/* The URL which get_physical() returned */
+  const char *url = arg;	/* The URL which get_physical() returned */
   bstring *command = NULL;	/* The whole command */
   char *eol;			/* End of line if found */
   char *start_of_data;		/* Start of body of reply */
@@ -414,7 +414,7 @@ PRIVATE int HTLoadHTTP ARGS4 (
 #ifdef USE_SSL
   BOOL do_connect = FALSE;	/* ARE WE going to use a proxy tunnel ? */
   BOOL did_connect = FALSE;	/* ARE WE actually using a proxy tunnel ? */
-  CONST char *connect_url = NULL; /* The URL being proxied */
+  const char *connect_url = NULL; /* The URL being proxied */
   char *connect_host = NULL;	/* The host being proxied */
   SSL * handle = NULL;		/* The SSL handle */
   char ssl_dn[256];
@@ -2133,6 +2133,6 @@ GLOBALDEF (HTProtocol,HTTP,_HTTP_C_GLOBALDEF_1_INIT);
 #define _HTTP_C_GLOBALDEF_2_INIT { "https", HTLoadHTTP, 0}
 GLOBALDEF (HTProtocol,HTTPS,_HTTP_C_GLOBALDEF_2_INIT);
 #else
-GLOBALDEF PUBLIC HTProtocol HTTP = { "http", HTLoadHTTP, 0 };
-GLOBALDEF PUBLIC HTProtocol HTTPS = { "https", HTLoadHTTP, 0 };
+GLOBALDEF HTProtocol HTTP = { "http", HTLoadHTTP, 0 };
+GLOBALDEF HTProtocol HTTPS = { "https", HTLoadHTTP, 0 };
 #endif /* GLOBALDEF_IS_MACRO */

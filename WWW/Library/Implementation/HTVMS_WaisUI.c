@@ -176,7 +176,7 @@ char *database_name)
  * to those trying to modify the transport code to use non-UNIX streams:
  *  This is the function to modify!
  */
-PRIVATE long read_from_stream(int d, char *buf, long nbytes)
+static long read_from_stream(int d, char *buf, long nbytes)
 {
   long didRead;
   long toRead = nbytes;
@@ -203,7 +203,7 @@ PRIVATE long read_from_stream(int d, char *buf, long nbytes)
 
 /* returns the length of the response, 0 if an error */
 
-PRIVATE long
+static long
 transport_message(
 	long connection,
 	char *request_message,
@@ -331,7 +331,7 @@ interpret_message(
 
 /* modifies the string to exclude all seeker codes. sets length to
    the new length. */
-PRIVATE char *delete_seeker_codes(char *string, long *length)
+static char *delete_seeker_codes(char *string, long *length)
 {
   long original_count; /* index into the original string */
   long new_count = 0; /* index into the collapsed string */
@@ -1955,7 +1955,7 @@ readQueryTerm(query_term** qt, char* buffer)
 
 /*----------------------------------------------------------------------*/
 
-static unsigned long getQueryTermSize PARAMS((query_term* qt));
+static unsigned long getQueryTermSize (query_term* qt);
 
 static unsigned long
 getQueryTermSize(query_term* qt)
@@ -2078,7 +2078,7 @@ readQuery(any *info)
 
 /*----------------------------------------------------------------------*/
 
-static void exitAction PARAMS((long error));
+static void exitAction (long error);
 
 static void
 exitAction(long error GCC_UNUSED)

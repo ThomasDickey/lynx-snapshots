@@ -15,10 +15,10 @@ extern GLOBALREF (HTProtocol, HTFinger);
 GLOBALREF HTProtocol HTFinger;
 #endif /* GLOBALREF_IS_MACRO */
 
-extern int HTLoadFinger PARAMS((
-	CONST char *		arg,
+extern int HTLoadFinger (
+	const char *		arg,
 	HTParentAnchor *	anAnchor,
 	HTFormat		format_out,
-	HTStream *		stream));
+	HTStream *		stream);
 
 #endif /* HTFINGER_H */

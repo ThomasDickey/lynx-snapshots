@@ -24,7 +24,7 @@
 */
 
 struct _HTStream {
-	CONST HTStreamClass *	isa;
+	const HTStreamClass *	isa;
 
 	FILE *			fp;
 	char *			end_command;
@@ -41,22 +41,22 @@ struct _HTStream {
 **	who wanst a black hole.  These black holes don't radiate,
 **	they just absorb data.
 */
-PRIVATE void HTBlackHole_put_character ARGS2(HTStream *, me, char, c)
+static void HTBlackHole_put_character (HTStream * me, char c)
 {}
-PRIVATE void HTBlackHole_put_string ARGS2(HTStream *, me, CONST char*, s)
+static void HTBlackHole_put_string (HTStream * me, const char* s)
 {}
-PRIVATE void HTBlackHole_write ARGS3(HTStream *, me, CONST char*, s, int, l)
+static void HTBlackHole_write (HTStream * me, const char* s, int l)
 {}
-PRIVATE void HTBlackHole_free ARGS1(HTStream *, me)
+static void HTBlackHole_free (HTStream * me)
 {}
-PRIVATE void HTBlackHole_abort ARGS2(HTStream *, me, HTError, e)
+static void HTBlackHole_abort (HTStream * me, HTError e)
 {}
 
 
 /*	Black Hole stream
 **	-----------------
 */
-PRIVATE CONST HTStreamClass HTBlackHoleClass =
+static const HTStreamClass HTBlackHoleClass =
 {
 	"BlackHole",
 	HTBlackHole_free,
@@ -65,7 +65,7 @@ PRIVATE CONST HTStreamClass HTBlackHoleClass =
 	HTBlackHole_write
 };
 
-PRIVATE HTStream HTBlackHoleInstance =
+static HTStream HTBlackHoleInstance =
 {
 	&HTBlackHoleClass,
 	NULL,
@@ -76,7 +76,7 @@ PRIVATE HTStream HTBlackHoleInstance =
 
 /*	Black hole craetion
 */
-PUBLIC HTStream * HTBlackHole NOARGS
+HTStream * HTBlackHole (void)
 {
     return &HTBlackHoleInstance;
 }
@@ -93,7 +93,7 @@ PUBLIC HTStream * HTBlackHole NOARGS
 **	------------------
 */
 
-PRIVATE void HTFWriter_put_character ARGS2(HTStream *, me, char, c)
+static void HTFWriter_put_character (HTStream * me, char c)
 {
     putc(c, me->fp);
 }
@@ -105,7 +105,7 @@ PRIVATE void HTFWriter_put_character ARGS2(HTStream *, me, char, c)
 **
 **	Strings must be smaller than this buffer size.
 */
-PRIVATE void HTFWriter_put_string ARGS2(HTStream *, me, CONST char*, s)
+static void HTFWriter_put_string (HTStream * me, const char* s)
 {
     fputs(s, me->fp);
 }
@@ -114,7 +114,7 @@ PRIVATE void HTFWriter_put_string ARGS2(HTStream *, me, CONST char*, s)
 /*	Buffer write.  Buffers can (and should!) be big.
 **	------------
 */
-PRIVATE void HTFWriter_write ARGS3(HTStream *, me, CONST char*, s, int, l)
+static void HTFWriter_write (HTStream * me, const char* s, int l)
 {
     fwrite(s, 1, l, me->fp);
 }
@@ -129,7 +129,7 @@ PRIVATE void HTFWriter_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 **	object is not,
 **	as it takes on an existence of its own unless explicitly freed.
 */
-PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
+static void HTFWriter_free (HTStream * me)
 {
     fclose(me->fp);
     if (me->end_command) {		/* Temp file */
@@ -148,7 +148,7 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 /*	End writing
 */
 
-PRIVATE void HTFWriter_abort ARGS2(HTStream *, me, HTError, e)
+static void HTFWriter_abort (HTStream * me, HTError e)
 {
     fclose(me->fp);
     if (me->end_command) {		/* Temp file */
@@ -168,7 +168,7 @@ PRIVATE void HTFWriter_abort ARGS2(HTStream *, me, HTError, e)
 /*	Structured Object Class
 **	-----------------------
 */
-PRIVATE CONST HTStreamClass HTFWriter = /* As opposed to print etc */
+static const HTStreamClass HTFWriter = /* As opposed to print etc */
 {
 	"FileWriter",
 	HTFWriter_free,
@@ -182,7 +182,7 @@ PRIVATE CONST HTStreamClass HTFWriter = /* As opposed to print etc */
 **	-------------------------
 */
 
-PUBLIC HTStream* HTFWriter_new ARGS1(FILE *, fp)
+HTStream* HTFWriter_new (FILE * fp)
 {
     HTStream* me;
 
@@ -218,10 +218,10 @@ PUBLIC HTStream* HTFWriter_new ARGS1(FILE *, fp)
 **	in case the application is fussy, or so that a generic opener can
 **	be used.
 */
-PUBLIC HTStream* HTSaveAndExecute ARGS3(
-	HTPresentation *,	pres,
-	HTParentAnchor *,	anchor,	/* Not used */
-	HTStream *,		sink)	/* Not used */
+HTStream* HTSaveAndExecute (
+	HTPresentation *	pres,
+	HTParentAnchor *	anchor,	/* Not used */
+	HTStream *		sink)	/* Not used */
 
 #ifdef UNIX
 #define REMOVE_COMMAND "/bin/rm -f %s\n"
@@ -233,7 +233,7 @@ PUBLIC HTStream* HTSaveAndExecute ARGS3(
 #ifdef REMOVE_COMMAND
 {
     char *fnam;
-    CONST char * suffix;
+    const char * suffix;
 
     HTStream* me;
 
@@ -294,15 +294,15 @@ PUBLIC HTStream* HTSaveAndExecute ARGS3(
 **	GUI Apps should open local Save panel here really.
 **
 */
-PUBLIC HTStream* HTSaveLocally ARGS3(
-	HTPresentation *,	pres,
-	HTParentAnchor *,	anchor,	/* Not used */
-	HTStream *,		sink)	/* Not used */
+HTStream* HTSaveLocally (
+	HTPresentation *	pres,
+	HTParentAnchor *	anchor,	/* Not used */
+	HTStream *		sink)	/* Not used */
 
 {
     char *fnam;
     char *answer;
-    CONST char * suffix;
+    const char * suffix;
 
     HTStream* me;
 

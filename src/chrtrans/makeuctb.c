@@ -47,8 +47,8 @@ static FILE *chdr = 0;
  * everything before leaving, since some old (and a few not-so-old) platforms
  * do not properly implement POSIX 'exit()'.
  */
-PRIVATE void done PARAMS((int code)) GCC_NORETURN;
-PRIVATE void done ARGS1(int, code)
+static void done (int code) GCC_NORETURN;
+static void done (int code)
 {
     if (chdr != 0) {
 	fflush(chdr);
@@ -58,9 +58,9 @@ PRIVATE void done ARGS1(int, code)
     exit(code);
 }
 
-PRIVATE void usage NOARGS
+static void usage (void)
 {
-    static CONST char *tbl[] = {
+    static const char *tbl[] = {
 	"Usage: makeuctb [parameters]",
 	"",
 	"Utility to convert .tbl into .h files for Lynx compilation.",
@@ -79,7 +79,7 @@ PRIVATE void usage NOARGS
 }
 
 #ifdef EXP_ASCII_CTYPES
-PUBLIC int ascii_tolower ARGS1(int, i)
+int ascii_tolower (int i)
 {
     if ( 91 > i && i > 64 )
 	return (i+32);
@@ -89,13 +89,13 @@ PUBLIC int ascii_tolower ARGS1(int, i)
 #endif
 
 /* copied from HTString.c, not everybody has strncasecmp */
-PUBLIC int strncasecomp ARGS3(
-	CONST char*,	a,
-	CONST char *,	b,
-	int,		n)
+int strncasecomp (
+	const char*	a,
+	const char *	b,
+	int		n)
 {
-    CONST char *p = a;
-    CONST char *q = b;
+    const char *p = a;
+    const char *q = b;
 
     for (p = a, q = b; ; p++, q++) {
 	int diff;
@@ -110,8 +110,8 @@ PUBLIC int strncasecomp ARGS3(
     /*NOTREACHED*/
 }
 
-PRIVATE int getunicode ARGS1(
-	char **,	p0)
+static int getunicode (
+	char **	p0)
 {
     char *p = *p0;
 
@@ -140,19 +140,19 @@ int unicount[MAX_FONTLEN];
 
 struct unimapdesc_str themap_str = {0, NULL, 0, 0};
 
-PRIVATE char *tblname;
-PRIVATE char *hdrname;
+static char *tblname;
+static char *hdrname;
 
-PRIVATE int RawOrEnc = 0;
-PRIVATE int Raw_found = 0;		/* whether explicit R directive found */
-PRIVATE int CodePage = 0;
-PRIVATE int CodePage_found = 0;		/* whether explicit C directive found */
+static int RawOrEnc = 0;
+static int Raw_found = 0;		/* whether explicit R directive found */
+static int CodePage = 0;
+static int CodePage_found = 0;		/* whether explicit C directive found */
 
 #define MAX_UNIPAIRS 2500
 
-PRIVATE void addpair_str ARGS2(
-	char *,		str,
-	int,		un)
+static void addpair_str (
+	char *		str,
+	int		un)
 {
    int i = 0;
 
@@ -196,9 +196,9 @@ PRIVATE void addpair_str ARGS2(
     /* otherwise: ignore */
 }
 
-PRIVATE void addpair ARGS2(
-	int,	fp,
-	int,	un)
+static void addpair (
+	int	fp,
+	int	un)
 {
     int i;
 
@@ -248,9 +248,9 @@ int this_isDefaultMap = -1;
 int useDefaultMap = 1;
 int lowest_eight = 999;
 
-PUBLIC int main ARGS2(
-	int,		argc,
-	char **,	argv)
+int main (
+	int	argc,
+	char **	argv)
 {
     static char *first_ifdefs[] = {
 	"/*",
@@ -779,7 +779,7 @@ PUBLIC int main ARGS2(
  *\n\
  */\n\
 \n\
-static CONST u8 dfont_unicount%s[%d] = \n\
+static const u8 dfont_unicount%s[%d] = \n\
 {\n\t", argv[0], argv[1], id_append, fontlen);
 
     for (i = 0; i < fontlen; i++) {
@@ -805,10 +805,10 @@ static CONST u8 dfont_unicount%s[%d] = \n\
     }
 
     if (nuni) {
-	fprintf(chdr, "\nstatic CONST u16 dfont_unitable%s[%d] = \n{\n\t",
+	fprintf(chdr, "\nstatic const u16 dfont_unitable%s[%d] = \n{\n\t",
 		id_append, nuni);
     } else {
-	fprintf(chdr, "\nstatic CONST u16 dfont_unitable%s[1]; /* dummy */\n", id_append);
+	fprintf(chdr, "\nstatic const u16 dfont_unitable%s[1]; /* dummy */\n", id_append);
     }
 
     fp0 = 0;
@@ -851,11 +851,11 @@ static struct unipair_str repl_map%s[%d] = \n\
     }
     if (themap_str.entry_ct) {
 	fprintf(chdr, "\n\
-static CONST struct unimapdesc_str dfont_replacedesc%s = {%d,repl_map%s,",
+static const struct unimapdesc_str dfont_replacedesc%s = {%d,repl_map%s,",
 id_append, themap_str.entry_ct, id_append);
     } else {
 	fprintf(chdr, "\n\
-static CONST struct unimapdesc_str dfont_replacedesc%s = {0,NULL,",id_append);
+static const struct unimapdesc_str dfont_replacedesc%s = {0,NULL,",id_append);
     }
     fprintf(chdr, "%d,%d};\n",
 	    this_isDefaultMap ? 1 : 0,

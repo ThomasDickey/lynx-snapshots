@@ -37,8 +37,8 @@ struct struct_parts {
 **	Return value points to first non-white character, or to 0 if none.
 **	All trailing white space is OVERWRITTEN with zero.
 */
-PUBLIC char * HTStrip ARGS1(
-	char *,		s)
+char * HTStrip (
+	char *		s)
 {
 #define SPACE(c) ((c == ' ') || (c == '\t') || (c == '\n'))
     char * p = s;
@@ -65,9 +65,9 @@ PUBLIC char * HTStrip ARGS1(
 **	host, anchor and access may be nonzero if they were specified.
 **	Any which are nonzero point to zero terminated strings.
 */
-PRIVATE void scan ARGS2(
-	char *,			name,
-	struct struct_parts *,	parts)
+static void scan (
+	char *			name,
+	struct struct_parts *	parts)
 {
     char * after_access;
     char * p;
@@ -180,10 +180,10 @@ PRIVATE void scan ARGS2(
 ** On exit,
 **     returns         A pointer to a malloc'd string which MUST BE FREED
 */
-PUBLIC char * HTParse ARGS3(
-	CONST char *,	aName,
-	CONST char *,	relatedName,
-	int,		wanted)
+char * HTParse (
+	const char *	aName,
+	const char *	relatedName,
+	int		wanted)
 {
     char * result = NULL;
     char * tail = NULL;  /* a pointer to the end of the 'result' string */
@@ -578,10 +578,10 @@ PUBLIC char * HTParse ARGS3(
 ** On exit,
 **	returns		A pointer within input string (probably to its end '\0')
 */
-PUBLIC CONST char * HTParseAnchor ARGS1(
-	CONST char *,	aName)
+const char * HTParseAnchor (
+	const char *	aName)
 {
-    CONST char* p = aName;
+    const char* p = aName;
     for ( ; *p && *p != '#'; p++)
 	;
     if (*p == '#') {
@@ -622,8 +622,8 @@ PUBLIC CONST char * HTParseAnchor ARGS1(
 **
 **	or	../../albert.html
 */
-PUBLIC void HTSimplify ARGS1(
-	char *,		filename)
+void HTSimplify (
+	char *		filename)
 {
     char *p;
     char *q, *q1;
@@ -774,16 +774,16 @@ PUBLIC void HTSimplify ARGS1(
 **	The caller is responsible for freeing the resulting name later.
 **
 */
-PUBLIC char * HTRelative ARGS2(
-	CONST char *,	aName,
-	CONST char *,	relatedName)
+char * HTRelative (
+	const char *	aName,
+	const char *	relatedName)
 {
     char * result = NULL;
-    CONST char *p = aName;
-    CONST char *q = relatedName;
-    CONST char * after_access = NULL;
-    CONST char * path = NULL;
-    CONST char * last_slash = NULL;
+    const char *p = aName;
+    const char *q = relatedName;
+    const char * after_access = NULL;
+    const char * path = NULL;
+    const char * last_slash = NULL;
     int slashes = 0;
 
     for (; *p; p++, q++) {	/* Find extent of match */
@@ -836,7 +836,7 @@ PUBLIC char * HTRelative ARGS2(
 **
 **	Unlike HTUnEscape(), this routine returns a calloc'd string.
 */
-PRIVATE CONST unsigned char isAcceptable[96] =
+static const unsigned char isAcceptable[96] =
 
 /*	Bit 0		xalpha		-- see HTFile.h
 **	Bit 1		xpalpha		-- as xalpha but with plus.
@@ -850,14 +850,14 @@ PRIVATE CONST unsigned char isAcceptable[96] =
 	 0,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,	/* 6x  `abcdefghijklmno  */
 	 7,7,7,7,7,7,7,7,7,7,7,0,0,0,0,0 };	/* 7X  pqrstuvwxyz{|}~	DEL */
 
-PRIVATE char *hex = "0123456789ABCDEF";
+static char *hex = "0123456789ABCDEF";
 #define ACCEPTABLE(a)	( a>=32 && a<128 && ((isAcceptable[a-32]) & mask))
 
-PUBLIC char * HTEscape ARGS2(
-	CONST char *,	str,
-	unsigned char,	mask)
+char * HTEscape (
+	const char *	str,
+	unsigned char	mask)
 {
-    CONST char * p;
+    const char * p;
     char * q;
     char * result;
     int unacceptable = 0;
@@ -892,10 +892,10 @@ PUBLIC char * HTEscape ARGS2(
 */
 #define UNSAFE(ch) (((ch) <= 32) || ((ch) >= 127))
 
-PUBLIC char *HTEscapeUnsafe ARGS1(
-	CONST char *,	str)
+char *HTEscapeUnsafe (
+	const char *	str)
 {
-    CONST char * p;
+    const char * p;
     char * q;
     char * result;
     int unacceptable = 0;
@@ -929,11 +929,11 @@ PUBLIC char *HTEscapeUnsafe ARGS1(
 **
 **	Unlike HTUnEscape(), this routine returns a calloced string.
 */
-PUBLIC char * HTEscapeSP ARGS2(
-	CONST char *,	str,
-	unsigned char,	mask)
+char * HTEscapeSP (
+	const char *	str,
+	unsigned char	mask)
 {
-    CONST char * p;
+    const char * p;
     char * q;
     char * result;
     int unacceptable = 0;
@@ -967,16 +967,16 @@ PUBLIC char * HTEscapeSP ARGS2(
 **	the ASCII hex code for character 16x+y.
 **	The string is converted in place, as it will never grow.
 */
-PRIVATE char from_hex ARGS1(
-	char,		c)
+static char from_hex (
+	char		c)
 {
     return (char) ( c >= '0' && c <= '9' ?  c - '0'
 	    : c >= 'A' && c <= 'F'? c - 'A' + 10
 	    : c - 'a' + 10);     /* accept small letters just in case */
 }
 
-PUBLIC char * HTUnEscape ARGS1(
-	char *,		str)
+char * HTUnEscape (
+	char *		str)
 {
     char * p = str;
     char * q = str;
@@ -1023,9 +1023,9 @@ PUBLIC char * HTUnEscape ARGS1(
 **	should be unescaped if escaped in the first string.
 **	The first string is converted in place, as it will never grow.
 */
-PUBLIC char * HTUnEscapeSome ARGS2(
-	char *,		str,
-	CONST char *,	do_trans)
+char * HTUnEscapeSome (
+	char *		str,
+	const char *	do_trans)
 {
     char * p = str;
     char * q = str;
@@ -1054,7 +1054,7 @@ PUBLIC char * HTUnEscapeSome ARGS2(
 
 } /* HTUnEscapeSome */
 
-PRIVATE CONST unsigned char crfc[96] =
+static const unsigned char crfc[96] =
 
 /*	Bit 0		xalpha		-- need "quoting"
 **	Bit 1		xpalpha		-- need \escape if quoted
@@ -1072,11 +1072,11 @@ PRIVATE CONST unsigned char crfc[96] =
 **  The "quoted" parameter tells whether we need the beginning/ending quote
 **  marks.  If not, the caller will provide them -TD
 */
-PUBLIC void HTMake822Word ARGS2(
-	char **,	str,
-	int,		quoted)
+void HTMake822Word (
+	char **	str,
+	int		quoted)
 {
-    CONST char * p;
+    const char * p;
     char * q;
     char * result;
     unsigned char a;

@@ -9,7 +9,7 @@
 #include <HTMLDTD.h>
 
 /* list of elements */
-extern CONST SGML_dtd HTML_dtd;
+extern const SGML_dtd HTML_dtd;
 
 /* array of currently set styles */
 extern HTCharStyle displayStyles[DSTYLE_ELEMENTS];
@@ -18,18 +18,18 @@ extern HTCharStyle displayStyles[DSTYLE_ELEMENTS];
 extern int lynx_has_color;
 
 /* Set all the buckets in the hash table to be empty */
-extern void parse_userstyles NOPARAMS;
+extern void parse_userstyles (void);
 
-extern void style_deleteStyleList NOPARAMS;
+extern void style_deleteStyleList (void);
 
-extern void style_defaultStyleSheet NOPARAMS;
+extern void style_defaultStyleSheet (void);
 
-extern int style_readFromFile PARAMS((char* file));
+extern int style_readFromFile (char* file);
 
-extern void TrimColorClass PARAMS((
-    CONST char *	tagname,
+extern void TrimColorClass (
+    const char *	tagname,
     char *		styleclassname,
-    int *		phcode));
+    int *		phcode);
 
  /* this is an array of styles for tags that don't specify 'class' - the
     values from that array will be suggested by SGML.c by setting the
@@ -52,16 +52,16 @@ extern char* forced_classname; /* if force_current_tag_style =TRUE, then here
 
  /* This is called each time lss styles are read. It will fill
     each elt of 'cached_tag_styles' -HV */
-extern void cache_tag_styles NOPARAMS;
+extern void cache_tag_styles (void);
  /* this is global var - it can be used for reading the end of string found
    during last invokation of TrimColorClass.
  */
-extern void FastTrimColorClass PARAMS ((
-	    CONST char*		 tag_name,
+extern void FastTrimColorClass (
+	    const char*		 tag_name,
 	    int			 name_len,
 	    char*		 stylename,
 	    char**		 pstylename_end,
-	    int*		 hcode));
+	    int*		 hcode);
 
 #endif /* USE_COLOR_STYLE */
 

@@ -41,8 +41,8 @@
 /*
  *  Used for nested lists. - FM
  */
-PUBLIC int OL_CONTINUE = -29999;     /* flag for whether CONTINUE is set */
-PUBLIC int OL_VOID = -29998;	     /* flag for whether a count is set */
+int OL_CONTINUE = -29999;     /* flag for whether CONTINUE is set */
+int OL_VOID = -29998;	     /* flag for whether a count is set */
 
 
 /*
@@ -50,9 +50,9 @@ PUBLIC int OL_VOID = -29998;	     /* flag for whether a count is set */
 **  strings to "&amp;".  If isTITLE is TRUE, it also
 **  converts any angle-brackets to "&lt;" or "&gt;". - FM
 */
-PUBLIC void LYEntify ARGS2(
-	char **,	str,
-	BOOLEAN,	isTITLE)
+void LYEntify (
+	char **	str,
+	BOOLEAN	isTITLE)
 {
     char *p = *str;
     char *q = NULL, *cp = NULL;
@@ -224,10 +224,10 @@ PUBLIC void LYEntify ARGS2(
 **  including HT_NON_BREAK_SPACE (1) and HT_EN_SPACE (2),
 **  but not ESC, from the heads of strings. - FM
 */
-PUBLIC void LYTrimHead ARGS1(
-	char *, str)
+void LYTrimHead (
+	char * str)
 {
-    CONST char *s = str;
+    const char *s = str;
 
     if (isEmpty(s))
 	return;
@@ -248,8 +248,8 @@ PUBLIC void LYTrimHead ARGS1(
 **  including HT_NON_BREAK_SPACE (1), HT_EN_SPACE (2), and
 **  ESC from the tails of strings. - FM
 */
-PUBLIC void LYTrimTail ARGS1(
-	char *, str)
+void LYTrimTail (
+	char * str)
 {
     int i;
 
@@ -272,8 +272,8 @@ PUBLIC void LYTrimTail ARGS1(
 ** character of comment, or it's best guess if the comment
 ** is invalid. - FM
 */
-PUBLIC char *LYFindEndOfComment ARGS1(
-	char *, str)
+char *LYFindEndOfComment (
+	char * str)
 {
     char *cp, *cp1;
     enum comment_state { start1, start2, end1, end2 } state;
@@ -385,9 +385,9 @@ PUBLIC char *LYFindEndOfComment ARGS1(
 **  to assume "//localhost" when a host field is not
 **  present in file URLs - FM
 */
-PUBLIC void LYFillLocalFileURL ARGS2(
-	char **,	href,
-	CONST char *,	base)
+void LYFillLocalFileURL (
+	char **	href,
+	const char *	base)
 {
     char * temp = NULL;
 
@@ -442,7 +442,7 @@ PUBLIC void LYFillLocalFileURL ARGS2(
      * directory listing for the current default. - FM
      */
     if (!strcmp(*href, "file://localhost")) {
-	CONST char *temp2;
+	const char *temp2;
 #ifdef VMS
 	temp2 = HTVMS_wwwName(LYGetEnv("PATH"));
 #else
@@ -503,9 +503,9 @@ PUBLIC void LYFillLocalFileURL ARGS2(
 **  the display charset later: new bookmark entries may be mistranslated).
 **								 - LP
 */
-PUBLIC void LYAddMETAcharsetToFD ARGS2(
-	FILE *,		fd,
-	int,		disp_chndl)
+void LYAddMETAcharsetToFD (
+	FILE *		fd,
+	int		disp_chndl)
 {
     if (disp_chndl == -1)
 	/*
@@ -545,8 +545,8 @@ PUBLIC void LYAddMETAcharsetToFD ARGS2(
 ** This function returns OL TYPE="A" strings in
 ** the range of " A." (1) to "ZZZ." (18278). - FM
 */
-PUBLIC char *LYUppercaseA_OL_String ARGS1(
-	int, seqnum)
+char *LYUppercaseA_OL_String (
+	int seqnum)
 {
     static char OLstring[8];
 
@@ -577,8 +577,8 @@ PUBLIC char *LYUppercaseA_OL_String ARGS1(
 ** This function returns OL TYPE="a" strings in
 ** the range of " a." (1) to "zzz." (18278). - FM
 */
-PUBLIC char *LYLowercaseA_OL_String ARGS1(
-	int, seqnum)
+char *LYLowercaseA_OL_String (
+	int seqnum)
 {
     static char OLstring[8];
 
@@ -610,8 +610,8 @@ PUBLIC char *LYLowercaseA_OL_String ARGS1(
 ** range of " I." (1) to "MMM." (3000).- FM
 ** Maximum length: 16 -TD
 */
-PUBLIC char *LYUppercaseI_OL_String ARGS1(
-	int, seqnum)
+char *LYUppercaseI_OL_String (
+	int seqnum)
 {
     static char OLstring[20];
     int Arabic = seqnum;
@@ -745,8 +745,8 @@ PUBLIC char *LYUppercaseI_OL_String ARGS1(
 ** range of " i." (1) to "mmm." (3000).- FM
 ** Maximum length: 16 -TD
 */
-PUBLIC char *LYLowercaseI_OL_String ARGS1(
-	int, seqnum)
+char *LYLowercaseI_OL_String (
+	int seqnum)
 {
     static char OLstring[20];
     int Arabic = seqnum;
@@ -878,8 +878,8 @@ PUBLIC char *LYLowercaseI_OL_String ARGS1(
 /*
 **  This function initializes the Ordered List counter. - FM
 */
-PUBLIC void LYZero_OL_Counter ARGS1(
-	HTStructured *,		me)
+void LYZero_OL_Counter (
+	HTStructured *		me)
 {
     int i;
 
@@ -900,8 +900,8 @@ PUBLIC void LYZero_OL_Counter ARGS1(
 /*
 **  This function is used by the HTML Structured object. - KW
 */
-PUBLIC void LYGetChartransInfo ARGS1(
-	HTStructured *,		me)
+void LYGetChartransInfo (
+	HTStructured *		me)
 {
     me->UCLYhndl = HTAnchor_getUCLYhndl(me->node_anchor,
 					UCT_STAGE_STRUCTURED);
@@ -933,7 +933,7 @@ PUBLIC void LYGetChartransInfo ARGS1(
  *			next char after the UTF-8 put into buffer.
  *  On failure, including invalid code or 7-bit code, returns NULL.
  */
-PRIVATE char * UCPutUtf8ToBuffer ARGS3(char *, q, UCode_t, code, BOOL, terminate)
+static char * UCPutUtf8ToBuffer (char * q, UCode_t code, BOOL terminate)
 {
     char *q_in = q;
     if (!q)
@@ -977,7 +977,7 @@ PRIVATE char * UCPutUtf8ToBuffer ARGS3(char *, q, UCode_t, code, BOOL, terminate
 }
 
 	/* as in HTParse.c, saves some calls - kw */
-PRIVATE CONST char *hex = "0123456789ABCDEF";
+static const char *hex = "0123456789ABCDEF";
 
 /*
  *	  Any raw 8-bit or multibyte characters already have been
@@ -1048,28 +1048,28 @@ PRIVATE CONST char *hex = "0123456789ABCDEF";
 **
 **  In general, this somehow ugly function (KW)
 **  cover three functions from v.2.7.2 (FM):
-**		    extern void LYExpandString PARAMS((
+**		    extern void LYExpandString (
 **		       HTStructured *	       me,
-**		       char **		       str));
-**		    extern void LYUnEscapeEntities PARAMS((
+**		       char **		       str);
+**		    extern void LYUnEscapeEntities (
 **		       HTStructured *	       me,
-**		       char **		       str));
-**		    extern void LYUnEscapeToLatinOne PARAMS((
+**		       char **		       str);
+**		    extern void LYUnEscapeToLatinOne (
 **		       HTStructured *	       me,
 **		       char **		       str,
-**		       BOOLEAN		       isURL));
+**		       BOOLEAN		       isURL);
 */
 
-PUBLIC char ** LYUCFullyTranslateString ARGS9(
-	char **,	str,
-	int,		cs_from,
-	int,		cs_to,
-	BOOLEAN,	do_ent,
-	BOOL,		use_lynx_specials,
-	BOOLEAN,	plain_space,
-	BOOLEAN,	hidden,
-	BOOL,		Back,
-	CharUtil_st,	stype)
+char ** LYUCFullyTranslateString (
+	char **	str,
+	int		cs_from,
+	int		cs_to,
+	BOOLEAN	do_ent,
+	BOOL		use_lynx_specials,
+	BOOLEAN	plain_space,
+	BOOLEAN	hidden,
+	BOOL		Back,
+	CharUtil_st	stype)
 {
     char * p;
     char *q, *qs;
@@ -1084,7 +1084,7 @@ PUBLIC char ** LYUCFullyTranslateString ARGS9(
     long int lcode;
     BOOL output_utf8 = 0, repl_translated_C0 = 0;
     size_t len;
-    CONST char * name = NULL;
+    const char * name = NULL;
     BOOLEAN no_bytetrans;
     UCTransParams T;
     BOOL from_is_utf8 = FALSE;
@@ -1999,14 +1999,14 @@ PUBLIC char ** LYUCFullyTranslateString ARGS9(
 #undef REPLACE_CHAR
 #undef REPLACE_STRING
 
-PUBLIC BOOL LYUCTranslateHTMLString ARGS7(
-	char **, str,
-	int,	cs_from,
-	int,	cs_to,
-	BOOL,	use_lynx_specials,
-	BOOLEAN,	plain_space,
-	BOOLEAN,	hidden,
-	CharUtil_st,	stype)
+BOOL LYUCTranslateHTMLString (
+	char ** str,
+	int	cs_from,
+	int	cs_to,
+	BOOL	use_lynx_specials,
+	BOOLEAN	plain_space,
+	BOOLEAN	hidden,
+	CharUtil_st	stype)
 {
     BOOL ret = YES;
     /* May reallocate *str even if cs_to == 0 */
@@ -2018,11 +2018,11 @@ PUBLIC BOOL LYUCTranslateHTMLString ARGS7(
     return ret;
 }
 
-PUBLIC BOOL LYUCTranslateBackFormData ARGS4(
-	char **, str,
-	int,	cs_from,
-	int,	cs_to,
-	BOOLEAN,	plain_space)
+BOOL LYUCTranslateBackFormData (
+	char ** str,
+	int	cs_from,
+	int	cs_to,
+	BOOLEAN	plain_space)
 {
     char ** ret;
     /* May reallocate *str */
@@ -2035,9 +2035,9 @@ PUBLIC BOOL LYUCTranslateBackFormData ARGS4(
 /*
  * Parse a parameter from an HTML META tag, i.e., the CONTENT.
  */
-PUBLIC char *LYParseTagParam ARGS2(
-	char *,		from,
-	char *,		name)
+char *LYParseTagParam (
+	char *		from,
+	char *		name)
 {
     size_t len = strlen(name);
     char *result = NULL;
@@ -2078,10 +2078,10 @@ PUBLIC char *LYParseTagParam ARGS2(
  * Given a refresh-URL content string, parses the delay time and the URL
  * string.  Ignore the remainder of the content.
  */
-PUBLIC void LYParseRefreshURL ARGS3(
-	char *,		content,
-	char **,	p_seconds,
-	char **,	p_address)
+void LYParseRefreshURL (
+	char *		content,
+	char **	p_seconds,
+	char **	p_address)
 {
     char *cp;
     char *cp1 = NULL;
@@ -2107,11 +2107,11 @@ PUBLIC void LYParseRefreshURL ARGS3(
 /*
 **  This function processes META tags in HTML streams. - FM
 */
-PUBLIC void LYHandleMETA ARGS4(
-	HTStructured *,		me,
-	CONST BOOL*,		present,
-	CONST char **,		value,
-	char **,		include GCC_UNUSED)
+void LYHandleMETA (
+	HTStructured *		me,
+	const BOOL*		present,
+	const char **		value,
+	char **		include GCC_UNUSED)
 {
     char *http_equiv = NULL, *name = NULL, *content = NULL;
     char *href = NULL, *id_string = NULL, *temp = NULL;
@@ -2665,13 +2665,13 @@ free_META_copies:
 **  current paragraph and subsequent text when a P
 **  end tag is present or not in the markup. - FM
 */
-PUBLIC void LYHandlePlike ARGS6(
-	HTStructured *,		me,
-	CONST BOOL*,		present,
-	CONST char **,		value,
-	char **,		include GCC_UNUSED,
-	int,			align_idx,
-	BOOL,			start)
+void LYHandlePlike (
+	HTStructured *		me,
+	const BOOL*		present,
+	const char **		value,
+	char **		include GCC_UNUSED,
+	int			align_idx,
+	BOOL			start)
 {
     if (TRUE) {
 	/*
@@ -2776,12 +2776,12 @@ PUBLIC void LYHandlePlike ARGS6(
 **  If start is TRUE it handles a start tag, and if FALSE,
 **  an end tag. - FM
 */
-PUBLIC void LYHandleSELECT ARGS5(
-	HTStructured *,		me,
-	CONST BOOL*,		present,
-	CONST char **,		value,
-	char **,		include GCC_UNUSED,
-	BOOL,			start)
+void LYHandleSELECT (
+	HTStructured *		me,
+	const BOOL*		present,
+	const char **		value,
+	char **		include GCC_UNUSED,
+	BOOL			start)
 {
     int i;
 
@@ -2991,16 +2991,16 @@ PUBLIC void LYHandleSELECT ARGS5(
 **  are to be treated as partial or absolute
 **  URLs. - FM
 */
-PUBLIC int LYLegitimizeHREF ARGS4(
-	HTStructured *,		me,
-	char **,		href,
-	BOOL,			force_slash,
-	BOOL,			strip_dots)
+int LYLegitimizeHREF (
+	HTStructured *		me,
+	char **		href,
+	BOOL			force_slash,
+	BOOL			strip_dots)
 {
     int url_type = 0;
     char *p = NULL;
     char *pound = NULL;
-    CONST char *Base = NULL;
+    const char *Base = NULL;
 
     if (!me || !href || isEmpty(*href))
 	return(url_type);
@@ -3089,7 +3089,7 @@ PUBLIC int LYLegitimizeHREF ARGS4(
 	 *  by the document provider. - FM
 	 */
 	char *temp = NULL, *path = NULL, *cp;
-	CONST char *str = "";
+	const char *str = "";
 
 	temp = HTParse(*href, Base, PARSE_ALL);
 	path = HTParse(temp, "", PARSE_PATH+PARSE_PUNCTUATION);
@@ -3136,12 +3136,12 @@ PUBLIC int LYLegitimizeHREF ARGS4(
 **  accordingly.  If set, it will be replaced by
 **  any BASE tag in the HTML stream, itself. - FM
 */
-PUBLIC void LYCheckForContentBase ARGS1(
-	HTStructured *,		me)
+void LYCheckForContentBase (
+	HTStructured *		me)
 {
     char *cp = NULL;
     BOOL present[HTML_BASE_ATTRIBUTES];
-    CONST char *value[HTML_BASE_ATTRIBUTES];
+    const char *value[HTML_BASE_ATTRIBUTES];
     int i;
 
     if (!(me && me->node_anchor))
@@ -3194,7 +3194,7 @@ PUBLIC void LYCheckForContentBase ARGS1(
     for (i = 0; i < HTML_BASE_ATTRIBUTES; i++)
 	 present[i] = NO;
     present[HTML_BASE_HREF] = YES;
-    value[HTML_BASE_HREF] = (CONST char *)cp;
+    value[HTML_BASE_HREF] = (const char *)cp;
     (*me->isa->start_element)(me, HTML_BASE, present, value,
 			      0, 0);
     FREE(cp);
@@ -3204,11 +3204,11 @@ PUBLIC void LYCheckForContentBase ARGS1(
 **  This function creates NAMEd Anchors if a non-zero-length NAME
 **  or ID attribute was present in the tag. - FM
 */
-PUBLIC void LYCheckForID ARGS4(
-	HTStructured *,		me,
-	CONST BOOL *,		present,
-	CONST char **,		value,
-	int,			attribute)
+void LYCheckForID (
+	HTStructured *		me,
+	const BOOL *		present,
+	const char **		value,
+	int			attribute)
 {
     HTChildAnchor *ID_A = NULL;
     char *temp = NULL;
@@ -3246,9 +3246,9 @@ PUBLIC void LYCheckForID ARGS4(
 **  passed to it directly as an argument.  It assumes the
 **  does not need checking for character references. - FM
 */
-PUBLIC void LYHandleID ARGS2(
-	HTStructured *,		me,
-	CONST char *,		id)
+void LYHandleID (
+	HTStructured *		me,
+	const char *		id)
 {
     HTChildAnchor *ID_A = NULL;
 
@@ -3275,8 +3275,8 @@ PUBLIC void LYHandleID ARGS2(
 **  instead use that specified in the element's style
 **  sheet. - FM
 */
-PUBLIC BOOLEAN LYoverride_default_alignment ARGS1(
-	HTStructured *, me)
+BOOLEAN LYoverride_default_alignment (
+	HTStructured * me)
 {
     if (!me)
 	return NO;
@@ -3301,8 +3301,8 @@ PUBLIC BOOLEAN LYoverride_default_alignment ARGS1(
 **  and sets the left margin for subsequent text to the second line
 **  indentation of the current style. - FM
 */
-PUBLIC void LYEnsureDoubleSpace ARGS1(
-	HTStructured *, me)
+void LYEnsureDoubleSpace (
+	HTStructured * me)
 {
     if (!me || !me->text)
 	return;
@@ -3326,8 +3326,8 @@ PUBLIC void LYEnsureDoubleSpace ARGS1(
 **  and sets the left margin for subsequent text to the second line
 **  indentation of the current style. - FM
 */
-PUBLIC void LYEnsureSingleSpace ARGS1(
-	HTStructured *, me)
+void LYEnsureSingleSpace (
+	HTStructured * me)
 {
     if (!me || !me->text)
 	return;
@@ -3346,8 +3346,8 @@ PUBLIC void LYEnsureSingleSpace ARGS1(
 **  This function resets paragraph alignments for block
 **  elements which do not have a defined style sheet. - FM
 */
-PUBLIC void LYResetParagraphAlignment ARGS1(
-	HTStructured *, me)
+void LYResetParagraphAlignment (
+	HTStructured * me)
 {
     if (!me)
 	return;
@@ -3380,9 +3380,9 @@ PUBLIC void LYResetParagraphAlignment ARGS1(
 **  some other HTStructured object like in HTMLGen.c), or the new
 **  functions could be added to the SGML.h interface.
 */
-PUBLIC BOOLEAN LYCheckForCSI ARGS2(
-	HTParentAnchor *,	anchor,
-	char **,		url)
+BOOLEAN LYCheckForCSI (
+	HTParentAnchor *	anchor,
+	char **		url)
 {
     if (!(anchor && anchor->address))
 	return FALSE;
@@ -3418,11 +3418,11 @@ PUBLIC BOOLEAN LYCheckForCSI ARGS2(
 **  would have to agree on some better mechanism to make this kind of info
 **  from original mail headers available, for example using LINK.  - kw
 */
-PUBLIC BOOLEAN LYCommentHacks ARGS2(
-	HTParentAnchor *,	anchor,
-	CONST char *,		comment)
+BOOLEAN LYCommentHacks (
+	HTParentAnchor *	anchor,
+	const char *		comment)
 {
-    CONST char *cp = comment;
+    const char *cp = comment;
     size_t len;
 
     if (comment == NULL)
@@ -3533,9 +3533,9 @@ PUBLIC BOOLEAN LYCommentHacks ARGS2(
      *  from display character set which may need changing.
      *  Do NOT convert any 8-bit chars if we have CJK display. - LP
      */
-void LYformTitle ARGS2(
-	char **,	dst,
-	CONST char *,	src)
+void LYformTitle (
+	char **	dst,
+	const char *	src)
 {
     if (HTCJK == JAPANESE) {
 	char *tmp_buffer = NULL;
@@ -3543,10 +3543,10 @@ void LYformTitle ARGS2(
 	    outofmem(__FILE__, "LYformTitle");
 	switch(kanji_code) {	/* 1997/11/22 (Sat) 09:28:00 */
 	case EUC:
-	    TO_EUC((CONST unsigned char *) src, (unsigned char *) tmp_buffer);
+	    TO_EUC((const unsigned char *) src, (unsigned char *) tmp_buffer);
 	    break;
 	case SJIS:
-	    TO_SJIS((CONST unsigned char *) src, (unsigned char *) tmp_buffer);
+	    TO_SJIS((const unsigned char *) src, (unsigned char *) tmp_buffer);
 	    break;
 	default:
 	    CTRACE((tfp, "\nLYformTitle: kanji_code is an unexpected value."));

@@ -41,31 +41,31 @@ extern int exec_command(char * cmd, int wait_flag); /* xsystem.c */
 #include <LYCookie.h>
 #endif
 
-PUBLIC char * WWW_Download_File=NULL; /* contains the name of the temp file
+char * WWW_Download_File=NULL; /* contains the name of the temp file
 				      ** which is being downloaded into
 				      */
-PUBLIC BOOLEAN LYCancelDownload=FALSE;   /* exported to HTFormat.c in libWWW */
+BOOLEAN LYCancelDownload=FALSE;   /* exported to HTFormat.c in libWWW */
 
 #ifdef VMS
-PRIVATE char * FIXED_RECORD_COMMAND = NULL;
+static char * FIXED_RECORD_COMMAND = NULL;
 #ifdef USE_COMMAND_FILE		     /* Keep this as an option. - FM	*/
 #define FIXED_RECORD_COMMAND_MASK "@Lynx_Dir:FIXED512 %s"
 #else
 #define FIXED_RECORD_COMMAND_MASK "%s"
-PUBLIC unsigned long LYVMS_FixedLengthRecords PARAMS((char *filename));
+unsigned long LYVMS_FixedLengthRecords (char *filename);
 #endif /* USE_COMMAND_FILE */
 #endif /* VMS */
 
-PUBLIC HTStream* HTSaveToFile PARAMS((
+HTStream* HTSaveToFile (
 	HTPresentation *       pres,
 	HTParentAnchor *       anchor,
-	HTStream *	       sink));
+	HTStream *	       sink);
 
 /*	Stream Object
 **	-------------
 */
 struct _HTStream {
-	CONST HTStreamClass *	isa;
+	const HTStreamClass *	isa;
 
 	FILE *			fp;		/* The file we've opened */
 	char *			end_command;	/* What to do on _free.  */
@@ -91,7 +91,7 @@ struct _HTStream {
 /*	Character handling
 **	------------------
 */
-PRIVATE void HTFWriter_put_character ARGS2(HTStream *, me, char, c)
+static void HTFWriter_put_character (HTStream * me, char c)
 {
     if (me->fp) {
 	putc(c, me->fp);
@@ -103,7 +103,7 @@ PRIVATE void HTFWriter_put_character ARGS2(HTStream *, me, char, c)
 **
 **	Strings must be smaller than this buffer size.
 */
-PRIVATE void HTFWriter_put_string ARGS2(HTStream *, me, CONST char*, s)
+static void HTFWriter_put_string (HTStream * me, const char* s)
 {
     if (me->fp) {
 	fputs(s, me->fp);
@@ -113,7 +113,7 @@ PRIVATE void HTFWriter_put_string ARGS2(HTStream *, me, CONST char*, s)
 /*	Buffer write.  Buffers can (and should!) be big.
 **	------------
 */
-PRIVATE void HTFWriter_write ARGS3(HTStream *, me, CONST char*, s, int, l)
+static void HTFWriter_write (HTStream * me, const char* s, int l)
 {
     if (me->fp) {
 	fwrite(s, 1, l, me->fp);
@@ -130,7 +130,7 @@ PRIVATE void HTFWriter_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 **	object is not,
 **	as it takes on an existence of its own unless explicitly freed.
 */
-PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
+static void HTFWriter_free (HTStream * me)
 {
     int len;
     char *path = NULL;
@@ -455,9 +455,9 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 /*	Abort writing
 **	-------------
 */
-PRIVATE void HTFWriter_abort ARGS2(
-	HTStream *,	me,
-	HTError,	e GCC_UNUSED)
+static void HTFWriter_abort (
+	HTStream *	me,
+	HTError	e GCC_UNUSED)
 {
     CTRACE((tfp,"HTFWriter_abort called\n"));
     LYCloseTempFP(me->fp);
@@ -491,7 +491,7 @@ PRIVATE void HTFWriter_abort ARGS2(
 /*	Structured Object Class
 **	-----------------------
 */
-PRIVATE CONST HTStreamClass HTFWriter = /* As opposed to print etc */
+static const HTStreamClass HTFWriter = /* As opposed to print etc */
 {
 	"FileWriter",
 	HTFWriter_free,
@@ -503,7 +503,7 @@ PRIVATE CONST HTStreamClass HTFWriter = /* As opposed to print etc */
 /*	Subclass-specific Methods
 **	-------------------------
 */
-PUBLIC HTStream* HTFWriter_new ARGS1(FILE *, fp)
+HTStream* HTFWriter_new (FILE * fp)
 {
     HTStream* me;
 
@@ -524,9 +524,9 @@ PUBLIC HTStream* HTFWriter_new ARGS1(FILE *, fp)
     return me;
 }
 
-PRIVATE void chrcat ARGS2(
-	char *,		result,
-	int,		ch)
+static void chrcat (
+	char *		result,
+	int		ch)
 {
     result += strlen(result);
     *result++ = (char)ch;
@@ -538,10 +538,10 @@ PRIVATE void chrcat ARGS2(
 **
 **	See mailcap spec for description of template.
 */
-PRIVATE char *mailcap_substitute ARGS3(
-	HTParentAnchor *,	anchor,
-	HTPresentation *,	pres,
-	char *,			fnam)
+static char *mailcap_substitute (
+	HTParentAnchor *	anchor,
+	HTPresentation *	pres,
+	char *			fnam)
 {
     int pass;
     int skip;
@@ -621,13 +621,13 @@ PRIVATE char *mailcap_substitute ARGS3(
 **	in case the application is fussy, or so that a generic opener can
 **	be used.
 */
-PUBLIC HTStream* HTSaveAndExecute ARGS3(
-	HTPresentation *,	pres,
-	HTParentAnchor *,	anchor,
-	HTStream *,		sink)
+HTStream* HTSaveAndExecute (
+	HTPresentation *	pres,
+	HTParentAnchor *	anchor,
+	HTStream *		sink)
 {
     char fnam[LY_MAXPATH];
-    CONST char *suffix;
+    const char *suffix;
     HTStream* me;
 
     if (traversal) {
@@ -788,14 +788,14 @@ PUBLIC HTStream* HTSaveAndExecute ARGS3(
 **	file, and writes to it.  In HTSaveToFile_Free
 **	the user will see a list of choices for download
 */
-PUBLIC HTStream* HTSaveToFile ARGS3(
-	HTPresentation *,	pres,
-	HTParentAnchor *,	anchor,
-	HTStream *,		sink)
+HTStream* HTSaveToFile (
+	HTPresentation *	pres,
+	HTParentAnchor *	anchor,
+	HTStream *		sink)
 {
     HTStream * ret_obj;
     char fnam[LY_MAXPATH];
-    CONST char * suffix;
+    const char * suffix;
     char *cp;
     int c = 0;
     BOOL IsBinary = TRUE;
@@ -1021,10 +1021,10 @@ Prepend_BASE:
 /*	Set up stream for uncompressing - FM
 **	-------------------------------
 */
-PUBLIC HTStream* HTCompressed ARGS3(
-	HTPresentation *,	pres,
-	HTParentAnchor *,	anchor,
-	HTStream *,		sink)
+HTStream* HTCompressed (
+	HTPresentation *	pres,
+	HTParentAnchor *	anchor,
+	HTStream *		sink)
 {
     HTStream* me;
     HTFormat format;
@@ -1034,11 +1034,11 @@ PUBLIC HTStream* HTCompressed ARGS3(
     BOOL can_present = FALSE;
     char fnam[LY_MAXPATH];
     char temp[LY_MAXPATH];	/* actually stores just a suffix */
-    CONST char *program;
-    CONST char *suffix;
+    const char *program;
+    const char *suffix;
     char *uncompress_mask = NULL;
     char *compress_suffix = "";
-    CONST char *middle;
+    const char *middle;
 
     /*
      *	Deal with any inappropriate invocations of this function,
@@ -1268,10 +1268,10 @@ PUBLIC HTStream* HTCompressed ARGS3(
 **	---------------------
 **
 */
-PUBLIC HTStream* HTDumpToStdout ARGS3(
-	HTPresentation *,	pres GCC_UNUSED,
-	HTParentAnchor *,	anchor,
-	HTStream *,		sink GCC_UNUSED)
+HTStream* HTDumpToStdout (
+	HTPresentation *	pres GCC_UNUSED,
+	HTParentAnchor *	anchor,
+	HTStream *		sink GCC_UNUSED)
 {
     HTStream * ret_obj;
     ret_obj = typecalloc(HTStream);
@@ -1326,7 +1326,7 @@ extern unsigned long	sys$open(),  sys$qiow(),  sys$dassgn();
  *  Force a file to be marked as having fixed-length, 512 byte records
  *  without implied carriage control, and with best_try_contiguous set.
  */
-PUBLIC unsigned long LYVMS_FixedLengthRecords ARGS1(char *, filename)
+unsigned long LYVMS_FixedLengthRecords (char * filename)
 {
     struct FAB	    fab;		/* RMS file access block */
     struct fibdef   fib;		/* XQP file information block */

@@ -47,15 +47,15 @@ struct _HTStream
   HTStreamClass * isa;
 };
 
-PRIVATE HTList * LynxMaps = NULL;
+static HTList * LynxMaps = NULL;
 
-PUBLIC BOOL LYMapsOnly = FALSE;
+BOOL LYMapsOnly = FALSE;
 
 /*
  *  Utility for freeing a list of MAPs.
  */
-PUBLIC void ImageMapList_free ARGS1(
-    HTList *,		theList)
+void ImageMapList_free (
+    HTList *		theList)
 {
     LYImageMap *map;
     LYMapElement *element;
@@ -89,7 +89,7 @@ PUBLIC void ImageMapList_free ARGS1(
 /*
  *  Utility for freeing the global list of MAPs. - kw
  */
-PRIVATE void LYLynxMaps_free NOARGS
+static void LYLynxMaps_free (void)
 {
     ImageMapList_free(LynxMaps);
     LynxMaps = NULL;
@@ -123,10 +123,10 @@ PRIVATE void LYLynxMaps_free NOARGS
  *  it will have only those from AREA tags for the current analysis of
  *  MAP element content. - FM
  */
-PUBLIC BOOL LYAddImageMap ARGS3(
-	char *,		address,
-	char *,		title,
-	HTParentAnchor *, node_anchor)
+BOOL LYAddImageMap (
+	char *		address,
+	char *		title,
+	HTParentAnchor * node_anchor)
 {
     LYImageMap *new = NULL;
     LYImageMap *old = NULL;
@@ -211,12 +211,12 @@ PUBLIC BOOL LYAddImageMap ARGS3(
  * Utility for adding LYMapElements to LYImageMaps
  * in the appropriate list. - FM
  */
-PUBLIC BOOL LYAddMapElement ARGS5(
-	char *,		map,
-	char *,		address,
-	char *,		title,
-	HTParentAnchor *, node_anchor,
-	BOOL,		intern_flag GCC_UNUSED)
+BOOL LYAddMapElement (
+	char *		map,
+	char *		address,
+	char *		title,
+	HTParentAnchor * node_anchor,
+	BOOL		intern_flag GCC_UNUSED)
 {
     LYMapElement *new = NULL;
     LYImageMap *theMap = NULL;
@@ -298,8 +298,8 @@ PUBLIC BOOL LYAddMapElement ARGS5(
  *  with a given address already exists in the LynxMaps
  *  structure. - FM
  */
-PUBLIC BOOL LYHaveImageMap ARGS1(
-	char *,		address)
+BOOL LYHaveImageMap (
+	char *		address)
 {
     LYImageMap *Map;
     HTList *cur = LynxMaps;
@@ -327,11 +327,11 @@ PUBLIC BOOL LYHaveImageMap ARGS1(
  *  anAnchor is the LYNXIMGMAP: anchor; if it is associated with POST
  *	     data, we want the specific list, otherwise the global list.
  */
-PRIVATE void fill_DocAddress ARGS4(
-    DocAddress *,	wwwdoc,
-    char *,		address,
-    HTParentAnchor *,	anAnchor,
-    HTParentAnchor **,	punderlying)
+static void fill_DocAddress (
+    DocAddress *	wwwdoc,
+    char *		address,
+    HTParentAnchor *	anAnchor,
+    HTParentAnchor **	punderlying)
 {
     HTParentAnchor * underlying;
     if (anAnchor && anAnchor->post_data) {
@@ -375,11 +375,11 @@ PRIVATE void fill_DocAddress ARGS4(
  * LYLoadIMGmap() will never have post_data, so that the global list
  * will be used. - kw
  */
-PRIVATE HTList * get_the_list ARGS4(
-    DocAddress *,	wwwdoc,
-    char *,		address,
-    HTParentAnchor *,	anchor,
-    HTParentAnchor **,	punderlying)
+static HTList * get_the_list (
+    DocAddress *	wwwdoc,
+    char *		address,
+    HTParentAnchor *	anchor,
+    HTParentAnchor **	punderlying)
 {
     if (anchor && anchor->post_data) {
 	fill_DocAddress(wwwdoc, address, anchor, punderlying);
@@ -398,11 +398,11 @@ PRIVATE HTList * get_the_list ARGS4(
 **	for HyperText References in AREAs of a MAP.
 */
 
-PRIVATE int LYLoadIMGmap ARGS4 (
-	CONST char *,		arg,
-	HTParentAnchor *,	anAnchor,
-	HTFormat,		format_out,
-	HTStream*,		sink)
+static int LYLoadIMGmap (
+	const char *		arg,
+	HTParentAnchor *	anAnchor,
+	HTFormat		format_out,
+	HTStream*		sink)
 {
     HTFormat format_in = WWW_HTML;
     HTStream *target = NULL;
@@ -620,5 +620,5 @@ PRIVATE int LYLoadIMGmap ARGS4 (
 #define _LYIMGMAP_C_GLOBALDEF_1_INIT { "LYNXIMGMAP", LYLoadIMGmap, 0}
 GLOBALDEF (HTProtocol,LYLynxIMGmap,_LYIMGMAP_C_GLOBALDEF_1_INIT);
 #else
-GLOBALDEF PUBLIC HTProtocol LYLynxIMGmap = {"LYNXIMGMAP", LYLoadIMGmap, 0};
+GLOBALDEF HTProtocol LYLynxIMGmap = {"LYNXIMGMAP", LYLoadIMGmap, 0};
 #endif /* GLOBALDEF_IS_MACRO */

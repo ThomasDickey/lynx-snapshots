@@ -37,19 +37,19 @@ struct _domain_entry {
 };
 typedef struct _domain_entry domain_entry;
 
-extern void LYSetCookie PARAMS((
-	CONST char *	SetCookie,
-	CONST char *	SetCookie2,
-	CONST char *	address));
-extern char *LYAddCookieHeader PARAMS((
+extern void LYSetCookie (
+	const char *	SetCookie,
+	const char *	SetCookie2,
+	const char *	address);
+extern char *LYAddCookieHeader (
 	char *		hostname,
 	char *		partialpath,
 	int		port,
-	BOOL		secure));
-extern void LYStoreCookies PARAMS((
-	char *		cookie_file));
-extern void LYLoadCookies PARAMS((
-	char * 		cookie_file));
-extern void LYConfigCookies NOPARAMS;
+	BOOL		secure);
+extern void LYStoreCookies (
+	char *		cookie_file);
+extern void LYLoadCookies (
+	char * 		cookie_file);
+extern void LYConfigCookies (void);
 
 #endif /* LYCOOKIES_H */

@@ -822,7 +822,7 @@ if test "$cf_cv_bool_defs" = no ; then
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_BUILD_CC version: 2 updated: 2004/01/19 16:20:54
+dnl CF_BUILD_CC version: 3 updated: 2004/02/17 20:55:59
 dnl -----------
 dnl If we're cross-compiling, allow the user to override the tools and their
 dnl options.  The configure script is oriented toward identifying the host
@@ -2204,43 +2204,61 @@ make an error
 test "$cf_cv_gnu_source" = yes && CPPFLAGS="$CPPFLAGS -D_GNU_SOURCE"
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_GNUTLS version: 3 updated: 2003/10/05 17:34:54
+dnl CF_GNUTLS version: 4 updated: 2004/04/26 20:08:48
 dnl ---------
 dnl Check for gnutls library (TLS "is" SSL)
 dnl $1 = the [optional] directory in which the library may be found
 AC_DEFUN([CF_GNUTLS],[
-cf_ssl_library="-lgnutls-extra -lgnutls -lcrypt"
+cf_ssl_library="-lgnutls -lcrypt"
+AC_MSG_CHECKING(if we know what directory gnutls is in)
 case "$1" in #(vi
 no) #(vi
-  ;;
+	cf_ssl_root=no
+	;;
 yes) #(vi
-  AC_CHECK_LIB(gnutls, SSL_connect,[],[
-  	if test -d /usr/local/gnutls ; then
-		CF_VERBOSE(assume it is in /usr/local/gnutls)
-		cf_ssl_library="-L/usr/local/gnutls/lib $cf_ssl_library"
-		CPPFLAGS="-I/usr/local/gnutls/include $CPPFLAGS"
-	else
-		AC_MSG_ERROR(cannot find gnutls library)
-	fi
+	AC_CHECK_LIB(gnutls, gnutls_init,[],[
+		cf_ssl_root=/usr/local/gnutls
+		if test -d $cf_ssl_root ; then
+			CF_VERBOSE(assume it is in $cf_ssl_root)
+		else
+			AC_MSG_ERROR(cannot find gnutls library)
+		fi
 	],
 	[-lgnutls-extra -lgnutls -lcrypt])
-  ;;
+	;;
 *)
-  if test -d $1 ; then
-    if test -d $1/include ; then
-      CPPFLAGS="$CPPFLAGS -I$1/include"
-      cf_ssl_library="-L$1/lib $cf_ssl_library"
-    else
-      cf_ssl_library="-L$1 $cf_ssl_library"
-      test -d $1/../include && CPPFLAGS="$CPPFLAGS -I$1/../include"
-    fi
-  else
-    AC_MSG_WARN(expected a directory: $1)
-  fi
-  ;;
+	if test -d $1 ; then
+		if test -d $1/include ; then
+			cf_ssl_root=$1
+		elif test -d $1/../include ; then
+			cf_ssl_root=$1/..
+		else
+			AC_MSG_ERROR(cannot find ssl library under $1)
+		fi
+	else
+		AC_MSG_WARN(expected a directory: $1)
+	fi
+	;;
 esac
+AC_MSG_RESULT($cf_ssl_root)
 LIBS="$cf_ssl_library $LIBS"
 
+cf_ssl_subincs=yes
+if test "$cf_ssl_root" != no ; then
+	cf_ssl_library="-L$cf_ssl_root/lib $cf_ssl_library"
+	if test -d $cf_ssl_root/include ; then
+		CF_ADD_CFLAGS(-I$cf_ssl_root/include)
+		test -d $cf_ssl_root/include/gnutls || cf_ssl_subincs=no
+	fi
+fi
+
+AC_CHECK_LIB(gnutls-openssl,SSL_connect,
+	[LIBS="-lgnutls-openssl $LIBS"],
+	[AC_CHECK_LIB(gnutls-extra,SSL_connect,
+		[LIBS="-lgnutls-extra $LIBS"],
+		[AC_MSG_ERROR(cannot find gnutls openssl functions)])])
+
+if test "$cf_ssl_subincs" = yes ; then
 AC_MSG_CHECKING(for gnutls include directory)
 AC_TRY_COMPILE([
 #include <stdio.h>
@@ -2250,6 +2268,7 @@ AC_TRY_COMPILE([
 	[cf_openssl_incl=no])
 AC_MSG_RESULT($cf_openssl_incl)
 test "$cf_openssl_incl" = yes && AC_DEFINE(USE_GNUTLS_INCL)
+fi
 
 AC_MSG_CHECKING(if we can link to gnutls library)
 AC_TRY_LINK([
@@ -2619,7 +2638,9 @@ case $host_os in #(vi
 freebsd*)
 	# This is only necessary if you are linking against an obsolete
 	# version of ncurses (but it should do no harm, since it's static).
-	AC_CHECK_LIB(mytinfo,tgoto,[cf_ncurses_LIBS="-lmytinfo $cf_ncurses_LIBS"])
+	if test "$cf_nculib_root" = ncurses ; then
+		AC_CHECK_LIB(mytinfo,tgoto,[cf_ncurses_LIBS="-lmytinfo $cf_ncurses_LIBS"])
+	fi
 	;;
 esac
 
@@ -3410,43 +3431,54 @@ if test "$cf_cv_srand_func" != unknown ; then
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_SSL version: 3 updated: 2003/10/05 17:34:54
+dnl CF_SSL version: 5 updated: 2004/04/26 20:08:48
 dnl ------
 dnl Check for ssl library
 dnl $1 = the [optional] directory in which the library may be found
 AC_DEFUN([CF_SSL],[
+cf_ssl_root=
 cf_ssl_library="-lssl -lcrypto"
 case "$1" in #(vi
 no) #(vi
-  ;;
+	;;
 yes) #(vi
-  AC_CHECK_LIB(ssl, SSL_get_version,[],[
-  	if test -d /usr/local/ssl ; then
-		CF_VERBOSE(assume it is in /usr/local/ssl)
-		cf_ssl_library="-L/usr/local/ssl/lib $cf_ssl_library"
-		CPPFLAGS="-I/usr/local/ssl/include $CPPFLAGS"
-	else
-		AC_MSG_ERROR(cannot find ssl library)
-	fi
+	AC_CHECK_LIB(ssl, SSL_get_version,[],[
+		cf_ssl_root=/usr/local/ssl
+		if test -d $cf_ssl_root ; then
+			CF_VERBOSE(assume it is in $cf_ssl_root)
+			cf_ssl_library="-L$cf_ssl_root/lib $cf_ssl_library"
+		else
+			AC_MSG_ERROR(cannot find ssl library)
+		fi
 	],
 	[-lcrypto])
-  ;;
+	;;
 *)
-  if test -d $1 ; then
-    if test -d $1/include ; then
-      CPPFLAGS="$CPPFLAGS -I$1/include"
-      cf_ssl_library="-L$1/lib $cf_ssl_library"
-    else
-      cf_ssl_library="-L$1 $cf_ssl_library"
-      test -d $1/../include && CPPFLAGS="$CPPFLAGS -I$1/../include"
-    fi
-  else
-    AC_MSG_WARN(expected a directory: $1)
-  fi
-  ;;
+	if test -d $1 ; then
+		if test -d $1/include ; then
+			cf_ssl_root=$1
+		elif test -d $1/../include ; then
+			cf_ssl_root=$1/..
+		else
+			AC_MSG_ERROR(cannot find ssl library under $1)
+		fi
+		cf_ssl_library="-L$cf_ssl_root/lib $cf_ssl_library"
+	else
+		AC_MSG_WARN(expected a directory: $1)
+	fi
+	;;
 esac
 LIBS="$cf_ssl_library $LIBS"
 
+cf_ssl_subincs=yes
+if test -n "$cf_ssl_root" ; then
+	if test -d $cf_ssl_root/include ; then
+		CF_ADD_CFLAGS(-I$cf_ssl_root/include)
+		test -d $cf_ssl_root/include/openssl || cf_ssl_subincs=no
+	fi
+fi
+
+if test "$cf_ssl_subincs" = yes ; then
 AC_MSG_CHECKING(for openssl include directory)
 AC_TRY_COMPILE([
 #include <stdio.h>
@@ -3456,6 +3488,7 @@ AC_TRY_COMPILE([
 	[cf_openssl_incl=no])
 AC_MSG_RESULT($cf_openssl_incl)
 test "$cf_openssl_incl" = yes && AC_DEFINE(USE_OPENSSL_INCL)
+fi
 
 AC_MSG_CHECKING(if we can link to ssl library)
 AC_TRY_LINK([
@@ -4514,59 +4547,33 @@ CF_UPPER(cf_x_athena_LIBS,HAVE_LIB_$cf_x_athena)
 AC_DEFINE_UNQUOTED($cf_x_athena_LIBS)
 ])
 dnl ---------------------------------------------------------------------------
-dnl CF_X_TOOLKIT version: 9 updated: 2001/12/30 19:09:58
+dnl CF_X_TOOLKIT version: 10 updated: 2004/04/25 15:37:17
 dnl ------------
 dnl Check for X Toolkit libraries
 dnl
 AC_DEFUN([CF_X_TOOLKIT],
 [
+AC_REQUIRE([AC_PATH_XTRA])
 AC_REQUIRE([CF_CHECK_CACHE])
-# We need to check for -lsocket and -lnsl here in order to work around an
-# autoconf bug.  autoconf-2.12 is not checking for these prior to checking for
-# the X11R6 -lSM and -lICE libraries.  The resultant failures cascade...
-# 	(tested on Solaris 2.5 w/ X11R6)
-SYSTEM_NAME=`echo "$cf_cv_system_name"|tr ' ' -`
-cf_have_X_LIBS=no
-case $SYSTEM_NAME in
-irix[[56]]*) ;;
-clix*)
-	# FIXME: modify the library lookup in autoconf to
-	# allow _s.a suffix ahead of .a
-	AC_CHECK_LIB(c_s,open,
-		[LIBS="-lc_s $LIBS"
-	AC_CHECK_LIB(bsd,gethostname,
-		[LIBS="-lbsd $LIBS"
-	AC_CHECK_LIB(nsl_s,gethostname,
-		[LIBS="-lnsl_s $LIBS"
-	AC_CHECK_LIB(X11_s,XOpenDisplay,
-		[LIBS="-lX11_s $LIBS"
-	AC_CHECK_LIB(Xt_s,XtAppInitialize,
-		[LIBS="-lXt_s $LIBS"
-		 cf_have_X_LIBS=Xt
-		]) ]) ]) ]) ])
-	;;
-*)
-	AC_CHECK_LIB(socket,socket)
-	AC_CHECK_LIB(nsl,gethostname)
-	;;
-esac
 
-if test $cf_have_X_LIBS = no ; then
-	AC_PATH_XTRA
-	LDFLAGS="$LDFLAGS $X_LIBS"
-	CF_CHECK_CFLAGS($X_CFLAGS)
-	AC_CHECK_LIB(X11,XOpenDisplay,
-		[LIBS="-lX11 $LIBS"],,
-		[$X_PRE_LIBS $LIBS $X_EXTRA_LIBS])
-	AC_CHECK_LIB(Xt, XtAppInitialize,
-		[AC_DEFINE(HAVE_LIBXT)
-		 cf_have_X_LIBS=Xt
-		 LIBS="-lXt $X_PRE_LIBS $LIBS"],,
-		[$X_PRE_LIBS $LIBS $X_EXTRA_LIBS])
-else
-	LDFLAGS="$LDFLAGS $X_LIBS"
-	CF_CHECK_CFLAGS($X_CFLAGS)
-fi
+# SYSTEM_NAME=`echo "$cf_cv_system_name"|tr ' ' -`
+
+cf_have_X_LIBS=no
+
+LDFLAGS="$X_LIBS $LDFLAGS"
+CF_CHECK_CFLAGS($X_CFLAGS)
+
+AC_CHECK_FUNC(XOpenDisplay,,[
+AC_CHECK_LIB(X11,XOpenDisplay,
+	[LIBS="-lX11 $LIBS"],,
+	[$X_PRE_LIBS $LIBS $X_EXTRA_LIBS])])
+
+AC_CHECK_FUNC(XtAppInitialize,,[
+AC_CHECK_LIB(Xt, XtAppInitialize,
+	[AC_DEFINE(HAVE_LIBXT)
+	 cf_have_X_LIBS=Xt
+	 LIBS="-lXt $X_PRE_LIBS $LIBS"],,
+	[$X_PRE_LIBS $LIBS $X_EXTRA_LIBS])])
 
 if test $cf_have_X_LIBS = no ; then
 	AC_WARN(

@@ -25,8 +25,8 @@ BOOLEAN HadVMSInterrupt = FALSE;
 /*
  *  Interrupt handler.	Stop curses and exit gracefully.
  */
-PUBLIC void cleanup_sig ARGS1(
-	int,		sig)
+void cleanup_sig (
+	int		sig)
 {
 
 #ifdef IGNORE_CTRL_C
@@ -149,13 +149,13 @@ PUBLIC void cleanup_sig ARGS1(
  *  Called by Interrupt handler or at quit time.
  *  Erases the temporary files that lynx created.
  */
-PUBLIC void cleanup_files NOARGS
+void cleanup_files (void)
 {
     LYCleanupTemp();
     FREE(lynx_temp_space);
 }
 
-PUBLIC void cleanup NOARGS
+void cleanup (void)
 {
 #ifdef VMS
     extern BOOLEAN DidCleanup;

@@ -41,55 +41,55 @@ struct _HTList {
 
 /*	Create list.
 */
-extern HTList * HTList_new NOPARAMS;
+extern HTList * HTList_new (void);
 
 
 /*	Delete list.
 */
-extern void HTList_delete PARAMS((
-	HTList *	me));
+extern void HTList_delete (
+	HTList *	me);
 
 /*	Reverse a list.
 */
-extern HTList * HTList_reverse PARAMS((
-	HTList *	start));
+extern HTList * HTList_reverse (
+	HTList *	start);
 
 /*	Append two lists, making second list empty.
 */
-extern HTList * HTList_appendList PARAMS((
+extern HTList * HTList_appendList (
 	HTList *	start,
-	HTList *	tail));
+	HTList *	tail);
 
 
 /*      Add object to START of list (so it is pointed to by the head).
 */
-extern void HTList_addObject PARAMS((
+extern void HTList_addObject (
 	HTList *	me,
-	void *		newObject));
+	void *		newObject);
 
 
 /*      Append object to END of list (furthest from the head).
 */
-extern void HTList_appendObject PARAMS((
+extern void HTList_appendObject (
 	HTList *	me,
-	void *		newObject));
+	void *		newObject);
 
 
 /*	Insert an object into the list at a specified position.
 **      If position is 0, this places the object at the head of the list
 **      and is equivalent to HTList_addObject().
 */
-extern void HTList_insertObjectAt PARAMS((
+extern void HTList_insertObjectAt (
 	HTList *	me,
 	void *		newObject,
-	int		pos));
+	int		pos);
 
 
 /*	Remove specified object from list.
 */
-extern BOOL HTList_removeObject PARAMS((
+extern BOOL HTList_removeObject (
 	HTList *	me,
-	void *		oldObject));
+	void *		oldObject);
 
 
 /*	Remove object at a given position in the list, where 0 is the
@@ -97,47 +97,47 @@ extern BOOL HTList_removeObject PARAMS((
 **	(->object) for the object, and NULL if the list is empty, or
 **	if it doesn't exist - Yuk!).
 */
-extern void * HTList_removeObjectAt PARAMS((
+extern void * HTList_removeObjectAt (
 	HTList *	me,
-	int		position));
+	int		position);
 
 
 /*	Remove object from START of list (the Last one inserted
 **	via HTList_addObject(), and pointed to by the head).
 */
-extern void * HTList_removeLastObject PARAMS((
-	HTList *	me));
+extern void * HTList_removeLastObject (
+	HTList *	me);
 
 
 /*	Remove object from END of list (the First one inserted
 **	via HTList_addObject(), and furthest from the head).
 */
-extern void * HTList_removeFirstObject PARAMS((
-	HTList *	me));
+extern void * HTList_removeFirstObject (
+	HTList *	me);
 
 
 /*	Determine total number of objects in the list,
 **	not counting the head.
 */
-extern int HTList_count PARAMS((
-	HTList *	me));
+extern int HTList_count (
+	HTList *	me);
 
 
 /*	Determine position of an object in the list (a value of 0
 **	means it is pointed to by the head; returns -1 if not found).
 */
-extern int HTList_indexOf PARAMS((
+extern int HTList_indexOf (
 	HTList *	me,
-	void *		object));
+	void *		object);
 
 
 /*	Return pointer to the object at a specified position in the list,
 **	where 0 is the object pointed to by the head (returns NULL if
 **	the list is empty, or if it doesn't exist - Yuk!).
 */
-extern void * HTList_objectAt PARAMS((
+extern void * HTList_objectAt (
 	HTList *	me,
-	int		position));
+	int		position);
 
 /*      Link object to START of list (so it is pointed to by the head).
  *
@@ -145,23 +145,23 @@ extern void * HTList_objectAt PARAMS((
  *	it use already allocated memory which should not be free'd by any
  *	list operations (optimization).
  */
-extern void HTList_linkObject PARAMS((
+extern void HTList_linkObject (
 	HTList *	me,
 	void *		newObject,
-	HTList *	newNode));
+	HTList *	newNode);
 
 /*	Unlink object from START of list (the Last one inserted
  *	via HTList_linkObject(), and pointed to by the head).
  *	It does not free memory.
  */
-extern void * HTList_unlinkLastObject PARAMS((
-	HTList *	me));
+extern void * HTList_unlinkLastObject (
+	HTList *	me);
 
 /*	Unlink specified object from list.
  *	It does not free memory.
  */
-extern BOOL HTList_unlinkObject PARAMS((
+extern BOOL HTList_unlinkObject (
 	HTList *	me,
-	void *		oldObject));
+	void *		oldObject);
 
 #endif /* HTLIST_H */

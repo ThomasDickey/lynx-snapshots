@@ -28,7 +28,7 @@ typedef struct {
 /*
  * Initialize a chunk's allocation data and allocation-increment.
  */
-extern void HTChunkInit PARAMS((HTChunk * ch, int grow));
+extern void HTChunkInit (HTChunk * ch, int grow);
 
 /*
  *
@@ -46,7 +46,7 @@ extern void HTChunkInit PARAMS((HTChunk * ch, int grow));
  *
  */
 
-extern HTChunk * HTChunkCreate PARAMS((int growby));
+extern HTChunk * HTChunkCreate (int growby);
 
 /*
  *  Create a chunk for which an allocation error is not a fatal application
@@ -55,13 +55,13 @@ extern HTChunk * HTChunkCreate PARAMS((int growby));
  *  are ok each time after data have been appended.
  *  The create call may also fail and will reurn NULL in that case. - kw
  */
-extern HTChunk * HTChunkCreateMayFail PARAMS((int growby, int failok));
+extern HTChunk * HTChunkCreateMayFail (int growby, int failok);
 
 /*
  *  Like HTChunkCreate but with initial allocation - kw
  *
  */
-extern HTChunk * HTChunkCreate2 PARAMS((int growby, size_t needed));
+extern HTChunk * HTChunkCreate2 (int growby, size_t needed);
 
 
 /*
@@ -78,7 +78,7 @@ extern HTChunk * HTChunkCreate2 PARAMS((int growby, size_t needed));
  *
  */
 
-extern void HTChunkFree PARAMS((HTChunk * ch));
+extern void HTChunkFree (HTChunk * ch);
 
 
 /*
@@ -95,7 +95,7 @@ extern void HTChunkFree PARAMS((HTChunk * ch));
  *
  */
 
-extern void HTChunkClear PARAMS((HTChunk * ch));
+extern void HTChunkClear (HTChunk * ch);
 
 
 /*
@@ -114,7 +114,7 @@ extern void HTChunkClear PARAMS((HTChunk * ch));
  *
  */
 
-extern BOOL HTChunkRealloc PARAMS((HTChunk * ch, int growby));
+extern BOOL HTChunkRealloc (HTChunk * ch, int growby);
 
 
 /*
@@ -133,7 +133,7 @@ extern BOOL HTChunkRealloc PARAMS((HTChunk * ch, int growby));
  *
  */
 
-extern void HTChunkEnsure PARAMS((HTChunk * ch, int s));
+extern void HTChunkEnsure (HTChunk * ch, int s);
 
 
 /*
@@ -151,11 +151,11 @@ extern void HTChunkEnsure PARAMS((HTChunk * ch, int s));
  *   *ch		Is one character bigger
  *
  */
-extern void HTChunkPutc PARAMS((HTChunk * ch, char c));
+extern void HTChunkPutc (HTChunk * ch, char c);
 
-extern void HTChunkPutb PARAMS((HTChunk * ch, CONST char *b, int l));
+extern void HTChunkPutb (HTChunk * ch, const char *b, int l);
 
-extern void HTChunkPutUtf8Char PARAMS((HTChunk * ch, UCode_t code));
+extern void HTChunkPutUtf8Char (HTChunk * ch, UCode_t code);
 
 /*
  * Append a string to a  chunk
@@ -173,7 +173,7 @@ extern void HTChunkPutUtf8Char PARAMS((HTChunk * ch, UCode_t code));
  */
 
 
-extern void HTChunkPuts PARAMS((HTChunk * ch, CONST char *str));
+extern void HTChunkPuts (HTChunk * ch, const char *str);
 
 
 /*
@@ -195,6 +195,6 @@ extern void HTChunkPuts PARAMS((HTChunk * ch, CONST char *str));
  */
 
 
-extern void HTChunkTerminate PARAMS((HTChunk * ch));
+extern void HTChunkTerminate (HTChunk * ch);
 
 #endif /* HTCHUNK_H */

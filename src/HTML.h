@@ -47,7 +47,7 @@
 #define UNESCAPE_FIELDNAME_TO_STD(s) \
 	LYUCTranslateHTMLString(s, ATTR_CS_IN, ATTR_CS_IN, NO, NO, YES, st_HTML)
 
-extern CONST HTStructuredClass HTMLPresentation;
+extern const HTStructuredClass HTMLPresentation;
 
 #ifdef Lynx_HTML_Handler
 /*
@@ -66,7 +66,7 @@ typedef struct _stack_element {
 #define MAX_NESTING 800		/* Should be checked by parser */
 
 struct _HTStructured {
-    CONST HTStructuredClass *	isa;
+    const HTStructuredClass *	isa;
     HTParentAnchor *		node_anchor;
     HText *			text;
 
@@ -215,24 +215,24 @@ struct _HTStructured {
     int			tag_charset; /* charset for attribute values etc. */
 };
 
-extern  HTStyle *LYstyles PARAMS((int style_number));
-extern	BOOL LYBadHTML PARAMS((HTStructured *me)); 
+extern  HTStyle *LYstyles (int style_number);
+extern	BOOL LYBadHTML (HTStructured *me); 
 
 /*
  *	Semi-Private functions. - FM
  */
-extern void HTML_put_character PARAMS((HTStructured *me, char c));
-extern void HTML_put_string PARAMS((HTStructured *me, CONST char *s));
-extern void HTML_write PARAMS((HTStructured *me, CONST char *s, int l));
-extern int HTML_put_entity PARAMS((HTStructured *me, int entity_number));
-extern void actually_set_style PARAMS((HTStructured * me));
+extern void HTML_put_character (HTStructured *me, char c);
+extern void HTML_put_string (HTStructured *me, const char *s);
+extern void HTML_write (HTStructured *me, const char *s, int l);
+extern int HTML_put_entity (HTStructured *me, int entity_number);
+extern void actually_set_style (HTStructured * me);
 
 /*	Style buffering avoids dummy paragraph begin/ends.
 */
 #define UPDATE_STYLE if (me->style_change) { actually_set_style(me); }
 #endif /* Lynx_HTML_Handler */
 
-extern void strtolower PARAMS((char* i));
+extern void strtolower (char* i);
 
 /*				P U B L I C
 */
@@ -240,30 +240,30 @@ extern void strtolower PARAMS((char* i));
 /*
 **  HTConverter to present HTML
 */
-extern HTStream* HTMLToPlain PARAMS((
+extern HTStream* HTMLToPlain (
 	HTPresentation *	pres,
 	HTParentAnchor *	anchor,
-	HTStream *		sink));
+	HTStream *		sink);
 
-extern HTStream* HTMLParsedPresent PARAMS((
+extern HTStream* HTMLParsedPresent (
 	HTPresentation *	pres,
 	HTParentAnchor *	anchor,
-	HTStream *		sink));
+	HTStream *		sink);
 
-extern HTStream* HTMLToC PARAMS((
+extern HTStream* HTMLToC (
 	HTPresentation *	pres,
 	HTParentAnchor *	anchor,
-	HTStream *		sink));
+	HTStream *		sink);
 
-extern HTStream* HTMLPresent PARAMS((
+extern HTStream* HTMLPresent (
 	HTPresentation *	pres,
 	HTParentAnchor *	anchor,
-	HTStream *		sink));
+	HTStream *		sink);
 
-extern HTStructured* HTML_new PARAMS((
+extern HTStructured* HTML_new (
 	HTParentAnchor * anchor,
 	HTFormat	format_out,
-	HTStream *	target));
+	HTStream *	target);
 
 /*
 **  Record error message as a hypertext object.
@@ -277,11 +277,11 @@ extern HTStructured* HTML_new PARAMS((
 **      number  is the HTTP error number
 **      message is the human readable message.
 **  On exit,
-**      a retrun code like HT_LOADED if object exists else 60; 0
+**      a return code like HT_LOADED if object exists else 60; 0
 */
-extern int HTLoadError PARAMS((
+extern int HTLoadError (
 	HTStream *	sink,
 	int		number,
-	CONST char *	message));
+	const char *	message);
 
 #endif /* HTML_H */

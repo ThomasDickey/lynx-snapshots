@@ -13,7 +13,7 @@
 
 /*	Create list.
 */
-PUBLIC HTList * HTList_new NOARGS
+HTList * HTList_new (void)
 {
     HTList *newList;
 
@@ -29,8 +29,8 @@ PUBLIC HTList * HTList_new NOARGS
 
 /*	Delete list.
 */
-PUBLIC void HTList_delete ARGS1(
-	HTList *,	me)
+void HTList_delete (
+	HTList *	me)
 {
     HTList *current;
 
@@ -44,8 +44,8 @@ PUBLIC void HTList_delete ARGS1(
 
 /*	Reverse order of elements in list.
  */
-PUBLIC HTList * HTList_reverse ARGS1(
-    HTList *,		start)
+HTList * HTList_reverse (
+    HTList *		start)
 {
     HTList *cur, *succ;
     if (!(start && start->next && (cur = start->next->next)))
@@ -64,9 +64,9 @@ PUBLIC HTList * HTList_reverse ARGS1(
  *
  *	If successful, the second list will become empty but not freed.
  */
-PUBLIC HTList * HTList_appendList ARGS2(
-    HTList *,		start,
-    HTList *,		tail)
+HTList * HTList_appendList (
+    HTList *		start,
+    HTList *		tail)
 {
     HTList * temp = start;
 
@@ -93,10 +93,10 @@ PUBLIC HTList * HTList_appendList ARGS2(
  *	it use already allocated memory which should not be free'd by any
  *	list operations (optimization).
  */
-PUBLIC void HTList_linkObject ARGS3(
-	HTList *,	me,
-	void *,		newObject,
-	HTList *,	newNode)
+void HTList_linkObject (
+	HTList *	me,
+	void *		newObject,
+	HTList *	newNode)
 {
     if (me) {
 	if (newNode->object == NULL && newNode->next == NULL) {
@@ -126,9 +126,9 @@ PUBLIC void HTList_linkObject ARGS3(
 
 /*      Add object to START of list (so it is pointed to by the head).
 */
-PUBLIC void HTList_addObject ARGS2(
-	HTList *,	me,
-	void *,		newObject)
+void HTList_addObject (
+	HTList *	me,
+	void *		newObject)
 {
     HTList *newNode;
 
@@ -150,9 +150,9 @@ PUBLIC void HTList_addObject ARGS2(
 
 /*      Append object to END of list (furthest from the head).
 */
-PUBLIC void HTList_appendObject ARGS2(
-	HTList *,	me,
-	void *,		newObject)
+void HTList_appendObject (
+	HTList *	me,
+	void *		newObject)
 {
     HTList *temp = me;
 
@@ -170,10 +170,10 @@ PUBLIC void HTList_appendObject ARGS2(
 **      If position is 0, this places the object at the head of the list
 **      and is equivalent to HTList_addObject().
 */
-PUBLIC void HTList_insertObjectAt ARGS3(
-	HTList *,	me,
-	void *,		newObject,
-	int,		pos)
+void HTList_insertObjectAt (
+	HTList *	me,
+	void *		newObject,
+	int		pos)
 {
     HTList * newNode;
     HTList * temp = me;
@@ -215,9 +215,9 @@ PUBLIC void HTList_insertObjectAt ARGS3(
 /*	Unlink specified object from list.
  *	It does not free memory.
  */
-PUBLIC BOOL HTList_unlinkObject ARGS2(
-	HTList *,	me,
-	void *,		oldObject)
+BOOL HTList_unlinkObject (
+	HTList *	me,
+	void *		oldObject)
 {
     HTList *temp = me;
     HTList *prevNode;
@@ -240,9 +240,9 @@ PUBLIC BOOL HTList_unlinkObject ARGS2(
 
 /*	Remove specified object from list.
 */
-PUBLIC BOOL HTList_removeObject ARGS2(
-	HTList *,	me,
-	void *,		oldObject)
+BOOL HTList_removeObject (
+	HTList *	me,
+	void *		oldObject)
 {
     HTList *temp = me;
     HTList *prevNode;
@@ -267,9 +267,9 @@ PUBLIC BOOL HTList_removeObject ARGS2(
 **	(->object) for the object, and NULL if the list is empty, or
 **	if it doesn't exist - Yuk!).
 */
-PUBLIC void * HTList_removeObjectAt  ARGS2(
-	HTList *,	me,
-	int,		position)
+void * HTList_removeObjectAt  (
+	HTList *	me,
+	int		position)
 {
     HTList * temp = me;
     HTList * prevNode;
@@ -297,8 +297,8 @@ PUBLIC void * HTList_removeObjectAt  ARGS2(
  *	via HTList_linkObject(), and pointed to by the head).
  *	It does not free memory.
  */
-PUBLIC void * HTList_unlinkLastObject ARGS1(
-	HTList *,	me)
+void * HTList_unlinkLastObject (
+	HTList *	me)
 {
     HTList * lastNode;
     void * lastObject;
@@ -320,8 +320,8 @@ PUBLIC void * HTList_unlinkLastObject ARGS1(
 /*	Remove object from START of list (the Last one inserted
 **	via HTList_addObject(), and pointed to by the head).
 */
-PUBLIC void * HTList_removeLastObject ARGS1(
-	HTList *,	me)
+void * HTList_removeLastObject (
+	HTList *	me)
 {
     HTList * lastNode;
     void * lastObject;
@@ -342,8 +342,8 @@ PUBLIC void * HTList_removeLastObject ARGS1(
 /*	Remove object from END of list (the First one inserted
 **	via HTList_addObject(), and furthest from the head).
 */
-PUBLIC void * HTList_removeFirstObject ARGS1(
-	HTList *,	me)
+void * HTList_removeFirstObject (
+	HTList *	me)
 {
     HTList * temp = me;
     HTList * prevNode;
@@ -372,8 +372,8 @@ PUBLIC void * HTList_removeFirstObject ARGS1(
 /*	Determine total number of objects in the list,
 **	not counting the head.
 */
-PUBLIC int HTList_count ARGS1(
-	HTList *,	me)
+int HTList_count (
+	HTList *	me)
 {
     HTList * temp = me;
     int count = 0;
@@ -389,9 +389,9 @@ PUBLIC int HTList_count ARGS1(
 /*	Determine position of an object in the list (a value of 0
 **	means it is pointed to by the head; returns -1 if not found).
 */
-PUBLIC int HTList_indexOf ARGS2(
-	HTList *,	me,
-	void *,		object)
+int HTList_indexOf (
+	HTList *	me,
+	void *		object)
 {
     HTList * temp = me;
     int position = 0;
@@ -412,9 +412,9 @@ PUBLIC int HTList_indexOf ARGS2(
 **	where 0 is the object pointed to by the head (returns NULL if
 **	the list is empty, or if it doesn't exist - Yuk!).
 */
-PUBLIC void * HTList_objectAt ARGS2(
-	HTList *,	me,
-	int,		position)
+void * HTList_objectAt (
+	HTList *	me,
+	int		position)
 {
     HTList * temp = me;
     int pos = position;

@@ -10,7 +10,7 @@
 typedef struct _LYUCcharset {
     int UChndl;		/* -1 for "old" charsets, >= 0 for chartrans tables */
 
-    CONST char * MIMEname;
+    const char * MIMEname;
     int enc;
     int codepage;	/* if positive, an IBM OS/2 specific number;
 			   if negative, flag for no table translation */

@@ -11,7 +11,7 @@
 /*
 **	Initialize a chunk with a certain allocation unit
 */
-PUBLIC void HTChunkInit ARGS2 (HTChunk *,ch, int,grow)
+void HTChunkInit (HTChunk *ch, int grow)
 {
     ch->data = 0;
     ch->growby = grow;
@@ -22,7 +22,7 @@ PUBLIC void HTChunkInit ARGS2 (HTChunk *,ch, int,grow)
 /*	Create a chunk with a certain allocation unit
 **	--------------
 */
-PUBLIC HTChunk * HTChunkCreate ARGS1 (int,grow)
+HTChunk * HTChunkCreate (int grow)
 {
     HTChunk * ch = typecalloc(HTChunk);
     if (ch == NULL)
@@ -32,7 +32,7 @@ PUBLIC HTChunk * HTChunkCreate ARGS1 (int,grow)
     return ch;
 }
 
-PUBLIC HTChunk * HTChunkCreateMayFail ARGS2 (int,grow, int,failok)
+HTChunk * HTChunkCreateMayFail (int grow, int failok)
 {
     HTChunk * ch = typecalloc(HTChunk);
     if (ch == NULL) {
@@ -50,7 +50,7 @@ PUBLIC HTChunk * HTChunkCreateMayFail ARGS2 (int,grow, int,failok)
 /*	Create a chunk with a certain allocation unit and ensured size
 **	--------------
 */
-PUBLIC HTChunk * HTChunkCreate2 ARGS2 (int,grow, size_t, needed)
+HTChunk * HTChunkCreate2 (int grow, size_t  needed)
 {
     HTChunk * ch = typecalloc(HTChunk);
     if (ch == NULL)
@@ -73,7 +73,7 @@ PUBLIC HTChunk * HTChunkCreate2 ARGS2 (int,grow, size_t, needed)
 /*	Clear a chunk of all data
 **	--------------------------
 */
-PUBLIC void HTChunkClear ARGS1 (HTChunk *,ch)
+void HTChunkClear (HTChunk * ch)
 {
     FREE(ch->data);
     ch->size = 0;
@@ -84,7 +84,7 @@ PUBLIC void HTChunkClear ARGS1 (HTChunk *,ch)
 /*	Free a chunk
 **	------------
 */
-PUBLIC void HTChunkFree ARGS1 (HTChunk *,ch)
+void HTChunkFree (HTChunk * ch)
 {
     FREE(ch->data);
     FREE(ch);
@@ -94,7 +94,7 @@ PUBLIC void HTChunkFree ARGS1 (HTChunk *,ch)
 /*	Realloc the chunk
 **	-----------------
 */
-PUBLIC BOOL HTChunkRealloc ARGS2 (HTChunk *,ch, int,growby)
+BOOL HTChunkRealloc (HTChunk * ch, int growby)
 {
     char *data;
     ch->allocated = ch->allocated + growby;
@@ -118,7 +118,7 @@ PUBLIC BOOL HTChunkRealloc ARGS2 (HTChunk *,ch, int,growby)
 */
 /* Warning: the code of this function is defined as macro in SGML.c. Change
   the macro or undefine it in SGML.c when changing this function. -VH */
-PUBLIC void HTChunkPutc ARGS2 (HTChunk *,ch, char,c)
+void HTChunkPutc (HTChunk * ch, char c)
 {
     if (ch->size >= ch->allocated) {
 	if (!HTChunkRealloc(ch, ch->growby))
@@ -131,7 +131,7 @@ PUBLIC void HTChunkPutc ARGS2 (HTChunk *,ch, char,c)
 /*	Ensure a certain size
 **	---------------------
 */
-PUBLIC void HTChunkEnsure ARGS2 (HTChunk *,ch, int,needed)
+void HTChunkEnsure (HTChunk * ch, int needed)
 {
     if (needed <= ch->allocated) return;
     ch->allocated = needed-1 - ((needed-1) % ch->growby)
@@ -142,7 +142,7 @@ PUBLIC void HTChunkEnsure ARGS2 (HTChunk *,ch, int,needed)
 	outofmem(__FILE__, "HTChunkEnsure");
 }
 
-PUBLIC void HTChunkPutb ARGS3 (HTChunk *,ch, CONST char *,b, int,l)
+void HTChunkPutb (HTChunk *ch, const char *b, int l)
 {
     if (l <= 0) return;
     if (ch->size + l > ch->allocated) {
@@ -157,9 +157,9 @@ PUBLIC void HTChunkPutb ARGS3 (HTChunk *,ch, CONST char *,b, int,l)
 #define PUTC(code) ch->data[ch->size++] = (char)(code)
 #define PUTC2(code) ch->data[ch->size++] = (char)(0x80|(0x3f &(code)))
 
-PUBLIC void HTChunkPutUtf8Char ARGS2(
-	HTChunk *,	ch,
-	UCode_t,	code)
+void HTChunkPutUtf8Char (
+	HTChunk *	ch,
+	UCode_t	code)
 {
     int utflen;
 
@@ -228,7 +228,7 @@ PUBLIC void HTChunkPutUtf8Char ARGS2(
 /*	Terminate a chunk
 **	-----------------
 */
-PUBLIC void HTChunkTerminate ARGS1 (HTChunk *,ch)
+void HTChunkTerminate (HTChunk * ch)
 {
     HTChunkPutc(ch, (char)0);
 }
@@ -237,9 +237,9 @@ PUBLIC void HTChunkTerminate ARGS1 (HTChunk *,ch)
 /*	Append a string
 **	---------------
 */
-PUBLIC void HTChunkPuts ARGS2 (HTChunk *,ch, CONST char *,s)
+void HTChunkPuts (HTChunk * ch, const char * s)
 {
-    CONST char * p;
+    const char * p;
     for (p = s; *p; p++) {
 	if (ch->size >= ch->allocated) {
 	    if (!HTChunkRealloc(ch, ch->growby))

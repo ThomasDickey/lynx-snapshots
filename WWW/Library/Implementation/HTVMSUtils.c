@@ -37,7 +37,7 @@
 #include <LYLeaks.h>
 #include <LYStrings.h>
 
-PUBLIC BOOL HTVMSFileVersions = FALSE; /* Include version numbers in listing? */
+BOOL HTVMSFileVersions = FALSE; /* Include version numbers in listing? */
 
 typedef struct {
    unsigned long BufferLength : 16;
@@ -54,7 +54,7 @@ typedef struct {
 ** ON EXIT:
 **	returns	YES if SYSPRV is authorized
 */
-PUBLIC BOOL HTVMS_authSysPrv NOARGS
+BOOL HTVMS_authSysPrv (void)
 {
 unsigned long Result;
 ItemStruct ItemList[2];
@@ -93,7 +93,7 @@ unsigned long Buffer[2];
 ** ON EXIT:
 **
 */
-PUBLIC void HTVMS_enableSysPrv NOARGS
+void HTVMS_enableSysPrv (void)
 {
 unsigned long Result;
 unsigned long Prv[2], PreviousPrv[2];
@@ -119,7 +119,7 @@ unsigned long Prv[2], PreviousPrv[2];
 ** ON EXIT:
 **
 */
-PUBLIC void HTVMS_disableSysPrv NOARGS
+void HTVMS_disableSysPrv (void)
 {
 unsigned long Result;
 unsigned long Prv[2], PreviousPrv[2];
@@ -149,10 +149,10 @@ unsigned long Prv[2], PreviousPrv[2];
 **	returns YES if access is allowed
 **
 */
-PUBLIC BOOL HTVMS_checkAccess ARGS3(
-	CONST char *, FileName,
-	CONST char *, UserName,
-	CONST char *, Method)
+BOOL HTVMS_checkAccess (
+	const char * FileName,
+	const char * UserName,
+	const char * Method)
 {
 unsigned long Result;
 ItemStruct ItemList[2];
@@ -242,11 +242,10 @@ char *colon;
 **
 **
 */
-PUBLIC char * HTVMS_wwwName ARGS1(
-	CONST char *,	vmsname)
+char * HTVMS_wwwName (const char *	vmsname)
 {
 static char wwwname[LY_MAXPATH];
-CONST char *src;
+const char *src;
 char *dst;
 int dir;
    dst = wwwname;
@@ -302,9 +301,9 @@ int dir;
 **	The code below is for directory browsing by VMS Curses clients.
 **	It is based on the newer WWWLib's HTDirBrw.c. - Foteos Macrides
 */
-PUBLIC int HTStat ARGS2(
-	CONST char *, filename,
-	struct stat *, info)
+int HTStat (
+	const char * filename,
+	struct stat * info)
 {
    /*
       the following stuff does not work in VMS with a normal stat...
@@ -388,9 +387,9 @@ typedef	struct __dirdesc {
 	struct dsc$descriptor_s dirname_desc;	/* descriptor of dirname */
 } DIR;
 
-PRIVATE	DIR *HTVMSopendir(char *dirname);
-PRIVATE	struct dirent *HTVMSreaddir(DIR *dirp);
-PRIVATE	int HTVMSclosedir(DIR *dirp);
+static	DIR *HTVMSopendir(char *dirname);
+static	struct dirent *HTVMSreaddir(DIR *dirp);
+static	int HTVMSclosedir(DIR *dirp);
 
 /*** #include <sys_dirent.h> ***/
 /*** "sys_dirent.h" ***/
@@ -419,7 +418,7 @@ struct	dirent {
 #endif	/* !_POSIX_SOURCE */
 
 
-PRIVATE DIR *HTVMSopendir(char *dirname)
+static DIR *HTVMSopendir(char *dirname)
 {
 static DIR dir;
 char *closebracket;
@@ -514,7 +513,7 @@ char *dot;
    return(&dir);
 }
 
-PRIVATE struct dirent *HTVMSreaddir(DIR *dirp)
+static struct dirent *HTVMSreaddir(DIR *dirp)
 {
 static struct dirent entry;
 long status;
@@ -556,7 +555,7 @@ char *UnixEntry;
    }
 }
 
-PRIVATE int HTVMSclosedir(DIR *dirp)
+static int HTVMSclosedir(DIR *dirp)
 {
 long status;
 
@@ -582,13 +581,13 @@ long status;
 #define FREE_TARGET (*targetClass._free)(target)
 #define ABORT_TARGET (*targetClass._free)(target)
 struct _HTStructured {
-	CONST HTStructuredClass *	isa;
+	const HTStructuredClass *	isa;
 	/* ... */
 };
 
 #define STRUCT_DIRENT struct dirent
 
-PRIVATE char * months[12] = {
+static char * months[12] = {
     "Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"
 };
 
@@ -600,7 +599,7 @@ typedef struct _VMSEntryInfo {
     BOOLEAN      display;  /* show this entry? */
 } VMSEntryInfo;
 
-PRIVATE void free_VMSEntryInfo_contents ARGS1(VMSEntryInfo *,entry_info)
+static void free_VMSEntryInfo_contents (VMSEntryInfo * entry_info)
 {
     if (entry_info) {
 	FREE(entry_info->filename);
@@ -610,8 +609,8 @@ PRIVATE void free_VMSEntryInfo_contents ARGS1(VMSEntryInfo *,entry_info)
    /* dont free the struct */
 }
 
-PUBLIC int compare_VMSEntryInfo_structs ARGS2(VMSEntryInfo *,entry1,
-					      VMSEntryInfo *,entry2)
+int compare_VMSEntryInfo_structs (VMSEntryInfo * entry1,
+					      VMSEntryInfo * entry2)
 {
     int i, status;
     char date1[16], date2[16], time1[8], time2[8], month[4];
@@ -731,11 +730,11 @@ PUBLIC int compare_VMSEntryInfo_structs ARGS2(VMSEntryInfo *,entry1,
 **
 **	Developed for Lynx by Foteos Macrides (macrides@sci.wfeb.edu).
 */
-PUBLIC int HTVMSBrowseDir ARGS4(
-	CONST char *,		address,
-	HTParentAnchor *,	anchor,
-	HTFormat,		format_out,
-	HTStream *,		sink
+int HTVMSBrowseDir (
+	const char *		address,
+	HTParentAnchor *	anchor,
+	HTFormat		format_out,
+	HTStream *		sink
 )
 {
     HTStructured* target;
@@ -952,7 +951,7 @@ PUBLIC int HTVMSBrowseDir ARGS4(
 
 	    /* Get the type */
 	    format = HTFileFormat(dirbuf->d_name, &encoding,
-				  (CONST char **)&cp);
+				  (const char **)&cp);
 	    if (!cp) {
 		if(!strncmp(HTAtom_name(format), "application",11))
 		{
@@ -1002,7 +1001,7 @@ PUBLIC int HTVMSBrowseDir ARGS4(
 
 	    /* Get the date */
 	    {
-		char *t = (char *)ctime((CONST time_t *)&file_info.st_ctime);
+		char *t = (char *)ctime((const time_t *)&file_info.st_ctime);
 		*(t+24) = '\0';
 
 		StrAllocCopy(entry_info->date, (t+4));

@@ -39,12 +39,12 @@
 #define OK_HOST(p) ((p) != 0 && ((p)->h_length) != 0)
 
 #ifdef SVR4_BSDSELECT
-PUBLIC int BSDselect PARAMS((
+int BSDselect (
 	int		 nfds,
 	fd_set *	 readfds,
 	fd_set *	 writefds,
 	fd_set *	 exceptfds,
-	struct timeval * select_timeout));
+	struct timeval * select_timeout);
 #ifdef select
 #undef select
 #endif /* select */
@@ -62,13 +62,13 @@ PUBLIC int BSDselect PARAMS((
 /*
 **  Module-Wide variables
 */
-PRIVATE char *hostname = NULL;		/* The name of this host */
+static char *hostname = NULL;		/* The name of this host */
 
 /*
 **  PUBLIC VARIABLES
 */
 #ifdef SOCKS
-PUBLIC unsigned long socks_bind_remoteAddr; /* for long Rbind */
+unsigned long socks_bind_remoteAddr; /* for long Rbind */
 #endif /* SOCKS */
 
 /* PUBLIC SockA HTHostAddress; */	/* The internet address of the host */
@@ -129,10 +129,10 @@ static unsigned long _fork_func (void *arglist GCC_UNUSED)
 */
 #include <HTioctl.h>
 
-PUBLIC int HTioctl ARGS3(
-	int,		d,
-	int,		request,
-	int *,		argp)
+int HTioctl (
+	int		d,
+	int		request,
+	int *		argp)
 {
     int sdc, status;
     unsigned short fun, iosb[4];
@@ -184,8 +184,8 @@ PUBLIC int HTioctl ARGS3(
 /*	Report Internet Error
 **	---------------------
 */
-PUBLIC int HTInetStatus ARGS1(
-	char *,		where)
+int HTInetStatus (
+	char *		where)
 {
     int status;
     int saved_errno = errno;
@@ -266,10 +266,10 @@ PUBLIC int HTInetStatus ARGS1(
 **	*pp	    points to first unread character
 **	*pstatus    points to status updated iff bad
 */
-PUBLIC unsigned int HTCardinal ARGS3(
-	int *,		pstatus,
-	char **,	pp,
-	unsigned int,	max_value)
+unsigned int HTCardinal (
+	int *		pstatus,
+	char **	pp,
+	unsigned int	max_value)
 {
     unsigned int n;
     if ((**pp<'0') || (**pp>'9')) {	    /* Null string is error */
@@ -297,8 +297,8 @@ PUBLIC unsigned int HTCardinal ARGS3(
 **	returns a pointer to a static string which must be copied if
 **		it is to be kept.
 */
-PUBLIC CONST char * HTInetString ARGS1(
-	SockA*,		soc_in)
+const char * HTInetString (
+	SockA*		soc_in)
 {
 #ifdef INET6
     static char hostbuf[MAXHOSTNAMELEN];
@@ -338,8 +338,8 @@ PUBLIC CONST char * HTInetString ARGS1(
 **  On exit,
 **	returns 1 if valid, otherwise 0.
 */
-PUBLIC BOOL valid_hostname ARGS1(
-	char *,	name)
+BOOL valid_hostname (
+	char *	name)
 {
     int i=1, iseg = 0;
     char *cp = name;
@@ -373,14 +373,14 @@ PUBLIC BOOL valid_hostname ARGS1(
 **  SIGKILL), but don't go through normal libc exit() processing, which
 **  would screw up parent's stdio.  -BL
 */
-PRIVATE void quench ARGS1(
-	int,	sig GCC_UNUSED)
+static void quench (
+	int	sig GCC_UNUSED)
 {
     _exit(2);
 }
 #endif /* NSL_FORK */
 
-PUBLIC int lynx_nsl_status = HT_OK;
+int lynx_nsl_status = HT_OK;
 
 #define DEBUG_HOSTENT		/* disable in case of problems */
 #define DEBUG_HOSTENT_CHILD  /* for NSL_FORK, may screw up trace file */
@@ -392,9 +392,9 @@ PUBLIC int lynx_nsl_status = HT_OK;
 **  trace log or stderr, including all pointer values, strings, and
 **  addresses, in a format inspired by gdb's print format. - kw
 */
-PRIVATE void dump_hostent ARGS2(
-    CONST char *,		msgprefix,
-    CONST struct hostent *,	phost)
+static void dump_hostent (
+    const char *		msgprefix,
+    const struct hostent *	phost)
 {
     if (TRACE) {
 	int i;
@@ -466,10 +466,10 @@ typedef struct {
 	char		rest[REHOSTENT_SIZE];
     } AlignedHOSTENT;
 
-PRIVATE size_t fill_rehostent ARGS3(
-    char *,			rehostent,
-    size_t,			rehostentsize,
-    CONST struct hostent *,	phost)
+static size_t fill_rehostent (
+    char *			rehostent,
+    size_t			rehostentsize,
+    const struct hostent *	phost)
 {
     AlignedHOSTENT *data = (AlignedHOSTENT *)rehostent;
     int num_addrs = 0;
@@ -636,8 +636,8 @@ extern int h_errno;
 **	HT_ERROR		Resolver error, reason not known
 **	HT_INTERNAL		Internal error
 */
-PUBLIC struct hostent * LYGetHostByName ARGS1(
-	char *,	str)
+struct hostent * LYGetHostByName (
+	char *	str)
 {
 #ifndef _WINDOWS_NSL
     char *host = str;
@@ -1181,9 +1181,9 @@ failed:
 **		field is left unchanged in *soc_in.
 */
 #ifndef INET6
-PRIVATE int HTParseInet ARGS2(
-	SockA *,	soc_in,
-	CONST char *,	str)
+static int HTParseInet (
+	SockA *	soc_in,
+	const char *	str)
 {
     char *port;
     int dotcount_ip = 0;	/* for dotted decimal IP addr */
@@ -1364,10 +1364,10 @@ failed:
 #endif /* !INET6 */
 
 #ifdef INET6
-PRIVATE struct addrinfo *
-HTGetAddrInfo ARGS2(
-    CONST char *, str,
-    CONST int, defport)
+static struct addrinfo *
+HTGetAddrInfo (
+    const char * str,
+    const int defport)
 {
     struct addrinfo hints, *res;
     int error;
@@ -1412,7 +1412,7 @@ HTGetAddrInfo ARGS2(
 **	-------------------------------------------
 **
 */
-PRIVATE void free_HTTCP_hostname NOARGS
+static void free_HTTCP_hostname (void)
 {
     FREE(hostname);
 }
@@ -1422,7 +1422,7 @@ PRIVATE void free_HTTCP_hostname NOARGS
 **	-------------------------------------------
 **
 */
-PRIVATE void get_host_details NOARGS
+static void get_host_details (void)
 {
     char name[MAXHOSTNAMELEN+1];	/* The name of this host */
 #ifdef UCX
@@ -1496,7 +1496,7 @@ PRIVATE void get_host_details NOARGS
 #endif /* !DECNET */
 }
 
-PUBLIC CONST char * HTHostName NOARGS
+const char * HTHostName (void)
 {
     get_host_details();
     return hostname;
@@ -1512,11 +1512,11 @@ PUBLIC CONST char * HTHostName NOARGS
 **  and hacked in for Lynx years ago by Lou Montulli, and further
 **  modified over the years by numerous Lynx lovers. - FM
 */
-PUBLIC int HTDoConnect ARGS4(
-	CONST char *,	url,
-	char *,		protocol,
-	int,		default_port,
-	int *,		s)
+int HTDoConnect (
+	const char *	url,
+	char *		protocol,
+	int		default_port,
+	int *		s)
 {
     int status = 0;
     char *line = NULL;
@@ -1910,10 +1910,10 @@ PUBLIC int HTDoConnect ARGS4(
 /*
 **  This is so interruptible reads can be implemented cleanly.
 */
-PUBLIC int HTDoRead ARGS3(
-	int,		fildes,
-	void *,		buf,
-	unsigned,	nbyte)
+int HTDoRead (
+	int		fildes,
+	void *		buf,
+	unsigned	nbyte)
 {
     int ready, ret;
     fd_set readfds;
@@ -2083,12 +2083,12 @@ PUBLIC int HTDoRead ARGS3(
 #include <sys/time.h>
 #include <sys/select.h>
 
-PUBLIC int BSDselect ARGS5(
-	int,			nfds,
-	fd_set *,		readfds,
-	fd_set *,		writefds,
-	fd_set *,		exceptfds,
-	struct timeval *,	select_timeout)
+int BSDselect (
+	int			nfds,
+	fd_set *		readfds,
+	fd_set *		writefds,
+	fd_set *		exceptfds,
+	struct timeval *	select_timeout)
 {
     int rval,
     i;

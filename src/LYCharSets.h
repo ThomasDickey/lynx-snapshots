@@ -30,24 +30,24 @@ extern int current_char_set;
  *  Initializer, calls initialization function for the
  *  CHARTRANS handling. - KW
  */
-extern int LYCharSetsDeclared NOPARAMS;
+extern int LYCharSetsDeclared (void);
 
 
-extern CONST char ** LYCharSets[];
-extern CONST char * SevenBitApproximations[];
-extern CONST char ** p_entity_values;
-extern CONST char * LYchar_set_names[];  /* Full name, not MIME */
+extern const char ** LYCharSets[];
+extern const char * SevenBitApproximations[];
+extern const char ** p_entity_values;
+extern const char * LYchar_set_names[];  /* Full name, not MIME */
 extern int LYlowest_eightbit[];
 extern int LYNumCharsets;
 extern LYUCcharset LYCharSet_UC[];
-extern int UCGetLYhndl_byAnyName PARAMS((char *value));
-extern void HTMLSetCharacterHandling PARAMS((int i));
-extern void HTMLSetUseDefaultRawMode PARAMS((int i, BOOLEAN modeflag));
-extern void HTMLUseCharacterSet PARAMS((int i));
-extern UCode_t HTMLGetEntityUCValue PARAMS((CONST char *name));
-extern void Set_HTCJK PARAMS((CONST char *inMIMEname, CONST char *outMIMEname));
+extern int UCGetLYhndl_byAnyName (char *value);
+extern void HTMLSetCharacterHandling (int i);
+extern void HTMLSetUseDefaultRawMode (int i, BOOLEAN modeflag);
+extern void HTMLUseCharacterSet (int i);
+extern UCode_t HTMLGetEntityUCValue (const char *name);
+extern void Set_HTCJK (const char *inMIMEname, const char *outMIMEname);
 
-extern CONST char * HTMLGetEntityName PARAMS((UCode_t code));
+extern const char * HTMLGetEntityName (UCode_t code);
 		/*
 		** HTMLGetEntityName calls LYEntityNames for iso-8859-1 entity
 		** names only.	This is an obsolete technique but widely used in
@@ -87,14 +87,14 @@ extern int display_charset_map[];
 extern int assumed_doc_charset_map[];
 
 /* these arrays are NULL terminated */
-extern CONST char* display_charset_choices[];
-extern CONST char* assumed_charset_choices[];
+extern const char* display_charset_choices[];
+extern const char* assumed_charset_choices[];
 
 extern int displayed_display_charset_idx;
 
 #endif
 /* this will be called after lynx.cfg and .lynxrc are read */
-extern void init_charset_subsets NOPARAMS;
+extern void init_charset_subsets (void);
 #endif /* EXP_CHARSET_CHOICE */
 
 #if !defined(NO_AUTODETECT_DISPLAY_CHARSET)
@@ -116,8 +116,8 @@ enum switch_display_charset_t {
     SWITCH_DISPLAY_CHARSET_REALLY,
     SWITCH_DISPLAY_CHARSET_RESIZE
 };
-extern int Switch_Display_Charset PARAMS((int ord, enum switch_display_charset_t really));
-extern int Find_Best_Display_Charset PARAMS((int ord));
+extern int Switch_Display_Charset (int ord, enum switch_display_charset_t really);
+extern int Find_Best_Display_Charset (int ord);
 extern char *charsets_directory;
 extern char *charset_switch_rules;
 extern int switch_display_charsets;

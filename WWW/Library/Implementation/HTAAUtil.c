@@ -63,7 +63,7 @@
 ** ON EXIT:
 **	returns		the enumerated constant for that scheme.
 */
-PUBLIC HTAAScheme HTAAScheme_enum ARGS1(CONST char*, name)
+HTAAScheme HTAAScheme_enum (const char* name)
 {
     char *upcased = NULL;
 
@@ -105,7 +105,7 @@ PUBLIC HTAAScheme HTAAScheme_enum ARGS1(CONST char*, name)
 **	returns		the name of the scheme, i.e.
 **			"None", "Basic", "Pubkey", ...
 */
-PUBLIC char *HTAAScheme_name ARGS1(HTAAScheme, scheme)
+char *HTAAScheme_name (HTAAScheme scheme)
 {
     switch (scheme) {
 	case HTAA_NONE:
@@ -135,7 +135,7 @@ PUBLIC char *HTAAScheme_name ARGS1(HTAAScheme, scheme)
 **	returns		HTAAMethod enumerated value corresponding
 **			to the given name.
 */
-PUBLIC HTAAMethod HTAAMethod_enum ARGS1(CONST char *, name)
+HTAAMethod HTAAMethod_enum (const char * name)
 {
     if (!name)
 	return METHOD_UNKNOWN;
@@ -159,7 +159,7 @@ PUBLIC HTAAMethod HTAAMethod_enum ARGS1(CONST char *, name)
 **	returns		the name of the scheme, i.e.
 **			"GET", "PUT", ...
 */
-PUBLIC char *HTAAMethod_name ARGS1(HTAAMethod, method)
+char *HTAAMethod_name (HTAAMethod method)
 {
     switch (method) {
       case METHOD_GET:
@@ -184,8 +184,8 @@ PUBLIC char *HTAAMethod_name ARGS1(HTAAMethod, method)
 **	returns		YES, if method was found.
 **			NO, if not found.
 */
-PUBLIC BOOL HTAAMethod_inList ARGS2(HTAAMethod, method,
-				    HTList *,	list)
+BOOL HTAAMethod_inList (HTAAMethod method,
+				    HTList *	list)
 {
     HTList *cur = list;
     char *item;
@@ -222,11 +222,11 @@ PUBLIC BOOL HTAAMethod_inList ARGS2(HTAAMethod, method,
 **	returns		YES, if filename matches the template.
 **			NO, otherwise.
 */
-PUBLIC BOOL HTAA_templateMatch ARGS2(CONST char *, template,
-				     CONST char *, filename)
+BOOL HTAA_templateMatch (const char * template,
+				     const char * filename)
 {
-    CONST char *p = template;
-    CONST char *q = filename;
+    const char *p = template;
+    const char *q = filename;
     int m;
 
     for (; *p  &&  *q  &&  *p == *q; p++, q++)	/* Find first mismatch */
@@ -273,11 +273,11 @@ PUBLIC BOOL HTAA_templateMatch ARGS2(CONST char *, template,
 **	returns		YES, if filename matches the template.
 **			NO, otherwise.
 */
-PUBLIC BOOL HTAA_templateCaseMatch ARGS2(CONST char *, template,
-					 CONST char *, filename)
+BOOL HTAA_templateCaseMatch (const char * template,
+					 const char * filename)
 {
-    CONST char *p = template;
-    CONST char *q = filename;
+    const char *p = template;
+    const char *q = filename;
     int m;
 
     /* Find first mismatch */
@@ -322,7 +322,7 @@ PUBLIC BOOL HTAA_templateCaseMatch ARGS2(CONST char *, template,
 **				being a comment marker here,
 **				there really isn't any space.
 */
-PUBLIC char *HTAA_makeProtectionTemplate ARGS1(CONST char *, docname)
+char *HTAA_makeProtectionTemplate (const char * docname)
 {
     char *template = NULL;
     char *slash = NULL;
@@ -384,7 +384,7 @@ PUBLIC char *HTAA_makeProtectionTemplate ARGS1(CONST char *, docname)
 **		the number of order number of that item. E.g.
 **		"1" for the first, etc.
 */
-PUBLIC HTAssocList *HTAA_parseArgList ARGS1(char *, str)
+HTAssocList *HTAA_parseArgList (char * str)
 {
     HTAssocList *assoc_list = HTAssocList_new();
     char *cur = NULL;
@@ -448,14 +448,14 @@ PUBLIC HTAssocList *HTAA_parseArgList ARGS1(char *, str)
 
 #define BUFFER_SIZE	1024
 
-PRIVATE size_t buffer_length;
-PRIVATE char *buffer = 0;
-PRIVATE char *start_pointer;
-PRIVATE char *end_pointer;
-PRIVATE int in_soc = -1;
+static size_t buffer_length;
+static char *buffer = 0;
+static char *start_pointer;
+static char *end_pointer;
+static int in_soc = -1;
 
 #ifdef LY_FIND_LEAKS
-PRIVATE void FreeHTAAUtil NOARGS
+static void FreeHTAAUtil (void)
 {
     FREE(buffer);
 }
@@ -480,9 +480,9 @@ PRIVATE void FreeHTAAUtil NOARGS
 **			will use this buffer first and then
 **			proceed to read from socket.
 */
-PUBLIC void HTAA_setupReader ARGS3(char *,	start_of_headers,
-				   int,		length,
-				   int,		soc)
+void HTAA_setupReader (char *	start_of_headers,
+				   int		length,
+				   int		soc)
 {
     if (!start_of_headers)
 	length = 0;	       /* initialize length (is this reached at all?) */
@@ -536,7 +536,7 @@ PUBLIC void HTAA_setupReader ARGS3(char *,	start_of_headers,
 **	Field-Name: Blaa-Blaa This-Is-A-Continuation-Line Here-Is_Another
 **
 */
-PUBLIC char *HTAA_getUnfoldedLine NOARGS
+char *HTAA_getUnfoldedLine (void)
 {
     char *line = NULL;
     char *cur;

@@ -86,9 +86,9 @@
 **  list.  We keep a running total of cookies as we add or delete
 **  them
 */
-PRIVATE HTList *domain_list = NULL;
-PRIVATE HTList *cookie_list = NULL;
-PRIVATE int total_cookies = 0;
+static HTList *domain_list = NULL;
+static HTList *cookie_list = NULL;
+static int total_cookies = 0;
 
 struct _cookie {
     char *lynxID;  /* Lynx cookie identifier */
@@ -120,10 +120,10 @@ struct _HTStream
   HTStreamClass * isa;
 };
 
-PRIVATE void MemAllocCopy ARGS3(
-	char **,	dest,
-	CONST char *,	start,
-	CONST char *,	end)
+static void MemAllocCopy (
+	char **	dest,
+	const char *	start,
+	const char *	end)
 {
     char *temp;
 
@@ -140,7 +140,7 @@ PRIVATE void MemAllocCopy ARGS3(
     FREE(temp);
 }
 
-PRIVATE cookie * newCookie NOARGS
+static cookie * newCookie (void)
 {
     cookie *p = typecalloc(cookie);
 
@@ -151,8 +151,8 @@ PRIVATE cookie * newCookie NOARGS
     return p;
 }
 
-PRIVATE void freeCookie ARGS1(
-	cookie *,	co)
+static void freeCookie (
+	cookie *	co)
 {
     if (co) {
 	FREE(co->lynxID);
@@ -168,7 +168,7 @@ PRIVATE void freeCookie ARGS1(
 }
 
 #ifdef LY_FIND_LEAKS
-PRIVATE void LYCookieJar_free NOARGS
+static void LYCookieJar_free (void)
 {
     HTList *dl = domain_list;
     domain_entry *de = NULL;
@@ -207,9 +207,9 @@ PRIVATE void LYCookieJar_free NOARGS
 **   http://www.ics.uci.edu/pub/ietf/http/draft-ietf-http-state-man-mec-02.txt
 **	- AK & FM
 */
-PRIVATE BOOLEAN host_matches ARGS2(
-	CONST char *,	A,
-	CONST char *,	B)
+static BOOLEAN host_matches (
+	const char *	A,
+	const char *	B)
 {
     /*
      *	The following line will handle both numeric IP addresses and
@@ -237,11 +237,11 @@ PRIVATE BOOLEAN host_matches ARGS2(
 **   http://www.ics.uci.edu/pub/ietf/http/draft-ietf-http-state-man-mec-02.txt
 **	- FM
 */
-PRIVATE BOOLEAN port_matches ARGS2(
-	int,		port,
-	CONST char *,	list)
+static BOOLEAN port_matches (
+	int		port,
+	const char *	list)
 {
-    CONST char *number = list;
+    const char *number = list;
 
     if (!(number && isdigit(UCH(*number))))
 	return(FALSE);
@@ -264,7 +264,7 @@ PRIVATE BOOLEAN port_matches ARGS2(
 /*
  * Returns the length of the given path ignoring trailing slashes.
  */
-PRIVATE int ignore_trailing_slash ARGS1(CONST char *, a)
+static int ignore_trailing_slash (const char * a)
 {
     int len = strlen(a);
     while (len > 1 && a[len-1] == '/')
@@ -276,7 +276,7 @@ PRIVATE int ignore_trailing_slash ARGS1(CONST char *, a)
  * Check if the path 'a' is a prefix of path 'b', ignoring trailing slashes
  * in either, since they denote an empty component.
  */
-PRIVATE BOOL is_prefix ARGS2(CONST char *, a, CONST char *, b)
+static BOOL is_prefix (const char * a, const char * b)
 {
     int len_a = ignore_trailing_slash(a);
     int len_b = ignore_trailing_slash(b);
@@ -300,8 +300,8 @@ PRIVATE BOOL is_prefix ARGS2(CONST char *, a, CONST char *, b)
 /*
  * Find the domain-entry for the given name.
  */
-PRIVATE domain_entry * find_domain_entry ARGS1(
-    CONST char *,	name)
+static domain_entry * find_domain_entry (
+    const char *	name)
 {
     HTList *hl;
     domain_entry *de = NULL;
@@ -333,16 +333,16 @@ PRIVATE domain_entry * find_domain_entry ARGS1(
 /*
 **  Store a cookie somewhere in the domain list. - AK & FM
 */
-PRIVATE void store_cookie ARGS3(
-	cookie *,	co,
-	CONST char *,	hostname,
-	CONST char *,	path)
+static void store_cookie (
+	cookie *	co,
+	const char *	hostname,
+	const char *	path)
 {
     HTList *hl, *next;
     cookie *c2;
     time_t now = time(NULL);
     int pos;
-    CONST char *ptr;
+    const char *ptr;
     domain_entry *de = NULL;
     BOOL Replacement = FALSE;
     int invprompt_reasons = 0;	/* what is wrong with this cookie - kw */
@@ -655,13 +655,13 @@ PRIVATE void store_cookie ARGS3(
 **  Scan a domain's cookie_list for any cookies we should
 **  include in a Cookie: request header. - AK & FM
 */
-PRIVATE char * scan_cookie_sublist ARGS6(
-	char *,		hostname,
-	char *,		path,
-	int,		port,
-	HTList *,	sublist,
-	char *,		header,
-	BOOL,		secure)
+static char * scan_cookie_sublist (
+	char *		hostname,
+	char *		path,
+	int		port,
+	HTList *	sublist,
+	char *		header,
+	BOOL		secure)
 {
     HTList *hl = sublist, *next = NULL;
     cookie *co;
@@ -835,9 +835,9 @@ PRIVATE char * scan_cookie_sublist ARGS6(
  * Presence of value is needed (indicated normally by '=') to start a cookie,
  * but it can be an empty string.  - kw 1999-06-24
  */
-PRIVATE char *alloc_attr_value ARGS2(
-	CONST char *,	value_start,
-	CONST char *,	value_end)
+static char *alloc_attr_value (
+	const char *	value_start,
+	const char *	value_end)
 {
     char *value = NULL;
 
@@ -861,16 +861,16 @@ PRIVATE char *alloc_attr_value ARGS2(
 
 #define is_attr(s, len) attr_len == len && !strncasecomp(attr_start, s, len)
 
-PRIVATE unsigned parse_attribute ARGS9(
-	unsigned,	flags,
-	cookie *,	cur_cookie,
-	int *,		cookie_len,
-	CONST char *,	attr_start,
-	int,		attr_len,
-	char *,		value,
-	CONST char *,	address,
-	char *,		hostname,
-	int,		port)
+static unsigned parse_attribute (
+	unsigned	flags,
+	cookie *	cur_cookie,
+	int *		cookie_len,
+	const char *	attr_start,
+	int		attr_len,
+	char *		value,
+	const char *	address,
+	char *		hostname,
+	int		port)
 {
     BOOLEAN known_attr = NO;
     int url_type;
@@ -1090,15 +1090,15 @@ PRIVATE unsigned parse_attribute ARGS9(
 **  Process potentially concatenated Set-Cookie2 and/or Set-Cookie
 **  headers. - FM
 */
-PRIVATE void LYProcessSetCookies ARGS6(
-	CONST char *,	SetCookie,
-	CONST char *,	SetCookie2,
-	CONST char *,	address,
-	char *,		hostname,
-	char *,		path,
-	int,		port)
+static void LYProcessSetCookies (
+	const char *	SetCookie,
+	const char *	SetCookie2,
+	const char *	address,
+	char *		hostname,
+	char *		path,
+	int		port)
 {
-    CONST char *p, *attr_start, *attr_end, *value_start, *value_end;
+    const char *p, *attr_start, *attr_end, *value_start, *value_end;
     HTList *CombinedCookies = NULL, *cl = NULL;
     cookie *cur_cookie = NULL, *co = NULL;
     int cookie_len = 0;
@@ -1221,7 +1221,7 @@ PRIVATE void LYProcessSetCookies ARGS6(
 		/*
 		 *  The value starts as an unquoted number.
 		 */
-		CONST char *cp, *cp1;
+		const char *cp, *cp1;
 		value_start = p;
 		while (1) {
 		    while (isdigit(UCH(*p)))
@@ -1515,7 +1515,7 @@ PRIVATE void LYProcessSetCookies ARGS6(
 		/*
 		 *  The value starts as an unquoted number.
 		 */
-		CONST char *cp, *cp1;
+		const char *cp, *cp1;
 		value_start = p;
 		while (1) {
 		    while (isdigit(UCH(*p)))
@@ -1735,10 +1735,10 @@ PRIVATE void LYProcessSetCookies ARGS6(
 **  reply headers.   They may have been concatenated as comma
 **  separated lists in HTTP.c or HTMIME.c. - FM
 */
-PUBLIC void LYSetCookie ARGS3(
-	CONST char *,	SetCookie,
-	CONST char *,	SetCookie2,
-	CONST char *,	address)
+void LYSetCookie (
+	const char *	SetCookie,
+	const char *	SetCookie2,
+	const char *	address)
 {
     BOOL BadHeaders = FALSE;
     char *hostname = NULL, *path = NULL, *ptr;
@@ -1813,11 +1813,11 @@ PUBLIC void LYSetCookie ARGS3(
 **  Entry function from creating a Cookie: request header
 **  if needed. - AK & FM
 */
-PUBLIC char * LYAddCookieHeader ARGS4(
-	char *,		hostname,
-	char *,		path,
-	int,		port,
-	BOOL,		secure)
+char * LYAddCookieHeader (
+	char *		hostname,
+	char *		path,
+	int		port,
+	BOOL		secure)
 {
     char *header = NULL;
     HTList *hl = domain_list, *next = NULL;
@@ -1865,11 +1865,11 @@ PUBLIC char * LYAddCookieHeader ARGS4(
 }
 
 #ifdef USE_PERSISTENT_COOKIES
-PRIVATE int number_of_file_cookies = 0;
+static int number_of_file_cookies = 0;
 
 /* rjp - experiment cookie loading */
-PUBLIC void LYLoadCookies ARGS1 (
-	char *,		cookie_file)
+void LYLoadCookies (
+	char *		cookie_file)
 {
     FILE *cookie_handle;
     char *buf = NULL;
@@ -2019,8 +2019,8 @@ PUBLIC void LYLoadCookies ARGS1 (
 }
 
 /* rjp - experimental persistent cookie support */
-PUBLIC void LYStoreCookies ARGS1 (
-	char *,		cookie_file)
+void LYStoreCookies (
+	char *		cookie_file)
 {
     HTList *dl, *cl;
     domain_entry *de;
@@ -2117,11 +2117,11 @@ PUBLIC void LYStoreCookies ARGS1 (
 **	New functions can be added as extensions to the path, and/or by
 **	assigning meanings to ;parameters, a ?searchpart, and/or #fragments.
 */
-PRIVATE int LYHandleCookies ARGS4 (
-	CONST char *,		arg,
-	HTParentAnchor *,	anAnchor,
-	HTFormat,		format_out,
-	HTStream*,		sink)
+static int LYHandleCookies (
+	const char *		arg,
+	HTParentAnchor *	anAnchor,
+	HTFormat		format_out,
+	HTStream*		sink)
 {
     HTFormat format_in = WWW_HTML;
     HTStream *target = NULL;
@@ -2551,9 +2551,9 @@ Delete_all_cookies_in_domain:
 **      invcheck behavior, as well as accept/reject behavior. - BJP
 */
 
-PRIVATE void cookie_domain_flag_set ARGS2(
-	char *,		domainstr,
-	int,		flag)
+static void cookie_domain_flag_set (
+	char *		domainstr,
+	int		flag)
 {
     domain_entry *de = NULL;
     char **str = typecalloc(char *);
@@ -2650,9 +2650,9 @@ PRIVATE void cookie_domain_flag_set ARGS2(
  *
  * And for query/strict/loose invalid cookie checking.  - BJP
  */
-PUBLIC void LYConfigCookies NOARGS
+void LYConfigCookies (void)
 {
-    static CONST struct {
+    static const struct {
 	char **domain;
 	int flag;
 	int once;
@@ -2688,5 +2688,5 @@ PUBLIC void LYConfigCookies NOARGS
 #define _LYCOOKIE_C_GLOBALDEF_1_INIT { "LYNXCOOKIE",LYHandleCookies,0}
 GLOBALDEF (HTProtocol,LYLynxCookies,_LYCOOKIE_C_GLOBALDEF_1_INIT);
 #else
-GLOBALDEF PUBLIC HTProtocol LYLynxCookies = {"LYNXCOOKIE",LYHandleCookies,0};
+GLOBALDEF HTProtocol LYLynxCookies = {"LYNXCOOKIE",LYHandleCookies,0};
 #endif /* GLOBALDEF_IS_MACRO */

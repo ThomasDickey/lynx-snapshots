@@ -21,9 +21,9 @@ struct JumpTable {
 };
 
 extern struct JumpTable *JThead;
-extern void LYJumpTable_free NOPARAMS;
-extern void LYAddJumpShortcut PARAMS((HTList *the_history, char *shortcut));
-extern BOOL LYJumpInit PARAMS((char *config));
-extern char *LYJump PARAMS((int key));
+extern void LYJumpTable_free (void);
+extern void LYAddJumpShortcut (HTList *the_history, char *shortcut);
+extern BOOL LYJumpInit (char *config);
+extern char *LYJump (int key);
 
 #endif /* LYJUMP_H */

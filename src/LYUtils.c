@@ -103,8 +103,8 @@ extern int exec_command(char * cmd, int wait_flag); /* xsystem.c */
 #endif
 
 #ifdef SVR4_BSDSELECT
-extern int BSDselect PARAMS((int nfds, fd_set * readfds, fd_set * writefds,
-			     fd_set * exceptfds, struct timeval * timeout));
+extern int BSDselect (int nfds, fd_set * readfds, fd_set * writefds,
+			     fd_set * exceptfds, struct timeval * timeout);
 #ifdef select
 #undef select
 #endif /* select */
@@ -147,10 +147,10 @@ extern int BSDselect PARAMS((int nfds, fd_set * readfds, fd_set * writefds,
 
 #define COPY_COMMAND "%s %s %s"
 
-PRIVATE HTList * localhost_aliases = NULL;	/* Hosts to treat as local */
-PRIVATE char *HomeDir = NULL;			/* HOME directory */
+static HTList * localhost_aliases = NULL;	/* Hosts to treat as local */
+static char *HomeDir = NULL;			/* HOME directory */
 
-PUBLIC	HTList * sug_filenames = NULL;		/* Suggested filenames	 */
+HTList * sug_filenames = NULL;		/* Suggested filenames	 */
 
 /*
  * Maintain a list of all of the temp-files we create so that we can remove
@@ -163,9 +163,9 @@ typedef struct _LYTemp {
     FILE *file;
 } LY_TEMP;
 
-PRIVATE LY_TEMP *ly_temp;
+static LY_TEMP *ly_temp;
 
-PRIVATE LY_TEMP *FindTempfileByName ARGS1(CONST char *, name)
+static LY_TEMP *FindTempfileByName (const char * name)
 {
     LY_TEMP *p;
 
@@ -177,7 +177,7 @@ PRIVATE LY_TEMP *FindTempfileByName ARGS1(CONST char *, name)
     return p;
 }
 
-PRIVATE LY_TEMP *FindTempfileByFP ARGS1(FILE *, fp)
+static LY_TEMP *FindTempfileByFP (FILE * fp)
 {
     LY_TEMP *p;
 
@@ -192,7 +192,7 @@ PRIVATE LY_TEMP *FindTempfileByFP ARGS1(FILE *, fp)
 /*
  * Get an environment variable, rejecting empty strings
  */
-PUBLIC char *LYGetEnv ARGS1(CONST char *, name)
+char *LYGetEnv (const char * name)
 {
     char *result = getenv(name);
     return non_empty(result) ? result : 0;
@@ -204,7 +204,7 @@ PUBLIC char *LYGetEnv ARGS1(CONST char *, name)
  * sensitive operations with charset names, HTML tags etc.
  */
 #ifdef EXP_ASCII_CTYPES
-PUBLIC int ascii_tolower ARGS1(int, i)
+int ascii_tolower (int i)
 {
     if ( 91 > i && i > 64 )
 	return (i+32);
@@ -212,7 +212,7 @@ PUBLIC int ascii_tolower ARGS1(int, i)
 	return i;
 }
 
-PUBLIC int ascii_toupper ARGS1(int, i)
+int ascii_toupper (int i)
 {
     if ( 123 > i && i > 96 )
 	return (i-32);
@@ -220,7 +220,7 @@ PUBLIC int ascii_toupper ARGS1(int, i)
 	return i;
 }
 
-PUBLIC int ascii_isupper ARGS1(int, i)
+int ascii_isupper (int i)
 {
     if ( 91 > i && i > 64 )
 	return 1;
@@ -233,9 +233,9 @@ PUBLIC int ascii_isupper ARGS1(int, i)
  * Check for UTF-8 data, returning the length past the first character.
  * Return zero if we found an ordinary character rather than UTF-8.
  */
-PUBLIC size_t utf8_length ARGS2(
-	BOOL,		utf_flag,
-	CONST char *,	data)
+size_t utf8_length (
+	BOOL		utf_flag,
+	const char *	data)
 {
     size_t utf_extra = 0;
 
@@ -269,9 +269,9 @@ PUBLIC size_t utf8_length ARGS2(
 /*
  * Set the initial highlight information for a given link.
  */
-PUBLIC void LYSetHilite ARGS2(
-	int,		cur,
-	char *,		text)
+void LYSetHilite (
+	int		cur,
+	char *		text)
 {
     links[cur].list.hl_base.hl_text = text;
     links[cur].list.hl_len = (text != NULL) ? 1 : 0;
@@ -281,10 +281,10 @@ PUBLIC void LYSetHilite ARGS2(
 /*
  * Add highlight information for the next line of a link.
  */
-PUBLIC void LYAddHilite ARGS3(
-	int,		cur,
-	char *,		text,
-	int,		x)
+void LYAddHilite (
+	int		cur,
+	char *		text,
+	int		x)
 {
     HiliteList *list = &(links[cur].list);
     HiliteInfo *have = list->hl_info;
@@ -304,9 +304,9 @@ PUBLIC void LYAddHilite ARGS3(
 /*
  * Get the highlight text, counting from zero.
  */
-PUBLIC char *LYGetHiliteStr ARGS2(
-	int,		cur,
-	int,		count)
+char *LYGetHiliteStr (
+	int		cur,
+	int		count)
 {
     char *result;
 
@@ -322,9 +322,9 @@ PUBLIC char *LYGetHiliteStr ARGS2(
 /*
  * Get the X-ordinate at which to draw the corresponding highlight-text
  */
-PUBLIC int LYGetHilitePos ARGS2(
-	int,		cur,
-	int,		count)
+int LYGetHilitePos (
+	int		cur,
+	int		count)
 {
     int result;
 
@@ -359,13 +359,13 @@ PUBLIC int LYGetHilitePos ARGS2(
  * with all IsSpecial characters stripped, so we don't need to deal with them
  * here.  -FM
  */
-PRIVATE BOOL show_whereis_targets ARGS6(
-	int,	flag,
-	int,	cur,
-	int,	count,
-	char *,	target,
-	BOOL,	TargetEmphasisON,
-	BOOL,	utf_flag)
+static BOOL show_whereis_targets (
+	int	flag,
+	int	cur,
+	int	count,
+	char *	target,
+	BOOL	TargetEmphasisON,
+	BOOL	utf_flag)
 {
     char *Data = NULL;
     char *cp;
@@ -924,9 +924,9 @@ highlight_search_done:
 #endif /* SHOW_WHEREIS_TARGETS */
 
 #ifdef USE_COLOR_STYLE
-PRIVATE int find_cached_style ARGS2(
-	int,	cur,
-	int,	flag)
+static int find_cached_style (
+	int	cur,
+	int	flag)
 {
     int s = s_alink;
 
@@ -984,10 +984,10 @@ PRIVATE int find_cached_style ARGS2(
 /*
  *  Highlight (or unhighlight) a given link.
  */
-PUBLIC void LYhighlight ARGS3(
-	int,		flag,
-	int,		cur,
-	char *,		target)
+void LYhighlight (
+	int		flag,
+	int		cur,
+	char *		target)
 {
     char buffer[MAX_LINE];
     int i;
@@ -1159,8 +1159,8 @@ PUBLIC void LYhighlight ARGS3(
  *  free_and_clear will free a pointer if it
  *  is non-zero and then set it to zero.
  */
-PUBLIC void free_and_clear ARGS1(
-	char **,	pointer)
+void free_and_clear (
+	char **	pointer)
 {
     if (*pointer) {
 	FREE(*pointer);
@@ -1176,9 +1176,9 @@ PUBLIC void free_and_clear ARGS1(
  *  the condense argument is FALSE, otherwise, condense any serial spaces
  *  or tabs to one space. - FM
  */
-PUBLIC void convert_to_spaces ARGS2(
-	char *,		string,
-	BOOL,		condense)
+void convert_to_spaces (
+	char *		string,
+	BOOL		condense)
 {
     char *s = string;
     char *ns;
@@ -1222,8 +1222,8 @@ PUBLIC void convert_to_spaces ARGS2(
 /*
  *  Strip trailing slashes from directory paths.
  */
-PUBLIC char * strip_trailing_slash ARGS1(
-	char *,		dirname)
+char * strip_trailing_slash (
+	char *		dirname)
 {
     int i;
 
@@ -1238,8 +1238,8 @@ PUBLIC char * strip_trailing_slash ARGS1(
  */
 BOOLEAN mustshow = FALSE;
 
-PUBLIC void statusline ARGS1(
-	CONST char *,	text)
+void statusline (
+	const char *	text)
 {
     char buffer[MAX_LINE];
     unsigned char *temp = NULL;
@@ -1288,13 +1288,13 @@ PUBLIC void statusline ARGS1(
 	if ((temp = typecallocn(unsigned char, strlen(text_buff) + 1)) == NULL)
 	    outofmem(__FILE__, "statusline");
 	if (kanji_code == EUC) {
-	    TO_EUC((CONST unsigned char *)text_buff, temp);
+	    TO_EUC((const unsigned char *)text_buff, temp);
 	} else if (kanji_code == SJIS) {
 #ifdef KANJI_CODE_OVERRIDE
 	    if (!LYRawMode || last_kcode == SJIS)
 		strcpy(temp, text_buff);
 	    else
-		TO_SJIS((CONST unsigned char *)text_buff, temp);
+		TO_SJIS((const unsigned char *)text_buff, temp);
 #else
 	    strcpy((char *) temp, text_buff);
 #endif
@@ -1424,8 +1424,8 @@ PUBLIC void statusline ARGS1(
     return;
 }
 
-PRIVATE char *novice_lines ARGS1(
-	int,		lineno)
+static char *novice_lines (
+	int		lineno)
 {
     switch (lineno) {
     case 0:
@@ -1441,7 +1441,7 @@ PRIVATE char *novice_lines ARGS1(
 
 static int lineno = 0;
 
-PUBLIC void toggle_novice_line NOARGS
+void toggle_novice_line (void)
 {
 	lineno++;
 	if (*novice_lines(lineno) == '\0')
@@ -1449,8 +1449,8 @@ PUBLIC void toggle_novice_line NOARGS
 	return;
 }
 
-PUBLIC void noviceline ARGS1(
-	int,		more_flag GCC_UNUSED)
+void noviceline (
+	int		more_flag GCC_UNUSED)
 {
 
     if (dump_output_immediately)
@@ -1484,8 +1484,8 @@ PUBLIC void noviceline ARGS1(
  *  is possible - actually, currently only checks if fd is connected
  *  to a tty. - kw
  */
-PUBLIC int LYConsoleInputFD ARGS1(
-    BOOLEAN,		need_selectable)
+int LYConsoleInputFD (
+    BOOLEAN		need_selectable)
 {
     int fd = INVSOC;
 #ifdef USE_SLANG
@@ -1513,10 +1513,10 @@ PUBLIC int LYConsoleInputFD ARGS1(
 }
 #endif /* NSL_FORK || MISC_EXP */
 
-PRIVATE int fake_zap = 0;
+static int fake_zap = 0;
 
-PUBLIC void LYFakeZap ARGS1(
-    BOOL,	set)
+void LYFakeZap (
+    BOOL	set)
 {
     if (set && fake_zap < 1) {
 	CTRACE((tfp, "\r *** Set simulated 'Z'"));
@@ -1533,7 +1533,7 @@ PUBLIC void LYFakeZap ARGS1(
 
 }
 
-PRIVATE int DontCheck NOARGS
+static int DontCheck (void)
 {
     static long last;
     long next;
@@ -1570,7 +1570,7 @@ PRIVATE int DontCheck NOARGS
     return FALSE;
 }
 
-PUBLIC int HTCheckForInterrupt NOARGS
+int HTCheckForInterrupt (void)
 {
     int c;
     int cmd;
@@ -1799,8 +1799,8 @@ PUBLIC int HTCheckForInterrupt NOARGS
  * Check if the given filename looks like it's an absolute pathname, i.e.,
  * references a directory.
  */
-PUBLIC BOOLEAN LYisAbsPath ARGS1(
-	CONST char *,	path)
+BOOLEAN LYisAbsPath (
+	const char *	path)
 {
     BOOLEAN result = FALSE;
     if (non_empty(path)) {
@@ -1822,8 +1822,8 @@ PUBLIC BOOLEAN LYisAbsPath ARGS1(
 /*
  * Check if the given filename is the root path, e.g., "/" on Unix.
  */
-PUBLIC BOOLEAN LYisRootPath ARGS1(
-	CONST char *,		path)
+BOOLEAN LYisRootPath (
+	const char *		path)
 {
 #if defined(USE_DOS_DRIVES)
     if (strlen(path) == 3
@@ -1838,8 +1838,8 @@ PUBLIC BOOLEAN LYisRootPath ARGS1(
  *  A file URL for a remote host is an obsolete ftp URL.
  *  Return YES only if we're certain it's a local file. - FM
  */
-PUBLIC BOOLEAN LYisLocalFile ARGS1(
-	CONST char *,		filename)
+BOOLEAN LYisLocalFile (
+	const char *		filename)
 {
     char *host = NULL;
     char *acc_method = NULL;
@@ -1876,8 +1876,8 @@ PUBLIC BOOLEAN LYisLocalFile ARGS1(
  *  Utility for checking URLs with a host field.
  *  Return YES only if we're certain it's the local host. - FM
  */
-PUBLIC BOOLEAN LYisLocalHost ARGS1(
-	CONST char *,		filename)
+BOOLEAN LYisLocalHost (
+	const char *		filename)
 {
     char *host = NULL;
     char *cp;
@@ -1908,7 +1908,7 @@ PUBLIC BOOLEAN LYisLocalHost ARGS1(
 /*
  *  Utility for freeing the list of local host aliases. - FM
  */
-PUBLIC void LYLocalhostAliases_free NOARGS
+void LYLocalhostAliases_free (void)
 {
     char *alias;
     HTList *cur = localhost_aliases;
@@ -1927,8 +1927,8 @@ PUBLIC void LYLocalhostAliases_free NOARGS
 /*
  *  Utility for listing hosts to be treated as local aliases. - FM
  */
-PUBLIC void LYAddLocalhostAlias ARGS1(
-	char *,		alias)
+void LYAddLocalhostAlias (
+	char *		alias)
 {
     char *LocalAlias = NULL;
 
@@ -1952,8 +1952,8 @@ PUBLIC void LYAddLocalhostAlias ARGS1(
  *  Utility for checking URLs with a host field.
  *  Return YES only if we've listed the host as a local alias. - FM
  */
-PUBLIC BOOLEAN LYisLocalAlias ARGS1(
-	CONST char *,		filename)
+BOOLEAN LYisLocalAlias (
+	const char *		filename)
 {
     char *host = NULL;
     char *alias;
@@ -1994,8 +1994,8 @@ PUBLIC BOOLEAN LYisLocalAlias ARGS1(
 **  it returns UNKNOWN_URL_TYPE.  Otherwise, it returns
 **  0 (not a URL). - FM
 */
-PUBLIC int LYCheckForProxyURL ARGS1(
-	char *,		filename)
+int LYCheckForProxyURL (
+	char *		filename)
 {
     char *cp = filename;
     char *cp1;
@@ -2048,10 +2048,10 @@ PUBLIC int LYCheckForProxyURL ARGS1(
  * Compare a "type:" string, replacing it by the comparison-string if it
  * matches (and return true in that case).
  */
-static BOOLEAN compare_type ARGS3(
-	char *,		tst,
-	CONST char *,	cmp,
-	size_t,		len)
+static BOOLEAN compare_type (
+	char *		tst,
+	const char *	cmp,
+	size_t		len)
 {
     if (!strncasecomp(tst, cmp, len)) {
 	if (strncmp(tst, cmp, len)) {
@@ -2082,8 +2082,8 @@ static BOOLEAN compare_type ARGS3(
 **  Chains to LYCheckForProxyURL() if a colon
 **  is present but the type is not recognized.
 */
-PUBLIC int is_url ARGS1(
-	char *,		filename)
+int is_url (
+	char *		filename)
 {
     char *cp = filename;
     char *cp1;
@@ -2422,8 +2422,8 @@ PUBLIC int is_url ARGS1(
  *  dumping immediately.  Calling this will 'fix' it, but may not
  *  always be appropriate. - kw
  */
-PUBLIC void LYFixCursesOn ARGS1(
-    CONST char *,	reason)
+void LYFixCursesOn (
+    const char *	reason)
 {
     if (dump_output_immediately || LYCursesON)
 	return;
@@ -2444,9 +2444,9 @@ PUBLIC void LYFixCursesOn ARGS1(
  *  or rule substitution is not prevented for telnet-like URLs, and
  *  this 'fix' avoids some crashes that can otherwise occur. - kw
  */
-PUBLIC BOOLEAN LYFixCursesOnForAccess ARGS2(
-    CONST char *,	addr,
-    CONST char *,	physical)
+BOOLEAN LYFixCursesOnForAccess (
+    const char *	addr,
+    const char *	physical)
 {
     /*
      *  If curses is off when maybe it shouldn't...
@@ -2484,8 +2484,8 @@ PUBLIC BOOLEAN LYFixCursesOnForAccess ARGS2(
 /*
  *  Determine whether we allow HEAD and related flags for a URL. - kw
  */
-PUBLIC BOOLEAN LYCanDoHEAD ARGS1(
-    CONST char *,	address)
+BOOLEAN LYCanDoHEAD (
+    const char *	address)
 {
     char *temp0 = NULL;
     int isurl;
@@ -2560,8 +2560,8 @@ PUBLIC BOOLEAN LYCanDoHEAD ARGS1(
 /*
  * Close an input file.
  */
-PUBLIC BOOLEAN LYCloseInput ARGS1(
-	FILE *,		fp)
+BOOLEAN LYCloseInput (
+	FILE *		fp)
 {
     if (fp != 0) {
 	int err = ferror(fp);
@@ -2576,8 +2576,8 @@ PUBLIC BOOLEAN LYCloseInput ARGS1(
 /*
  * Close an output file, reporting any problems with writing to it.
  */
-PUBLIC BOOLEAN LYCloseOutput ARGS1(
-	FILE *,		fp)
+BOOLEAN LYCloseOutput (
+	FILE *		fp)
 {
     if (fp != 0) {
 	int err = ferror(fp);
@@ -2593,8 +2593,8 @@ PUBLIC BOOLEAN LYCloseOutput ARGS1(
 /*
  * Test if we'll be able to write a file.  If not, warn the user.
  */
-PUBLIC BOOLEAN LYCanWriteFile ARGS1(
-	CONST char*,	filename)
+BOOLEAN LYCanWriteFile (
+	const char*	filename)
 {
     if (LYCloseOutput(fopen(filename, "w"))) {
 	remove(filename);
@@ -2608,8 +2608,8 @@ PUBLIC BOOLEAN LYCanWriteFile ARGS1(
 /*
  * Test if we'll be able to read a file.
  */
-PUBLIC BOOLEAN LYCanReadFile ARGS1(
-	CONST char*,	filename)
+BOOLEAN LYCanReadFile (
+	const char*	filename)
 {
     FILE *fp;
 
@@ -2622,8 +2622,8 @@ PUBLIC BOOLEAN LYCanReadFile ARGS1(
 /*
  *  Remove backslashes from any string.
  */
-PUBLIC void remove_backslashes ARGS1(
-	char *,		buf)
+void remove_backslashes (
+	char *		buf)
 {
     char *cp;
 
@@ -2647,7 +2647,7 @@ PUBLIC void remove_backslashes ARGS1(
  *  via a terminal in the local domain.
  *
  */
-PUBLIC BOOLEAN inlocaldomain NOARGS
+BOOLEAN inlocaldomain (void)
 {
 #ifdef HAVE_UTMP
     int n;
@@ -2696,9 +2696,9 @@ PUBLIC BOOLEAN inlocaldomain NOARGS
  *  value would currently be ignored anyway.) - kw
  *
  */
-PUBLIC void LYExtSignal ARGS2(
-    int,			sig,
-    LYSigHandlerFunc_t *,	handler)
+void LYExtSignal (
+    int			sig,
+    LYSigHandlerFunc_t *	handler)
 {
 #ifdef SIGWINCH
     /* add more cases to if(condition) if required... */
@@ -2734,10 +2734,10 @@ PUBLIC void LYExtSignal ARGS2(
  *  signal handler from running while lynx is waiting in system() for
  *  an interactive command like an editor. - kw
  */
-PRIVATE BOOLEAN LYToggleSigDfl ARGS3(
-    int,			sig,
-    struct sigaction *,		where,
-    int,			to_dfl)
+static BOOLEAN LYToggleSigDfl (
+    int			sig,
+    struct sigaction *		where,
+    int			to_dfl)
 {
     int rv = -1;
     struct sigaction oact;
@@ -2789,8 +2789,8 @@ PRIVATE BOOLEAN LYToggleSigDfl ARGS3(
 # endif	/* TERMIO_AND_TERMIOS */
 #endif /* TERMIO_AND_CURSES */
 
-PUBLIC void size_change ARGS1(
-	int,		sig GCC_UNUSED)
+void size_change (
+	int		sig GCC_UNUSED)
 {
     int old_lines = LYlines;
     int old_cols = LYcols;
@@ -2888,7 +2888,7 @@ PUBLIC void size_change ARGS1(
 /*
  *  Utility for freeing the list of previous suggested filenames. - FM
  */
-PUBLIC void HTSugFilenames_free NOARGS
+void HTSugFilenames_free (void)
 {
     char *fname;
     HTList *cur = sug_filenames;
@@ -2908,8 +2908,8 @@ PUBLIC void HTSugFilenames_free NOARGS
  *  Utility for listing suggested filenames, making any
  *  repeated filenames the most current in the list. - FM
  */
-PUBLIC void HTAddSugFilename ARGS1(
-	char *,		fname)
+void HTAddSugFilename (
+	char *		fname)
 {
     char *new = NULL;
     char *old;
@@ -2946,10 +2946,10 @@ PUBLIC void HTAddSugFilename ARGS1(
  *  CHANGE_SUG_FILENAME -- Foteos Macrides 29-Dec-1993
  *	Upgraded for use with Lynx2.2 - FM 17-Jan-1994
  */
-PUBLIC void change_sug_filename ARGS1(
-	char *,		fname)
+void change_sug_filename (
+	char *		fname)
 {
-    CONST char *cp2;
+    const char *cp2;
     char *temp = 0, *cp, *cp1, *end;
 #ifdef VMS
     char *dot;
@@ -3247,10 +3247,10 @@ PUBLIC void change_sug_filename ARGS1(
 /*
  * Construct a temporary-filename.  Assumes result is LY_MAXPATH chars long.
  */
-PRIVATE int fmt_tempname ARGS3(
-	char *,		result,
-	CONST char *,	prefix,
-	CONST char *,	suffix)
+static int fmt_tempname (
+	char *		result,
+	const char *	prefix,
+	const char *	suffix)
 {
     int code;
 #ifdef USE_RAND_TEMPNAME
@@ -3319,7 +3319,7 @@ PRIVATE int fmt_tempname ARGS3(
     if (strlen(leaf) > 8)
 	leaf[8] = 0;
     if (strlen(suffix) > 4 || *suffix != '.') {
-	CONST char *tail = strchr(suffix, '.');
+	const char *tail = strchr(suffix, '.');
 	if (tail == 0)
 	    tail = suffix + strlen(suffix);
 	if (8 - (tail - suffix) >= 0)
@@ -3346,8 +3346,8 @@ PRIVATE int fmt_tempname ARGS3(
 /*
  *  Convert 4, 6, 2, 8 to left, right, down, up, etc.
  */
-PUBLIC int number2arrows ARGS1(
-	int,		number)
+int number2arrows (
+	int		number)
 {
     switch(number) {
 	case '1':
@@ -3393,8 +3393,8 @@ PUBLIC int number2arrows ARGS1(
 /* skip the special flags when processing "all" and "default": */
 #define N_SPECIAL_RESTRICT_OPTIONS 2
 
-PRIVATE CONST struct {
-    CONST char *name;
+static const struct {
+    const char *name;
     BOOLEAN *flag;
     BOOLEAN can;
 } restrictions[] = {
@@ -3494,10 +3494,10 @@ PRIVATE CONST struct {
     This function is also used (if macro OPTNAME_ALLOW_DASHES doesn't have
     value of zero) for compare of commandline options -VH
  */
-PUBLIC BOOL strn_dash_equ ARGS3(
-	CONST char*,	p1,
-	CONST char*,	p2,
-	int,		len)
+BOOL strn_dash_equ (
+	const char*	p1,
+	const char*	p2,
+	int		len)
 {
     while (len--) {
 	if (!*p2)
@@ -3537,8 +3537,8 @@ PUBLIC BOOL strn_dash_equ ARGS3(
  * Returns the inx'th name from the restrictions table, or null if inx is
  * out of range.
  */
-PUBLIC CONST char *index_to_restriction ARGS1(
-    int,	inx)
+const char *index_to_restriction (
+    int	inx)
 {
     if (inx >= 0 && inx < (int) TABLESIZE(restrictions))
 	return restrictions[inx].name;
@@ -3549,9 +3549,9 @@ PUBLIC CONST char *index_to_restriction ARGS1(
  * Returns the value TRUE/FALSE of a given restriction, or -1 if it is not
  * one that we recognize.
  */
-PUBLIC int find_restriction ARGS2(
-    CONST char *,	name,
-    int,		len)
+int find_restriction (
+    const char *	name,
+    int		len)
 {
     unsigned i;
     if (len < 0)
@@ -3564,11 +3564,11 @@ PUBLIC int find_restriction ARGS2(
     return -1;
 }
 
-PUBLIC void parse_restrictions ARGS1(
-    CONST char *,	s)
+void parse_restrictions (
+    const char *	s)
 {
-    CONST char *p;
-    CONST char *word;
+    const char *p;
+    const char *word;
     unsigned i;
     BOOLEAN found;
 
@@ -3620,8 +3620,8 @@ PUBLIC void parse_restrictions ARGS1(
     }
 }
 
-PUBLIC void print_restrictions_to_fd ARGS1(
-    FILE *,	fp)
+void print_restrictions_to_fd (
+    FILE *	fp)
 {
     unsigned i, count = 0;
 
@@ -3660,7 +3660,7 @@ typedef struct _VMSMailItemList
   long *return_length_address;
 } VMSMailItemList;
 
-PUBLIC void LYCheckMail NOARGS
+void LYCheckMail (void)
 {
     static BOOL firsttime = TRUE, failure = FALSE;
     static char user[13], dir[252];
@@ -3736,7 +3736,7 @@ PUBLIC void LYCheckMail NOARGS
     return;
 }
 #else
-PUBLIC void LYCheckMail NOARGS
+void LYCheckMail (void)
 {
     static BOOL firsttime = TRUE;
     static char *mf;
@@ -3791,10 +3791,10 @@ PUBLIC void LYCheckMail NOARGS
 **  Such URLs have no `base' reference to which they
 **  could be resolved.  LYLegitimizeHREF could not be used.
 */
-PUBLIC void LYEnsureAbsoluteURL ARGS3(
-	char **,	href,
-	CONST char *,	name,
-	int,		fixit)
+void LYEnsureAbsoluteURL (
+	char **	href,
+	const char *	name,
+	int		fixit)
 {
     char *temp = NULL;
 
@@ -3833,9 +3833,9 @@ PUBLIC void LYEnsureAbsoluteURL ARGS3(
  *  directory on the local system, otherwise as an
  *  http URL. - FM
  */
-PUBLIC void LYConvertToURL ARGS2(
-	char **,	AllocatedString,
-	int,		fixit)
+void LYConvertToURL (
+	char **	AllocatedString,
+	int		fixit)
 {
     char *old_string = *AllocatedString;
     char *temp = NULL;
@@ -4204,7 +4204,7 @@ have_VMS_URL:
 			    temp2 ? temp2 : temp));
 #ifdef WIN_EX  /* 1998/01/13 (Tue) 09:07:37 */
 		{
-		    CONST char *p, *q;
+		    const char *p, *q;
 		    char buff[LY_MAXPATH + 128];
 
 		    p = Home_Dir();
@@ -4314,7 +4314,7 @@ have_VMS_URL:
 
 #if defined(_WINDOWS) /* 1998/06/23 (Tue) 16:45:20 */
 
-PUBLIC int win32_check_interrupt(void)
+int win32_check_interrupt(void)
 {
     int c;
 
@@ -4363,10 +4363,10 @@ void sleep(unsigned sec)
  *  prepend the scheme field (e.g., http://), or pass the string
  *  to LYAddSchemeForURL(), if this function returns TRUE. - FM
  */
-PUBLIC BOOLEAN LYExpandHostForURL ARGS3(
-	char **,	AllocatedString,
-	char *,		prefix_list,
-	char *,		suffix_list)
+BOOLEAN LYExpandHostForURL (
+	char **	AllocatedString,
+	char *		prefix_list,
+	char *		suffix_list)
 {
     char DomainPrefix[80], *StartP, *EndP;
     char DomainSuffix[80], *StartS, *EndS;
@@ -4680,9 +4680,9 @@ PUBLIC BOOLEAN LYExpandHostForURL ARGS3(
  *  default_scheme argument was NULL or zero-length and no guess was
  *  made. - FM
   */
-PUBLIC BOOLEAN LYAddSchemeForURL ARGS2(
-	char **,	AllocatedString,
-	char *,		default_scheme)
+BOOLEAN LYAddSchemeForURL (
+	char **	AllocatedString,
+	char *		default_scheme)
 {
     char *Str = NULL;
     BOOLEAN GotScheme = FALSE;
@@ -4784,8 +4784,8 @@ PUBLIC BOOLEAN LYAddSchemeForURL ARGS2(
  *  a directory, our convention is to exclude "Up to parent"
  *  links when a terminal slash is present. - FM
  */
-PUBLIC void LYTrimRelFromAbsPath ARGS1(
-	char *,		path)
+void LYTrimRelFromAbsPath (
+	char *		path)
 {
     char *cp;
     int i;
@@ -4860,12 +4860,12 @@ PUBLIC void LYTrimRelFromAbsPath ARGS1(
  *  document.  Move this function to a separate module for doing this
  *  kind of thing seriously, someday. - FM
  */
-PUBLIC void LYDoCSI ARGS3(
-	char *,		url,
-	CONST char *,	comment,
-	char **,	csi)
+void LYDoCSI (
+	char *		url,
+	const char *	comment,
+	char **	csi)
 {
-    CONST char *cp = comment;
+    const char *cp = comment;
 
     if (cp == NULL)
 	return;
@@ -4888,9 +4888,9 @@ PUBLIC void LYDoCSI ARGS3(
  *  Define_VMSLogical -- Fote Macrides 04-Apr-1995
  *	Define VMS logicals in the process table.
  */
-PUBLIC void Define_VMSLogical ARGS2(
-	char *,		LogicalName,
-	char *,		LogicalValue)
+void Define_VMSLogical (
+	char *		LogicalName,
+	char *		LogicalValue)
 {
     $DESCRIPTOR(lname, "");
     $DESCRIPTOR(lvalue, "");
@@ -4915,14 +4915,14 @@ PUBLIC void Define_VMSLogical ARGS2(
 #endif /* VMS */
 
 #ifdef LY_FIND_LEAKS
-PRIVATE void LYHomeDir_free NOARGS
+static void LYHomeDir_free (void)
 {
     FREE(HomeDir);
 }
 #endif /* LY_FIND_LEAKS */
 
-PUBLIC char * Current_Dir ARGS1(
-	char *,	pathname)
+char * Current_Dir (
+	char *	pathname)
 {
     char *result;
 #ifdef HAVE_GETCWD
@@ -4939,8 +4939,8 @@ PUBLIC char * Current_Dir ARGS1(
  * Verify that the given path refers to an existing directory, returning the
  * string if the directory exists.  If not, return null.
  */
-PRIVATE char * CheckDir ARGS1(
-    char *,	path)
+static char * CheckDir (
+    char *	path)
 {
     struct stat stat_info;
     if (!LYisAbsPath(path)
@@ -4954,7 +4954,7 @@ PRIVATE char * CheckDir ARGS1(
 /*
  * Lookup various possibilities for $HOME, and check that the directory exists.
  */
-PRIVATE char *HomeEnv NOARGS
+static char *HomeEnv (void)
 {
     char *result = CheckDir(LYGetEnv("HOME"));
 
@@ -4997,9 +4997,9 @@ PRIVATE char *HomeEnv NOARGS
     return result;
 }
 
-PUBLIC CONST char * Home_Dir NOARGS
+const char * Home_Dir (void)
 {
-    static CONST char *homedir = NULL;
+    static const char *homedir = NULL;
     char *cp = NULL;
 
     if (homedir == NULL) {
@@ -5033,7 +5033,7 @@ PUBLIC CONST char * Home_Dir NOARGS
 	} else {
 	    StrAllocCopy(HomeDir, cp);
 	}
-	homedir = (CONST char *)HomeDir;
+	homedir = (const char *)HomeDir;
 #ifdef LY_FIND_LEAKS
 	atexit(LYHomeDir_free);
 #endif
@@ -5050,7 +5050,7 @@ PUBLIC CONST char * Home_Dir NOARGS
  * separators are found, returns the original pathname.  The leaf may be
  * empty.
  */
-PUBLIC char *LYPathLeaf ARGS1(char *, pathname)
+char *LYPathLeaf (char * pathname)
 {
     char *leaf;
 #ifdef UNIX
@@ -5086,9 +5086,9 @@ PUBLIC char *LYPathLeaf ARGS1(char *, pathname)
  *  If a subdirectory is present and the path does not begin
  *  with "./", that is prefixed to make the situation clear. - FM
  */
-PUBLIC BOOLEAN LYPathOffHomeOK ARGS2(
-	char *,		fbuffer,
-	size_t,		fbuffer_size)
+BOOLEAN LYPathOffHomeOK (
+	char *		fbuffer,
+	size_t		fbuffer_size)
 {
     char *file = NULL;
     char *cp, *cp1;
@@ -5262,10 +5262,10 @@ PUBLIC BOOLEAN LYPathOffHomeOK ARGS2(
  *  calling this function.  On VMS, the resultant full path
  *  and filename are converted to VMS syntax. - FM
  */
-PUBLIC void LYAddPathToHome ARGS3(
-	char *,		fbuffer,
-	size_t,		fbuffer_size,
-	char *,		fname)
+void LYAddPathToHome (
+	char *		fbuffer,
+	size_t		fbuffer_size,
+	char *		fname)
 {
     char *home = NULL;
     char *file = fname;
@@ -5362,8 +5362,8 @@ PUBLIC void LYAddPathToHome ARGS3(
  * an absolute pathname.  If there is no save-space defined, use the home
  * directory. Return a new string with the result.
  */
-PUBLIC char * LYAddPathToSave ARGS1(
-	char *,		fname)
+char * LYAddPathToSave (
+	char *		fname)
 {
     char *result = NULL;
 
@@ -5397,9 +5397,9 @@ PUBLIC char * LYAddPathToSave ARGS1(
  *  return the clock format value itself, but if anything goes wrong
  *  when parsing the expected patterns, we still return 0. - FM
  */
-PUBLIC time_t LYmktime ARGS2(
-	char *,		string,
-	BOOL,		absolute)
+time_t LYmktime (
+	char *		string,
+	BOOL		absolute)
 {
     char *s;
     time_t now, clock2;
@@ -5675,8 +5675,8 @@ extern char **environ;
 /*
  *  Put STRING, which is of the form "NAME=VALUE", in  the environment.
  */
-PUBLIC int putenv ARGS1(
-	CONST char *,	string)
+int putenv (
+	const char *	string)
 {
   char *name_end = strchr(string, '=');
   register size_t size;
@@ -5728,7 +5728,7 @@ PUBLIC int putenv ARGS1(
 #endif /* !HAVE_PUTENV */
 
 #ifdef NEED_REMOVE
-int remove ARGS1(char *, name)
+int remove (char * name)
 {
     return unlink(name);
 }
@@ -5750,7 +5750,7 @@ int remove ARGS1(char *, name)
  * special case of its directory being pointed to by a link from a directory
  * owned by root and not writable by other users.
  */
-PRIVATE BOOL IsOurFile ARGS1(char *, name)
+static BOOL IsOurFile (char * name)
 {
     struct stat data;
 
@@ -5812,7 +5812,7 @@ PRIVATE BOOL IsOurFile ARGS1(char *, name)
 /*
  * Open a file that we don't want other users to see.
  */
-PRIVATE FILE *OpenHiddenFile ARGS2(char *, name, char *, mode)
+static FILE *OpenHiddenFile (char * name, char * mode)
 {
     FILE *fp = 0;
     struct stat data;
@@ -5867,7 +5867,7 @@ PRIVATE FILE *OpenHiddenFile ARGS2(char *, name, char *, mode)
 }
 #endif /* MULTI_USER_UNIX */
 
-PUBLIC FILE *LYNewBinFile ARGS1(char *, name)
+FILE *LYNewBinFile (char * name)
 {
 #ifdef VMS
     FILE *fp = fopen (name, BIN_W, "mbc=32");
@@ -5878,7 +5878,7 @@ PUBLIC FILE *LYNewBinFile ARGS1(char *, name)
     return fp;
 }
 
-PUBLIC FILE *LYNewTxtFile ARGS1(char *, name)
+FILE *LYNewTxtFile (char * name)
 {
     FILE *fp;
 
@@ -5896,7 +5896,7 @@ PUBLIC FILE *LYNewTxtFile ARGS1(char *, name)
     return fp;
 }
 
-PUBLIC FILE *LYAppendToTxtFile ARGS1(char *, name)
+FILE *LYAppendToTxtFile (char * name)
 {
     FILE *fp;
 
@@ -5919,7 +5919,7 @@ PUBLIC FILE *LYAppendToTxtFile ARGS1(char *, name)
  *  with temp file restricted permissions.  The normal umask should
  *  apply for user files. - kw
  */
-PUBLIC void LYRelaxFilePermissions ARGS1(CONST char *, name)
+void LYRelaxFilePermissions (const char * name)
 {
     mode_t mode;
     struct stat stat_buf;
@@ -5942,9 +5942,9 @@ PUBLIC void LYRelaxFilePermissions ARGS1(CONST char *, name)
 /*
  * Check if the given anchor has an associated file-cache.
  */
-PUBLIC BOOLEAN LYCachedTemp ARGS2(
-	char *,		result,
-	char **,	cached)
+BOOLEAN LYCachedTemp (
+	char *		result,
+	char **	cached)
 {
     if (*cached) {
 	LYstrncpy(result, *cached, LY_MAXPATH);
@@ -5967,10 +5967,10 @@ PUBLIC BOOLEAN LYCachedTemp ARGS2(
  *
  * The mode can be one of: "w", "a", "wb".
  */
-PUBLIC FILE *LYOpenTemp ARGS3(
-	char *,		result,
-	CONST char *,	suffix,
-	CONST char *,	mode)
+FILE *LYOpenTemp (
+	char *		result,
+	const char *	suffix,
+	const char *	mode)
 {
     FILE *fp = 0;
     BOOL txt = TRUE;
@@ -6077,8 +6077,8 @@ PUBLIC FILE *LYOpenTemp ARGS3(
 /*
  * Reopen a temporary file
  */
-PUBLIC FILE *LYReopenTemp ARGS1(
-	char *,		name)
+FILE *LYReopenTemp (
+	char *		name)
 {
     LY_TEMP *p;
     FILE *fp = 0;
@@ -6105,10 +6105,10 @@ PUBLIC FILE *LYReopenTemp ARGS1(
  * The mode should be "w", others are possible (they may be passed on)
  * but probably don't make sense. - kw
  */
-PUBLIC FILE *LYOpenTempRewrite ARGS3(
-	char *,		fname,
-	CONST char *,	suffix,
-	CONST char *,	mode)
+FILE *LYOpenTempRewrite (
+	char *		fname,
+	const char *	suffix,
+	const char *	mode)
 {
     FILE *fp = 0;
     BOOL txt = TRUE;
@@ -6253,9 +6253,9 @@ PUBLIC FILE *LYOpenTempRewrite ARGS3(
  * Special case of LYOpenTemp, used for manipulating bookmark file, i.e., with
  * renaming.
  */
-PUBLIC FILE *LYOpenScratch ARGS2(
-	char *,		result,
-	CONST char *,	prefix)
+FILE *LYOpenScratch (
+	char *		result,
+	const char *	prefix)
 {
     FILE *fp;
     LY_TEMP *p;
@@ -6277,8 +6277,8 @@ PUBLIC FILE *LYOpenScratch ARGS2(
     return fp;
 }
 
-PRIVATE void LY_close_temp ARGS1(
-	LY_TEMP *,	p)
+static void LY_close_temp (
+	LY_TEMP *	p)
 {
     if (p->file != 0) {
 	if (p->outs) {
@@ -6293,8 +6293,8 @@ PRIVATE void LY_close_temp ARGS1(
 /*
  * Close a temp-file, given its name
  */
-PUBLIC void LYCloseTemp ARGS1(
-	char *, name)
+void LYCloseTemp (
+	char * name)
 {
     LY_TEMP *p;
 
@@ -6309,8 +6309,8 @@ PUBLIC void LYCloseTemp ARGS1(
 /*
  * Close a temp-file, given its file-pointer
  */
-PUBLIC void LYCloseTempFP ARGS1(
-	FILE *, fp)
+void LYCloseTempFP (
+	FILE * fp)
 {
     LY_TEMP *p;
 
@@ -6324,8 +6324,8 @@ PUBLIC void LYCloseTempFP ARGS1(
 /*
  * Close a temp-file, removing it.
  */
-PUBLIC int LYRemoveTemp ARGS1(
-	char *, name)
+int LYRemoveTemp (
+	char * name)
 {
     LY_TEMP *p, *q;
     int code = -1;
@@ -6357,7 +6357,7 @@ PUBLIC int LYRemoveTemp ARGS1(
  * Remove all of the temp-files.  Note that this assumes that they are closed,
  * since some systems will not allow us to remove a file which is open.
  */
-PUBLIC void LYCleanupTemp NOARGS
+void LYCleanupTemp (void)
 {
     while (ly_temp != 0) {
 	LYRemoveTemp(ly_temp->name);
@@ -6377,9 +6377,9 @@ PUBLIC void LYCleanupTemp NOARGS
 /*
  * We renamed a temporary file.  Keep track so we can remove it on exit.
  */
-PUBLIC void LYRenamedTemp ARGS2(
-	char *,		oldname,
-	char *,		newname)
+void LYRenamedTemp (
+	char *		oldname,
+	char *		newname)
 {
     LY_TEMP *p;
 
@@ -6393,7 +6393,7 @@ PUBLIC void LYRenamedTemp ARGS2(
 /*
  *  Check that bibhost defines the BibP icon.
  */
-PUBLIC void LYCheckBibHost NOARGS
+void LYCheckBibHost (void)
 {
     DocAddress bibhostIcon;
     BOOLEAN saveFlag;
@@ -6467,10 +6467,10 @@ static uip_entry ly_uip[] =
 
 /*  Public entry points for User Interface Page management: */
 
-PUBLIC BOOL LYIsUIPage3 ARGS3(
-    CONST char *,	url,
-    UIP_t,		type,
-    int,		flagparam)
+BOOL LYIsUIPage3 (
+    const char *	url,
+    UIP_t		type,
+    int		flagparam)
 {
     unsigned int i;
     size_t l;
@@ -6503,9 +6503,9 @@ PUBLIC BOOL LYIsUIPage3 ARGS3(
     return NO;
 }
 
-PUBLIC void LYRegisterUIPage ARGS2(
-    CONST char *,	url,
-    UIP_t,		type)
+void LYRegisterUIPage (
+    const char *	url,
+    UIP_t		type)
 {
     unsigned int i;
     for (i = 0; i < TABLESIZE(ly_uip); i++) {
@@ -6546,7 +6546,7 @@ PUBLIC void LYRegisterUIPage ARGS2(
     }
 }
 
-PUBLIC void LYUIPages_free NOARGS
+void LYUIPages_free (void)
 {
     unsigned int i;
     char *p;
@@ -6567,10 +6567,10 @@ PUBLIC void LYUIPages_free NOARGS
  *  Convert local pathname to www name
  *  (do not bother about file://localhost prefix at this point).
  */
-PUBLIC  CONST char * wwwName ARGS1(
-	CONST char *,	pathname)
+const char * wwwName (
+	const char *	pathname)
 {
-    CONST char *cp = NULL;
+    const char *cp = NULL;
 
 #if defined(USE_DOS_DRIVES)
     cp = HTDOS_wwwName(pathname);
@@ -6592,12 +6592,12 @@ PUBLIC  CONST char * wwwName ARGS1(
  *
  * Both strings are fixed buffer sizes, LY_MAXPATH.
  */
-PUBLIC BOOLEAN LYValidateFilename ARGS2(
-	char *,		result,
-	char *,		given)
+BOOLEAN LYValidateFilename (
+	char *		result,
+	char *		given)
 {
     char *cp;
-    CONST char *cp2;
+    const char *cp2;
 
     /*
      *  Cancel if the user entered "/dev/null" on Unix,
@@ -6689,8 +6689,8 @@ PUBLIC BOOLEAN LYValidateFilename ARGS2(
  *	'N' (no/retry)
  *	3   (cancel)
  */
-PUBLIC int LYValidateOutput ARGS1(
-	char *,		filename)
+int LYValidateOutput (
+	char *		filename)
 {
     int c;
 
@@ -6731,11 +6731,11 @@ PUBLIC int LYValidateOutput ARGS1(
 /*
  * Convert a local filename to a URL
  */
-PUBLIC void LYLocalFileToURL ARGS2(
-	char **,	target,
-	CONST char *,	source)
+void LYLocalFileToURL (
+	char **	target,
+	const char *	source)
 {
-    CONST char *leaf;
+    const char *leaf;
 
     StrAllocCopy(*target, "file://localhost");
 
@@ -6757,9 +6757,9 @@ PUBLIC void LYLocalFileToURL ARGS2(
  * Open a temporary file for internal-pages, optionally reusing an existing
  * filename.
  */
-PUBLIC FILE *InternalPageFP ARGS2(
-	char *, filename,
-	int,	reuse_flag)
+FILE *InternalPageFP (
+	char * filename,
+	int	reuse_flag)
 {
     FILE *fp;
 
@@ -6775,10 +6775,10 @@ PUBLIC FILE *InternalPageFP ARGS2(
     return fp;
 }
 
-PUBLIC void BeginInternalPage ARGS3(
-	FILE *, fp0,
-	char*, Title,
-	char*, HelpURL)
+void BeginInternalPage (
+	FILE * fp0,
+	char* Title,
+	char* HelpURL)
 {
     fprintf(fp0, "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">\n");
 
@@ -6813,14 +6813,14 @@ PUBLIC void BeginInternalPage ARGS3(
     }
 }
 
-PUBLIC void EndInternalPage ARGS1(
-	FILE *, fp0)
+void EndInternalPage (
+	FILE * fp0)
 {
     fprintf(fp0, "</body>\n</html>");
 }
 
-PUBLIC char *trimPoundSelector ARGS1(
-	char *,		address)
+char *trimPoundSelector (
+	char *		address)
 {
     char *pound = findPoundSelector(address);
     if (pound != 0)
@@ -6832,8 +6832,8 @@ PUBLIC char *trimPoundSelector ARGS1(
  * Trim a trailing path-separator to avoid confusing other programs when we concatenate
  * to it.  This only applies to local filesystems.
  */
-PUBLIC void LYTrimPathSep ARGS1(
-	char *,	path)
+void LYTrimPathSep (
+	char *	path)
 {
     size_t len;
 
@@ -6847,8 +6847,8 @@ PUBLIC void LYTrimPathSep ARGS1(
  * Add a trailing path-separator to avoid confusing other programs when we concatenate
  * to it.  This only applies to local filesystems.
  */
-PUBLIC void LYAddPathSep ARGS1(
-	char **,	path)
+void LYAddPathSep (
+	char **	path)
 {
     size_t len;
     char *temp;
@@ -6865,8 +6865,8 @@ PUBLIC void LYAddPathSep ARGS1(
  * Add a trailing path-separator to avoid confusing other programs when we concatenate
  * to it.  This only applies to local filesystems.
  */
-PUBLIC void LYAddPathSep0 ARGS1(
-	char *,		path)
+void LYAddPathSep0 (
+	char *		path)
 {
     size_t len;
 
@@ -6881,8 +6881,8 @@ PUBLIC void LYAddPathSep0 ARGS1(
 /*
  * Check if a given string contains a path separator
  */
-PUBLIC char * LYLastPathSep ARGS1(
-	CONST char *,	path)
+char * LYLastPathSep (
+	const char *	path)
 {
     char *result;
 #if defined(USE_DOS_DRIVES)
@@ -6898,8 +6898,8 @@ PUBLIC char * LYLastPathSep ARGS1(
  * Trim a trailing path-separator to avoid confusing other programs when we concatenate
  * to it.  This only applies to HTML paths.
  */
-PUBLIC void LYTrimHtmlSep ARGS1(
-	char *,	path)
+void LYTrimHtmlSep (
+	char *	path)
 {
     size_t len;
 
@@ -6913,8 +6913,8 @@ PUBLIC void LYTrimHtmlSep ARGS1(
  * Add a trailing path-separator to avoid confusing other programs when we concatenate
  * to it.  This only applies to HTML paths.
  */
-PUBLIC void LYAddHtmlSep ARGS1(
-	char **,	path)
+void LYAddHtmlSep (
+	char **	path)
 {
     size_t len;
     char *temp;
@@ -6931,8 +6931,8 @@ PUBLIC void LYAddHtmlSep ARGS1(
  * Add a trailing path-separator to avoid confusing other programs when we concatenate
  * to it.  This only applies to HTML paths.
  */
-PUBLIC void LYAddHtmlSep0 ARGS1(
-	char *,		path)
+void LYAddHtmlSep0 (
+	char *		path)
 {
     size_t len;
 
@@ -6947,12 +6947,12 @@ PUBLIC void LYAddHtmlSep0 ARGS1(
 /*
  * Copy a file
  */
-PUBLIC int LYCopyFile ARGS2(
-	char *,		src,
-	char *,		dst)
+int LYCopyFile (
+	char *		src,
+	char *		dst)
 {
     int code;
-    CONST char *program;
+    const char *program;
 
     if ((program = HTGetProgramPath(ppCOPY)) != NULL) {
 	char *the_command = 0;
@@ -6997,7 +6997,7 @@ PUBLIC int LYCopyFile ARGS2(
 }
 
 #ifdef __DJGPP__
-PRIVATE char *escape_backslashes ARGS1(char *, source)
+static char *escape_backslashes (char * source)
 {
     char *result = 0;
     int count = 0;
@@ -7026,8 +7026,8 @@ PRIVATE char *escape_backslashes ARGS1(char *, source)
 /*
  * Invoke a shell command, return nonzero on error.
  */
-PUBLIC int LYSystem ARGS1(
-	char *,	command)
+int LYSystem (
+	char *	command)
 {
     int code;
     int do_free = 0;
@@ -7192,7 +7192,7 @@ PUBLIC int LYSystem ARGS1(
  * Return a string which can be used in LYSystem() for spawning a subshell
  */
 #if defined(__CYGWIN__)	/* 1999/02/26 (Fri) */
-PUBLIC int Cygwin_Shell NOARGS
+int Cygwin_Shell (void)
 {
     char *shell;
     int code;
@@ -7233,7 +7233,7 @@ PUBLIC int Cygwin_Shell NOARGS
 }
 #endif
 
-PUBLIC char *LYSysShell NOARGS
+char *LYSysShell (void)
 {
     char *shell = 0;
 #ifdef DOSPATH
@@ -7285,7 +7285,7 @@ PUBLIC char *LYSysShell NOARGS
 /*
  * Return the X-Window $DISPLAY string if it is nonnull/nonempty
  */
-PUBLIC char *LYgetXDisplay NOARGS
+char *LYgetXDisplay (void)
 {
     return LYGetEnv(DISPLAY);
 }
@@ -7294,8 +7294,8 @@ PUBLIC char *LYgetXDisplay NOARGS
  * Set the value of the X-Window $DISPLAY variable (yes it leaks memory, but
  * that is putenv's fault).
  */
-PUBLIC void LYsetXDisplay ARGS1(
-	char *,	new_display)
+void LYsetXDisplay (
+	char *	new_display)
 {
     if (new_display != 0) {
 #ifdef VMS
@@ -7321,7 +7321,7 @@ static PPIB pib;
 static HAB hab;
 static HMQ hmq;
 
-PRIVATE void morph_PM NOARGS
+static void morph_PM (void)
 {
     PTIB tib;
     int first = 0;
@@ -7340,20 +7340,20 @@ PRIVATE void morph_PM NOARGS
     WinCancelShutdown(hmq, 1);	/* Do not inform us on shutdown */
 }
 
-PRIVATE void unmorph_PM NOARGS
+static void unmorph_PM (void)
 {
     WinDestroyMsgQueue(hmq);
     pib->pib_ultype = proc_type;
 }
 
-PUBLIC int size_clip NOARGS
+int size_clip (void)
 {
     return 8192;
 }
 
 /* Code partially stolen from FED editor. */
 
-PUBLIC int put_clip ARGS1(char *, s)
+int put_clip (char * s)
 {
     int sz = strlen(s) + 1;
     int ret = EOF, nl = 0;
@@ -7400,7 +7400,7 @@ static int clip_open;
 /* get_clip_grab() returns a pointer to the string in the system area.
    get_clip_release() should be called ASAP after this. */
 
-PUBLIC char* get_clip_grab NOARGS
+char* get_clip_grab (void)
 {
     char *ClipData;
     ULONG ulFormat;
@@ -7428,7 +7428,7 @@ PUBLIC char* get_clip_grab NOARGS
     return ClipData;
 }
 
-PUBLIC void get_clip_release NOARGS
+void get_clip_release (void)
 {
     if (!clip_open)
 	return;
@@ -7444,7 +7444,7 @@ PUBLIC void get_clip_release NOARGS
 static FILE* paste_handle = 0;
 static char *paste_buf = NULL;
 
-PUBLIC void get_clip_release NOARGS
+void get_clip_release (void)
 {
     if (paste_handle != 0)
 	pclose(paste_handle);
@@ -7452,7 +7452,7 @@ PUBLIC void get_clip_release NOARGS
 	FREE (paste_buf);
 }
 
-PRIVATE int clip_grab NOARGS
+static int clip_grab (void)
 {
     char *cmd = LYGetEnv("RL_PASTE_CMD");
 
@@ -7470,7 +7470,7 @@ PRIVATE int clip_grab NOARGS
 #define PASTE_BUFFER 1008
 #define CF_TEXT 0			/* Not used */
 
-PUBLIC char* get_clip_grab NOARGS
+char* get_clip_grab (void)
 {
     int len;
     int size = PASTE_BUFFER;
@@ -7497,8 +7497,8 @@ PUBLIC char* get_clip_grab NOARGS
     return paste_buf;
 }
 
-PUBLIC int
-put_clip ARGS1(char *, s)
+int
+put_clip (char * s)
 {
     char *cmd = LYGetEnv("RL_CLCOPY_CMD");
     FILE *fh;
@@ -7522,7 +7522,7 @@ put_clip ARGS1(char *, s)
 
 #if defined(WIN_EX)	/* 1997/10/16 (Thu) 20:13:28 */
 
-PUBLIC int put_clip(char *szBuffer)
+int put_clip(char *szBuffer)
 {
     HANDLE hWnd;
     HANDLE m_hLogData;
@@ -7577,7 +7577,7 @@ static int m_locked;
 /* get_clip_grab() returns a pointer to the string in the system area.
    get_clip_release() should be called ASAP after this. */
 
-PUBLIC char* get_clip_grab()
+char* get_clip_grab()
 {
     HANDLE hWnd;
     LPTSTR pLogData;
@@ -7600,7 +7600,7 @@ PUBLIC char* get_clip_grab()
     return pLogData;
 }
 
-PUBLIC void get_clip_release()
+void get_clip_release()
 {
     if (!m_locked)
 	return;
@@ -7625,7 +7625,7 @@ PUBLIC void get_clip_release()
  * Notes/Dependencies:  I got this from
  *      comp.os.ms-windows.programmer.win32
  */
-PUBLIC char * w32_strerror(DWORD ercode)
+char * w32_strerror(DWORD ercode)
 {
 /*  __declspec(thread) necessary if you will use multiple threads */
 #ifdef __CYGWIN__
@@ -7684,8 +7684,8 @@ PUBLIC char * w32_strerror(DWORD ercode)
 /*
  * syslog() interface
  */
-PUBLIC void LYOpenlog ARGS1(
-	CONST char *, banner)
+void LYOpenlog (
+	const char * banner)
 {
 #if defined(DJGPP)
     openlog("lynx", LOG_PID|LOG_NDELAY, LOG_LOCAL5);
@@ -7700,9 +7700,9 @@ PUBLIC void LYOpenlog ARGS1(
     }
 }
 
-PRIVATE BOOLEAN looks_like_password ARGS2(
-	char *,		first,
-	char *,		last)
+static BOOLEAN looks_like_password (
+	char *		first,
+	char *		last)
 {
     BOOLEAN result = FALSE;
 
@@ -7718,8 +7718,8 @@ PRIVATE BOOLEAN looks_like_password ARGS2(
     return result;
 }
 
-PUBLIC void LYSyslog ARGS1(
-	char *,		arg)
+void LYSyslog (
+	char *		arg)
 {
     char *colon1;
     char *colon2;
@@ -7750,7 +7750,7 @@ PUBLIC void LYSyslog ARGS1(
     syslog (LOG_INFO|LOG_LOCAL5, "%s", NONNULL(arg));
 }
 
-PUBLIC void LYCloselog NOARGS
+void LYCloselog (void)
 {
   syslog(LOG_INFO, "Session over");
   closelog();

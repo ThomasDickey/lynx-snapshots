@@ -74,7 +74,7 @@ typedef struct SourceLocation_tag	{
 	/*
 	 *	The file name and line number of where an event took place.
 	 */
-	CONST char *cp_FileName;
+	const char *cp_FileName;
 	short ssi_LineNumber;
 }
 SourceLocation;
@@ -187,9 +187,9 @@ typedef struct AllocationList_tag	{
 #endif /* LY_FIND_LEAKS && !NO_MEMORY_TRACKING */
 
 #if defined(LY_FIND_LEAKS)
-#define PUBLIC_IF_FIND_LEAKS PUBLIC
+#define PUBLIC_IF_FIND_LEAKS /* nothing */
 #else
-#define PUBLIC_IF_FIND_LEAKS PRIVATE
+#define PUBLIC_IF_FIND_LEAKS static
 #endif
 
 /*
@@ -197,56 +197,56 @@ typedef struct AllocationList_tag	{
 **	See the appropriate source file for usage.
 */
 #ifndef LYLeakSequence 
-extern long LYLeakSequence NOPARAMS;
+extern long LYLeakSequence (void);
 #endif
-extern void LYLeaks NOPARAMS;
+extern void LYLeaks (void);
 #ifdef LY_FIND_LEAKS_EXTENDED
-extern AllocationList *LYLeak_mark_malloced PARAMS((
+extern AllocationList *LYLeak_mark_malloced (
 	void *		vp_alloced,
 	size_t		st_bytes,
-	CONST char *	cp_File,
-	CONST short	ssi_Line));
+	const char *	cp_File,
+	const short	ssi_Line);
 #endif /* LY_FIND_LEAKS_EXTENDED */
-extern void *LYLeakMalloc PARAMS((
+extern void *LYLeakMalloc (
 	size_t		st_bytes,
-	CONST char *	cp_File,
-	CONST short	ssi_Line));
-extern void *LYLeakCalloc PARAMS((
+	const char *	cp_File,
+	const short	ssi_Line);
+extern void *LYLeakCalloc (
 	size_t		st_number,
 	size_t		st_bytes,
-	CONST char *	cp_File,
-	CONST short	ssi_Line));
-extern void *LYLeakRealloc PARAMS((
+	const char *	cp_File,
+	const short	ssi_Line);
+extern void *LYLeakRealloc (
 	void *		vp_alloced,
 	size_t		st_newbytes,
-	CONST char *	cp_File,
-	CONST short	ssi_Line));
-extern void LYLeakFree PARAMS((
+	const char *	cp_File,
+	const short	ssi_Line);
+extern void LYLeakFree (
 	void *		vp_alloced,
-	CONST char *	cp_File,
-	CONST short	ssi_Line));
-extern char * LYLeakSACopy PARAMS((
+	const char *	cp_File,
+	const short	ssi_Line);
+extern char * LYLeakSACopy (
 	char **		dest,
-	CONST char *	src,
-	CONST char *	cp_File,
-	CONST short	ssi_Line));
-extern char * LYLeakSACat PARAMS((
+	const char *	src,
+	const char *	cp_File,
+	const short	ssi_Line);
+extern char * LYLeakSACat (
 	char **		dest,
-	CONST char *	src,
-	CONST char *	cp_File,
-	CONST short	ssi_Line));
+	const char *	src,
+	const char *	cp_File,
+	const short	ssi_Line);
 
 #ifdef LY_FIND_LEAKS_EXTENDED
 /* Trick to get tracking of var arg functions without relying
    on var arg preprocessor macros: */
 
-typedef char * HTSprintflike PARAMS((char **, CONST char *, ...));
-extern HTSprintflike *Get_htsprintf_fn PARAMS((
-			   CONST char *	cp_File,
-			   CONST short	ssi_Line));
-extern HTSprintflike *Get_htsprintf0_fn PARAMS((
-			   CONST char *	cp_File,
-			   CONST short	ssi_Line));
+typedef char * HTSprintflike (char **, const char *, ...);
+extern HTSprintflike *Get_htsprintf_fn (
+			   const char *	cp_File,
+			   const short	ssi_Line);
+extern HTSprintflike *Get_htsprintf0_fn (
+			   const char *	cp_File,
+			   const short	ssi_Line);
 #endif /* LY_FIND_LEAKS_EXTENDED */
 
 #endif /* __LYLEAKS_H */

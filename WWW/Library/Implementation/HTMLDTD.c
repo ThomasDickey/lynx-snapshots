@@ -24,7 +24,7 @@
 **		(this is an obsolete translation mechanism, probably unused,
 **		currently replaced with Unicode chartrans in most cases...)
 */
-static CONST char* entities[] = {
+static const char* entities[] = {
   "AElig",	/* capital AE diphthong (ligature) */
   "Aacute",	/* capital A, acute accent */
   "Acirc",	/* capital A, circumflex accent */
@@ -1386,7 +1386,7 @@ static attr ulist_attr[] = {		/* UL attributes */
 #define NULL_HTTag NULL_HTTag_
 #endif
 
-static CONST HTTag tags_old[HTML_ALL_ELEMENTS] = {
+static const HTTag tags_old[HTML_ALL_ELEMENTS] = {
  { P("A")	, a_attr,	HTML_A_ATTRIBUTES,	SGML_EMPTY,T_A},
  { P("ABBREV")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_ABBREV},
  { P("ACRONYM") , gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_ACRONYM},
@@ -1511,7 +1511,7 @@ static CONST HTTag tags_old[HTML_ALL_ELEMENTS] = {
  { P("OBJECT")	, object_attr,	HTML_OBJECT_ATTRIBUTES, SGML_MIXED,T_OBJECT_PCDATA},
 };
 
-static CONST HTTag tags_new[HTML_ALL_ELEMENTS] = {
+static const HTTag tags_new[HTML_ALL_ELEMENTS] = {
  { P("A")	, a_attr,	HTML_A_ATTRIBUTES,	SGML_MIXED,T_A},
  { P("ABBREV")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_ABBREV},
  { P("ACRONYM") , gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_ACRONYM},
@@ -1645,7 +1645,7 @@ static CONST HTTag tags_new[HTML_ALL_ELEMENTS] = {
 
 static HTTag tags[HTML_ALL_ELEMENTS];
 
-PUBLIC CONST SGML_dtd HTML_dtd = {
+const SGML_dtd HTML_dtd = {
 	tags,
 	HTML_ELEMENTS,
 	entities, /* probably unused */
@@ -1659,8 +1659,8 @@ PUBLIC CONST SGML_dtd HTML_dtd = {
    that would make an initialisation call unnecessary, but my C knowledge
    is limited and I didn't want to list the whole tags_new table
    twice... - kw */
-PUBLIC void HTSwitchDTD ARGS1(
-    int,		new_flag)
+void HTSwitchDTD (
+    int		new_flag)
 {
     if (TRACE)
 	CTRACE((tfp,"HTMLDTD: Copying %s DTD element info of size %d, %d * %d\n",
@@ -1674,7 +1674,7 @@ PUBLIC void HTSwitchDTD ARGS1(
 	memcpy(tags, tags_old, HTML_ALL_ELEMENTS * sizeof(HTTag));
 }
 
-PUBLIC HTTag HTTag_unrecognized =
+HTTag HTTag_unrecognized =
 
     { NULL_HTTag,    NULL,	0,	SGML_EMPTY,T__UNREC_};
 
@@ -1695,13 +1695,13 @@ struct _HTStructured {
 	/* ... */
 };
 
-PUBLIC void HTStartAnchor ARGS3(
-	HTStructured *,		obj,
-	CONST char *,		name,
-	CONST char *,		href)
+void HTStartAnchor (
+	HTStructured *		obj,
+	const char *		name,
+	const char *		href)
 {
     BOOL		present[HTML_A_ATTRIBUTES];
-    CONST char *	value[HTML_A_ATTRIBUTES];
+    const char *	value[HTML_A_ATTRIBUTES];
     int i;
 
     for (i = 0; i < HTML_A_ATTRIBUTES; i++)
@@ -1709,26 +1709,26 @@ PUBLIC void HTStartAnchor ARGS3(
 
     if (name && *name) {
 	present[HTML_A_NAME] = YES;
-	value[HTML_A_NAME] = (CONST char *)name;
+	value[HTML_A_NAME] = (const char *)name;
     }
     if (href) {
 	present[HTML_A_HREF] = YES;
-	value[HTML_A_HREF] = (CONST char *)href;
+	value[HTML_A_HREF] = (const char *)href;
     }
 
     (*obj->isa->start_element)(obj, HTML_A, present, value, -1, 0);
 }
 
 
-PUBLIC void HTStartAnchor5 ARGS5(
-	HTStructured *,		obj,
-	CONST char *,		name,
-	CONST char *,		href,
-	CONST char *,		linktype,
-	int,			tag_charset)
+void HTStartAnchor5 (
+	HTStructured *		obj,
+	const char *		name,
+	const char *		href,
+	const char *		linktype,
+	int			tag_charset)
 {
     BOOL		present[HTML_A_ATTRIBUTES];
-    CONST char *	value[HTML_A_ATTRIBUTES];
+    const char *	value[HTML_A_ATTRIBUTES];
     int i;
 
     for (i = 0; i < HTML_A_ATTRIBUTES; i++)
@@ -1750,13 +1750,13 @@ PUBLIC void HTStartAnchor5 ARGS5(
     (*obj->isa->start_element)(obj, HTML_A, present, value, tag_charset, 0);
 }
 
-PUBLIC void HTStartIsIndex ARGS3(
-	HTStructured *,		obj,
-	CONST char *,		prompt,
-	CONST char *,		href)
+void HTStartIsIndex (
+	HTStructured *		obj,
+	const char *		prompt,
+	const char *		href)
 {
     BOOL		present[HTML_ISINDEX_ATTRIBUTES];
-    CONST char *	value[HTML_ISINDEX_ATTRIBUTES];
+    const char *	value[HTML_ISINDEX_ATTRIBUTES];
     int i;
 
     for (i = 0; i < HTML_ISINDEX_ATTRIBUTES; i++)
@@ -1764,11 +1764,11 @@ PUBLIC void HTStartIsIndex ARGS3(
 
     if (prompt && *prompt) {
 	present[HTML_ISINDEX_PROMPT] = YES;
-	value[HTML_ISINDEX_PROMPT] = (CONST char *)prompt;
+	value[HTML_ISINDEX_PROMPT] = (const char *)prompt;
     }
     if (href) {
 	present[HTML_ISINDEX_HREF] = YES;
-	value[HTML_ISINDEX_HREF] = (CONST char *)href;
+	value[HTML_ISINDEX_HREF] = (const char *)href;
     }
 
     (*obj->isa->start_element)(obj, HTML_ISINDEX , present, value, -1, 0);

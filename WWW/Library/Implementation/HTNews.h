@@ -34,20 +34,20 @@ GLOBALREF HTProtocol HTSNewsPost;
 GLOBALREF HTProtocol HTSNewsReply;
 #endif /* GLOBALREF_IS_MACRO */
 
-extern void HTSetNewsHost PARAMS((
-	CONST char *	value));
-extern CONST char * HTGetNewsHost NOPARAMS;
+extern void HTSetNewsHost (
+	const char *	value);
+extern const char * HTGetNewsHost (void);
 extern char * HTNewsHost;
 
-extern void HTClearNNTPAuthInfo NOPARAMS;
+extern void HTClearNNTPAuthInfo (void);
 
 #ifdef USE_SSL
-extern int HTNewsProxyConnect PARAMS ((
+extern int HTNewsProxyConnect (
 	int		sock,
-	CONST char *	url,
+	const char *	url,
 	HTParentAnchor *anAnchor,
 	HTFormat	format_out,
-	HTStream *	sink));
+	HTStream *	sink);
 #endif
 
 #endif /* HTNEWS_H */

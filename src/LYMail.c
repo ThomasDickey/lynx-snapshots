@@ -18,7 +18,7 @@
 
 BOOLEAN term_letter;	/* Global variable for async i/o. */
 
-PRIVATE void terminate_letter ARGS1(int,sig GCC_UNUSED)
+static void terminate_letter (int sig GCC_UNUSED)
 {
     term_letter = TRUE;
     /* Reassert the AST */
@@ -35,8 +35,8 @@ PRIVATE void terminate_letter ARGS1(int,sig GCC_UNUSED)
 }
 
 /* HTUnEscape with control-code nuking */
-PRIVATE void SafeHTUnEscape ARGS1(
-    char *,	string)
+static void SafeHTUnEscape (
+    char *	string)
 {
      int i;
      int flg = FALSE;
@@ -56,7 +56,7 @@ PRIVATE void SafeHTUnEscape ARGS1(
 	HTAlert(MAILTO_SQUASH_CTL);
 }
 
-PRIVATE void remove_tildes ARGS1(char *,string)
+static void remove_tildes (char *string)
 {
    /*
     *  Change the first character to
@@ -66,9 +66,9 @@ PRIVATE void remove_tildes ARGS1(char *,string)
 	*string = ' ';
 }
 
-PRIVATE void comma_append ARGS2(
-    char **,	dst,
-    char *,	src)
+static void comma_append (
+    char **	dst,
+    char *	src)
 {
     if (*src) {
 	while (*src == ',' || isspace(UCH(*src)))
@@ -84,10 +84,10 @@ PRIVATE void comma_append ARGS2(
     }
 }
 
-PRIVATE void extract_field ARGS3(
-    char **,	dst,
-    char *,	src,
-    char *,	keyword)
+static void extract_field (
+    char **	dst,
+    char *	src,
+    char *	keyword)
 {
     int len = strlen(keyword);
     char *cp, *cp1;
@@ -117,11 +117,11 @@ PRIVATE void extract_field ARGS3(
 /*
  * Seek and handle a subject=foo.  - FM
  */
-PRIVATE void extract_subject ARGS2(
-    char *,	dst,
-    char *,	src)
+static void extract_subject (
+    char *	dst,
+    char *	src)
 {
-    CONST char *keyword = "subject=";
+    const char *keyword = "subject=";
     int len = strlen(keyword);
     char *cp, *cp1;
 
@@ -153,11 +153,11 @@ PRIVATE void extract_subject ARGS2(
 /*
  * Seek and handle body=foo fields.  - FM
  */
-PRIVATE void extract_body ARGS2(
-    char **,	dst,
-    char *,	src)
+static void extract_body (
+    char **	dst,
+    char *	src)
 {
-    CONST char *keyword = "body=";
+    const char *keyword = "body=";
     int len = strlen(keyword);
     int i;
     char *cp, *cp0, *cp1, *temp = 0;
@@ -223,8 +223,8 @@ PRIVATE void extract_body ARGS2(
 /*
  * Convert any Explorer semi-colon Internet address separators to commas - FM
  */
-PRIVATE BOOLEAN trim_comma ARGS1(
-    char *,	address)
+static BOOLEAN trim_comma (
+    char *	address)
 {
     if (address[(strlen(address) - 1)] == ',')
 	address[(strlen(address) - 1)] = '\0';
@@ -234,8 +234,8 @@ PRIVATE BOOLEAN trim_comma ARGS1(
 /*
  * Convert any Explorer semi-colon Internet address separators to commas - FM
  */
-PRIVATE BOOLEAN convert_explorer ARGS1(
-    char *,	address)
+static BOOLEAN convert_explorer (
+    char *	address)
 {
     char *cp = address;
     char *cp0;
@@ -256,10 +256,10 @@ PRIVATE BOOLEAN convert_explorer ARGS1(
  * reply_by_mail() prompts line-by-line for header information, allowing
  * scrolling of the screen.
  */
-PRIVATE int header_prompt ARGS3(
-    char *,		label,
-    char **,		result,
-    unsigned,		limit)
+static int header_prompt (
+    char *		label,
+    char **		result,
+    unsigned		limit)
 {
     char buffer[LINESIZE];
     int ok;
@@ -287,8 +287,8 @@ PRIVATE int header_prompt ARGS3(
     return ok;
 }
 
-PRIVATE void show_addresses ARGS1(
-    char *,	addresses)
+static void show_addresses (
+    char *	addresses)
 {
     char *cp = addresses;
     char *cp1;
@@ -329,7 +329,7 @@ Blat <filename> -t <recipient> [optional switches (see below)]
 
 */
 
-PRIVATE char *blat_cmd(
+static char *blat_cmd(
 	char *mail_cmd,
 	char *filename,
 	char *address,
@@ -397,7 +397,7 @@ PRIVATE char *blat_cmd(
 #endif /* USE_BLAT_MAILER */
 
 #if USE_VMS_MAILER
-PUBLIC BOOLEAN LYMailPMDF(void)
+BOOLEAN LYMailPMDF(void)
 {
     return (system_mail != 0)
 	    ? !strncasecomp(system_mail, "PMDF SEND", 9)
@@ -407,7 +407,7 @@ PUBLIC BOOLEAN LYMailPMDF(void)
 /*
  * Add all of the people in the address field to the command
  */
-PRIVATE void vms_append_addrs (char **cmd, char *address, char *option)
+static void vms_append_addrs (char **cmd, char *address, char *option)
 {
     BOOLEAN first = TRUE;
     char *cp;
@@ -441,7 +441,7 @@ PRIVATE void vms_append_addrs (char **cmd, char *address, char *option)
     } while (address_ptr1 != NULL);
 }
 
-PRIVATE void remove_quotes (char * string)
+static void remove_quotes (char * string)
 {
     while (*string != 0) {
 	if (strchr("\"&|", *string) != 0)
@@ -455,7 +455,7 @@ PRIVATE void remove_quotes (char * string)
 /*
  * Open a pipe to the mailer
  */
-PUBLIC FILE *LYPipeToMailer NOARGS
+FILE *LYPipeToMailer (void)
 {
     char *buffer = NULL;
     FILE *fp = NULL;
@@ -470,12 +470,12 @@ PUBLIC FILE *LYPipeToMailer NOARGS
 }
 #else	/* DOS, Win32, etc. */
 
-PUBLIC int LYSendMailFile ARGS5(
-    char *,	the_address,
-    char *,	the_filename,
-    char *,	the_subject GCC_UNUSED,
-    char *,	the_ccaddr GCC_UNUSED,
-    char *,	message)
+int LYSendMailFile (
+    char *	the_address,
+    char *	the_filename,
+    char *	the_subject GCC_UNUSED,
+    char *	the_ccaddr GCC_UNUSED,
+    char *	message)
 {
     char *cmd = NULL;
 #ifdef __DJGPP__
@@ -548,11 +548,11 @@ PUBLIC int LYSendMailFile ARGS5(
 /*
 **  mailform() sends form content to the mailto address(es). - FM
 */
-PUBLIC void mailform ARGS4(
-    CONST char *,	mailto_address,
-    CONST char *,	mailto_subject,
-    CONST char *,	mailto_content,
-    CONST char *,	mailto_type)
+void mailform (
+    const char *	mailto_address,
+    const char *	mailto_subject,
+    const char *	mailto_content,
+    const char *	mailto_type)
 {
     FILE *fd;
     char *address = NULL;
@@ -877,11 +877,11 @@ cleanup:
 **  mailmsg() sends a message to the owner of the file, if one is defined,
 **  telling of errors (i.e., link not available).
 */
-PUBLIC void mailmsg ARGS4(
-	int,		cur,
-	char *,		owner_address,
-	char *,		filename,
-	char *,		linkname)
+void mailmsg (
+	int		cur,
+	char *		owner_address,
+	char *		filename,
+	char *		linkname)
 {
     FILE *fd, *fp;
     char *address = NULL;
@@ -1107,11 +1107,11 @@ PUBLIC void mailmsg ARGS4(
 **  reply_by_mail() invokes sendmail on Unix or mail on VMS to send
 **  a comment from the users to the owner
 */
-PUBLIC void reply_by_mail ARGS4(
-	char *,		mail_address,
-	char *,		filename,
-	CONST char *,	title,
-	CONST char *,	refid)
+void reply_by_mail (
+	char *		mail_address,
+	char *		filename,
+	const char *	title,
+	const char *	refid)
 {
 #ifndef NO_ANONYMOUS_EMAIL
     static char *personal_name = NULL;
@@ -1747,7 +1747,7 @@ cleanup:
 /*
  * Check that we have configured values for system mailer.
  */
-PUBLIC BOOLEAN LYSystemMail NOARGS
+BOOLEAN LYSystemMail (void)
 {
     if (system_mail == 0 || !strcmp(system_mail, "unknown")) {
 	HTAlert(gettext("No system mailer configured"));

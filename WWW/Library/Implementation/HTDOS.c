@@ -13,7 +13,7 @@
  * Make a copy of the source argument in the result, allowing some extra
  * space so we can append directly onto the result without reallocating.
  */
-PRIVATE char * copy_plus ARGS2(char **, result, CONST char *, source)
+static char * copy_plus (char **  result, const char *  source)
 {
     int length = strlen(source);
     HTSprintf0(result, "%-*s", length+10, source);
@@ -30,7 +30,7 @@ PRIVATE char * copy_plus ARGS2(char **, result, CONST char *, source)
 **	returns		WWW file specification
 **
 */
-char * HTDOS_wwwName ARGS1(CONST char *, dosname)
+char * HTDOS_wwwName (const char *  dosname)
 {
     static char *wwwname = NULL;
     char *cp_url = copy_plus(&wwwname, dosname);
@@ -78,7 +78,7 @@ char * HTDOS_wwwName ARGS1(CONST char *, dosname)
 /*
  * Convert slashes from Unix to DOS
  */
-char * HTDOS_slashes ARGS1(char *, path)
+char * HTDOS_slashes (char *  path)
 {
     char *s;
 
@@ -98,7 +98,7 @@ char * HTDOS_slashes ARGS1(char *, path)
 ** ON EXIT:
 **	returns		DOS file specification
 */
-char * HTDOS_name ARGS1(char *, wwwname)
+char * HTDOS_name (char *  wwwname)
 {
 #ifdef _WINDOWS	/* 1998/04/02 (Thu) 08:47:20 */
     extern char windows_drive[];
@@ -149,7 +149,7 @@ char * HTDOS_name ARGS1(char *, wwwname)
 }
 
 #ifdef WIN_EX
-PUBLIC char *HTDOS_short_name(char *path)
+char *HTDOS_short_name(char *path)
 {
     static char sbuf[LY_MAXPATH];
     char *ret;

@@ -27,19 +27,19 @@
 
 BOOLEAN term_options;
 
-PRIVATE int LYChosenShowColor = SHOW_COLOR_UNKNOWN; /* whether to show and save */
+static int LYChosenShowColor = SHOW_COLOR_UNKNOWN; /* whether to show and save */
 
-PRIVATE void terminate_options	PARAMS((int sig));
+static void terminate_options	(int sig);
 
 #if !defined(NO_OPTION_MENU) || (defined(USE_MOUSE) && (defined(NCURSES) || defined(PDCURSES)))
 #define COL_OPTION_VALUES 36  /* display column where option values start */
 #endif
 
 #if defined(USE_SLANG) || defined(COLOR_CURSES)
-PRIVATE BOOLEAN can_do_colors = FALSE;
+static BOOLEAN can_do_colors = FALSE;
 #endif
 
-PUBLIC BOOLEAN LYCheckUserAgent NOARGS
+BOOLEAN LYCheckUserAgent (void)
 {
     if (LYUserAgent && *LYUserAgent) {
 	if (strstr(LYUserAgent, "Lynx") == 0
@@ -52,7 +52,7 @@ PUBLIC BOOLEAN LYCheckUserAgent NOARGS
     return TRUE;
 }
 
-PRIVATE void SetupChosenShowColor NOARGS
+static void SetupChosenShowColor (void)
 {
 #if defined(USE_SLANG) || defined(COLOR_CURSES)
     can_do_colors = TRUE;
@@ -86,7 +86,7 @@ PRIVATE void SetupChosenShowColor NOARGS
 #endif /* USE_SLANG || COLOR_CURSES */
 }
 
-PRIVATE void validate_x_display NOPARAMS
+static void validate_x_display (void)
 {
     char *cp;
     if ((cp = LYgetXDisplay()) != NULL) {
@@ -96,8 +96,8 @@ PRIVATE void validate_x_display NOPARAMS
     }
 }
 
-PRIVATE void summarize_x_display ARGS1(
-    char *,	display_option)
+static void summarize_x_display (
+    char *	display_option)
 {
     if ((x_display == NULL && *display_option == '\0') ||
 	(x_display != NULL && !strcmp(x_display, display_option))) {
@@ -119,13 +119,13 @@ PRIVATE void summarize_x_display ARGS1(
 
 
 #ifndef NO_OPTION_MENU
-PRIVATE int boolean_choice PARAMS((
+static int boolean_choice (
 	int		status,
 	int		line,
 	int		column,
-	CONST char **	choices));
+	const char **	choices);
 #define LYChooseBoolean(status, line, column, choices) \
-	boolean_choice(status, line, column, (CONST char **)choices)
+	boolean_choice(status, line, column, (const char **)choices)
 
 #define MAXCHOICES 10
 
@@ -207,7 +207,7 @@ PRIVATE int boolean_choice PARAMS((
 #define LPAREN '('
 #define RPAREN ')'
 
-PRIVATE int add_it ARGS2(char *, text, int, len)
+static int add_it (char * text, int len)
 {
     if (len) {
 	text[len] = '\0';
@@ -220,7 +220,7 @@ PRIVATE int add_it ARGS2(char *, text, int, len)
  * addlbl() is used instead of plain LYaddstr() in old-style options menu
  * to show hot keys in bold.
  */
-PRIVATE void addlbl ARGS1(CONST char *, text)
+static void addlbl (const char * text)
 {
     char actual[80];
     int s, d;
@@ -259,7 +259,7 @@ PRIVATE void addlbl ARGS1(CONST char *, text)
 			goto draw_options
 #endif /* !VMS || USE_SLANG */
 
-PUBLIC void LYoptions NOARGS
+void LYoptions (void)
 {
 #define ShowBool(value) LYaddstr((value) ? "ON " : "OFF")
     static char *bool_choices[] = {
@@ -879,8 +879,8 @@ draw_options:
 	    case '\001':	/* Change assume_charset setting. */
 		if (use_assume_charset) {
 		    int i, curval;
-		    CONST char ** assume_list;
-		    assume_list = typecallocn(CONST char *,(LYNumCharsets + 1));
+		    const char ** assume_list;
+		    assume_list = typecallocn(const char *,(LYNumCharsets + 1));
 		    if (!assume_list) {
 			outofmem(__FILE__, "options");
 		    }
@@ -1550,8 +1550,8 @@ draw_options:
     signal(SIGINT, cleanup_sig);
 }
 
-PRIVATE int widest_choice ARGS1(
-	CONST char **,	choices)
+static int widest_choice (
+	const char **	choices)
 {
     int n, width = 0;
     for (n = 0; choices[n] != NULL; ++n) {
@@ -1562,9 +1562,9 @@ PRIVATE int widest_choice ARGS1(
     return width;
 }
 
-PRIVATE void show_choice ARGS2(
-	CONST char *,	choice,
-	int,		width)
+static void show_choice (
+	const char *	choice,
+	int		width)
 {
     int len = strlen(choice);
     LYaddstr(choice);
@@ -1575,11 +1575,11 @@ PRIVATE void show_choice ARGS2(
 /*
  *  Take a status code, prompt the user for a new status, and return it.
  */
-PRIVATE int boolean_choice ARGS4(
-	int,		cur_choice,
-	int,		line,
-	int,		column,
-	CONST char **,	choices)
+static int boolean_choice (
+	int		cur_choice,
+	int		line,
+	int		column,
+	const char **	choices)
 {
     int response = 0;
     int cmd = 0;
@@ -1720,8 +1720,8 @@ PRIVATE int boolean_choice ARGS4(
 }
 #endif /* !NO_OPTION_MENU */
 
-PRIVATE void terminate_options ARGS1(
-	int,		sig GCC_UNUSED)
+static void terminate_options (
+	int		sig GCC_UNUSED)
 {
     term_options = TRUE;
     /*
@@ -1742,7 +1742,7 @@ PRIVATE void terminate_options ARGS1(
 /*
  *  Multi-Bookmark On-Line editing support. - FMG & FM
  */
-PUBLIC void edit_bookmarks NOARGS
+void edit_bookmarks (void)
 {
     int response = 0, def_response = 0, ch;
     int MBM_current = 1;
@@ -2035,14 +2035,14 @@ draw_bookmark_list:
  *  Also used for mouse popups with ncurses; this is indicated
  *  by for_mouse.
  */
-PUBLIC int popup_choice ARGS7(
-	int,		cur_choice,
-	int,		line,
-	int,		column,
-	CONST char **,	choices,
-	int,		i_length,
-	int,		disabled,
-	BOOLEAN,	for_mouse)
+int popup_choice (
+	int		cur_choice,
+	int		line,
+	int		column,
+	const char **	choices,
+	int		i_length,
+	int		disabled,
+	BOOLEAN	for_mouse)
 {
     if (column < 0)
 	column = (COL_OPTION_VALUES - 1);
@@ -2051,7 +2051,7 @@ PUBLIC int popup_choice ARGS7(
     cur_choice = LYhandlePopupList(cur_choice,
 				   line,
 				   column,
-				   (CONST char **)choices,
+				   (const char **)choices,
 				   -1,
 				   i_length,
 				   disabled,
@@ -2089,8 +2089,8 @@ PUBLIC int popup_choice ARGS7(
 
 typedef struct {
     int value;
-    CONST char *LongName;
-    CONST char *HtmlName;
+    const char *LongName;
+    const char *HtmlName;
 } OptValues;
 
 typedef struct {
@@ -2098,12 +2098,12 @@ typedef struct {
     char * value;
 } PostPair;
 
-static CONST char selected_string[] = "selected";
-static CONST char disabled_string[] = "disabled";
-static CONST char on_string[]	    = N_("ON");
-static CONST char off_string[]	    = N_("OFF");
-static CONST char never_string[]    = N_("NEVER");
-static CONST char always_string[]   = N_("ALWAYS");
+static const char selected_string[] = "selected";
+static const char disabled_string[] = "disabled";
+static const char on_string[]	    = N_("ON");
+static const char off_string[]	    = N_("OFF");
+static const char never_string[]    = N_("NEVER");
+static const char always_string[]   = N_("ALWAYS");
 static OptValues bool_values[] = {
 	{ FALSE,	     N_("OFF"),		  "OFF"		},
 	{ TRUE,		     N_("ON"),		  "ON"		},
@@ -2180,9 +2180,9 @@ static char * underline_links_string	= RC_UNDERLINE_LINKS;
 static char * show_scrollbar_string	= RC_SCROLLBAR;
 #endif
 
-static CONST char prompt_dft_string[]	= N_("prompt normally");
-static CONST char prompt_yes_string[]	= N_("force yes-response");
-static CONST char prompt_no_string[]	= N_("force no-response");
+static const char prompt_dft_string[]	= N_("prompt normally");
+static const char prompt_yes_string[]	= N_("force yes-response");
+static const char prompt_no_string[]	= N_("force no-response");
 static OptValues prompt_values[] = {
 	{ FORCE_PROMPT_DFT,	prompt_dft_string, prompt_dft_string },
 	{ FORCE_PROMPT_YES,	prompt_yes_string, prompt_yes_string },
@@ -2334,10 +2334,10 @@ static char * user_agent_string		= RC_USERAGENT;
 #define EndSelect(fp)\
 	fprintf(fp,"</select>\n")
 
-PRIVATE void PutOptValues ARGS3(
-	FILE *,		fp,
-	int,		value,
-	OptValues *,	table)
+static void PutOptValues (
+	FILE *		fp,
+	int		value,
+	OptValues *	table)
 {
     while (table->LongName != 0) {
 	if (table->HtmlName) {
@@ -2350,10 +2350,10 @@ PRIVATE void PutOptValues ARGS3(
     }
 }
 
-PRIVATE BOOLEAN GetOptValues ARGS3(
-	OptValues *,	table,
-	char *,		value,
-	int *,		result)
+static BOOLEAN GetOptValues (
+	OptValues *	table,
+	char *		value,
+	int *		result)
 {
     while (table->LongName != 0) {
 	if (table->HtmlName && !strcmp(value, table->HtmlName)) {
@@ -2375,8 +2375,8 @@ PRIVATE BOOLEAN GetOptValues ARGS3(
  * Not pretty, but works.  Hey, if strings can be null terminate arrays...
  */
 
-PRIVATE PostPair * break_data ARGS1(
-    bstring *,	data)
+static PostPair * break_data (
+    bstring *	data)
 {
     char * p;
     PostPair * q = NULL;
@@ -2448,7 +2448,7 @@ PRIVATE PostPair * break_data ARGS1(
     return q;
 }
 
-PRIVATE int gen_options PARAMS((char **newfile));
+static int gen_options (char **newfile);
 
 /*
  * Handle options from the pseudo-post.  I think we really only need
@@ -2482,8 +2482,8 @@ PRIVATE int gen_options PARAMS((char **newfile));
  *             (use 'need_end_reload' flag).
  */
 
-PUBLIC int postoptions ARGS1(
-    DocInfo *,		newdoc)
+int postoptions (
+    DocInfo *		newdoc)
 {
     PostPair *data = 0;
     DocAddress WWWDoc;  /* need on exit */
@@ -3111,7 +3111,7 @@ PUBLIC int postoptions ARGS1(
     /******** Done! **************************************************/
 }
 
-PRIVATE char *NewSecureValue NOARGS
+static char *NewSecureValue (void)
 {
     FREE(secure_value);
     if ((secure_value = malloc(80)) != 0) {
@@ -3132,10 +3132,10 @@ PRIVATE char *NewSecureValue NOARGS
  * Note: the 'value' we are passing here is a local copy of the "same" string
  * as is used in LYrcFile.c to index the savable options.
  */
-PRIVATE void PutLabel ARGS3(
-	FILE *,		fp,
-	char *,		name,
-	char *,		value)
+static void PutLabel (
+	FILE *		fp,
+	char *		name,
+	char *		value)
 {
     if (will_save_rc(value) && !no_option_save) {
 	fprintf(fp, "  %-*s: ", LABEL_LEN, name);
@@ -3154,7 +3154,7 @@ PRIVATE void PutLabel ARGS3(
  * so, return that name, so the subsequence will_save_rc() check in PutLabel()
  * will flag the composite as not-saved.
  */
-PRIVATE char *check_if_write_lynxrc ARGS1(char **, table)
+static char *check_if_write_lynxrc (char ** table)
 {
     int n;
     char *result = NULL;
@@ -3172,7 +3172,7 @@ PRIVATE char *check_if_write_lynxrc ARGS1(char **, table)
  * from lynx.cfg (and perhaps .lynxrc) as a set of booleans.  Check if any are
  * not writable to .lynxrc, so we can show the user. 
  */
-PRIVATE char *will_save_cookies NOARGS
+static char *will_save_cookies (void)
 {
     static char *table[] = {
 	RC_SET_COOKIES,			/* LYSetCookies */
@@ -3187,7 +3187,7 @@ PRIVATE char *will_save_cookies NOARGS
  * read from lynx.cfg (and perhaps .lynxrc) as a set of booleans.  Check if any
  * are not writable to .lynxrc, so we can show the user. 
  */
-PRIVATE char *will_save_images NOARGS
+static char *will_save_images (void)
 {
     static char *table[] = {
 	RC_MAKE_PSEUDO_ALTS_FOR_INLINES, /* pseudo_inline_alts */
@@ -3201,9 +3201,9 @@ PRIVATE char *will_save_images NOARGS
  * The visited-links menu is used from the visited-links page as well as the
  * options page.
  */
-PUBLIC void LYMenuVisitedLinks ARGS2(
-	FILE *,		fp0,
-	int,		disable_all)
+void LYMenuVisitedLinks (
+	FILE *		fp0,
+	int		disable_all)
 {
     BeginSelect(fp0, visited_links_string);
     PutOptValues(fp0, Visited_Links_As, visited_links_values);
@@ -3221,8 +3221,8 @@ PUBLIC void LYMenuVisitedLinks ARGS2(
  * This function is synchronized with postoptions().  Read the comments in
  * postoptions() header if you change something in gen_options().
  */
-PRIVATE int gen_options ARGS1(
-	char **,	newfile)
+static int gen_options (
+	char **	newfile)
 {
     int i;
     static char tempfile[LY_MAXPATH] = "\0";

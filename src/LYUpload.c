@@ -38,8 +38,8 @@
  *  that looks like:
  *	LYNXDIRED://UPLOAD=<#>/TO=<STRING>
  */
-PUBLIC int LYUpload ARGS1(
-	char *, 	line)
+int LYUpload (
+	char * 	line)
 {
     char *method, *directory;
     int method_number;
@@ -174,9 +174,9 @@ cancelled:
  *  they select all other links.  Upload links look like:
  *	LYNXDIRED://UPLOAD=<#>/TO=<STRING>
  */
-PUBLIC int LYUpload_options ARGS2(
-	char **,	newfile,
-	char *, 	directory)
+int LYUpload_options (
+	char **	newfile,
+	char * 	directory)
 {
     static char tempfile[LY_MAXPATH];
     FILE *fp0;

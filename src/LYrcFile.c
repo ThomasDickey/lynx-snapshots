@@ -21,7 +21,7 @@
 #define MSG_ENABLE_LYNXRC N_("Normally disabled.  See ENABLE_LYNXRC in lynx.cfg\n")
 #define putBool(value) ((value) ? "on" : "off")
 
-PUBLIC Config_Enum tbl_DTD_recovery[] = {
+Config_Enum tbl_DTD_recovery[] = {
     { "true",		TRUE },
     { "false",		FALSE },
     { "on",		TRUE },
@@ -32,14 +32,14 @@ PUBLIC Config_Enum tbl_DTD_recovery[] = {
 };
 
 #ifdef DIRED_SUPPORT
-PRIVATE Config_Enum tbl_dir_list_style[] = {
+static Config_Enum tbl_dir_list_style[] = {
     { "FILES_FIRST",	FILES_FIRST },
     { "DIRECTORIES_FIRST", DIRS_FIRST },
     { "MIXED_STYLE",	MIXED_STYLE },
     { NULL,		MIXED_STYLE },
 };
 #ifdef LONG_LIST
-PRIVATE Config_Enum tbl_dir_list_order[] = {
+static Config_Enum tbl_dir_list_order[] = {
     { "ORDER_BY_NAME",	ORDER_BY_NAME },
     { "ORDER_BY_TYPE",	ORDER_BY_TYPE },
     { "ORDER_BY_SIZE",  ORDER_BY_SIZE },
@@ -54,7 +54,7 @@ PRIVATE Config_Enum tbl_dir_list_order[] = {
 #endif /* LONG_LIST */
 #endif /* DIRED_SUPPORT */
 
-PRIVATE Config_Enum tbl_file_sort[] = {
+static Config_Enum tbl_file_sort[] = {
     { "BY_FILENAME",	FILE_BY_NAME },
     { "BY_TYPE",	FILE_BY_TYPE },
     { "BY_SIZE",	FILE_BY_SIZE },
@@ -62,7 +62,7 @@ PRIVATE Config_Enum tbl_file_sort[] = {
     { NULL,		-1 },
 };
 
-PUBLIC Config_Enum tbl_keypad_mode[] = {
+Config_Enum tbl_keypad_mode[] = {
     { "FIELDS_ARE_NUMBERED", FIELDS_ARE_NUMBERED },
     { "LINKS_AND_FIELDS_ARE_NUMBERED", LINKS_AND_FIELDS_ARE_NUMBERED },
     { "LINKS_ARE_NUMBERED", LINKS_ARE_NUMBERED },
@@ -73,7 +73,7 @@ PUBLIC Config_Enum tbl_keypad_mode[] = {
     { NULL,		DEFAULT_KEYPAD_MODE }
 };
 
-PUBLIC Config_Enum tbl_multi_bookmarks[] = {
+Config_Enum tbl_multi_bookmarks[] = {
     { "OFF",		MBM_OFF },
     { "STANDARD",	MBM_STANDARD },
     { "ON",		MBM_STANDARD },
@@ -81,7 +81,7 @@ PUBLIC Config_Enum tbl_multi_bookmarks[] = {
     { NULL,		-1 }
 };
 
-PRIVATE Config_Enum tbl_show_colors[] = {
+static Config_Enum tbl_show_colors[] = {
     { "default",	SHOW_COLOR_UNKNOWN },
     { "default",	SHOW_COLOR_OFF },
     { "default",	SHOW_COLOR_ON },
@@ -92,7 +92,7 @@ PRIVATE Config_Enum tbl_show_colors[] = {
     { NULL,		SHOW_COLOR_UNKNOWN }
 };
 
-PUBLIC Config_Enum tbl_transfer_rate[] = {
+Config_Enum tbl_transfer_rate[] = {
     { "NONE",		rateOFF },
     { "KB",		rateKB },
     { "TRUE",		rateKB },
@@ -105,14 +105,14 @@ PUBLIC Config_Enum tbl_transfer_rate[] = {
     { NULL,		-1 },
 };
 
-PUBLIC Config_Enum tbl_user_mode[] = {
+Config_Enum tbl_user_mode[] = {
     { "ADVANCED",	ADVANCED_MODE },
     { "INTERMEDIATE",	INTERMEDIATE_MODE },
     { "NOVICE",		NOVICE_MODE },
     { NULL,		NOVICE_MODE }
 };
 
-PRIVATE Config_Enum tbl_visited_links[] = {
+static Config_Enum tbl_visited_links[] = {
     { "FIRST_REVERSED",	VISITED_LINKS_AS_FIRST_V | VISITED_LINKS_REVERSE },
     { "FIRST",		VISITED_LINKS_AS_FIRST_V },
     { "TREE",		VISITED_LINKS_AS_TREE    },
@@ -121,21 +121,21 @@ PRIVATE Config_Enum tbl_visited_links[] = {
     { NULL,		DEFAULT_VISITED_LINKS }
 };
 
-PUBLIC Config_Enum tbl_force_prompt[] = {
+Config_Enum tbl_force_prompt[] = {
     { "prompt",		FORCE_PROMPT_DFT	},
     { "yes",		FORCE_PROMPT_YES	},
     { "no",		FORCE_PROMPT_NO		},
     { NULL,		-1			}
 };
 
-PRIVATE BOOL getBool ARGS1(char *, src)
+static BOOL getBool (char * src)
 {
     return (BOOL) (!strncasecomp(src, "on", 2) || !strncasecomp(src, "true", 4));
 }
 
-PUBLIC CONST char *LYputEnum ARGS2(
-    Config_Enum *,	table,
-    int,		value)
+const char *LYputEnum (
+    Config_Enum *	table,
+    int		value)
 {
     while (table->name != 0) {
 	if (table->value == value) {
@@ -146,10 +146,10 @@ PUBLIC CONST char *LYputEnum ARGS2(
     return "?";
 }
 
-PUBLIC BOOL LYgetEnum ARGS3(
-    Config_Enum *,	table,
-    char *,		name,
-    int *,		result)
+BOOL LYgetEnum (
+    Config_Enum *	table,
+    char *		name,
+    int *		result)
 {
     Config_Enum *found = 0;
     unsigned len = strlen(name);
@@ -209,17 +209,17 @@ typedef enum {
 
 typedef struct config_type
 {
-    CONST char *name;
+    const char *name;
     int enabled;		/* see lynx.cfg ENABLE_LYNXRC "off" lines */
     Conf_Types type;
     ParseData;
     char **strings;
     Config_Enum *table;
-    void (*write_it) PARAMS((FILE * fp, struct config_type *));
+    void (*write_it) (FILE * fp, struct config_type *);
     char *note;
 } Config_Type;
 
-PRIVATE int get_assume_charset ARGS1(char *, value)
+static int get_assume_charset (char * value)
 {
     int i;
 
@@ -232,7 +232,7 @@ PRIVATE int get_assume_charset ARGS1(char *, value)
     return 0;
 }
 
-PRIVATE void put_assume_charset ARGS2(FILE *, fp, struct config_type *, tbl)
+static void put_assume_charset (FILE * fp, struct config_type * tbl)
 {
     int i;
 
@@ -241,7 +241,7 @@ PRIVATE void put_assume_charset ARGS2(FILE *, fp, struct config_type *, tbl)
     fprintf(fp, "%s=%s\n\n", tbl->name, LYCharSet_UC[UCLYhndl_for_unspec].MIMEname);
 }
 
-PRIVATE int get_display_charset ARGS1(char *, value)
+static int get_display_charset (char * value)
 {
     int i = 0;
 
@@ -251,7 +251,7 @@ PRIVATE int get_display_charset ARGS1(char *, value)
     return 0;
 }
 
-PRIVATE void put_display_charset ARGS2(FILE *, fp, struct config_type *, tbl)
+static void put_display_charset (FILE * fp, struct config_type * tbl)
 {
     int i;
 
@@ -260,19 +260,19 @@ PRIVATE void put_display_charset ARGS2(FILE *, fp, struct config_type *, tbl)
     fprintf(fp, "%s=%s\n\n", tbl->name, LYchar_set_names[current_char_set]);
 }
 
-PRIVATE int get_editor ARGS1(char *, value)
+static int get_editor (char * value)
 {
     if (!system_editor)
 	StrAllocCopy(editor, value);
     return 0;
 }
 
-PRIVATE void put_editor ARGS2(FILE *, fp, struct config_type *, tbl)
+static void put_editor (FILE * fp, struct config_type * tbl)
 {
     fprintf(fp, "%s=%s\n\n", tbl->name, NonNull(editor));
 }
 
-PUBLIC int get_tagsoup ARGS1(char *, value)
+int get_tagsoup (char * value)
 {
     int found = Old_DTD;
 
@@ -284,7 +284,7 @@ PUBLIC int get_tagsoup ARGS1(char *, value)
     return 0;
 }
 
-PRIVATE void put_tagsoup ARGS2(FILE *, fp, struct config_type *, tbl)
+static void put_tagsoup (FILE * fp, struct config_type * tbl)
 {
     fprintf(fp, "%s=%s\n\n", tbl->name, LYputEnum(tbl_DTD_recovery, Old_DTD));
 }
@@ -564,8 +564,8 @@ in the Visited Links Page.\n\
     PARSE_NIL
 };
 
-PRIVATE Config_Type *lookup_config ARGS1(
-	char *,		name)
+static Config_Type *lookup_config (
+	char *		name)
 {
     Config_Type *tbl = Config_Table;
     char ch = (char) TOUPPER(*name);
@@ -589,7 +589,7 @@ PRIVATE Config_Type *lookup_config ARGS1(
  *  for reading, otherwise use fp which has to be a file open for
  *  reading. - kw
  */
-PUBLIC void read_rc ARGS1(FILE *, fp)
+void read_rc (FILE * fp)
 {
     char *buffer = NULL;
     char rcfile[LY_MAXPATH];
@@ -749,9 +749,9 @@ PUBLIC void read_rc ARGS1(FILE *, fp)
  * Write a set of comments.  Doing it this way avoids preprocessor problems
  * with the leading '#', makes it simpler to use gettext.
  */
-PRIVATE void write_list ARGS2(
-    	FILE *,		fp,
-	char *,		list)
+static void write_list (
+    	FILE *		fp,
+	char *		list)
 {
     int first = TRUE;
     while (*list != 0) {
@@ -771,7 +771,7 @@ PRIVATE void write_list ARGS2(
 /*
  * This is too long for some compilers.
  */
-PRIVATE void explain_keypad_mode ARGS1(FILE *, fp)
+static void explain_keypad_mode (FILE * fp)
 {
     write_list(fp, gettext("\
 If keypad_mode is set to \"NUMBERS_AS_ARROWS\", then the numbers on\n\
@@ -807,7 +807,7 @@ enabled.\n\
  *  for writing, otherwise use fp which has to be a temp file open for
  *  writing. - kw
  */
-PUBLIC int save_rc ARGS1(FILE *, fp)
+int save_rc (FILE * fp)
 {
     Config_Type *tbl = Config_Table;
     char rcfile[LY_MAXPATH];
@@ -924,14 +924,14 @@ It is not this file.\n\
 /*
  * Returns true if the given name would be saved in .lynxrc
  */
-PUBLIC BOOL will_save_rc ARGS1(char *, name)
+BOOL will_save_rc (char * name)
 {
     Config_Type *tbl = lookup_config(name);
     return tbl->name != 0;
 }
 
-PUBLIC int enable_lynxrc ARGS1(
-	char *,		value)
+int enable_lynxrc (
+	char *		value)
 {
     Config_Type *tbl;
     char *colon = strchr(value, ':');

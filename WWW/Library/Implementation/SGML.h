@@ -154,7 +154,7 @@ struct _tag{
 typedef struct {
     HTTag *		tags;		/* Must be in strcmp order by name */
     int			number_of_tags;
-    CONST char **	entity_names;	/* Must be in strcmp order by name */
+    const char **	entity_names;	/* Must be in strcmp order by name */
     size_t		number_of_entities;
 				/*  "entity_names" table probably unused,
 				**  see comments in HTMLDTD.c near the top
@@ -195,42 +195,42 @@ typedef struct _HTStructuredClass{
 
 	char*  name;				/* Just for diagnostics */
 
-	void (*_free) PARAMS((
-		HTStructured*	me));
+	void (*_free) (
+		HTStructured*	me);
 
-	void (*_abort) PARAMS((
+	void (*_abort) (
 		HTStructured*	me,
-		HTError		e));
+		HTError		e);
 
-	void (*put_character) PARAMS((
+	void (*put_character) (
 		HTStructured*	me,
-		char		ch));
+		char		ch);
 
-	void (*put_string) PARAMS((
+	void (*put_string) (
 		HTStructured*	me,
-		CONST char *	str));
+		const char *	str);
 
-	void (*_write) PARAMS((
+	void (*_write) (
 		HTStructured*	me,
-		CONST char *	str,
-		int		len));
+		const char *	str,
+		int		len);
 
-	int (*start_element) PARAMS((
+	int (*start_element) (
 		HTStructured*	me,
 		int		element_number,
-		CONST BOOL*	attribute_present,
-		CONST char**	attribute_value,
+		const BOOL*	attribute_present,
+		const char**	attribute_value,
 		int		charset,
-		char **		include));
+		char **		include);
 
-	int (*end_element) PARAMS((
+	int (*end_element) (
 		HTStructured*	me,
 		int		element_number,
-		char **		include));
+		char **		include);
 
-	int (*put_entity) PARAMS((
+	int (*put_entity) (
 		HTStructured*	me,
-		int		entity_number));
+		int		entity_number);
 
 } HTStructuredClass;
 
@@ -239,9 +239,9 @@ typedef struct _HTStructuredClass{
   into additional HTStructuredClass members.  For now they don't do
   anything target-specific. - kw
   */
-extern BOOLEAN LYCheckForCSI PARAMS((HTParentAnchor *anchor, char **url));
-extern void LYDoCSI PARAMS((char *url, CONST char *comment, char **csi));
-extern BOOLEAN LYCommentHacks PARAMS((HTParentAnchor *anchor, CONST char *comment));
+extern BOOLEAN LYCheckForCSI (HTParentAnchor *anchor, char **url);
+extern void LYDoCSI (char *url, const char *comment, char **csi);
+extern BOOLEAN LYCommentHacks (HTParentAnchor *anchor, const char *comment);
 
 /*
 
@@ -250,9 +250,9 @@ Find a Tag by Name
    Returns a pointer to the tag within the DTD.
 
  */
-extern HTTag * SGMLFindTag PARAMS((
-	CONST SGML_dtd *	dtd,
-	CONST char *		string));
+extern HTTag * SGMLFindTag (
+	const SGML_dtd *	dtd,
+	const char *		string);
 
 
 /*
@@ -268,11 +268,11 @@ Create an SGML parser
 ** On exit,
 **		The default tag starter has been processed.
 */
-extern HTStream * SGML_new PARAMS((
-	CONST SGML_dtd *	dtd,
+extern HTStream * SGML_new (
+	const SGML_dtd *	dtd,
 	HTParentAnchor *	anchor,
-	HTStructured *		target));
+	HTStructured *		target);
 
-extern CONST HTStreamClass SGMLParser;
+extern const HTStreamClass SGMLParser;
 
 #endif	/* SGML_H */

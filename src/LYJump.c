@@ -19,10 +19,10 @@
 
 struct JumpTable *JThead = NULL;
 
-PRIVATE int LYCompare PARAMS((CONST void *e1, CONST void *e2));
-PRIVATE unsigned LYRead_Jumpfile PARAMS((struct JumpTable * jtp));
+static int LYCompare (const void *e1, const void *e2);
+static unsigned LYRead_Jumpfile (struct JumpTable * jtp);
 
-PUBLIC void LYJumpTable_free NOARGS
+void LYJumpTable_free (void)
 {
     struct JumpTable *cur = JThead;
     struct JumpTable *next;
@@ -56,7 +56,7 @@ PUBLIC void LYJumpTable_free NOARGS
  * Utility for listing shortcuts, making any repeated
  * shortcut the most current in the list. - FM
  */
-PUBLIC void LYAddJumpShortcut ARGS2(HTList *, historyp, char *, shortcut)
+void LYAddJumpShortcut (HTList * historyp, char * shortcut)
 {
     char *new = NULL;
     char *old;
@@ -79,7 +79,7 @@ PUBLIC void LYAddJumpShortcut ARGS2(HTList *, historyp, char *, shortcut)
     return;
 }
 
-PUBLIC BOOL LYJumpInit ARGS1(char *, config)
+BOOL LYJumpInit (char * config)
 {
     struct JumpTable *jtp;
     char *cp;
@@ -178,7 +178,7 @@ PUBLIC BOOL LYJumpInit ARGS1(char *, config)
     return TRUE;
 }
 
-PUBLIC char *LYJump ARGS1(int, key)
+char *LYJump (int key)
 {
     JumpDatum seeking;
     JumpDatum *found;
@@ -361,7 +361,7 @@ PUBLIC char *LYJump ARGS1(int, key)
     return found ? found->url : NULL;
 }
 
-PRIVATE unsigned LYRead_Jumpfile ARGS1(struct JumpTable *, jtp)
+static unsigned LYRead_Jumpfile (struct JumpTable * jtp)
 {
     struct stat st;
     unsigned int nel;
@@ -491,8 +491,8 @@ PRIVATE unsigned LYRead_Jumpfile ARGS1(struct JumpTable *, jtp)
     return i;
 }
 
-PRIVATE int LYCompare ARGS2(CONST void *, e1, CONST void *, e2)
+static int LYCompare (const void * e1, const void * e2)
 {
-    return strcasecomp(((CONST JumpDatum *) e1)->key,
-		       ((CONST JumpDatum *) e2)->key);
+    return strcasecomp(((const JumpDatum *) e1)->key,
+		       ((const JumpDatum *) e2)->key);
 }

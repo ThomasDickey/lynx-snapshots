@@ -55,8 +55,8 @@ extern BOOL can_justify_stack_depth;/* can be 0 or 1 if all code is correct*/
 #define EMIT_IFDEF_EXP_JUSTIFY_ELTS(x) x
     /*defined in order not to wrap single line of code  into #ifdef/#endif */
 
-extern void ht_justify_cleanup NOPARAMS;
-extern void mark_justify_start_position PARAMS((void* text));
+extern void ht_justify_cleanup (void);
+extern void mark_justify_start_position (void* text);
 
 #else /* ! EXP_JUSTIFY_ELTS */
 

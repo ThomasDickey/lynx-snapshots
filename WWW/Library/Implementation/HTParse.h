@@ -51,8 +51,8 @@
 **	Return value points to first non-white character, or to 0 if none.
 **	All trailing white space is OVERWRITTEN with zero.
 */
-extern char * HTStrip PARAMS((
-	char *		s));
+extern char * HTStrip (
+	char *		s);
 
 /*	Parse a Name relative to another name.			HTParse()
 **	--------------------------------------
@@ -68,10 +68,10 @@ extern char * HTStrip PARAMS((
 ** On exit,
 **	returns		A pointer to a malloc'd string which MUST BE FREED
 */
-extern char * HTParse PARAMS((
-	CONST char *	aName,
-	CONST char *	relatedName,
-	int		wanted));
+extern char * HTParse (
+	const char *	aName,
+	const char *	relatedName,
+	int		wanted);
 
 /*	HTParseAnchor(), fast HTParse() specialization
 **	----------------------------------------------
@@ -79,8 +79,8 @@ extern char * HTParse PARAMS((
 ** On exit,
 **	returns		A pointer within input string (probably to its end '\0')
 */
-extern CONST char * HTParseAnchor PARAMS((
-	CONST char *	aName));
+extern const char * HTParseAnchor (
+	const char *	aName);
 
 /*	Simplify a filename.				HTSimplify()
 **	--------------------
@@ -97,8 +97,8 @@ extern CONST char * HTParseAnchor PARAMS((
 **
 **	or	../../albert.html
 */
-extern void HTSimplify PARAMS((
-	char *		filename));
+extern void HTSimplify (
+	char *		filename);
 
 /*	Make Relative Name.					HTRelative()
 **	-------------------
@@ -117,9 +117,9 @@ extern void HTSimplify PARAMS((
 **	The caller is responsible for freeing the resulting name later.
 **
 */
-extern char * HTRelative PARAMS((
-	CONST char *	aName,
-	CONST char *	relatedName));
+extern char * HTRelative (
+	const char *	aName,
+	const char *	relatedName);
 
 /*		Escape undesirable characters using %		HTEscape()
 **		-------------------------------------
@@ -131,9 +131,9 @@ extern char * HTRelative PARAMS((
 **
 **	Unlike HTUnEscape(), this routine returns a malloc'd string.
 */
-extern char * HTEscape PARAMS((
-	CONST char *	str,
-	unsigned char	mask));
+extern char * HTEscape (
+	const char *	str,
+	unsigned char	mask);
 
 /*		Escape unsafe characters using %		HTEscapeUnsafe()
 **		--------------------------------
@@ -145,8 +145,8 @@ extern char * HTEscape PARAMS((
 **
 **	Unlike HTUnEscape(), this routine returns a malloc'd string.
 */
-extern char * HTEscapeUnsafe PARAMS((
-	CONST char *	str));
+extern char * HTEscapeUnsafe (
+	const char *	str);
 
 /*	Escape undesirable characters using % but space to +.	HTEscapeSP()
 **	-----------------------------------------------------
@@ -159,9 +159,9 @@ extern char * HTEscapeUnsafe PARAMS((
 **
 **	Unlike HTUnEscape(), this routine returns a malloc'd string.
 */
-extern char * HTEscapeSP PARAMS((
-	CONST char *	str,
-	unsigned char	mask));
+extern char * HTEscapeSP (
+	const char *	str,
+	unsigned char	mask);
 
 /*	Decode %xx escaped characters.				HTUnEscape()
 **	------------------------------
@@ -171,8 +171,8 @@ extern char * HTEscapeSP PARAMS((
 **	the acsii hex code for character 16x+y.
 **	The string is converted in place, as it will never grow.
 */
-extern char * HTUnEscape PARAMS((
-	char *		str));
+extern char * HTUnEscape (
+	char *		str);
 
 /*	Decode some %xx escaped characters.		      HTUnEscapeSome()
 **	-----------------------------------			Klaus Weide
@@ -184,15 +184,15 @@ extern char * HTUnEscape PARAMS((
 **	should be unescaped if escaped in the first string.
 **	The first string is converted in place, as it will never grow.
 */
-extern char * HTUnEscapeSome PARAMS((
+extern char * HTUnEscapeSome (
 	char *		str,
-	CONST char *	do_trans));
+	const char *	do_trans);
 
 /*
 **  Turn a string which is not a RFC 822 token into a quoted-string. - KW
 */
-extern void HTMake822Word PARAMS((
+extern void HTMake822Word (
 	char **		str,
-	int		quoted));
+	int		quoted);
 
 #endif  /* HTPARSE_H */

@@ -28,22 +28,22 @@
  *	UC_* to be only known internally.
  *	UC[A-Z]* to be exported to other parts of Lynx. -KW
  */
-extern void UC_Charset_Setup PARAMS((
-	CONST char *		UC_MIMEcharset,
-	CONST char *		UC_LYNXcharset,
-	CONST u8 *		unicount,
-	CONST u16 *		unitable,
+extern void UC_Charset_Setup (
+	const char *		UC_MIMEcharset,
+	const char *		UC_LYNXcharset,
+	const u8 *		unicount,
+	const u16 *		unitable,
 	int			nnuni,
 	struct unimapdesc_str	replacedesc,
 	int			lowest_eight,
 	int			UC_rawuni,
-	int			codepage));
+	int			codepage);
 
 struct UC_charset {
-	CONST char *MIMEname;
-	CONST char *LYNXname;
-	CONST u8* unicount;
-	CONST u16* unitable;
+	const char *MIMEname;
+	const char *LYNXname;
+	const u8* unicount;
+	const u16* unitable;
 	int num_uni;
 	struct unimapdesc_str replacedesc;
 	int uc_status;
@@ -57,7 +57,7 @@ struct UC_charset {
 extern int UCNumCharsets;
 extern int UCInitialized;
 
-extern void UCInit NOARGS;
+extern void UCInit (void);
 
 /*
  *  INSTRUCTIONS for adding new character sets which do not have

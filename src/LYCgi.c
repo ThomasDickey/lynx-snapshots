@@ -52,23 +52,23 @@ struct _HTStream
   HTStreamClass * isa;
 };
 
-PRIVATE char **env = NULL;  /* Environment variables */
-PRIVATE int envc_size = 0;  /* Slots in environment array */
-PRIVATE int envc = 0;	    /* Slots used so far */
-PRIVATE HTList *alloced = NULL;
+static char **env = NULL;  /* Environment variables */
+static int envc_size = 0;  /* Slots in environment array */
+static int envc = 0;	    /* Slots used so far */
+static HTList *alloced = NULL;
 #ifdef LYNXCGI_LINKS
-PRIVATE char *user_agent = NULL;
-PRIVATE char *server_software = NULL;
-PRIVATE char *accept_language = NULL;
-PRIVATE char *post_len = NULL;
+static char *user_agent = NULL;
+static char *server_software = NULL;
+static char *accept_language = NULL;
+static char *post_len = NULL;
 #endif /* LYNXCGI_LINKS */
 
-PRIVATE void add_environment_value PARAMS((char *env_value));
+static void add_environment_value (char *env_value);
 
 #define PERROR(msg) CTRACE((tfp, "LYNXCGI: %s: %s\n", msg, LYStrerror(errno)))
 
 #ifdef LY_FIND_LEAKS
-PRIVATE void free_alloced_lynxcgi NOARGS
+static void free_alloced_lynxcgi (void)
 {
     void *ptr;
     while ((ptr = HTList_removeLastObject(alloced)) != NULL) {
@@ -82,8 +82,8 @@ PRIVATE void free_alloced_lynxcgi NOARGS
 }
 #endif /* LY_FIND_LEAKS */
 
-PRIVATE void remember_alloced ARGS1(
-    void *,		ptr)
+static void remember_alloced (
+    void *		ptr)
 {
     if (!alloced) {
 	alloced = HTList_new();
@@ -98,8 +98,8 @@ PRIVATE void remember_alloced ARGS1(
  * Simple routine for expanding the environment array and adding a value to
  * it
  */
-PRIVATE void add_environment_value ARGS1(
-	char *,	env_value)
+static void add_environment_value (
+	char *	env_value)
 {
     if (envc == envc_size) {   /* Need some more slots */
 	envc_size += 10;
@@ -125,8 +125,8 @@ PRIVATE void add_environment_value ARGS1(
  * Add the value of an existing environment variable to those passed on to the
  * lynxcgi script.
  */
-PUBLIC void add_lynxcgi_environment ARGS1(
-	CONST char *,	variable_name)
+void add_lynxcgi_environment (
+	const char *	variable_name)
 {
     char *env_value;
 
@@ -141,20 +141,20 @@ PUBLIC void add_lynxcgi_environment ARGS1(
 }
 
 #ifdef __MINGW32__
-PRIVATE int LYLoadCGI ARGS4(
-	CONST char *, 		arg,
-	HTParentAnchor *,	anAnchor,
-	HTFormat,		format_out,
-	HTStream*,		sink)
+static int LYLoadCGI (
+	const char * 		arg,
+	HTParentAnchor *	anAnchor,
+	HTFormat		format_out,
+	HTStream*		sink)
 {
 	return -1;
 }
 #else
-PRIVATE int LYLoadCGI ARGS4(
-	CONST char *, 		arg,
-	HTParentAnchor *,	anAnchor,
-	HTFormat,		format_out,
-	HTStream*,		sink)
+static int LYLoadCGI (
+	const char * 		arg,
+	HTParentAnchor *	anAnchor,
+	HTFormat		format_out,
+	HTStream*		sink)
 {
     int status = 0;
 #ifdef LYNXCGI_LINKS
@@ -700,5 +700,5 @@ PRIVATE int LYLoadCGI ARGS4(
 #define _LYCGI_C_GLOBALDEF_1_INIT { "lynxcgi", LYLoadCGI, 0 }
 GLOBALDEF (HTProtocol,LYLynxCGI,_LYCGI_C_GLOBALDEF_1_INIT);
 #else
-GLOBALDEF PUBLIC HTProtocol LYLynxCGI = { "lynxcgi", LYLoadCGI, 0 };
+GLOBALDEF HTProtocol LYLynxCGI = { "lynxcgi", LYLoadCGI, 0 };
 #endif /* GLOBALDEF_IS_MACRO */

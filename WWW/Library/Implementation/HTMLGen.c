@@ -41,7 +41,7 @@
 #define PUTB(s,l) (*me->targetClass.put_block)(me->target, s, l)
 
 #ifdef USE_COLOR_STYLE
-PUBLIC char class_string[TEMPSTRINGSIZE];
+char class_string[TEMPSTRINGSIZE];
 
 static char *Style_className = NULL;
 static char myHash[128];
@@ -52,13 +52,13 @@ static int hcode;
 **		-----------
 */
 struct _HTStream {
-	CONST HTStreamClass *		isa;
+	const HTStreamClass *		isa;
 	HTStream *			target;
 	HTStreamClass			targetClass;	/* COPY for speed */
 };
 
 struct _HTStructured {
-	CONST HTStructuredClass *	isa;
+	const HTStructuredClass *	isa;
 	HTStream *			target;
 	HTStreamClass			targetClass;	/* COPY for speed */
 
@@ -81,8 +81,8 @@ struct _HTStructured {
 **	------------
 */
 
-PRIVATE void flush_breaks ARGS1(
-	HTStructured *,		me)
+static void flush_breaks (
+	HTStructured *		me)
 {
     int i;
     for (i=0; i<= MAX_CLEANNESS; i++) {
@@ -90,8 +90,8 @@ PRIVATE void flush_breaks ARGS1(
     }
 }
 
-PRIVATE void HTMLGen_flush ARGS1(
-	HTStructured *,		me)
+static void HTMLGen_flush (
+	HTStructured *		me)
 {
     (*me->targetClass.put_block)(me->target,
 				 me->buffer,
@@ -130,8 +130,8 @@ PRIVATE void HTMLGen_flush ARGS1(
  *  user: color styles are applied to html source only with the
  *  -preparsed flag. - kw
  */
-PRIVATE void do_cstyle_flush ARGS1(
-	HTStructured *,		me)
+static void do_cstyle_flush (
+	HTStructured *		me)
 {
     if (!me->text && LYPreparsedSource) {
 	me->text = HTMainText;
@@ -147,10 +147,10 @@ PRIVATE void do_cstyle_flush ARGS1(
 **	We keep track of all the breaks for when we chop the line
 */
 
-PRIVATE void allow_break ARGS3(
-	HTStructured *, me,
-	int,		new_cleanness,
-	BOOL,		dlbc)
+static void allow_break (
+	HTStructured * me,
+	int		new_cleanness,
+	BOOL		dlbc)
 {
     if (dlbc && me->write_pointer == me->buffer) dlbc = NO;
     me->line_break[new_cleanness] =
@@ -175,9 +175,9 @@ PRIVATE void allow_break ARGS3(
 **	   This should make the source files easier to read and modify
 **	by hand, too, though this is not a primary design consideration. TBL
 */
-PRIVATE void HTMLGen_put_character ARGS2(
-	HTStructured *,		me,
-	char,			c)
+static void HTMLGen_put_character (
+	HTStructured *		me,
+	char			c)
 {
     if (me->escape_specials && UCH(c) < 32) {
 	if (c == HT_NON_BREAK_SPACE || c == HT_EN_SPACE ||
@@ -286,22 +286,22 @@ PRIVATE void HTMLGen_put_character ARGS2(
 /*	String handling
 **	---------------
 */
-PRIVATE void HTMLGen_put_string ARGS2(
-	HTStructured *,		me,
-	CONST char *,		s)
+static void HTMLGen_put_string (
+	HTStructured *		me,
+	const char *		s)
 {
-    CONST char * p;
+    const char * p;
 
     for (p = s; *p; p++)
 	HTMLGen_put_character(me, *p);
 }
 
-PRIVATE void HTMLGen_write ARGS3(
-	HTStructured *,		me,
-	CONST char *,		s,
-	int,			l)
+static void HTMLGen_write (
+	HTStructured *		me,
+	const char *		s,
+	int			l)
 {
-    CONST char * p;
+    const char * p;
 
     for (p = s; p < (s + l); p++)
 	HTMLGen_put_character(me, *p);
@@ -313,13 +313,13 @@ PRIVATE void HTMLGen_write ARGS3(
 **	Within the opening tag, there may be spaces
 **	and the line may be broken at these spaces.
 */
-PRIVATE int HTMLGen_start_element ARGS6(
-	HTStructured *,		me,
-	int,			element_number,
-	CONST BOOL*,		present,
-	CONST char **,		value,
-	int,			charset GCC_UNUSED,
-	char **,		insert GCC_UNUSED)
+static int HTMLGen_start_element (
+	HTStructured *		me,
+	int			element_number,
+	const BOOL*		present,
+	const char **		value,
+	int			charset GCC_UNUSED,
+	char **			insert GCC_UNUSED)
 {
     int i;
     BOOL was_preformatted = me->preformatted;
@@ -433,7 +433,7 @@ PRIVATE int HTMLGen_start_element ARGS6(
 			HTMLGen_put_string(me, value[i]);
 			HTMLGen_put_character(me, '\'');
 		    } else {  /* attribute value has both kinds of quotes */
-			CONST char *p;
+			const char *p;
 			HTMLGen_put_string(me, "=\"");
 			for (p = value[i]; *p; p++) {
 			    if (*p != '"') {
@@ -529,10 +529,10 @@ PRIVATE int HTMLGen_start_element ARGS6(
 **	should be linked to the whole stack not just the top one.)
 **	TBL 921119
 */
-PRIVATE int HTMLGen_end_element ARGS3(
-	HTStructured *,		me,
-	int,			element_number,
-	char **,		insert GCC_UNUSED)
+static int HTMLGen_end_element (
+	HTStructured *		me,
+	int			element_number,
+	char **		insert GCC_UNUSED)
 {
     if (!me->preformatted &&
 	HTML_dtd.tags[element_number].contents != SGML_EMPTY) {
@@ -571,9 +571,9 @@ PRIVATE int HTMLGen_end_element ARGS3(
 **		------------------
 **
 */
-PRIVATE int HTMLGen_put_entity ARGS2(
-	HTStructured *,		me,
-	int,			entity_number)
+static int HTMLGen_put_entity (
+	HTStructured *		me,
+	int			entity_number)
 {
     int nent = HTML_dtd.number_of_entities;
 
@@ -589,8 +589,8 @@ PRIVATE int HTMLGen_put_entity ARGS2(
 **	-------------------
 **
 */
-PRIVATE void HTMLGen_free ARGS1(
-	HTStructured *,		me)
+static void HTMLGen_free (
+	HTStructured *		me)
 {
     (*me->targetClass.put_character)(me->target, '\n');
     HTMLGen_flush(me);
@@ -601,16 +601,16 @@ PRIVATE void HTMLGen_free ARGS1(
     FREE(me);
 }
 
-PRIVATE void PlainToHTML_free ARGS1(
-	HTStructured *,		me)
+static void PlainToHTML_free (
+	HTStructured *		me)
 {
     HTMLGen_end_element(me, HTML_PRE, 0);
     HTMLGen_free(me);
 }
 
-PRIVATE void HTMLGen_abort ARGS2(
-	HTStructured *,		me,
-	HTError,		e GCC_UNUSED)
+static void HTMLGen_abort (
+	HTStructured *		me,
+	HTError		e GCC_UNUSED)
 {
     HTMLGen_free(me);
 #ifdef USE_COLOR_STYLE
@@ -618,9 +618,9 @@ PRIVATE void HTMLGen_abort ARGS2(
 #endif
 }
 
-PRIVATE void PlainToHTML_abort ARGS2(
-	HTStructured *,		me,
-	HTError,		e GCC_UNUSED)
+static void PlainToHTML_abort (
+	HTStructured *		me,
+	HTError		e GCC_UNUSED)
 {
     PlainToHTML_free(me);
 }
@@ -628,7 +628,7 @@ PRIVATE void PlainToHTML_abort ARGS2(
 /*	Structured Object Class
 **	-----------------------
 */
-PRIVATE CONST HTStructuredClass HTMLGeneration = /* As opposed to print etc */
+static const HTStructuredClass HTMLGeneration = /* As opposed to print etc */
 {
 	"HTMLGen",
 	HTMLGen_free,
@@ -643,8 +643,8 @@ PRIVATE CONST HTStructuredClass HTMLGeneration = /* As opposed to print etc */
 */
 extern int LYcols;			/* LYCurses.h, set in LYMain.c	*/
 
-PUBLIC HTStructured * HTMLGenerator ARGS1(
-	HTStream *,		output)
+HTStructured * HTMLGenerator (
+	HTStream *		output)
 {
     HTStructured* me = (HTStructured*)malloc(sizeof(*me));
     if (me == NULL)
@@ -708,7 +708,7 @@ PUBLIC HTStructured * HTMLGenerator ARGS1(
 **	It is officially a structured strem but only the stream bits exist.
 **	This is just the easiest way of typecasting all the routines.
 */
-PRIVATE CONST HTStructuredClass PlainToHTMLConversion =
+static const HTStructuredClass PlainToHTMLConversion =
 {
 	"plaintexttoHTML",
 	HTMLGen_free,
@@ -724,15 +724,15 @@ PRIVATE CONST HTStructuredClass PlainToHTMLConversion =
 /*	HTConverter from plain text to HTML Stream
 **	------------------------------------------
 */
-PUBLIC HTStream* HTPlainToHTML ARGS3(
-	HTPresentation *,	pres GCC_UNUSED,
-	HTParentAnchor *,	anchor GCC_UNUSED,
-	HTStream *,		sink)
+HTStream* HTPlainToHTML (
+	HTPresentation *	pres GCC_UNUSED,
+	HTParentAnchor *	anchor GCC_UNUSED,
+	HTStream *		sink)
 {
     HTStructured *me = (HTStructured *)malloc(sizeof(*me));
     if (me == NULL)
 	outofmem(__FILE__, "PlainToHTML");
-    me->isa = (CONST HTStructuredClass *)&PlainToHTMLConversion;
+    me->isa = (const HTStructuredClass *)&PlainToHTMLConversion;
 
     /*
      *	Copy pointers to routines for speed.

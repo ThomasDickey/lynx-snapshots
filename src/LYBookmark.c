@@ -20,19 +20,19 @@
 
 #include <LYLeaks.h>
 
-PUBLIC char *MBM_A_subbookmark[MBM_V_MAXFILES+1];
-PUBLIC char *MBM_A_subdescript[MBM_V_MAXFILES+1];
+char *MBM_A_subbookmark[MBM_V_MAXFILES+1];
+char *MBM_A_subdescript[MBM_V_MAXFILES+1];
 
-PRIVATE BOOLEAN is_mosaic_hotlist = FALSE;
-PRIVATE char * convert_mosaic_bookmark_file PARAMS((char *filename_buffer));
+static BOOLEAN is_mosaic_hotlist = FALSE;
+static char * convert_mosaic_bookmark_file (char *filename_buffer);
 
-PUBLIC int LYindex2MBM ARGS1(int, n)
+int LYindex2MBM (int n)
 {
     static char MBMcodes[MBM_V_MAXFILES+2] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     return n >= 0 && n <= MBM_V_MAXFILES ? MBMcodes[n] : '?';
 }
 
-PUBLIC int LYMBM2index ARGS1(int, ch)
+int LYMBM2index (int ch)
 {
     if ((ch = TOUPPER(ch)) > 0) {
 	char *letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -44,8 +44,8 @@ PUBLIC int LYMBM2index ARGS1(int, ch)
     return -1;
 }
 
-PRIVATE void
-show_bookmark_not_defined NOARGS
+static void
+show_bookmark_not_defined (void)
 {
     char *string_buffer = 0;
 
@@ -69,8 +69,8 @@ show_bookmark_not_defined NOARGS
  *  but not *URL is the selection is valid but the file doesn't
  *  yet exist. - FM
  */
-PUBLIC char * get_bookmark_filename ARGS1(
-	char **,	URL)
+char * get_bookmark_filename (
+	char **	URL)
 {
     static char filename_buffer[LY_MAXPATH];
     char *string_buffer = 0;
@@ -145,8 +145,8 @@ PUBLIC char * get_bookmark_filename ARGS1(
  *  Converts a Mosaic hotlist file into an HTML
  *  file for handling as a Lynx bookmark file. - FM
  */
-PRIVATE char * convert_mosaic_bookmark_file ARGS1(
-	char *,		filename_buffer)
+static char * convert_mosaic_bookmark_file (
+	char *		filename_buffer)
 {
     static char newfile[LY_MAXPATH];
     FILE *fp, *nfp;
@@ -190,9 +190,9 @@ PRIVATE char * convert_mosaic_bookmark_file ARGS1(
     return(newfile);
 }
 
-PRIVATE  BOOLEAN havevisible PARAMS((CONST char *Title));
-PRIVATE  BOOLEAN have8bit PARAMS((CONST char *Title));
-PRIVATE  char* title_convert8bit PARAMS((CONST char *Title));
+static  BOOLEAN havevisible (const char *Title);
+static  BOOLEAN have8bit (const char *Title);
+static  char* title_convert8bit (const char *Title);
 
 /*
  *  Adds a link to a bookmark file, creating the file
@@ -201,9 +201,9 @@ PRIVATE  char* title_convert8bit PARAMS((CONST char *Title));
  *  so that the change will be evident on return to
  *  to that file. - FM
  */
-PUBLIC void save_bookmark_link ARGS2(
-	char *,		address,
-	char *,		title)
+void save_bookmark_link (
+	char *		address,
+	char *		title)
 {
     FILE *fp;
     BOOLEAN first_time = FALSE;
@@ -266,8 +266,8 @@ PUBLIC void save_bookmark_link ARGS2(
      *	bookmark file, get confirmation. - FM
      */
     if (LYMultiBookmarks != MBM_OFF) {
-	CONST char *url = HTLoadedDocumentURL();
-	CONST char *page = (*BookmarkPage == '.')
+	const char *url = HTLoadedDocumentURL();
+	const char *page = (*BookmarkPage == '.')
 			    ? (BookmarkPage + 1)
 			    : BookmarkPage;
 	if (strstr(url, page) != NULL) {
@@ -287,10 +287,10 @@ PUBLIC void save_bookmark_link ARGS2(
 	if (HTCJK == JAPANESE) {
 	    switch(kanji_code) {
 	    case EUC:
-		TO_EUC((CONST unsigned char *) title, (unsigned char *) tmp_buffer);
+		TO_EUC((const unsigned char *) title, (unsigned char *) tmp_buffer);
 		break;
 	    case SJIS:
-		TO_SJIS((CONST unsigned char *) title, (unsigned char *) tmp_buffer);
+		TO_SJIS((const unsigned char *) title, (unsigned char *) tmp_buffer);
 		break;
 	    default:
 		break;
@@ -451,9 +451,9 @@ Note: if you edit this file manually\n\
  *  string as cur_bookmark_page, and to have set up no_cache
  *  itself. - FM
  */
-PUBLIC void remove_bookmark_link ARGS2(
-	int,		cur,
-	char *,		cur_bookmark_page)
+void remove_bookmark_link (
+	int		cur,
+	char *		cur_bookmark_page)
 {
     FILE *fp, *nfp;
     char *buf = NULL;
@@ -634,9 +634,9 @@ PUBLIC void remove_bookmark_link ARGS2(
 	}
 #else
 	if (errno == EXDEV) {
-	    static CONST char MV_FMT[] = "%s %s %s";
+	    static const char MV_FMT[] = "%s %s %s";
 	    char *buffer = 0;
-	    CONST char *program;
+	    const char *program;
 
 	    if ((program = HTGetProgramPath(ppMV)) != NULL) {
 		HTAddParam(&buffer, MV_FMT, 1, program);
@@ -688,7 +688,7 @@ failure:
 /*
  *  Allows user to select sub-bookmarks files. - FMG & FM
  */
-PUBLIC int select_multi_bookmarks NOARGS
+int select_multi_bookmarks (void)
 {
     int c;
 
@@ -768,7 +768,7 @@ get_advanced_choice:
 /*
  *  Allows user to select sub-bookmarks files. - FMG & FM
  */
-PUBLIC int select_menu_multi_bookmarks NOARGS
+int select_menu_multi_bookmarks (void)
 {
     int c, d, MBM_tmp_count, MBM_allow;
     int MBM_screens, MBM_from, MBM_to, MBM_current;
@@ -947,7 +947,7 @@ PUBLIC int select_menu_multi_bookmarks NOARGS
  *  Otherwise (i.e., only the default bookmark file is defined),
  *  it returns FALSE. - FM
  */
-PUBLIC BOOLEAN LYHaveSubBookmarks NOARGS
+BOOLEAN LYHaveSubBookmarks (void)
 {
     int i;
 
@@ -967,8 +967,8 @@ PUBLIC BOOLEAN LYHaveSubBookmarks NOARGS
  *  _statusline() so that any multibyte/CJK characters in the
  *  string will be handled properly. - FM
  */
-PUBLIC void LYMBM_statusline  ARGS1(
-	char *,		text)
+void LYMBM_statusline  (
+	char *		text)
 {
     if (LYMultiBookmarks != MBM_OFF && user_mode == NOVICE_MODE) {
 	LYStatusLine = (LYlines - 1);
@@ -982,9 +982,9 @@ PUBLIC void LYMBM_statusline  ARGS1(
 /*
  * Check whether we have any visible (non-blank) chars.
  */
-PRIVATE  BOOLEAN havevisible ARGS1(CONST char *, Title)
+static  BOOLEAN havevisible (const char * Title)
 {
-    CONST char *p = Title;
+    const char *p = Title;
     unsigned char c;
     long unicode;
 
@@ -1011,9 +1011,9 @@ PRIVATE  BOOLEAN havevisible ARGS1(CONST char *, Title)
 /*
  * Check whether string have 8 bit chars.
  */
-PRIVATE  BOOLEAN have8bit ARGS1(CONST char *, Title)
+static  BOOLEAN have8bit (const char * Title)
 {
-    CONST char *p = Title;
+    const char *p = Title;
 
     for ( ; *p; p++) {
 	if (UCH(*p) > 127)
@@ -1041,9 +1041,9 @@ PRIVATE  BOOLEAN have8bit ARGS1(CONST char *, Title)
  *  Older versions fail.
  *
  */
-PRIVATE  char* title_convert8bit ARGS1(CONST char *, Title)
+static  char* title_convert8bit (const char * Title)
 {
-    CONST char *p = Title;
+    const char *p = Title;
     char *p0;
     char *q;
     char *comment = NULL;
@@ -1105,8 +1105,8 @@ PRIVATE  char* title_convert8bit ARGS1(CONST char *, Title)
  * Since this is the "Default Bookmark File", we save it as a global, and as
  * the first MBM_A_subbookmark entry.
  */
-PUBLIC void set_default_bookmark_page ARGS1(
-	char *,		value)
+void set_default_bookmark_page (
+	char *		value)
 {
     if (value != 0) {
 	if (bookmark_page == 0

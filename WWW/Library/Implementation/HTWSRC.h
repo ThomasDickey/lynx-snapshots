@@ -13,12 +13,12 @@
 
 #include <HTFormat.h>
 
-extern  char from_hex PARAMS((char c));
+extern  char from_hex (char c);
 
-extern  HTStream* HTWSRCConvert PARAMS((
+extern  HTStream* HTWSRCConvert (
         HTPresentation *        pres,
         HTParentAnchor *        anchor,
-        HTStream *              sink));
+        HTStream *              sink);
 
 /*
 
@@ -31,8 +31,8 @@ Escaping Strings
    the caller.
 
  */
-extern char * HTDeSlash PARAMS((CONST char * str));
+extern char * HTDeSlash (const char * str);
 
-extern char * HTEnSlash PARAMS((CONST char * str));
+extern char * HTEnSlash (const char * str);
 
 #endif /* HTWSRC_H */

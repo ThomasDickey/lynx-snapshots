@@ -60,63 +60,63 @@ extern HTCJKlang HTCJK;
 /*
 **  Function prototypes.
 */
-extern void JISx0201TO0208_EUC PARAMS((
+extern void JISx0201TO0208_EUC (
 	register unsigned char		IHI,
 	register unsigned char		ILO,
 	register unsigned char *	OHI,
-	register unsigned char *	OLO));
+	register unsigned char *	OLO);
 
-extern unsigned char * SJIS_TO_JIS1 PARAMS((
+extern unsigned char * SJIS_TO_JIS1 (
 	register unsigned char		HI,
 	register unsigned char		LO,
-	register unsigned char *	JCODE));
+	register unsigned char *	JCODE);
 
-extern unsigned char * JIS_TO_SJIS1 PARAMS((
+extern unsigned char * JIS_TO_SJIS1 (
 	register unsigned char		HI,
 	register unsigned char		LO,
-	register unsigned char *	SJCODE));
+	register unsigned char *	SJCODE);
 
-extern unsigned char * EUC_TO_SJIS1 PARAMS((
+extern unsigned char * EUC_TO_SJIS1 (
 	unsigned char			HI,
 	unsigned char			LO,
-	register unsigned char *	SJCODE));
+	register unsigned char *	SJCODE);
 
-extern void JISx0201TO0208_SJIS PARAMS((
+extern void JISx0201TO0208_SJIS (
 	register unsigned char		I,
 	register unsigned char *	OHI,
-	register unsigned char *	OLO));
+	register unsigned char *	OLO);
 
-extern unsigned char * SJIS_TO_EUC1 PARAMS((
+extern unsigned char * SJIS_TO_EUC1 (
 	unsigned char		HI,
 	unsigned char		LO,
-	unsigned char *		EUCp));
+	unsigned char *		EUCp);
 
-extern unsigned char * SJIS_TO_EUC PARAMS((
+extern unsigned char * SJIS_TO_EUC (
 	unsigned char *		src,
-	unsigned char *		dst));
+	unsigned char *		dst);
 
-extern unsigned char * EUC_TO_SJIS PARAMS((
+extern unsigned char * EUC_TO_SJIS (
 	unsigned char *		src,
-	unsigned char *		dst));
+	unsigned char *		dst);
 
-extern unsigned char * EUC_TO_JIS PARAMS((
+extern unsigned char * EUC_TO_JIS (
 	unsigned char *		src,
 	unsigned char *		dst,
-	CONST char *		toK,
-	CONST char *		toA));
+	const char *		toK,
+	const char *		toA);
 
-extern unsigned char * TO_EUC PARAMS((
-	CONST unsigned char *	jis,
-	unsigned char *		euc));
+extern unsigned char * TO_EUC (
+	const unsigned char *	jis,
+	unsigned char *		euc);
 
-extern void TO_SJIS PARAMS((
-	CONST unsigned char *	any,
-	unsigned char *		sjis));
+extern void TO_SJIS (
+	const unsigned char *	any,
+	unsigned char *		sjis);
 
-extern void TO_JIS PARAMS((
-	CONST unsigned char *	any,
-	unsigned char *		jis));
+extern void TO_JIS (
+	const unsigned char *	any,
+	unsigned char *		jis);
 
-extern char *str_kcode PARAMS((HTkcode code));
+extern char *str_kcode (HTkcode code);
 
 #endif /* HTCJK_H */

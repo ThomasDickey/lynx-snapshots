@@ -34,12 +34,12 @@
  *	{status} is one of "dev", "pre" or "rel", and
  *	{patch} is a number assigned by PRCS.
  */
-PUBLIC BOOL LYVersionIsRelease NOARGS
+BOOL LYVersionIsRelease (void)
 {
     return (BOOL)(strstr(LYNX_VERSION, "rel") != 0);
 }
 
-PUBLIC char *LYVersionStatus NOARGS
+char *LYVersionStatus (void)
 {
     if (LYVersionIsRelease())
 	return REL_VERSION;
@@ -48,7 +48,7 @@ PUBLIC char *LYVersionStatus NOARGS
     return DEV_VERSION;
 }
 
-PUBLIC char *LYVersionDate NOARGS
+char *LYVersionDate (void)
 {
     static char temp[LYNX_DATE_LEN+1];
     LYstrncpy(temp, &LYNX_DATE[LYNX_DATE_OFF], LYNX_DATE_LEN);
@@ -60,18 +60,18 @@ PUBLIC char *LYVersionDate NOARGS
  *  that the cursor is on.
  */
 
-PUBLIC int LYShowInfo ARGS4(
-	DocInfo *,	doc,
-	int,		size_of_file,
-	DocInfo *,	newdoc,
-	char *, 	owner_address)
+int LYShowInfo (
+	DocInfo *	doc,
+	int		size_of_file,
+	DocInfo *	newdoc,
+	char * 	owner_address)
 {
     static char tempfile[LY_MAXPATH] = "\0";
     int url_type;
     FILE *fp0;
     char *Address = NULL, *Title = NULL;
     char *name;
-    CONST char *cp;
+    const char *cp;
 #ifdef ADVANCED_INFO
     BOOLEAN LYInfoAdvanced = (BOOL) (user_mode == ADVANCED_MODE);
 #endif

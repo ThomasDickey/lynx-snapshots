@@ -43,8 +43,8 @@
 /*	Issue a message about a problem.		HTAlert()
 **	--------------------------------
 */
-PUBLIC void HTAlert ARGS1(
-	CONST char *,	Msg)
+void HTAlert (
+	const char *	Msg)
 {
     CTRACE((tfp, "\nAlert!: %s\n\n", Msg));
     CTRACE_FLUSH(tfp);
@@ -54,9 +54,9 @@ PUBLIC void HTAlert ARGS1(
     LYSleepAlert();
 }
 
-PUBLIC void HTAlwaysAlert ARGS2(
-	CONST char *,	extra_prefix,
-	CONST char *,	Msg)
+void HTAlwaysAlert (
+	const char *	extra_prefix,
+	const char *	Msg)
 {
     if (!dump_output_immediately && LYCursesON) {
 	HTAlert(Msg);
@@ -83,8 +83,8 @@ PUBLIC void HTAlwaysAlert ARGS2(
 /*	Issue an informational message.			HTInfoMsg()
 **	--------------------------------
 */
-PUBLIC void HTInfoMsg ARGS1(
-	CONST char *,	Msg)
+void HTInfoMsg (
+	const char *	Msg)
 {
     _statusline(Msg);
     if (Msg && *Msg) {
@@ -97,8 +97,8 @@ PUBLIC void HTInfoMsg ARGS1(
 /*	Issue an important message.			HTUserMsg()
 **	--------------------------------
 */
-PUBLIC void HTUserMsg ARGS1(
-	CONST char *,	Msg)
+void HTUserMsg (
+	const char *	Msg)
 {
     _statusline(Msg);
     if (Msg && *Msg) {
@@ -114,9 +114,9 @@ PUBLIC void HTUserMsg ARGS1(
     }
 }
 
-PUBLIC void HTUserMsg2 ARGS2(
-	CONST char *,	Msg2,
-	CONST char *,	Arg)
+void HTUserMsg2 (
+	const char *	Msg2,
+	const char *	Arg)
 {
     _user_message(Msg2, Arg);
     if (Msg2 && *Msg2) {
@@ -131,8 +131,8 @@ PUBLIC void HTUserMsg2 ARGS2(
 /*	Issue a progress message.			HTProgress()
 **	-------------------------
 */
-PUBLIC void HTProgress ARGS1(
-	CONST char *,	Msg)
+void HTProgress (
+	const char *	Msg)
 {
     statusline(Msg);
     LYstore_message(Msg);
@@ -140,11 +140,11 @@ PUBLIC void HTProgress ARGS1(
     LYSleepDebug();
 }
 
-PUBLIC CONST char *HTProgressUnits ARGS1(
-	int,		rate)
+const char *HTProgressUnits (
+	int		rate)
 {
-    static CONST char *bunits = 0;
-    static CONST char *kbunits = 0;
+    static const char *bunits = 0;
+    static const char *kbunits = 0;
 
     if (!bunits) {
 	bunits = gettext("bytes");
@@ -157,13 +157,13 @@ PUBLIC CONST char *HTProgressUnits ARGS1(
 	    ) ? kbunits : bunits;
 }
 
-PRIVATE CONST char *sprint_bytes ARGS3(
-	char *,		s,
-	long,		n,
-	CONST char *, 	was_units)
+static const char *sprint_bytes (
+	char *		s,
+	long		n,
+	const char * 	was_units)
 {
     static long kb_units = 1024;
-    CONST char *u = HTProgressUnits(LYTransferRate);
+    const char *u = HTProgressUnits(LYTransferRate);
 
     if (LYTransferRate == rateKB || LYTransferRate == rateEtaKB_maybe) {
 	if (n >= 10 * kb_units) {
@@ -185,9 +185,9 @@ PRIVATE CONST char *sprint_bytes ARGS3(
 
 #ifdef USE_READPROGRESS
 #define TIME_HMS_LENGTH (16)
-PRIVATE char *sprint_tbuf ARGS2(
-	char *,	       s,
-	long,	       t)
+static char *sprint_tbuf (
+	char *	       s,
+	long	       t)
 {
     if (t > 3600)
 	sprintf (s, "%ldh%ldm%lds", t / 3600, (t / 60) % 60, t % 60);
@@ -202,16 +202,16 @@ PRIVATE char *sprint_tbuf ARGS2(
 /*	Issue a read-progress message.			HTReadProgress()
 **	------------------------------
 */
-PUBLIC void HTReadProgress ARGS2(
-	long,		bytes,
-	long,		total)
+void HTReadProgress (
+	long		bytes,
+	long		total)
 {
     static long bytes_last, total_last;
     static long transfer_rate = 0;
     static char *line = NULL;
     char bytesp[80], totalp[80], transferp[80];
     int renew = 0;
-    CONST char *was_units;
+    const char *was_units;
 
 #ifdef HAVE_GETTIMEOFDAY
     struct timeval tv;
@@ -321,9 +321,9 @@ PUBLIC void HTReadProgress ARGS2(
 #endif
 }
 
-PRIVATE BOOL conf_cancelled = NO; /* used by HTConfirm only - kw */
+static BOOL conf_cancelled = NO; /* used by HTConfirm only - kw */
 
-PUBLIC BOOL HTLastConfirmCancelled NOARGS
+BOOL HTLastConfirmCancelled (void)
 {
     if (conf_cancelled) {
 	conf_cancelled = NO;	/* reset */
@@ -337,10 +337,10 @@ PUBLIC BOOL HTLastConfirmCancelled NOARGS
  * Prompt for yes/no response, but let a configuration variable override
  * the prompt entirely.
  */
-PUBLIC int HTForcedPrompt ARGS3(
-	int,		option,
-	CONST char *,	msg,
-	int,		dft)
+int HTForcedPrompt (
+	int		option,
+	const char *	msg,
+	int		dft)
 {
     int result = FALSE;
     char *show = NULL;
@@ -370,7 +370,7 @@ PUBLIC int HTForcedPrompt ARGS3(
 /*	Seek confirmation with default answer.		HTConfirmDefault()
 **	--------------------------------------
 */
-PUBLIC int HTConfirmDefault ARGS2(CONST char *, Msg, int, Dft)
+int HTConfirmDefault (const char * Msg, int Dft)
 {
 /* Meta-note: don't move the following note from its place right
    in front of the first gettext().  As it is now, it should
@@ -471,7 +471,7 @@ PUBLIC int HTConfirmDefault ARGS2(CONST char *, Msg, int, Dft)
 /*	Seek confirmation.				HTConfirm()
 **	------------------
 */
-PUBLIC BOOL HTConfirm ARGS1(CONST char *, Msg)
+BOOL HTConfirm (const char * Msg)
 {
     return (BOOL) HTConfirmDefault(Msg, DFT_CONFIRM);
 }
@@ -487,14 +487,14 @@ PUBLIC BOOL HTConfirm ARGS1(CONST char *, Msg)
  *  - kw
  */
 
-PUBLIC BOOL confirm_post_resub ARGS4(
-    CONST char*,	address,
-    CONST char*,	title,
-    int,		if_imgmap,
-    int,		if_file)
+BOOL confirm_post_resub (
+    const char*	address,
+    const char*	title,
+    int		if_imgmap,
+    int		if_file)
 {
     size_t len1;
-    CONST char *msg = CONFIRM_POST_RESUBMISSION_TO;
+    const char *msg = CONFIRM_POST_RESUBMISSION_TO;
     char buf[240];
     char *temp = NULL;
     BOOL res;
@@ -561,9 +561,9 @@ PUBLIC BOOL confirm_post_resub ARGS4(
 /*	Prompt for answer and get text back.		HTPrompt()
 **	------------------------------------
 */
-PUBLIC char * HTPrompt ARGS2(
-	CONST char *,	Msg,
-	CONST char *,	deflt)
+char * HTPrompt (
+	const char *	Msg,
+	const char *	deflt)
 {
     char * rep = NULL;
     char Tmp[200];
@@ -587,8 +587,8 @@ PUBLIC char * HTPrompt ARGS2(
 **	Prompt for password without echoing the reply.	HTPromptPassword()
 **	----------------------------------------------
 */
-PUBLIC char * HTPromptPassword ARGS1(
-	CONST char *,	Msg)
+char * HTPromptPassword (
+	const char *	Msg)
 {
     char *result = NULL;
     char pw[120];
@@ -629,11 +629,11 @@ PUBLIC char * HTPromptPassword ARGS1(
 **	are NOT freed.
 **
 */
-PUBLIC void HTPromptUsernameAndPassword ARGS4(
-	CONST char *,	Msg,
-	char **,	username,
-	char **,	password,
-	BOOL,		IsProxy)
+void HTPromptUsernameAndPassword (
+	const char *	Msg,
+	char **	username,
+	char **	password,
+	BOOL		IsProxy)
 {
     if ((IsProxy == FALSE &&
 	 authentication_info[0] && authentication_info[1]) ||
@@ -771,11 +771,11 @@ PUBLIC void HTPromptUsernameAndPassword ARGS4(
 **	Returns FALSE on cancel,
 **		TRUE if the cookie should be set.
 */
-PUBLIC BOOL HTConfirmCookie ARGS4(
-	domain_entry *, de,
-	CONST char *,	server,
-	CONST char *,	name,
-	CONST char *,	value)
+BOOL HTConfirmCookie (
+	domain_entry * de,
+	const char *	server,
+	const char *	name,
+	const char *	value)
 {
     int ch;
     char *prompt = ADVANCED_COOKIE_CONFIRMATION;
@@ -941,9 +941,9 @@ PUBLIC BOOL HTConfirmCookie ARGS4(
 **	  1 for redirect of POST with content,
 **	303 for redirect as GET without content
 */
-PUBLIC int HTConfirmPostRedirect ARGS2(
-	CONST char *,	Redirecting_url,
-	int,		server_status)
+int HTConfirmPostRedirect (
+	const char *	Redirecting_url,
+	int		server_status)
 {
     int result = -1;
     char *show_POST_url = NULL;
@@ -1081,32 +1081,32 @@ PUBLIC int HTConfirmPostRedirect ARGS2(
 /*
  * Sleep for the given message class's time.
  */
-PUBLIC void LYSleepAlert NOARGS
+void LYSleepAlert (void)
 {
     if (okToSleep())
 	LYSleep(AlertSecs);
 }
 
-PUBLIC void LYSleepDebug NOARGS
+void LYSleepDebug (void)
 {
     if (okToSleep())
 	LYSleep(DebugSecs);
 }
 
-PUBLIC void LYSleepInfo NOARGS
+void LYSleepInfo (void)
 {
     if (okToSleep())
 	LYSleep(InfoSecs);
 }
 
-PUBLIC void LYSleepMsg NOARGS
+void LYSleepMsg (void)
 {
     if (okToSleep())
 	LYSleep(MessageSecs);
 }
 
 #ifdef EXP_CMD_LOGGING
-PUBLIC void LYSleepReplay NOARGS
+void LYSleepReplay (void)
 {
     if (okToSleep())
 	LYSleep(ReplaySecs);
@@ -1119,7 +1119,7 @@ PUBLIC void LYSleepReplay NOARGS
 #ifdef LYStrerror
     /* defined as macro in .h file. */
 #else
-PUBLIC char *LYStrerror ARGS1(int, code)
+char *LYStrerror (int code)
 {
     static char temp[80];
     sprintf(temp, "System errno is %d.\r\n", code);

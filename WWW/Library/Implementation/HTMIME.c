@@ -109,7 +109,7 @@ typedef enum {
 
 #define VALUE_SIZE 5120		/* @@@@@@@ Arbitrary? */
 struct _HTStream {
-	CONST HTStreamClass *	isa;
+	const HTStreamClass *	isa;
 
 	BOOL			net_ascii;	/* Is input net ascii? */
 	MIME_state		state;		/* current state */
@@ -119,7 +119,7 @@ struct _HTStream {
 	BOOL			head_only;	/* only parsing header */
 	BOOL			pickup_redirection; /* parsing for location */
 	BOOL			no_streamstack; /* use sink directly */
-	CONST char *		check_pointer;	/* checking input */
+	const char *		check_pointer;	/* checking input */
 
 	char *			value_pointer;	/* storing values */
 	char			value[VALUE_SIZE];
@@ -150,8 +150,8 @@ struct _HTStream {
 **  and will not modify the string unless both the
 **  first and last characters are double-quotes. - FM
 */
-PUBLIC void HTMIME_TrimDoubleQuotes ARGS1(
-	char *,		value)
+void HTMIME_TrimDoubleQuotes (
+	char *		value)
 {
     int i;
     char *cp = value;
@@ -169,7 +169,7 @@ PUBLIC void HTMIME_TrimDoubleQuotes ARGS1(
 	value[i] = cp[(i +1)];
 }
 
-PRIVATE BOOL content_is_compressed ARGS1(HTStream *, me)
+static BOOL content_is_compressed (HTStream *  me)
 {
     char *encoding = me->anchor->content_encoding;
 
@@ -182,7 +182,7 @@ PRIVATE BOOL content_is_compressed ARGS1(HTStream *, me)
 /*
  * Strip quotes from a refresh-URL.
  */
-PRIVATE void dequote ARGS1(char *, url)
+static void dequote (char *  url)
 {
     int len;
 
@@ -195,7 +195,7 @@ PRIVATE void dequote ARGS1(char *, url)
     }
 }
 
-PRIVATE int pumpData ARGS1(HTStream *, me)
+static int pumpData (HTStream *  me)
 {
     if (strchr(HTAtom_name(me->format), ';') != NULL) {
 	char *cp = NULL, *cp1, *cp2, *cp3 = NULL, *cp4;
@@ -485,7 +485,7 @@ PRIVATE int pumpData ARGS1(HTStream *, me)
     return HT_OK;
 }
 
-PRIVATE int dispatchField ARGS1(HTStream *, me)
+static int dispatchField (HTStream *  me)
 {
     int i, j;
     char *cp;
@@ -973,9 +973,9 @@ PRIVATE int dispatchField ARGS1(HTStream *, me)
 **	the beginning (that are not folded continuation lines) are ignored
 **	as unknown field names.  Fields with empty values are not picked up.
 */
-PRIVATE void HTMIME_put_character ARGS2(
-	HTStream *,	me,
-	char,		c)
+static void HTMIME_put_character (
+	HTStream *	me,
+	char		c)
 {
     if (me->state == MIME_TRANSPARENT) {
 	(*me->targetClass.put_character)(me->target, c);/* MUST BE FAST */
@@ -1839,11 +1839,11 @@ bad_field_name:				/* Ignore it */
 **
 **	Strings must be smaller than this buffer size.
 */
-PRIVATE void HTMIME_put_string ARGS2(
-	HTStream *,	me,
-	CONST char *,	s)
+static void HTMIME_put_string (
+	HTStream *	me,
+	const char *	s)
 {
-    CONST char * p;
+    const char * p;
 
     if (me->state == MIME_TRANSPARENT) {	/* Optimisation */
 	(*me->targetClass.put_string)(me->target,s);
@@ -1860,12 +1860,12 @@ PRIVATE void HTMIME_put_string ARGS2(
 /*	Buffer write.  Buffers can (and should!) be big.
 **	------------
 */
-PRIVATE void HTMIME_write ARGS3(
-	HTStream *,	me,
-	CONST char *,	s,
-	int,		l)
+static void HTMIME_write (
+	HTStream *	me,
+	const char *	s,
+	int		l)
 {
-    CONST char * p;
+    const char * p;
 
     if (me->state == MIME_TRANSPARENT) {	/* Optimisation */
 	(*me->targetClass.put_block)(me->target, s, l);
@@ -1883,8 +1883,8 @@ PRIVATE void HTMIME_write ARGS3(
 **	-------------------
 **
 */
-PRIVATE void HTMIME_free ARGS1(
-	HTStream *,	me)
+static void HTMIME_free (
+	HTStream *	me)
 {
     if (me) {
 	FREE(me->location);
@@ -1897,9 +1897,9 @@ PRIVATE void HTMIME_free ARGS1(
 
 /*	End writing
 */
-PRIVATE void HTMIME_abort ARGS2(
-	HTStream *,	me,
-	HTError,	e)
+static void HTMIME_abort (
+	HTStream *	me,
+	HTError	e)
 {
     if (me) {
 	FREE(me->location);
@@ -1914,7 +1914,7 @@ PRIVATE void HTMIME_abort ARGS2(
 /*	Structured Object Class
 **	-----------------------
 */
-PRIVATE CONST HTStreamClass HTMIME =
+static const HTStreamClass HTMIME =
 {
 	"MIMEParser",
 	HTMIME_free,
@@ -1928,10 +1928,10 @@ PRIVATE CONST HTStreamClass HTMIME =
 /*	Subclass-specific Methods
 **	-------------------------
 */
-PUBLIC HTStream* HTMIMEConvert ARGS3(
-	HTPresentation *,	pres,
-	HTParentAnchor *,	anchor,
-	HTStream *,		sink)
+HTStream* HTMIMEConvert (
+	HTPresentation *	pres,
+	HTParentAnchor *	anchor,
+	HTStream *		sink)
 {
     HTStream* me;
 
@@ -1998,10 +1998,10 @@ PUBLIC HTStream* HTMIMEConvert ARGS3(
     return me;
 }
 
-PUBLIC HTStream* HTNetMIME ARGS3(
-	HTPresentation *,	pres,
-	HTParentAnchor *,	anchor,
-	HTStream *,		sink)
+HTStream* HTNetMIME (
+	HTPresentation *	pres,
+	HTParentAnchor *	anchor,
+	HTStream *		sink)
 {
     HTStream* me = HTMIMEConvert(pres,anchor, sink);
     if (!me)
@@ -2011,10 +2011,10 @@ PUBLIC HTStream* HTNetMIME ARGS3(
     return me;
 }
 
-PUBLIC HTStream* HTMIMERedirect ARGS3(
-	HTPresentation *,	pres,
-	HTParentAnchor *,	anchor,
-	HTStream *,		sink)
+HTStream* HTMIMERedirect (
+	HTPresentation *	pres,
+	HTParentAnchor *	anchor,
+	HTStream *		sink)
 {
     HTStream* me = HTMIMEConvert(pres,anchor, sink);
     if (!me)
@@ -2072,14 +2072,14 @@ PUBLIC HTStream* HTMIMERedirect ARGS3(
 #include <LYCharVals.h>  /* S/390 -- gil -- 0163 */
 #define ESC	CH_ESC
 
-PRIVATE char HTmm64[] =
+static char HTmm64[] =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=" ;
-PRIVATE char HTmmquote[] = "0123456789ABCDEF";
-PRIVATE int HTmmcont = 0;
+static char HTmmquote[] = "0123456789ABCDEF";
+static int HTmmcont = 0;
 
-PUBLIC void HTmmdec_base64 ARGS2(
-	char *,		t,
-	char *,		s)
+void HTmmdec_base64 (
+	char *		t,
+	char *		s)
 {
     int   d, count, j, val;
     char  buf[LINE_LENGTH], *bp, nw[4], *p;
@@ -2116,9 +2116,9 @@ PUBLIC void HTmmdec_base64 ARGS2(
     strcpy(t, buf);
 }
 
-PUBLIC void HTmmdec_quote ARGS2(
-	char *,		t,
-	char *,		s)
+void HTmmdec_quote (
+	char *		t,
+	char *		s)
 {
     char  buf[LINE_LENGTH], cval, *bp, *p;
 
@@ -2153,9 +2153,9 @@ PUBLIC void HTmmdec_quote ARGS2(
 /*
 **	HTmmdecode for ISO-2022-JP - FM
 */
-PUBLIC void HTmmdecode ARGS2(
-	char *,		trg,
-	char *,		str)
+void HTmmdecode (
+	char *		trg,
+	char *		str)
 {
     char buf[LINE_LENGTH], mmbuf[LINE_LENGTH];
     char *s, *t, *u;
@@ -2218,9 +2218,9 @@ end:
 **  Insert ESC where it seems lost.
 **  (The author of this function "rjis" is S. Ichikawa.)
 */
-PUBLIC int HTrjis ARGS2(
-	char *,		t,
-	char *,		s)
+int HTrjis (
+	char *		t,
+	char *		s)
 {
     char *p, buf[LINE_LENGTH];
     int kanji = 0;
@@ -2286,9 +2286,9 @@ PUBLIC int HTrjis ARGS2(
  * Software Foundation Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-PUBLIC int HTmaybekanji ARGS2(
-	int,		c1,
-	int,		c2)
+int HTmaybekanji (
+	int		c1,
+	int		c2)
 {
 
     if ((c2 < 33) || (c2 > 126))

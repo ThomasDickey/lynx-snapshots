@@ -57,8 +57,8 @@
 
 /*----------------------------------------------------------------------*/
 
-static unsigned long userInfoTagSize PARAMS((data_tag tag,
-					  unsigned long length));
+static unsigned long userInfoTagSize (data_tag tag,
+					  unsigned long length);
 
 static unsigned long
 userInfoTagSize(tag,length)
@@ -126,8 +126,8 @@ long* len;
 
 /*----------------------------------------------------------------------*/
 
-static char* readUserInfoHeader PARAMS((data_tag* tag,unsigned long* num,
-				     char* buffer));
+static char* readUserInfoHeader (data_tag* tag,unsigned long* num,
+				     char* buffer);
 
 static char*
 readUserInfoHeader(tag,num,buffer)
@@ -435,7 +435,7 @@ DocObj* doc;
 
 /*----------------------------------------------------------------------*/
 
-static char* writeDocObj PARAMS((DocObj* doc,char* buffer,long* len));
+static char* writeDocObj (DocObj* doc,char* buffer,long* len);
 
 static char*
 writeDocObj(doc,buffer,len)
@@ -482,7 +482,7 @@ long* len;
 
 /*----------------------------------------------------------------------*/
 
-static char* readDocObj PARAMS((DocObj** doc,char* buffer));
+static char* readDocObj (DocObj** doc,char* buffer);
 
 static char*
 readDocObj(doc,buffer)
@@ -1397,14 +1397,14 @@ long* len;
 /*----------------------------------------------------------------------*/
 
 static void
-cleanUpWaisSearchResponse PARAMS((char* buf,char* seedWordsUsed,
+cleanUpWaisSearchResponse (char* buf,char* seedWordsUsed,
 			       WAISDocumentHeader** docHeaders,
 			       WAISDocumentShortHeader** shortHeaders,
 			       WAISDocumentLongHeader** longHeaders,
 			       WAISDocumentText** text,
 			       WAISDocumentHeadlines** headlines,
 			       WAISDocumentCodes** codes,
-			       diagnosticRecord**diags));
+			       diagnosticRecord**diags);
 
 static void
 cleanUpWaisSearchResponse (buf,seedWordsUsed,docHeaders,shortHeaders,
@@ -2046,7 +2046,7 @@ char* buffer;
 	( XXX return type could be in the element set)
 */
 
-static query_term** makeWAISQueryTerms PARAMS((DocObj** docs));
+static query_term** makeWAISQueryTerms (DocObj** docs);
 
 static query_term**
 makeWAISQueryTerms(docs)
@@ -2165,7 +2165,7 @@ DocObj** docs;
 
 /*----------------------------------------------------------------------*/
 
-static DocObj** makeWAISQueryDocs PARAMS((query_term** terms));
+static DocObj** makeWAISQueryDocs (query_term** terms);
 
 static DocObj**
 makeWAISQueryDocs(terms)

@@ -22,13 +22,13 @@
 
 #include <LYLeaks.h>
 
-PUBLIC HTAssocList *HTAssocList_new NOARGS
+HTAssocList *HTAssocList_new (void)
 {
     return HTList_new();
 }
 
 
-PUBLIC void HTAssocList_delete ARGS1(HTAssocList *, alist)
+void HTAssocList_delete (HTAssocList * alist)
 {
     if (alist) {
 	HTAssocList *cur = alist;
@@ -44,9 +44,9 @@ PUBLIC void HTAssocList_delete ARGS1(HTAssocList *, alist)
 }
 
 
-PUBLIC void HTAssocList_add ARGS3(HTAssocList *,	alist,
-				  CONST char *,		name,
-				  CONST char *,		value)
+void HTAssocList_add (HTAssocList *	alist,
+				  const char *		name,
+				  const char *		value)
 {
     HTAssoc *assoc;
 
@@ -67,8 +67,8 @@ PUBLIC void HTAssocList_add ARGS3(HTAssocList *,	alist,
 }
 
 
-PUBLIC char *HTAssocList_lookup ARGS2(HTAssocList *,	alist,
-				      CONST char *,	name)
+char *HTAssocList_lookup (HTAssocList *	alist,
+				      const char *	name)
 {
     HTAssocList *cur = alist;
     HTAssoc *assoc;

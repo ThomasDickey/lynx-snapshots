@@ -38,7 +38,7 @@ typedef struct {
 #define HText_characterStyle _internal_HTC
 
 #if defined(USE_COLOR_STYLE)
-extern void _internal_HTC PARAMS((HText * text, int style, int dir));
+extern void _internal_HTC (HText * text, int style, int dir);
 #define TEMPSTRINGSIZE 256
 extern char class_string[TEMPSTRINGSIZE];
 

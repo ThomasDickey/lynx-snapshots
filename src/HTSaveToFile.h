@@ -8,19 +8,19 @@
 #include <HTStream.h>
 #include <HTFormat.h>
 
-extern HTStream * HTSaveToFile PARAMS((
+extern HTStream * HTSaveToFile (
         HTPresentation *        pres,
         HTParentAnchor *        anchor,
-        HTStream *              sink));
+        HTStream *              sink);
 
-extern HTStream * HTDumpToStdout PARAMS((
+extern HTStream * HTDumpToStdout (
         HTPresentation *        pres,
         HTParentAnchor *        anchor,
-        HTStream *              sink));
+        HTStream *              sink);
 
-extern HTStream * HTCompressed PARAMS((
+extern HTStream * HTCompressed (
         HTPresentation *        pres,
         HTParentAnchor *        anchor,
-        HTStream *              sink));
+        HTStream *              sink);
 
 #endif /* HTSAVETOFILE_H */

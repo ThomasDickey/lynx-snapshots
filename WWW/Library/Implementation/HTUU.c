@@ -39,7 +39,7 @@
 
 #include <LYLeaks.h>
 
-PRIVATE char six2pr[64] = {
+static char six2pr[64] = {
     'A','B','C','D','E','F','G','H','I','J','K','L','M',
     'N','O','P','Q','R','S','T','U','V','W','X','Y','Z',
     'a','b','c','d','e','f','g','h','i','j','k','l','m',
@@ -47,7 +47,7 @@ PRIVATE char six2pr[64] = {
     '0','1','2','3','4','5','6','7','8','9','+','/'
 };
 
-PRIVATE unsigned char pr2six[256];
+static unsigned char pr2six[256];
 
 
 /*--- function HTUU_encode -----------------------------------------------
@@ -70,9 +70,9 @@ PRIVATE unsigned char pr2six[256];
  *                      The last byte is a zero byte.
  *             Returns the number of ASCII characters in "bufcoded".
  */
-PUBLIC int HTUU_encode ARGS3(unsigned char *,	bufin,
-			     unsigned int,	nbytes,
-			     char *,		bufcoded)
+int HTUU_encode (unsigned char *	bufin,
+			     unsigned int	nbytes,
+			     char *		bufcoded)
 {
 /* ENC is the basic 1 character encoding function to make a char printing */
 #define ENC(c) six2pr[c]
@@ -125,9 +125,9 @@ PUBLIC int HTUU_encode ARGS3(unsigned char *,	bufin,
  *    Exit     Returns the number of binary bytes decoded.
  *             bufplain    contains these bytes.
  */
-PUBLIC int HTUU_decode ARGS3(char *,		bufcoded,
-			     unsigned char *,	bufplain,
-			     int,		outbufsize)
+int HTUU_decode (char *		bufcoded,
+			     unsigned char *	bufplain,
+			     int		outbufsize)
 {
 /* single character decode */
 #define DEC(c) pr2six[(int)c]

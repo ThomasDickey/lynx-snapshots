@@ -25,8 +25,8 @@
 #define NEWS_PORT 119		/* See rfc977 */
 #define SNEWS_PORT 563		/* See Lou Montulli */
 #define APPEND			/* Use append methods */
-PUBLIC int HTNewsChunkSize = 30;/* Number of articles for quick display */
-PUBLIC int HTNewsMaxChunk = 40; /* Largest number of articles in one window */
+int HTNewsChunkSize = 30;/* Number of articles for quick display */
+int HTNewsMaxChunk = 40; /* Largest number of articles in one window */
 
 #ifndef DEFAULT_NEWS_HOST
 #define DEFAULT_NEWS_HOST "news"
@@ -37,13 +37,13 @@ PUBLIC int HTNewsMaxChunk = 40; /* Largest number of articles in one window */
 
 #ifdef USE_SSL
 extern SSL_CTX * ssl_ctx;
-PRIVATE SSL * Handle = NULL;
-PRIVATE int channel_s = 1;
+static SSL * Handle = NULL;
+static int channel_s = 1;
 #define NEWS_NETWRITE(sock, buff, size) \
 	(Handle ? SSL_write(Handle, buff, size) : NETWRITE(sock, buff, size))
 #define NEWS_NETCLOSE(sock) \
 	{ (void)NETCLOSE(sock); if (Handle) SSL_free(Handle); Handle = NULL; }
-PRIVATE char HTNewsGetCharacter NOPARAMS;
+static char HTNewsGetCharacter (void);
 #define NEXT_CHAR HTNewsGetCharacter()
 #else
 #define NEWS_NETWRITE  NETWRITE
@@ -65,7 +65,7 @@ PRIVATE char HTNewsGetCharacter NOPARAMS;
 #define SnipIn2(d,fmt,tag,len,s) sprintf(d, fmt, tag, (int)sizeof(d)-len, s)
 
 struct _HTStructured {
-	CONST HTStructuredClass *	isa;
+	const HTStructuredClass *	isa;
 	/* ... */
 };
 struct _HTStream
@@ -79,24 +79,24 @@ struct _HTStream
 /*
 **  Module-wide variables.
 */
-PUBLIC	char * HTNewsHost = NULL;		/* Default host */
-PRIVATE char * NewsHost = NULL;			/* Current host */
-PRIVATE char * NewsHREF = NULL;			/* Current HREF prefix */
-PRIVATE int s;					/* Socket for NewsHost */
-PRIVATE int HTCanPost = FALSE;			/* Current POST permission */
-PRIVATE char response_text[LINE_LENGTH+1];	/* Last response */
-/* PRIVATE HText *	HT;	*/		/* the new hypertext */
-PRIVATE HTStructured * target;			/* The output sink */
-PRIVATE HTStructuredClass targetClass;		/* Copy of fn addresses */
-PRIVATE HTStream * rawtarget = NULL;		/* The output sink for rawtext */
-PRIVATE HTStreamClass rawtargetClass;		/* Copy of fn addresses */
-PRIVATE HTParentAnchor *node_anchor;		/* Its anchor */
-PRIVATE int	diagnostic;			/* level: 0=none 2=source */
-PRIVATE BOOL rawtext = NO;			/* Flag: HEAD or -mime_headers */
-PRIVATE HTList *NNTP_AuthInfo = NULL;		/* AUTHINFO database */
-PRIVATE char *name = NULL;
-PRIVATE char *address = NULL;
-PRIVATE char *dbuf = NULL;	/* dynamic buffer for long messages etc. */
+char * HTNewsHost = NULL;		/* Default host */
+static char * NewsHost = NULL;			/* Current host */
+static char * NewsHREF = NULL;			/* Current HREF prefix */
+static int s;					/* Socket for NewsHost */
+static int HTCanPost = FALSE;			/* Current POST permission */
+static char response_text[LINE_LENGTH+1];	/* Last response */
+/* static HText *	HT;	*/		/* the new hypertext */
+static HTStructured * target;			/* The output sink */
+static HTStructuredClass targetClass;		/* Copy of fn addresses */
+static HTStream * rawtarget = NULL;		/* The output sink for rawtext */
+static HTStreamClass rawtargetClass;		/* Copy of fn addresses */
+static HTParentAnchor *node_anchor;		/* Its anchor */
+static int	diagnostic;			/* level: 0=none 2=source */
+static BOOL rawtext = NO;			/* Flag: HEAD or -mime_headers */
+static HTList *NNTP_AuthInfo = NULL;		/* AUTHINFO database */
+static char *name = NULL;
+static char *address = NULL;
+static char *dbuf = NULL;	/* dynamic buffer for long messages etc. */
 
 #define PUTC(c) (*targetClass.put_character)(target, c)
 #define PUTS(s) (*targetClass.put_string)(target, s)
@@ -117,7 +117,7 @@ typedef struct _NNTPAuth {
 } NNTPAuth;
 
 #ifdef LY_FIND_LEAKS
-PRIVATE void free_news_globals NOARGS
+static void free_news_globals (void)
 {
     if (s >= 0) {
 	NEWS_NETCLOSE(s);
@@ -132,7 +132,7 @@ PRIVATE void free_news_globals NOARGS
 }
 #endif /* LY_FIND_LEAKS */
 
-PRIVATE void free_NNTP_AuthInfo NOARGS
+static void free_NNTP_AuthInfo (void)
 {
     HTList *cur = NNTP_AuthInfo;
     NNTPAuth *auth = NULL;
@@ -151,12 +151,12 @@ PRIVATE void free_NNTP_AuthInfo NOARGS
     return;
 }
 
-PUBLIC CONST char * HTGetNewsHost NOARGS
+const char * HTGetNewsHost (void)
 {
 	return HTNewsHost;
 }
 
-PUBLIC void HTSetNewsHost ARGS1(CONST char *, value)
+void HTSetNewsHost (const char *  value)
 {
 	StrAllocCopy(HTNewsHost, value);
 }
@@ -179,8 +179,8 @@ PUBLIC void HTSetNewsHost ARGS1(CONST char *, value)
 **	4.	Compilation time macro DEFAULT_NEWS_HOST
 **	5.	Default to "news"
 */
-PRIVATE BOOL initialized = NO;
-PRIVATE BOOL initialize NOARGS
+static BOOL initialized = NO;
+static BOOL initialize (void)
 {
 #ifdef NeXTStep
     char *cp = NULL;
@@ -240,7 +240,7 @@ PRIVATE BOOL initialize NOARGS
 **	Negative status indicates transmission error, socket closed.
 **	Positive status is an NNTP status.
 */
-PRIVATE int response ARGS1(char *,command)
+static int response (char * command)
 {
     int result;
     char * p = response_text;
@@ -252,7 +252,7 @@ PRIVATE int response ARGS1(char *,command)
 	CTRACE((tfp, "NNTP command to be sent: %s", command));
 #ifdef NOT_ASCII
 	{
-	    CONST char	* p;
+	    const char	* p;
 	    char	* q;
 	    char ascii[LINE_LENGTH+1];
 	    for(p = command, q=ascii; *p; p++, q++) {
@@ -308,10 +308,10 @@ PRIVATE int response ARGS1(char *,command)
 **	template must be already un upper case.
 **	unknown may be in upper or lower or mixed case to match.
 */
-PRIVATE BOOL match ARGS2 (CONST char *,unknown, CONST char *,template)
+static BOOL match (const char * unknown, const char * template)
 {
-    CONST char * u = unknown;
-    CONST char * t = template;
+    const char * u = unknown;
+    const char * t = template;
     for (; *u && *t && (TOUPPER(*u) == *t); u++, t++)
 	; /* Find mismatch or end */
     return (BOOL)(*t == 0);		/* OK if end of template */
@@ -325,8 +325,8 @@ typedef enum {
 /*
 **  This function handles nntp authentication. - FM
 */
-PRIVATE NNTPAuthResult HTHandleAuthInfo ARGS1(
-	char *,		host)
+static NNTPAuthResult HTHandleAuthInfo (
+	char *		host)
 {
     HTList *cur = NULL;
     NNTPAuth *auth = NULL;
@@ -562,7 +562,7 @@ PRIVATE NNTPAuthResult HTHandleAuthInfo ARGS1(
 **	" Tim Berners-Lee <tim@online.cern.ch> "
 **  or	" tim@online.cern.ch ( Tim Berners-Lee ) "
 */
-PRIVATE char * author_name ARGS1 (char *,email)
+static char * author_name (char * email)
 {
     char *p, *e;
 
@@ -599,7 +599,7 @@ PRIVATE char * author_name ARGS1 (char *,email)
 **	" Lou Montulli <montulli@spaced.out.galaxy.net> "
 **  or	" montulli@spaced.out.galaxy.net ( Lou "The Stud" Montulli ) "
 */
-PRIVATE char * author_address ARGS1(char *,email)
+static char * author_address (char * email)
 {
     char *p, *at, *e;
 
@@ -651,10 +651,10 @@ PRIVATE char * author_address ARGS1(char *,email)
 /*	Start anchor element
 **	--------------------
 */
-PRIVATE void start_anchor ARGS1(CONST char *,  href)
+static void start_anchor (const char *   href)
 {
     BOOL		present[HTML_A_ATTRIBUTES];
-    CONST char*		value[HTML_A_ATTRIBUTES];
+    const char*		value[HTML_A_ATTRIBUTES];
     int i;
 
     for(i=0; i < HTML_A_ATTRIBUTES; i++)
@@ -666,10 +666,10 @@ PRIVATE void start_anchor ARGS1(CONST char *,  href)
 /*	Start link element
 **	------------------
 */
-PRIVATE void start_link ARGS2(CONST char *,  href, CONST char *, rev)
+static void start_link (const char *   href, const char *  rev)
 {
     BOOL		present[HTML_LINK_ATTRIBUTES];
-    CONST char*		value[HTML_LINK_ATTRIBUTES];
+    const char*		value[HTML_LINK_ATTRIBUTES];
     int i;
 
     for(i=0; i < HTML_LINK_ATTRIBUTES; i++)
@@ -682,10 +682,10 @@ PRIVATE void start_link ARGS2(CONST char *,  href, CONST char *, rev)
 /*	Start list element
 **	------------------
 */
-PRIVATE void start_list ARGS1(int, seqnum)
+static void start_list (int  seqnum)
 {
     BOOL		present[HTML_OL_ATTRIBUTES];
-    CONST char*		value[HTML_OL_ATTRIBUTES];
+    const char*		value[HTML_OL_ATTRIBUTES];
     char SeqNum[20];
     int i;
 
@@ -707,10 +707,10 @@ PRIVATE void start_list ARGS1(int, seqnum)
 **	addr	points to the hypertext reference address,
 **		terminated by white space, comma, NULL or '>'
 */
-PRIVATE void write_anchor ARGS2(CONST char *,text, CONST char *,addr)
+static void write_anchor (const char * text, const char * addr)
 {
     char href[LINE_LENGTH+1];
-    CONST char * p;
+    const char * p;
     char *q;
 
     for (p = addr; *p && (*p != '>') && !WHITE(*p) && (*p!=','); p++)
@@ -744,7 +744,7 @@ PRIVATE void write_anchor ARGS2(CONST char *,text, CONST char *,addr)
 ** On exit,
 **	*text	is NOT any more chopped up into substrings.
 */
-PRIVATE void write_anchors ARGS1 (char *,text)
+static void write_anchors (char * text)
 {
     char * start = text;
     char * end;
@@ -774,7 +774,7 @@ PRIVATE void write_anchors ARGS1 (char *,text)
 /*	Abort the connection					abort_socket
 **	--------------------
 */
-PRIVATE void abort_socket NOARGS
+static void abort_socket (void)
 {
     CTRACE((tfp, "HTNews: EOF on read, closing socket %d\n", s));
     NEWS_NETCLOSE(s);	/* End of file, close socket */
@@ -791,8 +791,8 @@ PRIVATE void abort_socket NOARGS
 **  Determine if a line is a valid header line.			valid_header
 **  -------------------------------------------
 */
-PRIVATE BOOLEAN valid_header ARGS1(
-	char *,		line)
+static BOOLEAN valid_header (
+	char *		line)
 {
     char *colon, *space;
 
@@ -828,8 +828,8 @@ PRIVATE BOOLEAN valid_header ARGS1(
 **	s		Global socket number is OK
 **	postfile	file with header and article to post.
 */
-PRIVATE void post_article ARGS1(
-	char *,		postfile)
+static void post_article (
+	char *		postfile)
 {
     char line[512];
     char buf[512];
@@ -993,7 +993,7 @@ static char *decode_mime(char *str)
     return str;
 }
 #else /* !SH_EX */
-static char *decode_mime ARGS1(char *, str)
+static char *decode_mime (char *  str)
 {
     HTmmdecode(str, str);
     HTrjis(str, str);
@@ -1013,8 +1013,8 @@ static char *decode_mime ARGS1(char *, str)
 **	s	Global socket number is OK
 **	HT	Global hypertext object is ready for appending text
 */
-PRIVATE int read_article ARGS1(
-	HTParentAnchor *,	thisanchor)
+static int read_article (
+	HTParentAnchor *	thisanchor)
 {
     char line[LINE_LENGTH+1];
     char *full_line = NULL;
@@ -1029,7 +1029,7 @@ PRIVATE int read_article ARGS1(
     char *href = NULL;
     char *p = line;
     char *cp;
-    CONST char *ccp;
+    const char *ccp;
     BOOL done = NO;
 
     /*
@@ -1526,7 +1526,7 @@ PRIVATE int read_article ARGS1(
 **  RFC 977 specifies that the line "folding" of RFC850 is not used,
 **  so we do not handle it here.
 */
-PRIVATE int read_list ARGS1(char *, arg)
+static int read_list (char *  arg)
 {
     char line[LINE_LENGTH+1];
     char *p;
@@ -1705,10 +1705,10 @@ PRIVATE int read_list ARGS1(char *, arg)
 **  want more than one field.
 **
 */
-PRIVATE int read_group ARGS3(
-	CONST char *,	groupName,
-	int,		first_required,
-	int,		last_required)
+static int read_group (
+	const char *	groupName,
+	int		first_required,
+	int		last_required)
 {
     char line[LINE_LENGTH+1];
     char author[LINE_LENGTH+1];
@@ -2115,11 +2115,11 @@ add_post:
 /*	Load by name.						HTLoadNews
 **	=============
 */
-PRIVATE int HTLoadNews ARGS4(
-	CONST char *,		arg,
-	HTParentAnchor *,	anAnchor,
-	HTFormat,		format_out,
-	HTStream*,		stream)
+static int HTLoadNews (
+	const char *		arg,
+	HTParentAnchor *	anAnchor,
+	HTFormat		format_out,
+	HTStream*		stream)
 {
     char command[262];			/* The whole command */
     char proxycmd[260];			/* The proxy command */
@@ -2163,7 +2163,7 @@ PRIVATE int HTLoadNews ARGS4(
     proxycmd[sizeof(proxycmd)-1] = '\0';
 
     {
-	CONST char * p1 = arg;
+	const char * p1 = arg;
 
 	/*
 	**  We will ask for the document, omitting the host name & anchor.
@@ -3005,7 +3005,7 @@ Send_NNTP_command:
 **  the terminal for a period of time, but does not want
 **  to end the current session.  - FM
 */
-PUBLIC void HTClearNNTPAuthInfo NOARGS
+void HTClearNNTPAuthInfo (void)
 {
     /*
     **	Need code to check cached documents and do
@@ -3021,7 +3021,7 @@ PUBLIC void HTClearNNTPAuthInfo NOARGS
 }
 
 #ifdef USE_SSL
-PRIVATE char HTNewsGetCharacter NOARGS
+static char HTNewsGetCharacter (void)
 {
     if (!Handle)
 	return HTGetCharacter();
@@ -3029,15 +3029,15 @@ PRIVATE char HTNewsGetCharacter NOARGS
 	return HTGetSSLCharacter((void *)Handle);
 }
 
-PUBLIC int HTNewsProxyConnect ARGS5 (
-    int,		sock,
-    CONST char *,	url,
-    HTParentAnchor *,	anAnchor,
-    HTFormat,		format_out,
-    HTStream *,		sink)
+int HTNewsProxyConnect (
+    int		sock,
+    const char *	url,
+    HTParentAnchor *	anAnchor,
+    HTFormat		format_out,
+    HTStream *		sink)
 {
     int status;
-    CONST char * arg = url;
+    const char * arg = url;
     char SSLprogress[256];
 
     s = channel_s = sock;
@@ -3086,13 +3086,13 @@ GLOBALDEF (HTProtocol,HTSNewsPost,_HTNEWS_C_6_INIT);
 #define _HTNEWS_C_7_INIT { "snewsreply", HTLoadNews, NULL }
 GLOBALDEF (HTProtocol,HTSNewsReply,_HTNEWS_C_7_INIT);
 #else
-GLOBALDEF PUBLIC HTProtocol HTNews = { "news", HTLoadNews, NULL };
-GLOBALDEF PUBLIC HTProtocol HTNNTP = { "nntp", HTLoadNews, NULL };
-GLOBALDEF PUBLIC HTProtocol HTNewsPost = { "newspost", HTLoadNews, NULL };
-GLOBALDEF PUBLIC HTProtocol HTNewsReply = { "newsreply", HTLoadNews, NULL };
-GLOBALDEF PUBLIC HTProtocol HTSNews = { "snews", HTLoadNews, NULL };
-GLOBALDEF PUBLIC HTProtocol HTSNewsPost = { "snewspost", HTLoadNews, NULL };
-GLOBALDEF PUBLIC HTProtocol HTSNewsReply = { "snewsreply", HTLoadNews, NULL };
+GLOBALDEF HTProtocol HTNews = { "news", HTLoadNews, NULL };
+GLOBALDEF HTProtocol HTNNTP = { "nntp", HTLoadNews, NULL };
+GLOBALDEF HTProtocol HTNewsPost = { "newspost", HTLoadNews, NULL };
+GLOBALDEF HTProtocol HTNewsReply = { "newsreply", HTLoadNews, NULL };
+GLOBALDEF HTProtocol HTSNews = { "snews", HTLoadNews, NULL };
+GLOBALDEF HTProtocol HTSNewsPost = { "snewspost", HTLoadNews, NULL };
+GLOBALDEF HTProtocol HTSNewsReply = { "snewsreply", HTLoadNews, NULL };
 #endif /* GLOBALDEF_IS_MACRO */
 
 #endif /* not DISABLE_NEWS */

@@ -77,27 +77,27 @@
 #endif /* FNAMES_8_3 */
 #endif /* OK_INSTALL */
 
-PRIVATE char *get_filename PARAMS((
+static char *get_filename (
 	char *		prompt,
 	char *		buf,
-	size_t		bufsize));
+	size_t		bufsize);
 
 #ifdef OK_PERMIT
-PRIVATE int permit_location PARAMS((
+static int permit_location (
 	char *		destpath,
 	char *		srcpath,
-	char **		newpath));
+	char **		newpath);
 #endif /* OK_PERMIT */
 
-PRIVATE char *render_item PARAMS((
-	CONST char *	s,
-	CONST char *	path,
-	CONST char *	dir,
+static char *render_item (
+	const char *	s,
+	const char *	path,
+	const char *	dir,
 	char *		buf,
 	int		bufsize,
-	BOOLEAN		url_syntax));
+	BOOLEAN		url_syntax);
 
-PRIVATE struct dired_menu *menu_head = NULL;
+static struct dired_menu *menu_head = NULL;
 struct dired_menu {
     int cond;
 #define DE_TAG     1
@@ -262,7 +262,7 @@ struct dired_menu {
 		    NULL, NULL,					NULL }
 };
 
-PRIVATE BOOLEAN cannot_stat ARGS1(CONST char *, name)
+static BOOLEAN cannot_stat (const char * name)
 {
     char *tmpbuf = 0;
     HTSprintf0(&tmpbuf, gettext("Unable to get status of '%s'."), name);
@@ -273,7 +273,7 @@ PRIVATE BOOLEAN cannot_stat ARGS1(CONST char *, name)
 
 #define OK_STAT(name, sb) (stat(name, sb) == 0)
 
-PRIVATE BOOLEAN ok_stat ARGS2(CONST char *, name, struct stat*, sb)
+static BOOLEAN ok_stat (const char * name, struct stat* sb)
 {
     CTRACE((tfp, "testing ok_stat(%s)\n", name));
     if (!OK_STAT(name, sb)) {
@@ -283,7 +283,7 @@ PRIVATE BOOLEAN ok_stat ARGS2(CONST char *, name, struct stat*, sb)
 }
 
 #ifdef HAVE_LSTAT
-PRIVATE BOOLEAN ok_lstat ARGS2(char *, name, struct stat*, sb)
+static BOOLEAN ok_lstat (char * name, struct stat* sb)
 {
     CTRACE((tfp, "testing ok_lstat(%s)\n", name));
     if (lstat(name, sb) < 0) {
@@ -295,7 +295,7 @@ PRIVATE BOOLEAN ok_lstat ARGS2(char *, name, struct stat*, sb)
 #define ok_lstat(name,sb) ok_stat(name,sb)
 #endif
 
-PRIVATE BOOLEAN ok_file_or_dir ARGS1(struct stat*, sb)
+static BOOLEAN ok_file_or_dir (struct stat* sb)
 {
     if (!S_ISDIR(sb->st_mode)
      && !S_ISREG(sb->st_mode)) {
@@ -306,7 +306,7 @@ PRIVATE BOOLEAN ok_file_or_dir ARGS1(struct stat*, sb)
 }
 
 #ifdef OK_INSTALL		/* currently only used in local_install */
-PRIVATE BOOLEAN ok_localname ARGS2(char*, dst, CONST char*, src)
+static BOOLEAN ok_localname (char* dst, const char* src)
 {
     struct stat dir_info;
 
@@ -326,10 +326,10 @@ PRIVATE BOOLEAN ok_localname ARGS2(char*, dst, CONST char*, src)
 /*
  *  Execute DIRED command, return -1 or 0 on failure, 1 success.
  */
-PRIVATE int LYExecv ARGS3(
-	CONST char *,	path,
-	char **,	argv,
-	char *,		msg)
+static int LYExecv (
+	const char *	path,
+	char **	argv,
+	char *		msg)
 {
     int rc = 0;
 #if defined(VMS) || defined(_WINDOWS)
@@ -423,10 +423,10 @@ PRIVATE int LYExecv ARGS3(
     return(rc);
 }
 
-PRIVATE int make_directory ARGS1(char *, path)
+static int make_directory (char * path)
 {
     int code;
-    CONST char *program;
+    const char *program;
 
     if ((program = HTGetProgramPath(ppMKDIR)) != NULL) {
 	char *args[5];
@@ -448,10 +448,10 @@ PRIVATE int make_directory ARGS1(char *, path)
     return (code);
 }
 
-PRIVATE int remove_file ARGS1(char *, path)
+static int remove_file (char * path)
 {
     int code;
-    CONST char *program;
+    const char *program;
 
     if ((program = HTGetProgramPath(ppRM)) != NULL) {
 	char *args[5];
@@ -470,10 +470,10 @@ PRIVATE int remove_file ARGS1(char *, path)
     return (code);
 }
 
-PRIVATE int remove_directory ARGS1(char *, path)
+static int remove_directory (char * path)
 {
     int code;
-    CONST char *program;
+    const char *program;
 
     if ((program = HTGetProgramPath(ppRMDIR)) != NULL) {
 	char *args[5];
@@ -491,10 +491,10 @@ PRIVATE int remove_directory ARGS1(char *, path)
     return (code);
 }
 
-PRIVATE int touch_file ARGS1(char *, path)
+static int touch_file (char * path)
 {
     int code;
-    CONST char *program;
+    const char *program;
 
     if ((program = HTGetProgramPath(ppTOUCH)) != NULL) {
 	char *args[5];
@@ -518,10 +518,10 @@ PRIVATE int touch_file ARGS1(char *, path)
     return (code);
 }
 
-PRIVATE int move_file ARGS2(char *, source, char *, target)
+static int move_file (char * source, char * target)
 {
     int code;
-    CONST char *program;
+    const char *program;
 
     if ((program = HTGetProgramPath(ppMV)) != NULL) {
 	char *msg = 0;
@@ -556,7 +556,7 @@ PRIVATE int move_file ARGS2(char *, source, char *, target)
     return code;
 }
 
-PRIVATE BOOLEAN not_already_exists ARGS1(char *, name)
+static BOOLEAN not_already_exists (char * name)
 {
     struct stat dir_info;
 
@@ -576,7 +576,7 @@ PRIVATE BOOLEAN not_already_exists ARGS1(char *, name)
     return FALSE;
 }
 
-PRIVATE BOOLEAN dir_has_same_owner ARGS2(struct stat *, info, int, owner)
+static BOOLEAN dir_has_same_owner (struct stat * info, int owner)
 {
     if (S_ISDIR(info->st_mode)) {
 	if ((int) info->st_uid == owner) {
@@ -593,7 +593,7 @@ PRIVATE BOOLEAN dir_has_same_owner ARGS2(struct stat *, info, int, owner)
 /*
  *  Remove all tagged files and directories.
  */
-PRIVATE int remove_tagged NOARGS
+static int remove_tagged (void)
 {
     int ans;
     BOOL will_clear = TRUE;
@@ -649,8 +649,8 @@ PRIVATE int remove_tagged NOARGS
  *  If a user has enough permissions to move a file somewhere, the same
  *   uid with Lynx & dired can do the same thing.
  */
-PRIVATE int modify_tagged ARGS1(
-	char *,		testpath)
+static int modify_tagged (
+	char *		testpath)
 {
     char *cp;
     dev_t dev;
@@ -805,8 +805,8 @@ PRIVATE int modify_tagged ARGS1(
 /*
  *  Modify the name of the specified item.
  */
-PRIVATE int modify_name ARGS1(
-	char *,		testpath)
+static int modify_name (
+	char *		testpath)
 {
     char *cp;
     char tmpbuf[DIRED_MAXBUF];
@@ -861,8 +861,8 @@ PRIVATE int modify_name ARGS1(
 /*
  *  Change the location of a file or directory.
  */
-PRIVATE int modify_location ARGS1(
-	char *,		testpath)
+static int modify_location (
+	char *		testpath)
 {
     char *cp;
     dev_t dev;
@@ -956,9 +956,9 @@ PRIVATE int modify_location ARGS1(
 /*
  *  Modify name or location of a file or directory on localhost.
  */
-PUBLIC int local_modify ARGS2(
-	DocInfo *,	doc,
-	char **,	newpath)
+int local_modify (
+	DocInfo *	doc,
+	char **	newpath)
 {
     int ans;
     char *cp;
@@ -1029,8 +1029,8 @@ PUBLIC int local_modify ARGS2(
 /*
  *  Create a new empty file in the current directory.
  */
-PRIVATE int create_file ARGS1(
-	char *,		current_location)
+static int create_file (
+	char *		current_location)
 {
     int code = FALSE;
     char tmpbuf[DIRED_MAXBUF];
@@ -1071,8 +1071,8 @@ PRIVATE int create_file ARGS1(
 /*
  *  Create a new directory in the current directory.
  */
-PRIVATE int create_directory ARGS1(
-	char *,		current_location)
+static int create_directory (
+	char *		current_location)
 {
     int code = FALSE;
     char tmpbuf[DIRED_MAXBUF];
@@ -1110,8 +1110,8 @@ PRIVATE int create_directory ARGS1(
 /*
  *  Create a file or a directory at the current location.
  */
-PUBLIC int local_create ARGS1(
-	DocInfo *,	doc)
+int local_create (
+	DocInfo *	doc)
 {
     int ans;
     char *cp;
@@ -1140,8 +1140,8 @@ PUBLIC int local_create ARGS1(
 /*
  *  Remove a single file or directory.
  */
-PRIVATE int remove_single ARGS1(
-	char *,		testpath)
+static int remove_single (
+	char *		testpath)
 {
     int code = 0;
     char *cp;
@@ -1204,8 +1204,8 @@ PRIVATE int remove_single ARGS1(
 /*
  *  Remove a file or a directory.
  */
-PUBLIC int local_remove ARGS1(
-	DocInfo *,	doc)
+int local_remove (
+	DocInfo *	doc)
 {
     char *cp, *tp;
     char testpath[DIRED_MAXBUF];
@@ -1245,9 +1245,9 @@ PUBLIC int local_remove ARGS1(
 
 #ifdef OK_PERMIT
 
-PRIVATE char LYValidPermitFile[LY_MAXPATH] = "\0";
+static char LYValidPermitFile[LY_MAXPATH] = "\0";
 
-PRIVATE long permit_bits ARGS1(char *, string_mode)
+static long permit_bits (char * string_mode)
 {
     if (!strcmp(string_mode, "IRUSR")) return S_IRUSR;
     if (!strcmp(string_mode, "IWUSR")) return S_IWUSR;
@@ -1265,10 +1265,10 @@ PRIVATE long permit_bits ARGS1(char *, string_mode)
 /*
  *  Handle DIRED permissions.
  */
-PRIVATE int permit_location ARGS3(
-	char *,		destpath,
-	char *,		srcpath,
-	char **,	newpath)
+static int permit_location (
+	char *		destpath,
+	char *		srcpath,
+	char **	newpath)
 {
 #ifndef UNIX
     HTAlert(gettext("Sorry, don't know how to permit non-UNIX files yet."));
@@ -1278,7 +1278,7 @@ PRIVATE int permit_location ARGS3(
     char *cp;
     char tmpdst[LY_MAXPATH];
     struct stat dir_info;
-    CONST char *program;
+    const char *program;
 
     if (srcpath) {
 	/*
@@ -1519,9 +1519,9 @@ PRIVATE int permit_location ARGS3(
 /*
  *  Display or remove a tag from a given link.
  */
-PUBLIC void tagflag ARGS2(
-	int,		flag,
-	int,		cur)
+void tagflag (
+	int		flag,
+	int		cur)
 {
     if (nlinks > 0) {
 	LYmove(links[cur].ly, 2);
@@ -1549,8 +1549,8 @@ PUBLIC void tagflag ARGS2(
 /*
  *  Handle DIRED tags.
  */
-PUBLIC void showtags ARGS1(
-	HTList *,	t)
+void showtags (
+	HTList *	t)
 {
     int i;
     HTList *s;
@@ -1567,8 +1567,8 @@ PUBLIC void showtags ARGS1(
     }
 }
 
-PRIVATE char * DirectoryOf ARGS1(
-	char *,		pathname)
+static char * DirectoryOf (
+	char *		pathname)
 {
     char *result = 0;
     char *leaf;
@@ -1577,7 +1577,7 @@ PRIVATE char * DirectoryOf ARGS1(
     leaf = LYPathLeaf(result);
 
     if (leaf != result) {
-	CONST char *result1 = 0;
+	const char *result1 = 0;
 
 	*leaf = '\0';
 	if (!LYisRootPath(result))
@@ -1593,8 +1593,8 @@ PRIVATE char * DirectoryOf ARGS1(
  * Convert filenames to acceptable 8+3 names when necessary.  Make a copy of
  * the parameter if we must modify it.
  */
-PRIVATE char * LYonedot ARGS1(
-	char *,		line)
+static char * LYonedot (
+	char *		line)
 {
     char *dot;
     static char line1[LY_MAXPATH];
@@ -1619,9 +1619,9 @@ PRIVATE char * LYonedot ARGS1(
 #define LYonedot(path) path
 #endif /*  __DJGPP__ */
 
-PRIVATE char * match_op ARGS2(
-	CONST char *,	prefix,
-	char *,		data)
+static char * match_op (
+	const char *	prefix,
+	char *		data)
 {
     int len = strlen(prefix);
 
@@ -1642,14 +1642,14 @@ PRIVATE char * match_op ARGS2(
  *  Construct the appropriate system command taking care to
  *  escape all path references to avoid spoofing the shell.
  */
-PRIVATE char *build_command ARGS3(
-	char *,		line,
-	char *,		dirname,
-	char *,		arg)
+static char *build_command (
+	char *		line,
+	char *		dirname,
+	char *		arg)
 {
     char *buffer = NULL;
-    CONST char *program;
-    CONST char *tar_path = HTGetProgramPath(ppTAR);
+    const char *program;
+    const char *tar_path = HTGetProgramPath(ppTAR);
 
     if ((arg = match_op("DECOMPRESS", line)) != 0) {
 #define FMT_UNCOMPRESS "%s %s"
@@ -1844,8 +1844,8 @@ PRIVATE char *build_command ARGS3(
  *  about not escaping parsing '#' "the URL way" built into HTParse, but that
  *  doesn't look like a clean way.)
  */
-PUBLIC int local_dired ARGS1(
-	DocInfo *,	doc)
+int local_dired (
+	DocInfo *	doc)
 {
     char *line_url;    /* will point to doc's address, which is a URL */
     char *line = NULL; /* same as line_url, but HTUnEscaped, will be alloced */
@@ -1972,9 +1972,9 @@ PUBLIC int local_dired ARGS1(
 /*
  *  Provide a menu of file management options.
  */
-PUBLIC int dired_options ARGS2(
-	DocInfo *,	doc,
-	char **,	newfile)
+int dired_options (
+	DocInfo *	doc,
+	char **	newfile)
 {
     static char tempfile[LY_MAXPATH];
     char *path;
@@ -2128,10 +2128,10 @@ PUBLIC int dired_options ARGS2(
 /*
  *  Check DIRED filename.
  */
-PRIVATE char *get_filename ARGS3(
-	char *,		prompt,
-	char *,		buf,
-	size_t,		bufsize)
+static char *get_filename (
+	char *		prompt,
+	char *		buf,
+	size_t		bufsize)
 {
     char *cp;
 
@@ -2164,7 +2164,7 @@ PRIVATE char *get_filename ARGS3(
 static char ** install_argp = NULL;	/* args for execv install */
 static char * install_path = NULL;	/* auxiliary */
 #ifdef LY_FIND_LEAKS
-PRIVATE void clear_install_path NOARGS
+static void clear_install_path (void)
 {
     FREE(install_argp);
     FREE(install_path);
@@ -2183,12 +2183,12 @@ PRIVATE void clear_install_path NOARGS
  *  because INSTALL_ARGS may be significant, and someone may configure it
  *  with more than one significant flags. - kw
  */
-PRIVATE int fill_argv_for_execv ARGS5(
-    char ***,		argvp,
-    char **,		pathp,
-    char *,		cmd_path,
-    CONST char *,	cmd_args,
-    int,		reserve)
+static int fill_argv_for_execv (
+    char ***		argvp,
+    char **		pathp,
+    char *		cmd_path,
+    const char *	cmd_args,
+    int		reserve)
 {
     int n = 0;
 
@@ -2228,10 +2228,10 @@ PRIVATE int fill_argv_for_execv ARGS5(
 /*
  *  Install the specified file or directory.
  */
-PUBLIC BOOLEAN local_install ARGS3(
-	char *,		destpath,
-	char *,		srcpath,
-	char **,	newpath)
+BOOLEAN local_install (
+	char *		destpath,
+	char *		srcpath,
+	char **	newpath)
 {
     char *tmpbuf = NULL;
     static char savepath[DIRED_MAXBUF]; /* This will be the link that
@@ -2244,7 +2244,7 @@ PUBLIC BOOLEAN local_install ARGS3(
     int count = 0;
     int n = 0;		/* indices into 'args[]' */
     static int src = -1;
-    CONST char *program;
+    const char *program;
 
     if ((program = HTGetProgramPath(ppINSTALL)) == NULL) {
 	HTAlert(gettext("Install in the selected directory not permitted."));
@@ -2404,7 +2404,7 @@ PUBLIC BOOLEAN local_install ARGS3(
 /*
  *  Clear DIRED tags.
  */
-PUBLIC void clear_tags NOARGS
+void clear_tags (void)
 {
     char *cp = NULL;
 
@@ -2418,8 +2418,8 @@ PUBLIC void clear_tags NOARGS
 /*
  *  Handle DIRED menu item.
  */
-PUBLIC void add_menu_item ARGS1(
-	char *,		str)
+void add_menu_item (
+	char *		str)
 {
     struct dired_menu *new, *mp;
     char *cp;
@@ -2480,7 +2480,7 @@ PUBLIC void add_menu_item ARGS1(
 	menu_head = new;
 }
 
-PUBLIC void reset_dired_menu NOARGS
+void reset_dired_menu (void)
 {
     if (menu_head != defmenu) {
 	struct dired_menu *mp, *mp_next = NULL;
@@ -2499,15 +2499,15 @@ PUBLIC void reset_dired_menu NOARGS
 /*
  *  Create URL for DIRED HREF value.
  */
-PRIVATE char * render_item ARGS6(
-	CONST char *,	s,
-	CONST char *,	path,
-	CONST char *,	dir,
-	char *,		buf,
-	int,		bufsize,
-	BOOLEAN,	url_syntax)
+static char * render_item (
+	const char *	s,
+	const char *	path,
+	const char *	dir,
+	char *		buf,
+	int		bufsize,
+	BOOLEAN	url_syntax)
 {
-    CONST char *cp;
+    const char *cp;
     char *bp;
     char overrun = '\0';
     char *taglist = NULL;

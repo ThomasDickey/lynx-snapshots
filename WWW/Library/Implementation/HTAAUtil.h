@@ -91,7 +91,7 @@ Authentication Schemes
 ** ON EXIT:
 **      returns         the enumerated constant for that scheme.
 */
-PUBLIC HTAAScheme HTAAScheme_enum PARAMS((CONST char* name));
+extern HTAAScheme HTAAScheme_enum (const char* name);
 
 
 /* PUBLIC                                               HTAAScheme_name()
@@ -104,7 +104,7 @@ PUBLIC HTAAScheme HTAAScheme_enum PARAMS((CONST char* name));
 **      returns         the name of the scheme, i.e.
 **                      "none", "basic", "pubkey", ...
 */
-PUBLIC char *HTAAScheme_name PARAMS((HTAAScheme scheme));
+extern char *HTAAScheme_name (HTAAScheme scheme);
 
 /*
 
@@ -121,7 +121,7 @@ Methods
 **      returns         HTAAMethod enumerated value corresponding
 **                      to the given name.
 */
-PUBLIC HTAAMethod HTAAMethod_enum PARAMS((CONST char * name));
+extern HTAAMethod HTAAMethod_enum (const char * name);
 
 
 /* PUBLIC                                               HTAAMethod_name()
@@ -134,7 +134,7 @@ PUBLIC HTAAMethod HTAAMethod_enum PARAMS((CONST char * name));
 **      returns         the name of the scheme, i.e.
 **                      "GET", "PUT", ...
 */
-PUBLIC char *HTAAMethod_name PARAMS((HTAAMethod method));
+extern char *HTAAMethod_name (HTAAMethod method);
 
 
 /* PUBLIC                                               HTAAMethod_inList()
@@ -147,8 +147,8 @@ PUBLIC char *HTAAMethod_name PARAMS((HTAAMethod method));
 **      returns         YES, if method was found.
 **                      NO, if not found.
 */
-PUBLIC BOOL HTAAMethod_inList PARAMS((HTAAMethod        method,
-                                     HTList *           list));
+extern BOOL HTAAMethod_inList (HTAAMethod        method,
+                                     HTList *           list);
 /*
 
 Match Template Against Filename
@@ -177,8 +177,8 @@ Match Template Against Filename
 **      returns         YES, if filename matches the template.
 **                      NO, otherwise.
 */
-PUBLIC BOOL HTAA_templateMatch PARAMS((CONST char * template,
-                                       CONST char * filename));
+extern BOOL HTAA_templateMatch (const char * template,
+                                       const char * filename);
 
 
 /* PUBLIC                                               HTAA_templateCaseMatch()
@@ -203,8 +203,8 @@ PUBLIC BOOL HTAA_templateMatch PARAMS((CONST char * template,
 **      returns         YES, if filename matches the template.
 **                      NO, otherwise.
 */
-PUBLIC BOOL HTAA_templateCaseMatch PARAMS((CONST char * template,
-                                         CONST char * filename));
+extern BOOL HTAA_templateCaseMatch (const char * template,
+                                         const char * filename);
 
 
 /* PUBLIC                                       HTAA_makeProtectionTemplate()
@@ -226,7 +226,7 @@ PUBLIC BOOL HTAA_templateCaseMatch PARAMS((CONST char * template,
 **                              being a comment marker here,
 **                              there really isn't any space.
 */
-PUBLIC char *HTAA_makeProtectionTemplate PARAMS((CONST char * docname));
+extern char *HTAA_makeProtectionTemplate (const char * docname);
 /*
 
 MIME Argument List Parser
@@ -260,7 +260,7 @@ MIME Argument List Parser
 **              the number of order number of that item. E.g.
 **              "1" for the first, etc.
 */
-PUBLIC HTList *HTAA_parseArgList PARAMS((char * str));
+extern HTList *HTAA_parseArgList (char * str);
 
 /*
 
@@ -287,9 +287,9 @@ Header Line Reader
 **                      will use this buffer first and then
 **                      proceed to read from socket.
 */
-PUBLIC void HTAA_setupReader PARAMS((char *     start_of_headers,
+extern void HTAA_setupReader (char *     start_of_headers,
                                      int        length,
-                                     int        soc));
+                                     int        soc);
 
 
 /* PUBLIC                                               HTAA_getUnfoldedLine()
@@ -313,6 +313,6 @@ PUBLIC void HTAA_setupReader PARAMS((char *     start_of_headers,
 **      Field-Name: Blaa-Blaa This-Is-A-Continuation-Line Here-Is_Another
 **
 */
-PUBLIC char *HTAA_getUnfoldedLine NOPARAMS;
+extern char *HTAA_getUnfoldedLine (void);
 
 #endif  /* NOT HTAAUTIL_H */

@@ -7,8 +7,8 @@
 #include <UCAux.h>
 #include <LYCharSets.h>
 
-PUBLIC BOOL UCCanUniTranslateFrom ARGS1(
-	int,		from)
+BOOL UCCanUniTranslateFrom (
+	int		from)
 {
     if (from < 0)
 	return NO;
@@ -21,8 +21,8 @@ PUBLIC BOOL UCCanUniTranslateFrom ARGS1(
     return YES;
 }
 
-PUBLIC BOOL UCCanTranslateUniTo ARGS1(
-	int,		to)
+BOOL UCCanTranslateUniTo (
+	int		to)
 {
     if (to < 0)
 	return NO;
@@ -34,9 +34,9 @@ PUBLIC BOOL UCCanTranslateUniTo ARGS1(
     return YES;			/* well at least some characters... */
 }
 
-PUBLIC BOOL UCCanTranslateFromTo ARGS2(
-	int,		from,
-	int,		to)
+BOOL UCCanTranslateFromTo (
+	int		from,
+	int		to)
 {
     if (from == to)
 	return YES;
@@ -47,8 +47,8 @@ PUBLIC BOOL UCCanTranslateFromTo ARGS2(
     if (to == LATIN1 || LYCharSet_UC[to].enc == UCT_ENC_UTF8)
 	return UCCanUniTranslateFrom(from);
     {
-	CONST char * fromname = LYCharSet_UC[from].MIMEname;
-	CONST char * toname = LYCharSet_UC[to].MIMEname;
+	const char * fromname = LYCharSet_UC[from].MIMEname;
+	const char * toname = LYCharSet_UC[to].MIMEname;
 	if (!strcmp(fromname, "x-transparent") ||
 	    !strcmp(toname, "x-transparent")) {
 	    return YES; /* ??? */
@@ -87,12 +87,12 @@ PUBLIC BOOL UCCanTranslateFromTo ARGS2(
 **  Returns YES if no translation necessary (because
 **  charsets are equal, are equivalent, etc.).
 */
-PUBLIC BOOL UCNeedNotTranslate ARGS2(
-	int,		from,
-	int,		to)
+BOOL UCNeedNotTranslate (
+	int		from,
+	int		to)
 {
-    CONST char *fromname;
-    CONST char *toname;
+    const char *fromname;
+    const char *toname;
     if (from == to)
 	return YES;
     if (from < 0)
@@ -148,12 +148,12 @@ PUBLIC BOOL UCNeedNotTranslate ARGS2(
 **  not taken into account here (except for HTCJK, somewhat), it's still
 **  up to the caller to do something about them. - KW
 */
-PUBLIC void UCSetTransParams ARGS5(
-    UCTransParams *,	pT,
-    int,		cs_in,
-    CONST LYUCcharset*,	p_in,
-    int,		cs_out,
-    CONST LYUCcharset*,	p_out)
+void UCSetTransParams (
+    UCTransParams *	pT,
+    int		cs_in,
+    const LYUCcharset*	p_in,
+    int		cs_out,
+    const LYUCcharset*	p_out)
 {
     CTRACE((tfp, "UCSetTransParams: from %s(%d) to %s(%d)\n",
 	   p_in->MIMEname,  UCGetLYhndl_byMIME(p_in->MIMEname),
@@ -301,8 +301,8 @@ PUBLIC void UCSetTransParams ARGS5(
 **  structure by setting all its elements to
 **  FALSE. - KW
 */
-PUBLIC void UCTransParams_clear ARGS1(
-    UCTransParams *,    pT)
+void UCTransParams_clear (
+    UCTransParams *    pT)
 {
     pT->transp = FALSE;
     pT->do_cjk = FALSE;
@@ -326,12 +326,12 @@ PUBLIC void UCTransParams_clear ARGS1(
 **  chars to displayable ASCII chars if '0' was requested.  They'll
 **  stay as they are otherwise. - kw
 */
-PUBLIC void UCSetBoxChars ARGS5(
-    int,	cset,
-    int *,	pvert_out,
-    int *,	phori_out,
-    int,	vert_in,
-    int,	hori_in)
+void UCSetBoxChars (
+    int	cset,
+    int *	pvert_out,
+    int *	phori_out,
+    int	vert_in,
+    int	hori_in)
 {
 #ifndef WIDEC_CURSES
     if (cset >= -1 && LYCharSet_UC[cset].enc == UCT_ENC_UTF8) {
@@ -360,10 +360,10 @@ PUBLIC void UCSetBoxChars ARGS5(
 #define PUTC(ch) ((*myPutc)(target, (char)(ch)))
 #define PUTC2(ch) ((*myPutc)(target,(char)(0x80|(0x3f &(ch)))))
 
-PUBLIC BOOL UCPutUtf8_charstring ARGS3(
-	HTStream *,	target,
-	putc_func_t *,	myPutc,
-	long,		code)
+BOOL UCPutUtf8_charstring (
+	HTStream *	target,
+	putc_func_t *	myPutc,
+	long		code)
 {
     if (code < 128)
 	return NO;		/* indicate to caller we didn't handle it */
@@ -406,9 +406,9 @@ PUBLIC BOOL UCPutUtf8_charstring ARGS3(
 **  to minimize byte alignment problems with some
 **  compilers). - FM
 */
-PUBLIC BOOL UCConvertUniToUtf8 ARGS2(
-	UCode_t,	code,
-	char *,		buffer)
+BOOL UCConvertUniToUtf8 (
+	UCode_t	code,
+	char *		buffer)
 {
     char *ch = buffer;
 
@@ -465,7 +465,7 @@ PUBLIC BOOL UCConvertUniToUtf8 ARGS2(
 ** returns the UCS value
 ** returns negative value on error (invalid UTF-8 sequence)
 */
-PUBLIC UCode_t UCGetUniFromUtf8String ARGS1(char **, ppuni)
+UCode_t UCGetUniFromUtf8String (char ** ppuni)
 {
     UCode_t uc_out = 0;
     char * p = *ppuni;

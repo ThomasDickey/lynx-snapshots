@@ -25,14 +25,14 @@
 
 #endif  /* EXP_ALT_BINDINGS */
 
-PUBLIC int current_lineedit = 0;  /* Index into LYLineEditors[]   */
+int current_lineedit = 0;  /* Index into LYLineEditors[]   */
 
-PUBLIC int escape_bound = 0;      /* User wanted Escape to perform actions?  */
+int escape_bound = 0;      /* User wanted Escape to perform actions?  */
 
 /*
  * See LYStrings.h for the LYE definitions.
  */
-PRIVATE LYEditCode DefaultEditBinding[KEYMAP_SIZE-1]={
+static LYEditCode DefaultEditBinding[KEYMAP_SIZE-1]={
 
 LYE_NOP,        LYE_BOL,        LYE_DELPW,      LYE_ABORT,
 /* nul          ^A              ^B              ^C      */
@@ -278,7 +278,7 @@ LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
 /* Why the difference for tab? - kw */
 
 #ifdef EXP_ALT_BINDINGS
-PRIVATE LYEditCode BetterEditBinding[KEYMAP_SIZE-1]={
+static LYEditCode BetterEditBinding[KEYMAP_SIZE-1]={
 
 LYE_NOP,        LYE_BOL,        LYE_BACK,       LYE_ABORT,
 /* nul          ^A              ^B              ^C      */
@@ -536,7 +536,7 @@ LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
              /*         M-bs,M-del=delete-prev-word, M-d=delete-next-word, */
              /*                M-b=BACKW,            M-f=FORWW,            */
 
-PRIVATE LYEditCode BashlikeEditBinding[KEYMAP_SIZE-1]={
+static LYEditCode BashlikeEditBinding[KEYMAP_SIZE-1]={
 
 LYE_SETMARK,    LYE_BOL,        LYE_BACK,       LYE_ABORT,
 /* nul          ^A              ^B              ^C      */
@@ -779,7 +779,7 @@ LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
  *  that map a lynxkeycode to LYE_SETMn.  ( This doesn't apply if
  *  the modifier is already being set in LYgetch(). ) - kw
  */
-PRIVATE short Mod1Binding[LAST_MOD1_LKC+1]={
+static short Mod1Binding[LAST_MOD1_LKC+1]={
 
 LYE_NOP,        LYE_BOL,        LYE_BACKW,      LYE_UNMOD,
 /* nul          ^A              ^B              ^C      */
@@ -918,8 +918,8 @@ LYE_UNMOD,      LYE_UNMOD,
 /*  Two more tables here, but currently they are all the same.
     In other words, we are cheating to save space, until there
     is a need for different tables. - kw */
-PRIVATE short *Mod2Binding = Mod1Binding;
-PRIVATE short *Mod3Binding = Mod1Binding;
+static short *Mod2Binding = Mod1Binding;
+static short *Mod3Binding = Mod1Binding;
 
 #endif /* EXP_ALT_BINDINGS */
 
@@ -928,7 +928,7 @@ PRIVATE short *Mod3Binding = Mod1Binding;
  * Add the array name to LYLineEditors
  */
 
-PUBLIC LYEditCode * LYLineEditors[]={
+LYEditCode * LYLineEditors[]={
         DefaultEditBinding,     /* You can't please everyone, so you ... DW */
 #ifdef EXP_ALT_BINDINGS
 	BetterEditBinding,      /* No, you certainly can't ... /ked 10/27/98*/
@@ -940,7 +940,7 @@ PUBLIC LYEditCode * LYLineEditors[]={
  * Add the name that the user will see below.
  * The order of LYLineEditors and LYLineditNames MUST be the same.
  */
-PUBLIC char * LYLineeditNames[]={
+char * LYLineeditNames[]={
 	"Default Binding",
 #ifdef EXP_ALT_BINDINGS
 	"Alternate Bindings",
@@ -955,7 +955,7 @@ PUBLIC char * LYLineeditNames[]={
  *
  * The order must correspond to that of LYLineditNames.
  */
-PUBLIC CONST char * LYLineeditHelpURLs[]={
+const char * LYLineeditHelpURLs[]={
 	EDIT_HELP,
 #ifdef EXP_ALT_BINDINGS
 	ALT_EDIT_HELP,
@@ -964,8 +964,8 @@ PUBLIC CONST char * LYLineeditHelpURLs[]={
 	(char *) 0
 };
 
-PUBLIC int EditBinding ARGS1(
-    int,	xlkc)
+int EditBinding (
+    int	xlkc)
 {
     int editaction, xleac = LYE_UNMOD;
     int c = xlkc & LKC_MASK;
@@ -1023,10 +1023,10 @@ PUBLIC int EditBinding ARGS1(
  *  as a result of re-parsing lynx.cfg), we don't remember the
  *  original editaction from the Bindings tables anywhere. - kw
  */
-PUBLIC BOOL LYRemapEditBinding ARGS3(
-    int,	xlkc,
-    int,	lec,
-    int,	select_edi)
+BOOL LYRemapEditBinding (
+    int	xlkc,
+    int	lec,
+    int	select_edi)
 {
     int j;
     int c = xlkc & LKC_MASK;
@@ -1091,8 +1091,8 @@ PUBLIC BOOL LYRemapEditBinding ARGS3(
 			(i==255) ? (-1) :i+1)
 #define FIRST_I 97
 
-PUBLIC int LYKeyForEditAction ARGS1(
-    int,		lec)
+int LYKeyForEditAction (
+    int		lec)
 {
     int editaction, i;
     for (i = FIRST_I; i >= 0; i = NEXT_I(i,KEYMAP_SIZE-2)) {
@@ -1122,9 +1122,9 @@ PUBLIC int LYKeyForEditAction ARGS1(
  *  This is all a bit long - it is general enough to continue to work
  *  should the three Mod<N>Binding[] become different tables. - kw
  */
-PUBLIC int LYEditKeyForAction ARGS2(
-    int,		lac,
-    int *,		pmodkey)
+int LYEditKeyForAction (
+    int		lac,
+    int *		pmodkey)
 {
     int editaction, i, c;
     int mod1found = -1, mod2found = -1, mod3found = -1;
@@ -1292,7 +1292,7 @@ PUBLIC int LYEditKeyForAction ARGS2(
  * if the external model is common block, and the
  * module is ever placed in a library. - FM
  */
-PUBLIC int LYEditmapDeclared NOARGS
+int LYEditmapDeclared (void)
 {
     int status = 1;
 

@@ -159,11 +159,11 @@ extern HTLinkType * HTInternalLink;
 **	a name, and possibly a link to a _relatively_ named anchor.
 **	(Code originally in ParseHTML.h)
 */
-extern HTChildAnchor * HTAnchor_findChildAndLink PARAMS((
+extern HTChildAnchor * HTAnchor_findChildAndLink (
 	HTParentAnchor * parent,	/* May not be 0 */
-	CONST char * tag,		/* May be "" or 0 */
-	CONST char * href,		/* May be "" or 0 */
-	HTLinkType * ltype));		/* May be 0 */
+	const char * tag,		/* May be "" or 0 */
+	const char * href,		/* May be "" or 0 */
+	HTLinkType * ltype);		/* May be 0 */
 
 /*	Create new or find old parent anchor
 **	------------------------------------
@@ -173,8 +173,8 @@ extern HTChildAnchor * HTAnchor_findChildAndLink PARAMS((
 **	Note: You are not guaranteed a new anchor -- you might get an old one,
 **	like with fonts.
 */
-extern HTParentAnchor * HTAnchor_findAddress PARAMS((
-	CONST DocAddress *	address));
+extern HTParentAnchor * HTAnchor_findAddress (
+	const DocAddress *	address);
 
 /*	Create new or find old named anchor - simple form
 **	-------------------------------------------------
@@ -182,8 +182,8 @@ extern HTParentAnchor * HTAnchor_findAddress PARAMS((
 **	Like the previous one, but simpler to use for simple cases.
 **	No post data etc. can be supplied. - kw
 */
-extern HTParentAnchor * HTAnchor_findSimpleAddress PARAMS((
-	CONST char *	url));
+extern HTParentAnchor * HTAnchor_findSimpleAddress (
+	const char *	url);
 
 /*	Delete an anchor and possibly related things (auto garbage collection)
 **	--------------------------------------------
@@ -194,255 +194,255 @@ extern HTParentAnchor * HTAnchor_findSimpleAddress PARAMS((
 **	We also try to delete the targets whose documents are not loaded.
 **	If this anchor's sources list is empty, we delete it and its children.
 */
-extern BOOL HTAnchor_delete PARAMS((
-	HTParentAnchor0 *	me));
+extern BOOL HTAnchor_delete (
+	HTParentAnchor0 *	me);
 
 /*
  *  Unnamed children (children_notag) have no sense without HText -
  *  delete them and their links if we are about to free HText.
  *  Document currently exists.  Called within HText_free().
  */
-extern void HTAnchor_delete_links PARAMS((
-	HTParentAnchor *	me));
+extern void HTAnchor_delete_links (
+	HTParentAnchor *	me);
 
 #ifdef USE_SOURCE_CACHE
-extern void HTAnchor_clearSourceCache PARAMS((
-	HTParentAnchor *	me));
+extern void HTAnchor_clearSourceCache (
+	HTParentAnchor *	me);
 #endif
 
 /*	Data access functions
 **	---------------------
 */
-extern HTParentAnchor * HTAnchor_parent PARAMS((
-	HTAnchor *		me));
+extern HTParentAnchor * HTAnchor_parent (
+	HTAnchor *		me);
 
-extern void HTAnchor_setDocument PARAMS((
+extern void HTAnchor_setDocument (
 	HTParentAnchor *	me,
-	HyperDoc *		doc));
+	HyperDoc *		doc);
 
-extern HyperDoc * HTAnchor_document PARAMS((
-	HTParentAnchor *	me));
+extern HyperDoc * HTAnchor_document (
+	HTParentAnchor *	me);
 
 /*	Returns the full URI of the anchor, child or parent
 **	as a malloc'd string to be freed by the caller.
 */
-extern char * HTAnchor_address PARAMS((
-	HTAnchor *		me));
+extern char * HTAnchor_address (
+	HTAnchor *		me);
 
-extern void HTAnchor_setFormat PARAMS((
+extern void HTAnchor_setFormat (
 	HTParentAnchor *	me,
-	HTFormat		form));
+	HTFormat		form);
 
-extern HTFormat HTAnchor_format PARAMS((
-	HTParentAnchor *	me));
+extern HTFormat HTAnchor_format (
+	HTParentAnchor *	me);
 
-extern void HTAnchor_setIndex PARAMS((
+extern void HTAnchor_setIndex (
 	HTParentAnchor *	me,
-	CONST char *		address));
+	const char *		address);
 
-extern void HTAnchor_setPrompt PARAMS((
+extern void HTAnchor_setPrompt (
 	HTParentAnchor *	me,
-	CONST char *		prompt));
+	const char *		prompt);
 
-extern BOOL HTAnchor_isIndex PARAMS((
-	HTParentAnchor *	me));
+extern BOOL HTAnchor_isIndex (
+	HTParentAnchor *	me);
 
-extern BOOL HTAnchor_isISMAPScript PARAMS((
-	HTAnchor *		me));
+extern BOOL HTAnchor_isISMAPScript (
+	HTAnchor *		me);
 
 #if defined(USE_COLOR_STYLE)
-extern CONST char * HTAnchor_style PARAMS((
-	HTParentAnchor *	me));
+extern const char * HTAnchor_style (
+	HTParentAnchor *	me);
 
-extern void HTAnchor_setStyle PARAMS((
+extern void HTAnchor_setStyle (
 	HTParentAnchor *	me,
-	CONST char *		style));
+	const char *		style);
 #endif
 
 /*	Title handling.
 */
-extern CONST char * HTAnchor_title PARAMS((
-	HTParentAnchor *	me));
+extern const char * HTAnchor_title (
+	HTParentAnchor *	me);
 
-extern void HTAnchor_setTitle PARAMS((
+extern void HTAnchor_setTitle (
 	HTParentAnchor *	me,
-	CONST char *		title));
+	const char *		title);
 
-extern void HTAnchor_appendTitle PARAMS((
+extern void HTAnchor_appendTitle (
 	HTParentAnchor *	me,
-	CONST char *		title));
+	const char *		title);
 
 /*	Bookmark handling.
 */
-extern CONST char * HTAnchor_bookmark PARAMS((
-	HTParentAnchor *	me));
+extern const char * HTAnchor_bookmark (
+	HTParentAnchor *	me);
 
-extern void HTAnchor_setBookmark PARAMS((
+extern void HTAnchor_setBookmark (
 	HTParentAnchor *	me,
-	CONST char *		bookmark));
+	const char *		bookmark);
 
 /*	Owner handling.
 */
-extern CONST char * HTAnchor_owner PARAMS((
-	HTParentAnchor *	me));
+extern const char * HTAnchor_owner (
+	HTParentAnchor *	me);
 
-extern void HTAnchor_setOwner PARAMS((
+extern void HTAnchor_setOwner (
 	HTParentAnchor *	me,
-	CONST char *		owner));
+	const char *		owner);
 
 /*	TITLE handling in LINKs with REV="made" or REV="owner". - FM
 */
-extern CONST char * HTAnchor_RevTitle PARAMS((
-	HTParentAnchor *	me));
+extern const char * HTAnchor_RevTitle (
+	HTParentAnchor *	me);
 
-extern void HTAnchor_setRevTitle PARAMS((
+extern void HTAnchor_setRevTitle (
 	HTParentAnchor *	me,
-	CONST char *		title));
+	const char *		title);
 
 /*	Citehost for bibp links from LINKs with REL="citehost". - RDC
 */
-extern CONST char * HTAnchor_citehost PARAMS((
-	HTParentAnchor *	me));
+extern const char * HTAnchor_citehost (
+	HTParentAnchor *	me);
 
-extern void HTAnchor_setCitehost PARAMS((
+extern void HTAnchor_setCitehost (
 	HTParentAnchor *	me,
-	CONST char *		citehost));
+	const char *		citehost);
 
 /*	Suggested filename handling. - FM
 **	(will be loaded if we had a Content-Disposition
 **	 header or META element with filename=name.suffix)
 */
-extern CONST char * HTAnchor_SugFname PARAMS((
-	HTParentAnchor *	me));
+extern const char * HTAnchor_SugFname (
+	HTParentAnchor *	me);
 
 /*	Content-Type handling. - FM
 */
-extern CONST char * HTAnchor_content_type PARAMS((
-	HTParentAnchor *	me));
+extern const char * HTAnchor_content_type (
+	HTParentAnchor *	me);
 
 /*	Content-Encoding handling. - FM
 **	(will be loaded if we had a Content-Encoding
 **	 header.)
 */
-extern CONST char * HTAnchor_content_encoding PARAMS((
-	HTParentAnchor *	me));
+extern const char * HTAnchor_content_encoding (
+	HTParentAnchor *	me);
 
 /*	Last-Modified header handling. - FM
 */
-extern CONST char * HTAnchor_last_modified PARAMS((
-	HTParentAnchor *	me));
+extern const char * HTAnchor_last_modified (
+	HTParentAnchor *	me);
 
 /*	Date header handling. - FM
 */
-extern CONST char * HTAnchor_date PARAMS((
-	HTParentAnchor *	me));
+extern const char * HTAnchor_date (
+	HTParentAnchor *	me);
 
 /*	Server header handling. - FM
 */
-extern CONST char * HTAnchor_server PARAMS((
-	HTParentAnchor *	me));
+extern const char * HTAnchor_server (
+	HTParentAnchor *	me);
 
 /*	Safe header handling. - FM
 */
-extern BOOL HTAnchor_safe PARAMS((
-	HTParentAnchor *	me));
+extern BOOL HTAnchor_safe (
+	HTParentAnchor *	me);
 
 /*	Content-Base header handling. - FM
 */
-extern CONST char * HTAnchor_content_base PARAMS((
-	HTParentAnchor *	me));
+extern const char * HTAnchor_content_base (
+	HTParentAnchor *	me);
 
 /*	Content-Location header handling. - FM
 */
-extern CONST char * HTAnchor_content_location PARAMS((
-	HTParentAnchor *	me));
+extern const char * HTAnchor_content_location (
+	HTParentAnchor *	me);
 
 /*	Message-ID, used for mail replies - kw
 */
-extern CONST char * HTAnchor_messageID PARAMS((
-	HTParentAnchor *	me));
+extern const char * HTAnchor_messageID (
+	HTParentAnchor *	me);
 
-extern BOOL HTAnchor_setMessageID PARAMS((
+extern BOOL HTAnchor_setMessageID (
 	HTParentAnchor *	me,
-	CONST char *		messageid));
+	const char *		messageid);
 
 /*	Subject, used for mail replies - kw
 */
-extern CONST char * HTAnchor_subject PARAMS((
-	HTParentAnchor *	me));
+extern const char * HTAnchor_subject (
+	HTParentAnchor *	me);
 
-extern BOOL HTAnchor_setSubject PARAMS((
+extern BOOL HTAnchor_setSubject (
 	HTParentAnchor *	me,
-	CONST char *		subject));
+	const char *		subject);
 
 /*	Manipulation of links
 **	---------------------
 */
-extern HTAnchor * HTAnchor_followLink PARAMS((
-	HTChildAnchor *		me));
+extern HTAnchor * HTAnchor_followLink (
+	HTChildAnchor *		me);
 
-extern HTAnchor * HTAnchor_followTypedLink PARAMS((
+extern HTAnchor * HTAnchor_followTypedLink (
 	HTChildAnchor *		me,
-	HTLinkType *		type));
+	HTLinkType *		type);
 
 /*	Read and write methods
 **	----------------------
 */
-extern HTList * HTAnchor_methods PARAMS((
-	HTParentAnchor *	me));
+extern HTList * HTAnchor_methods (
+	HTParentAnchor *	me);
 
 /*	Protocol
 **	--------
 */
-extern void * HTAnchor_protocol PARAMS((
-	HTParentAnchor *	me));
+extern void * HTAnchor_protocol (
+	HTParentAnchor *	me);
 
-extern void HTAnchor_setProtocol PARAMS((
+extern void HTAnchor_setProtocol (
 	HTParentAnchor *	me,
-	void *			protocol));
+	void *			protocol);
 
 /*	Physical address
 **	----------------
 */
-extern char * HTAnchor_physical PARAMS((
-	HTParentAnchor *	me));
+extern char * HTAnchor_physical (
+	HTParentAnchor *	me);
 
-extern void HTAnchor_setPhysical PARAMS((
+extern void HTAnchor_setPhysical (
 	HTParentAnchor *	me,
-	char *			protocol));
+	char *			protocol);
 
-extern LYUCcharset * HTAnchor_getUCInfoStage PARAMS((
+extern LYUCcharset * HTAnchor_getUCInfoStage (
 	HTParentAnchor *	me,
-	int			which_stage));
+	int			which_stage);
 
-extern int HTAnchor_getUCLYhndl PARAMS((
+extern int HTAnchor_getUCLYhndl (
 	HTParentAnchor *	me,
-	int			which_stage));
+	int			which_stage);
 
-extern LYUCcharset * HTAnchor_setUCInfoStage PARAMS((
-	HTParentAnchor *	me,
-	int			LYhndl,
-	int			which_stage,
-	int			set_by));
-
-extern LYUCcharset * HTAnchor_setUCInfoStage PARAMS((
+extern LYUCcharset * HTAnchor_setUCInfoStage (
 	HTParentAnchor *	me,
 	int			LYhndl,
 	int			which_stage,
-	int			set_by));
+	int			set_by);
 
-extern LYUCcharset * HTAnchor_resetUCInfoStage PARAMS((
+extern LYUCcharset * HTAnchor_setUCInfoStage (
 	HTParentAnchor *	me,
 	int			LYhndl,
 	int			which_stage,
-	int			set_by));
+	int			set_by);
 
-extern LYUCcharset * HTAnchor_copyUCInfoStage PARAMS((
+extern LYUCcharset * HTAnchor_resetUCInfoStage (
+	HTParentAnchor *	me,
+	int			LYhndl,
+	int			which_stage,
+	int			set_by);
+
+extern LYUCcharset * HTAnchor_copyUCInfoStage (
 	HTParentAnchor *	me,
 	int			to_stage,
 	int			from_stage,
-	int			set_by));
+	int			set_by);
 
-extern void ImageMapList_free PARAMS((HTList * list));
+extern void ImageMapList_free (HTList * list);
 
 #endif /* HTANCHOR_H */

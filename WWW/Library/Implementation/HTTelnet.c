@@ -35,7 +35,7 @@
 #include <LYClean.h>
 #include <LYLeaks.h>
 
-PRIVATE void do_system ARGS1(char *, command)
+static void do_system (char *  command)
 {
     if (!isEmpty(command)) {
 	CTRACE((tfp, "HTTelnet: Command is: %s\n\n", command));
@@ -47,9 +47,9 @@ PRIVATE void do_system ARGS1(char *, command)
 /*	Telnet or "rlogin" access
 **	-------------------------
 */
-PRIVATE int remote_session ARGS2(char *, acc_method, char *, host)
+static int remote_session (char *  acc_method, char *  host)
 {
-    CONST char *program;
+    const char *program;
 	char * user = host;
 	char * password = NULL;
 	char * cp;
@@ -504,13 +504,12 @@ PRIVATE int remote_session ARGS2(char *, acc_method, char *, host)
 **			(See WWW.h)
 **
 */
-PRIVATE int HTLoadTelnet
-ARGS4
+static int HTLoadTelnet
 (
- CONST char *,		addr,
- HTParentAnchor *,	anchor GCC_UNUSED,
- HTFormat,		format_out GCC_UNUSED,
- HTStream *,		sink			/* Ignored */
+ const char *		addr,
+ HTParentAnchor *	anchor GCC_UNUSED,
+ HTFormat		format_out GCC_UNUSED,
+ HTStream *		sink			/* Ignored */
 )
 {
     char * acc_method;
@@ -545,7 +544,7 @@ GLOBALDEF (HTProtocol, HTTelnet, _HTTELNET_C_1_INIT );
 GLOBALDEF (HTProtocol, HTRlogin, _HTTELNET_C_2_INIT );
 GLOBALDEF (HTProtocol, HTTn3270, _HTTELNET_C_3_INIT );
 #else
-GLOBALDEF PUBLIC HTProtocol HTTelnet = { "telnet", HTLoadTelnet, NULL };
-GLOBALDEF PUBLIC HTProtocol HTRlogin = { "rlogin", HTLoadTelnet, NULL };
-GLOBALDEF PUBLIC HTProtocol HTTn3270 = { "tn3270", HTLoadTelnet, NULL };
+GLOBALDEF HTProtocol HTTelnet = { "telnet", HTLoadTelnet, NULL };
+GLOBALDEF HTProtocol HTRlogin = { "rlogin", HTLoadTelnet, NULL };
+GLOBALDEF HTProtocol HTTn3270 = { "tn3270", HTLoadTelnet, NULL };
 #endif /* GLOBALDEF_IS_MACRO */

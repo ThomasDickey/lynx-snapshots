@@ -19,9 +19,9 @@
 **                it is to be kept.
 */
 #ifdef INET6
-extern CONST char * HTInetString PARAMS((SockA* mysin));
+extern const char * HTInetString (SockA* mysin);
 #else
-extern CONST char * HTInetString PARAMS((struct sockaddr_in* mysin));
+extern const char * HTInetString (struct sockaddr_in* mysin);
 #endif /* INET6 */
 
 /*      Encode INET status (as in sys/errno.h)                    inet_status()
@@ -34,11 +34,7 @@ extern CONST char * HTInetString PARAMS((struct sockaddr_in* mysin));
 ** On return:
 **      returns a negative status in the unix way.
 */
-#if defined(__STDC__) || defined(__BORLANDC__) || defined(_MSC_VER)
-        extern int HTInetStatus(char *where);
-#else
-        extern int HTInetStatus();
-#endif
+extern int HTInetStatus(char *where);
 
 /*      Publicly accessible variables
 */
@@ -61,15 +57,15 @@ extern CONST char * HTInetString PARAMS((struct sockaddr_in* mysin));
 **      *pstatus points to status updated iff bad
 */
 
-extern unsigned int HTCardinal PARAMS((int *pstatus,
+extern unsigned int HTCardinal (int *pstatus,
                 char            **pp,
-                unsigned int    max_value));
+                unsigned int    max_value);
 
 /*	Check whether string is a valid Internet hostname
 **	-------------------------------------------------
 */
 
-extern BOOL valid_hostname PARAMS((char * name));
+extern BOOL valid_hostname (char * name);
 
 /*	Resolve an internet hostname, like gethostbyname
 **	------------------------------------------------
@@ -87,24 +83,24 @@ extern BOOL valid_hostname PARAMS((char * name));
 */
 extern int lynx_nsl_status;
 
-extern struct hostent * LYGetHostByName PARAMS((char * str));
+extern struct hostent * LYGetHostByName (char * str);
 
 /*      Get Name of This Machine
 **      ------------------------
 **
 */
 
-extern CONST char * HTHostName NOPARAMS;
+extern const char * HTHostName (void);
 
-extern int HTDoConnect PARAMS((
-	CONST char *	url,
+extern int HTDoConnect (
+	const char *	url,
 	char *		protocol,
 	int		default_port,
-	int *		s));
+	int *		s);
 
-extern int HTDoRead PARAMS((
+extern int HTDoRead (
 	int		fildes,
 	void *		buf,
-	unsigned	nbyte));
+	unsigned	nbyte);
 
 #endif   /* HTTCP_H */

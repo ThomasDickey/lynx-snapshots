@@ -1,6 +1,6 @@
 /* character level styles for Lynx
  * (c) 1996 Rob Partington -- donated to the Lyncei (if they want it :-)
- * @Id: LYStyle.c 1.54 Mon, 19 Jan 2004 04:16:02 -0800 dickey @
+ * @Id: LYStyle.c 1.55 Tue, 27 Apr 2004 13:06:18 -0700 dickey @
  */
 #include <HTUtils.h>
 #include <HTML.h>
@@ -25,66 +25,66 @@
 
 #ifdef USE_COLOR_STYLE
 
-PRIVATE void style_initialiseHashTable NOPARAMS;
+static void style_initialiseHashTable (void);
 
 /* stack of attributes during page rendering */
-PUBLIC int last_styles[128] = { 0 };
-PUBLIC int last_colorattr_ptr = 0;
+int last_styles[128] = { 0 };
+int last_colorattr_ptr = 0;
 
-PUBLIC bucket hashStyles[CSHASHSIZE];
-PUBLIC bucket special_bucket =
+bucket hashStyles[CSHASHSIZE];
+bucket special_bucket =
 {
     "<special>", /* in order something to be in trace. */
     0, 0, 0, 0, NULL
 };
-PUBLIC bucket nostyle_bucket =
+bucket nostyle_bucket =
 {
     "<NOSTYLE>", /* in order something to be in trace. */
     0, 0, 0, 0, NULL
 };
 
-PUBLIC int cached_tag_styles[HTML_ELEMENTS];
-PUBLIC int current_tag_style;
-PUBLIC BOOL force_current_tag_style = FALSE;
-PUBLIC char* forced_classname;
-PUBLIC BOOL force_classname;
+int cached_tag_styles[HTML_ELEMENTS];
+int current_tag_style;
+BOOL force_current_tag_style = FALSE;
+char* forced_classname;
+BOOL force_classname;
 
 /* Remember the hash codes for common elements */
-PUBLIC int s_a			= NOSTYLE;
-PUBLIC int s_aedit		= NOSTYLE;
-PUBLIC int s_aedit_arr		= NOSTYLE;
-PUBLIC int s_aedit_pad		= NOSTYLE;
-PUBLIC int s_aedit_sel		= NOSTYLE;
-PUBLIC int s_alert		= NOSTYLE;
-PUBLIC int s_alink		= NOSTYLE;
-PUBLIC int s_curedit		= NOSTYLE;
-PUBLIC int s_forw_backw		= NOSTYLE;
-PUBLIC int s_hot_paste		= NOSTYLE;
-PUBLIC int s_menu_active	= NOSTYLE;
-PUBLIC int s_menu_bg		= NOSTYLE;
-PUBLIC int s_menu_entry		= NOSTYLE;
-PUBLIC int s_menu_frame		= NOSTYLE;
-PUBLIC int s_menu_number	= NOSTYLE;
-PUBLIC int s_menu_sb		= NOSTYLE;
-PUBLIC int s_normal		= NOSTYLE;
-PUBLIC int s_prompt_edit	= NOSTYLE;
-PUBLIC int s_prompt_edit_arr	= NOSTYLE;
-PUBLIC int s_prompt_edit_pad	= NOSTYLE;
-PUBLIC int s_prompt_sel		= NOSTYLE;
-PUBLIC int s_status		= NOSTYLE;
-PUBLIC int s_title		= NOSTYLE;
-PUBLIC int s_whereis		= NOSTYLE;
+int s_a			= NOSTYLE;
+int s_aedit		= NOSTYLE;
+int s_aedit_arr		= NOSTYLE;
+int s_aedit_pad		= NOSTYLE;
+int s_aedit_sel		= NOSTYLE;
+int s_alert		= NOSTYLE;
+int s_alink		= NOSTYLE;
+int s_curedit		= NOSTYLE;
+int s_forw_backw		= NOSTYLE;
+int s_hot_paste		= NOSTYLE;
+int s_menu_active	= NOSTYLE;
+int s_menu_bg		= NOSTYLE;
+int s_menu_entry		= NOSTYLE;
+int s_menu_frame		= NOSTYLE;
+int s_menu_number	= NOSTYLE;
+int s_menu_sb		= NOSTYLE;
+int s_normal		= NOSTYLE;
+int s_prompt_edit	= NOSTYLE;
+int s_prompt_edit_arr	= NOSTYLE;
+int s_prompt_edit_pad	= NOSTYLE;
+int s_prompt_sel		= NOSTYLE;
+int s_status		= NOSTYLE;
+int s_title		= NOSTYLE;
+int s_whereis		= NOSTYLE;
 
 #ifdef USE_SCROLLBAR
-PUBLIC int s_sb_aa		= NOSTYLE;
-PUBLIC int s_sb_bar		= NOSTYLE;
-PUBLIC int s_sb_bg		= NOSTYLE;
-PUBLIC int s_sb_naa		= NOSTYLE;
+int s_sb_aa		= NOSTYLE;
+int s_sb_bar		= NOSTYLE;
+int s_sb_bg		= NOSTYLE;
+int s_sb_naa		= NOSTYLE;
 #endif
 
 /* start somewhere safe */
 #define MAX_COLOR 16
-PRIVATE int colorPairs = 0;
+static int colorPairs = 0;
 
 #ifdef USE_BLINK
 #  define MAX_BLINK	2
@@ -94,7 +94,7 @@ PRIVATE int colorPairs = 0;
 #  define M_BLINK	0
 #endif
 
-PRIVATE unsigned char our_pairs[2]
+static unsigned char our_pairs[2]
 				[MAX_BLINK]
 				[MAX_COLOR + 1]
 				[MAX_COLOR + 1];
@@ -102,11 +102,11 @@ PRIVATE unsigned char our_pairs[2]
 /*
  * Parse a string containing a combination of video attributes and color.
  */
-PRIVATE void parse_either ARGS4(
-    char *,	attrs,
-    int,	dft_color,
-    int *,	monop,
-    int *,	colorp)
+static void parse_either (
+    char *	attrs,
+    int	dft_color,
+    int *	monop,
+    int *	colorp)
 {
     int value;
 
@@ -131,12 +131,12 @@ PRIVATE void parse_either ARGS4(
 }
 
 /* icky parsing of the style options */
-PRIVATE void parse_attributes ARGS5(
-    char *,	mono,
-    char *,	fg,
-    char *,	bg,
-    int,	style,
-    char *,	element)
+static void parse_attributes (
+    char *	mono,
+    char *	fg,
+    char *	bg,
+    int	style,
+    char *	element)
 {
     int mA = A_NORMAL;
     int fA = default_fg;
@@ -224,7 +224,7 @@ PRIVATE void parse_attributes ARGS5(
 /* parse a style option of the format
  * STYLE:<OBJECT>:FG:BG
  */
-PRIVATE void parse_style ARGS1(char*, param)
+static void parse_style (char* param)
 {
     static struct {
 	char *name;
@@ -359,7 +359,7 @@ where OBJECT is one of EM,STRONG,B,I,U,BLINK etc.\n\n"), buffer);
 }
 
 #ifdef LY_FIND_LEAKS
-PRIVATE void free_colorstylestuff NOARGS
+static void free_colorstylestuff (void)
 {
     style_initialiseHashTable();
     style_deleteStyleList();
@@ -370,9 +370,9 @@ PRIVATE void free_colorstylestuff NOARGS
  * initialise the default style sheet
  * This should be able to be read from a file in CSS format :-)
  */
-PRIVATE void initialise_default_stylesheet NOARGS
+static void initialise_default_stylesheet (void)
 {
-    static CONST char *table[] = {
+    static const char *table[] = {
 	"a:bold:green",
 	"alert:bold:yellow:red",
 	"alink:reverse:yellow:black",
@@ -390,7 +390,7 @@ PRIVATE void initialise_default_stylesheet NOARGS
 }
 
 /* Set all the buckets in the hash table to be empty */
-PRIVATE void style_initialiseHashTable NOARGS
+static void style_initialiseHashTable (void)
 {
     int i;
     static int firsttime = 1;
@@ -428,9 +428,9 @@ PRIVATE void style_initialiseHashTable NOARGS
  * need to remember the STYLE: lines we encounter and parse them
  * after curses has started
  */
-PRIVATE HTList *lss_styles = NULL;
+static HTList *lss_styles = NULL;
 
-PUBLIC void parse_userstyles NOARGS
+void parse_userstyles (void)
 {
     char *name;
     HTList *cur = lss_styles;
@@ -471,7 +471,7 @@ PUBLIC void parse_userstyles NOARGS
 /* Add a STYLE: option line to our list.  Process "default:" early
    for it to have the same semantic as other lines: works at any place
    of the style file, the first line overrides the later ones. */
-PRIVATE void HStyle_addStyle ARGS1(char*, buffer)
+static void HStyle_addStyle (char* buffer)
 {
     char *name = NULL;
 
@@ -493,7 +493,7 @@ PRIVATE void HStyle_addStyle ARGS1(char*, buffer)
     HTList_addObject (lss_styles, name);
 }
 
-PUBLIC void style_deleteStyleList NOARGS
+void style_deleteStyleList (void)
 {
     char *name;
     while ((name = HTList_removeLastObject(lss_styles)) != NULL)
@@ -502,9 +502,9 @@ PUBLIC void style_deleteStyleList NOARGS
     lss_styles = NULL;
 }
 
-PRIVATE int style_readFromFileREC ARGS2(
-    char *,	lss_filename,
-    char *,	parent_filename)
+static int style_readFromFileREC (
+    char *	lss_filename,
+    char *	parent_filename)
 {
     FILE *fh;
     char *buffer = NULL;
@@ -540,17 +540,17 @@ PRIVATE int style_readFromFileREC ARGS2(
     return 0;
 }
 
-PUBLIC int style_readFromFile ARGS1(char*, filename)
+int style_readFromFile (char* filename)
 {
     return style_readFromFileREC(filename, (char *)0);
 }
 
 /* Used in HTStructured methods: - kw */
 
-PUBLIC void TrimColorClass ARGS3(
-    CONST char *,	tagname,
-    char *,		styleclassname,
-    int *,		phcode)
+void TrimColorClass (
+    const char *	tagname,
+    char *		styleclassname,
+    int *		phcode)
 {
     char *end, *start=NULL, *lookfrom;
     char tmp[64];
@@ -578,12 +578,12 @@ PUBLIC void TrimColorClass ARGS3(
 /* This function is designed as faster analog to TrimColorClass.
    It assumes that tag_name is present in stylename! -HV
 */
-PUBLIC void FastTrimColorClass ARGS5 (
-	    CONST char*,	 tag_name,
-	    int,		 name_len,
-	    char*,		 stylename,
-	    char**,		 pstylename_end,/*will be modified*/
-	    int*,		 phcode)	/*will be modified*/
+void FastTrimColorClass (
+	    const char*	 tag_name,
+	    int		 name_len,
+	    char*		 stylename,
+	    char**		 pstylename_end,/*will be modified*/
+	    int*		 phcode)	/*will be modified*/
 {
     char* tag_start = *pstylename_end;
     BOOLEAN found = FALSE;
@@ -612,7 +612,7 @@ PUBLIC void FastTrimColorClass ARGS5 (
  /* This is called each time lss styles are read. It will fill
     each elt of 'cached_tag_styles' -HV
  */
-PUBLIC void cache_tag_styles NOARGS
+void cache_tag_styles (void)
 {
     char buf[200];
     int i;

@@ -16,9 +16,9 @@
 */
 #include <HTFormat.h>
 
-PUBLIC float HTMaxSecs = 1e10;		/* No effective limit */
-PUBLIC float HTMaxLength = 1e10;	/* No effective limit */
-PUBLIC long int HTMaxBytes  = 0;	/* No effective limit */
+float HTMaxSecs = 1e10;		/* No effective limit */
+float HTMaxLength = 1e10;	/* No effective limit */
+long int HTMaxBytes  = 0;	/* No effective limit */
 
 #ifdef UNIX
 #ifdef NeXT
@@ -54,18 +54,18 @@ PUBLIC long int HTMaxBytes  = 0;	/* No effective limit */
 #include <LYMainLoop.h>
 #endif
 
-PUBLIC	BOOL HTOutputSource = NO;	/* Flag: shortcut parser to stdout */
+BOOL HTOutputSource = NO;	/* Flag: shortcut parser to stdout */
 
 #ifdef ORIGINAL
 struct _HTStream {
-      CONST HTStreamClass*	isa;
+      const HTStreamClass*	isa;
       /* ... */
 };
 #endif /* ORIGINAL */
 
 /* this version used by the NetToText stream */
 struct _HTStream {
-	CONST HTStreamClass *	isa;
+	const HTStreamClass *	isa;
 	BOOL			had_cr;
 	HTStream *		sink;
 };
@@ -73,26 +73,26 @@ struct _HTStream {
 /*	Presentation methods
 **	--------------------
 */
-PUBLIC	HTList * HTPresentations = NULL;
-PUBLIC	HTPresentation * default_presentation = NULL;
+HTList * HTPresentations = NULL;
+HTPresentation * default_presentation = NULL;
 
 /*
  *	To free off the presentation list.
  */
 #ifdef LY_FIND_LEAKS
-PRIVATE void HTFreePresentations NOPARAMS;
+static void HTFreePresentations (void);
 #endif
 
 /*	Define a presentation system command for a content-type
 **	-------------------------------------------------------
 */
-PUBLIC void HTSetPresentation ARGS6(
-	CONST char *,	representation,
-	CONST char *,	command,
-	double,		quality,
-	double,		secs,
-	double,		secs_per_byte,
-	long int,	maxbytes)
+void HTSetPresentation (
+	const char *	representation,
+	const char *	command,
+	double		quality,
+	double		secs,
+	double		secs_per_byte,
+	long int	maxbytes)
 {
     HTPresentation * pres = typecalloc(HTPresentation);
     if (pres == NULL)
@@ -130,14 +130,14 @@ PUBLIC void HTSetPresentation ARGS6(
 /*	Define a built-in function for a content-type
 **	---------------------------------------------
 */
-PUBLIC void HTSetConversion ARGS7(
-	CONST char *,	representation_in,
-	CONST char *,	representation_out,
-	HTConverter*,	converter,
-	float,		quality,
-	float,		secs,
-	float,		secs_per_byte,
-	long int,	maxbytes)
+void HTSetConversion (
+	const char *	representation_in,
+	const char *	representation_out,
+	HTConverter*	converter,
+	float		quality,
+	float		secs,
+	float		secs_per_byte,
+	long int	maxbytes)
 {
     HTPresentation * pres = typecalloc(HTPresentation);
     if (pres == NULL)
@@ -177,7 +177,7 @@ PUBLIC void HTSetConversion ARGS7(
 **	Revision History:
 **		05-28-94	created Lynx 2-3-1 Garrett Arch Blythe
 */
-PRIVATE void HTFreePresentations NOARGS
+static void HTFreePresentations (void)
 {
     HTPresentation * pres = NULL;
 
@@ -211,10 +211,10 @@ PRIVATE void HTFreePresentations NOARGS
 **	release the server faster, and if small will save space on PCs etc.
 */
 #define INPUT_BUFFER_SIZE 4096		/* Tradeoff */
-PRIVATE char input_buffer[INPUT_BUFFER_SIZE];
-PRIVATE char * input_pointer;
-PRIVATE char * input_limit;
-PRIVATE int input_file_number;
+static char input_buffer[INPUT_BUFFER_SIZE];
+static char * input_pointer;
+static char * input_limit;
+static int input_file_number;
 
 /*	Set up the buffering
 **
@@ -222,14 +222,14 @@ PRIVATE int input_file_number;
 **	many parsers, and on PCs and Macs we should not duplicate
 **	the static buffer area.
 */
-PUBLIC void HTInitInput ARGS1 (int,file_number)
+void HTInitInput (int file_number)
 {
     input_file_number = file_number;
     input_pointer = input_limit = input_buffer;
 }
 
-PUBLIC int interrupted_in_htgetcharacter = 0;
-PUBLIC int HTGetCharacter NOARGS
+int interrupted_in_htgetcharacter = 0;
+int HTGetCharacter (void)
 {
     char ch;
     interrupted_in_htgetcharacter = 0;
@@ -259,7 +259,7 @@ PUBLIC int HTGetCharacter NOARGS
 }
 
 #ifdef USE_SSL
-PUBLIC char HTGetSSLCharacter ARGS1(void *, handle)
+char HTGetSSLCharacter (void *  handle)
 {
     char ch;
     interrupted_in_htgetcharacter = 0;
@@ -294,7 +294,7 @@ PUBLIC char HTGetSSLCharacter ARGS1(void *, handle)
 /*  Match maintype to any MIME type starting with maintype,
  *  for example:  image/gif should match image
  */
-PRIVATE int half_match ARGS2(char *,trial_type, char *,target)
+static int half_match (char * trial_type, char * target)
 {
     char *cp = strchr(trial_type, '/');
 
@@ -325,10 +325,10 @@ PRIVATE int half_match ARGS2(char *,trial_type, char *,target)
 **	nothing found. - kw
 **
 */
-PRIVATE HTPresentation * HTFindPresentation ARGS3(
-	HTFormat,		rep_in,
-	HTFormat,		rep_out,
-	HTPresentation*,	fill_in)
+static HTPresentation * HTFindPresentation (
+	HTFormat		rep_in,
+	HTFormat		rep_out,
+	HTPresentation*	fill_in)
 {
     HTAtom * wildcard = NULL; /* = HTAtom_for("*"); lookup when needed - kw */
 
@@ -425,11 +425,11 @@ PRIVATE HTPresentation * HTFindPresentation ARGS3(
 **	be a lot neater.
 **
 */
-PUBLIC HTStream * HTStreamStack ARGS4(
-	HTFormat,		rep_in,
-	HTFormat,		rep_out,
-	HTStream*,		sink,
-	HTParentAnchor*,	anchor)
+HTStream * HTStreamStack (
+	HTFormat		rep_in,
+	HTFormat		rep_out,
+	HTStream*		sink,
+	HTParentAnchor*	anchor)
 {
     HTPresentation temp;
     HTPresentation *match;
@@ -479,9 +479,9 @@ PUBLIC HTStream * HTStreamStack ARGS4(
 **	Look up a presentation (exact match only) and, if found, reorder
 **	it to the start of the HTPresentations list. - kw
 */
-PUBLIC void HTReorderPresentation ARGS2(
-	HTFormat,		rep_in,
-	HTFormat,		rep_out)
+void HTReorderPresentation (
+	HTFormat		rep_in,
+	HTFormat		rep_out)
 {
     HTPresentation *match;
     if ((match = HTFindPresentation(rep_in, rep_out, NULL))) {
@@ -494,7 +494,7 @@ PUBLIC void HTReorderPresentation ARGS2(
  * Setup 'get_accept' flag to denote presentations that are not redundant,
  * and will be listed in "Accept:" header.
  */
-PUBLIC void HTFilterPresentations NOARGS
+void HTFilterPresentations (void)
 {
     int i, j;
     int n = HTList_count(HTPresentations);
@@ -547,11 +547,11 @@ PUBLIC void HTFilterPresentations NOARGS
 ** On entry,
 **	length	The size of the data to be converted
 */
-PUBLIC float HTStackValue ARGS4(
-	HTFormat,		rep_in,
-	HTFormat,		rep_out,
-	float,			initial_value,
-	long int,		length)
+float HTStackValue (
+	HTFormat		rep_in,
+	HTFormat		rep_out,
+	float			initial_value,
+	long int		length)
 {
     HTAtom * wildcard = WWW_WILDCARD_REP_OUT;
 
@@ -592,7 +592,7 @@ PUBLIC float HTStackValue ARGS4(
 **   This is a traverse call for HText_pageDisplay() - it works!.
 **
 */
-PUBLIC void HTDisplayPartial NOARGS
+void HTDisplayPartial (void)
 {
 #ifdef DISP_PARTIAL
     if (display_partial) {
@@ -635,7 +635,7 @@ PUBLIC void HTDisplayPartial NOARGS
 }
 
 /* Put this as early as possible, OK just after HTDisplayPartial() */
-PUBLIC void HTFinishDisplayPartial NOARGS
+void HTFinishDisplayPartial (void)
 {
 #ifdef DISP_PARTIAL
 		    /*
@@ -677,11 +677,11 @@ PUBLIC void HTFinishDisplayPartial NOARGS
 **	-1		socket still open, target aborted.
 **	otherwise	socket closed,	target stream still valid.
 */
-PUBLIC int HTCopy ARGS4(
-	HTParentAnchor *,	anchor,
-	int,			file_number,
-	void*,			handle GCC_UNUSED,
-	HTStream*,		sink)
+int HTCopy (
+	HTParentAnchor *	anchor,
+	int			file_number,
+	void*			handle GCC_UNUSED,
+	HTStream*		sink)
 {
     HTStreamClass targetClass;
     BOOL suppress_readprogress = NO;
@@ -859,9 +859,9 @@ finished:
 **  State of file and target stream on return:
 **	always		fp still open, target stream still valid.
 */
-PUBLIC int HTFileCopy ARGS2(
-	FILE *,			fp,
-	HTStream*,		sink)
+int HTFileCopy (
+	FILE *			fp,
+	HTStream*		sink)
 {
     HTStreamClass targetClass;
     int status, bytes;
@@ -934,13 +934,13 @@ PUBLIC int HTFileCopy ARGS2(
 **  State of memory and target stream on return:
 **	always		chunk unchanged, target stream still valid.
 */
-PUBLIC int HTMemCopy ARGS2(
-	HTChunk *,		chunk,
-	HTStream *,		sink)
+int HTMemCopy (
+	HTChunk *		chunk,
+	HTStream *		sink)
 {
     HTStreamClass targetClass;
     int bytes = 0;
-    CONST char *data = chunk->data;
+    const char *data = chunk->data;
     int rv = HT_OK;
 
     targetClass = *(sink->isa);
@@ -997,9 +997,9 @@ PUBLIC int HTMemCopy ARGS2(
 **  State of file and target stream on return:
 **	always		gzfp still open, target stream still valid.
 */
-PRIVATE int HTGzFileCopy ARGS2(
-	gzFile,			gzfp,
-	HTStream*,		sink)
+static int HTGzFileCopy (
+	gzFile			gzfp,
+	HTStream*		sink)
 {
     HTStreamClass targetClass;
     int status, bytes;
@@ -1078,9 +1078,9 @@ PRIVATE int HTGzFileCopy ARGS2(
 **  State of file and target stream on return:
 **	always		bzfp still open, target stream still valid.
 */
-PRIVATE int HTBzFileCopy ARGS2(
-	BZFILE *,		bzfp,
-	HTStream*,		sink)
+static int HTBzFileCopy (
+	BZFILE *		bzfp,
+	HTStream*		sink)
 {
     HTStreamClass targetClass;
     int status, bytes;
@@ -1145,10 +1145,10 @@ PRIVATE int HTBzFileCopy ARGS2(
 **   when the format is textual.
 **
 */
-PUBLIC void HTCopyNoCR ARGS3(
-	HTParentAnchor *,	anchor GCC_UNUSED,
-	int,			file_number,
-	HTStream*,		sink)
+void HTCopyNoCR (
+	HTParentAnchor *	anchor GCC_UNUSED,
+	int			file_number,
+	HTStream*		sink)
 {
     HTStreamClass targetClass;
     int character;
@@ -1205,12 +1205,12 @@ PUBLIC void HTCopyNoCR ARGS3(
 **	-1		socket still open, target stream aborted or NULL.
 **	otherwise	socket closed,	target stream freed.
 */
-PUBLIC int HTParseSocket ARGS5(
-	HTFormat,		rep_in,
-	HTFormat,		format_out,
-	HTParentAnchor *,	anchor,
-	int,			file_number,
-	HTStream*,		sink)
+int HTParseSocket (
+	HTFormat		rep_in,
+	HTFormat		format_out,
+	HTParentAnchor *	anchor,
+	int			file_number,
+	HTStream*		sink)
 {
     HTStream * stream;
     HTStreamClass targetClass;
@@ -1265,12 +1265,12 @@ PUBLIC int HTParseSocket ARGS5(
 **  State of file and target stream on return:
 **	always		fp still open; target freed, aborted, or NULL.
 */
-PUBLIC int HTParseFile ARGS5(
-	HTFormat,		rep_in,
-	HTFormat,		format_out,
-	HTParentAnchor *,	anchor,
-	FILE *,			fp,
-	HTStream*,		sink)
+int HTParseFile (
+	HTFormat		rep_in,
+	HTFormat		format_out,
+	HTParentAnchor *	anchor,
+	FILE *			fp,
+	HTStream*		sink)
 {
     HTStream * stream;
     HTStreamClass targetClass;
@@ -1336,12 +1336,12 @@ PUBLIC int HTParseFile ARGS5(
 **  State of memory and target stream on return:
 **	always		chunk unchanged; target freed, aborted, or NULL.
 */
-PUBLIC int HTParseMem ARGS5(
-	HTFormat,		rep_in,
-	HTFormat,		format_out,
-	HTParentAnchor *,	anchor,
-	HTChunk *,		chunk,
-	HTStream *,		sink)
+int HTParseMem (
+	HTFormat		rep_in,
+	HTFormat		format_out,
+	HTParentAnchor *	anchor,
+	HTChunk *		chunk,
+	HTStream *		sink)
 {
     HTStream * stream;
     HTStreamClass targetClass;
@@ -1368,8 +1368,8 @@ PUBLIC int HTParseMem ARGS5(
 #endif
 
 #ifdef USE_ZLIB
-PRIVATE int HTCloseGzFile ARGS1(
-	gzFile,			gzfp)
+static int HTCloseGzFile (
+	gzFile			gzfp)
 {
     int gzres;
     if (gzfp == NULL)
@@ -1401,12 +1401,12 @@ PRIVATE int HTCloseGzFile ARGS1(
 **  State of file and target stream on return:
 **	always		gzfp closed; target freed, aborted, or NULL.
 */
-PUBLIC int HTParseGzFile ARGS5(
-	HTFormat,		rep_in,
-	HTFormat,		format_out,
-	HTParentAnchor *,	anchor,
-	gzFile,			gzfp,
-	HTStream*,		sink)
+int HTParseGzFile (
+	HTFormat		rep_in,
+	HTFormat		format_out,
+	HTParentAnchor *	anchor,
+	gzFile			gzfp,
+	HTStream*		sink)
 {
     HTStream * stream;
     HTStreamClass targetClass;
@@ -1454,8 +1454,8 @@ PUBLIC int HTParseGzFile ARGS5(
 #endif /* USE_ZLIB */
 
 #ifdef USE_BZLIB
-PRIVATE void HTCloseBzFile ARGS1(
-	BZFILE *,		bzfp)
+static void HTCloseBzFile (
+	BZFILE *		bzfp)
 {
     if (bzfp)
 	BZ2_bzclose(bzfp);
@@ -1477,12 +1477,12 @@ PRIVATE void HTCloseBzFile ARGS1(
 **  State of file and target stream on return:
 **	always		bzfp closed; target freed, aborted, or NULL.
 */
-PUBLIC int HTParseBzFile ARGS5(
-	HTFormat,		rep_in,
-	HTFormat,		format_out,
-	HTParentAnchor *,	anchor,
-	BZFILE*,		bzfp,
-	HTStream*,		sink)
+int HTParseBzFile (
+	HTFormat		rep_in,
+	HTFormat		format_out,
+	HTParentAnchor *	anchor,
+	BZFILE*		bzfp,
+	HTStream*		sink)
 {
     HTStream * stream;
     HTStreamClass targetClass;
@@ -1539,7 +1539,7 @@ PUBLIC int HTParseBzFile ARGS5(
 **	C representation of a new line.
 */
 
-PRIVATE void NetToText_put_character ARGS2(HTStream *, me, char, net_char)
+static void NetToText_put_character (HTStream *  me, char  net_char)
 {
     char c = FROMASCII(net_char);
     if (me->had_cr) {
@@ -1556,29 +1556,29 @@ PRIVATE void NetToText_put_character ARGS2(HTStream *, me, char, net_char)
 	me->sink->isa->put_character(me->sink, c);		/* normal */
 }
 
-PRIVATE void NetToText_put_string ARGS2(HTStream *, me, CONST char *, s)
+static void NetToText_put_string (HTStream *  me, const char *  s)
 {
-    CONST char * p;
+    const char * p;
 
     for (p = s; *p; p++)
 	NetToText_put_character(me, *p);
 }
 
-PRIVATE void NetToText_put_block ARGS3(HTStream *, me, CONST char*, s, int, l)
+static void NetToText_put_block (HTStream * me, const char* s, int l)
 {
-    CONST char * p;
+    const char * p;
 
     for (p = s; p < (s+l); p++)
 	NetToText_put_character(me, *p);
 }
 
-PRIVATE void NetToText_free ARGS1(HTStream *, me)
+static void NetToText_free (HTStream *  me)
 {
     (me->sink->isa->_free)(me->sink);		/* Close rest of pipe */
     FREE(me);
 }
 
-PRIVATE void NetToText_abort ARGS2(HTStream *, me, HTError, e)
+static void NetToText_abort (HTStream *  me, HTError  e)
 {
     me->sink->isa->_abort(me->sink,e);		/* Abort rest of pipe */
     FREE(me);
@@ -1586,7 +1586,7 @@ PRIVATE void NetToText_abort ARGS2(HTStream *, me, HTError, e)
 
 /*	The class structure
 */
-PRIVATE HTStreamClass NetToTextClass = {
+static HTStreamClass NetToTextClass = {
     "NetToText",
     NetToText_free,
     NetToText_abort,
@@ -1597,7 +1597,7 @@ PRIVATE HTStreamClass NetToTextClass = {
 
 /*	The creation method
 */
-PUBLIC HTStream * HTNetToText ARGS1(HTStream *, sink)
+HTStream * HTNetToText (HTStream *  sink)
 {
     HTStream* me = typecalloc(HTStream);
 
@@ -1610,41 +1610,41 @@ PUBLIC HTStream * HTNetToText ARGS1(HTStream *, sink)
     return me;
 }
 
-PRIVATE HTStream	HTBaseStreamInstance;		      /* Made static */
+static HTStream	HTBaseStreamInstance;		      /* Made static */
 /*
 **	ERROR STREAM
 **	------------
 **	There is only one error stream shared by anyone who wants a
 **	generic error returned from all stream methods.
 */
-PRIVATE void HTErrorStream_put_character ARGS2(HTStream *, me GCC_UNUSED, char, c GCC_UNUSED)
+static void HTErrorStream_put_character (HTStream *  me GCC_UNUSED, char  c GCC_UNUSED)
 {
     LYCancelDownload = TRUE;
 }
 
-PRIVATE void HTErrorStream_put_string ARGS2(HTStream *, me GCC_UNUSED, CONST char *, s)
+static void HTErrorStream_put_string (HTStream *  me GCC_UNUSED, const char *  s)
 {
     if (s && *s)
 	LYCancelDownload = TRUE;
 }
 
-PRIVATE void HTErrorStream_write ARGS3(HTStream *, me GCC_UNUSED, CONST char *, s, int, l)
+static void HTErrorStream_write (HTStream * me GCC_UNUSED, const char * s, int l)
 {
     if (l && s)
 	LYCancelDownload = TRUE;
 }
 
-PRIVATE void HTErrorStream_free ARGS1(HTStream *, me GCC_UNUSED)
+static void HTErrorStream_free (HTStream *  me GCC_UNUSED)
 {
     return;
 }
 
-PRIVATE void HTErrorStream_abort ARGS2(HTStream *, me GCC_UNUSED, HTError, e GCC_UNUSED)
+static void HTErrorStream_abort (HTStream *  me GCC_UNUSED, HTError  e GCC_UNUSED)
 {
     return;
 }
 
-PRIVATE CONST HTStreamClass HTErrorStreamClass =
+static const HTStreamClass HTErrorStreamClass =
 {
     "ErrorStream",
     HTErrorStream_free,
@@ -1654,7 +1654,7 @@ PRIVATE CONST HTStreamClass HTErrorStreamClass =
     HTErrorStream_write
 };
 
-PUBLIC HTStream * HTErrorStream NOARGS
+HTStream * HTErrorStream (void)
 {
     CTRACE((tfp, "ErrorStream. Created\n"));
     HTBaseStreamInstance.isa = &HTErrorStreamClass;    /* The rest is random */
