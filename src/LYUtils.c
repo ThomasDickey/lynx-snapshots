@@ -2262,7 +2262,7 @@ PUBLIC int HTCheckForInterrupt NOARGS
     int c;
     int cmd;
 #ifndef VMS /* UNIX stuff: */
-#if !defined(USE_SLANG) && defined(UNIX)
+#if !defined(USE_SLANG) && (defined(UNIX) || defined(__DJGPP__))
     struct timeval socket_timeout;
     int ret = 0;
     fd_set readfds;
@@ -3197,7 +3197,7 @@ PUBLIC BOOLEAN LYCloseOutput ARGS1(
 PUBLIC BOOLEAN LYCanWriteFile ARGS1(
 	CONST char*,	filename)
 {
-    if (LYCloseOutput(fopen(filename, TXT_W))) {
+    if (LYCloseOutput(fopen(filename, "w"))) {
 	remove(filename);
 	return TRUE;
     } else {
@@ -3214,7 +3214,7 @@ PUBLIC BOOLEAN LYCanReadFile ARGS1(
 {
     FILE *fp;
 
-    if ((fp = fopen(filename, TXT_R)) != 0) {
+    if ((fp = fopen(filename, "r")) != 0) {
 	return LYCloseInput(fp);
     }
     return FALSE;
@@ -3259,7 +3259,7 @@ PUBLIC BOOLEAN inlocaldomain NOARGS
     if ((cp = ttyname(0)))
 	mytty = strrchr(cp, '/');
 
-    if (mytty && (fp = fopen(UTMP_FILE, TXT_R)) != NULL) {
+    if (mytty && (fp = fopen(UTMP_FILE, "r")) != NULL) {
 	mytty++;
 	do {
 	    n = fread((char *) &me, sizeof(struct utmp), 1, fp);

@@ -846,7 +846,7 @@ PUBLIC int HTVMSBrowseDir ARGS4(
 	if (header[strlen(header)-1] != '/')
 	    StrAllocCat(header, "/");
 	StrAllocCat(header, HT_DIR_README_FILE);
-	if ((fp = fopen(header,	 TXT_R)) != NULL) {
+	if ((fp = fopen(header,	 "r")) != NULL) {
 	    START(HTML_PRE);
 	    for(;;) {
 		char c = fgetc(fp);

@@ -678,7 +678,7 @@ PRIVATE char * scan_cookie_sublist ARGS6(
 			host_matches(hostname, co->domain),
 			path, co->path,
 			(co->pathlen > 0)
-			    ? !is_prefix(path, co->path)
+			    ? !is_prefix(co->path, path)
 			    : 0,
 			(co->flags & COOKIE_FLAG_SECURE)
 			    ? " secure"
@@ -700,7 +700,7 @@ PRIVATE char * scan_cookie_sublist ARGS6(
 	 */
 	if (((co != NULL) &&
 	     host_matches(hostname, co->domain)) &&
-	    (co->pathlen == 0 || is_prefix(path, co->path))) {
+	    (co->pathlen == 0 || is_prefix(co->path, path))) {
 	    /*
 	     *	Skip if the secure flag is set and we don't have
 	     *	a secure connection.  HTTP.c presently treats only

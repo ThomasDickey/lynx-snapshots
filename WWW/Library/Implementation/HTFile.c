@@ -1604,7 +1604,7 @@ PRIVATE void do_readme ARGS2(HTStructured *, target, CONST char *, localname)
 
     HTSprintf0(&readme_file_name, "%s/%s", localname, HT_DIR_README_FILE);
 
-    fp = fopen(readme_file_name,  TXT_R);
+    fp = fopen(readme_file_name, "r");
 
     if (fp) {
 	HTStructuredClass targetClass;
@@ -2184,7 +2184,7 @@ PUBLIC int HTLoadFile ARGS4(
 	FILE * fp;
 	char * vmsname = strchr(filename + 1, '/') ?
 		    HTVMS_name(nodename, filename) : filename + 1;
-	fp = fopen(vmsname, TXT_R, "shr=put", "shr=upd");
+	fp = fopen(vmsname, "r", "shr=put", "shr=upd");
 
 	/*
 	**  If the file wasn't VMS syntax, then perhaps it is Ultrix.
@@ -2193,7 +2193,7 @@ PUBLIC int HTLoadFile ARGS4(
 	    char * ultrixname = 0;
 	    CTRACE((tfp, "HTLoadFile: Can't open as %s\n", vmsname));
 	    HTSprintf0(&ultrixname, "%s::\"%s\"", nodename, filename);
-	    fp = fopen(ultrixname, TXT_R, "shr=put", "shr=upd");
+	    fp = fopen(ultrixname, "r", "shr=put", "shr=upd");
 	    if (!fp) {
 		CTRACE((tfp, "HTLoadFile: Can't open as %s\n",
 			    ultrixname));
@@ -2563,7 +2563,7 @@ PUBLIC int HTLoadFile ARGS4(
 #endif /* HAVE_READDIR */
 	{
 	    int bin = HTCompressFileType(localname, ".", &dot) != cftNone;
-	    FILE * fp = fopen(localname, (bin ? BIN_R : TXT_R));
+	    FILE * fp = fopen(localname, (bin ? BIN_R : "r"));
 
 	    CTRACE((tfp, "HTLoadFile: Opening `%s' gives %p\n",
 				 localname, (void*)fp));

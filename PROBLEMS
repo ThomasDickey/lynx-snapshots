@@ -32,7 +32,7 @@ they will be outlined in this file.
 ---------
 
     If you run into a problem compiling GridText.c, try omitting -O from the
-    compiler flags; these are very big files and may not compile successfully
+    compiler flags; it is a very big file and may not compile successfully
     if you include optimization.
 
 ---------
