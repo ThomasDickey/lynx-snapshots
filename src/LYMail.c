@@ -602,8 +602,8 @@ PUBLIC void mailmsg ARGS4(
     char hdrfile[256];
     FILE *hfd;
 
-    CTRACE(tfp, "mailmsg(%d, \"%s\", \"%s\", \"%s\")\n",cur,
-	cur, owner_address?owner_address:"<nil>",
+    CTRACE(tfp, "mailmsg(%d, \"%s\", \"%s\", \"%s\")\n", cur,
+	owner_address?owner_address:"<nil>",
 	filename?filename:"<nil>",
 	linkname?linkname:"<nil>");
 

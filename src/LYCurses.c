@@ -1,4 +1,5 @@
 #include <HTUtils.h>
+#include <HTAlert.h>
 #include <LYCurses.h>
 #include <LYStyle.h>
 #include <LYUtils.h>
@@ -933,7 +934,7 @@ PUBLIC BOOLEAN setup ARGS1(
 {
     int c;
     int status;
-    char *dummy, *cp, term[81];
+    char *dummy = 0, *cp, term[81];
 #ifdef USE_SLANG
     extern void longname();
 #endif /* USE_SLANG */

@@ -189,7 +189,7 @@ struct _HText {
 				S_nonascii_text, S_dollar_paren,
 				S_jisx0201_text }
 				state;			/* Escape sequence? */
-	char			kanji_buf;		/* Lead multibyte */
+	int			kanji_buf;		/* Lead multibyte */
 	int			in_sjis;		/* SJIS flag */
 	int			halted; 		/* emergency halt */
 
@@ -2263,7 +2263,7 @@ PUBLIC void HText_appendCharacter ARGS2(
 					(unsigned char *)&kb,
 					(unsigned char *)&c);
 		    ch = (char)c;
-		    text->kanji_buf = (char)kb;
+		    text->kanji_buf = kb;
 		} else {
 		    text->kanji_buf = ch;
 		    /*

@@ -231,7 +231,6 @@ extern BOOLEAN local_host_only;
 extern BOOLEAN override_no_download;
 extern BOOLEAN show_dotfiles;	/* From rcfile if no_dotfiles is false */
 extern char *indexfile;
-extern int outgoing_mail_charset; /* translate outgoing mail to this charset */
 extern char *personal_mail_address;
 extern char *homepage;	      /* startfile or command line argument */
 extern char *editor;          /* if non empty it enables edit mode with
@@ -264,6 +263,7 @@ extern int Newline_partial;          /* -//- "current" newline position */
 extern int NumOfLines_partial;       /* -//- "current" number of lines */
 extern BOOLEAN debug_display_partial;  /* show with MessageSecs delay */
 extern BOOLEAN detected_forms_input_partial; /* trimHightext temp fix */
+extern int min_lines_partial; /* incremental rendering minimum */
 #endif
 extern char *form_post_data;         /* User data for post form */
 extern char *form_get_data;          /* User data for get form */
@@ -294,12 +294,15 @@ extern BOOLEAN LYNoFromHeader;		/* Never send From header?    */
 extern BOOLEAN LYListNewsNumbers;
 extern BOOLEAN LYUseMouse;
 extern BOOLEAN LYListNewsDates;
+
 extern BOOLEAN LYRawMode;
 extern BOOLEAN LYDefaultRawMode;
 extern BOOLEAN LYUseDefaultRawMode;
 extern char *UCAssume_MIMEcharset;
 extern BOOLEAN UCSaveBookmarksInUnicode; /* in titles,  chars >127 save as &#xUUUU */
 extern BOOLEAN UCForce8bitTOUPPER; /* disable locale case-conversion for >127 */
+extern int outgoing_mail_charset; /* translate outgoing mail to this charset */
+
 extern BOOLEAN LYisConfiguredForX;
 extern char *URLDomainPrefixes;
 extern char *URLDomainSuffixes;
@@ -327,8 +330,6 @@ extern int LYHiddenLinks;
 
 extern BOOL New_DTD;
 
-#define BOOKMARK_TITLE "Bookmark file"
-#define MOSAIC_BOOKMARK_TITLE "Converted Mosaic Hotlist"
 #define MBM_V_MAXFILES  25		/* Max number of sub-bookmark files */
 /*
  *  Arrays that holds the names of sub-bookmark files

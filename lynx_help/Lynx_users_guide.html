@@ -1,12 +1,12 @@
 <!DOCTYPE html public "-//IETF//DTD HTML 3.0//EN">
 <html>
 <head>
-<title>Lynx Users Guide v2.8</title>
+<title>Lynx Users Guide v2.8.1</title>
 <link rev="made" href="mailto:lynx-dev@sig.net">
 </head>
 
 <body>
-<h1>Lynx Users Guide v2.8</h1>
+<h1>Lynx Users Guide v2.8.1</h1>
 
 Lynx is a fully-featured <em>World Wide Web</em> (<em>WWW</em>) client
 for users running cursor-addressable, character-cell display devices (e.g.,
@@ -61,7 +61,7 @@ within a single LAN.
 <li><a href="#Refresh" NAME="ToC-Refresh">Lynx and Client-Side-Pull</a>
 <li><a href="#Cookies" NAME="ToC-Cookies">Lynx and State Management</a> (Me want <em>cookie</em>!)
 <li><A HREF="#Invoking" NAME="ToC-Invoking">The Lynx command line</A>
-<li><A HREF="#lynx.cfg" NAME="ToC-lynx.cfg">System-wide configuration in lynx.cfg file</A>
+<li><A HREF="#lynx.cfg" NAME="ToC-lynx.cfg">Main configuration file lynx.cfg</A>
 <li><A HREF="#Hist" NAME="ToC-Hist">Lynx development history</A>
 </ul>
 
@@ -223,8 +223,7 @@ portions of it in the startfile argument.  For example:<br>
 See <a href="lynx_url_support.html">URL Schemes Supported by Lynx</a> for
 more detailed information.  [<A HREF="#ToC-Remote">ToC</A>]
 
-<h2 ID="EnVar"><A NAME="EnVar">
-<em>Starting Lynx with the WWW_HOME environment variable.</em></A></h2>
+<h2 ID="EnVar"><A NAME="EnVar"><em>Starting Lynx with the WWW_HOME environment variable.</em></A></h2>
 
 You may also specify a starting file for Lynx using the WWW_HOME
 environment variable,
@@ -328,8 +327,9 @@ circular buffer, and any previous entries can be retrieved for re-use by
 pressing the <em>up-arrow</em> or <em>down-arrow</em> keys at the prompt.
 
 <p>Note that if you want exact copies of text files without any expansions
-of TAB characters to spaces you should use the <a href="#RemoteSource">
-Download</a> options. [<A HREF="#ToC-Disposing">ToC</A>]
+of TAB characters to spaces you should use the
+<a href="#RemoteSource">Download</a> options.
+[<A HREF="#ToC-Disposing">ToC</A>]
 
 <h2 ID="LocalSource"><A NAME="LocalSource"
 ><em>Viewing the HTML document source and editing documents</em></A></h2>
@@ -370,25 +370,35 @@ After changes are completed, exit your editor and you will return to Lynx.
 Lynx will reload and render the file so that changes can be immediately
 examined. [<A HREF="#ToC-LocalSource">ToC</A>]
 
-<h2 ID="RemoteSource"><A NAME="RemoteSource">
-<em>Downloading and Saving source files.</em></A></h2>
+<h2 ID="RemoteSource"><A NAME="RemoteSource"><em>Downloading and Saving source files.</em></A></h2>
 
 If the DOWNLOAD keystroke command ('<em>d</em>' or <em>D</em>) is
 used when positioned on a link for an HTML, plain text, or binary
-file, Lynx will transfer the file, without rendering or
-modification, into a temporary location and present the user with
-a list of options, as when a link for a binary file of a type for
-which no viewer has been mapped is activated.  As described
-above, the only default <em>Download option</em> is <em>Save to
-disk</em>, which is disabled if Lynx is running in anonymous
-mode. Additional download methods such as
-kermit and zmodem may be defined in the <A HREF="#lynx.cfg">lynx.cfg</A> file.
-Downloading the sources of HTML and
-plain text files, instead of toggling to <a
-href="#LocalSource">display the source</a> ('<em>\</em>') and
-then using <a href="#Disposing">Printing</a> options, ensures
-that no modifications of the source (e.g., expansions of TAB
-characters to a series of spaces) will occur.
+file, Lynx will transfer the file, without rendering, into a
+temporary location and present the user with a list of options,
+just as it does when a link for a binary file of a type for which
+no viewer has been mapped is activated.
+
+<P>There is a default <em>Download option</em> of <em>Save to
+disk</em>.  This is disabled if Lynx is running in anonymous
+mode.  Any number of download methods such as kermit and zmodem
+may be defined in addition to this default in the
+<em>lynx.cfg</em> file.  Using the <em>Save to disk</em> option
+under the PRINT command after viewing the source of an HTML with
+the VIEW SOURCE (<em>\</em>) command will result in a file which
+differs from the original source in various ways such as tab 
+characters expanded to spaces.  Lynx formats the source presentation
+in this mode.  On the other hand, if the DOWNLOAD command is used,
+the only change will be that Lynx optionally puts 
+<blockquote>
+&lt;!--X-URL: http://www.site.foo/path/to/file.html --&gt<BR>
+&lt;BASE href="http://www.site.foo/path/to/file.html"&gt;
+</blockquote>
+at the start of the file so that relative URLs in the document
+will still work.
+
+Even this modification can be prevented by setting
+PREPEND_BASE_TO_SOURCE:FALSE in lynx.cfg.
 
 <p>Some options, such as <em>Save to disk</em>, involve prompting for an
 output filename.  All output filename entries are saved in a circular buffer,
@@ -462,8 +472,63 @@ to the net.bio.net WAIS server. [<A HREF="#ToC-Search">ToC</A>]
 <h2 ID="InteractiveOptions"><A NAME="InteractiveOptions"><em>Lynx Options Menu</em></A></h2>
 
 The Lynx <em>Options Menu</em> may be accessed by pressing the '<em>o</em>'
-key.  The current Options Menu contains the following configurable
-options.
+key.  The current Options Menu allows you to change options which are
+useful at runtime.  Most of these are read/saved from your .lynxrc file.
+Other options are stored in the lynx.cfg file.
+
+<p>Lynx supports two styles of options menu.  The new style shown below is an HTML
+file generated at runtime:
+
+<pre>
+
+                    Options Menu (Lynx Version 2.8.1pre.2)
+                                       
+      Accept Changes - Reset Changes Left Arrow cancels changes HELP!
+   
+                         Save options to disk: [_]
+
+  Personal Preferences
+  Cookies                          : [ask user..]
+  Editor                           : __________________________________________
+  Emacs keys                       : [OFF]
+  Keypad mode                      : [Numbers act as arrows.............]
+  Personal mail address            : __________________________________________
+  Popups for select fields         : [ON.]
+  Searching type                   : [Case insensitive]
+  Show color                       : [ON....]
+  Show cursor                      : [OFF]
+  User mode                        : [Novice......]
+  Verbose images                   : [OFF]
+  VI keys                          : [OFF]
+  X Display                        : __________________________________________
+
+  Bookmark Options
+  Multi-bookmarks                  : [OFF.....]
+  Bookmarks file                   : __________________________________________
+
+  Character Set Options
+  Assumed document character set   : [iso-8859-1......]
+  Display character set            : [Western (ISO-8859-1)...........]
+  Raw 8-bit                        : [ON.]
+
+  File Management Options
+  Ftp sort criteria                : [By Name]
+  Local directory sort criteria    : [Mixed style......]
+
+  Headers transferred to remote server
+  Preferred document character set : _________________________________
+  Preferred document language      : _________________________________
+  User-Agent header                : __________________________________________
+
+  Check your lynx.cfg here
+
+         Accept Changes - Reset Changes Left Arrow cancels changes
+
+</pre>
+
+<p>The old style of options menu is a fixed form.  Normally this will be
+compiled into Lynx, and is accessed by setting FORMS_OPTIONS true in your
+lynx.cfg file.
 
 <pre>
                       Options Menu
@@ -550,8 +615,7 @@ return to Lynx or the '<em>&gt;</em>' command to save the options to a
 	    href="keystrokes/edit_help.html">Line Editor</a>.
 	    Bookmark files allow frequently traveled links to be stored in
 	    personal easy to access files.  Using the '<em>a</em>'dd bookmark
-	    link command (see <a href="#Bookmarks">
-	    Lynx bookmarks</a>) you may save
+	    link command (see <a href="#Bookmarks">Lynx bookmarks</a>) you may save
 	    any link that does not have associated POST content into a
 	    bookmark file.  All bookmark files must be in or under your
 	    account's home directory.  If the location specified does not
@@ -790,7 +854,7 @@ return to Lynx or the '<em>&gt;</em>' command to save the options to a
 	<dd>The header string which Lynx sends to servers to indicate the
 	    User-Agent is displayed here.  Changes may be disallowed via
 	    the <em>-restrictions</em> switch.	Otherwise, the header can be
-	    changed temporarily to a string such as <em>L_y_n_x/2.8</em>
+	    changed temporarily to a string such as <em>L_y_n_x/2.8.1</em>
 	    for access to sites which discriminate against Lynx based on
 	    checks for the presence of &quot;Lynx&quot; in the header. If
 	    changed during a Lynx session, the default User-Agent header can
@@ -2283,8 +2347,7 @@ White space may be substituted for any equal sign ('<em>=</em>')
 appearing in the option list above. [<A HREF="#ToC-Invoking">ToC</A>]
 
 
-<h2 ID="lynx.cfg"><A NAME="lynx.cfg">
-<em>System-wide configuration in lynx.cfg file</em></A></h2>
+<h2 ID="lynx.cfg"><A NAME="lynx.cfg"><em>Main configuration file lynx.cfg</em></A></h2>
 
 Lynx has several levels of customization:
 from the Options Menu (accessible on-line,
@@ -2368,6 +2431,7 @@ The Lynx2-6FM code set was released as v2.7 in February 1997.
 The v2-7FM code set was released as v2.7.1 in April 1997.
 The v2-7-1FM code set was released as v2.7.2 in January 1998.
 The 2.7.1 development set was released as v2.8 in March 1998.
+The 2.8 development set is planned to release as v2.8.1 in October 1998.
 
 <p>Since early 1997, the Lynx code has expanded into autoconfigure and
 PC versions.  The branching of the Lynx source base from a single

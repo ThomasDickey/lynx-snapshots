@@ -903,6 +903,7 @@ static Config_Type Config_Table [] =
      PARSE_FUN("outgoing_mail_charset", CONF_FUN, outgoing_mail_charset_fun),
 #ifdef DISP_PARTIAL
      PARSE_SET("partial", CONF_BOOL, display_partial),
+     PARSE_SET("partial_min_lines", CONF_INT, min_lines_partial),
 #endif
      PARSE_STR("personal_mailcap", CONF_STR, personal_type_map),
      PARSE_STR("personal_extension_map", CONF_STR, personal_extension_map),
@@ -1135,7 +1136,7 @@ PUBLIC void read_cfg ARGS4(
 
 	    if (getenv (name) == 0) {
 #ifdef VMS
-		Define_VMSLogical(tbl->name, value);
+		Define_VMSLogical(name, value);
 #else
 		char tmpbuf[MAX_LINE_BUFFER_LEN];
 		sprintf (tmpbuf, "%s=%s", name, value);

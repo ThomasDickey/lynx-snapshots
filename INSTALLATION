@@ -274,7 +274,8 @@ II. Compile instructions -- UNIX
   --enable-persistent-cookies		(define EXP_PERSISTENT_COOKIES)
 	Use this option to compile-in support for saving cookies to a file,
 	for subsequent reuse.  This creates a file named 'cookies' in the
-	current directory.
+	current directory.  (Currently there is no protection against conflict
+	if several lynx copies active from the same account).
 
   --enable-syslog			(define SYSLOG_REQUESTED_URLS)
 	Use this option to log NSL requests via syslog().

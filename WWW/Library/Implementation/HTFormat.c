@@ -503,10 +503,15 @@ PRIVATE void HTDisplayPartial NOARGS
 		/* new hypertext document available  */
 	&& ((Newline_partial + display_lines) > NumOfLines_partial)
 		/* current page not complete... */
-	&& ((Newline_partial + display_lines)  < HText_getNumOfLines())) {
-		/*             ^^^^^^^^^^^^^
-		 * and we MAY display the page in one stage:
-		 * incremental rendering of the first page reported annoying
+	&& ((Newline_partial +
+		((min_lines_partial < 1) ?
+		display_lines : min_lines_partial))
+		< HText_getNumOfLines())) {
+		/*
+		 * and we MAY display certain amount of lines (from lynx.cfg)
+		 * 
+		 * By default, wait for complete screen:
+		 * incremental rendering of the first screen reported annoying
 		 * on slow network connection.
 		 */
 	    NumOfLines_partial = HText_getNumOfLines();

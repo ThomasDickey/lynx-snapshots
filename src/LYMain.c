@@ -360,6 +360,7 @@ PUBLIC BOOLEAN LYQuitDefaultYes = QUIT_DEFAULT_YES;
 PUBLIC BOOLEAN display_partial = TRUE; /* Display document during download */
 PUBLIC BOOLEAN debug_display_partial = FALSE; /* Show with MessageSecs delay */
 PUBLIC BOOLEAN detected_forms_input_partial = FALSE; /* trimHightext temp fix */
+PUBLIC int min_lines_partial = 0; /* default: wait for complete screen */
 #endif
 
 /* These are declared in cutil.h for current freeWAIS libraries. - FM */
