@@ -35,6 +35,10 @@
 #include <dos.h>
 #endif /* __DJGPP__ */
 
+#ifdef __EMX__
+#include <io.h>
+#endif
+
 #ifndef VMS
 #ifdef SYSLOG_REQUESTED_URLS
 #include <syslog.h>
@@ -559,16 +563,14 @@ PUBLIC int main ARGS2(
     sock_init();
 #endif
 
-#if defined(_WINDOWS) || defined(DJGPP)
     /*
      * To prevent corrupting binary data with _WINDOWS and DJGPP
      * we open files and stdout in BINARY mode by default.
      * Where necessary we should open and (close!) TEXT mode.
      * (use LYNewTxtFile/LYAppendToTxtFile to open text files for writing)
      */
-    _fmode = O_BINARY;
+    SetDefaultMode(O_BINARY);
     SetOutputMode( O_BINARY );
-#endif
 
 #ifdef DOSPATH
     if (getenv("TERM")==NULL) putenv("TERM=vt100");

@@ -396,10 +396,16 @@ extern void lynx_stop_all_colors NOPARAMS;
  * stdout in BINARY mode by default.  Where necessary we should open and
  * (close!) TEXT mode.
  */
-#if defined(_WINDOWS) || defined(DJGPP)
+#if defined(_WINDOWS) || defined(DJGPP) || defined(__EMX__)
 #define SetOutputMode(mode) setmode(fileno(stdout), mode)
 #else
 #define SetOutputMode(mode) /* nothing */
+#endif
+
+#if defined(_WINDOWS) || defined(DJGPP)
+#define SetDefaultMode(mode) _fmode = mode
+#else
+#define SetDefaultMode(mode) /* nothing */
 #endif
 
 #endif /* LYCURSES_H */

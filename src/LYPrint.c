@@ -1136,7 +1136,7 @@ PUBLIC int printfile ARGS1(
 			HTAddSugFilename(filename);
 		    }
 
-#if defined (VMS) || defined (__EMX__)
+#if defined (VMS) || defined (__EMX__) || defined(__DJGPP__)
 		    sprintf(buffer, cur_printer->command, tempfile, filename,
 				    "", "", "", "", "", "", "", "", "", "");
 #else /* Unix: */

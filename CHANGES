@@ -1,12 +1,23 @@
 Changes since Lynx 2.8 release
 ================================================================================
 
-1998-09-29 (2.8.1pre.5)
+1998-10-01 (2.8.1pre.6)
+* add EMX to special cases for SetOutputMode, to force stdout to O_BINARY mode
+  so that downloading binary files will not corrupt them (reported by Ilya
+  Zakharevich <ilya@math.ohio-state.edu>) - TD
+* correct missing "\n\" in change to LYrcFile.c for pre.4 (reported by David
+  Eaton) - TD
+* reorder HTCheckForInterrupt() so that partial displace mode will work for
+  VMS (reported by LP) - TD
+* fix LYK_DOWNLOAD to restrict downloading remote links for local_host_only,
+  like it was done for mailto: links recently, see comments where in. - LP
+* replace few statusline messages with ones from LYMessages.en.h
+1998-09-30 (2.8.1pre.5)
 * force compile on VMS to use stdarg.h; it was ifdef'd for __STDC__ which
   VAX C does not define, though it does support stdarg.h (reported by Tony
   Bolton).  Test-compile HTVMS_WaisUI.c on Linux to check... - TD
 * update url for tcplib in INSTALLATION - DK
-* fix HTDOS_name trace massage - LP 
+* fix HTDOS_name trace massage - LP
 * expand "~" in include-statements in lynx.cfg (reported by LP) - TD
 * remove some obsolete stuff from INSTALLATION - HN
 * DOSPATH fix: user input URL like c:/path/file.ext (begins with drive letter)

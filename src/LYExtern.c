@@ -57,7 +57,7 @@ void run_external ARGS1(char *, c)
 		 */
 #if defined(VMS) || defined(DOSPATH) || defined(__EMX__)
 		sprintf(command, externals2->command, c);
-#else /* Unix or DOS/Win: */
+#else /* Unix: */
 		cp = quote_pathname(c);
 		sprintf(command, externals2->command, cp);
 		FREE(cp);

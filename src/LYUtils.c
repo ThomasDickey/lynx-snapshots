@@ -2031,8 +2031,8 @@ PUBLIC void LYFakeZap ARGS1(
 
 PUBLIC int HTCheckForInterrupt NOARGS
 {
-#ifndef VMS /* UNIX stuff: */
     int c;
+#ifndef VMS /* UNIX stuff: */
 #ifndef USE_SLANG
     struct timeval socket_timeout;
     int ret = 0;
@@ -2095,6 +2095,37 @@ PUBLIC int HTCheckForInterrupt NOARGS
 #if defined (DOSPATH) && defined (NCURSES)
     nodelay(stdscr,FALSE);
 #endif /* DOSPATH */
+
+#else /* VMS: */
+    extern BOOLEAN HadVMSInterrupt;
+    extern int typeahead();
+
+    if (fake_zap > 0) {
+	fake_zap--;
+	CTRACE(tfp, "\r *** Got simulated 'Z' ***\n");
+	CTRACE_FLUSH(tfp);
+	CTRACE_SLEEP(AlertSecs);
+	return((int)TRUE);
+    }
+
+    /** Curses or slang setup was not invoked **/
+    if (dump_output_immediately)
+	  return((int)FALSE);
+
+    /** Control-C or Control-Y and a 'N'o reply to exit query **/
+    if (HadVMSInterrupt) {
+	HadVMSInterrupt = FALSE;
+	return((int)TRUE);
+    }
+
+    /** Keyboard 'Z' or 'z', or Control-G or Control-C **/
+    c = typeahead();
+
+#endif /* !VMS */
+
+    /*
+     * 'c' contains whatever character we're able to read from type-ahead
+     */
     if (TOUPPER(c) == 'Z' || c == 7 || c == 3)
 	return((int)TRUE);
 #ifdef DISP_PARTIAL
@@ -2147,42 +2178,8 @@ PUBLIC int HTCheckForInterrupt NOARGS
 	HText_pageDisplay(Newline_partial, "");
     }
 #endif /* DISP_PARTIAL */
-
-    /** Other keystrokes **/
-    return((int)FALSE);
-
-#else /* VMS: */
-
-    int c;
-    extern BOOLEAN HadVMSInterrupt;
-    extern int typeahead();
-
-    if (fake_zap > 0) {
-	fake_zap--;
-	CTRACE(tfp, "\r *** Got simulated 'Z' ***\n");
-	CTRACE_FLUSH(tfp);
-	CTRACE_SLEEP(AlertSecs);
-	return((int)TRUE);
-    }
-
-    /** Curses or slang setup was not invoked **/
-    if (dump_output_immediately)
-	  return((int)FALSE);
-
-    /** Control-C or Control-Y and a 'N'o reply to exit query **/
-    if (HadVMSInterrupt) {
-	HadVMSInterrupt = FALSE;
-	return((int)TRUE);
-    }
-
-    /** Keyboard 'Z' or 'z', or Control-G or Control-C **/
-    c = typeahead();
-    if (TOUPPER(c) == 'Z' || c == 7 || c == 3)
-	return((int)TRUE);
-
     /** Other or no keystrokes **/
     return((int)FALSE);
-#endif /* !VMS */
 }
 
 /*
@@ -5549,15 +5546,11 @@ PUBLIC FILE *LYNewTxtFile ARGS1(char *, name)
     fp = fopen (name, "w", "shr=get");
     chmod(name, HIDE_CHMOD);
 #else
-#if defined(__DJGPP__) || defined(_WINDOWS)
-    _fmode = O_TEXT;
-#endif /* __DJGPP__  or _WINDOWS */
+    SetDefaultMode(O_TEXT);
 
     fp = OpenHiddenFile(name, "w");
 
-#if defined(__DJGPP__) || defined(_WINDOWS)
-    _fmode = O_BINARY;
-#endif /* __DJGPP__ or _WINDOWS */
+    SetDefaultMode(O_BINARY);
 #endif
 
     return fp;
@@ -5571,15 +5564,11 @@ PUBLIC FILE *LYAppendToTxtFile ARGS1(char *, name)
     fp = fopen (name, "a+", "shr=get");
     chmod(name, HIDE_CHMOD);
 #else
-#if defined(__DJGPP__) || defined(_WINDOWS)
-    _fmode = O_TEXT;
-#endif /* __DJGPP__  or _WINDOWS */
+    SetDefaultMode(O_TEXT);
 
     fp = OpenHiddenFile(name, "a+");
 
-#if defined(__DJGPP__) || defined(_WINDOWS)
-    _fmode = O_BINARY;
-#endif /* __DJGPP__ or _WINDOWS */
+    SetDefaultMode(O_BINARY);
 #endif
     return fp;
 }

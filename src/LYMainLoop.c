@@ -42,6 +42,10 @@
 #include <LYExtern.h>
 #endif
 
+#ifdef __EMX__
+#include <io.h>
+#endif
+
 #ifdef VMS
 #include <HTVMSUtils.h>
 #endif /* VMS */
@@ -4958,6 +4962,21 @@ check_add_bookmark_to_self:
 		} else if (!strncmp(links[curdoc.link].lname,
 				    "mailto:", 7)) {
 		    HTUserMsg(NO_DOWNLOAD_MAILTO_LINK);
+
+		/*
+		 *  From here on we could have a remote host, so check if
+		 *  that's allowed.
+		 *
+		 *  We copy all these checks from getfile() to LYK_DOWNLOAD
+		 *  here because LYNXDOWNLOAD:// will NOT be pushing the
+		 *  previous document into the history stack so preserve
+		 *  getfile() from returning a wrong status (NULLFILE).
+		 */
+		} else if (local_host_only &&
+			   !(LYisLocalHost(links[curdoc.link].lname) ||
+			     LYisLocalAlias(links[curdoc.link].lname))) {
+		    HTUserMsg(ACCESS_ONLY_LOCALHOST);
+
 
 		} else {   /* Not a forms, options or history link */
 		    /*
