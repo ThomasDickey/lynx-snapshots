@@ -2,18 +2,18 @@
 #   Use this as a template
 
 # For W3 distribution, machine type for subdirectories
-WWW_MACH = djgpp
+WWW_MACH = unix
 
 # The ASIS repository's name for the machine we are on
-#ASIS_MACH = hardware/os
+ASIS_MACH = hardware/os
 
-CFLAGS = -O3 -DUSE_ZLIB -DDOSPATH -DNOUSERS -DDEBUG -I../../../djgpp/tcplib/include -I../../../djgpp/tcplib/include/tcp \
--I../../../src -I../../..
+
+CFLAGS =  -g -DDEBUG
 LFLAGS =
-CC = gcc
+CC = cc
 
 # Directory for installed binary:
-!BINDIR = /usr/local/bin
+BINDIR = /usr/local/bin
 
 # Where is the W3 object library to be installed (not normally done)?
 LIBDIR = $(WWW)/Library/Implementation/$(WWW_MACH)
@@ -25,6 +25,6 @@ WWW = ../..
 #  Where should temporary (object) files go?
 WTMP = ../..
 
+
 include $(WWW)/Library/Implementation/Version.make
-#include $(WWW)/Library/Implementation/CommonMakefile
-include ./CommonMakefile
+include $(WWW)/Library/Implementation/CommonMakefile

@@ -78,17 +78,17 @@ char * HTDOS_name(char *dosname)	{
 
 	if((cp_url[1] == '\\') || (cp_url[0]  != '\\'))
 	{
-/*
+#if 0
 		printf("\n\n%s = i%\n\n",cp_url,strlen(cp_url));
 		sleep(5);
-/**/
+#endif
       strcpy(dosname, cp_url);
       return(dosname); /* return(cp_url); */
 	} else {
-/*
+#if 0
 		printf("\n\n%s = %i\n\n",cp_url+1,strlen(cp_url));
 		sleep(5);
-/**/
+#endif
 		strcpy(dosname, cp_url+1);
       return(dosname); /* return(cp_url+1);  */
 	}

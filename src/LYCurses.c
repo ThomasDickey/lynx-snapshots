@@ -355,11 +355,7 @@ PUBLIC void curses_w_style ARGS4(WINDOW*,win,int,style,int,dir,int,previous)
 				"in LynxChangStyle(curses_w_style)");
 		    last_ptr--;
 		}
-#ifndef _NCURSES_H
 		last_styles[last_ptr++] = getattrs(stdscr);
-#else
-		last_styles[last_ptr++] = attr_get();
-#endif
 		/* don't cache style changes for active links */
 		if (style != s_alink)
 		{

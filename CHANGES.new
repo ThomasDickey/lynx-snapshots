@@ -7,6 +7,31 @@ platforms see also INSTALLATION, for some changes for auto-configure and
 simple curses color see also README.configure).  Note that the 2.7 -> 2.7.1
 changes are included here. - KW]
 
+1998-02-05
+* adjust formatting, comments & some messages in WWW files to simplify
+  comparison with 2.7.2 version.  - TD
+* Update SGML entity to Unicode table in HTMLDTD.c from ftp.unicode.org -
+  lots of new entities, iso-latin-1 now included there (htmldtd.c).
+  See also new files in test/ directory:  sgml.html and unicode.html.
+  Tweak a few typos in test/*.html according to sgml.html - LP
+* Cleanup iso01-iso09, cp866 tables against ones found at ftp.unicode.org
+* Strip the fat from LYCharSets.c - unneccesary obsoleted tables removed
+  and redirected to SevenBitApproximation table (ones which have unicode tables
+  override it anyway, those for CJK had exactly the same tables as
+  SevenBit..). - LP
+* Remove obsoleted "Other ISO Latin" charset, which work *exactly*
+  the same as "7 bit approximation" (tweaks UCdefs.h and LYCharSet.c)
+  (See the note on 06-14-96 where it comes from). - LP
+* Tweaks UCdomap.c and LyCharSet.c according to 2.7.2 for 1997-10-15 - LP
+* add ifdef to HTFile.c to workaround conflicting S_IFIFO vs S_IFSOCK
+  (e.g., on apollo, from a report by Dave Eaton <dwe@arde.com>) - TD
+* updated INSTALLATION (patch by HN) - TD
+* modify DOS handling of CTL-C and CTL-BREAK handling for DOS to allow
+  exiting via SIGINT when pressing CTL-C or CTL-BREAK regardless of the
+  BREAK setting in DOS.  This leaves the BREAK setting unchanged unless
+  CTL-C or CTL-BREAK is actually pressed (in which case it leaves BREAK
+  ON) - DK
+* add note about Lynx vs frames to User's Guide (from Al Gilman) - TD
 1998-01-27
 * correct lynx.man to reference section "1" (one), not "l", since it is
   not installed in the latter (reported by Jason Castonguay
@@ -768,6 +793,14 @@ from the lynx code.  I think the following patch does this.
 * Restored LYCheckForCSI example function to its previous form, with a check
   added and comments added. - KW 
 1997-10-15
+* Changed the order of display character set entries for the options menu
+  popup.  "ISO Latin 1" and its "DosLatin1 (cp850)" and "WinLatin1 (cp1252)"
+  equivalents come first, then the system-based charsets (note that I
+  changed "IBM PC character set" to "DosLatinUS (cp437)"), then the CJK
+  and Vietnamese charsets, then "Other ISO Latin" (probably don't need
+  that one any more), then the known ISO 8859-# charsets with their
+  homologs (e.g, Dos and Win Cyrillic and KOI8-R) in groups, then
+  "UNICODE UTF 8" and the Unicode mnemomic charsets. - FM
 * Various fixes for color style code, should prevent memory corruption. - KW
 * Some LYCharUtils.c cleanup. - KW
 * Added some of the changes from fotemods to SGML.c, especially handling of

@@ -12,7 +12,7 @@
 CFLAGS = $(MCFLAGS)
 
 CC = gcc
-MCFLAGS = -O3 -DEXP_CHARTRANS -DDOSPATH -DNO_TTYTYP \
+MCFLAGS = -O3 -DDOSPATH -DNO_TTYTYP \
 -I../../WWW/library/implement -I../../djgpp/tcplib/include \
 -I../../djgpp/tcplib/include/tcp
 

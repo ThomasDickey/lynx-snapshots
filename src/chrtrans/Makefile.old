@@ -18,7 +18,7 @@ FONTMAP_INC = iso01_uni.h# default, if not set by recursive call
 
 ### fastdep: $(FONTMAP_INC)
 
-### MCFLAGS=-g -DUNIX -DLINUX -DNO_KEYPAD -DNO_TTYTYPE -DEXP_CHARTRANS -I.. -I../../WWW/Library/Implementation -I../..
+### MCFLAGS=-g -DUNIX -DLINUX -DNO_KEYPAD -DNO_TTYTYPE -I.. -I../../WWW/Library/Implementation -I../..
 
 TABLES= \
  cp1250_uni.h \

@@ -1026,7 +1026,7 @@ PUBLIC int UCTransUniChar ARGS2(
 	long,		unicode,
 	int,		charset_out)
 {
-    int rc;
+    int rc = 0;
     int UChndl_out;
     int isdefault, trydefault = 0;
     u16 * ut;
@@ -2013,39 +2013,37 @@ PUBLIC void UCInit NOARGS
     UC_CHARSET_SETUP;	/* us-ascii */	  /* 7 bit approximations */
 
     UC_CHARSET_SETUP_iso_8859_1;	  /* ISO Latin 1	  */
-    UC_CHARSET_SETUP_iso_8859_2;	  /* ISO Latin 2	  */
+    UC_CHARSET_SETUP_cp850;		  /* DosLatin1 (cp850)	  */
     UC_CHARSET_SETUP_windows_1252;	  /* WinLatin1 (cp1252)	  */
-    UC_CHARSET_SETUP_cp852;		  /* DosLatin2 (cp852)	  */
+    UC_CHARSET_SETUP_cp437;		  /* DosLatinUS (cp437)	  */
 
     UC_CHARSET_SETUP_dec_mcs;		  /* DEC Multinational    */
     UC_CHARSET_SETUP_macintosh;		  /* Macintosh (8 bit)    */
     UC_CHARSET_SETUP_next;		  /* NeXT character set   */
-    UC_CHARSET_SETUP_koi8_r;		  /* KOI8-R Cyrillic	  */
 
     UC_CHARSET_SETUP_viscii;		  /* Vietnamese (VISCII)  */
 
-    UC_CHARSET_SETUP_cp437;		  /* DosLatinUS (cp437)	  */
-    UC_CHARSET_SETUP_cp850;		  /* DosLatin1 (cp850)	  */
-    UC_CHARSET_SETUP_cp866;		  /* DosCyrillic (cp866)  */
-    UC_CHARSET_SETUP_cp864;		  /* DosArabic (cp864)	  */
-    UC_CHARSET_SETUP_cp737;		  /* DosGreek (cp737)	  */
-    UC_CHARSET_SETUP_cp775;		  /* DosBaltRim (cp775)	  */
-    UC_CHARSET_SETUP_cp869;		  /* DosGreek2 (cp869)	  */
-    UC_CHARSET_SETUP_cp862;		  /* DosHebrew (cp862)	  */
-
+    UC_CHARSET_SETUP_iso_8859_2;	  /* ISO Latin 2	  */
+    UC_CHARSET_SETUP_cp852;		  /* DosLatin2 (cp852)	  */
     UC_CHARSET_SETUP_windows_1250;	  /* WinLatin2 (cp1250)	  */
-    UC_CHARSET_SETUP_windows_1251;	  /* WinCyrillic (cp1251) */
-    UC_CHARSET_SETUP_windows_1253;	  /* WinGreek (cp1253)	  */
-    UC_CHARSET_SETUP_windows_1255;	  /* WinHebrew (cp1255)	  */
-    UC_CHARSET_SETUP_windows_1256;	  /* WinArabic (cp1256)	  */
-    UC_CHARSET_SETUP_windows_1257;	  /* WinBaltRim (cp1257)  */
-
     UC_CHARSET_SETUP_iso_8859_3;	  /* ISO Latin 3	  */
     UC_CHARSET_SETUP_iso_8859_4;	  /* ISO Latin 4	  */
+    UC_CHARSET_SETUP_cp775;		  /* DosBaltRim (cp775)	  */
+    UC_CHARSET_SETUP_windows_1257;	  /* WinBaltRim (cp1257)  */
     UC_CHARSET_SETUP_iso_8859_5;	  /* ISO 8859-5 Cyrillic  */
+    UC_CHARSET_SETUP_cp866;		  /* DosCyrillic (cp866)  */
+    UC_CHARSET_SETUP_windows_1251;	  /* WinCyrillic (cp1251) */
+    UC_CHARSET_SETUP_koi8_r;		  /* KOI8-R Cyrillic	  */
     UC_CHARSET_SETUP_iso_8859_6;	  /* ISO 8869-6 Arabic	  */
+    UC_CHARSET_SETUP_cp864;		  /* DosArabic (cp864)	  */
+    UC_CHARSET_SETUP_windows_1256;	  /* WinArabic (cp1256)	  */
     UC_CHARSET_SETUP_iso_8859_7;	  /* ISO 8859-7 Greek	  */
+    UC_CHARSET_SETUP_cp737;		  /* DosGreek (cp737)	  */
+    UC_CHARSET_SETUP_cp869;		  /* DosGreek2 (cp869)	  */
+    UC_CHARSET_SETUP_windows_1253;	  /* WinGreek (cp1253)	  */
     UC_CHARSET_SETUP_iso_8859_8;	  /* ISO 8859-8 Hebrew	  */
+    UC_CHARSET_SETUP_cp862;		  /* DosHebrew (cp862)	  */
+    UC_CHARSET_SETUP_windows_1255;	  /* WinHebrew (cp1255)	  */
     UC_CHARSET_SETUP_iso_8859_9;	  /* ISO 8859-9 (Latin 5) */
     UC_CHARSET_SETUP_iso_8859_10;	  /* ISO 8859-10	  */
 

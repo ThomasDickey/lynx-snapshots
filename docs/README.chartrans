@@ -94,10 +94,6 @@ HOW TO INSTALL:
     NOTE that there is a new "#define" in userdefs.h for MAX_CHARSETS
     near the end (in "Section 3.").
 
-    If, for some reason, for UNIX you are not using the configure
-    script but Makefile.old, note that in the top-level Makefile,
-    the -DEXP_CHARTRANS must be in *both* SITE_DEFS *and* SITE_LYDEFS.
-
 (5) Building Lynx:
 
     Compiling the chartrans code is now integrated into the normal

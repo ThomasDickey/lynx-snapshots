@@ -375,23 +375,6 @@ dnl --------------------------------------------------------------------------
 CF_HELP_MESSAGE(
 Miscellaneous Options:)
 
-AC_SUBST(EXTRA_OBJS)
-AC_SUBST(EXTRA_DEPS)
-
-dnl AC_MSG_CHECKING(if character-translation code should be used)
-dnl CF_ARG_DISABLE(char-trans,
-dnl [  --disable-char-trans    enable optional character-translations],
-dnl 	[use_char_trans=$enableval],
-dnl 	[use_char_trans=yes])
-dnl AC_MSG_RESULT($use_char_trans)
-
-dnl if test ".$use_char_trans" != ".no" ; then
-### FIXME: this option is obsolete
-	AC_DEFINE(EXP_CHARTRANS)
-	EXTRA_OBJS="$EXTRA_OBJS \$(CHARTRANS_OBJS)"
-	EXTRA_DEPS="$EXTRA_DEPS do_chartrans_stuff"
-dnl fi
-
 AC_MSG_CHECKING(if color-style code should be used)
 CF_ARG_ENABLE(color-style,
 [  --enable-color-style    use optional/experimental color style],

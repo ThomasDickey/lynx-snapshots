@@ -102,7 +102,6 @@ Related to *experimental* (unsupported) character style code
 Other
 -----
 # -DDONT_TRACK_INTERNAL_LINKS - Handle following links to same doc differently.
-# -DEXP_CHARTRANS  (see INSTALLATION, Section II-1c - currently needed, WILL GO AWAY)
 # -DEXP_CHARTRANS_AUTOSWITCH also let lynx switch term mode(Linux console only)
 # -DIGNORE_CTRL_C  Define if Control-C shouldn't exit lynx.
 # -DLY_FIND_LEAKS  (see INSTALLATION, Section II-1c)

@@ -15,7 +15,6 @@
 #undef DECL_STRSTR
 #undef DECL_SYS_ERRLIST
 #undef DIRED_SUPPORT		/* AC_ARG_WITH(dired) */
-#undef EXP_CHARTRANS		/* AC_ARG_WITH(char-trans) */
 #undef EXP_CHARTRANS_AUTOSWITCH	/* AC_ARG_WITH(font-switch) */
 #undef FANCY_CURSES		/* defined by CF_FANCY_CURSES */
 #undef GZIP_PATH		/* CF_PATH_PROG(gzip) */

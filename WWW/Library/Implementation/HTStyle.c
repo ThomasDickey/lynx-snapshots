@@ -62,9 +62,9 @@ HTStyle * HTStyleRead (HTStyle * style, HTStream * stream)
     char myTag[STYLE_NAME_LENGTH];
     char fontName[STYLE_NAME_LENGTH];
     NXTextStyle *p;
-    int	tab;
+    int tab;
     int gotpara;		/* flag: have we got a paragraph definition? */
-	
+
     NXScanf(stream, "%s%s%f%d",
 	myTag,
 	fontName,
@@ -93,13 +93,13 @@ HTStyle * HTStyleRead (HTStyle * style, HTStream * stream)
 		    &p->tabs[tab].x);
 	}
     } else { /* No paragraph */
-    	FREE(style->paragraph);
+	FREE(style->paragraph);
     } /* if no paragraph */
     StrAllocCopy(style->SGMLTag, myTag);
     if (strcmp(fontName, NONE_STRING)==0)
-        style->font = 0;
+	style->font = 0;
     else
-        style->font = [Font newFont:fontName size:style->fontSize];
+	style->font = [Font newFont:fontName size:style->fontSize];
     return NULL;
 }
 
@@ -126,7 +126,7 @@ HTStyle * HTStyleWrite (HTStyle * style, NXStream * stream)
 	    style->spaceBefore,
 	    style->spaceAfter,
 	    p->numTabs);
-	    
+
 	for (tab=0; tab < p->numTabs; tab++)
 	    NXPrintf(stream, "\t%d %f\n",
 		    p->tabs[tab].kind,
@@ -143,14 +143,14 @@ HTStyle * HTStyleDump (HTStyle * style)
     int tab;
     NXTextStyle *p = style->paragraph;
     printf("Style %d `%s' SGML:%s. Font %s %.1f point.\n",
-    	style,
+	style,
 	style->name,
 	style->SGMLTag,
 	[style->font name],
 	style->fontSize);
     if (p) {
-        printf(
-    	"\tIndents: first=%.0f others=%.0f, Height=%.1f Desc=%.1f\n"
+	printf(
+	"\tIndents: first=%.0f others=%.0f, Height=%.1f Desc=%.1f\n"
 	"\tAlign=%d, %d tabs. (%.0f before, %.0f after)\n",
 	    p->indent1st,
 	    p->indent2nd,
@@ -160,12 +160,12 @@ HTStyle * HTStyleDump (HTStyle * style)
 	    p->numTabs,
 	    style->spaceBefore,
 	    style->spaceAfter);
-	    
+
 	for (tab=0; tab < p->numTabs; tab++) {
 	    printf("\t\tTab kind=%d at %.0f\n",
 		    p->tabs[tab].kind,
 		    p->tabs[tab].x);
-    	}
+	}
 	printf("\n");
     } /* if paragraph */
     return style;
@@ -183,7 +183,7 @@ HTStyle * HTStyleNamed ARGS2 (HTStyleSheet *,self, CONST char *,name)
 {
     HTStyle * scan;
     for (scan=self->styles; scan; scan=scan->next)
-        if (0==strcmp(scan->name, name)) return scan;
+	if (0==strcmp(scan->name, name)) return scan;
     if (TRACE) fprintf(stderr, "StyleSheet: No style named `%s'\n", name);
     return NULL;
 }
@@ -194,7 +194,7 @@ HTStyle * HTStyleMatching (HTStyleSheet * self, HTStyle *style)
 {
     HTStyle * scan;
     for (scan=self->styles; scan; scan=scan->next)
-        if (scan->paragraph == para) return scan;
+	if (scan->paragraph == para) return scan;
     return NULL;
 }
 
@@ -214,14 +214,14 @@ HTStyle * HTStyleForRun (HTStyleSheet *self, NXRun *run)
 {
     HTStyle * scan;
     HTStyle * best = 0;
-    int	bestMatch = 0;
+    int bestMatch = 0;
     NXTextStyle * rp = run->paraStyle;
     for (scan=self->styles; scan; scan=scan->next)
-        if (scan->paragraph == run->paraStyle) return scan;	/* Exact */
+	if (scan->paragraph == run->paraStyle) return scan;	/* Exact */
 
     for (scan=self->styles; scan; scan=scan->next){
-    	NXTextStyle * sp = scan->paragraph;
-    	if (sp) {
+	NXTextStyle * sp = scan->paragraph;
+	if (sp) {
 	    int match = 0;
 	    if (sp->indent1st ==	rp->indent1st)	match = match+1;
 	    if (sp->indent2nd ==	rp->indent2nd)	match = match+2;
@@ -236,7 +236,7 @@ HTStyle * HTStyleForRun (HTStyleSheet *self, NXRun *run)
 	}
     }
     if (TRACE) fprintf(stderr, "HTStyleForRun: Best match for style is %d out of 18\n",
-    			 bestMatch);
+			 bestMatch);
     return best;
 }
 #endif /* NEXT_SUPRESS */
@@ -250,10 +250,10 @@ HTStyleSheet * HTStyleSheetAddStyle ARGS2
 {
     style->next = 0;		/* The style will go on the end */
     if (!self->styles) {
-    	self->styles = style;
+	self->styles = style;
     } else {
-    	HTStyle * scan;
-        for(scan=self->styles; scan->next; scan=scan->next); /* Find end */
+	HTStyle * scan;
+	for(scan=self->styles; scan->next; scan=scan->next); /* Find end */
 	scan->next=style;
     }
     return self;
@@ -266,13 +266,13 @@ HTStyleSheet * HTStyleSheetRemoveStyle ARGS2
   (HTStyleSheet *,self, HTStyle *,style)
 {
     if (self->styles == style) {
-    	self->styles = style->next;
+	self->styles = style->next;
 	return self;
     } else {
-    	HTStyle * scan;
+	HTStyle * scan;
 	for(scan = self->styles; scan; scan = scan->next) {
 	    if (scan->next == style) {
-	        scan->next = style->next;
+		scan->next = style->next;
 		return self;
 	    }
 	}
@@ -290,7 +290,7 @@ HTStyleSheet * HTStyleSheetNew NOARGS
     memset((void*)self, 0, sizeof(*self));	/* ANSI */
 /* Harbison c ref man says (char*)self
    but k&r ansii and abc books and Think_C say (void*) */
-    
+
 /*    bzero(self, sizeof(*self)); */		/* BSD */
     return self;
 }
@@ -302,7 +302,7 @@ HTStyleSheet * HTStyleSheetFree ARGS1 (HTStyleSheet *,self)
 {
     HTStyle * style;
     while((style=self->styles)!=0) {
-        self->styles = style->next;
+	self->styles = style->next;
 	HTStyleFree(style);
     }
     FREE(self);
@@ -327,8 +327,8 @@ HTStyleSheet * HTStyleSheetRead(HTStyleSheet * self, NXStream * stream)
     NXScanf(stream, " %d ", &numStyles);
     if (TRACE) fprintf(stderr, "Stylesheet: Reading %d styles\n", numStyles);
     for (i=0; i<numStyles; i++) {
-        NXScanf(stream, "%s", styleName);
-        style = HTStyleNamed(self, styleName);
+	NXScanf(stream, "%s", styleName);
+	style = HTStyleNamed(self, styleName);
 	if (!style) {
 	    style = HTStyleNewNamed(styleName);
 	    (void) HTStyleSheetAddStyle(self, style);
@@ -349,13 +349,13 @@ HTStyleSheet * HTStyleSheetWrite(HTStyleSheet * self, NXStream * stream)
 {
     int numStyles = 0;
     HTStyle * style;
-    
+
     for(style=self->styles; style; style=style->next) numStyles++;
     NXPrintf(stream, "%d\n", numStyles);
-    
+
     if (TRACE) fprintf(stderr, "StyleSheet: Writing %d styles\n", numStyles);
     for (style=self->styles; style; style=style->next) {
-        NXPrintf(stream, "%s ", style->name);
+	NXPrintf(stream, "%s ", style->name);
 	(void) HTStyleWrite(style, stream);
     }
     return self;

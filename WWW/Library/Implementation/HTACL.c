@@ -4,7 +4,7 @@
 **
 ** AUTHORS:
 **	AL	Ari Luotonen	luotonen@dxcern.cern.ch
-**	MD 	Mark Donszelmann    duns@vxdeop.cern.ch
+**	MD	Mark Donszelmann    duns@vxdeop.cern.ch
 **
 ** HISTORY:
 **	 8 Nov 93  MD	(VMS only) case insensitive compare reading acl entry, filename
@@ -27,7 +27,7 @@
 
 #include "LYLeaks.h"
 
-/* PUBLIC						HTAA_getAclFilename()
+/* PRIVATE						HTAA_getAclFilename()
 **	    RESOLVE THE FULL PATHNAME OF ACL FILE FOR A GIVEN FILE
 ** ON ENTRY:
 **	path	is the pathname of the file for which to
@@ -38,19 +38,19 @@
 **		(this is done to a local copy, of course).
 **
 ** ON EXIT:
-**	returns	the absolute pathname of ACL file
+**	returns the absolute pathname of ACL file
 **		(which is automatically freed next time
 **		this fuction is called).
 */
-PUBLIC char *HTAA_getAclFilename ARGS1(CONST char *, pathname)
+PRIVATE char *HTAA_getAclFilename ARGS1(CONST char *, pathname)
 {
     static char * local_copy = NULL;
     static char * acl_path = NULL;
     char * directory = NULL;
     char * filename = NULL;
 
-    StrAllocCopy(local_copy, pathname);	/* Also frees local_copy */
-                                        /* from previous call.   */
+    StrAllocCopy(local_copy, pathname); /* Also frees local_copy */
+					/* from previous call.	 */
 
     directory = local_copy;
     filename = strrchr(directory, '/');
@@ -62,9 +62,9 @@ PUBLIC char *HTAA_getAclFilename ARGS1(CONST char *, pathname)
 	*filename = '\0'; /* Truncate filename off from directory path */
 	filename++;	  /* and the filename begins from the next character */
     }
-    
+
     StrAllocCopy(acl_path, directory);	/* Also frees acl_path */
-                                        /* from previous call. */
+					/* from previous call. */
     StrAllocCat(acl_path, "/");
     StrAllocCat(acl_path, ACL_FILE_NAME);
 
@@ -79,7 +79,7 @@ PUBLIC char *HTAA_getAclFilename ARGS1(CONST char *, pathname)
 **			the file to be accessed.
 **
 ** ON EXIT:
-**	returns		the FILE* to open ACL.
+**	returns 	the FILE* to open ACL.
 **			NULL, if ACL not found.
 */
 PUBLIC FILE *HTAA_openAcl ARGS1(CONST char *, pathname)
@@ -94,7 +94,7 @@ PUBLIC FILE *HTAA_openAcl ARGS1(CONST char *, pathname)
 **	acl_file is Access Control List file to close.
 **
 ** ON EXIT:
-**	returns	nothing.
+**	returns nothing.
 */
 PUBLIC void HTAA_closeAcl ARGS1(FILE *, acl_file)
 {
@@ -124,7 +124,7 @@ PUBLIC void HTAA_closeAcl ARGS1(FILE *, acl_file)
 **		(user,group,...)@(address, address, ...)
 **
 ** ON EXIT:
-**	returns		NULL, if there is no entry for the file in the ACL,
+**	returns 	NULL, if there is no entry for the file in the ACL,
 **			or ACL doesn't exist.
 **			If there is, a GroupDef object containing the
 **			group and user names allowed to access the file
@@ -147,7 +147,7 @@ PUBLIC void HTAA_closeAcl ARGS1(FILE *, acl_file)
 **	HTAA_readGroupFile()) and after that access authorization
 **	can be checked with function HTAA_userAndInetGroup().
 */
-PUBLIC GroupDef *HTAA_getAclEntry ARGS3(FILE *,		acl_file,
+PUBLIC GroupDef *HTAA_getAclEntry ARGS3(FILE *, 	acl_file,
 					CONST char *,	pathname,
 					HTAAMethod,	method)
 {
@@ -156,8 +156,8 @@ PUBLIC GroupDef *HTAA_getAclEntry ARGS3(FILE *,		acl_file,
     int len;
     char *buf;
 
-    if (!acl_file) return NULL;		/* ACL doesn't exist */
-    
+    if (!acl_file) return NULL; 	/* ACL doesn't exist */
+
     if (group_def) {
 	GroupDef_delete(group_def);	/* From previous call */
 	group_def = NULL;
@@ -171,7 +171,7 @@ PUBLIC GroupDef *HTAA_getAclEntry ARGS3(FILE *,		acl_file,
 
     if (!(buf = (char*)malloc((strlen(filename)+2)*sizeof(char))))
 	outofmem(__FILE__, "HTAA_getAuthorizedGroups");
-    
+
     while (EOF != HTAAFile_readField(acl_file, buf, len+1)) {
 #ifdef VMS
 	if (HTAA_templateCaseMatch(buf, filename)) {
@@ -184,7 +184,7 @@ PUBLIC GroupDef *HTAA_getAclEntry ARGS3(FILE *,		acl_file,
 		fprintf(stderr,
 			"Filename '%s' matched template '%s', allowed methods:",
 			filename, buf);
-	    }	
+	    }
 	    if (HTAAMethod_inList(method, methods)) {	/* right method? */
 		if (TRACE)
 		    fprintf(stderr, " METHOD OK\n");
@@ -198,7 +198,7 @@ PUBLIC GroupDef *HTAA_getAclEntry ARGS3(FILE *,		acl_file,
 		*/
 		return group_def;
 	    } else if (TRACE) {
-	        fprintf(stderr, " METHOD NOT FOUND\n");
+		fprintf(stderr, " METHOD NOT FOUND\n");
 	    }
 	    HTList_delete(methods);
 	    methods = NULL;
@@ -216,6 +216,6 @@ PUBLIC GroupDef *HTAA_getAclEntry ARGS3(FILE *,		acl_file,
     FREE(buf);
 
     return NULL;	/* No entry for requested file */
-                        /* (or an empty entry).        */
+			/* (or an empty entry).        */
 }
 

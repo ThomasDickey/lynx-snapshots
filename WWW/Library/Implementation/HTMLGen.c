@@ -8,7 +8,7 @@
 **		Should convert old XMP, LISTING and PLAINTEXT to PRE.
 **
 **	It is not obvious to me right now whether the HEAD should be generated
-**	from the incomming data or the anchor.  Currently it is from the former
+**	from the incomming data or the anchor.	Currently it is from the former
 **	which is cleanest.
 */
 
@@ -40,23 +40,23 @@
 **		-----------
 */
 struct _HTStream {
-	CONST HTStreamClass *		isa;	
-	HTStream * 			target;
+	CONST HTStreamClass *		isa;
+	HTStream *			target;
 	HTStreamClass			targetClass;	/* COPY for speed */
 };
 
 struct _HTStructured {
 	CONST HTStructuredClass *	isa;
-	HTStream * 			target;
+	HTStream *			target;
 	HTStreamClass			targetClass;	/* COPY for speed */
-	
+
 	char				buffer[BUFFER_SIZE+1]; /* 1for NL */
-        int				buffer_maxchars;
+	int				buffer_maxchars;
 	char *				write_pointer;
-        char *				line_break [MAX_CLEANNESS+1];
+	char *				line_break [MAX_CLEANNESS+1];
 	int				cleanness;
 	BOOL				overflowed;
-    	BOOL				delete_line_break_char[MAX_CLEANNESS+1];
+	BOOL				delete_line_break_char[MAX_CLEANNESS+1];
 	BOOL				preformatted;
 	BOOL				escape_specials;
 	BOOL				in_attrval;
@@ -67,18 +67,18 @@ struct _HTStructured {
 */
 
 PRIVATE void flush_breaks ARGS1(
-	HTStructured *,		me)
+	HTStructured *, 	me)
 {
     int i;
     for (i=0; i<= MAX_CLEANNESS; i++) {
-        me->line_break[i] = NULL;
+	me->line_break[i] = NULL;
     }
 }
 
 PRIVATE void HTMLGen_flush ARGS1(
-	HTStructured *,		me)
+	HTStructured *, 	me)
 {
-    (*me->targetClass.put_block)(me->target, 
+    (*me->targetClass.put_block)(me->target,
 				 me->buffer,
 				 me->write_pointer - me->buffer);
     me->write_pointer = me->buffer;
@@ -93,12 +93,12 @@ PRIVATE void HTMLGen_flush ARGS1(
 */
 
 PRIVATE void allow_break ARGS3(
-	HTStructured *,	me,
+	HTStructured *, me,
 	int,		new_cleanness,
 	BOOL,		dlbc)
 {
     if (dlbc && me->write_pointer == me->buffer) dlbc = NO;
-    me->line_break[new_cleanness] = 
+    me->line_break[new_cleanness] =
 			 dlbc ? me->write_pointer - 1 /* Point to space */
 			      : me->write_pointer ;   /* point to gap */
     me->delete_line_break_char[new_cleanness] = dlbc;
@@ -121,7 +121,7 @@ PRIVATE void allow_break ARGS3(
 **	by hand, too, though this is not a primary design consideration. TBL
 */
 PRIVATE void HTMLGen_put_character ARGS2(
-	HTStructured *,		me,
+	HTStructured *, 	me,
 	char,			c)
 {
     if (me->escape_specials && (unsigned char)c < 32) {
@@ -149,18 +149,18 @@ PRIVATE void HTMLGen_put_character ARGS2(
 	    c = ';';
 	}
     }
-    
+
     *me->write_pointer++ = c;
-    
+
     if (c == '\n') {
-        HTMLGen_flush(me);
+	HTMLGen_flush(me);
 	return;
     }
-    
+
     /* Figure our whether we can break at this point
     */
     if ((!me->preformatted && (c == ' ' || c == '\t'))) {
-        int new_cleanness = 3;
+	int new_cleanness = 3;
 	if (me->write_pointer > (me->buffer + 1)) {
 	    char delims[5];
 	    char * p;
@@ -171,25 +171,25 @@ PRIVATE void HTMLGen_put_character ARGS2(
 	}
 	allow_break(me, new_cleanness, YES);
     }
-    
+
     /*
-     *  Flush buffer out when full, or whenever the line is over
-     *  the nominal maximum and we can break at all
+     *	Flush buffer out when full, or whenever the line is over
+     *	the nominal maximum and we can break at all
      */
     if (me->write_pointer >= me->buffer + me->buffer_maxchars ||
 	(me->overflowed && me->cleanness)) {
-    	if (me->cleanness) {
+	if (me->cleanness) {
 	    char line_break_char = me->line_break[me->cleanness][0];
 	    char * saved = me->line_break[me->cleanness];
-	    
-	    if (me->delete_line_break_char[me->cleanness]) saved++; 
-	    me->line_break[me->cleanness][0] = '\n'; 
+
+	    if (me->delete_line_break_char[me->cleanness]) saved++;
+	    me->line_break[me->cleanness][0] = '\n';
 	    (*me->targetClass.put_block)(me->target,
-     					 me->buffer,
+					 me->buffer,
 			       me->line_break[me->cleanness] - me->buffer + 1);
 	    me->line_break[me->cleanness][0] = line_break_char;
 	    {  /* move next line in */
-	    	char * p = saved;
+		char * p = saved;
 		char *q;
 		for (q = me->buffer; p < me->write_pointer; )
 		    *q++ = *p++;
@@ -197,18 +197,18 @@ PRIVATE void HTMLGen_put_character ARGS2(
 	    me->cleanness = 0;
 	    /* Now we have to check whether ther are any perfectly good breaks
 	    ** which weren't good enough for the last line but may be
-	    **  good enough for the next
+	    **	good enough for the next
 	    */
 	    {
-	        int i;
+		int i;
 		for(i=0; i <= MAX_CLEANNESS; i++) {
 		    if (me->line_break[i] != NULL &&
 			me->line_break[i] > saved) {
-		        me->line_break[i] = me->line_break[i] -
+			me->line_break[i] = me->line_break[i] -
 						(saved-me->buffer);
 			me->cleanness = i;
 		    } else {
-		        me->line_break[i] = NULL;
+			me->line_break[i] = NULL;
 		    }
 		}
 	    }
@@ -232,7 +232,7 @@ PRIVATE void HTMLGen_put_character ARGS2(
 **	---------------
 */
 PRIVATE void HTMLGen_put_string ARGS2(
-	HTStructured *,		me,
+	HTStructured *, 	me,
 	CONST char *,		s)
 {
     CONST char * p;
@@ -242,7 +242,7 @@ PRIVATE void HTMLGen_put_string ARGS2(
 }
 
 PRIVATE void HTMLGen_write ARGS3(
-	HTStructured *,		me,
+	HTStructured *, 	me,
 	CONST char *,		s,
 	int,			l)
 {
@@ -261,7 +261,7 @@ PRIVATE void HTMLGen_write ARGS3(
 PRIVATE void HTMLGen_start_element ARGS6(
 	HTStructured *, 	me,
 	int,			element_number,
-	CONST BOOL*,	 	present,
+	CONST BOOL*,		present,
 	CONST char **,		value,
 	int,			charset,
 	char **,		insert)
@@ -313,16 +313,16 @@ PRIVATE void HTMLGen_start_element ARGS6(
 	    allow_break(me, 12, NO);
     }
     HTMLGen_put_string(me, ">"); /* got rid of \n LJM */
-    
+
     /*
-     *  Make very specific HTML assumption that PRE can't be nested!
+     *	Make very specific HTML assumption that PRE can't be nested!
      */
     me->preformatted = (element_number == HTML_PRE)  ? YES : was_preformatted;
 
     /*
-     *  Can break after element start.
-     */ 
-    if (!me->preformatted && tag->contents != SGML_EMPTY) {  
+     *	Can break after element start.
+     */
+    if (!me->preformatted && tag->contents != SGML_EMPTY) {
 	if (HTML_dtd.tags[element_number].contents == SGML_ELEMENT)
 	    allow_break(me, 15, NO);
 	else
@@ -335,22 +335,22 @@ PRIVATE void HTMLGen_start_element ARGS6(
 **
 */
 /*	When we end an element, the style must be returned to that
-**	in effect before that element.  Note that anchors (etc?)
+**	in effect before that element.	Note that anchors (etc?)
 **	don't have an associated style, so that we must scan down the
 **	stack for an element with a defined style. (In fact, the styles
 **	should be linked to the whole stack not just the top one.)
 **	TBL 921119
 */
 PRIVATE void HTMLGen_end_element ARGS3(
-	HTStructured *,		me,
+	HTStructured *, 	me,
 	int,			element_number,
 	char **,		insert)
 {
-    if (!me->preformatted && 
+    if (!me->preformatted &&
 	HTML_dtd.tags[element_number].contents != SGML_EMPTY) {
-    	/*
+	/*
 	 *  Can break before element end.
-	 */ 
+	 */
 	if (HTML_dtd.tags[element_number].contents == SGML_ELEMENT)
 	    allow_break(me, 14, NO);
 	else
@@ -369,17 +369,19 @@ PRIVATE void HTMLGen_end_element ARGS3(
 **
 */
 PRIVATE int HTMLGen_put_entity ARGS2(
-	HTStructured *,		me,
+	HTStructured *, 	me,
 	int,			entity_number)
 {
     int nent = HTML_dtd.number_of_entities;
-  
+
     HTMLGen_put_character(me, '&');
-    if (entity_number < nent)  
+    if (entity_number < nent) {
       HTMLGen_put_string(me, HTML_dtd.entity_names[entity_number]);
-    else
+    } else {
       HTMLGen_put_string(me,
-			 HTML_dtd.extra_entity_info[entity_number-nent].name);
+			 HTML_dtd.extra_entity_info[entity_number-nent].name
+			 );
+    }
     HTMLGen_put_character(me, ';');
     return HT_OK;
 }
@@ -389,7 +391,7 @@ PRIVATE int HTMLGen_put_entity ARGS2(
 **
 */
 PRIVATE void HTMLGen_free ARGS1(
-	HTStructured *,		me)
+	HTStructured *, 	me)
 {
     (*me->targetClass.put_character)(me->target, '\n');
     HTMLGen_flush(me);
@@ -398,21 +400,21 @@ PRIVATE void HTMLGen_free ARGS1(
 }
 
 PRIVATE void PlainToHTML_free ARGS1(
-	HTStructured *,		me)
+	HTStructured *, 	me)
 {
     HTMLGen_end_element(me, HTML_PRE, 0);
     HTMLGen_free(me);
 }
 
 PRIVATE void HTMLGen_abort ARGS2(
-	HTStructured *,		me,
+	HTStructured *, 	me,
 	HTError,		e)
 {
     HTMLGen_free(me);
 }
 
 PRIVATE void PlainToHTML_abort ARGS2(
-	HTStructured *,		me,
+	HTStructured *, 	me,
 	HTError,		e)
 {
     PlainToHTML_free(me);
@@ -422,21 +424,21 @@ PRIVATE void PlainToHTML_abort ARGS2(
 **	-----------------------
 */
 PRIVATE CONST HTStructuredClass HTMLGeneration = /* As opposed to print etc */
-{		
+{
 	"HTMLGen",
 	HTMLGen_free,
 	HTMLGen_abort,
-	HTMLGen_put_character, 	HTMLGen_put_string, HTMLGen_write,
-	HTMLGen_start_element, 	HTMLGen_end_element,
+	HTMLGen_put_character,	HTMLGen_put_string, HTMLGen_write,
+	HTMLGen_start_element,	HTMLGen_end_element,
 	HTMLGen_put_entity
-}; 
+};
 
 /*	Subclass-specific Methods
 **	-------------------------
 */
 extern int LYcols;			/* LYCurses.h, set in LYMain.c	*/
-extern BOOL dump_output_immediately;	/* TRUE if no interactive user 	*/
-extern int dump_output_width;	        /* -width instead of 80		*/
+extern BOOL dump_output_immediately;	/* TRUE if no interactive user	*/
+extern int dump_output_width;		/* -width instead of 80 	*/
 extern BOOLEAN LYPreparsedSource;	/* Show source as preparsed?	*/
 
 PUBLIC HTStructured * HTMLGenerator ARGS1(
@@ -444,23 +446,23 @@ PUBLIC HTStructured * HTMLGenerator ARGS1(
 {
     HTStructured* me = (HTStructured*)malloc(sizeof(*me));
     if (me == NULL)
-        outofmem(__FILE__, "HTMLGenerator");
-    me->isa = &HTMLGeneration;       
+	outofmem(__FILE__, "HTMLGenerator");
+    me->isa = &HTMLGeneration;
 
     me->target = output;
     me->targetClass = *me->target->isa; /* Copy pointers to routines for speed*/
-    
+
     me->write_pointer = me->buffer;
     flush_breaks(me);
     me->line_break[0] = me->buffer;
-    me->cleanness = 	0;
+    me->cleanness =	0;
     me->overflowed = NO;
     me->delete_line_break_char[0] = NO;
-    me->preformatted = 	NO;
+    me->preformatted =	NO;
     me->in_attrval = NO;
 
     /*
-     *  For what line length should we attempt to wrap ? - kw
+     *	For what line length should we attempt to wrap ? - kw
      */
     if (!LYPreparsedSource) {
 	me->buffer_maxchars = 80; /* work as before - kw */
@@ -480,14 +482,14 @@ PUBLIC HTStructured * HTMLGenerator ARGS1(
 
     /*
      *	If dump_output_immediately is set, there likely isn't anything
-     *  after this stream to interpret the Lynx special chars.  Also
-     *  if they get displayed via HTPlain, that will probably make
+     *	after this stream to interpret the Lynx special chars.	Also
+     *	if they get displayed via HTPlain, that will probably make
      *	non-breaking space chars etc. invisible.  So let's translate
-     *  them to numerical character references.  For debugging
-     *  purposes we'll use the new hex format.
+     *	them to numerical character references.  For debugging
+     *	purposes we'll use the new hex format.
      */
     me->escape_specials = LYPreparsedSource;
-	    
+
     return me;
 }
 
@@ -499,39 +501,39 @@ PUBLIC HTStructured * HTMLGenerator ARGS1(
 **	This is just the easiest way of typecasting all the routines.
 */
 PRIVATE CONST HTStructuredClass PlainToHTMLConversion =
-{		
+{
 	"plaintexttoHTML",
-	HTMLGen_free,	
-	PlainToHTML_abort,	
+	HTMLGen_free,
+	PlainToHTML_abort,
 	HTMLGen_put_character,
 	HTMLGen_put_string,
 	HTMLGen_write,
 	NULL,		/* Structured stuff */
 	NULL,
 	NULL
-}; 
+};
 
 /*	HTConverter from plain text to HTML Stream
 **	------------------------------------------
 */
 PUBLIC HTStream* HTPlainToHTML ARGS3(
 	HTPresentation *,	pres,
-	HTParentAnchor *,	anchor,	
+	HTParentAnchor *,	anchor,
 	HTStream *,		sink)
 {
     HTStructured *me = (HTStructured *)malloc(sizeof(*me));
     if (me == NULL)
-        outofmem(__FILE__, "PlainToHTML");
-    me->isa = (CONST HTStructuredClass *)&PlainToHTMLConversion;       
+	outofmem(__FILE__, "PlainToHTML");
+    me->isa = (CONST HTStructuredClass *)&PlainToHTMLConversion;
 
     /*
-     *  Copy pointers to routines for speed.
+     *	Copy pointers to routines for speed.
      */
     me->target = sink;
     me->targetClass = *me->target->isa;
     me->write_pointer = me->buffer;
     flush_breaks(me);
-    me->cleanness = 	0;
+    me->cleanness =	0;
     me->overflowed = NO;
     me->delete_line_break_char[0] = NO;
     /* try to honor -width - kw */

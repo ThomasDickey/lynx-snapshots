@@ -1,15 +1,14 @@
-/*                               The HTML DTD -- software interface in libwww
-                              HTML DTD - SOFTWARE INTERFACE
-                                             
+/*				 The HTML DTD -- software interface in libwww
+			      HTML DTD - SOFTWARE INTERFACE
+
    SGML purists should excuse the use of the term "DTD" in this file to
    represent DTD-related information which is not exactly a DTD itself.
-   
+
    The C modular structure doesn't work very well here, as the dtd is
    partly in the .h and partly in the .c which are not very independent.
    Tant pis.
-   
- */
 
+ */
 #ifndef HTMLDTD_H
 #define HTMLDTD_H
 
@@ -41,24 +40,24 @@ Element Numbers
 
    Must Match all tables by element!
    These include tables in HTMLDTD.c and code in HTML.c.
-   
+
  */
 typedef enum _HTMLElement {
-        HTML_A,
-        HTML_ABBREV,
-        HTML_ACRONYM,
-        HTML_ADDRESS,
+	HTML_A,
+	HTML_ABBREV,
+	HTML_ACRONYM,
+	HTML_ADDRESS,
 	HTML_APPLET,
 	HTML_AREA,
-        HTML_AU,
-        HTML_AUTHOR,
-        HTML_B,
+	HTML_AU,
+	HTML_AUTHOR,
+	HTML_B,
 	HTML_BANNER,
 	HTML_BASE,
 	HTML_BASEFONT,
-        HTML_BDO,
+	HTML_BDO,
 	HTML_BGSOUND,
-        HTML_BIG,
+	HTML_BIG,
 	HTML_BLINK,
 	HTML_BLOCKQUOTE,
 	HTML_BODY,
@@ -66,7 +65,7 @@ typedef enum _HTMLElement {
 	HTML_BQ,
 	HTML_BR,
 	HTML_BUTTON,
-        HTML_CAPTION,
+	HTML_CAPTION,
 	HTML_CENTER,
 	HTML_CITE,
 	HTML_CODE,
@@ -74,15 +73,15 @@ typedef enum _HTMLElement {
 	HTML_COLGROUP,
 	HTML_COMMENT,
 	HTML_CREDIT,
-        HTML_DD,
-        HTML_DEL,
+	HTML_DD,
+	HTML_DEL,
 	HTML_DFN,
 	HTML_DIR,
 	HTML_DIV,
-        HTML_DL,
+	HTML_DL,
 	HTML_DLC,
 	HTML_DT,
-        HTML_EM,
+	HTML_EM,
 	HTML_EMBED,
 	HTML_FIELDSET,
 	HTML_FIG,
@@ -91,7 +90,7 @@ typedef enum _HTMLElement {
 	HTML_FORM,
 	HTML_FRAME,
 	HTML_FRAMESET,
-        HTML_H1,
+	HTML_H1,
 	HTML_H2,
 	HTML_H3,
 	HTML_H4,
@@ -101,21 +100,21 @@ typedef enum _HTMLElement {
 	HTML_HR,
 	HTML_HTML,
 	HTML_HY,
-        HTML_I,
-        HTML_IFRAME,
+	HTML_I,
+	HTML_IFRAME,
 	HTML_IMG,
 	HTML_INPUT,
-        HTML_INS,
+	HTML_INS,
 	HTML_ISINDEX,
-        HTML_KBD,
-        HTML_KEYGEN,
+	HTML_KBD,
+	HTML_KEYGEN,
 	HTML_LABEL,
 	HTML_LEGEND,
 	HTML_LH,
 	HTML_LI,
 	HTML_LINK,
 	HTML_LISTING,
-        HTML_MAP,
+	HTML_MAP,
 	HTML_MARQUEE,
 	HTML_MATH,
 	HTML_MENU,
@@ -123,8 +122,8 @@ typedef enum _HTMLElement {
 	HTML_NEXTID,
 	HTML_NOFRAMES,
 	HTML_NOTE,
-        HTML_OBJECT,
-        HTML_OL,
+	HTML_OBJECT,
+	HTML_OL,
 	HTML_OPTION,
 	HTML_OVERLAY,
 	HTML_P,
@@ -132,19 +131,19 @@ typedef enum _HTMLElement {
 	HTML_PLAINTEXT,
 	HTML_PRE,
 	HTML_Q,
-        HTML_S,
-        HTML_SAMP,
+	HTML_S,
+	HTML_SAMP,
 	HTML_SCRIPT,
 	HTML_SELECT,
 	HTML_SHY,
-        HTML_SMALL,
+	HTML_SMALL,
 	HTML_SPAN,
 	HTML_SPOT,
 	HTML_STRIKE,
 	HTML_STRONG,
 	HTML_STYLE,
-        HTML_SUB,
-        HTML_SUP,
+	HTML_SUB,
+	HTML_SUP,
 	HTML_TAB,
 	HTML_TABLE,
 	HTML_TBODY,
@@ -157,10 +156,10 @@ typedef enum _HTMLElement {
 	HTML_TITLE,
 	HTML_TR,
 	HTML_TT,
-        HTML_U,
+	HTML_U,
 	HTML_UL,
-        HTML_VAR,
-        HTML_WBR,
+	HTML_VAR,
+	HTML_WBR,
 	HTML_XMP } HTMLElement;
 
 #define HTML_ELEMENTS 118
@@ -175,10 +174,10 @@ Attribute numbers
 
    Identifier is HTML_<element>_<attribute>.
    These must match the tables in HTML.c!
-   
+
  */
 #define HTML_A_ACCESSKEY        0
-#define HTML_A_CHARSET          1 /* RFC 2070 HTML i18n - kw */
+#define HTML_A_CHARSET          1 /* i18n draft, added tentatively - KW */
 #define HTML_A_CLASS            2
 #define HTML_A_CLEAR            3
 #define HTML_A_COORDS           4
@@ -214,47 +213,47 @@ Attribute numbers
 #define HTML_ADDRESS_TITLE      7
 #define HTML_ADDRESS_ATTRIBUTES 8
 
-#define	HTML_APPLET_ALIGN       0
-#define	HTML_APPLET_ALT         1
-#define	HTML_APPLET_CLASS       2
-#define	HTML_APPLET_CLEAR       3
-#define	HTML_APPLET_CODE        4
-#define	HTML_APPLET_CODEBASE    5
-#define	HTML_APPLET_DIR         6
-#define	HTML_APPLET_DOWNLOAD    7
-#define	HTML_APPLET_HEIGHT      8
-#define	HTML_APPLET_HSPACE      9
-#define	HTML_APPLET_ID         10
-#define	HTML_APPLET_LANG       11
-#define	HTML_APPLET_NAME       12
-#define	HTML_APPLET_STYLE      13
-#define	HTML_APPLET_TITLE      14
-#define	HTML_APPLET_VSPACE     15
-#define	HTML_APPLET_WIDTH      16
-#define	HTML_APPLET_ATTRIBUTES 17
+#define HTML_APPLET_ALIGN       0
+#define HTML_APPLET_ALT         1
+#define HTML_APPLET_CLASS       2
+#define HTML_APPLET_CLEAR       3
+#define HTML_APPLET_CODE        4
+#define HTML_APPLET_CODEBASE    5
+#define HTML_APPLET_DIR         6
+#define HTML_APPLET_DOWNLOAD    7
+#define HTML_APPLET_HEIGHT      8
+#define HTML_APPLET_HSPACE      9
+#define HTML_APPLET_ID         10
+#define HTML_APPLET_LANG       11
+#define HTML_APPLET_NAME       12
+#define HTML_APPLET_STYLE      13
+#define HTML_APPLET_TITLE      14
+#define HTML_APPLET_VSPACE     15
+#define HTML_APPLET_WIDTH      16
+#define HTML_APPLET_ATTRIBUTES 17
 
-#define	HTML_AREA_ALT           0
-#define	HTML_AREA_CLASS         1
-#define	HTML_AREA_CLEAR         2
-#define	HTML_AREA_COORDS        3
-#define	HTML_AREA_DIR           4
-#define	HTML_AREA_HREF          5
-#define	HTML_AREA_ID            6
-#define	HTML_AREA_LANG          7
-#define	HTML_AREA_NOHREF        8
-#define	HTML_AREA_NONOTAB       9
-#define	HTML_AREA_ONCLICK      10
-#define	HTML_AREA_ONMOUSEOUT   11
-#define	HTML_AREA_ONMOUSEOVER  12
-#define	HTML_AREA_SHAPE        13
-#define	HTML_AREA_STYLE        14
-#define	HTML_AREA_TABINDEX     15
-#define	HTML_AREA_TARGET       16
-#define	HTML_AREA_TITLE        17
-#define	HTML_AREA_ATTRIBUTES   18
+#define HTML_AREA_ALT           0
+#define HTML_AREA_CLASS         1
+#define HTML_AREA_CLEAR         2
+#define HTML_AREA_COORDS        3
+#define HTML_AREA_DIR           4
+#define HTML_AREA_HREF          5
+#define HTML_AREA_ID            6
+#define HTML_AREA_LANG          7
+#define HTML_AREA_NOHREF        8
+#define HTML_AREA_NONOTAB       9
+#define HTML_AREA_ONCLICK      10
+#define HTML_AREA_ONMOUSEOUT   11
+#define HTML_AREA_ONMOUSEOVER  12
+#define HTML_AREA_SHAPE        13
+#define HTML_AREA_STYLE        14
+#define HTML_AREA_TABINDEX     15
+#define HTML_AREA_TARGET       16
+#define HTML_AREA_TITLE        17
+#define HTML_AREA_ATTRIBUTES   18
 
 #define HTML_BASE_HREF          0
-#define	HTML_BASE_TARGET        1
+#define HTML_BASE_TARGET        1
 #define HTML_BASE_TITLE         2
 #define HTML_BASE_ATTRIBUTES    3
 
@@ -312,20 +311,20 @@ Attribute numbers
 #define HTML_BQ_TITLE           7
 #define HTML_BQ_ATTRIBUTES      8
 
-#define HTML_BUTTON_CLASS      0
-#define HTML_BUTTON_CLEAR      1
-#define HTML_BUTTON_DIR        2
-#define HTML_BUTTON_DISABLED   3
-#define HTML_BUTTON_ID         4
-#define HTML_BUTTON_LANG       5
-#define HTML_BUTTON_NAME       6
-#define HTML_BUTTON_ONFOCUS    7
-#define HTML_BUTTON_ONBLUR     8
-#define HTML_BUTTON_STYLE      9
-#define HTML_BUTTON_TABINDEX  10
-#define HTML_BUTTON_TITLE     11
-#define HTML_BUTTON_TYPE      12
-#define HTML_BUTTON_VALUE     13
+#define HTML_BUTTON_CLASS       0
+#define HTML_BUTTON_CLEAR       1
+#define HTML_BUTTON_DIR         2
+#define HTML_BUTTON_DISABLED    3
+#define HTML_BUTTON_ID          4
+#define HTML_BUTTON_LANG        5
+#define HTML_BUTTON_NAME        6
+#define HTML_BUTTON_ONFOCUS     7
+#define HTML_BUTTON_ONBLUR      8
+#define HTML_BUTTON_STYLE       9
+#define HTML_BUTTON_TABINDEX   10
+#define HTML_BUTTON_TITLE      11
+#define HTML_BUTTON_TYPE       12
+#define HTML_BUTTON_VALUE      13
 #define HTML_BUTTON_ATTRIBUTES 14
 
 #define HTML_CAPTION_ACCESSKEY  0
@@ -447,13 +446,12 @@ Attribute numbers
 #define HTML_FONT_CLEAR         1
 #define HTML_FONT_COLOR         2
 #define HTML_FONT_DIR           3
-#define HTML_FONT_END           4
-#define HTML_FONT_FACE          5
-#define HTML_FONT_ID            6
-#define HTML_FONT_LANG          7
-#define HTML_FONT_SIZE          8
-#define HTML_FONT_STYLE         9
-#define HTML_FONT_ATTRIBUTES   10
+#define HTML_FONT_FACE          4
+#define HTML_FONT_ID            5
+#define HTML_FONT_LANG          6
+#define HTML_FONT_SIZE          7
+#define HTML_FONT_STYLE         8
+#define HTML_FONT_ATTRIBUTES    9
 
 #define HTML_FORM_ACCEPT_CHARSET  0 /* HTML 4.0 draft - kw */
 #define HTML_FORM_ACTION        1
@@ -468,7 +466,7 @@ Attribute numbers
 #define HTML_FORM_SCRIPT       10
 #define HTML_FORM_STYLE        11
 #define HTML_FORM_SUBJECT      12
-#define	HTML_FORM_TARGET       13
+#define HTML_FORM_TARGET       13
 #define HTML_FORM_TITLE        14
 #define HTML_FORM_ATTRIBUTES   15
 
@@ -656,7 +654,7 @@ Attribute numbers
 #define HTML_LINK_REL           5
 #define HTML_LINK_REV           6
 #define HTML_LINK_STYLE         7
-#define	HTML_LINK_TARGET        8
+#define HTML_LINK_TARGET        8
 #define HTML_LINK_TITLE         9
 #define HTML_LINK_TYPE         10
 #define HTML_LINK_ATTRIBUTES   11
@@ -686,7 +684,7 @@ Attribute numbers
 #define HTML_META_NAME          2
 #define HTML_META_ATTRIBUTES    3
 
-#define NEXTID_N 		0
+#define NEXTID_N                0
 
 #define HTML_NOTE_CLASS         0
 #define HTML_NOTE_CLEAR         1
@@ -966,19 +964,19 @@ Start anchor element
 
    It is kinda convenient to have a particular routine for starting an anchor
    element, as everything else for HTML is simple anyway.
-   
+
   ON ENTRY
-  
+
    targetstream points to a structured stream object.
-   
+
    name and href point to attribute strings or are NULL if the attribute is
    to be omitted.
-   
+
  */
 extern void HTStartAnchor PARAMS((
-                HTStructured * targetstream,
-                CONST char *    name,
-                CONST char *    href));
+		HTStructured * targetstream,
+		CONST char *	name,
+		CONST char *	href));
 
 /*
 
@@ -986,19 +984,19 @@ Start IsIndex element - FM
 
    It is kinda convenient to have a particular routine for starting an IsIndex
    element with the prompt and/or href (action) attributes specified.
-   
+
   ON ENTRY
-  
+
    targetstream points to a structured stream object.
-   
+
    prompt and href point to attribute strings or are NULL if the attribute is
    to be omitted.
-   
+
  */
 extern void HTStartIsIndex PARAMS((
-                HTStructured * targetstream,
-                CONST char *    prompt,
-                CONST char *    href));
+		HTStructured * targetstream,
+		CONST char *	prompt,
+		CONST char *	href));
 
 
 #endif /* HTMLDTD_H */

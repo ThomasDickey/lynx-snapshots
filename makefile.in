@@ -137,7 +137,6 @@ SITE_DEFS = # Your defines here
 # defines which have configure options   (see INSTALLATION, Section II-1c.):
 # -DARCHIVE_ONLY
 # -DDIRED_SUPPORT
-# -DEXP_CHARTRANS  (must be set by default; eventually will be removed)
 # -DEXP_CHARTRANS_AUTOSWITCH
 # -DLINKEDSTYLES
 # -DLONG_LIST

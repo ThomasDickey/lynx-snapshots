@@ -1,4 +1,4 @@
-/* Definitions for EXP_CHARTRANS */
+/* Definitions for Unicode character-translations */
 
 #ifndef UCDEFS_H
 #define UCDEFS_H
@@ -53,7 +53,6 @@ typedef struct _LYUCcharset {
 
 #define UCT_R_ASCII UCT_R_7BITINV | UCT_R_7BITNAT /*displayable US-ASCII*/
 #define UCT_R_LAT1 UCT_R_ASCII | UCT_R_8859SPECL | UCT_R_HIGH8BIT
-#define UCT_R_8859S UCT_R_ASCII | UCT_R_8859SPECL
 #define UCT_R_8BIT UCT_R_LAT1 | UCT_R_HIGHCTRL /* full 8bit range */
 
 /*

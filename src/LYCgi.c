@@ -57,7 +57,7 @@ struct _HTStream
 
 PRIVATE char **env = NULL;  /* Environment variables */
 PRIVATE int envc_size = 0;  /* Slots in environment array */
-PRIVATE envc = 0;	    /* Slots used so far */
+PRIVATE int envc = 0;	    /* Slots used so far */
 #ifdef LYNXCGI_LINKS
 PRIVATE char user_agent[64];
 PRIVATE char server_software[64];
