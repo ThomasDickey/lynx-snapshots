@@ -1,8 +1,11 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+1999-06-01 (2.8.2pre.11)
+* minor fixes from W3C HTML validation -TD
+* update links to HTML'ized lynxcfg in users' guide -VH
 1999-05-31 (2.8.2pre.10)
-+ add links to HTML'ized lynxcfg to users' guide -LP
+* add links to HTML'ized lynxcfg to users' guide -LP
 * cleanup temporary files left by
      lynx -dump LYNXCFG:// > /dev/null
   (analysis by LP) -VH
