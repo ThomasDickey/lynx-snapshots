@@ -54,6 +54,10 @@ struct _HTStructured {
 	CONST HTStructuredClass *	isa;
 	/* ... */
 };
+struct _HTStream 
+{
+  HTStreamClass * isa;
+};
 
 #define LINE_LENGTH 512			/* Maximum length of line of ARTICLE etc */
 #define GROUP_NAME_LENGTH	256	/* Maximum length of group name */
@@ -62,6 +66,7 @@ extern BOOLEAN LYListNewsNumbers;
 extern BOOLEAN LYListNewsDates;
 extern HTCJKlang HTCJK;
 extern int interrupted_in_htgetcharacter;
+extern BOOL keep_mime_headers;   /* Include mime headers and force raw text */
 extern BOOL using_proxy;	/* Are we using an NNTP proxy? */
 
 /*
@@ -76,16 +81,24 @@ PRIVATE char response_text[LINE_LENGTH+1];	/* Last response */
 /* PRIVATE HText *	HT;	*/		/* the new hypertext */
 PRIVATE HTStructured * target;			/* The output sink */
 PRIVATE HTStructuredClass targetClass;		/* Copy of fn addresses */
+PRIVATE HTStream * rawtarget = NULL;		/* The output sink for rawtext */
+PRIVATE HTStreamClass rawtargetClass;		/* Copy of fn addresses */
 PRIVATE HTParentAnchor *node_anchor;		/* Its anchor */
 PRIVATE int	diagnostic;			/* level: 0=none 2=source */
+PRIVATE BOOL rawtext = NO;			/* Flag: HEAD or -mime_headers */
 PRIVATE HTList *NNTP_AuthInfo = NULL;		/* AUTHINFO database */
 
 #define PUTC(c) (*targetClass.put_character)(target, c)
 #define PUTS(s) (*targetClass.put_string)(target, s)
+#define RAW_PUTS(s) (*rawtargetClass.put_string)(rawtarget, s)
 #define START(e) (*targetClass.start_element)(target, e, 0, 0, -1, 0)
 #define END(e) (*targetClass.end_element)(target, e, 0)
 #define MAYBE_END(e) if (HTML_dtd.tags[e].contents != SGML_EMPTY) \
                         (*targetClass.end_element)(target, e, 0)
+#define FREE_TARGET if (rawtext) (*rawtargetClass._free)(rawtarget); \
+    			else (*targetClass._free)(target)
+#define ABORT_TARGET if (rawtext) (*rawtargetClass._abort)(rawtarget, NULL); \
+    			else (*targetClass._abort)(target, NULL)
 
 typedef struct _NNTPAuth {
    char * host;
@@ -958,7 +971,7 @@ PRIVATE int read_article NOARGS
     **  The header fields are either ignored,
     **  or formatted and put into the text.
     */
-    if (!diagnostic) {
+    if (!diagnostic && !rawtext) {
 	while (!done) {
 	    char ch = *p++ = NEXT_CHAR;
 	    if (ch == (char)EOF) {
@@ -1217,20 +1230,26 @@ PRIVATE int read_article NOARGS
 	FREE(href);
     }
 
-    if (diagnostic) {
+    if (rawtext) {
+	/*
+	 *  No tags - kw
+	 */
+	;
+    } else if (diagnostic) {
         /*
 	**  Read in the HEAD and BODY of the Article
 	**  as XMP formatted text. - FM
 	*/
 	START(HTML_XMP);
+	PUTC('\n');
     } else {
         /*
 	**  Read in the BODY of the Article
 	**  as PRE formatted text. - FM
 	*/
 	START(HTML_PRE);
+	PUTC('\n');
     }
-    PUTC('\n');
 
     p = line;
     while (!done) {
@@ -1258,10 +1277,15 @@ PRIVATE int read_article NOARGS
 		    done = YES;
 		    break;
 		} else {			/* Line starts with dot */
-		    PUTS(&line[1]);	/* Ignore first dot */
+		    if (rawtext)
+			RAW_PUTS(&line[1]);
+		    else
+			PUTS(&line[1]);	/* Ignore first dot */
 		}
 	    } else {
-	        if (diagnostic || !scan_for_buried_news_references) {
+		if (rawtext) {
+		    RAW_PUTS(line);
+	        } else if (diagnostic || !scan_for_buried_news_references) {
 		    /*
 		    **  All lines are passed as unmodified source. - FM
 		    */
@@ -1361,7 +1385,10 @@ PRIVATE int read_article NOARGS
 	    p = line;				/* Restart at beginning */
 	} /* if end of line */
     } /* Loop over characters */
-    
+
+    if (rawtext)
+	return(HT_LOADED);
+
     if (diagnostic)
 	END(HTML_XMP);
     else
@@ -1955,6 +1982,7 @@ PUBLIC int HTLoadNews ARGS4(
     BOOL reply_wanted;		/* Flag: followup post was asked for */
     BOOL spost_wanted;		/* Flag: new SSL post to group was asked for */
     BOOL sreply_wanted;		/* Flag: followup SSL post was asked for */
+    BOOL head_wanted = NO;	/* Flag: want HEAD of single article */
     int first, last;		/* First and last articles asked for */
     char *cp = 0;
     char *ListArg = NULL;
@@ -1965,6 +1993,7 @@ PUBLIC int HTLoadNews ARGS4(
     diagnostic = (format_out == WWW_SOURCE ||	/* set global flag */
     		  format_out == HTAtom_for("www/download") ||
 		  format_out == HTAtom_for("www/dump"));
+    rawtext = NO;
     
     if (TRACE) fprintf(stderr, "HTNews: Looking for %s\n", arg);
     
@@ -2260,6 +2289,34 @@ PUBLIC int HTLoadNews ARGS4(
         return NO;			/* Ignore if no name */
     }
 
+    if (!(post_wanted || reply_wanted || spost_wanted || sreply_wanted ||
+	  (group_wanted && last != -1) || list_wanted)) {
+	head_wanted = anAnchor->isHEAD;
+	if (head_wanted && !strncmp(command, "ARTICLE_", 8)) {
+	    /* overwrite "ARTICLE" - hack... */
+	    strcpy(command, "HEAD ");
+	    for (cp = command + 5; ; cp++)
+		if ((*cp = *(cp + 3)) == '\0')
+		    break;
+	}
+	rawtext = (head_wanted || keep_mime_headers);
+    }
+    if (rawtext) {
+        node_anchor = anAnchor;
+	rawtarget = HTStreamStack(WWW_PLAINTEXT,
+				  format_out,
+				  stream, anAnchor);
+	if (!rawtarget) {
+	    FREE(NewsHost);
+	    FREE(NewsHREF);
+	    FREE(ProxyHost);
+	    FREE(ProxyHREF);
+	    FREE(ListArg);
+	    HTAlert("No target for raw text!");
+	    return(HT_NOT_LOADED);
+	}	/* Copy routine entry points */
+	rawtargetClass = *rawtarget->isa;
+    } else
     /*
     **  Make a hypertext object with an anchor list.
     */
@@ -2298,8 +2355,9 @@ PUBLIC int HTLoadNews ARGS4(
 		     "HTNews: Interrupted on connect; recovering cleanly.\n");
 		_HTProgress("Connection interrupted.");
 		if (!(post_wanted || reply_wanted ||
-		      spost_wanted || sreply_wanted))
-		    (*targetClass._abort)(target, NULL);
+		      spost_wanted || sreply_wanted)) {
+		    ABORT_TARGET;
+		}
 		FREE(NewsHost);
 		FREE(NewsHREF);
 		FREE(ProxyHost);
@@ -2360,8 +2418,9 @@ PUBLIC int HTLoadNews ARGS4(
 			if (status == HT_INTERRUPTED) {
 			    _HTProgress("Connection interrupted.");
 			    if (!(post_wanted || reply_wanted ||
-				  spost_wanted || sreply_wanted))
-			        (*targetClass._abort)(target, NULL);
+				  spost_wanted || sreply_wanted)) {
+			        ABORT_TARGET;
+			    }
 			    FREE(NewsHost);
 			    FREE(NewsHREF);
 			    FREE(ProxyHost);
@@ -2609,7 +2668,9 @@ Send_NNTP_command:
 		**  the number (first) as the command and go back
 		**  to send it and check the response. - FM
 		*/
-		sprintf(command, "ARTICLE %d%c%c", first, CR, LF);
+		sprintf(command, "%s %d%c%c",
+			head_wanted ? "HEAD" : "ARTICLE",
+			first, CR, LF);
 		group_wanted = FALSE;
 		retries = 2;
 		goto Send_NNTP_command;
@@ -2630,9 +2691,9 @@ Send_NNTP_command:
 	if (!(post_wanted || reply_wanted ||
 	      spost_wanted || sreply_wanted)) {
 	    if (status == HT_NOT_LOADED) {
-		(*targetClass._abort)(target, NULL);
+		ABORT_TARGET;
 	    } else {
-		(*targetClass._free)(target);
+		FREE_TARGET;
 	    }
 	}
 	FREE(NewsHREF);
@@ -2660,8 +2721,9 @@ Send_NNTP_command:
 	    NULL,NULL,NULL, arg);No -- message earlier wil have covered it */
 
     if (!(post_wanted || reply_wanted ||
-	  spost_wanted || sreply_wanted))
-        (*targetClass._abort)(target, NULL);
+	  spost_wanted || sreply_wanted)) {
+        ABORT_TARGET;
+    }
     FREE(NewsHREF);
     if (ProxyHREF) {
 	StrAllocCopy(NewsHost, ProxyHost);

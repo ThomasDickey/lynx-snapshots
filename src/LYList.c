@@ -8,8 +8,8 @@
 #include "HTUtils.h"
 #include "tcp.h"
 #include "LYUtils.h"
-#include "LYList.h"
 #include "GridText.h"
+#include "LYList.h"
 #include "LYSignal.h"
 #include "LYGlobalDefs.h"
 #include "LYCharUtils.h"
@@ -36,13 +36,18 @@
 
 static char list_filename[256] = "\0";
 
+/*
+ *  Returns the name of the file used for the List Page, if one has
+ *  been created, as a full URL; otherwise, returns an empty string.
+ * - kw
+ */
 PUBLIC char * LYlist_temp_url NOARGS
 {
     return list_filename;
 }
 
 PUBLIC int showlist ARGS2(
-	char **,	newfile,
+	document *,	newdoc,
 	BOOLEAN,	titles)
 {
     int cnt;
@@ -51,6 +56,7 @@ PUBLIC int showlist ARGS2(
     static BOOLEAN first = TRUE;
     FILE *fp0;
     char *Address = NULL, *Title = NULL, *cp = NULL;
+    BOOLEAN intern_w_post = FALSE;
     char *desc = "unknown field or link";
 
     refs = HText_sourceAnchors(HTMainText);
@@ -90,13 +96,24 @@ PUBLIC int showlist ARGS2(
 	return(-1);
     }
 
-    StrAllocCopy(*newfile, list_filename);
+    StrAllocCopy(newdoc->address, list_filename);
     LYforce_HTML_mode = TRUE;	/* force this file to be HTML */
     LYforce_no_cache = TRUE;	/* force this file to be new */
 
 
     fprintf(fp0, "<head>\n");
     LYAddMETAcharsetToFD(fp0, -1);
+    if (strchr(HTLoadedDocumentURL(), '"') == NULL) {
+	/*
+	 *  Insert a BASE tag so there is some way to relate the List Page
+	 *  file to its underlying document after we are done.  It won't
+	 *  be actually used for resolving relative URLs. - kw
+	 */
+	StrAllocCopy(Address, HTLoadedDocumentURL());
+	LYEntify(&Address, FALSE);
+	fprintf(fp0, "<base href=\"%s\">\n", Address);
+	FREE(Address);
+    }
     fprintf(fp0, "<title>%s</title>\n</head>\n<body>\n",
 		 LIST_PAGE_TITLE);
     fprintf(fp0, "<h1>You have reached the List Page</h1>\n");
@@ -130,10 +147,16 @@ PUBLIC int showlist ARGS2(
 	     *  ensure that the link numbers on the list page match the
 	     *  numbering in the original document, but won't create a
 	     *  forward link to the form. - FM && LE
+	     *
+	     *  Changed to create a fake hidden link, to get the numbering
+	     *  right in connection with always treating this file as
+	     *  HIDDENLINKS_MERGE in GridText.c - kw
 	     */
 	    if (keypad_mode == LINKS_AND_FORM_FIELDS_ARE_NUMBERED) {
 		HText_FormDescNumber(cnt, (char **)&desc);
-		fprintf(fp0, "<li>[%d](<em>%s</em>)</a>\n", cnt, desc);
+		/* fprintf(fp0, "<li>[%d](<em>%s</em>)\n", cnt, desc); */
+		fprintf(fp0, "<li><a id=%d href='#%d'></a>(<em>%s</em>)\n",
+			cnt, cnt, desc);
 	    }
 	    continue;
 	}
@@ -144,6 +167,19 @@ PUBLIC int showlist ARGS2(
 	dest = dest_intl ?
 	    dest_intl : HTAnchor_followMainLink((HTAnchor *)child);
 	parent = HTAnchor_parent(dest);
+	if (!intern_w_post && dest_intl &&
+	    HTMainAnchor && HTMainAnchor->post_data &&
+	    parent->post_data &&
+	    !strcmp(HTMainAnchor->post_data, parent->post_data)) {
+	    /*
+	     *  Set flag to note that we had at least one internal link,
+	     *  if the document from which we are generating the list
+	     *  has assosiated POST data; after an extra check that the
+	     *  link destination really has hthe same POST data so that
+	     *  we can believe it is an internal link.
+	     */
+	    intern_w_post = TRUE;
+	}
 	address =  HTAnchor_address(dest);
 	title = titles ? HTAnchor_title(parent) : NULL;
 	StrAllocCopy(Address, address);
@@ -196,6 +232,26 @@ PUBLIC int showlist ARGS2(
     fprintf(fp0,"\n</%s>\n</body>\n", ((keypad_mode == NUMBERS_AS_ARROWS) ?
     				       "ol" : "ul"));
 
+    /*
+     *  Make necessary changes to newdoc before returning to caller.
+     *  If the intern_w_post flag is set, we keep the POST data in
+     *  newdoc that have been passed in.  They should be the same as
+     *  in the loaded locument for which we generated the list.
+     *  In that case the file we have written will be associated with
+     *  the same POST data when it is loaded after we are done here,
+     *  so that following one of the links we have marked as "internal
+     *  link" can lead back to the underlying document with the right
+     *  address+post_data combination. - kw
+     */
+    if (intern_w_post) {
+	newdoc->internal_link = TRUE;
+    } else {
+	FREE(newdoc->post_data);
+	FREE(newdoc->post_content_type);
+	newdoc->internal_link = FALSE;
+    }
+    newdoc->isHEAD = FALSE;
+    newdoc->safe = FALSE;
     fclose(fp0);
     return(0);
 }      
@@ -256,6 +312,15 @@ PUBLIC void printlist ARGS2(
 		continue;
 	    }
 	    dest = HTAnchor_followMainLink((HTAnchor *)child);
+	    /*
+	     *  Ignore if child anchor points to itself, i.e. we had
+	     *  something like <A NAME=xyz HREF="#xyz"> and it is not
+	     *  treated as a hidden link.  Useful if someone 'P'rints
+	     *  the List Page (which isn't a very useful action to do,
+	     *  but anyway...) - kw
+	     */
+	    if (dest == (HTAnchor *)child)
+		continue;
 	    parent = HTAnchor_parent(dest);
 	    title = titles ? HTAnchor_title(parent) : NULL;
 	    address =  HTAnchor_address(dest);

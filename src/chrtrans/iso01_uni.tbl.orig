@@ -21,7 +21,7 @@ OISO Latin 1
 0x63	U+0063 U+0107 U+0109 U+010B U+010D
 0x64-0x7e	idem
 0xa0-0xff	idem
-#0x00	U+fffd   # don't let failed char lookups return 0
+#0x00	U+fffd   # don't let failed char lookups return '\0'
 # Mappings of C0 control chars from original, disabled
 #0x01	U+263A
 #0x02	U+263B
@@ -75,4 +75,4 @@ U+2122:(TM)
 0x27    U+2019-U+201b   # various single quotation marks
 0x22    U+201c-U+201f   # various double quotation marks
 
-U+2297 "(\327)"
+U+2297:(×)

@@ -237,6 +237,10 @@ where OBJECT is one of EM,STRONG,B,I,U,BLINK etc.\n\n", buffer);
  {
 	parse_attributes(mono,fg,bg,DSTYLE_HIGH,"high");
  }
+ else if (!strcmp(element, "normal")) /* added - kw */
+ {
+	parse_attributes(mono,fg,bg,DSTYLE_NORMAL,"html");
+ }
  /* this may vanish */
  else if (!strncasecmp(element, "candy", 5)) /* [INLINE]'s */
  {

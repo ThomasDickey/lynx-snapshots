@@ -1897,11 +1897,18 @@ PUBLIC void statusline ARGS1(
 		int a=(strncmp(buffer, "Alert", 5) || !hashStyles[s_alert].name ? s_status : s_alert);
 		LynxChangeStyle (a, ABS_ON, 1);
 		addstr(buffer);
-		wbkgdset(stdscr, (lynx_has_color
-			? hashStyles[a].color
-			: hashStyles[a].mono) | ' ');
+		wbkgdset(stdscr,
+			 ((lynx_has_color && LYShowColor >= SHOW_COLOR_ON)
+			  ? hashStyles[a].color
+			  :A_NORMAL) | ' ');
 		clrtoeol();
-		wbkgdset(stdscr, hashStyles[s_normal].color | ' ');
+		if (s_normal != NOSTYLE)
+		    wbkgdset(stdscr, hashStyles[s_normal].color | ' ');
+		else
+		    wbkgdset(stdscr,
+			     ((lynx_has_color && LYShowColor >= SHOW_COLOR_ON)
+			      ? displayStyles[DSTYLE_NORMAL].color
+			      : A_NORMAL) | ' ');
 		LynxChangeStyle (a, ABS_OFF, 0);
 	}
 #endif
@@ -2696,6 +2703,47 @@ PUBLIC int is_url ARGS1(
     }
 }
 
+/*
+ *  Determine whether we allow HEAD and related flags for a URL. - kw
+ */
+PUBLIC BOOLEAN LYCanDoHEAD ARGS1(
+    CONST char *,	address
+    )
+{
+    char *temp0 = NULL;
+    int isurl;
+    if (!(address && *address))
+	return FALSE;
+    if (!strncmp(address, "http", 4))
+	return TRUE;
+    /* Make copy for is_url() since caller may not care for case changes */
+    StrAllocCopy(temp0, address);
+    isurl = is_url(temp0);
+    FREE(temp0);
+    if (!isurl)
+	return FALSE;
+    if (isurl == LYNXCGI_URL_TYPE) {
+#if defined(LYNXCGI_LINKS) && !defined(VMS)
+	return TRUE;
+#else
+	return FALSE;
+#endif
+    }
+    if (isurl == NEWS_URL_TYPE || isurl == NNTP_URL_TYPE) {
+	char *temp = HTParse(address, "", PARSE_PATH);
+	char *cp = strrchr(temp, '/');
+	if (strchr((cp ? cp : temp), '@') != NULL) {
+	    FREE(temp);
+	    return TRUE;
+	}
+	if (cp && isdigit(cp[1]) && strchr(cp, '-') == NULL) {
+	    FREE(temp);
+	    return TRUE;
+	}
+	FREE(temp);
+    }
+    return FALSE;
+}
 /*
  *  Remove backslashes from any string.
  */
@@ -5530,3 +5578,29 @@ PUBLIC FILE *LYAppendToTxtFile ARGS1(char *, name)
 #endif
     return fp;
 }
+
+#ifdef UNIX
+/*
+ *  Restore normal permisions to a copy of a file that we have created
+ *  with temp file restricted permissions.  The normal umask should
+ *  apply for user files. - kw
+ */
+PUBLIC void LYRelaxFilePermissions ARGS1(CONST char *, name)
+{
+    int mode;
+    struct stat stat_buf;
+    if (stat(name, &stat_buf) == 0 &&
+	S_ISREG(stat_buf.st_mode) &&
+	(mode = (stat_buf.st_mode & 0777)) == HIDE_CHMOD) {
+	/*
+	 *  It looks plausible that this is a file we created with
+	 *  temp file paranoid permissions (and the umask wasn't even
+	 *  more restrictive when it was copied). - kw
+	 */
+	int save = umask(HIDE_UMASK);
+	mode = ((mode & 0700) | 0066) & ~save;
+	umask(save);
+	chmod(name, mode);
+    }
+}
+#endif

@@ -72,7 +72,7 @@ WWWINC= WWW/Library/Implementation
 #	ftp://ftp.cnidr.org/pub/NIDR.tools/freewais
 # If you are using freeWAIS-0.202 or older, include -DDECLARE_WAIS_LOGFILES
 # in your SITE_DEFS.
-# Plese put an ABSOLUTE address here if you want it to work!
+# Please put an ABSOLUTE address here if you want it to work!
 #WAISLIB= ../../freeWAIS-0.202/bin/client.a ../../freeWAIS-0.202/bin/wais.a /usr/lib/libm.a
 
 # !!!!!!!!!!!!! SLANG Support (For color version of Lynx). !!!!!!!!!!!!!!!!
@@ -192,13 +192,13 @@ depend:
 	cd src && $(MAKE) $@
 
 distclean: clean
-	-rm -f WWW/Library/unix/makefile src/makefile src/chrtrans/makefile
 	-rm -f WWW/Library/*/*~
 	-rm -f WWW/Library/*/*.bak
 	-rm -rf src/obsolete
-	-cd src && $(MAKE) clean
-	-cd src/chrtrans && $(MAKE) distclean
+	-cd src && $(MAKE) $@
+	-cd src/chrtrans && $(MAKE) $@
 	-rm -f *~ *.bak *.sav
+	-rm -f WWW/Library/unix/makefile src/makefile src/chrtrans/makefile
 	-rm -f makefile lynx_cfg.h config.status config.log config.cache
 	-rm -f lynx
 
@@ -229,7 +229,7 @@ save:
 compress: tar
 	cd ..; rm -f $(lynxname).tar.Z; compress -f -v $(lynxname).tar
 
-install: lynx
+install: lynx $(bindir) $(mandir) $(libdir)
 	-mv -f $(bindir)/lynx $(bindir)/lynx.old
 	-mv -f $(libdir)/lynx.cfg $(libdir)/lynx.oldcfg
 	$(installbin) lynx $(bindir)/lynx
@@ -240,3 +240,6 @@ uninstall:
 	-rm -f $(bindir)/lynx
 	-rm -f $(mandir)/lynx.1
 	-rm -f $(libdir)/lynx.cfg
+
+$(bindir) $(mandir) $(libdir) :
+	$(srcdir)/mkdirs.sh $@

@@ -53,13 +53,14 @@ PRIVATE HTList * LynxMaps = NULL;
 PUBLIC BOOL LYMapsOnly = FALSE;
 
 /* 
- *  Utility for freeing the list of MAPs. - FM
+ *  Utility for freeing a list of MAPs.
  */
-PRIVATE void LYLynxMaps_free NOARGS
+PUBLIC void ImageMapList_free ARGS1(
+    HTList *,		theList)
 {
     LYImageMap *map;
     LYMapElement *element;
-    HTList *cur = LynxMaps;
+    HTList *cur = theList;
     HTList *current;
 
     if (!cur)
@@ -81,36 +82,92 @@ PRIVATE void LYLynxMaps_free NOARGS
 	}
 	FREE(map);
     }
-    HTList_delete(LynxMaps);
-    LynxMaps = NULL;
+    HTList_delete(theList);
     return;
 }
 
 /* 
- *  Utility for creating an LYImageMap list (LynxMaps), if it doesn't
+ *  Utility for freeing the global list of MAPs. - kw
+ */
+PRIVATE void LYLynxMaps_free NOARGS
+{
+    ImageMapList_free(LynxMaps);
+    LynxMaps = NULL;
+    return;
+}
+
+/*
+ *  We keep two kinds of lists:
+ *  - A global list (LynxMaps) shared by MAPs from all documents that
+ *    do not have POST data.
+ *  - For each response to a POST which contains MAPs, a list specific
+ *    to this combination of URL and post_data.  It is kept in the
+ *    HTParentAnchor structure and is freed when the document is removed
+ *    from memory, in the course of normal removal of anchors.
+ *    MAPs from POST responses can only be accessed via internal links,
+ *    i.e. from within the same document (with the same post_data).
+ *    The notion of "same document" is extended, so that LYNXIMGMAP:
+ *    and List Page screens are logically part of the document on which
+ *    they are based. - kw
+ *
+ *  If DONT_TRACK_INTERNAL_LINKS is defined, only the global list will
+ *  be used for all MAPs.
+ *
+ */
+
+/* 
+ *  Utility for creating an LYImageMap list, if it doesn't
  *  exist already, adding LYImageMap entry structures if needed, and
  *  removing any LYMapElements in a pre-existing LYImageMap entry so that
  *  it will have only those from AREA tags for the current analysis of
  *  MAP element content. - FM
  */
-PUBLIC BOOL LYAddImageMap ARGS2(
+PUBLIC BOOL LYAddImageMap ARGS3(
 	char *,		address,
-	char *,		title)
+	char *,		title,
+	HTParentAnchor *, node_anchor)
 {
     LYImageMap *new = NULL;
     LYImageMap *old = NULL;
     HTList *cur = NULL;
+    HTList *theList = NULL;
     HTList *curele = NULL;
     LYMapElement *ele = NULL;
 
     if (!(address && *address))
         return FALSE;
+    if (!(node_anchor && node_anchor->address))
+	return FALSE;
 
-    if (!LynxMaps) {
-        LynxMaps = HTList_new();
-	atexit(LYLynxMaps_free);
-    } else {
-        cur = LynxMaps;
+    /*
+     *  Set theList to either the global LynxMaps list or, if we
+     *  are associated with post data, the specific list.  The
+     *  list is created if it doesn't already exist. - kw
+     */
+#ifndef DONT_TRACK_INTERNAL_LINKS
+    if (node_anchor->post_data) {
+	/*
+	 *  We are handling a MAP element found while parsing
+	 *  node_anchor's stream of data, and node_anchor has
+	 *  post_data associated and should therefore represent
+	 *  a POST response, so use the specific list. - kw
+	 */
+	theList = node_anchor->imaps;
+	if (!theList) {
+	    theList = node_anchor->imaps = HTList_new();
+	}
+    } else
+#endif
+    {
+	if (!LynxMaps) {
+	    LynxMaps = HTList_new();
+	    atexit(LYLynxMaps_free);
+	}
+	theList = LynxMaps;
+    }
+
+    if (theList) {
+        cur = theList;
 	while (NULL != (old = (LYImageMap *)HTList_nextObject(cur))) {
 	    if (!strcmp(old->address, address)) {
 		FREE(old->address);
@@ -141,31 +198,59 @@ PUBLIC BOOL LYAddImageMap ARGS2(
     if (title && *title)
         StrAllocCopy(new->title, title);
     if (new != old)
-        HTList_addObject(LynxMaps, new);
+        HTList_addObject(theList, new);
     return TRUE;
 }
 
 /* 
  * Utility for adding LYMapElements to LYImageMaps
- * in the LynxMaps list. - FM
+ * in the appropriate list. - FM
  */
-PUBLIC BOOL LYAddMapElement ARGS4(
+PUBLIC BOOL LYAddMapElement ARGS5(
 	char *,		map,
 	char *,		address,
 	char *,		title,
+	HTParentAnchor *, node_anchor,
 	BOOL,		intern_flag)
 {
     LYMapElement *new = NULL;
     LYImageMap *theMap = NULL;
+    HTList *theList = NULL;
     HTList *cur = NULL;
 
     if (!(map && *map && address && *address))
         return FALSE;
+    if (!(node_anchor && node_anchor->address))
+	return FALSE;
 
-    if (!LynxMaps)
-        LYAddImageMap(map, NULL);
+    /*
+     *  Set theList to either the global LynxMaps list or, if we
+     *  are associated with post data, the specific list.  The
+     *  list should already exist, since this function is only called
+     *  if the AREA tag we are handling was within a MAP element
+     *  in node_anchor's stream of data, so that LYAddImageMap has
+     *  been called. - kw
+     */
+#ifndef DONT_TRACK_INTERNAL_LINKS
+    if (node_anchor->post_data) {
+	/*
+	 *  We are handling an AREA tag found while parsing
+	 *  node_anchor's stream of data, and node_anchor has
+	 *  post_data associated and should therefore represent
+	 *  a POST response, so use the specific list. - kw
+	 */
+	theList = node_anchor->imaps;
+	if (!theList)
+	    return FALSE;
+    } else
+#endif
+    {
+	if (!LynxMaps)
+	    LYAddImageMap(map, NULL, node_anchor);
+	theList = LynxMaps;
+    }
 
-    cur = LynxMaps;
+    cur = theList;
     while (NULL != (theMap = (LYImageMap *)HTList_nextObject(cur))) {
         if (!strcmp(theMap->address, map)) {
 	    break;
@@ -224,6 +309,82 @@ PUBLIC BOOL LYHaveImageMap ARGS1(
     return FALSE;
 }
 
+/*
+ *  Fills in a Doccaddress structure for getting the HTParentAnchor of
+ *  the underlying resource.  ALso returns a pointer to that anchor in
+ *  *punderlying if we are dealing with POST data. - kw
+ *
+ *  address  is the address of the underlying resource, i.e. the one
+ *           containing the MAP element, the MAP's name appended as
+ *	     fragment is ignored.
+ *  anAnchor is the LYNXIMGMAP: anchor; if it is associated with POST
+ *           data, we want the specific list, otherwise the global list.
+ */
+PRIVATE void fill_DocAddress ARGS4(
+    DocAddress *,	wwwdoc,
+    char *,		address,
+    HTParentAnchor *,	anAnchor,
+    HTParentAnchor **,	punderlying)
+{
+    HTParentAnchor * underlying;
+    if (anAnchor && anAnchor->post_data) {
+	wwwdoc->address = address;
+        wwwdoc->post_data = anAnchor->post_data;
+        wwwdoc->post_content_type = anAnchor->post_content_type;
+        wwwdoc->bookmark = NULL;
+	wwwdoc->isHEAD = FALSE;
+	wwwdoc->safe = FALSE;
+	underlying = HTAnchor_parent(HTAnchor_findAddress(wwwdoc));
+	if (underlying->safe)
+	    wwwdoc->safe = TRUE;
+	if (punderlying)
+	    *punderlying = underlying;
+    } else {
+	wwwdoc->address = address;
+        wwwdoc->post_data = NULL;
+        wwwdoc->post_content_type = NULL;
+        wwwdoc->bookmark = NULL;
+	wwwdoc->isHEAD = FALSE;
+	wwwdoc->safe = FALSE;
+	if (punderlying)
+	    *punderlying = NULL;
+    }
+}
+
+/*
+ *  Get the appropriate list for creating a LYNXIMGMAP: pseudo-
+ *  document: either the global list (LynxMaps), or the specific
+ *  list if a List Page for a POST response is requested.  Also
+ *  fill in the DocAddress structure etc. by calling fill_DocAddress().
+ *
+ *  address is the address of the underlying resource, i.e. the one
+ *          containing the MAP element, the MAP's name appended as
+ *	    fragment is ignored.
+ *  anchor  is the LYNXIMGMAP: anchor for which LYLoadIMGmap() is
+ *          requested; if it is associated with POST data, we want the
+ *	    specific list for this combination of address+post_data.
+ *
+ * if DONT_TRACK_INTERNAL_LINKS is defined, the Anchor passed to
+ * LYLoadIMGmap() will never have post_data, so that the global list
+ * will be used. - kw
+ */
+PRIVATE HTList * get_the_list ARGS4(
+    DocAddress *,	wwwdoc,
+    char *,		address,
+    HTParentAnchor *,	anchor,
+    HTParentAnchor **,	punderlying)
+{
+    if (anchor && anchor->post_data) {
+	fill_DocAddress(wwwdoc, address, anchor, punderlying);
+	if (punderlying && *punderlying)
+	    return (*punderlying)->imaps;
+	return anchor->imaps;
+    } else {
+	fill_DocAddress(wwwdoc, address, NULL, punderlying);
+	return LynxMaps;
+    }
+}
+
 /* 	LYLoadIMGmap - F.Macrides (macrides@sci.wfeb.edu)
 **	------------
 **  	Create a text/html stream with a list of links
@@ -243,10 +404,12 @@ PRIVATE int LYLoadIMGmap ARGS4 (
     LYImageMap *theMap = NULL;
     char *MapTitle = NULL;
     char *MapAddress = NULL;
+    HTList *theList;
     HTList *cur = NULL;
     char *address = NULL;
     char *cp = NULL;
     DocAddress WWWDoc;
+    HTParentAnchor * underlying;
     BOOL old_cache_setting = LYforce_no_cache;
     BOOL old_reloading = reloading;
     HTFormat old_format_out = HTOutputFormat;
@@ -259,13 +422,17 @@ PRIVATE int LYLoadIMGmap ARGS4 (
 	return(HT_NOT_LOADED);
     }
 
-    if (!LynxMaps) {
-	WWWDoc.address = address;
-        WWWDoc.post_data = NULL;
-        WWWDoc.post_content_type = NULL;
-        WWWDoc.bookmark = NULL;
-	WWWDoc.isHEAD = FALSE;
-	WWWDoc.safe = FALSE;
+    theList = get_the_list(&WWWDoc, address, anAnchor, &underlying);
+    if (WWWDoc.safe)
+	anAnchor->safe = TRUE;
+
+    if (!theList) {
+	if (anAnchor->post_data && !WWWDoc.safe &&
+	    ((underlying && underlying->document && !LYforce_no_cache) ||
+	     HTConfirm("LYNXIMGMAP: " CONFIRM_POST_RESUBMISSION) != TRUE)) {
+	    HTAlert("Image map from POST response not available!");
+	    return(HT_NOT_LOADED);
+	}
         LYforce_no_cache = TRUE;
 	reloading = TRUE;
 	HTOutputFormat = WWW_PRESENT;
@@ -282,26 +449,27 @@ PRIVATE int LYLoadIMGmap ARGS4 (
 	reloading = old_reloading;
 	HTOutputFormat = old_format_out;
 	LYMapsOnly = FALSE;
+	theList = get_the_list(&WWWDoc, address, anAnchor, &underlying);
     }
 
-    if (!LynxMaps) {
+    if (!theList) {
 	HTAlert(MAPS_NOT_AVAILABLE);
 	return(HT_NOT_LOADED);
     }
 
-    cur = LynxMaps;
+    cur = theList;
     while (NULL != (theMap = (LYImageMap *)HTList_nextObject(cur))) {
         if (!strcmp(theMap->address, address)) {
 	    break;
 	}
     }
     if (!(theMap && theMap->elements)) {
-	WWWDoc.address = address;
-        WWWDoc.post_data = NULL;
-        WWWDoc.post_content_type = NULL;
-        WWWDoc.bookmark = NULL;
-	WWWDoc.isHEAD = FALSE;
-	WWWDoc.safe = FALSE;
+	if (anAnchor->post_data && !WWWDoc.safe &&
+	    ((underlying && underlying->document && !LYforce_no_cache) ||
+	    HTConfirm("LYNXIMGMAP: " CONFIRM_POST_RESUBMISSION) != TRUE)) {
+	    HTAlert("Image map from POST response not available!");
+	    return(HT_NOT_LOADED);
+	}
         LYforce_no_cache = TRUE;
 	reloading = TRUE;
 	HTOutputFormat = WWW_PRESENT;
@@ -318,7 +486,7 @@ PRIVATE int LYLoadIMGmap ARGS4 (
 	reloading = old_reloading;
 	HTOutputFormat = old_format_out;
 	LYMapsOnly = FALSE;
-	cur = LynxMaps;
+	cur = get_the_list(&WWWDoc, address, anAnchor, &underlying);
 	while (NULL != (theMap = (LYImageMap *)HTList_nextObject(cur))) {
 	    if (!strcmp(theMap->address, address)) {
 		break;
@@ -330,7 +498,9 @@ PRIVATE int LYLoadIMGmap ARGS4 (
 	}
     }
 
+#ifdef DONT_TRACK_INTERNAL_LINKS
     anAnchor->no_cache = TRUE;
+#endif
 
     target = HTStreamStack(format_in, 
 			   format_out,

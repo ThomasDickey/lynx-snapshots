@@ -40,6 +40,11 @@ extern void HTProgress PARAMS((CONST char * Msg));
 extern BOOLEAN mustshow;
 #define _HTProgress(msg)	mustshow = TRUE, HTProgress(msg)
 
+/*
+ *  Indicates whether last HTConfirm was cancelled (^G or ^C) and
+ *  resets flag. (so only call once!) - kw
+ */
+extern BOOL HTLastConfirmCancelled NOPARAMS;
 
 /*      Display a message, then wait for 'yes' or 'no'.
 **

@@ -238,11 +238,21 @@ PUBLIC HTChildAnchor * HTAnchor_findChildAndLink ARGS4(
         HTAnchor * dest;
 
         parsed_doc.address = HTParse(href, relative_to, PARSE_ALL);
-        parsed_doc.post_data = NULL;
-        parsed_doc.post_content_type = NULL;
-        parsed_doc.bookmark = NULL;
-        parsed_doc.isHEAD = FALSE;
-        parsed_doc.safe = FALSE;
+#ifndef DONT_TRACK_INTERNAL_LINKS
+	if (ltype && parent->post_data && ltype == LINK_INTERNAL) {
+	    /* for internal links, find a destination with the same
+	       post data if the source of the link has post data. - kw */
+	    parsed_doc.post_data = parent->post_data;
+	    parsed_doc.post_content_type = parent->post_content_type;
+	} else
+#endif
+	{
+	    parsed_doc.post_data = NULL;
+	    parsed_doc.post_content_type = NULL;
+	}
+	parsed_doc.bookmark = NULL;
+	parsed_doc.isHEAD = FALSE;
+	parsed_doc.safe = FALSE;
         dest = HTAnchor_findAddress(&parsed_doc);
 
         HTAnchor_link((HTAnchor *)child, dest, ltype);
@@ -690,6 +700,8 @@ PUBLIC BOOL HTAnchor_delete ARGS1(
 #ifdef EXP_CHARTRANS
     FREE (me->UCStages);
 #endif
+    ImageMapList_free(me->imaps);
+
 
     /*
      *  Finally, kill the parent anchor passed in.

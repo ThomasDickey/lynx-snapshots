@@ -205,7 +205,10 @@ draw_options:
      *  might have non-ASCII or multibyte/CJK characters. - FM
      */
     response = 0;
-    clear();
+    if (enable_scrollback)
+	clear();
+    else
+	erase();
     move(0, 5);
 
     lynx_start_h1_color ();
@@ -1792,7 +1795,10 @@ draw_bookmark_list:
      *  to increase the chances that any non-ASCII or multibyte/CJK
      *  characters will be handled properly. - FM
      */
-    clear();
+    if (enable_scrollback)
+	clear();
+    else
+	erase();
     move(0, 5);
 
     lynx_start_h1_color ();

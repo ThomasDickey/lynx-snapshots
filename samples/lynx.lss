@@ -10,7 +10,7 @@ i:bold:blue
 alink:reverse:yellow
 a:bold:green
 img:dim:brown
-status:normal:yellow:blue
+status:reverse:yellow:blue
 fig:normal:gray
 caption:reverse:brown
 hr:normal:yellow

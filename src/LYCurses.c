@@ -75,7 +75,11 @@ PUBLIC void LY_SLrefresh NOARGS
     return;
 }
 
-PUBLIC void LY_SLclear NOARGS
+/* the following renamed from LY_SLclear since it is more like erase()
+   described in curses man pages than like clear(); but for USE_SLANG
+   clear() is still a macro calling this, and will do the same thing as
+   erase(). - kw */
+PUBLIC void LY_SLerase NOARGS
 {
     SLsmg_gotorc (0, 0);
     SLsmg_erase_eos ();
@@ -409,7 +413,7 @@ PRIVATE void LYsetWAttr ARGS1(WINDOW *, win)
 #endif /* DOSPATH */
 	}
 
-#ifndef __DJGPP__
+#if ( !defined(__DJGPP__) && !defined(_WINDOWS) )
 	if (no_color_video < 0) {
 		no_color_video = tigetnum("ncv");
 	}
@@ -1554,9 +1558,17 @@ PUBLIC void VMSbox ARGS3(
 PUBLIC void lynx_force_repaint NOARGS
 {
 #if defined(COLOR_CURSES)
-    chtype a = (LYShowColor >= SHOW_COLOR_ON) ? COLOR_PAIR(9) : A_NORMAL;
+    chtype a;
+#ifndef USE_COLOR_STYLE
+    if (LYShowColor >= SHOW_COLOR_ON)
+	a = COLOR_PAIR(9);
+    else
+#endif
+	a = A_NORMAL;
     bkgdset(a | ' ');
+#ifndef USE_COLOR_STYLE
     bkgd(a | ' ');
+#endif
     attrset(a);
 #endif
     clearok(curscr, TRUE);

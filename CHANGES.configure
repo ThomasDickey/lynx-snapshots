@@ -1,3 +1,12 @@
+97-11-07
+--------
+* add logic to make install-directories as needed. - TD
+* remove --disable-char-trans option (ifdef's still remain). - TD
+* correct type used in first compile-test for union wait. - TD
+* correct order of deletions in "make distclean" rule. - TD
+* new versions of macros used to check for ncurses version. - TD
+* don't suppress -I/usr/local/include when checking -I/usr/local/include/*,
+  to accommodate older versions of gcc. - TD
 97-10-21
 --------
 * revised tests for wait/waitpid/union-wait. - TD

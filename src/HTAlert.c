@@ -55,11 +55,24 @@ PUBLIC void HTProgress ARGS1(
         statusline(Msg);
 }
 
+PRIVATE BOOL conf_cancelled = NO; /* used by HTConfirm only - kw */
+
+PUBLIC BOOL HTLastConfirmCancelled NOARGS
+{
+    if (conf_cancelled) {
+	conf_cancelled = NO;	/* reset */
+	return(YES);
+    } else {
+	return(NO);
+    }
+}
+
 /*	Seek confirmation.				HTConfirm()
 **	------------------
 */
 PUBLIC BOOL HTConfirm ARGS1(CONST char *, Msg)
 {
+    conf_cancelled = NO;
     if (dump_output_immediately) { /* Non-interactive, can't respond */
 	return(NO);
     } else {
@@ -80,6 +93,8 @@ PUBLIC BOOL HTConfirm ARGS1(CONST char *, Msg)
 #endif /* VMS */
 	    if (TOUPPER(c) == 'Y')
 		return(YES);
+	    if (c == 7 || c == 3) /* remember we had ^G or ^C */
+		conf_cancelled = YES;
 	    if (TOUPPER(c) == 'N' || c == 7 || c == 3) /* ^G or ^C cancels */
 		return(NO);
 	}

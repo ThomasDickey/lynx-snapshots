@@ -1,7 +1,5 @@
 #Shall this become the "default" translation?
-#Meaning of that is currently unclear...  It's different
-#from the default input or defualt output charset...
-#but there has to be exactly one table marked as "default".
+#There has to be exactly one table marked as "default".
 D0
 #
 #The MIME name of this charset. 
@@ -287,7 +285,7 @@ OIBM PC character set
 0xff	U+00a0	#NO-BREAK SPACE
 
 U+03ac:a'
-U+03ad:î'
+U+03ad "\356'"	#:î'
 U+03ae:h'
 U+03af:i'
 U+03cc:o'

@@ -164,7 +164,8 @@ PUBLIC int LYrcShowColor = SHOW_COLOR_UNKNOWN;  /* ... as last read or written *
 PUBLIC BOOLEAN LYShowCursor = SHOW_CURSOR; /* to show or not to show */
 PUBLIC BOOLEAN LYUseDefShoCur = TRUE;	/* Command line -show_cursor toggle */
 PUBLIC BOOLEAN LYforce_no_cache = FALSE;
-PUBLIC BOOLEAN LYoverride_no_cache = FALSE;
+PUBLIC BOOLEAN LYoverride_no_cache = FALSE;/*override no-cache b/c history etc*/
+PUBLIC BOOLEAN LYinternal_flag = FALSE;	/* override no-cache b/c internal link*/
 PUBLIC BOOLEAN LYresubmit_posts = ALWAYS_RESUBMIT_POSTS;
 PUBLIC BOOLEAN LYUserSpecifiedURL = TRUE;/* always TRUE  the first time */
 PUBLIC BOOLEAN LYJumpFileURL = FALSE;	 /* always FALSE the first time */
@@ -1563,7 +1564,7 @@ PUBLIC int main ARGS2(
     /*
      *  Check for a valid HEAD request. - FM
      */
-    if (HEAD_request && strncmp(startfile, "http", 4)) {
+    if (HEAD_request && LYCanDoHEAD(startfile) != TRUE) {
         fprintf(stderr,
  "The '-head' switch is for http HEAD requests and cannot be used for\n'%s'.\n",
 		startfile);
@@ -1584,7 +1585,7 @@ PUBLIC int main ARGS2(
     /*
      *  Check for a valid MIME headers request. - FM
      */
-    if (keep_mime_headers && strncmp(startfile, "http", 4)) {
+    if (keep_mime_headers && LYCanDoHEAD(startfile) != TRUE) {
         fprintf(stderr,
  "The '-mime_header' switch is for http URLs and cannot be used for\n'%s'.\n",
 		startfile);

@@ -98,6 +98,7 @@ PRIVATE void scan ARGS2(
 	if (*p =='#') {
 	    parts->anchor = (p + 1);
 	    *p = '\0';			/* terminate the rest */
+	    break;		/* leave things after first # alone - kw */
 	}
     }
 
@@ -137,8 +138,12 @@ PRIVATE void scan ARGS2(
 	     *  or it's an nntp or snews URL, or news URL with a host.
 	     *  Restore the '#' in the address.
 	     */
-	    *(parts->anchor - 1) = '#';
-	    parts->anchor = NULL;
+	    /* but only if we have found a path component of which this will
+	     * become part. - kw  */
+	    if (parts->relative || parts->absolute) {
+		*(parts->anchor - 1) = '#';
+		parts->anchor = NULL;
+	    }
 	}
     }
 
@@ -693,12 +698,13 @@ PUBLIC char * HTUnEscape ARGS1(
         return str;
 
     while (*p != '\0') {
-        if (*p == HEX_ESCAPE) {
+        if (*p == HEX_ESCAPE &&
+	    p[1] && p[2] &&	/* tests shouldn't be needed, but.. */
+	    isxdigit((unsigned char)p[1]) &&
+	    isxdigit((unsigned char)p[2])) {
 	    p++;
-	    if (*p)
-	        *q = from_hex(*p++) * 16;
-	    if (*p)
-	        *q = FROMASCII(*q + from_hex(*p++));
+	    *q = from_hex(*p++) * 16;
+	    *q = FROMASCII(*q + from_hex(*p++));
 	    q++;
 	} else {
 	    *q++ = *p++; 

@@ -348,18 +348,19 @@ Miscellaneous Options:)
 AC_SUBST(EXTRA_OBJS)
 AC_SUBST(EXTRA_DEPS)
 
-AC_MSG_CHECKING(if character-translation code should be used)
-CF_ARG_DISABLE(char-trans,
-[  --disable-char-trans    enable optional character-translations],
-	[use_char_trans=$withval],
-	[use_char_trans=yes])
-AC_MSG_RESULT($use_char_trans)
+dnl AC_MSG_CHECKING(if character-translation code should be used)
+dnl CF_ARG_DISABLE(char-trans,
+dnl [  --disable-char-trans    enable optional character-translations],
+dnl 	[use_char_trans=$enableval],
+dnl 	[use_char_trans=yes])
+dnl AC_MSG_RESULT($use_char_trans)
 
-if test ".$use_char_trans" != ".no" ; then
+dnl if test ".$use_char_trans" != ".no" ; then
+### FIXME: this option is obsolete
 	AC_DEFINE(EXP_CHARTRANS)
 	EXTRA_OBJS="$EXTRA_OBJS \$(CHARTRANS_OBJS)"
 	EXTRA_DEPS="$EXTRA_DEPS do_chartrans_stuff"
-fi
+dnl fi
 
 AC_MSG_CHECKING(if color-style code should be used)
 CF_ARG_ENABLE(color-style,

@@ -125,9 +125,8 @@ struct _HTParentAnchor {
   char *	expires;		/* Expires */
   char *	last_modified;		/* Last-Modified */
   char *	server;			/* Server */
-#ifdef EXP_CHARTRANS
-  UCAnchorInfo *	UCStages;
-#endif
+  UCAnchorInfo *	UCStages; 	/* chartrans stages */
+  HTList *	imaps;			/* client side image maps */
 };
 
 typedef struct {
@@ -411,7 +410,6 @@ extern void HTAnchor_setPhysical PARAMS((
 
 #endif /* HTANCHOR_H */
 
-#ifdef EXP_CHARTRANS
 
 extern LYUCcharset * HTAnchor_getUCInfoStage PARAMS((HTParentAnchor * me,
 						     int which_stage));
@@ -433,7 +431,8 @@ extern LYUCcharset * HTAnchor_copyUCInfoStage PARAMS((HTParentAnchor * me,
 						     int to_stage,
 						     int from_stage,
 						     int set_by));
-#endif
+
+extern void ImageMapList_free PARAMS((HTList * list));
 /*
 
     */

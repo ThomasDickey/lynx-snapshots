@@ -177,8 +177,9 @@ extern int PHYSICAL_SLtt_Screen_Cols;
 #define LINES SLtt_Screen_Rows
 #define move SLsmg_gotorc
 #define addstr SLsmg_write_string
-extern void LY_SLclear NOPARAMS;
-#define clear LY_SLclear
+extern void LY_SLerase NOPARAMS;
+#define erase LY_SLerase
+#define clear LY_SLerase
 #define standout SLsmg_reverse_video
 #define standend  SLsmg_normal_video
 #define clrtoeol SLsmg_erase_eol

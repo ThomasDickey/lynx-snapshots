@@ -25,6 +25,7 @@ extern void LYAddLocalhostAlias PARAMS((char *alias));
 extern BOOLEAN LYisLocalAlias PARAMS((char *filename));
 extern int LYCheckForProxyURL PARAMS((char *filename));
 extern int is_url PARAMS((char *filename));
+extern BOOLEAN LYCanDoHEAD PARAMS((CONST char *address));
 extern void remove_backslashes PARAMS((char *buf));
 extern char *quote_pathname PARAMS((char *pathname));
 extern BOOLEAN inlocaldomain NOPARAMS;
@@ -61,7 +62,9 @@ extern int putenv PARAMS((CONST char *string));
 FILE *LYNewBinFile PARAMS((char * name));
 FILE *LYNewTxtFile PARAMS((char * name));
 FILE *LYAppendToTxtFile PARAMS((char * name));
-
+#ifdef UNIX
+extern void LYRelaxFilePermissions PARAMS((CONST char * name));
+#endif
 /*
  *  Whether or not the status line must be shown.
  */

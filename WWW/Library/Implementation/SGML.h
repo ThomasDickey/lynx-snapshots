@@ -90,8 +90,10 @@ typedef enum _TagClass {
 typedef enum _TagFlags {
     Tgf_endO		= 0x00001, /* end tag can be Omitted */
     Tgf_startO		= 0x00002, /* start tag can be Omitted */
-    Tgf_mafse   	= 0x00004  /* Make Attribute-Free Start-tag End instead
+    Tgf_mafse   	= 0x00004, /* Make Attribute-Free Start-tag End instead
 				      (if found invalid) */
+    Tgf_strict		= 0x00008  /* Ignore contained invalid elements,
+				      don't pass them on */
 } TagFlags;
 
 /*              A tag structure describes an SGML element.

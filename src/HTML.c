@@ -243,7 +243,24 @@ PUBLIC void HTML_put_character ARGS2(HTStructured *, me, char, c)
 	return;
 
     default:
-        break;
+	if (me->inSELECT) {
+	    /*
+	     *  If we are within a SELECT not caught by the cases
+	     *  above - HTML_SELECT or HTML_OPTION may not be the
+	     *  last element pushed on the style stack if there were
+	     *  invalid markup tags within a SELECT element.  For error
+	     *  recovery, treat text as part of the OPTION text, it is
+	     *  probably meant to show up as user-visible text.
+	     *  Having A as an open element while in SELECT is really sick,
+	     *  don't make anchor text part of the option text in that case
+	     *  since the option text will probably just be discarded. - kw
+	     */
+	    if (me->sp[0].tag_number == HTML_A)
+		break;
+	    HTChunkPutc(&me->option, c);
+	    return;
+	}
+	break;
     } /* end first switch */
 
     /*
@@ -498,13 +515,57 @@ PUBLIC void HTML_write ARGS3(HTStructured *, me, CONST char*, s, int, l)
         HTML_put_character(me, *p);
 }
 
-#ifndef DONT_TRACK_INTERNAL_LINKS
+/*
+ *  "Internal links" are hyperlinks whose source and destination are
+ *  within the same document, and for which the destination is given
+ *  as a URL Reference with an empty URL, but possibly with a non-empty
+ *  #fragment.  (This terminology re URL-Reference vs. URL follows the
+ *  Fielding URL syntax and semantics drafts).
+ *  Differences:
+ *  (1) The document's base (in whatever way it is given) is not used for
+ *      resolving internal link references.
+ *  (2) Activating an internal link should not result in a new retrieval
+ *      of a copy of the document.
+ *  (3) Internal links are the only way to refer with a hyperlink to a document
+ *      (or a location in it) which is only known as the result of a POST
+ *      request (doesn't have a URL from which the document can be retrieved
+ *      with GET), and can only be used from within that document.
+ *
+ * *If DONT_TRACK_INTERNAL_LINKS is not defined, we keep track of whether a
+ *  link destination was given as an internal link.  This information is
+ *  recorded in the type of the link between anchor objects, and is available
+ *  to the HText object and the mainloop from there.  URL References to
+ *  internal destinations are still resolved into an absolute form before
+ *  being passed on, but using the current stream's retrieval address instead
+ *  of the base URL.
+ *  Examples:  (replace [...] to have a valid absolute URL)
+ *  In document retrieved from [...]/mypath/mydoc.htm w/ base [...]/otherpath/
+ *  a. HREF="[...]/mypath/mydoc.htm"      -> [...]/mypath/mydoc.htm
+ *  b. HREF="[...]/mypath/mydoc.htm#frag" -> [...]/mypath/mydoc.htm#frag
+ *  c. HREF="mydoc.htm"                   -> [...]/otherpath/mydoc.htm
+ *  d. HREF="mydoc.htm#frag"              -> [...]/otherpath/mydoc.htm#frag
+ *  e. HREF=""                -> [...]/mypath/mydoc.htm      (marked internal)
+ *  f. HREF="#frag"           -> [...]/mypath/mydoc.htm#frag (marked internal)
+ *
+ * *If DONT_TRACK_INTERNAL_LINKS is defined, URL-less URL-References are
+ *  resolved differently from URL-References with a non-empty URL (using the
+ *  current stream's retrieval address instead of the base), but we make no
+ *  further distinction.  Resolution is then as in the examples above, execept
+ *  that there is no "(marked internal)".
+ *
+ * *Note that this doesn't apply to form ACTIONs (always resolved using base,
+ *  never marked internal).  Also other references encountered or generated
+ *  are not marked internal, whether they have a URL or not, if in a given
+ *  context an internal link makes no sense (e.g. IMG SRC=).
+ */
 
+#ifndef DONT_TRACK_INTERNAL_LINKS
 /* A flag is used to keep track of whether an "URL reference" encountered
-   had a real "URL" or not.  (This is the terminology of the Fielding
-   Internet Draft.)  In the latter case, it will be marked as an "internal"
-   link.  The flag is set before we start messing around with the string
-   (resolution of relative URLs etc.). - kw */
+   had a real "URL" or not. In the latter case, it will be marked as
+   "internal".  The flag is set before we start messing around with the
+   string (resolution of relative URLs etc.). This variable only used
+   locally here, don't confuse with LYinternal_flag which is for
+   for overriding non-caching similar to LYoverride_no_cache. - kw */
 #define CHECK_FOR_INTERN(s) intern_flag = (s && (*s=='#' || *s=='\0')) ? TRUE : FALSE; 
 
 /* Last argument to pass to HTAnchor_findChildAndLink() calls,
@@ -741,6 +802,25 @@ PRIVATE void HTML_start_element ARGS6(
 		me->inBadBASE = TRUE;
 	    }
 
+	    if (url_type == LYNXIMGMAP_URL_TYPE) {
+		/*
+		 *  These have a are non-standard form, basically
+		 *  strip the prefix or the code below would insert
+		 *  a nonsense host into the pseudo URL.  These
+		 *  should never occur where they would used for
+		 *  resolution of relative URLs anyway.  We can
+		 *  also strip the #map part. - kw
+		 */
+		temp = HTParse(base + 11, "",
+			       PARSE_ACCESS+PARSE_HOST+PARSE_PATH
+			       +PARSE_PUNCTUATION);
+		if (temp) {
+		    FREE(base);
+		    base = temp;
+		    temp = NULL;
+		}
+	    }
+
 	    /* 
 	     *  Get parent's address for defaulted fields.
 	     */
@@ -754,6 +834,7 @@ PRIVATE void HTML_start_element ARGS6(
 		*temp != '\0') {
 	        StrAllocCopy(me->base_href, temp);
 	    } else {
+		FREE(temp);
 	        StrAllocCopy(me->base_href, (temp = HTParse(related, "",
 					 PARSE_ACCESS+PARSE_PUNCTUATION)));
 	    }
@@ -773,6 +854,7 @@ PRIVATE void HTML_start_element ARGS6(
 	        if (!strcmp(me->base_href, "file:")) {
 		    StrAllocCat(me->base_href, "//localhost");
 		} else if (strcmp(me->base_href, "news:")) {
+		    FREE(temp);
 	            StrAllocCat(me->base_href, (temp = HTParse(related, "",
 					    PARSE_HOST+PARSE_PUNCTUATION)));
 		}
@@ -787,7 +869,6 @@ PRIVATE void HTML_start_element ARGS6(
 	    			PARSE_PATH+PARSE_PUNCTUATION)) &&
 		*temp != '\0') {
 	        StrAllocCat(me->base_href, temp);
-		FREE(temp);
 	    } else if (!strcmp(me->base_href, "news:")) {
 	        StrAllocCat(me->base_href, "*");
 	    } else if (!strncmp(me->base_href, "news:", 5) ||
@@ -797,6 +878,7 @@ PRIVATE void HTML_start_element ARGS6(
 	    } else {
 	        StrAllocCat(me->base_href, "/");
 	    }
+	    FREE(temp);
 	    FREE(base);
 
             me->inBASE = TRUE;
@@ -3307,7 +3389,7 @@ PRIVATE void HTML_start_element ARGS6(
 		    FREE(title);
 		}
 	    }
-	    LYAddImageMap(me->map_address, title);
+	    LYAddImageMap(me->map_address, title, me->node_anchor);
 	    FREE(title);
 	}
         break;
@@ -3401,7 +3483,8 @@ PRIVATE void HTML_start_element ARGS6(
 	        StrAllocCopy(alt_string, href);
 	    }
 
-	    LYAddMapElement(me->map_address, href, alt_string, intern_flag);
+	    LYAddMapElement(me->map_address, href, alt_string,
+			    me->node_anchor, intern_flag);
 	    FREE(href);
 	    FREE(alt_string);
 	}
@@ -4622,6 +4705,19 @@ PRIVATE void HTML_start_element ARGS6(
 	    }
 
 	    /*
+	     *  Check for an unclosed SELECT, try to close it if found.
+	     */
+	    if (me->inSELECT) {
+	        if (TRACE) {
+		    fprintf(stderr, "HTML: Missing SELECT end tag, faking it...\n");
+		}
+		if (me->sp->tag_number != HTML_SELECT) {
+		    SET_SKIP_STACK(HTML_SELECT);
+		}
+		HTML_end_element(me, HTML_SELECT, (char **)&include);
+	    }
+
+	    /*
 	     *  Handle the INPUT as for a FORM. - FM
 	     */
 	    if (!(present && present[HTML_INPUT_NAME] &&
@@ -5059,7 +5155,9 @@ PRIVATE void HTML_start_element ARGS6(
 		me->inBadHTML = TRUE;
 		sleep(MessageSecs);
 	    }
-	    SET_SKIP_STACK(HTML_SELECT);
+	    if (me->sp->tag_number != HTML_SELECT) {
+		SET_SKIP_STACK(HTML_SELECT);
+	    }
 	    HTML_end_element(me, HTML_SELECT, (char **)&include);
 	}
 	{
@@ -5086,9 +5184,14 @@ PRIVATE void HTML_start_element ARGS6(
 		}
 
 	        /*
-		 *  Too likely to cause a crash, so we'll ignore it. - FM
-		 */
+		 *  We should have covered all crash possibilities with the
+		 *  current TagSoup parser, so we'll allow it because some
+		 *  people with other browsers use SELECT for "information"
+		 *  popups, outside of FORM blocks, though no Lynx user
+		 *  would do anything that awful, right? - FM
+		 *//***
 		break;
+		***/
 	    }
 
 	    /*
@@ -5815,6 +5918,17 @@ PRIVATE void HTML_end_element ARGS3(
     case HTML_HEAD:
         if (!me->text)
 	    UPDATE_STYLE;
+	if (me->inBASE &&
+	    !strcmp(me->node_anchor->address, LYlist_temp_url())) {
+	    /*  If we are parsing the List Page, and have a BASE after
+	     *  we are done with the HEAD element, propagate it back
+	     *  to the node_anchor object.  The base should have been
+	     *  inserted by showlist() to record what document the List
+	     *  Page is about, and other functions may later look for it
+	     *  in the anchor. - kw
+	     */
+	    StrAllocCopy(me->node_anchor->content_base, me->base_href);
+	}
 	if (HText_hasToolbar(me->text))
 	    HText_appendParagraph(me->text);
 	break;
@@ -6670,7 +6784,9 @@ End_Object:
 		me->inBadHTML = TRUE;
 		sleep(MessageSecs);
 	    }
-	    SET_SKIP_STACK(HTML_SELECT);
+	    if (me->sp->tag_number != HTML_SELECT) {
+		SET_SKIP_STACK(HTML_SELECT);
+	    }
 	    HTML_end_element(me, HTML_SELECT, (char **)&include);
 	}
 
@@ -6907,12 +7023,9 @@ End_Object:
 		    me->inBadHTML = TRUE;
 		    sleep(MessageSecs);
 		}
-
 	        /*
-		 *  Too likely to cause a crash, so we'll ignore it. - kw
+		 *  Hopefully won't crash, so we'll ignore it. - kw
 		 */
-		HTChunkClear(&me->option);
-		break;
 	    }
 
 	    /*
@@ -6971,9 +7084,11 @@ End_Object:
 	        /*
 		 *  Add end option character.
 		 */
-	        HText_appendCharacter(me->text, ']');
-		HText_setLastChar(me->text, ']');
-		me->in_word = YES;
+		if (!me->first_option) {
+		    HText_appendCharacter(me->text, ']');
+		    HText_setLastChar(me->text, ']');
+		    me->in_word = YES;
+		}
 		HText_setIgnoreExcess(me->text, FALSE); 
 	    }
     	    HTChunkClear(&me->option);
@@ -7211,7 +7326,56 @@ PRIVATE void HTML_free ARGS1(HTStructured *, me)
 	    HTML_end_element(me, HTML_FORM, (char **)&include);
 	    me->inFORM = FALSE;
 	}
-
+	if (me->option.size > 0) {
+	    /*
+	     *  If we still have data in the me->option chunk after
+	     *  forcing a close of a still-open form, something must
+	     *  have gone very wrong. - kw
+	     */
+	    if (TRACE) {
+		fprintf(stderr,
+			"HTML_free: ***** SELECT or OPTION not ended properly *****\n");
+	    } else if (!me->inBadHTML) {
+		_statusline(BAD_HTML_USE_TRACE);
+		me->inBadHTML = TRUE;
+		sleep(MessageSecs);
+	    }
+	    HTChunkTerminate(&me->option);
+	    /*
+	     *  Output the left-over data as text, maybe it was invalid
+	     *  markup meant to be shown somewhere. - kw
+	     */
+	    if (TRACE)
+		fprintf(stderr, "           ***** leftover option data: %s\n",
+			me->option.data);
+	    HTML_put_string(me, me->option.data);
+	    HTChunkClear(&me->option);
+	}
+	if (me->textarea.size > 0) {
+	    /*
+	     *  If we still have data in the me->textarea chunk after
+	     *  forcing a close of a still-open form, something must
+	     *  have gone very wrong. - kw
+	     */
+	    if (TRACE) {
+		fprintf(stderr,
+			"HTML_free: ***** TEXTAREA not used properly *****\n");
+	    } else if (!me->inBadHTML) {
+		_statusline(BAD_HTML_USE_TRACE);
+		me->inBadHTML = TRUE;
+		sleep(MessageSecs);
+	    }
+	    HTChunkTerminate(&me->textarea);
+	    /*
+	     *  Output the left-over data as text, maybe it was invalid
+	     *  markup meant to be shown somewhere. - kw
+	     */
+	    if (TRACE)
+		fprintf(stderr, "           ***** leftover textarea data: %s\n",
+			me->textarea.data);
+	    HTML_put_string(me, me->textarea.data);
+	    HTChunkClear(&me->textarea);
+	}
 	/*
 	 *  If we're interactive and have hidden links but no visible
 	 *  links, add a message informing the user about this and
@@ -7234,6 +7398,48 @@ PRIVATE void HTML_free ARGS1(HTStructured *, me)
 	 *  Now call the cleanup function. - FM
 	 */
 	HText_endAppend(me->text);
+    }
+    if (me->option.size > 0) {
+	/*
+	 *  If we still have data in the me->option chunk after
+	 *  forcing a close of a still-open form, something must
+	 *  have gone very wrong. - kw
+	 */
+	if (TRACE) {
+	    fprintf(stderr,
+		    "HTML_free: ***** SELECT or OPTION not ended properly *****\n");
+	} else if (!me->inBadHTML) {
+	    _statusline(BAD_HTML_USE_TRACE);
+	    me->inBadHTML = TRUE;
+	    sleep(MessageSecs);
+	}
+	if (TRACE) {
+	    HTChunkTerminate(&me->option);
+	    fprintf(stderr, "           ***** leftover option data: %s\n",
+		    me->option.data);
+	}
+	HTChunkClear(&me->option);
+    }
+    if (me->textarea.size > 0) {
+	/*
+	 *  If we still have data in the me->textarea chunk after
+	 *  forcing a close of a still-open form, something must
+	 *  have gone very wrong. - kw
+	 */
+	if (TRACE) {
+	    fprintf(stderr,
+		    "HTML_free: ***** TEXTAREA not used properly *****\n");
+	} else if (!me->inBadHTML) {
+	    _statusline(BAD_HTML_USE_TRACE);
+	    me->inBadHTML = TRUE;
+	    sleep(MessageSecs);
+	}
+	if (TRACE) {
+	    HTChunkTerminate(&me->textarea);
+	    fprintf(stderr, "           ***** leftover textarea data: %s\n",
+		    me->textarea.data);
+	}
+	HTChunkClear(&me->textarea);
     }
 
     if (me->target) {
@@ -7289,6 +7495,37 @@ PRIVATE void HTML_abort ARGS2(HTStructured *, me, HTError, e)
 	 *  Now call the cleanup function. - FM
 	 */
 	HText_endAppend(me->text);
+    }
+
+    if (me->option.size > 0) {
+	/*
+	 *  If we still have data in the me->option chunk after
+	 *  forcing a close of a still-open form, something must
+	 *  have gone very wrong. - kw
+	 */
+	if (TRACE) {
+	    fprintf(stderr,
+		    "HTML_abort: ***** SELECT or OPTION not ended properly *****\n");
+	    HTChunkTerminate(&me->option);
+	    fprintf(stderr, "            ***** leftover option data: %s\n",
+		    me->option.data);
+	}
+	HTChunkClear(&me->option);
+    }
+    if (me->textarea.size > 0) {
+	/*
+	 *  If we still have data in the me->textarea chunk after
+	 *  forcing a close of a still-open form, something must
+	 *  have gone very wrong. - kw
+	 */
+	if (TRACE) {
+	    fprintf(stderr,
+		    "HTML_abort: ***** TEXTAREA not used properly *****\n");
+	    HTChunkTerminate(&me->textarea);
+	    fprintf(stderr, "            ***** leftover textarea data: %s\n",
+		    me->textarea.data);
+	}
+	HTChunkClear(&me->textarea);
     }
 
     if (me->target) {

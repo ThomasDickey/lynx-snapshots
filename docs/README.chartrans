@@ -12,15 +12,20 @@ Lynx CHARTRANS
 
  - New method to define character sets: used for input charset as well
    as display character set, translation tables compiled in from 
-   separate files (one per charset).
+   separate files (one per charset).  One table is designated as default
+   and can be used for fallback translation to 7-bit replacements for
+   display.
 
  - Unicode (UTF8) support: can (attempt to) decode and translate UTF8 to
    display character set, or pass through UTF to display (if terminal
    or console understands UTF8).  [raw display of UTF only tested with Slang 
    so far, does not always position everything correctly on screen]
 
- - Support for CHARSET attribute on A tag [but not yet on LINK], as in
-   HTML i18n RFC 2070.  A link can suggest the target's charset in this way.
+ - Support for CHARSET attribute on A tag (and sometimesLINK), as in HTML
+   i18n RFC 2070 and W3C HTML 4.0 drafts.  A link can suggest the target's
+   charset in this way.
+
+-  Support for ACCEPT-CHARSET attribute of FORM tags.
 
  - EXPERIMENTAL, currently enabled only for Linux console: 
    can (attempt to) automatically switch terminal mode and load new
@@ -33,7 +38,8 @@ Lynx CHARTRANS
 Additions/changes to user interface:
 
  - many new Display Character Sets are available on O)ptions screen.
-   (also can now use arrow keys, HOME, END etc. for cycling through the list). 
+   (One can use arrow keys, HOME, END etc. for cycling through the list
+   or use selection from popup box, as for other options.)
 
  - new command line flags:
    -assume_charset=...  assume this as charset for documents that don't
@@ -41,16 +47,21 @@ Additions/changes to user interface:
    -assume_unknown_charset=...  in case a charset parameter is not recognized 
    -assume_local_charset=... assume this as charset of local file: docs 
    also available as ASSUME_CHARSET etc. in lynx.cfg
+   In "Advanced User" mode, ASSUME_CHARSET can be changed during a session
+   from the Optios Screen.
 
  - The "Raw" toggle (from -raw flag, '@' key, or Options screen)
-   o  should work as before for CJK charsets,
-   o  otherwise toggles the assumption "Default remote charset is same 
-      as Display Character Set" on or off.
+   o  toggles the assumption "Default remote charset is same as Display
+      Character Set" on or off.
       Toggling of the assumed charset is between Display Character Set and
       the specified ASSUME_CHARSET or, if they are the same, between the
       specified ASSUME_CHARSET and ISO-8859-1.
    o  The default for raw mode now depends on the Display Character Set as
       well as on the specified ASSUME_CHARSET value.
+   o  should work as before for CJK charsets (turning CJK-mode on or off).
+   o  If the effective ASSUME_CHARSET and the Display Character Set are
+      unchanged from the ISO-8859-1 default, toggling "Raw" may have some
+      additional effect for characters that can't be translated.
    (Try the "Transparent" Display Character Set for more "rawness".)
 
 Requirements:  same as for Lynx in general :)
@@ -58,57 +69,21 @@ Requirements:  same as for Lynx in general :)
 The chartrans code is now merged with Wayne Buttle's changes for
 32-bit MS Windows and DOS/DJGPP, with Thomas Dickey's and Jim Spath's
 emerging auto-configure mechanism, and with BUGFIXES from Foteos
-Macrides.  See the accompanying file CHANGES.few for the current
+Macrides.  See the accompanying file CHANGES.new for the current
 status.
 
 
-A WARNING BEFORE YOU PROCEDE:
-
-This is experimental.  It works already nicely for me, but I have only
-tested it on Linux, compiled with Slang.  In some cases undisplayable bytes
-may get sent to the terminal which are then interpreted as control chars.
-Other usual warnings about alpha software apply...
+A warning:
+In some cases undisplayable bytes may still get sent to the terminal
+which are then interpreted as control chars, there is no protection
+against if strange things are defined in the table files.
 
 
 HOW TO GET SOURCES:
 
-The location of files mentioned below is currently at
-         <URL: http://sol.slcc.edu/lynx/klaus/merged/all/>
-but it is probably easier to get a full package of the development code
-from
+The development code is available at
          <URL: http://sol.slcc.edu/lynx/current/>
-(different formats there, check it out.)
-Check both locations to find the newest version.
-
-There are three alternatives:
-( Replace the * in the followin filenames with the appropriate subversion )
-
-(1.)
-   Provided as a full Lynx distribution (for now..) - in zip format.
-   This contains the complete Lynx source package.
-
-   Just get lynx-2.7.1ac-*.zip.
-
-(2.)
-   Provided as add-on over the Lynx 2.7.1 distribution, i.e. all files that
-   are new or have changed - in zip format.
-   (a) Get the official Lynx 2.7.1 distribution - see list of download sites at
-           <URL: http://www.crl.com/~subir/lynx/sources.html>.
-   (b) Get add-to-offi-2.7.1ac-*.zip.
-   (c) Unpack the official 2.7.1 package, then unzip add-to-offi-2.7.1ac-*.zip
-       over that directory tree.
-
-(3.)
-   Provided in two files (for minimal download time) to install over the
-   Lynx 2.7.1 distribution - needs gunzip, tar, and patch.
-   (a) Get the official Lynx 2.7.1 distribution - see list of download sites at
-           <URL: http://www.crl.com/~subir/lynx/sources.html>.
-   (b) Get lynx-newfiles-2.7.1ac-*.tar.gz.
-   (c) Get lynx-patch-2.7.1ac-*.pch.gz.
-   (d) Unpack the official 2.7.1 package, then unpack 
-       lynx-newfiles-2.7.1ac-*.tar.gz over that directory tree.
-   (d) Apply patches from lynx-patch-2.7.1ac-*.pch.
-
+in various formats.
 
 HOW TO INSTALL:
 
@@ -119,13 +94,15 @@ HOW TO INSTALL:
     NOTE that there is a new "#define" in userdefs.h for MAX_CHARSETS
     near the end (in "Section 3.").
 
-    NOTE that in the top-level Makefile, the -DEXP_CHARTRANS must be
-    in *both* SITE_DEFS *and* SITE_LYDEFS.
+    If, for some reason, for UNIX you are not using the configure
+    script but Makefile.old, note that in the top-level Makefile,
+    the -DEXP_CHARTRANS must be in *both* SITE_DEFS *and* SITE_LYDEFS.
 
 (5) Building Lynx:
 
-    If you are compiling for VMS you have to figure out for yourself
-    how to modify the procedure, sorry.
+    Compiling the chartrans code is now integrated into the normal
+    installation procedures for UNIX (configure script) and other
+    platforms.
 
     What's supposed to happen (in addition to the usual things when
     building Lynx): in the new subdirectory src/chrtrans, make should
@@ -188,10 +165,10 @@ HOW TO INSTALL:
     <URL:  http://www.accentsoft.com/un/un-all.htm>
 
 (9) Please report bugs, unexpected behavior, etc. 
-    to <lynx-dev@sig.net> or <kweide@tezcat.com>.
+    to <lynx-dev@sig.net>.
 
     Suggestions for improvement would be welcome, as well as 
     contributed translation tables (for stuff that is not available
     at ftp://dkuug.dk or ftp://unicode.org).
 
-KW  1996-05-03
+KW  1997-11-06

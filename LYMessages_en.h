@@ -518,10 +518,15 @@
  "Redirection of POST content. P)roceed, see U)RL, or C)ancel"
 #define CONFIRM_POST_RESUBMISSION \
  "Document from Form with POST content.  Resubmit?"
+#define CONFIRM_POST_RESUBMISSION_TO \
+ "Resubmit POST content to %s ?"
+#define CONFIRM_POST_LIST_RELOAD \
+ "List from document with POST data.  Reload %s ?"
 #define CONFIRM_POST_DOC_HEAD \
  "Document from POST action, HEAD may not be understood.  Proceed?"
 #define CONFIRM_POST_LINK_HEAD \
  "Form submit action is POST, HEAD may not be understood.  Proceed?"
+#define DISCARDING_POST_DATA "Discarding POST data..."
 #define WILL_NOT_RELOAD_DOC "Document will not be reloaded!"
 #define	LOCATION_HEADER "Location: "
 #define STRING_NOT_FOUND "'%s' not found!"

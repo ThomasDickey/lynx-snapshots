@@ -307,8 +307,15 @@ PRIVATE int LYLoadCGI ARGS4(
 	int wstatus;
 #endif
 
-	/* Decode full HTTP response */
-	format_in = HTAtom_for("www/mime");
+	if (anAnchor->isHEAD || keep_mime_headers) {
+
+	    /* Show output as plain text */
+	    format_in = WWW_PLAINTEXT;
+	} else {
+	    
+	    /* Decode full HTTP response */
+	    format_in = HTAtom_for("www/mime");
+	}
 		
 	target = HTStreamStack(format_in,
 			       format_out,
@@ -361,6 +368,7 @@ PRIVATE int LYLoadCGI ARGS4(
 		close(fd2[1]);
 		
 		if (anAnchor->post_data) {
+		    int written, remaining, total_written = 0;
 		    close(fd1[0]);
 
 		    /* We have form data to push across the pipe */
@@ -371,8 +379,41 @@ PRIVATE int LYLoadCGI ARGS4(
 				"LYNXCGI: Writing:\n%s----------------------------------\n",
 				anAnchor->post_data);			
 		    }
-		    write(fd1[1], anAnchor->post_data,
-			  strlen(anAnchor->post_data));
+		    remaining = strlen(anAnchor->post_data);
+		    while ((written = write(fd1[1],
+					    anAnchor->post_data + total_written,
+					    remaining)) != 0) {
+			if (written < 0) {
+#ifdef EINTR
+			    if (errno == EINTR)
+				continue;
+#endif /* EINTR */
+#ifdef ERESTARTSYS
+			    if (errno == ERESTARTSYS)
+				continue;
+#endif /* ERESTARTSYS */
+			    if (TRACE) {
+				perror("LYNXCGI: write() of POST data failed");
+			    }
+			    break;
+			}
+			if (TRACE) {
+			    fprintf(stderr,
+				    "LYNXCGI: Wrote %d bytes of POST data.\n",
+				    written);
+			}
+			total_written += written;
+			remaining -= written;
+			if (remaining == 0)
+			    break;
+		    }
+		    if (remaining != 0) {
+			if (TRACE)
+			    fprintf(stderr,
+				    "LYNXCGI: %d bytes remain unwritten!\n",
+				    remaining);
+		    }
+		    close(fd1[1]);
 		}
 		
 		total_chars = 0;
@@ -404,9 +445,6 @@ PRIVATE int LYLoadCGI ARGS4(
 		    break;
 		}
 #endif /* !HAVE_WAITPID */
-		if (anAnchor->post_data) {
-		    close(fd1[1]);
-		}
 		close(fd2[0]);
 		status = HT_LOADED;
 		
@@ -449,6 +487,10 @@ PRIVATE int LYLoadCGI ARGS4(
 		    add_environment_value(post_len);
 		} else {
 		    close(fileno(stdin));
+
+		    if (anAnchor->isHEAD) {
+			add_environment_value("REQUEST_METHOD=HEAD");
+		    }
 		}
 
 		/* 
@@ -473,7 +515,7 @@ PRIVATE int LYLoadCGI ARGS4(
 		    /* Data for a get/search form */
 		    if (is_www_index) {
 			add_environment_value("REQUEST_METHOD=SEARCH");
-		    } else {
+		    } else if (!anAnchor->isHEAD) {
 			add_environment_value("REQUEST_METHOD=GET");
 		    }
 		    

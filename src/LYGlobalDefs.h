@@ -146,7 +146,8 @@ extern char *lynx_temp_space;
 extern char *lynx_save_space;
 extern BOOLEAN LYforce_HTML_mode;
 extern BOOLEAN LYforce_no_cache;
-extern BOOLEAN LYoverride_no_cache;
+extern BOOLEAN LYoverride_no_cache;  /* don't need fresh copy, from history */
+extern BOOLEAN LYinternal_flag; /* don't need fresh copy, was internal link */
 extern BOOLEAN LYresubmit_posts;
 extern BOOLEAN user_mode; /* novice or advanced */
 extern BOOLEAN is_www_index;

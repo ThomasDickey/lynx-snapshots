@@ -366,6 +366,7 @@ check_recall:
 	     */
 	    LYDidRename = TRUE;
 	}
+	chmod(buffer, HIDE_CHMOD);
 #else /* Unix: */
 	/*
 	 *  Prevent spoofing of the shell.
@@ -384,10 +385,10 @@ check_recall:
         fflush(stdout);
 	fflush(stderr);
         start_curses();
+#if defined(UNIX)
+	LYRelaxFilePermissions(buffer);
+#endif /* defined(UNIX) */
 #endif /* VMS */
-#if defined(VMS) || defined(UNIX)
-	chmod(buffer, HIDE_CHMOD);
-#endif /*  defined(VMS) || defined(UNIX) */
 
     } else {
 	/*

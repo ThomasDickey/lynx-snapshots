@@ -64,10 +64,6 @@ Here's an alphabetical listing of the Lynx-specific options.  The actual
 order shown by the -help option is different due to the requirements of
 the script:
 
-  --disable-char-trans			(defines EXP_CHARTRANS)
-  	Use this option to enable optional character-translations with
-	new charsets, UTF8 mode, etc.
-
   --disable-dired			(defines DIRED_SUPPORT)
 	Use this option to enable or disable the optional
 	directory-editor.
