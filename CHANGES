@@ -1,6 +1,8 @@
 Changes since Lynx 2.8 release
 ================================================================================
 
+1998-05-14 (2.8.1dev.12)
+* remove unneeded definition used in testing dev.11 from config.hin) - TD
 1998-05-14 (2.8.1dev.11)
 * fixes for function-keys with slang configuration on DOS (patch by DK).
 * correct missing '&' in command-line options entry for syslog (reported by
