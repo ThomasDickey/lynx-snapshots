@@ -1,6 +1,11 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2000-04-11 (2.8.3pre.4)
+* add to logic of --with-charsets configure option, checking for charset names
+  that happen to be built-into UCdomap.c rather than defined via .tbl files
+  in src/charsets (reported by HN) -TD
+* correct missing extern in CF_SLANG_UNIX compile-test -TD
 2000-04-06 (2.8.3pre.3)
 * remove definitions for NCURSES and NCURSES_VERSION from top-level makefiles
   that really use PDCurses -TD
