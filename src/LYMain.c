@@ -4,6 +4,8 @@
 #include "HTAccess.h"
 #include "HTList.h"
 #include "HTFile.h"
+#include "UCMap.h"
+#include "UCDefs.h"
 #ifdef VMS
 #include "HTVMSUtils.h"
 #endif /* VMS */
@@ -152,6 +154,7 @@ PUBLIC lynx_html_item_type *externals = NULL;
 PUBLIC lynx_html_item_type *uploaders = NULL;
 PUBLIC int port_syntax = 1;
 PUBLIC BOOLEAN LYShowCursor = SHOW_CURSOR; /* to show or not to show */
+PUBLIC BOOLEAN LYUseDefShoCur = TRUE;	/* Command line -show_cursor toggle */
 PUBLIC BOOLEAN LYforce_no_cache = FALSE;
 PUBLIC BOOLEAN LYoverride_no_cache = FALSE;
 PUBLIC BOOLEAN LYresubmit_posts = ALWAYS_RESUBMIT_POSTS;
@@ -289,8 +292,10 @@ PUBLIC BOOLEAN no_url_redirection = FALSE; /* Don't follow URL redirections */
 PUBLIC char *form_post_data = NULL;  /* User data for post form */
 PUBLIC char *form_get_data = NULL;   /* User data for get form */
 PUBLIC char *http_error_file = NULL; /* Place HTTP status code in this file */
-	     /* Id:Password for protected forms */
+	     /* Id:Password for protected documents */
 PUBLIC char *authentication_info[2] = {NULL, NULL};
+	     /* Id:Password for protected proxy servers */
+PUBLIC char *proxyauth_info[2] = {NULL, NULL};
 
 PUBLIC char *MBM_A_subbookmark[MBM_V_MAXFILES+1];
 PUBLIC char *MBM_A_subdescript[MBM_V_MAXFILES+1];
@@ -345,7 +350,11 @@ PUBLIC FILE *LYTraceLogFP = NULL;		/* Pointer for TRACE log  */
 PUBLIC char *LYTraceLogPath = NULL;		/* Path for TRACE log	   */
 PUBLIC BOOLEAN LYUseTraceLog = USE_TRACE_LOG;	/* Use a TRACE log?	   */
 PUBLIC FILE LYOrigStderr;			/* Original stderr pointer */
+PUBLIC BOOLEAN LYSeekFragMAPinCur = TRUE;
+PUBLIC BOOLEAN LYSeekFragAREAinCur = TRUE;
+
 PUBLIC BOOLEAN LYStripDotDotURLs = FALSE;	/* Try to fix ../ in some URLs? */
+PUBLIC BOOLEAN LYForceSSLCookiesSecure = FALSE;
 
 /* These are declared in cutil.h for current freeWAIS libraries. - FM */
 #ifdef DECLARE_WAIS_LOGFILES
@@ -363,6 +372,7 @@ PRIVATE char *terminal = NULL;
 PRIVATE char *pgm;
 PRIVATE BOOLEAN number_links = FALSE;
 PRIVATE BOOLEAN LYPrependBase = FALSE;
+PRIVATE HTList *LYStdinArgs = NULL;
 
 PRIVATE void parse_arg PARAMS((char **arg, int *i, int argc));
 #ifndef VMS
@@ -437,6 +447,8 @@ PRIVATE void free_lynx_globals NOARGS
     FREE(editor);
     FREE(authentication_info[0]);
     FREE(authentication_info[1]);
+    FREE(proxyauth_info[0]);
+    FREE(proxyauth_info[1]);
     FREE(lynxjumpfile);
     FREE(startrealm);
     FREE(personal_mail_address);
@@ -456,31 +468,24 @@ PRIVATE void free_lynx_globals NOARGS
     char *lynx_lss_file=NULL;
 #endif
 
-PRIVATE char *make_homedir_lynxrc_filename ARGS1(char *, name)
+
+/*
+ *  This function frees the LYStdinArgs list. - FM
+ */
+PRIVATE void LYStdinArgs_free NOARGS
 {
-   char *home = NULL;
+    char *argument;
+    HTList *cur = LYStdinArgs;
 
-   if (name == NULL)
-     {
-#if defined(UNIX) && !defined(DJGPP)
-	name = "/.lynxrc";
-#else
-	name = "/lynx.rc";
-#endif
-     }
+    if (cur == NULL)
+        return;
 
-#ifdef DOSPATH
-   StrAllocCopy(home, HTDOS_wwwName((char *)Home_Dir()));
-#else
-#ifdef VMS
-   StrAllocCopy(home, HTVMS_wwwName((char *)Home_Dir()));
-#else
-   StrAllocCopy(home, Home_Dir());
-#endif /* VMS */
-#endif /* DOSPATH */
-   
-   StrAllocCat(home, name);
-   return home;
+    while (NULL != (argument = (char *)HTList_nextObject(cur))) {
+	FREE(argument);
+    }
+    HTList_delete(LYStdinArgs);
+    LYStdinArgs = NULL;
+    return;
 }
 
 /*
@@ -498,29 +503,30 @@ PUBLIC int main ARGS2(
     char *cp;
     FILE *fp;
     char filename[256];
+    BOOL LYGetStdinArgs = FALSE;
 
 #ifdef _WINDOWS 
-WSADATA WSAData;
- {
-                int err;
-                WORD wVerReq;
+    WSADATA WSAData;
+    {
+	int err;
+	WORD wVerReq;
 
-                _fmode = O_BINARY;
+	_fmode = O_BINARY;
 
-                wVerReq = MAKEWORD(1,1);
+	wVerReq = MAKEWORD(1,1);
 
-                err = WSAStartup(wVerReq, &WSAData);
-                if (err != 0)
-                {
-                        printf("No Winsock found, sorry.");
-                        sleep(5);
-                        return;
-                }
- }
+	err = WSAStartup(wVerReq, &WSAData);
+	if (err != 0)
+	{
+	    printf("No Winsock found, sorry.");
+	    sleep(5);
+	    return;
+	}
+    }
 #endif /* _WINDOWS */
 
 #ifdef DJGPP
-        sock_init();
+    sock_init();
 #endif
 
 #ifdef DOSPATH
@@ -533,6 +539,15 @@ WSADATA WSAData;
     pgm = argv[0];
     if ((cp = strrchr(pgm, '/')) != NULL) {
 	pgm = cp + 1;
+    }
+
+    /*
+     *  Act on -help NOW, so we only output the help and exit. - FM
+     */
+    for (i = 1; i < argc; i++) {
+	if (strncmp(argv[i], "-help", 5) == 0) {
+	    parse_arg(&argv[i], &i, argc);
+	}
     }
 
 #ifdef LY_FIND_LEAKS
@@ -608,6 +623,21 @@ WSADATA WSAData;
     StrAllocCopy(pref_charset, PREFERRED_CHARSET);
     StrAllocCopy(system_mail, SYSTEM_MAIL);
     StrAllocCopy(system_mail_flags, SYSTEM_MAIL_FLAGS);
+    StrAllocCopy(LYUserAgent, LYNX_NAME);
+    StrAllocCat(LYUserAgent, "/");
+    StrAllocCat(LYUserAgent, LYNX_VERSION);
+    if (HTLibraryVersion) {
+        StrAllocCat(LYUserAgent, " libwww-FM/");
+	StrAllocCat(LYUserAgent, HTLibraryVersion);
+    }
+    StrAllocCopy(LYUserAgentDefault, LYUserAgent);
+#ifdef VMS
+    Define_VMSLogical("LYNX_VERSION", LYNX_VERSION);
+#else
+    StrAllocCopy(lynx_version_putenv_command, "LYNX_VERSION=");
+    StrAllocCat(lynx_version_putenv_command, LYNX_VERSION);
+    putenv(lynx_version_putenv_command);
+#endif /* VMS */
 #ifdef DOSPATH
        if ((cp = getenv("TEMP")) != NULL)
                 StrAllocCopy(lynx_temp_space, cp);
@@ -637,21 +667,20 @@ WSADATA WSAData;
 	StrAllocCopy(lynx_temp_space, temp);
 	FREE(temp);
     }
-    StrAllocCopy(LYUserAgent, LYNX_NAME);
-    StrAllocCat(LYUserAgent, "/");
-    StrAllocCat(LYUserAgent, LYNX_VERSION);
-    if (HTLibraryVersion) {
-        StrAllocCat(LYUserAgent, " libwww-FM/");
-	StrAllocCat(LYUserAgent, HTLibraryVersion);
+    if ((cp = strstr(lynx_temp_space, "$USER")) != NULL) {
+	char *cp1;
+
+	if ((cp1 = (char *)getenv("USER")) != NULL) {
+	    *cp = '\0';
+	    StrAllocCopy(temp, lynx_temp_space);
+	    *cp = '$';
+	    StrAllocCat(temp, cp1);
+	    cp += 5;
+	    StrAllocCat(temp, cp);
+	    StrAllocCopy(lynx_temp_space, temp);
+	    FREE(temp);
+	}
     }
-    StrAllocCopy(LYUserAgentDefault, LYUserAgent);
-#ifdef VMS
-    Define_VMSLogical("LYNX_VERSION", LYNX_VERSION);
-#else
-    StrAllocCopy(lynx_version_putenv_command, "LYNX_VERSION=");
-    StrAllocCat(lynx_version_putenv_command, LYNX_VERSION);
-    putenv(lynx_version_putenv_command);
-#endif /* VMS */
 #ifdef VMS
     for (i = 0; lynx_temp_space[i]; i++)
         lynx_temp_space[i] = TOLOWER(lynx_temp_space[i]);
@@ -751,10 +780,163 @@ WSADATA WSAData;
                 StrAllocCopy(lynx_cfg_file, argv[i+1]);
                 i++;
             }
-	} else if (strncmp(argv[i], "-help", 5) == 0) {
-	    parse_arg(&argv[i], &i, argc);
 	}
     }
+
+    /*
+     *  If we have a lone "-" switch for getting arguments from stdin,
+     *  get them NOW, and act on the relevant ones, saving the others
+     *  into an HTList for handling after the other initializations.
+     *  The primary purpose of this feature is to allow for the
+     *  potentially very long command line that can be associated with
+     *  post or get data.  The original implementation required that
+     *  the lone "-" be the only command line argument, but that
+     *  precluded its use when the lynx command is aliased with other
+     *  arguments.  When interactive, the stdin input is terminated by
+     *  by Control-D on Unix or Control-Z on VMS, and each argument
+     *  is terminated by a RETURN.  When the argument is -get_data or
+     *  -post_data, the data are terminate by a "___" string, alone
+     *  on the line (also terminated by RETURN). - FM
+     */
+    for (i = 1; i < argc; i++) {
+        if (strcmp(argv[i], "-") == 0) {
+	    LYGetStdinArgs = TRUE;
+	}
+    }
+    if (LYGetStdinArgs == TRUE) {
+	char buf[1025];
+ 
+	while (fgets(buf, sizeof(buf) - 1, stdin)) {
+	    int j;
+     
+	    for (j = strlen(buf) - 1; j > 0 && 
+		(buf[j] == CR || buf[j] == LF); j--) {
+		buf[j] = '\0';
+	    }
+
+	    if (strncmp(buf, "-trace", 6) == 0) {
+		WWW_TraceFlag = TRUE;
+	    } else if (strncmp(buf, "-tlog", 5) == 0) {
+		if (LYUseTraceLog) {
+		    LYUseTraceLog = FALSE;
+		} else {
+		    LYUseTraceLog = TRUE;
+		}
+	    } else if (strncmp(buf, "-anonymous", 10) == 0) {
+		if (!LYValidate && !anon_restrictions_set)
+		    parse_restrictions("default");
+		anon_restrictions_set = TRUE;
+	    } else if (strcmp(buf, "-validate") == 0) {
+		/*
+		 *  Follow only http URLs.
+		 */
+		LYValidate = TRUE;
+#ifdef SOCKS
+	    } else if (strncmp(buf, "-nosocks", 8) == 0) {
+		socks_flag = FALSE;
+#endif /* SOCKS */
+	    } else if (strncmp(buf, "-cfg", 4) == 0) {
+		if ((cp = strchr(buf,'=')) != NULL) {
+		    StrAllocCopy(lynx_cfg_file, cp+1);
+		} else {
+		    cp = buf;
+		    while (*cp && !isspace((unsigned char)*cp))
+			cp++;
+		    while (*cp && isspace((unsigned char)*cp))
+			cp++;
+		    if (*cp)
+			StrAllocCopy(lynx_cfg_file, cp);
+	        }
+	    } else if (strcmp(buf, "-get_data") == 0) {
+		/*
+		 *  User data for GET form.
+		 */
+		char **get_data;
+
+		/*
+		 *  On Unix, conflicts with curses when interactive
+		 *  so let's force a dump.  - CL
+		 *
+		 *  On VMS, mods have been made in LYCurses.c to deal
+		 *  with potential conflicts, so don't force the dump
+		 *  here. - FM
+		 */
+#ifndef VMS
+		dump_output_immediately = TRUE;
+		LYcols = 80;
+#endif /* VMS */
+
+		StrAllocCopy(form_get_data, "?");   /* Prime the pump */
+		get_data = &form_get_data;
+
+		/*
+		 *  Build GET data for later.  Stop reading when we see
+		 *  a line with "---" as its first three characters.
+		 */
+		while (fgets(buf, sizeof(buf), stdin) &&
+		       strncmp(buf, "---", 3) != 0) {
+		    int j;
+
+		    /*
+		     *  Strip line terminators.
+		     */
+		    for (j = strlen(buf) - 1; j >= 0 &&
+			 (buf[j] == CR || buf[j] == LF); j--) {
+			buf[j] = '\0';
+		    }
+		    StrAllocCat(*get_data, buf);
+		}
+	    } else if (strcmp(buf, "-post_data") == 0) {
+		/*
+		 *  User data for POST form.
+		 */
+		char **post_data;
+
+		/*
+		 *  On Unix, conflicts with curses when interactive
+		 *  so let's force a dump.  - CL
+		 *
+		 *  On VMS, mods have been made in LYCurses.c to deal
+		 *  with potential conflicts, so don't force a dump
+		 *  here. - FM
+		 */
+#ifndef VMS
+		dump_output_immediately = TRUE;
+		LYcols = 80;
+#endif /* VMS */
+
+		post_data = &form_post_data;
+
+		/*
+		 *  Build post data for later.  Stop reading when we see
+		 *  a line with "---" as its first three characters.
+		 */
+		while (fgets(buf, sizeof(buf), stdin) &&
+		       strncmp(buf, "---", 3) != 0) {
+		    int j;
+
+		     /*
+		      *  Strip line terminators.
+		      */
+		    for (j = strlen(buf) - 1; j >= 0 &&
+			 (buf[j] == CR || buf[j] == LF); j--) {
+			buf[j] = '\0';
+		    }
+		    StrAllocCat(*post_data, buf);
+		}
+	    } else if (buf[0] != '\0') {
+	        char *argument = NULL;
+
+		if (LYStdinArgs == NULL) {
+		    LYStdinArgs = HTList_new();
+		    atexit(LYStdinArgs_free);
+		}
+		StrAllocCopy(argument, buf);
+		HTList_appendObject(LYStdinArgs, argument);
+	    }
+	}
+    }
+
 #ifdef SOCKS
     if (socks_flag)
         SOCKSinit(argv[0]);
@@ -825,6 +1007,7 @@ WSADATA WSAData;
 	    exit(-1);
 	}
 #endif /* VMS */
+	chmod(LYTraceLogPath, 0600);
 	*stderr = *LYTraceLogFP;
 	fprintf(stderr, "\t\t%s\n\n", LYNX_TRACELOG_TITLE);
     }
@@ -868,21 +1051,6 @@ WSADATA WSAData;
 	    StrAllocCopy(lynx_cfg_file, cp);
     }
 
-   /* If we still have no config file, check one in home directory */
-   if (NULL == lynx_cfg_file)
-     {
-	temp = make_homedir_lynxrc_filename (NULL);
-	if (temp != NULL)
-	  {
-	     if (NULL != (fp = fopen (temp, "r")))
-	       {
-		  fclose (fp);
-		  StrAllocCopy (lynx_cfg_file, temp);
-	       }
-	     FREE(temp);
-	  }
-     }
-
     /*
      *  If we still don't have a configuration file,
      *  use the userdefs.h definition.
@@ -897,10 +1065,14 @@ WSADATA WSAData;
    /* I think this should only be performed if lynx_cfg_file starts with ~/ */
    if ((lynx_cfg_file[0] == '~') && (lynx_cfg_file[1] == '/'))
      {
-	temp = make_homedir_lynxrc_filename (lynx_cfg_file + 2);
-	FREE(lynx_cfg_file);
-	lynx_cfg_file = temp;
-	temp = NULL;
+#ifdef VMS
+	StrAllocCopy(temp, HTVMS_wwwName((char *)Home_Dir()));
+#else
+	StrAllocCopy(temp, Home_Dir());
+#endif /* VMS */
+	StrAllocCat(temp, lynx_cfg_file + 1);
+	StrAllocCopy(lynx_cfg_file, temp);
+	FREE(temp);
      }
 #endif
 
@@ -1119,37 +1291,25 @@ WSADATA WSAData;
     LYEnsureAbsoluteURL((char **)&LynxHome, "LynxHome");
 
     /*
-     *  Process arguments - with none, look for the database in STARTDIR,
-     *  starting with STARTFILE.
-     *
-     *  If a pathname is given, use it as the starting point.  Split it
-     *  into directory and file components, 'cd' to the directory, and
-     *  view the file.
-     *
-     *  If the only argument is '-' then we expect to see the arguments on
-     *  stdin, this is to allow for the potentially very long command line
-     *  that can be associated with post or get data.
+     *  Process any command line arguments not already handled. - FM
      */
-    if (argc == 2 && strcmp(argv[1], "-") == 0) {
-	char buf[1025];
-	char *my_args[2];
- 
-	my_args[0] = buf;
-	my_args[1] = NULL;
- 
-	while (fgets(buf, sizeof(buf) - 1, stdin)) {
-	    int j;
-     
-	    for (j = strlen(buf) - 1; j > 0 && 
-		(buf[j] == CR || buf[j] == LF); j--) {
-		buf[j] = '\0';
-	    }
-	    parse_arg(my_args, NULL, -1);
+    for (i = 1; i < argc; i++) {
+	parse_arg(&argv[i], &i, argc);
+    }
+
+    /*
+     *  Process any stdin-derived arguments for a lone "-"  which we've
+     *  loaded into LYStdinArgs. - FM
+     */
+    if (LYStdinArgs != NULL) {
+	char *argv[2];
+	HTList *cur = LYStdinArgs;
+
+	argv[1] = NULL;
+	while (NULL != (argv[0] = (char *)HTList_nextObject(cur))) {
+	    parse_arg(argv, NULL, -1);
 	}
-    } else {
-	for (i = 1; i < argc; i++) {
-	    parse_arg(&argv[i], &i, argc);
-	}
+	LYStdinArgs_free();
     }
 
 #ifndef VMS
@@ -1182,7 +1342,7 @@ WSADATA WSAData;
     if (vi_keys)
         set_vi_keys();
  
-    if (number_links)
+    if (number_links && keypad_mode == NUMBERS_AS_ARROWS)
 	keypad_mode = LINKS_ARE_NUMBERED;
     if (keypad_mode == NUMBERS_AS_ARROWS)
         set_numbers_as_arrows();
@@ -1195,6 +1355,16 @@ WSADATA WSAData;
 	    LYSelectPopups = FALSE;
 	else
 	    LYSelectPopups = TRUE;
+    }
+
+    /*
+     *  Check the -show_cursor command line toggle. - FM
+     */
+    if (LYUseDefShoCur == FALSE) {
+	if (LYShowCursor == TRUE)
+	    LYShowCursor = FALSE;
+	else
+	    LYShowCursor = TRUE;
     }
 
     /*
@@ -1422,13 +1592,17 @@ WSADATA WSAData;
         if (crawl && !number_links) {
 	    keypad_mode = NUMBERS_AS_ARROWS;
 	} else if (!nolist) {
-	    keypad_mode = LINKS_ARE_NUMBERED;
+	    if (keypad_mode == NUMBERS_AS_ARROWS) {
+		keypad_mode = LINKS_ARE_NUMBERED;
+	    }
 	}
 	if (display != NULL && *display != '\0') {
 	    LYisConfiguredForX = TRUE;
 	}
 	status = mainloop();
-        if (!nolist && keypad_mode == LINKS_ARE_NUMBERED)
+	if (!nolist &&
+	    (keypad_mode == LINKS_ARE_NUMBERED ||
+	     keypad_mode == LINKS_AND_FORM_FIELDS_ARE_NUMBERED))
 	    printlist(stdout,FALSE);
 #ifndef NOSIGHUP
         (void) signal(SIGHUP, SIG_DFL);
@@ -1464,10 +1638,10 @@ WSADATA WSAData;
  *    LYNXKEYMAP, lynxcgi, LYNXIMGMAP, LYNXCOOKIE
  */
 #ifdef GLOBALREF_IS_MACRO
-extern GLOBALREF (HTProtocol,LYLynxKeymap);
-extern GLOBALREF (HTProtocol,LYLynxCGI);
-extern GLOBALREF (HTProtocol,LYLynxIMGmap);
-extern GLOBALREF (HTProtocol,LYLynxCookies);
+extern GLOBALREF (HTProtocol, LYLynxKeymap);
+extern GLOBALREF (HTProtocol, LYLynxCGI);
+extern GLOBALREF (HTProtocol, LYLynxIMGmap);
+extern GLOBALREF (HTProtocol, LYLynxCookies);
 #else
 GLOBALREF  HTProtocol LYLynxKeymap;
 GLOBALREF  HTProtocol LYLynxCGI;
@@ -1533,6 +1707,15 @@ PRIVATE void parse_arg ARGS3(
 	return;
     }
 
+    /*
+     *  Skip any lone "-" arguments, because we've loaded
+     *  the stdin input into an HTList structure for
+     *  special handling. - FM
+     */
+    if (strcmp(argv[0], "-") == 0) {
+        return;
+    }
+
     switch (TOLOWER(argv[0][1])) {
 
     case 'a':
@@ -1586,23 +1769,23 @@ PRIVATE void parse_arg ARGS3(
 
     } else if (strncmp(argv[0], "-auth", 5) == 0) {
         /*
-	 *  Authentication information for protected forms.
+	 *  Authentication information for protected documents.
 	 */
 	char *auth_info = NULL;
 	
 	if (nextarg) {
 	    StrAllocCopy(auth_info, cp);
-	    memset(cp, ' ', strlen(cp));/* Let's not show too much */
+	    memset(cp, ' ', strlen(cp));	/* Let's not show too much */
 	}
         if (auth_info != NULL)  {
-	    if ((cp = strchr(auth_info, ':')) != NULL) { /* Pw */
+	    if ((cp = strchr(auth_info, ':')) != NULL) {	/* Pw */
 		*cp++ = '\0';	/* Terminate ID */
 		if (*cp) {
 		    HTUnEscape(cp);
 		    StrAllocCopy(authentication_info[1], cp);
 		}
 	    }
-	    if (*auth_info) { /* Id */
+	    if (*auth_info) {					/* Id */
 	        HTUnEscape(auth_info);
 		StrAllocCopy(authentication_info[0], auth_info);
 	    }
@@ -1768,6 +1951,12 @@ PRIVATE void parse_arg ARGS3(
 	break;;
 #endif /* VMS */
 	
+    } else if (strncmp(argv[0], "-force_secure", 13) == 0) {
+        if (LYForceSSLCookiesSecure)
+	    LYForceSSLCookiesSecure = FALSE;
+	else
+	    LYForceSSLCookiesSecure = TRUE;
+
     } else if (strncmp(argv[0], "-from", 5) == 0) {
         if (LYNoFromHeader)
 	    LYNoFromHeader = FALSE;
@@ -2024,7 +2213,32 @@ PRIVATE void parse_arg ARGS3(
     break;
 
     case 'p':
-    if (strncmp(argv[0], "-popup", 6) == 0) {
+    if (strncmp(argv[0], "-pauth", 6) == 0) {
+        /*
+	 *  Authentication information for protected proxy server. - AJL
+	 */
+	char *pauth_info = NULL;
+	
+	if (nextarg) {
+	    StrAllocCopy(pauth_info, cp);
+	    memset(cp, ' ', strlen(cp));	/* Let's not show too much */
+	}
+        if (pauth_info != NULL)  {
+	    if ((cp = strchr(pauth_info, ':')) != NULL) {	/* Pw */
+		*cp++ = '\0';	/* Terminate ID */
+		if (*cp) {
+		    HTUnEscape(cp);
+		    StrAllocCopy(proxyauth_info[1], cp);
+		}
+	    }
+	    if (*pauth_info) {					/* Id */
+	        HTUnEscape(pauth_info);
+		StrAllocCopy(proxyauth_info[0], pauth_info);
+	    }
+	    FREE(pauth_info);
+	}
+
+    } else if (strncmp(argv[0], "-popup", 6) == 0) {
 	LYUseDefSelPop = FALSE;
 
     } else if (strcmp(argv[0], "-post_data") == 0) {
@@ -2203,10 +2417,7 @@ PRIVATE void parse_arg ARGS3(
 	HTDirAccess = HT_DIR_SELECTIVE;
 
     } else if (strncmp(argv[0], "-show_cursor", 12) == 0) {
-	if (LYShowCursor)
-	    LYShowCursor = FALSE;
-	else
-	    LYShowCursor = TRUE;
+	LYUseDefShoCur = FALSE;
 
     } else if (strncmp(argv[0], "-soft_dquotes", 13) == 0) {
         if (soft_dquotes)
@@ -2348,11 +2559,11 @@ Output_Help_List:
     printf("                     in double-quotes (\"-\") on VMS)\n");
     printf("    -anonymous       used to specify the anonymous account\n");
 #ifdef EXP_CHARTRANS
-    printf("    -assume_charset  charset for documents that don't specify it\n");
-    printf("    -assume_local_charset  charset assumed for local files\n");
-    printf("    -assume_unrec_charset  use this instead of unrecognized charsets\n");
+    printf("    -assume_charset=MIMEname  charset for documents that don't specify it\n");
+    printf("    -assume_local_charset=MIMEname  charset assumed for local files\n");
+    printf("    -assume_unrec_charset=MIMEname  use this instead of unrecognized charsets\n");
 #endif /* EXP_CHARTRANS */
-    printf("    -auth=id:pw      authentication information for protected forms\n");
+    printf("    -auth=id:pw      authentication information for protected documents\n");
     printf("    -base            prepend a request URL comment and BASE tag to text/html\n");
     printf("                     outputs for -source or -mime_header dumps\n");
     printf("    -book            use the bookmark page as the startfile\n");
@@ -2385,6 +2596,7 @@ Output_Help_List:
     printf("    -fileversions    include all versions of files in local VMS directory\n");
     printf("                     listings\n");
     printf("    -force_html      forces the first document to be interpreted as HTML\n");
+    printf("    -force_secure    toggles forcing of the secure flag for SSL cookies\n");
     printf("    -from            toggle transmissions of From headers\n");
     printf("    -ftp             disable ftp access\n");
     printf("    -get_data        user data for get forms, read from stdin,\n");
@@ -2420,6 +2632,7 @@ Output_Help_List:
 #endif /* SOCKS */
     printf("    -nostatus        disable the miscellaneous information messages\n");
     printf("    -number_links    force numbering of links\n");
+    printf("    -pauth=id:pw     authentication information for protected proxy server\n");
     printf("    -popup           toggles handling of single-choice SELECT options via\n");
     printf("                     popup windows or as lists of radio buttons\n");
     printf("    -post_data       user data for post forms, read from stdin,\n");

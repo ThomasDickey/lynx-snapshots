@@ -1,9 +1,10 @@
 #include "HTUtils.h"
 #include "tcp.h"
+#include "HTParse.h"
+#include "HTAccess.h"
+#include "HTCJK.h"
 #include "HTAlert.h"
 #include "LYCurses.h"
-#include "HTAccess.h"
-#include "HTParse.h"
 #include "LYSignal.h"
 #include "LYStructs.h"
 #include "LYUtils.h"
@@ -13,7 +14,7 @@
 #include "LYHistory.h"
 #include "LYSystem.h"
 #include "GridText.h"
-#include "LYSignal.h"
+#include "LYCharSets.h"
 #include "LYNews.h"
 
 #include "LYGlobalDefs.h"
@@ -44,14 +45,17 @@ PUBLIC char *LYNewsPost ARGS2(
 	BOOLEAN,	followup)
 {
     char user_input[1024];
+    char CJKinput[1024];
     char *cp = NULL;
     int c = 0;  /* user input */
-    FILE *fd;
+    FILE *fd = NULL;
     char my_tempfile[256];
+    FILE *fc = NULL;
+    char CJKfile[256];
     char *postfile = NULL;
     char *NewsGroups = NULL;
     char *org = NULL;
-    FILE *fp;
+    FILE *fp = NULL;
 
     /*
      *  Make sure a non-zero length newspost, newsreply,
@@ -63,11 +67,34 @@ PUBLIC char *LYNewsPost ARGS2(
     /*
      *  Open a temporary file for the headers
      *  and message body. - FM
-     */ 
+     */
     tempname(my_tempfile, NEW_FILE);
     if ((fd = fopen(my_tempfile, "w")) == NULL) {
 	HTAlert(CANNOT_OPEN_TEMP);
 	return(postfile);
+    }
+    chmod(my_tempfile, 0600);
+
+    /*
+     *  If we're using a Japanese display character set,
+     *  open a temporary file for a conversion to JIS. - FM
+     */
+    CJKfile[0] = '\0';
+    if (!strncmp(LYchar_set_names[current_char_set], "Japanese (EUC)", 14) ||
+	!strncmp(LYchar_set_names[current_char_set], "Japanese (SJIS)", 15)) {
+	tempname(CJKfile, NEW_FILE);
+	if ((fc = fopen(CJKfile, "w")) == NULL) {
+	    HTAlert(CANNOT_OPEN_TEMP);
+	    fclose(fd);
+#ifdef VMS
+	    while (remove(my_tempfile) == 0)
+		; /* loop through all versions */
+#else
+	    remove(my_tempfile);
+#endif /* VMS */
+	    return(postfile);
+	}
+	chmod(CJKfile, 0600);
     }
 
     /*
@@ -109,8 +136,8 @@ PUBLIC char *LYNewsPost ARGS2(
 	term_message) {
         _statusline(NEWS_POST_CANCELLED);
 	sleep(InfoSecs);
-	fclose(fd);		/* close the temp file */
-	scrollok(stdscr,FALSE);	/* Stop scrolling.    */
+	fclose(fd);		 /* Close the temp file. */
+	scrollok(stdscr, FALSE); /* Stop scrolling.	 */
 	goto cleanup;
     }
     fprintf(fd, "%s\n", user_input);
@@ -127,20 +154,26 @@ PUBLIC char *LYNewsPost ARGS2(
 	/*
 	 *  Add the default subject.
 	 */
-	while (isspace(*cp))
+	while (isspace(*cp)) {
 	    cp++;
-	if (strncasecomp(cp, "Re:", 3))
+	}
+	if (strncasecomp(cp, "Re:", 3)) {
             strcat(user_input, "Re: ");
+	    cp += 3;
+	    while (isspace(*cp)) {
+		cp++;
+	    }
+	}
         strcat(user_input, cp);
-	cp = NULL;
     }
+    cp = NULL;
     if (LYgetstr(user_input, VISIBLE,
 		 sizeof(user_input), NORECALL) < 0 ||
 	term_message) {
         _statusline(NEWS_POST_CANCELLED);
         sleep(InfoSecs);
-        fclose(fd);		/* close the temp file */
-	scrollok(stdscr,FALSE);	/* Stop scrolling.    */
+        fclose(fd);		 /* Close the temp file. */
+	scrollok(stdscr, FALSE); /* Stop scrolling.	 */
         goto cleanup;
     }
     fprintf(fd,"%s\n",user_input);
@@ -155,17 +188,19 @@ PUBLIC char *LYNewsPost ARGS2(
     	       *org != '\0') {
 	StrAllocCat(cp, org);
 #ifndef VMS
-    } else if ((fp = fopen("/etc/organization", "r")) != 0) {
+    } else if ((fp = fopen("/etc/organization", "r")) != NULL) {
 	if (fgets(user_input, sizeof(user_input), fp) != NULL) {
-	    if ((cp = strchr(user_input, '\n')) != NULL)
-	        *cp = '\0';
-	    if (user_input[0] != '\0')
+	    if ((org = strchr(user_input, '\n')) != NULL) {
+	        *org = '\0';
+	    }
+	    if (user_input[0] != '\0') {
 	        StrAllocCat(cp, user_input);
+	    }
 	}
 	fclose(fp);
 #endif /* !VMS */
     }
-    strcpy(user_input, cp);
+    LYstrncpy(user_input, cp, (sizeof(user_input) - 16));
     FREE(cp); 
     addstr("\n\n Please provide or edit the Organization: header\n");
     if (LYgetstr(user_input, VISIBLE,
@@ -173,8 +208,8 @@ PUBLIC char *LYNewsPost ARGS2(
 	term_message) {
         _statusline(NEWS_POST_CANCELLED);
         sleep(InfoSecs);
-        fclose(fd);		/* close the temp file */
-	scrollok(stdscr,FALSE);	/* Stop scrolling.    */
+        fclose(fd);		 /* Close the temp file. */
+	scrollok(stdscr, FALSE); /* Stop scrolling.	 */
         goto cleanup;
     }
     fprintf(fd,"%s\n",user_input);
@@ -205,11 +240,15 @@ PUBLIC char *LYNewsPost ARGS2(
 	    if (TOUPPER(c) == 'Y')
 	        /*
 		 *  The 1 will add the reply ">" in front of every line.
+		 *  We're assuming that if the display character set is
+		 *  Japanese and the document did not have a CJK charset,
+		 *  any non-EUC or non-SJIS 8-bit characters in it where
+		 *  converted to 7-bit equivalents. - FM
 		 */
 	        print_wwwfile_to_fd(fd, 1);
 	}
-	fclose(fd);
-	scrollok(stdscr,FALSE);	/* Stop scrolling.    */
+	fclose(fd);		 /* Close the temp file. */
+	scrollok(stdscr, FALSE); /* Stop scrolling.	 */
 	if (term_message || c == 7 || c == 3)
 	    goto cleanup;
 
@@ -244,8 +283,8 @@ PUBLIC char *LYNewsPost ARGS2(
 	    term_message) {
 	    _statusline(NEWS_POST_CANCELLED);
 	    sleep(InfoSecs);
-	    fclose(fd);	/* close the temp file */
-	    scrollok(stdscr,FALSE);	/* Stop scrolling.    */
+	    fclose(fd);			/* Close the temp file.	*/
+	    scrollok(stdscr, FALSE);	/* Stop scrolling.	*/
 	    goto cleanup;
 	}
 	while (!STREQ(user_input,".") && !term_message) { 
@@ -256,14 +295,14 @@ PUBLIC char *LYNewsPost ARGS2(
 	       		 sizeof(user_input), NORECALL) < 0) {
 	        _statusline(NEWS_POST_CANCELLED);
 	        sleep(InfoSecs);
-	        fclose(fd);		/* close the temp file */
-		scrollok(stdscr,FALSE);	/* Stop scrolling.    */
+	        fclose(fd);		 /* Close the temp file. */
+		scrollok(stdscr, FALSE); /* Stop scrolling.	 */
 	        goto cleanup;
 	    }
  	}
 	fprintf(fd, "\n");
-	fclose(fd);		/* close the temp file */
-	scrollok(stdscr,FALSE);  /* stop scrolling */
+	fclose(fd);		 /* Close the temp file. */
+	scrollok(stdscr, FALSE); /* Stop scrolling.	 */
     }
 
     /*
@@ -302,8 +341,40 @@ PUBLIC char *LYNewsPost ARGS2(
 	fclose(fp);
     }
     clear();  /* clear the screen */
-    StrAllocCopy(postfile, my_tempfile);
-    if (!followup)
+
+    /*
+     *  If we are using a Japanese display character
+     *  set, convert the contents of the temp file to
+     *  JIS (nothing should change if it does not, in
+     *  fact, contain EUC or SJIS di-bytes).  Otherwise,
+     *  use the temp file as is. - FM
+     */
+    if (CJKfile[0] != '\0') {
+	if ((fd = fopen(my_tempfile, "r")) != NULL) {
+	    while (fgets(user_input, sizeof(user_input), fd) != NULL) {
+	        TO_JIS((unsigned char *)user_input,
+		       (unsigned char *)CJKinput);
+		fputs(CJKinput, fc);
+	    }
+	    fclose(fc);
+	    StrAllocCopy(postfile, CJKfile);
+	    fclose(fd);
+#ifdef VMS
+	    while (remove(my_tempfile) == 0)
+		; /* loop through all versions */
+#else
+	    remove(my_tempfile);
+#endif /* VMS */
+	    fd = fc;
+	    strcpy(my_tempfile, CJKfile);
+	    CJKfile[0] = '\0';
+	} else {
+	    StrAllocCopy(postfile, my_tempfile);
+	}
+    } else {
+	StrAllocCopy(postfile, my_tempfile);
+    }
+    if (!followup) {
         /*
 	 *  If it's not a followup, the current document
 	 *  most likely is the group listing, so force a
@@ -314,6 +385,7 @@ PUBLIC char *LYNewsPost ARGS2(
 	 *  group listing. - FM
 	 */
         LYforce_no_cache = TRUE;
+    }
     LYStatusLine = (LYlines - 1);
     statusline(POSTING_TO_NEWS);
     LYStatusLine = -1;
@@ -333,6 +405,15 @@ cleanup:
 	    ; /* loop through all versions */
 #else
 	remove(my_tempfile);
+#endif /* VMS */
+    }
+    if (CJKfile[0] != '\0') {
+#ifdef VMS
+	fclose(fc);
+        while (remove(CJKfile) == 0)
+	    ; /* loop through all versions */
+#else
+	remove(CJKfile);
 #endif /* VMS */
     }
     FREE(NewsGroups);

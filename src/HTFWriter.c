@@ -44,9 +44,6 @@ PUBLIC char * WWW_Download_File=NULL; /* contains the name of the temp file
 				      */
 PUBLIC char LYCancelDownload=FALSE;   /* exported to HTFormat.c in libWWW */
 
-/* Type mismatch found here - char != BOOLEAN - WSB */
-extern BOOLEAN dump_output_immediately;  /* if true dump to stdout and quit */
-
 #ifdef VMS
 extern BOOLEAN HadVMSInterrupt;      /* flag from cleanup_sig()		*/
 PRIVATE char * FIXED_RECORD_COMMAND = NULL;
@@ -224,14 +221,20 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 		    FREE(path);
 		    FREE(me->anchor->content_encoding);
 #ifdef EXP_CHARTRANS
-		    /* lock the chartrans info we may possibly have,
-		       so HTCharSetFormat will not apply the default for
-		       local files */
+		    /*
+		     *  Lock the chartrans info we may possibly have,
+		     *  so HTCharsetFormat() will not apply the default
+		     *  for local files. - KW
+		     */
 		    HTAnchor_copyUCInfoStage(me->anchor,
 					     UCT_STAGE_PARSER,
 					     UCT_STAGE_MIME,
 					     UCT_SETBY_PARSER);
 #endif
+		    /*
+		     *  Now have HTLoadFile() handle the uncompressed
+		     *  file as if it were the original reply. - FM
+		     */
 		    status = HTLoadFile(addr,
 			    		me->anchor,
 			    		me->output_format,
@@ -512,6 +515,7 @@ SaveAndExecute_tempname:
 	FREE(me);
 	return NULL;
     }
+    chmod(fnam, 0600);
 
     /*
      *  Make command to process file.
@@ -522,7 +526,7 @@ SaveAndExecute_tempname:
     if (me->end_command == NULL)
         outofmem(__FILE__, "HTSaveAndExecute");
     
-    sprintf (me->end_command, pres->command, fnam, "");
+    sprintf(me->end_command, pres->command, fnam, "", "", "", "", "", "");
 
     /*
      *  Make command to delete file.
@@ -533,7 +537,7 @@ SaveAndExecute_tempname:
     if (me->remove_command == NULL)
         outofmem(__FILE__, "HTSaveAndExecute");
     
-    sprintf (me->remove_command, REMOVE_COMMAND, fnam);
+    sprintf(me->remove_command, REMOVE_COMMAND, fnam, "", "", "", "", "", "");
 
     StrAllocCopy(anchor->FileCache, fnam);
     return me;
@@ -710,6 +714,7 @@ SaveToFile_tempname:
         FREE(ret_obj);
         return NULL;
     }
+    chmod(fnam, 0600);
 
     /*
      *  Any "application/foo" or other non-"text/foo" types that
@@ -731,8 +736,9 @@ SaveToFile_tempname:
     			 * sizeof (char),1);
     if (ret_obj->remove_command == NULL)
         outofmem(__FILE__, "HTSaveToFile");
-    
-    sprintf (ret_obj->remove_command, REMOVE_COMMAND, fnam);
+
+    sprintf(ret_obj->remove_command,
+	    REMOVE_COMMAND, fnam, "", "", "", "", "", "");
 
 #ifdef VMS
     if (IsBinary && UseFixedRecords) {
@@ -745,7 +751,8 @@ SaveToFile_tempname:
     		* sizeof (char),1);
         if (FIXED_RECORD_COMMAND == NULL)
 	    outofmem(__FILE__, "HTSaveToFile");
-        sprintf(FIXED_RECORD_COMMAND, FIXED_RECORD_COMMAND_MASK, fnam);
+        sprintf(FIXED_RECORD_COMMAND,
+		FIXED_RECORD_COMMAND_MASK, fnam, "", "", "", "", "", "");
     } else {
 #endif /* VMS */
     ret_obj->end_command = (char *)calloc (sizeof(char)*12,1);
@@ -909,7 +916,7 @@ PUBLIC HTStream* HTCompressed ARGS3(
      */
 Compressed_tempname:
     tempname(fnam, NEW_FILE);
-    if ((cp = strchr(fnam, '.')) != NULL) {
+    if ((cp = strrchr(fnam, '.')) != NULL) {
 	*cp = '\0';
 	if (!strcasecomp(anchor->content_type, "text/html")) {
 #ifdef VMS
@@ -970,6 +977,7 @@ Compressed_tempname:
 	FREE(me);
 	return NULL;
     }
+    chmod(fnam, 0600);
 
     /*
      *  Make command to process file. - FM
@@ -978,7 +986,7 @@ Compressed_tempname:
     					 strlen(fnam)) * sizeof(char));
     if (me->end_command == NULL)
         outofmem(__FILE__, "HTCompressed");
-    sprintf (me->end_command, uncompress_mask, fnam);
+    sprintf(me->end_command, uncompress_mask, fnam, "", "", "", "", "", "");
     FREE(uncompress_mask);
 
     /*
@@ -988,7 +996,7 @@ Compressed_tempname:
     					    strlen(fnam)) * sizeof(char));
     if (me->remove_command == NULL)
         outofmem(__FILE__, "HTCompressed");
-    sprintf (me->remove_command, REMOVE_COMMAND, fnam);
+    sprintf(me->remove_command, REMOVE_COMMAND, fnam, "", "", "", "", "", "");
 
     /*
      *  Save the filename and return the structure. - FM

@@ -31,16 +31,17 @@
 SGML content types
 
  */
-typedef enum _SGMLContent{
-  SGML_EMPTY,    /* no content */
-  SGML_LITTERAL, /* character data. Recognised excat close tag only. litteral
-                    Old www server compatibility only! Not SGML */
-  SGML_CDATA,    /* character data. recognize </ only */
-  SGML_RCDATA,   /* replaceable character data. recognize </ and &ref; */
-  SGML_MIXED,    /* elements and parsed character data. recognize all markup */
-  SGML_ELEMENT,  /* any data found will be returned as an error*/
-  SGML_PCDATA    /* added - kw */
-  } SGMLContent;
+typedef enum _SGMLContent {
+    SGML_EMPTY,    /* No content. */
+    SGML_LITTERAL, /* Literal character data.  Recognize exact close tag only.
+		      Old www server compatibility only!  Not SGML */
+    SGML_CDATA,    /* Character data.  Recognize </ only. */
+    SGML_RCDATA,   /* Replaceable character data.  Recognize </ and &ref; */
+    SGML_MIXED,    /* Elements and parsed character data.
+		      Recognize all markup. */
+    SGML_ELEMENT,  /* Any data found will be returned as an error. */
+    SGML_PCDATA    /* Added by KW. */
+} SGMLContent;
 
 
 typedef struct {
@@ -124,17 +125,15 @@ struct _tag{
 };
 
 
-
-
 /*              DTD Information
 **              ---------------
 **
-** Not the whole DTD, but all this parser usues of it.
+**  Not the whole DTD, but all this parser uses of it.
 */
 #ifdef EXP_CHARTRANS
 typedef struct {
-  char* name;
-  long code;
+    char* name;
+    long code;
 } UC_entity_info;
 #endif
 
@@ -162,18 +161,19 @@ typedef struct _HTSGMLContext *HTSGMLContext;   /* Hidden */
 
 Structured Object definition
 
-   A structured object is something which can reasonably be represented in SGML.  I'll
-   rephrase that.  A structured object is am ordered tree-structured arrangement of data
-   which is representable as text.The SGML parer outputs to a Structured object. A
-   Structured object can output its contents to another Structured Object. It's a kind of
-   typed stream. The architecure is largely Dan Conolly's. Elements and entities are
-   passed to the sob by number, implying a knowledge of the DTD. Knowledge of the SGML
-   syntax is not here, though.
+   A structured object is something which can reasonably be represented
+   in SGML.  I'll rephrase that.  A structured object is am ordered
+   tree-structured arrangement of data which is representable as text.
+   The SGML parer outputs to a Structured object.  A Structured object
+   can output its contents to another Structured Object. It's a kind of
+   typed stream. The architecure is largely Dan Conolly's. Elements and
+   entities are passed to the sob by number, implying a knowledge of the
+   DTD.  Knowledge of the SGML syntax is not here, though.
    
    Superclass: HTStream
    
-   The creation methods will vary on the type of Structured Object.Maybe the callerData is
-   enough info to pass along.
+   The creation methods will vary on the type of Structured Object.
+   Maybe the callerData is enough info to pass along.
    
  */
 typedef struct _HTStructured HTStructured;
@@ -227,7 +227,9 @@ Find a Tag by Name
    Returns a pointer to the tag within the DTD.
    
  */
-extern HTTag * SGMLFindTag PARAMS((CONST SGML_dtd* dtd, CONST char * string));
+extern HTTag * SGMLFindTag PARAMS((
+	CONST SGML_dtd *	dtd,
+	CONST char *		string));
 
 
 /*
@@ -243,25 +245,14 @@ Create an SGML parser
 ** On exit,
 **              The default tag starter has been processed.
 */
-
-
-extern HTStream* SGML_new PARAMS((
-        CONST SGML_dtd *                dtd,
+extern HTStream * SGML_new PARAMS((
+	CONST SGML_dtd *	dtd,
 	HTParentAnchor *	anchor,
-        HTStructured *          target));
+	HTStructured *		target));
 
 extern CONST HTStreamClass SGMLParser;
 
-
 #endif  /* SGML_H */
-
-
-
-
-
-
-
-
 
 /*
 

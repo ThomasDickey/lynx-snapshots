@@ -3,7 +3,8 @@
 #define LYCOOKIES_H
 
 extern void LYSetCookie PARAMS((
-	CONST char *	header,
+	CONST char *	SetCookie,
+	CONST char *	SetCookie2,
 	CONST char *	address));
 extern char *LYCookie PARAMS((
 	CONST char *	hostname,

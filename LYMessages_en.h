@@ -86,8 +86,12 @@
  "DISABLED form reset button.  Use UP or DOWN arrows or tab to move off."
 #define FORM_LINK_OPTION_LIST_MESSAGE \
  "(Option list) Hit return and use arrow keys and return to select option."
+#define CHOICE_LIST_MESSAGE \
+ "(Choice list) Hit return and use arrow keys and return to select option."
 #define FORM_LINK_OPTION_LIST_UNM_MSG \
  "UNMODIFIABLE option list.  Use return or arrow keys to review or leave."
+#define CHOICE_LIST_UNM_MSG \
+ "UNMODIFIABLE choice list.  Use return or arrow keys to review or leave."
 #define NORMAL_LINK_MESSAGE \
  "(NORMAL LINK)   Use right-arrow or <return> to activate."
 #define LINK_NOT_FOUND "The resource requested is not available at this time."
@@ -141,6 +145,8 @@
 #define FILE_SERVED_LINKS_DISALLOWED \
  "file: URLs via served links are disallowed!"
 #define FILE_BOOKMARKS_DISALLOWED "file: URLs via bookmarks are disallowed!"
+#define SPECIAL_VIA_EXTERNAL_DISALLOWED \
+ "This special URL is not allowed in external documents!"
 #define RETURN_TO_LYNX "Press <return> to return to Lynx."
 #ifdef VMS
 #define SPAWNING_MSG \
@@ -157,6 +163,7 @@
 #define NO_DOWNLOAD_PRINT_OP "You cannot download a printing option."
 #define NO_DOWNLOAD_UPLOAD_OP "You cannot download an upload option."
 #define NO_DOWNLOAD_PERMIT_OP "You cannot download an permit option."
+#define NO_DOWNLOAD_SPECIAL "This special URL cannot be downloaded!"
 #define NO_DOWNLOAD_CHOICE "Nothing to download."
 #define TRACE_ON "Trace ON!"
 #define TRACE_OFF "Trace OFF!"
@@ -180,6 +187,7 @@
 #define FORM_ACTION_NOT_HTTP_URL \
  "Sorry, the ACTION for this form is not an http URL."
 #define NOT_HTTP_URL_OR_ACTION "Not an http URL or form ACTION!"
+#define SPECIAL_ACTION_DISALLOWED "This special URL cannot be a form ACTION!"
 #define NOT_IN_STARTING_REALM "URL is not in starting realm!"
 #define NEWSPOSTING_DISABLED "News posting is disabled!"
 #define DIRED_DISABLED "File management support is disabled!"
@@ -286,6 +294,7 @@
 #define GOTO_TELNET_DISALLOWED "You are not allowed to goto \"telnet:\" URLs"
 #define GOTO_TN3270_DISALLOWED "You are not allowed to goto \"tn3270:\" URLs"
 #define GOTO_WAIS_DISALLOWED "You are not allowed to goto \"wais:\" URLs"
+#define GOTO_SPECIAL_DISALLOWED "This special URL is not allowed as a goto!"
 #define URL_TO_OPEN "URL to open: "
 #define EDIT_CURRENT_GOTO "Edit the current Goto URL: "
 #define EDIT_THE_PREV_GOTO "Edit the previous Goto URL: "
@@ -326,6 +335,24 @@
 #define NO_TOOLBAR "Document has no Toolbar links or Banner."
 #define NOOPEN_TRAV_ERR_FILE "Unable to open traversal errors output file"
 #define FOLLOW_LINK_NUMBER "Follow link (or goto link or page) number: "
+#define SELECT_OPTION_NUMBER "Select option (or page) number: "
+#define OPTION_CHOICE_NUMBER "Option choice (or page) number: "
+#define OPTION_ALREADY_CURRENT "Option number %d already is current."
+#define CHOICE_ALREADY_CURRENT "Choice number %d already is current."
+#define ALREADY_AT_OPTION_END \
+ "You are already at the end of this option list."
+#define ALREADY_AT_CHOICE_END \
+ "You are already at the end of this choice list."
+#define ALREADY_AT_OPTION_BEGIN \
+ "You are already at the beginning of this option list."
+#define ALREADY_AT_CHOICE_BEGIN \
+ "You are already at the beginning of this choice list."
+#define ALREADY_AT_OPTION_PAGE \
+ "You are already at page %d of this option list."
+#define ALREADY_AT_CHOICE_PAGE \
+ "You are already at page %d of this choice list."
+#define BAD_OPTION_NUM_ENTERED "You have entered an invalid option number."
+#define BAD_CHOICE_NUM_ENTERED "You have entered an invalid choice number."
 #define BAD_HTML_USE_TRACE "** Bad HTML!!  Use -trace to diagnose. **"
 #define CANNOT_OPEN_TEMP "Can't open temporary file!"
 #define CANNOT_OPEN_OUTPUT "Can't open output file!  Cancelling!"
@@ -570,6 +597,10 @@
 #define NO_TRACELOG_STARTED "No trace log has been started for this session."
 #define MAX_TEMPCOUNT_REACHED \
  "The maximum temporary file count has been reached!"
+#define FORM_VALUE_TOO_LONG \
+ "Form field value exceeds buffer length!  Trim the tail."
+#define FORM_TAIL_COMBINED_WITH_HEAD \
+ "Modified tail combined with head of form field value."
 
 #ifdef DIRED_SUPPORT
 #define DIRED_NOVICELINE \

@@ -177,6 +177,7 @@ PRIVATE int data_soc = -1;		/* Socket for data transfer =invalid */
 #define WINDOWS_NT_SERVER  9
 #define MS_WINDOWS_SERVER 10
 #define MSDOS_SERVER      11
+#define APPLESHARE_SERVER 12
 
 PRIVATE int     server_type = GENERIC_SERVER;   /* the type of ftp host */
 PRIVATE int     unsure_type = FALSE;            /* sure about the type? */
@@ -499,12 +500,22 @@ PRIVATE int response ARGS1(
     return result/100;
 }
 
-/* this function should try to set the macintosh server into binary mode
+/*
+ *  This function should try to set the macintosh server into binary mode.
+ *  Some servers need an additional letter after the MACB command.
  */
-PRIVATE int set_mac_binary NOARGS
+PRIVATE int set_mac_binary ARGS1(
+        int,		server_type)
 {
     /* try to set mac binary mode */
-    return(2 == response("MACB\r\n"));
+    if (server_type == APPLESHARE_SERVER) {
+	/*
+	 *  Presumably E means "Enable"  - kw
+	 */
+	return(2 == response("MACB E\r\n"));
+    } else {
+	return(2 == response("MACB\r\n"));
+    }
 }
 
 /* This function gets the current working directory to help
@@ -536,7 +547,7 @@ PRIVATE void get_ftp_pwd ARGS2(
             /* path names beginning with / imply Unix,
 	     * right? 
 	     */
-	    if (set_mac_binary()) {
+	    if (set_mac_binary(*server_type)) {
 		*server_type = NCSA_SERVER;
 		if (TRACE)
 	            fprintf(stderr, "HTFTP: Treating as NCSA server.\n");
@@ -562,7 +573,7 @@ PRIVATE void get_ftp_pwd ARGS2(
         if ((*server_type == NCSA_SERVER) ||
             (*server_type == TCPC_SERVER) ||
             (*server_type == PETER_LEWIS_SERVER))
-            set_mac_binary();
+            set_mac_binary(*server_type);
     }
 }
 
@@ -878,7 +889,7 @@ PRIVATE int get_connection ARGS1(
         } else if (strncmp(response_text+4, "MACOS Peter's Server", 20) == 0) {
             server_type = PETER_LEWIS_SERVER;
             use_list = TRUE;
-            set_mac_binary();
+            set_mac_binary(server_type);
 	    if (TRACE)
 	        fprintf(stderr,
 	 	 	"HTFTP: Treating as Peter Lewis (MACOS) server.\n");
@@ -894,6 +905,15 @@ PRIVATE int get_connection ARGS1(
 	    use_list = TRUE;
 	    if (TRACE)
 	        fprintf(stderr, "HTFTP: Treating as MS Windows server.\n");
+
+        } else if (strncmp(response_text+4,
+			   "MACOS AppleShare IP FTP Server", 30) == 0) {
+            server_type = APPLESHARE_SERVER;
+            use_list = TRUE;
+            set_mac_binary(server_type);
+	    if (TRACE)
+	        fprintf(stderr,
+	 	 	"HTFTP: Treating as AppleShare server.\n");
 
 	} else  {
 	    server_type = GENERIC_SERVER;
@@ -1902,6 +1922,7 @@ PRIVATE EntryInfo * parse_dir_entry ARGS2(
         case MACHTEN_SERVER:
 	case MSDOS_SERVER:
         case WINDOWS_NT_SERVER:
+        case APPLESHARE_SERVER:
 	    /*
 	    **  Check for EPLF output (local times).
 	    */
@@ -2513,6 +2534,15 @@ unload_btree:
     }
 
     FREE(lastpath);
+
+    if (server_type == APPLESHARE_SERVER) {
+	/*
+	 *  Without closing the data socket first,
+	 *  the response(NIL) below hangs... - kw
+	 */
+	NETCLOSE(data_soc);
+    }
+
     if (WasInterrupted || HTCheckForInterrupt()) {
         if (server_type != CMS_SERVER)
             response(NIL);

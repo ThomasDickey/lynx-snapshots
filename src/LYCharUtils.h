@@ -27,6 +27,11 @@ extern char *LYFindEndOfComment PARAMS((
 extern void LYFillLocalFileURL PARAMS((
 	char **		href,
 	char *		base));
+#ifdef EXP_CHARTRANS
+extern void LYAddMETAcharsetToFD PARAMS((
+	FILE *			fd,
+	int			disp_chndl));
+#endif /* EXP_CHARTRANS */
 
 #ifdef Lynx_HTML_Handler
 extern int OL_CONTINUE;		/* flag for whether CONTINUE is set */
@@ -41,6 +46,16 @@ extern char *LYUppercaseI_OL_String PARAMS((
 	int			seqnum));
 extern char *LYLowercaseI_OL_String PARAMS((
 	int			seqnum));
+#ifdef EXP_CHARTRANS
+#ifdef HTML_H
+extern void LYGetChartransInfo PARAMS((
+	HTStructured *		me));
+#endif
+extern void add_META_charset_to_fd PARAMS((
+    FILE *	fp,
+    int		disp_chndl));
+#endif /* EXP_CHARTRANS */
+
 extern void LYHandleMETA PARAMS((
 	HTStructured *		me,
 	CONST BOOL*	 	present,
@@ -73,14 +88,5 @@ extern BOOLEAN LYCheckForCSI PARAMS((
 	HTStructured *		me,
 	char **			url));
 #endif /* Lynx_HTML_Handler */
-
-#ifdef EXP_CHARTRANS
-#ifdef HTML_H
-extern void html_get_chartrans_info PARAMS((HTStructured * me));
-#endif
-extern void add_META_charset_to_fd PARAMS((
-    FILE *	fp,
-    int		disp_chndl));
-#endif /* EXP_CHARTRANS */
 
 #endif /* LYCHARUTILS_H */

@@ -627,8 +627,9 @@ PUBLIC CONST char * HTHostName NOARGS
 }
 
 /*
-**  Interruptable connect as implemented by Marc Andreesen and
-**  hacked in by Lou Montulli.
+**  Interruptable connect as implemented for Mosaic by Marc Andreesen
+**  and hacked in for Lynx years ago by Lou Montulli, and further
+**  modified over the years by numerous Lynx lovers. - FM
 */ 
 PUBLIC int HTDoConnect ARGS4(
 	CONST char *,	url,
@@ -640,6 +641,9 @@ PUBLIC int HTDoConnect ARGS4(
     struct sockaddr_in *sin = &soc_address;
     int status;
     char *line = NULL;
+    char *p1 = NULL;
+    char *at_sign = NULL;
+    char *host = NULL;
 
     /*
     **  Set up defaults.
@@ -650,49 +654,42 @@ PUBLIC int HTDoConnect ARGS4(
     /*
     **  Get node name and optional port number.
     */
-    {
-        char *p1 = HTParse(url, "", PARSE_HOST);
-        char *at_sign;
-        char *host = NULL;
-        int status;
-
-        /*
+    p1 = HTParse(url, "", PARSE_HOST);
+    if ((at_sign = strchr(p1, '@')) != NULL) {
+	/*
 	**  If there's an @ then use the stuff after it as a hostname.
 	*/
-        if ((at_sign = strchr(p1, '@')) != NULL)
-	    StrAllocCopy(host, (at_sign + 1));
-        else
-	    StrAllocCopy(host, p1);
-	FREE(p1);
-
-        line = (char *)malloc(strlen(host) + strlen(protocol) + 128);
-        if (line == NULL)
-            outofmem(__FILE__, "HTDoConnect");
-        sprintf (line, "Looking up %s.", host);
-        _HTProgress (line);
-
-        status = HTParseInet(sin, host);
-        if (status) {
-	    if (status != HT_INTERRUPTED) {
-		sprintf (line, "Unable to locate remote host %s.", host);
-		_HTProgress(line);
-		status = HT_NO_DATA;
-	    }
-	    FREE(host);
-	    FREE(line);
-            return status;
-        }
-
-        sprintf (line, "Making %s connection to %s.", protocol, host);
-        _HTProgress (line);
-        FREE(host);
+	StrAllocCopy(host, (at_sign + 1));
+    } else {
+	StrAllocCopy(host, p1);
     }
+    FREE(p1);
+
+    line = (char *)malloc(strlen(host) + strlen(protocol) + 128);
+    if (line == NULL)
+	outofmem(__FILE__, "HTDoConnect");
+    sprintf (line, "Looking up %s.", host);
+    _HTProgress (line);
+    status = HTParseInet(sin, host);
+    if (status) {
+	if (status != HT_INTERRUPTED) {
+	    sprintf (line, "Unable to locate remote host %s.", host);
+	    _HTProgress(line);
+	    status = HT_NO_DATA;
+	}
+	FREE(host);
+	FREE(line);
+        return status;
+    }
+
+    sprintf (line, "Making %s connection to %s.", protocol, host);
+    _HTProgress (line);
+    FREE(host);
 
     /*
     **  Now, let's get a socket set up from the server for the data.
     */
     *s = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-   
     if (*s == -1) {
 	HTAlert("socket failed.");
 	FREE(line);

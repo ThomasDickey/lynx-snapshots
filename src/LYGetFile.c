@@ -575,7 +575,7 @@ Try_Redirected_URL:
 			    StrAllocCopy(tmp, "http://");
 			    if (TRACE)
 			        fprintf(stderr,
-					"LYGetFile: URL %s\nchanged to ",
+					"LYGetFile: URL %s\n",
 					doc->address);
 			    *cp = '\0';
 			    StrAllocCat(tmp, doc->address+9);
@@ -590,7 +590,8 @@ Try_Redirected_URL:
 			        StrAllocCat(tmp, cp+8);
 			    StrAllocCopy(doc->address, tmp);
 			    if (TRACE)
-			        fprintf(stderr, "%s\n",doc->address);
+			        fprintf(stderr, "    changed to %s\n",
+						doc->address);
 			    FREE(tmp);
 			    url_type = HTTP_URL_TYPE;
 		        }
@@ -601,36 +602,56 @@ Try_Redirected_URL:
 			url_type == CSO_URL_TYPE)
 			fix_http_urls(doc);
 		    WWWDoc.address = doc->address;  /* possible reload */
-
 #ifdef DIRED_SUPPORT
 		    lynx_edit_mode = FALSE;
+#endif /* DIRED_SUPPORT */
+
 		    if (url_type == FILE_URL_TYPE) {
-		        doc->address = LYSanctify(doc->address);
-		        WWWDoc.address = doc->address;
-		    }
-#else
-		    if (url_type == FILE_URL_TYPE &&
-		        (cp=strstr(doc->address, "/~")) != NULL) {
-			*cp = '\0';
-			cp += 2;
-			StrAllocCopy(temp, doc->address);
+			/*
+			 *  If a file URL has a '~' as the lead character
+			 *  of its first symbolic element, convert the '~'
+			 *  to Home_Dir(), then append the rest of of path,
+			 *  if present, skipping "user" if "~user" was
+			 *  entered, simplifying, and eliminating any
+			 *  residual relative elements. - FM
+			 */
+		        if (((cp = HTParse(doc->address, "",
+				   PARSE_PATH+PARSE_ANCHOR+PARSE_PUNCTUATION))
+			      != NULL) &&
+			    !strncmp(cp, "/~", 2)) {
+			    char *cp1 = strstr(doc->address, "/~");
+			    char *cp2;
+
+			    if (TRACE)
+			        fprintf(stderr, "LYGetFile: URL %s\n",
+						doc->address);
+			    *cp1 = '\0';
+			    cp1 += 2;
+			    StrAllocCopy(temp, doc->address);
 #ifdef DOSPATH
 			StrAllocCat(temp, HTDOS_wwwName((char *)Home_Dir()));
 #else
 #ifdef VMS
-			StrAllocCat(temp, HTVMS_wwwName((char *)Home_Dir()));
+			    StrAllocCat(temp, 
+					HTVMS_wwwName((char *)Home_Dir()));
 #else
-			StrAllocCat(temp, Home_Dir());
+			    StrAllocCat(temp, Home_Dir());
 #endif /* VMS */
 #endif /* DOSPATH */
-			if (*cp)
-			    StrAllocCat(temp, cp);
-			StrAllocCopy(doc->address, temp);
-			FREE(temp);
-			WWWDoc.address = doc->address;
+			    if ((cp2 = strchr(cp1, '/')) != NULL) {
+				LYTrimRelFromAbsPath(cp2);
+				StrAllocCat(temp, cp2);
+			    }
+			    StrAllocCopy(doc->address, temp);
+			    FREE(temp);
+			    if (TRACE)
+			        fprintf(stderr, "    changed to %s\n",
+						doc->address);
+			    WWWDoc.address = doc->address;
+			}
+			FREE(cp);
 		    }
-#endif /* DIRED_SUPPORT */
-		    if (TRACE)
+		    if (TRACE && LYTraceLogFP == NULL)
 		        sleep(MessageSecs);
 		    user_message(WWW_WAIT_MESSAGE, doc->address);
 #ifdef NOTDEFINED
@@ -645,6 +666,22 @@ Try_Redirected_URL:
 #endif /* USE_SLANG */
 		        fprintf(stderr,"\n");
 		    }
+		    if ((LYNoRefererHeader == FALSE &&
+			 LYNoRefererForThis == FALSE) &&
+			(url_type == HTTP_URL_TYPE ||
+			 url_type == HTTPS_URL_TYPE) &&
+			(cp = strchr(HTLoadedDocumentURL(), '?')) != NULL &&
+			strchr(cp, '=') != NULL) {
+			/*
+			 *  Don't send a Referer header if the URL is
+			 *  the reply from a form with method GET, in
+			 *  case the content has personal data (e.g.,
+			 *  a password or credit card number) which
+			 *  would become visible in logs. - FM
+			 */
+			LYNoRefererForThis = TRUE;
+		    }
+		    cp = NULL;
 		    if (!HTLoadAbsolute(&WWWDoc)) {
 			/*
 			 *  Check for redirection.
@@ -819,7 +856,7 @@ Try_Redirected_URL:
 }
 
 /*
- *  The user wants to select a link or a page by number.
+ *  The user wants to select a link or page by number.
  *  If follow_link_number returns DO_LINK_STUFF do_link
  *   will be run immediately following its execution.
  *  If follow_link_number returns DO_GOTOLINK_STUFF
@@ -897,10 +934,11 @@ PUBLIC int follow_link_number ARGS4(
 	 *  in the current document, whether it is displayed
 	 *  on the screen or not!
 	 */
-	if ((info = HTGetLinkInfo(*num,
-				  want_go ? &new_top : NULL,
-				  want_go ? &new_link : NULL,
-			  &links[cur].hightext, 
+	if ((info = HTGetLinkInfo(*num, 
+				  want_go,
+				  &new_top,
+				  &new_link,
+			  	  &links[cur].hightext, 
 			  &links[cur].lname)) == WWW_INTERN_LINK_TYPE) {
 	    links[cur].type = WWW_INTERN_LINK_TYPE;
 	    return(DO_LINK_STUFF);

@@ -1,6 +1,14 @@
-$Id: CHANGES.chartrans,v 1.2 1997/05/16 08:51:31 tom Exp $
-$ProjectHeader: Lynx 2.7.1ac-0.28 Sat, 24 May 1997 18:14:19 -0600 dickey $
+$Id: CHANGES.chartrans,v 1.3 1997/07/18 07:44:14 tom Exp $
+$ProjectHeader: Lynx 2.7.1ac-0.36 Fri, 18 Jul 1997 01:44:14 -0600 kweide $
 
+1997-07-17
+ Lynx 2.7.1ac-0.35
+* Since 1997-06-29 the chartrans code (with minor changes; most relating
+  to functions in LYStrings.c) is part of Foteos Macrides's "fotemods"
+  to Lynx 2.7.1.  This code ("developmet code") has been compared against
+  fotemods.  Some functions renamed to FM's names.
+* Now also include FM's recognition of &xnnnn; character references.
+  In general more detailed change info can be found in CHANGES.new.
 1997-05-15
  Lynx 2.7.1wb+ct-0.26
 * Mods in LYMainLoop.c to not force a cache refresh on a proxy any more

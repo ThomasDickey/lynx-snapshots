@@ -1,6 +1,9 @@
 !	Make LYNX hypertext browser under VMS
 !       =====================================
 !
+!	NOTE:  Use [.SRC.CHRTRANS]BUILD-CHRTRANS.COM to create the
+!	       chrtrans header files before using this descrip.mms.
+!
 ! History:
 !  01/01/93 creation at KU (Lou montulli@ukanaix.cc.ukans.edu). 
 !  04/12/93 (seb@lns61.tn.cornell.edu)

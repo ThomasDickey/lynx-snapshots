@@ -19,7 +19,7 @@ typedef struct _hashbucket bucket;
 #define NOSTYLE -1
 
 extern bucket hashStyles[HASHSIZE];
-extern int hash_code PARAMS((char*));
+extern int hash_code PARAMS((char* string));
 extern int hash_table[HASHSIZE]; /* 32K should be big enough */
 
 extern int	s_alink, s_a, s_status,

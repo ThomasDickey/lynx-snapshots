@@ -37,7 +37,7 @@ PUBLIC int showinfo ARGS4(
 {
     static char tempfile[256];
     static BOOLEAN first = TRUE;
-    char *info_url = NULL;
+    static char info_url[256];
     int url_type;
     FILE *fp0;
     char *Address = NULL, *Title = NULL;
@@ -50,7 +50,15 @@ PUBLIC int showinfo ARGS4(
     struct group *grp;
 #endif /* DIRED_SUPPORT */
     if (first) {
-        tempname(tempfile,NEW_FILE);
+        tempname(tempfile, NEW_FILE);
+	/*
+	 *  Make the temporary file a URL now.
+	 */
+#if defined (VMS) || defined (DOSPATH)
+	sprintf(info_url, "file://localhost/%s", tempfile);
+#else
+	sprintf(info_url, "file://localhost%s", tempfile);
+#endif /* VMS */
 	first = FALSE;
 #ifdef VMS
     } else {
@@ -58,28 +66,16 @@ PUBLIC int showinfo ARGS4(
 #endif /* VMS */
     }
 
-
-    /*
-     *  Make the temporary file a URL now.
-     */
-#if defined (VMS) || defined (DOSPATH)
-    StrAllocCopy(info_url,"file://localhost/");
-#else
-    StrAllocCopy(info_url,"file://localhost");
-#endif /* VMS */
-    StrAllocCat(info_url,tempfile);
-
-    if ((fp0 = fopen(tempfile,"w")) == NULL) {
+    if ((fp0 = fopen(tempfile, "w")) == NULL) {
         HTAlert(CANNOT_OPEN_TEMP);
-	FREE(info_url);
         return(0);
     }
+    chmod(tempfile, 0600);
 
     /*
      *  Point the address pointer at this Url
      */
     StrAllocCopy(newdoc->address, info_url);
-    FREE(info_url);
 
     if (nlinks > 0 && links[doc->link].lname != NULL &&
 	(url_type = is_url(links[doc->link].lname)) != 0 &&
@@ -94,7 +90,7 @@ PUBLIC int showinfo ARGS4(
 
     fprintf(fp0, "<head>\n");
 #ifdef EXP_CHARTRANS
-    add_META_charset_to_fd(fp0, -1);
+    LYAddMETAcharsetToFD(fp0, -1);
 #endif
     fprintf(fp0, "<title>%s</title>\n</head>\n<body>\n",
 		 SHOWINFO_TITLE);
@@ -297,9 +293,10 @@ PUBLIC int showinfo ARGS4(
 	"<dt>&nbsp;&nbsp;&nbsp;&nbsp;<em>size:</em> %d lines\n", size_of_file);
 
     fprintf(fp0, "<dt>&nbsp;&nbsp;&nbsp;&nbsp;<em>mode:</em> %s%s%s\n",
-		 (lynx_mode == FORMS_LYNX_MODE ? "forms mode" : "normal"),
-	    (doc->safe ? ", safe" : ""),
-	    (doc->internal_link ? ", internal link" : "")
+		 (lynx_mode == FORMS_LYNX_MODE ?
+				  "forms mode" : "normal"),
+		 ((lynx_mode == FORMS_LYNX_MODE && doc->safe) ? ", safe" : ""),
+		 (doc->internal_link ? ", internal link" : "")
 	    );
 
     fprintf(fp0, "</dl>\n");  /* end of list */
@@ -331,7 +328,7 @@ PUBLIC int showinfo ARGS4(
 	        fprintf(fp0, "<dt>&nbsp;&nbsp;<em>Action:</em> %s\n", Address);
 	    }
 	    if (!(links[doc->link].form->submit_method &&
-		links[doc->link].form->submit_action)) {
+		  links[doc->link].form->submit_action)) {
 	        fprintf(fp0,"<dt>&nbsp;(Form field)\n");
 	    }
 	} else {
@@ -341,7 +338,8 @@ PUBLIC int showinfo ARGS4(
 	    } else {
 	        StrAllocCopy(Title, "");
 	    }
-	    fprintf(fp0, "<dt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<em>URL:</em> %s\n", Title);
+	    fprintf(fp0,
+	       "<dt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<em>URL:</em> %s\n", Title);
 	}
 	fprintf(fp0, "</dl>\n");  /* end of list */
 

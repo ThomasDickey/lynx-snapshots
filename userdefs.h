@@ -35,8 +35,17 @@
 /**************************
  * TEMP_SPACE is where Lynx temporary cache files will be placed.
  * Temporary files are removed automatically as long as nothing
- * goes terribly wrong :)
- * This definition can be overridden at run time by defining a
+ * goes terribly wrong :)  If you include "$USER" in the definition
+ * (e.g., "device:[dir.$USER]"), Lynx will replace the "$USER" with
+ * the username of the account which invoked the Lynx image.  Such
+ * directories should already exist, and have protections/ACLs set
+ * so that only the appropriate user(s) will have read/write access.
+ * On VMS, "sys$scratch:" defaults to "sys$login:" if it has not been
+ * defined externally, or you can use "sys$login:" explicitly here.
+ * If the path has SHELL syntax and includes a tilde (e.g, "~/lynxtmp"),
+ * Lynx will replace the tilde with the full path for the user's home
+ * and convert the result to VMS syntax.
+ * The definition here can be overridden at run time by defining a
  * "LYNX_TEMP_SPACE" VMS logical.
  */
 #define TEMP_SPACE "sys$scratch:"
@@ -310,9 +319,15 @@
 #endif	/* !HAVE_CONFIG_H */
 
 /**************************
- * A place to put temporary files, it's almost always "/tmp/" on
- * UNIX systems
- * This definition can be overridden at run time by setting a
+ * A place to put temporary files, it's almost always in "/tmp/"
+ * for UNIX systems.  If you include "$USER" in the definition
+ * (e.g., "/tmp/$USER"), Lynx will replace the "$USER" with the
+ * username of the account which invoked the Lynx image.  Such
+ * directories should already exist, and have protections/ACLs set
+ * so that only the appropriate user(s) will have read/write access.
+ * If the path includes a tilde (e.g, "~" or "~/lynxtmp"), Lynx will
+ * replace the tilde with the full path for the user's home.
+ * The definition here can be overridden at run time by setting a
  * "LYNX_TEMP_SPACE" environment symbol.
  */
 #define TEMP_SPACE "/tmp/"
@@ -547,8 +562,8 @@
  * CHARACTER_SET defines the default character set, i.e., that assumed
  * to be installed on the user's termimal.  It determines which characters
  * or strings will be used to represent 8-bit character entities within
- * HTML.  New character sets may be defined by modifying the file
- * src/LYCharSets.c in the Lynx source code distribution and recompiling.
+ * HTML.  New character sets may be defined as explained in the README
+ * files of the src/chrtrans directory in the Lynx source code distribution.
  * For Asian (CJK) character sets, it also determines how Kanji code will
  * be handled.  The default defined here can be changed in lynx.cfg, and
  * via the 'o'ptions menu.  The 'o'ptions menu setting will be stored in
@@ -571,6 +586,19 @@
  *    Korean
  *    Taipei (Big5)
  *    7 bit approximations
+ *    Transparent
+ *    ISO Latin 3
+ *    ISO Latin 4
+ *    ISO Latin 5 Cyrillic
+ *    ISO Latin 7 Greek
+ *    ISO Latin 9 (Latin 5)
+ *    ISO Latin 10
+ *    PC Latin2 CP 852
+ *    MS Windows CP 1250
+ *    MS Windows CP 1252
+ *    UNICODE UTF 8
+ *    RFC 1345 w/o Intro
+ *    RFC1345 Mnemonic
  */
 #define CHARACTER_SET "ISO Latin 1"
 
@@ -703,8 +731,10 @@
  * the MULTIPLE attribute is present in the SELECT start tag, Lynx
  * always will create a vertical list of checkboxes for the OPTIONs.
  *
- * The default defined here can be changed in lynx.cfg, and can be
- * toggled via the -popup command line switch.
+ * The default defined here can be changed in lynx.cfg.  It can be
+ * set and saved via the 'o'ptions menu to override the compilation
+ * and configuration defaults, and the default always can be toggled
+ * via the -popup command line switch.
  */
 #define USE_SELECT_POPUPS TRUE
 
@@ -772,12 +802,17 @@
 
 /******************************
  * SHOW_CURSOR controls whether or not the cursor is hidden or appears
- * over the link.  The default set here can be changed in lynx.cfg,
- * and can be toggled with the -show_cursor command line option.
+ * over the current link, or current option in select popup windows.
  * Showing the cursor is handy if you are a sighted user with a poor
  * terminal that can't do bold and reverse video at the same time or
  * at all.  It also can be useful to blind users, as an alternative
- * or supplement to setting LINKS_ARE_NUMBERED.
+ * or supplement to setting LINKS_AND_FORM_FIELDS_ARE_NUMBERED or
+ * LINKS_ARE_NUMBERED.
+ *
+ * The default defined here can be changed in lynx.cfg.  It can be
+ * set and saved via the 'o'ptions menu to override the compilation
+ * and configuration defaults, and the default always can be toggled
+ * via the -show_cursor command line switch.
  */
 #define SHOW_CURSOR FALSE
 
@@ -1097,20 +1132,21 @@
  * VI_KEYS can be turned on by the user in the options
  * screen or the .lynxrc file.  This is just the default.
  */
-#define VI_KEYS_ALWAYS_ON           FALSE /* familiar h,j,k, & l */
+#define VI_KEYS_ALWAYS_ON	FALSE /* familiar h,j,k, & l */
 
 /*********************************
  * EMACS_KEYS can be turned on by the user in the options
  * screen or the .lynxrc file.  This is just the default.
  */
-#define EMACS_KEYS_ALWAYS_ON           FALSE /* familiar ^N, ^P, ^F, ^B */
+#define EMACS_KEYS_ALWAYS_ON	FALSE /* familiar ^N, ^P, ^F, ^B */
 
 /*********************************
  * DEFAULT_KEYPAD_MODE specifies whether by default the user
  * has numbers that work like arrows or else numbered links
  * DEFAULT KEYPAD MODE may be set to 
+ *	NUMBERS_AS_ARROWS   or
  *	LINKS_ARE_NUMBERED  or
- *	NUMBERS_AS_ARROWS
+ *	LINKS_AND_FORM_FIELDS_ARE_NUMBERED
  */
 #define DEFAULT_KEYPAD_MODE	       NUMBERS_AS_ARROWS
 
@@ -1201,7 +1237,7 @@
  * the version definition with the Project Version on checkout. Just
  * ignore it. - kw */
 /* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
-#define LYNX_VERSION "2.7.1ac-0.30"
+#define LYNX_VERSION "2.7.1ac-0.36"
 
 /****************************************************************
  * The LYMessages_en.h header defines default, English strings
@@ -1229,10 +1265,8 @@
 #define SEARCH_GOAL_LINE 4	/* try to position search target there */
 #endif
 
-#ifdef EXP_CHARTRANS
-#define MAX_CHARSETS 40
-#define MAX_CHARSETSP 41	/* always one more */
-#endif
+#define MAXCHARSETS 40		/* max character sets supported */
+#define MAXCHARSETSP 41		/* always one more than MAXCHARSETS */
 
 #ifdef VMS
 /*
@@ -1287,6 +1321,7 @@
 #define	ZCAT_PATH	"/usr/bin/zcat"
 #define	GZIP_PATH	"/usr/bin/gzip"
 #define	INSTALL_PATH	"/usr/bin/install"
+#define	INSTALL_ARGS	"-c"
 #define	TAR_PATH	"/usr/bin/tar"
 #define	TOUCH_PATH	"/usr/bin/touch"
 #else
@@ -1300,6 +1335,7 @@
 #define	ZCAT_PATH	"/usr/local/bin/zcat"
 #define	GZIP_PATH	"/usr/local/bin/gzip"
 #define	INSTALL_PATH	"/bin/install"
+#define	INSTALL_ARGS	"-c"
 #define	TAR_PATH	"/bin/tar"
 #define	TOUCH_PATH	"/bin/touch"
 

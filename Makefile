@@ -180,9 +180,9 @@ DIRED_PERMIT   =   -DOK_PERMIT
 # it out for your system, anyway)!
 # If you are not, then you should edit the generic: entry below.
 #
-# If you need ncurses, the latest version can always be found
-# in ftp://ftp.clark.net/pub/dickey/ncurses/
-# or ftp://ftp.netcom.com/pub/zm/zmbenhal/ncurses/
+# If you need ncurses, the latest version can always be found in
+#	ftp://ftp.clark.net/pub/dickey/ncurses/
+# or	ftp://ftp.netcom.com/pub/zm/zmbenhal/ncurses/
 # (you may need -DNCURSESHEADER in addition to -DNCURSES for old
 # versions of ncurses; see below).
 #
@@ -694,7 +694,8 @@ bsdi-slang:
 # (Solaris 2.5 and later actually have a ranlib program - but it does 
 #  nothing and is only there to make Makefiles like this one happy)
 solaris2:
-	cd WWW/Library/solaris2; $(MAKE) CC="gcc" LYFLAGS="$(SITE_LYDEFS)"
+	cd WWW/Library/solaris2; $(MAKE) CC="gcc" LYFLAGS="-DNSL_FORK \
+		$(SITE_LYDEFS)"
 	cd src; $(MAKE) all CC="gcc" MCFLAGS="-O -DCOLOR_CURSES -DFANCY_CURSES -DUNIX -DSVR4 \
 		-DSOLARIS2 -DCURS_PERFORMANCE -DUTMPX_FOR_UTMP -DUSE_DIRENT \
 		-DLOCALE -DHAVE_TERMIOS_H \
@@ -742,7 +743,8 @@ solaris2-ncurses-NHE:
 # define RESOLVLIB (above) for the "LIBS" entry if needed
 # Solaris2 doesn't have or need ranlib. (ignore the error message about that :)
 solaris2cc:
-	cd WWW/Library/solaris2; $(MAKE) CC="cc" LYFLAGS="$(SITE_LYDEFS)"
+	cd WWW/Library/solaris2; $(MAKE) CC="cc" LYFLAGS="-DNSL_FORK \
+		$(SITE_LYDEFS)"
 	cd src; $(MAKE) all CC="cc" MCFLAGS="-O -DCOLOR_CURSES -DFANCY_CURSES -DUNIX -DSVR4 \
 		-DSOLARIS2 -DCURS_PERFORMANCE -DUTMPX_FOR_UTMP -DUSE_DIRENT \
 		-DLOCALE -DHAVE_TERMIOS_H \
@@ -754,7 +756,8 @@ solaris2cc:
 # define RESOLVLIB (above) for the "LIBS" entry if needed
 # Solaris2 doesn't have or need ranlib. (ignore the error message about that :)
 solaris2-slang:
-	cd WWW/Library/solaris2; $(MAKE) CC="gcc" LYFLAGS="$(SITE_LYDEFS)"
+	cd WWW/Library/solaris2; $(MAKE) CC="gcc" LYFLAGS="-DNSL_FORK \
+		$(SITE_LYDEFS)"
 	cd src; $(MAKE) all CC="gcc" MCFLAGS="-O -DUNIX -DSVR4 -DSOLARIS2 \
 		-DUSE_SLANG -DCURS_PERFORMANCE -DUTMPX_FOR_UTMP -DUSE_DIRENT \
 		-DLOCALE -DHAVE_TERMIOS_H \
@@ -769,7 +772,8 @@ solaris2-slang:
 # define RESOLVLIB (above) for the "LIBS" entry if needed
 # Solaris2 doesn't have or need ranlib. (ignore the error message about that :)
 solaris2-slangcc:
-	cd WWW/Library/solaris2; $(MAKE) CC="cc" LYFLAGS="$(SITE_LYDEFS)"
+	cd WWW/Library/solaris2; $(MAKE) CC="cc" LYFLAGS="-DNSL_FORK \
+		$(SITE_LYDEFS)"
 	cd src; $(MAKE) all CC="cc" MCFLAGS="-O -DUNIX -DSVR4 -DSOLARIS2 \
 		-DUSE_SLANG -DCURS_PERFORMANCE -DUTMPX_FOR_UTMP -DUSE_DIRENT \
 		-DLOCALE -DHAVE_TERMIOS_H \
@@ -824,8 +828,12 @@ sgi:
 		$(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)" \
 		WWWLIB="../WWW/Library/sgi/libwww.a"
 
+##linux
+# Add -DDECL_SYS_ERRLIST to the LYFLAGS if sys_errlist and sys_nerr
+# are not declared in your system headers.
 linux:
-	cd WWW/Library/unix; $(MAKE) CC="gcc" LYFLAGS="-DLINUX $(SITE_LYDEFS)"
+	cd WWW/Library/unix; $(MAKE) CC="gcc" LYFLAGS="-DLINUX -DNSL_FORK \
+		$(SITE_LYDEFS)"
 	cd src; $(MAKE) all CC="gcc" MCFLAGS="-O -DUNIX -DLINUX \
 		-DNO_KEYPAD -DNO_TTYTYPE \
 		-I../$(WWWINC) $(SITE_DEFS)" \
@@ -834,7 +842,8 @@ linux:
 		WWWLIB="../WWW/Library/unix/libwww.a"
 
 linux-ncurses:
-	cd WWW/Library/unix; $(MAKE) CC="gcc" LYFLAGS="-DLINUX $(SITE_LYDEFS)"
+	cd WWW/Library/unix; $(MAKE) CC="gcc" LYFLAGS="-DLINUX -DNSL_FORK \
+		$(SITE_LYDEFS)"
 	cd src; $(MAKE) all CC="gcc" MCFLAGS="-O -DUNIX -DLINUX -DNCURSES \
 		-DFANCY_CURSES -DCOLOR_CURSES -DNO_TTYTYPE \
 		-I/usr/include/ncurses -I../$(WWWINC) $(SITE_DEFS)" \
@@ -843,7 +852,8 @@ linux-ncurses:
 		WWWLIB="../WWW/Library/unix/libwww.a"
 
 linux-slang:
-	cd WWW/Library/unix; $(MAKE) CC="gcc" LYFLAGS="-DLINUX $(SITE_LYDEFS)"
+	cd WWW/Library/unix; $(MAKE) CC="gcc" LYFLAGS="-DLINUX -DNSL_FORK \
+		$(SITE_LYDEFS)"
 	cd src; $(MAKE) all CC="gcc" MCFLAGS="-O -DUNIX -DLINUX -DUSE_SLANG \
 		-DNO_KEYPAD -DNO_TTYTYPE \
 		-I../$(WWWINC) $(SITE_DEFS)" \
@@ -904,16 +914,16 @@ aix31:
 
 ##ultrix - DEC Ultrix
 ultrix:
-	cd WWW/Library/decstation; $(MAKE) LYFLAGS="$(SITE_LYDEFS)"
-	cd src; $(MAKE) all CC="cc" MCFLAGS="-O -Olimit 600 -DFANCY_CURSES \
-		-DUNIX -DULTRIX -I../$(WWWINC) $(SITE_DEFS)" \
+	cd WWW/Library/decstation; $(MAKE) LYFLAGS="-G 7 $(SITE_LYDEFS)"
+	cd src; $(MAKE) all CC="cc" MCFLAGS="-O -Olimit 600 -G 7 \
+		-DFANCY_CURSES -DUNIX -DULTRIX -I../$(WWWINC) $(SITE_DEFS)" \
 		LIBS="-lcursesX -ltermcap \
 		$(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)" \
 		WWWLIB="../WWW/Library/decstation/libwww.a"
 
 ultrix-slang:
-	cd WWW/Library/decstation; $(MAKE) LYFLAGS="$(SITE_LYDEFS)"
-	cd src; $(MAKE) all CC="cc" MCFLAGS="-O -Olimit 600 -DFANCY_CURSES \
+	cd WWW/Library/decstation; $(MAKE) LYFLAGS="-G 7 $(SITE_LYDEFS)"
+	cd src; $(MAKE) all CC="cc" MCFLAGS="-O -Olimit 600 -G 7 \
 		-DUSE_SLANG -DUNIX -DULTRIX -I../$(WWWINC) $(SITE_DEFS)" \
 		LIBS="-lcursesX -ltermcap \
 		$(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)" \

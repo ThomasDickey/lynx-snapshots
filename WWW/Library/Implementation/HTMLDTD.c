@@ -338,6 +338,7 @@ static attr address_attr[] = {			/* ADDRESS attributes */
 	{ "LANG" },
 	{ "NOWRAP" },
 	{ "STYLE" },
+	{ "TITLE" },
 	{ 0 }	/* Terminate list */
 };
 
@@ -387,6 +388,7 @@ static attr area_attr[] = {			/* AREA attributes */
 static attr base_attr[] = {			/* BASE attributes */
 	{ "HREF" },
 	{ "TARGET" },
+	{ "TITLE" },
 	{ 0 }	/* Terminate list */
 };	
 
@@ -399,6 +401,7 @@ static attr bgsound_attr[] = {			/* BGSOUND attributes */
 	{ "LOOP" },
 	{ "SRC" },
 	{ "STYLE" },
+	{ "TITLE" },
 	{ 0 }	/* Terminate list */
 };
 
@@ -415,6 +418,7 @@ static attr body_attr[] = {			/* BODY attributes */
 	{ "ONLOAD" },
 	{ "ONUNLOAD" },
 	{ "STYLE" },
+	{ "TITLE" },
 	{ "TEXT" },
 	{ "VLINK" },
 	{ 0 } /* Terminate list */
@@ -431,6 +435,7 @@ static attr bodytext_attr[] = {			/* BODYTEXT attributes */
 	{ "OBJECT" },
 	{ "REF" },
 	{ "STYLE" },
+	{ "TITLE" },
 	{ "TYPE" },
 	{ "VALUE" },
 	{ "VALUETYPE" },
@@ -445,6 +450,25 @@ static attr bq_attr[] = {			/* BQ (BLOCKQUOTE) attributes */
 	{ "LANG" },
 	{ "NOWRAP" },
 	{ "STYLE" },
+	{ "TITLE" },
+	{ 0 }	/* Terminate list */
+};
+
+static attr button_attr[] = {			/* BUTTON attributes */
+	{ "CLASS" },
+	{ "CLEAR" },
+	{ "DIR" },
+	{ "DISABLED" },
+	{ "ID" },
+	{ "LANG" },
+	{ "NAME" },
+	{ "ONFOCUS" },
+	{ "ONBLUR" },
+	{ "STYLE" },
+	{ "TABINDEX" },
+	{ "TITLE" },
+	{ "TYPE" },
+	{ "VALUE" },
 	{ 0 }	/* Terminate list */
 };
 
@@ -457,6 +481,7 @@ static attr caption_attr[] = {			/* CAPTION attributes */
 	{ "ID" },
 	{ "LANG" },
 	{ "STYLE" },
+	{ "TITLE" },
 	{ 0 }	/* Terminate list */
 };
 
@@ -471,6 +496,7 @@ static attr col_attr[] = {		/* COL and COLGROUP attributes */
 	{ "LANG" },
 	{ "SPAN" },
 	{ "STYLE" },
+	{ "TITLE" },
 	{ "VALIGN" },
 	{ "WIDTH" },
 	{ 0 }	/* Terminate list */
@@ -483,6 +509,7 @@ static attr credit_attr[] = {			/* CREDIT attributes */
 	{ "ID" },
 	{ "LANG" },
 	{ "STYLE" },
+	{ "TITLE" },
 	{ 0 }	/* Terminate list */
 };
 
@@ -494,6 +521,7 @@ static attr div_attr[] = {			/* DIV attribures */
 	{ "ID" },
 	{ "LANG" },
 	{ "STYLE" },
+	{ "TITLE" },
 	{ 0 }	/* Terminate list */
 };
 
@@ -515,6 +543,7 @@ static attr embed_attr[] = {			/* EMBED attributes */
 	{ "PARAMS" },
 	{ "SRC" },
 	{ "STYLE" },
+	{ "TITLE" },
 	{ "UNITS" },
 	{ "USEMAP" },
 	{ "WIDTH" },
@@ -536,6 +565,7 @@ static attr fig_attr[] = {			/* FIG attributes */
 	{ "NOFLOW" },
 	{ "SRC" },
 	{ "STYLE" },
+	{ "TITLE" },
 	{ "UNITS" },
 	{ "WIDTH" },
 	{ 0 }	/* Terminate list */
@@ -559,6 +589,7 @@ static attr fn_attr[] = {			/* FN attributes */
 	{ "ID" },
 	{ "LANG" },
 	{ "STYLE" },
+	{ "TITLE" },
 	{ 0 }	/* Terminate list */
 };
 
@@ -595,6 +626,7 @@ static attr form_attr[] = {			/* FORM attributes */
 };
 
 static attr frame_attr[] = {			/* FRAME attributes */
+	{ "ID" },
 	{ "MARGINHEIGHT"},
 	{ "MARGINWIDTH" },
 	{ "NAME" },
@@ -617,6 +649,7 @@ static attr gen_attr[] = {			/* Minimum HTML 3.0 */
 	{ "ID" },
 	{ "LANG" },
 	{ "STYLE" },
+	{ "TITLE" },
 	{ 0 }	/* Terminate list */
 };
 
@@ -628,6 +661,7 @@ static attr glossary_attr[] = {			/* DL (and DLC) attributes */
 	{ "ID" },
 	{ "LANG" },
 	{ "STYLE" },
+	{ "TITLE" },
 	{ 0 }	/* Terminate list */
 };
 
@@ -645,6 +679,7 @@ static attr h_attr[] = {			/* H1 - H6 attributes */
 	{ "SKIP" },
 	{ "SRC" },
 	{ "STYLE" },
+	{ "TITLE" },
 	{ 0 }	/* Terminate list */
 };
 
@@ -657,6 +692,22 @@ static attr hr_attr[] = {			/* HR attributes */
 	{ "MD" },
 	{ "NOSHADE" },
 	{ "SIZE" },
+	{ "SRC" },
+	{ "STYLE" },
+	{ "TITLE" },
+	{ "WIDTH" },
+	{ 0 }	/* Terminate list */
+};
+
+static attr iframe_attr[] = {			/* IFRAME attributes */
+	{ "ALIGN" },
+	{ "FRAMEBORDER" },
+	{ "HEIGHT" },
+	{ "ID" },
+	{ "MARGINHEIGHT"},
+	{ "MARGINWIDTH" },
+	{ "NAME" },
+	{ "SCROLLING" },
 	{ "SRC" },
 	{ "STYLE" },
 	{ "WIDTH" },
@@ -724,8 +775,10 @@ static attr isindex_attr[] = {			/* ISINDEX attributes */
 	{ "ACTION" },	/* Not in spec.  Lynx treats it as HREF. - FM */
 	{ "DIR" },
 	{ "HREF" },	/* HTML 3.0 attritute for search action. - FM */ 
+	{ "ID" },
 	{ "LANG" },
 	{ "PROMPT" },	/* HTML 3.0 attribute for prompt string. - FM */
+	{ "TITLE" },
 	{ 0 }	/* Terminate list */
 };	
 
@@ -737,6 +790,7 @@ static attr keygen_attr[] = {			/* KEYGEN attributes */
 	{ "LANG" },
 	{ "NAME" },
 	{ "STYLE" },
+	{ "TITLE" },
 	{ 0 }	/* Terminate list */
 };
 
@@ -754,10 +808,24 @@ static attr label_attr[] = {			/* LABEL attributes */
 	{ 0 }	/* Terminate list */
 };
 
+static attr legend_attr[] = {			/* LEGEND attributes */
+	{ "ACCESSKEY" },
+	{ "ALIGN" },
+	{ "CLASS" },
+	{ "CLEAR" },
+	{ "DIR" },
+	{ "ID" },
+	{ "LANG" },
+	{ "STYLE" },
+	{ "TITLE" },
+	{ 0 }	/* Terminate list */
+};
+
 static attr link_attr[] = {			/* LINK attributes */
 	{ "CLASS" },
 	{ "HREF" },
 	{ "ID" },
+	{ "MEDIA" },
 	{ "REL" },
 	{ "REV" },
 	{ "STYLE" },
@@ -778,6 +846,7 @@ static attr list_attr[] = {			/* LI attributes */
 	{ "SKIP" },
 	{ "SRC" },
 	{ "STYLE" },
+	{ "TITLE" },
 	{ "TYPE" },
 	{ "VALUE" },
 	{ 0 }	/* Terminate list */
@@ -803,6 +872,7 @@ static attr math_attr[] = {			/* MATH attributes */
 	{ "ID" },
 	{ "LANG" },
 	{ "STYLE" },
+	{ "TITLE" },
 	{ 0 }	/* Terminate list */
 };
 
@@ -827,6 +897,7 @@ static attr note_attr[]	= {			/* NOTE attributes */
 	{ "ROLE" },
 	{ "SRC" },
 	{ "STYLE" },
+	{ "TITLE" },
 	{ 0 }	/* Terminate list */
 };
 
@@ -870,6 +941,7 @@ static attr olist_attr[] = {			/* OL attributes */
 	{ "SEQNUM" },
 	{ "START" },
 	{ "STYLE" },
+	{ "TITLE" },
 	{ "TYPE" },
 	{ 0 }	/* Terminate list */
 };
@@ -885,6 +957,7 @@ static attr option_attr[] = {			/* OPTION attributes */
 	{ "SELECTED" },
 	{ "SHAPE" },
 	{ "STYLE" },
+	{ "TITLE" },
 	{ "VALUE" },
 	{ 0 }	/* Terminate list */
 };
@@ -897,6 +970,7 @@ static attr overlay_attr[] = {			/* OVERLAY attributes */
 	{ "MD" },
 	{ "SRC" },
 	{ "STYLE" },
+	{ "TITLE" },
 	{ "UNITS" },
 	{ "WIDTH" },
 	{ "X" },
@@ -913,6 +987,7 @@ static attr p_attr[] = {			/* P attributes */
 	{ "LANG" },
 	{ "NOWRAP" },
 	{ "STYLE" },
+	{ "TITLE" },
 	{ 0 }	/* Terminate list */
 };
 
@@ -930,6 +1005,7 @@ static attr param_attr[] = {			/* PARAM attribures */
 	{ "OBJECT" },
 	{ "REF" },
 	{ "STYLE" },
+	{ "TITLE" },
 	{ "TYPE" },
 	{ "VALUE" },
 	{ "VALUEREF" },
@@ -950,6 +1026,7 @@ static attr script_attr[] = {			/* SCRIPT attribures */
 	{ "SCRIPTENGINE" },
 	{ "SRC" },
 	{ "STYLE" },
+	{ "TITLE" },
 	{ "TYPE" },
 	{ 0 }	/* Terminate list */
 };
@@ -998,6 +1075,7 @@ static attr tab_attr[] = {			/* TAB attributes */
 	{ "INDENT" },
 	{ "LANG" },
 	{ "STYLE" },
+	{ "TITLE" },
 	{ "TO" },
 	{ 0 }	/* Terminate list */
 };
@@ -1020,6 +1098,7 @@ static attr table_attr[] = {			/* TABLE attributes */
 	{ "NOWRAP" },
 	{ "RULES" },
 	{ "STYLE" },
+	{ "TITLE" },
 	{ "UNITS" },
 	{ "WIDTH" },
 	{ 0 }	/* Terminate list */
@@ -1041,6 +1120,7 @@ static attr td_attr[] = {			/* TD and TH attributes */
 	{ "NOWRAP" },
 	{ "ROWSPAN" },
 	{ "STYLE" },
+	{ "TITLE" },
 	{ "VALIGN" },
 	{ 0 }	/* Terminate list */
 };
@@ -1080,6 +1160,7 @@ static attr tr_attr[] = {	/* TR, THEAD, TFOOT, and TBODY attributes */
 	{ "LANG" },
 	{ "NOWRAP" },
 	{ "STYLE" },
+	{ "TITLE" },
 	{ "VALIGN" },
 	{ 0 }	/* Terminate list */
 };
@@ -1096,6 +1177,7 @@ static attr ulist_attr[] = {			/* UL attributes */
 	{ "PLAIN" },
 	{ "SRC" },
 	{ "STYLE" },
+	{ "TITLE" },
 	{ "TYPE" },
 	{ "WRAP" },
 	{ 0 }	/* Terminate list */
@@ -1200,6 +1282,7 @@ static attr ulist_attr[] = {			/* UL attributes */
 #define T_BQ		0x0200,	0xAFBCF,0xAFFFF,0xB6680,0xB6FAF,0x8031F,0x00000
  /* { "BR"	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_EMPTY }, */
 #define T_BR		0x1000, 0x00000,0x00000,0x377BF,0x77FBF,0x8101F,0x00001
+#define T_BUTTON	0x0200, 0x0BB0B,0x0FF3B,0x0378F,0x37FAF,0x8035F,0x00000
  /* { "CAPTION"	, caption_attr,	HTML_CAPTION_ATTRIBUTES, SGML_MIXED }, */
 #define	T_CAPTION	0x0100,	0x0B04F,0x8FFFF,0x06A00,0xB6FA7,0x8035F,0x00000
  /* { "CENTER"	, div_attr,	HTML_DIV_ATTRIBUTES,	SGML_MIXED }, */
@@ -1237,7 +1320,7 @@ static attr ulist_attr[] = {			/* UL attributes */
  /* { "EMBED"	, embed_attr,	HTML_EMBED_ATTRIBUTES,	SGML_EMPTY }, */
 #define T_EMBED		0x2000, 0x8F107,0x8FFF7,0xB6FBF,0xB7FBF,0x1FF7F,0x00001
  /* { "FIELDSET", fieldset_attr,HTML_FIELDSET_ATTRIBUTES, SGML_MIXED }, */
-#define T_FIELDSET	0x0200,	0x0FB40,0x0FF5F,0x07787,0x37FF7,0x8805F,0x00000
+#define T_FIELDSET	0x0200,	0x0FB42,0x0FF5F,0x07787,0x37FF7,0x8805F,0x00000
  /* { "FIG"	, fig_attr,	HTML_FIG_ATTRIBUTES,	SGML_MIXED }, */
 #define T_FIG		0x0200, 0x0FB00,0x8FFFF,0x36680,0xB6FBF,0x8834F,0x00000
  /* { "FN"	, fn_attr,	HTML_FN_ATTRIBUTES,	SGML_MIXED }, */
@@ -1271,6 +1354,7 @@ static attr ulist_attr[] = {			/* UL attributes */
 #define T_HY		0x1000, 0x00000,0x00000,0x3779F,0x77FBF,0x8101F,0x00001
  /* { "I"	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED }, */
 #define T_I		0x0001, 0x8B04F,0x8FFFF,0xA778F,0xF7FBF,0x00001,0x00004
+#define T_IFRAME	0x2000,	0x8FBCF,0x8FFFF,0xB679F,0xB6FBF,0xD335F,0x00000
  /* { "IMG"     , img_attr,	HTML_IMG_ATTRIBUTES,	SGML_EMPTY }, */
 #define T_IMG		0x1000,	0x00000,0x00000,0x3779F,0x37FBF,0x80000,0x00001
  /* { "INPUT"   , input_attr,	HTML_INPUT_ATTRIBUTES,	SGML_EMPTY }, */
@@ -1285,6 +1369,7 @@ static attr ulist_attr[] = {			/* UL attributes */
 #define T_KEYGEN	0x0040,	0x00000,0x00000,0x07FB7,0x37FB7,0x80070,0x00001
  /* { "LABEL"	, label_attr,	HTML_LABEL_ATTRIBUTES,	SGML_MIXED }, */
 #define T_LABEL		0x0020, 0x9FFFF,0x9FFFF,0x9FFFF,0x9FFFF,0x00007,0x00000
+#define T_LEGEND	0x0002, 0x0B04F,0x0FF7F,0x00200,0x37FA7,0x00003,0x00000
  /* { "LH"	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_EMPTY }, */
 #define T_LH		0x0400,	0x0BB7F,0x8FFFF,0x00800,0x97FFF,0x8071F,0x00001
  /* { "LI"	, list_attr,	HTML_LI_ATTRIBUTES,	SGML_EMPTY }, */
@@ -1421,6 +1506,7 @@ static HTTag tags_old[HTML_ELEMENTS] = {
     { "BODYTEXT", bodytext_attr,HTML_BODYTEXT_ATTRIBUTES, SGML_MIXED,T_BODYTEXT},
     { "BQ"	, bq_attr,	HTML_BQ_ATTRIBUTES,	SGML_MIXED,T_BQ},
     { "BR"	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_EMPTY,T_BR},
+    { "BUTTON"	, button_attr,	HTML_BUTTON_ATTRIBUTES,	SGML_MIXED,T_BUTTON},
     { "CAPTION"	, caption_attr,	HTML_CAPTION_ATTRIBUTES, SGML_MIXED,T_CAPTION},
     { "CENTER"	, div_attr,	HTML_DIV_ATTRIBUTES,	SGML_MIXED,T_CENTER},
     { "CITE"	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_EMPTY,T_CITE},
@@ -1457,6 +1543,7 @@ static HTTag tags_old[HTML_ELEMENTS] = {
     { "HTML"	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_HTML},
     { "HY"	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_EMPTY,T_HY},
     { "I"	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_EMPTY,T_I},
+    { "IFRAME"	, iframe_attr,	HTML_IFRAME_ATTRIBUTES,	SGML_MIXED,T_IFRAME},
     { "IMG"     , img_attr,	HTML_IMG_ATTRIBUTES,	SGML_EMPTY,T_IMG},
     { "INPUT"   , input_attr,	HTML_INPUT_ATTRIBUTES,	SGML_EMPTY,T_INPUT},
     { "INS"	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_INS},
@@ -1464,6 +1551,7 @@ static HTTag tags_old[HTML_ELEMENTS] = {
     { "KBD"	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_KBD},
     { "KEYGEN"	, keygen_attr,	HTML_KEYGEN_ATTRIBUTES,	SGML_EMPTY,T_KEYGEN},
     { "LABEL"	, label_attr,	HTML_LABEL_ATTRIBUTES,	SGML_MIXED,T_LABEL},
+    { "LEGEND"	, legend_attr,	HTML_LEGEND_ATTRIBUTES,	SGML_MIXED,T_LEGEND},
     { "LH"	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_EMPTY,T_LH},
     { "LI"	, list_attr,	HTML_LI_ATTRIBUTES,	SGML_EMPTY,T_LI},
     { "LINK"	, link_attr,	HTML_LINK_ATTRIBUTES,	SGML_EMPTY,T_LINK},
@@ -1539,6 +1627,7 @@ static HTTag tags_new[HTML_ELEMENTS] = {
     { "BODYTEXT", bodytext_attr,HTML_BODYTEXT_ATTRIBUTES, SGML_MIXED,T_BODYTEXT},
     { "BQ"	, bq_attr,	HTML_BQ_ATTRIBUTES,	SGML_MIXED,T_BQ},
     { "BR"	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_EMPTY,T_BR},
+    { "BUTTON"	, button_attr,	HTML_BUTTON_ATTRIBUTES,	SGML_MIXED,T_BUTTON},
     { "CAPTION"	, caption_attr,	HTML_CAPTION_ATTRIBUTES, SGML_MIXED,T_CAPTION},
     { "CENTER"	, div_attr,	HTML_DIV_ATTRIBUTES,	SGML_MIXED,T_CENTER},
     { "CITE"	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_CITE},
@@ -1575,6 +1664,7 @@ static HTTag tags_new[HTML_ELEMENTS] = {
     { "HTML"	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_HTML},
     { "HY"	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_EMPTY,T_HY},
     { "I"	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_I},
+    { "IFRAME"	, iframe_attr,	HTML_IFRAME_ATTRIBUTES,	SGML_MIXED,T_IFRAME},
     { "IMG"     , img_attr,	HTML_IMG_ATTRIBUTES,	SGML_EMPTY,T_IMG},
     { "INPUT"   , input_attr,	HTML_INPUT_ATTRIBUTES,	SGML_EMPTY,T_INPUT},
     { "INS"	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_INS},
@@ -1582,6 +1672,7 @@ static HTTag tags_new[HTML_ELEMENTS] = {
     { "KBD"	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_KBD},
     { "KEYGEN"	, keygen_attr,	HTML_KEYGEN_ATTRIBUTES,	SGML_EMPTY,T_KEYGEN},
     { "LABEL"	, label_attr,	HTML_LABEL_ATTRIBUTES,	SGML_MIXED,T_LABEL},
+    { "LEGEND"	, legend_attr,	HTML_LEGEND_ATTRIBUTES,	SGML_MIXED,T_LEGEND},
     { "LH"	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_LH},
     { "LI"	, list_attr,	HTML_LI_ATTRIBUTES,	SGML_MIXED,T_LI},
     { "LINK"	, link_attr,	HTML_LINK_ATTRIBUTES,	SGML_EMPTY,T_LINK},

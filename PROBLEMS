@@ -126,3 +126,14 @@ they will be outlined in this file.
     current versions of MultiNet, you can modify tcp.h to use the DECC
     socket and related headers.
 
+    On VMS, the ftp function does not work with SOCKETSHR 0.9D and NETLIB
+    2 (NETLIB 1 may work).  This is because the functions getsockname()
+    and getpeername() within SOCKETSHR make incorrect calls to the NETLIB
+    functions.  This results in zeroes being returned for part of the local
+    IP address.  Since ftp sends this IP address to the remote end, the
+    remote server ends up sending a file back to a non-existent address.
+    Andy Harper (A.HARPER@kcl.ac.uk) has fixed these problems in the
+    SOCKETSHR 0.9D sources and offers the fixes as:
+       http://alder.cc.kcl.ac.uk/fileserv/zip/socketshr_src_09d-2.zip
+       ftp://ftp2.kcl.ac.uk/zip/socketshr_src_09d-2.zip
+

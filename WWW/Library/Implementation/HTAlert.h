@@ -64,6 +64,8 @@ extern char * HTPromptPassword PARAMS((CONST char * Msg));
 **      *username and
 **      *password       are char pointers; they are changed
 **                      to point to result strings.
+**	IsProxy		should be TRUE if this is for
+**			proxy authentication.
 **
 **                      If *username is not NULL, it is taken
 **                      to point to  a default value.
@@ -79,7 +81,8 @@ extern char * HTPromptPassword PARAMS((CONST char * Msg));
 extern void HTPromptUsernameAndPassword PARAMS((
 	CONST char *	Msg,
 	char **		username,
-	char **		password));
+	char **		password,
+	BOOL		IsProxy));
 
 
 /*	Confirm a cookie operation.			HTConfirmCookie()

@@ -92,10 +92,13 @@ PRIVATE int set_clicked_link ARGS2(int,x,int,y)
 
 
 /*
- * LYstrncpy() terminates strings with a null byte.
- * Writes a null byte into the n+1 byte of dst.
+ *  LYstrncpy() terminates strings with a null byte.
+ *  Writes a null byte into the n+1 byte of dst.
  */
-PUBLIC char * LYstrncpy ARGS3(char *,dst, char *,src, int,n)
+PUBLIC char *LYstrncpy ARGS3(
+	char *,		dst,
+	char *,		src,
+	int,		n)
 {
     char *val;
     int len=strlen(src);
@@ -110,6 +113,10 @@ PUBLIC char * LYstrncpy ARGS3(char *,dst, char *,src, int,n)
         *(dst+n) = '\0';
     return val;
 }
+
+#define IS_NEW_GLYPH(ch) (utf_flag && ((unsigned char)(ch)&0xc0) != 0x80)
+#define IS_UTF_EXTRA(ch) (utf_flag && ((unsigned char)(ch)&0xc0) == 0x80)
+
 #ifdef EXP_CHARTRANS
 /*
  * LYmbcsstrncpy() terminates strings with a null byte.
@@ -118,7 +125,7 @@ PUBLIC char * LYstrncpy ARGS3(char *,dst, char *,src, int,n)
  * either bytes or glyphs (mbcs sequences) (currently only UTF8).
  */
 PUBLIC char * LYmbcsstrncpy ARGS5(char *,dst, char *,src, int,n_bytes,
-				  int,n_glyphs,	int,enc)
+				  int,n_glyphs,	int,utf_flag)
 {
     char *val = dst;
     int i_bytes = 0, i_glyphs = 0;
@@ -128,15 +135,13 @@ PUBLIC char * LYmbcsstrncpy ARGS5(char *,dst, char *,src, int,n_bytes,
     if (n_glyphs < 0)
         n_glyphs = 0;
 
-#define IS_NEW_GLYPH(ch) (enc && ((unsigned char)(ch)&0xc0) != 0x80)
-
-    for (; *src != '\0' && i_bytes < n_bytes;
-	 i_bytes++) {
-	if (IS_NEW_GLYPH(*src))
+    for (; *src != '\0' && i_bytes < n_bytes; i_bytes++) {
+	if (IS_NEW_GLYPH(*src)) {
 	    if (i_glyphs++ >= n_glyphs) {
 		*dst = '\0';
 		return val;
 	    }
+	}
 	*(dst++) = *(src++);
     }
     *dst = '\0';
@@ -145,8 +150,44 @@ PUBLIC char * LYmbcsstrncpy ARGS5(char *,dst, char *,src, int,n_bytes,
 }
 #endif /* EXP_CHARTRANS */
 
-#undef GetChar
+/*
+ *  LYmbcsstrlen() returns the printable length of a string
+ *  that might contain IsSpecial or multibyte (CJK or UTF8)
+ *  characters. - FM
+ */
+PUBLIC int LYmbcsstrlen ARGS2(
+	char *,		str,
+	BOOL,		utf_flag)
+{
+    int i, j, len = 0;
 
+    if (!str && *str)
+	return(len);
+
+    for (i = 0; str[i] != '\0'; i++) {
+	if (IsSpecialAttrChar(str[i])) {
+	    continue;
+	} else {
+	    len++;
+	}
+	if (IS_NEW_GLYPH(str[i])) {
+	    j = 0;
+	    while (str[(i + 1)] != '\0' && 
+	    	   !IsSpecialAttrChar(str[(i + 1)]) &&
+		   j < 5 &&
+		   IS_UTF_EXTRA(str[(i + 1)])) {
+		i++;
+		j++;
+	    }
+	} else if (!utf_flag && HTCJK != NOCJK && !isascii(str[i]) &&
+		    str[(i + 1)] != '\0' &&
+		    !IsSpecialAttrChar(str[(i + 1)])) {
+	    i++;
+	}
+    }
+
+    return(len);
+}
 #undef GetChar
 
 #ifdef USE_SLANG
@@ -233,9 +274,9 @@ PRIVATE int map_function_to_key ARGS1(char, keysym)
 #endif
 
 /*
- * LYgetch() translates some escape sequences and may fake noecho
+ *  LYgetch() translates some escape sequences and may fake noecho.
  */
-PUBLIC int LYgetch ()
+PUBLIC int LYgetch NOARGS
 {
     int a, b, c, d = -1;
 
@@ -456,10 +497,9 @@ re_read:
     }
 #if HAVE_KEYPAD
     else {
-
-	/* convert keypad() mode keys into Lynx defined keys
+	/*
+	 *  Convert keypad() mode keys into Lynx defined keys.
 	 */
-
 	switch(c) {
 	case KEY_DOWN:	           /* The four arrow keys ... */
 	   c=DNARROW;
@@ -563,35 +603,29 @@ re_read:
     }
 #endif /* defined(HAVE_KEYPAD) */
 
-    if (c > DO_NOTHING)
-    /* Don't return raw values for KEYPAD symbols which we may have missed
-     * in the switch above if they are obviously invalid when used as an
-     * index into (e.g.) keypad[]. - kw
-     */
-       return (0);
-    else
-    return(c);
+    if (c > DO_NOTHING) {
+	/*
+	 *  Don't return raw values for KEYPAD symbols which we may have
+	 *  missed in the switch above if they are obviously invalid when
+	 *  used as an index into (e.g.) keypad[]. - KW
+	 */
+	return (0);
+    } else {
+	return(c);
+    }
 }
 
 
 /*
- * display the current value of the string and allow the user
- * to edit it.
- */
-
-#ifdef USE_SLANG
-#define GetYX(y,x)   y = SLsmg_get_row(), x = SLsmg_get_column()
-#else
-#ifdef getyx
-#define GetYX(y,x)   getyx(stdscr,y,x)
-#else
-#define GetYX(y,x)   y = stdscr->_cury, x = stdscr->_curx
-#endif /* getyx */
-#endif /* USE_SLANG */
+**  Display the current value of the string and allow the user
+**  to edit it.
+*/
 
 #define EDREC    EditFieldData
 
-/* shorthand to get rid of all most of the "edit->suchandsos" */
+/*
+ *  Shorthand to get rid of all most of the "edit->suchandsos".
+ */
 #define Buf      edit->buffer
 #define Pos      edit->pos
 #define StrLen   edit->strlen
@@ -600,11 +634,16 @@ re_read:
 #define DspStart edit->xpan
 #define Margin   edit->margin
 
-PUBLIC void LYSetupEdit ARGS4(EDREC *,edit, char *,old, int,maxstr, int,maxdsp)
+PUBLIC void LYSetupEdit ARGS4(
+	EDREC *,	edit,
+	char *,		old,
+	int,		maxstr,
+	int,		maxdsp)
 {
-    /* Initialize edit record */
-
-    GetYX(edit->sy, edit->sx);
+    /*
+     *  Initialize edit record
+     */
+    LYGetYX(edit->sy, edit->sx);
     edit->pad   = ' ';
     edit->dirty = TRUE;
     edit->panon = FALSE;
@@ -620,22 +659,42 @@ PUBLIC void LYSetupEdit ARGS4(EDREC *,edit, char *,old, int,maxstr, int,maxdsp)
         if (DspWdth > 4)    /* Else "{}" take up precious screen space */
 	    edit->panon = TRUE;
 
-	/* Figure out margins. If too big we do a lot of unnecessary
-	 * scrolling. If too small user doesn't have sufficient look-ahead.
-	 * Let's say 25% for each margin, upper bound is 10 columns.
+	/*
+	 *  Figure out margins.  If too big, we do a lot of unnecessary
+	 *  scrolling.  If too small, user doesn't have sufficient
+	 *  look-ahead.  Let's say 25% for each margin, upper bound is
+	 *  10 columns.
 	 */
 	Margin = DspWdth/4;
 	if (Margin > 10)
 	    Margin = 10;
     }
-    strcpy(edit->buffer, old);
+
+    /*
+     *  We expect the called function to pass us a default (old) value
+     *  with a length that is less than or equal to maxstr, and to
+     *  handle any messaging associated with actions to achieve that
+     *  requirement.  However, in case the calling function screwed
+     *  up, we'll check it here, and ensure that no buffer overrun can
+     *  occur by loading only as much of the head as fits. - FM
+     */
+    if (strlen(old) >= maxstr) {
+	strncpy(edit->buffer, old, maxstr);
+	edit->buffer[maxstr] = '\0';
+	StrLen = maxstr;
+    } else {
+	strcpy(edit->buffer, old);
+    }
 }
 
-PUBLIC int LYEdit1 ARGS4(EDREC *,edit, int,ch, int,action, BOOL,maxMessage)
+PUBLIC int LYEdit1 ARGS4(
+	EDREC *,	edit,
+	int,		ch,
+	int,		action,
+	BOOL,		maxMessage)
 {   /* returns 0    character processed
      *         ch   otherwise
      */
-
     int i;
     int length;
 
@@ -648,15 +707,15 @@ PUBLIC int LYEdit1 ARGS4(EDREC *,edit, int,ch, int,action, BOOL,maxMessage)
     switch (action) {
     case LYE_AIX:
         /*
-	 * Hex 97.
-	 * Fall through as a character for CJK.
-	 * Otherwise, we treat this as LYE_ENTER.
+	 *  Hex 97.
+	 *  Fall through as a character for CJK.
+	 *  Otherwise, we treat this as LYE_ENTER.
 	 */
 	 if (HTCJK == NOCJK)
 	     return(ch);
     case LYE_CHAR:
         /*
-	 * ch is printable or ISO-8859-1 escape character.
+	 *  ch is printable or ISO-8859-1 escape character.
 	 */
 	if (Pos <= (MaxLen) && StrLen < (MaxLen)) {
 	    for(i = length; i >= Pos; i--)    /* Make room */
@@ -671,8 +730,8 @@ PUBLIC int LYEdit1 ARGS4(EDREC *,edit, int,ch, int,action, BOOL,maxMessage)
 
     case LYE_BACKW:
         /*
-	 * Backword.
-	 * Definition of word is very naive: 1 or more a/n characters.
+	 *  Backword.
+	 *  Definition of word is very naive: 1 or more a/n characters.
 	 */
 	while (Pos && !isalnum(Buf[Pos-1]))
 	    Pos--;
@@ -682,7 +741,7 @@ PUBLIC int LYEdit1 ARGS4(EDREC *,edit, int,ch, int,action, BOOL,maxMessage)
 
     case LYE_FORWW:
         /*
-	 * Word forward.
+	 *  Word forward.
 	 */
 	while (isalnum(Buf[Pos]))
 	    Pos++;   /* '\0' is not a/n */
@@ -692,28 +751,28 @@ PUBLIC int LYEdit1 ARGS4(EDREC *,edit, int,ch, int,action, BOOL,maxMessage)
 
     case LYE_ERASE:
         /*
-	 * Erase the line to start fresh.
+	 *  Erase the line to start fresh.
 	 */
 	 Buf[0] = '\0';
 	 /* fall through */
 
     case LYE_BOL:
         /*
-	 * Go to first column.
+	 *  Go to first column.
 	 */
 	Pos = 0;
 	break;
 
     case LYE_EOL:
         /*
-	 * Go to last column.
+	 *  Go to last column.
 	 */
 	Pos = length;
 	break;
 
     case LYE_DELNW:
         /*
-	 * Delete next word.
+	 *  Delete next word.
 	 */
 	{
 	    int pos0 = Pos;
@@ -725,7 +784,7 @@ PUBLIC int LYEdit1 ARGS4(EDREC *,edit, int,ch, int,action, BOOL,maxMessage)
 
     case LYE_DELPW:
         /*
-	 * Delete previous word.
+	 *  Delete previous word.
 	 */
 	{
 	    int pos0 = Pos;
@@ -738,7 +797,7 @@ PUBLIC int LYEdit1 ARGS4(EDREC *,edit, int,ch, int,action, BOOL,maxMessage)
 
     case LYE_DELN:
         /*
-	 * Delete next character
+	 *  Delete next character
 	 */
 	if (Pos >= length)
 	    break;
@@ -747,7 +806,7 @@ PUBLIC int LYEdit1 ARGS4(EDREC *,edit, int,ch, int,action, BOOL,maxMessage)
 
     case LYE_DELP:
         /*
-	 * Delete preceding character.
+	 *  Delete preceding character.
 	 */
 	if (length == 0 || Pos == 0)
 	    break;
@@ -760,7 +819,7 @@ PUBLIC int LYEdit1 ARGS4(EDREC *,edit, int,ch, int,action, BOOL,maxMessage)
 
     case LYE_DELC:
         /*
-	 * Delete current character.
+	 *  Delete current character.
 	 */
 	if (length == 0)
 	    break;
@@ -772,7 +831,7 @@ PUBLIC int LYEdit1 ARGS4(EDREC *,edit, int,ch, int,action, BOOL,maxMessage)
 
     case LYE_FORW:
         /*
-	 * Move cursor to the right.
+	 *  Move cursor to the right.
 	 */
 	if (Pos < length)
 	    Pos++;
@@ -780,7 +839,7 @@ PUBLIC int LYEdit1 ARGS4(EDREC *,edit, int,ch, int,action, BOOL,maxMessage)
 
     case LYE_BACK:
         /*
-	 * Left-arrow move cursor to the left.
+	 *  Left-arrow move cursor to the left.
 	 */
 	if (Pos > 0)
 	    Pos--;
@@ -805,7 +864,8 @@ PUBLIC int LYEdit1 ARGS4(EDREC *,edit, int,ch, int,action, BOOL,maxMessage)
 }
 
 
-PUBLIC void LYRefreshEdit ARGS1(EDREC *,edit)
+PUBLIC void LYRefreshEdit ARGS1(
+	EDREC *,	edit)
 {
     int i;
     int length;
@@ -876,14 +936,14 @@ PUBLIC void LYRefreshEdit ARGS1(EDREC *,edit)
     }
 
     /*
-     * Erase rest of input area.
+     *  Erase rest of input area.
      */
-    padsize= DspWdth-nrdisplayed;
+    padsize = DspWdth-nrdisplayed;
     while (padsize--)
         addch((unsigned char)edit->pad);
 
     /*
-     * Scrolling indicators.
+     *  Scrolling indicators.
      */
     if (edit->panon) {
         if ((DspStart + nrdisplayed) < length) {
@@ -901,9 +961,14 @@ PUBLIC void LYRefreshEdit ARGS1(EDREC *,edit)
 }
 
 
-PUBLIC int LYgetstr ARGS4(char *,inputline, int,hidden,
-			  int,bufsize, int,recall)
+PUBLIC int LYgetstr ARGS4(
+	char *,		inputline,
+	int,		hidden,
+	int,		bufsize,
+	int,		recall)
 {
+    extern BOOLEAN term_letter;     /* Flag from terminate_letter() AST  */
+    extern BOOLEAN term_options;    /* Flag from terminate_options() AST */
     extern BOOLEAN term_message;    /* Flag from terminate_message() AST */
 #ifdef VMS
     extern BOOLEAN HadVMSInterrupt; /* Flag from cleanup_sig() AST       */
@@ -912,7 +977,7 @@ PUBLIC int LYgetstr ARGS4(char *,inputline, int,hidden,
     int ch;
     EditFieldData MyEdit;
 
-    GetYX(y,x);                 /* Use screen from cursor position to eol */
+    LYGetYX(y, x);		/* Use screen from cursor position to eol */
     MaxStringSize = (bufsize < sizeof(MyEdit.buffer)) ?
     		    (bufsize - 1) : (sizeof(MyEdit.buffer) - 1);
     LYSetupEdit(&MyEdit, inputline, MaxStringSize, (LYcols-1)-x);
@@ -943,9 +1008,9 @@ again:
 	    /* fall through */
 	case LYE_AIX:
 	    /*
-	     * Hex 97.
-	     * Treat as a character for CJK.
-	     * Otherwise, we treat this as LYE_ENTER.
+	     *  Hex 97.
+	     *  Treat as a character for CJK.
+	     *  Otherwise, we treat this as LYE_ENTER.
 	     */
 	    if (HTCJK != NOCJK && ch != '\t') {
 	        LYLineEdit(&MyEdit,ch, FALSE);
@@ -953,7 +1018,7 @@ again:
 	    }
 	case LYE_ENTER:
 	    /*
-	     * Terminate the string and return.
+	     *  Terminate the string and return.
 	     */
 	    strcpy(inputline, MyEdit.buffer);
             return(ch);
@@ -961,7 +1026,7 @@ again:
 
         case LYE_ABORT:
 	    /*
-	     * Control-C or Control-G aborts.
+	     *  Control-C or Control-G aborts.
 	     */
 	    inputline[0] = '\0';		   
 	    return(-1);
@@ -974,11 +1039,13 @@ again:
 }
 
 /*
- * LYstrstr will find the first occurence of the string pointed to by tarptr
- * in the string pointed to by chptr.  
- * It is a case insensitive search.
+ *  LYstrstr will find the first occurence of the string
+ *  pointed to by tarptr in the string pointed to by chptr.  
+ *  It is a case insensitive search.
  */
-PUBLIC char * LYstrstr ARGS2(char *,chptr, char *,tarptr)
+PUBLIC char * LYstrstr ARGS2(
+	char *,		chptr,
+	char *,		tarptr)
 {
     register char *tmpchptr, *tmptarptr;
 
@@ -999,16 +1066,19 @@ PUBLIC char * LYstrstr ARGS2(char *,chptr, char *,tarptr)
 }	
 
 /*
- * LYno_attr_char_case_strstr will find the first occurence of the string 
- * pointed to by tarptr in the string pointed to by chptr.
- * It ignores the characters: LY_UNDERLINE_START_CHAR and
- * 			      LY_UNDERLINE_END_CHAR
- * 			      LY_BOLD_START_CHAR
- * 			      LY_BOLD_END_CHAR
- *			      if present in chptr.
- * It is a case insensitive search.
+ *  LYno_attr_char_case_strstr will find the first occurence of the
+ *  string pointed to by tarptr in the string pointed to by chptr.
+ *  It ignores the characters: LY_UNDERLINE_START_CHAR and
+ * 			       LY_UNDERLINE_END_CHAR
+ * 			       LY_BOLD_START_CHAR
+ * 			       LY_BOLD_END_CHAR
+ *				LY_SOFT_HYPHEN
+ *			       if present in chptr.
+ *  It is a case insensitive search.
  */
-PUBLIC char * LYno_attr_char_case_strstr ARGS2(char *,chptr, char *,tarptr)
+PUBLIC char * LYno_attr_char_case_strstr ARGS2(
+	char *,		chptr,
+	char *,		tarptr)
 {
     register char *tmpchptr, *tmptarptr;
 
@@ -1019,10 +1089,10 @@ PUBLIC char * LYno_attr_char_case_strstr ARGS2(char *,chptr, char *,tarptr)
         chptr++;
 
     for (; *chptr != '\0'; chptr++) {
-
         if (TOUPPER(*chptr) == TOUPPER(*tarptr)) {
-
-            /* see if they line up */
+            /*
+	     *  See if they line up.
+	     */
 	    tmpchptr = chptr+1;
 	    tmptarptr = tarptr+1;
 
@@ -1031,20 +1101,15 @@ PUBLIC char * LYno_attr_char_case_strstr ARGS2(char *,chptr, char *,tarptr)
 
 	    while (1) {
 		 if (!IsSpecialAttrChar(*tmpchptr)) {
-
                     if (TOUPPER(*tmpchptr) != TOUPPER(*tmptarptr))
 			break;
-
 		    tmpchptr++;
 		    tmptarptr++;
-
 		 } else {
 		    tmpchptr++;
 		 }
-
                  if (*tmptarptr == '\0')
 		     return(chptr);
-
 		 if (*tmpchptr == '\0')
 		     break;
 	    }
@@ -1055,16 +1120,19 @@ PUBLIC char * LYno_attr_char_case_strstr ARGS2(char *,chptr, char *,tarptr)
 }
 
 /*
- * LYno_attr_char_strstr will find the first occurence of the string
- * pointed to by tarptr in the string pointed to by chptr.
- * It ignores the characters: LY_UNDERLINE_START_CHAR and
- *                            LY_UNDERLINE_END_CHAR
- *                            LY_BOLD_START_CHAR
- *                            LY_BOLD_END_CHAR
- *			      if present in chptr.
- * It is a case sensitive search.
+ *  LYno_attr_char_strstr will find the first occurence of the
+ *  string pointed to by tarptr in the string pointed to by chptr.
+ *  It ignores the characters: LY_UNDERLINE_START_CHAR and
+ *                             LY_UNDERLINE_END_CHAR
+ *                             LY_BOLD_START_CHAR
+ *                             LY_BOLD_END_CHAR
+ *				LY_SOFT_HYPHEN
+ *			       if present in chptr.
+ *  It is a case sensitive search.
  */
-PUBLIC char * LYno_attr_char_strstr ARGS2(char *,chptr, char *,tarptr)
+PUBLIC char * LYno_attr_char_strstr ARGS2(
+	char *,		chptr,
+	char *,		tarptr)
 {
     register char *tmpchptr, *tmptarptr;
 
@@ -1075,32 +1143,27 @@ PUBLIC char * LYno_attr_char_strstr ARGS2(char *,chptr, char *,tarptr)
         chptr++;
 
     for (; *chptr != '\0'; chptr++) {
-
         if ((*chptr) == (*tarptr)) {
-
-            /* see if they line up */
-            tmpchptr = chptr+1;
-            tmptarptr = tarptr+1;
+            /*
+	     *  See if they line up.
+	     */
+            tmpchptr = chptr + 1;
+            tmptarptr = tarptr + 1;
 
 	    if (*tmptarptr == '\0')  /* one char target */
 		 return(chptr);
 
             while (1) {
 		 if (!IsSpecialAttrChar(*tmpchptr)) {
-
                     if ((*tmpchptr) != (*tmptarptr))
                         break;
-
                     tmpchptr++;
                     tmptarptr++;
-
                  } else {
                     tmpchptr++;
                  }
-
                  if (*tmptarptr == '\0')
                      return(chptr);
-
                  if (*tmpchptr == '\0')
                      break;
             }
@@ -1110,9 +1173,6 @@ PUBLIC char * LYno_attr_char_strstr ARGS2(char *,chptr, char *,tarptr)
     return(NULL);
 }
 
-#ifdef EXP_CHARTRANS
-
-#define IS_UTFEXTRA(ch) (utf_flag && ((unsigned char)(ch)&0xc0) == 0x80)
 /*
  * LYno_attr_mbcs_case_strstr will find the first occurence of the string 
  * pointed to by tarptr in the string pointed to by chptr.
@@ -1122,45 +1182,111 @@ PUBLIC char * LYno_attr_char_strstr ARGS2(char *,chptr, char *,tarptr)
  * It ignores the characters: LY_UNDERLINE_START_CHAR and
  * 			      LY_UNDERLINE_END_CHAR
  * 			      LY_BOLD_START_CHAR
- * 			      LY_BOLD_END_CHAR[B
+ *				LY_BOLD_END_CHAR
+ *				LY_SOFT_HYPHEN
  *			      if present in chptr.
  * It assumes UTF8 if utf_flag is set.
- * It is a case insensitive search.
+ *  It is a case insensitive search. - KW & FM
  */
-PUBLIC char * LYno_attr_mbcs_case_strstr ARGS4(char *,chptr, char *,tarptr,
-					       BOOL, utf_flag, int *,nendp)
+PUBLIC char * LYno_attr_mbcs_case_strstr ARGS5(
+	char *,		chptr,
+	char *,		tarptr,
+	BOOL,		utf_flag,
+	int *,		nstartp,
+	int *,		nendp)
 {
     register char *tmpchptr, *tmptarptr;
     int len = 0;
+    int offset;
 
-    if (!chptr)
+    if (!(chptr && tarptr))
         return(NULL);
 
+    /*
+     *  Skip initial IsSpecial chars. - FM
+     */
     while (IsSpecialAttrChar(*chptr) && *chptr != '\0')
         chptr++;
 
+    /*
+     *  Seek a first target match. - FM
+     */
     for (; *chptr != '\0'; chptr++) {
-	    
-        if (TOUPPER(*chptr) == TOUPPER(*tarptr)) {
+	if ((!utf_flag && HTCJK != NOCJK && !isascii(*chptr) &&
+	     *chptr == *tarptr &&
+	     *(chptr + 1) != '\0' &&
+	     !IsSpecialAttrChar(*(chptr + 1))) ||
+	    TOUPPER(*chptr) == TOUPPER(*tarptr)) {
 	    int tarlen = 0;
+	    offset = len;
 	    len++;
 
-            /* see if they line up */
-	    tmpchptr = chptr+1;
-	    tmptarptr = tarptr+1;
+            /*
+	     *  See if they line up.
+	     */
+	    tmpchptr = (chptr + 1);
+	    tmptarptr = (tarptr + 1);
 
-	    if (*tmptarptr == '\0') { /* one char target */
+	    if (*tmptarptr == '\0') {
+		/*
+		 *  One char target.
+		 */
+		*nstartp = offset;
 		*nendp = len;
 		 return(chptr);
 	    }
+	    if (!utf_flag && HTCJK != NOCJK && !isascii(*chptr) &&
+		 *chptr == *tarptr &&
+		 *tmpchptr != '\0' &&
+		 !IsSpecialAttrChar(*tmpchptr)) {
+		/*
+		 *  Check the CJK mutibyte. - FM
+		 */
+		if (*tmpchptr == *tmptarptr) {
+		    /*
+		     *  It's a match.  Advance to next char. - FM
+		     */
+		    tmpchptr++;
+		    tmptarptr++;
+		    if (*tmptarptr == '\0') {
+		        /*
+			 *  One character match. - FM
+			 */
+			*nstartp = offset;
+			*nendp = len + tarlen;
+			return(chptr);
+		    }
+		    tarlen++;
+		} else {
+		    /*
+		     *  It's not a match, so go back to
+		     *  seeking a first target match. - FM
+		     */
+		    chptr++;
+		    continue;
+		}
+	    }
+	    /*
+	     *  See if the rest of the target matches. - FM
+	     */
 	    while (1) {
 		 if (!IsSpecialAttrChar(*tmpchptr)) {
-
-                    if (TOUPPER(*tmpchptr) != TOUPPER(*tmptarptr))
+		    if (!utf_flag && HTCJK != NOCJK && !isascii(*tmpchptr)) {
+			if (*tmpchptr == *tmptarptr &&
+			    *(tmpchptr + 1) == *(tmptarptr + 1) &&
+			    !IsSpecialAttrChar(*(tmpchptr + 1))) {
+			    tmpchptr++;
+			    tmptarptr++;
+			} else {
 			break;
+			}
+		    } else if (TOUPPER(*tmpchptr) != TOUPPER(*tmptarptr)) {
+			break;
+		    }
 
-		    if (!IS_UTFEXTRA(*tmptarptr))
+		    if (!IS_UTF_EXTRA(*tmptarptr)) {
 			tarlen++;
+		    }
 		    tmpchptr++;
 		    tmptarptr++;
 
@@ -1169,17 +1295,23 @@ PUBLIC char * LYno_attr_mbcs_case_strstr ARGS4(char *,chptr, char *,tarptr,
 		 }
 
                  if (*tmptarptr == '\0') {
+		    *nstartp = offset;
 		     *nendp = len + tarlen;
 		     return(chptr);
 		 }
-		 if (*tmpchptr == '\0')
+		if (*tmpchptr == '\0') {
 		     break;
 	    }
-        } else if (!( IS_UTFEXTRA(*chptr) ||
+	    }
+        } else if (!(IS_UTF_EXTRA(*chptr) ||
 		      IsSpecialAttrChar(*chptr))) {
+	    if (!utf_flag && HTCJK != NOCJK && !isascii(*chptr) &&
+		*(chptr + 1) != '\0' &&
+		!IsSpecialAttrChar(*(chptr + 1))) {
+		chptr++;
+	    }
 	    len++;
 	}
-		       
     } /* end for */
 
     return(NULL);
@@ -1188,51 +1320,114 @@ PUBLIC char * LYno_attr_mbcs_case_strstr ARGS4(char *,chptr, char *,tarptr,
 /*
  * LYno_attr_mbcs_strstr will find the first occurence of the string
  * pointed to by tarptr in the string pointed to by chptr.
- * It takes account of MultiByte Character Sequences (UTF8).
- * The physical lenght of the displayed string up to the end of the target
- * string is returned in *nendp if the search is successful.
+ *  It takes account of CJK and MultiByte Character Sequences (UTF8).
+ *  The physical lengths of the displayed string up to the start and
+ *  end of the target string are returned in *nstartp and *nendp if
+ *  the search is successful.
  * It ignores the characters: LY_UNDERLINE_START_CHAR and
  *                            LY_UNDERLINE_END_CHAR
  *                            LY_BOLD_START_CHAR
  *                            LY_BOLD_END_CHAR
+ *				LY_SOFT_HYPHEN
  *			      if present in chptr.
  * It assumes UTF8 if utf_flag is set.
- * It is a case sensitive search.
+ *  It is a case sensitive search. - KW & FM
  */
-PUBLIC char * LYno_attr_mbcs_strstr ARGS4(char *,chptr, char *,tarptr,
-					       BOOL, utf_flag, int *,nendp)
+PUBLIC char * LYno_attr_mbcs_strstr ARGS5(
+	char *,		chptr,
+	char *,		tarptr,
+	BOOL,		utf_flag,
+	int *,		nstartp,
+	int *,		nendp)
 {
     register char *tmpchptr, *tmptarptr;
     int len = 0;
+    int offset;
 
-    if (!chptr)
+    if (!(chptr && tarptr))
         return(NULL);
 
+    /*
+     *  Skip initial IsSpecial chars. - FM
+     */
     while (IsSpecialAttrChar(*chptr) && *chptr != '\0')
         chptr++;
 
+    /*
+     *  Seek a first target match. - FM
+     */
     for (; *chptr != '\0'; chptr++) {
 
         if ((*chptr) == (*tarptr)) {
 	    int tarlen = 0;
+	    offset = len;
 	    len++;
 
-            /* see if they line up */
-            tmpchptr = chptr+1;
-            tmptarptr = tarptr+1;
+            /*
+	     *  See if they line up.
+	     */
+            tmpchptr = (chptr + 1);
+            tmptarptr = (tarptr + 1);
 
-	    if (*tmptarptr == '\0') { /* one char target */
+	    if (*tmptarptr == '\0') {
+		/*
+		 *  One char target.
+		 */
+		*nstartp = offset;
 		*nendp = len + 1;
 		 return(chptr);
 	    }
+	    if (!utf_flag && HTCJK != NOCJK && !isascii(*chptr) &&
+		 *tmpchptr != '\0' &&
+		 !IsSpecialAttrChar(*tmpchptr)) {
+		/*
+		 *  Check the CJK mutibyte. - FM
+		 */
+		if (*tmpchptr == *tmptarptr) {
+		    /*
+		     *  It's a match.  Advance to next char. - FM
+		     */
+		    tmpchptr++;
+		    tmptarptr++;
+		    if (*tmptarptr == '\0') {
+		        /*
+			 *  One character match. - FM
+			 */
+			*nstartp = offset;
+			*nendp = len + tarlen;
+			return(chptr);
+		    }
+		    tarlen++;
+		} else {
+		    /*
+		     *  It's not a match, so go back to
+		     *  seeking a first target match. - FM
+		     */
+		    chptr++;
+		    continue;
+		}
+	    }
+	    /*
+	     *  See if the rest of the target matches. - FM
+	     */
             while (1) {
 		 if (!IsSpecialAttrChar(*tmpchptr)) {
-
-                    if ((*tmpchptr) != (*tmptarptr))
+		    if (!utf_flag && HTCJK != NOCJK && !isascii(*tmpchptr)) {
+			if (*tmpchptr == *tmptarptr &&
+			    *(tmpchptr + 1) == *(tmptarptr + 1) &&
+			    !IsSpecialAttrChar(*(tmpchptr + 1))) {
+			    tmpchptr++;
+			    tmptarptr++;
+			} else {
+			    break;
+			}
+		    } else if ((*tmpchptr) != (*tmptarptr)) {
                         break;
+		    }
 
-		    if (!IS_UTFEXTRA(*tmptarptr))
+		    if (!IS_UTF_EXTRA(*tmptarptr)) {
 			tarlen++;
+		    }
                     tmpchptr++;
                     tmptarptr++;
 
@@ -1241,60 +1436,73 @@ PUBLIC char * LYno_attr_mbcs_strstr ARGS4(char *,chptr, char *,tarptr,
                  }
 
                  if (*tmptarptr == '\0') {
+		    *nstartp = offset;
 		     *nendp = len + tarlen;
 		     return(chptr);
 		 }
-                 if (*tmpchptr == '\0')
+		if (*tmpchptr == '\0') {
                      break;
             }
-        } else if (!( IS_UTFEXTRA(*chptr) ||
+	    }
+        } else if (!(IS_UTF_EXTRA(*chptr) ||
 		      IsSpecialAttrChar(*chptr))) {
+	    if (!utf_flag && HTCJK != NOCJK && !isascii(*chptr) &&
+		*(chptr + 1) != '\0' &&
+		!IsSpecialAttrChar(*(chptr + 1))) {
+		chptr++;
+	    }
 	    len++;
         }
     } /* end for */
 
     return(NULL);
 }
-#endif /* EXP_CHARTRANS */
 
-/*      Allocate a new copy of a string, and returns it
-*/
-PUBLIC char * SNACopy ARGS3 (char **,dest, CONST char *,src, int,n)
+/*
+ *  Allocate a new copy of a string, and returns it.
+ */
+PUBLIC char * SNACopy ARGS3(
+	char **,	dest,
+	CONST char *,	src,
+	int,		n)
 {
-  FREE(*dest);
-  if (src) {
-    *dest = (char *) calloc (1, n + 1);
-    if (*dest == NULL) {
-	fprintf(stderr,"Tried to calloc %d bytes\n",n);
-	outofmem(__FILE__, "SNACopy");
+    FREE(*dest);
+    if (src) {
+	*dest = (char *)calloc(1, n + 1);
+	if (*dest == NULL) {
+	    if (TRACE)
+	        fprintf(stderr, "Tried to calloc %d bytes\n", n);
+	    outofmem(__FILE__, "SNACopy");
+	}
+	strncpy (*dest, src, n);
+	*(*dest + n) = '\0'; /* terminate */
     }
-    strncpy (*dest, src, n);
-    *(*dest + n) = '\0'; /* terminate */
-  }
-  return *dest;
+    return *dest;
 }
 
-/*      String Allocate and Concatenate
-*/
-PUBLIC char * SNACat ARGS3 (char **,dest, CONST char *,src, int,n)
+/*
+ *  String Allocate and Concatenate.
+ */
+PUBLIC char * SNACat ARGS3(
+	char **,	dest,
+	CONST char *,	src,
+	int,		n)
 {
-  if (src && *src) {
-    if (*dest) {
-      int length = strlen (*dest);
-      *dest = (char *) realloc (*dest, length + n + 1);
-      if (*dest == NULL)
-          outofmem(__FILE__, "SNACat");
-      strncpy (*dest + length, src, n);
-      *(*dest + length + n) = '\0'; /* terminate */
-    } else {
-      *dest = (char *) calloc (1, strlen(src) + 1);
-      if (*dest == NULL)
-          outofmem(__FILE__, "SNACat");
-      strncpy (*dest, src, n);
-      *dest[n] = '\0'; /* terminate */
+    if (src && *src) {
+	if (*dest) {
+	    int length = strlen(*dest);
+	    *dest = (char *)realloc(*dest, length + n + 1);
+	    if (*dest == NULL)
+		outofmem(__FILE__, "SNACat");
+	    strncpy(*dest + length, src, n);
+	    *(*dest + length + n) = '\0'; /* terminate */
+	} else {
+	    *dest = (char *)calloc(1, strlen(src) + 1);
+	    if (*dest == NULL)
+		outofmem(__FILE__, "SNACat");
+	    strncpy(*dest, src, n);
+	    *dest[n] = '\0'; /* terminate */
+	}
     }
-  }
-  return *dest;
+    return *dest;
 }
-
-

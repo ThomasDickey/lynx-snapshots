@@ -30,7 +30,7 @@ PUBLIC int HTNewsMaxChunk = 40;	/* Largest number of articles in one window */
 
 #ifndef DEFAULT_NEWS_HOST
 #define DEFAULT_NEWS_HOST "news"
-#endif /* DEFAULE_NEWS_HOST */
+#endif /* DEFAULT_NEWS_HOST */
 #ifndef SERVER_FILE
 #define SERVER_FILE "/usr/local/lib/rn/server"
 #endif /* SERVER_FILE */
@@ -1478,17 +1478,22 @@ PRIVATE int read_group ARGS3(
 			if (TRACE)
 			    fprintf(stderr, "G %s\n", line);
 			switch(line[0]) {
-    
+
 			case '.':
 			    done = (line[1] < ' ');	/* End of article? */
 			    break;
-    
+
 			case 'S':
 			case 's':
-			    if (match(line, "SUBJECT:"))
+			    if (match(line, "SUBJECT:")) {
 				strcpy(subject, line+9);/* Save subject */
+			 	if (HTCJK == JAPANESE) {
+				    HTmmdecode(subject, subject);
+				    HTrjis(subject, subject);
+				}
+			    }
 			    break;
-    
+
 			case 'M':
 			case 'm':
 			    if (match(line, "MESSAGE-ID:")) {
@@ -1497,19 +1502,23 @@ PRIVATE int read_group ARGS3(
 				StrAllocCopy(reference, addr);
 			    }
 			    break;
-    
+
 			case 'f':
 			case 'F':
 			    if (match(line, "FROM:")) {
 				char * p;
 				strcpy(author,
 					author_name(strchr(line,':')+1));
+				if (HTCJK == JAPANESE) {
+				    HTmmdecode(author, author);
+				    HTrjis(author, author);
+				}
 				p = author + strlen(author) - 1;
 				if (*p==LF)
 				    *p = '\0';	/* Chop off newline */
 			    }
 			    break;
-				    
+
 			case 'd':
 			case 'D':
 			    if (LYListNewsDates && match(line, "DATE:")) {
@@ -1517,7 +1526,7 @@ PRIVATE int read_group ARGS3(
 					     HTStrip(strchr(line,':')+1));
 			    }
 			    break;
-				    
+
 			} /* end switch on first character */
 		    } /* if end of line */
 		} /* Loop over characters */

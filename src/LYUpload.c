@@ -189,6 +189,7 @@ retry:
     system(cmd);
     fflush(stdout);
     start_curses();
+    chmod(buffer, 0600);
     /* don't remove(file); */
 
     return 1;

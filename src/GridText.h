@@ -44,6 +44,7 @@ extern BOOLEAN mustshow;
 extern int HTVirtualMemorySize;
 #endif /* VMS && VAXC && !__DECC */
 extern HTChildAnchor * HText_childNumber PARAMS((int n));
+extern void HText_FormDescNumber PARAMS((int n, char **desc));
 
 /*	Is there any file left?
 */
@@ -87,10 +88,19 @@ extern BOOL HText_POSTReplyLoaded PARAMS((document *doc));
 extern BOOL HTFindPoundSelector PARAMS((char *selector));
 extern int HTGetLinkInfo PARAMS((
 	int		number,
+	int		want_go,
 	int *		go_line,
 	int *		linknum,
 	char **		hightext,
 	char **		lname));
+extern BOOL HText_getFirstTargetInLine PARAMS((
+	HText *		text,
+	int		line_num,
+	BOOL		utf_flag,
+	int *		offset,
+	int *		tLen,
+	char **		data,
+	char *		target));
 extern int HTisDocumentSource NOPARAMS;
 extern void HTuncache_current_document NOPARAMS;
 extern int HText_getTopOfScreen NOPARAMS;
@@ -106,8 +116,8 @@ extern char * HTLoadedDocumentCharset NOPARAMS;
 extern BOOL HTLoadedDocumentEightbit NOPARAMS;
 extern void HText_setNodeAnchorBookmark PARAMS((CONST char *bookmark));
 extern char * HTLoadedDocumentBookmark NOPARAMS;
-extern int HText_LastLineSize PARAMS((HText *me));
-extern int HText_PreviousLineSize PARAMS((HText *me));
+extern int HText_LastLineSize PARAMS((HText *me, BOOL IgnoreSpaces));
+extern int HText_PreviousLineSize PARAMS((HText *me, BOOL IgnoreSpaces));
 extern void HText_NegateLineOne PARAMS((HText *text));
 extern void HText_RemovePreviousLine PARAMS((HText *text));
 extern int HText_getCurrentColumn PARAMS((HText *text));
@@ -125,13 +135,17 @@ extern void HText_beginForm PARAMS((
 	char *		title));
 extern void HText_endForm PARAMS((HText *text));
 extern void HText_beginSelect PARAMS((char *name, BOOLEAN multiple, char *len));
+extern int HText_getOptionNum PARAMS((HText *text));
 extern char * HText_setLastOptionValue PARAMS((
 	HText *		text,
 	char *		value,
 	char *		submit_value,
 	int 		order,
 	BOOLEAN		checked));
-extern int HText_beginInput PARAMS((HText *text, InputFieldData *I));
+extern int HText_beginInput PARAMS((
+	HText *		text,
+	BOOL		underline,
+	InputFieldData *I));
 extern void HText_SubmitForm PARAMS((
 	FormInfo *	submit_item,
 	document *	doc,
@@ -163,6 +177,7 @@ extern BOOL HText_hasToolbar PARAMS((HText *text));
 extern void HText_setNoCache PARAMS((HText *text));
 extern BOOL HText_hasNoCacheSet PARAMS((HText *text));
 
+extern BOOL HText_hasUTF8OutputSet PARAMS((HText *text));
 extern void HText_setKcode PARAMS((HText *text, CONST char *charset));
 
 extern void HText_setBreakPoint PARAMS((HText *text));

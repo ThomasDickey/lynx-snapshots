@@ -347,7 +347,7 @@ PUBLIC void save_bookmark_link ARGS2(
     if (first_time) {
 	fprintf(fp,"<head>\n");
 #ifdef EXP_CHARTRANS
-	add_META_charset_to_fd(fp, -1);
+	LYAddMETAcharsetToFD(fp, -1);
 #endif
 	fprintf(fp,"<title>%s</title>\n</head>\n",BOOKMARK_TITLE);
 	fprintf(fp,"\

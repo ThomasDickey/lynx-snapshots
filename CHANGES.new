@@ -10,16 +10,540 @@ README.configure), and miscellaneous other changes.  Note that the 2.7 ->
 2.7.1 changes (which are listed at the beginning of the current CHANGES
 file) are duplicated here. - KW]
 
+1997-07-15
+* Added support for a commentURL attribute in cookies.  This attribute is
+  under discussion in the HTTP-WG and not presently in the draft (see the
+  1997-07-09 mods for the draft's URL), but would be extremely advantageous
+  for multi-lingual and non-English-speaking sites because the comment
+  attribute can have only ASCII characters in its value, whereas a request
+  for the comment via a URL in turn allows use of charset and language
+  negotiation for what the server returns.  The value of the commentURL is
+  resolved and retained only if it's scheme points to a server (i.e., file
+  and special lynx URLs are rejected), and if it is retained, is included
+  as a link in the Cookie Jar Page.  If commentURL is not ultimately
+  included in the revised State Management RFC, sites which wish to use
+  it could do a User-Agent check for Lynx (and any other browsers which
+  implement it). - FM
+* Fixed a typo in HTCompressed() of HTFWriter.c so that the last dot in a
+  tentative temporary filename is sought via strrchr(), as is done for
+  HTSaveAndExecute() and HTSaveToFile(). - KW
+1997-07-14
+* Yet more tweaks of the cookie support.  We include $PATH and/or $DOMAIN
+  attribute/value pairs in Cookie request headers only when their values
+  were set explicitly via a server's Set-Cookie and/or Set-Cookie2 reply
+  headers (and the cookies are $VERSION="1" or greater). - FM
+* Added support for IFRAME homologous (but not identical) to that for FRAME.
+  It is handled as a block with a blank line before and after style, and
+  with margins and default alignment inherited from the containing block,
+  division, or span.  The IFRAME rendition always begins with an emphasized
+  "IFRAME: " label followed by the NAME attribute's value, if present, or
+  the URL for the SRC attribute, serving as a link for the SRC, followed
+  on a new line by any rendered IFRAME content. - FM
+* Added handling of LEGEND elements.  The content is rendered in place,
+  as for CAPTION elements, since we don't have multiple pass inlining
+  capabilites.  Hopefully, if the LEGEND is intended to be ALIGN-ed at
+  the "top" or "bottom" of the associated insert, the author will place
+  the LEGEND element above or below it, respectively.  Note that LABEL
+  elements similarly are rendered in place, and will be displayed
+  interpretably only if the INPUT to which the LABEL's "for" attribute
+  refers, immediately follows the LABEL element. - FM
+* Added recognition of BUTTON elements, and handling of them (sorta :)
+  when they are TYPE="submit" or TYPE="reset" in forms.  The default
+  "submit" or "reset" string, or the value of a VALUE attribute, if
+  present, is embedded in parentheses and used for the link, and the
+  content is simply rendered and displayed in place.  Until we see what
+  kind of markup the real world puts in such elements, it's too risky
+  to try to use that rendition as the link.  Also, the W3C's HTML 4.0
+  draft presently is very fuzzy about whether, and if so, when, an IMG
+  element in the BUTTON content should be treated as an image map, so
+  the present code doesn't try to cast any submitted BUTTON name/value
+  pairs into the format for INPUTs with TYPE="image".  When the BUTTON
+  is a script control rather than submit or reset button, a "[BUTTON]"
+  pseudo-ALT is inserted to warn users of its presence, but the form
+  is not disabled.  The W3C's HTML 4.0 draft makes scripting intrinsic,
+  with no SGML-based fallbacks if it is not available or is disabled by
+  security-conscious sites.  Dave Raggett of the W3C replied to criticisms
+  of this in www-html@w3c.org by saying that he wished it have been
+  otherwise, but "market forces" prevailed (Sigh...) - FM
+1997-07-13
+* Changed is_url() to return immediately if the string to check starts with 
+  a slash character.  This prevents some false positives if the string
+  contains ':' characters. - KW
+* Added support for "MACOS AppleShare IP FTP Server" to HTFTP.c.
+  Only based on and tested with (the current incarnation of)
+  <ftp://www.unicode.org/>. - KW
+1997-07-12
+* Correct some build issues with the merge (ifdefs for the curses modules)
+  as well as minor fix for makefile distclean rule. - TD
+* More refinements of the cookie support in relation to recent discussions
+  in the HTTP-WG, and for more fully effective protection against denial
+  of service attacks.  If the same attribute appears more than once for
+  the same cookie, ensure that the first instance will be used.  Limit
+  the total number of cookies across Set-Cookie and Set-Cookie2 headers
+  to 50 per server reply, and each cookie to a maximum of 4096 bytes. - FM
+1997-07-11
+* Added support for hexadecimal character references (&#xH;) as proposed
+  in the W3C HTML 4.0 draft. - FM
+1997-07-10
+* Synchronized the development code against the fotemods patches up to
+  1997-07-06 (relevant changes listed below, as usual).  Note that FM
+  has now included the chartrans code, but has eliminated conditional 
+  compilation of it; however, in this code set setting -DEXP_CHARTRANS 
+  at compile time is still necessary (but compilation without it has not 
+  been tested). - KW
+* Fixed character counting logic in display_line() for lines where 
+  soft hyphens (&shy; or <SHY> or a soft-hyphen character) are used
+  for their intended purpose. - KW
+  NOTE: The W3C HTML 4.0 draft explicitly specifies handling of &shy;,
+  &#173; (and now also &#xAD;) in the manner long implemented by Lynx
+  (i.e., as a truly soft hyphen), and not in the brain-dead manner
+  implemented by Netscape and MSIE. - FM
+* Various tweaks of the cookie support to handle likely (based on past
+  experience in the real world :) abuses of Set-Cookie and Set-Cookie2
+  headers from servers.  Most importantly, apply sanity checks to the
+  values of port attributes so that any unquoted port list will not be
+  misinterpreted as the start of a new cookie within the port list.
+  Also added code to fold (CR LF TAB) Cookie request headers if they
+  contain a long sequence of cookies which would exceed 1024 bytes on
+  one line, since some servers suffer buffer overruns and crash in such
+  cases. - FM
+* Modified HTNews.c to use HTmmdecode() and HTrjis() for the Subject and
+  Author strings in listings of news articles when using a Japanese display
+  character set. - HEN
+1997-07-09
+* Massive updating and revamping of the cookie support in accordance with
+  http://www.ics.uci.edu/pub/ietf/http/draft-ietf-http-state-man-mec-02.txt
+  which is scheduled to replace RFC 2109 on July 15, 1997.  Noteworthy
+  changes are that (1) the blanket port restriction is now lifted, and
+  sharing of cookies among servers with matching domains but different
+  ports is blocked only if a port attribute was included in the
+  Set-Cookie2 header (or Set-Cookie header, though it's not expected
+  there), with a value which defaults to the request's port, but can
+  be a comma separated list of ports, and (2) the blanket restriction
+  on sharing of SSL-encrypted (https) cookies with http servers is
+  lifted, and normally depends on the Set-Cookie or Set-Cookie2 header
+  having included a secure attribute.  However, a configuration option
+  (see lynx.cfg) to FORCE_SSL_COOKIES_SECURE is now available, and the
+  compilation or configuration default can be toggled via a -force_secure
+  command line switch. - FM
+* Make NOCACHE ('x' key) work as expected from history list for internal 
+  links. - KW
+* Removed bogus checking for a config file in home directory which had
+  been introduced into the development code. - KW
+1997-07-08
+* Synchronized the development code against the fotemods patches up to
+  1997-06-24 - TD & KW
+1997-07-06
+* Implemented popup windows for the 'o'ptions menu, homologous to those
+  for SELECT blocks in forms.  They are implemented when select_popups
+  is on, and include WHEREIS search and 123[g,p] features (very useful
+  for navigating the choice list of 28 display character sets :).  Use
+  the F_LINK_NUM command ('0') to invoke the prompt for a choice list
+  number when in NUMBERS_AS_ARROWS mode.  The popups are not invoked for
+  the simple, binary choice options.  Also modified the options menu so
+  that the cursor is positioned to the left of choices when show_curser
+  is on (but it is still positioned initially at the endings of strings
+  when the line editor is invoked for options that have user-entered
+  values). - FM
+1997-07-04 (KaBoom! :)
+* Mods of HTMIME.c and HTFile.c to ignore Content-Type parameters other
+  than charset when charset is not present, as we do when it is present
+  and we know we can handle it. - FM
+* Fixed bug in LYNews.c which could cause Lynx to crash when posting or
+  sending followups to news groups and the Organization header was
+  obtained from the /etc/organization file. - FM
+* Fixed bug in LYEdit.c which could cause Lynx to crash when an editor
+  to which a line number is passed as an argument is used and there are
+  no links on the current page of the document to be edited. - FM
+* Added information about the new $USER feature to the comments about
+  TEMP_SPACE in userdefs.h. - FM
+1997-07-03
+* Tweaks of change_sug_filename() in LYUtils.c to make protections against
+  buffer overruns explicit within the function. - FM
+* Tweaks of the #ifdef'ing in HTTCP.c. - FM
+1997-07-02
+* Mods in LYDownload.c and LYPrint.c to treat a suggested output file
+  entry of "/dev/null" on Unix, and "nl:" or "/nl/" paths on VMS (case
+  insensitive), as a cancel (^G). - FM
+* Mods in LYGetFile.c to include URLs with content from a form submission
+  with method GET in the group for which Referer headers are never sent,
+  because the content might include private (e.g., password or credit
+  card) information which should not be visible in Referer logs. - FM
+* Added -G 7 to the LYFLAGS and MCFLAGS for the ultrix and ultrix-slang
+  Makefile targets when using the native ultrix compiler. - HM
+* Added -DNSL_FORK to the LYFLAGS for all of the solaris2 and linux
+  targets in Makefile. - FM
+* The above two changes don't affect the makefile used by auto-config - KW
+1997-06-30
+* Removed a redundant declaration in UCdomap.c which was causing some
+  compilers to balk. - FM
+* Fixed typos in SGML.c which could cause echoing of numeric character
+  references for some of the display character sets. - FM
+1997-06-29
+* Updated lynx.hlp, lynx.man and the online 'h'elp concerning the chartrans
+  support. - FM
 1997-06-26
-* change download function to check filename -- FM 
+* Tweak of the "tag and attribute soup" parsing mods in HTML.c so that the
+  PLAIN attribute works for UL blocks again. - FM
+* More tweaks of LYMainLoop.c to issue informative statusline messages
+  about attempts to ACTIVATE, DOWNLOAD, or submit URLs or ACTIONs which
+  are disallowed in the current context and destined to fail, rather than
+  acting on them and generating actual failures. - FM
+* Mods of LYmktime() in LYUtils.c to support dd-mm-yyyy format for expires
+  headers and cookie attributes. - FM
+* Oops, hadn't included checks for whether there are links on the page
+  in this morning's LYMainLoop.c mods to ensure appropriate statusline
+  messages for attempts to bookmark special URLs that can't be bookmarked,
+  which could yield a crash it there aren't any.  The checks are in there
+  now. - FM
+* Added ability to bookmark links from the Lynx List Page, as from the
+  Visited Links Page, but not for those pages, themselves, since they
+  are temporary files.  Note that Lynx List Page links will not have
+  the documents' titles, as do those in the Visited Links Page, unless
+  you've visited them before invoking the Lynx List Page. - FM
+* Added explicit protections against buffer overruns in the LYDownload.c
+  handling of suggested filenames. - FM
+* Changes in LYCurses.c, GridText.c, HTML.c, and LYUtils.c, and smaller
+  changes to some other files, to fix problems with RP's style code.
+  Color leaking should now be at least much reduced, and some possible
+  crashes avoided. - KW
+1997-06-24
+* Mods in LYDownload.c to check whether the File= field in a LYNXDOWNLOAD
+  URL has the value that was inserted into the URL via the most recent
+  download options menu.  This prevents spoofing with arbitrary LYNXDOWNLOAD
+  URLs entered via the 'g'oto or ECGOTO commands, or ACTIVATE-ed in a file
+  other than the most recent download options menu which was created by
+  Lynx internally. - FM
+* Mods in LYMainLoop.c to ignore LYNXCOOKIE, LYNXDIRED, LYNXDOWNLOAD, and
+  LYNXPRINT URLs if entered via a 'g'oto or ECGOTO command, and to issue
+  a statusline message explaining that the special URL is not allowed as a
+  goto.  This is just for informational purposes, and the above anti-spoof
+  mod is not dependent on it. - FM
 1997-06-23
-* patch pop-up function in LYForms.c - FM
 * remove "Styles" identifier from Lynx version string in userdefs.h
   since it causes "patch-o-matic" to choke. -- JES
-
+1997-06-20
+* Now that we add or subtract attributes for Unix FANCY_CURSES, as for VMS
+  curses and slang, the 1997-05-30 mods based on LE's patch for keeping track
+  of whether links occur in an underlining context, and if so, restoring it
+  when a current link is made non-current, should be extended to FANCY_CURSES
+  as well.  So they are extended, now, in highlight() of LYUtils.c. - FM
+* Added code in LYNewsPost() of LYNews.c for converting any EUC or SJIS to
+  JIS (ISO-2022-JP) in posts or followups to Usenet news groups if the
+  display character set is "Japanese (EUC)" or "Japanese (SJIS)".  The mods
+  need testing by Japanese users, because the TO_JIS() function I added
+  long ago in SGML.c has not actually been used before. - FM
+* Modified the hack in LYPrint.c for mailing HTML source so that it never
+  appends a charset parameter to the "text/html" value of the Content-Type
+  header if compiled without chartrans enabled. - FM & KW
+1997-06-18
+* Added a check for nonsense LINES and COLS values in setup() of LYCurses.c,
+  homologous to the check in size_change() of LYUtils.c, and set LYlines and
+  LYcols to the 80x24 default if they're nonsense.  The slang library and
+  most curses implementations do the equivalent themselves, but we may as
+  well make sure it's done. - FM
+* Tweaks of the anti-spoof mods in HTFWriter.c for additional protection
+  against extra %s entries in viewer command mappings. - FM
+1997-06-17
+* Came up with a low overhead way to restore the emphasis for WHEREIS
+  search targets when links are made current or non-current and the
+  target string starts before and/or extends past the end of the link
+  name (hightext or hightext2) string (see 1997-06-14 mods), so the
+  restoration works in that case as well, now. - FM
+1997-06-14
+* Fixed a longstanding bug in highlight() of LYUtils.c which caused seeking
+  of a column position less than 0 and strange behavior when a link is made
+  current, if show_cursor is on and the link begins at column 0 (as can
+  happen in PRE blocks).  We now position the cursor on the first character
+  of such links, so the current link will remain clear for those with speech
+  or braille interfaces. - FM
+* Added functions in LYCurses.c, along the lines of those in the development
+  code, so that the [w]start_foo() and [w]stop_foo() functions no longer
+  just replace character attributes for Unix FANCY_CURSES, but now add or
+  subtract them as for VMS curses and slang. - FM
+* More mods in GridText.c and LYUtils.c so that the handling of WHEREIS
+  search target emphasis when links are made current and non-current is the
+  full equivalent for Unix FANCY_CURSES of that for VMS curses and slang.
+  Note that the restoration of search target emphasis does not succeed if
+  the hit started before or extends beyond the link name (hightext or
+  hightext2 string).  What it would take to succeed in that case as well
+  doesn't seem worth the overhead, but I'm still thinking about it.  Also
+  note that we still do not emphasize search target hits, but only do link
+  or page re-positioning, for Unix curses when only standout() and standin()
+  are supported.  In that case, standout() is being used for all links,
+  including the current (with the latter indicated via cursor position by
+  turning show_cursor on), so we don't want to create a totally confusing
+  situation by using standout() for search target hits as well.  The code
+  is still designed to degrade gracefully when the terminal does not have
+  the capabilities of the curses or slang with which Lynx was built. - FM
+1997-06-13
+* Tweak of yesterday's LYGetFile.c mods.  Lost a lynx_edit_mode = FALSE
+  statement that is still needed when DIRED_SUPPORT is defined. - FM
+* Mods in LYForms.c so that the cursor is positioned at the left of the
+  current option in select popup windows when show_cursor is on, as when
+  the cursor is used to indicate the current link in the main document.
+  This is important when Lynx is used with a speech or braille interface,
+  or a terminal which does not respond to the highlighting/color for the
+  current option.  When show_cursor is off, the cursor is still positioned
+  to the right of the current option for curses, and is fully "hidden" in
+  the lower right corner for slang, so that the hightlighting or color of
+  the current option can be used without the distraction of a blinking
+  cursor in the left-to-right reading field. - FM
+* Added ability to change the show_cursor setting via the 'o'ptions menu
+  and to save that as the default in the RC file (otherwise, the default
+  is still that set in userdefs.h or lynx.cfg).  The -show_cursor command
+  line switch toggles the default, however obtained, homologously to the
+  -popup toggle.  Updated the online 'h'elp accordingly (option_help.html
+  and Lynx_users_guide.html). - FM
+1997-06-12
+* Tweaks of the 1997-06-04 mods for restoring emphasis of WHEREIS search
+  targets in link names when they are changed to the current link or again
+  made non-current.  When the link is made current, the first and last
+  characters of the link name never are emphasized, so they'll retain the
+  attributes/color for the current link, and the user can see (if sighted)
+  that the link was made current.  With this change, the restoration of
+  emphasis also is interpretable with Unix FANCY_CURSES, so the block for
+  that is lifted.  Note that I figured out why the bold+reverse+underline
+  combination doesn't work for that.  The vanilla and this Lynx code are
+  not adding or subtracting attributes for their start_foo() and stop_foo()
+  functions (as is done for slang and VMS curses), but are replacing them,
+  so you always end up with the last attribute in a series of start_foo()
+  calls (underlining for the search target emphasis).  I don't know if
+  ability to sum attributes applies to all Unix curses flavors for which
+  FANCY_CURSES is defined in the Makefile, so I left the Unix, non-slang
+  start_foo() and stop_foo() functions the way they are, for now. - FM
+* Mods in LYGetFile.c so that any '~' in file URLs is handled as when in
+  startfile, home page, or 'g'oto commands.  Only the first '~' is converted
+  to Home_Dir(), and only for the first symbolic element in the URL, and if
+  it is followed by a username, that username is stripped (so that the
+  "~username" becomes a reference to the home of the account running Lynx,
+  as if only '~' had been used, and can't be used as a reference for an
+  arbitrary home).  Note that we don't do this stripping for ftp URLs,
+  because the ftp server should decide, itself, whether to grant access to
+  arbitrary homes, based on the username and password that were used to
+  log in.  Note, also, that if the account running Lynx is allowed access
+  to the root of the file system for its home, then access to any arbitrary
+  home in that file system can be gained from there.  Access to the root
+  never is allowed for file URLs in the for-VMS code, but depends on the
+  root's protection in the for-Unix code.  Also, any arbitrary path in file
+  URLs will be attempted if it is specified as an absolute path.  The
+  stripping of the username from "~username" in most cases on Unix only
+  protects against probing for homes in other file systems, without the
+  user knowing the corresponding absolute path. - FM
+1997-06-11
+* Mods in HTAABrow.c, HTTP.c and HTAlert.c so that auth_proxy is no
+  longer a module wide global, and the structures which handle/create
+  authentication/authorization headers maintain separate setup trees
+  for proxy authentication/authorization versus for protected limbs of
+  http/https data trees (realms) on the same server.  This ensures that
+  each proxy's template, which is the global '*' for all paths (that are
+  in fact full URLs) in its proxying requests, are kept distinct from
+  the templates for true paths of the protected limbs on the same saver,
+  even if the user fails to include that proxy in the no_proxy list, or
+  the server's WebMaster fails to do the equivalent configuration for
+  the server, and the realm names overlap.  Also modified the prompt
+  strings for the username and password to be encrypted for protected
+  document requests versus for proxy access so that they indicate
+  explicitly whether the user's entries will be used for one or the
+  other. - FM
+* Added a -pauth=id:pw switch for proxy servers, homologous to the
+  -auth=id:pw switch for protected documents, along the lines of AJL's
+  patch.  Note that the -pauth value is used only for authorization
+  headers to the first protected proxy server encountered, and the -auth
+  value is used only for the authorization headers in document requests
+  for the first protected limb encountered.  Now that we have an explicit
+  switch for proxy authentication, it should be used explicitly for that,
+  instead of still allowing use of the -auth=id:pw switch for either
+  (IMHO).  Also, there's no serious need to make inclusion of the code
+  for handling these switches a compilation option, because they are only
+  available to users with shell access.  Updated the help files concerning
+  these switches, and included advice to make sure any script files which
+  use these switches have restricted access. - FM
+1997-06-09
+* More refinements of the code in GridText.c, HTML.c and LYCharUtils.c
+  for handling visible versus hidden links, blank lines, stripping of
+  the numbered brackets for links, and the interactions of these things
+  with soft hyphens. - FM
+1997-06-06
+* Fixed typos in LYrcFile.c which caused failure to start two comments
+  on new lines when writing to the RC file. - FM
+* Fixed a typo in the lead dot pair stripping code in LYLegitimizeHREF()
+  of LYCharUtils.c. - FM
+* Tweak of code in GridText.c for handling soft hyphens so that we don't
+  display a hyphen if it's the first character in the line, or is preceded
+  by a space, even if it is followed by a newline. - FM
+* Mods of the hidden link handling and numbered bracket stripping code in
+  GridText.c so that it succeeds no matter how many blank lines are in
+  the anchor content. - FM
+1997-06-04
+* Mods in LYLegitimizeHREF() of LYCharUtils.c for dealing more effectively
+  with fragments which have illegal characters, as is becoming common due
+  to authoring tools such as MicroSoft's Frontpage and Netscape's HTML
+  editor.  The actual URL-reference is still handled so as to yield a
+  fully legitimate absolute URL, without any unescaped spaces, but the
+  fragment is checked only for problem characters such as tab or newline,
+  and otherwise is unmodified.  (Try the vanilla versus modified code with
+  the http://www.cnib.org/library/ww_flw96.htm atrocity, brought to you
+  discourtesy of Frontpage. :) - FM
+* Worked into the fotemods code use of bold+reverse+underline highlighting
+  of WHEREIS search hits for VMS curses, and slang on both VMS and Unix (with
+  or without the color mode on), and added code in highlight() of LYUtils.c
+  for restoring that highlighting when links are made current or non-current
+  if the string for the hit was contained within the string for the link (won't
+  be restored if the hit's string starts before or extends past the link's
+  string).  Couldn't get any of this to work with curses and the solaris2
+  target, so for Unix curses the hit string still is just underlined and
+  not restored when links are made current or non-current. - FM
+* Fixed typo in the 1997-06-01 LYOptions.c mods. - FM
+1997-06-03
+* Mods in LYList.c to skip setting up a list block for visible links if
+  the document has only hidden links, and in HTML.c to include a notice
+  about this with a suggestion to use the 'l'ist command.  Try it with
+  the http://www.sony.com/ atrocity. - FM
+* Tweak in LYMainLoop.c to fix a longstanding bug which would cause the
+  curdoc.line and curdoc.link numbers to be mishandled, and thus cause
+  the wrong page and current link to be restored on return to the document
+  via PREV_DOC or the History Page, if the document was fetched originally
+  with a fragment and a link on its first page had been activated. - FM
+* Tweaks in GridText.c so that returns from image map menus to parent
+  documents are not treated as if a different document is being sought,
+  and thus any no-cache directives associated with the parent will be
+  ignored unless another fetch is initiated within the parent or via
+  another, externally existing document. - FM
+* Added SEEK_FRAG_MAP_IN_CUR and SEEK_FRAG_AREA_IN_CUR configuration
+  (lynx.cfg) options for how to resolve USEMAP attribute values in
+  IMG or OBJECT tags and HREF attribute values in AREA tags when they
+  consist solely of a fragment (USEMAP="#frag" or HREF="#frag").  The
+  compilation default is TRUE, i.e., they are resolved with respect
+  to the current document's URL, even if the base is different, as is
+  being done for the HREF attribute values of Anchors and LINKs.  The
+  compilation default seems to be working out, even though most of the
+  currently deployed browsers still use the base. - FM
+1997-06-02
+* Mods in LYMain.c so as not to require that a lone "-" argument for
+  invoking input of command line arguments from stdin be the only
+  argument on the actual command line.  That requirement preluded use
+  of this feature when the command for invoking Lynx was aliased so
+  as to include arguments, because the lone "-" then could not be the
+  only argument.  Also tweaked the code so that any stdin-derived
+  arguments which need to be processed early in main() are so processed.
+  The vanilla code had severly flawed logic in this respect.  The
+  security considerations associated with switch handling have gotten
+  hairy beyond reasonable bounds, but I think I've thought it all through
+  (we'll see :), and have plugged some holes in the vanilla code for
+  this feature.  Redirection of stdout and/or stderr to a file now also
+  works reliably in conjunction with this feature. - FM
+* Added an explanation in the PROBLEMS file of the bad getsockname() and
+  getpeername() functions within SOCKETSHR 0.9D which affect the ftp
+  gateway, and the URLs for Andy Harper's (A.HARPER@kcl.ac.uk) fixes of
+  the SOCKETSHR 0.9D sources. - FM
+* Cast LYLocal.c into the Lynx programming style. - FM
+1997-06-01
+* Added support for numbered form fields, and options in SELECT popups,
+  based on LE's patch.  The LINKS_AND_FORM_FIELDS_ARE_NUMBERED keypad
+  mode can be defined in userdefs.h and via the 'o'ptions menu.  When
+  in SELECT popups, the F_LINK_NUM ('0') command can be used in any mode
+  to invoke a "Select option (or page) number:" prompt, which can take
+  'g' or 'p' suffixes, homologously to the 
+  "Follow link (or goto link or page) number:"
+  prompt in the main document with popups retracted.  Note that when in
+  the main document, the F_LINK_NUM command has an implied 'g' suffix
+  for form links (i.e., will position you on the form link, not, for
+  example, ACTIVATE a submit button), but *not* in popup windows (i.e.,
+  without a 'g' suffix, the option corresponding to the number will be
+  selected, and the popup will be retracted, as if you had pressed
+  ACTIVATE when positioned on that option).  The 123p feature is quite
+  useful in popups with a very large number of options, and supplements
+  the HOME, END and WHEREIS functions for seeking positions in the list
+  (again, regardless of keypad mode, if F_LINK_NUM is used to invoke
+  the prompt).  A "page" is defined as the number of lines within the
+  vertical dimension of the popup box. - FM
+* Mods in LYEdit.c to seek the current page and line when the editor
+  is sedt on VMS. - FM
+* Updated the online 'h'elp concerning the "Follow link (or page) number:"
+  and "Select option (or page) number:" features (Lynx_users_guide.html,
+  follow_help.html, keystroke_help.html and other_help.html). - FM
+* changes to help files to reflect the different prompt string. - KW
+1997-05-30
+* Worked in LE's patch for keeping track of whether links occur in an
+  underlining context, and if so, restore it when slang color is on and
+  a current link is made non-current, thereby actually dealing with the
+  longstanding bug discussed in the 1997-05-27 mods (This is just a hobby,
+  and I always reserve the right to change my mind! :). - FM
+* Mods of LYForms.c and LYStrings.c to deal with form field values too
+  long to fit in the line editor's buffer (such as long TEXTAREA values
+  which have no newlines in them).  As much of the tail as fits in the
+  buffer is offered for editing, with statusline messages explaining the
+  situation.  If the tail is modified, it is combined with the unmodified
+  head when the form field is made non-current.  The result can be edited
+  further by making the form field current again.  If the form has a
+  Reset button, it can be used to restore the original value.  The
+  vanilla code would crash on buffer overflow (Ugh!  A potential
+  security hole.). - FM
+1997-05-29
+* Restored underlining in conjunction with reversing for the current link
+  with slang when colors are being used, but not otherwise. - FM
+* The 1997-05-26 mods to bypass screen redraws on retractions of SELECT
+  popups when the selected OPTION was not changed worked properly only
+  for VMS curses.  Tweaked the for-slang code so that it now works like
+  VMS curses (though not as efficiently).  However, with Unix curses,
+  the delwin() - refresh() sequence does not restore what was there
+  before the popup was invoked, and none of the tweaks I tried got that
+  to work, so the poor Unix folks using Unix curses are now stuck again
+  with screen redraws for every popup retraction.  - FM
+1997-05-27
+* Eliminated in the fotemods code underlining in conjunction with reversing
+  for the current link with slang, to avoid the longstanding bug of 
+  underlining being lost (and distracting color changes occurring) when that
+  link ceases to be current and it was embedded in an underlined region of
+  text.  The attributes of the current link can be better handled in the
+  development code based on configureable style sheets, so there's no
+  point letting this bug ride, nor trying to deal with it through
+  temporary internal mods, in the fotemods code set. - FM
+1997-05-26
+* Mods of display_title() in GridText.c to eliminate the "format"
+  mask as in KW's 1997-05-14 development code mods, and to make the
+  memory management more efficient. - FM
+* Mods of change_form_link() in LYForms.c to bypass the screen redraw
+  on retraction of a SELECT popup if the SELECT block is DISABLE-ed
+  or the selected OPTION was not changed.  Note that the complete
+  elimination of the screen redraw in the 1997-05-20 development code
+  mods, i.e., even when the selected OPTION was changed, results in
+  the change not being made evident to the user in the retracted popup
+  unless the screen is redrawn fortuituously (e.g., due to subsequent
+  paging). - FM
+* Modified the caching-related changes of 1997-05-15 to LYMainLoop.c,
+  handling automatic reloading after a change of the User-Agent string
+  like after comparable other option changes.
+  We force a reload if "preferred document lan(G)uage"
+  or "preferred document c(H)arset" are changed via the 'o'ptions menu,
+  and to set the "reloading" flag for forcing a proxy cache refresh if
+  those or "user (A)gent" are changed and the current document has an
+  http, https or lynxcgi scheme, but not force a proxy cache refresh if
+  we're reloading due to an INLINE_TOGGLE, IMAGE_TOGGLE, or RAW_TOGGLE
+  command. - KW & FM
+1997-05-25
+* Mods in LYMain.c to convert $USER if present in the TEMP_SPACE
+  definition or LYNX_TEMP_SPACE environment variable to the string
+  returned by getenv("USER"). - FM
+* Fixed two typos for me->inFONT settings in HTML.c - TD
+* Added chmod(file, 0600) calls for most files created by Lynx. - FM
 1997-05-24
 * integrate patch JED's mods which support mouse for slang as well as add
   new functions to encapsulate differences between slang/curses. - TD
+1997-05-21
+* Mods in HTML.c and LYCharUtils.c so that TABLE blocks are treated
+  as divisions in the DIV nest, with a default alignment of HT_LEFT
+  if the TABLE start tag lacks an ALIGN attribute, and otherwise,
+  that attribute's value.  Nested TABLEs extend the DIV nest.  This
+  avoids the problem in the vanilla code of TABLE content inheriting
+  the alignment of a containing CENTER or DIV which is intended for
+  alignment of the TABLE as a whole.  Also added support for ALIGN
+  attributes in TR elements.  If the TR has no ALIGN attribute, it
+  inherits that of the current division, which should be that of the
+  current TABLE.  This, of course, still does not yield true TABLEs
+  for truly tabular content, but makes TABLEs used for formatting
+  more readable. - FM
 1997-05-20
 * correct 2 occurrences of "me->inFONT == TRUE;" in HTML.c - TD
 * add configure --with-color-style option to merge RP's alpha changes for
@@ -58,7 +582,10 @@ file) are duplicated here. - KW]
   which are invalid when used later as an index into keymap[],
   override[], etc. - KW
 * in the USE_SLANG for-unix start_curses(), honor the no_suspend flag
-  if set.  Note that the no_suspend flag cannot be suspected to have
+  if set.  This implements -restrictions=suspend handling for slang 
+  (although it was intended for curses implementations which have 
+  problems with ^Z within Lynx; see the PROBLEMS file).
+  Note that the no_suspend flag cannot be suspected to have
   the desired effect if lynx is executed from a shell script, unless
   the shell process forked for the script also ignores the SIGTSTP
   signal generated (usually) by the ^Z key.  Also if the user is 
@@ -96,6 +623,12 @@ file) are duplicated here. - KW]
 * Fixed long-standing bug in display_page() of GridText.c.  When it
   was updating the links structures, it wasn't re-initializing the
   form element if the links structure is not for a form field. - FM
+* Mods in HTML.c to deal more effectively with H# headers used instead
+  of LH in lists.  We now, in effect, treat them fully as if they were
+  LH, so that their left indentations are in register with the current
+  list nesting depth, and we apply better error recovery in cases where
+  the author is mis-using H# for a FONT change rather than as an actual
+  header. - FM
 1997-05-16
 * Changed the line where a WHEREIS search target should preferably be
   displayed to the 4th line (not counting the title line).  This can
@@ -216,6 +749,18 @@ file) are duplicated here. - KW]
   LYGetFile.c to nlines, to deal with the AIX 4.2 bug of treating lines
   as a macro.  Also changed the variable name, pages, to npages for
   logical complementarity (they both refer to the total number). - FM
+* Mods in HTML.c, LYCharUtils.c and GridText.c to deal with links for
+  positioning, specified via NAME or ID attributes, when they are embedded
+  in Anchors which have an HREF, so that they now don't force premature
+  closing of those Anchors.  Also tweaked the code for creating links for
+  the sources of images or other for-GUI embedded objects when clickable
+  images ('*') is toggled on, so they use those mods as well, when
+  possible.  Note, however, that the clickable images feature is creating
+  Anchors with HREFs which aren't actually there, and still can create
+  technically invalid markup, on occassion, when the non-doctored markup
+  actually is valid.  The latter mods still need some improvements in the
+  formatting, but are OK to use for now, and my brain hurts from trying
+  to think through all the possible markup we might encounter. - FM
 * Tweaks of the Lynx Trace Log handling to deal with reloads when the
   HText structure for the log has been dumped.  Made the first letter
   of the filename uppercase (Lynx.trace), complementary to Lynx.leaks.
@@ -401,6 +946,14 @@ file) are duplicated here. - KW]
 * In the section of HTUtils.h for non-autoconf builds, don't set 
   HAVE_KEYPAD or HAVE_TTYTYPE if USE_SLANG is defined. - KW
 * Modified HText_LinksInLines() to not count hidden form fields. - KW 
+* Added support for setting an anchor's no_cache element based on a
+  comparison between Expires and Date headers if both were received
+  and we didn't set it based on a Cache-Control directive.  Also
+  added equivalent support for a comparison between an Expires value
+  from a META tag and a Date header.  We still compare Expires header
+  or META values versus the system time if no Date header was received,
+  and still do not accept Date values from META tags because they are
+  unlikely to be reliable. - FM
 1997-05-02
 * Fixed a bug in LYAddImageMap() of LYMap.c which could cause multiple
   insertions of the same MAP into the LynxMaps structure, and crashes
@@ -547,7 +1100,7 @@ file) are duplicated here. - KW]
   TABLE-related elements (TR, THEAD, TFOOT, TBODY, COLGROUP, TH, TD)
   and of DT, DD, LH, LI, FONT, OVERLAY to the switch in
   HTML_end_element, currently just break from the switch. - KW
-  Some tweaks and corrections to the additional element info and
+* Some tweaks and corrections to the additional element info and
   to the content types used with New_DTD, in HTMLDTD.c.  Made
   OPTION non-empty. - KW
 * Now changed the tags_old[] in HTMLDTD.c, which is used with the

@@ -7,7 +7,13 @@ extern BOOLEAN term_options;
 extern void options NOPARAMS;
 extern void edit_bookmarks NOPARAMS;
 
-/* values for options */
+/*
+ *  Values for the options menu. - FM
+ *
+ *  L_foo values are the Y coordinates for the menu item.
+ *  B_foo values are the X coordinates for the item's prompt string.
+ *  C_foo values are the X coordinates for the item's value string.
+ */
 #define L_EDITOR	 2
 #define L_DISPLAY	 3
 
@@ -32,7 +38,12 @@ extern void edit_bookmarks NOPARAMS;
 #define B_SHOW_DOTFILES	44
 #define C_SHOW_DOTFILES	62
 
-#define L_SELECT_POPUPS 13
+#define L_BOOL_B	13
+#define B_SELECT_POPUPS	5
+#define C_SELECT_POPUPS	36
+#define B_SHOW_CURSOR	44
+#define C_SHOW_CURSOR	62
+
 #define L_KEYPAD	14 
 #define L_LINEED	15
 

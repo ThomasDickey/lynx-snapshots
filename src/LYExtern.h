@@ -5,6 +5,6 @@
 #include "LYStructs.h"
 #endif /* LYSTRUCTS_H */
 
-void run_external(char * c);
+void run_external PARAMS((char * c));
 
 #endif /* EXTERNALS_H */

@@ -81,6 +81,7 @@ extern BOOLEAN local_exec_on_local_files; /* TRUE to enable local program  *
 /* Values to which keypad_mode can be set */
 #define NUMBERS_AS_ARROWS 0
 #define LINKS_ARE_NUMBERED 1
+#define LINKS_AND_FORM_FIELDS_ARE_NUMBERED 2
 
 #define HIDDENLINKS_MERGE	0
 #define HIDDENLINKS_SEPARATE	1
@@ -97,7 +98,8 @@ extern char star_string[MAX_LINE + 1]; /* from GridText.c */
  ((n) >= MAX_LINE ? star_string : &star_string[(MAX_LINE-1)] - (n))
 #define DIRNAMESIZE 256
 
-extern BOOLEAN LYShowCursor;   /* show the cursor or hide it */
+extern BOOLEAN LYShowCursor;	/* Show the cursor or hide it?	    */
+extern BOOLEAN LYUseDefShoCur;	/* Command line -show_cursor toggle */
 extern BOOLEAN LYCursesON;  /* start_curses()->TRUE, stop_curses()->FALSE */
 extern BOOLEAN LYUserSpecifiedURL;  /* URL from a goto or document? */
 extern BOOLEAN LYJumpFileURL;   /* URL from the jump file shortcuts? */
@@ -235,7 +237,8 @@ extern BOOLEAN no_url_redirection;   /* Don't follow URL redirections */
 extern char *form_post_data;         /* User data for post form */
 extern char *form_get_data;          /* User data for get form */
 extern char *http_error_file;        /* Place HTTP status code in this file */
-extern char *authentication_info[2]; /* Id:Password for protected forms */
+extern char *authentication_info[2]; /* Id:Password for protected documents */
+extern char *proxyauth_info[2];	  /* Id:Password for protected proxy server */
 extern BOOLEAN HEAD_request;	     /* Do a HEAD request */
 extern BOOLEAN scan_for_buried_news_references;
 extern BOOLEAN bookmark_start;	  /* Use bookmarks as startfile */
@@ -302,6 +305,9 @@ extern FILE *LYTraceLogFP;		/* Pointer for TRACE log	 */
 extern char *LYTraceLogPath;		/* Path for TRACE log		 */
 extern BOOLEAN LYUseTraceLog;		/* Use a TRACE log?		 */
 extern FILE LYOrigStderr;		/* Original stderr pointer	 */
+extern BOOLEAN LYSeekFragMAPinCur;
+extern BOOLEAN LYSeekFragAREAinCur;
 extern BOOLEAN LYStripDotDotURLs;	/* Try to fix ../ in some URLs?  */
+extern BOOLEAN LYForceSSLCookiesSecure;
 
 #endif /* LYGLOBALDEFS_H */

@@ -140,11 +140,14 @@ PUBLIC char * HTPromptPassword ARGS1(
 **  On entry,
 **      Msg             is the prompting message.
 **      *username and
-**      *password       are char pointers; they are changed
+**      *password       are char pointers which contain default
+**			or zero-length strings; they are changed
 **                      to point to result strings.
+**	IsProxy		should be TRUE if this is for
+**			proxy authentication.
 **
 **                      If *username is not NULL, it is taken
-**                      to point to  a default value.
+**                      to point to a default value.
 **                      Initial value of *password is
 **                      completely discarded.
 **
@@ -154,40 +157,71 @@ PUBLIC char * HTPromptPassword ARGS1(
 **      are NOT freed.
 **
 */
-PUBLIC void HTPromptUsernameAndPassword ARGS3(
+PUBLIC void HTPromptUsernameAndPassword ARGS4(
 	CONST char *,	Msg,
 	char **,	username,
-	char **,	password)
+	char **,	password,
+	BOOL,		IsProxy)
 {
-    if (authentication_info[0] && authentication_info[1]) {
+    if ((IsProxy == FALSE &&
+	 authentication_info[0] && authentication_info[1]) ||
+	(IsProxy == TRUE &&
+	 proxyauth_info[0] && proxyauth_info[1])) {
 	/* 
-	**  -auth parameter gave us both the username and password
-	**  to use for the first realm, so just use them without
-	**  any prompting. - FM
+	**  The -auth or -pauth parameter gave us both the username
+	**  and password to use for the first realm or proxy server,
+	**  respectively, so just use them without any prompting. - FM
 	*/
- 	StrAllocCopy(*username, authentication_info[0]);
-	FREE(authentication_info[0]);
-	StrAllocCopy(*password, authentication_info[1]);
-	FREE(authentication_info[1]);
+ 	StrAllocCopy(*username, (IsProxy ?
+		       proxyauth_info[0] : authentication_info[0]));
+	if (IsProxy) {
+	    FREE(proxyauth_info[0]);
+	} else {
+	    FREE(authentication_info[0]);
+	}
+	StrAllocCopy(*password, (IsProxy ?
+		       proxyauth_info[1] : authentication_info[1]));
+	if (IsProxy) {
+	    FREE(proxyauth_info[1]);
+	} else {
+	    FREE(authentication_info[1]);
+	}
     } else if (dump_output_immediately) {
-        if (authentication_info[0]) {
+        /*
+	 *  We are not interactive and don't have both the
+	 *  username and password from the command line,
+	 *  but might have one or the other. - FM
+	 */
+        if ((IsProxy == FALSE && authentication_info[0]) ||
+	    (IsProxy == TRUE && proxyauth_info[0])) {
 	    /*
 	    **  Use the command line username. - FM
 	    */
-	    StrAllocCopy(*username, authentication_info[0]);
-	    FREE(authentication_info[0]);
+	    StrAllocCopy(*username, (IsProxy ?
+			   proxyauth_info[0] : authentication_info[0]));
+	    if (IsProxy) {
+		FREE(proxyauth_info[0]);
+	    } else {
+		FREE(authentication_info[0]);
+	    }
 	} else {
 	    /*
 	    **  Default to "WWWuser". - FM
 	    */
             StrAllocCopy(*username, "WWWuser");
 	}
-	if (authentication_info[1]) {
+        if ((IsProxy == FALSE && authentication_info[1]) ||
+	    (IsProxy == TRUE && proxyauth_info[1])) {
 	    /*
 	    **  Use the command line password. - FM
 	    */
-	    StrAllocCopy(*password, authentication_info[1]);
-	    FREE(authentication_info[1]);
+	    StrAllocCopy(*password, (IsProxy ?
+			   proxyauth_info[1] : authentication_info[1]));
+	    if (IsProxy) {
+		FREE(proxyauth_info[1]);
+	    } else {
+		FREE(authentication_info[1]);
+	    }
 	} else {
 	    /*
 	    **  Default to a zero-length string. - FM
@@ -195,30 +229,51 @@ PUBLIC void HTPromptUsernameAndPassword ARGS3(
 	    StrAllocCopy(*password, "");
 	}
 	printf("\n%s\n", USERNAME_PASSWORD_REQUIRED);
+
     } else {
-        if (authentication_info[0]) {
+        /*
+	 *  We are interactive and don't have both the
+	 *  username and password from the command line,
+	 *  but might have one or the other. - FM
+	 */
+        if ((IsProxy == FALSE && authentication_info[0]) ||
+	    (IsProxy == TRUE && proxyauth_info[0])) {
 	    /*
-	    **  Offer command line username in the prompt
-	    **  for the first realm. - FM
+	    **  Offer the command line username in the
+	    **  prompt for the first realm. - FM
 	    */
-	    StrAllocCopy(*username, authentication_info[0]);
-	    FREE(authentication_info[0]);
+	    StrAllocCopy(*username, (IsProxy ?
+			   proxyauth_info[0] : authentication_info[0]));
+	    if (IsProxy) {
+		FREE(proxyauth_info[0]);
+	    } else {
+		FREE(authentication_info[0]);
+	    }
 	}
+	/*
+	 *  Prompt for confirmation or entry of the username. - FM
+	 */
 	if (Msg != NULL) {
 	    *username = HTPrompt(Msg, *username);
 	} else {
 	    *username = HTPrompt(USERNAME_PROMPT, *username);
 	}
-	if (authentication_info[1]) {
+        if ((IsProxy == FALSE && authentication_info[1]) ||
+	    (IsProxy == TRUE && proxyauth_info[1])) {
 	    /*
 	    **  Use the command line password for the first realm. - FM
 	    */
-	    StrAllocCopy(*password, authentication_info[1]);
-	    FREE(authentication_info[1]);
+	    StrAllocCopy(*password, (IsProxy ?
+			   proxyauth_info[1] : authentication_info[1]));
+	    if (IsProxy) {
+		FREE(proxyauth_info[1]);
+	    } else {
+		FREE(authentication_info[1]);
+	    }
 	} else if (*username != NULL && *username[0] != '\0') {
 	    /*
-	    **  If we have a non-zero length username,
-	    **  prompt for the password. - FM
+	    **  We have a non-zero length username,
+	    **  so prompt for the password. - FM
 	    */
 	    *password = HTPromptPassword(PASSWORD_PROMPT);
 	} else {
@@ -227,7 +282,6 @@ PUBLIC void HTPromptUsernameAndPassword ARGS3(
 	    */
 	    StrAllocCopy(*password, "");
 	}
-	
     }
 }
 

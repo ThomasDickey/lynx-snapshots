@@ -15,7 +15,6 @@
  See lynx.cfg for other info.
 */
 
-#ifdef USE_EXTERNALS
 #include "tcp.h"
 #include "LYGlobalDefs.h"
 #include "LYUtils.h"
@@ -23,6 +22,7 @@
 
 #include "LYLeaks.h"
 
+#ifdef USE_EXTERNALS
 #define FREE(x) if (x) {free(x); x = NULL;}
 
 void run_external(char * c)

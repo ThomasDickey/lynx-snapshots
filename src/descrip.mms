@@ -1,6 +1,9 @@
 !       Make LYNX hypertext browser under VMS
 !       =====================================
 !
+!	NOTE:  Use [.SRC.CHRTRANS]BUILD-CHRTRANS.COM to create the
+!	       chrtrans header files before using this descrip.mms.
+!
 ! History:
 !  1/1/93  creation at KU (Lou montulli@ukanaix.cc.ukans.edu). 
 !  4/12/93 (seb@lns61.tn.cornell.edu)
@@ -21,6 +24,7 @@
 !  07/26/95 FM Separated transport (TOPT) and compiler (COPT) option files.
 !  07/29/95 FM Added support for GNUC.
 !  02/29/96 FM Added LYMap.
+!  06/28/97 FM Added UCAuto, UCAux, and UCdomap.
 !
 ! Instructions:
 !       Use the correct command line for your TCP/IP implementation:
@@ -58,7 +62,7 @@ OBJS = 	DefaultStyle.obj, GridText.obj, HTAlert.obj, HTFWriter.obj, -
 	LYList.obj, LYMail.obj, LYMain.obj, LYMainLoop.obj, LYMap.obj, -
 	LYNews.obj, LYOptions.obj, LYPrint.obj, LYrcFile.obj, LYReadCFG.obj, -
 	LYSearch.obj, LYShowInfo.obj, LYStrings.obj, LYTraversal.obj, -
-	LYUpload.obj, LYUtils.obj
+	LYUpload.obj, LYUtils.obj, UCAuto.obj, UCAux.obj, UCdomap.obj
 
 .ifdef WIN_TCP
 TCP = WIN_TCP

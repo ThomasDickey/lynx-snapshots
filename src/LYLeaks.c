@@ -55,6 +55,7 @@ PUBLIC void LYLeaks NOARGS	{
 	if(Fp_leakagesink == NULL)	{
 		return;
 	}
+	chmod(LEAKAGE_SINK, 0600);
 
 	while(ALp_RunTimeAllocations != NULL)	{
 		/*

@@ -30,8 +30,11 @@ extern char *LYchar_set_names[];
 extern BOOL HTPassEightBitRaw;
 extern HTCJKlang HTCJK;
 
-extern void LYSetCookie PARAMS((CONST char *header, CONST char *address));
-extern time_t LYmktime PARAMS((char *string));
+extern void LYSetCookie PARAMS((
+	CONST char *	SetCookie,
+	CONST char *	SetCookie2,
+	CONST char *	address));
+extern time_t LYmktime PARAMS((char *string, BOOL absolute));
 
 
 /*		MIME Object
@@ -88,6 +91,8 @@ typedef enum _MIME_state {
 	miSE,
 	miSERVER,
 	miSET_COOKIE,
+	miSET_COOKIE1,
+	miSET_COOKIE2,
 	miT,
 	miTITLE,
 	miTRANSFER_ENCODING,
@@ -128,6 +133,8 @@ struct _HTStream {
 	HTStream *		sink;		/* Given on creation */
 	
 	char *			boundary;	/* For multipart */
+	char *			set_cookie;	/* Set-Cookie */
+	char *			set_cookie2;	/* Set-Cookie2 */
 	
 	HTFormat		encoding;	/* Content-Transfer-Encoding */
 	char *			compression_encoding;
@@ -139,13 +146,13 @@ struct _HTStream {
 };
 
 /*
-**  This function if for trimming off any paired
+**  This function is for trimming off any paired
 **  open- and close-double quotes from header values.
 **  It does not parse the string for embedded quotes,
 **  and will not modify the string unless both the
 **  first and last characters are double-quotes. - FM
 */
-PRIVATE void HTMIME_TrimDoubleQuotes ARGS1(
+PUBLIC void HTMIME_TrimDoubleQuotes ARGS1(
 	char *,		value)
 {
     int i;
@@ -187,9 +194,10 @@ PRIVATE void HTMIME_put_character ARGS2(
 	return;
     }
 
-    /* This slightly simple conversion just strips CR and turns LF to
-    ** newline. On unix LF is \n but on Mac \n is CR for example.
-    ** See NetToText for an implementation which preserves single CR or LF.
+    /*
+    **  This slightly simple conversion just strips CR and turns LF to
+    **  newline.  On unix LF is \n but on Mac \n is CR for example.
+    **  See NetToText for an implementation which preserves single CR or LF.
     */
     if (me->net_ascii) {
         c = FROMASCII(c);
@@ -355,10 +363,11 @@ PRIVATE void HTMIME_put_character ARGS2(
 		    */
 		    for (i = 0; cp[i]; i++)
 		        cp[i] = TOLOWER(cp[i]);
-		    if ((cp1=strchr(cp, ';')) != NULL) {
+		    if ((cp1 = strchr(cp, ';')) != NULL) {
 			BOOL chartrans_ok = NO;
-		        if ((cp2=strstr(cp1, "charset")) != NULL) {
+		        if ((cp2 = strstr(cp1, "charset")) != NULL) {
 			    int chndl;
+
 			    cp2 += 7;
 			    while (*cp2 == ' ' || *cp2 == '=' || *cp2 == '\"')
 			        cp2++;
@@ -554,9 +563,49 @@ PRIVATE void HTMIME_put_character ARGS2(
 				StrAllocCopy(me->anchor->charset,
 					     "iso-2022-cn");
 			    }
+			} else {
+			    /*
+			    **  No charset parameter is present.
+			    **  Ignore all other parameters, as
+			    **  we do when charset is present. - FM
+			    */
+			    *cp1 = '\0';
+			    me->format = HTAtom_for(cp);
 			}
 		    }
 		    FREE(cp);
+		}
+		/*
+		**  If we have an Expires header and haven't
+		**  already set the no_cache element for the
+		**  anchor, check if we should set it based
+		**  on that header. - FM
+		*/
+		if (me->anchor->no_cache == FALSE &&
+		    me->anchor->expires != NULL) {
+		    if (!strcmp(me->anchor->expires, "0")) {
+			/*
+			 *  The value is zero, which we treat as
+			 *  an absolute no-cache directive. - FM
+			 */
+			me->anchor->no_cache = TRUE;
+		    } else if (me->anchor->date != NULL) {
+		        /*
+			**  We have a Date header, so check if
+			**  the value is less than or equal to
+			**  that. - FM
+			*/
+			if (LYmktime(me->anchor->expires, TRUE) <=
+			    LYmktime(me->anchor->date, TRUE)) {
+			    me->anchor->no_cache = TRUE;
+			}
+		    } else if (LYmktime(me->anchor->expires, FALSE) <= 0) {
+		        /*
+			**  We don't have a Date header, and
+			**  the value is in past for us. - FM
+			*/
+			me->anchor->no_cache = TRUE;
+		    }
 		}
 		StrAllocCopy(me->anchor->content_type,
 			     HTAtom_name(me->format));
@@ -581,6 +630,13 @@ PRIVATE void HTMIME_put_character ARGS2(
 			 "        Treating as '%s'.  Converting to '%s'\n",
 			 HTAtom_name(me->format), HTAtom_name(me->targetRep));
 		    }
+		}
+		if (me->set_cookie != NULL || me->set_cookie2 != NULL) {
+		    LYSetCookie(me->set_cookie,
+				me->set_cookie2,
+				me->anchor->address);
+		    FREE(me->set_cookie);
+		    FREE(me->set_cookie2);
 		}
 		me->target = HTStreamStack(me->format, me->targetRep,
 	 				   me->sink , me->anchor);
@@ -958,7 +1014,7 @@ PRIVATE void HTMIME_put_character ARGS2(
 
 	case 't':
 	case 'T':
-	    me->check_pointer = "-cookie:";
+	    me->check_pointer = "-cookie";
 	    me->if_ok = miSET_COOKIE;
 	    me->state = miCHECK;
 	    if (TRACE)
@@ -971,6 +1027,36 @@ PRIVATE void HTMIME_put_character ARGS2(
 	        fprintf(stderr,
 		   "HTMIME: Bad character `%c' found where `%s' expected\n",
 		        c, "'r' or 't'");
+	    goto bad_field_name;
+	    break;
+
+	} /* switch on character */
+	break;
+
+    case miSET_COOKIE:			/* Check for ':' or '2' */
+        switch (c) {
+	case ':':
+	    me->field = miSET_COOKIE1;		/* remember it */
+	    me->state = miSKIP_GET_VALUE;
+	    if (TRACE)
+	        fprintf(stderr,
+			"HTMIME: Was SET_COOKIE, found :, processing\n");
+	    break;
+
+	case '2':
+	    me->check_pointer = ":";
+	    me->if_ok = miSET_COOKIE2;
+	    me->state = miCHECK;
+	    if (TRACE)
+	        fprintf(stderr,
+		 "HTMIME: Was SET_COOKIE, found 2, checking for ':'\n");
+	    break;
+
+	default:
+	    if (TRACE)
+	        fprintf(stderr,
+		   "HTMIME: Bad character `%c' found where `%s' expected\n",
+		        c, "':' or '2'");
 	    goto bad_field_name;
 	    break;
 
@@ -1314,7 +1400,8 @@ PRIVATE void HTMIME_put_character ARGS2(
     case miRETRY_AFTER:
     case miSAFE:
     case miSERVER:
-    case miSET_COOKIE:
+    case miSET_COOKIE1:
+    case miSET_COOKIE2:
     case miTITLE:
     case miTRANSFER_ENCODING:
     case miUPGRADE:
@@ -1397,8 +1484,8 @@ PRIVATE void HTMIME_put_character ARGS2(
 		    me->value[i] = TOLOWER(me->value[i]);
 		StrAllocCopy(me->anchor->cache_control, me->value);
 		/*
-		 *  Check whether to set no_cache for the anchor. - FM
-		 */
+		**  Check whether to set no_cache for the anchor. - FM
+		*/
 		{
 		    char *cp, *cp0 = me->value;
 
@@ -1692,12 +1779,6 @@ PRIVATE void HTMIME_put_character ARGS2(
 		**  Indicate in anchor. - FM
 		*/
 		StrAllocCopy(me->anchor->expires, me->value);
-		/*
-		**  Check whether to set no_cache for the anchor. - FM
-		*/
-		if ((me->value[0] == '0' && me->value[1] == '\0') ||
-		    LYmktime(me->value) <= 0)
-		    me->anchor->no_cache = TRUE;
                 break;
 	    case miKEEP_ALIVE:
 	        HTMIME_TrimDoubleQuotes(me->value);
@@ -1742,8 +1823,8 @@ PRIVATE void HTMIME_put_character ARGS2(
 		if (!(me->value && *me->value))
 		    break;
 		/*
-		 *  Check whether to set no_cache for the anchor. - FM
-		 */
+		**  Check whether to set no_cache for the anchor. - FM
+		*/
 		if (!strcmp(me->value, "no-cache"))
 		    me->anchor->no_cache = TRUE;
                 break;
@@ -1797,13 +1878,31 @@ PRIVATE void HTMIME_put_character ARGS2(
 		*/
 		StrAllocCopy(me->anchor->server, me->value);
                 break;
-	    case miSET_COOKIE:
+	    case miSET_COOKIE1:
 	        HTMIME_TrimDoubleQuotes(me->value);
                 if (TRACE)
                     fprintf(stderr,
                             "HTMIME: PICKED UP Set-Cookie: '%s'\n",
 			    me->value);
-		LYSetCookie(me->value, me->anchor->address);
+		if (me->set_cookie == NULL) {
+		    StrAllocCopy(me->set_cookie, me->value);
+		} else {
+		    StrAllocCat(me->set_cookie, ", ");
+		    StrAllocCat(me->set_cookie, me->value);
+		}
+                break;
+	    case miSET_COOKIE2:
+	        HTMIME_TrimDoubleQuotes(me->value);
+                if (TRACE)
+                    fprintf(stderr,
+                            "HTMIME: PICKED UP Set-Cookie2: '%s'\n",
+			    me->value);
+		if (me->set_cookie2 == NULL) {
+		    StrAllocCopy(me->set_cookie2, me->value);
+		} else {
+		    StrAllocCat(me->set_cookie2, ", ");
+		    StrAllocCat(me->set_cookie2, me->value);
+		}
                 break;
 	    case miTITLE:
 	        HTMIME_TrimDoubleQuotes(me->value);
@@ -1959,7 +2058,6 @@ PRIVATE void HTMIME_free ARGS1(
 
 /*	End writing
 */
-
 PRIVATE void HTMIME_abort ARGS2(
 	HTStream *,	me,
 	HTError,	e)
@@ -1987,7 +2085,6 @@ PRIVATE CONST HTStreamClass HTMIME =
 /*	Subclass-specific Methods
 **	-------------------------
 */
-
 PUBLIC HTStream* HTMIMEConvert ARGS3(
 	HTPresentation *,	pres,
 	HTParentAnchor *,	anchor,
@@ -2042,6 +2139,8 @@ PUBLIC HTStream* HTMIMEConvert ARGS3(
     me->format	  =	WWW_HTML;
     me->targetRep =	pres->rep_out;
     me->boundary  =	NULL;		/* Not set yet */
+    me->set_cookie  =	NULL;		/* Not set yet */
+    me->set_cookie2  =	NULL;		/* Not set yet */
     me->encoding  =	0;		/* Not set yet */
     me->compression_encoding = NULL;	/* Not set yet */
     me->net_ascii =	NO;		/* Local character set */
@@ -2102,11 +2201,11 @@ PUBLIC HTStream* HTNetMIME ARGS3(
 /* #include <string.h> */	/* Included via previous headers. - FM */
 
 /*
- *  MIME decoding routines
- *
- *	Written by S. Ichikawa,
- *	partially inspired by encdec.c of <jh@efd.lth.se>.
- */
+**  MIME decoding routines
+**
+**	Written by S. Ichikawa,
+**	partially inspired by encdec.c of <jh@efd.lth.se>.
+*/
 #define	BUFLEN	1024
 #ifdef ESC
 #undef ESC
