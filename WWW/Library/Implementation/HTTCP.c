@@ -30,6 +30,8 @@
 
 #define FREE(x) if (x) {free(x); x = NULL;}
 
+#define OK_HOST(p) ((p) != 0 && (p->h_length) != 0)
+
 extern int HTCheckForInterrupt NOPARAMS;
 
 #ifdef SVR4_BSDSELECT
@@ -456,14 +458,13 @@ PUBLIC int HTParseInet ARGS2(
 		/*
 		**  Return value (or nulls).
 		*/
-		if (phost != NULL)
+		if (OK_HOST(phost)) {
 		    write(pfd[1], phost->h_addr, phost->h_length);
-		else
+		    _exit(0);
+		} else {
 		    write(pfd[1], &cst1, 4);
-		/*
-		**  Return an error code.
-		*/
-		_exit(phost == NULL);
+		    _exit(1);	/* return an error code */
+		}
 	    }
 
 	    /*
@@ -541,7 +542,7 @@ PUBLIC int HTParseInet ARGS2(
 			"             Trying again without forking.\n");
 		}
 		phost = gethostbyname(host);	/* See netdb.h */
-		if (!phost) {
+		if (!OK_HOST(phost)) {
 		    if (TRACE) {
 			fprintf(stderr,
 			 "HTParseInet: Can't find internet node name `%s'.\n",
@@ -727,7 +728,7 @@ PRIVATE void get_host_details NOARGS
 #ifndef DECNET	/* Decnet ain't got no damn name server 8#OO */
 #ifdef NEED_HOST_ADDRESS		/* no -- needs name server! */
     phost = gethostbyname(name);	/* See netdb.h */
-    if (!phost) {
+    if (!OK_HOST(phost)) {
 	if (TRACE) fprintf(stderr,
 		"TCP: Can't find my own internet node address for `%s'!!\n",
 		name);

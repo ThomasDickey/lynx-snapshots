@@ -755,7 +755,7 @@ PRIVATE int display_line ARGS2(
 	while (current_style < line->numstyles &&
 	       i >= CStyle.horizpos + line->offset + 1)
 	{
-		(void) LynxChangeStyle (CStyle.style,CStyle.direction,CStyle.previous);
+		LynxChangeStyle (CStyle.style,CStyle.direction,CStyle.previous);
 		current_style++;
 	}
 #endif
@@ -884,7 +884,7 @@ PRIVATE int display_line ARGS2(
 #else
     while (current_style < line->numstyles)
     {
-	(void) LynxChangeStyle (CStyle.style, CStyle.direction, CStyle.previous);
+	LynxChangeStyle (CStyle.style, CStyle.direction, CStyle.previous);
 	current_style++;
     }
 #undef CStyle
@@ -2189,7 +2189,7 @@ PUBLIC void HText_appendCharacter ARGS2(
 		    text->kanji_buf = '\0';
 		    return;
 		} else {
-		    text->kanji_buf = '\x8E';
+		    text->kanji_buf = '\216';
 		    ch |= 0200;
 		}
 		break;

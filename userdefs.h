@@ -453,7 +453,7 @@
 
 /*****************************
  * If USE_TRACE_LOG is set FALSE, then when TRACE mode is invoked the
- * syserr messages will not be directed to a log file named lynx.trace
+ * syserr messages will not be directed to a log file named Lynx.trace
  * in the account's HOME directory.  The default defined here can be
  * toggled via the -tlog command line switch.  Also, it is set FALSE
  * automatically when Lynx is executed in an anonymous or validation
@@ -468,7 +468,7 @@
  * the log, even if TRACE mode is turned off via the TOGGLE_TRACE
  * (Control-T) command.
  */
-#define USE_TRACE_LOG	FALSE
+#define USE_TRACE_LOG	TRUE
 
 /*******************************
  * If GOTOBUFFER is set to TRUE here or in lynx.cfg the last entered
@@ -1202,7 +1202,7 @@
  * the version definition with the Project Version on checkout. Just
  * ignore it. - kw */
 /* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
-#define LYNX_VERSION "2.8.1dev.4"
+#define LYNX_VERSION "2.8.1dev.6"
 
 #ifndef MAXINT
 #define MAXINT 2147483647	/* max integer */

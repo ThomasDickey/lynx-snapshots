@@ -1,6 +1,38 @@
 Changes since Lynx 2.8 release
 ================================================================================
 
+1998-04-18 (2.8.1dev.6)
+* correct misplaced ifdef in LYMail.c, which caused Cc to not work (patch
+  by LE).
+* convert \x escapes to octal form (reported by Claude Soma). - TD
+* modify configure script to check for cursesX before curses library, for
+  ultrix 4.3 (reported by Claude Soma <soma_c@decus.fr>). - TD
+* incorporate lpansi into LYPrint.c (patch by HN).
+* modify top-level makefile to use INSTALL_PROGRAM and INSTALL_DATA
+  consistently, rather than installbin and installdoc (reported by
+  <karl@deas.harvard.edu>).  - TD
+* modify treatment of -auth and -pauth options to allow setting a blank
+  password, e.g., -pauth=user:  specifies a blank password, and -pauth=user
+  leaves the password unspecified (patch by Frederick P Herrmann
+  <fph@tiac.net>).
+* Change documentation to indicate "Lynx.trace" file rather than "lynx.trace".
+* Change default for USE_TRACE_LOG in userdefs.h to TRUE, to make behavior
+  consistent with 2.7.2 - TD
+* Rename no_color_video symbol in LYCurses.c to NoColorVideo, to avoid conflict
+  with term.h, which is included by curses.h on some systems (reported by Paul
+  Gilmartin). - TD
+* modify include-path in djgpp makefile to avoid conflicting tcp.h - DK
+* Add -tagsoup option, for initializing parser directly to TagSoup. - TD
+* Modify HTML.c, ifdef'ing some of the logic involved in unstacking tags.  It
+  appears to be not completely necessary:  makes Lynx a little faster, at the
+  cost of making the tagsoup parser do the wrong thing.  Some entries in the
+  tagsoup DTD table versus the sortasgml table have SGML_EMPTY versus
+  SGML_MIXED.  This information is used to control unstacking (in the
+  color-style configuration as well).  There is still a problem evidenced
+  when toggling between the two parsers in the Lynx main help page, but that
+  appears to be missing logic in 2.8's version of the tagsoup parser.  - TD
+* Modify HTTCP.c to check the length returned from gethostbyname(), which
+  returns 0 on error on a SunOS 4 system (reported by Paul Gilmartin). - TD
 1998-03-29 (2.8.1dev.5)
 * Fixed my typo for FNAMES_8_3 define. WB
 * Added SYSTEM_MAIL and SYSTEM_MAIL_FLAGS defines for DOSPATH target. WB
@@ -12,8 +44,8 @@ Changes since Lynx 2.8 release
 1998-03-25 (2.8.1dev.4)
 * restore original string in LYUtils.c when user enters a badly formed or
   nonexistent URL when prompted for Goto/history list (patch by Randall
-  <hezekiah@may98.rahul.net>).  Otherwise Lynx would always attempt to load
-  a local file.
+  <hezekiah@may98.rahul.net>).  Otherwise Lynx would always attempt to load a
+  local file if the original string omits scheme:// prefix but guessing fails.
 * tweak formatting of .message in HTFTP.c so it has leading/trailing blank
   lines (patch by Ismael Cordeiro <ismael@CAM.ORG>)
 * retested 'make depend' rule (for Larry Virden) - TD

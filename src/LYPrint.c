@@ -38,13 +38,30 @@
  *  LYNXPRINT://LOCAL_FILE/lines=##
  *  LYNXPRINT://MAIL_FILE/lines=##
  *  LYNXPRINT://TO_SCREEN/lines=##
+ *  LYNXPRINT://LPANSI/lines=##
  *  LYNXPRINT://PRINTER/lines=##/number=#
  */
 
 #define TO_FILE   1
 #define TO_SCREEN 2
-#define MAIL	  3
-#define PRINTER   4
+/*
+ * "lpansi.c"
+ * Original author: Gary Day (gday@comp.uark.edu), 11/30/93
+ * Current version: 2.1 by Noel Hunter (noel@wfu.edu), 10/20/94
+ *
+ * Basic structure based on print -- format files for printing from
+ * _Practical_C_Programming by Steve Oualline, O'Reilly & Associates
+ *
+ * adapted from the README for lpansi.c v2.1, dated 10/20/1994:
+ *		    Print to ANSI printer on local terminal
+ *     The VT100 standard defines printer on and off escape sequences,
+ *     esc[5i is printer on, and esc[4i is printer off.
+ *
+ * incorporate the idea of "lpansi" directly into LYPrint.c - HN
+ */
+#define LPANSI    3
+#define MAIL      4
+#define PRINTER   5
 
 #ifdef VMS
 PRIVATE int remove_quotes PARAMS((char *string));
@@ -62,6 +79,7 @@ PUBLIC int printfile ARGS1(
     int printer_number = 0;
     int pages = 0;
     int type = 0, c, len;
+    BOOLEAN Lpansi = FALSE;
     FILE *outfile_fp;
     char *cp = NULL;
     lynx_printer_item_type *cur_printer;
@@ -195,6 +213,9 @@ PUBLIC int printfile ARGS1(
     if (strstr(link_info, "LOCAL_FILE")) {
 	type = TO_FILE;
     } else if (strstr(link_info, "TO_SCREEN")) {
+	type = TO_SCREEN;
+    } else if (strstr(link_info, "LPANSI")) {
+	Lpansi = TRUE;
 	type = TO_SCREEN;
     } else if (strstr(link_info, "MAIL_FILE")) {
 	type = MAIL;
@@ -882,7 +903,7 @@ PUBLIC int printfile ARGS1(
 		if (pages > 4) {
 		    sprintf(filename, CONFIRM_LONG_SCREEN_PRINT, pages);
 		    _statusline(filename);
-		    c=LYgetch();
+		    c = LYgetch();
 #ifdef VMS
 		    if (HadVMSInterrupt) {
 			HadVMSInterrupt = FALSE;
@@ -901,7 +922,11 @@ PUBLIC int printfile ARGS1(
 		    }
 		}
 
-		_statusline(PRESS_RETURN_TO_BEGIN);
+		if (Lpansi) {
+		      _statusline(CHECK_PRINTER);
+		} else	{
+		      _statusline(PRESS_RETURN_TO_BEGIN);
+		}
 		*filename = '\0';
 		if (LYgetstr(filename, VISIBLE,
 			     sizeof(filename), NORECALL) < 0) {
@@ -930,6 +955,8 @@ PUBLIC int printfile ARGS1(
 			    "<!-- X-URL: %s -->\n<BASE HREF=\"%s\">\n\n",
 			    newdoc->address, content_base);
 		}
+		if (Lpansi)
+		    printf("\033[5i");
 		print_wwwfile_to_fd(outfile_fp, 0);
 		if (keypad_mode)
 		    printlist(outfile_fp, FALSE);
@@ -941,13 +968,18 @@ PUBLIC int printfile ARGS1(
 		     break;
 		}
 #endif /* VMS */
-		fprintf(stdout,"\n\n%s", PRESS_RETURN_TO_FINISH);
-
-		fflush(stdout);  /* refresh to screen */
-		LYgetch();  /* grab some user input to pause */
+		if (Lpansi) {
+		     printf("\n\014");  /* Form feed */
+		     printf("\033[4i");
+		     Lpansi = FALSE;
+		} else {
+		     fprintf(stdout,"\n\n%s", PRESS_RETURN_TO_FINISH);
+		     LYgetch();  /* grab some user input to pause */
 #ifdef VMS
-		HadVMSInterrupt = FALSE;
+		     HadVMSInterrupt = FALSE;
 #endif /* VMS */
+		}
+		fflush(stdout);  /* refresh to screen */
 		start_curses();
 		break;
 
@@ -1275,6 +1307,7 @@ PRIVATE int remove_quotes ARGS1(
  * printer links look like
  *  LYNXPRINT://LOCAL_FILE/lines=#	     print to a local file
  *  LYNXPRINT://TO_SCREEN/lines=#	     print to the screen
+ *  LYNXPRINT://LPANSI/lines=#		     print to the local terminal
  *  LYNXPRINT://MAIL_FILE/lines=#	     mail the file
  *  LYNXPRINT://PRINTER/lines=#/number=#   print to printer number #
  */
@@ -1345,6 +1378,9 @@ PUBLIC int print_options ARGS2(
 		lines_in_file);
     fprintf(fp0,
    "   <a href=\"LYNXPRINT://TO_SCREEN/lines=%d\">Print to the screen</a>\n",
+		lines_in_file);
+    fprintf(fp0,
+   "   <a href=\"LYNXPRINT://LPANSI/lines=%d\">Print out on a printer attached to your vt100 terminal</a>\n",
 		lines_in_file);
 
     for (count = 0, cur_printer = printers; cur_printer != NULL;

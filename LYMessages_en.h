@@ -460,6 +460,8 @@
 #define PRESS_RETURN_TO_FINISH "Press <return> to finish: "
 #define CONFIRM_LONG_PAGE_PRINT \
  "File is %d pages long.  Are you sure you want to print? [y]"
+#define CHECK_PRINTER \
+ "Be sure your printer is on-line.  Press <return> to start printing:"
 #define FILE_ALLOC_FAILED "ERROR - Unable to allocate file space!!!"
 #define UNABLE_TO_OPEN_TEMPFILE "Unable to open tempfile"
 #define UNABLE_TO_OPEN_PRINTOP_FILE "Unable to open print options file"
@@ -562,7 +564,7 @@
  "Maximum links per page exceeded!  Use half-page or two-line scrolling."
 #define MAXHIST_REACHED \
  "History List maximum reached!  Document not pushed."
-#define VISITED_LINKS_EMPTY "No previously visited links available!" 
+#define VISITED_LINKS_EMPTY "No previously visited links available!"
 #define MEMORY_EXHAUSTED_ABORT "Memory exhausted!  Program aborted!"
 #define DFM_NOT_AVAILABLE "Directory/File Manager not available"
 #define BASE_NOT_ABSOLUTE "HREF in BASE tag is not an absolute URL."

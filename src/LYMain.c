@@ -1786,6 +1786,7 @@ PRIVATE void parse_arg ARGS3(
 	int *,		i,
 	int,		argc)
 {
+    static int ignored;
     char *cp;
 #ifndef VMS
     static char display_putenv_command[142];
@@ -1884,10 +1885,8 @@ PRIVATE void parse_arg ARGS3(
 	if (auth_info != NULL)	{
 	    if ((cp = strchr(auth_info, ':')) != NULL) {	/* Pw */
 		*cp++ = '\0';	/* Terminate ID */
-		if (*cp) {
-		    HTUnEscape(cp);
-		    StrAllocCopy(authentication_info[1], cp);
-		}
+		HTUnEscape(cp); 
+		StrAllocCopy(authentication_info[1], cp); 
 	    }
 	    if (*auth_info) {					/* Id */
 		HTUnEscape(auth_info);
@@ -1960,7 +1959,7 @@ PRIVATE void parse_arg ARGS3(
 	 *  so just check whether we need to increment i
 	 */
 	if (nextarg)
-	    ; /* do nothing */
+	    ignored++; /* do nothing */
 
     } else if (strncmp(argv[0], "-child", 6) == 0) {
 	child_lynx = TRUE;
@@ -2227,7 +2226,7 @@ PRIVATE void parse_arg ARGS3(
 	 *  so just check whether we need to increment i
 	 */
 	if (nextarg)
-	    ; /* do nothing */
+	    ignored++; /* do nothing */
 #endif
 
     } else {
@@ -2356,10 +2355,8 @@ PRIVATE void parse_arg ARGS3(
 	if (pauth_info != NULL)  {
 	    if ((cp = strchr(pauth_info, ':')) != NULL) {	/* Pw */
 		*cp++ = '\0';	/* Terminate ID */
-		if (*cp) {
-		    HTUnEscape(cp);
-		    StrAllocCopy(proxyauth_info[1], cp);
-		}
+		HTUnEscape(cp); 
+		StrAllocCopy(proxyauth_info[1], cp); 
 	    }
 	    if (*pauth_info) {					/* Id */
 		HTUnEscape(pauth_info);
@@ -2574,7 +2571,10 @@ PRIVATE void parse_arg ARGS3(
     break;
 
     case 't':
-    if (strncmp(argv[0], "-telnet", 7) == 0) {
+    if (strncmp(argv[0], "-tagsoup", 8) == 0) {
+        HTSwitchDTD(New_DTD = NO);
+
+    } else if (strncmp(argv[0], "-telnet", 7) == 0) {
 	telnet_ok = FALSE;
 
     } else if (strncmp(argv[0], "-term", 5) == 0) {
@@ -2800,6 +2800,7 @@ Output_Help_List:
 ,"    -syslog=text     information for syslog call"
 #endif /* SYSLOG_REQUESTED_URLS */
 #endif /* !VMS */
+,"    -tagsoup         use TagSoup rather than SortaSGML parser"
 ,"    -telnet          disable telnets"
 ,"    -term=TERM       set terminal type to TERM"
 ,"    -tlog            toggles use of a Lynx Trace Log for the current session"

@@ -603,7 +603,7 @@ PRIVATE char *compose_auth_string ARGS3(
     realm = HTAARealm_lookup(setup->server->realms, realmname);
     if (!(realm &&
     	  realm->username && *realm->username &&
-	  realm->password && *realm->password) || setup->retry) {
+	  realm->password) || setup->retry) { 
 	if (!realm) {
 	    if (TRACE)
 	        fprintf(stderr, "%s `%s' %s\n",
@@ -675,7 +675,7 @@ PRIVATE char *compose_auth_string ARGS3(
 	     *  Signals to retry. - FM
 	     */
 	    return NULL;
-	} else if (*realm->username == '\0' || *realm->password == '\0') {
+	} else if (*realm->username == '\0') { 
 	    /*
 	     *  Signals to abort. - FM
 	     */
