@@ -92,7 +92,7 @@ PUBLIC void HTInfoMsg ARGS1(
     if (Msg && *Msg) {
 	CTRACE((tfp, "Info message: %s\n", Msg));
 	LYstore_message(Msg);
-	LYSleep(InfoSecs);
+	LYSleepInfo();
     }
 }
 
@@ -106,6 +106,12 @@ PUBLIC void HTUserMsg ARGS1(
     if (Msg && *Msg) {
 	CTRACE((tfp, "User message: %s\n", Msg));
 	LYstore_message(Msg);
+#if !(defined(USE_SLANG) || defined(WIDEC_CURSES))
+	if (HTCJK != NOCJK) {
+	    clearok(curscr, TRUE);
+	    LYrefresh();
+	}
+#endif
 	LYSleepMsg();
     }
 }

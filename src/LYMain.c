@@ -3477,7 +3477,7 @@ keys (may be incompatible with some curses packages)"
       "nolog",		4|UNSET_ARG,		error_logging,
       "disable mailing of error messages to document owners"
    ),
-#if HAVE_SIGACTION && defined(SIGWINCH)
+#if defined(HAVE_SIGACTION) && defined(SIGWINCH)
    PARSE_SET(
       "nonrestarting_sigwinch", 4|SET_ARG,	LYNonRestartingSIGWINCH,
       "\nmake window size change handler non-restarting"

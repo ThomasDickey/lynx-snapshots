@@ -2990,6 +2990,7 @@ PUBLIC int LYLegitimizeHREF ARGS4(
 	 * No blanks really belong in the HREF, but if it refers to an actual
 	 * file, it may actually have blanks in the name.  Try to accommodate.
 	 */
+	LYRemoveNewlines(*href);
 	convert_to_spaces(*href, FALSE);
 	LYTrimLeading(*href);
 	LYTrimTrailing(*href);

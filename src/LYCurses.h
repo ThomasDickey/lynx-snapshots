@@ -171,22 +171,27 @@ typedef struct {
 #endif
 
 #ifdef HAVE_CONFIG_H
-# ifdef HAVE_NCURSES_NCURSES_H
-#   include <ncurses/ncurses.h>
+# ifdef HAVE_NCURSESW_NCURSES_H
+#  undef GCC_PRINTFLIKE		/* <libutf8.h> may define 'printf' */
+#  include <ncursesw/ncurses.h>
 # else
-#  ifdef HAVE_NCURSES_H
-#   include <ncurses.h>
+#  ifdef HAVE_NCURSES_NCURSES_H
+#   include <ncurses/ncurses.h>
 #  else
-#   ifdef HAVE_CURSESX_H
-#    include <cursesX.h>	/* Ultrix */
+#   ifdef HAVE_NCURSES_H
+#    include <ncurses.h>
 #   else
-#    ifdef HAVE_JCURSES_H
-#     include <jcurses.h>	/* sony_news */
+#    ifdef HAVE_CURSESX_H
+#     include <cursesX.h>	/* Ultrix */
 #    else
-#     ifdef HAVE_XCURSES
-#      include <xcurses.h>	/* PDCurses' UNIX port */
+#     ifdef HAVE_JCURSES_H
+#      include <jcurses.h>	/* sony_news */
 #     else
-#      include <curses.h>	/* default */
+#      ifdef HAVE_XCURSES
+#       include <xcurses.h>	/* PDCurses' UNIX port */
+#      else
+#       include <curses.h>	/* default */
+#      endif
 #     endif
 #    endif
 #   endif
@@ -613,8 +618,8 @@ FANCY_CURSES.  Check your config.log to see why the FANCY_CURSES test failed.
  * If the screen library allows us to specify "default" color, allow user to 
  * control it.
  */
-#if USE_DEFAULT_COLORS
-#if USE_SLANG || (HAVE_ASSUME_DEFAULT_COLORS && !defined(USE_COLOR_STYLE))
+#ifdef USE_DEFAULT_COLORS
+#if USE_SLANG || (defined(HAVE_ASSUME_DEFAULT_COLORS) && !defined(USE_COLOR_STYLE))
 #define EXP_ASSUMED_COLOR 1
 #endif
 #endif

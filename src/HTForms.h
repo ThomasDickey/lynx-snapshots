@@ -103,7 +103,7 @@ typedef struct _FormInfo {
 typedef struct _PerFormInfo
 {
 	int			number;	   /* form number, see GridText.c */
-    /* except for the last two, the followign fields aren't actually used.. */
+    /* except for the last two, the following fields aren't actually used.. */
 	int			disabled;  /* If YES, can't change values */
 	struct _PerFormInfo *	next;	   /* pointer to next form in doc */
 	int			nfields;   /* number of fields */

@@ -36,6 +36,10 @@ extern int _NOSHARE(COLS);
 #include <LYHash.h>
 #endif
 
+#ifdef NEED_WCHAR_H
+#include <wchar.h>
+#endif
+
 #if defined(COLOR_CURSES)
 int lynx_has_color = FALSE;
 #endif
@@ -555,7 +559,7 @@ PUBLIC void curses_style ARGS2(
 PRIVATE BOOL lynx_called_initscr = FALSE;
 #endif
 
-#if HAVE_USE_DEFAULT_COLORS && USE_DEFAULT_COLORS
+#if defined(HAVE_USE_DEFAULT_COLORS) && defined(USE_DEFAULT_COLORS)
 /*
  * If we find a "default" color while reading the config-file, set default
  * colors on the screen.
@@ -1000,7 +1004,7 @@ PUBLIC void start_curses NOARGS
 	if (has_colors()) {
 	    lynx_has_color = TRUE;
 	    start_color();
-#if USE_DEFAULT_COLORS
+#ifdef USE_DEFAULT_COLORS
 #ifdef EXP_ASSUMED_COLOR
 	    /*
 	     * Adjust the color mapping table to match the ASSUMED_COLOR
@@ -1652,29 +1656,147 @@ PUBLIC void LYtouchline ARGS1(
 }
 
 /*
- * There's no guarantee that a library won't temporarily write on its input.
- * Be safe and copy it when we have const-data.
+ * Wrapper for waddnstr().
  */
 PUBLIC void LYwaddnstr ARGS3(
 	WINDOW *,	w,
-	CONST char *,	s,
+	CONST char *,	src,
 	size_t,		len)
 {
+    /*
+     * We only want to trace this function for the color-style code.  It would
+     * be too much logging if not needed.
+     */
 #ifdef USE_COLOR_STYLE
     if (TRACE) {
 	int y, x;
 	LYGetYX(y, x);
-	CTRACE2(TRACE_STYLE, (tfp, "[%2d,%2d] LYwaddnstr(%.*s)\n", y, x, (int) len, s));
+	CTRACE2(TRACE_STYLE, (tfp, "[%2d,%2d] LYwaddnstr(%.*s)\n", y, x, (int) len, src));
     }
 #endif
+    /*
+     * Wide (multibyte) characters are always written as part of a string.  So
+     * we can handle the conversion in one place.
+     *
+     * X/Open curses documents addstr() as able to handle multibyte sequences
+     * directly, but that is not (2001/11/5) yet implemented in ncurses.  Two
+     * alternatives are possible:  translating the string to an array of
+     * wchar_t's or to an array of cchar_t's.  The former is more direct.  Both
+     * have problems with combining-characters in this version of ncurses
+     * (successive calls are not merged), so I'm using them for testing -TD
+     */
+#ifdef WIDEC_CURSES
+#if 1	/* array of wchar_t's */
+    {
+	static wchar_t *temp = 0;
+	static size_t used = 0;
+
+	wchar_t wch;
+	int l = 0;
+	mbstate_t state;
+	size_t rc;
+	int width;
+	unsigned j;
+	size_t need;
+
+	memset(&state, 0, sizeof(state));
+	need = 1 + len;
+	if (need > used) {
+	    used = 2 * need;
+	    CTRACE((tfp, "allocated %d (%d)\n", used, len));
+	    FREE(temp);
+	    temp = typecallocn(wchar_t, used);
+	}
+	for (j = 0; j < len; j++) {
+	    rc = mbrtowc(&wch, src + j, len - j, &state);
+	    if (rc == 0 || rc == (size_t)(-1) || rc == (size_t)(-2))
+		break;
+	    j += rc - 1;
+	    if ((width = wcwidth(wch)) < 0)
+		break;
+	    temp[l++] = wch;
+	}
+	temp[l] = L'\0';
+	waddnwstr(w, temp, l);
+#ifdef LY_FIND_LEAKS
+	FREE(temp);
+	used = 0;
+#endif
+    }
+#else	/* array of cchar_t's */
+    {
+	static cchar_t *temp = 0;
+	static size_t used = 0;
+
+	wchar_t wch;
+	wchar_t wstr[CCHARW_MAX + 1];
+	int l = 0;
+	mbstate_t state;
+	size_t rc;
+	int width;
+	int y, x;
+	unsigned j, k;
+	size_t need;
+	attr_t attr;
+	short pair;
+
+	wattr_get(w, &attr, &pair, (void *)0);
+
+	memset(&state, 0, sizeof(state));
+	need = 1 + len;
+	if (need > used) {
+	    used = 2 * need;
+	    CTRACE((tfp, "allocated %d (%d)\n", used, len));
+	    FREE(temp);
+	    temp = typecallocn(cchar_t, used);
+	}
+	for (j = k = 0; j < len; j++) {
+	    rc = mbrtowc(&wch, src + j, len - j, &state);
+	    if (rc == 0 || rc == (size_t)(-1) || rc == (size_t)(-2))
+		break;
+	    j += rc - 1;
+	    if ((width = wcwidth(wch)) < 0)
+		break;
+	    if ((width > 0 && l > 0) || l == CCHARW_MAX) {
+		wstr[l] = L'\0';
+		l = 0;
+		if (setcchar(temp + k, wstr, attr, 0, NULL) != OK)
+		    break;
+		++k;
+	    }
+	    if (width == 0 && l == 0)
+		wstr[l++] = L' ';
+	    wstr[l++] = wch;
+	}
+	if (l > 0) {
+	    wstr[l] = L'\0';
+	    if (setcchar(temp + k, wstr, attr, 0, NULL) == OK)
+		++k;
+	}
+	setcchar(temp + k, L"", 0, 0, NULL);
+	wadd_wchnstr (w, temp, k);
+	getyx(w, y, x);		/* we didn't move - do it now */
+	wmove(w, y, x + k);
+#ifdef LY_FIND_LEAKS
+	FREE(temp);
+	used = 0;
+#endif
+    }
+#endif
+#else
+    /*
+     * There's no guarantee that a library won't temporarily write on its input.
+     * Be safe and copy it when we have const-data.
+     */
     while (len > 0) {
 	char temp[MAX_LINE];
 	size_t use = (len >= MAX_LINE) ? MAX_LINE - 1 : len;
-	memcpy(temp, s, use);
+	memcpy(temp, src, use);
 	temp[use] = 0;
 	waddstr(w, temp);
 	len -= use;
     }
+#endif
 }
 
 #ifdef VMS

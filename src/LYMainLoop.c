@@ -217,7 +217,7 @@ PRIVATE BOOL textinput_activated = FALSE;
 #endif
 #ifdef INACTIVE_INPUT_STYLE_VH
 PUBLIC BOOL textinput_redrawn = FALSE;
-    /*must be public since used in highlight(..)*/
+    /*must be public since used in LYhighlight(..)*/
 #endif
 
 #ifdef LY_FIND_LEAKS
@@ -494,7 +494,7 @@ PRIVATE void set_curdoc_link ARGS1(
      && nextlink >= 0
      && nextlink < nlinks) {
 	if (curdoc.link >= 0 && curdoc.link < nlinks)
-	    highlight(OFF, curdoc.link, prev_target);
+	    LYhighlight(OFF, curdoc.link, prev_target);
 	curdoc.link = nextlink;
     }
 }
@@ -3615,7 +3615,7 @@ PRIVATE void handle_LYK_MAIN_MENU ARGS2(
 	    newdoc.isHEAD = FALSE;
 	    newdoc.safe = FALSE;
 	    newdoc.internal_link = FALSE;
-	    highlight(OFF, curdoc.link, prev_target);
+	    LYhighlight(OFF, curdoc.link, prev_target);
 #ifdef DIRED_SUPPORT
 	    if (lynx_edit_mode) {
 		DIRED_UNCACHE_2;
@@ -3903,7 +3903,7 @@ PRIVATE void handle_LYK_NEXT_LINK ARGS3(
     int,	real_c)
 {
     if (curdoc.link < nlinks-1) {	/* next link */
-	highlight(OFF, curdoc.link, prev_target);
+	LYhighlight(OFF, curdoc.link, prev_target);
 #ifdef FASTTAB
 	/*
 	 *  Move to different textarea if TAB in textarea.
@@ -6549,10 +6549,10 @@ try_again:
 	      *  text input field.
 	      */
 	    if (!curlink_is_editable) {
-		highlight(ON, curdoc.link, prev_target);
+		LYhighlight(ON, curdoc.link, prev_target);
 #ifndef INACTIVE_INPUT_STYLE_VH
 	    } else if (!textinput_activated) {
-		highlight(ON, curdoc.link, prev_target);
+		LYhighlight(ON, curdoc.link, prev_target);
 #endif
 	    }
 	}

@@ -2172,7 +2172,7 @@ static OptValues show_color_values[] = {
 
 static char * show_cursor_string	= "show_cursor";
 
-#if USE_SCROLLBAR
+#ifdef USE_SCROLLBAR
 static char * show_scrollbar_string	= "show_scrollbar";
 #endif
 

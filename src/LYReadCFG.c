@@ -236,7 +236,7 @@ PUBLIC int match_item_by_name ARGS3(
 #define COLOR_BLACK 0
 #endif
 
-#if USE_DEFAULT_COLORS
+#ifdef USE_DEFAULT_COLORS
 int default_fg = DEFAULT_COLOR;
 int default_bg = DEFAULT_COLOR;
 #else
@@ -294,7 +294,7 @@ PUBLIC int check_color ARGS2(
 
     CTRACE2(TRACE_STYLE, (tfp, "check_color(%s,%d)\n", color, the_default));
     if (!strcasecomp(color, "default")) {
-#if USE_DEFAULT_COLORS
+#ifdef USE_DEFAULT_COLORS
 	if (!default_color_reset)
 	    the_default = DEFAULT_COLOR;
 #endif	/* USE_DEFAULT_COLORS */

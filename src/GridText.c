@@ -45,7 +45,7 @@
 #define NOTUSED_BAD_FOR_SCREEN
 #endif
 
-#undef DEBUG_APPCH
+/*#define DEBUG_APPCH 1*/
 
 #ifdef SOURCE_CACHE
 #include <HTFile.h>
@@ -494,6 +494,11 @@ PUBLIC char star_string[MAX_LINE + 1];
 PRIVATE int ctrl_chars_on_this_line = 0; /* num of ctrl chars in current line */
 PRIVATE int utfxtra_on_this_line = 0; /* num of UTF-8 extra bytes in line,
 				       they *also* count as ctrl chars. */
+#ifdef WIDEC_CURSES
+#define UTFXTRA_ON_THIS_LINE 0
+#else
+#define UTFXTRA_ON_THIS_LINE utfxtra_on_this_line
+#endif
 
 PRIVATE HTStyle default_style =
 	{ 0,  "(Unstyled)", "",
@@ -1094,7 +1099,7 @@ PRIVATE int display_line ARGS4(
 #define intarget NO
 #endif /* SHOW_WHEREIS_TARGETS && !USE_COLOR_STYLE */
 
-#ifndef NCURSES_VERSION
+#if !(defined(NCURSES_VERSION) || defined(WIDEC_CURSES))
     text->has_utf8 = NO; /* use as per-line flag, except with ncurses */
 #endif
 
@@ -1297,30 +1302,9 @@ PRIVATE int display_line ARGS4(
 #endif /* SHOW_WHEREIS_TARGETS */
 #endif /* USE_COLOR_STYLE */
 		i++;
-		if (text->T.output_utf8 && !isascii(UCH(buffer[0]))) {
+		if (text->T.output_utf8 && is8bits(buffer[0])) {
 		    text->has_utf8 = YES;
-		    if ((*buffer & 0xe0) == 0xc0) {
-			utf_extra = 1;
-		    } else if ((*buffer & 0xf0) == 0xe0) {
-			utf_extra = 2;
-		    } else if ((*buffer & 0xf8) == 0xf0) {
-			utf_extra = 3;
-		    } else if ((*buffer & 0xfc) == 0xf8) {
-			utf_extra = 4;
-		    } else if ((*buffer & 0xfe) == 0xfc) {
-			utf_extra = 5;
-		    } else {
-			 /*
-			  *  Garbage.
-			  */
-			utf_extra = 0;
-		    }
-		    if (strlen(data) < utf_extra) {
-			/*
-			 *  Shouldn't happen.
-			 */
-			utf_extra = 0;
-		    }
+		    utf_extra = utf8_length(text->T.output_utf8, data-1);
 		    LastDisplayChar = 'M';
 		}
 		if (utf_extra) {
@@ -1330,7 +1314,7 @@ PRIVATE int display_line ARGS4(
 		    buffer[1] = '\0';
 		    data += utf_extra;
 		    utf_extra = 0;
-		} else if (HTCJK != NOCJK && !isascii(UCH(buffer[0]))
+		} else if (HTCJK != NOCJK && is8bits(buffer[0])
 #ifndef CONV_JISX0201KANA_JISX0208KANA
 		    && kanji_code != SJIS
 #endif
@@ -1366,7 +1350,7 @@ PRIVATE int display_line ARGS4(
     } /* end of while */
 
 after_while:
-#if !defined(NCURSES_VERSION)
+#if !(defined(NCURSES_VERSION) || defined(WIDEC_CURSES))
     if (text->has_utf8) {
 	LYtouchline(scrline);
 	text->has_utf8 = NO;	/* we had some, but have dealt with it. */
@@ -1651,10 +1635,11 @@ PRIVATE void display_scrollbar ARGS1(
 	    LynxChangeStyle(s_sb_bar, STACK_OFF);
 #endif /* USE_COLOR_STYLE */
 	LYmove(i + off, LYcols + LYshiftWin - 1);
-	if (i > top_skip && i <= h - bot_skip)
+	if (i > top_skip && i <= h - bot_skip) {
 	    LYaddch(ACS_BLOCK);
-	else
+	} else {
 	    LYaddch(ACS_CKBOARD);
+	}
     }
 #ifdef USE_COLOR_STYLE
     LynxChangeStyle(s_sb_bg, STACK_OFF);
@@ -1942,30 +1927,7 @@ PRIVATE void display_page ARGS3(
 			/*
 			 *  Output all the printable target chars.
 			 */
-			if (text->T.output_utf8 && !isascii(UCH(tmp[0]))) {
-			    if ((*tmp & 0xe0) == 0xc0) {
-				utf_extra = 1;
-			    } else if ((*tmp & 0xf0) == 0xe0) {
-				utf_extra = 2;
-			    } else if ((*tmp & 0xf8) == 0xf0) {
-				utf_extra = 3;
-			    } else if ((*tmp & 0xfc) == 0xf8) {
-				utf_extra = 4;
-			    } else if ((*tmp & 0xfe) == 0xfc) {
-				utf_extra = 5;
-			    } else {
-				/*
-				 *  Garbage.
-				 */
-				utf_extra = 0;
-			    }
-			    if (strlen(&line->data[itmp+1]) < utf_extra) {
-				/*
-				 *  Shouldn't happen.
-				 */
-				utf_extra = 0;
-			    }
-			}
+			utf_extra = utf8_length(text->T.output_utf8, data + itmp);
 			if (utf_extra) {
 			    strncpy(&tmp[1], &line->data[itmp+1], utf_extra);
 			    tmp[utf_extra+1] = '\0';
@@ -1974,7 +1936,7 @@ PRIVATE void display_page ARGS3(
 			    tmp[1] = '\0';
 			    written += (utf_extra + 1);
 			    utf_extra = 0;
-			} else if (HTCJK != NOCJK && !isascii(UCH(tmp[0]))) {
+			} else if (HTCJK != NOCJK && is8bits(tmp[0])) {
 			    /*
 			     *  For CJK strings, by Masanobu Kimura.
 			     */
@@ -2164,7 +2126,7 @@ PRIVATE void display_page ARGS3(
 		/*
 		 *  Bold the link after incrementing nlinks.
 		 */
-		highlight(OFF, (nlinks - 1), target);
+		LYhighlight(OFF, (nlinks - 1), target);
 
 		display_flag = TRUE;
 
@@ -2238,6 +2200,7 @@ PRIVATE void display_page ARGS3(
     }
 #endif /* DISP_PARTIAL */
 
+#if !defined(WIDEC_CURSES)
     if (text->has_utf8 || text->had_utf8) {
 	/*
 	 *  For other than ncurses, repainting is taken care of
@@ -2255,6 +2218,8 @@ PRIVATE void display_page ARGS3(
 	 */
 	clearok(curscr, TRUE);
     }
+#endif /* WIDEC_CURSES */
+
     LYrefresh();
 }
 
@@ -2284,9 +2249,13 @@ PUBLIC void HText_beginAppend ARGS1(
    as any other large value.  (But don't use INT_MAX or something close
    to it to, avoid over/underflow.) - kw */
 #ifdef USE_SLANG
-#define LYcols_cu (dump_output_immediately ? MAX_COLS : SLtt_Screen_Cols)
+#define LYcols_cu(text) (dump_output_immediately ? MAX_COLS : SLtt_Screen_Cols)
 #else
-#define LYcols_cu (dump_output_immediately ? MAX_COLS : DISPLAY_COLS)
+#ifdef WIDEC_CURSES
+#define LYcols_cu(text) WRAP_COLS(text)
+#else
+#define LYcols_cu(text) (dump_output_immediately ? MAX_COLS : DISPLAY_COLS)
+#endif
 #endif
 
 /*	Add a new line of text
@@ -2459,7 +2428,9 @@ PRIVATE HTLine * insert_blanks_in_line ARGS7(
 	int curlim = (ip < ninserts
 		      ? oldpos[ip]
 		      /* Include'em all! */
-		      : (line->size <= MAX_LINE ? MAX_LINE+1 : line->size+1));
+		      : ((int)line->size <= MAX_LINE
+			  ? MAX_LINE+1
+			  : (int)line->size+1));
 	pre = s;
 
 	/* Fast forward to char==curlim or EOL.  Stop *before* the
@@ -2564,7 +2535,7 @@ PRIVATE void split_line ARGS2(
     char *p;
     HTLine * previous = text->last_line;
     int ctrl_chars_on_previous_line = 0;
-    int utfxtra_on_previous_line = utfxtra_on_this_line;
+    int utfxtra_on_previous_line = UTFXTRA_ON_THIS_LINE;
     char * cp;
     /* can't wrap in middle of multibyte sequences, so allocate 2 extra */
     HTLine * line = (HTLine *)LY_CALLOC(1, LINE_SIZE(MAX_LINE)+2);
@@ -2698,10 +2669,11 @@ PRIVATE void split_line ARGS2(
 		    p[i] == LY_UNDERLINE_END_CHAR ||
 		    p[i] == LY_BOLD_START_CHAR ||
 		    p[i] == LY_BOLD_END_CHAR ||
-		    p[i] == LY_SOFT_HYPHEN)
+		    p[i] == LY_SOFT_HYPHEN) {
 		    ctrl_chars_on_this_line++;
-		else if (IS_UTF_EXTRA(p[i]))
+		} else if (IS_UTF_EXTRA(p[i])) {
 		    utfxtra_on_this_line++;
+		}
 		if (p[i] == LY_SOFT_HYPHEN && (int)text->permissible_split < i)
 		    text->permissible_split = i + 1;
 	    }
@@ -2896,8 +2868,9 @@ PRIVATE void split_line ARGS2(
 		*cp == LY_BOLD_START_CHAR ||
 		*cp == LY_BOLD_END_CHAR ||
 		IS_UTF_EXTRA(*cp) ||
-		*cp == LY_SOFT_HYPHEN)
+		*cp == LY_SOFT_HYPHEN) {
 		ctrl_chars_on_previous_line++;
+	    }
 	}
 	if ((previous->size > 0) &&
 		(int)(previous->data[previous->size-1] == LY_SOFT_HYPHEN))
@@ -2912,9 +2885,9 @@ PRIVATE void split_line ARGS2(
 
 	if (spare > 0 && !dump_output_immediately &&
 	    text->T.output_utf8 && ctrl_chars_on_previous_line) {
-	    utfxtra_on_previous_line -= utfxtra_on_this_line;
+	    utfxtra_on_previous_line -= UTFXTRA_ON_THIS_LINE;
 	    if (utfxtra_on_previous_line) {
-		int spare_cu = (LYcols_cu-1) -
+		int spare_cu = (LYcols_cu(text)-1) -
 		    utfxtra_on_previous_line - indent +
 		    ctrl_chars_on_previous_line - previous->size;
 		    /*
@@ -2933,7 +2906,7 @@ PRIVATE void split_line ARGS2(
 			    (int)(previous->offset + indent + spare/2 +
 				  previous->size)
 			    - ctrl_chars_on_previous_line
-			    + utfxtra_on_previous_line <= (LYcols_cu - 1))
+			    + utfxtra_on_previous_line <= (LYcols_cu(text) - 1))
 			    /* do nothing - it still fits - kw */;
 			else {
 			    spare = spare_cu;
@@ -3107,22 +3080,8 @@ PRIVATE void split_line ARGS2(
 		*jp = ' ';	/* substitute it */
 		continue;
 	    }
-	    if (text->T.output_utf8 && !isascii(UCH(c))) {
-		int utf_extra = 0;
-		if ((c & 0xe0) == 0xc0) {
-		    utf_extra = 1;
-		} else if ((c & 0xf0) == 0xe0) {
-		    utf_extra = 2;
-		} else if ((c & 0xf8) == 0xf0) {
-		    utf_extra = 3;
-		} else if ((c & 0xfc) == 0xf8) {
-		    utf_extra = 4;
-		} else if ((c & 0xfe) == 0xfc) {
-		    utf_extra = 5;
-		} else
-		    utf_extra = 0;
-		if ( (int) strlen(jp+1) < utf_extra)
-		    utf_extra = 0;
+	    if (text->T.output_utf8 && is8bits(c)) {
+		int utf_extra = utf8_length(text->T.output_utf8, jp);
 		r->byte_len += utf_extra;
 		jp += utf_extra;
 	    }
@@ -3309,7 +3268,9 @@ PUBLIC void HText_appendCharacter ARGS2(
 {
     HTLine * line;
     HTStyle * style;
-    int indent, utfx;
+    int indent;
+    int limit = 0;
+    int actual;
 
 #ifdef DEBUG_APPCH
 #ifdef CJK_EX
@@ -3366,12 +3327,12 @@ PUBLIC void HText_appendCharacter ARGS2(
 		save_ch = 0;
 	    }
 #else
-	    if (ch < 0x80) {
-		CTRACE((tfp, "add(%c) %d/%d\n", ch,
-		    HTisDocumentSource(), HTOutputFormat != WWW_SOURCE));
+	    if (UCH(ch) < 0x80) {
+		CTRACE((tfp, "add(%c) %d/%d\n", UCH(ch),
+			HTisDocumentSource(), HTOutputFormat != WWW_SOURCE));
 	    } else {
-		CTRACE((tfp, "add(%02x) %d/%d\n", ch,
-		    HTisDocumentSource(), HTOutputFormat != WWW_SOURCE));
+		CTRACE((tfp, "add(%02x) %d/%d\n", UCH(ch),
+			HTisDocumentSource(), HTOutputFormat != WWW_SOURCE));
 	    }
 #endif	/* CJK_EX */
 	}
@@ -3516,10 +3477,11 @@ PUBLIC void HText_appendCharacter ARGS2(
      *  processing stage anyway. - kw
      */
 #ifndef   EBCDIC  /* S/390 -- gil -- 1514 */
-    if (UCH(ch) >= 128 && HTCJK == NOCJK &&
+    if (is8bits(ch) && HTCJK == NOCJK &&
 	!text->T.transp && !text->T.output_utf8 &&
-	UCH(ch) < LYlowest_eightbit[current_char_set])
+	UCH(ch) < LYlowest_eightbit[current_char_set]) {
 	return;
+    }
 #endif /* EBCDIC */
 #endif /* !USE_SLANG */
     if (UCH(ch) == 155 && HTCJK == NOCJK) {	/* octal 233 */
@@ -3534,7 +3496,6 @@ PUBLIC void HText_appendCharacter ARGS2(
     style = text->style;
 
     indent = text->in_line_1 ? (int)style->indent1st : (int)style->leftIndent;
-    utfx = utfxtra_on_this_line;
 
     if (HTCJK != NOCJK) {
 	switch(text->state) {
@@ -3718,8 +3679,9 @@ PUBLIC void HText_appendCharacter ARGS2(
 
     if (IsSpecialAttrChar(ch) && ch != LY_SOFT_NEWLINE) {
 #if !defined(USE_COLOR_STYLE) || !defined(NO_DUMP_WITH_BACKSPACES)
-	if (line->size >= (MAX_LINE-1))
+	if (line->size >= (MAX_LINE-1)) {
 	    return;
+	}
 #if defined(USE_COLOR_STYLE) && !defined(NO_DUMP_WITH_BACKSPACES)
 	if (with_backspaces && HTCJK==NOCJK && !text->T.output_utf8) {
 #endif
@@ -3757,8 +3719,9 @@ PUBLIC void HText_appendCharacter ARGS2(
 	     *  on the line, or if it is preceded by a space or
 	     *  hyphen. - FM
 	     */
-	    if (line->size < 1 || text->permissible_split >= line->size)
+	    if (line->size < 1 || text->permissible_split >= line->size) {
 		return;
+	    }
 
 	    for (i = (text->permissible_split + 1); line->data[i]; i++) {
 		if (!IsSpecialAttrChar(UCH(line->data[i])) &&
@@ -3775,8 +3738,9 @@ PUBLIC void HText_appendCharacter ARGS2(
 	}
 #if defined(USE_COLOR_STYLE) && !defined(NO_DUMP_WITH_BACKSPACES)
 	} /* if (with_backspaces && HTCJK==HTNOCJK && !text->T.output_utf8) */
-	 else
-	     return;
+	 else {
+	    return;
+	 }
 #endif
 
 #else
@@ -3796,12 +3760,13 @@ PUBLIC void HText_appendCharacter ARGS2(
 	 */
 	if (IS_UTF_EXTRA(ch)) {
 	    if ((line->size > (MAX_LINE-1))
-		|| (indent + (int)(line->offset + line->size) +
-		    utfxtra_on_this_line - ctrl_chars_on_this_line +
-		    ((line->size > 0) &&
-		     (int)(line->data[line->size-1] ==
+		|| (indent + (int)(line->offset + line->size)
+		    + UTFXTRA_ON_THIS_LINE
+		    - ctrl_chars_on_this_line
+		    + ((line->size > 0) &&
+		       (int)(line->data[line->size-1] ==
 				LY_SOFT_HYPHEN ?
-					     1 : 0)) >= (LYcols_cu-1))
+					     1 : 0)) >= (LYcols_cu(text)-1))
 		) {
 		if (!text->permissible_split || text->source) {
 		    text->permissible_split = line->size;
@@ -3817,7 +3782,7 @@ PUBLIC void HText_appendCharacter ARGS2(
 		split_line(text, text->permissible_split);
 		line = text->last_line;
 		if (text->source && line->size - ctrl_chars_on_this_line
-		    + utfxtra_on_this_line == 0)
+		    + UTFXTRA_ON_THIS_LINE == 0)
 		    HText_appendCharacter (text, LY_SOFT_NEWLINE);
 	    }
 	    line->data[line->size++] = (char) ch;
@@ -3840,7 +3805,7 @@ PUBLIC void HText_appendCharacter ARGS2(
 		split_line(text, text->permissible_split);
 		line = text->last_line;
 		if (text->source && line->size - ctrl_chars_on_this_line
-		    + utfxtra_on_this_line == 0)
+		    + UTFXTRA_ON_THIS_LINE == 0)
 		    HText_appendCharacter (text, LY_SOFT_NEWLINE);
 	    }
 	}
@@ -3850,15 +3815,15 @@ PUBLIC void HText_appendCharacter ARGS2(
      *  New Line.
      */
     if (ch == '\n') {
-	    new_line(text);
-	    text->in_line_1 = YES;	/* First line of new paragraph */
-	    /*
-	     *  There are some pages written in
-	     *  different kanji codes. - TA & kw
-	     */
-	    if (HTCJK == JAPANESE)
-		text->kcode = NOKANJI;
-	    return;
+	new_line(text);
+	text->in_line_1 = YES;	/* First line of new paragraph */
+	/*
+	 *  There are some pages written in
+	 *  different kanji codes. - TA & kw
+	 */
+	if (HTCJK == JAPANESE)
+	    text->kcode = NOKANJI;
+	return;
     }
 
     /*
@@ -3894,7 +3859,6 @@ PUBLIC void HText_appendCharacter ARGS2(
 	return;
     }
 
-
     /*
      *  Tabs.
      */
@@ -3913,7 +3877,7 @@ PUBLIC void HText_appendCharacter ARGS2(
 	}
 	here = ((int)(line->size + line->offset) + indent)
 		- ctrl_chars_on_this_line; /* Consider special chars GAB */
-	here_cu = here + utfxtra_on_this_line;
+	here_cu = here + UTFXTRA_ON_THIS_LINE;
 	if (style->tabs) {	/* Use tab table */
 	    for (Tab = style->tabs;
 		Tab->position <= here;
@@ -3976,12 +3940,11 @@ check_WrapSource:
 	 * the source visible.
 	 */
 	int target = (int)(line->offset + line->size) - ctrl_chars_on_this_line;
-	int target_cu = target + utfxtra_on_this_line;
+	int target_cu = target + UTFXTRA_ON_THIS_LINE;
 	if (target >= (WRAP_COLS(text)-1) - style->rightIndent -
 	    (((HTCJK != NOCJK) && text->kanji_buf) ? 1 : 0) ||
 	    (text->T.output_utf8 &&
-	     target_cu + UTF_XLEN(ch) >= (LYcols_cu-1))
-	    ) {
+	     target_cu + UTF_XLEN(ch) >= (LYcols_cu(text)-1))) {
 	    int saved_kanji_buf;
 	    int saved_state;
 
@@ -4016,9 +3979,9 @@ check_WrapSource:
      */
     if (text->IgnoreExcess) {
 	int nominal = (indent + (int)(line->offset + line->size) - ctrl_chars_on_this_line);
-	int limit = (WRAP_COLS(text) - 1);
 	int number;
 
+	limit = (WRAP_COLS(text) - 1);
 	if (fields_are_numbered()
 	 && !number_fields_on_left
 	 && text->last_anchor != 0
@@ -4036,7 +3999,7 @@ check_WrapSource:
 					: 1))))) + 2;
 	}
 	if ((nominal + (int)style->rightIndent) >= limit
-	 || (nominal + utfxtra_on_this_line) >= (LYcols_cu - 1)) {
+	 || (nominal + UTFXTRA_ON_THIS_LINE) >= (LYcols_cu(text) - 1)) {
 	    return;
 	}
     }
@@ -4044,21 +4007,21 @@ check_WrapSource:
     /*
      *  Check for end of line.
      */
-    if (((indent + (int)line->offset + (int)line->size) +
+    actual = ((indent + (int)line->offset + (int)line->size) +
+       ((line->size > 0) &&
+	(int)(line->data[line->size-1] == LY_SOFT_HYPHEN ? 1 : 0)));
+
+    if (text->T.output_utf8) {
+	actual += (UTFXTRA_ON_THIS_LINE - ctrl_chars_on_this_line + UTF_XLEN(ch));
+	limit = (LYcols_cu(text) - 1);
+    } else {
+	actual +=
 	 (int)style->rightIndent - ctrl_chars_on_this_line +
-	 (((HTCJK != NOCJK) && text->kanji_buf) ? 1 : 0) +
-	 ((line->size > 0) &&
-	  (int)(line->data[line->size-1] ==
-				LY_SOFT_HYPHEN ?
-					     1 : 0))) >= (WRAP_COLS(text) - 1) ||
-	(text->T.output_utf8 &&
-	 (((indent + (int)line->offset + (int)line->size) +
-	   utfxtra_on_this_line - ctrl_chars_on_this_line +
-	   UTF_XLEN(ch) +
-	   ((line->size > 0) &&
-	    (int)(line->data[line->size-1] ==
-				LY_SOFT_HYPHEN ?
-					     1 : 0))) >= (LYcols_cu - 1)))) {
+	 (((HTCJK != NOCJK) && text->kanji_buf) ? 1 : 0);
+	limit = (WRAP_COLS(text) - 1);
+    }
+
+    if (actual >= limit) {
 
 	if (style->wordWrap && HTOutputFormat != WWW_SOURCE) {
 #ifdef EXP_JUSTIFY_ELTS
@@ -4066,33 +4029,34 @@ check_WrapSource:
 		this_line_was_split = TRUE;
 #endif
 	    split_line(text, text->permissible_split);
-	    if (ch == ' ') return;	/* Ignore space causing split */
+	    if (ch == ' ') {
+		return;	/* Ignore space causing split */
+	    }
 
-	}  else if (HTOutputFormat == WWW_SOURCE) {
-		 /*
-		  *  For source output we don't want to wrap this stuff
-		  *  unless absolutely necessary. - LJM
-		  *  !
-		  *  If we don't wrap here we might get a segmentation fault.
-		  *  but let's see what happens
-		  */
-		if ((int)line->size >= (int)(MAX_LINE-1)) {
-		   new_line(text);  /* try not to linewrap */
-		}
+	} else if (HTOutputFormat == WWW_SOURCE) {
+	    /*
+	     *  For source output we don't want to wrap this stuff
+	     *  unless absolutely necessary. - LJM
+	     *  !
+	     *  If we don't wrap here we might get a segmentation fault.
+	     *  but let's see what happens
+	     */
+	    if ((int)line->size >= (int)(MAX_LINE-1)) {
+		new_line(text);  /* try not to linewrap */
+	    }
 	} else {
-		/*
-		 *  For normal stuff like pre let's go ahead and
-		 *  wrap so the user can see all of the text.
-		 */
-
-		if ( (dump_output_immediately|| (crawl && traversal) )
-		     && dont_wrap_pre) {
-		    if ((int)line->size >= (int)(MAX_LINE-1))
-			new_line(text);
-		} else {
+	    /*
+	     *  For normal stuff like pre let's go ahead and
+	     *  wrap so the user can see all of the text.
+	     */
+	    if ( (dump_output_immediately|| (crawl && traversal) )
+		 && dont_wrap_pre) {
+		if ((int)line->size >= (int)(MAX_LINE-1)) {
 		    new_line(text);
 		}
-
+	    } else {
+		new_line(text);
+	    }
 	}
     } else if ((int)line->size >= (int)(MAX_LINE-1)) {
 	/*
@@ -8357,7 +8321,7 @@ PRIVATE int HText_TrueLineSize ARGS3(
 	for (i = 0; i < line->size; i++) {
 	    if (!IsSpecialAttrChar(UCH(line->data[i])) &&
 		(!(text && text->T.output_utf8) ||
-		 UCH(line->data[i]) < 128 ||
+		 !is8bits(line->data[i]) ||
 		 (UCH((line->data[i] & 0xc0)) == 0xc0)) &&
 		!isspace(UCH(line->data[i])) &&
 		UCH(line->data[i]) != HT_NON_BREAK_SPACE &&
@@ -8369,7 +8333,7 @@ PRIVATE int HText_TrueLineSize ARGS3(
 	for (i = 0; i < line->size; i++) {
 	    if (!IsSpecialAttrChar(line->data[i]) &&
 		(!(text && text->T.output_utf8) ||
-		 UCH(line->data[i]) < 128 ||
+		 !is8bits(line->data[i]) ||
 		 (UCH(line->data[i] & 0xc0) == 0xc0))) {
 		true_size++;
 	    }
@@ -9764,6 +9728,123 @@ PRIVATE int find_best_target_cs ARGS3(
     return (-1);
 }
 
+PRIVATE BOOLEAN begin_submission_part ARGS5(
+    char **,	query,
+    BOOLEAN,	first_one,
+    BOOLEAN,	SemiColon,
+    BOOLEAN,	PlainText,
+    char *,	Boundary)
+{
+    if (first_one) {
+	if (Boundary) {
+	    HTSprintf(query, "--%s\r\n", Boundary);
+	}
+	first_one = FALSE;
+    } else {
+	if (PlainText) {
+	    StrAllocCat(*query, "\n");
+	} else if (SemiColon) {
+	    StrAllocCat(*query, ";");
+	} else if (Boundary) {
+	    HTSprintf(query, "\r\n--%s\r\n", Boundary);
+	} else {
+	    StrAllocCat(*query, "&");
+	}
+    }
+    return FALSE;
+}
+
+#ifdef EXP_FILE_UPLOAD
+PRIVATE BOOLEAN send_a_file ARGS6(
+    char **,	query,
+    BOOLEAN,	PlainText,
+    char *,	MultipartContentType,
+    char *,	Boundary,
+    char *,	name_used,
+    char *,	val_used)
+{
+    char *escaped1 = NULL;
+    char *escaped2 = NULL;
+    FILE *fd;
+    size_t n, bytes;
+    BOOLEAN code = FALSE;
+    BOOLEAN use_mime = FALSE;
+    char buffer[257];
+    char base64buf[128];
+
+    CTRACE((tfp, "Ok, about to convert %s to mime/thingy\n", val_used));
+
+    if ((fd = fopen(val_used, BIN_R)) == 0) {
+	/* We can't open the file, what do we do? */
+	HTAlert(gettext("Can't open file for uploading"));
+	goto exit_disgracefully;
+    }
+    StrAllocCopy(escaped2, "");
+    while ((bytes = fread(buffer, sizeof(char), 256, fd)) != 0) {
+	buffer[bytes] = 0;
+	for (n = 0; n < bytes; ++n) {
+	    int ch = UCH(buffer[n]);
+	    if ((iscntrl(ch) && !isspace(ch))
+	     || (!iscntrl(ch) && !isprint(ch))) {
+		use_mime = TRUE;
+		break;
+	    }
+	}
+	if (use_mime)
+	    break;
+	StrAllocCat(escaped2, buffer);
+    }
+    if (use_mime) {
+	rewind(fd);
+	StrAllocCopy(escaped2, "");
+	while ((bytes = fread(buffer, sizeof(char), 45, fd)) != 0) {
+	    base64_encode(base64buf, buffer, bytes);
+	    StrAllocCat(escaped2, base64buf);
+	}
+    }
+    if (ferror(fd)) {
+	/* We got an error reading the file, what do we do? */
+	HTAlert(gettext("Short read from file, problem?"));
+	LYCloseInput(fd);
+	goto exit_disgracefully;
+    }
+    LYCloseInput(fd);
+    /* we need to modify the mime-type here - rp */
+    /* Note: could use LYGetFileInfo for that and for
+       other headers that should be transmitted - kw */
+
+    if (PlainText) {
+	StrAllocCopy(escaped1, name_used);
+    } else if (Boundary) {
+	StrAllocCopy(escaped1, "Content-Disposition: form-data");
+	HTSprintf(&escaped1, "; name=%s", name_used);
+	HTSprintf(&escaped1, "; filename=\"%s\"", val_used);
+	if (MultipartContentType) {
+	    StrAllocCat(escaped1, MultipartContentType);
+	    if (use_mime)
+		StrAllocCat(escaped1, "\r\nContent-Transfer-Encoding: base64");
+	}
+	StrAllocCat(escaped1, "\r\n\r\n");
+    } else {
+	escaped1 = HTEscapeSP(name_used, URL_XALPHAS);
+    }
+
+    HTSprintf(query,
+	      "%s%s%s%s%s",
+	      escaped1,
+	      (Boundary ? "" : "="),
+	      (PlainText ? "\n" : ""),
+	      escaped2,
+	      ((PlainText && *escaped2) ? "\n" : ""));
+    code = TRUE;
+
+exit_disgracefully:
+    FREE(escaped1);
+    FREE(escaped2);
+    return code;
+}
+#endif /* EXP_FILE_UPLOAD */
+
 /*
  *  HText_SubmitForm - generate submit data from form fields.
  *  For mailto forms, send the data.
@@ -9784,7 +9865,7 @@ PUBLIC int HText_SubmitForm ARGS4(
     PerFormInfo *thisform;
     char *query = NULL;
     char *escaped1 = NULL, *escaped2 = NULL;
-    int first_one = 1;
+    BOOLEAN first_one = TRUE;
     char *last_textarea_name = NULL;
     int textarea_lineno = 0;
     char *previous_blanks = NULL;
@@ -10078,8 +10159,7 @@ PUBLIC int HText_SubmitForm ARGS4(
 			  strcmp(target_csname, "iso-8859-1"))) ||
 			(!HTMainText->node_anchor->charset &&
 			 target_cs != UCLYhndl_for_unspec)) {
-			StrAllocCat(content_type_out, "; charset=");
-			StrAllocCat(content_type_out, target_csname);
+			HTSprintf(&content_type_out, "; charset=%s", target_csname);
 		    }
 		}
 	    } else {
@@ -10115,6 +10195,15 @@ PUBLIC int HText_SubmitForm ARGS4(
 		switch(form_ptr->type) {
 		case F_RESET_TYPE:
 		    break;
+#ifdef EXP_FILE_UPLOAD
+		case F_FILE_TYPE:
+		    name_used = (form_ptr->name ? form_ptr->name : "");
+		    val_used = (form_ptr->value ? form_ptr->value : "");
+		    CTRACE((tfp,
+			    "I'd submit %s (from %s), but you've not finished it\n",
+			    val_used, name_used));
+		    break;
+#endif
 		case F_SUBMIT_TYPE:
 		case F_TEXT_SUBMIT_TYPE:
 		case F_IMAGE_SUBMIT_TYPE:
@@ -10142,16 +10231,6 @@ PUBLIC int HText_SubmitForm ARGS4(
 			break;
 		    }
 		    /* FALLTHRU */
-
-#ifdef EXP_FILE_UPLOAD
-		case F_FILE_TYPE:
-		    CTRACE((tfp, "I'd submit %s (from %s), but you've not finished it\n", form_ptr->value, form_ptr->name));
-		    name_used = (form_ptr->name ? form_ptr->name : "");
-		    val_used = (form_ptr->value ? form_ptr->value : "");
-		    break;
-#endif
-
-		    /*  fall through  */
 		case F_RADIO_TYPE:
 		case F_CHECKBOX_TYPE:
 		case F_TEXTAREA_TYPE:
@@ -10227,24 +10306,20 @@ PUBLIC int HText_SubmitForm ARGS4(
 		    if (out_cs >= 0)
 			out_csname = LYCharSet_UC[out_cs].MIMEname;
 		    if (Boundary) {
+			StrAllocCopy(MultipartContentType,
+				     "\r\nContent-Type: text/plain");
 			if (!success && form_ptr->value_cs < 0) {
 			    /*  This is weird. */
-			    StrAllocCopy(MultipartContentType,
-					 "\r\nContent-Type: text/plain; charset=");
-			    StrAllocCat(MultipartContentType, "UNKNOWN-8BIT");
+			    out_csname = "UNKNOWN-8BIT";
 			} else if (!success) {
-			    StrAllocCopy(MultipartContentType,
-					 "\r\nContent-Type: text/plain; charset=");
-			    StrAllocCat(MultipartContentType, out_csname);
 			    target_csname = NULL;
 			} else {
 			    if (!target_csname) {
 				target_csname = LYCharSet_UC[target_cs].MIMEname;
 			    }
-			    StrAllocCopy(MultipartContentType,
-					 "\r\nContent-Type: text/plain; charset=");
-			    StrAllocCat(MultipartContentType, out_csname);
 			}
+			if (strcmp(out_csname, "iso-8859-1"))
+			    HTSprintf(&MultipartContentType, "; charset=%s", out_csname);
 		    }
 
 		    /*
@@ -10354,82 +10429,18 @@ PUBLIC int HText_SubmitForm ARGS4(
 
 #ifdef EXP_FILE_UPLOAD
 		case F_FILE_TYPE:
-		{
-		    int cdisp_name_startpos = 0;
-		    FILE *fd;
-		    int bytes;
-		    char buffer[257];
-
-		    CTRACE((tfp, "Ok, about to convert %s to mime/thingy\n", form_ptr->value));
-		    if (first_one) {
-			if (Boundary) {
-			    HTSprintf(&query, "--%s\r\n", Boundary);
-			}
-			first_one = FALSE;
-		    } else {
-			if (PlainText) {
-			    HTSprintf(&query, "\n");
-			} else if (SemiColon) {
-			    HTSprintf(&query, ";");
-			} else if (Boundary) {
-			    HTSprintf(&query, "\r\n--%s\r\n", Boundary);
-			} else {
-			    HTSprintf(&query, "&");
-			}
-		    }
-
-		    if (PlainText) {
-			StrAllocCopy(escaped1, name_used);
-		    } else if (Boundary) {
-			StrAllocCopy(escaped1,
-				"Content-Disposition: form-data; name=");
-			cdisp_name_startpos = strlen(escaped1);
-			StrAllocCat(escaped1, name_used);
-			StrAllocCat(escaped1, "; filename=\"");
-			StrAllocCat(escaped1, val_used);
-			StrAllocCat(escaped1, "\"");
-			if (MultipartContentType) {
-			    StrAllocCat(escaped1, MultipartContentType);
-			    StrAllocCat(escaped1, "\r\nContent-Transfer-Encoding: base64");
-			}
-			StrAllocCat(escaped1, "\r\n\r\n");
-		    } else {
-			escaped1 = HTEscapeSP(name_used, URL_XALPHAS);
-		    }
-
-		    if ((fd = fopen(val_used, BIN_R)) == 0) {
-			/* We can't open the file, what do we do? */
-			HTAlert(gettext("Can't open file for uploading"));
+		    first_one = begin_submission_part(&query,
+						    first_one,
+						    SemiColon,
+						    PlainText,
+						    Boundary);
+		    if (!send_a_file(&query,
+				     PlainText,
+				     MultipartContentType,
+				     Boundary,
+				     name_used,
+				     val_used))
 			goto exit_disgracefully;
-		    }
-		    StrAllocCopy(escaped2, "");
-		    while ((bytes = fread(buffer, sizeof(char), 45, fd)) != 0) {
-			char base64buf[128];
-			base64_encode(base64buf, buffer, bytes);
-			StrAllocCat(escaped2, base64buf);
-		    }
-		    if (ferror(fd)) {
-			/* We got an error reading the file, what do we do? */
-			HTAlert(gettext("Short read from file, problem?"));
-			LYCloseInput(fd);
-			goto exit_disgracefully;
-		    }
-		    LYCloseInput(fd);
-		    /* we need to modify the mime-type here - rp */
-		    /* Note: could use LYGetFileInfo for that and for
-		       other headers that should be transmitted - kw */
-
-		    HTSprintf(&query,
-				   "%s%s%s%s%s",
-				   escaped1,
-				   (Boundary ? "" : "="),
-				   (PlainText ? "\n" : ""),
-					escaped2,
-				   ((PlainText && *escaped2) ?
-							 "\n" : ""));
-		    FREE(escaped1);
-		    FREE(escaped2);
-		}
 		break;
 #endif /* EXP_FILE_UPLOAD */
 
@@ -10451,22 +10462,12 @@ PUBLIC int HText_SubmitForm ARGS4(
 			(form_ptr->value && *form_ptr->value != '\0' &&
 			 !strcmp(form_ptr->value, link_value)))) {
 			int cdisp_name_startpos = 0;
-			if (first_one) {
-			    if (Boundary) {
-				HTSprintf(&query, "--%s\r\n", Boundary);
-			    }
-			    first_one=FALSE;
-			} else {
-			    if (PlainText) {
-				StrAllocCat(query, "\n");
-			    } else if (SemiColon) {
-				StrAllocCat(query, ";");
-			    } else if (Boundary) {
-				HTSprintf(&query, "\r\n--%s\r\n", Boundary);
-			    } else {
-				StrAllocCat(query, "&");
-			    }
-			}
+
+			first_one = begin_submission_part(&query,
+							  first_one,
+							  SemiColon,
+							  PlainText,
+							  Boundary);
 
 			if (PlainText) {
 			    StrAllocCopy(escaped1, name_used);
@@ -10522,13 +10523,10 @@ PUBLIC int HText_SubmitForm ARGS4(
 			    HTSprintf(&query,
 				    "%s%s%s%s%s",
 				    escaped1,
-				    (Boundary ?
-					   "" : "="),
-				    (PlainText ?
-					  "\n" : ""),
+				    (Boundary ? "" : "="),
+				    (PlainText ? "\n" : ""),
 				    escaped2,
-				    ((PlainText && *escaped2) ?
-							 "\n" : ""));
+				    ((PlainText && *escaped2) ? "\n" : ""));
 			}
 			FREE(escaped1);
 			FREE(escaped2);
@@ -10543,37 +10541,25 @@ PUBLIC int HText_SubmitForm ARGS4(
 		     *  Only add if selected.
 		     */
 		    if (form_ptr->num_value) {
-			if (first_one) {
-			    if (Boundary) {
-				HTSprintf(&query,
-					"--%s\r\n", Boundary);
-			    }
-			    first_one=FALSE;
-			} else {
-			    if (PlainText) {
-				StrAllocCat(query, "\n");
-			    } else if (SemiColon) {
-				StrAllocCat(query, ";");
-			    } else if (Boundary) {
-				HTSprintf(&query, "\r\n--%s\r\n", Boundary);
-			    } else {
-				StrAllocCat(query, "&");
-			    }
-			}
+			first_one = begin_submission_part(&query,
+							  first_one,
+							  SemiColon,
+							  PlainText,
+							  Boundary);
 
 			if (PlainText) {
 			    StrAllocCopy(escaped1, name_used);
 			} else if (Boundary) {
 			    StrAllocCopy(escaped1,
 				     "Content-Disposition: form-data; name=");
-			    StrAllocCat(escaped1,
-					name_used);
+			    StrAllocCat(escaped1, name_used);
 			    if (MultipartContentType)
 				StrAllocCat(escaped1, MultipartContentType);
 			    StrAllocCat(escaped1, "\r\n\r\n");
 			} else {
 			    escaped1 = HTEscapeSP(name_used, URL_XALPHAS);
 			}
+
 			if (PlainText || Boundary) {
 			    StrAllocCopy(escaped2,
 					 (val_used ?
@@ -10621,27 +10607,17 @@ PUBLIC int HText_SubmitForm ARGS4(
 			} else {
 			    FREE(previous_blanks);
 			}
-			if (first_one) {
-			    if (Boundary) {
-				HTSprintf(&query, "--%s\r\n", Boundary);
-			    }
-			    first_one = FALSE;
-			} else {
-			    if (PlainText) {
-				StrAllocCat(query, "\n");
-			    } else if (SemiColon) {
-				StrAllocCat(query, ";");
-			    } else if (Boundary) {
-				HTSprintf(&query, "\r\n--%s\r\n", Boundary);
-			    } else {
-				StrAllocCat(query, "&");
-			    }
-			}
+			first_one = begin_submission_part(&query,
+							  first_one,
+							  SemiColon,
+							  PlainText,
+							  Boundary);
+
 			if (PlainText) {
 			    StrAllocCopy(escaped1, name_used);
 			} else if (Boundary) {
 			    StrAllocCopy(escaped1,
-				    "Content-Disposition: form-data; name=");
+				     "Content-Disposition: form-data; name=");
 			    StrAllocCat(escaped1, name_used);
 			    if (MultipartContentType)
 				StrAllocCat(escaped1, MultipartContentType);
@@ -10649,16 +10625,14 @@ PUBLIC int HText_SubmitForm ARGS4(
 			} else {
 			    escaped1 = HTEscapeSP(name_used, URL_XALPHAS);
 			}
+
 			HTSprintf(&query,
 				"%s%s%s%s%s",
 				escaped1,
-				(Boundary ?
-				       "" : "="),
-				(PlainText ?
-				      "\n" : ""),
+				(Boundary ? "" : "="),
+				(PlainText ? "\n" : ""),
 				escaped2,
-				((PlainText && *escaped2) ?
-						     "\n" : ""));
+				((PlainText && *escaped2) ? "\n" : ""));
 			FREE(escaped1);
 			last_textarea_name = form_ptr->name;
 		    } else {
@@ -10696,23 +10670,11 @@ PUBLIC int HText_SubmitForm ARGS4(
 		case F_TEXT_TYPE:
 		case F_OPTION_LIST_TYPE:
 		case F_HIDDEN_TYPE:
-		    if (first_one) {
-			if (Boundary) {
-			    HTSprintf(&query, "--%s\r\n", Boundary);
-			}
-			first_one=FALSE;
-		    } else {
-			if (PlainText) {
-			    StrAllocCat(query, "\n");
-			} else if (SemiColon) {
-			    StrAllocCat(query, ";");
-			} else if (Boundary) {
-			    HTSprintf(&query, "\r\n--%s\r\n", Boundary);
-			} else {
-			    StrAllocCat(query, "&");
-			}
-		    }
-
+		    first_one = begin_submission_part(&query,
+						      first_one,
+						      SemiColon,
+						      PlainText,
+						      Boundary);
 		    if (PlainText) {
 		       StrAllocCopy(escaped1, name_used);
 		    } else if (Boundary) {
@@ -10737,13 +10699,10 @@ PUBLIC int HText_SubmitForm ARGS4(
 		    HTSprintf(&query,
 			    "%s%s%s%s%s",
 			    escaped1,
-			    (Boundary ?
-				   "" : "="),
-			    (PlainText ?
-				  "\n" : ""),
+			    (Boundary ? "" : "="),
+			    (PlainText ? "\n" : ""),
 			    escaped2,
-			    ((PlainText && *escaped2) ?
-						 "\n" : ""));
+			    ((PlainText && *escaped2) ? "\n" : ""));
 		    FREE(escaped1);
 		    FREE(escaped2);
 		    FREE(copied_name_used);
@@ -12827,29 +12786,8 @@ PRIVATE void redraw_part_of_line ARGS4(
 
 	    default:
 		i++;
-		if (text->T.output_utf8 && !isascii(UCH(buffer[0]))) {
-		    if ((*buffer & 0xe0) == 0xc0) {
-			utf_extra = 1;
-		    } else if ((*buffer & 0xf0) == 0xe0) {
-			utf_extra = 2;
-		    } else if ((*buffer & 0xf8) == 0xf0) {
-			utf_extra = 3;
-		    } else if ((*buffer & 0xfc) == 0xf8) {
-			utf_extra = 4;
-		    } else if ((*buffer & 0xfe) == 0xfc) {
-			utf_extra = 5;
-		    } else {
-			 /*
-			  *  Garbage.
-			  */
-			utf_extra = 0;
-		    }
-		    if (strlen(data) < utf_extra) {
-			/*
-			 *  Shouldn't happen.
-			 */
-			utf_extra = 0;
-		    }
+		if (text->T.output_utf8 && is8bits(buffer[0])) {
+		    utf_extra = utf8_length(text->T.output_utf8, data-1);
 		    LastDisplayChar = 'M';
 		}
 		if (utf_extra) {
@@ -12859,7 +12797,7 @@ PRIVATE void redraw_part_of_line ARGS4(
 		    buffer[1] = '\0';
 		    data += utf_extra;
 		    utf_extra = 0;
-		} else if (HTCJK != NOCJK && !isascii(UCH(buffer[0]))) {
+		} else if (HTCJK != NOCJK && is8bits(buffer[0])) {
 		    /*
 		     *  For CJK strings, by Masanobu Kimura.
 		     */
@@ -13050,7 +12988,7 @@ PRIVATE void move_to_glyph ARGS10(
 	     *  and when to react to it should be cleaned up (here and
 	     *  further below).  For now this seems to work but isn't
 	     *  very clear.  The complications arise from reproducing
-	     *  the behavior (previously done in highlight()) for target
+	     *  the behavior (previously done in LYhighlight()) for target
 	     *  strings that fall into or overlap a link: use target
 	     *  emphasis for the target string, except for the first
 	     *  and last character of the anchor text if the anchor is
@@ -13237,7 +13175,7 @@ PRIVATE void move_to_glyph ARGS10(
 		    if (i == XP - 1) {
 			i_after_tgt = i;
 		    } else if (i == XP - 2 && HTCJK != NOCJK &&
-			       !isascii(UCH(buffer[0]))) {
+			       is8bits(buffer[0])) {
 			i_after_tgt = i;
 			cp_tgt = NULL;
 			if (drawing) {
@@ -13295,30 +13233,9 @@ PRIVATE void move_to_glyph ARGS10(
 		    }
 
 		i++;
-		if (utf_flag && !isascii(UCH(buffer[0]))) {
+		if (utf_flag && is8bits(buffer[0])) {
 		    hadutf8 = YES;
-		    if ((*buffer & 0xe0) == 0xc0) {
-			utf_extra = 1;
-		    } else if ((*buffer & 0xf0) == 0xe0) {
-			utf_extra = 2;
-		    } else if ((*buffer & 0xf8) == 0xf0) {
-			utf_extra = 3;
-		    } else if ((*buffer & 0xfc) == 0xf8) {
-			utf_extra = 4;
-		    } else if ((*buffer & 0xfe) == 0xfc) {
-			utf_extra = 5;
-		    } else {
-			 /*
-			  *  Garbage.
-			  */
-			utf_extra = 0;
-		    }
-		    if (strlen(data) < utf_extra) {
-			/*
-			 *  Shouldn't happen.
-			 */
-			utf_extra = 0;
-		    }
+		    utf_extra = utf8_length(utf_flag, data-1);
 		    LastDisplayChar = 'M';
 		}
 		if (utf_extra) {
@@ -13344,7 +13261,7 @@ PRIVATE void move_to_glyph ARGS10(
 		    buffer[1] = '\0';
 		    sdata += utf_extra; data += utf_extra;
 		    utf_extra = 0;
-		} else if (HTCJK != NOCJK && !isascii(UCH(buffer[0]))) {
+		} else if (HTCJK != NOCJK && is8bits(buffer[0])) {
 		    /*
 		     *  For CJK strings, by Masanobu Kimura.
 		     */

@@ -1,6 +1,77 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2001-11-08 (2.8.5dev.4)
+* if file-upload code is configured, suppress message that indicates it is not
+  implemented, i.e., "[FILE Input] (not implemented)" -TD
+* modify file-upload submission to send plain text if the file is entirely
+  printable text.  Mime encoding is needed if the file contains nulls, etc.,
+  but reportedly may confuse some hosts -TD
+* suppress "charset=" clause on form submission if it is iso-8859-1 -TD
+* move case for F_FILE_TYPE in HText_SubmitForm() to obtain original behavior
+  of fallthrough for F_SUBMIT_TYPE, F_TEXT_SUBMIT_TYPE, F_IMAGE_SUBMIT_TYPE to
+  translate their character set, etc.  (report by KW) -TD
+* revert 2.8.4dev.21 change to avoid truncating cookie path in LYSetCookie().
+  The server that wouldn't work with the current lynx behavior is
+  identified as "Oracle_Web_Listener/4.0.8.2.3EnterpriseEdition"  -DK
+* modify LYLegitimizeHREF() change from 2.8.4dev.21 to eliminate newlines from
+  the HREF rather than converting them to spaces.  This fixes a problem with
+  www.ebay.com which splits up HREFs with newlines.  Changing the newlines to
+  spaces made the HREF no longer match, e.g., when it was built up from
+  a CGI script (report by Morten Bo Johansen) -TD
+* add two test files for testing UTF-8, based on Markus Kuhn's demos
+  (quickbrown.html and utf-8-demo.html).  These work with ncurses 20011103
+  patch, for wide-characters except for combining characters (more work is
+  needed in ncurses).  Tested with XFree86 xterm (patch #163) -TD
+* modify select_multi_bookmarks() check for interrupt character to limit it to
+  "hard" interrupt characters such as ^G.  This fixes a case where "z" would
+  have been treated as an interrupt character in advanced multibookmark mode
+  (reports by Michael Warner, HN, as well as Debian #111463) -TD
+* modify SUPPORT_MULTIBYTE_EDIT logic in LYUpperCase() and LYLowerCase() to
+  check for a null character following an upper-128 code.  This is more likely
+  to occur in EBCDIC, though the multibyte strings should not have a null at
+  this position in any case (report by PG) -TD
+* for wide-character curses configuration, do not force repainting at the end
+  of display_page() -TD
+* modify configure test for mkstemp() to check if that function returns
+  distinct values (report by Fr3dY indicates that AmigaOS has a broken version
+  of mkstemp() which always returns the same value) -TD
+* modify LYwaddstr() to use wide-character curses functions to make UTF-8 output
+  work without relying upon side-effects of narrow-character functions.  Note
+  that this relies on the user having set a UTF-8 locale, e.g., en_US.UTF-8 -TD
+* modify HText_appendCharacter() to not use utfxtra_on_this_line when compiling
+  with WIDEC_CURSES, since the curses library already does this adjustment -TD
+* correct the following names in LYrcFile.c which were added to allow
+  ENABLE_LYNXRC lines in lynx.cfg to enable them to be saved in ~/.lynxrc
+    old           new          where-used
+    -------------------------------------
+    DTD_recovery  tagsoup      (command-line option and lynx.cfg)
+    show_rate     show_kb_rate (lynx.cfg)
+    user_agent    useragent    (command-line option)
+    -------------------------------------
+  (report by Michel Such <msuch@free.fr>) -TD
+* modify LYRefreshEdit() to clear field before repainting (patch by Hataguchi
+  Takeshi)
+* for CJK configuration, force clearing/repainting in HTUserMsg() (patch by
+  Hataguchi Takeshi)
+* make HTInfoMsg() sleep condition consistent with other messages by using
+  LYSleepInfo() -TD
+* reduce clutter with new function utf8_length() -TD
+* replace !isascii(ch) with new macro is8bits(ch), to reduce clutter, fix some
+  sign-extensions and make it more portable -TD
+* change some of the "#if" statements to "#ifdef", to work around broken
+  versions (2.96, 3.0.1) of gcc distributed with Mandrake 8.1 (though
+  reportedly this is due to Redhat):  the -C option passes through comments as
+  usual, but some comments expand on preprocessor lines, which causes the
+  preprocessor to report an expression error.  This prevented "make
+  install-help" from running, though the -C option is not needed for that. 
+  However, lacking a working -C option makes the C preprocessor useless for
+  analyzing bugs -TD
+* modify configure script to accept --with-screen=ncursesw, to build with the
+  wide-character version of ncurses -TD
+* modify configure script to look for mkdtemp(), to quiet another bogus linker
+  message -TD
+
 2001-10-06 (2.8.5dev.3)
 * add CF_MKSTEMP configure macro, from vile, to check for a working mkstemp().
   This will quiet some bogus warning messages in recent runtime support, but

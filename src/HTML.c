@@ -4926,6 +4926,9 @@ PRIVATE int HTML_start_element ARGS6(
 	     */
 	    if (present && present[HTML_INPUT_TYPE] &&
 		value[HTML_INPUT_TYPE] && *value[HTML_INPUT_TYPE]) {
+		char *not_impl = NULL;
+		char *usingval = NULL;
+
 		I.type = value[HTML_INPUT_TYPE];
 
 		if (!strcasecomp(I.type, "range")) {
@@ -4936,7 +4939,7 @@ PRIVATE int HTML_start_element ARGS6(
 		    /*
 		     *	Not yet implemented.
 		     */
-		    HTML_put_string(me,"[RANGE Input] (Not yet implemented.)");
+		    not_impl = "[RANGE Input]";
 #ifdef NOTDEFINED
 		    if (me->inFORM)
 			HText_DisableCurrentForm();
@@ -4947,27 +4950,15 @@ PRIVATE int HTML_start_element ARGS6(
 		} else if (!strcasecomp(I.type, "file")) {
 		    if (present[HTML_INPUT_ACCEPT])
 			I.accept = value[HTML_INPUT_ACCEPT];
-#ifdef EXP_FILE_UPLOAD
-		    /*
-		     *	Not yet implemented.
-		     */
-		    if (me->inUnderline == FALSE) {
-			HText_appendCharacter(me->text,
-					      LY_UNDERLINE_START_CHAR);
-		    }
-		    HTML_put_string(me,"[FILE Input] (Not yet implemented.)");
-		    if (me->inUnderline == FALSE) {
-			HText_appendCharacter(me->text,
-					      LY_UNDERLINE_END_CHAR);
-		    }
-#else
+#ifndef EXP_FILE_UPLOAD
+		    not_impl = "[FILE Input]";
 		    CTRACE((tfp, "Attempting to fake as: %s\n", I.type));
-#endif /* EXP_FILE_UPLOAD */
 #ifdef NOTDEFINED
 		    if (me->inFORM)
 			HText_DisableCurrentForm();
 #endif /* NOTDEFINED */
 		    CTRACE((tfp, "HTML: Ignoring TYPE=\"file\"\n"));
+#endif /* EXP_FILE_UPLOAD */
 
 		} else if (!strcasecomp(I.type, "button")) {
 		    /*
@@ -4975,6 +4966,23 @@ PRIVATE int HTML_start_element ARGS6(
 		     */
 		    HTML_put_string(me,"[BUTTON] ");
 		    break;
+		}
+		if (not_impl != NULL) {
+		    if (me->inUnderline == FALSE) {
+			HText_appendCharacter(me->text,
+					      LY_UNDERLINE_START_CHAR);
+		    }
+		    HTML_put_string(me, not_impl);
+		    if (usingval != NULL) {
+			HTML_put_string(me, usingval);
+			FREE(usingval);
+		    } else {
+			HTML_put_string(me, " (not implemented)");
+		    }
+		    if (me->inUnderline == FALSE) {
+			HText_appendCharacter(me->text,
+					      LY_UNDERLINE_END_CHAR);
+		    }
 		}
 	    }
 

@@ -117,11 +117,11 @@ SITE_DEFS = # Your defines here
 # defines for which there are no configure options:
 # -DHP_TERMINAL    For DIM workaround to REVERSE problems on HP terminals.
 # -DIGNORE_CTRL_C  Define if Control-C shouldn't exit lynx.
-# -DNO_CPU_LIMIT   Disables Max CPU timeout (includes CLOCKS_PER_SECOND)
 # -DNO_RULES       Disables CERN-style access rules (see lynx.cfg).
+# -DMISC_EXP       Enable some truly experimental stuff
 # -DSHORTENED_RBIND  For a SOCKSified lynx with the short version of Rbind.
 # -DSLANG_MBCS_HACK prevent cutoff lines when using UTF8 console (slang only)
-# -DUSE_SCROLLBAR  supports scrollbar when built with ncurses
+# -DUSE_VASPRINT   Use vasprintf() function
 #
 # if you are linking to freeWAIS-0.202 or older, you should define this
 # in SITE_DEFS
@@ -143,44 +143,10 @@ SITE_DEFS = # Your defines here
 #
 # -DDGUX_OLD
 
-# defines which have configure options   (see INSTALLATION, Section II-1c.):
-# -DARCHIVE_ONLY
-# -DDIRED_SUPPORT
-# -DDISP_PARTIAL
-# -DDONT_TRACK_INTERNAL_LINKS
-# -DEXEC_LINKS
-# -DEXEC_SCRIPTS
-# -DEXP_CHARTRANS_AUTOSWITCH
-# -DEXP_PERSISTENT_COOKIES
-# -DLONG_LIST
-# -DLYNXCGI_LINKS
-# -DLY_FIND_LEAKS
-# -DNCURSES
-# -DNO_CHANGE_EXECUTE_PERMS
-# -DNO_EXTENDED_HTMLDTD
-# -DNO_PARENT_DIR_REFERENCE
-# -DNSL_FORK
-# -DOK_GZIP
-# -DOK_OVERRIDE
-# -DOK_PERMIT
-# -DOK_TAR
-# -DOK_UUDECODE
-# -DOK_ZIP
-# -DOPTIONS_FORMS
-# -DOPTIONS_MENU
-# -DSOCKS
-# -DSYSLOG_REQUESTED_URLS
-# -DUNDERLINE_LINKS
-# -DUSE_COLOR_STYLE
-# -DUSE_DEFAULT_COLORS
-# -DUSE_EXTERNALS
-# -DUSE_SLANG
-# -DUSE_SOCKS5
-# -DUSE_ZLIB
+# Many other defines have configure options  (see INSTALLATION, Section II-1c.):
 #
 # for installation of local execution links, please see the file userdefs.h
 
-# TESTED: Linux FreeBSD SunOS Solaris IRIX CLIX HP-UX AIX SCO
 all lynx$x: cfg_defs.h LYHelp.h
 @MSG_DIR_MAKE@	$(SHELL) $(srcdir)/fixtext.sh $(srcdir)/LYMessages_en.h >LYMessages.c
 @INTLDIR_MAKE@	cd intl && $(MAKE) CC="$(CC)"

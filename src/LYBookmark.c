@@ -712,7 +712,7 @@ get_advanced_choice:
 	    c = LYCharINTERRUPT2;
 	}
 #endif /* VMS */
-	if (LYisNonAlnumKeyname(c, LYK_PREV_DOC) || LYCharIsINTERRUPT(c)) {
+	if (LYisNonAlnumKeyname(c, LYK_PREV_DOC) || LYCharIsINTERRUPT_HARD(c)) {
 	    /*
 	     *	Treat left-arrow, ^G, or ^C as cancel.
 	     */
