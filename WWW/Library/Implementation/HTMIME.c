@@ -15,6 +15,7 @@
 #include <HTMIME.h>		/* Implemented here */
 #include <HTTP.h>		/* for redirecting_url */
 #include <HTAlert.h>
+#include <HTFile.h>
 #include <HTCJK.h>
 #include <UCMap.h>
 #include <UCDefs.h>
@@ -168,14 +169,17 @@ void HTMIME_TrimDoubleQuotes(char *value)
 	value[i] = cp[(i + 1)];
 }
 
+/*
+ * Check if the token from "Content-Encoding" corresponds to a compression
+ * type.
+ */
 static BOOL content_is_compressed(HTStream *me)
 {
     char *encoding = me->anchor->content_encoding;
+    BOOL result = (HTEncodingToCompressType(encoding) != cftNone);
 
-    return encoding != 0
-	&& strcmp(encoding, "8bit") != 0
-	&& strcmp(encoding, "7bit") != 0
-	&& strcmp(encoding, "binary") != 0;
+    CTRACE((tfp, "content is%s compressed\n", result ? "" : " NOT"));
+    return result;
 }
 
 /*

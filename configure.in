@@ -5,7 +5,7 @@ dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
 dnl
 dnl ask PRCS to plug-in the project-version for the configure-script.
 dnl $Format: "AC_REVISION($ProjectVersion$)"$
-AC_REVISION(2.8.6dev.6)
+AC_REVISION(2.8.6dev.7)
 
 # Save the original $CFLAGS so we can distinguish whether the user set those
 # in the environment, or whether autoconf added -O and -g options:
@@ -28,12 +28,16 @@ rm -f config.cache; touch config.cache
 CONFIG_H=lynx_cfg.h
 AC_CONFIG_HEADER($CONFIG_H:config.hin)
 
-CF_CHECK_CACHE
+CF_CHECK_CACHE([AC_CANONICAL_SYSTEM])
+AC_ARG_WITH(system-type,
+[  --with-system-type=XXX  test: override derived host system-type],
+[AC_MSG_WARN(overriding system type $host_os to $withval)
+ host_os=$withval])
 
 PACKAGE=lynx
 dnl ask PRCS to plug-in the project-version for the packages.
 # $Format: "VERSION=$ProjectVersion$"$
-VERSION=2.8.6dev.6
+VERSION=2.8.6dev.7
 AC_SUBST(PACKAGE)
 AC_SUBST(VERSION)
 AC_SUBST(DESTDIR)
@@ -347,7 +351,7 @@ if test $with_full_paths = no ; then
 fi
 fi
 
-CF_XOPEN_SOURCE
+CF_XOPEN_SOURCE(600,199506L)
 
 dnl Collect tests for compiler options into one place
 if test -n "$TRY_CFLAGS" ; then
@@ -1101,6 +1105,13 @@ CF_PATH_PROG(UNCOMPRESS,gunzip)
 CF_PATH_PROG(UNZIP,	unzip)
 CF_PATH_PROG(BZIP2,	bzip2)
 
+CF_PATH_PROG(TAR,	tar, pax gtar gnutar bsdtar star)
+CF_TAR_OPTIONS($TAR)
+AC_DEFINE_UNQUOTED(TAR_UP_OPTIONS,   "$TAR_UP_OPTIONS")
+AC_DEFINE_UNQUOTED(TAR_DOWN_OPTIONS, "$TAR_DOWN_OPTIONS")
+AC_DEFINE_UNQUOTED(TAR_FILE_OPTIONS, "$TAR_FILE_OPTIONS")
+AC_DEFINE_UNQUOTED(TAR_PIPE_OPTIONS, "$TAR_PIPE_OPTIONS")
+
 dnl --------------------------------------------------------------------------
 dnl Test features that rely on configure-definitions
 dnl --------------------------------------------------------------------------
@@ -1108,16 +1119,9 @@ if test ".$use_dired" != ".no" ; then
 
 CF_PATH_PROG(COMPRESS,	compress)
 CF_PATH_PROG(RM,	rm)
-CF_PATH_PROG(TAR,	tar, pax gtar gnutar bsdtar star)
 CF_PATH_PROG(UUDECODE,	uudecode)
 CF_PATH_PROG(ZCAT,	zcat)
 CF_PATH_PROG(ZIP,	zip)
-
-CF_TAR_OPTIONS($TAR)
-AC_DEFINE_UNQUOTED(TAR_UP_OPTIONS,   "$TAR_UP_OPTIONS")
-AC_DEFINE_UNQUOTED(TAR_DOWN_OPTIONS, "$TAR_DOWN_OPTIONS")
-AC_DEFINE_UNQUOTED(TAR_FILE_OPTIONS, "$TAR_FILE_OPTIONS")
-AC_DEFINE_UNQUOTED(TAR_PIPE_OPTIONS, "$TAR_PIPE_OPTIONS")
 
 dnl 'INSTALL' is a special case, since the configure script has to find a
 dnl BSD-compatible one so the build/install works properly.

@@ -812,6 +812,29 @@ const char *HTFileSuffix(HTAtom *rep,
     return "";			/* Dunno */
 }
 
+/*
+ * Trim version from VMS filenames to avoid confusing comparisons.
+ */
+#ifdef VMS
+static const char *VMS_trim_version(const char *filename)
+{
+    const char *result = filename;
+    char *version = strchr(filename, ';');
+
+    if (version != 0) {
+	static char *stripped;
+
+	StrAllocCopy(stripped, filename);
+	stripped[(const char *) version - filename] = '\0';
+	result = (const char *) stripped;
+    }
+    return result;
+}
+#define VMS_DEL_VERSION(name) name = VMS_trim_version(name)
+#else
+#define VMS_DEL_VERSION(name)	/* nothing */
+#endif
+
 /*	Determine file format from file name.
  *	-------------------------------------
  *
@@ -832,9 +855,7 @@ HTFormat HTFileFormat(const char *filename,
     int i;
     int lf;
 
-#ifdef VMS
-    char *semicolon = NULL;
-#endif /* VMS */
+    VMS_DEL_VERSION(filename);
 
     if (pencoding)
 	*pencoding = NULL;
@@ -845,15 +866,6 @@ HTFormat HTFileFormat(const char *filename,
 	    *pencoding = WWW_ENC_8BIT;
 	return WWW_HTML;
     }
-#ifdef VMS
-    /*
-     * Trim at semicolon if a version number was included, so it doesn't
-     * interfere with the code for getting the MIME type.  - FM
-     */
-    if ((semicolon = strchr(filename, ';')) != NULL)
-	*semicolon = '\0';
-#endif /* VMS */
-
 #ifndef NO_INIT
     if (!HTSuffixes)
 	HTFileInit();
@@ -873,10 +885,6 @@ HTFormat HTFileFormat(const char *filename,
 	    if (pdesc)
 		*pdesc = suff->desc;
 	    if (suff->rep) {
-#ifdef VMS
-		if (semicolon != NULL)
-		    *semicolon = ';';
-#endif /* VMS */
 		return suff->rep;	/* OK -- found */
 	    }
 	    for (j = 0; j < n; j++) {	/* Got encoding, need representation */
@@ -894,10 +902,6 @@ HTFormat HTFileFormat(const char *filename,
 			    *pencoding != WWW_ENC_7BIT &&
 			    !IsUnityEnc(suff->encoding))
 			    *pencoding = suff->encoding;
-#ifdef VMS
-			if (semicolon != NULL)
-			    *semicolon = ';';
-#endif /* VMS */
 			return suff->rep;
 		    }
 		}
@@ -915,13 +919,11 @@ HTFormat HTFileFormat(const char *filename,
     /*
      * Set default encoding unless found with suffix already.
      */
-    if (pencoding && !*pencoding)
-	*pencoding = suff->encoding ? suff->encoding
-	    : HTAtom_for("binary");
-#ifdef VMS
-    if (semicolon != NULL)
-	*semicolon = ';';
-#endif /* VMS */
+    if (pencoding && !*pencoding) {
+	*pencoding = (suff->encoding
+		      ? suff->encoding
+		      : HTAtom_for("binary"));
+    }
     return suff->rep ? suff->rep : WWW_BINARY;
 }
 
@@ -1207,6 +1209,8 @@ CompressFileType HTCompressFileType(char *filename,
     size_t len = strlen(filename);
     char *ftype = filename + len;
 
+    VMS_DEL_VERSION(filename);
+
     if ((len > 4)
 	&& !strcasecomp((ftype - 3), "bz2")
 	&& strchr(dots, ftype[-4]) != 0) {
@@ -1217,6 +1221,11 @@ CompressFileType HTCompressFileType(char *filename,
 	       && strchr(dots, ftype[-3]) != 0) {
 	result = cftGzip;
 	ftype -= 3;
+    } else if ((len > 3)
+	       && !strcasecomp((ftype - 2), "zz")
+	       && strchr(dots, ftype[-3]) != 0) {
+	result = cftDeflate;
+	ftype -= 3;
     } else if ((len > 2)
 	       && !strcmp((ftype - 1), "Z")
 	       && strchr(dots, ftype[-2]) != 0) {
@@ -1225,8 +1234,39 @@ CompressFileType HTCompressFileType(char *filename,
     }
 
     *suffix = ftype;
+
     CTRACE((tfp, "HTCompressFileType(%s) returns %d:%s\n",
 	    filename, result, *suffix));
+    return result;
+}
+
+/*
+ * Check if the token from "Content-Encoding" corresponds to a compression
+ * type.  RFC 2068 (and cut/paste into RFC 2616) lists these:
+ *	gzip
+ *	compress
+ *	deflate
+ * as well as "identity" (but that does nothing).
+ */
+CompressFileType HTEncodingToCompressType(const char *coding)
+{
+    CompressFileType result = cftNone;
+
+    if (coding == 0) {
+	result = cftNone;
+    } else if (!strcasecomp(coding, "gzip") ||
+	       !strcasecomp(coding, "x-gzip")) {
+	result = cftGzip;
+    } else if (!strcasecomp(coding, "compress") ||
+	       !strcasecomp(coding, "x-compress")) {
+	result = cftCompress;
+    } else if (!strcasecomp(coding, "bzip2") ||
+	       !strcasecomp(coding, "x-bzip2")) {
+	result = cftBzip2;
+    } else if (!strcasecomp(coding, "deflate") ||
+	       !strcasecomp(coding, "x-deflate")) {
+	result = cftDeflate;
+    }
     return result;
 }
 
@@ -2079,6 +2119,269 @@ int HTStat(const char *filename,
 }
 #endif
 
+#ifdef VMS
+#define FOPEN_MODE(bin) "r", "shr=put", "shr=upd"
+#define DOT_STRING "._-"	/* FIXME: should we check if suffix is after ']' or ':' ? */
+#else
+#define FOPEN_MODE(bin) (bin ? BIN_R : "r")
+#define DOT_STRING "."
+#endif
+
+static int decompressAndParse(HTParentAnchor *anchor,
+			      HTFormat format_out,
+			      HTStream *sink,
+			      char *nodename GCC_UNUSED,
+			      char *filename,
+			      HTAtom *myEncoding,
+			      HTFormat format,
+			      int *statusp)
+{
+    HTAtom *encoding = 0;
+
+#ifdef USE_ZLIB
+    FILE *zzfp = 0;
+    gzFile gzfp = 0;
+#endif /* USE_ZLIB */
+#ifdef USE_BZLIB
+    BZFILE *bzfp = 0;
+#endif /* USE_ZLIB */
+#if defined(USE_ZLIB) || defined(USE_BZLIB)
+    CompressFileType internal_decompress = cftNone;
+    BOOL failed_decompress = NO;
+#endif
+    char *dot = 0;
+    char *localname = filename;
+    int bin;
+    FILE *fp;
+
+#ifdef VMS
+    /*
+     * Assume that the file is in Unix-style syntax if it contains a '/' after
+     * the leading one.  @@
+     */
+    localname = (strchr(localname + 1, '/')
+		 ? HTVMS_name(nodename, localname)
+		 : localname + 1);
+#endif /* VMS */
+
+    bin = HTCompressFileType(filename, ".", &dot) != cftNone;
+    fp = fopen(localname, FOPEN_MODE(bin));
+
+#ifdef VMS
+    /*
+     * If the file wasn't VMS syntax, then perhaps it is Ultrix.
+     */
+    if (!fp) {
+	char *ultrixname = 0;
+
+	CTRACE((tfp, "HTLoadFile: Can't open as %s\n", localname));
+	HTSprintf0(&ultrixname, "%s::\"%s\"", nodename, filename);
+	fp = fopen(ultrixname, FOPEN_MODE(bin));
+	if (!fp) {
+	    CTRACE((tfp, "HTLoadFile: Can't open as %s\n", ultrixname));
+	}
+	FREE(ultrixname);
+    }
+#endif /* VMS */
+    CTRACE((tfp, "HTLoadFile: Opening `%s' gives %p\n", localname, fp));
+    if (fp) {			/* Good! */
+	if (HTEditable(localname)) {
+	    HTAtom *put = HTAtom_for("PUT");
+	    HTList *methods = HTAnchor_methods(anchor);
+
+	    if (HTList_indexOf(methods, put) == (-1)) {
+		HTList_addObject(methods, put);
+	    }
+	}
+	/*
+	 * Fake a Content-Encoding for compressed files.  - FM
+	 */
+	if (!IsUnityEnc(myEncoding)) {
+	    /*
+	     * We already know from the call to HTFileFormat that
+	     * this is a compressed file, no need to look at the filename
+	     * again.  - kw
+	     */
+	    CompressFileType method = HTEncodingToCompressType(HTAtom_name(myEncoding));
+
+#define isDOWNLOAD(m) (strcmp(format_out->name, "www/download") && (method == m))
+#ifdef USE_ZLIB
+	    if (isDOWNLOAD(cftGzip)) {
+		fclose(fp);
+		gzfp = gzopen(localname, BIN_R);
+
+		CTRACE((tfp, "HTLoadFile: gzopen of `%s' gives %p\n",
+			localname, gzfp));
+		internal_decompress = cftGzip;
+	    } else if (isDOWNLOAD(cftDeflate)) {
+		zzfp = fp;
+		fp = 0;
+
+		CTRACE((tfp, "HTLoadFile: zzopen of `%s' gives %p\n",
+			localname, zzfp));
+		internal_decompress = cftDeflate;
+	    } else
+#endif /* USE_ZLIB */
+#ifdef USE_BZLIB
+	    if (isDOWNLOAD(cftBzip2)) {
+		fclose(fp);
+		bzfp = BZ2_bzopen(localname, BIN_R);
+
+		CTRACE((tfp, "HTLoadFile: bzopen of `%s' gives %p\n",
+			localname, bzfp));
+		internal_decompress = cftBzip2;
+	    } else
+#endif /* USE_BZLIB */
+	    {
+		StrAllocCopy(anchor->content_type, format->name);
+		StrAllocCopy(anchor->content_encoding, HTAtom_name(myEncoding));
+		format = HTAtom_for("www/compressed");
+	    }
+	} else {
+	    CompressFileType cft = HTCompressFileType(localname, DOT_STRING, &dot);
+
+	    if (cft != cftNone) {
+		char *cp = NULL;
+
+		StrAllocCopy(cp, localname);
+		cp[dot - localname] = '\0';
+		format = HTFileFormat(cp, &encoding, NULL);
+		FREE(cp);
+		format = HTCharsetFormat(format, anchor,
+					 UCLYhndl_HTFile_for_unspec);
+		StrAllocCopy(anchor->content_type, format->name);
+	    }
+
+	    switch (cft) {
+	    case cftCompress:
+		StrAllocCopy(anchor->content_encoding, "x-compress");
+		format = HTAtom_for("www/compressed");
+		break;
+	    case cftDeflate:
+		StrAllocCopy(anchor->content_encoding, "x-deflate");
+#ifdef USE_ZLIB
+		if (strcmp(format_out->name, "www/download") != 0) {
+		    zzfp = fp;
+		    fp = 0;
+
+		    CTRACE((tfp, "HTLoadFile: zzopen of `%s' gives %p\n",
+			    localname, zzfp));
+		    internal_decompress = cftDeflate;
+		}
+#else /* USE_ZLIB */
+		format = HTAtom_for("www/compressed");
+#endif /* USE_ZLIB */
+		break;
+	    case cftGzip:
+		StrAllocCopy(anchor->content_encoding, "x-gzip");
+#ifdef USE_ZLIB
+		if (strcmp(format_out->name, "www/download") != 0) {
+		    fclose(fp);
+		    gzfp = gzopen(localname, BIN_R);
+
+		    CTRACE((tfp, "HTLoadFile: gzopen of `%s' gives %p\n",
+			    localname, gzfp));
+		    internal_decompress = cftGzip;
+		}
+#else /* USE_ZLIB */
+		format = HTAtom_for("www/compressed");
+#endif /* USE_ZLIB */
+		break;
+	    case cftBzip2:
+		StrAllocCopy(anchor->content_encoding, "x-bzip2");
+#ifdef USE_BZLIB
+		if (strcmp(format_out->name, "www/download") != 0) {
+		    fclose(fp);
+		    bzfp = BZ2_bzopen(localname, BIN_R);
+
+		    CTRACE((tfp, "HTLoadFile: bzopen of `%s' gives %p\n",
+			    localname, bzfp));
+		    internal_decompress = cftBzip2;
+		}
+#else /* USE_BZLIB */
+		format = HTAtom_for("www/compressed");
+#endif /* USE_BZLIB */
+		break;
+	    case cftNone:
+		break;
+	    }
+	}
+#if defined(USE_ZLIB) || defined(USE_BZLIB)
+	if (internal_decompress != cftNone) {
+	    switch (internal_decompress) {
+#ifdef USE_ZLIB
+	    case cftDeflate:
+		failed_decompress = (zzfp == 0);
+		break;
+	    case cftCompress:
+	    case cftGzip:
+		failed_decompress = (gzfp == 0);
+		break;
+#endif
+#ifdef USE_BZLIB
+	    case cftBzip2:
+		failed_decompress = (bzfp == 0);
+		break;
+#endif
+	    default:
+		failed_decompress = YES;
+		break;
+	    }
+	    if (failed_decompress) {
+		*statusp = HTLoadError(NULL,
+				       -(HT_ERROR),
+				       FAILED_OPEN_COMPRESSED_FILE);
+	    } else {
+		char *sugfname = NULL;
+
+		if (anchor->SugFname) {
+		    StrAllocCopy(sugfname, anchor->SugFname);
+		} else {
+		    char *anchor_path = HTParse(anchor->address, "",
+						PARSE_PATH + PARSE_PUNCTUATION);
+		    char *lastslash;
+
+		    HTUnEscape(anchor_path);
+		    lastslash = strrchr(anchor_path, '/');
+		    if (lastslash)
+			StrAllocCopy(sugfname, lastslash + 1);
+		    FREE(anchor_path);
+		}
+		FREE(anchor->content_encoding);
+		if (sugfname && *sugfname)
+		    HTCheckFnameForCompression(&sugfname, anchor,
+					       TRUE);
+		if (sugfname && *sugfname)
+		    StrAllocCopy(anchor->SugFname, sugfname);
+		FREE(sugfname);
+#ifdef USE_BZLIB
+		if (bzfp)
+		    *statusp = HTParseBzFile(format, format_out,
+					     anchor,
+					     bzfp, sink);
+#endif
+#ifdef USE_ZLIB
+		if (gzfp)
+		    *statusp = HTParseGzFile(format, format_out,
+					     anchor,
+					     gzfp, sink);
+		else if (zzfp)
+		    *statusp = HTParseZzFile(format, format_out,
+					     anchor,
+					     zzfp, sink);
+#endif
+	    }
+	} else
+#endif /* USE_ZLIB || USE_BZLIB */
+	{
+	    *statusp = HTParseFile(format, format_out, anchor, fp, sink);
+	    fclose(fp);
+	}
+	return TRUE;
+    }				/* If successful open */
+    return FALSE;
+}
+
 /*	Load a document.
  *	----------------
  *
@@ -2102,7 +2405,6 @@ int HTLoadFile(const char *addr,
     HTFormat format;
     char *nodename = NULL;
     char *newname = NULL;	/* Simplified name of file */
-    HTAtom *encoding;		/* @@ not used yet */
     HTAtom *myEncoding = NULL;	/* enc of this file, may be gzip etc. */
     int status = -1;
     char *dot;
@@ -2110,16 +2412,6 @@ int HTLoadFile(const char *addr,
 #ifdef VMS
     struct stat stat_info;
 #endif /* VMS */
-#ifdef USE_ZLIB
-    gzFile gzfp = 0;
-#endif /* USE_ZLIB */
-#ifdef USE_BZLIB
-    BZFILE *bzfp = 0;
-#endif /* USE_ZLIB */
-#if defined(USE_ZLIB) || defined(USE_BZLIB)
-    CompressFileType internal_decompress = cftNone;
-    BOOL failed_decompress = NO;
-#endif
 
     /*
      * Reduce the filename to a basic form (hopefully unique!).
@@ -2231,222 +2523,19 @@ int HTLoadFile(const char *addr,
 	}
     }
 
-    /*
-     * Assume that the file is in Unix-style syntax if it contains a '/' after
-     * the leading one.  @@
-     */
-    {
-	FILE *fp;
-	char *vmsname = strchr(filename + 1, '/') ?
-	HTVMS_name(nodename, filename) : filename + 1;
-
-	fp = fopen(vmsname, "r", "shr=put", "shr=upd");
-
-	/*
-	 * If the file wasn't VMS syntax, then perhaps it is Ultrix.
-	 */
-	if (!fp) {
-	    char *ultrixname = 0;
-
-	    CTRACE((tfp, "HTLoadFile: Can't open as %s\n", vmsname));
-	    HTSprintf0(&ultrixname, "%s::\"%s\"", nodename, filename);
-	    fp = fopen(ultrixname, "r", "shr=put", "shr=upd");
-	    if (!fp) {
-		CTRACE((tfp, "HTLoadFile: Can't open as %s\n",
-			ultrixname));
-	    }
-	    FREE(ultrixname);
-	}
-	if (fp) {
-	    char *semicolon = NULL;
-
-	    if (HTEditable(vmsname)) {
-		HTAtom *put = HTAtom_for("PUT");
-		HTList *methods = HTAnchor_methods(anchor);
-
-		if (HTList_indexOf(methods, put) == (-1)) {
-		    HTList_addObject(methods, put);
-		}
-	    }
-	    /*
-	     * Trim vmsname at semicolon if a version number was included, so
-	     * it doesn't interfere with the check for a compressed file.  - FM
-	     */
-	    if ((semicolon = strchr(vmsname, ';')) != NULL)
-		*semicolon = '\0';
-	    /*
-	     * Fake a Content-Encoding for compressed files.  - FM
-	     */
-	    if (!IsUnityEnc(myEncoding)) {
-		/*
-		 * We already know from the call to HTFileFormat above that
-		 * this is a compressed file, no need to look at the filename
-		 * again.  - kw
-		 */
-#ifdef USE_ZLIB
-		if (strcmp(format_out->name, "www/download") != 0 &&
-		    (!strcmp(HTAtom_name(myEncoding), "gzip") ||
-		     !strcmp(HTAtom_name(myEncoding), "x-gzip"))) {
-		    fclose(fp);
-		    if (semicolon != NULL)
-			*semicolon = ';';
-		    gzfp = gzopen(vmsname, BIN_R);
-
-		    CTRACE((tfp, "HTLoadFile: gzopen of `%s' gives %p\n",
-			    vmsname, (void *) gzfp));
-		    internal_decompress = cftGzip;
-		} else
-#endif /* USE_ZLIB */
-#ifdef USE_BZLIB
-		    if (strcmp(format_out->name, "www/download") != 0 &&
-			(!strcmp(HTAtom_name(myEncoding), "bzip2") ||
-			 !strcmp(HTAtom_name(myEncoding), "x-bzip2"))) {
-		    fclose(fp);
-		    if (semicolon != NULL)
-			*semicolon = ';';
-		    bzfp = BZ2_bzopen(vmsname, BIN_R);
-
-		    CTRACE((tfp, "HTLoadFile: bzopen of `%s' gives %p\n",
-			    vmsname, (void *) bzfp));
-		    use_zread = YES;
-		} else
-#endif /* USE_BZLIB */
-		{
-		    StrAllocCopy(anchor->content_type, format->name);
-		    StrAllocCopy(anchor->content_encoding, HTAtom_name(myEncoding));
-		    format = HTAtom_for("www/compressed");
-		}
-	    } else {
-		/* FIXME: should we check if suffix is after ']' or ':' ? */
-		CompressFileType cft = HTCompressFileType(vmsname, "._-", &dot);
-
-		if (cft != cftNone) {
-		    char *cp = NULL;
-
-		    StrAllocCopy(cp, vmsname);
-		    cp[dot - vmsname] = '\0';
-		    format = HTFileFormat(cp, &encoding, NULL);
-		    FREE(cp);
-		    format = HTCharsetFormat(format, anchor,
-					     UCLYhndl_HTFile_for_unspec);
-		    StrAllocCopy(anchor->content_type, format->name);
-		}
-
-		switch (cft) {
-		case cftCompress:
-		    StrAllocCopy(anchor->content_encoding, "x-compress");
-		    format = HTAtom_for("www/compressed");
-		    break;
-		case cftGzip:
-		    StrAllocCopy(anchor->content_encoding, "x-gzip");
-#ifdef USE_ZLIB
-		    if (strcmp(format_out->name, "www/download") != 0) {
-			fclose(fp);
-			if (semicolon != NULL)
-			    *semicolon = ';';
-			gzfp = gzopen(vmsname, BIN_R);
-
-			CTRACE((tfp, "HTLoadFile: gzopen of `%s' gives %p\n",
-				vmsname, (void *) gzfp));
-			internal_decompress = cftGzip;
-		    }
-#else /* USE_ZLIB */
-		    format = HTAtom_for("www/compressed");
-#endif /* USE_ZLIB */
-		    break;
-		case cftBzip2:
-		    StrAllocCopy(anchor->content_encoding, "x-bzip2");
-#ifdef USE_BZLIB
-		    if (strcmp(format_out->name, "www/download") != 0) {
-			fclose(fp);
-			if (semicolon != NULL)
-			    *semicolon = ';';
-			bzfp = BZ2_bzopen(vmsname, BIN_R);
-
-			CTRACE((tfp, "HTLoadFile: bzopen of `%s' gives %p\n",
-				vmsname, (void *) bzfp));
-			internal_decompress = cfgBzip2;
-		    }
-#else /* USE_BZLIB */
-		    format = HTAtom_for("www/compressed");
-#endif /* USE_BZLIB */
-		    break;
-		case cftNone:
-		    break;
-		}
-	    }
-	    if (semicolon != NULL)
-		*semicolon = ';';
-	    FREE(filename);
-	    FREE(nodename);
-#if defined(USE_ZLIB) || defined(USE_BZLIB)
-	    if (internal_decompress != cftNone) {
-		switch (internal_decompress) {
-#ifdef USE_ZLIB
-		case cftCompress:
-		case cftGzip:
-		    failed_decompress = (gzfp == 0);
-		    break;
-#endif
-#ifdef USE_BZLIB
-		case cftBzip2:
-		    failed_decompress = (bzfp == 0);
-		    break;
-#endif
-		default:
-		    failed_decompress = YES;
-		    break;
-		}
-		if (failed_decompress) {
-		    status = HTLoadError(NULL,
-					 -(HT_ERROR),
-					 FAILED_OPEN_COMPRESSED_FILE);
-		} else {
-		    char *sugfname = NULL;
-
-		    if (anchor->SugFname) {
-			StrAllocCopy(sugfname, anchor->SugFname);
-		    } else {
-			char *anchor_path = HTParse(anchor->address, "",
-						    PARSE_PATH + PARSE_PUNCTUATION);
-			char *lastslash;
-
-			HTUnEscape(anchor_path);
-			lastslash = strrchr(anchor_path, '/');
-			if (lastslash)
-			    StrAllocCopy(sugfname, lastslash + 1);
-			FREE(anchor_path);
-		    }
-		    FREE(anchor->content_encoding);
-		    if (sugfname && *sugfname)
-			HTCheckFnameForCompression(&sugfname, anchor,
-						   TRUE);
-		    if (sugfname && *sugfname)
-			StrAllocCopy(anchor->SugFname, sugfname);
-		    FREE(sugfname);
-#ifdef USE_BZLIB
-		    if (bzfp)
-			status = HTParseBzFile(format, format_out,
-					       anchor,
-					       bzfp, sink);
-#endif
-#ifdef USE_ZLIB
-		    if (gzfp)
-			status = HTParseGzFile(format, format_out,
-					       anchor,
-					       gzfp, sink);
-#endif
-		}
-	    } else
-#endif /* USE_ZLIB || USE_BZLIB */
-	    {
-		status = HTParseFile(format, format_out, anchor, fp, sink);
-		fclose(fp);
-	    }
-	    return status;
-	}			/* If successful open */
+    if (decompressAndParse(anchor,
+			   format_out,
+			   sink,
+			   nodename,
+			   filename,
+			   myEncoding,
+			   format,
+			   &status)) {
+	FREE(nodename);
 	FREE(filename);
+	return status;
     }
+    FREE(filename);
 
 #else /* not VMS: */
 
@@ -2539,6 +2628,9 @@ int HTLoadFile(const char *addr,
 				break;
 			    case cftGzip:
 				atomname = "application/x-gzip";
+				break;
+			    case cftDeflate:
+				atomname = "application/x-deflate";
 				break;
 			    case cftBzip2:
 				atomname = "application/x-bzip2";
@@ -2678,184 +2770,19 @@ int HTLoadFile(const char *addr,
 /* End of directory reading section
 */
 #endif /* HAVE_READDIR */
-	{
-	    int bin = HTCompressFileType(localname, ".", &dot) != cftNone;
-	    FILE *fp = fopen(localname, (bin ? BIN_R : "r"));
-
-	    CTRACE((tfp, "HTLoadFile: Opening `%s' gives %p\n",
-		    localname, (void *) fp));
-	    if (fp) {		/* Good! */
-		if (HTEditable(localname)) {
-		    HTAtom *put = HTAtom_for("PUT");
-		    HTList *methods = HTAnchor_methods(anchor);
-
-		    if (HTList_indexOf(methods, put) == (-1)) {
-			HTList_addObject(methods, put);
-		    }
-		}
-		/*
-		 * Fake a Content-Encoding for compressed files.  - FM
-		 */
-		if (!IsUnityEnc(myEncoding)) {
-		    /*
-		     * We already know from the call to HTFileFormat above that
-		     * this is a compressed file, no need to look at the
-		     * filename again.  - kw
-		     */
-#ifdef USE_ZLIB
-		    if (strcmp(format_out->name, "www/download") != 0 &&
-			(!strcmp(HTAtom_name(myEncoding), "gzip") ||
-			 !strcmp(HTAtom_name(myEncoding), "x-gzip"))) {
-			fclose(fp);
-			gzfp = gzopen(localname, BIN_R);
-
-			CTRACE((tfp, "HTLoadFile: gzopen of `%s' gives %p\n",
-				localname, (void *) gzfp));
-			internal_decompress = cftGzip;
-		    } else
-#endif /* USE_ZLIB */
-#ifdef USE_BZLIB
-			if (strcmp(format_out->name, "www/download") != 0 &&
-			    (!strcmp(HTAtom_name(myEncoding), "bzip2") ||
-			     !strcmp(HTAtom_name(myEncoding), "x-bzip2"))) {
-			fclose(fp);
-			bzfp = BZ2_bzopen(localname, BIN_R);
-
-			CTRACE((tfp, "HTLoadFile: bzopen of `%s' gives %p\n",
-				localname, (void *) bzfp));
-			internal_decompress = cftBzip2;
-		    } else
-#endif /* USE_BZLIB */
-		    {
-			StrAllocCopy(anchor->content_type, format->name);
-			StrAllocCopy(anchor->content_encoding, HTAtom_name(myEncoding));
-			format = HTAtom_for("www/compressed");
-		    }
-		} else {
-		    CompressFileType cft = HTCompressFileType(localname, ".", &dot);
-
-		    if (cft != cftNone) {
-			char *cp = NULL;
-
-			StrAllocCopy(cp, localname);
-			cp[dot - localname] = '\0';
-			format = HTFileFormat(cp, &encoding, NULL);
-			FREE(cp);
-			format = HTCharsetFormat(format, anchor,
-						 UCLYhndl_HTFile_for_unspec);
-			StrAllocCopy(anchor->content_type, format->name);
-		    }
-
-		    switch (cft) {
-		    case cftCompress:
-			StrAllocCopy(anchor->content_encoding, "x-compress");
-			format = HTAtom_for("www/compressed");
-			break;
-		    case cftGzip:
-			StrAllocCopy(anchor->content_encoding, "x-gzip");
-#ifdef USE_ZLIB
-			if (strcmp(format_out->name, "www/download") != 0) {
-			    fclose(fp);
-			    gzfp = gzopen(localname, BIN_R);
-
-			    CTRACE((tfp,
-				    "HTLoadFile: gzopen of `%s' gives %p\n",
-				    localname, (void *) gzfp));
-			    internal_decompress = cftGzip;
-			}
-#else /* USE_ZLIB */
-			format = HTAtom_for("www/compressed");
-#endif /* USE_ZLIB */
-			break;
-		    case cftBzip2:
-			StrAllocCopy(anchor->content_encoding, "x-bzip2");
-#ifdef USE_BZLIB
-			if (strcmp(format_out->name, "www/download") != 0) {
-			    fclose(fp);
-			    bzfp = BZ2_bzopen(localname, BIN_R);
-
-			    CTRACE((tfp,
-				    "HTLoadFile: bzopen of `%s' gives %p\n",
-				    localname, (void *) bzfp));
-			    internal_decompress = cftBzip2;
-			}
-#else /* USE_BZLIB */
-			format = HTAtom_for("www/compressed");
-#endif /* USE_BZLIB */
-			break;
-		    case cftNone:
-			break;
-		    }
-		}
-		FREE(localname);
-		FREE(nodename);
-#if defined(USE_ZLIB) || defined(USE_BZLIB)
-		if (internal_decompress != cftNone) {
-		    switch (internal_decompress) {
-#ifdef USE_ZLIB
-		    case cftGzip:
-			failed_decompress = (gzfp == 0);
-			break;
-#endif
-#ifdef USE_BZLIB
-		    case cftBzip2:
-			failed_decompress = (bzfp == 0);
-			break;
-#endif
-		    default:
-			failed_decompress = YES;
-			break;
-		    }
-		    if (failed_decompress) {
-			status = HTLoadError(NULL,
-					     -(HT_ERROR),
-					     FAILED_OPEN_COMPRESSED_FILE);
-		    } else {
-			char *sugfname = NULL;
-
-			if (anchor->SugFname) {
-			    StrAllocCopy(sugfname, anchor->SugFname);
-			} else {
-			    char *anchor_path = HTParse(anchor->address, "",
-							PARSE_PATH + PARSE_PUNCTUATION);
-			    char *lastslash;
-
-			    HTUnEscape(anchor_path);
-			    lastslash = strrchr(anchor_path, '/');
-			    if (lastslash)
-				StrAllocCopy(sugfname, lastslash + 1);
-			    FREE(anchor_path);
-			}
-			FREE(anchor->content_encoding);
-			if (sugfname && *sugfname)
-			    HTCheckFnameForCompression(&sugfname, anchor,
-						       TRUE);
-			if (sugfname && *sugfname)
-			    StrAllocCopy(anchor->SugFname, sugfname);
-			FREE(sugfname);
-#ifdef USE_BZLIB
-			if (bzfp)
-			    status = HTParseBzFile(format, format_out,
-						   anchor,
-						   bzfp, sink);
-#endif
-#ifdef USE_ZLIB
-			if (gzfp)
-			    status = HTParseGzFile(format, format_out,
-						   anchor,
-						   gzfp, sink);
-#endif
-		    }
-		} else
-#endif /* USE_ZLIB */
-		{
-		    status = HTParseFile(format, format_out, anchor, fp, sink);
-		    fclose(fp);
-		}
-		return status;
-	    }			/* If successful open */
+	if (decompressAndParse(anchor,
+			       format_out,
+			       sink,
+			       nodename,
+			       localname,
+			       myEncoding,
+			       format,
+			       &status)) {
+	    FREE(nodename);
 	    FREE(localname);
-	}			/* scope of fp */
+	    return status;
+	}
+	FREE(localname);
     }				/* local unix file system */
 #endif /* !NO_UNIX_IO */
 #endif /* VMS */
@@ -2964,6 +2891,11 @@ void HTInitProgramPaths(void)
 #ifdef GZIP_PATH
 	case ppGZIP:
 	    path = GZIP_PATH;
+	    break;
+#endif
+#ifdef INFLATE_PATH
+	case ppINFLATE:
+	    path = INFLATE_PATH;
 	    break;
 #endif
 #ifdef INSTALL_PATH

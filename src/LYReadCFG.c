@@ -1331,6 +1331,7 @@ static Config_Type Config_Table [] =
      PARSE_Env(RC_HTTP_PROXY,           0),
      PARSE_Env(RC_HTTPS_PROXY,          0),
      PARSE_REQ(RC_INCLUDE,              0),
+     PARSE_PRG(RC_INFLATE_PATH,         ppINFLATE),
      PARSE_TIM(RC_INFOSECS,             InfoSecs),
      PARSE_PRG(RC_INSTALL_PATH,         ppINSTALL),
      PARSE_STR(RC_JUMP_PROMPT,          jumpprompt),
@@ -1662,7 +1663,7 @@ void LYSetConfigValue(char *name,
 {
     Config_Type *tbl = lookup_config(name);
     ParseUnionPtr q = ParseUnionOf(tbl);
-    char *temp;
+    char *temp = 0;
 
     switch (tbl->type) {
     case CONF_BOOL:
@@ -1878,6 +1879,7 @@ static void do_read_cfg(char *cfg_filename,
 	case CONF_STR:
 	case CONF_ENV:
 	case CONF_ENV2:
+	case CONF_PRG:
 	case CONF_ADD_ITEM:
 	case CONF_ADD_TRUSTED:
 	    LYSetConfigValue(name, value);

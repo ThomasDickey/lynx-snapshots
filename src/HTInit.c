@@ -1093,8 +1093,10 @@ void HTFileInit(void)
 
 	SET_SUFFIX5(".zip",	"application/zip",		"binary", "Zip File");
 
-	SET_SUFFIX1(".bz2",	"application/x-bzip2",		"binary");
+	SET_SUFFIX1(".zz",	"application/x-deflate",	"binary");
+	SET_SUFFIX1(".zz",	"application/deflate",		"binary");
 
+	SET_SUFFIX1(".bz2",	"application/x-bzip2",		"binary");
 	SET_SUFFIX1(".bz2",	"application/bzip2",		"binary");
 
 #ifdef TRADITIONAL_SUFFIXES

@@ -353,6 +353,40 @@ static void strip_userid(char *host)
     }
 }
 
+/*
+ * Check if the user's options specified to use the given encoding.  Normally
+ * all encodings with compiled-in support are specified (encodingALL).
+ */
+static BOOL acceptEncoding (int code)
+{
+    BOOL result = FALSE;
+    if ((code & LYAcceptEncoding) != 0) {
+	const char *program = 0;
+	switch (code) {
+	case encodingGZIP:
+	    program = HTGetProgramPath(ppGZIP);
+	    break;
+	case encodingDEFLATE:
+	    program = HTGetProgramPath(ppINFLATE);
+	    break;
+	case encodingCOMPRESS:
+	    program = HTGetProgramPath(ppCOMPRESS);
+	    break;
+	case encodingBZIP2:
+	    program = HTGetProgramPath(ppBZIP2);
+	    break;
+	default:
+	    break;
+	}
+	/*
+	 * FIXME:  if lynx did not rely upon external programs to decompress
+	 * files for external viewers, this check could be relaxed.
+	 */
+	result = (program != 0);
+    }
+    return result;
+}
+
 /*		Load Document from HTTP Server			HTLoadHTTP()
  *		==============================
  *
@@ -745,7 +779,7 @@ static int HTLoadHTTP(const char *arg,
 	    int j, k;
 
 	    for (j = 1; j < encodingALL; j <<= 1) {
-		if ((j & LYAcceptEncoding) != 0) {
+		if (acceptEncoding(j)) {
 		    for (k = 0; tbl_preferred_encoding[k].name != 0; ++k) {
 			if (tbl_preferred_encoding[k].value == j) {
 			    if (list != 0)

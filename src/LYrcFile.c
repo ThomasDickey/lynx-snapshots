@@ -86,6 +86,7 @@ Config_Enum tbl_preferred_encoding[] = {
     { "none",		encodingNONE },
 #if defined(USE_ZLIB) || defined(GZIP_PATH)
     { "gzip",		encodingGZIP },
+    { "deflate",	encodingDEFLATE },
 #endif
 #if defined(USE_ZLIB) || defined(COMPRESS_PATH)
     { "compress",	encodingCOMPRESS },

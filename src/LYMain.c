@@ -4140,7 +4140,7 @@ static BOOL parse_arg(char **argv,
 		if ((countp != 0) && (next_arg != 0))
 		    (*countp)++;
 	    }
-	    CTRACE((tfp, "...arg:%s\n", next_arg != 0 ? next_arg : "<null>"));
+	    CTRACE((tfp, "...arg:%s\n", NONNULL(next_arg)));
 	}
 
 	/* ignore option if it's not our turn */
