@@ -684,10 +684,10 @@ PRIVATE int HTLoad ARGS4(
     /* prevent crash if telnet or similar mapped or proxied by rule. - kw */
     LYFixCursesOnForAccess(addr, HTAnchor_physical(anchor));
     p = (HTProtocol *)HTAnchor_protocol(anchor);
-    anchor->underway = TRUE;		/* Hack to deal with caching */
+    anchor->parent->underway = TRUE;		/* Hack to deal with caching */
     status= p->load(HTAnchor_physical(anchor),
 			anchor, format_out, sink);
-    anchor->underway = FALSE;
+    anchor->parent->underway = FALSE;
     LYUCPopAssumed();
     return status;
 }
@@ -817,7 +817,7 @@ PRIVATE BOOL HTLoadDocument ARGS4(
 	    NewDoc.bookmark = anchor->bookmark;
 	    NewDoc.isHEAD = anchor->isHEAD;
 	    NewDoc.safe = anchor->safe;
-	    anchor = HTAnchor_parent(HTAnchor_findAddress(&NewDoc));
+	    anchor = HTAnchor_findAddress(&NewDoc);
 	}
     }
     /*
@@ -1083,7 +1083,7 @@ PUBLIC BOOL HTLoadAbsolute ARGS1(
 	CONST DocAddress *,	docaddr)
 {
     return HTLoadDocument(docaddr->address,
-			  HTAnchor_parent(HTAnchor_findAddress(docaddr)),
+			  HTAnchor_findAddress(docaddr),
 			  (HTOutputFormat ? HTOutputFormat : WWW_PRESENT),
 			  HTOutputStream);
 }
@@ -1106,7 +1106,7 @@ PUBLIC BOOL HTLoadToStream ARGS3(
 	HTStream *,	sink)
 {
     return HTLoadDocument(addr,
-			  HTAnchor_parent(HTAnchor_findAddress(addr)),
+			  HTAnchor_findAddress(addr),
 			  (HTOutputFormat ? HTOutputFormat : WWW_PRESENT),
 			  sink);
 }
@@ -1131,7 +1131,6 @@ PUBLIC BOOL HTLoadRelative ARGS2(
     BOOL result;
     char * mycopy = NULL;
     char * stripped = NULL;
-    char * current_address = HTAnchor_address((HTAnchor*)here);
 
     full_address.address = NULL;
     full_address.post_data = NULL;
@@ -1145,7 +1144,7 @@ PUBLIC BOOL HTLoadRelative ARGS2(
     stripped = HTStrip(mycopy);
     full_address.address =
 		HTParse(stripped,
-			current_address,
+			here->address,
 			PARSE_ACCESS|PARSE_HOST|PARSE_PATH|PARSE_PUNCTUATION);
     result = HTLoadAbsolute(&full_address);
     /*
@@ -1154,7 +1153,6 @@ PUBLIC BOOL HTLoadRelative ARGS2(
     **	is appropriate. - FM
     */
     FREE(full_address.address);
-    FREE(current_address);
     FREE(mycopy);  /* Memory leak fixed 10/7/92 -- JFG */
     return result;
 }
@@ -1182,14 +1180,12 @@ PUBLIC BOOL HTLoadAnchor ARGS1(
     if (HTAnchor_document(parent) == NULL) {	/* If not already loaded */
 						/* TBL 921202 */
 	BOOL result;
-	char * address = HTAnchor_address((HTAnchor*) parent);
 
-	result = HTLoadDocument(address,
+	result = HTLoadDocument(parent->address,
 				parent,
 				HTOutputFormat ?
 				HTOutputFormat : WWW_PRESENT,
 				HTOutputStream);
-	FREE(address);
 	if (!result) return NO;
 	loaded = YES;
     }
@@ -1197,7 +1193,9 @@ PUBLIC BOOL HTLoadAnchor ARGS1(
     {
 	HText *text = (HText*)HTAnchor_document(parent);
 
-	if (destination != (HTAnchor *)parent) {  /* If child anchor */
+	if ((destination != (HTAnchor *)parent) &&
+	    (destination != (HTAnchor *)(parent->parent))) {
+						  /* If child anchor */
 	    HText_selectAnchor(text,		  /* Double display? @@ */
 			       (HTChildAnchor*)destination);
 	} else {
@@ -1321,7 +1319,7 @@ PUBLIC BOOL HTSearchAbsolute ARGS2(
     abs_doc.isHEAD = FALSE;
     abs_doc.safe = FALSE;
 
-    anchor = (HTParentAnchor*)HTAnchor_findAddress(&abs_doc);
+    anchor = HTAnchor_findAddress(&abs_doc);
     return HTSearch(keywords, anchor);
 }
 
@@ -1396,13 +1394,13 @@ PUBLIC HTParentAnchor * HTHomeAnchor NOARGS
 		   my_home_document : (HTClientHost ?
 				     REMOTE_ADDRESS : LAST_RESORT)),
 		  STR_FILE_URL,
-		  PARSE_ACCESS|PARSE_HOST|PARSE_PATH|PARSE_PUNCTUATION);
+		  PARSE_ALL_WITHOUT_ANCHOR);
     if (my_home_document) {
 	CTRACE((tfp, "HTAccess: Using custom home page %s i.e., address %s\n",
 		    my_home_document, ref));
 	FREE(my_home_document);
     }
-    anchor = (HTParentAnchor*)HTAnchor_findAddress(ref);
+    anchor = HTAnchor_findSimpleAddress(ref);
     FREE(ref);
     return anchor;
 }

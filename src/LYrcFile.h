@@ -54,6 +54,7 @@
 #define RC_DEFAULT_USER_MODE            "default_user_mode"
 #define RC_DEFAULT_VIRTUAL_MEMORY_SIZE  "default_virtual_memory_size"
 #define RC_DEFINE RC_XLOADIMAGE_COMMAND "XLOADIMAGE_COMMAND"
+#define RC_DELAYSECS                    "delaysecs"
 #define RC_DIRED_MENU                   "dired_menu"
 #define RC_DIR_LIST_ORDER               "dir_list_order"
 #define RC_DIR_LIST_STYLE               "dir_list_style"
@@ -70,8 +71,10 @@
 #define RC_FINGER_PROXY                 "finger_proxy"
 #define RC_FOCUS_WINDOW                 "focus_window"
 #define RC_FORCE_8BIT_TOUPPER           "force_8bit_toupper"
+#define RC_FORCE_COOKIE_PROMPT          "force_cookie_prompt"
 #define RC_FORCE_EMPTY_HREFLESS_A       "force_empty_hrefless_a"
 #define RC_FORCE_SSL_COOKIES_SECURE     "force_ssl_cookies_secure"
+#define RC_FORCE_SSL_PROMPT             "force_ssl_prompt"
 #define RC_FORMS_OPTIONS                "forms_options"
 #define RC_FTP_PASSIVE                  "ftp_passive"
 #define RC_FTP_PROXY                    "ftp_proxy"
@@ -227,6 +230,7 @@
 #define RC_ZIP_PATH                     "zip_path"
 
 extern Config_Enum tbl_DTD_recovery[];
+extern Config_Enum tbl_force_prompt[];
 extern Config_Enum tbl_keypad_mode[];
 extern Config_Enum tbl_multi_bookmarks[];
 extern Config_Enum tbl_transfer_rate[];

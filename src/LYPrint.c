@@ -157,7 +157,7 @@ PRIVATE void SetupFilename ARGS2(
 	format = HTFileFormat(filename, &encoding, NULL);
 	if (!strcasecomp(format->name, "text/html") ||
 	    !IsUnityEnc(encoding)) {
-	    strcpy(cp, ".txt");
+	    strcpy(cp, TEXT_SUFFIX);
 	}
     }
 }
@@ -564,14 +564,14 @@ PRIVATE void send_file_to_mail ARGS3(
     outfile_fp = LYOpenTemp(my_temp,
 			    (HTisDocumentSource())
 				    ? HTML_SUFFIX
-				    : ".txt",
+				    : TEXT_SUFFIX,
 			    "w");
     if (outfile_fp == NULL) {
 	CannotPrint(UNABLE_TO_OPEN_TEMPFILE);
     }
 
     if (isPMDF) {
-	if ((hfd = LYOpenTemp(hdrfile, ".txt", "w")) == NULL) {
+	if ((hfd = LYOpenTemp(hdrfile, TEXT_SUFFIX, "w")) == NULL) {
 	    CannotPrint(UNABLE_TO_OPEN_TEMPFILE);
 	}
 	if (use_type) {
@@ -678,7 +678,7 @@ PRIVATE void send_file_to_mail ARGS3(
 #if CAN_PIPE_TO_MAILER
     outfile_fp = LYPipeToMailer();
 #else
-    outfile_fp = LYOpenTemp(my_temp, ".txt", "w");
+    outfile_fp = LYOpenTemp(my_temp, TEXT_SUFFIX, "w");
 #endif
     if (outfile_fp == NULL) {
 	CannotPrint(MAIL_REQUEST_FAILED);
@@ -813,7 +813,7 @@ PRIVATE void send_file_to_printer ARGS4(
     outfile_fp = LYOpenTemp(my_temp,
 			    (HTisDocumentSource())
 				    ? HTML_SUFFIX
-				    : ".txt",
+				    : TEXT_SUFFIX,
 			    "w");
     if (outfile_fp == NULL) {
 	CannotPrint(FILE_ALLOC_FAILED);

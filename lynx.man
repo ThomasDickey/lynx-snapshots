@@ -188,6 +188,7 @@ toggles handling of Set-Cookie headers.
 .TP
 .B \-core
 toggles forced core dumps on fatal errors.
+Turn this option off to ask lynx to force a core dump if a fatal error occurs.
 .TP
 .B \-crawl
 with \fB\-traversal,\fR output each page to a file.
@@ -199,6 +200,9 @@ left/right scrolling of the display.
 .TP
 .B \-debug_partial
 separate incremental display stages with MessageSecs delay
+.TP
+.B \-delay
+add DebugSecs delay after each progress-message
 .TP
 .B \-display\fR=\fIDISPLAY
 set the display variable for X rexec-ed programs.

@@ -388,6 +388,10 @@ PRIVATE int set_clicked_link ARGS4(
 	mouse_link = -2;
 	if (x == 0 && toolbar)		/* On '#' */
 	    c = LAC_TO_LKC0(LYK_TOOLBAR);
+#if defined(CAN_CUT_AND_PASTE) && defined(USE_COLOR_STYLE)
+	else if (y == 0 && x == LYcols - 1 && s_hot_paste != NOSTYLE)
+	    c = LAC_TO_LKC0(LYK_PASTE_URL);
+#endif
 	else if (clicks > 1) {
 	    if (x < left + toolbar)
 		c = (code==FOR_PROMPT && y)
@@ -5685,7 +5689,7 @@ PUBLIC int LYReadCmdKey ARGS1(
     } else {
 	ch = LYgetch_for(mode);
     }
-    CTRACE((tfp, "LYReadCmdKey(%d) ->%c (%#x)\n", mode, ch, ch));
+    CTRACE((tfp, "LYReadCmdKey(%d) ->%s (%#x)\n", mode, LYKeycodeToString(ch, TRUE), ch));
     LYWriteCmdKey(ch);
     return ch;
 }

@@ -41,10 +41,6 @@
 #include <LYexit.h>
 #include <LYLeaks.h>
 
-#ifdef SH_EX	/* for DEBUG (1997/10/10 (Fri) 07:58:47) */
-#define NOTUSED_BAD_FOR_SCREEN
-#endif
-
 /*#define DEBUG_APPCH 1*/
 
 #ifdef SOURCE_CACHE
@@ -467,6 +463,14 @@ struct _HText {
 #endif
 };
 
+/* exported */
+PUBLIC void* HText_pool_calloc ARGS2(
+	HText *,	text,
+	unsigned,	size)
+{
+    return (void*) ALLOC_IN_POOL(&text->pool, size);
+}
+
 PRIVATE void HText_AddHiddenLink PARAMS((HText *text, TextAnchor *textanchor));
 
 #ifdef EXP_JUSTIFY_ELTS
@@ -744,6 +748,30 @@ PRIVATE void LYAddHiText ARGS3(
 }
 
 /*
+ * Return an offset to skip leading blanks in the highlighted link.  That is
+ * needed to avoid having the color-style paint the leading blanks.
+ */
+#ifdef USE_COLOR_STYLE
+PRIVATE int LYAdjHiTextPos ARGS2(
+	TextAnchor *,	a,
+	int,		count)
+{
+    char *result;
+
+    if (count >= a->lites.hl_len)
+	result = NULL;
+    else if (count > 0)
+	result = a->lites.hl_info[count - 1].hl_text;
+    else
+	result = a->lites.hl_base.hl_text;
+
+    return (result != 0) ? (LYSkipBlanks(result) - result) : 0;
+}
+#else
+#define LYAdjHiTextPos(a,count) 0
+#endif
+
+/*
  * Get the highlight text, counting from zero.
  */
 PRIVATE char *LYGetHiTextStr ARGS2(
@@ -758,6 +786,8 @@ PRIVATE char *LYGetHiTextStr ARGS2(
 	result = a->lites.hl_info[count - 1].hl_text;
     else
 	result = a->lites.hl_base.hl_text;
+    result += LYAdjHiTextPos(a, count);
+    CTRACE((tfp, "FIXME text '%s'\n", result));
     return result;
 }
 
@@ -776,6 +806,8 @@ PRIVATE int LYGetHiTextPos ARGS2(
 	result = a->lites.hl_info[count - 1].hl_x;
     else
 	result = a->line_pos;
+    result += LYAdjHiTextPos(a, count);
+    CTRACE((tfp, "FIXME cols '%d'\n", result));
     return result;
 }
 
@@ -890,6 +922,8 @@ PUBLIC HText *	HText_new ARGS1(
     if (anchor->document) {
 	HTList_removeObject(loaded_texts, anchor->document);
 	CTRACE((tfp, "GridText: Auto-uncaching\n")) ;
+
+	HTAnchor_delete_links(anchor);
 	((HText *)anchor->document)->node_anchor = NULL;
 	HText_free((HText *)anchor->document);
 	anchor->document = NULL;
@@ -1092,8 +1126,6 @@ PUBLIC void HText_free ARGS1(
     if (!self)
 	return;
 
-    HTAnchor_setDocument(self->node_anchor, (HyperDoc *)0);
-
     while (self->first_anchor) {		/* Free off anchor array */
 	TextAnchor * l = self->first_anchor;
 	self->first_anchor = l->next;
@@ -1194,7 +1226,12 @@ PUBLIC void HText_free ARGS1(
 	 */
 	HTAnchor_clearSourceCache(self->node_anchor);
 #endif
-	if (HTAnchor_delete(self->node_anchor))
+
+	HTAnchor_delete_links(self->node_anchor);
+
+	HTAnchor_setDocument(self->node_anchor, (HyperDoc *)0);
+
+	if (HTAnchor_delete(self->node_anchor->parent))
 	    /*
 	     *  Make sure HTMainAnchor won't point
 	     *  to an invalid structure. - KW
@@ -1680,6 +1717,16 @@ PRIVATE void display_title ARGS1(
 	LYaddstr(percent);
     LYaddch('\n');
     FREE(title);
+
+#if defined(USE_COLOR_STYLE) && defined(CAN_CUT_AND_PASTE)
+    if (s_hot_paste != NOSTYLE) {	/* Only if the user set the style */
+	LYmove(0, LYcols - 1);
+	LynxChangeStyle(s_hot_paste, STACK_ON);
+	LYaddch(ACS_RARROW);
+	LynxChangeStyle(s_hot_paste, STACK_OFF);
+	LYmove(1, 0);			/* As after \n */
+    }
+#endif /* USE_COLOR_STYLE */
 
 #ifdef USE_COLOR_STYLE
 /* turn the TITLE style off */
@@ -3368,6 +3415,8 @@ PRIVATE void blank_lines ARGS2(
 	    newlines--;		/* Don't bother: already blank */
 	    line = line->prev;
 	}
+    } else if (AT_START_OF_CELL(text)) {
+	newlines = 1;			/* New line to get a correct offset */
     } else {
 	newlines++;			/* Need also to finish this line */
     }
@@ -5877,6 +5926,8 @@ re_parse:
 	line_ptr2 = line_ptr;
 	count_line = cur_line;
 	while (actual_len > hilite_len) {
+	    HTLine *old_line_ptr2 = line_ptr2;
+
 	    count_line++;
 	    line_ptr2 = line_ptr2->next;
 
@@ -5884,7 +5935,7 @@ re_parse:
 	     && count_line >= stop_before) {
 		LYClearHiText(anchor_ptr);
 		break;
-	    } else if (line_ptr2 == text->last_line) {
+	    } else if (old_line_ptr2 == text->last_line) {
 		break;
 	    }
 
@@ -9367,10 +9418,8 @@ PUBLIC char * HText_setLastOptionValue ARGS7(
 	if (HTCJK != NOCJK) {
 	    if (cp &&
 		(tmp = typecallocn(unsigned char, strlen(cp)+1)) != 0) {
-#ifdef SH_EX
 		if (tmp == NULL)
 		    outofmem(__FILE__, "HText_setLastOptionValue");
-#endif
 		if (kanji_code == EUC) {
 		    TO_EUC((unsigned char *)cp, tmp);
 		    val_cs = current_char_set;
@@ -11147,10 +11196,12 @@ PUBLIC int HText_SubmitForm ARGS4(
 		     * Names are different so this is the first textarea or a
 		     * different one from any before it.
 		     */
-		    if (Boundary) {
+		    if (PlainText) {
+			FREE(previous_blanks);
+		    } else if (Boundary) {
 			StrAllocCopy(previous_blanks, "\r\n");
 		    } else {
-			FREE(previous_blanks);
+			StrAllocCopy(previous_blanks, "%0d%0a");
 		    }
 		    escaped1 = escape_or_quote_name(name_used,
 						    my_data[anchor_count].quote,
@@ -11178,7 +11229,10 @@ PUBLIC int HText_SubmitForm ARGS4(
 			    FREE(previous_blanks);
 			}
 			BStrCat0(my_query, escaped2);
-			BStrCat0(my_query, marker);
+			if (PlainText || Boundary)
+			    BStrCat0(my_query, marker);
+			else
+			    StrAllocCopy(previous_blanks, marker);
 		    } else {
 			StrAllocCat(previous_blanks, marker);
 		    }
@@ -11463,8 +11517,6 @@ PRIVATE void free_all_texts NOARGS
      */
     while (loaded_texts && !HTList_isEmpty(loaded_texts)) {
 	if ((cur = (HText *)HTList_removeLastObject(loaded_texts)) != NULL) {
-	    if (cur->node_anchor && cur->node_anchor->underway)
-		cur->node_anchor->underway = FALSE;
 	    HText_free(cur);
 	}
     }
@@ -13886,7 +13938,7 @@ PUBLIC void redraw_lines_of_link ARGS1(
 	todr1 = todr1->prev;
 
     row = links[cur].ly;
-    for (count = 0; row < display_lines && (text = LYGetHiliteStr(cur, count)) != NULL; ++count) {
+    for (count = 0; row <= display_lines && (text = LYGetHiliteStr(cur, count)) != NULL; ++count) {
 	col = LYGetHilitePos(cur, count);
 	LYmove(row++, col);
 	redraw_part_of_line (todr1, text, strlen(text), HTMainText);

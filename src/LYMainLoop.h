@@ -5,7 +5,9 @@
 #include <HTUtils.h>
 #endif
 
+#ifdef DISP_PARTIAL
 extern BOOL LYMainLoop_pageDisplay PARAMS((int line_num));
+#endif
 extern BOOLEAN LYOpenTraceLog NOPARAMS;
 extern char* LYDownLoadAddress NOPARAMS;
 extern int LYGetNewline NOPARAMS;

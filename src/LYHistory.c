@@ -254,7 +254,6 @@ PUBLIC BOOLEAN LYwouldPush ARGS2(
 	rc = (BOOLEAN)
 		! (LYIsUIPage(docurl, UIP_HISTORY)
 		|| LYIsUIPage(docurl, UIP_PRINT_OPTIONS)
-		|| LYIsUIPage(docurl, UIP_DOWNLOAD_OPTIONS)
 #ifdef DIRED_SUPPORT
 		|| LYIsUIPage(docurl, UIP_DIRED_MENU)
 		|| LYIsUIPage(docurl, UIP_UPLOAD_OPTIONS)
@@ -265,7 +264,6 @@ PUBLIC BOOLEAN LYwouldPush ARGS2(
 	rc = (BOOLEAN)
 		! (!strcmp(title, HISTORY_PAGE_TITLE)
 		|| !strcmp(title, PRINT_OPTIONS_TITLE)
-		|| !strcmp(title, DOWNLOAD_OPTIONS_TITLE)
 #ifdef DIRED_SUPPORT
 		|| !strcmp(title, DIRED_MENU_TITLE)
 		|| !strcmp(title, UPLOAD_OPTIONS_TITLE)
@@ -449,7 +447,7 @@ PUBLIC int LYpush ARGS2(
 		WWWDoc.isHEAD = doc->isHEAD;
 		WWWDoc.safe = doc->safe;
 		thisparent =
-		    HTAnchor_parent(HTAnchor_findAddress(&WWWDoc));
+		    HTAnchor_findAddress(&WWWDoc);
 		/* Now find the ParentAnchor for the previous history
 		** item - kw
 		*/
@@ -476,7 +474,7 @@ PUBLIC int LYpush ARGS2(
 			WWWDoc.isHEAD = HDOC(nhist-1).isHEAD;
 			WWWDoc.safe = HDOC(nhist-1).safe;
 			thatparent =
-			    HTAnchor_parent(HTAnchor_findAddress(&WWWDoc));
+			    HTAnchor_findAddress(&WWWDoc);
 			FREE(temp);
 		    } else {
 			WWWDoc.address = HDOC(nhist-1).address;
@@ -488,7 +486,7 @@ PUBLIC int LYpush ARGS2(
 			WWWDoc.isHEAD = HDOC(nhist-1).isHEAD;
 			WWWDoc.safe = HDOC(nhist-1).safe;
 			thatparent =
-			    HTAnchor_parent(HTAnchor_findAddress(&WWWDoc));
+			    HTAnchor_findAddress(&WWWDoc);
 		    }
 		    /* In addition to equality of the ParentAnchors, require
 		    ** that IF we have a HTMainText (i.e., it wasn't just
@@ -763,7 +761,7 @@ PUBLIC BOOLEAN historytarget ARGS1(
 	WWWDoc.bookmark = newdoc->bookmark;
 	WWWDoc.isHEAD = newdoc->isHEAD;
 	WWWDoc.safe = newdoc->safe;
-	tmpanchor = HTAnchor_parent(HTAnchor_findAddress(&WWWDoc));
+	tmpanchor = HTAnchor_findAddress(&WWWDoc);
 	text = (HText *)HTAnchor_document(tmpanchor);
 	if (((((LYresubmit_posts == TRUE) ||
 	       (LYforce_no_cache == TRUE &&

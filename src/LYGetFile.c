@@ -529,15 +529,12 @@ Try_Redirected_URL:
 	    if (no_mail) {
 		HTUserMsg(MAIL_DISABLED);
 	    } else {
-		HTParentAnchor *tmpanchor;
+		HTParentAnchor *tmpanchor = HTAnchor_findAddress(&WWWDoc);
 		CONST char *title;
 		char *tmptitle = NULL;
 
 		title = "";
-		if ((tmpanchor = HTAnchor_parent(
-					HTAnchor_findAddress(&WWWDoc)
-						)) != NULL &&
-		    HTAnchor_title(tmpanchor)) {
+		if (HTAnchor_title(tmpanchor)) {
 			title = HTAnchor_title(tmpanchor);
 		} else if (HTMainAnchor && !LYUserSpecifiedURL) {
 		    title = HTAnchor_subject(HTMainAnchor);
@@ -1005,19 +1002,15 @@ Try_Redirected_URL:
 		 *  file waiting for us to download.
 		 */
 		if (WWW_Download_File) {
-		    HTParentAnchor *tmpanchor;
+		    HTParentAnchor *tmpanchor = HTAnchor_findAddress(&WWWDoc);
 		    char *fname = NULL;
 
 		    /*
 		     *	Check for a suggested filename from
 		     *	the Content-Disposition header. - FM
 		     */
-		    if (((tmpanchor = HTAnchor_parent(
-					HTAnchor_findAddress(&WWWDoc)
-						     )) != NULL) &&
-			HTAnchor_SugFname(tmpanchor) != NULL) {
-			StrAllocCopy(fname,
-				     HTAnchor_SugFname(tmpanchor));
+		    if (HTAnchor_SugFname(tmpanchor) != NULL) {
+			StrAllocCopy(fname, HTAnchor_SugFname(tmpanchor));
 		    } else {
 			StrAllocCopy(fname, doc->address);
 		    }
@@ -1026,10 +1019,8 @@ Try_Redirected_URL:
 		     *	which we don't uncompress for downloads,
 		     *	and adjust any suffix appropriately. - FM
 		     */
-		    if (tmpanchor != NULL) {
-			HTCheckFnameForCompression(&fname, tmpanchor,
-						   FALSE);
-		    }
+		    HTCheckFnameForCompression(&fname, tmpanchor, FALSE);
+
 		    if (LYdownload_options(&fname,
 					   WWW_Download_File) < 0) {
 			FREE(fname);

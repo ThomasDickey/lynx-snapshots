@@ -385,6 +385,7 @@ extern char * LYToolbarName;
 extern int AlertSecs;
 extern int InfoSecs;
 extern int MessageSecs;
+extern int DebugSecs;
 extern int ReplaySecs;
 
 extern char * LYUserAgent;		/* Lynx User-Agent header */
@@ -453,10 +454,14 @@ extern int LYHiddenLinks;
 extern int Old_DTD;
 
 #define MBM_V_MAXFILES  25		/* Max number of sub-bookmark files */
+
 /*
  *  Arrays that holds the names of sub-bookmark files
  *  and their descriptions.
  */
+extern char *MBM_A_subbookmark[MBM_V_MAXFILES+1];
+extern char *MBM_A_subdescript[MBM_V_MAXFILES+1];
+
 extern BOOLEAN LYForceSSLCookiesSecure;
 extern BOOLEAN LYNoCc;
 extern BOOLEAN LYNonRestartingSIGWINCH;
@@ -470,8 +475,18 @@ extern BOOLEAN LYSeekFragMAPinCur;
 extern BOOLEAN LYStripDotDotURLs;	/* Try to fix ../ in some URLs?  */
 extern BOOLEAN LYUseBuiltinSuffixes;
 extern BOOLEAN dont_wrap_pre;
-extern char *MBM_A_subbookmark[MBM_V_MAXFILES+1];
-extern char *MBM_A_subdescript[MBM_V_MAXFILES+1];
+
+extern int cookie_noprompt;
+
+typedef enum {
+    FORCE_PROMPT_DFT		/* force a prompt, use the result */
+    ,FORCE_PROMPT_YES		/* assume "yes" where a prompt would be used */
+    ,FORCE_PROMPT_NO		/* assume "no" where a prompt would be used */
+} FORCE_PROMPT;
+
+#ifdef USE_SSL
+extern int ssl_noprompt;
+#endif
 
 #ifdef MISC_EXP
 extern int LYNoZapKey;  /* 0: off (do 'z' checking), 1: full, 2: initially */
@@ -530,11 +545,9 @@ extern int lynx_timeout;
 
 #ifdef SH_EX
 extern BOOLEAN show_cfg;
-#ifdef WIN_EX
-extern int     debug_delay;
 #endif
+
 extern BOOLEAN no_table_center;
-#endif
 
 #if USE_BLAT_MAILER
 extern BOOLEAN mail_is_blat;

@@ -314,11 +314,9 @@ PUBLIC BOOLEAN system_is_NT = FALSE;
 
 #ifdef SH_EX
 PUBLIC BOOLEAN show_cfg = FALSE;
-#ifdef WIN_EX
-PUBLIC int     debug_delay = 0;		/* 1998/10/06 (Tue) 08:41:20 */
 #endif
+
 PUBLIC BOOLEAN no_table_center = FALSE;	/* 1998/10/09 (Fri) 15:12:49 */
-#endif /* SH_EX */
 
 #if USE_BLAT_MAILER
 PUBLIC BOOLEAN mail_is_blat = TRUE;
@@ -422,6 +420,7 @@ PUBLIC char *system_mail_flags = NULL;	/* Flags for sending mail */
 PUBLIC char *x_display = NULL;		/* display environment variable */
 PUBLIC HistInfo history[MAXHIST];
 PUBLIC int AlertSecs;			/* time-delay for HTAlert() messages   */
+PUBLIC int DebugSecs;			/* time-delay for HTProgress messages */
 PUBLIC int InfoSecs;			/* time-delay for Information messages */
 PUBLIC int LYMultiBookmarks = MULTI_BOOKMARK_SUPPORT;
 PUBLIC int LYStatusLine = -1;		/* Line for statusline() if > -1 */
@@ -487,6 +486,12 @@ PUBLIC BOOLEAN LYPrependBaseToSource = TRUE;
 PUBLIC BOOLEAN LYPrependCharsetToSource = TRUE;
 PUBLIC BOOLEAN LYQuitDefaultYes = QUIT_DEFAULT_YES;
 PUBLIC BOOLEAN dont_wrap_pre = FALSE;
+
+PUBLIC int cookie_noprompt;
+
+#ifdef USE_SSL
+PUBLIC int ssl_noprompt = FORCE_PROMPT_DFT;
+#endif
 
 PUBLIC int connect_timeout = 18000; /*=180000*0.1 - used in HTDoConnect.*/
 
@@ -1043,9 +1048,11 @@ PUBLIC int main ARGS2(
     StrAllocCopy(list_format, LIST_FORMAT);
 #endif /* !VMS */
 
+    AlertSecs	= SECS2Secs(ALERTSECS);
+    DebugSecs	= SECS2Secs(DEBUGSECS);
     InfoSecs	= SECS2Secs(INFOSECS);
     MessageSecs	= SECS2Secs(MESSAGESECS);
-    AlertSecs	= SECS2Secs(ALERTSECS);
+    ReplaySecs	= SECS2Secs(REPLAYSECS);
 
     StrAllocCopy(helpfile, HELPFILE);
     StrAllocCopy(startfile, STARTFILE);
@@ -2249,9 +2256,10 @@ PUBLIC void reload_read_cfg NOARGS
 
 PRIVATE void disable_pausing NOARGS
 {
+    AlertSecs = 0;
+    DebugSecs = 0;
     InfoSecs = 0;
     MessageSecs = 0;
-    AlertSecs = 0;
     ReplaySecs = 0;
 }
 
@@ -2290,10 +2298,12 @@ typedef struct parse_args_type
 #define LYSTRING_ARG		0x0050
 #define INT_ARG			0x0060
 #define STRING_ARG		0x0070
+#define TIME_ARG		0x0080
 #define ARG_TYPE_MASK		0x0FF0
 #define NEED_NEXT_ARG		0x1000
 
 #define NEED_INT_ARG		(NEED_NEXT_ARG | INT_ARG)
+#define NEED_TIME_ARG		(NEED_NEXT_ARG | TIME_ARG)
 #define NEED_LYSTRING_ARG	(NEED_NEXT_ARG | LYSTRING_ARG)
 #define NEED_STRING_ARG		(NEED_NEXT_ARG | STRING_ARG)
 #define NEED_FUNCTION_ARG	(NEED_NEXT_ARG | FUNCTION_ARG)
@@ -3072,33 +3082,20 @@ PRIVATE int version_fun ARGS1(
     printf("\n");
 #endif /* USE_SSL */
 
-#ifdef SYSTEM_NAME
 #ifndef __DATE__
 #define __DATE__ ""
 #endif
 #ifndef __TIME__
 #define __TIME__ ""
 #endif
+
+/*
+ * SYSTEM_NAME is set by the configure script.  Show build date/time for other
+ * systems, according to predefined compiler symbols.
+ */
+#ifdef SYSTEM_NAME
     printf(gettext("Built on %s %s %s\n"), SYSTEM_NAME, __DATE__, __TIME__);
-#endif
-
-    printf("\n");
-    printf(gettext(
-	  "Copyrights held by the University of Kansas, CERN, and other contributors.\n"
-	  ));
-    printf(gettext("Distributed under the GNU General Public License.\n"));
-    printf(gettext(
-	  "See http://lynx.browser.org/ and the online help for more information.\n\n"
-	  ));
-#ifdef USE_SSL
-    printf("See http://www.moxienet.com/lynx/ for information about SSL for Lynx.\n");
-#ifdef OPENSSL_VERSION_TEXT
-    printf("See http://www.openssl.org/ for information about OpenSSL.\n");
-#endif /* OPENSSL_VERSION_TEXT */
-    printf("\n");
-#endif /* USE_SSL */
-
-#ifdef SH_EX
+#else
 #ifdef __CYGWIN__
     printf("Compiled by CYGWIN (%s %s).\n", __DATE__, __TIME__);
 #else
@@ -3116,7 +3113,23 @@ PRIVATE int version_fun ARGS1(
 #endif /* _MSC_VER */
 #endif /* __BORLANDC__ */
 #endif /* __CYGWIN__ */
-#endif /* SH_EX */
+#endif
+
+    printf("\n");
+    printf(gettext(
+	  "Copyrights held by the University of Kansas, CERN, and other contributors.\n"
+	  ));
+    printf(gettext("Distributed under the GNU General Public License.\n"));
+    printf(gettext(
+	  "See http://lynx.browser.org/ and the online help for more information.\n\n"
+	  ));
+#ifdef USE_SSL
+    printf("See http://www.moxienet.com/lynx/ for information about SSL for Lynx.\n");
+#ifdef OPENSSL_VERSION_TEXT
+    printf("See http://www.openssl.org/ for information about OpenSSL.\n");
+#endif /* OPENSSL_VERSION_TEXT */
+    printf("\n");
+#endif /* USE_SSL */
 
     SetOutputMode( O_BINARY );
 
@@ -3197,12 +3210,10 @@ PRIVATE Config_Type Arg_Table [] =
       "case",		4|SET_ARG,		case_sensitive,
       "enable case sensitive user searching"
    ),
-#ifdef SH_EX
    PARSE_SET(
       "center",		4|TOGGLE_ARG,		no_table_center,
-      "Toggle center alignment in HTML TABLE"
+      "toggle center alignment in HTML TABLE"
    ),
-#endif
    PARSE_STR(
       "cfg",		2|NEED_LYSTRING_ARG,	lynx_cfg_file,
       "=FILENAME\nspecifies a lynx.cfg file other than the default"
@@ -3274,12 +3285,10 @@ with -dump, format output as with -traversal, but to stdout"
       "incremental display stages with MessageSecs delay"
    ),
 #endif
-#if defined(SH_EX) && defined(WIN_EX)
    PARSE_INT(
-      "delay",		4|NEED_INT_ARG,		debug_delay,
-      "=NNN\nset the NNN msec delay at statusline message"
+      "delay",		4|NEED_TIME_ARG,	DebugSecs,
+      "=NNN\nset NNN-second delay at statusline message"
    ),
-#endif
    PARSE_FUN(
       "display",	4|NEED_FUNCTION_ARG,	display_fun,
       "=DISPLAY\nset the display variable for X exec'ed programs"
@@ -3852,6 +3861,9 @@ in double-quotes (\"-\") on VMS)", NULL, TRUE);
 	    case INT_ARG:
 		sprintf(temp, "%d", *(q->int_value));
 		break;
+	    case TIME_ARG:
+		sprintf(temp, SECS_FMT, (double) Secs2SECS(*(q->int_value)));
+		break;
 	    case STRING_ARG:
 		if ((value = *(q->str_value)) != 0
 		 && !*value)
@@ -4075,10 +4087,19 @@ PRIVATE BOOL parse_arg ARGS3(
 		 *(q->int_value) = strtol (next_arg, &temp_ptr, 0);
 	     break;
 
+	case TIME_ARG:
+	    if ((q->int_value != 0) && (next_arg != 0)) {
+		float ival;
+		if (1 == sscanf (next_arg, "%f", &ival)) {
+		    *(q->int_value) = (int) SECS2Secs(ival);
+		}
+	    }
+	    break;
+
 	case STRING_ARG:
-	     if ((q->str_value != 0) && (next_arg != 0))
+	    if ((q->str_value != 0) && (next_arg != 0))
 		*(q->str_value) = next_arg;
-	     break;
+	    break;
 	}
 
 	Old_DTD = DTD_recovery;	/* BOOL != int */

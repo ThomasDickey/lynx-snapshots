@@ -2176,6 +2176,21 @@ static char * show_cursor_string	= RC_SHOW_CURSOR;
 static char * show_scrollbar_string	= RC_SCROLLBAR;
 #endif
 
+static CONST char prompt_dft_string[]	= "prompt normally";
+static CONST char prompt_yes_string[]	= "force yes-response";
+static CONST char prompt_no_string[]	= "force no-response";
+static OptValues prompt_values[] = {
+	{ FORCE_PROMPT_DFT,	prompt_dft_string, prompt_dft_string },
+	{ FORCE_PROMPT_YES,	prompt_yes_string, prompt_yes_string },
+	{ FORCE_PROMPT_NO,	prompt_no_string,  prompt_no_string },
+	{ 0, 0, 0 }};
+
+static char * cookie_prompt_string	= RC_FORCE_COOKIE_PROMPT;
+
+#ifdef USE_SSL
+static char * ssl_prompt_string		= RC_FORCE_SSL_PROMPT;
+#endif
+
 static char * user_mode_string		= RC_USER_MODE;
 static OptValues user_mode_values[] = {
 	{ NOVICE_MODE,		"Novice",	"Novice" },
@@ -2708,6 +2723,16 @@ PUBLIC int postoptions ARGS1(
 	 && GetOptValues(bool_values, data[i].value, &code)) {
 	    LYShowScrollbar = (BOOL) code;
 	}
+#endif
+
+	/* Cookie Prompting: SELECT */
+	if (!strcmp(data[i].tag, cookie_prompt_string))
+	    GetOptValues(prompt_values, data[i].value, &cookie_noprompt);
+
+#ifdef USE_SSL
+	/* SSL Prompting: SELECT */
+	if (!strcmp(data[i].tag, ssl_prompt_string))
+	    GetOptValues(prompt_values, data[i].value, &ssl_noprompt);
 #endif
 
 	/* User Mode: SELECT */
@@ -3255,6 +3280,9 @@ PRIVATE int gen_options ARGS1(
     PutOptValues(fp0, case_sensitive, search_type_values);
     EndSelect(fp0);
 
+    fprintf(fp0,"\n  <em>%s</em>\n", gettext("Security and Privacy"));
+    /*****************************************************************/
+
     /* Cookies: SELECT */
     PutLabel(fp0, gettext("Cookies"), will_save_cookies());
     BeginSelect(fp0, cookies_string);
@@ -3269,6 +3297,19 @@ PRIVATE int gen_options ARGS1(
 		   cookies_accept_all_string);
     EndSelect(fp0);
 
+    /* Cookie Prompting: SELECT */
+    PutLabel(fp0, gettext("Invalid-Cookie Prompting"), cookie_prompt_string);
+    BeginSelect(fp0, cookie_prompt_string);
+    PutOptValues(fp0, cookie_noprompt, prompt_values);
+    EndSelect(fp0);
+
+#ifdef USE_SSL
+    /* SSL Prompting: SELECT */
+    PutLabel(fp0, gettext("SSL Prompting"), ssl_prompt_string);
+    BeginSelect(fp0, ssl_prompt_string);
+    PutOptValues(fp0, ssl_noprompt, prompt_values);
+    EndSelect(fp0);
+#endif
 
     fprintf(fp0,"\n  <em>%s</em>\n", gettext("Keyboard Input"));
     /*****************************************************************/

@@ -463,6 +463,19 @@ cancelled:
 }
 
 /*
+ * Compare a filename with a given suffix, which we have set to give a rough
+ * idea of its content.
+ */
+PRIVATE int SuffixIs ARGS2(
+	char *,		filename,
+	char *,		suffix)
+{
+    size_t have = strlen(filename);
+    size_t need = strlen(suffix);
+    return have > need && !strcmp(filename + have - need, suffix);
+}
+
+/*
  *  LYdownload_options writes out the current download choices to
  *  a file so that the user can select downloaders in the same way that
  *  they select all other links.  Download links look like:
@@ -521,13 +534,27 @@ PUBLIC int LYdownload_options ARGS2(
 	 */
 	if (!lynx_edit_mode)
 #endif /* DIRED_SUPPORT */
-	fprintf(fp0,
-		"   <a href=\"%s//Method=-1/File=%s/SugFile=%s%s\">%s</a>\n",
-		STR_LYNXDOWNLOAD,
-		data_file,
-		NonNull(lynx_save_space),
-		sug_filename,
-		gettext("Save to disk"));
+	{
+	    fprintf(fp0,
+		    "   <a href=\"%s//Method=-1/File=%s/SugFile=%s%s\">%s</a>\n",
+		    STR_LYNXDOWNLOAD,
+		    data_file,
+		    NonNull(lynx_save_space),
+		    sug_filename,
+		    gettext("Save to disk"));
+	    /*
+	     * If it is not a binary file, offer the opportunity to view the
+	     * downloaded temporary file (see HTSaveToFile).
+	     */
+	    if (SuffixIs(data_file, HTML_SUFFIX)
+	     || SuffixIs(data_file, TEXT_SUFFIX)) {
+		fprintf(fp0,
+			"   <a href=\"file://localhost%s%s\">%s</a>\n",
+			NonNull(lynx_save_space),
+			data_file,
+			gettext("View temporary file"));
+	    }
+	}
     } else {
 	fprintf(fp0, "   <em>%s</em>\n", gettext("Save to disk disabled."));
     }

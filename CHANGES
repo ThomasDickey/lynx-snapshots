@@ -1,6 +1,116 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2003-06-01 (2.8.5dev.16)
++ add zh_CN.po from
+  http://www.iro.umontreal.ca/contrib/po/maint/lynx/
++ updated obsolete link for nntp in users's guide -TD
++ add F_FILE_TYPE to F_TEXTLIKE() macro, and use it consistently in a few more
+  places, making editing in filename fields consistent with other text input
+  fields -TD
++ add LYAdjHiTextPos() to modify the behavior of color-style code, so leading
+  blanks are not highlighted (reported by Frederic L W Meunier) -TD
++ modify CacheThru_new() to accept "https:" URLs for source-caching (report
+  by Chuck Martin) -TD
++ adapt some of the SH_EX ifdef'd features:
+  + add -delay option, to make progress messages slow, along with corresponding
+    code for lynx.cfg -TD
+  + show build date/time for systems that do not use a configure script.
+  + use LYK_CHG_CENTER keycode bound to ^Q to control whether table cells are
+    centered.  The command-line -center option also controls this behavior.
++ add BIN_SUFFIX, TEXT_SUFFIX to userdefs.h -TD
++ modify BeginInternalPage(), adding a doctype to generated internal pages
+  to allow validating them -TD
++ modify HTFWriter.c to use binary suffix for any file with an application
+  presentation type, to better distinguish it from text and html.  Use text
+  suffix for any "text/" file other than "text/html".  These changes cover the
+  most common cases needed to make a link to view the temporary file useful in
+  the download page -TD
++ modify LYdownload_options(), adding a link to view the temporary file if the
+  downloaded file is text or html -TD
++ modify LYwouldPush(), omitting the download page from list of user-interface
+  pages which should not be pushed onto the history stack when visiting another
+  page, such as info or help.  Otherwise the downloaded file is discarded
+  (report by BL) -TD
++ simplify set_vi_keys() and related functions using table-driven
+  set_any_keys() and reset_any_keys() -TD
++ HTAnchor_findAddress now returns HTParentAnchor, avoid casting -LP
++ change select timeout in HTCheckForInterrupt() to zero, allowing immediate
+  return rather than waiting (DJGPP otherwise blocks for 50msec).  For Unix
+  platforms, the DontCheck() function limits the amount of polling which
+  otherwise would be too much CPU usage -LP
++ modify configure check for gcc -Winline warning to work around defect in
+  gcc 3.3 -TD
++ fix bug introduced recently in forms-submitting for TEXTAREA; the "%0d%0a"
+  was put after each line rather than before, making the first and second lines
+  joined (report by LV) -TD
++ reset the leading/trailing space counts in error-recovery logic added in
+  2.8.5dev.15 for S_litteral case in SGML_character().  Otherwise a mismatch,
+  e.g., due to a stray "<" or ">" in <script>...</script>, prevented a match
+  on the </script> -TD
++ do not free adult_table[] atexit - it should be perfectly empty after
+  free'ing all HText's.  (There is an error if it is not empty at exit) -LP
++ unnamed child anchors (`children_notag' list) now use HText memory pool.
+  Links properly deleted when reparsing the document -LP
++ Use less memory for documents with many anchors:  most anchors are never
+  visited, just stored for the reference.  So fill in adult_table[] with
+  HTParentAnchor0 (36 bytes size) instead of full HTParentAnchor (~200 bytes). 
+  HTParentAnchor now allocated on demand, nearly 1:1 to HText.  [more comments
+  in HTAnchor.h, changes located in HTAnchor.c] -LP
++ HTParentAnchor0 stores its hash value, to avoid calling HASH_FUNCTION twice
+  on the same anchor (Re:  HTAnchor_delete()) -LP
++ fix a potential out-of-bounds bug in HTBEquivalent() -LP
++ change strrchr() calls to strchr() in a few src/*.c file when parsing
+  "#fragment" left-to-right -LP
++ modify HTFWriter_abort() to remove file on error -IZ
++ added hot.paste style which puts a right-arrow at the UR corner (which is
+  currently unused).  Clicking on it initiates a GOTO to the current selection
+  (same as PASTE_URL action).  The hot.paste style is disabled unless STYLES
+  and CUT_AND_PASTE are both enabled.  Disabled and the user defines hot.paste
+  in the ".lss" file -IZ
++ modify LYK_PASTE_URL case in LYMainLoop.c to allow pasting URLs of the form
+  <address> and "<URL:address>" to lynx.  This is useful when it is not easy to
+  choose address without the surrounding "<>" or "<URL:>" -IZ
++ make a minor memory saving (circa 15%) for table processing, improve yet
+  another case of "ladder" (as in the top of google results), and fixes one
+  case of "wrong indentation" (elements of a table which contained <center>
+  were made too wide) -IZ
++ modify Stbl_trimFakeRows() to compensate for 2.8.5dev.15 changes to
+  Stbl_addRowToTable() from 2.8.5dev.15 which caches shrinking cell arrays in a
+  pool.  It did not take into account reallocation of the same data, e.g., in
+  Stbl_reserveCellsInRow().  For example:
+    http://camden-sbc.rutgers.edu/FacultyStaff/Directory/default.htm
+  (report by Patrick Ash) -IZ
++ add FORCE_COOKIE_PROMPT setting to lynx.cfg, allowing for manipulation in the
+  options menu and (if LYNXRC_ENABLE is set) via the .lynxrc file.  This lets
+  the user decide whether to ignore prompting for cookies with invalid syntax.
+  If the prompts are ignored, a corresponding message is displayed -TD
++ add FORCE_SSL_PROMPT setting to lynx.cfg, allowing for manipulation in the
+  options menu and (if LYNXRC_ENABLE is set) via the .lynxrc file.  This lets
+  the user decide whether to ignore prompting for questionable aspects of
+  an SSL connection.  If the prompts are ignored, a corresponding message is
+  displayed -TD
++ change select() calls to use the expected 1+descriptor value documented for
+  that function rather than FD_SETSIZE.  It is possible that some very old
+  or unique platform would not work, but this is more efficient (discussion on
+  lynx-dev) -TD
++ modify logic for S_litteral case in SGML_character() to recover from spaces
+  between the '<', '>' and the corresponding end of the tag, e.g.,
+	<style >
+	< style >
+	< style >
+  match "<style>", and
+	</style >
+	< /style >
+	< /style >
+  match "</style>" (report by TH) -TD
++ correct a check in HText_trimHightext() for the last line of the display,
+  which left unhighlighted the portion of a multi-line anchor which fell in
+  that place (report by TH) -TD
++ correct an off-by-one in redraw_lines_of_link() which left the link on the
+  last line on a page highlighted when moving the cursor up (reported by Morten
+  Bo Johansen) -TD
+
 2003-04-27 (2.8.5dev.15)
 * change definition of docdir1, helpdir1 to avoid using ksh-semantics (see
   2.8.5dev.2) -TD
@@ -90,7 +200,7 @@ Changes since Lynx 2.8 release
   in the adults table (more correct in case of post data), now a mainline:
   we omit "#ifndef DONT_TRACK_INTERNAL_LINKS" condition in the two files.
   In HTML.c, avoid using internal links for unrelated `src=' attributes
-  (BGSOUND_SRC, FRAME_SRC, IFRAME_SRC, OVERLAY_SRC, EMBED_ERC links:) -LP
+  (BGSOUND_SRC, FRAME_SRC, IFRAME_SRC, OVERLAY_SRC, EMBED_SRC links:) -LP
 * refine HTAnchor_delete() vs deleteLinks() mutual recursion logic - LP
 * change ALIGN_SIZE in GridText.c to sizeof(double), which is probably more
   portable than "8" -LP
