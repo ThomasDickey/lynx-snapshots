@@ -34,7 +34,7 @@ PUBLIC void LYDownload ARGS1(
     char buffer[LY_MAXPATH];
     char command[LY_MAXPATH];
     char *cp;
-    lynx_html_item_type *download_command = 0;
+    lynx_list_item_type *download_command = 0;
     int ch, recall;
     int FnameTotal;
     int FnameNum;
@@ -62,7 +62,7 @@ PUBLIC void LYDownload ARGS1(
     /*
      *	Parse out the File, sug_file, and the Method.
      */
-    if ((file = (char *)strstr(Line, "/File=")) == NULL)
+    if ((file = strstr(Line, "/File=")) == NULL)
 	goto failed;
     *file = '\0';
     /*
@@ -70,7 +70,7 @@ PUBLIC void LYDownload ARGS1(
      */
     file += 6;
 
-    if ((sug_file = (char *)strstr(file + 1, "/SugFile=")) != NULL) {
+    if ((sug_file = strstr(file + 1, "/SugFile=")) != NULL) {
 	*sug_file = '\0';
 	/*
 	 *  Go past "SugFile=".
@@ -110,7 +110,7 @@ PUBLIC void LYDownload ARGS1(
 #endif /* _WINDOWS */
 #endif /* DIRED_SUPPORT */
 
-    if ((method = (char *)strstr(Line, "Method=")) == NULL)
+    if ((method = strstr(Line, "Method=")) == NULL)
 	goto failed;
     /*
      *	Go past "Method=".
@@ -485,7 +485,7 @@ PUBLIC int LYdownload_options ARGS2(
     char *downloaded_url = NULL;
     char *sug_filename = NULL;
     FILE *fp0;
-    lynx_html_item_type *cur_download;
+    lynx_list_item_type *cur_download;
     int count;
 
     /*
@@ -495,10 +495,10 @@ PUBLIC int LYdownload_options ARGS2(
     change_sug_filename(sug_filename);
 
     if (LYReuseTempfiles) {
-	fp0 = LYOpenTempRewrite(tempfile, HTML_SUFFIX, "wb");
+	fp0 = LYOpenTempRewrite(tempfile, HTML_SUFFIX, BIN_W);
     } else {
 	LYRemoveTemp(tempfile);
-	fp0 = LYOpenTemp(tempfile, HTML_SUFFIX, "wb");
+	fp0 = LYOpenTemp(tempfile, HTML_SUFFIX, BIN_W);
     }
     if (fp0 == NULL) {
 	HTAlert(CANNOT_OPEN_TEMP);

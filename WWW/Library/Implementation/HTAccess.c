@@ -1244,7 +1244,7 @@ PUBLIC BOOL HTSearch ARGS2(
     CONST char * p, *s, *e;		/* Pointers into keywords */
     char * address = NULL;
     BOOL result;
-    char * escaped = (char *)calloc(1, ((strlen(keywords)*3) + 1));
+    char * escaped = typecallocn(char, (strlen(keywords)*3) + 1);
     static CONST BOOL isAcceptable[96] =
 
     /*	 0 1 2 3 4 5 6 7 8 9 A B C D E F */
@@ -1360,10 +1360,10 @@ PUBLIC HTParentAnchor * HTHomeAnchor NOARGS
 	/*
 	**  Someone telnets in, they get a special home.
 	*/
-	FILE * fp = fopen(REMOTE_POINTER, "r");
+	FILE * fp = fopen(REMOTE_POINTER, TXT_R);
 	char * status;
 	if (fp) {
-	    my_home_document = (char*)calloc(1, MAX_FILE_NAME);
+	    my_home_document = typecallocn(char, MAX_FILE_NAME);
 	    if (my_home_document == NULL)
 		outofmem(__FILE__, "HTHomeAnchor");
 	    status = fgets(my_home_document, MAX_FILE_NAME, fp);
@@ -1382,12 +1382,12 @@ PUBLIC HTParentAnchor * HTHomeAnchor NOARGS
 	CONST char * home =  (CONST char*)getenv("HOME");
 	if (home != null) {
 	    HTSprintf0(&my_home_document, "%s/%s", home, PERSONAL_DEFAULT);
-	    fp = fopen(my_home_document, "r");
+	    fp = fopen(my_home_document, TXT_R);
 	}
 
 	if (!fp) {
 	    StrAllocCopy(my_home_document, LOCAL_DEFAULT_FILE);
-	    fp = fopen(my_home_document, "r");
+	    fp = fopen(my_home_document, TXT_R);
 	}
 	if (fp) {
 	    fclose(fp);

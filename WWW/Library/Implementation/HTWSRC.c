@@ -259,7 +259,7 @@ PRIVATE BOOL write_cache ARGS1(HTStream *, me)
 	me->par_value[PAR_TCP_PORT] ? me->par_value[PAR_TCP_PORT] : "210",
 	www_database);
 
-    if ((fp = fopen(cache_file_name, "w")) != 0) {
+    if ((fp = fopen(cache_file_name, TXT_W)) != 0) {
 	result = YES;
 	if (me->par_value[PAR_DESCRIPTION])
 	    fputs(me->par_value[PAR_DESCRIPTION], fp);

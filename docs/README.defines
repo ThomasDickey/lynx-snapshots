@@ -106,8 +106,6 @@ Both:
 Related to experimental (unsupported) character style code
 ------------------------------------------------------------
 # -DUSE_COLOR_STYLE (see INSTALLATION, Section II-1c) needs SVr4 curses
-# -DUSE_HASH       (see INSTALLATION, Section II-1c)  probably needs the above
-# -DLINKEDSTYLES   (see INSTALLATION, Section II-1c)  probably needs the above
 
 Other general
 -------------

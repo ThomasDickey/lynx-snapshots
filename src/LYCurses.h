@@ -66,6 +66,14 @@ typedef struct {
 #define ACS_DARROW  SLSMG_DARROW_CHAR
 #endif
 
+#ifndef ACS_LARROW
+#define ACS_LARROW  SLSMG_LARROW_CHAR
+#endif
+
+#ifndef ACS_RARROW
+#define ACS_RARROW  SLSMG_RARROW_CHAR
+#endif
+
 #ifndef ACS_CKBOARD
 #define ACS_CKBOARD SLSMG_CKBRD_CHAR
 #endif
@@ -542,6 +550,7 @@ FANCY_CURSES.  Check your config.log to see why the FANCY_CURSES test failed.
 
 extern void lynx_enable_mouse PARAMS((int));
 extern void lynx_force_repaint NOPARAMS;
+extern void lynx_nl2crlf PARAMS((int normal));
 extern void lynx_start_title_color NOPARAMS;
 extern void lynx_stop_title_color NOPARAMS;
 extern void lynx_start_link_color PARAMS((int flag, int pending));

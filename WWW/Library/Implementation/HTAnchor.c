@@ -67,12 +67,11 @@ PRIVATE HTList **adult_table = 0;  /* Point to table of lists of all parents */
 */
 PRIVATE HTParentAnchor * HTParentAnchor_new NOARGS
 {
-    HTParentAnchor *newAnchor =
-       (HTParentAnchor *)calloc(1, sizeof(HTParentAnchor));  /* zero-filled */
+    HTParentAnchor *newAnchor = typecalloc(HTParentAnchor);
     if (newAnchor == NULL)
 	outofmem(__FILE__, "HTParentAnchor_new");
     newAnchor->parent = newAnchor;
-    newAnchor->bookmark = NULL; 	/* Bookmark filename. - FM */
+    newAnchor->bookmark = NULL;		/* Bookmark filename. - FM */
     newAnchor->isISMAPScript = FALSE;	/* Lynx appends ?0,0 if TRUE. - FM */
     newAnchor->isHEAD = FALSE;		/* HEAD request if TRUE. - FM */
     newAnchor->safe = FALSE;		/* Safe. - FM */
@@ -81,9 +80,9 @@ PRIVATE HTParentAnchor * HTParentAnchor_new NOARGS
     newAnchor->source_cache_chunk = NULL;
 #endif
     newAnchor->FileCache = NULL;	/* Path to a disk-cached copy. - FM */
-    newAnchor->SugFname = NULL; 	/* Suggested filename. - FM */
-    newAnchor->RevTitle = NULL; 	/* TITLE for a LINK with REV. - FM */
-    newAnchor->citehost = NULL; 	/* LINK REL=citehost - RDC */
+    newAnchor->SugFname = NULL;		/* Suggested filename. - FM */
+    newAnchor->RevTitle = NULL;		/* TITLE for a LINK with REV. - FM */
+    newAnchor->citehost = NULL;		/* LINK REL=citehost - RDC */
     newAnchor->cache_control = NULL;	/* Cache-Control. - FM */
     newAnchor->no_cache = FALSE;	/* no-cache? - FM */
     newAnchor->content_type = NULL;	/* Content-Type. - FM */
@@ -106,7 +105,7 @@ PRIVATE HTChildAnchor * HTChildAnchor_new NOARGS
 {
     HTChildAnchor *p;
 
-    p = (HTChildAnchor *)calloc(1, sizeof(HTChildAnchor)); /* zero-filled */
+    p = typecalloc(HTChildAnchor);
     if (p == NULL)
 	outofmem(__FILE__, "HTChildAnchor_new");
     return p;
@@ -135,7 +134,7 @@ PRIVATE BOOL HTEquivalent ARGS2(
 	}
 	return( TOUPPER(*s) == TOUPPER(*t));
     } else {
-	return(s == t); 	/* Two NULLs are equivalent, aren't they ? */
+	return(s == t);		/* Two NULLs are equivalent, aren't they ? */
     }
 }
 
@@ -389,7 +388,7 @@ PUBLIC HTAnchor * HTAnchor_findAddress ARGS1(
 	*/
 	hash = HASH_FUNCTION(newdoc->address);
 	if (!adult_table) {
-	    adult_table = (HTList **)calloc(HASH_SIZE, sizeof(HTList *));
+	    adult_table = typecallocn(HTList *, HASH_SIZE);
 	    if (!adult_table)
 		outofmem(__FILE__, "HTAnchor_findAddress");
 #ifdef LY_FIND_LEAKS
@@ -750,7 +749,7 @@ PUBLIC BOOL HTAnchor_delete ARGS1(
 #endif
     if (me->FileCache) {
 	FILE *fd;
-	if ((fd = fopen(me->FileCache, "r")) != NULL) {
+	if ((fd = fopen(me->FileCache, TXT_R)) != NULL) {
 	    fclose(fd);
 	    remove(me->FileCache);
 	}
@@ -885,7 +884,7 @@ PUBLIC HTFormat HTAnchor_format ARGS1(
 
 PUBLIC void HTAnchor_setIndex ARGS2(
 	HTParentAnchor *,	me,
-	char *, 		address)
+	char *,			address)
 {
     if (me) {
 	me->isIndex = YES;
@@ -895,7 +894,7 @@ PUBLIC void HTAnchor_setIndex ARGS2(
 
 PUBLIC void HTAnchor_setPrompt ARGS2(
 	HTParentAnchor *,	me,
-	char *, 		prompt)
+	char *,			prompt)
 {
     if (me) {
 	StrAllocCopy(me->isIndexPrompt, prompt);
@@ -1201,7 +1200,7 @@ PUBLIC BOOL HTAnchor_link ARGS3(
 	source->mainLink.dest = destination;
 	source->mainLink.type = type;
     } else {
-	HTLink * newLink = (HTLink *)calloc (1, sizeof (HTLink));
+	HTLink * newLink = typecalloc(HTLink);
 	if (newLink == NULL)
 	    outofmem(__FILE__, "HTAnchor_link");
 	newLink->dest = destination;
@@ -1256,7 +1255,7 @@ PUBLIC BOOL HTAnchor_makeMainLink ARGS2(
 	return(NO);  /* link not found or NULL anchor */
     } else {
 	/* First push current main link onto top of links list */
-	HTLink *newLink = (HTLink *)calloc (1, sizeof (HTLink));
+	HTLink *newLink = typecalloc(HTLink);
 	if (newLink == NULL)
 	    outofmem(__FILE__, "HTAnchor_makeMainLink");
 	memcpy((void *)newLink,
@@ -1311,7 +1310,7 @@ PUBLIC char * HTAnchor_physical ARGS1(
 
 PUBLIC void HTAnchor_setPhysical ARGS2(
 	HTParentAnchor *,	me,
-	char *, 		physical)
+	char *,			physical)
 {
     if (me) {
 	StrAllocCopy(me->physical, physical);
@@ -1349,8 +1348,7 @@ PUBLIC LYUCcharset * HTAnchor_getUCInfoStage ARGS2(
     if (me && !me->UCStages) {
 	int i;
 	int chndl = UCLYhndl_for_unspec;  /* always >= 0 */
-	UCAnchorInfo * stages = (UCAnchorInfo*)calloc(1,
-						      sizeof(UCAnchorInfo));
+	UCAnchorInfo * stages = typecalloc(UCAnchorInfo);
 	if (stages == NULL)
 	    outofmem(__FILE__, "HTAnchor_getUCInfoStage");
 	for (i = 0; i < UCT_STAGEMAX; i++) {
@@ -1504,7 +1502,7 @@ PUBLIC LYUCcharset * HTAnchor_copyUCInfoStage ARGS4(
 	    if ( me->UCStages->s[to_stage].LYhndl >= 0
 		 && me->UCStages->s[to_stage].LYhndl != ohandle
 		 && to_stage == UCT_STAGE_PARSER )
-		setup_switch_display_charset(me, 
+		setup_switch_display_charset(me,
 					     me->UCStages->s[to_stage].LYhndl);
 #endif
 	    if (p_to != p_from)

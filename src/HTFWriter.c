@@ -570,7 +570,7 @@ PRIVATE char *mailcap_substitute ARGS3(
 	    }
 	}
 	if (pass == 0) {
-	    if ((result = malloc(need)) == 0)
+	    if ((result = malloc(need + 1)) == 0)
 		outofmem(__FILE__, "mailcap_substitute");
 	    *result = 0;
 	}
@@ -667,7 +667,7 @@ PUBLIC HTStream* HTSaveAndExecute ARGS3(
 	 *  not being able to find the fp.  The ".bin" suffix is expected
 	 *  to not be used, it's only for fallback in unusual error cases. - kw
 	 */
-	me->fp = LYOpenTempRewrite(fnam, ".bin", "wb");
+	me->fp = LYOpenTempRewrite(fnam, ".bin", BIN_W);
     } else {
 #if defined(WIN_EX) && !defined(__CYGWIN__)	/* 1998/01/04 (Sun) */
 	if (!strncmp(anchor->address,"file://localhost",16)) {
@@ -730,7 +730,7 @@ PUBLIC HTStream* HTSaveAndExecute ARGS3(
 	{
 	    suffix = HTML_SUFFIX;
 	}
-	me->fp = LYOpenTemp(fnam, suffix, "wb");
+	me->fp = LYOpenTemp(fnam, suffix, BIN_W);
     }
 
     if (!me->fp) {
@@ -862,7 +862,7 @@ PUBLIC HTStream* HTSaveToFile ARGS3(
 	 *  not being able to find the fp.  The ".bin" suffix is expected
 	 *  to not be used, it's only for fallback in unusual error cases. - kw
 	 */
-	ret_obj->fp = LYOpenTempRewrite(fnam, ".bin", "wb");
+	ret_obj->fp = LYOpenTempRewrite(fnam, ".bin", BIN_W);
     } else {
 	/*
 	 *  Check for a suffix.
@@ -880,7 +880,7 @@ PUBLIC HTStream* HTSaveToFile ARGS3(
 		    || *suffix != '.') {
 	    suffix = HTML_SUFFIX;
 	}
-	ret_obj->fp = LYOpenTemp(fnam, suffix, "wb");
+	ret_obj->fp = LYOpenTemp(fnam, suffix, BIN_W);
     }
 
     if (!ret_obj->fp) {
@@ -1173,7 +1173,7 @@ PUBLIC HTStream* HTCompressed ARGS3(
     /*
      *	Open the file for receiving the compressed input stream. - FM
      */
-    me->fp = LYOpenTemp (fnam, temp, "wb");
+    me->fp = LYOpenTemp (fnam, temp, BIN_W);
     if (!me->fp) {
 	HTAlert(CANNOT_OPEN_TEMP);
 	FREE(uncompress_mask);

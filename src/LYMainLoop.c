@@ -2683,12 +2683,22 @@ PRIVATE int handle_LYK_ELGOTO ARGS5(
 }
 
 #ifdef USE_EXTERNALS
-PRIVATE void handle_LYK_EXTERN ARGS1(
+PRIVATE void handle_LYK_EXTERN_LINK ARGS1(
     BOOLEAN *,	refresh_screen)
 {
     if ((nlinks > 0) && (links[curdoc.link].lname != NULL))
     {
 	run_external(links[curdoc.link].lname, FALSE);
+	*refresh_screen = TRUE;
+    }
+}
+
+PRIVATE void handle_LYK_EXTERN_PAGE ARGS1(
+    BOOLEAN *,	refresh_screen)
+{
+    if (curdoc.address != NULL)
+    {
+	run_external(curdoc.address, FALSE);
 	*refresh_screen = TRUE;
     }
 }
@@ -7300,8 +7310,11 @@ new_cmd:  /*
 #endif /* DIRED_SUPPORT || VMS*/
 
 #ifdef USE_EXTERNALS
-	case LYK_EXTERN:	/* use external program on url */
-	    handle_LYK_EXTERN(&refresh_screen);
+	case LYK_EXTERN_LINK:	/* use external program on url */
+	    handle_LYK_EXTERN_LINK(&refresh_screen);
+	    break;
+	case LYK_EXTERN_PAGE:	/* use external program on current page */
+	    handle_LYK_EXTERN_PAGE(&refresh_screen);
 	    break;
 #endif /* USE_EXTERNALS */
 

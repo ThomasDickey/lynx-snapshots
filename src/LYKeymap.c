@@ -104,7 +104,7 @@ LYK_LAST_LINK,          0,              0,          LYK_HISTORICAL,
 LYK_UP_HALF,      LYK_DOWN_HALF, LYK_IMAGE_TOGGLE,  LYK_NEXT_PAGE,
 /* ( */              /* ) */         /* * */        /* + */
 
-LYK_NEXT_PAGE,    LYK_PREV_PAGE, LYK_EXTERN,        LYK_WHEREIS,
+LYK_EXTERN_PAGE,  LYK_PREV_PAGE, LYK_EXTERN_LINK,   LYK_WHEREIS,
 /* , */              /* - */         /* . */        /* / */
 
 LYK_F_LINK_NUM,      LYK_1,          LYK_2,         LYK_3,
@@ -898,8 +898,11 @@ PRIVATE Kcmd revmap[] = {
 #endif
 #ifdef USE_EXTERNALS
     DATA(
-	LYK_EXTERN, "EXTERN",
-	"run external program with url" ),
+	LYK_EXTERN_LINK, "EXTERN_LINK",
+	"run external program with current link" ),
+    DATA(
+	LYK_EXTERN_PAGE, "EXTERN_PAGE",
+	"run external program with current page" ),
 #endif
 #ifdef VMS
     DATA(
@@ -1319,7 +1322,7 @@ PUBLIC int lacname_to_lac ARGS1(
 {
        Kcmd *mp = LYStringToKcmd(func);
 
-       return (mp != 0) ? mp->code : -1;
+       return (mp != 0) ? (int) mp->code : -1;
 }
 
 /*
@@ -1488,7 +1491,7 @@ PUBLIC int remap ARGS3(
 	else
 #endif
 	    keymap[c+1] = mp->code;
-	return (c ? c : LAC_TO_LKC0(mp->code)); /* don't return 0, successful */
+	return (c ? c : (int) LAC_TO_LKC0(mp->code)); /* don't return 0, successful */
     }
     return 0;
 }
@@ -1612,19 +1615,6 @@ PUBLIC void reset_numbers_as_arrows NOARGS
     keymap['5'+1] = saved_number_keys[8];
 
     did_number_keys = FALSE;
-}
-
-PUBLIC int lookup_keymap ARGS1(
-	int,	func)
-{
-    size_t i;
-
-    for (i = 1; i < KEYMAP_SIZE; i++) {
-	if (LYisNonAlnumKeyname(i, func)) {
-	    return i;
-	}
-    }
-    return -1;
 }
 
 PUBLIC char *key_for_func ARGS1 (

@@ -8178,7 +8178,7 @@ PUBLIC HTStructured* HTML_new ARGS3(
 	exit_immediately (EXIT_FAILURE);
     }
 
-    me = (HTStructured*) calloc(sizeof(*me),1);
+    me = typecalloc(HTStructured);
     if (me == NULL)
 	outofmem(__FILE__, "HTML_new");
 
@@ -8631,7 +8631,7 @@ PRIVATE HTStream* CacheThru_new ARGS2(
 	 * don't get munged; this way, the file should (knock on wood)
 	 * contain exactly what came in from the network.
 	 */
-	if (!(stream->fp = LYOpenTemp(filename, HTML_SUFFIX, "wb"))) {
+	if (!(stream->fp = LYOpenTemp(filename, HTML_SUFFIX, BIN_W))) {
 	    CTRACE((tfp, "SourceCacheWriter: Cannot open source cache file for URL %s\n",
 		   HTAnchor_address((HTAnchor *)anchor)));
 	    FREE(stream);

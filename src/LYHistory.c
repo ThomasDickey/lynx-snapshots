@@ -38,7 +38,7 @@ PRIVATE VisitedLink *Latest_tree;
 PRIVATE VisitedLink *First_tree;
 PRIVATE VisitedLink *Last_by_first;
 
-PRIVATE int nhist_extra;
+int nhist_extra;
 
 #ifdef LY_FIND_LEAKS
 /*

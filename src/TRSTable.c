@@ -74,6 +74,12 @@ typedef struct _STable_cellinfo {
 				   or RESERVEDCELL */
 } STable_cellinfo;
 
+enum ended_state {
+	ROW_not_ended,
+	ROW_ended_by_endtr,
+	ROW_ended_by_splitline
+};
+
 typedef struct _STable_rowinfo {
     /* Each row may be displayed on many display lines, but we fix up
        positions of cells on this display line only: */
@@ -103,6 +109,7 @@ typedef struct _STable_rowinfo {
        reset to the line of icell_core.
      */
 	BOOL	fixed_line;	/* if we have a 'core' line of cells */
+	BOOL	ended;		/* if we saw </tr> */
 	int	allocated;	/* number of table cells allocated */
 	STable_cellinfo * cells;
 	short	alignment;	/* global align attribute for this row */
@@ -620,7 +627,7 @@ PRIVATE int Stbl_finishCellInRow ARGS5(
 		  cellstate_s(s->prev_state), cellstate_s(s->state)));
 
     if (multiline) {
-	if (!end_td) {			/* processing line-break */
+	if ((end_td & TRST_ENDCELL_MASK) == TRST_ENDCELL_LINEBREAK) {
 	    switch (s->state) {
 	    case CS_invalid:
 		newstate = empty ? CS_invalid : CS__cbc;
@@ -862,7 +869,7 @@ PRIVATE int Stbl_finishCellInRow ARGS5(
 	    }
 	}
     } else {				/* (!multiline) */
-	if (!end_td) {			/* processing line-break */
+	if ((end_td & TRST_ENDCELL_MASK) == TRST_ENDCELL_LINEBREAK) {
 	    switch (s->state) {
 	    case CS_invalid:
 	    case CS__0new:
@@ -1218,6 +1225,7 @@ PUBLIC int Stbl_addRowToTable ARGS3(
 	me->pending_colgroup_next = 0;
     }
     me->rows[me->nrows].Line = -1; /* not yet used */
+    me->rows[me->nrows].ended = ROW_not_ended; /* No </tr> yet */
     return (me->nrows - 1);
 }
 
@@ -1236,6 +1244,7 @@ PRIVATE int Stbl_finishRowInTable ARGS1(
 	return -1;		/* no row started! */
     lastrow = me->rows + (me->nrows - 1);
     ncells = lastrow->ncells;
+    lastrow->ended = ROW_ended_by_endtr;
     if (lastrow->ncells > 0) {
 	if (s->pending_len > 0)
 	    lastrow->cells[lastrow->ncells - 1].len = s->pending_len;
@@ -1366,7 +1375,7 @@ PRIVATE int Stbl_fakeFinishCellInTable ARGS4(
 	int cs = lastrow->cells[lastrow->ncells - 1].colspan;
 	int rs = 1;			/* XXXX How to find rowspan? */
 	int ih = 0;			/* XXXX How to find is_header? */
-	int end_td = 1;
+	int end_td = (TRST_ENDCELL_ENDTD | TRST_FAKING_CELLS);
 	int need_reserved = 0;
 	int prev_reserved_last = -1;
 	STable_rowinfo *prev_row;
@@ -1421,6 +1430,7 @@ PRIVATE int Stbl_fakeFinishCellInTable ARGS4(
 					   (me->allocated_rows + 1)
 					   * sizeof(STable_rowinfo));
 	    int need_cells = prev_reserved_last + 1;
+	    int n;
 
 	    if (!rows)
 		return -1; /* ignore silently, no free memory, may be recoverable */
@@ -1433,8 +1443,8 @@ PRIVATE int Stbl_fakeFinishCellInTable ARGS4(
 	    me->allocated_rows++;
 
 	    /* Insert a duplicate row after lastrow */
-	    memmove(lastrow+1, lastrow,
-		    sizeof(STable_rowinfo)*(me->allocated_rows - me->nrows));
+	    for (n = me->allocated_rows - me->nrows - 1; n >= 0; --n)
+		lastrow[n + 1] = lastrow[n];
 
 	    /* Ignore cells, they belong to the next row now */
 	    lastrow->allocated = 0;
@@ -1515,7 +1525,9 @@ PUBLIC int Stbl_addCellToTable ARGS7(
     if (!me->rows || !me->nrows)
 	return -1;		/* no row started! */
 				/* ##850_fail_if_fail?? */
-    Stbl_finishCellInTable(me, YES, lineno, pos);
+    if (me->rows[me->nrows - 1].ended)
+	Stbl_addRowToTable(me, alignment, lineno);
+    Stbl_finishCellInTable(me, TRST_ENDCELL_ENDTD, lineno, pos);
     lastrow = me->rows + (me->nrows - 1);
 
 #ifdef EXP_NESTED_TABLES
@@ -1650,12 +1662,14 @@ PUBLIC int Stbl_finishCellInTable ARGS4(
     icell = lastrow->ncells - 1;
     if (icell < 0)
 	return icell;
-    if (s->x_td == -1)
-	return end_td ? -1 : 0;
+    if (s->x_td == -1) {	/* Stray </TD> or safety-call */
+	if ((end_td & TRST_ENDCELL_MASK) == TRST_ENDCELL_LINEBREAK)
+	    lastrow->ended = ROW_ended_by_splitline;
+	return 0;
+    }
 
 #ifdef EXP_NESTED_TABLES
-    /* This check for pos saves us from infinite recursion... */
-    if (!NO_AGGRESSIVE_NEWROW && pos) {
+    if (!NO_AGGRESSIVE_NEWROW && !(end_td & TRST_FAKING_CELLS)) {
 	int rc = Stbl_fakeFinishCellInTable(me, lastrow, lineno, 1);
 
 	if (rc) {
@@ -1670,7 +1684,7 @@ PUBLIC int Stbl_finishCellInTable ARGS4(
     if (len == -1)
 	return len;
     xlen = (len > 0) ? len : s->pending_len; /* ##890 use xlen if fixed_line?: */
-    if (lastrow->fixed_line && lastrow->Line == lineno)
+    if (lastrow->Line == lineno)
 	len = xlen;
     if (lastrow->cells[icell].colspan > 1) {
 	/*
@@ -1758,7 +1772,12 @@ PUBLIC int Stbl_finishCellInTable ARGS4(
     }
 #endif
 
-#ifndef EXP_NESTED_TABLES /* maxlen may already include contribution of a cell in this column */
+    if ((end_td & TRST_ENDCELL_MASK) == TRST_ENDCELL_LINEBREAK)
+	lastrow->ended = ROW_ended_by_splitline;
+#ifdef EXP_NESTED_TABLES /* maxlen may already include contribution of a cell in this column */
+    if (me->maxlen > MAX_STBL_POS)
+	return -1;
+#else
     if (me->maxlen + (xlen - len) > MAX_STBL_POS)
 	return -1;
 #endif
@@ -1996,6 +2015,16 @@ PUBLIC int Stbl_getStartLine ARGS1(
 
 #ifdef EXP_NESTED_TABLES
 
+PUBLIC int Stbl_getStartLineDeep ARGS1(
+    STable_info *,	me)
+{
+    if (!me)
+	return -1;
+    while (me->enclosing)
+	me = me->enclosing;
+    return me->startline;
+}
+
 PUBLIC void Stbl_update_enclosing ARGS3(
     STable_info *,	me,
     int,		max_width,
@@ -2009,7 +2038,7 @@ PUBLIC void Stbl_update_enclosing ARGS3(
 	    max_width, me->startline, last_lineno));
     for (l = me->startline; l <= last_lineno; l++) {
 	/* Fake <BR> in appropriate positions */
-	if (Stbl_finishCellInTable(me->enclosing, 0, l, max_width) < 0) {
+	if (Stbl_finishCellInTable(me->enclosing, TRST_ENDCELL_LINEBREAK, l, max_width) < 0) {
 	    /* It is not handy to let the caller delete me->enclosing,
 	       and it does not buy us anything.  Do it directly. */
 	    STable_info *stbl = me->enclosing;

@@ -16,7 +16,6 @@ extern int LYStringToKeycode PARAMS((char *src));
 extern int lacname_to_lac PARAMS((CONST char *func));
 extern int lecname_to_lec PARAMS((CONST char *func));
 extern int lkcstring_to_lkc PARAMS((CONST char *src));
-extern int lookup_keymap PARAMS((int code));
 extern int remap PARAMS((char *key, char *func, BOOLEAN for_dired));
 extern void print_keymap PARAMS((char **newfile));
 extern void reset_emacs_keys NOPARAMS;
@@ -213,9 +212,11 @@ typedef enum {
 #endif
 
 #ifdef USE_EXTERNALS
-  , LYK_EXTERN
+  , LYK_EXTERN_LINK
+  , LYK_EXTERN_PAGE
 #else
-#define LYK_EXTERN        LYK_UNKNOWN
+#define LYK_EXTERN_LINK   LYK_UNKNOWN
+#define LYK_EXTERN_PAGE   LYK_UNKNOWN
 #endif /* !defined(USE_EXTERNALS) */
 
 #if defined(VMS) || defined(DIRED_SUPPORT)

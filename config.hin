@@ -151,7 +151,6 @@
 #undef INCLUDE_PROTOTYPES	/* CF_SOCKS5 */
 #undef INSTALL_ARGS		/* CF_PATH_PROG(install) */
 #undef INSTALL_PATH		/* CF_PATH_PROG(install) */
-#undef LINKEDSTYLES		/* see USE_COLOR_STYLE */
 #undef LINUX			/* FIXME: make tests? */
 #undef LOCALE			/* for locale support */
 #undef LONG_LIST		/* CF_ARG_DISABLE(long-list) */
@@ -159,7 +158,8 @@
 #undef LYNX_CFG_FILE		/* $libdir/lynx.cfg */
 #undef LYNX_LSS_FILE		/* $libdir/lynx.lss */
 #undef LYNX_RAND_MAX		/* CF_SRAND */
-#undef LY_FIND_LEAKS		/* configure --disable-leaks */
+#undef LY_FIND_LEAKS		/* CF_ARG_ENABLE(find-leaks) */
+#undef LY_TRACELINE		/* CF_ARG_ENABLE(vertrace) */
 #undef MKDIR_PATH		/* CF_PATH_PROG(mkdir) */
 #undef MV_PATH			/* CF_PATH_PROG(mv) */
 #undef NCURSES			/* defined for ncurses support */
@@ -173,7 +173,7 @@
 #undef NO_LYNX_TRACE		/* CF_ARG_DISABLE(trace) */
 #undef NO_OPTION_FORMS		/* CF_ARG_DISABLE(forms-options) */
 #undef NO_OPTION_MENU		/* CF_ARG_DISABLE(option-menu) */
-#undef NO_PARENT_DIR_REFERENCE	/* configure --disable-parent-dir */
+#undef NO_PARENT_DIR_REFERENCE	/* CF_ARG_DISABLE(parent-dir-refs) */
 #undef NSL_FORK			/* CF_ARG_ENABLE(nsl-fork) */
 #undef OK_GZIP			/* CF_ARG_DISABLE(dired-gzip) */
 #undef OK_INSTALL
@@ -210,7 +210,6 @@
 #undef USE_OPENSSL_INCL		/* CF_SSL */
 #undef USE_PRETTYSRC		/* CF_ARG_ENABLE(prettysrc) */
 #undef USE_SCROLLBAR		/* CF_ARG_ENABLE(scrollbar) */
-#undef USE_SIZECHANGEHACK	/* FIXME: find a case where this works! */
 #undef USE_SLANG		/* AC_ARG_WITH(screen=slang) */
 #undef USE_SOCKS4_PREFIX	/* CF_SOCKS5 */
 #undef USE_SOCKS5		/* CF_SOCKS5 */
@@ -244,14 +243,19 @@
 #undef const
 #endif
 
-/* FIXME:DECLARE_WAIS_LOGFILES */
-/* FIXME:DGUX */
+/*
+ * The configure script generates LYHelp.h (handcrafted makefiles may not do
+ * this, so we set a definition):
+ */
+#define HAVE_LYHELP_H 1
+
+/* FIXME:DGUX (done in $host_os case-statement) */
 /* FIXME:DGUX_OLD */
 /* FIXME:HP_TERMINAL */
 /* FIXME:REVERSE_CLEAR_SCREEN_PROBLEM */
 /* FIXME:SHORTENED_RBIND */
 /* FIXME:SNAKE */
-/* FIXME:SVR4_BSDSELECT */
+/* FIXME:SVR4_BSDSELECT (done in $host_os case-statement) */
 
 /* Some older socks libraries, especially AIX need special definitions */
 #if defined(_AIX) && !defined(USE_SOCKS5)

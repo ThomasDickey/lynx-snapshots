@@ -53,8 +53,11 @@ extern void read_cfg PARAMS((char *cfg_filename, char *parent_filename, int nest
 extern void free_lynx_cfg NOPARAMS;
 extern BOOLEAN have_read_cfg;
 
+extern FILE *LYOpenCFG PARAMS((char *cfg_filename, char *parent_filename, char *dft_filename));
 extern int lynx_cfg_infopage PARAMS((document *newdoc));
 extern int lynx_compile_opts PARAMS((document *newdoc));
+extern int match_item_by_name PARAMS((lynx_list_item_type * ptr, char * name, BOOLEAN only_overriders));
+extern lynx_list_item_type *find_item_by_number PARAMS((lynx_list_item_type * list_ptr, char * number));
 extern void reload_read_cfg NOPARAMS; /* implemented in LYMain.c */
 
 #endif /* LYREADCFG_H */

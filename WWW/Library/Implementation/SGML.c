@@ -82,7 +82,7 @@ PRIVATE void fake_put_character ARGS2(
     if (ch->size >= ch->allocated) {\
 	ch->allocated = ch->allocated + ch->growby;\
 	ch->data = ch->data ? (char *)realloc(ch->data, ch->allocated)\
-			    : (char *)calloc(1, ch->allocated);\
+			    : typecallocn(char, ch->allocated);\
       if (!ch->data)\
 	  outofmem(__FILE__, "HTChunkPutc");\
     }\

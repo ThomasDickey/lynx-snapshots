@@ -48,6 +48,7 @@
 #include <HTLex.h>	/* Lexical analysor	*/
 #include <HTGroup.h>	/* Implemented here	*/
 
+#include <LYUtils.h>
 #include <LYLeaks.h>
 
 /*
@@ -107,7 +108,7 @@ PRIVATE AddressDefList *parse_address_part ARGS1(FILE *, fp)
     address_def_list = HTList_new();
 
     for(;;) {
-	Ref *ref = (Ref*)calloc(1, sizeof(Ref));
+	Ref *ref = typecalloc(Ref);
 	if (ref == NULL)
 	    outofmem(__FILE__, "parse_address_part");
 	ref->name = NULL;
@@ -163,7 +164,7 @@ PRIVATE UserDefList *parse_user_part ARGS1(FILE *, fp)
     user_def_list = HTList_new();
 
     for (;;) {
-	Ref *ref = (Ref*)calloc(1, sizeof(Ref));
+	Ref *ref = typecalloc(Ref);
 	if (ref == NULL)
 	    outofmem(__FILE__, "parse_user_part");
 	ref->name = NULL;
@@ -238,7 +239,7 @@ PRIVATE Item *parse_item ARGS1(FILE *, fp)
 	syntax_error(fp, "Empty item not allowed", lex_item);
 	return NULL;
     }
-    item = (Item*)calloc(1, sizeof(Item));
+    item = typecalloc(Item);
     if (item == NULL)
 	outofmem(__FILE__, "parse_item");
     item->user_def_list = user_def_list;
@@ -287,7 +288,7 @@ PUBLIC GroupDef *HTAA_parseGroupDef ARGS1(FILE *, fp)
     if (!(item_list = parse_item_list(fp))) {
 	return NULL;
     }
-    group_def = (GroupDef*)calloc(1, sizeof(GroupDef));
+    group_def = typecalloc(GroupDef);
     if (group_def == NULL)
 	outofmem(__FILE__, "HTAA_parseGroupDef");
     group_def->group_name = NULL;
@@ -671,14 +672,14 @@ PUBLIC GroupDefList *HTAA_readGroupFile ARGS1(CONST char *, filename)
     CTRACE((tfp, "HTAA_readGroupFile: reading group file `%s'\n",
 		filename));
 
-    if (!(fp = fopen(filename, "r"))) {
+    if (!(fp = fopen(filename, TXT_R))) {
 	CTRACE((tfp, "%s '%s'\n",
 		    "HTAA_readGroupFile: unable to open group file",
 		    filename));
 	return NULL;
     }
 
-    if (!(group_cache = (GroupCache*)calloc(1, sizeof(GroupCache))))
+    if ((group_cache = typecalloc(GroupCache)) == 0)
 	outofmem(__FILE__, "HTAA_readGroupFile");
 
     group_cache->group_filename = NULL;

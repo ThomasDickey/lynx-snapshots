@@ -210,10 +210,10 @@ PUBLIC void UCChangeTerminalCodepage ARGS2(
     } else if (lastcs < 0 && old_umap == 0 && old_font == 0) {
 	FILE * fp1;
 	FILE * fp2 = NULL;
-	if ((old_font = calloc(1, LY_MAXPATH)))
-	    old_umap = calloc(1, LY_MAXPATH);
-	if ((fp1 = LYOpenTemp(old_font, ".fnt", "wb")))
-	    fp2 = LYOpenTemp(old_umap, ".uni", "wb");
+	if ((old_font = typecallocn(char, LY_MAXPATH)))
+	    old_umap = typecallocn(char, LY_MAXPATH);
+	if ((fp1 = LYOpenTemp(old_font, ".fnt", BIN_W)))
+	    fp2 = LYOpenTemp(old_umap, ".uni", BIN_W);
 	if (fp1 && fp2) {
 	    size_t nlen;
 	    char *rp;
@@ -543,7 +543,7 @@ PRIVATE int _Switch_Display_Charset ARGS2 (int, ord, int, really)
 {
     CONST char *name;
     unsigned short cp;
-    static int font_loaded_for = -1;
+    static int font_loaded_for = -1, old_h, old_w;
     int rc, ord1;
     UCHAR msgbuf[MAXPATHLEN + 80];
 
@@ -581,10 +581,7 @@ PRIVATE int _Switch_Display_Charset ARGS2 (int, ord, int, really)
     }
 
     /* Not a "prepared" codepage.  Need to load the user font. */
-    if (ord1 == font_loaded_for) {	/* The same as the previous font */
-	if ((rc = VioSetCp(0, -1, 0)))	/* -1: User font */
-	    goto err;
-    } else if (charsets_directory) {
+    if (charsets_directory) {
 	TIB *tib;			/* Can't load font in a windowed-VIO */
 	PIB *pib;
 	VIOFONTINFO f[2];
@@ -597,7 +594,8 @@ PRIVATE int _Switch_Display_Charset ARGS2 (int, ord, int, really)
 	long i, j;
 
 	/* 0 means a FS protected-mode session */
-	if (DosGetInfoBlocks(&tib, &pib) || pib->pib_ultype != 0) {
+	if ( font_loaded_for == -1		/* Did not try it yet */
+	     && (DosGetInfoBlocks(&tib, &pib) || pib->pib_ultype != 0) ) {
 	    ord = ord1 = auto_display_charset;
 	    goto retry;
 	}
@@ -619,9 +617,16 @@ PRIVATE int _Switch_Display_Charset ARGS2 (int, ord, int, really)
 	    ord = ord1 = auto_display_charset;
 	    goto retry;
 	}
+	if ( ord1 == font_loaded_for
+	     && old_h == font->cyCell && old_w == font->cxCell ) {
+	    /* The same as the previous font */
+	    if ((rc = VioSetCp(0, -1, 0)))	/* -1: User font */
+		goto err;
+	    goto report;
+	}
 	sprintf(fnamebuf, "%s/%dx%d/%s.fnt",
 		charsets_directory, font->cyCell, font->cxCell, name);
-	file = fopen(fnamebuf,"rb");
+	file = fopen(fnamebuf, BIN_R);
 	if (!file) {
 	    sprintf(msgbuf, "Can't open font file '%s'", fnamebuf);
 	    HTInfoMsg(msgbuf);
@@ -645,9 +650,12 @@ PRIVATE int _Switch_Display_Charset ARGS2 (int, ord, int, really)
 	    sprintf(msgbuf, "Can't set font: err=%#lx=%ld", rc, rc);
 	    HTInfoMsg(msgbuf);
 	    ord = ord1 = auto_display_charset;
+	    font_loaded_for = -1;
 	    goto retry;
 	}
 	font_loaded_for = ord1;
+	old_h = font->cyCell;
+	old_w = font->cxCell;
     }
   report:
     CTRACE((tfp, "Display font set to '%s'.\n", name));

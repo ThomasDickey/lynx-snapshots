@@ -209,8 +209,7 @@ PUBLIC void *LYLeakMalloc ARGS3(
 	 *  Further allocate memory to store the information.
 	 *  Just return on failure to allocate more.
 	 */
-	AllocationList *ALp_new =
-			(AllocationList *)calloc(1, sizeof(AllocationList));
+	AllocationList *ALp_new = typecalloc(AllocationList);
 
 	if (ALp_new == NULL) {
 	    return(vp_malloc);
@@ -242,7 +241,7 @@ PUBLIC void *LYLeakMalloc ARGS3(
 **  Arguments:	vp_malloc	The pointer to newly allocate memory.
 **  Arguments:	st_bytes	The size of the allocation requested
 **				in bytes.
-**		cp_File 	The file from which the request for
+**		cp_File		The file from which the request for
 **				allocation came from.
 **		ssi_Line	The line number in cp_File where the
 **				allocation request came from.
@@ -256,7 +255,7 @@ PUBLIC void *LYLeakMalloc ARGS3(
 */
 PUBLIC AllocationList *LYLeak_mark_malloced ARGS4(
 	void *,		vp_malloced,
-	size_t, 	st_bytes,
+	size_t,		st_bytes,
 	CONST char *,	cp_File,
 	CONST short,	ssi_Line)
 {
@@ -276,12 +275,12 @@ PUBLIC AllocationList *LYLeak_mark_malloced ARGS4(
 	    ALp_new->SL_memory.cp_FileName = cp_File;
 	    ALp_new->SL_memory.ssi_LineNumber = ssi_Line;
 	    return(ALp_new);
-	}	    
+	}
 	/*
 	 *  Further allocate memory to store the information.
 	 *  Just return on failure to allocate more.
 	 */
-	ALp_new = (AllocationList *)calloc(1, sizeof(AllocationList));
+	ALp_new = typecalloc(AllocationList);
 
 	if (ALp_new == NULL) {
 	    return(NULL);
@@ -338,8 +337,7 @@ PUBLIC void *LYLeakCalloc ARGS4(
 	 *  Allocate memory for the item to be in the list.
 	 *  If unable, just return.
 	 */
-	AllocationList *ALp_new =
-			(AllocationList *)calloc(1, sizeof(AllocationList));
+	AllocationList *ALp_new = typecalloc(AllocationList);
 
 	if (ALp_new == NULL) {
 		return(vp_calloc);
@@ -413,9 +411,7 @@ PUBLIC void *LYLeakRealloc ARGS4(
 	 *  Track the invalid pointer value and then exit.
 	 *  If unable to allocate, just exit.
 	 */
-	auto AllocationList *ALp_new =
-			     (AllocationList *)calloc(1,
-						      sizeof(AllocationList));
+	auto AllocationList *ALp_new = typecalloc(AllocationList);
 
 	if (ALp_new == NULL) {
 	    exit(EXIT_FAILURE);
@@ -463,15 +459,15 @@ PUBLIC void *LYLeakRealloc ARGS4(
 **		after a call to realloc or an equivalent
 **		function which has not already created or updated
 **		a list entry.
-**  Arguments:	ALp_old   	List entry for previously allocated
+**  Arguments:	ALp_old		List entry for previously allocated
 **				block of memory to resize.  If NULL,
 **				mark_realloced works just like
 **				mark_malloced.
 **		vp_realloced	The new pointer, after resizing.
 **		st_newBytes	The new size of the chunk of memory.
-**		cp_File 	The file to record.
+**		cp_File		The file to record.
 **		ssi_Line	The line to record.
-**  Return Value:	      	Pointer to new or updated list entry
+**  Return Value:		Pointer to new or updated list entry
 **				for this memory block.
 **				NULL on allocation error.
 **  Revision History:
@@ -480,8 +476,8 @@ PUBLIC void *LYLeakRealloc ARGS4(
 #if defined(LY_FIND_LEAKS) && defined(LY_FIND_LEAKS_EXTENDED)
 PRIVATE AllocationList *mark_realloced ARGS5(
 	AllocationList *, ALp_old,
-	void *, 	vp_realloced,
-	size_t, 	st_newBytes,
+	void *,		vp_realloced,
+	size_t,		st_newBytes,
 	CONST char *,	cp_File,
 	CONST short,	ssi_Line)
 {
@@ -546,9 +542,7 @@ PUBLIC void LYLeakFree ARGS3(
 	 *  Create the final entry before exiting marking this error.
 	 *  If unable to allocate more memory just exit.
 	 */
-	AllocationList *ALp_new =
-			(AllocationList *)calloc(1,
-						 sizeof(AllocationList));
+	AllocationList *ALp_new = typecalloc(AllocationList);
 
 	if (ALp_new == NULL) {
 	    exit(EXIT_FAILURE);
@@ -701,7 +695,7 @@ PRIVATE char * LYLeakSAVsprintf ARGS6(
 {
     AllocationList *ALp_old;
     void *vp_oldAlloced;
-    
+
     CONST char * old_cp_File = __FILE__;
     short old_ssi_Line = __LINE__;
 
@@ -721,9 +715,7 @@ PRIVATE char * LYLeakSAVsprintf ARGS6(
 	     *  Track the invalid pointer value and then exit.
 	     *  If unable to allocate, just exit.
 	     */
-	    auto AllocationList *ALp_new =
-		(AllocationList *)calloc(1,
-					 sizeof(AllocationList));
+	    auto AllocationList *ALp_new = typecalloc(AllocationList);
 
 	    if (ALp_new == NULL) {
 		exit(EXIT_FAILURE);

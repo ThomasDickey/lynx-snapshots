@@ -1087,7 +1087,7 @@ PUBLIC void HTSABCat ARGS3(
 	    int length = t->len;
 	    t->str = (char *)realloc(t->str, length + len);
 	} else {
-	    t = (bstring *)calloc(1, sizeof(*t));
+	    t = typecalloc(bstring);
 	    if (t == NULL)
 		outofmem(__FILE__, "HTSACat");
 	    t->str = (char *)malloc(len);

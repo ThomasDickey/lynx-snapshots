@@ -2514,7 +2514,7 @@ PUBLIC int HTCheckForInterrupt NOARGS
  * references a directory.
  */
 PUBLIC BOOLEAN LYisAbsPath ARGS1(
-	char *,		path)
+	CONST char *,	path)
 {
 #ifdef VMS
     return TRUE;
@@ -3231,7 +3231,7 @@ PUBLIC BOOLEAN LYCloseOutput ARGS1(
 PUBLIC BOOLEAN LYCanWriteFile ARGS1(
 	CONST char*,	filename)
 {
-    if (LYCloseOutput(fopen(filename, "w"))) {
+    if (LYCloseOutput(fopen(filename, TXT_W))) {
 	remove(filename);
 	return TRUE;
     } else {
@@ -3248,7 +3248,7 @@ PUBLIC BOOLEAN LYCanReadFile ARGS1(
 {
     FILE *fp;
 
-    if ((fp = fopen(filename, "r")) != 0) {
+    if ((fp = fopen(filename, TXT_R)) != 0) {
 	return LYCloseInput(fp);
     }
     return FALSE;
@@ -3293,7 +3293,7 @@ PUBLIC BOOLEAN inlocaldomain NOARGS
     if ((cp = ttyname(0)))
 	mytty = strrchr(cp, '/');
 
-    if (mytty && (fp = fopen(UTMP_FILE, "r")) != NULL) {
+    if (mytty && (fp = fopen(UTMP_FILE, TXT_R)) != NULL) {
 	mytty++;
 	do {
 	    n = fread((char *) &me, sizeof(struct utmp), 1, fp);
@@ -3506,6 +3506,15 @@ PUBLIC void size_change ARGS1(
 	recent_sizechange = TRUE;
 	CTRACE((tfp, "Window size changed from (%d,%d) to (%d,%d)\n",
 		old_lines, old_cols, LYlines, LYcols));
+#if defined(CAN_SWITCH_DISPLAY_CHARSET) && defined(CAN_AUTODETECT_DISPLAY_CHARSET)
+	/* May need to reload the font due to different char-box size */
+	if (current_char_set != auto_display_charset) {
+	    int old = current_char_set;
+
+	    Switch_Display_Charset(auto_display_charset, 1);
+	    Switch_Display_Charset(old, 1);
+	}
+#endif
     }
 #ifdef SIGWINCH
     LYExtSignal (SIGWINCH, size_change);
@@ -6388,6 +6397,7 @@ PRIVATE FILE *OpenHiddenFile ARGS2(char *, name, char *, mode)
 {
     FILE *fp = 0;
     struct stat data;
+    BOOLEAN binary = strchr(mode, 'b') != 0;
 
 #if defined(O_CREAT) && defined(O_EXCL) /* we have fcntl.h or kindred? */
     /*
@@ -6405,7 +6415,7 @@ PRIVATE FILE *OpenHiddenFile ARGS2(char *, name, char *, mode)
 	}
 	if (fd >= 0) {
 #if defined(O_BINARY) && defined(__CYGWIN__)
-	    if (mode[1] == 'b')
+	    if (binary)
 		setmode(fd, O_BINARY);
 #endif
 	    fp = fdopen(fd, mode);
@@ -6418,7 +6428,7 @@ PRIVATE FILE *OpenHiddenFile ARGS2(char *, name, char *, mode)
 	 && chmod(name, HIDE_CHMOD) == 0)
 	    fp = fopen(name, mode);
 	else if (lstat(name, &data) != 0)
-	    fp = OpenHiddenFile(name, "w");
+	    fp = OpenHiddenFile(name, binary ? BIN_W : TXT_W);
     /*
      * This is less stringent, but reasonably portable.  For new files, the
      * umask will suffice; however if the file already exists we'll change
@@ -6445,10 +6455,10 @@ PRIVATE FILE *OpenHiddenFile ARGS2(char *, name, char *, mode)
 PUBLIC FILE *LYNewBinFile ARGS1(char *, name)
 {
 #ifdef VMS
-    FILE *fp = fopen (name, "wb", "mbc=32");
+    FILE *fp = fopen (name, BIN_W, "mbc=32");
     chmod(name, HIDE_CHMOD);
 #else
-    FILE *fp = OpenHiddenFile(name, "wb");
+    FILE *fp = OpenHiddenFile(name, BIN_W);
 #endif
     return fp;
 }
@@ -6458,12 +6468,12 @@ PUBLIC FILE *LYNewTxtFile ARGS1(char *, name)
     FILE *fp;
 
 #ifdef VMS
-    fp = fopen (name, "w", "shr=get");
+    fp = fopen (name, TXT_W, "shr=get");
     chmod(name, HIDE_CHMOD);
 #else
     SetDefaultMode(O_TEXT);
 
-    fp = OpenHiddenFile(name, "w");
+    fp = OpenHiddenFile(name, TXT_W);
 
     SetDefaultMode(O_BINARY);
 #endif
@@ -6476,12 +6486,12 @@ PUBLIC FILE *LYAppendToTxtFile ARGS1(char *, name)
     FILE *fp;
 
 #ifdef VMS
-    fp = fopen (name, "a+", "shr=get");
+    fp = fopen (name, TXT_A, "shr=get");
     chmod(name, HIDE_CHMOD);
 #else
     SetDefaultMode(O_TEXT);
 
-    fp = OpenHiddenFile(name, "a+");
+    fp = OpenHiddenFile(name, TXT_A);
 
     SetDefaultMode(O_BINARY);
 #endif
@@ -7321,6 +7331,11 @@ PUBLIC void LYLocalFileToURL ARGS2(
 
     leaf = wwwName(source);
 
+    if (!LYisAbsPath(source)) {
+	char temp[LY_MAXPATH];
+	Current_Dir(temp);
+	StrAllocCat(*target, temp);
+    }
     if (!LYIsHtmlSep(*leaf))
 	LYAddHtmlSep(target);
     StrAllocCat(*target, leaf);
@@ -7529,8 +7544,8 @@ PUBLIC int LYCopyFile ARGS2(
     int len;
 
     code = EOF;
-    if ((fin = fopen(src, "rb")) != 0) {
-	if ((fout = fopen(dst, "wb")) != 0) {
+    if ((fin = fopen(src, BIN_R)) != 0) {
+	if ((fout = fopen(dst, BIN_W)) != 0) {
 	    code = 0;
 	    while ((len = fread(buff, 1, BUF_SIZE, fin)) > 0) {
 		fwrite(buff, 1, len, fout);

@@ -718,7 +718,7 @@ PRIVATE int get_connection ARGS2(
 	/*
 	**  Allocate and init control struct.
 	*/
-	con = (connection *)calloc(1, sizeof(connection));
+	con = typecalloc(connection);
 	if (con == NULL)
 	    outofmem(__FILE__, "get_connection");
     }

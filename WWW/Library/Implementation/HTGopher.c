@@ -1028,7 +1028,7 @@ PRIVATE int parse_cso_fields ARGS2(
 			**  Initialize new block, append to end of list
 			**  to preserve order.
 			*/
-			new = (CSOfield_info *)calloc(1, sizeof(CSOfield_info));
+			new = typecalloc(CSOfield_info);
 			if (!new) {
 			    outofmem(__FILE__, "HTLoadCSO");
 			}

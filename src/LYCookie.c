@@ -132,7 +132,7 @@ PRIVATE void MemAllocCopy ARGS3(
 	return;
     }
 
-    temp = (char *)calloc(1, ((end - start) + 1));
+    temp = typecallocn(char, (end - start) + 1);
     if (temp == NULL)
 	outofmem(__FILE__, "MemAllocCopy");
     LYstrncpy(temp, start, (end - start));
@@ -1031,7 +1031,7 @@ PRIVATE void LYProcessSetCookies ARGS6(
 		if (value_len > max_cookies_buffer) {
 		    value_len = max_cookies_buffer;
 		}
-		value = (char *)calloc(1, value_len + 1);
+		value = typecallocn(char, value_len + 1);
 		if (value == NULL)
 		    outofmem(__FILE__, "LYProcessSetCookies");
 		LYstrncpy(value, value_start, value_len);
@@ -1551,7 +1551,7 @@ PRIVATE void LYProcessSetCookies ARGS6(
 		if (value_len > max_cookies_buffer) {
 		    value_len = max_cookies_buffer;
 		}
-		value = (char *)calloc(1, value_len + 1);
+		value = typecallocn(char, value_len + 1);
 		if (value == NULL)
 		    outofmem(__FILE__, "LYProcessSetCookies");
 		LYstrncpy(value, value_start, value_len);

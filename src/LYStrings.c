@@ -364,16 +364,45 @@ PRIVATE int set_clicked_link ARGS4(
     int i;
     int c = -1;
 
-    if (y == (LYlines-1)) {
+    if (y == (LYlines-1) || y == 0) {	/* First or last row */
+	/* XXXX In fact # is not always at x==0?  KANJI_CODE_OVERRIDE? */
+	int toolbar = (y == 0 && HText_hasToolbar(HTMainText));
+
 	mouse_link = -2;
-	if (x < left)	    c = (code==FOR_PROMPT) ? LTARROW : LTARROW;
-	else if (x > right) c = (code==FOR_PROMPT) ? RTARROW : '\b';
-	else c = PGDOWN;
-    } else if (y == 0) {
-	mouse_link = -2;
-	if (x < left) c = LTARROW;
-	else if (x > right) c = '\b';
-	else c = PGUP;
+	if (x == 0 && toolbar)		/* On '#' */
+	    c = LAC_TO_LKC0(LYK_TOOLBAR);
+	else if (clicks > 1) {
+	    if (x < left + toolbar)
+		c = (code==FOR_PROMPT && y)
+		    ? HOME : LAC_TO_LKC0(LYK_MAIN_MENU);
+	    else if (x > right)
+		c = (code==FOR_PROMPT && y)
+		    ? END_KEY : LAC_TO_LKC0(LYK_VLINKS);
+	    else if (y)			/* Last row */
+		c = LAC_TO_LKC0(LYK_END);
+	    else			/* First row */
+		c = LAC_TO_LKC0(LYK_HOME);
+	} else {
+	    if (x < left + toolbar)
+		c = (code==FOR_PROMPT && y)
+		    ? LTARROW
+		    : (
+#ifdef USE_COLOR_STYLE
+			(s_forw_backw != NOSTYLE && x - toolbar >= 3)
+			? LAC_TO_LKC0(LYK_NEXT_DOC)
+			: LAC_TO_LKC0(LYK_PREV_DOC)
+#else
+			LAC_TO_LKC0(LYK_NEXT_DOC)
+#endif
+			);
+	    else if (x > right)
+		c = (code==FOR_PROMPT && y)
+		    ? RTARROW : LAC_TO_LKC0(LYK_HISTORY);
+	    else if (y)			/* Last row */
+		c = LAC_TO_LKC0(LYK_NEXT_PAGE);
+	    else			/* First row */
+		c = LAC_TO_LKC0(LYK_PREV_PAGE);
+	}
 #ifdef USE_SCROLLBAR
     } else if (x == LYcols - 1 && LYsb && LYsb_begin >= 0) {
 	int h = display_lines - 2*(LYsb_arrow != 0);
@@ -499,9 +528,9 @@ PRIVATE int set_clicked_link ARGS4(
 	if (mouse_link >= 0) {
 	    if (mouse_err == 0) {
 		if (c == -1)
-		    c = lookup_keymap(LYK_ACTIVATE);
+		    c = LAC_TO_LKC0(LYK_ACTIVATE);
 	    } else if (mouse_err >= 0)
-		c = lookup_keymap(LYK_CHANGE_LINK);
+		c = LAC_TO_LKC0(LYK_CHANGE_LINK);
 	}
     }
     return c;
@@ -1213,18 +1242,16 @@ PRIVATE int read_keymap_file NOARGS
     char *line = NULL;
     FILE *fp;
     char file[LY_MAXPATH];
-    int ret;
     int linenum;
     size_t n;
 
     LYAddPathToHome(file, sizeof(file), FNAME_LYNX_KEYMAPS);
 
-    if ((fp = fopen (file, "r")) == 0)
+    if ((fp = fopen (file, TXT_R)) == 0)
 	return 0;
 
     linenum = 0;
-    ret = 0;
-    while (LYSafeGets(&line, fp) != 0 && (ret == 0)) {
+    while (LYSafeGets(&line, fp) != 0) {
 	char *s = LYSkipBlanks(line);
 
 	linenum++;
@@ -1234,23 +1261,15 @@ PRIVATE int read_keymap_file NOARGS
 
 	for (n = 0; n < TABLESIZE(table); n++) {
 	    size_t len = strlen(table[n].name);
-	    if (strlen(s) > len
-	     && !strncmp(s, table[n].name, len)) {
-		if ((*(table[n].func))(LYSkipBlanks(s+len)) < 0) {
-		    ret = -1;
-		    break;
-		}
-	    }
+
+	    if ( strlen(s) > len && !strncmp(s, table[n].name, len)
+		 && (*(table[n].func))(LYSkipBlanks(s+len)) < 0 )
+		fprintf (stderr, FAILED_READING_KEYMAP, linenum, file);
 	}
     }
     FREE(line);
-
     LYCloseInput (fp);
-
-    if (ret == -1)
-	fprintf (stderr, FAILED_READING_KEYMAP, linenum, file);
-
-    return ret;
+    return 0;
 }
 
 PRIVATE void setup_vtXXX_keymap NOARGS
@@ -1547,9 +1566,11 @@ re_read:
 #endif /* !USE_SLANG */
 #if !defined(USE_SLANG) || defined(VMS) || defined(DJGPP_KEYHANDLER)
     c = GetChar();
+    lynx_nl2crlf(FALSE);
 #else
     if (LYCursesON) {
 	c = GetChar();
+	lynx_nl2crlf(FALSE);
     } else {
 	c = getchar();
 	if (c == EOF && errno == EINTR) /* Ctrl-Z causes EINTR in getchar() */
@@ -1595,7 +1616,7 @@ re_read:
 	    if (new_fd >= 0) {
 		FILE *frp;
 		close(new_fd);
-		freopen(term_name, "r", stdin);
+		freopen(term_name, TXT_R, stdin);
 		CTRACE((tfp,
 		"nozap: freopen(%s,\"r\",stdin) returned %p, stdin is now %p with fd %d.\n",
 			term_name, frp, stdin, fileno(stdin)));
@@ -2077,23 +2098,7 @@ re_read:
 		    c = set_clicked_link(event.x, event.y, code, 1);
 		} else if (event.bstate & BUTTON1_DOUBLE_CLICKED) {
 		    c = set_clicked_link(event.x, event.y, code, 2);
-		    if (c == PGDOWN)
-			c = END_KEY;
-		    else if (c == PGUP)
-			c = HOME;
-		    else if (c == REMOVE_KEY)
-			c = END_KEY;
-		    else if (c == INSERT_KEY)
-			c = HOME;
-		    else if (c == RTARROW)
-			c = END_KEY;
-		    else if (c == LTARROW && code == FOR_PROMPT)
-			c = HOME;
-		    else if (c == LTARROW)
-			c = LYReverseKeymap(LYK_MAIN_MENU);
-		    else if (c == '\b' && (code == FOR_PANEL || code == FOR_INPUT))
-			c = LAC_TO_LKC0(LYK_VLINKS);
-		    else if (c == LAC_TO_LKC0(LYK_SUBMIT) && code == FOR_INPUT)
+		    if (c == LAC_TO_LKC0(LYK_SUBMIT) && code == FOR_INPUT)
 			lac = LYK_SUBMIT;
 		} else if (event.bstate & BUTTON3_CLICKED) {
 		    c = LAC_TO_LKC0(LYK_PREV_DOC);
@@ -2110,7 +2115,7 @@ re_read:
 		    int atlink;
 
 		    c = set_clicked_link(event.x, event.y, code, 1);
-		    atlink = (c == LYReverseKeymap(LYK_ACTIVATE));
+		    atlink = (c == LAC_TO_LKC0(LYK_ACTIVATE));
 		    if (!atlink)
 			mouse_link = -1; /* Forget about approx stuff. */
 
@@ -2695,7 +2700,8 @@ PUBLIC int LYEditInsert ARGS5(
     if (map < 0)
 	map = map_active;
     if (map && LYCharSet_UC[current_char_set].enc == UCT_ENC_UTF8) {
-	unsigned char *e = s + len, *t = Buf + Pos;
+	int off = Pos;
+	unsigned char *e = s + len;
 	char *tail = 0;
 
 	while (s < e) {
@@ -2712,30 +2718,30 @@ PUBLIC int LYEditInsert ARGS5(
 			remains -= l - 1;
 			if (remains < 0) {
 			    if (tail)
-				strcpy(t, tail);
+				strcpy(Buf + off, tail);
 			    FREE(tail);
-			    len = (char*)t - Buf;
+			    len = off;
 			    overflow = 1;
 			    goto finish;
 			}
 			if (l > 1 && !tail)
-			    StrAllocCopy((char*)tail, Buf + Pos + len);
+			    StrAllocCopy(tail, Buf + Pos + len);
 		    } else
 			utfbuf[0] = '?';
 		} else
 		    utfbuf[0] = UCH(ucode);
 	    }
-	    strncpy(t, utfbuf, l);
+	    strncpy(Buf + off, utfbuf, l);
 	    edited = 1;
-	    t += l;
+	    off += l;
 	    s++;
 	}
 	if (tail)
-	    strcpy(t, tail);
-	len = (char*)t - (Buf + Pos);
+	    strcpy(Buf + off, tail);
+	len = off - Pos;
 	FREE(tail);
     } else if (map) {
-	unsigned char *e = s + len, *t = Buf + Pos;
+	unsigned char *e = s + len, *t = (unsigned char *)Buf + Pos;
 
 	while (s < e) {
 	    int ch;
@@ -3556,7 +3562,7 @@ PRIVATE char **sortedList ARGS2(
     unsigned count = HTList_count(list);
     unsigned j = 0;
     unsigned k, jk;
-    char **result = calloc(count + 1, sizeof(char *));
+    char **result = typecallocn(char *, count + 1);
 
     if (result == 0)
 	outofmem(__FILE__, "sortedList");
@@ -3695,7 +3701,7 @@ PUBLIC int LYhandlePopupList ARGS9(
 	BOOLEAN,	numbered)
 {
     int c = 0, cmd = 0, i = 0, j = 0, rel = 0;
-    int orig_choice = cur_choice;
+    int orig_choice;
     WINDOW * form_window;
     int num_choices = 0;
     int max_choices = 0;
@@ -3718,6 +3724,10 @@ PUBLIC int LYhandlePopupList ARGS9(
     char buffer[MAX_LINE];
     char *popup_status_msg = NULL;
     CONST char **Cptr = NULL;
+
+    orig_choice = cur_choice;
+    if (cur_choice < 0)
+	cur_choice = 0;
 
     /*
      * Initialize the search string buffer. - FM
@@ -5341,7 +5351,7 @@ PUBLIC char * SNACopy ARGS3(
 {
     FREE(*dest);
     if (src) {
-	*dest = (char *)calloc(1, n + 1);
+	*dest = typecallocn(char, n + 1);
 	if (*dest == NULL) {
 	    CTRACE((tfp, "Tried to calloc %d bytes\n", n));
 	    outofmem(__FILE__, "SNACopy");
@@ -5369,7 +5379,7 @@ PUBLIC char * SNACat ARGS3(
 	    strncpy(*dest + length, src, n);
 	    *(*dest + length + n) = '\0'; /* terminate */
 	} else {
-	    *dest = (char *)calloc(1, n + 1);
+	    *dest = typecallocn(char, n + 1);
 	    if (*dest == NULL)
 		outofmem(__FILE__, "SNACat");
 	    memcpy(*dest, src, n);
@@ -5692,7 +5702,7 @@ PUBLIC BOOL LYHaveCmdScript NOARGS
 PUBLIC void LYOpenCmdScript NOARGS
 {
     if (lynx_cmd_script != 0) {
-	cmd_script = fopen(lynx_cmd_script, "r");
+	cmd_script = fopen(lynx_cmd_script, TXT_R);
 	CTRACE((tfp, "LYOpenCmdScript(%s) %s\n",
 		lynx_cmd_script,
 		cmd_script != 0 ? "SUCCESS" : "FAIL"));

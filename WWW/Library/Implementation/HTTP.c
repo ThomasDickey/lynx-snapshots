@@ -1,4 +1,4 @@
-/*	HyperText Tranfer Protocol	- Client implementation 	HTTP.c
+/*	HyperText Tranfer Protocol	- Client implementation		HTTP.c
 **	==========================
 ** Modified:
 ** 27 Jan 1994	PDM  Added Ari Luotonen's Fix for Reload when using proxy
@@ -350,16 +350,16 @@ PRIVATE int HTLoadHTTP ARGS4 (
 {
   int s;			/* Socket number for returned data */
   CONST char *url = arg;	/* The URL which get_physical() returned */
-  char *command = NULL; 	/* The whole command */
+  char *command = NULL;		/* The whole command */
   char *eol;			/* End of line if found */
   char *start_of_data;		/* Start of body of reply */
   int status;			/* tcp return */
   int bytes_already_read;
-  char crlf[3]; 		/* A CR LF equivalent string */
+  char crlf[3];			/* A CR LF equivalent string */
   HTStream *target;		/* Unconverted data */
   HTFormat format_in;		/* Format arriving in the message */
-  BOOL do_head = FALSE; 	/* Whether or not we should do a head */
-  BOOL do_post = FALSE; 	/* ARE WE posting ? */
+  BOOL do_head = FALSE;		/* Whether or not we should do a head */
+  BOOL do_post = FALSE;		/* ARE WE posting ? */
   char *METHOD;
 
   BOOL had_header;		/* Have we had at least one header? */
@@ -372,7 +372,7 @@ PRIVATE int HTLoadHTTP ARGS4 (
   BOOL first_Accept = TRUE;
   BOOL show_401 = FALSE;
   BOOL show_407 = FALSE;
-  BOOL auth_proxy = NO; 	/* Generate a proxy authorization. - AJL */
+  BOOL auth_proxy = NO;		/* Generate a proxy authorization. - AJL */
 
   int length, rawlength, rv;
   int server_status;
@@ -455,12 +455,13 @@ try_again:
   line_buffer = NULL;
   line_kept_clean = NULL;
 
-  if (!strncmp(url, "https", 5))
 #ifdef USE_SSL
+  if (!strncmp(url, "https", 5))
     status = HTDoConnect (url, "HTTPS", HTTPS_PORT, &s);
   else
     status = HTDoConnect (url, "HTTP", HTTP_PORT, &s);
 #else
+  if (!strncmp(url, "https", 5))
     {
       HTAlert(gettext("This client does not contain support for HTTPS URLs."));
       status = HT_NOT_LOADED;
@@ -521,7 +522,7 @@ use_tunnel:
 	      try_tls = FALSE;
 	      if (did_connect)
 		  HTTP_NETCLOSE(s, handle);
-      	      goto try_again;
+	      goto try_again;
 	  } else {
 	      unsigned long SSLerror;
 	      CTRACE((tfp,
@@ -531,11 +532,11 @@ use_tunnel:
 	      while((SSLerror=ERR_get_error())!=0) {
 		  CTRACE((tfp,"HTTP: SSL: %s\n",ERR_error_string(SSLerror,NULL)));
 	      }
-      	      HTAlert("Unable to make secure connection to remote host.");
+	      HTAlert("Unable to make secure connection to remote host.");
 	      if (did_connect)
 		  HTTP_NETCLOSE(s, handle);
-      	      status = HT_NOT_LOADED;
-      	      goto done;
+	      status = HT_NOT_LOADED;
+	      goto done;
 	  }
 #else
 	  unsigned long SSLerror;
@@ -546,11 +547,11 @@ use_tunnel:
 	  while((SSLerror=ERR_get_error())!=0) {
 	      CTRACE((tfp,"HTTP: SSL: %s\n",ERR_error_string(SSLerror,NULL)));
 	  }
-      	  HTAlert("Unable to make secure connection to remote host.");
+	  HTAlert("Unable to make secure connection to remote host.");
 	  if (did_connect)
 	      HTTP_NETCLOSE(s, handle);
-      	  status = HT_NOT_LOADED;
-      	  goto done;
+	  status = HT_NOT_LOADED;
+	  goto done;
 #endif /* SSLEAY_VERSION_NUMBER >= 0x0900 */
       }
       sprintf(SSLprogress,"Secure %d-bit %s (%s) HTTP connection",SSL_get_cipher_bits(handle,NULL),SSL_get_cipher_version(handle),SSL_get_cipher(handle));
@@ -558,13 +559,13 @@ use_tunnel:
 
 #ifdef NOTDEFINED
       if (strcmp(HTParse(url, "", PARSE_HOST),
-      		 strstr(X509_NAME_oneline(
-		 	X509_get_subject_name(
+		 strstr(X509_NAME_oneline(
+			X509_get_subject_name(
 				handle->session->peer)),"/CN=")+4)) {
 	  HTAlert("Certificate is for different host name");
 	  HTAlert(strstr(X509_NAME_oneline(
-	  		 X509_get_subject_name(
-			 	handle->session->peer)),"/CN=")+4);
+			 X509_get_subject_name(
+				handle->session->peer)),"/CN=")+4);
       }
 #endif /* NOTDEFINED */
   }
@@ -1056,7 +1057,7 @@ use_tunnel:
     BOOL end_of_file = NO;
     int buffer_length = INIT_LINE_SIZE;
 
-    line_buffer = (char *)calloc(1, (buffer_length * sizeof(char)));
+    line_buffer = typecallocn(char, buffer_length);
     if (line_buffer == NULL)
 	outofmem(__FILE__, "HTLoadHTTP");
 
@@ -1214,13 +1215,13 @@ use_tunnel:
     if (http_error_file) {     /* Make the status code externally available */
 	FILE *error_file;
 #ifdef SERVER_STATUS_ONLY
-	error_file = fopen(http_error_file, "w");
+	error_file = fopen(http_error_file, TXT_W);
 	if (error_file) {		/* Managed to open the file */
 	    fprintf(error_file, "error=%d\n", server_status);
 	    fclose(error_file);
 	}
 #else
-	error_file = fopen(http_error_file, "a");
+	error_file = fopen(http_error_file, TXT_A);
 	if (error_file) {		/* Managed to open the file */
 	    fprintf(error_file, "   URL=%s (%s)\n", url, METHOD);
 	    fprintf(error_file, "STATUS=%s\n", line_buffer);

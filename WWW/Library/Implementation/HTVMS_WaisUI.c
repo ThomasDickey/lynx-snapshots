@@ -220,7 +220,7 @@ transport_message(
 
   if( request_length + HEADER_LENGTH !=
       NETWRITE(connection,request_message,
-   		  (int)( request_length +HEADER_LENGTH)) )
+		  (int)( request_length +HEADER_LENGTH)) )
     return 0;
 
   /* read for the first '0' */

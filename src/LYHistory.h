@@ -20,4 +20,6 @@ extern void LYstatusline_messages_on_exit PARAMS((char **buf));
 extern void LYstore_message PARAMS((CONST char *message));
 extern void LYstore_message2 PARAMS((CONST char *message, CONST char *argument));
 
+extern int nhist_extra;
+
 #endif /* LYHISTORY_H */

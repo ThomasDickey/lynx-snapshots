@@ -328,7 +328,7 @@ PUBLIC void save_bookmark_link ARGS2(
     }
     CTRACE((tfp, "\nsave_bookmark_link: SEEKING %s\n   AS %s\n\n",
 		BookmarkPage, filename_buffer));
-    if ((fp = fopen(filename_buffer, (first_time ? "w" : "a+"))) == NULL) {
+    if ((fp = fopen(filename_buffer, (first_time ? TXT_W : TXT_A))) == NULL) {
 	LYMBM_statusline(BOOKMARK_OPEN_FAILED);
 	LYSleepAlert();
 	FREE(Title);
