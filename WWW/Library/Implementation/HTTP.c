@@ -56,7 +56,7 @@ PUBLIC char * redirecting_url = NULL;	    /* Location: value. */
 PUBLIC BOOL permanent_redirection = FALSE;  /* Got 301 status? */
 PUBLIC BOOL redirect_post_content = FALSE;  /* Don't convert to GET? */
 
-extern char LYUserSpecifiedURL; /* Is the URL a goto? */
+extern BOOLEAN LYUserSpecifiedURL; /* Is the URL a goto? */
 
 extern BOOL keep_mime_headers;	 /* Include mime headers and force source dump */
 extern BOOL no_url_redirection;  /* Don't follow Location: URL for */

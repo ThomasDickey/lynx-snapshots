@@ -283,4 +283,6 @@ extern void redraw_lines_of_link PARAMS((int cur));
 extern void HTMark_asSource NOPARAMS;
 #endif
 
+extern int HTMainText_Get_UCLYhndl NOPARAMS;
+
 #endif /* LYGRIDTEXT_H */

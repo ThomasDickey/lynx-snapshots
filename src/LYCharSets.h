@@ -49,4 +49,6 @@ extern CONST char * HTMLGetEntityName PARAMS((UCode_t code));
 		*/
 
 
+extern BOOL force_old_UCLYhndl_on_reload;
+extern int forced_UCLYhdnl;
 #endif /* LYCHARSETS_H */

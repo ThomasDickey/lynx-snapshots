@@ -1231,10 +1231,6 @@ try_again:
 	     */
 	    curdoc.line = -1;
 
-	    /*
-	     * I have no idea what this does, but it seems to be necessary... -dsb
-	     */
-	    LYUCPopAssumed();
 	}
 #endif
 
@@ -1861,46 +1857,46 @@ new_cmd:  /*
 		break;
 	    }
 
-
-#ifndef USE_PSRC
 	    if (HTisDocumentSource()) {
 		HTOutputFormat = WWW_PRESENT;
-	    } else {
-		if (HText_getOwner())
-		    StrAllocCopy(ownerS_address, HText_getOwner());
-		LYUCPushAssumed(HTMainAnchor);
-		HTOutputFormat = WWW_SOURCE;
-	    }
-#else
-	    if (HTisDocumentSource()) {
-		HTOutputFormat = WWW_PRESENT;
+#ifdef USE_PSRC
 		psrc_view = FALSE;
+#endif
 	    } else {
 		if (HText_getOwner())
 		    StrAllocCopy(ownerS_address, HText_getOwner());
 		LYUCPushAssumed(HTMainAnchor);
+#ifdef USE_PSRC
 		if (LYpsrc)
 		    psrc_view = TRUE;
 		else
 		    HTOutputFormat = WWW_SOURCE;
-	    }
+#else
+		HTOutputFormat = WWW_SOURCE;
 #endif
+	    }
+
 #ifdef SOURCE_CACHE
 	    if (HTreparse_document()) {
-		/*
-		 * These normally get cleaned up after getfile() returns;
-		 * since we're not calling getfile(), we have to clean them
-		 * up ourselves.  -dsb
-		 */
-		HTOutputFormat = WWW_PRESENT;
+			/*
+			 * These normally get cleaned up after getfile() returns;
+			 * since we're not calling getfile(), we have to clean them
+			 * up ourselves.  -dsb
+			 */
+			HTOutputFormat = WWW_PRESENT;
 #ifdef USE_PSRC
-		if (psrc_view)
-		    HTMark_asSource();
-		psrc_view = FALSE;
+			if (psrc_view)
+				HTMark_asSource();
+			psrc_view = FALSE;
 #endif
-		break;
+			FREE(ownerS_address);   /* not used with source_cache */
+			LYUCPopAssumed();  		/* probably a right place here */
+			HTMLSetCharacterHandling(current_char_set);  /* restore now */
+
+			break;
 	    }
 #endif
+
 	    FREE(curdoc.address); /* so it doesn't get pushed */
 	    LYforce_no_cache = TRUE;
 	    break;
@@ -1922,6 +1918,8 @@ new_cmd:  /*
 	     */
 
 	    if (HTisDocumentSource()) {
+		force_old_UCLYhndl_on_reload = TRUE;
+		forced_UCLYhdnl = HTMainText_Get_UCLYhndl();
 #ifndef USE_PSRC
 		HTOutputFormat = WWW_SOURCE;
 #else

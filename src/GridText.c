@@ -6195,7 +6195,9 @@ PUBLIC BOOLEAN HTreparse_document NOARGS
 	    format = HTFileFormat(HTMainText->source_cache_file, NULL, NULL);
 	    format = HTCharsetFormat(format, HTMainText->node_anchor,
 					     UCLYhndl_for_unspec);
-	    /* not UCLYhndl_HTFile_for_unspec - we are talking about remote documents... */
+	    /* not UCLYhndl_HTFile_for_unspec - we are talking about remote
+	     * documents...
+	     */
 	}
 	CTRACE(tfp, "  Content type is \"%s\"\n", format->name);
 
@@ -6240,6 +6242,18 @@ PUBLIC BOOLEAN HTreparse_document NOARGS
 
 	CTRACE(tfp, "Reparsing from source memory cache %p\n",
 	       (void *)HTMainText->source_cache_chunk);
+
+	/*
+	 * This is only done to make things aligned with SOURCE_CACHE_NONE and
+	 * SOURCE_CACHE_FILE when switching to source mode since the original
+	 * document's charset will be LYPushAssumed() and then LYPopAssumed().
+	 * See LYK_SOURCE in mainloop if you change something here.  No
+	 * user-visible benefits, seems just '=' Info Page will show source's
+	 * effective charset as "(assumed)".
+	 */
+	format = HTCharsetFormat(format, HTMainText->node_anchor,
+					 UCLYhndl_for_unspec);
+	/* not UCLYhndl_HTFile_for_unspec - we are talking about remote documents... */
 
 	/*
 	 * Pass the source cache HTChunk on to the next HText.  Clear it
@@ -10752,3 +10766,8 @@ PUBLIC void HTMark_asSource NOARGS
         HTMainText->source = TRUE;
 }
 #endif
+
+PUBLIC int HTMainText_Get_UCLYhndl NOARGS
+{
+    return (HTMainText ? HTMainText->node_anchor->UCStages->s[0].C.UChndl : 0);
+}

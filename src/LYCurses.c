@@ -657,6 +657,7 @@ PUBLIC void start_curses NOARGS
 	sock_init();
 
     LYCursesON = TRUE;
+    CTRACE(tfp, "start_curses: done.\n");
     clear();
     noecho();
 }
@@ -670,8 +671,10 @@ PUBLIC void start_curses NOARGS
 #ifdef USE_SLANG
     static int slinit;
 
-    if (LYCursesON)
+    if (LYCursesON) {
+	CTRACE(tfp, "start_curses: Hmm, already ON.\n");
 	return;
+    }
 
     if (slinit == 0) {
 	SLtt_get_terminfo();
@@ -871,6 +874,7 @@ PUBLIC void start_curses NOARGS
 #endif
 
     LYCursesON = TRUE;
+    CTRACE(tfp, "start_curses: done.\n");
 }
 
 
@@ -960,6 +964,7 @@ PUBLIC void stop_curses NOARGS
     fflush(stderr);
 
     LYCursesON = FALSE;
+    CTRACE(tfp, "stop_curses: done.\n");
 
 #if defined(SIGTSTP) && defined(USE_SLANG)
 #ifndef VMS

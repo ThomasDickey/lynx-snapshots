@@ -31,7 +31,7 @@
 PUBLIC char * WWW_Download_File=NULL; /* contains the name of the temp file
 				      ** which is being downloaded into
 				      */
-PUBLIC char LYCancelDownload=FALSE;   /* exported to HTFormat.c in libWWW */
+PUBLIC BOOLEAN LYCancelDownload=FALSE;   /* exported to HTFormat.c in libWWW */
 
 #ifdef VMS
 PRIVATE char * FIXED_RECORD_COMMAND = NULL;

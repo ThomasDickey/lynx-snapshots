@@ -380,6 +380,7 @@ PRIVATE int LYLoadCGI ARGS4(
 	    }
 	    fflush(stdout);
 	    fflush(stderr);
+	    CTRACE_FLUSH(tfp);
 
 	    if ((pid = fork()) > 0) { /* The good, */
 		int chars, total_chars;

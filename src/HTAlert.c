@@ -111,8 +111,8 @@ PUBLIC void HTProgress ARGS1(
 	CONST char *,	Msg)
 {
     statusline(Msg);
-    LYstore_message(Msg); 
-    CTRACE(tfp, "%s\n", Msg); 
+    LYstore_message(Msg);
+    CTRACE(tfp, "%s\n", Msg);
 }
 
 /*	Issue a read-progress message.			HTReadProgress()
@@ -178,12 +178,10 @@ PUBLIC void HTReadProgress ARGS2(
 		if (total < -1)
 		    strcat(line, gettext(" (Press 'z' to abort)"));
 	    }
- 
-	    /* do not store the message for history page. */ 
-	    if (TRACE) 
-		fprintf(tfp, "%s\n", line); 
-	    else 
-		statusline(line); 
+
+	    /* do not store the message for history page. */
+	    statusline(line);
+	    CTRACE(tfp, "%s\n", line);
 	}
     }
 }
