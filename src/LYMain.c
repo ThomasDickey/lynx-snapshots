@@ -92,6 +92,10 @@ PUBLIC char *syslog_txt = NULL;		/* syslog arb text for session */
 PUBLIC char *LYCSwingPath = NULL;
 #endif /* VMS */
 
+#if HAVE_CUSERID && !defined(_XOPEN_SOURCE)
+extern char *cuserid();		/* workaround for Redhat 6.0 */
+#endif
+
 #ifdef DIRED_SUPPORT
 PUBLIC BOOLEAN lynx_edit_mode = FALSE;
 PUBLIC BOOLEAN no_dired_support = FALSE;
@@ -197,7 +201,7 @@ PUBLIC BOOLEAN telnet_ok = TRUE;
 PUBLIC BOOLEAN news_ok = TRUE;
 #endif
 PUBLIC BOOLEAN rlogin_ok = TRUE;
-PUBLIC BOOLEAN long_url_ok = TRUE;
+PUBLIC BOOLEAN long_url_ok = FALSE;
 PUBLIC BOOLEAN ftp_ok = TRUE;
 PUBLIC BOOLEAN system_editor = FALSE;
 
@@ -276,6 +280,9 @@ PUBLIC BOOLEAN local_host_only = FALSE;
 PUBLIC BOOLEAN override_no_download = FALSE;
 PUBLIC BOOLEAN show_dotfiles = FALSE; /* From rcfile if no_dotfiles is false */
 PUBLIC BOOLEAN LYforce_HTML_mode = FALSE;
+#ifdef __DJGPP__
+PUBLIC BOOLEAN watt_debug = FALSE;  /* WATT-32 debugging */
+#endif /* __DJGPP__ */
 
 #ifdef WIN_EX
 #undef SYSTEM_MAIL
@@ -728,7 +735,7 @@ PRIVATE int argcmp ARGS2(
 {
     if (str[0] == '-' && str[1] == '-' ) ++str;
 #if !OPTNAME_ALLOW_DASHES
-    return strcmp(str,what);
+    return strcmp(str, what);
 #else
     ++str; ++what; /*skip leading dash in both strings*/
     {
@@ -779,7 +786,7 @@ PUBLIC int main ARGS2(
 	int err;
 	WORD wVerReq;
 
-	wVerReq = MAKEWORD(1,1);
+	wVerReq = MAKEWORD(1, 1);
 
 	err = WSAStartup(wVerReq, &WSAData);
 	if (err != 0)
@@ -823,10 +830,7 @@ PUBLIC int main ARGS2(
 	init_ctrl_break[0] = 1;
     }
     atexit(reset_break);
-    dbug_init();
-    sock_init();
-    __system_flags = 0x501D;
-#endif
+#endif /* __DJGPP__ */
 
     /*
      * To prevent corrupting binary data on DOS, MS-WINDOWS or OS/2
@@ -1078,7 +1082,8 @@ PUBLIC int main ARGS2(
 	    socks_flag = FALSE;
 #endif /* SOCKS */
 	} else if (argncmp(argv[i], "-cfg") == 0) {
-	    if ((cp=strchr(argv[i],'=')) != NULL)
+	    if (((cp = strchr(argv[i], '=')) != NULL)
+	     || ((cp = strchr(argv[i], ':')) != NULL))
 		StrAllocCopy(lynx_cfg_file, cp+1);
 	    else {
 		StrAllocCopy(lynx_cfg_file, argv[i+1]);
@@ -1087,7 +1092,7 @@ PUBLIC int main ARGS2(
 
 #if defined(USE_HASH)
 	} else if (argncmp(argv[i], "-lss") == 0) {
-	    if ((cp=strchr(argv[i],'=')) != NULL)
+	    if ((cp=strchr(argv[i], '=')) != NULL)
 		StrAllocCopy(lynx_lss_file, cp+1);
 	    else {
 		StrAllocCopy(lynx_lss_file, argv[i+1]);
@@ -1152,7 +1157,7 @@ PUBLIC int main ARGS2(
 		socks_flag = FALSE;
 #endif /* SOCKS */
 	    } else if (argncmp(buf, "-cfg") == 0) {
-		if ((cp = strchr(buf,'=')) != NULL) {
+		if ((cp = strchr(buf, '=')) != NULL) {
 		    StrAllocCopy(lynx_cfg_file, cp+1);
 		} else {
 		    cp = LYSkipNonBlanks(buf);
@@ -1162,7 +1167,7 @@ PUBLIC int main ARGS2(
 		}
 #if defined(USE_HASH)
 	    } else if (argncmp(buf, "-lss") == 0) {
-		if ((cp = strchr(buf,'=')) != NULL) {
+		if ((cp = strchr(buf, '=')) != NULL) {
 		    StrAllocCopy(lynx_lss_file, cp+1);
 		} else {
 		    cp = LYSkipNonBlanks(buf);
@@ -1287,7 +1292,7 @@ PUBLIC int main ARGS2(
      *	a TRACE log NOW. - FM
      */
     if (!LYValidate && !LYRestricted &&
-	strlen((char *)ANONYMOUS_USER) > 0 &&
+	strlen(ANONYMOUS_USER) > 0 &&
 #if defined (VMS) || defined (NOUSERS)
 	!strcasecomp(((char *)getenv("USER")==NULL ? " " : getenv("USER")),
 		     ANONYMOUS_USER)
@@ -1817,7 +1822,7 @@ PUBLIC int main ARGS2(
      *	Block Control-Z suspending if requested. - FM
      */
     if (no_suspend)
-	(void) signal(SIGTSTP,SIG_IGN);
+	(void) signal(SIGTSTP, SIG_IGN);
 #endif /* SIGTSTP */
 
     /*
@@ -1904,7 +1909,7 @@ PUBLIC int main ARGS2(
 	ftp_ok = !no_inside_ftp && !no_outside_ftp && ftp_ok;
 	rlogin_ok = !no_inside_rlogin && !no_outside_rlogin && rlogin_ok;
 #else
-	CTRACE(tfp,"LYMain: User in Local domain\n");
+	CTRACE(tfp, "LYMain: User in Local domain\n");
 	telnet_ok = !no_inside_telnet && telnet_ok;
 #ifndef DISABLE_NEWS
 	news_ok = !no_inside_news && news_ok;
@@ -1913,7 +1918,7 @@ PUBLIC int main ARGS2(
 	rlogin_ok = !no_inside_rlogin && rlogin_ok;
 #endif /* !HAVE_UTMP || VMS */
     } else {
-	CTRACE(tfp,"LYMain: User in REMOTE domain\n");
+	CTRACE(tfp, "LYMain: User in REMOTE domain\n");
 	telnet_ok = !no_outside_telnet && telnet_ok;
 #ifndef DISABLE_NEWS
 	news_ok = !no_outside_news && news_ok;
@@ -1938,6 +1943,20 @@ PUBLIC int main ARGS2(
 	StrAllocCopy(MBM_A_subbookmark[0], bookmark_page);
 	StrAllocCopy(MBM_A_subdescript[0], MULTIBOOKMARKS_DEFAULT);
     }
+
+#if defined (__DJGPP__) 
+    if (watt_debug) 
+      dbug_init(); 
+    sock_init(); 
+
+    __system_flags = 
+       __system_emulate_chdir        |  /* handle `cd' internally */ 
+       __system_handle_null_commands |  /* ignore cmds with no effect */ 
+       __system_allow_long_cmds      |  /* handle commands > 126 chars  */ 
+       __system_use_shell            |  /* use $SHELL if set */ 
+       __system_allow_multiple_cmds  |  /* allow `cmd1; cmd2; ...' */ 
+       __system_redirect;               /* redirect internally */ 
+#endif  /* __DJGPP__ */ 
 
     /*
      *	Here's where we do all the work.
@@ -1964,7 +1983,7 @@ PUBLIC int main ARGS2(
 	    !crawl &&		/* For -crawl it has already been done! */
 	    (keypad_mode == LINKS_ARE_NUMBERED ||
 	     keypad_mode == LINKS_AND_FIELDS_ARE_NUMBERED))
-	    printlist(stdout,FALSE);
+	    printlist(stdout, FALSE);
 #ifdef EXP_PERSISTENT_COOKIES
 	/*
 	 *  We want to save cookies picked up when in immediate dump
@@ -3242,12 +3261,22 @@ with the PREV_DOC command or from the History List"
       "rlogin",		UNSET_ARG,		&rlogin_ok,
       "disable rlogins"
    ),
+#ifdef USE_SCROLLBAR
+   PARSE_SET(
+      "scrollbar",	TOGGLE_ARG,		&LYsb,
+      "toggles showing scrollbar (requires color styles)"
+   ),
+   PARSE_SET(
+      "scrollbar_arrow", TOGGLE_ARG,		&LYsb_arrow,
+      "toggles showing arrows at ends of the scrollbar"
+   ),
+#endif
    PARSE_FUN(
       "selective",	FUNCTION_ARG,		selective_fun,
       "require .www_browsable files to browse directories"
    ),
    PARSE_SET(
-      "short_url",	UNSET_ARG,		&long_url_ok,
+      "short_url",	SET_ARG,		&long_url_ok,
       "enables examination of beginning and end of long URL in status line"
    ),
 #ifdef SH_EX
@@ -3351,6 +3380,12 @@ treated '>' as a co-terminator for double-quotes and tags"
       "vikeys",		SET_ARG,		&vi_keys,
       "enable vi-like key movement"
    ),
+#ifdef __DJGPP__
+   PARSE_SET(
+      "wdebug",		TOGGLE_ARG,		&watt_debug,
+      "enables Waterloo tcp/ip packet debug. Prints to watt debugfile"
+  ),
+#endif /* __DJGPP__ */
    PARSE_FUN(
       "width",		NEED_FUNCTION_ARG,	width_fun,
       "=NUMBER\nscreen width for formatting of dumps (default is 80)"
@@ -3485,6 +3520,7 @@ static int arg_eqs_parse ARGS3(
 	    if (*a == 0) {
 		switch (*b) {
 		case '=':
+		case ':':
 		    *c = b + 1;
 		    return 1;
 		case '-':	/* FALLTHRU */

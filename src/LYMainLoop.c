@@ -68,32 +68,30 @@ PUBLIC char *str_kcode(HTkcode code)
     static char buff[8];
 
     if (current_char_set == CHARSET_TRANS) {
-	    p = "THRU";
+	p = "THRU";
+    } else if (!LYRawMode) {
+	p = "RAW";
     } else {
-	if (!LYRawMode) {
-	    p = "RAW";
-	} else {
-	    switch (code) {
-	    case NOKANJI:
-		p = "AUTO";
-		break;
+	switch (code) {
+	case NOKANJI:
+	    p = "AUTO";
+	    break;
 
-	    case EUC:
-		p = "EUC+";
-		break;
+	case EUC:
+	    p = "EUC+";
+	    break;
 
-	    case SJIS:
-		p = "SJIS";
-		break;
+	case SJIS:
+	    p = "SJIS";
+	    break;
 
-	    case JIS:
-		p = " JIS";
-		break;
+	case JIS:
+	    p = " JIS";
+	    break;
 
-	    default:
-		p = " ???";
-		break;
-	    }
+	default:
+	    p = " ???";
+	    break;
 	}
     }
 
@@ -121,7 +119,10 @@ PRIVATE void set_ws_title(char * str)
 }
 #endif
 
-/* 1998/10/30 (Fri) 10:06:47 */
+#endif /* CJK_EX */
+
+
+#ifdef SH_EX  /* 1998/10/30 (Fri) 10:06:47 */
 
 #define NOT_EQU	1
 
@@ -400,6 +401,93 @@ PRIVATE int find_link_near_col ARGS2(
 }
 
 /*
+ * This is a special feature to traverse every http link derived from startfile
+ * and check for errors or create crawl output files.  Only URL's that begin
+ * with "traversal_host" are searched - this keeps the search from crossing to
+ * other servers (a feature, not a bug!).
+ */
+PRIVATE int DoTraversal ARGS2(
+    int,	c,
+    BOOLEAN *,	crawl_ok)
+{
+    BOOLEAN rlink_rejected = FALSE;
+    BOOLEAN rlink_exists;
+    BOOLEAN rlink_allowed;
+
+    rlink_exists = (nlinks > 0 &&
+		    links[curdoc.link].type != WWW_FORM_LINK_TYPE &&
+		    links[curdoc.link].lname != NULL);
+
+    if (rlink_exists) {
+	rlink_rejected = lookup_reject(links[curdoc.link].lname);
+	if (!rlink_rejected &&
+	     traversal_host &&
+	     links[curdoc.link].lname) {
+	    if (strncmp(links[curdoc.link].lname, "LYNXIMGMAP:", 11)) {
+		rlink_allowed = !strncmp(traversal_host,
+					 links[curdoc.link].lname,
+					 strlen(traversal_host));
+	    } else {
+		rlink_allowed = !strncmp(traversal_host,
+					 links[curdoc.link].lname + 11,
+					 strlen(traversal_host));
+	    }
+	} else {
+	    rlink_allowed = FALSE;
+	}
+    } else {
+	rlink_allowed = FALSE;
+    }
+    if (rlink_exists && rlink_allowed) {
+	if (lookup(links[curdoc.link].lname)) {
+	    if (more_links ||
+		(curdoc.link > -1 && curdoc.link < nlinks -1))
+		 c= DNARROW;
+	    else {
+		if (STREQ(curdoc.title,"Entry into main screen") ||
+		    (nhist <= 0 )) {
+		    if (!dump_output_immediately) {
+			cleanup();
+			exit_immediately(-1);
+		    }
+		    return(-1);
+		}
+		c = LTARROW;
+	    }
+	} else {
+	    StrAllocCopy(traversal_link_to_add,
+			 links[curdoc.link].lname);
+	    if (strncmp(traversal_link_to_add, "LYNXIMGMAP:", 11))
+		*crawl_ok = TRUE;
+	    c = RTARROW;
+	}
+    } else { /* no good right link, so only down and left arrow ok*/
+	if (rlink_exists /* && !rlink_rejected */)
+	    /* uncomment in previous line to avoid duplicates - kw */
+	    add_to_reject_list(links[curdoc.link].lname);
+	if (more_links ||
+	    (curdoc.link > -1 && curdoc.link < nlinks-1))
+	    c = DNARROW;
+	else {
+	    /*
+	     *	curdoc.title doesn't always work, so
+	     *	bail out if the history list is empty.
+	     */
+	    if (STREQ(curdoc.title,"Entry into main screen") ||
+		(nhist <= 0 )) {
+		if (!dump_output_immediately) {
+		    cleanup();
+		    exit_immediately(-1);
+		}
+		return(-1);
+	    }
+	    c = LTARROW;
+	}
+    } /* right link not NULL or link to another site*/
+    return c;
+}
+
+/*
  *  Here's where we do all the work.
  *  mainloop is basically just a big switch dependent on the users input.
  *  I have tried to offload most of the work done here to procedures to
@@ -434,8 +522,6 @@ int mainloop NOARGS
     BOOLEAN force_load = FALSE;
     BOOLEAN try_internal = FALSE;
     BOOLEAN crawl_ok = FALSE;
-    BOOLEAN rlink_exists;
-    BOOLEAN rlink_allowed;
     BOOLEAN vi_keys_flag = vi_keys;
     BOOLEAN emacs_keys_flag = emacs_keys;
     BOOLEAN trace_mode_flag = FALSE;
@@ -826,11 +912,11 @@ try_again:
 				mail_owner = owner_address + 7;
 			    }
 			    /*
-			 *  Email a bad link message to the owner of
-			 *  the document, or to ALERTMAIL if defined,
-			 *  but NOT to lynx-dev (it is rejected in
-			 *  mailmsg). - FM, kw
-			 */
+			     *  Email a bad link message to the owner of
+			     *  the document, or to ALERTMAIL if defined,
+			     *  but NOT to lynx-dev (it is rejected in
+			     *  mailmsg). - FM, kw
+			     */
 #ifndef ALERTMAIL
 			    if (mail_owner)
 #endif
@@ -1604,7 +1690,7 @@ try_again:
 
 	}
 
-#if defined(SH_EX)	/* 1997/10/08 (Wed) 14:52:06 */
+#if defined(CJK_EX)			/* 1997/10/08 (Wed) 14:52:06 */
 	if (nlinks > 0) {
 	    char *p = "LYNX (unknown link type)";
 
@@ -1670,7 +1756,7 @@ try_again:
 		set_ws_title(HTUnEscape(temp_buff));
 	    }
 	}
-#endif /* SH_EX */
+#endif /* CJK_EX */
 
 	/*
 	 *  Report unread or new mail, if appropriate.
@@ -1934,77 +2020,8 @@ new_keyboard_input:
 	 *  back through the getch() loop.
 	 */
 	if (traversal) {
-	    /*
-	     *	This is a special feature to traverse every http link
-	     *	derived from startfile and check for errors or create
-	     *	crawl output files.  Only URL's that begin with
-	     *	"traversal_host" are searched - this keeps the search
-	     *	from crossing to other servers (a feature, not a bug!).
-	     */
-	    BOOLEAN rlink_rejected = FALSE;
-	    rlink_exists = (nlinks > 0 &&
-			    links[curdoc.link].type != WWW_FORM_LINK_TYPE &&
-			    links[curdoc.link].lname != NULL);
-	    if (rlink_exists) {
-		rlink_rejected = lookup_reject(links[curdoc.link].lname);
-		rlink_allowed =
-		    (!rlink_rejected &&
-		     traversal_host && links[curdoc.link].lname &&
-		     !strncmp(traversal_host,
-			      (strncmp(links[curdoc.link].lname,
-				       "LYNXIMGMAP:", 11)
-					 ?
-		links[curdoc.link].lname : (links[curdoc.link].lname + 11)),
-			      strlen(traversal_host)));
-	    } else {
-		rlink_allowed = FALSE;
-	    }
-	    if (rlink_exists && rlink_allowed) {
-		if (lookup(links[curdoc.link].lname)) {
-		    if (more_links ||
-			(curdoc.link > -1 && curdoc.link < nlinks -1))
-			 c= DNARROW;
-		    else {
-			if (STREQ(curdoc.title,"Entry into main screen") ||
-			    (nhist <= 0 )) {
-			    if (!dump_output_immediately) {
-				cleanup();
-				exit_immediately(-1);
-			    }
-			    return(-1);
-			}
-			c = LTARROW;
-		    }
-		} else {
-		    StrAllocCopy(traversal_link_to_add,
-				 links[curdoc.link].lname);
-		    if (strncmp(traversal_link_to_add, "LYNXIMGMAP:", 11))
-			crawl_ok = TRUE;
-		    c = RTARROW;
-		}
-	    } else { /* no good right link, so only down and left arrow ok*/
-		if (rlink_exists /* && !rlink_rejected */)
-		    /* uncomment in previous line to avoid duplicates - kw */
-		    add_to_reject_list(links[curdoc.link].lname);
-		if (more_links ||
-		    (curdoc.link > -1 && curdoc.link < nlinks-1))
-		    c = DNARROW;
-		else {
-		    /*
-		     *	curdoc.title doesn't always work, so
-		     *	bail out if the history list is empty.
-		     */
-		    if (STREQ(curdoc.title,"Entry into main screen") ||
-			(nhist <= 0 )) {
-			if (!dump_output_immediately) {
-			    cleanup();
-			    exit_immediately(-1);
-			}
-			return(-1);
-		    }
-		    c = LTARROW;
-		}
-	    } /* right link not NULL or link to another site*/
+	    if ((c = DoTraversal(c, &crawl_ok)) < 0)
+	    	return (-1);
 	} /* traversal */
 
 #ifdef WIN_EX
@@ -2314,22 +2331,22 @@ new_cmd:  /*
 
 #ifdef SOURCE_CACHE
 	    if (HTreparse_document()) {
-			/*
-			 * These normally get cleaned up after getfile() returns;
-			 * since we're not calling getfile(), we have to clean them
-			 * up ourselves.  -dsb
-			 */
-			HTOutputFormat = WWW_PRESENT;
+		/*
+		 * These normally get cleaned up after getfile() returns;
+		 * since we're not calling getfile(), we have to clean them
+		 * up ourselves.  -dsb
+		 */
+		HTOutputFormat = WWW_PRESENT;
 #ifdef USE_PSRC
-			if (psrc_view)
-				HTMark_asSource();
-			psrc_view = FALSE;
+		if (psrc_view)
+		    HTMark_asSource();
+		psrc_view = FALSE;
 #endif
-			FREE(ownerS_address);   /* not used with source_cache */
-			LYUCPopAssumed();  		/* probably a right place here */
-			HTMLSetCharacterHandling(current_char_set);  /* restore now */
+		FREE(ownerS_address);   /* not used with source_cache */
+		LYUCPopAssumed();  	/* probably a right place here */
+		HTMLSetCharacterHandling(current_char_set);  /* restore now */
 
-			break;
+		break;
 	    }
 #endif
 
@@ -2726,7 +2743,7 @@ new_cmd:  /*
 	    }
 	    break;
 
-#if defined(SH_EX) && defined(DOSPATH)	/*1997/12/22 (Mon) 09:28:56 */
+#if defined(WIN_EX) && defined(SH_EX)	/*1997/12/22 (Mon) 09:28:56 */
 	case LYK_TO_CLIPBOARD:	/* ^S */
 	    {
 		if (put_clip(links[curdoc.link].lname) == 0) {
@@ -6883,7 +6900,7 @@ PRIVATE void status_link ARGS3(
 	BOOLEAN,	show_indx)
 {
 #define MAX_STATUS (LYcols - 2)
-#define MIN_STATUS MAX_STATUS / 2
+#define MIN_STATUS 0
     char format[MAX_LINE];
     int prefix;
     int length;
@@ -6903,41 +6920,40 @@ PRIVATE void status_link ARGS3(
 
 	if ((length + prefix > MAX_STATUS) && long_url_ok) {
 	    char *buf = NULL;
-	    int j;
-	    int k;
-	    int cut_position;
-	    int link_position;
+	    int cut_from_pos;
+	    int cut_to_pos;
+	    int n;
 
 	    StrAllocCopy(buf, curlink_name);
-
-	    /* Scan to find the final leaf of the url, put it in 'k'.
-	     * Ignore trailing '/'.
+	    /*
+	     *  Scan to find the final leaf of the URL.
+	     *  Ignore trailing '/'.
 	     */
-	    for (j = length; (j > 0) && buf[j] != '/'; --j)
-		;
-	    if (j >= (length - 3)) {
-		for (k = j - 1; (k > 0) && buf[k] != '/'; --k)
-		    ;
-	    } else {
-		k = j;
-	    }
-
-	    /* We assume that one can recognize the link from at least
-	     * MIN_STATUS characters.
+	    for (cut_to_pos = length - 2;
+		 (cut_to_pos > 0) && (buf[cut_to_pos] != '/');
+		 cut_to_pos--)
+		 ;
+	    /*
+	     *  Jump back to the next leaf to remove.
 	     */
-	    cut_position = MAX_STATUS - prefix - (length - k);
-	    if (cut_position < MIN_STATUS){
-		cut_position = MIN_STATUS;
-		link_position = length - MIN_STATUS + 3;
-	    } else {
-		link_position = k;
+	    for (cut_from_pos = cut_to_pos - 4;
+		 (cut_from_pos > 0) && ((buf[cut_from_pos] != '/')
+		 || (prefix + cut_from_pos + 4 + (length - cut_to_pos) >= MAX_STATUS));
+		 cut_from_pos--)
+		 ;
+	    /*
+	     *  Replace some leaves to '...', if possible, and put the
+	     *  final leaf at the end. We assume that one can recognize
+	     * 	the link from at least MIN_STATUS characters.
+	     */
+	    if (cut_from_pos > MIN_STATUS) {
+		for (n = 1; n <= 3; n++)
+		    buf[cut_from_pos + n] = '.';
+		for (n = 0; cut_to_pos + n <= length; n++)
+		    buf[cut_from_pos + 4 + n] = buf[cut_to_pos + n];
 	    }
-	    for (j = 0; j < 3; j++)
-		buf[cut_position++] = '_';
-	    if (cut_position < link_position)
-		while ((buf[cut_position++] = buf[link_position++]) != 0)
-		    ;
 	    _user_message(format, buf);
+	    CTRACE(tfp,"lastline = %s\n",buf); /* don't forget to erase me */
 	    FREE(buf);
 	} else {	/* show (possibly truncated) url */
 	    _user_message(format, curlink_name);

@@ -1,6 +1,38 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+1999-08-13 (2.8.3dev.6)
+* workarounds in LYMain.c and LYMainLoop.c for excessive compiler warnings due
+  to defective design of glibc2 -TD
+* modify logic for EXP_JUSTIFY_ELTS in GridText.c to change a raw
+  LY_NONBREAK_SPACE to ' ', to work better for tables -VH
+* add/clarify user's guide for command line option syntax -DK, KW
+* add a new command line toggle for DOS to control debugging of packets under
+  WATTCP and WATT-32.  Under WATT-32, once dbug_init is called, debugging
+  cannot be turned off (although output can be sent to /dev/null).  This new
+  option "-wdebug" controls whether debugging is active, is off by default -DK,
+  Gisle Vanem
+* allow ':' as a separator between the option and its value -DK
+* corrected install rule using symbolic link for copyright files (reported by
+  HN, KED) -TD
+* reset "stalled for xxx" counter from Ilya's ETA change in dev.5 between ftp
+  requests -VH
+* add support for scrollbars, ifdef'd with USE_SCROLLBAR.  Use command-line
+  options -scrollbar and -scrollbar_arrow or corresponding lynx.cfg to enable
+  it.  Requires ncurses; may be further tuned if color-style configuration
+  is used (Ilya Zakharevich)
+* LYCopyFile():  Thanks to Hiroyuki Senshu, DOS-based systems needs no cp.exe
+  binary when compiled with SH_EX.  This code is now defined with DOSPATH so
+  used automatically by any dos/windows port, but unused for UNIXes
+  (permissions?) if occasionally built with SH_EX symbol -LP
+* few includes labelled with _WIN_CC now tweaked with WIN_EX as should be -LP
+* adjustments to SH_EX, CJK_EX ifdef's in LYMainLoop.c and LYUtils.c to aid in
+  porting -LP
+* improved logic in status_link() for -short_url option (patches from
+  <nsh@itjit.ne.jp> and Eduardo Chappa L)
+* modify display_page() to not necessarily call lynx_force_repaint() to make
+  highlighting work when displaying UTF-8 -Christian Weisgerber, KW
+* add check in read_directory() if transfer was interrupted -KED
 1999-07-30 (2.8.3dev.5)
 * add/use LYHideCursor() macro to accommodate position in older curses -TD
 * add configure option --enable-cjk to compile-in CJK_EX logic -TD

@@ -45,6 +45,9 @@ extern int hash_table[CSHASHSIZE]; /* 32K should be big enough */
 extern int	s_alink, s_a, s_status,
 		s_label, s_value, s_high,
 		s_normal, s_alert, s_title,
+#ifdef USE_SCROLLBAR
+		s_sb_bar, s_sb_bg, s_sb_aa, s_sb_naa,
+#endif
 		s_whereis;
 #define CACHEW 128
 #define CACHEH 64

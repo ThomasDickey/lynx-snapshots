@@ -3159,7 +3159,7 @@ PUBLIC void LYExtSignal ARGS2(
  *  much state as possible.
  *  Second arg is where to save or restore from.
  *  Third arg to_dfl specifies what to do:
- *  	1	Save current state in where, set handling to SIG_DFL
+ *	1	Save current state in where, set handling to SIG_DFL
  *	0	Restore current state to previously saved one in where
  *
  *  Currently only used for SIGTSTP without SLANG, to prevent (n)curses
@@ -7052,7 +7052,7 @@ PUBLIC int LYCopyFile ARGS2(
 	char *,		src,
 	char *,		dst)
 {
-#ifdef SH_EX
+#if defined(DOSPATH)		/* thanks to Hiroyuki Senshu */
 
 #define BUF_SIZE	1024
 
@@ -7065,8 +7065,10 @@ PUBLIC int LYCopyFile ARGS2(
 	return EOF;
 
     fout = fopen(dst, "wb");
-    if (fout == NULL)
+    if (fout == NULL) {
+	fclose(fin);		/* it was opened, yes? */
 	return EOF;
+    }
 
     while ((len = fread(buff, 1, BUF_SIZE, fin)) > 0) {
 	fwrite(buff, 1, len, fout);
@@ -7281,7 +7283,7 @@ PUBLIC char *LYSysShell NOARGS
 {
     char *shell = 0;
 #ifdef DOSPATH
-#ifdef SH_EX
+#ifdef WIN_EX
     shell = getenv("SHELL");
     if (shell) {
 	if (access(shell, 0) != 0)
@@ -7301,7 +7303,7 @@ PUBLIC char *LYSysShell NOARGS
     if (shell == NULL) {
 	shell = "command.com";
     }
-#endif	/* SH_EX */
+#endif /* WIN_EX */
 #else
 #ifdef __EMX__
     if (getenv("SHELL") != NULL) {

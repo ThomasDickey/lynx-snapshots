@@ -1,6 +1,6 @@
 /* character level styles for Lynx
  * (c) 1996 Rob Partington -- donated to the Lyncei (if they want it :-)
- * $Id: LYStyle.c,v 1.23 1999/07/30 16:06:54 tom Exp $
+ * @Id: LYStyle.c 1.31 Fri, 13 Aug 1999 07:27:27 -0600 dickey @
  */
 #include <HTUtils.h>
 #include <HTML.h>
@@ -64,6 +64,10 @@ static char *Mono_Strings[7] =
 PUBLIC int	s_alink  = NOSTYLE, s_a     = NOSTYLE, s_status = NOSTYLE,
 		s_label  = NOSTYLE, s_value = NOSTYLE, s_high   = NOSTYLE,
 		s_normal = NOSTYLE, s_alert = NOSTYLE, s_title  = NOSTYLE,
+#ifdef USE_SCROLLBAR
+		s_sb_bar = NOSTYLE, s_sb_bg = NOSTYLE,
+		s_sb_aa = NOSTYLE, s_sb_naa = NOSTYLE,
+#endif
 		s_whereis= NOSTYLE;
 
 /* start somewhere safe */
@@ -360,6 +364,12 @@ PUBLIC void style_initialiseHashTable NOARGS
 	s_status = hash_code("status");
 	s_alert  = hash_code("alert");
 	s_title  = hash_code("title");
+#ifdef USE_SCROLLBAR
+	s_sb_bar = hash_code("scroll.bar");
+	s_sb_bg  = hash_code("scroll.back");
+	s_sb_aa  = hash_code("scroll.arrow");
+	s_sb_naa = hash_code("scroll.noarrow");
+#endif
 }
 
 /* because curses isn't started when we parse the config file, we

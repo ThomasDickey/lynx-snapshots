@@ -243,7 +243,7 @@
               enabled).
 
        -mime_header
-              prints  the MIME header of a fetched document along
+              prints the MIME header of a fetched document  along
               with its source.
 
        -minimal
@@ -253,25 +253,25 @@
               number of articles in chunked news listings.
 
        -newsmaxchunk=NUMBER
-              maximum news articles in listings before  chunking.
+              maximum  news articles in listings before chunking.
 
        -nobrowse
               disable directory browsing.
 
-       -nocc  disable  Cc:  prompts  for self copies of mailings.
-              Note that this does not disable any CCs  which  are
+       -nocc  disable Cc: prompts for self  copies  of  mailings.
+              Note  that  this does not disable any CCs which are
               incorporated within a mailto URL or form ACTION.
 
        -nocolor
               force   color   mode   off,   overriding   terminal
-              capabilities  and  any  -color   flags,   COLORTERM
+              capabilities   and   any  -color  flags,  COLORTERM
               variable, and saved .lynxrc settings.
 
        -noexec
               disable local program execution. (DEFAULT)
 
        -nofilereferer
-              disable  transmissions  of Referer headers for file
+              disable transmissions of Referer headers  for  file
               URLs.
 
        -nolist
@@ -281,10 +281,10 @@
               owners.
 
        -nonrestarting_sigwinch
-              This  flag  is  not  available on all systems, Lynx
-              needs to be compiled with  HAVE_SIGACTION  defined.
-              If  available,  this  flag  may cause Lynx to react
-              more immediately to window changes when run  within
+              This flag is not available  on  all  systems,  Lynx
+              needs  to  be compiled with HAVE_SIGACTION defined.
+              If available, this flag may  cause  Lynx  to  react
+              more  immediately to window changes when run within
               an xterm.
 
        -nopause
@@ -317,23 +317,23 @@
               with partial-display logic
 
        -pauth=ID:PASSWD
-              set  authorization  ID and password for a protected
-              proxy server at startup.  Be sure  to  protect  any
+              set authorization ID and password for  a  protected
+              proxy  server  at  startup.  Be sure to protect any
               script files which use this switch.
 
-       -popup toggles  handling  of  single-choice SELECT options
+       -popup toggles handling of  single-choice  SELECT  options
               via popup windows or as lists of radio buttons.
 
        -post_data
-              send form data from stdin  using  POST  method  and
+              send  form  data  from  stdin using POST method and
               dump results.
 
        -preparsed
-              show  HTML  source  preparsed  and reformatted when
+              show HTML source  preparsed  and  reformatted  when
               used with -source or in source view.
 
        -prettysrc
-              show HTML source view  with  lexical  elements  and
+              show  HTML  source  view  with lexical elements and
               tags in color.
 
        -print enable print functions. (default)
@@ -341,8 +341,8 @@
        -pseudo_inlines
               toggles pseudo-ALTs for inlines with no ALT string.
 
-       -raw   toggles  default   setting   of   8-bit   character
-              translations  or CJK mode for the startup character
+       -raw   toggles   default   setting   of   8-bit  character
+              translations or CJK mode for the startup  character
               set.
 
        -realm restricts access to URLs in the starting realm.
@@ -352,33 +352,32 @@
               document affected).
 
        -restrictions=[option][,option][,option]...
-              allows   a   list   of   services  to  be  disabled
+              allows  a  list  of   services   to   be   disabled
               selectively. Dashes and underscores in option names
               can be intermixed. The following list is printed if
               no options are specified.
 
               all - restricts all options listed below.
 
-              bookmark - disallow changing the  location  of  the
+              bookmark  -  disallow  changing the location of the
               bookmark file.
 
-              bookmark_exec  -  disallow  execution links via the
+              bookmark_exec - disallow execution  links  via  the
               bookmark file.
 
-              change_exec_perms - disallow changing  the  eXecute
-              permission   on  files  (but  still  allow  it  for
+              change_exec_perms  -  disallow changing the eXecute
+              permission  on  files  (but  still  allow  it   for
               directories) when local file management is enabled.
 
-              default  -  same as command line option -anonymous.
-
+              default - same as command line  option  -anonymous.
               Disables default services for anonymous users.  Set
-              to   all  restricted,  except  for:  inside_telnet,
-              outside_telnet,      inside_ftp,       outside_ftp,
+              to  all  restricted,  except  for:   inside_telnet,
+              outside_telnet,       inside_ftp,      outside_ftp,
               inside_rlogin,     outside_rlogin,     inside_news,
               outside_news, telnet_port, jump, mail, print, exec,
-              and  goto.   The  settings  for  these,  as well as
-              additional  goto  restrictions  for  specific   URL
-              schemes  that  are  also  applied, are derived from
+              and goto.  The  settings  for  these,  as  well  as
+              additional   goto  restrictions  for  specific  URL
+              schemes that are also  applied,  are  derived  from
               definitions within userdefs.h.
 
               dired_support - disallow local file management.
@@ -386,43 +385,43 @@
               disk_save - disallow saving to disk in the download
               and print menus.
 
-              dotfiles  -  disallow  access  to,  or creation of,
+              dotfiles - disallow  access  to,  or  creation  of,
               hidden (dot) files.
 
-              download  -  disallow  some  downloaders   in   the
-              download    menu    (does   not   imply   disk_save
+              download   -   disallow  some  downloaders  in  the
+              download   menu   (does   not    imply    disk_save
               restriction).
 
               editor - disallow external editing.
 
               exec - disable execution scripts.
 
-              exec_frozen - disallow the user from  changing  the
+              exec_frozen  -  disallow the user from changing the
               local execution option.
 
-              externals  - disallow some "EXTERNAL" configuration
-              lines if  support  for  passing  URLs  to  external
-              applications  (with the EXTERN command) is compiled
+              externals - disallow some "EXTERNAL"  configuration
+              lines  if  support  for  passing  URLs  to external
+              applications (with the EXTERN command) is  compiled
               in.
 
-              file_url - disallow using G)oto,  served  links  or
+              file_url  -  disallow  using G)oto, served links or
               bookmarks for file: URLs.
 
               goto - disable the 'g' (goto) command.
 
-              inside_ftp  -  disallow ftps for people coming from
+              inside_ftp - disallow ftps for people  coming  from
               inside your domain (utmp required for selectivity).
 
-              inside_news  -  disallow  USENET  news  posting for
-              people  coming  from  inside  your   domain   (utmp
+              inside_news -  disallow  USENET  news  posting  for
+              people   coming   from  inside  your  domain  (utmp
               required for selectivity).
 
-              inside_rlogin  - disallow rlogins for people coming
-              from  inside  your  domain   (utmp   required   for
+              inside_rlogin - disallow rlogins for people  coming
+              from   inside   your   domain  (utmp  required  for
               selectivity).
 
-              inside_telnet  - disallow telnets for people coming
-              from  inside  your  domain   (utmp   required   for
+              inside_telnet - disallow telnets for people  coming
+              from   inside   your   domain  (utmp  required  for
               selectivity).
 
               jump - disable the 'j' (jump) command.
@@ -433,45 +432,45 @@
 
               news_post - disallow USENET News posting.
 
-              options_save  - disallow saving options in .lynxrc.
+              options_save - disallow saving options in  .lynxrc.
 
-              outside_ftp - disallow ftps for people coming  from
-              outside    your    domain    (utmp   required   for
+              outside_ftp  - disallow ftps for people coming from
+              outside   your   domain    (utmp    required    for
               selectivity).
 
-              outside_news - disallow  USENET  news  reading  and
-              posting  for people coming from outside your domain
-              (utmp required for selectivity).  This  restriction
-              applies   to   "news",   "nntp",   "newspost",  and
-              "newsreply" URLs, but not to "snews",  "snewspost",
+              outside_news  -  disallow  USENET  news reading and
+              posting for people coming from outside your  domain
+              (utmp  required for selectivity).  This restriction
+              applies  to   "news",   "nntp",   "newspost",   and
+              "newsreply"  URLs, but not to "snews", "snewspost",
               or "snewsreply" in case they are supported.
 
               outside_rlogin - disallow rlogins for people coming
-              from  outside  your  domain  (utmp   required   for
+              from   outside   your  domain  (utmp  required  for
               selectivity).
 
               outside_telnet - disallow telnets for people coming
-              from  outside  your  domain  (utmp   required   for
+              from   outside   your  domain  (utmp  required  for
               selectivity).
 
               print - disallow most print options.
 
-              shell  -  disallow  shell  escapes  and lynxexec or
+              shell - disallow  shell  escapes  and  lynxexec  or
               lynxprog G)oto's.
 
-              suspend - disallow  Unix  Control-Z  suspends  with
+              suspend  -  disallow  Unix  Control-Z suspends with
               escape to shell.
 
-              telnet_port  - disallow specifying a port in telnet
+              telnet_port - disallow specifying a port in  telnet
               G)oto's.
 
-              useragent - disallow  modifications  of  the  User-
+              useragent  -  disallow  modifications  of the User-
               Agent header.
 
        -resubmit_posts
-              toggles  forced  resubmissions  (no-cache) of forms
-              with method POST when the documents  they  returned
-              are  sought  with  the PREV_DOC command or from the
+              toggles forced resubmissions  (no-cache)  of  forms
+              with  method  POST when the documents they returned
+              are sought with the PREV_DOC command  or  from  the
               History List.
 
        -rlogin
@@ -540,6 +539,7 @@
               traverse all http  links  derived  from  startfile.
               When  used  with -crawl, each link that begins with
               the same string as startfile is output to  a  file,
+
               intended for indexing.  See CRAWL.announce for more
               information.
 
@@ -567,7 +567,7 @@
               security restrictions also are implemented.
 
        -verbose
-              taggles  [LINK], [IMAGE] and [INLINE] comments with
+              toggle  [LINK],  [IMAGE] and [INLINE] comments with
               filenames of these images.
 
        -version
@@ -575,6 +575,11 @@
 
        -vikeys
               enable vi-like key movement.
+
+       -wdebug
+              enable Waterloo tcp/ip packet debug (print to  watt
+              debugfile).   This  applies  only  to  DOS versions
+              compiled with WATTCP or WATT-32.
 
        -width=NUMBER
               number of columns for formatting of dumps,  default

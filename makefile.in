@@ -119,6 +119,7 @@ SITE_DEFS = # Your defines here
 # -DNO_RULES       Disables CERN-style access rules (see lynx.cfg).
 # -DSHORTENED_RBIND  For a SOCKSified lynx with the short version of Rbind.
 # -DSLANG_MBCS_HACK prevent cutoff lines when using UTF8 console (slang only)
+# -DUSE_SCROLLBAR  supports scrollbar when built with ncurses
 #
 # if you are linking to freeWAIS-0.202 or older, you should define this
 # in SITE_DEFS
@@ -317,16 +318,19 @@ install-bin: $(BINDIR)
 install-man : $(MANDIR)
 	$(INSTALL_DATA) $(srcdir)/lynx.man $(MANDIR)/lynx.1
 
-install-doc : $(DOCDIR)
+install-doc : $(DOCDIR) $(HELPDIR)
 	@echo Copying sample files
 	(cd $(srcdir) && tar cf - C[HO]* PROBLEMS README samples test ) | \
 			       ( cd $(DOCDIR) && tar xf - )
+	$(SHELL) -c 'for name in COPYING COPYHEADER; do \
+		cd $(HELPDIR) && ( $(LN_S) $(DOCDIR)/$$name . || cp $(DOCDIR)/$$name . );\
+		done'
 
 # HPUX 'sed' does not seem to like '=' as pattern delimiter.
 FIX_SED = tr '=' '%'
 #FIX_SED = cat
 
-install-help : $(DOCDIR) $(HELPDIR)
+install-help : $(HELPDIR)
 	(cd $(HELPDIR) && WD=`pwd` && HEAD=`echo $$WD|sed -e 's@/lynx_help$$@@'` && test $$WD != $$HEAD && rm -rf *)
 	@echo Constructing sed-script
 	@ECHO_CC@sed	-e '/^#/d' -e '/^$$/d' \
@@ -373,9 +377,6 @@ install-help : $(DOCDIR) $(HELPDIR)
 		$(LIBDIR)/lynx.tmp >$(LIBDIR)/lynx.cfg
 	chmod 644 $(LIBDIR)/lynx.cfg
 	-rm -f $(LIBDIR)/lynx.tmp
-	$(SHELL) -c 'for name in COPYING COPYHEADER; do \
-		cd $(DOCDIR) && ( $(LN_S) $$name $(HELPDIR)/ || cp $$name $(HELPDIR)/ );\
-		done'
 
 LYHelp.h : LYHelp.hin
 	@echo Constructing sed-script

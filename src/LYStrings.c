@@ -305,6 +305,22 @@ PRIVATE int set_clicked_link ARGS4(
 	if (x < left) c = LTARROW;
 	else if (x > right) c = '\b';
 	else c = PGUP;
+#ifdef USE_SCROLLBAR
+    } else if (x == LYcols - 1 && LYsb && LYsb_begin >= 0) {
+	int h = display_lines - 2*(LYsb_arrow != 0);
+
+	mouse_link = -2;
+	y -= 1 + (LYsb_arrow != 0);
+	if (y < 0)
+	    return INSERT_KEY;
+	if (y >= h)
+	    return REMOVE_KEY;
+	if (y < LYsb_begin)
+	    return PGUP;
+	if (y >= LYsb_end)
+	    return PGDOWN;
+	mouse_link = -1;		/* No action in edit fields */
+#endif
     } else {
 	int mouse_err = 4, /* subjctv-dist better than this for approx stuff */
 	    cur_err;
@@ -1836,6 +1852,10 @@ re_read:
 		    if (c == PGDOWN)
 			c = END_KEY;
 		    else if (c == PGUP)
+			c = HOME;
+		    else if (c == REMOVE_KEY)
+			c = END_KEY;
+		    else if (c == INSERT_KEY)
 			c = HOME;
 		    else if (c == RTARROW)
 			c = END_KEY;

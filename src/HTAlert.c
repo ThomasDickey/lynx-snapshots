@@ -22,7 +22,7 @@
 
 #include <LYLeaks.h>
 
-#if _WIN_CC
+#if defined(WIN_EX) && defined(UNUSED_CODE)
 #include <HTParse.h>
 #endif
 
@@ -110,7 +110,7 @@ PUBLIC void HTUserMsg2 ARGS2(
     }
 }
 
-#ifdef WIN_EX		/* 1997/10/28 (Tue) 17:19:43 */
+#if defined(WIN_EX) && defined(UNUSED_CODE)	/* 1997/10/28 (Tue) 17:19:43 */
 
 #define MAX_LEN	512
 

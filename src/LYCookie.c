@@ -611,8 +611,8 @@ PRIVATE void store_cookie ARGS3(
 **  include in a Cookie: request header. - AK & FM
 */
 PRIVATE char * scan_cookie_sublist ARGS6(
-	CONST char *,	hostname,
-	CONST char *,	path,
+	char *,		hostname,
+	char *,		path,
 	int,		port,
 	HTList *,	sublist,
 	char *, 	header,
@@ -630,7 +630,7 @@ PRIVATE char * scan_cookie_sublist ARGS6(
 	next = hl->next;
 
        if ((co) && /* speed-up host_matches() and limit trace output */
-	   (LYstrstr((char *)hostname, co->domain) != NULL))
+	   (LYstrstr(hostname, co->domain) != NULL))
        {
 	    CTRACE(tfp, "Checking cookie %p %s=%s\n",
 			hl,
@@ -1952,8 +1952,8 @@ PUBLIC void LYSetCookie ARGS3(
 **  if needed. - AK & FM
 */
 PUBLIC char * LYCookie ARGS4(
-	CONST char *,	hostname,
-	CONST char *,	path,
+	char *,		hostname,
+	char *,		path,
 	int,		port,
 	BOOL,		secure)
 {
