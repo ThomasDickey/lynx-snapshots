@@ -908,55 +908,6 @@ static int nonrest_sigwinch_fun ARGS1(
     return 0;
 }
 
-#ifdef USE_PSRC
-
-static void html_src_bad_syntax ARGS2(
-	    char*, value,
-	    char*, option_name)
-{
-    char *buf = 0;
-
-    HTSprintf0(&buf,"HTMLSRC_%s", option_name);
-    LYUpperCase(buf);
-    fprintf(stderr,"Bad syntax in TAGSPEC %s:%s\n", buf, value);
-    exit_immediately(-1);
-}
-
-
-static int parse_html_src_spec ARGS3(
-	    HTlexem, lexem_code,
-	    char*, value,
-	    char*, option_name)
-{
-   /* Now checking the value for being correct.  Since HTML_dtd is not
-    * initialized completely (member tags points to non-initiailized data), we
-    * use tags_old.  If the syntax is incorrect, then lynx will exit with error
-    * message.
-    */
-    char* ts2;
-    if ( !value || !*value) return 0; /* silently ignoring*/
-
-#define BS() html_src_bad_syntax(value,option_name)
-
-    ts2 = strchr(value,':');
-    if (!ts2)
-	BS();
-    *ts2 = '\0';
-
-    if ( html_src_parse_tagspec(value, lexem_code, TRUE, TRUE)
-	|| html_src_parse_tagspec(ts2, lexem_code, TRUE, TRUE) )
-    {
-	*ts2 = ':';
-	BS();
-    }
-
-    *ts2 = ':';
-    HTL_tagspecs[lexem_code] = NULL;
-    StrAllocCopy(HTL_tagspecs[lexem_code],value);
-#undef BS
-    return 0;
-}
-
 #ifdef EXP_CHARSET_CHOICE
 PRIVATE void matched_charset_choice ARGS2(
 	BOOL,	display_charset,
@@ -1041,6 +992,55 @@ PRIVATE int parse_assumed_doc_charset_choice ARGS1(char*,p)
 }
 
 #endif /* EXP_CHARSET_CHOICE */
+
+#ifdef USE_PSRC
+
+static void html_src_bad_syntax ARGS2(
+	    char*, value,
+	    char*, option_name)
+{
+    char *buf = 0;
+
+    HTSprintf0(&buf,"HTMLSRC_%s", option_name);
+    LYUpperCase(buf);
+    fprintf(stderr,"Bad syntax in TAGSPEC %s:%s\n", buf, value);
+    exit_immediately(-1);
+}
+
+
+static int parse_html_src_spec ARGS3(
+	    HTlexem, lexem_code,
+	    char*, value,
+	    char*, option_name)
+{
+   /* Now checking the value for being correct.  Since HTML_dtd is not
+    * initialized completely (member tags points to non-initiailized data), we
+    * use tags_old.  If the syntax is incorrect, then lynx will exit with error
+    * message.
+    */
+    char* ts2;
+    if ( !value || !*value) return 0; /* silently ignoring*/
+
+#define BS() html_src_bad_syntax(value,option_name)
+
+    ts2 = strchr(value,':');
+    if (!ts2)
+	BS();
+    *ts2 = '\0';
+
+    if ( html_src_parse_tagspec(value, lexem_code, TRUE, TRUE)
+	|| html_src_parse_tagspec(ts2, lexem_code, TRUE, TRUE) )
+    {
+	*ts2 = ':';
+	BS();
+    }
+
+    *ts2 = ':';
+    HTL_tagspecs[lexem_code] = NULL;
+    StrAllocCopy(HTL_tagspecs[lexem_code],value);
+#undef BS
+    return 0;
+}
 
 #if defined(__STDC__) || defined(_WIN_CC)
 #define defHTSRC_parse_fun(x) static int html_src_set_##x ARGS1( char*,str) \
@@ -1323,6 +1323,7 @@ static Config_Type Config_Table [] =
 #endif
      PARSE_STR("startfile", CONF_STR, &startfile),
 #ifndef NO_NONSTICKY_INPUTS
+     PARSE_SET("sticky_fields", CONF_BOOL, &textfield_stop_at_left_edge),
      PARSE_SET("sticky_inputs", CONF_BOOL, &sticky_inputs),
 #endif
      PARSE_SET("strip_dotdot_urls", CONF_BOOL, &LYStripDotDotURLs),
@@ -1426,7 +1427,7 @@ PRIVATE Config_Type *lookup_config ARGS1(
     return tbl;
 }
 
-#define NOPTS_ ( (sizeof Config_Table)/(sizeof Config_Table[0]) - 1 )
+#define NOPTS_ ( TABLESIZE(Config_Table) - 1 )
 typedef BOOL (optidx_set_t) [ NOPTS_ ];
  /* if element is FALSE, then it's allowed in the current file*/
 

@@ -109,7 +109,7 @@ makeuctb.o: $(srcdir)/UCkd.h $(srcdir)/makeuctb.c
 	@ECHO_CC@$(CPP) -C $(CPP_OPTS) $(srcdir)/$*.c >$@
 
 .tbl.h:
-	./makeuctb$x $(srcdir)/$*.tbl > $@
+	./makeuctb$x $(srcdir)/$*.tbl $*.h
 
 # table files listed here once again to get the make dependencies
 # right, in case makeuctb was recompiled.

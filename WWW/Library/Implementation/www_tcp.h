@@ -664,9 +664,9 @@ Defaults
 #endif /* !NO_IOCTL */
 #include <sys/socket.h>
 #include <netinet/in.h>
-#if !defined( __hpux) && !defined(__BEOS__) /* this may or may not be good -marc */
+#ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>      /* Must be after netinet/in.h */
-#endif /* !__hpux */
+#endif
 #include <netdb.h>
 #endif  /* TCP includes */
 

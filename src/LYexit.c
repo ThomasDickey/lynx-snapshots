@@ -9,9 +9,6 @@
 #include <LYSignal.h>
 #include <LYClean.h>
 #include <LYMainLoop.h>
-#ifdef SYSLOG_REQUESTED_URLS
-#include <syslog.h>
-#endif /* SYSLOG_REQUESTED_URLS */
 #endif /* !VMS */
 
 /*
@@ -145,12 +142,9 @@ PUBLIC void LYexit ARGS1(
      */
     LYCompleteExit();
 
-#ifndef VMS
-#ifdef SYSLOG_REQUESTED_URLS
-    syslog(LOG_INFO, "Session over");
-    closelog();
-#endif /* SYSLOG_REQUESTED_URLS */
-#endif /* !VMS */
+#if !defined(VMS) && defined(SYSLOG_REQUESTED_URLS)
+    LYCloselog();
+#endif /* !VMS && SYSLOG_REQUESTED_URLS */
 
 #ifdef exit
 /*  Make sure we use stdlib exit and not LYexit. - GAB

@@ -1,6 +1,64 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+1999-09-13 (2.8.3dev.9)
+* add -nobold, -noreverse, -nounderline options to disable corresponding
+  video attributes (based on a patch by John Hawkinson <jhawk@MIT.EDU>) -TD
+* add STICKEY_FIELDS to lynx.cfg, which tells lynx whether to activate the
+  previous document when an extra key-left is given -VH,TD
+* minor cleanup of run_external(), use single return, HTSprintf0 -TD
+* for WATT32 configuration, call _eth_release() and _eth_init() in HTTelnet.c
+  to make telnet work properly -DK
+* correct redefinition of u_long for WATT32 -LP
+* modify syslog change to make it more specific, based on comments by KW -TD
+* fix potential security problem with SYSLOG_REQUESTED_URLS, which would let
+  syslog() send sensitive information as broadcast to any syslog daemon that
+  care to listen.
+  E.g. URLs with embedded passwords are sent to syslog:
+    Sep 11 12:26:06 lynx[16177]: ftp://joe:password@host/~joe
+  The patch masks the password by breaking up the URL and replacing
+  the password with "******" (Gisle Vanem <giva@bryggen.bgnett.no>).
+* fix mismatch of const's from call of map_string_to_keysym() in
+  lkcstring_to_lkc() -TD
+* Supply trailing slash for protocol_proxy settings (whether environment
+  variables or lynx.cfg) in HTAccess.c if the slash was omitted and if the
+  content otherwise looks normal (starts with http, no su) -KW
+* add links for "Free WWW E-mail services" to online help -PW
+* add links in online help to FAQ-o-matic -JS
+* more fixes to build with slang under cygwin32 - DK
+* add/use LYwaddstr(), etc to fix more const-casts (reported by PG) -TD
+* modify HTTCP.c to prevent telnet and similar applications from inadvertantly
+  using hostname tokens which look like command-line options -KW
+* modify configure script's --with-charsets option so that if --without-charsets
+  is selected, then it will use a 'minimal' set.  The keyword 'minimal' is
+  recognized as the list us-ascii,iso-8859-1,utf-8 (request by KW, HN) -TD
+* ifdef'd recursive calls on UCGetLYhndl_byMIME() for charsets that may be not
+  present (--with-charsets), and add getLYhndl_byCP() to cover a special case
+  of recursion which was also a preexisting hole (reported by Frederic L W
+  Meunier, analysis by KW) -TD
+* replace fr.po with a placeholder.  Add placeholders for ru.po, pt_BR.po -JS
+* review/modify HTNews.c to avoid potential buffer overflows, as well as reduce
+  the number of embedded constants that make it difficult to adjust fixed
+  buffer sizes -TD
+1999-08-28 (2.8.3dev.8)
+* correct ifdef's combining HAVE_POPEN and __CYGWIN__ in LYPrint.c, which would
+  link popen() code when it was not available -TD
+* correct order of ifdef's for __CYGWIN__ in LYGlobalDefs.h, which would result
+  in syntax error if __CYGWIN__ were undefined when __CYGWIN32__ was defined -TD
+* change hardcoded ifdef for <arpa/inet.h> include to autoconf'd form -TD
+* modify makeuctb to add ifdef's allowing most charsets to be suppressed at
+  compile time.  Use similar ifdef's in UCdomap.h to suppress registration
+  of non-uctb charsets.  Add configure option --with-charsets to specify list
+  of charsets which are not suppressed (def7_uni is always active) -TD
+* change makeuctb to generate the name of the output file, simplifying all of
+  the build scripts in chartrans -TD
+* correct a syntax error in crypt_util.c from dev.7 and an ifdef in LYCurses.c
+  that sets the codepath -SH
+* use macro TABLESIZE throughout for consistency -TD
+* revert use of TYPECAST for parameter of 'FREE()' macro, since that puts a
+  cast on the parameter as an lvalue (reported by LV) -PG
+* correct improperly-nested ifdef EXP_CHARSET_CHOICE in ifdef for USE_PSRC
+  in LYReadCFG.c -TD
 1999-08-26 (2.8.3dev.7)
 * tweak ifdef'ing of `debug_delay' (only available with SH_EX _and_ WIN_EX) -LP
 * tweak src/Xsystem.c (extern system_is_NT is now ifdef'ed with WIN_EX) so

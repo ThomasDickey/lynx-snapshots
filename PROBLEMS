@@ -150,6 +150,12 @@ they will be outlined in this file.
     Alternatively, compiling Lynx with the slang library may avoid problems
     with theses terminals.
 
+    The Sun console driver (aka wscons(7)) implements "reverse" and "bold"
+    as "reverse", causing confusion where Lynx uses the distinction between
+    the two to convey information. Lynx tries to detect this automatically,
+    but if it fails (for instance, you are running under "screen"), try
+    setting the -noreverse commandline option.
+
     On VMS, Lynx, and other TCP-IP software, have been experiencing chronic
     problems of incompatibilities between DECC and MultiNet headers whenever
     new versions of either DECC or MultiNet are released.  The Lynx build

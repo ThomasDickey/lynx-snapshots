@@ -25,6 +25,10 @@
 #undef exit
 #endif /* exit */
 
+#ifndef TOUPPER
+#define TOUPPER(c) (islower((unsigned char)c) ? toupper((unsigned char)c) : (c))
+#endif /* !TOLOWER */
+
 #ifndef TOLOWER
 #define TOLOWER(c) (isupper((unsigned char)c) ? tolower((unsigned char)c) : (c))
 #endif /* !TOLOWER */
@@ -39,25 +43,39 @@
  */
 typedef u16 unicode;
 
+static FILE *chdr = 0;
+
 /*
- * Since we're writing the formatted file to stdout, ensure that we flush
+ * Since we may be writing the formatted file to stdout, ensure that we flush
  * everything before leaving, since some old (and a few not-so-old) platforms
  * that do not implement POSIX 'exit()'.
  */
-#define done(code)  \
-    fflush(stdout); \
-    fflush(stderr); \
-    exit(code)
-
-PRIVATE void usage ARGS1(
-	char *,		argv0)
+PRIVATE void done PARAMS((int code)) GCC_NORETURN;
+PRIVATE void done ARGS1(int, code)
 {
-    fprintf(stderr, "Usage: \n");
-    fprintf(stderr,
-	    "        %s chartable [charsetmimename] [charsetdisplayname]\n",
-	    argv0);
-    fprintf(stderr,
-	    "Utility to convert .tbl into .h files for Lynx compilation.\n");
+    fflush(chdr);
+    fclose(chdr);
+    fflush(stderr);
+    exit(code);
+}
+
+PRIVATE void usage NOARGS
+{
+    static CONST char *tbl[] = {
+	"Usage: makeuctb [parameters]"
+	"",
+	"Utility to convert .tbl into .h files for Lynx compilation.",
+	""
+	"Parameters (all are optional):",
+	"  1: the input file (normally {filename}.tbl, but \"-\" for stdin",
+	"  2: the output file (normally {filename}.tbl but \"-\" for stdout",
+	"  3: charset mime name",
+	"  4: charset display name"
+    };
+    unsigned n;
+    for (n = 0; n < TABLESIZE(tbl); n++) {
+	fprintf(stderr, "%s\n", tbl[n]);
+    };
     done(EX_USAGE);
 }
 
@@ -110,7 +128,8 @@ int unicount[MAX_FONTLEN];
 
 struct unimapdesc_str themap_str = {0, NULL, 0, 0};
 
-char *tblname;
+PRIVATE char *tblname;
+PRIVATE char *hdrname;
 
 PRIVATE int RawOrEnc = 0;
 PRIVATE int Raw_found = 0;		/* whether explicit R directive found */
@@ -218,16 +237,55 @@ PUBLIC int main ARGS2(
 	int,		argc,
 	char **,	argv)
 {
+    static char *first_ifdefs[] = {
+	"/*",
+	" * Compile-in this chunk of code unless we've turned it off specifically",
+	" * or in general (id=%s).",
+	" */",
+	"",
+	"#ifndef INCL_CHARSET%s",
+	"#define INCL_CHARSET%s 1",
+	"",
+	"/*ifdef NO_CHARSET*/",
+	"#ifdef  NO_CHARSET",
+	"#undef  NO_CHARSET",
+	"#endif",
+	"#define NO_CHARSET 0 /* force default to always be active */",
+	"",
+	"/*ifndef NO_CHARSET%s*/",
+	"#ifndef NO_CHARSET%s",
+	"",
+	"#if    ALL_CHARSETS",
+	"#define NO_CHARSET%s 0",
+	"#else",
+	"#define NO_CHARSET%s 1",
+	"#endif",
+	"",
+	"#endif /* ndef(NO_CHARSET%s) */",
+	"",
+	"#if NO_CHARSET%s",
+	"#define UC_CHARSET_SETUP%s /*nothing*/",
+	"#else"
+    };
+    static char *last_ifdefs[] = {
+	"",
+	"#endif /* NO_CHARSET%s */"
+	"",
+	"#endif /* INCL_CHARSET%s */"
+    };
+
     FILE *ctbl;
     char buffer[65536];
+    char outname[256];
+    unsigned n;
     int fontlen;
     int i, nuni, nent;
-    int fp0, fp1, un0, un1;
+    int fp0 = 0, fp1 = 0, un0, un1;
     char *p, *p1;
     char *tbuf, ch;
 
-    if (argc < 2 || argc > 4) {
-	usage(argv[0]);
+    if (argc < 2 || argc > 5) {
+	usage();
     }
 
     if (!strcmp(argv[1], "-")) {
@@ -237,6 +295,31 @@ PUBLIC int main ARGS2(
 	ctbl = fopen(tblname = argv[1], "r");
 	if (!ctbl) {
 	    perror(tblname);
+	    done(EX_NOINPUT);
+	}
+    }
+
+    if (argc > 2) {
+	if (!strcmp(argv[2], "-")) {
+	    chdr = stdout;
+	    hdrname = "stdout";
+	} else {
+	    hdrname = argv[2];
+	}
+    } else if (ctbl == stdin) {
+	chdr = stdout;
+	hdrname = "stdout";
+    } else {
+	strcpy(hdrname = outname, tblname);
+	if ((p = strrchr(outname, '.')) == 0)
+	    p = outname + strlen(outname);
+	strcpy(p, ".h");
+    }
+
+    if (chdr == 0) {
+	chdr = fopen(hdrname, "w");
+	if (!chdr) {
+	    perror(hdrname);
 	    done(EX_NOINPUT);
 	}
     }
@@ -488,7 +571,7 @@ PUBLIC int main ARGS2(
 	    *p1 = '\0';
 	    for (i = un0; i <= un1; i++) {
 #ifdef NOTDEFINED
-		printf("U+0x%x:%s\n", i, tbuf); */
+		fprintf(chdr, "U+0x%x:%s\n", i, tbuf); */
 #endif /* NOTDEFINED */
 		addpair_str(tbuf,i);
 	    }
@@ -637,8 +720,8 @@ PUBLIC int main ARGS2(
 	nuni += unicount[i];
     }
 
-    if (argc >= 3) {
-	strncpy(this_MIMEcharset,argv[2],UC_MAXLEN_MIMECSNAME);
+    if (argc > 3) {
+	strncpy(this_MIMEcharset,argv[3],UC_MAXLEN_MIMECSNAME);
     } else if (this_MIMEcharset[0] == '\0') {
 	strncpy(this_MIMEcharset,tblname,UC_MAXLEN_MIMECSNAME);
 	if ((p = strchr(this_MIMEcharset,'.')) != 0) {
@@ -648,8 +731,8 @@ PUBLIC int main ARGS2(
     for (p = this_MIMEcharset; *p; p++) {
 	*p = TOLOWER(*p);
     }
-    if (argc >= 4) {
-	strncpy(this_LYNXcharset,argv[3],UC_MAXLEN_LYNXCSNAME);
+    if (argc > 4) {
+	strncpy(this_LYNXcharset,argv[4],UC_MAXLEN_LYNXCSNAME);
     } else if (this_LYNXcharset[0] == '\0') {
 	strncpy(this_LYNXcharset,this_MIMEcharset,UC_MAXLEN_LYNXCSNAME);
     }
@@ -683,7 +766,12 @@ PUBLIC int main ARGS2(
     }
     fprintf(stderr, " (%s).\n", id_append);
 
-    printf("\
+    for (n = 0; n < TABLESIZE(first_ifdefs); n++) {
+	fprintf(chdr, first_ifdefs[n], id_append);
+	fprintf(chdr, "\n");
+    }
+
+    fprintf(chdr, "\n\
 /*\n\
  *  uni_hash.tbl\n\
  *\n\
@@ -700,13 +788,13 @@ static CONST u8 dfont_unicount%s[%d] = \n\
 	if (i >= 128 && unicount[i] > 0 && i < lowest_eight) {
 	    lowest_eight = i;
 	}
-	printf("%3d", unicount[i]);
+	fprintf(chdr, "%3d", unicount[i]);
 	if (i == (fontlen - 1)) {
-	    printf("\n};\n");
+	    fprintf(chdr, "\n};\n");
 	} else if ((i % 8) == 7) {
-	    printf(",\n\t");
+	    fprintf(chdr, ",\n\t");
 	} else {
-	    printf(", ");
+	    fprintf(chdr, ", ");
 	}
     }
 
@@ -719,10 +807,10 @@ static CONST u8 dfont_unicount%s[%d] = \n\
     }
 
     if (nuni) {
-	printf("\nstatic CONST u16 dfont_unitable%s[%d] = \n{\n\t",
+	fprintf(chdr, "\nstatic CONST u16 dfont_unitable%s[%d] = \n{\n\t",
 	       id_append, nuni);
     } else {
-	printf("\nstatic CONST u16 dfont_unitable%s[1]; /* dummy */\n", id_append);
+	fprintf(chdr, "\nstatic CONST u16 dfont_unitable%s[1]; /* dummy */\n", id_append);
     }
 
     fp0 = 0;
@@ -732,57 +820,62 @@ static CONST u8 dfont_unicount%s[%d] = \n\
 	    fp0++;
 	    nent = 0;
 	}
-	printf("0x%04x", unitable[fp0][nent++]);
+	fprintf(chdr, "0x%04x", unitable[fp0][nent++]);
 	if (i == (nuni - 1)) {
-	    printf("\n};\n");
+	    fprintf(chdr, "\n};\n");
 	} else if ((i % 8) == 7) {
-	    printf(",\n\t");
+	    fprintf(chdr, ",\n\t");
 	} else {
-	    printf(", ");
+	    fprintf(chdr, ", ");
 	}
     }
 
     if (themap_str.entry_ct) {
-	printf("\n\
+	fprintf(chdr, "\n\
 static struct unipair_str repl_map%s[%d] = \n\
 {\n\t", id_append, themap_str.entry_ct);
     } else {
-	printf("\n\
+	fprintf(chdr, "\n\
 /* static struct unipair_str repl_map%s[]; */\n", id_append);
     }
 
     for (i = 0; i < themap_str.entry_ct; i++) {
-	printf("{0x%x,\"%s\"}",
+	fprintf(chdr, "{0x%x,\"%s\"}",
 	       themap_str.entries[i].unicode,
 	       themap_str.entries[i].replace_str);
 	if (i == (themap_str.entry_ct - 1)) {
-	    printf("\n};\n");
+	    fprintf(chdr, "\n};\n");
 	} else if ((i % 4) == 3) {
-	    printf(",\n\t");
+	    fprintf(chdr, ",\n\t");
 	} else {
-	    printf(", ");
+	    fprintf(chdr, ", ");
 	}
     }
     if (themap_str.entry_ct) {
-	printf("\n\
+	fprintf(chdr, "\n\
 static CONST struct unimapdesc_str dfont_replacedesc%s = {%d,repl_map%s,",
 id_append, themap_str.entry_ct, id_append);
     } else {
-	printf("\n\
+	fprintf(chdr, "\n\
 static CONST struct unimapdesc_str dfont_replacedesc%s = {0,NULL,",id_append);
     }
-    printf("%d,%d};\n",
-    this_isDefaultMap ? 1 : 0,
-    (useDefaultMap && !this_isDefaultMap) ? 1 : 0
+    fprintf(chdr, "%d,%d};\n",
+	    this_isDefaultMap ? 1 : 0,
+	    (useDefaultMap && !this_isDefaultMap) ? 1 : 0
     );
 
 
-    printf("#define UC_CHARSET_SETUP%s UC_Charset_Setup(\
+    fprintf(chdr, "#define UC_CHARSET_SETUP%s UC_Charset_Setup(\
 \"%s\",\\\n\"%s\",\\\n\
 dfont_unicount%s,dfont_unitable%s,%d,\\\n\
 dfont_replacedesc%s,%d,%d,%d)\n",
 id_append, this_MIMEcharset, this_LYNXcharset,
 id_append, id_append, nuni, id_append, lowest_eight, RawOrEnc, CodePage);
+
+    for (n = 0; n < TABLESIZE(last_ifdefs); n++) {
+	fprintf(chdr, last_ifdefs[n], id_append);
+	fprintf(chdr, "\n");
+    }
 
     done(EX_OK);
 }

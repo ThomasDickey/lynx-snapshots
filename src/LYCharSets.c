@@ -842,7 +842,7 @@ PUBLIC CONST char * HTMLGetEntityName ARGS1(
 	UCode_t,	code)
 {
 #define IntValue code
-    int MaxValue = ((sizeof(LYEntityNames)/sizeof(char **)) - 1);
+    int MaxValue = (TABLESIZE(LYEntityNames) - 1);
 
     if (IntValue < 0 || IntValue > MaxValue) {
 	return "";
@@ -872,7 +872,7 @@ PUBLIC UCode_t HTMLGetEntityUCValue ARGS1(
     UCode_t value = 0;
     size_t i, high, low;
     int diff = 0;
-    size_t number_of_unicode_entities = sizeof(unicode_entities)/sizeof(unicode_entities[0]);
+    size_t number_of_unicode_entities = TABLESIZE(unicode_entities);
 
     /*
      *	Make sure we have a non-zero length name. - FM

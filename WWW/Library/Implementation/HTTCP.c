@@ -91,7 +91,7 @@ PUBLIC unsigned long socks_bind_remoteAddr; /* for long Rbind */
 **	global errno	gives the error number in the Unix way.
 **
 **  On return,
-**	returns 	a negative status in the Unix way.
+**	returns		a negative status in the Unix way.
 */
 #ifndef PCNFS
 
@@ -201,7 +201,7 @@ PUBLIC int HTioctl ARGS3(
 **	---------------------
 */
 PUBLIC int HTInetStatus ARGS1(
-	char *, 	where)
+	char *,		where)
 {
 #ifdef VMS
 #ifdef MULTINET
@@ -308,7 +308,7 @@ PUBLIC unsigned int HTCardinal ARGS3(
 **		it is to be kept.
 */
 PUBLIC CONST char * HTInetString ARGS1(
-	SockA*, 	soc_in)
+	SockA*,		soc_in)
 {
     static char string[16];
     sprintf(string, "%d.%d.%d.%d",
@@ -327,6 +327,7 @@ PUBLIC CONST char * HTInetString ARGS1(
 **  - contains only valid chars for domain names (actually, the
 **    restrictions are somewhat relaxed),
 **  - no leading dots or empty segments,
+**  - no segment starts with '-' or '+' [this protects telnet command],
 **  - max. length of dot-separated segment <= 63 (RFC 1034,1035),
 **  - total length <= 254 (if it ends with dot) or 253 (otherwise)
 **     [an interpretation of RFC 1034,1035, although RFC 1123
@@ -354,8 +355,10 @@ PUBLIC BOOL valid_hostname ARGS1(
 		iseg = 0;
 		continue;
 	    }
+	} else if (iseg == 0 && (*cp == '-' || *cp == '+')) {
+	    return NO;
 	} else if (++iseg > 63) {
-		return NO;
+	    return NO;
 	}
 	if (!isalnum((unsigned char)*cp) &&
 	    *cp != '-' && *cp != '_' &&
@@ -458,6 +461,7 @@ PRIVATE void dump_hostent ARGS2(
 **  cast to a struct hostent. - kw
 **  See also description of LYGetHostByName.
 */
+#ifdef NSL_FORK
 PRIVATE size_t fill_rehostent ARGS3(
     char *,			rehostent,
     size_t,			rehostentsize,
@@ -581,6 +585,7 @@ PRIVATE size_t fill_rehostent ARGS3(
     curlen = p_next_char - (char *)rehostent;
     return curlen;
 }
+#endif /* NSL_FORK */
 
 #define REHOSTENT_SIZE 128		/* not bigger than pipe buffer! */
 
@@ -999,7 +1004,7 @@ PUBLIC struct hostent * LYGetHostByName ARGS1(
 			} else if (!statuses.h_errno_valid) {
 			    lynx_nsl_status = HT_INTERNAL;
 			}
-	    	    }
+		    }
 		} else {
 		    lynx_nsl_status = HT_ERROR;
 		}
@@ -1204,7 +1209,7 @@ PUBLIC int HTParseInet ARGS2(
 	    soc_in->sin_port = htons((unsigned short)strtol(port,(char**)0,10));
 #endif /* Decnet */
 #endif /* Unix vs. VMS */
-#ifdef SUPPRESS 	/* 1. crashes!?!.  2. Not recommended */
+#ifdef SUPPRESS		/* 1. crashes!?!.  2. Not recommended */
 	} else {
 	    struct servent * serv = getservbyname(port, (char*)0);
 	    if (serv) {
@@ -1381,7 +1386,7 @@ PRIVATE void get_host_details NOARGS
     int namelength = sizeof(name);
 
     if (hostname)
-	return; 			/* Already done */
+	return;				/* Already done */
     gethostname(name, namelength);	/* Without domain */
     StrAllocCopy(hostname, name);
 #ifdef LY_FIND_LEAKS
@@ -1392,7 +1397,7 @@ PRIVATE void get_host_details NOARGS
     **	UCX doesn't give the complete domain name.
     **	Get rest from UCX$BIND_DOM logical.
     */
-    if (strchr(hostname,'.') == NULL) { 	  /* Not full address */
+    if (strchr(hostname,'.') == NULL) {		  /* Not full address */
 	domain_name = getenv("UCX$BIND_DOMAIN");
 	if (domain_name != NULL) {
 	    StrAllocCat(hostname, ".");
@@ -1437,7 +1442,7 @@ PUBLIC CONST char * HTHostName NOARGS
 */
 PUBLIC int HTDoConnect ARGS4(
 	CONST char *,	url,
-	char *, 	protocol,
+	char *,		protocol,
 	int,		default_port,
 	int *,		s)
 {
@@ -1768,7 +1773,7 @@ PUBLIC int HTDoConnect ARGS4(
 */
 PUBLIC int HTDoRead ARGS3(
 	int,		fildes,
-	void *, 	buf,
+	void *,		buf,
 	unsigned,	nbyte)
 {
     int ready, ret;

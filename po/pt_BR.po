@@ -1,0 +1,34 @@
+#  This file is a placeholder;
+#  see http://www.iro.umontreal.ca/contrib/po/HTML/domain-lynx.html
+
+# Brazilian Portuguese translation of the "lynx" messages
+# Copyright (C) 1999 Free Software Foundation, Inc.
+# Rodrigo Stulzer Lopes <rodrigo@conectiva.com.br>, 1999.
+#
+msgid ""
+msgstr "" 
+"Project-Id-Version: lynx 2.8.3\n"
+"POT-Creation-Date: 1999-05-25 07:12:28-0400\n"
+"PO-Revision-Date: 1999-07-30 09:47-03:00\n"
+"Last-Translator: Rodrigo Stulzer Lopes <rodrigo@conectiva.com.br>\n"
+"Language-Team: Brazilian Portuguese <ldp-br@bazar.conectiva.com.br>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=ISO-8859-1\n"
+"Content-Transfer-Encoding: 8-bit\n"
+
+#: src/LYMain.c:2554
+msgid "\n%s Version %s (%.*s)\n"
+msgstr "\nVersão %s (%.*s)\n"
+
+#: src/LYMain.c:2570
+msgid "Copyrights held by the University of Kansas, CERN, and other contributors.\n"
+msgstr "Copyrights mantidos pela University of Kansas, CERN, e outros colaboradores.\n"
+
+#: src/LYMain.c:2572
+msgid "Distributed under the GNU General Public License.\n"
+msgstr "Distribuido pela GNU General Public License.\n"
+
+#: src/LYMain.c:2574
+msgid "See http://lynx.browser.org/ and the online help for more information.\n\n"
+msgstr "Veja http://lynx.browser.org/ e o help on-line para mais informações.\n\n"
+

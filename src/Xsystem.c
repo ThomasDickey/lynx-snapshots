@@ -1,12 +1,9 @@
-/* @Id: Xsystem.c 1.3 Thu, 26 Aug 1999 05:31:19 -0600 dickey @
+/* @Id: Xsystem.c 1.4 Sat, 28 Aug 1999 15:04:13 -0600 dickey @
  *	like system("cmd") but return with exit code of "cmd"
  *	for Turbo-C/MS-C/LSI-C
  *  This code is in the public domain.
  *
- * @Log: Xsystem.c,v @
- * Revision 1.1  1999/07/14 16:44:55  tom
- * Initial revision
- *
+ * @Log: xsystem.c,v @
  *
  * Revision 1.14  1997/10/17 (Fri) 16:28:24  senshu
  * *** for Win32 version ***
@@ -45,6 +42,8 @@
 #define TRUE	1
 #define FALSE	0
 #endif
+
+#define	TABLESIZE(v)	(sizeof(v)/sizeof(v[0]))
 
 #define STR_MAX 512	/* MAX command line */
 
@@ -122,7 +121,7 @@ is_builtin_command(char *s)
     int i, l, lc, count;
 
     l = strlen(s);
-    count = sizeof(cmdtab) / sizeof(cmdtab[0]);
+    count = TABLESIZE(cmdtab);
     count--;
 #ifdef WIN_EX
     if (system_is_NT)
@@ -178,7 +177,7 @@ pars1c(char *s)
     int q;
 
     pp = (PRO *) xmalloc(sizeof(PRO));
-    for (q = 0; q < sizeof(pp->ored) / sizeof(pp->ored[0]); q++)
+    for (q = 0; q < TABLESIZE(pp->ored); q++)
 	pp->ored[q] = q;
     while (isspc(*s))
 	s++;
@@ -442,7 +441,7 @@ redswitch(PRO * p)
 {
     int d;
 
-    for (d = 0; d < sizeof(p->ored) / sizeof(p->ored[0]); d++) {
+    for (d = 0; d < TABLESIZE(p->ored); d++) {
 	if (d != p->ored[d]) {
 	    p->sred[d] = dup(d);
 	    dup2(p->ored[d], d);
@@ -455,7 +454,7 @@ redunswitch(PRO * p)
 {
     int d;
 
-    for (d = 0; d < sizeof(p->ored) / sizeof(p->ored[0]); d++) {
+    for (d = 0; d < TABLESIZE(p->ored); d++) {
 	if (d != p->ored[d]) {
 	    dup2(p->sred[d], d);
 	    close(p->sred[d]);

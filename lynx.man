@@ -273,6 +273,9 @@ number of articles in chunked news listings.
 .B -newsmaxchunk\fR=\fINUMBER
 maximum news articles in listings before chunking.
 .TP
+.B -nobold
+disable bold video-attribute.
+.TP
 .B -nobrowse
 disable directory browsing.
 .TP
@@ -317,11 +320,17 @@ link to the new URL.
 .B -noreferer
 disable transmissions of Referer headers.
 .TP
+.B -noreverse
+disable reverse video-attribute.
+.TP
 .B -nosocks
 disable SOCKS proxy usage by a SOCKSified Lynx.
 .TP
 .B -nostatus
 disable the retrieval status messages.
+.TP
+.B -nounderline
+disable underline video-attribute.
 .TP
 .B -number_fields
 force numbering of links as well as form input fields

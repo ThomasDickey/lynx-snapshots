@@ -413,6 +413,10 @@ II. Compile instructions -- UNIX
   --with-catgets
 	use catgets functions if available.  See "--enable-nls".
 
+  --with-charsets=list			(define ALL_CHARSETS)
+ 	Limit the number of charsets that are compiled-in to the specified
+	list of comma-separated MIME names.
+
   --with-included-gettext
 	use the GNU gettext library included here (default).  See
 	"--enable-nls".

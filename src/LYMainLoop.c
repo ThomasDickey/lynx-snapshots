@@ -368,31 +368,31 @@ PRIVATE int do_change_link ARGS1(
 }
 
 PRIVATE int find_link_near_col ARGS2(
-    	int,	col,
+	int,	col,
 	int,	delta)
 {
     int i;
 
     for (i = curdoc.link; delta > 0 ? (i < nlinks) : (i >= 0); i += delta) {
-       if ( (links[i].ly - links[curdoc.link].ly) * delta > 0 ) {
-            int cy = links[i].ly, best = -1, dist = 1000000;
+	if ( (links[i].ly - links[curdoc.link].ly) * delta > 0 ) {
+	    int cy = links[i].ly, best = -1, dist = 1000000;
 
-            while ((delta > 0 ? (i < nlinks) : (i >= 0)) && cy == links[i].ly) {
-                int cx = links[i].lx;
+	    while ((delta > 0 ? (i < nlinks) : (i >= 0)) && cy == links[i].ly) {
+		int cx = links[i].lx;
 
-                if (links[i].hightext)
-                    cx += strlen(links[i].hightext)/2;
-                cx -= col;
-                if (cx < 0)
-                    cx = -cx;
-                if (cx < dist) {
-                    dist = cx;
-                    best = i;
-                }
-                i += delta;
-            }
-            return(best);
-       }
+		if (links[i].hightext)
+		    cx += strlen(links[i].hightext)/2;
+		cx -= col;
+		if (cx < 0)
+		    cx = -cx;
+		if (cx < dist) {
+		    dist = cx;
+		    best = i;
+		}
+		i += delta;
+	    }
+	    return(best);
+	}
     }
     return(-1);
 }
@@ -1828,7 +1828,7 @@ try_again:
 #ifndef NO_NONSTICKY_INPUTS
 		if (!sticky_inputs && !textinput_activated) {
 		    /*draw the text entry, but don't activate it*/
-    		    change_form_link_ex(&links[curdoc.link],
+		    change_form_link_ex(&links[curdoc.link],
 				     &newdoc, &refresh_screen,
 				     links[curdoc.link].form->name,
 				      links[curdoc.link].form->value,
@@ -2010,7 +2010,7 @@ new_keyboard_input:
 	 */
 	if (traversal) {
 	    if ((c = DoTraversal(c, &crawl_ok)) < 0)
-	    	return (-1);
+		return (-1);
 	} /* traversal */
 
 #ifdef WIN_EX
@@ -2332,7 +2332,7 @@ new_cmd:  /*
 		psrc_view = FALSE;
 #endif
 		FREE(ownerS_address);   /* not used with source_cache */
-		LYUCPopAssumed();  	/* probably a right place here */
+		LYUCPopAssumed();	/* probably a right place here */
 		HTMLSetCharacterHandling(current_char_set);  /* restore now */
 
 		break;
@@ -4103,7 +4103,7 @@ check_recall:
 			    LYAddHtmlSep0(user_input_buffer);
 			else {
 			    HTUserMsg2(WWW_ILLEGAL_URL_MESSAGE,
-			    			user_input_buffer);
+						user_input_buffer);
 			    strcpy(user_input_buffer, temp);
 			    FREE(temp);
 			    break;
@@ -5805,7 +5805,7 @@ check_add_bookmark_to_self:
 	    if (!no_shell) {
 		stop_curses();
 		printf("%s\r\n", SPAWNING_MSG);
-#if defined(__CYGWIN_) && defined(DOSPATH)
+#if defined(__CYGWIN__)
 		Cygwin_Shell();
 #else
 		LYSystem(LYSysShell());
@@ -6933,7 +6933,7 @@ PRIVATE void status_link ARGS3(
 	    /*
 	     *  Replace some leaves to '...', if possible, and put the
 	     *  final leaf at the end. We assume that one can recognize
-	     * 	the link from at least MIN_STATUS characters.
+	     *  the link from at least MIN_STATUS characters.
 	     */
 	    if (cut_from_pos > MIN_STATUS) {
 		for (n = 1; n <= 3; n++)

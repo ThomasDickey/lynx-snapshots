@@ -295,7 +295,7 @@ pr_bits ARGS2(
     printf(" ");
 }
 
-static set_bits ARGS(
+static set_bits ARGS2(
 	ufc_long,	v,
 	ufc_long *,	b)
 {

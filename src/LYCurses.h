@@ -26,6 +26,8 @@
 
 #ifdef USE_SLANG
 #include <slang.h>
+#define WINDOW void
+#define waddstr(w,s) addstr(s)
 
 #else /* Using curses: */
 
@@ -161,10 +163,14 @@ extern int LYcols;   /* replaces COLS */
 extern void start_curses NOPARAMS;
 extern void stop_curses NOPARAMS;
 extern BOOLEAN setup PARAMS((char *terminal));
+extern void LYnoVideo PARAMS((int mask));
 extern void LYstartTargetEmphasis NOPARAMS;
 extern void LYstopTargetEmphasis NOPARAMS;
-extern void LYaddnstr PARAMS((CONST char *s, size_t len));
-extern void LYaddstr PARAMS((CONST char *s));
+extern void LYwaddnstr PARAMS((WINDOW *w, CONST char *s, size_t len));
+
+#define LYaddstr(s)      LYwaddnstr(stdscr, s, strlen(s))
+#define LYaddnstr(s,len) LYwaddnstr(stdscr, s, len)
+#define LYwaddstr(w,s)   LYwaddnstr(w, s, strlen(s))
 
 #ifdef VMS
 extern int DCLsystem (char *command);

@@ -442,6 +442,44 @@ AC_DEFINE_UNQUOTED(LYNX_CFG_FILE,"$LYNX_CFG_FILE")
 AC_MSG_RESULT($LYNX_CFG_FILE)
 
 dnl --------------------------------------------------------------------------
+dnl Check for subsets of compiled-in tables.
+dnl --------------------------------------------------------------------------
+CHARSET_DEFS=
+AC_SUBST(CHARSET_DEFS)
+
+AC_MSG_CHECKING(if you want only a few charsets)
+AC_ARG_WITH(charsets,
+[ --with-charsets=list  limit charsets to given list of MIME names],
+[cf_charsets=$withval],
+[cf_charsets=])
+
+if test -n "$cf_charsets" ; then
+	AC_MSG_RESULT(yes)
+	AC_DEFINE(ALL_CHARSETS,0)
+	cf_min_charsets=us-ascii,iso-8859-1,utf-8
+	if test "$cf_charsets" = "no" ; then
+		cf_charsets=minimal
+	fi
+	if test "$cf_charsets" = "minimal" ; then
+		CF_VERBOSE(using minimal list of charsets: $cf_min_charsets)
+	fi
+	cf_charsets=`echo $cf_charsets | sed -e "s/minimal/$cf_min_charsets/g" -e 's/,/ /g'`
+	for cf_charset in $cf_charsets
+	do
+		if ( egrep '^M'$cf_charset'$' $srcdir/src/chrtrans/*.tbl 2>/dev/null >/dev/null )
+		then
+			CF_VERBOSE(found $cf_charset)
+			cf_charset=`echo $cf_charset | sed -e 's/-/_/g'`
+			CHARSET_DEFS="-DNO_CHARSET_${cf_charset}=0 $CHARSET_DEFS"
+		else
+			CF_VERBOSE(not found $cf_charset)
+		fi
+	done
+else
+	AC_MSG_RESULT(no)
+fi
+
+dnl --------------------------------------------------------------------------
 dnl Checks for standard headers
 dnl --------------------------------------------------------------------------
 
@@ -450,6 +488,7 @@ AC_HEADER_TIME
 AC_HEADER_DIRENT
 dnl Don't check for sys/wait.h here since it is covered by another test.
 AC_CHECK_HEADERS( \
+	arpa/inet.h \
 	fcntl.h \
 	limits.h \
 	stdlib.h \
@@ -692,6 +731,7 @@ CF_ARG_ENABLE(scrollbar,
 [  --enable-scrollbar      use experimental scrollbar, with mouse],
 	[use_scrollbar=$enableval],
 	[use_scrollbar=no])
+AC_MSG_RESULT($use_scrollbar)
 
 if test $use_scrollbar != no ; then
 	if test .$cf_cv_fancy_curses != .yes ; then

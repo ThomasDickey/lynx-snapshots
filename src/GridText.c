@@ -16,12 +16,6 @@
 
 #include <assert.h>
 
-#ifndef VMS
-#ifdef SYSLOG_REQUESTED_URLS
-#include <syslog.h>
-#endif /* SYSLOG_REQUESTED_URLS */
-#endif /* !VMS */
-
 #include <GridText.h>
 #include <LYCurses.h>
 #include <LYUtils.h>
@@ -6281,11 +6275,9 @@ get_query:
     StrAllocCat(tmpaddress, "?");
     StrAllocCat(tmpaddress, searchstring);
     user_message(WWW_WAIT_MESSAGE, tmpaddress);
-#ifndef VMS
-#ifdef SYSLOG_REQUESTED_URLS
-    syslog(LOG_INFO|LOG_LOCAL5, "%s", tmpaddress);
-#endif /* SYSLOG_REQUESTED_URLS */
-#endif /* !VMS */
+#if !defined(VMS) && defined(SYSLOG_REQUESTED_URLS)
+    LYSyslog(tmpaddress);
+#endif /* !VMS && SYSLOG_REQUESTED_URLS */
     FREE(tmpaddress);
     if (cp)
 	*cp = '?';

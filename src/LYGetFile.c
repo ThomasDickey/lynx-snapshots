@@ -32,12 +32,6 @@
 #include <LYexit.h>
 #include <LYLeaks.h>
 
-#ifndef VMS
-#ifdef SYSLOG_REQUESTED_URLS
-#include <syslog.h>
-#endif /* SYSLOG_REQUESTED_URLS */
-#endif /* !VMS */
-
 PRIVATE int fix_httplike_urls PARAMS((document *doc, UrlTypes type));
 extern char * WWW_Download_File;
 #ifdef VMS
@@ -286,11 +280,9 @@ Try_Redirected_URL:
 		    WWWDoc.post_data = NULL;
 		    WWWDoc.post_content_type = NULL;
 		}
-#ifndef VMS
-#ifdef SYSLOG_REQUESTED_URLS
-		syslog(LOG_INFO|LOG_LOCAL5, "%s", doc->address);
-#endif /* SYSLOG_REQUESTED_URLS */
-#endif /* !VMS */
+#if !defined(VMS) && defined(SYSLOG_REQUESTED_URLS)
+		LYSyslog (doc->address);
+#endif
 		if (url_type == UNKNOWN_URL_TYPE ||
 		    url_type == AFS_URL_TYPE ||
 		    url_type == PROSPERO_URL_TYPE) {

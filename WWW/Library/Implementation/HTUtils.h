@@ -46,9 +46,11 @@
 #define HAVE_STDARG_H 1
 #endif
 
-/* FIXME: these should be removed after completing auto-configure script */
+/* Accommodate non-autoconf'd Makefile's (VMS, DJGPP, etc) */
 
-/* Accommodate pre-autoconf Makefile */
+#ifndef NO_ARPA_INET_H
+#define HAVE_ARPA_INET_H 1
+#endif
 
 #ifndef NO_CBREAK
 #define HAVE_CBREAK 1
@@ -98,6 +100,10 @@
 #define LY_MAXPATH 256
 #endif
 
+#ifndef	GCC_NORETURN
+#define	GCC_NORETURN /* nothing */
+#endif
+
 #ifndef	GCC_UNUSED
 #define	GCC_UNUSED /* nothing */
 #endif
@@ -110,6 +116,7 @@
 #if defined(__CYGWIN__)			/* 1998/12/31 (Thu) 16:13:46 */
 #include <windows.h>		/* #include "windef.h" */
 #define BOOLEAN_DEFINED
+#undef HAVE_POPEN		/* FIXME: does this not work, or is it missing */
 #endif
 
 #if defined(_WINDOWS) && !defined(__CYGWIN__)	/* SCW */
@@ -286,12 +293,6 @@ Macros for declarations
 
 /* array/table size */
 #define	TABLESIZE(v)	(sizeof(v)/sizeof(v[0]))
-
-/* Quiet compiler warnings on places where we're being blamed incorrectly,
- * e.g., for casting away const, or for alignment problems.  It's always
- * legal to cast a pointer to long w/o loss of precision.
- */
-#define TYPECAST(type,ptr) (type*)((long)(ptr))
 
 #define	typecalloc(cast)		(cast *)calloc(sizeof(cast),1)
 #define	typecallocn(cast,ntypes)	(cast *)calloc(sizeof(cast),ntypes)

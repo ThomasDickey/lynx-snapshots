@@ -38,12 +38,6 @@
 #include <io.h>
 #endif
 
-#ifndef VMS
-#ifdef SYSLOG_REQUESTED_URLS
-#include <syslog.h>
-#endif /* SYSLOG_REQUESTED_URLS */
-#endif /* !VMS */
-
 #ifdef LOCALE
 #undef gettext		/* Solaris locale.h prototypes gettext() */
 #include <locale.h>
@@ -456,6 +450,8 @@ PUBLIC BOOL force_empty_hrefless_a = FALSE;
 #ifndef NO_NONSTICKY_INPUTS
 PUBLIC BOOL sticky_inputs = TRUE;
 #endif
+
+PUBLIC BOOL textfield_stop_at_left_edge=TRUE;
 
 #ifdef DISP_PARTIAL
 PUBLIC BOOLEAN display_partial_flag = TRUE; /* Display document during download */
@@ -930,9 +926,6 @@ PUBLIC int main ARGS2(
     memset((void *)MBM_A_subbookmark, 0, sizeof(char)*(MBM_V_MAXFILES+1));
     memset((void *)MBM_A_subdescript, 0, sizeof(char)*(MBM_V_MAXFILES+1));
 #ifndef VMS
-#ifdef SYSLOG_REQUESTED_URLS
-    openlog("lynx", LOG_PID, LOG_LOCAL5);
-#endif /* SYSLOG_REQUESTED_URLS */
     StrAllocCopy(list_format, LIST_FORMAT);
 #endif /* !VMS */
     InfoSecs	= (int)INFOSECS;
@@ -1671,16 +1664,6 @@ PUBLIC int main ARGS2(
     HTFormatInit();
     HTFileInit();
 
-#ifndef VMS
-#ifdef SYSLOG_REQUESTED_URLS
-    if (syslog_txt) {
-	syslog(LOG_INFO, "Session start:%s", syslog_txt);
-    } else {
-	syslog(LOG_INFO, "Session start");
-    }
-#endif /* SYSLOG_REQUESTED_URLS */
-#endif /* !VMS */
-
 #ifdef SH_EX
     if (show_cfg) {
 	cleanup();
@@ -1971,6 +1954,10 @@ PUBLIC int main ARGS2(
        __system_allow_multiple_cmds  |  /* allow `cmd1; cmd2; ...' */
        __system_redirect;               /* redirect internally */
 #endif  /* __DJGPP__ */
+
+#if !defined(VMS) && defined(SYSLOG_REQUESTED_URLS)
+    LYOpenlog (syslog_txt);
+#endif
 
     /*
      *	Here's where we do all the work.
@@ -2608,6 +2595,14 @@ static int newsmaxchunk_fun ARGS1(
 }
 #endif /* not DISABLE_NEWS */
 
+/* -nobold */
+static int nobold_fun ARGS1(
+	char *,			next_arg GCC_UNUSED)
+{
+   LYnoVideo(1);
+   return 0;
+}
+
 /* -nobrowse */
 static int nobrowse_fun ARGS1(
 	char *,			next_arg GCC_UNUSED)
@@ -2636,6 +2631,22 @@ static int nopause_fun ARGS1(
     MessageSecs = 0;
     AlertSecs = 0;
     return 0;
+}
+
+/* -noreverse */
+static int noreverse_fun ARGS1(
+	char *,			next_arg GCC_UNUSED)
+{
+   LYnoVideo(2);
+   return 0;
+}
+
+/* -nounderline */
+static int nounderline_fun ARGS1(
+	char *,			next_arg GCC_UNUSED)
+{
+   LYnoVideo(4);
+   return 0;
 }
 
 /* -pauth */
@@ -2783,7 +2794,7 @@ static int restrictions_fun ARGS1(
 
     if (next_arg == 0 || *next_arg == '\0') {
 	SetOutputMode( O_TEXT );
-	for (n = 0; n < sizeof(Usage)/sizeof(Usage[0]); n++)
+	for (n = 0; n < TABLESIZE(Usage); n++)
 	    printf("%s\n", Usage[n]);
 	SetOutputMode( O_BINARY );
 	exit(0);
@@ -3169,6 +3180,10 @@ keys (may be incompatible with some curses packages)"
    ),
 #endif
    PARSE_FUN(
+      "nobold",		FUNCTION_ARG,		nobold_fun,
+      "disable bold video-attribute"
+   ),
+   PARSE_FUN(
       "nobrowse",	FUNCTION_ARG,		nobrowse_fun,
       "disable directory browsing"
    ),
@@ -3214,6 +3229,10 @@ keys (may be incompatible with some curses packages)"
       "noreferer",	SET_ARG,		&LYNoRefererHeader,
       "disable transmissions of Referer headers"
    ),
+   PARSE_FUN(
+      "noreverse",	FUNCTION_ARG,		noreverse_fun,
+      "disable reverse video-attribute"
+   ),
 #ifdef SOCKS
    PARSE_SET(
       "nosocks",	UNSET_ARG,		&socks_flag,
@@ -3223,6 +3242,10 @@ keys (may be incompatible with some curses packages)"
    PARSE_SET(
       "nostatus",	SET_ARG,		&no_statusline,
       "disable the miscellaneous information messages"
+   ),
+   PARSE_FUN(
+      "nounderline",	FUNCTION_ARG,		nounderline_fun,
+      "disable underline video-attribute"
    ),
    PARSE_SET(
       "number_fields",	SET_ARG,		&number_fields,
