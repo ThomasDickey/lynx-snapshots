@@ -532,6 +532,7 @@ PUBLIC int main ARGS2(
 
 #ifdef DJGPP
     sock_init();
+    _fmode = O_BINARY;
 #endif
 
 #ifdef DOSPATH

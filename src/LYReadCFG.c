@@ -303,7 +303,7 @@ static char *Color_Strings[16] =
 	 "gray",
 	 "brightblue",
 	 "brightgreen",
-	 "lightcyan",
+	 "brightcyan",
 	 "brightred",
 	 "brightmagenta",
 	 "yellow",

@@ -1,13 +1,13 @@
 ;; -*- Lisp -*-
 (Created-By-Prcs-Version 1 2 0)
 (Project-Description "PRCS Project for The Lynx browser")
-(Project-Version Lynx 2.7.1ac-0 46)
-(Parent-Version Lynx 2.7.1ac-0 45)
+(Project-Version Lynx 2.7.1ac-0 47)
+(Parent-Version Lynx 2.7.1ac-0 46)
 
-(Version-Log "update fotemods 1997-08-01, various fixes")
+(Version-Log "DJGPP hacks")
 (New-Version-Log "")
-(Checkin-Time "Mon, 04 Aug 1997 09:32:39 -0600")
-(Checkin-Login kweide)
+(Checkin-Time "Thu, 07 Aug 1997 07:26:14 -0600")
+(Checkin-Login buttles)
 (Populate-Ignore ("\\.o$" "\\.a$" "~$" "^a.out$" "^core$"
                   "\\.dvi$" "\\.aux$" "^\\..*_aux$" "\\.log"
                   "\\.zip$" "^obsolete" "/obsolete"
@@ -76,7 +76,7 @@
   (src/LYCharSets.h (Lynx/c/44_LYCharSets 1.2 644))
   (src/LYCharSets.c (Lynx/c/45_LYCharSets 1.1.1.1.1.2 644))
   (src/LYDownload.h (Lynx/c/46_LYDownload 1.1 644))
-  (src/LYDownload.c (Lynx/c/47_LYDownload 1.1.4.1.1.2 644))
+  (src/LYDownload.c (Lynx/c/47_LYDownload 1.1.4.1.1.3 644))
   (src/HTML.h (Lynx/c/48_HTML.h 1.1.2.2.2.1.1.1.1.3 644))
   (src/LYUpload.h (Lynx/c/49_LYUpload.h 1.1 644))
   (src/HTSaveToFile.h (Lynx/c/50_HTSaveToFi 1.1 644))
@@ -120,12 +120,12 @@
   (src/LYStrings.c (Lynx/d/36_LYStrings. 1.1.3.3.2.7 644))
   (src/LYShowInfo.c (Lynx/d/37_LYShowInfo 1.1.2.1.2.8 644))
   (src/LYSearch.c (Lynx/d/38_LYSearch.c 1.2.2.5 644))
-  (src/LYReadCFG.c (Lynx/d/39_LYReadCFG. 1.1.1.1.3.2.3.1.1.2.1.4 644))
+  (src/LYReadCFG.c (Lynx/d/39_LYReadCFG. 1.1.1.1.3.2.3.1.1.2.1.5 644))
   (src/LYPrint.c (Lynx/d/40_LYPrint.c 1.1.1.1.1.1.1.1.1.1.1.3 644))
   (src/LYOptions.c (Lynx/d/41_LYOptions. 1.1.2.1.1.1.1.1.1.3.1.2 644))
   (src/LYNews.c (Lynx/d/42_LYNews.c 1.7 644))
-  (src/LYMainLoop.c (Lynx/d/43_LYMainLoop 1.2.4.2.2.1.2.6.1.2.1.1.1.1.1.1.1.1.1.1.1.5 644))
-  (src/LYMain.c (Lynx/d/44_LYMain.c 1.1.2.1.1.1.1.1.1.2.2.1.1.1.1.1.1.1.1.1.1.1.1.4 644))
+  (src/LYMainLoop.c (Lynx/d/43_LYMainLoop 1.2.4.2.2.1.2.6.1.2.1.1.1.1.1.1.1.1.1.1.1.6 644))
+  (src/LYMain.c (Lynx/d/44_LYMain.c 1.1.2.1.1.1.1.1.1.2.2.1.1.1.1.1.1.1.1.1.1.1.1.5 644))
   (src/LYMail.c (Lynx/d/45_LYMail.c 1.1.1.1.1.1.3.1.1.1.2.2 644))
   (src/LYLocal.c (Lynx/d/46_LYLocal.c 1.2.3.1.3.3 644))
   (src/LYJump.c (Lynx/d/47_LYJump.c 1.3 644))
@@ -138,7 +138,7 @@
   (src/HTML.c (Lynx/e/2_HTML.c 1.1.4.1.1.1.1.2.1.4.1.2.1.3.1.2.1.2.2.3 644))
   (src/HTInit.c (Lynx/e/3_HTInit.c 1.2.1.2 644))
   (src/HTAlert.c (Lynx/e/4_HTAlert.c 1.1.2.3 644))
-  (src/GridText.c (Lynx/e/5_GridText.c 1.1.3.1.1.1.1.1.1.2.2.2.1.2.1.2.1.1.1.1.1.1.1.2 644))
+  (src/GridText.c (Lynx/e/5_GridText.c 1.1.3.1.1.1.1.1.1.2.2.2.1.2.1.2.1.1.1.1.1.1.1.3 644))
   (src/descrip.mms (Lynx/e/6_descrip.mm 1.2 644))
   (samples/jumpsVMS.html (Lynx/e/7_jumpsVMS.h 1.1 644))
   (samples/jumpsUnix.html (Lynx/e/8_jumpsUnix. 1.1 644))
@@ -162,7 +162,7 @@
   (lynx_help/keystroke_commands/gopher_types_help.html (Lynx/e/26_gopher_typ 1.1 644))
   (lynx_help/keystroke_commands/bookmark_help.html (Lynx/e/27_bookmark_h 1.1 644))
   (lynx_help/keystroke_commands/keystroke_help.html (Lynx/e/28_keystroke_ 1.3.1.2 644))
-  (lynx_help/lynx_help_main.html (Lynx/e/29_lynx_help_ 1.3 644))
+  (lynx_help/lynx_help_main.html (Lynx/e/29_lynx_help_ 1.4 644))
   (lynx.man (Lynx/e/30_lynx.man 1.5.2.6.1.2 644))
   (lynx.hlp (Lynx/e/31_lynx.hlp 1.10.1.2 644))
   (lynx.cfg (Lynx/e/32_lynx.cfg 1.2.1.2.1.1.2.1.1.2.1.4 644))
@@ -176,7 +176,7 @@
   (about_lynx/COPYHEADER (Lynx/e/40_COPYHEADER 1.1 644))
   (about_lynx/COPYING (Lynx/e/41_COPYING 1.1 644))
   (about_lynx/about_lynx-dev.html (Lynx/e/42_about_lynx 1.1 644))
-  (about_lynx/about_lynx.html (Lynx/e/43_about_lynx 1.1 644))
+  (about_lynx/about_lynx.html (Lynx/e/43_about_lynx 1.2 644))
   (WWW/Makefile (Lynx/e/44_Makefile 1.1 644))
   (WWW/BUILD (Lynx/e/45_BUILD 1.1 644))
   (WWW/Copyright.txt (Lynx/e/46_Copyright. 1.1 644))
@@ -313,7 +313,7 @@
   (WWW/Library/Implementation/HTWriter.c (Lynx/h/21_HTWriter.c 1.1 644))
   (WWW/Library/Implementation/HTWAIS.c (Lynx/h/22_HTWAIS.c 1.1.1.1 644))
   (WWW/Library/Implementation/HTVMSUtils.c (Lynx/h/23_HTVMSUtils 1.2 644))
-  (WWW/Library/Implementation/HTTelnet.c (Lynx/h/24_HTTelnet.c 1.4 644))
+  (WWW/Library/Implementation/HTTelnet.c (Lynx/h/24_HTTelnet.c 1.5 644))
   (WWW/Library/Implementation/HTNews.c (Lynx/h/25_HTNews.c 1.1.2.2 644))  
   (WWW/Library/Implementation/HTMLDTD.c (Lynx/h/26_HTMLDTD.c 1.1.2.7 644))
   (WWW/Library/Implementation/HTFile.c (Lynx/h/27_HTFile.c 1.1.3.1.1.3 644))
@@ -379,8 +379,8 @@
   (WWW/Library/Implementation/UCMap.h (Lynx/i/22_UCMap.h 1.3 644))
   (WWW/Library/Implementation/UCAux.h (Lynx/f/0_UCAux.h 1.1 644))
 
-  (WWW/Library/djgpp/makefile (Lynx/0_makefile 1.4 644))
-  (src/makefile.dos (Lynx/1_makefile.d 1.5 644))
+  (WWW/Library/djgpp/makefile (Lynx/0_makefile 1.5 644))
+  (src/makefile.dos (Lynx/1_makefile.d 1.6 644))
   (README.win-386 (Lynx/2_386-WIN.TX 1.2 644))
 ;; Files added by populate at Mon, 03 Mar 1997 04:38:33 -0600:
 
@@ -390,7 +390,7 @@
 
 ;; Files added by populate at Mon, 03 Mar 1997 06:05:56 -0600:
 
-  (CHANGES.new (Lynx/6_CHANGES.ne 1.18.1.4.1.1.2.1.1.2.2.2.1.2.1.1.1.1.1.4.2.7.1.3.1.4.1.8 644))
+  (CHANGES.new (Lynx/6_CHANGES.ne 1.18.1.4.1.1.2.1.1.2.2.2.1.2.1.1.1.1.1.4.2.7.1.3.1.4.1.9 644))
 
 ;; Files added by populate at Tue, 11 Mar 1997 04:22:39 -0600:
 
@@ -406,7 +406,7 @@
 
 ;; Files added by populate at Wed, 09 Apr 1997 06:18:01 -0600:
 
-  (WWW/Library/djgpp/CommonMakefile (Lynx/26_CommonMake 1.1 644))
+  (WWW/Library/djgpp/CommonMakefile (Lynx/26_CommonMake 1.2 644))
   (WWW/Library/Implementation/HTDOS.h (Lynx/27_HTDOS.H 1.1 644))
   (WWW/Library/Implementation/HTDOS.c (Lynx/28_HTDOS.C 1.1 644))
 
@@ -420,7 +420,7 @@
 ;; Files added by populate at Thu, 24 Apr 1997 21:51:47 -0600:
 
   (src/LYExtern.h (Lynx/38_LYExtern.h 1.1.1.1 644))
-  (src/LYExtern.c (Lynx/39_LYExtern.c 1.5.1.1 644))
+  (src/LYExtern.c (Lynx/39_LYExtern.c 1.5.1.2 644))
 
 
   (config.sub (Lynx/30_config.sub 1.1 755))
@@ -436,7 +436,7 @@
   (src/LYStyle.h (Lynx/b/5_LYStyle.h 1.2 644))
 ;; Files added by populate at Tue, 08 Jul 1997 20:40:02 -0600:
 
-  (src/LYCurses.c (Lynx/d/51_LYCurses.c 1.1.5.1.1.8.1.4.1.3 644))
+  (src/LYCurses.c (Lynx/d/51_LYCurses.c 1.1.5.1.1.8.1.4.1.4 644))
   (src/LYCharUtils.c (Lynx/c/22_LYCharUtil 1.2.1.1.2.1.2.2.1.2.1.1.1.2.1.1.1.1.1.3 644))
 
 ;; Files added by populate at Wed, 09 Jul 1997 05:12:01 -0600:
@@ -447,22 +447,10 @@
   (src/chrtrans/build-chrtrans.com (Lynx/b/22_build-chrt 1.2 644))
   (src/chrtrans/build-header.com (Lynx/c/0_build-head 1.1 644))
 
-  (src/chrtrans/cp1251_uni.tbl (Lynx/b/0_cp1251_uni 1.1 644)))
-(Merge-Parents
-  (2.7.1fm-0.37 incomplete
-    (Makefile.old Makefile Makefile m) 
-  )
-  (2.7.1fm-0.37 complete
-    (userdefs.h userdefs.h userdefs.h m) (src/LYCookie.c src/LYCookie.c src/LYCookie.c m)
-    (src/HTFWriter.c src/HTFWriter.c src/HTFWriter.c m) (src/LYGlobalDefs.h src/LYGlobalDefs.h src/LYGlobalDefs.h m)
-    (src/LYUpload.c src/LYUpload.c src/LYUpload.c m) (src/LYReadCFG.c src/LYReadCFG.c src/LYReadCFG.c m)
-    (src/LYOptions.c src/LYOptions.c src/LYOptions.c m) (src/LYMain.c src/LYMain.c src/LYMain.c m)
-    (src/LYMail.c src/LYMail.c src/LYMail.c m) (src/LYGetFile.c src/LYGetFile.c src/LYGetFile.c m)
-    (src/GridText.c src/GridText.c src/GridText.c m) (samples/lynx.cfg samples/lynx.cfg samples/lynx.cfg m)
-    (lynx_help/Lynx_users_guide.html lynx_help/Lynx_users_guide.html lynx_help/Lynx_users_guide.html m) (lynx.man lynx.man lynx.man m)
-    (lynx.hlp lynx.hlp lynx.hlp m) (lynx.cfg lynx.cfg lynx.cfg m)
-    (WWW/Library/Implementation/HTFormat.c WWW/Library/Implementation/HTFormat.c WWW/Library/Implementation/HTFormat.c m) (WWW/Library/Implementation/HTTP.c WWW/Library/Implementation/HTTP.c WWW/Library/Implementation/HTTP.c m)
-    (WWW/Library/Implementation/HTFile.c WWW/Library/Implementation/HTFile.c WWW/Library/Implementation/HTFile.c m) (LYMessages_en.h LYMessages_en.h LYMessages_en.h m)
-    (() FOTEMODS FOTEMODS n) (() 00README 00README n))
+  (src/chrtrans/cp1251_uni.tbl (Lynx/b/0_cp1251_uni 1.1 644))
+;; Files added by populate at Thu, 07 Aug 1997 07:25:30 -0600:
+
+  (about_lynx/lynx-dev.html (Lynx/b/0_lynx-dev.h 1.1 644))
 )
+(Merge-Parents)
 (New-Merge-Parents)
