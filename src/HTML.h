@@ -76,6 +76,8 @@ struct _HTStructured {
     BOOL			select_disabled;
     HTChunk			textarea;	/* Grow by 128 */
     char *			textarea_name;
+    int				textarea_name_cs;
+    char *			textarea_accept_cs;
     char *			textarea_cols;
     int 			textarea_rows;
     int				textarea_disabled;
@@ -148,6 +150,7 @@ struct _HTStructured {
     LYUCcharset	* UCI;	/* pointer to node_anchor's UCInfo */
     int	UCLYhndl;		/* tells us what charset we are fed */
     UCTransParams T;
+    int 		tag_charset; /* charset for attribute values etc. */
 #endif
 };
 

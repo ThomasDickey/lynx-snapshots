@@ -829,7 +829,7 @@ PUBLIC void LYGetChartransInfo ARGS1(
 **  to their HTML entity names and then translated for
 **  the current character set. - FM
 */
-PUBLIC void LYExpandString ARGS1(
+PUBLIC void LYExpandString_old ARGS1(
 	char **, str)
 {
     char *p = *str;
@@ -904,6 +904,122 @@ PUBLIC void LYExpandString ARGS1(
 }
 
 /*
+** Get UCS character code for one character from UTF-8 encoded string. 
+** 
+** On entry:
+**	*ppuni should point to beginning of UTF-8 encoding character
+** On exit:
+** 	*ppuni is advanced to point to the last byte of UTF-8 sequence,
+**		if there was a valid one; otherwise unchanged.
+** returns the UCS value
+** returns negative value on error (invalid UTF-8 sequence)
+*/
+PRIVATE UCode_t UCGetUniFromUtf8String ARGS1(char **, ppuni)
+{
+    UCode_t uc_out = 0;
+    char * p = *ppuni;
+    int utf_count, i;
+    if (!(**ppuni&0x80))
+	return (UCode_t) **ppuni; /* ASCII range character */
+    else if (!(**ppuni&0x40))
+	return (-1);		/* not a valid UTF-8 start */
+    if ((*p & 0xe0) == 0xc0) {
+	utf_count = 1;
+    } else if ((*p & 0xf0) == 0xe0) {
+	utf_count = 2;
+    } else if ((*p & 0xf8) == 0xf0) {
+	utf_count = 3;
+    } else if ((*p & 0xfc) == 0xf8) {
+	utf_count = 4;
+    } else if ((*p & 0xfe) == 0xfc) {
+	utf_count = 5;
+    } else { /* garbage */
+	return (-1);
+    }
+    for (p = *ppuni, i = 0; i < utf_count ; i++) {
+	if ((*(++p) & 0xc0) != 0x80)
+	    return (-1);
+    }
+    p = *ppuni;
+    switch (utf_count) {
+    case 1:
+	uc_out = (((*p&0x1f) << 6) | (*(p+1)&0x3f)); 
+	break;
+    case 2:
+	uc_out = (((((*p&0x0f) << 6) | (*(p+1)&0x3f)) << 6) | (*(p+2)&0x3f));
+	break;
+    case 3:
+	uc_out = (((((((*p&0x07) << 6) | (*(p+1)&0x3f)) << 6) | (*(p+2)&0x3f)) << 6)
+	    | (*(p+3)&0x3f));
+	break;
+    case 4:
+	uc_out = (((((((((*p&0x03) << 6) | (*(p+1)&0x3f)) << 6) | (*(p+2)&0x3f)) << 6)
+		  | (*(p+3)&0x3f)) << 6) | (*(p+4)&0x3f)); 
+	break;
+    case 5:
+	uc_out = (((((((((((*p&0x01) << 6) | (*(p+1)&0x3f)) << 6) | (*(p+2)&0x3f)) << 6)
+		  | (*(p+3)&0x3f)) << 6) | (*(p+4)&0x3f)) << 6) | (*(p+5)&0x3f));
+	break;
+    }
+    *ppuni = p + utf_count;
+    return uc_out;
+}
+
+/*
+ *  Given an UCS character code, will fill buffer passed in as q with
+ *  the code's UTF-8 encoding.
+ *  If terminate = YES, terminates string on success and returns pointer
+ *			to beginning.
+ *  If terminate = NO,  does not terminate string, and returns pointer
+ *			next char after the UTF-8 put into buffer.
+ *  On failure, including invalid code or 7-bit code, returns NULL.
+ */
+PRIVATE char * UCPutUtf8ToBuffer ARGS3(char *, q, UCode_t, code, BOOL, terminate)
+{
+    char *q_in = q;
+    if (!q)
+    return NULL;
+    if (code > 127 && code < 0x7fffffffL) {
+	if (code < 0x800L) {
+	    *q++ = (char)(0xc0 | (code>>6));
+	    *q++ = (char)(0x80 | (0x3f & (code)));
+	} else if (code < 0x10000L) {
+	    *q++ = (char)(0xe0 | (code>>12));
+	    *q++ = (char)(0x80 | (0x3f & (code>>6)));
+	    *q++ = (char)(0x80 | (0x3f & (code)));
+	} else if (code < 0x200000L) {
+	    *q++ = (char)(0xf0 | (code>>18));
+	    *q++ = (char)(0x80 | (0x3f & (code>>12)));
+	    *q++ = (char)(0x80 | (0x3f & (code>>6)));
+	    *q++ = (char)(0x80 | (0x3f & (code)));
+	} else if (code < 0x4000000L) {
+	    *q++ = (char)(0xf8 | (code>>24));
+	    *q++ = (char)(0x80 | (0x3f & (code>>18)));
+	    *q++ = (char)(0x80 | (0x3f & (code>>12)));
+	    *q++ = (char)(0x80 | (0x3f & (code>>6)));
+	    *q++ = (char)(0x80 | (0x3f & (code)));
+	} else {
+	    *q++ = (char)(0xfc | (code>>30));
+	    *q++ = (char)(0x80 | (0x3f & (code>>24)));
+	    *q++ = (char)(0x80 | (0x3f & (code>>18)));
+	    *q++ = (char)(0x80 | (0x3f & (code>>12)));
+	    *q++ = (char)(0x80 | (0x3f & (code>>6)));
+	    *q++ = (char)(0x80 | (0x3f & (code)));
+	}
+    } else {
+	return NULL;
+    }
+    if (terminate) {
+	*q = '\0';
+	return q_in;
+    } else {
+	return q;
+    }
+}
+
+PRIVATE char *hex = "0123456789ABCDEF";
+
+/*
 **  This function converts HTML named entities within a string
 **  to their translations in the active LYCharSets.c array.
 **  It also converts numeric entities to their HTML entity names
@@ -916,32 +1032,704 @@ PUBLIC void LYExpandString ARGS1(
 **  space (32).  If hidden is TRUE, entities will be translated
 **  but escape sequences will be passed unaltered. - FM
 */
-PUBLIC char * LYUnEscapeEntities ARGS3(
-	char *,	str,
-	BOOLEAN, plain_space,
-	BOOLEAN, hidden)
+PRIVATE char ** LYUnEscapeEntities ARGS5(
+	char **,	str,
+	int,		cs_to,
+	BOOLEAN,	plain_space,
+	BOOLEAN, 	hidden,
+	CharUtil_st,	stype)
 {
-    char * p = str;
-    char * q = str;
+    char * p;
+    char *q, *Str;
     char * cp;
     char cpe;
-    int len, value;
+    char *esc = NULL;
+    char buf[2];
+    char replace_buf[61];
+    int uck;
+    int lowest_8;
+    UCode_t code;
+    long int lcode;
+    BOOL output_utf8, repl_translated_C0;
+    size_t len;
     int high, low, diff = 0, i;
+    CONST char ** entities = HTML_dtd.entity_names;
+    CONST UC_entity_info * extra_entities = HTML_dtd.extra_entity_info;
+    CONST char * name;
     enum _state
-        { S_text, S_esc, S_dollar, S_paren,
-	  S_nonascii_text, S_dollar_paren } state = S_text;
+        { S_text, S_esc, S_dollar, S_paren, S_nonascii_text, S_dollar_paren,
+	S_trans_byte, S_check_ent, S_ncr, S_check_uni, S_check_name, S_named,
+	S_recover,
+	S_got_oututf8, S_got_outstring, S_put_urlstring,
+	S_got_outchar, S_put_urlchar, S_next_char, S_done} state = S_text;
+    enum _parsing_what
+        { P_text, P_utf8, P_hex, P_decimal, P_named
+	} what = P_text;
 
     /*
     **  Make sure we have a non-empty string. - FM
     */
-    if (!str || *str == '\0')
+    if (!str || *str == NULL || **str == '\0')
         return str;
+    /*
+    **  Save malloc/calloc overhead in simple case - kw
+    */
+    if (hidden && (stype != st_URL) && (strchr(*str, '&') == NULL))
+	return str;
+    p = *str;
+
+    if (cs_to < 0)
+	return NULL;
+    output_utf8 = (LYCharSet_UC[cs_to].enc == UCT_ENC_UTF8 ||
+		   HText_hasUTF8OutputSet(HTMainText));
+#if 0
+    cs_to = current_char_set;	/* for now */
+    lowest_8 = LYlowest_eightbit[HTAnchor_getUCLYhndl(
+					 me->node_anchor,
+					 UCT_STAGE_STRUCTURED)];
+    repl_translated_C0 = me->T.repl_translated_C0;
+#endif
+    lowest_8 = LYlowest_eightbit[cs_to];
+    repl_translated_C0 = (LYCharSet_UC[cs_to].enc == UCT_ENC_8BIT_C0);
 
     /*
-    **  Loop through string, making conversions as needed. - FM
+    **  Create a buffer string seven times the length of the original,
+    **  so we have plenty of room for expansions. - FM
     */
+    len = (strlen(p) * 7) + 1;
+    if (len < 16)
+	len = 16;
+    if ((Str = (char *)calloc(1, len)) == NULL) {
+	fprintf(stderr,
+		"LYUnEscapeEntities: calloc(1, %lu) failed for '%s'\r\n",
+		(unsigned long)len, *str);
+	outofmem(__FILE__, "LYUnEscapeEntities");
+    }
+    q = Str;
+
+    /*
+    *  Loop through string, making conversions as needed.
+    *
+    *  The while() checks for a non-'\0' char only for the normal
+    *  text states since other states may temporarily modify p or *p
+    *  (which should be restored before S_done!) - kw
+    */
+
+    while (*p || (state != S_text && state != S_nonascii_text)) {
+	switch(state) {
+	case S_text:
+	    code = (unsigned char)(*p);
+	    if (*p == '\033') {
+		if ((HTCJK != NOCJK && !hidden) || stype != st_HTML) {
+		    state = S_esc;
+		    if (stype == st_URL) {
+			*q++ = '%'; *q++ = '1'; *q++ = 'B';
+			p++;
+			continue;
+		    } else if (stype != st_HTML) {
+			p++;
+			continue;
+		    } else {
+			*q++ = *p++;
+			continue;
+		    }
+		} else if (!hidden) {
+		    /*
+		    **  CJK handling not on, and not a hidden INPUT,
+		    **  so block escape. - FM
+		    */
+		    state = S_next_char;
+		} else {
+		    state = S_check_ent;
+		}
+	    } else {
+		state = S_check_ent;
+	    }
+	    break;
+
+	case S_esc:
+	    if (*p == '$') {
+		state = S_dollar;
+		*q++ = *p++;
+		continue;
+	    } else if (*p == '(') {
+		state = S_paren;
+		*q++ = *p++;
+		continue;
+	    } else {
+		state = S_text;
+	    }
+
+	case S_dollar:
+	    if (*p == '@' || *p == 'B' || *p == 'A') {
+		state = S_nonascii_text;
+		*q++ = *p++;
+		continue;
+	    } else if (*p == '(') {
+		state = S_dollar_paren;
+		*q++ = *p++;
+		continue;
+	    } else {
+		state = S_text;
+	    }
+	    break;
+
+	case S_dollar_paren:
+	    if (*p == 'C') {
+		state = S_nonascii_text;
+		*q++ = *p++;
+		continue;
+	    } else {
+		state = S_text;
+	    }
+	    break;
+
+	case S_paren:
+	    if (*p == 'B' || *p == 'J' || *p == 'T')  {
+		state = S_text;
+		*q++ = *p++;
+		continue;
+	    } else if (*p == 'I') {
+		state = S_nonascii_text;
+		*q++ = *p++;
+		continue;
+	    } else {
+		state = S_text;
+	    }
+	    break;
+
+	case S_nonascii_text:
+	    if (*p == '\033') {
+		if ((HTCJK != NOCJK && !hidden) || stype != st_HTML) {
+		    state = S_esc;
+		    if (stype == st_URL) {
+			*q++ = '%'; *q++ = '1'; *q++ = 'B';
+			p++;
+			continue;
+		    } else if (stype != st_HTML) {
+			p++;
+			continue;
+		    }
+		}
+	    }
+	    *q++ = *p++;
+	    continue;
+
+	case S_trans_byte:
+	    /*  character translation could go here  */
+	    state = S_got_outchar;
+	    break;
+
+	case S_check_ent:
+	    if (*p == '&') {
+		char * pp = p + 1;
+		len = strlen(pp);
+		/*
+		**  Check for a numeric entity. - FM
+		*/
+		if (*pp == '#' && len > 2 &&
+		    (unsigned char)*(pp+1) == 'x' &&
+		    (unsigned char)*(pp+2) < 127 && 
+		    isxdigit((unsigned char)*(pp+2))) {
+		    what = P_hex;
+		    state = S_ncr;
+		} else if (*pp == '#' && len > 2 &&
+			   (unsigned char)*(pp+1) < 127 &&
+			   isdigit((unsigned char)*(pp+1))) {
+		    what = P_decimal;
+		    state = S_ncr;
+		} else if ((unsigned char)*pp < 127 &&
+			   isalpha((unsigned char)*pp)) {
+		    what = P_named;
+		    state = S_named;
+		} else {
+		    state = S_trans_byte;
+		}
+	    } else {
+		state = S_trans_byte;
+	    }
+	    break;
+
+	case S_ncr:
+		if (what == P_hex) {
+		    p += 3;
+		} else {	/* P_decimal */
+		    p += 2;
+		}
+		cp = p;
+		while (*p && (unsigned char)*p < 127 &&
+		       (what == P_hex ? isxdigit((unsigned char)*p) :
+					isdigit((unsigned char)*p))) {
+		    p++;
+		}
+		/*
+		**  Save the terminator and isolate the digit(s). - FM
+		*/
+		cpe = *p;
+		if (*p)
+		    *p++ = '\0';
+	        /*
+		** Show the numeric entity if the value:
+		**  (1) Is greater than 255 and unhandled Unicode.
+		**  (2) Is less than 32, and not valid and we don't
+		**	have HTCJK set.
+		**  (3) Is 127 and we don't have HTPassHighCtrlRaw
+		**	or HTCJK set.
+		**  (4) Is 128 - 159 and we don't have HTPassHighCtrlNum set.
+		*/
+		if ((((what == P_hex) ?	sscanf(cp, "%lx", &lcode) :
+		      			sscanf(cp, "%ld", &lcode)) != 1) ||
+		    lcode > 0x7fffffffL || lcode < 0) {
+		    state = S_recover;
+		} else {
+		    code = lcode;
+		    state = S_check_uni;
+		}
+		break;
+	case S_check_uni:
+	        /*
+		** Show the numeric entity if the value:
+		**  (2) Is less than 32, and not valid and we don't
+		**	have HTCJK set.
+		**  (3) Is 127 and we don't have HTPassHighCtrlRaw
+		**	or HTCJK set.
+		**  (4) Is 128 - 159 and we don't have HTPassHighCtrlNum set.
+		*/
+		 if ((code < 32 &&
+		     code != 9 && code != 10 && code != 13 &&
+		     HTCJK == NOCJK) ||
+		    (code == 127 &&
+		     !(HTPassHighCtrlRaw || HTCJK != NOCJK)) ||
+		    (code > 127 && code < 160 &&
+		     !HTPassHighCtrlNum)) {
+		     state = S_recover;
+		     break;
+		 }
+		/*
+		**  Convert the value as an unsigned char,
+		**  hex escaped if isURL is set and it's
+		**  8-bit, and then recycle the terminator
+		**  if it is not a semicolon. - FM
+		*/
+		if (code > 159 && stype == st_URL) {
+		    state = S_got_oututf8;
+		    break;
+		}
+		    /*
+		    **  For 160 (nbsp), use that value if it's
+		    **  a hidden INPUT, otherwise use an ASCII
+		    **  space (32) if plain_space is TRUE,
+		    **  otherwise use the Lynx special character. - FM
+		    */
+		if (code == 160) {
+		    if (hidden) {
+			;
+		    } else if (plain_space) {
+			code = ' ';
+		    } else {
+			code = HT_NON_BREAK_SPACE;
+		    }
+		    state = S_got_outchar;
+		    break;
+		}
+		/*
+		    **  For 173 (shy), use that value if it's
+		    **  a hidden INPUT, otherwise ignore it
+		    **  if plain_space is TRUE, otherwise use
+		    **  the Lynx special character. - FM
+		    */
+		if (code == 173) {
+		    if (hidden) {
+			;
+		    } else if (plain_space) {
+			replace_buf[0] = '\0';
+			state = S_got_outstring;
+			break;
+		    } else {
+			code = LY_SOFT_HYPHEN;
+		    }
+		    state = S_got_outchar;
+		    break;
+		}
+		/*
+		**  Seek a translation from the chartrans tables.
+		*/
+		if ((uck = UCTransUniChar(code,
+					  cs_to)) >= 32 &&
+		    uck < 256 &&
+		    (uck < 127 || uck >= lowest_8)) {
+		    if (uck == 160 && cs_to == 0) {
+			/*
+			**  Would only happen if some other unicode
+			**  is mapped to Latin-1 160.
+			    */
+			if (hidden) {
+			    ;
+			} else if (plain_space) {
+			    code = ' ';
+			} else {
+			    code = HT_NON_BREAK_SPACE;
+			}
+		    } else if (uck == 173 && cs_to == 0) {
+			/*
+			    **  Would only happen if some other unicode
+			    **  is mapped to Latin-1 173.
+			    */
+			if (hidden) {
+			    ;
+			} else if (plain_space) {
+			    replace_buf[0] = '\0';
+			    state = S_got_outstring;
+			    break;
+			} else {
+			    code = LY_SOFT_HYPHEN;
+			}
+		    } else {
+			code = uck;
+		    }
+		    state = S_got_outchar;
+		    break;
+		} else if ((uck == -4 ||
+			    (repl_translated_C0 &&
+			     uck > 0 && uck < 32)) &&
+			   /*
+			   **  Not found; look for replacement string.
+			   */
+			   (uck = UCTransUniCharStr(replace_buf,
+						    60, code,
+						    current_char_set,
+						    0) >= 0)) {
+		    state = S_got_outstring;
+		    break;
+		}
+		if (output_utf8 &&
+		    code > 127 && code < 0x7fffffffL) {
+		    state = S_got_oututf8;
+		    break;
+		}
+		/*
+		**  For 8482 (trade) use the character reference if it's
+		**  a hidden INPUT, otherwise use whatever the tables have
+		**  for &trade;. - FM & KW
+		*/
+	        if (code == 8482 && hidden) {
+		    state = S_recover;
+		    break;
+		/*
+		**  For 8194 (ensp), 8195 (emsp), or 8201 (thinsp),
+		**  use the character reference if it's a hidden INPUT,
+		**  otherwise use an ASCII space (32) if plain_space is
+		**  TRUE, otherwise use the Lynx special character. - FM
+		*/
+		} else if (code == 8194 || code == 8195 || code == 8201) {
+		    if (hidden) {
+			state = S_recover;
+		    } else if (plain_space) {
+			code = ' ';
+			state = S_got_outchar;
+		    } else {
+			code = HT_EM_SPACE;
+			state = S_got_outchar;
+		    }
+		    break;
+		    /*
+		    **  For 8211 (ndash) or 8212 (mdash), use the character
+		    **  reference if it's a hidden INPUT, otherwise use an
+		    **  ASCII dash. - FM
+		    */
+		} else if (code == 8211 || code == 8212) {
+		    if (hidden) {
+			state = S_recover;
+		    } else {
+			code = '-';
+			state = S_got_outchar;
+		    }
+		    break;
+		    /*
+		    **  Show the numeric entity if the value:
+		    **  (1) Is greater than 255 and unhandled Unicode.
+		    */
+		} else if (code > 255 && code != 8482) {
+		    /*
+			**  Illegal or not yet handled value.
+			**  Recover the "&#" and continue
+			**  from there. - FM
+			*/
+		    state = S_recover;
+		    break;
+		/*
+		**  If it's ASCII, or is 8-bit but HTPassEightBitNum
+		**  is set or the character set is "ISO Latin 1",
+		**  use it's value. - FM
+		*/
+		} else if (code < 161 || 
+			   (code < 256 &&
+			    (HTPassEightBitNum ||
+			     !strncmp(LYchar_set_names[current_char_set],
+				      "ISO Latin 1", 11)))) {
+		    /*
+		    **  No conversion needed.
+		    */
+		    state = S_got_outchar;
+		    break;
+		    /*
+		    **  If we get to here, convert and handle
+		    **  the character as a named entity. - FM
+		    */
+		} else {
+		    if (code == 8482) {
+			/*
+			**  Trade mark sign falls through to here. - KW
+			*/
+			name = "trade";
+		    } else {
+			name = HTMLGetEntityName(code - 160);
+		    }
+		    state = S_check_name;
+		    break;
+		}
+		
+	case S_recover:
+	    if (what == P_decimal || what == P_hex) {
+		    /*
+		    **  Illegal or not yet handled value.
+		    **  Recover the "&#" and continue
+		    **  from there. - FM
+		    */
+		    *q++ = '&';
+		    *q++ = '#';
+		    if (what == P_hex)
+			*q++ = 'x';
+		    if (cpe != '\0')
+			*(p-1) = cpe;
+		    p = cp;
+	    } else if (what == P_named) {
+		*cp = cpe;
+		*q++ = '&';
+	    }
+	    state = S_done;
+	    break;
+
+	case S_named:
+	    cp = ++p;
+	    while (*cp && (unsigned char)*cp < 127 &&
+		   isalnum((unsigned char)*cp))
+		cp++;
+	    cpe = *cp;
+	    *cp = '\0';
+/*	    ppuni = cp - 1; */
+	    name = p;
+	    state = S_check_name;
+	    break;
+
+	case S_check_name:
+	    for (low = 0, high = HTML_dtd.number_of_entities;
+		 high > low;
+		 diff < 0 ? (low = i+1) : (high = i)) {
+		/*
+		**  Binary search.
+		*/
+		i = (low + (high-low)/2);
+		diff = strcmp(entities[i], name);
+		if (diff == 0) {
+		    strncpy(replace_buf,
+			    (cs_to >= 0 && LYCharSets[cs_to]) ?
+			    LYCharSets[cs_to][i] : LYCharSets[0][i],
+			    sizeof(replace_buf));
+		    replace_buf[sizeof(replace_buf) - 1] = '\0';
+		    if (hidden) {
+			/*
+			**  If it's hidden, use 160 for nbsp. - FM
+			*/
+			if (!strcmp("nbsp", entities[i]) ||
+			    (replace_buf[1] == '\0' &&
+			     replace_buf[0] == HT_NON_BREAK_SPACE)) {
+			    replace_buf[0] = 160;
+			    replace_buf[1] = '\0';
+			    state = S_got_outstring;
+			    break;
+			    /*
+			    **  If it's hidden, use 173 for shy. - FM
+			    */
+			} else if (!strcmp("shy", entities[i]) ||
+				   (replace_buf[1] == '\0' &&
+				    replace_buf[0] == LY_SOFT_HYPHEN)) {
+			    replace_buf[0] = 173;
+			    replace_buf[1] = '\0';
+			    state = S_got_outstring;
+			    break;
+			}
+			/*
+			**  Check whether we want a plain space for nbsp,
+			**  ensp, emsp or thinsp. - FM
+			*/
+		    } else if (plain_space) {
+			if (!strcmp("nbsp", entities[i]) ||
+			    !strcmp("emsp", entities[i]) ||
+			    !strcmp("ensp", entities[i]) ||
+			    !strcmp("thinsp", entities[i]) ||
+			    (replace_buf[1] == '\0' &&
+			     replace_buf[0] == HT_EM_SPACE)) {
+			    code = ' ';
+			    state = S_got_outchar;
+			    break;
+			    /*
+			    **  If plain_space is set, ignore shy. - FM
+			    */
+			} else if (!strcmp("shy", entities[i]) ||
+				   (replace_buf[1] == '\0' &&
+				    replace_buf[0] == LY_SOFT_HYPHEN)) {
+			    replace_buf[0] = '\0';
+			    state = S_got_outstring;
+			    break;
+			}
+		    }
+		    /*
+		    **  Found the entity.  If the length
+		    **  of the value exceeds the length of
+		    **  replace_buf it is cut off.
+		    */
+		    state = S_got_outstring;
+		    break;
+		}
+	    }
+	    if (diff == 0) {
+		break;
+	    }
+	    /*
+	    **  Entity name lookup failed (diff != 0).
+	    **  No point in repeating for extra entities. - kw
+	    */
+	    if (what != P_named) {
+		/*
+		**  Didn't find the entity.
+		**  Recover the "&#" and continue
+		**  from there. - FM
+		*/
+		state = S_recover;
+		break;
+	    }
+	    /*
+	    **  Not found, repeat for extra entities. - FM
+	    */
+	    for (low = 0, high = HTML_dtd.number_of_extra_entities;
+		 high > low;
+		 diff < 0 ? (low = i+1) : (high = i)) {
+		/*
+		**  Binary search.
+		*/
+		i = (low + (high - low)/2);
+		diff = strcmp(extra_entities[i].name, p);
+		if (diff == 0) {
+		    /*
+		    **  Found the entity.
+		    */
+		    code = extra_entities[i].code;
+		    if (code <= 0x7fffffffL && code > 0) {
+			state = S_check_uni;
+		    } else {
+			state = S_recover;
+		    }
+		    break;
+		}
+	    }
+	    if (diff == 0)
+		break;
+	    /*
+	    **  Didn't find the entity.
+	    **  Recover.
+	    */
+	    state = S_recover;
+	    break;
+
+				/* * * O U T P U T   S T A T E S * * */
+
+	case S_got_oututf8:
+	    if (code > 255 ||
+		(code >= 128 && LYCharSet_UC[cs_to].enc == UCT_ENC_UTF8)) {
+		UCPutUtf8ToBuffer(replace_buf, code, YES);
+		state = S_got_outstring;
+	    } else {
+		state = S_got_outchar;
+	    }
+	    break;
+	case S_got_outstring:
+	    if (what == P_decimal || what == P_hex) {
+		if (cpe != ';' && cpe != '\0')
+		    *(--p) = cpe;
+		p--;
+	    } else if (what == P_named) {
+		*cp = cpe;
+		p = (*cp != ';') ? (cp - 1) : cp;
+	    }
+#if 0
+	    if (what == P_decimal || what == P_hex) {
+		if (cpe != ';' && cpe != '\0')
+		    *(--p) = cpe;
+	    } else if (what == P_named) {
+		*cp = cpe;
+		p = (*cp != ';') ? cp : (cp + 1);
+	    }
+#endif
+	    if (replace_buf[0] == '\0') {
+		state = S_next_char;
+		break;
+	    }
+	    if (stype == st_URL) {
+		code = replace_buf[0]; /* assume string OK if first char is */
+		if (code >= 127 ||
+		    (code < 32 && (code != 9 && code != 10 && code != 0))) {
+		    state = S_put_urlstring;
+		}
+	    }
+	    for (i = 0; replace_buf[i]; i++)
+		*q++ = replace_buf[i];
+	    state = S_next_char;
+	    break;
+	case S_put_urlstring:
+	    esc = HTEscape(replace_buf, URL_XALPHAS);
+	    for (i = 0; esc[i]; i++)
+		*q++ = esc[i];
+	    FREE(esc);
+	    state = S_next_char;
+	    break;
+	case S_got_outchar:
+	    if (what == P_decimal || what == P_hex) {
+		if (cpe != ';' && cpe != '\0')
+		    *(--p) = cpe;
+		p--;
+	    } else if (what == P_named) {
+		*cp = cpe;
+		p = (*cp != ';') ? (cp - 1) : cp;
+	    }
+	    if (stype == st_URL) {
+	    /*  Not a full HTEscape, only for 8bit and ctrl chars */
+		if (code >= 127 ||
+		    (code < 32 && (code != 9 && code != 10))) {
+		    state = S_put_urlchar;
+		    break;
+		}
+	    }
+	    *q++ = (char)code;
+	    state = S_next_char;
+	    break;
+	case S_put_urlchar:
+	    *q++ = '%';
+	    *q++ = hex[(code >> 4) & 15];
+	    *q++ = hex[(code & 15)];
+	    			/* fall through */
+	case S_next_char:
+	    p++;		/* fall through */
+	case S_done:
+	    state = S_text;
+	    what = P_text;
+	    			/* for next round */
+	}
+    }
+
+#if 0
     while (*p) {
-        if (HTCJK != NOCJK && !hidden) {
+        if ((HTCJK != NOCJK && !hidden) || stype != st_HTML) {
 	    /*
 	    **  Handle CJK escape sequences, based on patch
 	    **  from Takuya ASADA (asada@three-a.co.jp). - FM
@@ -950,7 +1738,12 @@ PUBLIC char * LYUnEscapeEntities ARGS3(
 	        case S_text:
 		    if (*p == '\033') {
 		        state = S_esc;
-			*q++ = *p++;
+			if (stype == st_URL) {
+			    *q++ = '%'; *q++ = '1'; *q++ = 'B';
+			    p++;
+			} else {
+			    *q++ = *p++;
+			}
 			continue;
 		    }
 		    break;
@@ -1007,15 +1800,17 @@ PUBLIC char * LYUnEscapeEntities ARGS3(
 		    break;
 
 		case S_nonascii_text:
-		    if (*p == '\033')
+		    if (*p == '\033') {
 		        state = S_esc;
+			if (stype == st_URL) {
+			    *q++ = '%'; *q++ = '1'; *q++ = 'B';
+			    p++;
+			    continue;
+			}
+		    }
 		    *q++ = *p++;
 		    continue;
-		    break;
 
-		default:
-	            p++;
-		    continue;
 	    }
         } else if (*p == '\033' &&
 		   !hidden) {
@@ -1027,6 +1822,7 @@ PUBLIC char * LYUnEscapeEntities ARGS3(
 	    continue;
 	}
 
+	code = *p;
 	/*
 	**  Check for a numeric or named entity. - FM
 	*/
@@ -1069,23 +1865,21 @@ PUBLIC char * LYUnEscapeEntities ARGS3(
 	        /*
 		** Show the numeric entity if the value:
 		**  (1) Is greater than 255 and unhandled Unicode.
-		**  (2) Is less than 32, and not valid or we don't
+		**  (2) Is less than 32, and not valid and we don't
 		**	have HTCJK set.
 		**  (3) Is 127 and we don't have HTPassHighCtrlRaw
 		**	or HTCJK set.
 		**  (4) Is 128 - 159 and we don't have HTPassHighCtrlNum set.
 		*/
-		if (((isHex ? sscanf(cp, "%x", &value) :
-			      sscanf(cp, "%d", &value)) != 1) ||
-		    (value > 255 &&
-		     value != 8194 && value != 8195 && value != 8201 &&
-		     value != 8211 && value != 8212 && value != 8482) ||
-		    (value < 32 &&
-		     value != 9 && value != 10 && value != 13 &&
+		if (((isHex ? sscanf(cp, "%lx", &lcode) :
+			      sscanf(cp, "%ld", &lcode)) != 1) ||
+		    lcode > 0x7fffffffL || lcode < 0 ||
+		    ((code =lcode) < 32 &&
+		     code != 9 && code != 10 && code != 13 &&
 		     HTCJK == NOCJK) ||
-		    (value == 127 &&
+		    (code == 127 &&
 		     !(HTPassHighCtrlRaw || HTCJK != NOCJK)) ||
-		    (value > 127 && value < 160 &&
+		    (code > 127 && code < 160 &&
 		     !HTPassHighCtrlNum)) {
 		    /*
 		    **  Illegal or not yet handled value.
@@ -1095,95 +1889,143 @@ PUBLIC char * LYUnEscapeEntities ARGS3(
 		    *q++ = '&';
 		    *q++ = '#';
 		    if (isHex)
-		        *q++ = 'x';
+			*q++ = 'x';
 		    if (cpe != '\0')
-		       *(p-1) = cpe;
+			*(p-1) = cpe;
 		    p = cp;
 		    continue;
+		}
 		/*
-		**  For 160 (nbsp), use that value if it's
-		**  a hidden INPUT, otherwise use an ASCII
-		**  space (32) if plain_space is TRUE,
-		**  otherwise use the Lynx special character. - FM
+		**  Convert the value as an unsigned char,
+		**  hex escaped if isURL is set and it's
+		**  8-bit, and then recycle the terminator
+		**  if it is not a semicolon. - FM
 		*/
-		} else if (value == 160) {
-		    if (hidden) {
-		        *q++ = 160;
-		    } else if (plain_space) {
-		        *q++ = ' ';
+		if (code > 159 && stype == st_URL) {
+		    int e;
+		    if (LYCharSet_UC[cs_to].enc == UCT_ENC_UTF8) {
+			UCPutUtf8ToBuffer(replace_buf, code, YES);
+			esc = HTEscape(replace_buf, URL_XALPHAS);
 		    } else {
-		        *q++ = HT_NON_BREAK_SPACE;
+			buf[0] = code;
+			esc = HTEscape(buf, URL_XALPHAS);
 		    }
+		    for (e = 0; esc[e]; e++)
+		        *q++ = esc[e];
+		    FREE(esc);
 		    if (cpe != ';' && cpe != '\0') {
-		        p--;
+			p--;
 			*p = cpe;
 		    }
 		    continue;
-		/*
-		**  For 173 (shy), use that value if it's
-		**  a hidden INPUT, otherwise ignore it if
-		**  plain space is TRUE, otherwise use the
-		**  Lynx special character. - FM
-		*/
-		} else if (value == 173) {
+		}
+		    /*
+		    **  For 160 (nbsp), use that value if it's
+		    **  a hidden INPUT, otherwise use an ASCII
+		    **  space (32) if plain_space is TRUE,
+		    **  otherwise use the Lynx special character. - FM
+		    */
+		if (code == 160) {
 		    if (hidden) {
-		        *q++ = 173;
+			*q++ = 160;
 		    } else if (plain_space) {
-		        ;
+			*q++ = ' ';
 		    } else {
-		        *q++ = LY_SOFT_HYPHEN;
+			*q++ = HT_NON_BREAK_SPACE;
 		    }
 		    if (cpe != ';' && cpe != '\0') {
-		        p--;
+			p--;
 			*p = cpe;
 		    }
 		    continue;
+		}
 		/*
-		**  For 8194 (ensp), 8195 (emsp), or 8201 (thinsp),
-		**  use the character reference if it's a hidden INPUT,
-		**  otherwise use an ASCII space (32) if plain_space is
-		**  TRUE, otherwise use the Lynx special character. - FM
-		*/
-		} else if (value == 8194 || value == 8195 || value == 8201) {
+		    **  For 173 (shy), use that value if it's
+		    **  a hidden INPUT, otherwise ignore it
+		    **  if plain_space is TRUE, otherwise use
+		    **  the Lynx special character. - FM
+		    */
+		if (code == 173) {
 		    if (hidden) {
-		        *q++ = '&';
-		        *q++ = '#';
-			if (isHex)
-			    *q++ = 'x';
-			if (cpe != '\0')
-			    *(p-1) = cpe;
-			p = cp;
+			*q++ = 173;
+		    } else if (plain_space) {
+			;
+		    } else {
+			*q++ = LY_SOFT_HYPHEN;
+		    }
+		    if (cpe != ';' && cpe != '\0') {
+			p--;
+			*p = cpe;
+		    }
+		    continue;
+		}
+		/*
+		**  Seek a translation from the chartrans tables.
+		*/
+		if ((uck = UCTransUniChar(code,
+					  current_char_set)) >= 32 &&
+		    uck < 256 &&
+		    (uck < 127 || uck >= lowest_8)) {
+		    if (uck == 160 && current_char_set == 0) {
+			/*
+			**  Would only happen if some other unicode
+			**  is mapped to Latin-1 160.
+			    */
+			if (hidden) {
+			    *q++ = 160;
+			} else if (plain_space) {
+			    *q++ = ' ';
+			} else {
+			    *q++ = HT_NON_BREAK_SPACE;
+			}
+			if (cpe != ';' && cpe != '\0') {
+			    p--;
+			    *p = cpe;
+			}
 			continue;
-		    } else if (plain_space) {
-		        *q++ = ' ';
+		    } else if (uck == 173 && current_char_set == 0) {
+			/*
+			    **  Would only happen if some other unicode
+			    **  is mapped to Latin-1 173.
+			    */
+			if (hidden) {
+			    *q++ = 173;
+			} else if (plain_space) {
+			    ;
+			} else {
+			    *q++ = LY_SOFT_HYPHEN;
+			}
+			if (cpe != ';' && cpe != '\0') {
+			    p--;
+			    *p = cpe;
+			}
+			continue;
 		    } else {
-		        *q++ = HT_EM_SPACE;
+			*q++ = (char)uck;
+		    }
+		} else if ((uck == -4 ||
+			    (repl_translated_C0 &&
+			     uck > 0 && uck < 32)) &&
+			   /*
+			       **  Not found; look for replacement string.
+			       */
+			   (uck = UCTransUniCharStr(replace_buf,
+						    60, code,
+						    current_char_set,
+						    0) >= 0)) { 
+		    for (i = 0; replace_buf[i]; i++) {
+			*q++ = replace_buf[i];
 		    }
 		    if (cpe != ';' && cpe != '\0') {
-		        p--;
+			p--;
 			*p = cpe;
 		    }
 		    continue;
-		/*
-		**  For 8211 (ndash) or 8212 (mdash), use the character
-		**  reference if it's a hidden INPUT, otherwise use an
-		**  ASCII dash. - FM
-		*/
-		} else if (value == 8211 || value == 8212) {
-		    if (hidden) {
-		        *q++ = '&';
-		        *q++ = '#';
-			if (isHex)
-			    *q++ = 'x';
-			if (cpe != '\0')
-			    *(p-1) = cpe;
-			p = cp;
-			continue;
-		    } else {
-		        *q++ = '-';
-		    }
+		} else if (output_utf8 &&
+			   code > 127 && code < 0x7fffffffL) {
+		    UCPutUtf8ToBuffer(q, code, NO);
 		    if (cpe != ';' && cpe != '\0') {
-		        p--;
+			p--;
 			*p = cpe;
 		    }
 		    continue;
@@ -1192,7 +2034,7 @@ PUBLIC char * LYUnEscapeEntities ARGS3(
 		**  a hidden INPUT, otherwise use whatever the tables have
 		**  for &trade;. - FM & KW
 		*/
-	        } else if (value == 8482 && hidden) {
+	        } else if (code == 8482 && hidden) {
 		        *q++ = '&';
 		        *q++ = '#';
 			if (isHex)
@@ -1202,38 +2044,105 @@ PUBLIC char * LYUnEscapeEntities ARGS3(
 			p = cp;
 			continue;
 		/*
+		**  For 8194 (ensp), 8195 (emsp), or 8201 (thinsp),
+		**  use the character reference if it's a hidden INPUT,
+		**  otherwise use an ASCII space (32) if plain_space is
+		**  TRUE, otherwise use the Lynx special character. - FM
+		*/
+		} else if (code == 8194 || code == 8195 || code == 8201) {
+		    if (hidden) {
+			*q++ = '&';
+			*q++ = '#';
+			if (isHex)
+			    *q++ = 'x';
+			if (cpe != '\0')
+			    *(p-1) = cpe;
+			p = cp;
+			continue;
+		    } else if (plain_space) {
+			*q++ = ' ';
+		    } else {
+			*q++ = HT_EM_SPACE;
+		    }
+		    if (cpe != ';' && cpe != '\0') {
+			p--;
+			*p = cpe;
+		    }
+		    continue;
+		    /*
+		    **  For 8211 (ndash) or 8212 (mdash), use the character
+		    **  reference if it's a hidden INPUT, otherwise use an
+		    **  ASCII dash. - FM
+		    */
+		} else if (code == 8211 || code == 8212) {
+		    if (hidden) {
+			*q++ = '&';
+			*q++ = '#';
+			if (isHex)
+			    *q++ = 'x';
+			if (cpe != '\0')
+			    *(p-1) = cpe;
+			p = cp;
+			continue;
+		    } else {
+			*q++ = '-';
+		    }
+		    if (cpe != ';' && cpe != '\0') {
+			p--;
+			*p = cpe;
+		    }
+		    continue;
+		    /*
+		    **  Show the numeric entity if the value:
+		    **  (1) Is greater than 255 and unhandled Unicode.
+		    */
+		} else if (code > 255 && code != 8482) {
+		    /*
+			**  Illegal or not yet handled value.
+			**  Recover the "&#" and continue
+			**  from there. - FM
+			*/
+		    *q++ = '&';
+		    *q++ = '#';
+		    if (isHex)
+			*q++ = 'x';
+		    if (cpe != '\0')
+			*(p-1) = cpe;
+		    p = cp;
+		    continue;
+		/*
 		**  If it's ASCII, or is 8-bit but HTPassEightBitNum
 		**  is set or the character set is "ISO Latin 1",
 		**  use it's value. - FM
 		*/
-		} else if (value < 161 || 
-			   (value < 256 &&
+		} else if (code < 161 || 
+			   (code < 256 &&
 			    (HTPassEightBitNum ||
 			     !strncmp(LYchar_set_names[current_char_set],
 				      "ISO Latin 1", 11)))) {
 		    /*
 		    **  No conversion needed.
 		    */
-	            *q++ = (unsigned char)value;
+	            *q++ = (unsigned char)code;
 		    if (cpe != ';' && cpe != '\0') {
-		        p--;
+			p--;
 			*p = cpe;
 		    }
 		    continue;
-		/*
-		**  If we get to here, convert and handle
-		**  the character as a named entity. - FM
-		*/
+		    /*
+		    **  If we get to here, convert and handle
+		    **  the character as a named entity. - FM
+		    */
 		} else {
 		    CONST char * name;
-		    if (value == 8482) {
+		    if (code == 8482) {
 			/*
 			**  Trade mark sign falls through to here. - KW
 			*/
 			name = "trade";
 		    } else {
-			value -= 160;
-			name = HTMLGetEntityName(value);
+			code -= 160;
+			name = HTMLGetEntityName(code);
 		    }
 		    for (low = 0, high = HTML_dtd.number_of_entities;
 			 high > low;
@@ -1242,7 +2151,7 @@ PUBLIC char * LYUnEscapeEntities ARGS3(
 			**  Binary search.
 			*/
 			i = (low + (high-low)/2);
-			diff = strcmp(HTML_dtd.entity_names[i], name);
+			diff = strcmp(entities[i], name);
 			if (diff == 0) {
 			    /*
 			    **  Found the entity.  Assume that the length
@@ -1257,16 +2166,35 @@ PUBLIC char * LYUnEscapeEntities ARGS3(
 			    break;
 			}
 		    }
+			/*
+			**  No point in repeating for extra entities. - kw
+			*/
+		    if (diff != 0) {
+			/*
+			**  Didn't find the entity.
+			**  Recover the "&#" and continue
+			**  from there. - FM
+			*/
+			*q++ = '&';
+			*q++ = '#';
+			if (isHex)
+			    *q++ = 'x';
+			if (cpe != '\0')
+			    *(p-1) = cpe;
+			p = cp;
+			continue;
+		    }
 		    /*
 		    **  Recycle the terminator if it isn't the
 		    **  standard ';' for HTML. - FM
 		    */
 		    if (cpe != ';' && cpe != '\0') {
-		        p--;
+			p--;
 			*p = cpe;
 		    }
 		    continue;
 		}
+
 	    /*
 	    **  Check for a named entity. - FM
 	    */
@@ -1285,7 +2213,7 @@ PUBLIC char * LYUnEscapeEntities ARGS3(
 		    **  Binary search.
 		    */
 		    i = (low + (high-low)/2);
-		    diff = strcmp(HTML_dtd.entity_names[i], p);
+		    diff = strcmp(entities[i], p);
 		    if (diff == 0) {
 		        /*
 			**  Found the entity.  Assume that the length
@@ -1295,36 +2223,91 @@ PUBLIC char * LYUnEscapeEntities ARGS3(
 			**  true in the LYCharSets arrays. - FM
 			*/
 			int j;
+		        /*
+			**  Found the entity. Convert it to
+			**  an ISO-8859-1 character, or our
+			**  substitute for any non-ISO-8859-1
+			**  character, hex escaped if isURL
+			**  is set and it's 8-bit. - FM
+			*/
+			if (stype != st_HTML) {
+			    int e;
+			    buf[0] = HTMLGetLatinOneValue(i);
+			    if (buf[0] == '\0') {
+				/*
+				**  The entity does not have an 8859-1
+				**  representation of exactly one char length.
+				**  Try to deal with it anyway - either HTEscape
+				**  the whole mess, or pass through raw.  So
+				**  make sure the ISO_Latin1 table, which is the
+				**  first table in LYCharSets, has reasonable
+				**  substitution strings! (if it really must
+				**  have any longer than one char) - KW
+				*/
+				if (!LYCharSets[0][i][0]) {
+				    /*
+				    **  Totally empty, skip. - KW
+				    */
+				    ; /* do nothing */
+				} else if (stype == st_URL) {
+				    /*
+				    **  All will be HTEscape'd. - KW
+				    */
+				    esc = HTEscape(LYCharSets[0][i], URL_XALPHAS);
+				    for (e = 0; esc[e]; e++)
+					*q++ = esc[e];
+				    FREE(esc);
+				} else {
+				    /*
+				    **  Nothing will be HTEscape'd. - KW 
+				    */
+				    for (e = 0; LYCharSets[0][i][e]; e++) {
+					*q++ =
+					    (unsigned char)(LYCharSets[0][i][e]);
+				    }
+				}
+			    } else if ((unsigned char)buf[0] > 159 &&
+				       stype == st_URL) {
+				if (LYCharSet_UC[cs_to].enc == UCT_ENC_UTF8) {
+				    UCPutUtf8ToBuffer(replace_buf, code, YES);
+				    esc = HTEscape(replace_buf, URL_XALPHAS);
+				} else {
+				    buf[0] = code;
+				    esc = HTEscape(buf, URL_XALPHAS);
+				}
+				for (e = 0; esc[e]; e++)
+				    *q++ = esc[e];
+				FREE(esc);
+			    } else {
+				*q++ = buf[0];
+			    }
 			/*
 			**  If it's hidden, use 160 for nbsp. - FM
 			*/
-			if (hidden &&
-			    !strcmp("nbsp", HTML_dtd.entity_names[i])) {
+			} else if (hidden &&
+			    !strcmp("nbsp", entities[i])) {
 			    *q++ = 160;
 			/*
 			**  If it's hidden, use 173 for shy. - FM
 			*/
 			} else if (hidden &&
-				   !strcmp("shy", HTML_dtd.entity_names[i])) {
+				   !strcmp("shy", entities[i])) {
 			    *q++ = 173;
 			/*
 			**  Check whether we want a plain space for nbsp,
-			**  ensp or emsp. - FM
+			**  ensp, emsp or thinsp. - FM
 			*/
 			} else if (plain_space &&
-				   (!strcmp("nbsp",
-				   	    HTML_dtd.entity_names[i]) ||
-				    !strcmp("emsp",
-					    HTML_dtd.entity_names[i]) ||
-				    !strcmp("ensp", 
-					    HTML_dtd.entity_names[i]))) {
+				   (!strcmp("nbsp", entities[i]) ||
+				    !strcmp("emsp", entities[i]) ||
+				    !strcmp("ensp", entities[i]) ||
+				    !strcmp("thinsp", entities[i]))) {
 			    *q++ = ' ';
 			/*
 			**  If plain_space is set, ignore shy. - FM
 			*/
 			} else if (plain_space &&
-				   !strcmp("shy",
-					    HTML_dtd.entity_names[i])) {
+				   !strcmp("shy", entities[i])) {
 			    ;
 			/*
 			**  If we haven't used something else, use the
@@ -1345,6 +2328,268 @@ PUBLIC char * LYUnEscapeEntities ARGS3(
 			else
 			    p = (cp+1);
 			break;
+		    }
+		}
+		if (diff != 0) {
+		    /*
+		    **  Not found, repeat for extra entities. - FM
+		    */
+		    for (low = 0, high = HTML_dtd.number_of_extra_entities;
+			 high > low;
+			 diff < 0 ? (low = i+1) : (high = i)) {
+			/*
+			**  Binary search.
+			*/
+			i = (low + (high - low)/2);
+			diff = strcmp(extra_entities[i].name, p);
+			if (diff == 0) {
+			    /*
+			    **  Found the entity.
+			    */
+			    code = extra_entities[i].code;
+			    if ((stype == st_URL && code > 127) ||
+				(stype == st_other &&
+				 (code > 255 ||
+				  LYCharSet_UC[cs_to].enc == UCT_ENC_UTF8))) {
+				int e;
+				if (stype == st_URL) {
+				    if (LYCharSet_UC[cs_to].enc == UCT_ENC_UTF8 ||
+					code > 255) {
+					UCPutUtf8ToBuffer(replace_buf, code, YES);
+					esc = HTEscape(replace_buf, URL_XALPHAS);
+				    } else {
+					buf[0] = code;
+					esc = HTEscape(buf, URL_XALPHAS);
+				    }
+				    for (e = 0; esc[e]; e++)
+					*q++ = esc[e];
+				    FREE(esc);
+				} else if (LYCharSet_UC[cs_to].enc == UCT_ENC_UTF8 ||
+					   code > 255) {
+				    UCPutUtf8ToBuffer(q, code, NO);
+				} else {
+				    *q++ = buf[0];
+				}
+				*cp = cpe;
+				if (*cp != ';')
+				    p = cp;
+				else
+				    p = (cp+1);
+				break;
+				/*
+				**  If it's hidden, use 160 for nbsp. - FM
+				*/
+			    }
+			    if (code == 160) {
+			        /*
+				**  nbsp.
+				*/
+				if (hidden) {
+				    *q++ = 160;
+				} else if (plain_space) {
+				    *q++ = ' ';
+				} else {
+				    *q++ = HT_NON_BREAK_SPACE;
+				}
+				/*
+				**  Recycle the terminator if it isn't the
+				**  standard ';' for HTML. - FM
+				*/
+				*cp = cpe;
+				if (*cp != ';')
+				    p = cp;
+				else
+				    p = (cp+1);
+				break;
+			    } else if (code == 173) {
+			        /*
+				**  shy.
+				*/
+				if (hidden) {
+				    *q++ = 173;
+				} else if (plain_space) {
+				    ;
+				} else {
+				    *q++ = LY_SOFT_HYPHEN;
+				}
+				/*
+				**  Recycle the terminator if it isn't the
+				**  standard ';' for HTML. - FM
+				*/
+				*cp = cpe;
+				if (*cp != ';')
+				    p = cp;
+				else
+				    p = (cp+1);
+				break;
+			    } else if (code == 8194 ||
+				       code == 8195 ||
+				       code == 8201) {
+				/*
+				**  ensp, emsp or thinsp.
+				*/
+				if (hidden) {
+				    *q++ = '&';
+				    *cp = cpe;
+				    break;
+				} else if (plain_space) {
+				    *q++ = ' ';
+				} else {
+				    *q++ = HT_EM_SPACE;
+				}
+				/*
+				**  Recycle the terminator if it isn't the
+				**  standard ';' for HTML. - FM
+				*/
+				*cp = cpe;
+				if (*cp != ';')
+				    p = cp;
+				else
+				    p = (cp+1);
+				break;
+			    } else if (code == 8211 ||
+				       code == 8212) {
+				/*
+				**  ndash or mdash.
+				*/
+				if (hidden) {
+				    *q++ = '&';
+				    *cp = cpe;
+				    break;
+				} else {
+				    *q++ = '-';
+				}
+				/*
+				**  Recycle the terminator if it isn't the
+				**  standard ';' for HTML. - FM
+				*/
+				*cp = cpe;
+				if (*cp != ';')
+				    p = cp;
+				else
+				    p = (cp+1);
+				break;
+			    } else if (output_utf8 &&
+				       code > 127 &&
+				       code < 0x7fffffffL) {
+				UCPutUtf8ToBuffer(q, code, NO);
+				/*
+				**  Recycle the terminator if it isn't the
+				**  standard ';' for HTML. - FM
+				*/
+				*cp = cpe;
+				if (*cp != ';')
+				    p = cp;
+				else
+				    p = (cp+1);
+				break;
+			    }
+			    /*
+			    **  Seek a translation from the chartrans tables.
+			    */
+			    if (((uck = UCTransUniChar(code,
+						current_char_set)) >= 32 ||
+				 uck == 9 || uck == 10 || uck == 13) &&
+				 uck < 256 &&
+				 (uck < 127 ||
+				  uck >= lowest_8)) {
+				if (uck == 160 && current_char_set == 0) {
+				    /*
+				    **  Would only happen if some other unicode
+				    **  is mapped to Latin-1 160.
+				    */
+				    if (hidden) {
+					*q++ = 160;
+				    } else if (plain_space) {
+					*q++ = ' ';
+				    } else {
+					*q++ = HT_NON_BREAK_SPACE;
+				    }
+				    /*
+				    **  Recycle the terminator if it isn't the
+				    **  standard ';' for HTML. - FM
+				    */
+				    *cp = cpe;
+				    if (*cp != ';')
+					p = cp;
+				    else
+					p = (cp+1);
+				    break;
+				} else if (uck == 173 &&
+					   current_char_set == 0) {
+				    /*
+				    **  Would only happen if some other unicode
+				    **  is mapped to Latin-1 173.
+				    */
+				    if (hidden) {
+					*q++ = 173;
+				    } else if (plain_space) {
+					;
+				    } else {
+					*q++ = LY_SOFT_HYPHEN;
+				    }
+				    /*
+				    **  Recycle the terminator if it isn't the
+				    **  standard ';' for HTML. - FM
+				    */
+				    *cp = cpe;
+				    if (*cp != ';')
+					p = cp;
+				    else
+					p = (cp+1);
+				    break;
+				} else if (!hidden && uck == 10 &&
+					   q != Str && *(q-1) == 13) {
+				    /*
+				    **  If this is not a hidden string, and we
+				    **  have an encoded encoded LF (&#10) of a
+				    **  CRLF pair, drop the CR. - kw
+				    */
+				    *(q-1) = (char)uck;
+				} else {
+				    *q++ = (char)uck;
+				}
+				/*
+				**  Recycle the terminator if it isn't the
+				**  standard ';' for HTML. - FM
+				*/
+				*cp = cpe;
+				if (*cp != ';')
+				    p = cp;
+				else
+				    p = (cp+1);
+				break;
+			    } else if ((uck == -4 ||
+					(repl_translated_C0 &&
+					 uck > 0 && uck < 32)) &&
+				       /*
+				       **  Not found.  Look for
+				       **  replacement string.
+				       */
+				       (uck =
+					    UCTransUniCharStr(replace_buf,
+							      60,
+							      code,
+							    current_char_set,
+							       0) >= 0)) {
+				for (i = 0; replace_buf[i]; i++) {
+				    *q++ = replace_buf[i];
+				}
+				/*
+				**  Recycle the terminator if it isn't the
+				**  standard ';' for HTML. - FM
+				*/
+				*cp = cpe;
+				if (*cp != ';')
+				    p = cp;
+				else
+				    p = (cp+1);
+				break;
+			    }
+			    *cp = cpe;
+			    *q++ = '&';
+			    break;
+			}
 		    }
 		}
 		*cp = cpe;
@@ -1377,7 +2622,17 @@ PUBLIC char * LYUnEscapeEntities ARGS3(
 		    HTCJK != NOCJK)))) {
 	        *q++ = ' ';
 		p++;
-	    } else if (!hidden && *p == 10 && q != str && *(q-1) == 13) {
+	    } else if (stype == st_URL &&
+		       (code >= 127 ||
+			(code < 32 && (code != 9 && code != 10)))) {
+		*q++ = '%';
+		*q++ = hex[(code >> 4) & 15];
+		*q++ = hex[(code & 15)];
+		p++;
+		/*
+		**  If it's hidden, use 160 for nbsp. - FM
+		*/
+	    } else if (!hidden && *p == 10 && q != Str && *(q-1) == 13) {
 		/*
 		**  If this is not a hidden string, and the current char is
 		**  the LF ('\n') of a CRLF pair, drop the CR ('\r'). - KW
@@ -1388,8 +2643,15 @@ PUBLIC char * LYUnEscapeEntities ARGS3(
 	    }
 	}
     }
+#endif /* 0 */
     
     *q = '\0';
+    if (stype == st_URL) {
+	LYTrimHead(Str);
+	LYTrimTail(Str);
+    }
+    StrAllocCopy(*str, Str);
+    FREE(Str);
     return str;
 }
 
@@ -1403,9 +2665,9 @@ PUBLIC char * LYUnEscapeEntities ARGS3(
 **  it strips out ESC, as would be done when the
 **  "ISO Latin 1" Character Set is selected. - FM
 */
-PUBLIC void LYUnEscapeToLatinOne ARGS2(
+PRIVATE void LYUnEscapeToLatinOne_unused ARGS2(
 	char **,	str,
-	BOOLEAN,	isURL)
+	CharUtil_st,	stype)
 {
     char *p = *str;
     char *q = NULL;
@@ -1431,7 +2693,7 @@ PUBLIC void LYUnEscapeToLatinOne ARGS2(
     /*
     **  If the isURL flag is TRUE, set up for hex escaping. - FM
     */
-    if (isURL == TRUE) {
+    if (stype == st_URL) {
         if ((url = (char *)calloc(1, ((strlen(p) * 3) + 1))) == NULL) {
 	    outofmem(__FILE__, "LYUnEscapeToLatinOne");
 	}
@@ -1451,7 +2713,7 @@ PUBLIC void LYUnEscapeToLatinOne ARGS2(
 	    case S_text:
 		if (*p == '\033') {
 		    state = S_esc;
-		    if (isURL == TRUE) {
+		    if (stype == st_URL) {
 		        buf[0] = *p;
 		        esc = HTEscape(buf, URL_XALPHAS);
 			for (e = 0; esc[e]; e++)
@@ -1517,7 +2779,7 @@ PUBLIC void LYUnEscapeToLatinOne ARGS2(
 	    case S_nonascii_text:
 		if (*p == '\033') {
 		    state = S_esc;
-		    if (isURL == TRUE) {
+		    if (stype == st_URL) {
 		        buf[0] = *p;
 		        esc = HTEscape(buf, URL_XALPHAS);
 			for (e = 0; esc[e]; e++)
@@ -1586,7 +2848,7 @@ PUBLIC void LYUnEscapeToLatinOne ARGS2(
 		**  8-bit, and then recycle the terminator
 		**  if it is not a semicolon. - FM
 		*/
-		if (value > 159 && isURL == TRUE) {
+		if (value > 159 && stype == st_URL) {
 		    buf[0] = value;
 		    esc = HTEscape(buf, URL_XALPHAS);
 		    for (e = 0; esc[e]; e++)
@@ -1644,7 +2906,7 @@ PUBLIC void LYUnEscapeToLatinOne ARGS2(
 				**  Totally empty, skip. - KW
 				*/
 			        ; /* do nothing */
-			    } else if (isURL) {
+			    } else if (stype == st_URL) {
 				/*
 				**  All will be HTEscape'd. - KW
 				*/
@@ -1662,7 +2924,7 @@ PUBLIC void LYUnEscapeToLatinOne ARGS2(
 				}
 			    }
 		        } else if ((unsigned char)buf[0] > 159 &&
-				   isURL == TRUE) {
+				   stype == st_URL) {
 			    esc = HTEscape(buf, URL_XALPHAS);
 			    for (e = 0; esc[e]; e++)
 				*q++ = esc[e];
@@ -1710,13 +2972,293 @@ PUBLIC void LYUnEscapeToLatinOne ARGS2(
     **  Clean up and return. - FM
     */
     *q = '\0';
-    if (isURL == TRUE) {
+    if (stype == st_URL) {
         LYTrimHead(url);
 	LYTrimTail(url);
         StrAllocCopy(*str, url);
 	FREE(url);
     }
 }
+
+/*
+**  This is a generalized version of LYExpandString.
+**
+**  This function translates a string from charset
+**  cs_from to charset cs_to, reallocating it if necessary.
+**
+**  If use_lynx_specials is YES, translate 160 and 173
+**  (U+00A0 and U+00AD) to HT_NON_BREAK_SPACE and
+**  LY_SOFT_HYPHEN, respectively (unless input and output
+**  charset are both iso-8859-1, for compatibility with
+**  usage in HTML.c).
+**
+**  Returns YES if string translated or translation
+**              unnecessary, 
+**          NO otherwise.
+**
+*/
+#define REPLACE_STRING(s) \
+		p[i] = '\0'; \
+		StrAllocCat(*str, q); \
+		StrAllocCat(*str, s); \
+		q = (puni > p+i ? puni+1 : &p[i+1])
+
+#define REPLACE_CHAR(c) if (puni > &p[i]) { \
+		p[i] = c; \
+		p[i+1] = '\0'; \
+		StrAllocCat(*str, q); \
+		q = puni + 1; \
+	    } else \
+		p[i] = c
+
+/*
+ *  Back: try 'backward' translation
+ *  PlainText: only used with Back (?)
+ */
+PRIVATE BOOL LYUCTranslateString ARGS7(
+	char **, str,
+	int,	cs_from,
+	int,	cs_to,
+	BOOL,	use_lynx_specials,
+	BOOLEAN,	PlainText,
+	BOOL,	Back,
+	CharUtil_st,	stype)	/* stype unused */
+{
+    char *p = *str;
+    char *q = *str;
+    CONST char *name;
+    char replace_buf[21];
+    UCode_t unsign_c, uck;
+    UCTransParams T;
+    BOOL from_is_utf8, done;
+    char * puni;
+    int i, j, value, high, low, diff = 0;
+
+    /*
+    **  Don't do anything if we have no string,
+    **  or if original AND target character sets
+    **  are both iso-8859-1,
+    **  or if we are in CJK mode.
+    */
+    if (!p || *p == '\0' ||
+	(cs_to == 0 && cs_from == cs_to) ||
+        HTCJK != NOCJK)
+        return YES;
+
+    /* No need to translate or examine the string any further */
+    else if (!use_lynx_specials && !Back &&
+	     UCNeedNotTranslate(cs_from, cs_to))
+	return YES;
+
+    /* Can't do, caller should figure out what to do... */
+    else if (!UCCanTranslateFromTo(cs_from, cs_to))
+	return NO;
+    /*
+    **  Start a clean copy of the string, without
+    **  invalidating our pointer to the original. - FM
+    */
+    *str = NULL;
+    StrAllocCopy(*str, "");
+
+    UCTransParams_clear(&T);
+    UCSetTransParams(&T, cs_from, &LYCharSet_UC[cs_from],
+		     cs_to, &LYCharSet_UC[cs_to]);
+    from_is_utf8 = (LYCharSet_UC[cs_from].enc == UCT_ENC_UTF8);
+    puni = p;
+    /*
+    **  Check each character in the original string,
+    **  and add the characters or substitutions to
+    **  our clean copy. - FM
+    */
+    for (i = 0; p[i]; i++) {
+	unsign_c = (unsigned char)p[i];
+	done = NO;
+	if (Back) {
+	    int rev_c;
+	    if (p[i] == HT_NON_BREAK_SPACE ||
+		p[i] == HT_EM_SPACE) {
+		if (PlainText) {
+		    unsign_c = p[i] = ' ';
+		    done = YES;
+		} else {
+		    p[i] = 160;
+		    unsign_c = 160;
+		    if (LYCharSet_UC[cs_to].enc == UCT_ENC_8859 ||
+			(LYCharSet_UC[cs_to].like8859 & UCT_R_8859SPECL)) {
+			done = YES;
+		    }
+		}
+	    } else if (p[i] == LY_SOFT_HYPHEN) {
+		p[i] = 173;
+		unsign_c = 173;
+		if (LYCharSet_UC[cs_to].enc == UCT_ENC_8859 ||
+		    (LYCharSet_UC[cs_to].like8859 & UCT_R_8859SPECL)) {
+		    done = YES;
+		}
+	    } else if (unsign_c < 127 || T.transp) {
+		done = YES;
+	    }
+	    if (!done) {
+		rev_c = UCReverseTransChar(p[i], cs_to, cs_from);
+		if (rev_c > 127) {
+		    p[i] = rev_c;
+		    done = YES;
+		}
+	    }
+	} else if (unsign_c < 127)
+	    done = YES;
+	
+	if (!done) {
+	    if (from_is_utf8) {
+		if ((p[i]&0xc0)==0xc0) {
+		    puni = p+i;
+		    unsign_c = UCGetUniFromUtf8String(&puni);
+		    if (unsign_c <= 0) {
+			unsign_c = (unsigned char)p[i];
+			puni = p+i;
+		    }
+		}
+	    } else if (use_lynx_specials && !Back &&
+		       (unsign_c == 160 || unsign_c == 173) &&
+		       (LYCharSet_UC[cs_from].enc == UCT_ENC_8859 ||
+			(LYCharSet_UC[cs_from].like8859 & UCT_R_8859SPECL))) {
+		if (unsign_c == 160)
+		    p[i] = HT_NON_BREAK_SPACE;
+		else if (unsign_c == 173)
+		    p[i] = LY_SOFT_HYPHEN;
+		done = YES;
+	    } else if (T.trans_to_uni) {
+		unsign_c = UCTransToUni(p[i], cs_from);
+		if (unsign_c <= 0) {
+		    /* What else can we do? */
+		    unsign_c = (unsigned char)p[i];
+		}
+	    } else if (T.strip_raw_char_in &&
+		       (unsigned char)p[i] >= 0xc0 &&
+		       (unsigned char)p[i] < 255) {
+		REPLACE_CHAR((p[i] & 0x7f));
+		done = YES;
+	    } else if (!T.trans_from_uni) {
+		done = YES;
+	    }
+	    /*
+	    **  Substitute Lynx special character for
+	    **  160 (nbsp) if use_lynx_specials is set.
+	    */
+	    if (!done && use_lynx_specials && !Back &&
+		(unsign_c == 160 || unsign_c == 173)) {
+		REPLACE_CHAR((unsign_c==160 ? HT_NON_BREAK_SPACE : LY_SOFT_HYPHEN));
+		done = YES;
+	    }
+	}
+	/* At this point we should have the UCS value in unsign_c */
+	if (!done) {
+	    if (T.output_utf8 && UCPutUtf8ToBuffer(replace_buf, unsign_c, YES)) {
+		REPLACE_STRING(replace_buf);
+	    } else if ((uck = UCTransUniChar(unsign_c, cs_to)) >= 32 &&
+		uck < 256) {
+		REPLACE_CHAR((char)uck) ;
+	    } else if (uck == UCTRANS_NOTFOUND &&
+			(uck = UCTransUniCharStr(replace_buf,21, unsign_c,
+						 cs_to, 0)) >= 0) {
+		REPLACE_STRING(replace_buf);
+	    }
+	    /*
+	    ** fall through to old method:
+	    **
+	    **  Substitute other 8-bit characters based on
+	    **  the LYCharsets.c tables if HTPassEightBitRaw
+	    **  is not set. - FM
+	    */
+	    else if (unsign_c > 160 && unsign_c <= 255 &&
+		     !HTPassEightBitRaw) {
+		value = (int)(unsign_c - 160);
+		name = HTMLGetEntityName(value);
+		for (low = 0, high = HTML_dtd.number_of_entities;
+		     high > low;
+		     diff < 0 ? (low = j+1) : (high = j)) {
+		    /* Binary search */
+		    j = (low + (high-low)/2);
+		    diff = strcmp(HTML_dtd.entity_names[j], name);
+		    if (diff == 0) {
+			REPLACE_STRING(LYCharSets[cs_to][j]);
+			break;
+		    }
+		}
+		if (diff != 0) {
+		    sprintf(replace_buf, "U%.2lX", unsign_c);
+		    REPLACE_STRING(replace_buf);
+		}
+	    } else if (unsign_c > 255) {
+		if (T.strip_raw_char_in &&
+		    (unsigned char)p[i] >= 0xc0 &&
+		    (unsigned char)p[i] < 255) {
+		    REPLACE_CHAR((p[i] & 0x7f));
+		} else {
+		    sprintf(replace_buf, "U%.2lX", unsign_c);
+		    REPLACE_STRING(replace_buf);
+		}
+	    }
+	}
+	if ((puni-p) > i)
+	    i = (puni-p);	/* point to last byte of UTF sequence */
+    }	
+    StrAllocCat(*str, q);
+    free_and_clear(&p);
+    return YES;
+}
+
+PUBLIC BOOL LYUCFullyTranslateString ARGS7(
+	char **, str,
+	int,	cs_from,
+	int,	cs_to,
+	BOOL,	use_lynx_specials,
+	BOOLEAN,	plain_space,
+	BOOLEAN,	hidden,
+	CharUtil_st,	stype)
+{
+    BOOL ret = YES;
+    /* May reallocate *str even if cs_to == 0 */
+    if (!LYUCTranslateString(str, cs_from, cs_to, use_lynx_specials, FALSE, NO, stype)) {
+	LYExpandString_old(str);
+	ret = NO;
+    }
+
+    if (!LYUnEscapeEntities(str, cs_to, plain_space, hidden, stype)) {
+	ret = NO;
+    }
+    return ret;
+}
+
+PUBLIC BOOL LYUCTranslateBackFormData ARGS4(
+	char **, str,
+	int,	cs_from,
+	int,	cs_to,
+	BOOLEAN,	plain_space)
+{
+    /* May reallocate *str even if cs_to == 0 */
+    return (LYUCTranslateString(str, cs_from, cs_to, NO, plain_space, YES, st_HTML));
+
+}
+
+#ifdef NOTUSED
+PUBLIC BOOL LYUCFullyTranslateString ARGS6(
+	char **, str,
+	int,	cs_from,
+	int,	cs_to,
+	BOOL,	use_lynx_specials,
+	BOOLEAN,	plain_space,
+	BOOLEAN,	hidden)
+{
+    if (cs_to) {
+	if (!LYUCTranslateString(str, cs_from, cs_to, use_lynx_specials))
+	    LYExpandString_old(str);
+    }
+    /* Note that it is guaranteed that *str is not reallocated
+       if cs_to == 0 */
+    LYUnEscapeEntities(*str, plain_space, hidden);
+}
+#endif /* NOTUSED */
 
 /*
 **  This function processes META tags in HTML streams. - FM
@@ -1742,7 +3284,12 @@ PUBLIC void LYHandleMETA ARGS4(
 	value[HTML_META_HTTP_EQUIV] && *value[HTML_META_HTTP_EQUIV]) {
 	StrAllocCopy(http_equiv, value[HTML_META_HTTP_EQUIV]);
 	convert_to_spaces(http_equiv, TRUE);
+#ifdef EXP_CHARTRANS
+	LYUCFullyTranslateString(&http_equiv, me->tag_charset, me->tag_charset,
+				 NO, NO, YES, st_other);
+#else
 	LYUnEscapeToLatinOne(&http_equiv, FALSE);
+#endif
 	LYTrimHead(http_equiv);
 	LYTrimTail(http_equiv);
 	if (*http_equiv == '\0') {
@@ -1753,7 +3300,12 @@ PUBLIC void LYHandleMETA ARGS4(
 	value[HTML_META_NAME] && *value[HTML_META_NAME]) {
 	StrAllocCopy(name, value[HTML_META_NAME]);
 	convert_to_spaces(name, TRUE);
+#ifdef EXP_CHARTRANS
+	LYUCFullyTranslateString(&name, me->tag_charset, me->tag_charset,
+				 NO, NO, YES, st_other);
+#else
 	LYUnEscapeToLatinOne(&name, FALSE);
+#endif
 	LYTrimHead(name);
 	LYTrimTail(name);
 	if (*name == '\0') {
@@ -1801,7 +3353,12 @@ PUBLIC void LYHandleMETA ARGS4(
      */
     if (!strcasecomp((http_equiv ? http_equiv : ""), "Pragma") ||
         !strcasecomp((http_equiv ? http_equiv : ""), "Cache-Control")) {
+#ifdef EXP_CHARTRANS
+	LYUCFullyTranslateString(&content, me->tag_charset, me->tag_charset,
+				 NO, NO, YES, st_other);
+#else
 	LYUnEscapeToLatinOne(&content, FALSE);
+#endif
 	LYTrimHead(content);
 	LYTrimTail(content);
 	if (!strcasecomp(content, "no-cache")) {
@@ -1875,7 +3432,12 @@ PUBLIC void LYHandleMETA ARGS4(
 	 *  Date header from a server when making the
 	 *  comparsion. - FM
 	 */
+#ifdef EXP_CHARTRANS
+	LYUCFullyTranslateString(&content, me->tag_charset, me->tag_charset,
+				 NO, NO, YES, st_other);
+#else
 	LYUnEscapeToLatinOne(&content, FALSE);
+#endif
 	LYTrimHead(content);
 	LYTrimTail(content);
 	StrAllocCopy(me->node_anchor->expires, content);
@@ -1915,7 +3477,12 @@ PUBLIC void LYHandleMETA ARGS4(
      */
     } else if (!(me->node_anchor->charset && *me->node_anchor->charset) && 
 	       !strcasecomp((http_equiv ? http_equiv : ""), "Content-Type")) {
+#ifdef EXP_CHARTRANS
+	LYUCFullyTranslateString(&content, me->tag_charset, me->tag_charset,
+				 NO, NO, YES, st_other);
+#else
 	LYUnEscapeToLatinOne(&content, FALSE);
+#endif
 	LYTrimHead(content);
 	LYTrimTail(content);
 	/*
@@ -2434,7 +4001,7 @@ PUBLIC void LYHandleSELECT ARGS5(
 	if (!me->inFORM) {
 	    if (TRACE) {
 		fprintf(stderr,
-			"HTML: SELECT start tag not within FORM tag\n");
+			"HTML: ***** SELECT start tag not within FORM element *****\n");
 	    } else if (!me->inBadHTML) {
 		_statusline(BAD_HTML_USE_TRACE);
 		me->inBadHTML = TRUE;
@@ -2452,7 +4019,7 @@ PUBLIC void LYHandleSELECT ARGS5(
 	 */
 	if (me->inTEXTAREA) {
 	    if (TRACE) {
-		fprintf(stderr, "HTML: Missing TEXTAREA end tag\n");
+		fprintf(stderr, "HTML: ***** Missing TEXTAREA end tag *****\n");
 	    } else if (!me->inBadHTML) {
 		_statusline(BAD_HTML_USE_TRACE);
 		me->inBadHTML = TRUE;
@@ -2538,7 +4105,7 @@ PUBLIC void LYHandleSELECT ARGS5(
 	 */
 	if (!me->inSELECT) {
 	    if (TRACE) {
-		fprintf(stderr, "HTML: Unmatched SELECT end tag\n");
+		fprintf(stderr, "HTML: ***** Unmatched SELECT end tag *****\n");
 	    } else if (!me->inBadHTML) {
 		_statusline(BAD_HTML_USE_TRACE);
 		me->inBadHTML = TRUE;
@@ -2682,7 +4249,12 @@ PUBLIC int LYLegitimizeHREF ARGS4(
     }
     if (*(*href) == '\0')
         return(url_type);
+#ifdef EXP_CHARTRANS
+    LYUCFullyTranslateString(href, me->tag_charset, me->tag_charset,
+			     NO, NO, YES, st_URL);
+#else
     LYUnEscapeToLatinOne(&(*href), TRUE);
+#endif
     url_type = is_url(*href);
     if (!url_type && force_slash &&
 	(!strcmp(*href, ".") || !strcmp(*href, "..")) &&
@@ -2832,7 +4404,8 @@ PUBLIC void LYCheckForContentBase ARGS1(
 	 present[i] = NO;
     present[HTML_BASE_HREF] = YES;
     value[HTML_BASE_HREF] = (CONST char *)cp;
-    (*me->isa->start_element)(me, HTML_BASE, present, value, 0);
+    (*me->isa->start_element)(me, HTML_BASE, present, value,
+			      0, 0);
     FREE(cp);
 }
 
@@ -2858,7 +4431,12 @@ PUBLIC void LYCheckForID ARGS4(
 	 *  Translate any named or numeric character references. - FM
 	 */
 	StrAllocCopy(temp, value[attribute]);
+#ifdef EXP_CHARTRANS
+	LYUCFullyTranslateString(&temp, me->tag_charset, me->tag_charset,
+				 NO, NO, YES, st_URL);
+#else
 	LYUnEscapeToLatinOne(&temp, TRUE);
+#endif
 
 	/*
 	 *  Create the link if we still have a non-zero-length string. - FM

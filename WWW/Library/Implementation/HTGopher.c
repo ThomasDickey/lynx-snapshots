@@ -78,7 +78,7 @@
 
 #define PUTC(c) (*targetClass.put_character)(target, c)
 #define PUTS(s) (*targetClass.put_string)(target, s)
-#define START(e) (*targetClass.start_element)(target, e, 0, 0, 0)
+#define START(e) (*targetClass.start_element)(target, e, 0, 0, -1, 0)
 #define END(e) (*targetClass.end_element)(target, e, 0)
 #define FREE_TARGET (*targetClass._free)(target)
 
@@ -201,7 +201,7 @@ PRIVATE void write_anchor ARGS2(CONST char *,text, CONST char *,addr)
     
     HT_Is_Gopher_URL = TRUE;  /* tell HTML.c that this is a Gopher URL */
     (*targetClass.start_element)(target, HTML_A, present,
-    				 (CONST char **)value, 0);
+    				 (CONST char **)value, -1, 0);
 	    
     PUTS(text);
     END(HTML_A);
@@ -1773,7 +1773,7 @@ PUBLIC int HTLoadGopher ARGS4(
         int len;
 
 	if ((len = strlen(arg)) > 5) {
-	    if (0 == strcmp(&arg[len-6], ":105/2")) {
+	    if (0 == strcmp((CONST char *)&arg[len-6], ":105/2")) {
 	        /* Use CSO gateway. */
 		if (TRACE)
 		    fprintf(stderr, "HTGopher: Passing to CSO/PH gateway.\n");

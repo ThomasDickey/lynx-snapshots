@@ -77,6 +77,9 @@ struct _HTStream {
 	HTFormat		output_format; /* Original pres->rep_out */
 	HTParentAnchor *	anchor;	    /* Original stream's anchor. */
 	HTStream *		sink;	    /* Original stream's sink.   */
+#ifdef FNAMES_8_3
+        int			idash; /* remember position to become '.'*/
+#endif
 };
 
 
@@ -220,6 +223,29 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 		     *  for the uncompressed file and invoke
 		     *  HTLoadFile() to handle it. - FM
 		     */
+#ifdef FNAMES_8_3
+		    /*
+		     *  Assuming we have just uncompressed e.g.
+		     *  FILE-mpeg.gz -> FILE-mpeg, restore/shorten
+		     *  the name to be fit for passing to an external
+		     *  viewer, by renaming FILE-mpeg -> FILE.mpe  - kw
+		     */
+		    if (skip_loadfile) {
+			char *new_path = NULL;
+			if (me->idash > 1 && path[me->idash] == '-') {
+			    StrAllocCopy(new_path, path);
+			    new_path[me->idash] = '.';
+			    if (strlen(new_path + me->idash) > 4)
+				new_path[me->idash + 4] = '\0';
+			    if (rename(path, new_path) == 0) {
+				FREE(path);
+				path = new_path;
+			    } else {
+				FREE(new_path);
+			    }
+			}
+		    }
+#endif /* FNAMES_8_3 */
 		    StrAllocCopy(addr, "file://localhost");
 #ifdef DOSPATH
 			 StrAllocCat(addr, "/");
@@ -233,7 +259,7 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 #endif /* DOSPATH */
 		    if (!use_gzread) {
 			StrAllocCopy(me->anchor->FileCache, path);
-			FREE(me->anchor->content_encoding);
+			StrAllocCopy(me->anchor->content_encoding, "binary");
 		    }
 		    FREE(path);
 #ifdef EXP_CHARTRANS
@@ -560,19 +586,23 @@ SaveAndExecute_tempname:
 	     */
 	    *cp = '\0';
 	    if (!strcasecomp(pres->rep->name, "text/html")) {
-	        strcat(fnam, ".html");
+	        strcat(fnam, HTML_SUFFIX);
 	    } else if (!strcasecomp(pres->rep->name, "text/plain")) {
 	        strcat(fnam, ".txt");
 	    } else if (!strcasecomp(pres->rep->name,
 	    			    "application/octet-stream")) {
 	        strcat(fnam, ".bin");
-	    } else if ((suffix = HTFileSuffix(pres->rep)) && *suffix == '.') {
+	    } else if ((suffix = HTFileSuffix(pres->rep, anchor->content_encoding))
+		       && *suffix == '.') {
 	        strcat(fnam, suffix);
 		/*
 		 *  It's not one of the suffixes checked for a
 		 *  spoof in tempname(), so check it now. - FM
 		 */
-		if ((fp = fopen(fnam, "r")) != NULL) {
+		if (strcmp(suffix, HTML_SUFFIX) &&
+		    strcmp(suffix, ".txt") &&
+		    strcmp(suffix, ".bin") &&
+		    (fp = fopen(fnam, "r")) != NULL) {
 		    fclose(fp);
 		    fp = NULL;
 		    goto SaveAndExecute_tempname;
@@ -744,19 +774,23 @@ SaveToFile_tempname:
 	     */
 	    *cp = '\0';
 	    if (!strcasecomp(pres->rep->name, "text/html")) {
-	        strcat(fnam, ".html");
+	        strcat(fnam, HTML_SUFFIX);
 	    } else if (!strcasecomp(pres->rep->name, "text/plain")) {
 	        strcat(fnam, ".txt");
 	    } else if (!strcasecomp(pres->rep->name,
 	    			    "application/octet-stream")) {
 	        strcat(fnam, ".bin");
-	    } else if ((suffix = HTFileSuffix(pres->rep)) && *suffix == '.') {
+	    } else if ((suffix = HTFileSuffix(pres->rep,
+					      anchor->content_encoding)) && *suffix == '.') {
 	        strcat(fnam, suffix);
 		/*
 		 *  It's not one of the suffixes checked for a
 		 *  spoof in tempname(), so check it now. - FM
 		 */
-		if ((fp = fopen(fnam, "r")) != NULL) {
+		if (strcmp(suffix, HTML_SUFFIX) &&
+		    strcmp(suffix, ".txt") &&
+		    strcmp(suffix, ".bin") &&
+		    (fp = fopen(fnam, "r")) != NULL) {
 		    fclose(fp);
 		    fp = NULL;
 		    goto SaveToFile_tempname;
@@ -885,6 +919,7 @@ PUBLIC HTStream* HTCompressed ARGS3(
     char *uncompress_mask = NULL;
     char *compress_suffix = "";
     char *cp;
+    CONST char *middle;
     FILE *fp = NULL;
 
     /*
@@ -916,7 +951,7 @@ PUBLIC HTStream* HTCompressed ARGS3(
 		 *  It's compressed with the modern gzip. - FM
 		 */
 		StrAllocCopy(uncompress_mask, GZIP_PATH);
-		StrAllocCat(uncompress_mask, " -d %s");
+		StrAllocCat(uncompress_mask, " -d --no-name %s");
 		compress_suffix = "gz";
 	    } else if (!strcasecomp(anchor->content_encoding, "x-compress") ||
 	    	       !strcasecomp(anchor->content_encoding, "compress")) {
@@ -985,42 +1020,45 @@ PUBLIC HTStream* HTCompressed ARGS3(
 Compressed_tempname:
     tempname(fnam, NEW_FILE);
     if ((cp = strrchr(fnam, '.')) != NULL) {
-	*cp = '\0';
+	middle = NULL;
 	if (!strcasecomp(anchor->content_type, "text/html")) {
-#ifdef VMS
-	    strcat(fnam, ".html-");
-#else
-	    strcat(fnam, ".html.");
-#endif /* VMS */
+	    middle = HTML_SUFFIX;
+	    middle++;		/* point to 'h' of .htm(l) - kw */
 	} else if (!strcasecomp(anchor->content_type, "text/plain")) {
-#ifdef VMS
-	    strcat(fnam, ".txt-");
-#else
-	    strcat(fnam, ".txt.");
-#endif /* VMS */
+	    middle = "txt";
 	} else if (!strcasecomp(anchor->content_type,
 				"application/octet-stream")) {
-#ifdef VMS
-	    strcat(fnam, ".bin-");
-#else
-	    strcat(fnam, ".bin.");
-#endif /* VMS */
+	    middle = "bin";
 	} else if ((suffix =
-		    HTFileSuffix(HTAtom_for(anchor->content_type))) &&
+		    HTFileSuffix(HTAtom_for(anchor->content_type), NULL)) &&
 	    	   *suffix == '.') {
-	    strcat(fnam, suffix);
-#ifdef VMS
-	    strcat(fnam, "-");
+#if defined(VMS) || defined(FNAMES_8_3)
+	    if (strchr(suffix + 1, '.') == NULL)
+#endif
+		middle = suffix + 1;
+	}
+	if (middle) {
+	    *cp = '\0';
+#ifdef FNAMES_8_3
+	    me->idash = strlen(fnam);     /* remember position of '-'  - kw */
+	    strcat(fnam, "-");	/* NAME-htm,  NAME-txt, etc. - hack for DOS */
 #else
-	    strcat(fnam, ".");
+	    strcat(fnam, ".");	/* NAME.html, NAME-txt etc. */
+#endif /* FNAMES_8_3 */
+	    strcat(fnam, middle);
+#ifdef VMS
+	    strcat(fnam, "-");	/* NAME.html-gz, NAME.txt-gz, NAME.txt-Z etc.*/
+#else
+	    strcat(fnam, ".");	/* NAME-htm.gz (DOS), NAME.html.gz (UNIX)etc.*/
 #endif /* VMS */
 	} else {
-	    strcat(fnam, ".");
+	    *(cp + 1) = '\0';
 	}
     } else {
 	strcat(fnam, ".");
     }
     strcat(fnam, compress_suffix);
+
     /*
      *  It's not one of the suffixes checked for a
      *  spoof in tempname(), so check it now. - FM

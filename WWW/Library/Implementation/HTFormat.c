@@ -254,6 +254,7 @@ PUBLIC char HTGetCharacter NOARGS
     return FROMASCII(ch);
 }
 
+#ifdef NOT_USED
 /*	Stream the data to an ouput file as binary
 */
 PUBLIC int HTOutputBinary ARGS2( int, 		input,
@@ -271,6 +272,7 @@ PUBLIC int HTOutputBinary ARGS2( int, 		input,
 	    fwrite(input_buffer, sizeof(char), status, output);
     } while (YES);
 }
+#endif /* NOT_USED */
 
 /*  Match maintype to any MIME type starting with maintype,
  *  for example:  image/gif should match image

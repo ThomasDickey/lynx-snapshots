@@ -2292,26 +2292,60 @@ PUBLIC void HTmmdec_quote ARGS2(
     strcpy(t, buf);
 }
 
+/* Generalized HTmmdecode for chartrans - kweide 1997-03-06 */
+
 PUBLIC void HTmmdecode ARGS2(
 	char *,		trg,
 	char *,		str)
 {
     char buf[BUFLEN], mmbuf[BUFLEN];
-    char *s, *t, *u;
+    char *s, *t, *u, *qm2;
     int  base64, quote;
 
     buf[0] = '\0';
 
+/* encoded-words look like  =?ISO-8859-1?B?SWYgeW91IGNhbiByZWFkIHRoaXMgeW8=?=  */
+
     for (s = str, u = buf; *s; ) {
-	if (!strncasecomp(s, "=?ISO-2022-JP?B?", 16)) {
-	    base64 = 1;
-	} else {
-	    base64 = 0;
-	}
-	if (!strncasecomp(s, "=?ISO-2022-JP?Q?", 16)) {
-	    quote = 1;
-	} else {
-	    quote = 0;
+	base64 = quote = 0;
+	if (*s == '=' && s[1] == '?' &&
+	    (s == str || *(s-1) == '(' || WHITE(*(s-1))))
+	{ /* must be beginning of word */
+	    qm2 = strchr(s+2, '?'); /* 2nd question mark */
+	    if (qm2 &&
+		(qm2[1] == 'B' || qm2[1] == 'b' || qm2[1] == 'Q' || qm2[1] == 'q') &&
+		qm2[2] == '?') { /* 3rd question mark */
+		char * qm4 = strchr(qm2 + 3, '?'); /* 4th question mark */
+		if (qm4 && qm4 - s < 74 &&  /* RFC 2047 length restriction */
+		    qm4[1] == '=') {
+		    char *p;
+		    BOOL invalid = NO;
+		    for (p = s+2; p < qm4; p++)
+			if (WHITE(*p)) {
+			    invalid = YES;
+			    break;
+			}
+		    if (!invalid) {
+			int LYhndl;
+			*qm2 = '\0';
+#ifdef EXP_CHARTRANS
+			for (p = s+2; *p; p++)
+			    *p = TOLOWER(*p);
+			invalid = ((LYhndl = UCGetLYhndl_byMIME(s+2)) < 0 ||
+				   !UCCanTranslateFromTo(LYhndl, current_char_set));
+#else
+			invalid = (0!=strncasecomp(s+2, "ISO-2022-JP", 11));
+#endif
+			*qm2 = '?';
+		    }
+		    if (!invalid) {
+			if (qm2[1] == 'B' || qm2[1] == 'b')
+			    base64 = 1;
+			else if (qm2[1] == 'Q' || qm2[1] == 'q')
+			    quote = 1;
+		    }
+		}
+	    }
 	}
 	if (base64 || quote) {
 	    if (HTmmcont) {
@@ -2320,7 +2354,7 @@ PUBLIC void HTmmdecode ARGS2(
 			u--;
 		}
 	    }
-	    for (s += 16, t = mmbuf; *s; ) {
+	    for (s = qm2 + 3, t = mmbuf; *s; ) {
 		if (s[0] == '?' && s[1] == '=') { 
 		    break;
 		} else {
@@ -2461,7 +2495,7 @@ PUBLIC int HTrjis ARGS2(
 */
 /*
  * RJIS ( Recover JIS code from broken file )
- * $Header: /usr/build/VCS/lynx/WWW/Library/Implementation/RCS/HTMIME.c,v 1.10 1997/09/19 01:14:00 klaus Exp $
+ * @Header: rjis.c,v 0.2 92/09/04 takahasi Exp @
  * Copyright (C) 1992 1994
  * Hironobu Takahashi (takahasi@tiny.or.jp)
  *

@@ -82,7 +82,7 @@ PRIVATE HTList *NNTP_AuthInfo = NULL;		/* AUTHINFO database */
 
 #define PUTC(c) (*targetClass.put_character)(target, c)
 #define PUTS(s) (*targetClass.put_string)(target, s)
-#define START(e) (*targetClass.start_element)(target, e, 0, 0, 0)
+#define START(e) (*targetClass.start_element)(target, e, 0, 0, -1, 0)
 #define END(e) (*targetClass.end_element)(target, e, 0)
 #define MAYBE_END(e) if (HTML_dtd.tags[e].contents != SGML_EMPTY) \
                         (*targetClass.end_element)(target, e, 0)
@@ -639,7 +639,7 @@ PRIVATE void start_anchor ARGS1(CONST char *,  href)
     }
     ((CONST char **)value)[HTML_A_HREF] = href;
     (*targetClass.start_element)(target, HTML_A , present,
-    				 (CONST char **)value, 0);
+    				 (CONST char **)value, -1, 0);
 }
 
 /*      Start link element
@@ -658,7 +658,7 @@ PRIVATE void start_link ARGS2(CONST char *,  href, CONST char *, rev)
     ((CONST char **)value)[HTML_LINK_HREF] = href;
     ((CONST char **)value)[HTML_LINK_REV]  = rev;
     (*targetClass.start_element)(target, HTML_LINK, present,
-				 (CONST char **)value, 0);
+				 (CONST char **)value, -1, 0);
 }
 
 /*      Start list element
@@ -677,7 +677,7 @@ PRIVATE void start_list ARGS1(int, seqnum)
     ((CONST char **)value)[HTML_OL_SEQNUM] = SeqNum;
     ((CONST char **)value)[HTML_OL_START]  = SeqNum;
     (*targetClass.start_element)(target, HTML_OL , present,
-				 (CONST char **)value, 0);
+				 (CONST char **)value, -1, 0);
 }
 
 /*	Paste in an Anchor
@@ -1010,6 +1010,9 @@ PRIVATE int read_article NOARGS
 		        HTmmdecode(subject, subject);
 			HTrjis(subject, subject);
 		    }
+#ifdef NOTUSED_CHARTRANS
+		    else HTmmdecode(subject, subject);
+#endif
 
 		} else if (match(full_line, "DATE:")) {
 		    StrAllocCopy(date, HTStrip(strchr(full_line,':')+1));
@@ -1021,6 +1024,9 @@ PRIVATE int read_article NOARGS
 		        HTmmdecode(organization, organization);
 			HTrjis(organization, organization);
 		    }
+#ifdef NOTUSED_CHARTRANS
+		    else HTmmdecode(organization, organization);
+#endif
 
 		} else if (match(full_line, "FROM:")) {
 		    StrAllocCopy(from, HTStrip(strchr(full_line,':')+1));
@@ -1028,6 +1034,9 @@ PRIVATE int read_article NOARGS
 		        HTmmdecode(from, from);
 			HTrjis(from, from);
 		    }
+#ifdef NOTUSED_CHARTRANS
+		    else HTmmdecode(from, from);
+#endif
 
 		} else if (match(full_line, "REPLY-TO:")) {
 		    StrAllocCopy(replyto, HTStrip(strchr(full_line,':')+1));
@@ -1035,6 +1044,9 @@ PRIVATE int read_article NOARGS
 		        HTmmdecode(replyto, replyto);
 			HTrjis(replyto, replyto);
 		    }
+#ifdef NOTUSED_CHARTRANS
+		    else HTmmdecode(replyto, replyto);
+#endif
 
 		} else if (match(full_line, "NEWSGROUPS:")) {
 		    StrAllocCopy(newsgroups, HTStrip(strchr(full_line,':')+1));
@@ -1750,6 +1762,11 @@ PRIVATE int read_group ARGS3(
 			case 's':
 			    if (match(line, "SUBJECT:")) {
 				strcpy(subject, line+9);/* Save subject */
+#ifdef NOTUSED_CHARTRANS
+				HTmmdecode(subject, subject);
+				if (HTCJK == JAPANESE)
+				    HTrjis(subject, subject);
+#endif
 			 	if (HTCJK == JAPANESE) {
 				    HTmmdecode(subject, subject);
 				    HTrjis(subject, subject);
@@ -1772,6 +1789,11 @@ PRIVATE int read_group ARGS3(
 				char * p;
 				strcpy(author,
 					author_name(strchr(line,':')+1));
+#ifdef NOTUSED_CHARTRANS
+				HTmmdecode(author, author);
+				if (HTCJK == JAPANESE)
+				    HTrjis(author, author);
+#endif
 				if (HTCJK == JAPANESE) {
 				    HTmmdecode(author, author);
 				    HTrjis(author, author);

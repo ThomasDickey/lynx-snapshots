@@ -1449,7 +1449,7 @@ PUBLIC int local_dired ARGS1(
 
     StrAllocCopy(line, line_url);
     HTUnEscape(line);	/* _file_ (not URL) syntax, for those functions
-			   that need it.  DOn't forget to FREE it. */
+			   that need it.  Don't forget to FREE it. */
 
     tp = NULL;
     if (!strncmp(line, "LYNXDIRED://NEW_FILE", 20)) {

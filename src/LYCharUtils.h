@@ -6,6 +6,13 @@
 #include "HTUtils.h"
 #endif /* HTUTILS_H */
 
+typedef enum {
+    st_HTML	= 0,	/* attributes and content found in HTML, probably meant for display */
+    st_URL,		/* URLs, fragments, NAME and ID */
+    st_other
+} CharUtil_st;
+
+#ifndef EXP_CHARTRANS
 extern char * LYUnEscapeEntities PARAMS((
 	char *		str,
 	BOOLEAN		plain_space,
@@ -15,6 +22,23 @@ extern void LYUnEscapeToLatinOne PARAMS((
 	BOOLEAN		isURL));
 extern void LYExpandString PARAMS((
 	char **		str));
+#endif /* !EXP_CHARTRANS */
+
+#ifdef EXP_CHARTRANS
+extern BOOL LYUCFullyTranslateString PARAMS((
+	char ** 	str,
+	int		cs_from,
+	int		cs_to,
+	BOOL		use_lynx_specials,
+	BOOLEAN		plain_space,
+	BOOLEAN		hidden,
+	CharUtil_st	stype));
+extern BOOL LYUCTranslateBackFormData PARAMS((
+	char **		str,
+	int		cs_from,
+	int		cs_to,
+	BOOLEAN		plain_space));
+#endif
 extern void LYEntify PARAMS((
 	char **		str,
 	BOOLEAN		isTITLE));

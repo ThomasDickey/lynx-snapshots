@@ -7,6 +7,10 @@
    automatically reallocating them as necessary.
    
  */
+#ifdef EXP_CHARTRANS
+#include "UCMap.h"
+#endif
+
 typedef struct {
         int     size;           /* In bytes                     */
         int     growby;         /* Allocation unit in bytes     */
@@ -114,8 +118,12 @@ Append a character to a  chunk
  */
 extern void HTChunkPutc PARAMS((HTChunk * ch, char c));
 
-/*
+#ifdef EXP_CHARTRANS
+extern void HTChunkPutUtf8Char PARAMS((HTChunk * ch, UCode_t code));
 
+#endif /* EXP_CHARTRANS */
+
+/*
 Append a string to a  chunk
 
   ON ENTRY,

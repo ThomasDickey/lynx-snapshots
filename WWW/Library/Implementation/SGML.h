@@ -207,6 +207,7 @@ typedef struct _HTStructuredClass{
                 int             element_number,
                 CONST BOOL*     attribute_present,
                 CONST char**    attribute_value,
+		int		charset,
 		char **		include));
                 
         void (*end_element) PARAMS((

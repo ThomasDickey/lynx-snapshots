@@ -82,6 +82,56 @@ PUBLIC BOOL UCCanTranslateFromTo ARGS2(
     return (LYCharSet_UC[from].UChndl >= 0);
 }
 
+/* Returns YES if no tranlation necessary (because charsets
+** are equal, are equivalent, etc.)
+*/
+PUBLIC BOOL UCNeedNotTranslate ARGS2(int, from, int, to)
+{
+    CONST char *fromname;
+    CONST char *toname;
+    if (from==to)
+	return YES;
+    if (from < 0)
+	return NO;		/* ??? */
+    if (LYCharSet_UC[from].enc == UCT_ENC_7BIT) {
+	return YES;		/* only 7bit chars */
+    }
+    fromname = LYCharSet_UC[from].MIMEname;
+    if (0==strcmp(fromname,"x-transparent") ||
+	0==strcmp(fromname,"us-ascii")) {
+	    return YES;
+    }
+    if (to < 0)
+	return NO;		/* ??? */
+    if (to==0) {
+	if (LYCharSet_UC[from].codepoints & (UCT_CP_SUBSETOF_LAT1))
+	    return YES;
+    }
+    toname = LYCharSet_UC[to].MIMEname;
+    if (0==strcmp(toname,"x-transparent")) {
+	return YES;
+    }
+    if (LYCharSet_UC[to].enc == UCT_ENC_UTF8) {
+	return NO;
+    }
+    if (from==0) {
+	if (LYCharSet_UC[from].codepoints & (UCT_CP_SUPERSETOF_LAT1))
+	    return YES;
+    }
+    if (LYCharSet_UC[from].enc == UCT_ENC_CJK) {
+	if (HTCJK == NOCJK)	/* use that global flag, for now */
+	    return NO;
+	if (HTCJK == JAPANESE && (
+	    0==strcmp(fromname,"euc-jp") ||
+	    0==strncmp(fromname,"iso-2022-jp",11) ||
+	    0==strcmp(fromname,"shift_jis")
+	    ))
+	    return YES;	/* ??? */
+	return NO;	/* if not handled by (from==to) above */
+    }
+    return NO;
+}
+
 /*
  *  The idea here is that any stage of the stream pipe which is interested
  *  in some charset dependent processing will call this function.
@@ -93,8 +143,8 @@ PUBLIC BOOL UCCanTranslateFromTo ARGS2(
  *  output charsets has changed (e.g. by SGML.c stage after HTML.c stage
  *  has processed a META tag).
  *  The global flags (LYRawMode, HTPassEightBitRaw etc.) are currently
- *  not taken into account here, it's still up to the caller to do something
- *  about them.
+ *  not taken into account here (except for HTCJK, somewhat), it's still
+ *  up to the caller to do something about them.
  */
 PUBLIC void UCSetTransParams ARGS5(
     UCTransParams *, 	pT,

@@ -111,6 +111,10 @@ PUBLIC int change_form_link ARGS6(
 		 *  Set the value.
 		 */
 		form->cp_submit_value = opt_ptr->cp_submit_value;
+		 /*
+		  *  Set charset in which we have the submit value. - kw
+		  */
+		form->value_cs = opt_ptr->value_cs;
 	    }
 #if defined(FANCY_CURSES) || defined(USE_SLANG)
 	    if (!enable_scrollback && form->num_value == OrigNumValue)

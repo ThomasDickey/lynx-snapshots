@@ -317,9 +317,9 @@ try_again:
 	  for (i = 0; line[i]; i++)
 	      line[i] = TOLOWER(line[i]);
 	  if (strstr(line, "iso-8859-1") == NULL)
-	      strcat(line, ", iso-8859-1;q=0.001");
+	      strcat(line, ", iso-8859-1;q=0.01");
 	  if (strstr(line, "us-ascii") == NULL)
-	      strcat(line, ", us-ascii;q=0.001");
+	      strcat(line, ", us-ascii;q=0.01");
 	  StrAllocCat(command, line);
 	  sprintf(line, "%c%c", CR, LF);
 	  StrAllocCat(command, line);
@@ -830,7 +830,7 @@ try_again:
         if (TRACE)
             fprintf (stderr, "--- Talking HTTP0.\n");
 
-        format_in = HTFileFormat(url, &encoding);
+        format_in = HTFileFormat(url, &encoding, NULL);
 	/*
 	**  Treat all plain text as HTML.
         **  This sucks but its the only solution without
@@ -842,6 +842,23 @@ try_again:
                            "HTTP: format_in being changed to text/HTML\n");
             format_in = WWW_HTML;
         }
+	if (!IsUnityEnc(encoding)) {
+	    /*
+	    **  Change the format to that for "www/compressed".
+	    */
+	    if (TRACE) {
+		fprintf(stderr,
+			"HTTP: format_in is '%s',\n", HTAtom_name(format_in));
+	    }
+	    StrAllocCopy(anAnchor->content_type, HTAtom_name(format_in));
+	    StrAllocCopy(anAnchor->content_encoding, HTAtom_name(encoding));
+	    format_in = HTAtom_for("www/compressed");
+	    if (TRACE) {
+		fprintf(stderr,
+			"        Treating as '%s' with encoding '%s'\n",
+			"www/compressed", HTAtom_name(encoding));
+	    }
+	}
 
         start_of_data = line_kept_clean;
     } else {
@@ -893,6 +910,14 @@ try_again:
 	    /*
 	    **  Good: Got MIME object! (Successful) - FM
 	    */
+	    if (do_head) {
+	        /*
+		 *  If HEAD was requested, show headers (and possibly
+		 *  bogus body) for all 2xx status codes as text/plain - KW
+		 */
+		HTProgress(line_buffer);
+	        break;
+	    }
 	    switch (server_status) {
 	      case 204:
 	        /*

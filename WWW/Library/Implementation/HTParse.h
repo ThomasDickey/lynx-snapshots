@@ -154,6 +154,10 @@ extern char * HTUnEscapeSome PARAMS((
 	char *		str,
 	CONST char *	do_trans));
 
+/* Turn a string which is not a RFC 822 token into a quoted-string - kw */
+extern void HTMake822Word PARAMS((
+	char **	str));
+
 #endif  /* HTPARSE_H */
 
 /*

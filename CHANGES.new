@@ -10,6 +10,124 @@ README.configure), and miscellaneous other changes.  Note that the 2.7 ->
 2.7.1 changes (which are listed at the beginning of the current CHANGES
 file) are duplicated here. - KW]
 
+1997-10-05
+* Changed SGML.c parsing of unrecognized and invalid start tags. If the
+  '<' character in HTML is followed by a 7-bit letter character, we now
+  do tag parsing even if the element name is not recognized, instead of
+  going to 'S_junk_tag' mode, so that a '>' embedded in an attribute value
+  (which may also be part of a CJK character's encoding) will not
+  prematurely end the tag.  (But "soft double-quotes parsing" mode is
+  recognized.)  Treat a '<' followed by most other 7-bit chars as data,
+  i.e. recover it and the following char. - KW
+1997-10-04
+* Corrected check for empty string at beginning of LYUnEscapeEntities. - KW
+* Squeezed option for "Assume charset if unknown:" into Options screen.
+  It is selected with a control char (^A), is only available in Advanced User
+  mode, and the value is currently not saved into .lynxrc with '>', i.e.
+  for a persistent change lynx.cfg has to be modified (or use an alias or,
+  for DOS, a batch file to call lynx with -assume_charset=...).  The
+  interaction with the Raw M(O)de setting may be confusing (or confused :) ),
+  and it is possible to set nonsensical values that have no effect. - KW
+* Changed order and criteria of transformation attempts in HTPlain.c to
+  be more like SGML.c.  For plain text KOI8-R would use 8-bit stripping
+  to early.  HTPlain_write still is too different from SGML_character... - KW
+* Reinstate the slash after special interpretation of /~ at beginning of 
+  file URL path for DOSPATH - DK 
+* Changed SGML_character to not try to convert attribute values to UTF-8
+  if HTCJK is in effect (arrggh!) - KW
+* Changed effect of -raw / '@' for CJK display character sets: it now toggles
+  the effective charset assumption between that specified with ASSUME_CHARSET
+  or -assume_charset (or iso-8859-1 if none given) and the charset that
+  corresponds to the selected display character set, as for non-CJK.  An
+  exception is made if both charsets are CJK charsets, so that the toggle
+  will still have the function of toggling CJK mode on and off.  Explicitly
+  specifying a CJK charset as assumed is currently not very useful, since we
+  cannot translate from that to other character sets. - KW
+* Oh, by the way: compilation without defining EXP_CHARTRANS won't work any
+  more.  Regard #ifdef EXP_CHARTRANS is some strange kind of comment for
+  now, until it goes away. - KW
+* Write comment at top of .lynxrc file to make clear that it is different
+  from lynx.cfg, suggested by LWV. - KW 
+1997-09-30
+* Changed order of display character sets on options screen a bit, and
+  corrected charset listings in lynx.cfg and userdefs.h files - KW
+* Added comment on lynx.lss in lynx.cfg, moved it. - KW
+1997-09-27
+* Made TRACE messages which correspond to BAD_HTML_USE_TRACE warnings stand
+  out more by decorating them with ***** characters, so that users who
+  follow the BAD_HTML_USE_TRACE advice can more easily find the relevant
+  messages. - KW
+* Reworked LYUnEscapeEntities() while loop into a (hopefully) more 
+  understandable and consistent state-based switch, and integrated
+  LYUnEscapeToLatinOne functionality. - KW
+* Non-ASCII characters in URLs and similar strings encountered in the HTML.c
+  processing (previously handled by LYUnEscapeToLatinOne) are now generally
+  URL-encoded, instead of doing this just for 8-bit characters which are
+  the result of entity expansion.  There is no clear standard definition what
+  non-ASCII characters in URLs in HTML attributes (HREF etc.) actually mean,
+  especially if the transmission character encoding is something else than
+  iso-8859-1.  Leaving them as thir raw byte values as received runs against
+  the HTML i18n view that the transmission encoding is distinct from the
+  document character set and has to be (conceptually at least) decoded before
+  SGML parsing.  It also won't work in general for entities that expand to
+  to Unicode characters which cannot be expressed at all in the currently
+  effective (or assumed) charset, and would lead to problems with displaying
+  URLs on the statusline or representing them in auxiliary screens or bookmark
+  files.  So now we try to first transform to the document charset "as usual"
+  (undo the transmission encoding), then translate the Unicode value into a
+  sequence of (one or more) byte values which are then URL-encoded.  Since
+  character values > 255 cannot be expressed in a byte, always use UTF-8
+  for them.  It may not be what the author intended, but should be at least
+  consistent between internal (fragment) HREFs and NAME (or ID) attributes
+  in the same document or set of documents.  Since this is dealing with
+  bytes currently disallowed in URLs, it falls under error recovery.  But
+  the handling should be roughly in line with current Internet Drafts
+  (draft-masinter-url-i18n-00.txt, draft-duerst-query-i18n-00.txt,
+  draft-ietf-ftpext-intl-ftp-02.txt).
+  For character values < 256 (but > 127) this isn't currently consistently
+  done, we may still be URL-escaping the byte value without UTF-8 encoding.
+  - KW
+1997-09-25
+* Integrated the attribute and form field translation stuff from separate
+  code line.  This is still a rough attempt.  Needs testing and refinement,
+  for various character set situations, expect glitches and bugs. - KW
+1997-09-24
+* Removed the compilations of the old libwww-FM HTInit.c and HTFWriter.c
+  modules for VMS, as previously removed for Unix. - FM
+* Added other changes from FM's feedback for VMS. - KW
+* Fixed a bug in the SGML unescaping of OPTION values. - FM
+* Fixed a bug in the SGML unescaping of TEXTAREA text. - KW
+1997-09-23
+* Fixed file 'E'dit command from dired directory listing, which I had
+  broken in 2.7.1ac-0.69. - KW
+* Added -width=NUMBER option to specify line width for non-interactive
+  formatting (-dump output).  Also used by -preparsed source mode. - KW
+* Changed suffix mapping mechanism to deal with "real" content-encoding
+  parameters (gzip, compress) in addition to 7bit, 8bit, and binary.  Added
+  a new field for brief descriptive text, so that the MIME type doesn't have
+  to be abused for this purpose, but left most settings in HTInit.c unchanged
+  for now. - KW
+* Changes in HTFWriter.c and HTFile.c so that we don't forget the file type
+  and encoding information we already have for a compressed file when passing
+  control to HTLoadFile (possibly after uncompression). - KW
+* Introduced FNAMES_8_3 symbol (for DOS 8+3 file system), and HTML_SUFFIX
+  which should be defined as ".htm" for DOS and ".html" otherwise.  Various
+  tweaks to deal with systems with 8+3 restricted filenames, in general and
+  in connection with uncompression. - KW
+* Applied diffs from FM for VMS, compared with recent fotemods. - KW
+1997-09-21
+* Use 0.01 rather than 0.001 as the q value for inserted iso-8859-1 and
+  us-ascii charset parameters in Accept-Charset headers. - FM
+* Added internal buffering of I.value elements in HTML_start_element()
+  of HTML.c. - FM
+1997-09-20
+* Show HTTP header for all 2xx status codes (including 204-206) if requested
+  with HEAD or -head. - KW
+1997-09-19
+* Modified the Unix "strange character" filter in exec_ok() of LYGetFile.c
+  to allow '+', '&' and '=' characters. - FM
+* minor ifdef/declaration fixes required to build on IRIX 6.2,
+  SunOS (K&R) and VAX C. - TD
 1997-09-18
 * Try again after interrupted waitpid() in LYLoadCGI(), as in LYExecv() - KW
 * Tweak in LYKeymap.c to bypass the isalpha() test for non-ASCII values,
@@ -320,7 +438,7 @@ file) are duplicated here. - KW]
 * Changed the code of 1997-08-06 which modifies suggested filenames for a
   'D'ownload to be more cautious: don't remove a '.gz', '.Z' etc. suffix
   if there is no header indication that we have a compressed file.  Not
-  all servers and gateways (including the internal FTP gateawy) detect
+  all servers and gateways (including the internal FTP gateway) detect
   and label compressed content reliably. - KW
 1997-08-08
 * Mods of HTTP.c so that download requests are converted to presentation
@@ -1749,7 +1867,8 @@ file) are duplicated here. - KW]
   seeking a position in the currently loaded document. - FM
 * Commented out the above change in HTAccess.c.  There's a more complete
   mechanism for it already in this code... - KW
-* Fixed a typo in the bookmark file lead text. - DK
+* Fixed a typo in the bookmark file lead text. - DK (Doug Kaufmann
+  <dkaufman@rahul.net>)
 1997-04-19
 * Changed the inappropriate StrAllocCat() to StrAllocCopy() for
   loading the XLOADIMAGE_COMMAND in LYReadCFG.c. - PC

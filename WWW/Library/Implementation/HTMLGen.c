@@ -66,7 +66,8 @@ struct _HTStructured {
 **	------------
 */
 
-PRIVATE void flush_breaks (HTStructured * me)
+PRIVATE void flush_breaks ARGS1(
+	HTStructured *,		me)
 {
     int i;
     for (i=0; i<= MAX_CLEANNESS; i++) {
@@ -91,7 +92,10 @@ PRIVATE void HTMLGen_flush ARGS1(
 **	We keep track of all the breaks for when we chop the line
 */
 
-PRIVATE void allow_break (HTStructured * me, int new_cleanness, BOOL dlbc)
+PRIVATE void allow_break ARGS3(
+	HTStructured *,	me,
+	int,		new_cleanness,
+	BOOL,		dlbc)
 {
     if (dlbc && me->write_pointer == me->buffer) dlbc = NO;
     me->line_break[new_cleanness] = 
@@ -254,11 +258,12 @@ PRIVATE void HTMLGen_write ARGS3(
 **	Within the opening tag, there may be spaces
 **	and the line may be broken at these spaces.
 */
-PRIVATE void HTMLGen_start_element ARGS5(
+PRIVATE void HTMLGen_start_element ARGS6(
 	HTStructured *, 	me,
 	int,			element_number,
 	CONST BOOL*,	 	present,
 	CONST char **,		value,
+	int,			charset,
 	char **,		insert)
 {
     int i;
@@ -433,6 +438,7 @@ PRIVATE CONST HTStructuredClass HTMLGeneration = /* As opposed to print etc */
 */
 extern int LYcols;			/* LYCurses.h, set in LYMain.c	*/
 extern BOOL dump_output_immediately;	/* TRUE if no interactive user 	*/
+extern int dump_output_width;	        /* -width instead of 80		*/
 extern BOOLEAN LYPreparsedSource;	/* Show source as preparsed?	*/
 
 PUBLIC HTStructured * HTMLGenerator ARGS1(
@@ -460,17 +466,19 @@ PUBLIC HTStructured * HTMLGenerator ARGS1(
      */
     if (!LYPreparsedSource) {
 	me->buffer_maxchars = 80; /* work as before - kw */
+    } else if (dump_output_width > 1) {
+	me->buffer_maxchars = dump_output_width; /* try to honor -width - kw */
     } else if (dump_output_immediately) {
-	me->buffer_maxchars = 80; /* work as before - kw */
+	me->buffer_maxchars = 80; /* try to honor -width - kw */
     } else {
 	me->buffer_maxchars = LYcols - 2;
 	if (me->buffer_maxchars < 38) /* too narrow, let GridText deal */
 	    me->buffer_maxchars = 40;
-	if (me->buffer_maxchars > 900) /* likely not true - kw */
-	    me->buffer_maxchars = 78;
-	if (me->buffer_maxchars > BUFFER_SIZE) /* must not be larger! */
-	    me->buffer_maxchars = BUFFER_SIZE - 2;
     }
+    if (me->buffer_maxchars > 900) /* likely not true - kw */
+	me->buffer_maxchars = 78;
+    if (me->buffer_maxchars > BUFFER_SIZE) /* must not be larger! */
+	me->buffer_maxchars = BUFFER_SIZE - 2;
 
     /*
      *	If dump_output_immediately is set, there likely isn't anything
@@ -513,10 +521,10 @@ PUBLIC HTStream* HTPlainToHTML ARGS3(
 	HTParentAnchor *,	anchor,	
 	HTStream *,		sink)
 {
-    HTStructured* me = (HTStructured*)malloc(sizeof(*me));
+    HTStructured *me = (HTStructured *)malloc(sizeof(*me));
     if (me == NULL)
         outofmem(__FILE__, "PlainToHTML");
-    me->isa = (CONST HTStructuredClass*) &PlainToHTMLConversion;       
+    me->isa = (CONST HTStructuredClass *)&PlainToHTMLConversion;       
 
     /*
      *  Copy pointers to routines for speed.
@@ -528,8 +536,10 @@ PUBLIC HTStream* HTPlainToHTML ARGS3(
     me->cleanness = 	0;
     me->overflowed = NO;
     me->delete_line_break_char[0] = NO;
-    me->buffer_maxchars = 80;
-	
+    /* try to honor -width - kw */
+    me->buffer_maxchars = (dump_output_width > 1 ?
+			   dump_output_width : 80);
+
     HTMLGen_put_string(me, "<HTML>\n<BODY>\n<PRE>\n");
     me->preformatted = YES;
     me->escape_specials = NO;

@@ -87,6 +87,9 @@ struct unimapdesc_str themap_str = {0, NULL};
 
 char *tblname;
 
+PRIVATE int RawOrEnc = 0;
+PRIVATE int Raw_found = 0;		/* whether explicit R directive found */
+
 PRIVATE void addpair_str ARGS2(
 	char *,		str,
 	int,		un)
@@ -138,6 +141,22 @@ PRIVATE void addpair ARGS2(
 {
     int i;
 
+    if (!Raw_found) {       /* enc not (yet) explicitly given with 'R' */
+	if (fp >= 128) {
+	    if (RawOrEnc != UCT_ENC_8BIT && RawOrEnc <= UCT_ENC_8859) {
+		if (fp < 160) {	/* cannot be 8859 */
+		    RawOrEnc = UCT_ENC_8BIT;
+		} else if (fp != 160 && fp != 173) {
+		    RawOrEnc = UCT_ENC_8859; /* hmmm.. more tests needed? */
+		} else if (unicount[fp] == 0 && fp != un) {
+		    /* first unicode for fp doesn't map to itself */
+		    RawOrEnc = UCT_ENC_8BIT;
+		} else {
+		    RawOrEnc = UCT_ENC_8859; /* hmmm.. more tests needed? */
+		}
+	    }
+	}
+    }
     if (un <= 0xfffe) {
 	/*
 	 *  Check that it isn't a duplicate.
@@ -165,7 +184,6 @@ char this_MIMEcharset[UC_MAXLEN_MIMECSNAME +1];
 char this_LYNXcharset[UC_MAXLEN_LYNXCSNAME +1];
 char id_append[UC_MAXLEN_ID_APPEND +1] = "_";
 int this_isDefaultMap = -1;
-int RawUni = 0;
 int lowest_eight = 999;
 
 PUBLIC int main ARGS2(
@@ -253,7 +271,8 @@ PUBLIC int main ARGS2(
 		while (*p == ' ' || *p == '\t') {
 	  	    p++;
 		}
-		RawUni = strtol(p,0,10);
+		RawOrEnc = strtol(p,0,10);
+		Raw_found = 1;
 		continue;
 
 	    /*
@@ -348,7 +367,11 @@ PUBLIC int main ARGS2(
 	    }
 	    continue;
 	}
-	
+
+/* Input line (after skipping spaces) doesn't start with one
+   of the specially recognized characters, so try to interpret
+   it as starting with a fontpos.
+*/
 	fp0 = strtol(p, &p1, 0);
 	if (p1 == p) {
 	    fprintf(stderr, "Bad input line: %s\n", buffer);
@@ -473,7 +496,7 @@ PUBLIC int main ARGS2(
     }
 
     /*
-     *  Okay, we hit EOF, now output hash table.
+     *  Okay, we hit EOF, now output tables.
      */
     fclose(ctbl);
   
@@ -561,8 +584,8 @@ static u8 dfont_unicount%s[%d] = \n\
      *  If lowest_eightbit is anything else but 999,
      *  this can't be 7-bit only.
      */
-    if (lowest_eight != 999 && !RawUni) {
-	RawUni = UCT_ENC_8BIT;
+    if (lowest_eight != 999 && !RawOrEnc) {
+	RawOrEnc = UCT_ENC_8BIT;
     }
 
     if (nuni) {
@@ -621,10 +644,10 @@ static struct unimapdesc_str dfont_replacedesc%s = {0,NULL};\n",id_append);
 
     printf("#define UC_CHARSET_SETUP%s UC_Charset_Setup(\
 \"%s\",\\\n\"%s\",\\\n\
-dfont_unicount%s,dfont_unitable%s,%i,\\\n\
-dfont_replacedesc%s,%i,%i)\n",
+dfont_unicount%s,dfont_unitable%s,%d,\\\n\
+dfont_replacedesc%s,%d,%d)\n",
 id_append, this_MIMEcharset, this_LYNXcharset,
-id_append, id_append, nuni, id_append, lowest_eight, RawUni);
+id_append, id_append, nuni, id_append, lowest_eight, RawOrEnc);
 
     exit(EX_OK);
 }

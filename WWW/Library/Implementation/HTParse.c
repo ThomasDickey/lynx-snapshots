@@ -594,7 +594,7 @@ PRIVATE CONST unsigned char isAcceptable[96] =
 	 7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,	/* 4x  @ABCDEFGHIJKLMNO  */
 	 7,7,7,7,7,7,7,7,7,7,7,0,0,0,0,7,	/* 5X  PQRSTUVWXYZ[\]^_	 */
 	 0,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,	/* 6x  `abcdefghijklmno	 */
-	 7,7,7,7,7,7,7,7,7,7,7,0,0,0,0,0 };	/* 7X  pqrstuvwxyz{\}~	DEL */
+	 7,7,7,7,7,7,7,7,7,7,7,0,0,0,0,0 };	/* 7X  pqrstuvwxyz{|}~	DEL */
 
 PRIVATE char *hex = "0123456789ABCDEF";
 #define ACCEPTABLE(a)	( a>=32 && a<128 && ((isAcceptable[a-32]) & mask))
@@ -749,3 +749,63 @@ PUBLIC char * HTUnEscapeSome ARGS2(
     return str;
     
 } /* HTUnEscapeSome */
+
+PRIVATE CONST unsigned char crfc[96] =
+
+/*	Bit 0		xalpha		-- need "quoting"
+**	Bit 1		xpalpha		-- need \escape if quoted
+*/
+    /*   0 1 2 3 4 5 6 7 8 9 A B C D E F */
+    {    1,0,3,0,0,0,0,0,1,1,0,0,1,0,1,0,	/* 2x   !"#$%&'()*+,-./	 */
+         0,0,0,0,0,0,0,0,0,0,1,1,1,0,1,0,	/* 3x  0123456789:;<=>?	 */
+	 1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,	/* 4x  @ABCDEFGHIJKLMNO  */
+	 0,0,0,0,0,0,0,0,0,0,0,1,2,1,0,0,	/* 5X  PQRSTUVWXYZ[\]^_	 */
+	 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,	/* 6x  `abcdefghijklmno	 */
+	 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3 };	/* 7X  pqrstuvwxyz{|}~	DEL */
+
+PUBLIC void HTMake822Word ARGS1(
+	char **,	str)
+{
+    CONST char * p;
+    char * q;
+    char * result;
+    unsigned char a;
+    int added = 0;
+    if (!(*str) || !(**str)) {
+	StrAllocCopy(*str, "\"\"");
+	return;
+    }
+    for (p = *str; *p; p++) {
+	a = *p;
+        if (a < 32 || a >= 128 ||
+	    ((crfc[a-32]) & 1)) {
+	    if (!added)
+		added = 2;
+	    if (a >= 160 || a == '\t')
+		continue;
+	    if (a == '\r' || a == '\n')
+		added += 2;
+	    else if ((a & 127) < 32 || ((crfc[a-32]) & 2))
+		added++;
+	}
+    }
+    if (!added)
+	return;
+    result = (char *) malloc(p-(*str) + added + 1);
+    if (result == NULL)
+        outofmem(__FILE__, "HTMake822Word");
+    result[0] = '"';
+    for (q = result + 1, p = *str; *p; p++) {
+    	a = TOASCII(*p);
+	if ((a != '\t') && ((a & 127) < 32 ||
+			    ( a < 128 && ((crfc[a-32]) & 2))))
+	    *q++ = '\'';
+	*q++ = *p;
+	if (a == '\n' || (a == '\r' && (TOASCII(*(p+1)) != '\n')))
+	    *q++ = ' ';
+    }
+    *q++ = '"';
+    *q++ = '\0';			/* Terminate */
+    FREE(*str);
+    *str = result;
+}

@@ -11,6 +11,7 @@
 #include "LYClean.h"
 #include "LYCharSets.h"
 #include "LYCharUtils.h"
+#include "UCMap.h"
 #include "LYKeymap.h"
 #include "LYrcFile.h"
 #include "HTAlert.h"
@@ -45,6 +46,18 @@ PRIVATE int popup_choice PARAMS((
 	int		disabled));
 
 #define MAXCHOICES 10
+
+#define L_Bool_A (use_assume_charset ? L_BOOL_A + 1 : L_BOOL_A)
+#define L_Bool_B (use_assume_charset ? L_BOOL_B + 1 : L_BOOL_B)
+#define L_Exec (use_assume_charset ? L_EXEC + 1 : L_EXEC)
+#define L_Rawmode (use_assume_charset ? L_RAWMODE + 1 : L_RAWMODE)
+#define L_Charset (use_assume_charset ? L_CHARSET + 1 : L_CHARSET)
+#define L_Color (use_assume_charset ? L_COLOR + 1 : L_COLOR)
+#define L_Keypad (use_assume_charset ? L_KEYPAD + 1 : L_KEYPAD)
+#define L_Lineed (use_assume_charset ? L_LINEED + 1 : L_LINEED)
+#define L_Dired (use_assume_charset ? L_DIRED + 1 : L_DIRED)
+#define L_User_Mode (use_assume_charset ? L_USER_MODE + 1 : L_USER_MODE)
+#define L_User_Agent (use_assume_charset ? L_USER_AGENT + 1 : L_USER_AGENT)
 
 PRIVATE void option_statusline ARGS1(
 	CONST char *,		text)
@@ -109,8 +122,10 @@ PUBLIC void options NOARGS
     char *choices[MAXCHOICES];
     int CurrentCharSet = current_char_set;
     int CurrentShowColor = LYShowColor;
+    int CurrentAssumeCharSet = UCLYhndl_for_unspec;
     BOOLEAN CurrentRawMode = LYRawMode;
     BOOLEAN AddValueAccepted = FALSE;
+    BOOL use_assume_charset, old_use_assume_charset;
 
 #ifdef DIRED_SUPPORT
 #ifdef ALLOW_USERS_TO_CHANGE_EXEC_WITHIN_OPTIONS
@@ -178,7 +193,12 @@ PUBLIC void options NOARGS
 #endif /* USE_SLANG || COLOR_CURSES */
     }
 
+    old_use_assume_charset =
+	use_assume_charset = (user_mode == ADVANCED_MODE);
+
 draw_options:
+
+    old_use_assume_charset = use_assume_charset;
     /*
      *  NOTE that printw() should be avoided for strings that
      *  might have non-ASCII or multibyte/CJK characters. - FM
@@ -232,9 +252,9 @@ draw_options:
     addstr("S)earching type              : ");
     addstr(case_sensitive ? "CASE SENSITIVE  " : "CASE INSENSITIVE");
 
-    move(L_CHARSET, 5);
+    move(L_Charset, 5);
     addstr("display (C)haracter set      : ");
-    addstr(LYchar_set_names[current_char_set]);
+    addstr((char *)LYchar_set_names[current_char_set]);
 
     move(L_LANGUAGE, 5);
     addstr("preferred document lan(G)uage: ");
@@ -244,12 +264,22 @@ draw_options:
     addstr("preferred document c(H)arset : ");
     addstr((pref_charset && *pref_charset) ? pref_charset : "NONE");
 
-    move(L_RAWMODE, 5);
+    if (use_assume_charset) {
+	move(L_ASSUME_CHARSET, 5);
+	addstr("^A)ssume charset if unknown  : ");
+	if (UCAssume_MIMEcharset)
+	    addstr(UCAssume_MIMEcharset);
+	else
+	    addstr((UCLYhndl_for_unspec >= 0) ?
+		   LYCharSet_UC[UCLYhndl_for_unspec].MIMEname : "NONE");
+    }
+
+    move(L_Rawmode, 5);
     addstr("Raw 8-bit or CJK m(O)de      : ");
     addstr(LYRawMode ? "ON " : "OFF");
 
 #if defined(USE_SLANG) || defined(COLOR_CURSES)
-    move(L_COLOR, B_COLOR);
+    move(L_Color, B_COLOR);
     addstr("show color (&)  : ");
     if (no_option_save) {
 	addstr((LYShowColor == SHOW_COLOR_OFF ? "OFF" :
@@ -276,27 +306,27 @@ draw_options:
     }
 #endif /* USE_SLANG || COLOR_CURSES */
 
-    move(L_BOOL_A, B_VIKEYS);
+    move(L_Bool_A, B_VIKEYS);
     addstr("V)I keys: ");
     addstr(vi_keys ? "ON " : "OFF");
 
-    move(L_BOOL_A, B_EMACSKEYS);
+    move(L_Bool_A, B_EMACSKEYS);
     addstr("e(M)acs keys: ");
     addstr(emacs_keys ? "ON " : "OFF");
 
-    move(L_BOOL_A, B_SHOW_DOTFILES);
+    move(L_Bool_A, B_SHOW_DOTFILES);
     addstr("sho(W) dot files: ");
     addstr((!no_dotfiles && show_dotfiles) ? "ON " : "OFF");
 
-    move(L_BOOL_B, B_SELECT_POPUPS);
+    move(L_Bool_B, B_SELECT_POPUPS);
     addstr("popups for selec(T) fields   : ");
     addstr(LYSelectPopups ? "ON " : "OFF");
 
-    move(L_BOOL_B, B_SHOW_CURSOR);
+    move(L_Bool_B, B_SHOW_CURSOR);
     addstr("show cursor (@) : ");
     addstr(LYShowCursor ? "ON " : "OFF");
 
-    move(L_KEYPAD, 5);
+    move(L_Keypad, 5);
     addstr("K)eypad mode                 : ");
     addstr((keypad_mode == NUMBERS_AS_ARROWS) ?
 				"Numbers act as arrows             " :
@@ -304,30 +334,30 @@ draw_options:
 				"Links are numbered                " :
 				"Links and form fields are numbered"));
 
-    move(L_LINEED, 5);
+    move(L_Lineed, 5);
     addstr("li(N)e edit style            : ");
     addstr(LYLineeditNames[current_lineedit]);
 
 #ifdef DIRED_SUPPORT
-    move(L_DIRED, 5);
+    move(L_Dired, 5);
     addstr("l(I)st directory style       : ");
     addstr((dir_list_style == FILES_FIRST) ? "Files first      " :
 	  ((dir_list_style == MIXED_STYLE) ? "Mixed style      " :
 					     "Directories first"));
 #endif /* DIRED_SUPPORT */
 
-    move(L_USER_MODE, 5);
+    move(L_User_Mode, 5);
     addstr("U)ser mode                   : ");
     addstr(  (user_mode == NOVICE_MODE) ? "Novice      " :
       ((user_mode == INTERMEDIATE_MODE) ? "Intermediate" :
 					  "Advanced    "));
 
-    move(L_USER_AGENT, 5);
+    move(L_User_Agent, 5);
     addstr("user (A)gent                 : ");
     addstr((LYUserAgent && *LYUserAgent) ? LYUserAgent : "NONE");
 
 #ifdef ALLOW_USERS_TO_CHANGE_EXEC_WITHIN_OPTIONS
-    move(L_EXEC, 5);
+    move(L_Exec, 5);
     addstr("local e(X)ecution links      : ");
 #ifndef NEVER_ALLOW_REMOTE_EXEC
     addstr(		  local_exec ? "ALWAYS ON           " :
@@ -753,21 +783,99 @@ draw_options:
 		response = ' ';
 		break;
 
+	    case '\001':	/* Change assume_charset setting. */
+		if (use_assume_charset) {
+		    int i, curval;
+		    char ** assume_list;
+		    assume_list = calloc(LYNumCharsets + 1, sizeof(char *));
+		    if (!assume_list) {
+			outofmem(__FILE__, "options");
+		    }
+		    for (i = 0; i < LYNumCharsets; i++) {
+			assume_list[i] = (char *)LYCharSet_UC[i].MIMEname;
+		    }
+		    curval = UCLYhndl_for_unspec;
+		    if (curval == current_char_set && UCAssume_MIMEcharset) {
+			curval = UCGetLYhndl_byMIME(UCAssume_MIMEcharset);
+		    }
+		    if (curval < 0)
+			curval = LYRawMode ? current_char_set : 0;
+		    if (!LYSelectPopups) {
+			UCLYhndl_for_unspec = boolean_choice(curval,
+							     L_ASSUME_CHARSET, -1,
+							     assume_list);
+		    } else {
+			UCLYhndl_for_unspec = popup_choice(curval,
+							   L_ASSUME_CHARSET, -1,
+							   assume_list,
+							   0, FALSE);
+#if defined(VMS) || defined(USE_SLANG)
+			move(L_ASSUME_CHARSET, COL_OPTION_VALUES);
+			clrtoeol();
+			if (UCLYhndl_for_unspec >= 0)
+			    addstr(LYCharSet_UC[UCLYhndl_for_unspec].MIMEname);
+#endif /* VMS || USE_SLANG */
+		    }
+
+		    /*
+		 *  Set the raw 8-bit or CJK mode defaults and
+		 *  character set if changed. - FM
+		 */
+		    if (CurrentAssumeCharSet != UCLYhndl_for_unspec ||
+			UCLYhndl_for_unspec != curval) {
+			if (UCLYhndl_for_unspec != CurrentAssumeCharSet) {
+			    StrAllocCopy(UCAssume_MIMEcharset,
+					 LYCharSet_UC[UCLYhndl_for_unspec].MIMEname);
+			}
+			LYRawMode = (UCLYhndl_for_unspec == current_char_set);
+			HTMLSetUseDefaultRawMode(current_char_set, LYRawMode);
+			HTMLUseCharacterSet(current_char_set);
+			CurrentAssumeCharSet = UCLYhndl_for_unspec;
+			CurrentRawMode = LYRawMode;
+#if !defined(VMS) && !defined(USE_SLANG)
+			if (!LYSelectPopups)
+#endif /* !VMS && !USE_SLANG */
+			{
+			    move(L_Rawmode, COL_OPTION_VALUES);
+			    clrtoeol();
+			    addstr(LYRawMode ? "ON " : "OFF");
+			}
+		    }
+		    FREE(assume_list);
+		    response = ' ';
+		    if (LYSelectPopups) {
+#if !defined(VMS) || defined(USE_SLANG)
+			if (term_options) {
+			    term_options = FALSE;
+			} else {
+			    AddValueAccepted = TRUE;
+			}
+			goto draw_options;
+#else
+			term_options = FALSE;
+#endif /* !VMS || USE_SLANG */
+		    }
+		} else {
+		    option_statusline(NEED_ADVANCED_USER_MODE);
+		    AddValueAccepted = FALSE;
+		}
+		break;
+
 	    case 'c':	/* Change charset setting. */
 	    case 'C':
 		if (!LYSelectPopups) {
 		    current_char_set = boolean_choice(current_char_set,
-						      L_CHARSET, -1,
+		    				      L_Charset, -1,
 						      (char **)LYchar_set_names);
 		} else {
 		    current_char_set = popup_choice(current_char_set,
-						    L_CHARSET, -1,
+						    L_Charset, -1,
 						    (char **)LYchar_set_names,
 						    0, FALSE);
 #if defined(VMS) || defined(USE_SLANG)
-		    move(L_CHARSET, COL_OPTION_VALUES);
+		    move(L_Charset, COL_OPTION_VALUES);
 		    clrtoeol();
-		    addstr(LYchar_set_names[current_char_set]);
+		    addstr((char *)LYchar_set_names[current_char_set]);
 #endif /* VMS || USE_SLANG */
 		}
 		/*
@@ -784,7 +892,7 @@ draw_options:
 		    if (!LYSelectPopups)
 #endif /* !VMS && !USE_SLANG */
 		    {
-			move(L_RAWMODE, COL_OPTION_VALUES);
+			move(L_Rawmode, COL_OPTION_VALUES);
 			clrtoeol();
 			addstr(LYRawMode ? "ON " : "OFF");
 		    }
@@ -814,7 +922,7 @@ draw_options:
 		choices[1] = NULL;
 		StrAllocCopy(choices[1], "ON ");
 		choices[2] = NULL;
-		LYRawMode = boolean_choice(LYRawMode, L_RAWMODE, -1, choices);
+		LYRawMode = boolean_choice(LYRawMode, L_Rawmode, -1, choices);
 		/*
 		 *  Set the LYUseDefaultRawMode value and character
 		 *  handling if LYRawMode was changed. - FM
@@ -914,7 +1022,7 @@ draw_options:
 		StrAllocCopy(choices[1], "ON ");
 		choices[2] = NULL;
 		vi_keys = boolean_choice(vi_keys,
-					 L_BOOL_A, C_VIKEYS,
+					 L_Bool_A, C_VIKEYS,
 					 choices);
 		if (vi_keys) {
 		    set_vi_keys();
@@ -937,7 +1045,7 @@ draw_options:
 		StrAllocCopy(choices[1], "ON ");
 		choices[2] = NULL;
 		emacs_keys = boolean_choice(emacs_keys,
-					    L_BOOL_A, C_EMACSKEYS,
+					    L_Bool_A, C_EMACSKEYS,
 					    choices);
 		if (emacs_keys) {
 		    set_emacs_keys();
@@ -963,7 +1071,7 @@ draw_options:
 		    StrAllocCopy(choices[1], "ON ");
 		    choices[2] = NULL;
 		    show_dotfiles = boolean_choice(show_dotfiles,
-						   L_BOOL_A,
+						   L_Bool_A,
 						   C_SHOW_DOTFILES,
 						   choices);
 		    FREE(choices[0]);
@@ -983,7 +1091,7 @@ draw_options:
 		StrAllocCopy(choices[1], "ON ");
 		choices[2] = NULL;
 		LYSelectPopups = boolean_choice(LYSelectPopups,
-						L_BOOL_B,
+						L_Bool_B,
 						C_SELECT_POPUPS,
 						choices);
 		FREE(choices[0]);
@@ -1015,7 +1123,7 @@ draw_options:
 		    StrAllocCopy(choices[1], "ON ");
 		    choices[2] = NULL;
 		    LYShowColor = boolean_choice((LYShowColor - 1),
-						 L_COLOR,
+						 L_Color,
 						 C_COLOR,
 						 choices);
 		    if (LYShowColor == 0) {
@@ -1046,12 +1154,12 @@ draw_options:
 		    do {
 			if (!LYSelectPopups) {
 			    chosen = boolean_choice(LYChosenShowColor,
-						    L_COLOR,
+						    L_Color,
 						    C_COLOR,
 						    choices);
 			} else {
 			    chosen = popup_choice(LYChosenShowColor,
-						  L_COLOR,
+						  L_Color,
 						  C_COLOR,
 						  choices, 4, FALSE);
 			}
@@ -1072,7 +1180,7 @@ draw_options:
 		    LYChosenShowColor = chosen;
 #if defined(VMS)
 		    if (LYSelectPopups) {
-			move(L_COLOR, C_COLOR);
+			move(L_Color, C_COLOR);
 			clrtoeol();
 			addstr(choices[LYChosenShowColor]);
 		    }
@@ -1119,7 +1227,7 @@ draw_options:
 		StrAllocCopy(choices[1], "ON ");
 		choices[2] = NULL;
 		LYShowCursor = boolean_choice(LYShowCursor,
-					      L_BOOL_B,
+					      L_Bool_B,
 					      C_SHOW_CURSOR,
 					      choices);
 		FREE(choices[0]);
@@ -1144,15 +1252,15 @@ draw_options:
 		choices[3] = NULL;
 		if (!LYSelectPopups) {
 		    keypad_mode = boolean_choice(keypad_mode,
-						 L_KEYPAD, -1,
+						 L_Keypad, -1,
 						 choices);
 		} else {
 		    keypad_mode = popup_choice(keypad_mode,
-					       L_KEYPAD, -1,
+					       L_Keypad, -1,
 					       choices,
 					       3, FALSE);
 #if defined(VMS) || defined(USE_SLANG)
-		    move(L_KEYPAD, COL_OPTION_VALUES);
+		    move(L_Keypad, COL_OPTION_VALUES);
 		    clrtoeol();
 		    addstr(choices[keypad_mode]);
 #endif /* VMS || USE_SLANG */
@@ -1184,15 +1292,15 @@ draw_options:
 	    case 'N':
 		if (!LYSelectPopups) {
 		    current_lineedit = boolean_choice(current_lineedit,
-						      L_LINEED, -1,
+						      L_Lineed, -1,
 						      LYLineeditNames);
 		} else {
 		    current_lineedit = popup_choice(current_lineedit,
-						    L_LINEED, -1,
+						    L_Lineed, -1,
 						    LYLineeditNames,
 						    0, FALSE);
 #if defined(VMS) || defined(USE_SLANG)
-		    move(L_LINEED, COL_OPTION_VALUES);
+		    move(L_Lineed, COL_OPTION_VALUES);
 		    clrtoeol();
 		    addstr(LYLineeditNames[current_lineedit]);
 #endif /* VMS || USE_SLANG */
@@ -1227,15 +1335,15 @@ draw_options:
 		choices[3] = NULL;
 		if (!LYSelectPopups) {
 		    dir_list_style = boolean_choice(dir_list_style,
-						    L_DIRED, -1,
+						    L_Dired, -1,
 						    choices);
 		} else {
 		    dir_list_style = popup_choice(dir_list_style,
-						  L_DIRED, -1,
+						  L_Dired, -1,
 						  choices,
 						  3, FALSE);
 #if defined(VMS) || defined(USE_SLANG)
-		    move(L_DIRED, COL_OPTION_VALUES);
+		    move(L_Dired, COL_OPTION_VALUES);
 		    clrtoeol();
 		    addstr(choices[dir_list_style]);
 #endif /* VMS || USE_SLANG */
@@ -1273,17 +1381,21 @@ draw_options:
 		choices[3] = NULL;
 		if (!LYSelectPopups) {
 		    user_mode = boolean_choice(user_mode,
-					       L_USER_MODE, -1,
+					       L_User_Mode, -1,
 					       choices);
+		    use_assume_charset = (user_mode >= 2);
 		} else {
 		    user_mode = popup_choice(user_mode,
-					     L_USER_MODE, -1,
+					     L_User_Mode, -1,
 					     choices,
 					     3, FALSE);
+		    use_assume_charset = (user_mode >= 2);
 #if defined(VMS) || defined(USE_SLANG)
-		    move(L_USER_MODE, COL_OPTION_VALUES);
-		    clrtoeol();
-		    addstr(choices[user_mode]);
+		    if (use_assume_charset == old_use_assume_charset) {
+			move(L_User_Mode, COL_OPTION_VALUES);
+			clrtoeol();
+			addstr(choices[user_mode]);
+		    }
 #endif /* VMS || USE_SLANG */
 		}
 		FREE(choices[0]);
@@ -1305,6 +1417,8 @@ draw_options:
 		    goto draw_options;
 #else
 		    term_options = FALSE;
+		    if (use_assume_charset != old_use_assume_charset)
+			goto draw_options;
 #endif /* !VMS || USE_SLANG */
 		}
 		break;
@@ -1320,12 +1434,12 @@ draw_options:
 			*display_option = '\0';
 		    }
 		    option_statusline(ACCEPT_DATA_OR_DEFAULT);
-		    move(L_USER_AGENT, COL_OPTION_VALUES);
+		    move(L_User_Agent, COL_OPTION_VALUES);
 		    start_bold();
 		    ch = LYgetstr(display_option, VISIBLE,
 				  sizeof(display_option), NORECALL);
 		    stop_bold();
-		    move(L_USER_AGENT, COL_OPTION_VALUES);
+		    move(L_User_Agent, COL_OPTION_VALUES);
 		    if (term_options || ch == -1) {
 			addstr((LYUserAgent &&
 				*LYUserAgent) ?
@@ -1391,15 +1505,15 @@ draw_options:
 #endif /* !NEVER_ALLOW_REMOTE_EXEC */
 		if (!LYSelectPopups) {
 		    itmp = boolean_choice(itmp,
-					  L_EXEC, -1,
+					  L_Exec, -1,
 					  choices);
 		} else {
 		    itmp = popup_choice(itmp,
-					L_EXEC, -1,
+					L_Exec, -1,
 					choices,
 					0, (exec_frozen ? TRUE : FALSE));
 #if defined(VMS) || defined(USE_SLANG)
-		    move(L_EXEC, COL_OPTION_VALUES);
+		    move(L_Exec, COL_OPTION_VALUES);
 		    clrtoeol();
 		    addstr(choices[itmp]);
 #endif /* VMS || USE_SLANG */

@@ -34,6 +34,9 @@ typedef struct _InputFieldData {
 	CONST char *type;
 	char *value;
 	CONST char *width;
+        int name_cs;		/* charset handle for name */
+        int value_cs;		/* charset handle for value */
+        CONST char *accept_cs;
 } InputFieldData;
 
 /* The OptionType structure is for a linked list of option entries
@@ -41,6 +44,7 @@ typedef struct _InputFieldData {
 typedef struct _OptionType {
 	char *			name;		 /* the name of the entry */
 	char *			cp_submit_value; /* the value to submit	  */
+	int			value_cs;        /* charset value is in   */
 	struct _OptionType *	next;		 /* the next entry	  */
 } OptionType;
 
@@ -72,6 +76,8 @@ typedef struct _FormInfo {
         char *			orig_submit_value; /* original submit value */
 	int			size_l;	   /* The length of the option list */
 	int			disabled;  /* If YES, can't change values */
+        int 			name_cs;
+        int 			value_cs;
 } FormInfo;
 
 #define HYPERTEXT_ANCHOR 1

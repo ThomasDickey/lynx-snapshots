@@ -178,7 +178,7 @@ Attribute numbers
    
  */
 #define HTML_A_ACCESSKEY        0
-#define HTML_A_CHARSET          1 /* i18n draft, added tentatively - kw */
+#define HTML_A_CHARSET          1 /* RFC 2070 HTML i18n - kw */
 #define HTML_A_CLASS            2
 #define HTML_A_CLEAR            3
 #define HTML_A_COORDS           4
@@ -455,21 +455,22 @@ Attribute numbers
 #define HTML_FONT_STYLE         9
 #define HTML_FONT_ATTRIBUTES   10
 
-#define HTML_FORM_ACTION        0
-#define HTML_FORM_CLASS         1
-#define HTML_FORM_CLEAR         2
-#define HTML_FORM_DIR           3
-#define HTML_FORM_ENCTYPE       4
-#define HTML_FORM_ID            5
-#define HTML_FORM_LANG          6
-#define HTML_FORM_METHOD        7
-#define HTML_FORM_ONSUBMIT      8
-#define HTML_FORM_SCRIPT        9
-#define HTML_FORM_STYLE        10
-#define HTML_FORM_SUBJECT      11
-#define	HTML_FORM_TARGET       12
-#define HTML_FORM_TITLE        13
-#define HTML_FORM_ATTRIBUTES   14
+#define HTML_FORM_ACCEPT_CHARSET  0 /* HTML 4.0 draft - kw */
+#define HTML_FORM_ACTION        1
+#define HTML_FORM_CLASS         2
+#define HTML_FORM_CLEAR         3
+#define HTML_FORM_DIR           4
+#define HTML_FORM_ENCTYPE       5
+#define HTML_FORM_ID            6
+#define HTML_FORM_LANG          7
+#define HTML_FORM_METHOD        8
+#define HTML_FORM_ONSUBMIT      9
+#define HTML_FORM_SCRIPT       10
+#define HTML_FORM_STYLE        11
+#define HTML_FORM_SUBJECT      12
+#define	HTML_FORM_TARGET       13
+#define HTML_FORM_TITLE        14
+#define HTML_FORM_ATTRIBUTES   15
 
 #define HTML_FRAME_ID           0
 #define HTML_FRAME_MARGINHEIGHT 1
@@ -557,37 +558,38 @@ Attribute numbers
 #define HTML_IMG_ATTRIBUTES    18
 
 #define HTML_INPUT_ACCEPT       0
-#define HTML_INPUT_ALIGN        1
-#define HTML_INPUT_ALT          2
-#define HTML_INPUT_CHECKED      3
-#define HTML_INPUT_CLASS        4
-#define HTML_INPUT_CLEAR        5
-#define HTML_INPUT_DIR          6
-#define HTML_INPUT_DISABLED     7
-#define HTML_INPUT_ERROR        8
-#define HTML_INPUT_HEIGHT       9
-#define HTML_INPUT_ID          10
-#define HTML_INPUT_LANG        11
-#define HTML_INPUT_MAX         12
-#define HTML_INPUT_MAXLENGTH   13
-#define HTML_INPUT_MD          14
-#define HTML_INPUT_MIN         15
-#define HTML_INPUT_NAME        16
-#define HTML_INPUT_NOTAB       17
-#define HTML_INPUT_ONBLUR      18
-#define HTML_INPUT_ONCHANGE    19
-#define HTML_INPUT_ONCLICK     20
-#define HTML_INPUT_ONFOCUS     21
-#define HTML_INPUT_ONSELECT    22
-#define HTML_INPUT_SIZE        23
-#define HTML_INPUT_SRC         24
-#define HTML_INPUT_STYLE       25
-#define HTML_INPUT_TABINDEX    26
-#define HTML_INPUT_TITLE       27
-#define HTML_INPUT_TYPE        28
-#define HTML_INPUT_VALUE       29
-#define HTML_INPUT_WIDTH       30
-#define HTML_INPUT_ATTRIBUTES  31
+#define HTML_INPUT_ACCEPT_CHARSET  1 /* RFC 2070 HTML i18n - kw */
+#define HTML_INPUT_ALIGN        2
+#define HTML_INPUT_ALT          3
+#define HTML_INPUT_CHECKED      4
+#define HTML_INPUT_CLASS        5
+#define HTML_INPUT_CLEAR        6
+#define HTML_INPUT_DIR          7
+#define HTML_INPUT_DISABLED     8
+#define HTML_INPUT_ERROR        9
+#define HTML_INPUT_HEIGHT      10
+#define HTML_INPUT_ID          11
+#define HTML_INPUT_LANG        12
+#define HTML_INPUT_MAX         13
+#define HTML_INPUT_MAXLENGTH   14
+#define HTML_INPUT_MD          15
+#define HTML_INPUT_MIN         16
+#define HTML_INPUT_NAME        17
+#define HTML_INPUT_NOTAB       18
+#define HTML_INPUT_ONBLUR      19
+#define HTML_INPUT_ONCHANGE    20
+#define HTML_INPUT_ONCLICK     21
+#define HTML_INPUT_ONFOCUS     22
+#define HTML_INPUT_ONSELECT    23
+#define HTML_INPUT_SIZE        24
+#define HTML_INPUT_SRC         25
+#define HTML_INPUT_STYLE       26
+#define HTML_INPUT_TABINDEX    27
+#define HTML_INPUT_TITLE       28
+#define HTML_INPUT_TYPE        29
+#define HTML_INPUT_VALUE       30
+#define HTML_INPUT_WIDTH       31
+#define HTML_INPUT_ATTRIBUTES  32
 
 #define HTML_ISINDEX_ACTION     0  /* Treat as synonym for HREF. - FM */
 #define HTML_ISINDEX_DIR        1
@@ -646,17 +648,18 @@ Attribute numbers
 #define HTML_LI_VALUE          12
 #define HTML_LI_ATTRIBUTES     13
 
-#define HTML_LINK_CLASS         0
-#define HTML_LINK_HREF          1
-#define HTML_LINK_ID            2
-#define HTML_LINK_MEDIA         3
-#define HTML_LINK_REL           4
-#define HTML_LINK_REV           5
-#define HTML_LINK_STYLE         6
-#define	HTML_LINK_TARGET        7
-#define HTML_LINK_TITLE         8
-#define HTML_LINK_TYPE          9
-#define HTML_LINK_ATTRIBUTES   10
+#define HTML_LINK_CHARSET       0 /* RFC 2070 HTML i18n - kw */
+#define HTML_LINK_CLASS         1
+#define HTML_LINK_HREF          2
+#define HTML_LINK_ID            3
+#define HTML_LINK_MEDIA         4
+#define HTML_LINK_REL           5
+#define HTML_LINK_REV           6
+#define HTML_LINK_STYLE         7
+#define	HTML_LINK_TARGET        8
+#define HTML_LINK_TITLE         9
+#define HTML_LINK_TYPE         10
+#define HTML_LINK_ATTRIBUTES   11
 
 #define HTML_MAP_CLASS          0
 #define HTML_MAP_CLEAR          1
@@ -897,26 +900,27 @@ Attribute numbers
 #define HTML_TD_VALIGN         16
 #define HTML_TD_ATTRIBUTES     17
 
-#define HTML_TEXTAREA_ALIGN     0
-#define HTML_TEXTAREA_CLASS     1
-#define HTML_TEXTAREA_CLEAR     2
-#define HTML_TEXTAREA_COLS      3
-#define HTML_TEXTAREA_DIR       4
-#define HTML_TEXTAREA_DISABLED  5
-#define HTML_TEXTAREA_ERROR     6
-#define HTML_TEXTAREA_ID        7
-#define HTML_TEXTAREA_LANG      8
-#define HTML_TEXTAREA_NAME      9
-#define HTML_TEXTAREA_NOTAB    10
-#define HTML_TEXTAREA_ONBLUR   11
-#define HTML_TEXTAREA_ONCHANGE 12
-#define HTML_TEXTAREA_ONFOCUS  13
-#define HTML_TEXTAREA_ONSELECT 14
-#define HTML_TEXTAREA_ROWS     15
-#define HTML_TEXTAREA_STYLE    16
-#define HTML_TEXTAREA_TABINDEX 17
-#define HTML_TEXTAREA_TITLE    18
-#define HTML_TEXTAREA_ATTRIBUTES 19
+#define HTML_TEXTAREA_ACCEPT_CHARSET  0 /* RFC 2070 HTML i18n - kw */
+#define HTML_TEXTAREA_ALIGN     1
+#define HTML_TEXTAREA_CLASS     2
+#define HTML_TEXTAREA_CLEAR     3
+#define HTML_TEXTAREA_COLS      4
+#define HTML_TEXTAREA_DIR       5
+#define HTML_TEXTAREA_DISABLED  6
+#define HTML_TEXTAREA_ERROR     7
+#define HTML_TEXTAREA_ID        8
+#define HTML_TEXTAREA_LANG      9
+#define HTML_TEXTAREA_NAME     10
+#define HTML_TEXTAREA_NOTAB    11
+#define HTML_TEXTAREA_ONBLUR   12
+#define HTML_TEXTAREA_ONCHANGE 13
+#define HTML_TEXTAREA_ONFOCUS  14
+#define HTML_TEXTAREA_ONSELECT 15
+#define HTML_TEXTAREA_ROWS     16
+#define HTML_TEXTAREA_STYLE    17
+#define HTML_TEXTAREA_TABINDEX 18
+#define HTML_TEXTAREA_TITLE    19
+#define HTML_TEXTAREA_ATTRIBUTES 20
 
 #define HTML_TR_ALIGN           0
 #define HTML_TR_CHAR            1
@@ -953,6 +957,8 @@ extern CONST SGML_dtd HTML_dtd;
 
 extern void HTSwitchDTD PARAMS((
     BOOL new));
+
+extern CONST HTTag HTTag_unrecognized;
 
 /*
 

@@ -87,6 +87,7 @@ typedef struct _HTSuffix {
 	char *		suffix;
 	HTAtom *	rep;
 	HTAtom *	encoding;
+        char *		desc;
 	float		quality;
 } HTSuffix;
 
@@ -102,7 +103,7 @@ typedef struct _HTSuffix {
 
 #define PUTC(c) (*target->isa->put_character)(target, c)
 #define PUTS(s) (*target->isa->put_string)(target, s)
-#define START(e) (*target->isa->start_element)(target, e, 0, 0, 0)
+#define START(e) (*target->isa->start_element)(target, e, 0, 0, -1, 0)
 #define END(e) (*target->isa->end_element)(target, e, 0)
 #define MAYBE_END(e) if (HTML_dtd.tags[e].contents != SGML_EMPTY) \
                         (*target->isa->end_element)(target, e, 0)
@@ -148,8 +149,8 @@ PRIVATE char *HTCacheRoot = "/tmp/W3_Cache_";	/* Where to cache things */
 **  Suffix registration.
 */
 PRIVATE HTList * HTSuffixes = 0;
-PRIVATE HTSuffix no_suffix = { "*", NULL, NULL, 1.0 };
-PRIVATE HTSuffix unknown_suffix = { "*.*", NULL, NULL, 1.0};
+PRIVATE HTSuffix no_suffix = { "*", NULL, NULL, NULL, 1.0 };
+PRIVATE HTSuffix unknown_suffix = { "*.*", NULL, NULL, NULL, 1.0};
 
 
 #ifdef _WINDOWS
@@ -354,16 +355,21 @@ PRIVATE void LYListFmtParse ARGS5(
 **	Calling this with suffix set to "*.*" will set the default
 **	representation for unknown suffix files which contain a ".".
 **
-**	If filename suffix is already defined its previous
-**	definition is overridden.
+**	The encoding parameter can give a trivial (8bit, 7bit, binary)
+**	or real (gzip, compress) encoding.
+**
+**	If filename suffix is already defined with the same encoding
+**	its previous definition is overridden.
 */
-PUBLIC void HTSetSuffix ARGS4(
+PUBLIC void HTSetSuffix5 ARGS5(
 	CONST char *,	suffix,
 	CONST char *,	representation,
 	CONST char *,	encoding,
+	CONST char *,	desc,
 	float,		value)
 {
     HTSuffix * suff;
+    BOOL trivial_enc = IsUnityEncStr(encoding);
 
     if (strcmp(suffix, "*") == 0)
         suff = &no_suffix;
@@ -373,7 +379,10 @@ PUBLIC void HTSetSuffix ARGS4(
 	HTList *cur = HTSuffixes;
 
 	while (NULL != (suff = (HTSuffix*)HTList_nextObject(cur))) {
-	    if (suff->suffix && 0 == strcmp(suff->suffix, suffix))
+	    if (suff->suffix && 0 == strcmp(suff->suffix, suffix) &&
+		((trivial_enc && IsUnityEnc(suff->encoding)) ||
+		 (!trivial_enc && !IsUnityEnc(suff->encoding) &&
+		     strcmp(encoding, HTAtom_name(suff->encoding)) == 0)))
 		break;
 	}
 	if (!suff) { /* Not found -- create a new node */
@@ -396,7 +405,8 @@ PUBLIC void HTSetSuffix ARGS4(
 	}
     }
 
-    suff->rep = HTAtom_for(representation);
+    if (representation)
+	suff->rep = HTAtom_for(representation);
    
     /*
     **	Memory leak fixed.
@@ -404,7 +414,9 @@ PUBLIC void HTSetSuffix ARGS4(
     **	Invariant code removed.
     */
     suff->encoding = HTAtom_for(encoding);
-    
+
+    StrAllocCopy(suff->desc, desc);
+
     suff->quality = value;
 }
 
@@ -430,6 +442,7 @@ PRIVATE void free_suffixes NOARGS
 	*/
 	suff = (HTSuffix *)HTList_removeLastObject(HTSuffixes);
 	FREE(suff->suffix);
+	FREE(suff->desc);
 	FREE(suff);
     }
     /*
@@ -643,15 +656,21 @@ PUBLIC char * WWW_nameOfFile ARGS1(
 **
 **  On entry,
 **	rep	is the atomized MIME style representation
+**	enc	is an encoding, trivial (8bit, binary, etc.) or gzip etc.
 **
 **  On exit:
 **	Returns	a pointer to a suitable suffix string if one has been
 **	found, else "".
 */
-PUBLIC CONST char * HTFileSuffix ARGS1(
-	HTAtom*,	rep)
+PUBLIC CONST char * HTFileSuffix ARGS2(
+	HTAtom*,	rep,
+	CONST char *,	enc)
 {
     HTSuffix * suff;
+#ifdef FNAMES_8_3
+    HTSuffix * first_found = NULL;
+#endif
+    BOOL trivial_enc;
     int n;
     int i;
 
@@ -660,13 +679,44 @@ PUBLIC CONST char * HTFileSuffix ARGS1(
     if (!HTSuffixes)
         HTFileInit();
 #endif /* !NO_INIT */
+
+    trivial_enc = IsUnityEncStr(enc);
     n = HTList_count(HTSuffixes);
     for (i = 0; i < n; i++) {
 	suff = (HTSuffix *)HTList_objectAt(HTSuffixes, i);
-	if (suff->rep == rep) {
+	if (suff->rep == rep &&
+#if defined(VMS) || defined(FNAMES_8_3)
+	    /*  Don't return a suffix whose first char is a dot and which
+		has more dots or with asterisks, for
+		these systems - kw */
+	    (!suff->suffix || !suff->suffix[0] || suff->suffix[0] != '.' ||
+	     (strchr(suff->suffix + 1, '.') == NULL &&
+	      strchr(suff->suffix + 1, '.') == NULL)) &&
+#endif
+	    ((trivial_enc && IsUnityEnc(suff->encoding)) ||
+	     (!trivial_enc && !IsUnityEnc(suff->encoding) &&
+	      strcmp(enc, HTAtom_name(suff->encoding)) == 0))) {
+#ifdef FNAMES_8_3
+	    if (suff->suffix && (strlen(suff->suffix) <= 4)) {
+		/*
+		 *  If length of suffix (including dot) is 4 or smaller,
+		 *  return this one even if we found a longer one
+		 *  earlier - kw
+		 */
+		return suff->suffix;
+	    } else if (!first_found) {
+		first_found = suff; 		/* remember this one */
+	    }
+#else
 	    return suff->suffix;		/* OK -- found */
+#endif
 	}
     }
+#ifdef FNAMES_8_3
+    if (first_found)
+	return first_found->suffix;
+    else
+#endif
     return "";		/* Dunno */
 }
 
@@ -676,11 +726,15 @@ PUBLIC CONST char * HTFileSuffix ARGS1(
 **	This version will return the representation and also set
 **	a variable for the encoding.
 **
+**	Encoding may be a unity encoding (binary, 8bit, etc.) or
+**      a content-coding like gzip, compress.
+**
 **	It will handle for example  x.txt, x.txt,Z, x.Z
 */
-PUBLIC HTFormat HTFileFormat ARGS2(
+PUBLIC HTFormat HTFileFormat ARGS3(
 	CONST char *,	filename,
-	HTAtom **,	pencoding)
+	HTAtom **,	pencoding,
+	CONST char**,	pdesc)
 {
     HTSuffix * suff;
     int n;
@@ -691,7 +745,13 @@ PUBLIC HTFormat HTFileFormat ARGS2(
 #endif /* VMS */
     extern char LYforce_HTML_mode;
 
+    if (pencoding)
+	*pencoding = NULL;
+    if (pdesc)
+	*pdesc = NULL;
     if (LYforce_HTML_mode) {
+	if (pencoding)
+	    *pencoding = WWW_ENC_8BIT;
         return WWW_HTML;
     }
 
@@ -709,8 +769,6 @@ PUBLIC HTFormat HTFileFormat ARGS2(
     if (!HTSuffixes)
         HTFileInit();
 #endif /* !NO_INIT */
-    if (pencoding)
-	*pencoding = NULL;
     lf  = strlen(filename);
     n = HTList_count(HTSuffixes);
     for (i = 0; i < n; i++) {
@@ -721,6 +779,8 @@ PUBLIC HTFormat HTFileFormat ARGS2(
 	    int j;
 	    if (pencoding)
 		*pencoding = suff->encoding;
+	    if (pdesc)
+		*pdesc = suff->desc;
 	    if (suff->rep) {
 #ifdef VMS
 		if (semicolon != NULL)
@@ -732,9 +792,11 @@ PUBLIC HTFormat HTFileFormat ARGS2(
 		int ls2;
 		suff = (HTSuffix *)HTList_objectAt(HTSuffixes, j);
 		ls2 = strlen(suff->suffix);
-		if ((ls <= lf) && 0 == strncasecomp(
+		if ((ls + ls2 <= lf) && 0 == strncasecomp(
 			suff->suffix, filename + lf - ls -ls2, ls2)) {
 		    if (suff->rep) {
+			if (pdesc && !(*pdesc))
+			    *pdesc = suff->desc;
 #ifdef VMS
 			if (semicolon != NULL)
 			    *semicolon = ';';
@@ -1419,7 +1481,8 @@ PUBLIC int HTLoadFile ARGS4(
     HTFormat format;
     char * nodename = NULL;
     char * newname = NULL;	/* Simplified name of file */
-    HTAtom * encoding;		/* @@ not used yet */
+    HTAtom * encoding;		/* @@ not used */
+    HTAtom * myEncoding = NULL;	/* enc of this file, may be gzip etc. */
     int status;
 #ifdef VMS
     struct stat stat_info;
@@ -1466,17 +1529,25 @@ PUBLIC int HTLoadFile ARGS4(
     /*
     **  Determine the format and encoding mapped to any suffix.
     */
-    format = HTFileFormat(filename, &encoding);
-
+    if (anchor->content_type && anchor->content_encoding) {
+	/*
+	 *  If content_type and content_encoding are BOTH already set
+	 *  in the anchor object, we believe it and don't try to
+	 *  derive format and ancoding from the filename. - kw
+	 */
+	format = HTAtom_for(anchor->content_type);
+	myEncoding = HTAtom_for(anchor->content_encoding);
+    } else {
+	format = HTFileFormat(filename, &myEncoding, NULL);
+    
     /*
     **  Check the format for an extended MIME charset value, and
-    **  act on it if present.  Otherwise, assume the ISO-8859-1
-    **  character set for local files.  If it's actually another
-    **  charset (e.g., ISO-8859-2 or KOI8-R) and the terminal is
-    **  using that, Lynx users should make the current character
-    **  set "ISO Latin 1" so that 8-bit characters are passed raw.
+    **  act on it if present.  Otherwise, assume what is indicated
+    **  by the last parameter (fallback will effectively be
+    **  UCLYhndl_for_unspec, by default ISO-8859-1). - kw
     */
-    format = HTCharsetFormat(format, anchor, UCLYhndl_HTFile_for_unspec);
+	format = HTCharsetFormat(format, anchor, UCLYhndl_HTFile_for_unspec);
+    }
 
 #ifdef VMS
     /*
@@ -1576,7 +1647,7 @@ PUBLIC int HTLoadFile ARGS4(
 		    vmsname[len - 3] != ':') {
 		    StrAllocCopy(cp, vmsname);
 		    cp[len - 2] = '\0';
-		    format = HTFileFormat(cp, &encoding);
+		    format = HTFileFormat(cp, &encoding, NULL);
 		    FREE(cp);
 		    format = HTCharsetFormat(format, anchor,
 					     UCLYhndl_HTFile_for_unspec);
@@ -1590,7 +1661,7 @@ PUBLIC int HTLoadFile ARGS4(
 			vmsname[len - 3] == '_') {
 			StrAllocCopy(cp, vmsname);
 			cp[len - 3] = '\0';
-			format = HTFileFormat(cp, &encoding);
+			format = HTFileFormat(cp, &encoding, NULL);
 			FREE(cp);
 			format = HTCharsetFormat(format, anchor,
 						 UCLYhndl_HTFile_for_unspec);
@@ -1692,6 +1763,7 @@ PUBLIC int HTLoadFile ARGS4(
 	    STRUCT_DIRENT * dirbuf;
 	    float best = NO_VALUE_FOUND;	/* So far best is bad */
 	    HTFormat best_rep = NULL;	/* Set when rep found */
+	    HTAtom * best_enc = NULL;
 	    char * best_name = NULL;	/* Best dir entry so far */
 
 	    char *base = strrchr(localname, '/');
@@ -1722,8 +1794,9 @@ PUBLIC int HTLoadFile ARGS4(
 		    continue;	/* if the entry is not being used, skip it */
 #endif
 		if ((int)strlen(dirbuf->d_name) > baselen &&     /* Match? */
-		    !strncmp(dirbuf->d_name, base, baselen)) {	
-		    HTFormat rep = HTFileFormat(dirbuf->d_name, NULL);
+		    !strncmp(dirbuf->d_name, base, baselen)) {
+		    HTAtom * enc;
+		    HTFormat rep = HTFileFormat(dirbuf->d_name, &enc, NULL);
 		    float filevalue = HTFileValue(dirbuf->d_name);
 		    float value = HTStackValue(rep, format_out,
 		    				filevalue,
@@ -1731,12 +1804,13 @@ PUBLIC int HTLoadFile ARGS4(
 		    if (value <= 0.0) {
 			char * cp = NULL;
 			int len = strlen(dirbuf->d_name);
+			enc = NULL;
     			if (len > 2 &&
 			    dirbuf->d_name[len - 1] == 'Z' &&
 			    dirbuf->d_name[len - 2] == '.') {
 			    StrAllocCopy(cp, dirbuf->d_name);
 			    cp[len - 2] = '\0';
-			    format = HTFileFormat(cp, NULL);
+			    format = HTFileFormat(cp, NULL, NULL);
 			    FREE(cp);
 			    value = HTStackValue(format, format_out,
 						 filevalue, 0);
@@ -1756,7 +1830,7 @@ PUBLIC int HTLoadFile ARGS4(
 				   dirbuf->d_name[len - 3] == '.') {
 			    StrAllocCopy(cp, dirbuf->d_name);
 			    cp[len - 3] = '\0';
-			    format = HTFileFormat(cp, NULL);
+			    format = HTFileFormat(cp, NULL, NULL);
 			    FREE(cp);
 			    value = HTStackValue(format, format_out,
 						 filevalue, 0);
@@ -1779,6 +1853,7 @@ PUBLIC int HTLoadFile ARGS4(
 				    HTAtom_name(rep), value);
 			if  (value > best) {
 			    best_rep = rep;
+			    best_enc = enc;
 			    best = value;
 			    StrAllocCopy(best_name, dirbuf->d_name);
 		       }
@@ -1790,6 +1865,7 @@ PUBLIC int HTLoadFile ARGS4(
 	    
 	    if (best_rep) {
 		format = best_rep;
+		myEncoding = best_enc;
 		base[-1] = '/';		/* Restore directory name */
 		base[0] = '\0';
 		StrAllocCat(localname, best_name);
@@ -2188,12 +2264,37 @@ PUBLIC int HTLoadFile ARGS4(
 		/*
 		**  Fake a Content-Encoding for compressed files. - FM
 		*/
-		if ((len = strlen(localname)) > 2) {
+		if (!IsUnityEnc(myEncoding)) {
+		    /*
+		     *  We already know from the call to HTFileFormat above
+		     *  that this is a compressed file, no need to look at
+		     *  the filename again. - kw
+		     */
+#ifdef USE_ZLIB
+		    if (strcmp(format_out->name, "www/download") != 0 &&
+			(!strcmp(HTAtom_name(myEncoding), "gzip") ||
+			 !strcmp(HTAtom_name(myEncoding), "x-gzip"))) {
+			fclose(fp);
+			gzfp = gzopen(localname, "rb");
+
+			if (TRACE)
+			    fprintf(stderr,
+				    "HTLoadFile: gzopen of `%s' gives %p\n",
+				    localname, (void*)gzfp);
+			use_gzread = YES;
+		    } else
+#endif  /* USE_ZLIB */
+		    {
+			StrAllocCopy(anchor->content_type, format->name);
+			StrAllocCopy(anchor->content_encoding, HTAtom_name(myEncoding));
+			format = HTAtom_for("www/compressed");
+		    }
+		} else if ((len = strlen(localname)) > 2) {
 		    if (localname[len - 1] == 'Z' &&
 		        localname[len - 2] == '.') {
 			StrAllocCopy(cp, localname);
 			cp[len - 2] = '\0';
-			format = HTFileFormat(cp, &encoding);
+			format = HTFileFormat(cp, &encoding, NULL);
 			FREE(cp);
 			format = HTCharsetFormat(format, anchor,
 						 UCLYhndl_HTFile_for_unspec);
@@ -2206,7 +2307,7 @@ PUBLIC int HTLoadFile ARGS4(
 			       localname[len - 3] == '.') {
 			StrAllocCopy(cp, localname);
 			cp[len - 3] = '\0';
-			format = HTFileFormat(cp, &encoding);
+			format = HTFileFormat(cp, &encoding, NULL);
 			FREE(cp);
 			format = HTCharsetFormat(format, anchor,
 						 UCLYhndl_HTFile_for_unspec);

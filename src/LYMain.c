@@ -320,6 +320,7 @@ PUBLIC char *UCAssume_unrecMIMEcharset = NULL;
 #endif /* EXP_CHARTRANS */
 PUBLIC int LYlines = 24;
 PUBLIC int LYcols = 80;
+PUBLIC int dump_output_width = 0;
 PUBLIC linkstruct links[MAXLINKS];
 PUBLIC histstruct history[MAXHIST];
 PUBLIC int nlinks = 0;		/* number of links in memory */
@@ -1360,6 +1361,9 @@ PUBLIC int main ARGS2(
     if (LYPreparsedSource) {
 	HTPreparsedFormatInit();
     }
+    if (dump_output_width > 0) {
+	LYcols = dump_output_width;
+    }
 	
 #if defined(EXEC_LINKS) || defined(EXEC_SCRIPTS)
 #ifdef NEVER_ALLOW_REMOTE_EXEC
@@ -1604,7 +1608,8 @@ PUBLIC int main ARGS2(
      *  are all allocated and synchronized. - FM
      */
     if (!bookmark_page || *bookmark_page == '\0') {
-        StrAllocCopy(bookmark_page, "lynx_bookmarks.html");
+        StrAllocCopy(bookmark_page, "lynx_bookmarks");
+        StrAllocCat(bookmark_page, HTML_SUFFIX);
         StrAllocCopy(BookmarkPage, bookmark_page);
         StrAllocCopy(MBM_A_subbookmark[0], bookmark_page);
         StrAllocCopy(MBM_A_subdescript[0], "Default");
@@ -2140,13 +2145,14 @@ PRIVATE void parse_arg ARGS3(
 	    ccount = atoi(cp);
 #if defined(USEHASH)
         } else if (strncmp(argv[0], "-lss", 4) == 0) {
-        fprintf(stderr, "***********************\n");
             if ((cp=strchr(argv[0],'=')) != NULL)
                 StrAllocCopy(lynx_lss_file, cp+1);
             else {
                 StrAllocCopy(lynx_lss_file, argv[1]);
                 i++;
             }
+	    fprintf(stderr, "LYMain found -lss flag, lss file is %s\n",
+		    lynx_lss_file ? lynx_lss_file : "<NONE>");
 #endif
 
     } else if (strncmp(argv[0], "-localhost", 10) == 0) {
@@ -2591,6 +2597,21 @@ PRIVATE void parse_arg ARGS3(
     } else if (strncmp(argv[0], "-vikeys", 7) == 0) {
 	vi_keys = TRUE;
 
+    } else {
+        goto Output_Error_and_Help_List;
+    }
+    break;
+
+    case 'w':
+    if (strncmp(argv[0], "-width", 2) == 0) {
+	if (nextarg) {
+	    int w = atoi(cp);
+	    if (w > 0) {
+		dump_output_width = w;
+		break;
+	    }
+	}
+	dump_output_width = 80;
     } else {
         goto Output_Error_and_Help_List;
     }

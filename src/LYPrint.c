@@ -227,8 +227,9 @@ PUBLIC int printfile ARGS1(
 		change_sug_filename(filename);
 		if (!(HTisDocumentSource()) &&
 		    (cp = strrchr(filename, '.')) != NULL) {
-		    format = HTFileFormat(filename, &encoding);
-		    if (!strcasecomp(format->name, "text/html")) {
+		    format = HTFileFormat(filename, &encoding, NULL);
+		    if (!strcasecomp(format->name, "text/html") ||
+			!IsUnityEnc(encoding)) {
 		        *cp = '\0';
 			strcat(filename, ".txt");
 		    }
@@ -817,9 +818,9 @@ PUBLIC int printfile ARGS1(
 #endif /* VMS */
 		    NULL == strchr(cp, '/')) {
 		    if (HTisDocumentSource() &&
-			strcasecomp(cp, ".html")) {
+			strcasecomp(cp, HTML_SUFFIX)) {
 			*cp = '\0';
-			strcat(tempfile, ".html");
+			strcat(tempfile, HTML_SUFFIX);
 		    } else if (!HTisDocumentSource() &&
 			       strcasecomp(cp, ".txt")) {
 			*cp = '\0';
@@ -876,8 +877,9 @@ PUBLIC int printfile ARGS1(
 			change_sug_filename(filename);
 			if (!(HTisDocumentSource()) &&
 			    (cp = strrchr(filename, '.')) != NULL) {
-			    format = HTFileFormat(filename, &encoding);
-			    if (!strcasecomp(format->name, "text/html")) {
+			    format = HTFileFormat(filename, &encoding, NULL);
+			    if (!strcasecomp(format->name, "text/html") ||
+				!IsUnityEnc(encoding)) {
 			        *cp = '\0';
 				strcat(filename, ".txt");
 			    }

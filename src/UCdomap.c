@@ -30,12 +30,21 @@
 #include "LYCharSets.h"
 
 /*
- *  Include hash tables & parameters.
+ *  Include tables & parameters.
  */
 #ifdef VMS
 #include "[.chrtrans]def7_uni.h"
 #include "[.chrtrans]iso01_uni.h"
 #include "[.chrtrans]iso02_uni.h"
+#include "[.chrtrans]cp437_uni.h"
+#include "[.chrtrans]cp850_uni.h"
+#include "[.chrtrans]koi8r_uni.h"
+#include "[.chrtrans]cp852_uni.h"
+#include "[.chrtrans]cp866_uni.h"
+#include "[.chrtrans]cp1252_uni.h"
+#include "[.chrtrans]cp1250_uni.h"
+#include "[.chrtrans]cp1251_uni.h"
+#include "[.chrtrans]viscii_uni.h"
 #include "[.chrtrans]iso03_uni.h"
 #include "[.chrtrans]iso04_uni.h"
 #include "[.chrtrans]iso05_uni.h"
@@ -44,15 +53,6 @@
 #include "[.chrtrans]iso08_uni.h"
 #include "[.chrtrans]iso09_uni.h"
 #include "[.chrtrans]iso10_uni.h"
-#include "[.chrtrans]koi8r_uni.h"
-#include "[.chrtrans]cp437_uni.h"
-#include "[.chrtrans]cp850_uni.h"
-#include "[.chrtrans]cp852_uni.h"
-#include "[.chrtrans]cp866_uni.h"
-#include "[.chrtrans]cp1250_uni.h"
-#include "[.chrtrans]cp1251_uni.h"
-#include "[.chrtrans]cp1252_uni.h"
-#include "[.chrtrans]viscii_uni.h"
 #include "[.chrtrans]utf8_uni.h"
 #include "[.chrtrans]rfc_suni.h"
 #include "[.chrtrans]mnemonic_suni.h"
@@ -63,6 +63,15 @@
 #include "chrtrans/def7_uni.h"
 #include "chrtrans/iso01_uni.h"
 #include "chrtrans/iso02_uni.h"
+#include "chrtrans/cp437_uni.h"
+#include "chrtrans/cp850_uni.h"
+#include "chrtrans/koi8r_uni.h"
+#include "chrtrans/cp852_uni.h"
+#include "chrtrans/cp866_uni.h"
+#include "chrtrans/cp1250_uni.h"
+#include "chrtrans/cp1251_uni.h"
+#include "chrtrans/cp1252_uni.h"
+#include "chrtrans/viscii_uni.h"
 #include "chrtrans/iso03_uni.h"
 #include "chrtrans/iso04_uni.h"
 #include "chrtrans/iso05_uni.h"
@@ -71,15 +80,6 @@
 #include "chrtrans/iso08_uni.h"
 #include "chrtrans/iso09_uni.h"
 #include "chrtrans/iso10_uni.h"
-#include "chrtrans/koi8r_uni.h"
-#include "chrtrans/cp437_uni.h"
-#include "chrtrans/cp850_uni.h"
-#include "chrtrans/cp852_uni.h"
-#include "chrtrans/cp866_uni.h"
-#include "chrtrans/cp1250_uni.h"
-#include "chrtrans/cp1251_uni.h"
-#include "chrtrans/cp1252_uni.h"
-#include "chrtrans/viscii_uni.h"
 #include "chrtrans/utf8_uni.h"
 #include "chrtrans/rfc_suni.h"
 #include "chrtrans/mnemonic_suni.h"
@@ -251,9 +251,12 @@ PRIVATE u16 translations[][256] = {
 };
 static u16 *UC_translate = NULL;
 
-/* The standard kernel character-to-font mappings are not invertible
-   -- this is just a best effort. */
+PRIVATE struct UC_charset UCInfo[MAXCHARSETS];
 
+/*
+ *  The standard kernel character-to-font mappings are not invertible
+ *  -- this is just a best effort.
+ */
 #define MAX_GLYPH 512		/* Max possible glyph value */
 
 PRIVATE unsigned char * inv_translate = NULL;
@@ -880,8 +883,8 @@ UCconsole_map_init NOARGS
  *  OK now, finally, some stuff that is more specifically for Lynx: - KW
  */
 #ifdef NOTDEFINED
-PUBLIC int UCGetcharset_byMIMEname PARAMS((char * UC_MIMEcharset));
-PUBLIC int UCGetcharset_byLYNXname PARAMS((char * UC_LYNXcharset));
+PUBLIC int UCGetcharset_byMIMEname PARAMS((CONST char * UC_MIMEcharset));
+PUBLIC int UCGetcharset_byLYNXname PARAMS((CONST char * UC_LYNXcharset));
 #endif /* NOTDEFINED */
 
 PUBLIC int UCTransUniChar ARGS2(
@@ -1001,6 +1004,9 @@ PRIVATE int UC_MapGN ARGS2(
     UCInfo[UChndl].GN = Gn;
     UC_GNhandles[Gn] = UChndl;
   }
+  if (TRACE)
+      fprintf(stderr,"UC_Map...... Using %i <- %i (%s)\n",
+		Gn, UChndl, UCInfo[UChndl].MIMEname);
   UC_con_set_trans(UChndl,Gn,update_flag);
   return Gn;
 }
@@ -1091,49 +1097,48 @@ PUBLIC long int UCTransToUni ARGS2(
   return unicode;
 }
 
-#if 0	/* UNUSED */
 PUBLIC int UCReverseTransChar ARGS3(char, ch_out, int, charset_in, int, charset_out)
 {
-  int Gn;
-  int rc;
-  int UChndl_in, UChndl_out;
-  u16 * ut;
+    int Gn;
+    int rc;
+    int UChndl_in, UChndl_out;
+    int i_ch = (unsigned char)ch_out;
+    u16 * ut;
 
 #ifndef UC_NO_SHORTCUTS
-  if (charset_in == charset_out)
-    return ch_out;
+    if (charset_in == charset_out)
+	return ch_out;
 #endif /* UC_NO_SHORTCUTS */
     if (charset_in < 0)
 	return -11;
-  if ((UChndl_in = LYCharSet_UC[charset_in].UChndl) < 0)
-    return -11;
+    if ((UChndl_in = LYCharSet_UC[charset_in].UChndl) < 0)
+	return -11;
     if (charset_out < 0)
 	return -12;
-  if ((UChndl_out = LYCharSet_UC[charset_out].UChndl) < 0)
-    return -12;
-  if (!UCInfo[UChndl_in].num_uni)
-    return -11;
+    if ((UChndl_out = LYCharSet_UC[charset_out].UChndl) < 0)
+	return -12;
+    if (!UCInfo[UChndl_in].num_uni)
+	return -11;
 
-  ut = UCInfo[UChndl_out].unitable;
-  if (ut == UC_current_unitable) {
-    if ((Gn = UCInfo[UChndl_in].GN) >= 0) {
-      UC_translate = set_translate(Gn);
-      rc = inv_translate[(unsigned int)ch_out];
-	    if (rc >= 32) {
-		return rc;
-    }
-	} else {
-      Gn = UC_MapGN(UChndl_in,1);
-      UC_translate = set_translate(Gn);
-      rc = inv_translate[(unsigned int)ch_out];
+    ut = UCInfo[UChndl_out].unitable;
+    if (ut == UC_current_unitable) {
+	if ((Gn = UCInfo[UChndl_in].GN) >= 0) {
+	    UC_translate = set_translate(Gn);
+	    rc = inv_translate[i_ch];
 	    if (rc >= 32) {
 		return rc;
 	    }
+	} else {
+	    Gn = UC_MapGN(UChndl_in,1);
+	    UC_translate = set_translate(Gn);
+	    rc = inv_translate[i_ch];
+	    if (rc >= 32) {
+		return rc;
+	    }
+	}
     }
-  }
-  return UCTransChar(ch_out, charset_out, charset_in);
+    return UCTransChar(ch_out, charset_out, charset_in);
 }
-#endif /* UNUSED */
   
 /*
  *  Returns string length, or negative value for error.
@@ -1221,7 +1226,7 @@ if (buflen<2)
 }
 
 PRIVATE int UC_FindGN_byMIME ARGS1(
-	CONST char *,		UC_MIMEcharset)
+	CONST char *,	UC_MIMEcharset)
 {
   int i;
 
@@ -1272,7 +1277,8 @@ PUBLIC int UCGetLYhndl_byMIME ARGS1(
 	if (!strcmp(UC_MIMEcharset, "utf-8")) {
 	  return UCGetLYhndl_byMIME("unicode-1-1-utf-8");
 	}
-	if (!strncmp(UC_MIMEcharset, "iso-2022-jp", 11)) {
+	if (!strncmp(UC_MIMEcharset, "iso-2022-jp", 11) ||
+	    !strcmp(UC_MIMEcharset, "x-euc-jp")) {
 	  return UCGetLYhndl_byMIME("euc-jp");
 	} else if (!strcmp(UC_MIMEcharset, "iso-2022-kr")) {
 	  return UCGetLYhndl_byMIME("euc-kr");
@@ -1466,8 +1472,8 @@ PRIVATE char ** UC_setup_LYCharSets_repl ARGS2(
 	  (*p)[1] = '\0';
 #else
 		    /*
-		     *  Use this instead... make those buggers
-		     *  int HTAtoms, so they will be cleaned up
+		     *  Use this instead... make those 1-char strings
+		     *  into HTAtoms, so they will be cleaned up
 		     *  at exit... all for the sake of preventing
 		     *  memory leaks, sigh.
 		     */
@@ -1502,9 +1508,9 @@ PRIVATE char ** UC_setup_LYCharSets_repl ARGS2(
  */
 PRIVATE int UC_Register_with_LYCharSets ARGS4(
 	int,		s,
-				       CONST char *, UC_MIMEcharset,
-				       CONST char *, UC_LYNXcharset,
-				       int, lowest_eightbit)
+	CONST char *,	UC_MIMEcharset,
+	CONST char *,	UC_LYNXcharset,
+	int,		lowest_eightbit)
 {
   int i, LYhndl,found;
   char ** repl;
@@ -1525,14 +1531,14 @@ PRIVATE int UC_Register_with_LYCharSets ARGS4(
      *  after all, this is experimental...
      */
     for (i = 0; i < MAXCHARSETS && LYchar_set_names[i] && LYhndl < 0; i++) {
-	if (!strcmp(UC_LYNXcharset,LYchar_set_names[i])) {
-      LYhndl = i;
+	if (!strcmp(UC_LYNXcharset, LYchar_set_names[i])) {
+	    LYhndl = i;
 	}
     }
     for (i = 0; i < MAXCHARSETS && LYchar_set_names[i] && LYhndl < 0; i++) {
-    if (LYCharSet_UC[i].MIMEname &&
-	    !strcmp(UC_MIMEcharset,LYCharSet_UC[i].MIMEname)) {
-      LYhndl = i;
+	if (LYCharSet_UC[i].MIMEname &&
+	    !strcmp(UC_MIMEcharset, LYCharSet_UC[i].MIMEname)) {
+	    LYhndl = i;
 	}
     }
 
@@ -1542,7 +1548,7 @@ PRIVATE int UC_Register_with_LYCharSets ARGS4(
 	    if (TRACE) {
 		fprintf(stderr,
 		    "UC_Register_with_LYCharSets: Too many. Ignoring %s/%s.",
-	      UC_MIMEcharset,UC_LYNXcharset);
+			UC_MIMEcharset, UC_LYNXcharset);
 	    }
       return -1;
     } 
@@ -1556,8 +1562,8 @@ PRIVATE int UC_Register_with_LYCharSets ARGS4(
 	/*
 	 *  Hmm, try to be conservative here.
 	 */
-    LYchar_set_names[LYhndl] = UC_LYNXcharset;
-    LYchar_set_names[LYhndl+1] = NULL;
+	LYchar_set_names[LYhndl] = UC_LYNXcharset;
+	LYchar_set_names[LYhndl+1] = NULL;
 	/*
 	 *  Terminating NULL may be looked for by Lynx code.
 	 */
@@ -1605,7 +1611,7 @@ PUBLIC void UC_Charset_Setup ARGS8(
 	int,			nnuni,
 	struct unimapdesc_str,	replacedesc,
 	int,			lowest_eight,
-		      int, UC_rawuni)
+	int,			UC_rawuni)
 {
   int s, Gn;
   int i, status = 0, found;
@@ -1613,19 +1619,19 @@ PUBLIC void UC_Charset_Setup ARGS8(
     /*
      *  Get (new?) slot.
      */
-  found = -1;  
-  for (i=0; i<UCNumCharsets && found<0; i++) {
-	if (!strcmp(UCInfo[i].MIMEname,UC_MIMEcharset)) {
-      found = i;
-  }
+    found = -1;  
+    for (i = 0; i < UCNumCharsets && found < 0; i++) {
+	if (!strcmp(UCInfo[i].MIMEname, UC_MIMEcharset)) {
+	    found = i;
+	}
     }
     if (found >= 0) {
 	s = found;
     } else {
 	if (UCNumCharsets >= MAXCHARSETS) {
 	    if (TRACE) {
-	  fprintf(stderr,"UC_Charset_Setup: Too many. Ignoring %s/%s.",
-		  UC_MIMEcharset,UC_LYNXcharset);
+		fprintf(stderr, "UC_Charset_Setup: Too many. Ignoring %s/%s.",
+				UC_MIMEcharset, UC_LYNXcharset);
 	    }
 	return;
       }
@@ -1674,6 +1680,16 @@ PUBLIC void UCInit NOARGS
     UC_CHARSET_SETUP;
     UC_CHARSET_SETUP_iso_8859_1;
     UC_CHARSET_SETUP_iso_8859_2;
+    UC_CHARSET_SETUP_cp437;
+    UC_CHARSET_SETUP_cp850;
+    UC_CHARSET_SETUP_koi8_r;
+
+    UC_CHARSET_SETUP_cp852;
+    UC_CHARSET_SETUP_cp866;
+    UC_CHARSET_SETUP_iso_8859_1_windows_;
+    UC_CHARSET_SETUP_windows_1250;
+    UC_CHARSET_SETUP_windows_1251;
+    UC_CHARSET_SETUP_viscii;
     UC_CHARSET_SETUP_iso_8859_3;
     UC_CHARSET_SETUP_iso_8859_4;
     UC_CHARSET_SETUP_iso_8859_5;
@@ -1682,16 +1698,7 @@ PUBLIC void UCInit NOARGS
     UC_CHARSET_SETUP_iso_8859_8;
     UC_CHARSET_SETUP_iso_8859_9;
     UC_CHARSET_SETUP_iso_8859_10;
-    UC_CHARSET_SETUP_koi8_r;
 
-    UC_CHARSET_SETUP_cp437;
-    UC_CHARSET_SETUP_cp850;
-    UC_CHARSET_SETUP_cp852;
-    UC_CHARSET_SETUP_cp866;
-    UC_CHARSET_SETUP_windows_1250;
-    UC_CHARSET_SETUP_windows_1251;
-    UC_CHARSET_SETUP_iso_8859_1_windows_;
-    UC_CHARSET_SETUP_viscii;
     UC_CHARSET_SETUP_unicode_1_1_utf_8;
     UC_CHARSET_SETUP_mnemonic_ascii_0;
     UC_CHARSET_SETUP_mnemonic;

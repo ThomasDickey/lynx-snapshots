@@ -65,6 +65,7 @@ typedef struct sockaddr_in SockA;  /* See netinet/in.h */
 #define STDIO_H
 #endif /* !STDIO_H */
 
+#ifndef VMS
 #include <sys/types.h>
 
 #if HAVE_DIRENT_H
@@ -84,7 +85,8 @@ typedef struct sockaddr_in SockA;  /* See netinet/in.h */
 # if HAVE_NDIR_H
 #  include <ndir.h>
 # endif
-#endif
+#endif /* HAVE_DIRENT_H */
+#endif /* !VMS */
 
 #if TIME_WITH_SYS_TIME
 # include <sys/time.h>

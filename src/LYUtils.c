@@ -1882,6 +1882,11 @@ PUBLIC void statusline ARGS1(
     }
     clrtoeol();
     if (text != NULL) {
+#ifdef EXP_CHARTRANS
+	if (LYCharSet_UC[current_char_set].enc == UCT_ENC_UTF8) {
+	    refresh();
+	}
+#endif
 #ifndef USE_COLOR_STYLE
 	lynx_start_status_color ();
 	addstr (buffer);
@@ -3184,8 +3189,8 @@ PUBLIC void tempname ARGS2(
 		    lynx_temp_space, (int)getpid(), counter-1);
 	    remove(namebuffer);
 	    sprintf(namebuffer,
-	    	    "%sL%d%uTMP.html",
-		    lynx_temp_space, (int)getpid(), counter-1);
+	    	    "%sL%d%uTMP%s",
+		    lynx_temp_space, (int)getpid(), counter-1, HTML_SUFFIX);
 	    remove(namebuffer);
 	}
     } else {
@@ -3201,6 +3206,10 @@ PUBLIC void tempname ARGS2(
 	     *  the count and try again.  Otherwise, return
 	     *  with the name which has the .html suffix
 	     *  loaded in namebuffer. - FM
+	     *
+	     *  Some systems may use .htm instead of .html.  This
+	     *  should be done consistently by always using HTML_SUFFIX
+	     *  where filenames are generated for new local files. - kw
 	     */
 	    sprintf(namebuffer,
 		    "%sL%d%uTMP.txt",
@@ -3227,8 +3236,8 @@ PUBLIC void tempname ARGS2(
 		continue;
 	    }
 	    sprintf(namebuffer,
-		    "%sL%d%uTMP.html",
-		    lynx_temp_space, (int)getpid(), counter++);
+		    "%sL%d%uTMP%s",
+		    lynx_temp_space, (int)getpid(), counter++, HTML_SUFFIX);
 	    if ((fp = fopen(namebuffer, "r")) != NULL) {
 		fclose(fp);
 		if (TRACE)
@@ -5380,7 +5389,7 @@ int remove ARGS1(char *, name)
  * first, before opening it.  If the chmod fails because of some reason other
  * than a non-existent file, there's no point in trying to open it.
  */
-static FILE *OpenHiddenFile ARGS2(char *, name, char *, mode)
+PRIVATE FILE *OpenHiddenFile ARGS2(char *, name, char *, mode)
 {
     int save = umask(HIDE_UMASK);
     FILE *fp = 0;
@@ -5395,7 +5404,7 @@ static FILE *OpenHiddenFile ARGS2(char *, name, char *, mode)
 # endif
 #endif
 
-FILE *LYNewBinFile ARGS1(char *, name)
+PUBLIC FILE *LYNewBinFile ARGS1(char *, name)
 {
 #ifdef VMS
     FILE *fp = fopen (name, "wb", "mbc=32");
@@ -5406,7 +5415,7 @@ FILE *LYNewBinFile ARGS1(char *, name)
     return fp;
 }
 
-FILE *LYNewTxtFile ARGS1(char *, name)
+PUBLIC FILE *LYNewTxtFile ARGS1(char *, name)
 {
 #ifdef VMS
     FILE *fp = fopen (name, "w", "shr=get");
@@ -5417,7 +5426,7 @@ FILE *LYNewTxtFile ARGS1(char *, name)
     return fp;
 }
 
-FILE *LYAppendToTxtFile ARGS1(char *, name)
+PUBLIC FILE *LYAppendToTxtFile ARGS1(char *, name)
 {
 #ifdef VMS
     FILE *fp = fopen (name, "a+", "shr=get");

@@ -57,7 +57,7 @@ typedef struct _LYUCcharset {
 #define UCT_R_8BIT UCT_R_LAT1 | UCT_R_HIGHCTRL /* full 8bit range */
 
 /*
- *  For the following some coments are in HTAnchor.c.
+ *  For the following some comments are in HTAnchor.c.
  */
 #define UCT_STAGE_MIME 0
 #define UCT_STAGE_PARSER 1	/* What the parser (SGML.c) gets to see */
@@ -67,9 +67,10 @@ typedef struct _LYUCcharset {
 
 #define UCT_SETBY_NONE 0
 #define UCT_SETBY_DEFAULT 1
-#define UCT_SETBY_STRUCTURED 2	/* structured stream stage */
-#define UCT_SETBY_PARSER 3	/* set by SGML parser or similar */
-#define UCT_SETBY_MIME 4	/* set explicitly by MIME charset parameter */
+#define UCT_SETBY_LINK 2	/* set by A or LINK CHARSET= hint */
+#define UCT_SETBY_STRUCTURED 3	/* structured stream stage (HTML.c) */
+#define UCT_SETBY_PARSER 4	/* set by SGML parser or similar */
+#define UCT_SETBY_MIME 5	/* set explicitly by MIME charset parameter */
 
 typedef struct _UCStageInfo
 {

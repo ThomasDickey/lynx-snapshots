@@ -26,6 +26,7 @@ extern void edit_bookmarks NOPARAMS;
 #define L_SSEARCH	 7
 #define L_LANGUAGE	 8
 #define L_PREF_CHARSET	 9
+#define L_ASSUME_CHARSET (L_PREF_CHARSET + 1)
 #define L_CHARSET	10
 #define L_RAWMODE	11
 

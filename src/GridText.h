@@ -138,16 +138,22 @@ extern void HText_beginForm PARAMS((
 	char *		action,
 	char *		method,
 	char *		enctype,
-	char *		title));
+	char *		title,
+	CONST char *	accept_cs));
 extern void HText_endForm PARAMS((HText *text));
-extern void HText_beginSelect PARAMS((char *name, BOOLEAN multiple, char *len));
+extern void HText_beginSelect PARAMS((char *name,
+				      int name_cs,
+				      BOOLEAN multiple,
+				      char *len));
 extern int HText_getOptionNum PARAMS((HText *text));
 extern char * HText_setLastOptionValue PARAMS((
 	HText *		text,
 	char *		value,
 	char *		submit_value,
 	int 		order,
-	BOOLEAN		checked));
+	BOOLEAN		checked,
+	int 		val_cs,
+	int 		submit_val_cs));
 extern int HText_beginInput PARAMS((
 	HText *		text,
 	BOOL		underline,
@@ -165,7 +171,9 @@ extern HTList * search_queries; /* Previous isindex and whereis queries */
 extern void HTSearchQueries_free NOPARAMS;
 extern void HTAddSearchQuery PARAMS((char *query));
 
-extern void user_message PARAMS((CONST char * message, CONST char * argument));
+extern void user_message PARAMS((
+	CONST char *	message,
+	CONST char *	argument));
 
 #define _user_message(msg, arg)	mustshow = TRUE, user_message(msg, arg)
 

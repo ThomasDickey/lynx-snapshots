@@ -129,7 +129,7 @@ typedef struct _connection {
 
 #define PUTC(c) (*targetClass.put_character)(target, c)
 #define PUTS(s) (*targetClass.put_string)(target, s)
-#define START(e) (*targetClass.start_element)(target, e, 0, 0, 0)
+#define START(e) (*targetClass.start_element)(target, e, 0, 0, -1, 0)
 #define END(e) (*targetClass.end_element)(target, e, 0)
 #define FREE_TARGET (*targetClass._free)(target)
 #define ABORT_TARGET (*targetClass._free)(target)
@@ -2143,17 +2143,19 @@ PRIVATE EntryInfo * parse_dir_entry ARGS2(
     **  Get real types eventually.
     */
     if (!entry_info->type) {
-	char *cp;
+	CONST char *cp;
         HTFormat format;
         HTAtom * encoding;  /* @@ not used at all */
-        format = HTFileFormat(entry_info->filename, &encoding);
+        format = HTFileFormat(entry_info->filename, &encoding, &cp);
 
-	if (!strncmp(HTAtom_name(format), "application",11)) {
-	    cp = HTAtom_name(format) + 12;
-	    if (!strncmp(cp,"x-",2))
-		cp += 2;
-	} else {
-	    cp = HTAtom_name(format);
+	if (cp == NULL) {
+	    if (!strncmp(HTAtom_name(format), "application",11)) {
+		cp = HTAtom_name(format) + 12;
+		if (!strncmp(cp,"x-",2))
+		    cp += 2;
+	    } else {
+		cp = HTAtom_name(format);
+	    }
 	}
 
         StrAllocCopy(entry_info->type, cp);
@@ -2574,6 +2576,7 @@ PUBLIC int HTFTPLoad ARGS4(
 	HTStream *,		sink)
 {
     BOOL isDirectory = NO;
+    HTAtom * encoding = NULL;
     int status;
     int retry;			/* How many times tried? */
     HTFormat format;
@@ -2689,7 +2692,6 @@ PUBLIC int HTFTPLoad ARGS4(
         char *filename = HTParse(name, "", PARSE_PATH + PARSE_PUNCTUATION);
 	char *fname = filename;	/** Save for subsequent free() **/
 	BOOL binary;
-	HTAtom * encoding;
 	char *type = NULL;
 	char *cp;
 
@@ -2795,16 +2797,16 @@ PUBLIC int HTFTPLoad ARGS4(
 		    (cp > (filename + 3) &&
 	             0 == strncasecomp((cp - 4), "read.me", 7))) {
 		    *cp = '\0';
-		    format = HTFileFormat(filename, &encoding);
+		    format = HTFileFormat(filename, &encoding, NULL);
 		    *cp = '.';
 		} else {
-		    format = HTFileFormat(filename, &encoding);
+		    format = HTFileFormat(filename, &encoding, NULL);
 		}
 	    } else {
-	        format = HTFileFormat(filename, &encoding);
+	        format = HTFileFormat(filename, &encoding, NULL);
 	    }
 	} else {
-	    format = HTFileFormat(filename, &encoding);
+	    format = HTFileFormat(filename, &encoding, NULL);
 	}
 	format = HTCharsetFormat(format, anchor, -1);
 	binary = (encoding != HTAtom_for("8bit") &&
@@ -3218,7 +3220,6 @@ listen:
     } else {
         int rv;
 	int len;
-	HTAtom * encoding;
 	char *FileName = HTParse(name, "", PARSE_PATH + PARSE_PUNCTUATION);
 
 	/** Clear any login messages **/
@@ -3226,14 +3227,24 @@ listen:
 
 	/** Fake a Content-Encoding for compressed files. - FM **/
 	HTUnEscape(FileName);
-	if ((len = strlen(FileName)) > 2) {
+	if (!IsUnityEnc(encoding)) {
+	    /*
+	     *  We already know from the call to HTFileFormat above that
+	     *  this is a compressed file, no need to look at the filename
+	     *  again. - kw
+	     */
+	    StrAllocCopy(anchor->content_type, format->name);
+	    StrAllocCopy(anchor->content_encoding, HTAtom_name(encoding));
+	    format = HTAtom_for("www/compressed");
+
+	} else if ((len = strlen(FileName)) > 2) {
 	    if ((FileName[len - 1] == 'Z') &&
 	        (FileName[len - 2] == '.' ||
 		 FileName[len - 2] == '-' ||
 		 FileName[len - 2] == '_')) {
 		
 		FileName[len - 2] = '\0';
-		format = HTFileFormat(FileName, &encoding);
+		format = HTFileFormat(FileName, &encoding, NULL);
 		format = HTCharsetFormat(format, anchor, -1);
 		StrAllocCopy(anchor->content_type, format->name);
 		StrAllocCopy(anchor->content_encoding, "x-compress");
@@ -3244,7 +3255,7 @@ listen:
 		    FileName[len - 3] == '-' ||
 		    FileName[len - 3] == '_') {
 		    FileName[len - 3] = '\0';
-		    format = HTFileFormat(FileName, &encoding);
+		    format = HTFileFormat(FileName, &encoding, NULL);
 		    format = HTCharsetFormat(format, anchor, -1);
 		    StrAllocCopy(anchor->content_type, format->name);
 		    StrAllocCopy(anchor->content_encoding, "x-gzip");
