@@ -280,7 +280,10 @@ II. Compile instructions -- UNIX
 	--with-screen=ncurses		(define NCURSES)
 	--with-screen=slang		(define USE_SLANG)
 
-   --with-zlib				(define USE_ZLIB)
+  --with-socks5				(define USE_SOCKS5)
+	Use this option to configure with the socks5 library.
+
+  --with-zlib				(define USE_ZLIB)
 	Use zlib for decompression of some gzip files.
 
 1d. Environment variables

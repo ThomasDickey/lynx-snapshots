@@ -20,7 +20,6 @@
 #endif /* HTUTILS_H */
 
 #include <tcp.h>		/* Macro FROMASCII() */
-/*#include <stdio.h> included by HTUtils.h -- FM *//* FILE */
 #include <string.h>
 #include <HTAAUtil.h>		/* Common utilities used in AA */
 #include <HTAAFile.h>		/* Implemented here */

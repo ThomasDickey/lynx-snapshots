@@ -38,6 +38,7 @@ extern void HTAlert PARAMS((CONST char * Msg));
 **              The input is a list of parameters for printf.
 */
 extern void HTProgress PARAMS((CONST char * Msg));
+extern void HTReadProgress PARAMS((long bytes, long total));
 extern BOOLEAN mustshow;
 #define _HTProgress(msg)	mustshow = TRUE, HTProgress(msg)
 

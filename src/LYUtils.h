@@ -1,8 +1,5 @@
-
 #ifndef LYUTILS_H
 #define LYUTILS_H
-
-#include <stdio.h>
 
 #ifndef HTLIST_H
 #include <HTList.h>

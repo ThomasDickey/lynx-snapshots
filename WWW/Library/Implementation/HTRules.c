@@ -23,7 +23,6 @@
 
 #include <HTUtils.h>
 #include <tcp.h>
-/*#include <stdio.h> included by HTUtils.h -- FM */
 #include <HTFile.h>
 #include <HTAAServ.h>	/* Access Authorization */
 

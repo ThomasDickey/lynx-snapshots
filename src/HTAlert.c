@@ -55,6 +55,43 @@ PUBLIC void HTProgress ARGS1(
         statusline(Msg);
 }
 
+/*	Issue a read-progress message.			HTReadProgress()
+**	------------------------------
+*/
+PUBLIC void HTReadProgress ARGS2(
+	long,		bytes,
+	long,		total)
+{
+    static long kb_units = 1024000;
+    static time_t first, last;
+    char line[80];
+    time_t now = time((time_t *)0);
+    char *units = "bytes";
+
+    if (bytes == 0) {
+	first = last = now;
+    } else if (bytes > 0) {
+	if (now != last) {
+	    last = now;
+	    if (total >= kb_units || bytes >= kb_units) {
+		if (bytes > 0) bytes /= 1024;
+		if (total > 0) total /= 1024;
+		units = "KB";
+	    }
+	    if (total > 0) {
+		sprintf (line, "Read %ld of %ld %s of data.", bytes, total, units);
+	    } else if (total < 0) {
+		sprintf (line, "Read %ld uncompressed %s of data.", bytes, units);
+		if (total < -1)
+		    strcat(line, " (Press 'z' to abort)");
+	    } else {
+		sprintf (line, "Read %ld %s of data.", bytes, units);
+	    }
+	    _HTProgress(line);
+	}
+    }
+}
+
 PRIVATE BOOL conf_cancelled = NO; /* used by HTConfirm only - kw */
 
 PUBLIC BOOL HTLastConfirmCancelled NOARGS

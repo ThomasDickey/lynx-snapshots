@@ -243,7 +243,7 @@ dnl ---------------------------------------------------------------------------
 dnl Check if curses supports color.  (Note that while SVr3 curses supports
 dnl color, it does this differently from SVr4 curses; more work would be needed
 dnl to accommodate SVr3).
-dnl 
+dnl
 AC_DEFUN([CF_COLOR_CURSES],
 [
 AC_MSG_CHECKING(if curses supports color attributes)
@@ -1347,6 +1347,31 @@ AC_TRY_LINK([#include <slang.h>],
 	[cf_result=no])
 AC_MSG_RESULT($cf_result)
 test $cf_result = no && LIBS="$cf_slang_LIBS3"
+])dnl
+dnl ---------------------------------------------------------------------------
+dnl Check for socks5 configuration
+AC_DEFUN([CF_SOCKS5],[
+AC_MSG_CHECKING(if we can link against socks5 library)
+AC_CACHE_VAL(cf_cv_lib_socks5,[
+LIBS="$LIBS -lsocks5"
+AC_TRY_LINK([
+#define SOCKS
+#include <socks.h>],[
+#ifdef USE_SOCKS4_PREFIX
+	Rinit((char *)0);
+#else
+	SOCKSinit((char *)0);
+#endif
+	getpeername(0, (struct sockaddr *)0, (int *)0);],
+	[cf_cv_lib_socks5=yes],
+	[cf_cv_lib_socks5=no])
+])
+AC_MSG_RESULT($cf_cv_lib_socks5)
+if test $cf_cv_lib_socks5 = yes ; then
+	AC_DEFINE(USE_SOCKS5)
+else
+	AC_ERROR(Sorry.  Cannot link against socks5 library)
+fi
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl	Remove "-g" option from the compiler options

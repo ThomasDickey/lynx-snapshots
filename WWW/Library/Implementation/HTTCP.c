@@ -22,6 +22,7 @@
 #include <HTParse.h>
 #include <HTAlert.h>
 #include <HTTCP.h>
+#include <LYUtils.h>
 
 #ifdef NSL_FORK
 #include <signal.h>
@@ -31,8 +32,6 @@
 #define FREE(x) if (x) {free(x); x = NULL;}
 
 #define OK_HOST(p) ((p) != 0 && (p->h_length) != 0)
-
-extern int HTCheckForInterrupt NOPARAMS;
 
 #ifdef SVR4_BSDSELECT
 PUBLIC int BSDselect PARAMS((
