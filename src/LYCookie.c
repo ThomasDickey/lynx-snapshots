@@ -2136,9 +2136,8 @@ PRIVATE int LYHandleCookies ARGS4 (
 				 *  from this domain. - FM
 				 */
 				de->bv = QUERY_USER;
-				_user_message(ALWAYS_ALLOWING_COOKIES,
+				HTUserMsg2(ALWAYS_ALLOWING_COOKIES,
 					      de->domain);
-				sleep(MessageSecs);
 				return(HT_NO_DATA);
 
 			    case 'C':
@@ -2147,8 +2146,7 @@ PRIVATE int LYHandleCookies ARGS4 (
 				/*
 				 *  Cancelled. - FM
 				 */
-				_statusline(CANCELLED);
-				sleep(MessageSecs);
+				HTUserMsg(CANCELLED);
 				return(HT_NO_DATA);
 
 			    case 'D':
@@ -2213,9 +2211,8 @@ Delete_all_cookies_in_domain:
 				 *  from this domain. - FM
 				 */
 				de->bv = QUERY_USER;
-				_user_message(PROMPTING_TO_ALLOW_COOKIES,
-					      de->domain);
-				sleep(MessageSecs);
+				HTUserMsg2(PROMPTING_TO_ALLOW_COOKIES,
+					   de->domain);
 				return(HT_NO_DATA);
 
 			    case 'V':
@@ -2224,9 +2221,8 @@ Delete_all_cookies_in_domain:
 				 *  from this domain. - FM
 				 */
 				de->bv = REJECT_ALWAYS;
-				_user_message(NEVER_ALLOWING_COOKIES,
-					      de->domain);
-				sleep(MessageSecs);
+				HTUserMsg2(NEVER_ALLOWING_COOKIES,
+					   de->domain);
 				if ((!HTList_isEmpty(de->cookie_list)) &&
 				    HTConfirm(DELETE_ALL_COOKIES_IN_DOMAIN))
 				    goto Delete_all_cookies_in_domain;

@@ -199,8 +199,7 @@ Try_Redirected_URL:
 			  (lynxjumpfile != NULL &&
 			   0==strncasecomp(WWWDoc.address, lynxjumpfile,
 					  strlen(lynxjumpfile))))) {
-			_statusline(NOT_HTTP_URL_OR_ACTION);
-			sleep(MessageSecs);
+			HTUserMsg(NOT_HTTP_URL_OR_ACTION);
 			return(NULLFILE);
 		    }
 		}
@@ -240,8 +239,7 @@ Try_Redirected_URL:
 			  (lynxjumpfile != NULL &&
 			   0==strncasecomp(WWWDoc.address, lynxjumpfile,
 					  strlen(lynxjumpfile))))) {
-			_statusline(NOT_IN_STARTING_REALM);
-			sleep(MessageSecs);
+			HTUserMsg(NOT_IN_STARTING_REALM);
 			return(NULLFILE);
 		    }
 		}
@@ -294,8 +292,7 @@ Try_Redirected_URL:
 			   url_type == SNEWSREPLY_URL_TYPE) {
 
 		    if (no_newspost) {
-			_statusline(NEWSPOSTING_DISABLED);
-			sleep(MessageSecs);
+			HTUserMsg(NEWSPOSTING_DISABLED);
 			return(NULLFILE);
 		    } else {
 			HTLoadAbsolute(&WWWDoc);
@@ -323,8 +320,7 @@ Try_Redirected_URL:
 		} else if (url_type == LYNXDIRED_URL_TYPE) {
 #ifdef DIRED_SUPPORT
 		    if (no_dired_support) {
-		       _statusline(DIRED_DISABLED);
-		       sleep(MessageSecs);
+		       HTUserMsg(DIRED_DISABLED);
 		       return(NULLFILE);
 		    } else {
 		       local_dired(doc);
@@ -340,8 +336,7 @@ Try_Redirected_URL:
 		       return(NORMAL);
 		    }
 #else
-		    _statusline(DIRED_DISABLED);
-		    sleep(MessageSecs);
+		    HTUserMsg(DIRED_DISABLED);
 		    return(NULLFILE);
 #endif /* DIRED_SUPPORT */
 
@@ -386,12 +381,10 @@ Try_Redirected_URL:
 		    if (no_exec &&
 			!exec_ok(HTLoadedDocumentURL(),
 				 doc->address+9, ALWAYS_EXEC_PATH)) {
-			statusline(EXECUTION_DISABLED);
-			sleep(MessageSecs);
+			HTUserMsg(EXECUTION_DISABLED);
 		    } else if (no_bookmark_exec &&
 			       HTLoadedDocumentBookmark()) {
-			statusline(BOOKMARK_EXEC_DISABLED);
-			sleep(MessageSecs);
+			HTUserMsg(BOOKMARK_EXEC_DISABLED);
 		    } else if (local_exec || (local_exec_on_local_files &&
 			       exec_ok(HTLoadedDocumentURL(),
 				       doc->address+9, EXEC_PATH))) {
@@ -428,8 +421,7 @@ Try_Redirected_URL:
 			/*
 			 *  Show URL before executing it.
 			 */
-			statusline(doc->address);
-			sleep(InfoSecs);
+			HTInfoMsg(doc->address);
 			stop_curses();
 			/*
 			 *  Run the command.
@@ -472,19 +464,16 @@ Try_Redirected_URL:
 			sprintf(buf,
 				EXECUTION_DISABLED_FOR_FILE,
 				key_for_func(LYK_OPTIONS));
-			_statusline(buf);
-			sleep(AlertSecs);
+			HTAlert(buf);
 		     }
 #else /* no exec_links */
-		     _statusline(EXECUTION_NOT_COMPILED);
-		     sleep(MessageSecs);
+		     HTUserMsg(EXECUTION_NOT_COMPILED);
 #endif /* EXEC_LINKS */
 		     return(NULLFILE);
 
 		} else if (url_type == MAILTO_URL_TYPE) {
 		    if (no_mail) {
-			_statusline(MAIL_DISABLED);
-			sleep(MessageSecs);
+			HTUserMsg(MAIL_DISABLED);
 		    } else {
 			HTParentAnchor *tmpanchor;
 			CONST char *title;
@@ -518,8 +507,7 @@ Try_Redirected_URL:
 			   url_type != LYNXCGI_URL_TYPE &&
 			   !(LYisLocalHost(doc->address) ||
 			     LYisLocalAlias(doc->address))) {
-		    statusline(ACCESS_ONLY_LOCALHOST);
-		    sleep(MessageSecs);
+		    HTUserMsg(ACCESS_ONLY_LOCALHOST);
 		    return(NULLFILE);
 
 		/*
@@ -529,11 +517,9 @@ Try_Redirected_URL:
 			   url_type == TN3270_URL_TYPE ||
 			   url_type == TELNET_GOPHER_URL_TYPE) {
 		    if (!telnet_ok) {
-			_statusline(TELNET_DISABLED);
-			sleep(MessageSecs);
+			HTUserMsg(TELNET_DISABLED);
 		    } else if (no_telnet_port && strchr(doc->address+7, ':')) {
-			statusline(TELNET_PORT_SPECS_DISABLED);
-			sleep(MessageSecs);
+			HTUserMsg(TELNET_PORT_SPECS_DISABLED);
 		    } else {
 			stop_curses();
 			HTLoadAbsolute(&WWWDoc);
@@ -547,14 +533,12 @@ Try_Redirected_URL:
 		 *  Disable www news access if not news_ok.
 		 */
 		} else if (url_type == NEWS_URL_TYPE && !news_ok) {
-		    _statusline(NEWS_DISABLED);
-		    sleep(MessageSecs);
+		    HTUserMsg(NEWS_DISABLED);
 		    return(NULLFILE);
 
 		} else if (url_type == RLOGIN_URL_TYPE) {
 		    if (!rlogin_ok) {
-			statusline(RLOGIN_DISABLED);
-			sleep(MessageSecs);
+			HTUserMsg(RLOGIN_DISABLED);
 		    } else {
 			stop_curses();
 			HTLoadAbsolute(&WWWDoc);
@@ -615,8 +599,7 @@ Try_Redirected_URL:
 		} else {
 
 		    if (url_type == FTP_URL_TYPE && !ftp_ok) {
-			statusline(FTP_DISABLED);
-			sleep(MessageSecs);
+			HTUserMsg(FTP_DISABLED);
 			return(NULLFILE);
 		    }
 
@@ -702,12 +685,8 @@ Try_Redirected_URL:
 			}
 			FREE(cp);
 		    }
-		    if (TRACE && LYTraceLogFP == NULL)
-			sleep(MessageSecs);
+		    CTRACE_SLEEP(MessageSecs);
 		    user_message(WWW_WAIT_MESSAGE, doc->address);
-#ifdef NOTDEFINED
-		    sleep(InfoSecs);
-#endif /* NOTDEFINED */
 		    if (TRACE) {
 #ifdef USE_SLANG
 			if (LYCursesON) {
@@ -777,6 +756,9 @@ Try_Redirected_URL:
 				url_type == LYNXDIRED_URL_TYPE ||
 #endif /* DIRED_SUPPORT */
 				url_type == LYNXPRINT_URL_TYPE ||
+#ifdef EXP_FORMS_OPTIONS
+				url_type == LYNXOPTIONS_URL_TYPE ||
+#endif
 				url_type == LYNXHIST_URL_TYPE ||
 				url_type == LYNXCOOKIE_URL_TYPE ||
 				(LYValidate &&
@@ -847,8 +829,7 @@ Try_Redirected_URL:
 				    pound);
 				StrAllocCat(use_this_url_instead, pound);
 			    }
-			    if (TRACE && LYTraceLogFP == NULL)
-				sleep(MessageSecs);
+			    CTRACE_SLEEP(MessageSecs);
 			    _user_message(WWW_USING_MESSAGE,
 					  use_this_url_instead);
 			    sleep(InfoSecs);
@@ -985,11 +966,9 @@ Try_Redirected_URL:
 		    }
 		}
 	  } else {
-	      if (TRACE && LYTraceLogFP == NULL)
-		  sleep(MessageSecs);
-	      _user_message(WWW_BAD_ADDR_MESSAGE, doc->address);
+	      CTRACE_SLEEP(MessageSecs);
+	      HTUserMsg2(WWW_BAD_ADDR_MESSAGE, doc->address);
 	      CTRACE(tfp,"\n");
-	      sleep(MessageSecs);
 	      return(NULLFILE);
 	  }
 }
@@ -1028,8 +1007,7 @@ PUBLIC int follow_link_number ARGS4(
      *	Get the number, possibly with a letter suffix, from the user.
      */
     if (LYgetstr(temp, VISIBLE, sizeof(temp), NORECALL) < 0 || *temp == 0) {
-	_statusline(CANCELLED);
-	sleep(InfoSecs);
+	HTInfoMsg(CANCELLED);
 	return(DO_NOTHING);
     }
     *num = atoi(temp);
@@ -1217,7 +1195,7 @@ PUBLIC void add_trusted ARGS2(
  */
 PUBLIC BOOLEAN exec_ok ARGS3(
 	CONST char *,	source,
-	CONST char *,	link,
+	CONST char *,	linktext,
 	int,		type)
 {
     struct trust *tp;
@@ -1248,7 +1226,7 @@ PUBLIC BOOLEAN exec_ok ARGS3(
     /*
      *	Security: reject on relative path.
      */
-    if ((cp = strchr(link, '[')) != NULL) {
+    if ((cp = strchr(linktext, '[')) != NULL) {
 	char *cp1;
 	if (((cp1 = strchr(cp, '-')) != NULL) &&
 	    strchr(cp1, ']') != NULL) {
@@ -1265,7 +1243,7 @@ PUBLIC BOOLEAN exec_ok ARGS3(
     /*
      *	Security: reject on relative path.
      */
-    if (strstr(link, "../") != NULL) {
+    if (strstr(linktext, "../") != NULL) {
 	HTAlert(RELPATH_IN_EXEC_LINK);
 	return FALSE;
     }
@@ -1273,7 +1251,7 @@ PUBLIC BOOLEAN exec_ok ARGS3(
     /*
      *	Security: reject on strange character.
      */
-    for (cp = link; *cp != '\0'; cp++) {
+    for (cp = linktext; *cp != '\0'; cp++) {
 	if (!isalnum(*cp) &&
 	    *cp != '_' && *cp != '-' && *cp != ' ' &&
 	    *cp != ':' && *cp != '.' && *cp != '/' &&
@@ -1294,9 +1272,9 @@ PUBLIC BOOLEAN exec_ok ARGS3(
 check_tp_for_entry:
     while (tp) {
 	if (tp->type == Type) {
-	    char CONST *command = link;
+	    char CONST *command = linktext;
 
-	    if (strstr(command,"//") == link) {
+	    if (strstr(command,"//") == linktext) {
 		command += 2;
 	    }
 #ifdef VMS
@@ -1358,11 +1336,8 @@ PRIVATE int fix_http_urls ARGS1(
 	 */
 	CTRACE(tfp, "fix_http_urls: URL '%s'\n", doc->address);
 	doc->address[strlen(doc->address)-1] = '\0';
-	if (TRACE) {
-	    fprintf(tfp, "        changed to '%s'\n", doc->address);
-	    if (!LYTraceLogFP)
-		sleep(MessageSecs);
-	}
+	CTRACE(tfp, "        changed to '%s'\n", doc->address);
+	CTRACE_SLEEP(MessageSecs);
     }
 
     /*
@@ -1375,11 +1350,8 @@ PRIVATE int fix_http_urls ARGS1(
     }
     CTRACE(tfp, "fix_http_urls: URL '%s'\n", doc->address);
     StrAllocCat(doc->address, "/");
-    if (TRACE) {
-	fprintf(tfp, "        changed to '%s'\n",doc->address);
-	if (!LYTraceLogFP)
-	    sleep(MessageSecs);
-    }
+    CTRACE(tfp, "        changed to '%s'\n",doc->address);
+    CTRACE_SLEEP(MessageSecs);
 
     return(1);
 }

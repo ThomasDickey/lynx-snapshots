@@ -372,6 +372,7 @@ The local equivalents of CR and LF
 
 #define CTRACE if(TRACE)fprintf
 #define tfp TraceFP()
+#define CTRACE_SLEEP(secs) if (TRACE && LYTraceLogFP == 0) sleep(secs)
 
 extern FILE *TraceFP NOPARAMS;
 
@@ -384,9 +385,24 @@ extern FILE *TraceFP NOPARAMS;
  * for the stdio functions as well as the network functions.
  */
 #if defined(USE_SOCKS5) && !defined(DONT_USE_SOCKS5)
-#define SOCKS4TO5
-#define SHORTENED_RBIND
+#define SOCKS4TO5	/* turn on the Rxxxx definitions used in Lynx */
 #include <socks.h>
+
+/*
+ * The AIX- and SOCKS4-specific definitions in socks.h are inconsistent. 
+ * Repair them so they're consistent (and usable).
+ */
+#if defined(_AIX) && !defined(USE_SOCKS4_PREFIX)
+#undef  Raccept
+#define Raccept       accept
+#undef  Rgetsockname
+#define Rgetsockname  getsockname
+#undef  Rgetpeername
+#define Rgetpeername  getpeername
+#endif
+
 #endif /* USE_SOCKS5 */
+
+#define SHORTENED_RBIND	/* FIXME: do this in configure-script */
 
 #endif /* HTUTILS_H */

@@ -301,6 +301,7 @@ PUBLIC BOOLEAN LYUseDefaultRawMode = TRUE;
 PUBLIC char *UCAssume_MIMEcharset = NULL;
 PUBLIC char *UCAssume_localMIMEcharset = NULL;
 PUBLIC char *UCAssume_unrecMIMEcharset = NULL;
+PUBLIC BOOLEAN LYSaveBookmarksInUnicode = FALSE;
 PUBLIC int LYlines = 24;
 PUBLIC int LYcols = 80;
 PUBLIC int dump_output_width = 0;
@@ -2432,8 +2433,10 @@ static int restrictions_fun ARGS3(
     if (next_arg != 0) {
 	parse_restrictions(next_arg);
     } else {
+	SetOutputMode( O_TEXT );
 	for (n = 0; n < sizeof(Usage)/sizeof(Usage[0]); n++)
 	    printf("%s\n", Usage[n]);
+	SetOutputMode( O_BINARY );
 	exit(0);
     }
     return 0;
@@ -2494,6 +2497,8 @@ static int version_fun ARGS3(
 	char **,		argv GCC_UNUSED,
 	char *,			next_arg GCC_UNUSED)
 {
+    SetOutputMode( O_TEXT );
+
     printf("\n%s Version %s (1998)\n", LYNX_NAME, LYNX_VERSION);
     printf(
 	  "Copyrights held by the University of Kansas, CERN, and other contributors.\n"
@@ -2502,6 +2507,9 @@ static int version_fun ARGS3(
     printf(
 	  "See http://lynx.browser.org/ and the online help for more information.\n\n"
 	  );
+
+    SetOutputMode( O_BINARY );
+
     exit(0);
     /* NOT REACHED */
     return 0;

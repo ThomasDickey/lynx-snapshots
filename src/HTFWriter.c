@@ -512,8 +512,7 @@ PUBLIC HTStream* HTSaveAndExecute ARGS3(
 	    return(NULL);
 	}
 	if (no_exec) {
-	    _statusline(EXECUTION_DISABLED);
-	    sleep(AlertSecs);
+	    HTAlert(EXECUTION_DISABLED);
 	    return HTPlainPresent(pres, anchor, sink);
 	}
 	if (!local_exec)
@@ -526,8 +525,7 @@ PUBLIC HTStream* HTSaveAndExecute ARGS3(
 
 		sprintf(buf, EXECUTION_DISABLED_FOR_FILE,
 			     key_for_func(LYK_OPTIONS));
-		_statusline(buf);
-		sleep(AlertSecs);
+		HTAlert(buf);
 		return HTPlainPresent(pres, anchor, sink);
 	    }
     }
@@ -547,7 +545,7 @@ PUBLIC HTStream* HTSaveAndExecute ARGS3(
     me->sink = sink;
 
     if (LYCachedTemp(fnam, &(anchor->FileCache))) {
-        me->fp = LYNewBinFile (fnam);
+	me->fp = LYNewBinFile (fnam);
     } else {
 	/*
 	 *  Check for a suffix.
@@ -652,8 +650,7 @@ PUBLIC HTStream* HTSaveToFile ARGS3(
 	if (traversal ||
 	    (no_download && !override_no_download && no_disk_save)) {
 	    if (!traversal) {
-		_statusline(CANNOT_DISPLAY_FILE);
-		sleep(AlertSecs);
+		HTAlert(CANNOT_DISPLAY_FILE);
 	    }
 	    LYCancelDownload = TRUE;
 	    if (traversal)
@@ -744,8 +741,7 @@ PUBLIC HTStream* HTSaveToFile ARGS3(
      *	Unix folks don't need to know this, but we'll show it to
      *	them, too. - FM
      */
-    user_message("Content-type: %s", pres->rep->name);
-    sleep(MessageSecs);
+    HTUserMsg2("Content-type: %s", pres->rep->name);
 
     StrAllocCopy(WWW_Download_File,fnam);
 
@@ -796,6 +792,8 @@ Prepend_BASE:
 	 *  Note that the markup will be technically invalid if a DOCTYPE
 	 *  declaration, or HTML or HEAD tags, are present, and thus the
 	 *  file may need editing for perfection. - FM
+	 *
+	 *  Add timestamp (last reload).
 	 */
 	char *temp = NULL;
 
@@ -812,8 +810,12 @@ Prepend_BASE:
 	}
 
 	fprintf(ret_obj->fp,
-		"<!-- X-URL: %s -->\n<BASE HREF=\"%s\">\n\n",
-		anchor->address, (temp ? temp : anchor->address));
+		"<!-- X-URL: %s -->\n", anchor->address);
+	if (anchor->date && *anchor->date)
+	     fprintf(ret_obj->fp,
+		"<!-- Date: %s -->\n", anchor->date);
+	fprintf(ret_obj->fp,
+		"<BASE HREF=\"%s\">\n\n", (temp ? temp : anchor->address));
 	FREE(temp);
     }
     if (LYPrependCharsetToSource &&

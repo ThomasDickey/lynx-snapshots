@@ -32,7 +32,7 @@ extern void change_sug_filename PARAMS((char *fname));
 extern int number2arrows PARAMS((int number));
 extern void parse_restrictions PARAMS((CONST char *s));
 extern void checkmail NOPARAMS;
-extern int LYCheckMail NOPARAMS;
+extern void LYCheckMail NOPARAMS;
 extern void LYEnsureAbsoluteURL PARAMS((char **href, CONST char *name));
 extern void LYConvertToURL PARAMS((char **AllocatedString));
 extern BOOLEAN LYExpandHostForURL PARAMS((

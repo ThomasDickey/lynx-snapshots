@@ -6,6 +6,7 @@
 */
 
 #include <HTUtils.h>
+#include <HTAlert.h>
 #include <LYUtils.h>
 #include <GridText.h>
 #include <LYList.h>
@@ -59,20 +60,17 @@ PUBLIC int showlist ARGS2(
     hidden_links = HText_HiddenLinkCount(HTMainText);
     if (refs <= 0 && hidden_links > 0 &&
 	LYHiddenLinks != HIDDENLINKS_SEPARATE) {
-	_statusline(NO_VISIBLE_REFS_FROM_DOC);
-	sleep(MessageSecs);
+	HTUserMsg(NO_VISIBLE_REFS_FROM_DOC);
 	return(-1);
     }
     if (refs <= 0 && hidden_links <= 0) {
-	_statusline(NO_REFS_FROM_DOC);
-	sleep(MessageSecs);
+	HTUserMsg(NO_REFS_FROM_DOC);
 	return(-1);
     }
 
     LYRemoveTemp(tempfile);
     if ((fp0 = LYOpenTemp(tempfile, HTML_SUFFIX, "w")) == NULL) {
-	_statusline(CANNOT_OPEN_TEMP);
-	sleep(MessageSecs);
+	HTUserMsg(CANNOT_OPEN_TEMP);
 	return(-1);
     }
 

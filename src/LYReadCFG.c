@@ -783,6 +783,7 @@ static int viewer_fun ARGS1(
     return 0;
 }
 
+/* This table should be sorted alphabetically */
 static Config_Type Config_Table [] =
 {
      PARSE_SET("accept_all_cookies", CONF_BOOL, LYAcceptAllCookies),
@@ -874,6 +875,7 @@ static Config_Type Config_Table [] =
      PARSE_INT("messagesecs", CONF_INT, MessageSecs),
      PARSE_SET("minimal_comments", CONF_BOOL, minimal_comments),
      PARSE_INT("multi_bookmark_support", CONF_BOOL, LYMultiBookmarks),
+     PARSE_SET("ncr_in_bookmarks", CONF_BOOL, LYSaveBookmarksInUnicode),
      PARSE_FUN("news_chunk_size", CONF_FUN, news_chunk_size_fun),
      PARSE_FUN("news_max_chunk", CONF_FUN, news_max_chunk_fun),
      PARSE_FUN("news_posting", CONF_FUN, news_posting_fun),

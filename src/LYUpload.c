@@ -81,8 +81,7 @@ PUBLIC int LYUpload ARGS1(
      *	Parsed out the Method and the Location?
      */
     if (upload_command->command == NULL) {
-	_statusline("ERROR! - upload command is misconfigured");
-	sleep(AlertSecs);
+	HTAlert("ERROR! - upload command is misconfigured");
 	goto failed;
     }
 
@@ -104,18 +103,13 @@ retry:
 	    goto cancelled;
 
 	if (strstr(tmpbuf, "../") != NULL) {
-	    _statusline(
-		    "Illegal redirection \"../\" found! Request ignored.");
-	    sleep(AlertSecs);
+	    HTAlert("Illegal redirection \"../\" found! Request ignored.");
 	    goto cancelled;
 	} else if (strchr(tmpbuf, '/') != NULL) {
-	    _statusline("Illegal character \"/\" found! Request ignored.");
-	    sleep(AlertSecs);
+	    HTAlert("Illegal character \"/\" found! Request ignored.");
 	    goto cancelled;
 	} else if (tmpbuf[0] == '~') {
-	    _statusline(
-		"Illegal redirection using \"~\" found! Request ignored.");
-	    sleep(AlertSecs);
+	    HTAlert("Illegal redirection using \"~\" found! Request ignored.");
 	    goto cancelled;
 	}
 	sprintf(buffer, "%s/%s", directory, tmpbuf);
@@ -197,13 +191,11 @@ retry:
     return 1;
 
 failed:
-    _statusline("Unable to upload file.");
-    sleep(AlertSecs);
+    HTAlert("Unable to upload file.");
     return 0;
 
 cancelled:
-    _statusline("Cancelling.");
-    sleep(InfoSecs);
+    HTInfoMsg("Cancelling.");
     return 0;
 }
 

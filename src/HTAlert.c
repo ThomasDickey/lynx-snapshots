@@ -39,6 +39,37 @@ PUBLIC void HTAlert ARGS1(
     sleep(AlertSecs);
 }
 
+/*	Issue an informational message.			HTInfoMsg()
+**	--------------------------------
+*/
+PUBLIC void HTInfoMsg ARGS1(
+	CONST char *,	Msg)
+{
+    _statusline(Msg);
+    if (Msg && *Msg)
+	sleep(InfoSecs);
+}
+
+/*	Issue an important message.			HTUserMsg()
+**	--------------------------------
+*/
+PUBLIC void HTUserMsg ARGS1(
+	CONST char *,	Msg)
+{
+    _statusline(Msg);
+    if (Msg && *Msg)
+	sleep(MessageSecs);
+}
+
+PUBLIC void HTUserMsg2 ARGS2(
+	CONST char *,	Msg,
+	CONST char *,	Arg)
+{
+    _user_message(Msg, Arg);
+    if (Msg && *Msg)
+	sleep(MessageSecs);
+}
+
 /*	Issue a progress message.			HTProgress()
 **	-------------------------
 */
@@ -454,8 +485,7 @@ PUBLIC BOOL HTConfirmCookie ARGS4(
 		**  Set to accept all cookies for this domain.
 		*/
 		de->bv = ACCEPT_ALWAYS;
-		_user_message(ALWAYS_ALLOWING_COOKIES, de->domain);
-		sleep(MessageSecs);
+		HTUserMsg2(ALWAYS_ALLOWING_COOKIES, de->domain);
 		return TRUE;
 
 	    case 'N':
@@ -464,8 +494,7 @@ PUBLIC BOOL HTConfirmCookie ARGS4(
 		/*
 		**  Reject the cookie.
 		*/
-		_statusline(REJECTING_COOKIE);
-		sleep(MessageSecs);
+		HTUserMsg(REJECTING_COOKIE);
 		return FALSE;
 
 	    case 'V':
@@ -473,16 +502,14 @@ PUBLIC BOOL HTConfirmCookie ARGS4(
 		**  Set to reject all cookies from this domain.
 		*/
 		de->bv = REJECT_ALWAYS;
-		_user_message(NEVER_ALLOWING_COOKIES, de->domain);
-		sleep(MessageSecs);
+		HTUserMsg2(NEVER_ALLOWING_COOKIES, de->domain);
 		return FALSE;
 
 	    case 'Y':
 		/*
 		**  Accept the cookie.
 		*/
-		_statusline(ALLOWING_COOKIE);
-		sleep(InfoSecs);
+		HTInfoMsg(ALLOWING_COOKIE);
 		return TRUE;
 
 	    default:

@@ -743,12 +743,9 @@ re_read:
 		break;
 	    }
 	default:
-	   if (TRACE) {
-		fprintf(tfp,"Unknown key sequence: %d:%d:%d\n",c,b,a);
-		if (!LYTraceLogFP) {
-		    sleep(MessageSecs);
-		}
-	   }
+	    CTRACE(tfp,"Unknown key sequence: %d:%d:%d\n",c,b,a);
+	    CTRACE_SLEEP(MessageSecs);
+	    break;
 	}
 	if (isdigit(a) && (b == '[' || c == 155) && d != -1 && d != '~')
 	    d = GetChar();
@@ -896,6 +893,78 @@ re_read:
 	}
     }
 #endif /* HAVE_KEYPAD */
+#ifdef DJGPP_KEYHANDLER
+    else {
+	switch(c) {
+	case K_Down:		   /* The four arrow keys ... */
+	case K_EDown:
+	   c = DNARROW;
+	   break;
+	case K_Up:
+	case K_EUp:
+	   c = UPARROW;
+	   break;
+	case K_Left:
+	case K_ELeft:
+	   c = LTARROW;
+	   break;
+	case K_Right: 		   /* ... */
+	case K_ERight:
+	   c = RTARROW;
+	   break;
+	case K_Home:		   /* Home key (upward+left arrow) */
+	case K_EHome:
+	   c = HOME;
+	   break;
+	case K_PageDown: 	   /* Next page */
+	case K_EPageDown:
+	   c = PGDOWN;
+	   break;
+	case K_PageUp:	 	   /* Previous page */
+	case K_EPageUp:
+	   c = PGUP;
+	   break;
+	case K_End:		   /* home down or bottom (lower left) */
+	case K_EEnd:
+	   c = END_KEY;
+	   break;
+	}
+    }
+#endif /* DGJPP_KEYHANDLER */
+#if defined(USE_SLANG) && defined(__DJGPP__) && !defined(DJGPP_KEYHANDLER)  && !defined(USE_SLANG_KEYMAPS)
+    else {
+	switch(c) {
+	case SL_KEY_DOWN:	   /* The four arrow keys ... */
+	   c = DNARROW;
+	   break;
+	case SL_KEY_UP:
+	   c = UPARROW;
+	   break;
+	case SL_KEY_LEFT:
+	   c = LTARROW;
+	   break;
+	case SL_KEY_RIGHT: 	   /* ... */
+	   c = RTARROW;
+	   break;
+	case SL_KEY_HOME:	   /* Home key (upward+left arrow) */
+	case SL_KEY_A1:		   /* upper left of keypad */
+	   c = HOME;
+	   break;
+	case SL_KEY_NPAGE: 	   /* Next page */
+	case SL_KEY_C3:		   /* lower right of keypad */
+	   c = PGDOWN;
+	   break;
+	case SL_KEY_PPAGE: 	   /* Previous page */
+	case SL_KEY_A3:		   /* upper right of keypad */
+	   c = PGUP;
+	   break;
+	case SL_KEY_END:	   /* home down or bottom (lower left) */
+	case SL_KEY_C1:		   /* lower left of keypad */
+	   c = END_KEY;
+	   break;
+	}
+    }
+#endif /* USE_SLANG && __DJGPP__ && !DJGPP_KEYHANDLER && !USE_SLANG_KEYMAPS */
 
 #if (defined(__DJGPP__) || defined(_WINDOWS))
     if (c > 659)

@@ -27,7 +27,7 @@
 
 /*
  *  printfile prints out the current file minus the links and targets
- *  to a verity of places
+ *  to a variety of places
  */
 
 /* it parses an incoming link that looks like
@@ -342,8 +342,7 @@ PUBLIC int printfile ARGS1(
 		    /*
 		     *	Save cancelled.
 		     */
-		    _statusline(SAVE_REQUEST_CANCELLED);
-		    sleep(InfoSecs);
+		    HTInfoMsg(SAVE_REQUEST_CANCELLED);
 		    break;
 		}
 
@@ -367,8 +366,7 @@ PUBLIC int printfile ARGS1(
 		if (!strcmp(filename, "/dev/null"))
 #endif /* VMS */
 		{
-		    _statusline(SAVE_REQUEST_CANCELLED);
-		    sleep(InfoSecs);
+		    HTInfoMsg(SAVE_REQUEST_CANCELLED);
 		    break;
 		}
 		if ((cp = strchr(filename, '~'))) {
@@ -439,14 +437,12 @@ PUBLIC int printfile ARGS1(
 #ifdef VMS
 		    if (HadVMSInterrupt) {
 			HadVMSInterrupt = FALSE;
-			_statusline(SAVE_REQUEST_CANCELLED);
-			sleep(InfoSecs);
+			HTInfoMsg(SAVE_REQUEST_CANCELLED);
 			break;
 		    }
 #endif /* VMS */
 		    if (c == 7 || c == 3) { /* Control-G or Control-C */
-			_statusline(SAVE_REQUEST_CANCELLED);
-			sleep(InfoSecs);
+			HTInfoMsg(SAVE_REQUEST_CANCELLED);
 			break;
 		    }
 		    if (TOUPPER(c) == 'N') {
@@ -473,10 +469,17 @@ PUBLIC int printfile ARGS1(
 		     *	get any partial or relative URLs resolved
 		     *	properly if no BASE tag is present to
 		     *	replace it. - FM
+		     *
+		     *  Add timestamp (last reload).
 		     */
+
 		    fprintf(outfile_fp,
-			    "<!-- X-URL: %s -->\n<BASE HREF=\"%s\">\n",
-			    newdoc->address, content_base);
+			    "<!-- X-URL: %s -->\n", newdoc->address);
+		    if (HText_getDate() != NULL)
+			 fprintf(outfile_fp,
+			    "<!-- Date: %s -->\n", HText_getDate());
+		    fprintf(outfile_fp,
+			    "<BASE HREF=\"%s\">\n", content_base);
 		}
 
 		if (LYPrependCharsetToSource && HTisDocumentSource()) {
@@ -543,8 +546,7 @@ PUBLIC int printfile ARGS1(
 #ifdef VMS
 		if (HadVMSInterrupt) {
 		    HadVMSInterrupt = FALSE;
-		    _statusline(MAIL_REQUEST_CANCELLED);
-		    sleep(InfoSecs);
+		    HTInfoMsg(MAIL_REQUEST_CANCELLED);
 		    break;
 		}
 #endif /* VMS */
@@ -553,8 +555,7 @@ PUBLIC int printfile ARGS1(
 		    addstr("   Ok...");
 		    first_mail_preparsed = FALSE;
 		} else	{
-		    _statusline(MAIL_REQUEST_CANCELLED);
-		    sleep(InfoSecs);
+		    HTInfoMsg(MAIL_REQUEST_CANCELLED);
 		    break;
 		}
 	    }
@@ -565,8 +566,7 @@ PUBLIC int printfile ARGS1(
 		if (LYgetstr(user_response, VISIBLE,
 			     sizeof(user_response), NORECALL) < 0 ||
 		    *user_response == '\0') {
-		    _statusline(MAIL_REQUEST_CANCELLED);
-		    sleep(InfoSecs);
+		    HTInfoMsg(MAIL_REQUEST_CANCELLED);
 		    break;
 		}
 
@@ -733,8 +733,7 @@ PUBLIC int printfile ARGS1(
 		outfile_fp = popen(buffer, "w");
 #endif
 		if (outfile_fp == NULL) {
-		    _statusline(MAIL_REQUEST_FAILED);
-		    sleep(AlertSecs);
+		    HTAlert(MAIL_REQUEST_FAILED);
 		    break;
 		}
 
@@ -867,8 +866,7 @@ PUBLIC int printfile ARGS1(
 #ifdef VMS
 		    if (HadVMSInterrupt) {
 			HadVMSInterrupt = FALSE;
-			_statusline(PRINT_REQUEST_CANCELLED);
-			sleep(InfoSecs);
+			HTInfoMsg(PRINT_REQUEST_CANCELLED);
 			break;
 		    }
 #endif /* VMS */
@@ -876,8 +874,7 @@ PUBLIC int printfile ARGS1(
 			 || c == '\n' || c == '\r') {
 			addstr("   Ok...");
 		    } else {
-			_statusline(PRINT_REQUEST_CANCELLED);
-			sleep(InfoSecs);
+			HTInfoMsg(PRINT_REQUEST_CANCELLED);
 			break;
 		    }
 		}
@@ -890,8 +887,7 @@ PUBLIC int printfile ARGS1(
 		*filename = '\0';
 		if (LYgetstr(filename, VISIBLE,
 			     sizeof(filename), NORECALL) < 0) {
-		      _statusline(PRINT_REQUEST_CANCELLED);
-		      sleep(InfoSecs);
+		      HTInfoMsg(PRINT_REQUEST_CANCELLED);
 		      break;
 		}
 
@@ -955,8 +951,7 @@ PUBLIC int printfile ARGS1(
 #ifdef VMS
 		    if (HadVMSInterrupt) {
 			HadVMSInterrupt = FALSE;
-			_statusline(PRINT_REQUEST_CANCELLED);
-			sleep(InfoSecs);
+			HTInfoMsg(PRINT_REQUEST_CANCELLED);
 			break;
 		    }
 #endif /* VMS */
@@ -964,8 +959,7 @@ PUBLIC int printfile ARGS1(
 			 || c == '\n' || c == '\r') {
 			addstr("   Ok...");
 		    } else  {
-			_statusline(PRINT_REQUEST_CANCELLED);
-			sleep(InfoSecs);
+			HTInfoMsg(PRINT_REQUEST_CANCELLED);
 			break;
 		    }
 		}
@@ -1111,8 +1105,7 @@ PUBLIC int printfile ARGS1(
 			    /*
 			     *	Printer cancelled.
 			     */
-			    _statusline(PRINT_REQUEST_CANCELLED);
-			    sleep(InfoSecs);
+			    HTInfoMsg(PRINT_REQUEST_CANCELLED);
 			    break;
 			}
 
@@ -1136,8 +1129,7 @@ PUBLIC int printfile ARGS1(
 			if (!strcmp(filename, "/dev/null"))
 #endif /* VMS */
 			{
-			    _statusline(PRINT_REQUEST_CANCELLED);
-			    sleep(InfoSecs);
+			    HTInfoMsg(PRINT_REQUEST_CANCELLED);
 			    break;
 			}
 			HTAddSugFilename(filename);
@@ -1270,7 +1262,7 @@ PUBLIC int print_options ARGS2(
 
     StrAllocCopy(*newfile, print_filename);
 
-    fprintf(fp0, "<head>\n<title>%s</title>\n</head>\n<body>\n",
+    fprintf(fp0, "<html>\n<head>\n<title>%s</title>\n</head>\n<body>\n",
 		 PRINT_OPTIONS_TITLE);
 
     fprintf(fp0,"<h1>Printing Options (%s Version %s)</h1><pre>\n",
@@ -1294,16 +1286,19 @@ PUBLIC int print_options ARGS2(
 		lines_in_file);
     else
 	fprintf(fp0,"   Save to disk disabled.\n");
-    if (child_lynx == FALSE && no_mail == FALSE)
+    if (child_lynx == FALSE && no_mail == FALSE && local_host_only == FALSE)
 	 fprintf(fp0,
    "   <a href=\"LYNXPRINT://MAIL_FILE/lines=%d\">Mail the file</a>\n",
 		lines_in_file);
+
+#ifndef DOSPATH
     fprintf(fp0,
    "   <a href=\"LYNXPRINT://TO_SCREEN/lines=%d\">Print to the screen</a>\n",
 		lines_in_file);
     fprintf(fp0,
    "   <a href=\"LYNXPRINT://LPANSI/lines=%d\">Print out on a printer attached to your vt100 terminal</a>\n",
 		lines_in_file);
+#endif
 
     for (count = 0, cur_printer = printers; cur_printer != NULL;
 	cur_printer = cur_printer->next, count++)
@@ -1315,7 +1310,7 @@ PUBLIC int print_options ARGS2(
 		      cur_printer->name : "No Name Given"));
 	fprintf(fp0, "</a>\n");
     }
-    fprintf(fp0, "</pre>\n</body>\n");
+    fprintf(fp0, "</pre>\n</body>\n</html>\n");
     LYCloseTempFP(fp0);
 
     LYforce_no_cache = TRUE;

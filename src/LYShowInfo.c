@@ -102,8 +102,7 @@ PUBLIC int showinfo ARGS4(
 	strcpy(temp, cp);
 	HTUnEscape(temp);
 	if (lstat(temp, &dir_info) == -1) {
-	    _statusline(CURRENT_LINK_STATUS_FAILED);
-	    sleep(AlertSecs);
+	    HTAlert(CURRENT_LINK_STATUS_FAILED);
 	} else {
 	    char modes[80];
 	    if (S_ISDIR(dir_info.st_mode)) {

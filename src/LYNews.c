@@ -122,8 +122,7 @@ PUBLIC char *LYNewsPost ARGS2(
     if (LYgetstr(user_input, VISIBLE,
 		 sizeof(user_input), NORECALL) < 0 ||
 	term_message) {
-        _statusline(NEWS_POST_CANCELLED);
-	sleep(InfoSecs);
+        HTInfoMsg(NEWS_POST_CANCELLED);
 	LYCloseTempFP(fd);		/* Close the temp file.	*/
 	scrollok(stdscr, FALSE);	/* Stop scrolling.	*/
 	goto cleanup;
@@ -152,8 +151,7 @@ PUBLIC char *LYNewsPost ARGS2(
     if (LYgetstr(user_input, VISIBLE,
 		 sizeof(user_input), NORECALL) < 0 ||
 	term_message) {
-        _statusline(NEWS_POST_CANCELLED);
-        sleep(InfoSecs);
+        HTInfoMsg(NEWS_POST_CANCELLED);
         LYCloseTempFP(fd);		/* Close the temp file. */
 	scrollok(stdscr, FALSE);	/* Stop scrolling.	*/
         goto cleanup;
@@ -188,8 +186,7 @@ PUBLIC char *LYNewsPost ARGS2(
     if (LYgetstr(user_input, VISIBLE,
 		 sizeof(user_input), NORECALL) < 0 ||
 	term_message) {
-        _statusline(NEWS_POST_CANCELLED);
-        sleep(InfoSecs);
+        HTInfoMsg(NEWS_POST_CANCELLED);
         LYCloseTempFP(fd);		/* Close the temp file. */
 	scrollok(stdscr, FALSE);	/* Stop scrolling.	*/
         goto cleanup;
@@ -245,8 +242,7 @@ PUBLIC char *LYNewsPost ARGS2(
 	stop_curses();
 	if (system(user_input)) {
 	    start_curses();
-	    _statusline(ERROR_SPAWNING_EDITOR);
-	    sleep(AlertSecs);
+	    HTAlert(ERROR_SPAWNING_EDITOR);
 	} else {
 	    start_curses();
 	}
@@ -263,8 +259,7 @@ PUBLIC char *LYNewsPost ARGS2(
 	if (LYgetstr(user_input, VISIBLE,
 	    	     sizeof(user_input), NORECALL) < 0 ||
 	    term_message) {
-	    _statusline(NEWS_POST_CANCELLED);
-	    sleep(InfoSecs);
+	    HTInfoMsg(NEWS_POST_CANCELLED);
 	    LYCloseTempFP(fd);		/* Close the temp file.	*/
 	    scrollok(stdscr, FALSE);	/* Stop scrolling.	*/
 	    goto cleanup;
@@ -275,8 +270,7 @@ PUBLIC char *LYNewsPost ARGS2(
 	    *user_input = '\0';
 	    if (LYgetstr(user_input, VISIBLE,
 	       		 sizeof(user_input), NORECALL) < 0) {
-	        _statusline(NEWS_POST_CANCELLED);
-	        sleep(InfoSecs);
+	        HTInfoMsg(NEWS_POST_CANCELLED);
 	        LYCloseTempFP(fd);		/* Close the temp file. */
 		scrollok(stdscr, FALSE);	/* Stop scrolling.	*/
 	        goto cleanup;
@@ -363,9 +357,8 @@ PUBLIC char *LYNewsPost ARGS2(
         LYforce_no_cache = TRUE;
     }
     LYStatusLine = (LYlines - 1);
-    statusline(POSTING_TO_NEWS);
+    HTUserMsg(POSTING_TO_NEWS);
     LYStatusLine = -1;
-    sleep(MessageSecs);
 
     /*
      *  Come here to cleanup and exit.

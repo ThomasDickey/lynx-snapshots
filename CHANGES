@@ -1,12 +1,61 @@
 Changes since Lynx 2.8 release
 ================================================================================
 
+1998-08-15 (2.8.1dev.21)
+* correct pathname for help file in forms-options screen - TD
+* reduce clutter in LYOptions.c with SELECTED, DISABLED, NOTEMPTY macros,
+  PutOptValues, GetOptValues functions - TD
+* modified LYOptions options to include MBM support from form-based options, by
+  making a link href="LYNXOPTIONS://MBM_MENU" like it was in LYPrint.c and
+  calling edit_bookmarks() from postoptions() - LP
+* add/use HTUserMsg to encapsulate most of the important messages - TD
+* add/use HTInfoMsg to encapsulate most of the informational messages - TD
+* make most of the alert messages use HTAlert, for consistency - TD
+* exclude forms-options pages from history page - LP
+* The current keymapping for the DOS Slang ports maps the keys directly to lynx
+  actions via keymap.c.  There are several places in the code that test for
+  arrow keys, page up or down, home and end for special handling that depend on
+  the lynx definition of the keys.  Hence, the keys in the DOS Slang ports were
+  failing the tests and not working as expected.  The following patch now maps
+  these special keys.  They can no longer be mapped individually via the KEYMAP
+  mechanism in lynx.cfg.  Arrows should now work in GOTO fields.  Tested the
+  patch against the binaries maade by makefile.dos, makefile.dsl, and
+  makefile.wsl - DK
+* The wsl port seems to be working well with DISP_PARTIAL, make this the
+  default - DK
+* correct spelling in lynx.cfg - DK
+* modify HText_appendCharacter to wrap long lines when displaying HTML document
+  source - TD
+* add configure option --enable-cgi-links - TD
+* clarify discussion of no_proxy in lynx.cfg (Al Gilman).
+* Multilingual bookmarks:  now we store characters >127 in bookmark titles with
+  a more consistent and independent way, by keeping in unicode as &#UUUU
+  (NCR=numeric character reference).  The idea belongs to Klaus Weide & Andrey
+  Chernov (long ago).  It may be useful if we need switching display charset
+  frequently.  This is the case when you use lynx on different platforms, e.g.
+  on UNIX and from remote PC, but want to keep common bookmarks file valid.
+  Compatibility:  NCR as part of I18N and HTML4.0 specifications supported
+  starting with Lynx 2.7.2, Netscape 4.0 and MSIE 4.0.  New option to lynx.cfg
+  added:  NCR_IN_BOOKMARKS which is FALSE by default.  - LP
+* Tweak "print options menu" to exclude choises which are not available under
+  the certain conditions (print to the screen and lpansi on DOS/WINDOWS, print
+  to e-mail for local_host_only).  - LP
+* Forms options menu:  add a link on option_help.html; synchronize
+  option_help.html against Lynx_User_guide.html and lynx.cfg.  Rename label
+  "raw 8-bit or CJK Mode" with "CJK Mode" for CJK people and "raw 8-bit" for
+  others.  Cleanup postoptions() by introducing flags.
+* Force HTuncache_current_document if gen_options() invoked.  - LP This is a
+  dirty fix until we uncache only when necessary.  - LP
+* Add time/date in addition to X-URL and BASE (PrependBaseToSource), (request
+  by Hans-Joachim Gurt <gurt@nacamar.net>) - LP
+* Turn partial_display off if we are not interactive (reported by Ari Moisio
+  <armoi@sci.fi>) - LP
+* more fixes/refinements for auto-configuring socks5 on AIX (report by Brian
+  Hauber) - TD
 1998-08-06 (2.8.1dev.20)
 * rename eat_all_cookies to accept_all_cookies everywhere - BJP
-* added ACCEPT_ALL_COOKIES lines to the dist lynx.cfg -- this conflicts with
-  LP's "2.8.1dev.19 typo & lynx.man/lynx.hlp/ lynx.cfg fix" patch -- his adds
-  the EAT_ALL_COOKIES option to lynx.cfg (with the appropriate description),
-  this should be the only problem there - BJP
+* added ACCEPT_ALL_COOKIES lines to the dist lynx.cfg with the appropriate
+  description - BJP
 * added COOKIE_ACCEPT_DOMAINS and COOKIE_REJECT_DOMAINS to lynx.cfg.  These are
   comma delimited lists of the domains to handle - BJP
 * added cookie_add_acceptlist and cookie_add_rejectlist to LYCookie.c, which
@@ -28,7 +77,7 @@ Changes since Lynx 2.8 release
 * Few minor typos and forgotten notes in man/hlp/cfg files; also quote Bela's
   note on lynx.cfg INCLUDE facility - LP
 * correct typos in makefile.wsl, makefile.dsl - LP
-* correct typos, misuse of character set in LYOptions.c for preferred_doc_char
+* correct typos, fix character set problems in recent changes of LYOptions.c
   - LP
 * move include for socks.h past tcp.h, to allow for redefinition of some
   symbols on AIX (report by Brian Hauber) - TD

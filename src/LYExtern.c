@@ -16,6 +16,7 @@
 */
 
 #include <LYUtils.h>
+#include <HTAlert.h>
 #include <LYGlobalDefs.h>
 #include <LYExtern.h>
 #include <LYCurses.h>
@@ -44,8 +45,7 @@ void run_external ARGS1(char *, c)
 
 		if(no_externals && !externals2->always_enabled)
 		{
-		  statusline(EXTERNALS_DISABLED);
-		  sleep(MessageSecs);
+		  HTUserMsg(EXTERNALS_DISABLED);
 		  return;
 		}
 
@@ -66,8 +66,7 @@ void run_external ARGS1(char *, c)
 		if (*command != '\0')
 		{
 
-		 statusline(command);
-		 sleep(MessageSecs);
+		 HTUserMsg(command);
 
 		 stop_curses();
 		 fflush(stdout);
