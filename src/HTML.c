@@ -2115,7 +2115,7 @@ PRIVATE void HTML_start_element ARGS5(
 			(present &&
 			 present[HTML_A_TYPE] &&
 			   value[HTML_A_TYPE]) ? 
-   (HTLinkType*)HTAtom_for(value[HTML_A_TYPE]) : (void *)0);	/* Type */
+   (HTLinkType*)HTAtom_for(value[HTML_A_TYPE]) : (HTLinkType*)0);  /* Type */
 
 	/*
 	 *  Get rid of href since no longer needed.
@@ -2309,7 +2309,8 @@ PRIVATE void HTML_start_element ARGS5(
 	    StrAllocCopy(alt_string, (title ?
 	    			      title : "[USEMAP]"));
 
-	} else if (dest_ismap || present && present[HTML_IMG_ISMAP]) {
+	} else if ((dest_ismap == TRUE) ||
+		   (me->inA && present && present[HTML_IMG_ISMAP])) {
 	    StrAllocCopy(alt_string, (title ?
 	    			      title : "[ISMAP]"));
 
@@ -2335,8 +2336,9 @@ PRIVATE void HTML_start_element ARGS5(
 	    fprintf(stderr,
 	    	    "HTML IMG: USEMAP=%d ISMAP=%d ANCHOR=%d PARA=%d\n",
 		    map_href ? 1 : 0,
-		    (dest_ismap ||
-		     (present && present[HTML_IMG_ISMAP])) ? 1 : 0,
+		    ((dest_ismap == TRUE) ||
+		     (me->inA && present && present[HTML_IMG_ISMAP])) ?
+		     						    1 : 0,
 		    me->inA, me->inP);
 	}
 

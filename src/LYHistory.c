@@ -399,10 +399,10 @@ PUBLIC BOOLEAN historytarget ARGS1(
 	      LYoverride_no_cache == FALSE) ||
 	     text == NULL) &&
 	    HTConfirm(CONFIRM_POST_RESUBMISSION) == TRUE) {
-	    LYforce_no_cache == TRUE;
+	    LYforce_no_cache = TRUE;
 	    LYoverride_no_cache = FALSE;
 	} else if (text != NULL) {
-	    LYforce_no_cache == FALSE;
+	    LYforce_no_cache = FALSE;
 	    LYoverride_no_cache = TRUE;
 	} else {
 	    _statusline(CANCELLED);

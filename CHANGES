@@ -1,3 +1,174 @@
+---  Release of Lynx2-7 + BUGFIXES as Lynx v2.7.1 (April 4, 1997)   ---
+=======================================================================
+1997-04-04
+* Fixed typos in LYHistory.c, LYMail.c and LYMain.c which caused
+  failures of flag setting in the distributed code. - TD
+1997-03-31
+* Added a missing check for whether the fragment token is NULL in
+  LYConvertToURL() of LYUtils.c.  Without the check, the for-Unix code
+  could crash if a local file spec was entered as a startfile or goto
+  with escaped characters. - KW
+* Mod in HTML.c to retain "[INLINE]" as the default ALT string if an
+  IMG element has an ISMAP attribute but is not in Anchor content such
+  that it could not in fact function as a server-side image map. - FM
+1997-03-28
+* In mainloop(), after the call to HText_pageDisplay() following a change
+  of the document view, ensure that curdoc.link does not remain set to -1 
+  if there are any links on the screen.  This would otherwise happen if
+  a document is pushed to the history stack while there are no links, and
+  later popped (and refreshed) after one or more links have been created.
+  This change prevents segmentation faults which occurred after creation
+  of a new file in a previously empty directory via the DIRED menu.  The
+  access to invalid memory only occurred if the screen showing the empty
+  directory did not have a parent dir reference link (which is always the
+  case if NO_PARENT_DIR_REFERENCE was specified at compilation time). - KW
+1997-03-27
+* Fixed a typo and added comments for the code in LYMainLoop.c which
+  decides whether to load the URLs for homepage and/or startfile into
+  the goto buffer at startup.  The typo in the distributed code caused
+  the startfile URL always to be added to the goto buffer, even if
+  it had POST content such that it could be resent inappropriately
+  as a GET request via the goto buffer. - FM
+* Added a bsdi-slang target to the Makefile. - LE
+1997-03-26
+* Modified the HTStream structure and associated code in src/HTFWriter.c
+  so that we save and use the relevant content of the associated
+  HTPresentation structure as two HTFormat elements rather than via a
+  pointer to the HTPresentation structure itself, because the latter
+  structure might not be valid under some circumstances when
+  HTFWriter_free() is called.  The distributed code might indirectly
+  result in segmentation faults during downloading on linux and some
+  other flavors of Unix (though they don't occur for most flavors, or
+  on VMS). - KW
+1997-03-21
+* Mods in LYPrint.c to use ".txt" as the output file extension for
+  all rendered text/html files regardless of their original extension.
+  The distributed code was doing this only for ones with an extension
+  of ".html".  The original extension still is retained if the file
+  is being output as source. - FM
+* Added protection against passing a NULL pointer for path_url to
+  render_item() from dired_options() in LYLocal.c. - GN
+1997-03-20
+* Tweaked the protection against URLs directed to port 19 or port 25 so
+  that it can't be circumvented via lead zeros in the port numbers. - FM
+* Changed the compilation default so as not to send From MIME headers to
+  http or https servers.  The default can still be changed via lynx.cfg.
+  Replaced the -nofrom disabling switch to a -from switch for toggling
+  the compilation or configuration default.  Sending the From header
+  has become widely regarded as an invasion of privacy risk, particularly
+  in conjunction with cookie support. - FM
+* Corrected a typo in the lynx.cfg comments concerning TRUSTED_LYNXCGI
+  rules. - KW
+1997-03-17
+* Mods of LYNews.c and LYMail.c to prepend a "-- " separator before
+  appending the LYNX_SIG_FILE signature file to news and email
+  messages. - FM
+* Made the installation mode 755 in the top-level Makefile.  The
+  distributed code used 555, and some install commands were unable
+  to do the strip. - LWV
+1997-03-14
+* Corrected typos and expanded the comments concerning lynxcgi symbols
+  in userdefs.h and lynx.cfg. - FM
+* Modified SGML.c, LYCharSets.c and LYCharUtils.c to handle the numeric
+  character reference &#8482; as the named entity &trade; and use "(TM)"
+  as the ASCII substitution if the current character set does not have the
+  trademark character.  The distributed code was substituting &reg;. - FM
+* Include time.h via tcp.h for SVR4 systems.  The tcp.h header does include
+  sys/time.h for Unix systems, but this apparently doesn't get  struct tm 
+  and  extern char * ctime()  declared for SVR4. - FM
+1997-03-13
+* Added protection in LYGetFile.c against connections to the port 25
+  ESMTP service. - FM
+1997-03-11
+* Added protection in LYGetFile.c against denial of service attacks via
+  the port 19 CHARGEN service.  The distributed code left Lynx or proxies
+  vulnerable to such attacks via direct or redirection URLs. - FM
+1997-03-10
+* Fixed error in the handling of numeric character references with values
+  greater than 255 in SGML.c.  The distributed code was breaking after
+  substitutions instead of falling through to reset the string chunk and
+  recycle the terminator if not a semi-colon. - FM
+1997-03-08
+* Fixed error in the switch positioning of checks for XLOADIMAGE_COMMAND
+  and wais_proxy in LYReadCFG.c.  The distributed code had them reversed
+  under case 'W' versus case 'X'. - PDS
+* Expanded the copyright and licensing statements in the -version
+  output. - FM
+1997-03-04
+* Corrected the offset computation in textsearch() of LYSearch.c so that
+  WHEREIS searches repeated on a page with no links seek the target
+  starting at the line immediately following the last displayed.  The
+  distributed code was setting a greater offset. - JS
+1997-03-02
+* Don't entify post content for the showinfo display, now that we are
+  making it an XMP block in that display to handle all of the supported
+  enctypes. - FM
+1997-02-28
+* Changed all references to "image/*" to just "image" in the userdefs.h
+  and lynx.cfg comments about XLOADIMAGE_COMMAND.  The "/*" within the
+  userdefs.h comments was generating warnings from some compilers. - FM
+* Added a snake-slang target to the Makefile, and added -DUNIX to the
+  LYFLAGS for the snake3 and snake3-slang targets (HP-UX apparently does
+  not define "unix" itself with the -Ae switch, and thus needs to have
+  that definition forced via -DUNIX). - HL
+1997-02-26
+* Close both descriptors of the pipe() for the NSL_FORK enabled code
+  in HTTCP.c.  The distributed code was closing only one of them on
+  completed gethostbyname() calls, and neither on 'z'aps. - FM
+* Changed the HREF for the "Lynx FAQ" link in the online 'h'elp to
+  its new URL (http://www.slcc.edu/lynx/faq.html). - FM
+1997-02-25
+* More reverse engineering to cope with Netscape's bogus cookie header
+  parsing.  The parser must not require an '=' between the expires
+  attribute name and value, because Set-Cookie headers are being
+  transmitted without it (e.g., by http://law.agps.gov.au).  So Lynx
+  now treats that as another special case. - FM
+* Cope with invalid use of expires attributes in Version 1 cookies.
+  An -06 State Management draft recommends that for "backward
+  compatibility", and has been severely criticized in the HTTP-WG,
+  but it would be foolish not to assume Netscape will do that.  See the
+  expanded comments in LYSetCookie() of LYCookie.c for more information.
+  Note that "expires" thus cannot be used as a Version 1 cookie name, but
+  a provider would be foolish to use that, anyway.  Note also that the
+  possibility of using different header names for Version 1 versus
+  Version 0 (a.k.a., "Netscape") cookies is being discussed in the
+  HTTP-WG, which might have been better to do in the first place, but
+  the -05 draft has been approved as RFC 2109:
+    http://info.internet.isi.edu/in-notes/rfc/files/rfc2109.txt
+  so it would be a while before that were done, if ever. - FM
+1997-02-22
+* Fixed a memory management glitch which could cause a crash if the
+  MIME type of a reply to a FORM submission with METHOD=POST caused a
+  download offer to be invoked. - FM
+* Don't simplify ftp URLs by trimming trailing slashes if the URL is
+  being proxied.  The Netscape proxy server for some unknown reason
+  can return redirection for ftp URLs with the slash appended, and
+  trimming it can result in a redirection loop.  Based on a posted
+  patch from KW. - FM
+* Fixed two typos in the checks for HTPassHighCtrlRaw in LYExpandString()
+  of LYCharUtils.c. - KW
+* Fixed typo in the equality check on line 1553 in HTGopher.c. - AM
+1997-02-19
+* Reset the host string after an '@', if present, when trimming default
+  ":port" fields in the new code aimed at compliance with the Masinter
+  and Fielding URL drafts, expected to replace RFCs 1738 and 1808.  The
+  distributed code neglected to do that, and was ending up on a ":password"
+  field, if present, instead of on the ":port" field, causing the username
+  to be treated as the host name.  - FM
+* Expand the default port trimming so as to include all of the registered
+  URL schemes which support a port field in the v2.7 release. - FM
+* Correctly uncache the current directory listing when invoking an 'u'pload,
+  so that it will be updated to include the uploaded file if placed in the
+  current directory.  The released code attempted to do this in a manner
+  which prevented a pop, so that the directory listing couldn't be restored
+  on return from the uploader menu. - FM
+* Recognize a bookmark file used as the startfile, whether it resides in the
+  home directory or in a subdirectory off home.  The released code failed if
+  the file was in home, and not in a subdirectory, unless the -book switch
+  was used instead of a startfile entry or WWW_HOME variable. - FM
+=======================================================================
+---			Start of v2.7 bug fixes			    ---
+=======================================================================
 ---      Release of Lynx2-6FM as Lynx v2.7 (February 15, 1997)      ---
 =======================================================================
 1997-02-15

@@ -271,6 +271,8 @@ PUBLIC char * HTParse ARGS3(
 	    */
 	    {
 	    	char *p, *h;
+		if ((p = strchr(result, '@')) != NULL)
+		   tail = (p + 1);
 		p = strchr(tail, ':');
 		if (p != NULL && !isdigit((unsigned char)p[1]))
 		    /*
@@ -281,15 +283,23 @@ PUBLIC char * HTParse ARGS3(
 		    /*
 		    **  Port specified.
 		    */
-		    if ((!strcmp(access, "http"  ) && !strcmp(p, ":80" )) ||
-		        (!strcmp(access, "gopher") && !strcmp(p, ":70" )) ||
-		        (!strcmp(access, "ftp"   ) && !strcmp(p, ":21" )) ||
-		        (!strcmp(access, "wais"  ) && !strcmp(p, ":210")) ||
-		        (!strcmp(access, "nntp"  ) && !strcmp(p, ":119")) ||
-			(!strcmp(access, "news"  ) && !strcmp(p, ":119")) ||
-		        (!strcmp(access, "snews" ) && !strcmp(p, ":563")) ||
-		        (!strcmp(access, "finger") && !strcmp(p, ":79" )) ||
-		        (!strcmp(access, "cso"   ) && !strcmp(p, ":105")))
+		    if ((!strcmp(access, "http"      ) && !strcmp(p, ":80" )) ||
+		        (!strcmp(access, "https"     ) && !strcmp(p, ":443")) ||
+		        (!strcmp(access, "gopher"    ) && !strcmp(p, ":70" )) ||
+		        (!strcmp(access, "ftp"       ) && !strcmp(p, ":21" )) ||
+		        (!strcmp(access, "wais"      ) && !strcmp(p, ":210")) ||
+		        (!strcmp(access, "nntp"      ) && !strcmp(p, ":119")) ||
+			(!strcmp(access, "news"      ) && !strcmp(p, ":119")) ||
+			(!strcmp(access, "newspost"  ) && !strcmp(p, ":119")) ||
+			(!strcmp(access, "newsreply" ) && !strcmp(p, ":119")) ||
+		        (!strcmp(access, "snews"     ) && !strcmp(p, ":563")) ||
+		        (!strcmp(access, "snewspost" ) && !strcmp(p, ":563")) ||
+		        (!strcmp(access, "snewsreply") && !strcmp(p, ":563")) ||
+		        (!strcmp(access, "finger"    ) && !strcmp(p, ":79" )) ||
+		        (!strcmp(access, "telnet"    ) && !strcmp(p, ":23" )) ||
+		        (!strcmp(access, "tn3270"    ) && !strcmp(p, ":23" )) ||
+		        (!strcmp(access, "rlogin"    ) && !strcmp(p, ":513")) ||
+		        (!strcmp(access, "cso"       ) && !strcmp(p, ":105")))
 		    *p = '\0';	/* It is the default: ignore it */
 		}
 		if (p == NULL) { 

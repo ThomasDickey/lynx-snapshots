@@ -462,6 +462,8 @@ PUBLIC int HTParseInet ARGS2(
 			fprintf (stderr, "*** INTERRUPTED gethostbyname.\n");
 		    kill(fpid , SIGKILL);
 		    FREE(host);
+		    close(pfd[0]);
+		    close(pfd[1]);
 		    return HT_INTERRUPTED;
 		}
 		/*
@@ -479,6 +481,7 @@ PUBLIC int HTParseInet ARGS2(
 	    else
 	        cstat = read(pfd[0], (void *)&sin->sin_addr , cstat);
 	    close(pfd[0]);
+	    close(pfd[1]);
 	}
 
 	if (sin->sin_addr.s_addr == 0) {

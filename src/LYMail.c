@@ -384,6 +384,7 @@ PUBLIC void mailmsg ARGS4(int,cur, char *,owner_address,
     fprintf(fd, "Lynx ver. %s", LYNX_VERSION);
     if ((LynxSigFile != NULL) &&
         (fp = fopen(LynxSigFile, "r")) != NULL) {
+	fputs("-- \n", fd);
 	while (fgets(cmd, sizeof(cmd), fp) != NULL)
 	    fputs(cmd, fd);
 	fclose(fp);
@@ -657,7 +658,7 @@ PUBLIC void reply_by_mail ARGS3(
 	cp = cp1;
     }
     if (address[(strlen(address) - 1)] == ',')
-        address[(strlen(address) - 1)] == '\0';
+        address[(strlen(address) - 1)] = '\0';
     if (*address == '\0') {
         FREE(address);
 	FREE(body);
@@ -1050,6 +1051,7 @@ PUBLIC void reply_by_mail ARGS3(
 	    c = LYgetch();
 	if (TOUPPER(c) == 'Y') {
 	    if ((fd = fopen(tmpfile, "a")) != NULL) {
+	        fputs("-- \n", fd);
 	        while (fgets(user_input, sizeof(user_input), fp) != NULL) {
 		    fputs(user_input, fd);
 		}

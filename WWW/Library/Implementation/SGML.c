@@ -819,9 +819,16 @@ top:
 	    if (sscanf(string->data, "%d", &value) == 1) {
 	        if (value == 8482) {
 		    /*
-		    **  trade  Treat as reg. - FM
+		    **  trade  Handle as named entity. - FM
 		    */
-		    value = 174;
+		    string->size = 0;
+		    HTChunkPutc(string, 't');
+		    HTChunkPutc(string, 'r');
+		    HTChunkPutc(string, 'a');
+		    HTChunkPutc(string, 'd');
+		    HTChunkPutc(string, 'e');
+		    context->state = S_entity;
+		    goto top;
 		}
 	        /*
 		** Show the numeric entity if the value:
@@ -847,27 +854,25 @@ top:
 			**  ensp, emsp or thinsp. - FM
 			*/
 			PUTC(2);
-			break;
-		    }
-		    if (value == 8211 || value == 8212) {
+		    } else if (value == 8211 || value == 8212) {
 		        /*
 			**  ndash or mdash. - FM
 			*/
 			PUTC('-');
-			break;
+		    } else {
+			/*
+			**  Unhandled or llegal value.  Recover the "&#"
+			**  and digit(s), and recycle the terminator. - FM
+			*/
+			PUTC('&');
+			PUTC('#');
+			string->size--;
+			for (i = 0; i < string->size; i++)	/* recover */
+			    PUTC(string->data[i]);
+			string->size = 0;
+			context->state = S_text;
+			goto top;
 		    }
-		    /*
-		    **  Unhandled or llegal value.  Recover the "&#"
-		    **  and digit(s), and recycle the terminator. - FM
-		    */
-		    PUTC('&');
-		    PUTC('#');
-		    string->size--;
-		    for (i = 0; i < string->size; i++)	/* recover */
-		        PUTC(string->data[i]);
-		    string->size = 0;
-		    context->state = S_text;
-		    goto top;
 		} else if (value == 160) {
 		    /*
 		    **  Use Lynx special character for 160 (nbsp). - FM

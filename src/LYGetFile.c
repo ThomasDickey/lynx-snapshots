@@ -116,6 +116,38 @@ Try_Redirected_URL:
 	}
 
 	/*
+	 *  Protect against denial of service attacks
+	 *  via the port 19 CHARGEN service, and block
+	 *  connections to the port 25 ESMTP service. - FM
+	 */
+	if ((temp = HTParse(doc->address, "", PARSE_HOST)) != NULL &&
+	    strlen(temp) > 3) {
+	    char *cp1;
+
+	    if ((cp1 = strchr(temp, '@')) == NULL)
+	        cp1 = temp;
+	    if ((cp = strrchr(cp1, ':')) != NULL) {
+	        int value;
+
+		cp++;
+	        if (sscanf(cp, "%d", &value) == 1) {
+		    if (value == 19) {
+			HTAlert(PORT_NINETEEN_INVALID);
+			FREE(temp);
+			return(NULLFILE); 
+		    }
+		    if (value == 25) {
+			HTAlert(PORT_TWENTYFIVE_INVALID);
+			FREE(temp);
+			return(NULLFILE);
+		    } 
+		}
+	    }
+	}
+	cp = NULL;
+	FREE(temp);
+
+	/*
 	 *  Check to see if this is a universal document ID
 	 *  that lib WWW wants to handle.
  	 *
@@ -709,11 +741,13 @@ Try_Redirected_URL:
 			    StrAllocCopy(doc->address, fname);
 			    FREE(fname);
 		    	    WWWDoc.address = doc->address;
-		    	    FREE(WWWDoc.post_data);
-		    	    FREE(WWWDoc.post_content_type);
-			    WWWDoc.bookmark = doc->bookmark;
-			    WWWDoc.isHEAD = FALSE;
-			    WWWDoc.safe = doc->safe;
+			    FREE(doc->post_data);
+		    	    WWWDoc.post_data = NULL;
+			    FREE(doc->post_content_type);
+		    	    WWWDoc.post_content_type = NULL;
+			    WWWDoc.bookmark = doc->bookmark = FALSE;
+			    WWWDoc.isHEAD = doc->isHEAD = FALSE;
+			    WWWDoc.safe = doc->safe = FALSE;
 			    HTOutputFormat = WWW_PRESENT;
 			    if (!HTLoadAbsolute(&WWWDoc)) 
                         	return(NOT_FOUND);
@@ -1056,7 +1090,12 @@ PRIVATE int fix_http_urls ARGS1(
      */
     if (!strncmp(doc->address, "ftp", 3) &&
         doc->address[strlen(doc->address)-1] == '/') {
+        char * proxy;
 	char *path = HTParse(doc->address, "", PARSE_PATH|PARSE_PUNCTUATION);
+
+	/*
+	 *  If the path is a lone slash, we're done. - FM
+	 */
 	if (path) {
 	    if (path[0] == '/' && path[1] == '\0') {
 	        FREE(path);
@@ -1064,6 +1103,17 @@ PRIVATE int fix_http_urls ARGS1(
 	    }
 	    FREE(path);
 	}
+
+	/*
+	 *  If we're proxying ftp, don't trim anything. - KW
+	 */
+	if (((proxy = (char *)getenv("ftp_proxy")) != NULL) &&
+	    *proxy != '\0' && !override_proxy(doc->address))
+	    return 0;
+
+        /*
+	 *  If we get to here, trim the trailing slash. - FM
+	 */
 	if (TRACE)
 	    fprintf(stderr,"LYGetFile: URL %s\n", doc->address);
 	doc->address[strlen(doc->address)-1] = '\0';

@@ -330,7 +330,7 @@ PUBLIC char * LYUnEscapeEntities ARGS3(
 		    continue;
 		/*
 		**  For 8482 (trade) use the character reference if it's
-		**  a hidden INPUT, otherwise use 174 (reg). - FM
+		**  a hidden INPUT, otherwise handle as named entify. - FM
 		*/
 	        } else if (value == 8482) {
 		    if (hidden) {
@@ -345,13 +345,14 @@ PUBLIC char * LYUnEscapeEntities ARGS3(
 			    p--;
 			    *p = cpe;
 			}
-			cp = (p - 5);
+			cp = (p - 6);
 			*cp++ = '&';
-			*cp++ = '#';
-			*cp++ = '1';
-			*cp++ = '7';
-			*cp++ = '4';
-			p -= 5;
+			*cp++ = 't';
+			*cp++ = 'r';
+			*cp++ = 'a';
+			*cp++ = 'd';
+			*cp++ = 'e';
+			p -= 6;
 			continue;
 		    }
 		/*
@@ -857,7 +858,7 @@ PUBLIC void LYExpandString ARGS1(
 	**  set. - FM
 	*/
         if (((unsigned char)p[i]) == 160 &&
-	    HTPassHighCtrlRaw) {
+	    !HTPassHighCtrlRaw) {
 	    p[i] = HT_NON_BREAK_SPACE;
 	/*
 	**  Substitute Lynx special character for
@@ -865,7 +866,7 @@ PUBLIC void LYExpandString ARGS1(
 	**  set. - FM
 	*/
         } else if (((unsigned char)p[i]) == 173 &&
-	    HTPassHighCtrlRaw) {
+	    !HTPassHighCtrlRaw) {
 	    p[i] = LY_SOFT_HYPHEN;
 	/*
 	**  Substitute other 8-bit characters based on

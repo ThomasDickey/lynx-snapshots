@@ -3,6 +3,7 @@
 #include "HTAccess.h"
 #include "HTList.h"
 #include "HTAlert.h"
+#include "HTFile.h"
 #include "LYCurses.h"
 #include "GridText.h"
 #include "LYUtils.h"
@@ -68,6 +69,8 @@ PUBLIC int printfile ARGS1(document *,newdoc)
     int FnameNum;
     BOOLEAN FirstRecall = TRUE;
     char *content_base = NULL, *content_location = NULL;
+    HTFormat format;
+    HTAtom *encoding;
 #ifdef VMS
     extern BOOLEAN HadVMSInterrupt;
 #endif /* VMS */
@@ -189,10 +192,11 @@ PUBLIC int printfile ARGS1(document *,newdoc)
 	retry:	strcpy(filename, sug_filename);  /* add suggestion info */
 		/* make the sug_filename conform to system specs */
 		change_sug_filename(filename);
-		if (!(HTisDocumentSource()) && (len = strlen(filename)) > 4) {
-		    len -= 5;
-		    if (!strcasecomp((filename + len), ".html")) {
-		        filename[len] = '\0';
+		if (!(HTisDocumentSource()) &&
+		    (cp = strrchr(filename, '.')) != NULL) {
+		    format = HTFileFormat(filename, &encoding);
+		    if (!strcasecomp(format->name, "text/html")) {
+		        *cp = '\0';
 			strcat(filename, ".txt");
 		    }
 		}
@@ -436,16 +440,16 @@ PUBLIC int printfile ARGS1(document *,newdoc)
 		if (HTisDocumentSource()) {
 		    if ((len = strlen(tempfile)) > 3) {
 		        len -= 4;
-			if (!strcasecomp((filename + len), ".txt")) {
-			    filename[len] = '\0';
-			    strcat(filename, ".html");
+			if (!strcasecomp((tempfile + len), ".txt")) {
+			    tempfile[len] = '\0';
+			    strcat(tempfile, ".html");
 			}
 		    }
 		} else if ((len = strlen(tempfile)) > 4) {
 		    len -= 5;
-		    if (!strcasecomp((filename + len), ".html")) {
-		        filename[len] = '\0';
-			strcat(filename, ".txt");
+		    if (!strcasecomp((tempfile + len), ".html")) {
+		        tempfile[len] = '\0';
+			strcat(tempfile, ".txt");
 		    }
 		}
 		if((outfile_fp = fopen(tempfile, "w")) == NULL) {
@@ -716,10 +720,11 @@ PUBLIC int printfile ARGS1(document *,newdoc)
 			_statusline(FILENAME_PROMPT);
 		again:	strcpy(filename, sug_filename);
 			change_sug_filename(filename);
-			if ((len = strlen(filename)) > 4) {
-			    len -= 5;
-			    if (!strcasecomp((filename + len), ".html")) {
-			        filename[len] = '\0';
+			if (!(HTisDocumentSource()) &&
+			    (cp = strrchr(filename, '.')) != NULL) {
+			    format = HTFileFormat(filename, &encoding);
+			    if (!strcasecomp(format->name, "text/html")) {
+			        *cp = '\0';
 				strcat(filename, ".txt");
 			    }
 			}

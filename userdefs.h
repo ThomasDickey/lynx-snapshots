@@ -95,7 +95,7 @@
 
 /**************************
  * XLOADIMAGE_COMMAND will be used as a default in src/HTInit.c
- * for viewing image/* content types when the DECW$DISPLAY logical
+ * for viewing image content types when the DECW$DISPLAY logical
  * is set.  Make it the foreign command for your system's X image
  * viewer (commonly, "xv").  Make it "exit" or something like that
  * if you don't have one.  It can be anything that will handle GIF,
@@ -254,7 +254,7 @@
 
 /**************************
  * XLOADIMAGE_COMMAND will be used as a default in src/HTInit.c for
- * viewing image/* content types when the DISPLAY environment variable
+ * viewing image content types when the DISPLAY environment variable
  * is set.  Make it the full path and name of the xli (also known as
  * xloadimage or xview) command, or other image viewer.  Put 'echo' or
  * something like it here if you don't have a suitable viewer.  It can
@@ -948,8 +948,9 @@
  * should be able to fire up your main page with lynxcgi:path and everything
  * should work as if you were talking to the http daemon.
  *
- * Note that you must use a LYNXCGI_PATH directive in your lynx.cfg file as
- * well in order for this to work.
+ * Note that TRUSTED_LYNXCGI directives must be defined in your lynx.cfg file
+ * if you wish to place restrictions on source documents and/or paths for
+ * lynxcgi links.
  *
  * The cgi scripts are called with a fork()/execve() sequence so you don't
  * have to worry about people trying to abuse the code. :-)
@@ -958,8 +959,12 @@
  *
  * VMS:
  * ====
- * Uncomment the following line to define LYNXCGI_LINK, and when
- * running Lynx, enter  lynxcgi:advice  as a G)oto URL.
+ * The lynxcgi scheme, if enabled, yields an informational message regardless
+ * of the path, and use of the freeware OSU DECthreads server as a local
+ * script server is recommended instead of lynxcgi URLs.  Uncomment the
+ * following line to define LYNXCGI_LINKS, and when running Lynx, enter
+ * lynxcgi:advice  as a G)oto URL for more information and links to the
+ * OSU server distribution.
  */
 /* #define LYNXCGI_LINKS */
 
@@ -1150,7 +1155,7 @@
  */
 
 #define LYNX_NAME "Lynx"
-#define LYNX_VERSION "2.7"
+#define LYNX_VERSION "2.7.1"
 
 /****************************************************************
  * The LYMessages_en.h header defines default, English strings

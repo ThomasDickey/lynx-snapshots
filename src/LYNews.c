@@ -291,6 +291,7 @@ PUBLIC char *LYNewsPost ARGS2(
 	    c = LYgetch();
 	if (TOUPPER(c) == 'Y') {
 	    if ((fd = fopen(tmpfile, "a")) != NULL) {
+	        fputs("-- \n", fd);
 	        while (fgets(user_input, sizeof(user_input), fp) != NULL) {
 		    fputs(user_input, fd);
 		}

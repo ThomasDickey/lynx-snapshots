@@ -200,7 +200,7 @@ GLOBALREF  HTProtocol HTWAIS;
 **  Use "*" to override all proxy service:
 **	     no_proxy="*"
 */
-PRIVATE BOOL override_proxy ARGS1(
+PUBLIC BOOL override_proxy ARGS1(
 	CONST char *,	addr)
 {
     CONST char * no_proxy = getenv("no_proxy");

@@ -2241,12 +2241,14 @@ have_VMS_URL:
 		if ((stat(cp, &st) > -1) ||
 		    (fptemp = fopen(cp, "r")) != NULL) {
 		    /*
-		     *  It is a subdirectory of file on the local system
+		     *  It is a subdirectory or file on the local system
 		     *  with escaped characters and/or a fragment to be
 		     *  appended to the URL. - FM
 		     */
-		    *fragment = '#';
-		    fragment = NULL;
+		    if (fragment != NULL) {
+		        *fragment = '#';
+			fragment = NULL;
+		    }
 		    StrAllocCat(*AllocatedString, temp);
 		    if (TRACE) {
 		        fprintf(stderr, "Converted '%s' to '%s'\n",

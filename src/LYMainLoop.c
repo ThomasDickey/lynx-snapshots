@@ -516,10 +516,15 @@ try_again:
 			    if ((cp = (char *)calloc(1,
 				  (strlen((char *)&temp[len]) + 2))) == NULL)
 				outofmem(__FILE__, "mainloop");
-			    if (temp[len] == '/')
-				sprintf(cp, ".%s", (char *)&temp[len]);
-			    else
-				strcpy(cp, (char *)&temp[len]);
+			    if (temp[len] == '/') {
+			        if (strchr((char *)&temp[(len + 1)], '/')) {
+				    sprintf(cp, ".%s", (char *)&temp[len]);
+				} else {
+				    strcpy(cp, (char *)&temp[(len + 1)]);
+				}
+			    } else {
+			        strcpy(cp, (char *)&temp[len]);
+			    }
 			    for (i = 0; i <= MBM_V_MAXFILES; i++) {
 				if (MBM_A_subbookmark[i] &&
 #ifdef VMS
@@ -793,11 +798,22 @@ try_again:
 		}
 	    }
 	    if (startfile) {
+	        /*
+		 *  If homepage was not equated to startfile,
+		 *  make the homepage URL the first goto
+		 *  entry. - FM
+		 */
 	        if (homepage && strcmp(startfile, homepage))
 		    HTAddGotoURL(homepage);
-	    if (strcmp(startfile, newdoc.address) ||
-	        newdoc.post_data == NULL);
-		HTAddGotoURL(startfile);
+		/*
+		 *  If we are not starting up with startfile
+		 *  (e.g., had -book), or if we are using the
+		 *  startfile and it has no POST content, make
+		 *  the startfile URL a goto entry. - FM
+		 */
+		if (strcmp(startfile, newdoc.address) ||
+		    newdoc.post_data == NULL)
+		    HTAddGotoURL(startfile);
 	    }
 	    if (TRACE) {
 		refresh_screen = TRUE;
@@ -851,8 +867,16 @@ try_again:
 	        arrowup = FALSE;
 	    } else {
 	        curdoc.link = newdoc.link;
-		if (curdoc.link >= nlinks)
-	            curdoc.link = nlinks - 1;
+		if (curdoc.link >= nlinks) {
+		    curdoc.link = nlinks - 1;
+		} else if (curdoc.link < 0 && nlinks > 0) {
+		    /*
+		     *  We may have popped a doc (possibly in local_dired)
+		     *  which didn't have any links when it was pushed, but
+		     *  does have links now (e.g. a file was created) - KW
+		     */
+		    curdoc.link = 0;
+		}
 	    }
 
 	    show_help = FALSE; /* reset */
@@ -3765,12 +3789,17 @@ check_add_bookmark_to_self:
 	    if (lynx_edit_mode && !no_dired_support) {
                 LYUpload_options((char **)&newdoc.address,
 				 (char *)curdoc.address);
-		FREE(curdoc.address);	
 		FREE(newdoc.post_data);
 		FREE(newdoc.post_content_type);
 		FREE(newdoc.bookmark);
 		newdoc.isHEAD = FALSE;
 		newdoc.safe = FALSE;
+		/*
+		 *  Uncache the current listing so that it will
+		 *  be updated to included the uploaded file if
+		 *  placed in the current directory. - FM
+		 */
+		HTuncache_current_document();
 	     }
 	    break;
 #endif /* DIRED_SUPPORT */

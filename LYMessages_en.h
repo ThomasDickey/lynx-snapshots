@@ -558,6 +558,8 @@
 #define PROMTING_TO_ALLOW_COOKIES "'P'rompting to allow from domain '%s'."
 #define DELETE_ALL_COOKIES_IN_DOMAIN "Delete all cookies in this domain?"
 #define ALL_COOKIES_EATEN "All of the cookies in the jar have been eaten!"
+#define PORT_NINETEEN_INVALID "Port 19 not permitted in URLs."
+#define PORT_TWENTYFIVE_INVALID "Port 25 not permitted in URLs."
 
 #ifdef DIRED_SUPPORT
 #define DIRED_NOVICELINE \

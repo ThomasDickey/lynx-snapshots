@@ -295,7 +295,7 @@ PUBLIC char *LYUserAgent = NULL;	/* Lynx User-Agent header          */
 PUBLIC char *LYUserAgentDefault = NULL;	/* Lynx default User-Agent header  */
 PUBLIC BOOLEAN LYNoRefererHeader=FALSE;	/* Never send Referer header?      */
 PUBLIC BOOLEAN LYNoRefererForThis=FALSE;/* No Referer header for this URL? */
-PUBLIC BOOLEAN LYNoFromHeader=FALSE;	/* Never send From header?         */
+PUBLIC BOOLEAN LYNoFromHeader = TRUE;	/* Never send From header?         */
 PUBLIC BOOLEAN LYListNewsNumbers = LIST_NEWS_NUMBERS;
 PUBLIC BOOLEAN LYListNewsDates = LIST_NEWS_DATES;
 PUBLIC BOOLEAN LYisConfiguredForX = FALSE;
@@ -951,7 +951,7 @@ PUBLIC int main ARGS2(
     if (dump_output_immediately || LYMBMBlocked || no_multibook) {
         LYMultiBookmarks = FALSE;
 	LYMBMBlocked = TRUE;
-	no_multibook == TRUE;
+	no_multibook = TRUE;
     }
 
 #ifdef VMS
@@ -1459,6 +1459,12 @@ PRIVATE void parse_arg ARGS3(
 	break;;
 #endif /* VMS */
 	
+    } else if (strncmp(argv[0], "-from", 5) == 0) {
+        if (LYNoFromHeader)
+	    LYNoFromHeader = FALSE;
+	else
+	    LYNoFromHeader = TRUE;
+
     } else if (strncmp(argv[0], "-ftp", 4) == 0) {
 	ftp_ok = FALSE;
 
@@ -1639,9 +1645,6 @@ PRIVATE void parse_arg ARGS3(
 
     } else if (strncmp(argv[0], "-nofilereferer", 14) == 0) {
 	no_filereferer = TRUE;
-
-    } else if (strncmp(argv[0], "-nofrom", 7) == 0) {
-	LYNoFromHeader = TRUE;
 
     } else if (strncmp(argv[0], "-nolist", 7) == 0) {
 	nolist = TRUE;
@@ -1938,9 +1941,14 @@ PRIVATE void parse_arg ARGS3(
 	parse_restrictions("all");
 
     } else if (strncmp(argv[0], "-version", 8) == 0) {
-	printf("\n%s Version %s\n(c)1997 GNU General Public License\n\
-<URL:http://lynx.browser.org/>\n\n",
-		LYNX_NAME, LYNX_VERSION);
+	printf("\n%s Version %s (1997)\n", LYNX_NAME, LYNX_VERSION);
+	printf(
+ "Copyrights held by the University of Kansas, CERN, and other contributors.\n"
+	      );
+	printf("Distributed under the GNU General Public License.\n");
+	printf(
+ "See http://lynx.browser.org/ and the online help for more information.\n\n"
+	      );
 	exit(0);
 
     } else if (strncmp(argv[0], "-vikeys", 7) == 0) {
@@ -2001,6 +2009,7 @@ Output_Help_List:
     printf("    -fileversions    include all versions of files in local VMS directory\n");
     printf("                     listings\n");
     printf("    -force_html      forces the first document to be interpreted as HTML\n");
+    printf("    -from            toggle transmissions of From headers\n");
     printf("    -ftp             disable ftp access\n");
     printf("    -get_data        user data for get forms, read from stdin,\n");
     printf("                     terminated by '---' on a line\n");
@@ -2018,7 +2027,6 @@ Output_Help_List:
     printf("    -newsmaxchunk=NUMBER   maximum news articles in listings before chunking\n");
     printf("    -nobrowse        disable directory browsing\n");
     printf("    -nofilereferer   disable transmissions of Referer headers for file URLs\n");
-    printf("    -nofrom          disable transmissions of From headers\n");
     printf("    -nolist          disable the link list feature in dumps\n");
     printf("    -nolog           disable mailing of error messages to document owners\n");
     printf("    -nopause         disable forced pauses for statusline messages\n");

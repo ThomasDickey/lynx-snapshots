@@ -616,7 +616,14 @@ PUBLIC void LYSetCookie ARGS2(
 	attr_end = p;
 	SKIP_SPACES;
       
-	if (*p == '=') {
+        /*
+	 *  Check for an '=' delimiter, or an 'expires' name followed
+	 *  by white, since Netscape's bogus parser doesn't require
+	 *  an '=' delimiter, and 'expires' attributes are being
+	 *  encountered without them. - FM
+	 */
+	if (*p == '=' ||
+	     !strncasecomp(attr_start, "Expires", 7)) {
 	    /*
 	     *  Get the value string.
 	     */
@@ -751,10 +758,18 @@ PUBLIC void LYSetCookie ARGS2(
 	    } else if (len == 7 && !strncasecomp(attr_start, "expires", 7)) {
 	    	/*
 		 *  Convert an 'expires' attribute value for Version 0
-		 *  cookies to the equivalent of a Version 1 (or greater)
-		 *  'max-age' value added to 'time(NULL)'. - FM
+		 *  cookies, or for Version 1 if we haven't received a
+		 *  'max-age', to the equivalent of a Version 1 (or greater)
+		 *  'max-age' value added to 'time(NULL)'.  Note that
+		 *  'expires' should not be used in Version 1 cookies,
+		 *  but, as explained below, it might be used for "backward
+		 *  compatibility", and, in turn, ill-informed people
+		 *  surely would start using it instead of, rather than
+		 *  in addition to, 'max-age'. - FM
 		 */
-		if (cur_cookie && cur_cookie->version < 1) {
+		if (((cur_cookie) && cur_cookie->version < 1) ||
+		    ((cur_cookie) &&
+		     !(cur_cookie->flags & COOKIE_FLAG_EXPIRES_SET))) {
 		    known_attr = YES;
 		    if (value) {
 			cur_cookie->flags |= COOKIE_FLAG_EXPIRES_SET;
@@ -770,17 +785,26 @@ PUBLIC void LYSetCookie ARGS2(
 		}
 		/*
 		 *  If it's a version 1 (or greater) cookie, then you
-		 *  really can set a cookie named 'expires', so we don't
-		 *  set known_attr.
+		 *  really can set a cookie named 'expires', so we 
+		 *  perhaps shouldn't set known_attr.  However, an
+		 *  -06 draft, which hopefully will be shot down as
+		 *  bogus, suggests adding (invalidly) 'expires'
+		 *  headers for "backward compatibility".  So, we'll
+		 *  set known-attr, to ignore it, and hope it works
+		 *  out. - FM
 		 */
+		known_attr = YES;
 	    }
 
 	    /*
-	     *  If none of the above comparisions succeeded, then we have
-	     *  an unknown pair of the form 'foo=bar', which means it's
-	     *  time to create a new cookie.
+	     *  If none of the above comparisions succeeded, and we have
+	     *  a value, then we have an unknown pair of the form 'foo=bar',
+	     *  which means it's time to create a new cookie.  If we don't
+	     *  have a non-zero-length value, assume it's an error or a
+	     *  new, unknown attribute which doesn't take a value, and
+	     *  ignore it. - FM
 	     */
-	    if (!known_attr) {
+	    if (!known_attr && value_end > value_start) {
 		store_cookie(cur_cookie, hostname, path);
 		cur_cookie = newCookie();
 		length += len;
