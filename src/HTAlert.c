@@ -145,9 +145,11 @@ PRIVATE char *sprint_bytes ARGS3(
     }
 
     u = kbunits;
-    if ((LYTransferRate == rateKB) && (n >= 10 * kb_units))
+    if ( (LYTransferRate == rateKB || LYTransferRate == rateEtaKB_maybe)
+	 && (n >= 10 * kb_units) )
 	sprintf(s, "%ld", n/kb_units);
-    else if ((LYTransferRate == rateKB) && (n >= kb_units))
+    else if ((LYTransferRate == rateKB || LYTransferRate == rateEtaKB_maybe)
+	     && (n > 999))	/* Avoid switching between 1016b/s and 1K/s */
 	sprintf(s, "%.2g", ((double)n)/kb_units);
     else {
 	sprintf(s, "%ld", n);
@@ -264,6 +266,9 @@ PUBLIC void HTReadProgress ARGS2(
 	    CTRACE((tfp, "%s\n", line));
 	}
     }
+#ifdef LY_FIND_LEAKS
+    FREE(line);
+#endif
 }
 
 PRIVATE BOOL conf_cancelled = NO; /* used by HTConfirm only - kw */

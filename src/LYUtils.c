@@ -6,9 +6,9 @@
 #include <HTAlert.h>
 #include <LYCurses.h>
 #include <LYHistory.h>
-#include <LYUtils.h>
 #include <LYStrings.h>
 #include <LYGlobalDefs.h>
+#include <LYUtils.h>
 #include <LYSignal.h>
 #include <GridText.h>
 #include <LYClean.h>
@@ -40,6 +40,15 @@ extern int exec_command(char * cmd, int wait_flag); /* xsystem.c */
 #ifdef DJGPP_KEYHANDLER
 #include <bios.h>
 #endif /* DJGPP_KEYHANDLER */
+
+#ifdef __EMX__
+#  define BOOLEAN OS2_BOOLEAN		/* Conflicts, but is used */
+#  undef HT_ERROR			/* Conflicts too */
+#  define INCL_PM			/* I want some PM functions.. */
+#  define INCL_DOSPROCESS		/* TIB PIB. */
+#  include <os2.h>
+#  undef BOOLEAN
+#endif
 
 #ifdef VMS
 #include <descrip.h>
@@ -266,8 +275,9 @@ PUBLIC void highlight ARGS3(
 		 *  until we find one.
 		 */
 	    if (LYP >= 0 && LYP < CACHEH && LXP >= 0 && LXP < CACHEW) {
-		CTRACE((tfp, "STYLE.highlight.off: cached style @(%d,%d): ",
-			LYP, LXP));
+		CTRACE2(TRACE_STYLE,
+			(tfp, "STYLE.highlight.off: cached style @(%d,%d): ",
+			      LYP, LXP));
 		s = cached_styles[LYP][LXP];
 		if (s == 0) {
 		    for (x = LXP-1; x >= 0; x--) {
@@ -289,11 +299,11 @@ PUBLIC void highlight ARGS3(
 		    CTRACE((tfp, "found %d.\n", s));
 		}
 	    } else {
-		CTRACE((tfp, "STYLE.highlight.off: can't use cache.\n"));
+		CTRACE2(TRACE_STYLE, (tfp, "STYLE.highlight.off: can't use cache.\n"));
 		s = s_a;
 	    }
 	} else {
-	    CTRACE((tfp, "STYLE.highlight.on: @(%d,%d).\n", LYP, LXP));
+	    CTRACE2(TRACE_STYLE, (tfp, "STYLE.highlight.on: @(%d,%d).\n", LYP, LXP));
 	}
 	LYmove(LYP, LXP);
 	LynxChangeStyle(s, STACK_ON);
@@ -321,7 +331,7 @@ PUBLIC void highlight ARGS3(
 	    if (flag == OFF) {
 		hl2_drawn = TRUE;
 		redraw_lines_of_link(cur);
-		CTRACE((tfp, "STYLE.highlight.off: NOFIX branch @(%d,%d).\n", LYP, LXP));
+		CTRACE2(TRACE_STYLE, (tfp, "STYLE.highlight.off: NOFIX branch @(%d,%d).\n", LYP, LXP));
 	    } else
 #endif
 	    if (!hl1_drawn) {
@@ -352,9 +362,10 @@ PUBLIC void highlight ARGS3(
 #ifndef USE_COLOR_STYLE
 	    lynx_start_link_color (flag == ON, links[cur].inUnderline);
 #else
-	    CTRACE((tfp, "STYLE.highlight.line2: @(%d,%d), style=%d.\n",
-		    links[cur].ly + 1, links[cur].hightext2_offset,
-		    flag == ON ? s_alink : s_a));
+	    CTRACE2(TRACE_STYLE,
+		    (tfp, "STYLE.highlight.line2: @(%d,%d), style=%d.\n",
+			  links[cur].ly + 1, links[cur].hightext2_offset,
+			  flag == ON ? s_alink : s_a));
 	    LynxChangeStyle(flag == ON ? s_alink : s_a, ABS_ON);
 #endif
 
@@ -3472,6 +3483,16 @@ PUBLIC void size_change ARGS1(
 #endif /* TIOCGSIZE */
 #endif /* HAVE_SIZECHANGE */
 
+#ifdef __EMX__
+    {
+	int scrsize[2];
+
+	_scrsize(scrsize);
+	LYcols = scrsize[0];
+	LYlines = scrsize[1];
+    }
+#endif
+
     if (LYlines <= 0)
 	LYlines = DFT_ROWS;
     if (LYcols <= 0)
@@ -3876,9 +3897,10 @@ PRIVATE int fmt_tempname ARGS3(
     }
 #else
 #ifdef USE_RAND_TEMPNAME
+#define SIZE_TEMPNAME ((MAX_TEMPNAME / BITS_PER_CHAR) + 1)
     static BOOL first = TRUE;
     static int names_used = 0;
-    static unsigned char *used_tempname;
+    static unsigned char used_tempname[SIZE_TEMPNAME];
     unsigned offset, mask;
 #endif
     static unsigned counter;
@@ -3892,13 +3914,9 @@ PRIVATE int fmt_tempname ARGS3(
      * Prefer a random value rather than a counter.
      */
 #ifdef USE_RAND_TEMPNAME
-#define SIZE_TEMPNAME ((MAX_TEMPNAME / BITS_PER_CHAR) + 1)
     if (first) {
 	lynx_srand((unsigned)((long)time((time_t *)0) + (long)result));
 	first = FALSE;
-	used_tempname = typecallocn(unsigned char, SIZE_TEMPNAME);
-	if (used_tempname == 0)
-	    outofmem(__FILE__, "fmt_tempname");
     }
 
     /* We don't really need all of the bits from rand().  The high-order bits
@@ -3924,7 +3942,7 @@ PRIVATE int fmt_tempname ARGS3(
 	}
     }
     if (names_used >= MAX_TEMPNAME)
-	HTAlert("Too many tempfiles");
+	HTAlert(gettext("Too many tempfiles"));
 #else
     counter++;
 #endif
@@ -4059,6 +4077,9 @@ PRIVATE CONST struct {
     { "mail",		&no_mail,		CAN_ANONYMOUS_MAIL },
     { "dotfiles",	&no_dotfiles,		TRUE },
     { "useragent",	&no_useragent,		TRUE },
+#ifdef SUPPORT_CHDIR
+    { "chdir",		&no_chdir,		TRUE },
+#endif
 #ifdef DIRED_SUPPORT
     { "dired_support",	&no_dired_support,	TRUE },
 #ifdef OK_PERMIT
@@ -4075,9 +4096,41 @@ PRIVATE CONST struct {
     { "compileopts_info", &no_compileopts_info,	CAN_ANONYMOUS_VIEW_COMPILEOPTS_INFO },
 #endif
 #endif
+    /* put "goto" restrictions on the end, since they are a refinement */
 #ifndef DISABLE_BIBP
-    { "bibp:",		&no_goto_bibp,		TRUE },
+    { "goto_bibp",	&no_goto_bibp,		CAN_ANONYMOUS_GOTO_BIBP	},
 #endif
+#ifdef HAVE_CONFIG_H
+#ifndef NO_CONFIG_INFO
+    { "goto_configinfo", &no_goto_configinfo,	CAN_ANONYMOUS_GOTO_CONFIGINFO },
+#endif
+#endif
+    { "goto_cso",	&no_goto_cso,		CAN_ANONYMOUS_GOTO_CSO },
+    { "goto_file",	&no_goto_file,		CAN_ANONYMOUS_GOTO_FILE },
+#ifndef DISABLE_FINGER
+    { "goto_finger",	&no_goto_finger,	CAN_ANONYMOUS_GOTO_FINGER },
+#endif
+    { "goto_ftp",	&no_goto_ftp,		CAN_ANONYMOUS_GOTO_FTP },
+#ifndef DISABLE_GOPHER
+    { "goto_gopher",	&no_goto_gopher,	CAN_ANONYMOUS_GOTO_GOPHER },
+#endif
+    { "goto_http",	&no_goto_http,		CAN_ANONYMOUS_GOTO_HTTP },
+    { "goto_https",	&no_goto_https,		CAN_ANONYMOUS_GOTO_HTTPS },
+    { "goto_lynxcgi",	&no_goto_lynxcgi,	CAN_ANONYMOUS_GOTO_LYNXCGI },
+    { "goto_lynxexec",	&no_goto_lynxexec,	CAN_ANONYMOUS_GOTO_LYNXEXEC },
+    { "goto_lynxprog",	&no_goto_lynxprog,	CAN_ANONYMOUS_GOTO_LYNXPROG },
+    { "goto_mailto",	&no_goto_mailto,	CAN_ANONYMOUS_GOTO_MAILTO },
+#ifndef DISABLE_NEWS
+    { "goto_news",	&no_goto_news,		CAN_ANONYMOUS_GOTO_NEWS },
+    { "goto_nntp",	&no_goto_nntp,		CAN_ANONYMOUS_GOTO_NNTP },
+#endif
+    { "goto_rlogin",	&no_goto_rlogin,	CAN_ANONYMOUS_GOTO_RLOGIN },
+#ifndef DISABLE_NEWS
+    { "goto_snews",	&no_goto_snews,		CAN_ANONYMOUS_GOTO_SNEWS },
+#endif
+    { "goto_telnet",	&no_goto_telnet,	CAN_ANONYMOUS_GOTO_TELNET },
+    { "goto_tn3270",	&no_goto_tn3270,	CAN_ANONYMOUS_GOTO_TN3270 },
+    { "goto_wais",	&no_goto_wais,		CAN_ANONYMOUS_GOTO_WAIS },
 };
 
 /*  This will make no difference between '-' and '_'. It does only in/equality
@@ -4086,9 +4139,9 @@ PRIVATE CONST struct {
     value of zero) for compare of commandline options -VH
  */
 PUBLIC BOOL strn_dash_equ ARGS3(
-	CONST char*	,p1,
-	CONST char*	,p2,
-	int	,len)
+	CONST char*,	p1,
+	CONST char*,	p2,
+	int,		len)
 {
     while (len--) {
 	if (!*p2)
@@ -4124,13 +4177,44 @@ PUBLIC BOOL strn_dash_equ ARGS3(
 #	define RESTRICT_NM_EQU(a,b,len) STRNEQ(a,b,len)
 #endif
 
+/*
+ * Returns the inx'th name from the restrictions table, or null if inx is
+ * out of range.
+ */
+PUBLIC CONST char *index_to_restriction ARGS1(
+    int,	inx)
+{
+    if (inx >= 0 && inx < (int) TABLESIZE(restrictions))
+	return restrictions[inx].name;
+    return NULL;
+}
+
+/*
+ * Returns the value TRUE/FALSE of a given restriction, or -1 if it is not
+ * one that we recognize.
+ */
+PUBLIC int find_restriction ARGS2(
+    CONST char *,	name,
+    int,		len)
+{
+    unsigned i;
+    if (len < 0)
+	len = strlen(name);
+    for (i=0; i < TABLESIZE(restrictions); i++) {
+	if (RESTRICT_NM_EQU(name, restrictions[i].name, len)) {
+	    return (*restrictions[i].flag);
+	}
+    }
+    return -1;
+}
 
 PUBLIC void parse_restrictions ARGS1(
-	CONST char *,	s)
+    CONST char *,	s)
 {
     CONST char *p;
     CONST char *word;
     unsigned i;
+    BOOLEAN found;
 
     p = s;
     while (*p) {
@@ -4141,19 +4225,27 @@ PUBLIC void parse_restrictions ARGS1(
 	while (*p != ',' && *p != '\0')
 	    p++;
 
+	found = FALSE;
 	if (RESTRICT_NM_EQU(word, "all", p-word)) {
+	    found = TRUE;
 	    for (i = N_SPECIAL_RESTRICT_OPTIONS; i < TABLESIZE(restrictions); i++)
 		*(restrictions[i].flag) = TRUE;
 	} else if (RESTRICT_NM_EQU(word, "default", p-word)) {
+	    found = TRUE;
 	    for (i = N_SPECIAL_RESTRICT_OPTIONS; i < TABLESIZE(restrictions); i++)
 		*(restrictions[i].flag) = !restrictions[i].can;
 	} else {
 	    for (i=0; i < TABLESIZE(restrictions); i++) {
 		if (RESTRICT_NM_EQU(word, restrictions[i].name, p-word)) {
 		    *(restrictions[i].flag) = TRUE;
+		    found = TRUE;
 		    break;
 		}
 	    }
+	}
+	if (!found) {
+	    printf("%s: %.*s", gettext("unknown restriction"), p-word, word);
+	    exit(EXIT_FAILURE);
 	}
 	if (*p)
 	    p++;
@@ -4176,9 +4268,11 @@ PUBLIC void print_restrictions_to_fd ARGS1(
     FILE *,	fp)
 {
     unsigned i, count = 0;
+
     for (i=0; i < TABLESIZE(restrictions); i++) {
-	if (*(restrictions[i].flag) == TRUE)
+	if (*(restrictions[i].flag) == TRUE) {
 	    count++;
+	}
     }
     if (!count) {
 	fprintf(fp, gettext("No restrictions set.\n"));
@@ -4187,7 +4281,12 @@ PUBLIC void print_restrictions_to_fd ARGS1(
     fprintf(fp, gettext("Restrictions set:\n"));
     for (i=0; i < TABLESIZE(restrictions); i++) {
 	if (*(restrictions[i].flag) == TRUE) {
-	    fprintf(fp, "   %s\n", restrictions[i].name);
+	    /* if "goto" is restricted, don't bother tell about its
+	     * refinements
+	     */
+	    if (strncmp(restrictions[i].name, "goto_", 5)
+	     || !no_goto)
+		fprintf(fp, "   %s\n", restrictions[i].name);
 	}
     }
 }
@@ -7606,13 +7705,7 @@ PUBLIC int LYSystem ARGS1(
     set_errno(saved_errno);	/* may have been clobbered */
 #endif
 #ifdef __EMX__			/* Check whether the screen size changed */
-    _scrsize(scrsize+2);
-    if ((scrsize[0] != scrsize[2]) || (scrsize[1] != scrsize[3])) {
-	CTRACE((tfp, "EMX update size...\n"));
-	LYcols = scrsize[2];
-	LYlines = scrsize[3];
-	recent_sizechange = TRUE;
-    }
+    size_change(0);
 #endif
     return code;
 }
@@ -7745,6 +7838,131 @@ PUBLIC void LYsetXDisplay ARGS1(
     }
 }
 
+#ifdef __EMX__
+
+static int proc_type = -1;
+static PPIB pib;
+HAB hab;
+HMQ hmq;
+
+PRIVATE void morph_PM NOARGS
+{
+    PTIB tib;
+    int first = 0;
+
+    if (proc_type == -1) {
+	DosGetInfoBlocks(&tib, &pib);
+	proc_type = pib->pib_ultype;
+	first = 1;
+    }
+    if (pib->pib_ultype != 3)		/* 2 is VIO */
+	pib->pib_ultype = 3;		/* 3 is PM */
+    if (first)
+	hab = WinInitialize(0);
+    /* 64 messages if before OS/2 3.0, ignored otherwise */
+    hmq = WinCreateMsgQueue(hab, 64);
+    WinCancelShutdown(hmq, 1);	/* Do not inform us on shutdown */
+}
+
+PRIVATE void unmorph_PM NOARGS
+{
+    WinDestroyMsgQueue(hmq);
+    pib->pib_ultype = proc_type;
+}
+
+PUBLIC int size_clip NOARGS
+{
+    return 8192;
+}
+
+/* Code partialy stolen from FED editor. */
+
+PUBLIC int put_clip ARGS1(char *, s)
+{
+    int sz = strlen(s) + 1;
+    int ret = EOF, nl = 0;
+    char *pByte = 0, *s1 = s, c, *t;
+
+    while ((c = *s1++)) {
+	if (c == '\r' && *s1 == '\n')
+	    s1++;
+	else if (c == '\n')
+	    nl++;
+    }
+    if (DosAllocSharedMem((PPVOID)&pByte, 0, sz + nl,
+			  PAG_WRITE | PAG_COMMIT | OBJ_GIVEABLE | OBJ_GETTABLE))
+	return ret;
+
+    if (!nl)
+	memcpy(pByte, s, sz);
+    else {
+	t = pByte;
+	while ((c = *t++ = *s++))
+	    if (c == '\n' && (t == pByte + 1 || t[-2] != '\r'))
+		t[-1] = '\r', *t++ = '\n';
+    }
+
+    morph_PM();
+    if(!hab)
+	goto fail;
+
+    WinOpenClipbrd(hab);
+    WinEmptyClipbrd(hab);
+    if (WinSetClipbrdData(hab, (ULONG) pByte, CF_TEXT, CFI_POINTER))
+	ret = 0;
+    WinCloseClipbrd(hab);
+    unmorph_PM();
+    if (ret == 0)
+	return 0;
+  fail:
+    DosFreeMem((PPVOID)&pByte);
+    return EOF;
+}
+
+static int clip_open;
+
+/* get_clip_grab() returns a pointer to the string in the system area.
+   get_clip_release() should be called ASAP after this. */
+
+PUBLIC char* get_clip_grab NOARGS
+{
+    char *ClipData;
+    ULONG ulFormat;
+    int sz;
+
+    morph_PM();
+    if(!hab)
+	return 0;
+    if (clip_open)
+	get_clip_release();
+
+    WinQueryClipbrdFmtInfo(hab, CF_TEXT, &ulFormat);
+    if(ulFormat != CFI_POINTER) {
+	unmorph_PM();
+	return 0;
+    }
+    WinOpenClipbrd(hab);
+    clip_open = 1;
+    ClipData = (char *)WinQueryClipbrdData(hab, CF_TEXT);
+    sz = strlen(ClipData);
+    if(!ClipData || !sz) {
+	get_clip_release();
+	return 0;
+    }
+    return ClipData;
+}
+
+PUBLIC void get_clip_release NOARGS
+{
+    if (!clip_open)
+	return;
+    WinCloseClipbrd(hab);
+    clip_open = 0;
+    unmorph_PM();
+}
+
+#endif
+
 #if defined(WIN_EX)	/* 1997/10/16 (Thu) 20:13:28 */
 
 #define	MAX_DOS_PATH	128	/* exactly 80 */
@@ -7798,10 +8016,15 @@ PUBLIC int put_clip(char *szBuffer)
     return 0;
 }
 
-PUBLIC int get_clip(char *szBuffer, int size)
+static HANDLE m_hLogData;
+static int m_locked;
+
+/* get_clip_grab() returns a pointer to the string in the system area.
+   get_clip_release() should be called ASAP after this. */
+
+PUBLIC char* get_clip_grab()
 {
     HANDLE hWnd;
-    HANDLE m_hLogData;
     LPTSTR pLogData;
     int val;
 
@@ -7810,28 +8033,26 @@ PUBLIC int get_clip(char *szBuffer, int size)
 	return 0;
     }
 
-    lstrcpy(szBuffer, "");
     m_hLogData = GetClipboardData(CF_TEXT);
 
     if (m_hLogData == NULL) {
-	val = 0;
-    } else {
-	pLogData = (LPTSTR) GlobalLock(m_hLogData);
-
-	val = strlen((LPTSTR) pLogData);
-	if (size > val)
-	    lstrcpy(szBuffer, (LPTSTR) pLogData);
-	else {
-	    val = size - 1;
-	    lstrcpyn(szBuffer, (LPTSTR) pLogData, val);
-	    szBuffer[val] = '\0';
-	}
-
-	GlobalUnlock(m_hLogData);
+	CloseClipboard();
+	m_locked = 0;
+	return 0;
     }
-    CloseClipboard();
+    pLogData = (LPTSTR) GlobalLock(m_hLogData);
 
-    return val;
+    m_locked = 1;
+    return pLogData;
+}
+
+PUBLIC void get_clip_release()
+{
+    if (!m_locked)
+	return;
+    GlobalUnlock(m_hLogData);
+    CloseClipboard();
+    m_locked = 0;
 }
 
 

@@ -140,6 +140,12 @@ typedef enum {
 #endif
 } TransferRate;
 
+#ifdef EXP_READPROGRESS
+#  define rateEtaKB_maybe	rateEtaKB
+#else
+#  define rateEtaKB_maybe	rateKB
+#endif
+
 extern BOOLEAN LYCursesON;  	/* start_curses()->TRUE, stop_curses()->FALSE */
 extern BOOLEAN LYJumpFileURL;   /* URL from the jump file shortcuts? */
 extern BOOLEAN LYNewsPosting;	/* News posting supported if TRUE */
@@ -167,6 +173,7 @@ extern BOOLEAN is_www_index;
 extern BOOLEAN jump_buffer;     /* TRUE if offering default shortcut */
 extern BOOLEAN long_url_ok;
 extern BOOLEAN lynx_mode;
+extern BOOLEAN more;		/* is there more document to display? */
 extern BOOLEAN news_ok;
 extern BOOLEAN recent_sizechange;
 extern BOOLEAN rlogin_ok;
@@ -206,35 +213,24 @@ extern int display_lines;	/* number of lines in the display */
 extern int dump_output_width;
 extern int keypad_mode;		/* NUMBERS_AS_ARROWS or LINKS_ARE_NUMBERED */
 extern int lynx_temp_subspace;
-extern BOOLEAN more;		/* is there more document to display? */
 extern int user_mode;		/* novice or advanced */
 extern int www_search_result;
 
-extern BOOLEAN had_restrictions_default; /* flags to note whether we have... */
-extern BOOLEAN had_restrictions_all;     /* parsed these restriction options */
-extern BOOLEAN no_inside_telnet;  /* this and following are restrictions */
-extern BOOLEAN no_outside_telnet;
-extern BOOLEAN no_telnet_port;
-extern BOOLEAN no_inside_news;
-extern BOOLEAN no_outside_news;
-extern BOOLEAN no_inside_ftp;
-extern BOOLEAN no_outside_ftp;
-extern BOOLEAN no_inside_rlogin;
-extern BOOLEAN no_outside_rlogin;
-extern BOOLEAN no_suspend;
-extern BOOLEAN no_editor;
-extern BOOLEAN no_shell;
-extern BOOLEAN no_bookmark;
-extern BOOLEAN no_multibook;
-extern BOOLEAN no_bookmark_exec;
-extern BOOLEAN no_option_save;
-extern BOOLEAN no_download;
-extern BOOLEAN no_print;          /* TRUE to disable printing */
-extern BOOLEAN no_disk_save;
-extern BOOLEAN no_exec;
-extern BOOLEAN no_lynxcgi;
 extern BOOLEAN exec_frozen;
+extern BOOLEAN had_restrictions_all;     /* parsed these restriction options */
+extern BOOLEAN had_restrictions_default; /* flags to note whether we have... */
+extern BOOLEAN no_bookmark;
+extern BOOLEAN no_bookmark_exec;
+extern BOOLEAN no_chdir;
+extern BOOLEAN no_compileopts_info;
+extern BOOLEAN no_disk_save;
+extern BOOLEAN no_dotfiles;
+extern BOOLEAN no_download;
+extern BOOLEAN no_editor;
+extern BOOLEAN no_exec;
+extern BOOLEAN no_file_url;
 extern BOOLEAN no_goto;
+extern BOOLEAN no_goto_configinfo;
 extern BOOLEAN no_goto_cso;
 extern BOOLEAN no_goto_file;
 extern BOOLEAN no_goto_finger;
@@ -253,20 +249,27 @@ extern BOOLEAN no_goto_snews;
 extern BOOLEAN no_goto_telnet;
 extern BOOLEAN no_goto_tn3270;
 extern BOOLEAN no_goto_wais;
-extern BOOLEAN no_goto_configinfo;
+extern BOOLEAN no_inside_ftp;
+extern BOOLEAN no_inside_news;
+extern BOOLEAN no_inside_rlogin;
+extern BOOLEAN no_inside_telnet;  /* this and following are restrictions */
 extern BOOLEAN no_jump;
-extern BOOLEAN no_file_url;
-extern BOOLEAN no_newspost;
-extern BOOLEAN no_mail;
-extern BOOLEAN no_dotfiles;
-extern BOOLEAN no_useragent;
 extern BOOLEAN no_lynxcfg_info;
-#ifndef NO_CONFIG_INFO
 extern BOOLEAN no_lynxcfg_xinfo;
-#ifdef HAVE_CONFIG_H
-extern BOOLEAN no_compileopts_info;
-#endif
-#endif
+extern BOOLEAN no_lynxcgi;
+extern BOOLEAN no_mail;
+extern BOOLEAN no_multibook;
+extern BOOLEAN no_newspost;
+extern BOOLEAN no_option_save;
+extern BOOLEAN no_outside_ftp;
+extern BOOLEAN no_outside_news;
+extern BOOLEAN no_outside_rlogin;
+extern BOOLEAN no_outside_telnet;
+extern BOOLEAN no_print;          /* TRUE to disable printing */
+extern BOOLEAN no_shell;
+extern BOOLEAN no_suspend;
+extern BOOLEAN no_telnet_port;
+extern BOOLEAN no_useragent;
 
 extern BOOLEAN no_statusline;
 extern BOOLEAN no_filereferer;
@@ -293,9 +296,10 @@ extern BOOLEAN nolist;
 extern BOOLEAN historical_comments;
 extern BOOLEAN minimal_comments;
 extern BOOLEAN soft_dquotes;
+
 #ifdef SOURCE_CACHE
-extern int LYCacheSource;
 extern BOOLEAN source_cache_file_error;
+extern int LYCacheSource;
 #define SOURCE_CACHE_NONE	0
 #define SOURCE_CACHE_FILE	1
 #define SOURCE_CACHE_MEMORY	2
@@ -304,6 +308,7 @@ extern int LYCacheSourceForAborted;
 #define SOURCE_CACHE_FOR_ABORTED_KEEP 1
 #define SOURCE_CACHE_FOR_ABORTED_DROP 0
 #endif
+
 extern BOOLEAN LYCancelDownload;
 extern BOOLEAN LYRestricted;	/* whether we had -anonymous option */
 extern BOOLEAN LYValidate;
@@ -423,10 +428,7 @@ extern BOOLEAN LYSeekFragAREAinCur;
 extern BOOLEAN LYSeekFragMAPinCur;
 extern BOOLEAN LYStripDotDotURLs;	/* Try to fix ../ in some URLs?  */
 extern BOOLEAN LYUseBuiltinSuffixes;
-extern BOOLEAN LYUseTraceLog;		/* Use a TRACE log?		 */
 extern BOOLEAN dont_wrap_pre;
-extern FILE *LYTraceLogFP;		/* Pointer for TRACE log	 */
-extern char *LYTraceLogPath;		/* Path for TRACE log		 */
 extern char *MBM_A_subbookmark[MBM_V_MAXFILES+1];
 extern char *MBM_A_subdescript[MBM_V_MAXFILES+1];
 
@@ -441,6 +443,12 @@ extern int justify_max_void_percent;
 
 #ifndef NO_DUMP_WITH_BACKSPACES
 extern BOOLEAN with_backspaces;
+#endif
+
+#ifndef NO_LYNX_TRACE
+extern BOOLEAN LYUseTraceLog;		/* Use a TRACE log?		 */
+extern FILE *LYTraceLogFP;		/* Pointer for TRACE log	 */
+extern char *LYTraceLogPath;		/* Path for TRACE log		 */
 #endif
 
 extern BOOL force_empty_hrefless_a;

@@ -167,19 +167,8 @@ typedef unsigned short mode_t;
 #  define NO_EMPTY_HREFLESS_A
 #endif
 
-/*
-
-Debug message control.
-
- */
-
-#ifdef NO_LYNX_TRACE
-#define TRACE 0
-#define PROGRESS(str) /* nothing for now */
-#else
-#define TRACE (WWW_TraceFlag)
-#define PROGRESS(str) printf(str)
-        extern int WWW_TraceFlag;
+#if  defined(__EMX__) || defined(WIN_EX)
+#  define CAN_CUT_AND_PASTE
 #endif
 
 /*
@@ -491,10 +480,27 @@ The local equivalents of CR and LF
 #define LF   FROMASCII('\012')  /* ASCII line feed LOCAL EQUIVALENT */
 #define CR   FROMASCII('\015')  /* Will be converted to ^M for transmission */
 
-#define CTRACE(p) if(TRACE)fprintf p
+/*
+ * Debug message control.
+ */
+#ifdef NO_LYNX_TRACE
+#define WWW_TraceFlag   0
+#define WWW_TraceMask   0
+#else
+extern BOOLEAN WWW_TraceFlag;
+extern unsigned WWW_TraceMask;
+#endif
+
+#define TRACE           (WWW_TraceFlag)
+#define TRACE_bit(n)    (TRACE && (WWW_TraceMask & (1 << n)) != 0)
+#define TRACE_STYLE     (TRACE_bit(1))
+#define TRACE_TRST      (TRACE_bit(2))
+
+#define CTRACE(p)          if (TRACE) fprintf p
+#define CTRACE2(m,p)       if (m)     fprintf p
 #define tfp TraceFP()
 #define CTRACE_SLEEP(secs) if (TRACE && LYTraceLogFP == 0) sleep(secs)
-#define CTRACE_FLUSH(fp) if(TRACE) fflush(fp)
+#define CTRACE_FLUSH(fp)   if (TRACE) fflush(fp)
 
 extern FILE *TraceFP NOPARAMS;
 

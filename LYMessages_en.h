@@ -230,6 +230,7 @@
  gettext("Spawning your default shell.  Use 'exit' to return to Lynx.\n")
 #endif
 #endif /* VMS */
+#define CHDIR_DISABLED gettext("Changing working-directory is currently disabled.")
 #define SPAWNING_DISABLED gettext("Spawning is currently disabled.")
 #define DOWNLOAD_DISABLED gettext("The 'd'ownload command is currently disabled.")
 #define NO_DOWNLOAD_INPUT gettext("You cannot download an input field.")
@@ -243,6 +244,7 @@
 #define NO_DOWNLOAD_CHOICE gettext("Nothing to download.")
 #define TRACE_ON gettext("Trace ON!")
 #define TRACE_OFF gettext("Trace OFF!")
+#define TRACE_DISABLED gettext("Trace not supported")
 #define CLICKABLE_IMAGES_ON \
  gettext("Links will be included for all images!  Reloading...")
 #define CLICKABLE_IMAGES_OFF \

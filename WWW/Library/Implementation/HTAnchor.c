@@ -1398,6 +1398,20 @@ PUBLIC int HTAnchor_getUCLYhndl ARGS2(
     return( -1);
 }
 
+#ifdef CAN_SWITCH_DISPLAY_CHARSET
+PRIVATE void setup_switch_display_charset ARGS2(HTParentAnchor *, me, int, h)
+{
+    if (!Switch_Display_Charset(h,0))
+	return;
+    HTAnchor_setUCInfoStage(me, current_char_set,
+			    UCT_STAGE_HTEXT, UCT_SETBY_MIME); /* highest priorty! */
+    HTAnchor_setUCInfoStage(me, current_char_set,
+			    UCT_STAGE_STRUCTURED, UCT_SETBY_MIME); /* highest priorty! */
+    CTRACE((tfp, "changing UCInfoStage: HTEXT/STRUCTURED stages charset='%s'.\n",
+	    LYCharSet_UC[current_char_set].MIMEname));
+}
+#endif
+
 PUBLIC LYUCcharset * HTAnchor_setUCInfoStage ARGS4(
 	HTParentAnchor *,	me,
 	int,			LYhndl,
@@ -1413,10 +1427,18 @@ PUBLIC LYUCcharset * HTAnchor_setUCInfoStage ARGS4(
 	 *  Can we override?
 	 */
 	if (set_by >= me->UCStages->s[which_stage].lock) {
+#ifdef CAN_SWITCH_DISPLAY_CHARSET
+	    int ohandle = me->UCStages->s[which_stage].LYhndl;
+#endif
 	    me->UCStages->s[which_stage].lock = set_by;
 	    me->UCStages->s[which_stage].LYhndl = LYhndl;
 	    if (LYhndl >= 0) {
 		memcpy(p, &LYCharSet_UC[LYhndl], sizeof(LYUCcharset));
+#ifdef CAN_SWITCH_DISPLAY_CHARSET
+		/* Allow a switch to a more suitable display charset */
+		if ( LYhndl != ohandle && which_stage == UCT_STAGE_PARSER )
+		    setup_switch_display_charset(me, LYhndl);
+#endif
 	    }
 	    else {
 		p->UChndl = -1;
@@ -1433,10 +1455,18 @@ PUBLIC LYUCcharset * HTAnchor_resetUCInfoStage ARGS4(
 	int,			which_stage,
 	int,			set_by)
 {
+    int ohandle;
+
     if (!me || !me->UCStages)
 	return(NULL);
     me->UCStages->s[which_stage].lock = set_by;
+    ohandle = me->UCStages->s[which_stage].LYhndl;
     me->UCStages->s[which_stage].LYhndl = LYhndl;
+#ifdef CAN_SWITCH_DISPLAY_CHARSET
+    /* Allow a switch to a more suitable display charset */
+    if (LYhndl >= 0 && LYhndl != ohandle && which_stage == UCT_STAGE_PARSER)
+	setup_switch_display_charset(me, LYhndl);
+#endif
     return( &me->UCStages->s[which_stage].C);
 }
 
@@ -1463,9 +1493,20 @@ PUBLIC LYUCcharset * HTAnchor_copyUCInfoStage ARGS4(
 	if (set_by == UCT_SETBY_NONE)
 	    set_by = UCT_SETBY_DEFAULT;
 	if (set_by >= me->UCStages->s[to_stage].lock) {
+#ifdef CAN_SWITCH_DISPLAY_CHARSET
+	    int ohandle = me->UCStages->s[to_stage].LYhndl;
+#endif
 	    me->UCStages->s[to_stage].lock = set_by;
 	    me->UCStages->s[to_stage].LYhndl =
 		me->UCStages->s[from_stage].LYhndl;
+#ifdef CAN_SWITCH_DISPLAY_CHARSET
+	    /* Allow a switch to a more suitable display charset */
+	    if ( me->UCStages->s[to_stage].LYhndl >= 0
+		 && me->UCStages->s[to_stage].LYhndl != ohandle
+		 && to_stage == UCT_STAGE_PARSER )
+		setup_switch_display_charset(me, 
+					     me->UCStages->s[to_stage].LYhndl);
+#endif
 	    if (p_to != p_from)
 		memcpy(p_to, p_from, sizeof(LYUCcharset));
 	    return(p_to);

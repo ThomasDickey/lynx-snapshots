@@ -6,10 +6,9 @@
 #include <GridText.h>
 #include <LYCharSets.h>
 #include <UCAux.h>
-#include <LYUtils.h>
-#include <LYStructs.h>  /* includes HTForms.h */
-#include <LYStrings.h>
 #include <LYGlobalDefs.h>
+#include <LYUtils.h>
+#include <LYStrings.h>
 #include <LYKeymap.h>
 #include <LYClean.h>
 
@@ -600,56 +599,64 @@ again:
 	    break;
 	}
 
-#if defined(WIN_EX)	/* 1998/10/01 (Thu) 19:19:22 */
-
-#define FORM_PASTE_MAX	8192
-
+#ifdef CAN_CUT_AND_PASTE	/* 1998/10/01 (Thu) 19:19:22 */
 	if (action == LYE_PASTE) {
-	    unsigned char buff[FORM_PASTE_MAX];
-	    int i, len;
+	    unsigned char *s = get_clip_grab(), *e;
+	    char *buf = NULL;
+	    int len;
 
-	    len = get_clip(buff, FORM_PASTE_MAX);
+	    if (!s)
+		break;
+	    len = strlen(s);
+	    e = s + len;
 
 	    if (len > 0) {
-		i = 0;
-		while ((ch = buff[i]) != '\0') {
+		unsigned char *e1 = s;
 
-		    if (ch == '\r') {
-			i++;
-			continue;
-		    }
-		    if (ch == '\n') {
-			i++;
-			len = strlen(buff + i);
-			if (len > 0) {
-			    put_clip(buff + i);
-			}
-			break;
-		    }
-
-		    LYLineEdit(&MyEdit, ch, TRUE);
-
-		    if (MyEdit.strlen >= max_length) {
-			HaveMaxlength = TRUE;
-		    } else if (HaveMaxlength &&
-			       MyEdit.strlen < max_length) {
-			HaveMaxlength = FALSE;
-			_statusline(ENTER_TEXT_ARROWS_OR_TAB);
-		    }
-		    i++;
+		while (e1 < e) {
+		    if (*e1 < ' ') { /* Stop here? */
+			if (e1 > s)
+			    LYEditInsert(&MyEdit, s, e1 - s, -1, TRUE);
+			s = e1;
+			if (*e1 == '\t') { /* Replace by space */
+			    LYEditInsert(&MyEdit, " ", 1, -1, TRUE);
+			    s = ++e1;
+			} else
+			    break;
+		    } else
+			++e1;
+		}
+		if (e1 > s)
+		    LYEditInsert(&MyEdit, s, e1 - s, -1, TRUE);
+		while (e1 < e && *e1 == '\r')
+		    e1++;
+		if (e1 + 1 < e && *e1 == '\n')
+		    StrAllocCopy(buf, e1 + 1);	/* Survive _release() */
+		get_clip_release();
+		if (MyEdit.strlen >= max_length) {
+		    HaveMaxlength = TRUE;
+		} else if (HaveMaxlength &&
+			   MyEdit.strlen < max_length) {
+		    HaveMaxlength = FALSE;
+		    _statusline(ENTER_TEXT_ARROWS_OR_TAB);
 		}
 		if (strcmp(value, MyEdit.buffer) != 0) {
 		    Edited = TRUE;
 		}
+		if (buf) {
+		    put_clip(buf);
+		    FREE(buf);
+		    ch = '\n';		/* Sometimes moves to the next line */
+		    break;
+		}
 		LYRefreshEdit(&MyEdit);
-
 	    } else {
 		HTInfoMsg("Clipboard empty or Not text data.");
-		return(DO_NOTHING);
+		continue;
 	    }
-	    break;
 	}
-#else
+#endif
+#ifndef WIN_EX
 	if (action == LYE_AIX &&
 	    (HTCJK == NOCJK && LYlowest_eightbit[current_char_set] > 0x97))
 	    break;

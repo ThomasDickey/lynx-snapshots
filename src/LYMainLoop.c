@@ -255,14 +255,7 @@ PRIVATE void free_mainloop_variables NOARGS
 }
 #endif /* LY_FIND_LEAKS */
 
-PUBLIC FILE *TraceFP NOARGS
-{
-    if (LYTraceLogFP != 0) {
-	return LYTraceLogFP;
-    }
-    return stderr;
-}
-
+#ifndef NO_LYNX_TRACE
 PRIVATE void TracelogOpenFailed NOARGS
 {
     WWW_TraceFlag = FALSE;
@@ -274,8 +267,47 @@ PRIVATE void TracelogOpenFailed NOARGS
     }
 }
 
+PRIVATE BOOLEAN LYReopenTracelog ARGS1(BOOLEAN *, trace_flag_ptr)
+{
+    CTRACE((tfp, "\nTurning off TRACE for fetch of log.\n"));
+    LYCloseTracelog();
+    if ((LYTraceLogFP = LYAppendToTxtFile(LYTraceLogPath)) == NULL) {
+	TracelogOpenFailed();
+	return FALSE;
+    }
+    if (TRACE) {
+	WWW_TraceFlag = FALSE;
+	*trace_flag_ptr = TRUE;
+    }
+    return TRUE;
+}
+
+PRIVATE void turn_trace_back_on ARGS1(BOOLEAN *, trace_flag_ptr)
+{
+    if (*trace_flag_ptr == TRUE) {
+	WWW_TraceFlag = TRUE;
+	*trace_flag_ptr = FALSE;
+	fprintf(tfp, "Turning TRACE back on.\n\n");
+    }
+}
+#else
+#define LYReopenTracelog(flag) TRUE
+#define turn_trace_back_on(flag) /*nothing*/
+#endif /* NO_LYNX_TRACE */
+
+PUBLIC FILE *TraceFP NOARGS
+{
+#ifndef NO_LYNX_TRACE
+    if (LYTraceLogFP != 0) {
+	return LYTraceLogFP;
+    }
+#endif /* NO_LYNX_TRACE */
+    return stderr;
+}
+
 PUBLIC BOOLEAN LYOpenTraceLog NOARGS
 {
+#ifndef NO_LYNX_TRACE
     if (TRACE && LYUseTraceLog && LYTraceLogFP == NULL) {
 	/*
 	 * If we can't open it for writing, give up.  Otherwise, on VMS close
@@ -331,32 +363,31 @@ PUBLIC BOOLEAN LYOpenTraceLog NOARGS
 	    CTRACE((tfp, "\"all\" restrictions are set.\n"));
 	}
     }
+#endif /* NO_LYNX_TRACE */
     return TRUE;
 }
 
 PUBLIC void LYCloseTracelog NOARGS
 {
+#ifndef NO_LYNX_TRACE
     if (LYTraceLogFP != 0) {
 	fflush(stdout);
 	fflush(stderr);
 	fclose(LYTraceLogFP);
 	LYTraceLogFP = 0;
     }
+#endif /* NO_LYNX_TRACE */
 }
 
-PRIVATE BOOLEAN LYReopenTracelog ARGS1(BOOLEAN *, trace_flag_ptr)
+PUBLIC void handle_LYK_TRACE_TOGGLE NOARGS
 {
-    CTRACE((tfp, "\nTurning off TRACE for fetch of log.\n"));
-    LYCloseTracelog();
-    if ((LYTraceLogFP = LYAppendToTxtFile(LYTraceLogPath)) == NULL) {
-	TracelogOpenFailed();
-	return FALSE;
-    }
-    if (TRACE) {
-	WWW_TraceFlag = FALSE;
-	*trace_flag_ptr = TRUE;
-    }
-    return TRUE;
+#ifndef NO_LYNX_TRACE
+    WWW_TraceFlag = ! WWW_TraceFlag;
+    if (LYOpenTraceLog())
+	HTUserMsg(WWW_TraceFlag ? TRACE_ON : TRACE_OFF);
+#else
+    HTUserMsg(TRACE_DISABLED);
+#endif /* NO_LYNX_TRACE */
 }
 
 PUBLIC void LYSetNewline ARGS1(
@@ -3845,6 +3876,15 @@ PRIVATE BOOLEAN handle_LYK_OPTIONS ARGS2(
     return FALSE;
 }
 
+PRIVATE void handle_NEXT_DOC NOARGS
+{
+    if (LYhist_next(&curdoc, &newdoc)) {
+	FREE(curdoc.address);		/* avoid push */
+	return;
+    }
+    HTUserMsg(gettext("No next document present"));
+}
+
 PRIVATE void handle_LYK_NEXT_LINK ARGS3(
     int,	c,
     int *,	old_c,
@@ -4034,8 +4074,8 @@ PRIVATE int handle_PREV_DOC ARGS3(
 		    return 2;
 		} else {
 		    HTUserMsg2(WWW_SKIP_MESSAGE, WWWDoc.address);
-		    do {
-			LYpop(&curdoc);
+		    do {	/* Should be LYhist_prev when _next supports */
+			LYpop(&curdoc);		/* skipping of forms */
 		    } while (nhist > 1 && !are_different(
 			(document *)&history[(nhist - 1)],
 			&curdoc));
@@ -4061,6 +4101,7 @@ PRIVATE int handle_PREV_DOC ARGS3(
 	/*
 	 *  Set newdoc.address to empty to pop a file.
 	 */
+	LYhist_prev_register(&curdoc);	/* Why not call _prev instead of zeroing address?  */
 	FREE(newdoc.address);
 #ifdef DIRED_SUPPORT
 	if (lynx_edit_mode) {
@@ -4512,6 +4553,7 @@ PRIVATE void handle_LYK_TOOLBAR ARGS4(
 PRIVATE void handle_LYK_TRACE_LOG ARGS1(
     BOOLEAN *,	trace_flag_ptr)
 {
+#ifndef NO_LYNX_TRACE
     /*
      *	Check whether we've started a TRACE log
      *	in this session. - FM
@@ -4554,13 +4596,9 @@ PRIVATE void handle_LYK_TRACE_LOG ARGS1(
 	LYPermitURL = TRUE;
     }
     LYforce_no_cache = TRUE;
-}
-
-PUBLIC void handle_LYK_TRACE_TOGGLE NOARGS
-{
-    WWW_TraceFlag = ! WWW_TraceFlag;
-    if (LYOpenTraceLog())
-	HTUserMsg(WWW_TraceFlag ? TRACE_ON : TRACE_OFF);
+#else
+    HTUserMsg(TRACE_DISABLED);
+#endif /* NO_LYNX_TRACE */
 }
 
 #ifdef DIRED_SUPPORT
@@ -5042,6 +5080,11 @@ PUBLIC void handle_LYK_CHDIR NOARGS
     static char buf[LY_MAXPATH];
     char *p = NULL;
 
+    if (no_chdir) {
+	HTUserMsg(CHDIR_DISABLED);
+	return;
+    }
+
     _statusline(gettext("cd to:"));
     /* some people may prefer automatic clearing of the previous user input,
        here, to do this, just uncomment next line - VH */
@@ -5339,7 +5382,7 @@ try_again:
 		     *	If newdoc.address is empty then pop a file
 		     *	and load it.  - FM
 		     */
-		    LYpop(&newdoc);
+		    LYhist_prev(&newdoc);
 		    popped_doc = TRUE;
 
 
@@ -5532,11 +5575,7 @@ try_again:
 		     */
 		    LYoverride_no_cache = FALSE; /* Was TRUE if popped. - FM */
 		    LYinternal_flag = FALSE;	 /* Reset to default. - kw */
-		    if (trace_mode_flag == TRUE) {
-			WWW_TraceFlag = TRUE;
-			trace_mode_flag = FALSE;
-			fprintf(tfp, "Turning TRACE back on.\n\n");
-		    }
+		    turn_trace_back_on(&trace_mode_flag);
 		    if (!first_file && !LYCancelledFetch) {
 			/*
 			 *  Do error mail sending and/or traversal
@@ -5622,11 +5661,7 @@ try_again:
 		    LYoverride_no_cache = FALSE; /* Was TRUE if popped. - FM */
 		    popped_doc = FALSE;		 /* Was TRUE if popped. - FM */
 		    LYinternal_flag = FALSE;	 /* Reset to default. - kw */
-		    if (trace_mode_flag == TRUE) {
-			WWW_TraceFlag = TRUE;
-			trace_mode_flag = FALSE;
-			fprintf(tfp, "Turning TRACE back on.\n\n");
-		    }
+		    turn_trace_back_on(&trace_mode_flag);
 		    FREE(newdoc.address); /* to pop last doc */
 		    FREE(newdoc.bookmark);
 		    LYJumpFileURL = FALSE;
@@ -5755,11 +5790,7 @@ try_again:
 		     */
 		    LYoverride_no_cache = FALSE; /* Was TRUE if popped. - FM */
 		    LYinternal_flag = FALSE;	 /* Reset to default. - kw */
-		    if (trace_mode_flag == TRUE) {
-			WWW_TraceFlag = TRUE;
-			trace_mode_flag = FALSE;
-			fprintf(tfp, "Turning TRACE back on.\n\n");
-		    }
+		    turn_trace_back_on(&trace_mode_flag);
 
 		    /*
 		     *	If it's the first file and we're interactive,
@@ -6041,8 +6072,9 @@ try_again:
 	     *  WINDOW structures are already filled based on the old size.
 	     *  So we notify the ncurses library directly here. - kw
 	     */
-#if defined(HAVE_RESIZETERM)
+#if defined(NCURSES) && defined(HAVE_RESIZETERM)
 	    resizeterm(LYlines, LYcols);
+	    wresize(LYwin, LYlines, LYcols);
 #else
 	    stop_curses();
 	    start_curses();
@@ -6897,14 +6929,86 @@ new_cmd:  /*
 	    handle_LYK_DOWN_HALF(&old_c, real_c);
 	    break;
 
-#if defined(WIN_EX) && defined(SH_EX)	/*1997/12/22 (Mon) 09:28:56 */
+#ifdef CAN_CUT_AND_PASTE
 	case LYK_TO_CLIPBOARD:	/* ^S */
 	    {
-		if (put_clip(links[curdoc.link].lname) == 0) {
-		    HTInfoMsg("URL to Clip Board.");
-		} else {
+		char *s;
+		int c;
+
+		/* The logic resembles one of ADD_BOOKMARK */
+		if (nlinks > 0 && links[curdoc.link].lname
+		    && links[curdoc.link].type != WWW_FORM_LINK_TYPE) {
+		    /* Makes sense to copy a link */
+		    _statusline("Copy D)ocument's or L)ink's URL to clipboard or C)ancel?");
+		    c = LYgetch_single();
+		    if (c == 'D')
+			s = curdoc.address;
+		    else if (c == 'C')
+			break;
+		    else
+			s = links[curdoc.link].lname;
+		} else
+		    s = curdoc.address;
+		if (!s && !*s)
 		    HTInfoMsg("Current URL is empty.");
+		if (put_clip(s))
+		    HTInfoMsg("Copy to clipboard failed.");
+		else if (s == curdoc.address)
+		    HTInfoMsg("Document URL put to clipboard.");
+		else
+		    HTInfoMsg("Link URL put to clipboard.");
+	    }
+	    break;
+
+	case LYK_PASTE_URL:
+	    if (no_goto && !LYValidate) { /*  Go to not allowed. - FM */
+		HTUserMsg(GOTO_DISALLOWED);
+	    } else {
+		unsigned char *s = get_clip_grab(), *e, *t;
+		char *buf;
+		int len;
+
+		if (!s)
+		    break;
+		len = strlen(s);
+		e = s + len;
+		while (s < e && strchr(" \t\n\r", *s))
+		    s++;
+		while (s < e && strchr(" \t\n\r", e[-1]))
+		    e--;
+		if (s >= e) {
+		    HTInfoMsg("No URL in the clipboard.");
+		    break;
 		}
+		buf = (char*)malloc(e - s + 1);
+		strncpy(buf, s, e - s);
+		buf[e - s] = '\0';
+		t = buf;
+
+		while (s < e) {
+		    if (strchr(" \t\n\r", *s)) {
+			int nl = 0;	/* Keep whitespace without NL - file names! */
+			unsigned char *s1 = s;
+
+			while (strchr(" \t\n\r", *s)) {
+			    if (!nl && *s == '\n')
+				nl = 1;
+			    s++;
+			}
+			if (!nl) {
+			    while (s1 < s) {
+				if (*s1 != '\r' && *s1 != '\r')
+				    *t = *s1;
+				t++, s1++;
+			    }
+			}
+		    } else
+			*t++ = *s++;
+		}
+		*t = '\0';
+		get_clip_release();
+		do_check_goto_URL(buf, &temp, &force_load);
+		free(buf);
 	    }
 	    break;
 #endif
@@ -7027,6 +7131,10 @@ new_cmd:  /*
 	    case 2:
 		goto new_cmd;
 	    }
+	    break;
+
+	case LYK_NEXT_DOC:	/* undo back up a level */
+	    handle_NEXT_DOC();
 	    break;
 
 	case LYK_NOCACHE: /* Force submission of form or link with no-cache */

@@ -831,7 +831,7 @@ Try_Redirected_URL:
 			    LYrefresh();
 			}
 #endif /* USE_SLANG */
-			fprintf(tfp,"\n");
+			CTRACE((tfp, "\n"));
 		    }
 		    if (!HTLoadAbsolute(&WWWDoc)) {
 			/*

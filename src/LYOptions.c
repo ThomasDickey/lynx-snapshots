@@ -989,6 +989,12 @@ draw_options:
 			LYclrtoeol();
 			LYaddstr(LYRawMode ? "ON " : "OFF");
 		    }
+#ifdef CAN_SWITCH_DISPLAY_CHARSET
+		    /* Deduce whether the user wants autoswitch: */
+		    switch_display_charsets =
+			(current_char_set == auto_display_charset
+			    || current_char_set == auto_other_display_charset);
+#endif
 		}
 		response = ' ';
 		if (LYSelectPopups) {
@@ -2955,24 +2961,30 @@ PUBLIC int postoptions ARGS1(
 	 * charset settings: the order is essential here.
 	 */
 	if (display_char_set_old != current_char_set) {
-		/*
-		 *  Set the LYUseDefaultRawMode value and character
-		 *  handling if LYRawMode was changed. - FM
-		 */
-		LYUseDefaultRawMode = TRUE;
-		HTMLUseCharacterSet(current_char_set);
-	    }
+	    /*
+	     *  Set the LYUseDefaultRawMode value and character
+	     *  handling if LYRawMode was changed. - FM
+	     */
+	    LYUseDefaultRawMode = TRUE;
+	    HTMLUseCharacterSet(current_char_set);
+#ifdef CAN_SWITCH_DISPLAY_CHARSET
+	    /* Deduce whether the user wants autoswitch: */
+	    switch_display_charsets =
+		 (current_char_set == auto_display_charset
+		  || current_char_set == auto_other_display_charset);
+#endif
+	}
 	if (assume_char_set_changed && HTCJK != JAPANESE) {
-		LYRawMode = (BOOL) (UCLYhndl_for_unspec == current_char_set);
-	    }
+	    LYRawMode = (BOOL) (UCLYhndl_for_unspec == current_char_set);
+	}
 	if (raw_mode_old != LYRawMode || assume_char_set_changed) {
-		/*
-		 *  Set the raw 8-bit or CJK mode defaults and
-		 *  character set if changed. - FM
-		 */
-		HTMLSetUseDefaultRawMode(current_char_set, LYRawMode);
-		HTMLSetCharacterHandling(current_char_set);
-	    }
+	    /*
+	     *  Set the raw 8-bit or CJK mode defaults and
+	     *  character set if changed. - FM
+	     */
+	    HTMLSetUseDefaultRawMode(current_char_set, LYRawMode);
+	    HTMLSetCharacterHandling(current_char_set);
+	}
 	need_reload = TRUE;
      } /* end of charset settings */
 

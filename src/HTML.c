@@ -1099,7 +1099,7 @@ PRIVATE int HTML_start_element ARGS6(
 	force_current_tag_style = FALSE;
     }
 
-    CTRACE((tfp, "CSS.elt:<%s>\n", HTML_dtd.tags[element_number].name));
+    CTRACE2(TRACE_STYLE, (tfp, "CSS.elt:<%s>\n", HTML_dtd.tags[element_number].name));
 
     if (current_tag_style == -1) {	/* Append class_name */
 #if !OPT_SCN
@@ -1129,10 +1129,12 @@ PRIVATE int HTML_start_element ARGS6(
 	    if (!hashStyles[hcode].name) { /* None such -> classless version */
 		hcode = ohcode;
 		*oend = '\0';
-		CTRACE((tfp, "STYLE.start_element: <%s> (class <%s> not configured), hcode=%d.\n",
+		CTRACE2(TRACE_STYLE,
+			(tfp, "STYLE.start_element: <%s> (class <%s> not configured), hcode=%d.\n",
 			HTML_dtd.tags[element_number].name, class_name, hcode));
 	    } else {
-		CTRACE((tfp, "STYLE.start_element: <%s>.<%s>, hcode=%d.\n",
+		CTRACE2(TRACE_STYLE,
+			(tfp, "STYLE.start_element: <%s>.<%s>, hcode=%d.\n",
 			HTML_dtd.tags[element_number].name, class_name, hcode));
 		class_used = 1;
 	    }
@@ -1147,25 +1149,23 @@ PRIVATE int HTML_start_element ARGS6(
 #if !OPT_SCN
     if (TRACE)
     {
-	fprintf(tfp, "CSSTRIM:%s -> %d", myHash, hcode);
-	if (hashStyles[hcode].code!=hcode)
-	{
+	CTRACE((tfp, "CSSTRIM:%s -> %d", myHash, hcode));
+	if (hashStyles[hcode].code != hcode) {
 	    char *rp = strrchr(myHash, '.');
-	    fprintf(tfp, " (undefined) %s\n", myHash);
-	    if (rp)
-	    {
+	    CTRACE((tfp, " (undefined) %s\n", myHash));
+	    if (rp) {
 		int hcd;
-		*rp='\0'; /* trim the class */
+		*rp = '\0'; /* trim the class */
 		hcd = hash_code(myHash);
-		fprintf(tfp, "CSS:%s -> %d", myHash, hcd);
+		CTRACE((tfp, "CSS:%s -> %d", myHash, hcd));
 		if (hashStyles[hcd].code!=hcd)
-		    fprintf(tfp, " (undefined) %s\n", myHash);
+		    CTRACE((tfp, " (undefined) %s\n", myHash));
 		else
-		    fprintf(tfp, " ca=%d\n", hashStyles[hcd].color);
+		    CTRACE((tfp, " ca=%d\n", hashStyles[hcd].color));
 	    }
+	} else {
+	    CTRACE((tfp, " ca=%d\n", hashStyles[hcode].color));
 	}
-	else
-	    fprintf(tfp, " ca=%d\n", hashStyles[hcode].color);
     }
 #endif
     } else { /* (current_tag_style!=-1)	 */
@@ -1185,7 +1185,8 @@ PRIVATE int HTML_start_element ARGS6(
 	    class_string[0] = '\0';
 	}
 	hcode = current_tag_style;
-	CTRACE((tfp, "STYLE.start_element: <%s>, hcode=%d.\n",
+	CTRACE2(TRACE_STYLE,
+		(tfp, "STYLE.start_element: <%s>, hcode=%d.\n",
 		HTML_dtd.tags[element_number].name, hcode));
 	current_tag_style = -1;
     }
@@ -1218,10 +1219,13 @@ PRIVATE int HTML_start_element ARGS6(
 	if (!hashStyles[hcode].name) { /* None such -> classless version */
 	    hcode = ohcode;
 	    *oend = '\0';
-	    CTRACE((tfp, "STYLE.start_element: type <%s> not configured.\n", type));
+	    CTRACE2(TRACE_STYLE,
+		    (tfp, "STYLE.start_element: type <%s> not configured.\n",
+			   type));
 	} else {
-	    CTRACE((tfp, "STYLE.start_element: <%s>.type.<%s>, hcode=%d.\n",
-		    HTML_dtd.tags[element_number].name, type, hcode));
+	    CTRACE2(TRACE_STYLE,
+		    (tfp, "STYLE.start_element: <%s>.type.<%s>, hcode=%d.\n",
+			  HTML_dtd.tags[element_number].name, type, hcode));
 	}
     }
 #endif	/* OPT_SCN && !OMIT_SCN_KEEPING */
@@ -1452,9 +1456,8 @@ PRIVATE int HTML_start_element ARGS6(
 #ifndef USE_COLOR_STYLE
 		if (!strcasecomp(value[HTML_LINK_REL], "StyleSheet") ||
 		    !strcasecomp(value[HTML_LINK_REL], "Style")) {
-		    CTRACE((tfp, "HTML: StyleSheet link found.\n"));
-		    CTRACE((tfp,
-				"        StyleSheets not yet implemented.\n"));
+		    CTRACE2(TRACE_STYLE, (tfp, "HTML: StyleSheet link found.\n"));
+		    CTRACE2(TRACE_STYLE, (tfp, "        StyleSheets not yet implemented.\n"));
 		    FREE(href);
 		    break;
 		}
@@ -1654,7 +1657,8 @@ PRIVATE int HTML_start_element ARGS6(
 	    {
 		char *tmp = 0;
 		HTSprintf0(&tmp, "link.%s.%s", value[HTML_LINK_CLASS], title);
-		CTRACE((tfp, "STYLE.link: using style <%s>\n", tmp));
+		CTRACE2(TRACE_STYLE,
+			(tfp, "STYLE.link: using style <%s>\n", tmp));
 
 		HText_characterStyle(me->text, hash_code(tmp), 1);
 		HTML_put_string(me, title);
@@ -5800,7 +5804,9 @@ PRIVATE int HTML_start_element ARGS6(
 	 *  table tracking code.  Cancel tracking, it would only make
 	 *  things worse. - kw
 	 */
-	/* HText_cancelStbl(me->text); ** Not needed with new TRST */
+#ifndef EXP_NESTED_TABLES
+	HText_cancelStbl(me->text);
+#endif
 	if (me->inA) {
 	    SET_SKIP_STACK(HTML_A);
 	    HTML_end_element(me, HTML_A, include);
@@ -6109,7 +6115,8 @@ PRIVATE int HTML_start_element ARGS6(
 
     if (ReallyEmptyTagNum(element_number))
     {
-	CTRACE((tfp, "STYLE.begin_element:ending \"EMPTY\" element style\n"));
+	CTRACE2(TRACE_STYLE,
+		(tfp, "STYLE.begin_element:ending \"EMPTY\" element style\n"));
 	HText_characterStyle(me->text, HCODE_TO_STACK_OFF(hcode), STACK_OFF);
 
 #if !OPT_SCN
@@ -6239,8 +6246,9 @@ PRIVATE int HTML_end_element ARGS3(
 	    (me->sp < (me->stack + MAX_NESTING - 1)))
 	    me->sp[0].tag_number = HTML_OBJECT;
 	if (me->skip_stack > 0) {
-	    CTRACE((tfp, "HTML:end_element: Internal call (level %d), leaving on stack - %s\n",
-		    me->skip_stack, NONNULL(me->sp->style->name)));
+	    CTRACE2(TRACE_STYLE,
+		    (tfp, "HTML:end_element: Internal call (level %d), leaving on stack - %s\n",
+			  me->skip_stack, NONNULL(me->sp->style->name)));
 	    me->skip_stack--;
 	} else if (element_number == HTML_OBJECT &&
 		   me->sp[0].tag_number != HTML_OBJECT &&
@@ -6253,12 +6261,12 @@ PRIVATE int HTML_end_element ARGS3(
 	     *	didn't push because the SGML parser was supposed
 	     *  to go on parsing the contents non-literally. - kw
 	     */
-	    CTRACE((tfp,
-		   "HTML:end_element[%d]: %s (level %d), %s - %s\n",
-		   (int) STACKLEVEL(me),
-		   "Special OBJECT handling", me->objects_mixed_open,
-		   "leaving on stack",
-		   NONNULL(me->sp->style->name)));
+	    CTRACE2(TRACE_STYLE,
+		    (tfp, "HTML:end_element[%d]: %s (level %d), %s - %s\n",
+			   (int) STACKLEVEL(me),
+			   "Special OBJECT handling", me->objects_mixed_open,
+			   "leaving on stack",
+			   NONNULL(me->sp->style->name)));
 	    me->objects_mixed_open--;
 	} else if (me->stack_overrun == TRUE &&
 	    element_number != me->sp[0].tag_number) {
@@ -6315,22 +6323,24 @@ PRIVATE int HTML_end_element ARGS3(
 		     *  so pop the FIG and pretend that's what we are
 		     *  being called for. - kw
 		     */
-		    CTRACE((tfp,
-			"HTML:end_element[%d]: %s (level %d), %s - %s\n",
-			(int) STACKLEVEL(me),
-			"Special OBJECT->FIG handling", me->objects_figged_open,
-			"treating as end FIG",
-			NONNULL(me->sp->style->name)));
+		    CTRACE2(TRACE_STYLE,
+			    (tfp, "HTML:end_element[%d]: %s (level %d), %s - %s\n",
+				  (int) STACKLEVEL(me),
+				  "Special OBJECT->FIG handling",
+				  me->objects_figged_open,
+				  "treating as end FIG",
+				  NONNULL(me->sp->style->name)));
 		    me->objects_figged_open--;
 		    element_number = HTML_FIG;
 		}
 	    }
 	    (me->sp)++;
-	    CTRACE((tfp, "HTML:end_element[%d]: Popped style off stack - %s\n",
-			(int) STACKLEVEL(me),
-			NONNULL(me->sp->style->name)));
+	    CTRACE2(TRACE_STYLE,
+		    (tfp, "HTML:end_element[%d]: Popped style off stack - %s\n",
+			  (int) STACKLEVEL(me),
+			  NONNULL(me->sp->style->name)));
 	} else {
-	    CTRACE((tfp,
+	    CTRACE2(TRACE_STYLE, (tfp,
   "Stack underflow error!  Tried to pop off more styles than exist in stack\n"));
 	}
     }
@@ -6447,8 +6457,9 @@ PRIVATE int HTML_end_element ARGS3(
 	 *  we'll just ignore. - FM
 	 */
 	HTChunkTerminate(&me->style_block);
-	CTRACE((tfp, "HTML: STYLE content =\n%s\n",
-			    me->style_block.data));
+	CTRACE2(TRACE_STYLE,
+		(tfp, "HTML: STYLE content =\n%s\n",
+		      me->style_block.data));
 	HTChunkClear(&me->style_block);
 	break;
 
@@ -7614,6 +7625,9 @@ End_Object:
 	break;
 
     case HTML_TABLE:
+#ifndef EXP_NESTED_TABLES
+	me->inTABLE = FALSE;
+#endif
 	if (!strcmp(me->sp->style->name, "Preformatted")) {
 	    break;
 	}
@@ -7624,7 +7638,11 @@ End_Object:
 				me->DivisionAlignments[me->Division_Level];
 	change_paragraph_style(me, me->sp->style);
 	UPDATE_STYLE;
+#ifdef EXP_NESTED_TABLES
 	me->inTABLE = HText_endStblTABLE(me->text);
+#else
+	HText_endStblTABLE(me->text);
+#endif
 	me->current_default_alignment = me->sp->style->alignment;
 	if (me->List_Nesting_Level >= 0)
 	    HText_NegateLineOne(me->text);
@@ -7720,8 +7738,9 @@ End_Object:
 
 	if (!ReallyEmptyTagNum(element_number))
 	{
-	    CTRACE((tfp, "STYLE.end_element: ending non-\"EMPTY\" style <%s...>\n",
-		    HTML_dtd.tags[element_number].name));
+	    CTRACE2(TRACE_STYLE,
+		    (tfp, "STYLE.end_element: ending non-\"EMPTY\" style <%s...>\n",
+			  HTML_dtd.tags[element_number].name));
 	    HText_characterStyle(me->text, HCODE_TO_STACK_OFF(hcode), STACK_OFF);
 	}
     }
@@ -7891,8 +7910,8 @@ PRIVATE void HTML_free ARGS1(HTStructured *, me)
 		    "Bad HTML: SELECT or OPTION not ended properly *****\n"));
 	if (TRACE) {
 	    HTChunkTerminate(&me->option);
-	    fprintf(tfp, "HTML_free: ***** leftover option data: %s\n",
-		    me->option.data);
+	    CTRACE((tfp, "HTML_free: ***** leftover option data: %s\n",
+			 me->option.data));
 	}
 	HTChunkClear(&me->option);
     }
@@ -7907,8 +7926,8 @@ PRIVATE void HTML_free ARGS1(HTStructured *, me)
 		    "Bad HTML: TEXTAREA not used properly *****\n"));
 	if (TRACE) {
 	    HTChunkTerminate(&me->textarea);
-	    fprintf(tfp, "HTML_free: ***** leftover textarea data: %s\n",
-		    me->textarea.data);
+	    CTRACE((tfp, "HTML_free: ***** leftover textarea data: %s\n",
+			 me->textarea.data));
 	}
 	HTChunkClear(&me->textarea);
     }
@@ -7981,11 +8000,10 @@ PRIVATE void HTML_abort ARGS2(HTStructured *, me, HTError, e)
 	 *  have gone very wrong. - kw
 	 */
 	if (TRACE) {
-	    fprintf(tfp,
-		    "HTML_abort: SELECT or OPTION not ended properly *****\n");
+	    CTRACE((tfp, "HTML_abort: SELECT or OPTION not ended properly *****\n"));
 	    HTChunkTerminate(&me->option);
-	    fprintf(tfp, "HTML_abort: ***** leftover option data: %s\n",
-		    me->option.data);
+	    CTRACE((tfp, "HTML_abort: ***** leftover option data: %s\n",
+			 me->option.data));
 	}
 	HTChunkClear(&me->option);
     }
@@ -7996,11 +8014,10 @@ PRIVATE void HTML_abort ARGS2(HTStructured *, me, HTError, e)
 	 *  have gone very wrong. - kw
 	 */
 	if (TRACE) {
-	    fprintf(tfp,
-		    "HTML_abort: TEXTAREA not used properly *****\n");
+	    CTRACE((tfp, "HTML_abort: TEXTAREA not used properly *****\n"));
 	    HTChunkTerminate(&me->textarea);
-	    fprintf(tfp, "HTML_abort: ***** leftover textarea data: %s\n",
-		    me->textarea.data);
+	    CTRACE((tfp, "HTML_abort: ***** leftover textarea data: %s\n",
+			 me->textarea.data));
 	}
 	HTChunkClear(&me->textarea);
     }

@@ -49,7 +49,7 @@ LYE_NOP,        LYE_ENTER,      LYE_FORWW,      LYE_ABORT,
 LYE_BACKW,      LYE_NOP,        LYE_DELN,       LYE_NOP,
 /* ^P           XON             ^R              XOFF    */
 
-#ifdef WIN_EX
+#ifdef CAN_CUT_AND_PASTE
 LYE_UPPER,      LYE_ERASE,      LYE_LKCMD,      LYE_PASTE,
 #else
 LYE_UPPER,      LYE_ERASE,      LYE_LKCMD,      LYE_NOP,
@@ -295,7 +295,7 @@ LYE_NOP,        LYE_ENTER,      LYE_FORWW,      LYE_ABORT,
 LYE_BACKW,      LYE_NOP,        LYE_DELPW,      LYE_NOP,
 /* ^P           XON             ^R              XOFF    */
 
-#ifdef WIN_EX
+#ifdef CAN_CUT_AND_PASTE
 LYE_DELNW,      LYE_ERASE,      LYE_LKCMD,      LYE_PASTE,
 #else
 LYE_DELNW,      LYE_ERASE,      LYE_LKCMD,      LYE_NOP,

@@ -75,12 +75,6 @@
 
 #ifdef CAN_AUTODETECT_DISPLAY_CHARSET
 int auto_display_charset = -1;
-#  ifdef __EMX__
-/* If we include <os2.h>, BOOLEAN conflicts.  Just copy the proto: */
-unsigned long DosQueryCp (unsigned long ulLength,
-			  unsigned long* pCodePageList,
-			  unsigned long* pDataLength);
-#  endif
 #endif
 
 /*
@@ -1738,9 +1732,9 @@ PRIVATE CONST char ** UC_setup_LYCharSets_repl ARGS2(
 {
     CONST char **ISO_Latin1 = LYCharSets[0];
     CONST char **p;
-    CONST char **prepl;
+    char **prepl;
     CONST u16 *pp;
-    CONST char **tp;
+    char **tp;
     CONST char *s7;
     CONST char *s8;
     size_t i;
@@ -1751,7 +1745,7 @@ PRIVATE CONST char ** UC_setup_LYCharSets_repl ARGS2(
     /*
      *	Create a temporary table for reverse lookup of latin1 codes:
      */
-    tp = (CONST char **)malloc(96 * sizeof(CONST char *));
+    tp = (char **)malloc(96 * sizeof(char *));
     if (!tp)
 	return NULL;
     for (i = 0; i < 96; i++)
@@ -1796,7 +1790,7 @@ PRIVATE CONST char ** UC_setup_LYCharSets_repl ARGS2(
 	list = UCInfo[UC_charset_in_hndl].replacedesc.entries;
 	while (ct--) {
 	    if ((k = list->unicode) >= 160 && k < 256) {
-		tp[k-160] = list->replace_str;
+		tp[k-160] = (char *)list->replace_str;
 	    }
 	    list++;
 	}
@@ -1805,14 +1799,14 @@ PRIVATE CONST char ** UC_setup_LYCharSets_repl ARGS2(
      *	Now allocate a new table compatible with LYCharSets[]
      *	and with the HTMLDTD for entities.
      *	We don't know yet whether we'll keep it around. */
-    prepl = (CONST char **)malloc(HTML_dtd.number_of_entities * sizeof(char *));
+    prepl = (char **)malloc(HTML_dtd.number_of_entities * sizeof(char *));
     if (!prepl) {
 	FREE(tp);
 	FREE(ti);
 	return 0;
     }
 
-    p = prepl;
+    p = (CONST char **)prepl;
     changed = 0;
     for (i = 0; i < HTML_dtd.number_of_entities; i++, p++) {
 	/*
@@ -1883,7 +1877,7 @@ PRIVATE CONST char ** UC_setup_LYCharSets_repl ARGS2(
 	FREE(prepl);
 	return NULL;
     }
-    return prepl;
+    return (CONST char **)prepl;
 }
 
 /*
@@ -2164,6 +2158,47 @@ PRIVATE void UCcleanup_mem NOARGS
 }
 #endif /* LY_FIND_LEAKS */
 
+#ifdef CAN_AUTODETECT_DISPLAY_CHARSET
+#  ifdef __EMX__
+PRIVATE int CpOrdinal ARGS2 (CONST unsigned long, cp, CONST int, other)
+{
+    char lyName[80];
+    char myMimeName[80];
+    char *mimeName, *mName = NULL, *lName = NULL;
+    int s, i, exists = 0, ret;
+
+    CTRACE((tfp, "CpOrdinal(cp=%ul, other=%d).\n", cp, other));
+    sprintf(myMimeName, "auto%s-cp%lu", (other ? "2" : ""), cp);
+    mimeName = myMimeName + 5 + (other != 0);
+    sprintf(lyName, "AutoDetect%s (cp%lu)",
+	    (other ? "-2" : ""), cp);
+    /* Find slot. */
+    s = -1;
+    for (i = 0; i < UCNumCharsets; i++) {
+	if (!strcmp(UCInfo[i].LYNXname, lyName))
+	    return UCGetLYhndl_byMIME(myMimeName);
+	else if (!strcasecomp(UCInfo[i].MIMEname, mimeName))
+	    s = i;
+    }
+    if (s < 0)
+	return -1;
+    /* Store the "real" charset info */
+    real_charsets[other != 0] = UCGetLYhndl_byMIME(mimeName);
+    /* Duplicate the record. */
+    StrAllocCopy(mName, myMimeName);
+    StrAllocCopy(lName, lyName);
+    UC_Charset_Setup(mName, lName,
+		     UCInfo[s].unicount, UCInfo[s].unitable,
+		     UCInfo[s].num_uni, UCInfo[s].replacedesc,
+		     UCInfo[s].lowest_eight, UCInfo[s].enc,
+		     UCInfo[s].codepage);
+    ret = UCGetLYhndl_byMIME(myMimeName);
+    CTRACE((tfp, "Found %i.\n", ret));
+    return ret;
+}
+#  endif /* __EMX__ */
+#endif /* CAN_AUTODETECT_DISPLAY_CHARSET */
+
 PUBLIC void UCInit NOARGS
 {
 
@@ -2241,34 +2276,21 @@ PUBLIC void UCInit NOARGS
 #  ifdef __EMX__
     {
 	unsigned long lst[3];
-	unsigned long len;
+	unsigned long len, rc;
 
-	if (DosQueryCp(sizeof(lst), lst, &len) == 0 && len >= 1) {
-	    static char lyName[80];
-	    static char myMimeName[80];
-	    char *mimeName;
-	    int s, i, exists = 0;
-
-	    sprintf(myMimeName, "auto-cp%lu", lst[0]);
-	    mimeName = myMimeName + 5;
-	    sprintf(lyName, "AutoDetect (cp%lu)", lst[0]);
-	    /* Find slot. */
-	    s = -1;
-	    for (i = 0; i < UCNumCharsets; i++) {
-		    if (!strcmp(UCInfo[i].LYNXname, lyName))
-			exists = 1;
-		    else if (!stricmp(UCInfo[i].MIMEname, mimeName))
-			s = i;
+	rc = DosQueryCp(sizeof(lst), lst, &len);
+	if (rc == 0) {
+	    if (len >= 1)
+		auto_display_charset = CpOrdinal(lst[0], 0);
+#    ifdef CAN_SWITCH_DISPLAY_CHARSET
+	    if (len >= 3) {
+		codepages[0] = lst[0];
+		codepages[1] = (lst[0] == lst[1] ? lst[2] : lst[1]);
+		auto_other_display_charset = CpOrdinal(codepages[1], 1);
 	    }
-	    if (s >= 0 && !exists) {
-		/* Duplicate the record. */
-		UC_Charset_Setup(myMimeName, lyName,
-				 UCInfo[s].unicount, UCInfo[s].unitable,
-				 UCInfo[s].num_uni, UCInfo[s].replacedesc,
-				 UCInfo[s].lowest_eight, UCInfo[s].enc,
-				 UCInfo[s].codepage);
-		auto_display_charset = UCGetLYhndl_byMIME(myMimeName);
-	    }
+#    endif
+	} else {
+	    CTRACE((tfp, "DosQueryCp() returned %#lx=%lu.\n", rc, rc));
 	}
     }
 #  endif

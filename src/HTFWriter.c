@@ -1030,7 +1030,6 @@ PUBLIC HTStream* HTCompressed ARGS3(
      *	or a download request, in which case we won't bother to
      *	uncompress the file. - FM
      */
-    CTRACE((tfp, "FIXME %s @%d\n", __FILE__, __LINE__));
     if (!(anchor && anchor->content_encoding && anchor->content_type)) {
 	/*
 	 *  We have no idea what we're dealing with,
@@ -1041,16 +1040,10 @@ PUBLIC HTStream* HTCompressed ARGS3(
 	return me;
     }
     n = HTList_count(HTPresentations);
-    CTRACE((tfp, "FIXME %s @%d\n", __FILE__, __LINE__));
     for (i = 0; i < n; i++) {
 	Pres = (HTPresentation *)HTList_objectAt(HTPresentations, i);
-	CTRACE((tfp, "FIXME %s @%d '%s', '%s' (%s)\n", __FILE__, __LINE__,
-	    Pres->rep->name,
-	    anchor->content_type,
-	    anchor->content_encoding));
 	if (!strcasecomp(Pres->rep->name, anchor->content_type) &&
 	    Pres->rep_out == WWW_PRESENT) {
-    CTRACE((tfp, "FIXME %s @%d\n", __FILE__, __LINE__));
 	    /*
 	     *	We have a presentation mapping for it. - FM
 	     */

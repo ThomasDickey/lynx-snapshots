@@ -377,13 +377,13 @@ PUBLIC int check_color ARGS2(
 {
     int i;
 
-    CTRACE((tfp, "check_color(%s,%d)\n", color, the_default));
+    CTRACE2(TRACE_STYLE, (tfp, "check_color(%s,%d)\n", color, the_default));
     if (!strcasecomp(color, "default")) {
 #if USE_DEFAULT_COLORS
 	if (!default_color_reset)
 	    the_default = DEFAULT_COLOR;
 #endif	/* USE_DEFAULT_COLORS */
-	CTRACE((tfp, "=> default %d\n", the_default));
+	CTRACE2(TRACE_STYLE, (tfp, "=> default %d\n", the_default));
 	return the_default;
     }
     if (!strcasecomp(color, "nocolor"))
@@ -393,11 +393,11 @@ PUBLIC int check_color ARGS2(
 	if (!strcasecomp(color, Color_Strings[i])) {
 	    int c = ColorCode(i);
 
-	    CTRACE((tfp, "=> %d\n", c));
+	    CTRACE2(TRACE_STYLE, (tfp, "=> %d\n", c));
 	    return c;
 	}
     }
-    CTRACE((tfp, "=> ERR_COLOR\n"));
+    CTRACE2(TRACE_STYLE, (tfp, "=> ERR_COLOR\n"));
     return ERR_COLOR;
 }
 
@@ -602,7 +602,9 @@ static int character_set_fun ARGS1(
 
     if (i < 0) {
 #ifdef CAN_AUTODETECT_DISPLAY_CHARSET
-	if (auto_display_charset >= 0 && !strnicmp(value,"AutoDetect ",11))
+	if (auto_display_charset >= 0
+	    && (!strnicmp(value,"AutoDetect ",11)
+		|| !strnicmp(value,"AutoDetect-2 ",13)))
 	    current_char_set = auto_display_charset;
 #endif
 	/* do nothing here: so fallback to userdefs.h */
@@ -1431,6 +1433,10 @@ static Config_Type Config_Table [] =
      PARSE_SET("bold_name_anchors", CONF_BOOL, &bold_name_anchors),
      PARSE_SET("case_sensitive_always_on", CONF_BOOL, &case_sensitive),
      PARSE_FUN("character_set", CONF_FUN, character_set_fun),
+#ifdef CAN_SWITCH_DISPLAY_CHARSET
+     PARSE_SET("charset_switch_rules", CONF_STR, &charset_switch_rules),
+     PARSE_SET("charsets_directory", CONF_STR, &charsets_directory),
+#endif
      PARSE_SET("checkmail", CONF_BOOL, &check_mail),
      PARSE_SET("collapse_br_tags", CONF_BOOL, &LYCollapseBRs),
 #ifdef USE_COLOR_TABLE

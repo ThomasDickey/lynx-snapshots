@@ -768,6 +768,14 @@ CF_ARG_ENABLE(libjs,
 AC_MSG_RESULT($use_libjs)
 test $use_libjs != no && AC_DEFINE(EXP_LIBJS)
 
+AC_MSG_CHECKING(if experimental nested-table logic should be used)
+CF_ARG_ENABLE(nested-tables,
+[  --enable-nested-tables  use experimental nested-table support],
+	[use_nested_tables=$enableval],
+	[use_nested_tables=no])
+AC_MSG_RESULT($use_nested_tables)
+test $use_nested_tables != no && AC_DEFINE(EXP_NESTED_TABLES)
+
 AC_MSG_CHECKING(if html source should be colorized)
 CF_ARG_ENABLE(prettysrc,
 [  --enable-prettysrc      colorize HTML source],

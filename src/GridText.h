@@ -61,8 +61,6 @@ extern char * HTCurSelectGroupSize;
 extern HText * HTMainText;		/* Equivalent of main window */
 extern HTParentAnchor * HTMainAnchor;	/* Anchor for HTMainText */
 
-extern int WWW_TraceFlag;
-
 #if defined(VMS) && defined(VAXC) && !defined(__DECC)
 extern int HTVirtualMemorySize;
 #endif /* VMS && VAXC && !__DECC */
@@ -172,16 +170,16 @@ extern int HText_HiddenLinkCount PARAMS((HText *text));
 extern char * HText_HiddenLinkAt PARAMS((HText *text, int number));
 
 /* "simple table" stuff */
-extern void HText_cancelStbl PARAMS((HText *));
-extern void HText_startStblTABLE PARAMS((HText *, short));
 extern int HText_endStblTABLE PARAMS((HText *));
-extern void HText_startStblTR PARAMS((HText *, short));
-extern void HText_endStblTR PARAMS((HText *));
-extern void HText_startStblTD PARAMS((HText *, int, int, short, BOOL));
-extern void HText_endStblTD PARAMS((HText *));
-extern void HText_startStblCOL PARAMS((HText *, int, short, BOOL));
+extern void HText_cancelStbl PARAMS((HText *));
 extern void HText_endStblCOLGROUP PARAMS((HText *));
+extern void HText_endStblTD PARAMS((HText *));
+extern void HText_endStblTR PARAMS((HText *));
+extern void HText_startStblCOL PARAMS((HText *, int, short, BOOL));
 extern void HText_startStblRowGroup PARAMS((HText *, short));
+extern void HText_startStblTABLE PARAMS((HText *, short));
+extern void HText_startStblTD PARAMS((HText *, int, int, short, BOOL));
+extern void HText_startStblTR PARAMS((HText *, short));
 
 /* forms stuff */
 extern void HText_beginForm PARAMS((

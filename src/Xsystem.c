@@ -1,4 +1,4 @@
-/* @Id: Xsystem.c 1.8 Wed, 25 Oct 2000 09:35:28 -0700 dickey @
+/* @Id: Xsystem.c 1.9 Mon, 26 Feb 2001 18:41:57 -0800 dickey @
  *	like system("cmd") but return with exit code of "cmd"
  *	for Turbo-C/MS-C/LSI-C
  *  This code is in the public domain.
@@ -131,7 +131,7 @@ is_builtin_command(char *s)
         count++;
 #endif
     for (i = 0; i < count; i++) {
-	if (stricmp(s, cmdtab[i]) == 0)
+	if (strcasecomp(s, cmdtab[i]) == 0)
 	    return 1;
 	lc = strlen(cmdtab[i]);
 	if (lc < l && strnicmp(s, cmdtab[i], lc) == 0 && issep2(s[lc]))
@@ -344,7 +344,7 @@ prog_go(PRO * p, int flag)
 	s--;
     }
 
-    if (is_builtin_command(p->cmd) || (extp && stricmp(extp, ".bat") == 0))
+    if (is_builtin_command(p->cmd) || (extp && strcasecomp(extp, ".bat") == 0))
 	return csystem(p, flag);
 
     if (s < p->cmd) {		/* cmd has no PATH nor Drive */

@@ -377,7 +377,7 @@ PUBLIC void setHashStyle ARGS5(
 {
     bucket* ds = &hashStyles[style];
 
-    CTRACE((tfp, "CSS(SET): <%s> hash=%d, ca=%#x, ma=%#x\n", element, style, color, mono));
+    CTRACE2(TRACE_STYLE, (tfp, "CSS(SET): <%s> hash=%d, ca=%#x, ma=%#x\n", element, style, color, mono));
 
     ds->color = color;
     ds->cattr = cattr;
@@ -398,15 +398,15 @@ PRIVATE int LYAttrset ARGS3(
     if (lynx_has_color
      && LYShowColor >= SHOW_COLOR_ON
      && color >= 0) {
-	CTRACE((tfp, "CSS:LYAttrset color (%s)\n", attr_to_string(color)));
+	CTRACE2(TRACE_STYLE, (tfp, "CSS:LYAttrset color (%s)\n", attr_to_string(color)));
 	wattrset(win, color);
 	return color;
     } else if (mono >= 0) {
-	CTRACE((tfp, "CSS:LYAttrset mono (%s)\n", attr_to_string(mono)));
+	CTRACE2(TRACE_STYLE, (tfp, "CSS:LYAttrset mono (%s)\n", attr_to_string(mono)));
 	wattrset(win, mono);
 	return mono;
     } else {
-	CTRACE((tfp, "CSS:LYAttrset (A_NORMAL)\n"));
+	CTRACE2(TRACE_STYLE, (tfp, "CSS:LYAttrset (A_NORMAL)\n"));
 	wattrset(win, A_NORMAL);
 	return A_NORMAL;
     }
@@ -433,13 +433,13 @@ PRIVATE void curses_w_style ARGS3(
 
 
     if (!ds->name) {
-	CTRACE((tfp, "CSS.CS:Style %d not configured\n",style));
+	CTRACE2(TRACE_STYLE, (tfp, "CSS.CS:Style %d not configured\n",style));
 #if !OMIT_SCN_KEEPING
 	return;
 #endif
     }
 
-    CTRACE((tfp, "CSS.CS:<%s%s> (%d)\n",(dir?"":"/"),ds->name,ds->code));
+    CTRACE2(TRACE_STYLE, (tfp, "CSS.CS:<%s%s> (%d)\n",(dir?"":"/"),ds->name,ds->code));
 
     getyx (win, YP, XP);
 
@@ -463,7 +463,7 @@ PRIVATE void curses_w_style ARGS3(
 
     case STACK_ON: /* remember the current attributes */
 	if (last_colorattr_ptr > 127) {
-	    CTRACE((tfp,"........... %s (0x%x) %s\r\n",
+	    CTRACE2(TRACE_STYLE, (tfp,"........... %s (0x%x) %s\r\n",
 			"attribute cache FULL, dropping last",
 			last_styles[last_colorattr_ptr],
 			"in LynxChangeStyle(curses_w_style)"));
@@ -488,7 +488,7 @@ PRIVATE void curses_w_style ARGS3(
 	     && style != s_aedit_sel
 	     && style != s_aedit_pad
 	     && style != s_aedit_arr ) {
-	    CTRACE((tfp, "CACHED: <%s> @(%d,%d)\n", ds->name, YP, XP));
+	    CTRACE2(TRACE_STYLE, (tfp, "CACHED: <%s> @(%d,%d)\n", ds->name, YP, XP));
 	    if (win == LYwin) cached_styles[YP][XP] = style;
 	}
 	LYAttrset(win, ds->color, ds->mono);
@@ -508,14 +508,14 @@ PUBLIC void wcurses_css ARGS3(
 
     while (try_again) {
 	int tmpHash = hash_code(name);
-	CTRACE((tfp, "CSSTRIM:trying to set [%s] style - ", name));
+	CTRACE2(TRACE_STYLE, (tfp, "CSSTRIM:trying to set [%s] style - ", name));
 	if (tmpHash == NOSTYLE) {
 	    char *class = strrchr(name, '.');
-	    CTRACE((tfp, "undefined, trimming at %p\n", class));
+	    CTRACE2(TRACE_STYLE, (tfp, "undefined, trimming at %p\n", class));
 	    if (class)	*class = '\0';
 	    else	try_again = 0;
 	} else {
-	    CTRACE((tfp, "ok (%d)\n", hash_code(name)));
+	    CTRACE2(TRACE_STYLE, (tfp, "ok (%d)\n", hash_code(name)));
 	    curses_w_style(win, hash_code(name), dir);
 	    try_again = 0;
 	}
@@ -669,7 +669,7 @@ PUBLIC int lynx_chg_color ARGS3(
 PUBLIC void lynx_set_color ARGS1(int, a)
 {
     if (lynx_has_color && LYShowColor >= SHOW_COLOR_ON) {
-	attrset(lynx_color_cfg[a].attr
+	wattrset(LYwin, lynx_color_cfg[a].attr
 		| (((a+1) < COLOR_PAIRS)
 			? COLOR_PAIR(a+1)
 			: A_NORMAL));
@@ -742,7 +742,7 @@ PUBLIC void LYnoVideo ARGS1(
  * If newterm is not defined, assume a curses subset which
  * supports only initscr.  --gil
  */
-#if defined(HAVE_NEWTERM) && defined(HAVE_DELSCREEN) && !defined(NCURSES) && !defined(HAVE_RESIZETERM)
+#if defined(HAVE_NEWTERM) && defined(HAVE_DELSCREEN) && !(defined(NCURSES) && defined(HAVE_RESIZETERM))
 static SCREEN *LYscreen = NULL;
 #define LYDELSCR() { \
 if (recent_sizechange) { \
@@ -901,25 +901,32 @@ PUBLIC void start_curses NOARGS
 	 *  and one time only!
 	 */
 #if defined(HAVE_NEWTERM)
-#if !defined(NCURSES) && !defined(HAVE_RESIZETERM)
-	/*
-	 * Put screen geometry in environment variables used by
-	 * XOpen curses before calling newterm().  I believe this
-	 * completes work left unfinished by AJL & FM -- gil
-	 */
-	static char lines_putenv[] = "LINES=abcde",
-		    cols_putenv[]  = "COLUMNS=abcde";
+#if !(defined(NCURSES) && !defined(HAVE_RESIZETERM))
 	BOOLEAN savesize;
 
 	savesize = recent_sizechange;
 	size_change(0);
 	recent_sizechange = savesize;    /* avoid extra redraw */
-	sprintf(lines_putenv + 6, "%d", LYlines & 0xfff);
-	sprintf(cols_putenv  + 8, "%d", LYcols  & 0xfff);
-	putenv(lines_putenv);
-	putenv(cols_putenv);
-	CTRACE((tfp, "start_curses putenv %s, %s\n", lines_putenv, cols_putenv));
-#endif /* !defined(NCURSES) && !defined(HAVE_RESIZETERM) */
+#if defined(__MVS__)
+	{
+	    /*
+	     * The requirement to do this may be a bug in OS/390.
+	     *
+	     * Put screen geometry in environment variables used by
+	     * XOpen curses before calling newterm().  I believe this
+	     * completes work left unfinished by AJL & FM -- gil
+	     */
+	    static char lines_putenv[] = "LINES=abcde",
+			cols_putenv[]  = "COLUMNS=abcde";
+
+	    sprintf(lines_putenv + 6, "%d", LYlines & 0xfff);
+	    sprintf(cols_putenv  + 8, "%d", LYcols  & 0xfff);
+	    putenv(lines_putenv);
+	    putenv(cols_putenv);
+	    CTRACE((tfp, "start_curses putenv %s, %s\n", lines_putenv, cols_putenv));
+	}
+#endif /* defined(__MVS__) */
+#endif /* !(defined(NCURSES) && defined(HAVE_RESIZETERM)) */
 	if (!(LYscreen = newterm(NULL,stdout,stdin))) {  /* start curses */
 	    fprintf(tfp, "%s\n",
 		gettext("Terminal initialisation failed - unknown terminal type?"));
@@ -1523,7 +1530,7 @@ PUBLIC void LYwaddnstr ARGS3(
     if (TRACE) {
 	int y, x;
 	LYGetYX(y, x);
-	CTRACE((tfp, "[%2d,%2d] LYwaddnstr(%.*s)\n", y, x, (int) len, s));
+	CTRACE2(TRACE_STYLE, (tfp, "[%2d,%2d] LYwaddnstr(%.*s)\n", y, x, (int) len, s));
     }
 #endif
     while (len > 0) {
@@ -2108,7 +2115,7 @@ PUBLIC void lynx_force_repaint NOARGS
     wbkgd(LYwin, a | ' ');
 #endif
 #endif
-    attrset(a);
+    wattrset(LYwin, a);
 #endif /* COLOR_CURSES */
     clearok(curscr, TRUE);
 }

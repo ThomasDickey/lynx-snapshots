@@ -209,34 +209,19 @@ PUBLIC BOOLEAN system_editor = FALSE;
 
 PUBLIC BOOLEAN had_restrictions_default = FALSE;
 PUBLIC BOOLEAN had_restrictions_all = FALSE;
-#ifdef USE_EXTERNALS
-PUBLIC BOOLEAN no_externals = FALSE;
-#endif
-PUBLIC BOOLEAN no_inside_telnet = FALSE;
-PUBLIC BOOLEAN no_outside_telnet = FALSE;
-PUBLIC BOOLEAN no_telnet_port = FALSE;
-#ifndef DISABLE_NEWS
-PUBLIC BOOLEAN no_inside_news = FALSE;
-PUBLIC BOOLEAN no_outside_news = FALSE;
-#endif
-PUBLIC BOOLEAN no_inside_ftp = FALSE;
-PUBLIC BOOLEAN no_outside_ftp = FALSE;
-PUBLIC BOOLEAN no_inside_rlogin = FALSE;
-PUBLIC BOOLEAN no_outside_rlogin = FALSE;
-PUBLIC BOOLEAN no_suspend = FALSE;
-PUBLIC BOOLEAN no_editor = FALSE;
-PUBLIC BOOLEAN no_shell = FALSE;
-PUBLIC BOOLEAN no_bookmark = FALSE;
-PUBLIC BOOLEAN no_multibook = FALSE;
-PUBLIC BOOLEAN no_bookmark_exec = FALSE;
-PUBLIC BOOLEAN no_option_save = FALSE;
-PUBLIC BOOLEAN no_print = FALSE;
-PUBLIC BOOLEAN no_download = FALSE;
-PUBLIC BOOLEAN no_disk_save = FALSE;
-PUBLIC BOOLEAN no_exec = FALSE;
-PUBLIC BOOLEAN no_lynxcgi = FALSE;
+
 PUBLIC BOOLEAN exec_frozen = FALSE;
+PUBLIC BOOLEAN no_bookmark = FALSE;
+PUBLIC BOOLEAN no_bookmark_exec = FALSE;
+PUBLIC BOOLEAN no_chdir = FALSE;
+PUBLIC BOOLEAN no_disk_save = FALSE;
+PUBLIC BOOLEAN no_dotfiles = NO_DOT_FILES;
+PUBLIC BOOLEAN no_download = FALSE;
+PUBLIC BOOLEAN no_editor = FALSE;
+PUBLIC BOOLEAN no_exec = FALSE;
+PUBLIC BOOLEAN no_file_url = FALSE;
 PUBLIC BOOLEAN no_goto = FALSE;
+PUBLIC BOOLEAN no_goto_configinfo = FALSE;
 PUBLIC BOOLEAN no_goto_cso = FALSE;
 PUBLIC BOOLEAN no_goto_file = FALSE;
 PUBLIC BOOLEAN no_goto_finger = FALSE;
@@ -248,27 +233,41 @@ PUBLIC BOOLEAN no_goto_lynxcgi = FALSE;
 PUBLIC BOOLEAN no_goto_lynxexec = FALSE;
 PUBLIC BOOLEAN no_goto_lynxprog = FALSE;
 PUBLIC BOOLEAN no_goto_mailto = FALSE;
-#ifndef DISABLE_NEWS
-PUBLIC BOOLEAN no_goto_news = FALSE;
-PUBLIC BOOLEAN no_goto_nntp = FALSE;
-#endif
 PUBLIC BOOLEAN no_goto_rlogin = FALSE;
-#ifndef DISABLE_NEWS
-PUBLIC BOOLEAN no_goto_snews = FALSE;
-#endif
 PUBLIC BOOLEAN no_goto_telnet = FALSE;
 PUBLIC BOOLEAN no_goto_tn3270 = FALSE;
 PUBLIC BOOLEAN no_goto_wais = FALSE;
-PUBLIC BOOLEAN no_goto_configinfo = FALSE;
+PUBLIC BOOLEAN no_inside_ftp = FALSE;
+PUBLIC BOOLEAN no_inside_rlogin = FALSE;
+PUBLIC BOOLEAN no_inside_telnet = FALSE;
 PUBLIC BOOLEAN no_jump = FALSE;
-PUBLIC BOOLEAN no_file_url = FALSE;
-#ifndef DISABLE_NEWS
-PUBLIC BOOLEAN no_newspost = FALSE;
-#endif
-PUBLIC BOOLEAN no_mail = FALSE;
-PUBLIC BOOLEAN no_dotfiles = NO_DOT_FILES;
-PUBLIC BOOLEAN no_useragent = FALSE;
 PUBLIC BOOLEAN no_lynxcfg_info = FALSE;
+PUBLIC BOOLEAN no_lynxcgi = FALSE;
+PUBLIC BOOLEAN no_mail = FALSE;
+PUBLIC BOOLEAN no_multibook = FALSE;
+PUBLIC BOOLEAN no_option_save = FALSE;
+PUBLIC BOOLEAN no_outside_ftp = FALSE;
+PUBLIC BOOLEAN no_outside_rlogin = FALSE;
+PUBLIC BOOLEAN no_outside_telnet = FALSE;
+PUBLIC BOOLEAN no_print = FALSE;
+PUBLIC BOOLEAN no_shell = FALSE;
+PUBLIC BOOLEAN no_suspend = FALSE;
+PUBLIC BOOLEAN no_telnet_port = FALSE;
+PUBLIC BOOLEAN no_useragent = FALSE;
+
+#ifndef DISABLE_NEWS
+PUBLIC BOOLEAN no_goto_news = FALSE;
+PUBLIC BOOLEAN no_goto_nntp = FALSE;
+PUBLIC BOOLEAN no_goto_snews = FALSE;
+PUBLIC BOOLEAN no_inside_news = FALSE;
+PUBLIC BOOLEAN no_newspost = FALSE;
+PUBLIC BOOLEAN no_outside_news = FALSE;
+#endif
+
+#ifdef USE_EXTERNALS
+PUBLIC BOOLEAN no_externals = FALSE;
+#endif
+
 #ifndef NO_CONFIG_INFO
 PUBLIC BOOLEAN no_lynxcfg_xinfo = FALSE;
 #ifdef HAVE_CONFIG_H
@@ -427,7 +426,7 @@ PUBLIC char *LYCookieSQueryCheckDomains = NULL;  /* check w/a query */
 #ifndef DISABLE_BIBP
 PUBLIC BOOLEAN no_goto_bibp = FALSE;
 PUBLIC char *BibP_globalserver = NULL;   /* global server for bibp: links */
-PUBLIC char *BibP_bibhost = NULL;        /* local server for bibp: links  */
+PUBLIC char *BibP_bibhost = NULL;	 /* local server for bibp: links  */
 PUBLIC BOOLEAN BibP_bibhost_checked = FALSE;  /*  until LYCheckBibHost   */
 PUBLIC BOOLEAN BibP_bibhost_available = FALSE;  /* until check succeeds  */
 #endif
@@ -437,7 +436,7 @@ BOOLEAN persistent_cookies = FALSE;	/* disabled by default! */
 PUBLIC char *LYCookieFile = NULL;	/* cookie read file */
 PUBLIC char *LYCookieSaveFile = NULL;	/* cookie save file */
 #endif /* EXP_PERSISTENT_COOKIES */
-PUBLIC int LYTransferRate = rateKB;
+PUBLIC int LYTransferRate = rateEtaKB_maybe;
 PUBLIC char *XLoadImageCommand = NULL;	/* Default image viewer for X */
 PUBLIC BOOLEAN LYNoISMAPifUSEMAP = FALSE; /* Omit ISMAP link if MAP present? */
 PUBLIC int LYHiddenLinks = HIDDENLINKS_SEPARATE; /* Show hidden links? */
@@ -497,12 +496,6 @@ PUBLIC BOOLEAN LYUseBuiltinSuffixes = TRUE;
 PUBLIC int LYNoZapKey = 0; /* 0: off (do z checking), 1: full, 2: initially */
 #endif
 
-/* These are declared in cutil.h for current freeWAIS libraries. - FM */
-#ifdef DECLARE_WAIS_LOGFILES
-PUBLIC char *log_file_name = NULL; /* for WAIS log file name	in libWWW */
-PUBLIC FILE *logfile = NULL;	   /* for WAIS log file output	in libWWW */
-#endif /* DECLARE_WAIS_LOGFILES */
-
 #ifndef DISABLE_NEWS
 extern int HTNewsChunkSize; /* Number of news articles per chunk (HTNews.c) */
 extern int HTNewsMaxChunk;  /* Max news articles before chunking (HTNews.c) */
@@ -541,6 +534,7 @@ PRIVATE BOOLEAN no_options_further=FALSE; /* set to TRUE after '--' argument */
 
 PRIVATE BOOL parse_arg PARAMS((char **arg, unsigned mask, int *i));
 PRIVATE void print_help_and_exit PARAMS((int exit_status)) GCC_NORETURN;
+PRIVATE void print_help_strings PARAMS((CONST char * name, CONST char * help, CONST char * value, BOOLEAN option));
 
 #ifndef VMS
 PUBLIC BOOLEAN LYNoCore = NO_FORCED_CORE_DUMP;
@@ -831,7 +825,7 @@ PRIVATE BOOL cleanup_win32(DWORD fdwCtrlType)
     switch (fdwCtrlType) {
     case CTRL_CLOSE_EVENT:
 	cleanup_sig(-1);
-    	return TRUE;
+	return TRUE;
     default:
 	return FALSE;
     }
@@ -1189,9 +1183,11 @@ PUBLIC int main ARGS2(
      *	file, if specified, NOW.  Also, if we only want
      *	the help menu, output that and exit. - FM
      */
+#ifndef NO_LYNX_TRACE
     if (getenv("LYNX_TRACE") != 0) {
 	WWW_TraceFlag = TRUE;
     }
+#endif
     for (i = 1; i < argc; i++) {
 	parse_arg(&argv[i], 2, &i);
     }
@@ -1519,6 +1515,10 @@ PUBLIC int main ARGS2(
 	}
 	LYStdinArgs_free();
     }
+#ifdef CAN_SWITCH_DISPLAY_CHARSET
+    if (current_char_set == auto_display_charset) /* Better: explicit option */
+	switch_display_charsets = 1;
+#endif
 
 #undef TTY_DEVICE
 #undef NUL_DEVICE
@@ -2542,7 +2542,7 @@ PRIVATE int display_charset_fun ARGS1(
     int i = UCGetLYhndl_byMIME(next_arg);
 
 #ifdef CAN_AUTODETECT_DISPLAY_CHARSET
-    if (i < 0 && !stricmp(next_arg,"auto"))
+    if (i < 0 && !strcasecomp(next_arg, "auto"))
 	i = auto_display_charset;
 #endif
     if (i < 0) {	/* do nothing here: so fallback to lynx.cfg */
@@ -2839,100 +2839,179 @@ PRIVATE int post_data_fun ARGS1(
 PRIVATE int restrictions_fun ARGS1(
 	char *,			next_arg)
 {
-    static CONST char *Usage[] = {
- ""
-,"   USAGE: lynx -restrictions=[option][,option][,option]"
-,"   List of Options:"
-,"   ?               when used alone, list restrictions in effect."
-,"   all             restricts all options."
-,"   bookmark        disallow changing the location of the bookmark file."
-,"   bookmark_exec   disallow execution links via the bookmark file"
+    static CONST struct {
+	CONST char *name;
+	CONST char *help;
+    } table[] = {
+	{ "all", "restricts all options." },
+	{ "bookmark", "disallow changing the location of the bookmark file" },
+	{ "bookmark_exec", "disallow execution links via the bookmark file" },
 #if defined(DIRED_SUPPORT) && defined(OK_PERMIT)
-,"   change_exec_perms  disallow changing the eXecute permission on files"
-,"                   (but still allow it for directories) when local file"
-,"                   management is enabled."
+	{ "change_exec_perms", "\
+disallow changing the eXecute permission on files\n\
+(but still allow it for directories) when local file\n\
+management is enabled." },
 #endif /* DIRED_SUPPORT && OK_PERMIT */
 #if defined(HAVE_CONFIG_H) && !defined(NO_CONFIG_INFO)
-,"   compileopts_info  disable info on options used to compile the binary"
+	{ "compileopts_info", "\
+disable info on options used to compile the binary" },
 #endif
-,"   default         same as commandline option -anonymous.  Sets the"
-,"                   default service restrictions for anonymous users.  Set to"
-,"                   all restricted, except for: inside_telnet, outside_telnet,"
-,"                   inside_ftp, outside_ftp, inside_rlogin, outside_rlogin,"
-,"                   inside_news, outside_news, telnet_port, jump, mail, print,"
-,"                   exec, and goto.  The settings for these, as well as"
-,"                   additional goto restrictions for specific URL schemes"
-,"                   that are also applied, are derived from definitions"
-,"                   within userdefs.h."
+{ "default", "\
+same as commandline option -anonymous.  Sets the\n\
+default service restrictions for anonymous users.  Set to\n\
+all restricted, except for: inside_telnet, outside_telnet,\n\
+inside_ftp, outside_ftp, inside_rlogin, outside_rlogin,\n\
+inside_news, outside_news, telnet_port, jump, mail, print,\n\
+exec, and goto.  The settings for these, as well as\n\
+additional goto restrictions for specific URL schemes\n\
+that are also applied, are derived from definitions\n\
+within userdefs.h." },
 #ifdef DIRED_SUPPORT
-,"   dired_support   disallow local file management"
+	{ "dired_support", "disallow local file management" },
 #endif /* DIRED_SUPPORT */
-,"   disk_save       disallow saving to disk in the download and print menus"
-,"   dotfiles        disallow access to, or creation of, hidden (dot) files"
-,"   download        disallow some downloaders in the download menu"
-,"   editor          disallow editing"
-,"   exec            disable execution scripts"
-,"   exec_frozen     disallow the user from changing the execution link option"
+	{ "disk_save", "disallow saving to disk in the download and print menus" },
+	{ "dotfiles", "disallow access to, or creation of, hidden (dot) files" },
+	{ "download", "disallow some downloaders in the download menu" },
+	{ "editor", "disallow editing" },
+	{ "exec", "disable execution scripts" },
+	{ "exec_frozen", "disallow the user from changing the execution link option" },
 #ifdef USE_EXTERNALS
-,"   externals       disable passing URLs to some external programs"
+	{ "externals", "disable passing URLs to some external programs" },
 #endif
-,"   file_url        disallow using G)oto, served links or bookmarks for"
-,"                   file: URL's"
-,"   goto            disable the 'g' (goto) command"
+	{ "file_url", "\
+disallow using G)oto, served links or bookmarks for\n\
+file: URL's" },
+	{ "goto", "disable the 'g' (goto) command" },
 #if !defined(HAVE_UTMP) || defined(VMS) /* not selective */
-,"   inside_ftp      disallow ftps for people coming from inside your"
-,"                   domain (utmp required for selectivity)"
-,"   inside_news     disallow USENET news reading and posting for people coming"
-,"                   from inside your domain (utmp required for selectivity)"
-,"   inside_rlogin   disallow rlogins for people coming from inside your"
-,"                   domain (utmp required for selectivity)"
-,"   inside_telnet   disallow telnets for people coming from inside your"
-,"                   domain (utmp required for selectivity)"
+	{ "inside_ftp", "\
+disallow ftps coming from inside your\n\
+domain (utmp required for selectivity)" },
+	{ "inside_news", "\
+disallow USENET news reading and posting coming\n\
+from inside your domain (utmp required for selectivity)" },
+	{ "inside_rlogin", "\
+disallow rlogins coming from inside your\n\
+domain (utmp required for selectivity)" },
+	{ "inside_telnet", "\
+disallow telnets coming from inside your\n\
+domain (utmp required for selectivity)" },
 #else
-,"   inside_ftp      disallow ftps for people coming from inside your domain"
-,"   inside_news     disallow USENET news reading and posting for people coming"
-,"                   from inside your domain"
-,"   inside_rlogin   disallow rlogins for people coming from inside your domain"
-,"   inside_telnet   disallow telnets for people coming from inside your domain"
+	{ "inside_ftp", "\
+disallow ftps coming from inside your domain" },
+	{ "inside_news", "\
+disallow USENET news reading and posting coming\n\
+from inside your domain" },
+	{ "inside_rlogin", "\
+disallow rlogins coming from inside your domain" },
+	{ "inside_telnet", "\
+disallow telnets coming from inside your domain" },
 #endif /* HAVE_UTMP || VMS */
-,"   jump            disable the 'j' (jump) command"
-,"   lynxcfg_info    disable viewing of lynx.cfg configuration file info"
+	{ "jump", "disable the 'j' (jump) command" },
+	{ "lynxcfg_info", "\
+disable viewing of lynx.cfg configuration file info" },
 #ifndef NO_CONFIG_INFO
-,"   lynxcfg_xinfo   disable extended lynx.cfg viewing and reloading"
+	{ "lynxcfg_xinfo", "\
+disable extended lynx.cfg viewing and reloading" },
 #endif
-,"   mail            disallow mail"
-,"   multibook       disallow multiple bookmark files"
-,"   news_post       disallow USENET News posting."
-,"   option_save     disallow saving options in .lynxrc"
+	{ "mail", "disallow mail" },
+	{ "multibook", "disallow multiple bookmark files" },
+	{ "news_post", "disallow USENET News posting." },
+	{ "option_save", "disallow saving options in .lynxrc" },
 #if !defined(HAVE_UTMP) || defined(VMS) /* not selective */
-,"   outside_ftp     disallow ftps for people coming from outside your"
-,"                   domain (utmp required for selectivity)"
-,"   outside_news    disallow USENET news reading and posting for people coming"
-,"                   from outside your domain (utmp required for selectivity)"
-,"   outside_rlogin  disallow rlogins for people coming from outside your"
-,"                   domain (utmp required for selectivity)"
-,"   outside_telnet  disallow telnets for people coming from outside your"
-,"                   domain (utmp required for selectivity)"
+	{ "outside_ftp", "\
+disallow ftps coming from outside your\n\
+domain (utmp required for selectivity)" },
+	{ "outside_news", "\
+disallow USENET news reading and posting coming\n\
+from outside your domain (utmp required for selectivity)" },
+	{ "outside_rlogin", "\
+disallow rlogins coming from outside your\n\
+domain (utmp required for selectivity)" },
+	{ "outside_telnet", "\
+disallow telnets coming from outside your\n\
+domain (utmp required for selectivity)" },
 #else
-,"   outside_ftp     disallow ftps for people coming from outside your domain"
-,"   outside_news    disallow USENET news reading and posting for people coming"
-,"                   from outside your domain"
-,"   outside_rlogin  disallow rlogins for people coming from outside your domain"
-,"   outside_telnet  disallow telnets for people coming from outside your domain"
+	{ "outside_ftp", "\
+disallow ftp coming from outside your domain" },
+	{ "outside_news", "\
+disallow USENET news reading and posting coming\n\
+from outside your domain" },
+	{ "outside_rlogin", "\
+disallow rlogins coming from outside your domain" },
+	{ "outside_telnet", "\
+disallow telnets coming from outside your domain" },
 #endif /* !HAVE_UTMP || VMS */
-,"   print           disallow most print options"
-,"   shell           disallow shell escapes, and lynxexec, lynxprog or lynxcgi"
-,"                   G)oto's"
-,"   suspend         disallow Control-Z suspends with escape to shell"
-,"   telnet_port     disallow specifying a port in telnet G)oto's"
-,"   useragent       disallow modifications of the User-Agent header"
+	{ "print", "disallow most print options" },
+	{ "shell", "\
+disallow shell escapes, and lynxexec, lynxprog or lynxcgi\n\
+G)oto's" },
+	{ "suspend", "disallow Control-Z suspends with escape to shell" },
+	{ "telnet_port", "disallow specifying a port in telnet G)oto's" },
+	{ "useragent", "disallow modifications of the User-Agent header" },
     };
-    size_t n;
+    static CONST char *Usage[] = {
+ ""
+,"USAGE: lynx -restrictions=[option][,option][,option]"
+,"List of Options:"
+,"  ?                 when used alone, list restrictions in effect."
+
+    };
+    unsigned j, k, column = 0;
+    CONST char *name;
+    CONST char *value;
+    BOOLEAN found, first;
 
     if (next_arg == 0 || *next_arg == '\0') {
 	SetOutputMode( O_TEXT );
-	for (n = 0; n < TABLESIZE(Usage); n++)
-	    printf("%s\n", Usage[n]);
+	for (j = 0; j < TABLESIZE(Usage); j++) {
+	    printf("%s\n", Usage[j]);
+	}
+	for (j = 0; j < TABLESIZE(table); j++) {
+	    if (!strcmp(table[j].name, "all")
+	     || !strcmp(table[j].name, "default")) {
+		value = NULL;
+	    } else {
+		switch (find_restriction(table[j].name, -1)) {
+		case TRUE:
+		    value = "on";
+		    break;
+		case FALSE:
+		    value = "off";
+		    break;
+		default:
+		    value = "?";
+		    break;
+		}
+	    }
+	    print_help_strings (
+		table[j].name, table[j].help, value, FALSE);
+	}
+	first = TRUE;
+	for (j = 0; ; j++) {
+	    found = FALSE;
+	    if ((name = index_to_restriction(j)) == 0) {
+		break;
+	    }
+	    for (k = 0; k < TABLESIZE(table); k++) {
+		if (!strcmp(name, table[k].name)) {
+		    found = TRUE;
+		}
+	    }
+	    if (!found) {
+		if (first) {
+		    printf("Other restrictions (see the user's guide):\n");
+		}
+		printf("%s%s", column ? ", " : "  ", name);
+		column += 2 + strlen(name);
+		if (column > 50) {
+		    column = 0;
+		    printf("\n");
+		}
+		first = FALSE;
+	    }
+	}
+	if (column)
+	    printf("\n");
 	SetOutputMode( O_BINARY );
 	exit(EXIT_SUCCESS);
     } else if (*next_arg == '?') {
@@ -2998,11 +3077,11 @@ PRIVATE int version_fun ARGS1(
 #ifdef OPENSSL_VERSION_TEXT
     LYstrncpy(SSLLibraryVersion, OPENSSL_VERSION_TEXT, sizeof(SSLLibraryVersion)-1);
     if ((SSLcp = strchr(SSLLibraryVersion, ' ')) != NULL) {
-        *SSLcp++ = ' ';
-        if ((SSLcp = strchr(SSLcp, ' ')) != NULL) {
-            *SSLcp = '\0';
-            printf(", %s", SSLLibraryVersion);
-        }
+	*SSLcp++ = ' ';
+	if ((SSLcp = strchr(SSLcp, ' ')) != NULL) {
+	    *SSLcp = '\0';
+	    printf(", %s", SSLLibraryVersion);
+	}
     }
 #endif /* OPENSSL_VERSION_TEXT */
     printf("\n");
@@ -3622,10 +3701,16 @@ treated '>' as a co-terminator for double-quotes and tags"
       "turn on \"Textfields Need Activation\" mode"
    ),
 #endif
+#ifndef NO_LYNX_TRACE
    PARSE_SET(
       "trace",		2|SET_ARG,		&WWW_TraceFlag,
       "turns on Lynx trace mode"
    ),
+   PARSE_SET(
+      "trace_mask",	2|INT_ARG,		&WWW_TraceMask,
+      "customize Lynx trace mode"
+   ),
+#endif
    PARSE_FUN(
       "traversal",	4|FUNCTION_ARG,		traversal_fun,
       "traverse all http links derived from startfile"
@@ -3679,19 +3764,20 @@ treated '>' as a co-terminator for double-quotes and tags"
    {NULL, 0, 0, NULL}
 };
 
-PRIVATE void print_help_strings ARGS3(
+PRIVATE void print_help_strings ARGS4(
 	CONST char *,	name,
 	CONST char *,	help,
-	CONST char *,	value)
+	CONST char *,	value,
+	BOOLEAN,	option)
 {
     int pad;
     int c;
     int first;
     int field_width = 20;
 
-    pad = field_width - (4 + (int) strlen (name));
+    pad = field_width - (2 + option + (int) strlen (name));
 
-    fprintf (stdout, "   -%s", name);
+    fprintf (stdout, "  %s%s", option ? "-" : "", name);
 
     if (*help != '=') {
 	pad--;
@@ -3743,9 +3829,9 @@ PRIVATE void print_help_and_exit ARGS1(int, exit_status)
 #ifdef VMS
     print_help_strings("",
 "receive the arguments from stdin (enclose\n\
-in double-quotes (\"-\") on VMS)", NULL);
+in double-quotes (\"-\") on VMS)", NULL, TRUE);
 #else
-    print_help_strings("", "receive options and arguments from stdin", NULL);
+    print_help_strings("", "receive options and arguments from stdin", NULL, TRUE);
 #endif /* VMS */
 
     for (p = Arg_Table; p->name != 0; p++) {
@@ -3775,7 +3861,7 @@ in double-quotes (\"-\") on VMS)", NULL);
 		value = 0;
 		break;
 	}
-	print_help_strings(p->name, p->help_string, value);
+	print_help_strings(p->name, p->help_string, value, TRUE);
     }
 
     SetOutputMode( O_BINARY );
@@ -3926,6 +4012,7 @@ PRIVATE BOOL parse_arg ARGS3(
 #endif
 	ParseFunc fun;
 	char *next_arg = NULL;
+	char *temp_ptr = NULL;
 
 	if ((p->name[0] != *arg_name)
 	    || (0 == arg_eqs_parse (p->name, arg_name, &next_arg))) {
@@ -3989,7 +4076,7 @@ PRIVATE BOOL parse_arg ARGS3(
 
 	case INT_ARG:
 	     if ((q->int_value != 0) && (next_arg != 0))
-		 *(q->int_value) = atoi (next_arg);
+		 *(q->int_value) = strtol (next_arg, &temp_ptr, 0);
 	     break;
 
 	case STRING_ARG:

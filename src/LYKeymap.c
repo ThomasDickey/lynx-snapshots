@@ -1,7 +1,7 @@
 #include <HTUtils.h>
 #include <LYUtils.h>
-#include <LYKeymap.h>
 #include <LYGlobalDefs.h>
+#include <LYKeymap.h>
 #include <LYCharSets.h>		/* for LYlowest_eightbit - kw */
 #include <HTAccess.h>
 #include <HTFormat.h>
@@ -742,6 +742,9 @@ PRIVATE Kcmd revmap[] = {
 	LYK_PREV_DOC, "PREV_DOC",
 	"go back to the previous document" ),
     DATA(
+	LYK_NEXT_DOC, "NEXT_DOC",
+	"undo going back to the previous document" ),
+    DATA(
 	LYK_ACTIVATE, "ACTIVATE",
 	"go to the document given by the current link" ),
     DATA(
@@ -930,9 +933,6 @@ PRIVATE Kcmd revmap[] = {
     DATA(
 	LYK_CHG_CENTER, "CHANGE_CENTER",
 	"toggle center alignment in HTML TABLE" ),
-    DATA(
-	LYK_TO_CLIPBOARD, "TO_CLIPBOARD",
-	"link's URL to Clip Board" ),
 #endif
 #ifdef KANJI_CODE_OVERRIDE
     DATA(
@@ -955,6 +955,14 @@ PRIVATE Kcmd revmap[] = {
     DATA(
 	LYK_LINEWRAP_TOGGLE, "LINEWRAP_TOGGLE",
 	"toggle linewrap on/off" ),
+#endif
+#ifdef CAN_CUT_AND_PASTE
+    DATA(
+	LYK_PASTE_URL, "PASTE_URL",
+	"Goto the URL in the clipboard" ),
+    DATA(
+	LYK_TO_CLIPBOARD, "TO_CLIPBOARD",
+	"link's URL to Clip Board" ),
 #endif
     DATA(
 	LYK_UNKNOWN, NULL,
@@ -1047,9 +1055,9 @@ PRIVATE struct emap ekmap[] = {
   {"SETMARK",	LYE_SETMARK,	"emacs-like set-mark-command"},
   {"XPMARK",	LYE_XPMARK,	"emacs-like exchange-point-and-mark"},
   {"KILLREG",	LYE_KILLREG,	"emacs-like kill-region"},
-  {"YANK",	LYE_YANK,	"emacs-like yank"}
-#if defined(WIN_EX)
-, {"PASTE",	LYE_PASTE,	"ClipBoard to Lynx"}
+  {"YANK",	LYE_YANK,	"emacs-like yank"},
+#ifdef CAN_CUT_AND_PASTE
+  {"PASTE",	LYE_PASTE,	"ClipBoard to Lynx"},
 #endif
 };
 

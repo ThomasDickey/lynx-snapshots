@@ -170,7 +170,7 @@ typedef struct _line {
 	char	data[1];		/* Space for terminator at least! */
 } HTLine;
 
-#if defined(USE_COLOR_STYLE) 
+#if defined(USE_COLOR_STYLE)
 typedef struct _HTStyleChangePool {
 	HTStyleChange	data[4092];
 	struct _HTStyleChangePool* next;
@@ -399,7 +399,7 @@ struct _HText {
 
 	HTStream *		target;			/* Output stream */
 	HTStreamClass		targetClass;		/* Output routines */
-#if defined(USE_COLOR_STYLE) 
+#if defined(USE_COLOR_STYLE)
 	HTStyleChangePool*	styles_pool;
 #endif
 };
@@ -921,7 +921,7 @@ PUBLIC void HText_free ARGS1(
 	return;
 
     HTAnchor_setDocument(self->node_anchor, (HyperDoc *)0);
-#if defined(USE_COLOR_STYLE) 
+#if defined(USE_COLOR_STYLE)
     POOL_FREE(HTStyleChangePool,self->styles_pool);
 #endif
     while (YES) {	/* Free off line array */
@@ -1796,13 +1796,11 @@ PRIVATE void display_page ARGS3(
 	LYCursesON) {
 	charset_last_displayed = current_char_set;
 #ifdef EXP_CHARTRANS_AUTOSWITCH
-#ifdef LINUX
 	/*
 	 *  Currently implemented only for LINUX
 	 */
 	UCChangeTerminalCodepage(current_char_set,
 				 &LYCharSet_UC[current_char_set]);
-#endif /* LINUX */
 #endif /* EXP_CHARTRANS_AUTOSWITCH */
     }
 
@@ -2370,7 +2368,7 @@ PRIVATE void split_line ARGS2(
     HTLine * line = (HTLine *)LY_CALLOC(1, LINE_SIZE(MAX_LINE)+2);
     if (line == NULL)
 	outofmem(__FILE__, "split_line_1");
-#if defined(USE_COLOR_STYLE) 
+#if defined(USE_COLOR_STYLE)
     line->styles = stylechanges_buffers[stylechanges_buffers_free = (stylechanges_buffers_free + 1) &1];
 #endif
     ctrl_chars_on_this_line = 0; /*reset since we are going to a new line*/
@@ -2786,7 +2784,7 @@ PRIVATE void split_line ARGS2(
     if (temp == NULL)
 	outofmem(__FILE__, "split_line_2");
     memcpy(temp, previous, LINE_SIZE(previous->size));
-#if defined(USE_COLOR_STYLE) 
+#if defined(USE_COLOR_STYLE)
     ALLOC_IN_POOL((text->styles_pool),HTStyleChangePool,previous->numstyles,temp->styles);
     memcpy(temp->styles, previous->styles, sizeof(HTStyleChange)*previous->numstyles);
     if (!temp->styles)
@@ -3112,7 +3110,7 @@ PRIVATE void split_line ARGS2(
 	    jline = allocHTLine(previous->size+spare);
 	    if (jline == NULL)
 		outofmem(__FILE__, "split_line_1");
-#if defined(USE_COLOR_STYLE) 
+#if defined(USE_COLOR_STYLE)
 	    jline->styles = previous->styles;
 #endif
 	    jdata = jline->data;
@@ -4634,7 +4632,9 @@ PRIVATE int HText_insertBlanksInStblLines ARGS2(
     int *	newpos;
     int		ninserts, lineno;
     int		first_lineno, last_lineno, first_lineno_pass2;
+#ifdef EXP_NESTED_TABLES
     int		last_nonempty = -1;
+#endif
     int		added_chars_before = 0;
     TextAnchor * a;
     int lines_changed = 0;
@@ -4680,8 +4680,8 @@ PRIVATE int HText_insertBlanksInStblLines ARGS2(
 		int ip;
 		CTRACE((tfp, "line %d first to adjust  --  newpos:", lineno));
 		for (ip = 0; ip < ncols; ip++)
-		    fprintf(tfp, " %d", newpos[ip]);
-		fprintf(tfp, "\n");
+		    CTRACE((tfp, " %d", newpos[ip]));
+		CTRACE((tfp, "\n"));
 	    }
 	}
 	if (line == me->last_line) {
@@ -4703,8 +4703,10 @@ PRIVATE int HText_insertBlanksInStblLines ARGS2(
 	    int width = HText_TrueLineSize(line, me, FALSE);
 	    if (width > max_width)
 		max_width = width;
+#ifdef EXP_NESTED_TABLES
 	    if (width && last_nonempty < lineno)
 		last_nonempty = lineno;
+#endif
 	    CTRACE((tfp, "line %d true/max width:%d/%d oldpos: NONE\n",
 		   lineno, width, max_width));
 	    continue;
@@ -4744,15 +4746,17 @@ PRIVATE int HText_insertBlanksInStblLines ARGS2(
 	    int width = HText_TrueLineSize(line, me, FALSE);
 	    if (width > max_width)
 		max_width = width;
+#ifdef EXP_NESTED_TABLES
 	    if (width && last_nonempty < lineno)
 		last_nonempty = lineno;
+#endif
 	    if (TRACE) {
 		int ip;
 		CTRACE((tfp, "line %d true/max width:%d/%d oldpos:",
 		       lineno, width, max_width));
 		for (ip = 0; ip < ninserts; ip++)
-		    fprintf(tfp, " %d", oldpos[ip]);
-		fprintf(tfp, "\n");
+		    CTRACE((tfp, " %d", oldpos[ip]));
+		CTRACE((tfp, "\n"));
 	    }
 	}
     }
@@ -4844,8 +4848,10 @@ PRIVATE int HText_insertBlanksInStblLines ARGS2(
 	    CTRACE((tfp, " %d:%d", lineno, table_offset - line->offset));
 	    line->offset = table_offset;
 	}
+#ifdef EXP_NESTED_TABLES
 	if (max_width)
 	    Stbl_update_enclosing(me->stbl, max_width, last_nonempty);
+#endif
     }
     CTRACE((tfp, " %d:done\n", lineno));
     free(oldpos);
@@ -4868,12 +4874,16 @@ PUBLIC void HText_cancelStbl ARGS1(
 	return;
     }
     CTRACE((tfp, "cancelStbl: ok, will do.\n"));
+#ifdef EXP_NESTED_TABLES
     stbl = me->stbl;
     while (stbl) {
 	STable_info *enclosing = Stbl_get_enclosing(stbl);
 	Stbl_free(stbl);
 	stbl = enclosing;
     }
+#else
+    Stbl_free(me->stbl);
+#endif
     me->stbl = NULL;
 }
 
@@ -4883,16 +4893,25 @@ PUBLIC void HText_startStblTABLE ARGS2(
 	HText *,	me,
 	short,		alignment)
 {
+#ifdef EXP_NESTED_TABLES
     STable_info *current = me->stbl;
+#endif
 
     if (!me)
 	return;
+#ifdef EXP_NESTED_TABLES
     if (current)
 	new_line(me);
+#else
+    if (me->stbl)
+	HText_cancelStbl(me);	/* auto cancel previously open table */
+#endif
     me->stbl = Stbl_startTABLE(alignment);
     if (me->stbl) {
 	CTRACE((tfp, "startStblTABLE: started.\n"));
+#ifdef EXP_NESTED_TABLES
 	Stbl_set_enclosing(me->stbl, current, me->last_anchor_before_stbl);
+#endif
 	me->last_anchor_before_stbl = me->last_anchor;
     } else {
 	CTRACE((tfp, "startStblTABLE: failed.\n"));
@@ -4906,7 +4925,7 @@ PUBLIC int HText_endStblTABLE ARGS1(
 	HText *,	me)
 {
     int ncols, lines_changed = 0;
-    STable_info *enclosing;
+    STable_info *enclosing = NULL;
 
     if (!me || !me->stbl) {
 	CTRACE((tfp, "endStblTABLE: ignored.\n"));
@@ -4925,10 +4944,16 @@ PUBLIC int HText_endStblTABLE ARGS1(
 	NumOfLines_partial -= lines_changed;  /* fake */
 #endif  /* DISP_PARTIAL */
     }
+#ifdef EXP_NESTED_TABLES
     enclosing = Stbl_get_enclosing(me->stbl);
     me->last_anchor_before_stbl = Stbl_get_last_anchor_before(me->stbl);
+#endif
     Stbl_free(me->stbl);
+#ifdef EXP_NESTED_TABLES
     me->stbl = enclosing;
+#else
+    me->stbl = NULL;
+#endif
     return enclosing != 0;
 }
 
@@ -6123,7 +6148,7 @@ re_parse:
 PUBLIC void HText_dump ARGS1(
 	HText *,	text GCC_UNUSED)
 {
-    fprintf(tfp, "HText: Dump called\n");
+    CTRACE((tfp, "HText: Dump called\n"));
 }
 
 
@@ -7285,6 +7310,12 @@ PUBLIC BOOL HText_select ARGS1(
 	}
 #endif /* DISP_PARTIAL */
 
+#ifdef CAN_SWITCH_DISPLAY_CHARSET
+	/* text->UCLYhndl is not reset by META, so use a more circumvent way */
+	if ( text->node_anchor->UCStages->s[UCT_STAGE_HTEXT].LYhndl
+	     != current_char_set )
+	    Switch_Display_Charset(text->node_anchor->UCStages->s[UCT_STAGE_HTEXT].LYhndl, 0);
+#endif
 	if (HTMainText) {
 	    if (HText_hasUTF8OutputSet(HTMainText) &&
 		HTLoadedDocumentEightbit() &&
@@ -9553,24 +9584,24 @@ PUBLIC char * HText_setLastOptionValue ARGS7(
     }
 
     if (TRACE) {
-	fprintf(tfp,"HText_setLastOptionValue:%s value=%s",
+	CTRACE((tfp, "HText_setLastOptionValue:%s value=%s",
 		(order == LAST_ORDER) ? " LAST_ORDER" : "",
-		value);
-	fprintf(tfp,"            val_cs=%d \"%s\"",
+		value));
+	CTRACE((tfp,"            val_cs=%d \"%s\"",
 			val_cs,
 			(val_cs >= 0 ?
-			 LYCharSet_UC[val_cs].MIMEname : "<UNKNOWN>"));
+			 LYCharSet_UC[val_cs].MIMEname : "<UNKNOWN>")));
 	if (submit_value) {
-	    fprintf(tfp, " (submit_val_cs %d \"%s\") submit_value%s=%s\n",
+	    CTRACE((tfp, " (submit_val_cs %d \"%s\") submit_value%s=%s\n",
 		    submit_val_cs,
 		    (submit_val_cs >= 0 ?
 		     LYCharSet_UC[submit_val_cs].MIMEname : "<UNKNOWN>"),
 		    (HTCurSelectGroupType == F_CHECKBOX_TYPE) ?
 						  "(ignored)" : "",
-		    submit_value);
+		    submit_value));
 	}
 	else {
-	    fprintf(tfp,"\n");
+	    CTRACE((tfp,"\n"));
 	}
     }
     return(ret_Value);
@@ -10829,7 +10860,7 @@ PUBLIC int HText_SubmitForm ARGS4(
 
 		    if ((fd = fopen(val_used, "rb")) == 0) {
 			/* We can't open the file, what do we do? */
-			HTAlert("Can't open file for uploading");
+			HTAlert(gettext("Can't open file for uploading"));
 			goto exit_disgracefully;
 		    }
 		    StrAllocCopy(escaped2, "");
@@ -10840,7 +10871,7 @@ PUBLIC int HText_SubmitForm ARGS4(
 		    }
 		    if (ferror(fd)) {
 			/* We got an error reading the file, what do we do? */
-			HTAlert("Short read from file, problem?");
+			HTAlert(gettext("Short read from file, problem?"));
 			LYCloseInput(fd);
 			goto exit_disgracefully;
 		    }
@@ -12357,7 +12388,7 @@ PRIVATE void update_subsequent_anchors ARGS4(
 	}
     }
 
-exit:
+finish:
     /*
      *  Fixup various global variables.
      */
@@ -12374,11 +12405,8 @@ exit:
 
 hang_detected:  /* uglyness has happened; inform user and do the best we can */
 
-    printf ("\007");  /* beep the user */
-    fflush (NULL);
-    HTAlert ("Hang Detect: TextAnchor struct corrupted - suggest aborting!");
-    HTAlert ("Hang Detect: TextAnchor struct corrupted - suggest aborting!");
-    goto exit;
+    HTAlert(gettext("Hang Detect: TextAnchor struct corrupted - suggest aborting!"));
+    goto finish;
 }
 
 

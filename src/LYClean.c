@@ -172,12 +172,10 @@ PUBLIC void cleanup NOARGS
     }
 
 #ifdef EXP_CHARTRANS_AUTOSWITCH
-#ifdef LINUX
     /*
      *	Currently implemented only for LINUX: Restore original font.
      */
     UCChangeTerminalCodepage(-1, (LYUCcharset*)0);
-#endif /* LINUX */
 #endif /* EXP_CHARTRANS_AUTOSWITCH */
 
 #ifdef EXP_PERSISTENT_COOKIES

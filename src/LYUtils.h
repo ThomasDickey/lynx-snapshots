@@ -82,6 +82,7 @@ extern BOOLEAN LYisLocalHost PARAMS((char *filename));
 extern BOOLEAN LYisRootPath PARAMS((char *path));
 extern BOOLEAN inlocaldomain NOPARAMS;
 extern CONST char *Home_Dir NOPARAMS;
+extern CONST char *index_to_restriction PARAMS(( int	inx));
 extern FILE *LYAppendToTxtFile PARAMS((char * name));
 extern FILE *LYNewBinFile PARAMS((char * name));
 extern FILE *LYNewTxtFile PARAMS((char * name));
@@ -104,6 +105,7 @@ extern int LYOpenInternalPage PARAMS((FILE **fp0, char **newfile));
 extern int LYRemoveTemp PARAMS((char *name));
 extern int LYSystem PARAMS((char *command));
 extern int LYValidateOutput PARAMS((char * filename));
+extern int find_restriction PARAMS((CONST char * name, int len));
 extern int is_url PARAMS((char *filename));
 extern int number2arrows PARAMS((int number));
 extern time_t LYmktime PARAMS((char *string, BOOL absolute));
@@ -174,9 +176,20 @@ extern void LYRegisterUIPage PARAMS((CONST char * url, UIP_t type));
 #define LYUnRegisterUIPage(type) LYRegisterUIPage(NULL, type)
 extern void LYUIPages_free NOPARAMS;
 
-#if defined(WIN_EX)	/* 1997/10/16 (Thu) 20:13:28 */
+#ifdef CAN_CUT_AND_PASTE
 extern int put_clip(char *szBuffer);
-extern int get_clip(char *szBuffer, int size);
+/* get_clip_grab() returns a pointer to the string in the system area.
+   get_clip_release() should be called ASAP after this. */
+extern char* get_clip_grab(void);
+extern void  get_clip_release(void);
+#  ifdef WIN_EX
+#    define size_clip()	8192
+#  else
+extern int size_clip();
+#  endif
+#endif
+
+#if defined(WIN_EX)	/* 1997/10/16 (Thu) 20:13:28 */
 extern char *HTDOS_short_name(char *path);
 extern char *w32_strerror(DWORD ercode);
 #endif

@@ -155,6 +155,7 @@ typedef enum {
   , LYK_LEFT_LINK
   , LYK_HISTORY
   , LYK_PREV_DOC
+  , LYK_NEXT_DOC
   , LYK_ACTIVATE
   , LYK_SUBMIT	/* mostly like LYK_ACTIVATE, for mouse use, don't map */
   , LYK_GOTO
@@ -236,7 +237,6 @@ typedef enum {
 
 #ifdef SH_EX
   , LYK_CHG_CENTER
-  , LYK_TO_CLIPBOARD
 #endif /* SH_EX */
 
 #ifdef KANJI_CODE_OVERRIDE
@@ -257,6 +257,13 @@ typedef enum {
 #define LYK_LINEWRAP_TOGGLE LYK_UNKNOWN
 #endif
 
+#ifdef CAN_CUT_AND_PASTE
+  , LYK_PASTE_URL
+  , LYK_TO_CLIPBOARD
+#else
+#define LYK_PASTE_URL      LYK_UNKNOWN
+#define LYK_TO_CLIPBOARD   LYK_UNKNOWN
+#endif
 } LYKeymapCode;
 
 /*
