@@ -500,10 +500,10 @@ snake2-slang:
 
 # Lynx will compile with the purchased cc compiler added to HP-UX.
 # contributed by Andy Finkenstadt (genie@panix.com)
-# Note that HP/UX 10.10 apparently has a broken select() in libcurses.a
-# and will malfunction with Lynx.  See the PROBLEMS file.
+# Note that initial releases of HP/UX 10.10 have a broken select() in
+# libcurses.a and will malfunction with Lynx.  See the PROBLEMS file.
 snake3:
-	cd WWW/Library/snake; $(MAKE) CC="cc" LYFLAGS="$(SITE_LYDEFS)"
+	cd WWW/Library/snake; $(MAKE) CC="cc" LYFLAGS="-Ae $(SITE_LYDEFS)"
 	cd src; $(MAKE) all CC="cc" MCFLAGS="-O -Ae -DFANCY_CURSES -DUNIX \
 		-DSNAKE -I../$(WWWINC) $(SITE_DEFS)" \
 		LIBS="-lcurses -ltermcap \
@@ -511,7 +511,7 @@ snake3:
 		WWWLIB="../WWW/Library/snake/libwww.a"
 
 snake3-slang:
-	cd WWW/Library/snake; $(MAKE) CC="cc" LYFLAGS="$(SITE_LYDEFS)"
+	cd WWW/Library/snake; $(MAKE) CC="cc" LYFLAGS="-Ae $(SITE_LYDEFS)"
 	cd src; $(MAKE) all CC="cc" MCFLAGS="-O -Ae -DUSE_SLANG -DUNIX \
 		-DSNAKE -I../$(WWWINC) $(SITE_DEFS)" \
 		LIBS="-lcurses -ltermcap \

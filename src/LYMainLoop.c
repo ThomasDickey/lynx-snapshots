@@ -2146,6 +2146,69 @@ new_cmd:  /*
 	    }
 	    break;
 
+	case LYK_ECGOTO:   /* edit current URL and go to to it  */
+	    if (no_goto && !LYValidate) {
+	        if (old_c != real_c) {
+	   	    old_c = real_c;
+	    	    _statusline(GOTO_DISALLOWED);
+		    sleep(MessageSecs);
+		}
+		break;
+	    }
+
+	    /*
+	     *  Save the current user_input_buffer string,
+	     *  and load the current document's address.
+	     */
+	    StrAllocCopy(temp, user_input_buffer);
+	    LYstrncpy(user_input_buffer,
+	    	      curdoc.address,
+		      (sizeof(user_input_buffer) - 1));
+
+	    /*
+	     *  Warn the user if the current document has POST
+	     *  data associated with it. - FM
+	     */
+	    if (curdoc.post_data)
+	        HTAlert(CURRENT_DOC_HAS_POST_DATA);
+
+	    /*
+	     *  Offer the current document's URL for editing. - FM
+	     */
+	    _statusline(EDIT_CURDOC_URL);
+	    if (((ch = LYgetstr(user_input_buffer, VISIBLE,
+	    		        sizeof(user_input_buffer), RECALL)) >= 0) &&
+		user_input_buffer[0] != '\0' &&
+		strcmp(user_input_buffer, curdoc.address)) {
+		LYTrimHead(user_input_buffer);
+		if (!strncasecomp(user_input_buffer, "lynxexec:", 9) ||
+		    !strncasecomp(user_input_buffer, "lynxprog:", 9)) {
+		    /*
+		     *  The original implementations of these schemes expected
+		     *  white space without hex escaping, and did not check
+		     *  for hex escaping, so we'll continue to support that,
+		     *  until that code is redone in conformance with SGML
+		     *  principles.  - FM
+		     */
+		    HTUnEscapeSome(user_input_buffer, " \r\n\t");
+		    convert_to_spaces(user_input_buffer, TRUE);
+		} else {
+		    collapse_spaces(user_input_buffer);
+		}
+		if (user_input_buffer[0] != '\0') {
+		    goto check_goto_URL;
+		}
+	    }
+	    /*
+	     *  User cancelled via ^G, a full deletion,
+	     *  or not modifying the URL. - FM
+	     */
+	    _statusline(CANCELLED);
+	    sleep(InfoSecs);
+	    strcpy(user_input_buffer, temp);
+	    FREE(temp);
+	    break;
+
 	case LYK_GOTO:   /* 'g' to goto a random URL  */
 	    if (no_goto && !LYValidate) {
 	        if (old_c != real_c) {
@@ -2307,6 +2370,7 @@ check_recall:
 		}
 	    }
 
+check_goto_URL:
 	    /*
 	     *  If its not a URL then make it one.
 	     */

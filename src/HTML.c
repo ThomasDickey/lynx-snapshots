@@ -498,7 +498,13 @@ PRIVATE void HTML_start_element ARGS5(
 
 	    StrAllocCopy(base, (char *)value[HTML_BASE_HREF]);
 	    if (!(url_type = LYLegitimizeHREF(me, (char**)&base, TRUE))) {
-	        HTAlert(BASE_NOT_ABSOLUTE);
+	        if (TRACE)
+		    fprintf(stderr,
+		    	    "HTML: BASE '%s' is not an absolute URL.\n",
+			    (base ? base : ""));
+		if (me->inBadBASE == FALSE)
+	            HTAlert(BASE_NOT_ABSOLUTE);
+		me->inBadBASE = TRUE;
 	    }
 
 	    /* 
@@ -5647,6 +5653,7 @@ PUBLIC HTStructured* HTML_new ARGS3(
     me->inA = FALSE;
     me->inAPPLET = FALSE;
     me->inAPPLETwithP = FALSE;
+    me->inBadBASE = FALSE;
     me->inBadHTML = FALSE;
     me->inBASE = FALSE;
     me->inBoldA = FALSE;

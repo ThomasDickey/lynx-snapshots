@@ -127,7 +127,7 @@ VAX/VMS
   CMU_TCP                 Available via FTP from sacusr.mp.usbr.gov
   SOCKETSHR		  Eckhart Meyer's interface to NETLIB
   WIN_TCP                 From Wollongong, now GEC software.
-  MULTINET                From SRI, now from TGV Inv.
+  MULTINET                From SRI, became TGV, then Cisco.
   DECNET                  Cern's TCP socket emulation over DECnet
                            
    The last three do not interfere with the
@@ -175,8 +175,10 @@ VAX/VMS
 #undef IOCTL
 #undef SOCKET_ERRNO
 /*
-**  Remove these socket_foo() prototypes if
-**  MultiNet someday actually does this. - FM
+**  Delete these socket_foo() prototypes as MultiNet adds them
+**  to it's socket library headers.  Compiler warnings due to
+**  the absence of arguments in the generic prototypes here will
+**  include the names of those which can be deleted. - FM
 */
 extern int socket_read();
 extern int socket_write();
@@ -224,8 +226,12 @@ extern int socket_ioctl();
 
 #ifdef MULTINET  /* Include from standard Multinet directories */
 /*
-**  Remove these multinet_foo() and associated prototypes
-**  if MultiNet someday actually does this. - FM
+**  Delete any of these multinet_foo() and associated prototypes
+**  as MultiNet adds them to its socket library headers.  You'll
+**  get compiler warnings about them, due the absence of arguments
+**  in the generic prototyping here, and the warnings will include
+**  the names of the functions whose prototype entries can be
+**  deleted here. - FM
 */
 extern int multinet_accept();
 extern int multinet_bind();

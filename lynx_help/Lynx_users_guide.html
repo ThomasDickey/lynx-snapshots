@@ -732,14 +732,17 @@ address will be filled in automatically.  After entering the above
 information, if you have an editor defined in the <em>Options Menu</em>
 and you are not an anonymous user then your specified editor will be
 spawned for you so  that you can enter your message. If you do not have
-an editor  defined or you are an anonymous user, a simple line mode input 
+an editor defined or you are an anonymous user, a simple line mode input 
 scheme will allow you to enter your message.
 
 <p>To finish sending the message, exit your spawned editor or, if you are
 using the simple line mode input scheme, type a '<em>.</em>' (period) on
 a line by itself.  You will be asked a final time whether to send the
-message.  If you press '<em>y</em>' then the message will be sent, if you
-press '<em>n</em>' the message will be deleted. [<A HREF="#TOC">ToC</A>]
+message.  If you press '<em>y</em>', you will be prompted whether to
+append your signature file if one was defined in lynx.cfg and is accessible,
+and then the message will be sent, whereas if you press '<em>n</em>' the
+message will be deleted.  Entering Control-G in response to any prompts
+also will cancel the mailing.[<A HREF="#TOC">ToC</A>]
 
 <h2><A NAME="14"><em>USENET News posting</em></A></h2>
 
@@ -934,9 +937,25 @@ commands.
   	<dd>The '<em>g</em>' command allows any URL to be viewed.  Pressing
   	    the '<em>g</em>' command will bring up a prompt asking for a URL.
   	    Type in the URL that you wish to view.  All previously entered
-	    Goto URLs are saved in a circular buffer, and be accessed at
+	    goto URLs are saved in a circular buffer, and can be accessed at
 	    the prompt by pressing the <em>up-arrow</em> or
 	    <em>down-arrow</em> keys.
+   <dt><em>G</em>
+  	<dd>The '<em>G</em>' command allows you to edit the URL of the
+	    current document and then use that as a goto URL.  Pressing
+  	    the '<em>G</em>' command will bring up a prompt asking you
+	    to edit the current document's URL.  If you do not modify
+	    it, or completely delete it, or enter Control-G, the command
+	    will be cancelled.  If the current document has POST content
+	    associated with it, an Alert will be issued.  If you do edit
+	    that URL, and it does not simply involve a fragment change
+	    (for seeking a position in the current document), the modified
+	    URL will be submitted with method GET and no POST content.  If
+	    a modification of the current document's URL results in a
+	    submission, that modified URL will be entered into the circular
+	    buffer for goto URLs, and can be accessed for further
+	    modification via the '<em>g</em>' command.
+
    <dt><em>=</em>
   	<dd>The '<em>=</em>' command shows information about the current
 	    document and the currently selected link if there is one.  The
