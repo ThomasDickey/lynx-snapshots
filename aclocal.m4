@@ -238,7 +238,7 @@ AC_DEFUN([CF_COLOR_CURSES],
 AC_MSG_CHECKING(if curses supports color attributes)
 AC_CACHE_VAL(cf_cv_color_curses,[
 	AC_TRY_LINK([
-#include <$cf_cv_ncurses_header>
+#include <${cf_cv_ncurses_header-curses.h}>
 ],
 	[chtype x = COLOR_BLUE;
 	 has_colors();
@@ -266,15 +266,15 @@ freebsd*) #(vi
 	AC_CHECK_LIB(mytinfo,tgoto,[LIBS="-lmytinfo $LIBS"])
 	;;
 hpux10.*)
+	AC_CHECK_LIB(cur_colr,initscr,[
+		LIBS="-lcur_colr $LIBS"
+		CFLAGS="-I/usr/include/curses_colr $CFLAGS"
+		ac_cv_func_initscr=yes
+		],[
 	AC_CHECK_LIB(Hcurses,initscr,[
 		# HP's header uses __HP_CURSES, but user claims _HP_CURSES.
 		LIBS="-lHcurses $LIBS"
 		CFLAGS="-D__HP_CURSES -D_HP_CURSES $CFLAGS"
-		ac_cv_func_initscr=yes
-		],[
-	AC_CHECK_LIB(cur_color,initscr,[
-		LIBS="-lcur_color $LIBS"
-		CFLAGS="-I/usr/include/curses_colr $CFLAGS"
 		ac_cv_func_initscr=yes
 		])])
 	;;
@@ -481,6 +481,11 @@ AC_DEFUN([CF_FIND_LIBRARY],
 if test $cf_cv_have_lib_$1 = no ; then
 	AC_ERROR(Cannot link $1 library)
 fi
+case $host_os in #(vi
+linux*) # Suse Linux does not follow /usr/lib convention
+	$1="[$]$1 /lib"
+	;;
+esac
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl Check for availability of fcntl versus ioctl(,FIONBIO,).  Lynx uses this

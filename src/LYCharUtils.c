@@ -414,9 +414,9 @@ PUBLIC void LYFillLocalFileURL ARGS2(
 **  disp_chndl) already corresponds to the charset assumption that
 **  would be made when the file is read. - KW
 **
-**  Currently this function used for temporary files like "Lynx Info Page"
-**  and for one permanent - bookmarks (so may be a problem if you change
-**  display charset later: new bookmark entries may be wrongly interpreted).
+**  Currently this function is used for temporary files like "Lynx Info Page"
+**  and for one permanent - bookmarks (so it may be a problem if you change
+**  the display charset later: new bookmark entries may be mistranslated).
 ** 								 - LP
 */
 PUBLIC void LYAddMETAcharsetToFD ARGS2(

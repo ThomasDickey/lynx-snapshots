@@ -51,7 +51,7 @@ extern CONST HTStructuredClass HTMLPresentation;
 */
 
 typedef struct _stack_element {
-        HTStyle *	style;
+	HTStyle *	style;
 	int		tag_number;
 } stack_element;
 
@@ -234,38 +234,29 @@ extern void strtolower PARAMS((char* i));
 **  HTConverter to present HTML
 */
 extern HTStream* HTMLToPlain PARAMS((
-        HTPresentation *        pres,
-        HTParentAnchor *        anchor,
-        HTStream *              sink));
+	HTPresentation *	pres,
+	HTParentAnchor *	anchor,
+	HTStream *		sink));
 
 extern HTStream* HTMLParsedPresent PARAMS((
-        HTPresentation *        pres,
-        HTParentAnchor *        anchor,
-        HTStream *              sink));
+	HTPresentation *	pres,
+	HTParentAnchor *	anchor,
+	HTStream *		sink));
 
 extern HTStream* HTMLToC PARAMS((
-        HTPresentation *        pres,
-        HTParentAnchor *        anchor,
-        HTStream *              sink));
+	HTPresentation *	pres,
+	HTParentAnchor *	anchor,
+	HTStream *		sink));
 
 extern HTStream* HTMLPresent PARAMS((
-        HTPresentation *        pres,
-        HTParentAnchor *        anchor,
-        HTStream *              sink));
+	HTPresentation *	pres,
+	HTParentAnchor *	anchor,
+	HTStream *		sink));
 
 extern HTStructured* HTML_new PARAMS((
-        HTParentAnchor * anchor,
-        HTFormat        format_out,
-        HTStream *      target));
-
-/*
-**  Names for selected internal representations.
-*/
-typedef enum _HTMLCharacterSet {
-        HTML_ISO_LATIN1,
-        HTML_NEXT_CHARS,
-        HTML_PC_CP950
-} HTMLCharacterSet;
+	HTParentAnchor * anchor,
+	HTFormat	format_out,
+	HTStream *	target));
 
 /*
 **  Record error message as a hypertext object.

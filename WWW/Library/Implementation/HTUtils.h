@@ -424,8 +424,8 @@ Upper- and Lowercase macros
 
 #ifndef TOLOWER
   /* Pyramid and Mips can't uppercase non-alpha */
-#define TOLOWER(c) (isupper((unsigned char)c) ? tolower((unsigned char)c) : (c))
-#define TOUPPER(c) (islower((unsigned char)c) ? toupper((unsigned char)c) : (c))
+#define TOLOWER(c) (isupper((unsigned char)c) ? tolower((unsigned char)c) : ((unsigned char)c))
+#define TOUPPER(c) (islower((unsigned char)c) ? toupper((unsigned char)c) : ((unsigned char)c))
 #endif /* TOLOWER */
 
 /*
