@@ -1,6 +1,125 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+1999-06-29 (2.8.3dev.3)
+* move HTAlert call so we don't get it each time we run the options menu -TD
+* entify messages in LYshow_statusline_messages() -LP
+* add -DNO_PORT to WWW/*/djgpp makefiles -DK
+  This is to make ftp work with new version of the WATTCP library as revised by
+  Igor Poretsky for building lynx with DJGPP.  The old version has been renamed
+  to "tcplibdj-old.zip".  For the new package, go to:
+    "http://www.rahul.net/dkaufman/tcplibdj.zip" or
+    "ftp://ftp.rahul.net/pub/dkaufman/tcplibdj.zip"
+* new option REUSE_TEMPFILES, see comments in lynx.cfg -KW
+* use P instead of invalid TR for right-aligned "LYNXMESSAGES:" link in HISTORY
+  page -KW
+* better support for accessing FTP directory listings on Windows NT FTP
+  servers:  try to switch MSDOS-like directory output off with SITE DIRSTYLE.
+  The price to pay for this is one or (probably more often) two more command/
+  response round trips -KW
+* added support for accessing FTP directory listings in "dls" style sent by
+  some OS/2 servers.  Only one server was known and used for testing, so the
+  heuristics used may not be quite general enough.  File date/time is not shown
+  since it doesn't seem to be part of the basic format -KW
+* In lynx.man removed bogus "ID:" for -assume_charset, -assume_local_charset -KW
+* in a list, render a <DIV> that doesn't have an ALIGN="center" or
+  ALIGN="right" attribute like a <P> in that situation:  break the line if
+  necessary but don't create an empty line, an keep list indentation.  This
+  addresses Debian bug #21331 -KW
+* other changes for DIV:  it's a block element, so make sure its contents
+  doesn't get rendered inline, even for nested DIVs that don't change text
+  alignment.  Try to avoid improperly kept change of DIV styles' alignment by a
+  <P> or </P> in its content -KW
+* make "treating H# in a list as an LH" work also for SortaSGML parsing,
+  previously it only worked with TagSoup -KW
+* removed special handling for empty last field from LYstrsep(), which made it
+  act differently from (GNU) C library's strsep() -KW
+* macro DEFAULT_INVCHECK_BV for default invalid cookie checking behaviour, can
+  be changed at top of LYCookie.c for those who really want that -KW
+* reorganize code for invalid cookie checking / prompting somewhat, it is
+  hopefully easier to follow now, and should result in more logical prompting
+  (or not) if a cookie is invalid for more than one reason -KW
+* change invalid cookie confirmation prompts to default to "no" answer.  This
+  can prevent the impression that Lynx hangs because the prompt is not
+  completely visible.  There should be a better way to ensure that all prompts
+  are recognizable as such (at least with "normal" screen widths) -KW
+* use more of the available statusline width for showing cookie name and value
+  in normal cookie prompts -KW
+* handle \" in quoted cookie values, so that the quote char doesn't end the
+  value string -KW
+* write quoted cookie values to cookie file with the quotes ('"' chars).  When
+  the cookie file is read, assume that quoted strings are quoted cookie values.
+  It would be better to have a separate flag stored, but we are limited by the
+  choice of the Netscape-compatible file format.  This should resolve Debian
+  bug #35523 -KW
+* handle empty value strings like any other cookie values:  they can be kept in
+  the cookie jar (in memory), and can be written to and read from the cookie
+  file -KW
+* more checking whether a line read from a cookie file is complete -KW
+* write out second field in cookie file lines a TRUE or FALSE depending on
+  whether the domain can be used for suffix matching or has to match
+  completely.  This seems to be how Netscape uses it.  We don't actually use
+  this field when reading a file (presence of a leading dot in the domain value
+  tells us what we need to know), but this should improve behavior for people
+  sharing a cookie file between Lynx and a Netscape browser (although such
+  sharing shouldn't be recommended) -KW
+* treat case as insignificant in cookie domains more consistently -KW
+* remove remnants of FROM_FILE domain behaviour, it was unused -KW
+* add some clarifications in lynx.cfg regarding cookies -KW
+* entify strings when adding them to LYNXMESSAGES: stack -KW
+* save HTAlwaysAlert messages for LYNXMESSAGES: page -KW
+* generate TRACE output for prompts that use HTConfirm() or HTConfirmDefault
+  -KW
+* make sure force_old_UCLYhndl_on_reload is initialized and reset properly -KW
+* minor tweaks (LYCharUtils.c, LYMain.c, LYPrint.c) -KW
+* flush Lynx.leaks file after writing each memory leak record but before
+  freeing the memory block, to ensure the info is on disk if something goes
+  seriously wrong (i.e., FREE causes a signal).
+* more general checking in postoptions - `lynx LYNXOPTIONS:foo' now doesn't
+  crash -KW
+* revived dired "install" functionality, more or less as it was (apparently)
+  originally meant to be used, but with various checks added.  Compilation is
+  now conditional on new symbol OK_INSTALL.  The "install" function is the
+  closest we have to a "copy file" function, and could be used instead; the
+  actual command executed depends on macros INSTALL_PATH and possibly
+  INSTALL_ARGS, one can define INSTALL_PATH for example to "/bin/cp" before
+  compilation to effectively get something like a dired "copy" function.  Note
+  the the "install" function requires a special file in the home directory,
+  which can be customized, see samples/installdirs.html -KW
+* new function HTURLPath_toFile in HTFile.c.  Use it if we don't have a full
+  URL where HTnameOfFile_WWW was used previously, this avoids misparsing of
+  some unusual URL forms for files -KW
+* other changes for dired support (KW):
+  - various corrections with respect to URL-unescaping: don't escape
+    too often or too little, dired operations could fail on filenames
+    with special characters
+  - avoid some unnecessary copying and allocation for filenames
+  - avoid some more static buffers
+  - add some buffer overflow checks
+* make local directory display somewhat interruptible even without
+  partial page display -KW
+* make do_readme in HTFile.c 8-bit clean -KW
+* tweak in HTTP.c to avoid doing strlen() on received data that are to be
+  passed on raw; raw NUL bytes within the first block read could lead to data
+  loss -KW
+* change newly introduced CAN_ANONYMOUS_* at end of userdefs.h to be FALSE by
+  default, to get behavior with -anonymous that is equivalent to 2.8.2 -KW
+* handle some more common forms of mailcap $DISPLAY tests internally in
+  HTInit.c -KW
+* correct a problem which appears when the curses library causes FANCY_CURSES
+  to be defined but not COLOR_CURSES:  the code can call attrset() twice for
+  the same characters, thus replacing the original attribute with the new one.
+  Fix by using attron() instead (patch by Julian Coleman
+  <J.D.Coleman@newcastle.ac.uk>)
+* modify LYonedot() so it does not change its parameter, avoiding corrupting
+  the name to be zipped (reported by DK) -TD
+* modify LYDownload.c to skip over delimiter for file://localhost to avoid
+  treating it as part of the DOS filename -DK
+* alter LYExecv() to only do an HTAlert if the return-code is zero, i.e., an
+  error was reported.  This lets us reuse (and free) memory pointed to by
+  tmpbuf (reported by DK) -TD
+* remove redefinition of lstat() and change test of stat() function with DJGPP,
+  which returns nonzero rather than negative on failure -DK
 1999-06-18 (2.8.3dev.2)
 * move some of the path-manipulation from the DJGPP dired change into new
   functions LYisAbsPath, LYisRootPath and LYLastPathSep -TD
@@ -62,7 +181,7 @@ Changes since Lynx 2.8 release
 * document use of '|' pipes in PRINTER commands in lynx.cfg -TD
 * add shell script man2hlp.sh, used that to generate lynx.hlp from lynx.man -TD
 * SOURCE_CACHE:  source_cache_file and source_cache_chunk are now members of
-  HTParentAnchor (where they should belong, not HText nor mutable globals). 
+  HTParentAnchor (where they should belong, not HText nor mutable globals).
   Add one more parse setting member (verbose_img) to HText structure -LP
 * correct spelling of ifdef for reload_read_cfg() (reported by KW) -LP
 * minor docs tweaks -LP
@@ -77,7 +196,7 @@ Changes since Lynx 2.8 release
 (This is KW's patch, with minor corrections)
 * Key handling changes:
   - Extended lynxkeycodes:  a bit flag is used to indicate that the lower bits
-    of the value already are a lynxactioncode and need not be looked up again. 
+    of the value already are a lynxactioncode and need not be looked up again.
     Reduces need for back and forth forward and reverse binding lookups;
     currently only used in some places.
   - Extended lynxkeycodes:  several (currently three) bit flags are used to
@@ -122,15 +241,15 @@ Changes since Lynx 2.8 release
     a prefix key to set a modifier flag.  Keys with second function when
     pressed twice are ^E^E and ^K^K.  ESC is also recognized as setting a
     modifier flag, in case it gets through without been having been handled in
-    LYgetch().  See new file keystrokes/bashlike_edit_help.html for more info. 
+    LYgetch().  See new file keystrokes/bashlike_edit_help.html for more info.
     The Bash-like Line Editor Bindings are only compiled in if compiled with
     -DEXP_ALT_BINDINGS / configured with --enable-alt-bindings (but not subject
     to a new macro).  Implementation code for the new emacs-like functions
-    additionally ifdef'd with ENHANCED_LINEEDIT. 
+    additionally ifdef'd with ENHANCED_LINEEDIT.
   - Avoid dependency on DNARROW key binding when form field line-editing is
     ended with Enter or Return key.
   - Take setting of real_c/old_c into consideration after return from form
-    field line-editing.  Previously there were some strange effects: 
+    field line-editing.  Previously there were some strange effects:
     statusline messages would sometimes not appear when they should, the KEYMAP
     command would sometimes not work when invoked with ^Vk while in a form
     field.
@@ -145,14 +264,14 @@ Changes since Lynx 2.8 release
     and NEXT_LINK, with the difference that, when moving to a form input or
     textarea line, the last column position (relative to the field) is
     remembered.  They are not mapped by default, but mentioned in lynx.cfg.
-  - New key action DWIMHELP.  It should give some context-sensitive help. 
+  - New key action DWIMHELP.  It should give some context-sensitive help.
     Currentely the appropriate Line Editor Binding help page is shown if a form
     input field is selected, otherwise it defaults to the main HELP page.
-  - New key action DWIMEDIT.  Revert meaning of EDIT back to previous meaning: 
+  - New key action DWIMEDIT.  Revert meaning of EDIT back to previous meaning:
     always edit document file, not textarea content.  DWIMEDIT acts like
     EDITTEXTAREA if the current link is a form textarea or input field and
     AUTOEXTEDIT was defined, and like EDIT otherwise.  Also added slightly
-    different statusline message if form field external editiong cannot be done
+    different statusline message if form field external editing cannot be done
     because editing is disabled:  it shouldn't refer to "The 'e'dit command".
   - Summary of reasonable ways to invoke external texarea editing (assuming
     that it is desired to keep the action of 'e' to edit files at least outside
@@ -243,7 +362,7 @@ Changes since Lynx 2.8 release
     failed because of memory problems, and also fake a 'z' in that case to
     short-circuit a URL guessing cycle.
   - For most systems, generate more trace output for connection attempts, close
-    to the actual connect() and select() calls to prevent clobbering errno. 
+    to the actual connect() and select() calls to prevent clobbering errno.
     See SOCKET_DEBUG_TRACE.  This should help diagnose some obscure
     system-dependent problems that have occasionally been reported.
 * Added some missing stuff for color handling to forms Option Menu code.
@@ -259,7 +378,7 @@ Changes since Lynx 2.8 release
   whether to send Referer header earlier, and made it apply for URL types that
   might be proxied.
 * LYAddVisitedLink tried to regard documents with the same address but a
-  different title string as different documents, but this was coded wrong. 
+  different title string as different documents, but this was coded wrong.
   Removed ineffective comparison, but keep old title string if new title string
   is empty.
 * Correct long-standing logic error in MAIL_SYSTEM_ERROR_LOGGING handling.
@@ -267,7 +386,7 @@ Changes since Lynx 2.8 release
 * Fix for traversal code to put the right address into the TRAVERSE_REJECT_FILE
   if a request fails after popping a document from the history stack (this can
   only occur if a previous request for the same document had succeeded).  Also
-  don't try to send mail in such a case if MAIL_SYSTEM_ERROR_LOGGING is on. 
+  don't try to send mail in such a case if MAIL_SYSTEM_ERROR_LOGGING is on.
   Also prevent possible history stack underflow if this occurs on return to the
   first document.
 * According to lynx.cfg, error logging mail may be sent to ALERTMAIL if no
@@ -290,7 +409,7 @@ Changes since Lynx 2.8 release
   pushed on the history stack because it looks like a generated special page.
 * Made "Don't waste the cache" optimization in historytarget() subject to
   additional checks, to avoid uncaching of the wrong document in some cases.
-* LYSafeGets() would drop the last line from a file if it was not terminated. 
+* LYSafeGets() would drop the last line from a file if it was not terminated.
   Changed to return the unterminated line like fgets().
 * Clarifications on restrictions.  "download" does not imply "disk_save" while
   "print" does, this doesn't seem to make much sense but has been the behavior
@@ -299,7 +418,7 @@ Changes since Lynx 2.8 release
   posting.  The documentation (except for the corresponding comments in
   userdefs.h) said that they apply to posting, while in fact they were
   implemented for reading only.  [Does nobody read this stuff???] Also, the
-  implementation only checked the flag for news:  URLs, but not for nntp: 
+  implementation only checked the flag for news:  URLs, but not for nntp:
   URLs, which doesn't make much sense given that the latter provide an
   alternative way for most (if not all) purposes of the first.  So now these
   restrictions apply to news:, nntp:, newspost:, and newsreply:  (but not to
@@ -309,7 +428,7 @@ Changes since Lynx 2.8 release
   quite sure whether the corresponding features work there at all.
 * Changed restriction parsing so that "all" and "default" don't get ignored if
   they appear as one of several items in the same list.
-* Implement listing of current restrictions to stdout with new -restrictions=? 
+* Implement listing of current restrictions to stdout with new -restrictions=?
   option.  This should appear as the last command line option, otherwise the
   effect of options appearing later may not be shown.  The '?' may require
   quoting.
@@ -397,6 +516,13 @@ Changes since Lynx 2.8 release
 * Various doc tweaks.
 * Updated README.defines.  Other contributors should please add their stuff
   there, too.
+* Additional non-option args (before the last one), i.e.  URLs or filenames,
+  are made available for 'g'oto recall.  If unwanted, this can be disabled by
+  changing EXTENDED_STARTFILE_RECALL in LYMain.c -KW
+* In UCChangeTerminalCodepage() used for --enable-font-switch with linux:  use
+  LYOpenTemp() etc.  instead of tempnam(), this avoids "Invalid pointer" with
+  LY_FIND_LEAKS and avoids leaving old temporary files hanging around in some
+  situations.  Also added some error checking -KW
 
 1999-06-01 (2.8.2rel.1)
 -----------------------

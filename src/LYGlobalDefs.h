@@ -383,6 +383,7 @@ extern BOOLEAN LYPrependBaseToSource;
 extern BOOLEAN LYPrependCharsetToSource;
 extern BOOLEAN LYQuitDefaultYes;
 extern BOOLEAN LYNonRestartingSIGWINCH;
+extern BOOLEAN LYReuseTempfiles;
 
 #ifndef VMS
 extern BOOLEAN LYNoCore;

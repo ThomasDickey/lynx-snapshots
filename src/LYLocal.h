@@ -35,11 +35,16 @@
 extern char LYPermitFileURL[];
 extern char LYDiredFileURL[];
 extern char LYUploadFileURL[];
+#ifdef OK_INSTALL
+extern char LYInstallFileURL[];
+#endif
 
 extern BOOLEAN local_create PARAMS((document *doc));
 extern BOOLEAN local_modify PARAMS((document *doc, char **newpath));
 extern BOOLEAN local_remove PARAMS((document *doc));
+#ifdef OK_INSTALL
 extern BOOLEAN local_install PARAMS((char *destpath, char *srcpath, char **newpath));
+#endif
 
 /* MainLoop needs to know about this one for atexit cleanup */
 extern void clear_tags NOPARAMS;

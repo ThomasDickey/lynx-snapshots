@@ -1255,12 +1255,12 @@
  * the version definition with the Project Version on checkout.  Just
  * ignore it. - kw */
 /* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
-#define LYNX_VERSION "2.8.3dev.2"
+#define LYNX_VERSION "2.8.3dev.3"
 #define LYNX_WWW_HOME "http://lynx.browser.org/"
 #define LYNX_WWW_DIST "http://www.slcc.edu/lynx/current/"
 #define LYNX_RELEASE FALSE
 /* $Format: "#define LYNX_DATE \"$ProjectDate$\""$ */
-#define LYNX_DATE "Fri, 18 Jun 1999 15:54:46 -0600"
+#define LYNX_DATE "Tue, 29 Jun 1999 06:50:02 -0600"
 #define LYNX_DATE_OFF 5		/* truncate the automatically-generated date */
 #define LYNX_DATE_LEN 11	/* truncate the automatically-generated date */
 #define LYNX_RELEASE_DATE "1999"
@@ -1485,7 +1485,7 @@
  * to lynx.cfg as a normal file, e.g., through a "file:" URL,
  * if other restrictions allow that.)
  */
-#define CAN_ANONYMOUS_VIEW_LYNXCFG_INFO			TRUE
+#define CAN_ANONYMOUS_VIEW_LYNXCFG_INFO			FALSE
 
 /*******************************
  * set to FALSE if users with anonymous restrictions should
@@ -1500,7 +1500,7 @@
  * names and location and links for reading the files, as well
  * as information on nesting of included configuration files.
  */
-#define CAN_ANONYMOUS_VIEW_LYNXCFG_EXTENDED_INFO	TRUE
+#define CAN_ANONYMOUS_VIEW_LYNXCFG_EXTENDED_INFO	FALSE
 
 /*******************************
  * set to FALSE if users with anonymous restrictions should
@@ -1510,7 +1510,7 @@
  * AND --disable-config-info wasn't used, otherwise this
  * special URL scheme isn't recognized anyway.
  */
-#define CAN_ANONYMOUS_VIEW_COMPILEOPTS_INFO		TRUE
+#define CAN_ANONYMOUS_VIEW_COMPILEOPTS_INFO		FALSE
 
 /*******************************
  * set to FALSE if you don't want users of your anonymous
@@ -1518,7 +1518,7 @@
  * configuration info (LYNXCFG: and LYNXCOMPILEOPTS:) if
  * they are otherwise allowed.
  */
-#define CAN_ANONYMOUS_GOTO_CONFIGINFO		TRUE
+#define CAN_ANONYMOUS_GOTO_CONFIGINFO		FALSE
 
 /*****************************
  * Be sure you have read about and set defines above in Sections

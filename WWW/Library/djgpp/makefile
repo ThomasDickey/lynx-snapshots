@@ -8,7 +8,7 @@ WWW_MACH = djgpp
 #ASIS_MACH = hardware/os
 
 CFLAGS = -O3 -DUSE_ZLIB -DDOSPATH -DNOUSERS -DDISP_PARTIAL \
--DSOURCE_CACHE -DUSE_PSRC \
+-DSOURCE_CACHE -DUSE_PSRC -DNOPORT \
 -I../Implementation \
 -I../../../djgpp/tcplib/include \
 -I../../../djgpp/tcplib/include/tcp \

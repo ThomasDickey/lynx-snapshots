@@ -1181,6 +1181,7 @@ static Config_Type Config_Table [] =
      PARSE_SET("prepend_charset_to_source", CONF_BOOL, &LYPrependCharsetToSource),
      PARSE_FUN("printer", CONF_FUN, printer_fun),
      PARSE_SET("quit_default_yes", CONF_BOOL, &LYQuitDefaultYes),
+     PARSE_SET("reuse_tempfiles", CONF_BOOL, &LYReuseTempfiles),
 #ifndef NO_RULES
      PARSE_FUN("rule", CONF_FUN, HTSetConfiguration),
      PARSE_FUN("rulesfile", CONF_FUN, cern_rulesfile_fun),

@@ -117,7 +117,7 @@ PRIVATE int HTLoadHTTP ARGS4 (
   BOOL show_407 = FALSE;
   BOOL auth_proxy = NO; 	/* Generate a proxy authorization. - AJL */
 
-  int length, rv;
+  int length, rawlength, rv;
   BOOL doing_redirect, already_retrying = FALSE, bad_location = FALSE;
   int len = 0;
 
@@ -768,6 +768,8 @@ try_again:
     while (!eol && !end_of_file && bytes_already_read < 100);
   } /* Scope of loop variables */
 
+  /* save total length, in case we decide later to show it all - kw */
+  rawlength = length;
 
   /*	We now have a terminated unfolded line.  Parse it.
   **	--------------------------------------------------
@@ -1462,7 +1464,7 @@ Cookie2_continuation:
 	      doing_redirect = FALSE;
 	      permanent_redirection = FALSE;
 	      start_of_data = line_kept_clean;
-	      length = strlen(start_of_data);
+	      length = rawlength;
 	      if (!bad_location) {
 		  HTAlert(gettext("Got redirection with no Location header."));
 		  HTProgress(line_buffer);
@@ -1718,7 +1720,7 @@ Cookie2_continuation:
       **  It was a HEAD request, or we want the headers and source.
       */
       start_of_data = line_kept_clean;
-      length = strlen(start_of_data);
+      length = rawlength;
       format_in = HTAtom_for("text/plain");
   }
 

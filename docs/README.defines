@@ -59,6 +59,7 @@ Related to DirEd code - probably only usable for UNIX or similar
 # -DOK_TAR         (see INSTALLATION, Section II-1c)
 # -DOK_UUDECODE    (see INSTALLATION, Section II-1c)
 # -DOK_ZIP         (see INSTALLATION, Section II-1c)
+# -DOK_INSTALL     to enable dired menu "Install" function
 # -DARCHIVE_ONLY   (see INSTALLATION, Section II-1c)
 # -DNO_CHANGE_EXECUTE_PERMS (see INSTALLATION, Section II-1c)
 # -DCANT_EDIT_UNWRITABLE_FILES (see LYEdit.c - always in effect for VMS)
@@ -135,3 +136,7 @@ EXTENDED_STARTFILE_RECALL		LYMain.c
 reverse_mailcap				HTInit.c
 ADVANCED_INFO				LYShowInfo.c
 CHECK_FREE_MEM				GridText.c
+max_cookies_domain			LYCookie.c
+max_cookies_global			LYCookie.c
+max_cookies_buffer			LYCookie.c
+DEFAULT_INVCHECK_BV			LYCookie.c

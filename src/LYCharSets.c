@@ -21,7 +21,7 @@ extern HTCJKlang HTCJK;
 PUBLIC HTkcode kanji_code = NOKANJI;
 PUBLIC BOOLEAN LYHaveCJKCharacterSet = FALSE;
 PUBLIC BOOLEAN DisplayCharsetMatchLocale = TRUE;
-PUBLIC BOOL force_old_UCLYhndl_on_reload;
+PUBLIC BOOL force_old_UCLYhndl_on_reload = FALSE;
 PUBLIC int forced_UCLYhdnl;
 extern void UCInit NOARGS;
 extern int UCInitialized;

@@ -48,12 +48,14 @@ PUBLIC void HTAlwaysAlert ARGS2(
 		    "%s %s!\n",
 		    extra_prefix, Msg);
 	    fflush(stdout);
+	    LYstore_message2(ALERT_FORMAT, Msg);
 	    sleep(AlertSecs);
 	} else {
 	    fprintf(((TRACE) ? stdout : stderr),
 		    ALERT_FORMAT,
 		    (Msg == 0) ? "" : Msg);
 	    fflush(stdout);
+	    LYstore_message2(ALERT_FORMAT, Msg);
 	    sleep(AlertSecs);
 	    fprintf(((TRACE) ? stdout : stderr), "\n");
 	}
@@ -211,6 +213,12 @@ PUBLIC BOOL HTConfirmDefault ARGS2(CONST char *, Msg, int, Dft)
 
     conf_cancelled = NO;
     if (dump_output_immediately) { /* Non-interactive, can't respond */
+	if (Dft == DFT_CONFIRM) {
+	    CTRACE(tfp, "Confirm: %s (%c/%c) ", Msg, *msg_yes, *msg_no);
+	} else {
+	    CTRACE(tfp, "Confirm: %s (%c) ", Msg, (Dft == YES) ? *msg_yes : *msg_no);
+	}
+	CTRACE(tfp, "- NO, not interactive.\n");
 	result = NO;
     } else {
 	char *msg = NULL;
@@ -219,6 +227,9 @@ PUBLIC BOOL HTConfirmDefault ARGS2(CONST char *, Msg, int, Dft)
 	    HTSprintf0(&msg, "%s (%c/%c) ", Msg, *msg_yes, *msg_no);
 	else
 	    HTSprintf0(&msg, "%s (%c) ", Msg, (Dft == YES) ? *msg_yes : *msg_no);
+	if (LYTraceLogFP) {
+	    CTRACE(tfp, "Confirm: %s", msg);
+	}
 	_statusline(msg);
 	FREE(msg);
 
@@ -236,11 +247,15 @@ PUBLIC BOOL HTConfirmDefault ARGS2(CONST char *, Msg, int, Dft)
 	    } else if (TOUPPER(c) == TOUPPER(*msg_yes)) {
 		result = YES;
 	    } else if (TOUPPER(c) == TOUPPER(*msg_no)) {
-		return(NO);
+		result = NO;
 	    } else if (Dft != DFT_CONFIRM) {
-		return(Dft);
+		result = Dft;
+		break;
 	    }
 	}
+	CTRACE(tfp, "- %s%s.\n",
+	       (result != NO) ? "YES" : "NO",
+	       conf_cancelled ? ", cancelled" : "");
     }
     return (result);
 }
@@ -478,17 +493,16 @@ PUBLIC BOOL HTConfirmCookie ARGS4(
     if ((de = (domain_entry *)dp) == NULL)
 	return FALSE;
 
-#ifdef ENHANCED_COOKIES
     /*	If the user has specified a list of domains to allow or deny
     **	from the config file, then they'll already have de->bv set to
     **	ACCEPT_ALWAYS or REJECT_ALWAYS so we can relax and let the
-    **	default cookie handling code cope with this fine.  I hope.
+    **	default cookie handling code cope with this fine.
     */
-#endif
+
     /*
     **	If the user has specified a constant action, don't prompt at all.
     */
-    if (de->bv == ACCEPT_ALWAYS || de->bv == FROM_FILE)
+    if (de->bv == ACCEPT_ALWAYS)
 	return TRUE;
     if (de->bv == REJECT_ALWAYS)
 	return FALSE;
@@ -505,19 +519,14 @@ PUBLIC BOOL HTConfirmCookie ARGS4(
     /*
     **	Estimate how much of the cookie we can show.
     */
-    if (de != NULL) {
-	if (de->bv == ACCEPT_ALWAYS)
-	    return TRUE;
-	if (de->bv == REJECT_ALWAYS)
-	    return FALSE;
-    }
     if(!LYAcceptAllCookies) {
 	int namelen, valuelen, space_free, percentage;
 	char *message = 0;
 
-	space_free = (((LYcols - 1)
-		   - strlen(ADVANCED_COOKIE_CONFIRMATION))
-		   - strlen(server));
+	space_free = ((LYcols - 1)
+		      - (strlen(ADVANCED_COOKIE_CONFIRMATION)
+			 - 10)		/* %s and %.*s and %.*s chars */
+		      - strlen(server));
 	if (space_free < 0)
 	    space_free = 0;
 	namelen = strlen(name);

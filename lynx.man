@@ -70,10 +70,10 @@ accept all cookies.
 .B -anonymous
 apply restrictions for anonymous account, see also -restrictions.
 .TP
-.B -assume_charset\fR=\fIID\fR:\fIMIMEname
+.B -assume_charset\fR=\fIMIMEname
 charset for documents that don't specify it.
 .TP
-.B -assume_local_charset\fR=\fIID\fR:\fIMIMEname
+.B -assume_local_charset\fR=\fIMIMEname
 charset assumed for local files.
 .TP
 .B -assume_unrec_charset\fR=\fIMIMEname

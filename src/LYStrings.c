@@ -2737,11 +2737,6 @@ PUBLIC char *LYstrsep ARGS2(
     if (!stringp || !*stringp)		/* nothing to do? */
 	return 0;			/* then don't fall on our faces */
 
-    if (!**stringp) {			/* empty string: */
-	*stringp = 0;			/* let caller see he's done; */
-	return 0;			/* no tokens in an empty string */
-    }
-
     out = *stringp;			/* save the start of the string */
     tmp = strpbrk(*stringp, delim);
     if (tmp) {

@@ -3553,17 +3553,22 @@ PUBLIC int postoptions ARGS1(
 	return(NULLFILE);
     }
 
+    data = break_data(newdoc->post_data);
 
-    /*-------------------------------------------------
-     * kludge gen_options() call:
-     *--------------------------------------------------*/
+    if (!data) {
+	int status;
 
-    if (strstr(newdoc->address, "LYNXOPTIONS:/") && !newdoc->post_data) {
-	int status = gen_options(&newdoc->address);
-	if (status == NOT_FOUND)
-	    return(NOT_FOUND);
+	/*-------------------------------------------------
+	 * kludge gen_options() call:
+	 *--------------------------------------------------*/
+	status = gen_options(&newdoc->address);
+	if (status != NORMAL) {
+	    HTAlwaysAlert("Unexpected way of accessing", newdoc->address);
+	    FREE(newdoc->address);
+	    return(status);
+	}
 
-	/* exit to getfile() cyrcle */
+	/* exit to getfile() cycle */
 	WWWDoc.address = newdoc->address;
 	WWWDoc.post_data = newdoc->post_data;
 	WWWDoc.post_content_type = newdoc->post_content_type;
@@ -3575,9 +3580,6 @@ PUBLIC int postoptions ARGS1(
 	    return(NOT_FOUND);
 	return(NORMAL);
     }
-
-
-    data = break_data(newdoc->post_data);
 
     for (i = 0; data[i].tag != NULL; i++) {
 	/*
@@ -4085,13 +4087,17 @@ PRIVATE int gen_options ARGS1(
 #if defined(USE_SLANG) || defined(COLOR_CURSES)
     BOOLEAN can_do_colors;
 #endif
-    static char tempfile[LY_MAXPATH];
+    static char tempfile[LY_MAXPATH] = "\0";
     FILE *fp0;
     size_t cset_len = 0;
     size_t text_len = COLS - 38;	/* cf: PutLabel */
 
-    LYRemoveTemp(tempfile);
-    fp0 = LYOpenTemp(tempfile, HTML_SUFFIX, "w");
+    if (LYReuseTempfiles) {
+	fp0 = LYOpenTempRewrite(tempfile, HTML_SUFFIX, "w");
+    } else {
+	LYRemoveTemp(tempfile);
+	fp0 = LYOpenTemp(tempfile, HTML_SUFFIX, "w");
+    }
     if (fp0 == NULL) {
 	HTAlert(UNABLE_TO_OPEN_TEMPFILE);
 	return(NOT_FOUND);

@@ -530,7 +530,9 @@ PRIVATE int PassesTest ARGS1(
     /*
      *  Save overhead of system() calls by faking these. - FM
      */
-    if (0 == strcasecomp(mc->testcommand, "test -n \"$DISPLAY\"")) {
+    if (0 == strcmp(mc->testcommand, "test \"$DISPLAY\"") ||
+	0 == strcmp(mc->testcommand, "test \"$DISPLAY\" != \"\"") ||
+	0 == strcasecomp(mc->testcommand, "test -n \"$DISPLAY\"")) {
 	FREE(mc->testcommand);
 	CTRACE(tfp, "PassesTest: Testing for XWINDOWS environment.\n");
     	if (LYgetXDisplay() != NULL) {

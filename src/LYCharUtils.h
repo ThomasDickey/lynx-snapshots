@@ -63,11 +63,12 @@ extern void LYHandleMETA PARAMS((
 	CONST BOOL*		present,
 	CONST char **		value,
 	char ** 		include));
-extern void LYHandleP PARAMS((
+extern void LYHandlePlike PARAMS((
 	HTStructured *		me,
 	CONST BOOL*		present,
 	CONST char **		value,
 	char ** 		include,
+	int			align_idx,
 	BOOL			start));
 extern void LYHandleSELECT PARAMS((
 	HTStructured *		me,

@@ -33,7 +33,7 @@ PUBLIC int showinfo ARGS4(
 	document *,	newdoc,
 	char *, 	owner_address)
 {
-    static char tempfile[LY_MAXPATH];
+    static char tempfile[LY_MAXPATH] = "\0";
     int url_type;
     FILE *fp0;
     char *Address = NULL, *Title = NULL;
@@ -48,8 +48,13 @@ PUBLIC int showinfo ARGS4(
     struct stat dir_info;
 #endif /* DIRED_SUPPORT */
 
-    LYRemoveTemp(tempfile);
-    if ((fp0 = LYOpenTemp (tempfile, HTML_SUFFIX, "w")) == 0) {
+    if (LYReuseTempfiles) {
+	fp0 = LYOpenTempRewrite(tempfile, HTML_SUFFIX, "w");
+    } else {
+	LYRemoveTemp(tempfile);
+	fp0 = LYOpenTemp(tempfile, HTML_SUFFIX, "w");
+    }
+    if (fp0 == NULL) {
 	HTAlert(CANNOT_OPEN_TEMP);
 	return(-1);
     }

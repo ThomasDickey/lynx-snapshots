@@ -17,6 +17,10 @@
 #include <LYMainLoop.h>
 #include <LYKeymap.h>
 
+#ifndef NO_GROUPS
+#include <HTFile.h>
+#endif
+
 #ifdef DJGPP_KEYHANDLER
 #include <bios.h>
 #endif /* DJGPP_KEYHANDLER */
@@ -6114,6 +6118,165 @@ PUBLIC FILE *LYReopenTemp ARGS1(
 }
 
 /*
+ * Open a temp-file for writing, possibly re-using a previously used
+ * name and file.
+ * If a non-empty fname is given, it is reused if it indicates a file
+ * previously registered as a temp file and, in case the file still
+ * exists, if it looks like we can write to it safely.  Otherwise a
+ * new temp file (with new name) will be generated and returned in fname.
+ *
+ * File permissions are set so that the file is not readable by unprivileged
+ * other users.
+ *
+ * Suffix is only used if fname is not being reused.
+ * The mode should be "w", others are possible (they may be passed on)
+ * but probably don't make sense. - kw
+ */
+PUBLIC FILE *LYOpenTempRewrite ARGS3(
+	char *,		fname,
+	CONST char *,	suffix,
+	CONST char *,	mode)
+{
+    FILE *fp = 0;
+    BOOL txt = TRUE;
+    char wrt = 'r';
+    BOOL registered = NO;
+    BOOL writable_exists = NO;
+    BOOL is_ours = NO;
+    BOOL still_open = NO;
+    LY_TEMP *p;
+    struct stat stat_buf;
+
+    CTRACE(tfp, "LYOpenTempRewrite(%s,%s,%s)\n", fname, suffix, mode);
+    if (*fname == '\0')		/* first time, no filename yet */
+	return (LYOpenTemp(fname, suffix, mode));
+
+    for (p = ly_temp; p != 0; p = p->next) {
+	if (!strcmp(fname, p->name)) {
+	    registered = YES;
+	    if (p->file != 0)
+		still_open = YES;
+	    CTRACE(tfp, "...used before%s\n",
+		still_open ? ", still open!" : ".");
+	    break;
+	}
+    }
+
+    if (registered) {
+#ifndef NO_GROUPS
+	writable_exists = HTEditable(fname); /* existing, can write */
+#else
+	writable_exists = (stat(fname, &stat_buf) == 0); /* existing, assume can write */
+#endif
+
+	if (writable_exists) {
+#ifdef UNIX
+	    is_ours = IsOurFile(fname);
+#else
+	    is_ours = TRUE;	/* assume ok, if we get to here */
+#endif
+	}
+	CTRACE(tfp, "...%s%s\n",
+	       writable_exists ?
+#ifndef NO_GROUPS
+	       "exists and is writable, "
+#else
+	       "exists, "
+#endif
+	       : "",
+	       is_ours ? "is our file." : "is NOT our file.");
+    }
+
+    /*
+     *  Note that in cases where LYOpenTemp is called as fallback below,
+     *  we don't call LYRemoveTemp first.  That may be appropriate in some
+     *  cases, but not trying to remove a weird existing file seems safer
+     *  and could help diagnose an unusual situation.  (They may be removed
+     *  anyway later.)
+     */
+    if (still_open) {
+	/*
+	 * This should probably not happen.  Make a new one.
+	 */
+	return (LYOpenTemp(fname, suffix, mode));
+    } else if (is_ours) {
+	/*
+	 *  Yes, it exists, is writable if we checked, and everything
+	 *  looks ok so far.  This should be the most regular case.
+	 *  We truncate and then append, this avoids having a small
+	 *  window in which the file doesn't exist. - kw
+	 */
+	if (truncate(fname, 0) != 0) {
+	    CTRACE(tfp, "... truncate(%s,0) failed: %s\n",
+		   fname, LYStrerror(errno));
+	    return (LYOpenTemp(fname, suffix, mode));
+	} else {
+	    return (LYReopenTemp(fname));
+	}
+    } else if (writable_exists) {
+	/*
+	 *  File exists, writable if we checked, but something is wrong
+	 *  with it.
+	 */
+	return (LYOpenTemp(fname, suffix, mode));
+#ifndef NO_GROUPS
+    } else if (registered && (lstat(fname, &stat_buf) == 0)) {
+	/*
+	 *  Exists but not writable, and something is wrong with it.
+	 */
+	return (LYOpenTemp(fname, suffix, mode));
+#endif
+    } else if (!registered) {
+	/*
+	 *  Not registered.  It should have been registered at one point
+	 *  though, otherwise we wouldn't be called like this.
+	 */
+	return (LYOpenTemp(fname, suffix, mode));
+    } else {
+	/*
+	 *  File does not exist, but is registered as a temp file.
+	 *  It must have been removed by some means other than
+	 *  LYRemoveTemp.  Reuse the name!
+	 */
+    }
+
+    while (*mode != '\0') {
+	switch (*mode++) {
+	case 'w':	wrt = 'w';	break;
+	case 'a':	wrt = 'a';	break;
+	case 'b':	txt = FALSE;	break;
+	default:
+		CTRACE(tfp, "%s @%d: BUG\n", __FILE__, __LINE__);
+		return fp;
+	}
+    }
+
+    if (txt) {
+	switch (wrt) {
+	case 'w':
+	    fp = LYNewTxtFile (fname);
+	    break;
+	case 'a':
+	    fp = LYAppendToTxtFile (fname);
+	    break;
+	}
+    } else {
+	fp = LYNewBinFile (fname);
+    }
+    p->file = fp;
+
+    CTRACE(tfp, "... LYOpenTempRewrite(%s), %s\n", fname,
+	   (fp) ? "ok" : "failed");
+    /*
+     *  We could fall back to trying LYOpenTemp() here in case of failure.
+     *  After all the checks already done above a filure here should be
+     *  pretty unusual though, so maybe it's better to let the user notice
+     *  that something went wrong, and not try to fix it up. - kw
+     */
+    return fp;
+}
+
+/*
  * Special case of LYOpenTemp, used for manipulating bookmark file, i.e., with
  * renaming.
  */
@@ -6536,7 +6699,7 @@ PUBLIC void LYAddPathSep0 ARGS1(
  * Check if a given string contains a path separator
  */
 PUBLIC char * LYLastPathSep ARGS1(
-	char *,		path)
+	CONST char *,	path)
 {
     char *result;
 #ifdef DOSPATH
