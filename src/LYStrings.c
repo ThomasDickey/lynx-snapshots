@@ -245,10 +245,10 @@ PRIVATE int set_clicked_link ARGS3(
 		if (cur_err == 0) {
 		    int cury, curx;
 
+		    LYGetYX(cury,curx);
 		    if (code != FOR_INPUT
 			/* Do not pick up the current input field */
-			|| !(LYGetYX(cury,curx),
-			     (cury == y && (curx >= lx) && ((curx - lx) <= len)))) {
+			|| !((cury == y && (curx >= lx) && ((curx - lx) <= len)))) {
 			if (is_text)
 			    have_levent = 1;
 			mouse_link = i;

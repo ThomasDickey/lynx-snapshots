@@ -232,6 +232,7 @@ extern void HText_SubmitForm PARAMS((
 extern void HText_DisableCurrentForm NOPARAMS;
 extern void HText_ResetForm PARAMS((FormInfo *form));
 extern void HText_activateRadioButton PARAMS((FormInfo *form));
+extern BOOLEAN HText_HaveUserChangedForms NOPARAMS;
 
 extern HTList * search_queries; /* Previous isindex and whereis queries */
 extern void HTSearchQueries_free NOPARAMS;

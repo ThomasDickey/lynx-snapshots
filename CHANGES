@@ -1,6 +1,24 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+1999-05-28 (2.8.2pre.7)
+* when reloading/reparsing the document with forms, issue a warning only when
+  user input is detected (forms content is changed from its default so
+  information will be lost).  New function HText_HaveUserChangedForms() is
+  called from HTReparse_document() and HTuncache_current_document() -LP
+* fix exit from postoptions() when need_reload is set but no source_cache,
+  was broken in dev23 -LP
+* remove unneeded float from integer calculations -LP
+* move comment for 'const' off the definition line, to simplify debugging
+  configure problem on HPUX for David Eaton -TD
+* move LYGetYX() out of conditional expression, just in case it cannot be
+  evaluated as a function, i.e., return a value (from bug report by David
+  Eaton) -TD
+* make install for COPYHEADER and COPYING work when the build directory is not
+  the top source directory -PG
+* add check to FastTrimColorClass() to avoid updating stylename and pointer
+  into it when the tag to be trimmed is not found (fixes a core dump reported
+  by VH) -TD
 1999-05-25 (2.8.2pre.7)
 * update illustration of forms options menu in Lynx User Guide according to
   current lynx output -LP
@@ -25,11 +43,11 @@ Changes since Lynx 2.8 release
 1999-05-24 (2.8.2pre.6)
 * fix for problem reported by LP -VH
   Load an html file with META charset and switch "\" to source mode.  Now press
-  ^R to reload: 
+  ^R to reload:
   (1) In -prettysrc case you got a broken document (charset will be assumed by
     lynx from assume_charset or assume_local_charset, not from a META charset
     which was previously pushed with LYPushAssumed() so you get a problem with
-    8bit documents when assume_charset != META charset). 
+    8bit documents when assume_charset != META charset).
   (2) Without -prettysrc you got a document handled properly via META charset
     assumption.  Now if you press ^R again you will get a broken document.
 * LYK_SOURCE & HTreparse_document():  when using SOURCE_CACHE_MEMORY fix tiny
@@ -188,20 +206,11 @@ Changes since Lynx 2.8 release
   Harper) this is a detail I overlooked in dev.18 -TD
 * fixes to compile with SunOS K&R cc -TD
 1999-04-27 (2.8.2dev.25)
-* fix reload_read_cfg() to avoid persistent cookies mode changing at run time;
-  reload printers list, downloaders list, environments - as expected. - LP
-* fixes for SOURCE_CACHE!=NONE mode, trying to accommodate HTreparse_document()
-  for mainloop() events:
-  - add/use flag "from_source_cache" for better mainloop maintenance
-  - add partial display mode for HTreparse_document() operations
-  - add warning when the reparsed document may lost its forms content
-  - fix options menu staff to use HTreparse_document() when possible - LP
-* fix exit from postoptions() when the reloaded document was in source mode -LP
 * updates to INSTALLATION -HN
-* undo some redundant dev23 changes, in particular the absence of first
-  PSRC_TEST responsible for a wrong line breaking in -prettysrc mode (try "lynx
-  .  -prettysrc" and press "\" to see wrapping in dev23-24).  Also fix Visited
-  Links for internal pages (my fault) -LP
+* undo some redundant dev23 changes, in particular PSRC_TEST in HText_new
+  was responsible for a wrong line breaking in -prettysrc mode
+  (try "lynx .  -prettysrc" and press "\" to see wrapping with altered
+  define).  Also fix Visited Links for internal pages -LP
 * restore links in lynx-dev.html to original form, to make redirection work
   properly -TD
 * add to MAKEFILE.W32 (untested - suggested by LP) -TD
@@ -304,6 +313,15 @@ Changes since Lynx 2.8 release
 * fix redefinition of h_errno (report by Tony Bolton) -TD
 * ifdef'd print_local_dir in HTFile.c since this function does not compile on
   VMS (report by Andy Harper, Tony Bolton) -TD
+* fix reload_read_cfg() to avoid persistent cookies mode changing at run time;
+  reload printers list, downloaders list, environments - as expected. - LP
+* fixes for SOURCE_CACHE!=NONE mode, trying to accommodate HTreparse_document()
+  for mainloop() events:
+  - add/use flag "from_source_cache" for better mainloop maintenance
+  - add partial display mode for HTreparse_document() operations
+  - add warning when the reparsed document may lose its forms content
+  - fix options menu stuff to use HTreparse_document() when possible - LP
+* fix exit from postoptions() when the reloaded document was in source mode -LP
 * update flags to correct behavior with SOURCE_CACHE!=NONE:  the length of the
   re-rendered text may vary so the scrolling down is broken (especially nice
   when switching to source).  ("more" updated, "lines_in_file" inlined) -LP

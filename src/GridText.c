@@ -6145,6 +6145,13 @@ PUBLIC void HTuncache_current_document NOARGS
     if (HTMainText) {
 	HTParentAnchor * htmain_anchor = HTMainText->node_anchor;
 
+	if (HText_HaveUserChangedForms()) {
+	    /*
+	     * Issue a warning.  User forms content will be lost.
+	     */
+	    HTAlert(RELOADING_FORM);
+	}
+
 	if (htmain_anchor) {
 	    if (!(HTOutputFormat && HTOutputFormat == WWW_SOURCE)) {
 		FREE(htmain_anchor->UCStages);
@@ -6218,11 +6225,9 @@ PUBLIC BOOLEAN HTreparse_document NOARGS
 	display_partial = display_partial_flag;  /* restore */
 	Newline_partial = Newline;  /* initialize */
 #endif
-	if (lynx_mode == FORMS_LYNX_MODE) {
+	if (HText_HaveUserChangedForms()) {
 	    /*
-	     *  Note that if there are no form links on the current
-	     *  page, lynx_mode won't have this setting and we won't
-	     *  know that this warning should be issued. - FM
+	     * Issue a warning.  Will not restore changed forms, currently.
 	     */
 	    HTAlert(RELOADING_FORM);
 	}
@@ -6266,11 +6271,9 @@ PUBLIC BOOLEAN HTreparse_document NOARGS
 	display_partial = display_partial_flag;  /* restore */
 	Newline_partial = Newline;  /* initialize */
 #endif
-	if (lynx_mode == FORMS_LYNX_MODE) {
+	if (HText_HaveUserChangedForms()) {
 	    /*
-	     *  Note that if there are no form links on the current
-	     *  page, lynx_mode won't have this setting and we won't
-	     *  know that this warning should be issued. - FM
+	     * Issue a warning.  Will not restore changed forms, currently.
 	     */
 	    HTAlert(RELOADING_FORM);
 	}
@@ -8869,7 +8872,6 @@ PUBLIC void HText_DisableCurrentForm NOARGS
 	if (anchor_ptr == HTMainText->last_anchor)
 	    break;
 
-
 	anchor_ptr = anchor_ptr->next;
     }
 
@@ -8882,49 +8884,99 @@ PUBLIC void HText_ResetForm ARGS1(
     TextAnchor * anchor_ptr;
 
     _statusline(RESETTING_FORM);
-    if (!HTMainText)
+    if (HTMainText == 0)
 	return;
 
     /*
      *  Go through list of anchors and reset values.
      */
     anchor_ptr = HTMainText->first_anchor;
-    while (anchor_ptr) {
+    while (anchor_ptr != 0) {
 	if (anchor_ptr->link_type == INPUT_ANCHOR) {
 	    if (anchor_ptr->input_field->number == form->number) {
 
-		 if (anchor_ptr->input_field->type == F_RADIO_TYPE ||
-		     anchor_ptr->input_field->type == F_CHECKBOX_TYPE) {
+		if (anchor_ptr->input_field->type == F_RADIO_TYPE ||
+		    anchor_ptr->input_field->type == F_CHECKBOX_TYPE) {
 
 		    if (anchor_ptr->input_field->orig_value[0] == '0')
 			anchor_ptr->input_field->num_value = 0;
 		    else
 			anchor_ptr->input_field->num_value = 1;
 
-		 } else if (anchor_ptr->input_field->type ==
-			    F_OPTION_LIST_TYPE) {
+		} else if (anchor_ptr->input_field->type ==
+			   F_OPTION_LIST_TYPE) {
 		    anchor_ptr->input_field->value =
 				anchor_ptr->input_field->orig_value;
 
 		    anchor_ptr->input_field->cp_submit_value =
 				anchor_ptr->input_field->orig_submit_value;
 
-		 } else {
+		} else {
 		    StrAllocCopy(anchor_ptr->input_field->value,
-					anchor_ptr->input_field->orig_value);
-		 }
-	     } else if (anchor_ptr->input_field->number > form->number) {
-		 break;
-	     }
-
+				 anchor_ptr->input_field->orig_value);
+		}
+	    } else if (anchor_ptr->input_field->number > form->number) {
+		break;
+	    }
 	}
 
 	if (anchor_ptr == HTMainText->last_anchor)
 	    break;
 
+	anchor_ptr = anchor_ptr->next;
+    }
+}
+
+/*
+ * This function is called before reloading/reparsing current document to find
+ * whether any forms content was changed by user so any information will be
+ * lost.
+ */
+PUBLIC BOOLEAN HText_HaveUserChangedForms NOARGS
+{
+    TextAnchor * anchor_ptr;
+
+    if (HTMainText == 0)
+       return FALSE;
+
+    /*
+     *  Go through list of anchors to check if any value was changed.
+     *  This code based on HText_ResetForm()
+     */
+    anchor_ptr = HTMainText->first_anchor;
+    while (anchor_ptr != 0) {
+	if (anchor_ptr->link_type == INPUT_ANCHOR) {
+
+	    if (anchor_ptr->input_field->type == F_RADIO_TYPE ||
+		anchor_ptr->input_field->type == F_CHECKBOX_TYPE) {
+
+		if ((anchor_ptr->input_field->orig_value[0] == '0' &&
+		     anchor_ptr->input_field->num_value == 1) ||
+		    (anchor_ptr->input_field->orig_value[0] != '0' &&
+		     anchor_ptr->input_field->num_value == 0))
+		    return TRUE;
+
+	    } else if (anchor_ptr->input_field->type == F_OPTION_LIST_TYPE) {
+		if (strcmp(anchor_ptr->input_field->value,
+			   anchor_ptr->input_field->orig_value))
+		    return TRUE;
+
+		if (strcmp(anchor_ptr->input_field->cp_submit_value,
+			   anchor_ptr->input_field->orig_submit_value))
+		    return TRUE;
+
+	    } else {
+		if (strcmp(anchor_ptr->input_field->value,
+			   anchor_ptr->input_field->orig_value))
+		    return TRUE;
+	    }
+	}
+	if (anchor_ptr == HTMainText->last_anchor)
+	   break;
 
 	anchor_ptr = anchor_ptr->next;
     }
+    return FALSE;
 }
 
 PUBLIC void HText_activateRadioButton ARGS1(

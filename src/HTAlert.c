@@ -521,10 +521,10 @@ PUBLIC BOOL HTConfirmCookie ARGS4(
 	**  the whole cookie.  Reduce them both by a percentage.
 	**  This should be smarter.
 	*/
-	float percentage;
-	percentage = (float)space_free/(float)(namelen + valuelen);
-	namelen = (int)(percentage*(float)namelen);
-	valuelen = (int)(percentage*(float)valuelen);
+        int percentage;  /* no float */
+        percentage = (100 * space_free) / (namelen + valuelen);
+        namelen = (percentage * namelen) / 100;
+        valuelen = (percentage * valuelen) / 100;
     }
     if(!LYAcceptAllCookies) {
 	char *message = 0;

@@ -1,6 +1,6 @@
 /* character level styles for Lynx
  * (c) 1996 Rob Partington -- donated to the Lyncei (if they want it :-)
- * @Id: LYStyle.c 1.27 Wed, 05 May 1999 18:33:59 -0600 dickey @
+ * $Id: LYStyle.c,v 1.21 1999/05/28 14:18:50 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTML.h>
@@ -477,16 +477,22 @@ PUBLIC void FastTrimColorClass ARGS5 (
 	    int*,		 phcode)	/*will be modified*/
 {
     char* tag_start = *pstylename_end;
+    BOOLEAN found = FALSE;
 
     while (tag_start >= stylename)
     {
-	for (; tag_start >= stylename &&  *tag_start!=';' ; --tag_start)
+	for (; (tag_start >= stylename) && (*tag_start != ';') ; --tag_start)
 	    ;
-	if ( !strncasecomp(tag_start+1, tag_name, name_len) ) break;
-	    --tag_start;
+	if ( !strncasecomp(tag_start+1, tag_name, name_len) ) {
+	    found = TRUE;
+	    break;
+	}
+	--tag_start;
     }
-    *tag_start = '\0';
-    *pstylename_end = tag_start;
+    if (found) {
+	*tag_start = '\0';
+	*pstylename_end = tag_start;
+    }
     *phcode = hash_code(tag_start+1);
 }
 

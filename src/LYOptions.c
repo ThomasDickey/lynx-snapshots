@@ -1931,7 +1931,7 @@ draw_bookmark_list:
 
     if (LYlines < (MBM_V_MAXFILES + MULTI_OFFSET)) {
 	for (a = ((MBM_V_MAXFILES/2 + 1) * (MBM_current - 1));
-		      a <= ((float)MBM_V_MAXFILES/2 * MBM_current); a++) {
+		      a <= (MBM_current * MBM_V_MAXFILES/2 ); a++) {
 	    move((3 + a) - ((MBM_V_MAXFILES/2 + 1)*(MBM_current - 1)), 5);
 	    addch((unsigned char)(a + 'A'));
 	    addstr(" : ");
@@ -3513,7 +3513,7 @@ PRIVATE int gen_options PARAMS((char **newfile));
  * manually (e.g., doing 'e'dit in 'o'ptions) and submit it to access the
  * restricted items.  Prevent spoofing attempts from index overrun. - LP
  *
- * Exit status: NULLFILE (reloading) or NORMAL (from HText cache).
+ * Exit status: NULLFILE (reload) or NORMAL (use HText cache).
  *
  * On exit, got the document which was current before the Options menu:
  *
@@ -3943,6 +3943,10 @@ PUBLIC int postoptions ARGS1(
      *  Being out of mainloop()/getfile() cycle, do things manually.
      */
     CTRACE(tfp, "\nLYOptions.c/postoptions(): exiting...\n");
+    CTRACE(tfp, "                            need_reload = %s\n",
+                    need_reload ? "TRUE" : "FALSE");
+    CTRACE(tfp, "                            need_end_reload = %s\n",
+                    need_end_reload ? "TRUE" : "FALSE");
 
     /*  Options menu was pushed before postoptions(), so pop-up. */
     LYpop(newdoc);
@@ -3965,7 +3969,8 @@ PUBLIC int postoptions ARGS1(
     if (!HTLoadAbsolute(&WWWDoc))
 	return(NOT_FOUND);
 
-    HTuncache_current_document(); /* will never use again */
+    /* comment out to avoid warning when removing forms content... */
+    /* HTuncache_current_document(); */ /* will never use again */
 
     /*
      *  Return to previous doc, not to options menu!
@@ -3991,6 +3996,11 @@ PUBLIC int postoptions ARGS1(
     if (!HTLoadAbsolute(&WWWDoc))
        return(NOT_FOUND);
 
+    /*
+     * Now most interesting part: reload document when necessary.
+     * **********************************************************
+     */
+
     reloading = FALSE;  /* set manually */
     /*  force end-to-end reload from remote server if change LYUserAgent
      *  or language or pref_charset (marked by need_end_reload flag above),
@@ -4011,7 +4021,7 @@ PUBLIC int postoptions ARGS1(
 	 *  case LYK_RELOAD (see comments there). - KW
 	 */
 	reloading = TRUE;  /* global flag */
-	need_reload = TRUE;
+	need_reload = TRUE;  /* this was probably already TRUE, don't worry */
     }
 
     if (need_reload == FALSE) {
@@ -4022,8 +4032,7 @@ PUBLIC int postoptions ARGS1(
 	/*  update HText cache */
 
 	/*
-	 *  Check to see if should reload source, or load html
-	 *  (from LYK_RELOAD & LYK_OPTIONS)
+	 *  see LYK_RELOAD & LYK_OPTIONS in mainloop for details...
 	 */
 	if (HTisDocumentSource()) {
 #ifndef USE_PSRC
@@ -4035,14 +4044,6 @@ PUBLIC int postoptions ARGS1(
 		HTOutputFormat = WWW_SOURCE;
 #endif
 	}
-	if (lynx_mode == FORMS_LYNX_MODE) {
-	    /* Sorry! lynx_mode set according the last display_page() state,
-	     * it always in form mode since we came from form-based option menu
-	     * so the information from mainloop() apperently lost.
-	     * reset here until we learn how to do it properly.
-	     */
-	    lynx_mode = NORMAL_LYNX_MODE;
-	}
 #ifdef SOURCE_CACHE
 	if (reloading == FALSE) {
 	    /* one more attempt to be smart enough: */
@@ -4053,10 +4054,14 @@ PUBLIC int postoptions ARGS1(
 	}
 #endif
 	HEAD_request = HTLoadedDocumentIsHEAD();
-	/*  no uncache, already loaded */
+	/*  uncache and load again */
+	HTuncache_current_document();
+	LYpush(newdoc, FALSE);
 	CTRACE(tfp, "LYOptions.c/postoptions(): now really exit.\n\n");
-	return(NORMAL);
+	return(NULLFILE);
     }
+
+    /******** Done! **************************************************/
 }
 
 PRIVATE char *NewSecureValue NOARGS
