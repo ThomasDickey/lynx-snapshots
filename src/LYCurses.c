@@ -945,7 +945,8 @@ PUBLIC void lynx_enable_mouse ARGS1(int,state)
 
 PUBLIC void stop_curses NOARGS
 {
-    echo();
+    if (LYCursesON)
+	echo();
 #ifdef __DJGPP__
 #ifdef WATT32
     _eth_release();

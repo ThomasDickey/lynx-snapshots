@@ -598,6 +598,28 @@ PRIVATE void deleteLinks ARGS1(
     }
 }
 
+#ifdef SOURCE_CACHE
+PUBLIC void HTAnchor_clearSourceCache ARGS1(
+	HTParentAnchor *,	me)
+{
+    /*
+     * Clean up the source cache, if any.
+     */
+    if (me->source_cache_file) {
+	CTRACE((tfp, "SourceCache: Removing file %s\n",
+	       me->source_cache_file));
+	LYRemoveTemp(me->source_cache_file);
+	FREE(me->source_cache_file);
+    }
+    if (me->source_cache_chunk) {
+	CTRACE((tfp, "SourceCache: Removing memory chunk %p\n",
+	       (void *)me->source_cache_chunk));
+	HTChunkFree(me->source_cache_chunk);
+	me->source_cache_chunk = NULL;
+    }
+}
+#endif /* SOURCE_CACHE */
+
 PUBLIC BOOL HTAnchor_delete ARGS1(
 	HTParentAnchor *,	me)
 {
@@ -722,20 +744,7 @@ PUBLIC BOOL HTAnchor_delete ARGS1(
     FREE(me->owner);
     FREE(me->RevTitle);
 #ifdef SOURCE_CACHE
-    /*
-     * Clean up the source cache, if any.
-     */
-    if (me->source_cache_file) {
-	CTRACE((tfp, "Removing source cache file %s\n",
-	       me->source_cache_file));
-	LYRemoveTemp(me->source_cache_file);
-	FREE(me->source_cache_file);
-    }
-    if (me->source_cache_chunk) {
-	CTRACE((tfp, "Removing memory source cache %p\n",
-	       (void *)me->source_cache_chunk));
-	HTChunkFree(me->source_cache_chunk);
-    }
+    HTAnchor_clearSourceCache(me);
 #endif
     if (me->FileCache) {
 	FILE *fd;

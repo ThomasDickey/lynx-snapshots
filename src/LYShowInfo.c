@@ -236,7 +236,10 @@ PUBLIC int showinfo ARGS4(
     LYEntify(&Title, TRUE);
     fprintf(fp0, "<dt><em>%s</em> %s%s\n",
 		 gettext("Linkname:"),
-		 Title, (doc->isHEAD ? " (HEAD)" : ""));
+		 Title,
+		 ((doc->isHEAD &&
+		   !strstr(Title, " (HEAD)") &&
+		   !strstr(Title, " - HEAD")) ? " (HEAD)" : ""));
 
     StrAllocCopy(Address, doc->address);
     LYEntify(&Address, TRUE);

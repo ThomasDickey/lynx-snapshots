@@ -198,7 +198,7 @@ forces the first document to be interpreted as HTML.
 toggles forcing of the secure flag for SSL cookies.
 .TP
 .B -forms_options
-toggles the style of options (menu or forms).
+toggles whether the Options Menu is key-based or form-based.
 .TP
 .B -from
 toggles transmissions of From headers.

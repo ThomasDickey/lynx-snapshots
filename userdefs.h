@@ -1002,18 +1002,17 @@
 #if defined(EXEC_LINKS) || defined(EXEC_SCRIPTS)
 
 /**********
- * if ENABLE_OPTS_CHANGE_EXEC
- * is defined then the user will be able to change
- * the execution status within the options screen.
+ * if ENABLE_OPTS_CHANGE_EXEC is defined, the user will be able to change
+ * the execution status within the Options Menu.
  */
 /* #define ENABLE_OPTS_CHANGE_EXEC */
 
 /**********
- * if NEVER_ALLOW_REMOTE_EXEC is defined then local execution of
- * scripts or lynxexec and lynxprog URLs will only be implemented
- * from HTML files that were accessed via a "file://localhost/" URL,
- * and the options menu for "L)ocal executions links" will only
- * allow toggling between "ALWAYS OFF" and "FOR LOCAL FILES ONLY".
+ * if NEVER_ALLOW_REMOTE_EXEC is defined,
+ * local execution of scripts or lynxexec & lynxprog URLs will be implemented
+ * only from HTML files that were accessed via a "file://localhost/" URL
+ * and the Options Menu for "Local executions links" will allow toggling
+ * only between "ALWAYS OFF" and "FOR LOCAL FILES ONLY".
  */
 /* #define NEVER_ALLOW_REMOTE_EXEC */
 
@@ -1038,18 +1037,16 @@
  * LOCAL_EXECUTION_LINKS_ALWAYS_ON will be FALSE
  * if NEVER_ALLOW_REMOTE_EXEC has been defined.
  *
- * if LOCAL_EXECUTION_LINKS_ALWAYS_OFF_FOR_ANONYMOUS is
- * true all execution links will be disabled when the
- * -anonymous command line option is used.  Anonymous
- * users are not allowed to change the execution options
- * from within the Lynx options menu so you might be able
- * to use this option to enable execution links and set
- * LOCAL_EXECUTION_LINKS_ON_BUT_NOT_REMOTE to TRUE to
- * give anonymous execution link capability without compromising
- * your system (see comments about TRUSTED_EXEC rules in
- * lynx.cfg for more information).
- *
+ * if LOCAL_EXECUTION_LINKS_ALWAYS_OFF_FOR_ANONYMOUS is true,
+ * all execution links will be disabled when the -anonymous
+ * command-line option is used.  Anonymous users are not allowed
+ * to change the execution options from within the Lynx Options Menu,
+ * so you might be able to use this option to enable execution links
+ * and set LOCAL_EXECUTION_LINKS_ON_BUT_NOT_REMOTE to TRUE
+ * to give anonymous execution-link capability without compromising
+ * your system (see comments about TRUSTED_EXEC rules in lynx.cfg ).
  */
+
 #define LOCAL_EXECUTION_LINKS_ALWAYS_ON          FALSE
 #define LOCAL_EXECUTION_LINKS_ON_BUT_NOT_REMOTE  FALSE
 #define LOCAL_EXECUTION_LINKS_ALWAYS_OFF_FOR_ANONYMOUS FALSE
@@ -1062,8 +1059,7 @@
  *
  * UNIX:
  * =====
- * CGI script support.  Defining LYNXCGI_LINKS (done by the configure script)
- * allows you to use the
+ * CGI script support.  Defining LYNXCGI_LINKS allows you to use the
  *
  *   lynxcgi:path
  *
@@ -1139,29 +1135,24 @@
 #define CHECKMAIL	FALSE	/* report unread and new mail messages */
 
 /*********************************
- * VI_KEYS can be changed in lynx.cfg and can be turned on by the user
- * in the options screen or the .lynxrc file.  This is just the default.
+ * Vi or Emacs movement keys.  These are defaults,
+ * which can be changed in lynx.cfg , the Options Menu or .lynxrc .
  */
-#define VI_KEYS_ALWAYS_ON	FALSE /* familiar h,j,k, & l */
+#define VI_KEYS_ALWAYS_ON	FALSE /* familiar h j k l */
+#define EMACS_KEYS_ALWAYS_ON	FALSE /* familiar ^N ^P ^F ^B */
 
 /*********************************
- * EMACS_KEYS can be changed in lynx.cfg and can be turned on by the user
- * in the options screen or the .lynxrc file.  This is just the default.
+ * DEFAULT_KEYPAD_MODE may be set to NUMBERS_AS_ARROWS
+ *                                or LINKS_ARE_NUMBERED
+ *                                or LINKS_AND_FIELDS_ARE_NUMBERED
+ * to specify whether numbers (e.g. [10]) appear before all links,
+ * allowing immediate access by entering the number on the keyboard,
+ * or numbers on the numeric key-pad work like arrows;
+ * the 3rd option causes form fields also to be preceded by numbers.
+ * The first two options (but not the last) can be changed in lynx.cfg
+ * and all three can be changed via the Options Menu.
  */
-#define EMACS_KEYS_ALWAYS_ON	FALSE /* familiar ^N, ^P, ^F, ^B */
-
-/*********************************
- * DEFAULT_KEYPAD_MODE specifies whether by default the user
- * has numbers that work like arrows or else numbered links
- * DEFAULT KEYPAD MODE may be set to
- *	NUMBERS_AS_ARROWS   or
- *	LINKS_ARE_NUMBERED  or
- *	LINKS_AND_FIELDS_ARE_NUMBERED
- *
- * This default setting can be overridden in lynx.cfg (but not to
- * the third value), and it can be changed at run time by the user.
- */
-#define DEFAULT_KEYPAD_MODE	LINKS_AND_FIELDS_ARE_NUMBERED
+#define DEFAULT_KEYPAD_MODE	NUMBERS_AS_ARROWS
 
 /********************************
  * The default search.
@@ -1311,12 +1302,12 @@
  * the version definition with the Project Version on checkout.  Just
  * ignore it. - kw */
 /* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
-#define LYNX_VERSION "2.8.3dev.16"
+#define LYNX_VERSION "2.8.3dev.17"
 #define LYNX_WWW_HOME "http://lynx.browser.org/"
 #define LYNX_WWW_DIST "http://www.slcc.edu/lynx/current/"
 #define LYNX_RELEASE FALSE
 /* $Format: "#define LYNX_DATE \"$ProjectDate$\""$ */
-#define LYNX_DATE "Tue, 30 Nov 1999 20:33:02 -0700"
+#define LYNX_DATE "Wed, 15 Dec 1999 04:03:18 -0700"
 #define LYNX_DATE_OFF 5		/* truncate the automatically-generated date */
 #define LYNX_DATE_LEN 11	/* truncate the automatically-generated date */
 #define LYNX_RELEASE_DATE "1999"

@@ -32,17 +32,6 @@
 **			Clear:	we only get addresses.
 */
 
-static char *list_filename = 0;
-
-/*
- *  Returns the name of the file used for the List Page, if one has
- *  been created, as a full URL; otherwise, returns an empty string.
- * - kw
- */
-PUBLIC char * LYlist_temp_url NOARGS
-{
-    return list_filename ? list_filename : "";
-}
 
 PUBLIC int showlist ARGS2(
 	document *,	newdoc,
@@ -51,6 +40,7 @@ PUBLIC int showlist ARGS2(
     int cnt;
     int refs, hidden_links;
     static char tempfile[LY_MAXPATH];
+    static BOOLEAN last_titles = TRUE;
     FILE *fp0;
     char *Address = NULL, *Title = NULL, *cp = NULL;
     char *LinkTitle = NULL;  /* Rel stored as property of link, not of dest */
@@ -69,15 +59,22 @@ PUBLIC int showlist ARGS2(
 	return(-1);
     }
 
-    LYRemoveTemp(tempfile);
-    if ((fp0 = LYOpenTemp(tempfile, HTML_SUFFIX, "w")) == NULL) {
+    if (LYReuseTempfiles && titles == last_titles) {
+	fp0 = LYOpenTempRewrite(tempfile, HTML_SUFFIX, "w");
+    } else {
+	LYRemoveTemp(tempfile);
+	fp0 = LYOpenTemp(tempfile, HTML_SUFFIX, "w");
+    }
+    if (fp0 == NULL) {
 	HTUserMsg(CANNOT_OPEN_TEMP);
 	return(-1);
     }
 
-    LYLocalFileToURL(&list_filename, tempfile);
+    LYLocalFileToURL(&(newdoc->address), tempfile);
 
-    StrAllocCopy(newdoc->address, list_filename);
+    LYRegisterUIPage(newdoc->address,
+		     titles ? UIP_LIST_PAGE : UIP_ADDRLIST_PAGE);
+    last_titles = titles;
     LYforce_HTML_mode = TRUE;	/* force this file to be HTML */
     LYforce_no_cache = TRUE;	/* force this file to be new */
 

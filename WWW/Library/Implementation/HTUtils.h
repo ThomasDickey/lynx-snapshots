@@ -22,6 +22,7 @@
 #ifdef DJGPP
 #include <sys/config.h>	/* pseudo-autoconf values for DJGPP libc/headers */
 #define HAVE_TRUNCATE 1
+#include <limits.h>
 #endif /* DJGPP */
 
 #include <stdio.h>

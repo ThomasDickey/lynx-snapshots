@@ -1271,7 +1271,7 @@ PRIVATE char* subject_translate8bit ARGS1(char *, source)
  */
 PUBLIC int print_options ARGS3(
 	char **,	newfile,
-	char **,	printed_url,
+	CONST char *,	printed_url,
 	int,		lines_in_file)
 {
     static char my_temp[LY_MAXPATH] = "\0";
@@ -1301,7 +1301,7 @@ PUBLIC int print_options ARGS3(
     /*  pages = lines_in_file/66 + 1; */
     pages = (lines_in_file+65)/66;
     HTSprintf0(&buffer, "   <em>%s</em> %s\n   <em>%s</em> %d\n   <em>%s</em> %d %s %s\n",
-	    gettext("Document:"), *printed_url,
+	    gettext("Document:"), printed_url,
 	    gettext("Number of lines:"), lines_in_file,
 	    gettext("Number of pages:"), pages,
 	    (pages > 1 ? gettext("pages") : gettext("page")),

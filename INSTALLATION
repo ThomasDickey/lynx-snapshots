@@ -29,28 +29,26 @@ I. General configuration instructions (all ports).
 
 Step 1.  Compile-time Variables.
 
-  There are a few variables that MUST be defined in order for Lynx to build
+  There are a few variables that MUST be defined if Lynx is to build
   and there are others you may want to change.
 
-  If you are using configure (e.g., with UNIX or Cygwin), you don't strictly
-  need to make any changes in  userdefs.h , but it is wise to check there
-  to make sure e.g., that the location of  lynx.cfg  is correctly defined.
-  There are a few variables you can't define with configure --switches
-  but can define in  userdefs.h , e.g., numbering fields as well as links.
+  Lynx MUST be able to find lynx.cfg at start-up: using configure
+  (e.g. with UNIX or Cygwin), its location is best set with --libdir ;
+  you can check in lynx_cfg.h after configure has run, if you wish.
+  otherwise, you can use LYNX_CFG_FILE in userdefs.h ,
+  environment variable LYNX_CFG or the -cfg command-line option.
+
+  If you are using configure, you need not make any changes in userdefs.h .
+  There are a few variables you can't define with configure --options
+  but can define in userdefs.h , e.g. numbering fields as well as links.
   Many variables which can be defined with configure or  userdefs.h
-  can also be defined in  lynx.cfg  or via the Options Page (key `o').
+  can also be defined in lynx.cfg or via the Options Menu.
 
   Lynx implements Native Language Support.  Read "ABOUT-NLS", if you want
   to build an international version of Lynx or tailor status-line prompts,
   messages and warnings to the requirements of your site.
 
 Step 2.  Run-time Variables.
-
-  Lynx MUST be able to find  lynx.cfg  at start-up: its location
-  can be compiled in with LYNX_CFG_FILE defined in userdefs.h
-  or with the configure option explained in the Unix section below,
-  or may be specified with environment variable LYNX_CFG
-  or with the "-cfg" command-line option.
 
   Read  lynx.cfg  thoroughly, as many Lynx features and how to use them
   are explained there, in some cases ONLY there.  Set up local printers,
@@ -67,25 +65,25 @@ Step 3.  Alternative Character Sets.
   If you will be running Lynx in an environment with different incompatible
   character sets, configure CHARACTER_SET (the Display character set)
   and ASSUME_LOCAL_CHARSET to work correctly before creating bookmark files
-  and other such items: read "lynx.cfg" for detailed instructions.
+  and other such items: read lynx.cfg for detailed instructions.
   Additional character sets and their properties may be defined with tables
   in the src/chrtrans directory: see the README.* files therein.
 
-Step 4.  News for UNIX and VMS.
+Step 4.  News.
 
-  Set NNTPSERVER in "lynx.cfg" to your site's NNTP server, or set the
-  environment variable externally.  For news posting ability to be enabled
-  in Lynx, the NEWS_POSTING symbol must be defined to TRUE in userdefs.h or
-  lynx.cfg.  Also define LYNX_SIG_FILE in userdefs.h or lynx.cfg so that it
-  points to users' signature files for appending to posted messages.
+  Set NNTPSERVER in lynx.cfg to your site's NNTP server
+  or set the environment variable externally.  For posting to be enabled,
+  NEWS_POSTING must be TRUE in userdefs.h or lynx.cfg.
+  Also define LYNX_SIG_FILE in userdefs.h or lynx.cfg ,
+  so that it points to users' signature files for appending to messages.
 
-Step 5.  Anonymous accounts *** VERY IMPORTANT!!!!! ***
+Step 5.  Anonymous Accounts *** VERY IMPORTANT!!!!! ***
 
-  If you are building Lynx for personal use only, you should skip this.
+  If you are building Lynx for personal use only, you can skip this.
 
   If you are setting up anonymous accounts to use Lynx captively,
-  i.e., making Web access publicly available to unknown users
-  who should not be allowed any other type of access to your system,
+  i.e. making Web access publicly available to users who should not
+  be allowed any other type of access to your system,
   you are STRONGLY advised to use the -anonymous command-line option:
   if you do not use this option, users may be able to gain access
   to all readable files on your machine!
@@ -201,7 +199,7 @@ II. Compile instructions -- UNIX
 	disabled DirEd completely, you can ignore all the more specific
 	DirEd options.
 
-	All DirEd key functions that were enabled on compilation can be
+	All DirEd menu functions that were enabled on compilation can be
 	disabled or modified at run time via DIRED_MENU symbols in lynx.cfg.
 
   --disable-dired-dearchive		(define ARCHIVE_ONLY)
@@ -252,10 +250,10 @@ II. Compile instructions -- UNIX
 	Do not compile-in code used to connect to FTP servers.
 
   --disable-forms-options		(define NO_OPTION_FORMS)
-	Disable the forms-based options screen.  (See --disable-menu-options).
-	The default behavior is to compile both forms and menu options code
-	with FORMS_OPTIONS switch in lynx.cfg, or -forms_options command-line
-	switch.
+	Disable the Form-based Options Menu (see --disable-menu-options).
+	The default is to compile key-based & form-based Options Menu code,
+	allowing users the final choice via FORMS_OPTIONS in lynx.cfg
+	or the -forms_options command-line switch.
 
   --disable-gopher			(define DISABLE_GOPHER)
 	Do not compile-in code used to connect to GOPHER servers.
@@ -279,10 +277,8 @@ II. Compile instructions -- UNIX
 	enabled, the actual directory style is configurable from lynx.cfg).
 
   --disable-menu-options		(define NO_OPTION_MENU)
-	Disable the menu-style options screen.  (See --disable-forms-options).
-	The default behavior is to compile both styles options menu code with
-	FORMS_OPTIONS switch in lynx.cfg, or -forms_options command-line
-	switch.
+	Disable the Key-based Options Menu.
+	See --disable-forms-options (above) for further details.
 
   --disable-news			(define DISABLE_NEWS)
 	Do not compile-in code used to connect to NNTP (netnews) servers.
@@ -333,10 +329,10 @@ II. Compile instructions -- UNIX
 	(Also defines USE_HASH, LINKEDSTYLES)
 
   --enable-debug			(The symbol DEBUG is always defined.)
-        Use this option to compile-in support for debugging. 
-        Note that this flag is ignored if the CFLAGS environment 
-        variable is set, in that case "-g" (or whatever) has to 
-        be included in the CFLAGS value to get debugging. 
+        Use this option to compile-in support for debugging.
+        Note that this flag is ignored if the CFLAGS environment
+        variable is set, in that case "-g" (or whatever) has to
+        be included in the CFLAGS value to get debugging.
 
   --enable-default-colors		(define USE_DEFAULT_COLORS)
   	Enable use of default-color background (ncurses/slang).  Either
@@ -373,9 +369,16 @@ II. Compile instructions -- UNIX
 	use experimental element-justification logic.
 
   --enable-internal-links		(prevent defining DONT_TRACK_INTERNAL_LINKS)
-	Disabled by default, this option allows tracking of internal links,
-	a feature which could, however, compromise a secure transaction by
-	forcing inappropriate resubmission of form content.
+        With `internal links' (links within a document to a location within
+        the same document) enabled, Lynx will distinguish between, for example,
+        `<A HREF="foo#frag">' and `<A HREF="#frag">' within a document whose
+        URL is `foo'.  It may handle such links differently, although practical
+        differences would appear only if the document containing them resulted
+        from a POST request or had a no-cache flag set.  This feature attempts
+        to interpret URL-references as suggested by RFC 2396, and to prevent
+        mistaken resubmissions of form content with the POST method.  An
+        alternate opinion asserts that the feature could actually result in
+        inappropriate resubmission of form content.
 
   --enable-kbd-layout			(define EXP_KEYBOARD_LAYOUT)
 	Disabled by default, this option allows you to use translation
@@ -727,15 +730,16 @@ V. Compile instructions -- 386 DOS
     you wish to use PDCurses 2.3, you need to first apply the following
     patch:
 
-*** curses.h	Thu Jul  9 19:38:28 1998
---- curses.h.new	Sat Aug 15 11:02:08 1998
+*** curses.h   Fri Jul 10 11:24:28 1998
+--- curses.h.new       Mon Dec  6 22:46:08 1999
 ***************
 *** 1802,1807 ****
---- 1802,1808 ----
+--- 1802,1809 ----
   #define getbegx(w)              (w)->_begx
   #define getbegy(w)              (w)->_begy
   #define getbegyx(w,y,x)         ( y = (w)->_begy, x = (w)->_begx )
 + #define getbkgd(w)              ((w)->_bkgd)
++ #define getattrs(win)           ((win)->_attrs)
   #define getch()                 wgetch(stdscr)
   #define getmaxx(w)              (w)->_maxx
   #define getmaxy(w)              (w)->_maxy

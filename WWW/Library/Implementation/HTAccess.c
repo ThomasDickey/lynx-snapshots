@@ -971,6 +971,13 @@ PRIVATE BOOL HTLoadDocument ARGS4(
 	**  So, instead, we'll go all the way back to the top of getfile
 	**  in LYGetFile.c when the status is HT_REDIRECTING.  This may
 	**  seem bizarre, but it works like a charm! - FM
+	**
+	**  Actually, the location header for redirections is now again
+	**  picked up in HTMIME.c.  But that's an internal matter between
+	**  HTTP.c and HTMIME.c, is still under control of HTLoadHTTP for
+	**  http URLs, is done in a way that doesn't load the redirection
+	**  response's body (except when wanted as an error fallback), and
+	**  thus need not concern us here. - kw 1999-12-02
 	*/
 	CTRACE((tfp, "HTAccess: '%s' is a redirection URL.\n",
 		    address_to_load));

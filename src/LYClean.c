@@ -189,7 +189,7 @@ PUBLIC void cleanup NOARGS
      * out as well.
      */
     if (persistent_cookies)
-	LYStoreCookies (LYCookieFile);
+	LYStoreCookies (LYCookieSaveFile);
 #endif
 
     cleanup_files();

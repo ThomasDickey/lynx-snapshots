@@ -452,7 +452,7 @@ PUBLIC void read_rc ARGS1(FILE *, fp)
 
 #ifdef EXP_PERSISTENT_COOKIES
 	/*
-	 *  File in which to store persistent cookies.
+	 *  File from which to read persistent cookies.
 	 */
 	} else if (FIND_KEYWORD(cp, "cookie_file")) {
 	    cp = SkipEquals(cp);
@@ -995,10 +995,10 @@ querying the user for an invalid path or domain.\n\
 
 #ifdef EXP_PERSISTENT_COOKIES
     /*
-     *  Cookie file.
+     *  Cookie read file.
      */
     write_list(fp, gettext("\
-cookie_file specifies the file in which to store persistent cookies.\n\
+cookie_file specifies the file from which to read persistent cookies.\n\
 The default is ~/.lynx_cookies.\n\
 "));
     fprintf(fp, "cookie_file=%s\n\n",

@@ -824,21 +824,17 @@ PUBLIC char * HTUnEscape ARGS1(
 	    p[1] && p[2] &&
 	    isxdigit((unsigned char)p[1]) &&
 	    isxdigit((unsigned char)p[2])) {
-	      if (iscntrl(FROMASCII(from_hex(p[1])*16 + from_hex(p[2])))) {
-		*q++ = *p++;     /* Ignore control codes.  --HN [98/09/08] */
-	      } else {
-		p++;
-		if (*p)
-		    *q = (char) (from_hex(*p++) * 16);
-		if (*p) {
-		    /*
-		    ** Careful! FROMASCII() may evaluate its arg more than once!
-		    */  /* S/390 -- gil -- 0221 */
-		    *q = (char) (*q + from_hex(*p++));
-		}
-		*q = FROMASCII(*q);
-		q++;
-	      }
+	    p++;
+	    if (*p)
+		*q = (char) (from_hex(*p++) * 16);
+	    if (*p) {
+		/*
+		** Careful! FROMASCII() may evaluate its arg more than once!
+		*/  /* S/390 -- gil -- 0221 */
+		*q = (char) (*q + from_hex(*p++));
+	    }
+	    *q = FROMASCII(*q);
+	    q++;
 	} else {
 	    *q++ = *p++;
 	}

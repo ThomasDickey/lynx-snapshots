@@ -189,6 +189,11 @@ extern HTAnchor * HTAnchor_findSimpleAddress PARAMS((
 extern BOOL HTAnchor_delete PARAMS((
 	HTParentAnchor *	me));
 
+#ifdef SOURCE_CACHE
+extern void HTAnchor_clearSourceCache PARAMS((
+	HTParentAnchor *	me));
+#endif
+
 /*		Move an anchor to the head of the list of its siblings
 **		------------------------------------------------------
 **

@@ -30,8 +30,6 @@
 #include <LYexit.h>
 #include <LYLeaks.h>
 
-PUBLIC char LYUploadFileURL[LY_MAXPATH] = "\0";
-
 #define SUBDIR_COMMAND "cd %s ; "
 
 /*
@@ -192,8 +190,13 @@ PUBLIC int LYUpload_options ARGS2(
     static char curloc[LY_MAXPATH];
     char *cp;
 
-    LYRemoveTemp(tempfile);
-    if ((fp0 = LYOpenTemp(tempfile, HTML_SUFFIX, "w")) == NULL) {
+    if (LYReuseTempfiles) {
+	fp0 = LYOpenTempRewrite(tempfile, HTML_SUFFIX, "w");
+    } else {
+	LYRemoveTemp(tempfile);
+	fp0 = LYOpenTemp(tempfile, HTML_SUFFIX, "w");
+    }
+    if (fp0 == NULL) {
 	HTAlert(CANNOT_OPEN_TEMP);
 	return(-1);
     }
@@ -208,7 +211,7 @@ PUBLIC int LYUpload_options ARGS2(
 #endif /* VMS */
 
     LYLocalFileToURL(newfile, tempfile);
-    strcpy(LYUploadFileURL, *newfile);
+    LYRegisterUIPage(*newfile, UIP_UPLOAD_OPTIONS);
 
     BeginInternalPage(fp0, UPLOAD_OPTIONS_TITLE, UPLOAD_OPTIONS_HELP);
 

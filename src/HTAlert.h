@@ -76,6 +76,11 @@ extern int HTConfirmDefault PARAMS ((CONST char * Msg, int Dft));
 */
 extern BOOL HTConfirm PARAMS ((CONST char * Msg));
 
+extern BOOL confirm_post_resub PARAMS((
+    CONST char*		address,
+    CONST char*		title,
+    int			if_imgmap,
+    int			if_file));
 
 /*      Prompt for password without echoing the reply
 */

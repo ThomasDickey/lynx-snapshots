@@ -3630,11 +3630,15 @@ PUBLIC int postoptions ARGS1(
 
     if (strstr(newdoc->address, "LYNXOPTIONS://MBM_MENU")) {
 	FREE(newdoc->post_data);
-	if (!no_bookmark)
+	if (no_bookmark) {
+	   HTAlert(BOOKMARK_CHANGE_DISALLOWED); /* anonymous */
+	   return(NULLFILE);
+	} else if (dump_output_immediately) {
+	    return(NOT_FOUND);
+	} else {
 	   edit_bookmarks();
-	else /* anonymous */
-	   HTAlert(BOOKMARK_CHANGE_DISALLOWED);
-	return(NULLFILE);
+	   return(NULLFILE);
+	}
     }
 
     data = break_data(newdoc->post_data);
@@ -3662,21 +3666,46 @@ PUBLIC int postoptions ARGS1(
 
 	if (!HTLoadAbsolute(&WWWDoc))
 	    return(NOT_FOUND);
+	LYRegisterUIPage(newdoc->address, UIP_OPTIONS_MENU);
 #ifdef DIRED_SUPPORT
 	lynx_edit_mode = FALSE;
 #endif /* DIRED_SUPPORT */
 	return(NORMAL);
     }
 
+    if (!LYIsUIPage3(HTLoadedDocumentURL(), UIP_OPTIONS_MENU, 0) &&
+	!LYIsUIPage3(HTLoadedDocumentURL(), UIP_VLINKS, 0)) {
+	char *buf = NULL;
+
+	/*  We may have been spoofed? */
+	HTSprintf0(&buf,
+		   gettext("Use %s to invoke the Options menu!"),
+		   key_for_func_ext(LYK_OPTIONS, FOR_PANEL));
+	HTAlert(buf);
+	FREE(buf);
+	FREE(data);
+	return(NOT_FOUND);
+    }
+
     for (i = 0; data[i].tag != NULL; i++) {
 	/*
-	 * Paranoid security.
+	 *  This isn't really for security, but rather for avoiding that
+	 *  the user may revisit an older instance from the history stack
+	 *  and submit stuff which accidentally undoes changes that had
+	 *  been done from a newer instance. - kw
 	 */
 	if (!strcmp(data[i].tag, secure_string)) {
 	    if (!secure_value || strcmp(data[i].value, secure_value)) {
+		char *buf = NULL;
+
 		/*
-		 * FIXME: We've been spoofed message here.
+		 * We probably came from an older instance of the Options
+		 * page that had been on the history stack. - kw
 		 */
+		HTSprintf0(&buf,
+			   gettext("Use %s to invoke the Options menu!"),
+			   key_for_func_ext(LYK_OPTIONS, FOR_PANEL));
+		HTAlert(buf);
 		FREE(data);
 		return(NULLFILE);
 	    }
@@ -4132,24 +4161,28 @@ PUBLIC int postoptions ARGS1(
 	 *  see LYK_RELOAD & LYK_OPTIONS in mainloop for details...
 	 */
 	if (HTisDocumentSource()) {
-#ifndef USE_PSRC
-	    HTOutputFormat = WWW_SOURCE;
-#else
-	    if (LYpsrc)
-		psrc_view = TRUE;
-	    else
-		HTOutputFormat = WWW_SOURCE;
-#endif
+	    srcmode_for_next_retrieval(1);
 	}
 #ifdef SOURCE_CACHE
 	if (reloading == FALSE) {
 	    /* one more attempt to be smart enough: */
-	    if (HTreparse_document()) {
+	    if (HTcan_reparse_document()) {
+		if (!HTreparse_document())
+		    srcmode_for_next_retrieval(0);
 		CTRACE((tfp, "LYOptions.c/postoptions(): now really exit.\n\n"));
 		return(NORMAL);
 	    }
 	}
 #endif
+	if (newdoc->post_data != NULL && !newdoc->safe &&
+	    confirm_post_resub(newdoc->address, newdoc->title, 2, 1) == FALSE) {
+	    HTInfoMsg(WILL_NOT_RELOAD_DOC);
+	    if (HTisDocumentSource()) {
+		srcmode_for_next_retrieval(0);
+	    }
+	    return(NORMAL);
+	}
+
 	HEAD_request = HTLoadedDocumentIsHEAD();
 	/*  uncache and load again */
 	HTuncache_current_document();

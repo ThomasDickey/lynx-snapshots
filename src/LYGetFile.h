@@ -8,6 +8,7 @@
 #define NULLFILE 3
 
 extern int getfile PARAMS((document *doc));
+extern void srcmode_for_next_retrieval PARAMS((int));
 extern int follow_link_number PARAMS((
 	int		c,
 	int		cur,

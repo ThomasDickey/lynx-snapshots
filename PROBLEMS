@@ -127,8 +127,8 @@ they will be outlined in this file.
     in fact support.  Setting the right TERM environment variable, tweaking
     terminfo or termcap files, or compiling with a newer version of ncurses
     or slang may solve problems with missing highlighting or strange
-    characters appearing on the screen.  Also, for a mono terminal, make sure
-    that there is no "show color (&)  : ON" on the Options screen.
+    characters appearing on the screen.  Also, for a mono terminal,
+    make sure "show color" is not set to ON in the Options Menu.
 
     The Wyse 50 and older TeleVideo terminals, among others, are
     "magic cookie" terminals.  This means that display attributes like

@@ -72,6 +72,7 @@ extern BOOLEAN prev_lynx_edit_mode;
 #ifdef OK_PERMIT
 extern BOOLEAN no_change_exec_perms;
 #endif /* OK_PERMIT */
+extern int LYAutoUncacheDirLists;
 #endif /* DIRED_SUPPORT */
 
 extern int HTCacheSize;  /* the number of documents cached in memory */
@@ -273,8 +274,8 @@ extern BOOLEAN historical_comments;
 extern BOOLEAN minimal_comments;
 extern BOOLEAN soft_dquotes;
 #ifdef SOURCE_CACHE
-extern BOOLEAN from_source_cache; /* mutable */
 extern int LYCacheSource;
+extern BOOLEAN source_cache_file_error;
 #define SOURCE_CACHE_NONE	0
 #define SOURCE_CACHE_FILE	1
 #define SOURCE_CACHE_MEMORY	2
@@ -289,7 +290,6 @@ extern BOOLEAN keep_mime_headers; /* Include mime headers and *
 extern BOOLEAN no_url_redirection;   /* Don't follow URL redirections */
 #ifdef DISP_PARTIAL
 extern BOOLEAN display_partial;      /* Display document while loading */
-extern int Newline_partial;          /* -//- "current" newline position */
 extern int NumOfLines_partial;       /* -//- "current" number of lines */
 extern int partial_threshold;
 extern BOOLEAN debug_display_partial;  /* show with MessageSecs delay */
@@ -358,7 +358,8 @@ extern char *LYCookieSLooseCheckDomains;/* domains to check loosely      */
 extern char *LYCookieSQueryCheckDomains;/* domains to check w/a query    */
 #ifdef EXP_PERSISTENT_COOKIES
 extern BOOLEAN persistent_cookies;
-extern char *LYCookieFile;              /* file to store cookies in      */
+extern char *LYCookieFile;              /* cookie read file              */
+extern char *LYCookieSaveFile;          /* cookie save file              */
 #endif /* EXP_PERSISTENT_COOKIES */
 extern char *XLoadImageCommand;		/* Default image viewer for X	 */
 #ifdef USE_EXTERNALS

@@ -75,6 +75,12 @@ PUBLIC void HTFormatInit NOARGS
 /*
  *  Add our header handlers.
  */
+ HTSetConversion("message/x-http-redirection", "*",
+					     HTMIMERedirect, 2.0, 0.0, 0.0, 0);
+ HTSetConversion("message/x-http-redirection", "www/present",
+					     HTMIMERedirect, 2.0, 0.0, 0.0, 0);
+ HTSetConversion("message/x-http-redirection", "www/debug",
+					     HTMIMERedirect, 1.0, 0.0, 0.0, 0);
  HTSetConversion("www/mime",  "www/present",  HTMIMEConvert, 1.0, 0.0, 0.0, 0);
  HTSetConversion("www/mime",  "www/download", HTMIMEConvert, 1.0, 0.0, 0.0, 0);
  HTSetConversion("www/mime",  "www/source",   HTMIMEConvert, 1.0, 0.0, 0.0, 0);
@@ -83,8 +89,6 @@ PUBLIC void HTFormatInit NOARGS
 /*
  *  Add our compressed file handlers.
  */
- HTSetConversion("www/compressed", "www/present",
- 					      HTCompressed,   1.0, 0.0, 0.0, 0);
  HTSetConversion("www/compressed", "www/download",
  					      HTCompressed,   1.0, 0.0, 0.0, 0);
  HTSetConversion("www/compressed", "www/present",

@@ -128,6 +128,33 @@ extern void statusline PARAMS((CONST char *text));
 extern void toggle_novice_line NOPARAMS;
 extern BOOL strn_dash_equ PARAMS((CONST char* p1,CONST char* p2,int len));
 
+/* Keeping track of User Interface Pages: */
+typedef enum {
+    UIP_UNKNOWN=-1
+  , UIP_HISTORY=0
+  , UIP_DOWNLOAD_OPTIONS
+  , UIP_PRINT_OPTIONS
+  , UIP_SHOWINFO
+  , UIP_LIST_PAGE
+  , UIP_VLINKS
+  , UIP_LYNXCFG
+  , UIP_OPTIONS_MENU
+  , UIP_DIRED_MENU
+  , UIP_PERMIT_OPTIONS
+  , UIP_UPLOAD_OPTIONS
+  , UIP_ADDRLIST_PAGE
+  , UIP_CONFIG_DEF
+  , UIP_TRACELOG
+  , UIP_INSTALL
+} UIP_t;
+
+#define UIP_P_FRAG 0x0001   /* flag: consider "url#frag" as matching "url" */
+
+extern BOOL LYIsUIPage3 PARAMS((CONST char * url, UIP_t type, int flagparam));
+#define LYIsUIPage(url,type) LYIsUIPage3(url, type, UIP_P_FRAG)
+extern void LYRegisterUIPage PARAMS((CONST char * url, UIP_t type));
+#define LYUnRegisterUIPage(type) LYRegisterUIPage(NULL, type)
+extern void LYUIPages_free NOPARAMS;
 
 #if defined(WIN_EX)	/* 1997/10/16 (Thu) 20:13:28 */
 extern int put_clip(char *szBuffer);

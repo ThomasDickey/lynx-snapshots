@@ -697,7 +697,7 @@ PRIVATE char * LYLeakSAVsprintf ARGS6(
 	CONST short,	ssi_Line,
 	size_t,		inuse,
 	CONST char *,	fmt,
-	va_list,	ap)
+	va_list *,	ap)
 {
     AllocationList *ALp_old;
     void *vp_oldAlloced;
