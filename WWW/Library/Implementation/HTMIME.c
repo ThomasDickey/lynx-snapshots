@@ -981,8 +981,7 @@ PRIVATE void HTMIME_put_character ARGS2(
 	     * act on it. - kw */
 	    dispatchField(me);
 	}
-
-	/*	else Falls through */
+	/* FALLTHRU */
 
     case miBEGINNING_OF_LINE:
 	me->net_ascii = YES;

@@ -9,7 +9,7 @@ LYLeaks.o LYexit.o LYJump.o LYList.o LYCgi.o LYTraversal.o \
 LYEditmap.o LYCharSets.o LYCharUtils.o LYMap.o LYCookie.o LYExtern.o \
 LYStyle.o LYHash.o LYPrettySrc.o TRSTable.o
 
-CFLAGS= $(MCFLAGS) $(INTLFLAGS) -I. -I.. $(SLANGINC)
+CFLAGS= -O1 $(MCFLAGS) $(INTLFLAGS) -I. -I.. $(SLANGINC)
 
 # comment this line to suppress DIRED support
 DIRED_DEFS = \
@@ -22,7 +22,7 @@ DIRED_DEFS = \
 
 CC = gcc
 
-MCFLAGS = -O2 \
+MCFLAGS = \
  $(DIRED_DEFS) \
  -DACCESS_AUTH \
  -DDISP_PARTIAL \
@@ -34,7 +34,7 @@ MCFLAGS = -O2 \
  -DNO_UTMP \
  -DSOURCE_CACHE \
  -DUSE_EXTERNALS \
- -DUSE_PSRC \
+ -DUSE_PRETTYSRC \
  -DUSE_SLANG \
  -DUSE_ZLIB \
  -DWATT32 \

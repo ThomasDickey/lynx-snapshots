@@ -1578,13 +1578,13 @@ PUBLIC int UCGetLYhndl_byMIME ARGS1(
     }
 #endif
 #if !NO_CHARSET_euc_jp
-    if (!strncasecomp(value, "iso-2022-jp", 11) ||
-	!strcasecomp(value, "x-euc-jp")) {
+    if (!strcasecomp(value, "x-euc-jp")) {
 	return UCGetLYhndl_byMIME("euc-jp");
     }
 #endif
 #if !NO_CHARSET_shift_jis
-    if (!strcasecomp(value, "x-shift-jis")) {
+    if ((!strcasecomp(value, "x-shift-jis")) ||
+	(!strcasecomp(value, "x-sjis"))) {
 	return UCGetLYhndl_byMIME("shift_jis");
     }
 #endif

@@ -75,6 +75,7 @@
 /*			FROM WWW
 **			--------
 */
+#include <LYUtils.h>
 #include <LYLeaks.h>
 
 #define DIRECTORY "/cnidr.org:210/directory-of-servers"
@@ -663,7 +664,7 @@ PUBLIC int HTLoadWAIS ARGS4(
     }
     if (names[0] == '/') {
 	server_name = names+1;
-	if (as_gate =(*server_name == '/'))
+	if ((as_gate =(*server_name == '/')) != 0)
 	    server_name++;	/* Accept one or two */
 	www_database = strchr(server_name,'/');
 	if (www_database) {
@@ -816,7 +817,8 @@ PUBLIC int HTLoadWAIS ARGS4(
 	HTStructured * target;
 
 	strncpy(keywords, key, MAX_KEYWORDS_LENGTH);
-	while(p=strchr(keywords, '+')) *p = ' ';
+	while ((p = strchr(keywords, '+')) != 0)
+	    *p = ' ';
 
 	/*
 	**  Send advance title to get something fast to the other end.

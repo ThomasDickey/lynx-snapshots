@@ -384,7 +384,7 @@ PRIVATE int ProcessMailcapEntry ARGS2(
 	    } else if (eq && !strcmp(arg, "q")) {
 	        mc->quality = (float)atof(eq);
 		if (mc->quality > 0.000 && mc->quality < 0.001)
-		    mc->quality = 0.001;
+		    mc->quality = (float) 0.001;
 	    } else if (eq && !strcmp(arg, "mxb")) {
 	        mc->maxbytes = atol(eq);
 		if (mc->maxbytes < 0)
@@ -433,9 +433,11 @@ PRIVATE void BuildCommand ARGS5(
 		    *to++ = '%';
 		    break;
 		case 'n':
+		    /* FALLTHRU */
 		case 'F':
 		    CTRACE((tfp, "BuildCommand: Bad mailcap \"test\" clause: %s\n",
 				controlstring));
+		    /* FALLTHRU */
 		case 's':
 		    if (TmpFileLen && TmpFileName) {
 			if ((to - *pBuf) + TmpFileLen + 1 > Bufsize) {
@@ -896,15 +898,15 @@ PUBLIC void HTFileInit NOARGS
     HTSetSuffix(".bkp",		"application/x-VMS BAK File", "binary", 1.0);
     HTSetSuffix(".bck",		"application/x-VMS BAK File", "binary", 1.0);
 
-    HTSetSuffix(".bkp_gz",	"application/octet-stream", "gzip", "GNU BAK File", 1.0);
-    HTSetSuffix(".bkp-gz",	"application/octet-stream", "gzip", "GNU BAK File", 1.0);
-    HTSetSuffix(".bck_gz",	"application/octet-stream", "gzip", "GNU BAK File", 1.0);
-    HTSetSuffix(".bck-gz",	"application/octet-stream", "gzip", "GNU BAK File", 1.0);
+    HTSetSuffix5(".bkp_gz",	"application/octet-stream", "gzip", "GNU BAK File", 1.0);
+    HTSetSuffix5(".bkp-gz",	"application/octet-stream", "gzip", "GNU BAK File", 1.0);
+    HTSetSuffix5(".bck_gz",	"application/octet-stream", "gzip", "GNU BAK File", 1.0);
+    HTSetSuffix5(".bck-gz",	"application/octet-stream", "gzip", "GNU BAK File", 1.0);
 
-    HTSetSuffix(".bkp-Z",	"application/octet-stream", "compress", "Comp. BAK File", 1.0);
-    HTSetSuffix(".bkp_Z",	"application/octet-stream", "compress", "Comp. BAK File", 1.0);
-    HTSetSuffix(".bck-Z",	"application/octet-stream", "compress", "Comp. BAK File", 1.0);
-    HTSetSuffix(".bck_Z",	"application/octet-stream", "compress", "Comp. BAK File", 1.0);
+    HTSetSuffix5(".bkp-Z",	"application/octet-stream", "compress", "Comp. BAK File", 1.0);
+    HTSetSuffix5(".bkp_Z",	"application/octet-stream", "compress", "Comp. BAK File", 1.0);
+    HTSetSuffix5(".bck-Z",	"application/octet-stream", "compress", "Comp. BAK File", 1.0);
+    HTSetSuffix5(".bck_Z",	"application/octet-stream", "compress", "Comp. BAK File", 1.0);
 #else
     HTSetSuffix5(".bak",	NULL, "binary", "Backup", 0.5);
     HTSetSuffix5(".bkp",	"application/octet-stream", "binary", "VMS BAK File", 1.0);

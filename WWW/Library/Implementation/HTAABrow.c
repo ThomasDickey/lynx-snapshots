@@ -428,9 +428,10 @@ PRIVATE void HTAASetup_delete ARGS1(
 
     if (killme) {
 	FREE(killme->template);
-	if (killme->valid_schemes)
+	if (killme->valid_schemes) {
 	    HTList_delete(killme->valid_schemes);
 	    killme->valid_schemes = NULL;
+	}
 	for (scheme = 0; scheme < HTAA_MAX_SCHEMES; scheme++)
 	    if (killme->scheme_specifics[scheme])
 		HTAssocList_delete(killme->scheme_specifics[scheme]);
@@ -630,10 +631,10 @@ PRIVATE char *compose_auth_string ARGS3(
 	 */
 	if (!theHost)
 	    theHost = setup->server->hostname;
-	    if (setup->server->portnumber > 0 &&
-		setup->server->portnumber != 80) {
-		HTSprintf0(&thePort, ":%d", setup->server->portnumber);
-	    }
+	if (setup->server->portnumber > 0 &&
+	    setup->server->portnumber != 80) {
+	    HTSprintf0(&thePort, ":%d", setup->server->portnumber);
+	}
 	/*
 	 *  Set up the message for the username prompt,
 	 *  and then issue the prompt.  The default

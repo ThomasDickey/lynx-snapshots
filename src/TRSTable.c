@@ -26,7 +26,7 @@
 /* must be different from HT_ALIGN_NONE and HT_LEFT, HT_CENTER etc.: */
 #define RESERVEDCELL (-2)  /* cell's alignment field is overloaded, this
 			      value means cell was reserved by ROWSPAN */
-#define EOCOLG (-2)  	/* sumcols' Line field isn't used for line info, this
+#define EOCOLG (-2)	/* sumcols' Line field isn't used for line info, this
 			      special value means end of COLGROUP */
 typedef enum {
     CS_invalid = -1,
@@ -422,9 +422,9 @@ PRIVATE int Stbl_addCellToRow ARGS9(
 		cells = realloc(me->cells,
 				  (me->allocated + growby)
 				  * sizeof(STable_cellinfo));
-                for (i = 0; cells && i < growby; i++) {
+		for (i = 0; cells && i < growby; i++) {
 		    cells[me->allocated + i].alignment = HT_ALIGN_NONE;
-                }
+		}
 	    }
 	    if (cells) {
 		me->allocated += growby;
@@ -443,7 +443,7 @@ PRIVATE int Stbl_addCellToRow ARGS9(
     if (alignment != HT_ALIGN_NONE)
 	    me->cells[me->ncells].alignment = alignment;
     else {
-	if (ncolinfo >= me->ncells + 1) 
+	if (ncolinfo >= me->ncells + 1)
 	    me->cells[me->ncells].alignment = colinfo[me->ncells].alignment;
 	else
 	    me->cells[me->ncells].alignment = me->alignment;
@@ -538,8 +538,6 @@ PRIVATE int Stbl_finishCellInRow ARGS5(
 		    else
 			return lastcell->len <= 0 ? 0 : 0;
 		}
-		newstate = empty ? CS__0eb : CS__ebc;
-		break;
 	    case CS__0cb:
 		if (!me->fixed_line) {
 		    if (empty) { /* ##462_return_0 */
@@ -579,8 +577,6 @@ PRIVATE int Stbl_finishCellInRow ARGS5(
 		    else
 			return lastcell->len <= 0 ? 0 : -1;
 		}
-		newstate = empty ? CS__eb : CS__ebc;
-		break;
 	    case CS__cb:
 		if (s->pending_len && empty) { /* ##496: */
 		    lastcell->len = s->pending_len;
@@ -656,7 +652,6 @@ PRIVATE int Stbl_finishCellInRow ARGS5(
 		    else
 			return lastcell->len <= 0 ? 0 : 0;
 		}
-		newstate = empty ? CS__0f  : CS__0cf;	break; /* ebc?? */
 	    case CS__0cb:
 		if (s->pending_len) {
 		    if (empty)
@@ -682,6 +677,7 @@ PRIVATE int Stbl_finishCellInRow ARGS5(
 		newstate = empty ? CS__0cf : CS__cbc;	break;
 	    case CS__0f:
 		newstate = CS__0f;
+		/* FALLTHRU */
 	    case CS__0cf:
 		break;
 	    case CS_new:
@@ -700,7 +696,6 @@ PRIVATE int Stbl_finishCellInRow ARGS5(
 		    else
 			return lastcell->len <= 0 ? 0 : -1;
 		}
-		newstate = empty ? CS__ef  : CS__ef;	break;
 	    case CS__cb:
 		if (s->pending_len && empty) {
 		    lastcell->len = s->pending_len;
@@ -762,8 +757,10 @@ PRIVATE int Stbl_finishCellInRow ARGS5(
 		return 0; /* or 0 for xlen to s->pending_len?? */
 	    case CS__0eb:	/* cannot happen */
 		newstate = CS__eb;
+		break;
 	    case CS__0cb:	/* cannot happen */
-		newstate = CS__cb;			break;
+		newstate = CS__cb;
+		break;
 	    case CS__0f:
 	    case CS__0cf:
 		break;
@@ -808,6 +805,7 @@ PRIVATE int Stbl_finishCellInRow ARGS5(
 	    case CS_invalid:	/* ##691_no_lastcell_len_for_invalid: */
 		if (!(me->fixed_line && me->Line == lastcell->Line))
 		    lastcell->len = 0;
+		/* FALLTHRU */
 	    case CS__0:
 		newstate = empty ? CS__0f  : CS__0cf;	break; /* ##630 */
 	    case CS__0eb:

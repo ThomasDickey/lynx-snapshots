@@ -50,6 +50,7 @@
 
 #define LYIsHtmlSep(ch) ((ch) == '/')
 
+extern BOOL strn_dash_equ PARAMS((CONST char* p1,CONST char* p2,int len));
 extern BOOLEAN LYAddSchemeForURL PARAMS((char **AllocatedString, char *default_scheme));
 extern BOOLEAN LYCachedTemp PARAMS((char *result, char **cached));
 extern BOOLEAN LYCanDoHEAD PARAMS((CONST char *address));
@@ -83,6 +84,7 @@ extern int LYCheckForProxyURL PARAMS((char *filename));
 extern int LYConsoleInputFD PARAMS((BOOLEAN need_selectable));
 extern int LYCopyFile PARAMS((char *src, char *dst));
 extern int LYOpenInternalPage PARAMS((FILE **fp0, char **newfile));
+extern int LYRemoveTemp PARAMS((char *name));
 extern int LYSystem PARAMS((char *command));
 extern int LYValidateOutput PARAMS((char * filename));
 extern int is_url PARAMS((char *filename));
@@ -109,7 +111,6 @@ extern void LYFakeZap PARAMS((BOOL set));
 extern void LYFixCursesOn PARAMS((CONST char* reason));
 extern void LYLocalFileToURL PARAMS((char **target, CONST char *source));
 extern void LYLocalhostAliases_free NOPARAMS;
-extern void LYRemoveTemp PARAMS((char *name));
 extern void LYRenamedTemp PARAMS((char * oldname, char * newname));
 extern void LYTrimHtmlSep PARAMS((char *path));
 extern void LYTrimPathSep PARAMS((char *path));
@@ -126,7 +127,6 @@ extern void remove_backslashes PARAMS((char *buf));
 extern void size_change PARAMS((int sig));
 extern void statusline PARAMS((CONST char *text));
 extern void toggle_novice_line NOPARAMS;
-extern BOOL strn_dash_equ PARAMS((CONST char* p1,CONST char* p2,int len));
 
 /* Keeping track of User Interface Pages: */
 typedef enum {

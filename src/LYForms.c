@@ -20,6 +20,12 @@
 #include <LYHash.h>
 #endif
 
+#if defined(VMS) && !defined(USE_SLANG)
+#define CTRL_W_HACK DO_NOTHING
+#else
+#define CTRL_W_HACK 23  /* CTRL-W refresh without clearok */
+#endif /* VMS && !USE_SLANG */
+
 extern HTCJKlang HTCJK;
 
 PRIVATE int form_getstr PARAMS((
@@ -90,11 +96,7 @@ PUBLIC int change_form_link_ex ARGS8(
 				form->size_l, form->disabled);
 #if defined(FANCY_CURSES) || defined(USE_SLANG)
 		if (!enable_scrollback)
-#if defined(VMS) && !defined(USE_SLANG)
-		    c = DO_NOTHING;
-#else
-		    c = 23;  /* CTRL-W refresh without clearok */
-#endif /* VMS && !USE_SLANG */
+		    c = CTRL_W_HACK;  /* CTRL-W refresh without clearok */
 		else
 #endif /* FANCY_CURSES || USE_SLANG */
 		    c = 12;  /* CTRL-L for repaint */
@@ -125,12 +127,7 @@ PUBLIC int change_form_link_ex ARGS8(
 	    }
 #if defined(FANCY_CURSES) || defined(USE_SLANG)
 	    if (!enable_scrollback)
-#if defined(VMS) && !defined(USE_SLANG)
-		if (form->num_value == OrigNumValue)
-		    c = DO_NOTHING;
-		else
-#endif /* VMS && !USE_SLANG*/
-		c = 23;	 /* CTRL-W refresh without clearok */
+		c = CTRL_W_HACK;	 /* CTRL-W refresh without clearok */
 	    else
 #endif /* FANCY_CURSES || USE_SLANG */
 		c = 12;	 /* CTRL-L for repaint */
@@ -836,6 +833,7 @@ PRIVATE int get_popup_option_number ARGS2(
     default:
 	*c = *p++;
 	*rel = *p;
+	break;
     case 0:
 	break;
     }
@@ -1035,7 +1033,7 @@ PRIVATE int popup_options ARGS7(
 #ifdef PDCURSES
     keypad(form_window, TRUE);
 #endif /* PDCURSES */
-#if defined(NCURSES)
+#if defined(NCURSES) || defined(PDCURSES)
     LYsubwindow(form_window);
 #endif
 #if defined(HAVE_GETBKGD) /* not defined in ncurses 1.8.7 */
@@ -1191,14 +1189,15 @@ redraw:
 	switch(cmd) {
 	    case LYK_F_LINK_NUM:
 		c = '\0';
-	    case LYK_1:
-	    case LYK_2:
-	    case LYK_3:
-	    case LYK_4:
-	    case LYK_5:
-	    case LYK_6:
-	    case LYK_7:
-	    case LYK_8:
+		/* FALLTHRU */
+	    case LYK_1: /* FALLTHRU */
+	    case LYK_2: /* FALLTHRU */
+	    case LYK_3: /* FALLTHRU */
+	    case LYK_4: /* FALLTHRU */
+	    case LYK_5: /* FALLTHRU */
+	    case LYK_6: /* FALLTHRU */
+	    case LYK_7: /* FALLTHRU */
+	    case LYK_8: /* FALLTHRU */
 	    case LYK_9:
 		/*
 		 *  Get a number from the user, possibly with
@@ -1607,6 +1606,7 @@ redraw:
 		    }
 		}
 		strcpy(prev_target, prev_target_buffer);
+		/* FALLTHRU */
 	    case LYK_WHEREIS:
 		if (*prev_target == '\0' ) {
 		    _statusline(ENTER_WHEREIS_QUERY);
@@ -1657,11 +1657,12 @@ check_recall:
 			 */
 			QueryNum++;
 		    }
-		    if (QueryNum >= QueryTotal)
+		    if (QueryNum >= QueryTotal) {
 			/*
 			 *  Roll around to the last query in the list. - FM
 			 */
 			QueryNum = 0;
+		    }
 		    if ((cp = (char *)HTList_objectAt(search_queries,
 						      QueryNum)) != NULL) {
 			strcpy(prev_target, cp);
@@ -1687,35 +1688,36 @@ check_recall:
 		    }
 		} else if (recall && ch == DNARROW) {
 		    if (FirstRecall) {
-		    /*
-		     *  Use the current string or
-		     *  first query in the list. - FM
-		     */
-		    FirstRecall = FALSE;
-		    if (*prev_target_buffer) {
-			for (QueryNum = 0;
-			     QueryNum < (QueryTotal - 1); QueryNum++) {
-			    if ((cp = (char *)HTList_objectAt(
-							search_queries,
-							QueryNum)) != NULL &&
-				!strcmp(prev_target_buffer, cp)) {
-				    break;
+			/*
+			 *  Use the current string or
+			 *  first query in the list. - FM
+			 */
+			FirstRecall = FALSE;
+			if (*prev_target_buffer) {
+			    for (QueryNum = 0;
+				 QueryNum < (QueryTotal - 1); QueryNum++) {
+				if ((cp = (char *)HTList_objectAt(
+							    search_queries,
+							    QueryNum)) != NULL &&
+				    !strcmp(prev_target_buffer, cp)) {
+					break;
+				}
 			    }
+			} else {
+			    QueryNum = (QueryTotal - 1);
 			}
 		    } else {
+			/*
+			 *  Advance to the next query in the list. - FM
+			 */
+			QueryNum--;
+		    }
+		    if (QueryNum < 0) {
+			/*
+			 *  Roll around to the first query in the list. - FM
+			 */
 			QueryNum = (QueryTotal - 1);
 		    }
-		} else {
-		    /*
-		     *  Advance to the next query in the list. - FM
-		     */
-		    QueryNum--;
-		}
-		if (QueryNum < 0)
-		    /*
-		     *  Roll around to the first query in the list. - FM
-		     */
-		    QueryNum = (QueryTotal - 1);
 		    if ((cp = (char *)HTList_objectAt(search_queries,
 						      QueryNum)) != NULL) {
 			strcpy(prev_target, cp);

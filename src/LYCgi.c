@@ -240,13 +240,11 @@ PRIVATE int LYLoadCGI ARGS4(
 
     } else
 #ifdef _WINDOWS	/* 1998/01/14 (Wed) 09:16:04 */
-    if (!(S_ISREG(stat_buf.st_mode) &&
-		 stat_buf.st_mode & (S_IXUSR))) 
+#define isExecutable(mode) (mode & (S_IXUSR))
 #else
-    if (!(S_ISREG(stat_buf.st_mode) &&
-		 stat_buf.st_mode & (S_IXUSR|S_IXGRP|S_IXOTH))) 
+#define isExecutable(mode) (mode & (S_IXUSR|S_IXGRP|S_IXOTH))
 #endif
-    {
+    if (!(S_ISREG(stat_buf.st_mode) && isExecutable(stat_buf.st_mode))) {
 	/*
 	 *  Not a runnable file, See if we can load it using "file:" code.
 	 */

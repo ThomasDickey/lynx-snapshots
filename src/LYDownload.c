@@ -90,15 +90,14 @@ PUBLIC void LYDownload ARGS1(
 
 #if defined(DIRED_SUPPORT)
     /* FIXME: use HTLocalName */
-    if (!strncmp(file, "file://localhost", 16))
+    if (!strncmp(file, "file://localhost", 16)) {
 #ifdef __DJGPP__
-    {
 	file += 17;
 	file = HTDOS_name(file);
-    }
 #else
 	file += 16;
 #endif /* __DJGPP__ */
+    }
     else if (!strncmp(file, "file:", 5))
 	file += 5;
     HTUnEscape(file);

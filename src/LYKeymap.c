@@ -69,16 +69,20 @@ LYK_ABORT,          LYK_END,        LYK_NEXT_PAGE,     0,
 LYK_HISTORY,    LYK_FASTFORW_LINK,  LYK_ACTIVATE,  LYK_COOKIE_JAR,
 /* bs */            /* ht */        /* nl */       /* ^K */
 
-#ifdef SH_EX	/* 1998/10/02 (Fri) 08:48:44 */
+#ifdef KANJI_CODE_OVERRIDE
 LYK_CHG_KCODE,    LYK_ACTIVATE,     LYK_DOWN_TWO,      0,
 /* ^L */            /* cr */        /* ^N */       /* ^O */
 
-LYK_UP_TWO,       LYK_CHG_CENTER,   LYK_RELOAD,    LYK_TO_CLIPBOARD,
-/* ^P */            /* XON */       /* ^R */       /* ^S */
 #else
 LYK_REFRESH,      LYK_ACTIVATE,     LYK_DOWN_TWO,      0,
 /* ^L */            /* cr */        /* ^N */       /* ^O */
+#endif
 
+#ifdef SH_EX	/* 1998/10/02 (Fri) 08:48:44 */
+LYK_UP_TWO,       LYK_CHG_CENTER,   LYK_RELOAD,    LYK_TO_CLIPBOARD,
+/* ^P */            /* XON */       /* ^R */       /* ^S */
+
+#else
 LYK_UP_TWO,             0,          LYK_RELOAD,        0,
 /* ^P */            /* XON */       /* ^R */       /* XOFF */
 #endif

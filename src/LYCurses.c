@@ -14,6 +14,10 @@
 #include <LYexit.h>
 #include <LYLeaks.h>
 
+#ifdef VMS
+#include <LYMainLoop.h>
+#endif
+
 #if defined(VMS) && defined(__GNUC__)
 #include <gnu_hacks.h>
 #undef LINES
@@ -1246,7 +1250,7 @@ PUBLIC BOOLEAN setup ARGS1(
     LYlines = LINES;
     LYcols = COLS;
 #endif /* HAVE_SIZECHANGE && !USE_SLANG && USE_NOTDEFINED */
-#if defined(PDCURSES) && defined(WIN_EX) && defined(CJK_EX) /* 1999/08/26 (Thu) 17:53:38 */
+#if defined(PDCURSES_EXP) && defined(WIN_EX) && defined(CJK_EX) /* 1999/08/26 (Thu) 17:53:38 */
     {
 	extern int current_codepage;	/* PDCurses lib. */
 
@@ -1356,11 +1360,18 @@ PUBLIC void LYtouchline ARGS1(
 #if defined(HAVE_WREDRAWLN)
     wredrawln(stdscr, row, 1);
 #else
+#if defined(VMS) && !defined(_BSD44_CURSES)
+    /* touchline() is not available on VMS before version 7.0, and then
+     * only on Alpha, since prior ports of curses were broken.
+     */
+    touchwin(stdscr);
+#else
 #if defined(FANCY_CURSES)
     touchline(stdscr, row, 1);
 #else
 #if defined(USE_SLANG)
     SLsmg_touch_lines(row, 1);
+#endif
 #endif
 #endif
 #endif

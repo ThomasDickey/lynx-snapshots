@@ -299,12 +299,15 @@ PUBLIC BOOLEAN system_is_NT = FALSE;
 
 #ifdef SH_EX
 PUBLIC BOOLEAN show_cfg = FALSE;
-PUBLIC BOOLEAN mail_is_blat = TRUE;
 #ifdef WIN_EX
 PUBLIC int     debug_delay = 0;		/* 1998/10/06 (Tue) 08:41:20 */
 #endif
 PUBLIC BOOLEAN no_table_center = FALSE;	/* 1998/10/09 (Fri) 15:12:49 */
 #endif /* SH_EX */
+
+#if USE_BLAT_MAILER
+PUBLIC BOOLEAN mail_is_blat = TRUE;
+#endif
 
 PUBLIC char *editor = NULL;	/* the name of the current editor */
 PUBLIC char *jumpfile = NULL;	/* the name of the default jumps file */
@@ -3351,7 +3354,7 @@ keys (may be incompatible with some curses packages)"
       "=NUMBER\nmaximum news articles in listings before chunking"
    ),
 #endif
-#ifdef SH_EX
+#if USE_BLAT_MAILER
    PARSE_SET(
       "noblat",		TOGGLE_ARG,		&mail_is_blat,
       "select mail tool (`BLAT' ==> `sendmail')"

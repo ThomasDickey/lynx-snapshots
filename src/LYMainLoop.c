@@ -39,11 +39,16 @@
 #include <LYMainLoop.h>
 #include <LYPrettySrc.h>
 
-#if defined(CJK_EX)	/* 1999/05/25 (Tue) 11:10:45 */
+#ifdef KANJI_CODE_OVERRIDE
 #include <HTCJK.h>
 extern HTCJKlang HTCJK;
-extern char *string_short(char *str, int cut_pos);	/* LYExtern.c */
+#endif
 
+#if defined(CJK_EX)	/* 1999/05/25 (Tue) 11:10:45 */
+extern char *string_short(char *str, int cut_pos);	/* LYExtern.c */
+#endif
+
+#ifdef KANJI_CODE_OVERRIDE
 PUBLIC char *str_kcode(HTkcode code)
 {
     char *p;
@@ -90,17 +95,21 @@ PUBLIC char *str_kcode(HTkcode code)
 
     return buff;
 }
+#endif
 
+#ifdef CJK_EX
 #ifdef WIN_EX
 
 PRIVATE char *str_sjis(char *to, char *from)
 {
     if (!LYRawMode) {
 	strcpy(to, from);
+#ifdef KANJI_CODE_OVERRIDE
     } else if (last_kcode == EUC) {
 	EUC_TO_SJIS(from, to);
     } else if (last_kcode == SJIS) {
 	strcpy(to, from);
+#endif
     } else {
 	TO_SJIS(from, to);
     }
@@ -1214,6 +1223,7 @@ gettext("Enctype multipart/form-data not yet supported!  Cannot submit."));
 			*c = DO_NOTHING;
 			break;
 		    }
+		    /* FALLTHRU */
 #endif
 		default:
 		    if ((real_cmd == LYK_ACTIVATE || real_cmd == LYK_SUBMIT) &&
@@ -1824,6 +1834,8 @@ PRIVATE void handle_LYK_DIRED_MENU ARGS3(
     int,	real_c GCC_UNUSED)
 {
 #ifdef VMS
+    char *cp, *temp;
+
     /*
      *	Check if the CSwing Directory/File Manager is available.
      *	Will be disabled if LYCSwingPath is NULL, zero-length,
@@ -1940,7 +1952,6 @@ PRIVATE void handle_LYK_DIRED_MENU ARGS3(
     LYSystem(temp);
     start_curses();
     FREE(temp);
-    return;
 #else
     /*
      *	Don't do if not allowed or already viewing the menu.
@@ -1952,8 +1963,8 @@ PRIVATE void handle_LYK_DIRED_MENU ARGS3(
 	dired_options(&curdoc,&newdoc.address);
 	*refresh_screen = TRUE;	/* redisplay */
     }
-}
 #endif /* VMS */
+}
 #endif /* defined(DIRED_SUPPORT) || defined(VMS) */
 
 PRIVATE int handle_LYK_DOWNLOAD ARGS3(
@@ -3173,7 +3184,7 @@ PRIVATE void handle_LYK_INDEX ARGS2(
 		}
 
 	} else {
-#ifdef CJK_EX	/* 1997/12/13 (Sat) 15:20:18 */
+#ifdef KANJI_CODE_OVERRIDE
 	    if (HTCJK == JAPANESE) {
 		last_kcode = NOKANJI;	/* AUTO */
 	    }
@@ -4718,7 +4729,7 @@ PRIVATE void handle_LYK_VIEW_BOOKMARK ARGS3(
 		*refresh_screen = TRUE;
 	    return;
 	}
-#if defined(CJK_EX)	/* 1997/12/13 (Sat) 15:20:18 */
+#ifdef KANJI_CODE_OVERRIDE
 	if (HTCJK == JAPANESE) {
 	    last_kcode = NOKANJI;	/* AUTO */
 	}
@@ -5255,6 +5266,7 @@ try_again:
 			try_internal = TRUE;
 		    } else
 #endif /* TRACK_INTERNAL_LINKS */
+		    {
 			/*
 			 * Force a no_cache override unless
 			 *  it's a bookmark file, or it has POST content
@@ -5265,14 +5277,15 @@ try_again:
 			 *  value from getfile(). - FM
 			 */
 			if ((newdoc.bookmark != NULL) ||
-			(newdoc.post_data != NULL &&
-			 !newdoc.safe &&
-			 LYresubmit_posts &&
-			 !override_LYresubmit_posts &&
-			    NO_INTERNAL_OR_DIFFERENT(&curdoc, &newdoc))) {
-			LYoverride_no_cache = FALSE;
-		    } else {
-			LYoverride_no_cache = TRUE;
+			    (newdoc.post_data != NULL &&
+			     !newdoc.safe &&
+			     LYresubmit_posts &&
+			     !override_LYresubmit_posts &&
+				NO_INTERNAL_OR_DIFFERENT(&curdoc, &newdoc))) {
+			    LYoverride_no_cache = FALSE;
+			} else {
+			    LYoverride_no_cache = TRUE;
+			}
 		    }
 		}
 		override_LYresubmit_posts = FALSE;
@@ -5504,6 +5517,7 @@ try_again:
 			exit_immediately_with_error_message(NOT_FOUND, first_file);
 			return(-1);
 		    }
+		    /* FALLTHRU */
 
 		case NULLFILE:
 		    /*
@@ -5694,14 +5708,14 @@ try_again:
 			    } else {
 				strcpy(cp, (char *)&temp[len]);
 			    }
+#ifdef VMS
+#define CompareBookmark(a,b) strcasecomp(a, b)
+#else
+#define CompareBookmark(a,b) strcmp(a, b)
+#endif /* VMS */
 			    for (i = 0; i <= MBM_V_MAXFILES; i++) {
 				if (MBM_A_subbookmark[i] &&
-#ifdef VMS
-				    !strcasecomp(cp, MBM_A_subbookmark[i])
-#else
-				    !strcmp(cp, MBM_A_subbookmark[i])
-#endif /* VMS */
-				    ) {
+				    !CompareBookmark(cp, MBM_A_subbookmark[i])) {
 				    StrAllocCopy(BookmarkPage,
 						 MBM_A_subbookmark[i]);
 				    break;
@@ -6251,7 +6265,7 @@ try_again:
 	    /* Show the URL & kanji code . */
 	    if (strlen(links[curdoc.link].lname) == 0) {
 
-	       if (links[curdoc.link].type == WWW_FORM_LINK_TYPE)
+	       if (links[curdoc.link].type == WWW_FORM_LINK_TYPE) {
 
 		    switch(links[curdoc.link].form->type) {
 		    case F_TEXT_SUBMIT_TYPE:
@@ -6284,6 +6298,7 @@ try_again:
 			break;
 		    }
 		    set_ws_title(p);
+	       }
 	    } else {
 		if (user_mode == ADVANCED_MODE) {
 		    p = curdoc.title;
@@ -6697,14 +6712,15 @@ new_cmd:  /*
 
 	case LYK_F_LINK_NUM:
 	     c = '\0';
-	case LYK_1:
-	case LYK_2:
-	case LYK_3:
-	case LYK_4:
-	case LYK_5:
-	case LYK_6:
-	case LYK_7:
-	case LYK_8:
+	     /* FALLTHRU */
+	case LYK_1: /* FALLTHRU */
+	case LYK_2: /* FALLTHRU */
+	case LYK_3: /* FALLTHRU */
+	case LYK_4: /* FALLTHRU */
+	case LYK_5: /* FALLTHRU */
+	case LYK_6: /* FALLTHRU */
+	case LYK_7: /* FALLTHRU */
+	case LYK_8: /* FALLTHRU */
 	case LYK_9:
 	    handle_LYK_digit(c, &force_load, user_input_buffer,
 			     &old_c, real_c, &try_internal);
@@ -6724,8 +6740,8 @@ new_cmd:  /*
 		no_table_center = TRUE;
 		HTInfoMsg("TABLE center disable.");
 	    }
-	    /* goto RELOAD */
 #endif
+	    /* FALLTHRU */
 	case LYK_RELOAD:  /* control-R to reload and refresh */
 	    handle_LYK_RELOAD(real_cmd);
 	    break;
@@ -6796,7 +6812,7 @@ new_cmd:  /*
 	    break;
 #endif
 
-#if defined(CJK_EX) && defined(SH_EX)	/* 1999/02/25 (Thu) 15:29:05 */
+#ifdef KANJI_CODE_OVERRIDE
 	case LYK_CHG_KCODE:	/* ^L */
 	    if (LYRawMode && (HTCJK == JAPANESE)) {
 		switch(last_kcode) {

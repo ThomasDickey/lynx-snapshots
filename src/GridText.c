@@ -100,8 +100,10 @@ struct _HTStream {			/* only know it as object */
 extern BOOL HTPassHighCtrlRaw;
 extern HTCJKlang HTCJK;
 
-#ifdef CJK_EX
+#ifdef KANJI_CODE_OVERRIDE
 PUBLIC HTkcode last_kcode = NOKANJI;	/* 1997/11/14 (Fri) 09:09:26 */
+#endif
+#ifdef CJK_EX
 #define CHAR_WIDTH 6
 #else
 #define CHAR_WIDTH 1
@@ -386,6 +388,16 @@ struct _HText {
 	STable_info *		stbl;
 
 	HTkcode			kcode;			/* Kanji code? */
+	HTkcode			specified_kcode;	/* Specified Kanji code */
+#ifdef USE_TH_JP_AUTO_DETECT
+	enum _detected_kcode  { DET_SJIS, DET_EUC, DET_NOTYET, DET_MIXED }
+				detected_kcode;		/* Detected Kanji code */
+	enum _SJIS_status     { SJIS_state_neutral, SJIS_state_in_kanji,
+				SJIS_state_has_bad_code } SJIS_status;
+	enum _EUC_status      { EUC_state_neutral, EUC_state_in_kanji,
+				EUC_state_in_kana, EUC_state_has_bad_code }
+				EUC_status;
+#endif
 	enum grid_state       { S_text, S_esc, S_dollar, S_paren,
 				S_nonascii_text, S_dollar_paren,
 				S_jisx0201_text }
@@ -824,6 +836,12 @@ PUBLIC HText *	HText_new ARGS1(
     HTMainAnchor = anchor;
     self->display_on_the_fly = 0;
     self->kcode = NOKANJI;
+    self->specified_kcode = NOKANJI;
+#ifdef USE_TH_JP_AUTO_DETECT
+    self->detected_kcode = DET_NOTYET;
+    self->SJIS_status = SJIS_state_neutral;
+    self->EUC_status = EUC_state_neutral;
+#endif
     self->state = S_text;
     self->kanji_buf = '\0';
     self->in_sjis = 0;
@@ -837,9 +855,8 @@ PUBLIC HText *	HText_new ARGS1(
     /*
      *  Check the kcode setting if the anchor has a charset element. - FM
      */
-    if (anchor->charset)
-	HText_setKcode(self, anchor->charset,
-		       HTAnchor_getUCInfoStage(anchor, UCT_STAGE_HTEXT));
+    HText_setKcode(self, anchor->charset,
+		   HTAnchor_getUCInfoStage(anchor, UCT_STAGE_HTEXT));
 
     /*
      *	Memory leak fixed.
@@ -1293,6 +1310,7 @@ PRIVATE int display_line ARGS4(
 		     */
 		    buffer[0] = '-';
 		}
+		/* FALLTHRU */
 
 	    default:
 #ifndef USE_COLOR_STYLE
@@ -1342,11 +1360,18 @@ PRIVATE int display_line ARGS4(
 		    buffer[1] = '\0';
 		    data += utf_extra;
 		    utf_extra = 0;
-		} else if (HTCJK != NOCJK && !isascii((unsigned char)buffer[0])) {
+		} else if (HTCJK != NOCJK && !isascii((unsigned char)buffer[0])
+#ifndef CONV_JISX0201KANA_JISX0208KANA
+		    && kanji_code != SJIS
+#endif
+		) {
 		    /*
 		     *  For CJK strings, by Masanobu Kimura.
 		     */
+		    if (i >= LYcols) goto after_while;
+
 		    buffer[1] = *data;
+		    buffer[2] = '\0';
 		    data++;
 		    i++;
 		    addstr(buffer);
@@ -1379,6 +1404,7 @@ PRIVATE int display_line ARGS4(
 	} /* end of switch */
     } /* end of while */
 
+after_while:
 #if !defined(NCURSES_VERSION)
     if (text->has_utf8) {
 	LYtouchline(scrline);
@@ -1515,7 +1541,7 @@ PRIVATE void display_title ARGS1(
     }
     move(0, 0);
     clrtoeol();
-#if defined(CJK_EX) && defined(SH_EX)
+#if defined(SH_EX) && defined(KANJI_CODE_OVERRIDE)
     addstr(str_kcode(last_kcode));
 #endif
     if (text->top_of_screen > 0 && HText_hasToolbar(text)) {
@@ -3498,6 +3524,100 @@ PUBLIC void HText_appendCharacter ARGS2(
 	text->halted = 3;
 	return;
     }
+#ifdef USE_TH_JP_AUTO_DETECT
+    if ((HTCJK == JAPANESE) && (text->detected_kcode != DET_MIXED) &&
+	(text->specified_kcode != SJIS) && (text->specified_kcode != EUC)) {
+	unsigned char c;
+	int save_d_kcode;
+
+	c = ch;
+	save_d_kcode = text->detected_kcode;
+	switch (text->SJIS_status) {
+	case SJIS_state_has_bad_code:
+	    break;
+	case SJIS_state_neutral:
+	    if (IS_SJIS_HI1(c) || IS_SJIS_HI2(c)) {
+		text->SJIS_status = SJIS_state_in_kanji;
+	    }
+	    else if ((c & 0x80) && !IS_SJIS_X0201KANA(c)) {
+		text->SJIS_status = SJIS_state_has_bad_code;
+		if (text->EUC_status == EUC_state_has_bad_code)
+		    text->detected_kcode = DET_MIXED;
+		else
+		    text->detected_kcode = DET_EUC;
+	    }
+	    break;
+	case SJIS_state_in_kanji:
+	    if (IS_SJIS_LO(c)) {
+		text->SJIS_status = SJIS_state_neutral;
+	    }
+	    else {
+		text->SJIS_status = SJIS_state_has_bad_code;
+		if (text->EUC_status == EUC_state_has_bad_code)
+		    text->detected_kcode = DET_MIXED;
+		else
+		    text->detected_kcode = DET_EUC;
+	    }
+	    break;
+	}
+	switch (text->EUC_status) {
+	case EUC_state_has_bad_code:
+	    break;
+	case EUC_state_neutral:
+	    if (IS_EUC_HI(c)) {
+		text->EUC_status = EUC_state_in_kanji;
+	    }
+	    else if (c == 0x8e) {
+		text->EUC_status = EUC_state_in_kana;
+	    }
+	    else if (c & 0x80) {
+		text->EUC_status = EUC_state_has_bad_code;
+		if (text->SJIS_status == SJIS_state_has_bad_code)
+		    text->detected_kcode = DET_MIXED;
+		else
+		    text->detected_kcode = DET_SJIS;
+	    }
+	    break;
+	case EUC_state_in_kanji:
+	    if (IS_EUC_LOX(c)) {
+		text->EUC_status = EUC_state_neutral;
+	    }
+	    else {
+		text->EUC_status = EUC_state_has_bad_code;
+		if (text->SJIS_status == SJIS_state_has_bad_code)
+		    text->detected_kcode = DET_MIXED;
+		else
+		    text->detected_kcode = DET_SJIS;
+	    }
+	    break;
+	case EUC_state_in_kana:
+	    if ((0xA1<=c)&&(c<=0xDF)) {
+		text->EUC_status = EUC_state_neutral;
+	    }
+	    else {
+		text->EUC_status = EUC_state_has_bad_code;
+		if (text->SJIS_status == SJIS_state_has_bad_code)
+		    text->detected_kcode = DET_MIXED;
+		else
+		    text->detected_kcode = DET_SJIS;
+	    }
+	    break;
+	}
+	if (save_d_kcode != text->detected_kcode) {
+	    switch (text->detected_kcode) {
+	    case DET_SJIS:
+		CTRACE((tfp, "TH_JP_AUTO_DETECT: This document's kcode seems SJIS.\n"));
+		break;
+	    case DET_EUC:
+		CTRACE((tfp, "TH_JP_AUTO_DETECT: This document's kcode seems EUC.\n"));
+		break;
+	    case DET_MIXED:
+		CTRACE((tfp, "TH_JP_AUTO_DETECT: This document's kcode seems mixed!\n"));
+		break;
+	    }
+	}
+    }
+#endif /* USE_TH_JP_AUTO_DETECT */
     /*
      *  Make sure we don't hang on escape sequences.
      */
@@ -3547,7 +3667,7 @@ PUBLIC void HText_appendCharacter ARGS2(
 		}
 		break;
 
-		case S_esc:
+	    case S_esc:
 		/*
 		 *  Expecting '$'or '(' following CJK ESC.
 		 */
@@ -3560,13 +3680,16 @@ PUBLIC void HText_appendCharacter ARGS2(
 		} else {
 		    text->state = S_text;
 		}
+		/* FALLTHRU */
 
-		case S_dollar:
+	    case S_dollar:
 		/*
 		 *  Expecting '@', 'B', 'A' or '(' after CJK "ESC$".
 		 */
 		if (ch == '@' || ch == 'B' || ch=='A') {
 		    text->state = S_nonascii_text;
+		    if (ch == '@' || ch == 'B')
+			text->kcode = JIS;
 		    return;
 		} else if (ch == '(') {
 		    text->state = S_dollar_paren;
@@ -3576,7 +3699,7 @@ PUBLIC void HText_appendCharacter ARGS2(
 		}
 		break;
 
-		case S_dollar_paren:
+	    case S_dollar_paren:
 		/*
 		 * Expecting 'C' after CJK "ESC$(".
 		 */
@@ -3588,7 +3711,7 @@ PUBLIC void HText_appendCharacter ARGS2(
 		}
 		break;
 
-		case S_paren:
+	    case S_paren:
 		/*
 		 *  Expecting 'B', 'J', 'T' or 'I' after CJK "ESC(".
 		 */
@@ -3605,20 +3728,30 @@ PUBLIC void HText_appendCharacter ARGS2(
 		     *  Can split here. - FM
 		     */
 		    text->permissible_split = text->last_line->size;
+		    text->kcode = JIS;
 		    return;
 		} else {
 		    text->state = S_text;
 		}
 		break;
 
-		case S_nonascii_text:
+	    case S_nonascii_text:
 		/*
 		 *  Expecting CJK ESC after non-ASCII text.
 		 */
 		if (ch == CH_ESC) {  /* S/390 -- gil -- 1553 */
 		    text->state = S_esc;
 		    text->kanji_buf = '\0';
+		    if (HTCJK == JAPANESE) {
+			text->kcode = NOKANJI;
+		    }
 		    return;
+		} else if ((0 <= ch) && (ch < 32)) {
+		    text->state = S_text;
+		    text->kanji_buf = '\0';
+		    if (HTCJK == JAPANESE) {
+			text->kcode = NOKANJI;
+		    }
 		} else {
 		    ch |= 0200;
 		}
@@ -3627,14 +3760,16 @@ PUBLIC void HText_appendCharacter ARGS2(
 		/*
 		 *  JIS X0201 Kana in JIS support. - by ASATAKU
 		 */
-		case S_jisx0201_text:
+	    case S_jisx0201_text:
 		if (ch == CH_ESC) {  /* S/390 -- gil -- 1570 */
 		    text->state = S_esc;
 		    text->kanji_buf = '\0';
+		    text->kcode = NOKANJI;
 		    return;
 		} else {
 		    text->kanji_buf = '\216';
 		    ch |= 0200;
+#if 0 /* This conversion is done after. --TH */
 #ifdef SH_EX
 		    /**** Add Next Line by patakuti ****/
 		    text->permissible_split = (int)text->last_line->size;
@@ -3645,6 +3780,7 @@ PUBLIC void HText_appendCharacter ARGS2(
 			ch = low;
 		}
 #endif
+#endif
 	}
 		break;
 	} /* end switch */
@@ -3654,10 +3790,26 @@ PUBLIC void HText_appendCharacter ARGS2(
 		/*
 		 *  JIS X0201 Kana in SJIS support. - by ASATAKU
 		 */
-		if ((text->kcode == SJIS) &&
+		if ((text->kcode != JIS)
+		 && (
+#ifdef KANJI_CODE_OVERRIDE
+		    (last_kcode == SJIS) ||
+		     ((last_kcode == NOKANJI) &&
+#endif
+		      ((text->kcode == SJIS) ||
+#ifdef USE_TH_JP_AUTO_DETECT
+		       ((text->detected_kcode == DET_SJIS) &&
+			(text->specified_kcode == NOKANJI)) ||
+#endif
+		       ((text->kcode == NOKANJI) &&
+			(text->specified_kcode == SJIS)) )
+#ifdef KANJI_CODE_OVERRIDE
+		     )
+#endif
+		    ) &&
 		    ((unsigned char)ch >= 0xA1) &&
-		    ((unsigned char)ch <= 0xDF))
-		{
+		    ((unsigned char)ch <= 0xDF)) {
+#ifdef CONV_JISX0201KANA_ISX0208KANA
 		    unsigned char c = (unsigned char)ch;
 		    unsigned char kb = (unsigned char)text->kanji_buf;
 		    JISx0201TO0208_SJIS(c,
@@ -3665,6 +3817,7 @@ PUBLIC void HText_appendCharacter ARGS2(
 					(unsigned char *)&c);
 		    ch = (char)c;
 		    text->kanji_buf = kb;
+#endif
 		    /* 1998/01/19 (Mon) 09:06:15 */
 		    text->permissible_split = (int)text->last_line->size;
 		} else {
@@ -3677,7 +3830,7 @@ PUBLIC void HText_appendCharacter ARGS2(
 		}
 	    }
 	} else {
-	    goto check_IgnoreExcess;
+	    goto check_WrapSource;
 	}
     } else if (ch == CH_ESC) {  /* S/390 -- gil -- 1587 */
 	return;
@@ -3952,20 +4105,33 @@ PUBLIC void HText_appendCharacter ARGS2(
 	}
 	return;
     } /* if tab */
-    else if ( (text->source || dont_wrap_pre) && text == HTMainText) {
+
+check_WrapSource:
+    if ( (text->source || dont_wrap_pre) && text == HTMainText) {
 	/*
 	 * If we're displaying document source, wrap long lines to keep all of
 	 * the source visible.
 	 */
 	int target = (int)(line->offset + line->size) - ctrl_chars_on_this_line;
 	int target_cu = target + utfxtra_on_this_line;
-	if (target >= (LYcols-1) - style->rightIndent ||
+	if (target >= (LYcols-1) - style->rightIndent -
+	    (((HTCJK != NOCJK) && text->kanji_buf) ? 1 : 0) ||
 	    (text->T.output_utf8 &&
 	     target_cu + UTF_XLEN(ch) >= (LYcols_cu-1))
 	    ) {
+	    int saved_kanji_buf;
+	    int saved_state;
+
 	    new_line(text);
 	    line = text->last_line;
+
+	    saved_kanji_buf = text->kanji_buf;
+	    saved_state = text->state;
+	    text->kanji_buf = '\0';
+	    text->state = S_text;
 	    HText_appendCharacter (text, LY_SOFT_NEWLINE);
+	    text->kanji_buf = saved_kanji_buf;
+	    text->state = saved_state;
 	}
     }
 
@@ -3985,7 +4151,6 @@ PUBLIC void HText_appendCharacter ARGS2(
     /*
      *  Check if we should ignore characters at the wrap point.
      */
-check_IgnoreExcess:
     if (text->IgnoreExcess &&
 	(((indent + (int)line->offset + (int)line->size) +
 	  (int)style->rightIndent - ctrl_chars_on_this_line) >= (LYcols-1) ||
@@ -3998,6 +4163,7 @@ check_IgnoreExcess:
      */
     if (((indent + (int)line->offset + (int)line->size) +
 	 (int)style->rightIndent - ctrl_chars_on_this_line +
+	 (((HTCJK != NOCJK) && text->kanji_buf) ? 1 : 0) +
 	 ((line->size > 0) &&
 	  (int)(line->data[line->size-1] ==
 				LY_SOFT_HYPHEN ?
@@ -4078,12 +4244,40 @@ check_IgnoreExcess:
 
 	line = text->last_line; /* May have changed */
 
-#ifdef CJK_EX	/* 1997/11/14 (Fri) 09:10:03 */
 	if (HTCJK != NOCJK && text->kanji_buf) {
 	    hi = (unsigned char)text->kanji_buf;
 	    lo = (unsigned char)ch;
 
 	    if (HTCJK == JAPANESE) {
+		if (text->kcode != JIS) {
+		    if (IS_SJIS_2BYTE(hi, lo)) {
+			if (IS_EUC(hi, lo)) {
+#ifdef KANJI_CODE_OVERRIDE
+			    if (last_kcode != NOKANJI)
+				text->kcode = last_kcode;
+			    else
+#endif
+				if (text->specified_kcode != NOKANJI)
+				    text->kcode = text->specified_kcode;
+#ifdef USE_TH_JP_AUTO_DETECT
+				else if (text->detected_kcode == DET_EUC)
+				    text->kcode = EUC;
+				else if (text->detected_kcode == DET_SJIS)
+				    text->kcode = SJIS;
+#endif
+				else if (IS_EUC_X0201KANA(hi, lo) && (text->kcode != EUC))
+				    text->kcode = SJIS;
+			}
+			else
+			    text->kcode = SJIS;
+		    }
+		    else if (IS_EUC(hi, lo))
+			text->kcode = EUC;
+		    else
+			text->kcode = NOKANJI;
+		}
+
+#if 0 /* This judgement routine is replaced by above one. -- TH */
 		if (text->kcode == NOKANJI)
 		{
 		    if (IS_SJIS(hi, lo, text->in_sjis) && IS_EUC(hi, lo)) {
@@ -4094,6 +4288,7 @@ check_IgnoreExcess:
 			text->kcode = EUC;
 		    }
 		}
+#endif
 
 		switch (kanji_code) {
 		case EUC:
@@ -4101,37 +4296,39 @@ check_IgnoreExcess:
 			SJIS_TO_EUC1(hi, lo, tmp);
 			line->data[line->size++] = tmp[0];
 			line->data[line->size++] = tmp[1];
-		    } else if (text->kcode == EUC) {
+		    } else if (IS_EUC(hi, lo)) {
+#ifdef CONV_JISX0201KANA_ISX0208KANA
 			JISx0201TO0208_EUC(hi, lo, &hi, &lo);
+#endif
 			line->data[line->size++] = hi;
 			line->data[line->size++] = lo;
+		    } else {
+			CTRACE((tfp, "This character (%X:%X) doesn't seem Japanese\n", hi, lo));
+			line->data[line->size++] = '=';
+			line->data[line->size++] = '=';
 		    }
 		    break;
 
 		case SJIS:
-		    if (last_kcode != SJIS && text->kcode == EUC)
+		    if ((text->kcode == EUC) || (text->kcode == JIS))
 		    {
-			EUC_TO_SJIS1(hi, lo, tmp);
-			line->data[line->size++] = tmp[0];
-			line->data[line->size++] = tmp[1];
-		    } else {
-			/* text->kcode == (SJIS or NOKANJI) */
-#ifdef CJK_EX	/* 1998/01/20 (Tue) 16:46:34 */
-			if (last_kcode == EUC) {
-			    if (lo == 0) {	/* BAD EUC code */
-				hi = '=';
-				lo = '=';
-			    } else if (hi == 0x8e) {
-				text->kcode = NOKANJI;
-				JISx0201TO0208_EUC(hi, lo, &hi, &lo);
-				EUC_TO_SJIS1(hi, lo, tmp);
-				hi = tmp[0];
-				lo = tmp[1];
-			    }
-			}
+#ifndef CONV_JISX0201KANA_ISX0208KANA
+			if (IS_EUC_X0201KANA(hi, lo))
+			    line->data[line->size++] = lo;
+			else
 #endif
+			{
+			    EUC_TO_SJIS1(hi, lo, tmp);
+			    line->data[line->size++] = tmp[0];
+			    line->data[line->size++] = tmp[1];
+			}
+		    } else if (IS_SJIS_2BYTE(hi, lo)) {
 			line->data[line->size++] = hi;
 			line->data[line->size++] = lo;
+		    } else {
+			line->data[line->size++] = '=';
+			line->data[line->size++] = '=';
+			CTRACE((tfp, "This character (%X:%X) doesn't seem Japanese\n", hi, lo));
 		    }
 		    break;
 
@@ -4144,7 +4341,7 @@ check_IgnoreExcess:
 	    }
 	    text->kanji_buf = 0;
 	}
-#else
+#if 0
 	if (HTCJK != NOCJK && text->kanji_buf) {
 	    hi = (unsigned char)text->kanji_buf, lo = (unsigned char)ch;
 	    if (HTCJK == JAPANESE && text->kcode == NOKANJI) {
@@ -4163,7 +4360,9 @@ check_IgnoreExcess:
 		line->data[line->size++] = tmp[1];
 	    } else if (HTCJK == JAPANESE &&
 		       (kanji_code == EUC) && (text->kcode == EUC)) {
+#ifdef CONV_JISX0201KANA_JISX0208KANA
 		JISx0201TO0208_EUC(hi, lo, &hi, &lo);
+#endif
 		line->data[line->size++] = hi;
 		line->data[line->size++] = lo;
 	    } else if (HTCJK == JAPANESE &&
@@ -4176,6 +4375,13 @@ check_IgnoreExcess:
 		line->data[line->size++] = lo;
 	    }
 	    text->kanji_buf = 0;
+	}
+#endif
+#ifndef CONV_JISX0201KANA_JISX0208KANA
+	else if ((HTCJK == JAPANESE) && IS_SJIS_X0201KANA((unsigned char)(ch)) &&
+		 (kanji_code == EUC)) {
+	    line->data[line->size++] = 0x8e;
+	    line->data[line->size++] = ch;
 	}
 #endif
 	else if (HTCJK != NOCJK) {
@@ -4861,7 +5067,7 @@ PUBLIC int HText_beginAnchor ARGS3(
 	a->link_type = INTERNAL_LINK_ANCHOR;
     } else
 #endif
-	if (HTAnchor_followMainLink((HTAnchor*)anc)) {
+    if (HTAnchor_followMainLink((HTAnchor*)anc)) {
 	a->number = ++(text->last_anchor_number);
     } else {
 	a->number = 0;
@@ -6998,10 +7204,10 @@ PUBLIC BOOL HTFindPoundSelector ARGS1(
 		CTRACE((tfp,
 		       "HText: Selecting anchor [%d] at character %d, line %d\n",
 				     a->number, a->start, www_search_result));
-		if (!strcmp(selector, LYToolbarName))
+		if (!strcmp(selector, LYToolbarName)) {
 		    --www_search_result;
-
-		 return(YES);
+		}
+		return(YES);
 	    }
     }
 
@@ -7481,8 +7687,8 @@ PUBLIC void print_wwwfile_to_fd ARGS2(
 		    LYRawMode &&
 		    LYlowest_eightbit[current_char_set] <= 173 &&
 		    (LYCharSet_UC[current_char_set].enc == UCT_ENC_8859 ||
-		     LYCharSet_UC[current_char_set].like8859 &
-				  UCT_R_8859SPECL)) {
+		     (LYCharSet_UC[current_char_set].like8859 &
+				  UCT_R_8859SPECL)) != 0) {
 		    fputc(0xad, fp); /* the iso8859 byte for SHY */
 		} else {
 		    fputc('-', fp);
@@ -7585,8 +7791,8 @@ PUBLIC void print_crawl_to_fd ARGS3(
 		    LYRawMode &&
 		    LYlowest_eightbit[current_char_set] <= 173 &&
 		    (LYCharSet_UC[current_char_set].enc == UCT_ENC_8859 ||
-		     LYCharSet_UC[current_char_set].like8859 &
-				  UCT_R_8859SPECL)) {
+		     (LYCharSet_UC[current_char_set].like8859 &
+				  UCT_R_8859SPECL)) != 0) {
 		    fputc(0xad, fp); /* the iso8859 byte for SHY */
 		} else {
 		    fputc('-', fp);
@@ -10206,6 +10412,7 @@ PUBLIC int HText_SubmitForm ARGS4(
 				"values are different"));
 			break;
 		    }
+		    /* FALLTHRU */
 
 #ifdef EXP_FILE_UPLOAD
 		case F_FILE_TYPE:
@@ -11172,6 +11379,8 @@ PUBLIC void HText_setKcode ARGS3(
 	CONST char *,	charset,
 	LYUCcharset *,	p_in)
 {
+    BOOL explicit;
+
     if (!text)
 	return;
 
@@ -11181,6 +11390,7 @@ PUBLIC void HText_setKcode ARGS3(
     if (!charset && !p_in) {
 	return;
     }
+    explicit = charset ? TRUE : FALSE;
     /*
     **  If no explicit charset string, use the implied one. - kw
     */
@@ -11200,17 +11410,25 @@ PUBLIC void HText_setKcode ARGS3(
     **  so check the charset value and set the text->kcode element
     **  appropriately. - FM
     */
-    if (!strcmp(charset, "shift_jis") ||
+    /*  If charset isn't specified explicitely nor assumed,
+     *  p_in->MIMEname would be set as display charset.
+     *  So text->kcode sholud be set as SJIS or EUC here only if charset
+     *  is specified explicitely, otherwise text->kcode would cause
+     *  mishandling Japanese strings. -- TH
+     */
+    if (explicit && (!strcmp(charset, "shift_jis") ||
 	!strcmp(charset, "x-sjis") ||		/* 1997/11/28 (Fri) 18:11:33 */
-	!strcmp(charset, "x-shift-jis"))
+	!strcmp(charset, "x-shift-jis")))
     {
 	text->kcode = SJIS;
-    } else if ((p_in && (p_in->enc == UCT_ENC_CJK)) ||
+    } else if (explicit && ((p_in && (p_in->enc == UCT_ENC_CJK)) ||
 	       !strcmp(charset, "x-euc") ||	/* 1997/11/28 (Fri) 18:11:24 */
 	       !strcmp(charset, "euc-jp") ||
 	       !strncmp(charset, "x-euc-", 6) ||
+#if 0 /* iso-2022-jp* shouldn't be treated as euc-jp */
 	       !strcmp(charset, "iso-2022-jp") ||
 	       !strcmp(charset, "iso-2022-jp-2") ||
+#endif
 	       !strcmp(charset, "euc-kr") ||
 	       !strcmp(charset, "iso-2022-kr") ||
 	       !strcmp(charset, "big5") ||
@@ -11218,14 +11436,14 @@ PUBLIC void HText_setKcode ARGS3(
 	       !strcmp(charset, "euc-cn") ||
 	       !strcmp(charset, "gb2312") ||
 	       !strncmp(charset, "cn-gb", 5) ||
-	       !strcmp(charset, "iso-2022-cn")) {
+	       !strcmp(charset, "iso-2022-cn"))) {
 	text->kcode = EUC;
     } else {
 	/*
 	**  If we get to here, it's not CJK, so disable that if
 	**  it is enabled.  But only if we are quite sure. - FM & kw
 	*/
-#ifdef CJK_EX
+#ifdef KANJI_CODE_OVERRIDE
 	last_kcode = text->kcode = NOKANJI;
 #else
 	text->kcode = NOKANJI;
@@ -11233,6 +11451,16 @@ PUBLIC void HText_setKcode ARGS3(
 	if (HTCJK != NOCJK) {
 	    if (!p_in || p_in->enc != UCT_ENC_CJK)
 		HTCJK = NOCJK;
+	}
+    }
+    if (explicit)
+	text->specified_kcode = text->kcode;
+    else {
+	if (UCAssume_MIMEcharset) {
+	    if (!strcmp(UCAssume_MIMEcharset, "euc-jp"))
+		text->kcode = text->specified_kcode = EUC;
+	    else if (!strcmp(UCAssume_MIMEcharset, "shift_jis"))
+		text->kcode = text->specified_kcode = SJIS;
 	}
     }
 
@@ -11450,7 +11678,7 @@ PRIVATE void cleanup_line_for_textarea ARGS2(
 	 *   multibyte character set support, consider yourself to have been
 	 *   warned.]
 	 */
-	for (p = line, s = tbuf; *s != '\0'; p++, s++)
+	for (p = line, s = tbuf; *s != '\0'; p++, s++) {
 #ifndef EBCDIC
 	    *p = (((unsigned char)*s  < (unsigned char)' ')       ||
 		  ((unsigned char)*s == (unsigned char)'\177')    ||
@@ -11461,6 +11689,7 @@ PRIVATE void cleanup_line_for_textarea ARGS2(
 #else
 	    *p = ((unsigned char)*s < (unsigned char)' ') ? SPLAT : *s;
 #endif
+	}
 	*p = '\0';
     }
 
@@ -11624,7 +11853,7 @@ PRIVATE int increment_tagged_htline ARGS6(
 		     *   Dunno how to fix that behavior ATT, but at least the
 		     *   tag numbers themselves are correct.  -KED  /\oo/\ ]
 		     */
-		    if (new_n -= n) {
+		    if ((new_n -= n) != 0) {
 			nxt_anchor = st_anchor;
 			while ((nxt_anchor)			      &&
 			       (nxt_anchor->line_num == a->line_num)) {
@@ -12922,6 +13151,7 @@ PRIVATE void redraw_part_of_line ARGS4(
 		    buffer[0] = '-';
 		    i++;
 		}
+		/* FALLTHRU */
 
 	    default:
 		i++;
@@ -13349,6 +13579,7 @@ PRIVATE void move_to_glyph ARGS10(
 		     */
 		    buffer[0] = '-';
 		}
+		/* FALLTHRU */
 
 	    default:
 		/*
@@ -13650,7 +13881,6 @@ PUBLIC void HTMark_asSource NOARGS
 }
 #endif
 
-#ifdef CJK_EX
 PUBLIC HTkcode HText_getKcode ARGS1(
 	HText *,	text)
 {
@@ -13663,7 +13893,19 @@ PUBLIC void HText_updateKcode ARGS2(
 {
     text->kcode = kcode;
 }
-#endif
+
+PUBLIC HTkcode HText_getSpecifiedKcode ARGS1(
+	HText *,	text)
+{
+    return text->specified_kcode;
+}
+
+PUBLIC void HText_updateSpecifiedKcode ARGS2(
+	HText *,	text,
+	HTkcode,	kcode)
+{
+    text->specified_kcode = kcode;
+}
 
 PUBLIC int HTMainText_Get_UCLYhndl NOARGS
 {

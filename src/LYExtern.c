@@ -24,6 +24,7 @@
 #include <LYExtern.h>
 #include <LYLeaks.h>
 #include <LYCurses.h>
+#include <LYStrings.h>
 
 
 #ifdef WIN_EX
@@ -171,6 +172,15 @@ void run_external_ ARGS1(char *, cmd)
 }
 #endif
 
+PRIVATE void format ARGS3(
+    char **,	result,
+    char *,	fmt,
+    char *,	parm)
+{
+    *result = NULL;
+    HTAddParam(result, fmt, 1, parm);
+    HTEndParam(result, fmt, 1);
+}
 
 void run_external ARGS1(char *, c)
 {
@@ -216,12 +226,12 @@ void run_external ARGS1(char *, c)
 	     *  Dunno how this needs to be modified for VMS or DOS. - kw
 	     */
 #if (defined(VMS) || defined(DOSPATH) || defined(__EMX__)) && !defined(WIN_EX)
-	    HTSprintf0(&cmdbuf, externals2->command, c);
+	    format(&cmdbuf, externals2->command, c);
 #else	/* Unix or DOS/Win: */
 #if defined(WIN_EX)
 	    if (*c != '\"' && strchr(c, ' ') != NULL) {
 		char *cp = quote_pathname(c);
-		HTSprintf0(&cmdbuf, externals2->command, cp);
+		format(&cmdbuf, externals2->command, cp);
 		FREE(cp);
 	    } else {
 		LYstrncpy(pram_string, c, sizeof(pram_string)-1);
@@ -229,7 +239,7 @@ void run_external ARGS1(char *, c)
 		c = pram_string;
 
 		if (strnicmp("mailto:", c, 7) == 0) {
-		    HTSprintf0(&cmdbuf, externals2->command, c + 7);
+		    format(&cmdbuf, externals2->command, c + 7);
 		} else if (strnicmp("telnet://", c, 9) == 0) {
 		    char host[sizeof(pram_string)];
 		    int last_pos;
@@ -239,7 +249,7 @@ void run_external ARGS1(char *, c)
 		    if (last_pos > 1 && host[last_pos] == '/')
 			host[last_pos] = '\0';
 
-		    HTSprintf0(&cmdbuf, externals2->command, host);
+		    format(&cmdbuf, externals2->command, host);
 		} else if (strnicmp("file://localhost/", c, 17) == 0) {
 		    char e_buff[PATH_MAX], *p;
 
@@ -266,19 +276,19 @@ void run_external ARGS1(char *, c)
 		     * less ==> long filename
 		     */
 		    if (isupper(externals2->command[0])) {
-			HTSprintf0(&cmdbuf,
+			format(&cmdbuf,
 				externals2->command, HTDOS_short_name(e_buff));
 		    } else {
-			HTSprintf0(&cmdbuf, externals2->command, e_buff);
+			format(&cmdbuf, externals2->command, e_buff);
 		    }
 		} else {
-		    HTSprintf0(&cmdbuf, externals2->command, c);
+		    format(&cmdbuf, externals2->command, c);
 		}
 	    }
 #else	/* Unix */
 	    {
 		char *cp = HTQuoteParameter(c);
-		HTSprintf0(&cmdbuf, externals2->command, cp);
+		format(&cmdbuf, externals2->command, cp);
 		FREE(cp);
 	    }
 #endif

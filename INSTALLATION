@@ -379,6 +379,11 @@ II. Compile instructions -- UNIX
         alternate opinion asserts that the feature could actually result in
         inappropriate resubmission of form content.
 
+  --enable-kanji			(define KANJI_CODE_OVERRIDE)
+	Add special logic for supporting KANJI documents.
+	Also defines CONV_JISX0201KANA_JISX0208KANA and
+	USE_TH_JP_AUTO_DETECT.
+
   --enable-kbd-layout			(define EXP_KEYBOARD_LAYOUT)
 	Disabled by default, this option allows you to use translation
 	tables on the input keystrokes.  Current tables include
@@ -643,6 +648,8 @@ Step 3b.  (optional compilation method)
 
 IV. Compile instructions -- Win32 (Windows95/98/NT)
 
+Borland C:
+
     The original Win32 port was built with Borland C++ 4.52, but later
     versions reportedly can be used.  Before compiling the Lynx sources, you
     need a curses library, and it is recommended that you have the zlib
@@ -670,9 +677,10 @@ IV. Compile instructions -- Win32 (Windows95/98/NT)
 
 -- 1997/10/12 - W. Buttles <lynx-port@fdisk.com>
 
-    It is possible to compile under the cygwin32 system, which will allow you
+Cygwin:
+    It is possible to compile under the cygwin system, which will allow you
     to use the configure script described above for Unix.  Type, for example,
-    "./configure --with-screen=slang --with-libz" in a Dos window running the
+    "./configure --with-screen=ncurses --with-libz" in a Dos window running the
     cygwin bash$ shell.  You also have the choice of using either pdcurses or
     slang.  See "http://www.flora.org/lynx-dev/html/month1097/msg00559.html"
     and "http://www.flora.org/lynx-dev/html/month1097/msg00186.html", and other
@@ -680,27 +688,43 @@ IV. Compile instructions -- Win32 (Windows95/98/NT)
     HTTCP.c (change delay to 30 seconds) and modify HTFILE.c (concerning
     getgroups).  You will need a launch program to call helper applications.
 
+Visual C++:
+    You must have compiled zlib and PDCurses with the -MT (threaded code)
+    option.  This is not the default with zlib (see Makefile.msc).
+
+    Copy into lib the following
+	zconf.h
+	zlib.h
+	zlib.lib
+
+    from the zlib build-tree, and
+	pdcurses.h
+	pdcurses.lib
+
+    from the PDCurses build-tree.  Note that "pdcurses.h" is renamed from
+    PDCurses' "curses.h", to make it distinct from other versions of curses.
+
+    Then
+	make-msc
+
+    to build lynx.
 
 V. Compile instructions -- 386 DOS
 
     Compiling for DOS with DJGPP is a multistep procedure. First install
-    the c compiler and its libraries. If using DJGPP 2.01, update the
-    distribution with the patched lib.c, to take care of bug fixes. It is
-    available at: "http://www.cartsys.com/eldredge/djgpp-patches.html".
-    GCC 2.7.2.1, as distributed from the usual DJGPP archives, will not
-    successfully compile lynx. You need to "stubedit" your "cc1.exe" file.
-    The following parameters have worked successfully: minstack=800k,
-    bufsize=64k. To accomplish this, move to the djgpp\bin directory
-    and type the command:
-    	"stubedit cc1.exe bufsize=64k minstack=800k".
-    Or do it interactively with the command: "stubedit cc1.exe". (see
-    "http://www.flora.org/lynx-dev/html/month0897/msg00145.html").
+    the C compiler and its libraries (see readme.1st from DJGPP distribution).
 
-    If using DJGPP 2.02 and GCC 2.8.1, you may not need to "stubedit"
-    cc1.exe if you use -O2 optimization, since cc1.exe comes with
-    a 1536K stack. To compile with -O3 optimization, the stub
-    needs to be edited to give a larger stack. To do this go into
-    djgpp\lib\gcc-lib\djgpp\2.81 and either type the command:
+    Originally, lynx makefiles come with the initial -O1 optimization level.
+    If you experience compilation process too slow due to paging to the disk
+    (DPMI server provide virtual memory, when in lack of RAM),
+    you may turn the optimization off entirely.
+
+    Alternatively, to get the last bit of run-time performance you may try
+    -O2 or -O3, in this case you may need to "stubedit" your "cc1.exe" file
+    to enlarge compiler stack size.  If using DJGPP 2.02 and GCC 2.8.1,
+    to compile with -O3 optimization, the stub needs to be edited to give
+    a larger stack. To do this go into  djgpp\lib\gcc-lib\djgpp\2.81
+    and either type the command:
    	 "stubedit cc1.exe bufsize=63k minstack=2M",
     or edit interactively with: "stubedit cc1.exe".
 
@@ -799,8 +823,6 @@ V. Compile instructions -- 386 DOS
 
     If all goes well, you will have a lynx.exe file.  If you have trouble,
     check to be sure djgpp.env is the way it came in the original package.
-    To compile lynx with DJGPP you may need about 20Mb of free disk space
-    for virtual memory.
 
     To test Lynx_386 you must have a packet driver installed.  The simplest
     method is to use a null packet driver that just allows Lynx to start up,
@@ -861,6 +883,7 @@ V. Compile instructions -- 386 DOS
 
 -- 1997/9/29 - D. Kaufman <dkaufman@rahul.net>
 -- 1997/10/3 - B. Schiavo <Wschiavo@concentric.net>
+-- Last update - 2000/01/15
 
 
 VI. General installation instructions

@@ -180,6 +180,7 @@ PUBLIC void LYEntify ARGS2(
 			*q++ = *p;
 			continue;
 		    }
+		    /* FALLTHRU */
 
 		case S_nonascii_text:
 		    if (*p == '\033')
@@ -1658,8 +1659,10 @@ PUBLIC char ** LYUCFullyTranslateString ARGS9(
     enum _parsing_what
 	{ P_text, P_utf8, P_hex, P_decimal, P_named
 	} what = P_text;
-#ifdef CJK_EX	/* 1997/12/12 (Fri) 18:08:48 */
+#ifdef KANJI_CODE_OVERRIDE
     static unsigned char sjis_1st = '\0';
+#endif
+#ifdef CONV_JISX0201KANA_JISX0208KANA
     unsigned char sjis_str[3];
 #endif
 
@@ -1763,13 +1766,14 @@ PUBLIC char ** LYUCFullyTranslateString ARGS9(
 	switch(state) {
 	case S_text:
 	    code = (unsigned char)(*p);
-#ifdef CJK_EX	/* 1997/12/13 (Sat) 14:41:53 */
+#ifdef KANJI_CODE_OVERRIDE
 	    if (HTCJK == JAPANESE && last_kcode == SJIS) {
 		if (sjis_1st == '\0' && (IS_SJIS_HI1(code)||IS_SJIS_HI2(code))){
 		    sjis_1st = (unsigned char)code;
 		} else if (sjis_1st && IS_SJIS_LO(code)) {
 		    sjis_1st = '\0';
 		} else {
+#ifdef CONV_JISX0201KANA_JISX0208KANA
 		    if (0xA1 <= code && code <= 0xDF) {
 			sjis_str[2] = '\0';
 			JISx0201TO0208_SJIS((unsigned char)code,
@@ -1778,6 +1782,7 @@ PUBLIC char ** LYUCFullyTranslateString ARGS9(
 			p++;
 			continue;
 		    }
+#endif
 		}
 	    }
 #endif
@@ -1821,6 +1826,7 @@ PUBLIC char ** LYUCFullyTranslateString ARGS9(
 	    } else {
 		state = S_text;
 	    }
+	    break;
 
 	case S_dollar:
 	    if (*p == '@' || *p == 'B' || *p == 'A') {

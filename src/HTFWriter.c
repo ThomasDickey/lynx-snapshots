@@ -32,6 +32,7 @@ extern int exec_command(char * cmd, int wait_flag); /* xsystem.c */
 #include <LYGlobalDefs.h>
 #include <LYClean.h>
 #include <GridText.h>
+#include <LYExtern.h>
 #include <LYexit.h>
 #include <LYLeaks.h>
 #include <LYKeymap.h>

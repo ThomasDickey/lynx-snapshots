@@ -100,10 +100,6 @@
 #  define getbkgd(w) wgetbkgd(w)	/* workaround pre-1.9.9g bug */
 # endif
 
-# ifdef NCURSES
-extern void LYsubwindow PARAMS((WINDOW * param));
-# endif /* NCURSES */
-
 #if defined(NCURSES_VERSION) && defined(HAVE_DEFINE_KEY)
 #include <term.h>
 #define USE_KEYMAPS		1
@@ -120,6 +116,10 @@ extern void LYsubwindow PARAMS((WINDOW * param));
 #  endif /* not PDCURSES */
 # endif /* VMS && __GNUC__ */
 #endif /* HAVE_CONFIG_H */
+
+#if defined(NCURSES) || defined(PDCURSES)
+extern void LYsubwindow PARAMS((WINDOW * param));
+#endif /* NCURSES */
 
 #ifdef VMS
 extern void VMSbox PARAMS((WINDOW *win, int height, int width));

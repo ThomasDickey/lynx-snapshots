@@ -138,8 +138,8 @@ PUBLIC void HTChunkPutb ARGS3 (HTChunk *,ch, CONST char *,b, int,l)
 	if (data) {
 	    ch->data = data;
 	} else if (ch->failok) {
-	   HTChunkClear(ch);	/* allocation failed, clear all data - kw */
-	   return;		/* caller should check ch->allocated - kw */
+	    HTChunkClear(ch);	/* allocation failed, clear all data - kw */
+	    return;		/* caller should check ch->allocated - kw */
 	} else {
 	    outofmem(__FILE__, "HTChunkPutb");
 	}
@@ -208,18 +208,24 @@ PUBLIC void HTChunkPutUtf8Char ARGS2(
 	break;
     case 6:
 	PUTC(0xfc | (code>>30));
+	break;
     }
     switch (utflen) {
     case 6:
 	PUTC2(code>>24);
+	/* FALLTHRU */
     case 5:
 	PUTC2(code>>18);
+	/* FALLTHRU */
     case 4:
 	PUTC2(code>>12);
+	/* FALLTHRU */
     case 3:
 	PUTC2(code>>6);
+	/* FALLTHRU */
     case 2:
 	PUTC2(code);
+	break;
     }
 }
 

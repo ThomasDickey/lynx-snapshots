@@ -187,18 +187,18 @@ PUBLIC int HTUU_decode ARGS3(char *,		bufcoded,
    bufin = bufcoded;
 
    while (nprbytes > 0) {
-      *(bufout++) = (unsigned char) (DEC(*bufin) << 2 | DEC(bufin[1]) >> 4);
-      *(bufout++) = (unsigned char) (DEC(bufin[1]) << 4 | DEC(bufin[2]) >> 2);
-      *(bufout++) = (unsigned char) (DEC(bufin[2]) << 6 | DEC(bufin[3]));
+      *(bufout++) = (unsigned char) ((DEC(*bufin) << 2) | (DEC(bufin[1]) >> 4));
+      *(bufout++) = (unsigned char) ((DEC(bufin[1]) << 4) | (DEC(bufin[2]) >> 2));
+      *(bufout++) = (unsigned char) ((DEC(bufin[2]) << 6) | (DEC(bufin[3])));
       bufin += 4;
       nprbytes -= 4;
    }
 
    if(nprbytes & 03) {
       if(pr2six[(int)bufin[-2]] > MAXVAL) {
-         nbytesdecoded -= 2;
+	 nbytesdecoded -= 2;
       } else {
-         nbytesdecoded -= 1;
+	 nbytesdecoded -= 1;
       }
    }
 

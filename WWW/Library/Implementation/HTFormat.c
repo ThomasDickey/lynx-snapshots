@@ -36,6 +36,7 @@ PUBLIC long int HTMaxBytes  = 0;	/* No effective limit */
 #include <HTList.h>
 #include <HTInit.h>
 #include <HTTCP.h>
+#include <HTTP.h>
 /*	Streams and structured streams which we use:
 */
 #include <HTFWriter.h>
@@ -498,7 +499,7 @@ PUBLIC float HTStackValue ARGS4(
 	}
     }
 
-    return -1e30;		/* Really bad */
+    return (float) -1e30;	/* Really bad */
 
 }
 
@@ -1006,7 +1007,7 @@ PUBLIC void HTCopyNoCR ARGS3(
 	character = HTGetCharacter();
 	if (character == EOF)
 	    break;
-	(*targetClass.put_character)(sink, character);
+	(*targetClass.put_character)(sink, (unsigned char) character);
     }
 }
 

@@ -8,4 +8,8 @@
 void run_external PARAMS((char * c));
 char *string_short PARAMS((char * str, int cut_pos));
 
+#ifdef WIN_EX
+extern char * quote_pathname PARAMS((char * pathname));
+#endif
+
 #endif /* EXTERNALS_H */

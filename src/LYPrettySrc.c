@@ -209,7 +209,9 @@ PUBLIC int html_src_parse_tagspec ARGS4(
 	    case HTSRC_CK_after_tagname:
 		switch (*p) {
 		    case '\0': stop = TRUE;
+			/* FALLTHRU */
 		    case ' ':
+			/* FALLTHRU */
 		    case '\t':
 			{
 			    char save = *tagend;

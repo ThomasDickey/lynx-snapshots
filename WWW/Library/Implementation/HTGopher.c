@@ -981,28 +981,30 @@ PRIVATE int parse_cso_fields ARGS2(
 		**  multiple digits (infinite?).
 		*/
 
-	    /*
-	    **	Check status, ignore any non-success.
-	    */
-	    if (p[1] != '2' )
-		continue;
+		/*
+		** Check status, ignore any non-success.
+		*/
+		if (p[1] != '2' )
+		    continue;
 
-	    /*
-	    **	Parse fields within returned line into status, ndx, name, data.
-	    */
-	    indx = NULL;
-	    name = NULL;
-	    for (i = 0; p[i]; i++)
-		if (p[i] == ':' ) {
-		    p[i] = '\0';
-		    if (!indx) {
-			indx = (char *)&p[i+1];
-			code = atoi (indx);
-		    } else if (!name) {
-			name = (char *)&p[i+1];
-		    } else {
-		       i++;
-		       break;
+		/*
+		** Parse fields within returned line into status, ndx, name,
+		** data.
+		*/
+		indx = NULL;
+		name = NULL;
+		for (i = 0; p[i]; i++) {
+		    if (p[i] == ':' ) {
+			p[i] = '\0';
+			if (!indx) {
+			    indx = (char *)&p[i+1];
+			    code = atoi (indx);
+			} else if (!name) {
+			    name = (char *)&p[i+1];
+			} else {
+			    i++;
+			    break;
+			}
 		    }
 		}
 		/*

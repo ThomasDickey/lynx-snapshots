@@ -68,6 +68,10 @@ esac
 # Here we must recognize all the valid KERNEL-OS combinations.
 maybe_os=`echo $1 | sed 's/^\(.*\)-\([^-]*-[^-]*\)$/\2/'`
 case $maybe_os in
+  hurd-gnu*)
+    os=$maybe_os
+    basic_machine=`echo $1 | sed 's/^\(.*\)-\([^-]*-[^-]*\)$/\1/'`
+    ;;
   linux-gnu*)
     os=-$maybe_os
     basic_machine=`echo $1 | sed 's/^\(.*\)-\([^-]*-[^-]*\)$/\1/'`
@@ -157,7 +161,7 @@ case $basic_machine in
 		| i370 | sh | powerpc | powerpcle | 1750a | dsp16xx | pdp11 \
 		| mips64 | mipsel | mips64el | mips64orion | mips64orionel \
 		| mipstx39 | mipstx39el \
-		| sparc | sparclet | sparclite | sparc64 | v850)
+		| sparc | sparclet | sparclite | sparc64 | v850 | ia64)
 		basic_machine=$basic_machine-unknown
 		;;
 	# We use `pc' rather than `unknown'
@@ -184,7 +188,7 @@ case $basic_machine in
 	      | sparc64-* | mips64-* | mipsel-* \
 	      | mips64el-* | mips64orion-* | mips64orionel-*  \
 	      | mipstx39-* | mipstx39el-* \
-	      | f301-*)
+	      | f301-* | ia64-*)
 		;;
 	# Recognize the various machine names and aliases which stand
 	# for a CPU type and a company and sometimes even an OS.
@@ -728,6 +732,9 @@ case $os in
 		;;
 	-linux*)
 		os=`echo $os | sed -e 's|linux|linux-gnu|'`
+		;;
+	-hurd*)
+		os=`echo $os `
 		;;
 	-sunos5*)
 		os=`echo $os | sed -e 's|sunos5|solaris2|'`

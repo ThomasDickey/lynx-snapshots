@@ -24,6 +24,8 @@
 
 #include <LYLeaks.h>
 
+extern HTCJKlang HTCJK;
+
 BOOLEAN term_options;
 
 PRIVATE void terminate_options	PARAMS((int sig));
@@ -228,6 +230,21 @@ PRIVATE void addlbl ARGS1(CONST char *, text)
     if (b)
 	stop_bold();
 }
+
+#if !defined(VMS) || defined(USE_SLANG)
+#define HANDLE_LYOPTIONS \
+		    if (term_options) { \
+			term_options = FALSE; \
+		    } else { \
+			AddValueAccepted = TRUE; \
+		    } \
+		    goto draw_options
+#else
+#define HANDLE_LYOPTIONS \
+		    term_options = FALSE; \
+		    if (use_assume_charset != old_use_assume_charset) \
+			goto draw_options
+#endif /* !VMS || USE_SLANG */
 
 PUBLIC void LYoptions NOARGS
 {
@@ -585,14 +602,16 @@ draw_options:
 			      sizeof(display_option), NORECALL);
 		stop_bold();
 		move(L_DISPLAY, COL_OPTION_VALUES);
+
+#ifdef VMS
+#define CompareEnvVars(a,b) strcasecomp(a, b)
+#else
+#define CompareEnvVars(a,b) strcmp(a, b)
+#endif /* VMS */
+
 		if ((term_options || ch == -1) ||
 		    (x_display != NULL &&
-#ifdef VMS
-		     !strcasecomp(x_display, display_option)))
-#else
-		     !strcmp(x_display, display_option)))
-#endif /* VMS */
-		{
+		     !CompareEnvVars(x_display, display_option))) {
 		    /*
 		     *	Cancelled, or a non-NULL display string
 		     *	wasn't changed. - FM
@@ -691,16 +710,7 @@ draw_options:
 		}
 		response = ' ';
 		if (LYSelectPopups) {
-#if !defined(VMS) || defined(USE_SLANG)
-		    if (term_options) {
-			term_options = FALSE;
-		    } else {
-			AddValueAccepted = TRUE;
-		    }
-		    goto draw_options;
-#else
-		    term_options = FALSE;
-#endif /* !VMS || USE_SLANG */
+		    HANDLE_LYOPTIONS;
 		}
 		break;
 
@@ -796,16 +806,7 @@ draw_options:
 		FREE(choices[3]);
 		response = ' ';
 		if (LYSelectPopups) {
-#if !defined(VMS) || defined(USE_SLANG)
-		    if (term_options) {
-			term_options = FALSE;
-		    } else {
-			AddValueAccepted = TRUE;
-		    }
-		    goto draw_options;
-#else
-		    term_options = FALSE;
-#endif /* !VMS || USE_SLANG */
+		    HANDLE_LYOPTIONS;
 		}
 		break;
 
@@ -922,7 +923,8 @@ draw_options:
 			    StrAllocCopy(UCAssume_MIMEcharset,
 					 LYCharSet_UC[UCLYhndl_for_unspec].MIMEname);
 			}
-			LYRawMode = (BOOL) (UCLYhndl_for_unspec == current_char_set);
+			if (HTCJK != JAPANESE)
+			    LYRawMode = (BOOL) (UCLYhndl_for_unspec == current_char_set);
 			HTMLSetUseDefaultRawMode(current_char_set, LYRawMode);
 			HTMLSetCharacterHandling(current_char_set);
 			CurrentAssumeCharSet = UCLYhndl_for_unspec;
@@ -939,16 +941,7 @@ draw_options:
 		    FREE(assume_list);
 		    response = ' ';
 		    if (LYSelectPopups) {
-#if !defined(VMS) || defined(USE_SLANG)
-			if (term_options) {
-			    term_options = FALSE;
-			} else {
-			    AddValueAccepted = TRUE;
-			}
-			goto draw_options;
-#else
-			term_options = FALSE;
-#endif /* !VMS || USE_SLANG */
+			HANDLE_LYOPTIONS;
 		    }
 		} else {
 		    _statusline(NEED_ADVANCED_USER_MODE);
@@ -1009,16 +1002,7 @@ draw_options:
 		}
 		response = ' ';
 		if (LYSelectPopups) {
-#if !defined(VMS) || defined(USE_SLANG)
-		    if (term_options) {
-			term_options = FALSE;
-		    } else {
-			AddValueAccepted = TRUE;
-		    }
-		    goto draw_options;
-#else
-		    term_options = FALSE;
-#endif /* !VMS || USE_SLANG */
+		    HANDLE_LYOPTIONS;
 		}
 		break;
 
@@ -1310,16 +1294,7 @@ draw_options:
 #endif
 		response = ' ';
 		if (LYSelectPopups && !no_option_save) {
-#if !defined(VMS) || defined(USE_SLANG)
-		    if (term_options) {
-			term_options = FALSE;
-		    } else {
-			AddValueAccepted = TRUE;
-		    }
-		    goto draw_options;
-#else
-		    term_options = FALSE;
-#endif /* !VMS || USE_SLANG */
+		    HANDLE_LYOPTIONS;
 		}
 		break;
 #endif /* USE_SLANG or COLOR_CURSES */
@@ -1382,16 +1357,7 @@ draw_options:
 		FREE(choices[2]);
 		response = ' ';
 		if (LYSelectPopups) {
-#if !defined(VMS) || defined(USE_SLANG)
-		    if (term_options) {
-			term_options = FALSE;
-		    } else {
-			AddValueAccepted = TRUE;
-		    }
-		    goto draw_options;
-#else
-		    term_options = FALSE;
-#endif /* !VMS || USE_SLANG */
+		    HANDLE_LYOPTIONS;
 		}
 		break;
 
@@ -1414,16 +1380,7 @@ draw_options:
 		}
 		response = ' ';
 		if (LYSelectPopups) {
-#if !defined(VMS) || defined(USE_SLANG)
-		    if (term_options) {
-			term_options = FALSE;
-		    } else {
-			AddValueAccepted = TRUE;
-		    }
-		    goto draw_options;
-#else
-		    term_options = FALSE;
-#endif /* !VMS || USE_SLANG */
+		    HANDLE_LYOPTIONS;
 		}
 		break;
 
@@ -1447,16 +1404,7 @@ draw_options:
 		}
 		response = ' ';
 		if (LYSelectPopups) {
-#if !defined(VMS) || defined(USE_SLANG)
-		    if (term_options) {
-			term_options = FALSE;
-		    } else {
-			AddValueAccepted = TRUE;
-		    }
-		    goto draw_options;
-#else
-		    term_options = FALSE;
-#endif /* !VMS || USE_SLANG */
+		    HANDLE_LYOPTIONS;
 		}
 		break;
 #endif /* EXP_KEYBOARD_LAYOUT */
@@ -1494,16 +1442,7 @@ draw_options:
 		FREE(choices[2]);
 		response = ' ';
 		if (LYSelectPopups) {
-#if !defined(VMS) || defined(USE_SLANG)
-		    if (term_options) {
-			term_options = FALSE;
-		    } else {
-			AddValueAccepted = TRUE;
-		    }
-		    goto draw_options;
-#else
-		    term_options = FALSE;
-#endif /* !VMS || USE_SLANG */
+		    HANDLE_LYOPTIONS;
 		}
 		break;
 #endif /* DIRED_SUPPORT */
@@ -1549,18 +1488,7 @@ draw_options:
 		}
 		response = ' ';
 		if (LYSelectPopups) {
-#if !defined(VMS) || defined(USE_SLANG)
-		    if (term_options) {
-			term_options = FALSE;
-		    } else {
-			AddValueAccepted = TRUE;
-		    }
-		    goto draw_options;
-#else
-		    term_options = FALSE;
-		    if (use_assume_charset != old_use_assume_charset)
-			goto draw_options;
-#endif /* !VMS || USE_SLANG */
+		    HANDLE_LYOPTIONS;
 		}
 		break;
 
@@ -1589,18 +1517,7 @@ draw_options:
 		FREE(choices[1]);
 		response = ' ';
 		if (LYSelectPopups) {
-#if !defined(VMS) || defined(USE_SLANG)
-		    if (term_options) {
-			term_options = FALSE;
-		    } else {
-			AddValueAccepted = TRUE;
-		    }
-		    goto draw_options;
-#else
-		    term_options = FALSE;
-		    if (use_assume_charset != old_use_assume_charset)
-			goto draw_options;
-#endif /* !VMS || USE_SLANG */
+		    HANDLE_LYOPTIONS;
 		}
 		break;
 
@@ -1726,16 +1643,7 @@ draw_options:
 		}
 		response = ' ';
 		if (LYSelectPopups) {
-#if !defined(VMS) || defined(USE_SLANG)
-		    if (exec_frozen || term_options) {
-			term_options = FALSE;
-		    } else {
-			AddValueAccepted = TRUE;
-		    }
-		    goto draw_options;
-#else
-		    term_options = FALSE;
-#endif /* !VMS || USE_SLANG */
+		    HANDLE_LYOPTIONS;
 		}
 		break;
 #endif /* ENABLE_OPTS_CHANGE_EXEC */
@@ -2451,7 +2359,7 @@ PUBLIC int popup_choice ARGS7(
 #ifdef PDCURSES
     keypad(form_window, TRUE);
 #endif /* PDCURSES */
-#ifdef NCURSES
+#if defined(NCURSES) || defined(PDCURSES)
     LYsubwindow(form_window);
 #endif
 #if defined(HAVE_GETBKGD)/* not defined in ncurses 1.8.7 */
@@ -2637,14 +2545,15 @@ redraw:
 	switch(cmd) {
 	    case LYK_F_LINK_NUM:
 		c = '\0';
-	    case LYK_1:
-	    case LYK_2:
-	    case LYK_3:
-	    case LYK_4:
-	    case LYK_5:
-	    case LYK_6:
-	    case LYK_7:
-	    case LYK_8:
+		/* FALLTHRU */
+	    case LYK_1: /* FALLTHRU */
+	    case LYK_2: /* FALLTHRU */
+	    case LYK_3: /* FALLTHRU */
+	    case LYK_4: /* FALLTHRU */
+	    case LYK_5: /* FALLTHRU */
+	    case LYK_6: /* FALLTHRU */
+	    case LYK_7: /* FALLTHRU */
+	    case LYK_8: /* FALLTHRU */
 	    case LYK_9:
 		/*
 		 *  Get a number from the user, possibly with
@@ -2993,6 +2902,7 @@ redraw:
 		    }
 		}
 		strcpy(prev_target, prev_target_buffer);
+		/* FALLTHRU */
 	    case LYK_WHEREIS:
 		if (*prev_target == '\0' ) {
 		    _statusline(ENTER_WHEREIS_QUERY);
@@ -3073,35 +2983,35 @@ check_recall:
 		    }
 		} else if (recall && ch == DNARROW) {
 		    if (FirstRecall) {
-		    /*
-		     *	Use the current string or
-		     *	first query in the list. - FM
-		     */
-		    FirstRecall = FALSE;
-		    if (*prev_target_buffer) {
-			for (QueryNum = 0;
-			     QueryNum < (QueryTotal - 1); QueryNum++) {
-			    if ((cp = (char *)HTList_objectAt(
-							search_queries,
-							QueryNum)) != NULL &&
-				!strcmp(prev_target_buffer, cp)) {
-				    break;
+			/*
+			 * Use the current string or
+			 * first query in the list.  - FM
+			 */
+			FirstRecall = FALSE;
+			if (*prev_target_buffer) {
+			    for (QueryNum = 0;
+				 QueryNum < (QueryTotal - 1); QueryNum++) {
+				if ((cp = (char *)HTList_objectAt(
+							    search_queries,
+							    QueryNum)) != NULL &&
+				    !strcmp(prev_target_buffer, cp)) {
+					break;
+				}
 			    }
+			} else {
+			    QueryNum = (QueryTotal - 1);
 			}
 		    } else {
-			QueryNum = (QueryTotal - 1);
+			/*
+			 * Advance to the next query in the list.  - FM
+			 */
+			QueryNum--;
 		    }
-		} else {
-		    /*
-		     *	Advance to the next query in the list. - FM
-		     */
-		    QueryNum--;
-		}
-		if (QueryNum < 0)
-		    /*
-		     *	Roll around to the first query in the list. - FM
-		     */
-		    QueryNum = (QueryTotal - 1);
+		    if (QueryNum < 0)
+			/*
+			 * Roll around to the first query in the list.  - FM
+			 */
+			QueryNum = (QueryTotal - 1);
 		    if ((cp = (char *)HTList_objectAt(search_queries,
 						      QueryNum)) != NULL) {
 			strcpy(prev_target, cp);
@@ -4048,7 +3958,7 @@ PUBLIC int postoptions ARGS1(
 		LYUseDefaultRawMode = TRUE;
 		HTMLUseCharacterSet(current_char_set);
 	    }
-	if (assume_char_set_changed) {
+	if (assume_char_set_changed && HTCJK != JAPANESE) {
 		LYRawMode = (BOOL) (UCLYhndl_for_unspec == current_char_set);
 	    }
 	if (raw_mode_old != LYRawMode || assume_char_set_changed) {

@@ -34,10 +34,10 @@ PRIVATE int topOfStack = 0;
  */
 
 #ifdef __STDC__
-PUBLIC int LYatexit(void (*function)(void))
+PUBLIC int LYatexit(void (*function) NOPARAMS)
 #else /* Not ANSI, ugh! */
 PUBLIC int LYatexit(function)
-void (*function)();
+void (*function) NOPARAMS;
 #endif /* __STDC__ */
 {
     /*

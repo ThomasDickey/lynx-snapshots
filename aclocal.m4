@@ -27,9 +27,9 @@ AC_DEFUN(AM_GNU_GETTEXT,
    AC_REQUIRE([AC_FUNC_MMAP])dnl
 
    AC_CHECK_HEADERS([argz.h limits.h locale.h nl_types.h malloc.h string.h \
-unistd.h values.h sys/param.h])
+unistd.h sys/param.h])
    AC_CHECK_FUNCS([getcwd munmap putenv setenv setlocale strchr strcasecmp \
-__argz_count __argz_stringify __argz_next])
+strdup __argz_count __argz_stringify __argz_next])
 
    if test "${ac_cv_func_stpcpy+set}" != "set"; then
      AC_CHECK_FUNCS(stpcpy)
@@ -216,10 +216,6 @@ AC_SUBST($1)dnl
 ])
 
 dnl ---------------------------------------------------------------------------
-dnl gettext macros from hello-1.3.16
-dnl provided courtesy if Karl Eichwalder <ke@suse.de>
-dnl
-dnl
 dnl Macro to add for using GNU gettext.
 dnl Ulrich Drepper <drepper@cygnus.com>, 1995.
 dnl
@@ -228,7 +224,7 @@ dnl be used in projects which are not available under the GNU Public License
 dnl but which still want to provide support for the GNU gettext functionality.
 dnl Please note that the actual code is *not* freely available.
 dnl
-dnl serial 3
+dnl serial 5
 dnl
 AC_DEFUN(AM_WITH_NLS,
   [AC_MSG_CHECKING([whether NLS is requested])
@@ -273,6 +269,10 @@ AC_DEFUN(AM_WITH_NLS,
 		 [AC_TRY_LINK([], [return (int) gettext ("")],
 		 gt_cv_func_gettext_libintl=yes,
 		 gt_cv_func_gettext_libintl=no)])])
+	   fi
+
+	   if test "$gt_cv_func_gettext_libintl" = yes; then
+	     LIBS="$LIBS -lintl"
 	   fi
 
 	   if test "$gt_cv_func_gettext_libc" = "yes" \
@@ -366,7 +366,7 @@ AC_DEFUN(AM_WITH_NLS,
 	  : ;
 	else
 	  AC_MSG_RESULT(
-	    [found xgettext programs is not GNU xgettext; ignore it])
+	    [found xgettext program is not GNU xgettext; ignore it])
 	  XGETTEXT=":"
 	fi
       fi
@@ -384,7 +384,14 @@ AC_DEFUN(AM_WITH_NLS,
     if test "$PACKAGE" = gettext; then
       USE_NLS=yes
       USE_INCLUDED_LIBINTL=yes
+
+      AC_LINK_FILES($nls_cv_header_libgt, $nls_cv_header_intl)
     fi
+
+    AC_OUTPUT_COMMANDS( #(vi
+     [case "\$CONFIG_FILES" in *po/makefile.in*)
+        sed -e "/POTFILES =/r po/POTFILES" po/makefile.in > po/makefile
+      esac])
 
     dnl These rules are solely for the distribution goal.  While doing this
     dnl we only have to keep exactly one list of the available catalogs
@@ -471,7 +478,7 @@ for cf_arg in "-DCC_HAS_PROTOS" \
 	"" \
 	-qlanglvl=ansi \
 	-std1 \
-	"-Aa -D_HPUX_SOURCE +e" \
+	-Ae \
 	"-Aa -D_HPUX_SOURCE" \
 	-Xc
 do
@@ -589,7 +596,7 @@ AC_DEFUN([CF_CHECK_ERRNO],
 AC_MSG_CHECKING(if external $1 is declared)
 AC_CACHE_VAL(cf_cv_dcl_$1,[
     AC_TRY_COMPILE([
-#if HAVE_STDLIB_H
+#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
 #endif
 #include <stdio.h>
@@ -1615,7 +1622,8 @@ AC_CHECK_FUNCS(gethostname,,[
 #
 # FIXME:  sequent needs this library (i.e., -lsocket -linet -lnsl), but
 # I don't know the entrypoints - 97/7/22 TD
-AC_HAVE_LIBRARY(inet,cf_cv_netlibs="-linet $cf_cv_netlibs")
+# AC_HAVE_LIBRARY(inet,cf_cv_netlibs="-linet $cf_cv_netlibs")
+AC_CHECK_LIB(inet, main, cf_cv_netlibs="-linet $cf_cv_netlibs")
 #
 if test "$ac_cv_func_lsocket" != no ; then
 AC_CHECK_FUNCS(socket,,[
@@ -1671,6 +1679,7 @@ dnl Check if we use the messages included with this program
 AC_DEFUN([CF_OUR_MESSAGES],
 [
 use_our_messages=no
+if test "$USE_NLS" = yes ; then
 if test -d $srcdir/po ; then
 AC_MSG_CHECKING(if we should use included message-library)
 	AC_ARG_ENABLE(included-msgs,
@@ -1679,6 +1688,7 @@ AC_MSG_CHECKING(if we should use included message-library)
 	[use_our_messages=yes])
 fi
 AC_MSG_RESULT($use_our_messages)
+fi
 test $use_our_messages = yes && USE_OUR_MESSAGES=
 AC_SUBST(USE_OUR_MESSAGES)
 ])dnl

@@ -310,14 +310,15 @@ extern void HTMark_asSource NOPARAMS;
 
 extern int HTMainText_Get_UCLYhndl NOPARAMS;
 
-#ifdef CJK_EX
-
 #include <HTCJK.h>
+
+#ifdef KANJI_CODE_OVERRIDE
 extern HTkcode last_kcode;
+#endif
 
 extern HTkcode HText_getKcode PARAMS((HText * text));
 extern void HText_updateKcode PARAMS((HText * text, HTkcode kcode));
-
-#endif
+extern HTkcode HText_getSpecifiedKcode PARAMS((HText * text));
+extern void HText_updateSpecifiedKcode PARAMS((HText * text, HTkcode kcode));
 
 #endif /* LYGRIDTEXT_H */

@@ -108,9 +108,17 @@ extern int BSDselect PARAMS((int nfds, fd_set * readfds, fd_set * writefds,
 #endif /* __FreeBSD__ || __bsdi__ */
 #endif /* !UTMP_FILE */
 
+/*
+ * experimental - make temporary filenames random to make the scheme less
+ * obvious.  However, as noted by KW, there are instances (such as the
+ * 'O'ption page, for which Lynx will store a temporary filename even when
+ * it no longer applies, since it will reuse that filename at a later time.
+ */
+#ifdef EXP_RAND_TEMPNAME
 #if defined(HAVE_RAND) && defined(HAVE_SRAND) && defined(RAND_MAX)
 #define USE_RAND_TEMPNAME 1
 #define MAX_TEMPNAME 10000
+#endif
 #endif
 
 #define COPY_COMMAND "%s %s %s"
@@ -1984,7 +1992,7 @@ PUBLIC void statusline ARGS1(
 	if (kanji_code == EUC) {
 	    TO_EUC((CONST unsigned char *)text_buff, temp);
 	} else if (kanji_code == SJIS) {
-#ifdef CJK_EX
+#ifdef KANJI_CODE_OVERRIDE
 	    if (!LYRawMode || last_kcode == SJIS)
 		strcpy(temp, text_buff);
 	    else
@@ -2523,10 +2531,11 @@ PUBLIC BOOLEAN LYisLocalFile ARGS1(
 	if (0==strcmp("file", acc_method) &&
 	    (0==strcmp(host, "localhost") ||
 #ifdef VMS
-	     0==strcasecomp(host, HTHostName())))
+	     0==strcasecomp(host, HTHostName())
 #else
-	     0==strcmp(host, HTHostName())))
+	     0==strcmp(host, HTHostName())
 #endif /* VMS */
+	    ))
 	{
 	    FREE(host);
 	    FREE(acc_method);
@@ -4983,11 +4992,13 @@ PUBLIC BOOLEAN LYExpandHostForURL ARGS3(
 	FREE(MsgStr);
 	return GotHost;
     }
+    else if (LYCursesON && 
 #if defined(__DJGPP__) && !defined(WATT32)
-    else if (LYCursesON && HTCheckForInterrupt())
+	HTCheckForInterrupt()
 #else /* normal systems */
-    else if (LYCursesON && (lynx_nsl_status == HT_INTERRUPTED))
+	(lynx_nsl_status == HT_INTERRUPTED)
 #endif
+	)
     {
 	/*
 	 *  Give the user chance to interrupt lookup cycles. - KW & FM
@@ -5768,15 +5779,18 @@ PUBLIC void LYAddPathToHome ARGS3(
      *	Set up home string and length. - FM
      */
     StrAllocCopy(home, Home_Dir());
+
+#ifdef VMS
+#define NO_HOMEPATH "Error:"
+#else
+#define NO_HOMEPATH "/error"
+#endif /* VMS */
     if (!(home && *home))
 	/*
 	 *  Home_Dir() has a bug if this ever happens. - FM
 	 */
-#ifdef VMS
-	StrAllocCopy(home, "Error:");
-#else
-	StrAllocCopy(home, "/error");
-#endif /* VMS */
+	StrAllocCopy(home, NO_HOMEPATH);
+
     len = fbuffer_size - (strlen(home) + 1);
     if (len <= 0) {
 	/*
@@ -6231,7 +6245,7 @@ PRIVATE BOOL IsOurFile ARGS1(char *, name)
 		     * portable.
 		     */
 		    if (data.st_uid != 0
-		     || data.st_mode & S_IWOTH) {
+		     || (data.st_mode & S_IWOTH) != 0) {
 			linked = TRUE;	/* force an error-return */
 			break;
 		    }
@@ -6719,11 +6733,11 @@ PUBLIC void LYCloseTempFP ARGS1(
 /*
  * Close a temp-file, removing it.
  */
-PUBLIC void LYRemoveTemp ARGS1(
+PUBLIC int LYRemoveTemp ARGS1(
 	char *, name)
 {
     LY_TEMP *p, *q;
-    int code;
+    int code = -1;
 
     if (name != 0 && *name != 0) {
 	CTRACE((tfp, "LYRemoveTemp(%s)\n", name));
@@ -6746,6 +6760,7 @@ PUBLIC void LYRemoveTemp ARGS1(
 	    }
 	}
     }
+    return code;
 }
 
 /*
