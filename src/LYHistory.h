@@ -14,7 +14,4 @@ extern int showhistory PARAMS((char **newfile));
 extern BOOLEAN historytarget PARAMS((document *newdoc));
 extern int LYShowVisitedLinks PARAMS((char **newfile));
 
-#define HISTORY_PAGE_TITLE  "Lynx History Page"
-#define VISITED_LINKS_TITLE  "Lynx Visited Links Page"
-
 #endif /* LYHISTORY_H */

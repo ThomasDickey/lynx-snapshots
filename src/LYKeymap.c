@@ -709,9 +709,11 @@ PRIVATE int LYLoadKeymap ARGS4 (
     sprintf(buf, "<head>\n<title>%s</title>\n</head>\n<body>\n",
     		  CURRENT_KEYMAP_TITLE);
     (*target->isa->put_block)(target, buf, strlen(buf));
-
-    sprintf(buf, "<h1>%s (%s Version %s)</h1>\n<pre>",
-		 CURRENT_KEYMAP_TITLE, LYNX_NAME, LYNX_VERSION);
+    sprintf(buf, "<h1>%s (%s), help on <a href=\"%s%s\">%s</a></h1>\n",
+	LYNX_NAME, LYNX_VERSION,
+	helpfilepath, CURRENT_KEYMAP_HELP, CURRENT_KEYMAP_TITLE);
+    (*target->isa->put_block)(target, buf, strlen(buf));
+    sprintf(buf, "<pre>\n");
     (*target->isa->put_block)(target, buf, strlen(buf));
 
     for (i = 'a'+1; i <= 'z'+1; i++) {

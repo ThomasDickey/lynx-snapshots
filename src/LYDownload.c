@@ -616,15 +616,18 @@ PUBLIC int LYdownload_options ARGS2(
     StrAllocCopy(*newfile, download_filename);
     LYforce_no_cache = TRUE;  /* don't cache this doc */
 
+
     fprintf(fp0, "<head>\n<title>%s</title>\n</head>\n<body>\n",
 		 DOWNLOAD_OPTIONS_TITLE);
-
-    fprintf(fp0,"<h1>Download Options (%s Version %s)</h1><pre>\n",
-				       LYNX_NAME, LYNX_VERSION);
-
-
-    fprintf(fp0, "   You have the following download choices.\n");
-    fprintf(fp0, "   Please select one:\n\n");
+    fprintf(fp0, "<h1>%s (%s), help on <a href=\"%s%s\">%s</a></h1>\n",
+		 LYNX_NAME, LYNX_VERSION,
+		 helpfilepath, DOWNLOAD_OPTIONS_HELP, DOWNLOAD_OPTIONS_TITLE);
+    fprintf(fp0, "<pre>\n");
+    fprintf(fp0, "\
+   <em>You download the link:</em> %s\n\
+     <em>Suggested file name:</em> %s%s\n",
+	data_file, (lynx_save_space ? lynx_save_space : ""), sug_filename);
+    fprintf(fp0, "\nStandard download options:\n");
 
     if(!no_disk_save && !child_lynx)
 #ifdef DIRED_SUPPORT
@@ -640,7 +643,9 @@ PUBLIC int LYdownload_options ARGS2(
 	else {}
 #endif /* DIRED_SUPPORT */
     else
-	fprintf(fp0,"   Save to disk disabled.\n");
+	fprintf(fp0,"   <em>Save to disk disabled.</em>\n");
+
+    fprintf(fp0, "\nLocal additions:\n");
 
     if (downloaders != NULL) {
 	for (count = 0, cur_download = downloaders; cur_download != NULL;
@@ -655,9 +660,14 @@ PUBLIC int LYdownload_options ARGS2(
 	    }
 	}
     } else {
-	fprintf(fp0, "\n\
-No other download methods have been defined yet.  You may define\n\
-an unlimited number of download methods using the lynx.cfg file.\n");
+	fprintf(fp0, "   \
+&lt;NONE&gt;\n\n   \
+<!-- \
+You may define an unlimited number of download methods.\n   \
+Please refer to the <a href=\"%s\">lynx.cfg</a> file, \
+sections 'DOWNLOAD' and 'INCLUDE'. \
+--> \n",
+	LYNX_CFG_FILE);
     }
     fprintf(fp0, "</pre>\n</body>\n");
     LYCloseTempFP(fp0);

@@ -1,6 +1,85 @@
 Changes since Lynx 2.8 release
 ================================================================================
 
+1998-08-29 (2.8.1dev.23)
+* make interim fix for gzip'd html files until we can resolve portability
+  issues raised by SKY's renaming - TD
+* implement LY_SOFT_NEWLINE, to mark places where wrapping is done in
+  HText_appendCharacter, to allow printing to join lines back together
+  (reported by LP) - TD
+* correct missing assignment in change to HText_appendCharacter, fix a core
+  dump - TD
+* removed SKY's change that attempted to skip help-links, since it causes a core
+  dump, e.g., when viewing source - TD
+* use LYCloseTempFP in forms-options code and LYPrint.c where file was opened
+  with LYOpenTemp, to fix a core dump - TD
+* All XYZ_TITLE defines of UIPs (User Interface Page) are collected in
+  LYMessages_en.h for multi language support - SKY
+* Head and H1 of each UIP is standardized; reduced to 1 line.  In this line a
+  context sensitive Help anchor introduced which is skipped by default; i.e.,
+  'd' will directly goto 'Save to Disk' not to the help anchor - SKY
+* Download and Print UIPs are divided into 'Standard' and 'Local additions'.
+  Current and Suggested Filenames are printed on the page which was hidden on
+  the status line or accessed only by '=' - SKY
+* Information page now has links to either development or lynx home pages
+  depending on LYNX_RELEASE define.  Besides compile options can also be
+  accessed on this page:  $helpdir/lynx_site.txt.  A file derived from
+  'config.cache'.  Its corresponding makefile macro is 'install-log' - SKY
+* New Form-based options page is re-organized; logical sections are introduced
+  and sorted alphabetically (except for 'User Mode' - SKY
+* Al's convention of '#<number>' into '#<id name>' in Lynx_users_guide.html is
+  included - SKY
+* All links in the help files are marked, i.e., each
+  'href="../_filename.html_#section"' is converted to
+  'href="../@FILENAME@#section"'.  This is useful if a help filename or
+  link has to be changed through out whole package.
+* 'lynx_help/help_files.txt' is introduced which contains
+  FILENAME=_filename.html_ definitions.  Format and details are given in the
+  file - SKY
+* All help files are renamed from '.html' -> '.html_' - SKY
+* For context sensitive help links in UIPs 'src/LYHelp.h' is created with all
+  the filenames marked like the help files.  It will be included from
+  LYGlobal.h.  In 'src/makefile.in' necessary changes are done to load the
+  filenames from 'lynx_help/help_files.txt' - SKY
+* To be able to compress help files '--enable-gzip-help' option is added in
+  configure script.  In 'makefile' 'install-help:' is updated.
+  If COMPRESS_PROG and COMPRESS_EXT are *both* left empty (default) no
+  compression will be carried.  For the moment compression is restricted only
+  to 'gzip'.  Necessary updates are done in configure.in - SKY
+* documentation fixes for nsl-fork, print screen - PW
+* don't replace '\n' with ' ' if Chinese or Japanese - HN
+* use title information rather than suggested filename as a subject line when
+  printing a page to email - LP
+* add verbose_images to old-style options menu, and the .lynxrc - LE
+* add verbose_images and useragent to forms-based options menu - LP
+* disable download of "mailto:" links (reported by SKY (Sinan Kaan Yerli)
+  <sky@star.cpes.susx.ac.uk> ) - LP
+* Change HTUserMsg to HTInfoMsg for "ALREADY_AT_BEGIN" and "ALREADY_AT_END"
+  messages to make it less annoying - LP
+* reduce clutter in mainloop by inserting LYpop() in postoptions() - LP
+* makefile.dos: split long lines - LP
+* Fix bug with TAIPEI big5 charset in src/LYCharUtils.c
+  (this typo also found in lynx2.7.2: "big-5" instead of "big5"),
+  patch by Shou-Chuan Lai <chuan@cs.nthu.edu.tw> - LP
+* Add -debug_partial command line switch so we got MessageSecs dely
+  between incremental rendering stages if partial display mode is ON.
+  (MessageSecs available from lynx.cfg and set to 2 sec by default).
+  The problem in incremental rendering of forms input was reported by SKY
+  (Sinan Kaan Yerli) <sky@star.cpes.susx.ac.uk> ), still not fixed
+  but now we may enter form-based options menu in -debug_partial mode
+  and rerender the page with Cntrl-R to see what is happening in fact. - LP
+* Serious bug fixed for DISP_PARTIAL: two asynchronous processes synchronized.
+  HTDisplayPartial() synchronized by flag against HText_new() which create
+  the new HTMainText object. Otherwise HTDisplayPartial() sometimes was
+  matching old HTMainText (with its own line counter) and repaint previous doc,
+  not a new one. TRACE log now got a message from HText_pageDisplay - LP
+* fixed last chartrans changes, lines such as
+      #0x99    #NOTDEFINED
+  should not be commented with leading comment symbol because they are ignored
+  by makeuctbl in fact - LP
+* modify DH's patch for COLLAPSE_BR_TAGS to only modify the nonstandard case,
+  thereby making that more restrictive, and restoring standard behavior
+  (reported by HN) - TD
 1998-08-21 (2.8.1dev.22)
 * correct test for -std1 compiler option on Digital Unix (reported by Michael
   Warner) - TD
@@ -10,10 +89,10 @@ Changes since Lynx 2.8 release
   newlines in the block (David Henderson <davidh@psiphi.org>)
 * clarification in userdefs.h - HN
 * MS Windows codepages updated for EURO SIGN (0x20AC), from ftp.unicode.org - LP
-* minor fix for DISP_PARTIAL, solves problem of interfering with previously
-  displayed document - LP
+* minor fix for DISP_PARTIAL, disable scrolling when HTTP request already sent
+  but the new document not displayed on the screen yet - LP
 * ifdef DOS/WINDOWS to open lynx.trace in text mode - LP
-* rearrange text in lynx.cfg concerning character_set - LP 
+* rearrange text in lynx.cfg concerning character_set - LP
 * correct miscellaneous typos - LP
 * Fixed:  Verbose images now work with [IMAGE]-Submit.  Also, fixed the core
   dump when clickable_images is on.  The problem was an oversight in
@@ -30,14 +109,14 @@ Changes since Lynx 2.8 release
 * added blurb in lynx.cfg about COOKIE_{ACCEPT,REJECT}_DOMAINS - BJP
 * -accept_all_cookies on the commandline works as a toggle now (against
   lynx.cfg value -- NOT against .lynxrc value) - BJP
-* change HtAlert for bad partial reference to an HtUserMsg to make it less
+* change HTAlert for bad partial reference to an HTUserMsg to make it less
   annoying (request by Philip Webb, Jason McBrayer)
 1998-08-15 (2.8.1dev.21)
 * correct pathname for help file in forms-options screen - TD
 * reduce clutter in LYOptions.c with SELECTED, DISABLED, NOTEMPTY macros,
   PutOptValues, GetOptValues functions - TD
-* modified LYOptions options to include MBM support from form-based options, by
-  making a link href="LYNXOPTIONS://MBM_MENU" like it was in LYPrint.c and
+* modified LYOptions to include MBM support from form-based options,
+  by making a link href="LYNXOPTIONS://MBM_MENU" like it was in LYPrint.c and
   calling edit_bookmarks() from postoptions() - LP
 * add/use HTUserMsg to encapsulate most of the important messages - TD
 * add/use HTInfoMsg to encapsulate most of the informational messages - TD

@@ -8,7 +8,7 @@
 #define LYMESSAGES_EN_H
 
 /*******************************************************************
- * The following definitions are for statusline prompts, messages,
+ * The following definitions are for status line prompts, messages,
  * or warnings issued by Lynx during program execution.  You can
  * modify them to make them more appropriate for you site, and/or
  * to use other languages.  Links to collections of alternate
@@ -41,6 +41,8 @@
 #define MOREHELP \
  "-- press space for more, use arrow keys to move, '?' for help, 'q' to quit."
 #define MORE "-- press space for next page --"
+
+/* Forms messages */
 #define FORM_LINK_TEXT_MESSAGE \
  "(Text entry field) Enter text.  Use UP or DOWN arrows or tab to move off."
 #define FORM_LINK_TEXT_UNM_MSG \
@@ -89,6 +91,7 @@
  "UNMODIFIABLE option list.  Use return or arrow keys to review or leave."
 #define CHOICE_LIST_UNM_MSG \
  "UNMODIFIABLE choice list.  Use return or arrow keys to review or leave."
+
 #define NORMAL_LINK_MESSAGE \
  "(NORMAL LINK)   Use right-arrow or <return> to activate."
 #define LINK_NOT_FOUND "The resource requested is not available at this time."
@@ -166,8 +169,9 @@
 #endif /* VMS */
 #define SPAWNING_DISABLED "Spawning is currently disabled."
 #define DOWNLOAD_DISABLED "The 'd'ownload command is currently disabled."
-#define NO_DOWNLOAD_INPUT "You cannot download a input field."
+#define NO_DOWNLOAD_INPUT "You cannot download an input field."
 #define NO_DOWNLOAD_MAILTO_ACTION "Form has a mailto action!  Cannot download."
+#define NO_DOWNLOAD_MAILTO_LINK "You cannot download a mailto: link."
 #define NO_DOWNLOAD_COOKIES "You cannot download cookies."
 #define NO_DOWNLOAD_PRINT_OP "You cannot download a printing option."
 #define NO_DOWNLOAD_UPLOAD_OP "You cannot download an upload option."
@@ -595,6 +599,8 @@
  "\n When you are done, press enter and put a single period (.)"
 #define ENTER_PERIOD_WHEN_DONE_B \
  "\n on a line and press enter again."
+
+/* Cookies messages */
 #define ADVANCED_COOKIE_CONFIRMATION \
  "%s cookie: %.*s=%.*s  Allow? (Y/N/Always/neVer)"
 #define INVALID_COOKIE_DOMAIN_CONFIRMATION \
@@ -602,8 +608,6 @@
 #define ALLOWING_COOKIE "Allowing this cookie."
 #define REJECTING_COOKIE "Rejecting this cookie."
 #define COOKIE_JAR_IS_EMPTY "The Cookie Jar is empty."
-#define COOKIE_JAR_TITLE "Lynx Cookie Jar"
-#define REACHED_COOKIE_JAR_PAGE "You have reached the Lynx Cookie Jar Page"
 #define ACTIVATE_TO_GOBBLE \
  "Activate links to gobble up cookies or entire domains,"
 #define OR_CHANGE_ALLOW "or to change a domain's 'allow' setting."
@@ -628,6 +632,7 @@
 #define PROMPTING_TO_ALLOW_COOKIES "'P'rompting to allow from domain '%s'."
 #define DELETE_ALL_COOKIES_IN_DOMAIN "Delete all cookies in this domain?"
 #define ALL_COOKIES_EATEN "All of the cookies in the jar have been eaten!"
+
 #define PORT_NINETEEN_INVALID "Port 19 not permitted in URLs."
 #define PORT_TWENTYFIVE_INVALID "Port 25 not permitted in URLs."
 #define PORT_INVALID "Port %lu not permitted in URLs."
@@ -643,6 +648,19 @@
  "Form field value exceeds buffer length!  Trim the tail."
 #define FORM_TAIL_COMBINED_WITH_HEAD \
  "Modified tail combined with head of form field value."
+
+/* Lynx internal page titles */
+#define COOKIE_JAR_TITLE	"Lynx Cookie Jar"
+#define CURRENT_KEYMAP_TITLE	"Current Key Map"
+#define DIRED_MENU_TITLE	"File Management Options"
+#define PERMIT_OPTIONS_TITLE	"File Permission Options"
+#define DOWNLOAD_OPTIONS_TITLE	"Lynx Download Options"
+#define HISTORY_PAGE_TITLE	"Lynx History Page"
+#define LIST_PAGE_TITLE		"Lynx List Page"
+#define OPTIONS_TITLE		"Lynx Options Page"
+#define PRINT_OPTIONS_TITLE	"Lynx Printing Options"
+#define UPLOAD_OPTIONS_TITLE	"Lynx Upload Options"
+#define VISITED_LINKS_TITLE	"Lynx Visited Links Page"
 
 #ifdef DIRED_SUPPORT
 #define DIRED_NOVICELINE \

@@ -2038,10 +2038,8 @@ PUBLIC int HTCheckForInterrupt NOARGS
 
     if (fake_zap > 0) {
 	fake_zap--;
-	if (TRACE) {
-	    fprintf(tfp, "\r *** Got simulated 'Z' ***\n");
-	    fflush(tfp);
-	}
+	CTRACE(tfp, "\r *** Got simulated 'Z' ***\n");
+	CTRACE_FLUSH(tfp);
 	CTRACE_SLEEP(AlertSecs);
 	return((int)TRUE);
     }
@@ -2158,10 +2156,8 @@ PUBLIC int HTCheckForInterrupt NOARGS
 
     if (fake_zap > 0) {
 	fake_zap--;
-	if (TRACE) {
-	    fprintf(tfp, "\r *** Got simulated 'Z' ***\n");
-	    fflush(tfp);
-	}
+	CTRACE(tfp, "\r *** Got simulated 'Z' ***\n");
+	CTRACE_FLUSH(tfp);
 	CTRACE_SLEEP(AlertSecs);
 	return((int)TRUE);
     }
@@ -5781,6 +5777,7 @@ PUBLIC void LYRemoveTemp ARGS1(
 #endif
 		CTRACE(tfp, "...LYRemoveTemp done(%d)%s\n", code,
 		       (p->file != 0) ? ", closed" : "");
+		CTRACE_FLUSH(tfp);
 		if (p->file != 0)
 		    fclose(p->file);
 		free(p->name);

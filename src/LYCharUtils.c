@@ -2801,8 +2801,8 @@ PUBLIC void LYHandleMETA ARGS4(
 			} else if (!strcmp(p_in->MIMEname, "euc-cn") &&
 				   !strcmp(p_out->MIMEname, "euc-cn")) {
 			    HTCJK = CHINESE;
-			} else if (!strcmp(p_in->MIMEname, "big-5") &&
-				   !strcmp(p_out->MIMEname, "big-5")) {
+			} else if (!strcmp(p_in->MIMEname, "big5") &&
+				   !strcmp(p_out->MIMEname, "big5")) {
 			    HTCJK = TAIPEI;
 			} else if (!strcmp(p_in->MIMEname, "euc-kr") &&
 				   !strcmp(p_out->MIMEname, "euc-kr")) {

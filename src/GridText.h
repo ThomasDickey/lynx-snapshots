@@ -17,7 +17,8 @@
 #ifndef LY_SOFT_HYPHEN
 #define LY_SOFT_HYPHEN		((char)7)
 #endif /* !LY_SOFT_HYPHEN */
-#define IsSpecialAttrChar(a)  ((a > '\002') && (a < '\010'))
+#define LY_SOFT_NEWLINE         ((char)8)
+#define IsSpecialAttrChar(a)  ((a > '\002') && (a <= '\010'))
 
 extern int HTCurSelectGroupType;
 extern char * HTCurSelectGroupSize;

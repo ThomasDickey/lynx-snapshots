@@ -263,7 +263,8 @@ II. Compile instructions -- UNIX
 	a http daemon.
 
   --enable-nsl-fork			(define NSL_FORK)
-	Use this option to allow NSL requests to be aborted at will.
+	Disabled by default, this allows interruption of NSL requests,
+	so that `z' will stop the `look-up' phase of a connection.
 
   --enable-persistent-cookies		(define EXP_PERSISTENT_COOKIES)
 	Use this option to compile-in support for saving cookies to a file,

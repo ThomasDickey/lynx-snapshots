@@ -302,32 +302,33 @@ if it is needed again. [<A HREF="#TOC">ToC</A>]
 <h2><A NAME="7"
 ><em>Printing, Mailing, and Saving rendered files to disk.</em></A></h2>
 
-Rendered HTML documents, and plain text files, may be printed using the
-'<em>p</em>' command while viewing the document.  After pressing the
-'<em>p</em>' key a menu of <em>Print Options</em> will be displayed.  The
-menu will vary according to several factors.  First, some sites set up
-special accounts to let users run Lynx to access local information systems.
-Typically these accounts require no passwords and do not require users to
-identify themselves.  As a result such accounts are called "anonymous"
-accounts, and their users are considered "anonymous" users.  In most
-configurations, all Lynx users (including anonymous users) are able to
-mail files to themselves and print the entire file to the screen.
-
-<p>Additional print options are available for users who are using
-Lynx from their own accounts (that is, so-called "non-anonymous
-users").  In particular, the <em>Save to a local file</EM>
-option allows you to save the document into a file on your disk
-space.	Any number of additional print options may also be
-available as configured by your system administrator.
-
-<p>Some options, such as <em>Save to a local file</em>, involve prompting
-for an output filename.  All output filename entries are saved in a
-circular buffer, and any previous entries can be retrieved for re-use by
-pressing the <em>up-arrow</em> or <em>down-arrow</em> keys at the prompt.
-
-<p>Note that if you want exact copies of text files without any expansions
-of TAB characters to spaces you should use the <a href="#9">Download</a>
-options. [<A HREF="#TOC">ToC</A>]
+To print, mail or save the document you have on-screen, enter '<em>p</em>',
+which displays a menu of <em>Print Options</em>, including 4 pre-defined:
+`Save to local file', `E-mail the file', `Print to screen'
+and `Print to local printer attached to vt100'.
+<p>
+`Print to screen' allows file transfers in the absence of alternatives
+and is often the only option allowed here for anonymous users;
+`Print to local printer' prefixes the `Print to screen' routine
+with the VT100 standard `printer on' escape sequence and appends to it
+the escape sequences for `form feed' and `printer off';
+the 3rd & 4th options are not pre-defined for DOS/WINDOWS ports.
+<p>
+In most configurations, all Lynx users (including anonymous users)
+can mail files to themselves and print the entire file to the screen;
+users with named accounts (or individuals using Lynx on a personal computer)
+can also save documents to files in their disk space;
+if you have access to lynx.cfg, you can define your own options:
+see the detailed advice in lynx.cfg.
+<p>
+Some options prompt for an output filename.  These are saved
+in a circular buffer, and any previous entries can be retrieved
+for re-use by pressing the <em>up-arrow</em> or <em>down-arrow</em> keys
+at the prompt.
+<p>
+NB if you want exact copies of text files without expansion of TABs
+to spaces you should use the <a href="#9">Download</a> options.
+[<A HREF="#TOC">ToC</A>]
 
 <h2><A NAME="8"
 ><em>Viewing the HTML document source and editing documents</em></A></h2>
@@ -421,9 +422,9 @@ local to Lynx.
 <p>Some documents are designated <em>index documents</em> by virtue of an
 ISINDEX element in their HEAD section.	These documents can be used to
 retrieve additional information based on searches using words or phrases
-submitted to an index server.  The Lynx statusline will indicate that you
+submitted to an index server.  The Lynx status line will indicate that you
 are viewing such a document, and if so, the '<em>s</em>' key will invoke a
-statusline prompt to enter a query string.  The prompt can be specified via
+status line prompt to enter a query string.  The prompt can be specified via
 a PROMPT attribute in the ISINDEX element.  Otherwise, Lynx will use an
 internally configured prompt.  The address for submitting the search can be
 specified via an HREF or ACTION attribute.  Otherwise, Lynx will use the
@@ -1101,7 +1102,7 @@ commands.
    <dt><em>^T</em>
 	<dd><em>Control-T</em> toggles Lynx trace mode on and off.  This is
 	    useful for diagnosing bad html.  If you get a <em>Bad HTML</em>
-	    statusline message when loading a document, enter
+	    status line message when loading a document, enter
 	    <em>Control-T</em> and then <em>Control-R</em> to reload the
 	    document in trace mode.  You also can submit the document for
 	    validation via links in the online help menu.  If you are able
@@ -1143,7 +1144,7 @@ commands.
    <dt><em>]</em>
 	<dd>The '<em>]</em>' command is used to send HEAD requests for the
 	    current document or link.  It applies only to documents or links
-	    (or form submit buttons) of http servers.  A statusline message
+	    (or form submit buttons) of http servers.  A status line message
 	    will notify you if the context for this command was inappropriate.
 	    The HEAD requests always are sent to the http server, i.e., Lynx
 	    does not retrieve any previous server replies from its cache.
@@ -1155,10 +1156,10 @@ commands.
 	    href="keystrokes/cookie_help.html">Cookie Jar Page</a>
 	    if it contains cookies.
    <dt><em>z</em>
-	<dd>Lynx supports completely interruptible I/O processes. Press the
-	    '<em>z</em>' key at any time during a connect or transfer process
-	    and the process will be halted.  If any data was transferred
-	    before the interrupt, it will be displayed.
+	<dd>To interrupt a connect or transfer request, enter '<em>z</em>':
+	    any data transferred before the interrupt will be displayed;
+	    to allow interruption of the look-up phase with '<em>z</em>'
+	    Lynx must be configured with --enable-nsl-fork when compiled.
    <dt><em>numbers</em>
 	<dd>Lynx offers other, advanced navigation features when numbers
 	    are used to invoke the <a
@@ -2032,7 +2033,7 @@ where
 	     <dt><code>-nolog</code>
 		<dd>disable mailing of error messages to document owners.
 	     <dt><code>-nopause</code>
-		<dd>disable forced pauses for statusline messages.
+		<dd>disable forced pauses for status line messages.
 	     <dt><code>-noprint</code>
 		<dd>disable print functions.
 	     <dt><code>-noredir</code>

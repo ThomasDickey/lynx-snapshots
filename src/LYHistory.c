@@ -406,8 +406,10 @@ PUBLIC int showhistory ARGS1(
     LYAddMETAcharsetToFD(fp0, -1);
     fprintf(fp0, "<title>%s</title>\n</head>\n<body>\n",
 		 HISTORY_PAGE_TITLE);
-    fprintf(fp0, "<h1>You have reached the History Page</h1>\n");
-    fprintf(fp0, "<h2>%s Version %s</h2>\n<pre>", LYNX_NAME, LYNX_VERSION);
+    fprintf(fp0, "<h1>%s (%s), help on <a href=\"%s%s\">%s</a></h1>\n",
+		 LYNX_NAME, LYNX_VERSION,
+		 helpfilepath, HISTORY_PAGE_HELP, HISTORY_PAGE_TITLE);
+    fprintf(fp0, "<pre>\n");
     fprintf(fp0, "<em>You selected:</em>\n");
     for (x = nhist-1; x >= 0; x--) {
 	/*
@@ -438,7 +440,6 @@ PUBLIC int showhistory ARGS1(
 	}
 	fprintf(fp0, "<tab to=t%d>%s\n", x, Title);
     }
-
     fprintf(fp0,"</pre>\n</body>\n");
 
     LYCloseTempFP(fp0);
@@ -556,8 +557,10 @@ PUBLIC int LYShowVisitedLinks ARGS1(
     LYAddMETAcharsetToFD(fp0, -1);
     fprintf(fp0, "<title>%s</title>\n</head>\n<body>\n",
 		 VISITED_LINKS_TITLE);
-    fprintf(fp0, "<h1>You have reached the Visited Links Page</h1>\n");
-    fprintf(fp0, "<h2>%s Version %s</h2>\n<pre>", LYNX_NAME, LYNX_VERSION);
+    fprintf(fp0, "<h1>%s (%s), help on <a href=\"%s%s\">%s</a></h1>\n",
+	LYNX_NAME, LYNX_VERSION,
+	helpfilepath, VISITED_LINKS_HELP, VISITED_LINKS_TITLE);
+    fprintf(fp0, "<pre>\n");
     fprintf(fp0,
   "<em>You visited (POSTs, bookmark, menu and list files excluded):</em>\n");
     x = HTList_count(Visited_Links);
@@ -593,7 +596,6 @@ PUBLIC int LYShowVisitedLinks ARGS1(
 	fprintf(fp0, "<tab to=t%d>%s\n", x,
 		     ((Address != NULL) ? Address : "(no address)"));
     }
-
     fprintf(fp0,"</pre>\n</body>\n");
 
     LYCloseTempFP(fp0);

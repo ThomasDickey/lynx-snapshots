@@ -89,7 +89,8 @@ PUBLIC char * LYRequestTitle = NULL; /* newdoc.title in calls to getfile() */
 
 #ifdef DISP_PARTIAL
 PUBLIC int Newline_partial = 0;     /* required for display_partial mode */
-PUBLIC int NumOfLines_partial = 0;  /* required for display_partial mode */
+PUBLIC int NumOfLines_partial = -1; /* required for display_partial mode */
+PUBLIC BOOLEAN debug_display_partial;  /* show with MessageSecs delay */
 #endif
 
 PRIVATE document newdoc;
@@ -204,6 +205,7 @@ int mainloop NOARGS
     BOOLEAN LYRawMode_flag = LYRawMode;
 #ifndef EXP_FORMS_OPTIONS
     BOOLEAN LYSelectPopups_flag = LYSelectPopups;
+    BOOLEAN verbose_img_flag = verbose_img;
     BOOLEAN keypad_mode_flag = keypad_mode;
     BOOLEAN show_dotfiles_flag = show_dotfiles;
     BOOLEAN user_mode_flag = user_mode;
@@ -376,15 +378,7 @@ try_again:
 		     *	elements to the curdoc structure elements
 		     *	under case NORMAL.  - FM
 		     */
-#ifndef EXP_FORMS_OPTIONS
 		    if (strncmp(newdoc.address, "LYNXDOWNLOAD:", 13))
-#else /* EXP_FORMS_OPTIONS */
-		    if (!strncmp(newdoc.address, "LYNXOPTIONS://MBM_MENU", 22))
-			LYpush(&curdoc, ForcePush);
-
-		    if (strncmp(newdoc.address, "LYNXDOWNLOAD:", 13) &&
-			strncmp(newdoc.address, "LYNXOPTIONS:", 12))
-#endif /* EXP_FORMS_OPTIONS */
 		    {
 			LYpush(&curdoc, ForcePush);
 		    }
@@ -509,16 +503,20 @@ try_again:
 #ifdef DISP_PARTIAL
 		display_partial = display_partial_flag; /* restore */
 		Newline_partial = newdoc.line; /* initialize */
-		NumOfLines_partial = 0;        /* initialize */
+		NumOfLines_partial = -1;       /* initialize to -1 */
+				/* -1 restrict HTDisplayPartial()   */
+				/* until HText_new() start new HTMainText */
+				/* and set the flag to 0  */
 		if (display_partial) {
 		    /*
-		     * Disable display_partial if requested URL has #fragment. 
+		     * Disable display_partial if requested URL has #fragment.
 		     * Otherwise user got the new document from the first page
 		     * and be moved to #fragment later after download
 		     * completed, but only if user did not mess screen up by
 		     * scrolling before...  So fall down to old behavior here.
 		     */
-		    if (!LYCursesON || (strchr(newdoc.address, '#')))
+		    if (!LYCursesON ||
+				(strchr(newdoc.address, '#')))
 			display_partial = FALSE;
 		}
 #endif /* DISP_PARTIAL */
@@ -1009,12 +1007,20 @@ try_again:
 		     */
 		    Newline = newdoc.line;
 #ifdef DISP_PARTIAL
-		    /*
-		     *	Override newdoc.line with a new value if user
-		     *	scrolled the document while downloading.
-		     */
-		    if (display_partial && (Newline_partial != newdoc.line))
-			Newline = Newline_partial;
+		    if (display_partial) {
+			/*
+			 *  Override newdoc.line with a new value if user
+			 *  scrolled the document while downloading.
+			 */
+			if (Newline_partial != newdoc.line)
+			    Newline = Newline_partial;
+
+			/*
+			 *  End of incremental rendering stage here.
+			 *  Reset for debugging purpose only.
+			 */
+			display_partial = FALSE;
+		    }
 #endif /* DISP_PARTIAL */
 
 		    /*
@@ -1959,9 +1965,9 @@ new_cmd:  /*
 		     *	users (like me 8-). - FM
 		     */
 		    if (Newline <= 1) {
-			HTUserMsg(ALREADY_AT_BEGIN);
+			HTInfoMsg(ALREADY_AT_BEGIN);
 		    } else if (!more) {
-			HTUserMsg(ALREADY_AT_END);
+			HTInfoMsg(ALREADY_AT_END);
 		    } else {
 			StrAllocCopy(temp, user_input_buffer);
 			sprintf(user_input_buffer,
@@ -2229,7 +2235,7 @@ new_cmd:  /*
 		curdoc.link = nlinks-1;  /* put on last link */
 	    } else if (old_c != real_c) {
 		   old_c = real_c;
-		   HTUserMsg(ALREADY_AT_END);
+		   HTInfoMsg(ALREADY_AT_END);
 	    }
 	    break;
 
@@ -2241,7 +2247,7 @@ new_cmd:  /*
 		curdoc.link = 0;  /* put on first link */
 	    } else if (old_c != real_c) {
 		old_c = real_c;
-		HTUserMsg(ALREADY_AT_BEGIN);
+		HTInfoMsg(ALREADY_AT_BEGIN);
 	    }
 	    break;
 
@@ -2260,7 +2266,7 @@ new_cmd:  /*
 		}
 	    } else if (old_c != real_c) {
 		old_c = real_c;
-		HTUserMsg(ALREADY_AT_BEGIN);
+		HTInfoMsg(ALREADY_AT_BEGIN);
 	    }
 	    break;
 
@@ -2275,7 +2281,7 @@ new_cmd:  /*
 		}
 	    } else if (old_c != real_c) {
 		old_c = real_c;
-		HTUserMsg(ALREADY_AT_END);
+		HTInfoMsg(ALREADY_AT_END);
 	    }
 	    break;
 
@@ -2297,7 +2303,7 @@ new_cmd:  /*
 		}
 	    } else if (old_c != real_c) {
 		old_c = real_c;
-		HTUserMsg(ALREADY_AT_BEGIN);
+		HTInfoMsg(ALREADY_AT_BEGIN);
 	    }
 	    break;
 
@@ -2312,7 +2318,7 @@ new_cmd:  /*
 		}
 	    } else if (old_c != real_c) {
 		old_c = real_c;
-		HTUserMsg(ALREADY_AT_END);
+		HTInfoMsg(ALREADY_AT_END);
 	    }
 	    break;
 
@@ -2378,7 +2384,7 @@ new_cmd:  /*
 
 	    } else if (old_c != real_c) {
 		old_c = real_c;
-		HTUserMsg(ALREADY_AT_BEGIN);
+		HTInfoMsg(ALREADY_AT_BEGIN);
 	    }
 	    break;
 
@@ -2420,7 +2426,7 @@ new_cmd:  /*
 
 	    } else if (old_c != real_c) {
 		old_c = real_c;
-		HTUserMsg(ALREADY_AT_END);
+		HTInfoMsg(ALREADY_AT_END);
 	    }
 	    break;
 
@@ -2479,7 +2485,7 @@ new_cmd:  /*
 
 	    } else if (old_c != real_c) {
 		old_c = real_c;
-		HTUserMsg(ALREADY_AT_BEGIN);
+		HTInfoMsg(ALREADY_AT_BEGIN);
 	    }
 	    break;
 
@@ -2522,7 +2528,7 @@ new_cmd:  /*
 
 	    } else if (old_c != real_c) {
 		old_c = real_c;
-		HTUserMsg(ALREADY_AT_END);
+		HTInfoMsg(ALREADY_AT_END);
 	    }
 	    break;
 
@@ -3742,7 +3748,8 @@ check_goto_URL:
 	    c = dir_list_style;
 #endif /* DIRED_SUPPORT */
 #ifndef EXP_FORMS_OPTIONS
-	    LYoptions(); /* do the options stuff */
+
+	    LYoptions(); /* do the old-style options stuff */
 
 	    if (keypad_mode_flag != keypad_mode ||
 		(user_mode_flag != user_mode &&
@@ -3758,6 +3765,7 @@ check_goto_URL:
 		CurrentCharSet_flag != current_char_set ||
 		CurrentAssumeCharSet_flag != UCLYhndl_for_unspec ||
 		CurrentAssumeLocalCharSet_flag != UCLYhndl_HTFile_for_unspec ||
+		verbose_img_flag != verbose_img ||
 		LYRawMode_flag != LYRawMode ||
 		LYSelectPopups_flag != LYSelectPopups ||
 		((strcmp(CurrentUserAgent, (LYUserAgent ?
@@ -3829,6 +3837,7 @@ check_goto_URL:
 	    CurrentAssumeCharSet_flag = UCLYhndl_for_unspec;
 	    CurrentAssumeLocalCharSet_flag = UCLYhndl_HTFile_for_unspec;
 	    show_dotfiles_flag = show_dotfiles;
+	    verbose_img_flag = verbose_img;
 	    LYRawMode_flag = LYRawMode;
 	    LYSelectPopups_flag = LYSelectPopups;
 	    StrAllocCopy(CurrentUserAgent, (LYUserAgent ?
@@ -3858,15 +3867,15 @@ check_goto_URL:
 		FREE(newdoc.bookmark);
 		newdoc.isHEAD = FALSE;
 		newdoc.safe = FALSE;
-		ForcePush = TRUE;
 		if (check_realm)
 		    LYPermitURL = TRUE;
 		refresh_screen = TRUE;	/* redisplay */
 
 		/*
 		 * FIXME:  this is a temporary solution until we find the
-		 * correct place for this command to reload the document before
-		 * 'options menu' only when necessary.
+		 * correct place for this command to reload the document
+		 * before the 'options menu' only when (few) important options
+		 * were changed.
 		 */
 		HTuncache_current_document();
 	    }
@@ -4386,7 +4395,7 @@ check_goto_URL:
 		FREE(newdoc.bookmark);
 		newdoc.isHEAD = FALSE;
 		newdoc.safe = FALSE;
-		ForcePush = TRUE;
+		ForcePush = TRUE;  /* see LYpush() and print_options() */
 		if (check_realm)
 		    LYPermitURL = TRUE;
 		refresh_screen = TRUE;	/* redisplay */
@@ -5016,6 +5025,10 @@ check_add_bookmark_to_self:
 			   !strncmp(links[curdoc.link].lname,
 				    "lynxprog:", 9)) {
 		    HTUserMsg(NO_DOWNLOAD_SPECIAL);
+
+		} else if (!strncmp(links[curdoc.link].lname,
+				    "mailto:", 7)) {
+		    HTUserMsg(NO_DOWNLOAD_MAILTO_LINK);
 
 		} else {   /* Not a forms, options or history link */
 		    /*

@@ -15,6 +15,21 @@
 #include <LYStructs.h>
 #endif /* LYSTRUCTS_H */
 
+#ifdef HAVE_CONFIG_H
+#include <LYHelp.h>
+#else
+#define COOKIE_JAR_HELP		"Lynx_users_guide.html#Cookies"
+#define CURRENT_KEYMAP_HELP	"keystrokes/keystroke_help.html"
+#define DIRED_MENU_HELP		"keystrokes/dired_help.html"
+#define DOWNLOAD_OPTIONS_HELP	"Lynx_users_guide.html#RemoteSource"
+#define HISTORY_PAGE_HELP	"keystrokes/history_help.html"
+#define LIST_PAGE_HELP		"keystrokes/follow_help.html"
+#define OPTIONS_HELP		"keystrokes/option_help.html"
+#define PRINT_OPTIONS_HELP	"keystrokes/print_help.html"
+#define UPLOAD_OPTIONS_HELP	"Lynx_users_guide.html#DirEd"
+#define VISITED_LINKS_HELP	"keystrokes/visited_help.html"
+#endif /* LYHELP_H */
+
 #ifdef SOCKS
 extern BOOLEAN socks_flag;
 #endif /* SOCKS */
@@ -238,6 +253,7 @@ extern BOOLEAN no_url_redirection;   /* Don't follow URL redirections */
 extern BOOLEAN display_partial;      /* Display document during download */
 extern int Newline_partial;          /* -//- "current" newline position */
 extern int NumOfLines_partial;       /* -//- "current" number of lines */
+extern BOOLEAN debug_display_partial;  /* show with MessageSecs delay */
 extern char *form_post_data;         /* User data for post form */
 extern char *form_get_data;          /* User data for get form */
 extern char *http_error_file;        /* Place HTTP status code in this file */

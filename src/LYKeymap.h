@@ -23,8 +23,6 @@ extern unsigned short keymap[]; /* main keymap matrix */
 extern unsigned short key_override[];
 #endif
 
-#define CURRENT_KEYMAP_TITLE "Current Key Map"
-
 #define       LYK_1             1
 #define       LYK_2             2
 #define       LYK_3             3

@@ -515,6 +515,18 @@ PUBLIC void read_rc NOPARAMS
 		local_exec_on_local_files=FALSE;
 #endif /* ALLOW_USERS_TO_CHANGE_EXEC_WITHIN_OPTIONS */
 
+	} else if ((cp = LYstrstr(line_buffer,
+				  "verbose_images")) != NULL &&
+		   cp-line_buffer < number_sign) {
+
+	   if ((cp2 = (char *)strchr(cp, '=')) != NULL)
+		cp = cp2 + 1;
+	   cp = LYSkipBlanks(cp);
+	   if (!strncasecomp(cp, "on", 2))
+		verbose_img = 1;
+	   else if (!strncasecomp(cp, "off", 3))
+		verbose_img = 0;
+
 	} /* end of if */
 
     } /* end of while */
@@ -916,6 +928,13 @@ PUBLIC int save_rc NOPARAMS
     fprintf(fp, "run_execution_links_on_local_files=%s\n\n",
 		(local_exec_on_local_files ? "on" : "off"));
 #endif /* defined(EXEC_LINKS) || defined(EXEC_SCRIPTS) */
+
+    fprintf(fp, "\
+# If verbose_images is \"on\", lynx will print the name of the image\n\
+# source file in place of [INLINE], [LINK] or [IMAGE]\n\
+# See also VERBOSE_IMAGES in lynx.cfg\n");
+    fprintf(fp, "verbose_images=%s\n\n",
+		verbose_img ? "on" : "off");
 
     /*
      *  Close the RC file.

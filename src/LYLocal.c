@@ -1686,20 +1686,18 @@ PUBLIC int dired_options ARGS2(
 
     nothing_tagged = (HTList_isEmpty(tagged));
 
-    fprintf(fp0,
-	    "<head>\n<title>%s</title></head>\n<body>\n", DIRED_MENU_TITLE);
-
-    fprintf(fp0,
-	    "\n<h1>File Management Options (%s Version %s)</h1>",
-	    LYNX_NAME, LYNX_VERSION);
-
-    fprintf(fp0, "Current directory is %s<br>\n", dir);
+    fprintf(fp0, "<head>\n<title>%s</title></head>\n<body>\n",
+		 DIRED_MENU_TITLE);
+    fprintf(fp0, "<h1>%s (%s), help on <a href=\"%s%s\">%s</a></h1>\n",
+		 LYNX_NAME, LYNX_VERSION,
+		 helpfilepath, DIRED_MENU_HELP, DIRED_MENU_TITLE);
+    fprintf(fp0, "<em>Current directory:</em> %s<br>\n", dir);
 
     if (nothing_tagged) {
 	if (strlen(path)) {
-	    fprintf(fp0, "Current selection is %s<p>\n", path);
+	    fprintf(fp0, "<em>Current selection:</em> %s<p>\n", path);
 	} else {
-	    fprintf(fp0, "Nothing currently selected.<p>\n");
+	    fprintf(fp0, "<em>Current selection:</em> Nothing currently selected.<p>\n");
 	}
     } else {
 	/*
@@ -1712,7 +1710,7 @@ PUBLIC int dired_options ARGS2(
 	char *cd = NULL;
 	int i, m;
 #define NUM_TAGS_TO_WRITE 10
-	fprintf(fp0, "Current selection is %d tagged item%s",
+	fprintf(fp0, "<em>Current selection:</em> %d tagged item%s",
 		     n, ((n == 1) ? ":" : "s:"));
 	StrAllocCopy(cd, doc->address);
 	HTUnEscapeSome(cd, "/");
@@ -1724,7 +1722,7 @@ PUBLIC int dired_options ARGS2(
 			     (*cd ? cd : "file://localhost"));
 	    HTUnEscape(cp1);
 	    LYEntify(&cp1, TRUE); /* _should_ do this everywhere... */
-	    fprintf(fp0, "%s <br>\n &nbsp;&nbsp;&nbsp;%s",
+	    fprintf(fp0, "%s<br>\n&nbsp;&nbsp;&nbsp;%s",
 			 (i == 1 ? "" : " ,"), cp1);
 	    FREE(cp1);
 	}

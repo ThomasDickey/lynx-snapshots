@@ -688,7 +688,7 @@ PUBLIC int printfile ARGS1(
 		     *	For PMDF, put the subject in the
 		     *	header file and close it. - FM
 		     */
-		    fprintf(hfd, "Subject: %.70s\n\n", sug_filename);
+		    fprintf(hfd, "Subject: %.70s\n\n", newdoc->title);
 		    LYCloseTempFP(hfd);
 		    /*
 		     *	Now set up the command. - FM
@@ -710,7 +710,7 @@ PUBLIC int printfile ARGS1(
 			    "%s %s/subject=\"%.70s\" %s %s",
 			    system_mail,
 			    system_mail_flags,
-			    sug_filename,
+			    newdoc->title,
 			    tempfile,
 			    user_response);
 		}
@@ -818,9 +818,11 @@ PUBLIC int printfile ARGS1(
 
 		/*
 		 *  Add the To, Subject, and X-URL headers. - FM
+		 *  Use newdoc->title as a subject instead of sug_filename:
+		 *  MORE readable and 8-bit letters shouldn't be a problem - LP
 		 */
 		fprintf(outfile_fp, "To: %s\nSubject: %s\n",
-				     user_response, sug_filename);
+				     user_response, newdoc->title);
 		fprintf(outfile_fp, "X-URL: %s\n\n", newdoc->address);
 		if (LYPrependBaseToSource && HTisDocumentSource()) {
 		    /*
@@ -992,7 +994,7 @@ PUBLIC int printfile ARGS1(
 		if (keypad_mode)
 		    printlist(outfile_fp, FALSE);
 
-		fclose(outfile_fp);
+		LYCloseTempFP(outfile_fp);
 
 		/* find the right printer number */
 		{
@@ -1264,28 +1266,30 @@ PUBLIC int print_options ARGS2(
 
     fprintf(fp0, "<html>\n<head>\n<title>%s</title>\n</head>\n<body>\n",
 		 PRINT_OPTIONS_TITLE);
-
-    fprintf(fp0,"<h1>Printing Options (%s Version %s)</h1><pre>\n",
-				       LYNX_NAME, LYNX_VERSION);
+    fprintf(fp0, "<h1>%s (%s), help on <a href=\"%s%s\">%s</a></h1>\n",
+		 LYNX_NAME, LYNX_VERSION,
+		 helpfilepath, PRINT_OPTIONS_HELP, PRINT_OPTIONS_TITLE);
 
     pages = (lines_in_file+65)/66;
-    sprintf(buffer,
-	   "   There are %d lines, or approximately %d page%s, to print.\n",
-	    lines_in_file, pages, (pages > 1 ? "s" : ""));
+    fprintf(fp0, "<pre>\n");
+    sprintf(buffer, "   \
+<em>You print the document:</em> %s\n   \
+       <em>Number of lines:</em> %d\n   \
+       <em>Number of pages:</em> %d page%s (approximately)\n",
+	tempfile, lines_in_file, pages, (pages > 1 ? "s" : ""));
     fputs(buffer,fp0);
 
     if (no_print || no_disk_save || child_lynx || no_mail)
-	fprintf(fp0, "   Some print functions have been disabled!!!\n");
+	fprintf(fp0, "   <em>Some print functions have been disabled!</em>\n");
 
-    fprintf(fp0, "   You have the following print choices.\n");
-    fprintf(fp0, "   Please select one:\n\n");
+    fprintf(fp0, "\nStandard print options:\n");
 
     if (child_lynx == FALSE && no_disk_save == FALSE && no_print == FALSE)
 	fprintf(fp0,
    "   <a href=\"LYNXPRINT://LOCAL_FILE/lines=%d\">Save to a local file</a>\n",
 		lines_in_file);
     else
-	fprintf(fp0,"   Save to disk disabled.\n");
+	fprintf(fp0,"   <em>Save to disk disabled.</em>\n");
     if (child_lynx == FALSE && no_mail == FALSE && local_host_only == FALSE)
 	 fprintf(fp0,
    "   <a href=\"LYNXPRINT://MAIL_FILE/lines=%d\">Mail the file</a>\n",
@@ -1300,6 +1304,7 @@ PUBLIC int print_options ARGS2(
 		lines_in_file);
 #endif
 
+    fprintf(fp0, "\nLocal additions:\n");
     for (count = 0, cur_printer = printers; cur_printer != NULL;
 	cur_printer = cur_printer->next, count++)
     if (no_print == FALSE || cur_printer->always_enabled) {

@@ -16,6 +16,8 @@ CFLAGS		= @CFLAGS@
 DEFS		= @DEFS@
 CPPFLAGS	= @CPPFLAGS@
 
+AWK		= @AWK@
+
 LIBS		= @LIBS@
 
 INSTALL		= @INSTALL@
@@ -43,6 +45,12 @@ helpdir= @libdir@/lynx_help
 ##from this directory
 ##do not set this to be an absolute path!!!
 WWWINC= WWW/Library/Implementation
+
+## Path to gzip that will compress the help files.
+## It will be used when --enable-gzip-help is set by configure.
+## Leave *both* empty if you don't want to gzip help files.
+COMPRESS_PROG=@COMPRESS_PROG@
+COMPRESS_EXT=@COMPRESS_EXT@
 
 # !!!!!!!!!!! SUN resolv LIBRARY !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 # To include resolv in the LIBS="" list for SUN 3, 4 or Solaris OS,
@@ -141,7 +149,7 @@ SITE_DEFS = # Your defines here
 # for installation of local execution links, please see the file userdefs.h
 
 # TESTED: Linux FreeBSD SunOS Solaris IRIX CLIX HP-UX AIX SCO
-all lynx$x:
+all lynx$x: LYHelp.h
 	cd WWW/Library/unix && $(MAKE) CC="$(CC)" \
 		LY_CFLAGS="$(CFLAGS)" \
 		CPPFLAGS="$(CPPFLAGS)" \
@@ -170,9 +178,9 @@ clean:
 	rm -f WWW/Library/*/*.[aob]
 	rm -f WWW/Library/*/.created
 	cd src && $(MAKE) clean
-	rm -f *.b src/lynx$x core Lynx.leaks
+	rm -f *.b src/lynx$x core Lynx.leaks LYHelp.h
 
-depend:
+depend: LYHelp.h
 	cd WWW/Library/unix && $(MAKE) $@
 	cd src && $(MAKE) $@
 
@@ -218,7 +226,7 @@ save:
 compress: tar
 	cd ..; rm -f $(lynxname).tar.Z; compress -f -v $(lynxname).tar
 
-install: lynx$x install-bin install-man install-cfg @INSTALL_LSS@
+install: lynx$x install-bin install-man install-cfg @INSTALL_LSS@ install-log
 	@echo
 	@echo "Use $(MAKE) install-help to install the help-files"
 	@echo
@@ -232,10 +240,37 @@ install-man : $(mandir)
 
 install-help : $(helpdir)
 	(cd $(helpdir) && rm -rf *)
-	(cd $(srcdir)/lynx_help && tar cf - . ) | ( cd $(helpdir) && tar xf - )
+	@echo Constructing sed-script
+	@sed	-e '/^#/d' -e '/^$$/d' \
+		-e 's%\(.*\)=\(.*\@.*\)%s=@\1@=\2=%g' \
+		-e 's%\(.*\)=\(http:.*\)%s=@\1@=\2=%g' \
+		-e 's%\(.*\)=\(ftp:.*\)%s=@\1@=\2=%g' \
+		-e 's%\(.*\)=\(.*\.html\)$$%s=@\1@=\2$(COMPRESS_EXT)=%g' \
+		$(srcdir)/lynx_help/help_files.txt > \
+		$(helpdir)/help_files.sed
+	@echo Appending interim-fix for existing html files
+	@sed	-e '/^#/d' -e '/[:@]/d' -e '/^$$/d' \
+		-e 's%\(.*\)=\(.*\.html\)$$%s=\\<\2\\>=\2$(COMPRESS_EXT)=%g' \
+		$(srcdir)/lynx_help/help_files.txt >> \
+		$(helpdir)/help_files.sed
+	@echo Translating/copying html files
+	@sh -c	'cd $(srcdir)/lynx_help && ( \
+		dirs=`find . -type d -print` ; \
+		(cd $(helpdir) && mkdir $$dirs 2>/dev/null ) ; \
+		files=`find . -name \*.html -print` ; \
+		for f in $$files ; do \
+			sed -f $(helpdir)/help_files.sed $$f > $(helpdir)/$$f ; \
+		done ; \
+		if test "$(COMPRESS_PROG)" != "" ; then \
+			(cd $(helpdir) && $(COMPRESS_PROG) $$files ) \
+		fi ; \
+		)'
+	-rm -f $(helpdir)/help_files.sed
+	@echo Copying sample files
 	(cd $(srcdir) && tar cf - C[HO]* PROBLEMS README samples test ) | \
 			       ( cd $(helpdir) && tar xf - )
 	-rm -f $(libdir)/lynx.tmp
+	@echo Updating $(libdir)/lynx.cfg 
 	sh -c 'if test -f $(libdir)/lynx.cfg ; then \
 		mv $(libdir)/lynx.cfg $(libdir)/lynx.tmp ; \
 	else \
@@ -244,9 +279,32 @@ install-help : $(helpdir)
 	sed	-e '/^HELPFILE:http/s@^@#@' \
 		-e '/^#HELPFILE:file/s@#@@' \
 		-e '/^HELPFILE:file/s@/PATH_TO/lynx_help@$(helpdir)@' \
+		-e '/^HELPFILE:file/s@$$@$(COMPRESS_EXT)@' \
 		$(libdir)/lynx.tmp >$(libdir)/lynx.cfg
 	chmod 644 $(libdir)/lynx.cfg
 	-rm -f $(libdir)/lynx.tmp
+
+LYHelp.h : LYHelp.hin
+	@sed	-e '/^#/d' -e '/^$$/d' \
+		-e 's%\(.*\)=\(.*\@.*\)%s=@\1@=\2=%g' \
+		-e 's%\(.*\)=\(http:.*\)%s=@\1@=\2=%g' \
+		-e 's%\(.*\)=\(ftp:.*\)%s=@\1@=\2=%g' \
+		-e 's%\(.*\)=\(.*\.html\)$$%s=@\1@=\2$(COMPRESS_EXT)=%g' \
+		$(srcdir)/lynx_help/help_files.txt > \
+		help_files.sed
+	@sed -f help_files.sed $(srcdir)/LYHelp.hin > $@
+	-@rm -f help_files.sed
+	@echo '**********************************************'
+	@echo
+	@sh -c 'if test "$(COMPRESS_PROG)" = "" ; then \
+		echo "       Help files will NOT be gzipped."; \
+	else \
+		echo "       Help links point to compressed files"; \
+		echo "       To access them properly you have to type"; \
+		echo "                 make install-help"; \
+	fi'
+	@echo
+	@echo '**********************************************'
 
 install-cfg : $(libdir)
 	-mv -f $(libdir)/lynx.cfg $(libdir)/lynx.oldcfg
@@ -255,6 +313,12 @@ install-cfg : $(libdir)
 install-lss : $(libdir)
 	-mv -f $(libdir)/lynx.lss $(libdir)/lynx.oldlss
 	$(INSTALL_DATA) $(srcdir)/samples/lynx.lss $(libdir)/lynx.lss
+
+install-log : $(libdir) config.cache
+	-@sed	-e '/^#/d' \
+		-e 's/^.._cv_\(.*\)=.*=\(.*\)\}/\1=\2/g' \
+		config.cache | \
+	$(AWK) -F= '{printf "%-30s = %s\n",$$1,$$2}' |sort > $(libdir)/lynx_site.txt
 
 uninstall:
 	-rm -f $(bindir)/lynx$x

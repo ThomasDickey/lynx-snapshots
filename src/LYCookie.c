@@ -2274,10 +2274,9 @@ Delete_all_cookies_in_domain:
     sprintf(buf, "<HEAD>\n<TITLE>%s</title>\n</HEAD>\n<BODY>\n",
 		 COOKIE_JAR_TITLE);
     (*target->isa->put_block)(target, buf, strlen(buf));
-
-    sprintf(buf, "<H1>%s</H1>\n", REACHED_COOKIE_JAR_PAGE);
-    (*target->isa->put_block)(target, buf, strlen(buf));
-    sprintf(buf, "<H2>%s Version %s</H2>\n", LYNX_NAME, LYNX_VERSION);
+    sprintf(buf, "<h1>%s (%s), help on <a href=\"%s%s\">%s</a></h1>\n",
+	LYNX_NAME, LYNX_VERSION,
+	helpfilepath, COOKIE_JAR_HELP, COOKIE_JAR_TITLE);
     (*target->isa->put_block)(target, buf, strlen(buf));
 
     sprintf(buf, "<NOTE>%s\n", ACTIVATE_TO_GOBBLE);
@@ -2298,8 +2297,8 @@ Delete_all_cookies_in_domain:
 	/*
 	 *  Show the domain link and 'allow' setting. - FM
 	 */
-	sprintf(buf, "<DT><A HREF=\"LYNXCOOKIE://%s/\">Domain=%s</A>\n",
-		      de->domain, de->domain);
+	sprintf(buf, "<DT>%s<DD><A HREF=\"LYNXCOOKIE://%s/\">Domain=%s</A>\n",
+		      de->domain, de->domain, de->domain);
 	(*target->isa->put_block)(target, buf, strlen(buf));
 	switch (de->bv) {
 	    case (ACCEPT_ALWAYS):
@@ -2315,6 +2314,8 @@ Delete_all_cookies_in_domain:
 		sprintf(buf, COOKIES_READ_FROM_FILE);
 		break;
 	}
+	(*target->isa->put_block)(target, buf, strlen(buf));
+	sprintf(buf, "\n");
 	(*target->isa->put_block)(target, buf, strlen(buf));
 
 	/*
