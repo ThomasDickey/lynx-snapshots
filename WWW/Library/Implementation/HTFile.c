@@ -1704,7 +1704,7 @@ PRIVATE int print_local_dir ARGS5(
 	HTBTree * bt = HTBTree_new((HTComparer)AS_cmp);
 	int num_of_entries = 0;	    /* lines counter */
 
-	_HTProgress (gettext("Reading directory..."));
+	_HTProgress (READING_DIRECTORY);
 	status = HT_LOADED; /* assume we don't get interrupted */
 	while ((dirbuf = readdir(dp)) != NULL) {
 	    /*
@@ -1786,7 +1786,7 @@ PRIVATE int print_local_dir ARGS5(
 	}   /* end while directory entries left to read */
 
 	if (status != HT_PARTIAL_CONTENT)
-	    _HTProgress (gettext("OK"));
+	    _HTProgress (OPERATION_OK);
 	else
 	    CTRACE((tfp, "Reading the directory interrupted by user\n"));
 

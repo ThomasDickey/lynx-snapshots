@@ -138,17 +138,21 @@ extern void LYbox PARAMS((WINDOW *win, BOOLEAN formfield));
 /*
  * Useful macros not in PDCurses or very old ncurses headers.
  */
-#ifndef getattrs
+#if !defined(HAVE_GETATTRS) && !defined(getattrs)
 #define getattrs(win) ((win)->_attrs)
 #endif
-#ifndef getbegx
+#if !defined(HAVE_GETBEGX) && !defined(getbegx)
 #define getbegx(win) ((win)->_begx)
 #endif
-#ifndef getbegy
+#if !defined(HAVE_GETBEGY) && !defined(getbegy)
 #define getbegy(win) ((win)->_begy)
 #endif
-#ifndef getbkgd
+#if !defined(HAVE_GETBKGD) && !defined(getbkgd)
 #define getbkgd(win) ((win)->_bkgd)
+#endif
+
+#if defined(PDCURSES)
+#define HAVE_GETBKGD 1	/* can use fallback definition */
 #endif
 
 /* Both slang and curses: */

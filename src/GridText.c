@@ -8368,6 +8368,9 @@ PUBLIC BOOLEAN HTreparse_document NOARGS
 	    FREE(HTMainAnchor->UCStages);
 	}
 
+	if (HTMainAnchor->content_type) {
+	    format = HTAtom_for(HTMainAnchor->content_type);
+	} else {
 	/*
 	 * This is only done to make things aligned with SOURCE_CACHE_NONE and
 	 * SOURCE_CACHE_FILE when switching to source mode since the original
@@ -8376,8 +8379,9 @@ PUBLIC BOOLEAN HTreparse_document NOARGS
 	 * user-visible benefits, seems just '=' Info Page will show source's
 	 * effective charset as "(assumed)".
 	 */
-	format = HTCharsetFormat(format, HTMainAnchor,
-					 UCLYhndl_for_unspec);
+	    format = HTCharsetFormat(format, HTMainAnchor,
+					     UCLYhndl_for_unspec);
+	}
 	/* not UCLYhndl_HTFile_for_unspec - we are talking about remote documents... */
 
 	if (HText_HaveUserChangedForms()) {

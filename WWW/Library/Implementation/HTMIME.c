@@ -381,14 +381,13 @@ PRIVATE int pumpData ARGS1(HTStream *, me)
 	    permanent_redirection = FALSE;
 	    if (me->location) {
 		CTRACE((tfp, "HTTP: 'Location:' is zero-length!\n"));
-		HTAlert(
-		    gettext("Got redirection with a bad Location header."));
+		HTAlert(REDIRECTION_WITH_BAD_LOCATION);
 	    }
 	    CTRACE((tfp, "HTTP: Failed to pick up location.\n"));
 	    if (me->location) {
 		FREE(me->location);
 	    } else {
-		HTAlert(gettext("Got redirection with no Location header."));
+		HTAlert(REDIRECTION_WITH_NO_LOCATION);
 	    }
 	}
     }

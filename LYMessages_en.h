@@ -39,6 +39,7 @@
 #define CANCELLED gettext("Cancelled!!!")
 #define CANCELLING gettext("Cancelling!")
 #define NO_CANCEL gettext("Excellent!!!")
+#define OPERATION_OK gettext("OK")
 #define OPERATION_DONE gettext("Done!")
 #define BAD_REQUEST gettext("Bad request!")
 #define PREVIOUS gettext("previous")
@@ -345,6 +346,7 @@
  gettext("You are not on a form submission button or normal link.")
 #define NEED_CHECKED_RADIO_BUTTON \
  gettext("One radio button must be checked at all times!")
+#define NO_SUBMIT_BUTTON_QUERY gettext("No submit button for this form, submit single text field?")
 #define PREV_DOC_QUERY gettext("Do you want to go back to the previous document?")
 #define ARROWS_OR_TAB_TO_MOVE gettext("Use arrows or tab to move off of field.")
 #define ENTER_TEXT_ARROWS_OR_TAB \
@@ -467,9 +469,11 @@
 #define CANNOT_WRITE_TO_FILE gettext("Cannot write to file.")
 #define MISCONF_DOWNLOAD_COMMAND gettext("ERROR! - download command is misconfigured.")
 #define CANNOT_DOWNLOAD_FILE gettext("Unable to download file.")
+#define READING_DIRECTORY gettext("Reading directory...")
 #define BUILDING_DIR_LIST gettext("Building directory listing...")
 #define SAVING gettext("Saving...")
 #define COULD_NOT_EDIT_FILE gettext("Could not edit file '%s'.")
+#define COULD_NOT_ACCESS_DOCUMENT gettext("Unable to access document!")
 #define COULD_NOT_ACCESS_FILE gettext("Could not access file.")
 #define COULD_NOT_ACCESS_DIR gettext("Could not access directory.")
 #define COULD_NOT_LOAD_DATA gettext("Could not load data.")
@@ -629,6 +633,8 @@
 #define ILLEGAL_REDIRECTION_URL gettext("Illegal redirection URL received from server!")
 #define	SERVER_ASKED_FOR_REDIRECTION \
  gettext("Server asked for %d redirection of POST content to")
+#define REDIRECTION_WITH_BAD_LOCATION "Got redirection with a bad Location header."
+#define REDIRECTION_WITH_NO_LOCATION "Got redirection with no Location header."
 #define	PROCEED_GET_CANCEL gettext("P)roceed, use G)ET or C)ancel ")
 #define	PROCEED_OR_CANCEL gettext("P)roceed, or C)ancel ")
 #define	ADVANCED_POST_GET_REDIRECT \

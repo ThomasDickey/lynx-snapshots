@@ -61,6 +61,9 @@
 #undef HAVE_DEFINE_KEY
 #undef HAVE_DIRENT_H		/* defined by AC_HEADER_DIRENT */
 #undef HAVE_FCNTL_H		/* have <fcntl.h> */
+#undef HAVE_GETATTRS
+#undef HAVE_GETBEGX
+#undef HAVE_GETBEGY
 #undef HAVE_GETBKGD		/* defined by CF_COLOR_CURSES */
 #undef HAVE_GETCWD
 #undef HAVE_GETGROUPS
