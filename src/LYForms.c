@@ -353,7 +353,7 @@ PRIVATE int form_getstr ARGS3(
     int action, repeat;
     int last_xlkc = -1;
 #ifdef SUPPORT_MULTIBYTE_EDIT
-    BOOL refresh = TRUE;
+    BOOL refresh_mb = TRUE;
 #endif
 
     EditFieldData MyEdit;
@@ -446,10 +446,10 @@ again:
 	ch = LYgetch_for(FOR_INPUT);
 #ifdef SUPPORT_MULTIBYTE_EDIT
 #ifdef WIN_EX
-	if (!refresh && (EditBinding(ch) != LYE_CHAR))
+	if (!refresh_mb && (EditBinding(ch) != LYE_CHAR))
 	    goto again;
 #else
-	if (!refresh &&
+	if (!refresh_mb &&
 	    (EditBinding(ch) != LYE_CHAR) && (EditBinding(ch) != LYE_AIX))
 	    goto again;
 #endif
@@ -711,12 +711,12 @@ again:
 #else /* SUPPORT_MULTIBYTE_EDIT */
 		    if (LYLineEdit(&MyEdit, ch, TRUE) == 0) {
 			if (HTCJK != NOCJK && (0x80 <= ch)
-			&& (ch <= 0xfe) && refresh)
-			    refresh = FALSE;
+			&& (ch <= 0xfe) && refresh_mb)
+			    refresh_mb = FALSE;
 			else
-			    refresh = TRUE;
+			    refresh_mb = TRUE;
 		    } else {
-			if (!refresh) {
+			if (!refresh_mb) {
 			    LYEdit1(&MyEdit, 0, LYE_DELP, TRUE);
 			}
 		    }
@@ -733,7 +733,7 @@ again:
 		    Edited = TRUE;
 		}
 #ifdef SUPPORT_MULTIBYTE_EDIT
-		if (refresh)
+		if (refresh_mb)
 #endif
 		LYRefreshEdit(&MyEdit);
 		LYSetLastTFPos(MyEdit.pos);

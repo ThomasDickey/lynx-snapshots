@@ -8131,7 +8131,7 @@ int main() {
 make an error
 #else
 extern int SLang_TT_Baud_Rate;
-int x = SLang_TT_Baud_Rate
+SLang_TT_Baud_Rate = 1
 #endif
 
 ; return 0; }

@@ -180,7 +180,7 @@ PRIVATE void sl_suspend ARGS1(
     SLang_init_tty(3, 0, 1);
 #endif /* SLANG_VERSION > 9929 */
     signal(SIGTSTP, sl_suspend);
-#if defined(UNIX) && !defined(__CYGWIN__)
+#if defined(REAL_UNIX_SYSTEM) && !defined(__CYGWIN__)
     SLtty_set_suspend_state(1);
 #endif
     if (sig == SIGTSTP)
@@ -680,11 +680,11 @@ PUBLIC void start_curses NOARGS
 	SLkp_init ();
 #endif /* __DJGPP__ && !DJGPP_KEYHANDLER */
 
-#if defined(UNIX) && !defined(__CYGWIN__)
+#if defined(REAL_UNIX_SYSTEM) && !defined(__CYGWIN__)
 #if SLANG_VERSION >= 9935
 	SLang_TT_Read_FD = fileno(stdin);
 #endif /* SLANG_VERSION >= 9935 */
-#endif /* UNIX && !__CYGWIN__ */
+#endif /* REAL_UNIX_SYSTEM && !__CYGWIN__ */
 
 #if !defined(USE_KEYMAPS) && defined(ENHANCED_LINEEDIT) && defined(ESCDELAY)
 	/* way to get ESC that's not part of a recognized sequence through */
@@ -720,7 +720,7 @@ PUBLIC void start_curses NOARGS
 	}
 	size_change(0);
 
-#if (defined(VMS) || defined(UNIX)) && !defined(__CYGWIN__)
+#if (defined(VMS) || defined(REAL_UNIX_SYSTEM)) && !defined(__CYGWIN__)
 	if ((Masked_Attr & SLTT_ULINE_MASK) == 0) {
 	    SLtt_add_color_attribute(4, SLTT_ULINE_MASK);
 	    SLtt_add_color_attribute(5, SLTT_ULINE_MASK);
@@ -734,7 +734,7 @@ PUBLIC void start_curses NOARGS
 	} else {
 	    SLtt_Blink_Mode = 0;
 	}
-#endif /* (VMS || UNIX) && !__CYGWIN__  */
+#endif /* (VMS || REAL_UNIX_SYSTEM) && !__CYGWIN__  */
     }
 #ifdef __DJGPP__
 #ifdef WATT32
@@ -760,9 +760,9 @@ PUBLIC void start_curses NOARGS
     scrollok(0,0);
     SLsmg_Backspace_Moves = 1;
 #ifndef VMS
-#if defined(UNIX) && !defined(__CYGWIN__)
+#if defined(REAL_UNIX_SYSTEM) && !defined(__CYGWIN__)
     SLtty_set_suspend_state(1);
-#endif /* UNIX && !__CYGWIN__ */
+#endif /* REAL_UNIX_SYSTEM && !__CYGWIN__ */
 #ifdef SIGTSTP
     if (!no_suspend)
 	signal(SIGTSTP, sl_suspend);

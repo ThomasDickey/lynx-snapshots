@@ -2015,7 +2015,7 @@ AC_TRY_LINK([#include <slang.h>],
 make an error
 #else
 extern int SLang_TT_Baud_Rate;
-int x = SLang_TT_Baud_Rate
+SLang_TT_Baud_Rate = 1
 #endif
 ],
 	[cf_cv_slang_unix=yes],
