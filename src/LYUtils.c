@@ -1532,7 +1532,7 @@ PUBLIC int HTCheckForInterrupt NOARGS
     int c;
     int cmd;
 #ifndef VMS /* UNIX stuff: */
-#if !defined(USE_SLANG) && (defined(UNIX) || defined(__DJGPP__))
+#if !defined(USE_SLANG) && (defined(UNIX) || defined(__DJGPP__) || defined(__MINGW32__))
     struct timeval socket_timeout;
     int ret = 0;
     fd_set readfds;
@@ -4177,7 +4177,7 @@ PUBLIC int win32_check_interrupt(void)
     int c;
 
     if (kbhit()) {
-	c = wgetch(LYwin);
+	c = LYgetch();
 	/** Keyboard 'Z' or 'z', or Control-G or Control-C **/
 	if (LYCharIsINTERRUPT(c) || c == 0x1b) {
 	    return TRUE;
@@ -4195,7 +4195,7 @@ void sleep(unsigned sec)
 	for (i = 0; i < 10; i++) {
 	    Sleep(100);
 	    if (kbhit()) {
-		c = wgetch(LYwin);
+		c = LYgetch();
 		return;
 	    }
 	}
@@ -6917,9 +6917,11 @@ PUBLIC int LYSystem ARGS1(
 
 #ifdef _WIN_CC
     code = exec_command(command, TRUE);	/* Wait exec */
-#else
+#else /* !_WIN_CC */
+#ifdef SIGPIPE
     if (restore_sigpipe_for_children)
 	signal(SIGPIPE, SIG_DFL); /* Some commands expect the default */
+#endif
 #if defined(HAVE_SIGACTION) && defined(SIGTSTP) && !defined(USE_SLANG)
     if (!dump_output_immediately && !LYCursesON && !no_suspend)
 	sigtstp_saved = LYToggleSigDfl(SIGTSTP, &saved_sigtstp_act, 1);
@@ -6930,8 +6932,10 @@ PUBLIC int LYSystem ARGS1(
     if (sigtstp_saved)
 	LYToggleSigDfl(SIGTSTP, &saved_sigtstp_act, 0);
 #endif
+#ifdef SIGPIPE
     if (restore_sigpipe_for_children)
 	signal(SIGPIPE, SIG_IGN); /* Ignore it again - kw */
+#endif
 #endif
 #endif
 

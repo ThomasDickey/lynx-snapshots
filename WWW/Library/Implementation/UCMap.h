@@ -46,6 +46,8 @@ extern int UCLYhndl_for_unrec;
 extern int UCLYhndl_HTFile_for_unspec;
 extern int UCLYhndl_HTFile_for_unrec;
 
+#undef UTF8		/* defined in some broken header files */
+
 /* easy to type: */
 extern int LATIN1;     /* UCGetLYhndl_byMIME("iso-8859-1") */
 extern int US_ASCII;   /* UCGetLYhndl_byMIME("us-ascii")   */

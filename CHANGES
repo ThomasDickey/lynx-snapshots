@@ -1,6 +1,17 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2002-12-18 (2.8.5dev.12)
+* remove a check in LYMain.c for cygwin's console, which does not work with
+  screen (report by Frederic L W Meunier) -TD
+* undo line/pool logic, fixing a memory leak -LP
+* changes proposed by Bela Lubkin, to optimize ALLOC_IN_POOL macro
+  substitution, pack bitfields in HTStyleChanges more compact on some systems -LP
+* correct logic of do_check_recall(), broken in dev.9 cleanup of pathname
+  constants with LYIsDosDrive() (report by Frederic L W Meunier) -TD
+* update makelynx.bat, built with slang configuration -TD
+* turn on file-upload in makefile.msc -TD
+
 2002-12-01 (2.8.5dev.11)
 * fix a typo in changelog date -TD
 * add project version & date to lynx.cfg -TD

@@ -1,24 +1,28 @@
+@echo off
 @echo Windows/Dos batch makefile for MingW32 and lynx.exe
 @echo Remember to precede this by "command /E:8192" and to set the
 @echo MingW32 C_INCLUDE_PATH and %C_INCLUDE_PATH%..\..\bin paths
-@echo
-@echo Usage: makelynx [all|src|link]
+@echo.
+@echo Usage: makelynx [option]
 @echo Default option: all
 @echo Specifying "src" causes the libwww code to be skipped.
 @echo Specifying "link" causes the batch file to skip to the final
 @echo linking phase.
-@echo
-PAUSE
+@echo.
 @echo Note that you have to edit i386-mingw32\include\stdlib.h to put
 @echo an "#ifndef WIN_EX" around the declaration for `sleep', or the
 @echo compile won't work.  There is also an "#ifndef PDCURSES" around
-@echo the declaration for `beep' for the same reason.  To change the
-@echo console library from libslang to libpdcurses, uncomment the
-@echo `SET LIBRARY' line below.
+@echo the declaration for `beep' for the same reason.
+@echo.
+@echo To change the console library from libslang to libpdcurses,
+@echo uncomment the `SET LIBRARY' line below.
 
-PAUSE
+rem SET LIBRARY=PDCURSES
 
-REM SET LIBRARY=PDCURSES
+rem Uncomment these lines if the slang/curses headers and libraries
+rem are in the top-level lib directory:
+rem set C_INCLUDE_PATH=..\lib;..\..\..\lib;%C_INCLUDE_PATH%
+rem set LIBRARY_PATH=..\lib;..\..\..\lib;%LIBRARY_PATH%
 
 set CC=gcc
 
@@ -28,6 +32,7 @@ echo #define ANSI_VARARGS	 1 >> lynx_cfg.h
 echo #define BOXHORI             0 >> lynx_cfg.h
 echo #define BOXVERT             0 >> lynx_cfg.h
 echo #define HAVE_GETCWD	 1 >> lynx_cfg.h
+echo #define HAVE_STRERROR	 1 >> lynx_cfg.h
 echo #define LYNX_CFG_FILE "./lynx.cfg" >> lynx_cfg.h
 echo #define LY_MAXPATH       1024 >> lynx_cfg.h
 echo #define USE_ALT_BLAT_MAILER 1 >> lynx_cfg.h
@@ -36,7 +41,6 @@ echo #define _WIN_CC		 1 >> lynx_cfg.h
 rem echo #define USE_SCROLLBAR	 1 >> lynx_cfg.h
 
 SET DEFINES=-DCJK_EX
-SET DEFINES=%DEFINES% -DHAVE_CONFIG_H
 SET DEFINES=%DEFINES% -DNO_CONFIG_INFO
 SET DEFINES=%DEFINES% -DSH_EX
 SET DEFINES=%DEFINES% -DWIN_EX
@@ -298,7 +302,7 @@ if errorlevel 1 PAUSE
 
 :link
 if not "%LIBRARY%" == "PDCURSES" goto else2
-SET LIBS=-L..\WWW\Library\Implementation -lwww -lpdcurses -lpanel -lwsock32 -luser32
+SET LIBS=-L..\WWW\Library\Implementation -lwww -lpdcurses -lwsock32 -luser32
 goto endif2
 :else2
 SET LIBS=-L..\WWW\Library\Implementation -lwww -lslang -lwsock32 -luser32

@@ -170,6 +170,10 @@ typedef struct {
 #undef ERR			/* all versions of curses define this */
 #endif
 
+#ifdef MOUSE_MOVED
+#undef MOUSE_MOVED		/* wincon.h or MINGW32's copy of it */
+#endif
+
 #ifdef HAVE_CONFIG_H
 # ifdef HAVE_NCURSESW_NCURSES_H
 #  undef GCC_PRINTFLIKE		/* <libutf8.h> may define 'printf' */
