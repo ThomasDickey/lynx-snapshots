@@ -1,6 +1,6 @@
 /* character level styles for Lynx
  * (c) 1996 Rob Partington -- donated to the Lyncei (if they want it :-)
- * @Id: LYStyle.c 1.40 Thu, 21 Dec 2000 18:44:11 -0800 dickey @
+ * @Id: LYStyle.c 1.41 Thu, 08 Feb 2001 18:50:00 -0800 dickey @
  */
 #include <HTUtils.h>
 #include <HTML.h>
@@ -64,16 +64,29 @@ static char *Mono_Strings[7] =
 };
 
 /* Remember the hash codes for common elements */
-PUBLIC int	s_alink  = NOSTYLE, s_a     = NOSTYLE, s_status = NOSTYLE,
-		s_normal = NOSTYLE, s_alert = NOSTYLE, s_title  = NOSTYLE,
+PUBLIC int s_a			= NOSTYLE;
+PUBLIC int s_aedit		= NOSTYLE;
+PUBLIC int s_aedit_arr		= NOSTYLE;
+PUBLIC int s_aedit_pad		= NOSTYLE;
+PUBLIC int s_aedit_sel		= NOSTYLE;
+PUBLIC int s_alert		= NOSTYLE;
+PUBLIC int s_alink		= NOSTYLE;
+PUBLIC int s_curedit		= NOSTYLE;
+PUBLIC int s_normal		= NOSTYLE;
+PUBLIC int s_prompt_edit	= NOSTYLE;
+PUBLIC int s_prompt_edit_arr	= NOSTYLE;
+PUBLIC int s_prompt_edit_pad	= NOSTYLE;
+PUBLIC int s_prompt_sel		= NOSTYLE;
+PUBLIC int s_status		= NOSTYLE;
+PUBLIC int s_title		= NOSTYLE;
+PUBLIC int s_whereis		= NOSTYLE;
+
 #ifdef USE_SCROLLBAR
-		s_sb_bar = NOSTYLE, s_sb_bg = NOSTYLE,
-		s_sb_aa = NOSTYLE, s_sb_naa = NOSTYLE,
+PUBLIC int s_sb_aa		= NOSTYLE;
+PUBLIC int s_sb_bar		= NOSTYLE;
+PUBLIC int s_sb_bg		= NOSTYLE;
+PUBLIC int s_sb_naa		= NOSTYLE;
 #endif
-		s_whereis = NOSTYLE, s_aedit = NOSTYLE,
-		s_aedit_pad = NOSTYLE, s_aedit_arr = NOSTYLE, 
-		s_prompt_edit = NOSTYLE, s_prompt_edit_pad = NOSTYLE,
-		s_prompt_edit_arr = NOSTYLE;
 
 /* start somewhere safe */
 #define MAX_COLOR 16
@@ -196,6 +209,35 @@ PRIVATE void parse_attributes ARGS5(char*,mono,char*,fg,char*,bg,int,style,char*
  */
 PRIVATE void parse_style ARGS1(char*,buffer)
 {
+    static struct {
+	char *name;
+	int style;
+	int *set_hash;
+    } table[] = {
+	{ "default",		-1,			0 }, /* default fg/bg */
+	{ "alink",		DSTYLE_ALINK,		0 }, /* active link */
+	{ "a",			DSTYLE_LINK,		0 }, /* normal link */
+	{ "a",			HTML_A,			0 }, /* normal link */
+	{ "status",		DSTYLE_STATUS,		0 }, /* status bar */
+	{ "label",		DSTYLE_OPTION,		0 }, /* [INLINE]'s */
+	{ "value",		DSTYLE_VALUE,		0 }, /* [INLINE]'s */
+	{ "high",		DSTYLE_HIGH,		0 }, /* [INLINE]'s */
+	{ "normal",		DSTYLE_NORMAL,		0 },
+	{ "candy",		DSTYLE_CANDY,		0 }, /* [INLINE]'s */
+	{ "whereis",		DSTYLE_WHEREIS,		&s_whereis },
+	{ "edit.active.pad",	DSTYLE_ELEMENTS,	&s_aedit_pad },
+	{ "edit.active.arrow",	DSTYLE_ELEMENTS,	&s_aedit_arr },
+	{ "edit.active.marked",	DSTYLE_ELEMENTS,	&s_aedit_sel },
+	{ "edit.active",	DSTYLE_ELEMENTS,	&s_aedit },
+	{ "edit.current",	DSTYLE_ELEMENTS,	&s_curedit },
+	{ "edit.prompt.pad",	DSTYLE_ELEMENTS,	&s_prompt_edit_pad },
+	{ "edit.prompt.arrow",	DSTYLE_ELEMENTS,	&s_prompt_edit_arr },
+	{ "edit.prompt.marked",	DSTYLE_ELEMENTS,	&s_prompt_sel },
+	{ "edit.prompt",	DSTYLE_ELEMENTS,	&s_prompt_edit },
+    };
+    unsigned n;
+    BOOL found = FALSE;
+
     char *tmp = strchr(buffer, ':');
     char *element, *mono, *fg, *bg;
 
@@ -247,98 +289,29 @@ where OBJECT is one of EM,STRONG,B,I,U,BLINK etc.\n\n"), buffer);
     /*
     * We use some pseudo-elements, so catch these first
     */
-    if (!strncasecomp(element, "default", 7)) /* default fg/bg */
-    {
-	parse_attributes(mono,fg,bg,-1,"default");
+    for (n = 0; n < TABLESIZE(table); n++) {
+	if (!strcasecomp(element, table[n].name)) {
+	    parse_attributes(mono, fg, bg, table[n].style, table[n].name);
+	    if (table[n].set_hash != 0)
+		*(table[n].set_hash) = hash_code(table[n].name);
+	    found = TRUE;
+	    break;
+	}
     }
-    else if (!strncasecomp(element, "alink", 5)) /* active link */
-    {
-	parse_attributes(mono,fg,bg,DSTYLE_ALINK,"alink");
-    }
-    else if (!strcasecomp(element, "a")) /* normal link */
-    {
-	parse_attributes(mono,fg,bg, DSTYLE_LINK,"a");
-	parse_attributes(mono,fg,bg, HTML_A,"a");
-    }
-    else if (!strncasecomp(element, "status", 4)) /* status bar */
-    {
-	parse_attributes(mono,fg,bg, DSTYLE_STATUS,"status");
-    }
-    else if (!strncasecomp(element, "label", 6)) /* [INLINE]'s */
-    {
-	parse_attributes(mono,fg,bg,DSTYLE_OPTION,"label");
-    }
-    else if (!strncasecomp(element, "value", 5)) /* [INLINE]'s */
-    {
-	parse_attributes(mono,fg,bg,DSTYLE_VALUE,"value");
-    }
-    else if (!strncasecomp(element, "high", 4)) /* [INLINE]'s */
-    {
-	parse_attributes(mono,fg,bg,DSTYLE_HIGH,"high");
+
+    if (found) {
+	;
     }
     else if (!strcasecomp(element, "normal")) /* added - kw */
     {
 	parse_attributes(mono,fg,bg,DSTYLE_NORMAL,"html");
 	s_normal  = hash_code("html"); /* rather bizarre... - kw */
     }
-    /* this may vanish */
-    else if (!strncasecomp(element, "candy", 5)) /* [INLINE]'s */
-    {
-	parse_attributes(mono,fg,bg,DSTYLE_CANDY,"candy");
-    }
-    /* added for whereis search target - kw */
-    else if (!strncasecomp(element, "whereis", 7))
-    {
-	parse_attributes(mono,fg,bg,DSTYLE_WHEREIS,"whereis");
-	s_whereis  = hash_code("whereis");
-    }
-    else if (!strncasecomp(element, "edit.active.pad", 15))
-    {
-	parse_attributes(mono,fg,bg,DSTYLE_ELEMENTS,"edit.active.pad");
-	s_aedit_pad = hash_code("edit.active.pad");
-    }
-    else if (!strncasecomp(element, "edit.active.arrow", 17))
-    {
-	parse_attributes(mono,fg,bg,DSTYLE_ELEMENTS,"edit.active.arrow");
-	s_aedit_arr  = hash_code("edit.active.arrow");
-    }
-    else if (!strncasecomp(element, "edit.active", 11))
-    {
-	parse_attributes(mono,fg,bg,DSTYLE_ELEMENTS,"edit.active");
-	s_aedit  = hash_code("edit.active");
-    }
-    else if (!strncasecomp(element, "edit.prompt.pad", 15))
-    {
-	parse_attributes(mono,fg,bg,DSTYLE_ELEMENTS,"edit.prompt.pad");
-	s_prompt_edit_pad = hash_code("edit.prompt.pad");
-    }
-    else if (!strncasecomp(element, "edit.prompt.arrow", 17))
-    {
-	parse_attributes(mono,fg,bg,DSTYLE_ELEMENTS,"edit.prompt.arrow");
-	s_prompt_edit_arr  = hash_code("edit.prompt.arrow");
-    }
-    else if (!strncasecomp(element, "edit.prompt", 11))
-    {
-	parse_attributes(mono,fg,bg,DSTYLE_ELEMENTS,"edit.prompt");
-	s_prompt_edit  = hash_code("edit.prompt");
-    }
     /* Ok, it must be a HTML element, so look through the list until we
     * find it
     */
     else
     {
-#if !defined(USE_HASH)
-	int i;
-	for (i = 0; i <HTML_ELEMENTS; i++)
-	{
-	    if (!strcasecomp (HTML_dtd.tags[i].name, element))
-	    {
-		CTRACE((tfp, "PARSECSS:applying style <%s,%s,%s> for HTML_%s\n",mono,fg,bg,HTML_dtd.tags[i].name));
-			parse_attributes(mono,fg,bg,i+STARTAT,element);
-		break;
-	    }
-	}
-#else
 	int element_number = -1;
 	HTTag * t = SGMLFindTag(&HTML_dtd, element);
 	if (t && t->name) {
@@ -349,7 +322,6 @@ where OBJECT is one of EM,STRONG,B,I,U,BLINK etc.\n\n"), buffer);
 	    parse_attributes(mono,fg,bg, element_number+STARTAT,element);
 	else
 	    parse_attributes(mono,fg,bg, DSTYLE_ELEMENTS,element);
-#endif
     }
 }
 
@@ -442,18 +414,18 @@ PUBLIC void parse_userstyles NOARGS
 		parse_style(name);
 	}
     }
-    if (s_prompt_edit == NOSTYLE)
-	s_prompt_edit = s_normal;
-    if (s_prompt_edit_arr == NOSTYLE)
-	s_prompt_edit_arr = s_prompt_edit;
-    if (s_prompt_edit_pad == NOSTYLE)
-	s_prompt_edit_pad = s_prompt_edit;
-    if (s_aedit == NOSTYLE)
-	s_aedit = s_alink;
-    if (s_aedit_arr == NOSTYLE)
-	s_aedit_arr = s_aedit;
-    if (s_aedit_pad == NOSTYLE)
-	s_aedit_pad = s_aedit;
+
+#define dft_style(a,b) if (a == NOSTYLE) a = b
+
+    dft_style(s_prompt_edit,		s_normal);
+    dft_style(s_prompt_edit_arr,	s_prompt_edit);
+    dft_style(s_prompt_edit_pad,	s_prompt_edit);
+    dft_style(s_prompt_sel,		s_prompt_edit);
+    dft_style(s_aedit,			s_alink);
+    dft_style(s_aedit_arr,		s_aedit);
+    dft_style(s_aedit_pad,		s_aedit);
+    dft_style(s_curedit,		s_aedit);
+    dft_style(s_aedit_sel,		s_aedit);
 }
 
 

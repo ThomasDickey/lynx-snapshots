@@ -21,6 +21,7 @@
 #undef DECL_STRSTR
 #undef DECL_SYS_ERRLIST
 #undef DIRED_SUPPORT		/* AC_ARG_WITH(dired) */
+#undef DISABLE_BIBP		/* CF_ARG_DISABLE(bibp-urls) */
 #undef DISABLE_FINGER		/* CF_ARG_DISABLE(finger) */
 #undef DISABLE_FTP		/* CF_ARG_DISABLE(ftp) */
 #undef DISABLE_GOPHER		/* CF_ARG_DISABLE(gopher) */
@@ -59,6 +60,7 @@
 #undef HAVE_CUSERID
 #undef HAVE_DCGETTEXT		/* defined by AM_GNU_GETTEXT */
 #undef HAVE_DEFINE_KEY
+#undef HAVE_DELSCREEN		/* defined by CF_CURSES_FUNCS  */
 #undef HAVE_DIRENT_H		/* defined by AC_HEADER_DIRENT */
 #undef HAVE_FCNTL_H		/* have <fcntl.h> */
 #undef HAVE_FTIME
@@ -88,11 +90,12 @@
 #undef HAVE_MMAP		/* defined by AM_GNU_GETTEXT */
 #undef HAVE_MUNMAP		/* defined by AM_GNU_GETTEXT */
 #undef HAVE_NCURSES_H		/* defined if we include <ncurses.h> */
+#undef HAVE_NEWPAD
 #undef HAVE_NEWTERM
 #undef HAVE_NL_TYPES_H		/* defined by AM_GNU_GETTEXT */
+#undef HAVE_PNOUTREFRESH
 #undef HAVE_POPEN
 #undef HAVE_PUTENV
-#undef HAVE_RAND
 #undef HAVE_READDIR
 #undef HAVE_RESIZETERM
 #undef HAVE_RESOLV_H
@@ -101,7 +104,6 @@
 #undef HAVE_SETUID
 #undef HAVE_SIGACTION		/* CF_FUNC_SIGACTION */
 #undef HAVE_SIZECHANGE		/* defined by CF_SIZECHANGE */
-#undef HAVE_SRAND
 #undef HAVE_STDARG_H		/* CF_VARARGS */
 #undef HAVE_STDLIB_H
 #undef HAVE_STPCPY		/* defined by AM_GNU_GETTEXT */
@@ -145,8 +147,8 @@
 #undef HAVE___ARGZ_NEXT		/* defined by AM_GNU_GETTEXT */
 #undef HAVE___ARGZ_STRINGIFY	/* defined by AM_GNU_GETTEXT */
 #undef IGNORE_CTRL_C		/* FIXME: make tests? */
-#undef INSTALL_ARGS		/* CF_PATH_PROG(install) */
 #undef INCLUDE_PROTOTYPES	/* CF_SOCKS5 */
+#undef INSTALL_ARGS		/* CF_PATH_PROG(install) */
 #undef INSTALL_PATH		/* CF_PATH_PROG(install) */
 #undef LINKEDSTYLES		/* see USE_COLOR_STYLE */
 #undef LINUX			/* FIXME: make tests? */
@@ -203,7 +205,6 @@
 #undef USE_EXECVP		/* CF_ARG_DISABLE(full-paths) */
 #undef USE_EXTERNALS		/* CF_ARG_ENABLE(externs) */
 #undef USE_FCNTL		/* CF_FIONBIO */
-#undef USE_HASH			/* see USE_COLOR_STYLE */
 #undef USE_OPENSSL_INCL		/* CF_SSL */
 #undef USE_PRETTYSRC		/* CF_ARG_ENABLE(prettysrc) */
 #undef USE_SCROLLBAR		/* CF_ARG_ENABLE(scrollbar) */
@@ -224,6 +225,8 @@
 #undef _ALL_SOURCE		/* AC_AIX */
 #undef inline			/* defined by AC_C_INLINE */
 #undef mode_t			/* defined by AC_TYPE_MODE_T */
+#undef my_rand			/* CF_SRAND */
+#undef my_srand			/* CF_SRAND */
 #undef off_t			/* defined by AC_TYPE_OFF_T */
 #undef pid_t			/* defined by AC_TYPE_PID_T */
 #undef uid_t			/* defined by AC_TYPE_UID_T */

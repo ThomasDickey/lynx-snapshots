@@ -17,11 +17,7 @@ struct _hashbucket {
 typedef struct _hashbucket bucket;
 
 #if !defined(CSHASHSIZE)
-#ifdef NOT_USED
-#define CSHASHSIZE 32768
-#else
 #define CSHASHSIZE 8193
-#endif
 #endif
 
 #define NOSTYLE -1
@@ -37,13 +33,30 @@ extern int hash_code_lowercase_on_fly PARAMS((char* string));
 extern int hash_code_aggregate_char PARAMS((char c,int hash));
 extern int hash_code_aggregate_lower_str  PARAMS((char* c,int hash_was));
 
-extern int	s_alink, s_a, s_status,
-		s_normal, s_alert, s_title,
+extern int	s_a;
+extern int	s_aedit;
+extern int	s_aedit_arr;
+extern int	s_aedit_pad;
+extern int	s_aedit_sel;
+extern int	s_alert;
+extern int	s_alink;
+extern int	s_curedit;
+extern int	s_normal;
+extern int	s_prompt_edit;
+extern int	s_prompt_edit_arr;
+extern int	s_prompt_edit_pad;
+extern int	s_prompt_sel;
+extern int	s_status;
+extern int	s_title;
+extern int	s_whereis;
+
 #ifdef USE_SCROLLBAR
-		s_sb_bar, s_sb_bg, s_sb_aa, s_sb_naa,
+extern int	s_sb_aa;
+extern int	s_sb_bar;
+extern int	s_sb_bg;
+extern int	s_sb_naa;
 #endif
-		s_whereis, s_aedit, s_aedit_pad, s_aedit_arr, 
-		s_prompt_edit, s_prompt_edit_pad, s_prompt_edit_arr;
+
 #define CACHEW 128
 #define CACHEH 64
 

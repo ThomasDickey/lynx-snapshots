@@ -712,7 +712,7 @@ get_advanced_choice:
 	     *	Refresh the screen.
 	     */
 	    lynx_force_repaint();
-	    refresh();
+	    LYrefresh();
 	    goto get_advanced_choice;
 	}
 	if (LYisNonAlnumKeyname(c, LYK_ACTIVATE)) {
@@ -820,33 +820,33 @@ draw_bookmark_choices:
      *	to increase the chances that any non-ASCII or multibyte/CJK
      *	characters will be handled properly. - FM
      */
-    clear();
-    move(1, 5);
+    LYclear();
+    LYmove(1, 5);
     lynx_start_h1_color ();
     if (MBM_screens > 1) {
 	char *shead_buffer = 0;
 	HTSprintf0(&shead_buffer,
 		MULTIBOOKMARKS_SHEAD_MASK, MBM_current, MBM_screens);
-	addstr(shead_buffer);
+	LYaddstr(shead_buffer);
 	FREE(shead_buffer);
     } else {
-	addstr(MULTIBOOKMARKS_SHEAD);
+	LYaddstr(MULTIBOOKMARKS_SHEAD);
     }
 
     lynx_stop_h1_color ();
 
     MBM_tmp_count = 0;
     for (c = MBM_from; c <= MBM_to; c++) {
-	move(3+MBM_tmp_count, 5);
-	addch(UCH((c + 'A')));
-	addstr(" : ");
+	LYmove(3+MBM_tmp_count, 5);
+	LYaddch(UCH((c + 'A')));
+	LYaddstr(" : ");
 	if (MBM_A_subdescript[c])
-	    addstr(MBM_A_subdescript[c]);
-	move(3+MBM_tmp_count,36);
-	addch('(');
+	    LYaddstr(MBM_A_subdescript[c]);
+	LYmove(3+MBM_tmp_count,36);
+	LYaddch('(');
 	if (MBM_A_subbookmark[c])
-	    addstr(MBM_A_subbookmark[c]);
-	addch(')');
+	    LYaddstr(MBM_A_subbookmark[c]);
+	LYaddch(')');
 	MBM_tmp_count++;
     }
 
@@ -854,19 +854,19 @@ draw_bookmark_choices:
      *	Don't need to show it if it all fits on one screen!
      */
     if (MBM_screens > 1) {
-	move(LYlines-2, 0);
-	addstr("'");
-	standout();
-	addstr("[");
-	standend();
-	addstr("' ");
-	addstr(PREVIOUS);
-	addstr(", '");
-	standout();
-	addstr("]");
-	standend();
-	addstr("' ");
-	addstr(NEXT_SCREEN);
+	LYmove(LYlines-2, 0);
+	LYaddstr("'");
+	start_bold();
+	LYaddstr("[");
+	stop_bold();
+	LYaddstr("' ");
+	LYaddstr(PREVIOUS);
+	LYaddstr(", '");
+	start_bold();
+	LYaddstr("]");
+	stop_bold();
+	LYaddstr("' ");
+	LYaddstr(NEXT_SCREEN);
     }
 
     LYMBM_statusline(MULTIBOOKMARKS_SAVE);
@@ -892,7 +892,7 @@ get_bookmark_choice:
 	 *  Refresh the screen.
 	 */
 	lynx_force_repaint();
-	refresh();
+	LYrefresh();
 	goto get_bookmark_choice;
     }
 

@@ -198,7 +198,7 @@ PRIVATE int LYLoadCGI ARGS4(
 	while (statrv < 0 || (statrv = stat(pgm_buff, &stat_buf)) < 0) {
 	    if ((cp=strrchr(pgm_buff, '/')) != NULL) {
 		*cp = '\0';
-		statrv = 999;	/* force new stat()  - kw */
+		statrv = 1;	/* force new stat()  - kw */
 	    } else {
 		PERROR("strrchr(pgm_buff, '/') returned NULL");
 	    	break;

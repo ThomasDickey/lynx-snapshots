@@ -123,10 +123,10 @@ PUBLIC void HTSSLInitPRNG NOARGS
 	RAND_seed((unsigned char *)&pid, sizeof(pid_t));
 	/* Initialize system's random number generator */
 	RAND_bytes((unsigned char *)&seed, sizeof(long));
-	srand48(seed);
+	my_srand(seed);
 	while (RAND_status() == 0) {
 	    /* Repeatedly seed the PRNG using the system's random number generator until it has been seeded with enough data */
-	    l = lrand48();
+	    l = my_rand();
 	    RAND_seed((unsigned char *)&l, sizeof(long));
 	}
 	if (rand_file != NULL) {

@@ -358,16 +358,16 @@ PUBLIC int HTConfirmDefault ARGS2(CONST char *, Msg, int, Dft)
 		c = TOUPPER(*msg_no);
 	    }
 #endif /* VMS */
-	    if (LYCharIsINTERRUPT(c)) { /* remember we had ^G or ^C */
-		conf_cancelled = YES;
-		result = NO;
-	    } else if (c == TOUPPER(*msg_yes)) {
+	    if (c == TOUPPER(*msg_yes)) {
 		result = YES;
 	    } else if (c == TOUPPER(*msg_no)) {
 		result = NO;
 	    } else if (fallback_y && c == fallback_y) {
 		result = YES;
 	    } else if (fallback_n && c == fallback_n) {
+		result = NO;
+	    } else if (LYCharIsINTERRUPT(c)) { /* remember we had ^G or ^C */
+		conf_cancelled = YES;
 		result = NO;
 	    } else if (Dft != DFT_CONFIRM) {
 		result = Dft;
@@ -761,7 +761,7 @@ PUBLIC BOOL HTConfirmCookie ARGS4(
 	     * NOTE TO TRANSLATORS:  If the prompt has been rendered into
 	     * another language, and if yes/no are distinct, assume the
 	     * translator can make an ordered list in parentheses with one
-	     * capital letter for each as we assumed in HTConfirmDefault(). 
+	     * capital letter for each as we assumed in HTConfirmDefault().
 	     * The list has to be in the same order as in the original message,
 	     * and the four capital letters chosen to not match those in the
 	     * original unless they have the same position.
@@ -810,11 +810,10 @@ PUBLIC BOOL HTConfirmCookie ARGS4(
 		return TRUE;
 
 	    case 'N':
-	    case LYCharINTERRUPT2:	/* Ctrl-G */
-	    case LYCharINTERRUPT1:	/* Ctrl-C */
 		/*
 		**  Reject the cookie.
 		*/
+	      reject:
 		HTUserMsg(REJECTING_COOKIE);
 		return FALSE;
 
@@ -834,6 +833,8 @@ PUBLIC BOOL HTConfirmCookie ARGS4(
 		return TRUE;
 
 	    default:
+		if (LYCharIsINTERRUPT(ch))
+		    goto reject;
 		continue;
 	}
     }
@@ -892,15 +893,15 @@ PUBLIC int HTConfirmPostRedirect ARGS2(
 
     if (user_mode == NOVICE_MODE) {
 	on_screen = 2;
-	move(LYlines-2, 0);
+	LYmove(LYlines-2, 0);
 	HTSprintf0(&StatusInfo, SERVER_ASKED_FOR_REDIRECTION, server_status);
-	addstr(StatusInfo);
-	clrtoeol();
-	move(LYlines-1, 0);
+	LYaddstr(StatusInfo);
+	LYclrtoeol();
+	LYmove(LYlines-1, 0);
 	HTSprintf0(&url, "URL: %.*s",
 		    (LYcols < 250 ? LYcols-6 : 250), Redirecting_url);
-	addstr(url);
-	clrtoeol();
+	LYaddstr(url);
+	LYclrtoeol();
 	if (server_status == 301) {
 	    _statusline(PROCEED_GET_CANCEL);
 	} else {

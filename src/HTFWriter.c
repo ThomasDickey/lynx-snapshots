@@ -220,7 +220,7 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 		     */
 		    if (!dump_output_immediately) {
 			lynx_force_repaint();
-			refresh();
+			LYrefresh();
 		    }
 		    HTAlert(ERROR_UNCOMPRESSING_TEMP);
 		    LYRemoveTemp(me->anchor->FileCache);

@@ -197,19 +197,19 @@ PUBLIC char *LYNewsPost ARGS2(
     /*
      *  Show the list of newsgroups. - FM
      */
-    clear();
-    move(2,0);
-    scrollok(stdscr, TRUE);	/* Enable scrolling. */
-    addstr(gettext("You will be posting to:"));
-    addstr("\n\t");
-    addstr(NewsGroups);
-    addch('\n');
+    LYclear();
+    LYmove(2,0);
+    scrollok(LYwin, TRUE);		/* Enable scrolling. */
+    LYaddstr(gettext("You will be posting to:"));
+    LYaddstr("\n\t");
+    LYaddstr(NewsGroups);
+    LYaddch('\n');
 
     /*
      *  Get the mail address for the From header,
      *  offering personal_mail_address as default.
      */
-    addstr(gettext("\n\n Please provide your mail address for the From: header\n"));
+    LYaddstr(gettext("\n\n Please provide your mail address for the From: header\n"));
     sprintf(user_input, "From: %.*s", (int)sizeof(user_input) - 8,
 	    (personal_mail_address != NULL) ? personal_mail_address : "");
     if (LYgetstr(user_input, VISIBLE,
@@ -217,7 +217,7 @@ PUBLIC char *LYNewsPost ARGS2(
 	term_message) {
 	HTInfoMsg(NEWS_POST_CANCELLED);
 	LYCloseTempFP(fd);		/* Close the temp file.	*/
-	scrollok(stdscr, FALSE);	/* Stop scrolling.	*/
+	scrollok(LYwin, FALSE);		/* Stop scrolling.	*/
 	goto cleanup;
     }
     fprintf(fd, "%s\n", user_input);
@@ -227,7 +227,7 @@ PUBLIC char *LYNewsPost ARGS2(
      *  document's title as the default if this is a
      *  followup rather than a new post. - FM
      */
-    addstr(gettext("\n\n Please provide or edit the Subject: header\n"));
+    LYaddstr(gettext("\n\n Please provide or edit the Subject: header\n"));
     strcpy(user_input, "Subject: ");
     if ((followup == TRUE && nhist > 0) &&
 	(kp = HText_getTitle()) != NULL) {
@@ -264,7 +264,7 @@ PUBLIC char *LYNewsPost ARGS2(
 	term_message) {
 	HTInfoMsg(NEWS_POST_CANCELLED);
 	LYCloseTempFP(fd);		/* Close the temp file. */
-	scrollok(stdscr, FALSE);	/* Stop scrolling.	*/
+	scrollok(LYwin, FALSE);		/* Stop scrolling.	*/
 	goto cleanup;
     }
     fprintf(fd,"%s\n",user_input);
@@ -319,13 +319,13 @@ PUBLIC char *LYNewsPost ARGS2(
 #endif /* !UNIX */
     LYstrncpy(user_input, cp, (sizeof(user_input) - 16));
     FREE(cp);
-    addstr(gettext("\n\n Please provide or edit the Organization: header\n"));
+    LYaddstr(gettext("\n\n Please provide or edit the Organization: header\n"));
     if (LYgetstr(user_input, VISIBLE,
 		 sizeof(user_input), NORECALL) < 0 ||
 	term_message) {
 	HTInfoMsg(NEWS_POST_CANCELLED);
 	LYCloseTempFP(fd);		/* Close the temp file. */
-	scrollok(stdscr, FALSE);	/* Stop scrolling.	*/
+	scrollok(LYwin, FALSE);		/* Stop scrolling.	*/
 	goto cleanup;
     }
     fprintf(fd, "%s\n", user_input);
@@ -365,7 +365,7 @@ PUBLIC char *LYNewsPost ARGS2(
 	    }
 	}
 	LYCloseTempFP(fd);		/* Close the temp file. */
-	scrollok(stdscr, FALSE);	/* Stop scrolling.	*/
+	scrollok(LYwin, FALSE);		/* Stop scrolling.	*/
 	if (term_message || LYCharIsINTERRUPT(c))
 	    goto cleanup;
 
@@ -392,22 +392,22 @@ PUBLIC char *LYNewsPost ARGS2(
 	/*
 	 *  Use the built in line editior.
 	 */
-	addstr(gettext("\n\n Please enter your message below."));
-	addstr(gettext("\n When you are done, press enter and put a single period (.)"));
-	addstr(gettext("\n on a line and press enter again."));
-	addstr("\n\n");
-	refresh();
+	LYaddstr(gettext("\n\n Please enter your message below."));
+	LYaddstr(gettext("\n When you are done, press enter and put a single period (.)"));
+	LYaddstr(gettext("\n on a line and press enter again."));
+	LYaddstr("\n\n");
+	LYrefresh();
 	*user_input = '\0';
 	if (LYgetstr(user_input, VISIBLE,
 		     sizeof(user_input), NORECALL) < 0 ||
 	    term_message) {
 	    HTInfoMsg(NEWS_POST_CANCELLED);
 	    LYCloseTempFP(fd);		/* Close the temp file.	*/
-	    scrollok(stdscr, FALSE);	/* Stop scrolling.	*/
+	    scrollok(LYwin, FALSE);	/* Stop scrolling.	*/
 	    goto cleanup;
 	}
 	while (!STREQ(user_input,".") && !term_message) {
-	    addch('\n');
+	    LYaddch('\n');
 	    fprintf(fd,"%s\n",user_input);
 	    if (!nonempty && strlen(user_input))
 		nonempty = TRUE;
@@ -415,14 +415,14 @@ PUBLIC char *LYNewsPost ARGS2(
 	    if (LYgetstr(user_input, VISIBLE,
 			 sizeof(user_input), NORECALL) < 0) {
 		HTInfoMsg(NEWS_POST_CANCELLED);
-		LYCloseTempFP(fd);		/* Close the temp file. */
-		scrollok(stdscr, FALSE);	/* Stop scrolling.	*/
+		LYCloseTempFP(fd);	/* Close the temp file. */
+		scrollok(LYwin, FALSE);	/* Stop scrolling.	*/
 		goto cleanup;
 	    }
 	}
 	fprintf(fd, "\n");
 	LYCloseTempFP(fd);		/* Close the temp file. */
-	scrollok(stdscr, FALSE);	/* Stop scrolling.	*/
+	scrollok(LYwin, FALSE);		/* Stop scrolling.	*/
     }
 
     if (nonempty) {
@@ -434,7 +434,7 @@ PUBLIC char *LYNewsPost ARGS2(
 	c = HTConfirm(POST_MSG_PROMPT);
 	LYStatusLine = -1;
 	if (c != YES) {
-	    clear();  /* clear the screen */
+	    LYclear();  /* clear the screen */
 	    goto cleanup;
 	}
     } else {
@@ -464,7 +464,7 @@ PUBLIC char *LYNewsPost ARGS2(
 	FREE(msg);
 	LYStatusLine = -1;
     }
-    clear();  /* clear the screen */
+    LYclear();  /* clear the screen */
 
     /*
      *  If we are using a Japanese display character
@@ -539,7 +539,7 @@ PRIVATE void terminate_message ARGS1(
      *  Refresh the screen to get rid of the "interrupt" message.
      */
     lynx_force_repaint();
-    refresh();
+    LYrefresh();
 #endif /* VMS */
 }
 

@@ -348,7 +348,7 @@ struct _HText {
 	BOOLEAN			soft_dquotes;
 	BOOLEAN			old_dtd;
 	int			keypad_mode;
-	int			disp_lines;		/* Screen size */
+	int			disp_lines;	/* Screen size */
 	int			disp_cols;
 #endif
 	HTLine *		last_line;
@@ -1118,7 +1118,7 @@ PRIVATE int display_line ARGS4(
      *  writing.
      */
     buffer[0] = buffer[1] = buffer[2] = '\0';
-    clrtoeol();
+    LYclrtoeol();
 
     /*
      *  Add offset, making sure that we do not
@@ -1137,7 +1137,7 @@ PRIVATE int display_line ARGS4(
     else
 #endif
     for (i = 0; i < j; i++)
-	addch (' ');
+	LYaddch (' ');
 #endif /* USE_SLANG */
 
     /*
@@ -1232,7 +1232,7 @@ PRIVATE int display_line ARGS4(
 #ifndef USE_COLOR_STYLE
 	    case LY_UNDERLINE_START_CHAR:
 		if (dump_output_immediately && use_underscore) {
-		    addch('_');
+		    LYaddch('_');
 		    i++;
 		} else {
 		    inunderline = YES;
@@ -1251,7 +1251,7 @@ PRIVATE int display_line ARGS4(
 
 	    case LY_UNDERLINE_END_CHAR:
 		if (dump_output_immediately && use_underscore) {
-		    addch('_');
+		    LYaddch('_');
 		    i++;
 		} else {
 		    inunderline = NO;
@@ -1283,7 +1283,7 @@ PRIVATE int display_line ARGS4(
 #endif
 	    case LY_SOFT_NEWLINE:
 		if (!dump_output_immediately) {
-		    addch('+');
+		    LYaddch('+');
 		    i++;
 		}
 		break;
@@ -1355,7 +1355,7 @@ PRIVATE int display_line ARGS4(
 		if (utf_extra) {
 		    strncpy(&buffer[1], data, utf_extra);
 		    buffer[utf_extra+1] = '\0';
-		    addstr(buffer);
+		    LYaddstr(buffer);
 		    buffer[1] = '\0';
 		    data += utf_extra;
 		    utf_extra = 0;
@@ -1373,7 +1373,7 @@ PRIVATE int display_line ARGS4(
 		    buffer[2] = '\0';
 		    data++;
 		    i++;
-		    addstr(buffer);
+		    LYaddstr(buffer);
 		    buffer[1] = '\0';
 		    /*
 		     *  For now, load 'M' into LastDisplayChar,
@@ -1392,12 +1392,12 @@ PRIVATE int display_line ARGS4(
 #if defined(UNIX) || defined(VMS)
 		    if (!dump_output_immediately &&
 			UCH(buffer[0]) == 128+27) {
-			addstr("~^");
+			LYaddstr("~^");
 			buffer[0] ^= 0xc0;
 		    }
 #endif
 #endif
-		    addstr(buffer);
+		    LYaddstr(buffer);
 		    LastDisplayChar = buffer[0];
 		}
 	} /* end of switch */
@@ -1413,7 +1413,7 @@ after_while:
     /*
      *  Add the return.
      */
-    addch('\n');
+    LYaddch('\n');
 
 #if defined(SHOW_WHEREIS_TARGETS) && !defined(USE_COLOR_STYLE)
     if (intarget)
@@ -1446,6 +1446,7 @@ PRIVATE void display_title ARGS1(
     char *cp = NULL;
     unsigned char *tmp = NULL;
     int i = 0, j = 0;
+    int limit;
 
     /*
      *  Make sure we have a text structure. - FM
@@ -1484,7 +1485,8 @@ PRIVATE void display_title ARGS1(
     /*
      *  Generate the page indicator (percent) string.
      */
-    if (LYcols < 10) {
+    limit = LYscreenWidth();
+    if (limit < 10) {
 	percent[0] = '\0';	/* Null string */
     } else if ((display_lines) <= 0 && LYlines > 0 &&
 	text->top_of_screen <= 99999 && text->Lines <= 999999) {
@@ -1538,17 +1540,17 @@ PRIVATE void display_title ARGS1(
 	    FREE(tmp);
 	}
     }
-    move(0, 0);
-    clrtoeol();
+    LYmove(0, 0);
+    LYclrtoeol();
 #if defined(SH_EX) && defined(KANJI_CODE_OVERRIDE)
-    addstr(str_kcode(last_kcode));
+    LYaddstr(str_kcode(last_kcode));
 #endif
     if (text->top_of_screen > 0 && HText_hasToolbar(text)) {
-	addch('#');
+	LYaddch('#');
     }
-    i = (LYcols - 1) - strlen(percent) - strlen(title);
+    i = (limit - 1) - strlen(percent) - strlen(title);
     if (i >= CHAR_WIDTH) {
-	move(0, i);
+	LYmove(0, i);
     } else {
 	/*
 	 *  Note that this truncation is not taking into
@@ -1558,23 +1560,23 @@ PRIVATE void display_title ARGS1(
 #ifdef SH_EX	/* 1999/06/15 (Tue) 10:17:28 */
 	int last;
 	last = (int)strlen(percent) + CHAR_WIDTH;
-	if (LYcols - 3 >= last) {
-	    title[(LYcols - 3) - last] = '.';
-	    title[(LYcols - 2) - last] = '.';
-	    title[(LYcols - 1) - last] = '\0';
+	if (limit - 3 >= last) {
+	    title[(limit - 3) - last] = '.';
+	    title[(limit - 2) - last] = '.';
+	    title[(limit - 1) - last] = '\0';
 	} else {
-	    title[(LYcols - 1) - last] = '\0';
+	    title[(limit - 1) - last] = '\0';
 	}
 #else
-	if ((i = ((LYcols - 2) - strlen(percent)) - CHAR_WIDTH) >= 0)
+	if ((i = ((limit - 2) - strlen(percent)) - CHAR_WIDTH) >= 0)
 	    title[i] = '\0';
 #endif
-	move(0, CHAR_WIDTH);
+	LYmove(0, CHAR_WIDTH);
     }
-    addstr(title);
+    LYaddstr(title);
     if (percent[0] != '\0')
-	addstr(percent);
-    addch('\n');
+	LYaddstr(percent);
+    LYaddch('\n');
     FREE(title);
 
 #ifdef USE_COLOR_STYLE
@@ -1648,7 +1650,7 @@ PRIVATE void display_scrollbar ARGS1(
 	    LynxChangeStyle(s, ABS_ON, 0);
 	}
 #endif /* USE_COLOR_STYLE */
-	move(1, LYcols - 1);
+	LYmove(1, LYcols - 1);
 	addch_raw(ACS_UARROW);
 #ifdef USE_COLOR_STYLE
 	LynxChangeStyle(s, STACK_OFF, 0);
@@ -1669,11 +1671,11 @@ PRIVATE void display_scrollbar ARGS1(
 	if (i-1 <= h - bot_skip && i > h - bot_skip)
 	    LynxChangeStyle(s_sb_bar, STACK_OFF, 0);
 #endif /* USE_COLOR_STYLE */
-	move(i + off, LYcols - 1);
+	LYmove(i + off, LYcols - 1);
 	if (i > top_skip && i <= h - bot_skip)
-	    addch(ACS_BLOCK);
+	    LYaddch(ACS_BLOCK);
 	else
-	    addch(ACS_CKBOARD);
+	    LYaddch(ACS_CKBOARD);
     }
 #ifdef USE_COLOR_STYLE
     LynxChangeStyle(s_sb_bg, STACK_OFF, 0);
@@ -1689,7 +1691,7 @@ PRIVATE void display_scrollbar ARGS1(
 	    LynxChangeStyle(s, ABS_ON, 0);
 	}
 #endif /* USE_COLOR_STYLE */
-	move(h + 2, LYcols - 1);
+	LYmove(h + 2, LYcols - 1);
 	addch_raw(ACS_DARROW);
 #ifdef USE_COLOR_STYLE
 	LynxChangeStyle(s, STACK_OFF, 0);
@@ -1737,12 +1739,12 @@ PRIVATE void display_page ARGS3(
 	 *  curses packages. - shf@access.digex.net & seldon@eskimo.com
 	 */
 	if (enable_scrollback) {
-	    addch('*');
-	    refresh();
-	    clear();
+	    LYaddch('*');
+	    LYrefresh();
+	    LYclear();
 	}
-	addstr("\n\nError accessing document!\nNo data available!\n");
-	refresh();
+	LYaddstr("\n\nError accessing document!\nNo data available!\n");
+	LYrefresh();
 	nlinks = 0;  /* set number of links to 0 */
 	return;
     }
@@ -1785,12 +1787,12 @@ PRIVATE void display_page ARGS3(
 	    assert(line->next != NULL);
 	} else if (line->next == NULL) {
 	    if (enable_scrollback) {
-		addch('*');
-		refresh();
-		clear();
+		LYaddch('*');
+		LYrefresh();
+		LYclear();
 	    }
-	    addstr("\n\nError drawing page!\nBad HText structure!\n");
-	    refresh();
+	    LYaddstr("\n\nError drawing page!\nBad HText structure!\n");
+	    LYrefresh();
 	    nlinks = 0;  /* set number of links to 0 */
 	    return;
 	}
@@ -1825,9 +1827,9 @@ PRIVATE void display_page ARGS3(
      *  curses packages. - shf@access.digex.net & seldon@eskimo.com
      */
     if (enable_scrollback) {
-	addch('*');
-	refresh();
-	clear();
+	LYaddch('*');
+	LYrefresh();
+	LYclear();
     }
 
 #ifdef USE_COLOR_STYLE
@@ -1890,12 +1892,12 @@ PRIVATE void display_page ARGS3(
 		assert(line != NULL);
 	    } else if (line == NULL) {
 		if (enable_scrollback) {
-		    addch('*');
-		    refresh();
-		    clear();
+		    LYaddch('*');
+		    LYrefresh();
+		    LYclear();
 		}
-		addstr("\n\nError drawing page!\nBad HText structure!\n");
-		refresh();
+		LYaddstr("\n\nError drawing page!\nBad HText structure!\n");
+		LYrefresh();
 		nlinks = 0;  /* set number of links to 0 */
 		return;
 	    }
@@ -1907,7 +1909,7 @@ PRIVATE void display_page ARGS3(
 	    if (!display_partial &&
 		line_number == text->first_lineno_last_disp_partial &&
 		i + line_number <= text->last_lineno_last_disp_partial)
-		move((i + 2), 0);
+		LYmove((i + 2), 0);
 	    else
 #endif
 	    display_line(line, text, i+1, target);
@@ -1964,7 +1966,7 @@ PRIVATE void display_page ARGS3(
 			    /*
 			     *  First printable character of target.
 			     */
-			    move((i + 1), x_pos);
+			    LYmove((i + 1), x_pos);
 			}
 			/*
 			 *  Output all the printable target chars.
@@ -1997,7 +1999,7 @@ PRIVATE void display_page ARGS3(
 			    strncpy(&tmp[1], &line->data[itmp+1], utf_extra);
 			    tmp[utf_extra+1] = '\0';
 			    itmp += utf_extra;
-			    addstr(tmp);
+			    LYaddstr(tmp);
 			    tmp[1] = '\0';
 			    written += (utf_extra + 1);
 			    utf_extra = 0;
@@ -2006,7 +2008,7 @@ PRIVATE void display_page ARGS3(
 			     *  For CJK strings, by Masanobu Kimura.
 			     */
 			    tmp[1] = data[++itmp];
-			    addstr(tmp);
+			    LYaddstr(tmp);
 			    tmp[1] = '\0';
 			    written += 2;
 			} else {
@@ -2014,12 +2016,12 @@ PRIVATE void display_page ARGS3(
 #if defined(UNIX) || defined(VMS)
 			    if (!dump_output_immediately &&
 				UCH(tmp[0]) == 128+27) {
-				addstr("~^");
+				LYaddstr("~^");
 				tmp[0] ^= 0xc0;
 			    }
 #endif
 #endif
-			    addstr(tmp);
+			    LYaddstr(tmp);
 			    written++;
 			}
 		    }
@@ -2039,7 +2041,7 @@ PRIVATE void display_page ARGS3(
 		 *  the end of the line, or not have another hit
 		 *  in it. - FM
 		 */
-		move((i + 2), 0);
+		LYmove((i + 2), 0);
 	    } /* end while */
 #endif /* USE_COLOR_STYLE */
 #endif /* SHOW_WHEREIS_TARGETS */
@@ -2053,8 +2055,8 @@ PRIVATE void display_page ARGS3(
 		 *  Clear remaining lines of display.
 		 */
 		for (i++; i < (display_lines); i++) {
-		    move((i + 1), 0);
-		    clrtoeol();
+		    LYmove((i + 1), 0);
+		    LYclrtoeol();
 		}
 		break;
 	    }
@@ -2257,7 +2259,7 @@ PRIVATE void display_page ARGS3(
 	/*
 	 *  Nothing on the page.
 	 */
-	addstr("\n     Document is empty");
+	LYaddstr("\n     Document is empty");
     }
     display_scrollbar(text);
 
@@ -2285,13 +2287,13 @@ PRIVATE void display_page ARGS3(
 	/*
 	 *  For non-multibyte curses.
 	 *
-	 *  Full repainting is necessary, otherwise only part of a multibyte 
-	 *  character sequence might be written because of curses output 
-	 *  optimizations. 
+	 *  Full repainting is necessary, otherwise only part of a multibyte
+	 *  character sequence might be written because of curses output
+	 *  optimizations.
 	 */
-	clearok(curscr, TRUE); 
+	clearok(curscr, TRUE);
     }
-    refresh();
+    LYrefresh();
 }
 
 
@@ -2316,13 +2318,13 @@ PUBLIC void HText_beginAppend ARGS1(
    is used to try to prevent that lines with UTF-8 chars get wrapped
    by the library when they shouldn't.
    If there is no display library involved, i.e. dump_output_immediately,
-   no such limit should be imposed.  LYcols*6 should be just as good
+   no such limit should be imposed.  MAX_COLS should be just as good
    as any other large value.  (But don't use INT_MAX or something close
    to it to, avoid over/underflow.) - kw */
 #ifdef USE_SLANG
-#define LYcols_cu (dump_output_immediately ? LYcols*6 : SLtt_Screen_Cols)
+#define LYcols_cu (dump_output_immediately ? MAX_COLS : SLtt_Screen_Cols)
 #else
-#define LYcols_cu (dump_output_immediately ? LYcols*6 : LYcols)
+#define LYcols_cu (dump_output_immediately ? MAX_COLS : LYcols)
 #endif
 
 /*	Add a new line of text
@@ -4650,6 +4652,7 @@ PRIVATE int HText_insertBlanksInStblLines ARGS2(
     int *	newpos;
     int		ninserts, lineno;
     int		first_lineno, last_lineno, first_lineno_pass2;
+    int		last_nonempty = -1;
     int		added_chars_before = 0;
     TextAnchor * a;
     int lines_changed = 0;
@@ -4719,6 +4722,8 @@ PRIVATE int HText_insertBlanksInStblLines ARGS2(
 	    int width = HText_TrueLineSize(line, me, FALSE);
 	    if (width > max_width)
 		max_width = width;
+	    if (width && last_nonempty < lineno)
+		last_nonempty = lineno;
 	    CTRACE((tfp, "line %d true/max width:%d/%d oldpos: NONE\r\n",
 		   lineno, width, max_width));
 	    continue;
@@ -4758,6 +4763,8 @@ PRIVATE int HText_insertBlanksInStblLines ARGS2(
 	    int width = HText_TrueLineSize(line, me, FALSE);
 	    if (width > max_width)
 		max_width = width;
+	    if (width && last_nonempty < lineno)
+		last_nonempty = lineno;
 	    if (TRACE) {
 		int ip;
 		CTRACE((tfp, "line %d true/max width:%d/%d oldpos:",
@@ -4856,6 +4863,8 @@ PRIVATE int HText_insertBlanksInStblLines ARGS2(
 	    CTRACE((tfp, " %d:%d", lineno, table_offset - line->offset));
 	    line->offset = table_offset;
 	}
+	if (max_width)
+	    Stbl_update_enclosing(me->stbl, max_width, last_nonempty);
     }
     CTRACE((tfp, " %d:done\r\n", lineno));
     free(oldpos);
@@ -4871,12 +4880,19 @@ PRIVATE int HText_insertBlanksInStblLines ARGS2(
 PUBLIC void HText_cancelStbl ARGS1(
 	HText *,	me)
 {
+    STable_info *stbl;
+
     if (!me || !me->stbl) {
 	CTRACE((tfp, "cancelStbl: ignored.\n"));
 	return;
     }
     CTRACE((tfp, "cancelStbl: ok, will do.\n"));
-    Stbl_free(me->stbl);
+    stbl = me->stbl;
+    while (stbl) {
+	STable_info *enclosing = Stbl_get_enclosing(stbl);
+	Stbl_free(stbl);
+	stbl = enclosing;
+    }
     me->stbl = NULL;
 }
 
@@ -4886,13 +4902,16 @@ PUBLIC void HText_startStblTABLE ARGS2(
 	HText *,	me,
 	short,		alignment)
 {
+    STable_info *current = me->stbl;
+
     if (!me)
 	return;
-    if (me->stbl)
-	HText_cancelStbl(me);	/* auto cancel previously open table */
+    if (current)
+	new_line(me);
     me->stbl = Stbl_startTABLE(alignment);
     if (me->stbl) {
 	CTRACE((tfp, "startStblTABLE: started.\n"));
+	Stbl_set_enclosing(me->stbl, current, me->last_anchor_before_stbl);
 	me->last_anchor_before_stbl = me->last_anchor;
     } else {
 	CTRACE((tfp, "startStblTABLE: failed.\n"));
@@ -4900,14 +4919,17 @@ PUBLIC void HText_startStblTABLE ARGS2(
 }
 
 /*	Finish simple table handling
-*/
-PUBLIC void HText_endStblTABLE ARGS1(
+ *	Return TRUE if the table is nested inside another table.
+ */
+PUBLIC int HText_endStblTABLE ARGS1(
 	HText *,	me)
 {
     int ncols, lines_changed = 0;
+    STable_info *enclosing;
+
     if (!me || !me->stbl) {
 	CTRACE((tfp, "endStblTABLE: ignored.\n"));
-	return;
+	return FALSE;
     }
     CTRACE((tfp, "endStblTABLE: ok, will try.\n"));
     ncols = Stbl_finishTABLE(me->stbl);
@@ -4922,8 +4944,11 @@ PUBLIC void HText_endStblTABLE ARGS1(
 	NumOfLines_partial -= lines_changed;  /* fake */
 #endif  /* DISP_PARTIAL */
     }
+    enclosing = Stbl_get_enclosing(me->stbl);
+    me->last_anchor_before_stbl = Stbl_get_last_anchor_before(me->stbl);
     Stbl_free(me->stbl);
-    me->stbl = NULL;
+    me->stbl = enclosing;
+    return enclosing != 0;
 }
 
 /*	Start simple table row
@@ -5160,7 +5185,7 @@ PUBLIC BOOL HText_isAnchorBlank ARGS2(
 	HTLine *start = last;
 	int CurBlankExtent = 0;
 	int BlankExtent = 0;
-	
+
 	int extent_adjust = (text->chars + last->size) - a->start -
 		     (text->Lines - a->line_num);
 
@@ -6867,7 +6892,7 @@ PUBLIC CONST char * HText_getTitle NOARGS
 	  HTAnchor_title(HTMainText->node_anchor) : 0);
 }
 
-#ifdef USE_HASH
+#ifdef USE_COLOR_STYLE
 PUBLIC CONST char *HText_getStyle NOARGS
 {
    return(HTMainText ?
@@ -12617,7 +12642,7 @@ PUBLIC int HText_ExtEditForm ARGS1(
 	    (cp = strchr(lp, ' ')) != NULL &&
 	    (cp-lp) < start_anchor->input_field->size - 1) {
 	    LYFixCursesOn("ask for confirmation:");
-	    erase();		/* don't show previous state */
+	    LYerase();		/* don't show previous state */
 	    if (HTConfirmDefault(gettext("Wrap lines to fit displayed area?"),
 				 NO)) {
 		wanted_fieldlen_wrap = start_anchor->input_field->size - 1;
@@ -13249,7 +13274,7 @@ PRIVATE void redraw_part_of_line ARGS4(
 #ifndef USE_COLOR_STYLE
 	    case LY_UNDERLINE_START_CHAR:
 		if (dump_output_immediately && use_underscore) {
-		    addch('_');
+		    LYaddch('_');
 		    i++;
 		} else {
 		    start_underline();
@@ -13258,7 +13283,7 @@ PRIVATE void redraw_part_of_line ARGS4(
 
 	    case LY_UNDERLINE_END_CHAR:
 		if (dump_output_immediately && use_underscore) {
-		    addch('_');
+		    LYaddch('_');
 		    i++;
 		} else {
 		    stop_underline();
@@ -13276,7 +13301,7 @@ PRIVATE void redraw_part_of_line ARGS4(
 #endif
 	    case LY_SOFT_NEWLINE:
 		if (!dump_output_immediately)
-		    addch('+');
+		    LYaddch('+');
 		break;
 
 	    case LY_SOFT_HYPHEN:
@@ -13333,7 +13358,7 @@ PRIVATE void redraw_part_of_line ARGS4(
 		if (utf_extra) {
 		    strncpy(&buffer[1], data, utf_extra);
 		    buffer[utf_extra+1] = '\0';
-		    addstr(buffer);
+		    LYaddstr(buffer);
 		    buffer[1] = '\0';
 		    data += utf_extra;
 		    utf_extra = 0;
@@ -13343,7 +13368,7 @@ PRIVATE void redraw_part_of_line ARGS4(
 		     */
 		    buffer[1] = *data;
 		    data++;
-		    addstr(buffer);
+		    LYaddstr(buffer);
 		    buffer[1] = '\0';
 		    /*
 		     *  For now, load 'M' into LastDisplayChar,
@@ -13362,12 +13387,12 @@ PRIVATE void redraw_part_of_line ARGS4(
 #if defined(UNIX) || defined(VMS)
 		    if (!dump_output_immediately &&
 			UCH(buffer[0]) == 128+27) {
-			addstr("~^");
+			LYaddstr("~^");
 			buffer[0] ^= 0xc0;
 		    }
 #endif
 #endif
-		    addstr(buffer);
+		    LYaddstr(buffer);
 		    LastDisplayChar = buffer[0];
 		}
 	} /* end of switch */
@@ -13554,7 +13579,7 @@ PRIVATE void move_to_glyph ARGS10(
 #ifdef SHOW_WHEREIS_TARGETS
 		if (intarget) {
 		    if (i_after_tgt > i) {
-			move(YP, i);
+			LYmove(YP, i);
 			if (flag) {
 			    drawing = YES;
 			    drawingtarget = NO;
@@ -13703,7 +13728,7 @@ PRIVATE void move_to_glyph ARGS10(
 
 	    case LY_SOFT_NEWLINE:
 		if (drawing) {
-		    addch('+');
+		    LYaddch('+');
 		}
 		i++;
 		break;
@@ -13764,7 +13789,7 @@ PRIVATE void move_to_glyph ARGS10(
 			    lynx_stop_link_color (flag, inU);
 			}
 			if (incurlink && !drawing) {
-			    move(YP, i);
+			    LYmove(YP, i);
 			    if (inunderline)	inU = YES;
 			    if (flag && (i == XP_link || i == XP - 1)) {
 				lynx_start_link_color (flag, inU);
@@ -13792,7 +13817,7 @@ PRIVATE void move_to_glyph ARGS10(
 #endif /* SHOW_WHEREIS_TARGETS */
 		    if (incurlink) {
 			if (!drawing) {
-			    move(YP, i);
+			    LYmove(YP, i);
 			    if (inunderline)	inU = YES;
 			    lynx_start_link_color (flag, inU);
 			    drawing = YES;
@@ -13830,7 +13855,7 @@ PRIVATE void move_to_glyph ARGS10(
 		    strncpy(&buffer[1], data, utf_extra);
 		    buffer[utf_extra+1] = '\0';
 		    if (!drawing && i >= XP_draw_min) {
-			move(YP, i - 1);
+			LYmove(YP, i - 1);
 			drawing = YES;
 #if defined(SHOW_WHEREIS_TARGETS)
 			if (intarget) {
@@ -13845,7 +13870,7 @@ PRIVATE void move_to_glyph ARGS10(
 				start_underline();
 			}
 		    }
-		    addstr(buffer);
+		    LYaddstr(buffer);
 		    buffer[1] = '\0';
 		    sdata += utf_extra; data += utf_extra;
 		    utf_extra = 0;
@@ -13855,7 +13880,7 @@ PRIVATE void move_to_glyph ARGS10(
 		     */
 		    if (drawing && (i < LYcols - 1)) {
 			buffer[1] = *data;
-			addstr(buffer);
+			LYaddstr(buffer);
 			buffer[1] = '\0';
 		    }
 		    i++;
@@ -13878,12 +13903,12 @@ PRIVATE void move_to_glyph ARGS10(
 #if defined(UNIX) || defined(VMS)
 			if (!dump_output_immediately &&
 			    UCH(buffer[0]) == 128+27) {
-			    addstr("~^");
+			    LYaddstr("~^");
 			    buffer[0] ^= 0xc0;
 			}
 #endif
 #endif
-			addstr(buffer);
+			LYaddstr(buffer);
 		    }
 		    LastDisplayChar = buffer[0];
 		}
@@ -13891,7 +13916,7 @@ PRIVATE void move_to_glyph ARGS10(
     } /* end of while */
 
     if (!drawing) {
-	move(YP, i);
+	LYmove(YP, i);
 	lynx_start_link_color (flag, inU);
     } else {
 #if defined(SHOW_WHEREIS_TARGETS)
@@ -13975,7 +14000,7 @@ PUBLIC void LYMoveToLink ARGS6(
 	move_to_glyph(links[cur].ly, links[cur].lx, XP_draw_min,
 		      "", 0, links[cur].lx,
 		      target, hightext, flags, utf_flag);
-	/* move(links[cur].ly, links[cur].lx); */
+	/* LYmove(links[cur].ly, links[cur].lx); */
     }
 }
 #endif /* !USE_COLOR_STYLE */
@@ -14007,11 +14032,11 @@ PUBLIC void redraw_lines_of_link ARGS1(
     todr2 = (links[cur].hightext2 && links[cur].ly < display_lines) ?
 	    todr1->next : 0;
 
-    move(links[cur].ly,  links[cur].lx);
+    LYmove(links[cur].ly,  links[cur].lx);
     redraw_part_of_line (todr1, links[cur].hightext,
 			 strlen(links[cur].hightext),  HTMainText);
     if (todr2) {
-	move(links[cur].ly+1,links[cur].hightext2_offset);
+	LYmove(links[cur].ly+1,links[cur].hightext2_offset);
 	redraw_part_of_line (todr2, links[cur].hightext2,
 			     strlen(links[cur].hightext2),  HTMainText);
     }

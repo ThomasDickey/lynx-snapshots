@@ -672,11 +672,11 @@ PUBLIC int LYmbcsstrlen ARGS3(
 #endif /* USE_SLANG */
 
 #if !defined(GetChar) && defined(NCURSES)
-#define GetChar() wgetch(my_subwindow ? my_subwindow : stdscr)
+#define GetChar() wgetch(my_subwindow ? my_subwindow : LYwin)
 #endif
 
 #if !defined(GetChar) && defined(SNAKE)
-#define GetChar() wgetch(stdscr)
+#define GetChar() wgetch(LYwin)
 #endif
 
 #if !defined(GetChar) && defined(VMS)
@@ -711,13 +711,13 @@ PUBLIC void LYsubwindow ARGS1(WINDOW *, param)
 #if defined(NCURSES) || defined(PDCURSES)
 	keypad(my_subwindow, TRUE);
 #if defined(HAVE_GETBKGD) /* not defined in ncurses 1.8.7 */
-	wbkgd(my_subwindow, getbkgd(stdscr));
-	wbkgdset(my_subwindow, getbkgd(stdscr));
+	wbkgd(my_subwindow, getbkgd(LYwin));
+	wbkgdset(my_subwindow, getbkgd(LYwin));
 #endif
 #endif
 	scrollok(my_subwindow, TRUE);
     } else {
-	touchwin(stdscr);
+	touchwin(LYwin);
 	delwin(my_subwindow);
 	my_subwindow = 0;
     }
@@ -1602,7 +1602,7 @@ re_read:
 		if (LYCursesON) {
 		    stop_curses();
 		    start_curses();
-		    refresh();
+		    LYrefresh();
 		}
 		goto re_read;
 	    }
@@ -1665,7 +1665,9 @@ re_read:
     }
 #endif /* USE_SLANG */
 
-    if (c == CH_ESC || (csi_is_csi && c == UCH(CH_ESC_PAR))) { /* handle escape sequence  S/390 -- gil -- 2024 */
+    if (!escape_bound
+	&& (c == CH_ESC || (csi_is_csi && c == UCH(CH_ESC_PAR)))) {
+	/* handle escape sequence  S/390 -- gil -- 2024 */
 	done_esc = TRUE;		/* Flag: we did it, not keypad() */
 	b = GetChar();
 
@@ -1993,7 +1995,7 @@ re_read:
 		 *  so detecting happened *at the end* of the last refresh.
 		 *  Tell it to refresh again... - kw
 		 */
-		refresh();
+		LYrefresh();
 #endif
 #if defined(NCURSES)
 		/*
@@ -2131,13 +2133,13 @@ re_read:
 		    c = LAC_TO_LKC(lac);
 #if 0	/* Probably not necessary any more - kw */
 		    lynx_force_repaint();
-		    refresh();
+		    LYrefresh();
 #endif
 		}
 		if (code == FOR_INPUT && mouse_link == -1 &&
 		    lac != LYK_REFRESH && lac != LYK_SUBMIT) {
 		    ungetmouse(&event);	/* Caller will process this. */
-		    getch();		/* ungetmouse puts KEY_MOUSE back */
+		    wgetch(LYwin);	/* ungetmouse puts KEY_MOUSE back */
 		    c = MOUSE_KEY;
 		}
 #else /* pdcurses version */
@@ -2605,7 +2607,7 @@ PUBLIC void LYSetupEdit ARGS4(
     Margin  = 0;
     Pos = strlen(old);
 #ifdef ENHANCED_LINEEDIT
-    Mark = 0;
+    Mark = -1;			/* pos=0, but do not show it yet */
 #endif
     DspStart = 0;
 
@@ -2664,6 +2666,7 @@ PUBLIC int LYEdit1 ARGS4(
 	int,		action,
 	BOOL,		maxMessage)
 {   /* returns 0    character processed
+     *         -ch  if action should be performed outside of line-editing mode
      *	       ch   otherwise
      */
     int i;
@@ -2743,6 +2746,10 @@ PUBLIC int LYEdit1 ARGS4(
 #ifdef ENHANCED_LINEEDIT
 	    if (Mark > Pos)
 		Mark++;
+	    else if (Mark < -1 - Pos)
+		Mark--;
+	    if (Mark >= 0)
+		Mark = -1 - Mark;		/* Disable it */
 #endif
 	    for(i = length; i >= Pos; i--)    /* Make room */
 		Buf[i+1] = Buf[i];
@@ -2772,6 +2779,10 @@ PUBLIC int LYEdit1 ARGS4(
 #ifdef ENHANCED_LINEEDIT
 	    if (Mark > Pos)
 		Mark++;
+	    else if (Mark < -1 - Pos)
+		Mark--;
+	    if (Mark >= 0)
+		Mark = -1 - Mark;		/* Disable it */
 #endif
 	    for(i = length; i >= Pos; i--)    /* Make room */
 		Buf[i+1] = Buf[i];
@@ -2858,7 +2869,7 @@ PUBLIC int LYEdit1 ARGS4(
 	 */
 	 Buf[0] = '\0';
 #ifdef ENHANCED_LINEEDIT
-	Mark = 0;
+	Mark = -1;		/* Do not show the mark */
 #endif
 	 /* fall through */
 
@@ -2947,8 +2958,10 @@ PUBLIC int LYEdit1 ARGS4(
 	if (length == 0 || Pos == 0)
 	    break;
 #ifdef ENHANCED_LINEEDIT
-	if (Mark >= Pos)
-	    Mark--;
+	if (Mark >= 0)
+	    Mark = -1 - Mark;		/* Disable it */
+	if (Mark <= -1 - Pos)
+	    Mark++;
 #endif
 	Pos--;
 	for (i = Pos; i < length; i++)
@@ -2969,11 +2982,18 @@ PUBLIC int LYEdit1 ARGS4(
 	    for (i = Pos; i < length; i++)
 		Buf[i] = Buf[i + offset];
 	    i -= offset;
+#ifdef ENHANCED_LINEEDIT
+            if (Mark >= 0)
+                Mark = -1 - Mark;		/* Disable it */
+            if (Mark <= -1 - Pos)
+                Mark += offset;
+#endif
 	}
 #endif /* SUPPORT_MULTIBYTE_EDIT */
 	Buf[i] = 0;
 	break;
 
+    case LYE_FORW_RL:
     case LYE_FORW:
 	/*
 	 *  Move cursor to the right.
@@ -2988,8 +3008,11 @@ PUBLIC int LYEdit1 ARGS4(
 		Pos++;
 	}
 #endif /* SUPPORT_MULTIBYTE_EDIT */
+	else if (action == LYE_FORW_RL)
+	    return -ch;
 	break;
 
+    case LYE_BACK_LL:
     case LYE_BACK:
 	/*
 	 *  Left-arrow move cursor to the left.
@@ -3005,6 +3028,8 @@ PUBLIC int LYEdit1 ARGS4(
 		Pos--;
 	}
 #endif /* SUPPORT_MULTIBYTE_EDIT */
+	else if (action == LYE_BACK_LL)
+	    return -ch;
 	break;
 
 #ifdef ENHANCED_LINEEDIT
@@ -3016,8 +3041,12 @@ PUBLIC int LYEdit1 ARGS4(
 	    return(ch);
 	if (Pos == length)
 	    Pos--;
+	if (Mark < 0)
+	    Mark = -1 - Mark;		/* Temporary enable it */
 	if (Mark == Pos || Mark == Pos+1)
 	    Mark = Pos-1;
+	if (Mark >= 0)
+	    Mark = -1 - Mark;		/* Disable it */
 	if (Buf[Pos-1] == Buf[Pos]) {
 	    Pos++;
 	    break;
@@ -3036,6 +3065,8 @@ PUBLIC int LYEdit1 ARGS4(
 	/*
 	 *  emacs-like exchange-point-and-mark
 	 */
+	if (Mark < 0)
+	    Mark = -1 - Mark;		/* Enable it */
 	if (Mark == Pos)
 	    return(0);
 	i = Pos; Pos = Mark; Mark = i;
@@ -3045,6 +3076,8 @@ PUBLIC int LYEdit1 ARGS4(
 	/*
 	 *  primitive emacs-like kill-region
 	 */
+	if (Mark < 0)
+	    Mark = -1 - Mark;		/* Enable it */
 	if (Mark == Pos) {
 	    killbuffer[0] = '\0';
 	    return(0);
@@ -3061,6 +3094,8 @@ PUBLIC int LYEdit1 ARGS4(
 	    Buf[i] = Buf[i+reglen]; /* terminate */
 	    Pos = Mark;
 	}
+	if (Mark >= 0)
+	    Mark = -1 - Mark;		/* Disable it */
 	break;
 
     case LYE_YANK:
@@ -3068,14 +3103,14 @@ PUBLIC int LYEdit1 ARGS4(
 	 *  primitive emacs-like yank
 	 */
 	if (!killbuffer[0]) {
-	    Mark = Pos;
+	    Mark = -1 - Pos;
 	    return(0);
 	}
 	{
 	    int yanklen = strlen(killbuffer);
 
 	    if (Pos+yanklen <= (MaxLen) && StrLen+yanklen <= (MaxLen)) {
-		Mark = Pos;
+		Mark = -1 - Pos;
 
 		for(i = length; i >= Pos; i--)    /* Make room */
 		    Buf[i+yanklen] = Buf[i];
@@ -3277,7 +3312,7 @@ PUBLIC void LYRefreshEdit ARGS1(
     if (nrdisplayed > DspWdth)
 	nrdisplayed = DspWdth;
 
-    move(edit->sy, edit->sx);
+    LYmove(edit->sy, edit->sx);
 #ifdef USE_COLOR_STYLE
     /*
      *  If this is the last screen line, set attributes to normal,
@@ -3295,20 +3330,32 @@ PUBLIC void LYRefreshEdit ARGS1(
     if (estyle != NOSTYLE)
 	curses_style(estyle, STACK_ON);
     else
-	attrset(A_NORMAL);	/* need to do something about colors? */
+	wattrset(LYwin,A_NORMAL); /* need to do something about colors? */
 #endif
     if (edit->hidden) {
 	for (i = 0; i < nrdisplayed; i++)
-	    addch('*');
+	    LYaddch('*');
     } else {
-	for (i = 0; i < nrdisplayed; i++)
+#if defined(ENHANCED_LINEEDIT) && defined(USE_COLOR_STYLE)
+	if (Mark >= 0 && DspStart > Mark)
+	    TmpStyleOn(prompting ? s_prompt_sel : s_aedit_sel);
+#endif
+	for (i = 0; i < nrdisplayed; i++) {
+#if defined(ENHANCED_LINEEDIT) && defined(USE_COLOR_STYLE)
+	    if ( Mark >= 0 && ((DspStart + i == Mark && Pos > Mark)
+			       || (DspStart + i == Pos && Pos < Mark) ))
+		TmpStyleOn(prompting ? s_prompt_sel : s_aedit_sel);
+	    if ( Mark >= 0 && ((DspStart + i == Mark && Pos < Mark)
+			       || (DspStart + i == Pos && Pos > Mark) ))
+		TmpStyleOff(prompting ? s_prompt_sel : s_aedit_sel);
+#endif
 	    if ((buffer[0] = str[i]) == 1 || buffer[0] == 2 ||
 		(UCH(buffer[0]) == 160 &&
 		 !(HTPassHighCtrlRaw || HTCJK != NOCJK ||
 		   (LYCharSet_UC[current_char_set].enc != UCT_ENC_8859 &&
 		    !(LYCharSet_UC[current_char_set].like8859
 		      & UCT_R_8859SPECL))))) {
-		addch(' ');
+		LYaddch(' ');
 #ifdef SUPPORT_MULTIBYTE_EDIT
 		end_multi = 0;
 #endif /* SUPPORT_MULTIBYTE_EDIT */
@@ -3325,15 +3372,23 @@ PUBLIC void LYRefreshEdit ARGS1(
 		    } else
 			end_multi = 0;
 #endif /* SUPPORT_MULTIBYTE_EDIT */
-		    addstr(buffer);
+		    LYaddstr(buffer);
 		    buffer[1] = '\0';
 		} else {
-		    addstr(buffer);
+		    LYaddstr(buffer);
 #ifdef SUPPORT_MULTIBYTE_EDIT
 		    end_multi = 0;
 #endif /* SUPPORT_MULTIBYTE_EDIT */
 		}
 	    }
+	}
+#if defined(ENHANCED_LINEEDIT) && defined(USE_COLOR_STYLE)
+	if (Mark >= 0 &&
+	    ((DspStart + nrdisplayed <= Mark && DspStart + nrdisplayed > Pos)
+	     || (DspStart + nrdisplayed > Mark
+		 && DspStart + nrdisplayed <= Pos)))
+	    TmpStyleOff(prompting ? s_prompt_sel : s_aedit_sel);
+#endif
     }
 
     /*
@@ -3343,7 +3398,7 @@ PUBLIC void LYRefreshEdit ARGS1(
     if (padsize) {
 	TmpStyleOn(prompting ? s_prompt_edit_pad : s_aedit_pad);
 	while (padsize--)
-	    addch(UCH(edit->pad));
+	    LYaddch(UCH(edit->pad));
 	TmpStyleOff(prompting ? s_prompt_edit_pad : s_aedit_pad);
     }
 
@@ -3359,25 +3414,25 @@ PUBLIC void LYRefreshEdit ARGS1(
 	    if (end_multi)
 		add_space = 1;
 #endif
-	    move(edit->sy, edit->sx + nrdisplayed - 1 - add_space);
+	    LYmove(edit->sy, edit->sx + nrdisplayed - 1 - add_space);
 	    if (add_space)
-		addch(' ');		/* Needed with styles? */
-	    addch(ACS_RARROW);
+		LYaddch(' ');		/* Needed with styles? */
+	    LYaddch(ACS_RARROW);
 	    TmpStyleOff(prompting ? s_prompt_edit_arr : s_aedit_arr);
 	}
 	if (DspStart) {
 	    TmpStyleOn(prompting ? s_prompt_edit_arr : s_aedit_arr);
-	    move(edit->sy, edit->sx);
-	    addch(ACS_LARROW);
+	    LYmove(edit->sy, edit->sx);
+	    LYaddch(ACS_LARROW);
 #ifdef SUPPORT_MULTIBYTE_EDIT
 	    if (begin_multi)
-		addch(' ');		/* Needed with styles? */
+		LYaddch(' ');		/* Needed with styles? */
 #endif /* SUPPORT_MULTIBYTE_EDIT */
 	    TmpStyleOff(prompting ? s_prompt_edit_arr : s_aedit_arr);
 	}
     }
 
-    move(edit->sy, edit->sx + Pos - DspStart);
+    LYmove(edit->sy, edit->sx + Pos - DspStart);
 #ifdef SUPPORT_MULTIBYTE_EDIT
 #if (!USE_SLANG && !defined(USE_MULTIBYTE_CURSES))
     if (HTCJK != NOCJK)
@@ -3389,7 +3444,7 @@ PUBLIC void LYRefreshEdit ARGS1(
     if (estyle != NOSTYLE)
 	curses_style(estyle, STACK_OFF);
 #endif
-    refresh();
+    LYrefresh();
 }
 
 PRIVATE void reinsertEdit ARGS2(
@@ -3539,7 +3594,7 @@ PRIVATE void draw_option ARGS7(
     FormatChoiceNum(Cnum, num_choices, number, "");
 #ifdef USE_SLANG
     SLsmg_gotorc(win->top_y + entry, (win->left_x + 2));
-    addstr(Cnum);
+    LYaddstr(Cnum);
     if (reversed)
 	SLsmg_set_color(2);
     SLsmg_write_nstring((char *)value, win->width);
@@ -3741,8 +3796,8 @@ PUBLIC int LYhandlePopupList ARGS9(
      *	Clear the command line and write
      *	the popup statusline. - FM
      */
-    move((LYlines - 2), 0);
-    clrtoeol();
+    LYmove((LYlines - 2), 0);
+    LYclrtoeol();
     if (disabled) {
 	popup_status_msg = CHOICE_LIST_UNM_MSG;
     } else if (!for_mouse) {
@@ -4184,7 +4239,7 @@ redraw:
 
 	    case LYK_REFRESH:
 		lynx_force_repaint();
-		refresh();
+		LYrefresh();
 		break;
 
 	    case LYK_NEXT:
@@ -4449,6 +4504,7 @@ restore_popup_statusline:
 	    case LYK_QUIT:
 	    case LYK_ABORT:
 	    case LYK_PREV_DOC:
+	    case LYK_INTERRUPT:
 		cur_choice = orig_choice;
 		cmd = LYK_ACTIVATE; /* to exit */
 		break;
@@ -4574,7 +4630,7 @@ again:
 		    old_y = SLsmg_get_row();
 		    old_x = SLsmg_get_column();
 #else
-		    getyx(stdscr, old_y, old_x);
+		    getyx(LYwin, old_y, old_x);
 #endif
 
 		    cur_choice = LYhandlePopupList(
@@ -4595,7 +4651,7 @@ again:
 #ifdef USE_SLANG
 		    SLsmg_gotorc(old_y, old_x);
 #else
-		    wmove(stdscr, old_y, old_x);
+		    wmove(LYwin, old_y, old_x);
 #endif
 		    FREE(data);
 		}
@@ -5571,7 +5627,7 @@ PUBLIC int LYReadCmdKey ARGS1(
 		continue;
 	    src = LYSkipBlanks(tmp);
 	    if ((ch = LYStringToKeycode(src)) >= 0) {
-		refresh();
+		LYrefresh();
 		break;
 	    }
 	}

@@ -106,7 +106,7 @@ extern CONST char * HText_getContentBase NOPARAMS;
 extern CONST char * HText_getContentLocation NOPARAMS;
 extern CONST char * HText_getMessageID NOPARAMS;
 extern CONST char * HText_getRevTitle NOPARAMS;
-#ifdef USE_HASH
+#ifdef USE_COLOR_STYLE
 extern CONST char * HText_getStyle NOPARAMS;
 #endif
 extern void HText_setMainTextOwner PARAMS((CONST char * owner));
@@ -174,7 +174,7 @@ extern char * HText_HiddenLinkAt PARAMS((HText *text, int number));
 /* "simple table" stuff */
 extern void HText_cancelStbl PARAMS((HText *));
 extern void HText_startStblTABLE PARAMS((HText *, short));
-extern void HText_endStblTABLE PARAMS((HText *));
+extern int HText_endStblTABLE PARAMS((HText *));
 extern void HText_startStblTR PARAMS((HText *, short));
 extern void HText_endStblTR PARAMS((HText *));
 extern void HText_startStblTD PARAMS((HText *, int, int, short, BOOL));

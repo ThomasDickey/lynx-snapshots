@@ -1336,12 +1336,12 @@ PUBLIC void tagflag ARGS2(
 	int,		cur)
 {
     if (nlinks > 0) {
-	move(links[cur].ly, 2);
+	LYmove(links[cur].ly, 2);
 	stop_reverse();
 	if (flag == ON) {
-	    addch('+');
+	    LYaddch('+');
 	} else {
-	    addch(' ');
+	    LYaddch(' ');
 	}
 
 #if defined(FANCY_CURSES) || defined(USE_SLANG)
@@ -1352,9 +1352,9 @@ PUBLIC void tagflag ARGS2(
 	    /*
 	     *	Never hide the cursor if there's no FANCY CURSES.
 	     */
-	    move(links[cur].ly, links[cur].lx);
+	    LYmove(links[cur].ly, links[cur].lx);
 
-	refresh();
+	LYrefresh();
     }
 }
 

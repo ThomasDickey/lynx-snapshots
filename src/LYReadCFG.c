@@ -199,7 +199,7 @@ PRIVATE void add_item_to_list ARGS2(
 	if (*next_colon++) {
 	    colon = next_colon;
 	    if ((next_colon = strchr(colon,':')) != 0)
-		*next_colon++ = '\0';		
+		*next_colon++ = '\0';
 	    cur_item->always_enabled = is_true(colon);
 	    if (next_colon) {
 		cur_item->override_primary_action = is_true(next_colon);
@@ -588,8 +588,14 @@ static int character_set_fun ARGS1(
 	char *,		value)
 {
     int i = UCGetLYhndl_byAnyName(value); /* by MIME or full name */
-    if (i < 0)
-	; /* do nothing here: so fallback to userdefs.h */
+
+    if (i < 0) {
+#ifdef CAN_AUTODETECT_DISPLAY_CHARSET
+	if (auto_display_charset >= 0 && !strnicmp(value,"AutoDetect ",11))
+	    current_char_set = auto_display_charset;
+#endif
+	/* do nothing here: so fallback to userdefs.h */
+    }
     else
 	current_char_set = i;
 
@@ -1404,6 +1410,10 @@ static Config_Type Config_Table [] =
 #ifdef DIRED_SUPPORT
      PARSE_ENV("auto_uncache_dirlists", CONF_INT, &LYAutoUncacheDirLists),
 #endif
+#ifndef DISABLE_BIBP
+     PARSE_STR("bibp_bibhost", CONF_STR, &BibP_bibhost),
+     PARSE_STR("bibp_globalserver", CONF_STR, &BibP_globalserver),
+#endif
      PARSE_SET("block_multi_bookmarks", CONF_BOOL, &LYMBMBlocked),
      PARSE_SET("bold_h1", CONF_BOOL, &bold_H1),
      PARSE_SET("bold_headers", CONF_BOOL, &bold_headers),
@@ -1472,7 +1482,7 @@ static Config_Type Config_Table [] =
      PARSE_STR("helpfile", CONF_STR, &helpfile),
 #ifdef MARK_HIDDEN_LINKS
      PARSE_STR("hidden_link_marker", CONF_STR, &hidden_link_marker),
-#endif     
+#endif
      PARSE_SET("historical_comments", CONF_BOOL, &historical_comments),
 #ifdef USE_PRETTYSRC
      PARSE_FUN("htmlsrc_attrname_xform", CONF_FUN, read_htmlsrc_attrname_xform),

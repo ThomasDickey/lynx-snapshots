@@ -1445,46 +1445,17 @@ PRIVATE int HTML_start_element ARGS6(
 		present[HTML_LINK_REL] && value[HTML_LINK_REL]) {
 		/*
 		 *  Ignore style sheets, for now. - FM
+		 *
+		 * lss and css have different syntax - lynx shouldn't try to
+		 * parse them now (it tries to parse them as lss, so it exits
+		 * with error message on the 1st non-empty line) - VH
 		 */
-/*  lss and css has different syntax - lynx shouldn't try to
-    parse them now (it tries to parse them as lss, so it exits with
-    error message on the 1st non-empty line) - VH
-*/
 #ifndef USE_COLOR_STYLE
 		if (!strcasecomp(value[HTML_LINK_REL], "StyleSheet") ||
 		    !strcasecomp(value[HTML_LINK_REL], "Style")) {
 		    CTRACE((tfp, "HTML: StyleSheet link found.\n"));
-#ifdef LINKEDSTYLES
-		    if (href && *href != '\0')
-		    {
-			int res = -999;
-			if ((url_type = is_url(href)) == 0 ||
-			    (url_type == FILE_URL_TYPE && LYisLocalFile(href))) {
-			    if (url_type == FILE_URL_TYPE) {
-				temp = HTParse(href, "", PARSE_PATH+PARSE_PUNCTUATION);
-				HTUnEscape(temp);
-				if (temp && *temp != '\0') {
-				    res = style_readFromFile(temp);
-				    if (res != 0)
-					StrAllocCopy(href, temp);
-				}
-				FREE(temp);
-			    } else {
-				res = style_readFromFile(href);
-			    }
-			}
-			CTRACE((tfp, "CSS: StyleSheet=%s %d\n", href, res));
-			if (res == 0)
-			    HTAnchor_setStyle (me->node_anchor, href);
-		    }
-		    else {
-			CTRACE((tfp,
-				"        non-local StyleSheets not yet implemented.\n"));
-		    }
-#else
 		    CTRACE((tfp,
 				"        StyleSheets not yet implemented.\n"));
-#endif
 		    FREE(href);
 		    break;
 		}
@@ -1556,6 +1527,14 @@ PRIVATE int HTML_start_element ARGS6(
 			StrAllocCopy(temp, "RelTitle: ");
 			StrAllocCat(temp, value[HTML_LINK_REL]);
 		    }
+#ifndef DISABLE_BIBP
+		} else if (!strcasecomp(value[HTML_LINK_REL], "citehost")) {
+		    /*  Citehost determination for bibp links. - RDC */
+		    HTAnchor_setCitehost(me->node_anchor, href);
+		    CTRACE((tfp, "HTML: citehost '%s' found\n", href));
+		    FREE(href);
+		    break;
+#endif
 		} else {
 		    CTRACE((tfp, "HTML: LINK with REL=\"%s\" ignored.\n",
 				 value[HTML_LINK_REL]));
@@ -5815,15 +5794,14 @@ PRIVATE int HTML_start_element ARGS6(
 	 *
 	 *  Also notify simple table tracking code unless
 	 *  in a preformatted section, or (currently) non-left
-	 *  alignment.  But first cancel tracking any already
-	 *  open (enclosing) table.
+	 *  alignment.
 	 *
 	 *  If page author is using a TABLE within PRE, it's probably
 	 *  formatted specifically to work well for Lynx without simple
 	 *  table tracking code.  Cancel tracking, it would only make
 	 *  things worse. - kw
 	 */
-	HText_cancelStbl(me->text);
+	HText_cancelStbl(me->text); /* Not needed with new TRST */
 	if (me->inA) {
 	    SET_SKIP_STACK(HTML_A);
 	    HTML_end_element(me, HTML_A, include);
@@ -6133,11 +6111,7 @@ PRIVATE int HTML_start_element ARGS6(
     if (ReallyEmptyTagNum(element_number))
     {
 	CTRACE((tfp, "STYLE.begin_element:ending \"EMPTY\" element style\n"));
-#if !defined(USE_HASH)
-	HText_characterStyle(me->text, element_number+STARTAT, STACK_OFF);
-#else
 	HText_characterStyle(me->text, HCODE_TO_STACK_OFF(hcode), STACK_OFF);
-#endif /* USE_HASH */
 
 #if !OPT_SCN
 	TrimColorClass(HTML_dtd.tags[element_number].name,
@@ -7641,7 +7615,6 @@ End_Object:
 	break;
 
     case HTML_TABLE:
-	me->inTABLE = FALSE;
 	if (!strcmp(me->sp->style->name, "Preformatted")) {
 	    break;
 	}
@@ -7652,7 +7625,7 @@ End_Object:
 				me->DivisionAlignments[me->Division_Level];
 	change_paragraph_style(me, me->sp->style);
 	UPDATE_STYLE;
-	HText_endStblTABLE(me->text);
+	me->inTABLE = HText_endStblTABLE(me->text);
 	me->current_default_alignment = me->sp->style->alignment;
 	if (me->List_Nesting_Level >= 0)
 	    HText_NegateLineOne(me->text);
@@ -7750,11 +7723,7 @@ End_Object:
 	{
 	    CTRACE((tfp, "STYLE.end_element: ending non-\"EMPTY\" style <%s...>\n",
 		    HTML_dtd.tags[element_number].name));
-#if !defined(USE_HASH)
-	    HText_characterStyle(me->text, element_number+STARTAT, STACK_OFF);
-#else
 	    HText_characterStyle(me->text, HCODE_TO_STACK_OFF(hcode), STACK_OFF);
-#endif /* USE_HASH */
 	}
     }
 #endif /* USE_COLOR_STYLE */

@@ -292,7 +292,7 @@ PRIVATE BOOLEAN confirm_by_pages ARGS3(
 	FREE(msg);
 
 	if (c == YES) {
-	    addstr("   Ok...");
+	    LYaddstr("   Ok...");
 	} else {
 	    HTInfoMsg(PRINT_REQUEST_CANCELLED);
 	    return FALSE;
@@ -452,7 +452,8 @@ check_recall:
 	pclose(outfile_fp);
     else
 #endif
-    LYCloseOutput(outfile_fp);
+	LYCloseOutput(outfile_fp);
+
 #ifdef VMS
     if (0 == strncasecomp(buffer, "sys$disk:", 9)) {
 	if (0 == strncmp((buffer+9), "[]", 2)) {
@@ -499,7 +500,7 @@ PRIVATE void send_file_to_mail ARGS3(
     if (LYPreparsedSource && first_mail_preparsed &&
 	HTisDocumentSource()) {
 	if (HTConfirmDefault(CONFIRM_MAIL_SOURCE_PREPARSED, NO) == YES) {
-	    addstr("   Ok...");
+	    LYaddstr("   Ok...");
 	    first_mail_preparsed = FALSE;
 	} else	{
 	    CancelPrint(MAIL_REQUEST_CANCELLED);
@@ -775,6 +776,7 @@ PRIVATE void send_file_to_mail ARGS3(
 #if CAN_PIPE_TO_MAILER
     pclose(outfile_fp);
 #else
+    LYCloseOutput(outfile_fp);
     LYSendMailFile (
 	    user_response,
 	    my_temp,
@@ -919,7 +921,7 @@ check_again:
      * Move the cursor to the top of the screen so that output from system'd
      * commands don't scroll up the screen.
      */
-    move(1,1);
+    LYmove(1,1);
 
     stop_curses();
     CTRACE((tfp, "command: %s\n", the_command));

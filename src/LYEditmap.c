@@ -27,6 +27,8 @@
 
 PUBLIC int current_lineedit = 0;  /* Index into LYLineEditors[]   */
 
+PUBLIC int escape_bound = 0;      /* User wanted Escape to perform actions?  */
+
 /*
  * See LYStrings.h for the LYE definitions.
  */

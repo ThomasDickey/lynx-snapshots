@@ -758,6 +758,31 @@ Try_Redirected_URL:
 #ifdef DIRED_SUPPORT
 		    lynx_edit_mode = FALSE;
 #endif /* DIRED_SUPPORT */
+#ifndef DISABLE_BIBP
+		    if (url_type == BIBP_URL_TYPE) {
+			char *bibpTmp = NULL;
+			if (!BibP_bibhost_checked)
+			    LYCheckBibHost();
+			if (BibP_bibhost_available) {
+			    StrAllocCopy(bibpTmp, BibP_bibhost);
+			} else if (HTMainAnchor && HTAnchor_citehost(HTMainAnchor)) {
+			    StrAllocCopy(bibpTmp, HTAnchor_citehost(HTMainAnchor));
+			} else {
+			    StrAllocCopy(bibpTmp, BibP_globalserver);
+			}
+			if (HTMainAnchor && HTAnchor_citehost(HTMainAnchor)) {
+			    StrAllocCat(bibpTmp, "bibp1.0/resolve?citehost=");
+			    StrAllocCat(bibpTmp, HTAnchor_citehost(HTMainAnchor));
+			    StrAllocCat(bibpTmp, "&usin=");
+			} else {
+			    StrAllocCat(bibpTmp, "bibp1.0/resolve?usin=");
+			}
+			StrAllocCat(bibpTmp, doc->address+5); /* USIN after bibp: */
+			StrAllocCopy(doc->address, bibpTmp);
+			WWWDoc.address = doc->address;
+			FREE(bibpTmp);
+		    }
+#endif /* !DISABLE_BIBP */
 
 		    if (url_type == FILE_URL_TYPE) {
 			/*
@@ -802,8 +827,8 @@ Try_Redirected_URL:
 		    if (TRACE) {
 #ifdef USE_SLANG
 			if (LYCursesON) {
-			    addstr("*\n");
-			    refresh();
+			    LYaddstr("*\n");
+			    LYrefresh();
 			}
 #endif /* USE_SLANG */
 			fprintf(tfp,"\n");
@@ -865,6 +890,10 @@ Try_Redirected_URL:
 				 url_type == FILE_URL_TYPE) ||
 				(no_goto_lynxcgi &&
 				 url_type == LYNXCGI_URL_TYPE) ||
+#ifndef DISABLE_BIBP
+				(no_goto_bibp &&
+				 url_type == BIBP_URL_TYPE) ||
+#endif
 				(no_goto_cso &&
 				 url_type == CSO_URL_TYPE) ||
 				(no_goto_finger &&

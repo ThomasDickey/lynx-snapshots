@@ -1,6 +1,101 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2001-02-08 (2.8.4dev.17)
+* implement left/right scrolling and line-wrap toggle using '{', '}' and '|'
+  characters, respectively.  This uses SVr4 curses/ncurses pads to make the
+  whole screen treated as a viewport into a very wide screen -TD
+* make do_check_goto_URL() table-driven to simplify it as well as combine the
+  related messages into GOTO_XXXX_DISALLOWED -TD
+* combine restrict_name[] and restrict_flag[] arrays to eliminate possibile
+  ifdef mismatches, as well as to simplify the treatment of "default"
+  restrictions -TD
+* eliminate redundant symbols for color-style ifdefs (USE_HASH and
+  LINKEDSTYLES), using only USE_COLOR_STYLE -TD
+* simplify parse_style() by making most of it a table -TD
+* correct logic in arg_eqs_parse() for OPTNAME_ALLOW_DASHES ifdef which made
+  incorrect match for -display if -display-charset were given (report by IZ)
+  -TD
+* revert a commented-out call to HText_cancelStbl() in HTML_TABLE case in
+  HTML_start_element() from IZ's changes, which had the effect of changing the
+  article color in deja-news for color-style configuration -TD
+* fix off-by-one error in the END key handling (an empty line was shown at the
+  end) -IZ
+* makes END key always show a full last page of the document.  That is, even if
+  the last line is already shown, it is moved to become the last line of the
+  screen, so that as much as possible of the document is on the screen -IZ
+* add -display_chars cmdline option, and additionally allows autodetection of
+  the charset on the system which allow it.  This provides a way to switch the
+  display charset other than via obscure manipulation with 'O'ptions.  (.lynxrc
+  is not viable if you have different charsets in different windows.) -IZ
+  The logic:
+  (1) first autodetect;
+  (2) then read cfg file, and if it is not "AutoDetect ..." (as the saved
+      version says), grant the cfg file charset;
+  (3) then read the cmdline, if it is present, but not "auto", then
+      grant it, otherwise switch back to the autodetected one.
+* allow TRST code to handle table-in-table.  There are now two cases only
+  (modulo bugs) when Lynx will not show a table in a table form no matter what
+  is the screen width:  when TABLE is inside PRE, and when there is a TAB
+  inside a TABLE.  Both look like deliberate decisions, so I did not change
+  these places in HTML.c.  But one may need to reconsider this at some
+  moment...  Example of usage:  to process (my old copy of) DejaNews Power
+  Search form (which has TABLE-in-TABLE, and multiline cells) you need screen
+  width of 112 chars -IZ
+* enable <BR> and <P> in TRSTables.  The table still needs to fit into the
+  screen width without line wrapping.  A tiny bit of additional work may be
+  needed to allow tables-inside-tables too; then any table should be rendable
+  as a table after an appropriate screen resizing.  This patch also should make
+  around 70% of TRSTable.c unreachable.  A lot of simplification can be made,
+  and most of the current convoluted hackery may be removed.  Since this
+  algorithm tries to align *all* the display lines of the table, in some rare
+  cases it may need larger screen width than the old algorithm (the old
+  algorithm ignores all but one of the display lines corresponding to the given
+  <TR></TR> - and in most cases just gives up for the whole table if a
+  multiline cell is but of the simplest form) -IZ
+* add several traces and comments to TRSTable.c -IZ
+* enable interrupting LYNX by any char bound to INTERRUPT -IZ
+* add configure check for srand()/rand() functions, or alternatives with
+  similar interfaces.  These are used in the SSL and experimental temporary
+  file options -TD
+* allow binding ESC to perform some action (such as INTERRUPT:ABORT, or
+  something else).  It is useful only if the curses (or similar) package remaps
+  all the reasonable escape sequences, so Lynx internal escape-sequence
+  processing is not needed -IZ
+* enable showing the region between mark and point in the edit areas in a
+  different style.  The style names are edit.active.marked and
+  edit.prompt.marked -IZ
+* add visible feedback for special case of unactive current text area which may
+  exist with -tna.  The corresponding style is edit.current -IZ
+* add FORW_RL and BACK_LL to edit bindings support to allow cursor forward and
+  backward respectively to move to the next/previous link if done at the end of
+  the edit-field -IZ
+* update several configure script macros to smooth over incompatibilities
+  in autoconf 2.49c (alpha).  In particular, this eliminates support for
+  changequote(), and adds limited support for OS/2 -TD
+* add google to list of search engines in lynx_help_main.html -LP
+* minor formatting of help message -Michael Warner
+* modify GetStdin() function in LYMain.c to allow -stdin option to read past
+  a line consisting of "---" (reported by Michael Warner) -TD
+* ifdef'd bibp: support, added configure option --disable-bibp-urls -TD
+* add experimental support for bibp: URLs as described in
+  http://www.ietf.org/internet-drafts/draft-cameron-tatu-bibp-02.txt
+  (patch by Rob Cameron <cameron@cs.sfu.ca>).
+* change sed delimiters in makefile.in to avoid using '@', which may appear
+  in AFS pathnames (report by Martin Mokrejs <mmokrejs@natur.cuni.cz>) -TD
+* fix missing call to LYCloseTempFP() in LYPrint.c, which caused attempt to
+  mail a file from the PRINT menu to send an email with a blank body.  It looks
+  like this would happen for any platform not using LYPipeToMailer() -DK
+* change pointers for RFC's from ds.internic.net to rfc-editor.org, since
+  the former appears outdated -Michael Warner
+* add undef for HAVE_DELSCREEN to config.hin, so the delscreen() ifdef from
+  dev.16 works as intended -PG
+* workaround in CF_CURSES_FUNCS for overzealous compiler that optimized away
+  the test code -TD
+* change order of checks by CF_NETLIBS and CF_SSL macros in configure script,
+  since SSL libraries depend on network libraries (reports by Martin McCormick
+  <martin@dc.cis.okstate.edu>, IZ) -TD
+
 2001-01-01 (2.8.4dev.16)
 * add ja.po message file (overlooked in dev.15, reported by Atsuhito Kohda
   <kohda@nsx.pm.tokushima-u.ac.jp>)

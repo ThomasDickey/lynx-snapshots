@@ -2,6 +2,7 @@
 #define LYUTILS_H
 
 #include <LYCharVals.h>  /* S/390 -- gil -- 2149 */
+#include <LYKeymap.h>
 
 #ifndef HTLIST_H
 #include <HTList.h>
@@ -34,8 +35,16 @@
 
 #define LYIsPipeCommand(s) ((s)[0] == '|')
 
-/* See definitions in src/LYCharVals.h. */
-#define LYCharIsINTERRUPT(ch)	((ch) == LYCharINTERRUPT1 || ch == LYCharINTERRUPT2)
+/* See definitions in src/LYCharVals.h.  The hardcoded values...
+   This prohibits binding C-c and C-g.  Maybe it is better to remove this? */
+#define LYCharIsINTERRUPT_HARD(ch)	\
+  ((ch) == LYCharINTERRUPT1 || ch == LYCharINTERRUPT2)
+
+#define LYCharIsINTERRUPT(ch)		\
+  (LYCharIsINTERRUPT_HARD(ch) || LKC_TO_LAC(keymap,ch) == LYK_INTERRUPT)
+
+#define LYCharIsINTERRUPT_NO_letter(ch)	\
+  (LYCharIsINTERRUPT(ch) && !isprint(ch))
 
 #if defined(DOSPATH) || defined(__EMX__)
 #define LYIsPathSep(ch) ((ch) == '/' || (ch) == '\\')
@@ -108,6 +117,7 @@ extern void LYAddLocalhostAlias PARAMS((char *alias));
 extern void LYAddPathSep PARAMS((char **path));
 extern void LYAddPathSep0 PARAMS((char *path));
 extern void LYAddPathToHome PARAMS((char *fbuffer, size_t fbuffer_size, char *fname));
+extern void LYCheckBibHost NOPARAMS;
 extern void LYCheckMail NOPARAMS;
 extern void LYCleanupTemp NOPARAMS;
 extern void LYCloseTemp PARAMS((char *name));
@@ -212,6 +222,7 @@ typedef enum {
     TELNET_GOPHER_URL_TYPE,
     INDEX_GOPHER_URL_TYPE,
     MAILTO_URL_TYPE,
+    BIBP_URL_TYPE,
     FINGER_URL_TYPE,
     CSO_URL_TYPE,
     HTTPS_URL_TYPE,

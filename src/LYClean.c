@@ -50,7 +50,7 @@ PUBLIC void cleanup_sig ARGS1(
 	 *  Refresh screen to get rid of "cancel" message, then query.
 	 */
 	lynx_force_repaint();
-	refresh();
+	LYrefresh();
 
 	/*
 	 *  Ask if exit is intended.
@@ -162,11 +162,11 @@ PUBLIC void cleanup NOARGS
 #endif /* !VMS */
 
     if (LYCursesON) {
-	move(LYlines-1, 0);
-	clrtoeol();
+	LYmove(LYlines-1, 0);
+	LYclrtoeol();
 
 	lynx_stop_all_colors ();
-	refresh();
+	LYrefresh();
 
 	stop_curses();
     }

@@ -171,6 +171,9 @@ incremental display stages with MessageSecs delay
 .B -display\fR=\fIDISPLAY
 set the display variable for X rexec-ed programs.
 .TP
+.B -display_charset\fR=\fIMIMEname
+set the charset for the terminal output.
+.TP
 .B -dont_wrap_pre
 inhibit wrapping of text in <pre> when -dump'ing and -crawl'ing, mark
 wrapped lines in interactive session.

@@ -3,6 +3,7 @@
 
 #include <HTUtils.h>
 #include <HTList.h>
+#include <LYCurses.h>
 
 extern BOOLEAN LYisNonAlnumKeyname PARAMS((int ch, int KeyName));
 extern HTList *LYcommandList NOPARAMS;
@@ -129,7 +130,6 @@ typedef enum {
   , LYK_9
   , LYK_SOURCE
   , LYK_RELOAD
-  , LYK_PIPE
   , LYK_QUIT
   , LYK_ABORT
   , LYK_NEXT_PAGE
@@ -238,12 +238,25 @@ typedef enum {
   , LYK_CHG_CENTER
   , LYK_TO_CLIPBOARD
 #endif /* SH_EX */
+
 #ifdef KANJI_CODE_OVERRIDE
   , LYK_CHG_KCODE
 #endif
+
 #ifdef SUPPORT_CHDIR
   , LYK_CHDIR
 #endif
+
+#ifdef USE_CURSES_PADS
+  , LYK_SHIFT_LEFT
+  , LYK_SHIFT_RIGHT
+  , LYK_LINEWRAP_TOGGLE
+#else
+#define LYK_SHIFT_LEFT      LYK_UNKNOWN
+#define LYK_SHIFT_RIGHT     LYK_UNKNOWN
+#define LYK_LINEWRAP_TOGGLE LYK_UNKNOWN
+#endif
+
 } LYKeymapCode;
 
 /*
