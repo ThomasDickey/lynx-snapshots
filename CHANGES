@@ -1,6 +1,8 @@
 Changes since Lynx 2.8 release
 ================================================================================
 
+1998-08-31 (2.8.1dev.24)
+* re-correct DH's patch for COLLAPSE_BR_TAGS (reported by Larry Virden) - TD
 1998-08-29 (2.8.1dev.23)
 * make interim fix for gzip'd html files until we can resolve portability
   issues raised by SKY's renaming - TD

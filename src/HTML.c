@@ -1552,13 +1552,13 @@ PRIVATE void HTML_start_element ARGS6(
 	CHECK_ID(HTML_GEN_ID);
 	  /* Add a \r (new line) if these three conditions are true:
 	   *   1. We are not collapsing BR's, and
-	   *   2. This line has text on it, or
-	   *   3. The previous line has text on it.
+	   *   2. The previous line has text on it, or
+	   *   3. This line has text on it.
 	   * Otherwise, don't do anything. -DH 980814, TD 980827
 	   */
-	if ((LYCollapseBRs == FALSE) &&
-	    (HText_LastLineSize(me->text, FALSE) ||
-	     HText_PreviousLineSize(me->text, FALSE))) {
+	if ((LYCollapseBRs == FALSE &&
+	     HText_PreviousLineSize(me->text, FALSE)) ||
+	    HText_LastLineSize(me->text, FALSE)) {
 	    HText_setLastChar(me->text, ' ');  /* absorb white space */
 	    HText_appendCharacter(me->text, '\r');
 	}
