@@ -60,12 +60,12 @@ else
 		CF_STRIP_G_OPT(CFLAGS)
 		;;
 	*)
-		if test -n "$GCC" ; then
 			CF_STRIP_G_OPT(CFLAGS)
-		fi
 		;;
 	esac
 fi
+
+
 
 if test -n "$GCC"
 then

@@ -120,4 +120,11 @@ Motivation:
 
 - The format is independent of details of other parts of the Lynx code,
   unlike the "old" LYCharsets.c mechanism.  The tables don't have to
-  be changed in synch when e.g. new entities are added to the HTMLDTD.
+  be changed in synch when e.g. new entities are added to the entities.h.
+
+
+Note: the Default "7bit approximation" table can be used for
+case-insensitive search for non-ascii letters if no upper/lower case
+information provided by other means, e.g. locale.  It is assumed that
+upper/lower case letters have their "7bit approximation" images
+in def7_uni.tbl matched case-insensitively.

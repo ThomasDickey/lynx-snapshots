@@ -132,7 +132,7 @@ II. Compile instructions -- UNIX
   --disable-dired			(defines DIRED_SUPPORT)
 	Use this option to disable the optional directory-editor.
 
-	Lynx supports directory editing (DirEd) for local directories. 
+	Lynx supports directory editing (DirEd) for local directories.
 	This allows users to do things like view, copy and remove files
 	using a tabular display of the directory and single-keystroke
 	commands instead of using the command line.  From inside Lynx, the
@@ -228,8 +228,8 @@ II. Compile instructions -- UNIX
 
   --enable-internal-links		(define DONT_TRACK_INTERNAL_LINKS)
 	Disabled by default, this option allows tracking of internal links,
-	a useful feature which could, however, compromise a secure transaction
-	by forcing inappropriate resubmission of form content.
+	a feature which could, however, compromise a secure transaction by
+	forcing inappropriate resubmission of form content.
 
   --enable-nsl-fork			(define NSL_FORK)
 	Use this option to allow NSL requests to be aborted at will.
@@ -464,7 +464,7 @@ IV. Compile instructions -- Win32 (Windows95/NT)
     messages along those threads.  You will have to make a minor alteration to
     HTTCP.c (change delay to 30 seconds) and modify HTFILE.c (concerning
     getgroups).  You will need a launch program to call helper applications.
-  
+
 
 V. Compile instructions -- 386 DOS
 
@@ -494,9 +494,9 @@ V. Compile instructions -- 386 DOS
     zlib.h and zconf.h in the include subdirectory.
 
     In addition to the files in the Lynx distribution, you will need a
-    curses package and a TCP package.  You can use PDCurses (available at 
-    "http://www.lightlink.com/hessling/") and the DJGPP port of WATTCP 
-    (available in two different versions at "ftp://neonatal.sm.ic.ac.uk/" 
+    curses package and a TCP package.  You can use PDCurses (available at
+    "http://www.lightlink.com/hessling/") and the DJGPP port of WATTCP
+    (available in two different versions at "ftp://neonatal.sm.ic.ac.uk/"
     and in "http://www.fdisk.com/doslynx/wlynx/source/djgpp.zip").
     You can also use slang ("ftp://space.mit.edu/pub/davis/slang") as your
     curses library.  It has not been fully ported to DOS yet, however.
@@ -516,7 +516,7 @@ V. Compile instructions -- 386 DOS
     directory and do "make -f makefile.dos" to compile the character tables.
     Then move to the "lynx2-*/src" directory and do "make -f makefile.dos".
     If all goes well, you will have a lynx.exe file.  If you have trouble,
-    check to be sure djgpp.env is the way it came in the original package.  
+    check to be sure djgpp.env is the way it came in the original package.
 
     To test Lynx_386 you must have a packet driver installed.  The simplest
     method is to use a null packet driver that just allows Lynx to start up,
@@ -530,7 +530,7 @@ V. Compile instructions -- 386 DOS
     "slip8250  0x60 6 3 0x2F8" so that it uses COM2 and IRQ 3, in order to
     avoid an IRQ conflict with a mouse or some other device.  Another packet
     driver is slipper.exe, which is available from many sites, including
-    "ftp://jazz.trumpet.com.au/slipper".  To remove it from memory use 
+    "ftp://jazz.trumpet.com.au/slipper".  To remove it from memory use
     termin.com (usage "termin 0x60"), available in the CRYNWR package.  To
     connect over a dialup PPP connection you need dosppp or klos' pppshare.
     (Find at "http://www.simtel.net/pub/simtelnet/msdos/pktdrvr/dosppp05.zip"
@@ -608,7 +608,7 @@ VI. General installation instructions
     If you still have difficulties, send an email message to the Lynx-Dev
     mailing list (see the README file).  Try to include pertinent information
     about your system, the OS you are using, the name and version of your
-    compiler, which curses library you are using and the compile-time errors. 
+    compiler, which curses library you are using and the compile-time errors.
     Be sure to say what version and image-number (alternately the top date
     of the CHANGES file) of Lynx you are trying to build.
 
@@ -620,10 +620,10 @@ VII. Setting environment variables before running Lynx (optional)
     and posting via Lynx, set the environment variable NNTPSERVER so that
     it points to its Internet address.  The variable "NNTPSERVER" is used
     to specify the host which will be used as the default for news URLs.
-    
+
 	UNIX
 		setenv NNTPSERVER "news.server.dom"
-	
+
 	VMS
 		define/system NNTPSERVER "news.server.dom"
 
@@ -658,7 +658,7 @@ VII. Setting environment variables before running Lynx (optional)
     act as firewall gateways and caching servers.  They are preferable to
     the older gateway servers.  Each protocol used by Lynx can be mapped
     separately using PROTOCOL_proxy environment variables of the form:
-    
+
         UNIX
                 setenv http_proxy "http://some.server.dom:port/"
                 setenv https_proxy "http://some.server.dom:port/"
@@ -674,7 +674,7 @@ VII. Setting environment variables before running Lynx (optional)
                 setenv wais_proxy "http://some.server.dom:port/"
                 setenv finger_proxy "http://some.server.dom:port/"
                 setenv cso_proxy "http://some.server.dom:port/"
-                
+
         VMS
                 define "http_proxy" "http://some.server.dom:port/"
                 define "https_proxy" "http://some.server.dom:port/"
@@ -698,10 +698,10 @@ VII. Setting environment variables before running Lynx (optional)
     If you wish to override the use of a proxy server for specific hosts or
     entire domains you may use the "no_proxy" environment variable. Here is
     an example use of "no_proxy":
-          
+
         UNIX
                 setenv no_proxy "host.domain.dom, domain1.dom, domain2"
-                
+
         VMS
                 define "no_proxy" "host.domain.dom, domain1.dom, domain2"
 
@@ -729,7 +729,7 @@ VII. Setting environment variables before running Lynx (optional)
 
     The proxy and no_proxy variables also can be set at run time via
     lynx.cfg.
-    
+
 2. Win32 (95/NT) and 386 DOS (adapted from "readme.txt" by Wayne Buttles)
 
     HOME         Where to keep the bookmark file and personal config files.
