@@ -410,6 +410,7 @@ PUBLIC void remove_bookmark_link ARGS2(
     struct stat stat_buf;
     mode_t mode;
 #endif /* VMS */
+    char homepath[256];
 
     CTRACE(tfp, "remove_bookmark_link: deleting link number: %d\n", cur);
 
@@ -426,7 +427,8 @@ PUBLIC void remove_bookmark_link ARGS2(
 	return;
     }
 
-    if ((nfp = LYOpenScratch(newfile, filename_buffer)) == 0) {
+    LYAddPathToHome(homepath, sizeof(homepath), "");
+    if ((nfp = LYOpenScratch(newfile, homepath)) == 0) {
 	fclose(fp);
 	_statusline(BOOKSCRA_OPEN_FAILED_FOR_DEL);
 	sleep(AlertSecs);

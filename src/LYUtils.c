@@ -2893,9 +2893,9 @@ PUBLIC void size_change ARGS1(
      */
     if (LYlines != old_lines || LYcols != old_cols) {
 	recent_sizechange = TRUE;
-    }
-    CTRACE(tfp, "Window size changed from (%d,%d) to (%d,%d)\n",
+	CTRACE(tfp, "Window size changed from (%d,%d) to (%d,%d)\n",
 		old_lines, old_cols, LYlines, LYcols);
+    }
 #ifdef SIGWINCH
     (void)signal (SIGWINCH, size_change);
 #endif /* SIGWINCH */
@@ -3249,6 +3249,10 @@ PRIVATE char *fmt_tempname ARGS3(
     static unsigned counter;
     char *leaf;
 
+    if (prefix == 0)
+    	prefix = "";
+    if (suffix == 0)
+    	suffix = "";
     strcpy(result, prefix);
     leaf = result + strlen(result);
     counter++;

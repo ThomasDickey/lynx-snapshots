@@ -501,20 +501,16 @@ try_again:
 
 #ifdef DISP_PARTIAL
 		display_partial = display_partial_flag; /* reset */
-		Newline_partial = 0;     /* initialize */
-		NumOfLines_partial = 0;  /* initialize */
+		Newline_partial = newdoc.line; /* initialize */
+		NumOfLines_partial = 0;        /* initialize */
 		/*
 		 *  Disable display_partial if requested URL has #fragment.
 		 *  Otherwise user got the new document from the first page and
 		 *  be moved to #fragment later after download completed, but
-		 *  only if user did not mess screen up by scrolling before... 
+		 *  only if user did not mess screen up by scrolling before...
 		 *  So fall down to old behavior here.
-		 *  Also we should avoid displaying 'd'ownloaded files
-		 *  since they are not supposed to be shown on the screen.
-		 *  (actually we may get 'curdoc' displayed from the first page...)
 		 */
-		if (display_partial && (strchr(newdoc.address, '#')==NULL) &&
-			    (strncmp(newdoc.address, "LYNXDOWNLOAD:", 13)==0))
+		if (display_partial && (strchr(newdoc.address, '#')==NULL))
 			display_partial = TRUE;
 		else
 			display_partial = FALSE;
@@ -992,10 +988,10 @@ try_again:
 		    Newline = newdoc.line;
 #ifdef DISP_PARTIAL
 		    /*
-		     *	Override newdoc.line value with a new one if user
+		     *	Override newdoc.line with a new value if user
 		     *	scrolled the document while downloading.
 		     */
-		    if (display_partial && (Newline_partial != 0))
+		    if (display_partial && (Newline_partial != newdoc.line))
 			Newline = Newline_partial;
 #endif /* DISP_PARTIAL */
 
@@ -5090,6 +5086,7 @@ check_add_bookmark_to_self:
 			newdoc.safe = FALSE;
 		    }
 		    newdoc.internal_link = FALSE;
+		   newdoc.line = curdoc.line;  /* used for display_partial ! */
 		    newdoc.link = 0;
 		    HTOutputFormat = HTAtom_for("www/download");
 		    /*

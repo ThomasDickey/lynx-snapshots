@@ -599,7 +599,7 @@ cancelled:
 
 /*
  *  LYdownload_options writes out the current download choices to
- *  a file so that the user can select printers in the same way that
+ *  a file so that the user can select downloaders in the same way that
  *  they select all other links.  Download links look like:
  *  LYNXDOWNLOAD://Method=<#>/File=<STRING>/SugFile=<STRING>
  */

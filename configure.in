@@ -152,6 +152,7 @@ AC_C_CONST
 
 dnl Only add to this case statement things that we cannot design tests for.
 PROG_EXT=
+TRY_CFLAGS=
 case $host_os in
 aix4*)
 	CFLAGS="$CFLAGS -DAIX4 -D_BSD=44" 
@@ -161,7 +162,7 @@ aix*)
 	LIBS="$LIBS -lbsd"
 	;;
 apollo*)
-	CFLAGS="$CFLAGS -D_BUILTINS -W0,-opt,4"
+	TRY_CFLAGS="$TRY_CFLAGS -D_BUILTINS -W0,-opt,4"
 	;;
 bsdi*)
 	CFLAGS="$CFLAGS -DBSDI" 
@@ -214,11 +215,11 @@ osf4*)
 	;; 
 osf*)
 	# Increase the maximum size of functions that will be optimized.
-	test -z "$GCC" && CFLAGS="$CFLAGS -O -Olimit 4000"
+	test -z "$GCC" && TRY_CFLAGS="$TRY_CFLAGS -O -Olimit 4000"
 	CFLAGS="$CFLAGS -DDSYS5"
 	;;
 sco3.2v5*)
-	test $ac_cv_prog_gcc != yes && CC="cc -belf"
+	test $ac_cv_prog_gcc != yes && TRY_CFLAGS="$TRY_CFLAGS -belf"
 	;;
 sco*)
 	LIBS="$LIBS -lmalloc"
@@ -253,12 +254,22 @@ sunos4*)
 	;;
 ultrix*)
 	# Increase the maximum size of functions that will be optimized.
-	test -z "$GCC" && CFLAGS="$CFLAGS -O -Olimit 600 -G 7"
+	test -z "$GCC" && TRY_CFLAGS="$TRY_CFLAGS -O -Olimit 600 -G 7"
 	CFLAGS="$CFLAGS -DULTRIX" 
 	AC_CHECK_HEADERS(cursesX.h, cf_cv_ncurses_header=cursesX.h)
 	;;
 esac
 AC_SUBST(PROG_EXT)
+
+dnl Collect tests for compiler options into one place
+if test -n "$TRY_CFLAGS" ; then
+	cf_save_CFLAGS="$CFLAGS"
+	CFLAGS="$CFLAGS $TRY_CFLAGS"
+	AC_MSG_CHECKING(if we should use compile options $TRY_CFLAGS)
+	AC_TRY_COMPILE([#include <stdio.h>],[FILE *fp = stdin],[cf_result=yes],[cf_result=no])
+	AC_MSG_RESULT($cf_result)
+	test "$cf_result" = no && CFLAGS="$cf_save_CFLAGS"
+fi
 
 dnl --------------------------------------------------------------------------
 dnl Checks for library configuration (added right-to-left)
@@ -448,9 +459,9 @@ no)
 esac
 AC_SUBST(INSTALL_LSS)
 
-AC_MSG_CHECKING(if experimental partial-display should be used)
+AC_MSG_CHECKING(if partial-display should be used)
 CF_ARG_ENABLE(partial,
-[  --enable-partial        use experimental partial-display logic],
+[  --enable-partial        use partial-display logic],
 	[use_partial_display=$enableval],
 	[use_partial_display=yes])
 AC_MSG_RESULT($use_partial_display)
@@ -496,7 +507,7 @@ test $use_setfont = yes && AC_DEFINE(EXP_CHARTRANS_AUTOSWITCH)
 
 AC_MSG_CHECKING(if you want internal-links feature)
 CF_ARG_ENABLE(internal-links,
-[  --enable-internal-links  handle following links to same doc differently],
+[  --enable-internal-links handle following links to same doc differently],
 	[use_internal_links=yes],
 	[use_internal_links=no])
 AC_MSG_RESULT($use_internal_links)

@@ -1,6 +1,18 @@
 Changes since Lynx 2.8 release
 ================================================================================
 
+1998-06-11 (2.8.1dev.16)
+* modify configure script to check for special compiler options which are
+  assumed for particular platforms (suggested by BL) - TD
+* modify display_page in GridText.c so that TRACE does not cause a repaint,
+  since that causes colors to be incorrectly rendered when tracing - TD
+* fix a few of the signed/unsigned mismatch warnings in GridText.c - TD
+* correct pathname in LYOpenScratch call for bookmarks (reported by DK) - TD
+* DISP_PARTIAL:  fix initialization of newdoc.line (case LYK_DOWNLOAD,
+  mainloop) to correct display while 'd'ownloading files (it was initialized
+  _after_ the download completed and was good enough without display_partial
+  mode).  - LP
+* correct some ifdef's for DISP_PARTIAL - LP
 1998-06-04 (2.8.1dev.14)
 * minor formatting fixes and documentation for upload screen - LP
 * remove config.cache at beginning of configure script - TD
