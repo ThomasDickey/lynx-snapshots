@@ -176,12 +176,13 @@ void run_external ARGS1(char *, c)
 {
 #ifdef WIN_EX
     HANDLE handle;
-    int stat;
+    int status;
+    int confirmed;
     char pram_string[PATH_MAX];
     int redraw_flag;
     extern int xsystem(char *cmd);
 #endif
-    char command[1024];
+    char *cmdbuf = NULL;
     lynx_html_item_type *externals2 = 0;
 
     if (externals == NULL)
@@ -189,7 +190,7 @@ void run_external ARGS1(char *, c)
 
 #ifdef WIN_EX			/* 1998/01/26 (Mon) 09:16:13 */
     if (c == NULL) {
-	HTInfoMsg("Not exist external command");
+	HTInfoMsg("Not external command exists");
 	return;
     }
 #endif
@@ -206,7 +207,7 @@ void run_external ARGS1(char *, c)
 	{
 	    if (no_externals && !externals2->always_enabled) {
 		HTUserMsg(EXTERNALS_DISABLED);
-		return;
+		break;
 	    }
 	    /*  Too dangerous to leave any URL that may come along unquoted.
 	     *  They often contain '&', ';', and '?' chars, and who knows
@@ -215,25 +216,22 @@ void run_external ARGS1(char *, c)
 	     *  Dunno how this needs to be modified for VMS or DOS. - kw
 	     */
 #if (defined(VMS) || defined(DOSPATH) || defined(__EMX__)) && !defined(WIN_EX)
-	    sprintf(command, externals2->command, c);
+	    HTSprintf0(&cmdbuf, externals2->command, c);
 #else	/* Unix or DOS/Win: */
 #if defined(WIN_EX)
 	    if (*c != '\"' && strchr(c, ' ') != NULL) {
 		char *cp = quote_pathname(c);
-		sprintf(command, externals2->command, cp);
+		HTSprintf0(&cmdbuf, externals2->command, cp);
 		FREE(cp);
 	    } else {
-		strcpy(pram_string, c);
+		LYstrncpy(pram_string, c, sizeof(pram_string)-1);
 		decode_string(pram_string);
 		c = pram_string;
 
-		/* mailto: */
 		if (strnicmp("mailto:", c, 7) == 0) {
-		    sprintf(command, externals2->command, c + 7);
-		}
-		/* telnet:// */
-		else if (strnicmp("telnet://", c, 9) == 0) {
-		    char host[STRING_MAX];
+		    HTSprintf0(&cmdbuf, externals2->command, c + 7);
+		} else if (strnicmp("telnet://", c, 9) == 0) {
+		    char host[sizeof(pram_string)];
 		    int last_pos;
 
 		    strcpy(host, c + 9);
@@ -241,11 +239,8 @@ void run_external ARGS1(char *, c)
 		    if (last_pos > 1 && host[last_pos] == '/')
 			host[last_pos] = '\0';
 
-		    sprintf(command, externals2->command, host);
-		}
-		/* file:// */
-		else if (strnicmp("file://localhost/", c, 17) == 0) {
-		    extern char windows_drive[];
+		    HTSprintf0(&cmdbuf, externals2->command, host);
+		} else if (strnicmp("file://localhost/", c, 17) == 0) {
 		    char e_buff[PATH_MAX], *p;
 
 		    p = c + 17;
@@ -271,45 +266,42 @@ void run_external ARGS1(char *, c)
 		     * less ==> long filename
 		     */
 		    if (isupper(externals2->command[0])) {
-			sprintf(command,
+			HTSprintf0(&cmdbuf,
 				externals2->command, HTDOS_short_name(e_buff));
 		    } else {
-			sprintf(command, externals2->command, e_buff);
+			HTSprintf0(&cmdbuf, externals2->command, e_buff);
 		    }
 		} else {
-		    sprintf(command, externals2->command, c);
+		    HTSprintf0(&cmdbuf, externals2->command, c);
 		}
 	    }
 #else	/* Unix */
 	    {
 		char *cp = HTQuoteParameter(c);
-		sprintf(command, externals2->command, cp);
+		HTSprintf0(&cmdbuf, externals2->command, cp);
 		FREE(cp);
 	    }
 #endif
 #endif	/* VMS */
 
-	    if (*command != '\0') {
+	    if (cmdbuf != 0 && *cmdbuf != '\0') {
 #ifdef WIN_EX			/* 1997/10/17 (Fri) 14:07:50 */
 		int len;
 		char buff[PATH_MAX];
 
-		CTRACE(tfp, "Lynx EXTERNAL: '%s'\n", command);
+		CTRACE(tfp, "Lynx EXTERNAL: '%s'\n", cmdbuf);
 #ifdef WIN_GUI			/* 1997/11/06 (Thu) 14:17:15 */
-		stat = MessageBox(handle, command,
+		confirmed = MessageBox(handle, cmdbuf,
 				  "Lynx (EXTERNAL COMMAND EXEC)",
-		       MB_ICONQUESTION | MB_SETFOREGROUND | MB_OKCANCEL);
-		if (stat == IDCANCEL) {
-		    return;
-		}
+		       MB_ICONQUESTION | MB_SETFOREGROUND | MB_OKCANCEL)
+			    == IDCANCEL;
 #else
-		stat = HTConfirm(string_short(command, 40));
-		if (stat == NO) {
-		    return;
-		}
+		confirmed = HTConfirm(string_short(cmdbuf, 40)) == NO;
 #endif
+		if (confirmed)
+		    break;
 
-		len = strlen(command);
+		len = strlen(cmdbuf);
 		if (len > 255) {
 		    sprintf(buff, "Lynx: command line too long (%d > 255)", len);
 #ifdef WIN_GUI			/* 1997/11/06 (Thu) 14:17:02 */
@@ -318,16 +310,14 @@ void run_external ARGS1(char *, c)
 			  MB_ICONEXCLAMATION | MB_SETFOREGROUND | MB_OK);
 		    SetConsoleTitle("Lynx for Win32");
 #else
-		    stat = HTConfirm(string_short(buff, 40));
+		    HTConfirm(string_short(buff, 40));
 #endif
-		    return;
+		    break;
 		} else {
-		    SetConsoleTitle(command);
+		    SetConsoleTitle(cmdbuf);
 		}
-#endif
 
-#ifdef WIN_EX
-		if (strnicmp(command, "start ", 6) == 0)
+		if (strnicmp(cmdbuf, "start ", 6) == 0)
 		    redraw_flag = FALSE;
 		else
 		    redraw_flag = TRUE;
@@ -337,33 +327,33 @@ void run_external ARGS1(char *, c)
 		    fflush(stdout);
 		}
 #else
-		HTUserMsg(command);
+		HTUserMsg(cmdbuf);
 		stop_curses();
 #endif
 
 		/* command running. */
 #ifdef WIN_EX			/* 1997/10/17 (Fri) 14:07:50 */
 #ifdef __CYGWIN__
-		stat = system(command);
+		status = system(cmdbuf);
 #else
-		stat = xsystem(command);
+		status = xsystem(cmdbuf);
 #endif
-		if (stat != 0) {
+		if (status != 0) {
 		    sprintf(buff,
 			    "EXEC code = %04x (%2d, %2d)\r\n"
 			    "'%s'",
-			    stat, (stat / 256), (stat & 0xff),
-			    command);
+			    status, (status / 256), (status & 0xff),
+			    cmdbuf);
 #ifdef SH_EX	/* WIN_GUI for ERROR only */
 		    MessageBox(handle, buff,
 			       "Lynx (EXTERNAL COMMAND EXEC)",
 			       MB_ICONSTOP | MB_SETFOREGROUND | MB_OK);
 #else
-		    stat = HTConfirm(string_short(buff, 40));
+		    HTConfirm(string_short(buff, 40));
 #endif		/* 1 */
 		}
 #else	/* Not WIN_EX */
-		LYSystem(command);
+		LYSystem(cmdbuf);
 #endif	/* WIN_EX */
 
 #if defined(WIN_EX)
@@ -380,10 +370,11 @@ void run_external ARGS1(char *, c)
 		start_curses();
 #endif
 	    }
-	    return;
+	    break;
 	} /* end if */
     } /* end-for */
 
+    FREE(cmdbuf);
     return;
 }
 #endif	/* USE_EXTERNALS */

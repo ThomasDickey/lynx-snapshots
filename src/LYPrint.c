@@ -366,7 +366,7 @@ check_recall:
      */
     CTRACE(tfp, "LYPrint: filename is %s, action is `%c'\n", buffer, c);
 
-#if HAVE_POPEN || !defined(__CYGWIN__)
+#if HAVE_POPEN
     if (*buffer == '|') {
 	if (no_shell) {
 	    HTUserMsg(SPAWNING_DISABLED);
@@ -443,7 +443,7 @@ check_recall:
     if (keypad_mode)
 	printlist(outfile_fp,FALSE);
 
-#if HAVE_POPEN || !defined(__CYGWIN__)
+#if HAVE_POPEN
     if (LYIsPipeCommand(buffer))
 	pclose(outfile_fp);
     else

@@ -20,7 +20,6 @@
 #include <HTMLDTD.h>
 
 #include <LYGlobalDefs.h>
-#include <UCkd.h>
 #include <UCdomap.h>
 #include <UCMap.h>
 #include <UCDefs.h>
@@ -1522,6 +1521,29 @@ PUBLIC int UCGetRawUniMode_byLYhndl ARGS1(
 }
 
 /*
+ * Construct a new charset name, given prefix and codepage.  This introduces
+ * potentially unchecked recursion into UCGetLYhntl_byMIME if neither the "cp"
+ * nor "windows-" prefixes are configured, so we check it here.
+ */
+PRIVATE int getLYhndl_byCP ARGS2(
+	CONST char *,	prefix,
+	CONST char *,	codepage)
+{
+    static int nested;
+    int result = -1;
+
+    if (!nested++) {
+	char *cptmp = NULL;
+	StrAllocCopy(cptmp, prefix);
+	StrAllocCat(cptmp, codepage);
+	result = UCGetLYhndl_byMIME(cptmp);
+	FREE(cptmp);
+    }
+    nested--;
+    return result;
+}
+
+/*
  *  Get Lynx internal charset handler from MIME name,
  *  return -1 if we got NULL or did not recognize value.
  *  According to RFC, MIME headers should match case-insensitively.
@@ -1549,6 +1571,7 @@ PUBLIC int UCGetLYhndl_byMIME ARGS1(
     /*
      * Not yet found, try synonyms.  - FM
      */
+#if !NO_CHARSET_utf_8
     if (!strcasecomp(value, "unicode-1-1-utf-8") ||
 	!strcasecomp(value, "utf8")) {
 	/*
@@ -1556,33 +1579,49 @@ PUBLIC int UCGetLYhndl_byMIME ARGS1(
 	 */
 	return UCGetLYhndl_byMIME("utf-8");
     }
+#endif
+#if !NO_CHARSET_euc_jp
     if (!strncasecomp(value, "iso-2022-jp", 11) ||
 	!strcasecomp(value, "x-euc-jp")) {
 	return UCGetLYhndl_byMIME("euc-jp");
     }
+#endif
+#if !NO_CHARSET_shift_jis
     if (!strcasecomp(value, "x-shift-jis")) {
 	return UCGetLYhndl_byMIME("shift_jis");
     }
+#endif
+#if !NO_CHARSET_euc_kr
     if (!strcasecomp(value, "iso-2022-kr")) {
 	return UCGetLYhndl_byMIME("euc-kr");
     }
+#endif
+#if !NO_CHARSET_euc_cn
     if (!strcasecomp(value, "gb2312") ||
 	!strncasecomp(value, "cn-gb", 5) ||
 	!strcasecomp(value, "iso-2022-cn")) {
 	return UCGetLYhndl_byMIME("euc-cn");
     }
+#endif
+#if !NO_CHARSET_big5
     if (!strcasecomp(value, "cn-big5")) {
 	return UCGetLYhndl_byMIME("big5");
     }
+#endif
+#if !NO_CHARSET_macintosh
     if (!strcasecomp(value, "x-mac-roman") ||
 	!strcasecomp(value, "mac-roman")) {
 	return UCGetLYhndl_byMIME("macintosh");
     }
+#endif
+#if !NO_CHARSET_next
     if (!strcasecomp(value, "x-next") ||
 	!strcasecomp(value, "nextstep") ||
 	!strcasecomp(value, "x-nextstep")) {
 	return UCGetLYhndl_byMIME("next");
     }
+#endif
+#if !NO_CHARSET_windows_1252
     if (!strcasecomp(value, "iso-8859-1-windows-3.1-latin-1") ||
 	!strcasecomp(value, "cp1252") ||
 	!strcasecomp(value, "cp-1252") ||
@@ -1594,6 +1633,8 @@ PUBLIC int UCGetLYhndl_byMIME ARGS1(
 	 */
 	return UCGetLYhndl_byMIME("windows-1252");
     }
+#endif
+#if !NO_CHARSET_windows_1250
     if (!strcasecomp(value, "iso-8859-2-windows-latin-2") ||
 	!strcasecomp(value, "cp1250") ||
 	!strcasecomp(value, "cp-1250") ||
@@ -1603,6 +1644,7 @@ PUBLIC int UCGetLYhndl_byMIME ARGS1(
 	 */
 	return UCGetLYhndl_byMIME("windows-1250");
     }
+#endif
     if ((!strncasecomp(value, "ibm", 3) ||
 	 !strncasecomp(value, "cp-", 3)) &&
 	isdigit((unsigned char)value[3]) &&
@@ -1612,23 +1654,12 @@ PUBLIC int UCGetLYhndl_byMIME ARGS1(
 	 * For "ibmNNN<...>" or "cp-NNN", try "cpNNN<...>"
 	 * if not yet found.  - KW & FM
 	 */
-	char * cptmp = NULL;
-
-	StrAllocCopy(cptmp, (value + 1));
-	cptmp[0] = 'c';
-	cptmp[1] = 'p';
-	if ((LYhndl = UCGetLYhndl_byMIME(cptmp)) >= 0) {
-	    FREE(cptmp);
+	if ((LYhndl = getLYhndl_byCP("cp", value+3)) >= 0)
 	    return LYhndl;
-	}
 	/*
 	 * Try windows-NNN<...> if not yet found.  - FM
 	 */
-	StrAllocCopy(cptmp, "windows-");
-	StrAllocCat(cptmp, (value + 3));
-	LYhndl = UCGetLYhndl_byMIME(cptmp);
-	FREE(cptmp);
-	return LYhndl;
+	return getLYhndl_byCP("windows-", value + 3);
     }
     if (!strncasecomp(value, "windows-", 8) &&
 	isdigit((unsigned char)value[8]) &&
@@ -1637,18 +1668,13 @@ PUBLIC int UCGetLYhndl_byMIME ARGS1(
 	/*
 	 * For "windows-NNN<...>", try "cpNNN<...>" - FM
 	 */
-	char * cptmp = NULL;
-
-	StrAllocCopy(cptmp, (value + 6));
-	cptmp[0] = 'c';
-	cptmp[1] = 'p';
-	LYhndl = UCGetLYhndl_byMIME(cptmp);
-	FREE(cptmp);
-	return LYhndl;
+	return getLYhndl_byCP("cp", value + 8);
     }
+#if !NO_CHARSET_koi8_r
     if (!strcasecomp(value, "koi-8")) { /* accentsoft bugosity */
       return UCGetLYhndl_byMIME("koi8-r");
     }
+#endif
     /* no more synonyms if come here... */
 
     CTRACE(tfp, "UCGetLYhndl_byMIME: unrecognized MIME name \"%s\"\n", value);

@@ -2102,7 +2102,7 @@ PUBLIC int LYConsoleInputFD ARGS1(
 #ifdef USE_SLANG
     if (!LYCursesON)
 	fd = fileno(stdin);
-#if ((SLANG_VERSION >= 9919) && defined(UNIX))
+#if ((SLANG_VERSION >= 9919) && defined(UNIX) && !defined(__CYGWIN__))
     /* SLang_TT_Read_FD introduced in slang 0.99.19, from its changelog:
      *   SLang_TT_Read_FD variable is now available for unix.  This is the file
      *   descriptor used by SLang_getkey. */
@@ -7236,7 +7236,7 @@ PUBLIC int LYSystem ARGS1(
 /*
  * Return a string which can be used in LYSystem() for spawning a subshell
  */
-#if defined(__CYGWIN__) && defined(DOSPATH)	/* 1999/02/26 (Fri) */
+#if defined(__CYGWIN__)	/* 1999/02/26 (Fri) */
 PUBLIC int Cygwin_Shell NOARGS
 {
     char *shell;
@@ -7555,3 +7555,82 @@ PUBLIC char * w32_strerror(DWORD ercode)
 }
 
 #endif
+
+#if !defined(VMS) && defined(SYSLOG_REQUESTED_URLS)
+/*
+ * syslog() interface
+ */
+PUBLIC void LYOpenlog ARGS1(
+       CONST char *, banner)
+{
+#if defined(WATT32)
+    openlog("lynx", LOG_PID|LOG_NDELAY, LOG_LOCAL5);
+#else
+    openlog("lynx", LOG_PID, LOG_LOCAL5);
+#endif
+
+    if (banner) {
+	syslog(LOG_INFO, "Session start:%s", banner);
+    } else {
+	syslog(LOG_INFO, "Session start");
+    }
+}
+
+PRIVATE BOOLEAN looks_like_password ARGS2(
+	char *,		first,
+	char *,		last)
+{
+    BOOLEAN result = FALSE;
+
+    while (first <= last) {
+	if (*first == '/'
+	 || *first == ':') {
+	    result = FALSE;
+	    break;
+	}
+	result = TRUE;
+	first++;
+    }
+    return result;
+}
+
+PUBLIC void LYSyslog ARGS1(
+       char *,		arg)
+{
+    char *colon1;
+    char *colon2;
+    char *atsign;
+
+    CTRACE(tfp, "LYSyslog %s\n", arg);
+
+    if (is_url(arg)) {	/* proto://user:password@host/path:port */
+			/*	^this colon		    */
+	if ((colon1 = strchr(arg, ':')) != 0
+	 && !strncmp(colon1, "://", 3)
+	 && (colon2 = strchr(colon1+3, ':')) != 0
+	 && (atsign = strchr(colon1, '@')) != 0
+	 && (colon2 < atsign)
+	 && looks_like_password(colon2 + 1, atsign - 1)) {
+	    char *buf = NULL;
+
+	    StrAllocCopy(buf, arg);
+	    buf[colon2 - arg + 1] = 0;
+	    StrAllocCat(buf, "******");
+	    StrAllocCat(buf, atsign);
+	    syslog (LOG_INFO|LOG_LOCAL5, buf);
+	    CTRACE(tfp, "...alter %s\n", buf);
+	    FREE(buf);
+	    return;
+        }
+    }
+    syslog (LOG_INFO|LOG_LOCAL5, arg);
+}
+
+PUBLIC void LYCloselog NOARGS
+{
+  syslog(LOG_INFO, "Session over");
+  closelog();
+}
+
+#endif /* !VMS && SYSLOG_REQUESTED_URLS */
+

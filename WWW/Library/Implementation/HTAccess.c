@@ -528,6 +528,14 @@ PRIVATE int get_physical ARGS2(
 	if (proxy) {
 	    char * gatewayed = NULL;
 	    StrAllocCopy(gatewayed,proxy);
+	    if (!strncmp(gatewayed, "http", 4)) {
+		char *cp = strrchr(gatewayed, '/');
+		/* Append a slash to the proxy specification if it doesn't
+		 * end in one but otherwise looks normal (starts with "http",
+		 * has no '/' other than ones before the hostname). - kw */
+		if (cp && (cp - gatewayed) <= 7)
+		    LYAddHtmlSep(&gatewayed);
+	    }
 	    /*
 	    ** Ensure that the proxy server uses ftp for file URLs. - FM
 	    */

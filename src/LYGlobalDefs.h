@@ -402,6 +402,7 @@ extern BOOL force_empty_hrefless_a;
 #ifndef NO_NONSTICKY_INPUTS
 extern BOOL sticky_inputs;
 extern BOOL textinput_drawn;
+extern BOOL textfield_stop_at_left_edge;
 #endif
 
 
@@ -414,9 +415,10 @@ extern int HTNoDataOK;		/* HT_NO_DATA-is-ok hack */
 
 #ifdef WIN_EX
 /* LYMain.c */
-extern int lynx_timeout;
-extern BOOLEAN system_is_NT;
 extern BOOLEAN focus_window;
+extern BOOLEAN system_is_NT;
+extern char windows_drive[];
+extern int lynx_timeout;
 #endif /* _WINDOWS */
 
 #ifdef SH_EX
@@ -428,6 +430,12 @@ extern int     debug_delay;
 extern BOOLEAN no_table_center;
 #endif
 
+#if defined(__CYGWIN__)
+extern void cygwin_conv_to_full_win32_path(char *posix, char *dos);
+extern void cygwin_conv_to_full_posix_path(char *dos, char *posix);
+extern int setmode(int handle, int amode);
+#endif
+
 #if !defined(__CYGWIN__) && defined(__CYGWIN32__)
 #define __CYGWIN__
 
@@ -436,12 +444,6 @@ extern BOOLEAN no_table_center;
 
 #define	cygwin_conv_to_full_posix_path(p, q) \
 	cygwin32_conv_to_full_posix_path(p, q)
-#endif
-
-#if defined(__CYGWIN__)
-extern void cygwin_conv_to_full_win32_path(char *posix, char *dos);
-extern void cygwin_conv_to_full_posix_path(char *dos, char *posix);
-extern int setmode(int handle, int amode);
 #endif
 
 #ifdef USE_SCROLLBAR

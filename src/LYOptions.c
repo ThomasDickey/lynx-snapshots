@@ -912,7 +912,7 @@ draw_options:
 			    addstr(LYRawMode ? "ON " : "OFF");
 			}
 		    }
-		    FREE(TYPECAST(char *,assume_list));
+		    FREE(assume_list);
 		    response = ' ';
 		    if (LYSelectPopups) {
 #if !defined(VMS) || defined(USE_SLANG)
@@ -2487,7 +2487,7 @@ redraw:
 	    wmove(form_window, ((i + 1) - window_offset), 2);
 	    wclrtoeol(form_window);
 	    waddstr(form_window, Cnum);
-	    waddstr(form_window, Cptr[i]);
+	    LYwaddstr(form_window, Cptr[i]);
 #endif /* USE_SLANG */
 	}
     }
@@ -2522,7 +2522,7 @@ redraw:
 #else
 	    wmove(form_window, ((i + 1) - window_offset), 2);
 	    waddstr(form_window, Cnum);
-	    waddstr(form_window, Cptr[i]);
+	    LYwaddstr(form_window, Cptr[i]);
 #endif /* USE_SLANG */
 	}
 	Cptr = choices;
@@ -2562,7 +2562,7 @@ redraw:
 #else
 	wstart_reverse(form_window);
 #endif
-	waddstr(form_window, Cptr[i]);
+	LYwaddstr(form_window, Cptr[i]);
 #if defined(WIN_EX)	/* 1997/10/18 (Sat) 00:10:58 */
 	wattroff(form_window, A_REVERSE);
 #else

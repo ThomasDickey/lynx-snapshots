@@ -71,7 +71,7 @@ BUGS:	@@@	Limit connection cache size!
 **		same time.
 */
 
-#ifdef DJGPP
+#if defined(DJGPP) && !defined(WATT32)
 #define u_long unsigned long
 #endif
 

@@ -50,8 +50,6 @@
 
 #define LYIsHtmlSep(ch) ((ch) == '/')
 
-#define TABLESIZE(v) (sizeof(v)/sizeof(v[0]))
-
 extern BOOLEAN LYAddSchemeForURL PARAMS((char **AllocatedString, char *default_scheme));
 extern BOOLEAN LYCachedTemp PARAMS((char *result, char **cached));
 extern BOOLEAN LYCanDoHEAD PARAMS((CONST char *address));
@@ -217,6 +215,22 @@ typedef enum {
  *  For change_sug_filename().
  */
 extern HTList *sug_filenames;
+
+/*
+ * syslog() facility
+ */
+#if !defined(VMS) && defined(SYSLOG_REQUESTED_URLS)
+#ifdef WATT32
+#include <sys/syslog.h>
+#else
+#include <syslog.h>
+#endif
+
+extern void LYOpenlog  PARAMS((CONST char *banner));
+extern void LYSyslog   PARAMS((char *arg));
+extern void LYCloselog NOPARAMS;
+
+#endif /* !VMS && SYSLOG_REQUESTED_URLS */
 
 /*
  *  Miscellaneous.

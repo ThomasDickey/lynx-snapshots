@@ -1637,7 +1637,7 @@ PUBLIC CONST SGML_dtd HTML_dtd = {
 	tags,
 	HTML_ELEMENTS,
 	entities, /* probably unused */
-	sizeof(entities)/sizeof(entities[0]),
+	TABLESIZE(entities),
 };
 
 /* This function fills the "tags" part of the HTML_dtd structure with

@@ -623,10 +623,18 @@ again:
 	    case LTARROW:	/* 1999/04/14 (Wed) 15:01:33 */
 		if (MyEdit.pos == 0 && repeat == -1) {
 		    int c = YES;    /* Go back immediately if no changes */
+#ifndef NO_NONSTICKY_INPUTS
+		    if (sticky_inputs
+		     && !textfield_stop_at_left_edge)
+#endif
 		    if (strcmp(MyEdit.buffer, value)) {
 			c = HTConfirmDefault(PREV_DOC_QUERY, NO);
 		    }
 		    if (c == YES) {
+#ifndef NO_NONSTICKY_INPUTS
+			if (textfield_stop_at_left_edge)
+			    goto again;
+#endif
 			return(ch);
 		    } else {
 			if (form->disabled == YES)

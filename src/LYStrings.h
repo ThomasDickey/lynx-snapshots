@@ -243,7 +243,7 @@ typedef struct _EditFieldData {
 
 #if defined(USE_KEYMAPS)
 extern int lynx_initialize_keymaps NOPARAMS;
-extern int map_string_to_keysym PARAMS((char * src, int *lec));
+extern int map_string_to_keysym PARAMS((CONST char * src, int *lec));
 #endif
 
 extern void LYLowerCase PARAMS((

@@ -165,8 +165,8 @@ PRIVATE int remote_session ARGS2(char *, acc_method, char *, host)
 #define TELNET_DONE
 #endif
 
-/* Most unix machines suppport username only with rlogin */
-#if defined(UNIX) || defined(DOSPATH)
+/* Most unix machines support username only with rlogin */
+#if defined(UNIX) || defined(DOSPATH) || defined(__CYGWIN__)
 #ifndef TELNET_DONE
 
 #define FMT_RLOGIN "%s %s%s%s"
@@ -197,6 +197,9 @@ PRIVATE int remote_session ARGS2(char *, acc_method, char *, host)
 	}
 
 #ifdef __DJGPP__
+#ifdef WATT32
+	_eth_release();
+#endif /* WATT32 */
        __djgpp_set_ctrl_c(0);
        _go32_want_ctrl_break(1);
 #endif /* __DJGPP__ */
@@ -204,6 +207,9 @@ PRIVATE int remote_session ARGS2(char *, acc_method, char *, host)
 #ifdef __DJGPP__
        __djgpp_set_ctrl_c(1);
        _go32_want_ctrl_break(0);
+#ifdef WATT32
+       _eth_init();
+#endif /* WATT32 */
 #endif /* __DJGPP__ */
 	return HT_NO_DATA;		/* Ok - it was done but no data */
 #define TELNET_DONE

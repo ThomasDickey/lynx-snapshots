@@ -50,6 +50,7 @@ BOOLEAN LYCursesON = FALSE;
 
 #if USE_COLOR_TABLE || defined(USE_SLANG)
 PRIVATE int Current_Attr;
+PRIVATE int Masked_Attr;
 #endif
 
 #define OMIT_SCN_KEEPING 0 /* whether to omit keeping of Style_className
@@ -106,18 +107,37 @@ PUBLIC void LYaddAttr ARGS1(
 	int,		a)
 {
     Current_Attr |= a;
-    SLsmg_set_color(Current_Attr);
+    SLsmg_set_color(Current_Attr & ~Masked_Attr);
 }
 
 PUBLIC void LYsubAttr ARGS1(
 	int,		a)
 {
     Current_Attr &= ~a;
-    SLsmg_set_color(Current_Attr);
+    SLsmg_set_color(Current_Attr & ~Masked_Attr);
+}
+
+PRIVATE void lynx_setup_attrs NOARGS
+{
+    static int monoattr[] = {
+	0,
+	SLTT_BOLD_MASK,
+	SLTT_REV_MASK,
+	SLTT_REV_MASK | SLTT_BOLD_MASK,
+	SLTT_ULINE_MASK,
+	SLTT_ULINE_MASK | SLTT_BOLD_MASK,
+	SLTT_ULINE_MASK | SLTT_REV_MASK,
+	SLTT_ULINE_MASK | SLTT_BOLD_MASK | SLTT_REV_MASK
+    };
+    int n;
+
+    for (n = 1; n <= 7; n++)
+	SLtt_set_mono(n, NULL, (monoattr[n] & ~Masked_Attr));
 }
 
 PUBLIC void lynx_setup_colors NOARGS
 {
+    CTRACE(tfp, "lynx_setup_colors\n");
     SLtt_set_color(0, NULL, DEFAULT_FG, DEFAULT_BG);
     SLtt_set_color(1, NULL, "blue",	DEFAULT_BG); /* bold */
     SLtt_set_color(2, NULL, "yellow",	"blue");     /* reverse */
@@ -129,17 +149,10 @@ PUBLIC void lynx_setup_colors NOARGS
     SLtt_set_color(5, NULL, "blue",	DEFAULT_BG); /* bold-underline */
     SLtt_set_color(6, NULL, "red",	DEFAULT_BG); /* reverse-underline */
     SLtt_set_color(7, NULL, "magenta",	"cyan");     /* reverse-underline-bold */
-
     /*
      *	Now set monochrome attributes.
      */
-    SLtt_set_mono(1, NULL, SLTT_BOLD_MASK);
-    SLtt_set_mono(2, NULL, SLTT_REV_MASK);
-    SLtt_set_mono(3, NULL, SLTT_REV_MASK | SLTT_BOLD_MASK);
-    SLtt_set_mono(4, NULL, SLTT_ULINE_MASK);
-    SLtt_set_mono(5, NULL, SLTT_ULINE_MASK | SLTT_BOLD_MASK);
-    SLtt_set_mono(6, NULL, SLTT_ULINE_MASK | SLTT_REV_MASK);
-    SLtt_set_mono(7, NULL, SLTT_ULINE_MASK | SLTT_BOLD_MASK | SLTT_REV_MASK);
+    lynx_setup_attrs();
 }
 
 PRIVATE void sl_suspend ARGS1(
@@ -160,7 +173,7 @@ PRIVATE void sl_suspend ARGS1(
     SLang_init_tty(3, 0, 1);
 #endif /* SLANG_VERSION > 9929 */
     signal(SIGTSTP, sl_suspend);
-#ifdef UNIX
+#if defined(UNIX) && !defined(__CYGWIN__)
     SLtty_set_suspend_state(1);
 #endif
     if (sig == SIGTSTP)
@@ -522,9 +535,9 @@ PRIVATE void LYsetWAttr ARGS1(WINDOW *, win)
 		attr |= COLOR_PAIR(code+offs);
 	}
 
-	wattrset(win, attr);
+	wattrset(win, attr & ~Masked_Attr);
     } else {
-	wattrset(win, Current_Attr);
+	wattrset(win, Current_Attr & ~Masked_Attr);
     }
 }
 
@@ -598,7 +611,7 @@ PRIVATE void lynx_init_colors NOARGS
 	lynx_color_cfg[0].fg = default_fg;
 	lynx_color_cfg[0].bg = default_bg;
 
-	for (n = 0; n < sizeof(lynx_color_cfg)/sizeof(lynx_color_cfg[0]); n++) {
+	for (n = 0; n < TABLESIZE(lynx_color_cfg); n++) {
 	    for (m = 0; m <= 16; m += 8) {
 		int pair = n + m + 1;
 		if (pair < COLOR_PAIRS)
@@ -622,49 +635,23 @@ PUBLIC void lynx_setup_colors NOARGS
 }
 #endif /* USE_COLOR_TABLE */
 
-#ifdef NOTUSED
-#if defined (DJGPP) && !defined (USE_SLANG)
-/*
- * Sorry about making a completely new function,
- * but the real one is messy! WB
- */
-PUBLIC void start_curses NOARGS
+PUBLIC void LYnoVideo ARGS1(
+	int,		a)
 {
-    static BOOLEAN first_time = TRUE;
-
-    if(first_time)
-    {
-	initscr();		/* start curses */
-	first_time = FALSE;
-	cbreak();
-	keypad(stdscr, TRUE);
-	fflush(stdin);
-	fflush(stdout);
-	if (has_colors()) {
-	    lynx_has_color = TRUE;
-	    start_color();
-	}
-	lynx_init_colors();
-	lynx_called_initscr = TRUE;
-
-	/* Inform pdcurses that we're interested in knowing when mouse buttons
-	 * are clicked.  Maybe someday pdcurses will support it.
-	 */
-	if (LYUseMouse)
-	    lynx_enable_mouse (1);
-
-    } else {
-	sock_init();
-    }
-    LYCursesON = TRUE;
-    CTRACE(tfp, "start_curses: done.\n");
-    clear();
-    noecho();
-}
+    CTRACE(tfp, "LYnoVideo(%d)\n", a);
+#if USE_SLANG
+    if (a & 1) Masked_Attr |= SLTT_BOLD_MASK;
+    if (a & 2) Masked_Attr |= SLTT_REV_MASK;
+    if (a & 4) Masked_Attr |= SLTT_ULINE_MASK;
+    lynx_setup_attrs();
 #else
-#endif /* defined (DJGPP) && !defined (USE_SLANG) */
-#endif /* NOTUSED */
-
+#if USE_COLOR_TABLE
+    if (a & 1) Masked_Attr |= A_BOLD;
+    if (a & 2) Masked_Attr |= A_REVERSE;
+    if (a & 4) Masked_Attr |= A_UNDERLINE;
+#endif
+#endif
+}
 
 PUBLIC void start_curses NOARGS
 {
@@ -684,11 +671,11 @@ PUBLIC void start_curses NOARGS
 	SLkp_init ();
 #endif /* __DJGPP__ && !DJGPP_KEYHANDLER */
 
-#ifdef UNIX
+#if defined(UNIX) && !defined(__CYGWIN__)
 #if SLANG_VERSION >= 9935
 	SLang_TT_Read_FD = fileno(stdin);
 #endif /* SLANG_VERSION >= 9935 */
-#endif /* UNIX */
+#endif /* UNIX && !__CYGWIN__ */
 
 #if !defined(USE_KEYMAPS) && defined(ENHANCED_LINEEDIT) && defined(ESCDELAY)
 	/* way to get ESC that's not part of a recognized sequence through */
@@ -724,7 +711,7 @@ PUBLIC void start_curses NOARGS
 	}
 	size_change(0);
 
-#if defined(VMS) || defined(UNIX)
+#if (defined(VMS) || defined(UNIX)) && !defined(__CYGWIN__)
 	SLtt_add_color_attribute(4, SLTT_ULINE_MASK);
 	SLtt_add_color_attribute(5, SLTT_ULINE_MASK);
 	/*
@@ -736,7 +723,7 @@ PUBLIC void start_curses NOARGS
 	} else {
 	    SLtt_Blink_Mode = 0;
 	}
-#endif /* VMS || UNIX */
+#endif /* (VMS || UNIX) && !__CYGWIN__  */
     }
 #ifdef __DJGPP__
 #ifdef WATT32
@@ -762,9 +749,9 @@ PUBLIC void start_curses NOARGS
     scrollok(0,0);
     SLsmg_Backspace_Moves = 1;
 #ifndef VMS
-#ifdef UNIX
+#if defined(UNIX) && !defined(__CYGWIN__)
     SLtty_set_suspend_state(1);
-#endif /* UNIX */
+#endif /* UNIX && !__CYGWIN__ */
 #ifdef SIGTSTP
     if (!no_suspend)
 	signal(SIGTSTP, sl_suspend);
@@ -1176,6 +1163,18 @@ PUBLIC BOOLEAN setup ARGS1(
     if (strncmp((CONST char*)ttytype, "dec-vt", 6) == 0) {
 	(void) setterm(ttytype + 4);
     }
+
+    /*
+     *  Account for lossage on the 'sun' terminal type (80x24) Sun text
+     *  console driver. It only supports reverse video, but all SGR
+     *  sequences produce that same reverse video, and the terminfo
+     *  entry lists different SGRs for 'bold' and 'rev'. As a result,
+     *  the current link is indistinguishable from all other links.
+     *  The workaround here is to disable the 'rev' capability.
+     */
+    if ((strncmp(ttytype, "sun", 3) == 0)) {
+	LYnoVideo(2);
+    }
 #endif /* HAVE_TTYTYPE */
 
 #if defined(HAVE_SIZECHANGE) && !defined(USE_SLANG) && defined(NOTDEFINED)
@@ -1201,7 +1200,7 @@ PUBLIC BOOLEAN setup ARGS1(
     LYlines = LINES;
     LYcols = COLS;
 #endif /* HAVE_SIZECHANGE && !USE_SLANG && USE_NOTDEFINED */
-#if defined(WIN_EX) && defined(NOTDEFINED)
+#if defined(WIN_EX) && defined(CJK_EX) /* 1999/08/26 (Thu) 17:53:38 */
     {
 	extern int current_codepage;	/* PDCurses lib. */
 
@@ -1306,7 +1305,8 @@ PUBLIC void LYstopTargetEmphasis NOARGS
  * There's no guarantee that a library won't temporarily write on its input.
  * Be safe and copy it when we have const-data.
  */
-PUBLIC void LYaddnstr ARGS2(
+PUBLIC void LYwaddnstr ARGS3(
+	WINDOW *,	w,
 	CONST char *,	s,
 	size_t,		len)
 {
@@ -1314,14 +1314,8 @@ PUBLIC void LYaddnstr ARGS2(
 	char temp[MAX_LINE];
 	memcpy(temp, s, len);
 	temp[len] = 0;
-	addstr(temp);
+	waddstr(w, temp);
     }
-}
-
-PUBLIC void LYaddstr ARGS1(
-	CONST char *,	s)
-{
-    LYaddnstr(s, strlen(s));
 }
 
 #ifdef VMS

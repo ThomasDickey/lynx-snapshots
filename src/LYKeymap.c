@@ -185,17 +185,9 @@ LYK_TAG_LINK,     LYK_PREV_DOC,   LYK_VIEW_BOOKMARK,   0,
 LYK_NOCACHE,            0,          LYK_INTERRUPT,     0,
 /* x */              /* y */          /* z */       /* { */
 
-#if (defined(_WINDOWS) || defined(__DJGPP__) || defined(__CYGWIN__))
-
-LYK_PIPE,               0,              0,             0,
-/* | */               /* } */         /* ~ */
-
-#else
-
 LYK_PIPE,               0,              0,          LYK_HISTORY,
 /* | */               /* } */         /* ~ */       /* del */
 
-#endif /* _WINDOWS || __DJGPP__ || __CYGWIN__ */
 
 /* 80..9F (illegal ISO-8859-1) 8-bit characters. */
    0,                  0,              0,             0,
@@ -256,12 +248,7 @@ LYK_UP_TWO,       LYK_DOWN_TWO,     LYK_DO_NOTHING, LYK_FASTBACKW_LINK,
 
 /* 110..18F */
 
-#if (defined(_WINDOWS) || defined(__DJGPP__) || defined(__CYGWIN__)) && defined(USE_SLANG) && !defined(DJGPP_KEYHANDLER)
-   LYK_HISTORY,        LYK_ACTIVATE,   0,             0,
-   /* Backspace */     /* Enter */
-#else
    0,                  0,              0,             0,
-#endif /* USE_SLANG &&(_WINDOWS || __DJGPP || __CYGWIN__) && !DJGPP_KEYHANDLER */
    0,                  0,              0,             0,
    0,             LYK_DO_NOTHING,      0,             0,
                /* 0x11d: MOUSE_KEY */
@@ -889,32 +876,32 @@ PUBLIC int lacname_to_lac ARGS1(
 PUBLIC int lkcstring_to_lkc ARGS1(
 	CONST char *,	src)
 {
-       int c = -1;
+    int c = -1;
 
-       if (strlen(src) == 1)
-               c = *src;
-       else if (strlen(src) == 2 && *src == '^')
-               c = src[1] & 037;
-       else if (strlen(src) >= 2 && isdigit(*src)) {
-               if (sscanf(src, "%i", &c) != 1)
-                       return (-1);
-#ifdef USE_KEYMAPS
-       } else {
-	   map_string_to_keysym((char *)src, &c);
-#ifndef USE_SLANG
-	   if (c >= 0) {
-	       if ((c&LKC_MASK) > 255 && !(c & LKC_ISLKC))
-		   return (-1);	/* Don't accept untranslated curses KEY_* */
-	       else
-		   c &= ~LKC_ISLKC;
-	   }
-#endif
-#endif
-	}
-	if (c < -1)
+    if (strlen(src) == 1)
+	c = *src;
+    else if (strlen(src) == 2 && *src == '^')
+	c = src[1] & 037;
+    else if (strlen(src) >= 2 && isdigit(*src)) {
+	if (sscanf(src, "%i", &c) != 1)
 	    return (-1);
-	else
-	    return c;
+#ifdef USE_KEYMAPS
+    } else {
+	map_string_to_keysym(src, &c);
+#ifndef USE_SLANG
+	if (c >= 0) {
+	    if ((c&LKC_MASK) > 255 && !(c & LKC_ISLKC))
+		return (-1);	/* Don't accept untranslated curses KEY_* */
+	    else
+		c &= ~LKC_ISLKC;
+	}
+#endif
+#endif
+    }
+    if (c < -1)
+	return (-1);
+    else
+	return c;
 }
 
 PRIVATE int LYLoadKeymap ARGS4 (

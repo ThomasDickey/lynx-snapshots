@@ -686,7 +686,7 @@ PUBLIC void ena_csi ARGS1(
 #define define_key(string, code) \
 	SLkm_define_keysym (string, code, Keymap_List)
 #define expand_substring(dst, first, last) \
-	SLexpand_escaped_string(dst, first, last)
+	SLexpand_escaped_string(dst, (char *)first, (char *)last)
 static SLKeyMap_List_Type *Keymap_List;
 /* This value should be larger than anything in LYStrings.h */
 #define MOUSE_KEYSYM 0x0400
@@ -758,7 +758,7 @@ PRIVATE int lookup_tiname (char *name, NCURSES_CONST char *CONST *names)
     return -1;
 }
 
-PRIVATE char *expand_tiname (char *first, size_t len, char **result)
+PRIVATE CONST char *expand_tiname (CONST char *first, size_t len, char **result)
 {
     char name[BUFSIZ];
     int code;
@@ -775,7 +775,7 @@ PRIVATE char *expand_tiname (char *first, size_t len, char **result)
     return first + len;
 }
 
-PRIVATE char *expand_tichar (char *first, char **result)
+PRIVATE CONST char *expand_tichar (CONST char *first, char **result)
 {
     int ch;
     int limit = 0;
@@ -806,12 +806,12 @@ PRIVATE char *expand_tichar (char *first, char **result)
     }
 
     if (radix != 0) {
-	char *last;
-	int save = first[limit];
-	first[limit] = '\0';
-	value = strtol(first, &last, radix);
-	first[limit] = save;
-	first = last;
+	char *last = 0;
+	char tmp[80];
+	LYstrncpy(tmp, first, limit);
+	value = strtol(tmp, &last, radix);
+	if (last != 0 && last != tmp)
+	    first += (last - tmp);
     }
 
     if (name != 0) {
@@ -824,7 +824,7 @@ PRIVATE char *expand_tichar (char *first, char **result)
     return first;
 }
 
-PRIVATE void expand_substring (char* dst, char* first, char* last)
+PRIVATE void expand_substring (char* dst, CONST char* first, CONST char* last)
 {
     int ch;
     while (first < last) {
@@ -835,7 +835,7 @@ PRIVATE void expand_substring (char* dst, char* first, char* last)
 	case '^':
 	    ch = *first++;
 	    if (ch == LPAREN) {
-		char *s = strchr(first, RPAREN);
+		CONST char *s = strchr(first, RPAREN);
 		if (s == 0)
 		    s = first + strlen(first);
 		first = expand_tiname(first, s-first, &dst);
@@ -862,7 +862,7 @@ PRIVATE void expand_substring (char* dst, char* first, char* last)
 }
 #endif
 
-PRIVATE void unescaped_char ARGS2(char*, parse, int*,keysym)
+PRIVATE void unescaped_char ARGS2(CONST char*, parse, int*,keysym)
 {
     size_t len = strlen(parse);
     char buf[BUFSIZ];
@@ -893,7 +893,7 @@ PRIVATE BOOLEAN unescape_string ARGS2(char*, src, char *, dst)
     return ok;
 }
 
-PUBLIC int map_string_to_keysym ARGS2(char*, str, int*,keysym)
+PUBLIC int map_string_to_keysym ARGS2(CONST char*, str, int*,keysym)
 {
     int modifier = 0;
     *keysym = -1;
@@ -3812,7 +3812,7 @@ PRIVATE long UniToLowerCase ARGS1(long, upper)
      *	Try unicode_to_lower_case[].
      */
     low = 0;
-    high = sizeof(unicode_to_lower_case)/sizeof(unicode_to_lower_case[0]);
+    high = TABLESIZE(unicode_to_lower_case);
     while (low < high) {
 	/*
 	**  Binary search.

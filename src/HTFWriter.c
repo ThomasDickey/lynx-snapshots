@@ -530,11 +530,12 @@ PUBLIC HTStream* HTSaveAndExecute ARGS3(
 	    HTAlert(EXECUTION_DISABLED);
 	    return HTPlainPresent(pres, anchor, sink);
 	}
-	if (!local_exec)
+	if (!local_exec) {
 	    if (local_exec_on_local_files &&
 		(LYJumpFileURL ||
 		 !strncmp(anchor->address,"file://localhost",16))) {
 		/* allow it to continue */
+		;
 	    } else {
 		char *buf = 0;
 
@@ -544,6 +545,7 @@ PUBLIC HTStream* HTSaveAndExecute ARGS3(
 		FREE(buf);
 		return HTPlainPresent(pres, anchor, sink);
 	    }
+	}
     }
 #endif /* EXEC_LINKS || EXEC_SCRIPTS */
 
@@ -567,7 +569,6 @@ PUBLIC HTStream* HTSaveAndExecute ARGS3(
 	if (!strncmp(anchor->address,"file://localhost",16)) {
 
 	    /* 1998/01/23 (Fri) 17:38:26 */
-	    extern char windows_drive[];
 	    unsigned char *cp, *view_fname;
 
 #define IS_SJIS_HI1(hi) ((0x81<=hi)&&(hi<=0x9F))	/* 1st lev. */
