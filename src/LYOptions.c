@@ -1615,13 +1615,15 @@ draw_options:
 			HTInfoMsg("");
 		    } else if (LYUserAgent && *LYUserAgent &&
 			!strstr(LYUserAgent, "Lynx") &&
-			!strstr(LYUserAgent, "lynx")) {
-			_statusline(UA_COPYRIGHT_WARNING);
+			!strstr(LYUserAgent, "lynx") &&
+			!strstr(LYUserAgent, "L_y_n_x") &&
+			!strstr(LYUserAgent, "l_y_n_x")) {
+			_statusline(UA_PLEASE_USE_LYNX);
 		    } else {
 			_statusline(VALUE_ACCEPTED);
 		    }
 		} else { /* disallowed */
-		    _statusline(UA_COPYRIGHT_WARNING);
+		    _statusline(UA_CHANGE_DISABLED);
 		}
 		response = ' ';
 		break;
@@ -2425,7 +2427,7 @@ PUBLIC int popup_choice ARGS7(
 #ifdef NCURSES
     LYsubwindow(form_window);
 #endif
-#if defined(HAVE_GETBKGD) && !defined(PDCURSES)/* not defined in ncurses 1.8.7 */
+#if defined(HAVE_GETBKGD)/* not defined in ncurses 1.8.7 */
     wbkgd(form_window, getbkgd(stdscr));
     wbkgdset(form_window, getbkgd(stdscr));
 #endif
@@ -3405,19 +3407,26 @@ static char * user_agent_string		= "user_agent";
 #define PutLabel(fp, text) \
 	fprintf(fp,"  %-33s: ", text)
 
+#define PutLabelNotSaved(fp, text) \
+    if (!no_option_save) { \
+	int l=strlen(text); \
+	fprintf(fp,"  %s", text); \
+	fprintf(fp,"%s%-*s: ", (l<30)?" ":"", (l<30)?32-l:3, "(!)"); \
+    } else PutLabel(fp, text)
+
 #define PutTextInput(fp, Name, Value, Size, disable) \
 	fprintf(fp,\
 	"<input size=%d type=\"text\" name=\"%s\" value=\"%s\" %s>\n",\
-		(int) Size, Name, Value, disable)
+		(int) Size, Name, Value, disable_all?disabled_string:disable)
 
 #define PutOption(fp, flag, html, name) \
 	fprintf(fp,"<option value=\"%s\" %s>%s\n", html, SELECTED(flag), name)
 
 #define BeginSelect(fp, text) \
-	fprintf(fp,"<select name=\"%s\">\n", text)
+	fprintf(fp,"<select name=\"%s\" %s>\n", text, disable_all?disabled_string:"")
 
 #define MaybeSelect(fp, flag, text) \
-	fprintf(fp,"<select name=\"%s\" %s>\n", text, DISABLED(flag))
+	fprintf(fp,"<select name=\"%s\" %s>\n", text, disable_all?disabled_string:DISABLED(flag))
 
 #define EndSelect(fp)\
 	fprintf(fp,"</select>\n")
@@ -3928,8 +3937,10 @@ PUBLIC int postoptions ARGS1(
 		   : LYUserAgentDefault);
 		if (LYUserAgent && *LYUserAgent &&
 		   !strstr(LYUserAgent, "Lynx") &&
-		   !strstr(LYUserAgent, "lynx")) {
-		    HTAlert(UA_COPYRIGHT_WARNING);
+		   !strstr(LYUserAgent, "lynx") &&
+		   !strstr(LYUserAgent, "L_y_n_x") &&
+		   !strstr(LYUserAgent, "l_y_n_x")) {
+		    HTAlert(UA_PLEASE_USE_LYNX);
 		}
 	    }
 	}
@@ -4137,6 +4148,7 @@ PRIVATE int gen_options ARGS1(
     BOOLEAN can_do_colors;
 #endif
     static char tempfile[LY_MAXPATH] = "\0";
+    BOOLEAN disable_all = FALSE;
     FILE *fp0;
     size_t cset_len = 0;
     size_t text_len = COLS - 38;	/* cf: PutLabel */
@@ -4163,6 +4175,13 @@ PRIVATE int gen_options ARGS1(
        the flag. - kw 1999-05-24 */
     LYforce_no_cache = TRUE;
 
+    /*
+     * Without LYUseFormsOptions set we should maybe not even get here.
+     * However, it's possible we do; disable the form in that case. - kw
+     */
+    if (!LYUseFormsOptions)
+	disable_all = TRUE;
+
     BeginInternalPage(fp0, OPTIONS_TITLE, NULL); /* help link below */
 
     /*
@@ -4183,17 +4202,22 @@ PRIVATE int gen_options ARGS1(
 
     /* Submit/Reset/Help */
     fprintf(fp0,"<p align=center>\n");
-    fprintf(fp0,"<input type=\"submit\" value=\"%s\"> - \n", ACCEPT_CHANGES);
-    fprintf(fp0,"<input type=\"reset\" value=\"%s\">\n", RESET_CHANGES);
-    fprintf(fp0,"%s\n", CANCEL_CHANGES);
+    if (!disable_all) {
+	fprintf(fp0,"<input type=\"submit\" value=\"%s\"> - \n", ACCEPT_CHANGES);
+	fprintf(fp0,"<input type=\"reset\" value=\"%s\">\n", RESET_CHANGES);
+	fprintf(fp0,"%s\n", CANCEL_CHANGES);
+    }
     fprintf(fp0, "<a href=\"%s%s\">%s</a>\n",
 		 helpfilepath, OPTIONS_HELP, TO_HELP);
 
     /* Save options */
     if (!no_option_save) {
-	fprintf(fp0, "<p align=center>%s: ", SAVE_OPTIONS);
-	fprintf(fp0, "<input type=\"checkbox\" name=\"%s\">\n",
-		save_options_string);
+	if (!disable_all) {
+	    fprintf(fp0, "<p align=center>%s: ", SAVE_OPTIONS);
+	    fprintf(fp0, "<input type=\"checkbox\" name=\"%s\">\n",
+		    save_options_string);
+	}
+	fprintf(fp0, "<br>(options marked with (!) will not be saved)\n");
     }
 
     /*
@@ -4203,7 +4227,9 @@ PRIVATE int gen_options ARGS1(
     fprintf(fp0,"\n  <em>%s</em>\n", gettext("Personal Preferences"));
 
     /* Cookies: SELECT */
-    PutLabel(fp0, gettext("Cookies"));
+    /* @@@ This is inconsistent - LYAcceptAllCookies gets saved to RC file
+       but LYSetCookies doesn't! */
+    PutLabelNotSaved(fp0, gettext("Cookies"));
     BeginSelect(fp0, cookies_string);
     PutOption(fp0, !LYSetCookies,
 	      cookies_ignore_all_string,
@@ -4348,7 +4374,7 @@ PRIVATE int gen_options ARGS1(
     EndSelect(fp0);
 
     /* X Display: INPUT */
-    PutLabel(fp0, gettext("X Display"));
+    PutLabelNotSaved(fp0, gettext("X Display"));
     PutTextInput(fp0, x_display_string, NOTEMPTY(x_display), text_len, "");
 
     /*
@@ -4371,7 +4397,7 @@ PRIVATE int gen_options ARGS1(
 	    /* ok, LYRawMode, so use UCAssume_MIMEcharset */
 	    curval = safeUCGetLYhndl_byMIME(UCAssume_MIMEcharset);
 	}
-	PutLabel(fp0, gettext("Assumed document character set"));
+	PutLabelNotSaved(fp0, gettext("Assumed document character set"));
 	BeginSelect(fp0, assume_char_set_string);
 	for (i = 0; i < LYNumCharsets; i++) {
 #ifdef EXP_CHARSET_CHOICE
@@ -4385,15 +4411,16 @@ PRIVATE int gen_options ARGS1(
     }
 
     /* Raw Mode: ON/OFF */
-    if (LYHaveCJKCharacterSet)
+    if (LYHaveCJKCharacterSet) {
 	/*
 	 * Since CJK people hardly mixed with other world
 	 * we split the header to make it more readable:
 	 * "CJK mode" for CJK display charsets, and "Raw 8-bit" for others.
 	 */
-	PutLabel(fp0, gettext("CJK mode"));
-    else
-	PutLabel(fp0, gettext("Raw 8-bit"));
+	PutLabelNotSaved(fp0, gettext("CJK mode"));
+    } else {
+	PutLabelNotSaved(fp0, gettext("Raw 8-bit"));
+    }
 
     BeginSelect(fp0, raw_mode_string);
     PutOptValues(fp0, LYRawMode, bool_values);
@@ -4401,7 +4428,7 @@ PRIVATE int gen_options ARGS1(
 
 #ifndef SH_EX	/* 1999/01/19 (Tue) */
     /* HTML error recovery: SELECT */
-    PutLabel(fp0, gettext("HTML error recovery"));
+    PutLabelNotSaved(fp0, gettext("HTML error recovery"));
     BeginSelect(fp0, DTD_recovery_string);
     PutOptValues(fp0, Old_DTD, DTD_type_values);
     EndSelect(fp0);
@@ -4414,7 +4441,7 @@ PRIVATE int gen_options ARGS1(
     EndSelect(fp0);
 
     /* Show Images: SELECT */
-    PutLabel(fp0, gettext("Show images"));
+    PutLabelNotSaved(fp0, gettext("Show images"));
     BeginSelect(fp0, images_string);
     PutOption(fp0, !pseudo_inline_alts && !clickable_images,
        images_ignore_all_string,
@@ -4531,7 +4558,7 @@ PRIVATE int gen_options ARGS1(
 
     /* User Agent: INPUT */
     if (!no_useragent) {
-	PutLabel(fp0, gettext("User-Agent header"));
+	PutLabelNotSaved(fp0, gettext("User-Agent header"));
 	PutTextInput(fp0, user_agent_string,
 		     NOTEMPTY(LYUserAgent), text_len, "");
     }
@@ -4544,10 +4571,12 @@ PRIVATE int gen_options ARGS1(
     fprintf(fp0,"\n</pre>\n");
 
     /* Submit/Reset */
-    fprintf(fp0,"<p align=center>\n");
-    fprintf(fp0,"<input type=\"submit\" value=\"%s\">\n - ", ACCEPT_CHANGES);
-    fprintf(fp0,"<input type=\"reset\" value=\"%s\">\n", RESET_CHANGES);
-    fprintf(fp0,"%s\n", CANCEL_CHANGES);
+    if (!disable_all) {
+	fprintf(fp0,"<p align=center>\n");
+	fprintf(fp0,"<input type=\"submit\" value=\"%s\">\n - ", ACCEPT_CHANGES);
+	fprintf(fp0,"<input type=\"reset\" value=\"%s\">\n", RESET_CHANGES);
+	fprintf(fp0,"%s\n", CANCEL_CHANGES);
+    }
 
     /*
      * close HTML

@@ -441,7 +441,25 @@ PUBLIC HTAnchor * HTAnchor_findAddress ARGS1(
 	return (HTAnchor *)foundAnchor;
     }
 }
+/*	Create new or find old named anchor - simple form
+**	-------------------------------------------------
+**
+**	Like the previous one, but simpler to use for simple cases.
+**	No post data etc. can be supplied. - kw
+*/
+PUBLIC HTAnchor * HTAnchor_findSimpleAddress ARGS1(
+	CONST char *,	url)
+{
+    DocAddress urldoc;
 
+    urldoc.address = (char *)url; /* ignore warning, it IS treated like const - kw */
+    urldoc.post_data = NULL;
+    urldoc.post_content_type = NULL;
+    urldoc.bookmark = NULL;
+    urldoc.isHEAD = FALSE;
+    urldoc.safe = FALSE;
+    return HTAnchor_findAddress(&urldoc);
+}
 
 /*	Delete an anchor and possibly related things (auto garbage collection)
 **	--------------------------------------------

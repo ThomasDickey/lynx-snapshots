@@ -1,6 +1,230 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+1999-10-21 (2.8.3dev.13)
+* revert a change from dev.4 which disabled getbkgd support in PDCurses -DK 
+* modify ifdef for USE_QUOTED_PARAMETER to include __CYGWIN__, else names such
+  as "telnet.sh" are translated to "telnet" -DK
+* improve/simplify scrollbar support (Ilya Zakharevich)
+* implement LYNXMESSAGES:/ page using non-tempfile approach -LP
+* correct an assignment to last_kcode, broken by restructuring of LYMainLoop.c
+  in dev.11 -HS
+* tweak LYExecv() to exclude SH_EX conditional (dired commands didn't work
+  on non-Windows platforms when SH_EX defined) -LP
+* fix a potential out-of-range pointer in HTParse - JB
+* fix a small leak in the statusline history page - JB
+* restore DELEL lineedit key binding in the Alternate map (which apparently was
+  changed in -dev.4 to the DELNW function) to the ^K key -KED
+* LYMainLoop.c:  remove a dozen of unnecessary `refresh_screen' flags from
+  LYK_HISTORY, LYK_PRINT, LYK_LIST, LYK_ADDRLIST, LYK_VLINKS where a new html
+  page is generated (any document update that may be displayed in "partial
+  display" mode need not set `refresh_screen' flag) -LP
+* correct some typos in cernrules.txt -VH
+* move declaration of LastDisplayChar to make GridText.c compile with DJGPP -LP
+> the remainder (most) of this patch from KW:
+* HTFTP.c: (already sent w/o description - this is updated to dev.10)
+  - interrupted_in_next_data_char was not being reset.  That could make all
+    subsequent FTP directory listings fail (by showing an empty directory)
+    after receipt of one directory listing had been interrupted.
+  - be nice, send quit before closing at least in the normal (non-interrupted
+    and successful) case.  Some servers (wu-ftpd at least) otherwise complain
+    with "You could at least say goodbye" which in turn causes unnecessary RST
+    packets.  To minimize round-trip delays, the QUIT is sent before we start
+    reading the returned data (but after the initial response to our retrieval
+    command).
+  - always close data connection immediately after we are done reading from it,
+    also for directory requests.  This was already the case for file requests.
+    Some servers (including recent wu-ftpd beta) wait for indication that we
+    closed before proceeding.
+  - keep better track of closed sockets.  Some more trace messages.
+    Some comments corrected.
+* tabular representation for simple tables.  See included file README.TRST.
+* made User-Agent warning more friendly, and more specific.  Tell the user what
+  lynx expects in order to avoid the warning.  On the other hand, issue an
+  equivalent warning when -useragent is used.  Change documentation
+  accordingly.
+* don't send User-Agent header at all if it somehow would be blank.
+* indicate on forms 'O'ptions Screen which options are not saved to .lynxrc.
+* disable the form fields in the 'O'ptions Screen if the screen is generated
+  when FORMS_OPTIONS code is compiled in but not actually active.
+* LYPrint.c: In subject_translate8bit (see OUTGOING_MAIL_CHARSET
+  option), use higher level function to charset-translate mail Subject
+  line, rather than low-level UCTransCharStr.
+* UPPER8, UCForce8bitTOUPPER:  was severely broken for UTF-8 display, making
+  WHEREIS search for strings containing non-ASCII characters impossible (and
+  probably with other bad effects).  Now case mapping may still be wrong, but
+  at least identical strings compare as equal.
+* LYHistory.c:  Entification for saved statusline messages happened twice by
+  mistake.
+* HTFWriter.c:  Made code for automatic decompression of bzip2 files
+  conditional on BZIP2_PATH.  Such files should be treated as normal binary
+  files on systems without bzip2.  The configure seems to always define
+  BZIP2_PATH, but it could be undefined manually.
+* HTFWriter.c:  Use LYRemoveTemp instead of remove in some cases, to avoid
+  keeping those files in the temp file list after they are long gone.
+* HTTCP.c: Check whether port numbers in URLs are really numbers.
+* HTPlain.c:
+  - deal with backspace formatting as used in formatted man pages.
+    (No highlighting, only avoid double output of characters)
+  - pass on 0xAD (soft hyphen) character in more cases.
+* HTNews.c:  Prevent some ways that could trick lynx into treating a regular
+  "news:" or "nntp:" URL as something else, like snewspost.  Extra check in
+  LYNews.c whether posing is allowed.  Return with an error message in some
+  cases of URLs that are too long, instead of silently truncating.  Make HEAD
+  work again on news articles.  Some memory leaks in error path removed.  A
+  message tweak.
+* HTFormat.c:  HTStreamStack:  avoid some unnecessary work, add a trace message
+  to show what is returned.
+* SGML.c:  some cleanup of ugly ifdefs, and of unnecessary abuse of global
+  variables.  (still a lot left!)
+* more consistent and correct recognition of element names.  The characters
+  "_-.:" don't end the name.
+* handle INCLUDE and CDDATA marked sections: output the contents.
+* parse various elements differently that had/have special requirements or
+  hacks.  Extend meaning of Tgf_strict for litteral-like content modes.  Use
+  SGML_CDATA in some cases (and treat it similar to SGML_LITTERAL), use
+  SGML_PCDATA for litteral-like parsing (but if modified by Tgf_strict it's
+  more like regular SGML_MIXED).  A '<' that would start a tag gets displayed
+  (since not element content is allowed that's just error recovery).  Comments
+  now work in TEXTAREA instead of getting displayed as text (SortaSGML mode
+  only).
+* minor tweak of sorta SGML handling for invalid end tag if start tag could be
+  validly omitted.
+* more consistent and correct recognition of element names.  The characters
+  "_-.:" don't end tag names.
+* improved handling of '/' after element name in a tag:  "<foo/>" is treated as
+  an empty element (as in XML).  If we recognize "foo" as an empty element, do
+  nothing special; and if we recognize "foo" as a non-empty element; convert to
+  "<foo></foo>".  "<foo/bar/" is treated as a shortref construct, by converting
+  to "<foo>bar</foo>" (for non-empty and recognized "foo").  This is not
+  general as it would have to be for or real SGML parser, in particular '/' is
+  only treated this way if it directly follows the element name, and it may not
+  even be quite right.  It is better than the recovery lynx previously did in
+  these cases though.
+* changed handling of include buffer which is used to pass back data
+  from HTML.c to SGML.c.  Passing data upstream now works without strange
+  reordering effects even when SGML_character was already parsing data from
+  a previous include buffer.
+  Character set translation would happen several times on data passed back
+  to SGML_character in the include buffer for re-parsing.  This is now
+  avoided.  Well at least in most cases, and for characters that *can* be
+  translated, there are likely combinations of input and output character
+  sets where the assumptions made are still wrong.
+* the start_element and end_element methods of structured stream class now
+  return a status code.  Currently only used for the OBJECT stuff below.
+* mostly HTML.c, SGML.c: Changed handling of OBJECT and MAP.
+  - avoid using the include buffer mechanism as much as possible.  This
+    involves introducing some new special handling in SGML.c to change parsing
+    mode for element contents, and a way for HTML_{start,end}_element to signal
+    to SGML_character what it should do.  In most cases when the OBJECT element
+    content should be parsed and displayed, SGML_character now only needs one
+    pass through the data.
+  - don't lose content when several OBJECTs are nested.
+  - in HTML 4, an OBJECT with USEMAP attribute can refer to a MAP within the
+    OBJECT's content, possibly within nested inner OBJECTs.  Lynx would fail to
+    find the MAP in that case, now it doesn't.
+  - in HTML 4, MAP can contain arbitray block elements in addition to AREA. 
+    Lynx now shows such block content, even if it occurs within (possibly
+    nested) OBJECTs with USEMAP whose contents we would otherwise skip. 
+    Sometimes we may show too much now, by generating a LYNXIMGMAP link as well
+    as showing block content or by showing more of the OBJECT content than what
+    is within a MAP, but that is preferable to losing data.
+  - treat an A tag with COORDS attribute as equivalent to an AREA when it is
+    within MAP, for the purpose of collecting links for LYNXIMGMAP.
+  - as a fallback, internally redirect a LYNXIMGMAP request to the position of
+    the MAP element in the normally rendered text of the document containing
+    the MAP, if it is known that the MAP element exists and just doesn't
+    contain any AREA (or equivalent A-with-COORDS) links.  It is assumed that
+    in such a case there is some block content within the MAP that is rendered
+    normally.
+* HTFile.c: new function LYGetFileInfo.
+* HTAnchor.c: new function HTAnchor_findSimpleAddress.
+* new function HTStartAnchor5.
+* modified the way link text is (re-)drawn by function highlight.  The bulk of
+  processing now happens in new function LYMoveToLink.  The data of the
+  containing line is now scanned from the beginning, using the same logic as in
+  display_line to make sure that lynx and the display library have the same
+  idea of where in the line the link starts.  In UTF-8 output mode, parts of
+  the line preceding the link are also repainted if this is necessary. 
+  Refreshing of the physical line is forced if necessary in UTF-8 mode.  For
+  anchors split across lines, the new approach is currently only used for the
+  first line.
+  This change is not in effect for lynx with color style.  In that case
+  highlighting already is sometimes done in a similar similar, but not quite
+  the same, separate function.
+* modified WHEREIS target highlighting for hypertext links.  Now this is done
+  in the same pass as drawing the normal link text, in LYMoveToLink.  This
+  avoids problems in UTF-8 display mode.  It also avoids a lot of complicated
+  and extremely hard to understand older code in highlight(), but that code is
+  still there for use by lynx with color style and for other remaining cases
+  (non-hypertext anchors, second line highlighting).
+* modified WHEREIS target highlighting for general text.  Instead of first
+  writing each line's characters in display_line, then scanning again through
+  the line's data for portions to highlight and repainting those parts after in
+  display_page, this is now done in one pass within display_line.  However,
+  this isn't (yet?) done for lynx with color style which still uses the old
+  code.
+* these last three changes reduce problems that occur when using UTF-8 display
+  character set (in an appropriate terminal environment that understands it, of
+  course).  Most of them don't apply with color style lynx, so it continues to
+  have more UTF-8 problems.  Pages with mostly ASCII characters should be more
+  or less ok.  Problems that otherwise are not visible become apparent in
+  search higlighting, and after ^Z / fg.
+* GridText.c:  More changes to deal with problems caused by using UTF-8 output
+  with a display library that isn't aware of it.  Break line with UTF-8 before
+  curses does it.  This causes lines that are too short, effectively the
+  rightmost part of a line cannot be used if there are UTF-8 encoded
+  characters.  The alternative, letting curses wrap the line when it thinks it
+  got too long, is worse, so do it in lynx code instead.
+* avoid memory overrun for very long lines in UTF-8 mode.  Avoid splitting line
+  in the middle of a mutibyte UTF-8 character.
+* test for SHOW_WHEREIS_TARGETS instead of 'defined(FANCY_CURSES) ||
+  defined(USE_SLANG)'.
+* initialize new textarea lines created by insert_new_textarea_anchor with
+  current display character set for value_cs.  (The "cloned" value can be stale
+  in some cases if the user changed the display character set after the
+  document was last loaded - normally that should not happen).  For a file
+  inserted into a textarea with INSERTFILE use new function LYGetFileInfo
+  instead to determine the file content's charset.  Thus -assume_local_charset
+  and conventions based on file suffix should be honored.
+* for Unix, added more specific error message if calling external editor for
+  textarea failed, based on the status returned by system().
+* it is possible to require an additional prompt before Enter in
+  an input field causes form submission: define TEXT_SUBMIT_CONFIRM_WANTED,
+  explained in userdefs.h.
+* some small changes to prevent overstepping string boundary (HTParse.c)
+* extended SUFFIX option, added SUFFIX_ORDER option, see documentation in
+  lynx.cfg.  The long list of built-in file suffix rules in HTInit.c can now be
+  disabled, either at compile time - see userdefs.h - or at run time.  The
+  equivalent functionality is now available in lynx.cfg for those who want it. 
+  Added somments, see HTFileInit in HTInit.c.
+* various tweaks of built-in file suffix rules.
+* allow XLOADIMAGE_COMMAND to be empty (in lynx.cfg) or NULL (in userdefs.h),
+  just don't use a default X viewer for image types in that case.
+* moved UCGetUniFromUtf8String from LYCharUtils.c to UCAux.c.
+* renamed LYUCFullyTranslateString -> LYUCTranslateHTMLString, and
+  LYUCFullyTranslateString_1 -> LYUCFullyTranslateString.
+* tweaks for special chars in (what is now) LYUCFullyTranslateString, in
+  obscure cases (input fields of type password prefilled with unusual content)
+  lynx would pass text back to the server with special characters (soft hyphen
+  or non-break space) expressed as lynx-internal code values.
+* added some replacement characters or strings to various chartrans tables.
+* experimental command line option -convert_to, only compiled in if new
+  MISC_EXP symbol is defined.  This takes a string in the form of a MIME type,
+  which can also be combined with an appended ";charset=" parameter.  (This
+  needs shell quoting of course).  The charset value can be used to set the
+  display character set from the command line.  The MIME type can be one of the
+  non-official types used internally, for some interesting effects (crashing
+  lynx not excluded).  Try www/download, www/source, www/dump, or some
+  unrecognized string.
+* fixed HTMainText_Get_UCLYhndl, it was returning the wrong kind of charset
+  handle (a "UChndl", which is different from a "LYhndl" or "UCLYhndl" etc.,
+  and shouldn't be directly accessed by arbitrary bits of lynx code - it should
+  be regarded as private to the chartrans mechanism).
+* protect various printf-like calls against crashes from strings with '%': 
+  LYSyslog.
+* LYDownload.c: made parsing of LYNXDOWNLOAD: URL slightly more robust.
+* disabled some broken pieces.
 1999-10-14 (2.8.3dev.12)
 * fixes for restructured LYMainLoop.c (reported by PG, LP) -TD
 * minor fix for makeutcb, to compile with K&R C -TD
@@ -29,7 +253,7 @@ Changes since Lynx 2.8 release
   (reported by KW) -TD
 * Changes in UCAuto.c for --enable-font-switch:  Support some more code pages
   if available.  Check return code from setfont invocation, and use it to
-  determine whether font and/or translation map loading was successful. 
+  determine whether font and/or translation map loading was successful.
   Warning, this is not based on any documented interface but on
   experimentation, so may not work for long or for anyone but me; it shouldn't
   be worse than before though.  Better logic for keeping track of state, some
@@ -53,8 +277,8 @@ Changes since Lynx 2.8 release
   files do not fall into the same bug anymore by making sure the <ol> tag is in
   a line by itself.  This correction will only be activated when the first
   bookmark is attempted to be erased (patch by Eduardo Chappa L)
-* change a trace/error message in HTInit.c to say "Lynx" rather than "metamail",
-  to avoid confusion -HN
+* change a trace/error message in HTInit.c to say "Lynx" rather than
+  "metamail", to avoid confusion -HN
 * change <tab> formatting in user's guide, etc., to <pre> sections, thereby
   appeasing Dave Raggett's "tidy" program -TD
 1999-09-13 (2.8.3dev.9)
@@ -85,9 +309,10 @@ Changes since Lynx 2.8 release
 * add/use LYwaddstr(), etc to fix more const-casts (reported by PG) -TD
 * modify HTTCP.c to prevent telnet and similar applications from inadvertently
   using hostname tokens which look like command-line options -KW
-* modify configure script's --with-charsets option so that if --without-charsets
-  is selected, then it will use a 'minimal' set.  The keyword 'minimal' is
-  recognized as the list us-ascii,iso-8859-1,utf-8 (request by KW, HN) -TD
+* modify configure script's --with-charsets option so that if the option
+  --without-charsets is selected, then it will use a 'minimal' set.  The
+  keyword 'minimal' is recognized as the list us-ascii,iso-8859-1,utf-8
+  (request by KW, HN) -TD
 * ifdef'd recursive calls on UCGetLYhndl_byMIME() for charsets that may be not
   present (--with-charsets), and add getLYhndl_byCP() to cover a special case
   of recursion which was also a preexisting hole (reported by Frederic L W
@@ -100,7 +325,8 @@ Changes since Lynx 2.8 release
 * correct ifdef's combining HAVE_POPEN and __CYGWIN__ in LYPrint.c, which would
   link popen() code when it was not available -TD
 * correct order of ifdef's for __CYGWIN__ in LYGlobalDefs.h, which would result
-  in syntax error if __CYGWIN__ were undefined when __CYGWIN32__ was defined -TD
+  in a syntax error if the symbol __CYGWIN__ were undefined when __CYGWIN32__
+  was defined -TD
 * change hardcoded ifdef for <arpa/inet.h> include to autoconf'd form -TD
 * modify makeuctb to add ifdef's allowing most charsets to be suppressed at
   compile time.  Use similar ifdef's in UCdomap.h to suppress registration
@@ -169,9 +395,10 @@ Changes since Lynx 2.8 release
   source mode) -VH
 * add configure option --enable-scrollbar -TD
 * make the charset-choice code lynx.cfg-reloading-safe -VH
-* add experimental code to allow users to specify that a subset of the compiled-in
-  charset definitions are available for selection for display (ifdef'd with
-  EXP_CHARSET_CHOICE, added configure option --enable-charset-choice -TD) -VH
+* add experimental code to allow users to specify that a subset of the
+  compiled-in charset definitions are available for selection for display
+  (ifdef'd with EXP_CHARSET_CHOICE, added configure option
+  --enable-charset-choice -TD) -VH
 * add/use ANSI_PREPRO symbol to simplify ifdef's concerning preprocessor token
   substitution/concatenation -TD
 * modify ifdef of code that shows current CJK code in the title area under
@@ -276,10 +503,10 @@ Changes since Lynx 2.8 release
   (reported by <yury.burkatovsky@telrad.co.il>) -TD
 * move NO_GROUPS definitions from HTFile.c to HTFile.h to make them available
   for use in LYUtils.c on DOS -LP
-* correct several minor problems with integration of HS's changes in GridText.h,
-  HTAlert.c and LYPrint.c (reported by LP) -TD
-* restore dev.3 interface to LYLowerCase and LYUpperCase and do casts internally
-  to work on unsigned chars -PG
+* correct several minor problems with integration of HS's changes in
+  GridText.h, HTAlert.c and LYPrint.c (reported by LP) -TD
++ restore dev.3 interface to LYLowerCase and LYUpperCase and do casts
+  internally to work on unsigned chars -PG
 * corrected typos in some messages (reported by Dmitry Sivachenko
   <demon@gpad.ac.ru>).
 * changes for win32 -SH
@@ -520,7 +747,7 @@ Changes since Lynx 2.8 release
 * integrated patch adapted by DK from Igor B Poretsky <root@goga.energo.ru> for
   dired support with DJGPP.  (Some corrections/rework by TD also - must
   retest).  Some notes from DK:
-  + Since this is DJGPP based, it may be incompatible with a called program
+  + since this is DJGPP based, it may be incompatible with a called program
     that uses a WATCOM DOS extender.  I think I had this problem with a
     precompiled binary for zip.  The current zip binary doesn't have this
     problem.

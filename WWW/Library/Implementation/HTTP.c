@@ -537,7 +537,11 @@ try_again:
       }
 
       if (LYUserAgent && *LYUserAgent) {
-	  sprintf(line, "User-Agent: %s%c%c", LYUserAgent, CR, LF);
+	  char *cp = LYSkipBlanks(LYUserAgent);
+	  /* Won't send it at all if all blank - kw */
+	  if (*cp != '\0')
+	      sprintf(line, "User-Agent: %.*s%c%c",
+		      INIT_LINE_SIZE-15, LYUserAgent, CR, LF);
       } else {
 	  sprintf(line, "User-Agent: %s/%s  libwww-FM/%s%c%c",
 		  HTAppName ? HTAppName : "unknown",

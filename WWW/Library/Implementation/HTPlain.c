@@ -35,6 +35,7 @@ extern BOOL HTPassHighCtrlRaw;
 extern HTCJKlang HTCJK;
 
 PUBLIC int HTPlain_lastraw = -1;
+PRIVATE int HTPlain_bs_pending = 0; /* 1:bs 2:underline 3:underline+bs - kw */
 
 /*		HTML Object
 **		-----------
@@ -45,8 +46,8 @@ struct _HTStream {
     /*
     **	The node_anchor UCInfo and handle for the input (PARSER) stage. - FM
     */
-    LYUCcharset 	*	inUCI;
-    int 			inUCLYhndl;
+    LYUCcharset		*	inUCI;
+    int				inUCLYhndl;
     /*
     **	The node_anchor UCInfo and handle for the output (HTEXT) stage. - FM
     */
@@ -131,7 +132,11 @@ PRIVATE void HTPlain_put_character ARGS2(
 	HTPlain_lastraw = -1;
 	return;
     }
-    HTPlain_lastraw = c;
+    if (c == '\b' || c == '_' || HTPlain_bs_pending) {
+	HTPlain_write(me, &c, 1);
+	return;
+    }
+    HTPlain_lastraw = (unsigned char)c;
     if (c == '\r') {
 	HText_appendCharacter(me->text, '\n');
     } else if (TOASCII((unsigned char)c) >= 127) {  /* S/390 -- gil -- 0305 */
@@ -228,6 +233,34 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 	    HText_appendCharacter(me->text, *p);
 	}
 #else
+	if (*p == '\b') {
+	    if (HTPlain_lastraw >= (unsigned char)' ' &&
+		HTPlain_lastraw != '\r' && HTPlain_lastraw != '\n') {
+		if (!HTPlain_bs_pending) {
+		    HTPlain_bs_pending = 1;
+		    continue;
+		} else if (HTPlain_bs_pending == 2) {
+		    HTPlain_bs_pending = 3;
+		    continue;
+		}
+	    }
+	    if (HTPlain_bs_pending >= 2)
+		HText_appendCharacter(me->text, '_');
+	    HTPlain_bs_pending = 0;
+	} else if (*p == '_') {
+		if (!HTPlain_bs_pending) {
+		    HTPlain_bs_pending = 2;
+		    HTPlain_lastraw = (unsigned char)*p;
+		    continue;
+#if 0
+		} else if (HTPlain_bs_pending != 2) {
+		    HTPlain_bs_pending--; /* 1 -> 0, 3 -> 2 */
+		    HTPlain_lastraw = (unsigned char)*p;
+		    continue;
+#endif
+		}
+	}
+
 	/*
 	**  Try to handle lone LFs, CRLFs and lone CRs
 	**  as newline, and to deal with control, ASCII,
@@ -238,7 +271,35 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 	    HTPlain_lastraw = -1;
 	    continue;
 	}
-	HTPlain_lastraw = *p;
+
+	if (HTPlain_bs_pending &&
+	    !((unsigned char)*p >= ' ' && *p != '\r' && *p != '\n' &&
+	      (HTPlain_lastraw == (unsigned char)*p ||
+	       HTPlain_lastraw == (unsigned char)'_' ||
+	       *p == '_'))) {
+	    if (HTPlain_bs_pending >= 2)
+		HText_appendCharacter(me->text, '_');
+	    HTPlain_bs_pending = 0;
+	} else if (HTPlain_bs_pending == 1) {
+	    HTPlain_bs_pending = 0;
+	    continue;	/* ignore last two of "X\bX" or "X\b_" - kw */
+	} else if (HTPlain_bs_pending == 3) {
+	    if (*p == '_') {
+		HTPlain_bs_pending = 2;
+		continue;	/* ignore last two of "_\b_" - kw */
+	    } else {
+		HTPlain_bs_pending = 0;
+				/* ignore first two of "_\bX" - kw */
+	    }
+	} else if (HTPlain_bs_pending == 2) {
+	    HText_appendCharacter(me->text, '_');
+	    if (*p == '_')
+		continue;	/* keep second of "__" pending - kw */
+	    HTPlain_bs_pending = 0;
+	} else {
+	    HTPlain_bs_pending = 0;
+	}
+	HTPlain_lastraw = (unsigned char)*p;
 	if (*p == '\r') {
 	    HText_appendCharacter(me->text, '\n');
 	    continue;
@@ -454,8 +515,15 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 	/*
 	**  If neither HTPassHighCtrlRaw nor CJK is set, play it safe
 	**  and ignore 173 (shy). - FM
+	**  Now only ignore it for color style, which doesn't handle it anyway.
+	**  Otherwise pass it on as LY_SOFT_HYPHEN and let HText deal with it.
+	**  It should be either ignored, or displayed as a hyphen if it was
+	**  indeed at the end of a line.  Well it should. - kw
 	*/
 	} else if (code == CH_SHY) {
+#ifndef USE_COLOR_STYLE
+	    HText_appendCharacter(me->text, LY_SOFT_HYPHEN);
+#endif
 	    continue;
 	/*
 	**  If we get to here, pass the displayable ASCII characters. - FM
@@ -600,6 +668,8 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 PRIVATE void HTPlain_free ARGS1(
 	HTStream *,	me)
 {
+    if (HTPlain_bs_pending >= 2)
+	HText_appendCharacter(me->text, '_');
     FREE(me);
 }
 

@@ -16,6 +16,8 @@ extern int follow_link_number PARAMS((
 extern void add_trusted PARAMS((char *str, int type));
 extern BOOLEAN exec_ok PARAMS((CONST char *source, CONST char *linkpath, int type));
 
+extern char * WWW_Download_File;
+
 /* values for follow_link_number() */
 #define DO_LINK_STUFF		1
 #define DO_GOTOLINK_STUFF	2

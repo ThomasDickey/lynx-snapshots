@@ -315,6 +315,17 @@ PRIVATE int set_clicked_link ARGS4(
 	    return INSERT_KEY;
 	if (y >= h)
 	    return REMOVE_KEY;
+#ifdef DISP_PARTIAL			/* Newline is not defined otherwise */
+	if (clicks >= 2) {
+	    double frac = (1. * y)/(h - 1);
+	    int l = HText_getNumOfLines() + 1;	/* NOL() off by one? */
+
+	    l -= display_lines;
+	    if (l > 0)
+		Newline = frac * l + 1 + 0.5;
+	    return LYReverseKeymap(LYK_DO_NOTHING);
+	}
+#endif
 	if (y < LYsb_begin)
 	    return PGUP;
 	if (y >= LYsb_end)
@@ -418,7 +429,7 @@ PRIVATE int set_clicked_link ARGS4(
  *  Writes a null byte into the n+1 byte of dst.
  */
 PUBLIC char *LYstrncpy ARGS3(
-	char *, 	dst,
+	char *,		dst,
 	CONST char *,	src,
 	int,		n)
 {
@@ -451,7 +462,7 @@ PUBLIC char *LYstrncpy ARGS3(
  *  argument should be TRUE for UTF8. - KW & FM
  */
 PUBLIC char * LYmbcsstrncpy ARGS5(
-	char *, 	dst,
+	char *,		dst,
 	CONST char *,	src,
 	int,		n_bytes,
 	int,		n_glyphs,
@@ -485,7 +496,7 @@ PUBLIC char * LYmbcsstrncpy ARGS5(
  *  of UTF-8 encoded characters. - KW
  */
 PUBLIC char * LYmbcs_skip_glyphs ARGS3(
-	char *, 	data,
+	char *,		data,
 	int,		n_glyphs,
 	BOOL,		utf_flag)
 {
@@ -516,7 +527,7 @@ PUBLIC char * LYmbcs_skip_glyphs ARGS3(
  *  characters. - FM
  */
 PUBLIC int LYmbcsstrlen ARGS2(
-	char *, 	str,
+	char *,		str,
 	BOOL,		utf_flag)
 {
     int i, j, len = 0;
@@ -740,7 +751,7 @@ static Keysym_String_List Keysym_Strings [] =
     INTERN_KEY( "INSERT_KEY",	INSERT_KEY,	KEY_IC ),
     INTERN_KEY( "REMOVE_KEY",	REMOVE_KEY,	KEY_DC ),
     INTERN_KEY( "DO_NOTHING",	DO_NOTHING,	DO_NOTHING|LKC_ISLKC ),
-    INTERN_KEY( NULL, 		-1,		ERR )
+    INTERN_KEY( NULL,		-1,		ERR )
 };
 
 #ifdef NCURSES_VERSION
@@ -1141,7 +1152,7 @@ PRIVATE void setup_vtXXX_keymap NOARGS
     };
     size_t n;
     for (n = 0; n < TABLESIZE(table); n++)
-    	define_key(table[n].string, table[n].value);
+	define_key(table[n].string, table[n].value);
 }
 
 PUBLIC int lynx_initialize_keymaps NOARGS
@@ -1204,7 +1215,7 @@ PRIVATE int LYmouse_menu ARGS4(int, x, int, y, int, atlink, int, code)
 	"Page down",
 	"End of document",
 	"Bookmarks",
- 	"Cookie jar",
+	"Cookie jar",
 	"Search index",
 	"Set Options",
 	NULL
@@ -1238,7 +1249,7 @@ PRIVATE int LYmouse_menu ARGS4(int, x, int, y, int, atlink, int, code)
 	LYK_NEXT_PAGE,
 	LYK_END,
 	LYK_VIEW_BOOKMARK,
- 	LYK_COOKIE_JAR,
+	LYK_COOKIE_JAR,
 	LYK_INDEX_SEARCH,
 	LYK_OPTIONS
     };
@@ -1297,7 +1308,7 @@ PRIVATE int LYmouse_menu ARGS4(int, x, int, y, int, atlink, int, code)
 	    case LYK_NEXT_PAGE:
 	    case LYK_END:
 	    case LYK_VIEW_BOOKMARK:
- 	    case LYK_COOKIE_JAR:
+	    case LYK_COOKIE_JAR:
 	    case LYK_INDEX_SEARCH:
 	    case LYK_OPTIONS:
 		mouse_link = -3; /* so LYgetch_for() passes it on - kw */
@@ -1328,7 +1339,7 @@ PRIVATE int myGetChar NOARGS
 }
 
 PUBLIC int LYgetch_for ARGS1(
-	int, 	code)
+	int,	code)
 {
    SLang_Key_Type *key;
    int keysym;
@@ -1371,7 +1382,7 @@ PUBLIC int LYgetch_for ARGS1(
 #define found_CSI(first,second) ((second) == '[' || (first) == 155)
 
 PUBLIC int LYgetch_for ARGS1(
-	int, 	code)
+	int,	code)
 {
     int a, b, c, d = -1;
     int current_modifier = 0;
@@ -1644,7 +1655,7 @@ re_read:
 	case KEY_LEFT:
 	   c = LTARROW;
 	   break;
-	case KEY_RIGHT: 	   /* ... */
+	case KEY_RIGHT:		   /* ... */
 	   c = RTARROW;
 	   break;
 #if defined(SH_EX) && defined(DOSPATH)	/* for NEC PC-9800 1998/08/30 (Sun) 21:50:35 */
@@ -1660,23 +1671,23 @@ re_read:
 	case KEY_B3:
 	   c = RTARROW;
 	   break;
-	case PAD0:	 	   /* PC-9800 Ins */
+	case PAD0:		   /* PC-9800 Ins */
 	   c = INSERT_KEY;
 	   break;
-	case PADSTOP:	   	   /* PC-9800 DEL */
+	case PADSTOP:		   /* PC-9800 DEL */
 	   c = REMOVE_KEY;
 	   break;
 #endif /* SH_EX */
 	case KEY_HOME:		   /* Home key (upward+left arrow) */
 	   c = HOME;
 	   break;
-	case KEY_CLEAR: 	   /* Clear screen */
+	case KEY_CLEAR:		   /* Clear screen */
 	   c = 18; /* CTRL-R */
 	   break;
-	case KEY_NPAGE: 	   /* Next page */
+	case KEY_NPAGE:		   /* Next page */
 	   c = PGDOWN;
 	   break;
-	case KEY_PPAGE: 	   /* Previous page */
+	case KEY_PPAGE:		   /* Previous page */
 	   c = PGUP;
 	   break;
 	case KEY_LL:		   /* home down or bottom (lower left) */
@@ -2028,7 +2039,7 @@ re_read:
 	case K_ELeft:
 	   c = LTARROW;
 	   break;
-	case K_Right: 		   /* ... */
+	case K_Right:		   /* ... */
 	case K_ERight:
 	   c = RTARROW;
 	   break;
@@ -2036,11 +2047,11 @@ re_read:
 	case K_EHome:
 	   c = HOME;
 	   break;
-	case K_PageDown: 	   /* Next page */
+	case K_PageDown:	   /* Next page */
 	case K_EPageDown:
 	   c = PGDOWN;
 	   break;
-	case K_PageUp:	 	   /* Previous page */
+	case K_PageUp:		   /* Previous page */
 	case K_EPageUp:
 	   c = PGUP;
 	   break;
@@ -2086,18 +2097,18 @@ re_read:
 	case SL_KEY_LEFT:
 	   c = LTARROW;
 	   break;
-	case SL_KEY_RIGHT: 	   /* ... */
+	case SL_KEY_RIGHT:	   /* ... */
 	   c = RTARROW;
 	   break;
 	case SL_KEY_HOME:	   /* Home key (upward+left arrow) */
 	case SL_KEY_A1:		   /* upper left of keypad */
 	   c = HOME;
 	   break;
-	case SL_KEY_NPAGE: 	   /* Next page */
+	case SL_KEY_NPAGE:	   /* Next page */
 	case SL_KEY_C3:		   /* lower right of keypad */
 	   c = PGDOWN;
 	   break;
-	case SL_KEY_PPAGE: 	   /* Previous page */
+	case SL_KEY_PPAGE:	   /* Previous page */
 	case SL_KEY_A3:		   /* upper right of keypad */
 	   c = PGUP;
 	   break;
@@ -2193,7 +2204,7 @@ PUBLIC void LYUpperCase ARGS1(
  * Remove ALL whitespace from a string (including embedded blanks).
  */
 PUBLIC void LYRemoveBlanks ARGS1(
-	char *, 	buffer)
+	char *,		buffer)
 {
     if (buffer != 0) {
 	size_t i, j;
@@ -2208,7 +2219,7 @@ PUBLIC void LYRemoveBlanks ARGS1(
  * Skip whitespace
  */
 PUBLIC char * LYSkipBlanks ARGS1(
-	char *, 	buffer)
+	char *,		buffer)
 {
     while (isspace((unsigned char)(*buffer)))
 	buffer++;
@@ -2219,7 +2230,7 @@ PUBLIC char * LYSkipBlanks ARGS1(
  * Skip non-whitespace
  */
 PUBLIC char * LYSkipNonBlanks ARGS1(
-	char *, 	buffer)
+	char *,		buffer)
 {
     while (*buffer != 0 && !isspace((unsigned char)(*buffer)))
 	buffer++;
@@ -2252,7 +2263,7 @@ PUBLIC CONST char * LYSkipCNonBlanks ARGS1(
  * Trim leading blanks from a string
  */
 PUBLIC void LYTrimLeading ARGS1(
-	char *, 	buffer)
+	char *,		buffer)
 {
     char *skipped = LYSkipBlanks(buffer);
     while ((*buffer++ = *skipped++) != 0)
@@ -2263,7 +2274,7 @@ PUBLIC void LYTrimLeading ARGS1(
  * Trim trailing blanks from a string
  */
 PUBLIC void LYTrimTrailing ARGS1(
-	char *, 	buffer)
+	char *,		buffer)
 {
     size_t i = strlen(buffer);
     while (i != 0 && isspace((unsigned char)buffer[i-1]))
@@ -2320,7 +2331,7 @@ PRIVATE char killbuffer[1024] = "\0";
 
 PUBLIC void LYSetupEdit ARGS4(
 	EDREC *,	edit,
-	char *, 	old,
+	char *,		old,
 	int,		maxstr,
 	int,		maxdsp)
 {
@@ -3015,9 +3026,9 @@ PUBLIC void LYRefreshEdit ARGS1(
 #define CurModif MyEdit.current_modifiers
 
 PUBLIC int LYgetstr ARGS4(
-	char *, 	inputline,
+	char *,		inputline,
 	int,		hidden,
-	size_t, 	bufsize,
+	size_t,		bufsize,
 	int,		recall)
 {
     int x, y, MaxStringSize;
@@ -3280,8 +3291,8 @@ PUBLIC char *LYstrsep ARGS2(
  *  It is a case insensitive search.
  */
 PUBLIC char * LYstrstr ARGS2(
-	char *, 	chptr,
-	CONST char *, 	tarptr)
+	char *,		chptr,
+	CONST char *,	tarptr)
 {
     int len = strlen(tarptr);
 
@@ -3307,8 +3318,8 @@ PUBLIC char * LYstrstr ARGS2(
  *  It is a case insensitive search.
  */
 PUBLIC char * LYno_attr_char_case_strstr ARGS2(
-	char *, 	chptr,
-	char *, 	tarptr)
+	char *,		chptr,
+	char *,		tarptr)
 {
     register char *tmpchptr, *tmptarptr;
 
@@ -3418,8 +3429,8 @@ PRIVATE int LYAddToCloset ARGS1(char*, str)
  *  It is a case sensitive search.
  */
 PUBLIC char * LYno_attr_char_strstr ARGS2(
-	char *, 	chptr,
-	char *, 	tarptr)
+	char *,		chptr,
+	char *,		tarptr)
 {
     register char *tmpchptr, *tmptarptr;
 
@@ -3476,13 +3487,14 @@ PUBLIC char * LYno_attr_char_strstr ARGS2(
  *  It is a case insensitive search. - KW & FM
  */
 PUBLIC char * LYno_attr_mbcs_case_strstr ARGS5(
-	char *, 	chptr,
-	char *, 	tarptr,
+	char *,		chptr,
+	CONST char *,	tarptr,
 	BOOL,		utf_flag,
 	int *,		nstartp,
 	int *,		nendp)
 {
-    register char *tmpchptr, *tmptarptr;
+    char *tmpchptr;
+    CONST char *tmptarptr;
     int len = 0;
     int offset;
 
@@ -3518,9 +3530,9 @@ PUBLIC char * LYno_attr_mbcs_case_strstr ARGS5(
 		/*
 		 *  One char target.
 		 */
-		*nstartp = offset;
-		*nendp = len;
-		 return(chptr);
+		if (nstartp)	*nstartp = offset;
+		if (nendp)	*nendp = len;
+		return(chptr);
 	    }
 	    if (!utf_flag && HTCJK != NOCJK && !isascii(*chptr) &&
 		 *chptr == *tarptr &&
@@ -3539,8 +3551,8 @@ PUBLIC char * LYno_attr_mbcs_case_strstr ARGS5(
 			/*
 			 *  One character match. - FM
 			 */
-			*nstartp = offset;
-			*nendp = len + tarlen;
+			if (nstartp)	*nstartp = offset;
+			if (nendp)	*nendp = len + tarlen;
 			return(chptr);
 		    }
 		    tarlen++;
@@ -3557,7 +3569,7 @@ PUBLIC char * LYno_attr_mbcs_case_strstr ARGS5(
 	     *	See if the rest of the target matches. - FM
 	     */
 	    while (1) {
-		 if (!IsSpecialAttrChar(*tmpchptr)) {
+		if (!IsSpecialAttrChar(*tmpchptr)) {
 		    if (!utf_flag && HTCJK != NOCJK && !isascii(*tmpchptr)) {
 			if (*tmpchptr == *tmptarptr &&
 			    *(tmpchptr + 1) == *(tmptarptr + 1) &&
@@ -3565,7 +3577,7 @@ PUBLIC char * LYno_attr_mbcs_case_strstr ARGS5(
 			    tmpchptr++;
 			    tmptarptr++;
 			} else {
-			break;
+			    break;
 			}
 		    } else if (0 != UPPER8(*tmpchptr, *tmptarptr)) {
 			break;
@@ -3577,18 +3589,17 @@ PUBLIC char * LYno_attr_mbcs_case_strstr ARGS5(
 		    tmpchptr++;
 		    tmptarptr++;
 
-		 } else {
+		} else {
 		    tmpchptr++;
-		 }
+		}
 
-		 if (*tmptarptr == '\0') {
-		    *nstartp = offset;
-		     *nendp = len + tarlen;
-		     return(chptr);
-		 }
-		if (*tmpchptr == '\0') {
-		     break;
-	    }
+		if (*tmptarptr == '\0') {
+		    if (nstartp)	*nstartp = offset;
+		    if (nendp)		*nendp = len + tarlen;
+		    return(chptr);
+		}
+		if (*tmpchptr == '\0')
+		    break;
 	    }
 	} else if (!(IS_UTF_EXTRA(*chptr) ||
 		      IsSpecialAttrChar(*chptr))) {
@@ -3615,19 +3626,20 @@ PUBLIC char * LYno_attr_mbcs_case_strstr ARGS5(
  *			      LY_UNDERLINE_END_CHAR
  *			      LY_BOLD_START_CHAR
  *			      LY_BOLD_END_CHAR
- *				LY_SOFT_HYPHEN
+ *			      LY_SOFT_HYPHEN
  *			      if present in chptr.
  * It assumes UTF8 if utf_flag is set.
  *  It is a case sensitive search. - KW & FM
  */
 PUBLIC char * LYno_attr_mbcs_strstr ARGS5(
-	char *, 	chptr,
-	char *, 	tarptr,
+	char *,		chptr,
+	CONST char *,	tarptr,
 	BOOL,		utf_flag,
 	int *,		nstartp,
 	int *,		nendp)
 {
-    register char *tmpchptr, *tmptarptr;
+    char *tmpchptr;
+    CONST char *tmptarptr;
     int len = 0;
     int offset;
 
@@ -3659,9 +3671,9 @@ PUBLIC char * LYno_attr_mbcs_strstr ARGS5(
 		/*
 		 *  One char target.
 		 */
-		*nstartp = offset;
-		*nendp = len + 1;
-		 return(chptr);
+		if (nstartp)	*nstartp = offset;
+		if (nendp)	*nendp = len + 1;
+		return(chptr);
 	    }
 	    if (!utf_flag && HTCJK != NOCJK && !isascii(*chptr) &&
 		 *tmpchptr != '\0' &&
@@ -3679,8 +3691,8 @@ PUBLIC char * LYno_attr_mbcs_strstr ARGS5(
 			/*
 			 *  One character match. - FM
 			 */
-			*nstartp = offset;
-			*nendp = len + tarlen;
+			if (nstartp)	*nstartp = offset;
+			if (nendp)	*nendp = len + tarlen;
 			return(chptr);
 		    }
 		    tarlen++;
@@ -3721,13 +3733,12 @@ PUBLIC char * LYno_attr_mbcs_strstr ARGS5(
 		 }
 
 		 if (*tmptarptr == '\0') {
-		    *nstartp = offset;
-		     *nendp = len + tarlen;
+		     if (nstartp)	*nstartp = offset;
+		     if (nendp)		*nendp = len + tarlen;
 		     return(chptr);
 		 }
-		if (*tmpchptr == '\0') {
+		if (*tmpchptr == '\0')
 		     break;
-	    }
 	    }
 	} else if (!(IS_UTF_EXTRA(*chptr) ||
 		      IsSpecialAttrChar(*chptr))) {
@@ -3781,11 +3792,11 @@ PUBLIC char * SNACat ARGS3(
 	    strncpy(*dest + length, src, n);
 	    *(*dest + length + n) = '\0'; /* terminate */
 	} else {
-	    *dest = (char *)calloc(1, strlen(src) + 1);
+	    *dest = (char *)calloc(1, n + 1);
 	    if (*dest == NULL)
 		outofmem(__FILE__, "SNACat");
-	    strncpy(*dest, src, n);
-	    *dest[n] = '\0'; /* terminate */
+	    memcpy(*dest, src, n);
+	    (*dest)[n] = '\0'; /* terminate */
 	}
     }
     return *dest;
@@ -3845,6 +3856,13 @@ PRIVATE long UniToLowerCase ARGS1(long, upper)
 */
 PUBLIC int UPPER8 ARGS2(int,ch1, int,ch2)
 {
+    /* if they are the same or one is a null characters return immediately. */
+    if (ch1 == ch2)
+	return 0;
+    if (!ch2)
+	return (unsigned char)ch1;
+    else if (!ch1)
+	return -(unsigned char)ch2;
 
     /* case-insensitive match for us-ascii */
     if ((unsigned char)TOASCII(ch1) < 128 && (unsigned char)TOASCII(ch2) < 128)
@@ -3858,9 +3876,12 @@ PUBLIC int UPPER8 ARGS2(int,ch1, int,ch2)
 	   return(TOUPPER(ch1) - TOUPPER(ch2)); /* old-style */
 	else
 	{
-	long uni_ch1 = UCTransToUni(ch1, current_char_set);
-	long uni_ch2 = UCTransToUni(ch2, current_char_set);
-	return(UniToLowerCase(uni_ch1) - UniToLowerCase(uni_ch2));
+	    long uni_ch2 = UCTransToUni(ch2, current_char_set);
+	    long uni_ch1;
+	    if (uni_ch2 < 0)
+		return (unsigned char)ch1;
+	    uni_ch1 = UCTransToUni(ch1, current_char_set);
+	    return(UniToLowerCase(uni_ch1) - UniToLowerCase(uni_ch2));
 	}
     }
 

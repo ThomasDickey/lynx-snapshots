@@ -202,6 +202,7 @@ extern unsigned int Lynx_Color_Flags;
 #endif
 
 #ifdef USE_SLANG
+#define SHOW_WHEREIS_TARGETS 1
 
 #if !defined(VMS) && !defined(DJGPP)
 #define USE_SLANG_MOUSE		1
@@ -282,6 +283,7 @@ extern void VTHome NOPARAMS;
 #else /* Define curses functions: */
 
 #ifdef FANCY_CURSES
+#define SHOW_WHEREIS_TARGETS 1
 
 #ifdef VMS
 /*

@@ -50,6 +50,7 @@
 #define MOREHELP \
  gettext("-- press space for more, use arrow keys to move, '?' for help, 'q' to quit.")
 #define MORE gettext("-- press space for next page --")
+#define URL_TOO_LONG gettext("URL too long")
 
 /* Forms messages */
 #define FORM_LINK_FILE_UNM_MSG \
@@ -500,6 +501,8 @@
 #endif /* VMS */
 #define HAVE_NEW_MAIL_MSG gettext("*** You have new mail. ***")
 #define FILE_INSERT_CANCELLED gettext("File insert cancelled!!!")
+#define MEMORY_EXHAUSTED_FILE gettext("Not enough memory for file!")
+#define FILE_CANNOT_OPEN_R gettext("Can't open file for reading.")
 #define FILE_DOES_NOT_EXIST gettext("File does not exist.")
 #define FILE_DOES_NOT_EXIST_RE gettext("File does not exist - reenter or cancel:")
 #define FILE_NOT_READABLE gettext("File is not readable.")
@@ -575,8 +578,12 @@
 #define COLOR_TOGGLE_DISABLED gettext("Terminal does not support color")
 #define COLOR_TOGGLE_DISABLED_FOR_TERM gettext("Your '%s' terminal does not support color.")
 #define DOTFILE_ACCESS_DISABLED gettext("Access to dot files is disabled!")
-#define UA_COPYRIGHT_WARNING \
- gettext("WARNING: Misrepresentation of the User-Agent may be a copyright violation!")
+#define UA_NO_LYNX_WARNING \
+ gettext("User-Agent string does not contain \"Lynx\" or \"L_y_n_x\"")
+#define UA_PLEASE_USE_LYNX \
+ gettext("Use \"L_y_n_x\" or \"Lynx\" in User-Agent, or it looks like intentional deception!")
+#define UA_CHANGE_DISABLED \
+ gettext("Changing of the User-Agent string is disabled!")
 #define CHANGE_OF_SETTING_DISALLOWED \
  gettext("You are not allowed to change this setting.")
 #define SAVING_OPTIONS gettext("Saving Options...")

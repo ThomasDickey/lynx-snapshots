@@ -66,8 +66,8 @@ PUBLIC void LYEntify ARGS2(
     int amps = 0, lts = 0, gts = 0;
 #ifdef CJK_EX
     enum _state
-        { S_text, S_esc, S_dollar, S_paren,
-          S_nonascii_text, S_dollar_paren } state = S_text;
+	{ S_text, S_esc, S_dollar, S_paren,
+	  S_nonascii_text, S_dollar_paren } state = S_text;
     int in_sjis = 0;
 #endif
 
@@ -126,8 +126,8 @@ PUBLIC void LYEntify ARGS2(
 			state = S_esc;
 			*q++ = *p;
 			continue;
-                    }
-                    break;
+		    }
+		    break;
 
 		case S_esc:
 		    if (*p == '$') {
@@ -392,7 +392,7 @@ PUBLIC char *LYFindEndOfComment ARGS1(
 */
 PUBLIC void LYFillLocalFileURL ARGS2(
 	char **,	href,
-	CONST char *, 	base)
+	CONST char *,	base)
 {
     char * temp = NULL;
 
@@ -510,7 +510,7 @@ PUBLIC void LYFillLocalFileURL ARGS2(
 **								 - LP
 */
 PUBLIC void LYAddMETAcharsetToFD ARGS2(
-	FILE *, 	fd,
+	FILE *,		fd,
 	int,		disp_chndl)
 {
     if (disp_chndl == -1)
@@ -883,7 +883,7 @@ PUBLIC char *LYLowercaseI_OL_String ARGS1(
 **  This function initializes the Ordered List counter. - FM
 */
 PUBLIC void LYZero_OL_Counter ARGS1(
-	HTStructured *, 	me)
+	HTStructured *,		me)
 {
     int i;
 
@@ -905,7 +905,7 @@ PUBLIC void LYZero_OL_Counter ARGS1(
 **  This function is used by the HTML Structured object. - KW
 */
 PUBLIC void LYGetChartransInfo ARGS1(
-	HTStructured *, 	me)
+	HTStructured *,		me)
 {
     me->UCLYhndl = HTAnchor_getUCLYhndl(me->node_anchor,
 					UCT_STAGE_STRUCTURED);
@@ -944,7 +944,7 @@ PUBLIC void LYGetChartransInfo ARGS1(
 **  keep memory allocations at a minimum. - FM
 */
 PUBLIC void LYExpandString ARGS2(
-	HTStructured *, 	me,
+	HTStructured *,		me,
 	char **,		str)
 {
     char *p = *str;
@@ -1485,68 +1485,6 @@ PUBLIC void LYExpandString ARGS2(
 #endif /* NOTUSED_FOTEMODS */
 
 /*
-** Get UCS character code for one character from UTF-8 encoded string.
-**
-** On entry:
-**	*ppuni should point to beginning of UTF-8 encoding character
-** On exit:
-**	*ppuni is advanced to point to the last byte of UTF-8 sequence,
-**		if there was a valid one; otherwise unchanged.
-** returns the UCS value
-** returns negative value on error (invalid UTF-8 sequence)
-*/
-PRIVATE UCode_t UCGetUniFromUtf8String ARGS1(char **, ppuni)
-{
-    UCode_t uc_out = 0;
-    char * p = *ppuni;
-    int utf_count, i;
-    if (!(**ppuni&0x80))
-	return (UCode_t) **ppuni; /* ASCII range character */
-    else if (!(**ppuni&0x40))
-	return (-1);		/* not a valid UTF-8 start */
-    if ((*p & 0xe0) == 0xc0) {
-	utf_count = 1;
-    } else if ((*p & 0xf0) == 0xe0) {
-	utf_count = 2;
-    } else if ((*p & 0xf8) == 0xf0) {
-	utf_count = 3;
-    } else if ((*p & 0xfc) == 0xf8) {
-	utf_count = 4;
-    } else if ((*p & 0xfe) == 0xfc) {
-	utf_count = 5;
-    } else { /* garbage */
-	return (-1);
-    }
-    for (p = *ppuni, i = 0; i < utf_count ; i++) {
-	if ((*(++p) & 0xc0) != 0x80)
-	    return (-1);
-    }
-    p = *ppuni;
-    switch (utf_count) {
-    case 1:
-	uc_out = (((*p&0x1f) << 6) | (*(p+1)&0x3f));
-	break;
-    case 2:
-	uc_out = (((((*p&0x0f) << 6) | (*(p+1)&0x3f)) << 6) | (*(p+2)&0x3f));
-	break;
-    case 3:
-	uc_out = (((((((*p&0x07) << 6) | (*(p+1)&0x3f)) << 6) | (*(p+2)&0x3f)) << 6)
-	    | (*(p+3)&0x3f));
-	break;
-    case 4:
-	uc_out = (((((((((*p&0x03) << 6) | (*(p+1)&0x3f)) << 6) | (*(p+2)&0x3f)) << 6)
-		  | (*(p+3)&0x3f)) << 6) | (*(p+4)&0x3f));
-	break;
-    case 5:
-	uc_out = (((((((((((*p&0x01) << 6) | (*(p+1)&0x3f)) << 6) | (*(p+2)&0x3f)) << 6)
-		  | (*(p+3)&0x3f)) << 6) | (*(p+4)&0x3f)) << 6) | (*(p+5)&0x3f));
-	break;
-    }
-    *ppuni = p + utf_count;
-    return uc_out;
-}
-
-/*
  *  Given an UCS character code, will fill buffer passed in as q with
  *  the code's UTF-8 encoding.
  *  If terminate = YES, terminates string on success and returns pointer
@@ -1682,7 +1620,7 @@ PRIVATE CONST char *hex = "0123456789ABCDEF";
 **		       BOOLEAN		       isURL));
 */
 
-PRIVATE char ** LYUCFullyTranslateString_1 ARGS9(
+PUBLIC char ** LYUCFullyTranslateString ARGS9(
 	char **,	str,
 	int,		cs_from,
 	int,		cs_to,
@@ -1832,7 +1770,7 @@ PRIVATE char ** LYUCFullyTranslateString_1 ARGS9(
 		    sjis_1st = '\0';
 		} else {
 		    if (0xA1 <= code && code <= 0xDF) {
-		        sjis_str[2] = '\0';
+			sjis_str[2] = '\0';
 			JISx0201TO0208_SJIS((unsigned char)code,
 						sjis_str, sjis_str + 1);
 			REPLACE_STRING(sjis_str);
@@ -2283,15 +2221,29 @@ PRIVATE char ** LYUCFullyTranslateString_1 ARGS9(
 		    **	otherwise use the Lynx special character. - FM
 		    */
 		if (code == 160) {
-		    if (hidden) {
-			;
-		    } else if (plain_space) {
+		    if (plain_space) {
 			code = ' ';
-		    } else {
+			state = S_got_outchar;
+			break;
+		    } else if (use_lynx_specials) {
 			code = HT_NON_BREAK_SPACE;
+			state = S_got_outchar;
+			break;
+		    } else if ((hidden && !Back) ||
+			       (LYCharSet_UC[cs_to].codepoints & UCT_CP_SUPERSETOF_LAT1) ||
+			       LYCharSet_UC[cs_to].enc == UCT_ENC_8859 ||
+			       (LYCharSet_UC[cs_to].like8859 &
+						UCT_R_8859SPECL)) {
+			state = S_got_outchar;
+			break;
+		    } else if (
+			(LYCharSet_UC[cs_to].repertoire & UCT_REP_SUPERSETOF_LAT1)) {
+			;	/* nothing, may be translated later */
+		    } else {
+			code = ' ';
+			state = S_got_outchar;
+			break;
 		    }
-		    state = S_got_outchar;
-		    break;
 		}
 		/*
 		    **	For 173 (shy), use that value if it's
@@ -2312,7 +2264,7 @@ PRIVATE char ** LYUCFullyTranslateString_1 ARGS9(
 		    } else if (hidden || Back) {
 			state = S_got_outchar;
 			break;
-		    } else {
+		    } else if (use_lynx_specials) {
 			code = LY_SOFT_HYPHEN;
 			state = S_got_outchar;
 			break;
@@ -2607,7 +2559,7 @@ PRIVATE char ** LYUCFullyTranslateString_1 ARGS9(
 #undef REPLACE_CHAR
 #undef REPLACE_STRING
 
-PUBLIC BOOL LYUCFullyTranslateString ARGS7(
+PUBLIC BOOL LYUCTranslateHTMLString ARGS7(
 	char **, str,
 	int,	cs_from,
 	int,	cs_to,
@@ -2618,7 +2570,7 @@ PUBLIC BOOL LYUCFullyTranslateString ARGS7(
 {
     BOOL ret = YES;
     /* May reallocate *str even if cs_to == 0 */
-    if (!LYUCFullyTranslateString_1(str, cs_from, cs_to, TRUE,
+    if (!LYUCFullyTranslateString(str, cs_from, cs_to, TRUE,
 				    use_lynx_specials, plain_space, hidden,
 				    NO, stype)) {
 	ret = NO;
@@ -2634,7 +2586,7 @@ PUBLIC BOOL LYUCTranslateBackFormData ARGS4(
 {
     char ** ret;
     /* May reallocate *str */
-    ret = (LYUCFullyTranslateString_1(str, cs_from, cs_to, FALSE,
+    ret = (LYUCFullyTranslateString(str, cs_from, cs_to, FALSE,
 				       NO, plain_space, YES,
 				       YES, st_HTML));
     return (BOOL) (ret != NULL);
@@ -2644,7 +2596,7 @@ PUBLIC BOOL LYUCTranslateBackFormData ARGS4(
 **  This function processes META tags in HTML streams. - FM
 */
 PUBLIC void LYHandleMETA ARGS4(
-	HTStructured *, 	me,
+	HTStructured *,		me,
 	CONST BOOL*,		present,
 	CONST char **,		value,
 	char **,		include GCC_UNUSED)
@@ -2664,7 +2616,7 @@ PUBLIC void LYHandleMETA ARGS4(
 	value[HTML_META_HTTP_EQUIV] && *value[HTML_META_HTTP_EQUIV]) {
 	StrAllocCopy(http_equiv, value[HTML_META_HTTP_EQUIV]);
 	convert_to_spaces(http_equiv, TRUE);
-	LYUCFullyTranslateString(&http_equiv, me->tag_charset, me->tag_charset,
+	LYUCTranslateHTMLString(&http_equiv, me->tag_charset, me->tag_charset,
 				 NO, NO, YES, st_other);
 	LYTrimHead(http_equiv);
 	LYTrimTail(http_equiv);
@@ -2676,7 +2628,7 @@ PUBLIC void LYHandleMETA ARGS4(
 	value[HTML_META_NAME] && *value[HTML_META_NAME]) {
 	StrAllocCopy(name, value[HTML_META_NAME]);
 	convert_to_spaces(name, TRUE);
-	LYUCFullyTranslateString(&name, me->tag_charset, me->tag_charset,
+	LYUCTranslateHTMLString(&name, me->tag_charset, me->tag_charset,
 				 NO, NO, YES, st_other);
 	LYTrimHead(name);
 	LYTrimTail(name);
@@ -2722,7 +2674,7 @@ PUBLIC void LYHandleMETA ARGS4(
      */
     if (!strcasecomp((http_equiv ? http_equiv : ""), "Pragma") ||
 	!strcasecomp((http_equiv ? http_equiv : ""), "Cache-Control")) {
-	LYUCFullyTranslateString(&content, me->tag_charset, me->tag_charset,
+	LYUCTranslateHTMLString(&content, me->tag_charset, me->tag_charset,
 				 NO, NO, YES, st_other);
 	LYTrimHead(content);
 	LYTrimTail(content);
@@ -2796,7 +2748,7 @@ PUBLIC void LYHandleMETA ARGS4(
 	 *  Date header from a server when making the
 	 *  comparison. - FM
 	 */
-	LYUCFullyTranslateString(&content, me->tag_charset, me->tag_charset,
+	LYUCTranslateHTMLString(&content, me->tag_charset, me->tag_charset,
 				 NO, NO, YES, st_other);
 	LYTrimHead(content);
 	LYTrimTail(content);
@@ -2839,7 +2791,7 @@ PUBLIC void LYHandleMETA ARGS4(
 	       !strcasecomp((http_equiv ? http_equiv : ""), "Content-Type")) {
 	LYUCcharset * p_in = NULL;
 	LYUCcharset * p_out = NULL;
-	LYUCFullyTranslateString(&content, me->tag_charset, me->tag_charset,
+	LYUCTranslateHTMLString(&content, me->tag_charset, me->tag_charset,
 				 NO, NO, YES, st_other);
 	LYTrimHead(content);
 	LYTrimTail(content);
@@ -3085,11 +3037,15 @@ PUBLIC void LYHandleMETA ARGS4(
 	    /*
 	     *	Check for an anchor in http or https URLs. - FM
 	     */
+#ifndef DONT_TRACK_INTERNAL_LINKS
+	    /* id_string seems to be used wrong below if given.
+	       not that it matters much.  avoid setting it here. - kw */
 	    if ((strncmp(href, "http", 4) == 0) &&
 		(cp = strrchr(href, '#')) != NULL) {
 		StrAllocCopy(id_string, cp);
 		*cp = '\0';
 	    }
+#endif
 	    if (me->inA) {
 		/*
 		 *  Ugh!  The META tag, which is a HEAD element,
@@ -3213,7 +3169,7 @@ free_META_copies:
 **  end tag is present or not in the markup. - FM
 */
 PUBLIC void LYHandlePlike ARGS6(
-	HTStructured *, 	me,
+	HTStructured *,		me,
 	CONST BOOL*,		present,
 	CONST char **,		value,
 	char **,		include GCC_UNUSED,
@@ -3322,7 +3278,7 @@ PUBLIC void LYHandlePlike ARGS6(
 **  an end tag. - FM
 */
 PUBLIC void LYHandleSELECT ARGS5(
-	HTStructured *, 	me,
+	HTStructured *,		me,
 	CONST BOOL*,		present,
 	CONST char **,		value,
 	char **,		include GCC_UNUSED,
@@ -3553,7 +3509,7 @@ PUBLIC void LYHandleSELECT ARGS5(
 **  URLs. - FM
 */
 PUBLIC int LYLegitimizeHREF ARGS4(
-	HTStructured *, 	me,
+	HTStructured *,		me,
 	char **,		href,
 	BOOL,			force_slash,
 	BOOL,			strip_dots)
@@ -3586,7 +3542,7 @@ PUBLIC int LYLegitimizeHREF ARGS4(
     }
     if (*(*href) == '\0')
 	return(url_type);
-    LYUCFullyTranslateString(href, me->tag_charset, me->tag_charset,
+    LYUCTranslateHTMLString(href, me->tag_charset, me->tag_charset,
 			     NO, NO, YES, st_URL);
     url_type = is_url(*href);
     if (!url_type && force_slash &&
@@ -3679,7 +3635,7 @@ PUBLIC int LYLegitimizeHREF ARGS4(
 **  any BASE tag in the HTML stream, itself. - FM
 */
 PUBLIC void LYCheckForContentBase ARGS1(
-	HTStructured *, 	me)
+	HTStructured *,		me)
 {
     char *cp = NULL;
     BOOL present[HTML_BASE_ATTRIBUTES];
@@ -3747,7 +3703,7 @@ PUBLIC void LYCheckForContentBase ARGS1(
 **  or ID attribute was present in the tag. - FM
 */
 PUBLIC void LYCheckForID ARGS4(
-	HTStructured *, 	me,
+	HTStructured *,		me,
 	CONST BOOL *,		present,
 	CONST char **,		value,
 	int,			attribute)
@@ -3764,7 +3720,7 @@ PUBLIC void LYCheckForID ARGS4(
 	 *  Translate any named or numeric character references. - FM
 	 */
 	StrAllocCopy(temp, value[attribute]);
-	LYUCFullyTranslateString(&temp, me->tag_charset, me->tag_charset,
+	LYUCTranslateHTMLString(&temp, me->tag_charset, me->tag_charset,
 				 NO, NO, YES, st_URL);
 
 	/*
@@ -3789,8 +3745,8 @@ PUBLIC void LYCheckForID ARGS4(
 **  does not need checking for character references. - FM
 */
 PUBLIC void LYHandleID ARGS2(
-	HTStructured *, 	me,
-	char *, 		id)
+	HTStructured *,		me,
+	CONST char *,		id)
 {
     HTChildAnchor *ID_A = NULL;
 
@@ -3987,7 +3943,7 @@ PUBLIC BOOLEAN LYCommentHacks ARGS2(
 	cp = comment + 17;
 	StrAllocCopy(messageid, cp);
 	/* This should be ok - message-id should only contain 7-bit ASCII */
-	if (!LYUCFullyTranslateString(&messageid, 0, 0, NO, NO, YES, st_URL))
+	if (!LYUCTranslateHTMLString(&messageid, 0, 0, NO, NO, YES, st_URL))
 	    return FALSE;
 	for (p = messageid; *p; p++) {
 	    if ((unsigned char)*p >= 127 || !isgraph((unsigned char)*p)) {
@@ -4039,7 +3995,7 @@ PUBLIC BOOLEAN LYCommentHacks ARGS2(
 	 * header in raw form, but don't have MIME encoding implemented.
 	 * Someone may want to do more about this...  - kw
 	 */
-	if (!LYUCFullyTranslateString(&subject, 0, 0, NO, YES, NO, st_HTML))
+	if (!LYUCTranslateHTMLString(&subject, 0, 0, NO, YES, NO, st_HTML))
 	    return FALSE;
 	for (p = subject; *p; p++) {
 	    if ((unsigned char)*p >= 127 || !isprint((unsigned char)*p)) {

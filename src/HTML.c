@@ -109,7 +109,8 @@ PRIVATE HTStyleSheet * styleSheet = NULL;	/* Application-wide */
 
 /*	Module-wide style cache
 */
-PRIVATE HTStyle *styles[HTML_ELEMENTS+31]; /* adding 24 nested list styles  */
+PRIVATE HTStyle *styles[HTML_ELEMENTS+HTML_EXTRA_ELEMENTS];
+					   /* adding 24 nested list styles  */
 					   /* and 3 header alignment styles */
 					   /* and 3 div alignment styles    */
 PRIVATE HTStyle *default_style = NULL;
@@ -123,11 +124,11 @@ PRIVATE int i_prior_style = -1;
 /*
  *	Private function....
  */
-PRIVATE void HTML_end_element PARAMS((HTStructured *me,
+PRIVATE int HTML_end_element PARAMS((HTStructured *me,
 				      int element_number,
 				      char **include));
 
-PRIVATE void HTML_start_element PARAMS((
+PRIVATE int HTML_start_element PARAMS((
 	HTStructured *		me,
 	int			element_number,
 	CONST BOOL*		present,
@@ -236,7 +237,7 @@ PUBLIC void HTML_put_character ARGS2(HTStructured *, me, char, c)
      *	Ignore all non-MAP content when just
      *	scanning a document for MAPs. - FM
      */
-    if (LYMapsOnly)
+    if (LYMapsOnly && me->sp[0].tag_number != HTML_OBJECT)
 	return;
 
     /*
@@ -465,7 +466,7 @@ PUBLIC void HTML_put_string ARGS2(HTStructured *, me, CONST char *, s)
     char* translated_string = NULL;
 #endif
 
-    if (LYMapsOnly || s == NULL)
+    if (s == NULL || (LYMapsOnly && me->sp[0].tag_number != HTML_OBJECT))
 	return;
 #ifdef USE_PSRC
     if (psrc_convert_string) {
@@ -623,10 +624,10 @@ PUBLIC void HTML_write ARGS3(HTStructured *, me, CONST char*, s, int, l)
     CONST char* p;
     CONST char* e = s+l;
 
-    if (LYMapsOnly)
+    if (LYMapsOnly && me->sp[0].tag_number != HTML_OBJECT)
 	return;
 
-    for (p = s; s < e; p++)
+    for (p = s; p < e; p++)
 	HTML_put_character(me, *p);
 }
 
@@ -759,10 +760,159 @@ PRIVATE void HTMLSRC_apply_markup ARGS4(
 
 #endif /* USE_PSRC*/
 
+PRIVATE void LYStartArea ARGS5(
+	HTStructured *,		obj,
+	CONST char *,		href,
+	CONST char *,		alt,
+	CONST char *,		title,
+	int,			tag_charset)
+{
+    BOOL		new_present[HTML_AREA_ATTRIBUTES];
+    CONST char *		new_value[HTML_AREA_ATTRIBUTES];
+    int i;
+
+    for (i = 0; i < HTML_AREA_ATTRIBUTES; i++)
+	 new_present[i] = NO;
+
+    if (alt) {
+	new_present[HTML_AREA_ALT] = YES;
+	new_value[HTML_AREA_ALT] = (CONST char *)alt;
+    }
+    if (title && *title) {
+	new_present[HTML_AREA_TITLE] = YES;
+	new_value[HTML_AREA_TITLE] = (CONST char *)title;
+    }
+    if (href) {
+	new_present[HTML_AREA_HREF] = YES;
+	new_value[HTML_AREA_HREF] = (CONST char *)href;
+    }
+
+    (*obj->isa->start_element)(obj, HTML_AREA, new_present, new_value,
+			       tag_charset, 0);
+}
+
+PRIVATE void LYHandleFIG ARGS9(
+	HTStructured *,		me,
+	CONST BOOL*,		present,
+	CONST char **,		value,
+	BOOL,			isobject,
+	BOOL,			imagemap,
+	CONST char *,		id,
+	CONST char *,		src,
+	BOOL,			convert,
+	BOOL,			start)
+{
+    if (start == TRUE) {
+	me->inFIG = TRUE;
+	if (me->inA) {
+	    SET_SKIP_STACK(HTML_A);
+	    HTML_end_element(me, HTML_A, NULL);
+	}
+	if (!isobject) {
+	    LYEnsureDoubleSpace(me);
+	    LYResetParagraphAlignment(me);
+	    me->inFIGwithP = TRUE;
+	} else {
+	    me->inFIGwithP = FALSE;
+	    HTML_put_character(me, ' ');  /* space char may be ignored */
+	}
+	if (id && *id) {
+	    if (present && convert) {
+		CHECK_ID(HTML_FIG_ID);
+	    } else
+		LYHandleID(me, id);
+	}
+	me->in_word = NO;
+	me->inP = FALSE;
+
+	if (clickable_images && src && src != '\0') {
+	    char *href = NULL;
+	    StrAllocCopy(href, src);
+	    CHECK_FOR_INTERN(href);
+	    LYLegitimizeHREF(me, &href, TRUE, TRUE);
+	    if (*href) {
+		char *temp = NULL;
+		/*
+		 *  Check whether a base tag is in effect. - FM
+		 */
+		if ((me->inBASE && *href != '#') &&
+		    (temp = HTParse(href, me->base_href, PARSE_ALL)) &&
+		    *temp != '\0')
+		    /*
+		     *	Use reference related to the base.
+		     */
+		    StrAllocCopy(href, temp);
+		FREE(temp);
+
+		/*
+		 *  Check whether to fill in localhost. - FM
+		 */
+		LYFillLocalFileURL(&href,
+				   ((*href != '#' &&
+				     me->inBASE) ?
+				   me->base_href : me->node_anchor->address));
+
+		me->CurrentA = HTAnchor_findChildAndLink(
+					me->node_anchor,	/* Parent */
+					NULL,			/* Tag */
+					href,			/* Addresss */
+					INTERN_LT);		/* Type */
+		HText_beginAnchor(me->text, me->inUnderline, me->CurrentA);
+		if (me->inBoldH == FALSE)
+		    HText_appendCharacter(me->text, LY_BOLD_START_CHAR);
+		HTML_put_string(me, (isobject ?
+		      (imagemap ? "(IMAGE)" : "(OBJECT)") : "[FIGURE]"));
+		if (me->inBoldH == FALSE)
+		    HText_appendCharacter(me->text, LY_BOLD_END_CHAR);
+		HText_endAnchor(me->text, 0);
+		HTML_put_character(me, '-');
+		HTML_put_character(me, ' '); /* space char may be ignored */
+		me->in_word = NO;
+	    }
+	    FREE(href);
+	}
+    } else {			/* handle end tag */
+	if (me->inFIGwithP) {
+	    LYEnsureDoubleSpace(me);
+	} else {
+	    HTML_put_character(me, ' ');  /* space char may be ignored */
+	}
+	LYResetParagraphAlignment(me);
+	me->inFIGwithP = FALSE;
+	me->inFIG = FALSE;
+	change_paragraph_style(me, me->sp->style);  /* Often won't really change */
+	if (me->List_Nesting_Level >= 0) {
+	    UPDATE_STYLE;
+	    HText_NegateLineOne(me->text);
+	}
+    }
+}
+
+PRIVATE void clear_objectdata ARGS1(
+	HTStructured *,		me)
+{
+    if (me) {
+	HTChunkClear(&me->object);
+	me->object_started = FALSE;
+	me->object_declare = FALSE;
+	me->object_shapes = FALSE;
+	me->object_ismap = FALSE;
+	FREE(me->object_usemap);
+	FREE(me->object_id);
+	FREE(me->object_title);
+	FREE(me->object_data);
+	FREE(me->object_type);
+	FREE(me->object_classid);
+	FREE(me->object_codebase);
+	FREE(me->object_codetype);
+	FREE(me->object_name);
+    }
+}
+
 /*	Start Element
 **	-------------
 */
-PRIVATE void HTML_start_element ARGS6(
+PRIVATE int HTML_start_element ARGS6(
 	HTStructured *,		me,
 	int,			element_number,
 	CONST BOOL*,		present,
@@ -787,8 +937,10 @@ PRIVATE void HTML_start_element ARGS6(
     HTChildAnchor *ID_A = NULL;		     /* HTML_foo_ID anchor */
     int url_type = 0, i = 0;
     char *cp = NULL;
-    int ElementNumber = element_number;
+    HTMLElement ElementNumber = element_number;
     BOOL intern_flag = FALSE;
+    short stbl_align = HT_ALIGN_NONE;
+    int status = HT_OK;
 #ifdef USE_COLOR_STYLE
     char* class_name;
 #  if OPT_SCN
@@ -883,7 +1035,7 @@ PRIVATE void HTML_start_element ARGS6(
 	    PSRCSTOP(tag);
 	    PSRCSTART(abracket); PUTC('>'); PSRCSTOP(abracket);
 	    psrc_nested_call=FALSE;
-	    return;
+	    return HT_OK;
 	} /*if (!psrc_nested_call) */
 	/*fall through*/
     }
@@ -891,8 +1043,9 @@ PRIVATE void HTML_start_element ARGS6(
 
     if (LYMapsOnly) {
 	if (!(ElementNumber == HTML_MAP || ElementNumber == HTML_AREA ||
-	      ElementNumber == HTML_BASE)) {
-	    return;
+	      ElementNumber == HTML_BASE || ElementNumber == HTML_OBJECT ||
+	      ElementNumber == HTML_A)) {
+	    return HT_OK;
 	}
     } else if (!me->text) {
 	UPDATE_STYLE;
@@ -1461,6 +1614,12 @@ PRIVATE void HTML_start_element ARGS6(
 		HText_beginAnchor(me->text, me->inUnderline, ID_A);
 		HText_endAnchor(me->text, 0);
 		HText_setToolbar(me->text);
+	    } else {
+		/*
+		 *  Add collapsible space to separate link from previous
+		 *  generated links. - kw
+		 */
+		HTML_put_character(me, ' ');
 	    }
 	    HText_beginAnchor(me->text, me->inUnderline, me->CurrentA);
 	    if (me->inBoldH == FALSE)
@@ -1740,7 +1899,7 @@ PRIVATE void HTML_start_element ARGS6(
     case HTML_MARQUEE:
 	change_paragraph_style(me, styles[HTML_BANNER]);
 	UPDATE_STYLE;
-	if (me->sp->tag_number == ElementNumber)
+	if (me->sp->tag_number == (int) ElementNumber)
 	    LYEnsureDoubleSpace(me);
 	/*
 	 *  Treat this as a toolbar if we don't have one
@@ -2062,6 +2221,13 @@ PRIVATE void HTML_start_element ARGS6(
 	    CTRACE((tfp, "HTML: TAB tag has no attributes.  Ignored.\n"));
 	    break;
 	}
+	/*
+	 *  If page author is using TAB within a TABLE, it's probably
+	 *  formatted specifically to work well for Lynx without simple
+	 *  table tracking code.  Cancel tracking, it would only make
+	 *  things worse. - kw
+	 */
+	HText_cancelStbl(me->text);
 	UPDATE_STYLE;
 
 	CANT_JUSTIFY_THIS_LINE
@@ -2215,12 +2381,22 @@ PRIVATE void HTML_start_element ARGS6(
     case HTML_KBD:
     case HTML_SAMP:
     case HTML_SMALL:
-    case HTML_SUB:
-    case HTML_SUP:
     case HTML_TT:
     case HTML_VAR:
 	CHECK_ID(HTML_GEN_ID);
 	break; /* ignore */
+
+    case HTML_SUP:
+	if (isxdigit((unsigned char)HText_getLastChar(me->text))) {
+	    HText_appendCharacter(me->text, '^');
+	}
+	CHECK_ID(HTML_GEN_ID);
+	break;
+
+    case HTML_SUB:
+	HText_appendCharacter(me->text, '[');
+	CHECK_ID(HTML_GEN_ID);
+	break;
 
     case HTML_DEL:
     case HTML_S:
@@ -2285,7 +2461,7 @@ PRIVATE void HTML_start_element ARGS6(
     case HTML_BQ:
 	change_paragraph_style(me, styles[ElementNumber]);
 	UPDATE_STYLE;
-	if (me->sp->tag_number == ElementNumber)
+	if (me->sp->tag_number == (int) ElementNumber)
 	    LYEnsureDoubleSpace(me);
 	CHECK_ID(HTML_BQ_ID);
 	break;
@@ -2293,7 +2469,7 @@ PRIVATE void HTML_start_element ARGS6(
     case HTML_NOTE:
 	change_paragraph_style(me, styles[ElementNumber]);
 	UPDATE_STYLE;
-	if (me->sp->tag_number == ElementNumber)
+	if (me->sp->tag_number == (int) ElementNumber)
 	    LYEnsureDoubleSpace(me);
 	CHECK_ID(HTML_NOTE_ID);
 	{
@@ -2337,7 +2513,7 @@ PRIVATE void HTML_start_element ARGS6(
     case HTML_ADDRESS:
 	change_paragraph_style(me, styles[ElementNumber]);
 	UPDATE_STYLE;
-	if (me->sp->tag_number == ElementNumber)
+	if (me->sp->tag_number == (int) ElementNumber)
 	    LYEnsureDoubleSpace(me);
 	CHECK_ID(HTML_ADDRESS_ID);
 	break;
@@ -2778,7 +2954,7 @@ PRIVATE void HTML_start_element ARGS6(
     case HTML_FN:
 	change_paragraph_style(me, styles[ElementNumber]);
 	UPDATE_STYLE;
-	if (me->sp->tag_number == ElementNumber)
+	if (me->sp->tag_number == (int) ElementNumber)
 	    LYEnsureDoubleSpace(me);
 	CHECK_ID(HTML_FN_ID);
 	if (me->inUnderline == FALSE)
@@ -2794,6 +2970,25 @@ PRIVATE void HTML_start_element ARGS6(
 	break;
 
     case HTML_A:
+	    /*
+	     *  If we are looking for client-side image maps,
+	     *  then handle an A within a MAP that has a COORDS
+	     *  attribute as an AREA tag.  Unfortunately we lose
+	     *  the anchor text this way for the LYNXIMGMAP, we
+	     *  would have to do much more parsing to collect it.
+	     *  After potentially handling the A as AREA, always return
+	     *  immediately if only looking for image maps, without
+	     *  pushing anything on the style stack. - kw
+	     */
+	if (me->map_address && present && present[HTML_A_COORDS])
+	    LYStartArea(me,
+			present[HTML_A_HREF] ? value[HTML_A_HREF] : NULL,
+			NULL,
+			present[HTML_A_TITLE] ? value[HTML_A_TITLE] : NULL,
+			tag_charset);
+	if (LYMapsOnly) {
+	    return HT_OK;
+	}
 	/*
 	 *  A may have been declared SGML_EMPTY in HTMLDTD.c, and
 	 *  SGML_character() in SGML.c may check for an A end
@@ -3533,6 +3728,16 @@ PRIVATE void HTML_start_element ARGS6(
 	}
 
 	/*
+	 *  Generate a target anchor in this place in the containing
+	 *  document.  MAP can now contain block markup, if it doesn't
+	 *  contain any AREAs (or A anchors with COORDS converted to AREAs)
+	 *  the current location can be used as a fallback for following
+	 *  a USEMAP link. - kw
+	 */
+	 if (!LYMapsOnly)
+	     LYHandleID(me, id_string);
+
+	/*
 	 *  Load map_address. - FM
 	 */
 	if (id_string) {
@@ -3677,6 +3882,20 @@ PRIVATE void HTML_start_element ARGS6(
 	break;
 
     case HTML_FIG:
+	if (present)
+	    LYHandleFIG(me, present, value,
+			present[HTML_FIG_ISOBJECT],
+			present[HTML_FIG_IMAGEMAP],
+			present[HTML_FIG_ID] ? value[HTML_FIG_ID] : NULL,
+			present[HTML_FIG_SRC] ? value[HTML_FIG_SRC] : NULL,
+			YES, TRUE);
+	else
+	    LYHandleFIG(me, NULL, NULL,
+			0,
+			0,
+			NULL,
+			NULL, YES, TRUE);
+#if 0
 	me->inFIG = TRUE;
 	if (me->inA) {
 	    SET_SKIP_STACK(HTML_A);
@@ -3741,6 +3960,7 @@ PRIVATE void HTML_start_element ARGS6(
 	    }
 	    FREE(href);
 	}
+#endif
 	break;
 
     case HTML_OBJECT:
@@ -3847,9 +4067,81 @@ PRIVATE void HTML_start_element ARGS6(
 		}
 	    }
 	    /*
-	     *	Set flag that we are accumulating OBJECT content. - FM
+	     *  If we can determine now that we are not going to do anything
+	     *  special to the OBJECT element's SGML contents, like skipping
+	     *  it completely or collecting it up in order to add something
+	     *  after it, then generate any output that should be emitted in the
+	     *  place of the OBJECT start tag NOW, then don't initialize special
+	     *  handling but return, letting our SGML parser know that further
+	     *  content is to be parsed normally not literally.  We could defer
+	     *  this until we have collected the contents and then recycle the
+	     *  contents (as was previously always done), but that has a higher
+	     *  chance of completely losing content in case of nesting errors
+	     *  in the input, incomplete transmissions, etc. - kw
 	     */
-	    me->object_started = TRUE;
+	    if ((!present ||
+		 (me->object_declare == FALSE && me->object_name == NULL &&
+		  me->object_shapes == FALSE && me->object_usemap == NULL))) {
+		if (!LYMapsOnly) {
+		    if (!clickable_images || me->object_data == NULL ||
+			!(me->object_data != NULL &&
+			  me->object_classid == NULL &&
+			  me->object_codebase == NULL &&
+			  me->object_codetype == NULL))
+			FREE(me->object_data);
+		    if (me->object_data) {
+			HTStartAnchor5(me,
+				       me->object_id ? value[HTML_OBJECT_ID]
+					: NULL,
+				       value[HTML_OBJECT_DATA],
+				       value[HTML_OBJECT_TYPE],
+				       tag_charset);
+			if ((me->object_type != NULL) &&
+			    !strncasecomp(me->object_type, "image/", 6))
+			    HTML_put_string(me, "(IMAGE)");
+			else
+			    HTML_put_string(me, "(OBJECT)");
+			HTML_end_element(me,HTML_A,NULL);
+		    } else if (me->object_id)
+			LYHandleID(me, me->object_id);
+		}
+		clear_objectdata(me);
+		/*
+		 *  We do NOT want the HTML_put_* functions that are going
+		 *  to be called for the OBJECT's character content to
+		 *  add to the chunk, so we don't push on the stack.
+		 *  Instead we keep a counter for open OBJECT tags that
+		 *  are treated this way, so HTML_end_element can skip
+		 *  handling the corresponding end tag that is going to
+		 *  arrive unexpectedly as far as our stack is concerned.
+		 */
+		status = HT_PARSER_OTHER_CONTENT;
+		if (me->sp[0].tag_number == HTML_FIG &&
+		    me->objects_figged_open > 0) {
+		    ElementNumber = HTML_OBJECT_M;
+		} else {
+		    me->objects_mixed_open++;
+		    SET_SKIP_STACK(HTML_OBJECT);
+		}
+	    } else if (me->object_declare == FALSE && me->object_name == NULL &&
+		       me->object_shapes == TRUE) {
+		LYHandleFIG(me, present, value,
+		    1,
+		    1 || me->object_ismap,
+		    me->object_id,
+		    (me->object_data && !me->object_classid) ? value[HTML_OBJECT_DATA] : NULL,
+		    NO, TRUE);
+		clear_objectdata(me);
+		status = HT_PARSER_OTHER_CONTENT;
+		me->objects_figged_open++;
+		ElementNumber = HTML_FIG;
+
+	    } else {
+		/*
+		 *	Set flag that we are accumulating OBJECT content. - FM
+		 */
+		me->object_started = TRUE;
+	    }
 	}
 	break;
 
@@ -5477,11 +5769,22 @@ PRIVATE void HTML_start_element ARGS6(
 
     case HTML_TABLE:
 	/*
-	 *  Not implemented.  Just treat as a division
+	 *  Not fully implemented.  Just treat as a division
 	 *  with respect to any ALIGN attribute, with
 	 *  a default of HT_LEFT, or leave as a PRE
 	 *  block if we are presently in one. - FM
+	 *
+	 *  Also notify simple table tracking code unless
+	 *  in a preformatted section, or (currently) non-left
+	 *  alignment.  But first cancel tracking any already
+	 *  open (enclosing) table.
+	 *
+	 *  If page author is using a TABLE within PRE, it's probably
+	 *  formatted specifically to work well for Lynx without simple
+	 *  table tracking code.  Cancel tracking, it would only make
+	 *  things worse. - kw
 	 */
+	HText_cancelStbl(me->text);
 	if (me->inA) {
 	    SET_SKIP_STACK(HTML_A);
 	    HTML_end_element(me, HTML_A, include);
@@ -5525,33 +5828,41 @@ PRIVATE void HTML_start_element ARGS6(
 		change_paragraph_style(me, styles[HTML_DCENTER]);
 		UPDATE_STYLE;
 		me->current_default_alignment = styles[HTML_DCENTER]->alignment;
-
 #endif
+		stbl_align = HT_CENTER;
+
 	    } else if (!strcasecomp(value[HTML_TABLE_ALIGN], "right")) {
 		me->DivisionAlignments[me->Division_Level] = HT_RIGHT;
 		change_paragraph_style(me, styles[HTML_DRIGHT]);
 		UPDATE_STYLE;
 		me->current_default_alignment = styles[HTML_DRIGHT]->alignment;
+		stbl_align = HT_RIGHT;
 	    } else {
 		me->DivisionAlignments[me->Division_Level] = HT_LEFT;
 		change_paragraph_style(me, styles[HTML_DLEFT]);
 		UPDATE_STYLE;
 		me->current_default_alignment = styles[HTML_DLEFT]->alignment;
+		if (!strcasecomp(value[HTML_TABLE_ALIGN], "left") ||
+		    !strcasecomp(value[HTML_TABLE_ALIGN], "justify"))
+		    stbl_align = HT_LEFT;
 	    }
 	} else {
 	    me->DivisionAlignments[me->Division_Level] = HT_LEFT;
 	    change_paragraph_style(me, styles[HTML_DLEFT]);
 	    UPDATE_STYLE;
 	    me->current_default_alignment = styles[HTML_DLEFT]->alignment;
+	    /* stbl_align remains HT_ALIGN_NONE */
 	}
 	CHECK_ID(HTML_TABLE_ID);
+	HText_startStblTABLE(me->text, stbl_align);
 	break;
 
     case HTML_TR:
 	/*
-	 *  Not yet implemented.  Just start a new row,
+	 *  Not fully implemented.  Just start a new row,
 	 *  if needed, act on an ALIGN attribute if present,
 	 *  and check for an ID link. - FM
+	 *  Also notify simple table tracking code. - kw
 	 */
 	if (me->inA) {
 	    SET_SKIP_STACK(HTML_A);
@@ -5571,6 +5882,7 @@ PRIVATE void HTML_start_element ARGS6(
 	if (!strcmp(me->sp->style->name, "Preformatted")) {
 	    CHECK_ID(HTML_TR_ID);
 	    me->inP = FALSE;
+/*	    HText_cancelStbl(me->text);  seems unnecessary here - kw */
 	    break;
 	}
 	if (LYoverride_default_alignment(me)) {
@@ -5584,33 +5896,37 @@ PRIVATE void HTML_start_element ARGS6(
 	    me->sp->style->alignment = (short) me->current_default_alignment;
 	}
 	if (present && present[HTML_TR_ALIGN] && value[HTML_TR_ALIGN]) {
-#ifdef SH_EX
 	    if (!strcasecomp(value[HTML_TR_ALIGN], "center") &&
-		!(me->List_Nesting_Level >= 0 && !me->inP))
+		!(me->List_Nesting_Level >= 0 && !me->inP)) {
+#ifdef SH_EX
 		if (no_table_center)
 		    me->sp->style->alignment = HT_LEFT;
 		else
 		    me->sp->style->alignment = HT_CENTER;
 #else
-	    if (!strcasecomp(value[HTML_TR_ALIGN], "center") &&
-		!(me->List_Nesting_Level >= 0 && !me->inP))
 		me->sp->style->alignment = HT_CENTER;
 #endif
-	    else if (!strcasecomp(value[HTML_TR_ALIGN], "right") &&
-		!(me->List_Nesting_Level >= 0 && !me->inP))
+		stbl_align = HT_CENTER;
+	    } else if (!strcasecomp(value[HTML_TR_ALIGN], "right") &&
+		       !(me->List_Nesting_Level >= 0 && !me->inP)) {
 		me->sp->style->alignment = HT_RIGHT;
-	    else if (!strcasecomp(value[HTML_TR_ALIGN], "left") ||
-		     !strcasecomp(value[HTML_TR_ALIGN], "justify"))
+		stbl_align = HT_RIGHT;
+	    } else if (!strcasecomp(value[HTML_TR_ALIGN], "left") ||
+		       !strcasecomp(value[HTML_TR_ALIGN], "justify")) {
 		me->sp->style->alignment = HT_LEFT;
+		stbl_align = HT_LEFT;
+	    }
 	}
 
 	CHECK_ID(HTML_TR_ID);
 	me->inP = FALSE;
+	HText_startStblTR(me->text, stbl_align);
 	break;
 
     case HTML_THEAD:
     case HTML_TFOOT:
     case HTML_TBODY:
+	HText_endStblTR(me->text);
 	/*
 	 *  Not yet implemented.  Just check for an ID link. - FM
 	 */
@@ -5639,28 +5955,12 @@ PRIVATE void HTML_start_element ARGS6(
 	    SET_SKIP_STACK(HTML_U);
 	    HTML_end_element(me, HTML_U, include);
 	}
+/*	HText_cancelStbl(me->text);  we ingnore it instead - kw */
 	UPDATE_STYLE;
 	CHECK_ID(HTML_COL_ID);
 	break;
 
     case HTML_TH:
-	if (me->inA) {
-	    SET_SKIP_STACK(HTML_A);
-	    HTML_end_element(me, HTML_A, include);
-	}
-	if (me->Underline_Level > 0) {
-	    SET_SKIP_STACK(HTML_U);
-	    HTML_end_element(me, HTML_U, include);
-	}
-	UPDATE_STYLE;
-	CHECK_ID(HTML_TD_ID);
-	/*
-	 *  Not yet implemented.  Just add a collapsible space and break. - FM
-	 */
-	HTML_put_character(me, ' ');
-	me->in_word = NO;
-	break;
-
     case HTML_TD:
 	if (me->inA) {
 	    SET_SKIP_STACK(HTML_A);
@@ -5673,9 +5973,29 @@ PRIVATE void HTML_start_element ARGS6(
 	UPDATE_STYLE;
 	CHECK_ID(HTML_TD_ID);
 	/*
-	 *  Not yet implemented.  Just add a collapsible space and break. - FM
+	 *  Not fully implemented.  Just add a collapsible space and break. - FM
+	 *  Also notify simple table tracking code. - kw
 	 */
 	HTML_put_character(me, ' ');
+	{
+	    int colspan = 1;
+	    if (present && present[HTML_TD_COLSPAN] &&
+		value[HTML_TD_COLSPAN] &&
+		isdigit((unsigned char)*value[HTML_TD_COLSPAN]))
+		colspan = atoi(value[HTML_TD_COLSPAN]);
+	    if (present && present[HTML_TD_ALIGN] && value[HTML_TD_ALIGN]) {
+		if (!strcasecomp(value[HTML_TD_ALIGN], "center")) {
+		    stbl_align = HT_CENTER;
+		} else if (!strcasecomp(value[HTML_TD_ALIGN], "right")) {
+		    stbl_align = HT_RIGHT;
+		} else if (!strcasecomp(value[HTML_TD_ALIGN], "left") ||
+			   !strcasecomp(value[HTML_TD_ALIGN], "justify")) {
+		    stbl_align = HT_LEFT;
+		}
+	    }
+	    HText_startStblTD(me->text, colspan, stbl_align,
+			      (ElementNumber == HTML_TH));
+	}
 	me->in_word = NO;
 	break;
 
@@ -5693,13 +6013,14 @@ PRIVATE void HTML_start_element ARGS6(
 
     } /* end switch */
 
-    if (HTML_dtd.tags[ElementNumber].contents != SGML_EMPTY) {
+    if (ElementNumber >= HTML_ELEMENTS ||
+	HTML_dtd.tags[ElementNumber].contents != SGML_EMPTY) {
 	if (me->skip_stack > 0) {
 	    CTRACE((tfp,
     "HTML:begin_element: internal call (level %d), leaving on stack - `%s'\n",
 			me->skip_stack, me->sp->style->name));
 	    me->skip_stack--;
-	    return;
+	    return status;
 	}
 	if (me->sp == me->stack) {
 	    if (me->stack_overrun == FALSE) {
@@ -5713,7 +6034,7 @@ PRIVATE void HTML_start_element ARGS6(
 		}
 		me->stack_overrun = TRUE;
 	    }
-	    return;
+	    return HT_ERROR;
 	}
 
 	CTRACE((tfp,"HTML:begin_element[%d]: adding style to stack - %s\n",
@@ -5738,10 +6059,8 @@ PRIVATE void HTML_start_element ARGS6(
 
 #if defined(USE_COLOR_STYLE)
 /* end really empty tags straight away */
-#define REALLY_EMPTY(e) ((HTML_dtd.tags[e].contents == SGML_EMPTY) && \
-			 !(HTML_dtd.tags[e].flags & Tgf_nreie))
 
-    if (REALLY_EMPTY(element_number))
+    if (ReallyEmptyTagNum(element_number))
     {
 	CTRACE((tfp, "STYLE:begin_element:ending EMPTY element style\n"));
 #if !defined(USE_HASH)
@@ -5763,6 +6082,7 @@ PRIVATE void HTML_start_element ARGS6(
 #endif
     }
 #endif /* USE_COLOR_STYLE */
+    return status;
 }
 
 /*		End Element
@@ -5779,12 +6099,13 @@ PRIVATE void HTML_start_element ARGS6(
 **	(internal code errors apart) good nesting.  The parser checks
 **	incoming code errors, not this module.
 */
-PRIVATE void HTML_end_element ARGS3(
+PRIVATE int HTML_end_element ARGS3(
 	HTStructured *,		me,
 	int,			element_number,
 	char **,		include)
 {
     int i = 0;
+    int status = HT_OK;
     char *temp = NULL, *cp = NULL;
     BOOL BreakFlag = FALSE;
     EMIT_IFDEF_EXP_JUSTIFY_ELTS(BOOL reached_awaited_stacked_elt=FALSE;)
@@ -5809,30 +6130,35 @@ PRIVATE void HTML_end_element ARGS3(
 	    PSRCSTOP(tag);
 	    PSRCSTART(abracket); PUTC('>'); PSRCSTOP(abracket);
 	    psrc_nested_call=FALSE;
-	    return;
+	    return HT_OK;
 	}
 	/*fall through*/
     }
 #endif
 
-#ifdef CAREFUL			/* parser assumed to produce good nesting */
-    if (element_number != me->sp[0].tag_number &&
+    if ((me->sp >= (me->stack + MAX_NESTING - 1) ||
+	 element_number != me->sp[0].tag_number) &&
 	HTML_dtd.tags[element_number].contents != SGML_EMPTY) {
 	CTRACE((tfp,
-		"HTMLText: end of element %s when expecting end of %s\n",
+		"HTML: end of element %s when expecting end of %s\n",
 		HTML_dtd.tags[element_number].name,
+	       (me->sp == me->stack + MAX_NESTING - 1) ? "none" :
+	       (me->sp->tag_number < 0) ? "*invalid tag*" :
+	       (me->sp->tag_number >= HTML_ELEMENTS) ? "special tag" :
 		HTML_dtd.tags[me->sp->tag_number].name));
+#ifdef CAREFUL			/* parser assumed to produce good nesting */
 		/* panic */
-    }
 #endif /* CAREFUL */
+    }
 
     /*
      *	If we're seeking MAPs, skip everything that's
      *	not a MAP or AREA tag. - FM
      */
     if (LYMapsOnly) {
-	if (!(element_number == HTML_MAP || element_number == HTML_AREA)) {
-	    return;
+	if (!(element_number == HTML_MAP || element_number == HTML_AREA ||
+	      element_number == HTML_OBJECT)) {
+	    return HT_OK;
 	}
     }
 
@@ -5862,10 +6188,32 @@ PRIVATE void HTML_end_element ARGS3(
 	     */
 	    BreakFlag = TRUE;
 	}
+	if (me->skip_stack == 0 && element_number == HTML_OBJECT &&
+	    me->sp[0].tag_number == HTML_OBJECT_M &&
+	    (me->sp < (me->stack + MAX_NESTING - 1)))
+	    me->sp[0].tag_number = HTML_OBJECT;
 	if (me->skip_stack > 0) {
 	     CTRACE((tfp, "HTML:end_element: Internal call (level %d), leaving on stack - %s\n",
 			me->skip_stack, me->sp->style->name));
 	    me->skip_stack--;
+	} else if (element_number == HTML_OBJECT &&
+		   me->sp[0].tag_number != HTML_OBJECT &&
+		   me->sp[0].tag_number != HTML_OBJECT_M &&
+		   me->objects_mixed_open > 0 &&
+		   !(me->objects_figged_open > 0 &&
+		       me->sp[0].tag_number == HTML_FIG)) {
+	    /*
+	     *	Ignore non-corresponding OBJECT tags that we
+	     *	didn't push because the SGML parser was supposed
+	     *  to go on parsing the contents non-literally. - kw
+	     */
+	    CTRACE((tfp,
+		   "HTML:end_element[%d]: %s (level %d), %s - %s\n",
+		   (int) STACKLEVEL(me),
+		   "Special OBJECT handling", me->objects_mixed_open,
+		   "leaving on stack",
+		   me->sp->style->name));
+	    me->objects_mixed_open--;
 	} else if (me->stack_overrun == TRUE &&
 	    element_number != me->sp[0].tag_number) {
 	    /*
@@ -5879,7 +6227,7 @@ PRIVATE void HTML_end_element ARGS3(
 	     *	offer reasonable protection against crashes
 	     *	if an overrun does occur. - FM
 	     */
-	    return;
+	    return HT_OK; /* let's pretend... */
 	} else if (element_number == HTML_SELECT &&
 	    me->sp[0].tag_number != HTML_SELECT) {
 	    /*
@@ -5888,7 +6236,7 @@ PRIVATE void HTML_end_element ARGS3(
 	     *	to deal with markup which amounts to a nested
 	     *	SELECT, or an out of order FORM end tag. - FM
 	     */
-	    return;
+	    return HT_OK;
 	} else if ((element_number != me->sp[0].tag_number) &&
 	    HTML_dtd.tags[HTML_LH].contents == SGML_EMPTY &&
 	    (me->sp[0].tag_number == HTML_UL ||
@@ -5907,12 +6255,30 @@ PRIVATE void HTML_end_element ARGS3(
 	     *	an HTML_LH, which we've declared as
 	     *	SGML_EMPTY, so just return. - FM
 	     */
-	    return;
+	    return HT_OK;
 	} else if (me->sp < (me->stack + MAX_NESTING - 1)) {
 #ifdef EXP_JUSTIFY_ELTS
 	    if (wait_for_this_stacked_elt == me->stack - me->sp + MAX_NESTING)
 		reached_awaited_stacked_elt = TRUE;
 #endif
+	    if (element_number == HTML_OBJECT) {
+		if (me->sp[0].tag_number == HTML_FIG &&
+		    me->objects_figged_open > 0) {
+		    /*
+		     *  It's an OBJECT for which we substituted a FIG,
+		     *  so pop the FIG and pretend that's what we are
+		     *  being called for. - kw
+		     */
+		    CTRACE((tfp,
+		       "HTML:end_element[%d]: %s (level %d), %s - %s\n",
+			(int) STACKLEVEL(me),
+		       "Special OBJECT->FIG handling", me->objects_figged_open,
+		       "treating as end FIG",
+		       me->sp->style->name));
+		    me->objects_figged_open--;
+		    element_number = HTML_FIG;
+		}
+	    }
 	    (me->sp)++;
 	    CTRACE((tfp, "HTML:end_element[%d]: Popped style off stack - %s\n",
 			(int) STACKLEVEL(me),
@@ -5927,7 +6293,7 @@ PRIVATE void HTML_end_element ARGS3(
 	    if (reached_awaited_stacked_elt)
 		wait_for_this_stacked_elt=-1;
 #endif
-	return;
+	return HT_OK; /* let's pretend... */
     }
 
     /*
@@ -6003,6 +6369,8 @@ PRIVATE void HTML_end_element ARGS3(
 	    if ((LYMultiBookmarks == TRUE) ||
 		((bookmark_page && *bookmark_page) &&
 		 strcmp(me->node_anchor->bookmark, bookmark_page))) {
+		if (!include)
+		    include = &me->xinclude;
 		for (i = 0; i <= MBM_V_MAXFILES; i++) {
 		    if (MBM_A_subbookmark[i] &&
 			!strcmp(MBM_A_subbookmark[i],
@@ -6208,10 +6576,13 @@ PRIVATE void HTML_end_element ARGS3(
     case HTML_KBD:
     case HTML_SAMP:
     case HTML_SMALL:
-    case HTML_SUB:
     case HTML_SUP:
     case HTML_TT:
     case HTML_VAR:
+	break;
+
+    case HTML_SUB:
+	HText_appendCharacter(me->text, ']');
 	break;
 
     case HTML_DEL:
@@ -6362,19 +6733,11 @@ PRIVATE void HTML_end_element ARGS3(
 	break;
 
     case HTML_FIG:
-	if (me->inFIGwithP) {
-	    LYEnsureDoubleSpace(me);
-	} else {
-	    HTML_put_character(me, ' ');  /* space char may be ignored */
-	}
-	LYResetParagraphAlignment(me);
-	me->inFIGwithP = FALSE;
-	me->inFIG = FALSE;
-	change_paragraph_style(me, me->sp->style);  /* Often won't really change */
-	if (me->List_Nesting_Level >= 0) {
-	    UPDATE_STYLE;
-	    HText_NegateLineOne(me->text);
-	}
+	LYHandleFIG(me, NULL, NULL,
+		    0,
+		    0,
+		    NULL,
+		    NULL, NO, FALSE);
 	break;
 
     case HTML_OBJECT:
@@ -6383,7 +6746,8 @@ PRIVATE void HTML_end_element ARGS3(
 	 */
 	{
 	    int s = 0, e = 0;
-	    char *start = NULL, *first_end = NULL;
+	    char *start = NULL, *first_end = NULL, *last_end = NULL;
+	    char *first_map = NULL, *last_map = NULL;
 	    BOOL have_param = FALSE;
 	    char *data = NULL;
 
@@ -6399,38 +6763,30 @@ PRIVATE void HTML_end_element ARGS3(
 		if (!strncmp(cp, "<!--", 4)) {
 		    data = LYFindEndOfComment(cp);
 		    cp = data;
-		} else if (s == 0 && !strncasecomp(cp, "<PARAM", 6)) {
+		} else if (s == 0 && !strncasecomp(cp, "<PARAM", 6) &&
+		    !IsNmChar(cp[6])) {
 		    have_param = TRUE;
-		} else if (!strncasecomp(cp, "<OBJECT", 7)) {
+		} else if (!strncasecomp(cp, "<OBJECT", 7) &&
+		    !IsNmChar(cp[7])) {
 		    if (s == 0)
 			start = cp;
 		    s++;
-		} else if (!strncasecomp(cp, "</OBJECT", 8)) {
+		} else if (!strncasecomp(cp, "</OBJECT", 8) &&
+		    !IsNmChar(cp[8])) {
 		    if (e == 0)
 			first_end = cp;
+		    last_end = cp;
 		    e++;
+		} else if (!strncasecomp(cp, "<MAP", 4) &&
+		    !IsNmChar(cp[4])) {
+		    if (!first_map)
+			first_map = cp;
+		    last_map = cp;
+		} else if (!strncasecomp(cp, "</MAP", 5) &&
+		    !IsNmChar(cp[5])) {
+		    last_map = cp;
 		}
 		data = ++cp;
-	    }
-	    if (s > e) {
-		/*
-		 *  We have nested OBJECT tags, and not yet all of the
-		 *  end tags, so restore an end tag to the content, and
-		 *  pass a dummy start tag to the SGML parser so that it
-		 *  will resume the accumulation of OBJECT content. - FM
-		 */
-		CTRACE((tfp, "HTML: Nested OBJECT tags.  Recycling.\n"));
-		if (*include == NULL) {
-		    StrAllocCopy(*include, "<OBJECT>");
-		} else {
-		    if (0 && strstr(*include, me->object.data) == NULL) {
-			StrAllocCat(*include, "<OBJECT>");
-		    }
-		}
-		me->object.size--;
-		HTChunkPuts(&me->object, "</OBJECT>");
-		change_paragraph_style(me, me->sp->style);
-		break;
 	    }
 	    if (s < e) {
 		/*
@@ -6446,6 +6802,60 @@ PRIVATE void HTML_end_element ARGS3(
 		    me->inBadHTML = TRUE;
 		}
 		goto End_Object;
+	    }
+	    if (s > e) {
+		if (!me->object_declare && !me->object_name &&
+		    !(me->object_shapes && !LYMapsOnly) &&
+		    !(me->object_usemap != NULL && !LYMapsOnly) &&
+		    !(clickable_images && !LYMapsOnly &&
+		      me->object_data != NULL &&
+		      !have_param &&
+		      me->object_classid == NULL &&
+		      me->object_codebase == NULL &&
+		      me->object_codetype == NULL)) {
+		    /*
+		     *  We have nested OBJECT tags, and not yet all of the
+		     *  end tags, but have a case where the content needs
+		     *  to be parsed again (not dropped) and where we don't
+		     *  want to output anything special at the point when we
+		     *  *do* have accumulated all the end tags.  So recycle
+		     *  the incomplete contents now, and signal the SGML
+		     *  parser that it should not regard the current OBJECT
+		     *  ended but should treat its contents as mixed.
+		     *  Normally these cases would have already handled
+		     *  in the real start_element call, so this block may
+		     *  not be necessary. - kw
+		     */
+		    CTRACE((tfp, "%s:\n%s\n",
+			   "HTML: Nested OBJECT tags.  Recycling incomplete contents",
+			   me->object.data));
+		    status = HT_PARSER_OTHER_CONTENT;
+		    me->object.size--;
+		    HTChunkPuts(&me->object, "</OBJECT>");
+		    if (!include)	/* error, should not happen */
+			include = &me->xinclude;
+		    StrnAllocCat(*include, me->object.data, me->object.size);
+		    clear_objectdata(me);
+		    /* an internal fake call to keep our stack happy: */
+		    HTML_start_element(me, HTML_OBJECT, NULL,NULL,
+				       me->tag_charset, include);
+		    break;
+		}
+		/*
+		 *  We have nested OBJECT tags, and not yet all of the
+		 *  end tags, and we want the end tags.  So restore an
+		 *  end tag to the content, and signal to the SGML parser
+		 *  that it should resume the accumulation of OBJECT content
+		 *  (after calling back to start_element) in a way that
+		 *  is equivalent to passing it a dummy start tag. - FM, kw
+		 */
+		CTRACE((tfp, "HTML: Nested OBJECT tags.  Recycling.\n"));
+		status = HT_PARSER_REOPEN_ELT;
+		me->object.size--;
+		HTChunkPuts(&me->object, "</OBJECT>");
+		if (!LYMapsOnly)
+		    change_paragraph_style(me, me->sp->style);
+		break;
 	    }
 
 	    /*
@@ -6464,7 +6874,7 @@ PRIVATE void HTML_end_element ARGS3(
 	     *	the content (sigh 8-). - FM
 	     */
 	    if (me->object_declare == TRUE) {
-		if (me->object_id && *me->object_id)
+		if (me->object_id && *me->object_id && !LYMapsOnly)
 		    LYHandleID(me, me->object_id);
 		CTRACE((tfp, "HTML: DECLAREd OBJECT.  Ignoring!\n"));
 		goto End_Object;
@@ -6476,7 +6886,7 @@ PRIVATE void HTML_end_element ARGS3(
 	     *	present, and discard the content until we
 	     *	have code to handle these. (sigh 8-). - FM
 	     */
-	    if (me->object_name != NULL) {
+	    if (me->object_name != NULL && !LYMapsOnly) {
 		if (me->object_id && *me->object_id)
 		    LYHandleID(me, me->object_id);
 		CTRACE((tfp, "HTML: NAMEd OBJECT.  Ignoring!\n"));
@@ -6495,20 +6905,36 @@ PRIVATE void HTML_end_element ARGS3(
 		     *	to have succeeded are met.  We'll hope that
 		     *	it did succeed. - FM
 		     */
-		    *first_end = '\0';
-		    data = NULL;
-		    StrAllocCopy(data, start);
-		    if (e > 1) {
-			for (i = e; i > 1; i--) {
-			    StrAllocCat(data, "</OBJECT><OBJECT>");
+		    if (LYMapsOnly) {
+			/*
+			 *  Well we don't need to do this any more,
+			 *  nested objects should either not get here
+			 *  any more at all or can be handled fine by
+			 *  other code below.  Leave in place for now
+			 *  as a special case for LYMapsOnly. - kw
+			 */
+			if (LYMapsOnly && (!last_map || last_map < first_end))
+			    *first_end = '\0';
+			else
+			    e = 0;
+			data = NULL;
+			if (LYMapsOnly && (!first_map || first_map > start))
+			    StrAllocCopy(data, start);
+			else
+			    StrAllocCopy(data, me->object.data);
+			if (e > 0) {
+			    for (i = e; i > 0; i--) {
+				StrAllocCat(data, "</OBJECT>");
+			    }
 			}
+			if (!include)	/* error, should not happen */
+			    include = &me->xinclude;
+			StrAllocCat(*include, data);
+			CTRACE((tfp, "HTML: Recycling nested OBJECT%s.\n",
+			       (s > 1) ? "s" : ""));
+			FREE(data);
+			goto End_Object;
 		    }
-		    StrAllocCat(data, "</OBJECT>");
-		    StrAllocCat(*include, data);
-		    CTRACE((tfp, "HTML: Recycling nested OBJECT%s.\n",
-					(e > 1) ? "s" : ""));
-		    FREE(data);
-		    goto End_Object;
 		} else {
 		    if (TRACE) {
 			fprintf(tfp,
@@ -6522,10 +6948,16 @@ PRIVATE void HTML_end_element ARGS3(
 	    }
 
 	    /*
-	     *	If it's content has SHAPES, convert it to FIG. - FM
+	     *	If its content has SHAPES, convert it to FIG. - FM
+	     *
+	     *  This is now handled in our start_element without using
+	     *  include if the SGML parser cooperates, so this block
+	     *  may be unnecessary. - kw
 	     */
-	    if (me->object_shapes == TRUE) {
+	    if (me->object_shapes == TRUE && !LYMapsOnly) {
 		CTRACE((tfp, "HTML: OBJECT has SHAPES.  Converting to FIG.\n"));
+		if (!include)	/* error, should not happen */
+		    include = &me->xinclude;
 		StrAllocCat(*include, "<FIG ISOBJECT IMAGEMAP");
 		if (me->object_ismap == TRUE)
 		    StrAllocCat(*include, " IMAGEMAP");
@@ -6552,9 +6984,11 @@ PRIVATE void HTML_end_element ARGS3(
 	     *	If it has a USEMAP attribute and didn't have SHAPES,
 	     *	convert it to IMG. - FM
 	     */
-	    if (me->object_usemap != NULL) {
+	    if (me->object_usemap != NULL && !LYMapsOnly) {
 		CTRACE((tfp, "HTML: OBJECT has USEMAP.  Converting to IMG.\n"));
 
+		if (!include)	/* error, should not happen */
+		    include = &me->xinclude;
 		StrAllocCat(*include, "<IMG ISOBJECT");
 		if (me->object_id != NULL) {
 		    /*
@@ -6598,20 +7032,70 @@ PRIVATE void HTML_end_element ARGS3(
 		} else {
 		    StrAllocCat(*include, ">");
 		}
+		/*
+		 *  Add the content if it has <MAP, since that may
+		 *  be the MAP this usemap points to.  But if we have
+		 *  nested objects, try to eliminate portions that
+		 *  cannot contribute to the quest for MAP.  This is
+		 *  not perfect, we may get too much content; this seems
+		 *  preferable over losing too much. - kw
+		 */
+		if (first_map) {
+		    if (s == 0) {
+			StrAllocCat(*include, me->object.data);
+			CTRACE((tfp, "HTML: MAP found, recycling object contents.\n"));
+			goto End_Object;
+		    }
+		    /* s > 0 and s == e */
+		    data = NULL;
+		    if (last_map < start) {
+			*start = '\0';
+			i = 0;
+		    } else if (last_map < first_end) {
+			*first_end = '\0';
+			i = e;
+		    } else if (last_map < last_end) {
+			*last_end = '\0';
+			i = 1;
+		    } else {
+			i = 0;
+		    }
+		    if (first_map > last_end) {
+			/* fake empty object to keep stacks stack happy */
+			StrAllocCopy(data, "<OBJECT><");
+			StrAllocCat(data, last_end + 1);
+			i = 0;
+		    } else if (first_map > start) {
+			StrAllocCopy(data, start);
+		    } else {
+			StrAllocCopy(data, me->object.data);
+		    }
+		    for (; i > 0; i--) {
+			StrAllocCat(data, "</OBJECT>");
+		    }
+		    CTRACE((tfp, "%s:\n%s\n",
+			   "HTML: MAP and nested OBJECT tags.  Recycling parts",
+			   data));
+		    StrAllocCat(*include, data);
+		    FREE(data);
+		}
 		goto End_Object;
 	    }
 
 	    /*
 	     *	Add an ID link if needed. - FM
 	     */
-	    if (me->object_id && *me->object_id)
+	    if (me->object_id && *me->object_id && !LYMapsOnly)
 		LYHandleID(me, me->object_id);
 
 	    /*
 	     *	Add the OBJECTs content if not empty. - FM
 	     */
-	    if (me->object.size > 1)
+	    if (me->object.size > 1) {
+		if (!include)	/* error, should not happen */
+		    include = &me->xinclude;
 		StrAllocCat(*include, me->object.data);
+	    }
 
 	    /*
 	     *	Create a link to the DATA, if desired, and
@@ -6622,7 +7106,8 @@ PRIVATE void HTML_end_element ARGS3(
 	     *	it a try. - FM
 	     */
 	    if (clickable_images) {
-		if (me->object_data != NULL &&
+		if (!LYMapsOnly &&
+		    me->object_data != NULL &&
 		    !have_param &&
 		    me->object_classid == NULL &&
 		    me->object_codebase == NULL &&
@@ -6635,6 +7120,8 @@ PRIVATE void HTML_end_element ARGS3(
 		     *	an image or not, and set the link name
 		     *	accordingly. - FM
 		     */
+		    if (!include)	/* error, should not happen */
+			include = &me->xinclude;
 		    if (me->inA)
 			StrAllocCat(*include, "</A>");
 		    StrAllocCat(*include, " -<A HREF=\"");
@@ -6655,22 +7142,10 @@ PRIVATE void HTML_end_element ARGS3(
 	 *  Re-intialize all of the OBJECT elements. - FM
 	 */
 End_Object:
-	HTChunkClear(&me->object);
-	me->object_started = FALSE;
-	me->object_declare = FALSE;
-	me->object_shapes = FALSE;
-	me->object_ismap = FALSE;
-	FREE(me->object_usemap);
-	FREE(me->object_id);
-	FREE(me->object_title);
-	FREE(me->object_data);
-	FREE(me->object_type);
-	FREE(me->object_classid);
-	FREE(me->object_codebase);
-	FREE(me->object_codetype);
-	FREE(me->object_name);
+	clear_objectdata(me);
 
-	change_paragraph_style(me, me->sp->style);  /* Often won't really change */
+	if (!LYMapsOnly)
+	    change_paragraph_style(me, me->sp->style);  /* Often won't really change */
 	break;
 
     case HTML_APPLET:
@@ -6827,7 +7302,6 @@ End_Object:
 	     *	Finish the data off.
 	     */
 	    HTChunkTerminate(&me->textarea);
-	    data = me->textarea.data;
 	    FREE(temp);
 
 	    I.type = "textarea";
@@ -6840,19 +7314,32 @@ End_Object:
 	    I.id = me->textarea_id;
 
 	    /*
-	     *	SGML unescape any character references in TEXTAREA
-	     *	content, then parse it into individual lines
-	     *	to be handled as a series of INPUT fields (ugh!).
+	     *	Transform the TEXTAREA content as needed, then parse
+	     *	it into individual lines to be handled as a series
+	     *  series of INPUT fields (ugh!).
 	     *	Any raw 8-bit or multibyte characters already have been
 	     *	handled in relation to the display character set
 	     *	in SGML_character().
+	     *
+	     *  If TEXTAREA is handled as SGML_LITTERAL (the old way),
+	     *	we need to SGML-unescape any character references and NCRs
+	     *  here.  Otherwise this will already have happened in the
+	     *  SGML.c parsing. - kw
 	     */
 	    me->UsePlainSpace = TRUE;
 
-	    TRANSLATE_AND_UNESCAPE_ENTITIES5(&me->textarea.data,
+	    if (HTML_dtd.tags[element_number].contents == SGML_LITTERAL) {
+		TRANSLATE_AND_UNESCAPE_ENTITIES5(&me->textarea.data,
 						    me->UCLYhndl,
 						    current_char_set,
 						    me->UsePlainSpace, me->HiddenValue);
+	    } else {
+		TRANSLATE_HTML5(&me->textarea.data,
+						    me->UCLYhndl,
+						    current_char_set,
+						    me->UsePlainSpace, me->HiddenValue);
+	    }
+	    data = me->textarea.data;
 
 	    /*
 	     *	Trim any trailing newlines and
@@ -7091,6 +7578,7 @@ End_Object:
 				me->DivisionAlignments[me->Division_Level];
 	change_paragraph_style(me, me->sp->style);
 	UPDATE_STYLE;
+	HText_endStblTABLE(me->text);
 	me->current_default_alignment = me->sp->style->alignment;
 	if (me->List_Nesting_Level >= 0)
 	    HText_NegateLineOne(me->text);
@@ -7098,6 +7586,7 @@ End_Object:
 
 /* These TABLE related elements may now not be SGML_EMPTY. - kw */
     case HTML_TR:
+	HText_endStblTR(me->text);
 	if (HText_LastLineSize(me->text, FALSE)) {
 	    HText_setLastChar(me->text, ' ');  /* absorb next white space */
 	    HText_appendCharacter(me->text, '\r');
@@ -7114,9 +7603,8 @@ End_Object:
 	break;
 
     case HTML_TH:
-	break;
-
     case HTML_TD:
+	HText_endStblTD(me->text);
 	break;
 
 /* More stuff that may now not be SGML_EMPTY any more: */
@@ -7161,6 +7649,13 @@ End_Object:
 	    if (reached_awaited_stacked_elt)
 		wait_for_this_stacked_elt=-1;
 #endif
+
+    if (me->xinclude) {
+	HText_appendText(me->text, " *** LYNX ERROR ***\rUnparsed data:\r");
+	HText_appendText(me->text, me->xinclude);
+	FREE(me->xinclude);
+    }
+
 #ifdef USE_COLOR_STYLE
 #if !OPT_SCN
     TrimColorClass(HTML_dtd.tags[element_number].name,
@@ -7174,7 +7669,7 @@ End_Object:
 #  endif
 #endif
 
-    if (!REALLY_EMPTY(element_number))
+    if (!ReallyEmptyTagNum(element_number))
     {
 	CTRACE((tfp, "STYLE:end_element: ending non-EMPTY style\n"));
 #if !defined(USE_HASH)
@@ -7184,6 +7679,7 @@ End_Object:
 #endif /* USE_HASH */
     }
 #endif /* USE_COLOR_STYLE */
+    return status;
 }
 
 /*		Expanding entities
@@ -7226,6 +7722,8 @@ PRIVATE void HTML_free ARGS1(HTStructured *, me)
 	 */
 	FREE(me->base_href);
 	FREE(me->map_address);
+	clear_objectdata(me);
+	FREE(me->xinclude);
 	FREE(me);
 	return;
     }
@@ -7333,6 +7831,11 @@ PRIVATE void HTML_free ARGS1(HTStructured *, me)
 	    HTML_put_character(me, ']');
 	    HTML_end_element(me, HTML_P, &include);
 	}
+	if (me->xinclude) {
+	    HText_appendText(me->text, " *** LYNX ERROR ***\rUnparsed data:\r");
+	    HText_appendText(me->text, me->xinclude);
+	    FREE(me->xinclude);
+	}
 
 	/*
 	 *  Now call the cleanup function. - FM
@@ -7404,6 +7907,7 @@ PRIVATE void HTML_free ARGS1(HTStructured *, me)
     FREE(me->base_href);
     FREE(me->map_address);
     FREE(me->LastOptionValue);
+    clear_objectdata(me);
     FREE(me);
 }
 
@@ -7499,6 +8003,8 @@ PRIVATE void HTML_abort ARGS2(HTStructured *, me, HTError, e)
     FREE(me->textarea_cols);
     FREE(me->textarea_id);
     FREE(me->LastOptionValue);
+    FREE(me->xinclude);
+    clear_objectdata(me);
     FREE(me);
 }
 
@@ -8107,7 +8613,7 @@ PUBLIC HTStream* HTMLParsedPresent ARGS3(
 **	is commented out.
 **	This will convert from HTML to presentation or plain text.
 **
-**	It is registered in HTInit.c, but never actually used by lynx.
+**	It is registered in HTInit.c, but normally not used by lynx.
 **	- kw 1999-03-15
 */
 PUBLIC HTStream* HTMLToC ARGS3(
@@ -8116,12 +8622,18 @@ PUBLIC HTStream* HTMLToC ARGS3(
 	HTStream *,		sink)
 {
     HTStructured * html;
-
-    (*sink->isa->put_string)(sink, "/* ");	/* Before even title */
+#if 0
+    if (!sink)
+	sink = HTStreamStack(WWW_SOURCE, HTAtom_for("www/dump"),
+	HTOutputStream, anchor);
+#endif
+    if (sink)
+	(*sink->isa->put_string)(sink, "/* ");	/* Before even title */
     html = HTML_new(anchor, WWW_PLAINTEXT, sink);
     html->comment_start = "/* ";
     html->comment_end = " */\n";	/* Must start in col 1 for cpp */
-/*    HTML_put_string(html,html->comment_start); */
+    if (!sink)
+	HTML_put_string(html,html->comment_start);
 #ifdef SOURCE_CACHE
     return CacheThru_new(anchor,
 			 SGML_new(&HTML_dtd, anchor, html));

@@ -721,7 +721,7 @@ static attr map_attr[] = {			/* MAP attributes */
 	{ "DIR"           T(N) },
 	{ "ID"            T(i) },
 	{ "LANG"          T(N) },
-	{ "NAME"          T(N) },
+	{ "NAME"          T(i) },
 	{ "STYLE"         T(N) },
 	{ "TITLE"         T(N) },
 	{ 0               T(N) }	/* Terminate list */
@@ -1117,7 +1117,7 @@ static attr ulist_attr[] = {			/* UL attributes */
 /*	 1	   2	     3	       4	 5	   6	     7	       8 */
 /*345678901234567890123456789012345678901234567890123456789012345678901234567890 */
 
-/*			self	contain icont'n contn'd icont'd canclos omit */
+/*			self	contain icont'n contn'd icont'd canclos flags*/
  /* { "A"	, a_attr,	HTML_A_ATTRIBUTES,	SGML_MIXED }, */
 #define T_A		0x0008, 0x0B007,0x0FF17,0x37787,0x77BA7,0x8604F,0x00014
  /* { "ABBREV"	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED }, */
@@ -1160,7 +1160,7 @@ static attr ulist_attr[] = {			/* UL attributes */
 #define T_BQ		0x0200, 0xAFBCF,0xAFFFF,0xB6680,0xB6FAF,0x8031F,0x00000
  /* { "BR"	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_EMPTY }, */
 #define T_BR		0x1000, 0x00000,0x00000,0x377BF,0x77FBF,0x8101F,0x00001
-#define T_BUTTON	0x0200, 0x0BB0B,0x0FF3B,0x0378F,0x37FAF,0x8035F,0x00000
+#define T_BUTTON	0x2000, 0x0BB07,0x0FF37,0x0378F,0x37FBF,0x8135F,0x00000
  /* { "CAPTION" , caption_attr, HTML_CAPTION_ATTRIBUTES, SGML_MIXED }, */
 #define T_CAPTION	0x0100, 0x0B04F,0x8FFFF,0x06A00,0xB6FA7,0x8035F,0x00000
  /* { "CENTER"	, div_attr,	HTML_DIV_ATTRIBUTES,	SGML_MIXED }, */
@@ -1180,7 +1180,7 @@ static attr ulist_attr[] = {			/* UL attributes */
  /* { "DD"	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_EMPTY }, */
 #define T_DD		0x0400, 0x0FBCF,0x8FFFF,0x00800,0xB6FFF,0x8071F,0x00001
  /* { "DEL"	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED }, */
-#define T_DEL		0x0002, 0x8B04F,0x8FFFF,0xA778F,0xF7FBF,0x00003,0x00000
+#define T_DEL		0x0002, 0x8BBCF,0x8FFFF,0xA7F8F,0xF7FBF,0x00003,0x00000
  /* { "DFN"	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED }, */
 #define T_DFN		0x0002, 0x8B0CF,0x8FFFF,0x8778F,0xF7FBF,0x00003,0x00000
  /* { "DIR"	, ulist_attr,	HTML_UL_ATTRIBUTES,	SGML_MIXED }, */
@@ -1198,7 +1198,7 @@ static attr ulist_attr[] = {			/* UL attributes */
  /* { "EMBED"	, embed_attr,	HTML_EMBED_ATTRIBUTES,	SGML_EMPTY }, */
 #define T_EMBED		0x2000, 0x8F107,0x8FFF7,0xB6FBF,0xB7FBF,0x1FF7F,0x00001
  /* { "FIELDSET", fieldset_attr,HTML_FIELDSET_ATTRIBUTES, SGML_MIXED }, */
-#define T_FIELDSET	0x0200, 0x0FB42,0x0FF5F,0x07787,0x37FF7,0x8805F,0x00000
+#define T_FIELDSET	0x0200, 0x8FB4F,0x8FF7F,0x86787,0xB7FF7,0x8805F,0x00000
  /* { "FIG"	, fig_attr,	HTML_FIG_ATTRIBUTES,	SGML_MIXED }, */
 #define T_FIG		0x0200, 0x0FB00,0x8FFFF,0x36680,0xB6FBF,0x8834F,0x00000
  /* { "FN"	, fn_attr,	HTML_FN_ATTRIBUTES,	SGML_MIXED }, */
@@ -1206,7 +1206,7 @@ static attr ulist_attr[] = {			/* UL attributes */
  /* { "FONT"	, font_attr,	HTML_FONT_ATTRIBUTES,	SGML_EMPTY }, */
 #define T_FONT		0x0001, 0x8B04F,0x8FFFF,0xB778F,0xF7FBF,0x00001,0x00014
  /* { "FORM"	, form_attr,	HTML_FORM_ATTRIBUTES,	SGML_EMPTY }, */
-#define T_FORM		0x0080, 0x0FF6F,0x0FF7F,0x36E07,0x33F07,0x88DFF,0x00000
+#define T_FORM		0x0080, 0x0FF6F,0x0FF7F,0x36E07,0x32F07,0x88DFF,0x00000
  /* { "FRAME"	, frame_attr,	HTML_FRAME_ATTRIBUTES,	SGML_EMPTY }, */
 #define T_FRAME		0x10000,0x00000,0x00000,0x10000,0x10000,0x9FFFF,0x00001
  /* { "FRAMESET", frameset_attr,HTML_FRAMESET_ATTRIBUTES, SGML_MIXED }, */
@@ -1224,7 +1224,7 @@ static attr ulist_attr[] = {			/* UL attributes */
  /* { "H6"	, h_attr,	HTML_H_ATTRIBUTES,	SGML_MIXED }, */
 #define T_H6		0x0100, 0x0B04F,0x0B05F,0x36680,0x37FAF,0x80117,0x00000
  /* { "HEAD"	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED }, */
-#define T_HEAD		0x40000,0x4F000,0x47000,0x10000,0x10000,0x9FF7F,0x00006
+#define T_HEAD		0x40000,0x4F000,0x47000,0x10000,0x10000,0x9FF7F,0x00007
  /* { "HR"	, hr_attr,	HTML_HR_ATTRIBUTES,	SGML_EMPTY }, */
 #define T_HR		0x4000, 0x00000,0x00000,0x3FE80,0x3FFBF,0x87F37,0x00001
  /* { "HTML"	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED }, */
@@ -1238,7 +1238,7 @@ static attr ulist_attr[] = {			/* UL attributes */
  /* { "INPUT"	, input_attr,	HTML_INPUT_ATTRIBUTES,	SGML_EMPTY }, */
 #define T_INPUT		0x0040, 0x00000,0x00000,0x03F87,0x37F87,0x8904F,0x00001
  /* { "INS"	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED }, */
-#define T_INS		0x0002, 0x8B04F,0x8FFFF,0xA778F,0xF7FBF,0x00003,0x00000
+#define T_INS		0x0002, 0x8BBCF,0x8FFFF,0xA7F8F,0xF7FBF,0x00003,0x00000
  /* { "ISINDEX" , isindex_attr, HTML_ISINDEX_ATTRIBUTES,SGML_EMPTY }, */
 #define T_ISINDEX	0x8000, 0x00000,0x00000,0x7778F,0x7FFAF,0x80007,0x00001
  /* { "KBD"	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED }, */
@@ -1246,8 +1246,8 @@ static attr ulist_attr[] = {			/* UL attributes */
  /* { "KEYGEN"	, keygen_attr,	HTML_KEYGEN_ATTRIBUTES, SGML_EMPTY }, */
 #define T_KEYGEN	0x0040, 0x00000,0x00000,0x07FB7,0x37FB7,0x80070,0x00001
  /* { "LABEL"	, label_attr,	HTML_LABEL_ATTRIBUTES,	SGML_MIXED }, */
-#define T_LABEL		0x0020, 0x9FFFF,0x9FFFF,0x9FFFF,0x9FFFF,0x00007,0x00000
-#define T_LEGEND	0x0002, 0x0B04F,0x0FF7F,0x00200,0x37FA7,0x00003,0x00000
+#define T_LABEL		0x0002, 0x0304F,0x0FFFF,0x0679F,0x36FBF,0x00007,0x00000
+#define T_LEGEND	0x0002, 0x0B04F,0x8FF7F,0x00200,0xB7FA7,0x00003,0x00000
  /* { "LH"	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_EMPTY }, */
 #define T_LH		0x0400, 0x0BB7F,0x8FFFF,0x00800,0x97FFF,0x8071F,0x00001
  /* { "LI"	, list_attr,	HTML_LI_ATTRIBUTES,	SGML_EMPTY }, */
@@ -1273,7 +1273,8 @@ static attr ulist_attr[] = {			/* UL attributes */
  /* { "NOTE"	, note_attr,	HTML_NOTE_ATTRIBUTES,	SGML_MIXED }, */
 #define T_NOTE		0x0200, 0x0BBAF,0x8FFFF,0x376B0,0xB7FFF,0x8031F,0x00000
  /* { "OBJECT"	, object_attr,	HTML_OBJECT_ATTRIBUTES, SGML_LITTERAL }, */
-#define T_OBJECT	0x2000, 0x8FBCF,0x8FFFF,0xB679F,0xB6FBF,0x83F5F,0x00000
+#define T_OBJECT	0x2000, 0x8FBCF,0x8FFFF,0xB679F,0xB6FBF,0x83F5F,0x00020
+#define T_OBJECT_PCDATA	0x2000, 0x8FBCF,0x8FFFF,0xB679F,0xB6FBF,0x83F5F,0x00008
  /* { "OL"	, olist_attr,	HTML_OL_ATTRIBUTES,	SGML_MIXED }, */
 #define T_OL		0x0800, 0x0C400,0x8FFFF,0x37680,0xB7FB7,0x88F7F,0x00000
  /* { "OPTION"	, option_attr,	HTML_OPTION_ATTRIBUTES, SGML_EMPTY }, */
@@ -1297,7 +1298,7 @@ static attr ulist_attr[] = {			/* UL attributes */
  /* { "SCRIPT"	, script_attr,	HTML_SCRIPT_ATTRIBUTES, SGML_LITTERAL }, */
 #define T_SCRIPT	0x2000, 0x00000,0x00000,0x77F9F,0x77FFF,0x87F5F,0x00000
  /* { "SELECT"	, select_attr,	HTML_SELECT_ATTRIBUTES, SGML_MIXED }, */
-#define T_SELECT	0x0040, 0x08000,0x08000,0x03FAF,0x13FBF,0x80F5F,0x00008
+#define T_SELECT	0x0040, 0x08000,0x08000,0x03FAF,0x33FBF,0x80F5F,0x00008
 #define T_SHY		0x1000, 0x00000,0x00000,0x3779F,0x77FBF,0x8101F,0x00001
  /* { "SMALL"	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED }, */
 #define T_SMALL		0x0001, 0x8B04F,0x8FFFF,0xA778F,0xF7FBF,0x00001,0x00014
@@ -1334,7 +1335,7 @@ static attr ulist_attr[] = {			/* UL attributes */
  /* { "THEAD"	, tr_attr,	HTML_TR_ATTRIBUTES,	SGML_EMPTY }, */
 #define T_THEAD		0x0020, 0x00020,0x8FFFF,0x00800,0xB7FB7,0x8CF5F,0x00001
  /* { "TITLE",	  gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_RCDATA }, */
-#define T_TITLE		0x40000,0x00000,0x00000,0x50000,0x50000,0x0031F,0x00004
+#define T_TITLE		0x40000,0x00000,0x00000,0x50000,0x50000,0x0031F,0x0000C
  /* { "TR"	, tr_attr,	HTML_TR_ATTRIBUTES,	SGML_EMPTY }, */
 #define T_TR		0x0020, 0x00400,0x8FFFF,0x00820,0xB7FB7,0x8C75F,0x00001
  /* { "TT"	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED }, */
@@ -1357,10 +1358,10 @@ static attr ulist_attr[] = {			/* UL attributes */
 **	Must match definitions in HTMLDTD.html!
 **	Must be in alphabetical order.
 **
-**  The T_* extra info is listed here, but it won't matter (is not used
-**  in SGML.c if Old_DTD is not set).  This mainly simplifies comparison
-**  of the tags_old[] table (otherwise unchanged from original Lynx treatment)
-**  with the tags_new[] table below. - kw
+**  The T_* extra info is listed here, even though most fields are not used
+**  in SGML.c if Old_DTD is set (with the exception of some Tgf_* flags).
+**  This simplifies comparison of the tags_old[] table (otherwise unchanged
+**  from original Lynx treatment) with the tags_new[] table below. - kw
 **
 **    Name*,	Attributes,	No. of attributes,     content,   extra info...
 */
@@ -1577,7 +1578,7 @@ static CONST HTTag tags_new[HTML_ELEMENTS] = {
  { P("LISTING") , gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_LITTERAL,T_LISTING},
  { P("MAP")	, map_attr,	HTML_MAP_ATTRIBUTES,	SGML_ELEMENT,T_MAP},
  { P("MARQUEE") , gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_MARQUEE},
- { P("MATH")	, math_attr,	HTML_MATH_ATTRIBUTES,	SGML_LITTERAL,T_MATH},
+ { P("MATH")	, math_attr,	HTML_MATH_ATTRIBUTES,	SGML_PCDATA,T_MATH},
  { P("MENU")	, ulist_attr,	HTML_UL_ATTRIBUTES,	SGML_MIXED,T_MENU},
  { P("META")	, meta_attr,	HTML_META_ATTRIBUTES,	SGML_EMPTY,T_META},
  { P("NEXTID")	, nextid_attr,	1,			SGML_EMPTY,T_NEXTID},
@@ -1594,7 +1595,7 @@ static CONST HTTag tags_new[HTML_ELEMENTS] = {
  { P("Q")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_Q},
  { P("S")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_S},
  { P0("SAMP")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_SAMP},
- { P("SCRIPT")	, script_attr,	HTML_SCRIPT_ATTRIBUTES, SGML_LITTERAL,T_SCRIPT},
+ { P("SCRIPT")	, script_attr,	HTML_SCRIPT_ATTRIBUTES, SGML_CDATA,T_SCRIPT},
  { P("SELECT")	, select_attr,	HTML_SELECT_ATTRIBUTES, SGML_ELEMENT,T_SELECT},
  { P("SHY")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_EMPTY,T_SHY},
  { P("SMALL")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_SMALL},
@@ -1602,14 +1603,14 @@ static CONST HTTag tags_new[HTML_ELEMENTS] = {
  { P("SPOT")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_EMPTY,T_SPOT},
  { P("STRIKE")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_STRIKE},
  { P("STRONG")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_STRONG},
- { P("STYLE")	, style_attr,	HTML_STYLE_ATTRIBUTES,	SGML_LITTERAL,T_STYLE},
+ { P("STYLE")	, style_attr,	HTML_STYLE_ATTRIBUTES,	SGML_CDATA,T_STYLE},
  { P("SUB")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_SUB},
  { P("SUP")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_SUP},
  { P("TAB")	, tab_attr,	HTML_TAB_ATTRIBUTES,	SGML_EMPTY,T_TAB},
  { P("TABLE")	, table_attr,	HTML_TABLE_ATTRIBUTES,	SGML_ELEMENT,T_TABLE},
  { P("TBODY")	, tr_attr,	HTML_TR_ATTRIBUTES,	SGML_ELEMENT,T_TBODY},
  { P("TD")	, td_attr,	HTML_TD_ATTRIBUTES,	SGML_MIXED,T_TD},
- { P("TEXTAREA"), textarea_attr,HTML_TEXTAREA_ATTRIBUTES, SGML_LITTERAL,T_TEXTAREA},
+ { P("TEXTAREA"), textarea_attr,HTML_TEXTAREA_ATTRIBUTES, SGML_PCDATA,T_TEXTAREA},
  { P("TEXTFLOW"), bodytext_attr,HTML_BODYTEXT_ATTRIBUTES, SGML_MIXED,T_TEXTFLOW},
  { P("TFOOT")	, tr_attr,	HTML_TR_ATTRIBUTES,	SGML_ELEMENT,T_TFOOT},
  { P("TH")	, td_attr,	HTML_TD_ATTRIBUTES,	SGML_MIXED,T_TH},
@@ -1623,6 +1624,11 @@ static CONST HTTag tags_new[HTML_ELEMENTS] = {
  { P("WBR")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_EMPTY,T_WBR},
  { P0("XMP")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_LITTERAL,T_XMP},
 };
+
+/* This one will be used as a temporary substitute within the parser when
+   it has been signalled to parse OBJECT content (again) as MIXED. - kw */
+PUBLIC HTTag HTTag_mixedObject =
+ { P("OBJECT")	, object_attr,	HTML_OBJECT_ATTRIBUTES, SGML_MIXED,T_OBJECT_PCDATA};
 
 #undef P
 #undef P0
@@ -1665,6 +1671,7 @@ PUBLIC HTTag HTTag_unrecognized =
 
     { NULL_HTTag,    NULL,	0,	SGML_EMPTY,T__UNREC_};
 
+
 /*
 **	Utility Routine:  Useful for people building HTML objects.
 */
@@ -1703,6 +1710,37 @@ PUBLIC void HTStartAnchor ARGS3(
     }
 
     (*obj->isa->start_element)(obj, HTML_A, present, value, -1, 0);
+}
+
+
+PUBLIC void HTStartAnchor5 ARGS5(
+	HTStructured *,		obj,
+	CONST char *,		name,
+	CONST char *,		href,
+	CONST char *,		linktype,
+	int,			tag_charset)
+{
+    BOOL		present[HTML_A_ATTRIBUTES];
+    CONST char *	value[HTML_A_ATTRIBUTES];
+    int i;
+
+    for (i = 0; i < HTML_A_ATTRIBUTES; i++)
+	 present[i] = NO;
+
+    if (name && *name) {
+	present[HTML_A_NAME] = YES;
+	value[HTML_A_NAME] = name;
+    }
+    if (href) {
+	present[HTML_A_HREF] = YES;
+	value[HTML_A_HREF] = href;
+    }
+    if (linktype) {
+	present[HTML_A_TYPE] = YES;
+	value[HTML_A_TYPE] = linktype;
+    }
+
+    (*obj->isa->start_element)(obj, HTML_A, present, value, tag_charset, 0);
 }
 
 PUBLIC void HTStartIsIndex ARGS3(

@@ -928,16 +928,18 @@ PRIVATE int LYLoadKeymap ARGS4 (
     }
     anAnchor->no_cache = TRUE;
 
+#define PUTS(buf)    (*target->isa->put_block)(target, buf, strlen(buf))
+
     HTSprintf0(&buf, "<head>\n<title>%s</title>\n</head>\n<body>\n",
 		     CURRENT_KEYMAP_TITLE);
-    (*target->isa->put_block)(target, buf, strlen(buf));
+    PUTS(buf);
     HTSprintf0(&buf, "<h1>%s (%s)%s<a href=\"%s%s\">%s</a></h1>\n",
 	LYNX_NAME, LYNX_VERSION,
 	HELP_ON_SEGMENT,
 	helpfilepath, CURRENT_KEYMAP_HELP, CURRENT_KEYMAP_TITLE);
-    (*target->isa->put_block)(target, buf, strlen(buf));
+    PUTS(buf);
     HTSprintf0(&buf, "<pre>\n");
-    (*target->isa->put_block)(target, buf, strlen(buf));
+    PUTS(buf);
 
     for (i = 'a'+1; i <= 'z'+1; i++) {
 	print_binding(target, i);
@@ -959,7 +961,7 @@ PRIVATE int LYLoadKeymap ARGS4 (
     }
 
     HTSprintf0(&buf,"</pre>\n</body>\n");
-    (*target->isa->put_block)(target, buf, strlen(buf));
+    PUTS(buf);
 
     (*target->isa->_free)(target);
     FREE(buf);

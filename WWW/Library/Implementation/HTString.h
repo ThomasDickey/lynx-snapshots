@@ -81,7 +81,7 @@ extern char * HTSprintf () GCC_PRINTFLIKE(2,3);
 extern char * HTSprintf0 () GCC_PRINTFLIKE(2,3);
 #endif
 
-#if defined(VMS) || defined(DOSPATH) || defined(__EMX__)
+#if (defined(VMS) || defined(DOSPATH) || defined(__EMX__)) && !defined(__CYGWIN__)
 #define USE_QUOTED_PARAMETER 0
 #else
 #define USE_QUOTED_PARAMETER 1

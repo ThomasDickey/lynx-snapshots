@@ -124,8 +124,8 @@ PRIVATE void LYLynxMaps_free NOARGS
  *  MAP element content. - FM
  */
 PUBLIC BOOL LYAddImageMap ARGS3(
-	char *, 	address,
-	char *, 	title,
+	char *,		address,
+	char *,		title,
 	HTParentAnchor *, node_anchor)
 {
     LYImageMap *new = NULL;
@@ -173,7 +173,7 @@ PUBLIC BOOL LYAddImageMap ARGS3(
 	cur = theList;
 	while (NULL != (old = (LYImageMap *)HTList_nextObject(cur))) {
 	    if (old->address == 0)	/* shouldn't happen */
-	    	continue;
+		continue;
 	    if (!strcmp(old->address, address)) {
 		FREE(old->address);
 		FREE(old->title);
@@ -212,9 +212,9 @@ PUBLIC BOOL LYAddImageMap ARGS3(
  * in the appropriate list. - FM
  */
 PUBLIC BOOL LYAddMapElement ARGS5(
-	char *, 	map,
-	char *, 	address,
-	char *, 	title,
+	char *,		map,
+	char *,		address,
+	char *,		title,
 	HTParentAnchor *, node_anchor,
 	BOOL,		intern_flag)
 {
@@ -299,7 +299,7 @@ PUBLIC BOOL LYAddMapElement ARGS5(
  *  structure. - FM
  */
 PUBLIC BOOL LYHaveImageMap ARGS1(
-	char *, 	address)
+	char *,		address)
 {
     LYImageMap *Map;
     HTList *cur = LynxMaps;
@@ -468,6 +468,25 @@ PRIVATE int LYLoadIMGmap ARGS4 (
     while (NULL != (theMap = (LYImageMap *)HTList_nextObject(cur))) {
 	if (!strcmp(theMap->address, address)) {
 	    break;
+	}
+    }
+    if (theMap && HTList_count(theMap->elements) == 0) {
+	/*
+	 *  We found a MAP without any usable AREA.
+	 *  Fake a redirection to the address with fragment.
+	 *  We do this even for post data (internal link within
+	 *  a document with post data) if it will not result in
+	 *  an unwanted network request. - kw
+	 */
+	if (!anAnchor->post_data) {
+	    StrAllocCopy(redirecting_url, address);
+	    return(HT_REDIRECTING);
+	} else if (WWWDoc.safe ||
+		   (underlying->document && !anAnchor->document &&
+		    (LYinternal_flag || LYoverride_no_cache))) {
+	    StrAllocCopy(redirecting_url, address);
+	    redirect_post_content = TRUE;
+	    return(HT_REDIRECTING);
 	}
     }
     if (!(theMap && theMap->elements)) {

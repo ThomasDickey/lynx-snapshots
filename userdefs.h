@@ -120,14 +120,15 @@
  * XLOADIMAGE_COMMAND will be used as a default in src/HTInit.c
  * for viewing image content types when the DECW$DISPLAY logical
  * is set.  Make it the foreign command for your system's X image
- * viewer (commonly, "xv").  Make it "exit" or something like that
- * if you don't have one.  It can be anything that will handle GIF,
+ * viewer (commonly, "xv").  It can be anything that will handle GIF,
  * TIFF and other popular image formats.  Freeware ports of xv for
  * VMS are available in the ftp://ftp.wku.edu/vms/unsupported and
  * http://www.openvms.digital.com/cd/XV310A/ subdirectories.  You
  * must also have a "%s" for the filename.  The default defined
  * here can be overridden in lynx.cfg, or via the global or personal
  * mailcap files.
+ * Make this NULL if you don't have such a viewer or don't want to
+ * use any default viewers for image types.
  */
 #define XLOADIMAGE_COMMAND "xv %s"
 
@@ -305,16 +306,16 @@
  * XLOADIMAGE_COMMAND will be used as a default in src/HTInit.c for
  * viewing image content types when the DISPLAY environment variable
  * is set.  Make it the full path and name of the xli (also known as
- * xloadimage or xview) command, or other image viewer.  Put 'echo' or
- * something like it here if you don't have a suitable viewer.  It can
- * be anything that will handle GIF, TIFF and other popular image formats
+ * xloadimage or xview) command, or other image viewer.  It can be
+ * anything that will handle GIF, TIFF and other popular image formats
  * (xli does).  The freeware distribution of xli is available in the
  * ftp://ftp.x.org/contrib/ subdirectory.  The shareware, xv, also is
  * suitable.  You must also have a "%s" for the filename; "&" for
  * background is optional.  The default defined here can be overridden
- * in lynx.cfg, or via the global or personal mailcap files.  Note that
- * open is used as the default for NeXT, instead of the XLOADIMAGE_COMMAND
- * definition.
+ * in lynx.cfg, or via the global or personal mailcap files.
+ * Make this NULL if you don't have such a viewer or don't want to
+ * use any default viewers for image types.  Note that open is used as
+ * the default for NeXT, instead of the XLOADIMAGE_COMMAND definition.
  */
 #define XLOADIMAGE_COMMAND "xli %s &"
 
@@ -1226,6 +1227,29 @@
 #define QUIT_DEFAULT_YES	TRUE
 
 /********************************
+ * If TEXT_SUBMIT_CONFIRM_WANTED is defined (to anything), the user will be
+ * prompted for confirmation before Lynx submits a form with only one input
+ * field (of type text) to the server, after the user has pressed <return>
+ * or <enter> on the field.  Since the is no other way such as a "submit"
+ * button to submit, normally the form gets submitted automatically in this
+ * case, but some users may find this surprising and expect <return> to just
+ * move to the next link as for other text entry fields.
+ */
+
+/* #define TEXT_SUBMIT_CONFIRM_WANTED */
+
+/********************************
+ * If BUILTIN_SUFFIX_MAPS is defined (to anything), default mappings
+ * for file extensions (aka suffixes) will be compiled in (see
+ * src/HTInit.c).  By removing the definition, the default mappings
+ * are suppressed except for a few very basic ones for text/html.
+ * See GLOBAL_EXTENSION_MAP, PERSONAL_EXTENSION_MAP above and SUFFIX,
+ * SUFFIX_ORDER in lynx.cfg for other ways to map file extensions.
+ */
+
+#define BUILTIN_SUFFIX_MAPS
+
+/********************************
  * These definitions specify files created or used in conjunction
  * with traversals.  See CRAWL.ANNOUNCE for more information.
  */
@@ -1255,25 +1279,27 @@
  * the version definition with the Project Version on checkout.  Just
  * ignore it. - kw */
 /* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
-#define LYNX_VERSION "2.8.3dev.12"
+#define LYNX_VERSION "2.8.3dev.13"
 #define LYNX_WWW_HOME "http://lynx.browser.org/"
 #define LYNX_WWW_DIST "http://www.slcc.edu/lynx/current/"
 #define LYNX_RELEASE FALSE
 /* $Format: "#define LYNX_DATE \"$ProjectDate$\""$ */
-#define LYNX_DATE "Thu, 14 Oct 1999 20:05:30 -0600"
+#define LYNX_DATE "Thu, 21 Oct 1999 08:56:48 -0600"
 #define LYNX_DATE_OFF 5		/* truncate the automatically-generated date */
 #define LYNX_DATE_LEN 11	/* truncate the automatically-generated date */
 #define LYNX_RELEASE_DATE "1999"
 
+#if 0	/* unused */
 #ifndef MAXINT
 #define MAXINT 2147483647	/* max integer */
 #endif /* !MAXINT */
 #define MAXBASE 100		/* max length of base directory */
 #define MAXHIGHLIGHT 160	/* max length of highlighted text */
 #define MAXTARGET 130		/* max length of target string */
-#define LINESIZE 1024		/* max length of line to read from file */
 #define MAXFNAME 1280		/* max filename length DDD/FILENAME.EXT */
 #define MAXCOMMAND MAXFNAME	/* max length of command should be the same */
+#endif /* unused */
+#define LINESIZE 1024		/* max length of line to read from file */
 #define MAXHIST  1024		/* max links we remember in history */
 #define MAXLINKS 1024		/* max links on one screen */
 
@@ -1321,8 +1347,8 @@
 **  Currently, if compiled with -DUSE_ZLIB and without -DDIRED_SUPPORT
 **  (default), the following from the list below are required:
 **  MV_PATH   (mv.exe) - for bookmark handling (DEL_BOOKMARK command)
-**  UNCOMPRESS_PATH, BZIP2_PATH - for automatic decompression of files in
-**                                these formats
+**  UNCOMPRESS_PATH    - for automatic decompression of files in Unix
+**                       compress format
 **  TELNET_PATH, TN3270_PATH, RLOGIN_PATH - for access to "telnet:",
 **                                         "tn3270:", and "rlogin:" URLs.
 **  If they are not defined right, the corresponding operations may fail

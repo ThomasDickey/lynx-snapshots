@@ -28,6 +28,19 @@
 #endif /* !LY_SOFT_HYPHEN */
 
 /*
+**  Valid mane chars for tag parsing.
+*/
+#define IsNmStart(c) (isalpha((unsigned char)c))
+#define IsNmChar(c) (isalnum((unsigned char)c) || \
+		      c == '_' || c=='-' || c == '.' || c==':')
+
+
+#define ReallyEmptyTagNum(e) ((HTML_dtd.tags[e].contents == SGML_EMPTY) && \
+			      !(HTML_dtd.tags[e].flags & Tgf_nreie))
+#define ReallyEmptyTag(t) ((t->contents == SGML_EMPTY) && \
+			   !(t->flags & Tgf_nreie))
+
+/*
 
 Element Numbers
 
@@ -972,6 +985,7 @@ extern void HTSwitchDTD PARAMS((
     BOOL new));
 
 extern HTTag HTTag_unrecognized;
+extern HTTag HTTag_mixedObject;
 
 /*
 
@@ -992,6 +1006,13 @@ extern void HTStartAnchor PARAMS((
 		HTStructured * targetstream,
 		CONST char *	name,
 		CONST char *	href));
+
+extern void HTStartAnchor5 PARAMS((
+		HTStructured * targetstream,
+		CONST char *	name,
+		CONST char *	href,
+		CONST char *	linktype,
+		int		tag_charset));
 
 /*
 

@@ -621,7 +621,12 @@ PRIVATE void HTMLSetDisplayCharsetMatchLocale ARGS1(int,i)
 	match = TRUE; /* guess, but see below */
 
 #if !defined(LOCALE)
-	match = FALSE;
+	if (LYCharSet_UC[i].enc != UCT_ENC_UTF8)
+	    /*
+	     *  Leave true for utf-8 display - the code doesn't deal
+	     *  very well with this case. - kw
+	     */
+	    match = FALSE;
 #else
 	if (UCForce8bitTOUPPER) {
 	    /*

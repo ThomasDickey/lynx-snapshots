@@ -289,6 +289,7 @@ $ cc LYStrings
 $ cc LYTraversal
 $ cc LYUpload
 $ cc LYUtils
+$ cc TRSTable
 $ cc UCAuto
 $ cc UCAux
 $ cc UCdomap
@@ -335,6 +336,7 @@ LYStrings.obj, -
 LYTraversal.obj, -
 LYUpload.obj, -
 LYUtils.obj, -
+TRSTable.obj, -
 UCAuto.obj, -
 UCAux.obj, -
 UCdomap.obj, -

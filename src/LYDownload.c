@@ -25,7 +25,7 @@ PUBLIC BOOLEAN LYDidRename = FALSE;
 PRIVATE char LYValidDownloadFile[LY_MAXPATH] = "\0";
 
 PUBLIC void LYDownload ARGS1(
-	char *, 	line)
+	char *,		line)
 {
     char *Line = NULL, *method, *file, *sug_file = NULL;
     int method_number;
@@ -61,24 +61,24 @@ PUBLIC void LYDownload ARGS1(
     StrAllocCopy(Line, line);
 
     /*
-     *	Parse out the sug_file, Method and the File.
+     *	Parse out the File, sug_file, and the Method.
      */
-    if ((sug_file = (char *)strstr(Line, "SugFile=")) != NULL) {
-	*(sug_file-1) = '\0';
-	/*
-	 *  Go past "SugFile=".
-	 */
-	sug_file += 8;
-	HTUnEscape(sug_file);
-    }
-
-    if ((file = (char *)strstr(Line, "File=")) == NULL)
+    if ((file = (char *)strstr(Line, "/File=")) == NULL)
 	goto failed;
-    *(file-1) = '\0';
+    *file = '\0';
     /*
      *	Go past "File=".
      */
-    file += 5;
+    file += 6;
+
+    if ((sug_file = (char *)strstr(file + 1, "/SugFile=")) != NULL) {
+	*sug_file = '\0';
+	/*
+	 *  Go past "SugFile=".
+	 */
+	sug_file += 9;
+	HTUnEscape(sug_file);
+    }
 
     /*
      *	Make sure that the file string is the one from
@@ -486,7 +486,7 @@ cancelled:
  */
 PUBLIC int LYdownload_options ARGS2(
 	char **,	newfile,
-	char *, 	data_file)
+	char *,		data_file)
 {
     static char tempfile[LY_MAXPATH] = "\0";
     char *downloaded_url = NULL;
@@ -524,12 +524,12 @@ PUBLIC int LYdownload_options ARGS2(
 
     fprintf(fp0, "<pre>\n");
     fprintf(fp0, "<em>%s</em> %s\n",
-    	    gettext("Downloaded link:"),
+	    gettext("Downloaded link:"),
 	    downloaded_url);
     FREE(downloaded_url);
 
     fprintf(fp0, "<em>%s</em> %s\n",
-    	    gettext("Suggested file name:"),
+	    gettext("Suggested file name:"),
 	    sug_filename);
 
     fprintf(fp0, "\n%s\n",

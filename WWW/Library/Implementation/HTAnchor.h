@@ -168,6 +168,15 @@ extern HTChildAnchor * HTAnchor_findChildAndLink PARAMS((
 extern HTAnchor * HTAnchor_findAddress PARAMS((
 	CONST DocAddress *	address));
 
+/*	Create new or find old named anchor - simple form
+**	-------------------------------------------------
+**
+**	Like the previous one, but simpler to use for simple cases.
+**	No post data etc. can be supplied. - kw
+*/
+extern HTAnchor * HTAnchor_findSimpleAddress PARAMS((
+	CONST char *	url));
+
 /*	Delete an anchor and possibly related things (auto garbage collection)
 **	--------------------------------------------
 **

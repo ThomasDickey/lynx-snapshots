@@ -1,7 +1,7 @@
 /*
 **  This file contains code for changing the Linux console mode.
 **  Currently some names for font files are hardwired in here.
-**  You have to change this code if it needs accomodation for your
+**  You have to change this code if it needs accommodation for your
 **  system (or get the required files...).
 **
 **  Depending on the Display Character Set switched to, and the previous
@@ -168,7 +168,7 @@ PUBLIC void UCChangeTerminalCodepage ARGS2(
 			    SETFONT, old_font, NOOUTPUT);
 		}
 		CTRACE((tfp, "Executing setfont to restore: '%s'\n", tmpbuf1));
-		LYSystem(tmpbuf1);
+		status = LYSystem(tmpbuf1);
 		FREE(tmpbuf1);
 	    }
 	}
@@ -180,6 +180,10 @@ PUBLIC void UCChangeTerminalCodepage ARGS2(
 	    if (old_umap) {
 		LYRemoveTemp(old_umap);
 		FREE(old_umap);
+	    }
+	    if (status == 0) {
+		FREE(T_font_fn);
+		FREE(T_umap_fn);
 	    }
 	}
 	return;
@@ -360,6 +364,14 @@ PUBLIC void UCChangeTerminalCodepage ARGS2(
 	Utf = Dont_Care;
     } else if (!strncmp(name, "mnem", 4)) {
 	Utf = Dont_Care;
+    }
+
+    if (status == 1)
+	HasUmap = Is_Unset;
+    else if (status < 0) {
+	if (HasUmap == Is_Set)
+	    HasUmap = Dunno;
+	name = "unknown-8bit";
     }
 
     if (status == 1)

@@ -151,7 +151,7 @@ PUBLIC BOOL UCNeedNotTranslate ARGS2(
 **  up to the caller to do something about them. - KW
 */
 PUBLIC void UCSetTransParams ARGS5(
-    UCTransParams *, 	pT,
+    UCTransParams *,	pT,
     int,		cs_in,
     CONST LYUCcharset*,	p_in,
     int,		cs_out,
@@ -451,4 +451,66 @@ PUBLIC BOOL UCConvertUniToUtf8 ARGS2(
 	*ch = '\0';
     }
     return YES;
+}
+
+/*
+** Get UCS character code for one character from UTF-8 encoded string.
+**
+** On entry:
+**	*ppuni should point to beginning of UTF-8 encoding character
+** On exit:
+**	*ppuni is advanced to point to the last byte of UTF-8 sequence,
+**		if there was a valid one; otherwise unchanged.
+** returns the UCS value
+** returns negative value on error (invalid UTF-8 sequence)
+*/
+PUBLIC UCode_t UCGetUniFromUtf8String ARGS1(char **, ppuni)
+{
+    UCode_t uc_out = 0;
+    char * p = *ppuni;
+    int utf_count, i;
+    if (!(**ppuni&0x80))
+	return (UCode_t) **ppuni; /* ASCII range character */
+    else if (!(**ppuni&0x40))
+	return (-1);		/* not a valid UTF-8 start */
+    if ((*p & 0xe0) == 0xc0) {
+	utf_count = 1;
+    } else if ((*p & 0xf0) == 0xe0) {
+	utf_count = 2;
+    } else if ((*p & 0xf8) == 0xf0) {
+	utf_count = 3;
+    } else if ((*p & 0xfc) == 0xf8) {
+	utf_count = 4;
+    } else if ((*p & 0xfe) == 0xfc) {
+	utf_count = 5;
+    } else { /* garbage */
+	return (-1);
+    }
+    for (p = *ppuni, i = 0; i < utf_count ; i++) {
+	if ((*(++p) & 0xc0) != 0x80)
+	    return (-1);
+    }
+    p = *ppuni;
+    switch (utf_count) {
+    case 1:
+	uc_out = (((*p&0x1f) << 6) | (*(p+1)&0x3f));
+	break;
+    case 2:
+	uc_out = (((((*p&0x0f) << 6) | (*(p+1)&0x3f)) << 6) | (*(p+2)&0x3f));
+	break;
+    case 3:
+	uc_out = (((((((*p&0x07) << 6) | (*(p+1)&0x3f)) << 6) | (*(p+2)&0x3f)) << 6)
+	    | (*(p+3)&0x3f));
+	break;
+    case 4:
+	uc_out = (((((((((*p&0x03) << 6) | (*(p+1)&0x3f)) << 6) | (*(p+2)&0x3f)) << 6)
+		  | (*(p+3)&0x3f)) << 6) | (*(p+4)&0x3f));
+	break;
+    case 5:
+	uc_out = (((((((((((*p&0x01) << 6) | (*(p+1)&0x3f)) << 6) | (*(p+2)&0x3f)) << 6)
+		  | (*(p+3)&0x3f)) << 6) | (*(p+4)&0x3f)) << 6) | (*(p+5)&0x3f));
+	break;
+    }
+    *ppuni = p + utf_count;
+    return uc_out;
 }

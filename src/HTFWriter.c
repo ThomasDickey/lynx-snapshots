@@ -171,24 +171,25 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 		 *  and remove any previous uncompressed copy. - FM
 		 */
 		StrAllocCopy(path, me->anchor->FileCache);
-		if ((len = strlen(path)) > 3) {
-		    if (!strcasecomp(&path[len-3], "bz2")) {
-			    path[len-4] = '\0';
-			    remove(path);
-		    } else if (!strcasecomp(&path[len-2], "gz")) {
+		if ((len = strlen(path)) > 3 &&
+		    !strcasecomp(&path[len-2], "gz")) {
 #ifdef USE_ZLIB
-			if (!skip_loadfile) {
-			    use_gzread = YES;
-			} else
+		    if (!skip_loadfile) {
+			use_gzread = YES;
+		    } else
 #endif /* USE_ZLIB */
-			{
-			    path[len-3] = '\0';
-			    remove(path);
-			}
-		    } else if (!strcasecomp(&path[len-1], "Z")) {
-			path[len-2] = '\0';
+		    {
+			path[len-3] = '\0';
 			remove(path);
 		    }
+#ifdef BZIP2_PATH
+		} else if (len > 4 && !strcasecomp(&path[len-3], "bz2")) {
+		    path[len-4] = '\0';
+		    remove(path);
+#endif /* BZIP2_PATH */
+		} else if (len > 2 && !strcasecomp(&path[len-1], "Z")) {
+		    path[len-2] = '\0';
+		    remove(path);
 		}
 		if (!use_gzread) {
 		    if (!dump_output_immediately) {
@@ -216,7 +217,7 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 			refresh();
 		    }
 		    HTAlert(ERROR_UNCOMPRESSING_TEMP);
-		    remove(me->anchor->FileCache);
+		    LYRemoveTemp(me->anchor->FileCache);
 		    FREE(me->anchor->FileCache);
 		} else {
 		    /*
@@ -437,7 +438,7 @@ PRIVATE void HTFWriter_abort ARGS2(
     LYCloseTempFP(me->fp);
     FREE(me->viewer_command);
     if (me->end_command) {		/* Temp file */
-	CTRACE((tfp, "HTFWriter: Aborting: file not executed.\n"));
+	CTRACE((tfp, "HTFWriter: Aborting: file not executed or saved.\n"));
 	FREE(me->end_command);
 	if (me->remove_command) {
 	    LYSystem(me->remove_command);
@@ -913,7 +914,6 @@ PUBLIC HTStream* HTCompressed ARGS3(
     char *uncompress_mask = NULL;
     char *compress_suffix = "";
     CONST char *middle;
-    FILE *fp = NULL;
 
     /*
      *	Deal with any inappropriate invocations of this function,
@@ -938,12 +938,7 @@ PUBLIC HTStream* HTCompressed ARGS3(
 	     *	We have a presentation mapping for it. - FM
 	     */
 	    can_present = TRUE;
-	    if (!strcasecomp(anchor->content_encoding, "x-bzip2") ||
-		!strcasecomp(anchor->content_encoding, "bzip")) {
-		StrAllocCopy(uncompress_mask, BZIP2_PATH);
-		StrAllocCat(uncompress_mask, " -d %s");
-		compress_suffix = "bz2";
-	    } else if (!strcasecomp(anchor->content_encoding, "x-gzip") ||
+	    if (!strcasecomp(anchor->content_encoding, "x-gzip") ||
 		!strcasecomp(anchor->content_encoding, "gzip")) {
 		/*
 		 *  It's compressed with the modern gzip. - FM
@@ -951,6 +946,13 @@ PUBLIC HTStream* HTCompressed ARGS3(
 		StrAllocCopy(uncompress_mask, GZIP_PATH);
 		StrAllocCat(uncompress_mask, " -d --no-name %s");
 		compress_suffix = "gz";
+#ifdef BZIP2_PATH
+	    } else if (!strcasecomp(anchor->content_encoding, "x-bzip2") ||
+		!strcasecomp(anchor->content_encoding, "bzip")) {
+		StrAllocCopy(uncompress_mask, BZIP2_PATH);
+		StrAllocCat(uncompress_mask, " -d %s");
+		compress_suffix = "bz2";
+#endif /* BZIP2_PATH */
 	    } else if (!strcasecomp(anchor->content_encoding, "x-compress") ||
 		       !strcasecomp(anchor->content_encoding, "compress")) {
 		/*
@@ -976,7 +978,15 @@ PUBLIC HTStream* HTCompressed ARGS3(
 	 *  and pass it back to be handled as that type. - FM
 	 */
 	if (strchr(anchor->content_encoding, '/') == NULL) {
-	    StrAllocCopy(type, "application/");
+	    /*
+	     *  Use "x-" prefix, none of the types we are likely to
+	     *  construct here are official.  That is we generate
+	     *  "application/x-gzip" and so on. - kw
+	     */
+	    if (!strncasecomp(anchor->content_encoding, "x-", 2))
+		StrAllocCopy(type, "application/");
+	    else
+		StrAllocCopy(type, "application/x-");
 	    StrAllocCat(type, anchor->content_encoding);
 	} else {
 	    StrAllocCopy(type, anchor->content_encoding);
@@ -1008,10 +1018,7 @@ PUBLIC HTStream* HTCompressed ARGS3(
      *	Remove any old versions of the file. - FM
      */
     if (anchor->FileCache) {
-	while ((fp = fopen(anchor->FileCache, "r")) != NULL) {
-	    fclose(fp);
-	    remove(anchor->FileCache);
-	}
+	LYRemoveTemp(anchor->FileCache);
 	FREE(anchor->FileCache);
     }
 

@@ -151,7 +151,7 @@ PUBLIC int strncasecomp ARGS3(
     return ((long)n < 0 ? 0 : cm[*us1] - cm[*--us2]);
 }
 
-#else 	/* SH_EX */
+#else	/* SH_EX */
 
 /*	Strings of any length
 **	---------------------
@@ -355,7 +355,7 @@ PUBLIC char * HTNextField ARGS1(
 **	On entry,
 **	*pstr	points to a string to be parsed.
 **	delims	lists characters to be recognized as delimiters.
-**		If NULL default is white white space "," ";" or "=".
+**		If NULL, default is white space "," ";" or "=".
 **		The word can optionally be quoted or enclosed with
 **		chars from bracks.
 **		Comments surrrounded by '(' ')' are filtered out
@@ -363,7 +363,7 @@ PUBLIC char * HTNextField ARGS1(
 **		' ' or '(' in delims or bracks.
 **	bracks	lists bracketing chars.  Some are recognized as
 **		special, for those give the opening char.
-**		If NULL defaults to <"> and "<" ">".
+**		If NULL, defaults to <"> and "<" ">".
 **	found	points to location to fill with the ending delimiter
 **		found, or is NULL.
 **
@@ -378,7 +378,7 @@ PUBLIC char * HTNextTok ARGS4(
 	char **,	pstr,
 	CONST char *,	delims,
 	CONST char *,	bracks,
-	char *, 	found)
+	char *,		found)
 {
     char * p = *pstr;
     char * start = NULL;
@@ -432,7 +432,7 @@ PUBLIC char * HTNextTok ARGS4(
 		} else
 		    get_closing_char_too = (BOOL) (strchr(bracks,*p) != NULL);
 	    }
-	} else if (strchr(bracks,*p)) {        /* quoted or bracketted field */
+	} else if (strchr(bracks,*p)) {	       /* quoted or bracketed field */
 	    switch (*p) {
 	       case '<': closer = '>'; break;
 	       case '[': closer = ']'; break;
@@ -452,7 +452,7 @@ PUBLIC char * HTNextTok ARGS4(
 	    } else
 	    break;			    /* kr95-10-9: needs to stop here */
 #if 0
-	} else if (*p == '<') { 			     /* quoted field */
+	} else if (*p == '<') {				     /* quoted field */
 	    if (!start) start = ++p;
 	    for(;*p && *p!='>'; p++)
 		if (*p == '\\' && *(p+1)) p++;	       /* Skip escaped chars */
@@ -643,7 +643,7 @@ PRIVATE char * StrAllocVsprintf ARGS4(
 			break;
 		    default:
 			CTRACE((tfp, "unknown format character '%c' in %s\n",
-			            *fmt, format));
+				    *fmt, format));
 			break;
 		    }
 		} else if (*fmt == '.') {
@@ -707,7 +707,7 @@ PRIVATE char * StrAllocVsprintf ARGS4(
     FREE(fmt_ptr);
     dst_ptr[dst_len] = '\0';
     if (pstr)
-    	*pstr = dst_ptr;
+	*pstr = dst_ptr;
     return (dst_ptr);
 }
 
@@ -886,7 +886,7 @@ PUBLIC void HTAddXpand ARGS4(
 	    if (HTIsParam(next)) {
 		if (next != last) {
 		    size_t len = (next - last)
-		    		+ ((*result != 0) ? strlen(*result) : 0);
+				+ ((*result != 0) ? strlen(*result) : 0);
 		    HTSACat(result, last);
 		    (*result)[len] = 0;
 		}
@@ -933,7 +933,7 @@ PUBLIC void HTAddParam ARGS4(
 	    if (HTIsParam(next)) {
 		if (next != last) {
 		    size_t len = (next - last)
-		    		+ ((*result != 0) ? strlen(*result) : 0);
+				+ ((*result != 0) ? strlen(*result) : 0);
 		    HTSACat(result, last);
 		    (*result)[len] = 0;
 		}
@@ -989,11 +989,11 @@ PUBLIC void HTSABCopy ARGS3(
     CTRACE((tfp, "HTSABCopy(%p, %p, %d)\n", dest, src, len));
     /* if we already have a bstring ** ... */
     if (dest) {
-    	/* ... with a valid bstring *, free it ... */
-    	if (*dest) {
+	/* ... with a valid bstring *, free it ... */
+	if (*dest) {
 	    FREE((*dest)->str);
 	    FREE(*dest);
-    	}
+	}
 	*dest = malloc(sizeof(bstring));
 	if (src) {
 	    CTRACE((tfp, "%% [%s]\n", src));
