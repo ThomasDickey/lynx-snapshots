@@ -1,6 +1,14 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2002-01-06 (2.8.5dev.7)
+* ifdef'd new directory-sorting code to compile when configure --disable-dired
+  is specified -TD
+* add (commented-out) definitions for building with OpenSSL in makefile.msc,
+  tested with OpenSSL 0.9.6c and Visual C++ 5.0 -TD
+* correct call to HTGetLinkInfo() in follow_link_number() from 2.8.5dev.6
+  changes to fix uninitialized pointer (report by PW) -TD
+
 2002-01-01 (2.8.5dev.6)
 * add configure options to link with dbmalloc and dmalloc debugging libraries
   which offer different features than --enable-find-leaks -TD

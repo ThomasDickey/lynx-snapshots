@@ -19,13 +19,18 @@ ETC_LIB = lib
 # Uncomment SOCK_DEFS if you wish to build with winsock2.
 #SOCK_DEFS = /D "USE_WINSOCK2_H" /D "_WIN32_WINNT=0x0400"
 
+# Uncomment these to build with OpenSSL, adjusting SSL_DIR as needed.
+#SSL_DIR = C:\OpenSSL
+#SSL_DEFS = /D "USE_SSL" -I "$(SSL_DIR)\include" -I"$(SSL_DIR)\include\openssl"
+#SSL_LIBS = "$(SSL_DIR)\lib\ssleay32.lib" "$(SSL_DIR)\lib\libeay32.lib"
+
 INCLUDES = \
  /I "." \
  /I "$(SRC_DIR)" \
  /I "$(SRC_DIR)\chrtrans" \
  /I "$(WWW_DIR)" \
  /I "$(ETC_LIB)"
-DEFS = $(CS_DEFS) $(SOCK_DEFS) \
+DEFS = $(CS_DEFS) $(SOCK_DEFS) $(SSL_DEFS) \
  /D "__WIN32__" \
  /D "_CONSOLE" \
  /D "_MBCS" \
@@ -75,7 +80,7 @@ CFLAGS   = /nologo /MT /W3 /GX /O2 /c
 LDFLAGS  = /nologo /subsystem:console /incremental:no /machine:I386
 #LDFLAGS  = /debug /nologo /subsystem:console /incremental:no /machine:I386
 LIBS     = kernel32.lib user32.lib wsock32.lib /NODEFAULTLIB:libc\
- $(ETC_LIB)\pdcurses.lib $(ETC_LIB)\zlib.lib dirent.obj
+ $(ETC_LIB)\pdcurses.lib $(ETC_LIB)\zlib.lib dirent.obj $(SSL_LIBS)
 
 COMPILE = $(CC) $(CFLAGS) $(INCLUDES) $(DEFS)
 LINK    = $(LD) $(LDFLAGS) /map:lynx.map /out:$@
