@@ -3,6 +3,7 @@
 <head>
 <title>Lynx Users Guide v2.8.4</title>
 <link rev="made" href="mailto:lynx-dev@sig.net">
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
 </head>
 
 <body>
@@ -47,7 +48,7 @@ within a single LAN.
 <li><A HREF="#Bookmarks" NAME="ToC-Bookmarks">Lynx bookmarks</A>
 <li><A HREF="#Jumps" NAME="ToC-Jumps">Jump command</A>
 <li><A HREF="#DirEd" NAME="ToC-DirEd">Directory Editing</A>
-<li><A HREF="#ColorMouse" NAME="ToC-ColorMouse">Using Color & the Mouse</A>
+<li><A HREF="#ColorMouse" NAME="ToC-ColorMouse">Using Color &amp; the Mouse</A>
 <li><A HREF="#MiscKeys" NAME="ToC-MiscKeys">Scrolling and Other useful commands</A>
 <li><a href="#Forms" NAME="ToC-Forms">Lynx and HTML Forms</a>
 | <a href="#Images" NAME="ToC-Images">Lynx and HTML Images</a>
@@ -1167,9 +1168,9 @@ on your local system.  The commands available in DIRED mode are
 </dl>
 [<A HREF="#ToC-DirEd">ToC</A>]
 
-<h2 ID="ColorMouse"><A NAME="ColorMouse"><em>Using Color & the Mouse</em></A></h2>
+<h2 ID="ColorMouse"><A NAME="ColorMouse"><em>Using Color &amp; the Mouse</em></A></h2>
 
-A limited range of colors & mouse commands are available, if the user chooses:
+A limited range of colors &amp; mouse commands are available, if the user chooses:
 see <em>lynx.cfg</em> for details.
 
 [<A HREF="#ToC-ColorMouse">ToC</A>]
@@ -1422,8 +1423,7 @@ options from a list, and fields for entering text.
     Arrow</em>.  This mode can be used to avoid "getting stuck" in input
     fields, especially by users who rarely fill out forms.
 
-    <DIV ID="CtrlVNote">
-    <p><em>NOTE:</em> If you have a text input field selected you will not
+    <p><a name="CtrlVNote">NOTE:</a> If you have a text input field selected you will not
     have access to most of the Lynx keystroke commands, because they are
     interpreted by the <a href="keystrokes/edit_help.html"
     >Line Editor</a> as either text entries or editing commands.  Select a
@@ -1467,7 +1467,6 @@ options from a list, and fields for entering text.
     <em>^_</em> for the first Line Edit style, letting <em>^V</em> still
     act as SWITCH_DTD
     outside of text input fields.
-    </DIV>
 
 <dt>TEXTAREA Fields
 <dd>TEXTAREA fields are for most purposes handled as if they were a series of
@@ -2143,7 +2142,7 @@ same URL or a new URL, at a specified number of seconds following receipt
 of the current document.  This procedure has been termed
 <em>client-side-pull</em>.  An example of such an element is:
 <pre>
-      <em>&lt;META HTTP-EQUIV="Refresh" CONTENT="3; URL="http://host/path"&gt;</em>
+      <em>&lt;META HTTP-EQUIV="Refresh" CONTENT="3; URL=http://host/path"&gt;</em>
 </pre>
 which instructs a client to fetch the indicated URL in 3 seconds after
 receiving the current document.  If the <em>URL=</em> field is omitted,
@@ -2773,7 +2772,7 @@ where
              <dt><code>-stdin</code>
                 <dd>read the startfile from standard input
                     (UNIX only).
-             <dt><code>-syslog=<em>text</em>
+             <dt><code>-syslog=<em>text</em></code>
                 <dd>information for syslog call.
              <dt><code>-tagsoup</code>
                 <dd>initialize DTD with "TagSoup" tables,
@@ -2821,7 +2820,7 @@ where
                        <dd>color-style
                     <dt>4
                        <dd>TRST (table layout)
-                    <dl>
+                    </dl>
              <dt><code>-traversal</code>
                 <dd>traverse all http links derived from startfile.  When
                     used with <em>-crawl</em>, each link that begins with the

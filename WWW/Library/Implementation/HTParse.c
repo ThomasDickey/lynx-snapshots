@@ -275,7 +275,7 @@ PUBLIC char * HTParse ARGS3(
     /*
     **	Handle the host field.
     */
-    if (wanted & PARSE_HOST)
+    if (wanted & PARSE_HOST) {
 	if (given.host || related.host) {
 	    char *tail = result + strlen(result);
 	    if (wanted & PARSE_PUNCTUATION)
@@ -343,6 +343,7 @@ PUBLIC char * HTParse ARGS3(
 	    }
 #endif /* CLEAN_URLS */
 	}
+    }
 
     /*
     **	If host in given or related was ended directly with a '?' (no

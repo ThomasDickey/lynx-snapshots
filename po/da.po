@@ -2125,6 +2125,7 @@ msgid ""
 msgstr ""
 "\n"
 " Kig venligst brevets indhold igennem:\n"
+"\n"
 
 #: LYMessages.c:686
 msgid ""
@@ -2934,6 +2935,7 @@ msgid ""
 msgstr ""
 "\n"
 "Der er i øjeblikket ca. %d artikler i %s, ID'er som følger:\n"
+"\n"
 
 #: WWW/Library/Implementation/HTNews.c:1865
 msgid "All available articles in "
@@ -4133,6 +4135,7 @@ msgid ""
 msgstr ""
 "\n"
 "Opsætningsfil %s er ikke tilgængelig.\n"
+"\n"
 
 #: src/LYMain.c:1388
 msgid ""
@@ -4142,6 +4145,7 @@ msgid ""
 msgstr ""
 "\n"
 "Lynx tegnsæt er ikke angivet.\n"
+"\n"
 
 #: src/LYMain.c:1417
 msgid ""
@@ -4151,6 +4155,7 @@ msgid ""
 msgstr ""
 "\n"
 "Lynx \"edit map\" er ikke angivet.\n"
+"\n"
 
 #: src/LYMain.c:1446
 #, c-format
@@ -4161,6 +4166,7 @@ msgid ""
 msgstr ""
 "\n"
 "Lynx-fil %s er ikke tilgængelig.\n"
+"\n"
 
 #: src/LYMain.c:1704
 msgid "Warning:"

@@ -91,8 +91,12 @@ PUBLIC void LYDownload ARGS1(
     /* FIXME: use HTLocalName */
     if (!strncmp(file, "file://localhost", 16)) {
 #ifdef __DJGPP__
-	file += 17;
-	file = HTDOS_name(file);
+	if (!strncmp(file + 16, "/dev/", 5))
+	    file += 16;
+	else {
+	    file += 17;
+	    file = HTDOS_name(file);
+	}
 #else
 	file += 16;
 #endif /* __DJGPP__ */

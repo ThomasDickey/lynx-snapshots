@@ -5065,7 +5065,7 @@ msgstr ""
 #: src/LYUtils.c:4217
 #, fuzzy
 msgid "unknown restriction"
-msgstr "Pas de réstriction définies.\n"
+msgstr "Pas de réstriction définies."
 
 #: src/LYUtils.c:4248
 msgid "No restrictions set.\n"

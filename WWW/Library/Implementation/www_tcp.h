@@ -558,7 +558,6 @@ extern int errno;
 #include <errno.h>
 #include <sys/types.h>
 #include <io.h>
-#ifdef WATT32
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <tcp.h>
@@ -566,9 +565,6 @@ extern int errno;
 #undef word
 #endif /* word */
 #define select select_s
-#else
-#include <socket.h>
-#endif /* WATT32 */
 
 #undef NETWRITE
 #define NETWRITE write_s
@@ -579,9 +575,6 @@ extern int errno;
 #ifdef UNIX
 #undef UNIX
 #endif /* UNIX */
-#ifndef WATT32
-#define getsockname getsockname_s
-#endif /* !WATT32 */
 #ifdef HAVE_GETTEXT
 #define gettext gettext__
 #endif

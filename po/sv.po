@@ -5161,7 +5161,6 @@ msgstr ""
 "    Flytta ord: ^P    ^N        ^U    = Radera rad\n"
 " Radera tecken: ^H    ^R        ^A    = Radbörjan\n"
 "    Radera ord: ^B    ^F        ^E    = Radslut\n"
-"\n"
 
 #: src/LYrcFile.c:339
 msgid ""

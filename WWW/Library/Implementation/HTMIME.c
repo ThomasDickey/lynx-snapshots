@@ -75,6 +75,9 @@ typedef enum {
 	miPRAGMA,
 	miPROXY_AUTHENTICATE,
 	miPUBLIC,
+	miR,
+	miRE,
+	miREFRESH,
 	miRETRY_AFTER,
 	miS,
 	miSAFE,
@@ -130,6 +133,8 @@ struct _HTStream {
 	char *			set_cookie2;	/* Set-Cookie2 */
 	char *			location;	/* Location */
 
+	char *			refresh_url;	/* "Refresh:" URL */
+
 	HTFormat		encoding;	/* Content-Transfer-Encoding */
 	char *			compression_encoding;
 	HTFormat		format;		/* Content-Type */
@@ -165,6 +170,36 @@ PUBLIC void HTMIME_TrimDoubleQuotes ARGS1(
 	value[i] = cp[(i +1)];
 }
 
+PRIVATE char *parse_parameter ARGS2(
+	char *,		from,
+	char *,		name)
+{
+    size_t len = strlen(name);
+    char *result = NULL;
+    char *string = from;
+
+    do {
+	if ((string = strchr(string, ';')) == NULL)
+	    return NULL;
+	while (*string != '\0' && (*string == ';' || isspace(*string))) {
+	    string++;
+	}
+	if (strlen(string) < len) return NULL;
+    } while (strncasecomp(string, name, len) != 0);
+    string += len;
+    while (*string != '\0' && (isspace(*string) || *string == '=')) {
+	string++;
+    }
+
+    StrAllocCopy(result, string);
+    len = 0;
+    while (isprint(string[len]) && string[len] != ';') {
+	len++;
+    }
+    result[len] = '\0';
+    return result;
+}
+
 PRIVATE int pumpData ARGS1(HTStream *, me)
 {
     if (strchr(HTAtom_name(me->format), ';') != NULL) {
@@ -174,13 +209,13 @@ PRIVATE int pumpData ARGS1(HTStream *, me)
 		HTAtom_name(me->format)));
 	StrAllocCopy(cp, HTAtom_name(me->format));
 	/*
-	**	Note that the Content-Type value was converted
-	**	to lower case when we loaded into me->format,
-	**	but there may have been a mixed or upper-case
-	**	atom, so we'll force lower-casing again.  We
-	**	also stripped spaces and double-quotes, but
-	**	we'll make sure they're still gone from any
-	**	charset parameter we check. - FM
+	** Note that the Content-Type value was converted
+	** to lower case when we loaded into me->format,
+	** but there may have been a mixed or upper-case
+	** atom, so we'll force lower-casing again.  We
+	** also stripped spaces and double-quotes, but
+	** we'll make sure they're still gone from any
+	** charset parameter we check.  - FM
 	*/
 	LYLowerCase(cp);
 	if ((cp1 = strchr(cp, ';')) != NULL) {
@@ -431,6 +466,24 @@ PRIVATE int pumpData ARGS1(HTStream *, me)
 	me->state = MIME_TRANSPARENT;	/* Pump rest of data right through */
     } else {
 	me->state = MIME_IGNORE;	/* What else to do? */
+    }
+    if (me->refresh_url != NULL) {
+	char *url = parse_parameter(me->refresh_url, "URL");
+	char *txt = NULL;
+	int num = 0;
+
+	if (url != NULL) {
+	    CTRACE((tfp, "Formatting refresh-url as first line of result\n"));
+	    while (isdigit(me->refresh_url[num]))
+	    	++num;
+	    HTSprintf0(&txt, gettext("Refresh: "));
+	    if (num != 0)
+		HTSprintf(&txt, gettext("%.*s seconds "), num, me->refresh_url);
+	    HTSprintf(&txt, "<a href=\"%s\">%s</a><br>", url, url);
+	    (me->isa->put_string)(me, txt);
+	    free(url);
+	    free(txt);
+	}
     }
     return HT_OK;
 }
@@ -800,6 +853,12 @@ PRIVATE int dispatchField ARGS1(HTStream *, me)
 	CTRACE((tfp, "HTMIME: PICKED UP Public: '%s'\n",
 		me->value));
 	break;
+    case miREFRESH:		/* nonstandard: Netscape */
+	HTMIME_TrimDoubleQuotes(me->value);
+	CTRACE((tfp, "HTMIME: PICKED UP Refresh: '%s'\n",
+		me->value));
+	StrAllocCopy(me->refresh_url, me->value);
+	break;
     case miRETRY_AFTER:
 	HTMIME_TrimDoubleQuotes(me->value);
 	CTRACE((tfp, "HTMIME: PICKED UP Retry-After: '%s'\n",
@@ -1032,10 +1091,8 @@ PRIVATE void HTMIME_put_character ARGS2(
 
 	case 'r':
 	case 'R':
-	    me->check_pointer = "etry-after:";
-	    me->if_ok = miRETRY_AFTER;
-	    me->state = miCHECK;
-	    CTRACE((tfp, "HTMIME: Got 'R' at beginning of line, checking for 'etry-after'\n"));
+	    me->state = miR;
+	    CTRACE((tfp, "HTMIME: Got 'R' at beginning of line, state now R\n"));
 	    break;
 
 	case 's':
@@ -1318,6 +1375,47 @@ PRIVATE void HTMIME_put_character ARGS2(
 	default:
 	    CTRACE((tfp, "HTMIME: Bad character `%c' found where `%s' expected\n",
 			c, "'a' or 'o'"));
+	    goto bad_field_name;
+
+	} /* switch on character */
+	break;
+
+    case miR:				/* Check for 'e' */
+	switch (c) {
+	case 'e':
+	case 'E':
+	    me->state = miRE;
+	    CTRACE((tfp, "HTMIME: Was R, found E\n"));
+	    break;
+	default:
+	    CTRACE((tfp, "HTMIME: Bad character `%c' found where `%s' expected\n",
+			c, "'e'"));
+	    goto bad_field_name;
+
+	} /* switch on character */
+	break;
+
+    case miRE:				/* Check for 'a' or 'o' */
+	switch (c) {
+	case 'f':
+	case 'F':			/* nonstandard: Netscape */
+	    me->check_pointer = "resh:";
+	    me->if_ok = miREFRESH;
+	    me->state = miCHECK;
+	    CTRACE((tfp, "HTMIME: Was RE, found F, checking for '%s'\n", me->check_pointer));
+	    break;
+
+	case 't':
+	case 'T':
+	    me->check_pointer = "ry-after:";
+	    me->if_ok = miRETRY_AFTER;
+	    me->state = miCHECK;
+	    CTRACE((tfp, "HTMIME: Was RE, found T, checking for '%s'\n", me->check_pointer));
+	    break;
+
+	default:
+	    CTRACE((tfp, "HTMIME: Bad character `%c' found where `%s' expected\n",
+			c, "'f' or 't'"));
 	    goto bad_field_name;
 
 	} /* switch on character */
@@ -1672,6 +1770,7 @@ PRIVATE void HTMIME_put_character ARGS2(
     case miPRAGMA:
     case miPROXY_AUTHENTICATE:
     case miPUBLIC:
+    case miREFRESH:
     case miRETRY_AFTER:
     case miSAFE:
     case miSERVER:
@@ -1889,8 +1988,9 @@ PUBLIC HTStream* HTMIMEConvert ARGS3(
     me->format	  =	WWW_HTML;
     me->targetRep =	pres->rep_out;
     me->boundary  =	NULL;		/* Not set yet */
-    me->set_cookie  =	NULL;		/* Not set yet */
-    me->set_cookie2  =	NULL;		/* Not set yet */
+    me->set_cookie =	NULL;		/* Not set yet */
+    me->set_cookie2 =	NULL;		/* Not set yet */
+    me->refresh_url =	NULL;		/* Not set yet */
     me->encoding  =	0;		/* Not set yet */
     me->compression_encoding = NULL;	/* Not set yet */
     me->net_ascii =	NO;		/* Local character set */

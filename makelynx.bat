@@ -24,12 +24,15 @@ set CC=gcc
 
 echo /* Generated lynx_cfg.h file in the lynx directory: */ > lynx_cfg.h
 echo. >> lynx_cfg.h
-echo #define _WIN_CC		 1 >> lynx_cfg.h
+echo #define ANSI_VARARGS	 1 >> lynx_cfg.h
+echo #define BOXHORI             0 >> lynx_cfg.h
+echo #define BOXVERT             0 >> lynx_cfg.h
+echo #define HAVE_GETCWD	 1 >> lynx_cfg.h
+echo #define LYNX_CFG_FILE "./lynx.cfg" >> lynx_cfg.h
+echo #define LY_MAXPATH       1024 >> lynx_cfg.h
 echo #define USE_ALT_BLAT_MAILER 1 >> lynx_cfg.h
 echo #define USE_BLAT_MAILER	 1 >> lynx_cfg.h
-echo #define ANSI_VARARGS	 1 >> lynx_cfg.h
-echo #define HAVE_GETCWD	 1 >> lynx_cfg.h
-echo #define LY_MAXPATH       1024 >> lynx_cfg.h
+echo #define _WIN_CC		 1 >> lynx_cfg.h
 rem echo #define USE_SCROLLBAR	 1 >> lynx_cfg.h
 
 SET DEFINES=-DCJK_EX

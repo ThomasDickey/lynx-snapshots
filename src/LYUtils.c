@@ -652,7 +652,7 @@ highlight_hit_within_hightext:
 			TargetEmphasisON = TRUE;
 			LYaddstr(tmp);
 		    } else {
-			LYmove(hLine, (offset + 1));
+			LYmove(hLine, (offset + 2));
 		    }
 		    tmp[1] = '\0';
 		    written += 2;
@@ -1074,7 +1074,7 @@ PUBLIC void LYhighlight ARGS3(
 			 * For CJK strings, by Masanobu Kimura.
 			 */
 			if (HTCJK != NOCJK && is8bits(tmp[0])) {
-			    tmp[1] = LYGetHiliteStr(cur, 1)[++i];
+			    tmp[1] = hi_string[++i];
 			    LYaddstr(tmp);
 			    tmp[1] = '\0';
 			} else {
@@ -3139,21 +3139,6 @@ PRIVATE int fmt_tempname ARGS3(
 	CONST char *,	suffix)
 {
     int code;
-#if defined(HAVE_MKSTEMP)
-    int fd;
-    char interim[LY_MAXPATH];
-    sprintf(interim, "%.*sXXXXXX", LY_MAXPATH - 8, prefix);
-    if (strlen(interim) + strlen(suffix) < LY_MAXPATH - 2
-    && (fd = mkstemp(interim)) >= 0) {
-	sprintf(result, "%s%s", interim, suffix);
-	rename(interim, result);
-	chmod(result, HIDE_CHMOD); /* (yes, some mkstemps are broken ;-) */
-	close(fd);
-	code = TRUE;
-    } else {
-	code = FALSE;
-    }
-#else
 #ifdef USE_RAND_TEMPNAME
 #define SIZE_TEMPNAME ((MAX_TEMPNAME / BITS_PER_CHAR) + 1)
     static BOOL first = TRUE;
@@ -3240,7 +3225,6 @@ PRIVATE int fmt_tempname ARGS3(
 	sprintf(result, "%.*s", LY_MAXPATH-1, leaf);
 	code = FALSE;
     }
-#endif
     CTRACE((tfp, "-> '%s'\n", result));
     return (code);
 }
@@ -4382,13 +4366,7 @@ PUBLIC BOOLEAN LYExpandHostForURL ARGS3(
 	FREE(MsgStr);
 	return GotHost;
     }
-    else if (LYCursesON &&
-#if defined(__DJGPP__) && !defined(WATT32)
-	HTCheckForInterrupt()
-#else /* normal systems */
-	(lynx_nsl_status == HT_INTERRUPTED)
-#endif
-	)
+    else if (LYCursesON && (lynx_nsl_status == HT_INTERRUPTED))
     {
 	/*
 	 *  Give the user chance to interrupt lookup cycles. - KW & FM
@@ -4493,11 +4471,7 @@ PUBLIC BOOLEAN LYExpandHostForURL ARGS3(
 		/*
 		 *  Give the user chance to interrupt lookup cycles. - KW
 		 */
-#if defined(__DJGPP__) && !defined(WATT32)
-		if (LYCursesON && HTCheckForInterrupt())
-#else /* normal systems */
 		if (LYCursesON && (lynx_nsl_status == HT_INTERRUPTED))
-#endif
 		{
 		    CTRACE((tfp,
 	"LYExpandHostForURL: Interrupted while '%s' failed to resolve.\n",
@@ -7375,7 +7349,7 @@ PUBLIC char * w32_strerror(DWORD ercode)
 PUBLIC void LYOpenlog ARGS1(
 	CONST char *, banner)
 {
-#if defined(WATT32)
+#if defined(DJGPP)
     openlog("lynx", LOG_PID|LOG_NDELAY, LOG_LOCAL5);
 #else
     openlog("lynx", LOG_PID, LOG_LOCAL5);

@@ -2242,9 +2242,7 @@ PUBLIC void LYHandleMETA ARGS4(
 	LYTrimTail(content);
 	LYLowerCase(content);
 
-	if ((cp = strstr(content, "text/html;")) != NULL &&
-	    (cp1 = strstr(content, "charset")) != NULL &&
-	    cp1 > cp) {
+	if ((cp1 = strstr(content, "charset")) != NULL) {
 	    BOOL chartrans_ok = NO;
 	    char *cp3 = NULL, *cp4;
 	    int chndl;
