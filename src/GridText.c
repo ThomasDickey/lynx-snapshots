@@ -7155,9 +7155,9 @@ PUBLIC void HText_SubmitForm ARGS4(
 		    /* those specials will be trivial */
 		} else if (UCNeedNotTranslate(form_ptr->value_cs, target_cs)) {
 		    /* already ok */
-		} else if (UCCanTranslateFromTo(form_ptr->value_cs, target_cs)) {
+		} else if (UCCanTranslateFromTo(form_ptr->value_cs, target_cs) != TQ_NO) {
 		    /* also ok */
-		} else if (UCCanTranslateFromTo(target_cs, form_ptr->value_cs)) {
+		} else if (UCCanTranslateFromTo(target_cs, form_ptr->value_cs) != TQ_NO) {
 		    target_cs = form_ptr->value_cs; 	/* try this */
 		    target_csname = NULL; /* will be set after loop */
 		} else {
@@ -7175,9 +7175,9 @@ PUBLIC void HText_SubmitForm ARGS4(
 		    /* those specials will be trivial */
 		} else if (UCNeedNotTranslate(form_ptr->name_cs, target_cs)) {
 		    /* already ok */
-		} else if (UCCanTranslateFromTo(form_ptr->name_cs, target_cs)) {
+		} else if (UCCanTranslateFromTo(form_ptr->name_cs, target_cs) != TQ_NO) {
 		    /* also ok */
-		} else if (UCCanTranslateFromTo(target_cs, form_ptr->name_cs)) {
+		} else if (UCCanTranslateFromTo(target_cs, form_ptr->name_cs) != TQ_NO) {
 		    target_cs = form_ptr->value_cs; 	/* try this */
 		    target_csname = NULL; /* will be set after loop */
 		} else {

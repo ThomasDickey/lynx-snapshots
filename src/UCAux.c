@@ -261,7 +261,7 @@ PUBLIC void UCSetTransParams ARGS5(
 	    **  treated as already Unicode here.
 	    */
 	    pT->trans_to_uni = (!intm_ucs &&
-				UCCanUniTranslateFrom(cs_in));
+				UCCanUniTranslateFrom(cs_in) != TQ_NO);
 	    /*
 	    **  We set this if we are translating to Unicode and
 	    **  what normally are low value control characters in
@@ -329,7 +329,7 @@ PUBLIC void UCSetTransParams ARGS5(
 	    */
 	    pT->trans_from_uni = (use_ucs && !pT->do_8bitraw &&
 				  !pT->use_raw_char_in &&
-				  UCCanTranslateUniTo(cs_out));
+				  UCCanTranslateUniTo(cs_out) != TQ_NO);
 	}
     }
 }

@@ -143,6 +143,10 @@ the script:
   	Use this option to compile-in support for debugging.
 	(The symbol DEBUG is always defined).
 
+  --enable-externs			(define USE_EXTERNS)
+  	Use this option to compile-in support for passing URLs to external
+	programs.
+
   --enable-find-leaks			(defines LY_FIND_LEAKS)
   	Use this option to compile-in logic for testing memory leaks.
 

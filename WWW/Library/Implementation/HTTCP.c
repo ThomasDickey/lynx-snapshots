@@ -206,15 +206,10 @@ PUBLIC int HTInetStatus ARGS1(
 #define ER_NO_TRANS_DONE
 #endif /* VMS */
 
-#if defined(NeXT) || defined(THINK_C)
+#ifdef HAVE_STRERROR
 	   strerror(SOCKET_ERRNO));
 #define ER_NO_TRANS_DONE
-#endif /* NeXT || THINK_C */
-
-#if defined(__NetBSD__) || defined(__FreeBSD__) || defined(BSDI)
-	   strerror(SOCKET_ERRNO));
-#define ER_NO_TRANS_DONE
-#endif /* __NetBSD__ || __FreeBSD__ || BSDI */
+#endif /* HAVE_STRERROR */
 
 #ifndef ER_NO_TRANS_DONE
 	   (SOCKET_ERRNO < sys_nerr ?

@@ -7,7 +7,7 @@ em:bold:brightblue
 strong:bold:brightred
 b:bold:red
 i:bold:blue
-alink:reverse:yellow
+alink:reverse:yellow:black
 a:bold:green
 img:dim:brown
 status:reverse:yellow:blue
@@ -17,7 +17,7 @@ hr:normal:yellow
 blockquote:normal:brightblue
 ul:normal:brown
 address:normal:magenta
-title:normal:magenta:black
+title:normal:magenta:default
 tt:dim:gray:blue
 h1:bold:yellow:blue
 label:normal:magenta

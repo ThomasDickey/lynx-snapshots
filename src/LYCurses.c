@@ -6,6 +6,7 @@
 #include "LYGlobalDefs.h"
 #include "LYSignal.h"
 #include "LYClean.h"
+#include "LYReadCFG.h"
 #include "LYStrings.h"
 #include "LYCharSets.h"
 #include "UCAux.h"
@@ -37,7 +38,7 @@ extern int _NOSHARE(COLS);
 #endif
 
 #if defined(COLOR_CURSES)
-int lynx_has_color = 0;
+int lynx_has_color = FALSE;
 #endif
 
 /*
@@ -236,7 +237,7 @@ PUBLIC void LYbox ARGS2(
      *  specifiy our own ASCII characters for the corners and call
      *  wborder() instead of box(). - kw
      */
-#ifdef FANCY_CURSES
+#ifdef HAVE_WBORDER
     if (!boxvert || !boxhori)
 	box(win, boxvert, boxhori);
     else if (boxvert == '*' || boxhori == '*')
@@ -560,12 +561,10 @@ PUBLIC int lynx_chg_color ARGS3(
 	int, bg
 	)
 {
-    if (color >= 0 && color < 8
-     && fg >= 0 && fg < 16
-     && bg >= 0 && bg < 16) {
-	lynx_color_cfg[color].fg = fg & 7;
-	lynx_color_cfg[color].bg = bg & 7;
-	lynx_color_cfg[color].attr = (fg & 8) ? A_BOLD : A_NORMAL;
+    if (color >= 0 && color < 8) {
+	lynx_color_cfg[color].fg = (fg > 7) ? (fg & 7) : fg;
+	lynx_color_cfg[color].bg = (bg > 7) ? (bg & 7) : bg;
+	lynx_color_cfg[color].attr = ((fg > 7) && (fg & 8)) ? A_BOLD : A_NORMAL;
 	lynx_map_color(color);
     } else {
 	return -1;
@@ -590,13 +589,11 @@ PUBLIC void lynx_standout ARGS1(int, flag)
 
 PRIVATE void lynx_init_colors NOARGS
 {
-    lynx_has_color = FALSE;
-
-    if (has_colors()) {
+    if (lynx_has_color) {
 	int n, m;
 
-	lynx_has_color = TRUE;
-	start_color();
+	lynx_color_cfg[0].fg = default_fg;
+	lynx_color_cfg[0].bg = default_bg;
 
 	for (n = 0; n < sizeof(lynx_color_cfg)/sizeof(lynx_color_cfg[0]); n++) {
 	    for (m = 0; m <= 16; m += 8) {
@@ -634,7 +631,6 @@ PUBLIC void start_curses NOARGS
 		  initscr();      /* start curses */
 		  first_time = FALSE;
 		  cbreak();
-		  noecho();
 		  keypad(stdscr, TRUE);
 		  fflush(stdin);
 		  fflush(stdout);
@@ -651,6 +647,7 @@ PUBLIC void start_curses NOARGS
 
 	 LYCursesON = TRUE;
 	 clear();
+         noecho();
 }
 #else
 PUBLIC void start_curses NOARGS
@@ -792,17 +789,27 @@ PUBLIC void start_curses NOARGS
 	}
 #endif
 
+#if defined(USE_COLOR_STYLE) || defined(USE_COLOR_TABLE)
+	if (has_colors()) {
+	    lynx_has_color = TRUE;
+	    start_color();
+#if HAVE_USE_DEFAULT_COLORS
+	    if (use_default_colors() == OK) {
+		default_fg = DEFAULT_COLOR;
+		default_bg = DEFAULT_COLOR;
+	    }
+#endif
+	}
+#endif /* USE_COLOR_STYLE || USE_COLOR_TABLE */
+
 #ifdef USE_COLOR_STYLE
-	lynx_has_color = has_colors();
-	if (lynx_has_color)
-		start_color();
 	parse_userstyles();
 #endif
 	first_time = FALSE;
 #if USE_COLOR_TABLE
 	lynx_init_colors();
 	lynx_called_initscr = TRUE;
-#endif /* USE_SLANG */
+#endif /* USE_COLOR_TABLE */
     }
 #endif /* VMS */
 

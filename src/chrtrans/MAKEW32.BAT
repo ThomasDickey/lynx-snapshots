@@ -26,4 +26,13 @@ makeuctb mnem_suni.tbl > mnem_suni.h
 makeuctb rfc_suni.tbl > rfc_suni.h
 makeuctb def7_uni.tbl > def7_uni.h
 makeuctb koi8r_uni.tbl > koi8r_uni.h
-
+makeuctb mac_uni.tbl > mac_uni.h
+makeuctb next_uni.tbl > next_uni.h
+makeuctb dmcs_uni.tbl > dmcs_uni.h
+makeuctb cp869_uni.tbl > cp869_uni.h
+makeuctb cp864_uni.tbl > cp864_uni.h
+makeuctb cp862_uni.tbl > cp862_uni.h
+makeuctb cp737_uni.tbl > cp737_uni.h
+makeuctb cp1256_uni.tbl > cp1256_uni.h
+makeuctb cp1255_uni.tbl > cp1255_uni.h
+makeuctb cp1253_uni.tbl > cp1253_uni.h

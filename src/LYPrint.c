@@ -223,6 +223,9 @@ PUBLIC int printfile ARGS1(
      */
     switch (type) {
 	case TO_FILE:
+#if defined(__DJGPP__) || defined(_WINDOWS)
+                _fmode = O_TEXT;
+#endif /* __DJGPP__  or _WINDOWS */
 		_statusline(FILENAME_PROMPT);
 	retry:	strcpy(filename, sug_filename);  /* add suggestion info */
 		/* make the sug_filename conform to system specs */
@@ -477,6 +480,9 @@ PUBLIC int printfile ARGS1(
 #else
 		HTAddSugFilename(buffer);
 #endif /* VMS */
+#if defined(__DJGPP__) || defined(_WINDOWS)
+              _fmode = O_BINARY;
+#endif /* __DJGPP__ or _WINDOWS */
 		break;
 
 	case MAIL: 

@@ -201,6 +201,9 @@ PUBLIC BOOLEAN system_editor = FALSE;
 #ifdef USE_EXTERNALS
 PUBLIC BOOLEAN no_externals = FALSE;
 #endif
+#ifdef RAWDOSKEYHACK
+PUBLIC BOOLEAN raw_dos_key_hack = TRUE;
+#endif /* RAWDOSKEYHACK */
 PUBLIC BOOLEAN no_inside_telnet = FALSE;
 PUBLIC BOOLEAN no_outside_telnet = FALSE;
 PUBLIC BOOLEAN no_telnet_port = FALSE;
@@ -530,8 +533,6 @@ PUBLIC int main ARGS2(
 	int err;
 	WORD wVerReq;
 
-	_fmode = O_BINARY;
-
 	wVerReq = MAKEWORD(1,1);
 
 	err = WSAStartup(wVerReq, &WSAData);
@@ -546,7 +547,16 @@ PUBLIC int main ARGS2(
 
 #ifdef DJGPP
     sock_init();
-    _fmode = O_BINARY;
+#endif
+
+#if defined(_WINDOWS) || defined(DJGPP)
+        /*
+        * To prevent corrupting binary data with _WINDOWS and DJGPP
+        * we open files and stdout in BINARY mode by default.
+        * Where necessary we should open and (close!) TEXT mode.
+        */
+        _fmode = O_BINARY;
+	setmode( fileno( stdout ), O_BINARY );
 #endif
 
 #ifdef DOSPATH
@@ -815,7 +825,8 @@ PUBLIC int main ARGS2(
 		StrAllocCopy(lynx_lss_file, argv[i+1]);
 		i++;
 	    }
-	    fprintf(stderr, "LYMain found -lss flag, lss file is %s\n",
+	    if (TRACE)
+		fprintf(stderr, "LYMain found -lss flag, lss file is %s\n",
 		    lynx_lss_file ? lynx_lss_file : "<NONE>");
 #endif
 	}
@@ -898,7 +909,8 @@ PUBLIC int main ARGS2(
 		    if (*cp)
 			StrAllocCopy(lynx_cfg_file, cp);
 	        }
-		fprintf(stderr, "LYMain found -lss flag, lss file is %s\n",
+		if (TRACE)
+		    fprintf(stderr, "LYMain found -lss flag, lss file is %s\n",
 			lynx_lss_file ? lynx_lss_file : "<NONE>");
 #endif
 	    } else if (strcmp(buf, "-get_data") == 0) {

@@ -796,7 +796,7 @@ draw_options:
 		if (use_assume_charset) {
 		    int i, curval;
 		    char ** assume_list;
-		    assume_list = calloc(LYNumCharsets + 1, sizeof(char *));
+		    assume_list = (char **)calloc(LYNumCharsets + 1, sizeof(char *));
 		    if (!assume_list) {
 			outofmem(__FILE__, "options");
 		    }

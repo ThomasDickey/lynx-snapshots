@@ -1083,7 +1083,7 @@ PRIVATE char ** LYUCFullyTranslateString_1 ARGS9(
 	do_ent = FALSE;
 
     /* Can't do, caller should figure out what to do... */
-    if (!UCCanTranslateFromTo(cs_from, cs_to)) {
+    if (UCCanTranslateFromTo(cs_from, cs_to) == TQ_NO) {
 	if (cs_to < 0)
 	    return NULL;
 	if (!do_ent && no_bytetrans)
@@ -3225,7 +3225,7 @@ PRIVATE BOOL LYUCTranslateString ARGS7(
 	return YES;
 
     /* Can't do, caller should figure out what to do... */
-    else if (!UCCanTranslateFromTo(cs_from, cs_to))
+    else if (UCCanTranslateFromTo(cs_from, cs_to) == TQ_NO)
 	return NO;
     /*
     **  Start a clean copy of the string, without
@@ -3679,7 +3679,7 @@ PUBLIC void LYHandleMETA ARGS4(
 	    *cp4 = '\0';
 	    cp4 = cp3;
 	    chndl = UCGetLYhndl_byMIME(cp3);
-	    if (UCCanTranslateFromTo(chndl, current_char_set)) {
+	    if (UCCanTranslateFromTo(chndl, current_char_set) != TQ_NO) {
 		chartrans_ok = YES;
 		StrAllocCopy(me->node_anchor->charset, cp4);
 		HTAnchor_setUCInfoStage(me->node_anchor, chndl,
@@ -3690,7 +3690,7 @@ PUBLIC void LYHandleMETA ARGS4(
 		 *  Got something but we don't recognize it.
 		 */
 		chndl = UCLYhndl_for_unrec;
-		if (UCCanTranslateFromTo(chndl, current_char_set)) {
+		if (UCCanTranslateFromTo(chndl, current_char_set) != TQ_NO) {
 		    chartrans_ok = YES;
 		    HTAnchor_setUCInfoStage(me->node_anchor, chndl,
 					    UCT_STAGE_PARSER,

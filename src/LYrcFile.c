@@ -34,6 +34,9 @@ PUBLIC void read_rc NOPARAMS
     sprintf(rcfile, "%s/.lynxrc", Home_Dir());
 #endif /* VMS */
 #endif /* DJGPP */
+#if defined(__DJGPP__) || defined(_WINDOWS)
+                _fmode = O_TEXT;
+#endif /* __DJGPP__  or _WINDOWS */
 
     /*
      *  Open the RC file for reading.
@@ -663,7 +666,8 @@ PUBLIC int save_rc NOPARAMS
      */
     fprintf(fp, "\
 # preferred_language specifies the language in MIME notation (e.g., en,\n\
-# fr) which Lynx will indicate you prefer in requests to http servers.\n\
+# fr, may be a comma-separated list in decreasing preference)\n\
+# which Lynx will indicate you prefer in requests to http servers.\n\
 # If a file in that language is available, the server will send it.\n\
 # Otherwise, the server will send the file in it's default language.\n");
     fprintf(fp, "preferred_language=%s\n\n", (language ? language : ""));
@@ -675,10 +679,15 @@ PUBLIC int save_rc NOPARAMS
 # preferred_charset specifies the character set in MIME notation (e.g.,\n\
 # ISO-8859-2, ISO-8859-5) which Lynx will indicate you prefer in requests\n\
 # to http servers using an Accept-Charset header.  The value should NOT\n\
-# include ISO-8859-1 or US-ASCII, since those values are always assumed by\n\
-# default.  If a file in that character set is available, the server will\n\
-# send it.  Otherwise, the server will send the file in ISO-8859-1 or\n\
-# US-ASCII.\n");
+# include ISO-8859-1 or US-ASCII, since those values are always assumed\n\
+# by default.  May be a comma-separated list.\n\
+# If a file in that character set is available, the server will send it.\n\
+# If no Accept-Charset header is present, the default is that any\n\
+# character set is acceptable.  If an Accept-Charset header is present,\n\
+# and if the server cannot send a response which is acceptable\n\
+# according to the Accept-Charset header, then the server SHOULD send\n\
+# an error response, though the sending of an unacceptable response\n\
+# is also allowed.\n");
     fprintf(fp, "preferred_charset=%s\n\n",
     		(pref_charset ? pref_charset : ""));
 
@@ -896,6 +905,9 @@ PUBLIC int save_rc NOPARAMS
      *  Close the RC file.
      */
     fclose(fp);
+#if defined(__DJGPP__) || defined(_WINDOWS)
+              _fmode = O_BINARY;
+#endif /* __DJGPP__ or _WINDOWS */
 
 #ifdef VMS
     /*

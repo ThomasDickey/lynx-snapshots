@@ -1,6 +1,7 @@
 ##makefile for lynx
 
 SHELL = /bin/sh
+.SUFFIXES:
 @SET_MAKE@
 prefix		= @prefix@
 exec_prefix	= @exec_prefix@
@@ -34,6 +35,9 @@ mandir= @mandir@/man1
 
 ## Where you want the lynx.cfg file installed
 libdir= @libdir@
+
+## Where you want the help-files installed
+helpdir= @libdir@/lynx_help
 
 installbin= @INSTALL_PROGRAM@ -s -m 755
 installdoc= @INSTALL_DATA@
@@ -127,6 +131,7 @@ SITE_DEFS = # Your defines here
 # -DSOCKS          For making a SOCKSified lynx.
 # -DUNDERLINE_LINKS  Define if you want links underlined instead of bold.
 # -DUSE_COLOR_STYLE (see README.configure)
+# -DUSE_EXTERNS    (see README.configure)
 # -DUSE_HASH       (see README.configure)
 # -DUSE_SLANG      (see README.configure)
 # -DUSE_ZLIB       To use some functions from zlib library if you have it.
@@ -161,9 +166,12 @@ SITE_DEFS = # Your defines here
 # TESTED: Linux FreeBSD SunOS Solaris IRIX CLIX HP-UX AIX SCO
 all lynx:
 	cd WWW/Library/unix && $(MAKE) CC="$(CC)" \
+		LY_CFLAGS="$(CFLAGS)"
+		CPPFLAGS="$(CPPFLAGS)" \
 		LYFLAGS="$(SITE_LYDEFS)"
 	cd src && $(MAKE) all CC="$(CC)" \
 		CFLAGS="$(CFLAGS)" \
+		CPPFLAGS="$(CPPFLAGS)" \
 		LIBS="$(LIBS) $(RESOLVLIB) $(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)" \
 		SITE_DEFS="$(SITE_DEFS)" \
 		WWWINC=$(WWWINC) \
@@ -199,10 +207,12 @@ distclean: clean
 	-cd src/chrtrans && $(MAKE) $@
 	-rm -f *~ *.bak *.sav
 	-rm -f WWW/Library/unix/makefile src/makefile src/chrtrans/makefile
+	@SRCDIR_CLEAN@-find . -type f -name '*.rej' -exec -rm -f {} \;
+	@SRCDIR_CLEAN@-find . -type f -name '*.orig' -exec -rm -f {} \;
 	@SRCDIR_CLEAN@-rmdir WWW/Library/unix && rmdir WWW/Library && rmdir WWW
 	@SRCDIR_CLEAN@-rmdir src/chrtrans && rmdir src
 	-rm -f makefile lynx_cfg.h config.status config.log config.cache
-	-rm -f lynx
+	-rm -f lynx install-*
 
 maintainer-clean: distclean
 	-rm -rf WWW/Library/*/obsolete
@@ -231,17 +241,34 @@ save:
 compress: tar
 	cd ..; rm -f $(lynxname).tar.Z; compress -f -v $(lynxname).tar
 
-install: lynx $(bindir) $(mandir) $(libdir)
+install: lynx install-bin install-man install-help install-cfg
+
+install-bin: $(bindir)
 	-mv -f $(bindir)/lynx $(bindir)/lynx.old
-	-mv -f $(libdir)/lynx.cfg $(libdir)/lynx.oldcfg
 	$(installbin) lynx $(bindir)/lynx
+
+install-man : $(mandir) 
 	$(installdoc) lynx.man $(mandir)/lynx.1
-	$(installdoc) lynx.cfg $(libdir)/lynx.cfg
+
+install-help : $(helpdir)
+	(cd $(helpdir) && rm -rf *)
+	(cd $(srcdir)/lynx_help && tar cf - . ) | ( cd $(helpdir) && tar xf - )
+	(cd $(srcdir) && tar cf - CHANGES* PROBLEMS README samples test ) | \
+			       ( cd $(helpdir) && tar xf - )
+
+install-cfg :
+	-mv -f $(libdir)/lynx.cfg $(libdir)/lynx.oldcfg
+	sed	-e '/^HELPFILE:http/s@^@#@' \
+		-e '/^#HELPFILE:file/s@#@@' \
+		-e '/^HELPFILE:file/s@/PATH_TO/lynx_help@$(helpdir)@' \
+		lynx.cfg >$(libdir)/lynx.cfg
+	chmod 0644 $(libdir)/lynx.cfg
 
 uninstall:
 	-rm -f $(bindir)/lynx
 	-rm -f $(mandir)/lynx.1
 	-rm -f $(libdir)/lynx.cfg
+	-rm -rf $(libdir)/lynx_help
 
-$(bindir) $(mandir) $(libdir) :
+$(bindir) $(mandir) $(libdir) $(helpdir) :
 	$(srcdir)/mkdirs.sh $@

@@ -7,6 +7,46 @@ platforms see also README.win-386, for some changes for auto-configure and
 simple curses color see also README.configure).  Note that the 2.7 -> 2.7.1
 changes are included here. - KW]
 
+1997-12-18 
+* forgotten last } UN-inserted (John Line) - WB
+* few commented messages corrected according to RFC2068 (HTTP1.1)
+  (Leonid Pauzner) - WB
+1997-12-17 (all patches by Leonid Pauzner)
+* open text mode while writing lynx.rc and bookmarks files
+  LYrcFile.c and LYBookmark.c (forgotten last } inserted). - WB
+* add a comment about binary mode in LYMain.c and pile them 
+  in one ifdef - WB
+* few misprinted characters (in comments) corrected in
+  \chrtrans\cp850_uni.tbl - WB
+1997-12-14
+* added a lynx.cfg switch to turn on/off extended dos translations for keys. 
+  -WB
+* added minor DOS tweaks by Doug Kaufman and myself. - WB
+* fixed windos binary mode piping. - WB
+1997-12-13
+* check for and use ncurses default-color extension, use to make the
+  color-style configuration usable on xterm with white background. - TD
+* add cases in LYgetch() for remaining VT220-compatible codes, reported
+  by Michael Ritzert and FM.  - TD
+* add configure test to see if slang can be linked without curses or
+  termcap libraries, request by John Davis. - TD
+* set umask in mkdirs.sh script to work around users who have set root's
+  umask to 077. - TD
+* split up install rule to install-bin, install-cfg, install-man and
+  install-help. - TD
+* suppress suffixes in top-level makefile so 'make' won't try to create
+  a file named "install" from install.sh - TD 
+* make $(CPPFLAGS) inherit consistently from top-level makefile. - TD
+* add configure option --enable-externs, to turn on USE_EXTERNS. - TD
+* use explicit comparison for enum values, fix compile problem with VAX C
+  for UCAux functions (reported by Brian Tillman). - TD
+1997-12-03
+* Remove CHANGES.configure, since it is redundant. - TD
+* Make -g3 option check for OSF/1 3.2 consistent with -Olimit check. - TD
+* Use 'result' rather than 'time' in mktime.c to avoid shadowing. - TD
+* Use wborder only if configure finds it, not ifdef FANCY_CURSES. - PHDM
+* List of systems having strerror replaced by configure test. - PHDM
+* Beautifying of mktime.c (`now' was misleading). - PHDM
 1997-11-23
 * integrate PHDM's patch. - TD
 * Check for existence of sys/wait.h. - PHDM
