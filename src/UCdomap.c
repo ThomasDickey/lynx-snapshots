@@ -894,7 +894,7 @@ PRIVATE int conv_uni_to_pc ARGS2(
 	 *  Not a printable character.
 	 */
 	return -1;
-    } else if (ucs == 0xfeff || (ucs >= 0x200a && ucs <= 0x200f)) {
+    } else if (ucs == 0xfeff || (ucs >= 0x200b && ucs <= 0x200f)) {
 	/*
 	 *  Zero-width space.
 	 */
@@ -959,7 +959,7 @@ PRIVATE int conv_uni_to_str ARGS4(
 	 *  Not a printable character.
 	 */
 	return -1;
-    } else if (ucs == 0xfeff || (ucs >= 0x200a && ucs <= 0x200f)) {
+    } else if (ucs == 0xfeff || (ucs >= 0x200b && ucs <= 0x200f)) {
 	/*
 	 *  Zero-width space.
 	 */

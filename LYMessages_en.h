@@ -214,13 +214,11 @@
 #define BOOKMARK_OPEN_FAILED "ERROR - unable to open bookmark file."
 #define BOOKMARK_OPEN_FAILED_FOR_DEL \
  "Unable to open bookmark file for deletion of link."
-#ifdef VMS
 #define BOOKSCRA_OPEN_FAILED_FOR_DEL \
  "Unable to open scratch file for deletion of link."
+#ifdef VMS
 #define ERROR_RENAMING_SCRA "Error renaming scratch file."
 #else
-#define BOOKTEMP_OPEN_FAILED_FOR_DEL \
- "Unable to open temporary file for deletion of link."
 #define ERROR_RENAMING_TEMP "Error renaming temporary file."
 #define BOOKTEMP_COPY_FAIL \
  "Unable to copy temporary file for deletion of link."

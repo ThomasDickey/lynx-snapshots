@@ -36,7 +36,6 @@ PUBLIC int showinfo ARGS4(
 	char *, 	owner_address)
 {
     static char tempfile[256];
-    static BOOLEAN first = TRUE;
     static char info_url[256];
     int url_type;
     FILE *fp0;
@@ -49,27 +48,14 @@ PUBLIC int showinfo ARGS4(
     struct passwd *pw;
     struct group *grp;
 #endif /* DIRED_SUPPORT */
-    if (first) {
-	tempname(tempfile, NEW_FILE);
-	/*
-	 *  Make the temporary file a URL now.
-	 */
-#if defined (VMS) || defined (DOSPATH)	|| defined (__EMX__)
-	sprintf(info_url, "file://localhost/%s", tempfile);
-#else
-	sprintf(info_url, "file://localhost%s", tempfile);
-#endif /* VMS */
-	first = FALSE;
-#ifdef VMS
-    } else {
-	remove(tempfile);   /* Remove duplicates on VMS. */
-#endif /* VMS */
-    }
 
-    if ((fp0 = LYNewTxtFile(tempfile)) == NULL) {
+    LYRemoveTemp(tempfile);
+    if ((fp0 = LYOpenTemp (tempfile, HTML_SUFFIX, "w")) == 0) {
 	HTAlert(CANNOT_OPEN_TEMP);
 	return(0);
     }
+
+    LYLocalFileToURL(info_url, tempfile);
 
     /*
      *	Point the address pointer at this Url
@@ -357,7 +343,7 @@ PUBLIC int showinfo ARGS4(
 
     refresh();
 
-    fclose(fp0);
+    LYCloseTemp(tempfile);
     FREE(Address);
     FREE(Title);
 

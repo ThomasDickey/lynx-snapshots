@@ -6715,7 +6715,7 @@ fi
 
 echo "$ac_t""$cf_cv_alt_char_set" 1>&6
 test $cf_cv_alt_char_set != no && cat >> confdefs.h <<EOF
-#define ALT_CHAR_SET $mapname
+#define ALT_CHAR_SET $cf_cv_alt_char_set
 EOF
 
 

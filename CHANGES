@@ -1,6 +1,18 @@
 Changes since Lynx 2.8 release
 ================================================================================
 
+1998-05-23 (2.8.1dev.13)
+* use new function LYLocalFileToUrl to cleanup some pathname references - TD
+* eliminate 'tempname()' function, using LYNewTxtFile, etc., with new functions
+  LYOpenTemp, LYCloseTemp, etc., so that temporary files are opened with
+  appropriate permissions - TD
+* correct use of cache variable in CF_ALT_CHAR_SET (reported by BL) - TD
+* spell out the logic in HTPlain.c against 2.7.2:  there was a certain problem
+  with chartrans in text/plain mode (LYRawMode was wrongly interferring,
+  problem reported by Jacob Poon & FM).  - LP
+* modify logic for zero-width spaces in conv_uni_to_pc to exclude 0x200a - LP
+* supply missing "break", which was forcing raw utf-8 output in URLs (NOT hex
+  escaped) - LP
 1998-05-14 (2.8.1dev.12)
 * remove unneeded definition used in testing dev.11 from config.hin) - TD
 1998-05-14 (2.8.1dev.11)

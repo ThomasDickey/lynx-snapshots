@@ -53,7 +53,6 @@ PUBLIC int showlist ARGS2(
     int cnt;
     int refs, hidden_links;
     static char tempfile[256];
-    static BOOLEAN first = TRUE;
     FILE *fp0;
     char *Address = NULL, *Title = NULL, *cp = NULL;
     BOOLEAN intern_w_post = FALSE;
@@ -73,28 +72,14 @@ PUBLIC int showlist ARGS2(
 	return(-1);
     }
 
-    if (first) {
-	tempname(tempfile, NEW_FILE);
-	/*
-	 *  Make the file a URL now.
-	 */
-#if defined (VMS) || defined (DOSPATH)	|| defined (__EMX__)
-	sprintf(list_filename, "file://localhost/%s", tempfile);
-#else
-	sprintf(list_filename, "file://localhost%s", tempfile);
-#endif /* VMS */
-	first = FALSE;
-#ifdef VMS
-    } else {
-	remove(tempfile);  /* Remove duplicates on VMS. */
-#endif /* VMS */
-    }
-
-    if ((fp0 = LYNewTxtFile(tempfile)) == NULL) {
+    LYRemoveTemp(tempfile);
+    if ((fp0 = LYOpenTemp(tempfile, HTML_SUFFIX, "w")) == NULL) {
 	_statusline(CANNOT_OPEN_TEMP);
 	sleep(MessageSecs);
 	return(-1);
     }
+
+    LYLocalFileToURL(list_filename, tempfile);
 
     StrAllocCopy(newdoc->address, list_filename);
     LYforce_HTML_mode = TRUE;	/* force this file to be HTML */
@@ -257,7 +242,7 @@ PUBLIC int showlist ARGS2(
     }
     newdoc->isHEAD = FALSE;
     newdoc->safe = FALSE;
-    fclose(fp0);
+    LYCloseTempFP(fp0);
     return(0);
 }
 

@@ -714,10 +714,10 @@ PUBLIC int main ARGS2(
     else if ((cp = getenv("TMP")) != NULL)
 	StrAllocCopy(lynx_temp_space, cp);
     else
-	{
-		printf("You MUST define a valid TMP or TEMP area!\n");
-		exit(-1);
-	}
+    {
+	printf("You MUST define a valid TMP or TEMP area!\n");
+	exit(-1);
+    }
 #else
 	StrAllocCopy(lynx_temp_space, TEMP_SPACE);
 #endif

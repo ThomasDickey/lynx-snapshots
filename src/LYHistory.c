@@ -383,33 +383,18 @@ PUBLIC int showhistory ARGS1(
 	char **,	newfile)
 {
     static char tempfile[256];
-    static BOOLEAN first = TRUE;
     static char hist_filename[256];
     char *Title = NULL;
     int x = 0;
     FILE *fp0;
 
-    if (first) {
-	tempname(tempfile, NEW_FILE);
-	/*
-	 *  Make the file a URL now.
-	 */
-#if defined (VMS) || defined (DOSPATH) || defined (__EMX__)
-	sprintf(hist_filename,"file://localhost/%s", tempfile);
-#else
-	sprintf(hist_filename,"file://localhost%s", tempfile);
-#endif /* VMS */
-	first = FALSE;
-#ifdef VMS
-    } else {
-	remove(tempfile);  /* Remove duplicates on VMS. */
-#endif /* VMS */
-    }
-
-    if ((fp0 = LYNewTxtFile(tempfile)) == NULL) {
+    LYRemoveTemp(tempfile);
+    if ((fp0 = LYOpenTemp(tempfile, HTML_SUFFIX, "w")) == NULL) {
 	HTAlert(CANNOT_OPEN_TEMP);
 	return(-1);
     }
+
+    LYLocalFileToURL(hist_filename, tempfile);
 
     StrAllocCopy(*newfile, hist_filename);
     LYforce_HTML_mode = TRUE;	/* force this file to be HTML */
@@ -454,7 +439,7 @@ PUBLIC int showhistory ARGS1(
 
     fprintf(fp0,"</pre>\n</body>\n");
 
-    fclose(fp0);
+    LYCloseTempFP(fp0);
     FREE(Title);
     return(0);
 }
@@ -543,7 +528,6 @@ PUBLIC int LYShowVisitedLinks ARGS1(
 	char **,	newfile)
 {
     static char tempfile[256];
-    static BOOLEAN first = TRUE;
     static char vl_filename[256];
     char *Title = NULL;
     char *Address = NULL;
@@ -555,27 +539,13 @@ PUBLIC int LYShowVisitedLinks ARGS1(
     if (!cur)
 	return(-1);
 
-    if (first) {
-	tempname(tempfile, NEW_FILE);
-	/*
-	 *  Make the file a URL now.
-	 */
-#if defined (VMS) || defined (DOSPATH) || defined (__EMX__)
-	sprintf(vl_filename,"file://localhost/%s", tempfile);
-#else
-	sprintf(vl_filename,"file://localhost%s", tempfile);
-#endif /* VMS */
-	first = FALSE;
-#ifdef VMS
-    } else {
-	remove(tempfile);  /* Remove duplicates on VMS. */
-#endif /* VMS */
-    }
-
-    if ((fp0 = LYNewTxtFile(tempfile)) == NULL) {
+    LYRemoveTemp(tempfile);
+    if ((fp0 = LYOpenTemp(tempfile, HTML_SUFFIX, "w")) == NULL) {
 	HTAlert(CANNOT_OPEN_TEMP);
 	return(-1);
     }
+
+    LYLocalFileToURL(vl_filename, tempfile);
 
     StrAllocCopy(*newfile, vl_filename);
     LYforce_HTML_mode = TRUE;	/* force this file to be HTML */
@@ -625,7 +595,7 @@ PUBLIC int LYShowVisitedLinks ARGS1(
 
     fprintf(fp0,"</pre>\n</body>\n");
 
-    fclose(fp0);
+    LYCloseTempFP(fp0);
     FREE(Title);
     FREE(Address);
     return(0);

@@ -329,7 +329,8 @@ PRIVATE void handle_attribute_value ARGS2(
 **
 **  Additional issue, like handling bidirectional text if necessary
 **  may be called from here:  zwnj (8204), zwj (8205), lrm (8206), rlm (8207)
-**  - currently they are passed to def7_uni.tbl as regular characters.
+**  - currently they are ignored in SGML.c and LYCharUtils.c
+**  but also in UCdomap.c because they are non printable...
 **
 */
 PRIVATE BOOL put_special_unicodes ARGS2(

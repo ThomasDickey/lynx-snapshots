@@ -12,7 +12,4 @@ extern void cleanup_files NOPARAMS;
 extern void set_alarm PARAMS((int sig));
 extern void reset_alarm NOPARAMS;
 
-#define NEW_FILE     0
-#define REMOVE_FILES 1
-
 #endif /* LYCLEAN_H */

@@ -5104,9 +5104,6 @@ check_add_bookmark_to_self:
 	    else
 		WWW_TraceFlag = TRUE;
 
-	    _statusline(WWW_TraceFlag ? TRACE_ON : TRACE_OFF);
-	    sleep(MessageSecs);
-
 	    if (TRACE && LYUseTraceLog && LYTraceLogFP == NULL) {
 		/*
 		 *  We haven't yet started a TRACE log for this
@@ -5134,6 +5131,8 @@ check_add_bookmark_to_self:
 #endif /* VMS */
 		fprintf(tfp, "\t\t%s\n\n", LYNX_TRACELOG_TITLE);
 	    }
+	    _statusline(WWW_TraceFlag ? TRACE_ON : TRACE_OFF);
+	    sleep(MessageSecs);
 	    break;
 
 	case LYK_TRACE_LOG:	/*  View TRACE log. */
