@@ -3560,11 +3560,13 @@ top1:
 	    break;
 	}
 #ifdef USE_PRETTYSRC
+#if 0 /*seems this is not needed. It was causing some LSS style stack underflow -VH*/
 	/* we are here because this char seemed the beginning of attrname */
 	if (psrc_view && context->current_attribute_number == INVALID) {
 	    PSRCSTOP(badattr);
 	    PUTC(' ');
 	}
+#endif
 #endif
 	HTChunkPutc(string, c);
 	context->state = S_attr; /* Get next attribute */

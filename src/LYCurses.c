@@ -37,6 +37,10 @@ extern int _NOSHARE(COLS);
 int lynx_has_color = FALSE;
 #endif
 
+#ifdef HAVE_XCURSES
+char *XCursesProgramName = "Lynx";
+#endif
+
 #if defined(USE_COLOR_STYLE) && !USE_COLOR_TABLE
 #define COLOR_BKGD ((s_normal != NOSTYLE) ? hashStyles[s_normal].color : A_NORMAL)
 #else
@@ -522,15 +526,6 @@ PRIVATE void LYsetWAttr ARGS1(WINDOW *, win)
 	int code = 0;
 	int attr = A_NORMAL;
 	int offs = 1;
-	static int NoColorVideo = -1;
-
-#if defined(UNIX) && !defined(PDCURSES)
-	if (NoColorVideo < 0) {
-		NoColorVideo = tigetnum("ncv");
-	}
-	if (NoColorVideo < 0)
-		NoColorVideo = 0;
-#endif /* UNIX */
 
 	if (Current_Attr & A_BOLD)
 		code |= 1;
@@ -920,6 +915,8 @@ PUBLIC void start_curses NOARGS
 
 PUBLIC void lynx_enable_mouse ARGS1(int,state)
 {
+#ifdef USE_MOUSE
+/***********************************************************************/
 
 #if defined(WIN_EX)
 /* modify lynx_enable_mouse() for pdcurses configuration so that mouse support
@@ -939,19 +936,20 @@ PUBLIC void lynx_enable_mouse ARGS1(int,state)
     if (LYUseMouse == 0)
 	return;
 
-#ifdef USE_SLANG_MOUSE
+
+#if defined(USE_SLANG)
     SLtt_set_mouse_mode (state, 0);
     SLtt_flush_output ();
 #else
 
-#if defined(WIN_EX) && defined(PDCURSES_MOUSE_VERSION)
+#if defined(WIN_EX) && defined(PDCURSES)
     if (state)
     {
 	SetConsoleMode(hConIn, ENABLE_MOUSE_INPUT | ENABLE_WINDOW_INPUT);
 	FlushConsoleInputBuffer(hConIn);
     }
 #else
-#ifdef NCURSES_MOUSE_VERSION
+#if defined(NCURSES)
     if (state) {
 	/* Compensate for small value of maxclick in ncurses.  */
 	static int was = 0;
@@ -983,17 +981,20 @@ PUBLIC void lynx_enable_mouse ARGS1(int,state)
 		  NULL);
     } else
 	mousemask(0, NULL);
-#endif /* NCURSES_MOUSE_VERSION */
-#endif /* WIN_EX and PDCURSES_MOUSE_VERSION */
+#endif /* NCURSES */
+#endif /* WIN_EX and PDCURSES */
 
-#if defined(PDCURSES_MOUSE_VERSION)
+#if defined(PDCURSES)
     if (state)
 	mouse_set(
 	    	BUTTON1_CLICKED | BUTTON1_PRESSED | BUTTON1_RELEASED |
 		BUTTON2_CLICKED | BUTTON2_PRESSED | BUTTON2_RELEASED |
 		BUTTON3_CLICKED | BUTTON3_PRESSED | BUTTON3_RELEASED);
 #endif
-#endif				/* NOT USE_SLANG_MOUSE */
+#endif      /* NOT USE_SLANG */
+
+/***********************************************************************/
+#endif /* USE_MOUSE */
 }
 
 PUBLIC void stop_curses NOARGS

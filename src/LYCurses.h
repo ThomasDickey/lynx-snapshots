@@ -6,6 +6,27 @@
 #endif
 
 /*
+ * Because we have to configure PDCURSES last, we may get bogus definitions
+ * from the system curses library - cancel these now.
+ */
+#ifdef HAVE_XCURSES
+
+#undef ASSUME_DEFAULT_COLORS
+#undef COLOR_CURSES
+#undef FANCY_CURSES
+#undef HAVE_CBREAK
+#undef HAVE_RESIZETERM
+#undef HAVE_USE_DEFAULT_COLORS
+#undef NCURSES
+#undef USE_DEFAULT_COLORS
+
+#define HAVE_CBREAK 1
+#define COLOR_CURSES 1
+#define FANCY_CURSES 1
+
+#endif
+
+/*
  * The simple color scheme maps the 8 combinations of bold/underline/reverse
  * to the standard 8 ANSI colors (with some variations based on context).
  */
@@ -90,7 +111,11 @@
 #    ifdef PDCURSES
 #     include <pdcurses.h>	/* for PDCurses */
 #    else
-#     include <curses.h>	/* default */
+#     ifdef HAVE_XCURSES
+#      include <xcurses.h>	/* PDCurses' UNIX port */
+#     else
+#      include <curses.h>	/* default */
+#     endif
 #    endif
 #   endif
 #  endif
@@ -124,8 +149,15 @@ extern void LYsubwindow PARAMS((WINDOW * param));
 /*
  * PDCurses' mouse code does nothing in the DJGPP configuration.
  */
-#if defined(PDCURSES) && !defined(__DJGPP__)
-#define PDCURSES_MOUSE_VERSION 1
+#if defined(PDCURSES) && !defined(__DJGPP__) && !defined(HAVE_XCURSES)
+#define USE_MOUSE 1
+#endif
+
+/*
+ * Pick up the native ncurses name:
+ */
+#if defined(NCURSES_MOUSE_VERSION)
+#define USE_MOUSE 1
 #endif
 
 #ifdef VMS
@@ -232,7 +264,7 @@ extern unsigned int Lynx_Color_Flags;
 #define SHOW_WHEREIS_TARGETS 1
 
 #if !defined(VMS) && !defined(DJGPP)
-#define USE_SLANG_MOUSE		1
+#define USE_MOUSE              1
 #endif
 
 #if !defined(__DJGPP__) && !defined(__CYGWIN__)

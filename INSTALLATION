@@ -401,7 +401,7 @@ II. Compile instructions -- UNIX
 	Disabled by default, this allows interruption of NSL requests,
 	so that `z' will stop the `look-up' phase of a connection.
 
-  --enable-prettysrc			(define USE_PSRC)
+  --enable-prettysrc			(define USE_PRETTYSRC)
 	Use this option to compile-in support for colorizing the source view of
 	HTML pages.  If compiled-in, new source view mode is available with
 	-prettysrc command line option.

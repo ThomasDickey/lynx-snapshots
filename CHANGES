@@ -1,6 +1,26 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2000-04-06 (2.8.3pre.3)
+* remove definitions for NCURSES and NCURSES_VERSION from top-level makefiles
+  that really use PDCurses -TD
+* add USE_MOUSE symbol: cleanup/simplify ifdef'ing of mouse code,
+  replace USE_SLANG_MOUSE / NCURSES_MOUSE_VERSION / PDCURSES_MOUSE_VERSION
+  with USE_MOUSE (and modifier when necessary) -LP
+* windows makefiles: add new symbols SOURCE_CACHE and USE_PRETTYSRC,
+  remove obsolete EXP_CHARTRANS and unused EXP_CHARTRANS_AUTOSWITCH -LP
+* fixed a bug with psrcview on lss-enabled lynx. Code such as <a blah href=.> 
+  (i.e. unknown attribute and then some other attribute) was causing calls to 
+  PSRCSTOP(barattr) twice (and lynx was switched to "non-preformatted" mode 
+  losing all white spaces of the document after that piece of code) -VH 
+* add configure option --with-screen=pdcurses, mainly for checking ifdef
+  conflicts between ncurses and pdcurses.  This builds/runs with the PDCurses
+  X11 library, but is not recommended for general use -TD
+* remove test-artifact in configure check for zlib.h -TD
+* add CF_SLANG_UNIX configure macro, to allow slang configuration to build on
+  AIX, etc., (reported by Jens Schleusener <Jens.Schleusener@dlr.de>) -TD
+* update CF_CURSES_LIBS macro from CDK fixes, adds a special check for HPUX
+  11.x -lcur_colr library -TD
 2000-04-02 (2.8.3pre.2)
 * fixed problem with charset handling for SOURCE_CACHE:MEMORY - if the charset
   was specified by Content-Type http header it won't be lost (as it was) when

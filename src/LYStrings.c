@@ -15,7 +15,7 @@
 #include <HTString.h>
 #include <LYCharUtils.h>
 #include <HTParse.h>
-#if defined(NCURSES_MOUSE_VERSION) || defined(PDCURSES_MOUSE_VERSION) || defined(USE_SLANG_MOUSE)
+#ifdef USE_MOUSE
 #include <LYMainLoop.h>
 #endif
 
@@ -74,14 +74,14 @@ static int mouse_link = -1;
 
 static int have_levent;
 
-#if defined(NCURSES_MOUSE_VERSION)
+#if defined(USE_MOUSE) && defined(NCURSES)
 static MEVENT levent;
 #endif
 
 /* Return the value of mouse_link */
 PUBLIC int peek_mouse_levent NOARGS
 {
-#if defined(NCURSES_MOUSE_VERSION)
+#if defined(USE_MOUSE) && defined(NCURSES)
     if (have_levent > 0) {
 	ungetmouse(&levent);
 	have_levent--;
@@ -108,14 +108,17 @@ PUBLIC int peek_mouse_link NOARGS
     return mouse_link;
 }
 
+
 PUBLIC int fancy_mouse ARGS3(
     WINDOW *,	win,
     int,	row,
     int *,	position)
 {
     int cmd = LYK_DO_NOTHING;
+#ifdef USE_MOUSE
+/*********************************************************************/
 
-#if defined(WIN_EX) && defined(PDCURSES_MOUSE_VERSION)
+#if defined(WIN_EX) && defined(PDCURSES)
 
     request_mouse_pos();
 
@@ -171,7 +174,7 @@ PUBLIC int fancy_mouse ARGS3(
 	cmd = LYK_QUIT;
     }
 #else
-#if defined(NCURSES_MOUSE_VERSION)
+#if defined(NCURSES)
     MEVENT	event;
 
     getmouse(&event);
@@ -252,10 +255,14 @@ PUBLIC int fancy_mouse ARGS3(
     } else if (event.bstate & (BUTTON3_CLICKED | BUTTON3_DOUBLE_CLICKED | BUTTON3_TRIPLE_CLICKED)) {
 	cmd = LYK_QUIT;
     }
-#endif	/* defined(NCURSES_MOUSE_VERSION) */
+#endif /* NCURSES */
 #endif	/* _WINDOWS */
+
+/************************************************************************/
+#endif  /* USE_MOUSE */
     return cmd;
 }
+
 
 PRIVATE int XYdist ARGS5(
     int,	x1,
@@ -642,7 +649,7 @@ PUBLIC int LYmbcsstrlen ARGS3(
 #endif /* HAVE_KEYPAD */
 #endif /* !defined(GetChar) */
 
-#if defined(NCURSES)
+#if defined(NCURSES) || defined(PDCURSES)
 /*
  * Workaround a bug in ncurses order-of-refresh by setting a pointer to
  * the topmost window that should be displayed.
@@ -661,7 +668,8 @@ PUBLIC void LYsubwindow ARGS1(WINDOW *, param)
 }
 #endif
 
-#ifdef USE_SLANG_MOUSE
+
+#if defined(USE_SLANG) && defined(USE_MOUSE)
 PRIVATE int sl_parse_mouse_event ARGS3(int *, x, int *, y, int *, button)
 {
     /* "ESC [ M" has already been processed.  There more characters are
@@ -719,7 +727,8 @@ PRIVATE int sl_read_mouse_event ARGS1(
    else
        return -1;
 }
-#endif
+#endif  /* USE_SLANG and USE_MOUSE */
+
 
 PRIVATE BOOLEAN csi_is_csi = TRUE;
 PUBLIC void ena_csi ARGS1(
@@ -1263,7 +1272,8 @@ PUBLIC int lynx_initialize_keymaps NOARGS
 
 #endif				       /* USE_KEYMAPS */
 
-#if defined(NCURSES_MOUSE_VERSION) || defined(PDCURSES_MOUSE_VERSION)
+
+#if defined(USE_MOUSE) && (defined(NCURSES) || defined(PDCURSES))
 PRIVATE int LYmouse_menu ARGS4(int, x, int, y, int, atlink, int, code)
 {
     static char *choices[] = {
@@ -1395,9 +1405,11 @@ PRIVATE int LYmouse_menu ARGS4(int, x, int, y, int, atlink, int, code)
     }
     return retlac;
 }
-#endif /* NCURSES_MOUSE_VERSION */
+#endif /* USE_MOUSE && (NCURSES || PDCURSES) */
+
 
 #if defined(USE_KEYMAPS) && defined(USE_SLANG)
+/************************************************************************/
 
 PRIVATE int current_sl_modifier = 0;
 
@@ -1423,7 +1435,7 @@ PUBLIC int LYgetch_for ARGS1(
 
    keysym = key->f.keysym;
 
-#if defined (USE_SLANG_MOUSE)
+#if defined (USE_MOUSE)
    if (keysym == MOUSE_KEYSYM)
      return sl_read_mouse_event (code);
 #endif
@@ -1446,7 +1458,9 @@ PUBLIC int LYgetch_for ARGS1(
    return (keysym|current_sl_modifier);
 }
 
+/************************************************************************/
 #else	/* NOT  defined(USE_KEYMAPS) && defined(USE_SLANG) */
+
 
 /*
  *  LYgetch() translates some escape sequences and may fake noecho.
@@ -1464,7 +1478,7 @@ PUBLIC int LYgetch_for ARGS1(
 
 #if defined(IGNORE_CTRL_C) || defined(USE_GETCHAR) || !defined(NCURSES) || \
     (HAVE_KEYPAD && defined(KEY_RESIZE)) || \
-    (defined(NCURSES_MOUSE_VERSION) && !defined(DOSPATH))
+    (defined(NCURSES) && defined(USE_MOUSE) && !defined(DOSPATH))
 re_read:
 #endif /* IGNORE_CTRL_C || USE_GETCHAR etc. */
 #if !defined(UCX) || !defined(VAXC) /* errno not modifiable ? */
@@ -1616,7 +1630,7 @@ re_read:
 	case 'w': c = HOME;    break;  /* keypad on pc ncsa telnet */
 	case 'q': c = END_KEY; break;  /* keypad on pc ncsa telnet */
 	case 'M':
-#ifdef USE_SLANG_MOUSE
+#if defined(USE_SLANG) && defined(USE_MOUSE)
 	   if (found_CSI(c,b))
 	     {
 		c = sl_read_mouse_event (code);
@@ -1813,6 +1827,7 @@ re_read:
 	case KEY_LL:		   /* home down or bottom (lower left) */
 	   c = END_KEY;
 	   break;
+#if defined(KEY_A1) && defined(KEY_C3)
 					/* The keypad is arranged like this:*/
 					/*    a1    up	  a3   */
 					/*   left   b2	right  */
@@ -1832,6 +1847,7 @@ re_read:
 	case KEY_C3:		   /* lower right of keypad */
 	   c = PGDOWN;
 	   break;
+#endif /* defined(KEY_A1) && defined(KEY_C3) */
 #ifdef KEY_ENTER
 	case KEY_ENTER:		   /* enter/return	*/
 	   c = '\n';
@@ -1954,13 +1970,17 @@ re_read:
 	   c = 0x218;
 	   break;
 #endif /* PDCurses */
-#if defined(NCURSES_MOUSE_VERSION) || defined(PDCURSES_MOUSE_VERSION)
+
+#if defined(USE_MOUSE)
+/********************************************************************/
+
+#if defined(NCURSES) || defined(PDCURSES)
 	case KEY_MOUSE:
 	    CTRACE((tfp, "KEY_MOUSE\n"));
 	    if (code == FOR_CHOICE) {
 		c = MOUSE_KEY;		/* Will be processed by the caller */
 	    }
-#if defined(NCURSES_MOUSE_VERSION)
+#if defined(NCURSES)
 	    else if (code == FOR_SINGLEKEY) {
 		MEVENT event;
 		getmouse(&event);	/* Completely ignore event - kw */
@@ -1968,7 +1988,7 @@ re_read:
 	    }
 #endif
 	    else {
-#if defined(NCURSES_MOUSE_VERSION)
+#if defined(NCURSES)
 		MEVENT event;
 		int err;
 		int lac = LYK_UNKNOWN;
@@ -2150,7 +2170,11 @@ re_read:
 		    return(c);
 	    }
 	    break;
-#endif /* NCURSES_MOUSE_VERSION */
+#endif /* NCURSES || PDCURSES */
+
+/********************************************************************/
+#endif  /* USE_MOUSE */
+
 	}
 #endif /* HAVE_KEYPAD */
 #ifdef DJGPP_KEYHANDLER
@@ -2269,7 +2293,9 @@ re_read:
     }
 }
 
+/************************************************************************/
 #endif	/* NOT  defined(USE_KEYMAPS) && defined(USE_SLANG) */
+
 
 PUBLIC int LYgetch NOARGS
 {

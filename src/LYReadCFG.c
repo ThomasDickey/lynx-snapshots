@@ -1563,7 +1563,7 @@ static Config_Type Config_Table [] =
 #ifdef VMS
      PARSE_SET("use_fixed_records", CONF_BOOL, &UseFixedRecords),
 #endif
-#if defined(NCURSES_MOUSE_VERSION) || defined(PDCURSES_MOUSE_VERSION) || defined(USE_SLANG_MOUSE)
+#if defined(USE_MOUSE)
      PARSE_SET("use_mouse", CONF_BOOL, &LYUseMouse),
 #endif
      PARSE_SET("use_select_popups", CONF_BOOL, &LYSelectPopups),

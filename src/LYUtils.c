@@ -2300,14 +2300,14 @@ PUBLIC int HTCheckForInterrupt NOARGS
 #endif /* USE_SLANG */
 #endif /* !_WINDOWS */
 
-#if defined (DOSPATH) && defined (NCURSES)
+#if defined(PDCURSES)
     nodelay(stdscr,TRUE);
 #endif /* DOSPATH */
     /*
      * 'c' contains whatever character we're able to read from keyboard
      */
     c = LYgetch();
-#if defined (DOSPATH) && defined (NCURSES)
+#if defined(PDCURSES)
     nodelay(stdscr,FALSE);
 #endif /* DOSPATH */
 
