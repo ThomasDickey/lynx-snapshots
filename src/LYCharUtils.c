@@ -3730,7 +3730,6 @@ PUBLIC BOOLEAN LYoverride_default_alignment ARGS1(
 	case HTML_ADDRESS:
 	    me->sp->style->alignment = HT_LEFT;
 	    return YES;
-	    break;
 
 	default:
 	    break;

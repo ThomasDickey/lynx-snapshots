@@ -100,6 +100,10 @@ typedef struct _HTSuffix {
 #endif /* NGROUPS_MAX */
 #endif /* NGROUPS */
 
+#ifndef TYPE_GETGROUPS
+#define TYPE_GETGROUPS int
+#endif
+
 #include <HTML.h>		/* For directory object building */
 
 #define PUTC(c) (*target->isa->put_character)(target, c)
@@ -223,6 +227,7 @@ PRIVATE void LYListFmtParse ARGS5(
 			s++;
 		c = *s; 	/* the format char. or \0 */
 		*s = '\0';
+		buf[0] = '\0';
 
 		switch (c) {
 		case '\0':
@@ -1086,11 +1091,7 @@ PUBLIC BOOL HTEditable ARGS1(
 #ifdef NO_GROUPS
     return NO;		/* Safe answer till we find the correct algorithm */
 #else
-#ifdef NeXT
-    int 	groups[NGROUPS];
-#else
-    gid_t	groups[NGROUPS];
-#endif /* NeXT */
+    TYPE_GETGROUPS groups[NGROUPS];
     uid_t	myUid;
     int 	ngroups;			/* The number of groups  */
     struct stat fileStatus;
@@ -1106,12 +1107,13 @@ PUBLIC BOOL HTEditable ARGS1(
 	int i2;
 	fprintf(tfp,
 	    "File mode is 0%o, uid=%d, gid=%d. My uid=%d, %d groups (",
-	    (unsigned int) fileStatus.st_mode, fileStatus.st_uid,
+	    (unsigned int) fileStatus.st_mode,
+	    (int) fileStatus.st_uid,
 	    (int) fileStatus.st_gid,
 	    (int) myUid,
 	    (int) ngroups);
 	for (i2 = 0; i2 < ngroups; i2++)
-	    fprintf(tfp, " %d", groups[i2]);
+	    fprintf(tfp, " %d", (int) groups[i2]);
 	fprintf(tfp, ")\n");
     }
 
@@ -2067,6 +2069,7 @@ PUBLIC int HTLoadFile ARGS4(
 			    sprintf((char *)dirname, "F%s",dirbuf->d_name);
 			    /* D & F to have first directories, then files */
 #else
+			{
 			    if (dir_list_style == MIXED_STYLE)
 				sprintf((char *)dirname,
 					" %s/", dirbuf->d_name);
@@ -2076,6 +2079,7 @@ PUBLIC int HTLoadFile ARGS4(
 			    else
 				sprintf((char *)dirname,
 					"D%s", dirbuf->d_name);
+			}
 			else if (dir_list_style == MIXED_STYLE)
 			    sprintf((char *)dirname, " %s", dirbuf->d_name);
 			else if (dir_list_style == FILES_FIRST)

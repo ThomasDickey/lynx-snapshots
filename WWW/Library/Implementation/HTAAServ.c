@@ -92,45 +92,34 @@ PUBLIC char *HTAA_statusMessage NOARGS
     /* 401 cases */
       case HTAA_NO_AUTH:
 	return "Unauthorized -- authentication failed";
-	break;
       case HTAA_NOT_MEMBER:
 	return "Unauthorized to access the document";
-	break;
 
     /* 403 cases */
       case HTAA_BY_RULE:
 	return "Forbidden -- by rule";
-	break;
       case HTAA_IP_MASK:
 	return "Forbidden -- server refuses to serve to your IP address";
-	break;
       case HTAA_NO_ACL:
       case HTAA_NO_ENTRY:
 	return "Forbidden -- access to file is never allowed";
-	break;
       case HTAA_SETUP_ERROR:
 	return "Forbidden -- server protection setup error";
-	break;
       case HTAA_DOTDOT:
 	return "Forbidden -- URL containing /../ disallowed";
-	break;
       case HTAA_HTBIN:
 	return "Forbidden -- /htbin feature not enabled on this server";
-	break;
 
     /* 404 cases */
       case HTAA_NOT_FOUND:
 	return "Not found -- file doesn't exist or is read protected";
-	break;
 
     /* Success */
       case HTAA_OK:
 	return "AA: Access should be ok but something went wrong";
-	break;
 
       case HTAA_OK_GATEWAY:
 	return "AA check bypassed (gatewaying) but something went wrong";
-	break;
 
     /* Others */
       default:
@@ -147,46 +136,34 @@ PRIVATE char *status_name ARGS1(HTAAFailReasonType, reason)
     /* 401 cases */
       case HTAA_NO_AUTH:
 	return "NO-AUTHENTICATION";
-	break;
       case HTAA_NOT_MEMBER:
 	return "NOT-AUTHORIZED";
-	break;
 
     /* 403 cases */
       case HTAA_BY_RULE:
 	return "FORB-RULE";
-	break;
       case HTAA_IP_MASK:
 	return "FORB-IP";
-	break;
       case HTAA_NO_ACL:
 	return "NO-ACL-FILE";
-	break;
       case HTAA_NO_ENTRY:
 	return "NO-ACL-ENTRY";
-	break;
       case HTAA_SETUP_ERROR:
 	return "SETUP-ERROR";
-	break;
       case HTAA_DOTDOT:
 	return "SLASH-DOT-DOT";
-	break;
       case HTAA_HTBIN:
 	return "HTBIN-OFF";
-	break;
 
     /* 404 cases */
       case HTAA_NOT_FOUND:
 	return "NOT-FOUND";
-	break;
 
     /* Success */
       case HTAA_OK:
 	return "OK";
-	break;
       case HTAA_OK_GATEWAY:
 	return "OK-GATEWAY";
-	break;
 
     /* Others */
       default:
@@ -520,7 +497,6 @@ PUBLIC int HTAA_checkAuthorization ARGS4(CONST char *,	url,
       case HTAA_NO_AUTH:
       case HTAA_NOT_MEMBER:
 	return 401;
-	break;
 
       case HTAA_BY_RULE:
       case HTAA_IP_MASK:
@@ -530,16 +506,13 @@ PUBLIC int HTAA_checkAuthorization ARGS4(CONST char *,	url,
       case HTAA_DOTDOT:
       case HTAA_HTBIN:
 	return 403;
-	break;
 
       case HTAA_NOT_FOUND:
 	return 404;
-	break;
 
       case HTAA_OK:
       case HTAA_OK_GATEWAY:
 	return 200;
-	break;
 
       default:
 	return 500;
@@ -576,7 +549,6 @@ PRIVATE char *compose_scheme_specifics ARGS2(HTAAScheme,	scheme,
 		    (realm ? realm : "UNKNOWN"));
 	    return result;
 	}
-	break;
 
       case HTAA_PUBKEY:
 	{
@@ -587,7 +559,6 @@ PRIVATE char *compose_scheme_specifics ARGS2(HTAAScheme,	scheme,
 		    "PUBKEY-NOT-IMPLEMENTED");
 	    return result;
 	}
-	break;
       default:
 	return NULL;
     }
@@ -613,7 +584,7 @@ PRIVATE char *compose_scheme_specifics ARGS2(HTAAScheme,	scheme,
 PUBLIC char *HTAA_composeAuthHeaders NOARGS
 {
     static char *result = NULL;
-    HTAAScheme scheme;
+    int  n;
     char *scheme_name;
     char *scheme_params;
     HTAAProt *prot = HTAA_getCurrentProtection();
@@ -633,7 +604,8 @@ PUBLIC char *HTAA_composeAuthHeaders NOARGS
 	outofmem(__FILE__, "HTAA_composeAuthHeaders");
     *result = '\0';
 
-    for (scheme=0; scheme < HTAA_MAX_SCHEMES; scheme++) {
+    for (n = 0; n < (int) HTAA_MAX_SCHEMES; n++) {
+	HTAAScheme scheme = (HTAAScheme) n;
 	if (-1 < HTList_indexOf(prot->valid_schemes, (void*)scheme)) {
 	    if ((scheme_name = HTAAScheme_name(scheme))) {
 		scheme_params = compose_scheme_specifics(scheme,prot);

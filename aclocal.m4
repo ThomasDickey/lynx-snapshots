@@ -713,6 +713,33 @@ fi
 AC_SUBST(EXTRA_CFLAGS)
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl Make a test to determine the array type for the 'getgroups()' function. 
+dnl The BSD version uses 'int', while POSIX specifies 'gid_t', which is usually
+dnl an unsigned short.  (Check 'gid_t' first since not all compilers do proper
+dnl warning!).
+AC_DEFUN([CF_GETGROUPS],
+[
+AC_CACHE_CHECK(for array type of getgroups,cf_cv_getgroups_type,[
+	cf_save_CFLAGS="$CFLAGS"
+	test -n "$GCC" && CFLAGS="$CFLAGS -Werror"
+	for cf_type in gid_t int
+	do
+		AC_TRY_LINK([
+#include <sys/types.h>
+#include <unistd.h>],[$cf_type my_groups[64]; getgroups(64, my_groups)],
+		[cf_cv_getgroups_type=$cf_type
+		 break],[])
+	done
+	CFLAGS="$cf_save_CFLAGS"
+])
+if test "$cf_cv_getgroups_type" = unknown ; then
+	AC_MSG_WARN(Cannot determine the correct type, assuming int)
+	AC_DEFINE(TYPE_GETGROUPS,int)
+else
+	AC_DEFINE_UNQUOTED(TYPE_GETGROUPS,$cf_cv_getgroups_type)
+fi
+])dnl
+dnl ---------------------------------------------------------------------------
 dnl Construct a search-list for a nonstandard header-file
 AC_DEFUN([CF_HEADER_PATH],
 [$1=""

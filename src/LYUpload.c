@@ -258,11 +258,11 @@ PUBLIC int LYUpload_options ARGS2(
     fprintf(fp0, "<head>\n<title>%s</title>\n</head>\n<body>\n",
 		 UPLOAD_OPTIONS_TITLE);
 
-    fprintf(fp0, "<h1>Upload Options (%s Version %s)</h1>\n",
+    fprintf(fp0, "<h1>Upload Options (%s Version %s)</h1><pre>\n",
 				      LYNX_NAME, LYNX_VERSION);
 
-    fputs("You have the following upload choices.<br>\n", fp0);
-    fputs("Please select one:<br>\n<pre>\n", fp0);
+    fputs("   You have the following upload choices.<br>\n", fp0);
+    fputs("   Please select one:<br>\n\n", fp0);
 
     if (uploaders != NULL) {
 	for (count = 0, cur_upload = uploaders;

@@ -5204,7 +5204,7 @@ PRIVATE void HTML_start_element ARGS6(
 	}
 
 	CTRACE(tfp,"HTML:begin_element[%d]: adding style to stack - %s\n",
-	    						STACKLEVEL(me),
+	    						(int) STACKLEVEL(me),
 							me->new_style->name);
 	(me->sp)--;
 	me->sp[0].style = me->new_style;	/* Stack new style */
@@ -5370,7 +5370,7 @@ PRIVATE void HTML_end_element ARGS3(
 	} else if (me->sp < (me->stack + MAX_NESTING - 1)) {
 	    (me->sp)++;
 	    CTRACE(tfp, "HTML:end_element[%d]: Popped style off stack - %s\n",
-	    		STACKLEVEL(me),
+	    		(int) STACKLEVEL(me),
 			me->sp->style->name);
 	} else {
 	    CTRACE(tfp,
@@ -5403,7 +5403,7 @@ PRIVATE void HTML_end_element ARGS3(
     switch(element_number) {
 
     case HTML_HTML:
-	if (me->inA || me->inSELECT || me->inTEXTAREA)
+	if (me->inA || me->inSELECT || me->inTEXTAREA) {
 	    if (TRACE) {
 		fprintf(tfp,
 			"Bad HTML: %s%s%s%s%s not closed before HTML end tag *****\n",
@@ -5417,6 +5417,7 @@ PRIVATE void HTML_end_element ARGS3(
 		me->inBadHTML = TRUE;
 		sleep(MessageSecs);
 	    }
+	}
 	break;
 
     case HTML_HEAD:
@@ -5505,7 +5506,7 @@ PRIVATE void HTML_end_element ARGS3(
 	break;
 
     case HTML_BODY:
-	if (me->inA || me->inSELECT || me->inTEXTAREA)
+	if (me->inA || me->inSELECT || me->inTEXTAREA) {
 	    if (TRACE) {
 		fprintf(tfp,
 			"Bad HTML: %s%s%s%s%s not closed before BODY end tag *****\n",
@@ -5519,6 +5520,7 @@ PRIVATE void HTML_end_element ARGS3(
 		me->inBadHTML = TRUE;
 		sleep(MessageSecs);
 	    }
+	}
 	break;
 
     case HTML_FRAMESET:

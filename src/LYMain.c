@@ -307,7 +307,6 @@ PUBLIC BOOLEAN LYCancelledFetch = FALSE; /* TRUE if cancelled binary fetch */
 	       /* Include mime headers with source dump */
 PUBLIC BOOLEAN keep_mime_headers = FALSE;
 PUBLIC BOOLEAN no_url_redirection = FALSE; /* Don't follow URL redirections */
-PUBLIC BOOLEAN display_partial = FALSE; /* Display document during download */
 PUBLIC char *form_post_data = NULL;  /* User data for post form */
 PUBLIC char *form_get_data = NULL;   /* User data for get form */
 PUBLIC char *http_error_file = NULL; /* Place HTTP status code in this file */
@@ -373,6 +372,10 @@ PUBLIC BOOLEAN LYPreparsedSource = FALSE;	/* Show source as preparsed?	 */
 PUBLIC BOOLEAN LYPrependBaseToSource = TRUE;
 PUBLIC BOOLEAN LYPrependCharsetToSource = FALSE;
 PUBLIC BOOLEAN LYQuitDefaultYes = QUIT_DEFAULT_YES;
+
+#ifdef DISP_PARTIAL
+PUBLIC BOOLEAN display_partial = FALSE; /* Display document during download */
+#endif
 
 /* These are declared in cutil.h for current freeWAIS libraries. - FM */
 #ifdef DECLARE_WAIS_LOGFILES

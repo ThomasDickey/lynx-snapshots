@@ -199,7 +199,6 @@ PUBLIC HTAAUser *HTAA_authenticate ARGS3(HTAAScheme,	scheme,
 	    else
 		return NULL;
 	}
-	break;
       default:
 	/* Other authentication routines go here */
 	return NULL;

@@ -111,22 +111,16 @@ PUBLIC char *HTAAScheme_name ARGS1(HTAAScheme, scheme)
     switch (scheme) {
 	case HTAA_NONE:
 	    return "None";
-	    break;
 	case HTAA_BASIC:
 	    return "Basic";
-	    break;
 	case HTAA_PUBKEY:
 	    return "Pubkey";
-	    break;
 	case HTAA_KERBEROS_V4:
 	    return "KerberosV4";
-	    break;
 	case HTAA_KERBEROS_V5:
 	    return "KerberosV5";
-	    break;
 	case HTAA_UNKNOWN:
 	    return "UNKNOWN";
-	    break;
 	default:
 	    return "THIS-IS-A-BUG";
     }
@@ -171,13 +165,10 @@ PUBLIC char *HTAAMethod_name ARGS1(HTAAMethod, method)
     switch (method) {
       case METHOD_GET:
 	  return "GET";
-	  break;
       case METHOD_PUT:
 	  return "PUT";
-	  break;
       case METHOD_UNKNOWN:
 	  return "UNKNOWN";
-	  break;
       default:
 	  return "THIS-IS-A-BUG";
     }

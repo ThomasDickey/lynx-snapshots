@@ -142,6 +142,10 @@ typedef struct _EditFieldData {
 
 #define LYE_AIX   (LYE_LKCMD +1)  /* Hex 97		   */
 
+#if defined(USE_SLANG_KEYMAPS)
+extern int lynx_initialize_keymaps NOPARAMS;
+#endif
+
 extern void LYLowerCase PARAMS((
 	char *		buffer));
 extern void LYUpperCase PARAMS((

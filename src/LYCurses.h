@@ -188,9 +188,9 @@ extern unsigned int Lynx_Color_Flags;
 #define USE_SLANG_MOUSE		1
 #endif /* USE_SLANG */
 
-#if SLANG_VERSION >= 10000
+#if ((SLANG_VERSION >= 10000) && !defined(__DJGPP__))
 #define USE_SLANG_KEYMAPS	1
-#endif
+#endif /* SLANG_VERSION >= 10000 */
 
 #define SL_LYNX_USE_COLOR	1
 #define SL_LYNX_USE_BLINK	2

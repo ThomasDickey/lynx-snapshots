@@ -579,8 +579,11 @@ PUBLIC int HTCopy ARGS4(
 	(*targetClass.put_block)(sink, input_buffer, status);
 
 #ifdef DISP_PARTIAL
-	if (display_partial)
-	    HText_pageDisplay(Newline,"");
+	if (display_partial &&
+		((Newline_partial + display_lines) > NumOfLines_partial))  {
+	    NumOfLines_partial = HText_getNumOfLines();
+	    HText_pageDisplay(Newline_partial, "");
+	}
 #endif /* DISP_PARTIAL */
 
 	bytes += status;
@@ -644,8 +647,11 @@ PUBLIC int HTFileCopy ARGS2(
 	(*targetClass.put_block)(sink, input_buffer, status);
 
 #ifdef DISP_PARTIAL
-	if (display_partial)
-	    HText_pageDisplay(Newline,"");
+	if (display_partial &&
+		((Newline_partial + display_lines) > NumOfLines_partial))  {
+	    NumOfLines_partial = HText_getNumOfLines();
+	    HText_pageDisplay(Newline_partial, "");
+	}
 #endif /* DISP_PARTIAL */
 
 	bytes += status;
@@ -738,8 +744,11 @@ PRIVATE int HTGzFileCopy ARGS2(
 	(*targetClass.put_block)(sink, input_buffer, status);
 
 #ifdef DISP_PARTIAL
-	if (display_partial)
-	    HText_pageDisplay(Newline,"");
+	if (display_partial &&
+		((Newline_partial + display_lines) > NumOfLines_partial))  {
+	    NumOfLines_partial = HText_getNumOfLines();
+	    HText_pageDisplay(Newline_partial, "");
+	}
 #endif /* DISP_PARTIAL */
 
 	bytes += status;

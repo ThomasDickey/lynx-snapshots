@@ -219,7 +219,7 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
     char c;
     unsigned char c_unsign;
     BOOL chk;
-    UCode_t code, uck;
+    UCode_t code, uck = -1;
     char saved_char_in = '\0';
 
     for (p = s; p < e; p++) {
@@ -584,7 +584,7 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 		**  If we get to here and have a monobyte character,
 		**  pass it. - FM
 		*/
-	} else if (c_unsign > 0 && c_unsign < 256) {
+	} else if (c_unsign != 0 && c_unsign < 256) {
 		HText_appendCharacter(me->text, c);
 	    }
 #endif /* REMOVE_CR_ONLY */

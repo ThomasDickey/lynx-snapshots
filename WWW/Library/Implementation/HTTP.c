@@ -692,8 +692,11 @@ try_again:
 	    }
 	}
 #ifdef DISP_PARTIAL
+/*  retrieving HTTP headers: never use display_partial mode at this point!
+
 	else if (display_partial)
-	    HText_pageDisplay(Newline,"");
+	    HText_pageDisplay(Newline_partial,"");
+*/
 #endif /* DISP_PARTIAL */
 
 	bytes_already_read += status;
@@ -899,7 +902,6 @@ try_again:
 		HTTP_NETCLOSE(s, handle);
 		status = HT_NO_DATA;
 		goto clean_up;
-		break;
 
 	      case 205:
 		/*
@@ -913,7 +915,6 @@ try_again:
 		HTTP_NETCLOSE(s, handle);
 		status = HT_NO_DATA;
 		goto clean_up;
-		break;
 
 	      case 206:
 		/*
@@ -926,7 +927,6 @@ try_again:
 		HTTP_NETCLOSE(s, handle);
 		status = HT_NO_DATA;
 		goto clean_up;
-		break;
 
 	      default:
 		/*
@@ -1488,7 +1488,6 @@ Cookie2_continuation:
 		    FREE(line_buffer);
 		    FREE(line_kept_clean);
 		    goto try_again;
-		    break;
 		} else if (!(traversal || dump_output_immediately) &&
 			   HTConfirm("Show the 401 message body?")) {
 		    break;
@@ -1500,7 +1499,6 @@ Cookie2_continuation:
 		    status = -1;
 		    goto clean_up;
 		}
-		break;
 
 	      case 407:
 		/*
@@ -1537,7 +1535,6 @@ Cookie2_continuation:
 		    FREE(line_buffer);
 		    FREE(line_kept_clean);
 		    goto try_again;
-		    break;
 		} else if (!(traversal || dump_output_immediately) &&
 			   HTConfirm("Show the 407 message body?")) {
 		    if (!dump_output_immediately &&
@@ -1558,7 +1555,6 @@ Cookie2_continuation:
 		    status = -1;
 		    goto clean_up;
 		}
-		break;
 
 	      case 408:
 		/*
@@ -1569,7 +1565,6 @@ Cookie2_continuation:
 		HTTP_NETCLOSE(s, handle);
 		status = HT_NO_DATA;
 		goto done;
-		break;
 
 	      default:
 		/*

@@ -560,7 +560,6 @@ PRIVATE void HTMIME_put_character ARGS2(
 
 	default:
 	   goto bad_field_name;
-	   break;
 
 	} /* switch on character */
 	break;
@@ -593,7 +592,6 @@ PRIVATE void HTMIME_put_character ARGS2(
 	    CTRACE(tfp, "HTMIME: Bad character `%c' found where `%s' expected\n",
 			c, "'g' or 'l'");
 	    goto bad_field_name;
-	    break;
 
 	} /* switch on character */
 	break;
@@ -620,7 +618,6 @@ PRIVATE void HTMIME_put_character ARGS2(
 	    CTRACE(tfp, "HTMIME: Bad character `%c' found where `%s' expected\n",
 			c, "'l' or 't'");
 	    goto bad_field_name;
-	    break;
 
 	} /* switch on character */
 	break;
@@ -645,7 +642,6 @@ PRIVATE void HTMIME_put_character ARGS2(
 	    CTRACE(tfp, "HTMIME: Bad character `%c' found where `%s' expected\n",
 			c, "'a' or 'o'");
 	    goto bad_field_name;
-	    break;
 
 	} /* switch on character */
 	break;
@@ -670,7 +666,6 @@ PRIVATE void HTMIME_put_character ARGS2(
 	    CTRACE(tfp, "HTMIME: Bad character `%c' found where `%s' expected\n",
 			c, "'n' or 'o'");
 	    goto bad_field_name;
-	    break;
 
 	} /* switch on character */
 	break;
@@ -697,7 +692,6 @@ PRIVATE void HTMIME_put_character ARGS2(
 	    CTRACE(tfp, "HTMIME: Bad character `%c' found where `%s' expected\n",
 			c, "'n' or 't'");
 	    goto bad_field_name;
-	    break;
 
 	} /* switch on character */
 	break;
@@ -724,7 +718,6 @@ PRIVATE void HTMIME_put_character ARGS2(
 	    CTRACE(tfp, "HTMIME: Bad character `%c' found where `%s' expected\n",
 			c, "'t' or 'x'");
 	    goto bad_field_name;
-	    break;
 
 	} /* switch on character */
 	break;
@@ -759,7 +752,6 @@ PRIVATE void HTMIME_put_character ARGS2(
 	    CTRACE(tfp, "HTMIME: Bad character `%c' found where `%s' expected\n",
 			c, "'a', 'i' or 'o'");
 	    goto bad_field_name;
-	    break;
 
 	} /* switch on character */
 	break;
@@ -784,7 +776,6 @@ PRIVATE void HTMIME_put_character ARGS2(
 	    CTRACE(tfp, "HTMIME: Bad character `%c' found where `%s' expected\n",
 			c, "'r' or 'u'");
 	    goto bad_field_name;
-	    break;
 
 	} /* switch on character */
 	break;
@@ -811,7 +802,6 @@ PRIVATE void HTMIME_put_character ARGS2(
 	    CTRACE(tfp, "HTMIME: Bad character `%c' found where `%s' expected\n",
 			c, "'a' or 'o'");
 	    goto bad_field_name;
-	    break;
 
 	} /* switch on character */
 	break;
@@ -836,7 +826,6 @@ PRIVATE void HTMIME_put_character ARGS2(
 	    CTRACE(tfp, "HTMIME: Bad character `%c' found where `%s' expected\n",
 			c, "'a' or 'e'");
 	    goto bad_field_name;
-	    break;
 
 	} /* switch on character */
 	break;
@@ -863,7 +852,6 @@ PRIVATE void HTMIME_put_character ARGS2(
 	    CTRACE(tfp, "HTMIME: Bad character `%c' found where `%s' expected\n",
 			c, "'r' or 't'");
 	    goto bad_field_name;
-	    break;
 
 	} /* switch on character */
 	break;
@@ -887,7 +875,6 @@ PRIVATE void HTMIME_put_character ARGS2(
 	    CTRACE(tfp, "HTMIME: Bad character `%c' found where `%s' expected\n",
 			c, "':' or '2'");
 	    goto bad_field_name;
-	    break;
 
 	} /* switch on character */
 	break;
@@ -914,7 +901,6 @@ PRIVATE void HTMIME_put_character ARGS2(
 	    CTRACE(tfp, "HTMIME: Bad character `%c' found where `%s' expected\n",
 			c, "'i' or 'r'");
 	    goto bad_field_name;
-	    break;
 
 	} /* switch on character */
 	break;
@@ -941,7 +927,6 @@ PRIVATE void HTMIME_put_character ARGS2(
 	    CTRACE(tfp, "HTMIME: Bad character `%c' found where `%s' expected\n",
 			c, "'p' or 'r'");
 	    goto bad_field_name;
-	    break;
 
 	} /* switch on character */
 	break;
@@ -968,7 +953,6 @@ PRIVATE void HTMIME_put_character ARGS2(
 	    CTRACE(tfp, "HTMIME: Bad character `%c' found where `%s' expected\n",
 			c, "'a' or 'i'");
 	    goto bad_field_name;
-	    break;
 
 	} /* switch on character */
 	break;
@@ -995,7 +979,6 @@ PRIVATE void HTMIME_put_character ARGS2(
 	    CTRACE(tfp, "HTMIME: Bad character `%c' found where `%s' expected\n",
 			c, "'a' or 'w'");
 	    goto bad_field_name;
-	    break;
 
 	} /* switch on character */
 	break;
@@ -1078,7 +1061,6 @@ PRIVATE void HTMIME_put_character ARGS2(
 	default:
 	    CTRACE(tfp, "HTMIME: Was CONTENT_, found nothing; bleah\n");
 	    goto bad_field_name;
-	    break;
 
 	} /* switch on character */
 	break;
@@ -1114,7 +1096,6 @@ PRIVATE void HTMIME_put_character ARGS2(
 	default:
 	    CTRACE (tfp, "HTMIME: Was CONTENT_L, found nothing; bleah\n");
 	    goto bad_field_name;
-	    break;
 
 	} /* switch on character */
 	break;
@@ -1142,7 +1123,6 @@ PRIVATE void HTMIME_put_character ARGS2(
 	default:
 	    CTRACE (tfp, "HTMIME: Was CONTENT_T, found nothing; bleah\n");
 	    goto bad_field_name;
-	    break;
 
 	} /* switch on character */
 	break;
