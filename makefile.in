@@ -324,7 +324,7 @@ install-man : $(MANDIR)
 install-doc : $(DOCDIR) $(HELPDIR)
 	@echo Copying sample files
 	(cd $(srcdir) && tar cf - C[HO]* PROBLEMS README samples test ) | \
-			       ( cd $(DOCDIR) && tar xf - )
+			       ( cd $(DOCDIR) && chmod -R u+w . && tar xf - )
 	$(SHELL) -c 'for name in COPYING COPYHEADER; do \
 		cd $(HELPDIR) && ( $(LN_S) $(DOCDIR)/$$name . || cp $(DOCDIR)/$$name . );\
 		done'

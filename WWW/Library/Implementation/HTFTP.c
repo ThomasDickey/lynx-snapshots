@@ -1138,15 +1138,16 @@ PRIVATE int get_listen_socket NOARGS
 #ifndef SHORTENED_RBIND
 			,socks_bind_remoteAddr
 #endif /* !SHORTENED_RBIND */
-						)) == 0)
+						)) == 0) {
 		    break;
-	    else
+		} else
 #endif /* SOCKS */
 	    if ((status=bind(new_socket,
 		    (struct sockaddr*)&soc_address,
 			    /* Cast to generic sockaddr */
-		    sizeof(soc_address))) == 0)
+		    sizeof(soc_address))) == 0) {
 		break;
+	    }
 	    CTRACE((tfp, "TCP bind attempt to port %d yields %d, errno=%d\n",
 		port_number, status, SOCKET_ERRNO));
 	} /* for */
@@ -1433,6 +1434,7 @@ PRIVATE void parse_eplf_line ARGS2(
 		break;
 	    case '/':
 		StrAllocCopy(info->type, ENTRY_IS_DIRECTORY);
+		/* FALLTHRU */
 	    default:
 		while (*cp) {
 		    if (*cp++ == ',')
@@ -2851,9 +2853,6 @@ unload_btree:
 	_HTProgress(TRANSFER_INTERRUPTED);
     }
     return HT_LOADED;
-#ifdef NOTDEFINED
-    return response(NIL) == 2 ? HT_LOADED : -1;
-#endif /* NOTDEFINED */
 }
 
 /*	Retrieve File from Server

@@ -243,7 +243,7 @@ PUBLIC BOOL LYBadHTML ARGS1(
 */
 PUBLIC void HTML_put_character ARGS2(HTStructured *, me, char, c)
 {
-#ifdef CJK_EX
+#if 0 /* def KANJI_CODE_OVERRIDE */
     static unsigned char save_ch1 = 0;
     static unsigned char save_ch2 = 0;
 #endif
@@ -427,7 +427,7 @@ PUBLIC void HTML_put_character ARGS2(HTStructured *, me, char, c)
 	    } else {
 		me->inP = TRUE;
 		me->inLABEL = FALSE;
-#ifdef CJK_EX
+#if 0 /* Should this check be done in HText_appendCharacter? */
 		if (last_kcode == EUC) {
 		    if (save_ch1 && !save_ch2) {
 			if ((unsigned char)c & 0x80) {
@@ -445,9 +445,8 @@ PUBLIC void HTML_put_character ARGS2(HTStructured *, me, char, c)
 		} else {
 		    HText_appendCharacter(me->text, c);
 		}
-#else
-		HText_appendCharacter(me->text, c);
 #endif
+		HText_appendCharacter(me->text, c);
 		me->in_word = YES;
 	    }
 	}
@@ -587,7 +586,7 @@ PUBLIC void HTML_put_string ARGS2(HTStructured *, me, CONST char *, s)
 			if (me->in_word) {
 			    if (HText_getLastChar(me->text) != ' ')
 				HText_appendCharacter(me->text, ' ');
-				me->in_word = NO;
+			    me->in_word = NO;
 			}
 		    }
 
@@ -2245,7 +2244,7 @@ PRIVATE int HTML_start_element ARGS6(
 	HText_cancelStbl(me->text);
 	UPDATE_STYLE;
 
-	CANT_JUSTIFY_THIS_LINE
+	CANT_JUSTIFY_THIS_LINE;
 	if (present[HTML_TAB_ALIGN] && value[HTML_TAB_ALIGN] &&
 	    (strcasecomp(value[HTML_TAB_ALIGN], "left") ||
 	     !(present[HTML_TAB_TO] || present[HTML_TAB_INDENT]))) {
@@ -2462,8 +2461,11 @@ PRIVATE int HTML_start_element ARGS6(
 	**  PRE block is received. - FM
 	*/
 	me->inPRE = FALSE;
+	/* FALLTHRU */
     case HTML_LISTING:				/* Literal text */
+	/* FALLTHRU */
     case HTML_XMP:
+	/* FALLTHRU */
     case HTML_PLAINTEXT:
 	change_paragraph_style(me, styles[ElementNumber]);
 	UPDATE_STYLE;
@@ -4596,7 +4598,7 @@ PRIVATE int HTML_start_element ARGS6(
 	if (me->inUnderline == FALSE)
 	    HText_appendCharacter(me->text, LY_UNDERLINE_END_CHAR);
 	HTML_put_character(me, ' ');
-	CAN_JUSTIFY_START
+	CAN_JUSTIFY_START;
 
 	if (me->inFIG)
 	    /*
@@ -4645,7 +4647,7 @@ PRIVATE int HTML_start_element ARGS6(
 	     *	Set to know we are in a new form.
 	     */
 	    me->inFORM = TRUE;
-	    EMIT_IFDEF_EXP_JUSTIFY_ELTS(form_in_htext=TRUE;)
+	    EMIT_IFDEF_EXP_JUSTIFY_ELTS(form_in_htext = TRUE);
 
 	    if (present && present[HTML_FORM_ACCEPT_CHARSET]) {
 		accept_cs = value[HTML_FORM_ACCEPT_CHARSET] ?
@@ -4964,9 +4966,8 @@ PRIVATE int HTML_start_element ARGS6(
 	    BOOL HaveSRClink = FALSE;
 	    char* ImageSrc = NULL;
 	    BOOL IsSubmitOrReset = FALSE;
-#ifdef CJK_EX
 	    HTkcode kcode = 0;
-#endif
+	    HTkcode specified_kcode = 0;
 	    /* init */
 	    I.align=NULL; I.accept=NULL; I.checked=NO; I.class=NULL;
 	    I.disabled=NO; I.error=NULL; I.height= NULL; I.id=NULL;
@@ -5397,12 +5398,12 @@ PRIVATE int HTML_start_element ARGS6(
 		for (; chars > 0; chars--)
 		    HTML_put_character(me, '_');
 	    } else {
-#ifdef CJK_EX
-		if (HTCJK != NOCJK) {
+		if (HTCJK == JAPANESE) {
 		    kcode = HText_getKcode(me->text);
 		    HText_updateKcode(me->text, kanji_code);
+		    specified_kcode = HText_getSpecifiedKcode(me->text);
+		    HText_updateSpecifiedKcode(me->text, kanji_code);
 		}
-#endif
 		if (me->sp[0].tag_number == HTML_PRE ||
 		    !me->sp->style->freeFormat) {
 		    /*
@@ -5442,10 +5443,10 @@ PRIVATE int HTML_start_element ARGS6(
 		    while (i < chars)
 			HTML_put_character(me, HT_NON_BREAK_SPACE);
 		}
-#ifdef CJK_EX
-		if (HTCJK != NOCJK)
+		if (HTCJK == JAPANESE) {
 		    HText_updateKcode(me->text, kcode);
-#endif
+		    HText_updateSpecifiedKcode(me->text, specified_kcode);
+		}
 	    }
 	    HText_setIgnoreExcess(me->text, FALSE);
 	    FREE(ImageSrc);
@@ -6143,7 +6144,7 @@ PRIVATE int HTML_end_element ARGS3(
     BOOL BreakFlag = FALSE;
     BOOL intern_flag = FALSE;
     BOOL skip_stack_requested = FALSE;
-    EMIT_IFDEF_EXP_JUSTIFY_ELTS(BOOL reached_awaited_stacked_elt=FALSE;)
+    EMIT_IFDEF_EXP_JUSTIFY_ELTS(BOOL reached_awaited_stacked_elt = FALSE);
 
 #ifdef USE_PRETTYSRC
     if (psrc_view && !sgml_in_psrc_was_initialized) {
@@ -6655,8 +6656,11 @@ PRIVATE int HTML_end_element ARGS3(
 	 *  Set to know that we are no longer in a PRE block.
 	 */
 	me->inPRE = FALSE;
+	/* FALLTHRU */
     case HTML_LISTING:				/* Literal text */
+	/* FALLTHRU */
     case HTML_XMP:
+	/* FALLTHRU */
     case HTML_PLAINTEXT:
 	if (me->comment_start)
 	    HText_appendText(me->text, me->comment_start);
@@ -6681,9 +6685,13 @@ PRIVATE int HTML_end_element ARGS3(
     case HTML_OL:
 	me->OL_Counter[me->List_Nesting_Level < 11 ?
 			    me->List_Nesting_Level : 11] = OL_VOID;
+	/* FALLTHRU */
     case HTML_DL:
+	/* FALLTHRU */
     case HTML_UL:
+	/* FALLTHRU */
     case HTML_MENU:
+	/* FALLTHRU */
     case HTML_DIR:
 	me->List_Nesting_Level--;
 	CTRACE((tfp, "HTML_end_element: Reducing List Nesting Level to %d\n",
@@ -7202,7 +7210,7 @@ End_Object:
 	    if (LYBadHTML(me))
 		CTRACE((tfp, "Bad HTML: Unmatched FORM end tag\n"));
 	}
-	EMIT_IFDEF_EXP_JUSTIFY_ELTS(form_in_htext=FALSE;)
+	EMIT_IFDEF_EXP_JUSTIFY_ELTS(form_in_htext = FALSE);
 
 	/*
 	 *  Check if we still have a SELECT element open.
@@ -7551,8 +7559,21 @@ End_Object:
 		for (; ptr && *ptr != '\0'; ptr++) {
 		    if (*ptr == ' ')
 			HText_appendCharacter(me->text,HT_NON_BREAK_SPACE);
-		    else
+		    else {
+			HTkcode kcode = 0;
+			HTkcode specified_kcode = 0;
+			if (HTCJK == JAPANESE) {
+			    kcode = HText_getKcode(me->text);
+			    HText_updateKcode(me->text, kanji_code);
+			    specified_kcode = HText_getSpecifiedKcode(me->text);
+			    HText_updateSpecifiedKcode(me->text, kanji_code);
+			}
 			HText_appendCharacter(me->text,*ptr);
+			if (HTCJK == JAPANESE) {
+			    HText_updateKcode(me->text, kcode);
+			    HText_updateSpecifiedKcode(me->text, specified_kcode);
+			}
+		    }
 		}
 		/*
 		 *  Add end option character.
@@ -8611,6 +8632,8 @@ PRIVATE HTStream* CacheThru_new ARGS2(
 
     return stream;
 }
+#else
+#define CacheThru_new(anchor, target) target
 #endif
 
 /*	HTConverter for HTML to plain text
@@ -8626,13 +8649,9 @@ PUBLIC HTStream* HTMLToPlain ARGS3(
 	HTParentAnchor *,	anchor,
 	HTStream *,		sink)
 {
-#ifdef SOURCE_CACHE
     return CacheThru_new(anchor,
 			 SGML_new(&HTML_dtd, anchor,
 				  HTML_new(anchor, pres->rep_out, sink)));
-#else
-    return SGML_new(&HTML_dtd, anchor, HTML_new(anchor, pres->rep_out, sink));
-#endif
 }
 
 /*	HTConverter for HTML source to plain text
@@ -8691,13 +8710,9 @@ PUBLIC HTStream* HTMLParsedPresent ARGS3(
     }
     if (!intermediate)
 	return NULL;
-#ifdef SOURCE_CACHE
     return CacheThru_new(anchor,
 			 SGML_new(&HTML_dtd, anchor,
 				  HTMLGenerator(intermediate)));
-#else
-    return SGML_new(&HTML_dtd, anchor, HTMLGenerator(intermediate));
-#endif
 }
 
 /*	HTConverter for HTML to C code
@@ -8728,12 +8743,8 @@ PUBLIC HTStream* HTMLToC ARGS3(
     html->comment_end = " */\n";	/* Must start in col 1 for cpp */
     if (!sink)
 	HTML_put_string(html,html->comment_start);
-#ifdef SOURCE_CACHE
     return CacheThru_new(anchor,
 			 SGML_new(&HTML_dtd, anchor, html));
-#else
-    return SGML_new(&HTML_dtd, anchor, html);
-#endif
 }
 
 /*	Presenter for HTML
@@ -8750,13 +8761,9 @@ PUBLIC HTStream* HTMLPresent ARGS3(
 	HTParentAnchor *,	anchor,
 	HTStream *,		sink GCC_UNUSED)
 {
-#ifdef SOURCE_CACHE
     return CacheThru_new(anchor,
 			 SGML_new(&HTML_dtd, anchor,
 				  HTML_new(anchor, WWW_PRESENT, NULL)));
-#else
-    return SGML_new(&HTML_dtd, anchor, HTML_new(anchor, WWW_PRESENT, NULL));
-#endif
 }
 #endif /* !GUI */
 
@@ -8810,19 +8817,19 @@ PRIVATE char * MakeNewTitle ARGS2(CONST char **, value, int, src_type)
 #ifdef SH_EX	/* 1998/04/02 (Thu) 16:02:00 */
 
     /* for proxy server 1998/12/19 (Sat) 11:53:30 */
-    if (stricmp(newtitle + 1, "internal-gopher-menu") == 0) {
+    if (AS_casecomp(newtitle + 1, "internal-gopher-menu") == 0) {
 	StrAllocCopy(newtitle, "+");
-    } else if (stricmp(newtitle + 1, "internal-gopher-unknown") == 0) {
+    } else if (AS_casecomp(newtitle + 1, "internal-gopher-unknown") == 0) {
 	StrAllocCopy(newtitle, " ");
     } else {
 	/* normal title */
 	ptr = strrchr(newtitle, '.');
 	if (ptr) {
-	  if (stricmp(ptr, ".gif") == 0)
+	  if (AS_casecomp(ptr, ".gif") == 0)
 	    *ptr = '\0';
-	  else if (stricmp(ptr, ".jpg") == 0)
+	  else if (AS_casecomp(ptr, ".jpg") == 0)
 	    *ptr = '\0';
-	  else if (stricmp(ptr, ".jpeg") == 0)
+	  else if (AS_casecomp(ptr, ".jpeg") == 0)
 	    *ptr = '\0';
 	}
 	StrAllocCat(newtitle, "]");

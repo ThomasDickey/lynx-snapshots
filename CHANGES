@@ -1,6 +1,82 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2000-02-14 (2.8.3dev.19)
+* use HTAddParam/HTEndParam rather than HTSprintf0 for building external
+  commands, protecting against badly-formatted string with more than one %s
+  (reported by PW) -TD
+* update placeholder po/no.po -JS
+* add configure option --enable-kanji for defining symbols related to TH's
+  patch.
+* improved handling of Japanese text (patch by Hataguchi Takeshi (TH)
+  <patakuti@t3.rim.or.jp>):
+  + if Japanese document's charset is specified explicitly by the MIME tag or
+    HTTP responses, Lynx will assume the charset as that value.
+  + change the Japanese charset detection strategy when charset is not
+    specified explicitly.
+  + wrap a long text which includes only CJK characters in source mode.
+  + avoid writing CJK characters at the 80th column.
+  + improve kanji code override routine
+    # My change seemes to have broken this
+  + change the phrase "half width kana" to "JIS x0201 Kana" in comments.
+    # The latter has been used originally.
+  + enable assume_charset when display charset and assume charset
+    are Japanese. assume_charset acts like charset by META tag
+    only when charset isn't specified by META nor HTTP responses.
+  + change the behavior of the option menu.
+    For example, when display charset is Japanese (EUC-JP) and
+    CJK mode is on, changing assume_charset from iso-8859-1 to
+    shift_jis using the option menu,
+        old behavior:
+            assume_charset won't be changed.
+            CJK mode will turn off.
+        new behavior:
+            assume_charset will be changed to shift_jis
+            CJK mode won't be changed.
+  + improve handling Japanese in Visited Links Page, History Page
+    and pages with FORM.
+  New macros are:
+    USE_TH_JP_AUTO_DETECT
+        enable (2)
+    CONV_JISX0201KANA_JISX0208KANA
+        convert JIS X0201 Kana to JIS X0208 Kana,
+        i.e. convert half width kana to full width.
+        I've not tested the case not to define this well.
+    KANJI_CODE_OVERRIDE
+        enable kanji code override routine.
+        The code can be changed by ^L.
+        More precisely, this enables us to change the assumption kanji
+        code for the document. This assumption overrides the charaset
+        by META tag and HTTP responses.
+* ensure lynx_doc is writable when doing install, since it is not necessarily
+  done as root -TD
+* simplify/correct ifdef'ing in reply_by_mail() -TD
+* add ifdef CANNOT_PIPE_MAIL to simplify ifdef'ing for systems having mailers
+  that we can pipe to versus those that we cannot -TD
+* add ifdef USE_BLAT_MAILER to simplify & make consistent ifdef'ing for
+  blat mail program -TD
+* correct ifdef'ing in mailform() for Unix (report by LV, analysis by KW) -TD
+* tweak lynx.cfg for better cfg2html.pl output -LP
+* fix DOS makefiles for recent renaming USE_PSRC -> USE_PRETTYSRC.
+  Also, change optimization flag to -O1: having experience with slow
+  386 machine I see no visible difference in speed at run time, but this
+  makes compilation much faster and takes less memory. Tweak INSTALLATION
+  file accordingly -LP
+* ifdef'd feature for generating random temporary filenames with
+  EXP_RAND_TEMPNAME -TD
+* remove duplicate S_xxx definitions from LYLocal.h, already in www_tcp.h -TD
+* add note about building with Visual C++ -TD
+* ifdef'd reference to current_codepage in LYCurses.c with PDCURSES_EXP
+  rather than PDCURSES, since this variable is not found in any release
+  version of PDCurses -TD
+* several small fixes/adjustments to reduce warnings from lint-like program
+  'antic' -TD
+* fixes to compile on VMS with UCX -TD
+* change LYRemoveTemp() to return a value, needed for VMS -TD
+* rename intl/po2tbl.sed.in to intl/po2tbl.sed_in, to allow unzip on VMS -TD
+* correct HTSetSuffix/HTSetSuffix5 for VMS build (reported by Dan W. Olds
+  <oldsdw@wofford.edu>) -TD
+* resync autoconf macros, from tin -TD
 2000-01-06 (2.8.3dev.18)
 * correction to LYCookieSavefile so tilde expansion is done (reported by Larry
   Virden) -BJP

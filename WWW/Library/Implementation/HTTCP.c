@@ -1470,7 +1470,7 @@ PUBLIC int HTDoConnect ARGS4(
     */
     memset(soc_in, 0, sizeof(*soc_in));
     soc_in->sin_family = AF_INET;
-    soc_in->sin_port = htons(default_port);
+    soc_in->sin_port = htons((unsigned short) default_port);
 
     /*
     **	Get node name and optional port number.
@@ -1977,7 +1977,6 @@ PUBLIC int BSDselect ARGS5(
     switch (rval) {
 	case -1:
 	    return(rval);
-	    break;
 
 	case 0:
 	    if (readfds != NULL)
@@ -1987,7 +1986,6 @@ PUBLIC int BSDselect ARGS5(
 	    if (exceptfds != NULL)
 		FD_ZERO(exceptfds);
 	    return(rval);
-	    break;
 
 	default:
 	    for (i = 0, rval = 0; i < nfds; i++) {

@@ -24,6 +24,7 @@
 
 #ifndef VMS
 #ifdef DOSPATH
+#undef LONG_LIST
 #define LONG_LIST  /* Define this for long style unix listings (ls -l),
 		     the actual style is configurable from lynx.cfg */
 #endif
@@ -1215,9 +1216,7 @@ PUBLIC float HTFileValue ARGS1(
 PUBLIC BOOL HTEditable ARGS1(
 	CONST char *,	filename)
 {
-#ifdef NO_GROUPS
-    return NO;		/* Safe answer till we find the correct algorithm */
-#else
+#ifndef NO_GROUPS
     GETGROUPS_T groups[NGROUPS];
     uid_t	myUid;
     int		ngroups;			/* The number of groups	 */
@@ -1259,8 +1258,8 @@ PUBLIC BOOL HTEditable ARGS1(
 	}
     }
     CTRACE((tfp, "\tFile is not editable.\n"));
-    return NO;					/* If no excuse, can't do */
 #endif /* NO_GROUPS */
+    return NO;					/* If no excuse, can't do */
 }
 
 /*	Make a save stream.
@@ -2317,7 +2316,7 @@ PUBLIC int HTLoadFile ARGS4(
 	    BOOL forget_multi = NO;
 
 	    STRUCT_DIRENT * dirbuf;
-	    float best = NO_VALUE_FOUND;	/* So far best is bad */
+	    float best = (float) NO_VALUE_FOUND; /* So far best is bad */
 	    HTFormat best_rep = NULL;	/* Set when rep found */
 	    HTAtom * best_enc = NULL;
 	    char * best_name = NULL;	/* Best dir entry so far */

@@ -70,7 +70,7 @@ finddomain.$lo loadmsgcat.$lo localealias.$lo textdomain.$lo l10nflist.$lo \
 explodename.$lo
 CATOBJS = cat-compat.$lo ../po/cat-id-tbl.$lo
 GETTOBJS = intl-compat.$lo
-DISTFILES.common = ChangeLog makefile.in linux-msg.sed po2tbl.sed.in \
+DISTFILES.common = ChangeLog makefile.in linux-msg.sed po2tbl.sed_in \
 xopen-msg.sed $(HEADERS) $(SOURCES)
 DISTFILES.normal = VERSION
 DISTFILES.gettext = libintl.glibc intlh.inst.in

@@ -120,8 +120,8 @@ OBJS = \
 
 all : lynx.exe
 
-clean:
-	-del $(OBJS)
+clean :
+	-del *.obj
 
 lynx.exe: $(OBJS) dirent.obj
 	$(LINK) $(OBJS) $(LIBS)

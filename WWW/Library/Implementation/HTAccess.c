@@ -269,15 +269,16 @@ PUBLIC BOOL override_proxy ARGS1(
     }
     Host = (((at = strchr(host, '@')) != NULL) ? (at+1) : host);
 
+#ifdef VMS
+#define CompareHostname(a,b) strcasecomp(a, b)
+#else
+#define CompareHostname(a,b) strcmp(a, b)
+#endif /* VMS */
+
     if ((acc_method = HTParse(addr, "", PARSE_ACCESS))) {
 	if (!strcmp("file", acc_method) &&
 	    (!strcmp(Host, "localhost") ||
-#ifdef VMS
-	     !strcasecomp(Host, HTHostName())
-#else
-	     !strcmp(Host, HTHostName())
-#endif /* VMS */
-	)) {
+	     !CompareHostname(Host, HTHostName()))) {
 	    FREE(host);
 	    FREE(acc_method);
 	    return YES;

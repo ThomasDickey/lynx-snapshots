@@ -697,16 +697,21 @@ PUBLIC_IF_FIND_LEAKS char * StrAllocVsprintf ARGS4(
 		case 'f':
 		    if (width < prec + NUM_WIDTH)
 			width = prec + NUM_WIDTH;
+		    /* FALLTHRU */
 		case 'i':
+		    /* FALLTHRU */
 		case 'p':
 		    if (width < prec + 2)
 			width = prec + 2; /* leading sign/space/zero, "0x" */
+		    break;
 		case 'c':
+		    break;
 		case '%':
 		    break;
 		default:
 		    if (width < prec)
 			width = prec;
+		    break;
 		}
 	    }
 	    if (width >= (int)tmp_len) {

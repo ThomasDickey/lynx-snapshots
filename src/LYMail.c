@@ -31,9 +31,7 @@ PRIVATE void remove_tildes PARAMS((char *string));
 #define system(p) xsystem(p)	/* 1998/06/05 (Fri) 21:53:30 */
 #endif
 
-#ifdef SH_EX	/* 1999/01/03 (Sun) 22:00:47 */
-
-extern BOOLEAN mail_is_blat;
+#if USE_BLAT_MAILER
 
 /*
 syntax:
@@ -55,7 +53,7 @@ Blat <filename> -t <recipient> [optional switches (see below)]
 
 static char bl_cmd_file[512];
 
-PRIVATE void blat_clean()
+PRIVATE void blat_clean(void)
 {
     if (bl_cmd_file[0]) {
 	bl_cmd_file[0] = '\0';
@@ -68,8 +66,7 @@ PRIVATE char *blat_cmd(
 	char *address,
 	char *subject,
 	char *ccaddr,
-	char *mail_addr
-)
+	char *mail_addr)
 {
     FILE *fp;
     static char b_cmd[512];
@@ -137,8 +134,8 @@ PRIVATE void SafeHTUnEscape ARGS1(
 **  mailform() sends form content to the mailto address(es). - FM
 */
 PUBLIC void mailform ARGS4(
-	CONST char *, 	mailto_address GCC_UNUSED,
-	CONST char *, 	mailto_subject GCC_UNUSED,
+	CONST char *, 	mailto_address,
+	CONST char *, 	mailto_subject,
 	CONST char *, 	mailto_content,
 	CONST char *, 	mailto_type)
 {
@@ -147,29 +144,23 @@ PUBLIC void mailform ARGS4(
     char *ccaddr = NULL;
     char *keywords = NULL;
     char *cp = NULL;
+    char self[80];
     char subject[80];
+    char *searchpart = NULL;
     char cmd[512];
-    int len, i;
+    char *cp0 = NULL, *cp1 = NULL;
+    int ch, len, i;
 #ifdef VMS
     char *address_ptr1, *address_ptr2;
-    BOOLEAN isPMDF = FALSE;
+    BOOLEAN isPMDF = !strncasecomp(system_mail, "PMDF SEND", 9);
     BOOLEAN first = TRUE;
     FILE *hfd;
     char hdrfile[LY_MAXPATH];
 #endif
 #if defined(VMS) || defined(DOSPATH) || defined(SH_EX)
-    int ch;
-    char self[80];
-    char *searchpart = NULL;
-    char *cp0 = NULL, *cp1 = NULL;
     char *command = NULL;
     char my_tmpfile[LY_MAXPATH];
-
-#ifdef VMS
-    if (!strncasecomp(system_mail, "PMDF SEND", 9)) {
-	isPMDF = TRUE;
-    }
-#endif /* VMS */
+#endif
 
     if (!mailto_address || !mailto_content) {
 	HTAlert(BAD_FORM_MAILTO);
@@ -421,7 +412,30 @@ PUBLIC void mailform ARGS4(
 	}
     }
 
-#if defined(VMS) || defined(DOSPATH) || defined(SH_EX)
+#if CAN_PIPE_TO_MAILER
+    sprintf(cmd, "%s %s", system_mail, system_mail_flags);
+    if ((fd = popen(cmd, "w")) == NULL) {
+	HTAlert(FORM_MAILTO_FAILED);
+	FREE(address);
+	FREE(ccaddr);
+	FREE(keywords);
+	return;
+    }
+
+    if (mailto_type && *mailto_type) {
+	fprintf(fd, "Mime-Version: 1.0\n");
+	fprintf(fd, "Content-Type: %s\n", mailto_type);
+    }
+    fprintf(fd, "To: %s\n", address);
+    if (personal_mail_address && *personal_mail_address)
+	fprintf(fd, "From: %s\n", personal_mail_address);
+    if (ccaddr != NULL && *ccaddr != '\0')
+	fprintf(fd, "Cc: %s\n", ccaddr);
+    fprintf(fd, "Subject: %s\n\n", subject);
+    if (keywords != NULL && *keywords != '\0')
+	fprintf(fd, "Keywords: %s\n", keywords);
+    _statusline(SENDING_FORM_CONTENT);
+#else	/* e.g., VMS, DOSPATH */
     if ((fd = LYOpenTemp(my_tmpfile, ".txt", "w")) == NULL) {
 	HTAlert(FORM_MAILTO_FAILED);
 	FREE(address);
@@ -429,7 +443,6 @@ PUBLIC void mailform ARGS4(
 	FREE(keywords);
 	return;
     }
-#endif
 #ifdef VMS
     if (isPMDF) {
 	if ((hfd = LYOpenTemp(hdrfile, ".txt", "w")) == NULL) {
@@ -458,11 +471,13 @@ PUBLIC void mailform ARGS4(
 	fprintf(fd, "X-Content-Type: %s\n\n", mailto_type);
     }
 #else	/* !VMS (DOS) */
-#ifdef SH_EX
+#if USE_BLAT_MAILER
     if (mail_is_blat) {
 	if (strlen(subject) > 70)
 	    subject[70] = '\0';
-    } else {
+    } else
+#endif
+    {
 	if (mailto_type && *mailto_type) {
 	    fprintf(fd, "Mime-Version: 1.0\n");
 	    fprintf(fd, "Content-Type: %s\n", mailto_type);
@@ -473,43 +488,8 @@ PUBLIC void mailform ARGS4(
 	remove_tildes(self);
 	fprintf(fd,"Subject: %.70s\n\n", subject);
     }
-#else
-    if (mailto_type && *mailto_type) {
-	fprintf(fd, "Mime-Version: 1.0\n");
-	fprintf(fd, "Content-Type: %s\n", mailto_type);
-    }
-    fprintf(fd,"To: %s\n", address);
-    if (personal_mail_address && *personal_mail_address)
-	fprintf(fd,"From: %s\n", personal_mail_address);
-    remove_tildes(self);
-    fprintf(fd,"Subject: %.70s\n\n", subject);
-#endif	/* SH_EX */
-#endif
-
-#else	/* !(defined(VMS) || defined(DOSPATH) || defined(SH_EX)) */
-    sprintf(cmd, "%s %s", system_mail, system_mail_flags);
-    if ((fd = popen(cmd, "w")) == NULL) {
-	HTAlert(FORM_MAILTO_FAILED);
-	FREE(address);
-	FREE(ccaddr);
-	FREE(keywords);
-	return;
-    }
-
-    if (mailto_type && *mailto_type) {
-	fprintf(fd, "Mime-Version: 1.0\n");
-	fprintf(fd, "Content-Type: %s\n", mailto_type);
-    }
-    fprintf(fd, "To: %s\n", address);
-    if (personal_mail_address && *personal_mail_address)
-	fprintf(fd, "From: %s\n", personal_mail_address);
-    if (ccaddr != NULL && *ccaddr != '\0')
-	fprintf(fd, "Cc: %s\n", ccaddr);
-    fprintf(fd, "Subject: %s\n\n", subject);
-    if (keywords != NULL && *keywords != '\0')
-	fprintf(fd, "Keywords: %s\n", keywords);
-    _statusline(SENDING_FORM_CONTENT);
 #endif /* VMS */
+#endif /* CAN_PIPE_TO_MAILER */
 
     /*
      *	Break up the content into lines with a maximum length of 78.
@@ -543,7 +523,7 @@ PUBLIC void mailform ARGS4(
     if (len)
 	fprintf(fd, "%s\n", &mailto_content[i]);
 
-#if defined(UNIX) && !defined(__CYGWIN__)
+#if CAN_PIPE_TO_MAILER
     pclose(fd);
     sleep(MessageSecs);
 #endif /* UNIX */
@@ -666,7 +646,7 @@ PUBLIC void mailform ARGS4(
     LYRemoveTemp(my_tmpfile);
     LYRemoveTemp(hdrfile);
 #else /* DOSPATH */
-#ifdef SH_EX	/* 1998/05/04 (Mon) 22:18:44 */
+#if USE_BLAT_MAILER
     if (mail_is_blat) {
 	StrAllocCopy(command,
 		blat_cmd(
@@ -678,7 +658,9 @@ PUBLIC void mailform ARGS4(
 		    personal_mail_address
 		)
 	);
-    } else {
+    } else
+#endif
+    {
 	/* for sendmail.exe */
 	StrAllocCopy(command, system_mail);
 	StrAllocCat(command, " -t \"");
@@ -686,13 +668,7 @@ PUBLIC void mailform ARGS4(
 	StrAllocCat(command, "\" -F ");
 	StrAllocCat(command, my_tmpfile);
     }
-#else	/* !SH_EX */
-    StrAllocCopy(command, system_mail);
-    StrAllocCat(command, " -t \"");
-    StrAllocCat(command, address);
-    StrAllocCat(command, "\" -F ");
-    StrAllocCat(command, my_tmpfile);
-#endif
+
     stop_curses();
     printf("%s\n\n$ %s\n\n%s", SENDING_FORM_CONTENT, command, PLEASE_WAIT);
     LYSystem(command);	/* Mail sending form content (DOS/Windows) */
@@ -700,10 +676,11 @@ PUBLIC void mailform ARGS4(
     sleep(MessageSecs);
     start_curses();
     LYRemoveTemp(my_tmpfile);
-#ifdef SH_EX
+
+#if USE_BLAT_MAILER
     if (mail_is_blat)
 	blat_clean();
-#endif /* SH_EX */
+#endif
 #endif
 #endif /* VMS */
 
@@ -744,7 +721,6 @@ PUBLIC void mailmsg ARGS4(
     char hdrfile[LY_MAXPATH];
     FILE *hfd;
     char *command = NULL;
-    BOOLEAN first = TRUE;
 
     CTRACE((tfp, "mailmsg(%d, \"%s\", \"%s\", \"%s\")\n", cur,
 	owner_address?owner_address:"<nil>",
@@ -861,7 +837,7 @@ PUBLIC void mailmsg ARGS4(
 	return;
     }
 
-#if defined(UNIX) && !defined(__CYGWIN__)
+#if CAN_PIPE_TO_MAILER
     HTSprintf0(&cmd, "%s %s", system_mail, system_mail_flags);
     if ((fd = popen(cmd, "w")) == NULL) {
 	FREE(address);
@@ -876,8 +852,7 @@ PUBLIC void mailmsg ARGS4(
     }
     fprintf(fd, "X-URL: %s\n", filename);
     fprintf(fd, "X-Mailer: Lynx, Version %s\n\n", LYNX_VERSION);
-#endif /* UNIX */
-#if defined(VMS) || defined(DOSPATH) || defined(WIN_EX)
+#else
     if ((fd = LYOpenTemp(my_tmpfile, ".txt", "w")) == NULL) {
 	CTRACE((tfp, "mailmsg: Could not fopen '%s'.\n", my_tmpfile));
 	FREE(address);
@@ -897,11 +872,11 @@ PUBLIC void mailmsg ARGS4(
 	fprintf(fd, "X-URL: %s\n", filename);
 	fprintf(fd, "X-Mailer: Lynx, Version %s\n\n", LYNX_VERSION);
     }
-#else
+#else /* !VMS, e.g., DOSPATH */
     sprintf(subject, "Lynx Error in %.56s", filename);
     ccaddr = personal_mail_address;
 #endif /* VMS */
-#endif /* VMS || DOSPATH */
+#endif /* CAN_PIPE_TO_MAILER */
 
     fprintf(fd, gettext("The link   %s :?: %s \n"),
 		links[cur].lname, links[cur].target);
@@ -986,7 +961,7 @@ PUBLIC void mailmsg ARGS4(
 	LYRemoveTemp(hdrfile);
     }
 #else /* DOSPATH */
-#ifdef SH_EX
+#if USE_BLAT_MAILER
     if (mail_is_blat)
 	strcpy(cmd,
 		blat_cmd(
@@ -999,17 +974,16 @@ PUBLIC void mailmsg ARGS4(
 		)
 	);
     else
+#endif
 	sprintf(cmd, "%s -t \"%s\" -F %s", system_mail, address, my_tmpfile);
-#else /* !SH_EX */
-    sprintf(cmd, "%s -t \"%s\" -F %s", system_mail, address, my_tmpfile);
-#endif /* SH_EX */
+
     LYSystem(cmd);	/* Mail (DOS/Windows) */
 
 #if 0	/* Not SH_EX */
     FREE(command);
 #endif
     LYRemoveTemp(my_tmpfile);
-#ifdef SH_EX
+#if USE_BLAT_MAILER
     if (mail_is_blat)
 	blat_clean();
 #endif
@@ -1399,11 +1373,11 @@ PUBLIC void reply_by_mail ARGS4(
 		(filename && *filename) ? "" : address);
 	fprintf((isPMDF ? hfd : fd),
 		"X-Mailer: Lynx, Version %s\n",LYNX_VERSION);
-#ifdef NO_ANONYMOUS_MAIL
+#ifdef NO_ANONYMOUS_EMAIL
 	if (!isPMDF) {
 	    fprintf(fd, "\n");
 	}
-#endif /* NO_ANONYMOUS_MAIL */
+#endif /* NO_ANONYMOUS_EMAIL */
     }
 #else /* Unix/DOS/Windows */
     /*
@@ -1636,15 +1610,8 @@ PUBLIC void reply_by_mail ARGS4(
     }
     addstr("\n");
     remove_tildes(user_input);
-#ifdef VMS
     sprintf(subject, "%.70s", user_input);
-#else
-#ifdef SH_EX
-    if (mail_is_blat)
-	sprintf(subject, "%.70s", user_input);
-#else	/* @@@ */
-    sprintf(subject, "%.70s", user_input);
-#endif
+#ifndef VMS
     StrAllocCat(header, "Subject: ");
     StrAllocCat(header, user_input);
     StrAllocCat(header, "\n");
@@ -2013,86 +1980,83 @@ PUBLIC void reply_by_mail ARGS4(
     FREE(command);
     sleep(AlertSecs);
     start_curses();
-    goto cleandown;
 #else /* Unix/DOS/Windows */
     /*
      *	Send the tmpfile into sendmail.
      */
     _statusline(SENDING_YOUR_MSG);
-    sprintf(cmd, "%s %s", system_mail, system_mail_flags);
-#if defined(DOSPATH) || defined(WIN_EX)
-    if ((fp = LYOpenTemp(tmpfile2, ".txt", "w")) == NULL) {
-	HTAlert(MAILTO_URL_TEMPOPEN_FAILED);
-	return;
-    }
-#else
+#if CAN_PIPE_TO_MAILER
     signal(SIGINT, SIG_IGN);
+    sprintf(cmd, "%s %s", system_mail, system_mail_flags);
+    CTRACE((tfp, "%s\n", cmd));
     fp = popen(cmd, "w");
     if (fp == NULL) {
 	HTInfoMsg(COMMENT_REQUEST_CANCELLED);
-	goto cleanup;
     }
-#endif /* DOSPATH */
-    fd = fopen(my_tmpfile, TXT_R);
-    if (fd == NULL) {
-	HTInfoMsg(COMMENT_REQUEST_CANCELLED);
-	pclose(fp);
-	goto cleanup;
-    }
-#ifdef SH_EX
-    if (!mail_is_blat)
-	fputs(header, fp);
 #else
-    fputs(header, fp);
+    if ((fp = LYOpenTemp(tmpfile2, ".txt", "w")) == NULL) {
+	HTAlert(MAILTO_URL_TEMPOPEN_FAILED);
+    }
+#endif /* CAN_PIPE_TO_MAILER */
+    if (fp != 0) {
+	fd = fopen(my_tmpfile, TXT_R);
+	if (fd == NULL) {
+	    HTInfoMsg(COMMENT_REQUEST_CANCELLED);
+#if CAN_PIPE_TO_MAILER
+	    pclose(fp);
+#else
+	    LYCloseTempFP(fp);
+#endif /* CAN_PIPE_TO_MAILER */
+	} else {
+#if USE_BLAT_MAILER
+	    if (!mail_is_blat)
+		fputs(header, fp);
+#else
+	    fputs(header, fp);
 #endif
-    while ((n = fread(buf, 1, sizeof(buf), fd)) != 0) {
-	fwrite(buf, 1, n, fp);
-    }
-#if defined(DOSPATH) || defined(SH_EX)
-#ifdef SH_EX	/* 1998/05/04 (Mon) 22:40:35 */
-    if (mail_is_blat) {
-	StrAllocCopy(command,
-		blat_cmd(
-		    system_mail,
-		    tmpfile2,
-		    address,
-		    subject,
-		    ccaddr,
-		    personal_mail_address
-		)
-	);
-    } else {
-	StrAllocCopy(command, system_mail);
-	StrAllocCat(command, " -t \"");
-	StrAllocCat(command, address);
-	StrAllocCat(command, "\" -F ");
-	StrAllocCat(command, tmpfile2);
-    }
-#else /* DOSPATH */
-    StrAllocCopy(command, system_mail);
-    StrAllocCat(command, " -t \"");
-    StrAllocCat(command, address);
-    StrAllocCat(command, "\" -F ");
-    StrAllocCat(command, tmpfile2);
+	    while ((n = fread(buf, 1, sizeof(buf), fd)) != 0) {
+		fwrite(buf, 1, n, fp);
+	    }
+#if CAN_PIPE_TO_MAILER
+	    pclose(fp);
+#else
+	    LYCloseTempFP(fp);	/* Close the tmpfile. */
+#if USE_BLAT_MAILER
+	    if (mail_is_blat) {
+		StrAllocCopy(command,
+			blat_cmd(
+			    system_mail,
+			    tmpfile2,
+			    address,
+			    subject,
+			    ccaddr,
+			    personal_mail_address
+			)
+		);
+	    } else
 #endif	/* SH_EX */
-    LYCloseTempFP(fp);	/* Close the tmpfile. */
-    stop_curses();
-    printf("%s\n\n$ %s\n\n%s", SENDING_COMMENT, command, PLEASE_WAIT);
-    LYSystem(command);	/* SENDING COMMENT (DOS/Windows/Unix) */
-    FREE(command);
-    sleep(MessageSecs);
-    start_curses();
-    LYRemoveTemp(tmpfile2);	/* Delete the tmpfile. */
-#ifdef SH_EX
-    if (mail_is_blat)
-	blat_clean();
+	    {
+		StrAllocCopy(command, system_mail);
+		StrAllocCat(command, " -t \"");
+		StrAllocCat(command, address);
+		StrAllocCat(command, "\" -F ");
+		StrAllocCat(command, tmpfile2);
+	    }
+	    stop_curses();
+	    printf("%s\n\n$ %s\n\n%s", SENDING_COMMENT, command, PLEASE_WAIT);
+	    LYSystem(command);	/* SENDING COMMENT (DOS/Windows/Unix) */
+	    FREE(command);
+	    sleep(MessageSecs);
+	    start_curses();
+	    LYRemoveTemp(tmpfile2);	/* Delete the tmpfile. */
+#if USE_BLAT_MAILER
+	    if (mail_is_blat)
+		blat_clean();
 #endif
-#else /* !DOSPATH */
-    pclose(fp);
-#endif	/* DOSPATH */
-    fclose(fd); /* Close the tmpfile. */
-
-    CTRACE((tfp, "%s\n", cmd));
+#endif /* CAN_PIPE_TO_MAILER */
+	    fclose(fd); /* Close the tmpfile. */
+	}
+    }
 #endif /* VMS */
 
     /*
@@ -2100,14 +2064,8 @@ PUBLIC void reply_by_mail ARGS4(
      */
 cleanup:
     signal(SIGINT, cleanup_sig);
-#if !defined(VMS) && !defined(DOSPATH) || defined(SH_EX)
-    FREE(header);
-#endif /* !VMS */
-
-#if defined(VMS)
-cleandown:
-#endif /* VMS */
     term_letter = FALSE;
+
 #ifdef VMS
     FREE(command);
     while (LYRemoveTemp(my_tmpfile) == 0)
@@ -2116,8 +2074,10 @@ cleandown:
 	LYRemoveTemp(hdrfile); /* Delete the hdrfile. */
     }
 #else
+    FREE(header);
     LYRemoveTemp(my_tmpfile);  /* Delete the tmpfile. */
 #endif /* VMS */
+
     FREE(address);
     FREE(ccaddr);
     FREE(keywords);

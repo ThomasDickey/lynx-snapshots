@@ -792,8 +792,8 @@ try_again:
 
       StrAllocCat(command, anAnchor->post_data);
     }
-  else
-      StrAllocCat(command, crlf);	/* Blank line means "end" of headers */
+    else
+        StrAllocCat(command, crlf);	/* Blank line means "end" of headers */
 
   CTRACE((tfp, "Writing:\n%s%s----------------------------------\n",
 	       command,

@@ -1,11 +1,46 @@
+#  This file is a placeholder;
+#  see http://www.iro.umontreal.ca/contrib/po/HTML/domain-lynx.html
+
+# Dutch messages for Lynx.
+# Copyright (C) 1999 Free Software Foundation, Inc.
+# Tijs van Bakel <smoke@casema.net>, 1999.
+# Language-Team: Dutch <nl@li.org>
+
 msgid ""
 msgstr ""
-"Date: 1998-08-22 16:12:20-0400\n"
-"From: Webmaster Jim <jspath@bcpl.net>\n"
-"Content-Type: text/plain; charset=\n"
-"Xgettext-Options: --default-domain=po/nl\n"
-"Files: src/LYMain.c\n"
+"Project-Id-Version: lynx 2.8.3\n"
+"POT-Creation-Date: 1999-10-19 21:50-0400\n"
+"PO-Revision-Date: 1999-12-19 14:17+01:00\n"
+"Last-Translator: Tijs van Bakel <smoke@casema.net>\n"
+"Language-Team: Dutch <nl@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=ISO-8859-1\n"
+"Content-Transfer-Encoding: 8-bit\n"
 
-#: src/LYMain.c:2502
-msgid "%s Version %s %s"
-msgstr ""
+#: src/LYMain.c:2912
+#, c-format
+msgid "\n%s Version %s (%.*s)\n"
+msgstr "\n%s Versie %s (%.*s)\n"
+
+#: src/LYMain.c:2924
+#, c-format
+msgid "Built on %s %s %s\n"
+msgstr "Gebouwd op %s %s %s\n"
+
+#: src/LYMain.c:2928
+msgid "Copyrights held by the University of Kansas, CERN, and other contributors.\n"
+msgstr "Copyrights in handen van `the University of Kansas', CERN, en andere medewerkers.\n"
+
+#: src/LYMain.c:2930
+msgid "Distributed under the GNU General Public License.\n"
+msgstr "Gedistribueerd onder het GNU General Public License.\n"
+
+#: src/LYMain.c:2932
+msgid "See http://lynx.browser.org/ and the online help for more information.\n\n"
+msgstr "Zie http://lynx.browser.org/ en de online help voor meer informatie.\n\n"
+
+#: src/LYMain.c:3590
+#, c-format
+msgid "USAGE: %s [options] [file]\n"
+msgstr "GEBRUIK: %s [opties] [bestand]\n"
+

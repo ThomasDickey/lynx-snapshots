@@ -51,7 +51,7 @@ extern BOOL can_justify_stack_depth;/* can be 0 or 1 if all code is correct*/
  * This is a macro (that uses 'me').
  */
 #define CAN_JUSTIFY_START  mark_justify_start_position(me->text);
-#define CANT_JUSTIFY_THIS_LINE can_justify_this_line=FALSE;
+#define CANT_JUSTIFY_THIS_LINE can_justify_this_line = FALSE
 #define EMIT_IFDEF_EXP_JUSTIFY_ELTS(x) x
     /*defined in order not to wrap single line of code  into #ifdef/#endif */
 

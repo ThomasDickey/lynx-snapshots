@@ -26,6 +26,7 @@
 
 #include <LYexit.h>
 #include <LYLeaks.h>
+#include <HTCJK.h>
 
 PUBLIC HTList * Visited_Links = NULL;	/* List of safe popped docs. */
 PUBLIC int Visited_Links_As = VISITED_LINKS_AS_TREE;
@@ -36,6 +37,8 @@ PRIVATE VisitedLink Latest_last;
 PRIVATE VisitedLink *Latest_tree;
 PRIVATE VisitedLink *First_tree;
 PRIVATE VisitedLink *Last_by_first;
+
+extern HTCJKlang HTCJK;
 
 #ifdef LY_FIND_LEAKS
 /*
@@ -75,6 +78,7 @@ PUBLIC void LYAddVisitedLink ARGS1(
     VisitedLink *new;
     HTList *cur;
     char *title = (doc->title ? doc->title : NO_TITLE);
+    char *tmp_buffer = NULL;
 
     if (!(doc->address && *doc->address)) {
 	PrevVisitedLink = NULL;
@@ -156,7 +160,26 @@ PUBLIC void LYAddVisitedLink ARGS1(
     if ((new = (VisitedLink *)calloc(1, sizeof(*new))) == NULL)
 	outofmem(__FILE__, "LYAddVisitedLink");
     StrAllocCopy(new->address, doc->address);
-    StrAllocCopy(new->title, title);
+    if (HTCJK == JAPANESE) {
+	if ((tmp_buffer = (char *) malloc (strlen(title)+1)) == 0)
+	    outofmem(__FILE__, "LYAddVisitedLink");
+	switch(kanji_code) {
+	case EUC:
+	    TO_EUC((CONST unsigned char *) title, (unsigned char *) tmp_buffer);
+	    break;
+	case SJIS:
+	    TO_SJIS((CONST unsigned char *) title, (unsigned char *) tmp_buffer);
+	    break;
+	default:
+	    CTRACE((tfp, "\nLYADDVisitedLink: kanji_code is an unexpected value."));
+	    strcpy(tmp_buffer, title);
+	    break;
+	}
+	StrAllocCopy(new->title, tmp_buffer);
+	FREE(tmp_buffer);
+    } else {
+	StrAllocCopy(new->title, title);
+    }
 
     /* First-visited chain */
     HTList_appendObject(Visited_Links, new);	/* At end */
@@ -259,6 +282,8 @@ PUBLIC void LYpush ARGS2(
 	document *,	doc,
 	BOOLEAN,	force_push)
 {
+    char *tmp_buffer = NULL;
+
     /*
      *	Don't push NULL file names.
      */
@@ -309,7 +334,26 @@ PUBLIC void LYpush ARGS2(
 	history[nhist].link = doc->link;
 	history[nhist].line = doc->line;
 	history[nhist].title = NULL;
-	StrAllocCopy(history[nhist].title, doc->title);
+	if (HTCJK == JAPANESE) {
+	    if ((tmp_buffer = (char *) malloc (strlen(doc->title)+1)) == 0)
+		outofmem(__FILE__, "LYpush");
+	    switch(kanji_code) {
+	    case EUC:
+	    	TO_EUC((CONST unsigned char *) doc->title, (unsigned char *) tmp_buffer);
+	    	break;
+	    case SJIS:
+	    	TO_SJIS((CONST unsigned char *) doc->title, (unsigned char *) tmp_buffer);
+	    	break;
+	    default:
+		CTRACE((tfp, "\nLYpush: kanji_code is an unexpected value."));
+		strcpy(tmp_buffer, doc->title);
+	    	break;
+	    }
+	    StrAllocCopy(history[nhist].title, tmp_buffer);
+	    FREE(tmp_buffer);
+	} else {
+	    StrAllocCopy(history[nhist].title, doc->title);
+	}
 	history[nhist].address = NULL;
 	StrAllocCopy(history[nhist].address, doc->address);
 	history[nhist].post_data = NULL;

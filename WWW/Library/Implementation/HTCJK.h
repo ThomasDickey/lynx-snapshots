@@ -37,11 +37,21 @@
 #define IS_SJIS_HI1(hi) ((0x81<=hi)&&(hi<=0x9F))	/* 1st lev. */
 #define IS_SJIS_HI2(hi) ((0xE0<=hi)&&(hi<=0xEF))	/* 2nd lev. */
 #define IS_SJIS(hi,lo,in_sjis) (!IS_SJIS_LO(lo)?0:IS_SJIS_HI1(hi)?(in_sjis=1):in_sjis&&IS_SJIS_HI2(hi))
+#define IS_SJIS_2BYTE(hi,lo) (IS_SJIS_LO(lo)&&(IS_SJIS_HI1(hi)||IS_SJIS_HI2(hi)))
+#define IS_SJIS_X0201KANA(lo) ((0xA1<=lo)&&(lo<=0xDF))
 
+#if 0 /* IS_EUC_LOS isn't used because we are interested only in EUC-JP's
+       * code set 0 to 2 now. -- TH
+       * ref: http://www.isi.edu/in-notes/iana/assignments/character-sets
+       */
 #define IS_EUC_LOS(lo)	((0x21<=lo)&&(lo<=0x7E))	/* standard */
+#endif
 #define IS_EUC_LOX(lo)	((0xA1<=lo)&&(lo<=0xFE))	/* extended */
 #define IS_EUC_HI(hi)	((0xA1<=hi)&&(hi<=0xFE))
-#define IS_EUC(hi,lo) (IS_EUC_HI(hi) && (IS_EUC_LOS(lo) || IS_EUC_LOX(lo)))
+#define IS_EUC_X0201KANA(hi,lo) ((hi==0x8E)&&(0xA1<=lo)&&(lo<=0xDF))
+#define IS_EUC(hi,lo) ((IS_EUC_HI(hi) && IS_EUC_LOX(lo))||IS_EUC_X0201KANA(hi,lo))
+
+#define IS_JAPANESE_2BYTE(hi,lo) (IS_SJIS_2BYTE(hi,lo) || IS_EUC(hi,lo))
 
 #define IS_BIG5_LOS(lo)	((0x40<=lo)&&(lo<=0x7E))	/* standard */
 #define IS_BIG5_LOX(lo)	((0xA1<=lo)&&(lo<=0xFE))	/* extended */

@@ -18,9 +18,7 @@
 **           returns a pointer to a static string which must be copied if
 **                it is to be kept.
 */
-#ifndef _WINDOWS
 extern CONST char * HTInetString PARAMS((struct sockaddr_in* mysin));
-#endif
 
 
 /*      Encode INET status (as in sys/errno.h)                    inet_status()

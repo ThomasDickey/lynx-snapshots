@@ -150,6 +150,9 @@ EOF
 		echo pyramid-pyramid-bsd
 	fi
 	exit 0 ;;
+    "Power Macintosh":Rhapsody:*:*)
+	echo powerpc-apple-rhapsody`echo ${UNAME_RELEASE}|sed -e 's/[^.]*//'`
+	exit 0 ;;
     NILE:*:*:dcosx)
 	echo pyramid-pyramid-svr4
 	exit 0 ;;

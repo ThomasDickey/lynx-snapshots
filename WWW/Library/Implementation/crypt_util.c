@@ -278,7 +278,7 @@ static ufc_long longmask[32] = {
 
 #ifdef DEBUG
 
-pr_bits ARGS2(
+void pr_bits ARGS2(
 	ufc_long *,	a,
 	int,		n)
 {
@@ -295,7 +295,7 @@ pr_bits ARGS2(
     printf(" ");
 }
 
-static set_bits ARGS2(
+static void set_bits ARGS2(
 	ufc_long,	v,
 	ufc_long *,	b)
 {
@@ -949,7 +949,7 @@ void ufc_setup_password(cookie, s)
 
     setup_salt(s);
     dl1 = dl2 = dr1 = dr2 = 0;
-    for(i = 0, s += 2; c = *s++; i++) {
+    for(i = 0, s += 2; (c = *s++) != 0; i++) {
       int x = ascii_to_bin(c);
       dl1 |= revfinal[i][x][0];
       dl2 |= revfinal[i][x][1];

@@ -597,11 +597,11 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 	    */
 	    HText_appendCharacter(me->text, (char)(*p & 0x7f));
 #endif /* NOTDEFINED */
-	   /*
-	   **  If we don't actually want the character,
-	   **  make it safe and output that now. - FM
-	   */
-	   } else if ((c_unsign > 0 &&
+	    /*
+	    **  If we don't actually want the character,
+	    **  make it safe and output that now. - FM
+	    */
+	} else if ((c_unsign > 0 &&
 		      (int) c_unsign < LYlowest_eightbit[me->outUCLYhndl]) ||
 		      (me->T.trans_from_uni && !HTPassEightBitRaw)) {
 	    /*
@@ -618,9 +618,9 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 		/*
 		**  Got an ASCII character (yippey). - FM
 		*/
-	    c = FROMASCII((char)uck);
-	    HText_appendCharacter(me->text, c);
-	} else if ((chk && uck == -4) &&
+		c = FROMASCII((char)uck);
+		HText_appendCharacter(me->text, c);
+	    } else if ((chk && uck == -4) &&
 		       (uck = UCTransUniCharStr(replace_buf,
 						60, code,
 						UCGetLYhndl_byMIME("us-ascii"),
@@ -653,8 +653,8 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 		**  pass it. - FM
 		*/
 	} else if (c_unsign != 0 && c_unsign < 256) {
-		HText_appendCharacter(me->text, c);
-	    }
+	    HText_appendCharacter(me->text, c);
+	}
 #endif /* REMOVE_CR_ONLY */
     }
 }

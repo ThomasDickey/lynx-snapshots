@@ -228,9 +228,10 @@ typedef enum {
 #ifdef SH_EX
   , LYK_CHG_CENTER
   , LYK_TO_CLIPBOARD
-  , LYK_CHG_KCODE
 #endif /* SH_EX */
-
+#ifdef KANJI_CODE_OVERRIDE
+  , LYK_CHG_KCODE
+#endif
 } LYKeymapCode;
 
 

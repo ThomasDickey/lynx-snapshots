@@ -7,8 +7,8 @@ WWW_MACH = djgpp
 # The ASIS repository's name for the machine we are on
 #ASIS_MACH = hardware/os
 
-CFLAGS = -O3 -DUSE_SLANG -DUSE_ZLIB -DDOSPATH -DNOUSERS -DDISP_PARTIAL \
--DDIRED_SUPPORT -DSOURCE_CACHE -DUSE_PSRC \
+CFLAGS = -O1 -DUSE_SLANG -DUSE_ZLIB -DDOSPATH -DNOUSERS -DDISP_PARTIAL \
+-DDIRED_SUPPORT -DSOURCE_CACHE -DUSE_PRETTYSRC \
 -DWATT32 \
 -I../Implementation \
 -I../../../djgpp/watt32/inc -I../../../djgpp/watt32/inc/sys \

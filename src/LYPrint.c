@@ -21,10 +21,6 @@
 #define CancelPrint(msg) HTInfoMsg(msg); goto done
 #define CannotPrint(msg) HTAlert(msg); goto done
 
-#ifdef WIN_EX
-static BOOLEAN mail_is_blat = FALSE;
-#endif
-
 /*
  *  printfile prints out the current file minus the links and targets
  *  to a variety of places
@@ -668,11 +664,11 @@ PRIVATE void send_file_to_mail ARGS3(
     LYRemoveTemp(my_temp);
 #else /* !VMS (Unix or DOS) */
 
-#if defined(DOSPATH)
-    outfile_fp = LYOpenTemp(my_temp, ".txt", "w");
-#else
+#if CAN_PIPE_TO_MAILER 
     HTSprintf0(&buffer, "%s %s", system_mail, system_mail_flags);
     outfile_fp = popen(buffer, "w");
+#else
+    outfile_fp = LYOpenTemp(my_temp, ".txt", "w");
 #endif
     if (outfile_fp == NULL) {
 	CannotPrint(MAIL_REQUEST_FAILED);
@@ -771,14 +767,14 @@ PRIVATE void send_file_to_mail ARGS3(
 	printlist(outfile_fp, FALSE);
 
 #if defined(WIN_EX) || defined(__DJGPP__)
-#if defined(WIN_EX)	/* 1998/08/17 (Mon) 16:29:49 */
+#if USE_BLAT_MAILER
     if (mail_is_blat)
 	HTSprintf0(&buffer, "%s %s -t \"%s\"",
-		system_mail, my_temp, user_response);
+		   system_mail, my_temp, user_response);
     else
-#endif /* WIN_EX */
+#endif
 	HTSprintf0(&buffer, "%s -t \"%s\" -F %s",
-			system_mail, user_response, my_temp);
+		   system_mail, user_response, my_temp);
     LYCloseTempFP(outfile_fp);	/* Close the tmpfile. */
 
     stop_curses();

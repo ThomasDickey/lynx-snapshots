@@ -38,6 +38,31 @@
 #include <HTChunk.h>
 #endif
 
+/*
+ * Ifdef's in case we have a working popen/pclose, useful for piping to the
+ * mail program.
+ */
+#if !defined(HAVE_POPEN) || defined(VMS) || defined(DOSPATH) || defined(__CYGWIN__)
+#define CAN_PIPE_TO_MAILER 0
+#else
+#define CAN_PIPE_TO_MAILER 1
+#endif
+
+/*
+ * Ifdef's for specific mailers:
+ */
+#ifdef VMS
+#define USE_PMDF_MAILER 1
+#else
+#define USE_PMDF_MAILER 0
+#endif
+
+#ifdef SH_EX
+#define USE_BLAT_MAILER 1
+#else
+#define USE_BLAT_MAILER 0
+#endif
+
 #ifdef SOCKS
 extern BOOLEAN socks_flag;
 #endif /* SOCKS */
@@ -439,11 +464,14 @@ extern int lynx_timeout;
 
 #ifdef SH_EX
 extern BOOLEAN show_cfg;
-extern BOOLEAN mail_is_blat;
 #ifdef WIN_EX
 extern int     debug_delay;
 #endif
 extern BOOLEAN no_table_center;
+#endif
+
+#if USE_BLAT_MAILER
+extern BOOLEAN mail_is_blat;
 #endif
 
 #if defined(__CYGWIN__)

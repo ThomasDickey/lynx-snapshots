@@ -1259,14 +1259,12 @@ PUBLIC int lynx_initialize_keymaps NOARGS
     setup_vtXXX_keymap();
     define_key ("\033[M", MOUSE_KEYSYM);
 
-    if (SLang_Error
-    || (-1 == read_keymap_file ()))
-    SLang_exit_error ("Unable to initialize keymaps");
-    return 0;
+    if (SLang_Error)
+	SLang_exit_error ("Unable to initialize keymaps");
 #else
     setup_vtXXX_keymap();
-    return read_keymap_file();
 #endif
+    return read_keymap_file();
 }
 
 #endif				       /* USE_KEYMAPS */
@@ -1505,7 +1503,7 @@ re_read:
     if (LYNoZapKey > 1 && errno != EINTR &&
 	(c == EOF
 #ifdef USE_SLANG
-	 || c = 0xFFFF
+	 || (c == 0xFFFF)
 #endif
 	    )) {
 	int fd, kbd_fd;
@@ -1724,6 +1722,7 @@ re_read:
 		    c = F1;
 		break;
 	    }
+	    /* FALLTHRU */
 	default:
 	    if (c == CH_ESC && a == b && !found_CSI(c,b)) {
 		current_modifier = LKC_MOD2;
@@ -1767,9 +1766,8 @@ re_read:
 #endif
     if (done_esc) {
 	/* don't do keypad() switches below, we already got it - kw */
-    }
+    } else {
 #if HAVE_KEYPAD
-    else {
 	/*
 	 *  Convert keypad() mode keys into Lynx defined keys.
 	 */
@@ -2159,10 +2157,8 @@ re_read:
 	    break;
 #endif /* NCURSES_MOUSE_VERSION */
 	}
-    }
 #endif /* HAVE_KEYPAD */
 #ifdef DJGPP_KEYHANDLER
-    else {
 	switch(c) {
 	case K_Down:		   /* The four arrow keys ... */
 	case K_EDown:
@@ -2220,10 +2216,8 @@ re_read:
 	   c = BACKTAB_KEY;
 	   break;
 	}
-    }
 #endif /* DGJPP_KEYHANDLER */
 #if defined(USE_SLANG) && (defined(__DJGPP__) || defined(__CYGWIN__)) && !defined(DJGPP_KEYHANDLER)  && !defined(USE_KEYMAPS)
-    else {
 	switch(c) {
 	case SL_KEY_DOWN:	   /* The four arrow keys ... */
 	   c = DNARROW;
@@ -2263,8 +2257,8 @@ re_read:
 	   c = REMOVE_KEY;
 	   break;
 	}
-    }
 #endif /* USE_SLANG && __DJGPP__ && !DJGPP_KEYHANDLER && !USE_KEYMAPS */
+    }
 
     if (c&(LKC_ISLAC|LKC_ISLECLAC))
 	return(c);
@@ -2590,8 +2584,9 @@ PUBLIC int LYEdit1 ARGS4(
 	 *  character in the current display character set.
 	 *  Otherwise, we treat this as LYE_ENTER.
 	 */
-	 if (HTCJK == NOCJK && LYlowest_eightbit[current_char_set] > 0x97)
-	     return(ch);
+	if (HTCJK == NOCJK && LYlowest_eightbit[current_char_set] > 0x97)
+	    return(ch);
+	/* FALLTHRU */
 #endif
     case LYE_CHAR:
 #ifdef EXP_KEYBOARD_LAYOUT
@@ -3035,12 +3030,11 @@ PUBLIC void LYRefreshEdit ARGS1(
  *   extending the string.  Looks awful, but that way we can keep up with
  *   data entry at low baudrates.
  */
-    if ((DspStart + DspWdth) <= length)
+    if ((DspStart + DspWdth) <= length) {
+	if (Pos >= (DspStart + DspWdth) - Margin) {
 #ifndef SUPPORT_MULTIBYTE_EDIT
-	if (Pos >= (DspStart + DspWdth) - Margin)
 	    DspStart=(Pos - DspWdth) + Margin;
 #else /* SUPPORT_MULTIBYTE_EDIT */
-	if (Pos >= (DspStart + DspWdth) - Margin) {
 	    if (HTCJK != NOCJK) {
 		int tmp = (Pos - DspWdth) + Margin;
 
@@ -3049,10 +3043,12 @@ PUBLIC void LYRefreshEdit ARGS1(
 			DspStart++;
 		    DspStart++;
 		}
-	    } else
-		DspStart=(Pos - DspWdth) + Margin;
-	}
+	    } else {
+		DspStart = (Pos - DspWdth) + Margin;
+	    }
 #endif /* SUPPORT_MULTIBYTE_EDIT */
+	}
+    }
 
     if (Pos < DspStart + Margin) {
 #ifndef SUPPORT_MULTIBYTE_EDIT
@@ -3234,23 +3230,21 @@ again:
 	    goto again;
 #endif
 #endif /* SUPPORT_MULTIBYTE_EDIT */
+
+	if (term_letter || term_options
 #ifdef VMS
-	if (term_letter || term_options ||
-#ifndef DISABLE_NEWS
-	      term_message ||
-#endif
-	      HadVMSInterrupt) {
-	    HadVMSInterrupt = FALSE;
-	    ch = 7;
-	}
-#else
-      if (term_letter || term_options
+	      || HadVMSInterrupt
+#endif /* VMS */
 #ifndef DISABLE_NEWS
 	      || term_message
 #endif
-	      )
-	    ch = 7;
+	      ) {
+#ifdef VMS
+	    HadVMSInterrupt = FALSE;
 #endif /* VMS */
+	    ch = 7;
+	}
+
 	if (recall && (ch == UPARROW || ch == DNARROW)) {
 	    strcpy(inputline, MyEdit.buffer);
 	    LYAddToCloset(MyEdit.buffer);
@@ -3318,6 +3312,7 @@ again:
 		LYLineEdit(&MyEdit,ch, FALSE);
 		break;
 	    }
+	    /* FALLTHRU */
 #endif
 	case LYE_ENTER:
 	    /*

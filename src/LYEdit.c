@@ -18,9 +18,9 @@ PUBLIC BOOLEAN editor_can_position NOARGS
 #else
     return (strstr(editor, "emacs") || strstr(editor, "vi") ||
 	strstr(editor, "pico")  || strstr(editor, "jove")   ||
- 	strstr(editor, "jed")   || strstr(editor, "joe")    ||
- 	strstr(editor, "jstar") || strstr(editor, "jmacs")  ||
- 	strstr(editor, "rjoe")  || strstr(editor, "jpico"));
+	strstr(editor, "jed")   || strstr(editor, "joe")    ||
+	strstr(editor, "jstar") || strstr(editor, "jmacs")  ||
+	strstr(editor, "rjoe")  || strstr(editor, "jpico"));
 #endif
 }
 
@@ -157,14 +157,14 @@ PUBLIC int edit_current_file ARGS3(
     }
 #ifdef DOSPATH
     else if (strncmp(editor, "VZ", 2)==0) {
-    	/* for Vz editor */
+	/* for Vz editor */
 	format = "%s %s -%s";
 	HTAddXpand(&command, format, params++, editor);
 	HTAddParam(&command, format, params++, HTDOS_short_name(filename));
 	HTAddParam(&command, format, params++, position);
 	HTEndParam(&command, format, params);
     } else if (strncmp(editor, "edit", 4)==0) {
-    	/* for standard editor */
+	/* for standard editor */
 	HTAddXpand(&command, format, params++, editor);
 	HTAddParam(&command, format, params++, HTDOS_short_name(filename));
 	HTEndParam(&command, format, params);

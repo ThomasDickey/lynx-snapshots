@@ -350,18 +350,12 @@ Try_Redirected_URL:
 			 */
 			LYDidRename = FALSE;
 			return(NULLFILE);
-		    } else {
-			return(NORMAL);
 		    }
-#else
-		    return(NORMAL);
 #endif /* VMS */
+		    return(NORMAL);
 		} else if (url_type == LYNXDIRED_URL_TYPE) {
 #ifdef DIRED_SUPPORT
-		    if (no_dired_support) {
-		       HTUserMsg(DIRED_DISABLED);
-		       return(NULLFILE);
-		    } else {
+		    if (!no_dired_support) {
 		       local_dired(doc);
 		       WWWDoc.address = doc->address;
 		       WWWDoc.post_data = doc->post_data;
@@ -374,11 +368,9 @@ Try_Redirected_URL:
 			   return(NOT_FOUND);
 		       return(NORMAL);
 		    }
-#else
+#endif /* DIRED_SUPPORT */
 		    HTUserMsg(DIRED_DISABLED);
 		    return(NULLFILE);
-#endif /* DIRED_SUPPORT */
-
 		}
 
 		if (LYNoRefererHeader == FALSE &&
@@ -863,7 +855,7 @@ Try_Redirected_URL:
 				url_type == LYNXCOMPILE_OPTS_URL_TYPE ||
 				url_type == LYNXHIST_URL_TYPE ||
 				url_type == LYNXCOOKIE_URL_TYPE ||
-			        url_type == LYNXMESSAGES_URL_TYPE ||
+				url_type == LYNXMESSAGES_URL_TYPE ||
 				(LYValidate &&
 				 url_type != HTTP_URL_TYPE &&
 				 url_type != HTTPS_URL_TYPE) ||
@@ -1166,6 +1158,7 @@ PUBLIC int follow_link_number ARGS4(
 	break;
     default:
 	rel = *++p;
+	break;
     case 0:
 	break;
     }

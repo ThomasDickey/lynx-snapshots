@@ -39,8 +39,10 @@
 # include <LYPrettySrc.h>
 #endif
 
+#if 0
 #ifdef CJK_EX	/* 1997/12/12 (Fri) 16:54:58 */
 extern HTkcode last_kcode;
+#endif
 #endif
 
 #define INVALID (-1)
@@ -157,6 +159,7 @@ struct _HTStream {
 		S_esc_dq, S_dollar_dq, S_paren_dq, S_nonascii_text_dq,
 		S_dollar_paren_dq,
 		S_in_kanji, S_junk_tag, S_junk_pi} state;
+    unsigned char kanji_buf;
 #ifdef CALLERDATA
     void *			callerData;
 #endif /* CALLERDATA */
@@ -1473,7 +1476,7 @@ PRIVATE void SGML_character ARGS2(
     **	we can revert back to the unchanged c_in. - KW
     */
 #define unsign_c clong
-#ifdef CJK_EX	/* 1997/12/12 (Fri) 18:08:48 */
+#if 0
     static unsigned char sjis_1st = '\0';
     unsigned char sjis_hi, sjis_lo;
 #endif
@@ -1690,6 +1693,9 @@ top1:
 	HTCJK == NOCJK)
 	goto after_switch;
 
+#if 0	/* This JIS X0201 Kana to JIS X0208 Kana conversion is/should be
+	 * done in the HTextAppendCharacter. -- TH
+	 */
 #ifdef CJK_EX	/* 1998/11/24 (Tue) 17:02:31 */
     if (HTCJK == JAPANESE && last_kcode == SJIS) {
 	if (sjis_1st == '\0' && (IS_SJIS_HI1(c) || IS_SJIS_HI2(c))) {
@@ -1707,6 +1713,7 @@ top1:
 	    }
 	}
     }
+#endif
 #endif
 
     /*
@@ -1727,6 +1734,24 @@ top1:
 	!(PASSHICTRL || HTCJK != NOCJK))
 	goto after_switch;
 
+    /* Almost all CJK characters are double byte but only Japanese
+     * JIS X0201 Kana is single byte. To prevent to fail SGML parsing
+     * we have to care them here. -- TH
+     */
+    if ((HTCJK==JAPANESE) && (context->state==S_in_kanji) &&
+	!IS_JAPANESE_2BYTE(context->kanji_buf,(unsigned char)c)) {
+#ifdef CONV_JISX0201KANA_TO_JISX0208KANA
+	if (IS_SJIS_X0201KANA(context->kanji_buf)) {
+	    JISx0201TO0208_SJIS(context->kanji_buf, &sjis_hi, &sjis_lo);
+	    PUTC(sjis_hi);
+	    PUTC(sjis_lo);
+	}
+	else
+#endif
+	    PUTC(context->kanji_buf);
+	context->state = S_text;
+    }
+
     /*
     **	Handle character based on context->state.
     */
@@ -1744,6 +1769,7 @@ top1:
 	**  (see below). - FM
 	*/
 	context->state = S_text;
+	PUTC(context->kanji_buf);
 	PUTC(c);
 	break;
 
@@ -1772,7 +1798,7 @@ top1:
 	    **	to having raw mode off with CJK. - FM
 	    */
 	    context->state = S_in_kanji;
-	    PUTC(c);
+	    context->kanji_buf = c;
 	    break;
 	} else if (HTCJK != NOCJK && TOASCII(c) == '\033') {  /* S/390 -- gil -- 0881 */
 	    /*
@@ -3514,7 +3540,7 @@ top1:
 		PSRCSTART(abracket);
 		PUTC('>');
 		PSRCSTOP(abracket);
-	} else
+	    } else
 #endif
 	    if (context->current_tag->name)
 		start_element(context);
@@ -4097,6 +4123,8 @@ top1:
 	    context->state = S_esc;
 	}
 	PUTC(c);
+	if (c < 32)
+	    context->state = S_text;
 	break;
 
     case S_esc_sq:	/* Expecting '$'or '(' following CJK ESC. */
@@ -4383,6 +4411,7 @@ PUBLIC HTStream* SGML_new  ARGS3(
 /*    context->extra_tags = dtd->tags + dtd->number_of_tags; */
     context->current_tag = context->slashedtag = NULL;
     context->state = S_text;
+    context->kanji_buf = '\0';
     context->element_stack = 0;			/* empty */
     context->inSELECT = FALSE;
     context->no_lynx_specialcodes = NO;	/* special codes normally generated */
