@@ -11,10 +11,7 @@
 #include "GridText.h"
 #include "LYSystem.h"
 #include "LYMail.h"
-#ifdef EXP_CHARTRANS
 #include "LYCharSets.h"  /* to get current charset for mail header */
-extern BOOLEAN LYHaveCJKCharacterSet;
-#endif
 
 #include "LYLeaks.h"
 
@@ -28,10 +25,10 @@ PRIVATE void remove_tildes PARAMS((char *string));
 **  mailform() sends form content to the mailto address(es). - FM
 */
 PUBLIC void mailform ARGS4(
-	char *,		mailto_address,
-	char *,		mailto_subject,
-	char *,		mailto_content,
-	char *,		mailto_type)
+	char *, 	mailto_address,
+	char *, 	mailto_subject,
+	char *, 	mailto_content,
+	char *, 	mailto_type)
 {
     FILE *fd;
     char *address = NULL;
@@ -69,7 +66,7 @@ PUBLIC void mailform ARGS4(
     StrAllocCopy(address, mailto_address);
 
     /*
-     *  Check for a ?searchpart. - FM
+     *	Check for a ?searchpart. - FM
      */
     if ((cp = strchr(address, '?')) != NULL) {
 	StrAllocCopy(searchpart, cp);
@@ -77,7 +74,7 @@ PUBLIC void mailform ARGS4(
 	cp = (searchpart + 1);
 	if (*cp != '\0') {
 	    /*
-	     *  Seek and handle a subject=foo. - FM
+	     *	Seek and handle a subject=foo. - FM
 	     */
 	    while (*cp != '\0') {
 		if ((*(cp - 1) == '?' || *(cp - 1) == '&') &&
@@ -101,8 +98,8 @@ PUBLIC void mailform ARGS4(
 	    }
 
 	    /*
-	     *  Seek and handle to=address(es) fields.
-	     *  Appends to address. - FM
+	     *	Seek and handle to=address(es) fields.
+	     *	Appends to address. - FM
 	     */
 	    cp = (searchpart + 1);
 	    while (*cp != '\0') {
@@ -132,9 +129,9 @@ PUBLIC void mailform ARGS4(
 	    }
 
 	    /*
-	     *  Seek and handle cc=address(es) fields.  Excludes
-	     *  Bcc=address(es) as unsafe.  We may append our own
-	     *  cc (below) as a list for the actual mailing. - FM
+	     *	Seek and handle cc=address(es) fields.	Excludes
+	     *	Bcc=address(es) as unsafe.  We may append our own
+	     *	cc (below) as a list for the actual mailing. - FM
 	     */
 	    cp = (searchpart + 1);
 	    while (*cp != '\0') {
@@ -166,7 +163,7 @@ PUBLIC void mailform ARGS4(
 	    }
 
 	    /*
-	     *  Seek and handle keywords=term(s) fields. - FM
+	     *	Seek and handle keywords=term(s) fields. - FM
 	     */
 	    cp = (searchpart + 1);
 	    while (*cp != '\0') {
@@ -249,7 +246,7 @@ PUBLIC void mailform ARGS4(
     }
 
     /*
-     *  Unescape the address and ccaddr fields. - FM
+     *	Unescape the address and ccaddr fields. - FM
      */
     HTUnEscape(address);
     if (ccaddr != NULL) {
@@ -257,7 +254,7 @@ PUBLIC void mailform ARGS4(
     }
 
     /*
-     *  Allow user to edit the default Subject - FM
+     *	Allow user to edit the default Subject - FM
      */
     if (subject[0] == '\0') {
 	if (mailto_subject && *mailto_subject) {
@@ -281,8 +278,8 @@ PUBLIC void mailform ARGS4(
     }
 
     /*
-     *  Allow user to specify a self copy via a CC:
-     *  entry, if permitted. - FM
+     *	Allow user to specify a self copy via a CC:
+     *	entry, if permitted. - FM
      */
     if (!LYNoCc) {
 	sprintf(self, "%.79s", (personal_mail_address ?
@@ -358,15 +355,15 @@ PUBLIC void mailform ARGS4(
 	fprintf(fd, "X-Content-Type: %s\n\n", mailto_type);
     }
 #else
-	 if (mailto_type && *mailto_type) {
+    if (mailto_type && *mailto_type) {
 	fprintf(fd, "Mime-Version: 1.0\n");
 	fprintf(fd, "Content-Type: %s\n", mailto_type);
-	 }
-	 fprintf(fd,"To: %s\n", address);
-	 if (personal_mail_address && *personal_mail_address)
-		fprintf(fd,"From: %s\n", personal_mail_address);
-	 remove_tildes(self);
-	 fprintf(fd,"Subject: %.70s\n\n", subject);
+    }
+    fprintf(fd,"To: %s\n", address);
+    if (personal_mail_address && *personal_mail_address)
+	fprintf(fd,"From: %s\n", personal_mail_address);
+    remove_tildes(self);
+    fprintf(fd,"Subject: %.70s\n\n", subject);
 #endif
 
 #else
@@ -395,10 +392,10 @@ PUBLIC void mailform ARGS4(
 #endif /* VMS */
 
     /*
-     *  Break up the content into lines with a maximimum length of 78.
-     *  If the ENCTYPE was text/plain, we have physical newlines and
-     *  should take them into account.  Otherwise, the actual newline
-     *  characters in the content are hex escaped. - FM
+     *	Break up the content into lines with a maximum length of 78.
+     *	If the ENCTYPE was text/plain, we have physical newlines and
+     *	should take them into account.	Otherwise, the actual newline
+     *	characters in the content are hex escaped. - FM
      */
     while((cp = strchr(mailto_content, '\n')) != NULL) {
 	*cp = '\0';
@@ -434,7 +431,7 @@ PUBLIC void mailform ARGS4(
     fclose(fd);
 #ifdef VMS
     /*
-     *  Set the mail command. - FM
+     *	Set the mail command. - FM
      */
     if (isPMDF) {
 	/*
@@ -473,7 +470,7 @@ PUBLIC void mailform ARGS4(
     StrAllocCopy(command, cmd);
 
     /*
-     *  Now add all the people in the address field. - FM
+     *	Now add all the people in the address field. - FM
      */
     address_ptr1 = address;
     do {
@@ -485,7 +482,7 @@ PUBLIC void mailform ARGS4(
 	}
 
 	/*
-	 *  4 letters is arbitrarily the smallest posible mail
+	 *  4 letters is arbitrarily the smallest possible mail
 	 *  address, at least for lynx.  That way extra spaces
 	 *  won't confuse the mailer and give a blank address.
 	 */
@@ -501,7 +498,7 @@ PUBLIC void mailform ARGS4(
     } while (address_ptr1 != NULL);
 
     /*
-     *  Now add all the people in the CC field. - FM
+     *	Now add all the people in the CC field. - FM
      */
     if (ccaddr != NULL && *ccaddr != '\0') {
 	address_ptr1 = ccaddr;
@@ -514,9 +511,9 @@ PUBLIC void mailform ARGS4(
 	    }
 
 	    /*
-	     *  4 letters is arbitrarily the smallest possible mail
-	     *  address, at least for lynx.  That way extra spaces
-	     *  won't confuse the mailer and give a blank address.
+	     *	4 letters is arbitrarily the smallest possible mail
+	     *	address, at least for lynx.  That way extra spaces
+	     *	won't confuse the mailer and give a blank address.
 	     */
 	    if (strlen(address_ptr1) > 3) {
 		StrAllocCat(command, ",");
@@ -561,9 +558,9 @@ PUBLIC void mailform ARGS4(
 */
 PUBLIC void mailmsg ARGS4(
 	int,		cur,
-	char *,		owner_address,
-	char *,		filename,
-	char *,		linkname)
+	char *, 	owner_address,
+	char *, 	filename,
+	char *, 	linkname)
 {
     FILE *fd, *fp;
     char *address = NULL;
@@ -591,7 +588,7 @@ PUBLIC void mailmsg ARGS4(
     StrAllocCopy(address, owner_address);
 
     /*
-     *  Check for a ?searchpart. - FM
+     *	Check for a ?searchpart. - FM
      */
     if ((cp = strchr(address, '?')) != NULL) {
 	StrAllocCopy(searchpart, cp);
@@ -599,9 +596,9 @@ PUBLIC void mailmsg ARGS4(
 	cp = (searchpart + 1);
 	if (*cp != '\0') {
 	    /*
-	     *  Seek and handle to=address(es) fields.
-	     *  Appends to address.  We ignore any other
-	     *  headers in the ?searchpart. - FM
+	     *	Seek and handle to=address(es) fields.
+	     *	Appends to address.  We ignore any other
+	     *	headers in the ?searchpart. - FM
 	     */
 	    cp = (searchpart + 1);
 	    while (*cp != '\0') {
@@ -633,8 +630,8 @@ PUBLIC void mailmsg ARGS4(
     }
 
     /*
-     *  Convert any Explorer semi-colon Internet address
-     *  separators to commas. - FM
+     *	Convert any Explorer semi-colon Internet address
+     *	separators to commas. - FM
      */
     cp = address;
     while ((cp1 = strchr(cp, '@')) != NULL) {
@@ -647,7 +644,7 @@ PUBLIC void mailmsg ARGS4(
     }
 
     /*
-     *  Unescape the address field. - FM
+     *	Unescape the address field. - FM
      */
     HTUnEscape(address);
     if (address[(strlen(address) - 1)] == ',')
@@ -844,8 +841,8 @@ PUBLIC void mailmsg ARGS4(
 **  a comment  from the users to the owner
 */
 PUBLIC void reply_by_mail ARGS3(
-	char *,		mail_address,
-	char *,		filename,
+	char *, 	mail_address,
+	char *, 	filename,
 	CONST char *,	title)
 {
     char user_input[1000];
@@ -858,7 +855,7 @@ PUBLIC void reply_by_mail ARGS3(
     char *cp = NULL, *cp0 = NULL, *cp1 = NULL;
     char *temp = NULL;
     int i, len;
-    int c = 0;  /* user input */
+    int c = 0;	/* user input */
     char my_tmpfile[256], cmd[512];
 #ifdef DOSPATH
     char tmpfile2[256];
@@ -922,7 +919,7 @@ PUBLIC void reply_by_mail ARGS3(
     subject[0] = '\0';
 
     /*
-     *  Check for a ?searchpart. - FM
+     *	Check for a ?searchpart. - FM
      */
     if ((cp = strchr(address, '?')) != NULL) {
 	StrAllocCopy(searchpart, cp);
@@ -930,7 +927,7 @@ PUBLIC void reply_by_mail ARGS3(
 	cp = (searchpart + 1);
 	if (*cp != '\0') {
 	    /*
-	     *  Seek and handle a subject=foo. - FM
+	     *	Seek and handle a subject=foo. - FM
 	     */
 	    while (*cp != '\0') {
 		if ((*(cp - 1) == '?' || *(cp - 1) == '&') &&
@@ -955,8 +952,8 @@ PUBLIC void reply_by_mail ARGS3(
 	    }
 
 	    /*
-	     *  Seek and handle to=address(es) fields.
-	     *  Appends to address. - FM
+	     *	Seek and handle to=address(es) fields.
+	     *	Appends to address. - FM
 	     */
 	    cp = (searchpart + 1);
 	    while (*cp != '\0') {
@@ -986,9 +983,9 @@ PUBLIC void reply_by_mail ARGS3(
 	    }
 
 	    /*
-	     *  Seek and handle cc=address(es) fields.  Excludes
-	     *  Bcc=address(es) as unsafe.  We may append our own
-	     *  cc (below) as a list for the actual mailing. - FM
+	     *	Seek and handle cc=address(es) fields.	Excludes
+	     *	Bcc=address(es) as unsafe.  We may append our own
+	     *	cc (below) as a list for the actual mailing. - FM
 	     */
 	    cp = (searchpart + 1);
 	    while (*cp != '\0') {
@@ -1020,7 +1017,7 @@ PUBLIC void reply_by_mail ARGS3(
 	    }
 
 	    /*
-	     *  Seek and handle keywords=term(s) fields. - FM
+	     *	Seek and handle keywords=term(s) fields. - FM
 	     */
 	    cp = (searchpart + 1);
 	    while (*cp != '\0') {
@@ -1060,7 +1057,7 @@ PUBLIC void reply_by_mail ARGS3(
 	    }
 
 	    /*
-	     *  Seek and handle body=foo fields. - FM
+	     *	Seek and handle body=foo fields. - FM
 	     */
 	    cp = (searchpart + 1);
 	    while (*cp != '\0') {
@@ -1073,7 +1070,7 @@ PUBLIC void reply_by_mail ARGS3(
 		    if (*cp) {
 			/*
 			 *  Break up the value into lines with
-			 *  a maximimum length of 78. - FM
+			 *  a maximum length of 78. - FM
 			 */
 			StrAllocCopy(temp, cp);
 			HTUnEscape(temp);
@@ -1131,8 +1128,8 @@ PUBLIC void reply_by_mail ARGS3(
     }
 
     /*
-     *  Convert any Explorer semi-colon Internet address
-     *  separators to commas. - FM
+     *	Convert any Explorer semi-colon Internet address
+     *	separators to commas. - FM
      */
     cp = address;
     while ((cp1 = strchr(cp, '@')) != NULL) {
@@ -1174,7 +1171,7 @@ PUBLIC void reply_by_mail ARGS3(
     }
 
     /*
-     *  Unescape the address and ccaddr fields. - FM
+     *	Unescape the address and ccaddr fields. - FM
      */
     HTUnEscape(address);
     if (ccaddr != NULL) {
@@ -1182,7 +1179,7 @@ PUBLIC void reply_by_mail ARGS3(
     }
 
     /*
-     *  Set the default subject. - FM
+     *	Set the default subject. - FM
      */
     if (subject[0] == '\0' && title && *title) {
 	strncpy(subject, title, 70);
@@ -1190,8 +1187,8 @@ PUBLIC void reply_by_mail ARGS3(
     }
 
     /*
-     *  Use ^G to cancel mailing of comment
-     *  and don't let SIGINTs exit lynx.
+     *	Use ^G to cancel mailing of comment
+     *	and don't let SIGINTs exit lynx.
      */
     signal(SIGINT, terminate_letter);
 
@@ -1216,25 +1213,24 @@ PUBLIC void reply_by_mail ARGS3(
     }
 #else /* Unix: */
     /*
-     *  Put the To: line in the header.
+     *	Put the To: line in the header.
      */
 #ifndef DOSPATH
     sprintf(buf, "To: %s\n", address);
     StrAllocCopy(header, buf);
 #endif
 
-#ifdef EXP_CHARTRANS
     /*
-     *  Put the Mime-Version, Content-Type and
-     *  Content-Transfer-Encoding in the header.
-     *  This assumes that the same character set is used
-     *  for composing the mail which is currently selected
-     *  as display character set...
-     *  Don't send a charset if we have a CJK character set
-     *  selected, since it may not be appropriate for mail...
-     *  Also don't use an inofficial "x-" charset.
-     *  Also if the charset would be "us-ascii" (7-bit replacements
-     *  selected, don't send any MIME headers. - kw
+     *	Put the Mime-Version, Content-Type and
+     *	Content-Transfer-Encoding in the header.
+     *	This assumes that the same character set is used
+     *	for composing the mail which is currently selected
+     *	as display character set...
+     *	Don't send a charset if we have a CJK character set
+     *	selected, since it may not be appropriate for mail...
+     *	Also don't use an unofficial "x-" charset.
+     *	Also if the charset would be "us-ascii" (7-bit replacements
+     *	selected, don't send any MIME headers. - kw
      */
     if (strncasecomp(LYCharSet_UC[current_char_set].MIMEname,
 		     "us-ascii", 8) != 0) {
@@ -1248,9 +1244,8 @@ PUBLIC void reply_by_mail ARGS3(
 	}
 	StrAllocCat(header, "Content-Transfer-Encoding: 8bit\n");
     }
-#endif
     /*
-     *  Put the X-URL and X-Mailer lines in the header.
+     *	Put the X-URL and X-Mailer lines in the header.
      */
     sprintf(buf,
 	    "X-URL: %s%s\n",
@@ -1262,7 +1257,7 @@ PUBLIC void reply_by_mail ARGS3(
 #endif /* VMS */
 
     /*
-     *  Clear the screen and inform the user.
+     *	Clear the screen and inform the user.
      */
     clear();
     move(2,0);
@@ -1320,7 +1315,7 @@ PUBLIC void reply_by_mail ARGS3(
 #endif /* VMS */
 #ifndef NO_ANONYMOUS_EMAIL
     /*
-     *  Get the user's personal name.
+     *	Get the user's personal name.
      */
     addstr(ENTER_NAME_OR_BLANK);
     if (personal_name == NULL)
@@ -1344,7 +1339,7 @@ PUBLIC void reply_by_mail ARGS3(
 	_statusline(COMMENT_REQUEST_CANCELLED);
 	sleep(InfoSecs);
 	fclose(fd);		/* Close the tmpfile. */
-	scrollok(stdscr,FALSE);	/* Stop scrolling.    */
+	scrollok(stdscr,FALSE); /* Stop scrolling.    */
 	goto cleanup;
     }
     addstr("\n");
@@ -1362,7 +1357,7 @@ PUBLIC void reply_by_mail ARGS3(
     }
 
     /*
-     *  Get the user's return address.
+     *	Get the user's return address.
      */
     addstr(ENTER_MAIL_ADDRESS_OR_OTHER);
     addstr(MEANS_TO_CONTACT_FOR_RESPONSE);
@@ -1386,7 +1381,7 @@ PUBLIC void reply_by_mail ARGS3(
 	_statusline(COMMENT_REQUEST_CANCELLED);
 	sleep(InfoSecs);
 	fclose(fd);		/* Close the tmpfile. */
-	scrollok(stdscr,FALSE);	/* Stop scrolling.    */
+	scrollok(stdscr,FALSE); /* Stop scrolling.    */
 	goto cleanup;
     }
     addstr("\n");
@@ -1411,7 +1406,7 @@ PUBLIC void reply_by_mail ARGS3(
 #endif /* VMS */
 
     /*
-     *  Get the subject line.
+     *	Get the subject line.
      */
     addstr(ENTER_SUBJECT_LINE);
     addstr(CTRL_U_TO_ERASE);
@@ -1432,7 +1427,7 @@ PUBLIC void reply_by_mail ARGS3(
 	_statusline(COMMENT_REQUEST_CANCELLED);
 	sleep(InfoSecs);
 	fclose(fd);		/* Close the tmpfile. */
-	scrollok(stdscr,FALSE);	/* Stop scrolling.    */
+	scrollok(stdscr,FALSE); /* Stop scrolling.    */
 	goto cleanup;
     }
     addstr("\n");
@@ -1445,7 +1440,7 @@ PUBLIC void reply_by_mail ARGS3(
 #endif /* VMS */
 
     /*
-     *  Offer a CC line, if permitted. - FM
+     *	Offer a CC line, if permitted. - FM
      */
     user_input[0] = '\0';
     if (!LYNoCc) {
@@ -1464,7 +1459,7 @@ PUBLIC void reply_by_mail ARGS3(
 	    addstr("\n");
 	    _statusline(COMMENT_REQUEST_CANCELLED);
 	    sleep(InfoSecs);
-	    fclose(fd);			/* Close the tmpfile. */
+	    fclose(fd); 		/* Close the tmpfile. */
 	    scrollok(stdscr, FALSE);	/* Stop scrolling.    */
 	    goto cleanup;
 	}
@@ -1495,7 +1490,7 @@ PUBLIC void reply_by_mail ARGS3(
 
 #ifndef VMS
     /*
-    **  Add the Cc: header. - FM
+    **	Add the Cc: header. - FM
     */
     if (ccaddr != NULL && *ccaddr != '\0') {
 	StrAllocCat(header, "Cc: ");
@@ -1504,7 +1499,7 @@ PUBLIC void reply_by_mail ARGS3(
     }
 
     /*
-    **  Add the Keywords: header. - FM
+    **	Add the Keywords: header. - FM
     */
     if (keywords != NULL && *keywords != '\0') {
 	StrAllocCat(header, "Keywords: ");
@@ -1513,7 +1508,7 @@ PUBLIC void reply_by_mail ARGS3(
     }
 
     /*
-     *  Terminate the header.
+     *	Terminate the header.
      */
     sprintf(buf, "\n");
     StrAllocCat(header, buf);
@@ -1534,7 +1529,7 @@ PUBLIC void reply_by_mail ARGS3(
 	    }
 	} else if (strcmp(HTLoadedDocumentURL(), "")) {
 	    /*
-	     *  Ask if the user wants to include the original message.
+	     *	Ask if the user wants to include the original message.
 	     */
 	    BOOLEAN is_preparsed = (LYPreparsedSource &&
 				    HTisDocumentSource());
@@ -1557,7 +1552,7 @@ PUBLIC void reply_by_mail ARGS3(
 	    }
 	}
 	fclose(fd);		/* Close the tmpfile. */
-	scrollok(stdscr,FALSE);	/* Stop scrolling.    */
+	scrollok(stdscr,FALSE); /* Stop scrolling.    */
 
 	if (term_letter || c == 7 || c == 3)
 	    goto cleanup;
@@ -1598,7 +1593,7 @@ PUBLIC void reply_by_mail ARGS3(
 		if (term_letter || c == 7 || c == 3) {
 		    addstr(CANCELLED);
 		    sleep(InfoSecs);
-		    fclose(fd);			/* Close the tmpfile. */
+		    fclose(fd); 		/* Close the tmpfile. */
 		    scrollok(stdscr, FALSE);	/* Stop scrolling.    */
 		    goto cleanup;
 		}
@@ -1617,7 +1612,7 @@ PUBLIC void reply_by_mail ARGS3(
 	}
 	refresh();
 	fclose(fd);		/* Close the tmpfile.	  */
-	scrollok(stdscr,FALSE);	/* Stop scrolling.	  */
+	scrollok(stdscr,FALSE); /* Stop scrolling.	  */
 
     } else {
 	/*
@@ -1633,7 +1628,7 @@ PUBLIC void reply_by_mail ARGS3(
 	    term_letter || STREQ(user_input, ".")) {
 	    _statusline(COMMENT_REQUEST_CANCELLED);
 	    sleep(InfoSecs);
-	    fclose(fd);			/* Close the tmpfile. */
+	    fclose(fd); 		/* Close the tmpfile. */
 	    scrollok(stdscr,FALSE);	/* Stop scrolling.    */
 	    goto cleanup;
 	}
@@ -1648,19 +1643,19 @@ PUBLIC void reply_by_mail ARGS3(
 		_statusline(COMMENT_REQUEST_CANCELLED);
 		sleep(InfoSecs);
 		fclose(fd);		/* Close the tmpfile. */
-		scrollok(stdscr,FALSE);	/* Stop scrolling.    */
+		scrollok(stdscr,FALSE); /* Stop scrolling.    */
 		goto cleanup;
 	    }
 	}
 
 	fprintf(fd, "\n");	/* Terminate the message. */
 	fclose(fd);		/* Close the tmpfile.	  */
-	scrollok(stdscr,FALSE);	/* Stop scrolling.	  */
+	scrollok(stdscr,FALSE); /* Stop scrolling.	  */
     }
 
 #ifndef VMS
     /*
-     *  Ignore CTRL-C on this last question.
+     *	Ignore CTRL-C on this last question.
      */
     signal(SIGINT, SIG_IGN);
 #endif /* !VMS */
@@ -1685,7 +1680,7 @@ PUBLIC void reply_by_mail ARGS3(
 	c = 0;
 	LYStatusLine = -1;
 	while (TOUPPER(c) != 'Y' && TOUPPER(c) != 'N' &&
-	       !term_letter && c != 7   && c != 3)
+	       !term_letter && c != 7	&& c != 3)
 	    c = LYgetch();
 	if (TOUPPER(c) == 'Y') {
 	    if ((fd = fopen(my_tmpfile, "a")) != NULL) {
@@ -1701,11 +1696,11 @@ PUBLIC void reply_by_mail ARGS3(
     clear();  /* Clear the screen. */
 
     /*
-     *  Send the message.
+     *	Send the message.
      */
 #ifdef VMS
     /*
-     *  Set the mail command. - FM
+     *	Set the mail command. - FM
      */
     if (isPMDF) {
 	/*
@@ -1744,7 +1739,7 @@ PUBLIC void reply_by_mail ARGS3(
     StrAllocCopy(command, cmd);
 
     /*
-     *  Now add all the people in the address field. - FM
+     *	Now add all the people in the address field. - FM
      */
     address_ptr1 = address;
     do {
@@ -1756,7 +1751,7 @@ PUBLIC void reply_by_mail ARGS3(
 	}
 
 	/*
-	 *  4 letters is arbitrarily the smallest posible mail
+	 *  4 letters is arbitrarily the smallest possible mail
 	 *  address, at least for lynx.  That way extra spaces
 	 *  won't confuse the mailer and give a blank address.
 	 */
@@ -1772,7 +1767,7 @@ PUBLIC void reply_by_mail ARGS3(
     } while (address_ptr1 != NULL);
 
     /*
-     *  Now add all the people in the CC field. - FM
+     *	Now add all the people in the CC field. - FM
      */
     if (ccaddr != NULL && *ccaddr != '\0') {
 	address_ptr1 = ccaddr;
@@ -1785,9 +1780,9 @@ PUBLIC void reply_by_mail ARGS3(
 	    }
 
 	    /*
-	     *  4 letters is arbitrarily the smallest posible mail
-	     *  address, at least for lynx.  That way extra spaces
-	     *  won't confuse the mailer and give a blank address.
+	     *	4 letters is arbitrarily the smallest possible mail
+	     *	address, at least for lynx.  That way extra spaces
+	     *	won't confuse the mailer and give a blank address.
 	     */
 	    if (strlen(address_ptr1) > 3) {
 		StrAllocCat(command, ",");
@@ -1810,7 +1805,7 @@ PUBLIC void reply_by_mail ARGS3(
     goto cleandown;
 #else /* Unix: */
     /*
-     *  Send the tmpfile into sendmail.
+     *	Send the tmpfile into sendmail.
      */
     _statusline(SENDING_YOUR_MSG);
     sprintf(cmd, "%s %s", system_mail, system_mail_flags);
@@ -1845,25 +1840,25 @@ PUBLIC void reply_by_mail ARGS3(
     while ((n = fread(buf, 1, sizeof(buf), fd)) != 0)
 	fwrite(buf, 1, n, fp);
 #ifdef DOSPATH
-	 sprintf(cmd, "%s -t \"%s\" -F %s", system_mail, address, tmpfile2);
-	 fclose(fp);	/* Close the tmpfile. */
-	 stop_curses();
-	 printf("Sending your comment:\n\n$ %s\n\nPlease wait...", cmd);
-	 system(cmd);
-	 sleep(MessageSecs);
-	 start_curses();
-	 remove(tmpfile2);	/* Delete the tmpfile. */
+	sprintf(cmd, "%s -t \"%s\" -F %s", system_mail, address, tmpfile2);
+	fclose(fp);		/* Close the tmpfile. */
+	stop_curses();
+	printf("Sending your comment:\n\n$ %s\n\nPlease wait...", cmd);
+	system(cmd);
+	sleep(MessageSecs);
+	start_curses();
+	remove(tmpfile2);	/* Delete the tmpfile. */
 #else
     pclose(fp);
 #endif
-    fclose(fd);	/* Close the tmpfile. */
+    fclose(fd); /* Close the tmpfile. */
 
     if (TRACE)
 	printf("%s\n", cmd);
 #endif /* VMS */
 
     /*
-     *  Come here to cleanup and exit.
+     *	Come here to cleanup and exit.
      */
 cleanup:
     signal(SIGINT, cleanup_sig);
@@ -1883,7 +1878,7 @@ cleandown:
 	remove(hdrfile); /* Delete the hdrfile. */
     }
 #else
-    remove(my_tmpfile);	 /* Delete the tmpfile. */
+    remove(my_tmpfile);  /* Delete the tmpfile. */
 #endif /* VMS */
     FREE(address);
     FREE(ccaddr);
@@ -1899,7 +1894,7 @@ PRIVATE void terminate_letter ARGS1(int,sig)
     signal(SIGINT, terminate_letter);
 #if defined(VMS) || defined(DOSPATH)
     /*
-     *  Refresh the screen to get rid of the "interrupt" message.
+     *	Refresh the screen to get rid of the "interrupt" message.
      */
     if (!dump_output_immediately) {
 	lynx_force_repaint();

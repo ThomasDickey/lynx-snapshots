@@ -271,7 +271,7 @@ PUBLIC char *lynxlinksfile = NULL;  /* the current visited links file URL */
 PUBLIC char *startrealm = NULL;     /* the startfile realm */
 PUBLIC char *indexfile = NULL;	    /* an index file if there is one */
 PUBLIC char *personal_mail_address = NULL; /* the users mail address */
-PUBLIC char *display=NULL;	    /* display environment variable */
+PUBLIC char *display = NULL;	    /* display environment variable */
 PUBLIC char *personal_type_map = NULL;	   /* .mailcap */
 PUBLIC char *global_type_map = NULL;	   /* global mailcap */
 PUBLIC char *global_extension_map = NULL;  /* global mime.types */
@@ -305,10 +305,6 @@ PUBLIC char *http_error_file = NULL; /* Place HTTP status code in this file */
 PUBLIC char *authentication_info[2] = {NULL, NULL};
 	     /* Id:Password for protected proxy servers */
 PUBLIC char *proxyauth_info[2] = {NULL, NULL};
-
-PUBLIC char *MBM_A_subbookmark[MBM_V_MAXFILES+1];
-PUBLIC char *MBM_A_subdescript[MBM_V_MAXFILES+1];
-
 PUBLIC BOOLEAN HEAD_request = FALSE;
 PUBLIC BOOLEAN scan_for_buried_news_references = TRUE;
 PUBLIC BOOLEAN LYRawMode;
@@ -439,6 +435,7 @@ PRIVATE void free_lynx_globals NOARGS
     FREE(jumpfile);
 #endif /* JUMPFILE */
     FREE(indexfile);
+    FREE(display);
     FREE(global_type_map);
     FREE(personal_type_map);
     FREE(global_extension_map);
@@ -669,11 +666,11 @@ PUBLIC int main ARGS2(
 	StrAllocCopy(lynx_temp_space, cp);
     else
 #ifdef DOSPATH
-       if ((cp = getenv("TEMP")) != NULL)
-		StrAllocCopy(lynx_temp_space, cp);
-       else if ((cp = getenv("TMP")) != NULL)
-		StrAllocCopy(lynx_temp_space, cp);
-       else
+    if ((cp = getenv("TEMP")) != NULL)
+	StrAllocCopy(lynx_temp_space, cp);
+    else if ((cp = getenv("TMP")) != NULL)
+	StrAllocCopy(lynx_temp_space, cp);
+    else
 #endif
 	StrAllocCopy(lynx_temp_space, TEMP_SPACE);
     if ((cp = strchr(lynx_temp_space, '~'))) {
@@ -1993,7 +1990,7 @@ PRIVATE void parse_arg ARGS3(
 	    putenv(display_putenv_command);
 #endif /* VMS */
 	    if ((cp = getenv(DISPLAY)) != NULL && *cp != '\0') {
-		display = cp;
+		StrAllocCopy(display, cp);
 	    }
 	}
 

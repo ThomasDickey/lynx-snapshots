@@ -15,10 +15,10 @@ D1
 
 #U+00a0:NS
 U+00a1:!
-U+00a2:Ct
-U+00a3:Pd
+U+00a2:-c-
+U+00a3:-L-
 U+00a4:CUR
-U+00a5:Ye
+U+00a5:YEN
 U+00a6:|
 U+00a7:S:
 U+00a8:"
@@ -464,8 +464,8 @@ U+042a:"
 U+042b:Y
 U+042c:'
 U+042d:`E
-U+042e:JU
-U+042f:JA
+U+042e:YU
+U+042f:YA
 U+0430:a
 U+0431:b
 U+0432:v
@@ -496,8 +496,8 @@ U+044a:"
 U+044b:y
 U+044c:'
 U+044d:`e
-U+044e:ju
-U+044f:ja
+U+044e:yu
+U+044f:ya
 U+0451:io
 # end of Russian Cyrillic letters.
 # Cyrillic small letters (and some archaic)

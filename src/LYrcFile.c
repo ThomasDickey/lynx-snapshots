@@ -26,7 +26,7 @@ PUBLIC void read_rc NOPARAMS
      *  Make an RC file name.
      */
 #ifdef DJGPP
-	 sprintf(rcfile, "%s/lynx.rc", Home_Dir());
+    sprintf(rcfile, "%s/lynx.rc", Home_Dir());
 #else
 #ifdef VMS
     sprintf(rcfile, "sys$login:.lynxrc");
@@ -57,22 +57,22 @@ PUBLIC void read_rc NOPARAMS
 	 */
 	while (line_buffer[0] && isspace(line_buffer[strlen(line_buffer)-1]))
 	    line_buffer[strlen(line_buffer)-1] = '\0';
-	
+
 	/*
 	 *  Skip any comment or blank lines.
 	 */
 	if (line_buffer[0] == '\0' || line_buffer[0] == '#')
 	    continue;
 
-        /*
+	/*
 	 *  Find the line position of the number sign if there is one.
 	 */
-        if ((cp = (char *)strchr(line_buffer, '#')) == NULL)
+	if ((cp = (char *)strchr(line_buffer, '#')) == NULL)
 	    number_sign = 999;
 	else
 	    number_sign = cp - line_buffer;
 
-        /*
+	/*
 	 *  File editor.
 	 */
 	if (!system_editor &&
@@ -80,10 +80,10 @@ PUBLIC void read_rc NOPARAMS
 	    cp-line_buffer < number_sign) {
 
 	    if ((cp2 = (char *)strchr(cp, '=')) != NULL)
-	 	cp = cp2 + 1;
+		cp = cp2 + 1;
 	    while (isspace(*cp))
-	        cp++;  /* get rid of spaces */
- 	    StrAllocCopy(editor, cp);
+		cp++;  /* get rid of spaces */
+	    StrAllocCopy(editor, cp);
 
 	/*
 	 *  Default bookmark file.
@@ -94,105 +94,105 @@ PUBLIC void read_rc NOPARAMS
 	    if ((cp2 = (char *)strchr(cp,'=')) != NULL)
 		cp = cp2 + 1;
 	    while (isspace(*cp))
-	        cp++;  /* get rid of spaces */
+		cp++;  /* get rid of spaces */
 
-            /*
+	    /*
 	     *  Since this is the "Default Bookmark File", we save it
 	     *  as a globals, and as the first MBM_A_subbookmark entry.
 	     */
 	    StrAllocCopy(bookmark_page, cp);
 	    StrAllocCopy(BookmarkPage, cp);
-            StrAllocCopy(MBM_A_subbookmark[0], cp);
-            StrAllocCopy(MBM_A_subdescript[0], MULTIBOOKMARKS_DEFAULT);
+	    StrAllocCopy(MBM_A_subbookmark[0], cp);
+	    StrAllocCopy(MBM_A_subdescript[0], MULTIBOOKMARKS_DEFAULT);
 
 	/*
 	 *  Multiple (sub)bookmark support settings.
 	 */
-        } else if ((cp = LYstrstr(line_buffer, "sub_bookmarks")) != NULL &&
-                   cp-line_buffer < number_sign) {
+	} else if ((cp = LYstrstr(line_buffer, "sub_bookmarks")) != NULL &&
+		   cp-line_buffer < number_sign) {
 
-           if ((cp2 = (char *)strchr(cp, '=')) != NULL)
-                cp = (cp2 + 1);
-           while (isspace(*cp))
+	   if ((cp2 = (char *)strchr(cp, '=')) != NULL)
+		cp = (cp2 + 1);
+	   while (isspace(*cp))
 	       cp++;  /* get rid of spaces */
-           if (!strncasecomp(cp, "standard", 8)) {
-              LYMultiBookmarks = TRUE;
-              LYMBMAdvanced = FALSE;
-           } else if (!strncasecomp(cp, "advanced", 8)) {
-              LYMultiBookmarks = TRUE;
-              LYMBMAdvanced = TRUE;
-           } else {
-              LYMultiBookmarks = FALSE;
+	   if (!strncasecomp(cp, "standard", 8)) {
+	      LYMultiBookmarks = TRUE;
+	      LYMBMAdvanced = FALSE;
+	   } else if (!strncasecomp(cp, "advanced", 8)) {
+	      LYMultiBookmarks = TRUE;
+	      LYMBMAdvanced = TRUE;
+	   } else {
+	      LYMultiBookmarks = FALSE;
 	   }
 
 	/*
 	 *  Multiple (sub)bookmark definitions and descriptions.
 	 */
 	} else if ((cp = LYstrstr(line_buffer, "multi_bookmark")) != NULL &&
-                   cp-line_buffer < number_sign) {
+		   cp-line_buffer < number_sign) {
 
-            /*
+	    /*
 	     *  Found the root, now cycle through all the
-             *  possible spaces and match specific ones.
-             */
-            for (MBM_counter = 1;
-	         MBM_counter <= MBM_V_MAXFILES; MBM_counter++) {
-                sprintf(MBM_line, "multi_bookmark%c", (MBM_counter + 'A'));
+	     *	possible spaces and match specific ones.
+	     */
+	    for (MBM_counter = 1;
+		 MBM_counter <= MBM_V_MAXFILES; MBM_counter++) {
+		sprintf(MBM_line, "multi_bookmark%c", (MBM_counter + 'A'));
 
-                if ((cp = LYstrstr(line_buffer, MBM_line)) != NULL &&
-                    cp-line_buffer < number_sign) {
-                    if ((MBM_cp1 = (char *)strchr(cp, '=')) == NULL) {
-                        break;
-                    } else {
-                        if ((MBM_cp2 = (char *)strchr(cp, ',')) == NULL) {
-                            break;
-                        } else {
-                            MBM_i2 = 0;
+		if ((cp = LYstrstr(line_buffer, MBM_line)) != NULL &&
+		    cp-line_buffer < number_sign) {
+		    if ((MBM_cp1 = (char *)strchr(cp, '=')) == NULL) {
+			break;
+		    } else {
+			if ((MBM_cp2 = (char *)strchr(cp, ',')) == NULL) {
+			    break;
+			} else {
+			    MBM_i2 = 0;
 			    /*
 			     *  skip over the '='.
 			     */
-                            MBM_cp1++;
-                            while (MBM_cp1 && MBM_cp1 != MBM_cp2) {
-                                /*
+			    MBM_cp1++;
+			    while (MBM_cp1 && MBM_cp1 != MBM_cp2) {
+				/*
 				 *  Skip spaces.
 				 */
-                                if (isspace(*MBM_cp1)) {
-                                    MBM_cp1++;
-                                    continue;
-                                } else {
-                                    MBM_line[MBM_i2++] = *MBM_cp1++;
+				if (isspace(*MBM_cp1)) {
+				    MBM_cp1++;
+				    continue;
+				} else {
+				    MBM_line[MBM_i2++] = *MBM_cp1++;
 				}
 			    }
-                            MBM_line[MBM_i2++] = '\0';
+			    MBM_line[MBM_i2++] = '\0';
 
-                            StrAllocCopy(MBM_A_subbookmark[MBM_counter],
-			    		 MBM_line);
+			    StrAllocCopy(MBM_A_subbookmark[MBM_counter],
+					 MBM_line);
 
-                            /*
+			    /*
 			     *  Now get the description ',' and ->.
 			     */
-                            MBM_cp1 = (char *)strchr(cp, ',');
+			    MBM_cp1 = (char *)strchr(cp, ',');
 
-                            MBM_i2 = 0;
+			    MBM_i2 = 0;
 			    /*
 			     *  Skip over the ','.
 			     */
-                            MBM_cp1++;
-                            /*
+			    MBM_cp1++;
+			    /*
 			     *  Eat spaces in front of description.
 			     */
-                            while (isspace(*MBM_cp1))
-                                MBM_cp1++;
-                            while (*MBM_cp1)
-                                MBM_line[MBM_i2++] = *MBM_cp1++;
-                            MBM_line[MBM_i2++] = '\0';
+			    while (isspace(*MBM_cp1))
+				MBM_cp1++;
+			    while (*MBM_cp1)
+				MBM_line[MBM_i2++] = *MBM_cp1++;
+			    MBM_line[MBM_i2++] = '\0';
 
-                            StrAllocCopy(MBM_A_subdescript[MBM_counter],
-			    		 MBM_line);
+			    StrAllocCopy(MBM_A_subdescript[MBM_counter],
+					 MBM_line);
 
-                            break;
+			    break;
 			}
-                    }
+		    }
 		}
 	    }
 
@@ -219,14 +219,14 @@ PUBLIC void read_rc NOPARAMS
 	/*
 	 *  Personal mail address.
 	 */
-        } else if ((cp = LYstrstr(line_buffer,
+	} else if ((cp = LYstrstr(line_buffer,
 				  "personal_mail_address")) != NULL &&
 		   cp-line_buffer < number_sign) {
 
 	    if ((cp2 = (char *)strchr(cp, '=')) != NULL)
 		cp = cp2 + 1;
 	    while (isspace(*cp))
-	        cp++;  /* get rid of spaces */
+		cp++;  /* get rid of spaces */
 	    StrAllocCopy(personal_mail_address, cp);
 
 	/*
@@ -239,11 +239,11 @@ PUBLIC void read_rc NOPARAMS
 	    if ((cp2 = (char *)strchr(cp, '=')) != NULL)
 		cp = cp2 + 1;
 	    while (isspace(*cp))
-	        cp++;  /* get rid of spaces */
+		cp++;  /* get rid of spaces */
 	    if (!strncasecomp(cp, "on", 2))
-	        case_sensitive = TRUE;
+		case_sensitive = TRUE;
 	    else
-	        case_sensitive = FALSE;
+		case_sensitive = FALSE;
 
 	/*
 	 *  Character set.
@@ -256,13 +256,13 @@ PUBLIC void read_rc NOPARAMS
 	    if ((cp2 = (char *)strchr(cp, '=')) != NULL)
 		cp = cp2 + 1;
 	    while (isspace(*cp))
-	        cp++;  /* get rid of spaces */
-            for (; LYchar_set_names[i]; i++) {
-                if (!strncmp(cp, LYchar_set_names[i], strlen(cp))) {
-                    current_char_set=i;
+		cp++;  /* get rid of spaces */
+	    for (; LYchar_set_names[i]; i++) {
+		if (!strncmp(cp, LYchar_set_names[i], strlen(cp))) {
+		    current_char_set=i;
 		    HTMLSetRawModeDefault(i);
-                    break;
-                }
+		    break;
+		}
 	    }
 
 	/*
@@ -275,7 +275,7 @@ PUBLIC void read_rc NOPARAMS
 	    if ((cp2 = (char *)strchr(cp, '=')) != NULL)
 		cp = cp2 + 1;
 	    while (isspace(*cp))
-	        cp++;  /* get rid of spaces */
+		cp++;  /* get rid of spaces */
 	    StrAllocCopy(language, cp);
 
 	/*
@@ -288,7 +288,7 @@ PUBLIC void read_rc NOPARAMS
 	    if ((cp2 = (char *)strchr(cp, '=')) != NULL)
 		cp = cp2 + 1;
 	    while (isspace(*cp))
-	        cp++;  /* get rid of spaces */
+		cp++;  /* get rid of spaces */
 	    StrAllocCopy(pref_charset, cp);
 
 	/*
@@ -300,26 +300,26 @@ PUBLIC void read_rc NOPARAMS
 	    if ((cp2 = (char * )strchr(cp, '=')) != NULL)
 		cp = cp2 + 1;
 	    while (isspace(*cp))
-	        cp++;  /* get rid of spaces */
+		cp++;  /* get rid of spaces */
 	    if (!strncasecomp(cp, "on", 2))
-	        vi_keys = TRUE;
+		vi_keys = TRUE;
 	    else
-	        vi_keys = FALSE;
+		vi_keys = FALSE;
 
 	/*
 	 *  EMACS keys.
 	 */
-        } else if ((cp = LYstrstr(line_buffer, "emacs_keys")) != NULL &&
-                   cp-line_buffer < number_sign) {
+	} else if ((cp = LYstrstr(line_buffer, "emacs_keys")) != NULL &&
+		   cp-line_buffer < number_sign) {
 
-            if ((cp2 = (char *)strchr(cp, '=')) != NULL)
-                cp = cp2 + 1;
-            while (isspace(*cp))
-	        cp++;  /* get rid of spaces */
-            if (!strncasecomp(cp, "on", 2))
-                emacs_keys = TRUE;
-            else
-                emacs_keys=FALSE;
+	    if ((cp2 = (char *)strchr(cp, '=')) != NULL)
+		cp = cp2 + 1;
+	    while (isspace(*cp))
+		cp++;  /* get rid of spaces */
+	    if (!strncasecomp(cp, "on", 2))
+		emacs_keys = TRUE;
+	    else
+		emacs_keys=FALSE;
 
 	/*
 	 *  Show dot files.
@@ -330,11 +330,11 @@ PUBLIC void read_rc NOPARAMS
 	    if ((cp2 = (char * )strchr(cp, '=')) != NULL)
 		cp = cp2 + 1;
 	    while (isspace(*cp))
-	        cp++;  /* get rid of spaces */
+		cp++;  /* get rid of spaces */
 	    if (!strncasecomp(cp, "on", 2))
-	        show_dotfiles = TRUE;
+		show_dotfiles = TRUE;
 	    else
-	        show_dotfiles = FALSE;
+		show_dotfiles = FALSE;
 
 	/*
 	 *  Show color.
@@ -345,7 +345,7 @@ PUBLIC void read_rc NOPARAMS
 	    if ((cp2 = (char * )strchr(cp, '=')) != NULL)
 		cp = cp2 + 1;
 	    while (isspace(*cp))
-	        cp++;  /* get rid of spaces */
+		cp++;  /* get rid of spaces */
 	    if (!strncasecomp(cp, "always", 6)) {
 		LYrcShowColor = SHOW_COLOR_ALWAYS;
 #if defined(USE_SLANG) || defined(COLOR_CURSES)
@@ -369,11 +369,11 @@ PUBLIC void read_rc NOPARAMS
 	    if ((cp2 = (char * )strchr(cp, '=')) != NULL)
 		cp = cp2 + 1;
 	    while (isspace(*cp))
-	        cp++;  /* get rid of spaces */
+		cp++;  /* get rid of spaces */
 	    if (!strncasecomp(cp, "off", 3))
-	        LYSelectPopups = FALSE;
+		LYSelectPopups = FALSE;
 	    else
-	        LYSelectPopups = TRUE;
+		LYSelectPopups = TRUE;
 
 	/*
 	 *  Show cursor.
@@ -384,11 +384,11 @@ PUBLIC void read_rc NOPARAMS
 	    if ((cp2 = (char * )strchr(cp, '=')) != NULL)
 		cp = cp2 + 1;
 	    while (isspace(*cp))
-	        cp++;  /* get rid of spaces */
+		cp++;  /* get rid of spaces */
 	    if (!strncasecomp(cp, "off", 3))
-	        LYShowCursor = FALSE;
+		LYShowCursor = FALSE;
 	    else
-	        LYShowCursor = TRUE;
+		LYShowCursor = TRUE;
 
 	/*
 	 *  Keypad mode.
@@ -399,13 +399,13 @@ PUBLIC void read_rc NOPARAMS
 	    if ((cp2 = (char *)strchr(cp, '=')) != NULL)
 		cp = cp2 + 1;
 	    while (isspace(*cp))
-	        cp++;  /* get rid of spaces */
+		cp++;  /* get rid of spaces */
 	    if (LYstrstr(cp, "LINKS_ARE_NUMBERED"))
-	        keypad_mode = LINKS_ARE_NUMBERED;
+		keypad_mode = LINKS_ARE_NUMBERED;
 	    else if (LYstrstr(cp, "LINKS_AND_FORM_FIELDS_ARE_NUMBERED"))
 		keypad_mode = LINKS_AND_FORM_FIELDS_ARE_NUMBERED;
 	    else
-	        keypad_mode = NUMBERS_AS_ARROWS;
+		keypad_mode = NUMBERS_AS_ARROWS;
 
 	/*
 	 *  Linedit mode.
@@ -418,12 +418,12 @@ PUBLIC void read_rc NOPARAMS
 	    if ((cp2 = (char *)strchr(cp, '=')) != NULL)
 		cp = cp2 + 1;
 	    while (isspace(*cp))
-	        cp++;  /* get rid of spaces */
-            for (; LYLineeditNames[i]; i++) {
-                if (!strncmp(cp, LYLineeditNames[i], strlen(cp))) {
-                    current_lineedit = i;
-                    break;
-                }
+		cp++;  /* get rid of spaces */
+	    for (; LYLineeditNames[i]; i++) {
+		if (!strncmp(cp, LYLineeditNames[i], strlen(cp))) {
+		    current_lineedit = i;
+		    break;
+		}
 	    }
 
 #ifdef DIRED_SUPPORT
@@ -436,13 +436,13 @@ PUBLIC void read_rc NOPARAMS
 	    if ((cp2 = (char *)strchr(cp,'=')) != NULL)
 		cp = cp2 + 1;
 	    while (isspace(*cp))
-	        cp++;  /* get rid of spaces */
+		cp++;  /* get rid of spaces */
 	    if (LYstrstr(cp, "FILES_FIRST") != NULL) {
-	        dir_list_style = FILES_FIRST;
+		dir_list_style = FILES_FIRST;
 	    } else if (LYstrstr(cp,"DIRECTORIES_FIRST") != NULL) {
-	        dir_list_style = 0;
+		dir_list_style = 0;
 	    } else {
-	        dir_list_style = MIXED_STYLE;
+		dir_list_style = MIXED_STYLE;
 	    }
 #endif /* DIRED_SUPPORT */
 
@@ -455,17 +455,17 @@ PUBLIC void read_rc NOPARAMS
 	    if ((cp2 = (char *)strchr(cp, '=')) != NULL)
 		cp = cp2 + 1;
 	    while (isspace(*cp))
-	        cp++;  /* get rid of spaces */
+		cp++;  /* get rid of spaces */
 	    if (LYstrstr(cp, "ADVANCED") != NULL) {
-	        user_mode = ADVANCED_MODE;
+		user_mode = ADVANCED_MODE;
 	    } else if (LYstrstr(cp,"INTERMEDIATE") != NULL) {
-	        user_mode = INTERMEDIATE_MODE;
+		user_mode = INTERMEDIATE_MODE;
 	    } else {
-	        user_mode = NOVICE_MODE;
+		user_mode = NOVICE_MODE;
 	    }
 
 #ifdef ALLOW_USERS_TO_CHANGE_EXEC_WITHIN_OPTIONS
-        /*
+	/*
 	 *  Local execution mode - all links.
 	 */
 	} else if ((cp = LYstrstr(line_buffer,
@@ -475,14 +475,14 @@ PUBLIC void read_rc NOPARAMS
 	    if ((cp2 = (char *)strchr(cp, '=')) != NULL)
 		cp = cp2 + 1;
 	    while (isspace(*cp))
-	        cp++;  /* get rid of spaces */
+		cp++;  /* get rid of spaces */
 
 	    if (!strncasecomp(cp, "on", 2))
-	        local_exec = TRUE;
+		local_exec = TRUE;
 	     else
-	        local_exec = FALSE;
+		local_exec = FALSE;
 
-        /*
+	/*
 	 *  Local execution mode - only links in local files.
 	 */
 	} else if ((cp = LYstrstr(line_buffer,
@@ -492,20 +492,20 @@ PUBLIC void read_rc NOPARAMS
 	    if ((cp2 = (char *)strchr(cp, '=')) != NULL)
 		cp = cp2 + 1;
 	    while (isspace(*cp))
-	        cp++;  /* get rid of spaces */
+		cp++;  /* get rid of spaces */
 	    if (!strncasecomp(cp, "on", 2))
-	        local_exec_on_local_files = TRUE;
+		local_exec_on_local_files = TRUE;
 	    else
-	        local_exec_on_local_files=FALSE;
+		local_exec_on_local_files=FALSE;
 #endif /* ALLOW_USERS_TO_CHANGE_EXEC_WITHIN_OPTIONS */
 
 	} /* end of if */
 
     } /* end of while */
- 
+
     fclose(fp);
 } /* big end */
-	
+
 PUBLIC int save_rc NOPARAMS
 {
     char rcfile[256];
@@ -517,7 +517,7 @@ PUBLIC int save_rc NOPARAMS
      *  Make a name.
      */
 #ifdef DJGPP
-	 sprintf(rcfile, "%s/lynx.rc", Home_Dir());
+    sprintf(rcfile, "%s/lynx.rc", Home_Dir());
 #else
 #ifdef VMS
     sprintf(rcfile, "sys$login:.lynxrc");
@@ -525,7 +525,7 @@ PUBLIC int save_rc NOPARAMS
     sprintf(rcfile, "%s/.lynxrc", Home_Dir());
 #endif /* VMS */
 #endif /* DJGPP */
-    
+
     /*
      *  Open the file for write.
      */
@@ -582,9 +582,9 @@ PUBLIC int save_rc NOPARAMS
 # user modes.  When this option is set to \"standard\", the menu will be\n\
 # presented regardless of user mode.\n");
     fprintf(fp, "sub_bookmarks=%s\n\n", (LYMultiBookmarks ?
-          				   (LYMBMAdvanced ?
+					   (LYMBMAdvanced ?
 					       "advanced" : "standard")
-					       		  : "off"));
+							  : "off"));
 
     /*
      *  Multiple (sub)bookmark definitions and descriptions.
@@ -596,11 +596,11 @@ PUBLIC int save_rc NOPARAMS
 # We start with \"multi_bookmarkB\" since 'A' is the default (see above).\n");
     for (MBM_c = 1; MBM_c <= MBM_V_MAXFILES; MBM_c++)
        fprintf(fp, "multi_bookmark%c=%s%s%s\n",
-       		   (MBM_c + 'A'),
+		   (MBM_c + 'A'),
 		   (MBM_A_subbookmark[MBM_c] ?
 		    MBM_A_subbookmark[MBM_c] : ""),
 		   (MBM_A_subbookmark[MBM_c] ?
-		   			 "," : ""),
+					 "," : ""),
 		   (MBM_A_subdescript[MBM_c] ?
 		    MBM_A_subdescript[MBM_c] : ""));
     fprintf(fp, "\n");
@@ -616,9 +616,9 @@ PUBLIC int save_rc NOPARAMS
 #    BY_SIZE     -- sorts on the size of the file\n\
 #    BY_DATE     -- sorts on the date of the file\n");
     fprintf(fp, "file_sorting_method=%s\n\n",
-     		(HTfileSortMethod == FILE_BY_NAME ? "BY_FILENAME"
-				    		  : 
-	 	(HTfileSortMethod == FILE_BY_SIZE ? "BY_SIZE"
+		(HTfileSortMethod == FILE_BY_NAME ? "BY_FILENAME"
+						  :
+		(HTfileSortMethod == FILE_BY_SIZE ? "BY_SIZE"
 						  :
 		(HTfileSortMethod == FILE_BY_TYPE ? "BY_TYPE"
 						  : "BY_DATE"))));
@@ -635,7 +635,7 @@ PUBLIC int save_rc NOPARAMS
 # could leave this field blank, but then you won't have it included in\n\
 # your mailed comments.\n");
     fprintf(fp, "personal_mail_address=%s\n\n",
-    		(personal_mail_address ? personal_mail_address : ""));
+		(personal_mail_address ? personal_mail_address : ""));
 
     /*
      *  Searching type.
@@ -645,7 +645,7 @@ PUBLIC int save_rc NOPARAMS
 # using the 's' or '/' keys, the search performed will be case sensitive\n\
 # instead of case INsensitive.  The default is usually \"off\".\n");
     fprintf(fp, "case_sensitive_searching=%s\n\n",
-  		(case_sensitive ? "on" : "off"));
+		(case_sensitive ? "on" : "off"));
 
     /*
      *  Character set.
@@ -689,7 +689,7 @@ PUBLIC int save_rc NOPARAMS
 # an error response, though the sending of an unacceptable response\n\
 # is also allowed.\n");
     fprintf(fp, "preferred_charset=%s\n\n",
-    		(pref_charset ? pref_charset : ""));
+		(pref_charset ? pref_charset : ""));
 
     /*
      *  Show color.
@@ -843,8 +843,8 @@ PUBLIC int save_rc NOPARAMS
 # files and directories together.  \"FILES_FIRST\" lists files first and\n\
 # \"DIRECTORIES_FIRST\" lists directories first.\n");
     fprintf(fp, "dir_list_style=%s\n\n",
-    		(dir_list_style==FILES_FIRST ? "FILES_FIRST"
-					     : 
+		(dir_list_style==FILES_FIRST ? "FILES_FIRST"
+					     :
 		(dir_list_style==MIXED_STYLE ? "MIXED_STYLE"
 					     : "DIRECTORIES_FIRST")));
 #endif /* DIRED_SUPPORT */
@@ -860,11 +860,11 @@ PUBLIC int save_rc NOPARAMS
 # Use \"ADVANCED\" to see the URL of the currently selected link at the\n\
 # bottom of the screen.\n");
     fprintf(fp, "user_mode=%s\n\n",
-    		(user_mode == NOVICE_MODE ? "NOVICE" : 
-			 (user_mode == ADVANCED_MODE ? 
-			 		  "ADVANCED" : "INTERMEDIATE")));
+		(user_mode == NOVICE_MODE ? "NOVICE" :
+			 (user_mode == ADVANCED_MODE ?
+					  "ADVANCED" : "INTERMEDIATE")));
 
-#if defined(EXEC_LINKS) || defined(EXEC_SCRIPTS) 
+#if defined(EXEC_LINKS) || defined(EXEC_SCRIPTS)
     /*
      *  Local execution mode - all links.
      */
@@ -879,7 +879,7 @@ PUBLIC int save_rc NOPARAMS
 #           or compromise security.  This should only be set to \"on\" if\n\
 #           you are viewing trusted source information.\n");
     fprintf(fp, "run_all_execution_links=%s\n\n",
-    		(local_exec ? "on" : "off"));
+		(local_exec ? "on" : "off"));
 
     /*
      *  Local execution mode - only links in local files.
@@ -906,7 +906,7 @@ PUBLIC int save_rc NOPARAMS
      */
     fclose(fp);
 #if defined(__DJGPP__) || defined(_WINDOWS)
-              _fmode = O_BINARY;
+    _fmode = O_BINARY;
 #endif /* __DJGPP__ or _WINDOWS */
 
 #ifdef VMS

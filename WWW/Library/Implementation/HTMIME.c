@@ -2199,12 +2199,10 @@ PUBLIC HTStream* HTMIMEConvert ARGS3(
     me->encoding  =	0;		/* Not set yet */
     me->compression_encoding = NULL;	/* Not set yet */
     me->net_ascii =	NO;		/* Local character set */
-#ifdef EXP_CHARTRANS
     HTAnchor_setUCInfoStage(me->anchor, current_char_set,
 			     UCT_STAGE_STRUCTURED, UCT_SETBY_DEFAULT);
     HTAnchor_setUCInfoStage(me->anchor, current_char_set,
 			     UCT_STAGE_HTEXT, UCT_SETBY_DEFAULT);
-#endif /* EXP_CHARTRANS */
     return me;
 }
 

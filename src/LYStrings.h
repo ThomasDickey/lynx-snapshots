@@ -18,13 +18,12 @@ extern int LYgetstr PARAMS((
 extern char * LYstrstr PARAMS((
 	char *		chptr,
 	char *		tarptr));
-
 extern char * LYmbcsstrncpy PARAMS((
 	char *		dst,
 	CONST char *	src,
 	int		n_bytes,
 	int		n_glyphs,
-	int		enc));
+	BOOL		utf_flag));
 extern char * LYmbcs_skip_glyphs PARAMS((
 	char *		data,
 	int		n_glyphs,
@@ -44,7 +43,6 @@ extern char * LYno_attr_mbcs_case_strstr PARAMS((
 	BOOL		utf_flag,
 	int *		nstartp,
 	int *		nendp));
-
 extern char * LYno_attr_char_strstr PARAMS((
 	char *		chptr,
 	char *		tarptr));

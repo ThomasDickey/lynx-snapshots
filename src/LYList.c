@@ -1,7 +1,7 @@
 /*			Lynx Document Reference List Support	      LYList.c
 **			====================================
 **
-**	Author:	FM	Foteos Macrides (macrides@sci.wfbr.edu)
+**	Author: FM	Foteos Macrides (macrides@sci.wfbr.edu)
 **
 */
 
@@ -31,7 +31,7 @@
 **
 **  On entry
 **	titles		Set:	if we want titles where available
-**			Clear:  we only get addresses.
+**			Clear:	we only get addresses.
 */
 
 static char list_filename[256] = "\0";
@@ -106,7 +106,7 @@ PUBLIC int showlist ARGS2(
     if (strchr(HTLoadedDocumentURL(), '"') == NULL) {
 	/*
 	 *  Insert a BASE tag so there is some way to relate the List Page
-	 *  file to its underlying document after we are done.  It won't
+	 *  file to its underlying document after we are done.	It won't
 	 *  be actually used for resolving relative URLs. - kw
 	 */
 	StrAllocCopy(Address, HTLoadedDocumentURL());
@@ -145,17 +145,17 @@ PUBLIC int showlist ARGS2(
 
 	if (child == 0) {
 	    /*
-	     *  child should not be 0 unless form field numbering is on
-	     *  and cnt is the number of a form input field.
-	     *  HText_FormDescNumber() will set desc to a description
-	     *  of what type of input field this is.  We'll list it to
-	     *  ensure that the link numbers on the list page match the
-	     *  numbering in the original document, but won't create a
-	     *  forward link to the form. - FM && LE
+	     *	child should not be 0 unless form field numbering is on
+	     *	and cnt is the number of a form input field.
+	     *	HText_FormDescNumber() will set desc to a description
+	     *	of what type of input field this is.  We'll list it to
+	     *	ensure that the link numbers on the list page match the
+	     *	numbering in the original document, but won't create a
+	     *	forward link to the form. - FM && LE
 	     *
-	     *  Changed to create a fake hidden link, to get the numbering
-	     *  right in connection with always treating this file as
-	     *  HIDDENLINKS_MERGE in GridText.c - kw
+	     *	Changed to create a fake hidden link, to get the numbering
+	     *	right in connection with always treating this file as
+	     *	HIDDENLINKS_MERGE in GridText.c - kw
 	     */
 	    if (keypad_mode == LINKS_AND_FORM_FIELDS_ARE_NUMBERED) {
 		HText_FormDescNumber(cnt, (char **)&desc);
@@ -177,11 +177,11 @@ PUBLIC int showlist ARGS2(
 	    parent->post_data &&
 	    !strcmp(HTMainAnchor->post_data, parent->post_data)) {
 	    /*
-	     *  Set flag to note that we had at least one internal link,
-	     *  if the document from which we are generating the list
-	     *  has assosiated POST data; after an extra check that the
-	     *  link destination really has hthe same POST data so that
-	     *  we can believe it is an internal link.
+	     *	Set flag to note that we had at least one internal link,
+	     *	if the document from which we are generating the list
+	     *	has assosiated POST data; after an extra check that the
+	     *	link destination really has hthe same POST data so that
+	     *	we can believe it is an internal link.
 	     */
 	    intern_w_post = TRUE;
 	}
@@ -200,20 +200,20 @@ PUBLIC int showlist ARGS2(
 	    }
 	}
 
-        fprintf(fp0, "<li><a href=\"%s\"%s>%s%s%s%s%s</a>\n", Address,
-		        dest_intl ? " TYPE=\"internal link\"" : "",
-		        dest_intl ? "(internal) " : "",
+	fprintf(fp0, "<li><a href=\"%s\"%s>%s%s%s%s%s</a>\n", Address,
+			dest_intl ? " TYPE=\"internal link\"" : "",
+			dest_intl ? "(internal) " : "",
 			((HTAnchor*)parent != dest) && Title ? "in " : "",
 			(char *)(Title ? Title : Address),
 			(Title && cp) ? " - " : "",
-                        (Title && cp) ? (cp+1) : "");
+			(Title && cp) ? (cp+1) : "");
 
 	FREE(Address);
 	FREE(Title);
     }
 
     if (hidden_links > 0) {
-        if (refs > 0)
+	if (refs > 0)
 	    fprintf(fp0, "\n</%s>\n\n<p>\n",
 			 ((keypad_mode == NUMBERS_AS_ARROWS) ?
 							"ol" : "ul"));
@@ -229,7 +229,7 @@ PUBLIC int showlist ARGS2(
 	    FREE(Address);
 	    continue;
 	}
-        fprintf(fp0, "<li><a href=\"%s\">%s</a>\n", Address, Address);
+	fprintf(fp0, "<li><a href=\"%s\">%s</a>\n", Address, Address);
 
 	FREE(Address);
     }
@@ -238,15 +238,15 @@ PUBLIC int showlist ARGS2(
 				       "ol" : "ul"));
 
     /*
-     *  Make necessary changes to newdoc before returning to caller.
-     *  If the intern_w_post flag is set, we keep the POST data in
-     *  newdoc that have been passed in.  They should be the same as
-     *  in the loaded locument for which we generated the list.
-     *  In that case the file we have written will be associated with
-     *  the same POST data when it is loaded after we are done here,
-     *  so that following one of the links we have marked as "internal
-     *  link" can lead back to the underlying document with the right
-     *  address+post_data combination. - kw
+     *	Make necessary changes to newdoc before returning to caller.
+     *	If the intern_w_post flag is set, we keep the POST data in
+     *	newdoc that have been passed in.  They should be the same as
+     *	in the loaded locument for which we generated the list.
+     *	In that case the file we have written will be associated with
+     *	the same POST data when it is loaded after we are done here,
+     *	so that following one of the links we have marked as "internal
+     *	link" can lead back to the underlying document with the right
+     *	address+post_data combination. - kw
      */
     if (intern_w_post) {
 	newdoc->internal_link = TRUE;
@@ -268,10 +268,10 @@ PUBLIC int showlist ARGS2(
 **
 **  On entry
 **	titles		Set:	if we want titles where available
-**			Clear:  we only get addresses.
+**			Clear:	we only get addresses.
 */
 PUBLIC void printlist ARGS2(
-	FILE *,		fp,
+	FILE *, 	fp,
 	BOOLEAN,	titles)
 {
 #ifdef VMS
@@ -284,10 +284,10 @@ PUBLIC void printlist ARGS2(
 
     refs = HText_sourceAnchors(HTMainText);
     if (refs <= 0 && LYHiddenLinks != HIDDENLINKS_SEPARATE)
-        return;
+	return;
     hidden_links = HText_HiddenLinkCount(HTMainText);
     if (refs <= 0 && hidden_links <= 0) {
-        return;
+	return;
     } else {
 	fprintf(fp, "\n%s\n\n", "References");
 	if (hidden_links > 0) {
@@ -319,11 +319,11 @@ PUBLIC void printlist ARGS2(
 	    }
 	    dest = HTAnchor_followMainLink((HTAnchor *)child);
 	    /*
-	     *  Ignore if child anchor points to itself, i.e. we had
-	     *  something like <A NAME=xyz HREF="#xyz"> and it is not
-	     *  treated as a hidden link.  Useful if someone 'P'rints
-	     *  the List Page (which isn't a very useful action to do,
-	     *  but anyway...) - kw
+	     *	Ignore if child anchor points to itself, i.e. we had
+	     *	something like <A NAME=xyz HREF="#xyz"> and it is not
+	     *	treated as a hidden link.  Useful if someone 'P'rints
+	     *	the List Page (which isn't a very useful action to do,
+	     *	but anyway...) - kw
 	     */
 	    if (dest == (HTAnchor *)child)
 		continue;
@@ -352,7 +352,7 @@ PUBLIC void printlist ARGS2(
 	    FREE(address);
 #ifdef VMS
 	    if (HadVMSInterrupt)
-	        break;
+		break;
 #endif /* VMS */
 	}
     }

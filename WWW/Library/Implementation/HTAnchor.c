@@ -696,9 +696,7 @@ PUBLIC BOOL HTAnchor_delete ARGS1(
      */
     FREE(me->address);
 
-#ifdef EXP_CHARTRANS
     FREE (me->UCStages);
-#endif
     ImageMapList_free(me->imaps);
 
 

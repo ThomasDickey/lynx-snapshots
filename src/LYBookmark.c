@@ -25,7 +25,10 @@ extern BOOLEAN HadVMSInterrupt;	/* Flag from cleanup_sig() AST */
 
 #define FREE(x) if (x) {free(x); x = NULL;}
 
-PRIVATE BOOLEAN is_mosaic_hotlist=FALSE;
+PUBLIC char *MBM_A_subbookmark[MBM_V_MAXFILES+1];
+PUBLIC char *MBM_A_subdescript[MBM_V_MAXFILES+1];
+
+PRIVATE BOOLEAN is_mosaic_hotlist = FALSE;
 PRIVATE char * convert_mosaic_bookmark_file PARAMS((char *filename_buffer));
 
 /*
@@ -116,8 +119,8 @@ success:
 	fclose(fp);
 	newname = convert_mosaic_bookmark_file(filename_buffer);
 #ifdef DOSPATH
-		  sprintf(URL_buffer,"file://localhost/%s",
-				HTDOS_wwwName((char *)newname));
+	sprintf(URL_buffer, "file://localhost/%s",
+		HTDOS_wwwName((char *)newname));
 #else
 #ifdef VMS
 	sprintf(URL_buffer,"file://localhost%s",
@@ -131,7 +134,7 @@ success:
 	is_mosaic_hotlist = FALSE;
 #ifdef DOSPATH
         sprintf(URL_buffer,"file://localhost/%s",
-				HTDOS_wwwName((char *)filename_buffer));
+		HTDOS_wwwName((char *)filename_buffer));
 #else
 #ifdef VMS
 	sprintf(URL_buffer,"file://localhost%s",
@@ -318,7 +321,7 @@ PUBLIC void save_bookmark_link ARGS2(
      *  Otherwise, open the pre-existing bookmark file. - FM
      */
 #if defined(__DJGPP__) || defined(_WINDOWS)
-                _fmode = O_TEXT;
+	_fmode = O_TEXT;
 #endif /* __DJGPP__  or _WINDOWS */
     if (first_time) {
         /*
@@ -349,9 +352,7 @@ PUBLIC void save_bookmark_link ARGS2(
      */
     if (first_time) {
 	fprintf(fp,"<head>\n");
-#ifdef EXP_CHARTRANS
 	LYAddMETAcharsetToFD(fp, -1);
-#endif
 	fprintf(fp,"<title>%s</title>\n</head>\n",BOOKMARK_TITLE);
 	fprintf(fp,"\
      You can delete links using the remove bookmark command.  It is usually\n\
@@ -379,7 +380,7 @@ PUBLIC void save_bookmark_link ARGS2(
     fclose(fp);
 
 #if defined(__DJGPP__) || defined(_WINDOWS)
-              _fmode = O_BINARY;
+    _fmode = O_BINARY;
 #endif /* __DJGPP__ or _WINDOWS */
     /*
      *  If this is a cached bookmark file, set nocache for
@@ -544,7 +545,7 @@ PUBLIC void remove_bookmark_link ARGS2(
     fclose(nfp);
     nfp = NULL;
 #ifdef DOSPATH
-	 remove(filename_buffer);
+    remove(filename_buffer);
 #endif /* DOSPATH */
     if (rename(newfile, filename_buffer) != -1) {
 #ifdef VMS

@@ -32,17 +32,17 @@
 #define COL_OPTION_VALUES 36  /* display column where option values start */
 
 BOOLEAN term_options;
-PRIVATE void terminate_options  PARAMS((int sig));
+PRIVATE void terminate_options	PARAMS((int sig));
 PRIVATE int boolean_choice PARAMS((
 	int		status,
 	int		line,
 	int		column,
-	char **		choices));
+	char ** 	choices));
 PRIVATE int popup_choice PARAMS((
 	int		cur_choice,
 	int		line,
 	int		column,
-	char **		choices,
+	char ** 	choices,
 	int		i_length,
 	int		disabled));
 
@@ -64,19 +64,19 @@ PRIVATE void option_statusline ARGS1(
 	CONST char *,		text)
 {
     /*
-     *  Make sure we have a pointer to a string.
+     *	Make sure we have a pointer to a string.
      */
     if (text == NULL)
 	return;
 
     /*
-     *  Don't print statusline messages if dumping to stdout.
+     *	Don't print statusline messages if dumping to stdout.
      */
     if (dump_output_immediately)
 	return;
 
     /*
-     *  Use _statusline() set to output on the bottom line. - FM
+     *	Use _statusline() set to output on the bottom line. - FM
      */
     LYStatusLine = (LYlines - 1);
     _statusline(text);
@@ -85,22 +85,22 @@ PRIVATE void option_statusline ARGS1(
 
 PRIVATE void option_user_message ARGS2(
 	CONST char *,		message,
-	char *,			argument)
+	char *, 		argument)
 {
     /*
-     *  Make sure we have a pointer to a string.
+     *	Make sure we have a pointer to a string.
      */
     if (message == NULL || argument == NULL)
 	return;
 
     /*
-     *  Don't print statusline messages if dumping to stdout.
+     *	Don't print statusline messages if dumping to stdout.
      */
     if (dump_output_immediately)
 	return;
 
     /*
-     *  Use _user_message() set to output on the bottom line.
+     *	Use _user_message() set to output on the bottom line.
      */
     LYStatusLine = (LYlines - 1);
     _user_message(message, argument);
@@ -114,7 +114,7 @@ PUBLIC void options NOARGS
 #endif /* ALLOW_USERS_TO_CHANGE_EXEC_WITHIN_OPTIONS */
     int response, ch;
     /*
-     *  If the user changes the display we need memory to put it in.
+     *	If the user changes the display we need memory to put it in.
      */
     char display_option[256];
 #ifndef VMS
@@ -126,6 +126,7 @@ PUBLIC void options NOARGS
     int CurrentAssumeCharSet = UCLYhndl_for_unspec;
     BOOLEAN CurrentRawMode = LYRawMode;
     BOOLEAN AddValueAccepted = FALSE;
+    char *cp = NULL;
     BOOL use_assume_charset, old_use_assume_charset;
 
 #ifdef DIRED_SUPPORT
@@ -181,7 +182,7 @@ PUBLIC void options NOARGS
 #endif
 		    LYChosenShowColor =
 			(LYShowColor >= SHOW_COLOR_ON) ?
-		    		     SHOW_COLOR_ALWAYS :
+				     SHOW_COLOR_ALWAYS :
 				     SHOW_COLOR_OFF;
 		break;
 	    default:
@@ -201,15 +202,16 @@ draw_options:
 
     old_use_assume_charset = use_assume_charset;
     /*
-     *  NOTE that printw() should be avoided for strings that
-     *  might have non-ASCII or multibyte/CJK characters. - FM
+     *	NOTE that printw() should be avoided for strings that
+     *	might have non-ASCII or multibyte/CJK characters. - FM
      */
     response = 0;
 #if defined(FANCY_CURSES) || defined (USE_SLANG)
-    if (enable_scrollback)
+    if (enable_scrollback) {
 	clear();
-    else
+    } else {
 	erase();
+    }
 #else
     clear();
 #endif /* FANCY_CURSES || USE_SLANG */
@@ -280,7 +282,7 @@ draw_options:
 	else
 	    addstr((UCLYhndl_for_unspec >= 0) ?
 		   (char *)LYCharSet_UC[UCLYhndl_for_unspec].MIMEname
-		   			      : "NONE");
+					      : "NONE");
     }
 
     move(L_Rawmode, 5);
@@ -292,11 +294,11 @@ draw_options:
     addstr("show color (&)  : ");
     if (no_option_save) {
 	addstr((LYShowColor == SHOW_COLOR_OFF ? "OFF" :
-	   					"ON "));
+						"ON "));
     } else {
 	switch (LYChosenShowColor) {
 	case SHOW_COLOR_NEVER:
-		addstr("NEVER     ");
+                addstr("NEVER     ");
 		break;
 	case SHOW_COLOR_OFF:
 		addstr("OFF");
@@ -369,7 +371,7 @@ draw_options:
     move(L_Exec, 5);
     addstr("local e(X)ecution links      : ");
 #ifndef NEVER_ALLOW_REMOTE_EXEC
-    addstr(		  local_exec ? "ALWAYS ON           " :
+    addstr(               local_exec ? "ALWAYS ON           " :
 	  (local_exec_on_local_files ? "FOR LOCAL FILES ONLY" :
 				       "ALWAYS OFF          "));
 #else
@@ -490,8 +492,8 @@ draw_options:
 #endif /* VMS */
 		{
 		    /*
-		     *  Cancelled, or a non-NULL display string
-		     *  wasn't changed. - FM
+		     *	Cancelled, or a non-NULL display string
+		     *	wasn't changed. - FM
 		     */
 		    addstr((display && *display) ? display : "NONE");
 		    clrtoeol();
@@ -532,10 +534,12 @@ draw_options:
 		sprintf(putenv_command, "DISPLAY=%s", display_option);
 		putenv(putenv_command);
 #endif /* VMS */
-		if ((display = getenv(DISPLAY)) != NULL &&
-		    *display == '\0') {
-		    display = NULL;
+		if ((cp = getenv(DISPLAY)) != NULL && *cp != '\0') {
+		    StrAllocCopy(display, cp);
+		} else {
+		    FREE(display);
 		}
+		cp = NULL;
 		addstr(display ? display : "NONE");
 		clrtoeol();
 		if ((display == NULL && *display_option == '\0') ||
@@ -690,7 +694,7 @@ draw_options:
 		break;
 
 	    case 'f':	/* Change ftp directory sorting. */
-	    case 'F':	/*  (also local for non-DIRED)   */
+	    case 'F':	/*  (also local for non-DIRED)	 */
 		/*
 		 *  Copy strings into choice array.
 		 */
@@ -875,7 +879,7 @@ draw_options:
 	    case 'C':
 		if (!LYSelectPopups) {
 		    current_char_set = boolean_choice(current_char_set,
-		    				      L_Charset, -1,
+						      L_Charset, -1,
 						      (char **)LYchar_set_names);
 		} else {
 		    current_char_set = popup_choice(current_char_set,
@@ -1073,7 +1077,7 @@ draw_options:
 		    option_statusline(DOTFILE_ACCESS_DISABLED);
 		} else {
 		    /*
-		     *  Copy strings into choice array.
+		     *	Copy strings into choice array.
 		     */
 		    choices[0] = NULL;
 		    StrAllocCopy(choices[0], "OFF");
@@ -1215,9 +1219,9 @@ draw_options:
 		if (LYSelectPopups && !no_option_save) {
 #if !defined(VMS) || defined(USE_SLANG)
 		    if (term_options) {
-		        term_options = FALSE;
-	            } else {
-		        AddValueAccepted = TRUE;
+			term_options = FALSE;
+		    } else {
+			AddValueAccepted = TRUE;
 		    }
 		    goto draw_options;
 #else
@@ -1579,8 +1583,8 @@ draw_options:
 		} else {
 		    option_statusline(R_TO_RETURN_TO_LYNX);
 		    /*
-		     *  Change response so that we don't exit
-		     *  the options menu.
+		     *	Change response so that we don't exit
+		     *	the options menu.
 		     */
 		    response = ' ';
 		}
@@ -1623,21 +1627,20 @@ PRIVATE int boolean_choice ARGS4(
 #endif /* VMS */
 
     /*
-     *  Get the number of choices and then make
-     *  number zero-based.
+     *	Get the number of choices and then make
+     *	number zero-based.
      */
     for (number = 0; choices[number] != NULL; number++)
 	;  /* empty loop body */
-
     number--;
 
     /*
-     *  Update the statusline.
+     *	Update the statusline.
      */
     option_statusline(ANY_KEY_CHANGE_RET_ACCEPT);
 
     /*
-     *  Highlight the current choice.
+     *	Highlight the current choice.
      */
     move(line, col);
     start_reverse();
@@ -1647,10 +1650,10 @@ PRIVATE int boolean_choice ARGS4(
     refresh();
 
     /*
-     *  Get the keyboard entry, and leave the
-     *  cursor at the choice, to indicate that
-     *  it can be changed, until the user accepts
-     *  the current choice.
+     *	Get the keyboard entry, and leave the
+     *	cursor at the choice, to indicate that
+     *	it can be changed, until the user accepts
+     *	the current choice.
      */
     term_options = FALSE;
     while (1) {
@@ -1734,7 +1737,7 @@ PRIVATE int boolean_choice ARGS4(
 	    refresh();
 	} else {
 	    /*
-	     *  Unhighlight choice.
+	     *	Unhighlight choice.
 	     */
 	    move(line, col);
 	    stop_reverse();
@@ -1758,12 +1761,12 @@ PRIVATE void terminate_options ARGS1(
 {
     term_options = TRUE;
     /*
-     *  Reassert the AST.
+     *	Reassert the AST.
      */
     signal(SIGINT, terminate_options);
 #ifdef VMS
     /*
-     *  Refresh the screen to get rid of the "interrupt" message.
+     *	Refresh the screen to get rid of the "interrupt" message.
      */
     if (!dump_output_immediately) {
 	lynx_force_repaint();
@@ -1779,45 +1782,43 @@ PUBLIC void edit_bookmarks NOARGS
 {
     int response = 0, def_response = 0, ch;
     int MBM_current = 1;
-#define	MULTI_OFFSET 8
+#define MULTI_OFFSET 8
     int a; /* misc counter */
     char MBM_tmp_line[256]; /* buffer for LYgetstr */
     char ehead_buffer[265];
 
     /*
-     *  We need (MBM_V_MAXFILES + MULTI_OFFSET) lines to display
-     *  the whole list at once.  Otherwise break it up into two
-     *  segments.  We know it won't be less than that because
-     *  'o'ptions needs 23-24 at LEAST.
+     *	We need (MBM_V_MAXFILES + MULTI_OFFSET) lines to display
+     *	the whole list at once.  Otherwise break it up into two
+     *	segments.  We know it won't be less than that because
+     *	'o'ptions needs 23-24 at LEAST.
      */
     term_options = FALSE;
     signal(SIGINT, terminate_options);
 
 draw_bookmark_list:
     /*
-     *  Display menu of bookmarks.  NOTE that we avoid printw()'s
-     *  to increase the chances that any non-ASCII or multibyte/CJK
-     *  characters will be handled properly. - FM
+     *	Display menu of bookmarks.  NOTE that we avoid printw()'s
+     *	to increase the chances that any non-ASCII or multibyte/CJK
+     *	characters will be handled properly. - FM
      */
 #if defined(FANCY_CURSES) || defined (USE_SLANG)
-    if (enable_scrollback)
+    if (enable_scrollback) {
 	clear();
-    else
+    } else {
 	erase();
+    }
 #else
     clear();
 #endif /* FANCY_CURSES || USE_SLANG */
     move(0, 5);
-
     lynx_start_h1_color ();
-
     if (LYlines < (MBM_V_MAXFILES + MULTI_OFFSET)) {
 	sprintf(ehead_buffer, MULTIBOOKMARKS_EHEAD_MASK, MBM_current);
 	addstr(ehead_buffer);
     } else {
 	addstr(MULTIBOOKMARKS_EHEAD);
     }
-
     lynx_stop_h1_color ();
 
     if (LYlines < (MBM_V_MAXFILES + MULTI_OFFSET)) {
@@ -1850,7 +1851,7 @@ draw_bookmark_list:
     }
 
     /*
-     *  Only needed when we have 2 screens.
+     *	Only needed when we have 2 screens.
      */
     if (LYlines < MBM_V_MAXFILES + MULTI_OFFSET) {
 	move((LYlines - 4), 0);
@@ -1891,7 +1892,6 @@ draw_bookmark_list:
 	   response != '>') {
 
 	move((LYlines - 2), 0);
-
 	lynx_start_prompt_color ();
 	addstr(MULTIBOOKMARKS_LETTER);
 	lynx_stop_prompt_color ();
@@ -2072,14 +2072,14 @@ PRIVATE int get_popup_choice_number ARGS1(
     char temp[120];
 
     /*
-     *  Load the c argument into the prompt buffer.
+     *	Load the c argument into the prompt buffer.
      */
     temp[0] = *c;
     temp[1] = '\0';
     option_statusline(OPTION_CHOICE_NUMBER);
 
     /*
-     *  Get the number, possibly with a suffix, from the user.
+     *	Get the number, possibly with a suffix, from the user.
      */
     if (LYgetstr(temp, VISIBLE, sizeof(temp), NORECALL) < 0 ||
 	*temp == 0 || term_options) {
@@ -2091,8 +2091,8 @@ PRIVATE int get_popup_choice_number ARGS1(
     }
 
     /*
-     *  If we had a 'g' or 'p' suffix, load it into c.
-     *  Otherwise, zero c.  Then return the number.
+     *	If we had a 'g' or 'p' suffix, load it into c.
+     *	Otherwise, zero c.  Then return the number.
      */
     if (strchr(temp, 'g') != NULL || strchr(temp, 'G') != NULL) {
 	*c = 'g';
@@ -2159,12 +2159,12 @@ PRIVATE int popup_choice ARGS6(
     QueryNum = QueryTotal;
 
     /*
-     *  Count the number of choices to be displayed, where
-     *  num_choices ranges from 0 to n, and set width to the
-     *  longest choice string length.  Also set Lnum to the
-     *  length for the highest choice number, then decrement
-     *  num_choices so as to be zero-based.  The window width
-     *  will be based on the sum of width and Lnum. - FM
+     *	Count the number of choices to be displayed, where
+     *	num_choices ranges from 0 to n, and set width to the
+     *	longest choice string length.  Also set Lnum to the
+     *	length for the highest choice number, then decrement
+     *	num_choices so as to be zero-based.  The window width
+     *	will be based on the sum of width and Lnum. - FM
      */
     for (num_choices = 0; Cptr[num_choices] != NULL; num_choices++) {
 	if (strlen(Cptr[num_choices]) > width) {
@@ -2176,23 +2176,23 @@ PRIVATE int popup_choice ARGS6(
     num_choices--;
 
     /*
-     *  Let's assume for the sake of sanity that ly is the number
-     *   corresponding to the line the option is on.
-     *  Let's also assume that cur_choice is the number of the
-     *   choice that should be initially selected, with 0 being
-     *   the first choice.
-     *  So what we have, is the top equal to the current screen line
-     *   subtracting the cur_choice + 1 (the one must be for the top
-     *   line we will draw in a box).  If the top goes under 0, then
-     *   consider it 0.
+     *	Let's assume for the sake of sanity that ly is the number
+     *	 corresponding to the line the option is on.
+     *	Let's also assume that cur_choice is the number of the
+     *	 choice that should be initially selected, with 0 being
+     *	 the first choice.
+     *	So what we have, is the top equal to the current screen line
+     *	 subtracting the cur_choice + 1 (the one must be for the top
+     *	 line we will draw in a box).  If the top goes under 0, then
+     *	 consider it 0.
      */
     top = ly - (cur_choice + 1);
     if (top < 0)
 	top = 0;
 
     /*
-     *  Check and see if we need to put the i_length parameter up to
-     *  the number of real choices.
+     *	Check and see if we need to put the i_length parameter up to
+     *	the number of real choices.
      */
     if (i_length < 1) {
 	i_length = num_choices;
@@ -2204,14 +2204,14 @@ PRIVATE int popup_choice ARGS6(
     }
 
     /*
-     *  The bottom is the value of the top plus the number of choices
-     *  to view plus 3 (one for the top line, one for the bottom line,
-     *  and one to offset the 0 counted in the num_choices).
+     *	The bottom is the value of the top plus the number of choices
+     *	to view plus 3 (one for the top line, one for the bottom line,
+     *	and one to offset the 0 counted in the num_choices).
      */
     bottom = top + i_length + 3;
 
     /*
-     *  Hmm...  If the bottom goes beyond the number of lines available,
+     *	Hmm...	If the bottom goes beyond the number of lines available,
      */
     if (bottom > DisplayLines) {
 	/*
@@ -2225,10 +2225,10 @@ PRIVATE int popup_choice ARGS6(
 		bottom = (DisplayLines + 1);
 	} else {
 	    /*
-	     *  Try to position the window so that the selected choice will
-	     *    appear where the choice box currently is positioned.
-	     *  It could end up too high, at this point, but we'll move it
-	     *    down latter, if that has happened.
+	     *	Try to position the window so that the selected choice will
+	     *	  appear where the choice box currently is positioned.
+	     *	It could end up too high, at this point, but we'll move it
+	     *	  down latter, if that has happened.
 	     */
 	    top = (DisplayLines + 1) - (i_length + 3);
 	    bottom = (DisplayLines + 1);
@@ -2236,12 +2236,12 @@ PRIVATE int popup_choice ARGS6(
     }
 
     /*
-     *  This is really fun, when the length is 4, it means 0 to 4, or 5.
+     *	This is really fun, when the length is 4, it means 0 to 4, or 5.
      */
     length = (bottom - top) - 2;
 
     /*
-     *  Move the window down if it's too high.
+     *	Move the window down if it's too high.
      */
     if (bottom < ly + 2) {
 	bottom = ly + 2;
@@ -2251,8 +2251,8 @@ PRIVATE int popup_choice ARGS6(
     }
 
     /*
-     *  Set up the overall window, including the boxing characters ('*'),
-     *  if it all fits.  Otherwise, set up the widest window possible. - FM
+     *	Set up the overall window, including the boxing characters ('*'),
+     *	if it all fits.  Otherwise, set up the widest window possible. - FM
      */
 #ifdef USE_SLANG
     SLsmg_fill_region(top, lx - 1, bottom - top, (Lnum + width + 4), ' ');
@@ -2277,8 +2277,8 @@ PRIVATE int popup_choice ARGS6(
 #endif /* USE_SLANG */
 
     /*
-     *  Clear the command line and write
-     *  the popup statusline. - FM
+     *	Clear the command line and write
+     *	the popup statusline. - FM
      */
     move((LYlines - 2), 0);
     clrtoeol();
@@ -2289,16 +2289,16 @@ PRIVATE int popup_choice ARGS6(
     }
 
     /*
-     *  Set up the window_offset for choices.
-     *   cur_choice ranges from 0...n
-     *   length ranges from 0...m
+     *	Set up the window_offset for choices.
+     *	 cur_choice ranges from 0...n
+     *	 length ranges from 0...m
      */
     if (cur_choice >= length) {
 	window_offset = cur_choice - length + 1;
     }
 
     /*
-     *  Compute the number of popup window pages. - FM
+     *	Compute the number of popup window pages. - FM
      */
     npages = ((num_choices + 1) > length) ?
 		(((num_choices + 1) + (length - 1))/(length))
@@ -2310,7 +2310,7 @@ redraw:
     Cptr = choices;
 
     /*
-     *  Display the boxed choices.
+     *	Display the boxed choices.
      */
     for (i = 0; i <= num_choices; i++) {
 	if (i >= window_offset && i - window_offset < length) {
@@ -2343,7 +2343,7 @@ redraw:
     Cptr = NULL;
 
     /*
-     *  Loop on user input.
+     *	Loop on user input.
      */
     while (cmd != LYK_ACTIVATE) {
 	/*
@@ -2456,7 +2456,7 @@ redraw:
 		 */
 		if (c == 'p') {
 		    /*
-		     *  Treat 1 or less as the first page. - FM
+		     *	Treat 1 or less as the first page. - FM
 		     */
 		    if (number <= 1) {
 			if (window_offset == 0) {
@@ -2480,8 +2480,8 @@ redraw:
 		    }
 
 		    /*
-		     *  Treat a number equal to or greater than the
-		     *  number of pages as the last page. - FM
+		     *	Treat a number equal to or greater than the
+		     *	number of pages as the last page. - FM
 		     */
 		    if (number >= npages) {
 			if (window_offset >= ((num_choices - length) + 1)) {
@@ -2509,7 +2509,7 @@ redraw:
 		    }
 
 		    /*
-		     *  We want an intermediate page. - FM
+		     *	We want an intermediate page. - FM
 		     */
 		    if (((number - 1) * length) == window_offset) {
 			sprintf(buffer, ALREADY_AT_CHOICE_PAGE, number);
@@ -2538,14 +2538,14 @@ redraw:
 		 */
 		if (number > 0) {
 		    /*
-		     *  Decrement the number so as to correspond
-		     *  with our cur_choice values. - FM
+		     *	Decrement the number so as to correspond
+		     *	with our cur_choice values. - FM
 		     */
 		    number--;
 
 		    /*
-		     *  If the number is in range and had no legal
-		     *  suffix, select the indicated choice. - FM
+		     *	If the number is in range and had no legal
+		     *	suffix, select the indicated choice. - FM
 		     */
 		    if (number <= num_choices && c == '\0') {
 			cur_choice = number;
@@ -2554,13 +2554,13 @@ redraw:
 		    }
 
 		    /*
-		     *  Verify that we had a 'g' suffix,
-		     *  and act on the number. - FM
+		     *	Verify that we had a 'g' suffix,
+		     *	and act on the number. - FM
 		     */
 		    if (c == 'g') {
 			if (cur_choice == number) {
 			    /*
-			     *  The choice already is current. - FM
+			     *	The choice already is current. - FM
 			     */
 			    sprintf(buffer,
 				    CHOICE_ALREADY_CURRENT, (number + 1));
@@ -2576,9 +2576,9 @@ redraw:
 
 			if (number <= num_choices) {
 			    /*
-			     *  The number is in range and had a 'g'
-			     *  suffix, so make it the current choice,
-			     *  scrolling if needed. - FM
+			     *	The number is in range and had a 'g'
+			     *	suffix, so make it the current choice,
+			     *	scrolling if needed. - FM
 			     */
 			    j = (number - cur_choice);
 			    cur_choice = number;
@@ -2654,15 +2654,15 @@ redraw:
 		 */
 		if (window_offset != (num_choices - length + 1)) {
 		    /*
-		     *  Modify the current choice to not be a
-		     *  coordinate in the list, but a coordinate
-		     *  on the item selected in the window.
+		     *	Modify the current choice to not be a
+		     *	coordinate in the list, but a coordinate
+		     *	on the item selected in the window.
 		     */
 		    cur_choice -= window_offset;
 
 		    /*
-		     *  Page down the proper length for the list.
-		     *  If simply to far, back up.
+		     *	Page down the proper length for the list.
+		     *	If simply to far, back up.
 		     */
 		    window_offset += length;
 		    if (window_offset > (num_choices - length)) {
@@ -2670,17 +2670,17 @@ redraw:
 		    }
 
 		    /*
-		     *  Readjust the current choice to be a choice
-		     *  list coordinate rather than window.
-		     *  Redraw this thing.
+		     *	Readjust the current choice to be a choice
+		     *	list coordinate rather than window.
+		     *	Redraw this thing.
 		     */
 		    cur_choice += window_offset;
 		    goto redraw;
 		}
 		else if (cur_choice < num_choices) {
 		    /*
-		     *  Already on last page of the choice list so
-		     *  just redraw it with the last item selected.
+		     *	Already on last page of the choice list so
+		     *	just redraw it with the last item selected.
 		     */
 		    cur_choice = num_choices;
 		}
@@ -2693,14 +2693,14 @@ redraw:
 		 */
 		if (window_offset != 0) {
 		    /*
-		     *  Modify the current choice to not be a choice
-		     *  list coordinate, but a window coordinate.
+		     *	Modify the current choice to not be a choice
+		     *	list coordinate, but a window coordinate.
 		     */
 		    cur_choice -= window_offset;
 
 		    /*
-		     *  Page up the proper length.
-		     *  If too far, back up.
+		     *	Page up the proper length.
+		     *	If too far, back up.
 		     */
 		    window_offset -= length;
 		    if (window_offset < 0) {
@@ -2708,14 +2708,14 @@ redraw:
 		    }
 
 		    /*
-		     *  Readjust the current choice.
+		     *	Readjust the current choice.
 		     */
 		    cur_choice += window_offset;
 		    goto redraw;
 		} else if (cur_choice > 0) {
 		    /*
-		     *  Already on the first page so just
-		     *  back up to the first item.
+		     *	Already on the first page so just
+		     *	back up to the first item.
 		     */
 		    cur_choice = 0;
 		}
@@ -2809,18 +2809,18 @@ redraw:
 	    case LYK_NEXT:
 		if (recall && *prev_target_buffer == '\0') {
 		    /*
-		     *  We got a 'n'ext command with no prior query
-		     *  specified within the popup window.  See if
-		     *  one was entered when the popup was retracted,
-		     *  and if so, assume that's what's wanted.  Note
-		     *  that it will become the default within popups,
-		     *  unless another is entered within a popup.  If
-		     *  the within popup default is to be changed at
-		     *  that point, use WHEREIS ('/') and enter it,
-		     *  or the up- or down-arrow keys to seek any of
-		     *  the previously entered queries, regardless of
-		     *  whether they were entered within or outside
-		     *  of a popup window. - FM
+		     *	We got a 'n'ext command with no prior query
+		     *	specified within the popup window.  See if
+		     *	one was entered when the popup was retracted,
+		     *	and if so, assume that's what's wanted.  Note
+		     *	that it will become the default within popups,
+		     *	unless another is entered within a popup.  If
+		     *	the within popup default is to be changed at
+		     *	that point, use WHEREIS ('/') and enter it,
+		     *	or the up- or down-arrow keys to seek any of
+		     *	the previously entered queries, regardless of
+		     *	whether they were entered within or outside
+		     *	of a popup window. - FM
 		     */
 		    if ((cp = (char *)HTList_objectAt(search_queries,
 						      0)) != NULL) {
@@ -2849,7 +2849,7 @@ check_recall:
 		if (*prev_target == '\0' &&
 		    !(recall && (ch == UPARROW || ch == DNARROW))) {
 		    /*
-		     *  No entry.  Simply break.   - FM
+		     *	No entry.  Simply break.   - FM
 		     */
 		    option_statusline(CANCELLED);
 		    sleep(InfoSecs);
@@ -2903,7 +2903,7 @@ check_recall:
 			if ((ch = LYgetstr(prev_target, VISIBLE,
 				sizeof(prev_target_buffer), recall)) < 0) {
 			    /*
-			     *  User cancelled the search via ^G. - FM
+			     *	User cancelled the search via ^G. - FM
 			     */
 			    option_statusline(CANCELLED);
 			    sleep(InfoSecs);
@@ -2914,8 +2914,8 @@ check_recall:
 		} else if (recall && ch == DNARROW) {
 		    if (FirstRecall) {
 		    /*
-		     *  Use the current string or
-		     *  first query in the list. - FM
+		     *	Use the current string or
+		     *	first query in the list. - FM
 		     */
 		    FirstRecall = FALSE;
 		    if (*prev_target_buffer) {
@@ -2933,13 +2933,13 @@ check_recall:
 		    }
 		} else {
 		    /*
-		     *  Advance to the next query in the list. - FM
+		     *	Advance to the next query in the list. - FM
 		     */
 		    QueryNum--;
 		}
 		if (QueryNum < 0)
 		    /*
-		     *  Roll around to the first query in the list. - FM
+		     *	Roll around to the first query in the list. - FM
 		     */
 		    QueryNum = (QueryTotal - 1);
 		    if ((cp = (char *)HTList_objectAt(search_queries,
@@ -2994,11 +2994,11 @@ check_recall:
 		}
 		if (Cptr[i+j] != NULL) {
 		    /*
-		     *  We have a hit, so make that choice the current. - FM
+		     *	We have a hit, so make that choice the current. - FM
 		     */
 		    cur_choice += j;
 		    /*
-		     *  Scroll the window down if necessary.
+		     *	Scroll the window down if necessary.
 		     */
 		    if ((cur_choice - window_offset) >= length) {
 			window_offset += j;
@@ -3037,12 +3037,12 @@ check_recall:
 		}
 		if (j < cur_choice) {
 		    /*
-		     *  We have a hit, so make that choice the current. - FM
+		     *	We have a hit, so make that choice the current. - FM
 		     */
 		    j = (cur_choice - j);
 		    cur_choice -= j;
 		    /*
-		     *  Scroll the window up if necessary.
+		     *	Scroll the window up if necessary.
 		     */
 		    if ((cur_choice - window_offset) < 0) {
 			window_offset -= j;

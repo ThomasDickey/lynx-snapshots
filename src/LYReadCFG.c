@@ -1,14 +1,13 @@
 #include "HTUtils.h"
 #include "tcp.h"
 #include "HTFile.h"
+#include "UCMap.h"
+
 #include "LYUtils.h"
 #include "LYStrings.h"
 #include "LYStructs.h"
 #include "LYGlobalDefs.h"
 #include "LYCharSets.h"
-#ifdef EXP_CHARTRANS
-#include "UCMap.h"
-#endif /* EXP_CHARTRANS */
 #include "LYKeymap.h"
 #include "LYJump.h"
 #include "LYGetFile.h"
@@ -43,7 +42,7 @@ PUBLIC BOOLEAN LYUseNoviceLineTwo=TRUE;
  *  Translate a TRUE/FALSE field in a string buffer.
  */
 PRIVATE int is_true ARGS1(
-	char *,	string)
+	char *, string)
 {
     if (!strncasecomp(string,"TRUE",4))
 	return(TRUE);
@@ -55,20 +54,20 @@ PRIVATE int is_true ARGS1(
  *  Find an unescaped colon in a string buffer.
  */
 PRIVATE char *find_colon ARGS1(
-	char *,	buffer)
+	char *, buffer)
 {
     char ch, *buf = buffer;
 
     if (buf == NULL)
-        return NULL;
+	return NULL;
 
     while ((ch = *buf) != 0) {
 	if (ch == ':')
 	    return buf;
 	if (ch == '\\') {
-	     buf++;
-	     if (*buf == 0)
-	       break;
+	    buf++;
+	    if (*buf == 0)
+		break;
 	}
 	buf++;
     }
@@ -85,22 +84,22 @@ PRIVATE void free_item_list NOARGS
 
     cur = downloaders;
     while (cur) {
-        next = cur->next;
-    	FREE(cur->name);
-    	FREE(cur->command);
+	next = cur->next;
+	FREE(cur->name);
+	FREE(cur->command);
 	FREE(cur);
-        cur = next;
+	cur = next;
     }
     downloaders = NULL;
 
 #ifdef DIRED_SUPPORT
     cur = uploaders;
     while (cur) {
-        next = cur->next;
-    	FREE(cur->name);
-    	FREE(cur->command);
+	next = cur->next;
+	FREE(cur->name);
+	FREE(cur->command);
 	FREE(cur);
-        cur = next;
+	cur = next;
     }
     uploaders = NULL;
 #endif /* DIRED_SUPPORT */
@@ -108,11 +107,11 @@ PRIVATE void free_item_list NOARGS
 #ifdef USE_EXTERNALS
     cur = externals;
     while (cur) {
-        next = cur->next;
-    	FREE(cur->name);
-    	FREE(cur->command);
+	next = cur->next;
+	FREE(cur->name);
+	FREE(cur->command);
 	FREE(cur);
-        cur = next;
+	cur = next;
     }
     externals = NULL;
 #endif /* USE_EXTERNALS */
@@ -124,26 +123,26 @@ PRIVATE void free_item_list NOARGS
  *  Process string buffer fields for DOWNLOADER or UPLOADER menus.
  */
 PRIVATE void add_item_to_list ARGS2(
-	char *,			buffer,
-	lynx_html_item_type **,	list_ptr)
+	char *, 		buffer,
+	lynx_html_item_type **, list_ptr)
 {
     char *colon, *next_colon;
     lynx_html_item_type *cur_item, *prev_item;
 
     /*
-     *  Make a linked list
+     *	Make a linked list
      */
     if (*list_ptr == NULL) {
-    	/*
+	/*
 	 *  First item.
 	 */
-        cur_item = (lynx_html_item_type *)calloc(sizeof(lynx_html_item_type),1);
-        if (cur_item == NULL)
+	cur_item = (lynx_html_item_type *)calloc(sizeof(lynx_html_item_type),1);
+	if (cur_item == NULL)
 	    perror("Out of memory in read_cfg");
 	*list_ptr = cur_item;
 	atexit(free_item_list);
     } else {
-        /*
+	/*
 	 *  Find the last item.
 	 */
 	for (prev_item = *list_ptr;
@@ -151,7 +150,7 @@ PRIVATE void add_item_to_list ARGS2(
 	     prev_item = prev_item->next)
 	    ;  /* null body */
 	cur_item = (lynx_html_item_type *)calloc(sizeof(lynx_html_item_type),1);
-        if (cur_item == NULL)
+	if (cur_item == NULL)
 	    perror("Out of memory in read_cfg");
 	else
 	    prev_item->next = cur_item;
@@ -162,16 +161,16 @@ PRIVATE void add_item_to_list ARGS2(
     cur_item->always_enabled = FALSE;
 
     /*
-     *  Find first unescaped colon and process fields
+     *	Find first unescaped colon and process fields
      */
     if ((colon = find_colon(buffer)) != NULL) {
-        /*
+	/*
 	 *  Process name field
 	 */
-        cur_item->name = (char *)calloc((colon-buffer+1),sizeof(char));
+	cur_item->name = (char *)calloc((colon-buffer+1),sizeof(char));
 	if (cur_item->name == NULL)
 	    perror("Out of memory in read_cfg");
-	LYstrncpy(cur_item->name, buffer, (int)(colon-buffer));	
+	LYstrncpy(cur_item->name, buffer, (int)(colon-buffer));
 	remove_backslashes(cur_item->name);
 
 	/*
@@ -180,7 +179,7 @@ PRIVATE void add_item_to_list ARGS2(
 	if ((next_colon = find_colon(colon+1)) != NULL) {
 	    cur_item->command = (char *)calloc(next_colon-colon, sizeof(char));
 	    if (cur_item->command == NULL)
-	        perror("Out of memory in read_cfg");
+		perror("Out of memory in read_cfg");
 	    LYstrncpy(cur_item->command, colon+1, (int)(next_colon-(colon+1)));
 	    remove_backslashes(cur_item->command);
 	    cur_item->always_enabled = is_true(next_colon+1);
@@ -198,11 +197,11 @@ PRIVATE void free_printer_item_list NOARGS
     lynx_printer_item_type *next;
 
     while (cur) {
-        next = cur->next;
-    	FREE(cur->name);
-    	FREE(cur->command);
+	next = cur->next;
+	FREE(cur->name);
+	FREE(cur->command);
 	FREE(cur);
-        cur = next;
+	cur = next;
     }
     printers = NULL;
 
@@ -213,17 +212,17 @@ PRIVATE void free_printer_item_list NOARGS
  *  Process string buffer fields for PRINTER menus.
  */
 PRIVATE void add_printer_to_list ARGS2(
-	char *,				buffer,
+	char *, 			buffer,
 	lynx_printer_item_type **,	list_ptr)
 {
     char *colon, *next_colon;
     lynx_printer_item_type *cur_item, *prev_item;
 
     /*
-     *  Make a linked list.
+     *	Make a linked list.
      */
     if (*list_ptr == NULL) {
-        /*
+	/*
 	 *  First item.
 	 */
 	cur_item = (lynx_printer_item_type *)calloc(sizeof(lynx_printer_item_type),1);
@@ -232,7 +231,7 @@ PRIVATE void add_printer_to_list ARGS2(
 	*list_ptr = cur_item;
 	atexit(free_printer_item_list);
     } else {
-        /*
+	/*
 	 *  Find the last item.
 	 */
 	for (prev_item = *list_ptr;
@@ -252,17 +251,17 @@ PRIVATE void add_printer_to_list ARGS2(
     cur_item->always_enabled = FALSE;
 
     /*
-     *  Find first unescaped colon and process fields.
+     *	Find first unescaped colon and process fields.
      */
     if ((colon = find_colon(buffer)) != NULL) {
-        /*
+	/*
 	 *  Process name field.
 	 */
-        cur_item->name = (char *)calloc((colon-buffer+1), sizeof(char));
+	cur_item->name = (char *)calloc((colon-buffer+1), sizeof(char));
 	if (cur_item->name == NULL)
 	    perror("Out of memory in read_cfg");
-        LYstrncpy(cur_item->name, buffer, (int)(colon-buffer));	
-        remove_backslashes(cur_item->name);
+	LYstrncpy(cur_item->name, buffer, (int)(colon-buffer));
+	remove_backslashes(cur_item->name);
 
 	/*
 	 *  Process TRUE/FALSE field.
@@ -270,7 +269,7 @@ PRIVATE void add_printer_to_list ARGS2(
 	if ((next_colon = find_colon(colon+1)) != NULL) {
 	    cur_item->command = (char *)calloc(next_colon-colon, sizeof(char));
 	    if (cur_item->command == NULL)
-	        perror("Out of memory in read_cfg");
+		perror("Out of memory in read_cfg");
 	    LYstrncpy(cur_item->command, colon+1, (int)(next_colon-(colon+1)));
 	    remove_backslashes(cur_item->command);
 	    cur_item->always_enabled = is_true(next_colon+1);
@@ -327,7 +326,7 @@ PRIVATE int ColorCode ARGS1(
 	int,	color)
 {
 	static int map[] = {
-		0,  4,  2,  6, 1,  5,  3,  7,
+		0,  4,	2,  6, 1,  5,  3,  7,
 		8, 12, 10, 14, 9, 13, 11, 15 };
 	return map[color];
 }
@@ -339,7 +338,7 @@ PRIVATE int ColorCode ARGS1(
  *  Validator for COLOR fields.
  */
 PUBLIC int check_color ARGS2(
-	char *,	color,
+	char *, color,
 	int,	the_default)
 {
     int i;
@@ -363,7 +362,7 @@ PUBLIC int check_color ARGS2(
  *  Exit routine for failed COLOR parsing.
  */
 PRIVATE void exit_with_color_syntax ARGS1(
-	char *,		error_line)
+	char *, 	error_line)
 {
     unsigned int i;
     fprintf (stderr, "\
@@ -376,12 +375,10 @@ The special strings 'nocolor' or 'default', or\n"
 	    );
     for (i = 0; i < 16; i += 4) {
 	fprintf(stderr, "%16s %16s %16s %16s\n",
-		Color_Strings[i], Color_Strings[i + 1], 
+		Color_Strings[i], Color_Strings[i + 1],
 		Color_Strings[i + 2], Color_Strings[i + 3]);
     }
-    fprintf (stderr, "\
-Offending line:\n\
-%s\n",error_line);
+    fprintf (stderr, "Offending line:\n%s\n",error_line);
 
 #ifndef NOSIGHUP
     (void) signal(SIGHUP, SIG_DFL);
@@ -401,41 +398,41 @@ Offending line:\n\
  *  Process string buffer fields for COLOR setting.
  */
 PRIVATE void parse_color ARGS1(
-	char *,	buffer)
+	char *, buffer)
 {
     int color;
     char *fg, *bg;
-    char parse_color_line[501];
+    char temp[501];
 
-    if (strlen(buffer) < sizeof(parse_color_line))
-	strcpy(parse_color_line, buffer);
+    if (strlen(buffer) < sizeof(temp))
+	strcpy(temp, buffer);
     else
-	strcpy(parse_color_line, "Color config line too long");
+	strcpy(temp, "Color config line too long");
 
     /*
-     *  We are expecting a line of the form: 
-     *    INTEGER:FOREGROUND:BACKGROUND
+     *	We are expecting a line of the form:
+     *	  INTEGER:FOREGROUND:BACKGROUND
      */
-    color = atoi (buffer);
+    color = atoi(buffer);
     if (NULL == (fg = find_colon(buffer)))
-        exit_with_color_syntax(parse_color_line);
-    *fg++ = 0;
+	exit_with_color_syntax(temp);
+    *fg++ = '\0';
 
     if (NULL == (bg = find_colon(fg)))
-        exit_with_color_syntax(parse_color_line);
-    *bg++ = 0;
+	exit_with_color_syntax(temp);
+    *bg++ = '\0';
 
 #if defined(USE_SLANG)
     if ((check_color(fg, default_fg) < 0) ||
-        (check_color(bg, default_bg) < 0))
-	exit_with_color_syntax(parse_color_line);
+	(check_color(bg, default_bg) < 0))
+	exit_with_color_syntax(temp);
 
     SLtt_set_color(color, NULL, fg, bg);
 #else
     if (lynx_chg_color(color,
 	check_color(fg, default_fg),
 	check_color(bg, default_bg)) < 0)
-	exit_with_color_syntax(parse_color_line);
+	exit_with_color_syntax(temp);
 #endif
 }
 #endif /* USE_COLOR_TABLE */
@@ -444,17 +441,16 @@ PRIVATE void parse_color ARGS1(
  * Process the configuration file (lynx.cfg).
  */
 PUBLIC void read_cfg ARGS1(
-	char *,	cfg_filename)
+	char *, cfg_filename)
 {
     FILE *fp;
     char buffer[501];
     char temp[501];
-    char *line_feed;
     char *cp, *cp1;
     int i, j, len;
 
     /*
-     *  Locate and open the file.
+     *	Locate and open the file.
      */
     if (!cfg_filename || strlen(cfg_filename) == 0) {
 	if (TRACE)
@@ -469,15 +465,15 @@ PUBLIC void read_cfg ARGS1(
     have_read_cfg=TRUE;
 
     /*
-     *  Process each line in the file.
+     *	Process each line in the file.
      */
     while (fgets(buffer, 500, fp) != NULL) {
 	/*
 	 *  Strip off \n at the end.
 	 */
-	if ((line_feed = (char *)strchr(buffer, '\n')) != NULL)
-	    *line_feed = '\0';
-	
+	if ((cp = (char *)strchr(buffer, '\n')) != NULL)
+	    *cp = '\0';
+
 	/*
 	 *  Trim off any trailing comments.
 	 */
@@ -505,7 +501,7 @@ PUBLIC void read_cfg ARGS1(
 	if (buffer[0] == '\0' || buffer[0] == '#')
 	    continue;
 
-        /*
+	/*
 	 * Process the string buffer.
 	 */
 	switch (TOUPPER(buffer[0])) {
@@ -530,18 +526,17 @@ PUBLIC void read_cfg ARGS1(
 	    add_trusted(&buffer[20], ALWAYS_EXEC_PATH); /* Add exec path */
 #endif /* EXEC_LINKS */
 
-#ifdef EXP_CHARTRANS
 	} else if (!strncasecomp(buffer, "ASSUME_CHARSET:", 15)) {
 	    StrAllocCopy(UCAssume_MIMEcharset, buffer+15);
 	    for (i = 0; UCAssume_MIMEcharset[i]; i++)
-	        UCAssume_MIMEcharset[i] = TOLOWER(UCAssume_MIMEcharset[i]);
+		UCAssume_MIMEcharset[i] = TOLOWER(UCAssume_MIMEcharset[i]);
 	    UCLYhndl_for_unspec =
 		UCGetLYhndl_byMIME(UCAssume_MIMEcharset);
 
 	} else if (!strncasecomp(buffer, "ASSUME_LOCAL_CHARSET:", 21)) {
 	    StrAllocCopy(UCAssume_localMIMEcharset, buffer+21);
 	    for (i = 0; UCAssume_localMIMEcharset[i]; i++)
-	        UCAssume_localMIMEcharset[i] =
+		UCAssume_localMIMEcharset[i] =
 			TOLOWER(UCAssume_localMIMEcharset[i]);
 	    UCLYhndl_HTFile_for_unspec =
 		UCGetLYhndl_byMIME(UCAssume_localMIMEcharset);
@@ -549,12 +544,10 @@ PUBLIC void read_cfg ARGS1(
 	} else if (!strncasecomp(buffer, "ASSUME_UNREC_CHARSET:", 21)) {
 	    StrAllocCopy(UCAssume_unrecMIMEcharset, buffer+21);
 	    for (i = 0; UCAssume_unrecMIMEcharset[i]; i++)
-	        UCAssume_unrecMIMEcharset[i] =
+		UCAssume_unrecMIMEcharset[i] =
 			TOLOWER(UCAssume_unrecMIMEcharset[i]);
 	    UCLYhndl_for_unrec =
 		UCGetLYhndl_byMIME(UCAssume_unrecMIMEcharset);
-#endif /* EXP_CHARTRANS */
-
 	}
 	break;
 
@@ -651,7 +644,7 @@ PUBLIC void read_cfg ARGS1(
 		user_mode = ADVANCED_MODE;
 
 #if defined(VMS) && defined(VAXC) && !defined(__DECC)
-	} else if (!strncasecomp(buffer, 
+	} else if (!strncasecomp(buffer,
 				 "DEFAULT_VIRTUAL_MEMORY_SIZE:", 28)) {
 		HTVirtualMemorySize = atoi(buffer+28);
 #endif /* VMS && VAXC && !__DECC */
@@ -674,9 +667,9 @@ PUBLIC void read_cfg ARGS1(
 	    enable_scrollback = is_true(buffer+18);
 	}
 #ifdef USE_EXTERNALS
-        else if(!strncasecomp(buffer,"EXTERNAL:",9)) {
-            add_item_to_list(&buffer[9],&externals);
-                }
+	else if(!strncasecomp(buffer,"EXTERNAL:",9)) {
+	    add_item_to_list(&buffer[9],&externals);
+	}
 #endif
 	break;
 
@@ -802,17 +795,17 @@ PUBLIC void read_cfg ARGS1(
 	break;
 
 	case 'K':
-        if (!strncasecomp(buffer, "KEYMAP:", 7)) {
-            char *key;
-            char *func;
-  
-            key = buffer + 7;
-            if ((func = strchr(key, ':')) != NULL)	{
-                *func++ = '\0';
+	if (!strncasecomp(buffer, "KEYMAP:", 7)) {
+	    char *key;
+	    char *func;
+
+	    key = buffer + 7;
+	    if ((func = strchr(key, ':')) != NULL)	{
+		*func++ = '\0';
 		/* Allow comments on the ends of key remapping lines. - DT */
-            	if (!remap(key, strtok(func, " \t\n#")))
-                    fprintf(stderr,
-		    	    "key remapping of %s to %s failed\n",key,func);
+		if (!remap(key, strtok(func, " \t\n#")))
+		    fprintf(stderr,
+			    "key remapping of %s to %s failed\n",key,func);
 		else if (!strcmp("TOGGLE_HELP", strtok(func, " \t\n#")))
 		    LYUseNoviceLineTwo = FALSE;
 	    }
@@ -864,16 +857,16 @@ PUBLIC void read_cfg ARGS1(
 	} else if (!strncasecomp(buffer, "LYNX_SIG_FILE:", 14)) {
 	    strcpy(temp, (buffer+14));
 	    if (LYPathOffHomeOK(temp, 256)) {
-	        StrAllocCopy(LynxSigFile, temp);
+		StrAllocCopy(LynxSigFile, temp);
 		LYAddPathToHome(temp, 256, LynxSigFile);
 		StrAllocCopy(LynxSigFile, temp);
 		if (TRACE)
 		    fprintf(stderr,
-		    	    "LYNX_SIG_FILE set to '%s'\n", LynxSigFile);
-    	    } else {
-	        if (TRACE)
+			    "LYNX_SIG_FILE set to '%s'\n", LynxSigFile);
+	    } else {
+		if (TRACE)
 		    fprintf(stderr, "LYNX_SIG_FILE '%s' is bad. Ignoring.\n",
-	    			    LYNX_SIG_FILE);
+				    LYNX_SIG_FILE);
 	    }
 	}
 	break;
@@ -921,7 +914,7 @@ PUBLIC void read_cfg ARGS1(
 		 * increase HTNewsMaxChunk to this size. - FM
 		 */
 		if (HTNewsChunkSize > HTNewsMaxChunk) {
-		    HTNewsMaxChunk = HTNewsChunkSize; 
+		    HTNewsMaxChunk = HTNewsChunkSize;
 		}
 
 	} else if (!strncasecomp(buffer, "NEWS_MAX_CHUNK:", 15)) {
@@ -1040,10 +1033,10 @@ PUBLIC void read_cfg ARGS1(
 
 	case 'P':
 	if (!strncasecomp(buffer, "PERSONAL_MAILCAP:", 17)) {
-            StrAllocCopy(personal_type_map, buffer+17);
+	    StrAllocCopy(personal_type_map, buffer+17);
 
-        } else if (!strncasecomp(buffer, "PERSONAL_EXTENSION_MAP:", 23)) {
-            StrAllocCopy(personal_extension_map, buffer+23);
+	} else if (!strncasecomp(buffer, "PERSONAL_EXTENSION_MAP:", 23)) {
+	    StrAllocCopy(personal_extension_map, buffer+23);
 
 	} else if (!strncasecomp(buffer, "PREFERRED_CHARSET:", 18)) {
 	    StrAllocCopy(pref_charset, buffer+18);
@@ -1062,7 +1055,7 @@ PUBLIC void read_cfg ARGS1(
 #ifdef RAWDOSKEYHACK
 	case 'R':
 	if (!strncasecomp(buffer, "RAW_DOS_KEY_HACK:", 17)) {
-		 raw_dos_key_hack = is_true(buffer+17);
+	    raw_dos_key_hack = is_true(buffer+17);
 	}
 	break;
 #endif /* RAWDOSKEYHACK */
@@ -1137,34 +1130,34 @@ PUBLIC void read_cfg ARGS1(
 	} else if (!strncasecomp(buffer, "SUBSTITUTE_UNDERSCORES:", 23)) {
 	    use_underscore = is_true(buffer+23);
 
-        } else if (!strncasecomp(buffer, "SUFFIX:", 7)) {
+	} else if (!strncasecomp(buffer, "SUFFIX:", 7)) {
 	    char *extention;
 	    char *mime_type;
 
 	    if (strlen(buffer) > 9) {
-	        extention = buffer + 7;
-	        if ((mime_type = strchr(extention, ':')) != NULL) {
+		extention = buffer + 7;
+		if ((mime_type = strchr(extention, ':')) != NULL) {
 		    *mime_type++ = '\0';
 		    for (i = 0, j = 0; mime_type[i]; i++) {
-		        if (mime_type[i] != ' ') {
-		            mime_type[j++] = TOLOWER(mime_type[i]);
+			if (mime_type[i] != ' ') {
+			    mime_type[j++] = TOLOWER(mime_type[i]);
 			}
 		    }
 		    mime_type[j] = '\0';
 		    if (strstr(mime_type, "tex") != NULL ||
-		        strstr(mime_type, "postscript") != NULL ||
+			strstr(mime_type, "postscript") != NULL ||
 			strstr(mime_type, "sh") != NULL ||
 			strstr(mime_type, "troff") != NULL ||
 			strstr(mime_type, "rtf") != NULL)
 			HTSetSuffix(extention, mime_type, "8bit", 1.0);
 		    else
-		        HTSetSuffix(extention, mime_type, "binary", 1.0);
+			HTSetSuffix(extention, mime_type, "binary", 1.0);
 		}
 	    }
 
- 	} else if (!strncasecomp(buffer, "SYSTEM_EDITOR:", 14)) {
+	} else if (!strncasecomp(buffer, "SYSTEM_EDITOR:", 14)) {
 	    StrAllocCopy(editor, buffer+14);
- 	    system_editor = TRUE;
+	    system_editor = TRUE;
 
 	} else if (!strncasecomp(buffer, "SYSTEM_MAIL:", 12)) {
 	    StrAllocCopy(system_mail, buffer+12);
@@ -1219,24 +1212,24 @@ PUBLIC void read_cfg ARGS1(
 	if (!strncasecomp(buffer, "VI_KEYS_ALWAYS_ON:", 18)) {
 	    vi_keys = is_true(buffer+18);
 
-        } else if (!strncasecomp(buffer, "VIEWER:", 7)) {
+	} else if (!strncasecomp(buffer, "VIEWER:", 7)) {
 	    char *mime_type;
 	    char *viewer;
 	    char *environment;
 
 	    if (strlen(buffer) > 9) {
-	        mime_type = buffer + 7;
-	        if ((viewer = strchr(mime_type, ':')) != NULL) {
+		mime_type = buffer + 7;
+		if ((viewer = strchr(mime_type, ':')) != NULL) {
 		    *viewer++ = '\0';
 		    for (i = 0, j = 0; mime_type[i]; i++) {
-		        if (mime_type[i] != ' ') {
-		            mime_type[j++] = TOLOWER(mime_type[i]);
+			if (mime_type[i] != ' ') {
+			    mime_type[j++] = TOLOWER(mime_type[i]);
 			}
 		    }
 		    mime_type[j] = '\0';
 		    environment = strrchr(viewer, ':');
 		    if ((environment != NULL) &&
-		        (strlen(viewer) > 1) && *(environment-1) != '\\') {
+			(strlen(viewer) > 1) && *(environment-1) != '\\') {
 			*environment++ = '\0';
 			remove_backslashes(viewer);
 			/*
@@ -1245,20 +1238,22 @@ PUBLIC void read_cfg ARGS1(
 			 *  variable.
 			 */
 			if (!strcasecomp(environment,"XWINDOWS")) {
-			    if (getenv(DISPLAY)) 
-		      		HTSetPresentation(mime_type, viewer,
+			    if ((cp = getenv(DISPLAY)) != NULL &&
+				*cp != '\0')
+				HTSetPresentation(mime_type, viewer,
 						  1.0, 3.0, 0.0, 0);
 			} else if (!strcasecomp(environment,"NON_XWINDOWS")) {
-			    if (!getenv(DISPLAY)) 
-		      		HTSetPresentation(mime_type, viewer, 
+			    if ((cp = getenv(DISPLAY)) == NULL ||
+				*cp == '\0')
+				HTSetPresentation(mime_type, viewer,
 						  1.0, 3.0, 0.0, 0);
 			} else {
-		            HTSetPresentation(mime_type, viewer,
+			    HTSetPresentation(mime_type, viewer,
 						  1.0, 3.0, 0.0, 0);
 			}
 		    } else {
-		        remove_backslashes(viewer);
-		        HTSetPresentation(mime_type, viewer,
+			remove_backslashes(viewer);
+			HTSetPresentation(mime_type, viewer,
 						  1.0, 3.0, 0.0, 0);
 		    }
 		}
@@ -1291,25 +1286,25 @@ PUBLIC void read_cfg ARGS1(
 	default:
 	break;
 
-        }  /* end of Huge switch */
+	}  /* end of Huge switch */
     } /* end of while */
     fclose(fp);
 
     /*
-     *  If any DOWNLOADER: commands have always_enabled set (:TRUE),
-     *  make override_no_download TRUE, so that other restriction
-     *  settings will not block presentation of a download menu
-     *  with those always_enabled options still available. - FM
+     *	If any DOWNLOADER: commands have always_enabled set (:TRUE),
+     *	make override_no_download TRUE, so that other restriction
+     *	settings will not block presentation of a download menu
+     *	with those always_enabled options still available. - FM
      */
     if (downloaders != NULL) {
-    	int count;
+	int count;
 	lynx_html_item_type *cur_download;
 
-        for (count = 0, cur_download = downloaders;
-	     cur_download != NULL; 
+	for (count = 0, cur_download = downloaders;
+	     cur_download != NULL;
 	     cur_download = cur_download->next, count++) {
 	    if (cur_download->always_enabled) {
-	        override_no_download = TRUE;
+		override_no_download = TRUE;
 		break;
 	    }
 	}

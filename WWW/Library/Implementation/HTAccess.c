@@ -843,17 +843,22 @@ PRIVATE BOOL HTLoadDocument ARGS4(
 	    reloading = TRUE;
 #endif
 	    ForcingNoCache = YES;
-            if (TRACE)
+            if (TRACE) {
 	        fprintf(stderr, "HTAccess: Auto-reloading document.\n");
+	    }
 	}
     }
 
     /*
     **  Get the document from the net.  If we are auto-reloading,
-    **  the previous rendition will be freed in conjunction with
-    **  loading of the new rendition. - FM
+    **  the mutable anchor elements from the previous rendition
+    **  should be freed in conjunction with loading of the new
+    **  rendition. - FM
     */
     LYforce_no_cache = NO;  /* reset after each time through */
+    if (ForcingNoCache) {
+	FREE(anchor->title);
+    }
     status = HTLoad(address_to_load, anchor, format_out, sink);
     if (TRACE) {
 	fprintf(stderr, "HTAccess:  status=%d\n", status);

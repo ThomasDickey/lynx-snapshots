@@ -12,36 +12,22 @@ typedef enum {
     st_other
 } CharUtil_st;
 
-#ifndef EXP_CHARTRANS
-extern char * LYUnEscapeEntities PARAMS((
-	char *		str,
-	BOOLEAN		plain_space,
-	BOOLEAN		hidden));
-extern void LYUnEscapeToLatinOne PARAMS((
-	char **		str,
-	BOOLEAN		isURL));
-extern void LYExpandString PARAMS((
-	char **		str));
-#endif /* !EXP_CHARTRANS */
-
-#ifdef EXP_CHARTRANS
 extern BOOL LYUCFullyTranslateString PARAMS((
 	char ** 	str,
 	int		cs_from,
 	int		cs_to,
 	BOOL		use_lynx_specials,
-	BOOLEAN		plain_space,
-	BOOLEAN		hidden,
+	BOOLEAN 	plain_space,
+	BOOLEAN 	hidden,
 	CharUtil_st	stype));
 extern BOOL LYUCTranslateBackFormData PARAMS((
-	char **		str,
+	char ** 	str,
 	int		cs_from,
 	int		cs_to,
-	BOOLEAN		plain_space));
-#endif
+	BOOLEAN 	plain_space));
 extern void LYEntify PARAMS((
-	char **		str,
-	BOOLEAN		isTITLE));
+	char ** 	str,
+	BOOLEAN 	isTITLE));
 extern void LYTrimHead PARAMS((
 	char *		str));
 extern void LYTrimTail PARAMS((
@@ -49,16 +35,14 @@ extern void LYTrimTail PARAMS((
 extern char *LYFindEndOfComment PARAMS((
 	char *		str));
 extern void LYFillLocalFileURL PARAMS((
-	char **		href,
+	char ** 	href,
 	char *		base));
-#ifdef EXP_CHARTRANS
 extern void LYAddMETAcharsetToFD PARAMS((
 	FILE *			fd,
 	int			disp_chndl));
-#endif /* EXP_CHARTRANS */
 
 #ifdef Lynx_HTML_Handler
-extern int OL_CONTINUE;		/* flag for whether CONTINUE is set */
+extern int OL_CONTINUE; 	/* flag for whether CONTINUE is set */
 extern int OL_VOID;		/* flag for whether a count is set */
 extern void LYZero_OL_Counter PARAMS((
 	HTStructured *		me));
@@ -70,24 +54,35 @@ extern char *LYUppercaseI_OL_String PARAMS((
 	int			seqnum));
 extern char *LYLowercaseI_OL_String PARAMS((
 	int			seqnum));
-#ifdef EXP_CHARTRANS
 #ifdef HTML_H
 extern void LYGetChartransInfo PARAMS((
 	HTStructured *		me));
 #endif
 extern void add_META_charset_to_fd PARAMS((
-    FILE *	fp,
-    int		disp_chndl));
-#endif /* EXP_CHARTRANS */
-
+	FILE *			fp,
+	int			disp_chndl));
 extern void LYHandleMETA PARAMS((
 	HTStructured *		me,
-	CONST BOOL*	 	present,
+	CONST BOOL*		present,
 	CONST char **		value,
-	char **			include));
+	char ** 		include));
+#ifdef NOTDEFINED
+extern void LYHandleP PARAMS((
+	HTStructured *		me,
+	CONST BOOL*		present,
+	CONST char **		value,
+	char ** 		include,
+	BOOL			start));
+#endif
+extern void LYHandleSELECT PARAMS((
+	HTStructured *		me,
+	CONST BOOL*		present,
+	CONST char **		value,
+	char ** 		include,
+	BOOL			start));
 extern int LYLegitimizeHREF PARAMS((
-	HTStructured *	 	me,
-	char **			href,
+	HTStructured *		me,
+	char ** 		href,
 	BOOL			force_slash,
 	BOOL			strip_dots));
 extern void LYCheckForContentBase PARAMS((
@@ -110,7 +105,7 @@ extern void LYResetParagraphAlignment PARAMS((
 	HTStructured *		me));
 extern BOOLEAN LYCheckForCSI PARAMS((
 	HTParentAnchor *	anchor,
-	char **			url));
+	char ** 		url));
 #endif /* Lynx_HTML_Handler */
 
 #endif /* LYCHARUTILS_H */

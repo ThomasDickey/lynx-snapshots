@@ -206,12 +206,12 @@ PUBLIC char *LYNewsPost ARGS2(
 	scrollok(stdscr, FALSE); /* Stop scrolling.	 */
         goto cleanup;
     }
-    fprintf(fd,"%s\n",user_input);
+    fprintf(fd, "%s\n", user_input);
 
     /*
      *  Add Newsgroups Summary and Keywords headers.
      */
-    fprintf(fd,"Newsgroups: %s\nSummary: \nKeywords: \n\n", NewsGroups);
+    fprintf(fd, "Newsgroups: %s\nSummary: \nKeywords: \n\n", NewsGroups);
 
     /*
      *  Have the user create the message body.

@@ -25,7 +25,7 @@ ODosLatinUS (cp437)
 #    The entries are in cp437_DosLatinUS order
 #
 # some mapppings of greek letters to latin letters added,
-#  just for fun.. -kw
+#  just for fun.. - KW
 #
 0x00	U+0000	#NULL
 0x01	U+0001	#START OF HEADING

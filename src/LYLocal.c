@@ -34,7 +34,6 @@
 #include "HTParse.h"
 #include "LYCurses.h"
 #include "LYGlobalDefs.h"
-#include "HTAlert.h"
 #include "LYUtils.h"
 #include "LYStrings.h"
 #include "LYCharUtils.h"
@@ -78,7 +77,7 @@
 
 PRIVATE int LYExecv PARAMS((
 	char *		path,
-	char **		argv,
+	char ** 	argv,
 	char *		msg));
 
 #ifdef DIRED_SUPPORT
@@ -94,7 +93,7 @@ PRIVATE char *filename PARAMS((
 PRIVATE BOOLEAN permit_location PARAMS((
 	char *		destpath,
 	char *		srcpath,
-	char **		newpath));
+	char ** 	newpath));
 #endif /* OK_PERMIT */
 
 PRIVATE char *render_item PARAMS((
@@ -103,14 +102,14 @@ PRIVATE char *render_item PARAMS((
 	char *		dir,
 	char *		buf,
 	int		bufsize,
-	BOOLEAN		url_syntax));
+	BOOLEAN 	url_syntax));
 
 PRIVATE struct dired_menu *menu_head = NULL;
 struct dired_menu {
     int cond;
-#define DE_TAG	   1
-#define DE_DIR	   2
-#define DE_FILE	   3
+#define DE_TAG     1
+#define DE_DIR     2
+#define DE_FILE    3
 #define DE_SYMLINK 4
     char *sfx;
     char *link;
@@ -150,11 +149,11 @@ struct dired_menu {
 #endif /* OK_PERMIT */
 
 { DE_FILE,	      "", "Change Location",
-"(of selected file)"    , "LYNXDIRED://MODIFY_LOCATION%p",	NULL },
+"(of selected file)"	, "LYNXDIRED://MODIFY_LOCATION%p",	NULL },
 { DE_DIR,	      "", "Change Location",
 "(of selected directory)", "LYNXDIRED://MODIFY_LOCATION%p",	NULL },
 { DE_SYMLINK,	      "", "Change Location",
-"(of selected symbolic link)", "LYNXDIRED://MODIFY_LOCATION%p",	NULL },
+"(of selected symbolic link)", "LYNXDIRED://MODIFY_LOCATION%p", NULL },
 
 { DE_FILE,	      "", "Remove File",
    "(current selection)", "LYNXDIRED://REMOVE_SINGLE%p",	NULL },
@@ -169,7 +168,7 @@ struct dired_menu {
 #endif /* OK_UUDECODE && !ARCHIVE_ONLY */
 
 #if defined(OK_TAR) && !defined(ARCHIVE_ONLY)
-{ DE_FILE,      ".tar.Z", "Expand",
+{ DE_FILE,	".tar.Z", "Expand",
    "(current selection)", "LYNXDIRED://UNTAR_Z%p",		NULL },
 #endif /* OK_TAR && !ARCHIVE_ONLY */
 
@@ -177,27 +176,27 @@ struct dired_menu {
 { DE_FILE,     ".tar.gz", "Expand",
    "(current selection)", "LYNXDIRED://UNTAR_GZ%p",		NULL },
 
-{ DE_FILE,        ".tgz", "Expand",
+{ DE_FILE,	  ".tgz", "Expand",
    "(current selection)", "LYNXDIRED://UNTAR_GZ%p",		NULL },
 #endif /* OK_TAR && OK_GZIP && !ARCHIVE_ONLY */
 
 #ifndef ARCHIVE_ONLY
-{ DE_FILE,          ".Z", "Uncompress",
+{ DE_FILE,	    ".Z", "Uncompress",
    "(current selection)", "LYNXDIRED://DECOMPRESS%p",		NULL },
 #endif /* ARCHIVE_ONLY */
 
 #if defined(OK_GZIP) && !defined(ARCHIVE_ONLY)
-{ DE_FILE,         ".gz", "Uncompress",
+{ DE_FILE,	   ".gz", "Uncompress",
    "(current selection)", "LYNXDIRED://UNGZIP%p",		NULL },
 #endif /* OK_GZIP && !ARCHIVE_ONLY */
 
 #if defined(OK_ZIP) && !defined(ARCHIVE_ONLY)
-{ DE_FILE,        ".zip", "Uncompress",
+{ DE_FILE,	  ".zip", "Uncompress",
    "(current selection)", "LYNXDIRED://UNZIP%p",		NULL },
 #endif /* OK_ZIP && !ARCHIVE_ONLY */
 
 #if defined(OK_TAR) && !defined(ARCHIVE_ONLY)
-{ DE_FILE,        ".tar", "UnTar",
+{ DE_FILE,	  ".tar", "UnTar",
    "(current selection)", "LYNXDIRED://UNTAR%p",		NULL },
 #endif /* OK_TAR && !ARCHIVE_ONLY */
 
@@ -213,7 +212,7 @@ struct dired_menu {
 
 #ifdef OK_ZIP
 { DE_DIR,	      "", "Package and compress",
-           "(using zip)", "LYNXDIRED://ZIP%p",			NULL },
+	   "(using zip)", "LYNXDIRED://ZIP%p",			NULL },
 #endif /* OK_ZIP */
 
 { DE_FILE,	      "", "Compress",
@@ -221,12 +220,12 @@ struct dired_menu {
 
 #ifdef OK_GZIP
 { DE_FILE,	      "", "Compress",
-          "(using gzip)", "LYNXDIRED://GZIP%p",			NULL },
+	  "(using gzip)", "LYNXDIRED://GZIP%p", 		NULL },
 #endif /* OK_GZIP */
 
 #ifdef OK_ZIP
 { DE_FILE,	      "", "Compress",
-           "(using zip)", "LYNXDIRED://ZIP%p",			NULL },
+	   "(using zip)", "LYNXDIRED://ZIP%p",			NULL },
 #endif /* OK_ZIP */
 
 { DE_TAG,	      "", "Move all tagged items to another location.",
@@ -239,7 +238,7 @@ struct dired_menu {
 		      "", "LYNXDIRED://CLEAR_TAGGED",		NULL },
 
 { 0,		    NULL, NULL,
-		    NULL, NULL,					NULL }
+		    NULL, NULL, 				NULL }
 };
 
 /*
@@ -279,7 +278,7 @@ PRIVATE BOOLEAN remove_tagged NOARGS
 		testpath[(i - 1)] = '\0';
 
 	    /*
-	     *  Check the current status of the path to be deleted.
+	     *	Check the current status of the path to be deleted.
 	     */
 	    if (stat(testpath,&dir_info) == -1) {
 		sprintf(tmpbuf,
@@ -312,11 +311,11 @@ PRIVATE BOOLEAN remove_tagged NOARGS
  *  Input is current directory.
  *  The tests in this function can, at best, prevent some user mistakes -
  *   anybody who relies on them for security is seriously misguided.
- *  If a user has enough permissions to move a file somewhere, the same 
+ *  If a user has enough permissions to move a file somewhere, the same
  *   uid with Lynx & dired can do the same thing.
  */
 PRIVATE BOOLEAN modify_tagged ARGS1(
-	char *,		testpath)
+	char *, 	testpath)
 {
     char *cp;
     dev_t dev;
@@ -339,21 +338,21 @@ PRIVATE BOOLEAN modify_tagged ARGS1(
     LYgetstr(tmpbuf, VISIBLE, sizeof(tmpbuf), NORECALL);
     if (strlen(tmpbuf)) {
     /*
-     *  Determine the ownership of the current location.
+     *	Determine the ownership of the current location.
      */
 	/*
 	 *  This test used to always fail from the dired menu...
 	 *  changed to something that hopefully makes more sense - KW
-	 */ 
+	 */
 	if (testpath && *testpath && 0!=strcmp(testpath,"/")) {
 	    /*
-	     *  testpath passed in and is not empty and not a single "/"
-	     *  (which would probably be bogus) - use it.
+	     *	testpath passed in and is not empty and not a single "/"
+	     *	(which would probably be bogus) - use it.
 	     */
 	    cp = testpath;
 	} else {
 	    /*
-	     *  Prepare to get directory path from one of the tagged files.
+	     *	Prepare to get directory path from one of the tagged files.
 	     */
 	    cp = HTList_lastObject(tagged);
 	    testpath = NULL;	/* Won't be needed any more in this function,
@@ -368,7 +367,7 @@ PRIVATE BOOLEAN modify_tagged ARGS1(
 	}
 	if (testpath == NULL) {
 	    /*
-	     *  Get the directory containing the file or subdir.
+	     *	Get the directory containing the file or subdir.
 	     */
 	    cp = strip_trailing_slash(cp);
 	    savepath = HTParse(".", cp, PARSE_PATH+PARSE_PUNCTUATION);
@@ -382,7 +381,7 @@ PRIVATE BOOLEAN modify_tagged ARGS1(
 	    sleep(AlertSecs);
 	    FREE(savepath);
 	    return 0;
-	} 
+	}
 
 	/*
 	 *  Save the owner of the current location for later use.
@@ -491,7 +490,7 @@ PRIVATE BOOLEAN modify_tagged ARGS1(
 	    }
 	} else {
 	    _statusline(
-	    	   "Destination is not a valid directory! Request denied.");
+		   "Destination is not a valid directory! Request denied.");
 	    sleep(AlertSecs);
 	    FREE(savepath);
 	    return 0;
@@ -504,7 +503,7 @@ PRIVATE BOOLEAN modify_tagged ARGS1(
  *  Modify the name of the specified item.
  */
 PRIVATE BOOLEAN modify_name ARGS1(
-	char *,		testpath)
+	char *, 	testpath)
 {
     char *cp;
     char tmpbuf[512];
@@ -514,7 +513,7 @@ PRIVATE BOOLEAN modify_name ARGS1(
     char *args[5];
 
     /*
-     *  Determine the status of the selected item.
+     *	Determine the status of the selected item.
      */
     testpath = strip_trailing_slash(testpath);
 
@@ -553,7 +552,7 @@ PRIVATE BOOLEAN modify_name ARGS1(
 	    strcat(newpath,tmpbuf);
 
 	    /*
-	     *  Make sure the destination does not already exist.
+	     *	Make sure the destination does not already exist.
 	     */
 	    if (stat(newpath, &dir_info) == -1) {
 		if (errno != ENOENT) {
@@ -569,7 +568,7 @@ PRIVATE BOOLEAN modify_name ARGS1(
 		    args[3] = (char *) 0;
 		    if (LYExecv(MV_PATH, args, tmpbuf) <= 0)
 			return (-1);
-		    return 1; 
+		    return 1;
 		}
 	    } else if ((dir_info.st_mode & S_IFMT) == S_IFDIR) {
 		_statusline(
@@ -577,11 +576,11 @@ PRIVATE BOOLEAN modify_name ARGS1(
 		sleep(AlertSecs);
 	    } else if ((dir_info.st_mode & S_IFMT) == S_IFREG) {
 		_statusline(
-	    	 "There is already a file with that name! Request ignored.");
+		 "There is already a file with that name! Request ignored.");
 		sleep(AlertSecs);
 	    } else {
 		_statusline(
-	    	   "The specified name is already in use! Request ignored.");
+		   "The specified name is already in use! Request ignored.");
 		sleep(AlertSecs);
 	    }
 	}
@@ -593,7 +592,7 @@ PRIVATE BOOLEAN modify_name ARGS1(
  *  Change the location of a file or directory.
  */
 PRIVATE BOOLEAN modify_location ARGS1(
-	char *,		testpath)
+	char *, 	testpath)
 {
     int mode;
     char *cp;
@@ -607,7 +606,7 @@ PRIVATE BOOLEAN modify_location ARGS1(
     char *args[5];
 
     /*
-     *  Determine the status of the selected item.
+     *	Determine the status of the selected item.
      */
     testpath = strip_trailing_slash(testpath);
 
@@ -616,10 +615,10 @@ PRIVATE BOOLEAN modify_location ARGS1(
 	_statusline(tmpbuf);
 	sleep(AlertSecs);
 	return 0;
-    } 
+    }
 
     /*
-     *  Change the location of the file or directory.
+     *	Change the location of the file or directory.
      */
     if ((dir_info.st_mode & S_IFMT) == S_IFDIR) {
 	cp = "Enter new location for directory: ";
@@ -627,7 +626,7 @@ PRIVATE BOOLEAN modify_location ARGS1(
 	cp = "Enter new location for file: ";
     } else {
 	_statusline(
-        "The specified item is not a file or a directory - request ignored.");
+	"The specified item is not a file or a directory - request ignored.");
 	sleep(AlertSecs);
 	return 0;
     }
@@ -664,7 +663,7 @@ PRIVATE BOOLEAN modify_location ARGS1(
 	dev = dir_info.st_dev;
 	mode = dir_info.st_mode;
 	inode = dir_info.st_ino;
-	owner = dir_info.st_uid;  
+	owner = dir_info.st_uid;
 	if (stat(newpath, &dir_info) == -1) {
 	    sprintf(tmpbuf,"Unable to get status of '%s'.",newpath);
 	    _statusline(tmpbuf);
@@ -673,7 +672,7 @@ PRIVATE BOOLEAN modify_location ARGS1(
 	}
 	if ((dir_info.st_mode & S_IFMT) != S_IFDIR) {
 	    _statusline(
-	 	"Destination is not a valid directory! Request denied.");
+		"Destination is not a valid directory! Request denied.");
 	    sleep(AlertSecs);
 	    return 0;
 	}
@@ -730,20 +729,20 @@ PUBLIC BOOLEAN local_modify ARGS2(
 
 	if (doc->link > (nlinks-count - 1))
 	    doc->link = (nlinks-count - 1);
- 	doc->link = (doc->link < 0) ?
-				  0 : doc->link; 
+	doc->link = (doc->link < 0) ?
+				  0 : doc->link;
 
 	return count;
     } else if (doc->link < 0 || doc->link > nlinks) {
-        /*
+	/*
 	 *  Added protection.
 	 */
 	return 0;
     }
 
     /*
-     *  Do not allow simultaneous change of name and location as in Unix.
-     *  This reduces functionality but reduces difficulty for the novice.
+     *	Do not allow simultaneous change of name and location as in Unix.
+     *	This reduces functionality but reduces difficulty for the novice.
      */
 #ifdef OK_PERMIT
     _statusline("Modify name, location, or permission (n, l, or p): ");
@@ -777,7 +776,7 @@ PUBLIC BOOLEAN local_modify ARGS2(
 #endif /* OK_PERMIT */
 	} else {
 	    /*
-	     *  Code for changing ownership needed here.
+	     *	Code for changing ownership needed here.
 	     */
 	     _statusline("This feature not yet implemented!");
 	    sleep(AlertSecs);
@@ -790,7 +789,7 @@ PUBLIC BOOLEAN local_modify ARGS2(
  *  Create a new empty file in the current directory.
  */
 PRIVATE BOOLEAN create_file ARGS1(
-	char *,		current_location)
+	char *, 	current_location)
 {
     char tmpbuf[512];
     char testpath[512];
@@ -799,7 +798,7 @@ PRIVATE BOOLEAN create_file ARGS1(
     char *bad_chars = ".~/";
 
     if (filename("Enter name of file to create: ",
-   		 tmpbuf, sizeof(tmpbuf)) == NULL) {
+		 tmpbuf, sizeof(tmpbuf)) == NULL) {
 	return 0;
     }
 
@@ -831,7 +830,7 @@ PRIVATE BOOLEAN create_file ARGS1(
 		_statusline(tmpbuf);
 		sleep(AlertSecs);
 		return 0;
-	    } 
+	    }
 	    sprintf(tmpbuf,"create %s",testpath);
 	    args[0] = "touch";
 	    args[1] = testpath;
@@ -845,7 +844,7 @@ PRIVATE BOOLEAN create_file ARGS1(
 	    sleep(AlertSecs);
 	} else if ((dir_info.st_mode & S_IFMT) == S_IFREG) {
 	    _statusline(
-	 	"There is already a file with that name! Request ignored.");
+		"There is already a file with that name! Request ignored.");
 	    sleep(AlertSecs);
 	} else {
 	    _statusline(
@@ -860,7 +859,7 @@ PRIVATE BOOLEAN create_file ARGS1(
  *  Create a new directory in the current directory.
  */
 PRIVATE BOOLEAN create_directory ARGS1(
-	char *,		current_location)
+	char *, 	current_location)
 {
     char tmpbuf[512];
     char testpath[512];
@@ -869,7 +868,7 @@ PRIVATE BOOLEAN create_directory ARGS1(
     char *bad_chars = ".~/";
 
     if (filename("Enter name for new directory: ",
-   		 tmpbuf, sizeof(tmpbuf)) == NULL) {
+		 tmpbuf, sizeof(tmpbuf)) == NULL) {
 	return 0;
     }
 
@@ -881,8 +880,8 @@ PRIVATE BOOLEAN create_directory ARGS1(
 	_statusline("Illegal redirection \"//\" found! Request ignored.");
 	sleep(AlertSecs);
     } else if (strlen(tmpbuf) && strchr(bad_chars, tmpbuf[0]) == NULL) {
- 	strcpy(testpath,current_location);
- 	if (testpath[(strlen(testpath) - 1)] != '/') {
+	strcpy(testpath,current_location);
+	if (testpath[(strlen(testpath) - 1)] != '/') {
 	    strcat(testpath,"/");
 	}
 	strcat(testpath, tmpbuf);
@@ -897,7 +896,7 @@ PRIVATE BOOLEAN create_directory ARGS1(
 		_statusline(tmpbuf);
 		sleep(AlertSecs);
 		return 0;
-	    } 
+	    }
 	    sprintf(tmpbuf,"make directory %s",testpath);
 	    args[0] = "mkdir";
 	    args[1] = testpath;
@@ -911,7 +910,7 @@ PRIVATE BOOLEAN create_directory ARGS1(
 	    sleep(AlertSecs);
 	} else if ((dir_info.st_mode & S_IFMT) == S_IFREG) {
 	    _statusline(
-	 	"There is already a file with that name! Request ignored.");
+		"There is already a file with that name! Request ignored.");
 	    sleep(AlertSecs);
 	} else {
 	    _statusline(
@@ -958,7 +957,7 @@ PUBLIC BOOLEAN local_create ARGS1(
  *  Remove a single file or directory.
  */
 PRIVATE BOOLEAN remove_single ARGS1(
-	char *,		testpath) 
+	char *, 	testpath)
 {
     int c;
     char *cp;
@@ -967,10 +966,10 @@ PRIVATE BOOLEAN remove_single ARGS1(
     char *args[5];
 
     /*
-     *  lstat() first in case its a symbolic link.
+     *	lstat() first in case its a symbolic link.
      */
     if (lstat(testpath, &dir_info) == -1 &&
-        stat(testpath, &dir_info) == -1) {
+	stat(testpath, &dir_info) == -1) {
 	sprintf(tmpbuf,
 		"System error - failed to get status of '%s'.", testpath);
 	_statusline(tmpbuf);
@@ -979,7 +978,7 @@ PRIVATE BOOLEAN remove_single ARGS1(
     }
 
     /*
-     *  Locate the filename portion of the path.
+     *	Locate the filename portion of the path.
      */
     if ((cp = strrchr(testpath, '/')) != NULL) {
 	++cp;
@@ -1033,7 +1032,7 @@ PRIVATE BOOLEAN remove_single ARGS1(
  */
 PUBLIC BOOLEAN local_remove ARGS1(
 	document *,	doc)
-{  
+{
     char *cp, *tp;
     char testpath[512];
     int count, i;
@@ -1043,7 +1042,7 @@ PUBLIC BOOLEAN local_remove ARGS1(
 	if (doc->link > (nlinks-count - 1))
 	    doc->link = (nlinks-count - 1);
 	doc->link = (doc->link < 0) ?
-				  0 : doc->link; 
+				  0 : doc->link;
 	return count;
     } else if (doc->link < 0 || doc->link > nlinks) {
 	return 0;
@@ -1094,15 +1093,15 @@ static struct {
 #ifndef S_ISDIR
 #define S_ISDIR(mode)   ((mode&0xF000) == 0x4000)
 #endif /* !S_ISDIR */
-    
+
 PRIVATE char LYValidPermitFile[256] = "\0";
 
 /*
  *  Handle DIRED permissions.
  */
 PRIVATE BOOLEAN permit_location ARGS3(
-	char *,		destpath,
-	char *,		srcpath,
+	char *, 	destpath,
+	char *, 	srcpath,
 	char **,	newpath)
 {
 #ifndef UNIX
@@ -1117,7 +1116,7 @@ PRIVATE BOOLEAN permit_location ARGS3(
     struct stat dir_info;
 
     if (srcpath) {
-        /*
+	/*
 	 *  Create form.
 	 */
 	FILE *fp0;
@@ -1143,20 +1142,20 @@ PRIVATE BOOLEAN permit_location ARGS3(
 	    sleep(AlertSecs);
 	    return(0);
 	}
-	
+
 	user_filename = srcpath;
 	cp = strrchr(srcpath, '/');
 	if (cp != NULL) {
 	    user_filename = (cp + 1);
 	}
-	
+
 	if (first) {
 	    /*
-	     *  Get an unused tempfile name. - FM
+	     *	Get an unused tempfile name. - FM
 	     */
 	    tempname(tempfile, NEW_FILE);
 	}
-	
+
 	/*
 	 *  Open the tempfile for writing and set its
 	 *  protection in case this wasn't done via an
@@ -1170,7 +1169,7 @@ PRIVATE BOOLEAN permit_location ARGS3(
 
 	if (first) {
 	    /*
-	     *  Make the tempfile a URL.
+	     *	Make the tempfile a URL.
 	     */
 	    strcpy(LYPermitFileURL, "file://localhost");
 	    strcat(LYPermitFileURL, tempfile);
@@ -1193,14 +1192,14 @@ PRIVATE BOOLEAN permit_location ARGS3(
 		PERMIT_OPTIONS_TITLE);
 	fprintf(fp0,"<H1>Permissions for %s</H1>\n", user_filename);
 	{   /*
-	     *  Prevent filenames which include '#' or '?' from messing it up.
+	     *	Prevent filenames which include '#' or '?' from messing it up.
 	     */
 	    char * srcpath_url = HTEscape(srcpath, URL_PATH);
 	    fprintf(fp0, "<Form Action=\"LYNXDIRED://PERMIT_LOCATION%s\">\n",
 		    srcpath_url);
 	    FREE(srcpath_url);
 	}
-	
+
 	fprintf(fp0, "<Ol><Li>Specify permissions below:<Br><Br>\n");
 	fprintf(fp0, "Owner:<Br>\n");
 	fprintf(fp0,
@@ -1217,7 +1216,7 @@ PRIVATE BOOLEAN permit_location ARGS3(
        "<Input Type=\"checkbox\" Name=\"mode\" Value=\"IXUSR\" %s> %s<Br>\n",
 		(dir_info.st_mode & S_IXUSR) ? "checked" : "",
 		S_ISDIR(dir_info.st_mode) ? "Search" : "Execute");
-	
+
 	fprintf(fp0, "Group %s:<Br>\n", group_name);
 	fprintf(fp0,
      "<Input Type=\"checkbox\" Name=\"mode\" Value=\"IRGRP\" %s> Read<Br>\n",
@@ -1233,7 +1232,7 @@ PRIVATE BOOLEAN permit_location ARGS3(
        "<Input Type=\"checkbox\" Name=\"mode\" Value=\"IXGRP\" %s> %s<Br>\n",
 		(dir_info.st_mode & S_IXGRP) ? "checked" : "",
 		S_ISDIR(dir_info.st_mode) ? "Search" : "Execute");
-	
+
 	fprintf(fp0, "Others:<Br>\n");
 	fprintf(fp0,
      "<Input Type=\"checkbox\" Name=\"mode\" Value=\"IROTH\" %s> Read<Br>\n",
@@ -1249,7 +1248,7 @@ PRIVATE BOOLEAN permit_location ARGS3(
        "<Input Type=\"checkbox\" Name=\"mode\" Value=\"IXOTH\" %s> %s<Br>\n",
 		(dir_info.st_mode & S_IXOTH) ? "checked" : "",
 		S_ISDIR(dir_info.st_mode) ? "Search" : "Execute");
-	
+
 	fprintf(fp0,
 "<Br>\n<Li><Input Type=\"submit\" Value=\"Submit\"> \
 form to permit %s %s.\n</Ol>\n</Form>\n",
@@ -1257,15 +1256,15 @@ form to permit %s %s.\n</Ol>\n</Form>\n",
 		user_filename);
 	fprintf(fp0, "</Body></Html>");
 	fclose(fp0);
-	
-	LYforce_no_cache = TRUE;
-	return(PERMIT_FORM_RESULT);      /* Special flag for LYMainLoop */
 
-    } else {                             /* The form being activated. */
+	LYforce_no_cache = TRUE;
+	return(PERMIT_FORM_RESULT);	 /* Special flag for LYMainLoop */
+
+    } else {				 /* The form being activated. */
 	mode_t new_mode = 0;
 	char *args[5];
 	char amode[10];
-	
+
 	/*
 	 *  Make sure we have a valid set-permission
 	 *  file comparison string loaded via a previous
@@ -1293,7 +1292,7 @@ form to permit %s %s.\n</Ol>\n</Form>\n",
 			   start working on the masks. */
 
 	HTUnEscape(destpath);	/* Will now operate only on filename part. */
-	
+
 	/*
 	 *  Make sure that the file string is the one from
 	 *  the last displayed File Permissions menu. - KW
@@ -1325,25 +1324,25 @@ form to permit %s %s.\n</Ol>\n</Form>\n",
 	    sleep(AlertSecs);
 	    return 0;
 	}
-	
+
 	/*
 	 *  Cycle over permission strings.
 	 */
 	while(*cp != '\0') {
 	    char *cr = cp;
-	    
+
 	    while(*cr != '\0' && *cr != '&') { /* GET data split by '&'. */
 		cr++;
 	    }
 	    if (*cr != '\0') {
 		*cr++ = '\0';
 	    }
-	    if (strncmp(cp, "mode=", 5) == 0) {	/* Magic string. */
+	    if (strncmp(cp, "mode=", 5) == 0) { /* Magic string. */
 		int i;
 
 		for(i = 0; permissions[i].string_mode != NULL; i++) {
 		    if (strcmp(permissions[i].string_mode, cp+5) == 0) {
-		        /*
+			/*
 			 *  If restricted, only change eXecute
 			 *  permissions on directories.
 			 */
@@ -1364,7 +1363,7 @@ form to permit %s %s.\n</Ol>\n</Form>\n",
 		sleep(AlertSecs);
 		return 0;
 	    }
-	    
+
 	    cp = cr;
 	}
 
@@ -1381,7 +1380,7 @@ form to permit %s %s.\n</Ol>\n</Form>\n",
 	if (LYExecv(CHMOD_PATH, args, tmpbuf) <= 0) {
 	    return (-1);
 	}
-#endif /* UNIX */ 
+#endif /* UNIX */
 	LYforce_no_cache = TRUE;	/* Force update of dired listing. */
 	return 1;
     }
@@ -1411,7 +1410,7 @@ PUBLIC void tagflag ARGS2(
 	else
 #endif /* FANCY CURSES || USE_SLANG */
 	    /*
-	     *  Never hide the cursor if there's no FANCY CURSES.
+	     *	Never hide the cursor if there's no FANCY CURSES.
 	     */
 	    move(links[cur].ly, links[cur].lx);
 
@@ -1443,12 +1442,12 @@ PUBLIC void showtags ARGS1(
 /*
  *  Perform file management operations for LYNXDIRED URL's.
  *  Attempt to be consistent.  These are (pseudo) URLs - i.e. they should
- *  be in URL syntax: some bytes will be URL-escaped with '%'.  This is 
- *  necessary because these (pseudo) URLs will go through some of the same 
+ *  be in URL syntax: some bytes will be URL-escaped with '%'.	This is
+ *  necessary because these (pseudo) URLs will go through some of the same
  *  kinds of interpretations and mutilations as real ones: HTParse, stripping
- *  off #fragments etc.  (Some access schemes currently have special rules 
+ *  off #fragments etc.  (Some access schemes currently have special rules
  *  about not escaping parsing '#' "the URL way" built into HTParse, but that
- *  doesn't look like a clean way.)  
+ *  doesn't look like a clean way.)
  */
 PUBLIC int local_dired ARGS1(
 	document *,	doc)
@@ -1476,7 +1475,7 @@ PUBLIC int local_dired ARGS1(
 	    LYforce_no_cache = TRUE;
     } else if (!strncmp(line, "LYNXDIRED://NEW_FOLDER", 22)) {
 	if (create_directory(&line[22]) > 0)
- 	    LYforce_no_cache = TRUE;
+	    LYforce_no_cache = TRUE;
     } else if (!strncmp(line, "LYNXDIRED://INSTALL_SRC", 23)) {
 	local_install(NULL, &line[23], &tp);
 	StrAllocCopy(doc->address, tp);
@@ -1490,7 +1489,7 @@ PUBLIC int local_dired ARGS1(
 	LYforce_no_cache = TRUE;
     } else if (!strncmp(line, "LYNXDIRED://MODIFY_LOCATION", 27)) {
 	if (modify_location(&line[27]) > 0)
- 	    LYforce_no_cache = TRUE;
+	    LYforce_no_cache = TRUE;
     } else if (!strncmp(line, "LYNXDIRED://MOVE_TAGGED", 23)) {
 	if (modify_tagged(&line_url[23]) > 0)
 	    LYforce_no_cache = TRUE;
@@ -1499,7 +1498,7 @@ PUBLIC int local_dired ARGS1(
 	permit_location(NULL, &line[22], &tp);
 	if (tp)
 	    /*
-	     *  One of the checks may have failed.
+	     *	One of the checks may have failed.
 	     */
 	    StrAllocCopy(doc->address, tp);
 	FREE(line);
@@ -1596,7 +1595,7 @@ PUBLIC int local_dired ARGS1(
 
 	} else if (!strncmp(line, "LYNXDIRED://TAR_Z", 17)) {
 	    *cp++ = '\0';
-            cp = quote_pathname(cp);
+	    cp = quote_pathname(cp);
 	    tp = quote_pathname(line + 17);
 	    sprintf(buffer, "(cd %s; %s -cf - %s) | %s >%s/%s.tar.Z",
 			    tp, TAR_PATH, cp, COMPRESS_PATH, tp, cp);
@@ -1605,10 +1604,10 @@ PUBLIC int local_dired ARGS1(
 
 	} else if (!strncmp(line, "LYNXDIRED://TAR", 15)) {
 	    *cp++ = '\0';
-            cp = quote_pathname(cp);
+	    cp = quote_pathname(cp);
 	    tp = quote_pathname(line + 15);
 	    sprintf(buffer, "(cd %s; %s -cf %s.tar %s)",
-	    		    tp, TAR_PATH, cp, cp);
+			    tp, TAR_PATH, cp, cp);
 	    FREE(cp);
 	    FREE(tp);
 #endif /* OK_TAR */
@@ -1711,13 +1710,13 @@ PUBLIC int dired_options ARGS2(
 	/*
 	 *  Get an unused tempfile name. - FM
 	 */
-        tempname(tempfile, NEW_FILE);
+	tempname(tempfile, NEW_FILE);
     }
 
     /*
-     *  Open the tempfile for writing and set its
-     *  protection in case this wasn't done via an
-     *  external umask. - FM
+     *	Open the tempfile for writing and set its
+     *	protection in case this wasn't done via an
+     *	external umask. - FM
      */
     if ((fp0 = LYNewTxtFile(tempfile)) == NULL) {
 	_statusline("Unable to open file management menu file.");
@@ -1728,13 +1727,13 @@ PUBLIC int dired_options ARGS2(
     if (first) {
 	/*
 	 *  Make the tempfile a URL.
- 	 */
+	 */
 	strcpy(LYDiredFileURL, "file://localhost");
 	strcat(LYDiredFileURL, tempfile);
 	first = FALSE;
     }
     StrAllocCopy(*newfile, LYDiredFileURL);
-    
+
     cp = doc->address;
     if (!strncmp(cp, "file://localhost", 16)) {
 	cp += 16;
@@ -1771,7 +1770,7 @@ PUBLIC int dired_options ARGS2(
 	    FREE(dir_url);
 	    FREE(path_url);
 	    return 0;
-	} 
+	}
 
     } else {
 	path[0] = '\0';
@@ -1785,7 +1784,7 @@ PUBLIC int dired_options ARGS2(
 
     fprintf(fp0,
 	    "\n<h1>File Management Options (%s Version %s)</h1>",
-    	    LYNX_NAME, LYNX_VERSION);
+	    LYNX_NAME, LYNX_VERSION);
 
     fprintf(fp0, "Current directory is %s<br>\n", dir);
 
@@ -1815,14 +1814,14 @@ PUBLIC int dired_options ARGS2(
 	m = (n < NUM_TAGS_TO_WRITE) ? n : NUM_TAGS_TO_WRITE;
 	for (i = 1; i <= m; i++) {
 	    cp1 = HTRelative(HTList_objectAt(tagged, i-1),
-		             (*cd ? cd : "file://localhost"));
+			     (*cd ? cd : "file://localhost"));
 	    HTUnEscape(cp1);
 	    LYEntify(&cp1, TRUE); /* _should_ do this everywhere... */
 	    fprintf(fp0, "%s <br>\n &nbsp;&nbsp;&nbsp;%s",
 			 (i == 1 ? "" : " ,"), cp1);
 	    FREE(cp1);
 	}
-        if (n > m) {
+	if (n > m) {
 	    fprintf(fp0," , ...");
 	}
 	fprintf(fp0, "<p>\n");
@@ -1830,7 +1829,7 @@ PUBLIC int dired_options ARGS2(
     }
 
     /*
-     *  If menu_head is NULL then use defaults and link them together now.
+     *	If menu_head is NULL then use defaults and link them together now.
      */
     if (menu_head == NULL) {
 	for (mp = defmenu; mp->href != NULL; mp++)
@@ -1891,8 +1890,8 @@ PUBLIC int dired_options ARGS2(
  *  Check DIRED filename.
  */
 PRIVATE char *filename ARGS3(
-	char *,		prompt,
-	char *,		buf,
+	char *, 	prompt,
+	char *, 	buf,
 	int,		bufsize)
 {
     char *cp;
@@ -1904,12 +1903,12 @@ PRIVATE char *filename ARGS3(
     if (strstr(buf, "../") != NULL) {
 	_statusline("Illegal filename; request ignored.");
 	sleep(AlertSecs);
- 	return NULL;
+	return NULL;
     }
 
     if (no_dotfiles || !show_dotfiles) {
-	cp = strrchr(buf, '/');	/* find last slash */
-	if (cp) 
+	cp = strrchr(buf, '/'); /* find last slash */
+	if (cp)
 	    cp += 1;
 	else
 	    cp = buf;
@@ -1926,8 +1925,8 @@ PRIVATE char *filename ARGS3(
  *  Install the specified file or directory.
  */
 PUBLIC BOOLEAN local_install ARGS3(
-	char *,		destpath,
-	char *,		srcpath,
+	char *, 	destpath,
+	char *, 	srcpath,
 	char **,	newpath)
 {
     char tmpbuf[512];
@@ -1940,7 +1939,7 @@ PUBLIC BOOLEAN local_install ARGS3(
     int n = 0, src;	/* indices into 'args[]' */
 
     /*
-     *  Determine the status of the selected item.
+     *	Determine the status of the selected item.
      */
     if (srcpath) {
 	srcpath = strip_trailing_slash(srcpath);
@@ -1976,7 +1975,7 @@ PUBLIC BOOLEAN local_install ARGS3(
 	return 0;
     } else if ((dir_info.st_mode & S_IFMT) != S_IFDIR) {
 	_statusline(
-	 	"The selected item is not a directory! Request ignored.");
+		"The selected item is not a directory! Request ignored.");
 	sleep(AlertSecs);
 	return 0;
     } else if (0 /*directory not writeable*/) {
@@ -2011,7 +2010,7 @@ PUBLIC BOOLEAN local_install ARGS3(
 	    if (LYExecv(INSTALL_PATH, args, tmpbuf) <= 0)
 		return ((count == 0) ? -1 : count);
 	    count++;
-	}	
+	}
 	clear_tags();
     }
     statusline("Installation complete");
@@ -2026,7 +2025,7 @@ PUBLIC void clear_tags NOARGS
 {
     char *cp = NULL;
 
-    while ((cp = HTList_removeLastObject(tagged)) != NULL) { 
+    while ((cp = HTList_removeLastObject(tagged)) != NULL) {
 	FREE(cp);
     }
     if (HTList_isEmpty(tagged))
@@ -2037,14 +2036,14 @@ PUBLIC void clear_tags NOARGS
  *  Handle DIRED menu item.
  */
 PUBLIC void add_menu_item ARGS1(
-	char *,		str)
+	char *, 	str)
 {
     struct dired_menu *new, *mp;
     char *cp;
 
     /*
-     *  First custom menu definition causes entire default menu to be
-     *  discarded.
+     *	First custom menu definition causes entire default menu to be
+     *	discarded.
      */
     if (menu_head == defmenu)
 	menu_head = NULL;
@@ -2052,7 +2051,7 @@ PUBLIC void add_menu_item ARGS1(
     new = (struct dired_menu *)calloc(1, sizeof(*new));
 
     /*
-     *  Conditional on tagged != NULL ?
+     *	Conditional on tagged != NULL ?
      */
     cp = strchr(str, ':');
     *cp++ = '\0';
@@ -2067,7 +2066,7 @@ PUBLIC void add_menu_item ARGS1(
     }
 
     /*
-     *  Conditional on matching suffix.
+     *	Conditional on matching suffix.
      */
     str = cp;
     cp = strchr(str, ':');
@@ -2098,10 +2097,10 @@ PUBLIC void add_menu_item ARGS1(
  *  Create URL for DIRED HREF value.
  */
 PRIVATE char * render_item ARGS6(
-	char *,		s,
-	char *,		path,
-	char *,		dir,
-	char *,		buf,
+	char *, 	s,
+	char *, 	path,
+	char *, 	dir,
+	char *, 	buf,
 	int,		bufsize,
 	BOOLEAN,	url_syntax)
 {
@@ -2121,9 +2120,9 @@ PRIVATE char * render_item ARGS6(
 		    *BP_INC = '%';
 #ifdef NOTDEFINED
 		    /*
-		     *  These chars come from lynx.cfg or the default, let's
-		     *  just assume there won't be any improper %'s there that
-		     *  would need escaping.
+		     *	These chars come from lynx.cfg or the default, let's
+		     *	just assume there won't be any improper %'s there that
+		     *	would need escaping.
 		     */
 		    if(url_syntax) {
 			*BP_INC = '2';
@@ -2144,7 +2143,7 @@ PRIVATE char * render_item ARGS6(
 		case 'f':
 		    cp = strrchr(path, '/');
 		    if (cp)
-		    	cp++;
+			cp++;
 		    else
 			cp = path;
 		    while (*cp)
@@ -2153,7 +2152,7 @@ PRIVATE char * render_item ARGS6(
 		case 'l':
 		case 't':
 		    if (!HTList_isEmpty(tagged)) {
-			HTList *cur = tagged; 
+			HTList *cur = tagged;
 			char *name;
 
 			while (!overrun &&
@@ -2187,9 +2186,9 @@ PRIVATE char * render_item ARGS6(
 	    }
 	} else {
 	    /*
-	     *  Other chars come from the lynx.cfg or
-	     *  the default. Let's assume there isn't
-	     *  anything weird there that needs escaping.
+	     *	Other chars come from the lynx.cfg or
+	     *	the default. Let's assume there isn't
+	     *	anything weird there that needs escaping.
 	     */
 	    *BP_INC =*s;
 	}
@@ -2210,9 +2209,9 @@ PRIVATE char * render_item ARGS6(
  *  Execute DIRED command.
  */
 PRIVATE int LYExecv ARGS3(
-	char *,		path,
+	char *, 	path,
 	char **,	argv,
-	char *,		msg)
+	char *, 	msg)
 {
 #if defined(VMS) || defined(_WINDOWS)
     if (TRACE) {
@@ -2234,7 +2233,7 @@ PRIVATE int LYExecv ARGS3(
     stop_curses();
     pid = fork();	/* fork and execute rm */
     switch (pid) {
- 	case -1:
+	case -1:
 	    sprintf(tmpbuf, "Unable to %s due to system error!", msg);
 	    rc = 0;
 	    break;	/* don't fall thru! - KW */
@@ -2259,7 +2258,7 @@ PRIVATE int LYExecv ARGS3(
 	    }
 #endif /* !HAVE_WAITPID */
 	    if (WEXITSTATUS(wstatus) != 0 ||
-		WTERMSIG(wstatus) > 0)  { /* error return */
+		WTERMSIG(wstatus) > 0)	{ /* error return */
 		sprintf(tmpbuf, "Probable failure to %s due to system error!",
 				msg);
 		rc = 0;
@@ -2267,7 +2266,7 @@ PRIVATE int LYExecv ARGS3(
     }
 
     if (rc == 0) {
-        /*
+	/*
 	 *  Screen may have message from the failed execv'd command.
 	 *  Give user time to look at it before screen refresh.
 	 */

@@ -29,15 +29,10 @@ two places:
 
 a) Near the top, you will find a bunch of lines (some may be commented out)
   
-  #ifdef VMS
-  #include "[.chrtrans]<fn>.h"
-  #else
-  #include "chrtrans/<fn>.h"
-  #endif /* VMS */
+  #include "<fn>.h"
 
 Add or comment out as you wish.  But it is probably safest to leave the
-first two, referring to "chrtrans/def7_uni.h" and "chrtrans/iso01_uni.h",
-in place.
+commonly used ones, referring to "def7_uni.h" and "iso01_uni.h", in place.
 
 b) At the bottom, you will find a bunch of lines (again, some may be
    commented out by default) of the form

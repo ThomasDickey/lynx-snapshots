@@ -7,14 +7,11 @@
 #ifndef HTML_H
 #define HTML_H
 
-#ifdef EXP_CHARTRANS
-#include "UCDefs.h"
-#include "UCAux.h"
-#endif
-
 #ifndef HTUTILS_H
 #include "HTUtils.h"
 #endif /* HTUTILS_H */
+#include "UCDefs.h"
+#include "UCAux.h"
 #include "HTAnchor.h"
 #include "HTMLDTD.h"
 
@@ -22,6 +19,31 @@
 #define HTMLPresentation        HTMLPren
 #define HTMLPresent             HTMLPres
 #endif /* SHORT_NAMES */
+
+/* #define ATTR_CS_IN (me->T.output_utf8 ? me->UCLYhndl : 0) */
+#define ATTR_CS_IN me->tag_charset
+
+#define TRANSLATE_AND_UNESCAPE_ENTITIES(s, p, h) \
+	LYUCFullyTranslateString(s, ATTR_CS_IN, current_char_set, YES, p, h, st_HTML)
+
+#define TRANSLATE_AND_UNESCAPE_ENTITIES4(s, cs_to, p, h) \
+	LYUCFullyTranslateString(s, ATTR_CS_IN, cs_to, YES, p, h, st_HTML) /* not used */
+
+#define TRANSLATE_AND_UNESCAPE_ENTITIES5(s,cs_from,cs_to,p,h) \
+	LYUCFullyTranslateString(s, cs_from, cs_to, YES, p, h, st_HTML)
+
+#define TRANSLATE_AND_UNESCAPE_ENTITIES6(s,cs_from,cs_to,spcls,p,h) \
+	LYUCFullyTranslateString(s, cs_from, cs_to, spcls, p, h, st_HTML)
+
+/*
+ *  Strings from attributes which should be converted to some kind
+ *  of "standard" representation (character encoding), was Latin-1,
+ *  esp. URLs (incl. #fragments) and HTML NAME and ID stuff.
+ */
+#define TRANSLATE_AND_UNESCAPE_TO_STD(s) \
+	LYUCFullyTranslateString(s, ATTR_CS_IN, ATTR_CS_IN, NO, NO, YES, st_URL)
+#define UNESCAPE_FIELDNAME_TO_STD(s) \
+	LYUCFullyTranslateString(s, ATTR_CS_IN, ATTR_CS_IN, NO, NO, YES, st_HTML)
 
 extern CONST HTStructuredClass HTMLPresentation;
 

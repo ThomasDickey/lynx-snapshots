@@ -50,7 +50,7 @@
 #include "iso02_uni.h"		/* ISO Latin 2		*/
 #include "iso03_uni.h"		/* ISO Latin 3		*/
 #include "iso04_uni.h"		/* ISO Latin 4		*/
-#include "iso05_uni.h"		/* ISO Latin 5 Cyrillic	*/
+#include "iso05_uni.h"		/* ISO 8859-5 Cyrillic	*/
 #include "iso06_uni.h"		/* ISO 8859-6 Arabic	*/
 #include "iso07_uni.h"		/* ISO 8859-7 Greek	*/
 #include "iso08_uni.h"		/* ISO 8859-8 Hebrew	*/
@@ -2049,7 +2049,7 @@ PUBLIC void UCInit NOARGS
     UC_CHARSET_SETUP_iso_8859_9;	  /* ISO 8859-9 (Latin 5) */
     UC_CHARSET_SETUP_iso_8859_10;	  /* ISO 8859-10	  */
 
-    UC_CHARSET_SETUP_utf_8;		  /* UNICODE UTF 8	  */
+    UC_CHARSET_SETUP_utf_8;		  /* UNICODE UTF-8	  */
     UC_CHARSET_SETUP_mnemonic_ascii_0;	  /* RFC 1345 w/o Intro	  */
     UC_CHARSET_SETUP_mnemonic;		  /* RFC 1345 Mnemonic	  */
 #ifdef NOTDEFINED

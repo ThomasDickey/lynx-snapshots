@@ -46,14 +46,14 @@ PUBLIC void LYexit ARGS1(
 {
 #ifndef VMS	/*  On VMS, the VMSexit() handler does these. - FM */
 #ifdef _WINDOWS
-  WSACleanup();
+    WSACleanup();
 #endif
     if (LYOutOfMemory == TRUE) {
 	/*
 	 *  Ignore further interrupts. - FM
- 	 */
+	 */
 #ifndef NOSIGHUP
-				(void) signal(SIGHUP, SIG_IGN);
+	(void) signal(SIGHUP, SIG_IGN);
 #endif /* NOSIGHUP */
 	(void) signal (SIGTERM, SIG_IGN);
 	(void) signal (SIGINT, SIG_IGN);
@@ -65,7 +65,7 @@ PUBLIC void LYexit ARGS1(
 	(void) signal(SIGSEGV, SIG_IGN);
 	(void) signal(SIGILL, SIG_IGN);
 
-         /*
+	 /*
 	  *  Flush all messages. - FM
 	  */
 	 fflush(stderr);

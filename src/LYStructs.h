@@ -23,7 +23,7 @@ typedef struct link {
     int anchor_number;	/* The anchor number within the HText structure.  */
     int anchor_line_num;/* The anchor line number in the HText structure. */
     struct _FormInfo *form;	/* Pointer to form info. */
-} linkstruct; 
+} linkstruct;
 extern linkstruct links[MAXLINKS];
 extern int nlinks;
 
@@ -45,7 +45,7 @@ typedef struct _document {
 } document;
 
 #ifndef HTFORMS_H
-#include "HTForms.h" 
+#include "HTForms.h"
 #endif /* HTFORMS_H */
 
 typedef struct _histstruct {
@@ -58,9 +58,9 @@ typedef struct _histstruct {
     BOOL   isHEAD;
     int    link;
     int    page;
-   BOOL   internal_link;	/* whether doc was reached via an internal
+    BOOL   internal_link;	/* whether doc was reached via an internal
 				 (fragment) link. - kw */
-    int   intern_seq_start;	/* indicates which element on the history
+    int    intern_seq_start;	/* indicates which element on the history
 				   is the start of this sequence of
 				   "internal links", otherwise -1 */
 } histstruct;
@@ -75,23 +75,23 @@ extern int nhist;
 
 typedef struct _lynx_html_item_type {
     struct _lynx_html_item_type *next;  /* the next item in the linked list */
-    char *name;                         /* a description of the item */
-    char *command;                      /* the command to execute */
-    int  always_enabled;                /* a constant to tell whether or
-                                        * not to disable the printer
-                                        * when the no_print option is on
-                                        */
+    char *name; 			/* a description of the item */
+    char *command;			/* the command to execute */
+    int  always_enabled;		/* a constant to tell whether or
+					* not to disable the printer
+					* when the no_print option is on
+					*/
 } lynx_html_item_type;
 
 /* for printer commands */
 typedef struct _lynx_printer_item_type {
     struct _lynx_printer_item_type *next; /* next item in the linked list */
-    char *name;                           /* a description of the item    */
-    char *command;                        /* the command to execute       */
-    int  always_enabled;                  /* a constant to tell whether or
-                                           * not to disable the printer
-                                           * when the no_print option is on
-                                           */
+    char *name; 			  /* a description of the item	  */
+    char *command;			  /* the command to execute	  */
+    int  always_enabled;		  /* a constant to tell whether or
+					   * not to disable the printer
+					   * when the no_print option is on
+					   */
     int pagelen;			  /* an integer to store the printer's
 					   * page length
 					   */

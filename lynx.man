@@ -1,6 +1,6 @@
 .nr N -1
 .nr D 5
-.TH LYNX l Local
+.TH LYNX 1 Local
 .UC 4
 .SH NAME
 lynx \- a general purpose distributed information browser for the World Wide Web

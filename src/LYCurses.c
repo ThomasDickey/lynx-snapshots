@@ -4,6 +4,7 @@
 #include "LYStyle.h"
 #include "LYUtils.h"
 #include "LYGlobalDefs.h"
+#include "LYMainLoop.h"
 #include "LYSignal.h"
 #include "LYClean.h"
 #include "LYReadCFG.h"
@@ -117,15 +118,15 @@ PUBLIC void lynx_setup_colors NOARGS
     SLtt_set_color(2, NULL, "yellow", "blue");	 /* reverse */
     SLtt_set_color(4, NULL, "magenta", "white"); /* underline */
     /*
-     *  The other objects are '|'ed together to get rest.
+     *	The other objects are '|'ed together to get rest.
      */
     SLtt_set_color(3, NULL, "green", "white");	 /* bold-reverse */
-    SLtt_set_color(5, NULL, "blue", "white");    /* bold-underline */
+    SLtt_set_color(5, NULL, "blue", "white");	 /* bold-underline */
     SLtt_set_color(6, NULL, "red", "white");	 /* reverse-underline */
-    SLtt_set_color(7, NULL, "magenta", "cyan");	 /* reverse-underline-bold */
+    SLtt_set_color(7, NULL, "magenta", "cyan");  /* reverse-underline-bold */
 
     /*
-     *  Now set monchrome attributes.
+     *	Now set monchrome attributes.
      */
     SLtt_set_mono(1, NULL, SLTT_BOLD_MASK);
     SLtt_set_mono(2, NULL, SLTT_REV_MASK);
@@ -160,7 +161,7 @@ PRIVATE void sl_suspend ARGS1(
     if (sig == SIGTSTP)
 	SLsmg_resume_smg();
     /*
-     *  Get new window size in case it changed.
+     *	Get new window size in case it changed.
      */
     r = SLtt_Screen_Rows;
     c = SLtt_Screen_Cols;
@@ -195,9 +196,9 @@ PUBLIC void VMSbox ARGS3(
        waddch(win, 'q');
     waddch(win, 'k');
     for (i = 1; i < height-1; i++) {
-        wmove(win, i, 0);
+	wmove(win, i, 0);
 	waddch(win, 'x');
-        wmove(win, i, width-1);
+	wmove(win, i, width-1);
 	waddch(win, 'x');
     }
     wmove(win, i, 0);
@@ -216,12 +217,12 @@ PUBLIC void LYbox ARGS2(
 	BOOLEAN,	formfield)
 {
     /*
-     *  If the terminal is in UTF-8 mode, it probably cannot understand
-     *  box drawing characters as (n)curses handles them.  (This may also
-     *  be true for other display character sets, but isn't currently
-     *  checked.)  In that case, substitute ASCII characters for BOXVERT
-     *  and BOXHORI if they were defined to 0 for automatic use of box
-     *  drawing characters.  They'll stay as they are otherwise. - KW & FM
+     *	If the terminal is in UTF-8 mode, it probably cannot understand
+     *	box drawing characters as (n)curses handles them.  (This may also
+     *	be true for other display character sets, but isn't currently
+     *	checked.)  In that case, substitute ASCII characters for BOXVERT
+     *	and BOXHORI if they were defined to 0 for automatic use of box
+     *	drawing characters.  They'll stay as they are otherwise. - KW & FM
      */
     int boxvert, boxhori;
 
@@ -231,11 +232,11 @@ PUBLIC void LYbox ARGS2(
 	wcurses_css(win, "frame", ABS_ON);
 #endif
     /*
-     *  If we don't have explicitly specified characters for either
-     *  vertical or horizontal lines, the characters that box() would
-     *  use for the corners probably also won't work well.  So we
-     *  specifiy our own ASCII characters for the corners and call
-     *  wborder() instead of box(). - kw
+     *	If we don't have explicitly specified characters for either
+     *	vertical or horizontal lines, the characters that box() would
+     *	use for the corners probably also won't work well.  So we
+     *	specifiy our own ASCII characters for the corners and call
+     *	wborder() instead of box(). - kw
      */
 #ifdef HAVE_WBORDER
     if (!boxvert || !boxhori)
@@ -301,23 +302,14 @@ PRIVATE int LYAttrset ARGS3(WINDOW*,win,int,color,int,mono)
 	if (lynx_has_color && LYShowColor >= SHOW_COLOR_ON && color > -1)
 	{
 		wattrset(win,color);
-#if 0
-		//wbkgdset(win,color);
-#endif
 		return color;
 	}
 	if (mono > -1)
 	{
 		wattrset(win,mono);
-#if 0
-		//wbkgdset(win,mono);
-#endif
 		return mono;
 	}
 	wattrset(win,A_NORMAL);
-#if 0
-	//wbkgdset(win,A_NORMAL);
-#endif
 	return A_NORMAL;
 }
 
@@ -458,12 +450,12 @@ PRIVATE struct {
 } lynx_color_cfg[] = {
     /*0*/ { COLOR_BLACK,   COLOR_WHITE, A_NORMAL}, /* A_NORMAL */
     /*1*/ { COLOR_BLUE,    COLOR_WHITE, A_NORMAL}, /* A_BOLD */
-    /*2*/ { COLOR_YELLOW,  COLOR_BLUE,  A_BOLD},   /* A_REVERSE */
+    /*2*/ { COLOR_YELLOW,  COLOR_BLUE,	A_BOLD},   /* A_REVERSE */
     /*3*/ { COLOR_GREEN,   COLOR_WHITE, A_NORMAL}, /* A_REVERSE | A_BOLD */
     /*4*/ { COLOR_MAGENTA, COLOR_WHITE, A_NORMAL}, /* A_UNDERLINE */
     /*5*/ { COLOR_BLUE,    COLOR_WHITE, A_NORMAL}, /* A_UNDERLINE | A_BOLD */
-    /*6*/ { COLOR_RED,     COLOR_WHITE, A_NORMAL}, /* A_UNDERLINE | A_REVERSE */
-    /*7*/ { COLOR_MAGENTA, COLOR_CYAN,  A_NORMAL}  /* A_UNDERLINE | A_BOLD | A_REVERSE */
+    /*6*/ { COLOR_RED,	   COLOR_WHITE, A_NORMAL}, /* A_UNDERLINE | A_REVERSE */
+    /*7*/ { COLOR_MAGENTA, COLOR_CYAN,	A_NORMAL}  /* A_UNDERLINE | A_BOLD | A_REVERSE */
 };
 
 /*
@@ -629,7 +621,7 @@ PUBLIC void start_curses NOARGS
 
 	 if(first_time)
 	 {
-		  initscr();      /* start curses */
+		  initscr();	  /* start curses */
 		  first_time = FALSE;
 		  cbreak();
 		  keypad(stdscr, TRUE);
@@ -652,7 +644,7 @@ PUBLIC void start_curses NOARGS
 
 	 LYCursesON = TRUE;
 	 clear();
-         noecho();
+	 noecho();
 }
 #else
 PUBLIC void start_curses NOARGS
@@ -745,10 +737,10 @@ PUBLIC void start_curses NOARGS
 
 #ifdef VMS
     /*
-     *  If we are VMS then do initsrc() everytime start_curses()
-     *  is called!
+     *	If we are VMS then do initsrc() everytime start_curses()
+     *	is called!
      */
-    initscr();  /* start curses */
+    initscr();	/* start curses */
 #else /* Unix: */
     static BOOLEAN first_time = TRUE;
 
@@ -759,7 +751,7 @@ PUBLIC void start_curses NOARGS
 	 */
 	if (initscr() == NULL) {  /* start curses */
 	    fprintf(stderr,
-	        "Terminal initialisation failed - unknown terminal type?\n");
+		"Terminal initialisation failed - unknown terminal type?\n");
 #ifndef NOSIGHUP
 	    (void) signal(SIGHUP, SIG_DFL);
 #endif /* NOSIGHUP */
@@ -767,7 +759,7 @@ PUBLIC void start_curses NOARGS
 	    (void) signal(SIGINT, SIG_DFL);
 #ifdef SIGTSTP
 	    if (no_suspend)
-	        (void) signal(SIGTSTP,SIG_DFL);
+		(void) signal(SIGTSTP,SIG_DFL);
 #endif /* SIGTSTP */
 	    exit (-1);
 	}
@@ -779,7 +771,7 @@ PUBLIC void start_curses NOARGS
 	 * This is a workaround for a bug in SVr4 curses, observed on Solaris
 	 * 2.4:  if your terminal's alternate-character set contains codes in
 	 * the range 128-255, they'll be sign-extended in the acs_map[] table,
-	 * which in turn causes their values to be emitted as 255 (0xff). 
+	 * which in turn causes their values to be emitted as 255 (0xff).
 	 * "Fix" this by forcing the table to 8-bit codes (it has to be
 	 * anyway).
 	 */
@@ -787,9 +779,9 @@ PUBLIC void start_curses NOARGS
 	{
 	    int n;
 	    for (n = 0; n < 128; n++)
-	    	if (acs_map[n] & 0x80) {
-	    	    acs_map[n] &= 0xff;
-	    	    acs_map[n] |= A_ALTCHARSET;
+		if (acs_map[n] & 0x80) {
+		    acs_map[n] &= 0xff;
+		    acs_map[n] |= A_ALTCHARSET;
 		}
 	}
 #endif
@@ -818,7 +810,7 @@ PUBLIC void start_curses NOARGS
     }
 #endif /* VMS */
 
-    /* nonl();   */ /* seems to slow things down */
+    /* nonl();	 */ /* seems to slow things down */
 
 #ifdef VMS
     crmode();
@@ -886,10 +878,10 @@ PUBLIC void stop_curses NOARGS
 {
     echo();
 #ifdef DJGPP
-		  sock_exit();
+    sock_exit();
 #endif
 #if defined (DOSPATH) && !defined(USE_SLANG)
-	 clrscr();
+    clrscr();
 #else
 
     /*
@@ -924,7 +916,7 @@ PUBLIC void stop_curses NOARGS
  *  Check terminal type, start curses & setup terminal.
  */
 PUBLIC BOOLEAN setup ARGS1(
-	char *,		terminal)
+	char *, 	terminal)
 {
     int c;
     int status;
@@ -934,14 +926,17 @@ PUBLIC BOOLEAN setup ARGS1(
 #endif /* USE_SLANG */
 
     /*
-     *  If the display was not set by a command line option then
-     *  see if it is available from the environment.
+     *	If the display was not set by a command line option then
+     *	see if it is available from the environment.
      */
-    if ((display = getenv(DISPLAY)) != NULL && *display == '\0')
-	display = NULL;
+    if ((cp = getenv(DISPLAY)) != NULL && *cp != '\0') {
+	StrAllocCopy(display, cp);
+    } else {
+	FREE(display);
+    }
 
     /*
-     *  Get terminal type, and convert to lower case.
+     *	Get terminal type, and convert to lower case.
      */
     term[0] = '\0';
     longname(dummy, term);
@@ -963,7 +958,7 @@ PUBLIC BOOLEAN setup ARGS1(
 #endif /* SIGTSTP */
 	exit(status);
     }
-    for (cp=term; *cp!='\0'; cp++)
+    for (cp = term; *cp != '\0'; cp++)
 	if (isupper(*cp))
 	    *cp = TOLOWER(*cp);
 
@@ -1001,12 +996,12 @@ PUBLIC BOOLEAN setup ARGS1(
  *  Check terminal type, start curses & setup terminal.
  */
 PUBLIC BOOLEAN setup ARGS1(
-	char *,		terminal)
+	char *, 	terminal)
 {
     static char term_putenv[120];
     char buffer[120];
-#if defined(USE_SIZECHANGEHACK)
-#if defined(HAVE_SIZECHANGE) && !defined(USE_SLANG)
+    char *cp;
+#if defined(HAVE_SIZECHANGE) && !defined(USE_SLANG) && defined(NOTDEFINED)
 /*
  *  Hack to deal with a problem in sysV curses, that screen can't be
  *  resized to greater than the size used by initscr, which can only
@@ -1014,6 +1009,9 @@ PUBLIC BOOLEAN setup ARGS1(
  *  to some suitably large size to force initscr to allocate enough
  *  space.  Later we get the real window size for setting LYlines
  *  and LYcols. - AJL & FM
+ *
+ *  Has problems, so we don't use this hack, but the code is here
+ *  if someone wants to play with it some more. - FM
  */
     char *lines_putenv = NULL;
     char *cols_putenv = NULL;
@@ -1024,23 +1022,25 @@ PUBLIC BOOLEAN setup ARGS1(
 	StrAllocCopy(cols_putenv, "COLUMNS=240");
 	(void) putenv(cols_putenv);
     }
-#endif /* !NO_SIZECHANGE && !USE_SLANG */
-#endif /* USE_SIZECHANGEHACK */
+#endif /* HAVE_SIZECHANGE && !USE_SLANG && NOTDEFINED */
 
    /*
     *  If the display was not set by a command line option then
     *  see if it is available from the environment .
     */
-    if ((display = getenv(DISPLAY)) != NULL && *display == '\0')
-	display = NULL;
+    if ((cp = getenv(DISPLAY)) != NULL && *cp != '\0') {
+	StrAllocCopy(display, cp);
+    } else {
+	FREE(display);
+    }
 
     if (terminal != NULL) {
-	sprintf(term_putenv,"TERM=%s",terminal);
+	sprintf(term_putenv, "TERM=%s", terminal);
 	(void) putenv(term_putenv);
     }
 
     /*
-     *  Query the terminal type.
+     *	Query the terminal type.
      */
     if (dumbterm(getenv("TERM"))) {
 	char *s;
@@ -1065,17 +1065,20 @@ PUBLIC BOOLEAN setup ARGS1(
 
 #if HAVE_TTYTYPE
     /*
-     *  Get terminal type (strip 'dec-' from vms style types).
+     *	Get terminal type (strip 'dec-' from vms style types).
      */
     if (strncmp((CONST char*)ttytype, "dec-vt", 6) == 0) {
 	(void) setterm(ttytype + 4);
     }
 #endif /* HAVE_TTYTYPE */
 
-#if defined(HAVE_SIZECHANGE) && !defined(USE_SLANG) && defined(USE_SIZECHANGEHACK)
+#if defined(HAVE_SIZECHANGE) && !defined(USE_SLANG) && defined(NOTDEFINED)
     if (lines_putenv != NULL) {
 	/*
 	 *  Use SIGWINCH handler to set the true window size. - AJL && FM
+	 *
+	 *  Has problems, so we don't use this hack, but the code is here
+	 *  if someone wants to play with it some more. - FM
 	 */
 	size_change(0);
 	lines_putenv[6] = '\0';
@@ -1085,13 +1088,13 @@ PUBLIC BOOLEAN setup ARGS1(
 	FREE(lines_putenv);
 	FREE(cols_putenv);
     } else {
-        LYlines = LINES;
-        LYcols = COLS;
+	LYlines = LINES;
+	LYcols = COLS;
     }
 #else
     LYlines = LINES;
     LYcols = COLS;
-#endif /* !NO_SIZECHANGE && !USE_SLANG && USE_SIZECHANGEHACK */
+#endif /* HAVE_SIZECHANGE && !USE_SLANG && USE_NOTDEFINED */
     if (LYlines <= 0)
 	LYlines = 24;
     if (LYcols <= 0)
@@ -1101,7 +1104,7 @@ PUBLIC BOOLEAN setup ARGS1(
 }
 
 PRIVATE int dumbterm ARGS1(
-	char *,		terminal)
+	char *, 	terminal)
 {
     int dumb = FALSE;
 
@@ -1113,7 +1116,7 @@ PRIVATE int dumbterm ARGS1(
 	!strcasecomp(terminal, "network") ||
 	!strcasecomp(terminal, "unknown") ||
 	!strcasecomp(terminal, "dialup")  ||
-	!strcasecomp(terminal, "dumb")    ||
+	!strcasecomp(terminal, "dumb")	  ||
 	!strcasecomp(terminal, "switch")  ||
 	!strcasecomp(terminal, "ethernet")  )
 	dumb = TRUE;
@@ -1179,14 +1182,14 @@ PUBLIC void LYstopTargetEmphasis NOARGS
  *		Do character-oriented stream input for Jeff.
  *		Code ripped off from Micro-Emacs 3.7 by Daniel Lawrence.
  *
- *		Ever-so-slightly modified by Kathryn Huxtable.  29-Jan-1991.
+ *		Ever-so-slightly modified by Kathryn Huxtable.	29-Jan-1991.
  *		Cut down for Lou.  8 Sep 1992.
  *		Cut down farther for Lou.  19 Apr 1993.
  *			We don't set PASSALL or PASTHRU since we don't
  *			want to block CTRL/C, CTRL/Y, CTRL/S or CTRL/Q.
  *			Simply setting NOECHO and doing timed reads
  *			is sufficient.
- *              Further mods by Fote.  29-June-1993
+ *		Further mods by Fote.  29-June-1993
  *			ttopen() and ttclose() are now terminal initialization
  *			 and restoration procedures, called once at startup
  *			 and at exit, respectively, of the LYNX image.
@@ -1198,10 +1201,10 @@ PUBLIC void LYstopTargetEmphasis NOARGS
  *			 setting the terminal itself to NOECHO in ttopen()).
  *			VMSsignal() added for handling both Ctrl-C *and* Ctrl-Y
  *			 interrupts, and disabling system response to Ctrl-T.
- *              Further mods by Fote.  15-Dec-1993
+ *		Further mods by Fote.  15-Dec-1993
  *			Added edit handler in ttopen() which will invoke
  *			 VMSexit() and behave intelligently on ACCVIO's.
- *              Further mods by Fote.  29-Dec-1993
+ *		Further mods by Fote.  29-Dec-1993
  *			Simplified ttgetc().
  *		Further mods by Fote.  16-Jan-1994
  *			Added code in ttopen() which will invoke VMSVersion()
@@ -1237,12 +1240,12 @@ PUBLIC void LYstopTargetEmphasis NOARGS
 
 #define EFN	0			/* Event flag			*/
 
-static	unsigned char buffer[20];	/* Input buffer			*/
-static	int	in_pos, in_len;		/* For escape sequences		*/
+static	unsigned char buffer[20];	/* Input buffer 		*/
+static	int	in_pos, in_len; 	/* For escape sequences 	*/
 static	int	oldmode[3];		/* Old TTY mode bits		*/
 static	int	newmode[3];		/* New TTY mode bits		*/
-static	short	iochan;			/* TTY I/O channel		*/
-static  $DESCRIPTOR(term_nam_dsc,"TT"); /* Descriptor for iochan	*/
+static	short	iochan; 		/* TTY I/O channel		*/
+static	$DESCRIPTOR(term_nam_dsc,"TT"); /* Descriptor for iochan	*/
 static	unsigned long mask = LIB$M_CLI_CTRLY|LIB$M_CLI_CTRLT; /* ^Y and ^T */
 static	unsigned long old_msk;		/* Saved control mask		*/
 static	short	trap_flag = FALSE;	/* TRUE if AST is set		*/
@@ -1250,7 +1253,7 @@ BOOLEAN DidCleanup = FALSE;		/* Exit handler flag		*/
 static char VersionVMS[20];		/* Version of VMS		*/
 
 PUBLIC int VMSVersion ARGS2(
-	char *,		VerString,
+	char *, 	VerString,
 	int,		VerLen)
 {
      unsigned long status, itm_cod = SYI$_VERSION;
@@ -1279,9 +1282,9 @@ PUBLIC int VMSVersion ARGS2(
 PUBLIC void VMSexit NOARGS
 {
     /*
-     *  If we get here and DidCleanup is not set, it was via an
-     *  ACCVIO, or outofmemory forced exit, so make *sure* we
-     *  attempt a cleanup and reset the terminal.
+     *	If we get here and DidCleanup is not set, it was via an
+     *	ACCVIO, or outofmemory forced exit, so make *sure* we
+     *	attempt a cleanup and reset the terminal.
      */
     if (!DidCleanup) {
 	if (LYOutOfMemory == FALSE) {
@@ -1318,7 +1321,7 @@ PUBLIC void VMSexit NOARGS
 /*
  *	TTOPEN --
  *		This function is called once to set up the terminal
- *		device streams.	 It translates TT until it finds
+ *		device streams.  It translates TT until it finds
  *		the terminal, then assigns a channel to it, sets it
  *		to EDIT, and sets up the Ctrl-C and Ctrl-Y interrupt
  *		handling.
@@ -1497,15 +1500,15 @@ again:
  *		Sets up AST for both Ctrl-C and Ctrl-Y, with system response
  *		 to Ctrl-T disabled.  If called with a sig other than SIGINT,
  *		 it will use the C library's system(sig, func).
- *              The equivalent of VMSsignal(SIGINT, cleanup_sig) is done on
- *               intialization by ttopen(), so don't do it again.
+ *		The equivalent of VMSsignal(SIGINT, cleanup_sig) is done on
+ *		 intialization by ttopen(), so don't do it again.
  *		VMSsignal(SIGINT, SIG_DFL) is treated as a call to ttclose().
- *              Call VMSsignal(SIGINT, SIG_IGN) before system() calls to
- *               enable Ctrl-C and Ctrl-Y in the subprocess, and then call
- *               VMSsignal(SIG_INT, cleanup_sig) on return from the subprocess.
+ *		Call VMSsignal(SIGINT, SIG_IGN) before system() calls to
+ *		 enable Ctrl-C and Ctrl-Y in the subprocess, and then call
+ *		 VMSsignal(SIG_INT, cleanup_sig) on return from the subprocess.
  *		For func's which set flags and do not invoke an exit from
  *		 LYNX, the func should reassert itself.
- *              The VMS signal() calls do not fully emulate the Unix calls,
+ *		The VMS signal() calls do not fully emulate the Unix calls,
  *		 and VMSsignal() is just a "helper", also not a full emulation.
  */
 
@@ -1575,13 +1578,13 @@ void (*func)();
  */
 #ifdef __DECC
 PRIVATE unsigned int DCLspawn_exception ARGS2(
-	void *,		sigarr,
-	void *,		mecharr)
+	void *, 	sigarr,
+	void *, 	mecharr)
 {
 #else
 PRIVATE int DCLspawn_exception ARGS2(
-	void *,		sigarr,
-	void *,		mecharr)
+	void *, 	sigarr,
+	void *, 	mecharr)
 {
 #endif /* __DECC */
      int status;
@@ -1591,7 +1594,7 @@ PRIVATE int DCLspawn_exception ARGS2(
 }
 
 PRIVATE int spawn_DCLprocess ARGS1(
-	char *,		command)
+	char *, 	command)
 {
      int status;
      unsigned long Status = 0;
@@ -1599,9 +1602,9 @@ PRIVATE int spawn_DCLprocess ARGS1(
       *  Keep DECC from complaining.
       */
      struct dsc$descriptor_s  command_desc;
-     command_desc.dsc$w_length  = strlen(command);
-     command_desc.dsc$b_class   = DSC$K_CLASS_S;
-     command_desc.dsc$b_dtype   = DSC$K_DTYPE_T;
+     command_desc.dsc$w_length	= strlen(command);
+     command_desc.dsc$b_class	= DSC$K_CLASS_S;
+     command_desc.dsc$b_dtype	= DSC$K_DTYPE_T;
      command_desc.dsc$a_pointer = command;
 
      VAXC$ESTABLISH(DCLspawn_exception);
@@ -1640,7 +1643,7 @@ PRIVATE int spawn_DCLprocess ARGS1(
 }
 
 PUBLIC int DCLsystem ARGS1(
-	char *,		command)
+	char *, 	command)
 {
      int status;
      extern void controlc();

@@ -1,5 +1,7 @@
 #Shall this become the "default" translation?
-#There has to be exactly one table marked as "default".
+#Meaning of that is currently unclear...  It's different
+#from the default input or default output charset...
+#but there has to be exactly one table marked as "default".
 D0
 #
 #The MIME name of this charset. 
@@ -7,6 +9,7 @@ Mcp850
 
 #Name as a Display Charset (used on Options screen)
 ODosLatin1 (cp850)
+
 #
 #    Name:     cp850_DOSLatin1 to Unicode table
 #    Unicode version: 1.1

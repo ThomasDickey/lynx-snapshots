@@ -37,7 +37,7 @@ ONeXT character set
 #       Format: Three tab-separated columns
 #               Column #1 is the NextStep code (in hex as 0xXX)
 #               Column #2 is the Unicode (in hex as 0xXXXX)
-#               Column #3 NextStep name, Unicode name (follows a comment sign, '#')
+#               Column #3 NextStep name, Unicode name (follows a comment sign)
 #
 #       The entries are in NextStep order
 #

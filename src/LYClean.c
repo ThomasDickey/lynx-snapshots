@@ -19,7 +19,7 @@ BOOLEAN HadVMSInterrupt = FALSE;
 #endif /* VMS */
 
 /*
- *  Interrupt handler.  Stop curses and exit gracefully.
+ *  Interrupt handler.	Stop curses and exit gracefully.
  */
 PUBLIC void cleanup_sig ARGS1(
 	int,		sig)
@@ -28,7 +28,7 @@ PUBLIC void cleanup_sig ARGS1(
 #ifdef IGNORE_CTRL_C
     if (sig == SIGINT)	{
     /*
-     *  Need to rearm the signal.
+     *	Need to rearm the signal.
      */
     signal(SIGINT, cleanup_sig);
     sigint = TRUE;
@@ -38,7 +38,7 @@ PUBLIC void cleanup_sig ARGS1(
 
 #ifdef VMS
     if (!dump_output_immediately) {
-        int c;
+	int c;
 
 	/*
 	 *  Reassert the AST.
@@ -48,7 +48,7 @@ PUBLIC void cleanup_sig ARGS1(
 	if (!LYCursesON)
 	    return;
 
-        /*
+	/*
 	 *  Refresh screen to get rid of "cancel" message, then query.
 	 */
 	lynx_force_repaint();
@@ -70,15 +70,15 @@ PUBLIC void cleanup_sig ARGS1(
 #endif /* VMS */
 
     /*
-     *  Ignore further interrupts. - mhc: 11/2/91
+     *	Ignore further interrupts. - mhc: 11/2/91
      */
 #ifndef NOSIGHUP
     (void) signal(SIGHUP, SIG_IGN);
 #endif /* NOSIGHUP */
 
-#ifdef VMS 
+#ifdef VMS
     /*
-     *  Use ttclose() from cleanup() for VMS if not dumping.
+     *	Use ttclose() from cleanup() for VMS if not dumping.
      */
     if (dump_output_immediately)
 #else /* Unix: */
@@ -88,7 +88,7 @@ PUBLIC void cleanup_sig ARGS1(
     (void) signal(SIGTERM, SIG_IGN);
 
     if (traversal)
-        dump_traversal_history();
+	dump_traversal_history();
 
 #ifndef NOSIGHUP
     if (sig != SIGHUP) {
@@ -96,7 +96,7 @@ PUBLIC void cleanup_sig ARGS1(
 
 	if (!dump_output_immediately) {
 	    /*
-	     *  cleanup() also calls cleanup_files().
+	     *	cleanup() also calls cleanup_files().
 	     */
 	    cleanup();
 	}
@@ -122,14 +122,14 @@ PUBLIC void cleanup_sig ARGS1(
 	(void) signal(SIGTSTP, SIG_DFL);
 #endif /* SIGTSTP */
     if (sig != 0) {
-        exit(0);
+	exit(0);
     }
 }
 
 /*
- *  Called by Interrupt handler or at quit time.  
+ *  Called by Interrupt handler or at quit time.
  *  Erases the temporary files that lynx created
- *  temporary files are removed by tempname 
+ *  temporary files are removed by tempname
  *  which created them.
  */
 PUBLIC void cleanup_files NOARGS
@@ -148,11 +148,11 @@ PUBLIC void cleanup NOARGS
 #endif /* VMS */
 
     /*
-     *  Cleanup signals - just in case.
-     *  Ignore further interrupts. - mhc: 11/2/91
+     *	Cleanup signals - just in case.
+     *	Ignore further interrupts. - mhc: 11/2/91
      */
 #ifndef NOSIGHUP
-	 (void) signal(SIGHUP, SIG_IGN);
+    (void) signal(SIGHUP, SIG_IGN);
 #endif /* NOSIGHUP */
     (void) signal (SIGTERM, SIG_IGN);
 
@@ -161,19 +161,19 @@ PUBLIC void cleanup NOARGS
 #endif /* !VMS */
 
     if (LYCursesON) {
-        move(LYlines-1, 0);
-        clrtoeol();
+	move(LYlines-1, 0);
+	clrtoeol();
 
-        lynx_stop_all_colors ();
-        refresh();
+	lynx_stop_all_colors ();
+	refresh();
 
-        stop_curses();
+	stop_curses();
     }
 
 #ifdef EXP_CHARTRANS_AUTOSWITCH
 #ifdef LINUX
     /*
-     *  Currently implemented only for LINUX: Restore original font.
+     *	Currently implemented only for LINUX: Restore original font.
      */
     UCChangeTerminalCodepage(-1, (LYUCcharset*)0);
 #endif /* LINUX */
@@ -181,10 +181,10 @@ PUBLIC void cleanup NOARGS
 
     cleanup_files();
     for (i = 0; i < nhist; i++) {
-        FREE(history[i].title);
-        FREE(history[i].address);
-        FREE(history[i].post_data);
-        FREE(history[i].post_content_type);
+	FREE(history[i].title);
+	FREE(history[i].address);
+	FREE(history[i].post_data);
+	FREE(history[i].post_content_type);
 	FREE(history[i].bookmark);
     }
     nhist = 0;
@@ -197,7 +197,6 @@ PUBLIC void cleanup NOARGS
     fflush(stderr);
     if (LYTraceLogFP != NULL) {
 	fclose(LYTraceLogFP);
-	LYTraceLogFP = 0;
 	LYTraceLogFP = NULL;
 #if !defined(VMS) || (defined(VMS) && !defined(VAXC) && !defined(UCX))
 	*stderr = LYOrigStderr;

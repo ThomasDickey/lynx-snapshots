@@ -21,12 +21,9 @@
 #include "SGML.h"
 #include "HTMLDTD.h"
 #include "HTCJK.h"
-#ifdef EXP_CHARTRANS
 #include "UCMap.h"
 #include "UCDefs.h"
 #include "UCAux.h"
-#endif
-
 
 #include <ctype.h>
 /*#include <stdio.h> included in HTUtils.h -- FM */
@@ -133,7 +130,6 @@ struct _HTStream {
     int				csi_index;
 } ;
 
-#ifdef EXP_CHARTRANS
 
 PRIVATE void set_chartrans_handling ARGS3(
 	HTStream *,		context,
@@ -203,14 +199,11 @@ PRIVATE void change_chartrans_handling ARGS1(
 	}
     }
 }
-#endif /* EXP_CHARTRANS */
 
 
 #define PUTC(ch) ((*context->actions->put_character)(context->target, ch))
-#ifdef EXP_CHARTRANS
 #define PUTUTF8(code) (UCPutUtf8_charstring((HTStream *)context->target, \
 		      (putc_func_t*)(context->actions->put_character), code))
-#endif
 
 extern BOOL historical_comments;
 extern BOOL minimal_comments;
@@ -295,7 +288,6 @@ PRIVATE void handle_attribute_value ARGS2(
     context->current_attribute_number = INVALID; /* can't have two assignments! */
 }
 
-#ifdef EXP_CHARTRANS
 /* translate some Unicodes to Lynx special codes and output them. */
 PRIVATE BOOL put_special_unicodes ARGS2(
 	HTStream *,	context,
@@ -332,7 +324,6 @@ PRIVATE BOOL put_special_unicodes ARGS2(
     */
     return YES;
 }
-#endif
 
 /*	Handle entity
 **	-------------
@@ -1058,14 +1049,12 @@ PRIVATE void start_element ARGS1(
 	N->tag = new_tag;
 	context->element_stack = N;
     }
-#ifdef EXP_CHARTRANS
     else if (!strcasecomp(new_tag->name, "META")) {
 	/*
 	**  Check for result of META tag. - KW & FM
 	*/
 	change_chartrans_handling(context);
     }
-#endif /* EXP_CHARTRANS */
 }
 
 
@@ -1371,12 +1360,10 @@ PRIVATE void SGML_character ARGS2(
     **  or unsign_c and c will have to be passed raw. - KW
     */
 top:
-#ifdef EXP_CHARTRANS
     saved_char_in = '\0';
 top0a:
     *(context->utf_buf) = '\0';
     clong = (unsigned char)c;
-#endif
 top1:
     /*
     **  Ignore low ISO 646 7-bit control characters
@@ -1391,11 +1378,7 @@ top1:
     **  Ignore 127 if we don't have HTPassHighCtrlRaw
     **  or HTCJK set. - FM
     */
-#ifndef EXP_CHARTRANS
-#define PASSHICTRL HTPassHighCtrlRaw
-#else
 #define PASSHICTRL (context->T.transp || unsign_c >= LYlowest_eightbit[context->in_char_set])
-#endif /* EXP_CHARTRANS */
     if (c == 127 &&
         !(PASSHICTRL || HTCJK != NOCJK))
         return;
@@ -1457,11 +1440,7 @@ top1:
 			context->element_stack->tag->contents == SGML_LITTERAL)
 	      				 ?
 	    		      S_litteral : S_tag;
-#ifndef EXP_CHARTRANS
-#define PASS8859SPECL HTPassHighCtrlRaw
-#else
 #define PASS8859SPECL context->T.pass_160_173_raw
-#endif /* EXP_CHARTRANS */
 	/*
 	**  Convert 160 (nbsp) to Lynx special character if
 	**  neither HTPassHighCtrlRaw nor HTCJK is set. - FM
@@ -1524,11 +1503,7 @@ top1:
 	**  have the "ISO Latin 1" character set selected,
 	**  back translate for our character set. - FM
 	*/
-#ifndef EXP_CHARTRANS
-#define PASSHI8BIT HTPassEightBitRaw
-#else
 #define PASSHI8BIT (HTPassEightBitRaw || (context->T.do_8bitraw && !context->T.trans_from_uni))
-#endif /* EXP_CHARTRANS */
 	} else if (unsign_c > 160 && unsign_c < 256 &&
 		   !(PASSHI8BIT || HTCJK != NOCJK) &&
 		   !IncludesLatin1Enc(context->html_char_set)) {
@@ -1545,7 +1520,6 @@ top1:
 	    string->size = 0;
 	    if (!FoundEntity)
 	        PUTC(';');
-#ifdef EXP_CHARTRANS
 	/*
 	**  If we get to here and have an ASCII char, pass the character.
 	*/
@@ -1578,7 +1552,6 @@ top1:
 	    sprintf(replace_buf, "U%.2lX", unsign_c);
 	    for (p = replace_buf; *p; p++)
 		PUTC(*p);
-#endif /* EXP_CHARTRANS */
 	/*
 	**  If we get to here, pass the character. - FM
 	*/
@@ -1922,7 +1895,6 @@ top1:
 		    context->state = S_text;
 		    break;
 		}
-#ifdef EXP_CHARTRANS
 		if (value == 160 || value == 173) {
 		    /*
 		    **  We *always* should interpret these as Latin1 here!
@@ -1982,7 +1954,6 @@ top1:
 			 PUTUTF8(value)) {
 		  /* do nothing more */ ;
 	      } else 
-#endif /* EXP_CHARTRANS */
 	        if (value == 8482) {
 		    /*
 		    **  trade  Handle as named entity. - FM
@@ -2641,7 +2612,6 @@ top1:
 		break;
 	    }
 	    else context->state = S_tag_gap;
-#ifdef EXP_CHARTRANS
 	} else if (context->T.decode_utf8 &&
 		   *context->utf_buf) {
 	    HTChunkPuts(string, context->utf_buf);
@@ -2659,7 +2629,6 @@ top1:
 	    }
 	} else if (saved_char_in && context->T.use_raw_char_in) {
 	    HTChunkPutc(string, saved_char_in);
-#endif /* EXP_CHARTRANS */
 	} else {
 	    HTChunkPutc(string, c);
 	}
@@ -2678,7 +2647,6 @@ top1:
 	    */
 	    context->state = S_esc_sq;
 	    HTChunkPutc(string, c);
-#ifdef EXP_CHARTRANS
 	} else if (context->T.decode_utf8 &&
 		   *context->utf_buf) {
 	    HTChunkPuts(string, context->utf_buf);
@@ -2696,7 +2664,6 @@ top1:
 	    }
 	} else if (saved_char_in && context->T.use_raw_char_in) {
 	    HTChunkPutc(string, saved_char_in);
-#endif /* EXP_CHARTRANS */
 	} else {
 	    HTChunkPutc(string, c);
 	}
@@ -2719,7 +2686,6 @@ top1:
 	    */
 	    context->state = S_esc_dq;
 	    HTChunkPutc(string, c);
-#ifdef EXP_CHARTRANS
 	} else if (context->T.decode_utf8 &&
 		   *context->utf_buf) {
 	    HTChunkPuts(string, context->utf_buf);
@@ -2737,7 +2703,6 @@ top1:
 	    }
 	} else if (saved_char_in && context->T.use_raw_char_in) {
 	    HTChunkPutc(string, saved_char_in);
-#endif /* EXP_CHARTRANS */
 	} else {
 	    HTChunkPutc(string, c);
 	}
@@ -3182,7 +3147,6 @@ PUBLIC HTStream* SGML_new  ARGS3(
     context->second_bracket = FALSE;
     context->isHex = FALSE;
 
-#ifdef EXP_CHARTRANS
     context->node_anchor = anchor; /*only for chartrans info. could be NULL? */
 
     context->utf_count = 0;
@@ -3199,7 +3163,6 @@ PUBLIC HTStream* SGML_new  ARGS3(
     }
     context->UCI=HTAnchor_getUCInfoStage(anchor, UCT_STAGE_PARSER);
     set_chartrans_handling(context, anchor, -1);
-#endif /* EXP_CHARTRANS */
 
     context->recover = NULL;
     context->recover_index = 0;

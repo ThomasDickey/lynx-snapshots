@@ -131,7 +131,6 @@ static CONST char* entities[] = {
 
 #define HTML_ENTITIES 112
 
-#ifdef EXP_CHARTRANS
 /* 	Extra Entity Names
 **	------------------
 **
@@ -443,7 +442,6 @@ static CONST UC_entity_info extra_entities[] = {
   {"zwj",	  8205},  /* zero width joiner */ 
   {"zwnj",	  8204},  /* zero width non-joiner */ 
 };
-#endif /* EXP_CHARTRANS */
 
 /*		Attribute Lists
 **		---------------
@@ -1892,10 +1890,8 @@ PUBLIC CONST SGML_dtd HTML_dtd = {
 	HTML_ELEMENTS,
 	entities,
 	sizeof(entities)/sizeof(char*),
-#ifdef EXP_CHARTRANS
 	extra_entities,
 	sizeof(extra_entities)/sizeof(UC_entity_info),
-#endif
 };
 
 /* This function fills the "tags" part of the HTML_dtd structure with
