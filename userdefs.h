@@ -132,25 +132,6 @@
  */
 #define MAIL_ADRS "\"IN%%\"\"%s\"\"\""
 
-/*************************
- * The foreign command for the ANU-NEWS client (presumably "NEWS").
- * which serves as a transparent vector for posting to newsgroups
- * from Lynx via the ANU-NEWS client's server.  The account running
- * Lynx must have access to the ANU-NEWS client, which in turn must
- * have posting privileges (the news server could also be ANU-NEWS,
- * or any other server to which the ANU-NEWS client has access).
- *
- * The ANU-NEWS software for VMS is available from ftp.cc.ukans.edu.
- *
- * Define INEWS as "none" if you do not have access to an ANU-NEWS
- * client with a server for posting to newsgroups from Lynx.
- *
- * Note that posting is supported only for news: (not nntp: or snews:)
- * URLs, and only via the default nntp server defined with the NNTPSERVER
- * configuration or environment variable.
- */
-#define INEWS "NEWS"
-
 /*********************************
  * On VMS, CSwing (an XTree emulation for VTxxx terminals) is intended for
  * use as the Directory/File Manager (sources, objects, or executables are
@@ -287,19 +268,6 @@
  * definition.
  */
 #define XLOADIMAGE_COMMAND "xli %s &"
-
-/*************************
- * Set INEWS to the full path and name of your program for posting to
- * newsgroups.  A "mini" inews is included in the utils subdirectory of
- * the Lynx distribution.  You can disable news posting by setting INEWS
- * to "none", or via -restrictions switches.  The default defined here
- * can be overridden in lynx.cfg.
- * Note that some news software, such as INN's inews, requires an -h switch
- * added to the path.  Also note that posting is supported only for news:
- * (not nntp: or snews:) URLs, and only via the default nntp server defined
- * with the NNTPSERVER configuration or environment variable.
- */
-#define INEWS "inews"
 
 /**************************
  * For UNIX systems this should be sendmail
@@ -669,6 +637,29 @@
  * The default defined here can be changed in lynx.cfg.
  */
 #define LIST_NEWS_DATES FALSE
+
+/*************************
+ * Set NEWS_POSTING to FALSE if you do not want to support posting to
+ * news groups via Lynx.  If left TRUE, Lynx will use its news gateway to
+ * post new messages or followups to news groups, using the URL schemes
+ * described in the "Supported URL" section of the online 'h'elp.  The
+ * posts will be attempted via the nntp server specified in the URL, or
+ * if none was specified, via the NNTPSERVER configuration or environment
+ * variable.  Links with these URLs for posting or sending followups are
+ * created by the news gateway when reading group listings or articles
+ * from nntp servers if the server indicates that it permits posting.
+ * The setting here can be changed in lynx.cfg.
+ */
+#define NEWS_POSTING TRUE
+
+/*************************
+ * Define LYNX_SIG_FILE to the name of a file containing a signature which
+ * can be appended to news postings or followups.  The user will be prompted
+ * whether to append it.  It is sought in the home directory.  If it is in
+ * a subdirectory, begin it with a dot-slash (e.g., ./lynx/.lynxsig).  The
+ * definition here can be changed in lynx.cfg.
+ */
+#define LYNX_SIG_FILE ".lynxsig"
 
 /********************************
  * If USE_SELECT_POPUPS is set FALSE, Lynx will present a vertical list

@@ -1098,7 +1098,7 @@ PRIVATE char * KOI8_R[] = {
 	"-",	/* dash the width of ensp - endash */
         "\002",	/* ensp NEVER CHANGE THIS - ensp */
         "e",	/* small eth, Icelandic eth */
-	"\263",	/* small e, dieresis or umlaut mark - euml */
+	"\243",	/* small e, dieresis or umlaut mark - euml */
 	" 1/2",	/* fraction 1/2 (&#189;) - frac12 */
 	" 1/4",	/* fraction 1/4 (&#188;) - frac14 */
 	" 3/4",	/* fraction 3/4 (&#190;) - frac34 */

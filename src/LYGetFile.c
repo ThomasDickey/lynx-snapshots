@@ -166,6 +166,8 @@ Try_Redirected_URL:
 			  url_type == MAILTO_URL_TYPE ||
 			  url_type == NEWSPOST_URL_TYPE ||
 			  url_type == NEWSREPLY_URL_TYPE ||
+			  url_type == SNEWSPOST_URL_TYPE ||
+			  url_type == SNEWSREPLY_URL_TYPE ||
 			  (!LYUserSpecifiedURL &&
 			   (url_type == LYNXEXEC_URL_TYPE ||
 			    url_type == LYNXPROG_URL_TYPE ||
@@ -205,26 +207,18 @@ Try_Redirected_URL:
 		} else if (url_type == LYNXPRINT_URL_TYPE) {
 		    return(printfile(doc));
 
-		} else if (url_type == NEWSPOST_URL_TYPE) {
+		} else if (url_type == NEWSPOST_URL_TYPE ||
+			   url_type == NEWSREPLY_URL_TYPE ||
+			   url_type == SNEWSPOST_URL_TYPE ||
+			   url_type == SNEWSREPLY_URL_TYPE) {
 
 		    if (no_newspost) {
 			_statusline(NEWSPOSTING_DISABLED);
 			sleep(MessageSecs);
 			return(NULLFILE);
 		    } else {
-		        BOOLEAN followup = FALSE;
-		        return(LYNewsPost(doc, followup));
-		    }
-
-		} else if (url_type == NEWSREPLY_URL_TYPE) {
-
-		    if (no_newspost) {
-			_statusline(NEWSPOSTING_DISABLED);
-			sleep(MessageSecs);
+		        HTLoadAbsolute(&WWWDoc);
 			return(NULLFILE);
-		    } else {
-		        BOOLEAN followup = TRUE;
-		        return(LYNewsPost(doc, followup));
 		    }
 
 		} else if (url_type == LYNXDOWNLOAD_URL_TYPE) {

@@ -746,7 +746,8 @@ press '<em>n</em>' the message will be deleted. [<A HREF="#TOC">ToC</A>]
 While reading <a
 href="http://www.w3.org/hypertext/DataSources/News/Groups/Overview.html"
 >news</a> articles with Lynx you should see a link that says
-<em>Reply to: user@host</em> and a link that says
+<em>Reply to: user@host</em> and, if the nntp server from which you
+received the article supports posting from your site, a link that says
 <em>Followup to: newsgroup(s)</em>
     
 <dl>
@@ -760,10 +761,15 @@ href="http://www.w3.org/hypertext/DataSources/News/Groups/Overview.html"
     <dt>Followup to newsgroup(s)
         <dd>Selecting this link will allow you to post back to the
             newsgroup that you are currently reading and any newsgroups
-            that the message may be cross-posted to.  You will be given
+            to which the message was cross-posted.  You will be given
             the option of including the original message in your reply.
-            Once you have typed in your message the <em>inews</em> program
-            will be called to post your message to your news host. 
+            Once you have typed in your message, you will be asked for
+	    confirmation of whether to proceed with the posting, and
+	    whether to append your signature file if one was defined in
+	    lynx.cfg and is accessible.  See <a
+	    href="lynx_url_support.html">Supported URLs</a> for more
+	    information about the URL schemes for posting or sending
+	    followups (replies) to nntp servers with Lynx.
             [<A HREF="#TOC">ToC</A>]
 </dl>
 

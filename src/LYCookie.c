@@ -81,6 +81,7 @@ struct _cookie {
     int pathlen;   /* Length of the path */
     int flags;     /* Various flags */
     time_t expires;   /* The time when this cookie expires */
+    BOOL quoted;   /* Was a value quoted in the Set-Cookie header? */
 };
 typedef struct _cookie cookie;
 
@@ -97,11 +98,16 @@ PRIVATE void MemAllocCopy ARGS3(
 	CONST char *,	start,
 	CONST char *,	end)
 {
-    char *temp = (char *)calloc(1, ((end - start) + 1));
+    char *temp;
+    
+    if (!(start && end) || (end <= start)) {
+        HTSACopy(dest, "");
+	return;
+    }
 
+    temp = (char *)calloc(1, ((end - start) + 1));
     if (temp == NULL)
         outofmem(__FILE__, "MemAllocCopy");
-
     LYstrncpy(temp, (char *)start, (end - start));
     HTSACopy(dest, temp);
     FREE(temp);
@@ -218,8 +224,13 @@ PRIVATE void store_cookie ARGS3(
      *  Section 4.3.2, condition 1: The value for the Path attribute is
      *  not a prefix of the request-URI.
      */
-    if (strncmp(co->path, path, co->pathlen) != 0)
+    if (strncmp(co->path, path, co->pathlen) != 0) {
+	if (TRACE)
+	    fprintf(stderr,
+	    "store_cookie: Rejecting because '%s' is not a prefix of '%s'.\n",
+		    co->path, path);
         return;
+    }
     /*
      *  The next 4 conditions do NOT apply if the domain is still 
      *  the default of request-host.
@@ -228,26 +239,46 @@ PRIVATE void store_cookie ARGS3(
         /*
 	 *  The hostname does not contain a dot.
 	 */
-	if (strchr(hostname, '.') == NULL)
+	if (strchr(hostname, '.') == NULL) {
+	    if (TRACE)
+		fprintf(stderr,
+			"store_cookie: Rejecting because '%s' has no dot.\n",
+			hostname);
 	    return;
+	}
 
 	/*
 	 *  Section 4.3.2, condition 2: The value for the Domain attribute
 	 *  contains no embedded dots or does not start with a dot. 
 	 *  (A dot is embedded if it's neither the first nor last character.) 
 	 */
-	if (co->domain[0] != '.' || co->domain[1] == '\0')
+	if (co->domain[0] != '.' || co->domain[1] == '\0') {
+	    if (TRACE)
+		fprintf(stderr,
+			"store_cookie: Rejecting domain '%s'.\n",
+			co->domain);
 	    return;
+	}
 	ptr = strchr((co->domain + 1), '.');
-	if (ptr == NULL || ptr[1] == '\0')
+	if (ptr == NULL || ptr[1] == '\0') {
+	    if (TRACE)
+		fprintf(stderr,
+			"store_cookie: Rejecting domain '%s'.\n",
+			co->domain);
 	    return;
+	}
       
         /*
 	 *  Section 4.3.2, condition 3: The value for the request-host does
 	 *  not domain-match the Domain attribute.
 	 */
-	if (!host_matches(hostname, co->domain))
+	if (!host_matches(hostname, co->domain)) {
+	    if (TRACE)
+		fprintf(stderr,
+			"store_cookie: Rejecting domain '%s' for host '%s'.\n",
+			co->domain, hostname);
 	    return;
+	}
 
         /*
 	 *  Section 4.3.2, condition 4: The request-host is a FQDN (not IP
@@ -255,8 +286,13 @@ PRIVATE void store_cookie ARGS3(
 	 *  attribute, and H is a string that contains one or more dots.
 	 */
 	ptr = ((hostname + strlen(hostname)) - strlen(co->domain));
-	if (strchr(hostname, '.') < ptr)
+	if (strchr(hostname, '.') < ptr) {
+	    if (TRACE)
+		fprintf(stderr,
+			"store_cookie: Rejecting domain '%s' for host '%s'.\n",
+			co->domain, hostname);
 	    return;
+	}
     }
 
     /*
@@ -388,6 +424,7 @@ PRIVATE char * scan_cookie_sublist ARGS6(
     HTList *hl = sublist, *next = NULL;
     cookie *co;
     time_t now = time(NULL);
+    BOOL Quoted = FALSE;
 
     while (hl) {
 	co = (cookie *)hl->object;
@@ -460,7 +497,15 @@ PRIVATE char * scan_cookie_sublist ARGS6(
 	     */
 	    StrAllocCat(header, co->name);
 	    StrAllocCat(header, "=");
+	    if (co->quoted && strchr(co->value, ' ')) {
+	    	StrAllocCat(header, "\"");
+		Quoted = TRUE;
+	    }
 	    StrAllocCat(header, co->value);
+	    if (Quoted) {
+	    	StrAllocCat(header, "\"");
+		Quoted = FALSE;
+	    }
 	    /*
 	     *  For Version 1 (or greater) cookies, add
 	     *  attributes for the cookie. - FM
@@ -471,14 +516,30 @@ PRIVATE char * scan_cookie_sublist ARGS6(
 		     *  Append the path attribute. - FM
 		     */
 		    StrAllocCat(header, "; $Path=");
+		    if (co->quoted && strchr(co->path, ' ')) {
+		        StrAllocCat(header, "\"");
+			Quoted = TRUE;
+		    }
 		    StrAllocCat(header, co->path);
+		    if (Quoted) {
+		        StrAllocCat(header, "\"");
+			Quoted = FALSE;
+		    }
 		}
 		if (co->domain) {
 		    /*
 		     *  Append the domain attribute. - FM
 		     */
 		    StrAllocCat(header, "; $Domain=");
+		    if (co->quoted && strchr(co->domain, ' ')) {
+		        StrAllocCat(header, "\"");
+			Quoted = TRUE;
+		    }
 		    StrAllocCat(header, co->domain);
+		    if (Quoted) {
+		        StrAllocCat(header, "\"");
+			Quoted = FALSE;
+		    }
 		}
 	    }
 	}
@@ -497,6 +558,7 @@ PUBLIC void LYSetCookie ARGS2(
     cookie *cur_cookie = NULL;
     int port = 80;
     int length = 0;
+    BOOL Quoted = FALSE;
 
     /*
      *  Get the hostname, port and path of the address, and report
@@ -552,6 +614,7 @@ PUBLIC void LYSetCookie ARGS2(
 	       *p != '=' && *p != ';' && *p != ',')
 	    p++;
 	attr_end = p;
+	SKIP_SPACES;
       
 	if (*p == '=') {
 	    /*
@@ -595,28 +658,40 @@ PUBLIC void LYSetCookie ARGS2(
 		value_end = p;
 		if (*p == '"')
 		    p++;
+		Quoted = TRUE;
 	    } else {
 		/*
 		 *   Otherwise, it's an unquoted string.
 		 */
-		SKIP_SPACES;
 		value_start = p;
-		while (*p != '\0' && !isspace((unsigned char)*p) && *p != ';')
+		while (*p != '\0' && *p != ';' && *p != ',')
 		    p++;
 		value_end = p;
+		/*
+		 *  Trim trailing spaces.
+		 */
+		if ((value_end > value_start) &&
+		    isspace((unsigned char)*(value_end - 1))) {
+		    value_end--;
+		    while ((value_end > (value_start + 1)) &&
+		    	   isspace((unsigned char)*value_end) &&
+			   isspace((unsigned char)*(value_end - 1))) {
+		        value_end--;
+		    }
+		}
 	    }
 	}
 
 	/*
 	 *  Check for a separator character, and skip it.
 	 */
-	if (*p == ';')
+	if (*p == ';' || *p == ',')
 	    p++;
 
 	/*
 	 *  Now, we can handle this attribute/value pair.
 	 */
-	if (attr_end != attr_start) {
+	if (attr_end > attr_start) {
 	    int len = (attr_end - attr_start);
 	    BOOLEAN known_attr = NO;
 	    char *value = NULL;
@@ -719,6 +794,8 @@ PUBLIC void LYSetCookie ARGS2(
 		cur_cookie->port = port;
 		MemAllocCopy(&(cur_cookie->name), attr_start, attr_end);
 		MemAllocCopy(&(cur_cookie->value), value_start, value_end);
+		cur_cookie->quoted = Quoted;
+		Quoted = FALSE;
 	    }
 	    FREE(value);
 	}

@@ -843,6 +843,46 @@ PUBLIC int is_url ARGS1(
 	}
 	return(SNEWS_URL_TYPE);
 
+    } else if (!strncasecomp(cp, "newspost:", 9)) {
+	/*
+	 *  Special Lynx type to handle news posts.
+	 */
+        if (strncmp(cp, "newspost", 8)) {
+	    for (i = 0; i < 8; i++)
+	        cp[i] = TOLOWER(cp[i]);
+	}
+	return(NEWSPOST_URL_TYPE);
+
+    } else if (!strncasecomp(cp, "newsreply:", 10)) {
+	/*
+	 *  Special Lynx type to handle news replies (followups).
+	 */
+        if (strncmp(cp, "newsreply", 9)) {
+	    for (i = 0; i < 9; i++)
+	        cp[i] = TOLOWER(cp[i]);
+	}
+	return(NEWSREPLY_URL_TYPE);
+
+    } else if (!strncasecomp(cp, "snewspost:", 10)) {
+	/*
+	 *  Special Lynx type to handle snews posts.
+	 */
+        if (strncmp(cp, "snewspost", 9)) {
+	    for (i = 0; i < 9; i++)
+	        cp[i] = TOLOWER(cp[i]);
+	}
+	return(NEWSPOST_URL_TYPE);
+
+    } else if (!strncasecomp(cp, "snewsreply:", 11)) {
+	/*
+	 *  Special Lynx type to handle snews replies (followups).
+	 */
+        if (strncmp(cp, "snewsreply", 10)) {
+	    for (i = 0; i < 10; i++)
+	        cp[i] = TOLOWER(cp[i]);
+	}
+	return(NEWSREPLY_URL_TYPE);
+
     } else if (!strncasecomp(cp, "mailto:", 7)) {
         if (strncmp(cp, "mailto", 6)) {
 	    for (i = 0; i < 6; i++)
@@ -903,26 +943,6 @@ PUBLIC int is_url ARGS1(
 	        cp[i] = TOLOWER(cp[i]);
 	}
 	return(LYNXCGI_URL_TYPE);
-
-    } else if (!strncasecomp(cp, "newspost:", 9)) {
-	/*
-	 *  Special Internal Lynx type to handle news posts.
-	 */
-        if (strncmp(cp, "newspost", 8)) {
-	    for (i = 0; i < 8; i++)
-	        cp[i] = TOLOWER(cp[i]);
-	}
-	return(NEWSPOST_URL_TYPE);
-
-    } else if (!strncasecomp(cp, "newsreply:", 10)) {
-	/*
-	 *  Special Internal Lynx type to handle news replies (followups).
-	 */
-        if (strncmp(cp, "newsreply", 9)) {
-	    for (i = 0; i < 9; i++)
-	        cp[i] = TOLOWER(cp[i]);
-	}
-	return(NEWSREPLY_URL_TYPE);
 
     } else if (!strncasecomp(cp, "LYNXPRINT:", 10)) {
 	/*
@@ -1003,19 +1023,19 @@ PUBLIC int is_url ARGS1(
 	 */
 	return(LYCheckForProxyURL(filename));
 
-    } else if (!strncasecomp(cp, "https:", 6)) {
-        if (strncmp(cp, "https", 5)) {
-	    for (i = 0; i < 5; i++)
-	        cp[i] = TOLOWER(cp[i]);
-	}
-	return(HTTPS_URL_TYPE);
-
     } else if (!strncasecomp(cp, "http:", 5)) {
         if (strncmp(cp, "http", 4)) {
 	    for (i = 0; i < 4; i++)
 	        cp[i] = TOLOWER(cp[i]);
 	}
 	return(HTTP_URL_TYPE);
+
+    } else if (!strncasecomp(cp, "https:", 6)) {
+        if (strncmp(cp, "https", 5)) {
+	    for (i = 0; i < 5; i++)
+	        cp[i] = TOLOWER(cp[i]);
+	}
+	return(HTTPS_URL_TYPE);
 
     } else if (!strncasecomp(cp, "gopher:", 7)) {
         if (strncmp(cp, "gopher", 6)) {
