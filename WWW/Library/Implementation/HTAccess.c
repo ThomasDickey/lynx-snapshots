@@ -431,7 +431,7 @@ PRIVATE int get_physical ARGS2(
 	/*
 	**  Search for gateways.
 	*/
-	gateway_parameter = (char *)malloc(strlen(access) + 20);
+	gateway_parameter = (char *)calloc(1, (strlen(access) + 20));
 	if (gateway_parameter == NULL)
 	    outofmem(__FILE__, "HTLoad");
 	strcpy(gateway_parameter, "WWW_");
@@ -687,12 +687,15 @@ PRIVATE BOOL HTLoadDocument ARGS4(
     /*
     **  Make sure some yoyo doesn't send us 'round in circles
     **  with redirecting URLs that point back to themselves.
-    **  We'll set the HTTP/1.1 limit of 5 redirections per
-    **  requested URL from a user.  - FM
+    **  We'll set the original Lynx limit of 10 redirections
+    **  per requested URL from a user, because the HTTP/1.1
+    **  will no longer specify a restriction to 5, but will
+    **  leave it up to the browser's discretion, in deference
+    **  to MicroSoft.  - FM
     */
-    if (redirection_attempts > 5) {
+    if (redirection_attempts > 10) {
         redirection_attempts = 0;
-	HTAlert("Redirection limit of 5 URL's reached.");
+	HTAlert("Redirection limit of 10 URLs reached.");
         return NO;
     }
 
@@ -737,8 +740,8 @@ PRIVATE BOOL HTLoadDocument ARGS4(
 	    /*
 	    **  Don't exceed the redirection_attempts limit. - FM
 	    */
-	    if (++redirection_attempts > 5) {
-		HTAlert("Redirection limit of 5 URL's reached.");
+	    if (++redirection_attempts > 10) {
+		HTAlert("Redirection limit of 10 URLs reached.");
 		redirection_attempts = 0;
 		FREE(use_this_url_instead);
  		return NO;
@@ -1190,7 +1193,7 @@ PUBLIC BOOL HTSearch ARGS2(
     CONST char * p, *s, *e;		/* Pointers into keywords */
     char * address = NULL;
     BOOL result;
-    char * escaped = malloc((strlen(keywords)*3) + 1);
+    char * escaped = (char *)calloc(1, ((strlen(keywords)*3) + 1));
     static CONST BOOL isAcceptable[96] =
 
     /*   0 1 2 3 4 5 6 7 8 9 A B C D E F */
@@ -1309,7 +1312,7 @@ PUBLIC HTParentAnchor * HTHomeAnchor NOARGS
     	FILE * fp = fopen(REMOTE_POINTER, "r");
 	char * status;
 	if (fp) {
-	    my_home_document = (char*)malloc(MAX_FILE_NAME);
+	    my_home_document = (char*)calloc(1, MAX_FILE_NAME);
 	    if (my_home_document == NULL)
 	        outofmem(__FILE__, "HTHomeAnchor");
 	    status = fgets(my_home_document, MAX_FILE_NAME, fp);
@@ -1327,8 +1330,8 @@ PUBLIC HTParentAnchor * HTHomeAnchor NOARGS
 	FILE * fp = NULL;
 	CONST char * home =  (CONST char*)getenv("HOME");
 	if (home != null) { 
-	    my_home_document = (char *)malloc(
-		strlen(home) + 1 + strlen(PERSONAL_DEFAULT) + 1);
+	    my_home_document = (char *)calloc(1,
+		(strlen(home) + 1 + strlen(PERSONAL_DEFAULT) + 1));
 	    if (my_home_document == NULL)
 	        outofmem(__FILE__, "HTAnchorHome");
 	    sprintf(my_home_document, "%s/%s", home, PERSONAL_DEFAULT);

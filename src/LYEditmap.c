@@ -28,7 +28,7 @@ LYE_NOP,        LYE_ENTER,      LYE_FORWW,      LYE_ABORT,
 LYE_BACKW,      LYE_NOP,        LYE_DELN,       LYE_NOP,
 /* ^P           XON             ^R              XOFF    */
 
-LYE_UPPER,      LYE_ERASE,      LYE_LINKN,      LYE_NOP,
+LYE_UPPER,      LYE_ERASE,      LYE_LKCMD,      LYE_NOP,
 /* ^T           ^U              ^V              ^W      */
 
 LYE_ERASE,      LYE_NOP,        LYE_NOP,        LYE_NOP,

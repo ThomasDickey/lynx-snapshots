@@ -47,7 +47,9 @@
 
 #ifndef VMS
 #ifndef _WINDOWS
+#ifdef HAVE_SYS_WAIT_H
 #include <sys/wait.h>
+#endif
 #include <errno.h>
 #include <grp.h>
 #endif /*_WINDOWS */

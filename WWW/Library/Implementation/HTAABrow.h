@@ -78,7 +78,7 @@ Routines for Browser Side Recording of AA Info
 **
 **              As usual, this string is automatically freed.
 */
-PUBLIC char *HTAA_composeAuth PARAMS((
+extern char *HTAA_composeAuth PARAMS((
 	CONST char *	hostname,
 	CONST int	portnumber,
 	CONST char *	docname,
@@ -112,12 +112,19 @@ PUBLIC char *HTAA_composeAuth PARAMS((
 **                                field (in function HTAA_composeAuth()).
 **                      NO, otherwise.
 */
-PUBLIC BOOL HTAA_shouldRetryWithAuth PARAMS((
+extern BOOL HTAA_shouldRetryWithAuth PARAMS((
 	char *		start_of_headers,
 	int		length,
 	void *		handle,
 	int		soc,
 	BOOL		IsProxy));
+
+/*
+**  Function to allow clearing of all Authorization info
+**  via a browser command. - FM
+*/
+extern void HTClearHTTPAuthInfo NOPARAMS;
+
 /*
 
 Enabling Gateway httpds to Forward Authorization
@@ -129,10 +136,10 @@ Enabling Gateway httpds to Forward Authorization
    
  */
 
-PUBLIC void HTAAForwardAuth_set PARAMS((
+extern void HTAAForwardAuth_set PARAMS((
 	CONST char *	scheme_name,
 	CONST char *	scheme_specifics));
-PUBLIC void HTAAForwardAuth_reset NOPARAMS;
+extern void HTAAForwardAuth_reset NOPARAMS;
 /*
 
  */

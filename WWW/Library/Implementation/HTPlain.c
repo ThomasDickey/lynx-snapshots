@@ -390,22 +390,6 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 	*/
 	} else if (code == 8211 || code == 8212) {
 	    HText_appendCharacter(me->text, '-');
-	/*
-	**  Ignore 8204 (zwnj) or 8205 (zwj), for now. - FM
-	*/
-	} else if (code == 8204 || code == 8205) {
-	    if (TRACE) {
-		fprintf(stderr,
-			"HTPlain_write: Ignoring '%ld'.\n", code);
-	    }
-	/*
-	**  Ignore 8206 (lrm) or 8207 (rlm), for now. - FM
-	*/
-	} else if (code == 8206 || code == 8207) {
-	    if (TRACE) {
-		fprintf(stderr,
-			"HTPlain_write: Ignoring '%ld'.\n", code);
-	    }
 #endif /* NOTUSED_FOTEMODS */
 
 /******************************************************************
@@ -460,6 +444,51 @@ PRIVATE void HTPlain_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 	    **  (somewhat) readable ASCII.
 	    */
 	    HText_appendCharacter(me->text, (char)(*p & 0x7f));
+#ifdef NOTUSED_FOTEMODS
+	    /*
+	    **  If we do not have the "7-bit approximations" as our
+	    **  output character set (in which case we did it already)
+	    **  seek a translation for that.  Otherwise, or if the
+	    **  translation fails, use UHHH notation. - FM
+	    */
+	} else if (chk &&
+		   (chk = (!HTPassEightBitRaw &&
+			   (me->htext_char_set !=
+			    UCGetLYhndl_byMIME("us-ascii")))) &&
+		   (uck = UCTransUniChar(code,
+					 UCGetLYhndl_byMIME("us-ascii")))
+				      >= 32 && uck < 127) {
+		/*
+		**  Got an ASCII character (yippey). - FM
+		*/
+	    c = ((char)(uck & 0xff));
+	    HText_appendCharacter(me->text, c);
+	} else if ((chk && uck == -4) &&
+		       (uck = UCTransUniCharStr(replace_buf,
+						60, code,
+						UCGetLYhndl_byMIME("us-ascii"),
+						0) >= 0)) {
+		/*
+		**  Got a repacement string (yippey). - FM
+		*/
+	    HText_appendText(me->text, replace_buf);
+	} else if (code == 8204 || code == 8205) {
+	    /*
+	    **  Ignore 8204 (zwnj) or 8205 (zwj), if we get to here. - FM
+	    */
+	    if (TRACE) {
+		fprintf(stderr,
+			"HTPlain_write: Ignoring '%ld'.\n", code);
+	    }
+	} else if (code == 8206 || code == 8207) {
+	    /*
+	    **  Ignore 8206 (lrm) or 8207 (rlm), if we get to here. - FM
+	    */
+	    if (TRACE) {
+		fprintf(stderr,
+			"HTPlain_write: Ignoring '%ld'.\n", code);
+	    }
+#endif /* NOTUSED_FOTEMODS */
 	} else if (me->T.trans_from_uni && code > 255) {
 	    if (PASSHI8BIT && PASSHICTRL && LYRawMode &&
 		(unsigned char)*p >= LYlowest_eightbit[me->htext_char_set]) {

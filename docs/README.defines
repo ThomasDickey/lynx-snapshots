@@ -1,6 +1,4 @@
-[ If README.configure goes away, "(see README.configure)" has to change ]
-
-A place to list preprocessor macros (symbols) which are tested in the
+This file lists preprocessor macros (symbols) which are tested in the
 code (typically with ifdef).
 
 Does not include
@@ -54,25 +52,25 @@ Network related, specific protocols
 
 Related to DirEd code - probably one usable for UNIX or similar
 ---------------------------------------------------------------
-# -DDIRED_SUPPORT  (see README.configure)
-# -DOK_GZIP        (see README.configure)
-# -DOK_OVERRIDE    (see README.configure)
-# -DOK_PERMIT      (see README.configure)
-# -DOK_TAR         (see README.configure)
-# -DOK_UUDECODE    (see README.configure)
-# -DOK_ZIP         (see README.configure)
-# -DARCHIVE_ONLY   (see README.configure)
-# -DNO_CHANGE_EXECUTE_PERMS (see README.configure)
+# -DDIRED_SUPPORT  (see INSTALLATION, Section II-1c)
+# -DOK_GZIP        (see INSTALLATION, Section II-1c)
+# -DOK_OVERRIDE    (see INSTALLATION, Section II-1c)
+# -DOK_PERMIT      (see INSTALLATION, Section II-1c)
+# -DOK_TAR         (see INSTALLATION, Section II-1c)
+# -DOK_UUDECODE    (see INSTALLATION, Section II-1c)
+# -DOK_ZIP         (see INSTALLATION, Section II-1c)
+# -DARCHIVE_ONLY   (see INSTALLATION, Section II-1c)
+# -DNO_CHANGE_EXECUTE_PERMS (see INSTALLATION, Section II-1c)
 
 Related to formatting of local directory listings
 -------------------------------------------------
-# -DLONG_LIST      (see README.configure)
-# -DNO_PARENT_DIR_REFERENCE (see README.configure)
+# -DLONG_LIST      (see INSTALLATION, Section II-1c)
+# -DNO_PARENT_DIR_REFERENCE (see INSTALLATION, Section II-1c)
 
 Related to screen display
 -------------------------
 Using curses or ncurses library:
-# -DNCURSES        (see README.configure)
+# -DNCURSES        (see INSTALLATION, Section II-1c)
 # -DFANCY_CURSES   whether curses lib supports more than very basic stuff
                    for UNIX handled by ./configure, for VMS defined in code
 # -DNO_KEYPAD (old) or HAVE_KEYPAD (new)   whether curses lib uses keypad().
@@ -84,10 +82,11 @@ Using curses or ncurses library:
 # -DNO_SIZECHANGE (old) or HAVE_SIZECHANGE (new) whether using code to detect
                    new size after size changes of the terminal (window).
                    for UNIX handled by ./configure, may be set in HTUtils.h
-# -DNO_SIZECHANGEHACK  disable hack for size increase handling.
+# -DUSE_SIZECHANGEHACK  enable hack to handle increasing the window size
+			above window size at startup
 
 Using slang library:
-# -DUSE_SLANG      (see README.configure)
+# -DUSE_SLANG      (see INSTALLATION, Section II-1c)
 # -DSLANG_MBCS_HACK prevent cutoff lines when using UTF8 console (slang only)
 Both:
 # -DREVERSE_CLEAR_SCREEN_PROBLEM
@@ -96,17 +95,17 @@ Both:
 
 Related to *experimental* (unsupported) character style code
 ------------------------------------------------------------
-# -DUSE_COLOR_STYLE (see README.configure) probably needs -DNCURSES
-# -DUSE_HASH       (see README.configure)  probably needs the above
-# -DLINKEDSTYLES   (see README.configure)  probably needs the above
+# -DUSE_COLOR_STYLE (see INSTALLATION, Section II-1c) probably needs -DNCURSES
+# -DUSE_HASH       (see INSTALLATION, Section II-1c)  probably needs the above
+# -DLINKEDSTYLES   (see INSTALLATION, Section II-1c)  probably needs the above
 
 Other
 -----
 # -DDONT_TRACK_INTERNAL_LINKS - Handle following links to same doc differently.
-# -DEXP_CHARTRANS  (see README.configure - currently needed, WILL GO AWAY)
+# -DEXP_CHARTRANS  (see INSTALLATION, Section II-1c - currently needed, WILL GO AWAY)
 # -DEXP_CHARTRANS_AUTOSWITCH also let lynx switch term mode(Linux console only)
 # -DIGNORE_CTRL_C  Define if Control-C shouldn't exit lynx.
-# -DLY_FIND_LEAKS  (see README.configure)
+# -DLY_FIND_LEAKS  (see INSTALLATION, Section II-1c)
 # -DNO_CPU_LIMIT   Disables Max CPU timeout (includes CLOCKS_PER_SECOND)
 # -DNSL_FORK       For fork-based name server lookups that can be 'z'apped.
 # -DSYSLOG_REQUESTED_URLS

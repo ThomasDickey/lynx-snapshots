@@ -160,10 +160,12 @@ extern char *personal_mail_address;
 /*	Module-Wide Variables
 **	---------------------
 */
-PRIVATE connection * connections = 0;	/* Linked list of connections */
-PRIVATE char response_text[LINE_LENGTH+1];/* Last response from NewsHost */
-PRIVATE connection * control = NULL;		/* Current connection */
+PRIVATE connection * connections = NULL;/* Linked list of connections */
+PRIVATE char response_text[LINE_LENGTH+1];/* Last response from ftp host */
+PRIVATE connection * control = NULL;	/* Current connection */
 PRIVATE int data_soc = -1;		/* Socket for data transfer =invalid */
+PRIVATE char *user_entered_password = NULL;
+PRIVATE char *last_username_and_host = NULL;
 
 #define GENERIC_SERVER	   0
 #define MACHTEN_SERVER 	   1
@@ -207,7 +209,28 @@ PRIVATE char data_buffer[DATA_BUFFER_SIZE];		/* Input data buffer */
 PRIVATE char * data_read_pointer;
 PRIVATE char * data_write_pointer;
 #define NEXT_DATA_CHAR next_data_char()
+PRIVATE int close_connection PARAMS((
+	connection *	con));
 
+
+PRIVATE void cleanup_ftp NOARGS
+{
+    if (control) {
+	if (control->socket != -1)
+	    close_connection(control);
+	FREE(control);
+    }
+}
+
+/*
+**  This function frees module globals. - FM
+*/
+PRIVATE void free_FTPGlobals NOARGS
+{
+    FREE(user_entered_password);
+    FREE(last_username_and_host);
+    cleanup_ftp();
+}
 
 /* PUBLIC						HTMake_VMS_name()
 **		CONVERTS WWW name into a VMS name
@@ -340,15 +363,6 @@ PRIVATE int close_connection ARGS1(
 	} /*if */
     } /* for */
     return -1;		/* very strange -- was not on list. */
-}
-
-PRIVATE void cleanup_ftp NOARGS
-{
-    if (control) {
-	if (control->socket != -1)
-	    close_connection(control);
-	FREE(control);
-    }
 }
 
 PRIVATE char *help_message_buffer = NULL;  /* global :( */
@@ -617,18 +631,24 @@ PRIVATE int get_connection ARGS2(
     int status;
     char * command;
     connection * con;
-    char * username=NULL;
-    char * password=NULL;
-    static char *user_entered_password=NULL;
-    static char *last_username_and_host=NULL;
+    char * username = NULL;
+    char * password = NULL;
     static BOOLEAN firstuse = TRUE;
 
     if (!arg) return -1;		/* Bad if no name sepcified	*/
     if (!*arg) return -1;		/* Bad if name had zero length	*/
 
+    if (firstuse) {
+	/*
+	**  Set up freeing at exit. - FM
+	*/
+	atexit(free_FTPGlobals);
+	firstuse = FALSE;
+    }
+
     if (control) {
 	/*
-	**  Reuse this object - kw
+	**  Reuse this object - KW
 	*/
 	if (control->socket != -1)
 	    NETCLOSE(control->socket);
@@ -640,10 +660,6 @@ PRIVATE int get_connection ARGS2(
 	con = (connection *)calloc(1, sizeof(connection));
 	if (con == NULL)
 	    outofmem(__FILE__, "get_connection");
-	if (firstuse) {
-	    atexit(cleanup_ftp);
-	    firstuse = FALSE;
-	}
     }
     con->socket = -1;
 
@@ -666,18 +682,20 @@ PRIVATE int get_connection ARGS2(
 	    if (*username)
 	        HTUnEscape(username);
 
-	    /* if the password doesn't exist then we are going to have
-	     * to ask the user for it.  The only problem is that we
-	     * don't want to ask for it every time, so we will store
-	     * away in a primitive fashion.
+	    /*
+	     *  If the password doesn't exist then we are going to have
+	     *  to ask the user for it.  The only problem is that we
+	     *  don't want to ask for it every time, so we will store
+	     *  away in a primitive fashion.
 	     */
 	    if (!password) {
 		char tmp[256];
 
 		sprintf(tmp, "%s@%s", username, p1);
-		/* if the user@host is not equal to the last time through
-		 * or user_entered_password has no data then we need
-		 * to ask the user for the password
+		/*
+		 *  If the user@host is not equal to the last time through
+		 *  or user_entered_password has no data then we need
+		 *  to ask the user for the password.
 		 */
 		if (!last_username_and_host ||
 		    strcmp(tmp, last_username_and_host) ||
@@ -732,9 +750,10 @@ PRIVATE int get_connection ARGS2(
       return status;                    /* Bad return */
     }
 
-    if (TRACE) 
+    if (TRACE) {
  	fprintf(stderr, "FTP connected, socket %d  control %ld\n",
 			con->socket, (long)con);
+    }
     control = con;		/* Current control connection */
 
     /* Initialise buffering for control connection */
@@ -2001,8 +2020,10 @@ PRIVATE EntryInfo * parse_dir_entry ARGS2(
             len = strlen(entry);
 	    if (*first) {
 		if (!strcmp(entry, "can not access directory .")) {
-		    /* don't reset *first, nothing real will follow - kw */
-		    entry_info->display=FALSE;
+		    /*
+		     *  Don't reset *first, nothing real will follow. - KW
+		     */
+		    entry_info->display = FALSE;
 		    return(entry_info);
 		}
 	        *first = FALSE;
@@ -2527,10 +2548,10 @@ AgainForMultiNet:
 
 	    entry_info = parse_dir_entry(chunk->data, &first);
 	    if (entry_info->display) {
-		 if (TRACE)
-		     fprintf(stderr, "Adding file to BTree: %s\n",
-		     		     entry_info->filename);
-	         HTBTree_add(bt, (EntryInfo *)entry_info);
+		if (TRACE)
+		    fprintf(stderr, "Adding file to BTree: %s\n",
+		     		    entry_info->filename);
+	        HTBTree_add(bt, (EntryInfo *)entry_info);
 	    } else {
 		FREE(entry_info);
 	    }
@@ -3367,3 +3388,23 @@ listen:
 	return HT_LOADED;
     }       
 } /* open_file_read */
+
+/*
+**  This function frees any user entered password, so that
+**  it must be entered again for a future request. - FM
+*/
+PUBLIC void HTClearFTPPassword NOARGS
+{
+    /*
+    **  Need code to check cached documents from
+    **  non-anonymous ftp accounts and do something
+    **  to ensure that they no longer can be accessed
+    **  without a new retrieval. - FM
+    */
+
+    /*
+    **  Now free the current user entered password,
+    **  if any. - FM
+    */
+    FREE(user_entered_password);
+}

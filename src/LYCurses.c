@@ -236,12 +236,16 @@ PUBLIC void LYbox ARGS2(
      *  specifiy our own ASCII characters for the corners and call
      *  wborder() instead of box(). - kw
      */
+#ifdef FANCY_CURSES
     if (!boxvert || !boxhori)
 	box(win, boxvert, boxhori);
     else if (boxvert == '*' || boxhori == '*')
 	wborder(win, boxvert, boxvert, boxhori, boxhori, '*', '*', '*', '*');
     else
 	wborder(win, boxvert, boxvert, boxhori, boxhori, '/', '\\', '\\', '/');
+#else
+    box(win, boxvert, boxhori);
+#endif
 #ifdef CSS
     if (formfield)
 	wcurses_css(win, "frame", ABS_OFF);
@@ -989,7 +993,7 @@ PUBLIC BOOLEAN setup ARGS1(
 {
     static char term_putenv[120];
     char buffer[120];
-#if !defined(NO_SIZECHANGEHACK)
+#if defined(USE_SIZECHANGEHACK)
 #if defined(HAVE_SIZECHANGE) && !defined(USE_SLANG)
 /*
  *  Hack to deal with a problem in sysV curses, that screen can't be
@@ -1009,7 +1013,7 @@ PUBLIC BOOLEAN setup ARGS1(
 	(void) putenv(cols_putenv);
     }
 #endif /* !NO_SIZECHANGE && !USE_SLANG */
-#endif /* !NO_SIZECHANGEHACK */
+#endif /* USE_SIZECHANGEHACK */
 
    /*
     *  If the display was not set by a command line option then
@@ -1056,7 +1060,7 @@ PUBLIC BOOLEAN setup ARGS1(
     }
 #endif /* HAVE_TTYTYPE */
 
-#if defined(HAVE_SIZECHANGE) && !defined(USE_SLANG) && !defined(NO_SIZECHANGEHACK)
+#if defined(HAVE_SIZECHANGE) && !defined(USE_SLANG) && defined(USE_SIZECHANGEHACK)
     if (lines_putenv != NULL) {
 	/*
 	 *  Use SIGWINCH handler to set the true window size. - AJL && FM
@@ -1075,7 +1079,7 @@ PUBLIC BOOLEAN setup ARGS1(
 #else
     LYlines = LINES;
     LYcols = COLS;
-#endif /* !NO_SIZECHANGE && !USE_SLANG && !NO_SIZECHANGEHACK */
+#endif /* !NO_SIZECHANGE && !USE_SLANG && USE_SIZECHANGEHACK */
     if (LYlines <= 0)
 	LYlines = 24;
     if (LYcols <= 0)

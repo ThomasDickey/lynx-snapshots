@@ -123,7 +123,7 @@ LYK_FORM_UP,            0,        LYK_FORM_DOWN,    LYK_INLINE_TOGGLE,
 LYK_NOCACHE,            0,        LYK_INTERRUPT,    LYK_INLINE_TOGGLE,
 /* X */              /* Y */         /* Z */        /* [ */
 
-LYK_SOURCE,          LYK_HEAD,          0,             0,
+LYK_SOURCE,          LYK_HEAD,          0,          LYK_CLEAR_AUTH,
 /* \ */              /* ] */         /* ^ */        /* _ */
 
 LYK_MINIMAL,   LYK_ADD_BOOKMARK,  LYK_PREV_PAGE,    LYK_COMMENT,
@@ -462,6 +462,7 @@ PRIVATE struct rmap revmap[] = {
 { "RAW_TOGGLE",		"toggle raw 8-bit translations or CJK mode ON or OFF" },
 { "COOKIE_JAR",		"examine the Cookie Jar" },
 { "F_LINK_NUM",		"invoke the 'Follow link (or page) number:' prompt" },
+{ "CLEAR_AUTH",		"clear all authorization info for this session" },
 { "SWITCH_DTD",		"switch between two ways of parsing HTML" },
 #ifdef USE_EXTERNALS
 { "EXTERN",		"run external program with url" },

@@ -92,16 +92,17 @@ extern char override[];
 #define       LYK_RAW_TOGGLE    68
 #define       LYK_COOKIE_JAR    69
 #define       LYK_F_LINK_NUM    70
-#define       LYK_SWITCH_DTD    71
+#define       LYK_CLEAR_AUTH    71
+#define       LYK_SWITCH_DTD    72
 
 #ifdef USE_EXTERNALS
-#define       LYK_EXTERN        72
+#define       LYK_EXTERN        73
 #if defined(VMS) || defined(DIRED_SUPPORT)
-#define       LYK_DIRED_MENU    73
+#define       LYK_DIRED_MENU    74
 #endif /* VMS || DIRED_SUPPORT */
 #else  /* USE_EXTERNALS */
 #if defined(VMS) || defined(DIRED_SUPPORT)
-#define       LYK_DIRED_MENU    72
+#define       LYK_DIRED_MENU    73
 #endif /* VMS || DIRED_SUPPORT */
 #endif /* !defined(USE_EXTERNALS) */
 
@@ -115,9 +116,9 @@ extern char override[];
 #endif /* DIRED_SUPPORT */
 
 #ifdef NOT_USED
-#define       LYK_VERSION       80
-#define       LYK_FORM_UP       81
-#define       LYK_FORM_DOWN     82
+#define       LYK_VERSION       81
+#define       LYK_FORM_UP       82
+#define       LYK_FORM_DOWN     83
 #endif /* NOT_USED */
 
 #endif /* LYKEYMAP_H */

@@ -1124,6 +1124,15 @@ PUBLIC float HTFileValue ARGS1(
 **	1.	No code for non-unix systems.
 **	2.	Isn't there a quicker way?
 */
+
+#if defined(HAVE_CONFIG_H)
+
+#ifndef HAVE_GETGROUPS
+#define NO_GROUPS
+#endif
+
+#else
+
 #ifdef VMS
 #define NO_GROUPS
 #endif /* VMS */
@@ -1136,6 +1145,8 @@ PUBLIC float HTFileValue ARGS1(
 #ifdef NOUSERS
 #define NO_GROUPS
 #endif /* PCNFS */
+
+#endif	/* HAVE_CONFIG_H */
 
 PUBLIC BOOL HTEditable ARGS1(
 	CONST char *,	filename)

@@ -7,6 +7,60 @@ platforms see also README.win-386, for some changes for auto-configure and
 simple curses color see also README.configure).  Note that the 2.7 -> 2.7.1
 changes are included here. - KW]
 
+1997-11-23
+* integrate PHDM's patch. - TD
+* Check for existence of sys/wait.h. - PHDM
+* Do not include sys/stat.h twice. - PHDM
+* New autoconf-macros to check if a function is declared after including a
+  specific set of files. - PHDM
+* Declare strstr if it is not declared by string.h. - PHDM
+* Declare getgrgid and getgrnam if not declared by grp.h. - PHDM
+* Provide strstr and mktime implementations, and use them if needed. - PHDM
+* Always include sys/types.h in HTUtils.h. - PHDM
+* define NO_GROUPS if we do not have getgroups. - PHDM
+* define NEED_REMOVE also if test yields unknown. - PHDM
+* define mode_t if not done by system include files. - PHDM (phdm@macqel.be)
+* change CF_UNION_WAIT to use compile+link rather than compile, to ensure
+  that we pick up the wait-macros rather than an implied function, which
+  should fix configure problems on NeXT for Francisco A. Tomei Torres
+  <fatomei2@mail.unm.edu>. - TD
+* spelling nit from Larry Virden. - TD
+* add osf3.0 to special case compiler options using -g3 in place of
+  -O -g, from Harsh Kumar <harsh@krcl.ernet.in>. - TD
+* remove redundant "-c" option from $(installbin) in makefile.in, reported
+  by Michael Warner <warner@wsu.edu>, for OSF/1 4.0. - TD
+* if configure --srcdir is not used, comment-out rmdir's in "make distclean"
+  rule. - TD
+* modify recent erase/clear change so that it applies only to FANCY_CURSES,
+  since BSD curses does not otherwise clear the screen when restoring after
+  popup. - TD
+* modify change for boxes so this builds with BSD curses, which has no
+  wborder() function. - TD
+* reverse ifdef for NO_SIZECHANGEHACK to USE_SIZECHANGEHACK, which is
+  normally off, since this code did not work with BSD 4.4 curses, SVr4
+  curses, or ncurses 4.1 with xterm. (Will make a configure test if anyone
+  can identify a configuration that works). - TD.
+1997-11-21
+* Changed LYE_LINKN to LYE_LKCMD (still mapped by default to Ctrl-V; may
+  need to be entered twice for some systems) for invoking a prompt to
+  enter any Lynx keystroke command when in form text fields. - FM
+1997-11-20
+* Added an LYK_CLEAR_AUTH command, mapped to underscore ('_') by default,
+  which clears all authorization info for the current session.  This is
+  recommended for the situation when one leaves one's terminal but doesn't
+  want to end the Browser session, nor want others to be able to retrieve
+  protected documents with previously entered username and password info.
+  Note that we don't yet have a way to block access to any protected
+  documents which are still in cache. - FM
+1997-11-19
+* Tweak of HTTP.c to ensure closing of the connection when interrupted
+  ('z'apped) on the first socket read. - FM
+1997-11-18
+* Mods to use the explicit label "Bad HTML:" in trace messages corresponding
+  to BAD_HTML_USE_TRACE messages. - FM & KW
+* Tweak of the restored TABLE-in-PRE block handling to deal with the
+  case when it's encased in a CENTER or DIV with ALIGN="center". - FM
+* Changed docs/README.defines to refer to INSTALLATION file - NHE
 1997-11-17
 * Changed the default ASCII BOXVERT and BOXHORI definitions from '*' to
   to '|' and '-', and new function LYbox() for non-VMS (n)curses. - FM
@@ -47,24 +101,31 @@ changes are included here. - KW]
   available groups. - KW
 * Tweaks in code for highlighting search text in anchors, to better deal with
   terminals in UTF-8 mode. - KW
+* Mods to ignore anything past a '?' character when simplifying URL paths,
+  as is now more clearly specified in the Fielding URL draft.  Note that
+  we still assume a ';' is not in fact a parameter delimiter, or won't
+  have a value with characters that could be misinterpretted as relative
+  path specs. - FM
+* Increased the redirection limit to the original Lynx's value of 10,
+  because the HTTP/1.1 draft no longer will restrict it to 5, but instead
+  will leave it to the discretion of the browser (and I like 10, as a
+  reminder of the "good old days" :). - FM
 1997-11-15
-* Mods of the TagSoup parser to restore support for the TABLE-in-PRE-block
+* Mods of parsing in HTML.c to restore support for the TABLE-in-PRE-block
   HTML kludge described in http://ppewww.ph.gla.ac.uk/~flavell/tablejob.html,
   which stopped working in conjunction with the 1997-05-21 mods (see below)
   for treating TABLEs as DIVisions to support ALIGNment attributes in TABLE
   markup.  The PRE-in-TABLE-block HTML kludge was not affected by those mods
   but works only with the TagSoup parsing mode. - FM & KW
-* Added an LINKN command key in the line editor, mapped to Ctrl-V, for
-  invoking the F_LINK_NUM prompt when in form text fields.  Ctrl-V is
-  still a dead key under other circumstances in the line editor. - FM
 1997-11-12
 * Made handling of the 'x' in hexadecimal character references (&#xH;)
   case insensitive, as for the "alphabetic digits" (a-f, A-F). - FM
-* Added an LINKN command key in the line editor, mapped to Ctrl-V, for
+* Added a LINKN command key in the line editor, mapped to Ctrl-V, for
   invoking the F_LINK_NUM prompt when in form text fields.  Ctrl-V is
   still a dead key under other circumstances in the line editor. - FM
 * remove options --with-lss-file and --with-cfg-file, since the corresponding
-  files will always be installed under $(libdir), reported by Hynek Med. - TD
+  files will always be installed under $(libdir), reported by Nelson Henry
+  Eric. - TD
 * modify configure script and makefile templates to permit builds with the
   --srcdir option, noted by Philippe De Muyter. - TD
 1997-11-08
@@ -76,7 +137,7 @@ changes are included here. - KW]
 * Mods to handle "cp-#" charset names as synonyms for "cp#", and some
   cp# names as synonyms for "windows-#". FM & KW
 1997-11-07
-* Change of of LY_SLrefresh() in LYCurses.c as suggested by JED - FM
+* Change of LY_SLrefresh() in LYCurses.c as suggested by JED - FM
 * add logic to make install-directories as needed. - TD
 * remove --disable-char-trans option (ifdef's still remain). - TD
 * correct type used in first compile-test for union wait. - TD

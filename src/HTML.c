@@ -4436,7 +4436,7 @@ PRIVATE void HTML_start_element ARGS6(
 	     */
 	    if (!me->inFORM) {
 	        if (TRACE) {
-		    fprintf(stderr, "HTML: ***** BUTTON tag not within FORM element *****\n");
+		    fprintf(stderr, "Bad HTML: BUTTON tag not within FORM element *****\n");
 		} else if (!me->inBadHTML) {
 	            _statusline(BAD_HTML_USE_TRACE);
 		    me->inBadHTML = TRUE;
@@ -4691,7 +4691,7 @@ PRIVATE void HTML_start_element ARGS6(
 	     */
 	    if (!me->inFORM) {
 	        if (TRACE) {
-		    fprintf(stderr, "HTML: ***** INPUT tag not within FORM element *****\n");
+		    fprintf(stderr, "Bad HTML: INPUT tag not within FORM element *****\n");
 		} else if (!me->inBadHTML) {
 	            _statusline(BAD_HTML_USE_TRACE);
 		    me->inBadHTML = TRUE;
@@ -4710,7 +4710,8 @@ PRIVATE void HTML_start_element ARGS6(
 	     */
 	    if (me->inTEXTAREA) {
 	        if (TRACE) {
-		    fprintf(stderr, "HTML: ***** Missing TEXTAREA end tag. *****\n");
+		    fprintf(stderr,
+			    "Bad HTML: Missing TEXTAREA end tag. *****\n");
 		} else if (!me->inBadHTML) {
 		    _statusline(BAD_HTML_USE_TRACE);
 		    me->inBadHTML = TRUE;
@@ -5070,7 +5071,7 @@ PRIVATE void HTML_start_element ARGS6(
 	if (!me->inFORM) {
 	    if (TRACE) {
 		fprintf(stderr,
-			"HTML: ***** TEXTAREA start tag not within FORM element *****\n");
+			"Bad HTML: TEXTAREA start tag not within FORM element *****\n");
 	    } else if (!me->inBadHTML) {
 	        _statusline(BAD_HTML_USE_TRACE);
 		me->inBadHTML = TRUE;
@@ -5163,7 +5164,7 @@ PRIVATE void HTML_start_element ARGS6(
 	if (me->inSELECT) {
 	    if (TRACE) {
 		fprintf(stderr,
-		   "HTML: ***** SELECT start tag in SELECT element. Faking SELECT end tag. *****\n");
+		   "Bad HTML: SELECT start tag in SELECT element. Faking SELECT end tag. *****\n");
 	    } else if (!me->inBadHTML) {
 		_statusline(BAD_HTML_USE_TRACE);
 		me->inBadHTML = TRUE;
@@ -5190,7 +5191,7 @@ PRIVATE void HTML_start_element ARGS6(
 	    if (!me->inFORM) {
 	        if (TRACE) {
 		    fprintf(stderr,
-			    "HTML: ***** SELECT start tag not within FORM element *****\n");
+			    "Bad HTML: SELECT start tag not within FORM element *****\n");
 		} else if (!me->inBadHTML) {
 		    _statusline(BAD_HTML_USE_TRACE);
 		    me->inBadHTML = TRUE;
@@ -5213,7 +5214,7 @@ PRIVATE void HTML_start_element ARGS6(
 	     */
 	    if (me->inTEXTAREA) {
 	        if (TRACE) {
-		    fprintf(stderr, "HTML: ***** Missing TEXTAREA end tag *****\n");
+		    fprintf(stderr, "Bad HTML: Missing TEXTAREA end tag *****\n");
 		} else if (!me->inBadHTML) {
 		    _statusline(BAD_HTML_USE_TRACE);
 		    me->inBadHTML = TRUE;
@@ -5307,7 +5308,7 @@ PRIVATE void HTML_start_element ARGS6(
 	    if (!me->inSELECT) {
 	        if (TRACE) {
 		    fprintf(stderr,
-			    "HTML: ***** OPTION tag not within SELECT element *****\n");
+			    "Bad HTML: OPTION tag not within SELECT element *****\n");
 		} else if (!me->inBadHTML) {
 		    _statusline(BAD_HTML_USE_TRACE);
 		    me->inBadHTML = TRUE;
@@ -5563,9 +5564,9 @@ PRIVATE void HTML_start_element ARGS6(
 	    HTML_end_element(me, HTML_U, (char **)&include);
 	}
 	me->inTABLE = TRUE;
-	if (me->sp[0].tag_number == HTML_PRE) {
+	if (!strcmp(me->sp->style->name, "Preformatted")) {
 	    UPDATE_STYLE;
-	    LYCheckForID(me, present, value, (int)HTML_TABLE_ID);
+	    CHECK_ID(HTML_TABLE_ID);
 	    break;
 	}
 	if (me->Division_Level < (MAX_NESTING - 1)) {
@@ -5623,6 +5624,11 @@ PRIVATE void HTML_start_element ARGS6(
 	}
 	me->in_word = NO;
 
+	if (!strcmp(me->sp->style->name, "Preformatted")) {
+	    CHECK_ID(HTML_TR_ID);
+	    me->inP = FALSE;
+	    break;
+	}
 	if (LYoverride_default_alignment(me)) {
 	    me->sp->style->alignment = styles[me->sp[0].tag_number]->alignment;
 	} else if (me->List_Nesting_Level >= 0 ||
@@ -5952,7 +5958,7 @@ PRIVATE void HTML_end_element ARGS3(
      */
     if (me->inTEXTAREA && element_number != HTML_TEXTAREA)
         if (TRACE) {
-	    fprintf(stderr, "HTML: ***** Missing TEXTAREA end tag *****\n");
+	    fprintf(stderr, "Bad HTML: Missing TEXTAREA end tag *****\n");
 	} else if (!me->inBadHTML) {
 	    _statusline(BAD_HTML_USE_TRACE);
 	    me->inBadHTML = TRUE;
@@ -5970,7 +5976,7 @@ PRIVATE void HTML_end_element ARGS3(
 	if (me->inA || me->inSELECT || me->inTEXTAREA)
 	    if (TRACE) {
 	        fprintf(stderr,
-			"HTML: ***** %s%s%s%s%s not closed before HTML end tag\n",
+			"Bad HTML: %s%s%s%s%s not closed before HTML end tag *****\n",
 			me->inSELECT ? "SELECT" : "",
 			(me->inSELECT && me->inTEXTAREA) ? ", " : "",
 			me->inTEXTAREA ? "TEXTAREA" : "",
@@ -6086,7 +6092,7 @@ PRIVATE void HTML_end_element ARGS3(
 	if (me->inA || me->inSELECT || me->inTEXTAREA)
 	    if (TRACE) {
 	        fprintf(stderr,
-			"HTML: ***** %s%s%s%s%s not closed before BODY end tag *****\n",
+			"Bad HTML: %s%s%s%s%s not closed before BODY end tag *****\n",
 			me->inSELECT ? "SELECT" : "",
 			(me->inSELECT && me->inTEXTAREA) ? ", " : "",
 			me->inTEXTAREA ? "TEXTAREA" : "",
@@ -6542,7 +6548,7 @@ PRIVATE void HTML_end_element ARGS3(
 		 */
 		if (TRACE) {
 		    fprintf(stderr,
-      "HTML: ***** Unmatched OBJECT start and end tags. ***** Discarding content:\n%s\n",
+  "Bad HTML: Unmatched OBJECT start and end tags. ***** Discarding content:\n%s\n",
 			    me->object.data);
 		} else if (!me->inBadHTML) {
 		    _statusline(BAD_HTML_USE_TRACE);
@@ -6620,7 +6626,7 @@ PRIVATE void HTML_end_element ARGS3(
 		} else {
 		    if (TRACE) {
 			fprintf(stderr,
-	"HTML: ***** Unmatched OBJECT start and end tags. ***** Discarding content.\n");
+	"Bad HTML: Unmatched OBJECT start and end tags. ***** Discarding content.\n");
 			goto End_Object;
 		    } else if (!me->inBadHTML) {
 		        _statusline(BAD_HTML_USE_TRACE);
@@ -6824,7 +6830,7 @@ End_Object:
 	 */
 	if (!me->inFORM) {
 	    if (TRACE) {
-		fprintf(stderr, "HTML: ***** Unmatched FORM end tag *****\n");
+		fprintf(stderr, "Bad HTML: Unmatched FORM end tag *****\n");
 	    } else if (!me->inBadHTML) {
 	        _statusline(BAD_HTML_USE_TRACE);
 		me->inBadHTML = TRUE;
@@ -6846,7 +6852,7 @@ End_Object:
 	if (me->inSELECT) {
 	    if (TRACE) {
 		fprintf(stderr,
-		   "HTML: ***** Open SELECT at FORM end. Faking SELECT end tag. *****\n");
+		   "Bad HTML: Open SELECT at FORM end. Faking SELECT end tag. *****\n");
 	    } else if (!me->inBadHTML) {
 		_statusline(BAD_HTML_USE_TRACE);
 		me->inBadHTML = TRUE;
@@ -6909,7 +6915,7 @@ End_Object:
 	     */
 	    if (!me->inTEXTAREA) {
 	        if (TRACE) {
-		    fprintf(stderr, "HTML: ***** Unmatched TEXTAREA end tag *****\n");
+		    fprintf(stderr, "Bad HTML: Unmatched TEXTAREA end tag *****\n");
 		} else if (!me->inBadHTML) {
 		    _statusline(BAD_HTML_USE_TRACE);
 		    me->inBadHTML = TRUE;
@@ -7060,7 +7066,7 @@ End_Object:
 	     */
 	    if (!me->inSELECT) {
 	        if (TRACE) {
-		    fprintf(stderr, "HTML: ***** Unmatched SELECT end tag *****\n");
+		    fprintf(stderr, "Bad HTML: Unmatched SELECT end tag *****\n");
 		} else if (!me->inBadHTML) {
 		    _statusline(BAD_HTML_USE_TRACE);
 		    me->inBadHTML = TRUE;
@@ -7085,7 +7091,7 @@ End_Object:
 	    if (!me->inFORM) {
 	        if (TRACE) {
 		    fprintf(stderr,
-			    "HTML: ***** SELECT end tag not within FORM element *****\n");
+			    "Bad HTML: SELECT end tag not within FORM element *****\n");
 		} else if (!me->inBadHTML) {
 		    _statusline(BAD_HTML_USE_TRACE);
 		    me->inBadHTML = TRUE;
@@ -7175,7 +7181,7 @@ End_Object:
 
     case HTML_TABLE:
         me->inTABLE = FALSE;
-	if (me->sp[0].tag_number == HTML_PRE) {
+	if (!strcmp(me->sp->style->name, "Preformatted")) {
 	    break;
 	}
 	if (me->Division_Level >= 0)
@@ -7405,7 +7411,7 @@ PRIVATE void HTML_free ARGS1(HTStructured *, me)
 	     */
 	    if (TRACE) {
 		fprintf(stderr,
-			"HTML_free: ***** SELECT or OPTION not ended properly *****\n");
+			"Bad HTML: SELECT or OPTION not ended properly *****\n");
 	    } else if (!me->inBadHTML) {
 		_statusline(BAD_HTML_USE_TRACE);
 		me->inBadHTML = TRUE;
@@ -7417,7 +7423,7 @@ PRIVATE void HTML_free ARGS1(HTStructured *, me)
 	     *  markup meant to be shown somewhere. - kw
 	     */
 	    if (TRACE)
-		fprintf(stderr, "           ***** leftover option data: %s\n",
+		fprintf(stderr, "HTML_free: ***** leftover option data: %s\n",
 			me->option.data);
 	    HTML_put_string(me, me->option.data);
 	    HTChunkClear(&me->option);
@@ -7430,7 +7436,7 @@ PRIVATE void HTML_free ARGS1(HTStructured *, me)
 	     */
 	    if (TRACE) {
 		fprintf(stderr,
-			"HTML_free: ***** TEXTAREA not used properly *****\n");
+			"Bad HTML: TEXTAREA not used properly *****\n");
 	    } else if (!me->inBadHTML) {
 		_statusline(BAD_HTML_USE_TRACE);
 		me->inBadHTML = TRUE;
@@ -7442,7 +7448,7 @@ PRIVATE void HTML_free ARGS1(HTStructured *, me)
 	     *  markup meant to be shown somewhere. - kw
 	     */
 	    if (TRACE)
-		fprintf(stderr, "           ***** leftover textarea data: %s\n",
+		fprintf(stderr, "HTML_free: ***** leftover textarea data: %s\n",
 			me->textarea.data);
 	    HTML_put_string(me, me->textarea.data);
 	    HTChunkClear(&me->textarea);
@@ -7478,7 +7484,7 @@ PRIVATE void HTML_free ARGS1(HTStructured *, me)
 	 */
 	if (TRACE) {
 	    fprintf(stderr,
-		    "HTML_free: ***** SELECT or OPTION not ended properly *****\n");
+		    "Bad HTML: SELECT or OPTION not ended properly *****\n");
 	} else if (!me->inBadHTML) {
 	    _statusline(BAD_HTML_USE_TRACE);
 	    me->inBadHTML = TRUE;
@@ -7486,7 +7492,7 @@ PRIVATE void HTML_free ARGS1(HTStructured *, me)
 	}
 	if (TRACE) {
 	    HTChunkTerminate(&me->option);
-	    fprintf(stderr, "           ***** leftover option data: %s\n",
+	    fprintf(stderr, "HTML_free: ***** leftover option data: %s\n",
 		    me->option.data);
 	}
 	HTChunkClear(&me->option);
@@ -7499,7 +7505,7 @@ PRIVATE void HTML_free ARGS1(HTStructured *, me)
 	 */
 	if (TRACE) {
 	    fprintf(stderr,
-		    "HTML_free: ***** TEXTAREA not used properly *****\n");
+		    "Bad HTML: TEXTAREA not used properly *****\n");
 	} else if (!me->inBadHTML) {
 	    _statusline(BAD_HTML_USE_TRACE);
 	    me->inBadHTML = TRUE;
@@ -7507,7 +7513,7 @@ PRIVATE void HTML_free ARGS1(HTStructured *, me)
 	}
 	if (TRACE) {
 	    HTChunkTerminate(&me->textarea);
-	    fprintf(stderr, "           ***** leftover textarea data: %s\n",
+	    fprintf(stderr, "HTML_free: ***** leftover textarea data: %s\n",
 		    me->textarea.data);
 	}
 	HTChunkClear(&me->textarea);
@@ -7576,9 +7582,9 @@ PRIVATE void HTML_abort ARGS2(HTStructured *, me, HTError, e)
 	 */
 	if (TRACE) {
 	    fprintf(stderr,
-		    "HTML_abort: ***** SELECT or OPTION not ended properly *****\n");
+		    "HTML_abort: SELECT or OPTION not ended properly *****\n");
 	    HTChunkTerminate(&me->option);
-	    fprintf(stderr, "            ***** leftover option data: %s\n",
+	    fprintf(stderr, "HTML_abort: ***** leftover option data: %s\n",
 		    me->option.data);
 	}
 	HTChunkClear(&me->option);
@@ -7591,9 +7597,9 @@ PRIVATE void HTML_abort ARGS2(HTStructured *, me, HTError, e)
 	 */
 	if (TRACE) {
 	    fprintf(stderr,
-		    "HTML_abort: ***** TEXTAREA not used properly *****\n");
+		    "HTML_abort: TEXTAREA not used properly *****\n");
 	    HTChunkTerminate(&me->textarea);
-	    fprintf(stderr, "            ***** leftover textarea data: %s\n",
+	    fprintf(stderr, "HTML_abort: ***** leftover textarea data: %s\n",
 		    me->textarea.data);
 	}
 	HTChunkClear(&me->textarea);

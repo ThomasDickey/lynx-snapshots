@@ -1,7 +1,41 @@
+97-11-23
+--------
+* Check for existence of sys/wait.h. - PHDM
+* Do not include sys/stat.h twice. - PHDM
+* New autoconf-macros to check if a function is declared after including a
+  specific set of files. - PHDM
+* Declare strstr if it is not declared by string.h. - PHDM
+* Declare getgrgid and getgrnam if not declared by grp.h. - PHDM
+* Provide strstr and mktime implementations, and use them if needed. - PHDM
+* Always include sys/types.h in HTUtils.h. - PHDM
+* define NO_GROUPS if we do not have getgroups. - PHDM
+* define NEED_REMOVE also if test yields unknown. - PHDM
+* define mode_t if not done by system include files. - PHDM (phdm@macqel.be)
+* change CF_UNION_WAIT to use compile+link rather than compile, to ensure
+  that we pick up the wait-macros rather than an implied function, which
+  should fix configure problems on NeXT for Francisco A. Tomei Torres
+  <fatomei2@mail.unm.edu>. - TD
+* spelling nit from Larry Virden. - TD
+* add osf3.0 to special case compiler options using -g3 in place of
+  -O -g, from Harsh Kumar <harsh@krcl.ernet.in>. - TD
+* remove redundant "-c" option from $(installbin) in makefile.in, reported
+  by Michael Warner <warner@wsu.edu>, for OSF/1 4.0. - TD
+* if configure --srcdir is not used, comment-out rmdir's in "make distclean"
+  rule. - TD
+* modify recent erase/clear change so that it applies only to FANCY_CURSES,
+  since BSD curses does not otherwise clear the screen when restoring after
+  popup. - TD
+* modify change for boxes so this builds with BSD curses, which has no
+  wborder() function. - TD
+* reverse ifdef for NO_SIZECHANGEHACK to USE_SIZECHANGEHACK, which is
+  normally off, since this code did not work with BSD 4.4 curses, SVr4
+  curses, or ncurses 4.1 with xterm. (Will make a configure test if anyone
+  can identify a configuration that works). - TD.
 97-11-12
 --------
 * remove options --with-lss-file and --with-cfg-file, since the corresponding
-  files will always be installed under $(libdir), reported by Hynek Med. - TD
+  files will always be installed under $(libdir), reported by Nelson Henry
+  Eric. - TD
 * modify configure script and makefile templates to permit builds with the
   --srcdir option, noted by Philippe De Muyter. - TD
 97-11-07

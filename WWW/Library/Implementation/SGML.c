@@ -44,7 +44,8 @@ PUBLIC BOOL HTPassEightBitNum = FALSE;	/* Pass ^ numeric entities raw.	*/
 PUBLIC BOOL HTPassHighCtrlRaw = FALSE;	/* Pass 127-160,173,&#127; raw.	*/
 PUBLIC BOOL HTPassHighCtrlNum = FALSE;	/* Pass &#128;-&#159; raw.	*/
 
-extern UCode_t HTMLGetEntityUCValue PARAMS((CONST char *name));
+extern UCode_t HTMLGetEntityUCValue PARAMS((
+	CONST char *	name));
 extern int LYlowest_eightbit[];
 
 /*	The State (context) of the parser
@@ -323,23 +324,6 @@ PRIVATE BOOL put_special_unicodes ARGS2(
 	**  Use ASCII hyphen for ndash/endash or mdash/emdash.
 	*/
 	PUTC('-');
-#ifdef NOTUSED_FOTEMODS
-    } else if (code == 8204 || code == 8205) {
-	/*
-	**  Ignore zwnj or zwj, for now.  Note that zwnj may have
-	**  been handled as <WBR> by the calling function. - FM
-	*/
-	if (TRACE) {
-	    fprintf(stderr, "put_special_unicodes: Ignoring '%ld'.\n", code);
-	}
-    } else if (code == 8206 || code == 8207) {
-	/*
-	**  Ignore lrm or rlm, for now.
-	*/
-	if (TRACE) {
-	    fprintf(stderr, "put_special_unicodes: Ignoring '%ld'.\n", code);
-	}
-#endif /* NOTUSED_FOTEMODS */
     } else {
 	/*
 	**  Return NO if nothing done.
@@ -422,32 +406,6 @@ PRIVATE void handle_entity ARGS2(
 	FoundEntity = TRUE;
 	return;
     }
-
-    /*
-    **  Ignore zwnj (8204) and zwj (8205), for now.
-    **  Note that zwnj may have been handled as <WBR>
-    **  by the calling function. - FM
-    */
-    if (!strcmp(s, "zwnj") ||
-	!strcmp(s, "zwnj")) {
-	if (TRACE) {
-	    fprintf(stderr, "handle_entity: Ignoring '%s'.\n", s);
-	}
-	FoundEntity = TRUE;
-	return;
-    }
-
-    /*
-    **  Ignore lrm (8206), and rln (8207), for now. - FM
-    */
-    if (!strcmp(s, "lrm") ||
-	!strcmp(s, "rlm")) {
-	if (TRACE) {
-	    fprintf(stderr, "handle_entity: Ignoring '%s'.\n", s);
-	}
-	FoundEntity = TRUE;
-	return;
-    }
 #endif /* NOTUSED_FOTEMODS */
 
     /*
@@ -517,6 +475,33 @@ PRIVATE void handle_entity ARGS2(
 	    return;
 	}
     }
+#ifdef NOTUSED_FOTEMODS
+    /*
+    **  Ignore zwnj (8204) and zwj (8205), if we get to here.
+    **  Note that zwnj may have been handled as <WBR>
+    **  by the calling function. - FM
+    */
+    if (!strcmp(s, "zwnj") ||
+	!strcmp(s, "zwj")) {
+	if (TRACE) {
+	    fprintf(stderr, "handle_entity: Ignoring '%s'.\n", s);
+	}
+	FoundEntity = TRUE;
+	return;
+    }
+
+    /*
+    **  Ignore lrm (8206), and rlm (8207), if we get to here. - FM
+    */
+    if (!strcmp(s, "lrm") ||
+	!strcmp(s, "rlm")) {
+	if (TRACE) {
+	    fprintf(stderr, "handle_entity: Ignoring '%s'.\n", s);
+	}
+	FoundEntity = TRUE;
+	return;
+    }
+#endif /* NOTUSED_FOTEMODS */
 
     /*
     **  We haven't succeeded yet, so try the old LYCharSets
@@ -1770,6 +1755,133 @@ top1:
 	    HTChunkTerminate(string);
 	    if ((context->isHex ? sscanf(string->data, "%x", &value) :
 				  sscanf(string->data, "%d", &value)) == 1) {
+#ifdef NOTUSED_FOTEMODS
+		if ((code == 1) ||
+		    (code > 129 && code < 156)) {
+		    /*
+		    **  Assume these are MicroSoft code points,
+		    **  inflicted on us by FrontPage. - FM
+		    */
+		    switch (code) {
+			case 1:
+			    /*
+			    **  WHITE SMILING FACE
+			    */
+			    code = 0x263a;
+			    break;
+			case 130:
+			    /*
+			    **  SINGLE LOW-9 QUOTATION MARK (sbquo)
+			    */
+			    code = 0x201a;
+			    break;
+			case 132:
+			    /*
+			    **  DOUBLE LOW-9 QUOTATION MARK (bdquo)
+			    */
+			    code = 0x201e;
+			    break;
+			case 133:
+			    /*
+			    **  HORIZONTAL ELLIPSIS (hellip)
+			    */
+			    code = 0x2026;
+			    break;
+			case 134:
+			    /*
+			    **  DAGGER (dagger)
+			    */
+			    code = 0x2020;
+			    break;
+			case 135:
+			    /*
+			    **  DOUBLE DAGGER (Dagger)
+			    */
+			    code = 0x2021;
+			    break;
+			case 137:
+			    /*
+			    **  PER MILLE SIGN (permil)
+			    */
+			    code = 0x2030;
+			    break;
+			case 139:
+			    /*
+			    **  SINGLE LEFT-POINTING ANGLE QUOTATION MARK
+			    **  (lsaquo)
+			    */
+			    code = 0x2039;
+			    break;
+			case 145:
+			    /*
+			    **  LEFT SINGLE QUOTATION MARK (lsquo)
+			    */
+			    code = 0x2018;
+			    break;
+			case 146:
+			    /*
+			    **  RIGHT SINGLE QUOTATION MARK (rsquo)
+			    */
+			    code = 0x2019;
+			    break;
+			case 147:
+			    /*
+			    **  LEFT DOUBLE QUOTATION MARK (ldquo)
+			    */
+			    code = 0x201c;
+			    break;
+			case 148:
+			    /*
+			    **  RIGHT DOUBLE QUOTATION MARK (rdquo)
+			    */
+			    code = 0x201d;
+			    break;
+			case 149:
+			    /*
+			    **  BULLET (bull)
+			    */
+			    code = 0x2022;
+			    break;
+			case 150:
+			    /*
+			    **  EN DASH (ndash)
+			    */
+			    code = 0x2013;
+			    break;
+			case 151:
+			    /*
+			    **  EM DASH (mdash)
+			    */
+			    code = 0x2014;
+			    break;
+			case 152:
+			    /*
+			    **  SMALL TILDE (tilde)
+			    */
+			    code = 0x02dc;
+			    break;
+			case 153:
+			    /*
+			    **  TRADE MARK SIGN (trade)
+			    */
+			    code = 0x2122;
+			    break;
+			case 155:
+			    /*
+			    **  SINGLE RIGHT-POINTING ANGLE QUOTATION MARK
+			    **  (rsaquo)
+			    */
+			    code = 0x203a;
+			    break;
+			default:
+			    /*
+			    **  Do not attempt a conversion
+			    **  to valid Unicode values.
+			    */
+			    break;
+		    }
+		}
+#endif /* NOTUSED_FOTEMODS */
 		/*
 		**  Check for special values. - FM
 		*/
@@ -1911,6 +2023,25 @@ top1:
 		    */
 		    for (p = replace_buf; *p; p++)
 			PUTC(*p);
+		/*
+		**  Ignore 8205 (zwj),
+		**  8206 (lrm), and 8207 (rln), if we get to here. - FM
+		*/
+		} else if (code == 8205 ||
+			   code == 8206 ||
+			   code == 8207) {
+		    if (TRACE) {
+			fprintf(stderr,
+				"SGML_character: Ignoring '%s%s'.\n",
+				(context->isHex ? "&#x" : "&#"),
+				string->data);
+		    }
+		    string->size = 0;
+		    context->isHex = FALSE;
+		    context->state = S_text;
+		    if (c != ';')
+			goto top1;
+		    break;
 #endif /* NOTUSED_FOTEMODS */
 	        /*
 		**  Show the numeric entity if we get to here

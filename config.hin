@@ -10,6 +10,9 @@
 #undef COPY_PATH		/* CF_PATH_PROG(cp) */
 #undef CURS_PERFORMANCE		/* CF_CURS_PERFORMANCE */
 #undef DEBUG			/* configure --enable-debug */
+#undef DECL_GETGRGID
+#undef DECL_GETGRNAM
+#undef DECL_STRSTR
 #undef DECL_SYS_ERRLIST
 #undef DIRED_SUPPORT		/* AC_ARG_WITH(dired) */
 #undef EXP_CHARTRANS		/* AC_ARG_WITH(char-trans) */
@@ -21,6 +24,7 @@
 #undef HAVE_FCNTL_H		/* have <fcntl.h> */
 #undef HAVE_GETBKGD		/* defined by CF_COLOR_CURSES */
 #undef HAVE_GETCWD
+#undef HAVE_GETGROUPS
 #undef HAVE_KEYPAD
 #undef HAVE_LIMITS_H
 #undef HAVE_NCURSES_H		/* defined if we include <ncurses.h> */
@@ -33,6 +37,7 @@
 #undef HAVE_SYS_FILIO_H		/* have <sys/filio.h> */
 #undef HAVE_SYS_IOCTL_H		/* have <sys/ioctl.h> */
 #undef HAVE_SYS_NDIR_H		/* defined by AC_HEADER_DIRENT */
+#undef HAVE_SYS_WAIT_H		/* have <sys/wait.h> */
 #undef HAVE_TERMIOS_H		/* have <termios.h> */
 #undef HAVE_TTYTYPE
 #undef HAVE_TYPE_UNIONWAIT	/* CF_UNION_WAIT */
@@ -76,6 +81,7 @@
 #undef UNZIP_PATH		/* CF_PATH_PROG(unzip) */
 #undef USE_COLOR_STYLE		/* CF_ARG_ENABLE(color-style) */
 #undef USE_HASH			/* see USE_COLOR_STYLE */
+#undef USE_SIZECHANGEHACK	/* FIXME: find a case where this works! */
 #undef USE_SLANG		/* AC_ARG_WITH(screen=slang) */
 #undef USE_ZLIB			/* AC_ARG_WITH(zlib) */
 #undef UTMPX_FOR_UTMP		/* use <utmpx.h> since <utmp.h> not found */
@@ -85,6 +91,7 @@
 #undef ZCAT_PATH		/* CF_PATH_PROG(zcat) */
 #undef ZIP_PATH			/* CF_PATH_PROG(zip) */
 #undef const			/* defined by AC_C_CONST */
+#undef mode_t			/* defined by AC_TYPE_MODE_T */
 #undef vfork			/* defined by AC_FUNC_FORK */
 /* FIXME:ALLOW_USERS_TO_CHANGE_EXEC_WITHIN_OPTIONS */
 /* FIXME:BSDI */
@@ -103,5 +110,17 @@
 /* FIXME:SOCKS */
 /* FIXME:SVR4_BSDSELECT */
 /* FIXME:SYSLOG_REQUESTED_URLS */
+
+#ifdef DECL_GETGRGID
+extern struct group * getgrgid ();
+#endif
+
+#ifdef DECL_GETGRNAM
+extern struct group * getgrnam ();
+#endif
+
+#ifdef DECL_STRSTR
+extern char * strstr ();
+#endif
 
 #endif /* LYNX_CFG_H */

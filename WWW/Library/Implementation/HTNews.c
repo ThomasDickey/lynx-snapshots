@@ -953,15 +953,15 @@ PRIVATE int read_article NOARGS
 {
     char line[LINE_LENGTH+1];
     char *full_line = NULL;
-    char *subject=NULL;				/* Subject string	    */
-    char *from=NULL;				/* From string		    */
-    char *replyto=NULL;				/* Reply-to string	    */
-    char *date=NULL;				/* Date string		    */
-    char *organization=NULL;			/* Organization string	    */
-    char *references=NULL;			/* Hrefs for other articles */
-    char *newsgroups=NULL;			/* Newsgroups list	    */
-    char *followupto=NULL;			/* Followup list	    */
-    char *href=NULL;
+    char *subject = NULL;			/* Subject string	    */
+    char *from = NULL;				/* From string		    */
+    char *replyto = NULL;			/* Reply-to string	    */
+    char *date = NULL;				/* Date string		    */
+    char *organization = NULL;			/* Organization string	    */
+    char *references = NULL;			/* Hrefs for other articles */
+    char *newsgroups = NULL;			/* Newsgroups list	    */
+    char *followupto = NULL;			/* Followup list	    */
+    char *href = NULL;
     char *p = line;
     BOOL done = NO;
 
@@ -1009,8 +1009,11 @@ PRIVATE int read_article NOARGS
 		    StrAllocCopy(full_line, line);
 		}
 
-		if (full_line[0] == '.') {	
-		    if ((unsigned char)full_line[1] < ' ') {		/* End of article? */
+		if (full_line[0] == '.') {
+		    /*
+		    **  End of article?
+		    */
+		    if ((unsigned char)full_line[1] < ' ') {
 			done = YES;
 			break;
 		    }
@@ -1273,7 +1276,10 @@ PRIVATE int read_article NOARGS
 	    if (TRACE)
 	        fprintf(stderr, "B %s", line);
 	    if (line[0] == '.') {
-		if ((unsigned char)line[1] < ' ') {		/* End of article? */
+		/*
+		**  End of article?
+		*/
+		if ((unsigned char)line[1] < ' ') {
 		    done = YES;
 		    break;
 		} else {			/* Line starts with dot */
@@ -1506,7 +1512,7 @@ PRIVATE int read_list ARGS1(char *, arg)
 	    *p++ = ch;
 	}
 	if (ch == LF) {
-	    skip_rest_of_line = NO; /* done, reset flag */
+	    skip_rest_of_line = NO;	/* done, reset flag */
 	    *p = '\0';			/* Terminate the string */
 	    if (TRACE)
 	        fprintf(stderr, "B %s", line);
@@ -1709,7 +1715,10 @@ PRIVATE int read_group ARGS3(
 		    if (TRACE)
 		        fprintf(stderr, "X %s", line);
 		    if (line[0] == '.') {
-			if (line[1] < ' ') {	/* End of response? */
+			/*
+			**  End of response?
+			*/
+			if ((unsigned char)line[1] < ' ') {
 			    done = YES;
 			    break;
 			} else {		/* Line starts with dot */
@@ -1817,7 +1826,10 @@ PRIVATE int read_group ARGS3(
 			switch(line[0]) {
 
 			case '.':
-			    done = ((unsigned char)line[1] < ' ');  /* End of response? */
+			    /*
+			    **  End of response?
+			    */
+			    done = ((unsigned char)line[1] < ' ');
 			    break;
 
 			case 'S':
@@ -2776,6 +2788,29 @@ Send_NNTP_command:
 	FREE(postfile);
     }
     return HT_NOT_LOADED;
+}
+
+/*
+**  This function clears all authorization information by
+**  invoking the free_HTAAGlobals() function, which normally
+**  is invoked at exit.  It allows a browser command to do
+**  this at any time, for example, if the user is leaving
+**  the terminal for a period of time, but does not want
+**  to end the current session.  - FM
+*/
+PUBLIC void HTClearNNTPAuthInfo NOARGS
+{
+    /*
+    **  Need code to check cached documents and do
+    **  something to ensure that any protected
+    **  documents no longer can be accessed without
+    **  a new retrieval. - FM
+    */
+
+    /*
+    **  Now free all of the authorization info. - FM
+    */
+    free_NNTP_AuthInfo();
 }
 
 #ifdef GLOBALDEF_IS_MACRO

@@ -57,6 +57,11 @@ extern int HTFTPLoad PARAMS
   HTStream*             sink
 ));
 
+/*
+**  This function frees any user entered password, so that
+**  it must be entered again for a future request. - FM
+*/
+extern void HTClearFTPPassword NOPARAMS;
 
 /*
 

@@ -6,6 +6,8 @@
 #include "HTFTP.h"
 #include "HTFile.h"
 #include "HTTP.h"
+#include "HTAABrow.h"
+#include "HTNews.h"
 #include "LYCurses.h"
 #include "LYStyle.h"
 #include "LYGlobalDefs.h"
@@ -5319,6 +5321,25 @@ check_add_bookmark_to_self:
 			LYJumpFileURL = FALSE;
 		    }
 		}
+	    }
+	    break;
+
+	case LYK_CLEAR_AUTH:
+	    if (old_c != real_c) {
+		old_c = real_c;
+	        if (HTConfirm(CLEAR_ALL_AUTH_INFO)) {
+		    FREE(authentication_info[0]);
+		    FREE(authentication_info[1]);
+		    FREE(proxyauth_info[0]);
+		    FREE(proxyauth_info[1]);
+		    HTClearHTTPAuthInfo();
+		    HTClearNNTPAuthInfo();
+		    HTClearFTPPassword();
+		    _statusline(AUTH_INFO_CLEARED);
+		} else {
+		    _statusline(CANCELLED);
+		}
+		sleep(MessageSecs);
 	    }
 	    break;
 
