@@ -1003,6 +1003,7 @@ PRIVATE struct emap ekmap[] = {
   {"CHAR",	LYE_CHAR,	"Insert printable char"},
   {"ENTER",	LYE_ENTER,	"Input complete, return char/lynxkeycode"},
   {"TAB",	LYE_TAB,	"Input complete, return TAB"},
+  {"STOP",	LYE_STOP,	"Input deactivated"},
   {"ABORT",	LYE_ABORT,	"Input cancelled"},
 
   {"PASS",	LYE_FORM_PASS,  "In fields: input complete, or Do Nothing"},

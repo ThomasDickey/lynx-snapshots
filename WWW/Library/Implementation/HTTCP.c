@@ -44,7 +44,7 @@ PUBLIC int BSDselect PARAMS((
 	fd_set *	 readfds,
 	fd_set *	 writefds,
 	fd_set *	 exceptfds,
-	struct timeval * timeout));
+	struct timeval * select_timeout));
 #ifdef select
 #undef select
 #endif /* select */
@@ -462,11 +462,20 @@ PRIVATE void dump_hostent ARGS2(
 **  See also description of LYGetHostByName.
 */
 #ifdef NSL_FORK
+
+#define REHOSTENT_SIZE 128		/* not bigger than pipe buffer! */
+
+typedef struct {
+	struct hostent	h;
+	char		rest[REHOSTENT_SIZE];
+    } AlignedHOSTENT;
+
 PRIVATE size_t fill_rehostent ARGS3(
     char *,			rehostent,
     size_t,			rehostentsize,
     CONST struct hostent *,	phost)
 {
+    AlignedHOSTENT *data = (AlignedHOSTENT *)rehostent;
     int num_addrs = 0;
     int num_aliases = 0;
     char **pcnt;
@@ -526,8 +535,8 @@ PRIVATE size_t fill_rehostent ARGS3(
 	}
     }
 
-    ((struct hostent *)rehostent)->h_addrtype = phost->h_addrtype;
-    ((struct hostent *)rehostent)->h_length = phost->h_length;
+    data->h.h_addrtype = phost->h_addrtype;
+    data->h.h_length = phost->h_length;
     p_next_charptr = (char **)(rehostent + curlen);
     p_next_char = rehostent + curlen;
     if (phost->h_addr_list)
@@ -536,7 +545,7 @@ PRIVATE size_t fill_rehostent ARGS3(
 	p_next_char += (num_aliases+1) * sizeof(phost->h_aliases[0]);
 
     if (phost->h_addr_list) {
-	((struct hostent *)rehostent)->h_addr_list = p_next_charptr;
+	data->h.h_addr_list = p_next_charptr;
 	for (pcnt=phost->h_addr_list, i_addr = 0;
 	     i_addr < num_addrs;
 	     pcnt++, i_addr++) {
@@ -546,11 +555,11 @@ PRIVATE size_t fill_rehostent ARGS3(
 	}
 	*p_next_charptr++ = NULL;
     } else {
-	((struct hostent *)rehostent)->h_addr_list = NULL;
+	data->h.h_addr_list = NULL;
     }
 
     if (phost->h_name) {
-	((struct hostent *)rehostent)->h_name = p_next_char;
+	data->h.h_name = p_next_char;
 	if (name_len) {
 	    strcpy(p_next_char, phost->h_name);
 	    p_next_char += name_len + 1;
@@ -558,11 +567,11 @@ PRIVATE size_t fill_rehostent ARGS3(
 	    *p_next_char++ = '\0';
 	}
     } else {
-	((struct hostent *)rehostent)->h_name = NULL;
+	data->h.h_name = NULL;
     }
 
     if (phost->h_aliases) {
-	((struct hostent *)rehostent)->h_aliases = p_next_charptr;
+	data->h.h_aliases = p_next_charptr;
 	for (pcnt=phost->h_aliases, i_alias = 0;
 	     (*pcnt && i_alias < num_addrs);
 	     pcnt++, i_alias++) {
@@ -580,14 +589,12 @@ PRIVATE size_t fill_rehostent ARGS3(
 	}
 	*p_next_charptr++ = NULL;
     } else {
-	((struct hostent *)rehostent)->h_aliases = NULL;
+	data->h.h_aliases = NULL;
     }
     curlen = p_next_char - (char *)rehostent;
     return curlen;
 }
 #endif /* NSL_FORK */
-
-#define REHOSTENT_SIZE 128		/* not bigger than pipe buffer! */
 
 #ifndef HAVE_H_ERRNO
 #undef  h_errno
@@ -641,10 +648,7 @@ PUBLIC struct hostent * LYGetHostByName ARGS1(
 #endif
 #ifdef NSL_FORK
     /* for transfer of result between from child to parent: */
-    static struct {
-	struct hostent	h;
-	char		rest[REHOSTENT_SIZE];
-    } aligned_full_rehostent;
+    static AlignedHOSTENT aligned_full_rehostent;
     /*
      * We could define rehosten directly as a
      * static char rehostent[REHOSTENT_SIZE],
@@ -738,7 +742,7 @@ PUBLIC struct hostent * LYGetHostByName ARGS1(
 #endif
 	time_t start_time = time((time_t *)0);
 	fd_set readfds;
-	struct timeval timeout;
+	struct timeval one_second;
 	long dns_patience = 30; /* how many seconds will we wait for DNS? */
 	int child_exited = 0;
 
@@ -930,8 +934,8 @@ PUBLIC struct hostent * LYGetHostByName ARGS1(
 		}
 	    }
 
-	    timeout.tv_sec = 1;
-	    timeout.tv_usec = 0;
+	    one_second.tv_sec = 1;
+	    one_second.tv_usec = 0;
 	    FD_SET(pfd[0], &readfds);
 
 		/*
@@ -941,10 +945,10 @@ PUBLIC struct hostent * LYGetHostByName ARGS1(
 		*/
 #ifdef SOCKS
 	    if (socks_flag)
-		selret = Rselect(pfd[0] + 1, (void *)&readfds, NULL, NULL, &timeout);
+		selret = Rselect(pfd[0] + 1, (void *)&readfds, NULL, NULL, &one_second);
 	    else
 #endif /* SOCKS */
-		selret = select(pfd[0] + 1, (void *)&readfds, NULL, NULL, &timeout);
+		selret = select(pfd[0] + 1, (void *)&readfds, NULL, NULL, &one_second);
 
 	    if ((selret > 0) && FD_ISSET(pfd[0], &readfds)) {
 		/*
@@ -1173,24 +1177,14 @@ failed:
 **	*soc_in is filled in.  If no port is specified in str, that
 **		field is left unchanged in *soc_in.
 */
-#ifdef INET6
-PRIVATE int HTParseInet ARGS3(
-	SockA *,	soc_in,
-	CONST char *,	str,
-	int,		default_port)
-#else
+#ifndef INET6
 PRIVATE int HTParseInet ARGS2(
 	SockA *,	soc_in,
 	CONST char *,	str)
-#endif /* INET6 */
 {
     char *port;
-#ifdef INET6
-    char portstr[NI_MAXSERV];
-#else
     int dotcount_ip = 0;	/* for dotted decimal IP addr */
     char *strptr;
-#endif
 #ifndef _WINDOWS_NSL
     char *host = NULL;
 #endif /* _WINDOWS_NSL */
@@ -1212,20 +1206,6 @@ PRIVATE int HTParseInet ARGS2(
     /*
     **	Parse port number if present.
     */
-#ifdef INET6
-    if (!strrchr(host, ']'))
-	port = strrchr(host, ':');
-    else
-	port = strrchr(strrchr(host, ']'), ':');
-
-    if (port) {
-	*port++ = 0;		/* Chop off port */
-    }
-    else {
-	sprintf(portstr,"%d", default_port);
-	port = portstr;
-    }
-#else
     if ((port = strchr(host, ':')) != NULL) {
 	*port++ = 0;		/* Chop off port */
 	strptr = port;
@@ -1257,7 +1237,6 @@ PRIVATE int HTParseInet ARGS2(
 	    return -1;
 	}
     }
-#endif /* INET6 */
 
 #ifdef DECNET
     /*
@@ -1270,13 +1249,6 @@ PRIVATE int HTParseInet ARGS2(
 		soc_in->sdn_objnum, host));
 #else  /* parse Internet host: */
 
-#ifdef INET6
-    /* [host] case */
-    if (host[0] == '[' && host[strlen(host) - 1] == ']') {
-	host[strlen(host) - 1] = '\0';
-	host++;
-    }
-#else
     if (*host >= '0' && *host <= '9') {   /* Test for numeric node address: */
 	strptr = host;
 	while (*strptr) {
@@ -1325,7 +1297,6 @@ PRIVATE int HTParseInet ARGS2(
 	FREE(host);
 #endif /* _WINDOWS_NSL */
     } else
-#endif /* INET6 */
     {			    /* Alphanumeric node name: */
 
 #ifdef MVS	/* Outstanding problem with crash in MVS gethostbyname */
@@ -1348,25 +1319,10 @@ PRIVATE int HTParseInet ARGS2(
 	memcpy((void *)&soc_in->sin_addr, phost->h_addr, phost->h_length);
 #else /* !(__DJGPP__ && !WATT32) && !_WINDOWS_NSL */
 	{
-#ifdef INET6
-	    struct addrinfo hints, *res;
-	    int error;
-
-	    memset(&hints, 0, sizeof(hints));
-	    hints.ai_family = PF_UNSPEC;
-	    error = getaddrinfo(host, port, &hints, &res);
-
-	    if (error || !res) {
-		CTRACE((tfp, "HTParseInet: getaddrinfo(%s): %s\n", host,
-			gai_strerror(error)));
-		goto failed;
-	    }
-#else
 	    struct hostent  *phost;
 	    phost = LYGetHostByName(host);	/* See above */
 
 	    if (!phost) goto failed;
-#endif /* INET6 */
 #if defined(VMS) && defined(CMU_TCP)
 	    /*
 	    **  In LIBCMU, phost->h_length contains not the length of one address
@@ -1376,32 +1332,14 @@ PRIVATE int HTParseInet ARGS2(
 	    **  longer supported, and CMU users are encouraged to obtain and use
 	    **  SOCKETSHR/NETLIB instead. - S. Bjorndahl
 	    */
-#ifdef INET6
-	    if (res->ai_family == AF_INET) {
-		memcpy((void *)&soc_in->sin_addr,
-		    &((struct sockaddr_in *)res->ai_addr)->sin_addr, 4);
-	    } else {
-		CTRACE(tfp, "HTParseInet: unsupported address family %d\n",
-			res->ai_family);
-		goto failed;
-	    }
-#else
 	    memcpy((void *)&soc_in->sin_addr, phost->h_addr, 4);
-#endif /* INET6 */
-#else
-#ifdef INET6
-	    memcpy((void *)soc_in, res->ai_addr, res->ai_addrlen);
 #else
 	    if (!phost) goto failed;
 	    if (phost->h_length != sizeof soc_in->sin_addr) {
 		HTAlwaysAlert(host, gettext("Address length looks invalid"));
 	    }
 	    memcpy((void *)&soc_in->sin_addr, phost->h_addr, phost->h_length);
-#endif /* INET6 */
 #endif /* VMS && CMU_TCP */
-#ifdef INET6
-	    freeaddrinfo(res);
-#endif /* INET6 */
 	}
 #endif /* _WINDOWS_NSL */
 #endif /* __DJGPP__ && !WATT32 */
@@ -1411,14 +1349,12 @@ PRIVATE int HTParseInet ARGS2(
 
     }	/* Alphanumeric node name */
 
-#ifndef INET6
     CTRACE((tfp, "HTParseInet: Parsed address as port %d, IP address %d.%d.%d.%d\n",
 		(int)ntohs(soc_in->sin_port),
 		(int)*((unsigned char *)(&soc_in->sin_addr)+0),
 		(int)*((unsigned char *)(&soc_in->sin_addr)+1),
 		(int)*((unsigned char *)(&soc_in->sin_addr)+2),
 		(int)*((unsigned char *)(&soc_in->sin_addr)+3)));
-#endif /* !INET6 */
 #endif	/* Internet vs. Decnet */
 
     return 0;	/* OK */
@@ -1437,6 +1373,7 @@ failed:
 	return -1;
     }
 }
+#endif /* !INET6 */
 
 #ifdef INET6
 PRIVATE struct addrinfo *
@@ -1475,7 +1412,7 @@ HTGetAddrInfo ARGS2(
     if (error || !res) {
 	CTRACE((tfp, "HTGetAddrInfo: getaddrinfo(%s, %s): %s\n", host, port,
 		gai_strerror(error)));
-	return NULL;
+	res = NULL;
     }
 
     return res;
@@ -1765,7 +1702,7 @@ PUBLIC int HTDoConnect ARGS4(
 	 || SOCKET_ERRNO == EAGAIN
 #endif
 	 )) {
-	struct timeval timeout;
+	struct timeval select_timeout;
 	int ret;
 	int tries=0;
 
@@ -1789,21 +1726,21 @@ PUBLIC int HTDoConnect ARGS4(
 	    }
 
 #ifdef _WINDOWS_NSL
-	    timeout.tv_sec = connect_timeout;
-	    timeout.tv_usec = 0;
+	    select_timeout.tv_sec = connect_timeout;
+	    select_timeout.tv_usec = 0;
 #else
-	    timeout.tv_sec = 0;
-	    timeout.tv_usec = 100000;
+	    select_timeout.tv_sec = 0;
+	    select_timeout.tv_usec = 100000;
 #endif /* _WINDOWS_NSL */
 	    FD_ZERO(&writefds);
 	    FD_SET((unsigned) *s, &writefds);
 #ifdef SOCKS
 	    if (socks_flag)
 		ret = Rselect(FD_SETSIZE, NULL,
-			      (void *)&writefds, NULL, &timeout);
+			      (void *)&writefds, NULL, &select_timeout);
 	    else
 #endif /* SOCKS */
-	    ret = select(FD_SETSIZE, NULL, (void *)&writefds, NULL, &timeout);
+	    ret = select(FD_SETSIZE, NULL, (void *)&writefds, NULL, &select_timeout);
 
 #ifdef SOCKET_DEBUG_TRACE
 	    if (tries == 1) {
@@ -1995,7 +1932,7 @@ PUBLIC int HTDoRead ARGS3(
 {
     int ready, ret;
     fd_set readfds;
-    struct timeval timeout;
+    struct timeval select_timeout;
     int tries=0;
 #ifdef EXP_READPROGRESS
     int otries = 0;
@@ -2065,18 +2002,18 @@ PUBLIC int HTDoRead ARGS3(
 	**  interrupted.  Allow for this possibility. - JED
 	*/
 	do {
-	    timeout.tv_sec = 0;
-	    timeout.tv_usec = 100000;
+	    select_timeout.tv_sec = 0;
+	    select_timeout.tv_usec = 100000;
 	    FD_ZERO(&readfds);
 	    FD_SET((unsigned)fildes, &readfds);
 #ifdef SOCKS
 	    if (socks_flag)
 		ret = Rselect(FD_SETSIZE,
-			      (void *)&readfds, NULL, NULL, &timeout);
+			      (void *)&readfds, NULL, NULL, &select_timeout);
 	    else
 #endif /* SOCKS */
 		ret = select(FD_SETSIZE,
-			     (void *)&readfds, NULL, NULL, &timeout);
+			     (void *)&readfds, NULL, NULL, &select_timeout);
 	} while ((ret == -1) && (errno == EINTR));
 
 	if (ret < 0) {
@@ -2166,17 +2103,17 @@ PUBLIC int BSDselect ARGS5(
 	fd_set *,		readfds,
 	fd_set *,		writefds,
 	fd_set *,		exceptfds,
-	struct timeval *,	timeout)
+	struct timeval *,	select_timeout)
 {
     int rval,
     i;
 
 #ifdef SOCKS
     if (socks_flag)
-	rval = Rselect(nfds, readfds, writefds, exceptfds, timeout);
+	rval = Rselect(nfds, readfds, writefds, exceptfds, select_timeout);
     else
 #endif /* SOCKS */
-    rval = select(nfds, readfds, writefds, exceptfds, timeout);
+    rval = select(nfds, readfds, writefds, exceptfds, select_timeout);
 
     switch (rval) {
 	case -1:

@@ -2025,11 +2025,10 @@ PUBLIC int HTStat ARGS2(
      */
     if (access(temp_name, 0) == 0) {
 	if (stat(temp_name, data) == -1) data->st_mode = S_IFDIR;
-	return 0;
+	    result = 0;
     }
-    return -1;
 #else
-    return stat(temp_name, data);
+    result = stat(temp_name, data);
 #endif
 
     if (temp_name != filename) {

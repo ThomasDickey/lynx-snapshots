@@ -1311,21 +1311,21 @@ PRIVATE int get_listen_socket NOARGS
     }
 #endif /* INET6 */
 
-/*	Inform TCP that we will accept connections
-*/
-  {
-    int status;
+    /*	Inform TCP that we will accept connections
+    */
+    {
+	int status;
 #ifdef SOCKS
-    if (socks_flag)
-	status = Rlisten(master_socket, 1);
-    else
+	if (socks_flag)
+	    status = Rlisten(master_socket, 1);
+	else
 #endif /* SOCKS */
-    status = listen(master_socket, 1);
-    if (status < 0) {
-	master_socket = -1;
-	return HTInetStatus("listen");
+	    status = listen(master_socket, 1);
+	if (status < 0) {
+	    master_socket = -1;
+	    return HTInetStatus("listen");
+	}
     }
-  }
     CTRACE((tfp, "TCP: Master socket(), bind() and listen() all OK\n"));
     FD_SET(master_socket, &open_sockets);
     if ((master_socket+1) > num_sockets)
@@ -2998,18 +2998,21 @@ PUBLIC int HTFTPLoad ARGS4(
 	    CTRACE((tfp, "HTFTP: Port defined.\n"));
 #endif /* REPEAT_PORT */
 	} else {		/* Tell the server to be passive */
-	    char command[LINE_LENGTH+1];
+	    char *command = NULL;
 	    char *p;
 	    int h0, h1, h2, h3, p0, p1;	/* Parts of reply */
+#ifdef INET6
+	    char dst[LINE_LENGTH+1];
+#endif
 
 	    data_soc = status;
 
 #ifdef INET6
-	    status = send_cmd_1("EPSV");
+	    status = send_cmd_1(p = "EPSV");
 	    if (status < 0)	/* retry or Bad return */
 		continue;
 	    else if (status != 2) {
-		status = send_cmd_1("PASV");
+		status = send_cmd_1(p = "PASV");
 		if (status < 0)	/* retry or Bad return */
 		    continue;
 		else if (status != 2) {
@@ -3017,7 +3020,7 @@ PUBLIC int HTFTPLoad ARGS4(
 		}
 	    }
 
-	    if (strncmp(command, "PASV", 4) == 0) {
+	    if (strcmp(p, "PASV") == 0) {
 		for (p = response_text; *p && *p != ','; p++)
 		    ; /* null body */
 
@@ -3030,26 +3033,37 @@ PUBLIC int HTFTPLoad ARGS4(
 		    return -99;
 		}
 		passive_port = (p0<<8) + p1;
-	    } else if (strncmp(command, "EPSV", 4) == 0) {
+		snprintf(dst, sizeof(dst), "%d.%d.%d.%d", h0, h1, h2, h3);
+	    } else if (strcmp(p, "EPSV") == 0) {
 		unsigned char c0, c1, c2, c3;
+		struct sockaddr_storage ss;
+		int sslen;
+
 		/*
-		 * EPSV |||port|
+		 * EPSV bla (|||port|)
 		 */
 		for (p = response_text; *p && !isspace(*p); p++)
 		    ; /* null body */
-		for (p = response_text; *p && isspace(*p); p++)
+		for (/*nothing*/; *p && *p && *p != '('; p++)	/*)*/
 		    ; /* null body */
-		status = sscanf(p+1, "%c%c%c%d%c",
-		       &c0, &c1, &c2, &p0, &c3);
+		status = sscanf(p, "(%c%c%c%d%c)", &c0, &c1, &c2, &p0, &c3);
 		if (status != 5) {
 		    fprintf(tfp, "HTFTP: EPSV reply has invalid format!\n");
 		    return -99;
 		}
-		h0 = c0;
-		h1 = c1;
-		h2 = c2;
-		h3 = c3;
 		passive_port = p0;
+
+		sslen = sizeof(ss);
+		if (getpeername(control->socket, (struct sockaddr *)&ss,
+		    &sslen) < 0) {
+		    fprintf(tfp, "HTFTP: getpeername(control) failed\n");
+		    return -99;
+		}
+		if (getnameinfo((struct sockaddr *)&ss, sslen, dst,
+		    sizeof(dst), NULL, 0, NI_NUMERICHOST)) {
+		    fprintf(tfp, "HTFTP: getnameinfo failed\n");
+		    return -99;
+		}
 	    }
 #else
 	    status = send_cmd_1("PASV");
@@ -3077,9 +3091,14 @@ PUBLIC int HTFTPLoad ARGS4(
 
 	    /* Open connection for data:  */
 
-	    sprintf(command, "ftp://%d.%d.%d.%d:%d/",
+#ifdef INET6
+	    HTSprintf0(&command, "ftp://%s:%d/", dst, passive_port);
+#else
+	    HTSprintf0(&command, "ftp://%d.%d.%d.%d:%d/",
 		    h0, h1, h2, h3, passive_port);
+#endif
 	    status = HTDoConnect(command, "FTP data", passive_port, &data_soc);
+	    FREE(command);
 
 	    if (status < 0) {
 		(void) HTInetStatus(gettext("connect for data"));

@@ -473,6 +473,7 @@ PUBLIC BOOL force_empty_hrefless_a = FALSE;
 
 #ifdef TEXTFIELDS_MAY_NEED_ACTIVATION
 PUBLIC BOOL textfields_need_activation = FALSE;
+PUBLIC BOOL global_textfields_need_activation = FALSE;
 #endif
 
 PUBLIC BOOLEAN textfield_prompt_at_left_edge = FALSE;
@@ -1109,6 +1110,7 @@ PUBLIC int main ARGS2(
 	    FREE(temp);
 	}
     }
+
 #ifdef VMS
     LYLowerCase(lynx_temp_space);
     if (strchr(lynx_temp_space, '/') != NULL) {
@@ -1128,8 +1130,12 @@ PUBLIC int main ARGS2(
 #else
     LYAddPathSep(&lynx_temp_space);
 #endif /* VMS */
+
     if ((HTStat(lynx_temp_space, &dir_info) < 0
-	&& mkdir(lynx_temp_space, 0700) < 0)
+#ifdef UNIX
+	&& mkdir(lynx_temp_space, 0700) < 0
+#endif
+	)
      || !S_ISDIR(dir_info.st_mode)) {
 	fprintf(stderr, "%s: %s\n",
 		lynx_temp_space,
@@ -3612,7 +3618,7 @@ treated '>' as a co-terminator for double-quotes and tags"
    ),
 #ifdef TEXTFIELDS_MAY_NEED_ACTIVATION
    PARSE_SET(
-      "tna",		4|SET_ARG,		&textfields_need_activation,
+      "tna",		4|SET_ARG,		&global_textfields_need_activation,
       "turn on \"Textfields Need Activation\" mode"
    ),
 #endif
@@ -3811,7 +3817,7 @@ PRIVATE int arg_eqs_parse ARGS3(
 		    break;
 		case '-':
 #if OPTNAME_ALLOW_DASHES
-		    if (isalpha(b[1])) {
+		    if (isalpha(UCH(b[1]))) {
 			result = 0;
 			break;
 		    }

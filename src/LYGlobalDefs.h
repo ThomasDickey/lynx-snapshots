@@ -448,6 +448,7 @@ extern int connect_timeout;
 
 #ifdef TEXTFIELDS_MAY_NEED_ACTIVATION
 extern BOOL textfields_need_activation;
+extern BOOL global_textfields_need_activation;
 #ifdef INACTIVE_INPUT_STYLE_VH
 extern BOOL textinput_redrawn;
 #endif

@@ -33,7 +33,7 @@ PRIVATE int form_getstr PARAMS((
 
 /*
  * Returns an array of pointers to the given list
- */  
+ */
 PRIVATE char ** options_list ARGS1(
 	OptionType *,	opt_ptr)
 {
@@ -110,7 +110,7 @@ PUBLIC int change_form_link_ex ARGS8(
 
 	    if (form->disabled == YES) {
 		int dummy;
-		dummy = LYhandlePopupList(form->num_value, 
+		dummy = LYhandlePopupList(form->num_value,
 					  form_link->ly,
 					  form_link->lx,
 					  (CONST char **)my_data,
@@ -128,7 +128,7 @@ PUBLIC int change_form_link_ex ARGS8(
 		break;
 	    }
 	    OrigNumValue = form->num_value;
-	    form->num_value = LYhandlePopupList(form->num_value, 
+	    form->num_value = LYhandlePopupList(form->num_value,
 						form_link->ly,
 						form_link->lx,
 						(CONST char **)my_data,
@@ -661,7 +661,18 @@ again:
 	if (action == LYE_ABORT) {
 	    return(DO_NOTHING);
 	}
-	if (LKC_TO_LAC(keymap,ch) == LYK_REFRESH)
+	if (action == LYE_STOP) {
+#ifdef TEXTFIELDS_MAY_NEED_ACTIVATION
+	    textfields_need_activation = TRUE;
+	    break;
+#else
+#ifdef ENHANCED_LINEEDIT
+	    if (MyEdit.mark >= 0)
+		MyEdit.mark = -1 - MyEdit.strlen;	/* Disable. */
+#endif
+#endif
+	}
+	if (action == LYE_NOP && LKC_TO_LAC(keymap,ch) == LYK_REFRESH)
 	    break;
 #ifdef SH_EX
 /* ASATAKU emacskey hack 1997/08/26 (Tue) 09:19:23 */

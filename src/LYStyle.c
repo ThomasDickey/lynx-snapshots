@@ -1,6 +1,6 @@
 /* character level styles for Lynx
  * (c) 1996 Rob Partington -- donated to the Lyncei (if they want it :-)
- * @Id: LYStyle.c 1.41 Thu, 08 Feb 2001 18:50:00 -0800 dickey @
+ * @Id: LYStyle.c 1.42 Mon, 12 Feb 2001 17:33:21 -0800 dickey @
  */
 #include <HTUtils.h>
 #include <HTML.h>
@@ -49,20 +49,6 @@ PUBLIC BOOL force_current_tag_style = FALSE;
 PUBLIC char* forced_classname;
 PUBLIC BOOL force_classname;
 
-/* definitions for the mono attributes we can use */
-static int ncursesMono[7] = {
-    A_NORMAL, A_BOLD, A_REVERSE, A_UNDERLINE, A_STANDOUT, A_BLINK, A_DIM
-};
-
-/*
- * If these strings don't match the meanings of the above attributes,
- * you'll confuse the hell out of people, so make them the same. - RP
- */
-static char *Mono_Strings[7] =
-{
-    "normal", "bold", "reverse", "underline", "standout", "blink", "dim"
-};
-
 /* Remember the hash codes for common elements */
 PUBLIC int s_a			= NOSTYLE;
 PUBLIC int s_aedit		= NOSTYLE;
@@ -96,7 +82,6 @@ PRIVATE unsigned char our_pairs[2][MAX_COLOR][MAX_COLOR];
 /* icky parsing of the style options */
 PRIVATE void parse_attributes ARGS5(char*,mono,char*,fg,char*,bg,int,style,char*,element)
 {
-    int i;
     int mA = 0;
     short fA = default_fg;
     short bA = default_bg;
@@ -105,13 +90,7 @@ PRIVATE void parse_attributes ARGS5(char*,mono,char*,fg,char*,bg,int,style,char*
 
     CTRACE((tfp, "CSS(PA):style d=%d / h=%d, e=%s\n", style, newstyle,element));
 
-    for (i = 0; i < (int)TABLESIZE(Mono_Strings); i++)
-    {
-	if (!strcasecomp(Mono_Strings[i], mono))
-	{
-	    mA = ncursesMono[i];
-	}
-    }
+    mA = string_to_attr(mono);
     if (!mA) {
 	/*
 	 *  Not found directly yet, see whether we have a combination
@@ -122,13 +101,7 @@ PRIVATE void parse_attributes ARGS5(char*,mono,char*,fg,char*,bg,int,style,char*
 	char *cp = strchr(mono, csep);
 	while (cp) {
 	    *cp = '\0';
-	    for (i = 0; i < (int)TABLESIZE(Mono_Strings); i++)
-	    {
-		if (!strcasecomp(Mono_Strings[i], cp0))
-		{
-		    mA |= ncursesMono[i];
-		}
-	    }
+	    mA |= string_to_attr(cp0);
 	    if (!csep)
 		break;
 	    *cp = csep;
@@ -187,7 +160,7 @@ PRIVATE void parse_attributes ARGS5(char*,mono,char*,fg,char*,bg,int,style,char*
 	     && curPair < 255)
 		our_pairs[cA == A_BOLD][fA][bA] = curPair + 1;
 	}
-	CTRACE((tfp, "CSS(CURPAIR):%d\n", colorPairs));
+	CTRACE((tfp, "CSS(CURPAIR):%d\n", curPair));
 	if (style < DSTYLE_ELEMENTS)
 	    setStyle(style, COLOR_PAIR(curPair)|cA, cA, mA);
 	setHashStyle(newstyle, COLOR_PAIR(curPair)|cA, cA, mA, element);

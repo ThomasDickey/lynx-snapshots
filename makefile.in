@@ -249,7 +249,7 @@ distclean: clean
 @MSG_DIR_MAKE@	-rmdir intl
 @MSG_DIR_MAKE@	cd po && $(MAKE) $@
 @MSG_DIR_MAKE@	-rmdir po
-	-rm -f *~ *.bak *.sav
+	-rm -f *~ *.bak *.sav tags TAGS
 	-rm -f $(WWWINC)/makefile src/makefile src/chrtrans/makefile
 @SRCDIR_CLEAN@	-rmdir $(WWWINC) && rmdir WWW/Library && rmdir WWW
 @SRCDIR_CLEAN@	-rmdir src/chrtrans && rmdir src
@@ -449,3 +449,5 @@ uninstall-doc ::
 
 $(BINDIR) $(MANDIR) $(LIBDIR) $(HELPDIR) $(DOCDIR) :
 	$(srcdir)/mkdirs.sh $@
+etags:
+	etags -r "/\(PRIVATE\|PUBLIC\)[ \t]+\([a-zA-Z_][a-zA-Z_0-1]*[ \t*]+\)*\([a-zA-Z_][a-zA-Z_0-1]*\)[ \t]+\(ARGS[0-9]\|NOARGS\)/\3/" *.[ch] */*.[ch] */*/*.[ch] */*/*/*.[ch]

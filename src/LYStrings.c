@@ -170,13 +170,14 @@ PUBLIC int fancy_mouse ARGS3(
 
     getmouse(&event);
     if ((event.bstate & (BUTTON1_CLICKED
-		       | BUTTON1_DOUBLE_CLICKED
-		       | BUTTON1_TRIPLE_CLICKED))
-    && (event.x >= getbegx(win)
-    && (event.x < (getbegx(win) + getmaxx(win))))) {
+			      | BUTTON1_DOUBLE_CLICKED
+			      | BUTTON1_TRIPLE_CLICKED))) {
 	int mypos = event.y - getbegy(win);
 	int delta = mypos - row;
 
+	if ((event.x < getbegx(win) || event.x >= (getbegx(win) + getmaxx(win)))
+	    && !(event.bstate & (BUTTON_ALT | BUTTON_SHIFT | BUTTON_CTRL)))
+	    return LYK_QUIT;	/* User clicked outside, wants to quit? */
 	if (mypos+1 == getmaxy(win)) {
 	    /* At the decorative border: scroll forward */
 	    if (event.bstate & BUTTON1_TRIPLE_CLICKED)
@@ -4720,6 +4721,22 @@ again:
 	    inputline[0] = '\0';
 	    CTRACE((tfp, "LYgetstr LYE_ABORT\n"));
 	    return(-1);
+
+	case LYE_STOP:
+	    /*
+	     *	Deactivate.
+	     */
+	    CTRACE((tfp, "LYgetstr LYE_STOP\n"));
+#ifdef TEXTFIELDS_MAY_NEED_ACTIVATION
+	    textfields_need_activation = TRUE;
+	    return(-1);
+#else
+#ifdef ENHANCED_LINEEDIT
+	    if (Mark >= 0)
+		Mark = -1 - Mark;		/* Disable it */
+#endif
+#endif
+	    break;
 
 	case LYE_LKCMD:
 	    /*

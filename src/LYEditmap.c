@@ -32,7 +32,7 @@ PUBLIC int escape_bound = 0;      /* User wanted Escape to perform actions?  */
 /*
  * See LYStrings.h for the LYE definitions.
  */
-PRIVATE char DefaultEditBinding[KEYMAP_SIZE-1]={
+PRIVATE LYEditCode DefaultEditBinding[KEYMAP_SIZE-1]={
 
 LYE_NOP,        LYE_BOL,        LYE_DELPW,      LYE_ABORT,
 /* nul          ^A              ^B              ^C      */
@@ -278,7 +278,7 @@ LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
 /* Why the difference for tab? - kw */
 
 #ifdef EXP_ALT_BINDINGS
-PRIVATE char BetterEditBinding[KEYMAP_SIZE-1]={
+PRIVATE LYEditCode BetterEditBinding[KEYMAP_SIZE-1]={
 
 LYE_NOP,        LYE_BOL,        LYE_BACK,       LYE_ABORT,
 /* nul          ^A              ^B              ^C      */
@@ -536,7 +536,7 @@ LYE_NOP,        LYE_NOP,        LYE_NOP,        LYE_NOP,
              /*         M-bs,M-del=delete-prev-word, M-d=delete-next-word, */
              /*                M-b=BACKW,            M-f=FORWW,            */
 
-PRIVATE char BashlikeEditBinding[KEYMAP_SIZE-1]={
+PRIVATE LYEditCode BashlikeEditBinding[KEYMAP_SIZE-1]={
 
 LYE_SETMARK,    LYE_BOL,        LYE_BACK,       LYE_ABORT,
 /* nul          ^A              ^B              ^C      */
@@ -928,7 +928,7 @@ PRIVATE short *Mod3Binding = Mod1Binding;
  * Add the array name to LYLineEditors
  */
 
-PUBLIC char * LYLineEditors[]={
+PUBLIC LYEditCode * LYLineEditors[]={
         DefaultEditBinding,     /* You can't please everyone, so you ... DW */
 #ifdef EXP_ALT_BINDINGS
 	BetterEditBinding,      /* No, you certainly can't ... /ked 10/27/98*/
@@ -1062,7 +1062,7 @@ PUBLIC BOOL LYRemapEditBinding ARGS3(
 	    return FALSE;	/* cannot do, doesn't fit in a char - kw */
 	if (select_edi > 0) {
 	    if ((unsigned int)select_edi < TABLESIZE(LYLineEditors)) {
-		LYLineEditors[select_edi - 1][c] = (char) lec;
+		LYLineEditors[select_edi - 1][c] = (LYEditCode) lec;
 		success = TRUE;
 	    }
 	} else {
@@ -1070,7 +1070,7 @@ PUBLIC BOOL LYRemapEditBinding ARGS3(
 		success = TRUE;
 		if (select_edi < 0 && j + 1 + select_edi == 0)
 		    continue;
-		LYLineEditors[j][c] = (char) lec;
+		LYLineEditors[j][c] = (LYEditCode) lec;
 	    }
 	}
     }
@@ -1128,6 +1128,7 @@ PUBLIC int LYEditKeyForAction ARGS2(
 {
     int editaction, i, c;
     int mod1found = -1, mod2found = -1, mod3found = -1;
+
     if (pmodkey)
 	*pmodkey = -1;
     for (i = FIRST_I; i >= 0; i = NEXT_I(i,KEYMAP_SIZE-2)) {

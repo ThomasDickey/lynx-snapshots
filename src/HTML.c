@@ -153,8 +153,6 @@ PRIVATE char* MakeNewMapValue PARAMS((CONST char ** value, CONST char* mapstr));
 #define SET_SKIP_STACK(el_num) if (HTML_dtd.tags[el_num].contents != SGML_EMPTY) \
 						{ me->skip_stack++; }
 
-extern int hash_code PARAMS((char* i));
-
 PUBLIC void strtolower ARGS1(char*, i)
 {
     if (!i) return;
@@ -1203,11 +1201,12 @@ PRIVATE int HTML_start_element ARGS6(
 
 #if OPT_SCN && !OMIT_SCN_KEEPING	/* Can be done in other cases too... */
     if (!class_used && ElementNumber == HTML_INPUT) { /* For some other too? */
-	char *type = "", *oend = Style_className_end;
+	CONST char *type = "";
+	char *oend = Style_className_end;
 	int l, ohcode = hcode;
 
 	if (present && present[HTML_INPUT_TYPE] && value[HTML_INPUT_TYPE])
-	    type = (char *)value[HTML_INPUT_TYPE];
+	    type = value[HTML_INPUT_TYPE];
 	l = strlen(type);
 
 	*Style_className_end = '.';
@@ -5801,7 +5800,7 @@ PRIVATE int HTML_start_element ARGS6(
 	 *  table tracking code.  Cancel tracking, it would only make
 	 *  things worse. - kw
 	 */
-	HText_cancelStbl(me->text); /* Not needed with new TRST */
+	/* HText_cancelStbl(me->text); ** Not needed with new TRST */
 	if (me->inA) {
 	    SET_SKIP_STACK(HTML_A);
 	    HTML_end_element(me, HTML_A, include);

@@ -780,12 +780,12 @@ PUBLIC BOOL HTConfirmCookie ARGS4(
 		 && isalpha(ch)
 		 && (p = strrchr(prompt, L_PAREN)) != 0) {
 
-		    while (*p != R_PAREN && *p != 0 && isalpha(*s)) {
+		    while (*p != R_PAREN && *p != 0 && isalpha(UCH(*s))) {
 			if (*p == ch) {
 			    ch = *s;
 			    break;
 			} else {
-			    if (isalpha(*p) && (*p == TOUPPER(*p)))
+			    if (isalpha(UCH(*p)) && (*p == TOUPPER(*p)))
 				s++;
 			    p++;
 			}

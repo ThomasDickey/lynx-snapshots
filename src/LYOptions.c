@@ -3127,7 +3127,7 @@ PRIVATE char *NewSecureValue NOARGS
     FREE(secure_value);
     if ((secure_value = malloc(80)) != 0) {
 #if defined(RAND_MAX)
-	long key = my_rand();
+	long key = lynx_rand();
 #else
 	long key = (long)secure_value + (long)time(0);
 #endif

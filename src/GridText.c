@@ -146,14 +146,6 @@ PUBLIC int LYsb_end = -1;
 #if defined(USE_COLOR_STYLE)
 #define MAX_STYLES_ON_LINE 64
 
-#ifdef OLD_HTSTYLECHANGE
-typedef struct _stylechange {
-	int	horizpos;	/* horizontal position of this change */
-	int	style;		/* which style to change to */
-	int	direction;	/* on or off */
-	int	previous;	/* previous style */
-} HTStyleChange;
-#else
     /*try to fit in 2 shorts*/
 typedef struct _stylechange {
 	unsigned int	direction:2;	/* on or off */
@@ -161,7 +153,6 @@ typedef struct _stylechange {
 	    /* horizontal position of this change */
 	unsigned short	style;		/* which style to change to */
 } HTStyleChange;
-#endif
 #endif
 
 typedef struct _line {
@@ -173,17 +164,13 @@ typedef struct _line {
 	BOOL	bullet;			/* Do we bullet? */
 	BOOL	expansion_line;		/* TEXTAREA edit new line flag */
 #if defined(USE_COLOR_STYLE)
-#ifdef OLD_HTSTYLECHANGE
-	HTStyleChange	styles[MAX_STYLES_ON_LINE];
-#else
 	HTStyleChange* styles;
-#endif
 	int	numstyles;
 #endif
 	char	data[1];		/* Space for terminator at least! */
 } HTLine;
 
-#if defined(USE_COLOR_STYLE) && !defined(OLD_HTSTYLECHANGE)
+#if defined(USE_COLOR_STYLE) 
 typedef struct _HTStyleChangePool {
 	HTStyleChange	data[4092];
 	struct _HTStyleChangePool* next;
@@ -412,7 +399,7 @@ struct _HText {
 
 	HTStream *		target;			/* Output stream */
 	HTStreamClass		targetClass;		/* Output routines */
-#if defined(USE_COLOR_STYLE) && !defined(OLD_HTSTYLECHANGE)
+#if defined(USE_COLOR_STYLE) 
 	HTStyleChangePool*	styles_pool;
 #endif
 };
@@ -761,13 +748,11 @@ PUBLIC HText *	HText_new ARGS1(
     line->offset = line->size = 0;
 #ifdef USE_COLOR_STYLE
     line->numstyles = 0;
-#ifndef  OLD_HTSTYLECHANGE
     POOL_NEW(HTStyleChangePool,self->styles_pool);
     if (!self->styles_pool)
 	outofmem(__FILE__, "HText_New");
     stylechanges_buffers_free = 0;
     line->styles = stylechanges_buffers[0];
-#endif
 #endif
     self->Lines = self->chars = 0;
     self->first_anchor = self->last_anchor = NULL;
@@ -936,7 +921,7 @@ PUBLIC void HText_free ARGS1(
 	return;
 
     HTAnchor_setDocument(self->node_anchor, (HyperDoc *)0);
-#if defined(USE_COLOR_STYLE) && !defined(OLD_HTSTYLECHANGE)
+#if defined(USE_COLOR_STYLE) 
     POOL_FREE(HTStyleChangePool,self->styles_pool);
 #endif
     while (YES) {	/* Free off line array */
@@ -1223,8 +1208,8 @@ PRIVATE int display_line ARGS4(
 	while (current_style < line->numstyles &&
 	       i >= (int) (CStyle.horizpos + line->offset + 1))
 	{
-		LynxChangeStyle (CStyle.style,CStyle.direction,CStyle.previous);
-		current_style++;
+	    LynxChangeStyle (CStyle.style,CStyle.direction);
+	    current_style++;
 	}
 #endif
 	switch (buffer[0]) {
@@ -1427,7 +1412,7 @@ after_while:
 #else
     while (current_style < line->numstyles)
     {
-	LynxChangeStyle (CStyle.style, CStyle.direction, CStyle.previous);
+	LynxChangeStyle (CStyle.style, CStyle.direction);
 	current_style++;
     }
 #undef CStyle
@@ -1458,9 +1443,9 @@ PRIVATE void display_title ARGS1(
 #ifdef USE_COLOR_STYLE
 /* turn the TITLE style on */
     if (last_colorattr_ptr > 0) {
-	LynxChangeStyle(s_title, STACK_ON, 0);
+	LynxChangeStyle(s_title, STACK_ON);
     } else {
-	LynxChangeStyle(s_title, ABS_ON, 0);
+	LynxChangeStyle(s_title, ABS_ON);
     }
 #endif /* USE_COLOR_STYLE */
 
@@ -1581,7 +1566,7 @@ PRIVATE void display_title ARGS1(
 
 #ifdef USE_COLOR_STYLE
 /* turn the TITLE style off */
-    LynxChangeStyle(s_title, STACK_OFF, 0);
+    LynxChangeStyle(s_title, STACK_OFF);
 #endif /* USE_COLOR_STYLE */
     lynx_stop_title_color ();
 
@@ -1645,31 +1630,31 @@ PRIVATE void display_scrollbar ARGS1(
 	int s = top_skip ? s_sb_aa : s_sb_naa;
 
 	if (last_colorattr_ptr > 0) {
-	    LynxChangeStyle(s, STACK_ON, 0);
+	    LynxChangeStyle(s, STACK_ON);
 	} else {
-	    LynxChangeStyle(s, ABS_ON, 0);
+	    LynxChangeStyle(s, ABS_ON);
 	}
 #endif /* USE_COLOR_STYLE */
 	LYmove(1, LYcols - 1);
 	addch_raw(ACS_UARROW);
 #ifdef USE_COLOR_STYLE
-	LynxChangeStyle(s, STACK_OFF, 0);
+	LynxChangeStyle(s, STACK_OFF);
 #endif /* USE_COLOR_STYLE */
     }
 #ifdef USE_COLOR_STYLE
     if (last_colorattr_ptr > 0) {
-	LynxChangeStyle(s_sb_bg, STACK_ON, 0);
+	LynxChangeStyle(s_sb_bg, STACK_ON);
     } else {
-	LynxChangeStyle(s_sb_bg, ABS_ON, 0);
+	LynxChangeStyle(s_sb_bg, ABS_ON);
     }
 #endif /* USE_COLOR_STYLE */
 
     for (i=1; i <= h; i++) {
 #ifdef USE_COLOR_STYLE
 	if (i-1 <= top_skip && i > top_skip)
-	    LynxChangeStyle(s_sb_bar, STACK_ON, 0);
+	    LynxChangeStyle(s_sb_bar, STACK_ON);
 	if (i-1 <= h - bot_skip && i > h - bot_skip)
-	    LynxChangeStyle(s_sb_bar, STACK_OFF, 0);
+	    LynxChangeStyle(s_sb_bar, STACK_OFF);
 #endif /* USE_COLOR_STYLE */
 	LYmove(i + off, LYcols - 1);
 	if (i > top_skip && i <= h - bot_skip)
@@ -1678,7 +1663,7 @@ PRIVATE void display_scrollbar ARGS1(
 	    LYaddch(ACS_CKBOARD);
     }
 #ifdef USE_COLOR_STYLE
-    LynxChangeStyle(s_sb_bg, STACK_OFF, 0);
+    LynxChangeStyle(s_sb_bg, STACK_OFF);
 #endif /* USE_COLOR_STYLE */
 
     if (LYsb_arrow) {
@@ -1686,15 +1671,15 @@ PRIVATE void display_scrollbar ARGS1(
 	int s = bot_skip ? s_sb_aa : s_sb_naa;
 
 	if (last_colorattr_ptr > 0) {
-	    LynxChangeStyle(s, STACK_ON, 0);
+	    LynxChangeStyle(s, STACK_ON);
 	} else {
-	    LynxChangeStyle(s, ABS_ON, 0);
+	    LynxChangeStyle(s, ABS_ON);
 	}
 #endif /* USE_COLOR_STYLE */
 	LYmove(h + 2, LYcols - 1);
 	addch_raw(ACS_DARROW);
 #ifdef USE_COLOR_STYLE
-	LynxChangeStyle(s, STACK_OFF, 0);
+	LynxChangeStyle(s, STACK_OFF);
 #endif /* USE_COLOR_STYLE */
     }
     return;
@@ -2385,7 +2370,7 @@ PRIVATE void split_line ARGS2(
     HTLine * line = (HTLine *)LY_CALLOC(1, LINE_SIZE(MAX_LINE)+2);
     if (line == NULL)
 	outofmem(__FILE__, "split_line_1");
-#if defined(USE_COLOR_STYLE) && !defined(OLD_HTSTYLECHANGE)
+#if defined(USE_COLOR_STYLE) 
     line->styles = stylechanges_buffers[stylechanges_buffers_free = (stylechanges_buffers_free + 1) &1];
 #endif
     ctrl_chars_on_this_line = 0; /*reset since we are going to a new line*/
@@ -2657,7 +2642,7 @@ PRIVATE void split_line ARGS2(
     /*
      *  Color style changes after the split position + possible trimmed
      *  head characters are transferred to the new line.  Ditto for changes
-     *  within the trimming region, but be stop when we reach an OFF change.
+     *  within the trimming region, but we stop when we reach an OFF change.
      *  The second while loop below may then handle remaining changes. - kw
      */
     while (previous->numstyles && inew >= 0) {
@@ -2801,7 +2786,7 @@ PRIVATE void split_line ARGS2(
     if (temp == NULL)
 	outofmem(__FILE__, "split_line_2");
     memcpy(temp, previous, LINE_SIZE(previous->size));
-#if defined(USE_COLOR_STYLE) && !defined(OLD_HTSTYLECHANGE)
+#if defined(USE_COLOR_STYLE) 
     ALLOC_IN_POOL((text->styles_pool),HTStyleChangePool,previous->numstyles,temp->styles);
     memcpy(temp->styles, previous->styles, sizeof(HTStyleChange)*previous->numstyles);
     if (!temp->styles)
@@ -3127,7 +3112,7 @@ PRIVATE void split_line ARGS2(
 	    jline = allocHTLine(previous->size+spare);
 	    if (jline == NULL)
 		outofmem(__FILE__, "split_line_1");
-#if defined(USE_COLOR_STYLE) && !defined(OLD_HTSTYLECHANGE)
+#if defined(USE_COLOR_STYLE) 
 	    jline->styles = previous->styles;
 #endif
 	    jdata = jline->data;
@@ -3195,9 +3180,6 @@ PRIVATE void split_line ARGS2(
 
 		jline->styles[i].style = previous->styles[i].style;
 		jline->styles[i].direction = previous->styles[i].direction;
-#ifdef OLD_HTSTYLECHANGE
-		jline->styles[i].previous = previous->styles[i].previous;
-#endif
 		/*there are stylechanges with hpos > line length */
 		jline->styles[i].horizpos = (hpos > previous->size)
 			? previous->size + spare
@@ -4696,11 +4678,10 @@ PRIVATE int HText_insertBlanksInStblLines ARGS2(
 	    first_lineno_pass2 = lineno;
 	    if (TRACE) {
 		int ip;
-		CTRACE((tfp, "line %d first to adjust  --  newpos:",
-		       lineno));
+		CTRACE((tfp, "line %d first to adjust  --  newpos:", lineno));
 		for (ip = 0; ip < ncols; ip++)
 		    fprintf(tfp, " %d", newpos[ip]);
-		fprintf(tfp, "\r\n");
+		fprintf(tfp, "\n");
 	    }
 	}
 	if (line == me->last_line) {
@@ -4724,7 +4705,7 @@ PRIVATE int HText_insertBlanksInStblLines ARGS2(
 		max_width = width;
 	    if (width && last_nonempty < lineno)
 		last_nonempty = lineno;
-	    CTRACE((tfp, "line %d true/max width:%d/%d oldpos: NONE\r\n",
+	    CTRACE((tfp, "line %d true/max width:%d/%d oldpos: NONE\n",
 		   lineno, width, max_width));
 	    continue;
 	}
@@ -4771,7 +4752,7 @@ PRIVATE int HText_insertBlanksInStblLines ARGS2(
 		       lineno, width, max_width));
 		for (ip = 0; ip < ninserts; ip++)
 		    fprintf(tfp, " %d", oldpos[ip]);
-		fprintf(tfp, "\r\n");
+		fprintf(tfp, "\n");
 	    }
 	}
     }
@@ -4866,7 +4847,7 @@ PRIVATE int HText_insertBlanksInStblLines ARGS2(
 	if (max_width)
 	    Stbl_update_enclosing(me->stbl, max_width, last_nonempty);
     }
-    CTRACE((tfp, " %d:done\r\n", lineno));
+    CTRACE((tfp, " %d:done\n", lineno));
     free(oldpos);
     return lines_changed;
 }
@@ -12214,10 +12195,8 @@ PRIVATE void insert_new_textarea_anchor ARGS2(
 #if defined(USE_COLOR_STYLE)
     /* dup styles[] if needed [no need in TEXTAREA (?); leave 0's] */
     l->numstyles       = htline->numstyles;
-#ifndef OLD_HTSTYLECHANGE
     /*we fork the pointers!*/
     l->styles = htline->styles;
-#endif
 #endif
     strcpy (l->data,     htline->data);
     if (keypad_mode == LINKS_AND_FIELDS_ARE_NUMBERED) {
@@ -13087,10 +13066,8 @@ PUBLIC int HText_InsertFile ARGS1(
 #if defined(USE_COLOR_STYLE)
     /* dup styles[] if needed [no need in TEXTAREA (?); leave 0's] */
     l->numstyles       = htline->numstyles;
-#ifndef OLD_HTSTYLECHANGE
     /*we fork the pointers!*/
     l->styles = htline->styles;
-#endif
 #endif
     strcpy (l->data,     htline->data);
 
@@ -13265,7 +13242,7 @@ PRIVATE void redraw_part_of_line ARGS4(
 	while (current_style < line->numstyles &&
 	       i >= (int) (CStyle.horizpos + line->offset + 1))
 	{
-		LynxChangeStyle (CStyle.style,CStyle.direction,CStyle.previous);
+		LynxChangeStyle (CStyle.style,CStyle.direction);
 		current_style++;
 	}
 #endif
@@ -13405,7 +13382,7 @@ PRIVATE void redraw_part_of_line ARGS4(
 
     while (current_style < line->numstyles)
     {
-	LynxChangeStyle (CStyle.style, CStyle.direction, CStyle.previous);
+	LynxChangeStyle (CStyle.style, CStyle.direction);
 	current_style++;
     }
 

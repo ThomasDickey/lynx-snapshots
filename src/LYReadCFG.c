@@ -400,6 +400,17 @@ PUBLIC int check_color ARGS2(
     CTRACE((tfp, "=> ERR_COLOR\n"));
     return ERR_COLOR;
 }
+
+PUBLIC CONST char *lookup_color ARGS1(
+    int,	code)
+{
+    unsigned n;
+    for (n = 0; n < 16; n++) {
+	if ((int) ColorCode(n) == code)
+	    return Color_Strings[n];
+    }
+    return "default";
+}
 #endif /* USE_COLOR_STYLE || USE_COLOR_TABLE */
 
 #if defined(USE_COLOR_TABLE)
@@ -1614,7 +1625,7 @@ static Config_Type Config_Table [] =
      PARSE_STR("system_mail_flags", CONF_STR, &system_mail_flags),
      PARSE_SET("tagsoup", CONF_BOOL, &Old_DTD),
 #ifdef TEXTFIELDS_MAY_NEED_ACTIVATION
-     PARSE_SET("textfields_need_activation", CONF_BOOL, &textfields_need_activation),
+     PARSE_SET("textfields_need_activation", CONF_BOOL, &global_textfields_need_activation),
 #endif
 #if defined(_WINDOWS)
      PARSE_INT("timeout", CONF_INT, &lynx_timeout),
