@@ -111,8 +111,10 @@ extern int LYShowColor;		/* Show color or monochrome?	    */
 extern int LYChosenShowColor;	/* extended color/monochrome choice */
 extern int LYrcShowColor;	/* ... as read or last written	    */
 
-#ifndef EXP_FORMS_OPTIONS
+#if !defined(NO_OPTION_FORMS) && !defined(NO_OPTION_MENU)
 extern BOOLEAN LYUseFormsOptions; /* use Forms-based options menu */
+#else
+#define LYUseFormsOptions FALSE	/* simplify ifdef'ing in LYMainLoop.c */
 #endif
 extern BOOLEAN LYShowCursor;	/* Show the cursor or hide it?	    */
 extern BOOLEAN verbose_img;	/* display filenames of images?     */
@@ -168,7 +170,6 @@ extern BOOLEAN telnet_ok;
 extern BOOLEAN news_ok;
 extern BOOLEAN ftp_ok;
 extern BOOLEAN rlogin_ok;
-extern BOOLEAN no_print;          /* TRUE to disable printing */
 extern BOOLEAN system_editor;     /* True if locked-down editor */
 extern BOOLEAN child_lynx;        /* TRUE to exit with an arrow */
 extern BOOLEAN error_logging;     /* TRUE to mail error messages */
@@ -177,7 +178,6 @@ extern BOOLEAN vi_keys;           /* TRUE to turn on vi-like key movement */
 extern BOOLEAN emacs_keys;        /* TRUE to turn on emacs-like key movement */
 extern int keypad_mode;           /* is set to either NUMBERS_AS_ARROWS *
 				   * or LINKS_ARE_NUMBERED 		*/
-extern BOOLEAN verbose_links;     /* TRUE if links are preceded by (LINK) */ 
 extern BOOLEAN case_sensitive;    /* TRUE to turn on case sensitive search */
 extern BOOLEAN no_inside_telnet;  /* this and following are restrictions */
 extern BOOLEAN no_outside_telnet;
@@ -195,8 +195,8 @@ extern BOOLEAN no_bookmark;
 extern BOOLEAN no_multibook;
 extern BOOLEAN no_bookmark_exec;
 extern BOOLEAN no_option_save;
-extern BOOLEAN no_print;
 extern BOOLEAN no_download;
+extern BOOLEAN no_print;          /* TRUE to disable printing */
 extern BOOLEAN no_disk_save;
 extern BOOLEAN no_exec;
 extern BOOLEAN no_lynxcgi;

@@ -83,9 +83,6 @@ extern HTParentAnchor * HTMainAnchor;	/* Anchor for HTMainText */
 #endif /* SHORT_NAMES */
 
 extern int WWW_TraceFlag;
-extern int HTCacheSize;
-
-extern BOOLEAN mustshow;
 
 #if defined(VMS) && defined(VAXC) && !defined(__DECC)
 extern int HTVirtualMemorySize;

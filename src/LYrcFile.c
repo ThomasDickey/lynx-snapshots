@@ -1005,16 +1005,7 @@ PUBLIC int save_rc NOPARAMS
      */
     fclose(fp);
 
-#ifdef VMS
-    /*
-     *  Get rid of any copies of the .lynxrc file that VMS creates.
-     */
-    while (remove("sys$login:.lynxrc;-1") == 0) ;
-	/*
-	 *  Reset version number.
-	 */
-	rename("sys$login:.lynxrc", "sys$login:.lynxrc;1");
-#endif /* VMS */
+    HTSYS_purge(rcfile);
 
-   return TRUE;
+    return TRUE;
 }

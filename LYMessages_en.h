@@ -478,14 +478,14 @@
 #define MAP_NOT_ACCESSIBLE "Client-side image MAP is not accessible!"
 #define MAPS_NOT_AVAILABLE "No client-side image MAPs are available!"
 #define MAP_NOT_AVAILABLE "Client-side image MAP is not available!"
-#ifndef  EXP_FORMS_OPTIONS
+#ifndef NO_OPTION_MENU
 #define OPTION_SCREEN_NEEDS_24 \
  "Screen height must be at least 24 lines for the Options menu!"
 #define OPTION_SCREEN_NEEDS_23 \
  "Screen height must be at least 23 lines for the Options menu!"
 #define OPTION_SCREEN_NEEDS_22 \
  "Screen height must be at least 22 lines for the Options menu!"
-#endif /* !EXP_FORMS_OPTIONS */
+#endif /* !NO_OPTION_MENU */
 #define NEED_ADVANCED_USER_MODE "That key requires Advanced User mode."
 #define COMMAND_PROMPT "Command: "
 #define SELECT_SEGMENT "Select "

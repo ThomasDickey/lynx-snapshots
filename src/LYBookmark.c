@@ -12,7 +12,6 @@
 #include <GridText.h>
 
 #ifdef VMS
-#include <HTVMSUtils.h>
 #include <nam.h>
 extern BOOLEAN HadVMSInterrupt; /* Flag from cleanup_sig() AST */
 #endif /* VMS */
@@ -521,22 +520,9 @@ PUBLIC void remove_bookmark_link ARGS2(
 	    return;
 	}
     }
-#else  /* UNIX */
+#else  /* !UNIX */
     if (rename(newfile, filename_buffer) != -1) {
-#ifdef VMS
-	char VMSfilename[256];
-	/*
-	 *  Purge lower version of file.
-	 */
-	sprintf(VMSfilename, "%s;-1", filename_buffer);
-	while (remove(VMSfilename) == 0)
-	    ;
-	/*
-	 *  Reset version number.
-	 */
-	sprintf(VMSfilename, "%s;1", filename_buffer);
-	rename(filename_buffer, VMSfilename);
-#endif /* VMS */
+	HTSYS_purge(filename_buffer);
 	return;
     } else {
 #ifndef VMS

@@ -117,11 +117,14 @@ extern int sys_nerr;
 
 #ifdef _WINDOWS_NSL
 	 char host[512];
-	 struct hostent  *phost;     /* Pointer to host - See netdb.h */
+	 struct hostent  *phost;	/* Pointer to host - See netdb.h */
+	 int donelookup;
 
 unsigned long _fork_func (void *arglist)
 {
-    return (unsigned long)(phost = gethostbyname(host));
+	 phost = gethostbyname(host);
+	 donelookup = TRUE;
+	 return (unsigned long)(phost);
 }
 #endif /* _WINDOWS_NSL */
 
@@ -642,7 +645,9 @@ PUBLIC int HTParseInet ARGS2(
 		if (!hThread)
 			 MessageBox((void *)NULL, "CreateThread",
 				"CreateThread Failed", 0L);
-		while (!phost)
+
+		donelookup = FALSE;
+		while (!donelookup)
 			if (HTCheckForInterrupt())
 			 {
 			  /* Note that host is a character array and is not freed */
@@ -653,6 +658,8 @@ PUBLIC int HTParseInet ARGS2(
 			  return HT_INTERRUPTED;
 			};
 	};
+	if (!phost) goto failed;
+	memcpy((void *)&soc_in->sin_addr, phost->h_addr, phost->h_length);
 #else /* !NSL_FORK, !DJGPP, !_WINDOWS_NSL: */
 	{
 	    struct hostent  *phost;
@@ -680,8 +687,6 @@ PUBLIC int HTParseInet ARGS2(
 #endif /* !NSL_FORK */
 #ifndef _WINDOWS_NSL
 	FREE(host);
-#else
-	memcpy((void *)&soc_in->sin_addr, phost->h_addr, phost->h_length);
 #endif /* _WINDOWS_NSL */
 
     }

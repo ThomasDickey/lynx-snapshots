@@ -11,11 +11,7 @@
 #include <LYUtils.h>
 #ifdef VMS
 #include <unixio.h>
-#include <HTVMSUtils.h>
 #endif /* VMS */
-#ifdef DOSPATH
-#include <HTDOS.h>
-#endif
 
 #include <LYLeaks.h>
 
@@ -69,15 +65,7 @@ PUBLIC int edit_current_file ARGS3(
 #if defined (DOSPATH) || defined (__EMX__)
 	if (strlen(filename)>1) filename++;
 #endif
-#ifdef DOSPATH
-	if ((fp = fopen(HTDOS_name(filename),"r")) == NULL)
-#else
-#ifdef VMS
-	if ((fp = fopen(HTVMS_name("", filename), "r")) == NULL)
-#else
-	if ((fp = fopen(filename, "r")) == NULL)
-#endif /* VMS */
-#endif /* DOSPATH */
+	if ((fp = fopen(HTSYS_name(filename), "r")) == NULL)
 	{
 	    HTAlert(COULD_NOT_ACCESS_FILE);
 	    FREE(filename);
@@ -92,15 +80,7 @@ PUBLIC int edit_current_file ARGS3(
     /*
      *  Don't allow editing if user lacks append access.
      */
-#ifdef DOSPATH
-    if ((fp = fopen(HTDOS_name("", filename), "a")) == NULL)
-#else
-#ifdef VMS
-    if ((fp = fopen(HTVMS_name("", filename), "a")) == NULL)
-#else
-    if ((fp = fopen(filename, "a")) == NULL)
-#endif /* VMS */
-#endif /* DOSPATH */
+    if ((fp = fopen(HTSYS_name(filename), "a")) == NULL)
     {
 	HTUserMsg(NOAUTH_TO_EDIT_FILE);
 	goto failure;
@@ -135,21 +115,12 @@ PUBLIC int edit_current_file ARGS3(
 	sprintf(command, "%s +%d \"%s\"",
 			 editor,
 			 (lineno + (nlinks ? links[cur].ly : 0)),
-#ifdef DOSPATH
-			 HTDOS_name(filename));
-#else
-			 filename);
-#endif /* DOSPATH */
+			 HTSYS_name(filename));
     else
 #ifdef __DJGPP__
 	sprintf(command, "%s %s", editor, HTDOS_name(filename));
 #else
-	sprintf(command, "%s \"%s\"", editor,
-#ifdef DOSPATH
-				 HTDOS_name(filename));
-#else
-				 filename);
-#endif /* DOSPATH */
+	sprintf(command, "%s \"%s\"", editor, HTSYS_name(filename));
 #endif /* __DJGPP__ */
 #endif /* VMS */
     CTRACE(tfp, "LYEdit: %s\n", command);

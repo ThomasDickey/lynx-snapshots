@@ -63,6 +63,7 @@
 #include <GridText.h>
 #include <LYGlobalDefs.h>
 #include <LYexit.h>
+#include <LYUtils.h>
 #include <LYLeaks.h>
 
 extern HTCJKlang HTCJK;

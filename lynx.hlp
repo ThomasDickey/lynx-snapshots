@@ -143,6 +143,9 @@
   -force_secure
        toggles forcing of the secure flag for SSL cookies.
 
+  -forms_options
+       toggles the style of options (menu or forms).
+
   -from
        toggles transmissions of From headers.
 

@@ -15,6 +15,7 @@
 #include <HTCJK.h>
 #include <HTMIME.h>
 #include <HTTCP.h>
+#include <LYUtils.h>
 
 /* this define should be in HTFont.h :( */
 #define HT_NON_BREAK_SPACE ((char)1)   /* For now */
@@ -893,12 +894,7 @@ PRIVATE void post_article ARGS1(
 	}
     }
     fclose(fd);
-#ifdef VMS
-    while (remove(postfile) == 0)
-	; /* loop through all versions */
-#else
-    remove(postfile);
-#endif /* VMS */
+    HTSYS_remove(postfile);
 
     /*
     **	Send the nntp EOF and get the server's response. - FM
@@ -2351,12 +2347,7 @@ PRIVATE int HTLoadNews ARGS4(
 		FREE(ProxyHREF);
 		FREE(ListArg);
 		if (postfile) {
-#ifdef VMS
-		    while (remove(postfile) == 0)
-			; /* loop through all versions */
-#else
-		    remove(postfile);
-#endif /* VMS */
+		    HTSYS_remove(postfile);
 		    FREE(postfile);
 		}
 		return HT_NOT_LOADED;
@@ -2375,12 +2366,7 @@ PRIVATE int HTLoadNews ARGS4(
 		FREE(ProxyHREF);
 		FREE(ListArg);
 		if (postfile) {
-#ifdef VMS
-		    while (remove(postfile) == 0)
-			; /* loop through all versions */
-#else
-		    remove(postfile);
-#endif /* VMS */
+		    HTSYS_remove(postfile);
 		    FREE(postfile);
 		}
 		return HTLoadError(stream, 500, message);
@@ -2409,12 +2395,7 @@ PRIVATE int HTLoadNews ARGS4(
 			    FREE(ProxyHREF);
 			    FREE(ListArg);
 			    if (postfile) {
-#ifdef VMS
-				while (remove(postfile) == 0)
-				    ; /* loop through all versions */
-#else
-				remove(postfile);
-#endif /* VMS */
+				HTSYS_remove(postfile);
 				FREE(postfile);
 			    }
 			    return(HT_NOT_LOADED);
@@ -2441,12 +2422,7 @@ PRIVATE int HTLoadNews ARGS4(
 			}
 			FREE(ListArg);
 			if (postfile) {
-#ifdef VMS
-			    while (remove(postfile) == 0)
-				; /* loop through all versions */
-#else
-			    remove(postfile);
-#endif /* VMS */
+			    HTSYS_remove(postfile);
 			    FREE(postfile);
 			}
 			return(HT_NOT_LOADED);
@@ -2467,12 +2443,7 @@ PRIVATE int HTLoadNews ARGS4(
 		}
 		FREE(ListArg);
 		if (postfile) {
-#ifdef VMS
-		    while (remove(postfile) == 0)
-			; /* loop through all versions */
-#else
-		    remove(postfile);
-#endif /* VMS */
+		    HTSYS_remove(postfile);
 		    FREE(postfile);
 		}
 		return(HT_NOT_LOADED);
@@ -2617,12 +2588,7 @@ Send_NNTP_command:
 	    if (status != 340) {
 		HTAlert("Cannot POST to this host.");
 		if (postfile) {
-#ifdef VMS
-		    while (remove(postfile) == 0)
-			; /* loop through all versions */
-#else
-		    remove(postfile);
-#endif /* VMS */
+		    HTSYS_remove(postfile);
 		}
 	    } else {
 		post_article(postfile);
@@ -2684,12 +2650,7 @@ Send_NNTP_command:
 	}
 	FREE(ListArg);
 	if (postfile) {
-#ifdef VMS
-	    while (remove(postfile) == 0)
-		; /* loop through all versions */
-#else
-	    remove(postfile);
-#endif /* VMS */
+	    HTSYS_remove(postfile);
 	    FREE(postfile);
 	}
 	return status;
@@ -2712,12 +2673,7 @@ Send_NNTP_command:
     }
     FREE(ListArg);
     if (postfile) {
-#ifdef VMS
-	while (remove(postfile) == 0)
-	    ; /* loop through all versions */
-#else
-	remove(postfile);
-#endif /* VMS */
+	HTSYS_remove(postfile);
 	FREE(postfile);
     }
     return HT_NOT_LOADED;

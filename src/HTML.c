@@ -49,7 +49,6 @@
 
 #ifdef VMS
 #include <LYCurses.h>
-#include <HTVMSUtils.h>
 #endif /* VMS */
 
 #ifdef USE_COLOR_STYLE

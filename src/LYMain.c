@@ -6,9 +6,6 @@
 #include <HTFile.h>
 #include <UCMap.h>
 #include <UCDefs.h>
-#ifdef VMS
-#include <HTVMSUtils.h>
-#endif /* VMS */
 #include <HTInit.h>
 #include <LYCurses.h>
 #include <LYStyle.h>
@@ -150,8 +147,8 @@ PUBLIC int port_syntax = 1;
 PUBLIC int LYShowColor = SHOW_COLOR_UNKNOWN; /* to show or not to show */
 PUBLIC int LYChosenShowColor = SHOW_COLOR_UNKNOWN; /* whether to show and save */
 PUBLIC int LYrcShowColor = SHOW_COLOR_UNKNOWN;	/* ... as last read or written */
-#ifndef EXP_FORMS_OPTIONS
-PUBLIC BOOLEAN LYUseFormsOptions = FALSE; /* use forms-based options menu */
+#if !defined(NO_OPTION_FORMS) && !defined(NO_OPTION_MENU)
+PUBLIC BOOLEAN LYUseFormsOptions = TRUE; /* use forms-based options menu */
 #endif
 PUBLIC BOOLEAN LYShowCursor = SHOW_CURSOR; /* to show or not to show */
 PUBLIC BOOLEAN verbose_img = VERBOSE_IMAGES;  /* show filenames or not */
@@ -187,7 +184,6 @@ PUBLIC BOOLEAN check_mail = CHECKMAIL;
 PUBLIC BOOLEAN vi_keys = VI_KEYS_ALWAYS_ON;
 PUBLIC BOOLEAN emacs_keys = EMACS_KEYS_ALWAYS_ON;
 PUBLIC int keypad_mode = DEFAULT_KEYPAD_MODE;
-PUBLIC BOOLEAN verbose_links = VERBOSE_LINKS; 
 PUBLIC BOOLEAN case_sensitive = CASE_SENSITIVE_ALWAYS_ON;
 PUBLIC BOOLEAN telnet_ok = TRUE;
 PUBLIC BOOLEAN news_ok = TRUE;
@@ -683,22 +679,29 @@ PUBLIC int main ARGS2(
     StrAllocCat(lynx_version_putenv_command, LYNX_VERSION);
     putenv(lynx_version_putenv_command);
 #endif /* VMS */
+
     if ((cp = getenv("LYNX_TEMP_SPACE")) != NULL)
 	StrAllocCopy(lynx_temp_space, cp);
-    else
+#if defined (UNIX)
+    else if ((cp = getenv("TMPDIR")) != NULL)
+	StrAllocCopy(lynx_temp_space, cp);
+#endif
 #if defined (DOSPATH) || defined (__EMX__)
-    if ((cp = getenv("TEMP")) != NULL)
-	StrAllocCopy(lynx_temp_space, cp);
+    else if ((cp = getenv("TEMP")) != NULL)
+	StrAllocCopy(lynx_temp_space, HTDOS_name(cp));
     else if ((cp = getenv("TMP")) != NULL)
-	StrAllocCopy(lynx_temp_space, cp);
+	StrAllocCopy(lynx_temp_space, HTDOS_name(cp));
+#endif
     else
+#ifdef TEMP_SPACE
+	StrAllocCopy(lynx_temp_space, TEMP_SPACE);
+#else
     {
 	printf("You MUST define a valid TMP or TEMP area!\n");
 	exit(-1);
     }
-#else
-    StrAllocCopy(lynx_temp_space, TEMP_SPACE);
 #endif
+
     if ((cp = strchr(lynx_temp_space, '~'))) {
 	*(cp++) = '\0';
 	StrAllocCopy(temp, lynx_temp_space);
@@ -1037,8 +1040,7 @@ PUBLIC int main ARGS2(
 	}
 #ifdef VMS
 	LYCloseTracelog();
-	while (remove(LYTraceLogPath) == 0)
-	    ;
+	HTSYS_remove(LYTraceLogPath);
 	if ((LYTraceLogFP = LYNewTxtFile(LYTraceLogPath)) == NULL) {
 	    WWW_TraceFlag = FALSE;
 	    printf("%s\n", TRACELOG_OPEN_FAILED);
@@ -2645,10 +2647,10 @@ keys (may be incompatible with some curses packages)"
       "from",		TOGGLE_ARG,		&LYNoFromHeader,
       "toggle transmissions of From headers"
    ),
-#ifndef EXP_FORMS_OPTIONS
+#if !defined(NO_OPTION_FORMS) && !defined(NO_OPTION_MENU)
    PARSE_SET(
       "forms_options",	TOGGLE_ARG,		&LYUseFormsOptions,
-      "toggles forcing of forms-based options menu style"
+      "toggles forms-based vs old-style options menu"
    ),
 #endif
    PARSE_SET(

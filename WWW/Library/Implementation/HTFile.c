@@ -52,10 +52,6 @@
 #define INFINITY 512		/* file name length @@ FIXME */
 #define MULTI_SUFFIX ".multi"	/* Extension for scanning formats */
 
-#ifdef VMS
-#include <HTVMSUtils.h>
-#endif /* VMS */
-
 #include <HTParse.h>
 #include <HTTCP.h>
 #ifndef DECNET

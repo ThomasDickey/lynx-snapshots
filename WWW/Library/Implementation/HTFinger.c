@@ -34,6 +34,7 @@
 #include <HTString.h>
 #include <HTFinger.h>
 
+#include <LYUtils.h>
 #include <LYLeaks.h>
 
 #define FINGER_PORT 79		/* See rfc742 */

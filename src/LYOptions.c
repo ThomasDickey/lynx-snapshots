@@ -27,7 +27,7 @@ BOOLEAN term_options;
 
 PRIVATE void terminate_options	PARAMS((int sig));
 
-#ifndef EXP_FORMS_OPTIONS
+#ifndef NO_OPTION_MENU
 PRIVATE int boolean_choice PARAMS((
 	int		status,
 	int		line,
@@ -1789,7 +1789,7 @@ PRIVATE int boolean_choice ARGS4(
 	}
     }
 }
-#endif /* !EXP_FORMS_OPTIONS */
+#endif /* !NO_OPTION_MENU */
 
 PRIVATE void terminate_options ARGS1(
 	int,		sig GCC_UNUSED)
@@ -2096,7 +2096,7 @@ draw_bookmark_list:
     signal(SIGINT, cleanup_sig);
 }
 
-#ifndef EXP_FORMS_OPTIONS
+#ifndef NO_OPTION_MENU
 /*
 **  This function prompts for a choice or page number.
 **  If a 'g' or 'p' suffix is included, that will be
@@ -3127,7 +3127,9 @@ restore_popup_statusline:
     }
 }
 
-#endif /* !EXP_FORMS_OPTIONS */
+#endif /* !NO_OPTION_MENU */
+
+#ifndef NO_OPTION_FORMS
 
 /*
  * I'm paranoid about mistyping strings.  Also, this way they get combined
@@ -4113,3 +4115,4 @@ PUBLIC int gen_options ARGS1(
     LYCloseTempFP(fp0);
     return(0);
 }
+#endif /* !NO_OPTION_FORMS */

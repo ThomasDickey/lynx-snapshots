@@ -19,9 +19,6 @@
 #include <HTFile.h>
 #include <HTPlain.h>
 #include <HTFile.h>
-#ifdef VMS
-#include <HTVMSUtils.h>
-#endif /* VMS */
 
 #include <LYStrings.h>
 #include <LYUtils.h>

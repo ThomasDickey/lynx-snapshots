@@ -301,9 +301,7 @@ extern void VTHome NOPARAMS;
  */
 #if USE_COLOR_TABLE
 extern void LYaddWAttr PARAMS((WINDOW *win, int a));
-extern void LYaddAttr PARAMS((int a));
 extern void LYsubWAttr PARAMS((WINDOW *win, int a));
-extern void LYsubAttr PARAMS((int a));
 extern void LYaddWAttr PARAMS((WINDOW *win, int a));
 extern void LYsubWAttr PARAMS((WINDOW *win, int a));
 extern void lynx_set_color PARAMS((int a));

@@ -14,20 +14,18 @@
 #include <LYCharSets.h>
 #include <LYCharUtils.h>
 
-#if defined(DOSPATH) || defined(__EMX__)
-#include <HTDOS.h>
-#endif
 #ifdef DJGPP_KEYHANDLER
 #include <bios.h>
 #endif /* DJGPP_KEYHANDLER */
+
 #ifdef DISP_PARTIAL
 #include <LYKeymap.h>
 #endif /* DISP_PARTIAL */
+
 #ifdef VMS
 #include <descrip.h>
 #include <libclidef.h>
 #include <lib$routines.h>
-#include <HTVMSUtils.h>
 #endif /* VMS */
 
 #if HAVE_UTMP
@@ -5796,11 +5794,7 @@ PUBLIC void LYRemoveTemp ARGS1(
 		} else {
 		    ly_temp = p->next;
 		}
-		code = remove(name);
-#ifdef VMS
-		while (remove(name) == 0)
-		    ;
-#endif
+		code = HTSYS_remove(name);
 		CTRACE(tfp, "...LYRemoveTemp done(%d)%s\n", code,
 		       (p->file != 0) ? ", closed" : "");
 		CTRACE_FLUSH(tfp);

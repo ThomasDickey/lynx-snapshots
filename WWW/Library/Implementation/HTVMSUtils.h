@@ -111,4 +111,7 @@ PUBLIC int HTVMSBrowseDir PARAMS((
 	HTFormat format_out,
 	HTStream * sink));
 
+extern int HTVMS_remove(char *filename);
+extern void HTVMS_purge(char *filename);
+
 #endif /* not HTVMSUTIL_H */

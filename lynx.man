@@ -175,6 +175,9 @@ forces the first document to be interpreted as HTML.
 .B -force_secure
 toggles forcing of the secure flag for SSL cookies.
 .TP
+.B -forms_options
+toggles the style of options (menu or forms).
+.TP
 .B -from
 toggles transmissions of From headers.
 .TP
