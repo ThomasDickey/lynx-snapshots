@@ -6143,7 +6143,7 @@ try_again:
 	     *  WINDOW structures are already filled based on the old size.
 	     *  So we notify the ncurses library directly here. - kw
 	     */
-#if defined(NCURSES) && defined(HAVE_RESIZETERM)
+#if defined(NCURSES) && defined(HAVE_RESIZETERM) && defined(HAVE_WRESIZE)
 	    resizeterm(LYlines, LYcols);
 	    wresize(LYwin, LYlines, LYcols);
 #else

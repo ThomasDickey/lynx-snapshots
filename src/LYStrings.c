@@ -703,6 +703,36 @@ PUBLIC int LYmbcsstrlen ARGS3(
 #define GetChar() wgetch(my_subwindow ? my_subwindow : LYwin)
 #endif
 
+#if !defined(GetChar) && defined(PDCURSES)
+/* PDCurses sends back key-modifiers that we don't use, but would waste time
+ * upon, e.g., repainting the status line
+ */
+PRIVATE int myGetChar NOARGS
+{
+    int c;
+    BOOL done = FALSE;
+
+    do {
+	switch (c = wgetch(LYwin))
+	{
+	case KEY_SHIFT_L :
+	case KEY_SHIFT_R :
+	case KEY_CONTROL_L :
+	case KEY_CONTROL_R :
+	case KEY_ALT_L :
+	case KEY_ALT_R :
+	case KEY_RESIZE :
+	    break;
+	default:
+	    done = TRUE;
+	    break;
+	}
+    } while (!done);
+    return c;
+}
+#define GetChar() myGetChar()
+#endif
+
 #if !defined(GetChar) && defined(SNAKE)
 #define GetChar() wgetch(LYwin)
 #endif
@@ -713,7 +743,7 @@ PUBLIC int LYmbcsstrlen ARGS3(
 
 #if !defined(GetChar)
 #if HAVE_KEYPAD
-#define GetChar getch
+#define GetChar() getch()
 #else
 #ifndef USE_GETCHAR
 #define USE_GETCHAR

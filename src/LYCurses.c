@@ -1538,7 +1538,7 @@ PUBLIC WINDOW *LYstartPopup ARGS4(
 	LYsubwindow(form_window);
 #  ifdef USE_COLOR_STYLE
 	{
-	    attr_t b;
+	    long b;
 
 	    /* Get a proper value for the attribute */
 	    LynxWChangeStyle(form_window, s_menu_bg, STACK_ON);
