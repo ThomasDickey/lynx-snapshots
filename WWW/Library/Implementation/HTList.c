@@ -117,7 +117,7 @@ PUBLIC void HTList_insertObjectAt ARGS3(
 	Pos = 0;
 	if (TRACE) {
 	    fprintf(stderr,
-		    "HTList: Treating negative object position %i as %i.\n",
+		    "HTList: Treating negative object position %d as %d.\n",
 		    pos, Pos);
 	}
     }

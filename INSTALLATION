@@ -36,22 +36,18 @@ Step 2. (define run-time variables -- See the lynx.cfg file for details.)
     the LYNX_CFG_FILE define in userdefs.h, specified with an environment
     variable, LYNX_CFG, or specified with the "-cfg" command line option.
 
-Step 3. (You can skip this step only if you only use English and are not
-    interested in any special characters, or if the display and local files
-    will all use the ISO-8859-1 "ISO Latin 1" Western European character
-    set.)
+Step 3. (You may skip this step if you only use English and are not
+    interested in any special characters, or if your display and local files
+    will all use the ISO-8859-1 "ISO Latin 1" Western European character set.)
     People who will be running Lynx in an environment with different and
     incompatible character sets should configure CHARACTER_SET (the Display
-    character set) and ASSUME_LOCAL_CHARSET to work correctly for them
-    before starting to create bookmark files et cetera.  Please read
-    "lynx.cfg" for detailed instructions.
-    Additional character sets and some of their properties may be defined with 
-    tables in the src/chrtrans directory.  It is not necessary to change 
-    src/LYCharSets.c to make these new character sets known to Lynx, (although 
-    definitions for the "older" character sets are still there), but the new
+    character set) and ASSUME_LOCAL_CHARSET to work correctly for them before
+    creating bookmark files et cetera.  Please read "lynx.cfg" for detailed
+    instructions.  Additional character sets and their properties may be
+    defined with tables in the src/chrtrans directory.  It is not necessary to
+    change src/LYCharSets.c to make new character sets known to Lynx, but new
     ones have to be listed in src/UCdomap.c and, currently, the makefiles in
-    src/ and src/chrtrans to be automatically used.  See the README.* files
-    in src/chrtrans/ for details.
+    src/ and src/chrtrans to be used.  See the README.* files in src/chrtrans/.
 
 Step 4. (optional -- news for UNIX and VMS)
     Set NNTPSERVER in "lynx.cfg" to your site's NNTP server, or set the
@@ -125,6 +121,7 @@ II. Compile instructions -- UNIX
 	NetBSD
 	SCO (cc with curses)
 	Solaris 2.5 (cc and gcc with curses, ncurses and slang)
+	Solaris 2.6 (gcc with slang)
 	SunOS 4.1 (cc curses, gcc ncurses and slang)
 
     NOTE:  SunOS and HP-UX come with a bundled K&R compiler, which is only
@@ -132,12 +129,10 @@ II. Compile instructions -- UNIX
     require a compiler that recognizes prototypes.
 
 1c. Options
-    To get a list of the configure script's options, type
-
-	   ./configure --help
-
-    Here's an alphabetical listing of the Lynx-specific options.  The actual
-    order shown by the -help option is different.
+    To get a list of the configure script's options, type "./configure --help".
+    Below is an alphabetical listing of the Lynx-specific options.  The actual
+    order shown by the -help option is different.  See "docs/README.defines"
+    for information on defines for which there are no option switches.
 
   --disable-dired			(defines DIRED_SUPPORT)
 	Use this option to disable the optional directory-editor.
@@ -209,12 +204,23 @@ II. Compile instructions -- UNIX
   	Use this option to enable optional and *experimental* color style.
 	(Also defines USE_HASH, LINKEDSTYLES)
 
-  --enable-debug
+  --enable-debug			(The symbol DEBUG is always defined.)
   	Use this option to compile-in support for debugging.
-	(The symbol DEBUG is always defined).
 
-  --enable-find-leaks			(defines LY_FIND_LEAKS)
+  --enable-externs			(define USE_EXTERNALS)
+	Use this option to enable external application support. (See lynx.cfg.)
+
+  --enable-find-leaks			(define LY_FIND_LEAKS)
 	Use this option to compile-in logic for testing memory leaks.
+
+  --enable-font-switch			(define EXP_CHARTRANS_AUTOSWITCH)
+	Use Linux setfont for character-translation.  (Use with discretion.)
+
+  --enable-nsl-fork			(define NSL_FORK)
+	Use this option to allow NSL requests to be aborted at will.
+
+  --enable-underlines			(define UNDERLINE_LINKS)
+	Use this option underline links rather than using boldface.
 
   --enable-warnings
 	Use this option to turn on GCC compiler warnings.
@@ -231,10 +237,10 @@ II. Compile instructions -- UNIX
 	standard locations for the associated header and library files,
 	unless you have preset the $CFLAGS and $LIBS variables.
 
-	--with-screen=ncurses		(defines NCURSES)
-	--with-screen=slang		(defines USE_SLANG)
+	--with-screen=ncurses		(define NCURSES)
+	--with-screen=slang		(define USE_SLANG)
 
-   --with-zlib				(defines USE_ZLIB)
+   --with-zlib				(define USE_ZLIB)
 	Use zlib for decompression of some gzip files.
 
 1d. Environment variables
@@ -268,30 +274,30 @@ II. Compile instructions -- UNIX
 1e. Example
     I use the following csh shell script to set environment variables and
     configure options rather than type them at the command line each time.
+	setenv RESOLVLIB -lbind
 
 	#!/bin/csh -f
-	setenv RESOLVLIB -lbind
-	setenv CPPFLAGS "-DNSL_FORK -I$HOME/.slang/src -I$HOME/.usr/include"
+	setenv CPPFLAGS "-SYSLOG_REQUESTED_URLS -I$HOME/slang \
+		-I$HOME/.usr/include"
 	setenv LIBS "-L$HOME/.slang/lib -L$HOME/.usr/lib"
 	./configure --exec-prefix=$HOME --bindir=$HOME/.lynx \
 		--mandir=$HOME/.usr/man --libdir=$HOME/.usr/lib \
 		--with-screen=slang --with-zlib
 
-    The syntax for setting environment variables depends upon your shell.
-    I have installed the libbind.a resolver library on this particular SunOS
-    machine, and prefer to use it to the old libresolv.a.  Setting the
-    environment variable RESOLVLIB to -lbind predefines it for the configure
-    script.  CPPFLAGS in this example defines NSL_FORK, which is not defined
-    by default, and for which there is no option switch.  (Check under the
-    "SITE_DEFS" heading in "makefile.in" for other minor defines for which
-    there are no options.)  CPPFLAGS also defines the full path to the slang
-    and zlib header files, which are not kept in standard directories.
-    Likewise, LIBS defines the nonstandard locations of libslang.a and libz.a.
-    Setting the option --bindir tells the configure script where I want to
-    install the lynx binary; setting --mandir tells it where to put the lynx.1
-    man page, and setting --libdir tells it where to put the configuration
-    file "lynx.cfg", when I type "make install".  The --with-screen=slang and
-    --with-zlib options are explained above.
+    The syntax for setting environment variables depends upon your shell.  I
+    use the libbind.a resolver library, not libresolv.a.  Setting RESOLVLIB to
+    -lbind defines this environment variable for `make', and thus must be set
+    in the same shell that `make' will be run.  CPPFLAGS in this example
+    predefines SYSLOG_REQUESTED_URLS for the configure script, since it is not
+    defined by default, and has no option switch (see "docs/README.defines").
+    CPPFLAGS also defines the full path to the slang and zlib header files,
+    which are not kept in standard directories.  Likewise, LIBS defines the
+    nonstandard locations of libslang.a and libz.a.  Setting the option
+    --bindir tells the configure script where I want to install the lynx
+    binary; setting --mandir tells it where to put the lynx.1 man page, and
+    setting --libdir tells it where to put the configuration file "lynx.cfg",
+    when I type "make install".  The --with-screen=slang and --with-zlib
+    options are explained above.
 
 2. Manual compile
     If auto-configure does not work for you, or you prefer to compile
@@ -396,15 +402,14 @@ Step 3b.  (optional compilation method)
 
 IV. Compile instructions -- Win32 (Windows95/NT)
 
-    The original Win32 port was built with Borland C++ 4.52.  Later versions
-    of Borland C++ reportedly can be used, but no other compilers have been
-    tested.  Before compiling the Lynx sources, you need a curses library, and
-    it is recommended that you have the zlib library.  Get pdcurses2.3 from
-    "http://www.lightlink.com/hessling/".  I have modified it so that mouse
-    support is no longer broken for Lynx (see "http://www.fdisk.com/doslynx/").
-    You will want to get zlib from "http://www.cdrom.com/pub/infozip/zlib/".
-    Compile these libraries, and put them in a convenient place (pdcurses
-    inside the Lynx directory).
+    The original Win32 port was built with Borland C++ 4.52, but later
+    versions reportedly can be used.  Before compiling the Lynx sources, you
+    need a curses library, and it is recommended that you have the zlib
+    library.  Get pdcurses2.3 from "http://www.lightlink.com/hessling/".  I
+    have modified it so that mouse support is no longer broken for Lynx (see
+    "http://www.fdisk.com/doslynx/").  You will want to get zlib from
+    "http://www.cdrom.com/pub/infozip/zlib/".  Compile these libraries, and
+    put them in a convenient place (pdcurses inside the Lynx directory).
 
     Unpack the latest Lynx source distribution, and make an obj directory
     under the source root to contain the compile output.  Copy in your
@@ -424,6 +429,15 @@ IV. Compile instructions -- Win32 (Windows95/NT)
 
 -- 1997/10/12 - W. Buttles <lynx-port@fdisk.com>
 
+    Although not well documented, it is possible to compile under the cygwin32
+    system, which will allow you to use the configure script described above
+    for Unix.  You also have the choice of using either slang or pdcurses.
+    See "http://www.flora.org/lynx-dev/html/month1097/msg00559.html" and
+    "http://www.flora.org/lynx-dev/html/month1097/msg00186.html", and other
+    messages along those threads.  You will have to make a minor alteration to
+    HTTCP.c (change delay to 30 seconds) and modify HTFILE.c (concerning
+    getgroups).  You will need a launch program to call helper applications.
+  
 
 V. Compile instructions -- 386 DOS
 
@@ -477,18 +491,27 @@ V. Compile instructions -- 386 DOS
     If all goes well, you will have a lynx.exe file.  If you have trouble,
     check to be sure djgpp.env is the way it came in the original package.  
 
-    You probably want to test lynx now, but lynx_386 won't work without a
-    packet driver installed.  For testing purposes, you can use
-    slip8250.com.  It is available in the  CRYNWR package (available at
-    "http://www.simtel.net/pub/simtelnet/msdos/pktdrvr/pktd11.zip").
-    Usage is "slip8250 0x60".  For connecting over a dialup PPP connection
-    you need a package such as dosppp or klos' pppshare (available at 
-    "http://www.simtel.net/pub/simtelnet/msdos/pktdrvr/dosppp05.zip" and
-    "ftp://ftp.klos.com/demo/pppshare.exe").
+    You'll want to test Lynx now, but Lynx_386 won't work without a packet
+    driver installed.  You can use slip8250.com, available in the CRYNWR
+    package "http://www.simtel.net/pub/simtelnet/msdos/pktdrvr/pktd11.zip".
+    Usage is "slip8250 0x60", but you may have to invoke it as, for example,
+    "slip8250  0x60 6 3 0x2F8" so that it uses COM2 and IRQ 3, in order to
+    avoid an IRQ conflict with a mouse or some other device.  Another packet
+    driver is slipper.exe, which is available from many sites, including
+    "ftp://jazz.trumpet.com.au/slipper".  To remove it from memory use 
+    termin.com (usage "termin 0x60"), available in the CRYNWR package.  To 
+    connect over a dialup PPP connection you need a package such as klos'
+    pppshare or dosppp (available at "ftp://ftp.klos.com/demo/pppshare.exe" and
+    "http://www.simtel.net/pub/simtelnet/msdos/pktdrvr/dosppp05.zip").
 
     See "http://www.fdisk.com/doslynx/lynxport.htm" for more hints and some
-    precompiled libraries.  If you compile lynx regularly, you may automate
-    the procedure by creating a batch file such as the following.
+    precompiled libraries.  One problem you can run into is when editing
+    userdefs.h and lynx.cfg, which have unix-style end of lines.  You would be
+    well advised to use an editor that can handle end of lines terminated with
+    a single LF character.  You can also unpack the source code using unzip386
+    or unzip with the -a switch to convert unix LF to dos CRLF.  That will make
+    texts more readable under DOS.  If you compile lynx regularly, you may
+    automate the procedure by creating a batch file such as the following.
 
 	cd djgpp\tcplib\obj
 	make
@@ -703,4 +726,4 @@ VIII. Acknowledgment
    Thanks to the many volunteers who offered suggestions for making this
    installation manual as accurate and complete as possible.
 
--- 1997/11/18 - H. Nelson <lynx-admin@irm.nara.kindai.ac.jp>
+-- 1997/12/26 - H. Nelson <lynx-admin@irm.nara.kindai.ac.jp>

@@ -496,39 +496,39 @@ re_read:
 #endif /* VMS */
                 c = '0';  /* keypad 0 */
             break;
-        case '1':                           /** VT300  Find  **/
+        case '1':                           /** VTxxx  Find  **/
             if ((b == '[' || c == 155) && (d=GetChar()) == '~')
                 c = FIND_KEY;
             break;
 	case '2':
 	    if (b == '[' || c == 155) {
-	        if ((d=GetChar())=='~')     /** VT300 Insert **/
+	        if ((d=GetChar())=='~')     /** VTxxx Insert **/
 	            c = INSERT_KEY;
 	        else if ((d == '8' ||
 			  d == '9') &&
 			 GetChar() == '~')
 	         {
-		    if (d == '8')            /** VT300  Help **/
+		    if (d == '8')            /** VTxxx  Help **/
 	                c = F1;
-	            else if (d == '9')       /** VT300   Do  **/
+	            else if (d == '9')       /** VTxxx   Do  **/
 	                c = DO_KEY;
 		    d = -1;
 		 }
 	    }
 	    break;
-	case '3':			     /** VT300 Delete **/
+	case '3':			     /** VTxxx Delete **/
 	    if ((b == '[' || c == 155) && (d=GetChar()) == '~')
 	        c = REMOVE_KEY;
 	    break;
-        case '4':                            /** VT300 Select **/
+        case '4':                            /** VTxxx Select **/
             if ((b == '[' || c == 155) && (d=GetChar()) == '~')
                 c = SELECT_KEY;
             break;
-        case '5':                            /** VT300 PrevScreen **/
+        case '5':                            /** VTxxx PrevScreen **/
             if ((b == '[' || c == 155) && (d=GetChar()) == '~')
                 c = PGUP;
             break;
-        case '6':                            /** VT300 NextScreen **/
+        case '6':                            /** VTxxx NextScreen **/
             if ((b == '[' || c == 155) && (d=GetChar()) == '~')
                 c = PGDOWN;
             break;
@@ -556,92 +556,97 @@ re_read:
 	 */
 	switch(c) {
 	case KEY_DOWN:	           /* The four arrow keys ... */
-	   c=DNARROW;
+	   c = DNARROW;
 	   break;
 	case KEY_UP:	
-	   c=UPARROW;
+	   c = UPARROW;
 	   break;
 	case KEY_LEFT:	
-	   c=LTARROW;
+	   c = LTARROW;
 	   break;
 	case KEY_RIGHT:	           /* ... */
-	   c=RTARROW;
+	   c = RTARROW;
 	   break;
 	case KEY_HOME:	           /* Home key (upward+left arrow) */
-	   c=HOME;
+	   c = HOME;
 	   break;
 	case KEY_CLEAR:	           /* Clear screen */
-	   c=18; /* CTRL-R */
+	   c = 18; /* CTRL-R */
 	   break;
 	case KEY_NPAGE:	           /* Next page */
-	   c=PGDOWN;
+	   c = PGDOWN;
 	   break;
 	case KEY_PPAGE:	           /* Previous page */
-	   c=PGUP;
+	   c = PGUP;
 	   break;
 	case KEY_LL:	           /* home down or bottom (lower left) */
-	   c=END;
+	   c = END;
 	   break;
                                         /* The keypad is arranged like this:*/
                                         /*    a1    up    a3   */
                                         /*   left   b2  right  */
                                         /*    c1   down   c3   */
 	case KEY_A1:	           /* upper left of keypad */
-	   c=HOME;
+	   c = HOME;
 	   break;
 	case KEY_A3:	           /* upper right of keypad */
-	   c=PGUP;
+	   c = PGUP;
 	   break;
 	case KEY_B2:	           /* center of keypad */
-	   c=DO_NOTHING;
+	   c = DO_NOTHING;
 	   break;
 	case KEY_C1:	           /* lower left of keypad */
-	   c=END;
+	   c = END;
 	   break;
 	case KEY_C3:	           /* lower right of keypad */
-	   c=PGDOWN;
+	   c = PGDOWN;
 	   break;
 #ifdef KEY_END
 	case KEY_END:	           /* end key           001 */
-	   c=END;
+	   c = END;
 	   break;
 #endif /* KEY_END */
 #ifdef KEY_HELP
 	case KEY_HELP:	           /* help key          001 */
-	   c=F1;
+	   c = F1;
 	   break;
 #endif /* KEY_HELP */
 #ifdef KEY_BACKSPACE
 	case KEY_BACKSPACE:
-	   c=127;		   /* backspace key (delete, not Ctrl-H) */
+	   c = 127;		   /* backspace key (delete, not Ctrl-H) */
 	   break;
 #endif /* KEY_BACKSPACE */
 #ifdef KEY_DC
 	case KEY_DC:
-	   c=REMOVE_KEY;	   /* delete character */
+	   c = REMOVE_KEY;	   /* delete character */
 	   break;
 #endif /* KEY_DC */
 #ifdef KEY_IC
 	case KEY_IC:
-	   c=INSERT_KEY;	   /* insert character */
+	   c = INSERT_KEY;	   /* insert character */
 	   break;
 #endif /* KEY_IC */
 #ifdef KEY_FIND
 	case KEY_FIND:
-	   c=FIND_KEY;		   /* find */
+	   c = FIND_KEY;	   /* find */
 	   break;
 #endif /* KEY_FIND */
+#ifdef KEY_REDO
+	case KEY_REDO:	           /* VTxxx Do */
+	   c = DO_KEY;
+	   break;
+#endif /* KEY_REDO */
 #ifdef KEY_SELECT
 	case KEY_SELECT:
-	   c=SELECT_KEY;	   /* select */
+	   c = SELECT_KEY;	   /* select */
 	   break;
 #endif /* KEY_SELECT */
 #ifdef KEY_F
 	case KEY_F(1):
-	   c=F1;		   /* help-key */
+	   c = F1;		   /* help-key */
 	   break;
 	case KEY_F(16):
-	   c=DO_KEY;		   /* help-key */
+	   c = DO_KEY;		   /* help-key */
 	   break;
 #endif /* KEY_F */
 

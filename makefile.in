@@ -22,9 +22,6 @@ INSTALL_DATA	= @INSTALL_DATA@
 ##this is the name of the directory the lynx source code is in.
 ##(e.g. lynx2-7-1, not the full path)
 lynxdir= lynx2-7-1
-
-##this is the name of the directory the lynx source code is in.
-##(e.g. lynx2-7, not the full path)
 lynxname= lynx2-7-1
 
 ## Where you want lynx installed
@@ -89,7 +86,7 @@ WWWINC= WWW/Library/Implementation
 # If you need ncurses, the latest version can always be found
 # in ftp://ftp.clark.net/pub/dickey/ncurses/  (4.1)
 # or ftp://ftp.netcom.com/pub/zm/zmbenhal/ncurses/ (1.9.9g)
-#
+
 # Also be sure to check out the compilation symbols in userdefs.h
 # before building Lynx!
 
@@ -103,38 +100,15 @@ SITE_LYDEFS = # Your defines here
 # Set SITE_DEFS to one or more of the defines for lynx below:
 SITE_DEFS = # Your defines here
 
-# defines include:
-# -DARCHIVE_ONLY   (see README.configure)
-# -DDIRED_SUPPORT  (see README.configure)
+# defines for which there are no configure options:
 # -DDONT_TRACK_INTERNAL_LINKS - Handle following links to same doc differently.
-# -DEXP_CHARTRANS  (see README.configure - needs to be set)
-# -DEXP_CHARTRANS_AUTOSWITCH also let lynx switch term mode(Linux console only)
 # -DHP_TERMINAL    For DIM workaround to REVERSE problems on HP terminals.
 # -DIGNORE_CTRL_C  Define if Control-C shouldn't exit lynx.
-# -DLINKEDSTYLES   (see README.configure)
-# -DLONG_LIST      (see README.configure)
-# -DLY_FIND_LEAKS  (see README.configure)
-# -DNCURSES        (see README.configure)
 # -DNOPORT         if you must use PASV instead of PORT for FTP
-# -DNO_CHANGE_EXECUTE_PERMS (see README.configure)
 # -DNO_CPU_LIMIT   Disables Max CPU timeout (includes CLOCKS_PER_SECOND)
-# -DNO_PARENT_DIR_REFERENCE (see README.configure)
-# -DNSL_FORK       For fork-based name server lookups that can be 'z'apped.
-# -DOK_GZIP        (see README.configure)
-# -DOK_OVERRIDE    (see README.configure)
-# -DOK_PERMIT      (see README.configure)
-# -DOK_TAR         (see README.configure)
-# -DOK_UUDECODE    (see README.configure)
-# -DOK_ZIP         (see README.configure)
 # -DSHORTENED_RBIND  For a SOCKSified lynx with the short version of Rbind.
 # -DSLANG_MBCS_HACK prevent cutoff lines when using UTF8 console (slang only)
 # -DSOCKS          For making a SOCKSified lynx.
-# -DUNDERLINE_LINKS  Define if you want links underlined instead of bold.
-# -DUSE_COLOR_STYLE (see README.configure)
-# -DUSE_EXTERNS    (see README.configure)
-# -DUSE_HASH       (see README.configure)
-# -DUSE_SLANG      (see README.configure)
-# -DUSE_ZLIB       To use some functions from zlib library if you have it.
 #
 # if you are linking to freeWAIS-0.202 or older, you should define this
 # in SITE_DEFS
@@ -160,9 +134,33 @@ SITE_DEFS = # Your defines here
 # define this in SITE_DEFS
 #
 # -DSYSLOG_REQUESTED_URLS
+
+# defines which have configure options   (see INSTALLATION, Section II-1c.):
+# -DARCHIVE_ONLY
+# -DDIRED_SUPPORT
+# -DEXP_CHARTRANS  (must be set by default; eventually will be removed)
+# -DEXP_CHARTRANS_AUTOSWITCH
+# -DLINKEDSTYLES
+# -DLONG_LIST
+# -DLY_FIND_LEAKS
+# -DNCURSES
+# -DNO_CHANGE_EXECUTE_PERMS
+# -DNO_PARENT_DIR_REFERENCE
+# -DNSL_FORK
+# -DOK_GZIP
+# -DOK_OVERRIDE
+# -DOK_PERMIT
+# -DOK_TAR
+# -DOK_UUDECODE
+# -DOK_ZIP
+# -DUNDERLINE_LINKS
+# -DUSE_COLOR_STYLE
+# -DUSE_HASH
+# -DUSE_SLANG
+# -DUSE_ZLIB
 #
 # for installation of local execution links, please see the file userdefs.h
-#
+
 # TESTED: Linux FreeBSD SunOS Solaris IRIX CLIX HP-UX AIX SCO
 all lynx:
 	cd WWW/Library/unix && $(MAKE) CC="$(CC)" \
@@ -241,19 +239,20 @@ save:
 compress: tar
 	cd ..; rm -f $(lynxname).tar.Z; compress -f -v $(lynxname).tar
 
-install: lynx install-bin install-man install-help install-cfg
+install: lynx install-bin install-man install-cfg @INSTALL_LSS@
+	@echo Use $(MAKE) install-help to install the help-files
 
 install-bin: $(bindir)
 	-mv -f $(bindir)/lynx $(bindir)/lynx.old
-	$(installbin) lynx $(bindir)/lynx
+	$(installbin) lynx $(bindir)/
 
 install-man : $(mandir) 
-	$(installdoc) lynx.man $(mandir)/lynx.1
+	$(installdoc) $(srcdir)/lynx.man $(mandir)/lynx.1
 
 install-help : $(helpdir)
 	(cd $(helpdir) && rm -rf *)
 	(cd $(srcdir)/lynx_help && tar cf - . ) | ( cd $(helpdir) && tar xf - )
-	(cd $(srcdir) && tar cf - CHANGES* PROBLEMS README samples test ) | \
+	(cd $(srcdir) && tar cf - C[HO]* PROBLEMS README samples test ) | \
 			       ( cd $(helpdir) && tar xf - )
 
 install-cfg :
@@ -261,13 +260,18 @@ install-cfg :
 	sed	-e '/^HELPFILE:http/s@^@#@' \
 		-e '/^#HELPFILE:file/s@#@@' \
 		-e '/^HELPFILE:file/s@/PATH_TO/lynx_help@$(helpdir)@' \
-		lynx.cfg >$(libdir)/lynx.cfg
+		$(srcdir)/lynx.cfg >$(libdir)/lynx.cfg
 	chmod 0644 $(libdir)/lynx.cfg
+
+install-lss :
+	-mv -f $(libdir)/lynx.lss $(libdir)/lynx.oldlss
+	$(INSTALL_DATA) $(srcdir)/samples/lynx.lss $(libdir)/lynx.lss
 
 uninstall:
 	-rm -f $(bindir)/lynx
 	-rm -f $(mandir)/lynx.1
 	-rm -f $(libdir)/lynx.cfg
+	-rm -f $(libdir)/lynx.lss
 	-rm -rf $(libdir)/lynx_help
 
 $(bindir) $(mandir) $(libdir) $(helpdir) :

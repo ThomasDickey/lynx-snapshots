@@ -206,10 +206,10 @@ PUBLIC void HTML_put_character ARGS2(HTStructured *, me, char, c)
      *  Handle SGML_LITTERAL tags that have HTChunk elements. - FM
      */
     switch (me->sp[0].tag_number) {
- 
+
     case HTML_COMMENT:
     	return;	/* Do Nothing */
-	
+
     case HTML_TITLE:
         if (c == LY_SOFT_HYPHEN)
 	    return;
@@ -227,16 +227,16 @@ PUBLIC void HTML_put_character ARGS2(HTStructured *, me, char, c)
 	HTChunkPutc(&me->script, c);
         return;
 
-    case HTML_OBJECT:	
+    case HTML_OBJECT:
     	HTChunkPutc(&me->object, c);
 	return;
 
-    case HTML_TEXTAREA:	
+    case HTML_TEXTAREA:
     	HTChunkPutc(&me->textarea, c);
 	return;
 
-    case HTML_SELECT:	
-    case HTML_OPTION:	
+    case HTML_SELECT:
+    case HTML_OPTION:
     	HTChunkPutc(&me->option, c);
 	return;
 
@@ -269,7 +269,7 @@ PUBLIC void HTML_put_character ARGS2(HTStructured *, me, char, c)
      *  Handle all other tag content. - FM
      */
     switch (me->sp[0].tag_number) {
- 
+
     case HTML_PRE:				/* Formatted text */
 	/*
 	 *  We guarrantee that the style is up-to-date in begin_litteral
@@ -279,7 +279,7 @@ PUBLIC void HTML_put_character ARGS2(HTStructured *, me, char, c)
 	    !(c == '\n' && me->inLABEL && !me->inP) &&
 	    !(c == '\n' && !me->inPRE)) {
 	    me->inP = TRUE;
-	    me->inLABEL = FALSE; 
+	    me->inLABEL = FALSE;
 	    HText_appendCharacter(me->text, c);
 	}
 	me->inPRE = TRUE;
@@ -294,11 +294,11 @@ PUBLIC void HTML_put_character ARGS2(HTStructured *, me, char, c)
 	 */
 	if (c != '\r')	{
 	    me->inP = TRUE;
-	    me->inLABEL = FALSE; 
+	    me->inLABEL = FALSE;
 	    HText_appendCharacter(me->text, c);
 	}
 	break;
-	
+
     default:
         /*
 	 *  Free format text.
@@ -307,8 +307,8 @@ PUBLIC void HTML_put_character ARGS2(HTStructured *, me, char, c)
 	    if (c != '\r' &&
 	        !(c == '\n' && me->inLABEL && !me->inP) &&
 		!(c == '\n' && !me->inPRE)) {
-		me->inP = TRUE; 
-		me->inLABEL = FALSE; 
+		me->inP = TRUE;
+		me->inLABEL = FALSE;
 	        HText_appendCharacter(me->text, c);
 	    }
 	    me->inPRE = TRUE;
@@ -316,11 +316,11 @@ PUBLIC void HTML_put_character ARGS2(HTStructured *, me, char, c)
 	} else if (!strcmp(me->sp->style->name,"Listing") ||
 		   !strcmp(me->sp->style->name,"Example")) {
 	    if (c != '\r') {
-		me->inP = TRUE; 
-		me->inLABEL = FALSE; 
+		me->inP = TRUE;
+		me->inLABEL = FALSE;
 	        HText_appendCharacter(me->text, c);
 	    }
-	
+
 	} else {
 	    if (me->style_change) {
 	        if ((c == '\n') || (c == ' '))
@@ -340,7 +340,7 @@ PUBLIC void HTML_put_character ARGS2(HTStructured *, me, char, c)
 	    } else if (c == ' ' || c == '\t') {
 	        if (HText_getLastChar(me->text) != ' ') {
 		    me->inP = TRUE;
-		    me->inLABEL = FALSE; 
+		    me->inLABEL = FALSE;
 	            HText_appendCharacter(me->text, ' ');
 		}
 
@@ -386,7 +386,7 @@ PUBLIC void HTML_put_string ARGS2(HTStructured *, me, CONST char *, s)
 
     case HTML_COMMENT:
     	break;					/* Do Nothing */
-	
+
     case HTML_TITLE:
     	HTChunkPuts(&me->title, s);
 	break;
@@ -408,20 +408,20 @@ PUBLIC void HTML_put_string ARGS2(HTStructured *, me, CONST char *, s)
 	 */
     	HText_appendText(me->text, s);
 	break;
-	
-    case HTML_OBJECT:	
+
+    case HTML_OBJECT:
     	HTChunkPuts(&me->object, s);
 	break;
 
-    case HTML_TEXTAREA:	
+    case HTML_TEXTAREA:
     	HTChunkPuts(&me->textarea, s);
 	break;
 
-    case HTML_SELECT:	
-    case HTML_OPTION:	
+    case HTML_SELECT:
+    case HTML_OPTION:
     	HTChunkPuts(&me->option, s);
 	break;
-	
+
     case HTML_MATH:
     	HTChunkPuts(&me->math, s);
 	break;
@@ -458,7 +458,7 @@ PUBLIC void HTML_put_string ARGS2(HTStructured *, me, CONST char *, s)
 		    c = *p;
 		}
 		if (me->style_change) {
-		    if ((c == '\n') || (c == ' ') || (c == '\t')) 
+		    if ((c == '\n') || (c == ' ') || (c == '\t'))
 			continue;  /* Ignore it */
 		    UPDATE_STYLE;
 		}
@@ -472,7 +472,7 @@ PUBLIC void HTML_put_string ARGS2(HTStructured *, me, CONST char *, s)
 		} else if (c == ' ' || c == '\t') {
 		   if (HText_getLastChar(me->text) != ' ')
 			HText_appendCharacter(me->text, ' ');
-			
+
 		} else if (c == '\r') {
 			/* ignore */
 		} else {
@@ -486,7 +486,7 @@ PUBLIC void HTML_put_string ARGS2(HTStructured *, me, CONST char *, s)
         	    HText_setLastChar(me->text, ' ');
     		} else if (c == '\r' &&
 			   HText_getLastChar(me->text) == ' ') {
-		    /* 
+		    /*
 		     *  \r's are ignored.  In order to keep collapsing
 		     *  spaces correctly, we must default back to the
 		     *  previous seperator, if there was one.  So we
@@ -568,7 +568,7 @@ PUBLIC void HTML_write ARGS3(HTStructured *, me, CONST char*, s, int, l)
    string (resolution of relative URLs etc.). This variable only used
    locally here, don't confuse with LYinternal_flag which is for
    for overriding non-caching similar to LYoverride_no_cache. - kw */
-#define CHECK_FOR_INTERN(s) intern_flag = (s && (*s=='#' || *s=='\0')) ? TRUE : FALSE; 
+#define CHECK_FOR_INTERN(s) intern_flag = (s && (*s=='#' || *s=='\0')) ? TRUE : FALSE;
 
 /* Last argument to pass to HTAnchor_findChildAndLink() calls,
    just an abbreviation. - kw */
@@ -770,7 +770,7 @@ PRIVATE void HTML_start_element ARGS6(
     }
 #endif /* USE_COLOR_STYLE */
 
-#if 0 
+#if 0
 	me->inStyle[element_number]=1; /* this is a goodthing(tm) */
 #endif
 
@@ -823,12 +823,12 @@ PRIVATE void HTML_start_element ARGS6(
 		}
 	    }
 
-	    /* 
+	    /*
 	     *  Get parent's address for defaulted fields.
 	     */
 	    StrAllocCopy(related, me->node_anchor->address);
 
-	    /* 
+	    /*
 	     *  Create the access field.
 	     */
 	    if ((temp = HTParse(base, related,
@@ -884,6 +884,7 @@ PRIVATE void HTML_start_element ARGS6(
 	    FREE(base);
 
             me->inBASE = TRUE;
+	    StrAllocCopy(me->node_anchor->content_base, me->base_href);
 	}
 	break;
 
@@ -974,7 +975,7 @@ PRIVATE void HTML_start_element ARGS6(
 		    /*
 		     *  Load the RevTitle element if a TITLE attribute
 		     *  and value are present. - FM
-		     */ 
+		     */
 		    if (present && present[HTML_LINK_TITLE] &&
 		        value[HTML_LINK_TITLE] &&
 			*value[HTML_LINK_TITLE] != '\0') {
@@ -1121,7 +1122,7 @@ PRIVATE void HTML_start_element ARGS6(
 	        StrAllocCopy(href, helpfile);
 	    } else if (!strcasecomp(value[HTML_LINK_REL], "Index")) {
 	        StrAllocCopy(href, indexfile);
-	    } else { 
+	    } else {
 	        if (TRACE) {
 		    fprintf(stderr,
 			    "HTML: LINK with REL=\"%s\" and no HREF ignored.\n",
@@ -1136,7 +1137,7 @@ PRIVATE void HTML_start_element ARGS6(
 	     *  Create a title (link name) from the TITLE value,
 	     *  if present, or default to the REL value that was
 	     *  loaded into title. - FM
-	     */ 
+	     */
 	    if (present && present[HTML_LINK_TITLE] &&
 		value[HTML_LINK_TITLE] && *value[HTML_LINK_TITLE] != '\0') {
 		StrAllocCopy(title, value[HTML_LINK_TITLE]);
@@ -1233,7 +1234,7 @@ PRIVATE void HTML_start_element ARGS6(
 	    }
 	    else
 		HTML_put_string(me, title);
-#else	
+#else
 	    HTML_put_string(me, title);
 #endif
 	    if (me->inBoldH == FALSE)
@@ -1553,7 +1554,7 @@ PRIVATE void HTML_start_element ARGS6(
 	if (me->Division_Level < (MAX_NESTING - 1)) {
 	    me->Division_Level++;
 	} else if (TRACE) {
-            fprintf(stderr, 
+            fprintf(stderr,
 		"HTML: ****** Maximum nesting of %d divisions exceeded!\n",
             	MAX_NESTING);
 	}
@@ -1671,7 +1672,7 @@ PRIVATE void HTML_start_element ARGS6(
 	}
 	UPDATE_STYLE;
 	CHECK_ID(HTML_H_ID);
-	    
+
 	if ((bold_headers == TRUE ||
 	     (ElementNumber == HTML_H1 && bold_H1 == TRUE)) &&
 	    (styles[ElementNumber]->font&HT_BOLD)) {
@@ -1716,7 +1717,7 @@ PRIVATE void HTML_start_element ARGS6(
 	    }
 	} else if (me->sp[0].tag_number == HTML_ADDRESS) {
 	    /*
-	     *  We're in an ADDRESS. Treat P as an instruction 
+	     *  We're in an ADDRESS. Treat P as an instruction
 	     *  to start a newline, if needed, then fall through
 	     *  to handle attributes. - FM
 	     */
@@ -2026,7 +2027,7 @@ PRIVATE void HTML_start_element ARGS6(
     case HTML_BLINK:
     case HTML_I:
     case HTML_U:
-    
+
     case HTML_CITE:			/* Logical character highlighting */
     case HTML_EM:
     case HTML_STRONG:
@@ -2052,7 +2053,7 @@ PRIVATE void HTML_start_element ARGS6(
 	        fprintf(stderr,"Underline Level is %d\n", me->Underline_Level);
 	}
     	break;
-	
+
     case HTML_ABBREV:	/* Miscellaneous character containers */
     case HTML_ACRONYM:
     case HTML_AU:
@@ -2206,13 +2207,13 @@ PRIVATE void HTML_start_element ARGS6(
 
 	} else {
             change_paragraph_style(me, present && present[HTML_DL_COMPACT]
-    		 ? styles[(HTML_DLC1 - 1) + me->List_Nesting_Level] 
+    		 ? styles[(HTML_DLC1 - 1) + me->List_Nesting_Level]
 		 : styles[(HTML_DL1 - 1) + me->List_Nesting_Level]);
 	}
 	UPDATE_STYLE;	  /* update to the new style */
 	CHECK_ID(HTML_DL_ID);
 	break;
-	
+
     case HTML_DLC:
         me->List_Nesting_Level++;  /* increment the List nesting level */
         if (me->List_Nesting_Level <= 0) {
@@ -2222,7 +2223,7 @@ PRIVATE void HTML_start_element ARGS6(
             change_paragraph_style(me, styles[HTML_DLC6]);
 
         } else {
-            change_paragraph_style(me, 
+            change_paragraph_style(me,
                             styles[(HTML_DLC1 - 1) + me->List_Nesting_Level]);
         }
 	UPDATE_STYLE;	  /* update to the new style */
@@ -2270,7 +2271,7 @@ PRIVATE void HTML_start_element ARGS6(
 	 *  Check whether we have a starting sequence number,
 	 *  or want to continue the numbering from a previous
 	 *  OL in this nest. - FM
-	 */ 
+	 */
         if (present && (present[HTML_OL_SEQNUM] || present[HTML_OL_START])) {
 	    int seqnum;
 
@@ -2359,7 +2360,7 @@ PRIVATE void HTML_start_element ARGS6(
        	    change_paragraph_style(me, styles[HTML_OL6]);
 
 	} else {
-            change_paragraph_style(me, 
+            change_paragraph_style(me,
 		          styles[HTML_OL1 + me->List_Nesting_Level - 1]);
 	}
 	UPDATE_STYLE;  /* update to the new style */
@@ -2396,10 +2397,10 @@ PRIVATE void HTML_start_element ARGS6(
 	        !(present && present[HTML_UL_TYPE] &&
 		  value[HTML_UL_TYPE] &&
 		  0==strcasecomp(value[HTML_UL_TYPE], "PLAIN"))) {
-                change_paragraph_style(me, 
+                change_paragraph_style(me,
 		          styles[HTML_OL1 + me->List_Nesting_Level - 1]);
 	    } else {
-                change_paragraph_style(me, 
+                change_paragraph_style(me,
 		          styles[HTML_MENU1 + me->List_Nesting_Level - 1]);
 		ElementNumber = HTML_DIR;
 	    }
@@ -2419,13 +2420,13 @@ PRIVATE void HTML_start_element ARGS6(
        	    change_paragraph_style(me, styles[HTML_MENU6]);
 
 	} else {
-            change_paragraph_style(me, 
+            change_paragraph_style(me,
 		          styles[HTML_MENU1 + me->List_Nesting_Level - 1]);
 	}
 	UPDATE_STYLE;  /* update to the new style */
 	CHECK_ID(HTML_UL_ID);
 	break;
-	
+
     case HTML_LH:
         UPDATE_STYLE;  /* update to the new style */
 	HText_appendParagraph(me->text);
@@ -2554,7 +2555,7 @@ PRIVATE void HTML_start_element ARGS6(
 		case 6:
 	    	    HTML_put_character(me, '=');
 		    break;
-		    
+
 	    }
 	    /*
 	     *  Keep using HTML_put_character so that any other
@@ -2751,7 +2752,7 @@ PRIVATE void HTML_start_element ARGS6(
 		(HTLinkType*)HTAtom_for(temp) : INTERN_LT);  /* Type */
 	FREE(temp);
 	FREE(id_string);
-	    
+
 	if (me->CurrentA && present) {
 	    if (present[HTML_A_TITLE] &&
 	        value[HTML_A_TITLE] && *value[HTML_A_TITLE] != '\0') {
@@ -3343,7 +3344,7 @@ PRIVATE void HTML_start_element ARGS6(
 	dest = NULL;
 	dest_ismap = FALSE;
 	break;
-    
+
     case HTML_MAP:
 	/*
 	 *  Load id_string if we have a NAME or ID. - FM
@@ -4226,7 +4227,7 @@ PRIVATE void HTML_start_element ARGS6(
 	    char * method = NULL;
 	    char * enctype = NULL;
 	    CONST char * accept_cs = NULL;
-	    
+
 	    HTChildAnchor * source;
 	    HTAnchor *link_dest;
 
@@ -4299,7 +4300,7 @@ PRIVATE void HTML_start_element ARGS6(
 		}
 	    }
 	    if (action) {
-	        source = HTAnchor_findChildAndLink(me->node_anchor, 
+	        source = HTAnchor_findChildAndLink(me->node_anchor,
 						   NULL,
 						   action,
 						   (HTLinkType*)0);
@@ -4511,7 +4512,7 @@ PRIVATE void HTML_start_element ARGS6(
 		while (len > 0 && I.value[len] == ' ')
 		    I.value[len--] = '\0';
 	    }
-		
+
 	    if (present && present[HTML_BUTTON_DISABLED])
 		I.disabled = YES;
 
@@ -4825,7 +4826,7 @@ PRIVATE void HTML_start_element ARGS6(
 		BOOLEAN CurrentUseDefaultRawMode = LYUseDefaultRawMode;
 		HTCJKlang CurrentHTCJK = HTCJK;
 		int len;
-		
+
 		if (I.type && !strcasecomp(I.type, "hidden")) {
 		    me->HiddenValue = TRUE;
 		    current_char_set = 0;	/* Default ISO-Latin1 */
@@ -4874,7 +4875,7 @@ PRIVATE void HTML_start_element ARGS6(
 		        I.value[len--] = '\0';
 		}
 		me->UsePlainSpace = FALSE;
-		
+
 
 		if (I.type && !strcasecomp(I.type, "hidden")) {
 		    me->HiddenValue = FALSE;
@@ -5083,7 +5084,7 @@ PRIVATE void HTML_start_element ARGS6(
 	    break;
 	}
 
-	/* 
+	/*
 	 *  Set to know we are in a textarea.
 	 */
 	me->inTEXTAREA = TRUE;
@@ -5116,14 +5117,14 @@ PRIVATE void HTML_start_element ARGS6(
 
 	if (present && present[HTML_TEXTAREA_COLS] &&
 	    value[HTML_TEXTAREA_COLS] &&
-	    isdigit((unsigned char)*value[HTML_TEXTAREA_COLS]))  
+	    isdigit((unsigned char)*value[HTML_TEXTAREA_COLS]))
 	    StrAllocCopy(me->textarea_cols, value[HTML_TEXTAREA_COLS]);
 	else
 	    StrAllocCopy(me->textarea_cols, "60");
 
 	if (present && present[HTML_TEXTAREA_ROWS] &&
 	    value[HTML_TEXTAREA_ROWS] &&
-	    isdigit((unsigned char)*value[HTML_TEXTAREA_ROWS]))  
+	    isdigit((unsigned char)*value[HTML_TEXTAREA_ROWS]))
 	    me->textarea_rows = atoi(value[HTML_TEXTAREA_ROWS]);
 	else
 	    me->textarea_rows = 4;
@@ -5238,9 +5239,9 @@ PRIVATE void HTML_start_element ARGS6(
 		StrAllocCopy(name, value[HTML_SELECT_NAME]);
 		UNESCAPE_FIELDNAME_TO_STD(&name);
 	    }
-	    if (present && present[HTML_SELECT_MULTIPLE])  
+	    if (present && present[HTML_SELECT_MULTIPLE])
 		multiple=YES;
-	    if (present && present[HTML_SELECT_DISABLED])  
+	    if (present && present[HTML_SELECT_DISABLED])
 		me->select_disabled = TRUE;
 	    if (present && present[HTML_SELECT_SIZE] &&
 	        value[HTML_SELECT_SIZE] && *value[HTML_SELECT_SIZE]) {
@@ -5376,7 +5377,7 @@ PRIVATE void HTML_start_element ARGS6(
 		I.value_cs = current_char_set;
 
 	        I.type = "OPTION";
-    
+
 	        if ((present && present[HTML_OPTION_SELECTED]) ||
 		    (me->first_option && LYSelectPopups == FALSE &&
 		     HTCurSelectGroupType == F_RADIO_TYPE))
@@ -5442,7 +5443,7 @@ PRIVATE void HTML_start_element ARGS6(
 		}
 
 	        HText_beginInput(me->text, me->inUnderline, &I);
-    
+
 		if (HTCurSelectGroupType == F_CHECKBOX_TYPE) {
 	            /*
 		     *  Put a "[_]" placeholder, and one space
@@ -5572,7 +5573,7 @@ PRIVATE void HTML_start_element ARGS6(
 	if (me->Division_Level < (MAX_NESTING - 1)) {
 	    me->Division_Level++;
 	} else if (TRACE) {
-            fprintf(stderr, 
+            fprintf(stderr,
 	    "HTML: ****** Maximum nesting of %d divisions/tables exceeded!\n",
             	    MAX_NESTING);
 	}
@@ -5672,7 +5673,7 @@ PRIVATE void HTML_start_element ARGS6(
         UPDATE_STYLE;
 	CHECK_ID(HTML_TR_ID);
         break;
-    
+
     case HTML_COL:
     case HTML_COLGROUP:
         /*
@@ -5689,7 +5690,7 @@ PRIVATE void HTML_start_element ARGS6(
         UPDATE_STYLE;
 	CHECK_ID(HTML_COL_ID);
         break;
-    
+
     case HTML_TH:
 	if (me->inA) {
 	    SET_SKIP_STACK(HTML_A);
@@ -5754,10 +5755,10 @@ PRIVATE void HTML_start_element ARGS6(
 	if (me->sp == me->stack) {
 	    if (me->stack_overrun == FALSE) {
 		if (TRACE) {
-		    fprintf(stderr, 
+		    fprintf(stderr,
 			"HTML: ****** Maximum nesting of %d tags exceeded!\n",
 			MAX_NESTING);
-	    
+
 		} else {
 		    HTAlert(HTML_STACK_OVERRUN);
 		}
@@ -5773,7 +5774,7 @@ PRIVATE void HTML_start_element ARGS6(
 	if (TRACE)
 	    fprintf(stderr,"HTML:begin_element: adding style to stack - %s\n",
 							me->new_style->name);
-    }	
+    }
 
 #if defined(USE_COLOR_STYLE)
 /* end empty tags straight away */
@@ -5848,7 +5849,7 @@ PRIVATE void HTML_end_element ARGS3(
 #ifdef CAREFUL			/* parser assumed to produce good nesting */
     if (element_number != me->sp[0].tag_number &&
         HTML_dtd.tags[element_number].contents != SGML_EMPTY) {
-        fprintf(stderr, 
+        fprintf(stderr,
 		"HTMLText: end of element %s when expecting end of %s\n",
 		HTML_dtd.tags[element_number].name,
 		HTML_dtd.tags[me->sp->tag_number].name);
@@ -6055,7 +6056,7 @@ PRIVATE void HTML_end_element ARGS3(
 	    }
 	}
 	break;
-	
+
     case HTML_STYLE:
 	if (!me->text)
 	    UPDATE_STYLE;
@@ -6215,7 +6216,7 @@ PRIVATE void HTML_end_element ARGS3(
 	    }
 	} else if (me->sp[0].tag_number == HTML_ADDRESS) {
 	    /*
-	     *  We're in an ADDRESS. Treat </P> as an instruction 
+	     *  We're in an ADDRESS. Treat </P> as an instruction
 	     *  to start a newline, if needed. - kw
 	     */
 	    if (HText_LastLineSize(me->text, FALSE)) {
@@ -6267,7 +6268,7 @@ PRIVATE void HTML_end_element ARGS3(
     case HTML_BLINK:
     case HTML_I:
     case HTML_U:
-    
+
     case HTML_CITE:			/* Logical character highlighting */
     case HTML_EM:
     case HTML_STRONG:
@@ -6295,7 +6296,7 @@ PRIVATE void HTML_end_element ARGS3(
 	        fprintf(stderr,"Underline Level is %d\n", me->Underline_Level);
 	}
     	break;
-	
+
     case HTML_ABBREV:	/* Miscellaneous character containers */
     case HTML_ACRONYM:
     case HTML_AU:
@@ -6844,7 +6845,7 @@ End_Object:
 	 *  and in that case SGML_character() in SGML.c is
 	 *  not able to ensure correct nesting; or it may have
 	 *  failed to enforce valid nesting.  If a SELECT is open,
-	 *  issue a message, then 
+	 *  issue a message, then
 	 *  call HTML_end_element() directly (with a
 	 *  check in that to bypass decrementing of the HTML
 	 *  parser's stack) to close the SELECT. - kw
@@ -7142,7 +7143,7 @@ End_Object:
 		     */
 		    for (i = 0; i < 6; i++) {
 		        if (*ptr == ' ')
-	    	            HText_appendCharacter(me->text,HT_NON_BREAK_SPACE); 
+	    	            HText_appendCharacter(me->text,HT_NON_BREAK_SPACE);
 		        else
 	    	            HText_appendCharacter(me->text,*ptr);
 			ptr++;
@@ -7151,7 +7152,7 @@ End_Object:
 	        }
 	        for (; ptr && *ptr != '\0'; ptr++) {
 		    if (*ptr == ' ')
-	    	        HText_appendCharacter(me->text,HT_NON_BREAK_SPACE); 
+	    	        HText_appendCharacter(me->text,HT_NON_BREAK_SPACE);
 		    else
 	    	        HText_appendCharacter(me->text,*ptr);
 		}
@@ -7163,7 +7164,7 @@ End_Object:
 		    HText_setLastChar(me->text, ']');
 		    me->in_word = YES;
 		}
-		HText_setIgnoreExcess(me->text, FALSE); 
+		HText_setIgnoreExcess(me->text, FALSE);
 	    }
     	    HTChunkClear(&me->option);
 
@@ -7251,7 +7252,7 @@ End_Object:
     default:
 	change_paragraph_style(me, me->sp->style);  /* Often won't really change */
 	break;
-	
+
     } /* switch */
 #ifdef USE_COLOR_STYLE
     {
@@ -7309,11 +7310,11 @@ End_Object:
 PUBLIC int HTML_put_entity ARGS2(HTStructured *, me, int, entity_number)
 {
     int nent = HTML_dtd.number_of_entities;
-  
-    if (entity_number < nent) {		
+
+    if (entity_number < nent) {
 	HTML_put_string(me, p_entity_values[entity_number]);
 	return HT_OK;
-#ifdef EXP_CHARTRANS	
+#ifdef EXP_CHARTRANS
     } else if (me->UCLYhndl < 0) {
 	return HT_CANNOT_TRANSLATE;
     } else {
@@ -7345,7 +7346,7 @@ PUBLIC int HTML_put_entity ARGS2(HTStructured *, me, int, entity_number)
 **	of document, so we don't.
 **
 **	If non-interactive, everything is freed off.   No: crashes -listrefs
-**	Otherwise, the interactive object is left.	
+**	Otherwise, the interactive object is left.
 */
 PRIVATE void HTML_free ARGS1(HTStructured *, me)
 {
@@ -7379,7 +7380,7 @@ PRIVATE void HTML_free ARGS1(HTStructured *, me)
 	 *
 	 *  IF those tags are not declared SGML_EMPTY, but we let
 	 *  the SGML.c parser take care of correctly stacked ordering,
-	 *  and of correct wind-down on end-of-stream (in SGML_free 
+	 *  and of correct wind-down on end-of-stream (in SGML_free
 	 *  SGML_abort),
 	 *  THEN these and other checks here in HTML.c should not be
 	 *  necessary.  Still it can't hurt to include them. - kw
@@ -7674,14 +7675,14 @@ PRIVATE void get_styles NOARGS
     styles[HTML_OL6] =		HTStyleNamed(styleSheet, "List6");
 
     styles[HTML_MENU] =
-    styles[HTML_DIR] =		HTStyleNamed(styleSheet, "Menu");    
+    styles[HTML_DIR] =		HTStyleNamed(styleSheet, "Menu");
 	/* nested list styles */
-    styles[HTML_MENU1] =	HTStyleNamed(styleSheet, "Menu1");    
-    styles[HTML_MENU2] =	HTStyleNamed(styleSheet, "Menu2");    
-    styles[HTML_MENU3] =	HTStyleNamed(styleSheet, "Menu3");    
-    styles[HTML_MENU4] =	HTStyleNamed(styleSheet, "Menu4");    
-    styles[HTML_MENU5] =	HTStyleNamed(styleSheet, "Menu5");    
-    styles[HTML_MENU6] =	HTStyleNamed(styleSheet, "Menu6");    
+    styles[HTML_MENU1] =	HTStyleNamed(styleSheet, "Menu1");
+    styles[HTML_MENU2] =	HTStyleNamed(styleSheet, "Menu2");
+    styles[HTML_MENU3] =	HTStyleNamed(styleSheet, "Menu3");
+    styles[HTML_MENU4] =	HTStyleNamed(styleSheet, "Menu4");
+    styles[HTML_MENU5] =	HTStyleNamed(styleSheet, "Menu5");
+    styles[HTML_MENU6] =	HTStyleNamed(styleSheet, "Menu6");
 
     styles[HTML_DLC] =		HTStyleNamed(styleSheet, "GlossaryCompact");
 	/* nested list styles */
@@ -7711,14 +7712,14 @@ PRIVATE void get_styles NOARGS
 **	-----------------------
 */
 PUBLIC CONST HTStructuredClass HTMLPresentation = /* As opposed to print etc */
-{		
+{
 	"Lynx_HTML_Handler",
 	HTML_free,
 	HTML_abort,
 	HTML_put_character, 	HTML_put_string,  HTML_write,
 	HTML_start_element, 	HTML_end_element,
 	HTML_put_entity
-}; 
+};
 
 /*		New Structured Text object
 **		--------------------------
@@ -7733,7 +7734,7 @@ PUBLIC HTStructured* HTML_new ARGS3(
 {
 
     HTStructured * me;
-   
+
     if (format_out != WWW_PLAINTEXT && format_out != WWW_PRESENT) {
         HTStream * intermediate = HTStreamStack(WWW_HTML, format_out,
 						stream, anchor);
@@ -7794,7 +7795,7 @@ PUBLIC HTStructured* HTML_new ARGS3(
     me->object_codetype = NULL;
     me->object_usemap = NULL;
     me->object_name = NULL;
- 
+
     me->option.size = 0;
     me->option.growby = 128;
     me->option.allocated = 0;
@@ -7882,7 +7883,7 @@ PUBLIC HTStructured* HTML_new ARGS3(
     me->inUnderline = FALSE;
 
     me->needBoldH = FALSE;
- 
+
     me->comment_start = NULL;
     me->comment_end = NULL;
 
@@ -7988,7 +7989,7 @@ PUBLIC HTStructured* HTML_new ARGS3(
     me->target = stream;
     if (stream)
         me->targetClass = *stream->isa;			/* Copy pointers */
-    
+
     return (HTStructured*) me;
 }
 
@@ -7999,7 +8000,7 @@ PUBLIC HTStructured* HTML_new ARGS3(
 */
 PUBLIC HTStream* HTMLToPlain ARGS3(
 	HTPresentation *,	pres,
-	HTParentAnchor *,	anchor,	
+	HTParentAnchor *,	anchor,
 	HTStream *,		sink)
 {
     return SGML_new(&HTML_dtd, anchor, HTML_new(anchor, pres->rep_out, sink));
@@ -8012,7 +8013,7 @@ PUBLIC HTStream* HTMLToPlain ARGS3(
 */
 PUBLIC HTStream* HTMLParsedPresent ARGS3(
 	HTPresentation *,	pres,
-	HTParentAnchor *,	anchor,	
+	HTParentAnchor *,	anchor,
 	HTStream *,		sink)
 {
     HTStream * intermediate = sink;
@@ -8067,11 +8068,11 @@ PUBLIC HTStream* HTMLParsedPresent ARGS3(
 */
 PUBLIC HTStream* HTMLToC ARGS3(
 	HTPresentation *,	pres,
-	HTParentAnchor *,	anchor,	
+	HTParentAnchor *,	anchor,
 	HTStream *,		sink)
 {
     HTStructured * html;
-    
+
     (*sink->isa->put_string)(sink, "/* ");	/* Before even title */
     html = HTML_new(anchor, WWW_PLAINTEXT, sink);
     html->comment_start = "/* ";
@@ -8090,7 +8091,7 @@ PUBLIC HTStream* HTMLToC ARGS3(
 #ifndef GUI
 PUBLIC HTStream* HTMLPresent ARGS3(
 	HTPresentation *,	pres,
-	HTParentAnchor *,	anchor,	
+	HTParentAnchor *,	anchor,
 	HTStream *,		sink)
 {
     return SGML_new(&HTML_dtd, anchor, HTML_new(anchor, WWW_PRESENT, NULL));
@@ -8122,4 +8123,4 @@ PUBLIC int HTLoadError ARGS3(
 {
     HTAlert(message);		/* @@@@@@@@@@@@@@@@@@@ */
     return -number;
-} 
+}

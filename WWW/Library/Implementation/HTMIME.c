@@ -1696,7 +1696,7 @@ PRIVATE void HTMIME_put_character ARGS2(
 	        HTMIME_TrimDoubleQuotes(me->value);
                 if (TRACE)
                     fprintf(stderr,
-		    	    "HTMIME: PICKED UP Content-Base: '%s'\n",
+		    	    "HTMIME: PICKED UP Content-Features: '%s'\n",
 			    me->value);
                 break;
 	    case miCONTENT_LANGUAGE:
@@ -2260,8 +2260,6 @@ PUBLIC HTStream* HTNetMIME ARGS3(
 **
 **	Written by S. Ichikawa,
 **	partially inspired by encdec.c of <jh@efd.lth.se>.
-**
-**	Generalized HTmmdecode for chartrans - K. Weide 1997-03-06
 */
 #define	BUFLEN	1024
 #ifdef ESC
@@ -2347,6 +2345,10 @@ PUBLIC void HTmmdec_quote ARGS2(
     strcpy(t, buf);
 }
 
+#ifdef NOTDEFINED
+/*
+**	Generalized HTmmdecode for chartrans - K. Weide 1997-03-06
+*/
 PUBLIC void HTmmdecode ARGS2(
 	char *,		trg,
 	char *,		str)
@@ -2440,6 +2442,71 @@ PUBLIC void HTmmdecode ARGS2(
 end:
     strcpy(trg, buf);
 }
+#else
+/*
+**	HTmmdecode for ISO-2022-JP - FM
+*/
+PUBLIC void HTmmdecode ARGS2(
+	char *,		trg,
+	char *,		str)
+{
+    char buf[BUFLEN], mmbuf[BUFLEN];
+    char *s, *t, *u;
+    int  base64, quote;
+
+    buf[0] = '\0';
+
+    for (s = str, u = buf; *s; ) {
+	if (!strncasecomp(s, "=?ISO-2022-JP?B?", 16)) {
+	    base64 = 1;
+	} else {
+	    base64 = 0;
+	}
+	if (!strncasecomp(s, "=?ISO-2022-JP?Q?", 16)) {
+	    quote = 1;
+	} else {
+	    quote = 0;
+	}
+	if (base64 || quote) {
+	    if (HTmmcont) {
+		for (t = s - 1;
+		    t >= str && (*t == ' ' || *t == '\t'); t--) {
+			u--;
+		}
+	    }
+	    for (s += 16, t = mmbuf; *s; ) {
+		if (s[0] == '?' && s[1] == '=') { 
+		    break;
+		} else {
+		    *t++ = *s++;
+		}
+	    }
+	    if (s[0] != '?' || s[1] != '=') {
+		goto end;
+	    } else {
+		s += 2;
+		*t = '\0';
+	    }
+	    if (base64)
+	        HTmmdec_base64(mmbuf, mmbuf);
+	    if (quote)
+	        HTmmdec_quote(mmbuf, mmbuf);
+	    for (t = mmbuf; *t; )
+	        *u++ = *t++;
+	    HTmmcont = 1;
+	    /* if (*s == ' ' || *s == '\t') *u++ = *s; */
+	    /* for ( ; *s == ' ' || *s == '\t'; s++) ; */
+	} else {
+	    if (*s != ' ' && *s != '\t')
+	        HTmmcont = 0;
+	    *u++ = *s++;
+	}
+    }
+    *u = '\0';
+end:
+    strcpy(trg, buf);
+}
+#endif /* NOTDEFINED */
 
 /* 
 **  Modified for Lynx-jp by Takuya ASADA (and K&Rized by FM).

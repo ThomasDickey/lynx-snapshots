@@ -3,7 +3,7 @@
 D0
 #
 #The MIME name of this charset. 
-Miso-8859-1-windows-3.1-latin-1
+Mcp1252
 
 #Name as a Display Charset (used on Options screen)
 O WinLatin1 (cp1252)

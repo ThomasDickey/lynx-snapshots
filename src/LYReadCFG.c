@@ -329,10 +329,10 @@ PRIVATE int ColorCode ARGS1(
 	static int map[] = {
 		0,  4,  2,  6, 1,  5,  3,  7,
 		8, 12, 10, 14, 9, 13, 11, 15 };
-	return map[n];
+	return map[color];
 }
 #else
-#define ColorCode(n) (n)
+#define ColorCode(color) (color)
 #endif
 
 /*
@@ -1050,6 +1050,9 @@ PUBLIC void read_cfg ARGS1(
 
 	} else if (!strncasecomp(buffer, "PREFERRED_LANGUAGE:", 19)) {
 	    StrAllocCopy(language, buffer+19);
+
+	} else if (!strncasecomp(buffer, "PREPEND_BASE_TO_SOURCE:", 23)) {
+	    LYPrependBaseToSource = is_true(buffer+23);
 
 	} else if (!strncasecomp(buffer, "PRINTER:", 8)) {
 	    add_printer_to_list(&buffer[8], &printers);

@@ -550,8 +550,8 @@ PUBLIC HTBTElement * HTBTree_next ARGS2(
             printf("Objet du fils droit = %s\n",
 		   (char *)father_of_element->right->object);
         else printf("Pas de fils droit\n");
-        printf("Profondeur gauche = %i\t",father_of_element->left_depth);
-        printf("Profondeur droite = %i\n",father_of_element->right_depth);
+        printf("Profondeur gauche = %d\t",father_of_element->left_depth);
+        printf("Profondeur droite = %d\n",father_of_element->right_depth);
         printf("      **************\n");
     }
 #endif

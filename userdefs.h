@@ -126,19 +126,27 @@
 #define XLOADIMAGE_COMMAND "xv %s"
 
 /**************************
- * The full path and name of the standard VMS "mail" command.
+ * SYSTEM_MAIL must be defined here to your mail sending command,
+ * and SYSTEM_MAIL_FLAGS to approrpriate qualifiers.  They can be
+ * changed in lynx.cfg.
  *
  * The mail command will be spawned as a subprocess of lynx
- * and used to send replies and error messages.  It must be
- * defined here, and can be changed in lynx.cfg.
- * SYSTEM_MAIL must be able to accept a subject line through
- * the use of the /subject="SUBJECT" option.
+ * and used to send the email, with headers specified in a
+ * temporary file for PMDF.  If you define SYSTEM_MAIL to the
+ * "generic" MAIL utility for VMS, headers cannot be specified
+ * via a header file (and thus may not be included), and the
+ * subject line will be specified by use of the /subject="SUBJECT"
+ * qualifier.
+ *
  * If your mailer uses another syntax, some hacking of the
- * mailmsg() and reply_by_mail() functions in LYMail.c may
- * be required.
+ * mailform(), mailmsg() and reply_by_mail() functions in
+ * LYMail.c, and printfile() function in LYPrint.c, may be
+ * required.
  */
-#define SYSTEM_MAIL "mail"
-#define SYSTEM_MAIL_FLAGS ""
+#define SYSTEM_MAIL "PMDF SEND"
+#define SYSTEM_MAIL_FLAGS "/headers"
+/* #define SYSTEM_MAIL "MAIL"   */
+/* #define SYSTEM_MAIL_FLAGS "" */
 
 /*************************
  * Below is the argument for an sprintf command that will add
@@ -318,18 +326,20 @@
  *
  * SYSTEM_MAIL must be defined here.  You can change it in lynx.cfg.
  *
- * If you do not use the recommended mailers, some hacking of
- * the mailmsg() and reply_by_mail() functions in LYMail.c, or
- * interposition of a script, may be required.
+ * SYSTEM_MAIL_FLAGS must be defined here appropriately for your
+ * SYSTEM_MAIL definition.  You can change it in lynx.cfg.
  */
 #ifndef HAVE_CONFIG_H
 #ifdef MMDF
 #define SYSTEM_MAIL "/usr/mmdf/bin/submit" 
+#define SYSTEM_MAIL_FLAGS "-mlruxto,cc\\*"
 #else
 #if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__bsdi__)
 #define SYSTEM_MAIL "/usr/sbin/sendmail"
+#define SYSTEM_MAIL_FLAGS "-t -oi"
 #else /* everything else: */
 #define SYSTEM_MAIL "/usr/lib/sendmail" 
+#define SYSTEM_MAIL_FLAGS "-t -oi"
 #endif /* __FreeBSD || __NetBSD__ || __bsdi__ */
 #endif /* MMDF */
 #define SYSTEM_MAIL_FLAGS ""
@@ -615,49 +625,53 @@
  * the user's RC file whenever those settings are saved, and thereafter
  * will be used as the default.  Also see lynx.cfg for information about
  * the -raw switch and LYE_RAW_TOGGLE command.
+ *
  * The default character sets include:
+ *
  *   Display Character Set name		MIME name
  *   ==========================		=========
- *   ISO Latin 1			iso-8859-1
- *   ISO Latin 2			iso-8859-2
- *   Other ISO Latin			x-iso-8859-other
- *   WinLatin1 (cp1252)			iso-8859-1-windows-3.1-latin-1
- *   DEC Multinational			dec-mcs
- *   Macintosh (8 bit)			macintosh
- *   NeXT character set			x-next
- *   KOI8-R character set		koi8-r
- *   Chinese				euc-cn
- *   Japanese (EUC)			euc-jp
- *   Japanese (SJIS)			shift_jis
- *   Korean				euc-kr
- *   Taipei (Big5)			big5
- *   Vietnamese (VISCII)		viscii
  *   7 bit approximations		us-ascii
- *   Transparent			x-transparent
- *   IBM PC character set		cp437
- *   IBM PC codepage 850		cp850
- *   PC Latin2 CP 852			cp852
+ *   Chinese				euc-cn
+ *   DEC Multinational			dec-mcs
+ *   DosArabic (cp864)			cp864
+ *   DosBaltRim (cp775)			cp775
  *   DosCyrillic (cp866)		cp866
  *   DosGreek (cp737)			cp737
  *   DosGreek2 (cp869)			cp869
- *   DosArabic (cp864)			cp864
  *   DosHebrew (cp862)			cp862
- *   WinLatin2 (cp1250)			windows-1250
- *   WinCyrillic (cp1251)		windows-1251
- *   WinGreek (cp1253)			windows-1253
- *   WinHebrew (cp1255)			windows-1255
- *   WinArabic (cp1256)			windows-1256
- *   ISO Latin 3			iso-8859-3
- *   ISO Latin 4			iso-8859-4
+ *   IBM PC character set		cp437
+ *   IBM PC codepage 850		cp850
+ *   ISO 8859-10			iso-8859-10
  *   ISO 8859-5 Cyrillic		iso-8859-5
  *   ISO 8859-6 Arabic			iso-8859-6
  *   ISO 8859-7 Greek			iso-8859-7
  *   ISO 8859-8 Hebrew			iso-8859-8
  *   ISO 8859-9 (Latin 5)		iso-8859-9
- *   ISO 8859-10			iso-8859-10
- *   UNICODE UTF 8			unicode-1-1-utf-8
- *   RFC 1345 w/o Intro			mnemonic+ascii+0
+ *   ISO Latin 1			iso-8859-1
+ *   ISO Latin 2			iso-8859-2
+ *   ISO Latin 3			iso-8859-3
+ *   ISO Latin 4			iso-8859-4
+ *   Japanese (EUC)			euc-jp
+ *   Japanese (SJIS)			shift_jis
+ *   KOI8-R character set		koi8-r
+ *   Korean				euc-kr
+ *   Macintosh (8 bit)			macintosh
+ *   NeXT character set			x-next
+ *   Other ISO Latin			x-iso-8859-other
+ *   PC Latin2 CP 852			cp852
  *   RFC 1345 Mnemonic			mnemonic
+ *   RFC 1345 w/o Intro			mnemonic+ascii+0
+ *   Taipei (Big5)			big5
+ *   Transparent			x-transparent
+ *   UNICODE UTF 8			utf-8
+ *   Vietnamese (VISCII)		viscii
+ *   WinArabic (cp1256)			windows-1256
+ *   WinBaltRim (cp1257)		cp1257
+ *   WinCyrillic (cp1251)		cp1251
+ *   WinGreek (cp1253)			windows-1253
+ *   WinHebrew (cp1255)			windows-1255
+ *   WinLatin1 (cp1252)			cp1252
+ *   WinLatin2 (cp1250)			cp1250
  */
 #define CHARACTER_SET "ISO Latin 1"
 
@@ -1095,7 +1109,7 @@
  *	LINKS_ARE_NUMBERED  or
  *	LINKS_AND_FORM_FIELDS_ARE_NUMBERED
  */
-#define DEFAULT_KEYPAD_MODE	       NUMBERS_AS_ARROWS
+#define DEFAULT_KEYPAD_MODE	NUMBERS_AS_ARROWS
 
 /********************************
  * The default search.
@@ -1194,7 +1208,7 @@
  * the version definition with the Project Version on checkout. Just
  * ignore it. - kw */
 /* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
-#define LYNX_VERSION "2.7.1ac-0.102"
+#define LYNX_VERSION "2.7.1ac-0.105"
 
 #ifndef MAXINT
 #define MAXINT 2147483647	/* max integer */

@@ -1062,6 +1062,13 @@ PRIVATE char ** LYUCFullyTranslateString_1 ARGS9(
     */
     if (!str || *str == NULL || **str == '\0')
         return str;
+
+    /*
+     * FIXME: something's wrong with the limit checks here (clearing the
+     * buffer helps).
+     */
+    memset(replace_buf, 0, sizeof(replace_buf));
+
     /*
     **  Don't do byte translation
     **  if original AND target character sets

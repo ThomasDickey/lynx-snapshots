@@ -30,7 +30,7 @@ extern BOOLEAN LYHaveCJKCharacterSet;
 #define FREE(x) if (x) {free(x); x = NULL;}
 
 /*
- *  printfile prints out the current file minus the links and targets 
+ *  printfile prints out the current file minus the links and targets
  *  to a veriaty of places
  */
 
@@ -52,7 +52,7 @@ PRIVATE int remove_quotes PARAMS((char *string));
 #endif /* VMS */
 
 PUBLIC int printfile ARGS1(
-	document *,	newdoc) 
+	document *,	newdoc)
 {
     static char tempfile[256];
     static BOOLEAN first = TRUE;
@@ -83,6 +83,13 @@ PUBLIC int printfile ARGS1(
     char *envbuffer = NULL;
 #ifdef VMS
     extern BOOLEAN HadVMSInterrupt;
+    BOOLEAN isPMDF = FALSE;
+    char hdrfile[256];
+    FILE *hfd;
+
+    if (!strncasecomp(system_mail, "PMDF SEND", 9)) {
+	isPMDF = TRUE;
+    }
 #endif /* VMS */
 
     /*
@@ -101,7 +108,7 @@ PUBLIC int printfile ARGS1(
     WWWDoc.isHEAD = newdoc->isHEAD;
     WWWDoc.safe = newdoc->safe;
     if (!HTLoadAbsolute(&WWWDoc))
-        return(NOT_FOUND);
+	return(NOT_FOUND);
 
     /*
      *  If we have an explicit content-base, we may use it even
@@ -119,18 +126,18 @@ PUBLIC int printfile ARGS1(
      *  and content_location strings. - FM
      */
     if (HTisDocumentSource()) {
-    	if (HText_getContentLocation()) {
+	if (HText_getContentLocation()) {
 	    StrAllocCopy(content_location, HText_getContentLocation());
 	    collapse_spaces(content_location);
 	    if (!(content_location && *content_location)) {
-	        FREE(content_location);
+		FREE(content_location);
 	    }
 	}
 	if (!content_base) {
 	    if ((content_location) && is_url(content_location)) {
-	        StrAllocCopy(content_base, content_location);
+		StrAllocCopy(content_base, content_location);
 	    } else {
-	        StrAllocCopy(content_base, newdoc->address);
+		StrAllocCopy(content_base, newdoc->address);
 	    }
 	}
 	if (!content_location) {
@@ -142,16 +149,16 @@ PUBLIC int printfile ARGS1(
      *  Load the suggested filename string. - FM
      */
     if (HText_getSugFname() != NULL)
-        StrAllocCopy(sug_filename, HText_getSugFname()); /* must be freed */
+	StrAllocCopy(sug_filename, HText_getSugFname()); /* must be freed */
     else
-        StrAllocCopy(sug_filename, newdoc->address); /* must be freed */
+	StrAllocCopy(sug_filename, newdoc->address); /* must be freed */
     /*
      *  Strip any gzip or compress suffix, if present. - FM
      */
     cp = NULL;
     if (strlen(sug_filename) > 3) {
-        cp = (char *)&sug_filename[(strlen(sug_filename) - 3)];
-        if ((*cp == '.' || *cp == '-' || *cp == '_') &&
+	cp = (char *)&sug_filename[(strlen(sug_filename) - 3)];
+	if ((*cp == '.' || *cp == '-' || *cp == '_') &&
 	    !strcasecomp((cp + 1), "gz")) {
 	    *cp = '\0';
 	} else {
@@ -159,8 +166,8 @@ PUBLIC int printfile ARGS1(
 	}
     }
     if ((cp == NULL) && strlen(sug_filename) > 2) {
-        cp = (char *)&sug_filename[(strlen(sug_filename) - 2)];
-        if ((*cp == '.' || *cp == '-' || *cp == '_') &&
+	cp = (char *)&sug_filename[(strlen(sug_filename) - 2)];
+	if ((*cp == '.' || *cp == '-' || *cp == '_') &&
 	    !strcasecomp((cp + 1), "Z")) {
 	    *cp = '\0';
 	}
@@ -175,15 +182,15 @@ PUBLIC int printfile ARGS1(
 	 *  Terminate prev string here.
 	 */
 	*cp = '\0';
-        /*
+	/*
 	 *  Number of characters in "lines=".
 	 */
 	cp += 6;
 
-        lines_in_file = atoi(cp);
+	lines_in_file = atoi(cp);
 	pages = lines_in_file/66;
     }
-	
+
     /*
      *  Determine the type.
      */
@@ -196,19 +203,19 @@ PUBLIC int printfile ARGS1(
     } else if (strstr(link_info, "PRINTER")) {
 	type = PRINTER;
 
-        if ((cp = (char *)strstr(link_info, "number=")) != NULL) {
-            /* number of characters in "number=" */
-            cp += 7;
-            printer_number = atoi(cp);
-        }
-        if ((cp = (char *)strstr(link_info, "pagelen=")) != NULL) {
-            /* number of characters in "pagelen=" */
-            cp += 8;
+	if ((cp = (char *)strstr(link_info, "number=")) != NULL) {
+	    /* number of characters in "number=" */
+	    cp += 7;
+	    printer_number = atoi(cp);
+	}
+	if ((cp = (char *)strstr(link_info, "pagelen=")) != NULL) {
+	    /* number of characters in "pagelen=" */
+	    cp += 8;
 	    pagelen = atoi(cp);
-        } else {
-            /* default to 66 lines */
-            pagelen = 66;
-        }
+	} else {
+	    /* default to 66 lines */
+	    pagelen = 66;
+	}
     }
 
     /*
@@ -224,7 +231,7 @@ PUBLIC int printfile ARGS1(
     switch (type) {
 	case TO_FILE:
 #if defined(__DJGPP__) || defined(_WINDOWS)
-                _fmode = O_TEXT;
+		_fmode = O_TEXT;
 #endif /* __DJGPP__  or _WINDOWS */
 		_statusline(FILENAME_PROMPT);
 	retry:	strcpy(filename, sug_filename);  /* add suggestion info */
@@ -235,7 +242,7 @@ PUBLIC int printfile ARGS1(
 		    format = HTFileFormat(filename, &encoding, NULL);
 		    if (!strcasecomp(format->name, "text/html") ||
 			!IsUnityEnc(encoding)) {
-		        *cp = '\0';
+			*cp = '\0';
 			strcat(filename, ".txt");
 		    }
 		}
@@ -249,7 +256,7 @@ PUBLIC int printfile ARGS1(
 				   sizeof(filename), recall)) < 0 ||
 		    *filename == '\0' || ch == UPARROW || ch == DNARROW) {
 		    if (recall && ch == UPARROW) {
-		        if (FirstRecall) {
+			if (FirstRecall) {
 			    FirstRecall = FALSE;
 			    /*
 			     *  Use the last Fname in the list. - FM
@@ -273,17 +280,17 @@ PUBLIC int printfile ARGS1(
 			    goto retry;
 			} else if ((cp = (char *)HTList_objectAt(
 							sug_filenames,
-		    					FnameNum)) != NULL) {
+							FnameNum)) != NULL) {
 			    strcpy(filename, cp);
 			    if (FnameTotal == 1) {
-			        _statusline(EDIT_THE_PREV_FILENAME);
+				_statusline(EDIT_THE_PREV_FILENAME);
 			    } else {
-			        _statusline(EDIT_A_PREV_FILENAME);
+				_statusline(EDIT_A_PREV_FILENAME);
 			    }
 			    goto check_recall;
 			}
 		    } else if (recall && ch == DNARROW) {
-		        if (FirstRecall) {
+			if (FirstRecall) {
 			    FirstRecall = FALSE;
 			    /*
 			     * Use the first Fname in the list. - FM
@@ -306,12 +313,12 @@ PUBLIC int printfile ARGS1(
 			    goto retry;
 			} else if ((cp = (char *)HTList_objectAt(
 							sug_filenames,
-		    					FnameNum)) != NULL) {
+							FnameNum)) != NULL) {
 			    strcpy(filename, cp);
 			    if (FnameTotal == 1) {
-			        _statusline(EDIT_THE_PREV_FILENAME);
+				_statusline(EDIT_THE_PREV_FILENAME);
 			    } else {
-			        _statusline(EDIT_A_PREV_FILENAME);
+				_statusline(EDIT_A_PREV_FILENAME);
 			    }
 			    goto check_recall;
 			}
@@ -323,7 +330,7 @@ PUBLIC int printfile ARGS1(
 		    _statusline(SAVE_REQUEST_CANCELLED);
 		    sleep(InfoSecs);
 		    break;
-                }
+		}
 
 		if (no_dotfiles || !show_dotfiles) {
 		    if (*filename == '.' ||
@@ -358,7 +365,7 @@ PUBLIC int printfile ARGS1(
 		    *(cp++) = '\0';
 		    strcpy(buffer, filename);
 		    if ((len=strlen(buffer)) > 0 && buffer[len-1] == '/')
-		        buffer[len-1] = '\0';
+			buffer[len-1] = '\0';
 #ifdef DOSPATH
 			 strcat(buffer, HTDOS_wwwName((char *)Home_Dir()));
 #else
@@ -372,7 +379,7 @@ PUBLIC int printfile ARGS1(
 		    strcpy(filename, buffer);
 		}
 #ifdef VMS
-        	if (strchr(filename, '/') != NULL) {
+		if (strchr(filename, '/') != NULL) {
 		    strcpy(buffer, HTVMS_name("", filename));
 		    strcpy(filename, buffer);
 		}
@@ -382,22 +389,22 @@ PUBLIC int printfile ARGS1(
 		    strcat(buffer, "[]");
 		    strcat(buffer, filename);
 		} else {
-                    strcpy(buffer, filename);
+		    strcpy(buffer, filename);
 		}
 #else
-                if (*filename != '/')
+		if (*filename != '/')
 		    cp = getenv("PWD");
 		else
 		    cp = NULL;
 		if (cp)
 #ifdef DOSPATH
-		    sprintf(buffer,"%s/%s", cp, HTDOS_name(filename));
+		    sprintf(buffer, "%s/%s", cp, HTDOS_name(filename));
 #else
-                    sprintf(buffer, "%s/%s", cp, filename);
+		    sprintf(buffer, "%s/%s", cp, filename);
 #endif
 		else
 #ifdef DOSPATH
-			 strcpy(buffer, HTDOS_name(filename));
+		    strcpy(buffer, HTDOS_name(filename));
 #else
 		    strcpy(buffer, filename);
 #endif
@@ -415,8 +422,8 @@ PUBLIC int printfile ARGS1(
 #endif /* VMS */
 		    c = 0;
 		    while (TOUPPER(c)!='Y' && TOUPPER(c)!='N' &&
-		    	   c != 7 && c != 3)
-		        c = LYgetch();
+			   c != 7 && c != 3)
+			c = LYgetch();
 #ifdef VMS
 		    if (HadVMSInterrupt) {
 			HadVMSInterrupt = FALSE;
@@ -431,25 +438,22 @@ PUBLIC int printfile ARGS1(
 			break;
 		    }
 		    if (TOUPPER(c) == 'N') {
-		        _statusline(NEW_FILENAME_PROMPT);
+			_statusline(NEW_FILENAME_PROMPT);
 			FirstRecall = TRUE;
 			FnameNum = FnameTotal;
 			goto retry;
 		    }
 		}
 
-                if ((outfile_fp = fopen(buffer,"w")) == NULL) {
+		if ((outfile_fp = LYNewTxtFile(buffer)) == NULL) {
 		    HTAlert(CANNOT_WRITE_TO_FILE);
 		    _statusline(NEW_FILENAME_PROMPT);
 		    FirstRecall = TRUE;
 		    FnameNum = FnameTotal;
 		    goto retry;
-                }
-#ifdef VMS
-		chmod(buffer, 0600);
-#endif
+		}
 
-		if (HTisDocumentSource()) {
+		if (LYPrependBaseToSource && HTisDocumentSource()) {
 		    /*
 		     *  Added the document's base as a BASE tag
 		     *  to the top of the file.  May create
@@ -459,7 +463,7 @@ PUBLIC int printfile ARGS1(
 		     *  replace it. - FM
 		     */
 		    fprintf(outfile_fp,
-		    	    "<!-- X-URL: %s -->\n<BASE HREF=\"%s\">\n",
+			    "<!-- X-URL: %s -->\n<BASE HREF=\"%s\">\n",
 			    newdoc->address, content_base);
 		}
 		print_wwwfile_to_fd(outfile_fp,0);
@@ -470,9 +474,9 @@ PUBLIC int printfile ARGS1(
 #ifdef VMS
 		if (0 == strncasecomp(buffer, "sys$disk:", 9)) {
 		    if (0 == strncmp((buffer+9), "[]", 2)) {
-		        HTAddSugFilename(buffer+11);
-		    } else { 
-		        HTAddSugFilename(buffer+9);
+			HTAddSugFilename(buffer+11);
+		    } else {
+			HTAddSugFilename(buffer+9);
 		    }
 		} else {
 		    HTAddSugFilename(buffer);
@@ -481,11 +485,11 @@ PUBLIC int printfile ARGS1(
 		HTAddSugFilename(buffer);
 #endif /* VMS */
 #if defined(__DJGPP__) || defined(_WINDOWS)
-              _fmode = O_BINARY;
+		_fmode = O_BINARY;
 #endif /* __DJGPP__ or _WINDOWS */
 		break;
 
-	case MAIL: 
+	case MAIL:
 	    if (LYPreparsedSource && first_mail_preparsed &&
 		HTisDocumentSource()) {
 		_statusline(CONFIRM_MAIL_SOURCE_PREPARSED);
@@ -523,6 +527,28 @@ PUBLIC int printfile ARGS1(
 		    break;
 		}
 
+		/*
+		 *  Determine which mail headers should be sent.
+		 *  Use Content-Type and MIME-Version headers only
+		 *  if needed.  We need them if we are mailing HTML
+		 *  source, or if we have 8-bit characters and will
+		 *  be sending Content-Transfer-Encoding to indicate
+		 *  this.  We will append a charset parameter to the
+		 *  Content-Type if we do not have an "x-" charset,
+		 *  and we will include the Content-Transfer-Encoding
+		 *  only if we are appending the charset parameter,
+		 *  because indicating an 8-bit transfer without also
+		 *  indicating the charset can cause problems with
+		 *  many mailers. - FM & KW
+		 */
+		disp_charset = LYCharSet_UC[current_char_set].MIMEname;
+		use_cte = HTLoadedDocumentEightbit();
+		if (!(use_cte && strncasecomp(disp_charset, "x-", 2))) {
+		    disp_charset = NULL;
+		    use_cte = FALSE;
+		}
+		use_type =  (disp_charset || HTisDocumentSource());
+
 		change_sug_filename(sug_filename);
 #ifdef VMS
 		if (strchr(user_response,'@') && !strchr(user_response,':') &&
@@ -533,13 +559,23 @@ PUBLIC int printfile ARGS1(
 
 		if (first) {
 		    tempname(tempfile, NEW_FILE);
+		    if (isPMDF) {
+			tempname(hdrfile, NEW_FILE);
+			if ((len = strlen(hdrfile)) > 4) {
+			    len -= 5;
+			    if (!strcasecomp((hdrfile + len), ".html")) {
+				hdrfile[len] = '\0';
+				strcat(hdrfile, ".txt");
+			    }
+			}
+		    }
 		    first = FALSE;
 		} else {
 		    remove(tempfile);   /* remove duplicates */
 		}
 		if (HTisDocumentSource()) {
 		    if ((len = strlen(tempfile)) > 3) {
-		        len -= 4;
+			len -= 4;
 			if (!strcasecomp((tempfile + len), ".txt")) {
 			    tempfile[len] = '\0';
 			    strcat(tempfile, ".html");
@@ -548,19 +584,67 @@ PUBLIC int printfile ARGS1(
 		} else if ((len = strlen(tempfile)) > 4) {
 		    len -= 5;
 		    if (!strcasecomp((tempfile + len), ".html")) {
-		        tempfile[len] = '\0';
+			tempfile[len] = '\0';
 			strcat(tempfile, ".txt");
 		    }
 		}
-		if((outfile_fp = LYNewTxtFile(tempfile)) == NULL) {
+		if ((outfile_fp = LYNewTxtFile(tempfile)) == NULL) {
 		    HTAlert(UNABLE_TO_OPEN_TEMPFILE);
 		    break;
 		}
 
+		if (isPMDF) {
+		    if ((hfd = LYNewTxtFile(hdrfile)) == NULL) {
+			HTAlert(UNABLE_TO_OPEN_TEMPFILE);
+			break;
+		    }
+		    if (use_type) {
+			fprintf(hfd, "Mime-Version: 1.0\n");
+			if (use_cte) {
+			    fprintf(hfd,
+				    "Content-Transfer-Encoding: 8bit\n");
+			}
+		    }
+		    if (HTisDocumentSource()) {
+			/*
+			 *  Add Content-Type, Content-Location, and
+			 *  Content-Base headers for HTML source. - FM
+			 */
+			fprintf(hfd, "Content-Type: text/html");
+			if (disp_charset != NULL) {
+			    fprintf(hfd,
+				    "; charset=%s\n",
+				    disp_charset);
+			} else {
+			    fprintf(hfd, "\n");
+			}
+			fprintf(hfd,
+				"Content-Base: %s\n",
+				content_base);
+			fprintf(hfd,
+				"Content-Location: %s\n",
+				content_location);
+		    } else {
+			/*
+			 *  Add Content-Type: text/plain if we have 8-bit
+			 *  characters and a valid charset for non-source
+			 *  documents. - FM
+			 */
+			if (disp_charset != NULL) {
+			    fprintf(hfd,
+				    "Content-Type: text/plain; charset=%s\n",
+				    disp_charset);
+			}
+		    }
+		    /*
+		     *  X-URL header. - FM
+		     */
+		    fprintf(hfd, "X-URL: %s\n", newdoc->address);
+		}
 		/*
 		 *  Write the contents to a temp file.
 		 */
-		if (HTisDocumentSource()) {
+		if (LYPrependBaseToSource && HTisDocumentSource()) {
 		    /*
 		     *  Added the document's base as a BASE tag to
 		     *  the top of the message body.  May create
@@ -570,9 +654,9 @@ PUBLIC int printfile ARGS1(
 		     *  replace it. - FM
 		     */
 		    fprintf(outfile_fp,
-		    	    "<!-- X-URL: %s -->\n<BASE HREF=\"%s\">\n\n",
+			    "<!-- X-URL: %s -->\n<BASE HREF=\"%s\">\n\n",
 			    newdoc->address, content_base);
-		} else {
+		} else if (!isPMDF) {
 		    fprintf(outfile_fp, "X-URL: %s\n\n", newdoc->address);
 		}
 		print_wwwfile_to_fd(outfile_fp, 0);
@@ -580,27 +664,61 @@ PUBLIC int printfile ARGS1(
 		    printlist(outfile_fp, FALSE);
 		fclose(outfile_fp);
 
-		remove_quotes(sug_filename);
-		sprintf(buffer, "%s/subject=\"%s\" %s %s", 
-			system_mail, sug_filename, tempfile, user_response);
+		if (isPMDF) {
+		    /*
+		     *  For PMDF, put the subject in the
+		     *  header file and close it. - FM
+		     */
+		    fprintf(hfd, "Subject: %.70s\n\n", sug_filename);
+		    fclose(hfd);
+		    /*
+		     *  Now set up the command. - FM
+		     */
+		    sprintf(buffer,
+			    "%s %s %s,%s %s",
+			    system_mail,
+			    system_mail_flags,
+			    hdrfile,
+			    tempfile,
+			    user_response);
+		} else {
+		    /*
+		     *  For "generic" VMS MAIL, include
+		     *  the subject in the command. - FM
+		     */
+		    remove_quotes(sug_filename);
+		    sprintf(buffer,
+			    "%s %s/subject=\"%.70s\" %s %s",
+			    system_mail,
+			    system_mail_flags,
+			    sug_filename,
+			    tempfile,
+			    user_response);
+		}
 
-        	stop_curses();
+		stop_curses();
 		printf(MAILING_FILE);
 		fflush(stdout);
-        	system(buffer);
+		system(buffer);
 		fflush(stdout);
-		sleep(MessageSecs);
-        	start_curses();
+		sleep(AlertSecs);
+		start_curses();
+		if (isPMDF) {
+		    /*
+		     *  Delete the header file. - FM
+		     */
+		    remove(hdrfile);
+		}
 #else /* Unix: */
-    		sprintf(buffer, "%s %s", system_mail, system_mail_flags);
+		sprintf(buffer, "%s %s", system_mail, system_mail_flags);
 
 #ifdef DOSPATH
-	 sprintf(tempfile, "%s%s", lynx_temp_space, "temp_mail.txt");
-	 if ((outfile_fp = fopen(tempfile,"w")) == NULL) {
+		sprintf(tempfile, "%s%s", lynx_temp_space, "temp_mail.txt");
+		if ((outfile_fp = LYNewTxtFile(tempfile)) == NULL) {
 			_statusline(MAIL_REQUEST_FAILED);
 			sleep(AlertSecs);
 			return;
-	 }
+		}
 #else
 		if ((outfile_fp = popen(buffer, "w")) == NULL) {
 			_statusline(MAIL_REQUEST_FAILED);
@@ -608,7 +726,7 @@ PUBLIC int printfile ARGS1(
 			break;
 		}
 #endif
-		
+
 		/*
 		 *  Determine which mail headers should be sent.
 		 *  Use Content-Type and MIME-Version headers only
@@ -635,7 +753,7 @@ PUBLIC int printfile ARGS1(
 		}
 #ifdef NOTDEFINED
 		/*  Enable this if indicating an 8-bit transfer without
-                 *  also indicating the charset causes problems. - kw */
+		 *  also indicating the charset causes problems. - kw */
 		if (use_cte && !disp_charse)
 		    use_cte = FALSE;
 #endif /* NOTDEFINED */
@@ -644,8 +762,10 @@ PUBLIC int printfile ARGS1(
 
 		if (use_mime) {
 		    fprintf(outfile_fp, "Mime-Version: 1.0\n");
-		    if (use_cte)
-			fprintf(outfile_fp, "Content-Transfer-Encoding: 8bit\n");
+		    if (use_cte) {
+			fprintf(outfile_fp,
+				"Content-Transfer-Encoding: 8bit\n");
+		    }
 		}
 
 		if (HTisDocumentSource()) {
@@ -655,10 +775,10 @@ PUBLIC int printfile ARGS1(
 		     */
 		    fprintf(outfile_fp, "Content-Type: text/html");
 		    if (disp_charset != NULL) {
-		        fprintf(outfile_fp, "; charset=%s\n",
+			fprintf(outfile_fp, "; charset=%s\n",
 					    disp_charset);
 		    } else {
-		        fprintf(outfile_fp, "\n");
+			fprintf(outfile_fp, "\n");
 		    }
 		} else {
 		    /*
@@ -679,7 +799,7 @@ PUBLIC int printfile ARGS1(
 		 */
 		if (use_mime) {
 		    if (content_base)
-		        fprintf(outfile_fp, "Content-Base: %s\n",
+			fprintf(outfile_fp, "Content-Base: %s\n",
 				content_base);
 		    if (content_location)
 			fprintf(outfile_fp, "Content-Location: %s\n",
@@ -692,7 +812,7 @@ PUBLIC int printfile ARGS1(
 		fprintf(outfile_fp, "To: %s\nSubject: %s\n",
 				     user_response, sug_filename);
 		fprintf(outfile_fp, "X-URL: %s\n\n", newdoc->address);
-		if (HTisDocumentSource()) {
+		if (LYPrependBaseToSource && HTisDocumentSource()) {
 		    /*
 		     *  Added the document's base as a BASE tag to
 		     *  the top of the message body.  May create
@@ -702,7 +822,7 @@ PUBLIC int printfile ARGS1(
 		     *  replace it. - FM
 		     */
 		    fprintf(outfile_fp,
-		    	    "<!-- X-URL: %s -->\n<BASE HREF=\"%s\">\n\n",
+			    "<!-- X-URL: %s -->\n<BASE HREF=\"%s\">\n\n",
 			    newdoc->address, content_base);
 		}
 		print_wwwfile_to_fd(outfile_fp, 0);
@@ -710,28 +830,28 @@ PUBLIC int printfile ARGS1(
 		    printlist(outfile_fp, FALSE);
 
 #ifdef DOSPATH
-	 sprintf(buffer, "%s -t \"%s\" -F %s", system_mail, user_response, tempfile);
-	 fclose(outfile_fp);	/* Close the tmpfile. */
-	 stop_curses();
-	 printf("Sending \n\n$ %s\n\nPlease wait...", buffer);
-	 system(buffer);
-	 sleep(MessageSecs);
-	 start_curses();
-	 remove(tempfile);	/* Delete the tmpfile. */
+		sprintf(buffer, "%s -t \"%s\" -F %s", system_mail, user_response, tempfile);
+		fclose(outfile_fp);	/* Close the tmpfile. */
+		stop_curses();
+		printf("Sending \n\n$ %s\n\nPlease wait...", buffer);
+		system(buffer);
+		sleep(MessageSecs);
+		start_curses();
+		remove(tempfile);	/* Delete the tmpfile. */
 #else
 		pclose(outfile_fp);
 #endif
 #endif /* VMS */
 		break;
-	
+
 	case TO_SCREEN:
 		pages = lines_in_file/(LYlines+1);
 		/* count fractional pages ! */
 		if ((lines_in_file % (LYlines+1)) > 0)
-		    pages++; 
+		    pages++;
 		if (pages > 4) {
 		    sprintf(filename, CONFIRM_LONG_SCREEN_PRINT, pages);
- 		    _statusline(filename);
+		    _statusline(filename);
 		    c=LYgetch();
 #ifdef VMS
 		    if (HadVMSInterrupt) {
@@ -741,13 +861,13 @@ PUBLIC int printfile ARGS1(
 			break;
 		    }
 #endif /* VMS */
-    		    if (c == RTARROW || c == 'y' || c== 'Y'
-                         || c == '\n' || c == '\r') {
-                        addstr("   Ok...");
+		    if (c == RTARROW || c == 'y' || c== 'Y'
+			 || c == '\n' || c == '\r') {
+			addstr("   Ok...");
 		    } else {
 			_statusline(PRINT_REQUEST_CANCELLED);
 			sleep(InfoSecs);
-		        break;
+			break;
 		    }
 		}
 
@@ -756,9 +876,9 @@ PUBLIC int printfile ARGS1(
 		if (LYgetstr(filename, VISIBLE,
 			     sizeof(filename), NORECALL) < 0) {
 		      _statusline(PRINT_REQUEST_CANCELLED);
-	              sleep(InfoSecs);
+		      sleep(InfoSecs);
 		      break;
-                }
+		}
 
 		outfile_fp = stdout;
 
@@ -767,7 +887,7 @@ PUBLIC int printfile ARGS1(
 		signal(SIGINT, SIG_IGN);
 #endif /* !VMS */
 
-		if (HTisDocumentSource()) {
+		if (LYPrependBaseToSource && HTisDocumentSource()) {
 		    /*
 		     *  Added the document's base as a BASE tag
 		     *  to the top of the file.  May create
@@ -777,7 +897,7 @@ PUBLIC int printfile ARGS1(
 		     *  replace it. - FM
 		     */
 		    fprintf(outfile_fp,
-		    	    "<!-- X-URL: %s -->\n<BASE HREF=\"%s\">\n\n",
+			    "<!-- X-URL: %s -->\n<BASE HREF=\"%s\">\n\n",
 			    newdoc->address, content_base);
 		}
 		print_wwwfile_to_fd(outfile_fp, 0);
@@ -800,15 +920,15 @@ PUBLIC int printfile ARGS1(
 #endif /* VMS */
 		start_curses();
 		break;
-	
+
 	case PRINTER:
 		pages = lines_in_file/pagelen;
 		/* count fractional pages ! */
 		if ((lines_in_file % pagelen) > 0)
-		    pages++; 
+		    pages++;
 		if (pages > 4) {
 		    sprintf(filename, CONFIRM_LONG_PAGE_PRINT, pages);
- 		    _statusline(filename);
+		    _statusline(filename);
 		    c=LYgetch();
 #ifdef VMS
 		    if (HadVMSInterrupt) {
@@ -818,13 +938,13 @@ PUBLIC int printfile ARGS1(
 			break;
 		    }
 #endif /* VMS */
-    		    if (c == RTARROW || c == 'y' || c== 'Y'
-                         || c == '\n' || c == '\r') {
-                        addstr("   Ok...");
+		    if (c == RTARROW || c == 'y' || c== 'Y'
+			 || c == '\n' || c == '\r') {
+			addstr("   Ok...");
 		    } else  {
 			_statusline(PRINT_REQUEST_CANCELLED);
 			sleep(InfoSecs);
-		        break;
+			break;
 		    }
 		}
 
@@ -849,12 +969,12 @@ PUBLIC int printfile ARGS1(
 			strcat(tempfile, ".txt");
 		    }
 		}
-                if ((outfile_fp = LYNewTxtFile(tempfile)) == NULL) {
-	            HTAlert(FILE_ALLOC_FAILED);
+		if ((outfile_fp = LYNewTxtFile(tempfile)) == NULL) {
+		    HTAlert(FILE_ALLOC_FAILED);
 		    break;
-                }
+		}
 
-		if (HTisDocumentSource()) {
+		if (LYPrependBaseToSource && HTisDocumentSource()) {
 		    /*
 		     *  Added the document's base as a BASE tag
 		     *  to the top of the file.  May create
@@ -864,7 +984,7 @@ PUBLIC int printfile ARGS1(
 		     *  replace it. - FM
 		     */
 		    fprintf(outfile_fp,
-		    	    "<!-- X-URL: %s -->\n<BASE HREF=\"%s\">\n\n",
+			    "<!-- X-URL: %s -->\n<BASE HREF=\"%s\">\n\n",
 			    newdoc->address, content_base);
 		}
 		print_wwwfile_to_fd(outfile_fp, 0);
@@ -877,12 +997,12 @@ PUBLIC int printfile ARGS1(
 		{
 		    int count=0;
 		    for (cur_printer = printers;
-		         count < printer_number;
+			 count < printer_number;
 			 count++, cur_printer = cur_printer->next)
 			; /* null body */
 		}
 
-		/* 
+		/*
 		 *  Commands have the form "command %s [%s] [etc]"
 		 *  where %s is the filename and the second optional
 		 *  %s is the suggested filename.
@@ -902,7 +1022,7 @@ PUBLIC int printfile ARGS1(
 			    format = HTFileFormat(filename, &encoding, NULL);
 			    if (!strcasecomp(format->name, "text/html") ||
 				!IsUnityEnc(encoding)) {
-			        *cp = '\0';
+				*cp = '\0';
 				strcat(filename, ".txt");
 			    }
 			}
@@ -912,7 +1032,7 @@ PUBLIC int printfile ARGS1(
 			    *filename == '\0' ||
 			    ch == UPARROW || ch == DNARROW) {
 			    if (recall && ch == UPARROW) {
-			        if (FirstRecall) {
+				if (FirstRecall) {
 				    FirstRecall = FALSE;
 				    /*
 				     *  Use the last Fname in the list. - FM
@@ -936,17 +1056,17 @@ PUBLIC int printfile ARGS1(
 				    goto again;
 				} else if ((cp = (char *)HTList_objectAt(
 							sug_filenames,
-		    					FnameNum)) != NULL) {
+							FnameNum)) != NULL) {
 				    strcpy(filename, cp);
 				    if (FnameTotal == 1) {
-				        _statusline(EDIT_THE_PREV_FILENAME);
+					_statusline(EDIT_THE_PREV_FILENAME);
 				    } else {
-				        _statusline(EDIT_A_PREV_FILENAME);
+					_statusline(EDIT_A_PREV_FILENAME);
 				    }
 				    goto check_again;
 				}
 			    } else if (recall && ch == DNARROW) {
-			        if (FirstRecall) {
+				if (FirstRecall) {
 				    FirstRecall = FALSE;
 				    /*
 				     *  Use the first Fname in the list. - FM
@@ -970,12 +1090,12 @@ PUBLIC int printfile ARGS1(
 				    goto again;
 				} else if ((cp = (char *)HTList_objectAt(
 							sug_filenames,
-		    					FnameNum)) != NULL) {
+							FnameNum)) != NULL) {
 				    strcpy(filename, cp);
 				    if (FnameTotal == 1) {
-				        _statusline(EDIT_THE_PREV_FILENAME);
+					_statusline(EDIT_THE_PREV_FILENAME);
 				    } else {
-				        _statusline(EDIT_A_PREV_FILENAME);
+					_statusline(EDIT_A_PREV_FILENAME);
 				    }
 				    goto check_again;
 				}
@@ -987,25 +1107,25 @@ PUBLIC int printfile ARGS1(
 			    _statusline(PRINT_REQUEST_CANCELLED);
 			    sleep(InfoSecs);
 			    break;
-	                }
+			}
 
-		        if (no_dotfiles || !show_dotfiles) {
+			if (no_dotfiles || !show_dotfiles) {
 			    if (*filename == '.' ||
 #ifdef VMS
 			       ((cp = strrchr(filename, ':')) &&
-			       			*(cp+1) == '.') ||
+						*(cp+1) == '.') ||
 			       ((cp = strrchr(filename, ']')) &&
-			       			*(cp+1) == '.') ||
+						*(cp+1) == '.') ||
 #endif /* VMS */
 			       ((cp = strrchr(filename, '/')) &&
-			       			*(cp+1) == '.')) {
+						*(cp+1) == '.')) {
 				HTAlert(FILENAME_CANNOT_BE_DOT);
 				_statusline(NEW_FILENAME_PROMPT);
 				FirstRecall = TRUE;
 				FnameNum = FnameTotal;
-			        goto again;
+				goto again;
 			    }
-		        }
+			}
 			/*
 			 *  Cancel if the user entered "/dev/null" on Unix,
 			 *  or an "nl:" path (case-insensitive) on VMS. - FM
@@ -1044,8 +1164,8 @@ PUBLIC int printfile ARGS1(
 
 		/*
 		 *  Move the cursor to the top of the screen so that
-		 *  output from system'd commands don't scroll up 
-                 *  the screen.
+		 *  output from system'd commands don't scroll up
+		 *  the screen.
 		 */
 		move(1,1);
 
@@ -1064,7 +1184,7 @@ PUBLIC int printfile ARGS1(
 #else
 		/*
 		 *  Set document's title as an environment variable. - JKT
-		 */                
+		 */
 		StrAllocCopy(envbuffer, "LYNX_PRINT_TITLE=");
 		StrAllocCat(envbuffer, HText_getTitle());
 		putenv(envbuffer);
@@ -1098,7 +1218,7 @@ PUBLIC int printfile ARGS1(
     FREE(content_base);
     FREE(content_location);
     return(NORMAL);
-}	
+}
 
 #ifdef VMS
 PRIVATE int remove_quotes ARGS1(
@@ -1121,7 +1241,7 @@ PRIVATE int remove_quotes ARGS1(
 /*
  * print_options writes out the current printer choices to a file
  * so that the user can select printers in the same way that
- * they select all other links 
+ * they select all other links
  * printer links look like
  *  LYNXPRINT://LOCAL_FILE/lines=#  	     print to a local file
  *  LYNXPRINT://TO_SCREEN/lines=#   	     print to the screen
@@ -1144,7 +1264,7 @@ PUBLIC int print_options ARGS2(
     pages = lines_in_file/66 + 1;
 
     if (first) {
-        tempname(tempfile, NEW_FILE);
+	tempname(tempfile, NEW_FILE);
 #if defined (VMS) || defined (DOSPATH)
 	sprintf(print_filename, "file://localhost/%s", tempfile);
 #else
@@ -1153,12 +1273,12 @@ PUBLIC int print_options ARGS2(
 	first = FALSE;
 #ifdef VMS
     } else {
-        remove(tempfile);   /* Remove duplicates on VMS. */
+	remove(tempfile);   /* Remove duplicates on VMS. */
 #endif /* !VMS */
     }
 
     if ((fp0 = LYNewTxtFile(tempfile)) == NULL) {
-        HTAlert(UNABLE_TO_OPEN_PRINTOP_FILE);
+	HTAlert(UNABLE_TO_OPEN_PRINTOP_FILE);
 	return(-1);
     }
 
@@ -1166,15 +1286,15 @@ PUBLIC int print_options ARGS2(
     LYforce_no_cache = TRUE;
 
     fprintf(fp0, "<head>\n<title>%s</title>\n</head>\n<body>\n",
-    		 PRINT_OPTIONS_TITLE);
+		 PRINT_OPTIONS_TITLE);
 
     fprintf(fp0,"<h1>Printing Options (%s Version %s)</h1>\n",
-    				       LYNX_NAME, LYNX_VERSION);
+				       LYNX_NAME, LYNX_VERSION);
 
     pages = (lines_in_file+65)/66;
     sprintf(buffer,
-    	    "There are %d lines, or approximately %d page%s, to print.<br>\n",
-    	    lines_in_file, pages, (pages > 1 ? "s" : ""));
+	    "There are %d lines, or approximately %d page%s, to print.<br>\n",
+	    lines_in_file, pages, (pages > 1 ? "s" : ""));
     fputs(buffer,fp0);
 
     if (no_print || no_disk_save || child_lynx || no_mail)
@@ -1184,26 +1304,26 @@ PUBLIC int print_options ARGS2(
     fputs("Please select one:<br>\n<pre>\n", fp0);
 
     if (child_lynx == FALSE && no_disk_save == FALSE && no_print == FALSE)
-        fprintf(fp0,
+	fprintf(fp0,
    "   <a href=\"LYNXPRINT://LOCAL_FILE/lines=%d\">Save to a local file</a>\n",
-	 	lines_in_file);
+		lines_in_file);
     else
 	fprintf(fp0,"   Save to disk disabled.\n");
     if (child_lynx == FALSE && no_mail == FALSE)
-         fprintf(fp0,
+	 fprintf(fp0,
    "   <a href=\"LYNXPRINT://MAIL_FILE/lines=%d\">Mail the file</a>\n",
 		lines_in_file);
-    fprintf(fp0, 
+    fprintf(fp0,
    "   <a href=\"LYNXPRINT://TO_SCREEN/lines=%d\">Print to the screen</a>\n",
-	 	lines_in_file);
+		lines_in_file);
 
-    for (count = 0, cur_printer = printers; cur_printer != NULL; 
-        cur_printer = cur_printer->next, count++)
+    for (count = 0, cur_printer = printers; cur_printer != NULL;
+	cur_printer = cur_printer->next, count++)
     if (no_print == FALSE || cur_printer->always_enabled) {
-        fprintf(fp0,
+	fprintf(fp0,
    "   <a href=\"LYNXPRINT://PRINTER/number=%d/pagelen=%d/lines=%d\">",
-                count, cur_printer->pagelen, lines_in_file);
-	fprintf(fp0, (cur_printer->name ? 
+		count, cur_printer->pagelen, lines_in_file);
+	fprintf(fp0, (cur_printer->name ?
 		      cur_printer->name : "No Name Given"));
 	fprintf(fp0, "</a>\n");
     }

@@ -265,7 +265,7 @@ PUBLIC char *bookmark_page = NULL; /* the name of the default bookmark page */
 PUBLIC char *BookmarkPage = NULL;  /* the name of the current bookmark page */
 PUBLIC char *LynxHome = NULL;	/* the default Home HREF. */
 PUBLIC char *startfile = NULL;	/* the first file */
-PUBLIC char *helpfile = NULL; 	/* the main help file */
+PUBLIC char *helpfile = NULL;	/* the main help file */
 PUBLIC char *helpfilepath = NULL;   /* the path to the help file set */
 PUBLIC char *lynxjumpfile = NULL;   /* the current jump file URL */
 PUBLIC char *lynxlistfile = NULL;   /* the current list file URL */
@@ -282,8 +282,8 @@ PUBLIC char *language = NULL;	    /* preferred language */
 PUBLIC char *pref_charset = NULL;   /* preferred character set */
 PUBLIC BOOLEAN LYNewsPosting = NEWS_POSTING; /* News posting supported? */
 PUBLIC char *LynxSigFile = NULL;    /* Signature file, in or off home */
-PUBLIC char *system_mail = NULL;    /* The path for sending mail */
-PUBLIC char *system_mail_flags = NULL;    /* The flags for sending mail */
+PUBLIC char *system_mail = NULL;          /* The path for sending mail */
+PUBLIC char *system_mail_flags = NULL;    /* Flags for sending mail */
 PUBLIC char *lynx_temp_space = NULL; /* The prefix for temporary file paths */
 PUBLIC char *lynx_save_space = NULL; /* The prefix for save to disk paths */
 PUBLIC char *LYHostName = NULL;		/* treat as a local host name */
@@ -293,7 +293,7 @@ PUBLIC BOOLEAN pseudo_inline_alts = MAKE_PSEUDO_ALTS_FOR_INLINES;
 PUBLIC BOOLEAN crawl=FALSE;	     /* Do crawl? */
 PUBLIC BOOLEAN traversal=FALSE;     /* Do traversals? */
 PUBLIC BOOLEAN check_realm=FALSE;   /* Restrict to the starting realm? */
-	       /* Links beyond a displayed page with no links? */ 
+	       /* Links beyond a displayed page with no links? */
 PUBLIC BOOLEAN more_links=FALSE;
 PUBLIC int     ccount=0;  /* Starting number for lnk#.dat files in crawls */
 PUBLIC BOOLEAN LYCancelledFetch=FALSE; /* TRUE if cancelled binary fetch */
@@ -369,6 +369,7 @@ PUBLIC BOOLEAN LYStripDotDotURLs = TRUE;	/* Try to fix ../ in some URLs? */
 PUBLIC BOOLEAN LYForceSSLCookiesSecure = FALSE;
 PUBLIC BOOLEAN LYNoCc = FALSE;
 PUBLIC BOOLEAN LYPreparsedSource = FALSE;	/* Show source as preparsed?	 */
+PUBLIC BOOLEAN LYPrependBaseToSource = TRUE;
 
 /* These are declared in cutil.h for current freeWAIS libraries. - FM */
 #ifdef DECLARE_WAIS_LOGFILES
@@ -527,7 +528,7 @@ PUBLIC int main ARGS2(
     char filename[256];
     BOOL LYGetStdinArgs = FALSE;
 
-#ifdef _WINDOWS 
+#ifdef _WINDOWS
     WSADATA WSAData;
     {
 	int err;
@@ -720,7 +721,7 @@ PUBLIC int main ARGS2(
 	    StrAllocCopy(lynx_temp_space, "sys$scratch:");
 	} else {
 	    if (lynx_temp_space[len-1] != '/')
-	        StrAllocCat(lynx_temp_space, "/");
+		StrAllocCat(lynx_temp_space, "/");
             StrAllocCopy(temp, HTVMS_name("", lynx_temp_space));
 	    StrAllocCopy(lynx_temp_space, temp);
 	    FREE(temp);
@@ -792,13 +793,13 @@ PUBLIC int main ARGS2(
 	    WWW_TraceFlag = TRUE;
 	} else if (strncmp(argv[i], "-tlog", 5) == 0) {
 	    if (LYUseTraceLog) {
-	        LYUseTraceLog = FALSE;
+		LYUseTraceLog = FALSE;
 	    } else {
-	        LYUseTraceLog = TRUE;
+		LYUseTraceLog = TRUE;
 	    }
 	} else if (strncmp(argv[i], "-anonymous", 10) == 0) {
 	    if (!LYValidate)
-	        parse_restrictions("default");
+		parse_restrictions("default");
 	    anon_restrictions_set = TRUE;
 	} else if (strcmp(argv[i], "-validate") == 0) {
 	    /*
@@ -854,11 +855,11 @@ PUBLIC int main ARGS2(
     }
     if (LYGetStdinArgs == TRUE) {
 	char buf[1025];
- 
+
 	while (fgets(buf, sizeof(buf) - 1, stdin)) {
 	    int j;
-     
-	    for (j = strlen(buf) - 1; j > 0 && 
+
+	    for (j = strlen(buf) - 1; j > 0 &&
 		(buf[j] == CR || buf[j] == LF); j--) {
 		buf[j] = '\0';
 	    }
@@ -895,7 +896,7 @@ PUBLIC int main ARGS2(
 			cp++;
 		    if (*cp)
 			StrAllocCopy(lynx_cfg_file, cp);
-	        }
+		}
 #if defined(USE_HASH)
 	    } else if (strncmp(buf, "-lss", 4) == 0) {
 		if ((cp = strchr(buf,'=')) != NULL) {
@@ -908,7 +909,7 @@ PUBLIC int main ARGS2(
 			cp++;
 		    if (*cp)
 			StrAllocCopy(lynx_cfg_file, cp);
-	        }
+		}
 		if (TRACE)
 		    fprintf(stderr, "LYMain found -lss flag, lss file is %s\n",
 			lynx_lss_file ? lynx_lss_file : "<NONE>");
@@ -991,7 +992,7 @@ PUBLIC int main ARGS2(
 		    StrAllocCat(*post_data, buf);
 		}
 	    } else if (buf[0] != '\0') {
-	        char *argument = NULL;
+		char *argument = NULL;
 
 		if (LYStdinArgs == NULL) {
 		    LYStdinArgs = HTList_new();
@@ -1072,6 +1073,8 @@ PUBLIC int main ARGS2(
 	    exit(-1);
 	}
 #endif /* VMS */
+	fflush(stdout);
+	fflush(stderr);
 	*stderr = *LYTraceLogFP;
 	fprintf(stderr, "\t\t%s\n\n", LYNX_TRACELOG_TITLE);
     }
@@ -1120,7 +1123,7 @@ PUBLIC int main ARGS2(
      *  use the userdefs.h definition.
      */
     if (!lynx_cfg_file)
-    	StrAllocCopy(lynx_cfg_file, LYNX_CFG_FILE);
+	StrAllocCopy(lynx_cfg_file, LYNX_CFG_FILE);
 
     /*
      *  Convert a '~' in the configuration file path to $HOME.
@@ -1232,7 +1235,7 @@ PUBLIC int main ARGS2(
      */
     strcpy(filename, LYNX_SIG_FILE);
     if (LYPathOffHomeOK(filename, sizeof(filename))) {
-    	StrAllocCopy(LynxSigFile, filename);
+	StrAllocCopy(LynxSigFile, filename);
 	LYAddPathToHome(filename, sizeof(filename), LynxSigFile);
 	StrAllocCopy(LynxSigFile, filename);
 	if (TRACE)
@@ -1240,7 +1243,7 @@ PUBLIC int main ARGS2(
     } else {
 	if (TRACE)
 	    fprintf(stderr, "LYNX_SIG_FILE '%s' is bad. Ignoring.\n",
-	    		    LYNX_SIG_FILE);
+			    LYNX_SIG_FILE);
     }
 
     /*
@@ -1274,7 +1277,7 @@ PUBLIC int main ARGS2(
 	    *(cp++) = '\0';
 	    StrAllocCopy(temp, lynx_save_space);
 	    if (((len = strlen(temp)) > 0) && temp[len-1] == '/')
-	        temp[len-1] = '\0';
+		temp[len-1] = '\0';
 #ifdef DOSPATH
 	    StrAllocCat(temp, HTDOS_wwwName((char *)Home_Dir()));
 #else
@@ -1293,13 +1296,13 @@ PUBLIC int main ARGS2(
             lynx_save_space[i] = TOLOWER(lynx_save_space[i]);
         if (strchr(lynx_save_space, '/') != NULL) {
 	    if ((len = strlen(lynx_save_space)) == 1) {
-	        StrAllocCopy(lynx_save_space, "sys$login:");
+		StrAllocCopy(lynx_save_space, "sys$login:");
 	    } else {
-	        if (lynx_save_space[len-1] != '/')
-	            StrAllocCat(lynx_save_space, "/");
+		if (lynx_save_space[len-1] != '/')
+		    StrAllocCat(lynx_save_space, "/");
                 StrAllocCopy(temp, HTVMS_name("", lynx_save_space));
-	        StrAllocCopy(lynx_save_space, temp);
-	        FREE(temp);
+		StrAllocCopy(lynx_save_space, temp);
+		FREE(temp);
 	    }
         }
 	if (strchr(lynx_save_space, ':') == NULL &&
@@ -1408,25 +1411,22 @@ PUBLIC int main ARGS2(
     if (LYPreparsedSource) {
 	HTPreparsedFormatInit();
     }
-    if (dump_output_width > 0) {
-	LYcols = dump_output_width;
-    }
-	
+
 #if defined(EXEC_LINKS) || defined(EXEC_SCRIPTS)
 #ifdef NEVER_ALLOW_REMOTE_EXEC
     if (local_exec) {
         local_exec = FALSE;
-	local_exec_on_local_files=TRUE;
+	local_exec_on_local_files = TRUE;
     }
 #endif /* NEVER_ALLOW_REMOTE_EXEC */
 #endif /* EXEC_LINKS || EXEC_SCRIPTS */
 
     if (emacs_keys)
         set_emacs_keys();
- 
+
     if (vi_keys)
         set_vi_keys();
- 
+
     if (number_links && keypad_mode == NUMBERS_AS_ARROWS)
 	keypad_mode = LINKS_ARE_NUMBERED;
     if (keypad_mode == NUMBERS_AS_ARROWS)
@@ -1453,6 +1453,13 @@ PUBLIC int main ARGS2(
     }
 
     /*
+     *  Check the -base command line switch with -source. - FM
+     */
+    if (LYPrependBase && HTOutputFormat == HTAtom_for("www/download")) {
+	LYPrependBaseToSource = TRUE;
+    }
+
+    /*
      *  Disable multiple bookmark support if not interactive,
      *  so it doesn't crash on curses functions, or if the
      *  support was blocked via userdefs.h and/or lynx.cfg,
@@ -1470,7 +1477,7 @@ PUBLIC int main ARGS2(
     set_vms_keys();
 #endif /* VMS */
 
-    /* trap interrupts */    
+    /* trap interrupts */
     if (!dump_output_immediately)
 #ifndef NOSIGHUP
         (void) signal(SIGHUP, cleanup_sig);
@@ -1684,6 +1691,9 @@ PUBLIC int main ARGS2(
 	if (display != NULL && *display != '\0') {
 	    LYisConfiguredForX = TRUE;
 	}
+	if (dump_output_width > 0) {
+	    LYcols = dump_output_width;
+	}
 	status = mainloop();
 	if (!nolist &&
 	    (keypad_mode == LINKS_ARE_NUMBERED ||
@@ -1705,16 +1715,16 @@ PUBLIC int main ARGS2(
 	 *  Finish setting up and start an
 	 *  INTERACTIVE session. - FM
 	 */
- 	if (setup(terminal)) {
+	if (setup(terminal)) {
 	    if (display != NULL && *display != '\0') {
-	        LYisConfiguredForX = TRUE;
+		LYisConfiguredForX = TRUE;
 	    }
 	    ena_csi((LYlowest_eightbit[current_char_set] > 155));
 	    status = mainloop();
 	    cleanup();
 	}
     }
- 
+
     exit(status);
 }
 
@@ -1826,7 +1836,7 @@ PRIVATE void parse_arg ARGS3(
 	    int j;
 
 	    for (j = 0; cp[j]; j++)
-	        cp[j] = TOLOWER(cp[j]);
+		cp[j] = TOLOWER(cp[j]);
 	    if (local_flag) {
 		StrAllocCopy(UCAssume_localMIMEcharset, cp);
 		if (UCAssume_localMIMEcharset && *UCAssume_localMIMEcharset)
@@ -1860,7 +1870,7 @@ PRIVATE void parse_arg ARGS3(
 	 *  Authentication information for protected documents.
 	 */
 	char *auth_info = NULL;
-	
+
 	if (nextarg) {
 	    StrAllocCopy(auth_info, cp);
 	    memset(cp, ' ', strlen(cp));	/* Let's not show too much */
@@ -1874,7 +1884,7 @@ PRIVATE void parse_arg ARGS3(
 		}
 	    }
 	    if (*auth_info) {					/* Id */
-	        HTUnEscape(auth_info);
+		HTUnEscape(auth_info);
 		StrAllocCopy(authentication_info[0], auth_info);
 	    }
 	    FREE(auth_info);
@@ -1889,12 +1899,17 @@ PRIVATE void parse_arg ARGS3(
     if (strcmp(argv[0], "-base") == 0) {
         /*
 	 *  Treat -source equivalently to an interactive
-	 *  download, so that a BASE tag is prepended for
-	 *  text/html content types. - FM
+	 *  download with LYPrefixBaseToSource configured
+	 *  to TRUE, so that a BASE tag is prepended for
+	 *  text/html content types.  We normally treat
+	 *  the module-wide global LYPrefixBaseToSource
+	 *  flag as FALSE with -source, but force it TRUE,
+	 *  later, if LYPrependBase is set TRUE here. - FM
 	 */
 	LYPrependBase = TRUE;
-	if (HTOutputFormat == HTAtom_for("www/dump"))
+	if (HTOutputFormat == HTAtom_for("www/dump")) {
 	    HTOutputFormat = HTAtom_for("www/download");
+	}
 
     } else if (strcmp(argv[0], "-book") == 0) {
         /*
@@ -1935,7 +1950,7 @@ PRIVATE void parse_arg ARGS3(
 
     } else if (strncmp(argv[0], "-cfg", 4) == 0) {
 	/*
-	 *  Already read the alternate configuration file 
+	 *  Already read the alternate configuration file
 	 *  so just check whether we need to increment i
 	 */
 	if (nextarg)
@@ -1982,7 +1997,7 @@ PRIVATE void parse_arg ARGS3(
 #ifdef VMS
 	    int j;
 	    for (j = 0; cp[j]; j++)
-	        cp[j] = TOUPPER(cp[j]);
+		cp[j] = TOUPPER(cp[j]);
 	    Define_VMSLogical(DISPLAY, cp ? cp : "");
 #else
 	    sprintf(display_putenv_command, "DISPLAY=%s", cp ? cp : "");
@@ -2049,7 +2064,7 @@ PRIVATE void parse_arg ARGS3(
 #else
 	break;;
 #endif /* VMS */
-	
+
     } else if (strncmp(argv[0], "-force_secure", 13) == 0) {
         if (LYForceSSLCookiesSecure)
 	    LYForceSSLCookiesSecure = FALSE;
@@ -2147,7 +2162,7 @@ PRIVATE void parse_arg ARGS3(
 	    StrAllocCopy(homepage, cp);
 	    LYTrimHead(homepage);
 	    if (!strncasecomp(homepage, "lynxexec:", 9) ||
-	        !strncasecomp(homepage, "lynxprog:", 9)) {
+		!strncasecomp(homepage, "lynxprog:", 9)) {
 		/*
 		 *  The original implementions of these schemes expected
 		 *  white space without hex escaping, and did not check
@@ -2245,7 +2260,7 @@ PRIVATE void parse_arg ARGS3(
 	     * increase HTNewsMaxChunk to this size. - FM
 	     */
 	    if (HTNewsChunkSize > HTNewsMaxChunk) {
-	        HTNewsMaxChunk = HTNewsChunkSize; 
+		HTNewsMaxChunk = HTNewsChunkSize;
 	    }
 	}
 
@@ -2257,7 +2272,7 @@ PRIVATE void parse_arg ARGS3(
 	     * reduce HTNewsChunkSize to this maximum. - FM
 	     */
 	    if (HTNewsChunkSize > HTNewsMaxChunk) {
-	        HTNewsChunkSize = HTNewsMaxChunk;
+		HTNewsChunkSize = HTNewsMaxChunk;
 	    }
 	}
 
@@ -2305,7 +2320,7 @@ PRIVATE void parse_arg ARGS3(
     } else if (strncmp(argv[0], "-noreferer", 10) == 0) {
 	LYNoRefererHeader = TRUE;
 
-#ifdef SOCKS	
+#ifdef SOCKS
     } else if (strncmp(argv[0], "-nosocks", 8) == 0) {
 	socks_flag = FALSE;
 #endif /* SOCKS */
@@ -2327,7 +2342,7 @@ PRIVATE void parse_arg ARGS3(
 	 *  Authentication information for protected proxy server. - AJL
 	 */
 	char *pauth_info = NULL;
-	
+
 	if (nextarg) {
 	    StrAllocCopy(pauth_info, cp);
 	    memset(cp, ' ', strlen(cp));	/* Let's not show too much */
@@ -2341,7 +2356,7 @@ PRIVATE void parse_arg ARGS3(
 		}
 	    }
 	    if (*pauth_info) {					/* Id */
-	        HTUnEscape(pauth_info);
+		HTUnEscape(pauth_info);
 		StrAllocCopy(proxyauth_info[0], pauth_info);
 	    }
 	    FREE(pauth_info);
@@ -2423,16 +2438,16 @@ PRIVATE void parse_arg ARGS3(
    USAGE: lynx -restrictions=[option][,option][,option]\n\
    List of Options:\n\
    all             restricts all options.\n");
-	        printf("\
+		printf("\
    bookmark        disallow changing the location of the bookmark file.\n\
    bookmark_exec   disallow execution links via the bookmark file\n");
 #if defined(DIRED_SUPPORT) && defined(OK_PERMIT)
-	        printf("\
+		printf("\
    change_exec_perms  disallow changing the eXecute permission on files\n\
                    (but still allow it for directories) when local file\n\
 		   management is enabled.\n");
 #endif /* DIRED_SUPPORT && OK_PERMIT */
-	        printf("\
+		printf("\
    default         same as commandline option -anonymous.  Disables\n\
                    default services for anonymous users.  Currently set to,\n\
                    all restricted except for: inside_telnet, outside_telnet,\n\
@@ -2440,10 +2455,10 @@ PRIVATE void parse_arg ARGS3(
 		   outside_rlogin, goto, jump and mail.  Defaults\n\
                    are settable within userdefs.h\n");
 #ifdef DIRED_SUPPORT
-	        printf("\
+		printf("\
    dired_support   disallow local file management\n");
 #endif /* DIRED_SUPPORT */
-	        printf("\
+		printf("\
    disk_save       disallow saving to disk in the download and print menus\n\
    dotfiles        disallow access to, or creation of, hidden (dot) files\n\
    download        disallow downloaders in the download menu\n\
@@ -2459,7 +2474,7 @@ PRIVATE void parse_arg ARGS3(
                    file: URL's\n\
    goto            disable the 'g' (goto) command\n");
 #if !defined(HAVE_UTMP) || defined(VMS) /* not selective */
-	        printf("\
+		printf("\
    inside_ftp      disallow ftps for people coming from inside your\n\
                    domain (utmp required for selectivity)\n\
    inside_news     disallow USENET news posting for people coming from\n\
@@ -2469,21 +2484,21 @@ PRIVATE void parse_arg ARGS3(
    inside_telnet   disallow telnets for people coming from inside your\n\
                    domain (utmp required for selectivity)\n");
 #else
-	        printf("\
+		printf("\
    inside_ftp      disallow ftps for people coming from inside your domain\n\
    inside_news     disallow USENET news posting for people coming from inside\n\
                    your domain\n\
    inside_rlogin   disallow rlogins for people coming from inside your domain\n\
    inside_telnet   disallow telnets for people coming from inside your domain\n");
 #endif /* HAVE_UTMP || VMS */
-	        printf("\
+		printf("\
    jump            disable the 'j' (jump) command\n\
    mail            disallow mail\n\
    multibook       disallow multiple bookmark files\n\
    news_post       disallow USENET News posting.\n\
    option_save     disallow saving options in .lynxrc\n");
 #if !defined(HAVE_UTMP) || defined(VMS) /* not selective */
-	        printf("\
+		printf("\
    outside_ftp     disallow ftps for people coming from outside your\n\
                    domain (utmp required for selectivity)\n\
    outside_news    disallow USENET news posting for people coming from\n\
@@ -2552,7 +2567,7 @@ PRIVATE void parse_arg ARGS3(
 #ifndef VMS
 #ifdef SYSLOG_REQUESTED_URLS
     } else if (strncmp(argv[0], "-syslog", 7) == 0) {
-	if (nextarg) 
+	if (nextarg)
 	    StrAllocCopy(syslog_txt, cp);
 #endif /* SYSLOG_REQUESTED_URLS */
 #endif /* !VMS */
@@ -2643,7 +2658,7 @@ PRIVATE void parse_arg ARGS3(
 	if (nextarg) {
 	    int w = atoi(cp);
 	    if (w > 0) {
-		dump_output_width = w;
+		dump_output_width = ((w < 999) ? w : 999);
 		break;
 	    }
 	}
@@ -2682,7 +2697,7 @@ Output_Help_List:
 #endif /* EXP_CHARTRANS */
     printf("    -auth=id:pw      authentication information for protected documents\n");
     printf("    -base            prepend a request URL comment and BASE tag to text/html\n");
-    printf("                     outputs for -source or -mime_header dumps\n");
+    printf("                     outputs for -source dumps\n");
     printf("    -book            use the bookmark page as the startfile\n");
     printf("    -buried_news     toggles scanning of news articles for buried references\n");
     printf("    -cache=NUMBER    NUMBER of documents cached in memory (default is %d)\n",DEFAULT_CACHE_SIZE);
@@ -2794,6 +2809,7 @@ Output_Help_List:
     printf("    -validate        accept only http URLs (for validation)\n");
     printf("    -version         print Lynx version information\n");
     printf("    -vikeys          enable vi-like key movement\n");
+    printf("    -width=NUMBER    screen width for formatting of dumps (default is 80)\n");
     if (strncmp(argv[0], "-help", 5) != 0)
 	exit(-1);
     exit(0);

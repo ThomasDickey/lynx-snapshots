@@ -4,7 +4,7 @@ dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
 dnl and Philippe De Muyter <phdm@macqel.be>
 dnl
 dnl Created: 1997/1/28
-dnl Updated: 1997/11/23
+dnl Updated: 1997/12/23
 dnl
 dnl ---------------------------------------------------------------------------
 dnl ---------------------------------------------------------------------------
@@ -154,35 +154,53 @@ eval 'cf_result=$cf_cv_dcl_'$1
 AC_MSG_RESULT($cf_result)
 
 # It's possible (for near-UNIX clones) that the data doesn't exist
+AC_CACHE_VAL(cf_cv_have_$1,[
 if test $cf_result = no ; then
     eval 'cf_result=DECL_'$1
     CF_UPPER(cf_result,$cf_result)
     AC_DEFINE_UNQUOTED($cf_result)
     AC_MSG_CHECKING([existence of $1])
-    AC_CACHE_VAL(cf_cv_have_$1,[
         AC_TRY_LINK([
 #undef $1
 extern long $1;
 ],
             [$1 = 2],
             [eval 'cf_cv_have_'$1'=yes'],
-            [eval 'cf_cv_have_'$1'=no'])])
-    eval 'cf_result=$cf_cv_have_'$1
-    AC_MSG_RESULT($cf_result)
+            [eval 'cf_cv_have_'$1'=no'])
+        eval 'cf_result=$cf_cv_have_'$1
+        AC_MSG_RESULT($cf_result)
+else
+    eval 'cf_cv_have_'$1'=yes'
 fi
+])
+eval 'cf_result=HAVE_'$1
+CF_UPPER(cf_result,$cf_result)
+eval 'test $cf_cv_have_'$1' = yes && AC_DEFINE_UNQUOTED($cf_result)'
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl Check if a function is declared by including a set of include files.
 dnl Invoke the corresponding actions according to whether it is found or not.
+dnl
+dnl Gcc (unlike other compilers) will only warn about the miscast assignment
+dnl in the first test, but most compilers will oblige with an error in the
+dnl second test.
+dnl
 dnl CF_CHECK_FUNCDECL(INCLUDES, FUNCTION, [ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND]])
 AC_DEFUN(CF_CHECK_FUNCDECL,
-[AC_MSG_CHECKING([for $2 declaration])
+[
+AC_MSG_CHECKING([for $2 declaration])
 AC_CACHE_VAL(ac_cv_func_decl_$2,
 [AC_TRY_COMPILE([$1],
 [#ifndef ${ac_func}
+extern	int	${ac_func}();
+#endif],[
+AC_TRY_COMPILE([$1],
+[#ifndef ${ac_func}
 int	(*p)() = ${ac_func};
-#endif],
-eval "ac_cv_func_decl_$2=yes", eval "ac_cv_func_decl_$2=no")])dnl
+#endif],[
+eval "ac_cv_func_decl_$2=yes"],[
+eval "ac_cv_func_decl_$2=no"])],[
+eval "ac_cv_func_decl_$2=yes"])])
 if eval "test \"`echo '$ac_cv_func_'decl_$2`\" = yes"; then
   AC_MSG_RESULT(yes)
   ifelse([$3], , :, [$3])
@@ -249,38 +267,67 @@ freebsd*) #(vi
 		# HP's header uses __HP_CURSES, but user claims _HP_CURSES.
 		LIBS="-lHcurses $LIBS"
 		CFLAGS="-D__HP_CURSES -D_HP_CURSES $CFLAGS"
+		ac_cv_func_initscr=yes
 		],[
 	AC_CHECK_LIB(cur_color,initscr,[
 		LIBS="-lcur_color $LIBS"
 		CFLAGS="-I/usr/include/curses_colr $CFLAGS"
+		ac_cv_func_initscr=yes
 		])])
 	;;
 esac
+
 if test -d /usr/5lib ; then
 	# SunOS 3.x or 4.x
 	CPPFLAGS="$CPPFLAGS -I/usr/5include"
 	LIBS="$LIBS -L/usr/5lib"
-# FIXME: check if we need/use -R option
-# elif test -d /usr/ccs/lib ; then
-# 	# Solaris 5.x
-# 	LIBS="$LIBS -L/usr/ccs/lib -R/usr/ccs/lib"
 fi
 
-cf_save_LIBS="$LIBS"
-AC_CHECK_FUNC(tgoto,[
-	AC_CHECK_LIB(curses,initscr,,[
-		AC_ERROR(cannot link curses)])
-],[
-AC_CHECK_LIB(termcap, tgoto,[
-	LIBS="-ltermcap $cf_save_LIBS"
-	AC_CHECK_LIB(curses,initscr,,[
-		AC_CHECK_LIB(cursesX,initscr,,[
-			AC_CHECK_LIB(jcurses,initscr,,[
-				AC_ERROR(cannot link curses)])])])
-	],[
-	AC_CHECK_LIB(curses,initscr,,[
-		AC_ERROR(cannot link curses)])])
-])
+if test ".$ac_cv_func_initscr" != .yes ; then
+	cf_save_LIBS="$LIBS"
+	cf_term_lib=""
+	cf_curs_lib=""
+
+	# Check for library containing initscr
+	for cf_curs_lib in curses ncurses cursesX jcurses unknown
+	do
+		AC_CHECK_LIB($cf_curs_lib,initscr,[break])
+	done
+	test $cf_curs_lib = unknown && AC_ERROR(no curses library found)
+
+	# Check for library containing tgoto
+	AC_CHECK_FUNC(tgoto,[cf_term_lib=predefined],[
+		for cf_term_lib in termcap termlib unknown
+		do
+			AC_CHECK_LIB($cf_term_lib,tgoto,[break])
+		done
+	])
+
+	LIBS="-l$cf_curs_lib $cf_save_LIBS"
+	if test "$cf_term_lib" = unknown ; then
+		AC_MSG_CHECKING(if we can link with $cf_curs_lib library)
+		AC_TRY_LINK([#include <$cf_cv_ncurses_header>],
+			[initscr()],
+			[cf_result=yes],
+			[cf_result=no])
+		AC_MSG_RESULT($cf_result)
+		test $cf_result = no && AC_ERROR(Cannot link curses library)
+	elif test "$cf_term_lib" != predefined ; then
+		AC_MSG_CHECKING(if we need both $cf_curs_lib and $cf_term_lib libraries)
+		AC_TRY_LINK([#include <$cf_cv_ncurses_header>],
+			[initscr()],
+			[cf_result=no],
+			[
+			LIBS="-l$cf_curs_lib -l$cf_term_lib $cf_save_LIBS"
+			AC_TRY_LINK([#include <$cf_cv_ncurses_header>],
+				[initscr()],
+				[cf_result=yes],
+				[cf_result=error])
+			])
+		AC_MSG_RESULT($cf_result)
+	fi
+fi
+
 ])])
 dnl ---------------------------------------------------------------------------
 dnl Solaris 2.x curses provides a "performance" tradeoff according to whether
@@ -1014,6 +1061,10 @@ do
     AC_TRY_COMPILE([#include <sys/types.h>
 #if HAVE_TERMIOS_H
 #include <termios.h>
+#else
+#if HAVE_TERMIO_H
+#include <termio.h>
+#endif
 #endif
 #if NEED_PTEM_H
 /* This is a workaround for SCO:  they neglected to define struct winsize in
@@ -1071,7 +1122,8 @@ AC_CACHE_VAL(cf_cv_slang_header,[
 		for cf_header in \
 			slang.h
 		do
-			if egrep "SLANG_VERSION" $cf_incdir/$cf_header 1>&5 2>&1; then
+			echo trying $cf_incdir/$cf_header 1>&AC_FD_CC
+			if egrep "SLANG_VERSION" $cf_incdir/$cf_header 1>&AC_FD_CC 2>&1; then
 				cf_cv_slang_header=$cf_incdir/$cf_header 
 				break
 			fi
@@ -1109,7 +1161,7 @@ CF_FIND_LIBRARY(slang,
 	SLtt_get_screen_size)
 cf_slang_LIBS3="$LIBS"
 AC_MSG_CHECKING(if we can link slang without termcap)
-if test -n "$cf_slang_LIBS1" ; then
+if test -n "`echo $cf_slang_LIBS1 | sed -e 's/ //g'`" ; then
 	cf_exclude=`echo ".$cf_slang_LIBS2" | sed -e "s@$cf_slang_LIBS1@@" -e 's@^.@@'`
 else
 	cf_exclude="$cf_slang_LIBS2"

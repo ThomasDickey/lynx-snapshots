@@ -185,6 +185,11 @@ PUBLIC void cleanup NOARGS
     fflush(stdout);
     fflush(stderr);
     if (LYTraceLogFP != NULL) {
-        fclose(LYTraceLogFP);
+	fclose(LYTraceLogFP);
+	LYTraceLogFP = 0;
+	LYTraceLogFP = NULL;
+#if !defined(VMS) || (defined(VMS) && !defined(VAXC) && !defined(UCX))
+	*stderr = LYOrigStderr;
+#endif /* !VMS || (VMS && !VAXC && !UCX) */
     }
 }

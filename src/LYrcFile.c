@@ -34,9 +34,6 @@ PUBLIC void read_rc NOPARAMS
     sprintf(rcfile, "%s/.lynxrc", Home_Dir());
 #endif /* VMS */
 #endif /* DJGPP */
-#if defined(__DJGPP__) || defined(_WINDOWS)
-                _fmode = O_TEXT;
-#endif /* __DJGPP__  or _WINDOWS */
 
     /*
      *  Open the RC file for reading.
@@ -532,6 +529,9 @@ PUBLIC int save_rc NOPARAMS
     /*
      *  Open the file for write.
      */
+#if defined(__DJGPP__) || defined(_WINDOWS)
+    _fmode = O_TEXT;
+#endif /* __DJGPP__  or _WINDOWS */
     if ((fp = LYNewTxtFile(rcfile)) == NULL) {
 	return FALSE;
     }
@@ -632,7 +632,7 @@ PUBLIC int save_rc NOPARAMS
 # logging purposes, and for mailed comments.\n\
 # If you do not want this information given out, set the NO_FROM_HEADER\n\
 # to TRUE in lynx.cfg, or use the -nofrom command line switch.  You also\n\
-# could leave this field blank, but then you won't have if it included in\n\
+# could leave this field blank, but then you won't have it included in\n\
 # your mailed comments.\n");
     fprintf(fp, "personal_mail_address=%s\n\n",
     		(personal_mail_address ? personal_mail_address : ""));

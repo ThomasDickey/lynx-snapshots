@@ -3,14 +3,92 @@
 [ This file will become the CHANGES file for a new Lynx release.
 (More detailed change information may be in separate files, which could
 later disappear.  For some early changes for compilation on Win32 and DOS
-platforms see also README.win-386, for some changes for auto-configure and
+platforms see also INSTALLATION, for some changes for auto-configure and
 simple curses color see also README.configure).  Note that the 2.7 -> 2.7.1
 changes are included here. - KW]
 
+1998-01-02
+* workaround for sed expression when rerunning configure with config.cache
+  for slang libraries (reported by Hynek Med). - TD
+* fix indicated by Laura Eaves for LYUCFullyTranslateString_1() - TD
+* modify SPAWNING_MSG for DOSPATH configuration, avoid unnecessary use
+  of clear-screen in shell (patch by Doug Kaufman). - TD
+* remove install-help from list for install rule, adding message to
+  indicate how to install it. - TD
+* install lynx.lss only if color-style is configured. - TD
+* correct filemode for DJGPP when processing config-file, patch by
+  Doug Kaufman). - TD
+* add LYNX_LSS_FILE to config.hin, reported by Ambrose Li
+  <acli@acli.interlog.com>. - TD
+* new copy of INSTALLATION file from Henry Nelson Eric. - TD
+* add COPY* to install rule. - TD
+* simplify includes in UCdomap.c by using include-path in makefiles. - TD
+* build configure script with patched autoconf to workaround limited
+  environment space on CLIX 3.1 - TD
+* rename mnemonic_suni.tbl to mnem2_suni.tbl to accommodate 'make' on
+  older system with 14-character name-limit. - TD
+* sorted some lists (e.g., character sets) which were unreadable. - TD
+* incorporate most of FM's changes from 971124 to 971230 (see below). - TD
+  (Note:  don't try to use fflush(stdin) -- it's an FAQ -- nonstandard,
+  dumps core on some platforms).
+1997-12-30
+* Added Unicode translation support for "DosBaltRim (cp775)" and
+  "WinBaltRim (cp1257)". - FM
+1997-12-29
+* Fixed bug in the order of re-initializations for the 1997-12-22
+  get_connection() mods. - FM
+* Fixed typos in some LYCharUtils.c comment. - FM
+* Fixed typo in LYrcFile.c comments concerning the NO_FROM_HEADER
+  symbol. - DK
+1997-12-24
+* resolve conflict between autoconf $INSTALL and lynx's INSTALL_PATH
+  (reported by Scott McGee). - TD
+* modify CF_CHECK_FUNCDECL to work with non-gcc compilers. - TD
+* add <stdio.h> to prototype test for getgrgid getgrnam, needed on SVr3. - TD
+* add install-lss to makefile.in. - TD
+* modify order of includes in LYKeymap.c so that USE_EXTERNALS is defined
+  if it comes from userdefs.h (inferred from a report by Larry Virden). - TD
+* correct spelling of USE_EXTERNALS which prevented --enable-externs from
+  working. - TD
+* move assignment to stderr from VMSexit to cleanup function (reported
+  by Brian Tillman & FM). - TD
+* modify UCChangeTerminalCodepage() to not use stderr, disentangling it
+  from stderr/logfile hack. - TD
+* rename docs/CHANGES2-* files to docs/CHANGES2.* (reported by
+  Doug Kaufman). - TD
+* add start_color() call to DOSPATH version of start_curses() to
+  fix problem reported by Doug Kaufman - TD
+* correct typo in ColorCode() function (reported by Doug Kaufman) - TD
+* modify comments in makefile.in (patch by Henry Nelson Eric) - TD
+* minor fixes for CF_CHECK_ERRNO, CF_SIZECHANGE, CF_SLANG_CPPFLAGS
+  macros. - TD
+* add configure option --enable-nsl-fork to turn on code defined by
+  NSL_FORK. - TD
+* add configure option --enable-links to turn on code defined by
+  UNDERLINE_LINKS. - TD
+* add configure option --enable-font-switch, to turn on code defined by
+  EXP_CHARTRANS_AUTOSWITCH. - TD
+* modify configure CF_CURSES_LIBS test to look also for ncurses,
+  since some systems do not have a "curses" library (reported by
+  Michael Ritzert). - TD
+1997-12-22
+* Reworked -width=NUMBER command line switch for specifying the screen
+  width for formatting of dumps (default is 80; forced wraps occur at one
+  column less than the screen width, i.e., at 79 by default). - FM
+* Tweak of get_connection() in HTFTP.c to re-initialize the elements of
+  the connection structure when using a previously allocated connection
+  object. - DW & FM
+* Mods of LYexit.c, LYClean.c, LYMain.c and LYMainLoop.c to fflush() all
+  standard file descriptors in conjunction with all fopen() and fclose()
+  operations on the TRACE log and redirections of stderr via equality
+  statements (see 1997-12-16, 1997-12-13 and 1997-07-18 mods). - FM
 1997-12-18 
 * forgotten last } UN-inserted (John Line) - WB
 * few commented messages corrected according to RFC2068 (HTTP1.1)
   (Leonid Pauzner) - WB
+1997-12-17
+* Changed all %i tokens to %d or %ld in functions that always get decimal
+  values in their arguments. - FM
 1997-12-17 (all patches by Leonid Pauzner)
 * open text mode while writing lynx.rc and bookmarks files
   LYrcFile.c and LYBookmark.c (forgotten last } inserted). - WB
@@ -18,12 +96,50 @@ changes are included here. - KW]
   in one ifdef - WB
 * few misprinted characters (in comments) corrected in
   \chrtrans\cp850_uni.tbl - WB
+1997-12-16
+* Further mods in LYClean.c (see 1997-12-13 mods) do block the
+  *stderr = LYOrigStderr;  statement in cleanup() for VMS with VAXC. - FM
+* Added an ELGOTO keystroke command, mapped by default to upper case 'E'
+  (lower case 'e' still invokes the editor for the current document, if
+  it is a local file), for passing the URL (or ACTION) of the current
+  link to the line editor for editing as a goto URL.  Works like the
+  ECGOTO ('G') keystroke command for editing the URL of the current
+  document as a goto URL, i.e., if the URL is not modified, is set to
+  a zero-length string, or ^G is entered, the command is cancelled. - FM
+* Mods of LYMainLoop.c to disallow ECGOTO or ELGOTO commands for File
+  Management (DIRED_SUPPORT) menu URLs. - FM
+1997-12-15
+* Added reporting of the Discard value (YES or NO), in the Cookie Jar Page
+  (note that until we have code for storing cookies beyond the current
+  session, Lynx behaves as if Discard were set, whether or not it was set
+  by the server, but we still report the server's instructions, as we do
+  for the Maximum Gobble Date). - FM
 1997-12-14
 * added a lynx.cfg switch to turn on/off extended dos translations for keys. 
   -WB
 * added minor DOS tweaks by Doug Kaufman and myself. - WB
 * fixed windos binary mode piping. - WB
 1997-12-13
+* Tweaks in LYList.c to make the link numbers correspond with those in
+  the current document when LINKS_AND_FORM_FIELDS_ARE_NUMBERED in on,
+  and to show the current document's URL in the display. - FM
+* Mods in HTTP.c to show the body of a 305 return status instead of ever
+  acting on it.  A number of security/privacy problems with this status
+  are being discussed in the HTTP-WG, and it's likely to be dropped or
+  deprecated in the next revision of the HTTP/1.1 specs. - FM
+* Restored the v2.7.1 HTmmdecode() that's specific for iso-2022-jp in
+  HTMIME.c.  We still only call it when HTCJK == JAPANESE, and the
+  generalized version reportedly has problems. - FM
+* Removed the *stderr = LYOrigStderr; statement from VMSexit() in LYCurses.c
+  and added it to the if() claused section which closes the TRACE log file,
+  if opened, in cleanup() of LYClean.c.  This is just a stab in the dark
+  for dealing with reported problems on exit with VAXC on VAXen.  We may
+  need to use freopen() for redirecting TRACE messages to a file for VAXC
+  or VAXen (there's no apparent problem with the current code with DECC
+  on VMS/AXP). - FM
+* Added more function key cases to the keypad() mode switch() in LYgetch()
+  of LYStrings.c.  We don't need them with this code set, but they may as
+  well be there for completeness. - FM
 * check for and use ncurses default-color extension, use to make the
   color-style configuration usable on xterm with white background. - TD
 * add cases in LYgetch() for remaining VT220-compatible codes, reported
@@ -37,6 +153,7 @@ changes are included here. - KW]
 * suppress suffixes in top-level makefile so 'make' won't try to create
   a file named "install" from install.sh - TD 
 * make $(CPPFLAGS) inherit consistently from top-level makefile. - TD
+  (reported by Mark Mentovai)
 * add configure option --enable-externs, to turn on USE_EXTERNS. - TD
 * use explicit comparison for enum values, fix compile problem with VAX C
   for UCAux functions (reported by Brian Tillman). - TD
@@ -47,6 +164,53 @@ changes are included here. - KW]
 * Use wborder only if configure finds it, not ifdef FANCY_CURSES. - PHDM
 * List of systems having strerror replaced by configure test. - PHDM
 * Beautifying of mktime.c (`now' was misleading). - PHDM
+1997-12-02
+* Mods in LYCookie.c to prompt whether to accept (or reject) cookies with
+  an invalid domain value which yields a hostname prefix with a dot (as
+  specified in section 4.3.2 of the IETF cookie drafts and RFC), rather
+  than rejecting it silently.  Note that it is rejected in non-interactive
+  (-dump or -source) mode, because the user can't be prompted. - FM
+1997-11-27
+* Added a PREPEND_BASE_TO_SOURCE configuration symbol in lynx.cfg which
+  can be set FALSE to suppress prepending of a Request URL comment and
+  BASE element to text/html sources retrieved for 'd'ownloading or passed
+  to 'p'rint functions.  Note that this prepending is not done for -source
+  dumps unless the -base switch also was included on the command line, and
+  the latter switch overrides the setting of the PREPEND_BASE_TO_SOURCE
+  configuration variable. - FM
+1997-11-25
+* Mods in LYMail.c and LYPrint.c to handle to=address(es), cc=address(es),
+  subject=string, keywords=word_list, and body=message fields in the
+  ?searchpart of mailto URLs as specified in the 1997-11-16 draft:
+    ftp://ftp.isi.edu/internet-drafts/draft-hoffman-mailto-url-03.txt
+  The cc=address(es) values are now handled as a Cc: header, and a self
+  copy, if confirmed on prompt, is added to the Cc: header.  Note that
+  the draft now allows mailto:?to=address(es)[&foo=blah] as a format,
+  i.e., without an address before the ?searchpart.  The Netscape
+  ?searchpart tack-on broke all pre-existing implementations of mailto,
+  and this breaks Lynx's support through v2.7.1.  Though it's now
+  supported in this code set, don't use it.  Complaints and formal
+  requests to provide this functionality via a new scheme (e.g.,
+  mail: or smtp:) without breaking existing implementation of mailto:,
+  including from TimBL (HimSelf :), thus far have fallen on deaf ears.
+  You can send email to those deaf ears via:
+  	mailto:masinter@parc.xerox.com%20(Larry%20Masinter)
+  Don't allow the IETF backward compatibility principle to go down
+  the drain. - FM
+* Mods to support use of the PMDF SEND command on VMS in conjunction with
+  a temporary header file, so that all headers specified in the ?searchpart
+  of mailto URLs can be included in the mailing, and made that the compilation
+  default in userdefs.h to go with the default MAIL_ADRS mask for PMDF (If
+  the "generic" VMS MAIL utility is used, not all of the headers can be
+  specified on the command line, as it requires).  Look at the code in
+  LYMail.c and LYPrint.c that is used when isPMDF is TRUE as a model of how
+  to do this with other header-file-capable VMS mailers (but I don't have
+  any besides PMDF, and can't do it for you :). - FM
+* Tweak of the 1997-11-17 URL parsing mods so that relative symbolic
+  elements immediately preceding a ?searchpart are handled identically
+  to when a ?searchpart is not present. - FM
+* Added support for setting both SYSTEM_MAIL and SYSTEM_MAIL_FLAGS in
+  both userdefs.h and lynx.cfg. - FM
 1997-11-23
 * integrate PHDM's patch. - TD
 * Check for existence of sys/wait.h. - PHDM
@@ -88,7 +252,7 @@ changes are included here. - KW]
 * Added an LYK_CLEAR_AUTH command, mapped to underscore ('_') by default,
   which clears all authorization info for the current session.  This is
   recommended for the situation when one leaves one's terminal but doesn't
-  want to end the Browser session, nor want others to be able to retrieve
+  want to end the browser session, nor want others to be able to retrieve
   protected documents with previously entered username and password info.
   Note that we don't yet have a way to block access to any protected
   documents which are still in cache. - FM

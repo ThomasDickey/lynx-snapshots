@@ -16,6 +16,7 @@
 #undef DECL_SYS_ERRLIST
 #undef DIRED_SUPPORT		/* AC_ARG_WITH(dired) */
 #undef EXP_CHARTRANS		/* AC_ARG_WITH(char-trans) */
+#undef EXP_CHARTRANS_AUTOSWITCH	/* AC_ARG_WITH(font-switch) */
 #undef FANCY_CURSES		/* defined by CF_FANCY_CURSES */
 #undef GZIP_PATH		/* CF_PATH_PROG(gzip) */
 #undef HAVE_CBREAK
@@ -54,7 +55,8 @@
 #undef LINUX			/* FIXME: make tests? */
 #undef LOCALE			/* for locale support */
 #undef LONG_LIST		/* CF_ARG_DISABLE(long-list) */
-#undef LYNX_CFG_FILE		/* CF_WITH_PATH(cfg-file) */
+#undef LYNX_CFG_FILE		/* $libdir/lynx.cfg */
+#undef LYNX_LSS_FILE		/* $libdir/lynx.lss */
 #undef LY_FIND_LEAKS		/* configure --disable-leaks */
 #undef MKDIR_PATH		/* CF_PATH_PROG(mkdir) */
 #undef MV_PATH			/* CF_PATH_PROG(mv) */
@@ -65,6 +67,7 @@
 #undef NGROUPS			/* defined by CF_NGROUPS */
 #undef NO_CHANGE_EXECUTE_PERMS	/* CF_ARG_DISABLE(dired-xpermit) */
 #undef NO_PARENT_DIR_REFERENCE	/* configure --disable-parent-dir */
+#undef NSL_FORK			/* CF_ARG_ENABLE(nsl-fork) */
 #undef OK_GZIP			/* CF_ARG_DISABLE(dired-gzip) */
 #undef OK_OVERRIDE		/* CF_ARG_DISABLE(dired-override) */
 #undef OK_PERMIT		/* CF_ARG_DISABLE(dired-permit) */
@@ -80,10 +83,11 @@
 #undef TOUCH_PATH		/* CF_PATH_PROG(touch) */
 #undef ULTRIX			/* config.sub */
 #undef UNCOMPRESS_PATH		/* CF_PATH_PROG(gunzip) */
+#undef UNDERLINE_LINKS		/* CF_ARG_ENABLE(underlines) */
 #undef UNIX
 #undef UNZIP_PATH		/* CF_PATH_PROG(unzip) */
 #undef USE_COLOR_STYLE		/* CF_ARG_ENABLE(color-style) */
-#undef USE_EXTERNS		/* CF_ARG_ENABLE(externs) */
+#undef USE_EXTERNALS		/* CF_ARG_ENABLE(externs) */
 #undef USE_HASH			/* see USE_COLOR_STYLE */
 #undef USE_SIZECHANGEHACK	/* FIXME: find a case where this works! */
 #undef USE_SLANG		/* AC_ARG_WITH(screen=slang) */
@@ -106,7 +110,6 @@
 /* FIXME:EXEC_SCRIPTS */
 /* FIXME:HP_TERMINAL */
 /* FIXME:NOPORT */
-/* FIXME:NSL_FORK */
 /* FIXME:POSIX_JC */
 /* FIXME:REVERSE_CLEAR_SCREEN_PROBLEM */
 /* FIXME:SHORTENED_RBIND */

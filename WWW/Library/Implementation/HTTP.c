@@ -130,7 +130,7 @@ PUBLIC int HTLoadHTTP ARGS4 (
   BOOL auth_proxy = NO;		/* Generate a proxy authorization. - AJL */
 
   int length, rv;
-  BOOL doing_redirect, already_retrying = FALSE;
+  BOOL doing_redirect, already_retrying = FALSE, bad_location = FALSE;
   int len = 0;
 
   void * handle = NULL;
@@ -987,8 +987,8 @@ try_again:
 	    **  Various forms of Redirection. - FM
 	    **  300 Multiple Choices.
 	    **  301 Moved Permanently.
-	    **  302 General (temporary) Redirection (we can, and do, use GET).
-	    **  303 See Other (always use GET).
+	    **  302 Found (temporary; we can, and do, use GET).
+	    **  303 See Other (temporary; always use GET).
 	    **  304 Not Modified.
 	    **  305 Use Proxy.
 	    **  306 Set Proxy.
@@ -1047,24 +1047,12 @@ try_again:
 		break;
 	    }
 
-	    if (server_status == 305) { /* Use Proxy */
-		/*
-		 *  We don't want to compound proxying, so if we
-		 *  got this from a proxy, just show any message
-		 *  to the user.  Otherwise, we look for a Location:
-		 *  header and use that if present.  We should also
-		 *  look for a Set-Proxy: header, but that's not yet
-		 *  implemented. - FM
-		 */
-		if (using_proxy) {
-		    HTAlert("Got redirection to a proxy from the proxy!");
-		    break;
-		}
-	    } else if (server_status == 306 || server_status > 307) {
+	    if (server_status == 305 ||
+		server_status == 306 ||
+		server_status > 307) {
 	        /*
-		 *  Show user the content, if any, for 306 until we
-		 *  implement Set-Proxy: header handling, and for
-		 *  redirection statuses we don't know. - FM
+		 *  Show user the content, if any, for 305, 306,
+		 *  or unknown status. - FM
 		 */
 		HTAlert(line_buffer);
 		if (traversal) {
@@ -1385,11 +1373,8 @@ Cookie2_continuation:
 			        *cp1 = LF;
 			    if (cp2)
 			        *cp2 = CR;
+			    bad_location = TRUE;
 			    FREE(redirecting_url);
-			    doing_redirect = FALSE;
-			    permanent_redirection = FALSE;
-			    start_of_data = line_kept_clean;
-			    length = strlen(start_of_data);
 			    HTAlert(
 			       "Got redirection with a bad Location header.");
 			    HTProgress(line_buffer);
@@ -1494,8 +1479,10 @@ Cookie2_continuation:
 	      permanent_redirection = FALSE;
 	      start_of_data = line_kept_clean;
 	      length = strlen(start_of_data);
-	      HTAlert("Got redirection with no Location header.");
-	      HTProgress(line_buffer);
+	      if (!bad_location) {
+		  HTAlert("Got redirection with no Location header.");
+		  HTProgress(line_buffer);
+	      }
 	      if (traversal) {
 		  HTTP_NETCLOSE(s, handle);
 		  status = -1;
