@@ -24,6 +24,7 @@
 #include "HTUtils.h"
 #endif /* HTUTILS_H */
 #include "HTStream.h"
+#include "HTAnchor.h"
 
 /*
 
@@ -77,11 +78,22 @@ struct _tag{
 **
 ** Not the whole DTD, but all this parser usues of it.
 */
+#ifdef EXP_CHARTRANS
+typedef struct {
+  char* name;
+  long code;
+} UC_entity_info;
+#endif
+
 typedef struct {
     HTTag *             tags;           /* Must be in strcmp order by name */
     int                 number_of_tags;
     CONST char **       entity_names;   /* Must be in strcmp order by name */
     int                 number_of_entities;
+#ifdef EXP_CHARTRANS
+    CONST UC_entity_info * extra_entity_info; /* strcmp order by name */
+    int                 number_of_extra_entities;
+#endif
 } SGML_dtd;
 
 
@@ -149,7 +161,7 @@ typedef struct _HTStructuredClass{
                 int             element_number,
 		char **		include));
 
-        void (*put_entity) PARAMS((
+        int (*put_entity) PARAMS((
                 HTStructured*   me,
                 int             entity_number));
                 
@@ -182,6 +194,7 @@ Create an SGML parser
 
 extern HTStream* SGML_new PARAMS((
         CONST SGML_dtd *                dtd,
+	HTParentAnchor *	anchor,
         HTStructured *          target));
 
 extern CONST HTStreamClass SGMLParser;

@@ -69,7 +69,7 @@ PUBLIC int showlist ARGS2(char **, newfile, BOOLEAN, titles)
     /*
      *  Make the file a URL now.
      */
-#ifdef VMS
+#if defined (VMS) || defined (DOSPATH)
     sprintf(list_filename, "file://localhost/%s", tempfile);
 #else
     sprintf(list_filename, "file://localhost%s", tempfile);

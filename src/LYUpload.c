@@ -255,7 +255,7 @@ PUBLIC int LYUpload_options ARGS2 (char **,newfile, char *,directory)
 #endif /* VMS */
 
     /* make the file a URL now */
-#ifdef VMS
+#if defined (VMS) || defined (DOSPATH)
     sprintf(upload_filename,"file://localhost/%s",tempfile);
 #else
     sprintf(upload_filename,"file://localhost%s",tempfile);

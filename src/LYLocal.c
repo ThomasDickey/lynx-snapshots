@@ -58,6 +58,7 @@ struct dired_menu {
 #		define	DE_TAG	1
 #		define	DE_DIR	2
 #		define	DE_FILE	3
+#define			DE_SYMLINK	4
 	char *sfx;
 	char *link;
 	char *rest;
@@ -76,21 +77,37 @@ struct dired_menu {
 { 0,		      "", "New Directory",
 "(in current directory)", "LYNXDIRED://NEW_FOLDER%d",		NULL },
 
-{ 0,		      "", "Install",
+{ DE_FILE,	      "", "Install",
+"(of current selection)", "LYNXDIRED://INSTALL_SRC%p",		NULL },
+{ DE_DIR,	      "", "Install",
 "(of current selection)", "LYNXDIRED://INSTALL_SRC%p",		NULL },
 
-{ 0,		      "", "Modify Name",
+{ DE_FILE,	      "", "Modify File Name",
 "(of current selection)", "LYNXDIRED://MODIFY_NAME%p",		NULL },
+{ DE_DIR,	      "", "Modify Directory Name",
+"(of current selection)", "LYNXDIRED://MODIFY_NAME%p",		NULL },
+{ DE_SYMLINK,	      "", "Modify Name",
+"(of selected symbolic link)", "LYNXDIRED://MODIFY_NAME%p",		NULL },
 
 #ifdef OK_PERMIT
-{ 0,		      "", "Permit Name",
+{ DE_FILE,	      "", "Modify File Permissions",
+"(of current selection)", "LYNXDIRED://PERMIT_SRC%p",		NULL },
+{ DE_DIR,	      "", "Modify Directory Permissions",
 "(of current selection)", "LYNXDIRED://PERMIT_SRC%p",		NULL },
 #endif /* OK_PERMIT */
 
-{ 0,		      "", "Change Location",
-"(of current selection)", "LYNXDIRED://MODIFY_LOCATION%p",	NULL },
+{ DE_FILE,	      "", "Change Location",
+"(of selected file)"    , "LYNXDIRED://MODIFY_LOCATION%p",	NULL },
+{ DE_DIR,	      "", "Change Location",
+"(of selected directory)", "LYNXDIRED://MODIFY_LOCATION%p",	NULL },
+{ DE_SYMLINK,	      "", "Change Location",
+"(of selected symbolic link)", "LYNXDIRED://MODIFY_LOCATION%p",	NULL },
 
-{ 0,		      "", "Remove",
+{ DE_FILE,	      "", "Remove File",
+   "(current selection)", "LYNXDIRED://REMOVE_SINGLE%p",	NULL },
+{ DE_DIR,	      "", "Remove Directory",
+   "(current selection)", "LYNXDIRED://REMOVE_SINGLE%p",	NULL },
+{ DE_SYMLINK,	      "", "Remove Symbolic Link",
    "(current selection)", "LYNXDIRED://REMOVE_SINGLE%p",	NULL },
 
 #if defined(OK_UUDECODE) && !defined(ARCHIVE_ONLY)
@@ -1508,16 +1525,19 @@ PUBLIC int dired_options ARGS2(
 {
     static char tempfile[128];
     static BOOLEAN first = TRUE;
-    char dired_filename[256];
     char path[512], dir[512]; /* much too large */
     char tmpbuf[LINESIZE];
     lynx_html_item_type *nxt;
     struct stat dir_info;
     FILE *fp0;
-    char *cp,*tp = NULL;
-    /* char *escaped; */
-    char * dir_url = NULL;
-    char * path_url = NULL;
+    char *cp = NULL;
+    char * dir_url = NULL;	/* will hold URL-escaped path of
+				   directory from where DIRED_MENU was
+				   invoked (NOT its full URL) */
+    char * path_url = NULL;	/* will hold URL-escaped path of file
+				   (or directory) which was selected
+				   when DIRED_MENU was invoked (NOT
+				   its full URL) */
     BOOLEAN nothing_tagged;
     int count;
     struct dired_menu *mp;
@@ -1536,9 +1556,8 @@ PUBLIC int dired_options ARGS2(
     }
     
     /* make the tempfile a URL */
-    strcpy(dired_filename, "file://localhost");
-    strcat(dired_filename, tempfile);
-    StrAllocCopy(*newfile, dired_filename);
+    StrAllocCopy(*newfile, "file://localhost");
+    StrAllocCat(*newfile, tempfile);
     
     cp = doc->address;
     if(!strncmp(cp,"file://localhost",16))
@@ -1576,19 +1595,11 @@ PUBLIC int dired_options ARGS2(
 	  return 0;
        } 
 
-#ifdef NOTDEFINED
-       if ((cp = strrchr(path,'.')) != NULL && strlen(path) > strlen(cp)) {
-	  *cp = '\0';
-	  tp = strrchr(path,'.');
-	  *cp = '.';
-       }
-#endif /* NOTDEFINED */
     } else {
         path[0] = '\0';
 	StrAllocCopy(path_url, path);
     }
 
-  /*escaped = (char *) HTEscape(path,(unsigned char) 4); path_url instead- kw*/
     nothing_tagged = (HTList_isEmpty(tagged));
 
     fprintf(fp0,"<head>\n<title>%s</title></head>\n<body>\n",DIRED_MENU_TITLE);
@@ -1648,11 +1659,18 @@ PUBLIC int dired_options ARGS2(
 	    continue;
 	if (mp->cond == DE_TAG && nothing_tagged)
 	    continue;
-	if (mp->cond == DE_DIR && (dir_info.st_mode & S_IFMT) != S_IFDIR)
+	if (mp->cond == DE_DIR &&
+	    (!*path || (dir_info.st_mode & S_IFMT) != S_IFDIR))
 	    continue;
-	if (mp->cond == DE_FILE && (dir_info.st_mode & S_IFMT) != S_IFREG)
+	if (mp->cond == DE_FILE &&
+	    (!*path || (dir_info.st_mode & S_IFMT) != S_IFREG))
 	    continue;
-	if (strcmp(mp->sfx, &path[strlen(path)-strlen(mp->sfx)]) != 0)
+	if (mp->cond == DE_SYMLINK &&
+	    (!*path || (dir_info.st_mode & S_IFMT) != S_IFLNK))
+	    continue;
+	if (*mp->sfx &&
+	    (strlen(path) < strlen(mp->sfx) ||
+	     strcmp(mp->sfx, &path[strlen(path)-strlen(mp->sfx)]) != 0))
 	    continue;
 	fprintf(fp0, "<a href=\"%s",
 		render_item(mp->href, path_url, dir_url, buf,2048, YES));
@@ -1673,7 +1691,6 @@ PUBLIC int dired_options ARGS2(
     fprintf(fp0,"</body>\n");
     fclose(fp0);
 
-    /* FREE(escaped);  not used any more - kw*/
     FREE(dir_url);
     FREE(path_url);
 
@@ -1787,9 +1804,10 @@ PUBLIC BOOLEAN local_install ARGS3(
    char tmpbuf[512];
    static char savepath[512]; /* this will be the link that is to be installed */
    struct stat dir_info;
-   char *args[5];
+   char *args[6];
    HTList *tag;
    int count = 0;
+   int n = 0, src;	/* indices into 'args[]' */
 
 /* Determine the status of the selected item. */
 
@@ -1838,23 +1856,27 @@ PUBLIC BOOLEAN local_install ARGS3(
       }
 
    statusline("Just a moment, ...");
-   args[0] = "install";
-   args[2] = destpath;
-   args[3] = (char *) 0;
+   args[n++] = "install";
+#ifdef INSTALL_ARGS
+   args[n++] = INSTALL_ARGS;
+#endif
+   src = n++;
+   args[n++] = destpath;
+   args[n] = (char *) 0;
    sprintf(tmpbuf, "install %s", destpath);
    tag = tagged;
 
    if (HTList_isEmpty(tagged)) {
-         args[1] = savepath;
+         args[src] = savepath;
 	 if (my_spawn(INSTALL_PATH, args, tmpbuf) <= 0)
 	     return (-1);
 	 count++;
    } else {
        char * name;
        while ((name = (char *)HTList_nextObject(tag))) {
-	   args[1] = name;
-	   if (strncmp("file://localhost", args[1], 16) == 0)
-	       args[1] = name + 16;
+	   args[src] = name;
+	   if (strncmp("file://localhost", args[src], 16) == 0)
+	       args[src] = name + 16;
 
 	   if (my_spawn(INSTALL_PATH, args, tmpbuf) <= 0)
 	       return ((count == 0) ? -1 : count);
@@ -1898,10 +1920,12 @@ PUBLIC void add_menu_item ARGS1(
     *cp++ = '\0';
     if (strcasecomp(str, "tag") == 0)
 	new->cond = DE_TAG;
-    if (strcasecomp(str, "dir") == 0)
+    else if (strcasecomp(str, "dir") == 0)
 	new->cond = DE_DIR;
-    if (strcasecomp(str, "file") == 0)
+    else if (strcasecomp(str, "file") == 0)
 	new->cond = DE_FILE;
+    else if (strcasecomp(str, "link") == 0)
+	new->cond = DE_SYMLINK;
 
     /* conditional on matching suffix */
     str = cp;

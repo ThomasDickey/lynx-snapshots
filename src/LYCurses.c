@@ -39,11 +39,17 @@ extern int _NOSHARE(COLS);
 PRIVATE int dumbterm PARAMS((char *terminal));
 BOOLEAN LYCursesON = FALSE;
 
+#if defined(USE_SLANG) || defined(COLOR_CURSES)
+PRIVATE int Current_Attr;
+#endif
+
 #ifdef USE_SLANG
 PUBLIC unsigned int Lynx_Color_Flags = 0;
-PRIVATE int Current_Attr;
 PUBLIC BOOLEAN FullRefresh = FALSE;
 PUBLIC int curscr = 0;
+#ifdef SLANG_MBCS_HACK
+PUBLIC int PHYSICAL_SLtt_Screen_Cols = 10;/* will be set by size_change - kw */
+#endif /* SLANG_MBCS_HACK */
 
 PUBLIC void LY_SLrefresh NOARGS
 {
@@ -65,14 +71,14 @@ PUBLIC void VTHome NOARGS
 }
 #endif /* VMS */
 
-PUBLIC void sl_add_attr ARGS1(
+PUBLIC void lynx_add_attr ARGS1(
 	int,		a)
 {
     Current_Attr |= a;
     SLsmg_set_color(Current_Attr);
 }
 
-PUBLIC void sl_sub_attr ARGS1(
+PUBLIC void lynx_sub_attr ARGS1(
 	int,		a)
 {
     Current_Attr &= ~a;
@@ -122,7 +128,9 @@ PRIVATE void sl_suspend ARGS1(
     SLang_init_tty(3, 0, 1);
 #endif /* SLANG_VERSION > 9929 */
     signal(SIGTSTP, sl_suspend);
+#ifndef _WINDOWS
     SLtty_set_suspend_state(1);
+#endif
     if (sig == SIGTSTP)
         SLsmg_resume_smg();
     /*
@@ -141,6 +149,232 @@ PRIVATE void sl_suspend ARGS1(
 #endif /* USE_SLANG */
 
 
+#ifdef COLOR_CURSES
+/*
+ * This block of code is designed to produce the same color effects using SVr4
+ * curses as the slang library's implementation in this module.  That maps the
+ * SGR codes into a 0-7 index into the color table, with special treatment for
+ * backgrounds.  There's a bit of convoluted (but necessary) code handling the
+ * special case of initialization before 'initscr()' is called.
+ * 1997/1/19 - T.E.Dickey <dickey@clark.net>
+ */
+PRIVATE int lynx_uses_color;
+PRIVATE int lynx_called_initscr;
+
+PRIVATE struct {
+    int fg, bg;
+    chtype attr;
+} lynx_color_cfg[] = {
+    /*0*/ { COLOR_BLACK,   COLOR_WHITE, A_NORMAL}, /* A_NORMAL */
+    /*1*/ { COLOR_BLUE,    COLOR_WHITE, A_NORMAL}, /* A_BOLD */
+    /*2*/ { COLOR_YELLOW,  COLOR_BLUE,  A_BOLD},   /* A_REVERSE */
+    /*3*/ { COLOR_GREEN,   COLOR_WHITE, A_NORMAL}, /* A_REVERSE | A_BOLD */
+    /*4*/ { COLOR_MAGENTA, COLOR_WHITE, A_NORMAL}, /* A_UNDERLINE */
+    /*5*/ { COLOR_BLUE,    COLOR_WHITE, A_NORMAL}, /* A_UNDERLINE | A_BOLD */
+    /*6*/ { COLOR_RED,     COLOR_WHITE, A_NORMAL}, /* A_UNDERLINE | A_REVERSE */
+    /*7*/ { COLOR_MAGENTA, COLOR_CYAN,  A_NORMAL}  /* A_UNDERLINE | A_BOLD | A_REVERSE */
+};
+
+/*
+ * Hold the codes for color-pairs here until 'initscr()' is called.
+ */
+PRIVATE struct {
+    int fg;
+    int bg;
+} lynx_color_pairs[25];
+
+/*
+ * Map the SGR attributes (0-7) into ANSI colors, modified with the actual BOLD
+ * attribute we'll get 16 colors.
+ */
+PRIVATE void lynx_set_wattr ARGS1(WINDOW *, win)
+{
+    if (lynx_uses_color) {
+	int code = 0;
+	int attr = A_NORMAL;
+	int offs = 1;
+	static int have_underline = -1;
+	static int no_color_video = -1;
+
+	if (have_underline < 0) {
+#ifndef DOSPATH
+		have_underline = tigetstr("smul") != 0;
+#else
+                have_underline = 1;
+#endif /* DOSPATH */
+	}
+
+	if (no_color_video < 0) {
+		no_color_video = tigetnum("ncv");
+	}
+
+	if (Current_Attr & A_BOLD)
+		code |= 1;
+	if (Current_Attr & A_REVERSE)
+		code |= 2;
+	if (Current_Attr & A_UNDERLINE)
+		code |= 4;
+	attr = lynx_color_cfg[code].attr;
+
+	/*
+	 * FIXME:  no_color_video isn't implemented (97/4/14) in ncurses 4.x,
+	 * but may be in SVr4 (which would make this redundant for the latter).
+	 */
+	if ((Current_Attr & A_BOLD) && !(no_color_video & 33)) {
+		attr |= A_BOLD;
+		offs = 17;
+	}
+
+	if ((Current_Attr & A_UNDERLINE) && !(no_color_video & 2)) {
+		attr |= A_UNDERLINE;
+		offs = 17;
+	}
+
+	attr |= COLOR_PAIR(code+offs);
+
+	wattrset(win, attr);
+    } else {
+	wattrset(win, Current_Attr);
+    }
+}
+
+PRIVATE void lynx_map_color ARGS1(int, n)
+{
+    int m;
+
+    lynx_color_pairs[n+1].fg = lynx_color_cfg[n].fg;
+    lynx_color_pairs[n+1].bg = lynx_color_cfg[n].bg;
+
+    lynx_color_pairs[n+9].fg = lynx_color_cfg[n].fg;
+    lynx_color_pairs[n+9].bg = lynx_color_cfg[0].bg;
+
+    lynx_color_pairs[n+17].fg = lynx_color_cfg[n].bg;
+    lynx_color_pairs[n+17].bg = lynx_color_cfg[n].bg;
+
+    if (lynx_called_initscr) {
+	for (m = 0; m <= 16; m += 8) {
+	    init_pair(n+m+1,
+		lynx_color_pairs[n+m+1].fg,
+		lynx_color_pairs[n+m+1].bg);
+	}
+	if (n == 0)
+	    bkgd(COLOR_PAIR(9));
+    }
+}
+
+PUBLIC int lynx_chg_color ARGS3(
+	int, color,
+	int, fg,
+	int, bg
+	)
+{
+    if (color >= 0 && color < 8
+     && fg >= 0 && fg < 16
+     && bg >= 0 && bg < 16) {
+	lynx_color_cfg[color].fg = fg & 7;
+	lynx_color_cfg[color].bg = bg & 7;
+	lynx_color_cfg[color].attr = (fg & 8) ? A_BOLD : A_NORMAL;
+	lynx_map_color(color);
+    } else {
+	return -1;
+    }
+    return 0;
+}
+
+PUBLIC void lynx_set_color ARGS1(int, a)
+{
+    if (lynx_uses_color) {
+	attrset(lynx_color_cfg[a].attr | COLOR_PAIR(a+1));
+    }
+}
+
+PUBLIC void lynx_standout ARGS1(int, flag)
+{
+    if (flag)
+	lynx_add_attr(A_REVERSE);
+    else
+	lynx_sub_attr(A_REVERSE);
+}
+
+PUBLIC void lynx_add_wattr ARGS2(WINDOW *, win, int, a)
+{
+    Current_Attr |= a;
+    lynx_set_wattr(win);
+}
+
+PUBLIC void lynx_add_attr ARGS1(int, a)
+{
+    lynx_add_wattr (stdscr, a);
+}
+
+PUBLIC void lynx_sub_wattr ARGS2(WINDOW *, win, int, a)
+{
+    Current_Attr &= ~a;
+    lynx_set_wattr(win);
+}
+
+PUBLIC void lynx_sub_attr ARGS1(int, a)
+{
+    lynx_sub_wattr (stdscr, a);
+}
+
+PRIVATE void lynx_init_colors NOARGS
+{
+    lynx_uses_color = FALSE;
+
+    if (has_colors()) {
+	int n, m;
+
+	lynx_uses_color = TRUE;
+	start_color();
+
+	for (n = 0; n < sizeof(lynx_color_cfg)/sizeof(lynx_color_cfg[0]); n++) {
+	    for (m = 0; m <= 16; m += 8) {
+		init_pair(n+m+1,
+			lynx_color_pairs[n+m+1].fg,
+			lynx_color_pairs[n+m+1].bg);
+	    }
+	    if (n == 0)
+		bkgd(COLOR_PAIR(9));
+	}
+    }
+}
+
+PUBLIC void lynx_setup_colors NOARGS
+{
+    int n;
+    for (n = 0; n < 8; n++)
+	lynx_map_color(n);
+}
+#endif /* COLOR_CURSES */
+
+#if defined (DJGPP) && !defined (SLANG)
+/*
+ * Sorry about making a completely new function,
+ * but the real one is messy! WB
+ */
+PUBLIC void start_curses NOARGS
+{
+	 static BOOLEAN first_time = TRUE;
+
+	 if(first_time)
+	 {
+		  initscr();      /* start curses */
+		  first_time = FALSE;
+		  cbreak();
+		  noecho();
+		  keypad(stdscr, TRUE);
+		  fflush(stdin);
+		  fflush(stdout);
+                  lynx_init_colors();
+                  lynx_called_initscr = TRUE;
+	 } else sock_init();
+
+	 LYCursesON = TRUE;
+	 clear();
+
+}
+#else
 PUBLIC void start_curses NOARGS
 {
 #ifdef USE_SLANG
@@ -177,10 +411,14 @@ PUBLIC void start_curses NOARGS
 #endif /* !VMS */
     SLsmg_init_smg();
     SLsmg_Display_Eight_Bit = LYlowest_eightbit[current_char_set];
+    if (SLsmg_Display_Eight_Bit > 191)
+       SLsmg_Display_Eight_Bit = 191; /* may print ctrl chars otherwise - kw */
     SLsmg_Newline_Moves = -1;
     SLsmg_Backspace_Moves = 1;
 #ifndef VMS
+#ifndef _WINDOWS
    SLtty_set_suspend_state(1);
+#endif /* _WINDOWS */
 #ifdef SIGTSTP
     signal(SIGTSTP, sl_suspend);
 #endif /* SIGTSTP */
@@ -191,7 +429,7 @@ PUBLIC void start_curses NOARGS
 
 #ifdef VMS
     /*
-     *  If we are VMS then do initsrc() everytime start_curses()
+     *  If we are VMS then do initscr() everytime start_curses()
      *  is called!
      */
     initscr();  /* start curses */
@@ -206,7 +444,9 @@ PUBLIC void start_curses NOARGS
 	if (initscr() == NULL) {  /* start curses */
 	    fprintf(stderr, 
 	        "Terminal initialisation failed - unknown terminal type?\n");
+#ifndef NOSIGHUP
             (void) signal(SIGHUP, SIG_DFL);
+#endif /* NOSIGHUP */
             (void) signal(SIGTERM, SIG_DFL);
             (void) signal(SIGINT, SIG_DFL);
 #ifdef SIGTSTP
@@ -216,6 +456,10 @@ PUBLIC void start_curses NOARGS
 	    exit (-1);
 	}
         first_time = FALSE;
+#if defined(COLOR_CURSES)
+	lynx_init_colors();
+	lynx_called_initscr = TRUE;
+#endif /* USE_SLANG */
     }
 #endif /* VMS */
 
@@ -225,41 +469,67 @@ PUBLIC void start_curses NOARGS
     crmode();
     raw();
 #else
-#ifdef NO_CBREAK
-    crmode();
-#else
+#if HAVE_CBREAK
     cbreak();
-#endif /* NO_CBREAK */
+#else
+    crmode();
+#endif /* HAVE_CBREAK */
     signal(SIGINT, cleanup_sig);
 #endif /* VMS */
 
     noecho();
 
-#if !defined(VMS) && !defined(NO_KEYPAD)
+#if defined(HAVE_KEYPAD)
     keypad(stdscr,TRUE);
-#endif /* !VMS && !NO_KEYPAD */
+#endif /* HAVE_KEYPAD */
+
+#ifdef NCURSES_MOUSE_VERSION
+ /* Inform ncurses that we're interested in knowing when mouse
+    button 1 is clicked */
+    if (LYUseMouse)
+      mousemask(BUTTON1_CLICKED, NULL);
+#endif /* NCURSES_MOUSE_VERSION */
 
     fflush(stdin);
     fflush(stdout);
 #endif /* USE_SLANG */
 
+#ifdef _WINDOWS
+	 clear();
+#endif
+
     LYCursesON = TRUE;
 }
+#endif /* defined (DJGPP) && !defined (SLANG) */
 
 
 PUBLIC void stop_curses NOARGS
 {
     echo();
+#ifdef DJGPP
+		  sock_exit();
+#endif
+#if defined (DOSPATH) && !defined (SLANG)
+	 clrscr();
+/*
+		  clear();
+		  refresh();
+*/
+#else
 
     /*
      *	Fixed for better dumb terminal support.
      *	05-28-94 Lynx 2-3-1 Garrett Arch Blythe
      */
     if(LYCursesON == TRUE)	{
+#ifdef NCURSES_MOUSE_VERSION
+        mousemask(0, NULL);
+#endif
     	endwin();	/* stop curses */
     }
 
     fflush(stdout);
+#endif /* DJGPP */
 
     LYCursesON = FALSE;
 
@@ -300,8 +570,6 @@ PUBLIC BOOLEAN setup ARGS1(
 	 *  Some yoyo used these under conditions which require
 	 *  -dump, so force that mode here. - FM
 	 */
-        extern int mainloop();
-
 	dump_output_immediately = TRUE;
         LYcols = 80;
 	keypad_mode = LINKS_ARE_NUMBERED;
@@ -389,14 +657,14 @@ PUBLIC BOOLEAN setup ARGS1(
 
     start_curses();
 
-#ifndef NO_TTYTYPE
+#if HAVE_TTYTYPE
     /*
      *  Get terminal type (strip 'dec-' from vms style types).
      */
     if (strncmp((CONST char*)ttytype, "dec-vt", 6) == 0) {
 	(void) setterm(ttytype + 4);
     }
-#endif /* !NO_TTYTYPE */
+#endif /* HAVE_TTYTYPE */
 
     LYlines = LINES;
     LYcols = COLS;

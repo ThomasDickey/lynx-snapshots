@@ -62,7 +62,7 @@ PUBLIC int showinfo ARGS4(
     /*
      *  Make the temporary file a URL now.
      */
-#ifdef VMS
+#if defined (VMS) || defined (DOSPATH)
     StrAllocCopy(info_url,"file://localhost/");
 #else
     StrAllocCopy(info_url,"file://localhost");
@@ -250,6 +250,20 @@ PUBLIC int showinfo ARGS4(
     if (HTLoadedDocumentCharset())
         fprintf(fp0, "<dt><em>&nbsp;Charset:</em> %s\n",
 		     HTLoadedDocumentCharset());
+#ifdef EXP_CHARTRANS
+    else {
+      LYUCcharset * p_in = HTAnchor_getUCInfoStage(HTMainAnchor,
+                                                             UCT_STAGE_PARSER);
+      if (!p_in || !(p_in->MIMEname) || !*(p_in->MIMEname) ||
+	  HTAnchor_getUCLYhndl(HTMainAnchor, UCT_STAGE_PARSER) < 0)
+	p_in = HTAnchor_getUCInfoStage(HTMainAnchor, UCT_STAGE_MIME);
+      if (p_in && p_in->MIMEname && *(p_in->MIMEname) &&
+	  HTAnchor_getUCLYhndl(HTMainAnchor, UCT_STAGE_MIME) >= 0) {
+        fprintf(fp0, "<dt><em>&nbsp;Charset:</em> %s (assumed)\n",
+		     p_in->MIMEname);
+      }
+    }
+#endif /* EXP_CHARTRANS */
 
     if ((cp = HText_getServer()) != NULL && *cp != '\0')
         fprintf(fp0, "<dt><em>&nbsp;&nbsp;Server:</em> %s\n", cp);

@@ -10,6 +10,7 @@
 #include "LYSystem.h"
 #include "LYGlobalDefs.h"
 #include "HTParse.h"
+#include "LYMail.h"
 
 #include "LYLeaks.h"
 
@@ -36,8 +37,8 @@ PUBLIC void mailform ARGS4(
     char self[80];
     char cmd[512];
     int len, i, ch;
-#ifdef VMS
-    char tmpfile[256];
+#if defined(VMS) || defined(DOSPATH)
+    char my_tempfile[256];
     char *address_ptr1, *address_ptr2;
     BOOLEAN first = TRUE;
 #endif /* VMS */
@@ -176,9 +177,9 @@ PUBLIC void mailform ARGS4(
 	return;
     }
 
-#ifdef VMS
-    sprintf(tmpfile, "%s%s", lynx_temp_space, "temp_mail.txt");
-    if ((fd = fopen(tmpfile,"w")) == NULL) {
+#if defined(VMS) || defined(DOSPATH)
+    sprintf(my_tempfile, "%s%s", lynx_temp_space, "temp_mail.txt");
+    if ((fd = fopen(my_tempfile,"w")) == NULL) {
 	HTAlert(FORM_MAILTO_FAILED);
 	FREE(address);
 	return;
@@ -192,6 +193,7 @@ PUBLIC void mailform ARGS4(
 	    StrAllocCat(address, cp);
 	}
     }
+#ifdef VMS
     if (mailto_type &&
         !strncasecomp(mailto_type, "multipart/form-data", 19)) {
 	/*
@@ -202,11 +204,19 @@ PUBLIC void mailform ARGS4(
 	fprintf(fd, "X-Content-Type: %s\n\n", mailto_type);
     }
 #else
-#ifdef MMDF
-    sprintf(cmd, "%s -mlruxto,cc\\*",system_mail);
+	 if (mailto_type && *mailto_type) {
+	fprintf(fd, "Mime-Version: 1.0\n");
+	fprintf(fd, "Content-Type: %s\n", mailto_type);
+	 }
+	 fprintf(fd,"To: %s\n", address);
+	 if (personal_mail_address && *personal_mail_address)
+		fprintf(fd,"From: %s\n", personal_mail_address);
+	 remove_tildes(self);
+	 fprintf(fd,"Subject: %.70s\n\n", subject);
+#endif
+
 #else
-    sprintf(cmd, "%s -t -oi", system_mail);
-#endif /* MMDF */
+    sprintf(cmd, "%s %s", system_mail, system_mail_flags);
 
     if ((fd = popen(cmd, "w")) == NULL) {
 	HTAlert(FORM_MAILTO_FAILED);
@@ -264,12 +274,13 @@ PUBLIC void mailform ARGS4(
     pclose(fd);
     sleep(MessageSecs);
 #endif /* UNIX */
-#ifdef VMS
+#if defined(VMS) || defined(DOSPATH)
     fclose(fd);
+#ifdef VMS
     sprintf(cmd, "%s %s/subject=\"%.70s\" %s ",
     		 system_mail,
 		 (strncasecomp(system_mail, "MAIL", 4) ? "" : "/noself"),
-		 subject, tmpfile);
+		 subject, my_tempfile);
 
     address_ptr1 = address;
     do {
@@ -288,13 +299,15 @@ PUBLIC void mailform ARGS4(
 
 	address_ptr1 = address_ptr2;
     } while (address_ptr1 != NULL);
-
+#else
+	 sprintf(cmd, "%s -t \"%s\" -F %s", system_mail, address, my_tempfile);
+#endif
     stop_curses();
     printf("Sending form content:\n\n$ %s\n\nPlease wait...", cmd);
     system(cmd);
     sleep(MessageSecs);
     start_curses();
-    remove(tmpfile);
+    remove(my_tempfile);
 #endif /* VMS */
 
     FREE(address);
@@ -311,9 +324,8 @@ PUBLIC void mailmsg ARGS4(int,cur, char *,owner_address,
     FILE *fd, *fp;
     char *address = NULL;
     char cmd[512], *cp, *cp0, *cp1;
-    int i;
-#ifdef VMS
-    char tmpfile[256];
+#if defined(VMS) || defined(DOSPATH)
+    char my_tempfile[256];
     char *address_ptr1, *address_ptr2;
     BOOLEAN first = TRUE;
 #endif /* VMS */
@@ -348,11 +360,7 @@ PUBLIC void mailmsg ARGS4(int,cur, char *,owner_address,
     }
 
 #ifdef UNIX
-#ifdef MMDF
-    sprintf(cmd, "%s -mlruxto,cc\\*", system_mail);
-#else
-    sprintf(cmd, "%s -t -oi", system_mail);
-#endif /* MMDF */
+    sprintf(cmd, "%s %s", system_mail, system_mail_flags);
 
     if ((fd = popen(cmd, "w")) == NULL) {
 	FREE(address);
@@ -364,9 +372,9 @@ PUBLIC void mailmsg ARGS4(int,cur, char *,owner_address,
     fprintf(fd,"X-URL: %s\n", filename);
     fprintf(fd,"X-Mailer: Lynx, Version %s\n\n", LYNX_VERSION);
 #endif /* UNIX */
-#ifdef VMS
-    sprintf(tmpfile, "%s%s", lynx_temp_space, "temp_mail.txt");
-    if ((fd = fopen(tmpfile,"w")) == NULL) {
+#if defined(VMS) || defined(DOSPATH)
+    sprintf(my_tempfile, "%s%s", lynx_temp_space, "temp_mail.txt");
+    if ((fd = fopen(my_tempfile,"w")) == NULL) {
 	FREE(address);
 	return;
     }
@@ -392,10 +400,11 @@ PUBLIC void mailmsg ARGS4(int,cur, char *,owner_address,
 #ifdef UNIX
     pclose(fd);
 #endif /* UNIX */
-#ifdef VMS
+#if defined(VMS) || defined(DOSPATH)
     fclose(fd);
+#ifdef VMS
     sprintf(cmd, "%s /subject=\"Lynx Error in %s\" %s ",
-    		 system_mail, filename, tmpfile);
+    		 system_mail, filename, my_tempfile);
 
     address_ptr1 = address;
     do {
@@ -415,8 +424,11 @@ PUBLIC void mailmsg ARGS4(int,cur, char *,owner_address,
 	address_ptr1 = address_ptr2;
     } while (address_ptr1 != NULL);
 
+#else
+	 sprintf(cmd, "%s -t \"%s\" -F %s", system_mail, address, my_tempfile);
+#endif
     system(cmd);
-    remove(tmpfile);
+    remove(my_tempfile);
 #endif /* VMS */
 
     if (traversal) {
@@ -425,7 +437,9 @@ PUBLIC void mailmsg ARGS4(int,cur, char *,owner_address,
 	if ((ofp = fopen(TRAVERSE_ERRORS,"a+")) == NULL) {
 	    if ((ofp = fopen(TRAVERSE_ERRORS,"w")) == NULL) {
 		perror(NOOPEN_TRAV_ERR_FILE);
+#ifndef NOSIGHUP
 		(void) signal(SIGHUP, SIG_DFL);
+#endif /* NOSIGHUP */
 		(void) signal(SIGTERM, SIG_DFL);
 #ifndef VMS
 		(void) signal(SIGINT, SIG_DFL);
@@ -465,7 +479,10 @@ PUBLIC void reply_by_mail ARGS3(
     char *temp = NULL;
     int i, len;
     int c = 0;  /* user input */
-    char tmpfile[256], cmd[512];
+    char my_tempfile[256], cmd[512];
+#ifdef DOSPATH
+	 char tmpfile2[256];
+#endif
     static char *personal_name = NULL;
     char subject[80];
 #ifdef VMS
@@ -486,16 +503,16 @@ PUBLIC void reply_by_mail ARGS3(
 	return;
     }
 
-    tempname(tmpfile,NEW_FILE);
-    if (((cp = strrchr(tmpfile, '.')) != NULL) &&
+    tempname(my_tempfile,NEW_FILE);
+    if (((cp = strrchr(my_tempfile, '.')) != NULL) &&
 #ifdef VMS
 	NULL == strchr(cp, ']') &&
 #endif /* VMS */
 	NULL == strchr(cp, '/')) {
 	*cp = '\0';
-	strcat(tmpfile, ".txt");
+	strcat(my_tempfile, ".txt");
     }
-    if ((fd = fopen(tmpfile,"w")) == NULL) {
+    if ((fd = fopen(my_tempfile,"w")) == NULL) {
 	HTAlert(MAILTO_URL_TEMPOPEN_FAILED);
 	return;
     }
@@ -663,7 +680,7 @@ PUBLIC void reply_by_mail ARGS3(
         FREE(address);
 	FREE(body);
 	fclose(fd);		/* Close the tmpfile.  */
-	remove(tmpfile);	/* Delete the tmpfile. */
+	remove(my_tempfile);	/* Delete the tmpfile. */
 	HTAlert(NO_ADDRESS_IN_MAILTO_URL);
 	return;
     }
@@ -692,8 +709,10 @@ PUBLIC void reply_by_mail ARGS3(
     /*
      *  Put the To: line in the header.
      */
+#ifndef DOSPATH
     sprintf(buf,"To: %s\n", address);
     StrAllocCopy(header, buf);
+#endif
     /*
      *  Put the X-URL and X-Mailer lines in the header.
      */
@@ -868,7 +887,7 @@ PUBLIC void reply_by_mail ARGS3(
     }
     addstr("\n");
     remove_tildes(user_input);
-#ifdef VMS
+#if defined (VMS) || defined (DOSPATH)
     if (*user_input) {
         cp = user_input;
 	while (*cp == ' ' || *cp == ',')
@@ -878,6 +897,13 @@ PUBLIC void reply_by_mail ARGS3(
 	    StrAllocCat(address, cp);
 	}
     }
+#ifdef DOSPATH
+	 if (*address) {
+		sprintf(buf,"To: %s\n",address);
+		StrAllocCat(header, buf);
+	 }
+#endif
+
 #else
     if (*user_input) {
 	sprintf(buf,"Cc: %s\n",user_input);
@@ -930,7 +956,7 @@ PUBLIC void reply_by_mail ARGS3(
 	if (strstr(editor, "pico")) {
 	    editor_arg = " -t"; /* No prompt for filename to use */
 	}
-	sprintf(user_input,"%s%s %s",editor,editor_arg,tmpfile);
+	sprintf(user_input,"%s%s %s",editor,editor_arg,my_tempfile);
 	_statusline(SPAWNING_EDITOR_FOR_MAIL);
 	stop_curses();
 	if (system(user_input)) {
@@ -1050,7 +1076,7 @@ PUBLIC void reply_by_mail ARGS3(
 	       !term_letter && c != 7   && c != 3)
 	    c = LYgetch();
 	if (TOUPPER(c) == 'Y') {
-	    if ((fd = fopen(tmpfile, "a")) != NULL) {
+	    if ((fd = fopen(my_tempfile, "a")) != NULL) {
 	        fputs("-- \n", fd);
 	        while (fgets(user_input, sizeof(user_input), fp) != NULL) {
 		    fputs(user_input, fd);
@@ -1072,7 +1098,7 @@ PUBLIC void reply_by_mail ARGS3(
     sprintf(cmd, "%s %s/subject=\"%s\" %s ",
     		 system_mail,
 		 (strncasecomp(system_mail, "MAIL", 4) ? "" : "/noself"),
-		 subject, tmpfile);
+		 subject, my_tempfile);
 
     /*
      *  Now add all the people in the address field.
@@ -1111,11 +1137,19 @@ PUBLIC void reply_by_mail ARGS3(
      *  Send the tmpfile into sendmail.  
      */
     _statusline(SENDING_YOUR_MSG);
-#ifdef MMDF
-    sprintf(cmd, "%s -mlruxto,cc\\*",system_mail);
+    sprintf(cmd, "%s %s", system_mail, system_mail_flags);
+#ifdef DOSPATH
+	 tempname(tmpfile2,NEW_FILE);
+	 if (((cp = strrchr(tmpfile2, '.')) != NULL) &&
+		NULL == strchr(cp, '/')) {
+			*cp = '\0';
+			strcat(tmpfile2, ".txt");
+	 }
+	 if ((fp = fopen(tmpfile2,"w")) == NULL) {
+		HTAlert(MAILTO_URL_TEMPOPEN_FAILED);
+		return;
+	 }
 #else
-    sprintf(cmd,"%s -t -oi", system_mail);
-#endif /* MMDF */
     signal(SIGINT, SIG_IGN);
     fp = popen(cmd, "w");
     if (fp == NULL) {
@@ -1123,7 +1157,8 @@ PUBLIC void reply_by_mail ARGS3(
 	sleep(InfoSecs);
 	goto cleanup;
     }
-    fd = fopen(tmpfile, "r");
+#endif /* DOSPATH */
+    fd = fopen(my_tempfile, "r");
     if (fd == NULL) {
 	_statusline(COMMENT_REQUEST_CANCELLED);
 	sleep(InfoSecs);
@@ -1133,7 +1168,18 @@ PUBLIC void reply_by_mail ARGS3(
     fputs(header, fp);
     while ((n = fread(buf, 1, sizeof(buf), fd)) != 0)
 	fwrite(buf, 1, n, fp);
+#ifdef DOSPATH
+	 sprintf(cmd, "%s -t \"%s\" -F %s", system_mail, address, tmpfile2);
+	 fclose(fp);	/* Close the tmpfile. */
+	 stop_curses();
+	 printf("Sending your comment:\n\n$ %s\n\nPlease wait...", cmd);
+	 system(cmd);
+	 sleep(MessageSecs);
+	 start_curses();
+	 remove(tmpfile2);	/* Delete the tmpfile. */
+#else
     pclose(fp);
+#endif
     fclose(fd);	/* Close the tmpfile. */
 
     if (TRACE)
@@ -1145,15 +1191,15 @@ PUBLIC void reply_by_mail ARGS3(
      */
 cleanup:
     signal(SIGINT, cleanup_sig);
-#ifndef VMS
+#if !defined(VMS) && !defined(DOSPATH)
     FREE(header);
 #endif /* !VMS */
 
-#ifdef VMS
+#if defined(VMS) || defined(DOSPATH)
 cleandown:
 #endif /* VMS */
     term_letter = FALSE;
-    remove(tmpfile);	/* Delete the tmpfile. */
+    remove(my_tempfile);	/* Delete the tmpfile. */
     FREE(address);
     FREE(body);
     return;
@@ -1164,7 +1210,7 @@ PRIVATE void terminate_letter ARGS1(int,sig)
     term_letter = TRUE;
     /* Reassert the AST */
     signal(SIGINT, terminate_letter);
-#ifdef VMS
+#if defined(VMS) || defined(DOSPATH)
     /* Refresh the screen to get rid of the "interrupt" message */
     if (!dump_output_immediately) {
 	clearok(curscr, TRUE);

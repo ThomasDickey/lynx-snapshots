@@ -118,7 +118,7 @@ static CONST char* entities[] = {
   "thinsp",	/* thin space (not collapsed) */ 
   "thorn",	/* small thorn, Icelandic */ 
   "times",	/* multiplication sign */ 
-  "trade",	/* registerd trademark */ 
+  "trade",	/* trade mark sign (U+2122) */ 
   "uacute",	/* small u, acute accent */ 
   "ucirc",	/* small u, circumflex accent */ 
   "ugrave",	/* small u, grave accent */ 
@@ -131,6 +131,169 @@ static CONST char* entities[] = {
 
 #define HTML_ENTITIES 112
 
+#ifdef EXP_CHARTRANS
+/* 	Extra Entity Names
+**	------------------
+**
+**	This table contains Unicodes in addition to the Names.
+**
+**      Just an idea how it could be done. -kw
+*
+*	I think in the future the whole entities[] thing above could migrate
+*	to this kind of structure.  The structured streams to which
+*	the SGML modules sends its output could then easily have access
+*	to both entity names and unicode values for each (special)
+*	character.  Probably the whole translation to display characters
+*	should be done at that later stage (e.g. in HTML.c).
+*	What's missing is a way for the later stage to return info
+*	to SGML whether the entity could be displayed or not.
+*	(like between SGML_character() and handle_entity() via FoundEntity.)
+*	Well, trying to do that now.
+*       Why keep two structures for entities?  Backward compatibility..
+*/
+
+/* UC_entity_info structure is defined in SGML.h. */
+/* This has to be sorted alphabetically, 
+   bear this in mind when you add some more entities.. 
+   
+   Now we have here: - all ISO-8859-2 entites 
+                     - lrm, rlm, zwnj and zwj 
+*/
+static CONST UC_entity_info extra_entities[] = {
+  {"Aacute",  0x00c1},  /* A with acute */
+  {"Abreve",  0x0102},  /* A with breve */
+  {"Acirc",  0x00c2},  /* A with circumflex */
+  {"Aogon",  0x0104},  /* A with ogonek */
+  {"Auml",  0x00c4},  /* A with diaeresis */
+  {"Cacute",  0x0106},  /* C with acute */
+  {"Ccaron",  0x010c},  /* C with caron */
+  {"Ccedil",  0x00c7},  /* C with cedilla */
+  {"Dcaron",  0x010e},  /* D with caron */
+  {"Dstrok",  0x0110},  /* D with stroke */
+  {"Eacute",  0x00c9},  /* E with acute */
+  {"Ecaron",  0x011a},  /* E with caron */
+  {"Eogon",  0x0118},  /* E with ogonek */
+  {"Euml",  0x00cb},  /* E with diaeresis */
+  {"Iacute",  0x00cd},  /* I with acute */
+  {"Icirc",  0x00ce},  /* I with circumflex */
+  {"Lacute",  0x0139},  /* L with acute */
+  {"Lcaron",  0x013d},  /* L with caron */
+  {"Lstrok",  0x0141},  /* L with stroke */
+  {"Nacute",  0x0143},  /* N with acute */
+  {"Ncaron",  0x0147},  /* N with caron */
+  {"Oacute",  0x00d3},  /* O with acute */
+  {"Ocirc",  0x00d4},  /* O with circumflex */
+  {"Odblac",  0x0150},  /* O with double acute */
+  {"Ouml",  0x00d6},  /* O with diaeresis */
+  {"Racute",  0x0154},  /* R with acute */
+  {"Rcaron",  0x0158},  /* R with caron */
+  {"Sacute",  0x015a},  /* S with acute */
+  {"Scaron",  0x0160},  /* S with caron */
+  {"Scedil",  0x015e},  /* S with cedilla */
+  {"Tcaron",  0x0164},  /* T with caron */
+  {"Tcedil",  0x0162},  /* T with cedilla */
+  {"Uacute",  0x00da},  /* U with acute */
+  {"Udblac",  0x0170},  /* U with double acute */
+  {"Uring",  0x016e},  /* U with ring above */
+  {"Uuml",  0x00dc},  /* U with diaeresis */
+  {"Yacute",  0x00dd},  /* Y with acute */
+  {"Zacute",  0x0179},  /* Z with acute */
+  {"Zcaron",  0x017d},  /* Z with caron */
+  {"Zdot",  0x017b},  /* Z with dot above */
+  {"aacute",  0x00e1},  /* a with acute */
+  {"abreve",  0x0103},  /* a with breve */
+  {"acirc",  0x00e2},  /* a with circumflex */
+  {"acute",  0x00b4},  /* acuteaccent */
+  {"amp",  0x0026},  /* ampersand */
+  {"aogon",  0x0105},  /* a with ogonek */
+  {"apos",  0x0027},  /* apostrophe */
+  {"ast",  0x002a},  /* asterisk */
+  {"auml",  0x00e4},  /* a with diaeresis */
+  {"breve",  0x02d8},  /* breve */
+  {"bsol",  0x005c},  /* reversesolidus */
+  {"cacute",  0x0107},  /* c with acute */
+  {"caron",  0x02c7},  /* caron */
+  {"ccaron",  0x010d},  /* c with caron */
+  {"ccedil",  0x00e7},  /* c with cedilla */
+  {"cedil",  0x00b8},  /* cedilla */
+  {"circ",  0x005e},  /* circumflexaccent */
+  {"colon",  0x003a},  /* colon */
+  {"comma",  0x002c},  /* comma */
+  {"commat",  0x0040},  /* commercialat */
+  {"curren",  0x00a4},  /* currencysign */
+  {"dblac",  0x02dd},  /* doubleacuteaccent */
+  {"dcaron",  0x010f},  /* d with caron */
+  {"deg",  0x00b0},  /* degreesign */
+  {"divide",  0x00f7},  /* divisionsign */
+  {"dollar",  0x0024},  /* dollarsign */
+  {"dot",  0x02d9},  /* dotabove */
+  {"dstrok",  0x0111},  /* d with stroke */
+  {"eacute",  0x00e9},  /* e with acute */
+  {"ecaron",  0x011b},  /* e with caron */
+  {"eogon",  0x0119},  /* e with ogonek */
+  {"equals",  0x003d},  /* equalssign */
+  {"euml",  0x00eb},  /* e with diaeresis */
+  {"excl",  0x0021},  /* exclamationmark */
+  {"grave",  0x0060},  /* graveaccent */
+  {"gt",  0x003e},  /* greater-thansign */
+  {"hyphen",  0x002d},  /* hyphen-minus */
+  {"iacute",  0x00ed},  /* i with acute */
+  {"icirc",  0x00ee},  /* i with circumflex */
+  {"lacute",  0x013a},  /* l with acute */
+  {"lcaron",  0x013e},  /* l with caron */
+  {"lcub",  0x007b},  /* leftcurlybracket */
+  {"lowbar",  0x005f},  /* lowline */
+  {"lpar",  0x0028},  /* leftparenthesis */
+  {"lrm",	8206},	/* left-to-right mark */ 
+  {"lsqb",  0x005b},  /* leftsquarebracket */
+  {"lstrok",  0x0142},  /* l with stroke */
+  {"lt",  0x003c},  /* less-thansign */
+  {"nacute",  0x0144},  /* n with acute */
+  {"nbsp",  0x00a0},  /* no-breakspace */
+  {"ncaron",  0x0148},  /* n with caron */
+  {"num",  0x0023},  /* numbersign */
+  {"oacute",  0x00f3},  /* o with acute */
+  {"ocirc",  0x00f4},  /* o with circumflex */
+  {"odblac",  0x0151},  /* o with double acute */
+  {"ogon",  0x02db},  /* ogonek */
+  {"ouml",  0x00f6},  /* o with diaeresis */
+  {"percnt",  0x0025},  /* percentsign */
+  {"period",  0x002e},  /* fullstop */
+  {"plus",  0x002b},  /* plussign */
+  {"quest",  0x003f},  /* questionmark */
+  {"quot",  0x0022},  /* quotationmark */
+  {"racute",  0x0155},  /* r with acute */
+  {"rcaron",  0x0159},  /* r with caron */
+  {"rcub",  0x007d},  /* rightcurlybracket */
+  {"rlm",	8207},	/* right-to-left mark */ 
+  {"rpar",  0x0029},  /* rightparenthesis */
+  {"rsqb",  0x005d},  /* rightsquarebracket */
+  {"sacute",  0x015b},  /* s with acute */
+  {"scaron",  0x0161},  /* s with caron */
+  {"scedil",  0x015f},  /* s with cedilla */
+  {"sect",  0x00a7},  /* sectionsign */
+  {"semi",  0x003b},  /* semicolon */
+  {"shy",  0x00ad},  /* softhyphen */
+  {"sol",  0x002f},  /* solidus */
+  {"tcaron",  0x0165},  /* t with caron */
+  {"tcedil",  0x0163},  /* t with cedilla */
+  {"tilde",  0x007e},  /* tilde */
+  {"times",  0x00d7},  /* multiplicationsign */
+  {"uacute",  0x00fa},  /* u with acute */
+  {"udblac",  0x0171},  /* u with double acute */
+  {"uml",  0x00a8},  /* diaeresis */
+  {"uring",  0x016f},  /* u with ring above */
+  {"uuml",  0x00fc},  /* u with diaeresis */
+  {"verbar",  0x007c},  /* verticalline */
+  {"yacute",  0x00fd},  /* y with acute */
+  {"zacute",  0x017a},  /* z with acute */
+  {"zcaron",  0x017e},  /* z with caron */
+  {"zdot",  0x017c},  /* z with dot above */
+  {"zwj",	8205},	/* zero width joiner */ 
+  {"zwnj",	8204},	/* zero width non-joiner */ 
+
+};
+#endif /* EXP_CHARTRANS */
 
 /*		Attribute Lists
 **		---------------
@@ -140,6 +303,7 @@ static CONST char* entities[] = {
 */
 static attr a_attr[] = {			/* Anchor attributes */
 	{ "ACCESSKEY" },
+	{ "CHARSET" },
 	{ "CLASS" },
 	{ "CLEAR" },
 	{ "COORDS" },
@@ -989,7 +1153,7 @@ static HTTag tags[HTML_ELEMENTS] = {
     { "FIG"	, fig_attr,	HTML_FIG_ATTRIBUTES,	SGML_MIXED },
     { "FN"	, fn_attr,	HTML_FN_ATTRIBUTES,	SGML_MIXED },
     { "FONT"	, font_attr,	HTML_FONT_ATTRIBUTES,	SGML_EMPTY },
-    { "FORM"	, form_attr,	HTML_FORM_ATTRIBUTES,	SGML_MIXED },
+    { "FORM"	, form_attr,	HTML_FORM_ATTRIBUTES,	SGML_EMPTY },
     { "FRAME"	, frame_attr,	HTML_FRAME_ATTRIBUTES,	SGML_EMPTY },
     { "FRAMESET", frameset_attr,HTML_FRAMESET_ATTRIBUTES, SGML_MIXED },
     { "H1"	, h_attr,	HTML_H_ATTRIBUTES,	SGML_MIXED },
@@ -1064,7 +1228,11 @@ PUBLIC CONST SGML_dtd HTML_dtd = {
 	tags,
 	HTML_ELEMENTS,
 	entities,
-	sizeof(entities)/sizeof(char**)
+	sizeof(entities)/sizeof(char*),
+#ifdef EXP_CHARTRANS
+	extra_entities,
+	sizeof(extra_entities)/sizeof(UC_entity_info),
+#endif
 };
 
 

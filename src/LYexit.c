@@ -19,7 +19,7 @@
 /*
  *  Stack of functions to call upon exit.
  */
-PRIVATE void (*callstack[ATEXITSIZE])();
+PRIVATE void (*callstack[ATEXITSIZE]) NOPARAMS;
 PRIVATE int topOfStack = 0;
 
 /*
@@ -45,15 +45,22 @@ PUBLIC void LYexit ARGS1(
 	int,		status)
 {
 #ifndef VMS	/*  On VMS, the VMSexit() handler does these. - FM */
+#ifdef _WINDOWS
+  WSACleanup();
+#endif
     if (LYOutOfMemory == TRUE) {
 	/*
 	 *  Ignore further interrupts. - FM
  	 */
-	(void) signal (SIGHUP, SIG_IGN);
+#ifndef NOSIGHUP
+				(void) signal(SIGHUP, SIG_DFL);
+#endif /* NOSIGHUP */
 	(void) signal (SIGTERM, SIG_IGN);
 	(void) signal (SIGINT, SIG_IGN);
 #ifndef __linux__
+#ifndef DOSPATH
 	(void) signal(SIGBUS, SIG_IGN);
+#endif /* DOSPATH */
 #endif /* !__linux__ */
 	(void) signal(SIGSEGV, SIG_IGN);
 	(void) signal(SIGILL, SIG_IGN);
@@ -72,7 +79,9 @@ PUBLIC void LYexit ARGS1(
 	}
 	cleanup_sig(0);
 #ifndef __linux__
+#ifndef DOSPATH
 	signal(SIGBUS, SIG_DFL);
+#endif /* DOSPATH */
 #endif /* !__linux__ */
 	signal(SIGSEGV, SIG_DFL);
 	signal(SIGILL, SIG_DFL);
@@ -117,7 +126,7 @@ PUBLIC void LYexit ARGS1(
  *	06-15-94	created Lynx 2-3-1 Garrett Arch Blythe
  */
 #ifdef __STDC__
-PUBLIC int LYatexit(void (*function)())
+PUBLIC int LYatexit(void (*function)(void))
 #else /* Not ANSI, ugh! */
 PUBLIC int LYatexit(function)
 void (*function)();

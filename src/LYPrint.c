@@ -19,6 +19,9 @@
 #ifdef VMS
 #include "HTVMSUtils.h"
 #endif /* VMS */
+#ifdef DOSPATH
+#include "HTDOS.h"
+#endif
 
 #include "LYLeaks.h"
 
@@ -305,11 +308,15 @@ PUBLIC int printfile ARGS1(document *,newdoc)
 		    strcpy(buffer, filename);
 		    if ((len=strlen(buffer)) > 0 && buffer[len-1] == '/')
 		        buffer[len-1] = '\0';
+#ifdef DOSPATH
+			 strcat(buffer, HTDOS_wwwName((char *)Home_Dir()));
+#else
 #ifdef VMS
 		    strcat(buffer, HTVMS_wwwName((char *)Home_Dir()));
 #else
 		    strcat(buffer, Home_Dir());
 #endif /* VMS */
+#endif /* DOSPATH */
 		    strcat(buffer, cp);
 		    strcpy(filename, buffer);
 		}
@@ -332,9 +339,17 @@ PUBLIC int printfile ARGS1(document *,newdoc)
 		else
 		    cp = NULL;
 		if (cp)
+#ifdef DOSPATH
+						  sprintf(buffer,"%s/%s", cp, HTDOS_name(filename));
+#else
                     sprintf(buffer,"%s/%s", cp, filename);
+#endif
 		else
+#ifdef DOSPATH
+			 strcpy(buffer, HTDOS_name(filename));
+#else
 		    strcpy(buffer, filename);
+#endif
 #endif /* VMS */
 
 		/* see if it already exists */
@@ -482,7 +497,7 @@ PUBLIC int printfile ARGS1(document *,newdoc)
 
 		remove_quotes(sug_filename);
 		sprintf(buffer, "%s/subject=\"%s\" %s %s", 
-			SYSTEM_MAIL, sug_filename, tempfile, user_response);
+			system_mail, sug_filename, tempfile, user_response);
 
         	stop_curses();
 		printf(MAILING_FILE);
@@ -492,18 +507,22 @@ PUBLIC int printfile ARGS1(document *,newdoc)
 		sleep(MessageSecs);
         	start_curses();
 #else /* Unix: */
-#ifdef MMDF
-		sprintf(buffer, "%s -mlruxto,cc*", SYSTEM_MAIL);
-#else
-		sprintf(buffer, "%s -t -oi", SYSTEM_MAIL);
-#endif /* MMDF */
+    		sprintf(buffer, "%s %s", system_mail, system_mail_flags);
 
+#ifdef DOSPATH
+	 sprintf(tempfile, "%s%s", lynx_temp_space, "temp_mail.txt");
+	 if ((outfile_fp = fopen(tempfile,"w")) == NULL) {
+			_statusline(MAIL_REQUEST_FAILED);
+			sleep(AlertSecs);
+			return;
+	 }
+#else
 		if ((outfile_fp = popen(buffer, "w")) == NULL) {
 			_statusline(MAIL_REQUEST_FAILED);
 			sleep(AlertSecs);
 			break;
 		}
-		
+#endif
 		if (HTisDocumentSource()) {
 		    /*
 		     *  Add Content-Type, Content-Location, and
@@ -543,7 +562,18 @@ PUBLIC int printfile ARGS1(document *,newdoc)
 		if (keypad_mode)
 		    printlist(outfile_fp, FALSE);
 
+#ifdef DOSPATH
+	 sprintf(buffer, "%s -t \"%s\" -F %s", system_mail, user_response, tempfile);
+	 fclose(outfile_fp);	/* Close the tmpfile. */
+	 stop_curses();
+	 printf("Sending \n\n$ %s\n\nPlease wait...", buffer);
+	 system(buffer);
+	 sleep(MessageSecs);
+	 start_curses();
+	 remove(tempfile);	/* Delete the tmpfile. */
+#else
 		pclose(outfile_fp);
+#endif
 #endif /* VMS */
 		break;
 	
@@ -931,7 +961,7 @@ PUBLIC int print_options ARGS2(char **,newfile, int,lines_in_file)
 	return(-1);
     }
 
-#ifdef VMS
+#if defined (VMS) || defined (DOSPATH)
     StrAllocCopy(print_filename, "file://localhost/");
 #else
     StrAllocCopy(print_filename, "file://localhost");

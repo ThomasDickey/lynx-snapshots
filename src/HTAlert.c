@@ -254,7 +254,6 @@ PUBLIC BOOL HTConfirmCookie ARGS6(
 	CONST char *,	value)
 {
     char message[256];
-    HTList *hl;
     domain_entry *de;
     int ch, namelen, valuelen, space_free;
 

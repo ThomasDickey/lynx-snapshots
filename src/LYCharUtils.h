@@ -41,6 +41,7 @@ extern char *LYUppercaseI_OL_String PARAMS((
 	int			seqnum));
 extern char *LYLowercaseI_OL_String PARAMS((
 	int			seqnum));
+extern void html_get_chartrans_info PARAMS((HTStructured * me));
 extern void LYHandleMETA PARAMS((
 	HTStructured *		me,
 	CONST BOOL*	 	present,

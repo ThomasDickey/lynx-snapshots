@@ -26,6 +26,9 @@
 #ifdef VMS
 #include "HTVMSUtils.h"
 #endif /* VMS */
+#ifdef DOSPATH
+#include "HTDOS.h"
+#endif
 #ifdef DIRED_SUPPORT
 #include "LYLocal.h"
 #endif /* DIRED_SUPPORT */
@@ -358,11 +361,15 @@ Try_Redirected_URL:
 			if ((cp = strchr(doc->address, '~'))) {
 			    strncpy(addressbuf, doc->address, cp-doc->address);
 			    addressbuf[cp - doc->address] = '\0';
+#ifdef DOSPATH
+				 p = HTDOS_wwwName((char *)Home_Dir());
+#else
 #ifdef VMS
 			    p = HTVMS_wwwName((char *)Home_Dir());
 #else
 			    p = (char *)Home_Dir();
 #endif /* VMS */
+#endif /* DOSPATH */
 			    strcat(addressbuf, p);
 			    strcat(addressbuf, cp+1);
 			    p = addressbuf;
@@ -603,11 +610,15 @@ Try_Redirected_URL:
 			*cp = '\0';
 			cp += 2;
 			StrAllocCopy(temp, doc->address);
+#ifdef DOSPATH
+			StrAllocCat(temp, HTDOS_wwwName((char *)Home_Dir()));
+#else
 #ifdef VMS
 			StrAllocCat(temp, HTVMS_wwwName((char *)Home_Dir()));
 #else
 			StrAllocCat(temp, Home_Dir());
 #endif /* VMS */
+#endif /* DOSPATH */
 			if (*cp)
 			    StrAllocCat(temp, cp);
 			StrAllocCopy(doc->address, temp);

@@ -140,7 +140,7 @@ Load a document from absolute name
   
   addr                    The absolute address of the document to be accessed.
                          
-  filter                  if YES, treat document as HTML
+  filter_it               if YES, treat document as HTML
                          
  */
 
@@ -168,7 +168,7 @@ Load a document from absolute name to a stream
   
   addr                    The absolute address of the document to be accessed.
                          
-  filter                  if YES, treat document as HTML
+  filter_it               if YES, treat document as HTML
                          
   ON EXIT,
   
@@ -179,7 +179,7 @@ Load a document from absolute name to a stream
    Note: This is equivalent to HTLoadDocument
    
  */
-extern BOOL HTLoadToStream PARAMS((CONST char * addr, BOOL filter,
+extern BOOL HTLoadToStream PARAMS((CONST char * addr, BOOL filter_it,
                                 HTStream * sink));
 
 

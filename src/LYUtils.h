@@ -13,9 +13,9 @@ extern void free_and_clear PARAMS((char **obj));
 extern void collapse_spaces PARAMS((char *string));
 extern void convert_to_spaces PARAMS((char *string, BOOL condense));
 extern char * strip_trailing_slash PARAMS((char * dirname));
-extern void statusline PARAMS((char *text));
+extern void statusline PARAMS((CONST char *text));
 extern void toggle_novice_line NOPARAMS;
-extern void noviceline PARAMS((int more));
+extern void noviceline PARAMS((int more_flag));
 extern int HTCheckForInterrupt NOPARAMS;
 extern BOOLEAN LYisLocalFile PARAMS((char *filename));
 extern BOOLEAN LYisLocalHost PARAMS((char *filename));
@@ -53,9 +53,9 @@ extern BOOLEAN LYPathOffHomeOK PARAMS((char *fbuffer, int fbuffer_size));
 extern void LYAddPathToHome PARAMS((
 	char *fbuffer, int fbuffer_size, char *fname));
 extern time_t LYmktime PARAMS((char *string));
-#ifdef NO_PUTENV
+#if ! HAVE_PUTENV
 extern int putenv PARAMS((CONST char *string));
-#endif /* NO_PUTENV */
+#endif /* HAVE_PUTENV */
 
 /*
  *  Whether or not the status line must be shown.

@@ -265,13 +265,13 @@ HTStyleSheet * HTStyleSheetAddStyle ARGS2
 HTStyleSheet * HTStyleSheetRemoveStyle ARGS2
   (HTStyleSheet *,self, HTStyle *,style)
 {
-    if (self->styles = style) {
+    if (self->styles == style) {
     	self->styles = style->next;
 	return self;
     } else {
     	HTStyle * scan;
 	for(scan = self->styles; scan; scan = scan->next) {
-	    if (scan->next = style) {
+	    if (scan->next == style) {
 	        scan->next = style->next;
 		return self;
 	    }

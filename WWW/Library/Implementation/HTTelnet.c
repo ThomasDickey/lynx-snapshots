@@ -31,9 +31,13 @@
 
 #include "HTAccess.h"
 #include "HTAlert.h"
-#ifndef VMS
+#if !defined (VMS) && !defined (_WINDOWS)
 #include "../../../userdefs.h"  /* for TELNET_COMMAND and RLOGIN_COMMAND */
-#endif /* not VMS */
+#endif /* not VMS or _WINDOWS */
+
+#ifdef _WINDOWS /* ../../.. doesn't work for me WB */
+#include "userdefs.h"  /* for TELNET_COMMAND and RLOGIN_COMMAND */
+#endif
 
 #include "LYLeaks.h"
 
@@ -158,7 +162,7 @@ PRIVATE int remote_session ARGS2(char *, access, char *, host)
 #endif
 
 /* Most unix machines suppport username only with rlogin */
-#if defined(unix)
+#if defined(unix) || defined(DOSPATH)
 #ifndef TELNET_DONE
 	if (login_protocol == rlogin) {
 	    sprintf(command, "%s %s%s%s", RLOGIN_COMMAND,

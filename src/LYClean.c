@@ -70,7 +70,9 @@ PUBLIC void cleanup_sig ARGS1(
     /*
      *  Ignore further interrupts. - mhc: 11/2/91
      */
+#ifndef NOSIGHUP
     (void) signal(SIGHUP, SIG_IGN);
+#endif /* NOSIGHUP */
 
 #ifdef VMS 
     /*
@@ -86,7 +88,10 @@ PUBLIC void cleanup_sig ARGS1(
     if (traversal)
         dump_traversal_history();
 
+#ifndef NOSIGHUP
     if (sig != SIGHUP) {
+#endif /* NOSIGHUP */
+
 	if (!dump_output_immediately) {
 	    /*
 	     *  cleanup() also calls cleanup_files().
@@ -97,11 +102,15 @@ PUBLIC void cleanup_sig ARGS1(
 	    printf("\r\nExiting via interrupt: %d\r\n", sig);
 	    fflush(stdout);
 	}
+#ifndef NOSIGHUP
     } else {
 	cleanup_files();
     }
+#endif /* NOSIGHUP */
 
-    (void) signal(SIGHUP, SIG_DFL);
+#ifndef NOSIGHUP
+	 (void) signal(SIGHUP, SIG_IGN);
+#endif /* NOSIGHUP */
     (void) signal(SIGTERM, SIG_DFL);
 #ifndef VMS
     (void) signal(SIGINT, SIG_DFL);
@@ -140,7 +149,9 @@ PUBLIC void cleanup NOARGS
      *  Cleanup signals - just in case.
      *  Ignore further interrupts. - mhc: 11/2/91
      */
-    (void) signal (SIGHUP, SIG_IGN);
+#ifndef NOSIGHUP
+	 (void) signal(SIGHUP, SIG_IGN);
+#endif /* NOSIGHUP */
     (void) signal (SIGTERM, SIG_IGN);
 
 #ifndef VMS  /* use ttclose() from cleanup() for VMS */

@@ -71,6 +71,10 @@ BUGS:	@@@  	Limit connection cache size!
 **		same time.
 */		
 
+#ifdef DJGPP
+#define u_long unsigned long
+#endif
+
 #include "HTUtils.h"
 #include "tcp.h"
 
@@ -107,12 +111,6 @@ BUGS:	@@@  	Limit connection cache size!
 #endif /* !IPORT_FTP */
 
 #include "LYLeaks.h"
-
-#ifdef REMOVED_CODE
-extern char *malloc();
-extern void free();
-extern char *strncpy();
-#endif /* REMOVED_CODE */
 
 typedef struct _connection {
     struct _connection *	next;	/* Link on list 	*/
@@ -2775,7 +2773,7 @@ PUBLIC int HTFTPLoad ARGS4(
 	} else {
 	    format = HTFileFormat(filename, &encoding);
 	}
-	format = HTCharsetFormat(format, anchor);
+	format = HTCharsetFormat(format, anchor, -1);
 	binary = (encoding != HTAtom_for("8bit") &&
 		  encoding != HTAtom_for("7bit"));
 	if (!binary &&
@@ -3203,7 +3201,7 @@ listen:
 		
 		FileName[len - 2] = '\0';
 		format = HTFileFormat(FileName, &encoding);
-		format = HTCharsetFormat(format, anchor);
+		format = HTCharsetFormat(format, anchor, -1);
 		StrAllocCopy(anchor->content_type, format->name);
 		StrAllocCopy(anchor->content_encoding, "x-compress");
 		format = HTAtom_for("www/compressed");
@@ -3214,7 +3212,7 @@ listen:
 		    FileName[len - 3] == '_') {
 		    FileName[len - 3] = '\0';
 		    format = HTFileFormat(FileName, &encoding);
-		    format = HTCharsetFormat(format, anchor);
+		    format = HTCharsetFormat(format, anchor, -1);
 		    StrAllocCopy(anchor->content_type, format->name);
 		    StrAllocCopy(anchor->content_encoding, "x-gzip");
 		    format = HTAtom_for("www/compressed");

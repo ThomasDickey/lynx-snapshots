@@ -173,7 +173,8 @@ DIRED_PERMIT   =   -DOK_PERMIT
 # If you are not, then you should edit the generic: entry below.
 #
 # If you need ncurses, the latest version can always be found
-# in ftp://ftp.netcom.com/pub/zm/zmbenhal/ncurses/
+# in ftp://ftp.clark.net/pub/dickey/ncurses/
+# or ftp://ftp.netcom.com/pub/zm/zmbenhal/ncurses/
 # (you may need -DNCURSESHEADER in addition to -DNCURSES for old
 # versions of ncurses; see below).
 #
@@ -268,10 +269,10 @@ DIR_DEFS = $(DIRED_SUPPORT) $(DIRED_ARCHIVE) $(DIRED_TAR) $(DIRED_ZIP) $(DIRED_G
 #SITE_LIBS= # Your libraries here (remove the "#")
 
 # Set SITE_LYDEFS to one or more of the defines for the WWW Library:
-SITE_LYDEFS = $(DIR_LYDEFS) # Your defines here
+SITE_LYDEFS = $(DIR_LYDEFS) -DEXP_CHARTRANS # Your defines here
 
 # Set SITE_DEFS to one or more of the defines for lynx below:
-SITE_DEFS = $(DIR_DEFS) # Your defines here
+SITE_DEFS = $(DIR_DEFS) -DEXP_CHARTRANS # Your defines here
 
 # if you are compiling on a previously unsupported system, modify
 # this generic entry!!
@@ -282,6 +283,7 @@ SITE_DEFS = $(DIR_DEFS) # Your defines here
 # -Dvfork=fork     if you don't have vfork()
 # -DMMDF	   if you use MMDF instead of sendmail
 # -DFANCY_CURSES   enables fancy curses (bold, underline, reverse)
+# -DCOLOR_CURSES   enables color in SVr4 curses & clones such as ncurses
 # -DNCURSES        for ncurses support (also indicate the LIBS path)
 # -DNCURSESHEADER  seek ncurses.h instead of ncurses/curses.h in LYCurses.h
 # -DNO_KEYPAD      if you don't have keypad() and related defines
@@ -299,6 +301,10 @@ SITE_DEFS = $(DIR_DEFS) # Your defines here
 # -DNOPORT         if you must use PASV instead of PORT for FTP
 # -DNO_TTYTYPE	   if your system lacks a ttytype variable
 # -DNSL_FORK	   For fork-based name server lookups that can be 'z'apped.
+# -DEXP_CHARTRANS  enable chartrans support w/ new charsets, UTF8 mode etc.
+#                  (needed in SITE_DEFS *and* SITE_LYDEFS !)
+# -DEXP_CHARTRANS_AUTOSWITCH also let lynx switch term mode(Linux console only)
+# -DSLANG_MBCS_HACK prevent cutoff lines when using UTF8 console (slang only)
 #
 # if you are linking to freeWAIS-0.202 or older, you should define this
 # in MCFLAGS (SITE_DEFS)
@@ -371,7 +377,7 @@ convex-ncurses:
 	cd WWW/Library/convex; $(MAKE) LYFLAGS="$(SITE_LYDEFS)"
 	cd src; $(MAKE) all CC="cc" MCFLAGS="-O \
 		-I/usr/local/include \
-		-DNCURSES -DFANCY_CURSES \
+		-DNCURSES -DCOLOR_CURSES -DFANCY_CURSES \
 		-D__STDC__ \
 		-DNO_PUTENV -DNO_CBREAK -DUSE_DIRENT -DUNIX \
 		-DSTDC_HEADERS -I../$(WWWINC) $(SITE_DEFS)" \
@@ -409,7 +415,7 @@ freebsd:
 # FreeBSD doesn't have or need ranlib. (ignore the error message about that :)
 freebsd-ncurses:
 	cd WWW/Library/freebsd; $(MAKE) LYFLAGS="$(SITE_LYDEFS)"
-	cd src; $(MAKE) all MCFLAGS="$(CFLAGS) -DFANCY_CURSES -DNCURSES \
+	cd src; $(MAKE) all MCFLAGS="$(CFLAGS) -DFANCY_CURSES -DCOLOR_CURSES -DNCURSES \
 		-DNCURSESHEADER -DUNIX -DNO_TTYTYPE -DNO_CUSERID -DLOCALE \
 		-I../$(WWWINC) $(SITE_DEFS)" \
 		LIBS="-lncurses -lmytinfo \
@@ -439,7 +445,7 @@ netbsd:
 # NetBSD doesn't have or need ranlib. (ignore the error message about that :)
 netbsd-ncurses:
 	cd WWW/Library/netbsd; $(MAKE) LYFLAGS="$(SITE_LYDEFS)"
-	cd src; $(MAKE) all CC="cc" MCFLAGS="-O -DFANCY_CURSES -DNCURSES \
+	cd src; $(MAKE) all CC="cc" MCFLAGS="-O -DFANCY_CURSES -DCOLOR_CURSES -DNCURSES \
 		-DUNIX -DNO_CUSERID -I../$(WWWINC) $(SITE_DEFS) \
 		-I/usr/include/ncurses" \
 		LIBS="-lncurses -lcompat \
@@ -657,7 +663,7 @@ bsdi:
 bsdi-ncurses:
 	cd WWW/Library/Implementation; $(MAKE) -f BSDI_Makefile CC="gcc" \
 		LYFLAGS="-DBSDI $(SITE_LYDEFS)"
-	cd src; $(MAKE) all CC="gcc" MCFLAGS="-O -DNO_CUSERID -DUNIX -DNCURSES \
+	cd src; $(MAKE) all CC="gcc" MCFLAGS="-O -DNO_CUSERID -DUNIX -DCOLOR_CURSES -DNCURSES \
 		-DFANCY_CURSES -DBSDI -DSVR4 \
 		-I/usr/include/ncurses -I../$(WWWINC) $(SITE_DEFS)" \
 		LIBS="-lncurses \
@@ -681,7 +687,7 @@ bsdi-slang:
 #  nothing and is only there to make Makefiles like this one happy)
 solaris2:
 	cd WWW/Library/solaris2; $(MAKE) CC="gcc" LYFLAGS="$(SITE_LYDEFS)"
-	cd src; $(MAKE) all CC="gcc" MCFLAGS="-O -DFANCY_CURSES -DUNIX -DSVR4 \
+	cd src; $(MAKE) all CC="gcc" MCFLAGS="-O -DCOLOR_CURSES -DFANCY_CURSES -DUNIX -DSVR4 \
 		-DSOLARIS2 -DCURS_PERFORMANCE -DUTMPX_FOR_UTMP -DUSE_DIRENT \
 		-DLOCALE -DHAVE_TERMIOS_H \
 		-I../$(WWWINC) $(SITE_DEFS)" \
@@ -694,7 +700,7 @@ solaris2:
 # Solaris2 doesn't have or need ranlib. (ignore the error message about that :)
 solaris2cc:
 	cd WWW/Library/solaris2; $(MAKE) CC="cc" LYFLAGS="$(SITE_LYDEFS)"
-	cd src; $(MAKE) all CC="cc" MCFLAGS="-O -DFANCY_CURSES -DUNIX -DSVR4 \
+	cd src; $(MAKE) all CC="cc" MCFLAGS="-O -DCOLOR_CURSES -DFANCY_CURSES -DUNIX -DSVR4 \
 		-DSOLARIS2 -DCURS_PERFORMANCE -DUTMPX_FOR_UTMP -DUSE_DIRENT \
 		-DLOCALE -DHAVE_TERMIOS_H \
 		-I../$(WWWINC) $(SITE_DEFS)" \
@@ -787,9 +793,9 @@ linux:
 linux-ncurses:
 	cd WWW/Library/unix; $(MAKE) CC="gcc" LYFLAGS="-DLINUX $(SITE_LYDEFS)"
 	cd src; $(MAKE) all CC="gcc" MCFLAGS="-O -DUNIX -DLINUX -DNCURSES \
-		-DFANCY_CURSES -DNO_TTYTYPE \
+		-DFANCY_CURSES -DCOLOR_CURSES -DNO_TTYTYPE \
 		-I/usr/include/ncurses -I../$(WWWINC) $(SITE_DEFS)" \
-		LIBS="-lncurses \
+		LIBS="-lncurses -lgpm \
 		$(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)" \
 		WWWLIB="../WWW/Library/unix/libwww.a"
 
@@ -880,7 +886,7 @@ sun4:
 sun4-ncurses:
 	cd WWW/Library/sun4; $(MAKE) CC="gcc" LYFLAGS="$(SITE_LYDEFS)"
 	cd src; $(MAKE) all CC="gcc" \
-		MCFLAGS="-O -DUNIX -DFANCY_CURSES -DNCURSES \
+		MCFLAGS="-O -DUNIX -DFANCY_CURSES -DCOLOR_CURSES -DNCURSES \
 		-I/usr/local/include -I../$(WWWINC) -DSUN -DSUN4 \
 		-DLOCALE $(SITE_DEFS)" \
 		LIBS="-L/usr/local/lib -lncurses \
@@ -927,7 +933,7 @@ news-ncurses:
 	@echo "You must first compile the WWW library in WWW/Library"
 	cd WWW/Library/unix; $(MAKE) LYFLAGS="$(SITE_LYDEFS)"
 	cd src; $(MAKE) all CC="gcc -O" MCFLAGS="-O -DUNIX \
-		-DNO_CUSERID -DNCURSES -DFANCY_CURSES \
+		-DNO_CUSERID -DNCURSES -DCOLOR_CURSES -DFANCY_CURSES \
 		-I../$(WWWINC) $(SITE_DEFS)" \
 		LIBS="-lncurses $(WAISLIB) $(SOCKSLIB)" \
 		WWWLIB="../WWW/Library/unix/libwww.a"
@@ -955,7 +961,7 @@ next:
 next-ncurses:
 	cd WWW/Library/next; $(MAKE) LYFLAGS="$(SITE_LYDEFS)"
 	cd src; $(MAKE) all CC="cc" MCFLAGS="-O -DUNIX -DNEXT -DNO_UNISTD_H \
-		-DNCURSES -DFANCY_CURSES \
+		-DNCURSES -DCOLOR_CURSES -DFANCY_CURSES \
 		-DNO_CUSERID -DNO_GETCWD -DNO_PUTENV \
 		-I/usr/local/include -I../$(WWWINC) $(SITE_DEFS)" \
 		LIBS="-L/usr/local/lib -lncurses \
@@ -982,6 +988,16 @@ clean:
 	rm -f WWW/Library/*/.created
 	cd src; $(MAKE) clean
 	rm -f *.b src/lynx core Lynx.leaks
+
+distclean: clean
+	-rm -f WWW/Library/*/*~
+	-rm -f WWW/Library/*/*.bak
+	-rm -rf WWW/Library/*/obsolete
+	-rm -rf src/obsolete
+	-cd src; $(MAKE) clean
+	-cd src/chrtrans; $(MAKE) distclean
+	-rm -f Lynx.prj *~ *.bak *.sav .*_aux
+	rm lynx
 
 tar:  clean
 	rm -f lynx

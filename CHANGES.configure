@@ -1,0 +1,62 @@
+1997-04-15
+----------
+* refined logic of SVr4 curses color support to test the no_color_video
+  attribute - TD
+* ifdef'd NCURSES_MOUSE_VERSION logic to allow build with ncurses 1.9.4 - TD
+* ifdef'd wgetbkgd misspelling to allow build with ncurses prior to 1.9.9g - TD
+* document USE_MOUSE configuration-option - TD
+* modify configure script and makefile.in templates to make BSDI_Makefile
+  obsolete - TD
+* rename config.h to lynx_cfg.h to minimize conflict when configuring against
+  ncurses or slang in nonstandard locations - TD
+* new autoconf macro CF_HEADER_PATH is used to make header-search for slang
+  the same as ncurses - TD
+* modify CF_CURSES_LIBS, CF_NCURSES_LIBS and CF_SLANG_LIBS to accommodate
+  predefinition of $LIBS variable - TD
+* corrected autoconf'd compiler flags for Ultrix - TD
+* add config.guess & config.sub to allow specialized host-type checks - TD
+* guard against redefinition of NO_FILIO_H - TD
+* use new autoconf macro CF_SYSTEM_MAIL_FLAGS /jes
+
+1997-04-06
+----------
+* modified LYMain.c, LYMail.c, LYPrint.c, LYReadCFG.c, LYGlobalDefs.h
+  to add SYSTEM_MAIL_FLAGS define and system_mail_flags global
+  variable and remove MMDF from internal code.  /jes
+
+1997-04-02
+----------
+* add Andrew Kuchling's patch to support mouse-clicks with ncurses.
+* refine tests that address porting problems to SCO (detecting struct winsize,
+  workaround for misdefinition of 'remove')
+* refine CF_COLOR_CURSES test to avoid ncurses 1.9.9e bugs.
+* refine CF_PATH_PROG to allow for machines that haven't the given programs,
+  by using only the program name and added configure option
+  --disable-full-paths to enforce this behavior.
+* fixes for some gcc compiler warnings (missing prototypes, unused variables,
+  unintialized variables, shadowed variables, 2-3 places where assignments were
+  not being performed due to syntax errors -- LYHistory.c, LYMail.c).
+* correct cast in HTFWriter.c that may break if atoi() is not prototyped.
+* add top-level makefile target 'maintainer-clean', use this to remove Lynx.prj
+
+1997-03-22
+----------
+* Further reduction of top-level makefile.in by moving definitions out of
+  WWW/Implementation/*/Makefile, so only one is needed for autoconfigured
+  build (i.e., WWW/Implementation/unix/Makefile).  This highlights the
+  remaining differences between the top-level targets - TD
+* Make configure script generate Unix makefiles in subdirectories, a step
+  toward being able to run make from any directory, for development - TD
+* Add autoconf tests for paths of programs, including sendmail vs mmdf - TD
+* Add configure script options for development (--disable-echo, --enable-debug,
+  --enable-find-leaks, --enable-warnings) - TD
+* Allow user to override search path for ncurses header by setting $CFLAGS or
+  $CPPFLAGS - TD
+* Correct array limit in LYCurses.c for SVr4 color support - TD
+* Use addstr rather than printw in popup-forms to address concern about 8-bit
+  characters - TD
+
+1997-3-9
+--------
+* Integrated (simple) color, auto-configure patches with 2.7 following
+  chrtrans patch - T.Dickey, J.Spath.

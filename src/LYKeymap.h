@@ -12,7 +12,7 @@ extern void set_numbers_as_arrows NOPARAMS;
 extern void reset_numbers_as_arrows NOPARAMS;
 extern void print_keymap PARAMS((char **newfile));
 extern char *key_for_func PARAMS((int func));
-extern BOOLEAN LYisNonAlnumKeyname PARAMS((int ch, int keyname));
+extern BOOLEAN LYisNonAlnumKeyname PARAMS((int ch, int Keyname));
 
 extern char keymap[]; /* main keymap matrix */
 

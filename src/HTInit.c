@@ -594,7 +594,9 @@ PRIVATE int ExitWithError ARGS1(char *,txt)
 {
     if (txt)
         fprintf(stderr, "metamail: %s\n", txt);
+#ifndef NOSIGHUP
     (void) signal(SIGHUP, SIG_DFL);
+#endif /* NOSIGHUP */
     (void) signal(SIGTERM, SIG_DFL);
 #ifndef VMS
     (void) signal(SIGINT, SIG_DFL);

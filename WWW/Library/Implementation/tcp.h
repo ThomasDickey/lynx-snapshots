@@ -65,6 +65,37 @@ typedef struct sockaddr_in SockA;  /* See netinet/in.h */
 #define STDIO_H
 #endif /* !STDIO_H */
 
+#if HAVE_DIRENT_H
+# include <dirent.h>
+# define D_NAMLEN(dirent) strlen((dirent)->d_name)
+# define STRUCT_DIRENT struct dirent
+# define GOT_READ_DIR 1    /* if directory reading functions are available */
+#else
+# define D_NAMLEN(dirent) (dirent)->d_namlen
+# define STRUCT_DIRENT struct direct
+# define direct dirent	/* FIXME */
+# if HAVE_SYS_NDIR_H
+#  include <sys/ndir.h>
+# endif
+# if HAVE_SYS_DIR_H
+#  include <sys/dir.h>
+# endif
+# if HAVE_NDIR_H
+#  include <ndir.h>
+# endif
+#endif
+
+#if TIME_WITH_SYS_TIME
+# include <sys/time.h>
+# include <time.h>
+#else
+# if HAVE_SYS_TIME_H
+#  include <sys/time.h>
+# else
+#  include <time.h>
+# endif
+#endif
+
 #ifdef _AIX
 #define AIX
 #endif /* _AIX */
@@ -72,38 +103,17 @@ typedef struct sockaddr_in SockA;  /* See netinet/in.h */
 #define unix
 #endif /* AIX */
 
-#ifdef _IBMR2
-#define USE_DIRENT              /* sys V style directory open */
-#endif /* _IBMR2 */
-
-#ifdef _SYSV3
+#if HAVE_FCNTL_H
 #include <fcntl.h>
-#include <dirent.h>
-#endif /* _SYSV3 */
+#else
+#if HAVE_SYS_FCNTL_H
+#include <sys/fcntl.h>
+#endif
+#endif
 
-/* Solaris. */
-#if defined(sun) && defined(__svr4__) && !defined(USE_DIRENT)
-#define USE_DIRENT              /* sys V style directory open */
-#endif /* sun && __svr4__ && !USE_DIRENT */
-
-#ifdef __alpha
-#define USE_DIRENT
-#endif /* __alpha */
-
-#ifndef USE_DIRENT
-#ifdef SVR4
-#define USE_DIRENT
-#endif /* SVR4 */
-#endif /* !USE_DIRENT */
-
-#ifndef SOLARIS2
+#if HAVE_STRING_H
 #include <string.h>             /* For bzero etc */
-#endif /* !SOLARIS2 */
-
-/* Use builtin strdup when appropriate. */
-#if defined(ultrix) || defined(VMS) || defined(NeXT)
-extern char *strdup ();
-#endif /* ultrix || VMS || NeXT */
+#endif /* HAVE_STRING_H */
 
 /*
 
@@ -114,6 +124,47 @@ extern char *strdup ();
 #define TOASCII(c) (c)
 #define FROMASCII(c) (c)
 #endif /* !TOASCII */
+
+
+/*
+IBM-PC running Windows NT
+
+	These parameters providede by  Susan C. Weber <sweber@kyle.eitech.com>.
+*/
+
+#ifdef _WINDOWS
+#include "fcntl.h"                      /* For HTFile.c */
+#include "sys\types.h"                  /* For HTFile.c */
+#include "sys\stat.h"                   /* For HTFile.c */
+#undef NETREAD
+#undef NETWRITE
+#undef NETCLOSE
+#undef IOCTL
+#define NETREAD(s,b,l)  recv((s),(b),(l),0)
+#define NETWRITE(s,b,l) send((s),(b),(l),0)
+#define NETCLOSE(s)     closesocket(s)
+#define IOCTL				ioctlsocket
+#include <io.h>
+#include <string.h>
+#include <process.h>
+#include <time.h>
+#include <errno.h>
+#include <direct.h>
+#include <stdio.h>
+#include <winsock.h>
+typedef struct sockaddr_in SockA;  /* See netinet/in.h */
+#define EINPROGRESS          (WSABASEERR+36)
+#define EALREADY             (WSABASEERR+37)
+#define EISCONN              (WSABASEERR+56)
+#define EINTR                (WSABASEERR+4)
+#define EAGAIN               (WSABASEERR+1002)
+#define ENOTCONN             (WSABASEERR+57)
+#define ECONNRESET           (WSABASEERR+54)
+#define EINVAL                22
+#define INCLUDES_DONE
+#define TCP_INCLUDES_DONE
+#endif  /* WINDOWS */
+
 
 
 /*
@@ -149,10 +200,10 @@ VAX/VMS
 #undef SOCKET_READ
 #undef NETWRITE
 #undef NETCLOSE
-#undef IOCTL
 #define SOCKET_READ(s,b,l)  ((s)>10 ? netread((s),(b),(l)) : read((s),(b),(l)))
 #define NETWRITE(s,b,l) ((s)>10 ? netwrite((s),(b),(l)) : write((s),(b),(l)))
 #define NETCLOSE(s)     ((s)>10 ? netclose(s) : close(s))
+#undef IOCTL
 #define IOCTL(a,b,c) -1 /* disables ioctl function	      */
 #define NO_IOCTL	/* flag to check if ioctl is disabled */
 #endif /* WIN_TCP */
@@ -387,49 +438,32 @@ struct timeval {
 #define GLOBALREF extern
 #endif /* !GLOBALREF */
 
+#ifdef DJGPP
+#undef SELECT
+#define TCP_INCLUDES_DONE
+#define NO_IOCTL
+#include <errno.h>
+#include <sys/types.h>
+#include <socket.h>
+
+#undef NETWRITE
+#define NETWRITE write_s
+#undef NETREAD
+#define NETREAD read_s
+#undef NETCLOSE
+#define NETCLOSE close_s
+#endif
 
 /*
 SCO ODT unix version
  */
-#ifdef SCO
-#define sco
-#endif /* SCO */
-#ifdef sco
-#include <sys/fcntl.h>
-#define USE_DIRENT
-#endif /* sco */
-
-/*
-Intergraph CLIX
- */
-#ifdef CLIX
-#include <sys/fcntl.h>
-#define USE_DIRENT
-#endif /* CLIX */
-
-#ifdef ISC
-#ifndef NO_UNISTD_H
-#include <sys/unistd.h>
-#endif /* !NO_UNISTD_H */
-#else
-#if !defined(NO_UNISTD_H) && !defined(VMS)
+#if HAVE_UNISTD_H
 #include <unistd.h>
-#endif /* !NO_UNISTD_H && !VMS */
-#endif /* ISC */
+#endif /* HAVE_UNISTD_H */
 
-#if defined(SVR4) || defined(UNIXWARE)
-#include <sys/fcntl.h>
-#ifndef NO_FILIO_H	/* BSD Interactive doesn't have filio.h. */
+#if HAVE_SYS_FILIO_H
 #include <sys/filio.h>
-#endif /* !NO_FILIO_H */
-#endif /* SVR4 || UNIXWARE */
-
-/*
-SOLARIS 2
- */
-#ifdef SOLARIS2
-#include <sys/filio.h>
-#endif /* SOLARIS2 */
+#endif /* HAVE_SYS_FILIO_H */
 
 /*
 MIPS unix
@@ -447,9 +481,9 @@ Regular BSD unix versions
 #ifndef INCLUDES_DONE
 #include <sys/types.h>
 /* #include <streams/streams.h>                 not ultrix */
-#ifndef SOLARIS2
+#if HAVE_STRING_H
 #include <string.h>
-#endif /* !SOLARIS2 */
+#endif /* HAVE_STRING_H */
 #include <errno.h>          /* independent */
 #ifdef SCO
 #include <sys/timeb.h>
@@ -490,6 +524,7 @@ typedef int pid_t;
 #define INCLUDES_DONE
 #endif  /* Normal includes */
 
+/* FIXME: this should be autoconf'd */
 /* Interactive UNIX for i386 and i486 -- Thanks to jeffrey@itm.itm.org */
 #ifdef ISC
 #include <net/errno.h>
@@ -497,7 +532,6 @@ typedef int pid_t;
 #include <sys/tty.h>
 #include <sys/sioctl.h>
 #include <sys/bsdtypes.h>
-#include <sys/fcntl.h>
 #ifndef MERGE
 #define MERGE
 #include <sys/pty.h>
@@ -506,7 +540,7 @@ typedef int pid_t;
 #include <sys/pty.h>
 #endif /* !MERGE */
 #ifndef USE_DIRENT
-#define USE_DIRENT	/* sys V style directory open */
+#define USE_DIRENT     /* sys V style directory open */
 #endif /* USE_DIRENT */
 #include <sys/dirent.h>
 #endif /* ISC */
@@ -517,6 +551,18 @@ typedef int pid_t;
 #define unix
 #endif /* UNIX && !unix */
 
+#ifdef HAVE_CONFIG_H
+
+# ifdef HAVE_LIMITS_H
+#  include <limits.h>
+# endif /* HAVE_LIMITS_H */
+# if !defined(MAXINT) && defined(INT_MAX)
+#  define MAXINT INT_MAX
+# endif /* !MAXINT && INT_MAX */
+
+#else
+
+/* FIXME: remove after completing configure-script */
 #ifdef unix                    /* if this is to compile on a UNIX machine */
 #define GOT_READ_DIR 1    /* if directory reading functions are available */
 #ifdef USE_DIRENT             /* sys v version */
@@ -537,6 +583,16 @@ typedef int pid_t;
 #define MAXINT INT_MAX
 #endif /* !MAXINT && INT_MAX */
 #endif /* unix */
+
+#ifndef VM
+#ifndef VMS
+#ifndef THINK_C
+#define DECL_SYS_ERRLIST 1
+#endif /* !THINK_C */
+#endif /* !VMS */
+#endif /* !VM */
+
+#endif /* !HAVE_CONFIG_H */
 
 /*
 Defaults

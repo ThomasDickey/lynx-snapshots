@@ -5,6 +5,9 @@
 #include "LYGlobalDefs.h"
 #include "LYCharSets.h"
 #include "LYCharUtils.h"
+#ifdef EXP_CHARTRANS
+#include "UCMap.h"
+#endif /* EXP_CHARTRANS */
 #include "HTFont.h"
 #include "GridText.h"
 #include "LYCurses.h"
@@ -19,6 +22,18 @@ extern BOOL HTPassHighCtrlNum;
 extern HTCJKlang HTCJK;
 PUBLIC HTkcode kanji_code = NOKANJI;
 PUBLIC BOOLEAN LYHaveCJKCharacterSet = FALSE;
+
+#ifdef EXP_CHARTRANS
+extern void UCInit NOARGS;
+extern int UCInitialized;
+#else 
+#ifndef MAX_CHARSETS
+#define MAX_CHARSETS
+#endif
+#ifndef MAX_CHARSETSP
+#define MAX_CHARSETSP
+#endif
+#endif /* EXP_CHARTRANS */
 
 /* INSTRUCTIONS for adding new character sets !!!!
  *
@@ -47,7 +62,7 @@ PRIVATE char * ISO_Latin1[] = {
   	"\303",	/* capital A, tilde - Atilde */ 
   	"\304",	/* capital A, dieresis or umlaut mark - Auml */ 
   	"\307",	/* capital C, cedilla - Ccedil */ 
-  	"\320",	/* capital Eth, Icelandic - Dstrok */ 
+  	"\320",	/* capital Eth or D with stroke - Dstrok */ 
   	"\320",	/* capital Eth, Icelandic - ETH */ 
   	"\311",	/* capital E, acute accent - Eacute */ 
   	"\312",	/* capital E, circumflex accent - Ecirc */ 
@@ -166,8 +181,8 @@ PRIVATE char * ISO_Latin2[] = {
   	"A",	/* capital A, tilde - Atilde */ 
   	"\304",	/* capital A, dieresis or umlaut mark - Auml */ 
   	"\307",	/* capital C, cedilla - Ccedil */ 
-  	"DH",	/* capital Eth, Icelandic - Dstrok */ 
-  	"DH",	/* capital Eth, Icelandic - ETH */ 
+  	"\320",	/* capital Eth or D with stroke - Dstrok */ 
+  	"\320",	/* capital Eth, Icelandic - ETH */ 
   	"\311",	/* capital E, acute accent - Eacute */ 
   	"E",	/* capital E, circumflex accent - Ecirc */ 
   	"E",	/* capital E, grave accent - Egrave */ 
@@ -289,7 +304,7 @@ PRIVATE char * ISO_LatinN[] = {
         "A",	/* capital A, dieresis or umlaut mark - Auml*/
 #endif /* LY_UMLAUT */
         "C",	/* capital C, cedilla - Ccedil */
-        "DH",	/* capital Eth, Icelandic - Dstrok */
+        "Dj",	/* capital D with stroke - Dstrok */
         "DH",	/* capital Eth, Icelandic - ETH */
         "E",	/* capital E, acute accent - Eacute */
         "E",	/* capital E, circumflex accent - Ecirc */
@@ -350,7 +365,7 @@ PRIVATE char * ISO_LatinN[] = {
         "\002",	/* emsp NEVER CHANGE THIS - emsp */
 	"-",	/* dash the width of ensp - endash */
         "\002",	/* ensp NEVER CHANGE THIS - ensp */
-        "e",	/* small eth, Icelandic eth */
+        "dh",	/* small eth, Icelandic eth */
         "e",	/* small e, dieresis or umlaut mark - euml */
 	" 1/2",	/* fraction 1/2 (&#189;) - frac12 */
 	" 1/4",	/* fraction 1/4 (&#188;) - frac14 */
@@ -428,7 +443,7 @@ PRIVATE char * DEC_Multinational[] = {
   	"\303",	/* capital A, tilde - Atilde */ 
   	"\304",	/* capital A, dieresis or umlaut mark - Auml */ 
   	"\307",	/* capital C, cedilla - Ccedil */ 
-  	"DH",	/* capital Eth, Icelandic - Dstrok */ 
+  	"Dj",	/* capital D with stroke - Dstrok */ 
   	"DH",	/* capital Eth, Icelandic - ETH */ 
   	"\311",	/* capital E, acute accent - Eacute */ 
   	"\312",	/* capital E, circumflex accent - Ecirc */ 
@@ -550,7 +565,7 @@ PRIVATE char * PC_charset[] = {
         "A",	/* capital A, tilde - Atilde */
         "\216",	/* capital A, dieresis or umlaut mark - Auml */
         "\200",	/* capital C, cedilla - Ccedil */
-        "DH",	/* capital Eth, Icelandic - Dstrok */
+        "Dj",	/* capital D with stroke - Dstrok */
         "DH",	/* capital Eth, Icelandic - ETH */
         "\220",	/* capital E, acute accent - Eacute */
         "E",	/* capital E, circumflex accent - Ecirc */
@@ -599,7 +614,7 @@ PRIVATE char * PC_charset[] = {
         "\002",	/* emsp NEVER CHANGE THIS - emsp */
 	"-",	/* dash the width of ensp - endash */
         "\002",	/* ensp NEVER CHANGE THIS - ensp */
-        "e",	/* small eth, Icelandic - eth */
+        "dh",	/* small eth, Icelandic - eth */
         "\211",	/* small e, dieresis or umlaut mark - euml */
 	"\253",	/* fraction 1/2 (&#189;) - frac12 */
 	"\254",	/* fraction 1/4 (&#188;) - frac14 */
@@ -672,7 +687,7 @@ PRIVATE char * PC_850_charset[] = {
         "\307",	/* capital A, tilde - Atilde */
 	"\216",	/* capital A, dieresis or umlaut mark - Auml */
         "\200",	/* capital C, cedilla - Ccedil */
-        "\321",	/* capital Eth, Icelandic - Dstrok */
+        "\321",	/* capital Eth or D with stroke - Dstrok */
         "\321",	/* capital Eth, Icelandic - ETH */
 	"\220",	/* capital E, acute accent - Eacute */
         "\322",	/* capital E, circumflex accent - Ecirc */
@@ -793,7 +808,7 @@ PRIVATE char * Macintosh[] = {
         "\314",	/* capital A, tilde - Atilde */
         "\200",	/* capital A, dieresis or umlaut mark - Auml */
         "\202",	/* capital C, cedilla - Ccedil */
-        "DH",	/* capital Eth, Icelandic - Dstrok */
+        "Dj",	/* capital D with stroke - Dstrok */
         "DH",	/* capital Eth, Icelandic - ETH */
         "\203",	/* capital E, acute accent - Eacute */
         "\346",	/* capital E, circumflex accent - Ecirc */
@@ -912,7 +927,7 @@ PRIVATE char * NeXT_Step[] = {
 	"\204",	/* capital A, tilde - Atilde */
 	"\205",	/* capital A, dieresis or umlaut mark - Auml */
 	"\207",	/* capital C, cedilla - Ccedil */
-	"\220",	/* capital Eth, Icelandic - Dstrok */
+	"\220",	/* capital Eth or D with stroke - Dstrok */
 	"\220",	/* capital Eth, Icelandic - ETH */
 	"\211",	/* capital E, acute accent - Eacute */
 	"\212",	/* capital E, circumflex accent - Ecirc */
@@ -1036,7 +1051,7 @@ PRIVATE char * KOI8_R[] = {
         "A",	/* capital A, dieresis or umlaut mark - Auml*/
 #endif /* LY_UMLAUT */
         "C",	/* capital C, cedilla - Ccedil */
-        "DH",	/* capital Eth, Icelandic - Dstrok */
+        "Dj",	/* capital D with stroke - Dstrok */
         "DH",	/* capital Eth, Icelandic - ETH */
         "E",	/* capital E, acute accent - Eacute */
         "E",	/* capital E, circumflex accent - Ecirc */
@@ -1097,7 +1112,7 @@ PRIVATE char * KOI8_R[] = {
         "\002",	/* emsp NEVER CHANGE THIS - emsp */
 	"-",	/* dash the width of ensp - endash */
         "\002",	/* ensp NEVER CHANGE THIS - ensp */
-        "e",	/* small eth, Icelandic eth */
+        "dh",	/* small eth, Icelandic eth */
 	"\243",	/* small e, dieresis or umlaut mark - euml */
 	" 1/2",	/* fraction 1/2 (&#189;) - frac12 */
 	" 1/4",	/* fraction 1/4 (&#188;) - frac14 */
@@ -1179,7 +1194,7 @@ PRIVATE char * Chinese[] = {
         "A",	/* capital A, dieresis or umlaut mark - Auml*/
 #endif /* LY_UMLAUT */
         "C",	/* capital C, cedilla - Ccedil */
-        "DH",	/* capital Eth, Icelandic - Dstrok */
+        "Dj",	/* capital D with stroke - Dstrok */
         "DH",	/* capital Eth, Icelandic - ETH */
         "E",	/* capital E, acute accent - Eacute */
         "E",	/* capital E, circumflex accent - Ecirc */
@@ -1240,7 +1255,7 @@ PRIVATE char * Chinese[] = {
         "\002",	/* emsp NEVER CHANGE THIS - emsp */
 	"-",	/* dash the width of ensp - endash */
         "\002",	/* ensp NEVER CHANGE THIS - ensp */
-        "e",	/* small eth, Icelandic eth */
+        "dh",	/* small eth, Icelandic eth */
         "e",	/* small e, dieresis or umlaut mark - euml */
 	" 1/2",	/* fraction 1/2 (&#189;) - frac12 */
 	" 1/4",	/* fraction 1/4 (&#188;) - frac14 */
@@ -1322,7 +1337,7 @@ PRIVATE char * EUC_JP[] = {
         "A",	/* capital A, dieresis or umlaut mark - Auml*/
 #endif /* LY_UMLAUT */
         "C",	/* capital C, cedilla - Ccedil */
-        "DH",	/* capital Eth, Icelandic - Dstrok */
+        "Dj",	/* capital D with stroke - Dstrok */
         "DH",	/* capital Eth, Icelandic - ETH */
         "E",	/* capital E, acute accent - Eacute */
         "E",	/* capital E, circumflex accent - Ecirc */
@@ -1383,7 +1398,7 @@ PRIVATE char * EUC_JP[] = {
         "\002",	/* emsp NEVER CHANGE THIS - emsp */
 	"-",	/* dash the width of ensp - endash */
         "\002",	/* ensp NEVER CHANGE THIS - ensp */
-        "e",	/* small eth, Icelandic eth */
+        "dh",	/* small eth, Icelandic eth */
         "e",	/* small e, dieresis or umlaut mark - euml */
 	" 1/2",	/* fraction 1/2 (&#189;) - frac12 */
 	" 1/4",	/* fraction 1/4 (&#188;) - frac14 */
@@ -1465,7 +1480,7 @@ PRIVATE char * Shift_JIS[] = {
         "A",	/* capital A, dieresis or umlaut mark - Auml*/
 #endif /* LY_UMLAUT */
         "C",	/* capital C, cedilla - Ccedil */
-        "DH",	/* capital Eth, Icelandic - Dstrok */
+        "Dj",	/* capital D with stroke - Dstrok */
         "DH",	/* capital Eth, Icelandic - ETH */
         "E",	/* capital E, acute accent - Eacute */
         "E",	/* capital E, circumflex accent - Ecirc */
@@ -1526,7 +1541,7 @@ PRIVATE char * Shift_JIS[] = {
         "\002",	/* emsp NEVER CHANGE THIS - emsp */
 	"-",	/* dash the width of ensp - endash */
         "\002",	/* ensp NEVER CHANGE THIS - ensp */
-        "e",	/* small eth, Icelandic eth */
+        "dh",	/* small eth, Icelandic eth */
         "e",	/* small e, dieresis or umlaut mark - euml */
 	" 1/2",	/* fraction 1/2 (&#189;) - frac12 */
 	" 1/4",	/* fraction 1/4 (&#188;) - frac14 */
@@ -1608,7 +1623,7 @@ PRIVATE char * Korean[] = {
         "A",	/* capital A, dieresis or umlaut mark - Auml*/
 #endif /* LY_UMLAUT */
         "C",	/* capital C, cedilla - Ccedil */
-        "DH",	/* capital Eth, Icelandic - Dstrok */
+        "Dj",	/* capital D with stroke - Dstrok */
         "DH",	/* capital Eth, Icelandic - ETH */
         "E",	/* capital E, acute accent - Eacute */
         "E",	/* capital E, circumflex accent - Ecirc */
@@ -1669,7 +1684,7 @@ PRIVATE char * Korean[] = {
         "\002",	/* emsp NEVER CHANGE THIS - emsp */
 	"-",	/* dash the width of ensp - endash */
         "\002",	/* ensp NEVER CHANGE THIS - ensp */
-        "e",	/* small eth, Icelandic eth */
+        "dh",	/* small eth, Icelandic eth */
         "e",	/* small e, dieresis or umlaut mark - euml */
 	" 1/2",	/* fraction 1/2 (&#189;) - frac12 */
 	" 1/4",	/* fraction 1/4 (&#188;) - frac14 */
@@ -1751,7 +1766,7 @@ PRIVATE char * Taipei[] = {
         "A",	/* capital A, dieresis or umlaut mark - Auml*/
 #endif /* LY_UMLAUT */
         "C",	/* capital C, cedilla - Ccedil */
-        "DH",	/* capital Eth, Icelandic - Dstrok */
+        "Dj",	/* capital D with stroke - Dstrok */
         "DH",	/* capital Eth, Icelandic - ETH */
         "E",	/* capital E, acute accent - Eacute */
         "E",	/* capital E, circumflex accent - Ecirc */
@@ -1812,7 +1827,7 @@ PRIVATE char * Taipei[] = {
         "\002",	/* emsp NEVER CHANGE THIS - emsp */
 	"-",	/* dash the width of ensp - endash */
         "\002",	/* ensp NEVER CHANGE THIS - ensp */
-        "e",	/* small eth, Icelandic eth */
+        "dh",	/* small eth, Icelandic eth */
         "e",	/* small e, dieresis or umlaut mark - euml */
 	" 1/2",	/* fraction 1/2 (&#189;) - frac12 */
 	" 1/4",	/* fraction 1/4 (&#188;) - frac14 */
@@ -1881,7 +1896,7 @@ PRIVATE char * Taipei[] = {
 **
 **      This MUST match exactly the table referred to in the DTD!
 */
-PRIVATE char * SevenBitApproximations[] = {
+PUBLIC char * SevenBitApproximations[] = {
         "AE",	/* capital AE diphthong (ligature) - AElig */
         "A",	/* capital A, acute accent - Aacute */
         "A",	/* capital A, circumflex accent - Acirc */
@@ -1894,7 +1909,7 @@ PRIVATE char * SevenBitApproximations[] = {
         "A",	/* capital A, dieresis or umlaut mark - Auml*/
 #endif /* LY_UMLAUT */
         "C",	/* capital C, cedilla - Ccedil */
-        "DH",	/* capital Eth, Icelandic - Dstrok */
+        "Dj",	/* capital D with stroke - Dstrok */
         "DH",	/* capital Eth, Icelandic - ETH */
         "E",	/* capital E, acute accent - Eacute */
         "E",	/* capital E, circumflex accent - Ecirc */
@@ -1955,7 +1970,7 @@ PRIVATE char * SevenBitApproximations[] = {
         "\002",	/* emsp NEVER CHANGE THIS - emsp */
 	"-",	/* dash the width of ensp - endash */
         "\002",	/* ensp NEVER CHANGE THIS - ensp */
-        "e",	/* small eth, Icelandic eth */
+        "dh",	/* small eth, Icelandic eth */
         "e",	/* small e, dieresis or umlaut mark - euml */
 	" 1/2",	/* fraction 1/2 (&#189;) - frac12 */
 	" 1/4",	/* fraction 1/4 (&#188;) - frac14 */
@@ -2029,7 +2044,7 @@ PRIVATE char * SevenBitApproximations[] = {
 /* 
  *  Add the array name to LYCharSets
  */
-PUBLIC char ** LYCharSets[]={
+PUBLIC char ** LYCharSets[MAX_CHARSETS]={
 	ISO_Latin1,
 	ISO_Latin2,
 	ISO_LatinN,
@@ -2044,14 +2059,15 @@ PUBLIC char ** LYCharSets[]={
 	Shift_JIS,
 	Korean,
 	Taipei,
-	SevenBitApproximations
+	SevenBitApproximations,
+	ISO_Latin1		/* maybe... - kw */
 };
 
 /*
  *  Add the name that the user will see below.
  *  The order of LYCharSets and char_set_names MUST be the same
  */
-PUBLIC char * LYchar_set_names[]={
+PUBLIC char * LYchar_set_names[MAX_CHARSETSP]={
 	"ISO Latin 1         ",
 	"ISO Latin 2         ",
 	"Other ISO Latin     ",
@@ -2067,17 +2083,63 @@ PUBLIC char * LYchar_set_names[]={
 	"Korean              ",
 	"Taipei (Big5)       ",
 	"7 bit approximations",
+	"Transparent         ",
 	(char *) 0
 };
+#ifdef EXP_CHARTRANS
 
-#ifdef USE_SLANG
+PUBLIC int LYNumCharsets = 0; /* will be initialized later by UC_Register... */
+
+#include <UCDefs.h>
+/*
+ *  Associate additional pieces of info with each of the charsets listed
+ *  above.
+ *  Will be automatically modified (and extended) by charset translations
+ *  which are loaded using the EXP_CHARTRANS mechanism.
+ *  Most important piece of info to put here is a MIME charset name.
+ *  Used for EXP_CHARTRANS.
+ *  The order of LYCharSets and LYCharSet_UC MUST be the same.
+ *
+ *  Note that most of the charsets added by the new mechanism in src/chrtrans
+ *  don't show up here at all.  They don't have to.
+ */
+PUBLIC LYUCcharset LYCharSet_UC[MAX_CHARSETS]=
+{
+  {-1,"iso-8859-1",    UCT_ENC_8BIT,UCT_REP_IS_LAT1,UCT_CP_IS_LAT1,UCT_R_LAT1,
+                                                                   UCT_R_LAT1},
+  {-1,"iso-8859-2",	UCT_ENC_8BIT,0,0,	UCT_R_LAT1,UCT_R_8859S},
+  {-1,"x-iso-8859-other",UCT_ENC_8BIT,0,0,	UCT_R_LAT1,UCT_R_8859S},
+  {-1,"dec-mcs",	UCT_ENC_8BIT,0,0,	UCT_R_LAT1,UCT_R_8859S},
+  {-1,"cp437",		UCT_ENC_8BIT,0,0,	UCT_R_8BIT,UCT_R_ASCII},
+  {-1,"cp850",		UCT_ENC_8BIT,UCT_REP_SUPERSETOF_LAT1,0,
+                                                UCT_R_8BIT,UCT_R_ASCII},
+  {-1,"macintosh",	UCT_ENC_8BIT,0,0,	UCT_R_8BIT,UCT_R_ASCII},
+  {-1,"x-next",		UCT_ENC_8BIT,0,0,	UCT_R_8BIT,UCT_R_ASCII},
+  {-1,"koi8-r",		UCT_ENC_8BIT,0,0,	UCT_R_8BIT,UCT_R_ASCII},
+/* There is no strict correlation for the next five, since the tranfer
+ * charset gets decoded into Display Char Set by the CJK code (separate
+ * from EXP_CHARTRANS mechanism).  For now, just put something there for
+ * MIME charset name. */
+  {-1,"iso-2022-cn",	UCT_ENC_CJK,0,0,	UCT_R_8BIT,UCT_R_ASCII},
+  {-1,"euc-jp",		UCT_ENC_CJK,0,0,	UCT_R_8BIT,UCT_R_ASCII},
+  {-1,"shift_jis",	UCT_ENC_CJK,0,0,	UCT_R_8BIT,UCT_R_ASCII},
+  {-1,"iso-2022-kr",	UCT_ENC_CJK,0,0,	UCT_R_8BIT,UCT_R_ASCII},
+  {-1,"big5",		UCT_ENC_CJK,0,0,	UCT_R_8BIT,UCT_R_ASCII},
+  {-1,"us-ascii",	UCT_ENC_7BIT,UCT_REP_SUBSETOF_LAT1,
+                                     UCT_CP_SUBSETOF_LAT1,
+                                                UCT_R_ASCII,UCT_R_ASCII},
+  {-1,"x-transparent",	UCT_ENC_8BIT,0,0,	UCT_R_8BIT,UCT_R_ASCII}
+};
+#endif
+
+#if defined(USE_SLANG) || defined(EXP_CHARTRANS)
 /*
  *  Add the code of the the lowest character with the high bit set
  *  that can be directly displayed.
- *  Currently only used by SLANG.
+ *  Used by SLANG and for EXP_CHARTRANS.
  *  The order of LYCharSets and LYlowest_eightbit MUST be the same.
  */
-PUBLIC int LYlowest_eightbit[]={
+PUBLIC int LYlowest_eightbit[MAX_CHARSETS]={
 	160,	/* ISO Latin 1 */
 	160,	/* ISO Latin 2 */
 	160,	/* Other ISO Latin */
@@ -2092,9 +2154,10 @@ PUBLIC int LYlowest_eightbit[]={
 	128,	/* Japanese (SJIS) */
 	128,	/* Korean */
 	128,	/* Taipei (Big5) */
-	999	/* 7 bit approximations */
+	999,	/* 7 bit approximations */
+	128	/* Transparent  (???) */
 };
-#endif /* USE_SLANG */
+#endif /* USE_SLANG || EXP_CHARTRANS */
 
 
 /* 
@@ -2186,8 +2249,29 @@ PUBLIC void HTMLSetCharacterHandling ARGS1(int,i)
 	HTPassHighCtrlNum = FALSE;
     }
 
+#ifdef EXP_CHARTRANS
+    if (LYCharSet_UC[i].enc != UCT_ENC_CJK) {
+
+	    if (LYRawMode) {
+		UCLYhndl_for_unspec = i;
+	    } else {
+		int chndl = 0;
+		if (UCAssume_MIMEcharset)
+		    chndl = UCGetLYhndl_byMIME(UCAssume_MIMEcharset);
+		if (chndl != i || chndl != UCLYhndl_for_unspec)
+		    UCLYhndl_for_unspec = chndl < 0 ? 0 : chndl;
+		else
+		    UCLYhndl_for_unspec = 0;
+	    }
+    }
+#endif /* EXP_CHARTRANS */
+
 #ifdef USE_SLANG
-    SLsmg_Display_Eight_Bit = LYlowest_eightbit[i];
+    if (LYlowest_eightbit[i] > 191)
+      /* higher than this may output cntrl chars to screen - kw */
+	SLsmg_Display_Eight_Bit = 191;
+    else
+	SLsmg_Display_Eight_Bit = LYlowest_eightbit[i];
 #endif /* USE_SLANG */
 
     return;
@@ -2314,7 +2398,7 @@ PUBLIC CONST char * LYEntityNames[] = {
 	"Iacute",	/* 205,	capital I, acute accent */
 	"Icirc",	/* 206,	capital I, circumflex accent */ 
 	"Iuml",		/* 207,	capital I, dieresis or umlaut mark */ 
-	"ETH",		/* 208,	capital Eth, Icelandic (Dstrok) */ 
+	"ETH",		/* 208,	capital Eth, Icelandic (or Latin2 Dstrok) */ 
 	"Ntilde",	/* 209,	capital N, tilde */ 
 	"Ograve",	/* 210,	capital O, grave accent */
 	"Oacute",	/* 211,	capital O, acute accent */
@@ -2381,6 +2465,10 @@ PUBLIC CONST char * HTMLGetEntityName ARGS1(int,i)
  *  173, but keeps our substitutions for
  *  characters that are not part of the
  *  ISO-8859-1 charset. - FM
+ *
+ *  Return '\0' to signal that there isn't a one-character
+ *  equivalent.  Caller must check! and do whatever additional
+ *  processing it wants to do instead.  - kw
  */
 PUBLIC char HTMLGetLatinOneValue ARGS1(int,i)
 {
@@ -2400,6 +2488,8 @@ PUBLIC char HTMLGetLatinOneValue ARGS1(int,i)
 	    break;
 
 	default:
+	    if (ch && ISO_Latin1[i][1])	/* Got a string longer than 1 char */
+	      return '\0';
 	    break;
      }
 
@@ -2416,5 +2506,34 @@ PUBLIC void HTMLUseCharacterSet ARGS1(int,i)
     HTMLSetCharacterHandling(i);
     HTMLSetHaveCJKCharacterSet(i);
     return;
+}
+/*
+ * Initializer, calls initialization function for the
+ * CHARTRANS handling if compiled in. - kw
+ * (Also to ensure this module is linked
+ * if the external model is common block, and the
+ * module is ever placed in a library. - FM) ??
+ */
+PUBLIC int LYCharSetsDeclared NOPARAMS
+{
+    int status = 1;
+
+#ifdef EXP_CHARTRANS
+    UCInit();
+    status = UCInitialized;
+    
+    if (UCAssume_MIMEcharset && *UCAssume_MIMEcharset)
+	UCLYhndl_for_unspec = UCGetLYhndl_byMIME(UCAssume_MIMEcharset);
+    else
+	UCLYhndl_for_unspec = 0;
+    if (UCAssume_localMIMEcharset && *UCAssume_localMIMEcharset)
+	UCLYhndl_HTFile_for_unspec =
+	    UCGetLYhndl_byMIME(UCAssume_localMIMEcharset);
+    if (UCAssume_unrecMIMEcharset && *UCAssume_unrecMIMEcharset)
+	UCLYhndl_for_unrec =
+	    UCGetLYhndl_byMIME(UCAssume_unrecMIMEcharset);
+#endif
+
+    return status;
 }
 

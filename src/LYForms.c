@@ -14,6 +14,11 @@
 
 #include "LYLeaks.h"
 
+#ifdef ALT_CHAR_SET
+#define BOXVERT 0   /* use alt char set for popup window vertical borders */
+#define BOXHORI 0   /* use alt char set for popup window vertical borders */
+#endif
+
 #ifndef BOXVERT
 #define BOXVERT '*'	/* character for popup window vertical borders */
 #endif
@@ -353,6 +358,27 @@ breakfor:
 }
 
 
+/* Use this rather than the 'wprintw()' function to write a blank-padded
+ * string to the given window, since someone's asserted that printw doesn't
+ * handle 8-bit characters unlike addstr (though more info would be useful).
+ *
+ * We're blank-filling so that with SVr4 curses, it'll show the background
+ * color to a uniform width in the popup-menu.
+ */
+#ifndef USE_SLANG
+PRIVATE void paddstr ARGS3(
+	WINDOW *,	the_window,
+	int,		width,
+	char *,		the_string)
+{
+	width -= strlen(the_string);
+	waddstr(the_window, the_string);
+	while (width-- > 0)
+		waddstr(the_window, " ");
+}
+#endif
+
+
 PRIVATE int popup_options ARGS7(
 	int,		cur_selection,
 	OptionType *,	list,
@@ -504,6 +530,13 @@ PRIVATE int popup_options ARGS7(
         return(orig_selection);
     }
     scrollok(form_window, TRUE);
+#ifdef NCURSES
+#ifdef wgetbkgd
+#define getbkgd(w) wgetbkgd(w)	/* workaround pre-1.9.9g bug */
+#endif
+    LYsubwindow(form_window);
+    wbkgd(form_window, getbkgd(stdscr));
+#endif
 #else
     SLsmg_fill_region (top, lx - 1, bottom - top, width + 4, ' ');
 #endif /* !USE_SLANG */
@@ -533,8 +566,7 @@ redraw:
         if (i >= window_offset && i - window_offset < length) {
 #ifndef USE_SLANG
 	    wmove(form_window,(i+1)-window_offset,2);
-	    wclrtoeol(form_window);
-	    waddstr(form_window,opt_ptr->name);
+	    paddstr(form_window, width, opt_ptr->name);
 #else
 	    SLsmg_gotorc (top + (i+1)-window_offset, lx - 1 + 2);
 	    SLsmg_write_nstring (opt_ptr->name, width);
@@ -564,7 +596,7 @@ redraw:
 	if (opt_ptr != NULL) {
 #ifndef USE_SLANG
 	    wmove(form_window,(i+1)-window_offset,2);
-            waddstr(form_window,opt_ptr->name);
+            paddstr(form_window, width, opt_ptr->name);
 #else
 	    SLsmg_gotorc (top + (i+1)-window_offset, lx - 1 + 2);
 	    SLsmg_write_nstring (opt_ptr->name, width);
@@ -579,7 +611,7 @@ redraw:
 #ifndef USE_SLANG
         wstart_reverse(form_window);
         wmove(form_window,(i+1)-window_offset,2);
-        waddstr(form_window,opt_ptr->name);
+        paddstr(form_window, width, opt_ptr->name);
         wstop_reverse(form_window);
         wrefresh(form_window);
 #else
@@ -1042,6 +1074,9 @@ restore_popup_statusline:
     }
 #ifndef USE_SLANG
     delwin(form_window);
+#ifdef NCURSES
+    LYsubwindow(0);
+#endif
 #endif /* !USE_SLANG */
     refresh();
 

@@ -243,11 +243,20 @@ PRIVATE void HTMLGen_end_element ARGS3(HTStructured *, me,
 **
 */
 
-PRIVATE void HTMLGen_put_entity ARGS2(HTStructured *, me, int, entity_number)
+PRIVATE int HTMLGen_put_entity ARGS2(HTStructured *, me, int, entity_number)
 {
+    int nent = HTML_dtd.number_of_entities;
+  
     HTMLGen_put_character(me, '&');
-    HTMLGen_put_string(me, HTML_dtd.entity_names[entity_number]);
+    if (entity_number < nent)  
+      HTMLGen_put_string(me, HTML_dtd.entity_names[entity_number]);
+#ifdef EXP_CHARTRANS
+    else
+      HTMLGen_put_string(me,
+			 HTML_dtd.extra_entity_info[entity_number-nent].name);
+#endif
     HTMLGen_put_character(me, ';');
+    return HT_OK;
 }
 
 

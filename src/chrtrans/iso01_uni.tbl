@@ -1,0 +1,427 @@
+#
+# Unicode mapping table for ISO 8859-1 fonts iso01.*
+# [use: unicode_start iso01.f16 iso01]
+#
+#Shall this become the "default" translation?
+#Meaning of that is currently not well defined.  It is different
+#from the default input or default output charset...
+#but there has to be exactly one table marked as "default".
+D0
+#
+#The MIME name of this charset. 
+Miso-8859-1
+
+#Name as a Display Charset (used on Options screen)
+OISO Latin 1
+
+0x20	U+0020  U+1360 
+0x21-0x62	idem
+# The following line is an example for mapping several accented versions
+# of small letter 'c' to 'c':
+0x63	U+0063 U+0107 U+0109 U+010B U+010D
+0x64-0x7e	idem
+0x7f		U+2302
+0xa0-0xff	idem
+#0x00	U+fffd   # don't let failed char lookups return '\0'
+# Mappings of cntrl chars, left in from original, just to see what happens...
+0x01	U+263A
+0x02	U+263B
+0x03	U+2665
+0x04	U+2666
+0x05	U+2663
+0x06	U+2660
+0x07	U+2022
+0x08	U+25D8
+0x09	U+25CB
+0x0A	U+25D9
+0x0B	U+2642
+0x0C	U+2640
+0x0D	U+266A
+0x0E	U+266B
+0x0E	U+266C
+0x0F	U+263C
+0x10	U+25B6
+0x10	U+25BA
+0x11	U+25C0
+0x11	U+25C4
+0x12	U+2195
+0x13	U+203C
+0x14	U+00B6
+0x15	U+00A7
+0x16	U+25AC
+0x17	U+21A8
+0x18	U+2191
+0x19	U+2193
+0x1A	U+2192
+0x1B	U+2190
+0x1C	U+221F
+0x1C	U+2319
+0x1D	U+2194
+0x1E	U+25B2
+0x1F	U+25BC
+
+0xd0	U+0110	# Dstrok and ETH are nearly the same...
+
+# Dont wanna see these:
+# POP DIRECTIONAL FORMATTING      202C
+U+202c:
+# LEFT-TO-RIGHT OVERRIDE  202D
+U+202d:
+
+# Replacement strings for Ethiopic characters
+U+1200:he
+U+1201:hu
+U+1202:hi
+U+1203:ha
+U+1204:hE
+U+1205:h
+U+1206:ho
+U+1208:le
+U+1209:lu
+U+120A:li
+U+120B:la
+U+120C:lE
+U+120D:l
+U+120E:lo
+U+120F:lWa
+U+1210:He
+U+1211:Hu
+U+1212:Hi
+U+1213:Ha
+U+1214:HE
+U+1215:H
+U+1216:Ho
+U+1217:HWa
+U+1218:me
+U+1219:mu
+U+121A:mi
+U+121B:ma
+U+121C:mE
+U+121D:m
+U+121E:mo
+U+121F:mWa
+U+1220:`se
+U+1221:`su
+U+1222:`si
+U+1223:`sa
+U+1224:`sE
+U+1225:`s
+U+1226:`so
+U+1227:`sWa
+U+1228:re
+U+1229:ru
+U+122A:ri
+U+122B:ra
+U+122C:rE
+U+122D:r
+U+122E:ro
+U+122F:rWa
+U+1230:se
+U+1231:su
+U+1232:si
+U+1233:sa
+U+1234:sE
+U+1235:s
+U+1236:so
+U+1237:sWa
+U+1238:xe
+U+1239:xu
+U+123A:xi
+U+123B:xa
+U+123C:xE
+U+123D:xa
+U+123E:xo
+U+123F:xWa
+U+1240:qe
+U+1241:qu
+U+1242:qi
+U+1243:qa
+U+1244:qE
+U+1245:q
+U+1246:qo
+U+1248:qWe
+U+124A:qWi
+U+124B:qWa
+U+124C:qWE
+U+124D:qW
+U+1250:Qe
+U+1251:Qu
+U+1252:Qi
+U+1253:Qa
+U+1254:QE
+U+1255:Q
+U+1256:Qo
+U+1258:QWe
+U+125A:QWi
+U+125B:QWa
+U+125C:QWE
+U+125D:QW
+U+1260:be
+U+1261:bu
+U+1262:bi
+U+1263:ba
+U+1264:bE
+U+1265:b
+U+1266:bo
+U+1267:bWa
+U+1268:ve
+U+1269:vu
+U+126A:vi
+U+126B:va
+U+126C:vE
+U+126D:v
+U+126E:vo
+U+126F:vWa
+U+1270:te
+U+1271:tu
+U+1272:ti
+U+1273:ta
+U+1274:tE
+U+1275:t
+U+1276:to
+U+1277:tWa
+U+1278:ce
+U+1279:cu
+U+127A:ci
+U+127B:ca
+U+127C:cE
+U+127D:c
+U+127E:co
+U+127F:cWa
+U+1280:`he
+U+1281:`hu
+U+1282:`hi
+U+1283:`ha
+U+1284:`hE
+U+1285:`h
+U+1286:`ho
+U+1288:hWe
+U+128A:hWi
+U+128B:hWa
+U+128C:hWE
+U+128D:hW
+U+1290:na
+U+1291:nu
+U+1292:ni
+U+1293:na
+U+1294:nE
+U+1295:n
+U+1296:no
+U+1297:nWa
+U+1298:Ne
+U+1299:Nu
+U+129A:Ni
+U+129B:Na
+U+129C:NE
+U+129D:N
+U+129E:No
+U+129F:NWa
+U+12A0:e
+U+12A1:u
+U+12A2:i
+U+12A3:a
+U+12A4:E
+U+12A5:I
+U+12A6:o
+U+12A7:e3
+U+12A8:ke
+U+12A9:ku
+U+12AA:ki
+U+12AB:ka
+U+12AC:kE
+U+12AD:k
+U+12AE:ko
+U+12B0:kWe
+U+12B2:kWi
+U+12B3:kWa
+U+12B4:kWE
+U+12B5:kW
+U+12B8:Ke
+U+12B9:Ku
+U+12BA:Ki
+U+12BB:Ka
+U+12BC:KE
+U+12BD:K
+U+12BE:Ko
+U+12C0:KWe
+U+12C2:KWi
+U+12C3:KWa
+U+12C4:KWE
+U+12C5:KW
+U+12C8:we
+U+12C9:wu
+U+12CA:wi
+U+12CB:wa
+U+12CC:wE
+U+12CD:w
+U+12CE:wo
+U+12D0:`e
+U+12D1:`u
+U+12D2:`i
+U+12D3:`a
+U+12D4:`E
+U+12D5:`I
+U+12D6:`o
+U+12D8:ze
+U+12D9:zu
+U+12DA:zi
+U+12DB:za
+U+12DC:zE
+U+12DD:z
+U+12DE:zo
+U+12DF:zWa
+U+12E0:Ze
+U+12E1:Zu
+U+12E2:Zi
+U+12E3:Za
+U+12E4:ZE
+U+12E5:Z
+U+12E6:Zo
+U+12E7:ZWa
+U+12E8:ye
+U+12E9:yu
+U+12EA:yi
+U+12EB:ya
+U+12EC:yE
+U+12ED:y
+U+12EE:yo
+U+12EF:yWa
+U+12F0:de
+U+12F1:du
+U+12F2:di
+U+12F3:da
+U+12F4:dE
+U+12F5:d
+U+12F6:do
+U+12F7:dWa
+U+12F8:De
+U+12F9:Du
+U+12FA:Di
+U+12FB:Da
+U+12FC:DE
+U+12FD:D
+U+12FE:Do
+U+12FF:DWa
+U+1300:je
+U+1301:ju
+U+1302:ji
+U+1303:ja
+U+1304:jE
+U+1305:j
+U+1306:jo
+U+1307:jWa
+U+1308:ga
+U+1309:gu
+U+130A:gi
+U+130B:ga
+U+130C:gE
+U+130D:g
+U+130E:go
+U+1310:gWu
+U+1312:gWi
+U+1313:gWa
+U+1314:gWE
+U+1315:gW
+U+1318:Ge
+U+1319:Gu
+U+131A:Gi
+U+131B:Ga
+U+131C:GE
+U+131D:G
+U+131E:Go
+U+131F:GWa
+U+1320:Te
+U+1321:Tu
+U+1322:Ti
+U+1323:Ta
+U+1324:TE
+U+1325:T
+U+1326:To
+U+1327:TWa
+U+1328:Ce
+U+1329:Ca
+U+132A:Cu
+U+132B:Ca
+U+132C:CE
+U+132D:C
+U+132E:Co
+U+132F:CWa
+U+1330:Pe
+U+1331:Pu
+U+1332:Pi
+U+1333:Pa
+U+1334:PE
+U+1335:P
+U+1336:Po
+U+1337:PWa
+U+1338:SWe
+U+1339:SWu
+U+133A:SWi
+U+133B:SWa
+U+133C:SWE
+U+133D:SW
+U+133E:SWo
+U+133F:SWa
+U+1340:`Sa
+U+1341:`Su
+U+1342:`Si
+U+1343:`Sa
+U+1344:`SE
+U+1345:`S
+U+1346:`So
+U+1348:fa
+U+1349:fu
+U+134A:fi
+U+134B:fa
+U+134C:fE
+U+134D:f
+U+134E:fo
+U+134F:fWa
+U+1350:pe
+U+1351:pu
+U+1352:pi
+U+1353:pa
+U+1354:pE
+U+1355:p
+U+1356:po
+U+1357:pWa
+U+1358:mYa
+U+1359:rYa
+U+135A:fYa
+# ETHIOPIC SPACE U+1360 mapped to ASCII space above
+U+1361::
+U+1362:::
+U+1363:,
+U+1364:;
+U+1365:-:
+U+1366::-
+U+1367:`?
+U+1368::|:
+U+1369:`1
+U+136A:`2
+U+136B:`3
+U+136C:`4
+U+136D:`5
+U+136E:`6
+U+136F:`7
+U+1370:`8
+U+1371:`9
+U+1372:`10
+U+1373:`20
+U+1374:`30
+U+1375:`40
+U+1376:`50
+U+1377:`60
+U+1378:`70
+U+1379:`80
+U+137A:`90
+U+137B:`100
+U+137C:`10000
+
+
+# TRADE MARK SIGN:
+U+2122:(TM)
+
+0x60    U+2018          # left single quotation mark
+0x27    U+2019-U+201b   # various single quotation marks
+0x22    U+201c-U+201f   # various double quotation marks

@@ -28,6 +28,11 @@
 #include "LYGlobalDefs.h"
 #include "LYCharUtils.h"
 #include "LYCharSets.h"
+#ifdef EXP_CHARTRANS
+#include "UCMap.h"
+#include "UCDefs.h"
+#include "UCAux.h"
+#endif
 
 #include "HTAlert.h"
 #include "HTFont.h"
@@ -107,6 +112,13 @@ a sequence of styles.
 PRIVATE void actually_set_style ARGS1(HTStructured *, me)
 {
     if (!me->text) {			/* First time through */
+#ifdef EXP_CHARTRANS
+	html_get_chartrans_info(me);
+	UCSetTransParams(&me->T,
+		     me->UCLYhndl, me->UCI,
+		     HTAnchor_getUCLYhndl(me->node_anchor,UCT_STAGE_HTEXT),
+		     HTAnchor_getUCInfoStage(me->node_anchor,UCT_STAGE_HTEXT));
+#endif /* EXP_CHARTRANS */
 	    me->text = HText_new2(me->node_anchor, me->target);
 	    HText_beginAppend(me->text);
 	    HText_setStyle(me->text, me->new_style);
@@ -459,6 +471,9 @@ PRIVATE void HTML_start_element ARGS5(
     char *map_href = NULL;
     char *title = NULL;
     char *temp = NULL;
+#ifdef EXP_CHARTRANS
+    int dest_char_set  = -1;
+#endif
     static BOOLEAN first_option = TRUE;	     /* is this the first option tag? */
     HTParentAnchor *dest = NULL;	     /* an anchor's destination */
     BOOL dest_ismap = FALSE;	     	     /* is dest an image map script? */
@@ -810,9 +825,9 @@ PRIVATE void HTML_start_element ARGS5(
 		    		NULL,			/* Tag */
 		    		href,			/* Addresss */
 		    		(void *)0);		/* Type */
-	    if (dest = HTAnchor_parent(
+	    if ((dest = HTAnchor_parent(
 			    HTAnchor_followMainLink((HTAnchor*)me->CurrentA)
-			    	      )) {
+			    	      )) != 0) {
 		if (!HTAnchor_title(dest))
 		    HTAnchor_setTitle(dest, title);
 		dest = NULL;
@@ -1399,8 +1414,7 @@ PRIVATE void HTML_start_element ARGS5(
 		 *  The INDENT value is in "en" (enval per column) units.
 		 *  Divide it by enval, rounding odd values up. - FM
 		 */
-	        target =
-		   (int)((((float)atoi(value[HTML_TAB_INDENT]))/enval)+(0.5));
+	        target = ((1.0 * atoi(value[HTML_TAB_INDENT])) / enval) + 0.5;
 	    }
 	    /*
 	     *  If we are being directed to a column too far to the left
@@ -2115,7 +2129,7 @@ PRIVATE void HTML_start_element ARGS5(
 			(present &&
 			 present[HTML_A_TYPE] &&
 			   value[HTML_A_TYPE]) ? 
-   (HTLinkType*)HTAtom_for(value[HTML_A_TYPE]) : (HTLinkType*)0);  /* Type */
+   (HTLinkType*)HTAtom_for(value[HTML_A_TYPE]) : (HTLinkType *)0);	/* Type */
 
 	/*
 	 *  Get rid of href since no longer needed.
@@ -2143,7 +2157,17 @@ PRIVATE void HTML_start_element ARGS5(
 	    }
 	    if (present[HTML_A_ISMAP])
 		dest_ismap = TRUE;
+#ifdef EXP_CHARTRANS
+	        if (present[HTML_A_CHARSET] &&
+		    value[HTML_A_CHARSET] && *value[HTML_A_CHARSET] != '\0') {
+		    dest_char_set = UCGetLYhndl_byMIME(value[HTML_A_CHARSET]);
+		    if (dest_char_set < 0)
+		        dest_char_set = UCLYhndl_for_unrec;
+		}
+		if (title != NULL || dest_ismap == TRUE || dest_char_set >= 0)
+#else
 	    if (title != NULL || dest_ismap == TRUE)
+#endif /* EXP_CHARTRANS */
 	        dest = HTAnchor_parent(
 			HTAnchor_followMainLink((HTAnchor*)me->CurrentA)
 		    		      );
@@ -2151,6 +2175,13 @@ PRIVATE void HTML_start_element ARGS5(
 		HTAnchor_setTitle(dest, title);
 	    if (dest && dest_ismap)
 		dest->isISMAPScript = TRUE;
+#ifdef EXP_CHARTRANS
+		if (dest && dest_char_set >= 0)
+		    HTAnchor_setUCInfoStage(dest, dest_char_set,
+					    UCT_STAGE_PARSER,
+					    UCT_SETBY_DEFAULT);
+		dest_char_set = -1;
+#endif /* EXP_CHARTRANS */
 	    dest = NULL;
 	    dest_ismap = FALSE;
 	    FREE(title);
@@ -2170,9 +2201,9 @@ PRIVATE void HTML_start_element ARGS5(
 	 *  which typically returns the image's default. - FM
 	 */
 	if (me->inA && me->CurrentA) {
-	    if (dest = HTAnchor_parent(
+	    if ((dest = HTAnchor_parent(
 			HTAnchor_followMainLink((HTAnchor*)me->CurrentA)
-				      )) {
+				      )) != 0) {
 		if (dest->isISMAPScript == TRUE) {
 		    dest_ismap = TRUE;
 		    if (TRACE)
@@ -2405,11 +2436,11 @@ PRIVATE void HTML_start_element ARGS5(
 		    HText_endAnchor(me->text);
 		    HText_appendCharacter(me->text, '-');
 		    if (id_string) {
-		        if (ID_A = HTAnchor_findChildAndLink(
+		        if ((ID_A = HTAnchor_findChildAndLink(
 				  me->node_anchor,	/* Parent */
 				  id_string,		/* Tag */
 				  NULL,			/* Addresss */
-				  (void *)0)) {		/* Type */
+				  (void *)0)) != 0) {	/* Type */
 		            HText_beginAnchor(me->text, ID_A);
 		            HText_endAnchor(me->text);
 		        }
@@ -2420,9 +2451,9 @@ PRIVATE void HTML_start_element ARGS5(
 				map_href,		/* Addresss */
 				(void *)0);		/* Type */
 		    if (me->CurrentA && title) {
-			if (dest = HTAnchor_parent(
+			if ((dest = HTAnchor_parent(
 				HTAnchor_followMainLink((HTAnchor*)me->CurrentA)
-					          )) {
+					          )) != 0) {
 			    if (!HTAnchor_title(dest))
 			        HTAnchor_setTitle(dest, title);
 			}
@@ -2446,11 +2477,11 @@ PRIVATE void HTML_start_element ARGS5(
 		   ((map_href || dest_ismap) ?
 			     	   "(IMAGE)" : "(OBJECT)") : "[IMAGE]"));
 		if (id_string && !map_href) {
-		    if (ID_A = HTAnchor_findChildAndLink(
+		    if ((ID_A = HTAnchor_findChildAndLink(
 				  me->node_anchor,	/* Parent */
 				  id_string,		/* Tag */
 				  NULL,			/* Addresss */
-				  (void *)0)) {		/* Type */
+				  (void *)0)) != 0) {	/* Type */
 		        HText_beginAnchor(me->text, ID_A);
 		        HText_endAnchor(me->text);
 		    }
@@ -2459,11 +2490,11 @@ PRIVATE void HTML_start_element ARGS5(
 	        HTML_put_character(me, ' ');  /* space char may be ignored */
 		me->in_word = NO;
 		if (id_string) {
-		    if (ID_A = HTAnchor_findChildAndLink(
+		    if ((ID_A = HTAnchor_findChildAndLink(
 				  me->node_anchor,	/* Parent */
 				  id_string,		/* Tag */
 				  NULL,			/* Addresss */
-				  (void *)0)) {		/* Type */
+				  (void *)0)) != 0) {	/* Type */
 		        HText_beginAnchor(me->text, ID_A);
 		        HText_endAnchor(me->text);
 		    }
@@ -2474,9 +2505,9 @@ PRIVATE void HTML_start_element ARGS5(
 				map_href,		/* Addresss */
 				(void *)0);		/* Type */
 		if (me->CurrentA && title) {
-		    if (dest = HTAnchor_parent(
+		    if ((dest = HTAnchor_parent(
 				HTAnchor_followMainLink((HTAnchor*)me->CurrentA)
-					      )) {
+					      )) != 0) {
 		        if (!HTAnchor_title(dest))
 			    HTAnchor_setTitle(dest, title);
 		    }
@@ -2500,11 +2531,11 @@ PRIVATE void HTML_start_element ARGS5(
 	        HTML_put_character(me, ' ');  /* space char may be ignored */
 		me->in_word = NO;
 		if (id_string) {
-		    if (ID_A = HTAnchor_findChildAndLink(
+		    if ((ID_A = HTAnchor_findChildAndLink(
 				  me->node_anchor,	/* Parent */
 				  id_string,		/* Tag */
 				  NULL,			/* Addresss */
-				  (void *)0)) {		/* Type */
+				  (void *)0)) != 0) {	/* Type */
 		        HText_beginAnchor(me->text, ID_A);
 		        HText_endAnchor(me->text);
 		    }
@@ -2539,9 +2570,7 @@ PRIVATE void HTML_start_element ARGS5(
 		 *  We're in an anchor and have a USEMAP, so end the anchor
 		 *  and start a new one for the client-side MAP. - FM
 		 */
-		if (dest_ismap || (present && present[HTML_IMG_ISMAP])) {
-		    HTML_put_string(me, "[ISMAP]");
-		} else {
+		if (!(dest_ismap || (present && present[HTML_IMG_ISMAP]))) {
 		    HTML_put_string(me, "[LINK]");
 		}
 		if (me->inBoldA == TRUE && me->inBoldH == FALSE) {
@@ -2549,7 +2578,8 @@ PRIVATE void HTML_start_element ARGS5(
 		}
 		me->inBoldA = FALSE;
 		HText_endAnchor(me->text);
-		HText_appendCharacter(me->text, '-');
+		if (!(dest_ismap || (present && present[HTML_IMG_ISMAP])))
+		    HText_appendCharacter(me->text, '-');
 	    } else {
 	        HTML_put_character(me, ' ');
 	        me->in_word = NO;
@@ -2560,9 +2590,9 @@ PRIVATE void HTML_start_element ARGS5(
 				map_href,		/* Addresss */
 				(void *)0);		/* Type */
 	    if (me->CurrentA && title) {
-		if (dest = HTAnchor_parent(
+		if ((dest = HTAnchor_parent(
 				HTAnchor_followMainLink((HTAnchor*)me->CurrentA)
-				          )) {
+				          )) != 0) {
 		    if (!HTAnchor_title(dest))
 		        HTAnchor_setTitle(dest, title);
 		}
@@ -2591,11 +2621,11 @@ PRIVATE void HTML_start_element ARGS5(
 		me->in_word = NO;
 	    }
 	    if (id_string) {
-		if (ID_A = HTAnchor_findChildAndLink(
+		if ((ID_A = HTAnchor_findChildAndLink(
 				  me->node_anchor,	/* Parent */
 				  id_string,		/* Tag */
 				  NULL,			/* Addresss */
-				  (void *)0)) {		/* Type */
+				  (void *)0)) != 0) {	/* Type */
 		    HText_beginAnchor(me->text, ID_A);
 		    HText_endAnchor(me->text);
 		}
@@ -3402,11 +3432,27 @@ PRIVATE void HTML_start_element ARGS5(
 	    HTChildAnchor * source;
 	    HTAnchor *link_dest;
 
+	    UPDATE_STYLE;
 	    /*
-	     *  Set to know we are in a form.
+	     *  FORM was declared SGML_EMPTY in HTMLDTD.c, and
+	     *  SGML_character() in SGML.c checks for a FORM end
+	     *  tag to call HTML_end_element() directly (with a
+	     *  check in that to bypass decrementing of the HTML
+	     *  parser's stack), so if we have an open FORM, close
+	     *  that one now. - FM
+	     */
+	    if (me->inFORM) {
+	        if (TRACE) {
+		    fprintf(stderr,
+			    "HTML: Missing FORM end tag. Faking it!\n");
+		}
+		HTML_end_element(me, HTML_FORM, (char **)&include);
+	    }
+
+	    /*
+	     *  Set to know we are in a new form.
 	     */
 	    me->inFORM = TRUE;
-	    UPDATE_STYLE;
 
 	    if (present && present[HTML_FORM_ACTION] &&
 	        value[HTML_FORM_ACTION])  {
@@ -3451,7 +3497,7 @@ PRIVATE void HTML_start_element ARGS5(
 						   NULL,
 						   action,
 						   (void *)0);
-		if (link_dest = HTAnchor_followMainLink((HTAnchor *)source)) {
+		if ((link_dest = HTAnchor_followMainLink((HTAnchor *)source)) != 0) {
 		    /*
 		     *  Memory leak fixed.
 		     *  05-28-94 Lynx 2-3-1 Garrett Arch Blythe
@@ -3562,7 +3608,7 @@ PRIVATE void HTML_start_element ARGS5(
 	    /* Check for unclosed TEXTAREA */
 	    if (me->inTEXTAREA) {
 	        if (TRACE) {
-		    fprintf(stderr, "HTML: Missing TEXTAREA end tag\n");
+		    fprintf(stderr, "HTML: Missing TEXTAREA end tag.\n");
 		} else if (!me->inBadHTML) {
 		    _statusline(BAD_HTML_USE_TRACE);
 		    me->inBadHTML = TRUE;
@@ -4109,11 +4155,11 @@ PRIVATE void HTML_start_element ARGS5(
 
 	        if (present && present[HTML_OPTION_ID]
 		    && value[HTML_OPTION_ID] && *value[HTML_OPTION_ID]) {
-		    if (ID_A = HTAnchor_findChildAndLink(
+		    if ((ID_A = HTAnchor_findChildAndLink(
 				    me->node_anchor,	   /* Parent */
 				    value[HTML_OPTION_ID], /* Tag */
 				    NULL,		   /* Addresss */
-				    (void *)0)) {	   /* Type */
+				    (void *)0)) != 0) {	   /* Type */
 			HText_beginAnchor(me->text, ID_A);
 			HText_endAnchor(me->text);
 		        I.id = (char *)value[HTML_OPTION_ID];
@@ -4270,7 +4316,8 @@ PRIVATE void HTML_end_element ARGS3(
     char *temp = NULL, *cp = NULL;
 
 #ifdef CAREFUL			/* parser assumed to produce good nesting */
-    if (element_number != me->sp[0].tag_number) {
+    if (element_number != me->sp[0].tag_number &&
+	HTML_dtd.tags[element_number].contents != SGML_EMPTY) {
         fprintf(stderr, 
 		"HTMLText: end of element %s when expecting end of %s\n",
 		HTML_dtd.tags[element_number].name,
@@ -4290,18 +4337,20 @@ PRIVATE void HTML_end_element ARGS3(
     }
 
     /*
-     *  Pop state off stack.
+     *  Pop state off stack if it's not a FORM end tag. - FM
      */
-    if (me->sp < me->stack + MAX_NESTING+1) {
-        (me->sp)++;
-        if (TRACE)
-	    fprintf(stderr,
-	    	    "HTML:end_element: Popped style off stack - %s\n",
-		    me->sp->style->name);
-    } else {
-	if (TRACE)
-	    fprintf(stderr,
+    if (HTML_dtd.tags[element_number].contents != SGML_EMPTY) {
+        if (me->sp < me->stack + MAX_NESTING+1) {
+	    (me->sp)++;
+	    if (TRACE)
+		fprintf(stderr,
+			"HTML:end_element: Popped style off stack - %s\n",
+			me->sp->style->name);
+	} else {
+	    if (TRACE)
+		fprintf(stderr,
   "Stack underflow error!  Tried to pop off more styles than exist in stack\n");
+	}
     }
     
     /*
@@ -4725,11 +4774,10 @@ PRIVATE void HTML_end_element ARGS3(
 	 *  Finish the data off.
 	 */
 	{
-	    int s = 0, e = 0, n = 0;
+	    int s = 0, e = 0;
 	    char *start = NULL, *first_end = NULL;
 	    BOOL have_param = FALSE;
 	    char *data = NULL;
-	    HTPresentation *Pres;
 
 	    HTChunkTerminate(&me->object);
 	    data = me->object.data;
@@ -4910,7 +4958,7 @@ PRIVATE void HTML_end_element ARGS3(
 		if (TRACE)
 		    fprintf(stderr,
 		    "HTML: OBJECT has USEMAP.  Converting to IMG.\n");
-Object_as_IMG:
+
 	        StrAllocCat(*include, "<IMG ISOBJECT");
 	        if (me->object_id != NULL) {
 		    /*
@@ -5058,7 +5106,12 @@ End_Object:
 	break;
 
     case HTML_FORM:
-	/* Make sure we had a form start tag. */
+	/*
+	 *  Check if we had a FORM start tag, and issue a
+	 *  message if not, but fall through to ensure that
+	 *  the FORM-related globals in GridText.c are
+	 *  initialized. - FM
+	 */
 	if (!me->inFORM) {
 	    if (TRACE) {
 		fprintf(stderr, "HTML: Unmatched FORM end tag\n");
@@ -5067,12 +5120,6 @@ End_Object:
 		me->inBadHTML = TRUE;
 		sleep(MessageSecs);
 	    }
-	    /*
-	     *  We probably did start a form, for which bad HTML
-	     *  caused a substitution, so we'll try to end.
-	     *
-	    break;
-	     */
 	}
 
 	/*
@@ -5348,9 +5395,34 @@ End_Object:
 */
 /*	(In fact, they all shrink!)
 */
-PUBLIC void HTML_put_entity ARGS2(HTStructured *, me, int, entity_number)
+PUBLIC int HTML_put_entity ARGS2(HTStructured *, me, int, entity_number)
 {
-    HTML_put_string(me, p_entity_values[entity_number]);
+    int nent = HTML_dtd.number_of_entities;
+  
+    if (entity_number < nent) {		
+	HTML_put_string(me, p_entity_values[entity_number]);
+	return HT_OK;
+#ifdef EXP_CHARTRANS	
+    } else if (me->UCLYhndl < 0) {
+	return HT_CANNOT_TRANSLATE;
+    } else {
+	UCode_t uni = HTML_dtd.extra_entity_info[entity_number-nent].code;
+	int c_out = UCTransUniChar(uni, me->UCLYhndl);
+	if (c_out > 0) {
+	    HTML_put_character(me, (char)c_out);
+	    return HT_OK;
+	} else if (c_out==UCTRANS_NOTFOUND) {
+	    char buf[21];
+	    int c_out2 = UCTransUniCharStr(buf,20, uni, me->UCLYhndl, NO);
+	    if (c_out2 >= 0) {
+		HTML_put_string(me, buf);
+		return HT_OK;
+	    }
+	}
+	return HT_CANNOT_TRANSLATE;
+#endif /* EXP_CHARTRANS */
+    }
+    return HT_OK;
 }
 
 /*	Free an HTML object
@@ -5364,16 +5436,40 @@ PUBLIC void HTML_put_entity ARGS2(HTStructured *, me, int, entity_number)
 **	If non-interactive, everything is freed off.   No: crashes -listrefs
 **	Otherwise, the interactive object is left.	
 */
-PUBLIC void HTML_free ARGS1(HTStructured *, me)
+PRIVATE void HTML_free ARGS1(HTStructured *, me)
 {
+    char *include = NULL;
+
     UPDATE_STYLE;		/* Creates empty document here! */
     if (me->comment_end)
 	HTML_put_string(me, me->comment_end);
     if (me->text) {
+        /*
+	 *  Emphasis containers should have been closed via
+	 *  the SGML_free() wind-down, but let's play it
+	 *  safe. - FM
+	 */
 	if (me->inUnderline) {
 	    HText_appendCharacter(me->text, LY_UNDERLINE_END_CHAR);
 	    me->inUnderline = FALSE;
 	}
+
+	/*
+	 *  FORM was declared SGML_EMPTY in HTMLDTD.c, and
+	 *  SGML_character() in SGML.c checks for a FORM end
+	 *  tag to call HTML_end_element() directly (with a
+	 *  check in that to bypass decrementing of the HTML
+	 *  parser's stack), so if we still have an open FORM,
+	 *  close it now. - FM
+	 */
+	if (me->inFORM) {
+	    HTML_end_element(me, HTML_FORM, (char **)&include);
+	    me->inFORM = FALSE;
+	}
+
+	/*
+	 *  Now call the cleanup function. - FM
+	 */
 	HText_endAppend(me->text);
     }
 
@@ -5401,9 +5497,28 @@ PUBLIC void HTML_free ARGS1(HTStructured *, me)
 
 PRIVATE void HTML_abort ARGS2(HTStructured *, me, HTError, e)
 {
+    char *include = NULL;
+
     if (me->text) {
-	if (me->inUnderline)
+        /*
+	 *  If we have an open emphasis container, close it now. - FM
+	 */
+	if (me->inUnderline) {
 	    HText_appendCharacter(me->text, LY_UNDERLINE_END_CHAR);
+	    me->inUnderline = FALSE;
+	}
+
+        /*
+	 *  If we have an open FORM container, close it now. - FM
+	 */
+	if (me->inFORM) {
+	    HTML_end_element(me, HTML_FORM, (char **)&include);
+	    me->inFORM = FALSE;
+	}
+
+	/*
+	 *  Now call the cleanup function. - FM
+	 */
 	HText_endAppend(me->text);
     }
 
@@ -5542,7 +5657,9 @@ PUBLIC HTStructured* HTML_new ARGS3(
 	    return HTMLGenerator(intermediate);
         fprintf(stderr, "\n** Internal error: can't parse HTML to %s\n",
        		HTAtom_name(format_out));
+#ifndef NOSIGHUP
         (void) signal(SIGHUP, SIG_DFL);
+#endif /* NOSIGHUP */
         (void) signal(SIGTERM, SIG_DFL);
 #ifndef VMS
         (void) signal(SIGINT, SIG_DFL);
@@ -5676,6 +5793,11 @@ PUBLIC HTStructured* HTML_new ARGS3(
  
     me->comment_start = NULL;
     me->comment_end = NULL;
+#ifdef EXP_CHARTRANS
+    html_get_chartrans_info(me);
+
+    UCTransParams_clear(&me->T);
+#endif /* EXP_CHARTRANS */
 
     me->target = stream;
     if (stream)
@@ -5694,7 +5816,7 @@ PUBLIC HTStream* HTMLToPlain ARGS3(
 	HTParentAnchor *,	anchor,	
 	HTStream *,		sink)
 {
-    return SGML_new(&HTML_dtd, HTML_new(anchor, pres->rep_out, sink));
+    return SGML_new(&HTML_dtd, anchor, HTML_new(anchor, pres->rep_out, sink));
 }
 
 /*	HTConverter for HTML to C code
@@ -5716,7 +5838,7 @@ PUBLIC HTStream* HTMLToC ARGS3(
     html->comment_start = "/* ";
     html->comment_end = " */\n";	/* Must start in col 1 for cpp */
 /*    HTML_put_string(html,html->comment_start); */
-    return SGML_new(&HTML_dtd, html);
+    return SGML_new(&HTML_dtd, anchor, html);
 }
 
 /*	Presenter for HTML
@@ -5732,7 +5854,7 @@ PUBLIC HTStream* HTMLPresent ARGS3(
 	HTParentAnchor *,	anchor,	
 	HTStream *,		sink)
 {
-    return SGML_new(&HTML_dtd, HTML_new(anchor, WWW_PRESENT, NULL));
+    return SGML_new(&HTML_dtd, anchor, HTML_new(anchor, WWW_PRESENT, NULL));
 }
 #endif /* !GUI */
 
