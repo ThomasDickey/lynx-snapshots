@@ -18,6 +18,7 @@
 #include <HTAlert.h>
 #include <LYBookmark.h>
 #include <GridText.h>
+#include <LYGetFile.h>
 
 #include <LYLeaks.h>
 
@@ -3103,4 +3104,819 @@ restore_popup_statusline:
 	option_statusline(VALUE_ACCEPTED);
 	return(cur_choice);
     }
+}
+
+/*
+ * I'm paranoid about mistyping strings.  Also, this way they get combined
+ * so we don't have to worry about the intelligence of the compiler.
+ * We don't need to burn memory like it's cheap.  We're better than that.
+ */
+static char * selected_string = "selected";
+static char * disabled_string = "disabled";
+static char * label_string = "label";
+static char * on_string = "ON";
+static char * off_string = "OFF";
+static char * never_string = "NEVER";
+static char * always_string = "ALWAYS";
+static char * empty_string = "";
+
+static char * secure_string = "secure";
+static char * secure_value = NULL;
+
+static char * editor_string = "editor";
+
+static char * display_string = "display";
+
+static char * ftp_sort_string = "ftp_sort";
+static char * ftp_by_name_string = "ftp_by_name";
+static char * ftp_by_type_string = "ftp_by_type";
+static char * ftp_by_size_string = "ftp_by_size";
+static char * ftp_by_date_string = "ftp_by_date";
+
+static char * mail_address_string = "mail_address";
+
+static char * save_options_string = "save_options";
+
+static char * search_type_string = "search_type";
+static char * search_case_insensitive_string = "case_insensitive";
+static char * search_case_sensitive_string = "case_sensitive";
+
+static char * prefered_doc_lang_string = "prefered_doc_lang";
+
+static char * prefered_doc_char_string = "prefered_doc_char";
+
+static char * assume_char_set_string = "assume_char_set";
+
+static char * display_char_set_string = "display_char_set";
+
+static char * raw_mode_string = "raw_mode";
+
+static char * show_color_string = "show_color";
+
+static char * vi_keys_string = "vi_keys";
+
+static char * emacs_keys_string = "emacs_keys";
+
+static char * show_dotfiles_string = "show_dotfiles";
+
+static char * select_popups_string = "select_popups";
+
+static char * show_cursor_string = "show_cursor";
+
+static char * keypad_mode_string = "keypad_mode";
+static char * number_arrows_string = "number_arrows";
+static char * links_numbered_string = "links_numbered";
+static char * links_and_forms_string = "links_and_forms";
+
+static char * dired_sort_string = "dired_sort";
+static char * dired_dir_string = "dired_dir";
+static char * dired_files_string = "dired_files";
+static char * dired_mixed_string = "dired_mixed";
+
+static char * user_mode_string = "user_mode";
+static char * user_novice = "Novice";
+static char * user_intermediate = "Intermediate";
+static char * user_advanced = "Advanced";
+
+struct post_pair {
+    char * tag;
+    char * value;
+};
+
+/*
+ * Break cgi line into array of pairs of pointers.  Don't bother trying to
+ * be efficient.  We're not called all that often.
+ * We come in with a string looking like:
+ * tag1=value1&tag2=value2&...&tagN=valueN
+ * We leave with an array of post_pairs.  The last element in the array
+ * will have a tag pointing to NULL.
+ * Not pretty, but works.  Hey, if strings can be null terminate arrays...
+ */
+
+PRIVATE struct post_pair * break_data ARGS1(
+    char *,	data)
+{
+    char * p = data;
+    struct post_pair * q = NULL;
+    int count = 0;
+
+    if (p==NULL || p[0]=='\0')
+	return NULL;
+
+    q = calloc(sizeof(struct post_pair), 1);
+    if (q==NULL)
+	outofmem(__FILE__, "break_data(calloc)");
+
+    do {
+	/*
+	 * First, break up on '&', sliding 'p' on down the line.
+	 */
+	q[count].value = LYstrsep(&p, "&");
+	/*
+	 * Then break up on '=', sliding value down, and setting tag.
+	 */
+	q[count].tag = LYstrsep(&(q[count].value), "=");
+
+	/*
+	 * Clean them up a bit, in case user entered a funky string.
+	 */
+	HTUnEscape(q[count].tag);
+	HTUnEscape(q[count].value);
+
+	count++;
+	/*
+	 * Like I said, screw effeciency.  Sides, realloc is fast on
+	 * Linux ;->
+	 */
+	q = realloc(q, sizeof(struct post_pair)*(count+1));
+	if (q==NULL)
+	    outofmem(__FILE__, "break_data(realloc)");
+	q[count].tag=NULL;
+    } while (p!=NULL && p[0]!='\0');
+    return q;
+}
+
+/*
+ * Handle options from the pseudo-post.  I think we really only need
+ * post_data here, but bring along everything just in case.  It's only a
+ * pointer.  MRC
+ */
+
+PUBLIC int postoptions ARGS1(
+    document *,		newdoc)
+{
+    struct post_pair *data;
+    int i;
+    BOOLEAN save_all = FALSE;
+
+    data = break_data(newdoc->post_data);
+
+    /*
+     * This is just plain ugly.  Perhaps someone will have the will power
+     * to do this programmatically?  MRC
+     */
+    for (i = 0; data[i].tag != NULL; i++) {
+	/*
+	 * Paranoid security.
+	 */
+	if (!strcmp(data[i].tag, secure_string)) {
+	    if (!secure_value || strcmp(data[i].value, secure_value)) {
+		/*
+		 * FIXME: We've been spoofed message here.
+		 */
+		FREE(data);
+		return(NULLFILE);
+	    }
+	    FREE(secure_value);
+	}
+
+	/*
+	 * editor
+	 */
+	if (!strcmp(data[i].tag, editor_string)) {
+	    FREE(editor);
+	    StrAllocCopy(editor, data[i].value);
+	}
+
+	/*
+	 * display
+	 */
+	if (!strcmp(data[i].tag, display_string)) {
+	    FREE(display);
+	    StrAllocCopy(display, data[i].value);
+	}
+
+	/*
+	 * ftp sort
+	 */
+	if (!strcmp(data[i].tag, ftp_sort_string)) {
+	    if (!strcmp(data[i].value, ftp_by_name_string)) {
+		HTfileSortMethod = FILE_BY_NAME;
+	    } else if (!strcmp(data[i].value, ftp_by_type_string)) {
+		HTfileSortMethod = FILE_BY_TYPE;
+	    } else if (!strcmp(data[i].value, ftp_by_size_string)) {
+		HTfileSortMethod = FILE_BY_SIZE;
+	    } else if (!strcmp(data[i].value, ftp_by_date_string)) {
+		HTfileSortMethod = FILE_BY_DATE;
+	    }
+	}
+
+	/*
+	 * mail_address
+	 */
+	if (!strcmp(data[i].tag, mail_address_string)) {
+	    FREE(personal_mail_address);
+	    StrAllocCopy(personal_mail_address, data[i].value);
+	}
+
+	/*
+	 * search_type
+	 */
+	if (!strcmp(data[i].tag, search_type_string)) {
+	    if (!strcmp(data[i].value, search_case_insensitive_string)) {
+		case_sensitive = FALSE;
+	    } else if (!strcmp(data[i].value, search_case_sensitive_string)) {
+		case_sensitive = TRUE;
+	    }
+	}
+
+	/*
+	 * prefered_doc_lang
+	 */
+	if (!strcmp(data[i].tag, prefered_doc_lang_string)) {
+	    FREE(language);
+	    StrAllocCopy(language, data[i].value);
+	}
+
+	/*
+	 * prefered_doc_char
+	 */
+	if (!strcmp(data[i].tag, prefered_doc_lang_string)) {
+	    FREE(pref_charset);
+	    StrAllocCopy(pref_charset, data[i].value);
+	}
+
+	/*
+	 * assume_char_set
+	 */
+	if (!strcmp(data[i].tag, assume_char_set_string)) {
+	    int newval;
+
+	    newval = UCGetLYhndl_byMIME(data[i].value);
+	    /*
+	     *  Set the raw 8-bit or CJK mode defaults and
+	     *  character set if changed. - FM
+	     */
+	    /*
+	     * FIXME: I have no clue if I got this right.  Since this is
+	     * forms based, we should probably flag that we may have
+	     * changed something here, then when we're done, check to see
+	     * if the user also changed RAW mode.  If they did, take what
+	     * they set, even if it doesn't make sense.  Otherwise, use
+	     * what we calculate here.
+	     */
+	    if (newval != UCLYhndl_for_unspec) {
+		UCLYhndl_for_unspec = newval;
+		StrAllocCopy(UCAssume_MIMEcharset, data[i].value);
+		LYRawMode = (UCLYhndl_for_unspec == current_char_set);
+		HTMLSetUseDefaultRawMode(current_char_set, LYRawMode);
+		HTMLUseCharacterSet(current_char_set);
+	    }
+	}
+
+	/*
+	 * display_char_set
+	 */
+	/*
+	 * FIXME: This needs validation.  - MRC
+	 */
+	if (!strcmp(data[i].tag, display_char_set_string)) {
+	    int newval;
+
+	    newval = atoi(data[i].value);
+	    /*
+	     *  Set the LYUseDefaultRawMode value and character
+	     *  handling if LYRawMode was changed. - FM
+	     */
+	    if (newval != current_char_set) {
+		current_char_set = newval;
+		HTMLSetRawModeDefault(current_char_set);
+		LYUseDefaultRawMode = TRUE;
+		HTMLUseCharacterSet(current_char_set);
+	    }
+	}
+
+	/*
+	 * show_color
+	 */
+	if (!strcmp(data[i].tag, show_color_string)) {
+	    if (!strcmp(data[i].value, never_string)) {
+		LYShowColor = SHOW_COLOR_NEVER;
+	    } else if (!strcmp(data[i].value, off_string)) {
+		LYShowColor = SHOW_COLOR_OFF;
+	    } else if (!strcmp(data[i].value, on_string)) {
+		LYShowColor = SHOW_COLOR_ON;
+	    } else if (!strcmp(data[i].value, always_string)) {
+		LYShowColor = SHOW_COLOR_ALWAYS;
+	    }
+	    LYChosenShowColor = LYShowColor;
+	}
+
+	/*
+	 * raw_mode
+	 */
+	if (!strcmp(data[i].tag, raw_mode_string)) {
+	    BOOLEAN newmode;
+	    newmode = (!strcmp(data[i].value, on_string));
+	    if (newmode != LYRawMode) {
+		LYRawMode = newmode;
+		HTMLSetUseDefaultRawMode(current_char_set, LYRawMode);
+		HTMLSetCharacterHandling(current_char_set);
+	    }
+	}
+
+	/*
+	 * vi_keys
+	 */
+	if (!strcmp(data[i].tag, vi_keys_string)) {
+	    if (!strcmp(data[i].value, on_string)) {
+		vi_keys = TRUE;
+		set_vi_keys();
+	    } else if (!strcmp(data[i].value, off_string)) {
+		vi_keys = FALSE;
+		reset_vi_keys();
+	    }
+	}
+
+	/*
+	 * emacs_keys
+	 */
+	if (!strcmp(data[i].tag, emacs_keys_string)) {
+	    if (!strcmp(data[i].value, on_string)) {
+		emacs_keys = TRUE;
+		set_emacs_keys();
+	    } else if (!strcmp(data[i].value, off_string)) {
+		emacs_keys = FALSE;
+		reset_emacs_keys();
+	    }
+	}
+
+	/*
+	 * show_dotfiles
+	 */
+	if (!strcmp(data[i].tag, show_dotfiles_string)) {
+	    if (!strcmp(data[i].value, on_string)) {
+		show_dotfiles = TRUE;
+	    } else if (!strcmp(data[i].value, off_string)) {
+		show_dotfiles = FALSE;
+	    }
+	}
+
+	/*
+	 * select_popups
+	 */
+	if (!strcmp(data[i].tag, select_popups_string)) {
+	    if (!strcmp(data[i].value, on_string)) {
+		LYSelectPopups = TRUE;
+	    } else if (!strcmp(data[i].value, off_string)) {
+		LYSelectPopups = FALSE;
+	    }
+	}
+
+	/*
+	 * show_cursor
+	 */
+	if (!strcmp(data[i].tag, show_cursor_string)) {
+	    if (!strcmp(data[i].value, on_string)) {
+		LYShowCursor = TRUE;
+	    } else if (!strcmp(data[i].value, off_string)) {
+		LYShowCursor = FALSE;
+	    }
+	}
+
+	/*
+	 * keypad_mode
+	 */
+	if (!strcmp(data[i].tag, keypad_mode_string)) {
+	    if (!strcmp(data[i].value, number_arrows_string)) {
+		keypad_mode = NUMBERS_AS_ARROWS;
+	    } else if (!strcmp(data[i].value, links_numbered_string)) {
+		keypad_mode = LINKS_ARE_NUMBERED;
+	    } else if (!strcmp(data[i].value, links_and_forms_string)) {
+		keypad_mode = LINKS_AND_FORM_FIELDS_ARE_NUMBERED;
+	    }
+	}
+
+#ifdef DIRED_SUPPORT
+	/*
+	 * dired_sort
+	 */
+	if (!strcmp(data[i].tag, dired_sort_string)) {
+	    if (!strcmp(data[i].value, dired_dir_string)) {
+		dir_list_style = 0;
+	    } else if (!strcmp(data[i].value, dired_files_string)) {
+		dir_list_style = FILES_FIRST;
+	    } else if (!strcmp(data[i].value, dired_mixed_string)) {
+		dir_list_style = MIXED_STYLE;
+	    }
+	}
+#endif /* DIRED_SUPPORT */
+
+	/*
+	 * user_mode
+	 */
+	if (!strcmp(data[i].tag, user_mode_string)) {
+	    if (!strcmp(data[i].value, user_novice)) {
+		user_mode = NOVICE_MODE;
+	    } else if (!strcmp(data[i].value, user_intermediate)) {
+		user_mode = INTERMEDIATE_MODE;
+	    } else if (!strcmp(data[i].value, user_advanced)) {
+		user_mode = ADVANCED_MODE;
+	    }
+	}
+
+	/*
+	 * save_options
+	 */
+	if (!strcmp(data[i].tag, save_options_string)) {
+	    save_all = TRUE;
+	}
+    }
+    /*
+     * FIXME: Golly gee, we need to write all of this out now, don't we?
+     */
+    FREE(newdoc->post_data);
+    FREE(data);
+    if (save_all) {
+	option_statusline(SAVING_OPTIONS);
+	if (save_rc()) {
+	    option_statusline(OPTIONS_SAVED);
+	} else {
+	    HTAlert(OPTIONS_NOT_SAVED);
+	}
+    }
+    return(NULLFILE);
+}
+
+/*
+ * Okay, someone wants to change options.  So, lets gen up a form for them
+ * and pass it around.  Gor, this is ugly.  Be a lot easier in Bourne with
+ * "here" documents.  :->
+ * Basic Strategy:  For each option, throw up the appropriate type of
+ * control, giving defaults as appropriate.  If nothing else, we're
+ * probably going to test every control there is.  MRC
+ */
+PUBLIC int gen_options ARGS1(
+	char **,	newfile)
+{
+    int i;
+    BOOLEAN can_do_colors;
+    static char tempfile[256];
+    static char print_filename[256];
+    FILE *fp0;
+
+    LYRemoveTemp(tempfile);
+    fp0 = LYOpenTemp(tempfile, HTML_SUFFIX, "w");
+    if (fp0 == NULL) {
+	HTAlert(UNABLE_TO_OPEN_TEMPFILE);
+	return(-1);
+    }
+
+    LYLocalFileToURL(print_filename, tempfile);
+
+    StrAllocCopy(*newfile, print_filename);
+    LYforce_no_cache = TRUE;
+
+    fprintf(fp0, "<head>\n<title>%s</title>\n</head>\n<body>\n",
+	    OPTIONS_TITLE);
+
+    fprintf(fp0,"<h1>Options Menu (%s Version %s)</h1><pre>\n",
+	    LYNX_NAME, LYNX_VERSION);
+
+    /*
+     * I do C, not HTML.  Feel free to pretty this up.
+     */
+    fprintf(fp0,"<form action=\"LYNXOPTIONS:\" method=\"post\">\n");
+    /*
+     * use following with some sort of one shot secret key akin to NCSA
+     * (or was it CUTE?) telnet one shot password to allow ftp to self.
+     * to prevent spoofing.
+     */
+    FREE(secure_value);
+    StrAllocCopy(secure_value, "FIXMEtest=the&encoding");
+    fprintf(fp0,"<input name=\"%s\" type=\"hidden\" value=\"%s\">\n",
+	    secure_string, secure_value);
+
+    /*
+     * editor
+     */
+    fprintf(fp0,"<%s>Editor:</%s> ", label_string, label_string);
+    fprintf(fp0,"<input %s type=\"text\" name=\"%s\" value=\"%s\">\n",
+	    (no_editor || system_editor)?disabled_string:empty_string,
+	    editor_string, (editor && editor[0])?editor:empty_string);
+
+    /*
+     * display
+     */
+    fprintf(fp0,"<%s>Display:</%s> ", label_string, label_string);
+    fprintf(fp0,"<input type=\"text\" name=\"%s\" value=\"%s\">\n",
+	    display_string, (display && display[0])?display:empty_string);
+
+    /*
+     * ftp sort
+     */
+    fprintf(fp0,"<%s>Ftp sort criteria:</%s> ", label_string, label_string);
+    fprintf(fp0,"<select name=\"%s\">\n", ftp_sort_string);
+    fprintf(fp0,"<option %s value=\"%s\">By Name</option>\n",
+	    (HTfileSortMethod == FILE_BY_NAME)?selected_string:empty_string,
+	    ftp_by_name_string);
+    fprintf(fp0,"<option %s value=\"%s\">By Type</option>\n",
+	    (HTfileSortMethod == FILE_BY_TYPE)?selected_string:empty_string,
+	    ftp_by_type_string);
+    fprintf(fp0,"<option %s value=\"%s\">By Size</option>\n",
+	    (HTfileSortMethod == FILE_BY_SIZE)?selected_string:empty_string,
+	    ftp_by_size_string);
+    fprintf(fp0,"<option %s value=\"%s\">By Date</option>\n",
+	    (HTfileSortMethod == FILE_BY_DATE)?selected_string:empty_string,
+	    ftp_by_date_string);
+    fprintf(fp0,"</select>\n");
+
+    /*
+     * mail_address
+     */
+    fprintf(fp0,"<%s>Personal mail address:</%s> ", label_string,
+	    label_string);
+    fprintf(fp0,"<input type=\"text\" name=\"%s\" value=\"%s\">\n",
+	    mail_address_string,
+	    (personal_mail_address && personal_mail_address[0])?
+		personal_mail_address:empty_string);
+
+    /*
+     * search_type
+     */
+    fprintf(fp0,"<%s>Searching type:</%s> ", label_string, label_string);
+    fprintf(fp0,"<select name=\"%s\">\n", search_type_string);
+    fprintf(fp0,"<option %s value=\"%s\">Case insensitive</option>\n",
+	    case_sensitive?empty_string:selected_string,
+	    search_case_insensitive_string);
+    fprintf(fp0,"<option %s value=\"%s\">Case sensitive</option>\n",
+	    case_sensitive?selected_string:empty_string,
+	    search_case_sensitive_string);
+    fprintf(fp0,"</select>\n");
+
+    /*
+     * prefered_doc_lang
+     */
+    fprintf(fp0,"<%s>Prefered document language</%s> ", label_string,
+	    label_string);
+    fprintf(fp0,"<input type=\"text\" name=\"%s\" value=\"%s\">\n",
+	    prefered_doc_lang_string,
+	    (language && language[0])?language:empty_string);
+
+    /*
+     * prefered_doc_char
+     */
+    fprintf(fp0,"<%s>Prefered document character set</%s> ", label_string,
+	    label_string);
+    fprintf(fp0,"<input type=\"text\" name=\"%s\" value=\"%s\">\n",
+	    prefered_doc_char_string,
+	    (pref_charset && pref_charset[0])?pref_charset:empty_string);
+
+    /*
+     * assume_char_set
+     */
+    /*
+     * FIXME: If bogus value in lynx.cfg, then in old way, that is the
+     * string that was displayed.  Now, user will never see that.  Good
+     * or bad?  I don't know.  MRC
+     */
+    if (user_mode==ADVANCED_MODE) {
+	int curval;
+
+	curval = UCLYhndl_for_unspec;
+	if (curval == current_char_set && UCAssume_MIMEcharset) {
+	    curval = UCGetLYhndl_byMIME(UCAssume_MIMEcharset);
+	}
+	if (curval < 0) {
+	    curval = LYRawMode ? current_char_set : 0;
+	}
+	fprintf(fp0,"<%s>Assume Character Set:</%s> ", label_string,
+		label_string);
+	fprintf(fp0,"<select name=\"%s\">\n", assume_char_set_string);
+	for (i = 0; i < LYNumCharsets; i++) {
+	    fprintf(fp0,"<option %s value=\"%s\">%s</option>\n",
+		    (i==curval)?selected_string:empty_string,
+		    LYCharSet_UC[i].MIMEname, LYCharSet_UC[i].MIMEname);
+	}
+	fprintf(fp0,"</select>\n");
+    }
+
+    /*
+     * display_char_set
+     */
+    fprintf(fp0,"<%s>Display character set:</%s> ", label_string,
+	    label_string);
+    fprintf(fp0,"<select name=\"%s\">\n", display_char_set_string);
+    for (i = 0; LYchar_set_names[i]; i++) {
+	fprintf(fp0,"<option %s value=\"%d\">%s</options>\n",
+		(i==current_char_set)?selected_string:empty_string,
+		i, LYchar_set_names[i]);
+    }
+    fprintf(fp0,"</select>\n");
+
+    /*
+     * raw_mode
+     */
+    fprintf(fp0,"<%s>Raw 8-bit or CJK mode:</%s> ", label_string,
+	    label_string);
+    fprintf(fp0,"<select name=\"%s\">\n", raw_mode_string);
+    fprintf(fp0,"<option %s value=\"%s\">%s</option>\n",
+	    (LYRawMode)?empty_string:selected_string,
+	    off_string, off_string);
+    fprintf(fp0,"<option %s value=\"%s\">%s</option>\n",
+	    (LYRawMode)?selected_string:empty_string,
+	    on_string, on_string);
+    fprintf(fp0,"</select>\n");
+
+    /*
+     * show_color
+     */
+#if defined(USE_SLANG) || defined(COLOR_CURSES)
+    can_do_colors = 1;
+#if defined(COLOR_CURSES)
+    can_do_colors = has_colors();
+#endif
+    fprintf(fp0,"<%s>Show Color:</%s> ", label_string, label_string);
+    fprintf(fp0,"<select %s name=\"%s\">\n",
+	    can_do_colors?empty_string:disabled_string, show_color_string);
+    if (no_option_save) {
+	if (LYShowColor == SHOW_COLOR_NEVER) {
+	    LYShowColor = SHOW_COLOR_OFF;
+	} else if (LYShowColor == SHOW_COLOR_ALWAYS) {
+	    LYShowColor = SHOW_COLOR_ON;
+	}
+	fprintf(fp0,"<option %s value=\"%s\">%s</option>\n",
+		(LYShowColor==SHOW_COLOR_OFF)?empty_string:selected_string,
+		off_string, off_string);
+	fprintf(fp0,"<option %s value=\"%s\">%s</option>\n",
+		(LYShowColor==SHOW_COLOR_ON)?empty_string:selected_string,
+		on_string, on_string);
+    } else {
+	if (LYChosenShowColor == SHOW_COLOR_UNKNOWN) {
+	    switch (LYrcShowColor) {
+	    case SHOW_COLOR_NEVER:
+		LYChosenShowColor =
+		    (LYShowColor >= SHOW_COLOR_ON) ?
+			SHOW_COLOR_ON : SHOW_COLOR_NEVER;
+		break;
+	    case SHOW_COLOR_ALWAYS:
+		if (!can_do_colors)
+		    LYChosenShowColor = SHOW_COLOR_ALWAYS;
+		else
+		    LYChosenShowColor =
+			(LYShowColor >= SHOW_COLOR_ON) ?
+				SHOW_COLOR_ALWAYS : SHOW_COLOR_OFF;
+		break;
+	    default:
+		LYChosenShowColor =
+		    (LYShowColor >= SHOW_COLOR_ON) ?
+			SHOW_COLOR_ON : SHOW_COLOR_OFF;
+	    }
+	}
+	fprintf(fp0,"<option %s value=\"%s\">%s</option>\n",
+		(LYChosenShowColor==SHOW_COLOR_NEVER)?selected_string:empty_string,
+		never_string, never_string);
+	fprintf(fp0,"<option %s value=\"%s\">%s</option>\n",
+		(LYChosenShowColor==SHOW_COLOR_OFF)?selected_string:empty_string,
+		off_string, off_string);
+	fprintf(fp0,"<option %s value=\"%s\">%s</option>\n",
+		(LYChosenShowColor==SHOW_COLOR_ON)?selected_string:empty_string,
+		on_string, on_string);
+	fprintf(fp0,"<option %s value=\"%s\">%s</option>\n",
+		(LYChosenShowColor==SHOW_COLOR_ALWAYS)?selected_string:empty_string,
+		always_string, (can_do_colors)?always_string:"Always try");
+    }
+    fprintf(fp0,"</select>\n");
+#endif /* USE_SLANG || COLOR_CURSES */
+
+    /*
+     * vi_keys
+     */
+    fprintf(fp0,"<%s>VI Keys:</%s> ", label_string, label_string);
+    fprintf(fp0,"<select name=\"%s\">\n", vi_keys_string);
+    fprintf(fp0,"<option %s value=\"%s\">%s</option>\n",
+	    (vi_keys)?empty_string:selected_string,
+	    off_string, off_string);
+    fprintf(fp0,"<option %s value=\"%s\">%s</option>\n",
+	    (vi_keys)?selected_string:empty_string,
+	    on_string, on_string);
+    fprintf(fp0,"</select>\n");
+
+    /*
+     * emacs_keys
+     */
+    fprintf(fp0,"<%s>Emacs Keys:</%s> ", label_string, label_string);
+    fprintf(fp0,"<select name=\"%s\">\n", emacs_keys_string);
+    fprintf(fp0,"<option %s value=\"%s\">%s</option>\n",
+	    (emacs_keys)?empty_string:selected_string,
+	    off_string, off_string);
+    fprintf(fp0,"<option %s value=\"%s\">%s</option>\n",
+	    (emacs_keys)?selected_string:empty_string,
+	    on_string, on_string);
+    fprintf(fp0,"</select>\n");
+
+    /*
+     * show_dotfiles
+     */
+    if (!no_dotfiles) {
+	fprintf(fp0,"<%s>Show dot files:</%s> ", label_string, label_string);
+	fprintf(fp0,"<select name=\"%s\">\n", show_dotfiles_string);
+	fprintf(fp0,"<option %s value=\"%s\">%s</option>\n",
+		(show_dotfiles)?empty_string:selected_string,
+		off_string, off_string);
+	fprintf(fp0,"<option %s value=\"%s\">%s</option>\n",
+		(show_dotfiles)?selected_string:empty_string,
+		on_string, on_string);
+	fprintf(fp0,"</select>\n");
+    }
+
+    /*
+     * select_popups
+     */
+    fprintf(fp0,"<%s>Popups for select fields:</%s> ", label_string,
+	    label_string);
+    fprintf(fp0,"<select name=\"%s\">\n", select_popups_string);
+    fprintf(fp0,"<option %s value=\"%s\">%s</option>\n",
+	    (LYSelectPopups)?empty_string:selected_string,
+	    off_string, off_string);
+    fprintf(fp0,"<option %s value=\"%s\">%s</option>\n",
+	    (LYSelectPopups)?selected_string:empty_string,
+	    on_string, on_string);
+    fprintf(fp0,"</select>\n");
+
+    /*
+     * show_cursor
+     */
+    fprintf(fp0,"<%s>Show cursor:</%s> ", label_string, label_string);
+    fprintf(fp0,"<select name=\"%s\">\n", show_cursor_string);
+    fprintf(fp0,"<option %s value=\"%s\">%s</option>\n",
+	    (LYShowCursor)?empty_string:selected_string,
+	    off_string, off_string);
+    fprintf(fp0,"<option %s value=\"%s\">%s</option>\n",
+	    (LYShowCursor)?selected_string:empty_string,
+	    on_string, on_string);
+    fprintf(fp0,"</select>\n");
+
+    /*
+     * keypad_mode
+     */
+    fprintf(fp0,"<%s>Keypad Mode:</%s> ", label_string, label_string);
+    fprintf(fp0,"<select name=\"%s\">\n", keypad_mode_string);
+    fprintf(fp0,"<option %s value=\"%s\">Numbers act as arrows</option>\n",
+	    (keypad_mode==NUMBERS_AS_ARROWS)?selected_string:empty_string,
+	    number_arrows_string);
+    fprintf(fp0,"<option %s value=\"%s\">Links are numbered</option>\n",
+	    (keypad_mode==LINKS_ARE_NUMBERED)?selected_string:empty_string,
+	    links_numbered_string);
+    fprintf(fp0,"<option %s value=\"%s\">\
+	    Links and form fields are numbered</option>\n",
+	    (keypad_mode==LINKS_AND_FORM_FIELDS_ARE_NUMBERED)?
+		selected_string:empty_string, links_and_forms_string);
+    fprintf(fp0,"</select>\n");
+
+#ifdef DIRED_SUPPORT
+    /*
+     * dired_sort
+     */
+    fprintf(fp0,"<%s>User Mode:</%s> ", label_string, label_string);
+    fprintf(fp0,"<select name=\"%s\">\n", dired_sort_string);
+    fprintf(fp0,"<option %s value=\"%s\">Directories first</option>\n",
+	    (dir_list_style==0)?selected_string:empty_string,
+	    dired_dir_string);
+    fprintf(fp0,"<option %s value=\"%s\">Files first</option>\n",
+	    (dir_list_style==FILES_FIRST)?selected_string:empty_string,
+	    dired_files_string);
+    fprintf(fp0,"<option %s value=\"%s\">Mixed style</option>\n",
+	    (dir_list_style==MIXED_STYLE)?selected_string:empty_string,
+	    dired_mixed_string);
+    fprintf(fp0,"</select>\n");
+#endif /* DIRED_SUPPORT */
+
+    /*
+     * user_mode
+     */
+    fprintf(fp0,"<%s>User Mode:</%s> ", label_string, label_string);
+    fprintf(fp0,"<select name=\"%s\">\n", user_mode_string);
+    fprintf(fp0,"<option %s value=\"%s\">%s</option>\n",
+	    (user_mode==NOVICE_MODE)?selected_string:empty_string,
+	    user_novice, user_novice);
+    fprintf(fp0,"<option %s value=\"%s\">%s</option>\n",
+	    (user_mode==INTERMEDIATE_MODE)?selected_string:empty_string,
+	    user_intermediate, user_intermediate);
+    fprintf(fp0,"<option %s value=\"%s\">%s</option>\n",
+	    (user_mode==ADVANCED_MODE)?selected_string:empty_string,
+	    user_advanced, user_advanced);
+    fprintf(fp0,"</select>\n");
+
+    /*
+     * save options
+     */
+    if (!no_option_save) {
+        fprintf(fp0,"<%s>Save options to disk: </%s> ", label_string,
+		label_string);
+        fprintf(fp0,"<input type=\"checkbox\" name=\"%s\">\n",
+		save_options_string);
+    }
+
+    /*
+     * save/reset
+     */
+    fprintf(fp0,"<p>Use the back key to cancel changes.\n");
+    fprintf(fp0,"<input type=\"submit\" value=\"Accept Changes\">");
+    fprintf(fp0," <input type=\"reset\" value=\"Reset\">\n");
+    fprintf(fp0,"</p>");
+    fprintf(fp0,"</body>\n");
+
+    fclose(fp0);
+    return(0);
 }

@@ -28,7 +28,6 @@
 #if defined(USE_SOCKS5) && !defined(DONT_USE_SOCKS5)
 #define SOCKS4TO5
 #define SHORTENED_RBIND
-#define SOCKS
 #include <socks.h>
 #endif /* USE_SOCKS5 */
 
@@ -351,11 +350,7 @@ Out Of Memory checking for malloc() return:
 
 #include <LYexit.h>
 
-#define outofmem(file, func)\
- { fprintf(stderr,\
-  "\r\n\r\n\r\n%s %s: out of memory.  Aborting...\r\n", file, func);\
-  LYOutOfMemory = TRUE; exit(-1);}
-/* extern void outofmem PARAMS((const char *fname, const char *func)); */
+extern void outofmem PARAMS((CONST char *fname, CONST char *func));
 
 /*
 

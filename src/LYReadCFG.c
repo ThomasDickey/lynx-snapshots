@@ -138,7 +138,7 @@ PRIVATE void add_item_to_list ARGS2(
 	 */
 	cur_item = (lynx_html_item_type *)calloc(sizeof(lynx_html_item_type),1);
 	if (cur_item == NULL)
-	    perror("Out of memory in read_cfg");
+	    outofmem(__FILE__, "read_cfg");
 	*list_ptr = cur_item;
 	atexit(free_item_list);
     } else {
@@ -151,7 +151,7 @@ PRIVATE void add_item_to_list ARGS2(
 	    ;  /* null body */
 	cur_item = (lynx_html_item_type *)calloc(sizeof(lynx_html_item_type),1);
 	if (cur_item == NULL)
-	    perror("Out of memory in read_cfg");
+	    outofmem(__FILE__, "read_cfg");
 	else
 	    prev_item->next = cur_item;
     }
@@ -169,7 +169,7 @@ PRIVATE void add_item_to_list ARGS2(
 	 */
 	cur_item->name = (char *)calloc((colon-buffer+1),sizeof(char));
 	if (cur_item->name == NULL)
-	    perror("Out of memory in read_cfg");
+	    outofmem(__FILE__, "read_cfg");
 	LYstrncpy(cur_item->name, buffer, (int)(colon-buffer));
 	remove_backslashes(cur_item->name);
 
@@ -179,7 +179,7 @@ PRIVATE void add_item_to_list ARGS2(
 	if ((next_colon = find_colon(colon+1)) != NULL) {
 	    cur_item->command = (char *)calloc(next_colon-colon, sizeof(char));
 	    if (cur_item->command == NULL)
-		perror("Out of memory in read_cfg");
+		outofmem(__FILE__, "read_cfg");
 	    LYstrncpy(cur_item->command, colon+1, (int)(next_colon-(colon+1)));
 	    remove_backslashes(cur_item->command);
 	    cur_item->always_enabled = is_true(next_colon+1);
@@ -227,7 +227,7 @@ PRIVATE void add_printer_to_list ARGS2(
 	 */
 	cur_item = (lynx_printer_item_type *)calloc(sizeof(lynx_printer_item_type),1);
 	if (cur_item == NULL)
-	    perror("Out of memory in read_cfg");
+	    outofmem(__FILE__, "read_cfg");
 	*list_ptr = cur_item;
 	atexit(free_printer_item_list);
     } else {
@@ -241,7 +241,7 @@ PRIVATE void add_printer_to_list ARGS2(
 
 	cur_item = (lynx_printer_item_type *)calloc(sizeof(lynx_printer_item_type),1);
 	if (cur_item == NULL)
-	    perror("Out of memory in read_cfg");
+	    outofmem(__FILE__, "read_cfg");
 	else
 	    prev_item->next = cur_item;
     }
@@ -259,7 +259,7 @@ PRIVATE void add_printer_to_list ARGS2(
 	 */
 	cur_item->name = (char *)calloc((colon-buffer+1), sizeof(char));
 	if (cur_item->name == NULL)
-	    perror("Out of memory in read_cfg");
+	    outofmem(__FILE__, "read_cfg");
 	LYstrncpy(cur_item->name, buffer, (int)(colon-buffer));
 	remove_backslashes(cur_item->name);
 
@@ -269,7 +269,7 @@ PRIVATE void add_printer_to_list ARGS2(
 	if ((next_colon = find_colon(colon+1)) != NULL) {
 	    cur_item->command = (char *)calloc(next_colon-colon, sizeof(char));
 	    if (cur_item->command == NULL)
-		perror("Out of memory in read_cfg");
+		outofmem(__FILE__, "read_cfg");
 	    LYstrncpy(cur_item->command, colon+1, (int)(next_colon-(colon+1)));
 	    remove_backslashes(cur_item->command);
 	    cur_item->always_enabled = is_true(next_colon+1);
@@ -823,6 +823,7 @@ static Config_Type Config_Table [] =
      PARSE_FUN("dired_menu", CONF_FUN, dired_menu_fun),
 #endif
      PARSE_ADD("downloader", CONF_ADD_ITEM, downloaders),
+     PARSE_SET("eat_all_cookies", CONF_BOOL, LYEatAllCookies),
      PARSE_SET("emacs_keys_always_on", CONF_BOOL, emacs_keys),
      PARSE_SET("enable_scrollback", CONF_BOOL, enable_scrollback),
 #ifdef USE_EXTERNALS
@@ -1117,9 +1118,10 @@ PUBLIC void read_cfg ARGS3(
 #else
 		char tmpbuf[MAX_LINE_BUFFER_LEN];
 		sprintf (tmpbuf, "%s=%s", tbl->name, value);
-		q->str_value = (char **)calloc(1, sizeof(char **));
-		StrAllocCopy(*(q->str_value), tmpbuf);
-		putenv (*(q->str_value));
+		if ((q->str_value = (char **)calloc(1, sizeof(char **))) != 0) {
+			StrAllocCopy(*(q->str_value), tmpbuf);
+			putenv (*(q->str_value));
+		}
 #endif
 	    }
 	    break;

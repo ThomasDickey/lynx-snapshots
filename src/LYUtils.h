@@ -123,7 +123,11 @@ extern BOOLEAN mustshow;
 
 #define PROXY_URL_TYPE		36
 
-#define UNKNOWN_URL_TYPE	37
+/*
+ * FIXME: Where should this really go?
+ */
+#define LYNXOPTIONS_URL_TYPE	37
+#define UNKNOWN_URL_TYPE	38
 
 /*
  *  For change_sug_filename().

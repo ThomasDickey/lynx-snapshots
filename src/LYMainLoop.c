@@ -205,15 +205,17 @@ int mainloop NOARGS
     BOOLEAN rlink_allowed;
     BOOLEAN vi_keys_flag = vi_keys;
     BOOLEAN emacs_keys_flag = emacs_keys;
+    BOOLEAN LYRawMode_flag = LYRawMode;
+#ifndef EXP_FORMS_OPTIONS
+    BOOLEAN LYSelectPopups_flag = LYSelectPopups;
     BOOLEAN keypad_mode_flag = keypad_mode;
+    BOOLEAN show_dotfiles_flag = show_dotfiles;
     BOOLEAN user_mode_flag = user_mode;
-    int HTfileSortMethod_flag = HTfileSortMethod;
-    int CurrentCharSet_flag = current_char_set;
     int CurrentAssumeCharSet_flag = UCLYhndl_for_unspec;
     int CurrentAssumeLocalCharSet_flag = UCLYhndl_HTFile_for_unspec;
-    BOOLEAN show_dotfiles_flag = show_dotfiles;
-    BOOLEAN LYRawMode_flag = LYRawMode;
-    BOOLEAN LYSelectPopups_flag = LYSelectPopups;
+    int CurrentCharSet_flag = current_char_set;
+    int HTfileSortMethod_flag = HTfileSortMethod;
+#endif
     BOOLEAN trace_mode_flag = FALSE;
     BOOLEAN forced_HTML_mode = LYforce_HTML_mode;
 #ifdef DISP_PARTIAL
@@ -232,6 +234,7 @@ int mainloop NOARGS
     char *temp = NULL;
     BOOLEAN ForcePush = FALSE;
     BOOLEAN override_LYresubmit_posts = FALSE;
+    BOOLEAN was_in_options = FALSE;
     unsigned int len;
     int i;
 
@@ -378,7 +381,12 @@ try_again:
 		     *	elements to the curdoc structure elements
 		     *	under case NORMAL.  - FM
 		     */
+#ifndef EXP_FORMS_OPTIONS
 		    if (strncmp(newdoc.address, "LYNXDOWNLOAD:", 13)) {
+#else /* EXP_FORMS_OPTIONS */
+		    if (strncmp(newdoc.address, "LYNXDOWNLOAD:", 13) &&
+			strncmp(newdoc.address, "LYNXOPTIONS:", 12)) {
+#endif /* EXP_FORMS_OPTIONS */
 			LYpush(&curdoc, ForcePush);
 		    }
 		} else if (!newdoc.address) {
@@ -679,6 +687,12 @@ try_again:
 			trace_mode_flag = FALSE;
 			fprintf(tfp, "Turning TRACE back on.\n\n");
 		    }
+#ifdef EXP_FORMS_OPTIONS
+		    if (newdoc.address) {
+			was_in_options =
+			    (!strncmp(newdoc.address, "LYNXOPTIONS:", 12));
+		    }
+#endif /* LD_OPTIONS */
 		    FREE(newdoc.address); /* to pop last doc */
 		    FREE(newdoc.bookmark);
 		    LYJumpFileURL = FALSE;
@@ -3641,6 +3655,7 @@ check_goto_URL:
 	    } else if (!strncmp(user_input_buffer, "LYNXCOOKIE:", 11) ||
 		       !strncmp(user_input_buffer, "LYNXDIRED:", 10) ||
 		       !strncmp(user_input_buffer, "LYNXDOWNLOAD:", 13) ||
+		       !strncmp(user_input_buffer, "LYNXOPTIONS:", 12) ||
 		       !strncmp(user_input_buffer, "LYNXPRINT:", 10)) {
 		_statusline(GOTO_SPECIAL_DISALLOWED);
 		sleep(MessageSecs);
@@ -3802,6 +3817,7 @@ check_goto_URL:
 #ifdef DIRED_SUPPORT
 	    c = dir_list_style;
 #endif /* DIRED_SUPPORT */
+#ifndef EXP_FORMS_OPTIONS
 	    options(); /* do the options stuff */
 
 	    if (keypad_mode_flag != keypad_mode ||
@@ -3901,6 +3917,32 @@ check_goto_URL:
 	    StrAllocCopy(CurrentNegoCharset, (pref_charset ?
 					      pref_charset : ""));
 	    refresh_screen = TRUE; /* to repaint screen */
+#else /* EXP_FORMS_OPTIONS */
+	    /*
+	     * FIXME: Blatantly stolen from LYK_PRINT below.
+	     * how much is really valid here?  I don't know the
+	     * innards well enough. MRC
+	     */
+	    /*
+	     *	Don't do if already viewing options page.
+	     */
+	    if (strcmp((curdoc.title ? curdoc.title : ""),
+		       OPTIONS_TITLE)) {
+
+		if (gen_options(&newdoc.address) < 0)
+		    break;
+		StrAllocCopy(newdoc.title, OPTIONS_TITLE);
+		FREE(newdoc.post_data);
+		FREE(newdoc.post_content_type);
+		FREE(newdoc.bookmark);
+		newdoc.isHEAD = FALSE;
+		newdoc.safe = FALSE;
+		ForcePush = TRUE;
+		if (check_realm)
+		    LYPermitURL = TRUE;
+		refresh_screen = TRUE;	/* redisplay */
+	    }
+#endif /* EXP_FORMS_OPTIONS */
 	    break;
 
 	case LYK_INDEX_SEARCH: /* search for a user string */
@@ -4707,6 +4749,8 @@ check_goto_URL:
 		  strncmp(links[curdoc.link].lname,
 			 "LYNXCOOKIE:", 11) &&
 		  strncmp(links[curdoc.link].lname,
+			 "LYNXOPTIONS:", 12) &&
+		  strncmp(links[curdoc.link].lname,
 			 "LYNXLIST:", 9)))) {
 		if (nlinks > 0) {
 		    if (curdoc.post_data == NULL &&
@@ -5060,6 +5104,8 @@ check_add_bookmark_to_self:
 				    "LYNXDOWNLOAD:", 13) ||
 			   !strncmp(links[curdoc.link].lname,
 				    "LYNXPRINT:", 10) ||
+			   !strncmp(links[curdoc.link].lname,
+				    "LYNXOPTIONS:", 12) ||
 			   !strncmp(links[curdoc.link].lname,
 				    "lynxexec:", 9) ||
 			   !strncmp(links[curdoc.link].lname,

@@ -358,6 +358,8 @@ PRIVATE void store_cookie ARGS3(
 				strlen(INVALID_COOKIE_DOMAIN_CONFIRMATION) +
 				1));
 
+	    if (msg == 0)
+	    	outofmem(__FILE__, "store_cookie");
 	    sprintf(msg,
 		    INVALID_COOKIE_DOMAIN_CONFIRMATION,
 		    co->domain,
@@ -1829,16 +1831,16 @@ PUBLIC char * LYCookie ARGS4(
     return(NULL);
 }
 
-/* rjp - experiment cookie loading */
 #ifdef EXP_PERSISTENT_COOKIES
+/* rjp - experiment cookie loading */
 PUBLIC void LYLoadCookies ARGS1 (
 	CONST char *,	cookie_file)
 {
     FILE *cookie_handle;
     char buf[5000]; /* should be long enough for a cookie line */
-    char domain[256], path[256], name[256], value[4100];
-    char what[8], secure[8], expires_a[16];
-    int expires;
+    static char domain[256], path[256], name[256], value[4100];
+    static char what[8], secure[8], expires_a[16];
+    time_t expires;
 
     cookie_handle = fopen(cookie_file, "r+");
     if (!cookie_handle)
@@ -1863,10 +1865,9 @@ PUBLIC void LYLoadCookies ARGS1 (
 	 * what kind of platform problems this might introduce. - RP
 	 */
 	tok_ptr = buf;
-	tok_out = strsep(&tok_ptr, "\t");
+	tok_out = LYstrsep(&tok_ptr, "\t");
 	for (tok_loop = 0; tok_out && tok_values[tok_loop]; tok_loop++) {
-	if (TRACE)
-	fprintf(stderr, ">%d:%p:%p:[%s]:%s\n",
+	CTRACE(tfp, ">%d:%p:%p:[%s]:%s\n",
 	    tok_loop, tok_values[tok_loop], tok_out, tok_out, buf);
 	    strcpy(tok_values[tok_loop], tok_out);
 	    /*
@@ -1875,9 +1876,10 @@ PUBLIC void LYLoadCookies ARGS1 (
 	     * like "FALSE\t\tFALSE\t" translates to FALSE,FALSE
 	     * instead of FALSE,,FALSE. - RP
 	     */
-	    tok_out = strsep(&tok_ptr, "\t");
+	    tok_out = LYstrsep(&tok_ptr, "\t");
 	}
-	expires = atoi(expires_a);
+	expires = atol(expires_a);
+	fprintf(stderr, "COOKIE: expires %s\n", ctime(&expires));
 
 	/*
 	 * This fails when the path is blank
@@ -1886,9 +1888,8 @@ PUBLIC void LYLoadCookies ARGS1 (
 	 *  domain, what, path, secure, &expires, name, value);
 	 */
 
-	if (TRACE)
-	fprintf(stderr, "%s\t%s\t%s\t%s\t%d\t%s\t%s\tREADCOOKIE\n",
-	    domain, what, path, secure, expires, name, value);
+	CTRACE(tfp, "%s\t%s\t%s\t%s\t%ld\t%s\t%s\tREADCOOKIE\n",
+	    domain, what, path, secure, (long) expires, name, value);
 	moo = newCookie();
 	StrAllocCopy(moo->domain, domain);
 	StrAllocCopy(moo->path, path);
@@ -1896,6 +1897,7 @@ PUBLIC void LYLoadCookies ARGS1 (
 	StrAllocCopy(moo->value, value);
 	moo->pathlen = strlen(moo->path);
 	moo->flags |= COOKIE_FLAG_PERSISTENT;
+	moo->expires = expires;
 	/*
 	 * I don't like using this to store the cookies because it's
 	 * designed to store cookies that have been received from an
@@ -1920,6 +1922,7 @@ PRIVATE void LYStoreCookies ARGS1 (
 #ifdef VMS
     extern BOOLEAN HadVMSInterrupt;
 #endif /* VMS */
+    time_t now = time(NULL); /* system specific? - RP */
 
     /*
      *	Check whether we have something to do. - FM
@@ -1963,6 +1966,7 @@ PRIVATE void LYStoreCookies ARGS1 (
 	    if ((co = (cookie *)cl->object) == NULL)
 		continue;
 
+	    CTRACE(tfp, "COOKIE: %ld cf %ld\n", (long) now, (long) co->expires);
 	    fprintf(cookie_handle, "%s\t%s\t%s\t%s\t%ld\t%s\t%s\n",
 		de->domain,
 		"FALSE", co->path,

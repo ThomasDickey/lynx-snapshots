@@ -427,6 +427,24 @@ PUBLIC void read_rc NOPARAMS
 #endif /* DIRED_SUPPORT */
 
 	/*
+	 * eat all cookies? i think it should work user-by-user.
+	 *  -BJP
+	 */
+	} else if ((cp = LYstrstr(line_buffer, "eat_all_cookies")) != NULL &&
+		   cp-line_buffer < number_sign) {
+	    if((cp2 = (char *)strchr(cp,'=')) != NULL)
+		cp = cp2 + 1;
+	    while (isspace(*cp))
+		cp++; /* get rid of spaces */
+	    if (LYstrstr(cp,"TRUE") != NULL) {
+		LYEatAllCookies = TRUE;
+	    } else {
+		LYEatAllCookies = FALSE;
+	    }
+	/* BJP */
+
+
+	/*
 	 *  User mode.
 	 */
 	} else if ((cp = LYstrstr(line_buffer, "user_mode")) != NULL &&

@@ -14,6 +14,7 @@
 #include <LYSignal.h>
 #include <LYGetFile.h>
 #include <LYPrint.h>
+#include <LYOptions.h>
 #include <LYHistory.h>
 #include <LYStrings.h>
 #include <LYClean.h>
@@ -221,6 +222,7 @@ Try_Redirected_URL:
 			  url_type == LYNXIMGMAP_URL_TYPE ||
 			  url_type == LYNXCOOKIE_URL_TYPE ||
 			  url_type == LYNXPRINT_URL_TYPE ||
+			  url_type == LYNXOPTIONS_URL_TYPE ||
 			  url_type == LYNXDOWNLOAD_URL_TYPE ||
 			  url_type == MAILTO_URL_TYPE ||
 			  url_type == NEWSPOST_URL_TYPE ||
@@ -254,6 +256,7 @@ Try_Redirected_URL:
 		    url_type != GOPHER_URL_TYPE &&
 		    url_type != CSO_URL_TYPE &&
 		    url_type != PROXY_URL_TYPE &&
+		    url_type != LYNXOPTIONS_URL_TYPE &&
 		    !(url_type == FILE_URL_TYPE &&
 		      *(LYlist_temp_url()) &&
 		      !strncmp(WWWDoc.address, LYlist_temp_url(),
@@ -282,6 +285,9 @@ Try_Redirected_URL:
 
 		} else if (url_type == LYNXPRINT_URL_TYPE) {
 		    return(printfile(doc));
+
+		} else if (url_type == LYNXOPTIONS_URL_TYPE) {
+		    return(postoptions(doc));
 
 		} else if (url_type == NEWSPOST_URL_TYPE ||
 			   url_type == NEWSREPLY_URL_TYPE ||
@@ -429,6 +435,10 @@ Try_Redirected_URL:
 			/*
 			 *  Run the command.
 			 */
+#ifdef __DJGPP__
+			__djgpp_set_ctrl_c(0);
+			_go32_want_ctrl_break(1);
+#endif /* __DJGPP__ */
 			if (strstr(p,"//") == p+9)
 			    system(p+11);
 			else
@@ -442,13 +452,21 @@ Try_Redirected_URL:
 #endif /* !VMS */
 			    printf("\n%s", RETURN_TO_LYNX);
 			    fflush(stdout);
+#ifdef DJGPP_KEYHANDLER
+			    getxkey();
+#else
 			    LYgetch();
+#endif /* DJGPP_KEYHANDLER */
 #ifdef VMS
 			    {
 			      extern BOOLEAN HadVMSInterrupt;
 			      HadVMSInterrupt = FALSE;
 			    }
 #endif /* VMS */
+#ifdef __DJGPP__
+			    __djgpp_set_ctrl_c(1);
+			    _go32_want_ctrl_break(0);
+#endif /* __DJGPP__ */
 			}
 			start_curses();
 			LYAddVisitedLink(doc);

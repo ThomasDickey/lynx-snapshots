@@ -1452,6 +1452,23 @@ again:
 }
 
 /*
+ *  A replacement for 'strsep()'
+ */
+PUBLIC char *LYstrsep ARGS2(
+	char **,	stringp,
+	CONST char *,	delim)
+{
+    char *tmp, *out = 0;
+    tmp = strpbrk(*stringp, delim);
+    if (tmp) {
+	out = *stringp;		/* save the start of the string */
+	*tmp = '\0';		/* terminate the substring with \0 */
+	*stringp = ++tmp;	/* point at the terminator */
+    }
+    return out;
+}
+
+/*
  *  LYstrstr will find the first occurrence of the string
  *  pointed to by tarptr in the string pointed to by chptr.
  *  It returns NULL if string not found.

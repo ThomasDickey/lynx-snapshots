@@ -713,33 +713,6 @@ fi
 AC_SUBST(EXTRA_CFLAGS)
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl Make a test to determine the array type for the 'getgroups()' function. 
-dnl The BSD version uses 'int', while POSIX specifies 'gid_t', which is usually
-dnl an unsigned short.  (Check 'gid_t' first since not all compilers do proper
-dnl warning!).
-AC_DEFUN([CF_GETGROUPS],
-[
-AC_CACHE_CHECK(for array type of getgroups,cf_cv_getgroups_type,[
-	cf_save_CFLAGS="$CFLAGS"
-	test -n "$GCC" && CFLAGS="$CFLAGS -Werror"
-	for cf_type in gid_t int
-	do
-		AC_TRY_LINK([
-#include <sys/types.h>
-#include <unistd.h>],[$cf_type my_groups[64]; getgroups(64, my_groups)],
-		[cf_cv_getgroups_type=$cf_type
-		 break],[])
-	done
-	CFLAGS="$cf_save_CFLAGS"
-])
-if test "$cf_cv_getgroups_type" = unknown ; then
-	AC_MSG_WARN(Cannot determine the correct type, assuming int)
-	AC_DEFINE(TYPE_GETGROUPS,int)
-else
-	AC_DEFINE_UNQUOTED(TYPE_GETGROUPS,$cf_cv_getgroups_type)
-fi
-])dnl
-dnl ---------------------------------------------------------------------------
 dnl Construct a search-list for a nonstandard header-file
 AC_DEFUN([CF_HEADER_PATH],
 [$1=""
@@ -1349,67 +1322,71 @@ AC_MSG_RESULT($cf_result)
 test $cf_result = no && LIBS="$cf_slang_LIBS3"
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl Check for socks5 configuration
-AC_DEFUN([CF_SOCKS5],[
-
-# check in nonstandard locations
-AC_CACHE_CHECK(if we have socks.h,cf_cv_socks_incdir,[
-AC_TRY_COMPILE([#include <socks.h>],[],
-	[cf_cv_socks_incdir=yes],
-	[cf_cv_socks_incdir=no
-	CF_HEADER_PATH(cf_search,socks)
-	for cf_incdir in $cf_search
-	do
-		if test -f $cf_incdir/socks.h ; then
-			cf_cv_socks_incdir=$cf_incdir
-			break
-		fi
-	done
-])])
-
-case $cf_cv_socks_incdir in #(vi
-no)
-	AC_ERROR(Sorry.  Cannot find socks.h)
-	;;
-yes) #(vi
-	;;
+dnl Check for socks library
+dnl $1 = the [optional] directory in which the library may be found
+dnl $2 = the [optional] name of the library
+AC_DEFUN([CF_SOCKS],[
+case "$1" in #(vi
+no|yes) #(vi
+  ;;
 *)
-	CF_ADD_INCDIR($cf_cv_socks_incdir)
-	;;
+  LIBS="$LIBS -L$1"
+  ;;
 esac
-
-AC_CACHE_CHECK(if we can link against socks5 library,cf_cv_lib_socks5,[
-LIBS="$LIBS -lsocks5"
-
-# Try twice in case we're on AIX with a nonstandard binding
-for cf_redefine in yes getpeername ; do
+LIBS="$LIBS -lsocks"
+AC_DEFINE(SOCKS)
+AC_DEFINE(accept,Raccept)
+AC_DEFINE(bind,Rbind)
+AC_DEFINE(connect,Rconnect)
+AC_DEFINE(getpeername,Rgetpeername)
+AC_DEFINE(getsockname,Rgetsockname)
+AC_DEFINE(listen,Rlisten)
+AC_DEFINE(recvfrom,Rrecvfrom)
+AC_DEFINE(select,Rselect)
 AC_TRY_LINK([
-#define SOCKS
-#ifdef _AIX
-#define $cf_redefine 1
-#endif
+#include <stdio.h>],[
+	accept((char *)0)],,
+	[AC_ERROR(Cannot link with socks library)])
+])dnl
+dnl ---------------------------------------------------------------------------
+dnl Check for socks5 configuration
+dnl $1 = the [optional] directory in which the library may be found
+AC_DEFUN([CF_SOCKS5],[
+case "$1" in #(vi
+no|yes) #(vi
+  ;;
+*)
+  LIBS="$LIBS -L$1"
+  CFLAGS="$CFLAGS -I$1/../include"
+  ;;
+esac
+LIBS="$LIBS -lsocks5"
+AC_DEFINE(USE_SOCKS5)
+AC_DEFINE(SOCKS)
+AC_MSG_CHECKING(if the socks library uses socks4 prefix)
+AC_TRY_LINK([
 #include <socks.h>],[
-#ifdef USE_SOCKS4_PREFIX
-	Rinit((char *)0);
-#else
-	SOCKSinit((char *)0);
-#endif
-	getpeername(0, (struct sockaddr *)0, (int *)0);],
-	[cf_cv_lib_socks5=$cf_redefine
-	 break],
-	[cf_cv_lib_socks5=no])
-done
-])
-if test $cf_cv_lib_socks5 = no ; then
-	AC_ERROR(Sorry.  Cannot link against socks5 library)
-else 
-	AC_DEFINE(USE_SOCKS5)
-	if test $cf_cv_lib_socks5 != yes ; then
-		AC_DEFINE(getpeername)
-		AC_DEFINE(getsockname)
-		AC_DEFINE(accept)
-		AC_DEFINE(recvfrom)
-	fi
+	Rinit((char *)0)],
+	[cf_use_socks4=yes],
+	[AC_TRY_LINK([#include <socks.h>],
+		[SOCKSinit((char *)0)],
+		[cf_use_socks4=no],
+		[AC_ERROR(Cannot link with socks5 library)])])
+AC_MSG_RESULT($cf_use_socks4)
+if test "$cf_use_socks4" = "yes" ; then
+	AC_DEFINE(accept,Raccept)
+	AC_DEFINE(bind,Rbind)
+	AC_DEFINE(connect,Rconnect)
+	AC_DEFINE(getpeername,Rgetpeername)
+	AC_DEFINE(getsockname,Rgetsockname)
+	AC_DEFINE(listen,Rlisten)
+	AC_DEFINE(recvfrom,Rrecvfrom)
+	AC_DEFINE(select,Rselect)
+else
+	AC_DEFINE(accept,SOCKSaccept)
+	AC_DEFINE(getpeername,SOCKSgetpeername)
+	AC_DEFINE(getsockname,SOCKSgetsockname)
+	AC_DEFINE(recvfrom,SOCKSrecvfrom)
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
