@@ -237,15 +237,7 @@ check_recall:
 	    *(cp++) = '\0';
 	    strcpy(command, buffer);
 	    LYTrimPathSep(command);
-#ifdef DOSPATH
-	    strcat(command, HTDOS_wwwName((char *)Home_Dir()));
-#else
-#ifdef VMS
-	    strcat(command, HTVMS_wwwName((char *)Home_Dir()));
-#else
-	    strcat(command, Home_Dir());
-#endif /* VMS */
-#endif /* DOSPATH */
+	    strcat(command, wwwName(Home_Dir()));
 	    strcat(command, cp);
 	    strcpy(buffer, command);
 	}
@@ -588,6 +580,7 @@ PUBLIC int LYdownload_options ARGS2(
 	char *, 	data_file)
 {
     static char tempfile[LY_MAXPATH];
+    char *downloaded_url = NULL;
     char *sug_filename = NULL;
     FILE *fp0;
     lynx_html_item_type *cur_download;
@@ -596,6 +589,7 @@ PUBLIC int LYdownload_options ARGS2(
     /*
      *	Get a suggested filename.
      */
+    StrAllocCopy(downloaded_url, *newfile);
     StrAllocCopy(sug_filename, *newfile);
     change_sug_filename(sug_filename);
 
@@ -616,10 +610,12 @@ PUBLIC int LYdownload_options ARGS2(
 
     fprintf(fp0, "<pre>\n");
     fprintf(fp0, "\
-   <em>You download the link:</em> %s\n\
-     <em>Suggested file name:</em> %s%s\n",
-	data_file, (lynx_save_space ? lynx_save_space : ""), sug_filename);
-    fprintf(fp0, "\nStandard download options:\n");
+  <em>Downloaded link:</em> %s\n\
+  <em>Suggested file name:</em> %s%s\n",
+       downloaded_url, (lynx_save_space ? lynx_save_space : ""), sug_filename);
+
+    fprintf(fp0, "\n%s options:\n",
+	(user_mode == NOVICE_MODE) ? "Standard download" : "Download");
 
     if(!no_disk_save && !child_lynx) {
 #ifdef DIRED_SUPPORT
@@ -635,7 +631,8 @@ PUBLIC int LYdownload_options ARGS2(
 	fprintf(fp0,"   <em>Save to disk disabled.</em>\n");
     }
 
-    fprintf(fp0, "\nLocal additions:\n");
+    if (user_mode == NOVICE_MODE)
+	fprintf(fp0, "\nLocal additions:\n");
 
     if (downloaders != NULL) {
 	for (count = 0, cur_download = downloaders; cur_download != NULL;

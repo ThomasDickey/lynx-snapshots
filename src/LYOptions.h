@@ -7,10 +7,10 @@ extern BOOLEAN term_options;
 
 extern void edit_bookmarks NOPARAMS;
 
-#ifdef EXP_FORMS_OPTIONS
 extern int postoptions PARAMS((document *newdoc));
 extern int gen_options PARAMS((char **newfile));
-#else
+
+#ifndef EXP_FORMS_OPTIONS
 extern void LYoptions NOPARAMS;
 
 /*
@@ -73,6 +73,6 @@ extern void LYoptions NOPARAMS;
 #define B_VERBOSE_IMAGES 50
 #define C_VERBOSE_IMAGES (B_VERBOSE_IMAGES + 21)
 
-#endif /* EXP_FORMS_OPTIONS */
+#endif /* !EXP_FORMS_OPTIONS */
 
 #endif /* LYOPTIONS_H */

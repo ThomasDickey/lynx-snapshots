@@ -16,6 +16,7 @@
 #include <LYBookmark.h>
 #include <LYCookie.h>
 #include <LYReadCFG.h>
+#include <HTAlert.h>
 
 #ifdef DIRED_SUPPORT
 #include <LYLocal.h>
@@ -473,14 +474,16 @@ typedef struct
 {
    CONST char *name;
    int type;
+#define CONF_UNSPECIFIED	0
 #define CONF_BOOL		1      /* BOOLEAN type */
 #define CONF_FUN		2
 #define CONF_INT		3
 #define CONF_STR		4
 #define CONF_ENV		5      /* from environment variable */
-#define CONF_INCLUDE		6      /* include file-- handle special */
-#define CONF_ADD_ITEM		7
-#define CONF_ADD_TRUSTED	8
+#define CONF_ENV2		6      /* from environment VARIABLE */
+#define CONF_INCLUDE		7      /* include file-- handle special */
+#define CONF_ADD_ITEM		8
+#define CONF_ADD_TRUSTED	9
 
    ParseData;
 }
@@ -829,6 +832,9 @@ static Config_Type Config_Table [] =
      PARSE_ENV("finger_proxy", CONF_ENV, 0 ),
      PARSE_SET("force_8bit_toupper", CONF_BOOL, UCForce8bitTOUPPER),
      PARSE_SET("force_ssl_cookies_secure", CONF_BOOL, LYForceSSLCookiesSecure),
+#ifndef EXP_FORMS_OPTIONS
+     PARSE_SET("forms_options", CONF_BOOL, LYUseFormsOptions),
+#endif
      PARSE_ENV("ftp_proxy", CONF_ENV, 0 ),
      PARSE_STR("global_extension_map", CONF_STR, global_extension_map),
      PARSE_STR("global_mailcap", CONF_STR, global_type_map),
@@ -880,7 +886,7 @@ static Config_Type Config_Table [] =
      PARSE_ENV("newspost_proxy", CONF_ENV, 0),
      PARSE_ENV("newsreply_proxy", CONF_ENV, 0),
      PARSE_ENV("nntp_proxy", CONF_ENV, 0),
-     PARSE_ENV("nntpserver", CONF_ENV, 0),
+     PARSE_ENV("nntpserver", CONF_ENV2, 0), /* actually NNTPSERVER */
      PARSE_SET("no_dot_files", CONF_BOOL, no_dotfiles),
      PARSE_SET("no_file_referer", CONF_BOOL, no_filereferer),
 #ifndef VMS
@@ -974,10 +980,11 @@ PUBLIC void free_lynx_cfg NOARGS
 /*
  * Process the configuration file (lynx.cfg).
  */
-PUBLIC void read_cfg ARGS3(
+PUBLIC void read_cfg ARGS4(
 	char *, cfg_filename,
 	char *, parent_filename,
-	int,	nesting_level)
+	int,	nesting_level,
+	FILE *,	fp0)
 {
     FILE *fp;
     char buffer[MAX_LINE_BUFFER_LEN];
@@ -1082,7 +1089,9 @@ PUBLIC void read_cfg ARGS3(
 #else
 	q = (ConfigUnion *)(&(tbl->value));
 #endif
-	switch (tbl->type) {
+	switch ((fp0 != 0 && tbl->type != CONF_INCLUDE)
+		? CONF_UNSPECIFIED
+		: tbl->type) {
 	case CONF_BOOL:
 	    if (q->set_value != 0)
 		*(q->set_value) = is_true (value);
@@ -1111,12 +1120,19 @@ PUBLIC void read_cfg ARGS3(
 	    break;
 
 	case CONF_ENV:
-	    if (getenv (tbl->name) == 0) {
+	case CONF_ENV2:
+
+	    if (tbl->type == CONF_ENV)
+	    	LYLowerCase(name);
+	    else
+	    	LYUpperCase(name);
+		
+	    if (getenv (name) == 0) {
 #ifdef VMS
 		Define_VMSLogical(tbl->name, value);
 #else
 		char tmpbuf[MAX_LINE_BUFFER_LEN];
-		sprintf (tmpbuf, "%s=%s", tbl->name, value);
+		sprintf (tmpbuf, "%s=%s", name, value);
 		if ((q->str_value = (char **)calloc(1, sizeof(char **))) != 0) {
 			StrAllocCopy(*(q->str_value), tmpbuf);
 			putenv (*(q->str_value));
@@ -1127,18 +1143,29 @@ PUBLIC void read_cfg ARGS3(
 
 	case CONF_INCLUDE:
 	    /* include another file */
-	    read_cfg (value, cfg_filename, nesting_level + 1);
+	    if (fp0 != 0) {
+		fprintf(fp0, "%s:%s\n\n", name, value);
+		fprintf(fp0, "    #&lt;begin  %s&gt;\n", value);
+	    }
+	    read_cfg (value, cfg_filename, nesting_level + 1, fp0);
+	    if (fp0 != 0)
+		fprintf(fp0, "    #&lt;end of %s&gt;\n\n", value);
 	    break;
 
 	case CONF_ADD_ITEM:
 	    if (q->add_value != 0)
 		add_item_to_list (value, q->add_value);
 	    break;
+
 #if defined(EXEC_LINKS) || defined(LYNXCGI_LINKS)
 	case CONF_ADD_TRUSTED:
 	    add_trusted (value, q->def_value);
 	    break;
 #endif
+	default:
+	    if (fp0 != 0)
+		fprintf(fp0, "%s:%s\n", name, value);
+	    break;
 	}
     }
 
@@ -1174,6 +1201,56 @@ PUBLIC void read_cfg ARGS3(
     }
 
     if (LYCookieRejectDomains != NULL) {
-        cookie_add_rejectlist(LYCookieRejectDomains);
+	cookie_add_rejectlist(LYCookieRejectDomains);
     }
+}
+
+/*
+ * lynx.cfg infopage, returns local url.
+ */
+PUBLIC char *lynx_cfg_infopage NOARGS
+{
+    static char *local_url;
+    char tempfile[LY_MAXPATH];
+    char *temp = 0;
+    FILE *fp0;
+
+    if (local_url == 0) {
+	if ((fp0 = LYOpenTemp(tempfile, HTML_SUFFIX, "w")) == NULL) {
+	    HTAlert(CANNOT_OPEN_TEMP);
+	    return(0);
+	}
+	LYLocalFileToURL(&local_url, tempfile);
+
+	LYforce_no_cache = TRUE;  /* don't cache this doc */
+
+#ifdef HAVE_CONFIG_H
+	StrAllocCopy(temp, LYNX_CFG_FILE);
+#else
+	StrAllocCopy(temp, helpfilepath);
+	StrAllocCat(temp, LYNXCFG_HELP);  /* DJGPP/Win32/VMS should care of */
+#endif /* HAVE_CONFIG_H */
+
+	BeginInternalPage (fp0, LYNXCFG_TITLE, NULL);
+	fprintf(fp0, "<pre>\n");
+	fprintf(fp0, "<em>This is read from your lynx.cfg file,\n");
+
+	fprintf(fp0, "please \"read\" distribution's <a href=\"%s\">lynx.cfg",
+		     temp);
+	fprintf(fp0, "</a> for more comments.</em>\n\n");
+
+	fprintf(fp0, "    #<em>Your primary configuration %s</em>\n",
+		     lynx_cfg_file);
+	/*
+	 *  Process the configuration file.
+	 */
+	read_cfg(lynx_cfg_file, "main program", 1, fp0);
+
+	FREE(temp);
+	fprintf(fp0, "</pre>\n");
+	EndInternalPage(fp0);
+	LYCloseTempFP(fp0);
+    }
+
+    return(local_url);
 }

@@ -28,21 +28,30 @@
 
 #define PutDefs(table, n) fprintf(fp0, "%-35s %s\n", table[n].name, table[n].value)
 
+/*
+ *  Compile-time definitions info, returns local url
+ */
 PRIVATE char *lynx_compile_opts NOARGS
 {
-    static char tempfile[256];
+    char tempfile[LY_MAXPATH];
 #include <cfg_defs.h>
     unsigned n;
+    static char *info_url;
     FILE *fp0;
 
-    if (strlen(tempfile) == 0) {
+    if (info_url == 0) {
 	if ((fp0 = LYOpenTemp (tempfile, HTML_SUFFIX, "w")) == 0) {
 	    HTAlert(CANNOT_OPEN_TEMP);
-	    tempfile[0] = '\0';
 	    return(0);
 	}
+	LYLocalFileToURL(&info_url, tempfile);
+
 	BeginInternalPage (fp0, CONFIG_DEF_TITLE, NULL);
 	fprintf(fp0, "<pre>\n");
+
+	fprintf(fp0, "See also <a href=\"%s\">your lynx.cfg</a> for run-time options\n\n",
+		     lynx_cfg_infopage());
+
 	fprintf(fp0, "\n<em>config.cache</em>\n");
 	for (n = 0; n < TABLESIZE(config_cache); n++) {
 	    PutDefs(config_cache, n);
@@ -55,7 +64,7 @@ PRIVATE char *lynx_compile_opts NOARGS
 	EndInternalPage(fp0);
 	LYCloseTempFP(fp0);
     }
-    return tempfile;
+    return info_url;
 }
 #else
 #undef HAVE_CFG_DEFS_H
@@ -72,7 +81,7 @@ PUBLIC int showinfo ARGS4(
 	document *,	newdoc,
 	char *, 	owner_address)
 {
-    static char tempfile[256];
+    static char tempfile[LY_MAXPATH];
     static char *info_url;
     int url_type;
     FILE *fp0;
@@ -80,7 +89,7 @@ PUBLIC int showinfo ARGS4(
     CONST char *cp;
 
 #ifdef DIRED_SUPPORT
-    char temp[300];
+    char temp[LY_MAXPATH];
     struct stat dir_info;
     struct passwd *pw;
     struct group *grp;
@@ -116,19 +125,18 @@ PUBLIC int showinfo ARGS4(
     fprintf(fp0, "<title>%s</title>\n</head>\n<body>\n",
 		 SHOWINFO_TITLE);
 
-    LYLocalFileToURL(&info_url, lynx_compile_opts());
     fprintf(fp0, "<h1>%s %s (%.*s) (<a href=\"%s\">%s</a>)",
 		 LYNX_NAME, LYNX_VERSION,
 		 LYNX_DATE_LEN,
 		 (LYNX_RELEASE ? LYNX_RELEASE_DATE : &LYNX_DATE[LYNX_DATE_OFF]),
-		 (LYNX_RELEASE ? LYNX_WWW_HOME   : LYNX_WWW_DIST),
-		 (LYNX_RELEASE ? "latest release" : "development version") );
+		 (LYNX_RELEASE ? LYNX_WWW_HOME     : LYNX_WWW_DIST),
+		 (LYNX_RELEASE ? "latest release"  : "development version") );
 #ifdef HAVE_CFG_DEFS_H
     fprintf(fp0, " - <a href=\"%s\">compile time settings</a></h1>\n",
-		 info_url);
+		 lynx_compile_opts());
 #else
-    fprintf(fp0, "</h1>\n"
-		 ); /* do not forget to close </h1> */
+    fprintf(fp0, " - <a href=\"%s\">your lynx.cfg</a></h1>\n",
+		 lynx_cfg_infopage());
 #endif
 
 #ifdef DIRED_SUPPORT

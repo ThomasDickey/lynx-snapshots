@@ -36,13 +36,14 @@ extern char *LYSysShell NOPARAMS;
 extern char *LYgetXDisplay NOPARAMS;
 extern char *quote_pathname PARAMS((char *pathname));
 extern char *strip_trailing_slash PARAMS((char * my_dirname));
+extern char *wwwName PARAMS((CONST char *pathname));
 extern int HTCheckForInterrupt NOPARAMS;
 extern int LYCheckForProxyURL PARAMS((char *filename));
+extern int LYOpenInternalPage PARAMS((FILE **fp0, char **newfile));
 extern int LYSystem PARAMS((char *command));
 extern int is_url PARAMS((char *filename));
 extern int number2arrows PARAMS((int number));
 extern time_t LYmktime PARAMS((char *string, BOOL absolute));
-extern int LYOpenInternalPage PARAMS((FILE **fp0, char **newfile));
 extern void BeginInternalPage PARAMS((FILE *fp0, char *Title, char *HelpURL));
 extern void EndInternalPage PARAMS((FILE *fp0));
 extern void HTAddSugFilename PARAMS((char *fname));
@@ -142,13 +143,10 @@ extern BOOLEAN mustshow;
 #define LYNXIMGMAP_URL_TYPE	33
 #define LYNXCOOKIE_URL_TYPE	34
 #define LYNXDIRED_URL_TYPE	35
+#define LYNXOPTIONS_URL_TYPE	36
 
-#define PROXY_URL_TYPE		36
+#define PROXY_URL_TYPE		37
 
-/*
- * FIXME: Where should this really go?
- */
-#define LYNXOPTIONS_URL_TYPE	37
 #define UNKNOWN_URL_TYPE	38
 
 /*

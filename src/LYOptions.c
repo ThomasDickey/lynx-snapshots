@@ -19,6 +19,7 @@
 #include <LYBookmark.h>
 #include <GridText.h>
 #include <LYGetFile.h>
+#include <LYReadCFG.h>
 
 #include <LYLeaks.h>
 
@@ -3067,7 +3068,7 @@ restore_popup_statusline:
     }
 }
 
-#else /* EXP_FORMS_OPTIONS */
+#endif /* !EXP_FORMS_OPTIONS */
 
 /*
  * I'm paranoid about mistyping strings.  Also, this way they get combined
@@ -3362,19 +3363,17 @@ PUBLIC int postoptions ARGS1(
     BOOLEAN raw_mode_changed = FALSE;
     BOOLEAN assume_char_set_changed = FALSE;
     BOOLEAN need_reload = FALSE;
-    char *link_info = NULL;
     int CurrentShowColor = LYShowColor;
 
     /*-------------------------------------------------
      * kludge a link from mbm_menu, the URL was:
-     * fprintf(fp0,"<a href=\"LYNXOPTIONS://MBM_MENU\">go mbm menu</a>\n");
+     * "<a href=\"LYNXOPTIONS://MBM_MENU\">Goto multi-bookmark menu</a>\n"
      *--------------------------------------------------*/
 
-    StrAllocCopy(link_info, newdoc->address);
-    if (strstr(link_info, "LYNXOPTIONS://MBM_MENU")) {
-	edit_bookmarks();
+    if (strstr(newdoc->address, "LYNXOPTIONS://MBM_MENU")) {
 	FREE(newdoc->post_data);
 	FREE(data);
+	edit_bookmarks();
 	return(NULLFILE);
     }
 
@@ -3598,7 +3597,15 @@ PUBLIC int postoptions ARGS1(
 	if (!strcmp(data[i].tag, user_agent_string) && (!no_useragent)) {
 	    FREE(LYUserAgent);
 	    /* ignore Copyright warning ? */
-	    StrAllocCopy(LYUserAgent, data[i].value);
+	    StrAllocCopy(LYUserAgent,
+	    	*(data[i].value)
+	    	? data[i].value
+		: LYUserAgentDefault);
+	    if (LYUserAgent && *LYUserAgent &&
+		!strstr(LYUserAgent, "Lynx") &&
+		!strstr(LYUserAgent, "lynx")) {
+		HTAlert(UA_COPYRIGHT_WARNING);
+	    }
 	}
     } /* end of loop */
 
@@ -4018,6 +4025,10 @@ PUBLIC int gen_options ARGS1(
 		     NOTEMPTY(LYUserAgent), text_len, "");
     }
 
+    fprintf(fp0,
+	    "<a href=\"%s\">lynx.cfg information (read-only)</a>\n",
+	    lynx_cfg_infopage());
+
     fprintf(fp0,"\n</pre>\n");
 
     /* Submit/Reset */
@@ -4035,4 +4046,3 @@ PUBLIC int gen_options ARGS1(
     LYCloseTempFP(fp0);
     return(0);
 }
-#endif /* EXP_FORMS_OPTIONS */

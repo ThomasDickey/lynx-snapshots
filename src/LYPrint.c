@@ -372,15 +372,7 @@ PUBLIC int printfile ARGS1(
 		    *(cp++) = '\0';
 		    strcpy(buffer, filename);
 		    LYTrimPathSep(buffer);
-#ifdef DOSPATH
-		    strcat(buffer, HTDOS_wwwName((char *)Home_Dir()));
-#else
-#ifdef VMS
-		    strcat(buffer, HTVMS_wwwName((char *)Home_Dir()));
-#else
-		    strcat(buffer, Home_Dir());
-#endif /* VMS */
-#endif /* DOSPATH */
+		    strcat(buffer, wwwName(Home_Dir()));
 		    strcat(buffer, cp);
 		    strcpy(filename, buffer);
 		}
@@ -1283,7 +1275,8 @@ PUBLIC int print_options ARGS3(
     if (no_print || no_disk_save || child_lynx || no_mail)
 	fprintf(fp0, "   <em>Some print functions have been disabled!</em>\n");
 
-    fprintf(fp0, "\nStandard print options:\n");
+    fprintf(fp0, "\n%s options:\n",
+	(user_mode == NOVICE_MODE) ? "Standard print" : "Print");
 
     if (child_lynx == FALSE && no_disk_save == FALSE && no_print == FALSE)
 	fprintf(fp0,
@@ -1305,7 +1298,9 @@ PUBLIC int print_options ARGS3(
 		lines_in_file);
 #endif
 
-    fprintf(fp0, "\nLocal additions:\n");
+    if (user_mode == NOVICE_MODE)
+	fprintf(fp0, "\nLocal additions:\n");
+
     for (count = 0, cur_printer = printers; cur_printer != NULL;
 	cur_printer = cur_printer->next, count++)
     if (no_print == FALSE || cur_printer->always_enabled) {

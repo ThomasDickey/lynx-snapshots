@@ -11,9 +11,6 @@
 #include <LYCurses.h>
 #include <GridText.h>
 
-#ifdef DOSPATH
-#include <HTDOS.h>
-#endif
 #ifdef VMS
 #include <HTVMSUtils.h>
 #include <nam.h>

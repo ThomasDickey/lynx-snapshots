@@ -7,9 +7,7 @@
 #include <LYHistory.h>
 #include <LYPrint.h>
 #include <LYDownload.h>
-#ifdef EXP_FORMS_OPTIONS
 #include <LYOptions.h>
-#endif
 #include <LYKeymap.h>
 #include <LYList.h>
 #include <LYShowInfo.h>
@@ -70,9 +68,7 @@ PUBLIC void LYAddVisitedLink ARGS1(
 	!strcmp((doc->title ? doc->title : ""), HISTORY_PAGE_TITLE) ||
 	!strcmp((doc->title ? doc->title : ""), PRINT_OPTIONS_TITLE) ||
 	!strcmp((doc->title ? doc->title : ""), DOWNLOAD_OPTIONS_TITLE) ||
-#ifdef EXP_FORMS_OPTIONS
 	!strcmp((doc->title ? doc->title : ""), OPTIONS_TITLE) ||
-#endif
 #ifdef DIRED_SUPPORT
 	!strcmp((doc->title ? doc->title : ""), DIRED_MENU_TITLE) ||
 	!strcmp((doc->title ? doc->title : ""), UPLOAD_OPTIONS_TITLE) ||

@@ -3902,12 +3902,8 @@ have_VMS_URL:
 	     */
 #if defined (DOSPATH) || defined (__EMX__)
 	    if (old_string[1] != ':' && old_string[1] != '|') {
-#ifdef DOSPATH
-		StrAllocCopy(temp, HTDOS_wwwName(curdir));
-#else
-		StrAllocCopy(temp, curdir);
-#endif
-		LYAddPathSep(&temp);
+		StrAllocCopy(temp, wwwName(curdir));
+		LYAddHtmlSep(&temp);
 		LYstrncpy(curdir, temp, (DIRNAMESIZE - 1));
 		StrAllocCat(temp, old_string);
 	    } else {
@@ -5814,6 +5810,28 @@ PUBLIC void LYCleanupTemp NOARGS
 }
 
 /*
+ *  Convert local pathname to www name
+ *  (do not bother about file://localhost prefix at this point).
+ */
+PUBLIC  char * wwwName ARGS1(
+	CONST char *,	pathname)
+{
+    char *cp = NULL;
+
+#ifdef DOSPATH
+    cp = HTDOS_wwwName((char *)pathname);
+#else
+#ifdef VMS
+    cp = HTVMS_wwwName((char *)pathname);
+#else
+    cp = (char *)pathname;
+#endif /* VMS */
+#endif /* DOSPATH */
+
+    return cp;
+}
+
+/*
  * Convert a local filename to a URL
  */
 PUBLIC void LYLocalFileToURL ARGS2(
@@ -5824,15 +5842,7 @@ PUBLIC void LYLocalFileToURL ARGS2(
 
     StrAllocCopy(*target, "file://localhost");
 
-#if defined(DOSPATH) || defined(__EMX__)
-    leaf = HTDOS_wwwName(source);
-#else
-#ifdef VMS
-    leaf = HTVMS_wwwName(source);
-#else
-    leaf = (char *)source;
-#endif /* VMS */
-#endif /* DOSPATH */
+    leaf = wwwName(source);
 
     if (!LYIsHtmlSep(*leaf))
 	LYAddHtmlSep(target);

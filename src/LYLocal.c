@@ -238,7 +238,7 @@ struct dired_menu {
 
 PRIVATE BOOLEAN ok_stat ARGS2(char *, name, struct stat*, sb)
 {
-    char tmpbuf[512];
+    char tmpbuf[LY_MAXPATH+80];
 
     if (stat(name, sb) < 0) {
 	sprintf(tmpbuf, "Unable to get status of '%s'.", name);
@@ -251,7 +251,7 @@ PRIVATE BOOLEAN ok_stat ARGS2(char *, name, struct stat*, sb)
 #ifdef HAVE_LSTAT
 PRIVATE BOOLEAN ok_lstat ARGS2(char *, name, struct stat*, sb)
 {
-    char tmpbuf[512];
+    char tmpbuf[LY_MAXPATH+80];
 
     if (lstat(name, sb) < 0) {
 	sprintf(tmpbuf, "Unable to get status of '%s'.", name);
@@ -1053,6 +1053,7 @@ PRIVATE BOOLEAN permit_location ARGS3(
     static char tempfile[LY_MAXPATH] = "\0";
     char *cp;
     char tmpbuf[LINESIZE];
+    char tmpdst[LY_MAXPATH];
     struct stat dir_info;
 
     if (srcpath) {
@@ -1098,7 +1099,7 @@ PRIVATE BOOLEAN permit_location ARGS3(
 	}
 
 	LYstrncpy(LYValidPermitFile,
-		  srcpath,
+		  local_src,
 		  (sizeof(LYValidPermitFile) - 1));
 
 	fprintf(fp0, "<Html><Head>\n<Title>%s</Title>\n</Head>\n<Body>\n",
@@ -1203,7 +1204,12 @@ form to permit %s %s.\n</Ol>\n</Form>\n",
 	*cp++ = '\0';	/* Null terminate file name and
 			   start working on the masks. */
 
-	HTUnEscape(destpath);	/* Will now operate only on filename part. */
+	if ((destpath = HTfullURL_toFile(destpath)) == 0)
+		return(0);
+
+	strcpy(tmpdst, destpath);	/* operate only on filename */
+	free(destpath);
+	destpath = tmpdst;
 
 	/*
 	 *  Make sure that the file string is the one from
@@ -1942,11 +1948,15 @@ PRIVATE char * render_item ARGS6(
 		    break;
 		case 'p':
 		    cp = path;
+		    if (!LYIsHtmlSep(*cp))
+			*BP_INC = '/';
 		    while (*cp)
 			*BP_INC = *cp++;
 		    break;
 		case 'd':
 		    cp = dir;
+		    if (!LYIsHtmlSep(*cp))
+			*BP_INC = '/';
 		    while (*cp)
 			*BP_INC = *cp++;
 		    break;

@@ -24,6 +24,7 @@
 #define DOWNLOAD_OPTIONS_HELP	"Lynx_users_guide.html#RemoteSource"
 #define HISTORY_PAGE_HELP	"keystrokes/history_help.html"
 #define LIST_PAGE_HELP		"keystrokes/follow_help.html"
+#define LYNXCFG_HELP		"lynx.cfg"
 #define OPTIONS_HELP		"keystrokes/option_help.html"
 #define PRINT_OPTIONS_HELP	"keystrokes/print_help.html"
 #define UPLOAD_OPTIONS_HELP	"Lynx_users_guide.html#DirEd"
@@ -110,6 +111,9 @@ extern int LYShowColor;		/* Show color or monochrome?	    */
 extern int LYChosenShowColor;	/* extended color/monochrome choice */
 extern int LYrcShowColor;	/* ... as read or last written	    */
 
+#ifndef EXP_FORMS_OPTIONS
+extern BOOLEAN LYUseFormsOptions; /* use Forms-based options menu */
+#endif
 extern BOOLEAN LYShowCursor;	/* Show the cursor or hide it?	    */
 extern BOOLEAN verbose_img;	/* display filenames of images?     */
 extern BOOLEAN LYUseDefShoCur;	/* Command line -show_cursor toggle */
