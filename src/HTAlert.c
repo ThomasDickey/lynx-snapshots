@@ -42,7 +42,7 @@ PUBLIC void HTInfoMsg ARGS1(
 {
     _statusline(Msg);
     if (Msg && *Msg) {
-	CTRACE(tfp, "Info: %s\n", Msg);
+	CTRACE(tfp, "Info message: %s\n", Msg);
 	sleep(InfoSecs);
     }
 }
@@ -55,18 +55,20 @@ PUBLIC void HTUserMsg ARGS1(
 {
     _statusline(Msg);
     if (Msg && *Msg) {
-	CTRACE(tfp, "User: %s\n", Msg);
+	CTRACE(tfp, "User message: %s\n", Msg);
 	sleep(MessageSecs);
     }
 }
 
 PUBLIC void HTUserMsg2 ARGS2(
-	CONST char *,	Msg,
+	CONST char *,	Msg2,
 	CONST char *,	Arg)
 {
-    _user_message(Msg, Arg);
-    if (Msg && *Msg) {
-	CTRACE(tfp, "User: %s (%s)\n", Msg, Arg);
+    _user_message(Msg2, Arg);
+    if (Msg2 && *Msg2) {
+	CTRACE(tfp, "User message: ");
+	CTRACE(tfp, Msg2, Arg);
+	CTRACE(tfp, "\n");
 	sleep(MessageSecs);
     }
 }

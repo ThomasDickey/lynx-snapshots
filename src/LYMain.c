@@ -48,6 +48,12 @@
 #include <LYexit.h>
 #include <LYLeaks.h>
 
+#ifdef FNAMES_8_3 
+#define COOKIE_FILE "cookies"
+#else 
+#define COOKIE_FILE ".lynx_cookies"
+#endif /* FNAMES_8_3 */ 
+
 /* ahhhhhhhhhh!! Global variables :-< */
 #ifdef SOCKS
 PUBLIC BOOLEAN socks_flag=TRUE;
@@ -360,7 +366,7 @@ PUBLIC BOOLEAN LYQuitDefaultYes = QUIT_DEFAULT_YES;
 PUBLIC BOOLEAN display_partial = TRUE; /* Display document during download */
 PUBLIC BOOLEAN debug_display_partial = FALSE; /* Show with MessageSecs delay */
 PUBLIC BOOLEAN detected_forms_input_partial = FALSE; /* trimHightext temp fix */
-PUBLIC int min_lines_partial = 0; /* default: wait for complete screen */
+PUBLIC int partial_threshold = -1;  /* # of lines to be d/l'ed until we repaint */
 #endif
 
 /* These are declared in cutil.h for current freeWAIS libraries. - FM */
@@ -1478,7 +1484,7 @@ PUBLIC int main ARGS2(
      *	cookies file, probably.  - RP
      */
     if(LYCookieFile == NULL) {
-	LYAddPathToHome(LYCookieFile = malloc(LY_MAXPATH), LY_MAXPATH, "cookies");
+	LYAddPathToHome(LYCookieFile = malloc(LY_MAXPATH), LY_MAXPATH, COOKIE_FILE);
     } else {
 	if ((cp = strchr(LYCookieFile, '~'))) {
 	    temp = NULL;
@@ -2770,6 +2776,11 @@ keys (may be incompatible with some curses packages)"
    PARSE_SET(
       "partial",	TOGGLE_ARG,		&display_partial,
       "display partial pages while downloading"
+   ),
+   PARSE_INT(
+      "partial_thres",  IGNORE_ARG|INT_ARG,     partial_threshold,
+      "[=NUMBER]\nnumber of lines to render before repainting display\n\
+with partial-display logic"
    ),
 #endif
    PARSE_FUN(

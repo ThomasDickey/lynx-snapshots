@@ -386,10 +386,10 @@ may be defined in addition to this default in the
 <em>lynx.cfg</em> file.  Using the <em>Save to disk</em> option
 under the PRINT command after viewing the source of an HTML with
 the VIEW SOURCE (<em>\</em>) command will result in a file which
-differs from the original source in various ways such as tab 
+differs from the original source in various ways such as tab
 characters expanded to spaces.  Lynx formats the source presentation
 in this mode.  On the other hand, if the DOWNLOAD command is used,
-the only change will be that Lynx optionally puts 
+the only change will be that Lynx optionally puts
 <blockquote>
 &lt;!--X-URL: http://www.site.foo/path/to/file.html --&gt<BR>
 &lt;BASE href="http://www.site.foo/path/to/file.html"&gt;
@@ -474,7 +474,7 @@ to the net.bio.net WAIS server. [<A HREF="#ToC-Search">ToC</A>]
 The Lynx <em>Options Menu</em> may be accessed by pressing the '<em>o</em>'
 key.  The current Options Menu allows you to change options which are
 useful at runtime.  Most of these are read/saved from your .lynxrc file.
-Other options are stored in the lynx.cfg file.
+Other options are stored in the <A HREF="#lynx.cfg">lynx.cfg</A> file.
 
 <p>Lynx supports two styles of options menu.  The new style shown below is an HTML
 file generated at runtime:
@@ -482,9 +482,9 @@ file generated at runtime:
 <pre>
 
                     Options Menu (Lynx Version 2.8.1pre.2)
-                                       
+
       Accept Changes - Reset Changes Left Arrow cancels changes HELP!
-   
+
                          Save options to disk: [_]
 
   Personal Preferences
@@ -528,7 +528,7 @@ file generated at runtime:
 
 <p>The old style of options menu is a fixed form.  Normally this will be
 compiled into Lynx, and is accessed by setting FORMS_OPTIONS true in your
-lynx.cfg file.
+<A HREF="#lynx.cfg">lynx.cfg</A> file.
 
 <pre>
                       Options Menu
@@ -924,7 +924,7 @@ scheme will allow you to enter your message.
 using the simple line mode input scheme, type a '<em>.</em>' (period) on
 a line by itself.  You will be asked a final time whether to send the
 message.  If you press '<em>y</em>', you will be prompted whether to
-append your signature file if one was defined in 
+append your signature file if one was defined in
 <A HREF="#lynx.cfg">lynx.cfg</A> and is accessible,
 and then the message will be sent, whereas if you press '<em>n</em>' the
 message will be deleted.  Entering Control-G in response to any prompts
@@ -1890,7 +1890,14 @@ configuration files, and that default setting can be toggled via the
 <em>-cookies</em> command line switch.
 The SET_COOKIES symbol can be further modified by the ACCEPT_ALL_COOKIES mode.
 If ACCEPT_ALL_COOKIES is set TRUE, and SET_COOKIES is TRUE, Lynx will accept
-all cookies.
+all cookies.  Additionally, the cookies that are automatically accepted or
+rejected by Lynx can be further modified with the COOKIE_ACCEPT_DOMAINS and
+COOKIE_REJECT_DOMAINS options in your .lynxrc file, each of which is a
+comma-separated list of domains to perform the desired action.  The domain
+listed in these options must be identical to the domain the cookie comes
+from, there is no wildcard matching.  If a domain is specific in both
+COOKIE_ACCEPT_DOMAINS and COOKIE_REJECT_DOMAINS, rejection will take
+precedence.
 
 <p>When cookie support is enabled, <em>Set-Cookie</em> MIME headers
 received from an http server invoke confirmation prompts with possible
@@ -1903,9 +1910,7 @@ prompts, or ne'<em>V</em>'er to never allow cookies from that
 MIME headers).	All unexpired cookies are held in a hypothetical
 <em>Cookie Jar</em> which can be examined via the COOKIE_JAR keystroke
 command, normally mapped to <em>Ctrl-K</em>, for invoking the <a
-href="keystrokes/cookie_help.html">Cookie Jar Page</a>.  The
-<em>Cookie Jar</em>, and any '<em>A</em>'lways or ne'<em>V</em>'er
-'allow' settings, do not presently outlast the Lynx session.
+href="keystrokes/cookie_help.html">Cookie Jar Page</a>.
 
 <p>A common use of cookies by http servers is simply to track the
 documents visited by individual users.	Though this can be useful to the

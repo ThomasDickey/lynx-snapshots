@@ -584,7 +584,6 @@ PUBLIC char * HTnameOfFile_WWW ARGS3(
 	    CTRACE(tfp, "Node `%s' means path `%s'\n", name, path);
 #ifdef DOSPATH
 	    StrAllocCopy(result, HTDOS_name(path));
-	    CTRACE(tfp, "HTDOS_name changed `%s' to `%s'\n", path, result);
 #else
 #ifdef __EMX__
 	    if (path[0] == '/'

@@ -340,6 +340,17 @@ PUBLIC void LYFillLocalFileURL ARGS2(
 	}
     }
 
+#if defined(DOSPATH) || defined(__EMX__)
+    if (*(*href+1) == ':') {
+	/*
+	 * If it's a local DOS path beginning with drive letter,
+	 * add file://localhost/ prefix and go ahead.
+	 */
+	StrAllocCopy(temp, *href);
+	LYLocalFileToURL (href, temp);
+    }
+#endif /* DOSPATH */
+
     /*
      * No path in a file://localhost URL means a
      * directory listing for the current default. - FM
@@ -355,11 +366,7 @@ PUBLIC void LYFillLocalFileURL ARGS2(
 #else
 	getwd (curdir);
 #endif /* NO_GETCWD */
-#ifdef DOSPATH
-	temp2 = HTDOS_wwwName(curdir);
-#else
-	temp2 = curdir;
-#endif /* DOSPATH */
+	temp2 = wwwName(curdir);
 #endif /* VMS */
 	LYAddHtmlSep(href);
 	/*

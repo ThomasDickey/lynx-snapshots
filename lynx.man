@@ -47,10 +47,10 @@ Lynx
 can be used to
 build systems isolated within a single LAN.
 .SH OPTIONS
-At start up, \fILynx\fR will load any local 
+At start up, \fILynx\fR will load any local
 file or remote URL specified at the command
 line.  For help with URLs, press \fB"?"\fR
-or \fB"h"\fR while running \fILynx\fR.
+or \fB"H"\fR while running \fILynx\fR.
 Then follow the link titled, "Help on URLs."
 .PP
 .TP
@@ -144,7 +144,7 @@ set the display variable for X rexec-ed programs.
 .TP
 .B -dump
 dumps the formatted output of the default document or one
-specified on the command line to standard out. 
+specified on the command line to standard out.
 This can be used in the following way:
 .sp
 lynx -dump http://www.crl.com/~subir/lynx.html.
@@ -166,7 +166,7 @@ define a file where Lynx will report HTTP access codes.
 .B -exec
 enable local program execution (normally not configured).
 .TP
-.B -fileversions 
+.B -fileversions
 include all versions of files in local VMS directory listings.
 .TP
 .B -force_html
@@ -178,7 +178,7 @@ toggles forcing of the secure flag for SSL cookies.
 .B -from
 toggles transmissions of From headers.
 .TP
-.B -ftp 
+.B -ftp
 disable ftp access.
 .TP
 .B -get_data
@@ -292,9 +292,8 @@ disable the retrieval status messages.
 .B -number_links
 force numbering of links.
 .TP
-.B -partial 
-display partial pages while downloading. 
-.TP 
+.B -partial
+display partial pages while downloading.
 .TP
 .B -pauth\fR=\fIID\fR:\fIPASSWD
 set authorization ID and password for a protected proxy
@@ -334,12 +333,12 @@ allows a list of services to be disabled
 selectively.  The following list is printed
 if no options are specified.
 
-.I all   
+.I all
 - restricts all options.
 
-.I bookmark 
-- disallow changing the location of the bookmark 
-file. 
+.I bookmark
+- disallow changing the location of the bookmark
+file.
 
 .I bookmark_exec
 - disallow execution links via the bookmark file.
@@ -349,57 +348,57 @@ file.
 (but still allow it for directories) when local file
 management is enabled.
 
-.I default 
-- same as command line option -anonymous. 
-Disables default services for anonymous users. 
-Currently set to all restricted except for: 
-inside_telnet, outside_telnet, inside_news, 
+.I default
+- same as command line option -anonymous.
+Disables default services for anonymous users.
+Currently set to all restricted except for:
+inside_telnet, outside_telnet, inside_news,
 inside_ftp, outside_ftp, inside_rlogin,
-outside_rlogin, jump, mail and goto.  Defaults 
+outside_rlogin, jump, mail and goto.  Defaults
 are setable within userdefs.h.
 
 .I dired_support
 - disallow local file management.
 
-.I disk_save 
+.I disk_save
 - disallow saving to disk in the download and
 print menus.
 
 .I download
 - disallow downloaders in the download menu.
 
-.I editor  
+.I editor
 - disallow editing.
 
-.I exec    
+.I exec
 - disable execution scripts.
 
 .I exec_frozen
-- disallow the user from changing the local 
+- disallow the user from changing the local
 execution option.
 
-.I file_url 
+.I file_url
 - disallow using G)oto, served links or bookmarks for
 file: URLs.
 
-.I goto    
-- disable the 'g' (goto) command.  
+.I goto
+- disable the 'g' (goto) command.
 
 .I inside_ftp
 - disallow ftps for people coming from inside your
 domain (utmp required for selectivity).
 
 .I inside_news
-- disallow USENET news posting for people coming 
+- disallow USENET news posting for people coming
 from inside your domain (utmp required for selectivity).
 
 .I inside_rlogin
 - disallow rlogins for people coming from inside
 your domain (utmp required for selectivity).
 
-.I inside_telnet 
-- disallow telnets for people coming from inside 
-your domain (utmp required for selectivity). 
+.I inside_telnet
+- disallow telnets for people coming from inside
+your domain (utmp required for selectivity).
 
 .I jump
 - disable the 'j' (jump) command.
@@ -413,7 +412,7 @@ your domain (utmp required for selectivity).
 .I news_post
 - disallow USENET News posting.
 
-.I options_save 
+.I options_save
 - disallow saving options in .lynxrc.
 
 .I outside_ftp
@@ -421,24 +420,24 @@ your domain (utmp required for selectivity).
 domain (utmp required for selectivity).
 
 .I outside_news
-- disallow USENET news posting for people coming 
+- disallow USENET news posting for people coming
 from outside your domain (utmp required for selectivity).
 
 .I outside_rlogin
 - disallow rlogins for people coming from outside
 your domain (utmp required for selectivity).
 
-.I outside_telnet 
-- disallow telnets for people coming from 
-outside your domain (utmp required for selectivity). 
+.I outside_telnet
+- disallow telnets for people coming from
+outside your domain (utmp required for selectivity).
 
-.I print   
-- disallow most print options. 
+.I print
+- disallow most print options.
 
-.I shell   
+.I shell
 - disallow shell escapes and lynxexec or lynxprog G)oto's.
 
-.I suspend 
+.I suspend
 - disallow Unix Control-Z suspends with escape to shell.
 
 .I telnet_port
@@ -522,9 +521,9 @@ set alternate Lynx User-Agent header.
 .B -validate
 accept only http URLs (for validation).  Complete security
 restrictions also are implemented.
-.TP 
-.B -verbose 
-taggles [LINK], [IMAGE] and [INLINE] comments with filenames of these images. 
+.TP
+.B -verbose
+taggles [LINK], [IMAGE] and [INLINE] comments with filenames of these images.
 .TP
 .B -version
 print version information.
@@ -541,10 +540,10 @@ o \fBRight arrow\fR or \fBReturn\fR will follow a highlighted hypertext link.
 .br
 o \fBLeft Arrow\fR will retreat from a link.
 .br
-o Type \fB"h"\fR or \fB"?"\fR for online help and descriptions 
+o Type \fB"H"\fR or \fB"?"\fR for online help and descriptions
 of key-stroke commands.
 .br
-o Type \fB"k"\fR for a complete list of the current key-stroke 
+o Type \fB"K"\fR for a complete list of the current key-stroke
 command mappings.
 .SH NOTES
 This is the Lynx v2.8 Release
@@ -564,10 +563,10 @@ Do not send the unsubscribe message to the lynx-dev list, itself.
 Lynx has incorporated code from a variety of sources along the way.
 The earliest versions of Lynx included code from Earl Fogel of Computing
 Services at the University of Saskatchewan, who implemented HYPERREZ
-in the Unix environment.  HYPERREZ was developed by Niel Larson of 
+in the Unix environment.  HYPERREZ was developed by Niel Larson of
 Think.com and served as the model for the early versions of Lynx.
 Those versions also incorporated libraries from the Unix Gopher clients
-developed at the University of Minnesota, and the later versions of 
+developed at the University of Minnesota, and the later versions of
 Lynx rely on the WWW client library code developed by Tim Berners-Lee
 and the WWW community.  Also a special thanks to Foteos Macrides who ported
 much of Lynx to VMS and did or organized most of its development since the

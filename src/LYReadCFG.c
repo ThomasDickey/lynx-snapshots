@@ -903,7 +903,7 @@ static Config_Type Config_Table [] =
      PARSE_FUN("outgoing_mail_charset", CONF_FUN, outgoing_mail_charset_fun),
 #ifdef DISP_PARTIAL
      PARSE_SET("partial", CONF_BOOL, display_partial),
-     PARSE_SET("partial_min_lines", CONF_INT, min_lines_partial),
+     PARSE_INT("partial_thres", CONF_INT, partial_threshold),
 #endif
      PARSE_STR("personal_mailcap", CONF_STR, personal_type_map),
      PARSE_STR("personal_extension_map", CONF_STR, personal_extension_map),
@@ -994,6 +994,7 @@ PUBLIC void read_cfg ARGS4(
 	FILE *,	fp0)
 {
     FILE *fp;
+    char mypath[LY_MAXPATH];
     char buffer[MAX_LINE_BUFFER_LEN];
 
     CTRACE(tfp, "Loading cfg file '%s'.\n", cfg_filename);
@@ -1016,6 +1017,11 @@ PUBLIC void read_cfg ARGS4(
     if (!cfg_filename || strlen(cfg_filename) == 0) {
 	CTRACE(tfp,"No filename following -cfg switch!\n");
 	return;
+    }
+    if (!strncmp(cfg_filename, "~/", 2)) {
+	strcpy(mypath, Home_Dir());
+	strcat(mypath, cfg_filename+1);
+	cfg_filename = mypath;
     }
     if ((fp = fopen(cfg_filename,"r")) == 0) {
 	CTRACE(tfp,"lynx.cfg file not found as %s\n",cfg_filename);
@@ -1130,9 +1136,9 @@ PUBLIC void read_cfg ARGS4(
 	case CONF_ENV2:
 
 	    if (tbl->type == CONF_ENV)
-	    	LYLowerCase(name);
+		LYLowerCase(name);
 	    else
-	    	LYUpperCase(name);
+		LYUpperCase(name);
 
 	    if (getenv (name) == 0) {
 #ifdef VMS

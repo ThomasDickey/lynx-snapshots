@@ -1707,7 +1707,9 @@ PUBLIC void lynx_start_link_color ARGS2(
 	/* start_bold();  */
 	start_reverse();
 #if defined(USE_SLANG)
+#ifndef __DJGPP__
 	if (SLtt_Use_Ansi_Colors)
+#endif /* !__DJGPP__ */
 	    start_underline ();
 #endif /* USE_SLANG */
 #if defined(FANCY_CURSES) && defined(COLOR_CURSES)
@@ -1735,7 +1737,9 @@ PUBLIC void lynx_stop_link_color ARGS2(
     if (flag) {
 	stop_reverse();
 #if defined(USE_SLANG)
+#ifndef __DJGPP__
 	if (SLtt_Use_Ansi_Colors)
+#endif /* !__DJGPP__ */
 	stop_underline ();
 #endif /* USE_SLANG */
 #if defined(FANCY_CURSES) && defined(COLOR_CURSES)

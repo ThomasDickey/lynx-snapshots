@@ -2997,11 +2997,7 @@ PUBLIC void change_sug_filename ARGS1(
      *	Rename any temporary files.
      */
     temp = (char *)calloc(1, (strlen(lynx_temp_space) + 60));
-#if defined(FNAMES_8_3) && defined(DOSPATH)
-    cp = HTDOS_wwwName(lynx_temp_space);
-#else
-    cp = lynx_temp_space;
-#endif
+    cp = wwwName(lynx_temp_space);
     if (LYIsHtmlSep(*cp)) {
 	sprintf(temp, "file://localhost%s%d", cp, (int)getpid());
     } else {
@@ -3862,7 +3858,7 @@ have_VMS_URL:
 	     */
 	    char curdir[DIRNAMESIZE];
 	    getcwd (curdir, DIRNAMESIZE);
-	    StrAllocCopy(temp, HTDOS_wwwName(curdir));
+	    StrAllocCopy(temp, wwwName(curdir));
 	    StrAllocCat(*AllocatedString, temp);
 	    FREE(temp);
 	    CTRACE(tfp, "Converted '%s' to '%s'\n",
@@ -5561,7 +5557,7 @@ PUBLIC FILE *LYNewTxtFile ARGS1(char *, name)
 
 #if defined(__DJGPP__) || defined(_WINDOWS)
     _fmode = O_BINARY;
-#endif /* __DJGPP__ or _WINDOWS */  
+#endif /* __DJGPP__ or _WINDOWS */
 #endif
 
     return fp;
@@ -5583,7 +5579,7 @@ PUBLIC FILE *LYAppendToTxtFile ARGS1(char *, name)
 
 #if defined(__DJGPP__) || defined(_WINDOWS)
     _fmode = O_BINARY;
-#endif /* __DJGPP__ or _WINDOWS */  
+#endif /* __DJGPP__ or _WINDOWS */
 #endif
     return fp;
 }

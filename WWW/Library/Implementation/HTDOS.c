@@ -81,14 +81,18 @@ char * HTDOS_name(char *wwwname)
 		printf("\n\n%s = i%\n\n",cp_url,strlen(cp_url));
 		sleep(5);
 #endif
+		CTRACE(tfp, "HTDOS_name changed `%s' to `%s'\n",
+			wwwname, cp_url);
 		strcpy(wwwname, cp_url);
-		return(wwwname); /* return(cp_url); */
+		return(wwwname);  /* return(cp_url); */
 	} else {
 #if 0
 		printf("\n\n%s = %i\n\n",cp_url+1,strlen(cp_url));
 		sleep(5);
 #endif
+		CTRACE(tfp, "HTDOS_name changed `%s' to `%s'\n",
+			wwwname, cp_url+1);
 		strcpy(wwwname, cp_url+1);
-		return(wwwname); /* return(cp_url+1);  */
+		return(wwwname);  /* return(cp_url+1); */
 	}
 }
