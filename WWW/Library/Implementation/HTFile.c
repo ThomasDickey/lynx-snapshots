@@ -669,7 +669,7 @@ char *HTnameOfFile_WWW(const char *name,
     char *acc_method = HTParse(name, "", PARSE_ACCESS);
     char *host = HTParse(name, "", PARSE_HOST);
     char *path = HTParse(name, "", PARSE_PATH + PARSE_PUNCTUATION);
-    char *home;
+    const char *home;
     char *result = NULL;
 
     if (expand_all) {
@@ -697,7 +697,7 @@ char *HTnameOfFile_WWW(const char *name,
 	    home = HTVMS_wwwName(home);
 #else
 #if defined(_WINDOWS)		/* 1997/10/16 (Thu) 20:42:51 */
-	home = (char *) Home_Dir();
+	home = Home_Dir();
 #else
 	home = LYGetEnv("HOME");
 #endif

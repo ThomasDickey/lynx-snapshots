@@ -2983,13 +2983,17 @@ static BOOLEAN handle_LYK_HEAD(int *cmd)
 
 static void handle_LYK_HELP(const char **cshelpfile)
 {
+    char *my_value = NULL;
+
     if (*cshelpfile == NULL)
 	*cshelpfile = helpfile;
-    if (!STREQ(curdoc.address, *cshelpfile)) {
+    StrAllocCopy(my_value, *cshelpfile);
+    LYEnsureAbsoluteURL(&my_value, *cshelpfile, FALSE);
+    if (!STREQ(curdoc.address, my_value)) {
 	/*
 	 * Set the filename.
 	 */
-	set_address(&newdoc, *cshelpfile);
+	set_address(&newdoc, my_value);
 	/*
 	 * Make a name for this help file.
 	 */
@@ -3000,6 +3004,7 @@ static void handle_LYK_HELP(const char **cshelpfile)
 	newdoc.safe = FALSE;
 	newdoc.internal_link = FALSE;
     }
+    FREE(my_value);
     *cshelpfile = NULL;		/* reset pointer - kw */
 }
 
@@ -7421,7 +7426,7 @@ static void HTGotoURLs_free(void)
  */
 void HTAddGotoURL(char *url)
 {
-    char *new = NULL;
+    char *copy = NULL;
     char *old;
     HTList *cur;
 
@@ -7429,26 +7434,26 @@ void HTAddGotoURL(char *url)
 	return;
 
     CTRACE((tfp, "HTAddGotoURL %s\n", url));
-    StrAllocCopy(new, url);
+    StrAllocCopy(copy, url);
 
     if (!Goto_URLs) {
 	Goto_URLs = HTList_new();
 #ifdef LY_FIND_LEAKS
 	atexit(HTGotoURLs_free);
 #endif
-	HTList_addObject(Goto_URLs, new);
+	HTList_addObject(Goto_URLs, copy);
 	return;
     }
 
     cur = Goto_URLs;
     while (NULL != (old = (char *) HTList_nextObject(cur))) {
-	if (!strcmp(old, new)) {
+	if (!strcmp(old, copy)) {
 	    HTList_removeObject(Goto_URLs, old);
 	    FREE(old);
 	    break;
 	}
     }
-    HTList_addObject(Goto_URLs, new);
+    HTList_addObject(Goto_URLs, copy);
 
     return;
 }

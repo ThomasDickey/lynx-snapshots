@@ -21,6 +21,7 @@
 #include <UCDefs.h>
 #include <HTAlert.h>
 #include <HTFile.h>
+#include <HTInit.h>
 #include <HTPlain.h>
 
 #include <LYStrings.h>
@@ -513,14 +514,6 @@ HTStream *HTFWriter_new(FILE *fp)
     return me;
 }
 
-static void chrcat(char *result,
-		   int ch)
-{
-    result += strlen(result);
-    *result++ = (char) ch;
-    *result = 0;
-}
-
 /*	Make system command from template
  *	---------------------------------
  *
@@ -530,68 +523,17 @@ static char *mailcap_substitute(HTParentAnchor *anchor,
 				HTPresentation *pres,
 				char *fnam)
 {
-    int pass;
-    int skip;
-    size_t need = 0;
-    char *result = 0;
-    char *s;
-    char *repl;
+    char *result = LYMakeMailcapCommand(pres->command,
+					anchor->content_type_params,
+					fnam);
 
-    for (pass = 0; pass < 2; pass++) {
-	for (s = pres->command; *s; s++) {
-	    if (*s == '%') {
-		repl = 0;
-		skip = 0;
-		if (s[1] == 't') {
-		    repl = pres->rep->name;
-		    skip = 1;
-		} else if (s[1] == 's') {
-		    repl = fnam;
-		    skip = 1;
-		} else if (!strncasecomp(s + 1, "{charset}", 9)) {
-		    repl = anchor->charset;
-		    skip = 9;
-		} else if (!strncasecomp(s + 1, "{encoding}", 10)) {
-		    repl = anchor->content_encoding;
-		    skip = 10;
-		}
-		if (skip != 0) {
-		    if (repl == 0)
-			repl = "";
-		    if (pass) {
-			strcat(result, repl);
-		    } else {
-			need += strlen(repl);
-		    }
-		    s += skip;
-		} else {
-		    if (pass) {
-			chrcat(result, *s);
-		    } else {
-			need++;
-		    }
-		}
-	    } else {
-		if (pass) {
-		    chrcat(result, *s);
-		} else {
-		    need++;
-		}
-	    }
-	}
-	if (pass == 0) {
-	    if ((result = malloc(need + 1)) == 0)
-		outofmem(__FILE__, "mailcap_substitute");
-	    *result = 0;
-	}
-    }
 #if defined(UNIX)
     /* if we don't have a "%s" token, expect to provide the file via stdin */
-    if (strstr(pres->command, "%s") == 0) {
+    if (!LYMailcapUsesPctS(pres->command)) {
 	char *prepend = 0;
 	char *format = "( %s ) < %s";
 
-	HTSprintf(&prepend, "( %s", pres->command);	/* ...avoid quoting */
+	HTSprintf(&prepend, "( %s", result);	/* ...avoid quoting */
 	HTAddParam(&prepend, format, 2, fnam);	/* ...to quote if needed */
 	FREE(result);
 	result = prepend;
@@ -1107,8 +1049,8 @@ HTStream *HTCompressed(HTPresentation *pres,
 	    StrAllocCopy(type, anchor->content_encoding);
 	}
 	format = HTAtom_for(type);
-	FREE(type)
-	    FREE(uncompress_mask);
+	FREE(type);
+	FREE(uncompress_mask);
 	me = HTStreamStack(format, pres->rep_out, sink, anchor);
 	return me;
     }

@@ -82,7 +82,7 @@ extern BOOL HTVMS_checkAccess(const char *FileName,
  *
  *
  */
-extern char *HTVMS_wwwName(const char *vmsname);
+const extern char *HTVMS_wwwName(const char *vmsname);
 
 extern int HTVMSBrowseDir(const char *address,
 			  HTParentAnchor *anchor,

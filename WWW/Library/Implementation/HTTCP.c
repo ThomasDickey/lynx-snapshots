@@ -104,17 +104,18 @@ static int ResolveYield(void)
  * This chunk of code is used in both win32 and cygwin.
  */
 #if defined(_WINDOWS_NSL)
-static char host[512];
 static LYNX_HOSTENT *phost;	/* Pointer to host - See netdb.h */
 static int donelookup;
 
-static unsigned long _fork_func(void *arglist GCC_UNUSED)
+static unsigned long __stdcall _fork_func(void *arg)
 {
+    const char *host = (const char *) arg;
+
 #ifdef SH_EX
     unsigned long addr;
 
     addr = (unsigned long) inet_addr(host);
-    if ((int) addr != -1)
+    if (addr != INADDR_NONE)
 	phost = gethostbyaddr((char *) &addr, sizeof(addr), AF_INET);
     else
 	phost = gethostbyname(host);
@@ -643,9 +644,7 @@ extern int h_errno;
  */
 LYNX_HOSTENT *LYGetHostByName(char *str)
 {
-#ifndef _WINDOWS_NSL
     char *host = str;
-#endif
 
 #ifdef NSL_FORK
     /* for transfer of result between from child to parent: */
@@ -696,9 +695,6 @@ LYNX_HOSTENT *LYGetHostByName(char *str)
 	lynx_nsl_status = HT_INTERRUPTED;
 	return NULL;
     }
-#ifdef _WINDOWS_NSL
-    strncpy(host, str, sizeof(host));
-#endif /*  _WINDOWS_NSL */
 
     if (!valid_hostname(host)) {
 	lynx_nsl_status = HT_NOT_ACCEPTABLE;
@@ -1102,7 +1098,7 @@ LYNX_HOSTENT *LYGetHostByName(char *str)
 	    unsigned long t;
 
 	    t = (unsigned long) inet_addr(host);
-	    if ((int) t != -1)
+	    if (t != INADDR_NONE)
 		phost = gethostbyaddr((char *) &t, sizeof(t), AF_INET);
 	    else
 		phost = gethostbyname(host);
@@ -1110,11 +1106,12 @@ LYNX_HOSTENT *LYGetHostByName(char *str)
 #endif /* !__CYGWIN__ */
 	    phost = (LYNX_HOSTENT *) NULL;
 	    donelookup = FALSE;
-	    hThread = CreateThread((void *) NULL, 4096UL,
-				   (LPTHREAD_START_ROUTINE) _fork_func,
-				   (void *) NULL, 0UL, (unsigned long *) &dwThreadID);
+	    WSASetLastError(WSAHOST_NOT_FOUND);
+
+	    hThread = CreateThread(NULL, 4096UL, _fork_func, host, 0UL,
+				   (unsigned long *) &dwThreadID);
 	    if (!hThread)
-		MessageBox((void *) NULL, "CreateThread",
+		MessageBox(NULL, "CreateThread",
 			   "CreateThread Failed", 0L);
 
 	    while (!donelookup) {
@@ -1191,10 +1188,7 @@ static int HTParseInet(SockA * soc_in, const char *str)
     char *port;
     int dotcount_ip = 0;	/* for dotted decimal IP addr */
     char *strptr;
-
-#ifndef _WINDOWS_NSL
     char *host = NULL;
-#endif /* _WINDOWS_NSL */
 
     if (!str) {
 	CTRACE((tfp, "HTParseInet: Can't parse `NULL'.\n"));
@@ -1205,11 +1199,7 @@ static int HTParseInet(SockA * soc_in, const char *str)
 	CTRACE((tfp, "HTParseInet: INTERRUPTED for '%s'.\n", str));
 	return -1;
     }
-#ifdef _WINDOWS_NSL
-    strncpy(host, str, sizeof(host));
-#else
     StrAllocCopy(host, str);	/* Make a copy we can mutilate */
-#endif /*  _WINDOWS_NSL */
     /*
      * Parse port number if present.
      */
@@ -1238,9 +1228,7 @@ static int HTParseInet(SockA * soc_in, const char *str)
 #endif /* SUPPRESS */
 	}
 	if (strptr && *strptr != '\0') {
-#ifndef _WINDOWS_NSL
 	    FREE(host);
-#endif /* _WINDOWS_NSL */
 	    HTAlwaysAlert(NULL, gettext("Address has invalid port"));
 	    return -1;
 	}
@@ -1286,9 +1274,7 @@ static int HTParseInet(SockA * soc_in, const char *str)
 #ifdef HAVE_INET_ATON
 	if (!inet_aton(host, &(soc_in->sin_addr))) {
 	    CTRACE((tfp, "inet_aton(%s) returns error\n", host));
-#ifndef _WINDOWS_NSL
 	    FREE(host);
-#endif /* _WINDOWS_NSL */
 	    return -1;
 	}
 #else
@@ -1296,9 +1282,7 @@ static int HTParseInet(SockA * soc_in, const char *str)
 #endif /* HAVE_INET_ATON */
 #endif /* GUSI */
 #endif /* DGUX_OLD */
-#ifndef _WINDOWS_NSL
 	FREE(host);
-#endif /* _WINDOWS_NSL */
     } else {			/* Alphanumeric node name: */
 
 #ifdef MVS			/* Outstanding problem with crash in MVS gethostbyname */
@@ -1340,10 +1324,7 @@ static int HTParseInet(SockA * soc_in, const char *str)
 	}
 #endif /* _WINDOWS_NSL */
 
-#ifndef _WINDOWS_NSL
 	FREE(host);
-#endif /* _WINDOWS_NSL */
-
     }				/* Alphanumeric node name */
 
     CTRACE((tfp,
@@ -1360,9 +1341,7 @@ static int HTParseInet(SockA * soc_in, const char *str)
   failed:
     CTRACE((tfp, "HTParseInet: Can't find internet node name `%s'.\n",
 	    host));
-#ifndef _WINDOWS_NSL
     FREE(host);
-#endif /* _WINDOWS_NSL */
     switch (lynx_nsl_status) {
     case HT_NOT_ACCEPTABLE:
     case HT_INTERRUPTED:
@@ -1612,8 +1591,7 @@ int HTDoConnect(const char *url,
 	HTAlert(gettext("socket failed."));
 	return HT_NO_DATA;
     }
-#endif /* INET6 */
-#ifdef INET6
+#else
     for (res = res0; res; res = res->ai_next) {
 	*s = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
 	if (*s == -1) {

@@ -20,7 +20,7 @@ typedef struct {
     int size;			/* In bytes                     */
     int growby;			/* Allocation unit in bytes     */
     int allocated;		/* Current size of *data        */
-    char *data;			/* Pointer to malloced area or 0 */
+    char *data;			/* Pointer to malloc'd area or 0 */
     int failok;			/* allowed to fail without exiting program? */
 } HTChunk;
 

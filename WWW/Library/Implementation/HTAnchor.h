@@ -100,6 +100,10 @@ struct _HTParentAnchor {
     char *cache_control;	/* Cache-Control */
     BOOL no_cache;		/* Cache-Control, Pragma or META "no-cache"? */
     BOOL inBASE;		/* duplicated from HTStructured (HTML.c/h) */
+#ifdef EXP_HTTP_HEADERS
+    HTChunk http_headers;
+#endif
+    char *content_type_params;	/* Content-Type (with parameters if any) */
     char *content_type;		/* Content-Type */
     char *content_language;	/* Content-Language */
     char *content_encoding;	/* Compression algorithm */
@@ -283,6 +287,14 @@ extern void HTAnchor_setCitehost(HTParentAnchor *me,
  *	 header or META element with filename=name.suffix)
  */
 extern const char *HTAnchor_SugFname(HTParentAnchor *me);
+
+/*	HTTP Headers.
+*/
+extern const char *HTAnchor_http_headers(HTParentAnchor *me);
+
+/*	Content-Type handling (parameter list).
+*/
+extern const char *HTAnchor_content_type_params(HTParentAnchor *me);
 
 /*	Content-Type handling. - FM
 */

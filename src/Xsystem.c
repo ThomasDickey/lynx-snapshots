@@ -1,4 +1,4 @@
-/* @Id: Xsystem.c 1.13 Thu, 06 May 2004 17:31:33 -0700 dickey @
+/* @Id: Xsystem.c 1.14 Wed, 30 Jun 2004 16:55:04 -0700 dickey @
  *	like system("cmd") but return with exit code of "cmd"
  *	for Turbo-C/MS-C/LSI-C
  *  This code is in the public domain.
@@ -25,20 +25,13 @@
  *
  */
 #include <LYUtils.h>
-
-#if 0
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <fcntl.h>
-#include <io.h>
-#include <process.h>
-#ifndef __CYGWIN__
-#include <dos.h>
-#endif
-#endif
-
 #include <LYStrings.h>
+
+#ifdef DOSPATH
+#include <io.h>
+#else
+extern char *mktemp(char *);
+#endif
 
 #ifndef USECMDLINE
 #define USECMDLINE	0
@@ -52,8 +45,6 @@
 #define	TABLESIZE(v)	(sizeof(v)/sizeof(v[0]))
 
 #define STR_MAX 512		/* MAX command line */
-
-extern char *mktemp(char *);
 
 #define isk1(c)  ((0x81 <= UCH(c) && UCH(c) <= 0x9F) || (0xE0 <= UCH(c) && UCH(c) <= 0xFC))
 #define isq(c)   ((c) == '"')

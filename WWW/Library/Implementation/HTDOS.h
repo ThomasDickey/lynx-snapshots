@@ -16,7 +16,7 @@
  *	returns		WWW file specification
  *
  */
-char *HTDOS_wwwName(const char *dosname);
+const char *HTDOS_wwwName(const char *dosname);
 
 /*
  * Converts Unix slashes to DOS

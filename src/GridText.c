@@ -6878,6 +6878,18 @@ const char *HText_getServer(void)
 	    HTAnchor_server(HTMainText->node_anchor) : 0);
 }
 
+#ifdef EXP_HTTP_HEADERS
+/*
+ * Returns the full text of HTTP headers, if available, for the current
+ * document.
+ */
+const char *HText_getHttpHeaders(void)
+{
+    return (HTMainText ?
+	    HTAnchor_http_headers(HTMainText->node_anchor) : 0);
+}
+#endif
+
 /*
  * HText_pageDisplay displays a screen of text
  * starting from the line 'line_num'-1.

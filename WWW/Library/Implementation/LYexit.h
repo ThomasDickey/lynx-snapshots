@@ -19,6 +19,9 @@
 /*
  *	Required includes
  */
+#ifdef _WINDOWS
+#include <process.h>		/* declares exit() */
+#endif
 
 #ifndef HTUTILS_H
 #include <HTUtils.h>
@@ -29,7 +32,7 @@
  */
 #ifdef exit
 #undef exit
-#endif /* _WINDOWS */
+#endif
 
 #define exit(code) LYexit(code)
 

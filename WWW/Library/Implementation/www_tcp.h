@@ -176,8 +176,8 @@ IBM-PC running Windows NT
 #endif
 
 #include <fcntl.h>		/* For HTFile.c */
-#include <sys\types.h>		/* For HTFile.c */
-#include <sys\stat.h>		/* For HTFile.c */
+#include <sys/types.h>		/* For HTFile.c */
+#include <sys/stat.h>		/* For HTFile.c */
 #undef NETREAD
 #undef NETWRITE
 #undef NETCLOSE
@@ -195,8 +195,32 @@ extern int ws_netread(int fd, char *buf, int len);
 #include <errno.h>
 #include <direct.h>
 
+#ifdef ENABLE_IPV6
+#undef  USE_WINSOCK2_H
+#define USE_WINSOCK2_H
+
+/* Avoid including <winsock*.h> in <windows.h> */
+#ifndef WIN32_LEAN_AND_MEAN
+#error Define "WIN32_LEAN_AND_MEAN" in your makefile
+#endif
+
+#if defined(_MSC_VER) && (!defined(_WIN32_WINNT) || _WIN32_WINNT < 0x0501)
+/*
+ * Needed to pull in the real getaddrinfo() and not the inline version
+ * in <wspiAPI.H> which doesn't support IPv6 (IPv4 only). <wspiAPI.H> is
+ * included from <ws2tcpip.h> for <= 0x0500 SDKs.
+ */
+#undef  _WIN32_WINNT
+#define _WIN32_WINNT 0x0501
+#endif
+#endif /* ENABLE_IPV6 */
+
 #ifdef USE_WINSOCK2_H
 #include <winsock2.h>		/* normally included in windows.h */
+
+#ifdef ENABLE_IPV6
+#include <ws2tcpip.h>
+#endif
 
 #undef EINPROGRESS
 #undef EALREADY
@@ -216,10 +240,9 @@ extern int ws_netread(int fd, char *buf, int len);
 #define ECONNRESET   WSAECONNRESET
 #define ETIMEDOUT    WSAETIMEDOUT
 
-#else /* USE_WINSOCK_H */
+#else /* USE_WINSOCK2_H */
 
 #include <winsock.h>
-typedef struct sockaddr_in SockA;	/* See netinet/in.h */
 
 #if defined(_MSC_VER) || defined(__MINGW32__)
 #undef EINTR
@@ -233,12 +256,12 @@ typedef struct sockaddr_in SockA;	/* See netinet/in.h */
 #define EAGAIN               (WSABASEERR+1002)
 #define ENOTCONN             (WSABASEERR+57)
 #define ECONNRESET           (WSABASEERR+54)
-#define ETIMEDOUT             WSAETIMEDOUT	/* 1997/11/10 (Mon) */
+#define ETIMEDOUT             WSAETIMEDOUT
 
-#undef  SOCKET_ERRNO		/* 1997/10/19 (Sun) 18:01:46 */
+#endif /* USE_WINSOCK2_H */
+
+#undef  SOCKET_ERRNO
 #define SOCKET_ERRNO          WSAGetLastError()
-
-#endif /* USE_WINSOCK_H */
 
 #define INCLUDES_DONE
 #define TCP_INCLUDES_DONE
@@ -669,7 +692,7 @@ typedef unsigned short mode_t;
 
 #else
 
-#if !(defined(VM) || defined(VMS) || defined(THINK_C) || defined(PCNFS) || defined(__MINGW32__))
+#if !(defined(VM) || defined(VMS) || defined(THINK_C) || defined(PCNFS) || defined(_WINDOWS))
 #define DECL_SYS_ERRLIST 1
 #endif
 
@@ -817,21 +840,27 @@ typedef unsigned int fd_set;
 #define set_errno(value)	/* we do not know how */
 #endif
 
-/* IPv6 support */
-#if defined(HAVE_GETADDRINFO) && defined(HAVE_GAI_STRERROR) && defined(ENABLE_IPV6)
-#	define INET6
-#endif /* HAVE_GETADDRINFO && HAVE_GAI_STRERROR && ENABLE_IPV6 */
-
-#if !defined(__MINGW32__)
-#ifdef INET6
-typedef struct sockaddr_storage SockA;	/* See netinet/in.h */
-
-#else
-typedef struct sockaddr_in SockA;	/* See netinet/in.h */
-#endif /* INET6 */
+/*
+ * IPv6 support
+ */
+#if defined(HAVE_GETADDRINFO) && defined(ENABLE_IPV6)
+#if defined(HAVE_GAI_STRERROR)
+#define INET6
+#elif defined(_WINDOWS)
+#define INET6
+#ifndef WIN_EX
+#error Define "WIN_EX" in your makefile.
 #endif
+#ifndef _MSC_VER		/* MSVC has this inlined in <ws2tcpip.h> */
+#undef  gai_strerror
+#define gai_strerror(err) w32_strerror (err)
+#endif
+#endif
+#endif /* HAVE_GETADDRINFO && ENABLE_IPV6 */
 
 #ifdef INET6
+typedef struct sockaddr_storage SockA;
+
 #ifdef SIN6_LEN
 #define SOCKADDR_LEN(soc_address) ((struct sockaddr *)&soc_address)->sa_len
 #else
@@ -840,16 +869,18 @@ typedef struct sockaddr_in SockA;	/* See netinet/in.h */
 		   ? sizeof(struct sockaddr_in6) \
 		   : (((x)->sa_family == AF_INET) \
 		      ? sizeof(struct sockaddr_in) \
-		      : sizeof(struct sockaddr)))
+		      : sizeof(struct sockaddr)))	/* AF_UNSPEC? */
 #endif
 #define SOCKADDR_LEN(soc_address) SA_LEN((struct sockaddr *)&soc_address)
 #endif /* SIN6_LEN */
 #else
+typedef struct sockaddr_in SockA;
+
 #define SOCKADDR_LEN(soc_address) sizeof(soc_address)
 #endif /* INET6 */
 
 #ifndef MAXHOSTNAMELEN
-#define MAXHOSTNAMELEN 64	/* Arbitrary limit */
+#define MAXHOSTNAMELEN 128	/* Max label is 63. Should handle 2 of those */
 #endif /* MAXHOSTNAMELEN */
 
 #endif /* TCP_H */

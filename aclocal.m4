@@ -4,7 +4,7 @@ dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
 dnl and Philippe De Muyter <phdm@macqel.be>
 dnl
 dnl Created: 1997/1/28
-dnl Updated: 2004/5/23
+dnl Updated: 2004/6/29
 dnl
 dnl The autoconf used in Lynx development is GNU autoconf 2.13 or 2.52, patched
 dnl by Tom Dickey.  See your local GNU archives, and this URL:
@@ -1889,6 +1889,28 @@ AC_TRY_LINK([
 ])
 test "$cf_cv_fionbio" = "fcntl" && AC_DEFINE(USE_FCNTL)
 ])dnl
+dnl ---------------------------------------------------------------------------
+dnl CF_FUNC_CURSES_VERSION version: 3 updated: 2003/05/17 22:19:02
+dnl ----------------------
+dnl Solaris has a data item 'curses_version', which confuses AC_CHECK_FUNCS.
+dnl It's a character string "SVR4", not documented.
+AC_DEFUN([CF_FUNC_CURSES_VERSION],
+[
+AC_CACHE_CHECK(for function curses_version, cf_cv_func_curses_version,[
+AC_TRY_RUN([
+#include <${cf_cv_ncurses_header-curses.h}>
+int main()
+{
+	char temp[1024];
+	sprintf(temp, "%s\n", curses_version());
+	exit(0);
+}]
+,[cf_cv_func_curses_version=yes]
+,[cf_cv_func_curses_version=no]
+,[cf_cv_func_curses_version=unknown])
+rm -f core])
+test "$cf_cv_func_curses_version" = yes && AC_DEFINE(HAVE_CURSES_VERSION)
+])
 dnl ---------------------------------------------------------------------------
 dnl CF_FUNC_GETADDRINFO version: 5 updated: 2000/09/28 06:18:08
 dnl -------------------
@@ -4385,7 +4407,7 @@ AC_TRY_LINK([
 test $cf_cv_need_xopen_extension = yes && CPPFLAGS="$CPPFLAGS -D_XOPEN_SOURCE_EXTENDED"
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_XOPEN_SOURCE version: 11 updated: 2004/01/26 20:58:41
+dnl CF_XOPEN_SOURCE version: 12 updated: 2004/06/26 18:29:41
 dnl ---------------
 dnl Try to get _XOPEN_SOURCE defined properly that we can use POSIX functions,
 dnl or adapt to the vendor's definitions to get equivalent functionality.
@@ -4400,7 +4422,7 @@ hpux*) #(vi
 irix6.*) #(vi
 	CPPFLAGS="$CPPFLAGS -D_SGI_SOURCE"
 	;;
-linux*) #(vi
+linux*|gnu*) #(vi
 	CF_GNU_SOURCE
 	;;
 mirbsd*) #(vi
@@ -4464,25 +4486,47 @@ test "$cf_cv_xopen_source" = yes && CPPFLAGS="$CPPFLAGS -D_POSIX_C_SOURCE"
 esac
 ])
 dnl ---------------------------------------------------------------------------
-dnl CF_X_ATHENA version: 11 updated: 2002/12/26 20:56:10
+dnl CF_X_ATHENA version: 12 updated: 2004/06/15 21:14:41
 dnl -----------
 dnl Check for Xaw (Athena) libraries
 dnl
+dnl Sets $cf_x_athena according to the flavor of Xaw which is used.
 AC_DEFUN([CF_X_ATHENA],
 [AC_REQUIRE([CF_X_TOOLKIT])
 cf_x_athena=${cf_x_athena-Xaw}
 
+AC_MSG_CHECKING(if you want to link with Xaw 3d library)
+withval=
 AC_ARG_WITH(Xaw3d,
-	[  --with-Xaw3d            link with Xaw 3d library],
-	[cf_x_athena=Xaw3d])
+	[  --with-Xaw3d            link with Xaw 3d library])
+if test "$withval" = yes ; then
+	cf_x_athena=Xaw3d
+	AC_MSG_RESULT(yes)
+else
+	AC_MSG_RESULT(no)
+fi
 
+AC_MSG_CHECKING(if you want to link with neXT Athena library)
+withval=
 AC_ARG_WITH(neXtaw,
-	[  --with-neXtaw           link with neXT Athena library],
-	[cf_x_athena=neXtaw])
+	[  --with-neXtaw           link with neXT Athena library])
+if test "$withval" = yes ; then
+	cf_x_athena=neXtaw
+	AC_MSG_RESULT(yes)
+else
+	AC_MSG_RESULT(no)
+fi
 
+AC_MSG_CHECKING(if you want to link with Athena-Plus library)
+withval=
 AC_ARG_WITH(XawPlus,
-	[  --with-XawPlus          link with Athena-Plus library],
-	[cf_x_athena=XawPlus])
+	[  --with-XawPlus          link with Athena-Plus library])
+if test "$withval" = yes ; then
+	cf_x_athena=XawPlus
+	AC_MSG_RESULT(yes)
+else
+	AC_MSG_RESULT(no)
+fi
 
 AC_CHECK_LIB(Xext,XextCreateExtension,
 	[LIBS="-lXext $LIBS"])

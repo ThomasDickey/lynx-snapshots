@@ -593,11 +593,7 @@ static HTList *LYStdinArgs = NULL;
 #define OPTNAME_ALLOW_DASHES 1
 #endif
 
-#if EXTENDED_OPTION_LOGIC
-static BOOLEAN no_options_further = FALSE;	/* set to TRUE after '--' argument */
-#endif
-
-static BOOL parse_arg(char **arg, unsigned mask, int *i);
+static BOOL parse_arg(char **arg, unsigned mask, int *countp);
 static void print_help_and_exit(int exit_status) GCC_NORETURN;
 static void print_help_strings(const char *name,
 			       const char *help,
@@ -828,20 +824,6 @@ static void FixCharacters(void)
 }
 #endif /* EBCDIC */
 
-static int argncmp(char *str,
-		   char *what)
-{
-    if (str[0] == '-' && str[1] == '-')
-	++str;
-#if OPTNAME_ALLOW_DASHES
-    return strncmp(str, what, strlen(what));
-#else
-    ++str;
-    ++what;			/*skip leading dash in both strings */
-    return !strn_dash_equ(str, what, strlen(what));
-#endif
-}
-
 static void tildeExpand(char **pathname,
 			BOOLEAN embedded)
 {
@@ -1064,14 +1046,7 @@ int main(int argc,
      * Act on -help NOW, so we only output the help and exit.  - FM
      */
     for (i = 1; i < argc; i++) {
-	if (argncmp(argv[i], "-help") == 0) {
-	    parse_arg(&argv[i], 1, &i);
-	}
-#ifdef SH_EX
-	if (strncmp(argv[i], "-show_cfg", 9) == 0) {
-	    show_cfg = TRUE;
-	}
-#endif
+	parse_arg(&argv[i], 1, &i);
     }
 
 #ifdef LY_FIND_LEAKS
@@ -1585,10 +1560,11 @@ int main(int argc,
      * it's not an absolute URL, make it one. - FM
      */
     StrAllocCopy(LynxHome, startfile);
-    LYEnsureAbsoluteURL((char **) &LynxHome, "LynxHome", FALSE);
+    LYEnsureAbsoluteURL(&LynxHome, "LynxHome", FALSE);
 
     /*
      * Process any command line arguments not already handled.  - FM
+     * May set startfile as a side-effect.
      */
     for (i = 1; i < argc; i++) {
 	parse_arg(&argv[i], 4, &i);
@@ -1978,7 +1954,7 @@ int main(int argc,
      * If startfile is a file URL and the host is defaulted, force in
      * "//localhost", and if it's not an absolute URL, make it one.  - FM
      */
-    LYEnsureAbsoluteURL((char **) &startfile, "STARTFILE", FALSE);
+    LYEnsureAbsoluteURL(&startfile, "STARTFILE", FALSE);
 
     /*
      * If homepage was specified and is a file URL with the host defaulted,
@@ -1986,7 +1962,7 @@ int main(int argc,
      * FM
      */
     if (homepage) {
-	LYEnsureAbsoluteURL((char **) &homepage, "HOMEPAGE", FALSE);
+	LYEnsureAbsoluteURL(&homepage, "HOMEPAGE", FALSE);
     }
 
     /*
@@ -2046,6 +2022,10 @@ int main(int argc,
     LYOpenlog(syslog_txt);
 #endif
 
+    if (x_display != NULL && *x_display != '\0') {
+	LYisConfiguredForX = TRUE;
+    }
+
     /*
      * Here's where we do all the work.
      */
@@ -2063,18 +2043,36 @@ int main(int argc,
 		    keypad_mode = LINKS_ARE_NUMBERED;
 	    }
 	}
-
-	if (x_display != NULL && *x_display != '\0') {
-	    LYisConfiguredForX = TRUE;
-	}
 	if (dump_output_width > 0) {
 	    LYcols = dump_output_width;
 	}
+	/*
+	 * Normal argument processing puts non-options (URLs) into the Goto
+	 * history.  Use this to dump all of the pages listed on the command
+	 * line, or (if none are listed) via the startfile mechanism.
+	 * history.
+	 */
+#ifdef EXTENDED_STARTFILE_RECALL
+	HTAddGotoURL(startfile);
+	for (i = HTList_count(Goto_URLs) - 1; i >= 0; --i) {
+	    StrAllocCopy(startfile, (char *) HTList_objectAt(Goto_URLs, i));
+	    CTRACE((tfp, "dumping %d:%d %s\n",
+		    i + 1, HTList_count(Goto_URLs), startfile));
+	    status = mainloop();
+	    if (!nolist &&
+		!crawl &&	/* For -crawl it has already been done! */
+		links_are_numbered())
+		printlist(stdout, FALSE);
+	    if (i != 0)
+		printf("\n");
+	}
+#else
 	status = mainloop();
 	if (!nolist &&
 	    !crawl &&		/* For -crawl it has already been done! */
 	    links_are_numbered())
 	    printlist(stdout, FALSE);
+#endif
 #ifdef USE_PERSISTENT_COOKIES
 	/*
 	 * We want to save cookies picked up when in immediate dump mode. 
@@ -2088,9 +2086,6 @@ int main(int argc,
 	/*
 	 * Start an INTERACTIVE session.  - FM
 	 */
-	if (x_display != NULL && *x_display != '\0') {
-	    LYisConfiguredForX = TRUE;
-	}
 #ifdef USE_COLOR_STYLE
 	cache_tag_styles();
 #endif
@@ -2654,6 +2649,8 @@ static int get_data_fun(char *next_arg GCC_UNUSED)
 	StrAllocCat(*get_data, buf);
     }
 
+    CTRACE((tfp, "get_data:%s\n", *get_data));
+    CTRACE((tfp, "get_data:%s\n", form_get_data));
     return 0;
 }
 
@@ -3094,6 +3091,18 @@ static int version_fun(char *next_arg GCC_UNUSED)
     HTSprintf(&result, "libwww-FM %s,", HTLibraryVersion);
     append_ssl_version(&result, " ");
 #endif /* USE_SSL */
+
+#if defined(NCURSES) && defined(HAVE_CURSES_VERSION)
+    HTSprintf(&result, ", %s", curses_version());
+#if defined(WIDEC_CURSES)
+    HTSprintf(&result, "(wide)");
+#endif
+#elif defined(PDCURSES) && defined(PDC_BUILD)
+    HTSprintf(&result, ", pdcurses %.3f", PDC_BUILD * 0.001);
+#elif defined(USE_SLANG) && defined(SLANG_VERSION_STRING)
+    HTSprintf(&result, ", s-lang %s", SLANG_VERSION_STRING);
+#endif
+
     printf("%s\n", result);
     free(result);
 
@@ -3410,7 +3419,7 @@ keys (may be incompatible with some curses packages)"
       "disable ftp access"
    ),
    PARSE_FUN(
-      "get_data",	6|FUNCTION_ARG,		get_data_fun,
+      "get_data",	2|FUNCTION_ARG,		get_data_fun,
       "user data for get forms, read from stdin,\nterminated by '---' on a line"
    ),
    PARSE_SET(
@@ -3418,7 +3427,7 @@ keys (may be incompatible with some curses packages)"
       "send a HEAD request"
    ),
    PARSE_FUN(
-      "help",		5|FUNCTION_ARG,		help_fun,
+      "help",		1|FUNCTION_ARG,		help_fun,
       "print this usage message"
    ),
    PARSE_FUN(
@@ -3563,7 +3572,7 @@ keys (may be incompatible with some curses packages)"
    ),
 #ifdef SOCKS
    PARSE_SET(
-      "nosocks",	6|UNSET_ARG,		socks_flag,
+      "nosocks",	2|UNSET_ARG,		socks_flag,
       "don't use SOCKS proxy for this session"
    ),
 #endif
@@ -3609,7 +3618,7 @@ with partial-display logic"
       "toggles handling of single-choice SELECT options via\npopup windows or as lists of radio buttons"
    ),
    PARSE_FUN(
-      "post_data",	6|FUNCTION_ARG,		post_data_fun,
+      "post_data",	2|FUNCTION_ARG,		post_data_fun,
       "user data for post forms, read from stdin,\nterminated by '---' on a line"
    ),
    PARSE_SET(
@@ -3684,7 +3693,7 @@ with the PREV_DOC command or from the History List"
    ),
 #ifdef SH_EX
    PARSE_SET(
-      "show_cfg",	4|SET_ARG,		show_cfg,
+      "show_cfg",	1|SET_ARG,		show_cfg,
       "Show `LYNX.CFG' setting"
    ),
 #endif
@@ -3998,49 +4007,77 @@ static int arg_eqs_parse(const char *a,
 #define is_true(s)  (*s == '1' || *s == '+' || !strcmp(s, "on"))
 #define is_false(s) (*s == '0' || *s == '-' || !strcmp(s, "off"))
 
+/*
+ * Parse an option.
+ *	argv[] points to the beginning of the unprocessed options.
+ *	mask is used to select certain options which must be processed
+ *		before others.
+ *	countp (if nonnull) points to an index into argv[], which is updated
+ *		to reflect option values which are also parsed.
+ */
 static BOOL parse_arg(char **argv,
 		      unsigned mask,
-		      int *i)
+		      int *countp)
 {
     Config_Type *p;
     char *arg_name;
 
 #if EXTENDED_STARTFILE_RECALL
-    static BOOLEAN had_nonoption = FALSE;
+    static char *nonoption = 0;
+    static BOOLEAN no_options_further = FALSE;	/* set to TRUE after '--' argument */
 #endif
 
     arg_name = argv[0];
+    CTRACE((tfp, "parse_arg(arg_name=%s, mask=%d, count=%d)\n",
+	    arg_name, mask, countp ? *countp : -1));
+
+#if EXTENDED_STARTFILE_RECALL
+    if (mask == ((countp != 0) ? 0 : 1)) {
+	no_options_further = FALSE;
+	/* want to reset nonoption when beginning scan for --stdin */
+	if (nonoption != 0) {
+	    FREE(nonoption);
+	}
+    }
+#endif
 
     /*
      * Check for a command line startfile.  - FM
      */
-#if !EXTENDED_OPTION_LOGIC
-    if (*arg_name != '-')
-#else
-    if (*arg_name != '-' || no_options_further == TRUE)
+    if (*arg_name != '-'
+#if EXTENDED_OPTION_LOGIC
+	|| no_options_further == TRUE
 #endif
-    {
+	) {
 #if EXTENDED_STARTFILE_RECALL
-	if (had_nonoption && !dump_output_immediately) {
-	    HTAddGotoURL(startfile);	/* startfile was set by a previous arg */
+	/*
+	 * On the last pass (mask==4), check for cases where we may want to
+	 * provide G)oto history for multiple startfiles.
+	 */
+	if (mask == 4) {
+	    if (nonoption != 0) {
+		LYEnsureAbsoluteURL(&nonoption, "NONOPTION", FALSE);
+		HTAddGotoURL(nonoption);
+		FREE(nonoption);
+	    }
+	    StrAllocCopy(nonoption, arg_name);
 	}
-	had_nonoption = TRUE;
 #endif
 	StrAllocCopy(startfile, arg_name);
 	LYEscapeStartfile(&startfile);
 #ifdef _WINDOWS			/* 1998/01/14 (Wed) 20:11:17 */
 	HTUnEscape(startfile);
 	{
-	    char *p;
+	    char *q = startfile;
 
-	    p = startfile;
-	    while (*p++) {
-		if (*p == '|')
-		    *p = ':';
+	    while (*q++) {
+		if (*q == '|')
+		    *q = ':';
 	    }
 	}
 #endif
-	return (BOOL) (i != 0);
+	CTRACE((tfp, "parse_arg startfile:%s\n", startfile));
+	return (BOOL) (countp != 0);
     }
 #if EXTENDED_OPTION_LOGIC
     if (strcmp(arg_name, "--") == 0) {
@@ -4063,7 +4100,7 @@ static BOOL parse_arg(char **argv,
     if (*arg_name == '-')
 	++arg_name;
 
-    CTRACE((tfp, "parse_arg(%s)\n", arg_name));
+    CTRACE((tfp, "parse_arg lookup(%s)\n", arg_name));
 
     p = Arg_Table;
     while (p->name != 0) {
@@ -4081,8 +4118,8 @@ static BOOL parse_arg(char **argv,
 	if (p->type & NEED_NEXT_ARG) {
 	    if (next_arg == 0) {
 		next_arg = argv[1];
-		if ((i != 0) && (next_arg != 0))
-		    (*i)++;
+		if ((countp != 0) && (next_arg != 0))
+		    (*countp)++;
 	    }
 	    CTRACE((tfp, "...arg:%s\n", next_arg != 0 ? next_arg : "<null>"));
 	}

@@ -88,6 +88,7 @@ static void HTFreePresentations(void);
  */
 void HTSetPresentation(const char *representation,
 		       const char *command,
+		       const char *testcommand,
 		       double quality,
 		       double secs,
 		       double secs_per_byte,
@@ -111,6 +112,9 @@ void HTSetPresentation(const char *representation,
 
     pres->command = NULL;
     StrAllocCopy(pres->command, command);
+
+    pres->testcommand = NULL;
+    StrAllocCopy(pres->testcommand, testcommand);
 
     /*
      * Memory leak fixed.
@@ -151,12 +155,12 @@ void HTSetConversion(const char *representation_in,
     pres->rep = HTAtom_for(representation_in);
     pres->rep_out = HTAtom_for(representation_out);
     pres->converter = converter;
-    pres->command = NULL;	/* Fixed */
+    pres->command = NULL;
+    pres->testcommand = NULL;
     pres->quality = quality;
     pres->secs = secs;
     pres->secs_per_byte = secs_per_byte;
     pres->maxbytes = maxbytes;
-    pres->command = NULL;
     pres->get_accept = TRUE;
     pres->accept_opt = media;
 
@@ -198,6 +202,7 @@ static void HTFreePresentations(void)
 	 */
 	pres = (HTPresentation *) HTList_removeLastObject(HTPresentations);
 	FREE(pres->command);
+	FREE(pres->testcommand);
 	FREE(pres);
     }
     /*
@@ -323,6 +328,20 @@ static int half_match(char *trial_type, char *target)
     return 0;
 }
 
+/*
+ * Evaluate a deferred mailcap test command, i.e.,. one that substitutes the
+ * document's charset or other values in %{name} format.
+ */
+static BOOL failsMailcap(HTPresentation *pres, HTParentAnchor *anchor)
+{
+    if (pres->testcommand != 0) {
+	if (LYTestMailcapCommand(pres->testcommand,
+				 anchor->content_type_params) != 0)
+	    return TRUE;
+    }
+    return FALSE;
+}
+
 #define WWW_WILDCARD_REP_OUT HTAtom_for("*")
 
 /*		Look up a presentation
@@ -338,94 +357,104 @@ static int half_match(char *trial_type, char *target)
  */
 static HTPresentation *HTFindPresentation(HTFormat rep_in,
 					  HTFormat rep_out,
-					  HTPresentation *fill_in)
+					  HTPresentation *fill_in,
+					  HTParentAnchor *anchor)
 {
     HTAtom *wildcard = NULL;	/* = HTAtom_for("*"); lookup when needed - kw */
+    int n;
+    int i;
+    HTPresentation *pres;
+    HTPresentation *match;
+    HTPresentation *strong_wildcard_match = 0;
+    HTPresentation *weak_wildcard_match = 0;
+    HTPresentation *last_default_match = 0;
+    HTPresentation *strong_subtype_wildcard_match = 0;
 
     CTRACE((tfp, "HTFormat: Looking up presentation for %s to %s\n",
 	    HTAtom_name(rep_in), HTAtom_name(rep_out)));
 
-    /* don't do anymore do it in the Lynx code at startup LJM */
-/* if (!HTPresentations) HTFormatInit(); *//* set up the list */
-
-    {
-	int n = HTList_count(HTPresentations);
-	int i;
-	HTPresentation *pres;
-	HTPresentation *match;
-	HTPresentation *strong_wildcard_match = 0;
-	HTPresentation *weak_wildcard_match = 0;
-	HTPresentation *last_default_match = 0;
-	HTPresentation *strong_subtype_wildcard_match = 0;
-
-	for (i = 0; i < n; i++) {
-	    pres = (HTPresentation *) HTList_objectAt(HTPresentations, i);
-	    if (pres->rep == rep_in) {
-		if (pres->rep_out == rep_out) {
-		    CTRACE((tfp, "FindPresentation: found exact match: %s\n",
-			    HTAtom_name(pres->rep)));
-		    return pres;
-
-		} else if (!fill_in) {
+    n = HTList_count(HTPresentations);
+    for (i = 0; i < n; i++) {
+	pres = (HTPresentation *) HTList_objectAt(HTPresentations, i);
+	if (pres->rep == rep_in) {
+	    if (pres->rep_out == rep_out) {
+		if (failsMailcap(pres, anchor))
 		    continue;
-		} else {
-		    if (!wildcard)
-			wildcard = WWW_WILDCARD_REP_OUT;
-		    if (pres->rep_out == wildcard) {
-			if (!strong_wildcard_match)
-			    strong_wildcard_match = pres;
-			/* otherwise use the first one */
-			CTRACE((tfp,
-				"StreamStack: found strong wildcard match: %s\n",
-				HTAtom_name(pres->rep)));
-		    }
-		}
+		CTRACE((tfp, "FindPresentation: found exact match: %s\n",
+			HTAtom_name(pres->rep)));
+		return pres;
 
 	    } else if (!fill_in) {
 		continue;
-
-	    } else if (half_match(HTAtom_name(pres->rep),
-				  HTAtom_name(rep_in))) {
-		if (pres->rep_out == rep_out) {
-		    if (!strong_subtype_wildcard_match)
-			strong_subtype_wildcard_match = pres;
+	    } else {
+		if (!wildcard)
+		    wildcard = WWW_WILDCARD_REP_OUT;
+		if (pres->rep_out == wildcard) {
+		    if (failsMailcap(pres, anchor))
+			continue;
+		    if (!strong_wildcard_match)
+			strong_wildcard_match = pres;
 		    /* otherwise use the first one */
 		    CTRACE((tfp,
-			    "StreamStack: found strong subtype wildcard match: %s\n",
+			    "StreamStack: found strong wildcard match: %s\n",
 			    HTAtom_name(pres->rep)));
 		}
 	    }
 
-	    if (pres->rep == WWW_SOURCE) {
-		if (pres->rep_out == rep_out) {
-		    if (!weak_wildcard_match)
-			weak_wildcard_match = pres;
-		    /* otherwise use the first one */
-		    CTRACE((tfp,
-			    "StreamStack: found weak wildcard match: %s\n",
-			    HTAtom_name(pres->rep_out)));
+	} else if (!fill_in) {
+	    continue;
 
-		} else if (!last_default_match) {
-		    if (!wildcard)
-			wildcard = WWW_WILDCARD_REP_OUT;
-		    if (pres->rep_out == wildcard)
-			last_default_match = pres;
-		    /* otherwise use the first one */
-		}
+	} else if (half_match(HTAtom_name(pres->rep),
+			      HTAtom_name(rep_in))) {
+	    if (pres->rep_out == rep_out) {
+		if (failsMailcap(pres, anchor))
+		    continue;
+		if (!strong_subtype_wildcard_match)
+		    strong_subtype_wildcard_match = pres;
+		/* otherwise use the first one */
+		CTRACE((tfp,
+			"StreamStack: found strong subtype wildcard match: %s\n",
+			HTAtom_name(pres->rep)));
 	    }
 	}
 
-	match = strong_subtype_wildcard_match ? strong_subtype_wildcard_match :
-	    strong_wildcard_match ? strong_wildcard_match :
-	    weak_wildcard_match ? weak_wildcard_match :
-	    last_default_match;
+	if (pres->rep == WWW_SOURCE) {
+	    if (pres->rep_out == rep_out) {
+		if (failsMailcap(pres, anchor))
+		    continue;
+		if (!weak_wildcard_match)
+		    weak_wildcard_match = pres;
+		/* otherwise use the first one */
+		CTRACE((tfp,
+			"StreamStack: found weak wildcard match: %s\n",
+			HTAtom_name(pres->rep_out)));
 
-	if (match) {
-	    *fill_in = *match;	/* Specific instance */
-	    fill_in->rep = rep_in;	/* yuk */
-	    fill_in->rep_out = rep_out;		/* yuk */
-	    return fill_in;
+	    } else if (!last_default_match) {
+		if (!wildcard)
+		    wildcard = WWW_WILDCARD_REP_OUT;
+		if (pres->rep_out == wildcard) {
+		    if (failsMailcap(pres, anchor))
+			continue;
+		    last_default_match = pres;
+		/* otherwise use the first one */
+		}
+	    }
 	}
+    }
+
+    match = (strong_subtype_wildcard_match
+	     ? strong_subtype_wildcard_match
+	     : (strong_wildcard_match
+		? strong_wildcard_match
+		: (weak_wildcard_match
+		   ? weak_wildcard_match
+		   : last_default_match)));
+
+    if (match) {
+	*fill_in = *match;	/* Specific instance */
+	fill_in->rep = rep_in;	/* yuk */
+	fill_in->rep_out = rep_out;	/* yuk */
+	return fill_in;
     }
 
     return NULL;
@@ -450,8 +479,10 @@ HTStream *HTStreamStack(HTFormat rep_in,
     HTPresentation *match;
     HTStream *result;
 
-    CTRACE((tfp, "HTFormat: Constructing stream stack for %s to %s\n",
-	    HTAtom_name(rep_in), HTAtom_name(rep_out)));
+    CTRACE((tfp, "HTFormat: Constructing stream stack for %s to %s (%s)\n",
+	    HTAtom_name(rep_in),
+	    HTAtom_name(rep_out),
+	    NONNULL(anchor->content_type_params)));
 
     /* don't return on WWW_SOURCE some people might like
      * to make use of the source!!!!  LJM
@@ -464,7 +495,7 @@ HTStream *HTStreamStack(HTFormat rep_in,
     if (rep_out == rep_in) {
 	result = sink;
 
-    } else if ((match = HTFindPresentation(rep_in, rep_out, &temp))) {
+    } else if ((match = HTFindPresentation(rep_in, rep_out, &temp, anchor))) {
 	if (match == &temp) {
 	    CTRACE((tfp, "StreamStack: Using %s\n", HTAtom_name(temp.rep_out)));
 	} else {
@@ -499,7 +530,7 @@ void HTReorderPresentation(HTFormat rep_in,
 {
     HTPresentation *match;
 
-    if ((match = HTFindPresentation(rep_in, rep_out, NULL))) {
+    if ((match = HTFindPresentation(rep_in, rep_out, NULL, NULL))) {
 	HTList_removeObject(HTPresentations, match);
 	HTList_addObject(HTPresentations, match);
     }

@@ -58,6 +58,7 @@
 #undef HAVE_CATGETS		/* defined if you want to use non-GNU catgets */
 #undef HAVE_CBREAK
 #undef HAVE_CURSESX_H
+#undef HAVE_CURSES_VERSION	/* CF_FUNC_CURSES_VERSION */
 #undef HAVE_CUSERID
 #undef HAVE_DCGETTEXT		/* AM_GNU_GETTEXT */
 #undef HAVE_DEFINE_KEY

@@ -497,7 +497,7 @@ int HTSetConfiguration(char *config)
 			    &quality, &secs, &secs_per_byte, &maxbytes);
 	else
 	    status = 0;
-	HTSetPresentation(word2, word3,
+	HTSetPresentation(word2, word3, NULL,
 			  status >= 1 ? quality : 1.0,
 			  status >= 2 ? secs : 0.0,
 			  status >= 3 ? secs_per_byte : 0.0,

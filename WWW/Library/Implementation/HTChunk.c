@@ -101,8 +101,9 @@ BOOL HTChunkRealloc(HTChunk *ch, int growby)
 
     ch->allocated = ch->allocated + growby;
 
-    data = ch->data ? (char *) realloc(ch->data, ch->allocated)
-	: typecallocn(char, ch->allocated);
+    data = (ch->data
+	    ? (char *) realloc(ch->data, ch->allocated)
+	    : typecallocn(char, ch->allocated));
 
     if (data) {
 	ch->data = data;
@@ -159,7 +160,7 @@ void HTChunkPutb(HTChunk *ch, const char *b, int l)
     ch->size += l;
 }
 
-#define PUTC(code) ch->data[ch->size++] = (char)(code)
+#define PUTC(code)  ch->data[ch->size++] = (char)(code)
 #define PUTC2(code) ch->data[ch->size++] = (char)(0x80|(0x3f &(code)))
 
 void HTChunkPutUtf8Char(HTChunk *ch, UCode_t code)
@@ -244,11 +245,13 @@ void HTChunkPuts(HTChunk *ch, const char *s)
 {
     const char *p;
 
-    for (p = s; *p; p++) {
-	if (ch->size >= ch->allocated) {
-	    if (!HTChunkRealloc(ch, ch->growby))
-		return;
+    if (s != NULL) {
+	for (p = s; *p; p++) {
+	    if (ch->size >= ch->allocated) {
+		if (!HTChunkRealloc(ch, ch->growby))
+		    return;
+	    }
+	    ch->data[ch->size++] = *p;
 	}
-	ch->data[ch->size++] = *p;
     }
 }

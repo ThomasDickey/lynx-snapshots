@@ -1,6 +1,44 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2004-06-30 (2.8.6dev.5)
+* use LYEnsureAbsoluteURL() on the value passed to handle_LYK_HELP() in case
+  it is of the form file:///path rather than file://localhost/path -DK
+* add configure check for ncurses' curses_version() function, using that in
+  the "-version" output.  Add comparable ifdef's for PDCurses and slang -TD
+* Some patches to enable IPv6 on Windows (tested with MingW and MSVC6).  Some
+  minor cleanups also -GV
+  + LYutils.c; fixed extraction of module/system error strings.
+  + Xsystem.c; use <io.h> for mktemp() prototype.
+  + HTTCP.c; don't use global host[], fixed call-convention of thread- function
+    (must be __stdcall).  Sets pending WSAHOST_NOT_FOUND error status.
+  + HTTP.c; _thread_func() wasn't __stdcall.
+  + LYexit.c; avoid redeclaring error of exit() in <process.h>.  IMHO it's very
+    bad to shadow ANSI functions like this.  Should call LYexit() explicitly.
+  + www_tcp.h; cleanup for MSVC and IPv6 headers and macros.  Increase
+    MAXHOSTNAMELEN to 128.
+* updated po files (da.po, et.po, hu.po, sv.po, tr.po) from
+  http://www.iro.umontreal.ca/translation/domains/
+* change HTDOS_wwwName() and HTVMS_wwwName() to return a const value (report
+  by Serge B) -TD
+* update configure script macros CF_XOPEN_SOURCE (fixes Debian #238057) and
+  CF_X_ATHENA (from xterm).
+* update config.guess (2004-06-24) and config.sub (2004-06-24)
+* modified mailcap command and testcommand substitutions to provide for
+  running the testcommand's after program initialization (prompted by review
+  of Debian #167200, which gave as example a mailcap using %{charset} in the
+  test commands) -TD
+* add (ifdef'd with EXP_HTTP_HEADERS) code in HTMIME.c to collect and in
+  LYShowInfo.c to display the full text of the HTTP headers -TD
+* correct command-line options table for "-get_data" and "-post_data" which
+  were processed twice, thereby discarding the value (Debian #132674) -TD
+* lynx accepts multiple URLs on the command line; all are added to G)oto
+  history.  Documented this in manpage (Debian #177062) -TD
+* modify logic for -dump so it can dump all pages listed on the command line
+  (Debian #199131) -TD
+* add presentation type for application/xhtml+xml mime type as per RFC 3236
+  (report by Elimar Riesebieter) -TD
+
 2004-05-23 (2.8.6dev.4)
 * use puts() rather than printf() in some messages to avoid chance of "%" in
   the translation -TD
@@ -100,7 +138,7 @@ Changes since Lynx 2.8 release
   + use $ac_config_sub variable in CF_CHECK_CACHE macro.
   + add case in CF_XOPEN_SOURCE macro to prevent defining _XOPEN_SOURCE
   + use $(MKINSTALLDIRS) variable in generated makefile.
-  + correct comment in lynx.cfg for the default value of FTP_PASSIVE 
+  + correct comment in lynx.cfg for the default value of FTP_PASSIVE
   + increase pattern length for mkdtemp() call.
 * add command-line & menu option/config variables to replace the compile-time
   UNDERLINE_LINKS definition (suggested by BL) -TD
@@ -127,7 +165,7 @@ Changes since Lynx 2.8 release
   Metzler) -TD
 * remove intl subdirectory (gettext-0.10.35), since some of the ".po" files
   have been modified to rely upon newer features of gettext.  Modified
-  configure script macro to report this properly -TD 
+  configure script macro to report this properly -TD
 * add SSL_CERT_DIR, SSL_CERT_FILE to lynx.man (suggested by Stef Caunter) -TD
 * documentation updates for DJGPP -DK, LP, FLWM
 * update address for Free Software Foundation in COPYHEADER and COPYING
@@ -308,7 +346,7 @@ FreeBSD 4.1, 4.8, NetBSD 1.5, 1.6 and OpenBSD 2.8 (curses/ncurses).
     port-numbers from comparison).
   + fix a few typos & compiler-warnings.
 * add PT154 charset support.  See
-  http://www.iana.org/assignments/charset-reg/PTCP154 for more information. 
+  http://www.iana.org/assignments/charset-reg/PTCP154 for more information.
   (patch by Timur Birsh <birsh@mail.kz>)
 * integrate some improvements for configure script in CF_BUNDLED_INTL and
   CF_OUR_MESSAGES from tin and dialog -TD
@@ -388,7 +426,7 @@ FreeBSD 4.1, 4.8, NetBSD 1.5, 1.6 and OpenBSD 2.8 (curses/ncurses).
   Links properly deleted when reparsing the document -LP
 * Use less memory for documents with many anchors:  most anchors are never
   visited, just stored for the reference.  So fill in adult_table[] with
-  HTParentAnchor0 (36 bytes size) instead of full HTParentAnchor (~200 bytes). 
+  HTParentAnchor0 (36 bytes size) instead of full HTParentAnchor (~200 bytes).
   HTParentAnchor now allocated on demand, nearly 1:1 to HText.  [more comments
   in HTAnchor.h, changes located in HTAnchor.c] -LP
 * HTParentAnchor0 stores its hash value, to avoid calling HASH_FUNCTION twice
@@ -464,7 +502,7 @@ FreeBSD 4.1, 4.8, NetBSD 1.5, 1.6 and OpenBSD 2.8 (curses/ncurses).
   the table.  On my system with 128M memory, this leads to only 4M of the
   process space swapped.
 * add case LYK_TO_CLIPBOARD to HTCheckForInterrupt (not a good place), to allow
-  COPY command to work during download (copying the location to clipboard). 
+  COPY command to work during download (copying the location to clipboard).
   The best thing would be to get the location *after* redirects, but this will
   require some additional work -IZ
 * add popen-based support for cut/paste.  This is a slightly reworked patch to
@@ -478,7 +516,7 @@ FreeBSD 4.1, 4.8, NetBSD 1.5, 1.6 and OpenBSD 2.8 (curses/ncurses).
 * fix HTLoadFinger() which was miscasting const data -TD
 * update Subir Grewal's Lynx links URL to the newest location
   http://www.subir.com/lynx.html -TD
-* add configure option --with-gnutls, to allow lynx to be built with gnutls. 
+* add configure option --with-gnutls, to allow lynx to be built with gnutls.
   Used gnutls 0.8.6 on Redhat 8.0 to login at yahoo (gnutls is not very
   portable, so this is an experimental option) -TD
 * modify loop in HTInitProgramPaths() to convert enum ProgramPaths to an
@@ -487,13 +525,13 @@ FreeBSD 4.1, 4.8, NetBSD 1.5, 1.6 and OpenBSD 2.8 (curses/ncurses).
   internal URL types such as lynxprog (report by P.J.Walsh) -TD
 * modified ifdef's to enable -connect_timeout option for DJGPP -GV
   In particular, in LYUtils.c, undef "select" in case Lynx is compiled with
-  curses (and not S-Lang).  Watt-32's select_s cannot be used on a 
+  curses (and not S-Lang).  Watt-32's select_s cannot be used on a
   stdin handle, so one must undef it and use DJGPP's select().
 * modify ifdef in HTCheckForInterrupt() to work with MingW and PDcurses -GV
 * add version information for the macros in aclocal.m4 (request by Lars
   Hecking) -TD
 * modify file-upload to use actual binary-data rather than base64-format -TD
-* generate unique boundary for multipart data in HText_SubmitForm() -TD 
+* generate unique boundary for multipart data in HText_SubmitForm() -TD
 * reorganize HText_SubmitForm(), maintaining post data using bstring's -TD
 * modify HText_SubmitForm() to add field name for the fake coordinate pair
   when formatting a multipart submit (report by Peter Pilsl
