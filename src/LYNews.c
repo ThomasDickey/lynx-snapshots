@@ -37,7 +37,7 @@ PRIVATE BOOLEAN message_has_content ARGS1(
 	       filename ? filename : "(<null>)");
 	return FALSE;
     }
-    while ((buffer = LYSafeGets(buffer, fp)) != NULL) {
+    while (LYSafeGets(&buffer, fp) != NULL) {
 	char *cp = buffer;
 	char firstnonblank = '\0';
 	if (*cp == '\0') {
@@ -70,6 +70,7 @@ PRIVATE BOOLEAN message_has_content ARGS1(
 	    in_headers = FALSE;
 	}
     }
+    FREE(buffer);
     fclose(fp);
     return FALSE;
 }
@@ -239,8 +240,8 @@ PUBLIC char *LYNewsPost ARGS2(
 	StrAllocCat(cp, org);
 #ifndef VMS
     } else if ((fp = fopen("/etc/organization", "r")) != NULL) {
-	char *buffer;
-	if ((buffer = LYSafeGets(NULL, fp)) != NULL) {
+	char *buffer = 0;
+	if (LYSafeGets(&buffer, fp) != NULL) {
 	    if ((org = strchr(buffer, '\n')) != NULL) {
 		*org = '\0';
 	    }
@@ -248,6 +249,7 @@ PUBLIC char *LYNewsPost ARGS2(
 		StrAllocCat(cp, buffer);
 	    }
 	}
+	FREE(buffer);
 	fclose(fp);
 #endif /* !VMS */
     }
@@ -384,7 +386,7 @@ PUBLIC char *LYNewsPost ARGS2(
 	    if ((fd = LYAppendToTxtFile (my_tempfile)) != NULL) {
 		char *buffer = NULL;
 		fputs("-- \n", fd);
-		while ((buffer = LYSafeGets(buffer, fp)) != NULL) {
+		while (LYSafeGets(&buffer, fp) != NULL) {
 		    fputs(buffer, fd);
 		}
 		fclose(fd);
@@ -406,7 +408,7 @@ PUBLIC char *LYNewsPost ARGS2(
     if (CJKfile[0] != '\0') {
 	if ((fd = fopen(my_tempfile, "r")) != NULL) {
 	    char *buffer = NULL;
-	    while ((buffer = LYSafeGets(buffer, fd)) != NULL) {
+	    while (LYSafeGets(&buffer, fd) != NULL) {
 		TO_JIS((unsigned char *)buffer,
 		       (unsigned char *)CJKinput);
 		fputs(CJKinput, fc);

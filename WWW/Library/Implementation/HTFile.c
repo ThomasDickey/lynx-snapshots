@@ -521,7 +521,6 @@ PRIVATE void free_suffixes NOARGS
 }
 #endif /* LY_FIND_LEAKS */
 
-extern void HTDisplayPartial NOARGS;
 
 /*	Make the cache file name for a W3 document.
 **	-------------------------------------------

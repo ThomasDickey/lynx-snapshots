@@ -744,8 +744,7 @@ PUBLIC void mailmsg ARGS4(
     if ((LynxSigFile != NULL) &&
 	(fp = fopen(LynxSigFile, "r")) != NULL) {
 	fputs("-- \n", fd);
-	FREE(cmd);
-	while ((cmd = LYSafeGets(cmd, fp) )!= NULL)
+	while (LYSafeGets(&cmd, fp) != NULL)
 	    fputs(cmd, fd);
 	fclose(fp);
     }
@@ -1691,7 +1690,7 @@ PUBLIC void reply_by_mail ARGS4(
 	    if ((fd = fopen(my_tmpfile, "a")) != NULL) {
 		char *buffer = NULL;
 		fputs("-- \n", fd);
-		while ((buffer = LYSafeGets(buffer, fp)) != NULL) {
+		while (LYSafeGets(&buffer, fp) != NULL) {
 		    fputs(buffer, fd);
 		}
 		fclose(fd);

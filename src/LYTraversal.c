@@ -48,7 +48,7 @@ PUBLIC BOOLEAN lookup ARGS1(char *,target)
 
     HTSprintf0(&line, "%s\n", target);
 
-    while((buffer = LYSafeGets(buffer, ifp)) != NULL) {
+    while (LYSafeGets(&buffer, ifp) != NULL) {
 	if (STREQ(line,buffer)) {
 	    result = TRUE;
 	    break;
@@ -151,7 +151,7 @@ PUBLIC BOOLEAN lookup_reject ARGS1(char *,target)
 
     HTSprintf0(&line, "%s\n", target);
 
-    while ((buffer = LYSafeGets(buffer, ifp)) != NULL && !result) {
+    while (LYSafeGets(&buffer, ifp) != NULL && !result) {
 	frag = strlen(buffer) - 1; /* real length, minus trailing null */
 	ch   = buffer[frag - 1];   /* last character in buffer */
 	if (frag > 0) { 	   /* if not an empty line */

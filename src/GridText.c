@@ -562,7 +562,7 @@ PUBLIC HText *	HText_new ARGS1(
     self->LastChar = '\0';
     self->IgnoreExcess = FALSE;
 
-#ifndef USE_PSRC
+#ifndef PSRC_TEST
     if (HTOutputFormat == WWW_SOURCE)
 	self->source = YES;
     else
@@ -6231,10 +6231,6 @@ PUBLIC BOOLEAN HTreparse_document NOARGS
 	if (!ok) {
 	    FREE(source_cache_filename);
 	}
-#ifdef USE_PSRC
-	else if (LYpsrc && psrc_view)
-	    HTMainText->source = TRUE;
-#endif
     }
 
     if (LYCacheSource == SOURCE_CACHE_MEMORY &&
@@ -6271,10 +6267,6 @@ PUBLIC BOOLEAN HTreparse_document NOARGS
 	    HTChunkFree(source_cache_chunk);
 	    source_cache_chunk = NULL;
 	}
-#ifdef USE_PSRC
-	else if (LYpsrc && psrc_view)
-	    HTMainText->source = TRUE;
-#endif
     }
 
     /*
@@ -6284,13 +6276,8 @@ PUBLIC BOOLEAN HTreparse_document NOARGS
 
     CTRACE(tfp, "Reparse %s\n", (ok ? "succeeded" : "failed"));
 
-    if (ok)  {/* fix few flags: */
+    if (ok)  {
 	from_source_cache = TRUE;  /* flag for mainloop events */
-#ifdef USE_PSRC
-	if (LYpsrc && psrc_view)
-	    HTMainText->source = TRUE;
-#endif
-	more = HText_canScrollDown();  /* the length may be changed */
     }
 
     return ok;

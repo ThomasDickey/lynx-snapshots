@@ -738,28 +738,28 @@ try_again:
 			   newdoc.internal_link = FALSE;
 			   goto try_again;
 			} else {
-			   if (!dump_output_immediately)
+			    if (!dump_output_immediately)
 			       cleanup();
 #ifdef UNIX
-			   if (dump_output_immediately) {
+			    if (dump_output_immediately) {
 			       fprintf(stderr,
  gettext("\nlynx: Start file could not be found or is not text/html or text/plain\n"));
-			       fprintf(stderr,gettext("      Exiting...\n"));
-			   } else
+				fprintf(stderr, gettext("      Exiting...\n"));
+			    } else
 #endif /* UNIX */
-			   {
-			       SetOutputMode( O_TEXT );
+			    {
+				SetOutputMode( O_TEXT );
 
-			       printf(
- "\nlynx: Start file could not be found or is not text/html or text/plain\n");
-			       printf("      Exiting...\n");
+				printf(
+ gettext("\nlynx: Start file could not be found or is not text/html or text/plain\n"));
+				printf(gettext("      Exiting...\n"));
 
-			       SetOutputMode( O_BINARY );
-			   }
-			   if (!dump_output_immediately) {
-			       exit_immediately(-1);
-			   }
-			   return(-1);
+				SetOutputMode( O_BINARY );
+			    }
+			    if (!dump_output_immediately) {
+				exit_immediately(-1);
+			    }
+			    return(-1);
 			}
 		    }
 
@@ -1218,42 +1218,41 @@ try_again:
 	/*
 	 * If the parse settings have changed since this HText was
 	 * generated, we need to reparse and redraw it.  -dsb
+	 *
+	 * Should be configured to avoid shock for experienced lynx users.
+	 * Currently enabled for cached sources only.
 	 */
 	if (HTdocument_settings_changed()) {
-	    HTUserMsg(gettext("Reparsing document under current settings..."));
-	    if (HTreparse_document()) {}
-	    else {
+	   if (HTcan_reparse_document()) {
+	       HTUserMsg(gettext("Reparsing document under current settings..."));
+	       if (HTreparse_document()) {}
+	   } else {
 		/*
 		 * Urk.  I have no idea how to recover from a failure here.
 		 * At a guess, I'll try reloading.  -dsb
 		 */
+			/*  currently disabled ***
+		HTUserMsg(gettext("Reparsing document under current settings..."));
 		cmd = LYK_RELOAD;
 		goto new_cmd;
+			*/
 	    }
 	}
 
 	/*
 	 *  Trying to accomodate HTreparse_document() logic
-	 *  with mainloop events. Set all the necessaty flags here...
+	 *  with mainloop events.  Working out of force_load cycle
+	 *  set all the necessary flags here, from case NORMAL
+	 *  (see also LYK_SOURCE, some staff implemented directly there).
 	 */
 	if (from_source_cache) {
-		from_source_cache = FALSE; /* reset */
-
-		    /*
-		     *	Make sure curdoc.line will not be equal
-		     *	to Newline, so we get a redraw.
-		     */
-		    curdoc.line = -1;
+	    from_source_cache = FALSE; /* done */
 
 	    /*
-	     * This information can get clobbered if we go to an internal
-	     * page while viewing source.  Normally it would be recreated
-	     * by reloading the file; we have to do it ourselves.  -dsb
+	     *	Make sure curdoc.line will not be equal
+	     *	to Newline, so we get a redraw.
 	     */
-	    if (curdoc.link < 0 && nlinks > 0)
-		curdoc.link = 0;
-
-		refresh_screen = TRUE; /* ? */
+	    curdoc.line = -1;
 	}
 #endif
 
@@ -1262,6 +1261,7 @@ try_again:
 	 *  If the curdoc.line is different than Newline then there must
 	 *  have been a change since last update.  Run HText_pageDisplay()
 	 *  create a fresh screen of text out.
+	 *  All display_partial calls ends here for final redraw.
 	 */
 	if (curdoc.line != Newline) {
 
@@ -1344,16 +1344,6 @@ try_again:
 	     */
 	    more = HText_canScrollDown();
 
-#ifdef SOURCE_CACHE
-	    /*
-	     * This information can get clobbered if we go to an internal
-	     * page while viewing source, or if the page length changes
-	     * between reparses.  Normally it would be recreated by
-	     * reloading the file; we have to do it ourselves.  -dsb
-	     */
-	    if (curdoc.link < 0 && nlinks > 0)
-		curdoc.link = 0;
-#endif
 	    if (user_mode == NOVICE_MODE)
 		noviceline(more);  /* print help message */
 	    refresh_screen = FALSE;
@@ -2083,14 +2073,14 @@ new_cmd:  /*
 	    }
 #ifdef SOURCE_CACHE
 	    if (HTreparse_document()) {
-                break; /* OK */
+		break; /* OK */
 	    }
 #endif
 	    break;
 
 	case LYK_SOFT_DQUOTES:
 #ifdef SOURCE_CACHE
-            if (!HTcan_reparse_document()) {
+	    if (!HTcan_reparse_document()) {
 #endif
 	    /*
 	     *	Check if this is a reply from a POST, and if so,
@@ -2171,24 +2161,24 @@ new_cmd:  /*
 #endif /* NO_ASSUME_SAME_DOC */
 	    }
 #ifdef SOURCE_CACHE
-            } /* end if no bypass */
+	    } /* end if no bypass */
 #endif
 	    Old_DTD = !Old_DTD;
 	    HTSwitchDTD(!Old_DTD);
 	    HTUserMsg(Old_DTD ? USING_DTD_0 : USING_DTD_1);
 #ifdef SOURCE_CACHE
-            if (HTcan_reparse_document()) {
-            if (HTisDocumentSource() && LYPreparsedSource) {
+	    if (HTcan_reparse_document()) {
+	    if (HTisDocumentSource() && LYPreparsedSource) {
 #ifdef USE_PSRC
-                if (LYpsrc)
-                    psrc_view = TRUE;
-                else
+		if (LYpsrc)
+		    psrc_view = TRUE;
+		else
 #endif
-                HTOutputFormat = WWW_SOURCE;
-            }
-            if (HTreparse_document()) {
-                break;
-            }
+		HTOutputFormat = WWW_SOURCE;
+	    }
+	    if (HTreparse_document()) {
+		break;
+	    }
 	    } /* end if no bypass */
 #endif
 	    break;

@@ -974,7 +974,7 @@ PUBLIC int main ARGS2(
     if (LYGetStdinArgs == TRUE) {
 	char *buf = NULL;
 
-	while ((buf = LYSafeGets(buf, stdin)) != 0) {
+	while (LYSafeGets(&buf, stdin) != 0) {
 	    int j;
 
 	    for (j = strlen(buf) - 1; j > 0 &&
@@ -1051,7 +1051,7 @@ PUBLIC int main ARGS2(
 		 *  Build GET data for later.  Stop reading when we see
 		 *  a line with "---" as its first three characters.
 		 */
-		while ((buf = LYSafeGets(buf, stdin)) != 0 &&
+		while (LYSafeGets(&buf, stdin) != 0 &&
 		       strncmp(buf, "---", 3) != 0) {
 		    int j2;
 
@@ -1089,7 +1089,7 @@ PUBLIC int main ARGS2(
 		 *  Build post data for later.	Stop reading when we see
 		 *  a line with "---" as its first three characters.
 		 */
-		while ((buf = LYSafeGets(buf, stdin)) != 0 &&
+		while (LYSafeGets(&buf, stdin) != 0 &&
 		       strncmp(buf, "---", 3) != 0) {
 		    int j2;
 
@@ -1115,6 +1115,7 @@ PUBLIC int main ARGS2(
 		HTList_appendObject(LYStdinArgs, argument);
 	    }
 	}
+	FREE(buf);
     }
 
 #ifdef SOCKS
@@ -2230,7 +2231,7 @@ static int get_data_fun ARGS1(
      *  Build GET data for later.  Stop reading when we see a line
      *  with "---" as its first three characters.
      */
-    while ((buf = LYSafeGets(buf, stdin)) != 0 &&
+    while (LYSafeGets(&buf, stdin) != 0 &&
 	  strncmp(buf, "---", 3) != 0) {
 	int j;
 
@@ -2398,7 +2399,7 @@ static int post_data_fun ARGS1(
      * Build post data for later.  Stop reading when we see a line with "---"
      * as its first three characters.
      */
-    while ((buf = LYSafeGets(buf, stdin)) != 0 &&
+    while (LYSafeGets(&buf, stdin) != 0 &&
 	  strncmp(buf, "---", 3) != 0) {
 	int j;
 

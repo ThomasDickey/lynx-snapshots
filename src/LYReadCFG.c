@@ -1294,7 +1294,7 @@ PRIVATE void do_read_cfg ARGS5(
     /*
      *	Process each line in the file.
      */
-    while ((buffer = LYSafeGets(buffer, fp)) != 0) {
+    while (LYSafeGets(&buffer, fp) != 0) {
 	char *name, *value;
 	char *cp;
 	Config_Type *tbl;

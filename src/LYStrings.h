@@ -82,7 +82,7 @@ extern char * SNACat PARAMS((
 #define StrnAllocCopy(dest, src, n)  SNACopy (&(dest), src, n)
 #define StrnAllocCat(dest, src, n)   SNACat  (&(dest), src, n)
 
-extern char *LYSafeGets PARAMS((char * src, FILE * fp));
+extern char *LYSafeGets PARAMS((char ** src, FILE * fp));
 
 /* values for LYgetch */
 #define UPARROW		256	/* 0x100 */

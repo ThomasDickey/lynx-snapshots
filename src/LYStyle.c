@@ -1,6 +1,6 @@
 /* character level styles for Lynx
  * (c) 1996 Rob Partington -- donated to the Lyncei (if they want it :-)
- * @Id: LYStyle.c 1.25 Fri, 23 Apr 1999 08:56:35 -0600 dickey @
+ * @Id: LYStyle.c 1.26 Tue, 27 Apr 1999 06:59:06 -0600 dickey @
  */
 #include <HTUtils.h>
 #include <HTML.h>
@@ -415,7 +415,7 @@ PUBLIC int style_readFromFile ARGS1(char*, file)
     style_initialiseHashTable();
     style_deleteStyleList();
 
-    while ((buffer = LYSafeGets(buffer, fh)) != NULL)
+    while (LYSafeGets(&buffer, fh) != NULL)
     {
 	LYTrimTrailing(buffer);
 	LYTrimTail(buffer);

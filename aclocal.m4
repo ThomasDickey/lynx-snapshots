@@ -1274,61 +1274,6 @@ AC_MSG_RESULT($cf_cv_locale)
 test $cf_cv_locale = yes && AC_DEFINE(LOCALE)
 ])
 dnl ---------------------------------------------------------------------------
-dnl Check for the use of 'include' in 'make' (BSDI is a special case)
-dnl The symbol $ac_make is set in AC_MAKE_SET, as a side-effect.
-AC_DEFUN([CF_MAKE_INCLUDE],
-[
-AC_MSG_CHECKING(for style of include in makefiles)
-
-make_include_left=""
-make_include_right=""
-make_include_quote="unknown"
-
-cf_inc=head$$
-cf_dir=subd$$
-echo 'RESULT=OK' >$cf_inc
-mkdir $cf_dir
-
-for cf_include in "include" ".include" "!include"
-do
-	for cf_quote in '' '"'
-	do
-		cat >$cf_dir/makefile <<CF_EOF
-SHELL=/bin/sh
-${cf_include} ${cf_quote}../$cf_inc${cf_quote}
-all :
-	@echo 'cf_make_include=\$(RESULT)'
-CF_EOF
-	cf_make_include=""
-	eval `(cd $cf_dir && ${MAKE-make}) 2>&AC_FD_CC | grep cf_make_include=OK`
-	if test -n "$cf_make_include"; then
-		make_include_left="$cf_include"
-		make_include_quote="$cf_quote"
-		break
-	else
-		echo Tried 1>&AC_FD_CC
-		cat $cf_dir/makefile 1>&AC_FD_CC
-	fi
-	done
-	test -n "$cf_make_include" && break
-done
-
-rm -rf $cf_inc $cf_dir
-
-if test -z "$make_include_left" ; then
-	AC_ERROR(Your $ac_make program does not support includes)
-fi
-if test ".$make_include_quote" != .unknown ; then
-	make_include_left="$make_include_left $make_include_quote"
-	make_include_right="$make_include_quote"
-fi
-
-AC_MSG_RESULT(${make_include_left}file${make_include_right})
-
-AC_SUBST(make_include_left)
-AC_SUBST(make_include_right)
-])dnl
-dnl ---------------------------------------------------------------------------
 dnl Check for pre-1.9.9g ncurses (among other problems, the most obvious is
 dnl that color combinations don't work).
 AC_DEFUN([CF_NCURSES_BROKEN],

@@ -279,7 +279,7 @@ PRIVATE int ProcessMailcapEntry ARGS2(
     if (!rawentry)
 	ExitWithError(MEMORY_EXHAUSTED_ABORT);
     *rawentry = '\0';
-    while ((LineBuf = LYSafeGets(LineBuf, fp)) != 0) {
+    while (LYSafeGets(&LineBuf, fp) != 0) {
 	if (LineBuf[0] == '#')
 	    continue;
 	len = strlen(LineBuf);
@@ -301,6 +301,7 @@ PRIVATE int ProcessMailcapEntry ARGS2(
 	    break;
 	}
     }
+    FREE(LineBuf);
 
     s = LYSkipBlanks(rawentry);
     if (!*s) {
