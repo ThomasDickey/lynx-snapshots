@@ -277,10 +277,12 @@ freebsd*) #(vi
 	;;
 esac
 
+if test ".$With5lib" != ".no" ; then
 if test -d /usr/5lib ; then
 	# SunOS 3.x or 4.x
 	CPPFLAGS="$CPPFLAGS -I/usr/5include"
 	LIBS="$LIBS -L/usr/5lib"
+fi
 fi
 
 if test ".$ac_cv_func_initscr" != .yes ; then
@@ -298,8 +300,8 @@ if test ".$ac_cv_func_initscr" != .yes ; then
 	])
 
 	# Check for library containing initscr
-	test "$cf_term_lib" != predefined && \ test "$cf_term_lib" != unknown && LIBS="-l$cf_term_lib $cf_save_LIBS"
-	for cf_curs_lib in curses ncurses cursesX jcurses unknown
+	test "$cf_term_lib" != predefined && test "$cf_term_lib" != unknown && LIBS="-l$cf_term_lib $cf_save_LIBS"
+	for cf_curs_lib in curses ncurses xcurses cursesX jcurses unknown
 	do
 		AC_CHECK_LIB($cf_curs_lib,initscr,[break])
 	done
@@ -308,7 +310,7 @@ if test ".$ac_cv_func_initscr" != .yes ; then
 	LIBS="-l$cf_curs_lib $cf_save_LIBS"
 	if test "$cf_term_lib" = unknown ; then
 		AC_MSG_CHECKING(if we can link with $cf_curs_lib library)
-		AC_TRY_LINK([#include <$cf_cv_ncurses_header>],
+		AC_TRY_LINK([#include <${cf_cv_ncurses_header-curses.h}>],
 			[initscr()],
 			[cf_result=yes],
 			[cf_result=no])
@@ -316,12 +318,12 @@ if test ".$ac_cv_func_initscr" != .yes ; then
 		test $cf_result = no && AC_ERROR(Cannot link curses library)
 	elif test "$cf_term_lib" != predefined ; then
 		AC_MSG_CHECKING(if we need both $cf_curs_lib and $cf_term_lib libraries)
-		AC_TRY_LINK([#include <$cf_cv_ncurses_header>],
-			[initscr()],
+		AC_TRY_LINK([#include <${cf_cv_ncurses_header-curses.h}>],
+			[initscr(); tgoto((char *)0, 0, 0);],
 			[cf_result=no],
 			[
 			LIBS="-l$cf_curs_lib -l$cf_term_lib $cf_save_LIBS"
-			AC_TRY_LINK([#include <$cf_cv_ncurses_header>],
+			AC_TRY_LINK([#include <${cf_cv_ncurses_header-curses.h}>],
 				[initscr()],
 				[cf_result=yes],
 				[cf_result=error])
@@ -476,6 +478,34 @@ AC_DEFUN([CF_FIND_LIBRARY],
 if test $cf_cv_have_lib_$1 = no ; then
 	AC_ERROR(Cannot link $1 library)
 fi
+])dnl
+dnl ---------------------------------------------------------------------------
+dnl Check for availability of fcntl versus ioctl(,FIONBIO,).  Lynx uses this
+dnl for Sequent (ptx), and it is needed for OS/2 EMX.
+AC_DEFUN([CF_FIONBIO],
+[
+AC_CACHE_CHECK(if we should use fcntl or ioctl,cf_cv_fionbio,[
+AC_TRY_LINK([
+#include <sys/types.h>
+#include <sys/ioctl.h>
+],[
+        int ret = ioctl(0, FIONBIO, (char *)0);
+	],[cf_cv_fionbio=ioctl],[
+AC_TRY_LINK([
+#include <sys/types.h>
+#if HAVE_FCNTL_H
+#include <fcntl.h>
+#else
+#if HAVE_SYS_FCNTL_H
+#include <sys/fcntl.h>
+#endif
+#endif],[
+        int ret = fcntl(0, F_SETFL, O_NONBLOCK);
+	],
+	[cf_cv_fionbio=fcntl],
+	[cf_cv_fionbio=unknown])])
+])
+test "$cf_cv_fionbio" = "fcntl" && AC_DEFINE(USE_FCNTL)
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl Test for the presence of <sys/wait.h>, 'union wait', arg-type of 'wait()'
@@ -803,7 +833,7 @@ esac
 
 LIBS="$cf_ncurses_LIBS $LIBS"
 CF_FIND_LIBRARY(ncurses,
-	[#include <$cf_cv_ncurses_header>],
+	[#include <${cf_cv_ncurses_header-curses.h}>],
 	[initscr()],
 	initscr)
 
@@ -816,7 +846,7 @@ if test -n "$cf_ncurses_LIBS" ; then
 			LIBS="$q"
 		fi
 	done
-	AC_TRY_LINK([#include <$cf_cv_ncurses_header>],
+	AC_TRY_LINK([#include <${cf_cv_ncurses_header-curses.h}>],
 		[initscr(); mousemask(0,0); tgoto((char *)0, 0, 0);],
 		[AC_MSG_RESULT(yes)],
 		[AC_MSG_RESULT(no)
@@ -831,7 +861,7 @@ AC_CACHE_VAL(cf_cv_ncurses_version,[
 	cf_cv_ncurses_version=no
 	cf_tempfile=out$$
 	AC_TRY_RUN([
-#include <$cf_cv_ncurses_header>
+#include <${cf_cv_ncurses_header-curses.h}>
 int main()
 {
 	FILE *fp = fopen("$cf_tempfile", "w");
@@ -856,7 +886,7 @@ int main()
 	# This will not work if the preprocessor splits the line after the
 	# Autoconf token.  The 'unproto' program does that.
 	cat > conftest.$ac_ext <<EOF
-#include <$cf_cv_ncurses_header>
+#include <${cf_cv_ncurses_header-curses.h}>
 #undef Autoconf
 #ifdef NCURSES_VERSION
 Autoconf NCURSES_VERSION

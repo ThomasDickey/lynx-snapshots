@@ -320,6 +320,7 @@ dnl Checks for library units
 dnl --------------------------------------------------------------------------
 
 AC_FUNC_VFORK
+CF_FIONBIO
 CF_REMOVE_BROKEN
 AC_CHECK_FUNCS( \
 	cuserid \
@@ -409,6 +410,14 @@ no)
 	;;
 esac
 AC_SUBST(INSTALL_LSS)
+
+AC_MSG_CHECKING(if you want to use extended HTML DTD logic)
+CF_ARG_DISABLE(extended-dtd,
+[  --disable-extended-dtd  disable extended HTML DTD logic],
+	[use_ext_htmldtd=no],
+	[use_ext_htmldtd=yes])
+AC_MSG_RESULT($use_ext_htmldtd)
+test $use_ext_htmldtd = "no" && AC_DEFINE(NO_EXTENDED_HTMLDTD)
 
 AC_MSG_CHECKING(if you want to use external commands)
 CF_ARG_ENABLE(externs,

@@ -176,21 +176,25 @@ PUBLIC int HTAA_getGid NOARGS
     if (current_prot  &&  current_prot->gid_name) {
 	if (isNumber(current_prot->gid_name)) {
 	    if (NULL != (gr = getgrgid(atoi(current_prot->gid_name)))) {
+#ifndef __EMX__	/* no gr_passwd */
 		if (TRACE) fprintf(stderr,
 				   "%s(%s) returned (%s:%s:%d:...)\n",
 				   "HTAA_getGid: getgrgid",
 				   current_prot->gid_name,
 				   gr->gr_name, gr->gr_passwd, gr->gr_gid);
+#endif
 		return gr->gr_gid;
 	    }
 	}
 	else {	/* Group name (not number) */
 	    if (NULL != (gr = getgrnam(current_prot->gid_name))) {
+#ifndef __EMX__	/* no gr_passwd */
 		if (TRACE) fprintf(stderr, 
 				   "%s(\"%s\") returned (%s:%s:%d:...)\n",
 				   "HTAA_getGid: getgrnam",
 				   current_prot->gid_name,
 				   gr->gr_name, gr->gr_passwd, gr->gr_gid);
+#endif
 		return gr->gr_gid;
 	    }
 	}

@@ -33,7 +33,6 @@ extern void HTMLSetHaveCJKCharacterSet PARAMS((int i));
 extern CONST char * LYEntityNames[];
 extern CONST char * HTMLGetEntityName PARAMS((UCode_t code));
 extern UCode_t HTMLGetEntityUCValue PARAMS((CONST char *name));
-extern char HTMLGetLatinOneValue PARAMS((int i));
 extern void HTMLUseCharacterSet PARAMS((int i));
 
 #endif /* LYCHARSETS_H */

@@ -999,12 +999,14 @@ PRIVATE BOOLEAN remove_single ARGS1(
 	} else {
 	    sprintf(tmpbuf, "Remove file (y or n): ");
 	}
+#ifdef S_IFLNK
     } else if ((dir_info.st_mode & S_IFMT) == S_IFLNK) {
 	if (strlen(cp) < 50) {
 	    sprintf(tmpbuf, "Remove symbolic link '%s' (y or n): ", cp);
 	} else {
 	    sprintf(tmpbuf, "Remove symbolic link (y or n): ");
 	}
+#endif
     } else {
 	sprintf(tmpbuf, "Unable to determine status of '%s'.", testpath);
 	_statusline(tmpbuf);
@@ -1849,9 +1851,11 @@ PUBLIC int dired_options ARGS2(
 	if (mp->cond == DE_FILE &&
 	    (!*path || (dir_info.st_mode & S_IFMT) != S_IFREG))
 	    continue;
+#ifdef S_IFLNK
 	if (mp->cond == DE_SYMLINK &&
 	    (!*path || (dir_info.st_mode & S_IFMT) != S_IFLNK))
 	    continue;
+#endif
 	if (*mp->sfx &&
 	    (strlen(path) < strlen(mp->sfx) ||
 	     strcmp(mp->sfx, &path[(strlen(path) - strlen(mp->sfx))]) != 0))

@@ -144,6 +144,12 @@ typedef struct {
     size_t              number_of_entities;
     CONST UC_entity_info * extra_entity_info; /* strcmp order by name */
     size_t              number_of_extra_entities;
+			/*
+			**  All calls to extra_entities table should be done
+			**  through HTMLGetEntityUCValue (LYCharSets.c) only.
+			**  Unicode-based extra_entities table now hold *all*
+			**  old-style entities either.
+			*/
 } SGML_dtd;
 
 

@@ -890,7 +890,7 @@ Prepend_BASE:
 		anchor->address, (temp ? temp : anchor->address));
 	FREE(temp);
     }
-        if (LYPrependCharsetToSource &&
+    if (LYPrependCharsetToSource &&
 	!strncasecomp(pres->rep->name, "text/html", 9) &&
 	!anchor->content_encoding) {
 	/*
@@ -902,11 +902,6 @@ Prepend_BASE:
 	 *  declaration, or HTML or HEAD tags, are present, and thus the
 	 *  file may need editing for perfection. - FM
 	 */
-
-/* ++++ Not checked in detail - whether we may use anchor->charset
-or should find something else in HTAnchor.c or HTMime.c - LP.
-+++++++++ */
-
 	char *temp = NULL;
 
 	if (anchor->charset && *anchor->charset) {

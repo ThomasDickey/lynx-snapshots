@@ -849,7 +849,7 @@ PUBLIC void LYGetChartransInfo ARGS1(
 **  keep memory allocations at a minimum. - FM
 */
 PUBLIC void LYExpandString ARGS2(
-	HTStructured *,		me,
+	HTStructured *, 	me,
 	char **,		str)
 {
     char *p = *str;
@@ -868,22 +868,22 @@ PUBLIC void LYExpandString ARGS2(
     int i, j, high, low, diff = 0;
 
     /*
-    **  Don't do anything if we have no structure
-    **  or string, or are in CJK mode. - FM
+    **	Don't do anything if we have no structure
+    **	or string, or are in CJK mode. - FM
     */
     if (!me || !p || *p == '\0' ||
-        HTCJK != NOCJK)
-        return;
+	HTCJK != NOCJK)
+	return;
 
     /*
-    **  Set "convenience copies" of me structure
-    **  elements. - FM
+    **	Set "convenience copies" of me structure
+    **	elements. - FM
     */
     plain_space = me->UsePlainSpace;
     hidden = me->HiddenValue;
 
     /*
-    **  Check for special input charsets - FM
+    **	Check for special input charsets - FM
     */
     if (!strcmp(me->inUCI->MIMEname, "x-transparent")) {
 	/*
@@ -914,21 +914,21 @@ PUBLIC void LYExpandString ARGS2(
     }
 
     /*
-    **  Zero the UTF-8 multibytes buffer. - FM
+    **	Zero the UTF-8 multibytes buffer. - FM
     */
     utf_buf[0] = utf_buf[6] = utf_buf[7] = '\0';
 
     /*
-    **  Set up an HTChunk for accumulating the expanded copy
-    **  of the string, so that allocations are done in 128
-    **  byte increments, only as required. - FM
+    **	Set up an HTChunk for accumulating the expanded copy
+    **	of the string, so that allocations are done in 128
+    **	byte increments, only as required. - FM
     */
     s = HTChunkCreate(128);
 
     /*
-    **  Check each character in the original string,
-    **  and add the characters or substitutions to
-    **  our clean copy. - FM
+    **	Check each character in the original string,
+    **	and add the characters or substitutions to
+    **	our clean copy. - FM
     */
     for (i = 0; p[i]; i++) {
 	/*
@@ -945,8 +945,8 @@ PUBLIC void LYExpandString ARGS2(
 	*/
 	if (me->T.decode_utf8) {
 	    /*
-	    **  Our input charset is UTF-8, so check
-	    **  for non-ASCII characters. - FM
+	    **	Our input charset is UTF-8, so check
+	    **	for non-ASCII characters. - FM
 	    */
 	    if (c_unsign > 127) {
 		/*
@@ -954,9 +954,9 @@ PUBLIC void LYExpandString ARGS2(
 		*/
 		if (utf_count > 0 && (c & 0xc0) == 0x80) {
 		    /*
-		    **  Adjust the UCode_t value, add the octet
-		    **  to the buffer, and decrement the byte
-		    **  count. - FM
+		    **	Adjust the UCode_t value, add the octet
+		    **	to the buffer, and decrement the byte
+		    **	count. - FM
 		    */
 		    utf_char = (utf_char << 6) | (c & 0x3f);
 		    utf_count--;
@@ -987,7 +987,7 @@ PUBLIC void LYExpandString ARGS2(
 		    }
 		} else {
 		    /*
-		    **  Start handling a new multibyte character. - FM
+		    **	Start handling a new multibyte character. - FM
 		    */
 		    utf_buf[0] = c;
 		    utf_buf_p = &utf_buf[1];
@@ -1018,7 +1018,7 @@ PUBLIC void LYExpandString ARGS2(
 			utf_buf_p = utf_buf;
 		    }
 		    /*
-		    **  Get the next byte. - FM
+		    **	Get the next byte. - FM
 		    */
 		    continue;
 		}
@@ -1070,7 +1070,7 @@ PUBLIC void LYExpandString ARGS2(
 		       me->T.trans_C0_to_uni) {
 		/*
 		**  Quote from SGML.c:
-		**  	"This else if may be too ugly to keep. - KW"
+		**	"This else if may be too ugly to keep. - KW"
 		*/
 		if (me->T.trans_from_uni &&
 		    (((code = UCTransToUni(c, me->inUCLYhndl)) >= 32) ||
@@ -1147,7 +1147,7 @@ PUBLIC void LYExpandString ARGS2(
 	**  (or a space if plain_space or hidden is set) if
 	**  HTPassHighCtrlRaw is not set. - FM
 	*/
-        if (code == 160) {
+	if (code == 160) {
 	    if (!me->T.pass_160_173_raw) {
 		if (plain_space || hidden) {
 		    HTChunkPutc(s, ' ');
@@ -1170,7 +1170,7 @@ PUBLIC void LYExpandString ARGS2(
 	**  (or skip it if plain_space or hidden is set) if
 	**  HTPassHighCtrlRaw is not set. - FM
 	*/
-        if (code == 173) {
+	if (code == 173) {
 	    if (!me->T.pass_160_173_raw) {
 		if (!(plain_space || hidden)) {
 		    HTChunkPutc(s, LY_SOFT_HYPHEN);
@@ -1204,17 +1204,6 @@ PUBLIC void LYExpandString ARGS2(
 	    continue;
 	}
 	/*
-	**  For 8211 (ndash) or 8212 (mdash), use an ASCII dash. - FM
-	*/
-	if (code == 8211 || code == 8212) {
-	    HTChunkPutc(s, '-');
-	    if (me->T.decode_utf8 && *utf_buf) {
-		utf_buf[0] == '\0';
-		utf_buf_p = utf_buf;
-	    }
-	    continue;
-	}
-	/*
 	**  If we want the raw character, pass it now. - FM
 	*/
 	if (me->T.use_raw_char_in && saved_char_in) {
@@ -1229,37 +1218,6 @@ PUBLIC void LYExpandString ARGS2(
 	    uck < 256 &&
 	    (uck < 127 ||
 	     uck >= LYlowest_eightbit[me->outUCLYhndl])) {
-	    if (uck == 160 && me->outUCLYhndl == 0) {
-		/*
-		**  Would only happen if some other Unicode
-		**  is mapped to Latin-1 160.
-		*/
-		if (!(hidden ||
-		      me->T.pass_160_173_raw)) {
-		    if (plain_space) {
-			HTChunkPutc(s, ' ');
-		    } else {
-			HTChunkPutc(s, HT_NON_BREAK_SPACE);
-		    }
-		} else {
-		    HTChunkPutc(s, ((char)(uck & 0xff)));
-		}
-		continue;
-	    } else if (uck == 173 && me->outUCLYhndl == 0) {
-		/*
-		**  Would only happen if some other Unicode
-		**  is mapped to Latin-1 173.
-		*/
-		if (!(hidden ||
-		      me->T.pass_160_173_raw)) {
-		    if (!plain_space) {
-			HTChunkPutc(s, LY_SOFT_HYPHEN);
-		    }
-		} else {
-		    HTChunkPutc(s, ((char)(uck & 0xff)));
-		}
-		continue;
-	    }
 	    HTChunkPutc(s, ((char)(uck & 0xff)));
 	    continue;
 	} else if (chk &&
@@ -1272,13 +1230,13 @@ PUBLIC void LYExpandString ARGS2(
 		   (uck = UCTransUniCharStr(replace_buf,
 					    60, code,
 					    me->outUCLYhndl,
-					    0) >= 0)) { 
+					    0) >= 0)) {
 	    /*
-	    **  Got a replacement string.
+	    **	Got a replacement string.
 	    */
 	    HTChunkPuts(s, replace_buf);
 	    continue;
-    	}
+	}
 	/*
 	**  If we want raw UTF-8, output that now. - FM
 	*/
@@ -1294,22 +1252,17 @@ PUBLIC void LYExpandString ARGS2(
 	    continue;
 	}
 	/*
-	**  If it's 8482 (trade), or is any other (> 160) 8-bit
-	**  chararcter and we have not set HTPassEightBitRaw
+	**  If it's any other (> 160) 8-bit character
+	**  and we have not set HTPassEightBitRaw
 	**  nor have the "ISO Latin 1" character set selected,
 	**  back translate for our character set. - FM
 	*/
-	if ((code == 8482) ||
-	    (code > 160 && code < 256 &&
+	if (code > 160 && code < 256 &&
 	     me->outUCLYhndl != 0 &&
 	     (!(HTPassEightBitRaw ||
-	        (me->T.do_8bitraw && !me->T.trans_from_uni))))) {
-	    if (code == 8482) {
-	        name = "trade";
-	    } else {
-		value = (code - 160);
-		name = HTMLGetEntityName(value);
-	    }
+		(me->T.do_8bitraw && !me->T.trans_from_uni)))) {
+	    value = (code - 160);
+	    name = HTMLGetEntityName(value);
 	    for (low = 0, high = HTML_dtd.number_of_entities;
 		 high > low;
 		 diff < 0 ? (low = j+1) : (high = j)) {
@@ -1355,8 +1308,8 @@ PUBLIC void LYExpandString ARGS2(
 	    (unsigned char)saved_char_in < 255 &&
 	    saved_char_in) {
 	    /*
-	    **  KOI8 special: strip high bit, gives (somewhat) readable
-	    **  ASCII or KOI7 - it was constructed that way! - KW
+	    **	KOI8 special: strip high bit, gives (somewhat) readable
+	    **	ASCII or KOI7 - it was constructed that way! - KW
 	    */
 	    HTChunkPutc(s, (saved_char_in & 0x7f));
 	    continue;
@@ -1387,10 +1340,10 @@ PUBLIC void LYExpandString ARGS2(
 	     c_unsign < LYlowest_eightbit[me->outUCLYhndl]) ||
 	    (me->T.trans_from_uni && !HTPassEightBitRaw)) {
 	    /*
-	    **  If we do not have the "7-bit approximations" as our
-	    **  output character set (in which case we did it already)
-	    **  seek a translation for that.  Otherwise, or if the
-	    **  translation fails, use UHHH notation. - FM
+	    **	If we do not have the "7-bit approximations" as our
+	    **	output character set (in which case we did it already)
+	    **	seek a translation for that.  Otherwise, or if the
+	    **	translation fails, use UHHH notation. - FM
 	    */
 	    if ((chk = (me->outUCLYhndl !=
 			UCGetLYhndl_byMIME("us-ascii"))) &&
@@ -1432,9 +1385,9 @@ PUBLIC void LYExpandString ARGS2(
     }
 
     /*
-    **  Terminate the expanded string,
-    **  replace the original, and free
-    **  the chunk. - FM
+    **	Terminate the expanded string,
+    **	replace the original, and free
+    **	the chunk. - FM
     */
     HTChunkTerminate(s);
     StrAllocCopy(*str, s->data);
@@ -1641,7 +1594,6 @@ PRIVATE char ** LYUCFullyTranslateString_1 ARGS9(
     size_t len;
     int high, low, diff = 0, i;
     CONST char ** entities = HTML_dtd.entity_names;
-    CONST UC_entity_info * extra_entities = HTML_dtd.extra_entity_info;
     CONST char * name = NULL;
     BOOLEAN no_bytetrans;
     UCTransParams T;
@@ -2104,35 +2056,7 @@ PRIVATE char ** LYUCFullyTranslateString_1 ARGS9(
 					  cs_to)) >= 32 &&
 		    uck < 256 &&
 		    (uck < 127 || uck >= lowest_8)) {
-		    if (uck == 160 && cs_to == 0) {
-			/*
-			**  Would only happen if some other unicode
-			**  is mapped to Latin-1 160.
-			    */
-			if (hidden) {
-			    ;
-			} else if (plain_space) {
-			    code = ' ';
-			} else {
-			    code = HT_NON_BREAK_SPACE;
-			}
-		    } else if (uck == 173 && cs_to == 0) {
-			/*
-			    **	Would only happen if some other unicode
-			    **	is mapped to Latin-1 173.
-			    */
-			if (hidden) {
-			    ;
-			} else if (plain_space) {
-			    replace_buf[0] = '\0';
-			    state = S_got_outstring;
-			    break;
-			} else {
-			    code = LY_SOFT_HYPHEN;
-			}
-		    } else {
-			code = uck;
-		    }
+		    code = uck;
 		    state = S_got_outchar;
 		    break;
 		} else if ((uck == -4 ||
@@ -2154,20 +2078,12 @@ PRIVATE char ** LYUCFullyTranslateString_1 ARGS9(
 		    break;
 		}
 		/*
-		**  For 8482 (trade) use the character reference if it's
-		**  a hidden INPUT, otherwise use whatever the tables have
-		**  for &trade;. - FM & KW
-		*/
-		if (code == 8482 && hidden) {
-		    state = S_recover;
-		    break;
-		/*
 		**  For 8194 (ensp), 8195 (emsp), or 8201 (thinsp),
 		**  use the character reference if it's a hidden INPUT,
 		**  otherwise use an ASCII space (32) if plain_space is
 		**  TRUE, otherwise use the Lynx special character. - FM
 		*/
-		} else if (code == 8194 || code == 8195 || code == 8201) {
+		if (code == 8194 || code == 8195 || code == 8201) {
 		    if (hidden) {
 			state = S_recover;
 		    } else if (plain_space) {
@@ -2175,19 +2091,6 @@ PRIVATE char ** LYUCFullyTranslateString_1 ARGS9(
 			state = S_got_outchar;
 		    } else {
 			code = HT_EM_SPACE;
-			state = S_got_outchar;
-		    }
-		    break;
-		    /*
-		    **	For 8211 (ndash) or 8212 (mdash), use the character
-		    **	reference if it's a hidden INPUT, otherwise use an
-		    **	ASCII dash. - FM
-		    */
-		} else if (code == 8211 || code == 8212) {
-		    if (hidden) {
-			state = S_recover;
-		    } else {
-			code = '-';
 			state = S_got_outchar;
 		    }
 		    break;
@@ -2210,10 +2113,10 @@ PRIVATE char ** LYUCFullyTranslateString_1 ARGS9(
 		    **	Show the numeric entity if the value:
 		    **	(1) Is greater than 255 and unhandled Unicode.
 		    */
-		} else if (code > 255 && code != 8482) {
+		} else if (code > 255) {
 		    /*
 			**  Illegal or not yet handled value.
-			**  Recover the "&#" and continue
+			**  Return "&#" verbatim and continue
 			**  from there. - FM
 			*/
 		    state = S_recover;
@@ -2238,14 +2141,7 @@ PRIVATE char ** LYUCFullyTranslateString_1 ARGS9(
 		    **	the character as a named entity. - FM
 		    */
 		} else {
-		    if (code == 8482) {
-			/*
-			**  Trade mark sign falls through to here. - KW
-			*/
-			name = "trade";
-		    } else {
-			name = HTMLGetEntityName(code - 160);
-		    }
+		    name = HTMLGetEntityName(code - 160);
 		    state = S_check_name;
 		    break;
 		}
@@ -2254,7 +2150,7 @@ PRIVATE char ** LYUCFullyTranslateString_1 ARGS9(
 	    if (what == P_decimal || what == P_hex) {
 		    /*
 		    **	Illegal or not yet handled value.
-		    **	Recover the "&#" and continue
+		    **	Return "&#" verbatim and continue
 		    **	from there. - FM
 		    */
 		    *q++ = '&';
@@ -2310,7 +2206,7 @@ PRIVATE char ** LYUCFullyTranslateString_1 ARGS9(
 	    }
 	    /*
 	    **	Didn't find the entity.
-	    **	Check the traditional tables.
+	    **	Return to screen verbatim.
 	    */
 	    state = S_recover;
 	    break;
@@ -2775,18 +2671,6 @@ PUBLIC void LYHandleMETA ARGS4(
 		StrAllocCopy(me->node_anchor->charset, "iso-8859-1");
 		HTCJK = NOCJK;
 
-	    } else if (!strncmp(cp1, "iso-8859-2", 10) &&
-		       !strncmp(LYchar_set_names[current_char_set],
-				"ISO Latin 2", 11)) {
-		StrAllocCopy(me->node_anchor->charset, "iso-8859-2");
-		HTPassEightBitRaw = TRUE;
-	    /*
-	     *  Check for an iso-8859-# we don't know. - FM
-	     */
-	    } else if (!strncmp(cp4, "iso-8859-", 9) &&
-		       isdigit(cp4[9]) &&
-		       !strncmp(LYchar_set_names[current_char_set],
-				"Other ISO Latin", 15)) {
 		/*
 		 *  Hope it's a match, for now. - FM
 		 */
@@ -2798,12 +2682,6 @@ PUBLIC void LYHandleMETA ARGS4(
 		StrAllocCopy(me->node_anchor->charset, cp4);
 		HTPassEightBitRaw = TRUE;
 		HTAlert(me->node_anchor->charset);
-
-	    } else if (!strncmp(cp1, "koi8-r", 6) &&
-		       !strncmp(LYchar_set_names[current_char_set],
-				"KOI8-R Cyrillic", 15)) {
-		StrAllocCopy(me->node_anchor->charset, "koi8-r");
-		HTPassEightBitRaw = TRUE;
 
 	    } else if (!strncmp(cp1, "euc-jp", 6) && HTCJK == JAPANESE) {
 		StrAllocCopy(me->node_anchor->charset, "euc-jp");
@@ -3087,11 +2965,13 @@ PUBLIC void LYHandleP ARGS5(
 	 *  If we encounter a P in either's content, we set flags to treat
 	 *  the content as a block.  - FM
 	 */
-	if (me->inFIG)
-	    me->inFIGwithP = TRUE;
+	if (start) {
+	    if (me->inFIG)
+		me->inFIGwithP = TRUE;
 
-	if (me->inAPPLET)
-	    me->inAPPLETwithP = TRUE;
+	    if (me->inAPPLET)
+		me->inAPPLETwithP = TRUE;
+	}
 
 	UPDATE_STYLE;
 	if (me->List_Nesting_Level >= 0) {
@@ -3105,7 +2985,7 @@ PUBLIC void LYHandleP ARGS5(
 		if (me->inFIG || me->inAPPLET ||
 		    me->inCAPTION || me->inCREDIT ||
 		    me->sp->style->spaceAfter > 0 ||
-		    me->sp->style->spaceBefore > 0) {
+		    (start && me->sp->style->spaceBefore > 0)) {
 		    LYEnsureDoubleSpace(me);
 		} else {
 		    LYEnsureSingleSpace(me);
@@ -3121,8 +3001,16 @@ PUBLIC void LYHandleP ARGS5(
 		HText_setLastChar(me->text, ' ');  /* absorb white space */
 		HText_appendCharacter(me->text, '\r');
 	    }
-	} else if (!(me->inLABEL && !me->inP)) {
-	    HText_appendParagraph(me->text);
+	} else {
+	    if (start) {
+		if (!(me->inLABEL && !me->inP)) {
+		    HText_appendParagraph(me->text);
+		}
+	    } else if (me->sp->style->spaceAfter > 0) {
+		LYEnsureDoubleSpace(me);
+	    } else {
+		LYEnsureSingleSpace(me);
+	    }
 	    me->inLABEL = FALSE;
 	}
 	me->in_word = NO;
@@ -3137,19 +3025,22 @@ PUBLIC void LYHandleP ARGS5(
 	} else {
 	    me->sp->style->alignment = me->current_default_alignment;
 	}
-	if (present && present[HTML_P_ALIGN] && value[HTML_P_ALIGN]) {
-	    if (!strcasecomp(value[HTML_P_ALIGN], "center") &&
-		!(me->List_Nesting_Level >= 0 && !me->inP))
-		me->sp->style->alignment = HT_CENTER;
-	    else if (!strcasecomp(value[HTML_P_ALIGN], "right") &&
-		!(me->List_Nesting_Level >= 0 && !me->inP))
-		me->sp->style->alignment = HT_RIGHT;
-	    else if (!strcasecomp(value[HTML_P_ALIGN], "left") ||
-		     !strcasecomp(value[HTML_P_ALIGN], "justify"))
-		me->sp->style->alignment = HT_LEFT;
-	}
 
-	CHECK_ID(HTML_P_ID);
+	if (start) {
+	    if (present && present[HTML_P_ALIGN] && value[HTML_P_ALIGN]) {
+		if (!strcasecomp(value[HTML_P_ALIGN], "center") &&
+		    !(me->List_Nesting_Level >= 0 && !me->inP))
+		    me->sp->style->alignment = HT_CENTER;
+		else if (!strcasecomp(value[HTML_P_ALIGN], "right") &&
+		    !(me->List_Nesting_Level >= 0 && !me->inP))
+		    me->sp->style->alignment = HT_RIGHT;
+		else if (!strcasecomp(value[HTML_P_ALIGN], "left") ||
+			 !strcasecomp(value[HTML_P_ALIGN], "justify"))
+		    me->sp->style->alignment = HT_LEFT;
+	    }
+
+	    CHECK_ID(HTML_P_ID);
+	}
 
 	/*
 	 *  Mark that we are starting a new paragraph

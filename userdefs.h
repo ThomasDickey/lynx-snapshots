@@ -1206,7 +1206,7 @@
  * the version definition with the Project Version on checkout. Just
  * ignore it. - kw */
 /* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
-#define LYNX_VERSION "2.7.1ac-0.113"
+#define LYNX_VERSION "2.7.1ac-0.115"
 
 #ifndef MAXINT
 #define MAXINT 2147483647	/* max integer */

@@ -15,6 +15,7 @@
 #undef DECL_STRSTR
 #undef DECL_SYS_ERRLIST
 #undef DIRED_SUPPORT		/* AC_ARG_WITH(dired) */
+#undef DONT_TRACK_INTERNAL_LINKS /* CF_ARG_DISABLE(internal-links) */
 #undef EXP_CHARTRANS_AUTOSWITCH	/* AC_ARG_WITH(font-switch) */
 #undef FANCY_CURSES		/* defined by CF_FANCY_CURSES */
 #undef GZIP_PATH		/* CF_PATH_PROG(gzip) */
@@ -65,6 +66,7 @@
 #undef NEED_REMOVE		/* defined by CF_REMOVE_BROKEN */
 #undef NGROUPS			/* defined by CF_NGROUPS */
 #undef NO_CHANGE_EXECUTE_PERMS	/* CF_ARG_DISABLE(dired-xpermit) */
+#undef NO_EXTENDED_HTMLDTD	/* CF_ARG_DISABLE(extended-dtd) */
 #undef NO_PARENT_DIR_REFERENCE	/* configure --disable-parent-dir */
 #undef NSL_FORK			/* CF_ARG_ENABLE(nsl-fork) */
 #undef OK_GZIP			/* CF_ARG_DISABLE(dired-gzip) */
@@ -87,6 +89,7 @@
 #undef UNZIP_PATH		/* CF_PATH_PROG(unzip) */
 #undef USE_COLOR_STYLE		/* CF_ARG_ENABLE(color-style) */
 #undef USE_EXTERNALS		/* CF_ARG_ENABLE(externs) */
+#undef USE_FCNTL		/* CF_FIONBIO */
 #undef USE_HASH			/* see USE_COLOR_STYLE */
 #undef USE_SIZECHANGEHACK	/* FIXME: find a case where this works! */
 #undef USE_SLANG		/* AC_ARG_WITH(screen=slang) */

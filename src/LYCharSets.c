@@ -889,46 +889,6 @@ PUBLIC UCode_t HTMLGetEntityUCValue ARGS1(
 }
 
 /*
- *  Function to return the values of the ISO_Latin1 Character Set.
- *  It assumes the strings have only one character, and restores
- *  nbsp to 160 and shy to 173, but keeps our substitutions for
- *  characters that are not part of the ISO-8859-1 charset. - FM
- *
- *  Return '\0' to signal that there isn't a one-character
- *  equivalent.  Caller must check! and do whatever additional
- *  processing it wants to do instead.	- KW
- */
-PUBLIC char HTMLGetLatinOneValue ARGS1(int,i)
-{
-    char ch = ISO_Latin1[i][0];
-
-    switch ((unsigned char)ch) {
-	case HT_NON_BREAK_SPACE:
-	    ch = 160;
-	    break;
-
-	case HT_EM_SPACE:
-	    ch = 32;
-	    break;
-
-	case LY_SOFT_HYPHEN:
-	    ch = 173;
-	    break;
-
-	default:
-	    if (ch && ISO_Latin1[i][1]) {
-		/*
-		 *  Got a string longer than 1 char.
-		 */
-		return '\0';
-	    }
-	    break;
-     }
-
-     return ch;
-}
-
-/*
  *  Function to select a character set and then set the
  *  character handling and LYHaveCJKCharacterSet flag. - FM
  */

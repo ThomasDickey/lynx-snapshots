@@ -377,10 +377,6 @@ PRIVATE int HTMLGen_put_entity ARGS2(
     HTMLGen_put_character(me, '&');
     if (entity_number < nent) {
       HTMLGen_put_string(me, HTML_dtd.entity_names[entity_number]);
-    } else {
-      HTMLGen_put_string(me,
-			 HTML_dtd.extra_entity_info[entity_number-nent].name
-			 );
     }
     HTMLGen_put_character(me, ';');
     return HT_OK;
