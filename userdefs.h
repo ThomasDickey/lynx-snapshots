@@ -1213,7 +1213,8 @@
 #define MAXCHARSETS 60		/* max character sets supported */
 #define MAXCHARSETSP 61		/* always one more than MAXCHARSETS */
 
-#ifdef __DJGPP__
+/* Win32 may support more, but old win16 helper apps may not. */
+#if defined(__DJGPP__) && defined(_WINDOWS)
 #define FNAMES_8_3
 #endif
 

@@ -117,6 +117,16 @@ extern int sys_nerr;
 
 #endif	/* !PCNFS */
 
+#ifdef _WINDOWS_NSL
+	 char host[512];
+	 struct hostent  *phost;     /* Pointer to host - See netdb.h */
+
+unsigned long _fork_func (void *arglist)
+{
+		  return (unsigned long)(phost = gethostbyname(host));
+}
+#endif /* _WINDOWS_NSL */
+
 #if defined(VMS) && defined(UCX)
 /*
 **  A routine to mimic the ioctl function for UCX.
@@ -315,9 +325,11 @@ PUBLIC int HTParseInet ARGS2(
 	CONST char *,	str)
 {
     char *port;
-    char *host = NULL;
     int dotcount_ip = 0;	/* for dotted decimal IP addr */
+#ifndef _WINDOWS_NSL
+    char *host = NULL;
     struct hostent  *phost;	/* Pointer to host - See netdb.h */
+#endif /* _WINDOWS_NSL */
 
     if (!str) {
 	if (TRACE) {
@@ -331,8 +343,11 @@ PUBLIC int HTParseInet ARGS2(
 	}
 	return -1;
     }
+#ifdef _WINDOWS_NSL
+    strncpy(host, str, (size_t)512);
+#else
     StrAllocCopy(host, str);	/* Make a copy we can mutilate */
-
+#endif /*  _WINDOWS_NSL */
     /*
     **	Parse port number if present.
     */
@@ -407,7 +422,9 @@ PUBLIC int HTParseInet ARGS2(
 #endif /* GUSI */
 #endif /* DGUX_OLD */
 #endif /* DJGPP */
+#ifndef _WINDOWS_NSL
 	FREE(host);
+#endif /* _WINDOWS_NSL */
     } else {		    /* Alphanumeric node name: */
 #ifdef MVS	/* Outstanding problem with crash in MVS gethostbyname */
 	if (TRACE) {
@@ -550,10 +567,14 @@ PUBLIC int HTParseInet ARGS2(
 			"HTParseInet: Can't find internet node name `%s'.\n",
 			host);
 	    }
+#ifndef _WINDOWS_NSL
 	    FREE(host);
+#endif /* _WINDOWS_NSL */
 	    return -1;
 	}
+#ifndef _WINDOWS_NSL
 	FREE(host);
+#endif /* _WINDOWS_NSL */
 #ifdef MVS
 	if (TRACE) {
 	    fprintf(stderr,
@@ -572,7 +593,38 @@ PUBLIC int HTParseInet ARGS2(
 		 return -1;  /* Fail? */
 	}
 #else
+#ifdef _WINDOWS_NSL
+	{
+#ifdef __BORLANDC__
+		HANDLE hThread, dwThreadID;
+#else
+		unsigned long hThread, dwThreadID;
+#endif /* __BORLANDC__ */
+		phost = (struct hostent *) NULL;
+		hThread = CreateThread((void *)NULL, 4096UL,
+#ifdef __BORLANDC__
+			 (LPTHREAD_START_ROUTINE)_fork_func,
+#else
+			 (unsigned long (*)())_fork_func,
+#endif /* __BORLANDC__ */
+			 (void *)NULL, 0UL, (unsigned long *)&dwThreadID);
+		if (!hThread)
+			 MessageBox((void *)NULL, "CreateThread",
+				"CreateThread Failed", 0L);
+		while (!phost)
+			if (HTCheckForInterrupt())
+			 {
+			  /* Note that host is a character array and is not freed */
+			  /* to avoid possible subthread problems: */
+			  if (!CloseHandle(hThread))
+				 MessageBox((void *)NULL, "CloseHandle","CloseHandle Failed",
+						0L);
+			  return HT_INTERRUPTED;
+			};
+	};
+#else /* !_WINDOWS_NSL */
 	phost = gethostbyname(host);	/* See netdb.h */
+#endif /* _WINDOWS_NSL */
 #ifdef MVS
 	if (TRACE) {
 	    fprintf(stderr,
@@ -836,7 +888,11 @@ PUBLIC int HTDoConnect ARGS4(
 		return HT_NO_DATA;
 	    }
 
+#ifdef _WINDOWS_NSL
+	    timeout.tv_sec = 100;
+#else
 	    timeout.tv_sec = 0;
+#endif /* _WINDOWS_NSL */
 	    timeout.tv_usec = 100000;
 	    FD_ZERO(&writefds);
 	    FD_SET(*s, &writefds);
