@@ -469,10 +469,10 @@
  *   for this distribution (use SHELL syntax including the device
  *   on VMS systems).
  * The default HELPFILE is:
- * http://www.crl.com/~subir/lynx/lynx_help/lynx_help_main.html
+ * http://www.trill-home.com/lynx/lynx_help/lynx_help_main.html
  *   This should be changed here or in lynx.cfg to the local path.
  */
-#define HELPFILE "http://www.crl.com/~subir/lynx/lynx_help/lynx_help_main.html"
+#define HELPFILE "http://www.trill-home.com/lynx/lynx_help/lynx_help_main.html"
 /* #define HELPFILE "file://localhost/PATH_TO/lynx_help/lynx_help_main.html" */
 
 /*****************************
@@ -1339,12 +1339,12 @@
  * the version definition with the Project Version on checkout.  Just
  * ignore it. - kw */
 /* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
-#define LYNX_VERSION "2.8.3pre.4"
+#define LYNX_VERSION "2.8.3pre.5"
 #define LYNX_WWW_HOME "http://lynx.browser.org/"
 #define LYNX_WWW_DIST "http://lynx.isc.org/current/"
 #define LYNX_RELEASE FALSE
 /* $Format: "#define LYNX_DATE \"$ProjectDate$\""$ */
-#define LYNX_DATE "Tue, 11 Apr 2000 03:45:36 -0700"
+#define LYNX_DATE "Thu, 13 Apr 2000 19:39:31 -0700"
 #define LYNX_DATE_OFF 5		/* truncate the automatically-generated date */
 #define LYNX_DATE_LEN 11	/* truncate the automatically-generated date */
 #define LYNX_RELEASE_DATE "1999"

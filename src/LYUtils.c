@@ -6788,6 +6788,7 @@ PUBLIC void LYCleanupTemp NOARGS
 	LYTrimPathSep(result);
 	CTRACE((tfp, "LYCleanupTemp removing %s\n", result));
 	rmdir(result);
+	lynx_temp_subspace = FALSE;
     }
 #endif
 }

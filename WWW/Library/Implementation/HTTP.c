@@ -159,7 +159,7 @@ PUBLIC int ws_netread(int fd, char *buf, int len)
     HANDLE hThread;
     DWORD dwThreadID;
     DWORD exitcode = 0;
-    DWORD ret_val, val, process_time, now_TickCount, save_TickCount;
+    DWORD ret_val = -1, val, process_time, now_TickCount, save_TickCount;
 
     static recv_data_t para;
 

@@ -1081,6 +1081,7 @@ PUBLIC struct hostent * LYGetHostByName ARGS1(
 		phost = gethostbyname(host);
 	} else {		/* for Windows NT */
 	    phost = (struct hostent *) NULL;
+	    donelookup = FALSE;
 	    hThread = CreateThread((void *)NULL, 4096UL,
 		(LPTHREAD_START_ROUTINE)_fork_func,
 		(void *)NULL, 0UL, (unsigned long *)&dwThreadID);
@@ -1088,7 +1089,6 @@ PUBLIC struct hostent * LYGetHostByName ARGS1(
 		MessageBox((void *)NULL, "CreateThread",
 			   "CreateThread Failed", 0L);
 
-	    donelookup = FALSE;
 	    while (!donelookup) {
 		if (HTCheckForInterrupt()) {
 		    /* Note that host is a character array and is not freed */

@@ -153,6 +153,7 @@ PUBLIC void LYexit ARGS1(
 #undef exit
 #endif /* exit */
 
+    cleanup_files();	/* if someone starts with LYNXfoo: page */
 #ifndef VMS	/*  On VMS, the VMSexit() handler does these. - FM */
     fflush(stderr);
     if (LYOutOfMemory == TRUE) {

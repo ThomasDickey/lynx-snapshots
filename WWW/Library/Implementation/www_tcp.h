@@ -175,6 +175,7 @@ IBM-PC running Windows NT
 #undef NETWRITE
 #undef NETCLOSE
 #undef IOCTL
+extern int ws_netread(int fd, char *buf, int len);
 #define NETREAD(s,b,l)  ws_netread((s),(b),(l))	/* 1997/11/06 (Thu) */
 #define NETWRITE(s,b,l) send((s),(b),(l),0)
 #define NETCLOSE(s)     closesocket(s)

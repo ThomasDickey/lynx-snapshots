@@ -24,10 +24,6 @@ extern char * redirecting_url;
 extern BOOL permanent_redirection;
 extern BOOL redirect_post_content;
 
-#ifdef _WINDOWS
-extern int ws_netread(int fd, char *buf, int len);
-#endif /* _WINDOWS */
-
 #endif /* HTTP_H */
 
 /*
