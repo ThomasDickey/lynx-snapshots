@@ -1,6 +1,8 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+1999-04-23 (2.8.2dev.24)
+* added overlooked WWW/Library/Implementation/makefile.in -TD
 1999-04-23 (2.8.2dev.23)
 * add/use new function LYSafeGets to replace reads into fixed-size buffers -TD
 * change xxxx_URL_TYPE definitions in LYUtils.h to a enum -TD
