@@ -2246,6 +2246,9 @@ PRIVATE int DontCheck NOARGS
     if (dump_output_immediately)
 	return(TRUE);
 
+    if (LYHaveCmdScript()) /* we may be running from a script */
+	return(TRUE);
+
 #ifdef MISC_EXP
     if (LYNoZapKey)
 	return(TRUE);

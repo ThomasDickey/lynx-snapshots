@@ -180,7 +180,7 @@ PUBLIC void HTReadProgress ARGS2(
     static double first, last, last_active;
 #else
 #if defined(HAVE_FTIME) && defined(HAVE_SYS_TIMEB_H)
-    static double now, first, last;
+    static double now, first, last, last_active;
     struct timeb tb;
 
     ftime(&tb);
@@ -202,7 +202,7 @@ PUBLIC void HTReadProgress ARGS2(
 	       (now != first))
 		/* 1 sec delay for transfer_rate calculation without g-t-o-d */ {
 	if (transfer_rate <= 0)    /* the very first time */
-	    transfer_rate = (bytes) / (now - first);   /* bytes/sec */
+	    transfer_rate = (long)((bytes) / (now - first));   /* bytes/sec */
 	total_last = total;
 
 	/*
@@ -225,7 +225,7 @@ PUBLIC void HTReadProgress ARGS2(
 		if (bytes_last != bytes)
 		    last_active = now;
 		bytes_last = bytes;
-		transfer_rate = bytes / (now - first); /* more accurate here */
+		transfer_rate = (long)(bytes / (now - first)); /* more accurate here */
 	    }
 
 	    if (total > 0)

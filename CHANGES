@@ -1,6 +1,16 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2000-11-03 (2.8.4dev.14)
+* restore initialization of LYlines, LYcols in setup() which was lost in dev.12
+  changes (reported by DK).
+* modify logic for -stdin option to redirect keyboard input to null device
+  if lynx is not connected to a terminal, e.g., running under cron -TD
+* check in DontCheck() if Lynx is reading from a command-script, to avoid
+  using those characters to interrupt the application -TD
+* add a cleanup handler for win32, since UNIX-style signal handlers do not
+  work on that platform -TD
+
 2000-10-25 (2.8.4dev.13)
 * fix missing ifdef for EXP_READPROGRESS in LYOptions.c (reported by
   Atsuhito Kohda) -TD
@@ -48,7 +58,7 @@ Changes since Lynx 2.8 release
     input.type.:normal:white:cyan
     input.type.text:normal:white:cyan
   If your "link" is configured as normal:green, then input elements of types
-  other than typeless, text, or submit will be shown in the same style as link. 
+  other than typeless, text, or submit will be shown in the same style as link.
   The textareas and text input elements are shown in the same style (but
   different from "link" style), and submit "buttons" are shown yet in another
   style.
@@ -57,7 +67,7 @@ Changes since Lynx 2.8 release
   This patch is concerned with the first flavor only.  Two subflavors are
   document's text-edit areas, and Lynx's ones (such as where you input the URL
   after `g').  Each one of them has 3 elements:  scroll symbols ("arrows"),
-  after-the-end padding, and the actual input string. 
+  after-the-end padding, and the actual input string.
   The patch
     a) makes styles for these 2*3 elements customizable;
     b) uses ACS chars (if available) for the arrows (instead of `{'/`}').
@@ -104,7 +114,7 @@ Changes since Lynx 2.8 release
 * add fallback definitions to accommodate renaming of UCX$xxx symbols to
   TCPIP$xxx in recent versions of OpenVMS UCX (reported by Horst Drechsel
   <ai05@sternwarte.uni-erlangen.de>) -TD
-* add TRSTable.obj to src/descrip.mms objects -TD 
+* add TRSTable.obj to src/descrip.mms objects -TD
 * modify configure script to omit LYExtern.o and LYLocal.o if the corresponding
   options (externs and dired) are disabled -TD
 * correct a typo that made configure script always define USE_EXTERNALS -TD
