@@ -533,7 +533,7 @@ PRIVATE int LYLoadIMGmap ARGS4 (
 			   sink, anAnchor);
 
     if (!target || target == NULL) {
-	HTSprintf(&buf, CANNOT_CONVERT_I_TO_O,
+	HTSprintf0(&buf, CANNOT_CONVERT_I_TO_O,
 		HTAtom_name(format_in), HTAtom_name(format_out));
 	HTAlert(buf);
 	FREE(buf);

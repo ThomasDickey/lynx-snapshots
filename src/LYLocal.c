@@ -287,7 +287,7 @@ struct dired_menu {
 PRIVATE BOOLEAN cannot_stat ARGS1(CONST char *, name)
 {
     char *tmpbuf = 0;
-    HTSprintf(&tmpbuf, gettext("Unable to get status of '%s'."), name);
+    HTSprintf0(&tmpbuf, gettext("Unable to get status of '%s'."), name);
     HTAlert(tmpbuf);
     FREE(tmpbuf);
     return FALSE;
@@ -356,7 +356,7 @@ PRIVATE int move_file ARGS2(char *, source, char *, target)
     char *msg = 0;
     char *args[5];
 
-    HTSprintf(&msg, gettext("move %s to %s"), source, target);
+    HTSprintf0(&msg, gettext("move %s to %s"), source, target);
     args[0] = "mv";
     args[1] = source;
     args[2] = target;
@@ -869,7 +869,7 @@ PRIVATE BOOLEAN create_file ARGS1(
 	 */
 	if (not_already_exists(testpath)) {
 	    char *msg = 0;
-	    HTSprintf(&msg,gettext("create %s"),testpath);
+	    HTSprintf0(&msg,gettext("create %s"),testpath);
 	    args[0] = "touch";
 	    args[1] = testpath;
 	    args[2] = (char *) 0;
@@ -914,7 +914,7 @@ PRIVATE BOOLEAN create_directory ARGS1(
 	 */
 	if (not_already_exists(testpath)) {
 	    char *msg = 0;
-	    HTSprintf(&msg,"make directory %s",testpath);
+	    HTSprintf0(&msg,"make directory %s",testpath);
 	    args[0] = "mkdir";
 	    args[1] = testpath;
 	    args[2] = (char *) 0;
@@ -1322,7 +1322,7 @@ PRIVATE BOOLEAN permit_location ARGS3(
 	/*
 	 *  Call chmod().
 	 */
-	HTSprintf(&tmpbuf, "chmod %.4o %s", (unsigned int)new_mode, destpath);
+	HTSprintf0(&tmpbuf, "chmod %.4o %s", (unsigned int)new_mode, destpath);
 	sprintf(amode, "%.4o", (unsigned int)new_mode);
 	args[0] = "chmod";
 	args[1] = amode;
@@ -2090,7 +2090,7 @@ PUBLIC BOOLEAN local_install ARGS3(
 	    return 0;		/* don't do it */
 	}
 	args[src] = savepath;
-	HTSprintf(&tmpbuf, "install %s in %s", savepath, destpath);
+	HTSprintf0(&tmpbuf, "install %s in %s", savepath, destpath);
 	if (LYExecv(INSTALL_PATH, args, tmpbuf) <= 0) {
 	    FREE(tmpbuf);
 	    FREE(tmpdest);
@@ -2099,7 +2099,7 @@ PUBLIC BOOLEAN local_install ARGS3(
 	count++;
     } else {
 	char *name;
-	HTSprintf(&tmpbuf, "install in %s", destpath);
+	HTSprintf0(&tmpbuf, "install in %s", destpath);
 	while ((name = (char *)HTList_nextObject(tag))) {
 	    int err;
 	    args[src] = HTfullURL_toFile(name);
@@ -2333,7 +2333,7 @@ PRIVATE int LYExecv ARGS3(
     char *tmpbuf = 0;
 #ifdef __DJGPP__
     stop_curses();
-    HTSprintf(&tmpbuf, "%s", path);
+    HTSprintf0(&tmpbuf, "%s", path);
     for (n = 1; argv[n] != 0; n++)
 	HTSprintf(&tmpbuf, " %s", argv[n]);
     HTSprintf(&tmpbuf, "\n");
@@ -2357,7 +2357,7 @@ PRIVATE int LYExecv ARGS3(
     pid = fork();	/* fork and execute command */
     switch (pid) {
 	case -1:
-	    HTSprintf(&tmpbuf, gettext("Unable to %s due to system error!"), msg);
+	    HTSprintf0(&tmpbuf, gettext("Unable to %s due to system error!"), msg);
 	    rc = 0;
 	    break;	/* don't fall thru! - KW */
 	case 0:  /* child */
@@ -2386,7 +2386,7 @@ PRIVATE int LYExecv ARGS3(
 #endif /* !HAVE_WAITPID */
 	    if (WEXITSTATUS(wstatus) != 0 ||
 		WTERMSIG(wstatus) > 0)	{ /* error return */
-		HTSprintf(&tmpbuf, gettext("Probable failure to %s due to system error!"),
+		HTSprintf0(&tmpbuf, gettext("Probable failure to %s due to system error!"),
 				   msg);
 		rc = 0;
 	    }

@@ -104,6 +104,9 @@ typedef int TagFlags;
 				   allows recycling, i.e. don't translate to
 				   output (display) character set yet (treat
 				   content similar to attribute values) */
+#define Tgf_nolyspcl	0x00040 /* Don't generate lynx special characters
+				   for soft hyphen and various spaces (nbsp,
+				   ensp,..) */
 
 /*		A tag structure describes an SGML element.
 **		-----------------------------------------

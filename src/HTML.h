@@ -34,6 +34,9 @@
 #define TRANSLATE_HTML5(s,cs_from,cs_to,p,h) \
 	LYUCFullyTranslateString(s, cs_from, cs_to, NO, YES, p, h, NO, st_HTML)
 
+#define TRANSLATE_HTML7(s,cs_from,cs_to,spcls,p,h,Back) \
+	LYUCFullyTranslateString(s, cs_from, cs_to, NO, spcls, p, h, Back, st_HTML)
+
 /*
  *  Strings from attributes which should be converted to some kind
  *  of "standard" representation (character encoding), was Latin-1,

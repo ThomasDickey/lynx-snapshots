@@ -577,9 +577,14 @@ $(OBJ)/LYUpload.obj :  src/LYUpload.c
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ src/LYUpload.c
 |
 
-$(OBJ)/lyutils.obj :  src/lyutils.c
+$(OBJ)/LYUtils.obj :  src/LYUtils.c
   $(BCC32) -P- -c @&&|
- $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ src/lyutils.c
+ $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ src/LYUtils.c
+|
+
+$(OBJ)/TRSTable.obj :  src/TRSTable.c
+  $(BCC32) -P- -c @&&|
+ $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ src/TRSTable.c
 |
 
 $(OBJ)/xsystem.obj :  src/xsystem.c

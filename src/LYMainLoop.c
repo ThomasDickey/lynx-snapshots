@@ -209,6 +209,8 @@ PRIVATE document newdoc;
 PRIVATE document curdoc;
 PRIVATE char *traversal_host = NULL;
 PRIVATE char *traversal_link_to_add = NULL;
+PRIVATE char *owner_address = NULL;  /* Holds the responsible owner's address     */
+PRIVATE char *ownerS_address = NULL; /* Holds owner's address during source fetch */
 
 #ifndef NO_NONSTICKY_INPUTS
 PRIVATE BOOL textinput_activated = FALSE;
@@ -238,6 +240,8 @@ PRIVATE void free_mainloop_variables NOARGS
 #endif
     FREE(traversal_host);
     FREE(traversal_link_to_add);
+    FREE(owner_address);
+    FREE(ownerS_address);
 #ifdef DIRED_SUPPORT
     clear_tags();
 #endif /* DIRED_SUPPORT */
@@ -530,7 +534,8 @@ PRIVATE void do_check_goto_URL ARGS3(
     }
 }
 
-PRIVATE void do_check_recall ARGS7(
+/* returns FALSE if user cancelled input or URL was invalid, TRUE otherwise */
+PRIVATE BOOL do_check_recall ARGS7(
     int,	ch,
     char *,	user_input_buffer,
     char **,	old_user_input,
@@ -540,6 +545,7 @@ PRIVATE void do_check_recall ARGS7(
     BOOLEAN *,	FirstURLRecall)
 {
     char *cp;
+    BOOL ret = FALSE;
 
     if (*old_user_input == 0)
 	StrAllocCopy(*old_user_input, "");
@@ -565,6 +571,7 @@ PRIVATE void do_check_recall ARGS7(
 		HTUserMsg2(WWW_ILLEGAL_URL_MESSAGE, user_input_buffer);
 		strcpy(user_input_buffer, *old_user_input);
 		FREE(*old_user_input);
+		ret = FALSE;
 		break;
 	    }
 	}
@@ -580,6 +587,7 @@ PRIVATE void do_check_recall ARGS7(
 	    strcpy(user_input_buffer, *old_user_input);
 	    FREE(*old_user_input);
 	    HTInfoMsg(CANCELLED);
+	    ret = FALSE;
 	    break;
 	}
 	if (recall && ch == UPARROW) {
@@ -623,6 +631,7 @@ PRIVATE void do_check_recall ARGS7(
 		    strcpy(user_input_buffer, *old_user_input);
 		    FREE(*old_user_input);
 		    HTInfoMsg(CANCELLED);
+		    ret = FALSE;
 		    break;
 		}
 		continue;
@@ -666,14 +675,17 @@ PRIVATE void do_check_recall ARGS7(
 		    strcpy(user_input_buffer, *old_user_input);
 		    FREE(*old_user_input);
 		    HTInfoMsg(CANCELLED);
+		    ret = FALSE;
 		    break;
 		}
 		continue;
 	    }
 	} else {
+	    ret = TRUE;
 	    break;
 	}
     }
+    return ret;
 }
 
 PRIVATE void do_cleanup_after_delete NOARGS
@@ -808,6 +820,44 @@ PRIVATE int DoTraversal ARGS2(
     } /* right link not NULL or link to another site*/
     return c;
 }
+
+#ifndef DONT_TRACK_INTERNAL_LINKS
+PRIVATE BOOLEAN check_history NOARGS
+{
+    CONST char *base;
+
+    if (!curdoc.post_data)
+	/*
+	 *  Normal case - List Page is not associated
+	 *  with post data. - kw
+	 */
+	return TRUE;
+
+    if (nhist > 0
+     && !LYresubmit_posts
+     && curdoc.post_data
+     && history[nhist - 1].post_data
+     && !strcmp(curdoc.post_data, history[nhist - 1].post_data)
+     && (base = HText_getContentBase()) != 0) {
+	 char *text = strncmp(history[nhist - 1].address, "LYNXIMGMAP:", 11)
+		     ? history[nhist - 1].address
+		     : history[nhist - 1].address + 11;
+	if (!strncmp(base, text, strlen(base))) {
+	    /*
+	     * Normal case - as best as we can check, the document at the top
+	     * of the history stack seems to be the document the List Page is
+	     * about (or a LYNXIMGMAP derived from it), and LYresubmit_posts is
+	     * not set, so don't prompt here.  If we actually have to repeat a
+	     * POST because, against expectations, the underlying document
+	     * isn't cached any more, HTAccess will prompt for confirmation,
+	     * unless we had LYK_NOCACHE -kw
+	     */
+	    return TRUE;
+	}
+    }
+    return FALSE;
+}
+#endif
 
 PRIVATE int handle_LYK_ACTIVATE ARGS7(
     int *,	c,
@@ -1173,34 +1223,7 @@ gettext("Enctype multipart/form-data not yet supported!  Cannot submit."));
 		 */
 		if ( 0==strcmp(curdoc.address, LYlist_temp_url()) &&
 		    (LYIsListpageTitle(curdoc.title ? curdoc.title : ""))) {
-		    if (!curdoc.post_data ||
-			/*
-			 *  Normal case - List Page is not associated
-			 *  with post data. - kw
-			 */
-			(!LYresubmit_posts && curdoc.post_data &&
-			history[nhist - 1].post_data &&
-			!strcmp(curdoc.post_data,
-				 history[nhist - 1].post_data) &&
-			HText_getContentBase() &&
-			!strncmp(HText_getContentBase(),
-				 strncmp(history[nhist - 1].address,
-					 "LYNXIMGMAP:", 11) ?
-				 history[nhist - 1].address :
-				 history[nhist - 1].address + 11,
-				 strlen(HText_getContentBase())))) {
-			/*
-			 *  Normal case - as best as we can check, the
-			 *  document at the top of the history stack
-			 *  seems to be the document the List Page is
-			 *  about (or a LYNXIMGMAP derived from it),
-			 *  and LYresubmit_posts is not set, so don't
-			 *  prompt here.  If we actually have to repeat
-			 *  a POST because, against expectations, the
-			 *  underlying document isn't cached any more,
-			 *  HTAccess will prompt for confirmation,
-			 *  unless we had LYK_NOCACHE. - kw
-			 */
+		    if (check_history()) {
 			LYinternal_flag = TRUE;
 		    } else {
 			HTLastConfirmCancelled(); /* reset flag */
@@ -1532,13 +1555,13 @@ PRIVATE void handle_LYK_CLEAR_AUTH ARGS2(
 
 PRIVATE void handle_LYK_COMMENT ARGS4(
     BOOLEAN *,	refresh_screen,
-    char *,	owner_address,
+    char **,	owner_address_p,
     int *,	old_c,
     int,	real_c)
 {
     int	c;
 
-    if (!owner_address &&
+    if (!*owner_address_p &&
 	strncasecomp(curdoc.address, "http", 4)) {
 	if (*old_c != real_c)	{
 	    *old_c = real_c;
@@ -1551,7 +1574,7 @@ PRIVATE void handle_LYK_COMMENT ARGS4(
 	}
     } else {
 	if (HTConfirmDefault(CONFIRM_COMMENT, NO)) {
-	    if (!owner_address) {
+	    if (!*owner_address_p) {
 		/*
 		 *  No owner defined, so make a guess and
 		 *  and offer it to the user. - FM
@@ -1585,18 +1608,18 @@ PRIVATE void handle_LYK_COMMENT ARGS4(
 		c = HTConfirmDefault(temp, NO);
 		FREE(temp);
 		if (c == YES) {
-		    StrAllocCopy(owner_address, address);
+		    StrAllocCopy(*owner_address_p, address);
 		    FREE(address);
 		} else {
 		    FREE(address);
 		    return;
 		}
 	    }
-	    if (is_url(owner_address) != MAILTO_URL_TYPE) {
+	    if (is_url(*owner_address_p) != MAILTO_URL_TYPE) {
 		/*
 		 *  The address is a URL.  Just follow the link.
 		 */
-		StrAllocCopy(newdoc.address, owner_address);
+		StrAllocCopy(newdoc.address, *owner_address_p);
 		newdoc.internal_link = FALSE;
 	    } else {
 		/*
@@ -1616,15 +1639,15 @@ PRIVATE void handle_LYK_COMMENT ARGS4(
 		    }
 		}
 
-		if (strchr(owner_address,':')!=NULL)
+		if (strchr(*owner_address_p,':')!=NULL)
 		     /*
 		      *  Send a reply.	The address is after the colon.
 		      */
-		     reply_by_mail(strchr(owner_address,':')+1,
+		     reply_by_mail(strchr(*owner_address_p,':')+1,
 				   curdoc.address,
 				   (kp ? kp : ""), id);
 		else
-		    reply_by_mail(owner_address, curdoc.address,
+		    reply_by_mail(*owner_address_p, curdoc.address,
 				  (kp ? kp : ""), id);
 
 		FREE(tmptitle);
@@ -2368,7 +2391,7 @@ PRIVATE void handle_LYK_DWIMHELP ARGS1(
     CONST char **,	cshelpfile)
 {
     /*
-     *  Currently a different help file form the main
+     *  Currently a help file different from the main
      *  'helpfile' is shown only if current link is a
      *  text input form field. - kw
      */
@@ -3166,9 +3189,8 @@ PRIVATE void handle_LYK_INDEX_SEARCH ARGS4(
     }
 }
 
-PRIVATE BOOLEAN handle_LYK_INFO ARGS3(
+PRIVATE BOOLEAN handle_LYK_INFO ARGS2(
     char *,	prev_target,
-    char *,	owner_address,
     int *,	cmd)
 {
     /*
@@ -4194,7 +4216,7 @@ PRIVATE void handle_LYK_SOFT_DQUOTES NOARGS
  * seek confirmation if the safe element is not set.  - FM
  */
 PRIVATE void handle_LYK_SOURCE ARGS1(
-    char **,	ownerS_address)
+    char **,	ownerS_address_p)
 {
     if ((curdoc.post_data != NULL &&
 	 curdoc.safe != TRUE) &&
@@ -4211,7 +4233,7 @@ PRIVATE void handle_LYK_SOURCE ARGS1(
 #endif
     } else {
 	if (HText_getOwner())
-	    StrAllocCopy(*ownerS_address, HText_getOwner());
+	    StrAllocCopy(*ownerS_address_p, HText_getOwner());
 	LYUCPushAssumed(HTMainAnchor);
 #ifdef USE_PSRC
 	if (LYpsrc)
@@ -4236,7 +4258,7 @@ PRIVATE void handle_LYK_SOURCE ARGS1(
 	    HTMark_asSource();
 	psrc_view = FALSE;
 #endif
-	FREE(*ownerS_address);  /* not used with source_cache */
+	FREE(*ownerS_address_p);  /* not used with source_cache */
 	LYUCPopAssumed();	/* probably a right place here */
 	HTMLSetCharacterHandling(current_char_set);  /* restore now */
 
@@ -4716,7 +4738,7 @@ PRIVATE void handle_LYK_WHEREIS ARGS3(
     /*
      *	Force a redraw to ensure highlighting of hits
      *	even when found on the same page, or clearing
-     *	of highlighting is the default search string
+     *	of highlighting if the default search string
      *	was erased without replacement. - FM
      */
     /*
@@ -4783,34 +4805,7 @@ PRIVATE void handle_LYK_digit ARGS7(
 	    newdoc.internal_link = TRUE;
 	    if (LYIsListpageTitle(curdoc.title ? curdoc.title : "") &&
 		0==strcmp(HTLoadedDocumentURL(), LYlist_temp_url())) {
-		if (!curdoc.post_data ||
-		    /*
-		     *	Normal case - List Page is not associated
-		     *	with post data. - kw
-		     */
-		    (!LYresubmit_posts && curdoc.post_data &&
-		     history[nhist - 1].post_data &&
-		     !strcmp(curdoc.post_data,
-			     history[nhist - 1].post_data) &&
-		     HText_getContentBase() &&
-		     !strncmp(HText_getContentBase(),
-			      strncmp(history[nhist - 1].address,
-				      "LYNXIMGMAP:", 11) ?
-			      history[nhist - 1].address :
-			      history[nhist - 1].address + 11,
-			      strlen(HText_getContentBase())))) {
-		    /*
-		     *	Normal case - as best as we can check, the
-		     *	document at the top of the history stack
-		     *	seems to be the document the List Page is
-		     *	about (or a LYNXIMGMAP derived from it),
-		     *	and LYresubmit_posts is not set, so don't
-		     *	prompt here.  If we actually have to repeat
-		     *	a POST because, against expectations, the
-		     *	underlying document isn't cached any more,
-		     *	HTAccess will prompt for confirmation,
-		     *	unless we had LYK_NOCACHE. - kw
-		     */
+		if (check_history()) {
 		    LYinternal_flag = TRUE;
 		} else {
 		    HTLastConfirmCancelled(); /* reset flag */
@@ -4984,8 +4979,6 @@ int mainloop NOARGS
     int arrowup = FALSE, show_help = FALSE;
     char prev_target[512];
     char user_input_buffer[MAX_LINE];
-    char *owner_address = NULL;  /* Holds the responsible owner's address     */
-    char *ownerS_address = NULL; /* Holds owner's address during source fetch */
     CONST char *cshelpfile = NULL;
     BOOLEAN first_file = TRUE;
     BOOLEAN popped_doc = FALSE;
@@ -6037,6 +6030,7 @@ try_again:
 #ifndef NO_NONSTICKY_INPUTS
 	    textinput_drawn = FALSE;
 #endif
+
 	    refresh_screen = FALSE;
 
 	    HText_pageDisplay(Newline, prev_target);
@@ -6621,7 +6615,7 @@ new_cmd:  /*
 	case LYK_TO_CLIPBOARD:	/* ^S */
 	    {
 		if (put_clip(links[curdoc.link].lname) == 0) {
-		    HTInfoMsg("URL to Clip Borad.");
+		    HTInfoMsg("URL to Clip Board.");
 		} else {
 		    HTInfoMsg("Current URL is empty.");
 		}
@@ -6765,9 +6759,9 @@ new_cmd:  /*
 	    if (handle_LYK_GOTO(&ch, user_input_buffer, &temp, &recall,
 				&URLTotal, &URLNum, &FirstURLRecall, &old_c,
 				real_c)) {
-		do_check_recall (ch, user_input_buffer, &temp, URLTotal,
-				 &URLNum, recall, &FirstURLRecall);
-		do_check_goto_URL(user_input_buffer, &temp, &force_load);
+		if (do_check_recall (ch, user_input_buffer, &temp, URLTotal,
+				 &URLNum, recall, &FirstURLRecall))
+		    do_check_goto_URL(user_input_buffer, &temp, &force_load);
 	    }
 	    break;
 
@@ -6801,8 +6795,8 @@ new_cmd:  /*
 	    handle_LYK_WHEREIS(cmd, prev_target, &refresh_screen);
 	    break;
 
-	case LYK_COMMENT:	/* reply by mail */
-	    handle_LYK_COMMENT(&refresh_screen, owner_address, &old_c, real_c);
+	case LYK_COMMENT: 	/* reply by mail */
+	    handle_LYK_COMMENT(&refresh_screen, &owner_address, &old_c, real_c);
 	    break;
 
 #ifdef DIRED_SUPPORT
@@ -6849,7 +6843,7 @@ new_cmd:  /*
 #endif /* DIRED_SUPPORT && OK_INSTALL */
 
 	case LYK_INFO:		/* show document info */
-	    if (handle_LYK_INFO(prev_target, owner_address, &cmd))
+	    if (handle_LYK_INFO(prev_target, &cmd))
 		goto new_cmd;
 	    break;
 
@@ -6969,9 +6963,9 @@ new_cmd:  /*
 	    if (handle_LYK_JUMP(c, user_input_buffer, &temp, &recall,
 				    &FirstURLRecall, &URLNum, &URLTotal, &ch,
 				    &old_c, real_c)) {
-		do_check_recall (ch, user_input_buffer, &temp, URLTotal,
-				 &URLNum, recall, &FirstURLRecall);
-		do_check_goto_URL(user_input_buffer, &temp, &force_load);
+		if (do_check_recall (ch, user_input_buffer, &temp, URLTotal,
+				 &URLNum, recall, &FirstURLRecall))
+		    do_check_goto_URL(user_input_buffer, &temp, &force_load);
 	    }
 	    break;
 

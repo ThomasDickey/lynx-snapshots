@@ -161,8 +161,10 @@ PRIVATE char *FormatStr ARGS3(
     if (*start) {
 	sprintf(fmt, "%%%.*ss", (int) sizeof(fmt) - 3, start);
 	HTSprintf0(bufp, fmt, entry);
-    } else {
-	HTSprintf0(bufp, "%s", entry);
+    } else if (*bufp && !(entry && *entry)) {
+	**bufp = '\0';
+    } else if (entry) {
+	StrAllocCopy(*bufp, entry);
     }
     return *bufp;
 }
@@ -178,7 +180,7 @@ PRIVATE char *FormatNum ARGS3(
 	HTSprintf0(bufp, fmt, entry);
     } else {
 	sprintf(fmt, "%d", entry);
-	StrAllocCat(*bufp, fmt);
+	StrAllocCopy(*bufp, fmt);
     }
     return *bufp;
 }
@@ -1127,7 +1129,7 @@ PUBLIC void LYGetFileInfo ARGS7(
 	HTFormat format;
 	HTAtom * myEnc = NULL;
 	HTParentAnchor *file_anchor;
-	CONST char *file_csname = file_anchor->charset;
+	CONST char *file_csname;
 	int file_cs;
 
 	/*
@@ -1815,7 +1817,7 @@ PRIVATE int print_local_dir ARGS5(
 #ifndef DISP_PARTIAL
 		if (num_of_entries_output % HTMAX(display_lines,10) == 0) {
 		    if (HTCheckForInterrupt()) {
-			_HTProgress ("Data transfer interrupted.");
+			_HTProgress (TRANSFER_INTERRUPTED);
 			status = HT_PARTIAL_CONTENT;
 			break;
 		    }

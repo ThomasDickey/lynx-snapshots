@@ -1167,18 +1167,18 @@ PUBLIC char *key_for_func ARGS1 (
 
 /*
  *  This function returns TRUE if the ch is non-alphanumeric
- *  and maps to key_name (LYK_foo in the keymap[] array). - FM
+ *  and maps to KeyName (LYK_foo in the keymap[] array). - FM
  */
 PUBLIC BOOL LYisNonAlnumKeyname ARGS2(
 	int,	ch,
-	int,	key_name)
+	int,	KeyName)
 {
     if ((ch >= '0' && ch <= '9') ||
         (ch >= 'A' && ch <= 'z') ||
 	ch < 0 || ch >= KEYMAP_SIZE)
 	return (FALSE);
 
-    return (BOOL) (keymap[ch+1] == key_name);
+    return (BOOL) (keymap[ch+1] == KeyName);
 }
 
 /*
@@ -1186,12 +1186,12 @@ PUBLIC BOOL LYisNonAlnumKeyname ARGS2(
  *  LYK_foo value passed to it as an argument. - FM
  */
 PUBLIC int LYReverseKeymap ARGS1(
-	int,	key_name)
+	int,	KeyName)
 {
     int i;
 
     for (i = 1; i < KEYMAP_SIZE; i++) {
-	if (keymap[i] == key_name) {
+	if (keymap[i] == KeyName) {
 	    return(i - 1);
 	}
     }

@@ -148,6 +148,10 @@ PUBLIC BOOLEAN LYwouldPush ARGS2(
 	if (strncmp(docurl, "file://localhost/", 17) != 0 ||
 	    (ulen = strlen(docurl)) <= strlen(HTML_SUFFIX) ||
 	    strcmp(docurl + ulen - strlen(HTML_SUFFIX), HTML_SUFFIX) != 0)
+	    /*
+	     *  If it is not a local HTML file, it may be a Web page that
+	     *  accidentally has the same title.  So return TRUE now. - kw
+	     */
 	    return TRUE;
     }
 
@@ -726,7 +730,7 @@ PUBLIC void LYstore_message2 ARGS2(
 
     if (message != NULL) {
 	char *temp = NULL;
-	HTSprintf(&temp, message, (argument == 0) ? "" : argument);
+	HTSprintf0(&temp, message, (argument == 0) ? "" : argument);
 	to_stack(temp);
     }
 }

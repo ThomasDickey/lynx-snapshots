@@ -170,9 +170,21 @@ typedef enum _HTMLElement {
 	HTML_UL,
 	HTML_VAR,
 	HTML_WBR,
-	HTML_XMP } HTMLElement;
+	HTML_XMP,
+	HTML_ALT_OBJECT } HTMLElement;
 
+/* Notes: HTML.c uses a different extension of the HTML_ELEMENTS space
+          privately, see HTNestedList.h. */
+/*        Don't replace HTML_ELEMENTS with TABLESIZE(mumble_dtd.tags). */
+/* Keep the following defines in synch with the above enum! */
+
+/* HTML_ELEMENTS:     number of elements visible to Lynx code in general,
+                      alphabetic (ASCII) order. */
+/* HTML_ALL_ELEMENTS: number of elements visible to SGML parser,
+                      additional variant(s) at end. */
+#define HTML_ALL_ELEMENTS 119
 #define HTML_ELEMENTS 118
+
 
 /*
 

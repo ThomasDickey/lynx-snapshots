@@ -374,14 +374,6 @@ PUBLIC void UCChangeTerminalCodepage ARGS2(
 	name = "unknown-8bit";
     }
 
-    if (status == 1)
-	HasUmap = Is_Unset;
-    else if (status < 0) {
-	if (HasUmap == Is_Set)
-	    HasUmap = Dunno;
-	name = "unknown-8bit";
-    }
-
     if (TransT != lastTransT) {
 	if (TransT == GN_Blat1) {
 	    /*

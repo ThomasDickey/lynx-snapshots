@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 1999-10-19 21:50-0400\n"
+"POT-Creation-Date: 1999-11-02 21:18-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -2770,7 +2770,7 @@ msgstr ""
 #. * hack: if we fail in HTAccess.c
 #. * avoid duplicating URL, oh.
 #.
-#: WWW/Library/Implementation/HTAccess.c:1062 src/LYMainLoop.c:7399
+#: WWW/Library/Implementation/HTAccess.c:1062 src/LYMainLoop.c:7392
 msgid "Can't Access"
 msgstr ""
 
@@ -2823,11 +2823,11 @@ msgid "Receiving FTP file."
 msgstr ""
 
 #. lines counter
-#: WWW/Library/Implementation/HTFile.c:1707
+#: WWW/Library/Implementation/HTFile.c:1709
 msgid "Reading directory..."
 msgstr ""
 
-#: WWW/Library/Implementation/HTFile.c:1789
+#: WWW/Library/Implementation/HTFile.c:1791
 msgid "OK"
 msgstr ""
 
@@ -2993,7 +2993,7 @@ msgstr ""
 #. *  there will be other alerts from the callers. - kw
 #.
 #: WWW/Library/Implementation/HTTCP.c:1501
-#: WWW/Library/Implementation/HTTelnet.c:99
+#: WWW/Library/Implementation/HTTelnet.c:103
 #, c-format
 msgid "Invalid hostname %s"
 msgstr ""
@@ -3125,7 +3125,7 @@ msgstr ""
 msgid "Unknown status reply from server!"
 msgstr ""
 
-#: WWW/Library/Implementation/HTTelnet.c:97
+#: WWW/Library/Implementation/HTTelnet.c:101
 #, c-format
 msgid "remote %s session:"
 msgstr ""
@@ -3299,98 +3299,111 @@ msgstr ""
 msgid "Host"
 msgstr ""
 
-#: src/GridText.c:476
+#: src/GridText.c:613
 msgid "Memory exhausted, display interrupted!"
 msgstr ""
 
-#: src/GridText.c:481
+#: src/GridText.c:618
 msgid "Memory exhausted, will interrupt transfer!"
 msgstr ""
 
-#: src/GridText.c:3289
+#: src/GridText.c:3480
 msgid " *** MEMORY EXHAUSTED ***"
 msgstr ""
 
-#: src/GridText.c:5499 src/GridText.c:5506 src/LYList.c:260
+#: src/GridText.c:5741 src/GridText.c:5748 src/LYList.c:260
 msgid "unknown field or link"
 msgstr ""
 
-#: src/GridText.c:5515
+#: src/GridText.c:5757
 msgid "text entry field"
 msgstr ""
 
-#: src/GridText.c:5518
+#: src/GridText.c:5760
 msgid "password entry field"
 msgstr ""
 
-#: src/GridText.c:5521
+#: src/GridText.c:5763
 msgid "checkbox"
 msgstr ""
 
-#: src/GridText.c:5524
+#: src/GridText.c:5766
 msgid "radio button"
 msgstr ""
 
-#: src/GridText.c:5527
+#: src/GridText.c:5769
 msgid "submit button"
 msgstr ""
 
-#: src/GridText.c:5530
+#: src/GridText.c:5772
 msgid "reset button"
 msgstr ""
 
-#: src/GridText.c:5533
+#: src/GridText.c:5775
 msgid "popup menu"
 msgstr ""
 
-#: src/GridText.c:5536
+#: src/GridText.c:5778
 msgid "hidden form field"
 msgstr ""
 
-#: src/GridText.c:5539
+#: src/GridText.c:5781
 msgid "text entry area"
 msgstr ""
 
-#: src/GridText.c:5542
+#: src/GridText.c:5784
 msgid "range entry field"
 msgstr ""
 
-#: src/GridText.c:5545
+#: src/GridText.c:5787
 msgid "file entry field"
 msgstr ""
 
-#: src/GridText.c:5548
+#: src/GridText.c:5790
 msgid "text-submit field"
 msgstr ""
 
-#: src/GridText.c:5551
+#: src/GridText.c:5793
 msgid "image-submit button"
 msgstr ""
 
-#: src/GridText.c:5554
+#: src/GridText.c:5796
 msgid "keygen field"
 msgstr ""
 
-#: src/GridText.c:5557
+#: src/GridText.c:5799
 msgid "unknown form field"
 msgstr ""
 
-#: src/GridText.c:10490
+#: src/GridText.c:10748
 #, c-format
 msgid "Submitting %s"
 msgstr ""
 
-#: src/GridText.c:11772
+#: src/GridText.c:12047
 msgid "Editor killed by signal"
 msgstr ""
 
-#: src/GridText.c:11774
+#: src/GridText.c:12049
 #, c-format
 msgid "Editor returned with error status, %s"
 msgstr ""
 
-#: src/GridText.c:11775
+#: src/GridText.c:12050
 msgid "reason unknown."
+msgstr ""
+
+#. don't show previous state
+#: src/GridText.c:12146
+msgid "Wrap lines to fit displayed area?"
+msgstr ""
+
+#: src/GridText.c:12198
+msgid "Very long lines have been wrapped!"
+msgstr ""
+
+#: src/GridText.c:12647
+msgid "Very long lines have been truncated!"
 msgstr ""
 
 #: src/HTAlert.c:189 src/HTAlert.c:391 src/LYShowInfo.c:297
@@ -3445,31 +3458,56 @@ msgstr ""
 msgid ", %ld %s/sec."
 msgstr ""
 
-#: src/HTAlert.c:443
+#. Meta-note: don't move the following note from its place right
+#. in front of the first gettext().  As it is now, it should
+#. automatically appear in generated lynx.pot files. - kw
+#.
+#. NOTE TO TRANSLATORS:  If you provide a translation for "yes", lynx
+#. *  will take the first byte of the translation as a positive response
+#. *  to Yes/No questions.  If you provide a translation for "no", lynx
+#. *  will take the first byte of the translation as a negative response
+#. *  to Yes/No questions.  For both, lynx will also try to show the
+#. *  first byte in the prompt as a character, instead of (y) or (n),
+#. *  respectively.  This will not work right for multibyte charsets!
+#. *  Don't translate "yes" and "no" for CJK character sets (or translate
+#. *  them to "yes" and "no").  For a translation using UTF-8, don't
+#. *  translate if the translation would begin with anything but a 7-bit
+#. *  (US_ASCII) character.  That also means do not translate if the
+#. *  translation would begin with anything but a 7-bit character, if
+#. *  you use a single-byte character encoding (a charset like ISO-8859-n)
+#. *  but anticipate that the message catalog may be used re-encoded in
+#. *  UTF-8 form.
+#. *  For translations using other character sets, you may also wish to
+#. *  leave "yes" and "no" untranslated, if using (y) and (n) is the
+#. *  preferred behavior.
+#. *  Lynx will also accept y Y n N as responses unless there is a conflict
+#. *  with the first letter of the "yes" or "no" translation.
+#.
+#: src/HTAlert.c:469
 msgid "yes"
 msgstr ""
 
-#: src/HTAlert.c:444
+#: src/HTAlert.c:470
 msgid "no"
 msgstr ""
 
-#: src/HTML.c:6379
+#: src/HTML.c:6421
 msgid "Description:"
 msgstr ""
 
-#: src/HTML.c:6384
+#: src/HTML.c:6426
 msgid "(none)"
 msgstr ""
 
-#: src/HTML.c:6388
+#: src/HTML.c:6430
 msgid "Filepath:"
 msgstr ""
 
-#: src/HTML.c:6393
+#: src/HTML.c:6435
 msgid "(unknown)"
 msgstr ""
 
-#: src/HTML.c:7829
+#: src/HTML.c:7893
 msgid "Document has only hidden links.  Use the 'l'ist command."
 msgstr ""
 
@@ -3561,34 +3599,34 @@ msgstr ""
 msgid "Terminal initialisation failed - unknown terminal type?"
 msgstr ""
 
-#: src/LYCurses.c:1056
+#: src/LYCurses.c:1060
 msgid "Terminal ="
 msgstr ""
 
-#: src/LYCurses.c:1061
+#: src/LYCurses.c:1065
 msgid "You must use a vt100, 200, etc. terminal with this program."
 msgstr ""
 
-#: src/LYCurses.c:1139
+#: src/LYCurses.c:1143
 msgid "Your Terminal type is unknown!"
 msgstr ""
 
-#: src/LYCurses.c:1140
+#: src/LYCurses.c:1144
 msgid "Enter a terminal type:"
 msgstr ""
 
-#: src/LYCurses.c:1153
+#: src/LYCurses.c:1157
 msgid "TERMINAL TYPE IS SET TO"
 msgstr ""
 
-#: src/LYCurses.c:1433
+#: src/LYCurses.c:1437
 #, c-format
 msgid ""
 "\n"
 "A Fatal error has occurred in %s Ver. %s\n"
 msgstr ""
 
-#: src/LYCurses.c:1435
+#: src/LYCurses.c:1439
 msgid ""
 "\n"
 "Please notify your system administrator to confirm a bug, and if\n"
@@ -3622,7 +3660,7 @@ msgstr ""
 msgid "Save to disk disabled."
 msgstr ""
 
-#: src/LYDownload.c:558 src/LYPrint.c:1345
+#: src/LYDownload.c:558 src/LYPrint.c:1346
 msgid "Local additions:"
 msgstr ""
 
@@ -3630,27 +3668,27 @@ msgstr ""
 msgid "No Name Given"
 msgstr ""
 
-#: src/LYHistory.c:426
+#: src/LYHistory.c:430
 msgid "You selected:"
 msgstr ""
 
-#: src/LYHistory.c:450 src/LYHistory.c:632
+#: src/LYHistory.c:454 src/LYHistory.c:636
 msgid "(no address)"
 msgstr ""
 
-#: src/LYHistory.c:454
+#: src/LYHistory.c:458
 msgid " (internal)"
 msgstr ""
 
-#: src/LYHistory.c:456
+#: src/LYHistory.c:460
 msgid " (was internal)"
 msgstr ""
 
-#: src/LYHistory.c:554
+#: src/LYHistory.c:558
 msgid " (From History)"
 msgstr ""
 
-#: src/LYHistory.c:596
+#: src/LYHistory.c:600
 msgid "You visited (POSTs, bookmark, menu and list files excluded):"
 msgstr ""
 
@@ -4031,15 +4069,15 @@ msgstr ""
 msgid "Personal Name: "
 msgstr ""
 
-#: src/LYMain.c:803
+#: src/LYMain.c:796
 msgid "No Winsock found, sorry."
 msgstr ""
 
-#: src/LYMain.c:988
+#: src/LYMain.c:981
 msgid "You MUST define a valid TMP or TEMP area!\n"
 msgstr ""
 
-#: src/LYMain.c:1395
+#: src/LYMain.c:1388
 #, c-format
 msgid ""
 "\n"
@@ -4047,21 +4085,21 @@ msgid ""
 "\n"
 msgstr ""
 
-#: src/LYMain.c:1411
+#: src/LYMain.c:1404
 msgid ""
 "\n"
 "Lynx character sets not declared.\n"
 "\n"
 msgstr ""
 
-#: src/LYMain.c:1435
+#: src/LYMain.c:1428
 msgid ""
 "\n"
 "Lynx edit map not declared.\n"
 "\n"
 msgstr ""
 
-#: src/LYMain.c:1478
+#: src/LYMain.c:1471
 #, c-format
 msgid ""
 "\n"
@@ -4069,61 +4107,61 @@ msgid ""
 "\n"
 msgstr ""
 
-#: src/LYMain.c:1679
+#: src/LYMain.c:1672
 msgid "Warning:"
 msgstr ""
 
-#: src/LYMain.c:2170
+#: src/LYMain.c:2171
 msgid "persistent cookies state will be changed in next session only."
 msgstr ""
 
-#: src/LYMain.c:2442
+#: src/LYMain.c:2443
 #, c-format
 msgid "Lynx: ignoring unrecognized charset=%s\n"
 msgstr ""
 
-#: src/LYMain.c:2912
+#: src/LYMain.c:2914
 #, c-format
 msgid ""
 "\n"
 "%s Version %s (%.*s)\n"
 msgstr ""
 
-#: src/LYMain.c:2924
+#: src/LYMain.c:2926
 #, c-format
 msgid "Built on %s %s %s\n"
 msgstr ""
 
-#: src/LYMain.c:2928
+#: src/LYMain.c:2930
 msgid ""
 "Copyrights held by the University of Kansas, CERN, and other contributors.\n"
 msgstr ""
 
-#: src/LYMain.c:2930
+#: src/LYMain.c:2932
 msgid "Distributed under the GNU General Public License.\n"
 msgstr ""
 
-#: src/LYMain.c:2932
+#: src/LYMain.c:2934
 msgid ""
 "See http://lynx.browser.org/ and the online help for more information.\n"
 "\n"
 msgstr ""
 
-#: src/LYMain.c:3590
+#: src/LYMain.c:3591
 #, c-format
 msgid "USAGE: %s [options] [file]\n"
 msgstr ""
 
-#: src/LYMain.c:3591
+#: src/LYMain.c:3592
 msgid "Options are:\n"
 msgstr ""
 
-#: src/LYMain.c:3824
+#: src/LYMain.c:3825
 #, c-format
 msgid "%s: Invalid Option: %s\n"
 msgstr ""
 
-#: src/LYMainLoop.c:368
+#: src/LYMainLoop.c:372
 #, c-format
 msgid "Internal error: Invalid mouse link %d!"
 msgstr ""
@@ -4131,63 +4169,63 @@ msgstr ""
 #.
 #. * Make a name for this new URL.
 #.
-#: src/LYMainLoop.c:515
+#: src/LYMainLoop.c:519
 msgid "A URL specified by the user"
 msgstr ""
 
-#: src/LYMainLoop.c:961
+#: src/LYMainLoop.c:1011
 msgid "Enctype multipart/form-data not yet supported!  Cannot submit."
 msgstr ""
 
 #.
 #. *  Make a name for this help file.
 #.
-#: src/LYMainLoop.c:2940
+#: src/LYMainLoop.c:2963
 msgid "Help Screen"
 msgstr ""
 
-#: src/LYMainLoop.c:3079
+#: src/LYMainLoop.c:3102
 msgid "System Index"
 msgstr ""
 
-#: src/LYMainLoop.c:3457 src/LYMainLoop.c:5050
+#: src/LYMainLoop.c:3478 src/LYMainLoop.c:5042
 msgid "Entry into main screen"
 msgstr ""
 
-#: src/LYMainLoop.c:4031
+#: src/LYMainLoop.c:4052
 msgid "charset for this document specified explicitely, sorry..."
 msgstr ""
 
-#: src/LYMainLoop.c:5997
+#: src/LYMainLoop.c:5989
 msgid "Reparsing document under current settings..."
 msgstr ""
 
-#: src/LYMainLoop.c:6260 src/LYMainLoop.c:6264
+#: src/LYMainLoop.c:6253 src/LYMainLoop.c:6257
 #, c-format
 msgid "Fatal error - could not open output file %s\n"
 msgstr ""
 
-#: src/LYMainLoop.c:7318 src/LYMainLoop.c:7451
+#: src/LYMainLoop.c:7311 src/LYMainLoop.c:7444
 msgid "-index-"
 msgstr ""
 
-#: src/LYMainLoop.c:7359
+#: src/LYMainLoop.c:7352
 msgid "Inactive text input, activate to edit (e.g., press ENTER)"
 msgstr ""
 
-#: src/LYMainLoop.c:7394
+#: src/LYMainLoop.c:7387
 msgid "lynx: Can't access startfile"
 msgstr ""
 
-#: src/LYMainLoop.c:7407
+#: src/LYMainLoop.c:7400
 msgid "lynx: Start file could not be found or is not text/html or text/plain"
 msgstr ""
 
-#: src/LYMainLoop.c:7408
+#: src/LYMainLoop.c:7401
 msgid "      Exiting..."
 msgstr ""
 
-#: src/LYMainLoop.c:7449
+#: src/LYMainLoop.c:7442
 msgid "-more-"
 msgstr ""
 
@@ -4423,67 +4461,67 @@ msgstr ""
 msgid "User-Agent header"
 msgstr ""
 
-#: src/LYPrint.c:785
+#: src/LYPrint.c:786
 msgid "Sending"
 msgstr ""
 
-#: src/LYPrint.c:966
+#: src/LYPrint.c:967
 msgid " Print job complete.\n"
 msgstr ""
 
-#: src/LYPrint.c:1303
+#: src/LYPrint.c:1304
 msgid "Document:"
 msgstr ""
 
-#: src/LYPrint.c:1304
+#: src/LYPrint.c:1305
 msgid "Number of lines:"
 msgstr ""
 
-#: src/LYPrint.c:1305
+#: src/LYPrint.c:1306
 msgid "Number of pages:"
 msgstr ""
 
-#: src/LYPrint.c:1306
+#: src/LYPrint.c:1307
 msgid "pages"
 msgstr ""
 
-#: src/LYPrint.c:1306
+#: src/LYPrint.c:1307
 msgid "page"
 msgstr ""
 
-#: src/LYPrint.c:1307
+#: src/LYPrint.c:1308
 msgid "(approximately)"
 msgstr ""
 
-#: src/LYPrint.c:1312
+#: src/LYPrint.c:1313
 msgid "Some print functions have been disabled!"
 msgstr ""
 
-#: src/LYPrint.c:1316
+#: src/LYPrint.c:1317
 msgid "Standard print options:"
 msgstr ""
 
-#: src/LYPrint.c:1317
+#: src/LYPrint.c:1318
 msgid "Print options:"
 msgstr ""
 
-#: src/LYPrint.c:1323
+#: src/LYPrint.c:1324
 msgid "Save to a local file"
 msgstr ""
 
-#: src/LYPrint.c:1325
+#: src/LYPrint.c:1326
 msgid "Save to disk disabled"
 msgstr ""
 
-#: src/LYPrint.c:1331
+#: src/LYPrint.c:1332
 msgid "Mail the file"
 msgstr ""
 
-#: src/LYPrint.c:1337
+#: src/LYPrint.c:1338
 msgid "Print to the screen"
 msgstr ""
 
-#: src/LYPrint.c:1341
+#: src/LYPrint.c:1342
 msgid "Print out on a printer attached to your vt100 terminal"
 msgstr ""
 
@@ -4506,58 +4544,58 @@ msgstr ""
 msgid "key remapping of %s to %s failed\n"
 msgstr ""
 
-#: src/LYReadCFG.c:670 src/LYReadCFG.c:683
+#: src/LYReadCFG.c:684 src/LYReadCFG.c:697
 #, c-format
 msgid ""
 "setting of line-editor binding for key %s (0x%x) to 0x%x for %s failed\n"
 msgstr ""
 
-#: src/LYReadCFG.c:688
+#: src/LYReadCFG.c:702
 #, c-format
 msgid "setting of line-editor binding for key %s (0x%x) for %s failed\n"
 msgstr ""
 
-#: src/LYReadCFG.c:793
+#: src/LYReadCFG.c:807
 #, c-format
 msgid "Lynx: cannot start, CERN rules file %s is not available\n"
 msgstr ""
 
-#: src/LYReadCFG.c:795
+#: src/LYReadCFG.c:809
 msgid "(no name)"
 msgstr ""
 
-#: src/LYReadCFG.c:1550
+#: src/LYReadCFG.c:1563
 #, c-format
 msgid "More than %d nested lynx.cfg includes -- perhaps there is a loop?!?\n"
 msgstr ""
 
-#: src/LYReadCFG.c:1552
+#: src/LYReadCFG.c:1565
 #, c-format
 msgid "Last attempted include was '%s',\n"
 msgstr ""
 
-#: src/LYReadCFG.c:1553
+#: src/LYReadCFG.c:1566
 #, c-format
 msgid "included from '%s'.\n"
 msgstr ""
 
-#: src/LYReadCFG.c:2013 src/LYReadCFG.c:2026 src/LYReadCFG.c:2054
+#: src/LYReadCFG.c:2026 src/LYReadCFG.c:2039 src/LYReadCFG.c:2067
 msgid "The following is read from your lynx.cfg file."
 msgstr ""
 
-#: src/LYReadCFG.c:2014 src/LYReadCFG.c:2027
+#: src/LYReadCFG.c:2027 src/LYReadCFG.c:2040
 msgid "Please read the distribution"
 msgstr ""
 
-#: src/LYReadCFG.c:2020 src/LYReadCFG.c:2030
+#: src/LYReadCFG.c:2033 src/LYReadCFG.c:2043
 msgid "for more comments."
 msgstr ""
 
-#: src/LYReadCFG.c:2036
+#: src/LYReadCFG.c:2049
 msgid "RELOAD THE CHANGES"
 msgstr ""
 
-#: src/LYReadCFG.c:2045
+#: src/LYReadCFG.c:2058
 msgid "Your primary configuration"
 msgstr ""
 
@@ -4800,7 +4838,7 @@ msgstr ""
 msgid "Restrictions set:\n"
 msgstr ""
 
-#: src/LYUtils.c:5428
+#: src/LYUtils.c:5431
 msgid "Ignoring invalid HOME"
 msgstr ""
 

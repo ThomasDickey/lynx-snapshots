@@ -109,7 +109,7 @@ PRIVATE HTStyleSheet * styleSheet = NULL;	/* Application-wide */
 
 /*	Module-wide style cache
 */
-PRIVATE HTStyle *styles[HTML_ELEMENTS+HTML_EXTRA_ELEMENTS];
+PRIVATE HTStyle *styles[HTML_ELEMENTS+LYNX_HTML_EXTRA_ELEMENTS];
 					   /* adding 24 nested list styles  */
 					   /* and 3 header alignment styles */
 					   /* and 3 div alignment styles    */
@@ -682,7 +682,7 @@ PUBLIC void HTML_write ARGS3(HTStructured *, me, CONST char*, s, int, l)
    string (resolution of relative URLs etc.).  This variable only used
    locally here, don't confuse with LYinternal_flag which is for
    overriding non-caching similar to LYoverride_no_cache. - kw */
-#define CHECK_FOR_INTERN(s) intern_flag = (s && (*s=='#' || *s=='\0')) ? TRUE : FALSE;
+#define CHECK_FOR_INTERN(flag,s) flag = (s && (*s=='#' || *s=='\0')) ? TRUE : FALSE
 
 /* Last argument to pass to HTAnchor_findChildAndLink() calls,
    just an abbreviation. - kw */
@@ -690,7 +690,7 @@ PUBLIC void HTML_write ARGS3(HTStructured *, me, CONST char*, s, int, l)
 
 #else  /* !DONT_TRACK_INTERNAL_LINKS */
 
-#define CHECK_FOR_INTERN(s)  /* do nothing */ ;
+#define CHECK_FOR_INTERN(flag,s)  /* do nothing */ ;
 #define INTERN_LT (HTLinkType *)NULL
 
 #endif /* DONT_TRACK_INTERNAL_LINKS */
@@ -712,11 +712,11 @@ static int hcode;
 
 PRIVATE void HTMLSRC_apply_markup ARGS4(
 	    HTStructured *,   context,
-	    HTlexem,	      lexem,
+	    HTlexeme,	      lexeme,
 	    BOOL,	      start,
 	    int,	      tag_charset)
 {
-    HT_tagspec* ts = *( ( start ? lexem_start : lexem_end ) + lexem);
+    HT_tagspec* ts = *( ( start ? lexeme_start : lexeme_end ) + lexeme);
 
     while (ts) {
 #ifdef USE_COLOR_STYLE
@@ -727,7 +727,7 @@ PRIVATE void HTMLSRC_apply_markup ARGS4(
 	    force_classname = TRUE;
 	}
 #endif
-	CTRACE((tfp,ts->start ? "SRCSTART %d\n" : "SRCSTOP %d\n",(int)lexem));
+	CTRACE((tfp,ts->start ? "SRCSTART %d\n" : "SRCSTOP %d\n",(int)lexeme));
 	if (ts->start)
 	    HTML_start_element(
 		context,
@@ -791,7 +791,7 @@ PRIVATE void LYStartArea ARGS5(
 			       tag_charset, 0);
 }
 
-PRIVATE void LYHandleFIG ARGS9(
+PRIVATE void LYHandleFIG ARGS10(
 	HTStructured *,		me,
 	CONST BOOL*,		present,
 	CONST char **,		value,
@@ -800,7 +800,8 @@ PRIVATE void LYHandleFIG ARGS9(
 	CONST char *,		id,
 	CONST char *,		src,
 	BOOL,			convert,
-	BOOL,			start)
+	BOOL,			start,
+	BOOL *,			intern_flag GCC_UNUSED)
 {
     if (start == TRUE) {
 	me->inFIG = TRUE;
@@ -828,7 +829,7 @@ PRIVATE void LYHandleFIG ARGS9(
 	if (clickable_images && src && src != '\0') {
 	    char *href = NULL;
 	    StrAllocCopy(href, src);
-	    CHECK_FOR_INTERN(href);
+	    CHECK_FOR_INTERN(*intern_flag,href);
 	    LYLegitimizeHREF(me, &href, TRUE, TRUE);
 	    if (*href) {
 		char *temp = NULL;
@@ -933,7 +934,7 @@ PRIVATE int HTML_start_element ARGS6(
     int dest_char_set = UCLYhndl_for_unrec;
     HTParentAnchor *dest = NULL;	     /* An anchor's destination */
     BOOL dest_ismap = FALSE;		     /* Is dest an image map script? */
-    BOOL UseBASE = TRUE;		     /* Resoved vs. BASE if present? */
+    BOOL UseBASE = TRUE;		     /* Resolved vs. BASE if present? */
     HTChildAnchor *ID_A = NULL;		     /* HTML_foo_ID anchor */
     int url_type = 0, i = 0;
     char *cp = NULL;
@@ -1310,7 +1311,7 @@ PRIVATE int HTML_start_element ARGS6(
 	intern_flag = FALSE;
 #endif
 	if (present && present[HTML_LINK_HREF]) {
-	    CHECK_FOR_INTERN(value[HTML_LINK_HREF]);
+	    CHECK_FOR_INTERN(intern_flag,value[HTML_LINK_HREF]);
 	    /*
 	     *	Prepare to do housekeeping on the reference. - FM
 	     */
@@ -1762,7 +1763,7 @@ PRIVATE int HTML_start_element ARGS6(
 	if (present && present[HTML_FRAME_SRC] &&
 	    value[HTML_FRAME_SRC] && *value[HTML_FRAME_SRC] != '\0') {
 	    StrAllocCopy(href, value[HTML_FRAME_SRC]);
-	    CHECK_FOR_INTERN(href);
+	    CHECK_FOR_INTERN(intern_flag,href);
 	    url_type = LYLegitimizeHREF(me, &href, TRUE, TRUE);
 
 	    /*
@@ -1837,7 +1838,7 @@ PRIVATE int HTML_start_element ARGS6(
 	if (present && present[HTML_IFRAME_SRC] &&
 	    value[HTML_IFRAME_SRC] && *value[HTML_IFRAME_SRC] != '\0') {
 	    StrAllocCopy(href, value[HTML_IFRAME_SRC]);
-	    CHECK_FOR_INTERN(href);
+	    CHECK_FOR_INTERN(intern_flag,href);
 	    url_type = LYLegitimizeHREF(me, &href, TRUE, TRUE);
 
 	    /*
@@ -3031,7 +3032,7 @@ PRIVATE int HTML_start_element ARGS6(
 	    if (present[HTML_A_ISMAP])
 		intern_flag = FALSE;
 	    else
-		CHECK_FOR_INTERN(value[HTML_A_HREF]);
+		CHECK_FOR_INTERN(intern_flag,value[HTML_A_HREF]);
 #endif
 	    /*
 	     *	Prepare to do housekeeping on the reference. - FM
@@ -3175,20 +3176,24 @@ PRIVATE int HTML_start_element ARGS6(
 					    me->inUnderline, me->CurrentA);
 	if (me->inBoldA == TRUE && me->inBoldH == FALSE)
 	    HText_appendCharacter(me->text, LY_BOLD_START_CHAR);
-#if defined(NOTUSED_FOTEMODS) || !defined(NO_EMPTY_HREFLESS_A)
+#if defined(NOTUSED_FOTEMODS)
 	/*
 	 *  Close an HREF-less NAMED-ed now if we aren't making their
 	 *  content bold, and let the check in HTML_end_element() deal
 	 *  with any dangling end tag this creates. - FM
 	 */
-# ifndef NO_EMPTY_HREFLESS_A
-	if (force_empty_hrefless_a)
-# endif
-	    if (href == NULL && me->inBoldA == FALSE) {
-		SET_SKIP_STACK(HTML_A);
-		HTML_end_element(me, HTML_A, include);
-	    }
-#endif /* NOTUSED_FOTEMODS || !defined(NO_EMPTY_HREFLESS_A)*/
+	if (href == NULL && me->inBoldA == FALSE) {
+	    SET_SKIP_STACK(HTML_A);
+	    HTML_end_element(me, HTML_A, include);
+	}
+#else
+	/*Close an HREF-less NAMED-ed now if force_empty_hrefless_a was
+	    requested - VH*/
+	if (href == NULL) {
+	    SET_SKIP_STACK(HTML_A);
+	    HTML_end_element(me, HTML_A, include);
+	}
+#endif
 	FREE(href);
 	break;
 
@@ -3225,7 +3230,7 @@ PRIVATE int HTML_start_element ARGS6(
 	if (present && present[HTML_IMG_USEMAP] &&
 	    value[HTML_IMG_USEMAP] && *value[HTML_IMG_USEMAP]) {
 	    StrAllocCopy(map_href, value[HTML_IMG_USEMAP]);
-	    CHECK_FOR_INTERN(map_href);
+	    CHECK_FOR_INTERN(intern_flag,map_href);
 	    url_type = LYLegitimizeHREF(me, &map_href, TRUE, TRUE);
 	    /*
 	     *	If map_href ended up zero-length or otherwise doesn't
@@ -3778,7 +3783,7 @@ PRIVATE int HTML_start_element ARGS6(
 	     *	Resolve the HREF. - FM
 	     */
 	    StrAllocCopy(href, value[HTML_AREA_HREF]);
-	    CHECK_FOR_INTERN(href);
+	    CHECK_FOR_INTERN(intern_flag,href);
 	    url_type = LYLegitimizeHREF(me, &href, TRUE, TRUE);
 
 	    /*
@@ -3888,13 +3893,13 @@ PRIVATE int HTML_start_element ARGS6(
 			present[HTML_FIG_IMAGEMAP],
 			present[HTML_FIG_ID] ? value[HTML_FIG_ID] : NULL,
 			present[HTML_FIG_SRC] ? value[HTML_FIG_SRC] : NULL,
-			YES, TRUE);
+			YES, TRUE, &intern_flag);
 	else
 	    LYHandleFIG(me, NULL, NULL,
 			0,
 			0,
 			NULL,
-			NULL, YES, TRUE);
+			NULL, YES, TRUE, &intern_flag);
 #if 0
 	me->inFIG = TRUE;
 	if (me->inA) {
@@ -3917,7 +3922,7 @@ PRIVATE int HTML_start_element ARGS6(
 	if (clickable_images && present && present[HTML_FIG_SRC] &&
 	    value[HTML_FIG_SRC] && *value[HTML_FIG_SRC] != '\0') {
 	    StrAllocCopy(href, value[HTML_FIG_SRC]);
-	    CHECK_FOR_INTERN(href);
+	    CHECK_FOR_INTERN(intern_flag,href);
 	    url_type = LYLegitimizeHREF(me, &href, TRUE, TRUE);
 	    if (*href) {
 		/*
@@ -4130,7 +4135,7 @@ PRIVATE int HTML_start_element ARGS6(
 		    1 || me->object_ismap,
 		    me->object_id,
 		    (me->object_data && !me->object_classid) ? value[HTML_OBJECT_DATA] : NULL,
-		    NO, TRUE);
+		    NO, TRUE, &intern_flag);
 		clear_objectdata(me);
 		status = HT_PARSER_OTHER_CONTENT;
 		me->objects_figged_open++;
@@ -4150,7 +4155,7 @@ PRIVATE int HTML_start_element ARGS6(
 	    present && present[HTML_OVERLAY_SRC] &&
 	    value[HTML_OVERLAY_SRC] && *value[HTML_OVERLAY_SRC] != '\0') {
 	    StrAllocCopy(href, value[HTML_OVERLAY_SRC]);
-	    CHECK_FOR_INTERN(href);
+	    CHECK_FOR_INTERN(intern_flag,href);
 	    url_type = LYLegitimizeHREF(me, &href, TRUE, TRUE);
 	    if (*href) {
 		/*
@@ -4355,7 +4360,7 @@ PRIVATE int HTML_start_element ARGS6(
 	if (clickable_images && present && present[HTML_BGSOUND_SRC] &&
 	    value[HTML_BGSOUND_SRC] && *value[HTML_BGSOUND_SRC] != '\0') {
 	    StrAllocCopy(href, value[HTML_BGSOUND_SRC]);
-	    CHECK_FOR_INTERN(href);
+	    CHECK_FOR_INTERN(intern_flag,href);
 	    url_type = LYLegitimizeHREF(me, &href, TRUE, TRUE);
 	    if (*href == '\0') {
 		FREE(href);
@@ -4469,7 +4474,7 @@ PRIVATE int HTML_start_element ARGS6(
 	if (clickable_images && present && present[HTML_EMBED_SRC] &&
 	    value[HTML_EMBED_SRC] && *value[HTML_EMBED_SRC] != '\0') {
 	    StrAllocCopy(href, value[HTML_EMBED_SRC]);
-	    CHECK_FOR_INTERN(href);
+	    CHECK_FOR_INTERN(intern_flag,href);
 	    url_type = LYLegitimizeHREF(me, &href, TRUE, TRUE);
 	    if (*href != '\0') {
 		/*
@@ -5928,7 +5933,7 @@ PRIVATE int HTML_start_element ARGS6(
     case HTML_TBODY:
 	HText_endStblTR(me->text);
 	/*
-	 *  Not yet implemented.  Just check for an ID link. - FM
+	 *  Not fully implemented.  Just check for an ID link. - FM
 	 */
 	if (me->inA) {
 	    SET_SKIP_STACK(HTML_A);
@@ -5939,13 +5944,26 @@ PRIVATE int HTML_start_element ARGS6(
 	    HTML_end_element(me, HTML_U, include);
 	}
 	UPDATE_STYLE;
+	if (me->inTABLE) {
+	    if (present && present[HTML_TR_ALIGN] && value[HTML_TR_ALIGN]) {
+		if (!strcasecomp(value[HTML_TR_ALIGN], "center")) {
+		    stbl_align = HT_CENTER;
+		} else if (!strcasecomp(value[HTML_TR_ALIGN], "right")) {
+		    stbl_align = HT_RIGHT;
+		} else if (!strcasecomp(value[HTML_TR_ALIGN], "left") ||
+			   !strcasecomp(value[HTML_TR_ALIGN], "justify")) {
+		    stbl_align = HT_LEFT;
+		}
+	    }
+	    HText_startStblRowGroup(me->text, stbl_align);
+	}
 	CHECK_ID(HTML_TR_ID);
 	break;
 
     case HTML_COL:
     case HTML_COLGROUP:
 	/*
-	 *  Not yet implemented.  Just check for an ID link. - FM
+	 *  Not fully implemented.  Just check for an ID link. - FM
 	 */
 	if (me->inA) {
 	    SET_SKIP_STACK(HTML_A);
@@ -5955,8 +5973,26 @@ PRIVATE int HTML_start_element ARGS6(
 	    SET_SKIP_STACK(HTML_U);
 	    HTML_end_element(me, HTML_U, include);
 	}
-/*	HText_cancelStbl(me->text);  we ingnore it instead - kw */
 	UPDATE_STYLE;
+	if (me->inTABLE) {
+	    int span = 1;
+	    if (present && present[HTML_COL_SPAN] &&
+		value[HTML_COL_SPAN] &&
+		isdigit((unsigned char)*value[HTML_COL_SPAN]))
+		span = atoi(value[HTML_COL_SPAN]);
+	    if (present && present[HTML_COL_ALIGN] && value[HTML_COL_ALIGN]) {
+		if (!strcasecomp(value[HTML_COL_ALIGN], "center")) {
+		    stbl_align = HT_CENTER;
+		} else if (!strcasecomp(value[HTML_COL_ALIGN], "right")) {
+		    stbl_align = HT_RIGHT;
+		} else if (!strcasecomp(value[HTML_COL_ALIGN], "left") ||
+			   !strcasecomp(value[HTML_COL_ALIGN], "justify")) {
+		    stbl_align = HT_LEFT;
+		}
+	    }
+	    HText_startStblCOL(me->text, span, stbl_align,
+			       (ElementNumber == HTML_COLGROUP));
+	}
 	CHECK_ID(HTML_COL_ID);
 	break;
 
@@ -5978,11 +6014,15 @@ PRIVATE int HTML_start_element ARGS6(
 	 */
 	HTML_put_character(me, ' ');
 	{
-	    int colspan = 1;
+	    int colspan = 1, rowspan = 1;
 	    if (present && present[HTML_TD_COLSPAN] &&
 		value[HTML_TD_COLSPAN] &&
 		isdigit((unsigned char)*value[HTML_TD_COLSPAN]))
 		colspan = atoi(value[HTML_TD_COLSPAN]);
+	    if (present && present[HTML_TD_ROWSPAN] &&
+		value[HTML_TD_ROWSPAN] &&
+		isdigit((unsigned char)*value[HTML_TD_ROWSPAN]))
+		rowspan = atoi(value[HTML_TD_ROWSPAN]);
 	    if (present && present[HTML_TD_ALIGN] && value[HTML_TD_ALIGN]) {
 		if (!strcasecomp(value[HTML_TD_ALIGN], "center")) {
 		    stbl_align = HT_CENTER;
@@ -5993,7 +6033,7 @@ PRIVATE int HTML_start_element ARGS6(
 		    stbl_align = HT_LEFT;
 		}
 	    }
-	    HText_startStblTD(me->text, colspan, stbl_align,
+	    HText_startStblTD(me->text, colspan, rowspan, stbl_align,
 			      (ElementNumber == HTML_TH));
 	}
 	me->in_word = NO;
@@ -6108,6 +6148,8 @@ PRIVATE int HTML_end_element ARGS3(
     int status = HT_OK;
     char *temp = NULL, *cp = NULL;
     BOOL BreakFlag = FALSE;
+    BOOL intern_flag = FALSE;
+    BOOL skip_stack_requested = FALSE;
     EMIT_IFDEF_EXP_JUSTIFY_ELTS(BOOL reached_awaited_stacked_elt=FALSE;)
 
 #ifdef USE_PSRC
@@ -6167,6 +6209,7 @@ PRIVATE int HTML_end_element ARGS3(
      *	SGML_EMPTY in HTMLDTD.c. - FM & KW
      */
     if (HTML_dtd.tags[element_number].contents != SGML_EMPTY) {
+	skip_stack_requested = me->skip_stack > 0;
 	if ((element_number != me->sp[0].tag_number) &&
 	    me->skip_stack <= 0 &&
 	    HTML_dtd.tags[HTML_LH].contents != SGML_EMPTY &&
@@ -6737,7 +6780,7 @@ PRIVATE int HTML_end_element ARGS3(
 		    0,
 		    0,
 		    NULL,
-		    NULL, NO, FALSE);
+		    NULL, NO, FALSE, &intern_flag);
 	break;
 
     case HTML_OBJECT:
@@ -7329,15 +7372,33 @@ End_Object:
 	    me->UsePlainSpace = TRUE;
 
 	    if (HTML_dtd.tags[element_number].contents == SGML_LITTERAL) {
-		TRANSLATE_AND_UNESCAPE_ENTITIES5(&me->textarea.data,
-						    me->UCLYhndl,
-						    current_char_set,
-						    me->UsePlainSpace, me->HiddenValue);
+		TRANSLATE_AND_UNESCAPE_ENTITIES6(&me->textarea.data,
+						 me->UCLYhndl,
+						 current_char_set,
+						 NO,
+						 me->UsePlainSpace, me->HiddenValue);
 	    } else {
-		TRANSLATE_HTML5(&me->textarea.data,
+		/*
+		 *  This shouldn't have anything to do, normally, but
+		 *  just in case...
+		 *  There shouldn't be lynx special character codes in
+		 *  the chunk ("DTD" flag Tgf_nolyspcl tells SGML.c not
+		 *  to generate them).  If there were, we could set the
+		 *  last parameter ('Back') below to YES, which would
+		 *  take them out of the data.
+		 *  The data may however contain non break space, soft
+		 *  hyphen, or en space etc., in the me->UCLYhndl character
+		 *  encoding.  If that's a problem, perhaps for the (line
+		 *  or other) editor, setting 'Back' to YES should also
+		 *  help to always convert them to plain spaces (or drop
+		 *  them). - kw
+		 */
+		TRANSLATE_HTML7(&me->textarea.data,
 						    me->UCLYhndl,
 						    current_char_set,
-						    me->UsePlainSpace, me->HiddenValue);
+						    NO,
+						    me->UsePlainSpace, me->HiddenValue,
+						    NO);
 	    }
 	    data = me->textarea.data;
 
@@ -7600,6 +7661,8 @@ End_Object:
 	break;
 
     case HTML_COLGROUP:
+	if (me->inTABLE)
+	    HText_endStblCOLGROUP(me->text);
 	break;
 
     case HTML_TH:
@@ -7657,26 +7720,28 @@ End_Object:
     }
 
 #ifdef USE_COLOR_STYLE
+    if (!skip_stack_requested) { /*don't emit stylechanges if skipped stack element - VH*/
 #if !OPT_SCN
-    TrimColorClass(HTML_dtd.tags[element_number].name,
-		   Style_className, &hcode);
+	TrimColorClass(HTML_dtd.tags[element_number].name,
+		       Style_className, &hcode);
 #else
 # if !OMIT_SCN_KEEPING
-    FastTrimColorClass(HTML_dtd.tags[element_number].name,
-		       HTML_dtd.tags[element_number].name_len,
-		       Style_className,
-		       &Style_className_end, &hcode);
+	FastTrimColorClass(HTML_dtd.tags[element_number].name,
+			   HTML_dtd.tags[element_number].name_len,
+			   Style_className,
+			   &Style_className_end, &hcode);
 #  endif
 #endif
 
-    if (!ReallyEmptyTagNum(element_number))
-    {
-	CTRACE((tfp, "STYLE:end_element: ending non-EMPTY style\n"));
+	if (!ReallyEmptyTagNum(element_number))
+	{
+	    CTRACE((tfp, "STYLE:end_element: ending non-EMPTY style\n"));
 #if !defined(USE_HASH)
-	HText_characterStyle(me->text, element_number+STARTAT, STACK_OFF);
+	    HText_characterStyle(me->text, element_number+STARTAT, STACK_OFF);
 #else
-	HText_characterStyle(me->text, HCODE_TO_STACK_OFF(hcode), STACK_OFF);
+	    HText_characterStyle(me->text, HCODE_TO_STACK_OFF(hcode), STACK_OFF);
 #endif /* USE_HASH */
+	}
     }
 #endif /* USE_COLOR_STYLE */
     return status;

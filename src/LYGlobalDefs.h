@@ -396,9 +396,7 @@ extern BOOL ok_justify;
 extern BOOLEAN with_backspaces;
 #endif
 
-#ifndef NO_EMPTY_HREFLESS_A
 extern BOOL force_empty_hrefless_a;
-#endif
 
 #ifndef NO_NONSTICKY_INPUTS
 extern BOOL sticky_inputs;

@@ -202,8 +202,11 @@ extern void HText_startStblTABLE PARAMS((HText *, short));
 extern void HText_endStblTABLE PARAMS((HText *));
 extern void HText_startStblTR PARAMS((HText *, short));
 extern void HText_endStblTR PARAMS((HText *));
-extern void HText_startStblTD PARAMS((HText *, int, short, BOOL));
+extern void HText_startStblTD PARAMS((HText *, int, int, short, BOOL));
 extern void HText_endStblTD PARAMS((HText *));
+extern void HText_startStblCOL PARAMS((HText *, int, short, BOOL));
+extern void HText_endStblCOLGROUP PARAMS((HText *));
+extern void HText_startStblRowGroup PARAMS((HText *, short));
 
 /* forms stuff */
 extern void HText_beginForm PARAMS((

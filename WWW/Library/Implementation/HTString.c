@@ -496,6 +496,16 @@ PRIVATE char *HTAlloc ARGS2(char *, ptr, size_t, length)
 }
 
 /*
+ * If SAVE_TIME_NOT_SPACE is defined, StrAllocVsprintf will hang on to
+ * its temporary string buffers instead of allocating and freeing them
+ * in each invocation.  They only grow and never shrink, and won't be
+ * cleaned up on exit. - kw
+ */
+#if !(defined(_REENTRANT) || defined(_THREAD_SAFE))
+#define SAVE_TIME_NOT_SPACE
+#endif
+
+/*
  * Replacement for sprintf, allocates buffer on the fly according to what's needed
  * for its arguments.  Unlike sprintf, this always concatenates to the destination
  * buffer, so we do not have to provide both flavors.
@@ -513,27 +523,65 @@ typedef enum { Flags, Width, Prec, Type, Format } PRINTF;
 #define GROW_EXPR(n) (((n) * 3) / 2)
 #define GROW_SIZE 256
 
-PRIVATE char * StrAllocVsprintf ARGS4(
+PUBLIC_IF_FIND_LEAKS char * StrAllocVsprintf ARGS4(
 	char **,	pstr,
 	size_t,		dst_len,
 	CONST char *,	fmt,
 	va_list *,	ap)
 {
+#ifdef SAVE_TIME_NOT_SPACE
+    static size_t tmp_len = 0;
+    static size_t fmt_len = 0;
+    static char *tmp_ptr = NULL;
+    static char *fmt_ptr = NULL;
+#else
     size_t tmp_len = GROW_SIZE;
-    size_t have, need;
     char *tmp_ptr = 0;
     char *fmt_ptr;
+#endif /* SAVE_TIME_NOT_SPACE */
+    size_t have, need;
     char *dst_ptr = *pstr;
     CONST char *format = fmt;
 
     if (fmt == 0 || *fmt == '\0')
 	return 0;
 
+#ifdef USE_VASPRINTF
+    if (pstr && !dst_len) {
+	if (*pstr)
+	    FREE(*pstr);
+	if (vasprintf(pstr, fmt, *ap) >= 0) {
+	    mark_malloced(*pstr, strlen(*pstr)+1);
+	    return(*pstr);
+	}
+    }
+#endif /* USE_VASPRINTF */
+
     need = strlen(fmt) + 1;
+#ifdef SAVE_TIME_NOT_SPACE
+    /* the following assumes that 0 as first arg to realloc works
+       portably like malloc; if that isn't the case, change to use
+       HTAlloc. - kw */
+    if (!fmt_ptr || fmt_len < need*NUM_WIDTH) {
+	if ((fmt_ptr = realloc(fmt_ptr, need*NUM_WIDTH)) == 0) {
+	    outofmem(__FILE__, "StrAllocVsprintf (fmt_ptr)");
+	} else {
+	    fmt_len = need*NUM_WIDTH;
+	}
+    }
+    if (!tmp_ptr || tmp_len < GROW_SIZE) {
+	if ((tmp_ptr = realloc(tmp_ptr, GROW_SIZE)) == 0) {
+	    outofmem(__FILE__, "StrAllocVsprintf (tmp_ptr)");
+	} else {
+	    tmp_len = GROW_SIZE;
+	}
+    }
+#else
     if ((fmt_ptr = malloc(need*NUM_WIDTH)) == 0
      || (tmp_ptr = malloc(tmp_len)) == 0) {
 	outofmem(__FILE__, "StrAllocVsprintf");
     }
+#endif /* SAVE_TIME_NOT_SPACE */
 
     if (dst_ptr == 0) {
 	dst_ptr = HTAlloc(dst_ptr, have = GROW_SIZE + need);
@@ -703,19 +751,27 @@ PRIVATE char * StrAllocVsprintf ARGS4(
 	}
     }
 
+#ifndef SAVE_TIME_NOT_SPACE
     FREE(tmp_ptr);
     FREE(fmt_ptr);
+#endif
     dst_ptr[dst_len] = '\0';
     if (pstr)
 	*pstr = dst_ptr;
     return (dst_ptr);
 }
+#undef SAVE_TIME_NOT_SPACE
 
 /*
  * Replacement for sprintf, allocates buffer on the fly according to what's needed
  * for its arguments.  Unlike sprintf, this always concatenates to the destination
  * buffer.
  */
+/* Note: if making changes, also check the memory tracking version
+ * LYLeakHTSprintf in LYLeaks.c. - kw */
+#ifdef HTSprintf		/* if hidden by LYLeaks stuff */
+#undef HTSprintf
+#endif
 #if ANSI_VARARGS
 PUBLIC char * HTSprintf (char ** pstr, CONST char * fmt, ...)
 #else
@@ -747,6 +803,11 @@ PUBLIC char * HTSprintf (va_alist)
  * needed for its arguments.  Like sprintf, this always resets the destination
  * buffer.
  */
+/* Note: if making changes, also check the memory tracking version
+ * LYLeakHTSprintf0 in LYLeaks.c. - kw */
+#ifdef HTSprintf0		/* if hidden by LYLeaks stuff */
+#undef HTSprintf0
+#endif
 #if ANSI_VARARGS
 PUBLIC char * HTSprintf0 (char ** pstr, CONST char * fmt, ...)
 #else
@@ -763,6 +824,15 @@ PUBLIC char * HTSprintf0 (va_alist)
 	char **		pstr = va_arg(ap, char **);
 	CONST char *	fmt  = va_arg(ap, CONST char *);
 #endif
+#ifdef USE_VASPRINTF
+	if (pstr) {
+	    if (*pstr)
+		FREE(*pstr);
+	    if (vasprintf(pstr, fmt, ap) >= 0) /* else call outofmem?? */
+		mark_malloced(*pstr, strlen(*pstr)+1);
+	    result = *pstr;
+	} else
+#endif /* USE_VASPRINTF */
 	result = StrAllocVsprintf(pstr, 0, fmt, &ap);
     }
     va_end(ap);

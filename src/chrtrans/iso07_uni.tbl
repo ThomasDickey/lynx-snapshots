@@ -147,8 +147,17 @@ C813
 #0x7D	U+007D	#	RIGHT CURLY BRACKET
 #0x7E	U+007E	#	TILDE
 0xA0	U+00A0	#	NO-BREAK SPACE
-0xA1	U+02BD	#	MODIFIER LETTER REVERSED COMMA
-0xA2	U+02BC	#	MODIFIER LETTER APOSTROPHE
+#
+# The following two changed in ISO 8859:1999
+#
+#   Remap 0xA1 to U+2018 (instead of U+02BD)
+#   Remap 0xA2 to U+2019 (instead of U+02BC)
+#
+# Keep the old ones as primary for now.  Also added old U+037[12]
+# found in existing linux kbd files and in RFC 1345 for compatibility.
+# - kw 1999-10-29
+0xA1	U+02BD	U+2018	U+0371	#	MODIFIER LETTER REVERSED COMMA
+0xA2	U+02BC	U+2019	U+0372	#	MODIFIER LETTER APOSTROPHE
 0xA3	U+00A3	#	POUND SIGN
 0xA6	U+00A6	#	BROKEN BAR
 0xA7	U+00A7	#	SECTION SIGN

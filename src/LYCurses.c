@@ -520,14 +520,17 @@ PRIVATE void LYsetWAttr ARGS1(WINDOW *, win)
 	attr = lynx_color_cfg[code].attr;
 
 	/*
-	 * no_color_video isn't implemented (97/4/14) in ncurses 4.1, but may
-	 * be in SVr4 (which would make this redundant for the latter).
+	 * no_color_video is implemented in ncurses 4.2, but not in other
+	 * flavors of curses.  So we check before adding video attributes that
+	 * might conflict with colors.  For A_BOLD, check for both the bold and
+	 * standout mask items because standout often uses bold in conjunction
+	 * with another attribute.  -TD
 	 */
 	if ((Current_Attr & A_BOLD) && !(NoColorVideo & 33)) {
 		attr |= A_BOLD;
 	}
 
-	if ((Current_Attr == A_UNDERLINE) && !(NoColorVideo & 2)) {
+	if ((Current_Attr & A_UNDERLINE) && !(NoColorVideo & 2)) {
 		attr |= A_UNDERLINE;
 	}
 
@@ -837,7 +840,11 @@ PUBLIC void start_curses NOARGS
 #endif /* USE_COLOR_TABLE */
     }
 #ifdef __DJGPP__
+#ifdef WATT32
+    _eth_init();
+#else
     else sock_init();
+#endif /* WATT32 */
 #endif /* __DJGPP__ */
 #endif /* not VMS */
 

@@ -37,7 +37,11 @@
 PRIVATE void do_system ARGS1(char *, command)
 {
     CTRACE((tfp, "HTTelnet: Command is: %s\n\n", command));
+#ifdef UNIX	/* want LYSystem's signal sanitizing - kw */
+    LYSystem(command);
+#else		/* Non-UNIX should use LYSystem too? - left for now - kw */
     system(command);
+#endif
     FREE(command);
 }
 

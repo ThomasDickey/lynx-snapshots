@@ -1,8 +1,266 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+1999-11-03 (2.8.3dev.14)
+* modify no_color_video check for A_UNDERLINE so it is active for any
+  combination that uses underlining (reported by KW) -TD
+* modified HTML.c so configure --enable-internal-links builds -TD
+* improved 'lynx.patch' rule in makefile.in -PG
+* add rough version of makelynx.bat for use with Khan's MingW32 (from Victor
+  Schneider <vtailor@gte.net>)
+* update dependencies in makefile.bcb for src/TRSTable.c -HS
+* fix PDCurses ifdef's in LYCurses.c to work with WATT-32 -DK
+* correct ifdef's in LYPrint.c so that send_file_to_mail() works with DJGPP -DK
+* modify DOS makefiles for PDCURSES for watt-32 and some of the other recent
+  changes to lynx.  Included some of the EXP_ defines that DOS users may want.
+  Changed the -O3 back to -O2, since -O3 has no advantage under djgpp -DK
+* remove a useless ';', use FREE() instead of free() - JB
+* correct spelling lexem/lexeme (reported by KW) -TD
+* split-out function check_history() in LYMainLoop.c -TD
+* add configure check for vasprintf -TD
+* add configure check for _GNU_SOURCE -TD
+* minor fixes for configure script macros CF_TERMCAP_LIBS, CF_DISABLE_ECHO,
+  CF_GCC_ATTRIBUTES, CF_GCC_WARNINGS -TD
+* fixed bug in psrcmode code.  Now htmlsrc_tag encloses only tagname, not
+  everything in generalized brackets <,>,</,/> (reported by KW) -VH
+* fixed a bug with 'g' command (reported by KW) -VH
+* default value for 'OPT' in SGML.c made '1', removed alternatives to code
+  surrounded by #if OPT1
+* notes (VH):
+  + Seems that 'OPT' stuff doesn't contain errors. Let's enable it for several
+    releases, and then remove alternative code.
+  + Added comments about pools.
+  + Docs updated to reflect new functionality of -dont-wrap-pre
+* old psrcview bug fixed  - markup was unbalanced in some situations -VH
+* content of SAMP tag made justifiable -VH
+* implemented HTStyleChange pooling - sizeof(HTStyleChange) is 4 times smaller
+  than before, and only necessary number of stylechanges is allocated now,
+  instead of some constant (1024 by default) -VH
+* functionality of dont-wrap-pre improved and extended. Now it's possible to
+  avoid wrapping the document being dumped completely (size of the non-wrapped
+  line before the patch was limited by MAX_LINE = 1024 by default). Specifying
+  -dont-wrap-pre with interactive session enables wrapped lines (in PRE) to
+  be marked as in source view - with '+' in normal view -VH
+* functionality of -force-empty-hrefless-a was cleaned up,
+  #ifndefs NO_EMPTY_HREFLESS_A and endif's were removed -VH
+* colorstyle changes are not emitted in HTML_end_element if me->skip_stack was
+  >0 on entry to this function. This caused some glitches if
+  -force-empty-hrefless-a was enabled -VH
+* LYPrettySrc.c was slightly cleaned up, added support for lynx.cfg reloading,
+  memory deallocation -VH
+* possible bug in print_wwwfile_to_fd fixed - when quoting the page, seems that
+  several '>'s could be emitted on the long line formed by concatenating ilnes
+  with LY_SOFT_NEWLINEs at the begining of them -VH
+* general notes -VH:
+  + users of lss-enabled lynx should consider on upgrading the lynx - at least
+    those who use lynx for viewing huge files.  By default, each line on the
+    screen took 1K for colorstyles (on x86).  With new approach colorstyle
+    changes take 24 bytes (on x86) per line in average document.  Old lynx with
+    900K html file loaded as startfile occupied 30M of virtual memory, lynx
+    with patch applied occupied 5 Mb on the same file.  Old code is still
+    accessible by defining OLD_STYLECHANGE.
+  + I spent 4 hours debugging attempting to write/fix code that cleans up the
+    memory allocated in LYPrettySrc.c, but Lynx.leaks shows that I didn't
+    succeeded.  I fear that leak detection stuff is broken - I checked/traced
+    the code very carefully several times.
+> the remainder (most) of this patch from KW:
+* for confirmation prompts (HTConfirm), also accept English letters 'Y', 'y',
+  'N', 'n' as responses.  If characters different from those are derived from
+  the first letters of the translation of "yes" and "no" in a localized lynx,
+  the latter will still be the ones that appear in the prompt text and will
+  have precedence.  Message translations using multibyte character sets should
+  continue to *not* translate "yes" and "no".  Added a note to that effect. 
+* small update for some chartrans tables, minor comment changes.
+* for Unix, use LYSystem instead of system for invoking telnet, rlogin,
+  rtn3270 commands.
+  [ For some non-Unix systems, LYSystem messes around with the passed command
+    string in various ways, and does some other stuff for DJGPP.  So no change
+    for those, since I assume it worked before.  For Unix the change prevents
+    the following occuring with ncurses (at least if USE_SIGACTION is defined):
+     - access some (valid) telnet://some.host URL.
+     - within telnet client, escape to command level (usually '^]')
+     - suspend (usually 'z' or ^Z)
+     - resume (fg).  Lynx process gets woken up, redraws lynx screen,
+       screen & tty state get messed up. ]
+* another tweak for display refreshing when text previously displayed
+  had UTF-8 (for ncurses) - a check in display_page was missing.
+* corrected stupid problem in LYGetFileInfo - invalid memory access.
+* corrected and extended handling for textarea INSERTFILE and EDITTEXTAREA
+  (or DWIMEDIT), the previous patch wasn't quite right:
+  - now really truncate very long lines as intended for INSERTFILE, instead of
+    wrapping with loss of one character.
+  - for EDITTEXTAREA (DWIMEDIT), implement wrapping instead of truncation
+    (Rationale for the difference:  user's editing work shouldn't be lost if we
+    can avoid it; it is only temporarily stored in a file which may be
+    unrecoverable, different from the typical INSERTFILE case.) If, upon
+    returning from the external editor, lines are encountered that don't fit in
+    the displayed width of the textarea fields, the user may be given the
+    option to wrap to that width.  (This prompt may not be given when the first
+    such line has no suitable spaces for breaking - the file may be binary
+    garbage after all, not worth fixing up too much.) Line breaking is
+    attempted at spaces if possible (using isspace() for checking), but not if
+    the only available spaces are close to the beginning of a line.  An attempt
+    is made to join the wrapped part of a line (if not too long) with the next
+    line if it is not indented, by suppressing the next line break (if not too
+    far away).  Some other heuristics are used that work reasonably well for
+    normal text paragraphs.
+    If the above mechanisms fail, or the user did not confirm wrapping when
+    prompted, very long lines will still be wrapped to fit into the buffer size
+    (around 1024 chars).
+  [ The wrapping works quite nicely in "normal" cases - please try it! ]
+* mouse action in popups would lead to call of fancy_mouse() with wrong row
+  number, which could lead to messed-up display as well as invalid memory
+  access.
+* The previous changes in link redrawing made things worse instead of better
+  for UTF-8 display with ncurses (without color style).  This time (using
+  wredrawln, not touchline) it should really get better... 
+  [ The UTF-8 related changes would need testing with non-ncurses curses libs,
+    if anyone has one of those AND a working UTF-8 environment - late xterm
+    betas(?) from Tom's site should do.  If the functions used for ncurses are
+    available in other curses libs, the code should probably look the same as
+    for ncurses.  ]
+* SGML.c to compile without --enable-prettysrc (reported by HN) -KW
+* fixes an invalid memory problem from previous patch 
+* adds alignment inheritance from COLGROUP / COL / THEAD / TFOOT / TBODY. 
+* remove some logic from LYmbcsstrlen() that gave an incorrect count for
+  the number of cells displaying multibyte characters, resulting in too-few
+  cells being highlighted (reported by HN, HS) -KW
+* added support for ROWSPAN attribute of TD and TH to TRST.  This only
+  reserves the appropriate amount of space in subsequent lines.
+  [ Pages that show off ROWSPAN nicely:
+    <http://www.iro.umontreal.ca/contrib/po/HTML/domain-hello.html>
+    and related ones for other "domain"s.  (Verify that there really
+    is a ROWSPAN= in the current version.)  View with a screen width
+    of 100.  With 80 there is some kind of problem, compare both
+    ^V settings... ]
+* some corrections in TRST code.
+* change initialization order of key escape sequence mappings for slang, so
+  that terminfo/termcap information always overrides defaults that may
+  conflict.
+* minimal memory cleanup / leak prevention for EXP_FILE_UPLOAD error
+  cases in GridText.c.
+* in HText_SubmitForm, don't change the post_content_type of the
+  passed in newdoc structure unless that is really wanted.
+* tweaked UTF-8 prevention of display library wrapping/truncation to make
+  better use of available width for centered text, and to not apply if dumping
+  to stdout.
+* for UTF-8 output with ncurses, do a clearok in display_page also if the page
+  that was *previously* displayed had UTF-8 characters.  Without this there
+  were still display glitches.
+* made previous changes to SGML.c and HTMLDTD for handling OBJECT more generic.
+* minor tweaks, cleanups, glitch removal in previous changes.
+* better tracking of HTSprintf0/HTSprintf with --enable-find-leaks
+  (-DLY_FIND_LEAKS).  This can be disabled in LYLeaks.h by removing the
+  definition of LY_FIND_LEAKS_EXTENDED.
+* added variant behavior in StrAllocVsprintf to make HTSprintf0/HTSprintf use
+  less memory allocation calls and keep its temporary string buffers across
+  calls.  The buffers then only grow and never get cleaned up.  This is enabled
+  by defining SAVE_TIME_NOT_SPACE in HTString.c, disable the definition there
+  in case of problems.
+* added code so HTSprintf0/HTSprintf can use vasprintf() in some situations,
+  which should be more efficient.  It also works with --enable-find-leaks
+  (EXTENDED or not).  This only comes into play if USE_VASPRINTF is defined
+  (not defined automatically anywhere).
+  [ For me (some Debian glibc version), the prototype for this function
+    is in stdio.h but only gets included with an explicit -D_GNU_SOURCE. ]
+  [ Which of the four combinations with/without vasprintf, with/without
+    SAVE_TIME_NOT_SPACE is better (if any) remains to be tested.  I have seen
+    drastic differences under leak tracking, but that's just too much
+    different from a normal situation to count for anything. ]
+* Some minor leaks fixed. (LYMainLoop.c)
+
+[ Had to make owner_address and ownerS_address file-wide PRIVATE's
+ instead of auto to unleak them.  Could be taken out of more
+ argument lists now. ]
+
+* HTFile.c: correction in FormatNum (could duplicate fields for some
+  LIST_FORMAT settings), avoid some HTSprintf0 calls in FormatStr.
+* replaced calls to HTSprintf with calls to HTSprintf0 in various files.
+* added missing include of LYLeaks.h in LYPrettySrc.c.  But disabled memory
+  tracking there, too many allocations show up as leaks.
+* allow digits in tagspec for -prettysrc.
+* the 'fixit' change of 1999-05-16 didn't really let LYConvertToURL() revert to
+  the right old behavior in the non-'g' use.  Now return a file URL for the
+  nonexisting file in the relevant situation again, as before 1998-03-25,
+  instead of an erroneous "file://localhost" which (on Unix-like systems at
+  least) would result in access to the root directory.  This change (like the
+  changes of 1999-05-16 and 1998-03-25) only matters for strings that aren't
+  already in absolute URL form, don't start with a slash (or, for DOSPATH
+  systems, other path separator) either, and don't get turned into remote URLs
+  by successful 'guessing' and DNS lookup.  None of the changes affect VMS.
+* protect INSERTFILE and EDITTEXTAREA from generating memory access violations
+  if the inserted file has lines that are too long for the buffer used.  An
+  alert message is issued and the long lines are truncated.  Also don't exit if
+  memory allocation fails for the buffer to hold the whole file, since the only
+  reason for the failure may be that the file is too huge when otherwise lynx
+  has enough memory.
+* improved handling of some invalid constructs in SGML, especially
+  '<' followed by various characters; don't lose those characters from
+  what gets displayed for -prettysrc.
+* a pre-filled TEXTAREA text that needed charset translation could cause
+  use of an invalid pointer when building the page, resulting in garbage
+  data being displayed (or worse).  The problem was in HTML.c, not related
+  to TEXTAREA editing or other related new functions.
+  [ preceding three were partially already in previous patch ]
+* recognize '<?' as introducing an SGML PI.  Within most elements' content (or
+  outside of any elements) this makes no effective difference except for TRACE
+  messages and -prettysrc, the input is still junked up to the next '>' as for
+  a completely invalid tag.  Within PCDATA elements the PI is now also ignored
+  instead of being treated as character data, this makes a difference for
+  example in a TEXTAREA in SortaSGML mode.  (PI's aren't really expected to
+  occur in the middle of HTML, but are used at the beginning of XHTML documents
+  and other XML documents.)
+* the earlier change of TEXTAREA handling (treating as SGML_PCDATA, SortaSGML
+  only) created a problem, some lynx special characters were passed on as data
+  characters in the field contents and would mess up line editing and possibly
+  the submitted form data.  Actually the problem also existed before, but only
+  for non break space, soft hyphen etc.  encoded directly as character data
+  (not NCRs or entities).  Resolved by telling SGML.c not to generate lynx
+  special chars for some element contents (currently only TEXTAREA), with new
+  flag Tgf_nolyspcl.
+* corrected some logic errors in LYUCFullyTranslateString.  Special attribute
+  characters are now more often translated to real characters when 'Back' flag
+  is set, and should now be translated to the *right* characters for the target
+  charset.  (They were sometimes converted to ISO-8859-1 values when the 'to'
+  charset was different.)
+* added a missing significant cast in UCReverseTransChar.
+* for scrollbar mouse clicking, use codes that work independent of current
+  line-editor key bindings.
+* better calculation of "subjective distance" from next anchor for mouse. 
+  Change of 1999-07-30 had various problems, it wasn't quite intuitive.  Use
+  scaled numbers for finer granularity.  Don't make "basin of attraction" too
+  wide, or it becomes hard to find a "background" spot to click on that doesn't
+  affect a link if a page has a high density of links.
+  [ For example with a pair of fields:
+         Submit Reset
+                xxx
+  clicking in any of the positions marked 'x' on the next line would
+  select the first field, not the second. That was not an improvement. ]
+* functions LYmbcsstrlen, LYno_attr_mbcs_case_strstr, and LYno_attr_mbcs_strstr
+  in LYStrings.c where unclear about the concept of 'printable' or 'physical'
+  used for some returned values in the CJK case.  Callers expected number of
+  display cells, implemented was number of 'characters' counting full-width
+  characters as 1 instead of 2.  Now these functions take an additional
+  argument 'count_gcells' that tells them how to count.
+  This removes some long-standing, somewhat obscure problems with search target
+  highlighting under CJK display character sets, as well as new (and less
+  obscure) CJK problems introduces by the latest changes for highlighting. 
+  Also fixed some details in the *strstr functions.  The positioning of the
+  highlighting in CJK mode should now be correct and work as expected (as for
+  other display character sets) for anchors, search targets, and combinations
+  of both.
+* reorganized LYOpenTempRewrite.  It should finally make sense for systems
+  without HAVE_TRUNCATE defined.
+* corrected SNACat (was unused).
+* changes for SUP and SUB:  Render SUP visibly as a '^' character if it needs
+  to be separated from a preceding character in order to prevent
+  misinterpretation.  The test currently used is isxdigit for the the preceding
+  character.  Render <SUB> and </SUB> always as brackets '[' and ']'
+  respectively.  SUB is mostly used in technical material while SUP occurs
+  frequently in pages of general nature where it is not essential, therefore
+  the different treatment.
 1999-10-21 (2.8.3dev.13)
-* revert a change from dev.4 which disabled getbkgd support in PDCurses -DK 
+* revert a change from dev.4 which disabled getbkgd support in PDCurses -DK
 * modify ifdef for USE_QUOTED_PARAMETER to include __CYGWIN__, else names such
   as "telnet.sh" are translated to "telnet" -DK
 * improve/simplify scrollbar support (Ilya Zakharevich)
@@ -77,13 +335,11 @@ Changes since Lynx 2.8 release
   to show what is returned.
 * SGML.c:  some cleanup of ugly ifdefs, and of unnecessary abuse of global
   variables.  (still a lot left!)
-* more consistent and correct recognition of element names.  The characters
-  "_-.:" don't end the name.
 * handle INCLUDE and CDDATA marked sections: output the contents.
 * parse various elements differently that had/have special requirements or
-  hacks.  Extend meaning of Tgf_strict for litteral-like content modes.  Use
+  hacks.  Extend meaning of Tgf_strict for literal-like content modes.  Use
   SGML_CDATA in some cases (and treat it similar to SGML_LITTERAL), use
-  SGML_PCDATA for litteral-like parsing (but if modified by Tgf_strict it's
+  SGML_PCDATA for literal-like parsing (but if modified by Tgf_strict it's
   more like regular SGML_MIXED).  A '<' that would start a tag gets displayed
   (since not element content is allowed that's just error recovery).  Comments
   now work in TEXTAREA instead of getting displayed as text (SortaSGML mode
@@ -123,9 +379,9 @@ Changes since Lynx 2.8 release
   - in HTML 4, an OBJECT with USEMAP attribute can refer to a MAP within the
     OBJECT's content, possibly within nested inner OBJECTs.  Lynx would fail to
     find the MAP in that case, now it doesn't.
-  - in HTML 4, MAP can contain arbitray block elements in addition to AREA. 
+  - in HTML 4, MAP can contain arbitray block elements in addition to AREA.
     Lynx now shows such block content, even if it occurs within (possibly
-    nested) OBJECTs with USEMAP whose contents we would otherwise skip. 
+    nested) OBJECTs with USEMAP whose contents we would otherwise skip.
     Sometimes we may show too much now, by generating a LYNXIMGMAP link as well
     as showing block content or by showing more of the OBJECT content than what
     is within a MAP, but that is preferable to losing data.
@@ -145,7 +401,7 @@ Changes since Lynx 2.8 release
   containing line is now scanned from the beginning, using the same logic as in
   display_line to make sure that lynx and the display library have the same
   idea of where in the line the link starts.  In UTF-8 output mode, parts of
-  the line preceding the link are also repainted if this is necessary. 
+  the line preceding the link are also repainted if this is necessary.
   Refreshing of the physical line is forced if necessary in UTF-8 mode.  For
   anchors split across lines, the new approach is currently only used for the
   first line.
@@ -196,7 +452,7 @@ Changes since Lynx 2.8 release
 * extended SUFFIX option, added SUFFIX_ORDER option, see documentation in
   lynx.cfg.  The long list of built-in file suffix rules in HTInit.c can now be
   disabled, either at compile time - see userdefs.h - or at run time.  The
-  equivalent functionality is now available in lynx.cfg for those who want it. 
+  equivalent functionality is now available in lynx.cfg for those who want it.
   Added somments, see HTFileInit in HTInit.c.
 * various tweaks of built-in file suffix rules.
 * allow XLOADIMAGE_COMMAND to be empty (in lynx.cfg) or NULL (in userdefs.h),
@@ -221,7 +477,7 @@ Changes since Lynx 2.8 release
   handle (a "UChndl", which is different from a "LYhndl" or "UCLYhndl" etc.,
   and shouldn't be directly accessed by arbitrary bits of lynx code - it should
   be regarded as private to the chartrans mechanism).
-* protect various printf-like calls against crashes from strings with '%': 
+* protect various printf-like calls against crashes from strings with '%':
   LYSyslog.
 * LYDownload.c: made parsing of LYNXDOWNLOAD: URL slightly more robust.
 * disabled some broken pieces.
@@ -505,7 +761,7 @@ Changes since Lynx 2.8 release
   for use in LYUtils.c on DOS -LP
 * correct several minor problems with integration of HS's changes in
   GridText.h, HTAlert.c and LYPrint.c (reported by LP) -TD
-+ restore dev.3 interface to LYLowerCase and LYUpperCase and do casts
+* restore dev.3 interface to LYLowerCase and LYUpperCase and do casts
   internally to work on unsigned chars -PG
 * corrected typos in some messages (reported by Dmitry Sivachenko
   <demon@gpad.ac.ru>).
@@ -523,7 +779,7 @@ Changes since Lynx 2.8 release
 * corrected definitions in HTTP.c and HTDOS.h to build with old TCP library -LP
 * When keypad_mode was changed from forms options menu
   set_numbers_as_arrows()/reset_numbers_as_arrows() was not reinitialized
-  (reported by KED). - LP
+  (reported by KED) - LP
 * SOURCE_CACHE: add one more parse setting member (keypad_mode)
   to HText structure -LP
 * SOURCE_CACHE:  fix updating the document when "display charset" was changed
@@ -1492,7 +1748,7 @@ Changes since Lynx 2.8 release
 * ifdef'd print_local_dir in HTFile.c since this function does not compile on
   VMS (report by Andy Harper, Tony Bolton) -TD
 * fix reload_read_cfg() to avoid persistent cookies mode changing at run time;
-  reload printers list, downloaders list, environments - as expected. - LP
+  reload printers list, downloaders list, environments - as expected - LP
 * fixes for SOURCE_CACHE!=NONE mode, trying to accommodate HTreparse_document()
   for mainloop() events:
   - add/use flag "from_source_cache" for better mainloop maintenance
@@ -1623,7 +1879,7 @@ Changes since Lynx 2.8 release
   (ie different commandline options make source view logic different) -VH
 * HTChunkPutc was inlined in SGML.c for better performance -VH
 * keeping of Style_className was omitted in HTML.c to increase performance of
-  lynx compiled with lss support. -VH
+  lynx compiled with lss support -VH
 * performance of lynx compiled with lss support is increased ~ by 15-20% for
   normal documents, and by up to 50% for documents with a lot of tags VH
 * fixed bug in lynx compiled with lss support  that caused it to load local CSS
@@ -1787,7 +2043,7 @@ Changes since Lynx 2.8 release
   (possible large) document over the net.  - LP
 * &mdash; (&#x2014) now display as "--" (popular requests) - LP
 * &emsp; are now displayed as two &ensp; (popular requests),
-  previous definition of HT_EM_SPACE now renamed to HT_EN_SPACE. - LP
+  previous definition of HT_EM_SPACE now renamed to HT_EN_SPACE - LP
 * minor tweaks in postoptions(), new flag added - LP
 * minor changes to make this build with SunOS K&R cc - TD
 * entities.h:  clean HTML4.0 entities table added, it is #ifdef'ed with
@@ -2013,7 +2269,7 @@ Changes since Lynx 2.8 release
 * function expand_substring used with NCURSES for user-defined mapping keysyms
   to byte sequences was parsing the "^(...)" construct wrong - KW
 * other small tweaks in key handling code - KW
-* changes to lynx.cfg to better reflect reality. - KW
+* changes to lynx.cfg to better reflect reality - KW
 * terminology note:  lynxkeycode = what's between the colons in lynx.cfg
   KEYMAP:...:..., lynxactioncode = LYK_* code for what's right of the second
   colon, lynxeditactioncode = what's assigned in LYEditmap.c (and which may

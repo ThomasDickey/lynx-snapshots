@@ -2592,7 +2592,7 @@ redraw:
 	    cmd = LYK_QUIT;
 #ifndef USE_SLANG
 	} else if (c == MOUSE_KEY) {
-	    if ((cmd = fancy_mouse(form_window, i + 1 + window_offset, &cur_choice)) < 0)
+	    if ((cmd = fancy_mouse(form_window, i + 1 - window_offset, &cur_choice)) < 0)
 		goto redraw;
 	    if  (cmd == LYK_ACTIVATE)
 		break;
