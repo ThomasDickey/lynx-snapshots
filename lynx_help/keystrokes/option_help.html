@@ -16,13 +16,13 @@ compiled in or chosen in `lynx.cfg':
 <LI>General Preferences
 <UL>
 <LI><A HREF="#UM">User Mode</A>
-<LI><A HREF="#CK">Cookies</A>
+<LI><A HREF="#ED">Editor</A>
 <LI><A HREF="#ST">Searching type</A>
+<LI><A HREF="#CK">Cookies</A>
 </UL>
 
 <LI>Keyboard Input
 <UL>
-<LI><A HREF="#ED">Editor</A>
 <LI><A HREF="#KM">Keypad mode</A>
 <LI><A HREF="#EM">Emacs keys</A>
 <LI><A HREF="#VI">VI keys</A>
@@ -67,7 +67,7 @@ compiled in or chosen in `lynx.cfg':
 <UL>
 <LI><A HREF="#MB">Multi-bookmarks</A>
 <LI><A HREF="#BF">Bookmark file</A>
-<LI><A HREF="#VP">Visited Pages</A> <!-- no text yet -->
+<LI><A HREF="#VP">Visited Pages</A>
 </UL>
 
 </UL>
@@ -347,6 +347,38 @@ if subdirectories are included (e.g., './BM/lynx_bookmarks.html').
 <P>
 Lynx will create bookmark files when you first 'a'dd a link,
 but any subdirectories in the filepath must already exist.
+
+<H1><A NAME="VP">Visited Pages</A></H1>
+
+This allows you to change the appearance of the
+<a href="visited_help.html">Visited Links Page</a>
+
+Normally it shows a list, in reverse order of the pages visited.
+The popup menu allows you these choices:
+<dl>
+<dt><EM>By First Visit</EM>:
+The default appearance, shows the pages based on when they were first visited.
+The list is shown in reverse order, to make the current page (usually) at
+the top of the list.
+<dt><EM>By First Visit Reversed</EM>
+The default appearance, shows the pages based on when they were first visited.
+The list is shown in order, to make the current page (usually) at
+the bottom of the list.
+<dt><EM>As Visit Tree</EM>
+Combines the first/last visited information, showing the list in order of
+the first visit, but using the indentation level of the page immediately
+previous to determine indentation of new entries.
+That gives a clue to the order of visiting pages when moving around in
+the History or Visited Pages lists.
+<dt><EM>By Last Visit</EM>
+The default appearance, shows the pages based on when they were last visited.
+The list is shown in reverse order, to make the current page (usually) at
+the top of the list.
+<dt><EM>By Last Visit Reversed</EM>
+The default appearance, shows the pages based on when they were last visited.
+The list is shown in order, to make the current page (usually) at
+the bottom of the list.
+</dl>
 
 <H1><A NAME="FT">FTP sort criteria</A></H1>
 

@@ -266,6 +266,14 @@ II. Compile instructions -- UNIX
 	bzip2, uudecode, zcat, zip, telnet, tn3270, rlogin.  (Not all of them
 	are used on all systems or in all configurations.)
 
+	This option makes Lynx simpler to install, but potentially less secure,
+	since the commands are then set in the user's $PATH.  All of these
+	commands may also be overridden individually by setting environment
+	variables before configuring.  For example, you can disable the telnet
+	command by doing this:
+
+		setenv TELNET /bin/false
+
   --disable-included-msgs
 	Do not use included messages, for i18n support.  If NLS support is
 	requested, the configure script will otherwise use the messages in the
@@ -326,7 +334,8 @@ II. Compile instructions -- UNIX
 
   --enable-color-style			(define USE_COLOR_STYLE)
   	Use this option to enable optional and *experimental* color style.
-	(Also defines USE_HASH, LINKEDSTYLES)
+	This is implemented for curses (if it supports color), ncurses and
+	PDCurses, but not slang.  (Also defines USE_HASH, LINKEDSTYLES)
 
   --enable-debug			(The symbol DEBUG is always defined.)
         Use this option to compile-in support for debugging.
@@ -464,6 +473,10 @@ II. Compile instructions -- UNIX
 	--with-screen=ncurses		(define NCURSES)
 	--with-screen=slang		(define USE_SLANG)
 
+	Note that some systems may have a default curses library which
+	does not support color, while on others, ncurses is installed as
+	the curses library.
+
   --with-socks				(define SOCKS)
 	Use this option to configure with the socks library.
 
@@ -508,6 +521,13 @@ II. Compile instructions -- UNIX
 		unrelated to the install prefix (that you can specify in
 		the configure script) you may have to specify these via
 		the $LIBS variable.
+
+    Lynx has compiled-in the pathnames of various programs which it executes.
+    Normally the full pathnames are given, rather than the program name
+    alone.  These may be preset in the environment by the capitalized version,
+    e.g., INSTALL for "install".  The corresponding internal definitions
+    are suffixed "_PATH", e.g., "INSTALL_PATH".
+
 
 -- 1997/7/27 - T. Dickey <dickey@clark.net>
 

@@ -1,6 +1,17 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2000-04-22 (2.8.3pre.8)
+* update option_help.html to describe the Visited Pages settings -TD
+* correct order of body_attr[] and button_attr[] in HTMLDTD.c -TD
+* correction for IMG attributes in HTMLDTD.c -KW
+* tweak form-based options menu:  General Preferencies now has User Mode,
+  Editor, Searching type and Cookies (suggested by PW).  Correct misspelled
+  gettext'ed message, introduced in pre.7 -LP, DK
+* note in configure --help and INSTALLATION that color-style is implemented
+  for various curses libraries but not slang -TD
+* add a note to INSTALLATION describing how to disable the telnet application
+  when configuring Lynx -TD
 2000-04-19 (2.8.3pre.7)
 * move initialization of WATT-32 "sock_init()" code in LYMain.c so it precedes
   Lynx's code to setup SIGINT handler, since WATT-32 installs a SIGINT handler
