@@ -30,7 +30,7 @@
  * the successive versions:
  *	{release}{status}{patch}
  * where
- *	{release} is the release that we are working on, e.g., 2.8.3
+ *	{release} is the release that we are working on, e.g., 2.8.4
  *	{status} is one of "dev", "pre" or "rel", and
  *	{patch} is a number assigned by PRCS.
  */

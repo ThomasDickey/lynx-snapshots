@@ -708,7 +708,7 @@ Borland C:
     library.  Get pdcurses2.3 from "http://www.lightlink.com/hessling/".  I
     have modified it so that mouse support is no longer broken for Lynx (see
     "http://www.fdisk.com/doslynx/").  You will want to get zlib from
-    "http://www.cdrom.com/pub/infozip/zlib/".  Compile these libraries, and
+    "http://www.gzip.org/zlib/ ".  Compile these libraries, and
     put them in a convenient place (pdcurses inside the Lynx directory).
 
     Unpack the latest Lynx source distribution, and make an obj directory
@@ -793,7 +793,7 @@ V. Compile instructions -- 386 DOS
 
     If you wish to compile with "USE_ZLIB" (recommended), you must have the
     zlib library.  Get the source from
-	    http://www.info-zip.org/pub/infozip/zlib/
+	    http://www.gzip.org/zlib/ 
     and compile it.  Put libz.a in the lib subdirectory of DJGPP, and put
     zlib.h and zconf.h in the include subdirectory.
 

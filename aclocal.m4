@@ -917,8 +917,12 @@ do
 char * XCursesProgramName = "test";
 #else
 #include <${cf_cv_ncurses_header-curses.h}>
+#if defined(NCURSES_VERSION) && defined(HAVE_NCURSES_TERM_H)
+#include <ncurses/term.h>
+#else
 #ifdef HAVE_TERM_H
 #include <term.h>
+#endif
 #endif
 #endif],
 			[

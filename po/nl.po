@@ -4,7 +4,7 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: lynx 2.8.3\n"
+"Project-Id-Version: lynx 2.8.4\n"
 "POT-Creation-Date: 2001-06-01 18:55-0400\n"
 "PO-Revision-Date: 2000-04-08 21:13+02:00\n"
 "Last-Translator: Tijs van Bakel <smoke@casema.net>\n"

@@ -1,6 +1,14 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2001-07-17 (2.8.4rel.1)
+* remove comment in README.ssl directing people to
+  http://www.moxienet.com/lynx/, since that page is moot with 2.8.4 (report by
+  DK)
+* add an ifdef in CF_CURSES_FUNCS configure macro to avoid confusing ncurses'
+  term.h with other versions -TD
+* update URL for zlib -Frederic L W Meunier
+
 2001-07-14 (2.8.4pre.5)
 * document CHARSETS_DIRECTORY and CHARSET_SWITCH_RULES in lynx.cfg -IZ
 * add a fallback in _Switch_Display_Charset() if no CHARSETS_DIRECTORY was
@@ -30,7 +38,7 @@ Changes since Lynx 2.8 release
   left/right scrolling logic.  This is used for testing, e.g., the repaint
   bug reported below -TD
 * remove logic in lynx_force_repaint() which reset the window background, since
-  it does not work with the logic used to implement left/right scrolling. 
+  it does not work with the logic used to implement left/right scrolling.
   Retested older versions of ncurses and did not find a case where this was
   needed after all (report by IZ) -TD
 * revert dev.21 change to SGML_character() S_equals case, which has undesirable
@@ -54,7 +62,7 @@ Changes since Lynx 2.8 release
   and reverse to be combined with colors, used this to debug problem with
   <script> and comment -TD
 * improve logic for nested-tables to handle cases such as www.tin.org -IZ
-  TRST ignores the horizontal alignment *inside* a multi-line cell of a table. 
+  TRST ignores the horizontal alignment *inside* a multi-line cell of a table.
   This limitation, in conjunction with the nested-tables modifications does not
   work well when text with a horizontal alignment (e.g., <ul>) is put in a
   table cell.  This patch introduces a *limited* logic to take this info into
