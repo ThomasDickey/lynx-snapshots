@@ -2778,7 +2778,7 @@ PUBLIC void LYCheckForContentBase ARGS1(
 {
     char *cp = NULL;
     BOOL present[HTML_BASE_ATTRIBUTES];
-    CONST char *value[HTML_BASE_ATTRIBUTES];
+    char *value[HTML_BASE_ATTRIBUTES];
     int i;
 
     if (!(me && me->node_anchor))
@@ -2831,7 +2831,7 @@ PUBLIC void LYCheckForContentBase ARGS1(
     for (i = 0; i < HTML_BASE_ATTRIBUTES; i++)
 	 present[i] = NO;
     present[HTML_BASE_HREF] = YES;
-    value[HTML_BASE_HREF] = (CONST char *)cp;
+    value[HTML_BASE_HREF] = cp;
     (*me->isa->start_element)(me, HTML_BASE, present, value, 0);
     FREE(cp);
 }

@@ -34,7 +34,7 @@ done
 dnl ---------------------------------------------------------------------------
 dnl This is adapted from the macros 'fp_PROG_CC_STDC' and 'fp_C_PROTOTYPES'
 dnl in the sharutils 4.2 distribution.
-AC_DEFUN([CF_ANSI_CC],
+AC_DEFUN([CF_ANSI_CC_CHECK],
 [
 AC_MSG_CHECKING(for ${CC-cc} option to accept ANSI C)
 AC_CACHE_VAL(cf_cv_ansi_cc,[
@@ -66,12 +66,15 @@ done
 CFLAGS="$cf_save_CFLAGS"
 ])
 AC_MSG_RESULT($cf_cv_ansi_cc)
+
 if test "$cf_cv_ansi_cc" != "no"; then
 if test ".$cf_cv_ansi_cc" != ".-DCC_HAS_PROTOS"; then
 	CFLAGS="$CFLAGS $cf_cv_ansi_cc"
+else
+	AC_DEFINE(CC_HAS_PROTOS)
 fi
 fi
-])
+])dnl
 dnl ---------------------------------------------------------------------------
 dnl Check for existence of alternate-character-set support in curses, so we
 dnl can decide to use it for box characters.
@@ -172,10 +175,15 @@ freebsd*) #(vi
 	AC_CHECK_LIB(mytinfo,tgoto,[LIBS="-lmytinfo $LIBS"])
 	;;
 *hp-hpux10.*)
+	AC_CHECK_LIB(Hcurses,initscr,[
+		# HP's header uses __HP_CURSES, but user claims _HP_CURSES.
+		LIBS="-lHcurses $LIBS"
+		CFLAGS="-D__HP_CURSES -D_HP_CURSES $CFLAGS"
+		],[
 	AC_CHECK_LIB(cur_color,initscr,[
 		LIBS="-lcur_color $LIBS"
 		CFLAGS="-I/usr/include/curses_colr $CFLAGS"
-		])
+		])])
 	;;
 esac
 if test -d /usr/5lib ; then
@@ -253,7 +261,38 @@ AC_MSG_RESULT($cf_cv_$2)
 AC_DEFINE_UNQUOTED($2,"$cf_cv_$2")
 ])
 dnl ---------------------------------------------------------------------------
+dnl You can always use "make -n" to see the actual options, but it's hard to
+dnl pick out/analyze warning messages when the compile-line is long.
 dnl
+dnl Sets:
+dnl	ECHO_LD - symbol to prefix "cc -o" lines
+dnl	RULE_CC - symbol to put before implicit "cc -c" lines (e.g., .c.o)
+dnl	SHOW_CC - symbol to put before explicit "cc -c" lines
+dnl	ECHO_CC - symbol to put before any "cc" line
+dnl
+AC_DEFUN([CF_DISABLE_ECHO],[
+AC_MSG_CHECKING(if you want to see long compiling messages)
+CF_ARG_DISABLE(echo,
+	[  --disable-echo          test: display \"compiling\" commands],
+	[
+    ECHO_LD='@echo linking [$]@;'
+    RULE_CC='	@echo compiling [$]<'
+    SHOW_CC='	@echo compiling [$]@'
+    ECHO_CC='@'
+],[
+    ECHO_LD=''
+    RULE_CC='# compiling'
+    SHOW_CC='# compiling'
+    ECHO_CC=''
+])
+AC_MSG_RESULT($enableval)
+AC_SUBST(ECHO_LD)
+AC_SUBST(RULE_CC)
+AC_SUBST(SHOW_CC)
+AC_SUBST(ECHO_CC)
+])dnl
+dnl ---------------------------------------------------------------------------
+dnl Check if 'errno' is declared in <errno.h>
 AC_DEFUN([CF_ERRNO],
 [
 AC_MSG_CHECKING([for errno external decl])
@@ -293,9 +332,13 @@ dnl	$1 = library name
 dnl	$2 = includes
 dnl	$3 = code fragment to compile/link
 dnl	$4 = corresponding function-name
+dnl
+dnl Sets the variable "$cf_libdir" as a side-effect, so we can see if we had
+dnl to use a -L option.
 AC_DEFUN([CF_FIND_LIBRARY],
 [
 	cf_cv_have_lib_$1=no
+	cf_libdir=""
 	AC_CHECK_FUNC($4,cf_cv_have_lib_$1=yes,[
 		cf_save_LIBS="$LIBS"
 		AC_MSG_CHECKING(for $4 in -l$1)
@@ -330,11 +373,8 @@ dnl
 dnl	-Wconversion (useful in older versions of gcc, but not in gcc 2.7.x)
 dnl	-Wredundant-decls (system headers make this too noisy)
 dnl	-Wtraditional (combines too many unrelated messages, only a few useful)
+dnl	-Wwrite-strings (too noisy, but should review occasionally)
 dnl	-pedantic
-dnl
-dnl FIXME: the following are useful, but Lynx's not there yet
-dnl	-Wcast-qual
-dnl	-Wwrite-strings
 dnl
 AC_DEFUN([CF_GCC_WARNINGS],
 [EXTRA_CFLAGS=""
@@ -352,6 +392,7 @@ EOF
 	for cf_opt in \
 		Wbad-function-cast \
 		Wcast-align \
+		Wcast-qual \
 		Winline \
 		Wmissing-declarations \
 		Wmissing-prototypes \
@@ -364,11 +405,13 @@ EOF
 		if AC_TRY_EVAL(ac_compile); then
 			test -n "$verbose" && AC_MSG_RESULT(... -$cf_opt)
 			EXTRA_CFLAGS="$EXTRA_CFLAGS -$cf_opt"
+			test "$cf_opt" = Wcast-qual && EXTRA_CFLAGS="$EXTRA_CFLAGS -DXTSTRINGDEFINES"
 		fi
 	done
 	rm -f conftest*
 	CFLAGS="$cf_save_CFLAGS"
 fi
+AC_SUBST(EXTRA_CFLAGS)
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl Construct a search-list for a nonstandard header-file
@@ -431,32 +474,41 @@ dnl The symbol $ac_make is set in AC_MAKE_SET, as a side-effect.
 AC_DEFUN([CF_MAKE_INCLUDE],
 [
 AC_MSG_CHECKING(for style of include in makefiles)
+
 make_include_left=""
 make_include_right=""
 make_include_quote="unknown"
+
+cf_inc=head$$
+cf_dir=subd$$
+echo 'RESULT=OK' >$cf_inc
+mkdir $cf_dir
+
 for cf_include in "include" ".include" "!include"
 do
 	for cf_quote in '' '"'
 	do
-		cat >WWW/Library/unix/makefile <<CF_EOF
+		cat >$cf_dir/makefile <<CF_EOF
 SHELL=/bin/sh
-${cf_include} ${cf_quote}../../Library/Implementation/Version.make${cf_quote}
+${cf_include} ${cf_quote}../$cf_inc${cf_quote}
 all :
-	@echo 'cf_make_include=OK'
+	@echo 'cf_make_include=\$(RESULT)'
 CF_EOF
 	cf_make_include=""
-	eval `cd WWW/Library/unix && ${MAKE-make} 2>&5 | grep cf_make_include=OK`
+	eval `cd $cf_dir && ${MAKE-make} 2>&AC_FD_CC | grep cf_make_include=OK`
 	if test -n "$cf_make_include"; then
 		make_include_left="$cf_include"
 		make_include_quote="$cf_quote"
 		break
 	else
-		echo Tried 1>&5
-		cat WWW/Library/unix/makefile 1>&5
+		echo Tried 1>&AC_FD_CC
+		cat $cf_dir/makefile 1>&AC_FD_CC
 	fi
 	done
 	test -n "$cf_make_include" && break
 done
+
+rm -rf $cf_inc $cf_dir
 
 if test -z "$make_include_left" ; then
 	AC_ERROR(Your $ac_make program does not support includes)
@@ -465,16 +517,19 @@ if test ".$make_include_quote" != .unknown ; then
 	make_include_left="$make_include_left $make_include_quote"
 	make_include_right="$make_include_quote"
 fi
+
 AC_MSG_RESULT(${make_include_left}file${make_include_right})
+
 AC_SUBST(make_include_left)
 AC_SUBST(make_include_right)
-])
+])dnl
 dnl ---------------------------------------------------------------------------
 dnl Check for pre-1.9.9g ncurses (among other problems, the most obvious is
 dnl that color combinations don't work).
 AC_DEFUN([CF_NCURSES_BROKEN],
 [
-if test "$cf_cv_ncurses_version" = yes ; then
+AC_MSG_CHECKING(for obsolete/broken version of ncurses)
+if test "$cf_cv_ncurses_version" != no ; then
 AC_CACHE_VAL(cf_cv_ncurses_broken,[
 AC_TRY_COMPILE([
 #include <$cf_cv_ncurses_header>],[
@@ -487,6 +542,7 @@ AC_TRY_COMPILE([
 	[cf_cv_ncurses_broken=no],
 	[cf_cv_ncurses_broken=yes])
 ])
+AC_MSG_RESULT($cf_cv_ncurses_broken=yes)
 if test "$cf_cv_ncurses_broken" = yes ; then
 	AC_MSG_WARN(hmm... you should get an up-to-date version of ncurses)
 	AC_DEFINE(NCURSES_BROKEN)
@@ -512,8 +568,17 @@ AC_DEFUN([CF_NCURSES_CPPFLAGS],
 [
 AC_MSG_CHECKING(for ncurses header file)
 AC_CACHE_VAL(cf_cv_ncurses_header,[
-	AC_TRY_COMPILE([#include <curses.h>],
-	[printf("%s\n", NCURSES_VERSION)],
+	AC_TRY_COMPILE([#include <curses.h>],[
+#ifdef NCURSES_VERSION
+printf("%s\n", NCURSES_VERSION);
+#else
+#ifdef __NCURSES_H
+printf("maybe 1.8.7\n");
+#else
+make an error
+#endif
+#endif
+	],
 	[cf_cv_ncurses_header=predefined],[
 	CF_HEADER_PATH(cf_search,ncurses)
 	test -n "$verbose" && echo
@@ -637,28 +702,34 @@ dnl	-lnsl -lsocket
 dnl	-lsocket
 dnl	-lbsd
 AC_DEFUN([CF_NETLIBS],[
-NETLIBS=""
-#
+cf_test_netlibs=no
+AC_MSG_CHECKING(for network libraries)
+AC_CACHE_VAL(cf_cv_netlibs,[
+AC_MSG_RESULT(working...)
+cf_cv_netlibs=""
+cf_test_netlibs=yes
 AC_CHECK_FUNCS(gethostname,,[
-	CF_RECHECK_FUNC(gethostname,nsl,NETLIBS,[
-		CF_RECHECK_FUNC(gethostname,socket,NETLIBS)])])
+	CF_RECHECK_FUNC(gethostname,nsl,cf_cv_netlibs,[
+		CF_RECHECK_FUNC(gethostname,socket,cf_cv_netlibs)])])
 #
 # FIXME:  sequent needs this library (i.e., -lsocket -linet -lnsl), but
 # I don't know the entrypoints - 97/7/22 TD
-AC_HAVE_LIBRARY(inet,NETLIBS="-linet $NETLIBS")
+AC_HAVE_LIBRARY(inet,cf_cv_netlibs="-linet $cf_cv_netlibs")
 #
 if test "$ac_cv_func_lsocket" != no ; then
 AC_CHECK_FUNCS(socket,,[
-	CF_RECHECK_FUNC(socket,socket,NETLIBS,[
-		CF_RECHECK_FUNC(socket,bsd,NETLIBS)])])
+	CF_RECHECK_FUNC(socket,socket,cf_cv_netlibs,[
+		CF_RECHECK_FUNC(socket,bsd,cf_cv_netlibs)])])
 fi
 #
 AC_CHECK_FUNCS(gethostbyname,,[
-	CF_RECHECK_FUNC(gethostbyname,nsl,NETLIBS)])
+	CF_RECHECK_FUNC(gethostbyname,nsl,cf_cv_netlibs)])
 #
 AC_CHECK_FUNCS(strcasecmp,,[
-	CF_RECHECK_FUNC(strcasecmp,resolv,NETLIBS)])
-LIBS="$LIBS $NETLIBS"
+	CF_RECHECK_FUNC(strcasecmp,resolv,cf_cv_netlibs)])
+])
+LIBS="$LIBS $cf_cv_netlibs"
+test $cf_test_netlibs = no && echo "$cf_cv_netlibs" >&AC_FD_MSG
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl Check for the symbol NGROUPS
@@ -832,7 +903,8 @@ do
 
 	CFLAGS="$cf_save_CFLAGS"
 	if test "$cf_cv_sizechange" = yes ; then
-		test -n "$cf_opts" && AC_DEFINE($cf_opts)
+		echo "size-change succeeded ($cf_opts)" >&AC_FD_MSG
+		test -n "$cf_opts" && AC_DEFINE_UNQUOTED($cf_opts)
 		break
 	fi
 done
@@ -918,7 +990,18 @@ AC_CACHE_VAL(cf_cv_dcl_sys_errlist,[
     [cf_cv_dcl_sys_errlist=yes],
     [cf_cv_dcl_sys_errlist=no])])
 AC_MSG_RESULT($cf_cv_dcl_sys_errlist)
-test $cf_cv_dcl_sys_errlist = no && AC_DEFINE(DECL_SYS_ERRLIST)
+
+# It's possible (for near-UNIX clones) that sys_errlist doesn't exist
+if test $cf_cv_dcl_sys_errlist = no ; then
+    AC_DEFINE(DECL_SYS_ERRLIST)
+    AC_MSG_CHECKING([existence of sys_errlist])
+    AC_CACHE_VAL(cf_cv_have_sys_errlist,[
+        AC_TRY_LINK([#include <errno.h>],
+            [char *c = (char *) *sys_errlist],
+            [cf_cv_have_sys_errlist=yes],
+            [cf_cv_have_sys_errlist=no])])
+    AC_MSG_RESULT($cf_cv_have_sys_errlist)
+fi
 ])dnl
 dnl ---------------------------------------------------------------------------
 AC_DEFUN([CF_SYSTEM_MAIL_FLAGS], 
@@ -1024,7 +1107,7 @@ AC_CACHE_VAL(cf_cv_type_unionwait,[
 	[cf_cv_type_unionwait=yes],
 	[cf_cv_type_unionwait=no])])
 AC_MSG_RESULT($cf_cv_type_unionwait)
-test $cf_cv_type_unionwait = yes && AC_DEFINE(HAVE_TYPE_UNION_WAIT)
+test $cf_cv_type_unionwait = yes && AC_DEFINE(HAVE_TYPE_UNIONWAIT)
 ])dnl
 dnl ---------------------------------------------------------------------------
 AC_DEFUN([CF_UTMP],

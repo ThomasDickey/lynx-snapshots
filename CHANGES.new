@@ -10,6 +10,23 @@ README.configure), and miscellaneous other changes.  Note that the 2.7 ->
 2.7.1 changes (which are listed at the beginning of the current CHANGES
 file) are duplicated here. - KW]
 
+97-09-17
+* Undo misleading/incorrect use of 'const' in HTML.c, and associated
+  modules. - TD
+* merge symbols 'has_color' and 'lynx_has_color' to simplify ifdef's,
+  and correct a problem building color-style configuration. - TD
+* add configure symbol for ifdef'ing presence of waitpid, which
+  was stopping build on HP-UX. - TD
+* correct the symbol that is defined by CF_SIZECHANGE test, noted
+  by failure to build SCO version after making an include for
+  <sys/ioctl.h> ifdef'd according to configure test. - TD
+* corrected check for broken (pre-1.9.9g) ncurses versions so that
+  they can build with color support. - TD
+* cache state of CF_NETLIBS so that rerunning configure will yield
+  the same results for network libraries. - TD
+* Add configure test for HP-UX -lHcurses library. - TD
+* Minor adjustments to names of configure-script variables, to make
+  them the same as other programs (e.g., tin-unoff). - TD
 97-09-15
 * Recover from bad sequence "<=" in SGML.c by outputting those characters
   litterally. - KW
@@ -24,7 +41,7 @@ file) are duplicated here. - KW]
 * Changes in LYStrings.c to enable keypad() processing for non-NCURSES
   if HAVE_KEYPAD is defined. - KW
 97-09-12
-* Correct mismatch/omission of HAVE_TYPE_UNION_WAIT symbol from
+* Correct mismatch/omission of HAVE_TYPE_UNIONWAIT symbol from
   change for wait vs waitpid. - TD
 97-09-11
 * Tweaks in HTMLGen.c for display of special characters and line breaking

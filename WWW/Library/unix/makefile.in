@@ -45,11 +45,11 @@ all : $(LOB)/libwww.a
 .SUFFIXES: .i .h .html
 
 .c.o:
-@SHOW_CC@
+@RULE_CC@
 	@ECHO_CC@$(CC) $(CPPOPTS) $(CFLAGS) -c $(srcdir)/$*.c
 
 .c.i:
-@SHOW_CC@
+@RULE_CC@
 	@ECHO_CC@$(CPP) -C $(CPPOPTS) $*.c >$@
 
 depend :

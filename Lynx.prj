@@ -1,13 +1,16 @@
 ;; -*- Lisp -*-
 (Created-By-Prcs-Version 1 2 0)
 (Project-Description "PRCS Project for The Lynx browser")
-(Project-Version Lynx 2.7.1ac-0 64)
-(Parent-Version Lynx 2.7.1ac-0 63)
+(Project-Version Lynx 2.7.1ac-0 68)
+(Parent-Version Lynx 2.7.1ac-0 67)
 
-(Version-Log "&#173 recognition, HTMLDTD.c small mods, HTMLGen.c mods, no more underlining of non-current links")
+(Version-Log "misc configure script fixes.  rebuilt on all of the platforms I've got
+(Linux, Solaris, SunOS, IRIX, CLIX, SCO, AIX, HP-UX).  Probably will work
+_now_ on HP-UX 10.x
+")
 (New-Version-Log "")
-(Checkin-Time "Thu, 11 Sep 1997 20:18:32 -0600")
-(Checkin-Login kweide)
+(Checkin-Time "Wed, 17 Sep 1997 17:34:13 -0600")
+(Checkin-Login dickey)
 (Populate-Ignore ("\\.o$" "\\.a$" "~$" "^a.out$" "^core$"
                   "\\.dvi$" "\\.aux$" "^\\..*_aux$" "\\.log"
                   "\\.zip$" "^obsolete" "/obsolete"
@@ -57,7 +60,7 @@
   (src/LYTraversal.c (Lynx/c/25_LYTraversa 1.1.2.6 644))
   (src/LYList.h (Lynx/c/26_LYList.h 1.2 644))
   (src/LYCgi.h (Lynx/c/27_LYCgi.h 1.1 644))
-  (src/LYCgi.c (Lynx/c/28_LYCgi.c 1.1.1.5 644))
+  (src/LYCgi.c (Lynx/c/28_LYCgi.c 1.1.1.6 644))
   (src/LYJump.h (Lynx/c/29_LYJump.h 1.2 644))
   (src/HTNestedList.h (Lynx/c/30_HTNestedLi 1.1 644))
   (src/LYLeaks.c (Lynx/c/31_LYLeaks.c 1.1.1.4 644))
@@ -117,7 +120,7 @@
   (src/GridText.h (Lynx/d/33_GridText.h 1.1.1.1.1.3.1.1.1.1.1.1.1.2 644))
   (src/LYUtils.h (Lynx/d/34_LYUtils.h 1.1.2.4 644))
   (src/LYUpload.c (Lynx/d/35_LYUpload.c 1.1.4.1.3.1.1.1.1.5 644))
-  (src/LYStrings.c (Lynx/d/36_LYStrings. 1.1.3.3.2.8 644))
+  (src/LYStrings.c (Lynx/d/36_LYStrings. 1.1.3.3.2.9 644))
   (src/LYShowInfo.c (Lynx/d/37_LYShowInfo 1.1.2.1.5.1.1.1.2.4 644))
   (src/LYSearch.c (Lynx/d/38_LYSearch.c 1.2.2.5 644))
   (src/LYReadCFG.c (Lynx/d/39_LYReadCFG. 1.1.1.1.3.2.3.1.1.2.1.7 644))
@@ -127,7 +130,7 @@
   (src/LYMainLoop.c (Lynx/d/43_LYMainLoop 1.2.4.2.2.1.2.6.1.2.1.1.1.1.1.1.1.1.1.1.1.3.1.1.1.5 644))
   (src/LYMain.c (Lynx/d/44_LYMain.c 1.1.2.1.1.1.1.1.1.2.2.1.1.1.1.1.1.1.1.1.1.1.1.3.1.6 644))
   (src/LYMail.c (Lynx/d/45_LYMail.c 1.1.1.1.1.1.3.1.1.1.2.5 644))
-  (src/LYLocal.c (Lynx/d/46_LYLocal.c 1.2.3.1.3.8 644))
+  (src/LYLocal.c (Lynx/d/46_LYLocal.c 1.2.3.1.3.10 644))
   (src/LYJump.c (Lynx/d/47_LYJump.c 1.3 644))
   (src/LYGetFile.c (Lynx/d/48_LYGetFile. 1.5.2.3.2.1.1.1.1.1.1.1.1.1.1.2.1.2 644))
   (src/LYForms.c (Lynx/d/49_LYForms.c 1.1.4.1.2.1.1.1.1.7 644))
@@ -135,7 +138,7 @@
   
   (src/LYClean.c (Lynx/e/0_LYClean.c 1.1.4.1.1.4 644))
   (src/LYBookmark.c (Lynx/e/1_LYBookmark 1.1.2.1.1.8 644))
-  (src/HTML.c (Lynx/e/2_HTML.c 1.1.4.1.1.1.1.2.1.4.1.2.1.3.1.2.1.2.2.2.1.4 644))
+  (src/HTML.c (Lynx/e/2_HTML.c 1.1.4.1.1.1.1.2.1.4.1.2.1.3.1.2.1.2.2.2.1.5 644))
   (src/HTInit.c (Lynx/e/3_HTInit.c 1.1.4.1.3.1.1.4 644))
   (src/HTAlert.c (Lynx/e/4_HTAlert.c 1.1.2.1.1.2 644))
   (src/GridText.c (Lynx/e/5_GridText.c 1.1.3.1.1.1.1.1.1.2.2.2.1.2.1.2.1.1.1.1.1.1.1.1.1.3.1.4 644))
@@ -147,7 +150,7 @@
   (samples/mailcap (Lynx/e/11_mailcap 1.2 644))
   (samples/lynx.cfg (Lynx/e/12_lynx.cfg 1.2.1.2.1.1.2.1.1.1.1.1.1.3.1.5 644))
   (lynx_help/lynx_url_support.html (Lynx/e/13_lynx_url_s 1.2 644))
-  (lynx_help/Lynx_users_guide.html (Lynx/e/14_Lynx_users 1.8.1.1.1.1.1.1.1.2.1.2 644))
+  (lynx_help/Lynx_users_guide.html (Lynx/e/14_Lynx_users 1.8.1.1.1.1.1.1.1.2.1.3 644))
   (lynx_help/keystroke_commands/cookie_help.html (Lynx/e/15_cookie_hel 1.1 644))
   (lynx_help/keystroke_commands/visited_help.html (Lynx/e/16_visited_he 1.1 644))
   (lynx_help/keystroke_commands/edit_help.html (Lynx/e/17_edit_help. 1.1 644))
@@ -156,7 +159,7 @@
   (lynx_help/keystroke_commands/scrolling_help.html (Lynx/e/20_scrolling_ 1.1 644))
   (lynx_help/keystroke_commands/print_help.html (Lynx/e/21_print_help 1.1 644))
   (lynx_help/keystroke_commands/other_help.html (Lynx/e/22_other_help 1.4 644))
-  (lynx_help/keystroke_commands/option_help.html (Lynx/e/23_option_hel 1.7 644))
+  (lynx_help/keystroke_commands/option_help.html (Lynx/e/23_option_hel 1.8 644))
   (lynx_help/keystroke_commands/movement_help.html (Lynx/e/24_movement_h 1.1 644))
   (lynx_help/keystroke_commands/history_help.html (Lynx/e/25_history_he 1.1 644))
   (lynx_help/keystroke_commands/gopher_types_help.html (Lynx/e/26_gopher_typ 1.1 644))
@@ -209,7 +212,7 @@
   (WWW/Library/vms/libmake.com (Lynx/f/21_libmake.co 1.1 644))
   (WWW/Library/vms/descrip.mms (Lynx/f/22_descrip.mm 1.1 644))
   (WWW/Library/Implementation/HTFinger.h (Lynx/f/23_HTFinger.h 1.1 644))
-  (WWW/Library/Implementation/HTFinger.c (Lynx/f/24_HTFinger.c 1.1 644))
+  (WWW/Library/Implementation/HTFinger.c (Lynx/f/24_HTFinger.c 1.2 644))
   (WWW/Library/Implementation/LYexit.h (Lynx/f/25_LYexit.h 1.1.1.2 644))
   (WWW/Library/Implementation/HTVMS_WaisUI.h (Lynx/f/26_HTVMS_Wais 1.1 644))
   (WWW/Library/Implementation/HTVMS_WaisUI.c (Lynx/f/27_HTVMS_Wais 1.1 644))
@@ -264,9 +267,9 @@
   (WWW/Library/Implementation/HTWriter.h (Lynx/g/24_HTWriter.h 1.1 644))
   (WWW/Library/Implementation/HTPlain.h (Lynx/g/25_HTPlain.h 1.1 644))
   (WWW/Library/Implementation/HTChunk.h (Lynx/g/26_HTChunk.h 1.1 644))
-  (WWW/Library/Implementation/HTMLDTD.h (Lynx/g/27_HTMLDTD.h 1.1.2.6 644))
+  (WWW/Library/Implementation/HTMLDTD.h (Lynx/g/27_HTMLDTD.h 1.1.2.7 644))
   (WWW/Library/Implementation/HTML.h (Lynx/g/28_HTML.h 1.1.2.2.1.1.1.1.1.1.1.3 644))
-  (WWW/Library/Implementation/SGML.h (Lynx/g/29_SGML.h 1.1.2.2 644))
+  (WWW/Library/Implementation/SGML.h (Lynx/g/29_SGML.h 1.1.2.3 644))
   (WWW/Library/Implementation/HTTCP.h (Lynx/g/30_HTTCP.h 1.3 644))
   (WWW/Library/Implementation/HTFTP.h (Lynx/g/31_HTFTP.h 1.1 644))
   (WWW/Library/Implementation/HTBTree.h (Lynx/g/32_HTBTree.h 1.1 644))
@@ -285,7 +288,7 @@
   (WWW/Library/Implementation/HTAABrow.c (Lynx/g/45_HTAABrow.c 1.2.1.2 644))
   (WWW/Library/Implementation/HTAAServ.c (Lynx/g/46_HTAAServ.c 1.1 644))
   (WWW/Library/Implementation/HTAAUtil.c (Lynx/g/47_HTAAUtil.c 1.1 644))
-  (WWW/Library/Implementation/HTGopher.c (Lynx/g/48_HTGopher.c 1.3 644))
+  (WWW/Library/Implementation/HTGopher.c (Lynx/g/48_HTGopher.c 1.4 644))
   (WWW/Library/Implementation/HTHistory.c (Lynx/g/49_HTHistory. 1.1 644))
   (WWW/Library/Implementation/HTMIME.c (Lynx/g/50_HTMIME.c 1.1.2.2.1.1.1.1.1.4 644))
   (WWW/Library/Implementation/HTInit.c (Lynx/g/51_HTInit.c 1.1 644))
@@ -298,10 +301,10 @@
   (WWW/Library/Implementation/HTAnchor.c (Lynx/h/6_HTAnchor.c 1.1.4.2.1.4 644))
   (WWW/Library/Implementation/HTAtom.c (Lynx/h/7_HTAtom.c 1.1.2.1 644))
   (WWW/Library/Implementation/HTChunk.c (Lynx/h/8_HTChunk.c 1.1 644))
-  (WWW/Library/Implementation/HTMLGen.c (Lynx/h/9_HTMLGen.c 1.1.2.4 644))
+  (WWW/Library/Implementation/HTMLGen.c (Lynx/h/9_HTMLGen.c 1.1.2.5 644))
   (WWW/Library/Implementation/HTFWriter.c (Lynx/h/10_HTFWriter. 1.1 644))
   (WWW/Library/Implementation/HTPlain.c (Lynx/h/11_HTPlain.c 1.1.2.3 644))
-  (WWW/Library/Implementation/SGML.c (Lynx/h/12_SGML.c 1.1.1.1.1.1.2.4.1.7 644))
+  (WWW/Library/Implementation/SGML.c (Lynx/h/12_SGML.c 1.1.1.1.1.1.2.4.1.9 644))
   (WWW/Library/Implementation/HTTCP.c (Lynx/h/13_HTTCP.c 1.2.3.1.1.1.1.1.1.2 644))
   (WWW/Library/Implementation/HTFTP.c (Lynx/h/14_HTFTP.c 1.6 644))
   (WWW/Library/Implementation/HTBTree.c (Lynx/h/15_HTBTree.c 1.1 644))
@@ -314,8 +317,8 @@
   (WWW/Library/Implementation/HTWAIS.c (Lynx/h/22_HTWAIS.c 1.1.1.1 644))
   (WWW/Library/Implementation/HTVMSUtils.c (Lynx/h/23_HTVMSUtils 1.2 644))
   (WWW/Library/Implementation/HTTelnet.c (Lynx/h/24_HTTelnet.c 1.5 644))
-  (WWW/Library/Implementation/HTNews.c (Lynx/h/25_HTNews.c 1.1.2.1.1.3 644))  
-  (WWW/Library/Implementation/HTMLDTD.c (Lynx/h/26_HTMLDTD.c 1.1.2.8 644))
+  (WWW/Library/Implementation/HTNews.c (Lynx/h/25_HTNews.c 1.1.2.1.1.4 644))  
+  (WWW/Library/Implementation/HTMLDTD.c (Lynx/h/26_HTMLDTD.c 1.1.2.10 644))
   (WWW/Library/Implementation/HTFile.c (Lynx/h/27_HTFile.c 1.1.3.1.1.8 644))
   (WWW/Library/Implementation/HTAuth.c (Lynx/h/28_HTAuth.c 1.1 644))
   (VMSWAIS.announce (Lynx/h/29_VMSWAIS.an 1.1 644))
@@ -390,19 +393,19 @@
 
 ;; Files added by populate at Mon, 03 Mar 1997 06:05:56 -0600:
 
-  (CHANGES.new (Lynx/6_CHANGES.ne 1.18.1.4.1.1.2.1.1.2.2.2.1.2.1.1.1.1.1.4.2.7.1.3.1.4.1.24 644))
+  (CHANGES.new (Lynx/6_CHANGES.ne 1.18.1.4.1.1.2.1.1.2.2.2.1.2.1.1.1.1.1.4.2.7.1.3.1.4.1.28 644))
 
 ;; Files added by populate at Tue, 11 Mar 1997 04:22:39 -0600:
 
   (newfiles.configure (Lynx/7_newfiles.c 1.4 644))
-  (makefile.in (Lynx/8_makefile.i 1.1.1.12 644))
+  (makefile.in (Lynx/8_makefile.i 1.1.1.13 644))
   (install.sh (Lynx/9_install.sh 1.1 755))
-  (configure.in (Lynx/10_configure. 1.14 644))
-  (config.hin (Lynx/11_config.hin 1.14 644))
-  (aclocal.m4 (Lynx/12_aclocal.m4 1.18 644))
-  (configure (Lynx/13_configure 1.18 755))
+  (configure.in (Lynx/10_configure. 1.15 644))
+  (config.hin (Lynx/11_config.hin 1.16 644))
+  (aclocal.m4 (Lynx/12_aclocal.m4 1.20 644))
+  (configure (Lynx/13_configure 1.20 755))
   (README.configure (Lynx/14_README.con 1.7 644))
-  (CHANGES.configure (Lynx/15_CHANGES.co 1.1.1.12 644))
+  (CHANGES.configure (Lynx/15_CHANGES.co 1.1.1.14 644))
 
 ;; Files added by populate at Wed, 09 Apr 1997 06:18:01 -0600:
 
@@ -411,9 +414,9 @@
   (WWW/Library/Implementation/HTDOS.c (Lynx/28_HTDOS.C 1.1 644))
 
 
-  (WWW/Library/unix/makefile.in (Lynx/16_makefile.i 1.5 644))
-  (src/makefile.in (Lynx/17_makefile.i 1.11 644))
-  (src/chrtrans/makefile.in (Lynx/18_makefile.i 1.7 644))
+  (WWW/Library/unix/makefile.in (Lynx/16_makefile.i 1.6 644))
+  (src/makefile.in (Lynx/17_makefile.i 1.12 644))
+  (src/chrtrans/makefile.in (Lynx/18_makefile.i 1.8 644))
 
   (src/chrtrans/koi8r_uni.tbl (Lynx/b/29_koi8r_uni. 1.2.1.1 644))
   (src/chrtrans/def7_uni.tbl (Lynx/25_def7_uni.t 1.4 644))
@@ -431,17 +434,17 @@
   (src/AttrList.h (Lynx/33_AttrList.h 1.3 644))
   (src/LYHash.h (Lynx/34_LYHash.h 1.4 644))
   (src/LYHash.c (Lynx/35_LYHash.c 1.3 644))
-  (src/LYStyle.c (Lynx/36_LYStyle.c 1.6 644))
+  (src/LYStyle.c (Lynx/36_LYStyle.c 1.7 644))
   (styles/lynx.lss (Lynx/37_lynx.lss 1.1 644))
-  (src/LYStyle.h (Lynx/b/5_LYStyle.h 1.2 644))
+  (src/LYStyle.h (Lynx/b/5_LYStyle.h 1.3 644))
 ;; Files added by populate at Tue, 08 Jul 1997 20:40:02 -0600:
 
-  (src/LYCurses.c (Lynx/d/51_LYCurses.c 1.1.5.1.1.1.1.1.1.8 644))
-  (src/LYCharUtils.c (Lynx/c/22_LYCharUtil 1.2.1.1.2.1.2.2.1.2.1.1.1.2.1.1.1.1.1.1.2.3.1.6 644))
+  (src/LYCurses.c (Lynx/d/51_LYCurses.c 1.1.5.1.1.1.1.1.1.9 644))
+  (src/LYCharUtils.c (Lynx/c/22_LYCharUtil 1.2.1.1.2.1.2.2.1.2.1.1.1.2.1.1.1.1.1.1.2.3.1.7 644))
 
 ;; Files added by populate at Wed, 09 Jul 1997 05:12:01 -0600:
 
-  (src/LYUtils.c (Lynx/d/27_LYUtils.c 1.1.4.1.2.2.1.1.1.1.1.1.1.1.4.2.1.1.1.3 644))
+  (src/LYUtils.c (Lynx/d/27_LYUtils.c 1.1.4.1.2.2.1.1.1.1.1.1.1.1.4.2.1.1.1.5 644))
 
 
   (src/chrtrans/build-chrtrans.com (Lynx/b/22_build-chrt 1.5 644))
@@ -460,13 +463,5 @@
 
   (src/chrtrans/viscii_uni.tbl (Lynx/b/0_viscii_uni 1.1 644))
 )
-(Merge-Parents
-  (2.7.1fm-0.52 incomplete
-    (src/LYUtils.c src/LYUtils.c src/LYUtils.c m) 
-  )
-  (2.7.1fm-0.52 complete
-    (src/LYGetFile.c src/LYGetFile.c src/LYGetFile.c n) (WWW/Library/Implementation/tcp.h WWW/Library/Implementation/tcp.h WWW/Library/Implementation/tcp.h m)
-    (() Makefile Makefile n) (() FOTEMODS FOTEMODS n)
-    (() 00README 00README n) (src/chrtrans/makeuctb.c src/chrtrans/makeuctb.c src/chrtrans/makeuctb.c m))
-)
+(Merge-Parents)
 (New-Merge-Parents)

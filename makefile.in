@@ -8,10 +8,15 @@ srcdir		= @srcdir@
 VPATH		= $(srcdir)
 
 CC		= @CC@
-CPPOPTS		= @DEFS@ @CPPFLAGS@
-CFLAGS		= $(CPPOPTS) @CFLAGS@
+CFLAGS		= @CFLAGS@
+DEFS		= @DEFS@
+CPPFLAGS	= @CPPFLAGS@
 
 LIBS		= @LIBS@
+
+INSTALL		= @INSTALL@
+INSTALL_PROGRAM	= @INSTALL_PROGRAM@
+INSTALL_DATA	= @INSTALL_DATA@
 
 ##this is the name of the directory the lynx source code is in.
 ##(e.g. lynx2-7-1, not the full path)
@@ -30,8 +35,8 @@ mandir= @mandir@/man1
 ## Where you want the lynx.cfg file installed
 libdir= @libdir@
 
-installbin= @INSTALL@ -c -s -m 755
-installdoc= @INSTALL@ -c -m 444
+installbin= @INSTALL_PROGRAM@ -c -s -m 755
+installdoc= @INSTALL_DATA@ -c -m 444
 
 ##set the relative location of the WWW library Implementation directory,
 ##from this directory
@@ -127,17 +132,17 @@ SITE_DEFS = # Your defines here
 # -DUSE_ZLIB       To use some functions from zlib library if you have it.
 #
 # if you are linking to freeWAIS-0.202 or older, you should define this
-# in MCFLAGS (SITE_DEFS)
+# in SITE_DEFS
 #
 # -DDECLARE_WAIS_LOGFILES
 #
 # if you have the reverse clear screen problem of some SUN4 systems you
-# should define this in MCFLAGS (SITE_DEFS)
+# should define this in SITE_DEFS
 #
 # -DREVERSE_CLEAR_SCREEN_PROBLEM
 #
 # if you have an SVR4 system with the "type any key" problem, try defining
-# this in LYFLAGS (SITE_LYDEFS) and MCFLAGS (SITE_DEFS)
+# this in LYFLAGS (SITE_LYDEFS) and SITE_DEFS
 #
 # -DSVR4_BSDSELECT
 #
@@ -147,7 +152,7 @@ SITE_DEFS = # Your defines here
 # -DDGUX_OLD
 #
 # if you would like logging of client requests via syslog(), you should
-# define this in MCFLAGS (SITE_DEFS)
+# define this in SITE_DEFS
 #
 # -DSYSLOG_REQUESTED_URLS
 #
@@ -158,7 +163,7 @@ all:
 	cd WWW/Library/unix && $(MAKE) CC="$(CC)" \
 		LYFLAGS="$(SITE_LYDEFS)"
 	cd src && $(MAKE) all CC="$(CC)" \
-		MCFLAGS="" \
+		CFLAGS="$(CFLAGS)" \
 		LIBS="$(LIBS) $(RESOLVLIB) $(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)" \
 		SITE_DEFS="$(SITE_DEFS)" \
 		WWWINC=$(WWWINC) \

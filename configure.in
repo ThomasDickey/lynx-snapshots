@@ -29,16 +29,7 @@ dnl --------------------------------------------------------------------------
 CF_HELP_MESSAGE(
 Development Options:)
 
-AC_MSG_CHECKING(if you want to see long compiling messages)
-CF_ARG_DISABLE(echo,
-	[  --disable-echo          display \"compiling\" commands],
-	[SHOW_CC='	@echo compiling $@'
-    ECHO_CC='@'],
-	[SHOW_CC='# compiling'
-    ECHO_CC=''])
-AC_MSG_RESULT($enableval)
-AC_SUBST(SHOW_CC)
-AC_SUBST(ECHO_CC)
+CF_DISABLE_ECHO
 
 AC_MSG_CHECKING(if you want to check memory-leaks)
 CF_ARG_ENABLE(find-leaks,
@@ -134,7 +125,7 @@ dnl If we're able to run this script, this is true!
 AC_DEFINE(UNIX)
 
 if test -z "$GCC" ; then
-	CF_ANSI_CC
+	CF_ANSI_CC_CHECK
 fi
 AC_C_CONST
 

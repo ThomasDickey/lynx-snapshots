@@ -1780,11 +1780,11 @@ struct _HTStructured {
 
 PUBLIC void HTStartAnchor ARGS3(
 	HTStructured *,		obj,
-	CONST char *,		name,
-	CONST char *,		href)
+	char *,			name,
+	char *,			href)
 {
     BOOL		present[HTML_A_ATTRIBUTES];
-    CONST char * 	value[HTML_A_ATTRIBUTES];
+    char * 		value[HTML_A_ATTRIBUTES];
     int i;
 
     for (i = 0; i < HTML_A_ATTRIBUTES; i++)
@@ -1792,11 +1792,11 @@ PUBLIC void HTStartAnchor ARGS3(
 
     if (name && *name) {
     	present[HTML_A_NAME] = YES;
-	value[HTML_A_NAME] = (CONST char *)name;
+	value[HTML_A_NAME] = name;
     }
     if (href) {
         present[HTML_A_HREF] = YES;
-        value[HTML_A_HREF] = (CONST char *)href;
+        value[HTML_A_HREF] = href;
     }
 
     (*obj->isa->start_element)(obj, HTML_A, present, value, 0);
@@ -1808,7 +1808,7 @@ PUBLIC void HTStartIsIndex ARGS3(
 	CONST char *,		href)
 {
     BOOL		present[HTML_ISINDEX_ATTRIBUTES];
-    CONST char * 	value[HTML_ISINDEX_ATTRIBUTES];
+    char * 		value[HTML_ISINDEX_ATTRIBUTES];
     int i;
 
     for (i = 0; i < HTML_ISINDEX_ATTRIBUTES; i++)
@@ -1816,11 +1816,11 @@ PUBLIC void HTStartIsIndex ARGS3(
 
     if (prompt && *prompt) {
     	present[HTML_ISINDEX_PROMPT] = YES;
-	value[HTML_ISINDEX_PROMPT] = (CONST char *)prompt;
+	value[HTML_ISINDEX_PROMPT] = prompt;
     }
     if (href) {
         present[HTML_ISINDEX_HREF] = YES;
-        value[HTML_ISINDEX_HREF] = (CONST char *)href;
+        value[HTML_ISINDEX_HREF] = href;
     }
 
     (*obj->isa->start_element)(obj, HTML_ISINDEX , present, value, 0);

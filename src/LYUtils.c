@@ -1892,7 +1892,7 @@ PUBLIC void statusline ARGS1(
 		int a=(strncmp(buffer, "Alert", 5) || !hashStyles[s_alert].name ? s_status : s_alert);
 		LynxChangeStyle (a, ABS_ON, 1);
 		addstr(buffer);
-		wbkgdset(stdscr, (has_color
+		wbkgdset(stdscr, (lynx_uses_color
 			? hashStyles[a].color
 			: hashStyles[a].mono) | ' ');
 		clrtoeol();
@@ -2754,9 +2754,9 @@ PUBLIC BOOLEAN inlocaldomain NOARGS
 ** This bit of code catches window size change signals
 **/
 
-#if !defined(VMS) && !defined(ISC) && !defined(DOSPATH)
+#ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
-#endif /* !VMS && !ISC */
+#endif
 
 /* For systems that have both, but both can't be included, duh */
 #ifdef TERMIO_AND_TERMIOS

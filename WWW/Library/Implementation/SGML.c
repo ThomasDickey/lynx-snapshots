@@ -810,7 +810,7 @@ PRIVATE void start_element ARGS1(
     	context->target,
 	new_tag - context->dtd->tags,
 	context->present,
-	(CONST char**) context->value,  /* coerce type for think c */
+	context->value,  /* coerce type for think c */
 	(char **)&context->include);
     if (new_tag->contents != SGML_EMPTY) {		/* i.e. tag not empty */
 	HTElement * N = (HTElement *)malloc(sizeof(HTElement));

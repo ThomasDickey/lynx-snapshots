@@ -627,38 +627,36 @@ PRIVATE char * author_address ARGS1(char *,email)
 /*	Start anchor element
 **	--------------------
 */
-PRIVATE void start_anchor ARGS1(CONST char *,  href)
+PRIVATE void start_anchor ARGS1(char *,  href)
 {
     BOOL		present[HTML_A_ATTRIBUTES];
-    CONST char*		value[HTML_A_ATTRIBUTES];
+    char*		value[HTML_A_ATTRIBUTES];
     
     {
     	int i;
     	for(i=0; i < HTML_A_ATTRIBUTES; i++)
 	    present[i] = (i == HTML_A_HREF);
     }
-    ((CONST char **)value)[HTML_A_HREF] = href;
-    (*targetClass.start_element)(target, HTML_A , present,
-    				 (CONST char **)value, 0);
+    value[HTML_A_HREF] = href;
+    (*targetClass.start_element)(target, HTML_A, present, value, 0);
 }
 
 /*      Start link element
 **      ------------------
 */
-PRIVATE void start_link ARGS2(CONST char *,  href, CONST char *, rev)
+PRIVATE void start_link ARGS2(char *,  href, char *, rev)
 {
     BOOL                present[HTML_LINK_ATTRIBUTES];
-    CONST char*         value[HTML_LINK_ATTRIBUTES];
+    char*         	value[HTML_LINK_ATTRIBUTES];
    
     {
         int i;
         for(i=0; i < HTML_LINK_ATTRIBUTES; i++)
             present[i] = (i == HTML_LINK_HREF || i == HTML_LINK_REV);
     }
-    ((CONST char **)value)[HTML_LINK_HREF] = href;
-    ((CONST char **)value)[HTML_LINK_REV]  = rev;
-    (*targetClass.start_element)(target, HTML_LINK, present,
-				 (CONST char **)value, 0);
+    value[HTML_LINK_HREF] = href;
+    value[HTML_LINK_REV]  = rev;
+    (*targetClass.start_element)(target, HTML_LINK, present, value, 0);
 }
 
 /*      Start list element
@@ -667,17 +665,16 @@ PRIVATE void start_link ARGS2(CONST char *,  href, CONST char *, rev)
 PRIVATE void start_list ARGS1(int, seqnum)
 {
     BOOL                present[HTML_OL_ATTRIBUTES];
-    CONST char*         value[HTML_OL_ATTRIBUTES];
+    char*         	value[HTML_OL_ATTRIBUTES];
     char SeqNum[20];
     int i;
    
     for (i = 0; i < HTML_OL_ATTRIBUTES; i++)
         present[i] = (i == HTML_OL_SEQNUM || i == HTML_OL_START);
     sprintf(SeqNum, "%d", seqnum);
-    ((CONST char **)value)[HTML_OL_SEQNUM] = SeqNum;
-    ((CONST char **)value)[HTML_OL_START]  = SeqNum;
-    (*targetClass.start_element)(target, HTML_OL , present,
-				 (CONST char **)value, 0);
+    value[HTML_OL_SEQNUM] = SeqNum;
+    value[HTML_OL_START]  = SeqNum;
+    (*targetClass.start_element)(target, HTML_OL, present, value, 0);
 }
 
 /*	Paste in an Anchor

@@ -14,12 +14,12 @@ VPATH		= $(srcdir)
 
 WWWINC		= WWW/Library/Implementation
 SITE_DEFS	= # FIXME: set in parent makefile
-MCFLAGS		= # FIXME: set in parent makefile
 
 CC		= @CC@
 CPP		= @CPP@
-CPPOPTS		= @DEFS@ @CPPFLAGS@ -I.. -I../.. -I../../$(WWWINC) $(MCFLAGS)
-CFLAGS		= $(CPPOPTS) @CFLAGS@
+CFLAGS		= @CFLAGS@
+CPP_OPTS	= @DEFS@ @CPPFLAGS@ -I.. -I../.. -I../../$(WWWINC) $(SITE_DEFS)
+CC_OPTS		= $(CPP_OPTS) $(CFLAGS)
 
 #
 # This file contains the font map for the default (hardware) font
@@ -30,8 +30,6 @@ FONTMAP_INC = iso01_uni.h# default, if not set by recursive call
 ### #include $(TOPDIR)/Rules.make ???
 
 ### fastdep: $(FONTMAP_INC)
-
-### MCFLAGS=-g -DUNIX -DLINUX -DNO_KEYPAD -DNO_TTYTYPE -DEXP_CHARTRANS -I.. -I../../WWW/Library/Implementation -I../..
 
 CHRTR=
 
@@ -65,17 +63,17 @@ default: $(FONTMAP_INC)
 tables: $(TABLES)
 
 makeuctb: makeuctb.c UCkd.h
-	$(CC) $(CFLAGS) -o makeuctb makeuctb.c
+	$(CC) $(CC_OPTS) -o makeuctb makeuctb.c
 
 .SUFFIXES : .tbl .i
 
 .c.o:
-@SHOW_CC@
-	@ECHO_CC@$(CC) $(CPPOPTS) $(CFLAGS) -c $(srcdir)/$*.c
+@RULE_CC@
+	@ECHO_CC@$(CC) $(CC_OPTS) -c $(srcdir)/$*.c
 
 .c.i:
-@SHOW_CC@
-	@ECHO_CC@$(CPP) -C $(CPPOPTS) $*.c >$@
+@RULE_CC@
+	@ECHO_CC@$(CPP) -C $(CPP_OPTS) $*.c >$@
 
 .tbl.h:
 	./makeuctb $*.tbl > $@
@@ -115,6 +113,6 @@ distclean: clean
 	rm -f core *.bak *.sav *~ *.h_old
 
 depend :
-	makedepend -fmakefile -- $(CFLAGS) -- $(C_SRC)
+	makedepend -fmakefile -- $(CPP_OPTS) -- $(C_SRC)
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.

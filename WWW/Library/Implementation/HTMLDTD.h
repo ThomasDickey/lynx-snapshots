@@ -962,8 +962,8 @@ Start anchor element
  */
 extern void HTStartAnchor PARAMS((
                 HTStructured * targetstream,
-                CONST char *    name,
-                CONST char *    href));
+                char *    	name,
+                char *    	href));
 
 /*
 
