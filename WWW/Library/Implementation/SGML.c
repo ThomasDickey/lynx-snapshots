@@ -1106,7 +1106,7 @@ PRIVATE void SGML_character ARGS2(
     CONST char * EntityName;
     char * p;
     BOOLEAN chk;	/* Helps (?) walk through all the else ifs... */
-    UCode_t clong, uck; /* Enough bits for UCS4 ... */
+    UCode_t clong, uck = 0; /* Enough bits for UCS4 ... */
     char c;
     char saved_char_in = '\0';
 

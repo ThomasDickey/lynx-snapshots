@@ -466,17 +466,14 @@ PRIVATE void LYsetWAttr ARGS1(WINDOW *, win)
 	int code = 0;
 	int attr = A_NORMAL;
 	int offs = 1;
-
-#ifdef UNIX
 	static int NoColorVideo = -1;
 
+#ifdef UNIX
 	if (NoColorVideo < 0) {
 		NoColorVideo = tigetnum("ncv");
 	}
 	if (NoColorVideo < 0)
 		NoColorVideo = 0;
-#else /* PDCurses */
-	static int NoColorVideo = 0;
 #endif /* UNIX */
 
 	if (Current_Attr & A_BOLD)
@@ -650,9 +647,9 @@ PUBLIC void start_curses NOARGS
 
     if (slinit == 0) {
 	SLtt_get_terminfo();
-#ifdef __DJGPP__
+#if defined(__DJGPP__) && !defined(DJGPP_KEYHANDLER) 
 	SLkp_init ();
-#endif /* __DJGPP__ */
+#endif /* __DJGPP__ && !DJGPP_KEYHANDLER */ 
 
 #ifdef UNIX
 #if SLANG_VERSION >= 9935
@@ -724,9 +721,7 @@ PUBLIC void start_curses NOARGS
     scrollok(0,0);
     SLsmg_Backspace_Moves = 1;
 #ifndef VMS
-#if defined(_WINDOWS) || defined(__DJGPP__)
-    /* SLgetkey_map_to_ansi (1); -- FIXME: is this needed? */
-#else
+#if !defined(_WINDOWS) && !defined(__DJGPP__) 
     SLtty_set_suspend_state(1);
 #endif /* !_WINDOWS */
 #ifdef SIGTSTP

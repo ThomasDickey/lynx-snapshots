@@ -15,6 +15,11 @@
 #include <LYCharSets.h>
 #include <HTString.h>
 
+#ifdef DJGPP_KEYHANDLER
+#include <pc.h>
+#include <keys.h>
+#endif /* DJGPP_KEYHANDLER */
+
 #include <ctype.h>
 
 #include <LYLeaks.h>
@@ -233,7 +238,11 @@ PUBLIC int LYmbcsstrlen ARGS2(
 #define GetChar() ttgetc()
 #else
 #ifdef __DJGPP__
+#ifdef DJGPP_KEYHANDLER
+#define GetChar getxkey
+#else
 #define GetChar SLkp_getkey
+#endif /* DJGPP_KEYHANDLER */
 #else
 #define GetChar (int)SLang_getkey
 #endif /* __DJGPP__ */
@@ -783,7 +792,31 @@ re_read:
 	    d = GetChar();
     }
 #if defined(__DJGPP__) && defined(USE_SLANG)
-    else { /* SLang keypad interface */
+#ifdef DJGPP_KEYHANDLER
+    else { /* DJGPP keypad interface (see file "keys.h" for definitions) */
+	switch (c) {
+	    case K_Up:		c = UPARROW;	break; /* up arrow */
+	    case K_EUp: 	c = UPARROW;	break; /* up arrow */
+	    case K_Down:	c = DNARROW;	break; /* down arrow */
+	    case K_EDown:	c = DNARROW;	break; /* down arrow */
+	    case K_Right:	c = RTARROW;	break; /* right arrow */
+	    case K_ERight:	c = RTARROW;	break; /* right arrow */
+	    case K_Left:	c = LTARROW;	break; /* left arrow */
+	    case K_ELeft:	c = LTARROW;	break; /* left arrow */
+	    case K_PageDown:	c = PGDOWN;	break; /* page down */
+	    case K_EPageDown:	c = PGDOWN;	break; /* page down */
+	    case K_PageUp:	c = PGUP;	break; /* page up */
+	    case K_EPageUp:	c = PGUP;	break; /* page up */
+	    case K_Home:	c = HOME;	break; /* HOME */
+	    case K_EHome:	c = HOME;	break; /* HOME */
+	    case K_End: 	c = END_KEY;	break; /* END */
+	    case K_EEnd:	c = END_KEY;	break; /* END */
+	    case K_F1:		c = F1; 	break; /* F1 */
+	    case K_Alt_X:	c = 4;		break; /* alt x */
+	}
+    }
+#else
+    else { /* SLang keypad interface (see file "slang.h" for definitions) */
 	switch (c) {
 	case SL_KEY_UP:
 	    c = UPARROW;
@@ -824,7 +857,8 @@ re_read:
 	    break;
 	}
     }
-#endif
+#endif /* DJGPP_KEYHANDLER */
+#endif /* __DJGPP__ && USE_SLANG */
 #if HAVE_KEYPAD
     else {
 	/*
@@ -1973,6 +2007,7 @@ PUBLIC char * SNACat ARGS3(
     }
     return *dest;
 }
+
 
 /*
 **   UPPER8 ?

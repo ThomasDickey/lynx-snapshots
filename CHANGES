@@ -1,6 +1,12 @@
 Changes since Lynx 2.8 release
 ================================================================================
 
+1998-05-14 (2.8.1dev.11)
+* fixes for function-keys with slang configuration on DOS (patch by DK).
+* correct missing '&' in command-line options entry for syslog (reported by
+  HN) - TD
+* correct initial value for NoColorvideo with PDCurses, from my error in
+  1998-05-10 integration (reported by DK) - TD
 1998-05-10 (2.8.1dev.10)
 * eliminate assignment to stderr for trace-file by making tfp a function. - TD
 * added John Davis' keymaps/keysym patch (it really should be integrated with

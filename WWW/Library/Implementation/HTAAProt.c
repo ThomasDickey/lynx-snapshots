@@ -129,7 +129,7 @@ PUBLIC int HTAA_getUid NOARGS
 			    "HTAA_getUid: getpwuid",
 			    current_prot->uid_name,
 			    pw->pw_name, pw->pw_passwd,
-			    pw->pw_uid, pw->pw_gid);
+			    (int) pw->pw_uid, (int) pw->pw_gid);
 		return pw->pw_uid;	
 	    }
 	}
@@ -139,7 +139,7 @@ PUBLIC int HTAA_getUid NOARGS
 			    "HTAA_getUid: getpwnam",
 			    current_prot->uid_name, "returned",
 			    pw->pw_name, pw->pw_passwd,
-			    pw->pw_uid, pw->pw_gid);
+			    (int) pw->pw_uid, (int) pw->pw_gid);
 		return pw->pw_uid;
 	    }
 	}
@@ -149,7 +149,7 @@ PUBLIC int HTAA_getUid NOARGS
     */
     if (NULL != (pw = getpwnam("nobody"))) {
 	CTRACE(tfp, "HTAA_getUid: Uid for `nobody' is %d\n",
-		    pw->pw_uid);
+		    (int) pw->pw_uid);
 	return pw->pw_uid;
     }
     /*
@@ -179,7 +179,7 @@ PUBLIC int HTAA_getGid NOARGS
 		CTRACE(tfp, "%s(%s) returned (%s:%s:%d:...)\n",
 			    "HTAA_getGid: getgrgid",
 			    current_prot->gid_name,
-			    gr->gr_name, gr->gr_passwd, gr->gr_gid);
+			    gr->gr_name, (int) gr->gr_passwd, (int) gr->gr_gid);
 #endif
 		return gr->gr_gid;
 	    }
@@ -190,7 +190,7 @@ PUBLIC int HTAA_getGid NOARGS
 		CTRACE(tfp, "%s(\"%s\") returned (%s:%s:%d:...)\n",
 			    "HTAA_getGid: getgrnam",
 			    current_prot->gid_name,
-			    gr->gr_name, gr->gr_passwd, gr->gr_gid);
+			    gr->gr_name, (int) gr->gr_passwd, (int) gr->gr_gid);
 #endif
 		return gr->gr_gid;
 	    }
@@ -201,7 +201,7 @@ PUBLIC int HTAA_getGid NOARGS
     */
     if (NULL != (gr = getgrnam("nogroup"))) {
 	CTRACE(tfp, "HTAA_getGid: Gid for `nogroup' is %d\n",
-		    gr->gr_gid);
+		    (int) gr->gr_gid);
 	return gr->gr_gid;
     }
     /*
