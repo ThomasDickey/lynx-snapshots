@@ -1108,7 +1108,7 @@ PUBLIC BOOLEAN setup ARGS1(
 	printf("\n\n  %s\n\n", gettext("Your Terminal type is unknown!"));
 	printf("  %s [vt100] ", gettext("Enter a terminal type:"));
 
-	if ((buffer = LYSafeGets(buffer, stdin)) != 0)
+	if (LYSafeGets(&buffer, stdin) != 0)
 	    if ((s = strchr(buffer, '\n')) != NULL)
 		*s = '\0';
 

@@ -1976,7 +1976,7 @@ PUBLIC void LYLoadCookies ARGS1 (
     CTRACE(tfp, "LYLoadCookies: reading cookies from %s\n", cookie_file);
 
     number_of_file_cookies = 0;
-    while ((buf = LYSafeGets(buf, cookie_handle)) != 0) {
+    while (LYSafeGets(&buf, cookie_handle) != 0) {
 	cookie *moo;
 	unsigned i = 0;
 	int tok_loop;
@@ -1993,7 +1993,7 @@ PUBLIC void LYLoadCookies ARGS1 (
 	 * cookie.
 	 */
 
-	while(buf[i] != '\n' && i < sizeof(buf)) {
+	while(buf[i] != '\n' && buf[i] != 0) {
 	    i++;
 	}
 	buf[i] = '\0';

@@ -56,7 +56,7 @@ PUBLIC void read_rc NOPARAMS
     /*
      *  Process the entries.
      */
-    while ((line_buffer = LYSafeGets(line_buffer, fp)) != NULL) {
+    while (LYSafeGets(&line_buffer, fp) != NULL) {
 	/*
 	 *  Remove any trailing white space.
 	 */

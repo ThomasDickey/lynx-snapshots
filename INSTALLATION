@@ -2,78 +2,71 @@
                       Lynx Installation Guide
 
 This file describes how to compile and install Lynx.  A description of Lynx
-can be found in the README file.  Lynx has been ported to UN*X, VMS,
-Win32 and 386DOS.  The procedures for compiling these ports are quite
-divergent and are detailed respectively in Sections II, III, IV and V.
-General installation, problem solving and environment variables are covered
-in Sections VI and VII.  There is also a PROBLEMS file in the same directory
-as this INSTALLATION: it contains advice for a lot of special problems
-people have encountered, esp for particular machines & operating systems.
+can be found in the README file.  Lynx has been ported to UN*X, VMS, Win32
+and 386DOS.  The procedures for compiling these ports are quite divergent
+and are detailed respectively in Sections II, III, IV and V.  General
+installation, problem solving and environment variables are covered in
+Sections VI and VII.  There is also a PROBLEMS file in the same directory
+as INSTALLATION which contains advice for special problems people have
+encountered, especially for particular machines and operating systems.
+
+If you still have difficulties, send an e-mail message to the Lynx-Dev mailing
+list (see the README file).  Try to include information about your system,
+the name and version of your compiler, which curses library you are using
+and the compile-time errors.  Be sure to say what version and image-number
+of Lynx you are trying to build (alternately the top date of the CHANGES file).
 
 If you don't understand what one of the defines means, try the README.defines
 and *.announce files in the docs subdirectory.  The docs/CHANGES* files record
 the entire development history of Lynx and are an invaluable resource for
 understanding how Lynx should perform.
 
-If you still have difficulties, send an e-mail message to the Lynx-Dev mailing
-list lynx-dev@sig.net (see the README file).  Try to include information about
-your system, the name and version of your compiler, which curses library you
-are using and the compile-time errors.  Be sure to say what version and
-image-number of Lynx you are trying to build (alternately the top date of the
-CHANGES file).
-
-First, you must configure Lynx for your system regardless of the port you will
-be using.  Follow the instructions given immediately below to configure for
-your system, and then go to the respective section concerning the port you wish
-to compile.
+First, you must configure Lynx for your system regardless of the port you use.
+Follow the instructions given immediately below to configure for your system,
+and then go to the respective section concerning the port you wish to compile.
 
 
 I. General configuration instructions (all ports).
 
-Step 1. (define compile-time variables -- See the userdefs.h file.)
+Step 1. (define compile-time variables  -- See the userdefs.h file.)
     There are a few variables that MUST be defined, or Lynx will not build.
     There are a few more that you will probably want to change.  The variables
     that must be changed are marked as such in the userdefs.h file.  Just edit
-    this file, and the changes should be straight forward.  Many of the
-    variables in "userdefs.h" are now configurable in the lynx.cfg file, so
-    you may set them at run-time if you wish.  If you compile using auto-
-    configure, you would not absolutely need to edit "userdefs.h".  Check
-    LYMessages_en.h for tailoring the Lynx statusline prompts, messages and
-    warnings to the requirements of your site.  Lynx implements Native
-    Language Support.  Read "ABOUT-NLS" if you are interested in building an
-    international version of Lynx.
+    this file, and the changes should be straight forward.  If you compile
+    using autoconfigure, you can set most defines with option switches and do
+    not absolutely have to edit userdefs.h.  Many of the variables are now
+    configurable in the lynx.cfg file, so you may set them at run-time if you
+    wish.  Lynx implements Native Language Support.  Read "ABOUT-NLS" if you
+    want to build an international version of Lynx or tailor the statusline
+    prompts, messages and warnings to the requirements of your site.
 
 Step 2. (define run-time variables -- See the lynx.cfg file for details.)
     Set up local printers, downloaders, assumed character set, key mapping,
     and colors in the lynx.cfg file.  Please read "lynx.cfg" thoroughly as
     many of the features of Lynx, and how to use them, are explained.  Also
     see the example mime.types, mailcap and jumps files in the samples
-    subdirectory.  Lynx must be able to find the lynx.cfg file at start-up.
+    subdirectory.  Lynx MUST be able to find the lynx.cfg file at start-up.
     The location of the lynx.cfg file may be compiled in with the LYNX_CFG_FILE
     defined in userdefs.h (or with the configure option explained in the Unix
     section below), specified with an environment variable, LYNX_CFG, or
     specified with the "-cfg" command line option.
 
-Step 3. (You may skip this step if you only use English and are not
-    interested in any special characters, or if your display and local files
-    will all use the ISO-8859-1 "ISO Latin 1" Western European character set.)
-    People who will be running Lynx in an environment with different and
-    incompatible character sets should configure CHARACTER_SET (the Display
-    character set) and ASSUME_LOCAL_CHARSET to work correctly for them before
-    creating bookmark files et cetera.  Please read "lynx.cfg" for detailed
-    instructions.  Additional character sets and their properties may be
-    defined with tables in the src/chrtrans directory, see the README.* files
-    therein.
+Step 3. (You may skip this step if you are not interested in any special
+    characters and any local files or WWW pages you will view all use the
+    ISO-8859-1 "ISO Latin 1" Western European character set.) People who
+    will be running Lynx in an environment with different and incompatible
+    character sets should configure CHARACTER_SET (the Display character set)
+    and ASSUME_LOCAL_CHARSET to work correctly for them before creating
+    bookmark files et cetera.  Read "lynx.cfg" for detailed instructions.
+    Additional character sets and their properties may be defined with tables
+    in the src/chrtrans directory, see the README.* files therein.
 
 Step 4. (optional -- news for UNIX and VMS)
     Set NNTPSERVER in "lynx.cfg" to your site's NNTP server, or set the
-    environment variable externally.  (See "VII. Setting environment
-    variables before running Lynx" for help on setting this and other
-    environment variables which affect Lynx.)  For news posting ability
-    to be enabled in Lynx, in userdefs.h (and optionally in lynx.cfg) the
-    NEWS_POSTING symbol must be defined to TRUE.  Also define LYNX_SIG_FILE
-    in userdefs.h or lynx.cfg so that it points to users' signature files
-    for appending to posted messages.
+    environment variable externally.  For news posting ability to be enabled
+    in Lynx, the NEWS_POSTING symbol must be defined to TRUE in userdefs.h or
+    lynx.cfg.  Also define LYNX_SIG_FILE in userdefs.h or lynx.cfg so that it
+    points to users' signature files for appending to posted messages.
 
 Step 5. (Anonymous account -- VERY IMPORTANT!!!!! -- )
     If you are building Lynx for your personal use only you may skip this
@@ -83,10 +76,10 @@ Step 5. (Anonymous account -- VERY IMPORTANT!!!!! -- )
     files on your machine!  ALSO NOTE that many implementations of telnetd
     allow passing of environment variables, which might be used by
     unscrupulous people to modify the environment in anonymous accounts.
-    When making Lynx and Web access publicly available via anonymous
-    accounts intended to run Lynx captively, be sure the wrapper uses the
-    -cfg switch to specify the startfile, rather than relying on the
-    LYNX_CFG, LYNX_CFG_FILE, or WWW_HOME variables.
+    When making Web access publicly available via anonymous accounts intended
+    to run Lynx captively, be sure the wrapper uses the -cfg and -homepage
+    switches to specify the configuration and start files, rather than relying
+    on the LYNX_CFG, LYNX_CFG_FILE, or WWW_HOME variables.
 
 
 II. Compile instructions -- UNIX
@@ -130,12 +123,11 @@ II. Compile instructions -- UNIX
 
     Note that while lynx will build with a variety of versions of curses and
     ncurses, some will be less satisfactory.  Versions of ncurses before 1.9.9g
-    will not render color properly (some of the interfaces did not match the
-    standard).  Some other versions of curses do not display color at all.
-    Likewise, lynx may not build with very old versions of slang, e.g., before
-    0.99-38 because slang's interfaces change periodically.
+    will not render color properly.  Some other versions of curses do not
+    display color at all.  Likewise, lynx may not build with old versions of
+    slang, e.g., before 0.99-38, because slang's interfaces change periodically.
 
-    See also
+    Note compiler/system specific problems below.  See also:
 	http://www.clark.net/pub/dickey/ncurses/ncurses.faq.html
 
 1b. Platforms.  Configure should work properly on any Unix-style system.
@@ -155,18 +147,13 @@ II. Compile instructions -- UNIX
 	SunOS 4.1 (cc w/ curses, gcc w/ ncurses & slang)
 	OS390 and BS2000.
 
-    NOTES:
+    NOTE:  SunOS and HP-UX come with a bundled K&R compiler, which is only
+    useful for compiling with the bundled curses.  Both ncurses and slang
+    require a compiler that recognizes prototypes.
 
-      + SunOS and HP-UX come with a bundled K&R compiler, which is only useful
-	for compiling with the bundled curses.  Both ncurses and slang require
-	a compiler that recognizes prototypes.
-
-      + ncurses 4.2 builds/works on OS/2; however you should get at least the
-	post-4.2 patches from October 1998, since that supports mouse and
-	screen sizes other than 25x80.
-
-	    http://www.clark.net/pub/dickey/ncurses/ncurses.faq.html
-	    ftp://ftp.clark.net/pub/dickey/ncurses/
+    NOTE:  Ncurses 4.2 builds/works on OS/2; however you should get at least
+    the post-4.2 patches from October 1998, since that supports mouse and
+    screen sizes other than 25x80.  (ftp://ftp.clark.net/pub/dickey/ncurses/)
 
 1c. Options
     To get a list of the configure script's options, type "./configure --help".
@@ -311,7 +298,7 @@ II. Compile instructions -- UNIX
   	Use this option to compile-in support for debugging.
 
   --enable-default-colors		(define USE_DEFAULT_COLORS)
-  	enable use of default-color background (ncurses/slang).  Either
+  	Enable use of default-color background (ncurses/slang).  Either
 	configuration supports the use of 'default' for colors even without
 	this option.
 
@@ -417,15 +404,14 @@ II. Compile instructions -- UNIX
   --with-socks5				(define USE_SOCKS5, SOCKS)
 	Use this option to configure with the socks5 library.
 
-	If you make a SOCKSified lynx, note that you may have problems
-	accessing FTP servers.  Also, instead of SOCKSifying lynx for use
-	behind a firewall, you are better off if you make it normally, and set
-	it up to use a proxy server.  You can SOCKSify the proxy server, and it
-	will handle all clients, not just Lynx (see the INSTALLATION file in
-	this distribution).  If your SOCKS server was compiled to use the short
-	version of Rbind, also include -DSHORTENED_RBIND in your SITE_LYDEFS
-	and SITE_DEFS.  If you do SOCKSify lynx, you can turn off SOCKS proxy
-	usage via a -nosocks command line switch.
+	If you make a SOCKSified lynx, you may have trouble accessing FTP
+        servers.  Also, instead of SOCKSifying lynx for use behind a firewall,
+        you are better off if you make it normally, and set it up to use a
+        proxy server.  You can SOCKSify the proxy server, and it will handle
+        all clients, not just Lynx.  If your SOCKS server was compiled to use
+        the short version of Rbind, also include -DSHORTENED_RBIND in your
+        SITE_LYDEFS and SITE_DEFS.  If you do SOCKSify lynx, you can turn off
+        SOCKS proxy usage via a -nosocks command line switch.
 
   --with-zlib				(define USE_ZLIB)
 	Use zlib for decompression of some gzip files.
@@ -473,8 +459,6 @@ II. Compile instructions -- UNIX
 
     I personally use the following csh shell script to set environment
     variables and configure options rather than type them each time.
-	setenv RESOLVLIB -lbind
-
 	#!/bin/csh -f
 	setenv CPPFLAGS "-I$HOME/slang -I$HOME/.usr/include"
 	setenv LIBS "-L$HOME/.slang/lib -L$HOME/.usr/lib"
@@ -482,26 +466,16 @@ II. Compile instructions -- UNIX
 		--mandir=$HOME/.usr/man --libdir=$HOME/.usr/lib \
 		--with-screen=slang --with-zlib
 
-    The syntax for setting environment variables depends upon your shell.  I
-    use the libbind.a resolver library, not libresolv.a.  Setting RESOLVLIB to
-    -lbind defines this environment variable for `make', and thus must be set
-    in the same shell that `make' will be run.  CPPFLAGS in this example
-    defines the full path to the slang and zlib header files, which are not
-    kept in standard directories.  Likewise, LIBS defines the nonstandard
-    locations of libslang.a and libz.a.  Setting the option --bindir tells
-    the configure script where I want to install the lynx binary; setting
-    --mandir tells it where to put the lynx.1 man page, and setting --libdir
-    tells it (while at the same time defining LYNX_CFG_FILE) where to put the
-    configuration file "lynx.cfg", when I type "make install".  The
-    --with-screen=slang and --with-zlib options are explained above.
+    CPPFLAGS in this example defines the full path to the slang and zlib header
+    files, which are not kept in standard directories.  Likewise, LIBS defines
+    the nonstandard locations of libslang.a and libz.a.  Setting the option
+    --bindir tells the configure script where I want to install the lynx
+    binary; setting --mandir tells it where to put the lynx.1 man page, and
+    setting --libdir tells it (while at the same time defining LYNX_CFG_FILE)
+    where to put the configuration file "lynx.cfg", when I type "make install".
+    The --with-screen=slang and --with-zlib options are explained above.
 
-2. Manual compile
-    If auto-configure does not work for you, or you prefer to compile
-    Lynx manually, "docs/Makefile.old" will serve as a template for the
-    top-level Makefile, and instructions on how to compile are given in
-    "docs/INSTALLATION.old".
-
-3. Wais support (optional)
+2. Wais support (optional)
     To add direct WAIS support, get the freeWAIS distribution from
     "ftp://ftp.cnidr.org/pub/NIDR.tools/freewais", and compile it.  The compile
     process will create the libraries you will need, wais.a and client.a.  Edit
@@ -728,8 +702,7 @@ V. Compile instructions -- 386 DOS
   	setcbrk(setting);
   # else
 
-    If you have trouble applying the patch, we recommend that you use the
-    "patch" program,
+    If you have trouble applying the patch, try using the "patch" program,
     ("http://www.simtel.net/pub/simtelnet/gnu/djgpp/v2gnu/pat25b.zip").  The
     WATTCP TCPLIB sources must also be patched prior to compilation.  See
     "http://www.flora.org/lynx-dev/html/month1197/msg00403.html".
@@ -793,7 +766,6 @@ V. Compile instructions -- 386 DOS
     "ftp://ftp.agate.net/users/01935/internet/dosppp06.zip";
     "ftp://ftp.klos.com/demo/pppshare.exe".)
 
-
     File access looks like this:
 
     file:///c:/
@@ -835,9 +807,10 @@ V. Compile instructions -- 386 DOS
 
 VI. General installation instructions
 
-    Once you have compiled Lynx, test it out on "lynx_help/about_lynx.html".
-    You shouldn't need to install Lynx to test it.  Once you are satisfied
-    that it works, go ahead and install Lynx.  For Unix, type "make install".
+    Once you have compiled Lynx, test it out first on a local file.  Be sure
+    Lynx can find lynx.cfg.  A _sample_ test command line would be:
+    `lynx -cfg=/usr/local/lib/lynx.cfg .`.  Once you are satisfied that
+    Lynx works, go ahead and install it.  For Unix, type "make install".
 
     For VMS, you need to have the executable in a public place, make it
     accessible, define it as a foreign command, and copy lynx.cfg to
@@ -870,22 +843,20 @@ VII. Setting environment variables before running Lynx (optional)
 
 1. All ports
 
-   Lynx Users Guide describes a complete set of environment variables
-   used by Lynx.  This should be checked later along with reading lynx.cfg
-   after you have installed Lynx.
+   The Lynx Users Guide describes all of the environment variables used by
+   Lynx.  This should be checked later along with reading lynx.cfg after you
+   have installed Lynx.
 
 2. Win32 (95/98/NT) and 386 DOS
-   These ports cannot start before setting certain environment variables
 
-   (adapted from "readme.txt" by Wayne Buttles and "readme.dos" by Doug Kaufman)
-
+    These ports cannot start before setting certain environment variables.
     Here are some environment variables that should be set, usually in a
     batch file that runs the lynx executable.  Make sure that you have enough
     room left in your environment.  You may need to change your "SHELL="
     setting in config.sys.  In addition, lynx looks for a "SHELL" environment
     variable when shelling to DOS.  If  you wish to preserve the environment
     space when shelling, put a line like this in your AUTOEXEC.BAT file also
-    "SET SHELL=C:\COMMAND.COM /E:2048". It should match CONFIG.SYS.
+    "SET SHELL=C:\COMMAND.COM /E:2048".  It should match CONFIG.SYS.
 
     HOME         Where to keep the bookmark file and personal config files.
     TEMP or TMP  Bookmarks are kept here with no HOME.  Temp files here.
@@ -903,10 +874,10 @@ VII. Setting environment variables before running Lynx (optional)
 	set home=d:\win32
 	set temp=d:\tmp
 	set lynx_cfg=d:\win32\lynx.cfg
-      set lynx_save_space=d:\download
+	set lynx_save_space=d:\download
 	d:\win32\lynx.exe %1 %2 %3 %4 %5
 
-    In lynx_386, a typical batch file might look like:
+    For lynx_386, a typical batch file might look like:
 
 	@echo off
 	set HOME=f:/lynx2-8
@@ -915,14 +886,15 @@ VII. Setting environment variables before running Lynx (optional)
 	set WATTCP.CFG=%HOME%
 	f:\lynx2-8\lynx %1 %2 %3 %4 %5 %6 %7 %8 %9
 
-    You will also need to make sure that the WATTCP.CFG file has the
-    correct information for IP number, Gateway, Netmask, and Domain Name
-    Server.  This can also be automated in the batch file.
+    You need to make sure that the WATTCP.CFG file has the correct information
+    for IP number, Gateway, Netmask, and Domain Name Server.  This can also be
+    automated in the batch file.
 
+    Adapted from "readme.txt" by Wayne Buttles and "readme.dos" by Doug Kaufman.
 
 VIII. Acknowledgment
 
    Thanks to the many volunteers who offered suggestions for making this
    installation manual as accurate and complete as possible.
 
--- 1998/01/22 - H. Nelson <lynx-admin@irm.nara.kindai.ac.jp>
+-- 1999/04/24 - H. Nelson <lynx-admin@irm.nara.kindai.ac.jp>

@@ -53,7 +53,7 @@ PUBLIC char * get_bookmark_filename ARGS1(
 	char **,	URL)
 {
     static char filename_buffer[LY_MAXPATH];
-    char *string_buffer;
+    char *string_buffer = 0;
     FILE *fp;
     int MBM_tmp;
 
@@ -107,7 +107,7 @@ success:
      *	We now have the file open.
      *	Check if it is a mosaic hotlist.
      */
-    if ((string_buffer = LYSafeGets(NULL, fp)) != 0
+    if (LYSafeGets(&string_buffer, fp) != 0
      && !strncmp(string_buffer, "ncsa-xmosaic-hotlist-format-1", 29)) {
 	char *newname;
 	/*
@@ -157,7 +157,7 @@ PRIVATE char * convert_mosaic_bookmark_file ARGS1(
      remove bookmark command, it is usually the 'R' key but may have\n\
      been remapped by you or your system administrator."));
 
-    while ((buf = LYSafeGets(buf, fp)) != NULL) {
+    while ((LYSafeGets(&buf, fp)) != NULL) {
 	if(line >= 0) {
 	    endline = &buf[strlen(buf)-1];
 	    if(*endline == '\n')
@@ -466,7 +466,7 @@ PUBLIC void remove_bookmark_link ARGS2(
     if (is_mosaic_hotlist) {
 	int del_line = cur*2;  /* two lines per entry */
 	n = -3;  /* skip past cookie and name lines */
-	while ((buf = LYSafeGets(buf, fp)) != NULL) {
+	while (LYSafeGets(&buf, fp) != NULL) {
 	    n++;
 	    if (n == del_line || n == del_line+1)
 		continue;  /* remove two lines */
@@ -480,7 +480,7 @@ PUBLIC void remove_bookmark_link ARGS2(
 	int seen;
 
 	n = -1;
-	while ((buf = LYSafeGets(buf, fp)) != NULL) {
+	while (LYSafeGets(&buf, fp) != NULL) {
 	    retain = TRUE;
 	    seen = 0;
 	    cp = buf;
@@ -563,6 +563,7 @@ PUBLIC void remove_bookmark_link ARGS2(
 #endif /* UNIX */
 
 failure:
+    FREE(buf);
     HTAlert(BOOKMARK_DEL_FAILED);
     LYCloseTempFP(nfp);
     if (fp != NULL)

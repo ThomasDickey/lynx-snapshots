@@ -1,6 +1,21 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+1999-04-27 (2.8.2dev.25)
+* updates to INSTALLATION -HN
+* undo some redundant dev23 changes, in particular the absence of first
+  PSRC_TEST responsible for a wrong line breaking in -prettysrc mode (try "lynx
+  .  -prettysrc" and press "\" to see wrapping in dev23-24).  Also fix Visited
+  Links for internal pages (my fault) -LP
+* restore links in lynx-dev.html to original form, to make redirection work
+  properly -TD
+* add to MAKEFILE.W32 (untested - suggested by LP) -TD
+  * definitions for DISP_PARTIAL;SOURCE_CACHE;USE_PSRC
+  * lypretty.obj to the list of objects.
+* remove CF_MAKE_INCLUDE from configure script, since it is not needed -TD
+* merge WWW/Library/Implementation/CommonMakefile into WWW/.../makefile.in -TD
+* corrections/simplification of LYSafeGets(), and remove sizeof(buf) from
+  related code in LYCookie.c (analysis by KW) -TD
 1999-04-23 (2.8.2dev.24)
 * added overlooked WWW/Library/Implementation/makefile.in -TD
 1999-04-23 (2.8.2dev.23)

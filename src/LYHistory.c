@@ -68,7 +68,10 @@ PUBLIC void LYAddVisitedLink ARGS1(
      *	or list files. - FM
      */
     if (doc->post_data || doc->isHEAD || doc->bookmark ||
-       (!strncmp(doc->address, "file://localhost/", 17) && (
+	(/* special url or a temp file */
+	 (!strncmp(doc->address, "LYNX", 4) ||
+	  !strncmp(doc->address, "file://localhost/", 17))
+	 && (
 	!strcmp((doc->title ? doc->title : ""), HISTORY_PAGE_TITLE) ||
 	!strcmp((doc->title ? doc->title : ""), PRINT_OPTIONS_TITLE) ||
 	!strcmp((doc->title ? doc->title : ""), DOWNLOAD_OPTIONS_TITLE) ||

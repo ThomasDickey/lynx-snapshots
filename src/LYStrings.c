@@ -905,7 +905,7 @@ PRIVATE int read_keymap_file NOARGS
 
     linenum = 0;
     ret = 0;
-    while ((line = LYSafeGets(line, fp)) != 0 && (ret == 0))
+    while (LYSafeGets(&line, fp) != 0 && (ret == 0))
     {
 	char *s = LYSkipBlanks(line);
 
@@ -2947,29 +2947,32 @@ PUBLIC int UPPER8 ARGS2(int,ch1, int,ch2)
 
 /*
  * Replaces 'fgets()' calls into a fixed-size buffer with reads into a buffer
- * that is allocated.  When an EOF or error is found, the buffer is automatically
- * freed.
+ * that is allocated.  When an EOF or error is found, the buffer is freed
+ * automatically.
  */
 PUBLIC char *LYSafeGets ARGS2(
-	char *,	src,
-	FILE *,	fp)
+	char **,	src,
+	FILE *,		fp)
 {
     char buffer[BUFSIZ];
     char *result = 0;
 
     if (src != 0)
-	*src = 0;
+	result = *src;
+    if (result != 0)
+	*result = 0;
 
-    while (fgets(buffer, sizeof(buffer)-1, fp) != 0) {
+    while (fgets(buffer, sizeof(buffer), fp) != 0) {
 	if (*buffer)
-	    result = StrAllocCat(src, buffer);
+	    result = StrAllocCat(result, buffer);
 	if (strchr(buffer, '\n') != 0)
 	    break;
-	if (feof(fp)
-	 || ferror(fp)) {
-	    FREE(src);
-	    break;
-	}
     }
+    if (feof(fp)
+     || ferror(fp)) {
+	FREE(result);
+    }
+    if (src != 0)
+	*src = result;
     return result;
 }
