@@ -152,6 +152,9 @@ PUBLIC int HTioctl ARGS3(
 	set_errno(EBADF);
 	return -1;
     }
+#ifndef UCX$C_IOCTL
+#define UCX$C_IOCTL TCPIP$C_IOCTL
+#endif
     ioctl_desc.opt  = UCX$C_IOCTL;
     ioctl_desc.len  = sizeof(struct comm);
     ioctl_desc.addr = &ioctl_comm;
@@ -1528,6 +1531,8 @@ PRIVATE void get_host_details NOARGS
     */
     if (strchr(hostname,'.') == NULL) {		  /* Not full address */
 	domain_name = getenv("UCX$BIND_DOMAIN");
+	if (domain_name == NULL)
+	    domain_name = getenv("TCPIP$BIND_DOMAIN");
 	if (domain_name != NULL) {
 	    StrAllocCat(hostname, ".");
 	    StrAllocCat(hostname, domain_name);

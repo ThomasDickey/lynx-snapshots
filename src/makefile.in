@@ -64,9 +64,9 @@ LYMail.o HTAlert.o GridText.o LYGetFile.o \
 LYMain.o LYMainLoop.o LYCurses.o LYBookmark.o LYUtils.o \
 LYOptions.o LYReadCFG.o LYSearch.o LYHistory.o \
 LYForms.o LYPrint.o LYrcFile.o LYDownload.o LYNews.o LYKeymap.o \
-HTML.o HTFWriter.o HTInit.o DefaultStyle.o LYLocal.o LYUpload.o \
+HTML.o HTFWriter.o HTInit.o DefaultStyle.o LYUpload.o \
 LYLeaks.o LYexit.o LYJump.o LYList.o LYCgi.o LYTraversal.o \
-LYEditmap.o LYCharSets.o LYCharUtils.o LYMap.o LYCookie.o LYExtern.o \
+LYEditmap.o LYCharSets.o LYCharUtils.o LYMap.o LYCookie.o \
 LYStyle.o LYHash.o LYPrettySrc.o TRSTable.o $(CHARTRANS_OBJS) @LIBOBJS@
 
 C_SRC	= $(OBJS:.o=.c)

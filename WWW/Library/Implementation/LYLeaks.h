@@ -46,7 +46,7 @@
 **			LY_FIND_LEAKS_EXTENDED is defined. - kw
 */
 
-/* Undefine this to get no inproved HTSprintf0/HTSprintf tracking: */
+/* Undefine this to get no improved HTSprintf0/HTSprintf tracking: */
 #define LY_FIND_LEAKS_EXTENDED
 
 /*

@@ -406,7 +406,8 @@ PRIVATE int remote_session ARGS2(char *, acc_method, char *, host)
 	do_system(command);
 	return HT_NO_DATA;		/* Ok - it was done but no data */
     }
-    else if (getenv("UCX$DEVICE") != NULL) {
+    else if (getenv("UCX$DEVICE") != NULL
+          || getenv("TCPIP$DEVICE") != NULL) {
 	if (login_protocol == rlogin) {
 	    HTSprintf0(&command, "RLOGIN%s%s %s %s",
 		user ? "/USERNAME=" : "",

@@ -825,7 +825,10 @@ CF_ARG_ENABLE(externs,
 	[use_externs=yes],
 	[use_externs=no])
 AC_MSG_RESULT($use_externs)
-test $use_externs != ".no" && AC_DEFINE(USE_EXTERNALS)
+if test $use_externs != "no" ; then
+	AC_DEFINE(USE_EXTERNALS)
+	LIBOBJS="$LIBOBJS LYExtern.o"
+fi
 
 AC_MSG_CHECKING(if you want to use setfont support)
 CF_ARG_ENABLE(font-switch,
@@ -1001,6 +1004,7 @@ CF_ARG_DISABLE(dired,
 AC_MSG_RESULT($use_dired)
 
 if test ".$use_dired" != ".no" ; then
+	LIBOBJS="$LIBOBJS LYLocal.o"
 	AC_DEFINE(DIRED_SUPPORT)
 
 	AC_MSG_CHECKING(if you wish to allow extracting from archives via DirEd)

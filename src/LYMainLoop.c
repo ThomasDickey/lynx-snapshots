@@ -2301,7 +2301,8 @@ PRIVATE int handle_LYK_DWIMEDIT ARGS3(
      *  contents, rather than attempting to edit the html source
      *  document.  KED
      */
-    if (links[curdoc.link].type       == WWW_FORM_LINK_TYPE &&
+    if (nlinks > 0  && 
+	links[curdoc.link].type       == WWW_FORM_LINK_TYPE &&
 	links[curdoc.link].form->type == F_TEXTAREA_TYPE)   {
 	*cmd = LYK_EDIT_TEXTAREA;
 	return 2;
@@ -2318,7 +2319,8 @@ PRIVATE int handle_LYK_DWIMEDIT ARGS3(
      *   auto invocation of the editor on the TEXTAREA's contents
      *   via the above if() statement.]
      */
-    if (links[curdoc.link].type       == WWW_FORM_LINK_TYPE &&
+    if (nlinks > 0 &&
+	links[curdoc.link].type       == WWW_FORM_LINK_TYPE &&
 	links[curdoc.link].form->type == F_TEXT_TYPE)       {
 	HTUserMsg (CANNOT_EDIT_FIELD);
 	return 1;

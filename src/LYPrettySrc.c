@@ -6,6 +6,7 @@
 #include <LYHash.h>
 #include <LYPrettySrc.h>
 #include <LYStrings.h>
+#include <LYLeaks.h>
 
  /* This file creates too many "leak detected" entries in Lynx.leaks. */
 #define NO_MEMORY_TRACKING
@@ -87,7 +88,7 @@ typedef enum _html_src_check_state
 PRIVATE void append_close_tag ARGS3(
 	    char*,	  tagname,
 	    HT_tagspec**, head,
-	    HT_tagspec**,  tail)
+	    HT_tagspec**, tail)
 {
     int idx, nattr;
     HTTag* tag;
@@ -103,10 +104,10 @@ PRIVATE void append_close_tag ARGS3(
 	exit_immediately(-1);
     }
 
-    subj = (HT_tagspec*) calloc( sizeof(*subj), 1);
+    subj = typecalloc(HT_tagspec);
     subj->element = idx;
-    subj->present = (BOOL*)calloc( nattr*sizeof (BOOL), 1);
-    subj->value = (char**)calloc( nattr*sizeof (char*), 1);
+    subj->present = typecallocn(BOOL, nattr);
+    subj->value = typecallocn(char *, nattr);
     subj->start = FALSE;
 #ifdef USE_COLOR_STYLE
     subj->class_name = NULL;
@@ -125,7 +126,7 @@ PRIVATE void append_open_tag ARGS4(
 	    char*,	  tagname,
 	    char*,	  classname GCC_UNUSED,
 	    HT_tagspec**, head,
-	    HT_tagspec**,  tail)
+	    HT_tagspec**, tail)
 {
     HT_tagspec* subj;
     HTTag* tag;
@@ -137,7 +138,7 @@ PRIVATE void append_open_tag ARGS4(
     subj = *tail;
     subj->start = TRUE;
 
-    tag = HTML_dtd.tags+subj->element;
+    tag = HTML_dtd.tags + subj->element;
 
 #ifdef USE_COLOR_STYLE
     hcode = hash_code_lowercase_on_fly(tagname);
@@ -180,7 +181,7 @@ PUBLIC int html_src_parse_tagspec ARGS4(
     char stop = FALSE, after_excl = FALSE;
     html_src_check_state state = HTSRC_CK_normal;
     HT_tagspec* head = NULL, *tail = NULL;
-    HT_tagspec** slot = ( isstart ? lexeme_start : lexeme_end ) +lexeme;
+    HT_tagspec** slot = ( isstart ? lexeme_start : lexeme_end ) + lexeme;
 
     while (!stop) {
 	switch (state) {
@@ -289,10 +290,14 @@ PUBLIC void html_src_clean_item ARGS1(
 	HTlexeme, l)
 {
     int i;
+
     if (HTL_tagspecs[l])
 	FREE(HTL_tagspecs[l]);
     for(i = 0; i < 2; ++i) {
-	HT_tagspec* cur,** pts = ( i ? lexeme_start : lexeme_end)+l,*ts = *pts;
+	HT_tagspec*	cur;
+	HT_tagspec**	pts = ( i ?  lexeme_start :  lexeme_end) + l;
+	HT_tagspec*	ts = *pts;
+
 	*pts = NULL;
 	while (ts) {
 	    FREE(ts->present);
