@@ -473,7 +473,7 @@ PUBLIC BOOL HTConfirmCookie ARGS4(
 	CONST char *,	value)
 {
     domain_entry *de;
-    int ch, namelen, valuelen, space_free;
+    int ch;
 
     if ((de = (domain_entry *)dp) == NULL)
 	return FALSE;
@@ -511,26 +511,27 @@ PUBLIC BOOL HTConfirmCookie ARGS4(
 	if (de->bv == REJECT_ALWAYS)
 	    return FALSE;
     }
-    space_free = (((LYcols - 1)
-	       - strlen(ADVANCED_COOKIE_CONFIRMATION))
-	       - strlen(server));
-    if (space_free < 0)
-	space_free = 0;
-    namelen = strlen(name);
-    valuelen = strlen(value);
-    if ((namelen + valuelen) > space_free) {
-	/*
-	**  Argh... there isn't enough space on our single line for
-	**  the whole cookie.  Reduce them both by a percentage.
-	**  This should be smarter.
-	*/
-        int percentage;  /* no float */
-        percentage = (100 * space_free) / (namelen + valuelen);
-        namelen = (percentage * namelen) / 100;
-        valuelen = (percentage * valuelen) / 100;
-    }
     if(!LYAcceptAllCookies) {
+	int namelen, valuelen, space_free, percentage;
 	char *message = 0;
+
+	space_free = (((LYcols - 1)
+		   - strlen(ADVANCED_COOKIE_CONFIRMATION))
+		   - strlen(server));
+	if (space_free < 0)
+	    space_free = 0;
+	namelen = strlen(name);
+	valuelen = strlen(value);
+	if ((namelen + valuelen) > space_free) {
+	    /*
+	    **  Argh... there isn't enough space on our single line for
+	    **  the whole cookie.  Reduce them both by a percentage.
+	    **  This should be smarter.
+	    */
+	    percentage = (100 * space_free) / (namelen + valuelen);
+	    namelen = (percentage * namelen) / 100;
+	    valuelen = (percentage * valuelen) / 100;
+	}
 	HTSprintf(&message, ADVANCED_COOKIE_CONFIRMATION,
 		 server, namelen, name, valuelen, value);
 	_statusline(message);

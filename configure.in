@@ -22,6 +22,7 @@ dnl --------------------------------------------------------------------------
 
 AC_PROG_CC
 AC_PROG_CPP
+AC_PROG_LN_S
 AC_PROG_RANLIB
 AC_PROG_MAKE_SET
 AC_PROG_INSTALL
@@ -618,6 +619,14 @@ AC_MSG_RESULT($use_dft_colors)
 test $use_dft_colors = "yes" && AC_DEFINE(USE_DEFAULT_COLORS)
 fi
 
+AC_MSG_CHECKING(if experimental file-upload logic should be used)
+CF_ARG_ENABLE(file-upload,
+[  --enable-file-upload    use experimental file-upload support],
+	[use_file_upload=$enableval],
+	[use_file_upload=no])
+AC_MSG_RESULT($use_file_upload)
+test $use_file_upload != no && AC_DEFINE(EXP_FILE_UPLOAD)
+
 AC_MSG_CHECKING(if experimental keyboard-layout logic should be used)
 CF_ARG_ENABLE(kbd-layout,
 [  --enable-kbd-layout     use experimental keyboard-layout support],
@@ -626,13 +635,13 @@ CF_ARG_ENABLE(kbd-layout,
 AC_MSG_RESULT($use_kbd_layout)
 test $use_kbd_layout != no && AC_DEFINE(EXP_KEYBOARD_LAYOUT)
 
-dnl AC_MSG_CHECKING(if experimental JavaScript support should be used)
-dnl CF_ARG_ENABLE(libjs,
-dnl [  --enable-libjs          use experimental JavaScript support (Mozilla libjs)],
-dnl 	[use_libjs=$enableval],
-dnl 	[use_libjs=no])
-dnl AC_MSG_RESULT($use_libjs)
-dnl test $use_libjs != no && AC_DEFINE(EXP_LIBJS)
+AC_MSG_CHECKING(if experimental JavaScript support should be used)
+CF_ARG_ENABLE(libjs,
+[  --enable-libjs          use experimental JavaScript support (Mozilla libjs)],
+	[use_libjs=$enableval],
+	[use_libjs=no])
+AC_MSG_RESULT($use_libjs)
+test $use_libjs != no && AC_DEFINE(EXP_LIBJS)
 
 AC_MSG_CHECKING(if html source should be colorized)
 CF_ARG_ENABLE(prettysrc,
@@ -703,6 +712,12 @@ CF_ARG_ENABLE(cgi-links,
 	[AC_DEFINE(LYNXCGI_LINKS)])
 AC_MSG_RESULT($enableval)
 
+AC_MSG_CHECKING(if you want change-exec support)
+CF_ARG_ENABLE(change-exec,
+[  --enable-change-exec    allow users to change exec options],
+	[AC_DEFINE(ENABLE_OPTS_CHANGE_EXEC)])
+AC_MSG_RESULT($enableval)
+
 AC_MSG_CHECKING(if you want exec-links support)
 CF_ARG_ENABLE(exec-links,
 [  --enable-exec-links     allow lynx to execute programs accessed via a link],
@@ -740,7 +755,7 @@ AC_MSG_RESULT($use_syslog)
 test $use_syslog = yes && AC_DEFINE(SYSLOG_REQUESTED_URLS)
 
 AC_MSG_CHECKING(if persistent-cookie logic should be used)
-CF_ARG_ENABLE(persistent-cookies,
+CF_ARG_DISABLE(persistent-cookies,
 [  --disable-persistent-cookies  disable persistent-cookie support],
 	[use_filed_cookies=$enableval],
 	[use_filed_cookies=yes])

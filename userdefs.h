@@ -1001,11 +1001,11 @@
 #if defined(EXEC_LINKS) || defined(EXEC_SCRIPTS)
 
 /**********
- * if ALLOW_USERS_TO_CHANGE_EXEC_WITHIN_OPTIONS
+ * if ENABLE_OPTS_CHANGE_EXEC
  * is defined then the user will be able to change
  * the execution status within the options screen.
  */
-/* #define ALLOW_USERS_TO_CHANGE_EXEC_WITHIN_OPTIONS */
+/* #define ENABLE_OPTS_CHANGE_EXEC */
 
 /**********
  * if NEVER_ALLOW_REMOTE_EXEC is defined then local execution of
@@ -1255,15 +1255,15 @@
  * the version definition with the Project Version on checkout.  Just
  * ignore it. - kw */
 /* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
-#define LYNX_VERSION "2.8.3dev.1"
+#define LYNX_VERSION "2.8.3dev.2"
 #define LYNX_WWW_HOME "http://lynx.browser.org/"
 #define LYNX_WWW_DIST "http://www.slcc.edu/lynx/current/"
 #define LYNX_RELEASE FALSE
 /* $Format: "#define LYNX_DATE \"$ProjectDate$\""$ */
-#define LYNX_DATE "Fri, 11 Jun 1999 03:34:08 -0600"
+#define LYNX_DATE "Fri, 18 Jun 1999 15:54:46 -0600"
 #define LYNX_DATE_OFF 5		/* truncate the automatically-generated date */
 #define LYNX_DATE_LEN 11	/* truncate the automatically-generated date */
-#define LYNX_RELEASE_DATE "1998"
+#define LYNX_RELEASE_DATE "1999"
 
 #ifndef MAXINT
 #define MAXINT 2147483647	/* max integer */

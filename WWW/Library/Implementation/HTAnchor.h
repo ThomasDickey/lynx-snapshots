@@ -15,6 +15,7 @@
 /* Version 1 of 24-Oct-1991 (JFG), written in C, browser-independent */
 
 #include <HTList.h>
+#include <HTChunk.h>
 #include <HTAtom.h>
 #include <UCDefs.h>
 
@@ -77,7 +78,11 @@ struct _HTParentAnchor {
   BOOL		isISMAPScript;	/* Script for clickable image map */
   BOOL		isHEAD;		/* Document is headers from a HEAD request */
   BOOL		safe;			/* Safe */
-  char *	FileCache;	/* Path to a disk-cached copy */
+#ifdef SOURCE_CACHE
+  char *	source_cache_file;
+  HTChunk *	source_cache_chunk;
+#endif
+  char *	FileCache;	/* Path to a disk-cached copy (see src/HTFWriter.c) */
   char *	SugFname;	/* Suggested filename */
   char *	cache_control;	/* Cache-Control */
   BOOL		no_cache;	/* Cache-Control, Pragma or META "no-cache"? */

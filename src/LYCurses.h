@@ -25,9 +25,6 @@
 #endif /* FALSE */
 
 #ifdef USE_SLANG
-#if defined(UNIX) && !defined(unix)
-#define unix
-#endif /* UNIX && !unix */
 #include <slang.h>
 
 #else /* Using curses: */

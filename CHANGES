@@ -1,6 +1,78 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+1999-06-18 (2.8.3dev.2)
+* move some of the path-manipulation from the DJGPP dired change into new
+  functions LYisAbsPath, LYisRootPath and LYLastPathSep -TD
+* integrated patch adapted by DK from Igor B Poretsky <root@goga.energo.ru> for
+  dired support with DJGPP.  (Some corrections/rework by TD also - must
+  retest).  Some notes from DK:
+  + Since this is DJGPP based, it may be incompatible with a called program
+    that uses a WATCOM DOS extender.  I think I had this problem with a
+    precompiled binary for zip.  The current zip binary doesn't have this
+    problem.
+  + The key to making this work with DJGPP is the __sysflags = 0x501d in
+    LYMain.c, since this lets the system() call handle multiple commands on one
+    line and allows the cd command to work across disks.
+  + I didn't look at Igor's changes to LYMainLoop.c as regards to the HTUncache
+    calls.  He said he wasn't sure about this.
+  + This was tested with Info-Zip's zip and unzip, GNU tar, gzip, comp430d,
+    PKZIP, and PKUNZIP.  This was only tested when built with slang.  I don't
+    see where PDCurses is likely to cause a problem, however.
+  Problems:
+  + To make this work, I made lynx_edit_mode = TRUE in LYMainLoop.c.  This does
+    not seem to be the correct solution.  It seems that this should be handled
+    by the code in HTAccess.c, but I don't understand how this works.  If
+    lynx_edit_mode isn't true, the dired menu doesn't appear with the "f"
+    invocation of LYK_DIRED_MENU.
+  + I'll try to explain this briefly, but this bug is very reproducible.  If a
+    program is invoked from the dired menu which needs to interact with the
+    user, the system sometimes freezes and has to be rebooted.  For example, a
+    call to unzip a zip archive where the files already exist has zip ask if
+    the file should be overwritten.  If done initially after lynx is started,
+    no keystrokes are accepted and the system always hangs.  If, however, any
+    file has been moved or had its name changed via the dired menu, then the
+    above problem doesn't occur.  I have tried to see what changes after the
+    name change that fixes this problem, but I am stumped.  Gzip and unzip seem
+    to have this problem, but PKUNZIP doesn't.
+* correct most-recent LYNX_RELEASE_DATE (reported by KW) -TD
+* change touchline() call in LYOptions.c to touchwin() in case anyone wants to
+  compile with BSD 4.4 curses (reported by IC) -TD
+* modified ifdef for DECL_ERRNO to allow for errno to be a macro -TD
+* ifdef'd the extern declaration of h_errno in HTTCP.c in case that name is
+  also a macro, e.g., for threaded code (reported by Mike Gravitz
+  <ddavid@lamar.ColoState.EDU> on AIX 4.3.1.0) -TD
+* rename ALLOW_USERS_TO_CHANGE_EXEC_WITHIN_OPTIONS to keep the names less than
+  31 characters, and add configure option --enable-change-exec to set the
+  ENABLE_OPTS_CHANGE_EXEC ifdef -TD
+* correct syntax of popup_choices() within
+  ALLOW_USERS_TO_CHANGE_EXEC_WITHIN_OPTIONS ifdef (reported by IC) -KW
+* modified some message texts, mostly for consistency -KW
+* correct display of local file times in INFO screen -KW
+* add null-pointer checks for buf2 variable in
+  exit_immediately_with_error_message().  Invalid memory access happens if
+  access to startfile fails but first_file is not true -KW
+* change all ifdef's except on for VAX ultrix that use the presumed predefined
+  symbol 'unix' to 'UNIX', which the configure script sets.  Not all Unix
+  systems define this in their compiler -TD
+  From compiler warning on NetBSD 1.4 (report by JS):
+    deprecated symbol "unix" is no longer predefined
+* add experimental file-upload, ifdef'd with EXP_FILE_UPLOAD and configured
+  with --with-file-upload (adapted from patch by RP) -TD
+* document use of '|' pipes in PRINTER commands in lynx.cfg -TD
+* add shell script man2hlp.sh, used that to generate lynx.hlp from lynx.man -TD
+* SOURCE_CACHE:  source_cache_file and source_cache_chunk are now members of
+  HTParentAnchor (where they should belong, not HText nor mutable globals). 
+  Add one more parse setting member (verbose_img) to HText structure -LP
+* correct spelling of ifdef for reload_read_cfg() (reported by KW) -LP
+* minor docs tweaks -LP
+* test/{sgml.html, unicode.html} files were badly broken for tagsoup mode
+  (incorrect html: extra <pre>..</pre> were added inside PRE mode in dev26) -LP
+* fix back-slashes conversion for DOSPATH systems when expanding ~ to local
+  path (mostly affects information screen) -LP
+* correct default value for --disable-persistent-cookies configure option
+  (reported by HenSiong Tan <tan@stat.psu.edu>) -TD
+* uncomment --with-libjs configure option -TD
 1999-06-11 (2.8.3dev.1)
 (This is KW's patch, with minor corrections)
 * Key handling changes:

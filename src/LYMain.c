@@ -718,6 +718,7 @@ PUBLIC int main ARGS2(
     atexit(reset_break);
     dbug_init();
     sock_init();
+    __system_flags = 0x501D;
 #endif
 
     /*
@@ -1841,7 +1842,7 @@ PUBLIC int main ARGS2(
 	if (persistent_cookies)
 	    LYStoreCookies(LYCookieFile);
 #endif /* EXP_PERSISTENT_COOKIES */
-	cleanup_files();
+	cleanup_files();	/* if someone starts with LYNXfoo: page */
 	exit_immediately(status);
     } else {
 	/*
@@ -1911,7 +1912,7 @@ PUBLIC void reload_read_cfg NOARGS
      *  that gets automatically set for -anonymous and -validate
      *  (and whether it applies for -anonymous can be made installer-
      *  configurable in the usual way at the bottom of userdefs.h). - kw
-     *  
+     *
      */
     if (no_option_save) {
 	/* current logic requires(?) that saving user preferences is
@@ -1930,7 +1931,7 @@ PUBLIC void reload_read_cfg NOARGS
 
     {
 	/* set few safe flags: */
-#ifdef PERSISTENT_COOKIES
+#ifdef EXP_PERSISTENT_COOKIES
 	BOOLEAN persistent_cookies_flag = persistent_cookies;
 	char * LYCookieFile_flag = LYCookieFile;
 #endif
@@ -1968,7 +1969,7 @@ PUBLIC void reload_read_cfg NOARGS
 		 * a major problem: file paths
 		 * like lynx_save_space, LYCookieFile etc.
 		 */
-#ifdef PERSISTENT_COOKIES
+#ifdef EXP_PERSISTENT_COOKIES
 	/* restore old settings */
 	 if (persistent_cookies != persistent_cookies_flag) {
 	     persistent_cookies = persistent_cookies_flag;

@@ -102,4 +102,16 @@ extern void HTEndParam PARAMS((char ** result, CONST char * command, int number)
 /* Force an option, with leading blanks, to be appended without quoting them */
 #define HTOptParam(result, command, number, parameter) HTSACat(result, parameter)
 
+/* Binary copy and concat */
+#ifdef EXP_FILE_UPLOAD
+
+typedef struct {
+	char *str;
+	int len;
+} bstring;
+
+extern void HTSABCopy PARAMS((bstring** dest, CONST char * src, int len));
+extern void HTSABCat PARAMS((bstring ** dest, CONST char * src, int len));
+#endif
+
 #endif /* HTSTRING_H */

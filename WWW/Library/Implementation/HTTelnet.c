@@ -166,7 +166,7 @@ PRIVATE int remote_session ARGS2(char *, acc_method, char *, host)
 #endif
 
 /* Most unix machines suppport username only with rlogin */
-#if defined(unix) || defined(DOSPATH)
+#if defined(UNIX) || defined(DOSPATH)
 #ifndef TELNET_DONE
 
 #define FMT_RLOGIN "%s %s%s%s"

@@ -4615,6 +4615,7 @@ PRIVATE void HTML_start_element ARGS6(
 		} else if (!strcasecomp(I.type, "file")) {
 		    if (present[HTML_INPUT_ACCEPT])
 			I.accept = value[HTML_INPUT_ACCEPT];
+#ifdef EXP_FILE_UPLOAD
 		    /*
 		     *	Not yet implemented.
 		     */
@@ -4627,12 +4628,14 @@ PRIVATE void HTML_start_element ARGS6(
 			HText_appendCharacter(me->text,
 					      LY_UNDERLINE_END_CHAR);
 		    }
+#else 
+		    CTRACE(tfp, "Attempting to fake as: %s\n", I.type);
+#endif /* EXP_FILE_UPLOAD */
 #ifdef NOTDEFINED
 		    if (me->inFORM)
 			HText_DisableCurrentForm();
 #endif /* NOTDEFINED */
 		    CTRACE(tfp, "HTML: Ignoring TYPE=\"file\"\n");
-		    break;
 
 		} else if (!strcasecomp(I.type, "button")) {
 		    /*
@@ -4661,6 +4664,8 @@ PRIVATE void HTML_start_element ARGS6(
 		break;
 		 */
 	    }
+
+	    CTRACE(tfp, "Ok, we're trying [%s]\n", I.type);
 
 	    /*
 	     *	Check for an unclosed TEXTAREA.
@@ -4774,6 +4779,8 @@ PRIVATE void HTML_start_element ARGS6(
 		}
 		FREE(href);
 	    }
+	    CTRACE(tfp, "2.Ok, we're trying [%s] (present=%p)\n", I.type, present);
+	    /* text+file don't go in here */
 	    if ((UseALTasVALUE == TRUE) ||
 		(present && present[HTML_INPUT_VALUE] &&
 		 value[HTML_INPUT_VALUE] && *value[HTML_INPUT_VALUE])) {
@@ -4793,13 +4800,20 @@ PRIVATE void HTML_start_element ARGS6(
 		    HTMLSetCharacterHandling(current_char_set);
 		}
 
+		CTRACE(tfp, "3.Ok, we're trying [%s]\n", I.type);
 		if (!I.type)
 		    me->UsePlainSpace = TRUE;
 		else if (!strcasecomp(I.type, "text") ||
+#ifdef EXP_FILE_UPLOAD
+			 !strcasecomp(I.type, "file") ||
+#endif
 			 !strcasecomp(I.type, "submit") ||
 			 !strcasecomp(I.type, "image") ||
-			 !strcasecomp(I.type, "reset"))
+			 !strcasecomp(I.type, "reset")) {
+		    CTRACE(tfp, "normal field type: %s\n", I.type);
 		    me->UsePlainSpace = TRUE;
+		}
+
 		StrAllocCopy(I_value,
 			     ((UseALTasVALUE == TRUE) ?
 				value[HTML_INPUT_ALT] :
@@ -4807,6 +4821,7 @@ PRIVATE void HTML_start_element ARGS6(
 		if (me->UsePlainSpace && !me->HiddenValue) {
 		    I.value_cs = current_char_set;
 		}
+	    CTRACE(tfp, "4.Ok, we're trying [%s]\n", I.type);
 		TRANSLATE_AND_UNESCAPE_ENTITIES6(
 		    &I_value,
 		    ATTR_CS_IN,
@@ -4895,6 +4910,9 @@ PRIVATE void HTML_start_element ARGS6(
 		I.md = value[HTML_INPUT_MD];
 
 	    chars = HText_beginInput(me->text, me->inUnderline, &I);
+#ifndef EXP_FILE_UPLOAD
+	    CTRACE(tfp, "I.%s have %d chars, or something\n", I.type, chars);
+#endif
 	    /*
 	     *	Submit and reset buttons have values which don't change,
 	     *	so HText_beginInput() sets I.value to the string which
@@ -4967,6 +4985,9 @@ PRIVATE void HTML_start_element ARGS6(
 		}
 		HText_setIgnoreExcess(me->text, TRUE);
 	    }
+#ifndef EXP_FILE_UPLOAD
+	    CTRACE(tfp, "I.%s, %d\n", I.type, IsSubmitOrReset);
+#endif
 	    if (IsSubmitOrReset == FALSE) {
 		/*
 		 *  This is not a submit or reset button,
@@ -7764,9 +7785,9 @@ PRIVATE HTStream* CacheThru_new ARGS2(
     stream->actions = target->isa;
 
     if (LYCacheSource == SOURCE_CACHE_FILE) {
-	if (source_cache_filename) {
+	if (anchor->source_cache_file) {
 	    CTRACE(tfp, "Reusing source cache file %s\n",
-		   source_cache_filename);
+		   anchor->source_cache_file);
 	    FREE(stream);
 	    return target;
 	}
@@ -7784,25 +7805,22 @@ PRIVATE HTStream* CacheThru_new ARGS2(
 	    return target;
 	}
 
-	/*
-	 * Yes, this is a Gross And Disgusting Hack(TM), I know...
-	 */
-	StrAllocCopy(source_cache_filename, filename);
+	StrAllocCopy(anchor->source_cache_file, filename);
 
 	CTRACE(tfp, "Caching source for URL %s in file %s\n",
 	       HTAnchor_address((HTAnchor *)anchor), filename);
     }
 
     if (LYCacheSource == SOURCE_CACHE_MEMORY) {
-	if (source_cache_chunk) {
+	if (anchor->source_cache_chunk) {
 	    CTRACE(tfp, "Reusing source memory cache %p\n",
-		   (void *)source_cache_chunk);
+		   (void *)anchor->source_cache_chunk);
 	    FREE(stream);
 	    return target;
 	}
 
 	/* I think this is right... */
-	source_cache_chunk = stream->chunk = HTChunkCreate(128);
+	anchor->source_cache_chunk = stream->chunk = HTChunkCreate(128);
 	CTRACE(tfp, "Caching source for URL %s in memory cache %p\n",
 	       HTAnchor_address((HTAnchor *)anchor), (void *)stream->chunk);
 

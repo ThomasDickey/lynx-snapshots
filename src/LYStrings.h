@@ -77,6 +77,10 @@ extern char * SNACat PARAMS((
 
 extern char *LYSafeGets PARAMS((char ** src, FILE * fp));
 
+#ifdef EXP_FILE_UPLOAD
+extern void base64_encode PARAMS((char * dest, char * src, int len));
+#endif
+
 /* values for LYgetch */
 /* The following are lynxkeycodes, not to be confused with
    lynxactioncodes (LYK_*) to which they are often mapped.

@@ -21,6 +21,7 @@
 #include <UCAux.h>
 #include <UCMap.h>
 
+#include <LYUtils.h>
 #include <LYCharSets.h>
 #include <LYLeaks.h>
 
@@ -75,6 +76,10 @@ PRIVATE HTParentAnchor * HTParentAnchor_new NOARGS
     newAnchor->isISMAPScript = FALSE;	/* Lynx appends ?0,0 if TRUE. - FM */
     newAnchor->isHEAD = FALSE;		/* HEAD request if TRUE. - FM */
     newAnchor->safe = FALSE;		/* Safe. - FM */
+#ifdef SOURCE_CACHE
+    newAnchor->source_cache_file = NULL;
+    newAnchor->source_cache_chunk = NULL;
+#endif
     newAnchor->FileCache = NULL;	/* Path to a disk-cached copy. - FM */
     newAnchor->SugFname = NULL; 	/* Suggested filename. - FM */
     newAnchor->RevTitle = NULL; 	/* TITLE for a LINK with REV. - FM */
@@ -689,6 +694,22 @@ PUBLIC BOOL HTAnchor_delete ARGS1(
     FREE(me->bookmark);
     FREE(me->owner);
     FREE(me->RevTitle);
+#ifdef SOURCE_CACHE
+    /*
+     * Clean up the source cache, if any.
+     */
+    if (me->source_cache_file) {
+	CTRACE(tfp, "Removing source cache file %s\n",
+	       me->source_cache_file);
+	LYRemoveTemp(me->source_cache_file);
+	FREE(me->source_cache_file);
+    }
+    if (me->source_cache_chunk) {
+	CTRACE(tfp, "Removing memory source cache %p\n",
+	       (void *)me->source_cache_chunk);
+	HTChunkFree(me->source_cache_chunk);
+    }
+#endif
     if (me->FileCache) {
 	FILE *fd;
 	if ((fd = fopen(me->FileCache, "r")) != NULL) {

@@ -49,9 +49,9 @@ Default values
 #define SELECT                  /* Can handle >1 channel.               */
 #define GOT_SYSTEM              /* Can call shell with string           */
 
-#ifdef unix
+#ifdef UNIX
 #define GOT_PIPE
-#endif /* unix */
+#endif /* UNIX */
 
 #define INVSOC (-1)             /* Unix invalid socket */
 		/* NB: newer libwww has something different for Windows */
@@ -100,10 +100,6 @@ typedef struct sockaddr_in SockA;  /* See netinet/in.h */
 #if defined(_AIX) && !defined(AIX)
 #define AIX
 #endif /* _AIX */
-
-#if defined(AIX) && !defined(unix)
-#define unix
-#endif /* AIX */
 
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
@@ -513,7 +509,11 @@ struct timeval {
 #include <sys/filio.h>
 #endif /* HAVE_SYS_FILIO_H */
 
-#ifdef DECL_ERRNO
+#if !defined(HAVE_LSTAT) && !defined(lstat)
+#define lstat(path,block) stat(path,block)
+#endif
+
+#if defined(DECL_ERRNO) && !defined(errno)
 extern int errno;
 #endif /* DECL_ERRNO */
 
@@ -598,10 +598,6 @@ typedef int pid_t;
 
 /*	Directory reading stuff - BSD or SYS V
 */
-#if defined(UNIX) && !defined(unix)
-#define unix
-#endif /* UNIX && !unix */
-
 #ifdef HAVE_CONFIG_H
 
 # ifdef HAVE_LIMITS_H

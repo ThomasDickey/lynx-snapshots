@@ -223,7 +223,7 @@ PUBLIC HTStream* HTSaveAndExecute ARGS3(
 	HTParentAnchor *,	anchor,	/* Not used */
 	HTStream *,		sink)	/* Not used */
 
-#ifdef unix
+#ifdef UNIX
 #define REMOVE_COMMAND "/bin/rm -f %s\n"
 #endif
 #ifdef VMS

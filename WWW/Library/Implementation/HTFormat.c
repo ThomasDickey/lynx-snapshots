@@ -20,14 +20,14 @@ PUBLIC float HTMaxSecs = 1e10;		/* No effective limit */
 PUBLIC float HTMaxLength = 1e10;	/* No effective limit */
 PUBLIC long int HTMaxBytes  = 0;	/* No effective limit */
 
-#ifdef unix
+#ifdef UNIX
 #ifdef NeXT
 #define PRESENT_POSTSCRIPT "open %s; /bin/rm -f %s\n"
 #else
 #define PRESENT_POSTSCRIPT "(ghostview %s ; /bin/rm -f %s)&\n"
 			   /* Full pathname would be better! */
 #endif /* NeXT */
-#endif /* unix */
+#endif /* UNIX */
 
 #include <HTML.h>
 #include <HTMLDTD.h>

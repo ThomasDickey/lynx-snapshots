@@ -87,6 +87,12 @@ msgstr ""
 msgid "(Text entry field) Enter text.  Use UP or DOWN arrows or tab to move off."
 msgstr ""
 
+msgid "UNMODIFIABLE file entry field.  Use UP or DOWN arrows or tab to move off."
+msgstr ""
+
+msgid "(File entry field) Enter filename.  Use UP or DOWN arrows or tab to move off."
+msgstr ""
+
 #. #define FORM_LINK_TEXTAREA_MESSAGE
 #: LYMessages.c:59
 msgid "(Textarea) Enter text. Use UP/DOWN arrows or TAB to move off (^Ve for editor)."

@@ -116,7 +116,7 @@ PUBLIC void LYLeaks NOARGS
 	    fprintf(Fp_leakagesink, "%s\t%p\n",
 		    gettext("Pointer:"),
 		    ALp_head->vp_Alloced);
-	    fprintf(Fp_leakagesink, "%s:\t",
+	    fprintf(Fp_leakagesink, "%s\t",
 		    gettext("Contains:"));
 	    for (i_counter = 0;
 		 i_counter < ALp_head->st_Bytes &&

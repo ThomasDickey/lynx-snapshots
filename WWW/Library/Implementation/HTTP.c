@@ -185,6 +185,11 @@ try_again:
       goto done;
   }
 
+/* *sob*  All this needs to be converted to handle binary strings
+ * if we're going to be able to handle binary form uploads...
+ * This is a nice long function as well.  *sigh*  -RJP
+ */
+
   /*	Ask that node for the document,
   **	omitting the host name & anchor
   */
@@ -583,6 +588,10 @@ try_again:
 	if (!anAnchor->post_data)
 	  content_length = 0;
 	else
+/* 
+ * Ack!  This assumes non-binary data!  Icky!  
+ * 
+ */
 	  content_length = strlen (anAnchor->post_data);
 	sprintf (line, "Content-length: %d%c%c",
 		 content_length, CR, LF);

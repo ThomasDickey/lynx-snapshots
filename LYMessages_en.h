@@ -53,6 +53,10 @@
 #define MORE gettext("-- press space for next page --")
 
 /* Forms messages */
+#define FORM_LINK_FILE_UNM_MSG \
+ gettext("UNMODIFIABLE file entry field.  Use UP or DOWN arrows or tab to move off.")
+#define FORM_LINK_FILE_MESSAGE \
+ gettext("(File entry field) Enter filename.  Use UP or DOWN arrows or tab to move off.")
 #define FORM_LINK_TEXT_MESSAGE \
  gettext("(Text entry field) Enter text.  Use UP or DOWN arrows or tab to move off.")
 #define FORM_LINK_TEXTAREA_MESSAGE \

@@ -266,8 +266,6 @@ extern BOOLEAN historical_comments;
 extern BOOLEAN minimal_comments;
 extern BOOLEAN soft_dquotes;
 #ifdef SOURCE_CACHE
-extern char * source_cache_filename;
-extern HTChunk * source_cache_chunk;
 extern BOOLEAN from_source_cache; /* mutable */
 extern int LYCacheSource;
 #define SOURCE_CACHE_NONE	0

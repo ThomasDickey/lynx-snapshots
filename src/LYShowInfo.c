@@ -150,7 +150,7 @@ PUBLIC int showinfo ARGS4(
 #endif
 	    name = HTAA_UidToName(dir_info.st_uid);
 	    if (*name)
-		fprintf(fp0, "   <em>%s</em>  %s\n", gettext("Name of owner"), name);
+		fprintf(fp0, "   <em>%s</em>  %s\n", gettext("Name of owner:"), name);
 	    name = HTAA_GidToName (dir_info.st_gid);
 	    if (*name)
 		fprintf(fp0, "      <em>%s</em>  %s\n", gettext("Group name:"), name);
@@ -162,13 +162,13 @@ PUBLIC int showinfo ARGS4(
 	     *	Include date and time information.
 	     */
 	    cp = ctime(&dir_info.st_ctime);
-	    fprintf(fp0, "   <em>%s</em>  %s", cp, gettext("Creation date:"));
+	    fprintf(fp0, "   <em>%s</em>  %s", gettext("Creation date:"), cp);
 
 	    cp = ctime(&dir_info.st_mtime);
-	    fprintf(fp0, "   <em>%s</em>  %s", cp, gettext("Last modified:"));
+	    fprintf(fp0, "   <em>%s</em>  %s", gettext("Last modified:"), cp);
 
 	    cp = ctime(&dir_info.st_atime);
-	    fprintf(fp0, "   <em>%s</em>  %s\n", cp, gettext("Last accessed:"));
+	    fprintf(fp0, "   <em>%s</em>  %s\n", gettext("Last accessed:"), cp);
 
 	    fprintf(fp0, "   %s\n", gettext("Access Permissions"));
 	    fprintf(fp0, "      <em>%s</em>  ", gettext("Owner:"));
@@ -323,7 +323,7 @@ PUBLIC int showinfo ARGS4(
 		  HTisDocumentSource() ?
 				  gettext("source") : gettext("normal")),
 		 (doc->safe ? gettext(", safe") : ""),
-		 (doc->internal_link ? gettext(", internal link") : "")
+		 (doc->internal_link ? gettext(", via internal link") : "")
 	    );
 #ifdef ADVANCED_INFO
     if (LYInfoAdvanced) {

@@ -175,6 +175,7 @@ PUBLIC int change_form_link ARGS7(
 	    }
 	    break;
 
+	case F_FILE_TYPE:
 	case F_TEXT_TYPE:
 	case F_TEXTAREA_TYPE:
 	case F_PASSWORD_TYPE:
@@ -372,6 +373,9 @@ PRIVATE int form_getstr ARGS2(
 		    } else {
 			statusline(FORM_LINK_TEXT_SUBMIT_MESSAGE);
 		    }
+		    break;
+		case F_FILE_TYPE:
+		    statusline(FORM_LINK_FILE_MESSAGE);
 		    break;
 		case F_TEXT_TYPE:
 		    statusline(FORM_LINK_TEXT_MESSAGE);
@@ -1778,6 +1782,12 @@ PUBLIC void show_formlink_statusline ARGS1(
 	    statusline(FORM_LINK_RESET_DIS_MSG);
 	else
 	    statusline(FORM_LINK_RESET_MESSAGE);
+	break;
+    case F_FILE_TYPE:
+	if (form->disabled == YES)
+	    statusline(FORM_LINK_FILE_UNM_MSG);
+	else
+	    statusline(FORM_LINK_FILE_MESSAGE);
 	break;
     case F_TEXT_TYPE:
 	if (form->disabled == YES)
