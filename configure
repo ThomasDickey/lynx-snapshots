@@ -1,6 +1,6 @@
 #! /bin/sh
 
-# From configure.in 2.8.5pre.4
+# From configure.in 2.8.5pre.5
 
 # Save the original $CFLAGS so we can distinguish whether the user set those
 # in the environment, or whether autoconf added -O and -g options:
@@ -723,7 +723,7 @@ fi
 
 PACKAGE=lynx
 # $Format: "VERSION=$ProjectVersion$"$
-VERSION=2.8.5pre.5
+VERSION=2.8.5rel.1
 
 
 
@@ -13855,7 +13855,7 @@ if test $use_externs != "no" ; then
 #define USE_EXTERNALS 1
 EOF
 
-	LIBOBJS="$LIBOBJS LYExtern.o"
+	LIBOBJS="$LIBOBJS LYExtern\$o"
 fi
 
 echo $ac_n "checking if you want to use setfont support""... $ac_c" 1>&6
@@ -14871,7 +14871,7 @@ fi
 echo "$ac_t""$use_dired" 1>&6
 
 if test ".$use_dired" != ".no" ; then
-	LIBOBJS="$LIBOBJS LYLocal.o"
+	LIBOBJS="$LIBOBJS LYLocal\$o"
 	cat >> confdefs.h <<\EOF
 #define DIRED_SUPPORT 1
 EOF
