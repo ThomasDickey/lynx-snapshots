@@ -9,11 +9,12 @@ rm -f config.cache
 AC_INIT(userdefs.h)
 AC_CONFIG_HEADER(lynx_cfg.h:config.hin)
 
+CF_CHECK_CACHE
+
 dnl Set of available languages (wishful thinking :-).
 ALL_LINGUAS="de es fr it ko nl no pl pt sl sv"
 
 AC_PREFIX_DEFAULT(/usr/local)
-AC_CANONICAL_HOST
 
 dnl --------------------------------------------------------------------------
 dnl Checks for location of programs
@@ -582,7 +583,6 @@ if test $use_color_style != no ; then
 		AC_ERROR(Configuration does not support color-styles)
 	fi
 	AC_DEFINE(USE_HASH)
-	AC_DEFINE(USE_PSRC)
 	AC_DEFINE(LINKEDSTYLES)
 fi
 
@@ -641,6 +641,14 @@ CF_ARG_ENABLE(persistent-cookies,
 	[use_filed_cookies=no])
 AC_MSG_RESULT($use_filed_cookies)
 test $use_filed_cookies != no && AC_DEFINE(EXP_PERSISTENT_COOKIES)
+
+AC_MSG_CHECKING(if html source should be colorized)
+CF_ARG_ENABLE(prettysrc,
+[  --enable-prettysrc      colorize HTML source],
+	[use_prettysrc=$enableval],
+	[use_prettysrc=no])
+AC_MSG_RESULT($use_prettysrc)
+test $use_prettysrc != no && AC_DEFINE(USE_PSRC)
 
 AC_MSG_CHECKING(if source caching should be used)
 CF_ARG_ENABLE(source-cache,
@@ -813,7 +821,7 @@ Directory Editor Options:)
 # or modified at run time via DIRED_MENU symbols in lynx.cfg.
 AC_MSG_CHECKING(if directory-editor code should be used)
 CF_ARG_DISABLE(dired,
-[  --disable-dired          enable optional directory-editor, DirEd],
+[  --disable-dired          disable optional directory-editor, DirEd],
 	[use_dired=$enableval],
 	[use_dired=yes])
 AC_MSG_RESULT($use_dired)
@@ -886,7 +894,7 @@ srcdir="$srcdir"
 SRCDIR_CLEAN="#"
 if test -n "$srcdir" ; then
 	echo srcdir is $srcdir
-	$srcdir/mkdirs.sh WWW/Library/unix
+	$srcdir/mkdirs.sh WWW/Library/Implementation
 	$srcdir/mkdirs.sh src/chrtrans
 	test "$USE_INCLUDED_LIBINTL" = yes && $srcdir/mkdirs.sh intl
 	test "$srcdir" != "." && SRCDIR_CLEAN=""
@@ -898,7 +906,7 @@ AC_SUBST(CONFIG_SHELL)
 AC_SUBST(SRCDIR_CLEAN)
 AC_OUTPUT(
 	[makefile \
-	WWW/Library/unix/makefile \
+	WWW/Library/Implementation/makefile \
 	src/makefile \
 	src/chrtrans/makefile \
 	$SUB_MAKEFILE

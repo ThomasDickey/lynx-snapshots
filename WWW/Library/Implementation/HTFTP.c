@@ -2365,7 +2365,7 @@ PRIVATE int read_directory ARGS4(
 	int BytesReceived = 0;
 	int BytesReported = 0;
 	char NumBytes[64];
-	PUTS("\n");  /* prettier LJM */
+	PUTC('\n');  /* prettier LJM */
 	for (ic = 0; ic != EOF;) {	/* For each entry in the directory */
 	    HTChunkClear(chunk);
 
@@ -2467,14 +2467,14 @@ unload_btree:
 	if (help_message_cache_non_empty()) {
 	    START(HTML_PRE);
 	    START(HTML_HR);
-	    PUTS("\n");
+	    PUTC('\n');
 	    PUTS(help_message_cache_contents());
 	    init_help_message_cache();	/* to free memory */
 	    START(HTML_HR);
-	    PUTS("\n");
+	    PUTC('\n');
 	} else {
 	    START(HTML_PRE);
-	    PUTS("\n");
+	    PUTC('\n');
 	}
 
 	/* Put up header

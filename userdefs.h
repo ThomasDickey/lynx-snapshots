@@ -9,7 +9,7 @@
  * There are four sections to this document:
  *  Section 1.  Things you MUST change or verify
  *	Section 1a)  VMS specific things
- *	Section 1b)  UNIX specific things
+ *	Section 1b)  non-VMS specific things
  *	Section 1c)  ALL Platforms
  *
  *  Section 2.  Things you should probably check!
@@ -35,7 +35,7 @@
  */
 
 /*******************************************************************
- * Things you must change  VMS specific
+ * Things you must change  -  VMS specific
  *  Section 1a).
  */
 #ifdef VMS
@@ -94,8 +94,9 @@
 /**************************
  * The EXTENSION_MAP file allows you to map file suffixes to
  * mime types.
- * These global and personal files override anything in
- * lynx.cfg or src/HTInit.c
+ * The file locations defined here can be overridden in lynx.cfg.
+ * Mappings in these global and personal files override any SUFFIX
+ * definitions in lynx.cfg and built-in defaults from src/HTInit.c.
  */
 #define GLOBAL_EXTENSION_MAP "Lynx_Dir:mime.types"
 #define PERSONAL_EXTENSION_MAP "mime.types"
@@ -103,8 +104,9 @@
 /**************************
  * The MAILCAP file allows you to map file MIME types to
  * external viewers.
- * These global and personal files override anything in
- * lynx.cfg or src/HTInit.c
+ * The file locations defined here can be overridden in lynx.cfg.
+ * Mappings in these global and personal files override any VIEWER
+ * definitions in lynx.cfg and built-in defaults from src/HTInit.c.
  */
 #define GLOBAL_MAILCAP "Lynx_Dir:mailcap"
 #define PERSONAL_MAILCAP ".mailcap"
@@ -224,10 +226,10 @@
 #endif /* LYNX_LSS_FILE */
 
 /*******************************************************************
- * Things you must change  UNIX specific
+ * Things you must change  -  non-VMS specific
  *  Section 1b).
  */
-#else     /* UNIX */
+#else     /* non-VMS: UNIX etc. */
 
 /**************************
  * NOTE: This variable is set by the configure script; editing changes will
@@ -277,8 +279,9 @@
 /**************************
  * The EXTENSION_MAP file allows you to map file suffixes to
  * mime types.
- * These global and personal files override anything in
- * lynx.cfg or src/HTInit.c
+ * The file locations defined here can be overridden in lynx.cfg.
+ * Mappings in these global and personal files override any SUFFIX
+ * definitions in lynx.cfg and built-in defaults from src/HTInit.c.
  */
 #define GLOBAL_EXTENSION_MAP "/usr/local/lib/mosaic/mime.types"
 #define PERSONAL_EXTENSION_MAP ".mime.types"
@@ -286,8 +289,9 @@
 /**************************
  * The MAILCAP file allows you to map file MIME types to
  * external viewers.
- * These global and personal files override anything in
- * lynx.cfg or src/HTInit.c
+ * The file locations defined here can be overridden in lynx.cfg.
+ * Mappings in these global and personal files override any VIEWER
+ * definitions in lynx.cfg and built-in defaults from src/HTInit.c.
  */
 #define GLOBAL_MAILCAP "/usr/local/lib/mosaic/mailcap"
 #define PERSONAL_MAILCAP ".mailcap"
@@ -324,7 +328,9 @@
  * If the path includes a tilde (e.g, "~" or "~/lynxtmp"), Lynx will
  * replace the tilde with the full path for the user's home.
  * The definition here can be overridden at run time by setting a
- * "LYNX_TEMP_SPACE" environment symbol.
+ * "LYNX_TEMP_SPACE" environment variable, or (if that is not set)
+ * the "TMPDIR" (unix), or "TEMP" or "TMP" (Windows,DOS,OS/2)
+ * variable.
  */
 #define TEMP_SPACE "/tmp/"
 
@@ -352,8 +358,8 @@
  *	%d	date of last modification
  *	%a	anchor pointing to file or directory
  *	%A	as above but don't show symbolic links
- *     %t      type of file (description derived from MIME type)
- *     %T      MIME type as known by Lynx (from mime.types or default)
+ *	%t	type of file (description derived from MIME type)
+ *	%T	MIME type as known by Lynx (from mime.types or default)
  *	%k	size of file in Kilobytes
  *	%K	as above but omit size for directories
  *	%s	size of file in bytes
@@ -416,7 +422,7 @@
  * note: STARTFILE must be a URL.  See the Lynx online help for more
  *       information on URLs
  */
-#define STARTFILE "."
+#define STARTFILE "http://lynx.browser.org/"
 
 /*****************************
  * HELPFILE must be defined as a URL and must have a
@@ -1036,8 +1042,9 @@
  * The first two settings:
  * LOCAL_EXECUTION_LINKS_ALWAYS_ON
  * LOCAL_EXECUTION_LINKS_ON_BUT_NOT_REMOTE
- * specify the DEFAULT setting of the users execution link
- * options, but the user may still change those options.
+ * specify the DEFAULT settings of the users execution link
+ * options (they can also be overridden in lynx.cfg), but
+ * the user may still change those options.
  * If you do not wish the user to be able to change the
  * execution link settings you may wish to use the command line option:
  *    -restrictions=exec_frozen
@@ -1067,6 +1074,8 @@
  *  MAIL_SYSTEM_ERROR_LOGGING will send a message to the owner of
  *  the information if there is one, every time
  *  that a document cannot be accessed!
+ *  This is just the default, it can be changed in lynx.cfg, and error
+ *  logging can be turned off with the -nolog command line option.
  *
  *  NOTE: This can generate A LOT of mail, be warned.
  */
@@ -1078,8 +1087,10 @@
  * will get status line messages if subsequent new mail arrives.  If a jumps
  * file with a lynxprog URL for invoking mail is available, or your html
  * pages include an mail launch file URL, the user thereby can access mail
- * and read the messages.  The checks and status line reports will not be
- * performed if Lynx has been invoked with the -restrictions=mail switch.
+ * and read the messages.
+ * This is just the default, it can be changed in lynx.cfg.  The checks and
+ * status line reports will not be performed if Lynx has been invoked with
+ * the -restrictions=mail switch.
  *
  *  VMS USERS !!!
  * New mail is normally broadcast as it arrives, via "unsolicited screen
@@ -1091,14 +1102,14 @@
 #define CHECKMAIL	FALSE	/* report unread and new mail messages */
 
 /*********************************
- * VI_KEYS can be turned on by the user in the options
- * screen or the .lynxrc file.  This is just the default.
+ * VI_KEYS can be changed in lynx.cfg and can be turned on by the user
+ * in the options screen or the .lynxrc file.  This is just the default.
  */
 #define VI_KEYS_ALWAYS_ON	FALSE /* familiar h,j,k, & l */
 
 /*********************************
- * EMACS_KEYS can be turned on by the user in the options
- * screen or the .lynxrc file.  This is just the default.
+ * EMACS_KEYS can be changed in lynx.cfg and can be turned on by the user
+ * in the options screen or the .lynxrc file.  This is just the default.
  */
 #define EMACS_KEYS_ALWAYS_ON	FALSE /* familiar ^N, ^P, ^F, ^B */
 
@@ -1109,12 +1120,15 @@
  *	NUMBERS_AS_ARROWS   or
  *	LINKS_ARE_NUMBERED  or
  *	LINKS_AND_FORM_FIELDS_ARE_NUMBERED
+ *
+ * This default setting can be overridden in lynx.cfg (but not to
+ * the third value), and it can be changed at run time by the user.
  */
 #define DEFAULT_KEYPAD_MODE	NUMBERS_AS_ARROWS
 
 /********************************
  * The default search.
- * This is a default that can be overridden by the user!
+ * This is a default that can be overridden in lynx.cfg or by the user!
  */
 #define CASE_SENSITIVE_ALWAYS_ON    FALSE /* case sensitive user search */
 
@@ -1211,12 +1225,12 @@
  * the version definition with the Project Version on checkout.  Just
  * ignore it. - kw */
 /* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
-#define LYNX_VERSION "2.8.2dev.22"
+#define LYNX_VERSION "2.8.2dev.23"
 #define LYNX_WWW_HOME "http://lynx.browser.org/"
 #define LYNX_WWW_DIST "http://www.slcc.edu/lynx/current/"
 #define LYNX_RELEASE FALSE
 /* $Format: "#define LYNX_DATE \"$ProjectDate$\""$ */
-#define LYNX_DATE "Tue, 13 Apr 1999 03:39:16 -0600"
+#define LYNX_DATE "Fri, 23 Apr 1999 08:56:35 -0600"
 #define LYNX_DATE_OFF 5		/* truncate the automatically-generated date */
 #define LYNX_DATE_LEN 11	/* truncate the automatically-generated date */
 #define LYNX_RELEASE_DATE "1998"
@@ -1269,10 +1283,21 @@
 #define SYSTEM_MAIL "sendmail"
 #define SYSTEM_MAIL_FLAGS "-t -oi"
 /*
-**  Following executables may be sought from your PATH at run-time.
-**  To get those programs look for GNU-port stuff elsewhere.  Currently,
-**  if compiled with -DUSE_ZLIB and without -DDIRED_SUPPORT (default),
-**  you need only "cp.exe" from the list below.
+**  The following executables may be used at run time.  Unless you change
+**  the definitions to include the full directories, they will be sought
+**  from your PATH at run-time; they should be available as "cp.exe",
+**  "mv.exe" and so on.  To get those programs look for GNU-port stuff
+**  elsewhere.
+**  Currently, if compiled with -DUSE_ZLIB and without -DDIRED_SUPPORT
+**  (default), the following from the list below are required:
+**  COPY_PATH (cp.exe) - needed for file downloading
+**  MV_PATH   (mv.exe) - for bookmark handling (DEL_BOOKMARK command)
+**  UNCOMPRESS_PATH, BZIP2_PATH - for automatic decompression of files in
+**                                these formats
+**  TELNET_PATH, TN3270_PATH, RLOGIN_PATH - for access to "telnet:",
+**                                         "tn3270:", and "rlogin:" URLs.
+**  If they are not defined right, the corresponding operations may fail
+**  in unexpected and obscure ways!
 **
 **    WINDOWS/DOS
 **    ===========

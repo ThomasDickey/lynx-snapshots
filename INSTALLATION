@@ -364,9 +364,13 @@ II. Compile instructions -- UNIX
 	directory.  (Currently there is no protection against conflict
 	if several lynx copies active from the same account).
 
+  --enable-prettysrc			(define USE_PSRC)
+	Use this option to compile-in support for colorizing the source
+	view of HTML pages.
+
   --enable-source-cache			(define SOURCE_CACHE)
 	Use this option to compile-in support for caching HTML pages locally,
-	in files.
+	in files or in memory.	Configurable from lynx.cfg
 
   --enable-syslog			(define SYSLOG_REQUESTED_URLS)
 	Use this option to log NSL requests via syslog().
@@ -602,7 +606,7 @@ Step 3b.  (optional compilation method)
     not just Lynx.
 
 
-IV. Compile instructions -- Win32 (Windows95/NT)
+IV. Compile instructions -- Win32 (Windows95/98/NT)
 
     The original Win32 port was built with Borland C++ 4.52, but later
     versions reportedly can be used.  Before compiling the Lynx sources, you
@@ -681,14 +685,16 @@ V. Compile instructions -- 386 DOS
     zlib.h and zconf.h in the include subdirectory.
 
     In addition to the files in the Lynx distribution, you will need a
-    curses package and a TCP package.  You can use PDCurses (available at
+    curses package and a TCP package. You can use PDCurses (available at
     "http://www.lightlink.com/hessling/") and the DJGPP port of WATTCP
     (available in two different versions at "ftp://neonatal.sm.med.ic.ac.uk/"
-    and in "http://www.fdisk.com/doslynx/wlynx/source/djgpp.zip"). You
-    can also use slang ("ftp://space.mit.edu/pub/davis/slang") as your
-    curses library.  You need to compile these before you go any further.
-    If you wish to use PDCurses 2.3, you need to first apply the
-    following patch:
+    and in "http://www.fdisk.com/doslynx/wlynx/source/djgpp.zip").
+    A patched copy of the version from the neonatal site is also
+    available from "http://www.rahul.net/dkaufman/tcplibdj.zip" or
+    "ftp://ftp.rahul.net/pub/dkaufman/tcplibdj.zip". You can also use slang
+    ("ftp://space.mit.edu/pub/davis/slang") as your curses library. You need
+    to compile these before you go any further. If you wish to use PDCurses
+    2.3, you need to first apply the following patch:
 
 *** curses.h	Thu Jul  9 19:38:28 1998
 --- curses.h.new	Sat Aug 15 11:02:08 1998
@@ -702,6 +708,25 @@ V. Compile instructions -- 386 DOS
   #define getch()                 wgetch(stdscr)
   #define getmaxx(w)              (w)->_maxx
   #define getmaxy(w)              (w)->_maxy
+*** dos/pdckbd.c	Sat Jul 12 17:10:12 1997
+--- dos/pdckbd.c.new	Thu Apr 15 20:52:16 1999
+***************
+*** 443,449 ****
+  		_watch_breaks();
+  #else
+  # ifdef GO32
+! 	(void*)signal(SIGINT,(setting ? SIG_DFL : SIG_IGN));
+  /*	__djgpp_set_ctrl_c(setting);*/
+  	setcbrk(setting);
+  # else
+--- 443,449 ----
+  		_watch_breaks();
+  #else
+  # ifdef GO32
+! /*	(void*)signal(SIGINT,(setting ? SIG_DFL : SIG_IGN)); */
+  /*	__djgpp_set_ctrl_c(setting);*/
+  	setcbrk(setting);
+  # else
 
     If you have trouble applying the patch, we recommend that you use the
     "patch" program,
@@ -849,7 +874,7 @@ VII. Setting environment variables before running Lynx (optional)
    used by Lynx.  This should be checked later along with reading lynx.cfg
    after you have installed Lynx.
 
-2. Win32 (95/NT) and 386 DOS
+2. Win32 (95/98/NT) and 386 DOS
    These ports cannot start before setting certain environment variables
 
    (adapted from "readme.txt" by Wayne Buttles and "readme.dos" by Doug Kaufman)
@@ -866,6 +891,7 @@ VII. Setting environment variables before running Lynx (optional)
     TEMP or TMP  Bookmarks are kept here with no HOME.  Temp files here.
     USER         Set to your login name (optional)
     LYNX_CFG     Set to the full path and filename for lynx.cfg
+    LYNX_SAVE_SPACE  The (modifiable) location for downloaded file storage.
 
     386 version only:
     WATTCP.CFG   Set to the full path for the WATTCP.CFG directory
@@ -877,6 +903,7 @@ VII. Setting environment variables before running Lynx (optional)
 	set home=d:\win32
 	set temp=d:\tmp
 	set lynx_cfg=d:\win32\lynx.cfg
+      set lynx_save_space=d:\download
 	d:\win32\lynx.exe %1 %2 %3 %4 %5
 
     In lynx_386, a typical batch file might look like:

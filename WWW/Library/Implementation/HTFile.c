@@ -523,61 +523,6 @@ PRIVATE void free_suffixes NOARGS
 
 extern void HTDisplayPartial NOARGS;
 
-/*	Send README file.
-**	-----------------
-**
-**  If a README file exists, then it is inserted into the document here.
-*/
-#ifdef HAVE_READDIR
-PRIVATE void do_readme ARGS2(HTStructured *, target, CONST char *, localname)
-{
-    FILE * fp;
-    char * readme_file_name =
-	malloc(strlen(localname)+ 1 + strlen(HT_DIR_README_FILE) + 1);
-    if (readme_file_name == NULL)
-	outofmem(__FILE__, "do_readme");
-    strcpy(readme_file_name, localname);
-    strcat(readme_file_name, "/");
-    strcat(readme_file_name, HT_DIR_README_FILE);
-
-    fp = fopen(readme_file_name,  "r");
-
-    if (fp) {
-	HTStructuredClass targetClass;
-
-	targetClass =  *target->isa;	/* (Can't init agregate in K&R) */
-	START(HTML_PRE);
-	for (;;){
-	    char c = fgetc(fp);
-	    if (c == (char)EOF) break;
-#ifdef NOTDEFINED
-	    switch (c) {
-		case '&':
-		case '<':
-		case '>':
-			PUTC('&');
-			PUTC('#');
-			PUTC((char)(c / 10));
-			PUTC((char) (c % 10));
-			PUTC(';');
-			break;
-/*		case '\n':
-			PUTC('\r');
-Bug removed thanks to joe@athena.mit.edu */
-		default:
-			PUTC(c);
-	    }
-#else
-	    PUTC(c);
-#endif /* NOTDEFINED */
-	}
-	END(HTML_PRE);
-	HTDisplayPartial();
-	fclose(fp);
-    }
-}
-#endif /* HAVE_READDIR */
-
 /*	Make the cache file name for a W3 document.
 **	-------------------------------------------
 **	Make up a suitable name for saving the node in
@@ -1460,7 +1405,7 @@ PUBLIC BOOL HTDirTitles ARGS3(
 		FREE(printable);
 	    }
 	} else {
-	    PUTS("/");
+	    PUTC('/');
 	}
 	END(HTML_A);
 	PUTC('\n');
@@ -1470,6 +1415,60 @@ PUBLIC BOOL HTDirTitles ARGS3(
     FREE(logical);
     FREE(path);
     return(need_parent_link);
+}
+
+#if defined HAVE_READDIR
+/*	Send README file.
+**	-----------------
+**
+**  If a README file exists, then it is inserted into the document here.
+*/
+PRIVATE void do_readme ARGS2(HTStructured *, target, CONST char *, localname)
+{
+    FILE * fp;
+    char * readme_file_name =
+	malloc(strlen(localname)+ 1 + strlen(HT_DIR_README_FILE) + 1);
+    if (readme_file_name == NULL)
+	outofmem(__FILE__, "do_readme");
+    strcpy(readme_file_name, localname);
+    strcat(readme_file_name, "/");
+    strcat(readme_file_name, HT_DIR_README_FILE);
+
+    fp = fopen(readme_file_name,  "r");
+
+    if (fp) {
+	HTStructuredClass targetClass;
+
+	targetClass =  *target->isa;	/* (Can't init agregate in K&R) */
+	START(HTML_PRE);
+	for (;;){
+	    char c = fgetc(fp);
+	    if (c == (char)EOF) break;
+#ifdef NOTDEFINED
+	    switch (c) {
+		case '&':
+		case '<':
+		case '>':
+			PUTC('&');
+			PUTC('#');
+			PUTC((char)(c / 10));
+			PUTC((char) (c % 10));
+			PUTC(';');
+			break;
+/*		case '\n':
+			PUTC('\r');
+Bug removed thanks to joe@athena.mit.edu */
+		default:
+			PUTC(c);
+	    }
+#else
+	    PUTC(c);
+#endif /* NOTDEFINED */
+	}
+	END(HTML_PRE);
+	HTDisplayPartial();
+	fclose(fp);
+    }
 }
 
 PRIVATE int print_local_dir ARGS5(
@@ -1822,8 +1821,10 @@ PRIVATE int print_local_dir ARGS5(
 	    ABORT_TARGET;
 	}
     }
+    HTFinishDisplayPartial();
     return status;  /* document loaded, maybe partial */
 }
+#endif /* HAVE_READDIR */
 
 
 

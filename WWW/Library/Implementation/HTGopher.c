@@ -225,28 +225,28 @@ PRIVATE void parse_menu ARGS2(
 
 
     START(HTML_HTML);
-    PUTS("\n");
+    PUTC('\n');
     START(HTML_HEAD);
-    PUTS("\n");
+    PUTC('\n');
     START(HTML_TITLE);
     if ((title = HTAnchor_title(anAnchor)))
 	PUTS(title);
     else
 	PUTS(GOPHER_MENU_TITLE);
     END(HTML_TITLE);
-    PUTS("\n");
+    PUTC('\n');
     END(HTML_HEAD);
-    PUTS("\n");
+    PUTC('\n');
 
     START(HTML_BODY);
-    PUTS("\n");
+    PUTC('\n');
     START(HTML_H1);
     if ((title = HTAnchor_title(anAnchor)))
 	PUTS(title);
     else
 	PUTS(GOPHER_MENU_TITLE);
     END(HTML_H1);
-    PUTS("\n");
+    PUTC('\n');
     START(HTML_PRE);
     while ((ich=NEXT_CHAR) != EOF) {
 
@@ -426,7 +426,7 @@ PRIVATE void parse_menu ARGS2(
 
 	    } /* parse error */
 
-	    PUTS("\n");
+	    PUTC('\n');
 	    p = line;	/* Start again at beginning of line */
 
 	} /* if end of line */
@@ -435,11 +435,11 @@ PRIVATE void parse_menu ARGS2(
 
 end_html:
     END(HTML_PRE);
-    PUTS("\n");
+    PUTC('\n');
     END(HTML_BODY);
-    PUTS("\n");
+    PUTC('\n');
     END(HTML_HTML);
-    PUTS("\n");
+    PUTC('\n');
     FREE_TARGET;
 
     return;
@@ -469,16 +469,16 @@ PRIVATE void parse_cso ARGS2(
     CONST char *title;
 
     START(HTML_HEAD);
-    PUTS("\n");
+    PUTC('\n');
     START(HTML_TITLE);
     if ((title = HTAnchor_title(anAnchor)))
 	PUTS(title);
     else
 	PUTS(GOPHER_CSO_SEARCH_RESULTS);
     END(HTML_TITLE);
-    PUTS("\n");
+    PUTC('\n');
     END(HTML_HEAD);
-    PUTS("\n");
+    PUTC('\n');
     START(HTML_H1);
     if ((title = HTAnchor_title(anAnchor)))
 	PUTS(title);
@@ -487,7 +487,7 @@ PRIVATE void parse_cso ARGS2(
 	PUTS(GOPHER_SEARCH_RESULTS);
     }
     END(HTML_H1);
-    PUTS("\n");
+    PUTC('\n');
     START(HTML_PRE);
 
     /*
@@ -572,7 +572,7 @@ PRIVATE void parse_cso ARGS2(
 			    **	Print data.
 			    */
 			    PUTS(second_colon+1);
-			    PUTS("\n");
+			    PUTC('\n');
 
 			    if (*(second_colon-1) != last_char)
 				/* end seperator */
@@ -594,9 +594,9 @@ PRIVATE void parse_cso ARGS2(
 	} /* Loop over characters */
 
     /* end the text block */
-    PUTS("\n");
+    PUTC('\n');
     END(HTML_PRE);
-    PUTS("\n");
+    PUTC('\n');
     FREE_TARGET;
 
     return;  /* all done */
@@ -612,18 +612,18 @@ PRIVATE void display_cso ARGS2(
     CONST char * title;
 
     START(HTML_HEAD);
-    PUTS("\n");
+    PUTC('\n');
     START(HTML_TITLE);
     if ((title = HTAnchor_title(anAnchor)))
 	PUTS(title);
     else
 	PUTS(GOPHER_CSO_INDEX);
     END(HTML_TITLE);
-    PUTS("\n");
+    PUTC('\n');
     START(HTML_ISINDEX);
-    PUTS("\n");
+    PUTC('\n');
     END(HTML_HEAD);
-    PUTS("\n");
+    PUTC('\n');
     START(HTML_H1);
     if ((title = HTAnchor_title(anAnchor)))
 	PUTS(title);
@@ -656,19 +656,19 @@ PRIVATE void display_index ARGS2(
     CONST char * title;
 
     START(HTML_HEAD);
-    PUTS("\n");
-    PUTS("\n");
+    PUTC('\n');
+    PUTC('\n');
     START(HTML_TITLE);
     if ((title = HTAnchor_title(anAnchor)))
 	PUTS(title);
     else
 	PUTS(GOPHER_INDEX_TITLE);
     END(HTML_TITLE);
-    PUTS("\n");
+    PUTC('\n');
     START(HTML_ISINDEX);
-    PUTS("\n");
+    PUTC('\n');
     END(HTML_HEAD);
-    PUTS("\n");
+    PUTC('\n');
     START(HTML_H1);
     if ((title = HTAnchor_title(anAnchor)))
 	PUTS(title);

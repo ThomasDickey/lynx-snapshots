@@ -110,7 +110,6 @@ extern void LYTrimPathSep PARAMS((char *path));
 extern void LYTrimRelFromAbsPath PARAMS((char *path));
 extern void LYsetXDisplay PARAMS((char *new_display));
 extern void change_sug_filename PARAMS((char *fname));
-extern void checkmail NOPARAMS;
 extern void convert_to_spaces PARAMS((char *string, BOOL condense));
 extern void free_and_clear PARAMS((char **obj));
 extern void highlight PARAMS((int flag, int cur, char *target));
@@ -144,52 +143,56 @@ extern BOOLEAN mustshow;
  *
  *  Universal document id types.
  */
-#define HTTP_URL_TYPE		 1
-#define FILE_URL_TYPE		 2
-#define FTP_URL_TYPE		 3
-#define WAIS_URL_TYPE		 4
-#define NEWS_URL_TYPE		 5
-#define NNTP_URL_TYPE		 6
-#define TELNET_URL_TYPE		 7
-#define TN3270_URL_TYPE		 8
-#define RLOGIN_URL_TYPE		 9
-#define GOPHER_URL_TYPE		10
-#define HTML_GOPHER_URL_TYPE	11
-#define TELNET_GOPHER_URL_TYPE	12
-#define INDEX_GOPHER_URL_TYPE	13
-#define MAILTO_URL_TYPE		14
-#define FINGER_URL_TYPE		15
-#define CSO_URL_TYPE		16
-#define HTTPS_URL_TYPE		17
-#define SNEWS_URL_TYPE		18
-#define PROSPERO_URL_TYPE	19
-#define AFS_URL_TYPE		20
+typedef enum {
+    UNKNOWN_URL_TYPE = 0,
 
-#define DATA_URL_TYPE		21
+    HTTP_URL_TYPE,
+    FILE_URL_TYPE,
+    FTP_URL_TYPE,
+    WAIS_URL_TYPE,
+    NEWS_URL_TYPE,
+    NNTP_URL_TYPE,
+    TELNET_URL_TYPE,
+    TN3270_URL_TYPE,
+    RLOGIN_URL_TYPE,
+    GOPHER_URL_TYPE,
+    HTML_GOPHER_URL_TYPE,
+    TELNET_GOPHER_URL_TYPE,
+    INDEX_GOPHER_URL_TYPE,
+    MAILTO_URL_TYPE,
+    FINGER_URL_TYPE,
+    CSO_URL_TYPE,
+    HTTPS_URL_TYPE,
+    SNEWS_URL_TYPE,
+    PROSPERO_URL_TYPE,
+    AFS_URL_TYPE,
 
-#define LYNXEXEC_URL_TYPE	22
-#define LYNXPROG_URL_TYPE	23
-#define LYNXCGI_URL_TYPE	24
+    DATA_URL_TYPE,
 
-#define NEWSPOST_URL_TYPE	25
-#define NEWSREPLY_URL_TYPE	26
-#define SNEWSPOST_URL_TYPE	27
-#define SNEWSREPLY_URL_TYPE	28
+    LYNXEXEC_URL_TYPE,
+    LYNXPROG_URL_TYPE,
+    LYNXCGI_URL_TYPE,
 
-#define LYNXPRINT_URL_TYPE	29
-#define LYNXHIST_URL_TYPE	30
-#define LYNXDOWNLOAD_URL_TYPE	31
-#define LYNXKEYMAP_URL_TYPE	32
-#define LYNXIMGMAP_URL_TYPE	33
-#define LYNXCOOKIE_URL_TYPE	34
-#define LYNXDIRED_URL_TYPE	35
-#define LYNXOPTIONS_URL_TYPE	36
-#define LYNXCFG_URL_TYPE	37
-#define LYNXCOMPILE_OPTS_URL_TYPE 38
+    NEWSPOST_URL_TYPE,
+    NEWSREPLY_URL_TYPE,
+    SNEWSPOST_URL_TYPE,
+    SNEWSREPLY_URL_TYPE,
 
-#define PROXY_URL_TYPE		39
+    LYNXPRINT_URL_TYPE,
+    LYNXHIST_URL_TYPE,
+    LYNXDOWNLOAD_URL_TYPE,
+    LYNXKEYMAP_URL_TYPE,
+    LYNXIMGMAP_URL_TYPE,
+    LYNXCOOKIE_URL_TYPE,
+    LYNXDIRED_URL_TYPE,
+    LYNXOPTIONS_URL_TYPE,
+    LYNXCFG_URL_TYPE,
+    LYNXCOMPILE_OPTS_URL_TYPE,
+    LYNXMESSAGES_URL_TYPE,
 
-#define UNKNOWN_URL_TYPE	40
+    PROXY_URL_TYPE,
+
+} UrlTypes;
 
 /*
  *  For change_sug_filename().

@@ -33,7 +33,7 @@ SITE_LIBS	= # FIXME: set in parent makefile
 WAISLIB		= # FIXME: set in parent makefile
 
 WWWINC		= WWW/Library/Implementation
-WWWLIB		= $(top_builddir)/WWW/Library/unix/libwww.a
+WWWLIB		= $(top_builddir)/WWW/Library/Implementation/libwww.a
 
 INTLLIB		= @INTLDIR_MAKE@@INTLLIBS@
 

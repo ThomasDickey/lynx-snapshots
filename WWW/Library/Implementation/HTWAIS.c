@@ -198,7 +198,7 @@ PRIVATE void showDiags ARGS2(
 	    PUTS(d[i]->DIAG);
 	    PUTC(' ');
 	    PUTS(d[i]->ADDINFO);
-	    PUTC('\n'); ;
+	    PUTC('\n');
 	}
     }
 }
@@ -482,7 +482,7 @@ PRIVATE void display_search_response ARGS4(
     PUTS(gettext("the second is the number of lines in the item."));
     START(HTML_BR);
     START(HTML_BR);
-    PUTS("\n");
+    PUTC('\n');
     START(HTML_OL);
 
     if (response->DatabaseDiagnosticRecords != 0) {
@@ -595,7 +595,7 @@ PRIVATE void display_search_response ARGS4(
 	}
     }	/* Loop: display user info */
     END(HTML_OL);
-    PUTC('\n'); ;
+    PUTC('\n');
 }
 
 /*		Load by name					HTLoadWAIS
@@ -758,18 +758,18 @@ PUBLIC int HTLoadWAIS ARGS4(
 	HTStructured * target = HTML_new(anAnchor, format_out, sink);
 
 	START(HTML_HEAD);
-	PUTS("\n");
+	PUTC('\n');
 	HTStartIsIndex(target, HTWAIS_SOLICIT_QUERY , NULL);
-	PUTS("\n");
+	PUTC('\n');
 
 	{
 	    START(HTML_TITLE);
 	    PUTS(wais_database);
 	    PUTS(gettext(" (WAIS Index)"));
 	    END(HTML_TITLE);
-	    PUTS("\n");
+	    PUTC('\n');
 	    END(HTML_HEAD);
-	    PUTS("\n");
+	    PUTC('\n');
 
 	    START(HTML_H1);
 	    PUTS(gettext("WAIS Index: "));
@@ -777,7 +777,7 @@ PUBLIC int HTLoadWAIS ARGS4(
 	    PUTS(wais_database);
 	    END(HTML_EM);
 	    END(HTML_H1);
-	    PUTS("\n");
+	    PUTC('\n');
 	    PUTS(gettext("This is a link for searching the "));
 	    START(HTML_EM);
 	    PUTS(wais_database);
@@ -801,7 +801,7 @@ PUBLIC int HTLoadWAIS ARGS4(
 	if (fp) {
 	    char c;
 	    START(HTML_PRE);		/* Preformatted description */
-	    PUTS("\n");
+	    PUTC('\n');
 	    while((c=getc(fp))!=EOF) PUTC(c);	/* Transfer file */
 	    END(HTML_PRE);
 	    fclose(fp);
@@ -824,18 +824,18 @@ PUBLIC int HTLoadWAIS ARGS4(
 	target = HTML_new(anAnchor, format_out, sink);
 
 	START(HTML_HEAD);
-	PUTS("\n");
+	PUTC('\n');
 	HTStartIsIndex(target, HTWAIS_SOLICIT_QUERY, NULL);
-	PUTS("\n");
+	PUTC('\n');
 	START(HTML_TITLE);
 	PUTS(keywords);
 	PUTS(gettext(" (in "));
 	PUTS(wais_database);
-	PUTS(")");
+	PUTC(')');
 	END(HTML_TITLE);
-	PUTS("\n");
+	PUTC('\n');
 	END(HTML_HEAD);
-	PUTS("\n");
+	PUTC('\n');
 
 	START(HTML_H1);
 	PUTS(gettext("WAIS Search of \""));
@@ -847,7 +847,7 @@ PUBLIC int HTLoadWAIS ARGS4(
 	PUTS(wais_database);
 	END(HTML_EM);
 	END(HTML_H1);
-	PUTS("\n");
+	PUTC('\n');
 
 	request_buffer_length = MAX_MESSAGE_LEN; /* Amount left */
 	CTRACE(tfp, "HTWAIS: Search for `%s' in `%s'\n",

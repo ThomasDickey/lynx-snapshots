@@ -146,18 +146,18 @@ PRIVATE int response ARGS5(
     */
     CTRACE(tfp,"HTFinger: Reading finger information\n");
     START(HTML_HTML);
-    PUTS("\n");
+    PUTC('\n');
     START(HTML_HEAD);
-    PUTS("\n");
+    PUTC('\n');
     START(HTML_TITLE);
     PUTS("Finger server on ");
     PUTS(sitename);
     END(HTML_TITLE);
-    PUTS("\n");
+    PUTC('\n');
     END(HTML_HEAD);
-    PUTS("\n");
+    PUTC('\n');
     START(HTML_BODY);
-    PUTS("\n");
+    PUTC('\n');
     START(HTML_H1);
     PUTS("Finger server on ");
     START(HTML_EM);
@@ -179,7 +179,7 @@ PRIVATE int response ARGS5(
     PUTS(cmd);
     FREE(cmd);
     END(HTML_H1);
-    PUTS("\n");
+    PUTC('\n');
     START(HTML_PRE);
 
     while ((ch=NEXT_CHAR) != EOF) {
@@ -237,11 +237,11 @@ PRIVATE int response ARGS5(
 
 end_html:
     END(HTML_PRE);
-    PUTS("\n");
+    PUTC('\n');
     END(HTML_BODY);
-    PUTS("\n");
+    PUTC('\n');
     END(HTML_HTML);
-    PUTS("\n");
+    PUTC('\n');
     FREE_TARGET;
     return(0);
 }

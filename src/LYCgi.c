@@ -41,7 +41,6 @@
 #include <LYBookmark.h>
 #include <GridText.h>
 #include <LYCgi.h>
-#include <LYSignal.h>
 #include <LYStrings.h>
 #include <LYLocal.h>
 

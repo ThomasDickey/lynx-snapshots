@@ -2706,6 +2706,12 @@ PUBLIC int is_url ARGS1(
 	 */
 	return(LYNXCFG_URL_TYPE);
 
+    } else if (compare_type(cp, "LYNXMESSAGES:", 13)) {
+	/*
+	 *  Special Internal Lynx type.
+	 */
+	return(LYNXMESSAGES_URL_TYPE);
+
     } else if (compare_type(cp, "LYNXCOMPILEOPTS:", 16)) {
 	/*
 	 *  Special Internal Lynx type.

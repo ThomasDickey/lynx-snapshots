@@ -29,7 +29,6 @@
 #include <HTForms.h>
 #include <HTNestedList.h>
 #include <GridText.h>
-#include <LYSignal.h>
 #include <LYStrings.h>
 #include <LYUtils.h>
 #include <LYMap.h>

@@ -110,7 +110,7 @@ typedef int TagFlags;
 typedef struct _tag HTTag;
 struct _tag{
     char *	name;			/* The name of the tag */
-#ifdef USE_PSRC
+#ifdef USE_COLOR_STYLE
     int		name_len;		/* The length of the name */
 #endif
     attr *	attributes;		/* The list of acceptable attributes */

@@ -622,6 +622,7 @@ PUBLIC void lynx_setup_colors NOARGS
 }
 #endif /* USE_COLOR_TABLE */
 
+#ifdef NOTUSED
 #if defined (DJGPP) && !defined (USE_SLANG)
 /*
  * Sorry about making a completely new function,
@@ -660,6 +661,10 @@ PUBLIC void start_curses NOARGS
     noecho();
 }
 #else
+#endif /* defined (DJGPP) && !defined (USE_SLANG) */
+#endif /* NOTUSED */
+
+
 PUBLIC void start_curses NOARGS
 {
 #ifdef USE_SLANG
@@ -758,13 +763,15 @@ PUBLIC void start_curses NOARGS
 
 #else /* Using curses: */
 
+
 #ifdef VMS
     /*
      *	If we are VMS then do initscr() everytime start_curses()
      *	is called!
      */
     initscr();	/* start curses */
-#else /* Unix: */
+#else  /* Unix: */
+
     static BOOLEAN first_time = TRUE;
 
     if (first_time) {
@@ -827,7 +834,10 @@ PUBLIC void start_curses NOARGS
 	lynx_called_initscr = TRUE;
 #endif /* USE_COLOR_TABLE */
     }
-#endif /* VMS */
+#ifdef __DJGPP__
+    else sock_init();
+#endif /* __DJGPP__ */
+#endif /* not VMS */
 
     /* nonl();	 */ /* seems to slow things down */
 
@@ -862,7 +872,7 @@ PUBLIC void start_curses NOARGS
 
     LYCursesON = TRUE;
 }
-#endif /* defined (DJGPP) && !defined (USE_SLANG) */
+
 
 PUBLIC void lynx_enable_mouse ARGS1(int,state)
 {
@@ -1048,8 +1058,8 @@ PUBLIC BOOLEAN setup ARGS1(
 PUBLIC BOOLEAN setup ARGS1(
 	char *, 	terminal)
 {
-    static char term_putenv[112];
-    char buffer[108];
+    char *term_putenv;
+    char *buffer = NULL;
     char *cp;
 #if defined(HAVE_SIZECHANGE) && !defined(USE_SLANG) && defined(NOTDEFINED)
 /*
@@ -1085,7 +1095,7 @@ PUBLIC BOOLEAN setup ARGS1(
     }
 
     if (terminal != NULL) {
-	sprintf(term_putenv, "TERM=%.106s", terminal);
+	HTSprintf0(&term_putenv, "TERM=%.106s", terminal);
 	(void) putenv(term_putenv);
     }
 
@@ -1097,15 +1107,17 @@ PUBLIC BOOLEAN setup ARGS1(
 
 	printf("\n\n  %s\n\n", gettext("Your Terminal type is unknown!"));
 	printf("  %s [vt100] ", gettext("Enter a terminal type:"));
-	*buffer = '\0';
-	fgets(buffer, sizeof(buffer), stdin);
-	if ((s = strchr(buffer, '\n')) != NULL)
-	    *s = '\0';
 
-	if (strlen(buffer) == 0)
-	    strcpy(buffer,"vt100");
+	if ((buffer = LYSafeGets(buffer, stdin)) != 0)
+	    if ((s = strchr(buffer, '\n')) != NULL)
+		*s = '\0';
 
-	sprintf(term_putenv,"TERM=%.106s", buffer);
+	if (buffer == 0 || *buffer == 0)
+	    StrAllocCopy(buffer,"vt100");
+
+	HTSprintf0(&term_putenv,"TERM=%.106s", buffer);
+	FREE(buffer);
+
 	(void) putenv(term_putenv);
 	printf("\n%s %s\n", gettext("TERMINAL TYPE IS SET TO"), getenv("TERM"));
 	sleep(MESSAGESECS);

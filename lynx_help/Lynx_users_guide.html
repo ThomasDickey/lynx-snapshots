@@ -141,7 +141,8 @@ the linked information.  Information included in the HTML file tells Lynx
 where to find the linked file and what kind of server will provide it
 (i.e., HTTP, Gopher, etc.).
 
-<p>Lynx renders HTML files and saves the rendition, not the source,
+<p>Lynx renders HTML files and saves the rendition (and the source, if
+so configured in the <A HREF="#lynx.cfg">lynx.cfg</A> file)
 for initial display and should you select the link again.  If you do
 select a link again and have reason to desire a new fetch and rendering
 of the file, use the NOCACHE command, normally mapped to '<em>x</em>' and
@@ -338,9 +339,10 @@ of TAB characters to spaces you should use the
 
 When viewing HTML documents it is possible to retrieve and display the
 unrendered (i.e., the original HTML) source of the document by pressing
-the '<em>\</em>' (backslash) key.  The document must be reloaded from the
-server or disk to be displayed on the screen unrendered, since Lynx
-originally rendered what it received and does not still have it as source.
+the '<em>\</em>' (backslash) key.  Lynx usually caches only the rendering
+of the document and doesn't keep the source (unless it is configured to do
+so in the <A HREF="#lynx.cfg">lynx.cfg</A> file), so to display the source
+unrendered, Lynx must reload it from the server or disk.
 When viewing unrendered documents you may print them as any normal document.
 
 <p>Selecting the <em>Print to a local file</em> option from the Print Menu,
@@ -909,8 +911,19 @@ return to Lynx or the '<em>&gt;</em>' command to save the options to a
 
 At any time while viewing documents within Lynx, you may use the
 '<em>c</em>' command to send a mail message to the owner of the current
-document if the author of the document has specified ownership.  If no
-ownership is specified then comments are disabled.  Certain links called
+document if the author of the document has specified ownership.  (Note to
+authors: if you want to assign the ownership to your document, you need to add
+into HEAD section a LINK element with appropriate value for REV attribute.  Two
+values are recognized: <em>owner</em> and <em>made</em> (these are case
+insensitive).  For example, <pre>
+&lt;HEAD&gt;
+    &hellip;
+    &lt;LINK REV="made" HREF="mailto:user@somedomain.com"&gt;
+    &hellip;
+&lt;HEAD&gt;
+</pre>
+You may also add a TITLE attribute with, for example, the name of your page) If
+no ownership is specified then comments are disabled.  Certain links called
 <a href="lynx_url_support.html#mailto">mailto:</a> links will also allow
 you to send mail to other people.  Using the mail features within Lynx is
 straightforward.
@@ -1029,19 +1042,29 @@ selection menu, or <em>RETURN</em> for the default bookmark file.
 
 <h2 ID="Jumps"><A NAME="Jumps"><em>Jump Command</em></a></h2>
 
-A feature similar to the Lynx bookmarks is the jump command.  The jump
-command allows you to enter a shortcut name to access a URL.  If the jump
-feature is active, typing '<em>j</em>' will produce a prompt where you may
-enter the shortcut name.  Type '<em>?</em>' at the jump prompt for a list
-of shortcut names available.
+Similar to the bookmarks file is the jumps file: for an example,
+look in the <em>samples</em> subdirectory in the distribution package.
+To use the jumps command, create a <em>jumps file</em> with the same format
+as the sample file, but containing your own URLs & short-cut names.
+Once you have done that, typing '<em>j</em>' prompts you to enter
+a short-cut name, which will take you straight to the URL
+associated with the short-cut in the jumps file,
+much like using '<em>g</em>'.
+If you want to check which short-cuts are available,
+type '<em>?</em>' at the jump prompt for the full list.<p>
 
-<p>All jump shortcut entries are saved in a circular buffer, and any
-previous entries can be retrieved for re-use by pressing the
-<em>up-arrow</em> or <em>down-arrow</em> keys at the prompt.
+All jump short-cuts you have entered are saved in a circular buffer
+in the same way as with '<em>g</em>' and '<em>/</em>' (search):<br>
+previous entries can be retrieved with <em>up-arrow</em>
+or <em>down-arrow</em>.<p>
 
-<p>Note to System Administrators:
-Read the <A HREF="#lynx.cfg">lynx.cfg</A> file on how
-to set up the jump command for your system and how to define shortcut names.
+The jumps feature is especially useful for system administrators
+who have unsophisticated users to care for, but ordinary Lynx users
+who have a number of URLs they regularly visit while browsing
+may find using the jumps command speeds their movements.<p>
+
+For more advice how to set up the jumps command on your system
+and how to define short-cut names, read  <A HREF="#lynx.cfg">lynx.cfg</A> .
 [<A HREF="#ToC-Jumps">ToC</A>]
 
 <h2 ID="DirEd"><A NAME="DirEd"><em>Directory Editing</em></a></h2>

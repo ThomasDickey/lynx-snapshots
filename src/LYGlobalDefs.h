@@ -252,6 +252,7 @@ extern BOOLEAN soft_dquotes;
 #ifdef SOURCE_CACHE
 extern char * source_cache_filename;
 extern HTChunk * source_cache_chunk;
+extern BOOLEAN from_source_cache; /* mutable */
 extern int LYCacheSource;
 #define SOURCE_CACHE_NONE	0
 #define SOURCE_CACHE_FILE	1
@@ -271,6 +272,8 @@ extern int Newline_partial;          /* -//- "current" newline position */
 extern int NumOfLines_partial;       /* -//- "current" number of lines */
 extern int partial_threshold;
 extern BOOLEAN debug_display_partial;  /* show with MessageSecs delay */
+extern BOOLEAN display_partial_flag; /* permanent flag, not mutable */
+extern int Newline; /* original newline position, from mainloop() */
 #endif
 extern char *form_post_data;         /* User data for post form */
 extern char *form_get_data;          /* User data for get form */

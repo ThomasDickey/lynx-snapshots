@@ -53,7 +53,7 @@ PUBLIC char * get_bookmark_filename ARGS1(
 	char **,	URL)
 {
     static char filename_buffer[LY_MAXPATH];
-    char string_buffer[BUFSIZ];
+    char *string_buffer;
     FILE *fp;
     int MBM_tmp;
 
@@ -107,21 +107,21 @@ success:
      *	We now have the file open.
      *	Check if it is a mosaic hotlist.
      */
-    if (fgets(string_buffer, sizeof(string_buffer)-1, fp) &&
-	!strncmp(string_buffer, "ncsa-xmosaic-hotlist-format-1", 29)) {
+    if ((string_buffer = LYSafeGets(NULL, fp)) != 0
+     && !strncmp(string_buffer, "ncsa-xmosaic-hotlist-format-1", 29)) {
 	char *newname;
 	/*
 	 *  It is a mosaic hotlist file.
 	 */
 	is_mosaic_hotlist = TRUE;
-	fclose(fp);
 	newname = convert_mosaic_bookmark_file(filename_buffer);
 	LYLocalFileToURL(URL, newname);
     } else {
-	fclose(fp);
 	is_mosaic_hotlist = FALSE;
 	LYLocalFileToURL(URL, filename_buffer);
     }
+    FREE(string_buffer);
+    fclose(fp);
 
     return(filename_buffer);  /* bookmark file exists */
 
@@ -136,7 +136,7 @@ PRIVATE char * convert_mosaic_bookmark_file ARGS1(
 {
     static char newfile[LY_MAXPATH];
     FILE *fp, *nfp;
-    char buf[BUFSIZ];
+    char *buf = NULL;
     int line = -2;
     char *endline;
 
@@ -157,7 +157,7 @@ PRIVATE char * convert_mosaic_bookmark_file ARGS1(
      remove bookmark command, it is usually the 'R' key but may have\n\
      been remapped by you or your system administrator."));
 
-    while (fgets(buf, sizeof(buf), fp) != NULL) {
+    while ((buf = LYSafeGets(buf, fp)) != NULL) {
 	if(line >= 0) {
 	    endline = &buf[strlen(buf)-1];
 	    if(*endline == '\n')
@@ -414,7 +414,7 @@ PUBLIC void remove_bookmark_link ARGS2(
 	char *, 	cur_bookmark_page)
 {
     FILE *fp, *nfp;
-    char buf[BUFSIZ];
+    char *buf = NULL;
     int n;
 #ifdef VMS
     char filename_buffer[NAM$C_MAXRSS+12];
@@ -466,7 +466,7 @@ PUBLIC void remove_bookmark_link ARGS2(
     if (is_mosaic_hotlist) {
 	int del_line = cur*2;  /* two lines per entry */
 	n = -3;  /* skip past cookie and name lines */
-	while (fgets(buf, sizeof(buf), fp) != NULL) {
+	while ((buf = LYSafeGets(buf, fp)) != NULL) {
 	    n++;
 	    if (n == del_line || n == del_line+1)
 		continue;  /* remove two lines */
@@ -480,7 +480,7 @@ PUBLIC void remove_bookmark_link ARGS2(
 	int seen;
 
 	n = -1;
-	while (fgets(buf, sizeof(buf), fp) != NULL) {
+	while ((buf = LYSafeGets(buf, fp)) != NULL) {
 	    retain = TRUE;
 	    seen = 0;
 	    cp = buf;

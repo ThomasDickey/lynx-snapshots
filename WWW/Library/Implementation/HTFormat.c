@@ -528,6 +528,30 @@ PUBLIC void HTDisplayPartial NOARGS
 #endif  /* DISP_PARTIAL */
 }
 
+/* Put this as early as possible, OK just after HTDisplayPartial() */
+PUBLIC void HTFinishDisplayPartial NOARGS
+{
+#ifdef DISP_PARTIAL
+		    if (display_partial) {
+			/*
+			 *  Override Newline with a new value if user
+			 *  scrolled the document while downloading.
+			 */
+			if (Newline_partial != Newline
+			 && NumOfLines_partial > 0)
+			    Newline = Newline_partial;
+		    }
+
+		    /*
+		     *  End of incremental rendering stage here.
+		     */
+		    display_partial = FALSE;
+		    NumOfLines_partial = -1;       /* initialize to -1 */
+				/* -1 restrict HTDisplayPartial()   */
+				/* until HText_new() start next HTMainText */
+				/* and set the flag to 0  */
+#endif /* DISP_PARTIAL */
+}
 
 /*	Push data from a socket down a stream
 **	-------------------------------------
@@ -697,6 +721,7 @@ PUBLIC int HTCopy ARGS4(
     rv = HT_LOADED;
 
 finished:
+    HTFinishDisplayPartial();
     return(rv);
 }
 
@@ -768,6 +793,7 @@ PUBLIC int HTFileCopy ARGS2(
 	}
     } /* next bufferload */
 
+    HTFinishDisplayPartial();
     return rv;
 }
 
@@ -783,6 +809,7 @@ PUBLIC int HTFileCopy ARGS2(
 **
 **  Return values:
 **	HT_LOADED	All data sent.
+**	HT_INTERRUPTED  Interruption after some data read.
 **
 **  State of memory and target stream on return:
 **	always		chunk unchanged, target stream still valid.
@@ -794,6 +821,7 @@ PUBLIC int HTMemCopy ARGS2(
     HTStreamClass targetClass = *(sink->isa);
     int bytes = 0;
     CONST char *data = chunk->data;
+    int rv = HT_OK;
 
     HTReadProgress(0, 0);
     for (;;) {
@@ -810,8 +838,20 @@ PUBLIC int HTMemCopy ARGS2(
 	data += n;
 	HTReadProgress(bytes, 0);
 	HTDisplayPartial();
+
+	if (HTCheckForInterrupt()) {
+	    _HTProgress (TRANSFER_INTERRUPTED);
+	    if (bytes) {
+		rv = HT_INTERRUPTED;
+	    } else {
+		rv = -1;
+	    }
+	    break;
+	}
     }
-    return HT_LOADED;
+
+    HTFinishDisplayPartial();
+    return rv;
 }
 #endif
 
@@ -891,6 +931,7 @@ PRIVATE int HTGzFileCopy ARGS2(
 	}
     } /* next bufferload */
 
+    HTFinishDisplayPartial();
     return rv;
 }
 #endif /* USE_ZLIB */

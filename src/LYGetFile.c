@@ -259,6 +259,10 @@ Try_Redirected_URL:
 		    return(lynx_compile_opts(doc));
 #endif
 
+		} else if (url_type == LYNXMESSAGES_URL_TYPE) {
+		    /* show list of recent statusline messages */
+		    return(LYshow_statusline_messages(doc));
+
 #ifndef DISABLE_NEWS
 		} else if (url_type == NEWSPOST_URL_TYPE ||
 			   url_type == NEWSREPLY_URL_TYPE ||

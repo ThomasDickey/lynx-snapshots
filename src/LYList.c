@@ -11,7 +11,6 @@
 #include <GridText.h>
 #include <LYList.h>
 #include <LYClean.h>
-#include <LYSignal.h>
 #include <LYGlobalDefs.h>
 #include <LYCharUtils.h>
 

@@ -305,6 +305,7 @@ extern void LYRegisterLynxProtocols NOARGS;
 
 extern void LYUCPushAssumed PARAMS((
     HTParentAnchor *	anchor));
+extern int LYUCPopAssumed NOPARAMS;
 
 #endif /* HTACCESS_H */
 /*

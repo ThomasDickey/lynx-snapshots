@@ -15,7 +15,6 @@
 #include <LYUtils.h>
 #include <LYMap.h>
 #include <GridText.h>
-#include <LYSignal.h>
 #include <LYGlobalDefs.h>
 #include <LYKeymap.h>
 #include <LYCharUtils.h>

@@ -4,12 +4,10 @@
 #include <HTAlert.h>
 #include <HTTP.h>
 #include <LYCurses.h>
-#include <LYStrings.h>
 #include <LYUtils.h>
 #include <LYStructs.h>
 #include <LYGlobalDefs.h>
 #include <LYShowInfo.h>
-#include <LYSignal.h>
 #include <LYCharUtils.h>
 #include <GridText.h>
 #include <LYReadCFG.h>

@@ -10,7 +10,6 @@
 #include <LYUtils.h>
 #include <LYClean.h>
 #include <LYStrings.h>
-#include <LYGetFile.h>
 #include <LYHistory.h>
 #include <GridText.h>
 #include <LYCharSets.h>
@@ -30,7 +29,7 @@ PRIVATE BOOLEAN message_has_content ARGS1(
     CONST char *,		filename)
 {
     FILE *fp;
-    char buffer[72];
+    char *buffer = NULL;
     BOOLEAN in_headers = TRUE;
 
     if (!filename || (fp = fopen(filename, "r")) == NULL) {
@@ -38,7 +37,7 @@ PRIVATE BOOLEAN message_has_content ARGS1(
 	       filename ? filename : "(<null>)");
 	return FALSE;
     }
-    while (fgets(buffer, sizeof(buffer), fp) != NULL) {
+    while ((buffer = LYSafeGets(buffer, fp)) != NULL) {
 	char *cp = buffer;
 	char firstnonblank = '\0';
 	if (*cp == '\0') {
@@ -63,6 +62,7 @@ PRIVATE BOOLEAN message_has_content ARGS1(
 	if (firstnonblank && firstnonblank != '>') {
 	    if (!in_headers) {
 		fclose(fp);
+		FREE(buffer);
 		return TRUE;
 	    }
 	}
@@ -239,12 +239,13 @@ PUBLIC char *LYNewsPost ARGS2(
 	StrAllocCat(cp, org);
 #ifndef VMS
     } else if ((fp = fopen("/etc/organization", "r")) != NULL) {
-	if (fgets(user_input, sizeof(user_input), fp) != NULL) {
-	    if ((org = strchr(user_input, '\n')) != NULL) {
+	char *buffer;
+	if ((buffer = LYSafeGets(NULL, fp)) != NULL) {
+	    if ((org = strchr(buffer, '\n')) != NULL) {
 		*org = '\0';
 	    }
 	    if (user_input[0] != '\0') {
-		StrAllocCat(cp, user_input);
+		StrAllocCat(cp, buffer);
 	    }
 	}
 	fclose(fp);
@@ -381,9 +382,10 @@ PUBLIC char *LYNewsPost ARGS2(
 	    _user_message(APPEND_SIG_FILE, LynxSigFile);
 	} else if (HTConfirm(msg) == YES) {
 	    if ((fd = LYAppendToTxtFile (my_tempfile)) != NULL) {
+		char *buffer = NULL;
 		fputs("-- \n", fd);
-		while (fgets(user_input, sizeof(user_input), fp) != NULL) {
-		    fputs(user_input, fd);
+		while ((buffer = LYSafeGets(buffer, fp)) != NULL) {
+		    fputs(buffer, fd);
 		}
 		fclose(fd);
 	    }
@@ -403,8 +405,9 @@ PUBLIC char *LYNewsPost ARGS2(
      */
     if (CJKfile[0] != '\0') {
 	if ((fd = fopen(my_tempfile, "r")) != NULL) {
-	    while (fgets(user_input, sizeof(user_input), fd) != NULL) {
-		TO_JIS((unsigned char *)user_input,
+	    char *buffer = NULL;
+	    while ((buffer = LYSafeGets(buffer, fd)) != NULL) {
+		TO_JIS((unsigned char *)buffer,
 		       (unsigned char *)CJKinput);
 		fputs(CJKinput, fc);
 	    }

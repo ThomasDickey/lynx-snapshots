@@ -384,7 +384,7 @@ PUBLIC BOOLEAN LYPrependCharsetToSource = TRUE;
 PUBLIC BOOLEAN LYQuitDefaultYes = QUIT_DEFAULT_YES;
 
 #ifdef DISP_PARTIAL
-PUBLIC BOOLEAN display_partial = TRUE; /* Display document during download */
+PUBLIC BOOLEAN display_partial_flag = TRUE; /* Display document during download */
 PUBLIC BOOLEAN debug_display_partial = FALSE; /* Show with MessageSecs delay */
 PUBLIC int partial_threshold = -1;  /* # of lines to be d/l'ed until we repaint */
 #endif
@@ -972,9 +972,9 @@ PUBLIC int main ARGS2(
 	}
     }
     if (LYGetStdinArgs == TRUE) {
-	char buf[LINESIZE];
+	char *buf = NULL;
 
-	while (fgets(buf, sizeof(buf) - 1, stdin)) {
+	while ((buf = LYSafeGets(buf, stdin)) != 0) {
 	    int j;
 
 	    for (j = strlen(buf) - 1; j > 0 &&
@@ -1051,7 +1051,7 @@ PUBLIC int main ARGS2(
 		 *  Build GET data for later.  Stop reading when we see
 		 *  a line with "---" as its first three characters.
 		 */
-		while (fgets(buf, sizeof(buf), stdin) &&
+		while ((buf = LYSafeGets(buf, stdin)) != 0 &&
 		       strncmp(buf, "---", 3) != 0) {
 		    int j2;
 
@@ -1089,7 +1089,7 @@ PUBLIC int main ARGS2(
 		 *  Build post data for later.	Stop reading when we see
 		 *  a line with "---" as its first three characters.
 		 */
-		while (fgets(buf, sizeof(buf), stdin) &&
+		while ((buf = LYSafeGets(buf, stdin)) != 0 &&
 		       strncmp(buf, "---", 3) != 0) {
 		    int j2;
 
@@ -1257,6 +1257,14 @@ PUBLIC int main ARGS2(
     StrAllocCopy(UCAssume_MIMEcharset,
 			LYCharSet_UC[UCLYhndl_for_unspec].MIMEname);
 
+    /*
+     *	Make sure we have the edit map declared. - FM
+     */
+    if (!LYEditmapDeclared()) {
+	fprintf(stderr, gettext("\nLynx edit map not declared.\n\n"));
+	exit(-1);
+    }
+
 #if defined(USE_HASH)
     /*
      *	If no alternate lynx-style file was specified on
@@ -1304,15 +1312,7 @@ PUBLIC int main ARGS2(
 	fclose(fp);
 	style_readFromFile(lynx_lss_file);
     }
-#endif
-
-    /*
-     *	Make sure we have the edit map declared. - FM
-     */
-    if (!LYEditmapDeclared()) {
-	fprintf(stderr, gettext("\nLynx edit map not declared.\n\n"));
-	exit(-1);
-    }
+#endif /* USE_HASH */
 
 #if USE_COLOR_TABLE
     /*
@@ -1584,6 +1584,13 @@ PUBLIC int main ARGS2(
     if (dump_output_immediately)
 	LYCacheSource = SOURCE_CACHE_NONE;
 #endif
+#ifdef DISP_PARTIAL
+    /*
+     * Disable partial mode if not interactive.
+     */
+    if (dump_output_immediately)
+	display_partial_flag = FALSE;
+#endif
 
 #ifdef VMS
     set_vms_keys();
@@ -1782,7 +1789,8 @@ PUBLIC int main ARGS2(
 	 *  mode.  Instead of calling cleanup() here, let's only call
 	 *  this one. - BJP
 	 */
-	LYStoreCookies(LYCookieFile);
+	if (persistent_cookies)
+	    LYStoreCookies(LYCookieFile);
 #endif /* EXP_PERSISTENT_COOKIES */
 	exit_immediately(status);
     } else {
@@ -1832,6 +1840,7 @@ PUBLIC void LYRegisterLynxProtocols NOARGS
     HTRegisterProtocol(&LYLynxCookies);
 }
 
+#ifndef NO_CONFIG_INFO
 /*
  *  Some staff to reload lynx.cfg without restarting new lynx session,
  *  also load options menu items and command-line options
@@ -1842,11 +1851,19 @@ PUBLIC void LYRegisterLynxProtocols NOARGS
  */
 PUBLIC void reload_read_cfg NOARGS
 {
-    if (!LYRestricted) {
+    if (LYRestricted) return;  /* for sure */
 
-	/* save .lynxrc file in case we change something from Options Menu */
-	if (!save_rc()) return;
+    /* save .lynxrc file in case we change something from Options Menu */
+    if (!save_rc()) return;    /* can not write the very own file :( */
 
+    {
+	/* set few safe flags: */
+#ifdef PERSISTENT_COOKIES
+	BOOLEAN persistent_cookies_flag = persistent_cookies;
+	char * LYCookieFile_flag = LYCookieFile;
+#endif
+
+	free_lynx_cfg(); /* free downloaders, printers, not always environments */
 	/*
 	 *  Process the configuration file.
 	 */
@@ -1862,13 +1879,13 @@ PUBLIC void reload_read_cfg NOARGS
 	/* but other things may be lost: */
 
 	/*
-	 *  Process any command line arguments not already handled. - FM
+	 *  Process any command line arguments not already handled.
 	 */
 		/* Not implemented yet here */
 
 	/*
 	 *  Process any stdin-derived arguments for a lone "-"  which we've
-	 *  loaded into LYStdinArgs. - FM
+	 *  loaded into LYStdinArgs.
 	 */
 		/* Not implemented yet here */
 
@@ -1877,11 +1894,23 @@ PUBLIC void reload_read_cfg NOARGS
 	 */
 		/* Not implemented yet here,
 		 * a major problem: file paths
-		 * like lynx_temp_space, LYCookieFile etc.
+		 * like lynx_save_space, LYCookieFile etc.
 		 */
+#ifdef PERSISTENT_COOKIES
+	/* restore old settings */
+	 if (persistent_cookies != persistent_cookies_flag) {
+	     persistent_cookies = persistent_cookies_flag;
+	     HTAlert(gettext("persistent cookies state will be changed in next session only."));
+	 }
+	 if (strcmp(LYCookieFile, LYCookieFile_flag)) {
+	     StrAllocCopy(LYCookieFile, LYCookieFile_flag);
+	     CTRACE(tfp, "cookies file can be changed in next session only, restored.\n")
+	 }
+#endif
 
     }
 }
+#endif /* !NO_CONFIG_INFO */
 
 
 /* There are different ways of setting arguments on the command line, and
@@ -1913,13 +1942,13 @@ typedef union {
 #ifdef  PARSE_DEBUG
 #define ParseData BOOLEAN *set_value; int *int_value; char **str_value; ParseFunc fun_value
 #define PARSE_SET(n,t,v,h) {n,t,    v,  0,  0,  0,    h}
-#define PARSE_INT(n,t,v,h) {n,t,    0, &v,  0,  0,    h}
+#define PARSE_INT(n,t,v,h) {n,t,    0,  v,  0,  0,    h}
 #define PARSE_STR(n,t,v,h) {n,t,    0,  0,  v,  0,    h}
 #define PARSE_FUN(n,t,v,h) {n,t,    0,  0,  0,  v,    h}
 #else
 #define ParseData long value
 #define PARSE_SET(n,t,v,h) {n,t,   (long) (v),        h}
-#define PARSE_INT(n,t,v,h) {n,t,   (long)&(v),        h}
+#define PARSE_INT(n,t,v,h) {n,t,   (long) (v),        h}
 #define PARSE_STR(n,t,v,h) {n,t,   (long) (v),        h}
 #define PARSE_FUN(n,t,v,h) {n,t,   (long) (v),        h}
 #endif
@@ -2180,7 +2209,7 @@ static int get_data_fun ARGS1(
      *  User data for GET form.
      */
     char **get_data;
-    char buf[1024];
+    char *buf = NULL;
 
     /*
      *  On Unix, conflicts with curses when interactive
@@ -2201,7 +2230,7 @@ static int get_data_fun ARGS1(
      *  Build GET data for later.  Stop reading when we see a line
      *  with "---" as its first three characters.
      */
-    while (fgets(buf, sizeof(buf), stdin) &&
+    while ((buf = LYSafeGets(buf, stdin)) != 0 &&
 	  strncmp(buf, "---", 3) != 0) {
 	int j;
 
@@ -2349,7 +2378,7 @@ static int post_data_fun ARGS1(
      *  User data for POST form.
      */
     char **post_data;
-    char buf[1024];
+    char *buf = NULL;
 
     /*
      * On Unix, conflicts with curses when interactive so let's force a dump.
@@ -2369,7 +2398,7 @@ static int post_data_fun ARGS1(
      * Build post data for later.  Stop reading when we see a line with "---"
      * as its first three characters.
      */
-    while (fgets(buf, sizeof(buf), stdin) &&
+    while ((buf = LYSafeGets(buf, stdin)) != 0 &&
 	  strncmp(buf, "---", 3) != 0) {
 	int j;
 
@@ -2522,6 +2551,9 @@ static int version_fun ARGS1(
 	  LYNX_DATE_LEN,
 	  LYNX_RELEASE ? LYNX_RELEASE_DATE : &LYNX_DATE[LYNX_DATE_OFF]
 	  );
+#ifdef SYSTEM_NAME
+    printf(gettext("Built on %s %s %s\n"), SYSTEM_NAME, __DATE__, __TIME__);
+#endif
     printf("\n");
     printf(gettext(
 	  "Copyrights held by the University of Kansas, CERN, and other contributors.\n"
@@ -2751,7 +2783,7 @@ keys (may be incompatible with some curses packages)"
       "toggles inclusion of ISMAP links when client-side\nMAPs are present"
    ),
    PARSE_INT(
-      "link",		NEED_INT_ARG,		ccount,
+      "link",		NEED_INT_ARG,		&ccount,
       "=NUMBER\nstarting count for lnk#.dat files produced by -crawl"
    ),
    PARSE_SET(
@@ -2838,11 +2870,11 @@ keys (may be incompatible with some curses packages)"
    ),
 #ifdef DISP_PARTIAL
    PARSE_SET(
-      "partial",	TOGGLE_ARG,		&display_partial,
+      "partial",	TOGGLE_ARG,		&display_partial_flag,
       "toggles display partial pages while downloading"
    ),
    PARSE_INT(
-      "partial_thres",  IGNORE_ARG|INT_ARG,     partial_threshold,
+      "partial_thres",  NEED_INT_ARG,          &partial_threshold,
       "[=NUMBER]\nnumber of lines to render before repainting display\n\
 with partial-display logic"
    ),
@@ -2862,7 +2894,7 @@ with partial-display logic"
    PARSE_SET(
       "preparsed",	SET_ARG,		&LYPreparsedSource,
       "show parsed text/html with -source and in source view\n\
-       to visualize how lynx behaves with invalid HTML"
+to visualize how lynx behaves with invalid HTML"
    ),
 #ifdef USE_PSRC
    PARSE_SET(

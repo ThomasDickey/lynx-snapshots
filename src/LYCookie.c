@@ -59,7 +59,6 @@
 #include <HTParse.h>
 #include <HTAlert.h>
 #include <LYCurses.h>
-#include <LYSignal.h>
 #include <LYUtils.h>
 #include <LYCharUtils.h>
 #include <LYClean.h>
@@ -1952,7 +1951,7 @@ PUBLIC void LYLoadCookies ARGS1 (
 	char *,		cookie_file)
 {
     FILE *cookie_handle;
-    char buf[max_cookies_buffer+10]; /* should be long enough for a cookie line */
+    char *buf = NULL;
     static char domain[256], path[LY_MAXPATH], name[256], value[4100];
     static char what[8], secure[8], expires_a[16];
     static struct {
@@ -1977,18 +1976,13 @@ PUBLIC void LYLoadCookies ARGS1 (
     CTRACE(tfp, "LYLoadCookies: reading cookies from %s\n", cookie_file);
 
     number_of_file_cookies = 0;
-    while (!feof(cookie_handle)) {
+    while ((buf = LYSafeGets(buf, cookie_handle)) != 0) {
 	cookie *moo;
 	unsigned i = 0;
 	int tok_loop;
 	char *tok_out, *tok_ptr;
-	char *j;
 
-	j = fgets(buf, sizeof(buf)-1, cookie_handle);
-
-	if((j == NULL) || (buf[0] == '\0' || buf[0] == '\n' || buf[0] == '#')) {
-	    if (j == NULL && ferror(cookie_handle))
-		break;
+	if ((buf[0] == '\0' || buf[0] == '\n' || buf[0] == '#')) {
 	    continue;
 	}
 

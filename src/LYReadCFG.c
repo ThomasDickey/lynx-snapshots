@@ -7,6 +7,7 @@
 #include <UCMap.h>
 
 #include <LYUtils.h>
+#include <GridText.h>
 #include <LYStrings.h>
 #include <LYStructs.h>
 #include <LYGlobalDefs.h>
@@ -17,7 +18,6 @@
 #include <LYGetFile.h>
 #include <LYCgi.h>
 #include <LYCurses.h>
-#include <LYSignal.h>
 #include <LYBookmark.h>
 #include <LYCookie.h>
 #include <LYReadCFG.h>
@@ -37,8 +37,8 @@ extern int HTNewsMaxChunk;  /* Max news articles before chunking (HTNews.c) */
 extern int HTNewsChunkSize; /* Number of news articles per chunk (HTNews.c) */
 #endif
 
-PUBLIC BOOLEAN have_read_cfg=FALSE;
-PUBLIC BOOLEAN LYUseNoviceLineTwo=TRUE;
+PUBLIC BOOLEAN have_read_cfg = FALSE;
+PUBLIC BOOLEAN LYUseNoviceLineTwo = TRUE;
 
 /*
  *  Translate a TRUE/FALSE field in a string buffer.
@@ -76,7 +76,6 @@ PRIVATE char *find_colon ARGS1(
     return NULL;
 }
 
-#ifdef LY_FIND_LEAKS
 /*
  *  Function for freeing the DOWNLOADER and UPLOADER menus list. - FM
  */
@@ -121,7 +120,6 @@ PRIVATE void free_item_list NOARGS
 
     return;
 }
-#endif /* LY_FIND_LEAKS */
 
 /*
  *  Process string buffer fields for DOWNLOADER or UPLOADER menus.
@@ -201,7 +199,6 @@ PRIVATE void add_item_to_list ARGS2(
 }
 
 
-#ifdef LY_FIND_LEAKS
 /*
  *  Function for freeing the PRINTER menus list. - FM
  */
@@ -221,7 +218,6 @@ PRIVATE void free_printer_item_list NOARGS
 
     return;
 }
-#endif /* LY_FIND_LEAKS */
 
 /*
  *  Process string buffer fields for PRINTER menus.
@@ -408,12 +404,9 @@ PRIVATE void parse_color ARGS1(
 {
     int color;
     char *fg, *bg;
-    char temp[501];
+    char *temp = 0;
 
-    if (strlen(buffer) < sizeof(temp))
-	strcpy(temp, buffer);
-    else
-	strcpy(temp, "Color config line too long");
+    StrAllocCopy(temp, buffer);	/* save a copy, for error messages */
 
     /*
      *	We are expecting a line of the form:
@@ -440,10 +433,9 @@ PRIVATE void parse_color ARGS1(
 	check_color(bg, default_bg)) < 0)
 	exit_with_color_syntax(temp);
 #endif
+    FREE(temp);
 }
 #endif /* USE_COLOR_TABLE */
-
-#define MAX_LINE_BUFFER_LEN	501
 
 typedef int (*ParseFunc) PARAMS((char *));
 
@@ -620,11 +612,12 @@ static int dired_menu_fun ARGS1(
 static int jumpfile_fun ARGS1(
 	char *,		value)
 {
-    char buffer [MAX_LINE_BUFFER_LEN];
+    char *buffer = NULL;
 
-    sprintf (buffer, "JUMPFILE:%s", value);
+    HTSprintf0 (&buffer, "JUMPFILE:%s", value);
     if (!LYJumpInit(buffer))
 	CTRACE(tfp, "Failed to register %s\n", buffer);
+    free(buffer);
 
     return 0;
 }
@@ -868,12 +861,11 @@ static void html_src_bad_syntax ARGS2(
 	    char*, value,
 	    char*, option_name)
 {
-    char buf[100];
+    char *buf = 0;
 
-    strcpy(buf,"HTMLSRC_");
-    strcat(buf,option_name);
+    HTSprintf0(&buf,"HTMLSRC_%s", option_name);
     LYUpperCase(buf);
-    fprintf(stderr,"Bad syntax in TAGSPEC %s:%s\n",buf,value);
+    fprintf(stderr,"Bad syntax in TAGSPEC %s:%s\n", buf, value);
     exit_immediately(-1);
 }
 
@@ -1121,7 +1113,7 @@ static Config_Type Config_Table [] =
      PARSE_SET("no_referer_header", CONF_BOOL, &LYNoRefererHeader),
      PARSE_FUN("outgoing_mail_charset", CONF_FUN, outgoing_mail_charset_fun),
 #ifdef DISP_PARTIAL
-     PARSE_SET("partial", CONF_BOOL, &display_partial),
+     PARSE_SET("partial", CONF_BOOL, &display_partial_flag),
      PARSE_INT("partial_thres", CONF_INT, &partial_threshold),
 #endif
 #ifdef EXP_PERSISTENT_COOKIES
@@ -1206,26 +1198,66 @@ PUBLIC void free_lynx_cfg NOARGS
 	    if (q->str_value != 0) {
 		FREE(*(q->str_value));
 		FREE(q->str_value);
+		/* is it enough for reload_read_cfg() to clean up
+		 * the result of putenv()?  No for certain platforms.
+		 */
 	    }
 	    break;
 	default:
 	    break;
 	}
     }
+    free_item_list();
+    free_printer_item_list();
 }
+
+PRIVATE Config_Type *lookup_config ARGS1(
+	char *,		name)
+{
+    Config_Type *tbl = Config_Table;
+    char ch = TOUPPER(*name);
+
+    while (tbl->name != 0) {
+	char ch1 = tbl->name[0];
+
+	if ((ch == TOUPPER(ch1))
+	    && (0 == strcasecomp (name, tbl->name)))
+	    break;
+
+	tbl++;
+    }
+    return tbl;
+}
+
+#define NOPTS_ ( (sizeof Config_Table)/(sizeof Config_Table[0]) - 1 )
+typedef BOOL (optidx_set_t) [ NOPTS_ ];
+ /* if element is FALSE, then it's allowed in the current file*/
+
+#define optidx_set_AND(r,a,b) \
+    {\
+	unsigned i1;\
+	for (i1 = 0; i1 < NOPTS_; ++i1) \
+	    (r)[i1]= (a)[i1] || (b)[i1]; \
+    }
+
 
 /*
  * Process the configuration file (lynx.cfg).
+ *
+ * 'allowed' is a pointer to HTList of allowed options.  Since the included
+ * file can also include other files with a list of acceptable options, these
+ * lists are ANDed.
  */
-PUBLIC void read_cfg ARGS4(
+PRIVATE void do_read_cfg ARGS5(
 	char *, cfg_filename,
 	char *, parent_filename,
 	int,	nesting_level,
-	FILE *,	fp0)
+	FILE *,	fp0,
+	optidx_set_t*, allowed)
 {
     FILE *fp;
     char mypath[LY_MAXPATH];
-    char buffer[MAX_LINE_BUFFER_LEN];
+    char *buffer = 0;
 
     CTRACE(tfp, "Loading cfg file '%s'.\n", cfg_filename);
 
@@ -1262,11 +1294,10 @@ PUBLIC void read_cfg ARGS4(
     /*
      *	Process each line in the file.
      */
-    while (fgets(buffer, sizeof(buffer), fp) != 0) {
+    while ((buffer = LYSafeGets(buffer, fp)) != 0) {
 	char *name, *value;
 	char *cp;
 	Config_Type *tbl;
-	char ch;
 #ifdef PARSE_DEBUG
 	Config_Type *q;
 #else
@@ -1309,21 +1340,20 @@ PUBLIC void read_cfg ARGS4(
 		*cp = 0;
 	}
 
-	tbl = Config_Table;
-	ch = TOUPPER(*name);
-	while (tbl->name != 0) {
-	    char ch1 = tbl->name[0];
-
-	    if ((ch == TOUPPER(ch1))
-		&& (0 == strcasecomp (name, tbl->name)))
-		break;
-
-	    tbl++;
+	tbl = lookup_config(name);
+	if (tbl->name == 0) {
+	    /* lynx ignores unknown keywords */
+	    continue;
 	}
 
-	if (tbl->name == 0) {
-	    /* Apparently, lynx ignores unknown keywords */
-	    /* fprintf (stderr, "%s not found in config file */
+	if ( allowed && (*allowed)[ tbl-Config_Table ] ) {
+	    if (fp0 == NULL)
+		fprintf (stderr, "%s is not allowed in the %s\n",
+		    name,cfg_filename);
+	    /*FIXME: we can do something wiser if we are generating
+	    the html representation of lynx.cfg - say include this line
+	    in bold, or something...*/
+
 	    continue;
 	}
 
@@ -1374,24 +1404,29 @@ PUBLIC void read_cfg ARGS4(
 #ifdef VMS
 		Define_VMSLogical(name, value);
 #else
-		char tmpbuf[MAX_LINE_BUFFER_LEN];
-		sprintf (tmpbuf, "%s=%s", name, value);
-		if ((q->str_value = (char **)calloc(1, sizeof(char **))) != 0) {
-		    StrAllocCopy(*(q->str_value), tmpbuf);
-		    putenv (*(q->str_value));
-		} else {
-		    outofmem(__FILE__, "read_cfg");
-		}
+		if (q->str_value == 0)
+			q->str_value = calloc(1, sizeof(char *));
+		HTSprintf0 (q->str_value, "%s=%s", name, value);
+		putenv (*(q->str_value));
 #endif
 	    }
 	    break;
 
-	case CONF_INCLUDE:
+	case CONF_INCLUDE: {
 	    /* include another file */
+	    optidx_set_t cur_set,anded_set;
+	    optidx_set_t* resultant_set = NULL;
+	    char* p1, *p2, savechar;
+	    BOOL any_optname_found = FALSE;
+
+	    char *url = NULL;
+	    char *cp1 = NULL;
+
+	    if ((p1 = strchr(value,':')) != 0)
+		*p1++ ='\0';
+
 #ifndef NO_CONFIG_INFO
 	    if (fp0 != 0  &&  !LYRestricted) {
-		char *url = 0;
-		char *cp1 = NULL;
 		LYLocalFileToURL(&url, value);
 		StrAllocCopy(cp1, value);
 		if (strchr(value, '&') || strchr(value, '<')) {
@@ -1400,17 +1435,79 @@ PUBLIC void read_cfg ARGS4(
 
 		fprintf(fp0, "%s:<a href=\"%s\">%s</a>\n\n", name, url, cp1);
 		fprintf(fp0, "	  #&lt;begin  %s&gt;\n", cp1);
+	    }
+#endif
 
-		read_cfg (value, cfg_filename, nesting_level + 1, fp0);
+	    if (p1) {
+		while (*(p1 = LYSkipBlanks(p1)) != 0) {
+		    Config_Type *tbl2;
 
+		    p2 = LYSkipNonBlanks(p1);
+		    savechar = *p2;
+		    *p2 = 0;
+
+		    tbl2 = lookup_config(p1);
+		    if (tbl2->name == 0) {
+			if (fp0 == NULL)
+			    fprintf (stderr, "unknown option name %s in %s\n",
+				     p1, cfg_filename);
+		    } else {
+			unsigned i;
+			if (!any_optname_found) {
+			    any_optname_found = TRUE;
+			    for (i = 0; i < NOPTS_; ++i)
+				cur_set[i] = TRUE;
+			}
+			cur_set[tbl2 - Config_Table] = FALSE;
+		    }
+		    *p2 = savechar;
+		}
+	    }
+	    if (!allowed) {
+		if (!any_optname_found)
+		    resultant_set = NULL;
+		else
+		    resultant_set = &cur_set;
+	    } else {
+		if (!any_optname_found)
+		    resultant_set = allowed;
+		else {
+		    optidx_set_AND(anded_set, *allowed, cur_set);
+		    resultant_set = &anded_set;
+		}
+	    }
+
+#ifndef NO_CONFIG_INFO
+	    /*now list the opts that are allowed in included file. If all opts
+	    are allowed, then emit nothing, else emit an effective set of
+	    allowed options in <ul>. Option names will be and uppercased.
+	    FIXME: uppercasing option names can be considered redundant. */
+
+	    if (fp0 != 0  &&  !LYRestricted && resultant_set) {
+		char *buf = NULL;
+		unsigned i;
+
+		fprintf(fp0,"	  Options allowed in this file:\n");
+		for (i = 0; i < NOPTS_; ++i) {
+		    if ((*resultant_set)[i])
+			continue;
+		    StrAllocCopy(buf, Config_Table[i].name);
+		    LYUpperCase(buf);
+		    fprintf(fp0,"	  * %s\n", buf);
+		}
+		free(buf);
+	    }
+#endif
+	    do_read_cfg (value, cfg_filename, nesting_level + 1, fp0,resultant_set);
+
+#ifndef NO_CONFIG_INFO
+	    if (fp0 != 0  &&  !LYRestricted) {
 		fprintf(fp0, "	  #&lt;end of %s&gt;\n\n", cp1);
 		FREE(url);
 		FREE(cp1);
-	    } else
-#endif /* !NO_CONFIG_INFO */
-
-	    read_cfg (value, cfg_filename, nesting_level + 1, fp0);
-
+	    }
+#endif
+	    }
 	    break;
 
 	case CONF_ADD_ITEM:
@@ -1514,6 +1611,17 @@ PUBLIC void read_cfg ARGS4(
     }
 
 }
+/* this is a public interface to do_read_cfg */
+PUBLIC void read_cfg ARGS4(
+	char *, cfg_filename,
+	char *, parent_filename,
+	int,	nesting_level,
+	FILE *,	fp0)
+{
+    do_read_cfg(cfg_filename,parent_filename,nesting_level,fp0,
+	NULL);
+}
+
 
 /*
  *  Show rendered lynx.cfg data without comments, LYNXCFG:/ internal page.
@@ -1541,7 +1649,7 @@ PUBLIC int lynx_cfg_infopage ARGS1(
 	/*
 	 *  Some staff to reload read_cfg(),
 	 *  but also load options menu items and command-line options
-	 *  to made things consistent.	Not implemented yet. Dummy.
+	 *  to make things consistent.	Implemented in LYMain.c
 	 */
 	reload_read_cfg();
 
@@ -1572,6 +1680,7 @@ PUBLIC int lynx_cfg_infopage ARGS1(
 	if (!HTLoadAbsolute(&WWWDoc))
 	    return(NOT_FOUND);
 
+	HTuncache_current_document();  /* will never use again */
 
 	/*  now set up the flag and fall down to create a new LYNXCFG:/ page */
 	local_url = 0;	/* see below */

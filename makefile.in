@@ -179,7 +179,7 @@ all lynx$x: cfg_defs.h LYHelp.h
 @MSG_DIR_MAKE@	$(SHELL) $(srcdir)/fixtext.sh $(srcdir)/LYMessages_en.h >LYMessages.c
 @INTLDIR_MAKE@	cd intl && $(MAKE) CC="$(CC)"
 @MSG_DIR_MAKE@	cd po && $(MAKE) CC="$(CC)"
-	cd WWW/Library/unix && $(MAKE) CC="$(CC)" \
+	cd $(WWWINC) && $(MAKE) CC="$(CC)" \
 		LY_CFLAGS="$(CFLAGS)" \
 		CPPFLAGS="$(CPPFLAGS)" \
 		LYFLAGS="$(SITE_LYDEFS)"
@@ -189,10 +189,10 @@ all lynx$x: cfg_defs.h LYHelp.h
 		LIBS="$(LIBS) $(RESOLVLIB) $(WAISLIB) $(SITE_LIBS)" \
 		SITE_DEFS="$(SITE_DEFS)" \
 		WWWINC=$(WWWINC) \
-		WWWLIB="../WWW/Library/unix/libwww.a"
+		WWWLIB="../$(WWWINC)/libwww.a"
 
 lint:
-	cd WWW/Library/unix && $(MAKE) LINT="$(LINT)" CC="$(CC)" \
+	cd $(WWWINC) && $(MAKE) LINT="$(LINT)" CC="$(CC)" \
 		LY_CFLAGS="$(CFLAGS)" \
 		CPPFLAGS="$(CPPFLAGS)" \
 		LYFLAGS="$(SITE_LYDEFS)" lint
@@ -202,7 +202,7 @@ lint:
 		LIBS="$(LIBS) $(RESOLVLIB) $(WAISLIB) $(SITE_LIBS)" \
 		SITE_DEFS="$(SITE_DEFS)" \
 		WWWINC=$(WWWINC) \
-		WWWLIB="../WWW/Library/unix/libwww.a" lint
+		WWWLIB="../$(WWWINC)/libwww.a" lint
 
 help:
 	@echo
@@ -227,7 +227,7 @@ clean:
 	rm -f core *.core
 
 depend: cfg_defs.h LYHelp.h
-	cd WWW/Library/unix && $(MAKE) $@
+	cd $(WWWINC) && $(MAKE) $@
 	cd src && $(MAKE) $@
 
 distclean: clean
@@ -241,8 +241,8 @@ distclean: clean
 @MSG_DIR_MAKE@	cd po && $(MAKE) $@
 @MSG_DIR_MAKE@	-rmdir po
 	-rm -f *~ *.bak *.sav
-	-rm -f WWW/Library/unix/makefile src/makefile src/chrtrans/makefile
-@SRCDIR_CLEAN@	-rmdir WWW/Library/unix && rmdir WWW/Library && rmdir WWW
+	-rm -f $(WWWINC)/makefile src/makefile src/chrtrans/makefile
+@SRCDIR_CLEAN@	-rmdir $(WWWINC) && rmdir WWW/Library && rmdir WWW
 @SRCDIR_CLEAN@	-rmdir src/chrtrans && rmdir src
 	-rm -f makefile lynx_cfg.h config.status config.log config.cache
 	-rm -f lynx$x install-*
@@ -286,7 +286,7 @@ lynx.patch: $(top_srcdir) $(top_srcdir)/CHANGES
 		config.status \
 		lynx_cfg.h \
 			; \
-		for I in . src WWW/Library/Implementation; do ( set +e; \
+		for I in . src $(WWWINC); do ( set +e; \
 			( set -x; cd $$I && rm -f *.orig *.rej makefile ); : ); \
 		done; }
 	( cd $(top_srcdir)/..; echo "%%% Created `date` by target $@. %%%"; \

@@ -11,7 +11,6 @@
 #include <LYSignal.h>
 #include <LYClean.h>
 #include <LYCharSets.h>
-#include <LYCharUtils.h>
 #include <UCMap.h>
 #include <UCAux.h>
 #include <LYKeymap.h>
@@ -21,6 +20,7 @@
 #include <GridText.h>
 #include <LYGetFile.h>
 #include <LYReadCFG.h>
+#include <LYPrettySrc.h>
 
 #include <LYLeaks.h>
 
@@ -3911,6 +3911,7 @@ PUBLIC int postoptions ARGS1(
 
     /*
      *  Exit: working around the previous document.
+     *  Being out of mainloop()/getfile() cycle, do things manually.
      */
     CTRACE(tfp, "\nLYOptions.c/postoptions(): exiting...\n");
 
@@ -3935,6 +3936,7 @@ PUBLIC int postoptions ARGS1(
     if (!HTLoadAbsolute(&WWWDoc))
 	return(NOT_FOUND);
 
+    HTuncache_current_document(); /* will never use again */
 
     /*
      *  Return to previous doc, not to options menu!
@@ -3960,6 +3962,7 @@ PUBLIC int postoptions ARGS1(
     if (!HTLoadAbsolute(&WWWDoc))
        return(NOT_FOUND);
 
+    reloading = FALSE;  /* set manually */ 
     /*  force end-to-end reload from remote server if change LYUserAgent
      *  or language or pref_charset (marked by need_end_reload flag above),
      *  from old-style LYK_OPTIONS (mainloop):
@@ -3982,13 +3985,45 @@ PUBLIC int postoptions ARGS1(
 	need_reload = TRUE;
     }
 
-    if (need_reload == TRUE) {
-	/*  update HText cache */
-	HTuncache_current_document();
-	LYpush(newdoc, FALSE);
+    if (need_reload == FALSE) {
+	/*  no uncache, already loaded */
 	CTRACE(tfp, "LYOptions.c/postoptions(): now really exit.\n\n");
-	return(NULLFILE);
+	return(NORMAL);
     } else {
+	/*  update HText cache */
+
+	/*
+	 *  Check to see if should reload source, or load html
+	 *  (from LYK_RELOAD & LYK_OPTIONS)
+	 */
+	if (HTisDocumentSource()) {
+#ifndef USE_PSRC
+	    HTOutputFormat = WWW_SOURCE;
+#else
+	    if (LYpsrc)
+		psrc_view = TRUE;
+	    else
+		HTOutputFormat = WWW_SOURCE;
+#endif
+	}
+	if (lynx_mode == FORMS_LYNX_MODE) {
+	    /* Sorry! lynx_mode set according the last display_page() state,
+	     * it always in form mode since we came from form-based option menu
+	     * so the information from mainloop() apperently lost.
+	     * reset here until we learn how to do it properly.
+	     */
+	    lynx_mode = NORMAL_LYNX_MODE;
+	}
+#ifdef SOURCE_CACHE
+	if (reloading == FALSE) {
+	    /* one more attempt to be smart enough: */
+	    if (HTreparse_document()) {
+		CTRACE(tfp, "LYOptions.c/postoptions(): now really exit.\n\n");
+		return(NORMAL);
+	    }
+	}
+#endif
+	HEAD_request = HTLoadedDocumentIsHEAD();
 	/*  no uncache, already loaded */
 	CTRACE(tfp, "LYOptions.c/postoptions(): now really exit.\n\n");
 	return(NORMAL);

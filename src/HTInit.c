@@ -272,16 +272,14 @@ PRIVATE int ProcessMailcapEntry ARGS2(
 	struct MailcapEntry *,	mc)
 {
     size_t rawentryalloc = 2000, len;
-    char *rawentry, *s, *t, *LineBuf;
+    char *rawentry, *s, *t;
+    char *LineBuf = NULL;
 
-    LineBuf = (char *)malloc(LINE_BUF_SIZE);
-    if (!LineBuf)
-	ExitWithError(MEMORY_EXHAUSTED_ABORT);
     rawentry = (char *)malloc(1 + rawentryalloc);
     if (!rawentry)
 	ExitWithError(MEMORY_EXHAUSTED_ABORT);
     *rawentry = '\0';
-    while (fgets(LineBuf, LINE_BUF_SIZE, fp)) {
+    while ((LineBuf = LYSafeGets(LineBuf, fp)) != 0) {
 	if (LineBuf[0] == '#')
 	    continue;
 	len = strlen(LineBuf);
@@ -303,8 +301,6 @@ PRIVATE int ProcessMailcapEntry ARGS2(
 	    break;
 	}
     }
-
-    FREE(LineBuf);
 
     s = LYSkipBlanks(rawentry);
     if (!*s) {
