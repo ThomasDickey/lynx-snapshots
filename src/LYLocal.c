@@ -444,6 +444,7 @@ PRIVATE BOOLEAN remove_tagged NOARGS
 		    break;
 		}
 		++count;
+		FREE(testpath);
 	    }
 	}
     }
@@ -599,7 +600,6 @@ PRIVATE BOOLEAN modify_tagged ARGS1(
 		srcpath = HTfullURL_toFile(cp);
 
 		if (move_file(srcpath, savepath) < 0) {
-		    FREE(cp);
 		    if (count == 0)
 			count = -1;
 		    break;
@@ -2119,6 +2119,7 @@ PUBLIC BOOLEAN local_install ARGS3(
 	    err = (LYExecv(INSTALL_PATH, args, tmpbuf) <= 0);
 	    FREE(args[src]);
 	    if (err) {
+		FREE(tmpbuf);
 		FREE(tmpdest);
 		return ((count == 0) ? -1 : count);
 	    }

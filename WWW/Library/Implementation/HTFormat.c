@@ -531,7 +531,7 @@ PUBLIC void HTDisplayPartial NOARGS
 	*/
 	int Newline_partial = LYGetNewline();
 
-	if (((Newline_partial + display_lines) - 1 >= NumOfLines_partial)
+	if (((Newline_partial + display_lines) - 1 > NumOfLines_partial)
 		/* current page not complete... */
 	&& (partial_threshold > 0 ?
 		((Newline_partial + partial_threshold) -1 <= HText_getNumOfLines()) :
@@ -813,8 +813,10 @@ PUBLIC int HTFileCopy ARGS2(
 	/*  Suppress last screen update in partial mode - a regular update
 	 *  under control of mainloop() should follow anyway. - kw
 	 */
+#ifdef DISP_PARTIAL
 	if (display_partial && bytes != HTMainAnchor->content_length)
 	    HTDisplayPartial();
+#endif
 
 	if (HTCheckForInterrupt()) {
 	    _HTProgress (TRANSFER_INTERRUPTED);

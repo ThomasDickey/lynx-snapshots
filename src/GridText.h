@@ -304,7 +304,7 @@ extern void LYMoveToLink PARAMS((
 	BOOL		utf_flag));
 
 
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 extern void HTMark_asSource NOPARAMS;
 #endif
 

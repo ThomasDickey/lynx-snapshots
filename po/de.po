@@ -1,3 +1,21 @@
+#  This file is a placeholder;
+#  see http://www.iro.umontreal.ca/contrib/po/HTML/domain-lynx.html
+
+# German translations for the `lynx' program.
+# Copyright (C) 1999 Free Software Foundation, Inc.
+# Erwin Dieterich <bamse@gmx.de>, 1999.
+#
+# The TRANSLATIONS in this file are in the public domain.
+# This does not apply to the included original strings, which were
+# extracted from the Lynx source code by the xgettext program.
+#
+# Most translations by:
+# Klaus Weide <kweide@enteract.com>, 1999.
+#
+# Maintainer since July 1999:
+# Erwin Dieterich <bamse@gmx.de>, 1999.
+#
+
 #
 # Sat Aug 22 18:47:32 EDT 1998
 #
@@ -8,10 +26,10 @@ msgstr ""
 "Content-Type: text/plain; charset=\n"
 "Files: src/LYMain.c\n"
 
-#: src/LYMain.c:2507
+#: src/LYMain.c:2554
 #, c-format
-msgid "%s Version %s %s"
-msgstr "%s Programmversion %s %s"
+msgid "\n%s Version %s (%.*s)\n"
+msgstr "\n%s Programmversion %s (%.*s)\n"
 
 #: src/LYMain.c:2509
 #, c-format

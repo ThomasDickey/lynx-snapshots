@@ -963,7 +963,7 @@
  * Use lynxexec for commands or scripts that generate a screen output which
  * should be held via a prompt to press <return> before returning to Lynx
  * for display of the current document.
- * Use lynxprog for programs such as mail which do require a pause before
+ * Use lynxprog for programs such as mail which do not require a pause before
  * Lynx restores the display of the current document.
  *
  * Execution scripts take the form of a standard
@@ -1302,12 +1302,12 @@
  * the version definition with the Project Version on checkout.  Just
  * ignore it. - kw */
 /* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
-#define LYNX_VERSION "2.8.3dev.17"
+#define LYNX_VERSION "2.8.3dev.18"
 #define LYNX_WWW_HOME "http://lynx.browser.org/"
 #define LYNX_WWW_DIST "http://www.slcc.edu/lynx/current/"
 #define LYNX_RELEASE FALSE
 /* $Format: "#define LYNX_DATE \"$ProjectDate$\""$ */
-#define LYNX_DATE "Wed, 15 Dec 1999 04:03:18 -0700"
+#define LYNX_DATE "Thu, 06 Jan 2000 20:02:22 -0700"
 #define LYNX_DATE_OFF 5		/* truncate the automatically-generated date */
 #define LYNX_DATE_LEN 11	/* truncate the automatically-generated date */
 #define LYNX_RELEASE_DATE "1999"

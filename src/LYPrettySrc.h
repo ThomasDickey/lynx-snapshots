@@ -1,7 +1,7 @@
 #ifndef LYPrettySrc_H
 #define LYPrettySrc_H
 
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 
 #include <HTMLDTD.h>
 
@@ -73,7 +73,7 @@ extern int attrname_transform;
 
 
 extern BOOL psrcview_no_anchor_numbering;
-#endif /* ifdef USE_PSRC */
+#endif /* ifdef USE_PRETTYSRC */
 
 
 #endif /* LYPrettySrc_H */

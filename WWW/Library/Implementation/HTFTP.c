@@ -1279,7 +1279,6 @@ PRIVATE void set_years_and_date NOARGS
 	day[0] = '0';
     }
     strncpy(month, (char *)ctime(&NowTime)+4, 3);
-    strncpy(month, (char *)ctime(&NowTime)+4, 3);
     month[3] = '\0';
     for (i = 0; i < 12; i++) {
 	if (!strcasecomp(month, months[i])) {
@@ -2459,7 +2458,11 @@ PRIVATE int compare_EntryInfo_structs ARGS2(
 		if (date1[6] == ' ' || date1[6] == HT_NON_BREAK_SPACE) {
 		    date1[6] = '0';
 		}
-		if (date1[0] == '9' && atoi(date1) > TheDate) {
+		/*  If no year given, assume last year if it would otherwise
+		 *  be in the future by more than one day.  The one day
+		 *  tolerance is to account for a possible timezone
+		 *  difference. - kw */
+		if (date1[0] == '9' && atoi(date1) > TheDate + 1) {
 		    for (i = 0; i < 4; i++) {
 			date1[i] = LastYear[i];
 		    }
@@ -2490,7 +2493,11 @@ PRIVATE int compare_EntryInfo_structs ARGS2(
 		if (date2[6] == ' ' || date2[6] == HT_NON_BREAK_SPACE) {
 		    date2[6] = '0';
 		}
-		if (date2[0] == '9' && atoi(date2) > TheDate) {
+		/*  If no year given, assume last year if it would otherwise
+		 *  be in the future by more than one day.  The one day
+		 *  tolerance is to account for a possible timezone
+		 *  difference. - kw */
+		if (date2[0] == '9' && atoi(date2) > TheDate + 1) {
 		    for (i = 0; i < 4; i++) {
 			date2[i] = LastYear[i];
 		    }
@@ -2545,6 +2552,13 @@ PRIVATE int read_directory ARGS4(
 
     _HTProgress (gettext("Receiving FTP directory."));
 
+    /*
+     *  Force the current Date and Year (TheDate, ThisYear, and LastYear)
+     *  to be recalculated for each directory request.  Otherwise we have
+     *  a problem with long-running sessions assuming the wrong date for
+     *  today. - kw
+     */
+    HaveYears = FALSE;
     /*
     **	Check whether we always want the home
     **	directory treated as Welcome. - FM

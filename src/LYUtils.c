@@ -108,6 +108,11 @@ extern int BSDselect PARAMS((int nfds, fd_set * readfds, fd_set * writefds,
 #endif /* __FreeBSD__ || __bsdi__ */
 #endif /* !UTMP_FILE */
 
+#if defined(HAVE_RAND) && defined(HAVE_SRAND) && defined(RAND_MAX)
+#define USE_RAND_TEMPNAME 1
+#define MAX_TEMPNAME 10000
+#endif
+
 #define COPY_COMMAND "%s %s %s"
 
 extern BOOLEAN LYHaveCJKCharacterSet;
@@ -116,6 +121,42 @@ extern HTCJKlang HTCJK;
 PRIVATE HTList * localhost_aliases = NULL;	/* Hosts to treat as local */
 PRIVATE char *HomeDir = NULL;			/* HOME directory */
 PUBLIC	HTList * sug_filenames = NULL;		/* Suggested filenames	 */
+
+/*
+ * Maintain a list of all of the temp-files we create so that we can remove
+ * them during the cleanup.
+ */
+typedef struct _LYTemp {
+    struct _LYTemp *next;
+    char *name;
+    FILE *file;
+} LY_TEMP;
+
+PRIVATE LY_TEMP *ly_temp;
+
+PRIVATE LY_TEMP *FindTempfileByName ARGS1(CONST char *, name)
+{
+    LY_TEMP *p;
+
+    for (p = ly_temp; p != 0; p = p->next) {
+	if (!strcmp(p->name, name)) {
+	    break;
+	}
+    }
+    return p;
+}
+
+PRIVATE LY_TEMP *FindTempfileByFP ARGS1(FILE *, fp)
+{
+    LY_TEMP *p;
+
+    for (p = ly_temp; p != 0; p = p->next) {
+	if (p->file == fp) {
+	    break;
+	}
+    }
+    return p;
+}
 
 /*
  *  Highlight (or unhighlight) a given link.
@@ -3732,26 +3773,21 @@ PRIVATE int fmt_tempname ARGS3(
     /*
      * Prefer a random value rather than a counter.
      */
-#if defined(HAVE_RAND) && defined(HAVE_SRAND) && defined(RAND_MAX)
+#ifdef USE_RAND_TEMPNAME
+    do {
+	int uninit;	/* ( intentionally uninitialized ;-) */
     if (counter == 0)
-	srand(time((time_t *)0));
-    counter = ( 10000.0 * rand() ) / RAND_MAX;
+	srand(time((time_t *)0) + uninit);
+    /* We don't really need all of the bits from rand().  The high-order bits
+     * are the more-random portion in any case, but limiting the width of the
+     * generated name is done partly to avoid problems on systems that may not
+     * support long filenames.
+     */
+    counter = ( (float)MAX_TEMPNAME * rand() ) / RAND_MAX + 1;
 #else
     counter++;
 #endif
 
-#if 0 && defined(_WINDOWS)	/* 1998/05/25 (Mon) 20:51:22 */
-    /*  This is nonsense - result hasn't been filled yet and will
-     *  be overwritten below.  If you mean 'prefix' then say so. - kw
-     */
-    {
-	char *p = result;
-	while (*p++) {
-	    if (*p == '/')
-		*p = '\\';
-	}
-    }
-#endif
 #ifdef FNAMES_8_3
     /*
      * The 'lynx_temp_space' string ends with a '/' or '\\', so we only have to
@@ -3787,6 +3823,10 @@ PRIVATE int fmt_tempname ARGS3(
 	sprintf(result, "%.*s", LY_MAXPATH-1, leaf);
 	code = FALSE;
     }
+#ifdef USE_RAND_TEMPNAME
+    /* If we really have 10000 files open, there's no point in returning... */
+    } while (FindTempfileByName(result) != 0);
+#endif
     CTRACE((tfp, "-> '%s'\n", result));
     return (code);
 }
@@ -6362,18 +6402,6 @@ PUBLIC BOOLEAN LYCachedTemp ARGS2(
 }
 
 /*
- * Maintain a list of all of the temp-files we create so that we can remove
- * them during the cleanup.
- */
-typedef struct _LYTemp {
-    struct _LYTemp *next;
-    char *name;
-    FILE *file;
-} LY_TEMP;
-
-static LY_TEMP *ly_temp;
-
-/*
  * Open a temp-file, ensuring that it is unique, and not readable by other
  * users.
  *
@@ -6456,11 +6484,8 @@ PUBLIC FILE *LYReopenTemp ARGS1(
     FILE *fp = 0;
 
     LYCloseTemp(name);
-    for (p = ly_temp; p != 0; p = p->next) {
-	if (!strcmp(p->name, name)) {
-	    fp = p->file = LYAppendToTxtFile (name);
-	    break;
-	}
+    if ((p = FindTempfileByName(name)) != 0) {
+	fp = p->file = LYAppendToTxtFile (name);
     }
     return fp;
 }
@@ -6499,15 +6524,11 @@ PUBLIC FILE *LYOpenTempRewrite ARGS3(
     if (*fname == '\0')		/* first time, no filename yet */
 	return (LYOpenTemp(fname, suffix, mode));
 
-    for (p = ly_temp; p != 0; p = p->next) {
-	if (!strcmp(fname, p->name)) {
-	    registered = YES;
-	    if (p->file != 0)
-		still_open = YES;
-	    CTRACE((tfp, "...used before%s\n",
-		still_open ? ", still open!" : "."));
-	    break;
-	}
+    if ((p = FindTempfileByName(fname)) != 0) {
+	registered = YES;
+	if (p->file != 0)
+	    still_open = YES;
+	CTRACE((tfp, "...used before%s\n", still_open ? ", still open!" : "."));
     }
 
     if (registered) {
@@ -6669,15 +6690,12 @@ PUBLIC void LYCloseTemp ARGS1(
     LY_TEMP *p;
 
     CTRACE((tfp, "LYCloseTemp(%s)\n", name));
-    for (p = ly_temp; p != 0; p = p->next) {
-	if (!strcmp(name, p->name)) {
-	    CTRACE((tfp, "...LYCloseTemp(%s)%s\n", name,
-		(p->file != 0) ? ", closed" : ""));
-	    if (p->file != 0) {
-		fclose(p->file);
-		p->file = 0;
-	    }
-	    break;
+    if ((p = FindTempfileByName(name)) != 0) {
+	CTRACE((tfp, "...LYCloseTemp(%s)%s\n", name,
+	    (p->file != 0) ? ", closed" : ""));
+	if (p->file != 0) {
+	    fclose(p->file);
+	    p->file = 0;
 	}
     }
 }
@@ -6691,13 +6709,10 @@ PUBLIC void LYCloseTempFP ARGS1(
     LY_TEMP *p;
 
     CTRACE((tfp, "LYCloseTempFP\n"));
-    for (p = ly_temp; p != 0; p = p->next) {
-	if (p->file == fp) {
-	    fclose(p->file);
-	    p->file = 0;
-	    CTRACE((tfp, "...LYCloseTempFP(%s)\n", p->name));
-	    break;
-	}
+    if ((p = FindTempfileByFP(fp)) != 0) {
+	fclose(p->file);
+	p->file = 0;
+	CTRACE((tfp, "...LYCloseTempFP(%s)\n", p->name));
     }
 }
 
@@ -6754,11 +6769,8 @@ PUBLIC void LYRenamedTemp ARGS2(
     LY_TEMP *p;
 
     CTRACE((tfp, "LYRenamedTemp(old=%s, new=%s)\n", oldname, newname));
-    for (p = ly_temp; p != 0; p = p->next) {
-	if (!strcmp(oldname, p->name)) {
-	    StrAllocCopy((p->name), newname);
-	    break;
-	}
+    if ((p = FindTempfileByName(oldname)) != 0) {
+	StrAllocCopy((p->name), newname);
     }
 }
 
@@ -7566,7 +7578,7 @@ PUBLIC char *LYgetXDisplay NOARGS
 PUBLIC void LYsetXDisplay ARGS1(
 	char *,	new_display)
 {
-    if (new_display != 0 && *new_display != '\0') {
+    if (new_display != 0) {
 #ifdef VMS
 	LYUpperCase(new_display);
 	Define_VMSLogical(DISPLAY, new_display);

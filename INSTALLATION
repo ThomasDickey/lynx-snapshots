@@ -96,7 +96,7 @@ Step 5.  Anonymous Accounts *** VERY IMPORTANT!!!!! ***
 
 II. Compile instructions -- UNIX
 
-1a. Auto-configure.  The auto-configure script uses autoconf2.12 to generate a
+1a. Auto-configure.  The auto-configure script uses autoconf2.13 to generate a
     Bourne shell script, configure, which creates "makefile" and "lynx_cfg.h".
 
     If you are on a UNIX platform, the easiest way to build Lynx is to type:
@@ -122,6 +122,9 @@ II. Compile instructions -- UNIX
     Please report problems in the configure/make process by including a copy
     of config.status, config.cache and config.log, as well as the pertinent
     compiler diagnostics.
+
+    See the note in aclocal.m4 for special instructions if you must modify the
+    configure script.
 
     NOTE:  Lynx is a curses-based application, so you must have a curses
     library available to link to.  Native curses (on the system when it was
@@ -162,10 +165,6 @@ II. Compile instructions -- UNIX
     NOTE:  SunOS and HP-UX come with a bundled K&R compiler, which is only
     useful for compiling with the bundled curses.  Both ncurses and slang
     require a compiler that recognizes prototypes.
-
-    NOTE:  Ncurses 4.2 builds/works on OS/2; however you should get at least
-    the post-4.2 patches from October 1998, since that supports mouse and
-    screen sizes other than 25x80.  (ftp://ftp.clark.net/pub/dickey/ncurses/)
 
 1c. Options
     To get a list of the configure script's options, type "./configure --help".

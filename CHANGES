@@ -1,28 +1,76 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2000-01-06 (2.8.3dev.18)
+* correction to LYCookieSavefile so tilde expansion is done (reported by Larry
+  Virden) -BJP
+* now it's guaranteed that LY_SOFT_NEWLINE could be only 0th character in
+  line->data (it could be preceded by LY_*_START_CHAR). Bug that caused
+  empty lines to disappear when printing files was fixed -VH
+* comments are now correctly converted to display charset in prettysrc mode -VH
+* fix "Please see" array initialization in cfg2html.pl (reported by VH, LP) -TD
+* small userdefs.h typo fixed -VH
+* added lynx.cfg setting that controls justification - maximum value for
+  ratio of 'spaces to spread'/'max width of a line' when justification can
+  take place -VH
+* change "PSRC" to "PRETTYSRC" in configuration (suggested by KW) -TD
+* combine a dozen of HTMLSRC_ lynx.cfg settings into PSRCSPEC setting.  Old
+  "HTMLSRC_foo:bar1:bar2" should be written as "PSRCSPEC:foo:bar1:bar2" -VH
+* use assume_default_colors() extension from upcoming ncurses 5.1 and related
+  support to provide more flexible coloring.  If the user's configuration files
+  do not specify "default", the default-color support is suppressed, and the
+  displayed colors default to white/black.  The original behavior matches
+  SVr4 curses, which assumes the default colors of the screen but does not
+  ensure that they match the assumption -TD
+* modify LYsetXDisplay() to permit $DISPLAY to have an empty value, and reuse
+  logic in forms-options from menu-options as validate_x_display() and
+  summarize_x_display().  The forms-options will not display a warning since it
+  exits too early, but at least one may now reset $DISPLAY to an empty string
+  (reported by KW) -TD
+* add note in INSTALLATION pointing to aclocal.m4 for details of regenerating
+  configure script -TD
+* add stub "po" gettext for Czech language, update other stubs -JS
+* undo dev.16 change to print_wwwfile_to_fd() logic for LY_SOFT_NEWLINE which
+  resulted in dropping blank lines from printed files -TD
+* make off by one correction in HTDisplayPartial line counting (as discussed
+  with LP) -KW
+* one invalid memory free (only reached in some (rare?) error case), two
+  memory leaks removed in LYLocal.c -KW
+* date calculations for file times in FTP directory listings used cached values
+  for the current day and year that never got reset.  This could cause wrong
+  ordering when sorting by date, and possibly other errors, especially in
+  long-running lynx sessions.  Now recalculate them for each new directory
+  request if they are needed -KW
+* be slightly more tolerant about FTP directory listing file times that appear
+  to lie in the future:  allow today plus one day without assuming that it must
+  mean a year ago, to account for possible timezone differences -KW
+* add comment to reload_read_cfg() listing things that are/aren't done -LP
+* minor lynx.cfg corections for better cfg2html.pl output -LP
+* restore 'from_source_cache' PRIVATE to LYMainLoop.c, add comments -LP
+* amend dev.16 feature for generating random temporary filenames to ensure that
+  Lynx does not currently have the generated name open as a temporary file -TD
 1999-12-15 (2.8.3dev.17)
-+ add a caution to jumpsUnix.html -PW
-+ ifdef LYEditKeyForAction() to compile when EXP_ALT_BINDINGS is not defined
+* add a caution to jumpsUnix.html -PW
+* ifdef LYEditKeyForAction() to compile when EXP_ALT_BINDINGS is not defined
   (reported by VH) -TD
-+ add 3-valued DEFAULT_KEYPAD_MODE to lynx.cfg -TD
-+ revert DEFAULT_KEYPAD_MODE to NUMBERS_AS_ARROWS (consensus) -TD
-+ add COOKIE_SAVE_FILE lynx.cfg and corresponding command-line option, default
+* add 3-valued DEFAULT_KEYPAD_MODE to lynx.cfg -TD
+* revert DEFAULT_KEYPAD_MODE to NUMBERS_AS_ARROWS (consensus) -TD
+* add COOKIE_SAVE_FILE lynx.cfg and corresponding command-line option, default
   it to /dev/null, which is recognized on all systems -BJP
-+ correct typo in declaration of LYLeakSAVsprintf() -Michael Warner
-+ remove from_source_cache_p parameters in LYMainLoop.c (request by LP) -TD
-+ documentation updates covering the Options Menu & other changes omitted
+* correct typo in declaration of LYLeakSAVsprintf() -Michael Warner
+* remove from_source_cache_p parameters in LYMainLoop.c (request by LP) -TD
+* documentation updates covering the Options Menu & other changes omitted
   previously -PW
-+ small correction in TRSTable.c:  One of my previous changes for TRST broke
+* small correction in TRSTable.c:  One of my previous changes for TRST broke
   inheritance of alignment for cell contents from TR elements -KW
-+ new functions for keeping track of temp files (and some other files) for user
+* new functions for keeping track of temp files (and some other files) for user
   interface pages:  LYRegisterUIPage(), LYIsUIPage().  Most checks that look at
   the loaded document's title have been replaced by this mechanism.  This also
   replaces various mechanism that were implemented for some specific pages -KW
-+ also replaced some more checks that looked at the document's title by checks
+* also replaced some more checks that looked at the document's title by checks
   of the address, for pages that are always identified by a special URL scheme
   (LYNXCOOKIE:, LYNXKEYMAP:, LYNXMESSAGES:) -KW
-+ now check directly in postoptions() whether the loaded document is one from
+* now check directly in postoptions() whether the loaded document is one from
   which submission of option changes can be accepted, using the new tracking
   mechanism.  Only the form-based Options Menu and Visited Links are allowed. 
   Relying on a good random generator to prevent spoofing is not necessary. 
@@ -30,51 +78,51 @@ Changes since Lynx 2.8 release
   user, it prevents changing options from an instance of the form-based Options
   Menu that is not the most recent one (this can happen if an Options Menu page
   is pushed on the history stack and later returned to) -KW
-+ honor REUSE_TEMPFILES for some more user interface pages.
-+ prevent an obscure LYNXOPTIONS://MBM_MENU crash.
-+ other minor additions and corrections to checks for special pages -KW
-+ changed INSTALLATION text for --enable-internal-links -KW, HN
-+ changes to build dev16 with color styles on DJGPP/PDCurses 2.3
+* honor REUSE_TEMPFILES for some more user interface pages.
+* prevent an obscure LYNXOPTIONS://MBM_MENU crash.
+* other minor additions and corrections to checks for special pages -KW
+* changed INSTALLATION text for --enable-internal-links -KW, HN
+* changes to build dev16 with color styles on DJGPP/PDCurses 2.3
   (you must uncomment a line in makefiles to build lynx that way) -LP
-+ correct a missing check in HTML.c HTML_A case against force_empty_hrefless_a
+* correct a missing check in HTML.c HTML_A case against force_empty_hrefless_a
   (reported by KW) -VH
-+ changed lines -> disp_lines, cols -> disp_cols in GridText.c -KW
-+ don't reparse with SOURCE_CACHE if screen size changed only
+* changed lines -> disp_lines, cols -> disp_cols in GridText.c -KW
+* don't reparse with SOURCE_CACHE if screen size changed only
   vertically (disp_lines).  Also don't reparse unnecessarily in
   some cases of LYK_MINIMAL -KW
-+ don't append (HEAD) to title for INFO screen if already present -KW
-+ set newdoc.title to curdoc.title in LYMainLoop.c for SOURCE command.
+* don't append (HEAD) to title for INFO screen if already present -KW
+* set newdoc.title to curdoc.title in LYMainLoop.c for SOURCE command.
   Otherwise INFO could show the wrong document's title -KW
-+ made global from_source_cache PRIVATE to LYMainLoop.c -KW
-+ reset DIRED_MENU item list when lynx.cfg is reloaded -KW
-+ new lynx.cfg option AUTO_UNCACHE_DIRLISTS for Dired mode, see lynx.cfg -KW
-+ prevent filedescriptor and inode leak in HTFWriter.c that occurred if
+* made global from_source_cache PRIVATE to mainloop -KW
+* reset DIRED_MENU item list when lynx.cfg is reloaded -KW
+* new lynx.cfg option AUTO_UNCACHE_DIRLISTS for Dired mode, see lynx.cfg -KW
+* prevent filedescriptor and inode leak in HTFWriter.c that occurred if
   the same resource is repeatedly downloaded (for 'd' or for passing to
   a viewer) -KW
-+ corrected logic for suppressing last HTDisplayPartial call at end of file,
+* corrected logic for suppressing last HTDisplayPartial call at end of file,
   after discussion with LP -KW
-+ corrected line counting in HTDisplayPartial, taking into account offsets used
+* corrected line counting in HTDisplayPartial, taking into account offsets used
   for the various variables being compared -KW
-+ added confirmation prompt for reloading non-safe post_data documents in
+* added confirmation prompt for reloading non-safe post_data documents in
   form-based Options Menu change handling.  Before this change, the prompt
   would be issued after returning to mainloop() instead, with different
   behavior if confirmation was denied:  The document would be popped instead of
   keeping the current instance -KW
-+ function confirm_post_resub made PUBLIC and moved to HTAlert.c.  New function
+* function confirm_post_resub made PUBLIC and moved to HTAlert.c.  New function
   srcmode_for_next_retrieval in LYGetFile.c.  Both used for the above and in
   LYMainLoop.c -KW
-+ fixed behavior for various post_data confirmation prompts in connection with
+* fixed behavior for various post_data confirmation prompts in connection with
   SOURCE_CACHE in LYMainLoop.c.  Before this change, the user would be prompted
   to confirm reloading, yet on confirmation reparsing from the source cache
   would be attempted.  So prompts were unnecessary and misleading -KW
-+ try to handle some failures of errors in source cache reparsing better.  Try
+* try to handle some failures of errors in source cache reparsing better.  Try
   to make sure that unsafe post_data documents don't get reloaded accidentally
   without confirmation if source cache reparsing fails.  Treat partial data
   (i.e.  loading from source cache probably 'z'apped by user) as successful, as
   HTLoadDocument does.  (Various error conditions are currently only passed on
   to the caller by HTParseFile, not by HTParseMem.  I left this apparent design
   decision unchanged.) -KW
-+ source cache reparsing did not rewrite a previous cache copy when the
+* source cache reparsing did not rewrite a previous cache copy when the
   document was reloaded from the net.  This means that e.g. NOCACHE or RELOAD
   would force reloading from the network, but then on the next non-forced
   loading of the document (e.g.  by toggling to SOURCE view) the old (and
@@ -83,7 +131,7 @@ Changes since Lynx 2.8 release
   (Note that RELOAD while in source view, at least in the normal one without
   -preparsed or -prettysrc, does not have this effect since the document does
   not get pushed through the cache writer at all in that case.) -KW
-+ if a source cache copy for a document exists, we need a way to ensure that
+* if a source cache copy for a document exists, we need a way to ensure that
   reparsing from that copy does not try to rewrite that same copy "under our
   feet" while still reading from it.  Previously that was done by just never
   rewriting an existing source cache.  After changing that (see previous item),
@@ -102,14 +150,14 @@ Changes since Lynx 2.8 release
   from (re)generating a cache copy.  Mechanism (b) isn't necessary (everything
   still works when DEBUG_SOURCE_CACHE is defined), it just avoids unnecessary
   work -KW
-+ source cache files and chunks were not always being removed when they should,
+* source cache files and chunks were not always being removed when they should,
   probably since change of 1999-06-18.  A large number of cache copies could be
   kept around unnecessarily wasting disk or memory space.  Now make sure that
   the source cache copy gets removed when a document is removed from the cache
   of rendered docs.  They would never be reused anyway.  New function
   HTAnchor_clearSourceCache.  Note to other developers:  HTAnchor_delete()
   doesn't always remove the HTParentAnchor object, see its implementation -KW
-+ detect errors during appending to the cache copy.  Previously, memory
+* detect errors during appending to the cache copy.  Previously, memory
   allocation errors (for SOURCE_CACHE:MEMORY) would cause program exit, and
   file write errors (SOURCE_CACHE:FILE, e.g. if the temp disk space was full)
   would go undetected and leave the cache file corrupt or truncated.  Now allow
@@ -119,13 +167,13 @@ Changes since Lynx 2.8 release
   error, produce the alert only once until a possibly re-reading of lynx.cfg,
   since Lynx should remain otherwise functional in the face of cache file
   writing errors -KW
-+ extended HTChunk: added a variant for which memory allocation errors
+* extended HTChunk: added a variant for which memory allocation errors
   are not fatal.  Used for changes described in previous item -KW
-+ don't write raw escape sequences to trace output for lynx-keymaps if
+* don't write raw escape sequences to trace output for lynx-keymaps if
   not using trace log file -KW
-+ protect echo() in stop_curses, it could crash if stop_curses gets called
+* protect echo() in stop_curses, it could crash if stop_curses gets called
   without preceding start_curses -KW
-+ save size for regular files in anchor structure (we do the stat() anyway).
+* save size for regular files in anchor structure (we do the stat() anyway).
   It shows up on INFO page as Content-Length.  Also use it in partial display
   mode to prevent the last call to HTDisplayPartial from HTFileCopy, since a
   call to HText_pageDisplay will follow immediately.  (But note that nothing
@@ -133,11 +181,11 @@ Changes since Lynx 2.8 release
   one partial display screen update.  An equivalent suppression of the last
   partial update for network protocols is not recommended, since (a) the size
   is more unreliable and (b) the socket FIN may be delayed by the network.) -KW
-+ split HTMIME_put_character into three functions -KW
-+ made HTMIME.c handle folded header lines correctly (long-standing bug,
+* split HTMIME_put_character into three functions -KW
+* made HTMIME.c handle folded header lines correctly (long-standing bug,
   reported in February by Devid Coles) -KW
   [ reference: http://www.flora.org/lynx-dev/html/month0299/msg00135.html ]
-+ changed how HTTP redirection messages are handled.  Don't read full message
+* changed how HTTP redirection messages are handled.  Don't read full message
   and parse buffer for some header fields in HTLoadHTTP.  Use common HTMIME.c
   header parsing instead.  Functions added/modified in HTMIME.c for storing
   away the Location URL (if requested and found) and for stopping after the
@@ -161,8 +209,8 @@ Changes since Lynx 2.8 release
     of the response, including HTML markup from the message body.)
   - Adding redirection support for lynxcgi would now be simpler (although
     currently not done) -KW
-+ HTErrorStream(), similar to W3C libwww, used in some cases for the above -KW
-+ remove check in HTParse() dated 98/09/08 which prevented unescaping of 8-bit
+* HTErrorStream(), similar to W3C libwww, used in some cases for the above -KW
+* remove check in HTParse() dated 98/09/08 which prevented unescaping of 8-bit
   data (reported by KW)
 * refresh screen for TRST changes in partial display mode as early as possible.
   This fixes a problem when the table finished below the screen bottom -LP

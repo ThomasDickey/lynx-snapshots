@@ -1,9 +1,18 @@
+#  This file is a placeholder;
+#  see http://www.iro.umontreal.ca/contrib/po/HTML/domain-lynx.html
+
+# Slovenian translation of Lynx WWW browser.
+# Copyright (C) 1999 Free Software Foundation, Inc.
+# Roman Maurer <roman.maurer@hermes.si>, 1999.
+# $Id: sl.po,v 1.2 2000/01/07 03:20:24 tom Exp $
+# $Source: /usr/build/VCS/lynx/po/RCS/sl.po,v $
+
 msgid ""
 msgstr ""
 "Date: 1998-08-22 16:12:20-0400\n"
 "From: Webmaster Jim <jspath@bcpl.net>\n"
 "Content-Type: text/plain; charset=\n"
-"Xgettext-Options: --default-domain=po/de\n"
+"Xgettext-Options: --default-domain=po/sl\n"
 "Files: src/LYMain.c\n"
 
 #: src/LYMain.c:2502

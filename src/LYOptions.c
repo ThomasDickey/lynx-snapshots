@@ -71,6 +71,37 @@ PUBLIC int SetupChosenShowColor NOARGS
     return LYChosenShowColor;
 }
 
+PRIVATE void validate_x_display NOPARAMS
+{
+    char *cp;
+    if ((cp = LYgetXDisplay()) != NULL) {
+	StrAllocCopy(x_display, cp);
+    } else {
+	FREE(x_display);
+    }
+}
+
+PRIVATE void summarize_x_display ARGS1(
+    char *,	display_option)
+{
+    if ((x_display == NULL && *display_option == '\0') ||
+	(x_display != NULL && !strcmp(x_display, display_option))) {
+	if (x_display == NULL && LYisConfiguredForX == TRUE) {
+	    _statusline(VALUE_ACCEPTED_WARNING_X);
+	} else if (x_display != NULL && LYisConfiguredForX == FALSE) {
+	    _statusline(VALUE_ACCEPTED_WARNING_NONX);
+	} else {
+	    _statusline(VALUE_ACCEPTED);
+	}
+    } else {
+	if (*display_option) {
+	    _statusline(FAILED_TO_SET_DISPLAY);
+	} else {
+	    _statusline(FAILED_CLEAR_SET_DISPLAY);
+	}
+    }
+}
+
 
 #ifndef NO_OPTION_MENU
 PRIVATE int boolean_choice PARAMS((
@@ -594,33 +625,11 @@ draw_options:
 		 *  Set the new DISPLAY variable. - FM
 		 */
 		LYsetXDisplay(display_option);
-		if ((cp = LYgetXDisplay()) != NULL) {
-		    StrAllocCopy(x_display, cp);
-		} else {
-		    FREE(x_display);
-		}
+		validate_x_display();
 		cp = NULL;
 		addstr(x_display ? x_display : "NONE");
 		clrtoeol();
-		if ((x_display == NULL && *display_option == '\0') ||
-		    (x_display != NULL &&
-		     !strcmp(x_display, display_option))) {
-		    if (x_display == NULL &&
-			LYisConfiguredForX == TRUE) {
-			_statusline(VALUE_ACCEPTED_WARNING_X);
-		    } else if (x_display != NULL &&
-			LYisConfiguredForX == FALSE) {
-			_statusline(VALUE_ACCEPTED_WARNING_NONX);
-		    } else {
-			_statusline(VALUE_ACCEPTED);
-		    }
-		} else {
-		    if (*display_option) {
-			_statusline(FAILED_TO_SET_DISPLAY);
-		    } else {
-			_statusline(FAILED_CLEAR_SET_DISPLAY);
-		    }
-		}
+		summarize_x_display(display_option);
 		response = ' ';
 		break;
 
@@ -3512,6 +3521,8 @@ PRIVATE PostPair * break_data ARGS1(
     if (p==NULL || p[0]=='\0')
 	return NULL;
 
+    CTRACE((tfp, "break_data %s\n", data));
+
     q = calloc(sizeof(PostPair), 1);
     if (q==NULL)
 	outofmem(__FILE__, "break_data(calloc)");
@@ -3558,6 +3569,7 @@ PRIVATE PostPair * break_data ARGS1(
 	   }
 	}
 	HTUnEscape(q[count].value);
+	CTRACE((tfp, "...item[%d] tag=%s, value=%s\n", count, q[count].tag, q[count].value));
 
 	count++;
 	/*
@@ -3733,6 +3745,8 @@ PUBLIC int postoptions ARGS1(
 	/* X Display: INPUT */
 	if (!strcmp(data[i].tag, x_display_string)) {
 	    LYsetXDisplay(data[i].value);
+	    validate_x_display();
+	    summarize_x_display(data[i].value);
 	}
 
 	/* Editor: INPUT */

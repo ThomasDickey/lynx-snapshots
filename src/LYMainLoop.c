@@ -368,6 +368,32 @@ PUBLIC int LYGetNewline NOARGS
     return Newline;
 }
 
+#ifdef SOURCE_CACHE
+/*
+ * To reparse current html document under the different settings we call
+ * reparse_document() within mainloop refresh cycle, it relies upon 'curdoc'.
+ *
+ * From the other hand, regular requests for new document go to getfile()
+ * and rely upon 'newdoc'.
+ *
+ * To work around newdoc.line/curdoc.line/www_search_target/Newline message
+ * the following flag is introduced:
+ */
+PRIVATE BOOLEAN from_source_cache = FALSE;
+
+PRIVATE BOOLEAN reparse_document NOARGS
+{
+    BOOLEAN ok;
+    from_source_cache = TRUE;	/* set for LYMainLoop_pageDisplay() */
+    if ((ok = HTreparse_document()) != FALSE) {
+	from_source_cache = TRUE;	/* set for mainloop refresh */
+	return ok;
+    }
+    from_source_cache = FALSE;
+    return ok;
+}
+#endif /* SOURCE_CACHE */
+
 /*
  * This is for traversal call from within partial mode in LYUtils.c
  * and HTFormat.c  It simply calls HText_pageDisplay() but utilizes
@@ -378,6 +404,15 @@ PUBLIC void LYMainLoop_pageDisplay ARGS1(
 	int,		line_num)
 {
 #ifdef DISP_PARTIAL
+#ifdef SOURCE_CACHE
+    /*
+     * reparse_document() acts on 'curdoc' which always on top of the
+     * history stack: no need to resolve #fragment position since
+     * we already know it (curdoc.line).
+     * So bypass here. Sorry for possible confusion...
+     */
+    if (!from_source_cache)
+#endif
     /*
      * Disable display_partial if requested URL has #fragment and we are not
      * popped from the history stack so can't calculate correct newline
@@ -387,8 +422,8 @@ PUBLIC void LYMainLoop_pageDisplay ARGS1(
      * down to old behavior here ... until we rewrite HTFindPoundSelector()
      */
     if (display_partial && newdoc.line == 1 && strchr(newdoc.address, '#')) {
-        display_partial = FALSE; /* restrict for this document */
-        return;			/* no repaint */
+	display_partial = FALSE; /* restrict for this document */
+	return;			/* no repaint */
     }
 
     /*
@@ -1371,7 +1406,7 @@ gettext("Enctype multipart/form-data not yet supported!  Cannot submit."));
 	    }
 	    newdoc.link = 0;
 	    *force_load = TRUE;	/* force MainLoop to reload */
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 	    psrc_view = FALSE;	/* we get here if link is not internal */
 #endif
 
@@ -3051,7 +3086,7 @@ PRIVATE void handle_LYK_HISTORICAL NOARGS
 		HISTORICAL_ON_VALID_OFF : HISTORICAL_OFF_VALID_ON);
     }
 #ifdef SOURCE_CACHE
-    (void) HTreparse_document();
+    (void) reparse_document();
 #endif
     return;
 }
@@ -3114,7 +3149,7 @@ PRIVATE BOOLEAN handle_LYK_IMAGE_TOGGLE ARGS1(
 	     CLICKABLE_IMAGES_ON : CLICKABLE_IMAGES_OFF);
 #ifdef SOURCE_CACHE
     if (HTcan_reparse_document()) {
-	HTreparse_document();
+	reparse_document();
 	return FALSE;
     }
 #endif
@@ -3279,7 +3314,7 @@ PRIVATE BOOLEAN handle_LYK_INLINE_TOGGLE ARGS1(
 	      PSEUDO_INLINE_ALTS_ON : PSEUDO_INLINE_ALTS_OFF);
 #ifdef SOURCE_CACHE
     if (HTcan_reparse_document()) {
-	HTreparse_document();
+	reparse_document();
 	return FALSE;
     }
 #endif
@@ -3576,7 +3611,7 @@ PRIVATE void handle_LYK_MINIMAL NOARGS
 	HTAlert(minimal_comments ?
 		MINIMAL_ON_IN_EFFECT : MINIMAL_OFF_VALID_ON);
 #ifdef SOURCE_CACHE
-	(void)HTreparse_document();
+	(void)reparse_document();
 #endif
     } else {
 	HTAlert(minimal_comments ?
@@ -3706,7 +3741,7 @@ PRIVATE BOOLEAN handle_LYK_OPTIONS ARGS2(
 #ifdef SOURCE_CACHE
 		if (reloading == FALSE) {
 		    /* one more attempt to be smart enough: */
-		    if (HTreparse_document()) {
+		    if (reparse_document()) {
 			FREE(CurrentUserAgent);
 			FREE(CurrentNegoLanguage);
 			FREE(CurrentNegoCharset);
@@ -4111,7 +4146,7 @@ PRIVATE BOOLEAN handle_LYK_RAW_TOGGLE ARGS1(
 	HTMLSetCharacterHandling(current_char_set);
 #ifdef SOURCE_CACHE
 	if (HTcan_reparse_document()) {
-	    HTreparse_document();
+	    reparse_document();
 	    return FALSE;
 	}
 #endif
@@ -4258,7 +4293,7 @@ PRIVATE void handle_LYK_SOFT_DQUOTES NOARGS
     HTUserMsg(soft_dquotes ?
 	      SOFT_DOUBLE_QUOTE_ON : SOFT_DOUBLE_QUOTE_OFF);
 #ifdef SOURCE_CACHE
-    (void)HTreparse_document();
+    (void)reparse_document();
 #endif
     return;
 }
@@ -4295,14 +4330,14 @@ PRIVATE void handle_LYK_SOURCE ARGS1(
     }
 
 #ifdef SOURCE_CACHE
-    if (HTreparse_document()) {
+    if (reparse_document()) {
 	/*
 	 * These normally get cleaned up after getfile() returns;
 	 * since we're not calling getfile(), we have to clean them
 	 * up ourselves.  -dsb
 	 */
 	HTOutputFormat = WWW_PRESENT;
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 	if (psrc_view)
 	    HTMark_asSource();
 	psrc_view = FALSE;
@@ -4377,7 +4412,7 @@ PRIVATE void handle_LYK_SWITCH_DTD NOARGS
 	if (HTisDocumentSource() && LYPreparsedSource) {
 	    srcmode_for_next_retrieval(1);
 	}
-	if (!HTreparse_document()) {
+	if (!reparse_document()) {
 	    srcmode_for_next_retrieval(0);
 	}
     }
@@ -5310,7 +5345,7 @@ try_again:
 		*prev_target = '\0';	/* Reset for new coming document */
 		Newline = newdoc.line;	/* set for LYGetNewline() */
 
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 		psrc_first_tag = TRUE;
 #endif
 		FREE(LYRequestReferer);
@@ -5770,6 +5805,7 @@ try_again:
 		     */
 #ifdef DISP_PARTIAL
 		    /* Newline = newdoc.line; */
+		    display_partial = FALSE; /* for sure, LYNXfoo:/ may be a problem */
 #else
 		    /* Should not be needed either if we remove
 		     * "DISP_PARTIAL" from LYHistory.c, but lets leave it
@@ -5820,7 +5856,7 @@ try_again:
 	     *	the visited links list. - FM
 	     */
 	    if (ownerS_address != NULL) {
-#ifndef USE_PSRC
+#ifndef USE_PRETTYSRC
 		if (HTOutputFormat == WWW_SOURCE && !HText_getOwner())
 #else
 		if ( (LYpsrc ? psrc_view : HTOutputFormat == WWW_SOURCE)
@@ -5846,7 +5882,7 @@ try_again:
 	    *  the source, we get rendered HTML from now on.
 	    */
 	   HTOutputFormat = WWW_PRESENT;
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 	   psrc_view = FALSE;
 #endif
 
@@ -6044,8 +6080,8 @@ try_again:
 	 */
 	if (HTdocument_settings_changed()) {
 	   if (HTcan_reparse_document()) {
-	       HTInfoMsg(gettext("Reparsing document under current settings..."));
-	       HTreparse_document(); /* @@@ignores status */
+		HTInfoMsg(gettext("Reparsing document under current settings..."));
+		reparse_document();
 	   } else {
 		/*
 		 * Urk.  I have no idea how to recover from a failure here.
@@ -6058,13 +6094,19 @@ try_again:
 			*/
 	    }
 	}
-#endif
 
+	if (from_source_cache) {
+	    from_source_cache = FALSE; /* reset */
+	    curdoc.line = -1 ;  /* so curdoc.line != Newline, see below */
+	}
+#endif
 
 	/*
 	 *  If the curdoc.line is different than Newline then there must
 	 *  have been a change since last update.  Run HText_pageDisplay()
 	 *  create a fresh screen of text out.
+	 *
+	 *  If we got new HTMainText go this way.
 	 *  All display_partial calls ends here for final redraw.
 	 */
 	if (curdoc.line != Newline) {

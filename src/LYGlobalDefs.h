@@ -400,6 +400,7 @@ extern int LYNoZapKey;  /* 0: off (do 'z' checking), 1: full, 2: initially */
 
 #ifdef EXP_JUSTIFY_ELTS
 extern BOOL ok_justify;
+extern int justify_max_void_percent;
 #endif
 
 #ifndef NO_DUMP_WITH_BACKSPACES

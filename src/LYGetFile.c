@@ -1090,20 +1090,20 @@ PUBLIC void srcmode_for_next_retrieval ARGS1(
 {
     if (mode < 0) {
 	HTOutputFormat = WWW_PRESENT;
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 	psrc_view = FALSE;
 #endif
 
     } else if (mode == 0) {
 	if (HTOutputFormat == WWW_SOURCE)
 	    HTOutputFormat = WWW_PRESENT;
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 	else if (LYpsrc)
 	    psrc_view = FALSE;
 #endif
 
     } else {
-#ifdef USE_PSRC
+#ifdef USE_PRETTYSRC
 	if (LYpsrc)
 	    psrc_view = TRUE;
 	else
