@@ -2901,10 +2901,12 @@ PUBLIC int postoptions ARGS1(
 	}
 
 	/* Show Transfer Rate: enumerated value */
+#ifdef EXP_READPROGRESS
 	if (!strcmp(data[i].tag, show_rate_string)
 	 && GetOptValues(rate_values, data[i].value, &code)) {
 	    LYTransferRate = code;
 	}
+#endif
 
 	/* Preferred Document Character Set: INPUT */
 	if (!strcmp(data[i].tag, preferred_doc_char_string)) {
