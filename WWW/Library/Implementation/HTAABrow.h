@@ -12,7 +12,7 @@
    these functions.
    
    Therefore also all the strings returned by this package are only valid until the next
-   call to the same function is made. This approach is selected, because of the nature of
+   call to the same function is made.  This approach is selected, because of the nature of
    access authorization: no string returned by the package needs to be valid longer than
    until the next call.
    
@@ -89,7 +89,7 @@ extern char *HTAA_composeAuth PARAMS((
 **              USERNAME AND/OR PASSWORD (IF MISSPELLED))
 ** ON ENTRY:
 **      start_of_headers is the first block already read from socket,
-**                      but status line skipped; i.e. points to the
+**                      but status line skipped; i.e., points to the
 **                      start of the header section.
 **      length          is the remaining length of the first block.
 **      soc             is the socket to read the rest of server reply.
@@ -127,7 +127,7 @@ Enabling Gateway httpds to Forward Authorization
    These functions should only be called from daemon code, and HTAAForwardAuth_reset()
    must be called before the next request is handled to make sure that authorization
    string isn't cached in daemon so that other people can access private files using
-   somebody elses previous authorization information.
+   somebody else's previous authorization information.
    
  */
 

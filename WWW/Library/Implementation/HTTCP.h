@@ -1,8 +1,8 @@
 /*                               /Net/dxcern/userd/timbl/hypertext/WWW/Library/src/HTTCP.html
                                GENERIC TCP/IP COMMUNICATION
-                                             
+
    This module has the common code for handling TCP/IP connections etc.
-   
+
  */
 #ifndef HTTCP_H
 #define HTTCP_H
@@ -79,7 +79,7 @@ extern unsigned int HTCardinal PARAMS((int *pstatus,
 **               sin points to the binary internet or decnet address field.
 **
 ** On exit:
-**               *sin is filled in. If no port is specified in str, that
+**               *sin is filled in.  If no port is specified in str, that
 **               field is left unchanged in *sin.
 */
 #ifdef __STDC__

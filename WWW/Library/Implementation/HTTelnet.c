@@ -10,7 +10,7 @@
 **	26 Jun 92 When over DECnet, suppressed FTP, Gopher and News. (JFG)
 **	 6 Oct 92 Moved HTClientHost and logfile into here. (TBL)
 **	17 Dec 92 Tn3270 added, bug fix. (DD)
-**	 2 Feb 93 Split from HTAccess.c. Registration.(TBL)
+**	 2 Feb 93 Split from HTAccess.c.  Registration.(TBL)
 */
 
 #include <HTUtils.h>
@@ -32,8 +32,6 @@
 
 #include <LYStrings.h>
 #include <LYLeaks.h>
-
-#define HT_NO_DATA -9999
 
 PRIVATE void do_system ARGS1(char *, command)
 {
@@ -87,20 +85,20 @@ PRIVATE int remote_session ARGS2(char *, acc_method, char *, host)
 	if (port)
 	    *port++ = '\0';	/* Split */
 
-    if (!hostname || *hostname == '\0') {
-	CTRACE(tfp, "HTTelnet: No host specified!\n");
-	return HT_NO_DATA;
-    }
-
-    if (user) {
-	password = strchr(user, ':');
-	if (password) {
-	    *password++ = '\0';
+	if (!hostname || *hostname == '\0') {
+	    CTRACE(tfp, "HTTelnet: No host specified!\n");
+	    return HT_NO_DATA;
 	}
-    }
 
-/* If the person is already telnetting etc, forbid hopping */
-/* This is a security precaution, for us and remote site */
+	if (user) {
+	    password = strchr(user, ':');
+	    if (password) {
+		*password++ = '\0';
+	    }
+	}
+
+	/* If the person is already telnetting etc, forbid hopping */
+	/* This is a security precaution, for us and remote site */
 
 	if (HTSecure) {
 
@@ -126,9 +124,9 @@ PRIVATE int remote_session ARGS2(char *, acc_method, char *, host)
 	    return HT_NO_DATA;
 	}
 
-/* Not all telnet servers get it even if user name is specified
-** so we always tell the guy what to log in as
-*/
+	/* Not all telnet servers get it even if user name is specified
+	** so we always tell the guy what to log in as
+	*/
 	if (user && login_protocol != rlogin)
 	    printf("When you are connected, log in as:  %s\n", user);
 	if (password && login_protocol != rlogin)
@@ -139,11 +137,14 @@ PRIVATE int remote_session ARGS2(char *, acc_method, char *, host)
  *		You may need to define this yourself.
  */
 #if	defined(NeXT) && defined(NeXTSTEP) && NeXTSTEP<=20100
-	HTSprintf0(&command, "%s%s%s %s %s", TELNET_COMMAND,
-		user ? " -l " : "",
-		user ? user : "",
-		hostname,
-		port ? port : "");
+#define FMT_TELNET "%s%s%s %s %s"
+
+	HTAddParam(&command, FMT_TELNET, 1, TELNET_COMMAND);
+	HTAddParam(&command, FMT_TELNET, 2, user ? " -l " : "");
+	HTAddParam(&command, FMT_TELNET, 3, user);
+	HTAddParam(&command, FMT_TELNET, 4, hostname);
+	HTAddParam(&command, FMT_TELNET, 5, port);
+	HTEndParam(&command, FMT_TELNET, 5);
 
 	do_system(command);
 	return HT_NO_DATA;		/* Ok - it was done but no data */
@@ -153,21 +154,32 @@ PRIVATE int remote_session ARGS2(char *, acc_method, char *, host)
 /* Most unix machines suppport username only with rlogin */
 #if defined(unix) || defined(DOSPATH)
 #ifndef TELNET_DONE
+
+#define FMT_RLOGIN "%s %s%s%s"
+#define FMT_TN3270 "%s %s %s"
+#define FMT_TELNET "%s %s %s"
+
 	if (login_protocol == rlogin) {
-	    HTSprintf0(&command, "%s %s%s%s", RLOGIN_COMMAND,
-		hostname,
-		user ? " -l " : "",
-		user ? user : "");
+
+	    HTAddParam(&command, FMT_RLOGIN, 1, RLOGIN_COMMAND);
+	    HTAddParam(&command, FMT_RLOGIN, 2, hostname);
+	    HTAddParam(&command, FMT_RLOGIN, 3, user ? " -l " : "");
+	    HTAddParam(&command, FMT_RLOGIN, 4, user);
+	    HTEndParam(&command, FMT_RLOGIN, 4);
 
 	} else if (login_protocol == tn3270) {
-	    HTSprintf0(&command, "%s %s %s", TN3270_COMMAND,
-		hostname,
-		port ? port : "");
+
+	    HTAddParam(&command, FMT_TN3270, 1, TN3270_COMMAND);
+	    HTAddParam(&command, FMT_TN3270, 2, hostname);
+	    HTAddParam(&command, FMT_TN3270, 3, port);
+	    HTEndParam(&command, FMT_TN3270, 3);
 
 	} else {  /* TELNET */
-	    HTSprintf0(&command, "%s %s %s", TELNET_COMMAND,
-		hostname,
-		port ? port : "");
+
+	    HTAddParam(&command, FMT_TELNET, 1, TELNET_COMMAND);
+	    HTAddParam(&command, FMT_TELNET, 2, hostname);
+	    HTAddParam(&command, FMT_TELNET, 3, port);
+	    HTEndParam(&command, FMT_TELNET, 3);
 	}
 
 #ifdef __DJGPP__

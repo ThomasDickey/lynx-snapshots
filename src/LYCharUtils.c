@@ -839,7 +839,7 @@ PUBLIC void LYGetChartransInfo ARGS1(
 **  characters for the current display character set.  It assumes
 **  that invalid control characters have been dealt with by the
 **  SGML (or other initial) parser of the document input stream
-**  (i.e. are present only if elements or global flags have been
+**  (i.e., are present only if elements or global flags have been
 **  set to allow them), and that otherwise this is a copy of the
 **  string with the charset of the input stream.  It handles Lynx
 **  special characters based on the 'me' structure's element values
@@ -1527,7 +1527,7 @@ PRIVATE CONST char *hex = "0123456789ABCDEF";
 **
 **  Some characters (see descriptions in `put_special_unicodes' from SGML.c)
 **  translated in relation with the state of boolean variables
-**  `use_lynx_specials', `plain_space' and `hidden'. It is not clear yet:
+**  `use_lynx_specials', `plain_space' and `hidden'.  It is not clear yet:
 **
 **  If plain_space is TRUE, nbsp (160) will be treated as an ASCII
 **  space (32).  If hidden is TRUE, entities will be translated
@@ -1541,7 +1541,7 @@ PRIVATE CONST char *hex = "0123456789ABCDEF";
 **  (unless input and output charset are both iso-8859-1, for compatibility
 **  with previous usage in HTML.c) even if `hidden' or `plain_space' is set.
 **
-**  If `Back' is YES, the reverse is done instead i.e. Lynx special codes
+**  If `Back' is YES, the reverse is done instead i.e., Lynx special codes
 **  in the input are translated back to character values.
 **
 **  If `Back' is YES, an attempt is made to use UCReverseTransChar() for
@@ -1559,7 +1559,7 @@ PRIVATE CONST char *hex = "0123456789ABCDEF";
 **
 **  Escape characters (0x1B, '\033') are
 **  - URL-encoded	if `stype'  is st_URL,	 otherwise
-**  - dropped		if `stype'  is st_other, otherwise (i.e. st_HTML)
+**  - dropped		if `stype'  is st_other, otherwise (i.e., st_HTML)
 **  - passed		if `hidden' is TRUE or HTCJK is set, otherwise
 **  - dropped.
 **
@@ -3098,7 +3098,7 @@ PUBLIC void LYHandleP ARGS5(
 	    }
 	} else if (me->sp[0].tag_number == HTML_ADDRESS) {
 	    /*
-	     *	We're in an ADDRESS. Treat P as an instruction
+	     *	We're in an ADDRESS.  Treat P as an instruction
 	     *	to start a newline, if needed, then fall through
 	     *	to handle attributes. - FM
 	     */
@@ -3771,7 +3771,7 @@ PUBLIC void LYResetParagraphAlignment ARGS1(
 **  For functions similar to this but which depend on details of
 **  the HTML handler's internal data, the calling interface should
 **  be changed, and functions in SGML.c would have to make sure not
-**  to call such functions inappropriately (e.g. calling a function
+**  to call such functions inappropriately (e.g., calling a function
 **  specific to the Lynx_HTML_Handler when SGML.c output goes to
 **  some other HTStructured object like in HTMLGen.c), or the new
 **  functions could be added to the SGML.h interface.

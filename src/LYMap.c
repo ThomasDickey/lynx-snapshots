@@ -105,7 +105,7 @@ PRIVATE void LYLynxMaps_free NOARGS
  *    HTParentAnchor structure and is freed when the document is removed
  *    from memory, in the course of normal removal of anchors.
  *    MAPs from POST responses can only be accessed via internal links,
- *    i.e. from within the same document (with the same post_data).
+ *    i.e., from within the same document (with the same post_data).
  *    The notion of "same document" is extended, so that LYNXIMGMAP:
  *    and List Page screens are logically part of the document on which
  *    they are based. - kw
@@ -318,7 +318,7 @@ PUBLIC BOOL LYHaveImageMap ARGS1(
  *  the underlying resource.  ALso returns a pointer to that anchor in
  *  *punderlying if we are dealing with POST data. - kw
  *
- *  address  is the address of the underlying resource, i.e. the one
+ *  address  is the address of the underlying resource, i.e., the one
  *	     containing the MAP element, the MAP's name appended as
  *	     fragment is ignored.
  *  anAnchor is the LYNXIMGMAP: anchor; if it is associated with POST
@@ -361,7 +361,7 @@ PRIVATE void fill_DocAddress ARGS4(
  *  list if a List Page for a POST response is requested.  Also
  *  fill in the DocAddress structure etc. by calling fill_DocAddress().
  *
- *  address is the address of the underlying resource, i.e. the one
+ *  address is the address of the underlying resource, i.e., the one
  *	    containing the MAP element, the MAP's name appended as
  *	    fragment is ignored.
  *  anchor  is the LYNXIMGMAP: anchor for which LYLoadIMGmap() is

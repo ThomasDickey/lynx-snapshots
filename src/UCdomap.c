@@ -69,8 +69,6 @@
 #include <mnem_suni.h>
 #endif /* NOTDEFINED */
 
-PUBLIC  char *UC_TEMPcharset = 0;	/* temporary in UCGetLYhndl_byMIME */
-
 /*
  *  Some of the code below, and some of the comments, are left in for
  *  historical reasons.  Not all those tables below are currently
@@ -1509,7 +1507,6 @@ PUBLIC int UCGetRawUniMode_byLYhndl ARGS1(
 PUBLIC int UCGetLYhndl_byMIME ARGS1(
 	CONST char *,	value)
 {
-#define UC_MIMEcharset UC_TEMPcharset
     int i;
     int LYhndl = -1;
 
@@ -1518,127 +1515,122 @@ PUBLIC int UCGetLYhndl_byMIME ARGS1(
 	return -1;
     }
 
-    StrAllocCopy(UC_MIMEcharset, value);
-    LYLowerCase(UC_MIMEcharset);
-
     for (i = 0;
 	 (i < MAXCHARSETS && i < LYNumCharsets &&
 	  LYchar_set_names[i]); i++) {
 	if (LYCharSet_UC[i].MIMEname &&
-	    !strcmp(UC_MIMEcharset, LYCharSet_UC[i].MIMEname)) {
+	   !strcasecomp(value, LYCharSet_UC[i].MIMEname)) {
 	    return i;
 	}
     }
-    {
+
+    /*
+     * Not yet found, try synonyms.  - FM
+     */
+    if (!strcasecomp(value, "unicode-1-1-utf-8") ||
+	!strcasecomp(value, "utf8")) {
 	/*
-	 *  Not yet found, try synonyms. - FM
+	 * Treat these as synonyms for the IANA registered name.  - FM
 	 */
-	if (!strcmp(UC_MIMEcharset, "unicode-1-1-utf-8") ||
-	    !strcmp(UC_MIMEcharset, "utf8")) {
-	    /*
-	     *	Treat these as synonyms for the IANA registered name. - FM
-	     */
-	    return UCGetLYhndl_byMIME("utf-8");
-	}
-	if (!strncmp(UC_MIMEcharset, "iso-2022-jp", 11) ||
-	    !strcmp(UC_MIMEcharset, "x-euc-jp")) {
-	    return UCGetLYhndl_byMIME("euc-jp");
-	}
-	if (!strcmp(UC_MIMEcharset, "x-shift-jis")) {
-	    return UCGetLYhndl_byMIME("shift_jis");
-	}
-	if (!strcmp(UC_MIMEcharset, "iso-2022-kr")) {
-	    return UCGetLYhndl_byMIME("euc-kr");
-	}
-	if (!strcmp(UC_MIMEcharset, "gb2312") ||
-	    !strncmp(UC_MIMEcharset, "cn-gb", 5) ||
-	    !strcmp(UC_MIMEcharset, "iso-2022-cn")) {
-	    return UCGetLYhndl_byMIME("euc-cn");
-	}
-	if (!strcmp(UC_MIMEcharset, "cn-big5")) {
-	    return UCGetLYhndl_byMIME("big5");
-	}
-	if (!strcmp(UC_MIMEcharset, "x-mac-roman") ||
-	    !strcmp(UC_MIMEcharset, "mac-roman")) {
-	    return UCGetLYhndl_byMIME("macintosh");
-	}
-	if (!strcmp(UC_MIMEcharset, "x-next") ||
-	    !strcmp(UC_MIMEcharset, "nextstep") ||
-	    !strcmp(UC_MIMEcharset, "x-nextstep")) {
-	    return UCGetLYhndl_byMIME("next");
-	}
-	if (!strcmp(UC_MIMEcharset, "iso-8859-1-windows-3.1-latin-1") ||
-	    !strcmp(UC_MIMEcharset, "cp1252") ||
-	    !strcmp(UC_MIMEcharset, "cp-1252") ||
-	    !strcmp(UC_MIMEcharset, "ibm1252") ||
-	    !strcmp(UC_MIMEcharset, "iso-8859-1-windows-3.0-latin-1")) {
-	    /*
-	     *	Treat these as synonyms for windows-1252, which is more
-	     *	commonly used than the IANA registered name. - FM
-	     */
-	    return UCGetLYhndl_byMIME("windows-1252");
-	}
-	if (!strcmp(UC_MIMEcharset, "iso-8859-2-windows-latin-2") ||
-	    !strcmp(UC_MIMEcharset, "cp1250") ||
-	    !strcmp(UC_MIMEcharset, "cp-1250") ||
-	    !strcmp(UC_MIMEcharset, "ibm1250")) {
-	    /*
-	     *	Treat these as synonyms for windows-1250. - FM
-	     */
-	    return UCGetLYhndl_byMIME("windows-1250");
-	}
-	if ((!strncmp(UC_MIMEcharset, "ibm", 3) ||
-	     !strncmp(UC_MIMEcharset, "cp-", 3)) &&
-	    isdigit((unsigned char)UC_MIMEcharset[3]) &&
-	    isdigit((unsigned char)UC_MIMEcharset[4]) &&
-	    isdigit((unsigned char)UC_MIMEcharset[5])) {
-	    /*
-	     *	For "ibmNNN<...>" or "cp-NNN", try "cpNNN<...>"
-	     *	if not yet found. - KW & FM
-	     */
-	    char * cptmp = NULL;
+	return UCGetLYhndl_byMIME("utf-8");
+    }
+    if (!strncasecomp(value, "iso-2022-jp", 11) ||
+	!strcasecomp(value, "x-euc-jp")) {
+	return UCGetLYhndl_byMIME("euc-jp");
+    }
+    if (!strcasecomp(value, "x-shift-jis")) {
+	return UCGetLYhndl_byMIME("shift_jis");
+    }
+    if (!strcasecomp(value, "iso-2022-kr")) {
+	return UCGetLYhndl_byMIME("euc-kr");
+    }
+    if (!strcasecomp(value, "gb2312") ||
+	!strncasecomp(value, "cn-gb", 5) ||
+	!strcasecomp(value, "iso-2022-cn")) {
+	return UCGetLYhndl_byMIME("euc-cn");
+    }
+    if (!strcasecomp(value, "cn-big5")) {
+	return UCGetLYhndl_byMIME("big5");
+    }
+    if (!strcasecomp(value, "x-mac-roman") ||
+	!strcasecomp(value, "mac-roman")) {
+	return UCGetLYhndl_byMIME("macintosh");
+    }
+    if (!strcasecomp(value, "x-next") ||
+	!strcasecomp(value, "nextstep") ||
+	!strcasecomp(value, "x-nextstep")) {
+	return UCGetLYhndl_byMIME("next");
+    }
+    if (!strcasecomp(value, "iso-8859-1-windows-3.1-latin-1") ||
+	!strcasecomp(value, "cp1252") ||
+	!strcasecomp(value, "cp-1252") ||
+	!strcasecomp(value, "ibm1252") ||
+	!strcasecomp(value, "iso-8859-1-windows-3.0-latin-1")) {
+	/*
+	 * Treat these as synonyms for windows-1252, which is more
+	 * commonly used than the IANA registered name.  - FM
+	 */
+	return UCGetLYhndl_byMIME("windows-1252");
+    }
+    if (!strcasecomp(value, "iso-8859-2-windows-latin-2") ||
+	!strcasecomp(value, "cp1250") ||
+	!strcasecomp(value, "cp-1250") ||
+	!strcasecomp(value, "ibm1250")) {
+	/*
+	 * Treat these as synonyms for windows-1250.  - FM
+	 */
+	return UCGetLYhndl_byMIME("windows-1250");
+    }
+    if ((!strncasecomp(value, "ibm", 3) ||
+	 !strncasecomp(value, "cp-", 3)) &&
+	isdigit((unsigned char)value[3]) &&
+	isdigit((unsigned char)value[4]) &&
+	isdigit((unsigned char)value[5])) {
+	/*
+	 * For "ibmNNN<...>" or "cp-NNN", try "cpNNN<...>"
+	 * if not yet found.  - KW & FM
+	 */
+	char * cptmp = NULL;
 
-	    StrAllocCopy(cptmp, (UC_MIMEcharset + 1));
-	    cptmp[0] = 'c';
-	    cptmp[1] = 'p';
-	    if ((LYhndl = UCGetLYhndl_byMIME(cptmp)) >= 0) {
-		FREE(cptmp);
-		return LYhndl;
-	    }
-	    /*
-	     *	Try windows-NNN<...> if not yet found. - FM
-	     */
-	    StrAllocCopy(cptmp, "windows-");
-	    StrAllocCat(cptmp, (UC_MIMEcharset + 3));
-	    LYhndl = UCGetLYhndl_byMIME(cptmp);
+	StrAllocCopy(cptmp, (value + 1));
+	cptmp[0] = 'c';
+	cptmp[1] = 'p';
+	if ((LYhndl = UCGetLYhndl_byMIME(cptmp)) >= 0) {
 	    FREE(cptmp);
 	    return LYhndl;
 	}
-	if (!strncmp(UC_MIMEcharset, "windows-", 8) &&
-	    isdigit((unsigned char)UC_MIMEcharset[8]) &&
-	    isdigit((unsigned char)UC_MIMEcharset[9]) &&
-	    isdigit((unsigned char)UC_MIMEcharset[10])) {
-	    /*
-	     *	For "windows-NNN<...>", try "cpNNN<...>" - FM
-	     */
-	    char * cptmp = NULL;
+	/*
+	 * Try windows-NNN<...> if not yet found.  - FM
+	 */
+	StrAllocCopy(cptmp, "windows-");
+	StrAllocCat(cptmp, (value + 3));
+	LYhndl = UCGetLYhndl_byMIME(cptmp);
+	FREE(cptmp);
+	return LYhndl;
+    }
+    if (!strncasecomp(value, "windows-", 8) &&
+	isdigit((unsigned char)value[8]) &&
+	isdigit((unsigned char)value[9]) &&
+	isdigit((unsigned char)value[10])) {
+	/*
+	 * For "windows-NNN<...>", try "cpNNN<...>" - FM
+	 */
+	char * cptmp = NULL;
 
-	    StrAllocCopy(cptmp, (UC_MIMEcharset + 6));
-	    cptmp[0] = 'c';
-	    cptmp[1] = 'p';
-	    LYhndl = UCGetLYhndl_byMIME(cptmp);
-	    FREE(cptmp);
-	    return LYhndl;
-	}
-	if (!strcmp(UC_MIMEcharset, "koi-8")) { /* accentsoft bugosity */
-	  return UCGetLYhndl_byMIME("koi8-r");
-	}
+	StrAllocCopy(cptmp, (value + 6));
+	cptmp[0] = 'c';
+	cptmp[1] = 'p';
+	LYhndl = UCGetLYhndl_byMIME(cptmp);
+	FREE(cptmp);
+	return LYhndl;
+    }
+    if (!strcasecomp(value, "koi-8")) { /* accentsoft bugosity */
+      return UCGetLYhndl_byMIME("koi8-r");
     }
     /* no more synonyms if come here... */
 
     CTRACE(tfp, "UCGetLYhndl_byMIME: unrecognized MIME name \"%s\"\n", value);
     return -1;	/* returns -1 if no charset found by that MIME name */
-#undef UC_MIMEcharset
 }
 
 /*
@@ -1873,7 +1865,7 @@ PRIVATE int UC_Register_with_LYCharSets ARGS4(
     if (LYhndl < 0) {		/* not found */
 	found = 0;
 	if (LYNumCharsets >= MAXCHARSETS) {
-	    CTRACE(tfp, "UC_Register_with_LYCharSets: Too many. Ignoring %s/%s.",
+	    CTRACE(tfp, "UC_Register_with_LYCharSets: Too many.  Ignoring %s/%s.",
 			UC_MIMEcharset, UC_LYNXcharset);
 	    return -1;
 	}
@@ -1958,7 +1950,7 @@ PUBLIC void UC_Charset_Setup ARGS9(
 	s = found;
     } else {
 	if (UCNumCharsets >= MAXCHARSETS) {
-	    CTRACE(tfp, "UC_Charset_Setup: Too many. Ignoring %s/%s.",
+	    CTRACE(tfp, "UC_Charset_Setup: Too many.  Ignoring %s/%s.",
 			UC_MIMEcharset, UC_LYNXcharset);
 	    return;
 	}

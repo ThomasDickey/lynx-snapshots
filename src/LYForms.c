@@ -11,6 +11,7 @@
 #include <LYStrings.h>
 #include <LYGlobalDefs.h>
 #include <LYKeymap.h>
+#include <LYClean.h>
 #include <LYSignal.h>
 
 #include <LYLeaks.h>
@@ -265,10 +266,6 @@ PRIVATE int form_getstr ARGS1(
     BOOL HaveMaxlength = FALSE;
     int action, repeat, non_first = 0;
 
-#ifdef VMS
-    extern BOOLEAN HadVMSInterrupt;	/* Flag from cleanup_sig() AST */
-#endif
-
     EditFieldData MyEdit;
     BOOLEAN Edited = FALSE;		/* Value might be updated? */
 
@@ -482,9 +479,9 @@ breakfor:
 	/*
 	 *  Remove trailing spaces
 	 *
-	 *  Do we really need to do that here? Trailing spaces will only
-	 *  be there if user keyed them in. Rather rude to throw away
-	 *  their hard earned spaces. Better deal with trailing spaces
+	 *  Do we really need to do that here?  Trailing spaces will only
+	 *  be there if user keyed them in.  Rather rude to throw away
+	 *  their hard earned spaces.  Better deal with trailing spaces
 	 *  when submitting the form????
 	 */
 	p = &(form->value[strlen(form->value)]);
@@ -592,9 +589,6 @@ PRIVATE int popup_options ARGS7(
     int window_offset = 0;
     int lines_to_show;
     int npages;
-#ifdef VMS
-    extern BOOLEAN HadVMSInterrupt; /* Flag from cleanup_sig() AST */
-#endif /* VMS */
     static char prev_target[512];		/* Search string buffer */
     static char prev_target_buffer[512];	/* Next search buffer */
     static BOOL first = TRUE;

@@ -11,6 +11,7 @@
 #include <LYGlobalDefs.h>
 #include <LYSignal.h>
 #include <GridText.h>
+#include <LYClean.h>
 #include <LYCharSets.h>
 #include <LYCharUtils.h>
 
@@ -2040,8 +2041,8 @@ PUBLIC void LYFakeZap ARGS1(
 
 PRIVATE int DontCheck NOARGS
 {
-    static time_t last;
-    time_t next;
+    static long last;
+    long next;
 
     /** Curses or slang setup was not invoked **/
     if (dump_output_immediately)
@@ -2051,7 +2052,15 @@ PRIVATE int DontCheck NOARGS
      * Avoid checking interrupts more than one per second, since it is a slow
      * and expensive operation - TD
      */
+#if HAVE_GETTIMEOFDAY
+    {
+	struct timeval tv;
+	gettimeofday(&tv, (struct timezone *)0);
+	next = tv.tv_usec / 100000L;	/* 0.1 seconds is a compromise */
+    }
+#else
     next = time((time_t*)0);
+#endif
     if (next == last)
 	return (TRUE);
 
@@ -2127,7 +2136,6 @@ PUBLIC int HTCheckForInterrupt NOARGS
 #endif /* DOSPATH */
 
 #else /* VMS: */
-    extern BOOLEAN HadVMSInterrupt;
     extern int typeahead();
 
     if (fake_zap > 0) {
@@ -2751,50 +2759,6 @@ PUBLIC void remove_backslashes ARGS1(
     *buf = '\0';
     return;
 }
-
-/*
- *  Quote the path to make it safe for shell command processing.
- *
- *  We use a simple technique which involves quoting the entire
- *  string using single quotes, escaping the real single quotes
- *  with double quotes. This may be gross but it seems to work.
- */
-PUBLIC char * quote_pathname ARGS1(
-	char *, 	pathname)
-#ifndef __DJGPP__
-{
-    size_t i, n = 0;
-    char * result;
-
-    for (i=0; i < strlen(pathname); ++i)
-	if (pathname[i] == '\'') ++n;
-
-    result = (char *)malloc(strlen(pathname) + 5*n + 3);
-    if (result == NULL)
-	outofmem(__FILE__, "quote_pathname");
-
-    n = 0;
-    result[n++] = '\'';
-    for (i = 0; i < strlen(pathname); i++) {
-	if (pathname[i] == '\'') {
-	    result[n++] = '\'';
-	    result[n++] = '"';
-	    result[n++] = '\'';
-	    result[n++] = '"';
-	    result[n++] = '\'';
-	} else {
-	    result[n++] = pathname[i];
-	}
-    }
-    result[n++] = '\'';
-    result[n] = '\0';
-    return result;
-}
-#else
-{
-	return pathname;
-}
-#endif /* !__DJGPP__ */
 
 #if HAVE_UTMP
 extern char *ttyname PARAMS((int fd));
@@ -3960,10 +3924,10 @@ have_VMS_URL:
 		 *  It is a subdirectory or file on the local system.
 		 */
 #if defined (DOSPATH) || defined (__EMX__)
-		/* Don't want to see DOS local paths like c: escaped */
-		/* especially when we really have file://localhost/  */
-		/* at the beginning. To avoid any confusion we allow */
-		/* escaping the path if URL specials % or # present. */
+		/* Don't want to see DOS local paths like c: escaped  */
+		/* especially when we really have file://localhost/   */
+		/* at the beginning.  To avoid any confusion we allow */
+		/* escaping the path if URL specials % or # present.  */
 		if (strchr(temp, '#') == NULL &&
 			   strchr(temp, '%') == NULL)
 		StrAllocCopy(cp, temp);
@@ -5868,6 +5832,148 @@ PUBLIC  char * wwwName ARGS1(
 #endif /* DOSPATH */
 
     return cp;
+}
+
+/*
+ * Given a user-specified filename, e.g., for download or print, validate and
+ * expand it.  Expand home-directory expressions in the given string.  Only
+ * allow pipes if the user can spawn shell commands.
+ */
+PUBLIC BOOLEAN LYValidateFilename ARGS2(
+    	char *,		result,
+	char *,		given)
+{
+    char *cp;
+
+    /*
+     *  Cancel if the user entered "/dev/null" on Unix,
+     *  or an "nl:" path (case-insensitive) on VMS. - FM
+     */
+#ifdef VMS
+    if (!strncasecomp(given, "nl:", 3) ||
+	!strncasecomp(given, "/nl/", 4))
+#else
+    if (!strcmp(given, "/dev/null"))
+#endif /* VMS */
+    {
+	/* just ignore it */
+	return FALSE;
+    }
+#if HAVE_POPEN
+    if (LYIsPipeCommand(given)) {
+	if (no_shell) {
+	    HTUserMsg(SPAWNING_DISABLED);
+	    return FALSE;
+	}
+	strcpy(result, given);
+	return TRUE;
+    }
+#endif
+    if ((cp = strchr(given, '~'))) {
+	*(cp++) = '\0';
+	strcpy(result, given);
+	LYTrimPathSep(result);
+	strcat(result, wwwName(Home_Dir()));
+	strcat(result, cp);
+	strcpy(given, result);
+    }
+#ifdef VMS
+    if (strchr(given, '/') != NULL) {
+	strcpy(result, HTVMS_name("", given));
+	strcpy(given, result);
+    }
+    if (given[0] != '/' && strchr(given, ':') == NULL) {
+	strcpy(result, "sys$disk:");
+	if (strchr(given, ']') == NULL)
+	    strcat(result, "[]");
+	strcat(result, given);
+    } else {
+	strcpy(result, given);
+    }
+#else
+
+#ifndef __EMX__
+    if (!LYIsPathSep(*given)) {
+#if defined(__DJGPP__) || defined(_WINDOWS)
+    if (strchr(result, ':') != NULL)
+	cp = NULL;
+    else
+#endif /*  __DJGPP__ || _WINDOWS */
+	cp = getenv("PWD");
+    }
+    else
+#endif /* __EMX__*/
+	cp = NULL;
+
+    if (cp) {
+	LYTrimPathSep(cp);
+	sprintf(result, "%s/%s", cp, HTSYS_name(given));
+    } else {
+	strcpy(result, HTSYS_name(given));
+    }
+#endif /* VMS */
+    return TRUE;
+}
+
+/*
+ * Given a valid filename, check if it exists.  If so, we'll have to worry
+ * about overwriting it.
+ *
+ * Returns:
+ *	'Y' (yes/success)
+ *	'N' (no/retry)
+ *	3   (cancel)
+ */
+PUBLIC int LYValidateOutput ARGS1(
+    	char *,		filename)
+{
+    FILE *fp;
+    int c;
+
+    /*
+     * Assume we can write to a pipe
+     */
+#if HAVE_POPEN
+    if (LYIsPipeCommand(filename))
+	return 'Y';
+#endif
+
+    if (no_dotfiles || !show_dotfiles) {
+	if (*LYPathLeaf(filename) == '.') {
+	    HTAlert(FILENAME_CANNOT_BE_DOT);
+	    return 'N';
+	}
+    }
+
+    /*
+     *  See if it already exists.
+     */
+    if ((fp = fopen(filename, "r")) != NULL) {
+	fclose(fp);
+#ifdef VMS
+	_statusline(FILE_EXISTS_HPROMPT);
+#else
+	_statusline(FILE_EXISTS_OPROMPT);
+#endif /* VMS */
+	c = 0;
+	while (TOUPPER(c)!='Y' && TOUPPER(c)!='N' &&
+	       TOUPPER(c)!='A' && c != 7 && c != 3)
+	    c = LYgetch();
+#ifdef VMS
+	if (HadVMSInterrupt) {
+	    HadVMSInterrupt = FALSE;
+	    c = 3;
+	}
+#endif /* VMS */
+	if (c == 7 || c == 3) { /* Control-G or Control-C */
+	    HTInfoMsg(SAVE_REQUEST_CANCELLED);
+	    return 3;
+	}
+	if (TOUPPER(c) == 'N') {
+	    return 'N';
+	}
+    }
+    return 'Y';
 }
 
 /*

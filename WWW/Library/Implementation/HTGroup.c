@@ -67,7 +67,7 @@ typedef struct {
     GroupDef *	translation;
 } Ref;
 
-	
+
 
 PRIVATE void syntax_error ARGS3(FILE *,	 fp,
 				char *,	 msg,
@@ -111,7 +111,7 @@ PRIVATE AddressDefList *parse_address_part ARGS1(FILE *, fp)
 	ref->name = NULL;
 	ref->translation = NULL;
 	StrAllocCopy(ref->name, HTlex_buffer);
-	
+
 	HTList_addObject(address_def_list, (void*)ref);
 
 	if (only_one || (lex_item = lex(fp)) != LEX_ITEM_SEP)
@@ -167,7 +167,7 @@ PRIVATE UserDefList *parse_user_part ARGS1(FILE *, fp)
 	StrAllocCopy(ref->name, HTlex_buffer);
 
 	HTList_addObject(user_def_list, (void*)ref);
-	
+
 	if (only_one || (lex_item = lex(fp)) != LEX_ITEM_SEP)
 	    break;
 	/*
@@ -288,9 +288,9 @@ PUBLIC GroupDef *HTAA_parseGroupDef ARGS1(FILE *, fp)
     if ((lex_item = lex(fp)) != LEX_REC_SEP) {
 	syntax_error(fp, "Garbage after group definition", lex_item);
     }
-    
+
     return group_def;
-}    
+}
 
 
 PRIVATE GroupDef *parse_group_decl ARGS1(FILE *, fp)
@@ -324,7 +324,7 @@ PRIVATE GroupDef *parse_group_decl ARGS1(FILE *, fp)
 
     return group_def;
 }
-	
+
 
 
 /*
@@ -380,10 +380,10 @@ PRIVATE GroupDefList *parse_group_file ARGS1(FILE *, fp)
 {
     GroupDefList *group_def_list = HTList_new();
     GroupDef *group_def;
-    
+
     while (NULL != (group_def = parse_group_decl(fp)))
 	add_group_def(group_def_list, group_def);
-    
+
     return group_def_list;
 }
 
@@ -452,7 +452,7 @@ PRIVATE void print_group_def_list ARGS1(GroupDefList *, group_list)
 {
     GroupDefList *cur = group_list;
     GroupDef *group_def;
-    
+
     while (NULL != (group_def = (GroupDef*)HTList_nextObject(cur)))
 	HTAA_printGroupDef(group_def);
 }
@@ -509,8 +509,8 @@ PRIVATE BOOL part_match ARGS2(CONST char *, tcur,
 /* PRIVATE						ip_number_match()
 **		MATCH INET NUMBER AGAINST AN INET NUMBER MASK
 ** ON ENTRY:
-**	template	mask to match agaist, e.g. 128.141.*.*
-**	the_inet_addr	actual inet address, e.g. 128.141.201.74
+**	template	mask to match agaist, e.g., 128.141.*.*
+**	the_inet_addr	actual inet address, e.g., 128.141.201.74
 **
 ** ON EXIT:
 **	returns		YES, if match;  NO, if not.
@@ -521,7 +521,7 @@ PRIVATE BOOL ip_number_match ARGS2(CONST char *,	template,
     CONST char *tcur = template;
     CONST char *icur = the_inet_addr;
     int cnt;
-    
+
     for (cnt=0; cnt<4; cnt++) {
 	if (!tcur || !icur || !part_match(tcur, icur))
 	    return NO;
@@ -568,9 +568,9 @@ PRIVATE BOOL is_domain_mask ARGS1(CONST char *,	mask)
 /* PRIVATE							ip_mask_match()
 **		MATCH AN IP NUMBER MASK OR IP NAME MASK
 **		AGAINST ACTUAL IP NUMBER OR IP NAME
-**		
+**
 ** ON ENTRY:
-**	mask		mask. Mask may be either an inet number
+**	mask		mask.  Mask may be either an inet number
 **			mask or a domain name mask,
 **			e.g.
 **				128.141.*.*
@@ -614,7 +614,7 @@ PRIVATE BOOL ip_in_def_list ARGS3(AddressDefList *,	address_def_list,
 	Ref *ref;
 
 	while (NULL != (ref = (Ref*)HTList_nextObject(cur))) {
-	    /* Value of ref->translation is ignored, i.e. */
+	    /* Value of ref->translation is ignored, i.e., */
 	    /* no recursion for ip address tamplates.	  */
 	    if (ip_mask_match(ref->name, ip_number, ip_name))
 		return YES;
@@ -719,7 +719,7 @@ PUBLIC HTAAFailReasonType HTAA_userAndInetInGroup ARGS4(GroupDef *, group,
 	while (NULL != (item = (Item*)HTList_nextObject(cur1))) {
 	    if (!item->address_def_list ||	/* Any address allowed */
 		ip_in_def_list(item->address_def_list, ip_number, ip_name)) {
-		    
+
 		if (!item->user_def_list)	/* Any user allowed */
 		    return HTAA_OK;
 		else {
@@ -727,7 +727,7 @@ PUBLIC HTAAFailReasonType HTAA_userAndInetInGroup ARGS4(GroupDef *, group,
 		    Ref *ref;
 
 		    while (NULL != (ref = (Ref*)HTList_nextObject(cur2))) {
-			
+
 			if (ref->translation) {	/* Group, check recursively */
 			    reason = HTAA_userAndInetInGroup(ref->translation,
 							     username,
@@ -748,7 +748,7 @@ PUBLIC HTAAFailReasonType HTAA_userAndInetInGroup ARGS4(GroupDef *, group,
 	    }
 	} /* while items in group */
     } /* valid parameters */
-    
+
     return reason;		/* No match, or invalid parameters */
 }
 

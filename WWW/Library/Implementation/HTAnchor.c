@@ -13,7 +13,7 @@
 **	(c) Copyright CERN 1991 - See Copyright.html
 */
 
-#define HASH_SIZE 101		/* Arbitrary prime. Memory/speed tradeoff */
+#define HASH_SIZE 101		/* Arbitrary prime.  Memory/speed tradeoff */
 
 #include <HTUtils.h>
 #include <HTAnchor.h>
@@ -60,7 +60,7 @@ PRIVATE HTList **adult_table = 0;  /* Point to table of lists of all parents */
 /*				Creation Methods
 **				================
 **
-**	Do not use "new" by itself outside this module. In order to enforce
+**	Do not use "new" by itself outside this module.  In order to enforce
 **	consistency, we insist that you furnish more information about the
 **	anchor you are creating : use newWithParent or newWithAddress.
 */
@@ -160,7 +160,7 @@ PRIVATE BOOL HTIdentical ARGS2(
 **	---------------------------------
 **
 **	Me one is for a new anchor being edited into an existing
-**	document. The parent anchor must already exist.
+**	document.  The parent anchor must already exist.
 */
 PUBLIC HTChildAnchor * HTAnchor_findChild ARGS2(
 	HTParentAnchor *,	parent,
@@ -470,7 +470,7 @@ PRIVATE void deleteLinks ARGS1(
 	 *  Test here to avoid calling overhead.
 	 *  If the parent has no loaded document, then we should
 	 *  tell it to attempt to delete itself.
-	 *  Don't do this jass if the anchor passed in is the same
+	 *  Don't do this jazz if the anchor passed in is the same
 	 *  as the anchor to delete.
 	 *  Also, don't do this if the destination parent is our
 	 *  parent.
@@ -1203,7 +1203,7 @@ PUBLIC void HTAnchor_setPhysical ARGS2(
 **     text/plain
 **	from file:	HTFile.c ->  HTPlain.c		     ->  GridText.c
 **
-**  The lock/set_by is used to lock e.g. a charset set by an explicit
+**  The lock/set_by is used to lock e.g., a charset set by an explicit
 **  HTTP MIME header against overriding by a HTML META tag - the MIME
 **  header has higher priority.  Defaults (from -assume_.. options etc.)
 **  will not override charset explicitly given by server.

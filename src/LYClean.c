@@ -183,9 +183,9 @@ PUBLIC void cleanup NOARGS
 
 #ifdef EXP_PERSISTENT_COOKIES
     /*
-     * This can go right here for now. We need to work up a better place
+     * This can go right here for now.  We need to work up a better place
      * to save cookies for the next release, preferably whenever a new
-     * persistent cookie is received or used. Some sort of protocol to
+     * persistent cookie is received or used.  Some sort of protocol to
      * handle two processes writing to the cookie file needs to be worked
      * out as well.
      */

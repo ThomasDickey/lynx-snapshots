@@ -2078,7 +2078,7 @@ PRIVATE int HTLoadNews ARGS4(
 	/* p1 = HTParse(arg, "", PARSE_PATH | PARSE_PUNCTUATION); */
 	/*
 	**  Don't use HTParse because news: access doesn't follow traditional
-	**  rules. For instance, if the article reference contains a '#',
+	**  rules.  For instance, if the article reference contains a '#',
 	**  the rest of it is lost -- JFG 10/7/92, from a bug report
 	*/
 	} else if (!strncasecomp (arg, "nntp:", 5)) {
@@ -2402,7 +2402,7 @@ PRIVATE int HTLoadNews ARGS4(
 			if (retries < 1)
 			    continue;
 			sprintf(message,
-				gettext("Can't read news info. News host %.20s responded: %.200s"),
+				gettext("Can't read news info.  News host %.20s responded: %.200s"),
 				NewsHost, response_text);
 			return HTLoadError(stream, 500, message);
 		}

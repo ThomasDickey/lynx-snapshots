@@ -11,7 +11,7 @@
 **
 **	Therefore also all the strings returned by this package
 **	are only valid until the next call to the same function
-**	is made. This approach is selected, because of the nature
+**	is made.  This approach is selected, because of the nature
 **	of access authorization: no string returned by the package
 **	needs to be valid longer than until the next call.
 **
@@ -212,11 +212,11 @@ PUBLIC BOOL HTAAMethod_inList ARGS2(HTAAMethod, method,
 **
 ** ON ENTRY:
 **	template	is a template string to match the file name
-**			agaist, may contain a single wildcard
+**			against, may contain a single wildcard
 **			character * which matches zero or more
 **			arbitrary characters.
 **	filename	is the filename (or pathname) to be matched
-**			agaist the template.
+**			against the template.
 **
 ** ON EXIT:
 **	returns 	YES, if filename matches the template.
@@ -263,11 +263,11 @@ PUBLIC BOOL HTAA_templateMatch ARGS2(CONST char *, template,
 **
 ** ON ENTRY:
 **	template	is a template string to match the file name
-**			agaist, may contain a single wildcard
+**			against, may contain a single wildcard
 **			character * which matches zero or more
 **			arbitrary characters.
 **	filename	is the filename (or pathname) to be matched
-**			agaist the template.
+**			against the template.
 **
 ** ON EXIT:
 **	returns 	YES, if filename matches the template.
@@ -353,7 +353,7 @@ PUBLIC char *HTAA_makeProtectionTemplate ARGS1(CONST char *, docname)
 #define SKIPWS(s) while (*s==' ' || *s=='\t') s++;
 
 /*
-** Kill trailing whitespace starting from *(s-1) backwords
+** Kill trailing whitespace starting from *(s-1) backwards
 */
 #define KILLWS(s) {char *c=s-1; while (*c==' ' || *c=='\t') *(c--)='\0';}
 
@@ -455,7 +455,7 @@ PRIVATE char *end_pointer = buffer;
 PRIVATE int in_soc = -1;
 
 /* PUBLIC						HTAA_setupReader()
-**		SET UP HEADER LINE READER, i.e. give
+**		SET UP HEADER LINE READER, i.e., give
 **		the already-read-but-not-yet-processed
 **		buffer of text to be read before more
 **		is read from the socket.

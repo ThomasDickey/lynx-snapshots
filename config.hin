@@ -5,6 +5,7 @@
 #undef ALT_CHAR_SET		/* CF_ALT_CHAR_SET */
 #undef ANSI_VARARGS		/* CF_VARARGS */
 #undef ARCHIVE_ONLY		/* CF_ARG_DISABLE(dired-archive) */
+#undef BZIP2_PATH		/* CF_PATH_PROG(bzip2) */
 #undef CHMOD_PATH		/* CF_PATH_PROG(chmod) */
 #undef COLOR_CURSES		/* defined by CF_COLOR_CURSES */
 #undef COMPRESS_PATH		/* CF_PATH_PROG(compress) */
@@ -46,6 +47,7 @@
 #undef HAVE_GETCWD
 #undef HAVE_GETGROUPS
 #undef HAVE_GETTEXT		/* defined if you want to use non-GNU gettext */
+#undef HAVE_GETTIMEOFDAY
 #undef HAVE_JCURSES_H
 #undef HAVE_KEYPAD
 #undef HAVE_LC_MESSAGES		/* locale messages */
@@ -58,6 +60,7 @@
 #undef HAVE_MUNMAP		/* defined by AM_GNU_GETTEXT */
 #undef HAVE_NCURSES_H		/* defined if we include <ncurses.h> */
 #undef HAVE_NL_TYPES_H		/* defined by AM_GNU_GETTEXT */
+#undef HAVE_POPEN
 #undef HAVE_PUTENV
 #undef HAVE_READDIR
 #undef HAVE_SETENV		/* defined by AM_GNU_GETTEXT */

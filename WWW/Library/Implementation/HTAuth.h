@@ -1,8 +1,8 @@
 /*                                   AUTHENTICATION MODULE
-                                             
-   This is the authentication module. By modifying the function HTAA_authenticate() it can
+
+   This is the authentication module.  By modifying the function HTAA_authenticate() it can
    be made to support external authentication methods.
-   
+
  */
 
 #ifndef HTAUTH_H
@@ -13,7 +13,7 @@
 
 
 #ifdef SHORT_NAMES
-#define HTAAauth        HTAA_authenticate
+#define HTAA_authenticate	HTAAauth
 #endif /* SHORT_NAMES */
 
 

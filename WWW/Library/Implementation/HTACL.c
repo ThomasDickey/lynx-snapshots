@@ -36,7 +36,7 @@
 ** ON EXIT:
 **	returns the absolute pathname of ACL file
 **		(which is automatically freed next time
-**		this fuction is called).
+**		this function is called).
 */
 PRIVATE char *HTAA_getAclFilename ARGS1(CONST char *, pathname)
 {
@@ -113,7 +113,7 @@ PUBLIC void HTAA_closeAcl ARGS1(FILE *, acl_file)
 **	template : method, method, ... : group@addr, user, group, ...
 **
 **	The last item is in fact in exactly the same format as
-**	group definition in group file, i.e. everything that
+**	group definition in group file, i.e., everything that
 **	follows the 'groupname:' part,
 **	e.g.
 **		user, group, user@address, group@address,
@@ -137,7 +137,7 @@ PUBLIC void HTAA_closeAcl ARGS1(FILE *, acl_file)
 **
 ** NOTE:
 **	The returned group definition may well contain references
-**	to groups defined in group file. Therefore these references
+**	to groups defined in group file.  Therefore these references
 **	must be resolved according to that rule file by function
 **	HTAA_resolveGroupReferences() (group file is read in by
 **	HTAA_readGroupFile()) and after that access authorization

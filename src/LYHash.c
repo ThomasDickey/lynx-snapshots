@@ -31,10 +31,10 @@ PUBLIC int hash_code_rp ARGS1(char*,string)
 /*
  *	This is the same function as the private HASH_FUNCTION() in HTAnchor.c,
  *      but with a different value for HASH_SIZE.
- */ 
+ */
 
 #ifdef NOT_USED
-#define HASH_SIZE 8193		/* Arbitrary prime. Memory/speed tradeoff */
+#define HASH_SIZE 8193		/* Arbitrary prime.  Memory/speed tradeoff */
 #else
 #define HASH_SIZE CSHASHSIZE
 #endif

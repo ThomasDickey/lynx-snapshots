@@ -15,6 +15,7 @@
 #include <LYCurses.h>
 #include <LYStrings.h>
 #include <LYUtils.h>
+#include <LYClean.h>
 #include <LYSignal.h>
 #include <GridText.h>
 #include <LYCookie.h>
@@ -167,9 +168,6 @@ PUBLIC BOOL HTConfirm ARGS1(CONST char *, Msg)
 	return(NO);
     } else {
 	int c;
-#ifdef VMS
-	extern BOOLEAN HadVMSInterrupt;
-#endif /* VMS */
 
 	_user_message(gettext("%s (y/n) "), Msg);
 
@@ -413,10 +411,6 @@ PUBLIC BOOL HTConfirmCookie ARGS4(
     char message[256];
     domain_entry *de;
     int ch, namelen, valuelen, space_free;
-
-#ifdef VMS
-    extern BOOLEAN HadVMSInterrupt;
-#endif /* VMS */
 
     if ((de = (domain_entry *)dp) == NULL)
 	return FALSE;

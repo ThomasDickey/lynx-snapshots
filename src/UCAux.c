@@ -137,7 +137,7 @@ PUBLIC BOOL UCNeedNotTranslate ARGS2(
 **
 **  Should be called once when a stage starts processing text (and the
 **  input and output charsets are known), or whenever one of input or
-**  output charsets has changed (e.g. by SGML.c stage after HTML.c stage
+**  output charsets has changed (e.g., by SGML.c stage after HTML.c stage
 **  has processed a META tag).
 **  The global flags (LYRawMode, HTPassEightBitRaw etc.) are currently
 **  not taken into account here (except for HTCJK, somewhat), it's still
@@ -215,7 +215,7 @@ PUBLIC void UCSetTransParams ARGS5(
 	    **  Set up for all other charset combinations.
 	    **  The intm_ucs flag is set TRUE if the input
 	    **  charset is iso-8859-1 or UTF-8, or largely
-	    **  equivalent to them, i.e. if we have UCS without
+	    **  equivalent to them, i.e., if we have UCS without
 	    **  having to do a table translation.
 	    */
 	    intm_ucs = (cs_in == LATIN1 || pT->decode_utf8 ||

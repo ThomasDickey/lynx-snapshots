@@ -31,6 +31,8 @@
 #define HTSYS_remove(path) remove(path)
 #endif
 
+#define LYIsPipeCommand(s) ((s)[0] == '|')
+
 #ifdef DOSPATH
 #define LYIsPathSep(ch) ((ch) == '/' || (ch) == '\\')
 #else
@@ -46,6 +48,7 @@ extern BOOLEAN LYCachedTemp PARAMS((char *result, char **cached));
 extern BOOLEAN LYCanDoHEAD PARAMS((CONST char *address));
 extern BOOLEAN LYExpandHostForURL PARAMS((char **AllocatedString, char *prefix_list, char *suffix_list));
 extern BOOLEAN LYPathOffHomeOK PARAMS((char *fbuffer, size_t fbuffer_size));
+extern BOOLEAN LYValidateFilename PARAMS((char * result, char * given));
 extern BOOLEAN LYisLocalAlias PARAMS((char *filename));
 extern BOOLEAN LYisLocalFile PARAMS((char *filename));
 extern BOOLEAN LYisLocalHost PARAMS((char *filename));
@@ -60,13 +63,13 @@ extern FILE *LYReopenTemp PARAMS((char *name));
 extern char *LYPathLeaf PARAMS((char * pathname));
 extern char *LYSysShell NOPARAMS;
 extern char *LYgetXDisplay NOPARAMS;
-extern char *quote_pathname PARAMS((char *pathname));
 extern char *strip_trailing_slash PARAMS((char * my_dirname));
 extern char *wwwName PARAMS((CONST char *pathname));
 extern int HTCheckForInterrupt NOPARAMS;
 extern int LYCheckForProxyURL PARAMS((char *filename));
 extern int LYOpenInternalPage PARAMS((FILE **fp0, char **newfile));
 extern int LYSystem PARAMS((char *command));
+extern int LYValidateOutput PARAMS((char * filename));
 extern int is_url PARAMS((char *filename));
 extern int number2arrows PARAMS((int number));
 extern time_t LYmktime PARAMS((char *string, BOOL absolute));

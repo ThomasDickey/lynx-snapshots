@@ -10,6 +10,7 @@
 #include <LYUtils.h>
 #include <GridText.h>
 #include <LYList.h>
+#include <LYClean.h>
 #include <LYSignal.h>
 #include <LYGlobalDefs.h>
 #include <LYCharUtils.h>
@@ -237,9 +238,6 @@ PUBLIC void printlist ARGS2(
 	FILE *, 	fp,
 	BOOLEAN,	titles)
 {
-#ifdef VMS
-    extern BOOLEAN HadVMSInterrupt;
-#endif /* VMS */
     int cnt;
     int refs, hidden_links;
     char *address = NULL;
@@ -282,7 +280,7 @@ PUBLIC void printlist ARGS2(
 	    }
 	    dest = HTAnchor_followMainLink((HTAnchor *)child);
 	    /*
-	     *	Ignore if child anchor points to itself, i.e. we had
+	     *	Ignore if child anchor points to itself, i.e., we had
 	     *	something like <A NAME=xyz HREF="#xyz"> and it is not
 	     *	treated as a hidden link.  Useful if someone 'P'rints
 	     *	the List Page (which isn't a very useful action to do,

@@ -59,10 +59,53 @@ PRIVATE int remove_quotes PARAMS((char *string));
 
 PRIVATE  char* subject_translate8bit PARAMS((char *source));
 
+#define LYNX_PRINT_TITLE   0
+#define LYNX_PRINT_URL     1
+#define LYNX_PRINT_DATE    2
+#define LYNX_PRINT_LASTMOD 3
+
+#define MAX_PUTENV 4
+
+PRIVATE void set_environ ARGS3(
+	int,		name,
+	CONST char *,	value,
+	CONST char *,	no_value)
+{
+    static CONST char *names[MAX_PUTENV] = {
+	"LYNX_PRINT_TITLE",
+	"LYNX_PRINT_URL",
+	"LYNX_PRINT_DATE",
+	"LYNX_PRINT_LASTMOD",
+    };
+    static char *pointers[MAX_PUTENV];
+    char *envbuffer = 0;
+#ifdef VMS
+#define SET_ENVIRON(name, value, no_value) set_environ(name, value, no_value)
+    StrAllocCopy(envbuffer, value);
+    if (!(envbuffer && *envbuffer))
+	StrAllocCopy(envbuffer, no_value);
+    Define_VMSLogical(names[name], envbuffer);
+    FREE(envbuffer);
+#else
+#define SET_ENVIRON(name, value, no_value) set_environ(name, value, "")
+    /*
+     * Once we've given a string to 'putenv()', we must not free it until we
+     * give it a string to replace it.
+     */
+    StrAllocCopy(envbuffer, names[name]);
+    StrAllocCat(envbuffer, "=");
+    StrAllocCat(envbuffer, value ? value : no_value);
+    putenv(envbuffer);
+    FREE(pointers[name]);
+    pointers[name] = envbuffer;
+#endif
+}
+
 PUBLIC int printfile ARGS1(
 	document *,	newdoc)
 {
     static char tempfile[LY_MAXPATH];
+    char *the_command = 0;
     char buffer[LINESIZE];
     char filename[LINESIZE];
     char user_response[256];
@@ -89,7 +132,6 @@ PUBLIC int printfile ARGS1(
     CONST char *disp_charset;
     char *subject = NULL;   /* print-to-email */
     static BOOLEAN first_mail_preparsed = TRUE;
-    char *envbuffer = NULL;
 #ifdef VMS
     BOOLEAN isPMDF = FALSE;
     char hdrfile[LY_MAXPATH];
@@ -340,103 +382,24 @@ PUBLIC int printfile ARGS1(
 		    break;
 		}
 
-		if (no_dotfiles || !show_dotfiles) {
-		    if (*LYPathLeaf(filename) == '.') {
-			HTAlert(FILENAME_CANNOT_BE_DOT);
-			_statusline(NEW_FILENAME_PROMPT);
-			FirstRecall = TRUE;
-			FnameNum = FnameTotal;
-			goto retry;
-		    }
-		}
-		/*
-		 *  Cancel if the user entered "/dev/null" on Unix,
-		 *  or an "nl:" path (case-insensitive) on VMS. - FM
-		 */
-#ifdef VMS
-		if (!strncasecomp(filename, "nl:", 3) ||
-		    !strncasecomp(filename, "/nl/", 4))
-#else
-		if (!strcmp(filename, "/dev/null"))
-#endif /* VMS */
-		{
+		if (!LYValidateFilename(buffer, filename)) {
 		    HTInfoMsg(SAVE_REQUEST_CANCELLED);
 		    break;
 		}
-		if ((cp = strchr(filename, '~'))) {
-		    *(cp++) = '\0';
-		    strcpy(buffer, filename);
-		    LYTrimPathSep(buffer);
-		    strcat(buffer, wwwName(Home_Dir()));
-		    strcat(buffer, cp);
-		    strcpy(filename, buffer);
-		}
-#ifdef VMS
-		if (strchr(filename, '/') != NULL) {
-		    strcpy(buffer, HTVMS_name("", filename));
-		    strcpy(filename, buffer);
-		}
-		if (filename[0] != '/' && strchr(filename, ':') == NULL) {
-		    strcpy(buffer, "sys$disk:");
-		    if (strchr(filename, ']') == NULL)
-		    strcat(buffer, "[]");
-		    strcat(buffer, filename);
-		} else {
-		    strcpy(buffer, filename);
-		}
-#else
-
-#ifndef __EMX__
-		if (!LYIsPathSep(*filename)) {
-#if defined(__DJGPP__) || defined(_WINDOWS)
-		if (strchr(buffer, ':') != NULL)
-			cp = NULL;
-		else
-#endif /*  __DJGPP__ || _WINDOWS */
-		    cp = getenv("PWD");
-		}
-		else
-#endif
-		    cp = NULL;
-
-		LYTrimPathSep(cp);
-		if (cp)
-		    sprintf(buffer, "%s/%s", cp, HTSYS_name(filename));
-		else
-		    strcpy(buffer, HTSYS_name(filename));
-#endif /* VMS */
 
 		/*
 		 *  See if it already exists.
 		 */
-		if ((outfile_fp = fopen(buffer, "r")) != NULL) {
-		    fclose(outfile_fp);
-#ifdef VMS
-		    _statusline(FILE_EXISTS_HPROMPT);
-#else
-		    _statusline(FILE_EXISTS_OPROMPT);
-#endif /* VMS */
-		    c = 0;
-		    while (TOUPPER(c)!='Y' && TOUPPER(c)!='N' &&
-			   TOUPPER(c)!='A' && c != 7 && c != 3)
-			c = LYgetch();
-#ifdef VMS
-		    if (HadVMSInterrupt) {
-			HadVMSInterrupt = FALSE;
-			HTInfoMsg(SAVE_REQUEST_CANCELLED);
-			break;
-		    }
-#endif /* VMS */
-		    if (c == 7 || c == 3) { /* Control-G or Control-C */
-			HTInfoMsg(SAVE_REQUEST_CANCELLED);
-			break;
-		    }
-		    if (TOUPPER(c) == 'N') {
-			_statusline(NEW_FILENAME_PROMPT);
-			FirstRecall = TRUE;
-			FnameNum = FnameTotal;
-			goto retry;
-		    }
+		switch (LYValidateOutput(buffer)) {
+		case 'Y':
+		    break;
+		case 'N':
+		    _statusline(NEW_FILENAME_PROMPT);
+		    FirstRecall = TRUE;
+		    FnameNum = FnameTotal;
+		    goto retry;
+		default:
+		    goto done;
 		}
 
 		/*
@@ -444,6 +407,23 @@ PUBLIC int printfile ARGS1(
 		 */
 		CTRACE(tfp, "LYPrint: filename is %s, action is `%c'\n", buffer, c);
 
+#if HAVE_POPEN
+		if (*buffer == '|') {
+		    if (no_shell) {
+			HTUserMsg(SPAWNING_DISABLED);
+			FirstRecall = TRUE;
+			FnameNum = FnameTotal;
+			goto retry;
+		    } else if ((outfile_fp = popen(buffer+1, "w")) == NULL) {
+			CTRACE(tfp, "LYPrint: errno is %d\n", errno);
+			HTAlert(CANNOT_WRITE_TO_FILE);
+			_statusline(NEW_FILENAME_PROMPT);
+			FirstRecall = TRUE;
+			FnameNum = FnameTotal;
+			goto retry;
+		    }
+		} else
+#endif
 		if ((outfile_fp = (TOUPPER(c) == 'A'
 			? LYAppendToTxtFile(buffer)
 			: LYNewTxtFile(buffer))) == NULL) {
@@ -510,6 +490,11 @@ PUBLIC int printfile ARGS1(
 		if (keypad_mode)
 		    printlist(outfile_fp,FALSE);
 
+#if HAVE_POPEN
+		if (LYIsPipeCommand(buffer))
+		    pclose(outfile_fp);
+		else
+#endif
 		fclose(outfile_fp);
 #ifdef VMS
 		if (0 == strncasecomp(buffer, "sys$disk:", 9)) {
@@ -588,7 +573,17 @@ PUBLIC int printfile ARGS1(
 		 *  MORE readable and 8-bit letters shouldn't be a problem - LP
 		 */
 		/* change_sug_filename(sug_filename); */
-		StrAllocCopy(subject, subject_translate8bit(newdoc->title));
+	       subject = subject_translate8bit(newdoc->title);
+
+	       if (newdoc->isHEAD) {
+		       /*
+			* Special case for mailing HEAD responce:
+			* this is rather technical information, show URL.
+			*/
+		       FREE(subject);
+		       StrAllocCopy(subject, "HEAD  ");
+		       StrAllocCat(subject, newdoc->address);
+		}
 
 #ifdef VMS
 		if (strchr(user_response,'@') && !strchr(user_response,':') &&
@@ -1008,8 +1003,7 @@ PUBLIC int printfile ARGS1(
 		     *	Check for two '%s' and ask for the second filename
 		     *	argument if there is.
 		     */
-		    char *first_s = strstr(cur_printer->command, "%s");
-		    if (first_s && strstr(first_s+1, "%s")) {
+		    if (HTCountCommandArgs (cur_printer->command) >= 2) {
 			_statusline(FILENAME_PROMPT);
 		again:	strcpy(filename, sug_filename);
 			change_sug_filename(filename);
@@ -1130,18 +1124,9 @@ PUBLIC int printfile ARGS1(
 			HTAddSugFilename(filename);
 		    }
 
-#if defined (VMS) || defined (__EMX__) || defined(__DJGPP__)
-		    sprintf(buffer, cur_printer->command, tempfile, filename,
-				    "", "", "", "", "", "", "", "", "", "");
-#else /* Unix: */
-		    /*
-		     *	Prevent spoofing of the shell.
-		     */
-		    cp = quote_pathname(filename);
-		    sprintf(buffer, cur_printer->command, tempfile, cp,
-				    "", "", "", "", "", "", "", "", "", "");
-		    FREE(cp);
-#endif /* !VMS */
+		    HTAddParam (&the_command, cur_printer->command, 1, tempfile);
+		    HTAddParam (&the_command, cur_printer->command, 2, filename);
+		    HTEndParam (&the_command, cur_printer->command, 2);
 
 		} else {
 		    HTAlert(PRINTER_MISCONF_ERROR);
@@ -1156,38 +1141,38 @@ PUBLIC int printfile ARGS1(
 		move(1,1);
 
 		stop_curses();
-		CTRACE(tfp, "command: %s\n", buffer);
+		CTRACE(tfp, "command: %s\n", the_command);
 		printf(PRINTING_FILE);
-#ifdef VMS
 		/*
-		 *  Set document's title as a VMS logical. -  FM
+		 * Set various bits of document information as environment
+		 * variables, for use by external print scripts/etc.  On UNIX,
+		 * We assume there are values, and leave NULL value checking
+		 * up to the external PRINTER:  cmd/script - KED
 		 */
-		StrAllocCopy(envbuffer, HText_getTitle());
-		if (!(envbuffer && *envbuffer))
-		    StrAllocCopy(envbuffer, "No Title");
-		Define_VMSLogical("LYNX_PRINT_TITLE", envbuffer);
-#else
+		SET_ENVIRON(LYNX_PRINT_TITLE,
+			    HText_getTitle(),
+			    "No Title");
+		SET_ENVIRON(LYNX_PRINT_URL,
+			    newdoc->address,
+			    "No URL");
+		SET_ENVIRON(LYNX_PRINT_DATE,
+			    HText_getDate(),
+			    "No Date");
+		SET_ENVIRON(LYNX_PRINT_LASTMOD,
+			    HText_getLastModified(),
+			    "No LastMod");
+
+		LYSystem(the_command);
+		FREE(the_command);
 		/*
-		 *  Set document's title as an environment variable. - JKT
+		 * Remove the various LYNX_PRINT_xxxx logicals.  - KED
+		 * [could use unsetenv(), but it's not portable]
 		 */
-		StrAllocCopy(envbuffer, "LYNX_PRINT_TITLE=");
-		StrAllocCat(envbuffer, HText_getTitle());
-		putenv(envbuffer);
-#endif /* VMS */
-		LYSystem(buffer);
-#ifdef VMS
-		/*
-		 *  Remove LYNX_PRINT_TITLE logical. - FM
-		 */
-		Define_VMSLogical("LYNX_PRINT_TITLE", "");
-#else
-		/*
-		 *  Remove LYNX_PRINT_TITLE value from environment. - KW
-		 */
-		envbuffer[17] = '\0'; /* truncate after '=' */
-		putenv(envbuffer);
-#endif /* VMS */
-		FREE(envbuffer);
+		SET_ENVIRON(LYNX_PRINT_TITLE,   "", "");
+		SET_ENVIRON(LYNX_PRINT_URL,     "","");
+		SET_ENVIRON(LYNX_PRINT_DATE,    "", "");
+		SET_ENVIRON(LYNX_PRINT_LASTMOD, "", "");
+
 		fflush(stdout);
 #ifndef VMS
 		signal(SIGINT, cleanup_sig);
@@ -1196,6 +1181,7 @@ PUBLIC int printfile ARGS1(
 		start_curses();
     } /* end switch */
 
+done:
     FREE(link_info);
     FREE(sug_filename);
     FREE(subject);
@@ -1234,6 +1220,7 @@ PRIVATE int remove_quotes ARGS1(
  *  it may correspond to US-ASCII as the safest value or any other
  *  lynx character handler, -1 for no translation (so display charset).
  *
+ *  Always returns a new allocated string which has to be freed.
  */
 PRIVATE char* subject_translate8bit ARGS1(char *, source)
 {
@@ -1250,7 +1237,8 @@ PRIVATE char* subject_translate8bit ARGS1(char *, source)
     if (i < 0
      || LYHaveCJKCharacterSet
      || LYCharSet_UC[i].enc == UCT_ENC_CJK) {
-	return(source); /* OK */
+	StrAllocCopy(target, source);
+	return(target); /* OK */
     } else {
 	charset_out = i;
 	charset_in  = current_char_set;

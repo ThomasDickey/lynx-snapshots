@@ -216,7 +216,7 @@ transport_message(
   int rv;
 
 
-  /* Write out message. Read back header. Figure out response length. */
+  /* Write out message.  Read back header.  Figure out response length. */
 
   if( request_length + HEADER_LENGTH !=
       NETWRITE(connection,request_message,
@@ -1206,7 +1206,7 @@ makeAny(unsigned long size, char* data)
 
 void
 freeAny(any* a)
-/* destroy an any and its associated data. Assumes a->bytes was
+/* destroy an any and its associated data.  Assumes a->bytes was
    allocated using the s_malloc family of libraries
  */
 {
@@ -1988,7 +1988,7 @@ getQueryTermSize(query_term* qt)
 
 /*----------------------------------------------------------------------*/
 
-/* A query is simply a null terminated list of query terms. For
+/* A query is simply a null terminated list of query terms.  For
    transmission, a query is written into an any which is sent as
    the user information field. */
 

@@ -2,7 +2,7 @@
              COMMON PARTS OF AUTHORIZATION MODULE TO BOTH SERVER AND BROWSER
 
    This module is the interface to the common parts of Access Authorization (AA) package
-   for both server and browser. Important to know about memory allocation:
+   for both server and browser.  Important to know about memory allocation:
 
    Routines in this module use dynamic allocation, but free automatically all the memory
    reserved by them.
@@ -33,16 +33,16 @@
 #include <HTList.h>
 
 #ifdef SHORT_NAMES
-#define HTAASenu        HTAAScheme_enum
-#define HTAASnam        HTAAScheme_name
-#define HTAAMenu        HTAAMethod_enum
-#define HTAAMnam        HTAAMethod_name
-#define HTAAMinL        HTAAMethod_inList
-#define HTAAteMa        HTAA_templateMatch
-#define HTAAmaPT        HTAA_makeProtectionTemplate
-#define HTAApALi        HTAA_parseArgList
-#define HTAAsuRe        HTAA_setupReader
-#define HTAAgUfL        HTAA_getUnfoldedLine
+#define HTAAScheme_enum			HTAASenu
+#define HTAAScheme_name			HTAASnam
+#define HTAAMethod_enum			HTAAMenu
+#define HTAAMethod_name			HTAAMnam
+#define HTAAMethod_inList		HTAAMinL
+#define HTAA_templateMatch		HTAAteMa
+#define HTAA_makeProtectionTemplate	HTAAmaPT
+#define HTAA_parseArgList		HTAApALi
+#define HTAA_setupReader		HTAAsuRe
+#define HTAA_getUnfoldedLine		HTAAgUfL
 #endif /*SHORT_NAMES*/
 
 
@@ -299,7 +299,7 @@ Header Line Reader
  */
 
 /* PUBLIC                                               HTAA_setupReader()
-**              SET UP HEADER LINE READER, i.e. give
+**              SET UP HEADER LINE READER, i.e., give
 **              the already-read-but-not-yet-processed
 **              buffer of text to be read before more
 **              is read from the socket.

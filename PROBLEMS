@@ -115,7 +115,7 @@ they will be outlined in this file.
     screen (separating different sorts of highlight); or sections of the
     screen may be unexpectedly highlighted.
     There is a workaround which works by restricting the terminal to a
-    single standout attribute (e.g.  normal and reverse, but no others).
+    single standout attribute (e.g., normal and reverse, but no others).
     Implementing the workaround is specific to your curses implementation.
     Most versions of curses use one of two terminal databases, called
     "termcap" and "terminfo".  Updating these databases is system-specific.

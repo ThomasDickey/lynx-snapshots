@@ -1733,9 +1733,6 @@ PRIVATE int boolean_choice ARGS4(
     int number = 0;
     int col = (column >= 0 ? column : COL_OPTION_VALUES);
     int orig_choice = cur_choice;
-#ifdef VMS
-    extern BOOLEAN HadVMSInterrupt; /* Flag from cleanup_sig() AST */
-#endif /* VMS */
 
     /*
      *	Get the number of choices and then make
@@ -2243,9 +2240,6 @@ PRIVATE int popup_choice ARGS6(
     char Cnum[64];
     int Lnum;
     int npages;
-#ifdef VMS
-    extern BOOLEAN HadVMSInterrupt; /* Flag from cleanup_sig() AST */
-#endif /* VMS */
     static char prev_target[512];		/* Search string buffer */
     static char prev_target_buffer[512];	/* Next search buffer */
     static BOOL first = TRUE;
@@ -3526,7 +3520,10 @@ PUBLIC int postoptions ARGS1(
     if (strstr(newdoc->address, "LYNXOPTIONS://MBM_MENU")) {
 	FREE(newdoc->post_data);
 	FREE(data);
-	edit_bookmarks();
+	if (!no_bookmark)
+	   edit_bookmarks();
+	else /* anonymous */
+	   HTAlert(BOOKMARK_CHANGE_DISALLOWED);
 	return(NULLFILE);
     }
 
@@ -3686,8 +3683,8 @@ PUBLIC int postoptions ARGS1(
 	    }
 	}
 
-	/* Single Bookmarks filename: INPUT */
-	if (!strcmp(data[i].tag, single_bookmark_string)) {
+	/* Default Bookmarks filename: INPUT */
+	if (!strcmp(data[i].tag, single_bookmark_string) && (!no_bookmark)) {
 	    if (strcmp(data[i].value, "")) {
 		FREE(bookmark_page);
 		StrAllocCopy(bookmark_page, data[i].value);

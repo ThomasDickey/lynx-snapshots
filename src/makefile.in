@@ -1,6 +1,6 @@
 # template-makefile for Lynx src directory
 
-SHELL = /bin/sh
+SHELL		= @CONFIG_SHELL@
 
 x		= @PROG_EXT@
 
@@ -14,7 +14,7 @@ VPATH		= $(srcdir)
 top_builddir	= ..
 
 # see po/makefile
-localedir	= $(prefix)/@DATADIRNAME@/locale
+localedir	= @NLS_DATADIR@/locale
 
 # Symbols which the configure script can set in each makefile:
 CC		= @CC@

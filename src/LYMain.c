@@ -367,7 +367,6 @@ PUBLIC BOOLEAN LYQuitDefaultYes = QUIT_DEFAULT_YES;
 #ifdef DISP_PARTIAL
 PUBLIC BOOLEAN display_partial = TRUE; /* Display document during download */
 PUBLIC BOOLEAN debug_display_partial = FALSE; /* Show with MessageSecs delay */
-PUBLIC BOOLEAN detected_forms_input_partial = FALSE; /* trimHightext temp fix */
 PUBLIC int partial_threshold = -1;  /* # of lines to be d/l'ed until we repaint */
 #endif
 
@@ -485,7 +484,6 @@ PRIVATE void free_lynx_globals NOARGS
     FREE(lynxjumpfile);
     FREE(startrealm);
     FREE(personal_mail_address);
-    FREE(UC_TEMPcharset);
     FREE(URLDomainPrefixes);
     FREE(URLDomainSuffixes);
     FREE(XLoadImageCommand);
@@ -753,7 +751,7 @@ PUBLIC int main ARGS2(
 #else
     StrAllocCopy(lynx_version_putenv_command, "LYNX_VERSION=");
     StrAllocCat(lynx_version_putenv_command, LYNX_VERSION);
-    putenv(lynx_version_putenv_command);
+    (void) putenv(lynx_version_putenv_command);
 #endif /* VMS */
 
     if ((cp = getenv("LYNX_TEMP_SPACE")) != NULL)
@@ -1218,7 +1216,7 @@ PUBLIC int main ARGS2(
     /*
      *  (**) in Lynx, UCLYhndl_HTFile_for_unspec and UCLYhndl_for_unrec may be
      *  valid or not, but current_char_set and UCLYhndl_for_unspec SHOULD
-     *  ALWAYS be a valid charset. Initialized here and may be changed later
+     *  ALWAYS be a valid charset.  Initialized here and may be changed later
      *  from lynx.cfg/command_line/options_menu. - LP  (**)
      */
     /*
@@ -1732,6 +1730,14 @@ PUBLIC int main ARGS2(
 	    (keypad_mode == LINKS_ARE_NUMBERED ||
 	     keypad_mode == LINKS_AND_FORM_FIELDS_ARE_NUMBERED))
 	    printlist(stdout,FALSE);
+#ifdef EXP_PERSISTENT_COOKIES
+	/*
+	 *  We want to save cookies picked up when in immediate dump
+	 *  mode.  Instead of calling cleanup() here, let's only call
+	 *  this one. - BJP
+	 */
+	LYStoreCookies(LYCookieFile);
+#endif /* EXP_PERSISTENT_COOKIES */
 	exit_immediately(status);
     } else {
 	/*

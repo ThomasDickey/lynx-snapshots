@@ -112,7 +112,7 @@ _nl_load_domain (domain_file)
     }
 #endif
 
-  /* If the data is not yet available (i.e. mmap'ed) we try to load
+  /* If the data is not yet available (i.e., mmap'ed) we try to load
      it manually.  */
   if (data == (struct mo_file_header *) -1)
     {

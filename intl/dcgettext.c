@@ -141,7 +141,7 @@ static char *stpcpy PARAMS ((char *dest, const char *src));
      setting of `local'.''
    However it does not specify the exact format.  And even worse: POSIX
    defines this not at all.  So we can use this feature only on selected
-   system (e.g. those using GNU C Library).  */
+   system (e.g., those using GNU C Library).  */
 #ifdef _LIBC
 # define HAVE_LOCALE_NULL
 #endif
@@ -325,7 +325,7 @@ DCGETTEXT (domainname, msgid, category)
 	{
 	  /* The whole contents of CATEGORYVALUE has been searched but
 	     no valid entry has been found.  We solve this situation
-	     by implicitly appending a "C" entry, i.e. no translation
+	     by implicitly appending a "C" entry, i.e., no translation
 	     will take place.  */
 	  single_locale[0] = 'C';
 	  single_locale[1] = '\0';

@@ -7,7 +7,6 @@
 #include <LYGlobalDefs.h>
 #include <LYSignal.h>
 #include <LYStrings.h>
-#include <LYClean.h>
 #include <LYGetFile.h>
 #include <LYDownload.h>
 
@@ -25,6 +24,8 @@
 #ifdef VMS
 #define COPY_COMMAND "copy/nolog/noconf %s %s"
 PUBLIC BOOLEAN LYDidRename = FALSE;
+#else
+#define COPY_COMMAND "%s %s %s"
 #endif /* VMS */
 
 PRIVATE char LYValidDownloadFile[LY_MAXPATH] = "\0";
@@ -35,11 +36,11 @@ PUBLIC void LYDownload ARGS1(
     char *Line = NULL, *method, *file, *sug_file = NULL;
     int method_number;
     int count;
-    char buffer[512];
-    char command[512];
-    char *cp, *cp1;
+    char *the_command = 0;
+    char buffer[LY_MAXPATH];
+    char command[LY_MAXPATH];
+    char *cp;
     lynx_html_item_type *download_command = 0;
-    int c;
     FILE *fp;
     int ch, recall;
     int FnameTotal;
@@ -47,7 +48,6 @@ PUBLIC void LYDownload ARGS1(
     BOOLEAN FirstRecall = TRUE;
     BOOLEAN SecondS = FALSE;
 #ifdef VMS
-    extern BOOLEAN HadVMSInterrupt;
     LYDidRename = FALSE;
 #endif /* VMS */
 
@@ -206,103 +206,34 @@ check_recall:
 	    goto cancelled;
 	}
 
-	if (no_dotfiles || !show_dotfiles) {
-	  if (*LYPathLeaf(buffer) == '.') {
-		HTAlert(FILENAME_CANNOT_BE_DOT);
-		_statusline(NEW_FILENAME_PROMPT);
-		FirstRecall = TRUE;
-		FnameNum = FnameTotal;
-		goto retry;
-	  }
-	}
-	/*
-	 *  Cancel if the user entered "/dev/null" on Unix,
-	 *  or an "nl:" path (case-insensitive) on VMS. - FM
-	 */
-#ifdef VMS
-	if (!strncasecomp(buffer, "nl:", 3) ||
-	    !strncasecomp(buffer, "/nl/", 4))
-#else
-	if (!strcmp(buffer, "/dev/null"))
-#endif /* VMS */
-	{
+	strcpy(command, buffer);
+	if (!LYValidateFilename(buffer, command))
 	    goto cancelled;
+#if HAVE_POPEN
+	else if (LYIsPipeCommand(buffer)) {
+	    /* I don't know how to download to a pipe */
+	    HTAlert(CANNOT_WRITE_TO_FILE);
+	    _statusline(NEW_FILENAME_PROMPT);
+	    FirstRecall = TRUE;
+	    FnameNum = FnameTotal;
+	    goto retry;
 	}
-	if ((cp = strchr(buffer, '~'))) {
-	    *(cp++) = '\0';
-	    strcpy(command, buffer);
-	    LYTrimPathSep(command);
-	    strcat(command, wwwName(Home_Dir()));
-	    strcat(command, cp);
-	    strcpy(buffer, command);
-	}
-#ifdef VMS
-	if (strchr(buffer, '/') != NULL) {
-	    strcpy(command, HTVMS_name("", buffer));
-	    strcpy(buffer, command);
-	}
-	if (buffer[0] != '/' && strchr(buffer, ':') == NULL) {
-	    strcpy(command, "sys$disk:");
-	    if (strchr(buffer, ']') == NULL)
-		strcat(command, "[]");
-	    strcat(command, buffer);
-	    strcpy(buffer, command);
-	}
-#else
-
-#ifndef __EMX__
-	if (!LYIsPathSep(*buffer)) {
-#if defined(__DJGPP__) || defined(_WINDOWS)
-	    if (strchr(buffer, ':') != NULL)
-		cp = NULL;
-	    else
-#endif /*  __DJGPP__ || _WINDOWS */
-	    cp = getenv("PWD");
-	}
-	else
-#endif /* __EMX__*/
-	    cp = NULL;
-
-	LYTrimPathSep(cp);
-
-	if (cp) {
-	    sprintf(command, "%s/%s", cp, buffer);
-	    strcpy(buffer, HTSYS_name(command));
-	}
-#endif /* VMS */
+#endif
 
 	/*
 	 *  See if it already exists.
 	 */
-	if ((fp = fopen(buffer, "r")) != NULL) {
-	    fclose(fp);
-
-#ifdef VMS
-	    _statusline(FILE_EXISTS_HPROMPT);
-#else
-	    _statusline(FILE_EXISTS_OPROMPT);
-#endif /* VMS */
-	    c = 0;
-	    while(TOUPPER(c)!='Y' && TOUPPER(c)!='N' && c != 7 && c != 3)
-		c = LYgetch();
-#ifdef VMS
-	    if (HadVMSInterrupt) {
-		HadVMSInterrupt = FALSE;
-		FREE(Line);
-		return;
-	    }
-#endif /* VMS */
-
-	    if (c == 7 || c == 3) { /* Control-G or Control-C */
-		goto cancelled;
-	    }
-
-	    if (TOUPPER(c) == 'N') {
-		_statusline(NEW_FILENAME_PROMPT);
-		FirstRecall = TRUE;
-		FnameNum = FnameTotal;
-		goto retry;
-	    }
+	switch (LYValidateOutput(buffer)) {
+	case 'Y':
+	    break;
+	case 'N':
+	    _statusline(NEW_FILENAME_PROMPT);
+	    FirstRecall = TRUE;
+	    FnameNum = FnameTotal;
+	    goto retry;
+	default:
+	    FREE(Line);
+	    return;
 	}
 
 	/*
@@ -333,10 +264,13 @@ check_recall:
 	     *	Failed.  Use spawned COPY_COMMAND. - FM
 	     */
 	    CTRACE(tfp, "         FAILED!\n");
-	    sprintf(command, COPY_COMMAND, file, buffer);
-	    CTRACE(tfp, "command: %s\n", command);
+	    HTAddParam(&the_command, COPY_COMMAND, 1, file);
+	    HTAddParam(&the_command, COPY_COMMAND, 2, buffer);
+	    HTEndParam(&the_command, COPY_COMMAND, 2);
+	    CTRACE(tfp, "command: %s\n", the_command);
 	    stop_curses();
-	    LYSystem(command);
+	    LYSystem(the_command);
+	    FREE(the_command);
 	    start_curses();
 	} else {
 	    /*
@@ -349,24 +283,15 @@ check_recall:
 	chmod(buffer, HIDE_CHMOD);
 #else /* Unix: */
 
-#if !( defined(__EMX__) || defined(__DJGPP__) )
-	/*
-	 *  Prevent spoofing of the shell.
-	 */
-	cp = quote_pathname(file);
-	cp1 = quote_pathname(buffer);
-	sprintf(command, "%s %s %s", COPY_PATH, cp, cp1);
-	FREE(cp);
-	FREE(cp1);
-#else
-	/* DJGPP: no " or space possible in 8+3 dos filenames.     */
-	/* (but EMX probably allows spaces which should be quoted, */
-	/* like Win32 LFN does...)                                 */
-	sprintf(command, "%s %s %s", COPY_PATH, file, buffer);
-#endif /* __EMX__ */
-	CTRACE(tfp, "command: %s\n", command);
+	HTAddParam(&the_command, COPY_COMMAND, 1, COPY_PATH);
+	HTAddParam(&the_command, COPY_COMMAND, 2, file);
+	HTAddParam(&the_command, COPY_COMMAND, 3, buffer);
+	HTEndParam(&the_command, COPY_COMMAND, 3);
+
+	CTRACE(tfp, "command: %s\n", the_command);
 	stop_curses();
-	LYSystem(command);
+	LYSystem(the_command);
+	FREE(the_command);
 	start_curses();
 #if defined(UNIX)
 	LYRelaxFilePermissions(buffer);
@@ -392,8 +317,7 @@ check_recall:
 	     *	Check for two '%s' and ask for the local filename if
 	     *	there is.
 	     */
-	    char *first_s = strstr(download_command->command, "%s");
-	    if (first_s && strstr(first_s+1, "%s")) {
+	    if (HTCountCommandArgs(download_command->command) >= 2) {
 		_statusline(FILENAME_PROMPT);
 	again:	if (sug_file)
 		    strcpy(buffer, sug_file);
@@ -508,29 +432,19 @@ check_recall:
 	     *	It actually is not a bug at all and does as it should,
 	     *	putting both names on the command line.
 	     */
-#ifdef VMS
-	    sprintf(command, download_command->command, file, buffer,
-			     "", "", "", "", "", "", "", "", "", "");
-#else /* Unix: */
-	    /*
-	     *	Prevent spoofing of the shell.
-	     */
-	    cp = quote_pathname(file);
-	    cp1 = quote_pathname(buffer);
-	    sprintf(command, download_command->command, cp, cp1,
-			     "", "", "", "", "", "", "", "", "", "");
-	    FREE(cp);
-	    FREE(cp1);
-#endif /* VMS */
+	    HTAddParam(&the_command, download_command->command, 1, file);
+	    HTAddParam(&the_command, download_command->command, 2, buffer);
+	    HTEndParam(&the_command, download_command->command, 2);
 
 	} else {
 	    HTAlert(MISCONF_DOWNLOAD_COMMAND);
 	    goto failed;
 	}
 
-	CTRACE(tfp, "command: %s\n", command);
+	CTRACE(tfp, "command: %s\n", the_command);
 	stop_curses();
-	LYSystem(command);
+	LYSystem(the_command);
+	FREE(the_command);
 	start_curses();
 	/* don't remove(file); */
     }

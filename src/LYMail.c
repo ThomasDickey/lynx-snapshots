@@ -503,7 +503,7 @@ PUBLIC void mailform ARGS4(
 	 *  won't confuse the mailer and give a blank address.
 	 *
 	 *  ignore addresses so long that they would overflow the
-	 *  temporary buffer (i.e. about 500 chars). - BL
+	 *  temporary buffer (i.e., about 500 chars). - BL
 	 */
 	if (strlen(address_ptr1) > 3 &&
             strlen(address_ptr1) + strlen(mail_adrs) < sizeof(cmd)) {
@@ -536,7 +536,7 @@ PUBLIC void mailform ARGS4(
 	     *	won't confuse the mailer and give a blank address.
 	     *
 	     *  ignore addresses so long that they would overflow the
-	     *  temporary buffer (i.e. about 500 chars). - BL
+	     *  temporary buffer (i.e., about 500 chars). - BL
 	     */
 	    if (strlen(address_ptr1) > 3 &&
                 strlen(address_ptr1) + strlen(mail_adrs) < sizeof(cmd)) {
@@ -797,7 +797,7 @@ PUBLIC void mailmsg ARGS4(
 	 *  won't confuse the mailer and give a blank address.
 	 *
 	 *  ignore addresses so long that they would overflow the
-	 *  temporary buffer (i.e. about 500 chars). - BL
+	 *  temporary buffer (i.e., about 500 chars). - BL
 	 */
 	if (strlen(address) > 3 &&
             strlen(address) + strlen(mail_adrs) < sizeof(cmd)) {
@@ -1766,7 +1766,7 @@ PUBLIC void reply_by_mail ARGS3(
 	 *  won't confuse the mailer and give a blank address.
 	 *
 	 *  ignore addresses so long that they would overflow the
-	 *  temporary buffer (i.e. about 500 chars). - BL
+	 *  temporary buffer (i.e., about 500 chars). - BL
 	 */
 	if (strlen(address_ptr1) > 3 &&
             strlen(address_ptr1) + strlen(mail_adrs) < sizeof(cmd)) {
@@ -1799,7 +1799,7 @@ PUBLIC void reply_by_mail ARGS3(
 	     *	won't confuse the mailer and give a blank address.
 	     *
 	     *  ignore addresses so long that they would overflow the
-	     *  temporary buffer (i.e. about 500 chars). - BL
+	     *  temporary buffer (i.e., about 500 chars). - BL
 	     */
 	    if (strlen(address_ptr1) > 3 &&
                 strlen(address_ptr1) + strlen(mail_adrs) < sizeof(cmd)) {

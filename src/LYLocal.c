@@ -43,6 +43,7 @@
 #include <LYHistory.h>
 #include <LYUpload.h>
 #include <LYLocal.h>
+#include <LYClean.h>
 
 #ifndef VMS
 #ifndef _WINDOWS
@@ -134,7 +135,7 @@ struct dired_menu {
 { DE_DIR,	      "", "Modify Directory Name",
 "(of current selection)", "LYNXDIRED://MODIFY_NAME%p",		NULL },
 { DE_SYMLINK,	      "", "Modify Name",
-"(of selected symbolic link)", "LYNXDIRED://MODIFY_NAME%p",		NULL },
+"(of selected symbolic link)", "LYNXDIRED://MODIFY_NAME%p",	NULL },
 
 #ifdef OK_PERMIT
 { DE_FILE,	      "", "Modify File Permissions",
@@ -270,7 +271,7 @@ PRIVATE BOOLEAN ok_file_or_dir ARGS1(struct stat*, sb)
 {
     if (!S_ISDIR(sb->st_mode)
      && !S_ISREG(sb->st_mode)) {
-	HTAlert(gettext("The selected item is not a file or a directory! Request ignored."));
+	HTAlert(gettext("The selected item is not a file or a directory!  Request ignored."));
 	return FALSE;
     }
     return TRUE;
@@ -508,13 +509,13 @@ PRIVATE BOOLEAN modify_tagged ARGS1(
 		clear_tags();
 		return count;
 	    } else {
-		HTAlert(gettext("Destination has different owner! Request denied."));
+		HTAlert(gettext("Destination has different owner!  Request denied."));
 		FREE(srcpath);
 		FREE(savepath);
 		return 0;
 	    }
 	} else {
-	    HTAlert(gettext("Destination is not a valid directory! Request denied."));
+	    HTAlert(gettext("Destination is not a valid directory!  Request denied."));
 	    FREE(savepath);
 	    return 0;
 	}
@@ -549,7 +550,7 @@ PRIVATE BOOLEAN modify_name ARGS1(
 	} else if (S_ISREG(dir_info.st_mode)) {
 	     cp = gettext("Enter new name for file: ");
 	} else {
-	     HTAlert(gettext("The selected item is not a file or a directory! Request ignored."));
+	     HTAlert(gettext("The selected item is not a file or a directory!  Request ignored."));
 	     return 0;
 	}
 	if (filename(cp, tmpbuf, sizeof(tmpbuf)) == NULL)
@@ -589,11 +590,11 @@ PRIVATE BOOLEAN modify_name ARGS1(
 		    return code;
 		}
 	    } else if (S_ISDIR(dir_info.st_mode)) {
-		HTAlert(gettext("There is already a directory with that name! Request ignored."));
+		HTAlert(gettext("There is already a directory with that name!  Request ignored."));
 	    } else if (S_ISREG(dir_info.st_mode)) {
-		HTAlert(gettext("There is already a file with that name! Request ignored."));
+		HTAlert(gettext("There is already a file with that name!  Request ignored."));
 	    } else {
-		HTAlert(gettext("The specified name is already in use! Request ignored."));
+		HTAlert(gettext("The specified name is already in use!  Request ignored."));
 	    }
 	}
     }
@@ -675,7 +676,7 @@ PRIVATE BOOLEAN modify_location ARGS1(
 	    return 0;
 	}
 	if (!S_ISDIR(dir_info.st_mode)) {
-	    HTAlert(gettext("Destination is not a valid directory! Request denied."));
+	    HTAlert(gettext("Destination is not a valid directory!  Request denied."));
 	    return 0;
 	}
 
@@ -683,7 +684,7 @@ PRIVATE BOOLEAN modify_location ARGS1(
 	 *  Make sure the source and target are not the same location.
 	 */
 	if (dev == dir_info.st_dev && inode == dir_info.st_ino) {
-	    HTAlert(gettext("Source and destination are the same location! Request ignored!"));
+	    HTAlert(gettext("Source and destination are the same location!  Request ignored!"));
 	    return 0;
 	}
 	if (dir_info.st_uid == owner) {
@@ -698,7 +699,7 @@ PRIVATE BOOLEAN modify_location ARGS1(
 	    FREE(msg);
 	    return code;
 	} else {
-	    HTAlert(gettext("Destination has different owner! Request denied."));
+	    HTAlert(gettext("Destination has different owner!  Request denied."));
 	    return 0;
 	}
     }
@@ -829,11 +830,11 @@ PRIVATE BOOLEAN create_file ARGS1(
 	    FREE(msg);
 	    return code;
 	} else if (S_ISDIR(dir_info.st_mode)) {
-	    HTAlert(gettext("There is already a directory with that name! Request ignored."));
+	    HTAlert(gettext("There is already a directory with that name!  Request ignored."));
 	} else if (S_ISREG(dir_info.st_mode)) {
-	    HTAlert(gettext("There is already a file with that name! Request ignored."));
+	    HTAlert(gettext("There is already a file with that name!  Request ignored."));
 	} else {
-	    HTAlert(gettext("The specified name is already in use! Request ignored."));
+	    HTAlert(gettext("The specified name is already in use!  Request ignored."));
 	}
     }
     return 0;
@@ -889,11 +890,11 @@ PRIVATE BOOLEAN create_directory ARGS1(
 	    FREE(msg);
 	    return code;
 	} else if (S_ISDIR(dir_info.st_mode)) {
-	    HTAlert(gettext("There is already a directory with that name! Request ignored."));
+	    HTAlert(gettext("There is already a directory with that name!  Request ignored."));
 	} else if (S_ISREG(dir_info.st_mode)) {
-	    HTAlert(gettext("There is already a file with that name! Request ignored."));
+	    HTAlert(gettext("There is already a file with that name!  Request ignored."));
 	} else {
-	    HTAlert(gettext("The specified name is already in use! Request ignored."));
+	    HTAlert(gettext("The specified name is already in use!  Request ignored."));
 	}
     }
     return 0;
@@ -1361,9 +1362,24 @@ PUBLIC void showtags ARGS1(
     }
 }
 
+PRIVATE char * DirectoryOf ARGS1(
+	char *,		pathname)
+{
+    char *result = 0;
+    char *leaf;
+
+    StrAllocCopy(result, pathname);
+    leaf = LYPathLeaf(result);
+    if (leaf != result) {
+	*leaf = '\0';
+	LYTrimPathSep(result);
+    }
+    return result;
+}
+
 /*
  *  Perform file management operations for LYNXDIRED URL's.
- *  Attempt to be consistent.  These are (pseudo) URLs - i.e. they should
+ *  Attempt to be consistent.  These are (pseudo) URLs - i.e., they should
  *  be in URL syntax: some bytes will be URL-escaped with '%'.	This is
  *  necessary because these (pseudo) URLs will go through some of the same
  *  kinds of interpretations and mutilations as real ones: HTParse, stripping
@@ -1371,17 +1387,15 @@ PUBLIC void showtags ARGS1(
  *  about not escaping parsing '#' "the URL way" built into HTParse, but that
  *  doesn't look like a clean way.)
  */
-#ifdef VMS
-    extern BOOLEAN HadVMSInterrupt;
-#endif /* VMS */
 PUBLIC int local_dired ARGS1(
 	document *,	doc)
 {
     char *line_url;    /* will point to doc's address, which is a URL */
     char *line = NULL; /* same as line_url, but HTUnEscaped, will be alloced */
-    char *cp, *tp, *bp;
+    char *tp;
     char *tmpbuf = NULL;
     char *buffer = NULL;
+    char *dirname = NULL;
 
     line_url = doc->address;
     CTRACE(tfp, "local_dired: called for <%s>.\n",
@@ -1449,7 +1463,7 @@ PUBLIC int local_dired ARGS1(
 	    LYforce_no_cache = TRUE;
     } else {
 	LYTrimPathSep(line);
-	if ((cp = strrchr(line, '/')) == NULL) {
+	if (strrchr(line, '/') == NULL) {
 	    FREE(line);
 	    return 0;
 	}
@@ -1459,117 +1473,125 @@ PUBLIC int local_dired ARGS1(
 	 *  escape all path references to avoid spoofing the shell.
 	 */
 	if (!strncmp(line, "LYNXDIRED://DECOMPRESS", 22)) {
-	    tp = quote_pathname(line + 22);
-	    HTSprintf0(&buffer,"%s %s", UNCOMPRESS_PATH, tp);
-	    FREE(tp);
+#define FMT_UNCOMPRESS "%s %s"
+	    HTAddParam(&buffer, FMT_UNCOMPRESS, 1, UNCOMPRESS_PATH);
+	    HTAddParam(&buffer, FMT_UNCOMPRESS, 2, line+22);
+	    HTEndParam(&buffer, FMT_UNCOMPRESS, 2);
 
 #if defined(OK_UUDECODE) && !defined(ARCHIVE_ONLY)
 	} else if (!strncmp(line, "LYNXDIRED://UUDECODE", 20)) {
-	    tp = quote_pathname(line + 20);
-	    HTSprintf0(&buffer,"%s %s", UUDECODE_PATH, tp);
-	    HTAlert(gettext("Warning! UUDecoded file will exist in the directory you started Lynx."));
-	    FREE(tp);
+#define FMT_UUDECODE "%s %s"
+	    HTAddParam(&buffer, FMT_UUDECODE, 1, UUDECODE_PATH);
+	    HTAddParam(&buffer, FMT_UUDECODE, 2, line+20);
+	    HTEndParam(&buffer, FMT_UUDECODE, 2);
+	    HTAlert(gettext("Warning!  UUDecoded file will exist in the directory you started Lynx."));
 #endif /* OK_UUDECODE && !ARCHIVE_ONLY */
 
 #ifdef OK_TAR
 # ifndef ARCHIVE_ONLY
 #  ifdef OK_GZIP
 	} else if (!strncmp(line, "LYNXDIRED://UNTAR_GZ", 20)) {
-	    tp = quote_pathname(line+20);
-	    *cp++ = '\0';
-	    cp = quote_pathname(line + 20);
-	    HTSprintf0(&buffer, "%s -qdc %s | (cd %s; %s -xf -)",
-				GZIP_PATH, tp, cp, TAR_PATH);
-	    FREE(cp);
-	    FREE(tp);
+#define FMT_UNTAR_GZ "%s -qdc %s | (cd %s; %s -xf -)"
+	    dirname = DirectoryOf(line+20);
+	    HTAddParam(&buffer, FMT_UNTAR_GZ, 1, GZIP_PATH);
+	    HTAddParam(&buffer, FMT_UNTAR_GZ, 2, line+20);
+	    HTAddParam(&buffer, FMT_UNTAR_GZ, 3, dirname);
+	    HTAddParam(&buffer, FMT_UNTAR_GZ, 4, TAR_PATH);
+	    HTEndParam(&buffer, FMT_UNTAR_GZ, 4);
 #  endif /* OK_GZIP */
 
 	} else if (!strncmp(line, "LYNXDIRED://UNTAR_Z", 19)) {
-	    tp = quote_pathname(line + 19);
-	    *cp++ = '\0';
-	    cp = quote_pathname(line + 19);
-	    HTSprintf0(&buffer, "%s %s | (cd %s; %s -xf -)",
-				ZCAT_PATH, tp, cp, TAR_PATH);
-	    FREE(cp);
-	    FREE(tp);
+#define FMT_UNTAR_Z "%s %s | (cd %s; %s -xf -)"
+	    dirname = DirectoryOf(line+19);
+	    HTAddParam(&buffer, FMT_UNTAR_Z, 1, ZCAT_PATH);
+	    HTAddParam(&buffer, FMT_UNTAR_Z, 2, line+19);
+	    HTAddParam(&buffer, FMT_UNTAR_Z, 3, dirname);
+	    HTAddParam(&buffer, FMT_UNTAR_Z, 4, TAR_PATH);
+	    HTEndParam(&buffer, FMT_UNTAR_Z, 4);
 
 	} else if (!strncmp(line, "LYNXDIRED://UNTAR", 17)) {
-	    tp = quote_pathname(line + 17);
-	    *cp++ = '\0';
-	    cp = quote_pathname(line + 17);
-	    HTSprintf0(&buffer, "cd %s; %s -xf %s", cp, TAR_PATH, tp);
-	    FREE(cp);
-	    FREE(tp);
+#define FMT_UNTAR "cd %s; %s -xf %s"
+	    dirname = DirectoryOf(line+17);
+	    HTAddParam(&buffer, FMT_UNTAR, 1, dirname);
+	    HTAddParam(&buffer, FMT_UNTAR, 2, TAR_PATH);
+	    HTAddParam(&buffer, FMT_UNTAR, 3, line+17);
+	    HTEndParam(&buffer, FMT_UNTAR, 3);
 # endif /* !ARCHIVE_ONLY */
 
 # ifdef OK_GZIP
 	} else if (!strncmp(line, "LYNXDIRED://TAR_GZ", 18)) {
-	    *cp++ = '\0';
-	    cp = quote_pathname(cp);
-	    tp = quote_pathname(line + 18);
-	    HTSprintf0(&buffer, "(cd %s; %s -cf - %s) | %s -qc >%s/%s.tar.gz",
-				tp, TAR_PATH, cp, GZIP_PATH, tp, cp);
-	    FREE(cp);
-	    FREE(tp);
+#define FMT_TAR_GZ "(cd %s; %s -cf - %s) | %s -qc >%s/%s.tar.gz"
+	    dirname = DirectoryOf(line+18);
+	    HTAddParam(&buffer, FMT_TAR_GZ, 1, dirname);
+	    HTAddParam(&buffer, FMT_TAR_GZ, 2, TAR_PATH);
+	    HTAddParam(&buffer, FMT_TAR_GZ, 3, LYPathLeaf(line+18));
+	    HTAddParam(&buffer, FMT_TAR_GZ, 4, GZIP_PATH);
+	    HTAddParam(&buffer, FMT_TAR_GZ, 5, dirname);
+	    HTAddParam(&buffer, FMT_TAR_GZ, 6, LYPathLeaf(line+18));
+	    HTEndParam(&buffer, FMT_TAR_GZ, 6);
 # endif /* OK_GZIP */
 
 	} else if (!strncmp(line, "LYNXDIRED://TAR_Z", 17)) {
-	    *cp++ = '\0';
-	    cp = quote_pathname(cp);
-	    tp = quote_pathname(line + 17);
-	    HTSprintf0(&buffer, "(cd %s; %s -cf - %s) | %s >%s/%s.tar.Z",
-				tp, TAR_PATH, cp, COMPRESS_PATH, tp, cp);
-	    FREE(cp);
-	    FREE(tp);
+#define FMT_TAR_Z "(cd %s; %s -cf - %s) | %s >%s/%s.tar.Z"
+	    dirname = DirectoryOf(line+17);
+	    HTAddParam(&buffer, FMT_TAR_Z, 1, dirname);
+	    HTAddParam(&buffer, FMT_TAR_Z, 2, TAR_PATH);
+	    HTAddParam(&buffer, FMT_TAR_Z, 3, LYPathLeaf(line+17));
+	    HTAddParam(&buffer, FMT_TAR_Z, 4, COMPRESS_PATH);
+	    HTAddParam(&buffer, FMT_TAR_Z, 5, dirname);
+	    HTAddParam(&buffer, FMT_TAR_Z, 6, LYPathLeaf(line+17));
+	    HTEndParam(&buffer, FMT_TAR_Z, 6);
 
 	} else if (!strncmp(line, "LYNXDIRED://TAR", 15)) {
-	    *cp++ = '\0';
-	    cp = quote_pathname(cp);
-	    tp = quote_pathname(line + 15);
-	    HTSprintf0(&buffer, "(cd %s; %s -cf %s.tar %s)",
-			    tp, TAR_PATH, cp, cp);
-	    FREE(cp);
-	    FREE(tp);
+#define FMT_TAR "(cd %s; %s -cf %s.tar %s)"
+	    dirname = DirectoryOf(line+15);
+	    HTAddParam(&buffer, FMT_TAR, 1, dirname);
+	    HTAddParam(&buffer, FMT_TAR, 2, TAR_PATH);
+	    HTAddParam(&buffer, FMT_TAR, 3, LYPathLeaf(line+15));
+	    HTAddParam(&buffer, FMT_TAR, 4, LYPathLeaf(line+15));
+	    HTEndParam(&buffer, FMT_TAR, 4);
 #endif /* OK_TAR */
 
 #ifdef OK_GZIP
 	} else if (!strncmp(line, "LYNXDIRED://GZIP", 16)) {
-	    tp = quote_pathname(line + 16);
-	    HTSprintf0(&buffer, "%s -q %s", GZIP_PATH, tp);
-	    FREE(tp);
+#define FMT_GZIP "%s -q %s"
+	    HTAddParam(&buffer, FMT_GZIP, 1, GZIP_PATH);
+	    HTAddParam(&buffer, FMT_GZIP, 2, line+16);
+	    HTEndParam(&buffer, FMT_GZIP, 2);
 #ifndef ARCHIVE_ONLY
 	} else if (!strncmp(line, "LYNXDIRED://UNGZIP", 18)) {
-	    tp = quote_pathname(line + 18);
-	    HTSprintf0(&buffer, "%s -d %s", GZIP_PATH, tp);
-	    FREE(tp);
+#define FMT_UNGZIP "%s -d %s"
+	    HTAddParam(&buffer, FMT_UNGZIP, 1, GZIP_PATH);
+	    HTAddParam(&buffer, FMT_UNGZIP, 2, line+18);
+	    HTEndParam(&buffer, FMT_UNGZIP, 2);
 #endif /* !ARCHIVE_ONLY */
 #endif /* OK_GZIP */
 
 #ifdef OK_ZIP
 	} else if (!strncmp(line, "LYNXDIRED://ZIP", 15)) {
-	    tp = quote_pathname(line + 15);
-	    *cp++ = '\0';
-	    bp = quote_pathname(cp);
-	    cp = quote_pathname(line + 15);
-	    HTSprintf0(&buffer, "cd %s; %s -rq %s.zip %s", cp, ZIP_PATH, tp, bp);
-	    FREE(cp);
-	    FREE(bp);
-	    FREE(tp);
+#define FMT_ZIP "cd %s; %s -rq %s.zip %s"
+	    dirname = DirectoryOf(line+15);
+	    HTAddParam(&buffer, FMT_ZIP, 1, dirname);
+	    HTAddParam(&buffer, FMT_ZIP, 2, ZIP_PATH);
+	    HTAddParam(&buffer, FMT_ZIP, 3, line+15);
+	    HTAddParam(&buffer, FMT_ZIP, 4, LYPathLeaf(line+15));
+	    HTEndParam(&buffer, FMT_ZIP, 4);
 #ifndef ARCHIVE_ONLY
 	} else if (!strncmp(line, "LYNXDIRED://UNZIP", 17)) {
-	    tp = quote_pathname(line + 17);
-	    *cp = '\0';
-	    cp = quote_pathname(line + 17);
-	    HTSprintf0(&buffer, "cd %s; %s -q %s", cp, UNZIP_PATH, tp);
-	    FREE(cp);
-	    FREE(tp);
+#define FMT_UNZIP "cd %s; %s -q %s"
+	    dirname = DirectoryOf(line+17);
+	    HTAddParam(&buffer, FMT_UNZIP, 1, dirname);
+	    HTAddParam(&buffer, FMT_UNZIP, 2, UNZIP_PATH);
+	    HTAddParam(&buffer, FMT_UNZIP, 3, line+17);
+	    HTEndParam(&buffer, FMT_UNZIP, 3);
 # endif /* !ARCHIVE_ONLY */
 #endif /* OK_ZIP */
 
 	} else if (!strncmp(line, "LYNXDIRED://COMPRESS", 20)) {
-	    tp = quote_pathname(line + 20);
-	    HTSprintf0(&buffer, "%s %s", COMPRESS_PATH, tp);
-	    FREE(tp);
+#define FMT_COMPRESS "%s %s"
+	    HTAddParam(&buffer, FMT_COMPRESS, 1, COMPRESS_PATH);
+	    HTAddParam(&buffer, FMT_COMPRESS, 2, line+20);
+	    HTEndParam(&buffer, FMT_COMPRESS, 2);
 	}
 
 	if (buffer != 0) {
@@ -1591,6 +1613,7 @@ PUBLIC int local_dired ARGS1(
 	}
     }
 
+    FREE(dirname);
     FREE(tmpbuf);
     FREE(buffer);
     FREE(line);
@@ -1825,7 +1848,7 @@ PUBLIC BOOLEAN local_install ARGS3(
     if (!ok_stat(destpath, &dir_info)) {
 	return 0;
     } else if (!S_ISDIR(dir_info.st_mode)) {
-	HTAlert(gettext("The selected item is not a directory! Request ignored."));
+	HTAlert(gettext("The selected item is not a directory!  Request ignored."));
 	return 0;
     } else if (0 /*directory not writable*/) {
 	HTAlert(gettext("Install in the selected directory not permitted."));
@@ -2022,7 +2045,7 @@ PRIVATE char * render_item ARGS6(
 	} else {
 	    /*
 	     *	Other chars come from the lynx.cfg or
-	     *	the default. Let's assume there isn't
+	     *	the default.  Let's assume there isn't
 	     *	anything weird there that needs escaping.
 	     */
 	    *BP_INC =*s;

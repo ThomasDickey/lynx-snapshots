@@ -128,7 +128,7 @@ PUBLIC void strtolower ARGS1(char*, i)
 **		------------------------------
 **
 On the NeXT, and on any read-only browser, it is simpler for the text to have
-a sequence of styles, rather than a nested tree of styles. In this
+a sequence of styles, rather than a nested tree of styles.  In this
 case we have to flatten the structure as it arrives from SGML tags into
 a sequence of styles.
 */
@@ -583,14 +583,14 @@ PUBLIC void HTML_write ARGS3(HTStructured *, me, CONST char*, s, int, l)
  * *Note that this doesn't apply to form ACTIONs (always resolved using base,
  *  never marked internal).  Also other references encountered or generated
  *  are not marked internal, whether they have a URL or not, if in a given
- *  context an internal link makes no sense (e.g. IMG SRC=).
+ *  context an internal link makes no sense (e.g., IMG SRC=).
  */
 
 #ifndef DONT_TRACK_INTERNAL_LINKS
 /* A flag is used to keep track of whether an "URL reference" encountered
-   had a real "URL" or not. In the latter case, it will be marked as
+   had a real "URL" or not.  In the latter case, it will be marked as
    "internal".	The flag is set before we start messing around with the
-   string (resolution of relative URLs etc.). This variable only used
+   string (resolution of relative URLs etc.).  This variable only used
    locally here, don't confuse with LYinternal_flag which is for
    for overriding non-caching similar to LYoverride_no_cache. - kw */
 #define CHECK_FOR_INTERN(s) intern_flag = (s && (*s=='#' || *s=='\0')) ? TRUE : FALSE;
@@ -1686,7 +1686,7 @@ PRIVATE void HTML_start_element ARGS6(
 
     case HTML_TAB:
 	if (!present) { /* Bad tag.  Must have at least one attribute. - FM */
-	    CTRACE(tfp, "HTML: TAB tag has no attributes. Ignored.\n");
+	    CTRACE(tfp, "HTML: TAB tag has no attributes.  Ignored.\n");
 	    break;
 	}
 	UPDATE_STYLE;
@@ -1699,7 +1699,7 @@ PRIVATE void HTML_start_element ARGS6(
 	     *	the ALIGN and DP attributes implemented. - FM
 	     */
 	    HTML_put_character(me, ' ');
-	    CTRACE(tfp, "HTML: ALIGN not 'left'. Using space instead of TAB.\n");
+	    CTRACE(tfp, "HTML: ALIGN not 'left'.  Using space instead of TAB.\n");
 
 	} else if (!LYoverride_default_alignment(me) &&
 		   me->current_default_alignment != HT_LEFT) {
@@ -1710,7 +1710,7 @@ PRIVATE void HTML_start_element ARGS6(
 	     *	that the alignment be HT_LEFT. - FM
 	     */
 	    HTML_put_character(me, ' ');
-	    CTRACE(tfp, "HTML: Not HT_LEFT. Using space instead of TAB.\n");
+	    CTRACE(tfp, "HTML: Not HT_LEFT.  Using space instead of TAB.\n");
 
 	} else if ((present[HTML_TAB_TO] &&
 		    value[HTML_TAB_TO] && *value[HTML_TAB_TO]) ||
@@ -1749,7 +1749,7 @@ PRIVATE void HTML_start_element ARGS6(
 	    if (target < column ||
 		target > HText_getMaximumColumn(me->text)) {
 		HTML_put_character(me, ' ');
-		CTRACE(tfp, "HTML: Column out of bounds. Using space instead of TAB.\n");
+		CTRACE(tfp, "HTML: Column out of bounds.  Using space instead of TAB.\n");
 	    } else {
 		for (i = column; i < target; i++)
 		    HText_appendCharacter(me->text, ' ');
@@ -3909,7 +3909,7 @@ PRIVATE void HTML_start_element ARGS6(
 	     *	that one now. - FM
 	     */
 	    if (me->inFORM) {
-		CTRACE(tfp, "HTML: Missing FORM end tag. Faking it!\n");
+		CTRACE(tfp, "HTML: Missing FORM end tag.  Faking it!\n");
 		SET_SKIP_STACK(HTML_FORM);
 		HTML_end_element(me, HTML_FORM, include);
 	    }
@@ -4802,7 +4802,7 @@ PRIVATE void HTML_start_element ARGS6(
 	if (me->inSELECT) {
 	    if (TRACE) {
 		fprintf(tfp,
-		   "Bad HTML: SELECT start tag in SELECT element. Faking SELECT end tag. *****\n");
+		   "Bad HTML: SELECT start tag in SELECT element.  Faking SELECT end tag. *****\n");
 	    } else if (!me->inBadHTML) {
 		HTUserMsg(BAD_HTML_USE_TRACE);
 		me->inBadHTML = TRUE;
@@ -5303,7 +5303,7 @@ PRIVATE void HTML_start_element ARGS6(
 **	TBL 921119
 **
 **	We don't turn on "CAREFUL" check because the parser produces
-**	(internal code errors apart) good nesting. The parser checks
+**	(internal code errors apart) good nesting.  The parser checks
 **	incoming code errors, not this module.
 */
 PRIVATE void HTML_end_element ARGS3(
@@ -6814,7 +6814,7 @@ PRIVATE void HTML_free ARGS1(HTStructured *, me)
 	    HTML_put_character(me, '[');
 	    HTML_start_element(me, HTML_EM, 0, 0, -1, &include);
 	    HTML_put_string(me,
-		gettext("Document has only hidden links. Use the 'l'ist command."));
+		gettext("Document has only hidden links.  Use the 'l'ist command."));
 	    HTML_end_element(me, HTML_EM, &include);
 	    HTML_put_character(me, ']');
 	    HTML_end_element(me, HTML_P, &include);

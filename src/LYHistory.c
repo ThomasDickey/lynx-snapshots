@@ -266,7 +266,7 @@ PUBLIC void LYpush ARGS2(
 			    HTAnchor_parent(HTAnchor_findAddress(&WWWDoc));
 		    }
 		/* In addition to equality of the ParentAnchors, require
-		** that IF we have a HTMainText (i.e. it wasn't just
+		** that IF we have a HTMainText (i.e., it wasn't just
 		** HTuncache'd by mainloop), THEN it has to be consistent
 		** with what we are trying to push.
 		**   This may be overkill... - kw

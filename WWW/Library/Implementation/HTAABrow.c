@@ -15,7 +15,7 @@
 **
 **	Therefore also all the strings returned by this package
 **	are only valid until the next call to the same function
-**	is made. This approach is selected, because of the nature
+**	is made.  This approach is selected, because of the nature
 **	of access authorization: no string returned by the package
 **	needs to be valid longer than until the next call.
 **
@@ -75,7 +75,7 @@ typedef struct {
     int		portnumber;	/* Port number			*/
     BOOL	IsProxy;	/* Is it a proxy?		*/
     HTList *	setups;		/* List of protection setups	*/
-                                /* on this server; i.e. valid	*/
+                                /* on this server; i.e., valid	*/
                                 /* authentication schemes and	*/
                                 /* templates when to use them.	*/
                                 /* This is actually a list of	*/
@@ -609,7 +609,7 @@ PRIVATE char *compose_auth_string ARGS3(
 	}
 	/*
 	 *  The template should be either the '*' global
-	 *  for everthing on the server (always true for
+	 *  for everything on the server (always true for
 	 *  proxy authorization setups), or a path for
 	 *  the start of a protected limb, with no host
 	 *  field, but we'll check for a host anyway in
@@ -1029,7 +1029,7 @@ PUBLIC char *HTAA_composeAuth ARGS4(
 **		USERNAME AND/OR PASSWORD (IF MISSPELLED))
 ** ON ENTRY:
 **	start_of_headers is the first block already read from socket,
-**			but status line skipped; i.e. points to the
+**			but status line skipped; i.e., points to the
 **			start of the header section.
 **	length		is the remaining length of the first block.
 **	soc		is the socket to read the rest of server reply.
@@ -1180,7 +1180,7 @@ PUBLIC BOOL HTAA_shouldRetryWithAuth ARGS4(
 	    }
 	} else {
 	    /*
-	    **  proxy_setup == NULL, i.e. we have a
+	    **  proxy_setup == NULL, i.e., we have a
 	    **  first connection to a protected server or
 	    **  the server serves a wider set of documents
 	    **  than we expected so far.
@@ -1239,7 +1239,7 @@ PUBLIC BOOL HTAA_shouldRetryWithAuth ARGS4(
 	}
     } else {
         /*
-	**  current_setup == NULL, i.e. we have a
+	**  current_setup == NULL, i.e., we have a
 	**  first connection to a protected server or
 	**  the server serves a wider set of documents
 	**  than we expected so far.
@@ -1278,7 +1278,7 @@ PUBLIC void HTClearHTTPAuthInfo NOARGS
 {
     /*
     **  Need code to check cached documents against the
-    **  protention templates, and do something to ensure
+    **  protection templates, and do something to ensure
     **  that any protected documents no longer can be
     **  accessed without a new retrieval. - FM
     */

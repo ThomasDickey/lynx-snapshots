@@ -5,7 +5,7 @@
    physical representation.
 
    A StyleSheet is a collection of styles, defining the translation necessary to represent
-   a document. It is a linked list of styles.
+   a document.  It is a linked list of styles.
 
 Overriding this module
 
@@ -21,7 +21,7 @@ Overriding this module
    be compiled with a knowledge of the
 
    It we take it out of the library, then of course HTStyle could be declared as an
-   undefined structure. The only references to it are in the structure-flattening code
+   undefined structure.  The only references to it are in the structure-flattening code
    HTML.c and HTPlain.c, which only use HTStypeNamed().
 
    You can in any case override this function in your own code, which will prevent the

@@ -17,7 +17,6 @@
 */
 
 #include <HTUtils.h>
-#include <HTAccess.h>
 #include <HTParse.h>
 #include <HTAlert.h>
 #include <HTTCP.h>
@@ -331,7 +330,7 @@ PRIVATE void quench ARGS1(
 **	soc_in	points to the binary internet or decnet address field.
 **
 **  On exit,
-**	*soc_in is filled in. If no port is specified in str, that
+**	*soc_in is filled in.  If no port is specified in str, that
 **		field is left unchanged in *soc_in.
 */
 PUBLIC int HTParseInet ARGS2(
@@ -538,7 +537,7 @@ PUBLIC int HTParseInet ARGS2(
 		**  selectable!  /dev/null isn't, on some systems, which
 		**  makes some useful Lynx invocations fail.  -BL
 		*/
-		if (isatty(fileno(stdin))) FD_SET(fileno(stdin), &readfds); 
+		if (isatty(fileno(stdin))) FD_SET(fileno(stdin), &readfds);
 #endif /* USE_SLANG */
 		timeout.tv_sec = 1;
 		timeout.tv_usec = 0;
@@ -693,8 +692,8 @@ PUBLIC int HTParseInet ARGS2(
 #if defined(VMS) && defined(CMU_TCP)
 	    /*
 	    **  In LIBCMU, phost->h_length contains not the length of one address
-	    **  (four bytes) but the number of bytes in *h_addr, i.e. some multiple
-	    **  of four. Thus we need to hard code the value here, and remember to
+	    **  (four bytes) but the number of bytes in *h_addr, i.e., some multiple
+	    **  of four.  Thus we need to hard code the value here, and remember to
 	    **  change it if/when IP addresses change in size. :-(	LIBCMU is no
 	    **  longer supported, and CMU users are encouraged to obtain and use
 	    **  SOCKETSHR/NETLIB instead. - S. Bjorndahl
@@ -1099,7 +1098,7 @@ PUBLIC int HTDoRead ARGS3(
     fd_set readfds;
     struct timeval timeout;
     int tries=0;
-#ifdef UCX
+#if defined(UNIX) || defined(UCX)
     int nb;
 #endif /* UCX, BSN */
 
@@ -1156,8 +1155,25 @@ PUBLIC int HTDoRead ARGS3(
     }
 
 #if !defined(UCX) || !defined(VAXC)
+#ifdef UNIX
+    while ((nb = SOCKET_READ (fildes, buf, nbyte)) == -1) {
+	int saved_errno = errno;
+	if (errno == EINTR)
+	    continue;
+#ifdef ERESTARTSYS
+	if (errno == ERESTARTSYS)
+	    continue;
+#endif /* ERESTARTSYS */
+	HTInetStatus("read");
+	errno = saved_errno;	/* our caller may check it */
+	break;
+    }
+    return nb;
+#else  /* UNIX */
     return SOCKET_READ (fildes, buf, nbyte);
-#else
+#endif /* !UNIX */
+
+#else  /* UCX && VAXC */
     /*
     **	VAXC and UCX problem only.
     */

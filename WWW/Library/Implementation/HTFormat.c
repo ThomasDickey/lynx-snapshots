@@ -11,7 +11,6 @@
 */
 
 #include <HTUtils.h>
-#include <HTAccess.h>
 
 /* Implements:
 */
@@ -503,13 +502,13 @@ PRIVATE void HTDisplayPartial NOARGS
 		/* new hypertext document available  */
 	&& ((Newline_partial + display_lines) > NumOfLines_partial)
 		/* current page not complete... */
-	&& (partial_threshold > 0 ? ((Newline_partial + partial_threshold)  < HText_getNumOfLines()) : 
-		 ((Newline_partial + display_lines) < HText_getNumOfLines()))) { 
-		/* 
-		 * Originally we rendered by increments of 2 lines, 
-		 * but that got annoying on slow network connections. 
-		 * Then we switched to full-pages.  Now it's configurable. 
-		 * If partial_threshold < 0, then it's a full page 
+	&& (partial_threshold > 0 ? ((Newline_partial + partial_threshold)  < HText_getNumOfLines()) :
+		 ((Newline_partial + display_lines) < HText_getNumOfLines()))) {
+		/*
+		 * Originally we rendered by increments of 2 lines,
+		 * but that got annoying on slow network connections.
+		 * Then we switched to full-pages.  Now it's configurable.
+		 * If partial_threshold < 0, then it's a full page
 		 */
 	    NumOfLines_partial = HText_getNumOfLines();
 	    HText_pageDisplay(Newline_partial, "");
@@ -530,6 +529,27 @@ PRIVATE void HTDisplayPartial NOARGS
 **   CRLF at the end of lines which need to be stripped to LF for unix
 **   when the format is textual.
 **
+**  State of socket and target stream on entry:
+**			socket (file_number) assumed open,
+**			target (sink) assumed valid.
+**
+**  Return values:
+**	HT_INTERRUPTED  Interruption or error after some data received.
+**	-2		Unexpected disconnect before any data received.
+**	-1		Interruption or error before any data received, or
+**			(UNIX) other read error before any data received, or
+**			download cancelled.
+**	HT_LOADED	Normal close of socket (end of file indication
+**			received), or
+**			unexpected disconnect after some data received, or
+**			other read error after some data received, or
+**			(not UNIX) other read error before any data received.
+**
+**  State of socket and target stream on return depends on return value:
+**	HT_INTERRUPTED	socket still open, target aborted.
+**	-2		socket still open, target stream still valid.
+**	-1		socket still open, target aborted.
+**	otherwise	socket closed,	target stream still valid.
 */
 PUBLIC int HTCopy ARGS4(
 	HTParentAnchor *,	anchor,
@@ -597,15 +617,51 @@ PUBLIC int HTCopy ARGS4(
 		    rv = -2;
 		    goto finished;
 		} else {
+#ifdef UNIX
+		   /*
+		    *  Treat what we've received already as the complete
+		    *  transmission, but not without giving the user
+		    *  an alert.  I don't know about all the different
+		    *  TCP stacks for VMS etc., so this is currently
+		    *  only for UNIX. - kw
+		    */
+		    HTInetStatus("NETREAD");
+		    HTAlert("Unexpected server disconnect.");
+		   CTRACE(tfp,
+	    "HTCopy: Unexpected server disconnect. Treating as completed.\n");
+		   status = 0;
+		   break;
+#else  /* !UNIX */
 		   /*
 		    *  Treat what we've gotten already
 		    *  as the complete transmission. - FM
 		    */
 		   CTRACE(tfp,
-	    "HTCopy: Unexpected server disconnect. Treating as completed.\n");
+	    "HTCopy: Unexpected server disconnect.  Treating as completed.\n");
 		   status = 0;
 		   break;
+#endif /* UNIX */
 		}
+#ifdef UNIX
+	    } else {		/* status < 0 and other errno */
+		/*
+		 *  Treat what we've received already as the complete
+		 *  transmission, but not without giving the user
+		 *  an alert.  I don't know about all the different
+		 *  TCP stacks for VMS etc., so this is currently
+		 *  only for UNIX. - kw
+		 */
+		HTInetStatus("NETREAD");
+		HTAlert("Unexpected read error.");
+		if (bytes) {
+		    (void)NETCLOSE(file_number);
+		    rv = HT_LOADED;
+		} else {
+		    (*targetClass._abort)(sink, NULL);
+		    rv = -1;
+		}
+		goto finished;
+#endif
 	    }
 	    break;
 	}
@@ -641,6 +697,18 @@ finished:
 **   graphic (or other) objects described by the file.
 **
 **
+**  State of file and target stream on entry:
+**			FILE* (fp) assumed open,
+**			target (sink) assumed valid.
+**
+**  Return values:
+**	HT_INTERRUPTED  Interruption after some data read.
+**	HT_PARTIAL_CONTENT	Error after some data read.
+**	-1		Error before any data read.
+**	HT_LOADED	Normal end of file indication on reading.
+**
+**  State of file and target stream on return:
+**	always		fp still open, target stream still valid.
 */
 PUBLIC int HTFileCopy ARGS2(
 	FILE *, 		fp,
@@ -701,6 +769,18 @@ PUBLIC int HTFileCopy ARGS2(
 **   graphic (or other) objects described by the file.
 **
 **
+**  State of file and target stream on entry:
+**		      gzFile (gzfp) assumed open (should have gzipped content),
+**		      target (sink) assumed valid.
+**
+**  Return values:
+**	HT_INTERRUPTED  Interruption after some data read.
+**	HT_PARTIAL_CONTENT	Error after some data read.
+**	-1		Error before any data read.
+**	HT_LOADED	Normal end of file indication on reading.
+**
+**  State of file and target stream on return:
+**	always		gzfp still open, target stream still valid.
 */
 PRIVATE int HTGzFileCopy ARGS2(
 	gzFile, 		gzfp,
@@ -807,6 +887,30 @@ PUBLIC void HTCopyNoCR ARGS3(
 **   CRLF at the end of lines which need to be stripped to LF for unix
 **   when the format is textual.
 **
+**  State of socket and target stream on entry:
+**			socket (file_number) assumed open,
+**			target (sink) usually NULL (will call stream stack).
+**
+**  Return values:
+**	HT_INTERRUPTED  Interruption or error after some data received.
+**	-501		Stream stack failed (cannot present or convert).
+**	-2		Unexpected disconnect before any data received.
+**	-1		Stream stack failed (cannot present or convert), or
+**			Interruption or error before any data received, or
+**			(UNIX) other read error before any data received, or
+**			download cancelled.
+**	HT_LOADED	Normal close of socket (end of file indication
+**			received), or
+**			unexpected disconnect after some data received, or
+**			other read error after some data received, or
+**			(not UNIX) other read error before any data received.
+**
+**  State of socket and target stream on return depends on return value:
+**	HT_INTERRUPTED	socket still open, target aborted.
+**	-501		socket still open, target stream NULL.
+**	-2		socket still open, target freed.
+**	-1		socket still open, target stream aborted or NULL.
+**	otherwise	socket closed,	target stream freed.
 */
 PUBLIC int HTParseSocket ARGS5(
 	HTFormat,		rep_in,
@@ -841,7 +945,8 @@ PUBLIC int HTParseSocket ARGS5(
     if (rv != -1 && rv != HT_INTERRUPTED)
 	(*targetClass._free)(stream);
 
-    return rv; /* full: HT_LOADED;  partial: HT_INTERRUPTED;  no bytes: -1 */
+    return rv;
+    /* Originally:  full: HT_LOADED;  partial: HT_INTERRUPTED;  no bytes: -1 */
 }
 
 /*	Parse a file given format and file pointer
@@ -853,6 +958,19 @@ PUBLIC int HTParseSocket ARGS5(
 **   CRLF at the end of lines which need to be stripped to \n for unix
 **   when the format is textual.
 **
+**  State of file and target stream on entry:
+**			FILE* (fp) assumed open,
+**			target (sink) usually NULL (will call stream stack).
+**
+**  Return values:
+**	-501		Stream stack failed (cannot present or convert).
+**	-1		Download cancelled.
+**	HT_NO_DATA	Error before any data read.
+**	HT_PARTIAL_CONTENT	Interruption or error after some data read.
+**	HT_LOADED	Normal end of file indication on reading.
+**
+**  State of file and target stream on return:
+**	always		fp still open; target freed, aborted, or NULL.
 */
 PUBLIC int HTParseFile ARGS5(
 	HTFormat,		rep_in,
@@ -921,6 +1039,22 @@ PRIVATE int HTCloseGzFile ARGS1(
     return(gzres);
 }
 
+/*	HTParseGzFile
+**
+**  State of file and target stream on entry:
+**			gzFile (gzfp) assumed open,
+**			target (sink) usually NULL (will call stream stack).
+**
+**  Return values:
+**	-501		Stream stack failed (cannot present or convert).
+**	-1		Download cancelled.
+**	HT_NO_DATA	Error before any data read.
+**	HT_PARTIAL_CONTENT	Interruption or error after some data read.
+**	HT_LOADED	Normal end of file indication on reading.
+**
+**  State of file and target stream on return:
+**	always		gzfp closed; target freed, aborted, or NULL.
+*/
 PUBLIC int HTParseGzFile ARGS5(
 	HTFormat,		rep_in,
 	HTFormat,		format_out,

@@ -48,7 +48,7 @@ PUBLIC LexItem lex ARGS1(FILE *, fp)
 
     if (fp != cache) {	/* This cache doesn't work ok because the system  */
 	cache = fp;	/* often assign same FILE structure the next open */
-	HTlex_line = 1;	/* file. So, if there are syntax errors in setup  */
+	HTlex_line = 1;	/* file.  So, if there are syntax errors in setup */
     }			/* files it may confuse things later on.	  */
 
     if (lex_pushed_back != LEX_NONE) {

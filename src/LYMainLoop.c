@@ -216,9 +216,6 @@ int mainloop NOARGS
     char cfile[128];
     FILE *cfp;
     char *cp, *toolbar;
-#ifdef VMS
-    extern BOOLEAN HadVMSInterrupt;   /* Flag from cleanup_sig */
-#endif /* VMS */
     int ch, recall;
     int URLTotal;
     int URLNum;
@@ -1238,7 +1235,7 @@ try_again:
 		    /*
 		     *	We may have popped a doc (possibly in local_dired)
 		     *	which didn't have any links when it was pushed, but
-		     *	does have links now (e.g. a file was created) - KW
+		     *	does have links now (e.g., a file was created) - KW
 		     */
 		    curdoc.link = 0;
 		}
@@ -2558,7 +2555,7 @@ new_cmd:  /*
 		 *  Check if the previous document is a reply from a POST,
 		 *  and if so, seek confirmation of resubmission if the safe
 		 *  element is not set and the document is not still in the
-		 *  cache or LYresubmit_posts is set. If not confirmed and
+		 *  cache or LYresubmit_posts is set.  If not confirmed and
 		 *  it is not the startfile, pop it so we go to the yet
 		 *  previous document, until we're OK or reach the startfile.
 		 *  If we reach the startfile and its not OK or we don't get

@@ -1,7 +1,7 @@
 /*                System dependencies in the W3 library
                                    SYSTEM DEPENDENCIES
 
-   System-system differences for TCP include files and macros. This
+   System-system differences for TCP include files and macros.  This
    file includes for each system the files necessary for network and
    file I/O.  It should be used in conjunction with HTUtils.h to help
    ensure portability across as many platforms and flavors of platforms
@@ -201,7 +201,7 @@ VAX/VMS
 
    The last three do not interfere with the
    unix i/o library, and so they need special calls to read, write and
-   close sockets. In these cases the socket number is a VMS channel
+   close sockets.  In these cases the socket number is a VMS channel
    number, so we make the @@@ HORRIBLE @@@ assumption that a channel
    number will be greater than 10 but a unix file descriptor less than
    10.  It works.

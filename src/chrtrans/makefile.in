@@ -4,7 +4,7 @@
 # This may not yet work for the general case.
 # Only some dependencies included.
 #
-SHELL		= /bin/sh
+SHELL		= @CONFIG_SHELL@
 
 x		= @PROG_EXT@
 
@@ -33,6 +33,7 @@ CPP_OPTS	= @DEFS@ @CPPFLAGS@ \
 		-I$(top_srcdir)/src \
 		-I$(top_srcdir)/src/chrtrans \
 		-I$(top_srcdir)/$(WWWINC) \
+		-I$(top_srcdir)/ \
 		$(SITE_DEFS)
 CC_OPTS		= $(CPP_OPTS) $(CFLAGS)
 

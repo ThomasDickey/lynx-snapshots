@@ -392,10 +392,7 @@ Try_Redirected_URL:
 			    fflush(stdout);
 			    LYgetch();
 #ifdef VMS
-			    {
-			      extern BOOLEAN HadVMSInterrupt;
-			      HadVMSInterrupt = FALSE;
-			    }
+			    HadVMSInterrupt = FALSE;
 #endif /* VMS */
 			}
 			start_curses();
@@ -672,7 +669,7 @@ Try_Redirected_URL:
 				 *  the RIGHT thing and returning an invalid
 				 *  address message. - FM
 				 */
-				HTAlert(LOCATION_NOT_ABSOLUTE);
+				HTUserMsg(LOCATION_NOT_ABSOLUTE);
 				temp = HTParse(use_this_url_instead,
 					       WWWDoc.address,
 					       PARSE_ALL);
