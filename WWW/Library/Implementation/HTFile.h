@@ -72,6 +72,13 @@ extern BOOL HTDirTitles PARAMS((
         HTAnchor *      anchor,
 	BOOL		tildeIsTop));
 
+/*
+**	Check existence.
+*/
+extern int HTStat PARAMS((
+	CONST char *	filename,
+	struct stat *	data));
+
 /*	Load a document.
 **	----------------
 */

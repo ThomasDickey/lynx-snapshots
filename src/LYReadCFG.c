@@ -425,7 +425,7 @@ The special strings 'nocolor' or 'default', or\n")
 		Color_Strings[i + 2], Color_Strings[i + 3]);
     }
     fprintf (stderr, "%s\n%s\n", gettext("Offending line:"), error_line);
-    exit_immediately(-1);
+    exit_immediately(EXIT_FAILURE);
 }
 
 /*
@@ -944,7 +944,7 @@ static int cern_rulesfile_fun ARGS1(
 		"Lynx: cannot start, CERN rules file %s is not available\n"
 		),
 	    (rulesfile2 && *rulesfile2) ? rulesfile2 : gettext("(no name)"));
-    exit_immediately(69);	/* EX_UNAVAILABLE in sysexits.h */
+    exit_immediately(EXIT_FAILURE);
     return 0;			/* though redundant, for compiler-warnings */
 }
 #endif /* NO_RULES */
@@ -1109,7 +1109,6 @@ static int system_editor_fun ARGS1(
     return 0;
 }
 
-#ifdef EXP_READPROGRESS
 static int transfer_rate_fun ARGS1(
 	char *,		value)
 {
@@ -1119,14 +1118,16 @@ static int transfer_rate_fun ARGS1(
 	{ "TRUE",	rateKB },
 	{ "BYTES",	rateBYTES },
 	{ "FALSE",	rateBYTES },
+#ifdef EXP_READPROGRESS
 	{ "KB,ETA",	rateEtaKB },
 	{ "BYTES,ETA",	rateEtaBYTES },
+#endif
 	{ NULL,		-1 },
     };
     config_enum(table, value, &LYTransferRate);
     return 0;
 }
-#endif
+
 static int viewer_fun ARGS1(
 	char *,		value)
 {
@@ -1277,7 +1278,7 @@ static void html_src_bad_syntax ARGS2(
     HTSprintf0(&buf,"HTMLSRC_%s", option_name);
     LYUpperCase(buf);
     fprintf(stderr,"Bad syntax in TAGSPEC %s:%s\n", buf, value);
-    exit_immediately(-1);
+    exit_immediately(EXIT_FAILURE);
 }
 
 
@@ -1584,9 +1585,7 @@ static Config_Type Config_Table [] =
      PARSE_SET("seek_frag_map_in_cur", CONF_BOOL, &LYSeekFragMAPinCur),
      PARSE_SET("set_cookies", CONF_BOOL, &LYSetCookies),
      PARSE_SET("show_cursor", CONF_BOOL, &LYShowCursor),
-#ifdef EXP_READPROGRESS
      PARSE_SET("show_kb_rate", CONF_FUN, transfer_rate_fun),
-#endif
      PARSE_ENV("snews_proxy", CONF_ENV, 0 ),
      PARSE_ENV("snewspost_proxy", CONF_ENV, 0 ),
      PARSE_ENV("snewsreply_proxy", CONF_ENV, 0 ),
@@ -1755,7 +1754,7 @@ PRIVATE void do_read_cfg ARGS5(
 		nesting_level - 1);
 	fprintf(stderr,gettext("Last attempted include was '%s',\n"), cfg_filename);
 	fprintf(stderr,gettext("included from '%s'.\n"), parent_filename);
-	exit(-1);
+	exit(EXIT_FAILURE);
     }
     /*
      *	Locate and open the file.

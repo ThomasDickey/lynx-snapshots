@@ -1,6 +1,22 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2000-12-21 (2.8.4dev.15)
++ add .po files to main distribution, remove stubs for files that were not
+  implemented, use msgmerge to resync against the current lynx.pot
+  (prompted by discussion with Morten Bo Johansen <mojo@image.dk>) -TD
++ corrected dev.13 changes for EXP_READPROGRESS, to make the
+  non-EXP_READPROGRESS configuration build and work with .lynxrc settings -DK
++ use EXIT_SUCCESS/EXIT_FAILURE in exit() and exit_immediately() calls -TD
++ improve check for lynx_temp_space by ensuring that the directory actually
+  exists; attempt to create the directory if it does not, e.g., ~/tmp/, to
+  resolve problem introduced by Mandrake's patch -TD
++ modify SetOutputMode() to flush stdout to work around buffering problem with
+  cygwin on error exit from Lynx (reported by Brad Town <btown@ceddec.com>) -TD
++ change definitions for LYCharINTERRUPT1 and LYCharINTERRUPT2 to not use
+  FROMASCII() in the EBCDIC configuration, since those symbols are used in case
+  statements which otherwise would not compile -PG
+
 2000-11-03 (2.8.4dev.14)
 * restore initialization of LYlines, LYcols in setup() which was lost in dev.12
   changes (reported by DK).

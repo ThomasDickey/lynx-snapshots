@@ -538,7 +538,7 @@ extern void lynx_stop_all_colors NOPARAMS;
  * have setmode.
  */
 #if defined(_WINDOWS) || defined(DJGPP) || defined(__EMX__) || defined(WIN_EX)
-#define SetOutputMode(mode) setmode(fileno(stdout), mode)
+#define SetOutputMode(mode) fflush(stdout), setmode(fileno(stdout), mode)
 #else
 #define SetOutputMode(mode) /* nothing */
 #endif

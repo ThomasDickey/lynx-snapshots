@@ -145,9 +145,9 @@ PRIVATE char *sprint_bytes ARGS3(
     }
 
     u = kbunits;
-    if ((LYTransferRate == rateBYTES) && (n >= 10 * kb_units))
+    if ((LYTransferRate == rateKB) && (n >= 10 * kb_units))
 	sprintf(s, "%ld", n/kb_units);
-    else if ((LYTransferRate == rateBYTES) && (n >= kb_units))
+    else if ((LYTransferRate == rateKB) && (n >= kb_units))
 	sprintf(s, "%.2g", ((double)n)/kb_units);
     else {
 	sprintf(s, "%ld", n);

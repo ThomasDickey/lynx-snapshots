@@ -696,7 +696,7 @@ PUBLIC void start_curses NOARGS
     if (slinit == 0) {
 #if defined(USE_KEYMAPS)
 	if (-1 == lynx_initialize_keymaps ())
-	    exit (-1);
+	    exit (EXIT_FAILURE);
 #else
 	SLtt_get_terminfo();
 #endif
@@ -839,7 +839,7 @@ PUBLIC void start_curses NOARGS
 	if (!(LYscreen=newterm(NULL,stdout,stdin))) {  /* start curses */
 	    fprintf(tfp, "%s\n",
 		gettext("Terminal initialisation failed - unknown terminal type?"));
-	    exit_immediately (-1);
+	    exit_immediately (EXIT_FAILURE);
 	}
 	lynx_called_initscr = TRUE;
 #if defined(SIGWINCH) && defined(NCURSES_VERSION)
@@ -857,7 +857,7 @@ PUBLIC void start_curses NOARGS
 
 	if (-1 == lynx_initialize_keymaps ()) {
 	    endwin();
-	    exit (-1);
+	    exit (EXIT_FAILURE);
 	}
 #endif
 

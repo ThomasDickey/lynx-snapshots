@@ -1057,7 +1057,7 @@ PRIVATE BOOL HTLoadDocument ARGS4(
 	fprintf(stderr,
  gettext("**** HTAccess: Internal software error.  Please mail lynx-dev@sig.net!\n"));
 	fprintf(stderr, gettext("**** HTAccess: Status returned was: %d\n"),status);
-	exit(-1);
+	exit(EXIT_FAILURE);
     }
 
     /* Failure in accessing a document */

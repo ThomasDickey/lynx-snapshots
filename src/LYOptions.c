@@ -2334,16 +2334,16 @@ static OptValues ftp_sort_values[] = {
 	{ FILE_BY_DATE,		"By Date",		"ftp_by_date" },
 	{ 0, 0, 0 }};
 
-#ifdef EXP_READPROGRESS
 static char * show_rate_string		= "show_rate";
 static OptValues rate_values[] = {
 	{ rateOFF,		"Do not show rate",	"rate_off" },
 	{ rateBYTES,		"Show Bytes/sec rate",	"rate_bytes" },
 	{ rateKB,		"Show KB/sec rate",	"rate_kb" },
+#ifdef EXP_READPROGRESS
 	{ rateEtaBYTES,		"Show Bytes/sec, ETA",	"rate_eta_bytes" },
 	{ rateEtaKB,		"Show KB/sec, ETA",	"rate_eta_kb" },
+#endif
 	{ 0, 0, 0 }};
-#endif /* EXP_READPROGRESS */
 
 /*
  * Headers transferred to remote server
@@ -2901,12 +2901,10 @@ PUBLIC int postoptions ARGS1(
 	}
 
 	/* Show Transfer Rate: enumerated value */
-#ifdef EXP_READPROGRESS
 	if (!strcmp(data[i].tag, show_rate_string)
 	 && GetOptValues(rate_values, data[i].value, &code)) {
 	    LYTransferRate = code;
 	}
-#endif
 
 	/* Preferred Document Character Set: INPUT */
 	if (!strcmp(data[i].tag, preferred_doc_char_string)) {

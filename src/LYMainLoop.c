@@ -269,7 +269,7 @@ PRIVATE void TracelogOpenFailed NOARGS
 	HTUserMsg(TRACELOG_OPEN_FAILED);
     } else {
 	fprintf(stderr, "%s\n", TRACELOG_OPEN_FAILED);
-	exit(-1);
+	exit(EXIT_FAILURE);
     }
 }
 
@@ -885,7 +885,7 @@ PRIVATE int DoTraversal ARGS2(
 		    (nhist <= 0 )) {
 		    if (!dump_output_immediately) {
 			cleanup();
-			exit_immediately(-1);
+			exit_immediately(EXIT_FAILURE);
 		    }
 		    return(-1);
 		}
@@ -914,7 +914,7 @@ PRIVATE int DoTraversal ARGS2(
 		(nhist <= 0 )) {
 		if (!dump_output_immediately) {
 		    cleanup();
-		    exit_immediately(-1);
+		    exit_immediately(EXIT_FAILURE);
 		}
 		return(-1);
 	    }
@@ -5581,7 +5581,7 @@ try_again:
 			    if ((ofp = LYAppendToTxtFile(TRAVERSE_ERRORS)) == NULL) {
 				if ((ofp = LYNewTxtFile(TRAVERSE_ERRORS)) == NULL) {
 				    perror(NOOPEN_TRAV_ERR_FILE);
-				    exit_immediately(-1);
+				    exit_immediately(EXIT_FAILURE);
 				}
 			    }
 			    if (nhist > 0) {
@@ -5612,7 +5612,7 @@ try_again:
 			 *  If nhist = 0 then it must be the first file.
 			 */
 			exit_immediately_with_error_message(NOT_FOUND, first_file);
-			return(-1);
+			return(EXIT_FAILURE);
 		    }
 		    /* FALLTHRU */
 
@@ -5687,7 +5687,7 @@ try_again:
 			   goto try_again;
 			} else {
 			   exit_immediately_with_error_message(NULLFILE, first_file);
-			   return(-1);
+			   return(EXIT_FAILURE);
 			}
 		    }
 
@@ -5821,7 +5821,7 @@ try_again:
 				FREE(temp);
 				if (LYValidate) {
 				    HTAlert(BOOKMARKS_DISABLED);
-				    return(-1);
+				    return(EXIT_FAILURE);
 				}
 				if ((temp = HTParse(newdoc.address, "",
 				 PARSE_ACCESS+PARSE_HOST+PARSE_PUNCTUATION))) {
@@ -6020,7 +6020,7 @@ try_again:
 	    } else {
 		print_wwwfile_to_fd(stdout, FALSE);
 	    }
-	    return(0);
+	    return(EXIT_SUCCESS);
 	}
 
 	/*
@@ -6483,9 +6483,9 @@ try_again:
 			printf(
 			gettext("Fatal error - could not open output file %s\n"),cfile);
 		    if (!dump_output_immediately) {
-			exit_immediately(-1);
+			exit_immediately(EXIT_FAILURE);
 		    }
-		    return(-1);
+		    return(EXIT_FAILURE);
 		}
 	    }
 	} else {
@@ -6742,7 +6742,7 @@ new_keyboard_input:
 	 */
 	if (traversal) {
 	    if ((c = DoTraversal(c, &crawl_ok)) < 0)
-		return (-1);
+		return (EXIT_FAILURE);
 	} /* traversal */
 
 #ifdef WIN_EX
@@ -6873,11 +6873,11 @@ new_cmd:  /*
 
 	case LYK_QUIT:		/* quit */
 	    if (handle_LYK_QUIT())
-		return(0);
+		return(EXIT_SUCCESS);
 	    break;
 
 	case LYK_ABORT:		/* don't ask the user about quitting */
-	    return(0);
+	    return(EXIT_SUCCESS);
 
 	case LYK_NEXT_PAGE:	/* next page */
 	    handle_LYK_NEXT_PAGE(&old_c, real_c);
@@ -7028,7 +7028,7 @@ new_cmd:  /*
 	case LYK_PREV_DOC:	/* back up a level */
 	    switch (handle_PREV_DOC(&cmd, &old_c, real_c)) {
 	    case 1:
-		return(0);
+		return(EXIT_SUCCESS);
 	    case 2:
 		goto new_cmd;
 	    }
@@ -7681,9 +7681,9 @@ PRIVATE void exit_immediately_with_error_message ARGS2(
     FREE(buf);
 
     if (!dump_output_immediately) {
-	exit_immediately(-1);
+	exit_immediately(EXIT_FAILURE);
     }
-    /* else: return(-1) in mainloop */
+    /* else: return(EXIT_FAILURE) in mainloop */
 }
 
 

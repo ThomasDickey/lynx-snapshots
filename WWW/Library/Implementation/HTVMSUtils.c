@@ -364,7 +364,7 @@ static char *Name;
       }
    }
 
-   /* try in case a file on toplevel directory or .DIR was alreadyt specified */
+   /* try in case a file on toplevel directory or .DIR was already specified */
    Result = stat(Name,info);
    if (Result == 0)
       return(Result);

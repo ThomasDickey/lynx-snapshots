@@ -127,7 +127,7 @@ PUBLIC void cleanup_sig ARGS1(
 	(void) signal(SIGTSTP, SIG_DFL);
 #endif /* SIGTSTP */
     if (sig != 0) {
-	exit(0);
+	exit(EXIT_SUCCESS);
     }
 }
 

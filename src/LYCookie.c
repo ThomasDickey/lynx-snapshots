@@ -2755,7 +2755,7 @@ PUBLIC void cookie_domain_flag_set ARGS2(
     if (str == NULL) {
 	HTAlwaysAlert(gettext("Internal"),
 		      gettext("cookie_domain_flag_set error, aborting program"));
-	exit_immediately(-1);
+	exit_immediately(EXIT_FAILURE);
     }
 
     /*

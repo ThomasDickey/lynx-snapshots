@@ -27,7 +27,7 @@ PRIVATE void final_perror ARGS2(CONST char *,msg, BOOLEAN, clean_flag)
 PRIVATE void exit_with_perror ARGS1(CONST char *,msg)
 {
     final_perror(msg, TRUE);
-    exit_immediately(-1);
+    exit_immediately(EXIT_FAILURE);
 }
 
 PUBLIC BOOLEAN lookup ARGS1(char *,target)

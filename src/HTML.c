@@ -8190,7 +8190,7 @@ PUBLIC HTStructured* HTML_new ARGS3(
 	    return HTMLGenerator(intermediate);
 	fprintf(stderr, "\n** Internal error: can't parse HTML to %s\n",
 		HTAtom_name(format_out));
-	exit_immediately (-1);
+	exit_immediately (EXIT_FAILURE);
     }
 
     me = (HTStructured*) calloc(sizeof(*me),1);
