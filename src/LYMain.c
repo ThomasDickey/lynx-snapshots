@@ -1091,7 +1091,7 @@ PUBLIC int main ARGS2(
 #ifdef EXP_CHARTRANS
     /*
      * Make sure we have the character sets declared.
-     * This will initialize the CHARTRANS handling. - kw
+     *  This will initialize the CHARTRANS handling. - KW
      */
     if (!LYCharSetsDeclared()) {
         fprintf(stderr, "\nLynx character sets not declared.\n\n");
@@ -1101,7 +1101,7 @@ PUBLIC int main ARGS2(
 
 #if defined(USEHASH)
     /*
-     *  If no alternate lynxile file was specified on
+     *  If no alternate lynx-style file was specified on
      *  the command line, see if it's in the environment.
      */
     if (!lynx_lss_file) {
@@ -1111,14 +1111,14 @@ PUBLIC int main ARGS2(
     }
 
     /*
-     *  If we still don't have a lynxile file,
+     *  If we still don't have a lynx-style file,
      *  use the userdefs.h definition.
      */
     if (!lynx_lss_file)
         StrAllocCopy(lynx_lss_file, LYNX_LSS_FILE);
 
     /*
-     *  Convert a '~' in the lynxile file path to $HOME.
+     *  Convert a '~' in the lynx-style file path to $HOME.
      */
     if ((cp = strchr(lynx_lss_file, '~'))) {
         char *temp = NULL;
@@ -1138,7 +1138,7 @@ PUBLIC int main ARGS2(
         FREE(temp);
     }
     /*
-     *  If the lynxile file is not available,
+     *  If the lynx-style file is not available,
      *  inform the user and exit.
      */
     if ((fp = fopen(lynx_lss_file, "r")) == NULL) {
@@ -1327,6 +1327,16 @@ PUBLIC int main ARGS2(
      *  Process the RC file.
      */
     read_rc();
+
+#ifdef USE_SLANG
+    if (LYShowColor == TRUE &&
+	!(Lynx_Color_Flags & SL_LYNX_USE_COLOR)) {
+	Lynx_Color_Flags |= SL_LYNX_USE_COLOR;
+    } else if ((Lynx_Color_Flags & SL_LYNX_USE_COLOR) ||
+	       getenv("COLORTERM") != NULL) {
+	LYShowColor = TRUE;
+    }
+#endif /* USE_SLANG */
 
 #if defined(EXEC_LINKS) || defined(EXEC_SCRIPTS)
 #ifdef NEVER_ALLOW_REMOTE_EXEC
@@ -1736,8 +1746,10 @@ PRIVATE void parse_arg ARGS3(
 	       (strncmp(argv[0], "-assume_unrec_charset", 21) == 0)) {
 	BOOL local_flag = (argv[0][8] == 'l');
 	BOOL unrec_flag = (argv[0][8] == 'u');
+
 	if (nextarg) {
 	    int j;
+
 	    for (j = 0; cp[j]; j++)
 	        cp[j] = TOLOWER(cp[j]);
 	    if (local_flag) {
@@ -1861,6 +1873,7 @@ PRIVATE void parse_arg ARGS3(
 #ifdef USE_SLANG
     } else if (strncmp(argv[0], "-color", 6) == 0) {
         Lynx_Color_Flags |= SL_LYNX_USE_COLOR;
+	LYShowColor = TRUE;
 #endif /* USE_SLANG */
 
     } else if (strncmp(argv[0], "-crawl", 6) == 0) {
@@ -2168,6 +2181,9 @@ PRIVATE void parse_arg ARGS3(
 
     } else if (strncmp(argv[0], "-nocolor", 8) == 0) {
 	LYShowColor = FALSE;
+#ifdef USE_SLANG
+	Lynx_Color_Flags &= ~SL_LYNX_USE_COLOR;
+#endif
 
 #if defined(EXEC_LINKS) || defined(EXEC_SCRIPTS)
     } else if (strncmp(argv[0], "-noexec", 7) == 0) {
@@ -2438,7 +2454,7 @@ PRIVATE void parse_arg ARGS3(
 #if defined(USEHASH)
     } else if (strncmp(argv[0], "-lss", 4) == 0) {
         /*
-         *  Already read the alternate lynxile file
+	 *  Already read the alternate lynx-style file
          *  so just check whether we need to increment i
          */
         if (nextarg)

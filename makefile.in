@@ -164,12 +164,8 @@ all:
 	@echo "Please run make with one of the following arguments"
 	@echo "clix       -- for Intergraph CLIX"
 	@echo "generic    -- for generic UNIX"
-	@echo "ptx        -- for Sequent's DYNIX/ptx, current version"
-	@echo "ptx2       -- for Sequent's DYNIX/ptx, version 2"
 	@echo "sco        -- for SCO machines"
 	@echo "sco5       -- for SCO OpenServer Release 5 machines"
-	@echo "snake2     -- for HP-UX gte 9.01 (gcc)"
-	@echo "snake3     -- for HP-UX (purchased compiler)"
 	@echo "umaxv      -- for Encore's UMAXV (SVR3.x) "
 	@echo "clean      -- removes all '.o' and 'core' files"
 	@echo "tar        -- runs clean, removes executable, and tars the whole directory"
@@ -235,7 +231,7 @@ SITE_DEFS = $(DIR_DEFS) -DEXP_CHARTRANS # Your defines here
 #
 # for installation of local execution links, please see the file userdefs.h
 
-generic: # NOT-TESTED
+generic: # TESTED: Linux FreeBSD SunOS Solaris IRIX CLIX HP-UX AIX SCO
 	cd WWW/Library/unix; $(MAKE) CC="$(CC)" \
 		LYFLAGS="$(SITE_LYDEFS) -I../../.."
 	cd src; $(MAKE) all CC="$(CC)" \
@@ -255,61 +251,6 @@ clix:	# NOT-TESTED
 	cd src; $(MAKE) all CC="$(CC)" \
 		MCFLAGS="-DUSG" \
 		LIBS="-lmalloc -lcurses -ltermcap -lbsd -lc_s \
-		$(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)" \
-		SITE_DEFS="$(SITE_DEFS)" \
-		WWWINC=$(WWWINC) \
-		WWWLIB="../WWW/Library/unix/libwww.a"
-
-snake2:	# NOT-TESTED
-	cd WWW/Library/unix; $(MAKE) CC="$(CC)" \
-		LYFLAGS="$(SITE_LYDEFS) -I../../.. \
-		-D_INCLUDE_HPUX_SOURCE \
-		-D_INCLUDE_POSIX_SOURCE \
-		-D_INCLUDE_AES_SOURCE \
-		-D_INCLUDE_XOPEN_SOURCE"
-	cd src; $(MAKE) all CC="$(CC)" \
-		MCFLAGS="\
-		-D_INCLUDE_HPUX_SOURCE \
-		-D_INCLUDE_POSIX_SOURCE \
-		-D_INCLUDE_AES_SOURCE \
-		-D_INCLUDE_XOPEN_SOURCE" \
-		LIBS="$(LIBS) $(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)" \
-		SITE_DEFS="$(SITE_DEFS)" \
-		WWWINC=$(WWWINC) \
-		WWWLIB="../WWW/Library/unix/libwww.a"
-
-# Lynx will compile with the purchased cc compiler added to HP-UX.
-# contributed by Andy Finkenstadt (genie@panix.com)
-# Note that initial releases of HP/UX 10.10 have a broken select() in
-# libcurses.a and will malfunction with Lynx.  See the PROBLEMS file.
-snake3:	# NOT-TESTED (replaces snake3-curses, snake3-slang)
-	cd WWW/Library/unix; $(MAKE) CC="$(CC)" \
-		LYFLAGS="$(SITE_LYDEFS) -I../../.. -Ae"
-	cd src; $(MAKE) all CC="$(CC)" \
-		MCFLAGS="-Ae" \
-		LIBS="$(LIBS) $(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)" \
-		SITE_DEFS="$(SITE_DEFS)" \
-		WWWINC=$(WWWINC) \
-		WWWLIB="../WWW/Library/unix/libwww.a"
-
-# aka SEQUENT
-ptx:	# NOT-TESTED (replaces ptx-curses, ptx-slang)
-	cd WWW/Library/unix; $(MAKE) $(MFLAGS) CC="$(CC)" \
-		LYFLAGS="$(SITE_LYDEFS) -I../../.. -DSVR4_BSDSELECT -DNO_IOCTL -DUSE_FCNTL"
-	cd src; $(MAKE) $(MFLAGS) all CC="$(CC)" \
-		MCFLAGS="" \
-		LIBS="$(LIBS) -lsocket -linet -lnsl \
-		$(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)" \
-		SITE_DEFS="$(SITE_DEFS)" \
-		WWWINC=$(WWWINC) \
-		WWWLIB="../WWW/Library/unix/libwww.a"
-
-ptx2:	# NOT-TESTED
-	cd WWW/Library/unix; $(MAKE) CC="$(CC)" \
-		LYFLAGS="$(SITE_LYDEFS) -I../../.. -DPTX2 -DNOPORT -DSVR4_BSDSELECT $(SITE_LYDEFS)"
-	cd src; $(MAKE) all CC="$(CC)" \
-		MCFLAGS="-DPTX2" \
-		LIBS="$(LIBS) -lsocket -linet -lnsl \
 		$(WAISLIB) $(SOCKSLIB) $(SITE_LIBS)" \
 		SITE_DEFS="$(SITE_DEFS)" \
 		WWWINC=$(WWWINC) \

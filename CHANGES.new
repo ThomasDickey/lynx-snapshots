@@ -10,10 +10,25 @@ README.configure), and miscellaneous other changes.  Note that the 2.7 ->
 2.7.1 changes (which are listed at the beginning of the current CHANGES
 file) are duplicated here. - KW]
 
+1997-07-22
+* Modify curses popups in LYForms.c and LYOptions.c to use background color
+  from main window - TD
+* Ifdef'd out the logic that saves "show color" to .lynxrc, since it is
+  deemed to be confusing to users - TD
+* Merged FM's changes to the "show color (&)" toggle to save to .lynxrc,
+  support slang, update online documentation - TD
+* Add error message to show actual context in error-checking for color
+  parsing suggested by Filip M Gieszczykiewicz - TD
+* Check for/suppress duplicate -lsocket in network library configure - TD
+* Remove HP-UX snake2/snake3 targets from makefile.in - TD
+* Add configure script case for 'sequent', drop ptx, ptx2 targets from
+  makefile.in - TD
+* Add logic to configure script handling of slang to suppress spurious
+  -Ipredefined when header location is given in $CFLAGS - TD
 1997-07-21
 * Check for lynx_uses_color and LYShowColor in lynx_start_status_color()
   and lynx_stop_status_color() of LYCurses.c so that the statusline
-  will appear reverse (or otherwise hightlighted if the terminal doesn't
+  will appear reverse (or otherwise highlighted if the terminal doesn't
   support reverse), if color support is compiled in but not currently
   used. - KW
 * Added comments on color usage to lynx.cfg. - KW
@@ -25,6 +40,7 @@ file) are duplicated here. - KW]
 * Correct background of popups in LYOptions.c - TD
 * Add configure check for compiler options to enable prototypes - TD
 * Remove IRIX "-cckr" compiler flags. - TD
+* Correct whitespace as per LPS: LYCurses.c, LYOptions.c - TD
 1997-07-18
 * Mods in LYexit.c and LYCurses.c to ensure restoration of stderr (if it
   was changed for output to the trace log) on all exits. - BRL & FM

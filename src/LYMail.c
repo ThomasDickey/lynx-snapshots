@@ -459,7 +459,7 @@ PUBLIC void mailmsg ARGS4(int,cur, char *,owner_address,
 	    chmod(TRAVERSE_ERRORS, 0600);
 	}
 
-	fprintf(ofp, "%s	%s 	in %s\n",
+	fprintf(ofp, "%s\t%s \tin %s\n",
 		     links[cur].lname, links[cur].target, filename);
 	fclose(ofp);
     }

@@ -1,6 +1,6 @@
--- 1997/3/20 - T.Dickey <dickey@clark.net>
+-- 1997/7/22 - T.Dickey <dickey@clark.net>
 
-This is the first pass of an auto-configure script which I and Jim Spath
+This is the second pass of an auto-configure script which I and Jim Spath
 have been working on.  It uses autoconf 2.12 to generate a Bourne shell
 script (configure), which can be run on a UNIX platform to generate:
 
@@ -24,12 +24,23 @@ and
 
 e.g., one of
 
-	make linux
-	make sgi
-	make solaris
-	make sun4
+	make generic
 
-Since the linux target has only a minor special case #ifdef, I've also built
-AIX (cc), CLIX (cc), SCO (cc) and HP-UX (K&R c, gcc) configurations using that
-target.  Jim has tested additionally the FreeBSD, NetBSD configurations, and
-will investigate DGUX.
+We've tested this on several platforms:
+
+	Linux 2.0.0 (gcc 2.7.2 with curses, several versions of ncurses
+		and slang)
+	FreeBSD 2.1.5 (gcc 2.6.3 with curses and ncurses)
+	NetBSD
+	DGUX
+	SunOS 4.1 (cc curses, gcc ncurses and slang)
+	Solaris 2.5 (cc and gcc with curses, ncurses and slang)
+	IRIX 5.2 and 6.2 (cc and gcc with curses, ncurses and slang)
+	CLIX (cc with curses and ncurses)
+	AIX 3.2.5 (cc with curses)
+	SCO (cc with curses)
+	HP-UX (K&R and ANSI cc, gcc with curses, ncurses and slang)
+
+Note: SunOS and HP-UX come with a bundled K&R compiler, which is only
+useful for compiling with the bundled curses.  Both ncurses and slang
+require a compiler that recognizes prototypes.

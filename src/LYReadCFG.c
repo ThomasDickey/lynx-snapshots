@@ -349,7 +349,8 @@ PRIVATE int check_color ARGS1(
 /*
  *  Exit routine for failed COLOR parsing.
  */
-PRIVATE void exit_with_color_syntax NOARGS
+PRIVATE void exit_with_color_syntax ARGS1(
+	char *,	error_line)
 {
     unsigned int i;
     fprintf (stderr, "\
@@ -364,6 +365,9 @@ Here FOREGROUND and BACKGROUND must be one of:\n"
 		Color_Strings[i], Color_Strings[i + 1], 
 		Color_Strings[i + 2], Color_Strings[i + 3]);
     }
+    fprintf (stderr, "\
+Offending line:\n\
+%s\n",error_line);
 
 #ifndef NOSIGHUP
     (void) signal(SIGHUP, SIG_DFL);
@@ -387,6 +391,12 @@ PRIVATE void parse_color ARGS1(
 {
     int color;
     char *fg, *bg;
+    char parse_color_line[501];
+
+    if (strlen(buffer) < sizeof(parse_color_line))
+	strcpy(parse_color_line, buffer);
+    else
+	strcpy(parse_color_line, "Color config line too long");
 
     /*
      *  We are expecting a line of the form: 
@@ -394,22 +404,22 @@ PRIVATE void parse_color ARGS1(
      */
     color = atoi (buffer);
     if (NULL == (fg = find_colon(buffer)))
-        exit_with_color_syntax();
+        exit_with_color_syntax(parse_color_line);
     *fg++ = 0;
 
     if (NULL == (bg = find_colon(fg)))
-        exit_with_color_syntax();
+        exit_with_color_syntax(parse_color_line);
     *bg++ = 0;
 
 #if defined(USE_SLANG)
     if ((-1 == check_color(fg)) ||
         (-1 == check_color(bg)))
-	exit_with_color_syntax();
+	exit_with_color_syntax(parse_color_line);
 
     SLtt_set_color(color, NULL, fg, bg);
 #else
     if (lynx_chg_color(color, check_color(fg), check_color(bg)) < 0)
-	exit_with_color_syntax();
+	exit_with_color_syntax(parse_color_line);
 #endif
 }
 #endif /* USE_COLOR_TABLE */

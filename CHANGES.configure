@@ -1,3 +1,16 @@
+1997-07-22
+----------
+* Check for/suppress duplicate -lsocket in network library configure - TD
+* Remove HP-UX snake2/snake3 targets from makefile.in - TD
+* Add configure script case for 'sequent', drop ptx, ptx2 targets from
+  makefile.in - TD
+* Add logic to configure script handling of slang to suppress spurious
+  -Ipredefined when header location is given in $CFLAGS - TD
+1997-07-20
+----------
+* Remove option value from configure option "--with-color-styles". - TD
+* Add configure check for compiler options to enable prototypes - TD
+* Remove IRIX "-cckr" compiler flags. - TD
 1997-04-22
 ----------
 * refined check for slang libraries/headers by checking if $CFLAGS has been

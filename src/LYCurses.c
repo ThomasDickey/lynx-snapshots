@@ -520,7 +520,8 @@ PRIVATE void lynx_init_colors NOARGS
 	    if (n == 0 && LYShowColor)
 		bkgd(COLOR_PAIR(9));
 	}
-    }
+    } else
+	LYShowColor = FALSE;
 }
 
 PUBLIC void lynx_setup_colors NOARGS
@@ -574,7 +575,7 @@ PUBLIC void start_curses NOARGS
 
     if (slinit == 0) {
 	SLtt_get_terminfo();
-	if (Lynx_Color_Flags & SL_LYNX_USE_COLOR)
+	if (LYShowColor && (Lynx_Color_Flags & SL_LYNX_USE_COLOR))
 	    SLtt_Use_Ansi_Colors = 1;
 	size_change(0);
 
@@ -584,7 +585,7 @@ PUBLIC void start_curses NOARGS
 	 *  If set, the blink escape sequence will turn on high
 	 *  intensity background (rxvt and maybe Linux console).
 	 */
-	if (Lynx_Color_Flags & SL_LYNX_USE_BLINK)
+	if (LYShowColor && (Lynx_Color_Flags & SL_LYNX_USE_BLINK))
 	    SLtt_Blink_Mode = 1;
 	else
 	    SLtt_Blink_Mode = 0;
@@ -1495,6 +1496,7 @@ PUBLIC void lynx_force_repaint NOARGS
 {
 #if defined(COLOR_CURSES)
     chtype a = (LYShowColor) ? COLOR_PAIR(9) : A_NORMAL;
+    bkgdset(a | ' ');
     bkgd(a | ' ');
     attrset(a);
 #endif

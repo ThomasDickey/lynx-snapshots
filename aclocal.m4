@@ -537,14 +537,23 @@ dnl	-lsocket
 dnl	-lbsd
 AC_DEFUN([CF_NETLIBS],[
 NETLIBS=""
+cf_have_lsocket=no
+#
 AC_CHECK_FUNC(gethostname,[AC_DEFINE(HAVE_GETHOSTNAME)],[
 	AC_CHECK_LIB(nsl,gethostname,
 		[AC_DEFINE(HAVE_GETHOSTNAME)
 		NETLIBS="-lnsl $NETLIBS"],
 		AC_CHECK_LIB(socket,gethostname,
 		[AC_DEFINE(HAVE_GETHOSTNAME)
-		NETLIBS="-lsocket $NETLIBS"]),
+		NETLIBS="-lsocket $NETLIBS"
+		cf_have_lsocket=yes]),
 		[$NETLIBS])])
+#
+# FIXME:  sequent needs this library (i.e., -lsocket -linet -lnsl), but
+# I don't know the entrypoints - 97/7/22 TD
+AC_HAVE_LIBRARY(inet,NETLIBS="-linet $NETLIBS")
+#
+if test $cf_have_lsocket = no ; then
 AC_CHECK_FUNC(socket,[AC_DEFINE(HAVE_SOCKET)],[
 	AC_CHECK_LIB(socket,socket,
 		[AC_DEFINE(HAVE_SOCKET)
@@ -553,11 +562,14 @@ AC_CHECK_FUNC(socket,[AC_DEFINE(HAVE_SOCKET)],[
 			[AC_DEFINE(HAVE_SOCKET)
 			NETLIBS="-lbsd $NETLIBS"]),
 		[$NETLIBS])])
+fi
+#
 AC_CHECK_FUNC(gethostbyname,[AC_DEFINE(HAVE_GETHOSTBYNAME)],[
 	AC_CHECK_LIB(nsl,gethostbyname,
 		[AC_DEFINE(HAVE_GETHOSTBYNAME)
 		NETLIBS="-lnsl $NETLIBS"],,
 		[$NETLIBS])])
+#
 AC_CHECK_FUNC(strcasecmp,[AC_DEFINE(HAVE_STRCASECMP)],[
 	AC_CHECK_LIB(resolv,strcasecmp,
 		[AC_DEFINE(HAVE_STRCASECMP)
@@ -749,10 +761,18 @@ AC_CACHE_VAL(cf_cv_slang_header,[
 	])])
 AC_MSG_RESULT($cf_cv_slang_header)
 AC_DEFINE(USE_SLANG)
+
 changequote(,)dnl
 cf_incdir=`echo $cf_cv_slang_header | sed -e 's:/[^/]*$::'`
 changequote([,])dnl
-CF_ADD_INCDIR($cf_incdir)
+
+case $cf_cv_slang_header in # (vi
+predefined) # (vi
+	;;
+*)
+	CF_ADD_INCDIR($cf_incdir)
+	;;
+esac
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl Look for the slang library (it needs the math-library because it uses

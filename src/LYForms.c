@@ -678,9 +678,10 @@ PRIVATE int popup_options ARGS7(
 #define getbkgd(w) wgetbkgd(w)	/* workaround pre-1.9.9g bug */
 #endif
     LYsubwindow(form_window);
-#ifdef getbkgd			/* not defined in ncurses 1.8.7 */
-    wbkgd(form_window, getbkgd(stdscr));
 #endif
+#if defined(COLOR_CURSES)	/* not defined in ncurses 1.8.7 */
+    wbkgd(form_window, getbkgd(stdscr));
+    wbkgdset(form_window, getbkgd(stdscr));
 #endif
 #endif /* USE_SLANG */
 

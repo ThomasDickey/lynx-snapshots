@@ -1,6 +1,5 @@
 #include "HTUtils.h"
 #include "tcp.h"
-#include "userdefs.h"
 #include "HTFTP.h"
 #include "HTML.h"
 #include "LYCurses.h"
@@ -85,6 +84,7 @@ PUBLIC void options NOARGS
 #endif /* !VMS */
     char *choices[MAXCHOICES];
     int CurrentCharSet = current_char_set;
+    int CurrentShowColor = LYShowColor;
     BOOLEAN CurrentRawMode = LYRawMode;
     BOOLEAN AddValueAccepted = FALSE;
 
@@ -176,14 +176,6 @@ draw_options:
     addstr("display (C)haracter set      : ");
     addstr(LYchar_set_names[current_char_set]);
 
-    move(L_RAWMODE, 5);
-    addstr("Raw 8-bit or CJK m(O)de      : ");
-    addstr(LYRawMode ? "ON " : "OFF");
-
-    move(L_COLOR, B_COLOR);
-    addstr("show color (&)  : ");
-    addstr(LYShowColor ? "ON " : "OFF");
-
     move(L_LANGUAGE, 5);
     addstr("preferred document lan(G)uage: ");
     addstr((language && *language) ? language : "NONE");
@@ -191,6 +183,16 @@ draw_options:
     move(L_PREF_CHARSET, 5);
     addstr("preferred document c(H)arset : ");
     addstr((pref_charset && *pref_charset) ? pref_charset : "NONE");
+
+    move(L_RAWMODE, 5);
+    addstr("Raw 8-bit or CJK m(O)de      : ");
+    addstr(LYRawMode ? "ON " : "OFF");
+
+#if defined(USE_SLANG) || defined(COLOR_CURSES)
+    move(L_COLOR, B_COLOR);
+    addstr("show color (&)  : ");
+    addstr(LYShowColor ? "ON " : "OFF");
+#endif /* USE_SLANG || COLOR_CURSES */
 
     move(L_BOOL_A, B_VIKEYS);
     addstr("V)I keys: ");
@@ -871,6 +873,39 @@ draw_options:
 		response = ' ';
 		break;
 
+#if defined(USE_SLANG) || defined(COLOR_CURSES)
+	    case '&':	/* Change show color setting. */
+#if defined(COLOR_CURSES)
+		if (!has_colors()) {
+		    option_statusline(COLOR_TOGGLE_DISABLED);
+		    break;
+		}
+#endif
+		/*
+		 *  Copy strings into choice array.
+		 */
+		choices[0] = NULL;
+		StrAllocCopy(choices[0], "OFF");
+		choices[1] = NULL;
+		StrAllocCopy(choices[1], "ON ");
+		choices[2] = NULL;
+		LYShowColor = boolean_choice(LYShowColor,
+					      L_COLOR,
+					      C_COLOR,
+					      choices);
+		FREE(choices[0]);
+		FREE(choices[1]);
+		if (CurrentShowColor != LYShowColor) {
+		    CurrentShowColor = LYShowColor;
+#ifdef USE_SLANG
+		    SLtt_Use_Ansi_Colors = LYShowColor;
+#endif
+		    lynx_force_repaint();
+		}
+		response = ' ';
+		break;
+#endif /* USE_SLANG or COLOR_CURSES */
+
 	    case '@':	/* Change show cursor setting. */
 		/*
 		 *  Copy strings into choice array.
@@ -887,25 +922,6 @@ draw_options:
 		FREE(choices[0]);
 		FREE(choices[1]);
 		response = ' ';
-		break;
-
-	    case '&':	/* Change show color setting. */
-		/*
-		 *  Copy strings into choice array.
-		 */
-		choices[0] = NULL;
-		StrAllocCopy(choices[0], "OFF");
-		choices[1] = NULL;
-		StrAllocCopy(choices[1], "ON ");
-		choices[2] = NULL;
-		LYShowColor = boolean_choice(LYShowColor,
-					      L_COLOR,
-					      C_COLOR,
-					      choices);
-		FREE(choices[0]);
-		FREE(choices[1]);
-		response = ' ';
-		lynx_force_repaint();
 		break;
 
 	    case 'k':	/* Change keypad mode. */
@@ -1915,9 +1931,10 @@ PRIVATE int popup_choice ARGS6(
 #define getbkgd(w) wgetbkgd(w)	/* workaround pre-1.9.9g bug */
 #endif
     LYsubwindow(form_window);
-#ifdef getbkgd			/* not defined in ncurses 1.8.7 */
-    wbkgd(form_window, getbkgd(stdscr));
 #endif
+#if defined(COLOR_CURSES)	/* not defined in ncurses 1.8.7 */
+    wbkgd(form_window, getbkgd(stdscr));
+    wbkgdset(form_window, getbkgd(stdscr));
 #endif
 #endif /* USE_SLANG */
 

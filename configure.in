@@ -109,6 +109,12 @@ osf*)
 	test -z "$GCC" && CFLAGS="$CFLAGS -O -Olimit 4000"
 	CFLAGS="$CFLAGS -DDSYS5"
 	;;
+sequent-ptx)
+	CFLAGS="$CFLAGS -DSVR4_BSDSELECT -DNO_IOCTL -DUSE_FCNTL"
+	;;
+sequent-ptx2)
+	CFLAGS="$CFLAGS -DSVR4_BSDSELECT"
+	;;
 svr4)
 	CFLAGS="$CFLAGS -DSVR4_BSDSELECT -DSVR4"
 	;;

@@ -99,7 +99,7 @@ PUBLIC void add_to_traverse_list ARGS2(char *,fname, char *,prev_link_name)
     }
     chmod(TRAVERSE_FOUND_FILE, 0600);
 
-    fprintf(ifp,"%s	%s\n",fname, prev_link_name);
+    fprintf(ifp,"%s\t%s\n",fname, prev_link_name);
 
     fclose(ifp);
 }
@@ -119,10 +119,10 @@ PUBLIC void dump_traversal_history NOARGS
     chmod(TRAVERSE_FILE, 0600);
 
     fprintf(ifp, "\n\nTRAVERSAL WAS INTERUPTED\n\n\
-	    here is a list of the history stack so that you may rebuild\n\n");
+\t    here is a list of the history stack so that you may rebuild\n\n");
 
     for (x = nhist-1; x >= 0; x--) {
-	fprintf(ifp,"%s	%s\n", history[x].title, history[x].address);
+	fprintf(ifp,"%s\t%s\n", history[x].title, history[x].address);
     }
 
     fclose(ifp);
