@@ -42,6 +42,7 @@
 #include <GridText.h>
 #include <LYCgi.h>
 #include <LYSignal.h>
+#include <LYStrings.h>
 #include <LYLocal.h>
 
 #include <LYLeaks.h>
@@ -69,17 +70,6 @@ PRIVATE char *post_len = NULL;
 PRIVATE void add_environment_value PARAMS((char *env_value));
 
 #define PERROR(msg) CTRACE(tfp, "LYNXCGI: %s: %s\n", msg, LYStrerror(errno))
-
-#ifdef HAVE_STRERROR
-#define LYStrerror(n) strerror(n)
-#else
-PRIVATE char *LYStrerror ARGS1(int, code)
-{
-    static char temp[80];
-    sprintf(temp, "System errno is %d.\r\n", code);
-    return temp;
-}
-#endif /* HAVE_STRERROR */
 
 PRIVATE void free_alloced_lynxcgi NOARGS
 {

@@ -46,13 +46,16 @@ PUBLIC void HTAlwaysAlert ARGS2(
 	    fprintf(((TRACE) ? stdout : stderr),
 		    "%s %s!\n",
 		    extra_prefix, Msg);
+	    fflush(stdout);
+	    sleep(AlertSecs);
 	} else {
 	    fprintf(((TRACE) ? stdout : stderr),
 		    ALERT_FORMAT,
 		    (Msg == 0) ? "" : Msg);
+	    fflush(stdout);
+	    sleep(AlertSecs);
+	    fprintf(((TRACE) ? stdout : stderr), "\n");
 	}
-	fflush(stdout);
-	sleep(AlertSecs);
 	CTRACE(tfp, "\nAlert!: %s\n\n", Msg);
 	CTRACE_FLUSH(tfp);
     }

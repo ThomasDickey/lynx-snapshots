@@ -311,8 +311,10 @@ PRIVATE int form_getstr ARGS1(
 		    }
 		    break;
 		case F_TEXT_TYPE:
-		case F_TEXTAREA_TYPE:
 		    statusline(FORM_LINK_TEXT_MESSAGE);
+		    break;
+		case F_TEXTAREA_TYPE:
+		    statusline(FORM_LINK_TEXTAREA_MESSAGE);
 		    break;
 		default:
 		    break;

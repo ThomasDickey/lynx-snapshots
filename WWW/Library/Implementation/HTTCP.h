@@ -69,7 +69,33 @@ extern unsigned int HTCardinal PARAMS((int *pstatus,
                 char            **pp,
                 unsigned int    max_value));
 
+/*	Check whether string is a valid Internet hostname
+**	-------------------------------------------------
+*/
+
 extern BOOL valid_hostname PARAMS((CONST char * name));
+
+/*	Resolve an internet hostname, like gethostbyname
+**	------------------------------------------------
+**
+**  On entry,
+**	str	points to the given host name, not numeric address,
+**		without colon or port number.
+**
+**  On exit,
+**	returns a pointer to a struct hostent in static storage,
+**	or NULL in case of error or user interruption.
+**
+**  The interface is intended to be the same as for gethostbyname(),
+**  but additional status is returned in lynx_nsl_status.
+*/
+extern int lynx_nsl_status;
+
+#ifndef DJGPP
+extern struct hostent * LYGetHostByName PARAMS((
+	CONST char *	str));
+#endif /* DJGPP */
+
 
 /*      Parse an internet node address and port
 **      ---------------------------------------

@@ -483,7 +483,7 @@ PRIVATE void send_file_to_mail ARGS3(
     BOOL use_type;
     CONST char *disp_charset;
     FILE *outfile_fp;
-    char *buffer;
+    char *buffer = NULL;
     char *subject = NULL;
     char user_response[LINESIZE];
     int c;

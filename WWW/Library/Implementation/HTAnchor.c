@@ -699,6 +699,8 @@ PUBLIC BOOL HTAnchor_delete ARGS1(
     FREE(me->content_disposition);
     FREE(me->content_location);
     FREE(me->content_md5);
+    FREE(me->message_id);
+    FREE(me->subject);
     FREE(me->date);
     FREE(me->expires);
     FREE(me->last_modified);
@@ -1060,6 +1062,44 @@ PUBLIC CONST char * HTAnchor_content_location ARGS1(
     return( me ? me->content_location : NULL);
 }
 
+/*	Message-ID, used for mail replies - kw
+*/
+PUBLIC CONST char * HTAnchor_messageID ARGS1(
+	HTParentAnchor *,	me)
+{
+    return( me ? me->message_id : NULL);
+}
+
+PUBLIC BOOL HTAnchor_setMessageID ARGS2(
+	HTParentAnchor *,	me,
+	CONST char *,		messageid)
+{
+    if (!(me && messageid && *messageid)) {
+	return FALSE;
+    }
+    StrAllocCopy(me->message_id, messageid);
+    return TRUE;
+}
+
+/*	Subject, used for mail replies - kw
+*/
+PUBLIC CONST char * HTAnchor_subject ARGS1(
+	HTParentAnchor *,	me)
+{
+    return( me ? me->subject : NULL);
+}
+
+PUBLIC BOOL HTAnchor_setSubject ARGS2(
+	HTParentAnchor *,	me,
+	CONST char *,		subject)
+{
+    if (!(me && subject && *subject)) {
+	return FALSE;
+    }
+    StrAllocCopy(me->subject, subject);
+    return TRUE;
+}
+
 /*	Link me Anchor to another given one
 **	-------------------------------------
 */
@@ -1203,7 +1243,7 @@ PUBLIC void HTAnchor_setPhysical ARGS2(
 **     text/plain
 **	from file:	HTFile.c ->  HTPlain.c		     ->  GridText.c
 **
-**  The lock/set_by is used to lock e.g., a charset set by an explicit
+**  The lock/set_by is used to lock e.g. a charset set by an explicit
 **  HTTP MIME header against overriding by a HTML META tag - the MIME
 **  header has higher priority.  Defaults (from -assume_.. options etc.)
 **  will not override charset explicitly given by server.

@@ -118,6 +118,8 @@ struct _HTParentAnchor {
   char *	content_disposition;	/* Content-Disposition */
   char *	content_location;	/* Content-Location */
   char *	content_md5;		/* Content-MD5 */
+  char *	message_id;		/* Message-ID */
+  char *	subject;		/* Subject */
   int		content_length; 	/* Content-Length */
   char *	date;			/* Date */
   char *	expires;		/* Expires */
@@ -357,6 +359,24 @@ extern CONST char * HTAnchor_content_base PARAMS((
 */
 extern CONST char * HTAnchor_content_location PARAMS((
 	HTParentAnchor *	me));
+
+/*	Message-ID, used for mail replies - kw
+*/
+extern CONST char * HTAnchor_messageID PARAMS((
+	HTParentAnchor *	me));
+
+extern BOOL HTAnchor_setMessageID PARAMS((
+	HTParentAnchor *	me,
+	CONST char *		messageid));
+
+/*	Subject, used for mail replies - kw
+*/
+extern CONST char * HTAnchor_subject PARAMS((
+	HTParentAnchor *	me));
+
+extern BOOL HTAnchor_setSubject PARAMS((
+	HTParentAnchor *	me,
+	CONST char *		subject));
 
 /*	Link this Anchor to another given one
 **	-------------------------------------

@@ -1194,12 +1194,13 @@ else
 		],[inet_addr(0)],
 		    [cf_cv_lib_inet_addr=$cf_inetlib],
 		    [cf_cv_lib_inet_addr=no])
+		LIBS="$cf_save_LIBS"
+		test "$cf_cv_lib_inet_addr" != no && break
 	    done
 	])
 	if test "$cf_cv_lib_inet_addr" != no ; then
 	    LIBS="$LIBS $cf_cv_lib_inet_addr"
 	else
-	    LIBS="$cf_save_LIBS"
 	    AC_MSG_WARN(Unable to find library for inet_addr function)
 	fi
     fi

@@ -46,7 +46,6 @@ PUBLIC int HTNewsMaxChunk = 40; /* Largest number of articles in one window */
 #include <LYGlobalDefs.h>
 #include <LYLeaks.h>
 
-#define BIG 1024 /* @@@ */
 
 struct _HTStructured {
 	CONST HTStructuredClass *	isa;
@@ -85,6 +84,9 @@ PRIVATE HTParentAnchor *node_anchor;		/* Its anchor */
 PRIVATE int	diagnostic;			/* level: 0=none 2=source */
 PRIVATE BOOL rawtext = NO;			/* Flag: HEAD or -mime_headers */
 PRIVATE HTList *NNTP_AuthInfo = NULL;		/* AUTHINFO database */
+PRIVATE char *name = NULL;
+PRIVATE char *address = NULL;
+PRIVATE char *dbuf = NULL;	/* dynamic buffer for long messages etc. */
 
 #define PUTC(c) (*targetClass.put_character)(target, c)
 #define PUTS(s) (*targetClass.put_string)(target, s)
@@ -113,6 +115,9 @@ PRIVATE void free_news_globals NOARGS
     FREE(HTNewsHost);
     FREE(NewsHost);
     FREE(NewsHREF);
+    FREE(name);
+    FREE(address);
+    FREE(dbuf);
 }
 
 PRIVATE void free_NNTP_AuthInfo NOARGS
@@ -423,7 +428,7 @@ PRIVATE NNTPAuthResult HTHandleAuthInfo ARGS1(
 
     if (status == 381) {
 	/*
-        **  Handle the password. - FM
+	**  Handle the password. - FM
 	*/
 	tries = 3;
 	while (tries) {
@@ -545,7 +550,6 @@ PRIVATE NNTPAuthResult HTHandleAuthInfo ARGS1(
 */
 PRIVATE char * author_name ARGS1 (char *,email)
 {
-    static char *name = NULL;
     char *p, *e;
 
     StrAllocCopy(name, email);
@@ -582,7 +586,6 @@ PRIVATE char * author_name ARGS1 (char *,email)
 */
 PRIVATE char * author_address ARGS1(char *,email)
 {
-    static char *address = NULL;
     char *p, *at, *e;
 
     StrAllocCopy(address, email);
@@ -935,7 +938,8 @@ PRIVATE void post_article ARGS1(
 **	s	Global socket number is OK
 **	HT	Global hypertext object is ready for appending text
 */
-PRIVATE int read_article NOARGS
+PRIVATE int read_article ARGS1(
+	HTParentAnchor *,	thisanchor)
 {
     char line[LINE_LENGTH+1];
     char *full_line = NULL;
@@ -949,6 +953,8 @@ PRIVATE int read_article NOARGS
     char *followupto = NULL;			/* Followup list	    */
     char *href = NULL;
     char *p = line;
+    char *cp;
+    CONST char *ccp;
     BOOL done = NO;
 
     /*
@@ -1009,6 +1015,9 @@ PRIVATE int read_article NOARGS
 			HTmmdecode(subject, subject);
 			HTrjis(subject, subject);
 		    }
+		    if (*subject) {
+			HTAnchor_setSubject(thisanchor, subject);
+		    }
 
 		} else if (match(full_line, "DATE:")) {
 		    StrAllocCopy(date, HTStrip(strchr(full_line,':')+1));
@@ -1044,6 +1053,14 @@ PRIVATE int read_article NOARGS
 		} else if (match(full_line, "FOLLOWUP-TO:")) {
 		    StrAllocCopy(followupto, HTStrip(strchr(full_line,':')+1));
 
+		} else if (match(full_line, "MESSAGE-ID:")) {
+		    char * msgid = HTStrip(full_line+11);
+		    if (msgid[0] == '<' && msgid[strlen(msgid)-1] == '>') {
+			msgid[strlen(msgid)-1] = '\0';	/* Chop > */
+			msgid++; 			/* Chop < */
+			HTAnchor_setMessageID(thisanchor, msgid);
+		    }
+
 		} /* end if match */
 		p = line;			/* Restart at beginning */
 	    } /* if end of line */
@@ -1064,9 +1081,15 @@ PRIVATE int read_article NOARGS
 	*/
 	if (from || replyto) {
 	    char *temp=NULL;
-	    StrAllocCopy(temp, replyto ? replyto : from);
+	    StrAllocCopy(temp, author_address(replyto ? replyto : from));
 	    StrAllocCopy(href,"mailto:");
-	    StrAllocCat(href, author_address(temp));
+	    if (strchr(temp, '%') || strchr(temp, '?')) {
+		cp = HTEscape(temp, URL_XPALPHAS);
+		StrAllocCat(href, cp);
+		FREE(cp);
+	    } else {
+		StrAllocCat(href, temp);
+	    }
 	    start_link(href, "made");
 	    PUTC('\n');
 	    FREE(temp);
@@ -1097,7 +1120,7 @@ PRIVATE int read_article NOARGS
 	    if (from)
 		PUTS(from);
 	    else
-		PUTS(from);
+		PUTS(replyto);
 	    MAYBE_END(HTML_DT);
 	    PUTC('\n');
 
@@ -1146,6 +1169,59 @@ PRIVATE int read_article NOARGS
 	    FREE(organization);
 	}
 
+	/* sanitize some headers - kw */
+	if (newsgroups &&
+	    ((cp = strchr(newsgroups, '/')) ||
+	     (cp = strchr(newsgroups, '(')))) {
+	    *cp = '\0';
+	}
+	if (newsgroups && !*newsgroups) {
+	    FREE(newsgroups);
+	}
+	if (followupto &&
+	    ((cp = strchr(followupto, '/')) ||
+	     (cp = strchr(followupto, '(')))) {
+	    *cp = '\0';
+	}
+	if (followupto && !*followupto) {
+	    FREE(followupto);
+	}
+
+	if (newsgroups && HTCanPost) {
+	    START(HTML_DT);
+	    START(HTML_B);
+	    PUTS("Newsgroups:");
+	    END(HTML_B);
+	    PUTC('\n');
+	    MAYBE_END(HTML_DT);
+	    START(HTML_DD);
+	    write_anchors(newsgroups);
+	    MAYBE_END(HTML_DD);
+	    PUTC('\n');
+	}
+
+	if (followupto && !strcasecomp(followupto, "poster")) {
+	    /*
+	    **	"Followup-To: poster" has special meaning.
+	    **  Don't use it to construct a newsreply link. -kw
+	    */
+	    START(HTML_DT);
+	    START(HTML_B);
+	    PUTS("Followup to:");
+	    END(HTML_B);
+	    PUTC(' ');
+	    if (href) {
+		start_anchor(href);
+		PUTS("poster");
+		END(HTML_A);
+	    } else {
+		PUTS("poster");
+	    }
+	    MAYBE_END(HTML_DT);
+	    PUTC('\n');
+	    FREE(followupto);
+	}
+
 	if (newsgroups && HTCanPost) {
 	    /*
 	    **	We have permission to POST to this host,
@@ -1159,17 +1235,20 @@ PRIVATE int read_article NOARGS
 	    StrAllocCat(href, NewsHost);
 	    StrAllocCat(href, "/");
 	    StrAllocCat(href, (followupto ? followupto : newsgroups));
-
-	    START(HTML_DT);
-	    START(HTML_B);
-	    PUTS("Newsgroups:");
-	    END(HTML_B);
-	    PUTC('\n');
-	    MAYBE_END(HTML_DT);
-	    START(HTML_DD);
-	    write_anchors(newsgroups);
-	    MAYBE_END(HTML_DD);
-	    PUTC('\n');
+	    if (*href == 'n' &&
+		(ccp = HTAnchor_messageID(thisanchor)) && *ccp) {
+		StrAllocCat(href, ";ref=");
+		if (strchr(ccp, '<') || strchr(ccp, '&') ||
+		    strchr(ccp, ' ') || strchr(ccp, ':') ||
+		    strchr(ccp, '/') || strchr(ccp, '%') ||
+		    strchr(ccp, ';')) {
+		    char *cp1 = HTEscape(ccp, URL_XPALPHAS);
+		    StrAllocCat(href, cp1);
+		    FREE(cp1);
+		} else {
+		    StrAllocCat(href, ccp);
+		}
+	    }
 
 	    START(HTML_DT);
 	    START(HTML_B);
@@ -1177,7 +1256,11 @@ PRIVATE int read_article NOARGS
 	    END(HTML_B);
 	    PUTC(' ');
 	    start_anchor(href);
-	    PUTS("newsgroup(s)");
+	    if (strchr((followupto ? followupto : newsgroups), ',')) {
+		PUTS("newsgroups");
+	    } else {
+		PUTS("newsgroup");
+	    }
 	    END(HTML_A);
 	    MAYBE_END(HTML_DT);
 	    PUTC('\n');
@@ -1629,11 +1712,11 @@ PRIVATE int read_group ARGS3(
 	    before = first;
 	else
 	    before = first_required-HTNewsChunkSize;
-	sprintf(buffer, "%s%s/%d-%d", NewsHREF, groupName,
+	HTSprintf0(&dbuf, "%s%s/%d-%d", NewsHREF, groupName,
 				      before, first_required-1);
-	CTRACE(tfp, "    Block before is %s\n", buffer);
+	CTRACE(tfp, "    Block before is %s\n", dbuf);
 	PUTC('(');
-	start_anchor(buffer);
+	start_anchor(dbuf);
 	PUTS(gettext("Earlier articles"));
 	END(HTML_A);
 	PUTS("...)\n");
@@ -1908,13 +1991,13 @@ PRIVATE int read_group ARGS3(
 	int after;			/* End of article after */
 	after = last_required+HTNewsChunkSize;
 	if (after == last)
-	    sprintf(buffer, "%s%s", NewsHREF, groupName); /* original group */
+	    HTSprintf0(&dbuf, "%s%s", NewsHREF, groupName); /* original group */
 	else
-	    sprintf(buffer, "%s%s/%d-%d", NewsHREF, groupName,
+	    HTSprintf0(&dbuf, "%s%s/%d-%d", NewsHREF, groupName,
 					  last_required+1, after);
-	CTRACE(tfp, "    Block after is %s\n", buffer);
+	CTRACE(tfp, "    Block after is %s\n", dbuf);
 	PUTC('(');
-	start_anchor(buffer);
+	start_anchor(dbuf);
 	PUTS(gettext("Later articles"));
 	END(HTML_A);
 	PUTS("...)\n");
@@ -2352,13 +2435,16 @@ PRIVATE int HTLoadNews ARGS4(
 		return HT_NOT_LOADED;
 	    }
 	    if (status < 0) {
-		char message[256];
 		NEWS_NETCLOSE(s);
 		s = -1;
 		CTRACE(tfp, "HTNews: Unable to connect to news host.\n");
 		if (retries < 1)
 		    continue;
-		sprintf(message, gettext("Could not access %s."), NewsHost);
+		if (!(post_wanted || reply_wanted ||
+		      spost_wanted || sreply_wanted)) {
+		    ABORT_TARGET;
+		}
+		HTSprintf0(&dbuf, gettext("Could not access %s."), NewsHost);
 		FREE(NewsHost);
 		FREE(NewsHREF);
 		FREE(ProxyHost);
@@ -2368,7 +2454,7 @@ PRIVATE int HTLoadNews ARGS4(
 		    HTSYS_remove(postfile);
 		    FREE(postfile);
 		}
-		return HTLoadError(stream, 500, message);
+		return HTLoadError(stream, 500, dbuf);
 	    } else {
 		CTRACE(tfp, "HTNews: Connected to news host %s.\n",
 			    NewsHost);
@@ -2379,7 +2465,6 @@ PRIVATE int HTLoadNews ARGS4(
 				status);
 		}
 		if (((status = response(NULL)) / 100) != 2) {
-			char message[BIG];
 			NEWS_NETCLOSE(s);
 			s = -1;
 			if (status == HT_INTERRUPTED) {
@@ -2401,10 +2486,14 @@ PRIVATE int HTLoadNews ARGS4(
 			}
 			if (retries < 1)
 			    continue;
-			sprintf(message,
+			if (!(post_wanted || reply_wanted ||
+			      spost_wanted || sreply_wanted)) {
+			    ABORT_TARGET;
+			}
+			HTSprintf0(&dbuf,
 				gettext("Can't read news info.  News host %.20s responded: %.200s"),
 				NewsHost, response_text);
-			return HTLoadError(stream, 500, message);
+			return HTLoadError(stream, 500, dbuf);
 		}
 		if (status == 200) {
 		    HTCanPost = TRUE;
@@ -2627,7 +2716,7 @@ Send_NNTP_command:
 	    **	Get an article from a news group. - FM
 	    */
 	    _HTProgress(gettext("Reading news article."));
-	    status = read_article();
+	    status = read_article(anAnchor);
 	}
 	if (status == HT_INTERRUPTED) {
 	    _HTProgress(CONNECTION_INTERRUPTED);

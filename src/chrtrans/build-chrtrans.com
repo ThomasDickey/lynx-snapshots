@@ -114,10 +114,14 @@ $ define/user sys$output 'CHRwhere'iso05_uni.h	!ISO 8859-5 Cyrillic
 $ makeuctb iso05_uni.tbl
 $ define/user sys$output 'CHRwhere'cp866_uni.h	!DosCyrillic (cp866)
 $ makeuctb cp866_uni.tbl
+$ define/user sys$output 'CHRwhere'cp866u_uni.h	!Ukrainian Cyrillic
+$ makeuctb cp866u_uni.tbl
 $ define/user sys$output 'CHRwhere'cp1251_uni.h	!WinCyrillic (cp1251)
 $ makeuctb cp1251_uni.tbl
 $ define/user sys$output 'CHRwhere'koi8r_uni.h	!KOI8-R Cyrillic
 $ makeuctb koi8r_uni.tbl
+$ define/user sys$output 'CHRwhere'koi8u_uni.h	!KOI8-U Ukranian Cyrillic
+$ makeuctb koi8u_uni.tbl
 $ define/user sys$output 'CHRwhere'iso06_uni.h	!ISO 8859-6 Arabic
 $ makeuctb iso06_uni.tbl
 $ define/user sys$output 'CHRwhere'cp864_uni.h	!DosArabic (cp864)
@@ -136,6 +140,8 @@ $ define/user sys$output 'CHRwhere'iso08_uni.h	!ISO 8859-8 Hebrew
 $ makeuctb iso08_uni.tbl
 $ define/user sys$output 'CHRwhere'cp862_uni.h	!DosHebrew (cp862)
 $ makeuctb cp862_uni.tbl
+$ define/user sys$output 'CHRwhere'iso9945_uni.h !Ukranian
+$ makeuctb iso9945_uni.tbl
 $ define/user sys$output 'CHRwhere'cp1255_uni.h	!WinHebrew (cp1255)
 $ makeuctb cp1255_uni.tbl
 $ define/user sys$output 'CHRwhere'iso09_uni.h	!ISO 8859-9 (Latin 5)

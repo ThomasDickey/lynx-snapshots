@@ -49,6 +49,8 @@
 /* Forms messages */
 #define FORM_LINK_TEXT_MESSAGE \
  gettext("(Text entry field) Enter text.  Use UP or DOWN arrows or tab to move off.")
+#define FORM_LINK_TEXTAREA_MESSAGE \
+ gettext("(Textarea) Enter text. Use UP/DOWN arrows or TAB to move off (^Ve for editor).")
 #define FORM_LINK_TEXT_UNM_MSG \
  gettext("UNMODIFIABLE form text field.  Use UP or DOWN arrows or tab to move off.")
 #define FORM_LINK_TEXT_SUBMIT_MESSAGE \
@@ -429,7 +431,9 @@
 #define COULD_NOT_ACCESS_DIR gettext("Could not access directory.")
 #define COULD_NOT_LOAD_DATA gettext("Could not load data.")
 #define CANNOT_EDIT_REMOTE_FILES \
- gettext("Lynx cannot currently (E)dit remote WWW files")
+ gettext("Lynx cannot currently (e)dit remote WWW files.")
+#define CANNOT_EDIT_FIELD \
+ gettext("This field cannot be (e)dited with an external editor.")
 #define RULE_INCORRECT gettext("Bad rule")
 #define RULE_NEEDS_DATA gettext("Insufficient operands:")
 #define NOAUTH_TO_EDIT_FILE gettext("You are not authorized to edit this file.")

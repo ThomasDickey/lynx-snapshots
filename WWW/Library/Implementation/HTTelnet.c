@@ -153,7 +153,7 @@ PRIVATE int remote_session ARGS2(char *, acc_method, char *, host)
 #if	defined(NeXT) && defined(NeXTSTEP) && NeXTSTEP<=20100
 #define FMT_TELNET "%s%s%s %s %s"
 
-	HTAddParam(&command, FMT_TELNET, 1, TELNET_COMMAND);
+	HTAddParam(&command, FMT_TELNET, 1, TELNET_PATH);
 	HTOptParam(&command, FMT_TELNET, 2, user ? " -l " : "");
 	HTAddParam(&command, FMT_TELNET, 3, user);
 	HTAddParam(&command, FMT_TELNET, 4, hostname);
@@ -175,7 +175,7 @@ PRIVATE int remote_session ARGS2(char *, acc_method, char *, host)
 
 	if (login_protocol == rlogin) {
 
-	    HTAddParam(&command, FMT_RLOGIN, 1, RLOGIN_COMMAND);
+	    HTAddParam(&command, FMT_RLOGIN, 1, RLOGIN_PATH);
 	    HTAddParam(&command, FMT_RLOGIN, 2, hostname);
 	    HTOptParam(&command, FMT_RLOGIN, 3, user ? " -l " : "");
 	    HTAddParam(&command, FMT_RLOGIN, 4, user);
@@ -183,14 +183,14 @@ PRIVATE int remote_session ARGS2(char *, acc_method, char *, host)
 
 	} else if (login_protocol == tn3270) {
 
-	    HTAddParam(&command, FMT_TN3270, 1, TN3270_COMMAND);
+	    HTAddParam(&command, FMT_TN3270, 1, TN3270_PATH);
 	    HTAddParam(&command, FMT_TN3270, 2, hostname);
 	    HTAddParam(&command, FMT_TN3270, 3, port);
 	    HTEndParam(&command, FMT_TN3270, 3);
 
 	} else {  /* TELNET */
 
-	    HTAddParam(&command, FMT_TELNET, 1, TELNET_COMMAND);
+	    HTAddParam(&command, FMT_TELNET, 1, TELNET_PATH);
 	    HTAddParam(&command, FMT_TELNET, 2, hostname);
 	    HTAddParam(&command, FMT_TELNET, 3, port);
 	    HTEndParam(&command, FMT_TELNET, 3);

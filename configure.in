@@ -183,6 +183,9 @@ CF_PATH_PROG(BZIP2,	bzip2)
 CF_PATH_PROG(UUDECODE,	uudecode)
 CF_PATH_PROG(ZCAT,	zcat)
 CF_PATH_PROG(ZIP,	zip)
+CF_PATH_PROG(TELNET,	telnet)
+CF_PATH_PROG(TN3270,	tn3270)
+CF_PATH_PROG(RLOGIN,	rlogin)
 
 dnl 'INSTALL' is a special case, since the configure script has to find a
 dnl BSD-compatible one so the build/install works properly.

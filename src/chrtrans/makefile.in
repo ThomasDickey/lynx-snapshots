@@ -61,6 +61,7 @@ TABLES= \
  cp862_uni.h \
  cp864_uni.h \
  cp866_uni.h \
+ cp866u_uni.h \
  cp869_uni.h \
  def7_uni.h \
  dmcs_uni.h \
@@ -76,10 +77,12 @@ TABLES= \
  iso09_uni.h \
  iso10_uni.h \
  iso15_uni.h \
+ iso9945_uni.h \
  koi8r_uni.h \
+ koi8u_uni.h \
  mac_uni.h \
- mnem_suni.h \
  mnem2_suni.h \
+ mnem_suni.h \
  next_uni.h \
  rfc_suni.h \
  utf8_uni.h \
@@ -124,6 +127,7 @@ cp852_uni.h:		$(srcdir)/cp852_uni.tbl		makeuctb$x
 cp862_uni.h:		$(srcdir)/cp862_uni.tbl		makeuctb$x
 cp864_uni.h:		$(srcdir)/cp864_uni.tbl		makeuctb$x
 cp866_uni.h:		$(srcdir)/cp866_uni.tbl		makeuctb$x
+cp866u_uni.h:		$(srcdir)/cp866u_uni.tbl	makeuctb$x
 cp869_uni.h:		$(srcdir)/cp869_uni.tbl		makeuctb$x
 def7_uni.h:		$(srcdir)/def7_uni.tbl		makeuctb$x
 dmcs_uni.h:		$(srcdir)/dmcs_uni.tbl		makeuctb$x
@@ -139,10 +143,12 @@ iso08_uni.h:		$(srcdir)/iso08_uni.tbl		makeuctb$x
 iso09_uni.h:		$(srcdir)/iso09_uni.tbl		makeuctb$x
 iso10_uni.h:		$(srcdir)/iso10_uni.tbl		makeuctb$x
 iso15_uni.h:		$(srcdir)/iso15_uni.tbl		makeuctb$x
+iso9945_uni.h:		$(srcdir)/iso9945_uni.tbl	makeuctb$x
 koi8r_uni.h:		$(srcdir)/koi8r_uni.tbl		makeuctb$x
+koi8u_uni.h:		$(srcdir)/koi8u_uni.tbl		makeuctb$x
 mac_uni.h:		$(srcdir)/mac_uni.tbl		makeuctb$x
-mnem_suni.h:		$(srcdir)/mnem_suni.tbl		makeuctb$x
 mnem2_suni.h:		$(srcdir)/mnem2_suni.tbl	makeuctb$x
+mnem_suni.h:		$(srcdir)/mnem_suni.tbl		makeuctb$x
 next_uni.h:		$(srcdir)/next_uni.tbl		makeuctb$x
 rfc_suni.h:		$(srcdir)/rfc_suni.tbl		makeuctb$x
 utf8_uni.h:		$(srcdir)/utf8_uni.tbl		makeuctb$x

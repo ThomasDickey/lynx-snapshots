@@ -229,6 +229,7 @@ typedef struct _HTStructuredClass{
   */
 extern BOOLEAN LYCheckForCSI PARAMS((HTParentAnchor *anchor, char **url));
 extern void LYDoCSI PARAMS((char *url, CONST char *comment, char **csi));
+extern BOOLEAN LYCommentHacks PARAMS((HTParentAnchor *anchor, CONST char *comment));
 
 /*
 

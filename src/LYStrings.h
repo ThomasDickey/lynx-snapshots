@@ -13,6 +13,13 @@ extern int peek_mouse_link NOPARAMS;
 extern int peek_mouse_levent NOPARAMS;
 extern int fancy_mouse PARAMS((WINDOW *win, int row, int *position));
 
+#ifdef HAVE_STRERROR
+#define LYStrerror strerror
+#else
+extern char *LYStrerror PARAMS((
+	int		code));
+#endif /* HAVE_STRERROR */
+
 extern char * LYstrncpy PARAMS((
 	char *		dst,
 	CONST char *	src,

@@ -504,6 +504,8 @@ PRIVATE int RememberTestResult ARGS3(
 	    return -1;
 	case RTR_add:
 	    cur = calloc(1, sizeof(struct cmdlist_s));
+	    if (cur == NULL)
+		outofmem(__FILE__, "RememberTestResult");
 	    cur->next = cmdlist;
 	    cur->cmd = (char *)malloc(strlen(cmd) + 1);
 	    if(cur->cmd)
