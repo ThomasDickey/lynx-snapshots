@@ -2417,14 +2417,14 @@ PRIVATE int LYHandleCookies ARGS4 (
 		    }
 		    HTNoDataOK = 1;
 		    while (1) {
-			ch = LYgetch_for(FOR_SINGLEKEY);
+			ch = LYgetch_single();
 #ifdef VMS
 			if (HadVMSInterrupt) {
 			    HadVMSInterrupt = FALSE;
 			    ch = 'C';
 			}
 #endif /* VMS */
-			switch(TOUPPER(ch)) {
+			switch(ch) {
 			    case 'A':
 				/*
 				 *  Set to accept all cookies
@@ -2571,7 +2571,7 @@ Delete_all_cookies_in_domain:
 #define PUTS(buf)    (*target->isa->put_block)(target, buf, strlen(buf))
 
 
-    HTSprintf0(&buf, "<HEAD>\n<TITLE>%s</title>\n</HEAD>\n<BODY>\n",
+    HTSprintf0(&buf, "<html>\n<head>\n<title>%s</title>\n</head>\n<body>\n",
 		 COOKIE_JAR_TITLE);
     PUTS(buf);
     HTSprintf0(&buf, "<h1>%s (%s)%s<a href=\"%s%s\">%s</a></h1>\n",
@@ -2580,12 +2580,12 @@ Delete_all_cookies_in_domain:
 	helpfilepath, COOKIE_JAR_HELP, COOKIE_JAR_TITLE);
     PUTS(buf);
 
-    HTSprintf0(&buf, "<NOTE>%s\n", ACTIVATE_TO_GOBBLE);
+    HTSprintf0(&buf, "<note>%s\n", ACTIVATE_TO_GOBBLE);
     PUTS(buf);
-    HTSprintf0(&buf, "%s</NOTE>\n", OR_CHANGE_ALLOW);
+    HTSprintf0(&buf, "%s</note>\n", OR_CHANGE_ALLOW);
     PUTS(buf);
 
-    HTSprintf0(&buf, "<DL COMPACT>\n");
+    HTSprintf0(&buf, "<dl compact>\n");
     PUTS(buf);
     for (dl = domain_list; dl != NULL; dl = dl->next) {
 	de = dl->object;
@@ -2598,7 +2598,7 @@ Delete_all_cookies_in_domain:
 	/*
 	 *  Show the domain link and 'allow' setting. - FM
 	 */
-	HTSprintf0(&buf, "<DT>%s<DD><A HREF=\"LYNXCOOKIE://%s/\">Domain=%s</A>\n",
+	HTSprintf0(&buf, "<dt>%s<dd><a href=\"LYNXCOOKIE://%s/\">Domain=%s</a>\n",
 		      de->domain, de->domain, de->domain);
 	PUTS(buf);
 	switch (de->bv) {
@@ -2641,7 +2641,7 @@ Delete_all_cookies_in_domain:
 	    } else {
 		StrAllocCopy(value, NO_VALUE);
 	    }
-	    HTSprintf0(&buf, "<DD><A HREF=\"LYNXCOOKIE://%s/%s\">%s=%s</A>\n",
+	    HTSprintf0(&buf, "<dd><a href=\"LYNXCOOKIE://%s/%s\">%s=%s</a>\n",
 			 de->domain, co->lynxID, name, value);
 	    FREE(name);
 	    FREE(value);
@@ -2661,7 +2661,7 @@ Delete_all_cookies_in_domain:
 	    } else {
 		StrAllocCopy(path, "/");
 	    }
-	    HTSprintf0(&buf, "<DD>Path=%s\n<DD>Port: %d Secure: %s Discard: %s\n",
+	    HTSprintf0(&buf, "<dd>Path=%s\n<dd>Port: %d Secure: %s Discard: %s\n",
 			 path, co->port,
 			 ((co->flags & COOKIE_FLAG_SECURE) ? "YES" : "NO"),
 			 ((co->flags & COOKIE_FLAG_DISCARD) ? "YES" : "NO"));
@@ -2672,7 +2672,7 @@ Delete_all_cookies_in_domain:
 	     *	Show the list of acceptable ports, if present. - FM
 	     */
 	    if (co->PortList) {
-		HTSprintf0(&buf, "<DD>PortList=\"%s\"\n", co->PortList);
+		HTSprintf0(&buf, "<dD>PortList=\"%s\"\n", co->PortList);
 		PUTS(buf);
 	    }
 
@@ -2685,7 +2685,7 @@ Delete_all_cookies_in_domain:
 		StrAllocCopy(Title, co->commentURL);
 		LYEntify(&Title, TRUE);
 		HTSprintf0(&buf,
-			"<DD>CommentURL: <A href=\"%s\">%s</A>\n",
+			"<dd>CommentURL: <a href=\"%s\">%s</a>\n",
 			Address,
 			Title);
 		FREE(Address);
@@ -2699,7 +2699,7 @@ Delete_all_cookies_in_domain:
 	    if (co->comment) {
 		StrAllocCopy(comment, co->comment);
 		LYEntify(&comment, TRUE);
-		HTSprintf0(&buf, "<DD>Comment: %s\n", comment);
+		HTSprintf0(&buf, "<dd>Comment: %s\n", comment);
 		FREE(comment);
 		PUTS(buf);
 	    }
@@ -2707,7 +2707,7 @@ Delete_all_cookies_in_domain:
 	    /*
 	     *	Show the Maximum Gobble Date. - FM
 	     */
-	    HTSprintf0(&buf, "<DD><EM>%s</EM> %s%s",
+	    HTSprintf0(&buf, "<dd><em>%s</em> %s%s",
 	    		 gettext("Maximum Gobble Date:"),
 			 ((co->flags & COOKIE_FLAG_EXPIRES_SET)
 					    ?
@@ -2717,10 +2717,10 @@ Delete_all_cookies_in_domain:
 					 "" : "\n"));
 	    PUTS(buf);
 	}
-	HTSprintf0(&buf, "</DT>\n");
+	HTSprintf0(&buf, "</dt>\n");
 	PUTS(buf);
     }
-    HTSprintf0(&buf, "</DL>\n</BODY>\n");
+    HTSprintf0(&buf, "</dl>\n</body>\n</html>\n");
     PUTS(buf);
 
     /*

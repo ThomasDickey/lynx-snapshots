@@ -1,6 +1,46 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2000-06-23 (2.8.4dev.4)
+* modify handling to EXTERNAL settings by adding a new field in lynx.cfg.  When
+  TRUE, then activating (using arrow-right for example) the link with URL
+  matching the one specified by 'prefix' field will be equal to pressing '.' on
+  it -VH
+* restore commented-out "clearok(curscr, TRUE)" in display_page() in GridText.c
+  to workaround problem repainting multibyte characters (reported by Takuya
+  ASADA <asada@isoternet.org>) -KW
+* add HIDDEN_LINK_MARKER entry to lynx.cfg, allowing user to specify string to
+  mark hidden links with (thus hidden links become non-hidden, thus they won't
+  be listed as hidden in the 'l' page) - the name of the setting is
+  hidden_link_marker.  If the string to mark with is empty, then old behaviour
+  is restored -VH
+* implement "change directory" command.  This is tested only on linux.  It's
+  bound to 'C' in both modes (before this in normal modem COMMENT command was
+  bound to 'c' and 'C' in normal mode, and CREATE was bound to 'c' and 'C' in
+  dired mode).  The main purpose of this command is not to type the name of the
+  directory when 'p'rinting to files and 'd'ownloading.  If this command is
+  invoked in dired mode, the listing of destination directory will be
+  automatically loaded.  Dired file operations menu lists this command too as
+  the first item.  To disable it, comment the line
+      #define SUPPORT_CHDIR 
+  in userdefs.h -VH
+* add definitions to allow slang configuration to implement scrollbars.  This
+  will no work for any termcap/terminfo-based systems, appears specific to
+  MS-DOS (patch by Gisle Vanem)
+* updates for config.guess, config.sub from tin -TD
+* fix typo in CF_CHECK_ERRNO configure macro (reported by John Coyne
+  <John.Coyne@ctbto.org>) -TD
+* add <html> and </html> around generated HTML in HTGopher.c, LYKeymap.c,
+  LYCookie.c and LYCgi.c to make them more-correct.  Did not modify
+  LYBookmark.c because the logic there relies on appending to the bookmark file
+  (report by Patrick Boylan <pboylan@island.net>) -TD
+* make pretty_html() in LYKeymap.c quote ampersand and quote, simplified logic
+  as well with LYKeycodeToString() implemented for command-logging -TD
+* add command-line options -cmd_log and -cmd_script, to provide a simple
+  command logging and scripting facility -TD
+* minor correction to -stdin option, add newline at the end of each line
+  copied -TD
+
 2000-06-02 (2.8.4dev.3)
 * initial support for SOURCE_CACHE_FOR_ABORTED -VH 
 * change default_keypad_mode_fun() to use config_enum() -TD

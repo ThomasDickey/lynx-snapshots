@@ -196,6 +196,8 @@ extern char *helpfilepath;
 extern char *jumpprompt;	/* The default jump statusline prompt */
 extern char *language;
 extern char *lynx_cfg_file;	/* location of active lynx.cfg file */
+extern char *lynx_cmd_logfile;	/* file to write keystroke commands, if any */
+extern char *lynx_cmd_script;	/* file to read keystroke commands, if any */
 extern char *lynx_save_space;
 extern char *lynx_temp_space;
 extern char *lynxjumpfile;
@@ -507,6 +509,10 @@ extern int LYsb;
 extern int LYsb_arrow;
 extern int LYsb_begin;
 extern int LYsb_end;
+#endif
+
+#ifdef MARK_HIDDEN_LINKS
+extern char* hidden_link_marker;
 #endif
 
 #endif /* LYGLOBALDEFS_H */

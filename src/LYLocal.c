@@ -68,6 +68,10 @@
 # endif
 #endif
 
+#ifdef SUPPORT_CHDIR
+#include <LYMainLoop.h>
+#endif
+
 #include <LYLeaks.h>
 
 #undef USE_COMPRESS
@@ -140,6 +144,10 @@ struct dired_menu {
  *  configuration file via DIRED_MENU lines, then these default entries
  *  are discarded entirely.
  */
+#ifdef SUPPORT_CHDIR
+{ 0,		      "", "Change directory",
+		      "", "LYNXDIRED://CHDIR",			NULL },
+#endif
 { 0,		      "", "New File",
 "(in current directory)", "LYNXDIRED://NEW_FILE%d",		NULL },
 
@@ -767,7 +775,7 @@ PUBLIC BOOLEAN local_modify ARGS2(
 	document *,	doc,
 	char **,	newpath)
 {
-    int c, ans;
+    int ans;
     char *cp;
     char testpath[DIRED_MAXBUF]; /* a bit ridiculous */
     int count;
@@ -800,8 +808,7 @@ PUBLIC BOOLEAN local_modify ARGS2(
 #else
     _statusline(gettext("Modify name or location (n or l): "));
 #endif /* OK_PERMIT */
-    c = LYgetch();
-    ans = TOUPPER(c);
+    ans = LYgetch_single();
 
     if (strchr("NLP", ans) != NULL) {
 	cp = HTfullURL_toFile(links[doc->link].lname);
@@ -935,7 +942,7 @@ PRIVATE BOOLEAN create_directory ARGS1(
 PUBLIC BOOLEAN local_create ARGS1(
 	document *,	doc)
 {
-    int c, ans;
+    int ans;
     char *cp;
     char testpath[DIRED_MAXBUF];
 
@@ -948,8 +955,7 @@ PUBLIC BOOLEAN local_create ARGS1(
     FREE(cp);
 
     _statusline(gettext("Create file or directory (f or d): "));
-    c = LYgetch();
-    ans = TOUPPER(c);
+    ans = LYgetch_single();
 
     if (ans == 'F') {
 	return(create_file(testpath));
@@ -1485,6 +1491,7 @@ PUBLIC int local_dired ARGS1(
     char *tmpbuf = NULL;
     char *buffer = NULL;
     char *dirname = NULL;
+    BOOL do_pop_doc = TRUE;
 
     line_url = doc->address;
     CTRACE((tfp, "local_dired: called for <%s>.\n",
@@ -1495,8 +1502,13 @@ PUBLIC int local_dired ARGS1(
     StrAllocCopy(line, line_url);
     HTUnEscape(line);	/* _file_ (not URL) syntax, for those functions
 			   that need it.  Don't forget to FREE it. */
-
-    if ((arg = match_op("NEW_FILE", line)) != 0) {
+    if ((arg = match_op("CHDIR", line)) != 0) {    
+#ifdef SUPPORT_CHDIR
+	handle_LYK_CHDIR();
+	do_pop_doc = FALSE;
+#endif
+	arg = "blah";	/* do something to avoid cc's complaints */
+    } else if ((arg = match_op("NEW_FILE", line)) != 0) {
 	if (create_file(arg) > 0)
 	    LYforce_no_cache = TRUE;
     } else if ((arg = match_op("NEW_FOLDER", line)) != 0) {
@@ -1713,7 +1725,8 @@ PUBLIC int local_dired ARGS1(
     FREE(buffer);
     FREE(line);
     FREE(tp);
-    LYpop(doc);
+    if (do_pop_doc)
+	LYpop(doc);
     return 0;
 }
 

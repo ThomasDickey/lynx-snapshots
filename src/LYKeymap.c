@@ -120,8 +120,13 @@ LYK_8,               LYK_9,             0,          LYK_TRACE_LOG,
 LYK_UP_LINK,         LYK_INFO,     LYK_DOWN_LINK,   LYK_HELP,
 /* < */              /* = */         /* > */        /* ? */
 
+#ifndef SUPPORT_CHDIR
 LYK_RAW_TOGGLE,      LYK_ADDRLIST, LYK_PREV_PAGE,   LYK_COMMENT,
 /* @ */              /* A */         /* B */        /* C */
+#else
+LYK_RAW_TOGGLE,      LYK_ADDRLIST, LYK_PREV_PAGE,   LYK_CHDIR,
+/* @ */              /* A */         /* B */        /* C */
+#endif
 
 LYK_DOWNLOAD,        LYK_ELGOTO,  LYK_DIRED_MENU,   LYK_ECGOTO,
 /* D */              /* E */         /* F */        /* G */
@@ -411,9 +416,13 @@ LYKeymap_t key_override[KEYMAP_SIZE] = {
 
    0,                  0,              0,             0,
 /* < */             /* = */         /* > */        /* ? */
-
+#ifndef SUPPORT_CHDIR
    0,                  0,              0,         LYK_CREATE,
 /* @ */             /* A */         /* B */        /* C */
+#else
+   0,                  0,              0,         LYK_CHDIR,
+/* @ */             /* A */         /* B */        /* C */
+#endif
 
    0,                  0,        LYK_DIRED_MENU,       0,
 /* D */             /* E */         /* F */        /* G */
@@ -734,31 +743,41 @@ PRIVATE struct rmap revmap[] = {
 { "CHANGE_KCODE",	"Change Kanji code" },
 #endif
 #endif /* VMS */
+#ifdef SUPPORT_CHDIR
+ { "CHDIR",		"change current directory" },
+#endif
 { NULL,			"" }
 };
 
-PRIVATE CONST char *funckey[] = {
-  "Up Arrow",
-  "Down Arrow",
-  "Right Arrow",
-  "Left Arrow",
-  "Page Down",
-  "Page Up",
-  "Home",
-  "End",
-  "F1",
-  "Do key",
-  "Find key",
-  "Select key",
-  "Insert key",
-  "Remove key",
-  "(DO_NOTHING)",		/* should normally not appear in list */
-  "Back Tab",
-  0, 0, 0, 0, 0, 0, 0, 0,
-  0, 0, 0, 0, 0,
-  "mouse pseudo key",		/* normally not mapped to keymap[] action */
+PRIVATE CONST struct {
+    int key;
+    CONST char *name;
+} named_keys[] = {
+    { '\t',		"<tab>" },
+    { '\r',		"<return>" },
+    { CH_ESC,		"ESC" },
+    { ' ',		"<space>" },
+    { '<',		"<" },
+    { '>',		">" },
+    { 0177,		"<delete>" },
+    { UPARROW,		"Up Arrow" },
+    { DNARROW,		"Down Arrow" },
+    { RTARROW,		"Right Arrow" },
+    { LTARROW,		"Left Arrow" },
+    { PGDOWN,		"Page Down" },
+    { PGUP,		"Page Up" },
+    { HOME,		"Home" },
+    { END_KEY,		"End" },
+    { F1,		"F1" },
+    { DO_KEY,		"Do key" },
+    { FIND_KEY,		"Find key" },
+    { SELECT_KEY,	"Select key" },
+    { INSERT_KEY,	"Insert key" },
+    { REMOVE_KEY,	"Remove key" },
+    { DO_NOTHING,	"(DO_NOTHING)" },
+    { BACKTAB_KEY,	"Back Tab" },
+    { MOUSE_KEY,	"mouse pseudo key" },
 };
-
 
 struct emap {
 	CONST char *name;
@@ -818,74 +837,115 @@ PRIVATE struct emap ekmap[] = {
 #endif
 };
 
-PRIVATE char *pretty ARGS1 (int, c)
+PUBLIC char *LYKeycodeToString ARGS2 (
+	int,		c,
+	BOOLEAN,	upper8)
 {
-	static char buf[30];
+    static char buf[30];
+    unsigned n;
+    BOOLEAN named = FALSE;
 
-	if (c == '\t')
-		sprintf(buf, "<tab>");
-	else if (c == '\r')
-		sprintf(buf, "<return>");
-	else if (c == CH_ESC)
-		sprintf(buf, "ESC");
-	else if (c == ' ')
-		sprintf(buf, "<space>");
-	else if (c == '<')
-		sprintf(buf, "<");
-	else if (c == '>')
-		sprintf(buf, ">");
-	else if (c == 0177)
-		sprintf(buf, "<delete>");
-	else if (c > ' ' && c < 0177)
-		sprintf(buf, "%c", c);
-	else if (c > ' ' && c <= 0377 &&
-		 c <= LYlowest_eightbit[current_char_set])
-		sprintf(buf, "%c", c);
+    for (n = 0; n < TABLESIZE(named_keys); n++) {
+	if (named_keys[n].key == c) {
+	    named = TRUE;
+	    strcpy(buf, named_keys[n].name);
+	    break;
+	}
+    }
+
+    if (!named) {
+	if (c > ' '
+	 && c < 0177)
+	    sprintf(buf, "%c", c);
+	else if (upper8
+	 && c > ' '
+	 && c <= 0377
+	 && c <= LYlowest_eightbit[current_char_set])
+	    sprintf(buf, "%c", c);
 	else if (c < ' ')
-		sprintf(buf, "^%c", c|0100);
-	else if (c >= 0400 && (c - 0400) < (int) TABLESIZE(funckey)
-		 && funckey[c-0400])
-		sprintf(buf, "%.*s", (int)(sizeof(buf) - 1), funckey[c-0400]);
+	    sprintf(buf, "^%c", c|0100);
 	else if (c >= 0400)
-		sprintf(buf, "key-%#x", c);
+	    sprintf(buf, "key-%#x", c);
 	else
-		return 0;
-
-	return buf;
+	    return 0;
+    }
+    return buf;
 }
+
+PUBLIC int LYStringToKeycode ARGS1 (
+	char *,		src)
+{
+    unsigned n;
+    int key = -1;
+    int len = strlen(src);
+
+    if (len == 1)
+	key = *src;
+    else if (len == 2 && *src == '^')
+	key = src[1] & 0x1f;
+    else if (len > 6 && !strncasecomp(src, "key-", 4)) {
+	char *dst = 0;
+	key = strtol(src + 4, &dst, 0);
+	if (dst == 0 || *dst != 0)
+	    key = -1;
+    }
+    if (key < 0) {
+	for (n = 0; n < TABLESIZE(named_keys); n++) {
+	    if (!strcasecomp(named_keys[n].name, src)) {
+		key = named_keys[n].key;
+		break;
+	    }
+	}
+    }
+    return key;
+}
+
+#define PRETTY_LEN 11
 
 PRIVATE char *pretty_html ARGS1 (int, c)
 {
+    char *src = LYKeycodeToString(c, TRUE);
+
+    if (src != 0) {
+	static CONST struct {
+	    int	code;
+	    CONST char *name;
+	} table[] = {
+	    { '<',	"&lt;" },
+	    { '>',	"&gt;" },
+	    { '"',	"&quot;" },
+	    { '&',	"&amp;" }
+	};
+
 	static char buf[30];
+	char *dst = buf;
+	int adj = 0;
+	unsigned n;
+	BOOLEAN found;
 
-	if (c == '\t')
-		sprintf(buf, "&lt;tab&gt;      ");
-	else if (c == '\r')
-		sprintf(buf, "&lt;return&gt;   ");
-	else if (c == ' ')
-		sprintf(buf, "&lt;space&gt;    ");
-	else if (c == '<')
-		sprintf(buf, "&lt;          ");
-	else if (c == '>')
-		sprintf(buf, "&gt;          ");
-	else if (c == 0177)
-		sprintf(buf, "&lt;delete&gt;   ");
-	else if (c > ' ' && c < 0177)
-		sprintf(buf, "%c", c);
-	else if (c > ' ' && c <= 0377 &&
-		 c <= LYlowest_eightbit[current_char_set])
-		sprintf(buf, "%c", c);
-	else if (c < ' ')
-		sprintf(buf, "^%c", c|0100);
-	else if (c >= 0400 && (c - 0400) < (int) TABLESIZE(funckey)
-		 && funckey[c-0400])
-		sprintf(buf, "%.*s", (int)(sizeof(buf) - 1), funckey[c-0400]);
-	else if (c >= 0400)
-		sprintf(buf, "%#x", c);
-	else
-		return 0;
-
+	while ((c = *src++) != 0) {
+	    found = FALSE;
+	    for (n = 0; n < TABLESIZE(table); n++) {
+		if (c == table[n].code) {
+		    found = TRUE;
+		    strcpy(dst, table[n].name);
+		    adj += strlen(dst) - 1;
+		    dst += strlen(dst);
+		    break;
+		}
+	    }
+	    if (!found) {
+		*dst++ = c;
+	    }
+	}
+	adj -= (dst - buf) - PRETTY_LEN;
+	while (adj-- > 0)
+	    *dst++ = ' ';
+	*dst = 0;
 	return buf;
+    }
+
+    return 0;
 }
 
 PRIVATE char * format_binding ARGS2(
@@ -901,9 +961,10 @@ PRIVATE char * format_binding ARGS2(
      && revmap[the_key].name != 0
      && revmap[the_key].doc != 0
      && (formatted = pretty_html(i-1)) != 0) {
-	HTSprintf0(&buf, "%-11s %-13s %s\n", formatted,
-		revmap[the_key].name,
-		revmap[the_key].doc);
+	HTSprintf0(&buf, "%-*s %-13s %s\n",
+		   PRETTY_LEN, formatted,
+		   revmap[the_key].name,
+		   revmap[the_key].doc);
 	return buf;
     }
     return 0;
@@ -1059,18 +1120,9 @@ PRIVATE int LYLoadKeymap ARGS4 (
 
 #define PUTS(buf)    (*target->isa->put_block)(target, buf, strlen(buf))
 
-    HTSprintf0(&buf, "<head>\n<title>%s</title>\n</head>\n<body>\n",
+    HTSprintf0(&buf, "<html>\n<head>\n<title>%s</title>\n</head>\n<body>\n",
 		     CURRENT_KEYMAP_TITLE);
     PUTS(buf);
-#if 0	/* There isn't really a help page *on* the current keymap.
-	   And we don't need a title and version info here, better
-	   make the page as compact as possible. - kw */
-    HTSprintf0(&buf, "<h1>%s (%s)%s<a href=\"%s%s\">%s</a></h1>\n",
-	LYNX_NAME, LYNX_VERSION,
-	HELP_ON_SEGMENT,
-	helpfilepath, CURRENT_KEYMAP_HELP, CURRENT_KEYMAP_TITLE);
-    PUTS(buf);
-#endif
     HTSprintf0(&buf, "<pre>\n");
     PUTS(buf);
 
@@ -1090,7 +1142,7 @@ PRIVATE int LYLoadKeymap ARGS4 (
 	}
     }
 
-    HTSprintf0(&buf,"</pre>\n</body>\n");
+    HTSprintf0(&buf,"</pre>\n</body>\n</html>\n");
     PUTS(buf);
 
     (*target->isa->_free)(target);
@@ -1301,7 +1353,7 @@ PUBLIC char *key_for_func ARGS1 (
     char *formatted;
 
     if ((i = LYReverseKeymap(func)) >= 0) {
-	formatted = pretty(i);
+	formatted = LYKeycodeToString(i, TRUE);
 	StrAllocCopy(buf, formatted != 0 ? formatted : "?");
     } else if (buf == 0) {
 	StrAllocCopy(buf, "");
@@ -1325,7 +1377,7 @@ PUBLIC char *fmt_keys ARGS2(
     char *fmt_second;
     if (lkc_first < 0)
 	return NULL;
-    fmt_first = pretty(lkc_first);
+    fmt_first = LYKeycodeToString(lkc_first, TRUE);
     if (fmt_first && strlen(fmt_first) == 1 && *fmt_first != '\'') {
 	quotes = TRUE;
     }
@@ -1340,7 +1392,7 @@ PUBLIC char *fmt_keys ARGS2(
 	StrAllocCopy(buf, fmt_first);
     }
     if (lkc_second >= 0) {
-	fmt_second = pretty(lkc_second);
+	fmt_second = LYKeycodeToString(lkc_second, TRUE);
 	if (!fmt_second) {
 	    FREE(buf);
 	    return NULL;

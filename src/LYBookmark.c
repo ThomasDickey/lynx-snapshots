@@ -265,8 +265,8 @@ PUBLIC void save_bookmark_link ARGS2(
 	       (*BookmarkPage == '.' ?
 		    (BookmarkPage+1) : BookmarkPage)) != NULL) {
 	LYMBM_statusline(MULTIBOOKMARKS_SELF);
-	c = LYgetch();
-	if (TOUPPER(c) != 'L') {
+	c = LYgetch_single();
+	if (c != 'L') {
 	    FREE(bookmark_URL);
 	    return;
 	}
@@ -354,14 +354,14 @@ PUBLIC void save_bookmark_link ARGS2(
      *  Once and forever...
      */
     if (first_time) {
-	fprintf(fp,"<head>\n");
+	fprintf(fp, "<head>\n");
 #if defined(SH_EX) && !defined(_WINDOWS)	/* 1997/12/11 (Thu) 19:13:40 */
 	if (HTCJK != JAPANESE)
 	    LYAddMETAcharsetToFD(fp, -1);
 	else
 	    fprintf(fp, "<META %s %s>\n",
 		    "http-equiv=\"content-type\"",
-		    "conetnt=\"text/html;charset=iso-2022-jp\""); 
+		    "content=\"text/html;charset=iso-2022-jp\""); 
 #else
 	LYAddMETAcharsetToFD(fp, -1);
 #endif	/* !_WINDOWS */

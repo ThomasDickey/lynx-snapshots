@@ -1,6 +1,6 @@
 /* character level styles for Lynx
  * (c) 1996 Rob Partington -- donated to the Lyncei (if they want it :-)
- * @Id: LYStyle.c 1.35 Tue, 30 Nov 1999 20:33:02 -0700 dickey @
+ * @Id: LYStyle.c 1.36 Fri, 23 Jun 2000 08:15:08 -0700 dickey @
  */
 #include <HTUtils.h>
 #include <HTML.h>
@@ -440,7 +440,7 @@ PRIVATE int style_readFromFileREC ARGS2(char*, file, int, toplevel)
     if (!fh)
     {
 	/* this should probably be an alert or something */
-	CTRACE((tfp, "CSS:Can't open style file %s, using defaults\n", file));
+	CTRACE((tfp, "CSS:Can't open style file '%s', using defaults\n", file));
 	return -1;
     }
 

@@ -5,7 +5,8 @@
 #include <LYStructs.h>
 #endif /* LYSTRUCTS_H */
 
-void run_external PARAMS((char * c));
+/*returns TRUE if something matching was executed*/
+BOOL run_external PARAMS((char * c, BOOL only_overriders));
 char *string_short PARAMS((char * str, int cut_pos));
 
 #ifdef WIN_EX

@@ -88,6 +88,13 @@ typedef struct _lynx_html_item_type {
 					* not to disable the printer
 					* when the no_print option is on
 					*/
+    BOOL override_primary_action;	/* whether primary action will be
+					* overridden by this - e.g. this allows
+					* invoking user's MUA when mailto: link
+					* is activated using normal "activate"
+					* command. This field is only examined
+					* by code that handles EXTERNAL command.
+					*/
 } lynx_html_item_type;
 
 /* for printer commands */

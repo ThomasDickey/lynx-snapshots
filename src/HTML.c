@@ -6730,7 +6730,12 @@ PRIVATE int HTML_end_element ARGS3(
 	 *  Set to know that we are no longer in an anchor.
 	 */
 	me->inA = FALSE;
-
+#ifdef MARK_HIDDEN_LINKS
+	if (hidden_link_marker && *hidden_link_marker && 
+		HText_isAnchorBlank(me->text, me->CurrentANum) ) {	    
+	    HText_appendText(me->text,hidden_link_marker);	
+	}
+#endif	
 	UPDATE_STYLE;
 	if (me->inBoldA == TRUE && me->inBoldH == FALSE)
 	    HText_appendCharacter(me->text, LY_BOLD_END_CHAR);

@@ -505,7 +505,7 @@ Try_Redirected_URL:
 #endif /* !VMS */
 			    printf("\n%s", RETURN_TO_LYNX);
 			    fflush(stdout);
-			    LYgetch();
+			    (void) LYgetch();
 #ifdef VMS
 			    HadVMSInterrupt = FALSE;
 #endif /* VMS */

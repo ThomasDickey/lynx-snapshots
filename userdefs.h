@@ -341,6 +341,12 @@
 #define TEMP_SPACE "/tmp/"
 
 /********************************
+ * Comment this line out to disable code that implements command logging
+ * and scripting.
+ */
+#define EXP_CMD_LOGGING 1
+
+/********************************
  * Comment this line out to disable code that randomizes the names given to
  * temporary files.
  */
@@ -1339,11 +1345,11 @@
  * the version definition with the Project Version on checkout.  Just
  * ignore it. - kw */
 /* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
-#define LYNX_VERSION "2.8.4dev.3"
+#define LYNX_VERSION "2.8.4dev.4"
 #define LYNX_WWW_HOME "http://lynx.browser.org/"
 #define LYNX_WWW_DIST "http://lynx.isc.org/current/"
 /* $Format: "#define LYNX_DATE \"$ProjectDate$\""$ */
-#define LYNX_DATE "Fri, 02 Jun 2000 18:01:05 -0700"
+#define LYNX_DATE "Fri, 23 Jun 2000 08:15:08 -0700"
 #define LYNX_DATE_OFF 5		/* truncate the automatically-generated date */
 #define LYNX_DATE_LEN 11	/* truncate the automatically-generated date */
 
@@ -1458,6 +1464,20 @@
  * required so much and I don't have an environment to test it. - TH
  */
 #define SUPPORT_MULTIBYTE_EDIT
+
+/***************************** 
+ * SUPPORT_CHDIR provides CD command (bound to 'C' by default).  It allows
+ * changing directory to arbitrary location (if OS allows them).  If dired is
+ * enabled, user will be able to visit any directory and view any file allowed
+ * according to file permissions or ACLs.
+ */
+#define SUPPORT_CHDIR
+
+/***************************** 
+ * MARK_HIDDEN_LINKS controls whether hidden links are shown with the title
+ * set by the HIDDEN_LINK_MARKER string in lynx.cfg
+ */
+#define MARK_HIDDEN_LINKS
 
 /*****************************
  * USE_TH_JP_AUTO_DETECT, CONV_JISX0201KANA_JISX0208KANA,  

@@ -443,7 +443,7 @@ again:
 	repeat = -1;
 	get_mouse_link();	/* Reset mouse_link. */
 
-	ch = LYgetch_for(FOR_INPUT);
+	ch = LYgetch_input();
 #ifdef SUPPORT_MULTIBYTE_EDIT
 #ifdef WIN_EX
 	if (!refresh_mb && (EditBinding(ch) != LYE_CHAR))
@@ -558,7 +558,7 @@ again:
 	}
 	if (action == LYE_LKCMD) {
 	    _statusline(ENTER_LYNX_COMMAND);
-	    ch = LYgetch_for(FOR_PANEL);
+	    ch = LYgetch();
 #ifdef VMS
 	    if (HadVMSInterrupt) {
 		HadVMSInterrupt = FALSE;
@@ -1166,8 +1166,8 @@ redraw:
 	wrefresh(form_window);
 #endif /* USE_SLANG  */
 
-	c = LYgetch_for(FOR_CHOICE);
-	if (c == 3 || c == 7) {	/* Control-C or Control-G */
+	c = LYgetch_choice();
+	if (c == 7) {		/* Control-C or Control-G */
 	    cmd = LYK_QUIT;
 #ifndef USE_SLANG
 	} else if (c == MOUSE_KEY) {
@@ -1851,7 +1851,6 @@ restore_popup_statusline:
 		cmd = LYK_ACTIVATE; /* to exit */
 		break;
 	}
-
     }
 #ifndef USE_SLANG
     delwin(form_window);

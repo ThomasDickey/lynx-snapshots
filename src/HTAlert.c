@@ -457,23 +457,23 @@ PUBLIC int HTConfirmDefault ARGS2(CONST char *, Msg, int, Dft)
 	FREE(msg);
 
 	while (result < 0) {
-	    int c = LYgetch_for(FOR_SINGLEKEY);
+	    int c = LYgetch_single();
 #ifdef VMS
 	    if (HadVMSInterrupt) {
 		HadVMSInterrupt = FALSE;
-		c = *msg_no;
+		c = TOUPPER(*msg_no);
 	    }
 #endif /* VMS */
 	    if (c == 7 || c == 3) { /* remember we had ^G or ^C */
 		conf_cancelled = YES;
 		result = NO;
-	    } else if (TOUPPER(c) == TOUPPER(*msg_yes)) {
+	    } else if (c == TOUPPER(*msg_yes)) {
 		result = YES;
-	    } else if (TOUPPER(c) == TOUPPER(*msg_no)) {
+	    } else if (c == TOUPPER(*msg_no)) {
 		result = NO;
-	    } else if (fallback_y && TOLOWER(c) == fallback_y) {
+	    } else if (fallback_y && c == fallback_y) {
 		result = YES;
-	    } else if (fallback_n && TOLOWER(c) == fallback_n) {
+	    } else if (fallback_n && c == fallback_n) {
 		result = NO;
 	    } else if (Dft != DFT_CONFIRM) {
 		result = Dft;
@@ -858,8 +858,7 @@ PUBLIC BOOL HTConfirmCookie ARGS4(
 	if(LYAcceptAllCookies) {
 	    ch = 'A';
 	} else {
-	    ch = LYgetch_for(FOR_SINGLEKEY);
-	    ch = TOUPPER(ch);
+	    ch = LYgetch_single();
 #if defined(LOCALE) && defined(HAVE_GETTEXT) && !defined(gettext)
 	    /*
 	     * Special-purpose workaround for gettext support (we should do
@@ -1033,8 +1032,8 @@ PUBLIC int HTConfirmPostRedirect ARGS2(
 	    case 1:
 		_statusline(show_POST_url);
 	}
-	c = LYgetch_for(FOR_SINGLEKEY);
-	switch (TOUPPER(c)) {
+	c = LYgetch_single();
+	switch (c) {
 	    case 'P':
 		/*
 		**  Proceed with 301 or 307 redirect of POST

@@ -6,14 +6,16 @@
 #endif
 
 extern BOOLEAN LYisNonAlnumKeyname PARAMS((int ch, int KeyName));
+extern char *LYKeycodeToString PARAMS((int c, BOOLEAN upper8));
+extern char *fmt_keys PARAMS((int lkc_first, int lkc_second));
 extern char *key_for_func PARAMS((int func));
 extern char *key_for_func_ext PARAMS((int lac, int context_code));
-extern char *fmt_keys PARAMS((int lkc_first, int lkc_second));
 extern int LYReverseKeymap PARAMS((int KeyName));
-extern int lookup_keymap PARAMS((int code));
+extern int LYStringToKeycode PARAMS((char *src));
 extern int lacname_to_lac PARAMS((CONST char *func));
 extern int lecname_to_lec PARAMS((CONST char *func));
 extern int lkcstring_to_lkc PARAMS((CONST char *src));
+extern int lookup_keymap PARAMS((int code));
 extern int remap PARAMS((char *key, char *func, BOOLEAN for_dired));
 extern void print_keymap PARAMS((char **newfile));
 extern void reset_emacs_keys NOPARAMS;
@@ -235,6 +237,9 @@ typedef enum {
 #endif /* SH_EX */
 #ifdef KANJI_CODE_OVERRIDE
   , LYK_CHG_KCODE
+#endif
+#ifdef SUPPORT_CHDIR
+  , LYK_CHDIR
 #endif
 } LYKeymapCode;
 

@@ -56,8 +56,7 @@ PRIVATE int dumbterm PARAMS((char *terminal));
 BOOLEAN LYCursesON = FALSE;
 
 #if USE_COLOR_TABLE || defined(USE_SLANG)
-PRIVATE int Current_Attr;
-PRIVATE int Masked_Attr;
+PUBLIC int Current_Attr, Masked_Attr;
 #endif
 
 #define OMIT_SCN_KEEPING 0 /* whether to omit keeping of Style_className

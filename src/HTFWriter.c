@@ -749,8 +749,8 @@ PUBLIC HTStream* HTSaveToFile ARGS3(
 	    _statusline(CANNOT_DISPLAY_FILE_D_OR_C);
 	}
 
-	while(TOUPPER(c)!='C' && TOUPPER(c)!='D' && c!=7) {
-	    c=LYgetch();
+	while(c != 'D') {
+	    c = LYgetch_single();
 #ifdef VMS
 	    /*
 	     *	'C'ancel on Control-C or Control-Y and
@@ -766,7 +766,7 @@ PUBLIC HTStream* HTSaveToFile ARGS3(
 	/*
 	 *  Cancel on 'C', 'c' or Control-G or Control-C.
 	 */
-	if (TOUPPER(c)=='C' || c==7 || c==3) {
+	if (c == 'C' || c == 7) {
 	    _statusline(CANCELLING_FILE);
 	    LYCancelDownload = TRUE;
 	    FREE(ret_obj);
