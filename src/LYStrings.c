@@ -3679,7 +3679,7 @@ void LYRefreshEdit(EDREC * edit)
     LYrefresh();
 }
 
-static void reinsertEdit(EditFieldData * edit, char *result)
+static void reinsertEdit(EditFieldData *edit, char *result)
 {
     if (result != 0) {
 	LYEdit1(edit, '\0', LYE_ERASE, FALSE);

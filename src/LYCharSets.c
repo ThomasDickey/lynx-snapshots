@@ -520,6 +520,9 @@ void Set_HTCJK(const char *inMIMEname,
 
     if (LYRawMode) {
 	if ((!strcmp(inMIMEname, "euc-jp") ||
+#ifdef EXP_JAPANESEUTF8_SUPPORT
+	     !strcmp(inMIMEname, "utf-8") ||
+#endif
 	     !strcmp(inMIMEname, "shift_jis")) &&
 	    (!strcmp(outMIMEname, "euc-jp") ||
 	     !strcmp(outMIMEname, "shift_jis"))) {

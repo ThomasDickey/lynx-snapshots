@@ -25,6 +25,7 @@ OPTS='
 -T DocInfo 
 -T DocObj
 -T EntryInfo 
+-T EditFieldData 
 -T FILE
 -T GCC_NORETURN 
 -T GCC_UNUSED 

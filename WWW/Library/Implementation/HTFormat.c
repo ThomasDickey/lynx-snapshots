@@ -91,7 +91,8 @@ void HTSetPresentation(const char *representation,
 		       double quality,
 		       double secs,
 		       double secs_per_byte,
-		       long int maxbytes)
+		       long int maxbytes,
+		       AcceptMedia media)
 {
     HTPresentation *pres = typecalloc(HTPresentation);
 
@@ -105,6 +106,9 @@ void HTSetPresentation(const char *representation,
     pres->secs = (float) secs;
     pres->secs_per_byte = (float) secs_per_byte;
     pres->maxbytes = maxbytes;
+    pres->get_accept = 0;
+    pres->accept_opt = media;
+
     pres->command = NULL;
     StrAllocCopy(pres->command, command);
 
@@ -136,7 +140,8 @@ void HTSetConversion(const char *representation_in,
 		     float quality,
 		     float secs,
 		     float secs_per_byte,
-		     long int maxbytes)
+		     long int maxbytes,
+		     AcceptMedia media)
 {
     HTPresentation *pres = typecalloc(HTPresentation);
 
@@ -152,6 +157,8 @@ void HTSetConversion(const char *representation_in,
     pres->secs_per_byte = secs_per_byte;
     pres->maxbytes = maxbytes;
     pres->command = NULL;
+    pres->get_accept = TRUE;
+    pres->accept_opt = media;
 
     /*
      * Memory Leak fixed.
@@ -508,41 +515,32 @@ void HTFilterPresentations(void)
     int n = HTList_count(HTPresentations);
     HTPresentation *p, *q;
     BOOL matched;
-    char *s, *t, *x, *y;
+    char *s, *t;
 
+    CTRACE((tfp, "HTFilterPresentations (AcceptMedia %#x)\n", LYAcceptMedia));
     for (i = 0; i < n; i++) {
 	p = (HTPresentation *) HTList_objectAt(HTPresentations, i);
 	s = HTAtom_name(p->rep);
 
-	if (p->rep_out == WWW_PRESENT) {
-	    if (p->rep != WWW_SOURCE
-		&& strcasecomp(s, "www/mime")
-		&& strcasecomp(s, "www/compressed")
-		&& p->quality <= 1.0 && p->quality >= 0.0) {
-		for (j = 0, matched = FALSE; j < i; j++) {
-		    q = (HTPresentation *) HTList_objectAt(HTPresentations, j);
-		    t = HTAtom_name(q->rep);
+	p->get_accept = FALSE;
+	if (LYAcceptMedia & p->accept_opt
+	    && p->rep_out == WWW_PRESENT
+	    && p->rep != WWW_SOURCE
+	    && strcasecomp(s, "www/mime")
+	    && strcasecomp(s, "www/compressed")
+	    && p->quality <= 1.0 && p->quality >= 0.0) {
+	    matched = TRUE;
+	    for (j = 0; j < i; j++) {
+		q = (HTPresentation *) HTList_objectAt(HTPresentations, j);
+		t = HTAtom_name(q->rep);
 
-		    if (!strcasecomp(s, t)) {
-			matched = TRUE;
-			break;
-		    }
-		    if ((x = strchr(s, '/')) != 0
-			&& (y = strchr(t, '/')) != 0) {
-			int len1 = x++ - s;
-			int len2 = y++ - t;
-			int lens = (len1 > len2) ? len1 : len2;
-
-			if ((*t == '*' || !strncasecomp(s, t, lens))
-			    && (*y == '*' || !strcasecomp(x, y))) {
-			    matched = TRUE;
-			    break;
-			}
-		    }
+		if (!strcasecomp(s, t)) {
+		    matched = FALSE;
+		    CTRACE((tfp, "  match %s %s\n", s, t));
+		    break;
 		}
-		if (!matched)
-		    p->get_accept = TRUE;
 	    }
+	    p->get_accept = matched;
 	}
     }
 }
@@ -567,9 +565,6 @@ float HTStackValue(HTFormat rep_in,
 
     if (rep_out == WWW_SOURCE || rep_out == rep_in)
 	return 0.0;
-
-    /* don't do anymore do it in the Lynx code at startup LJM */
-/* if (!HTPresentations) HTFormatInit(); *//* set up the list */
 
     {
 	int n = HTList_count(HTPresentations);

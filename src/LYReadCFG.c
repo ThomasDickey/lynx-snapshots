@@ -924,6 +924,9 @@ static int system_editor_fun(char *value)
     return 0;
 }
 
+#define SetViewer(mime_type, viewer) \
+    HTSetPresentation(mime_type, viewer, 1.0, 3.0, 0.0, 0, mediaCFG)
+
 static int viewer_fun(char *value)
 {
     char *mime_type;
@@ -952,16 +955,16 @@ static int viewer_fun(char *value)
 	 */
 	if (!strcasecomp(environment, "XWINDOWS")) {
 	    if (LYgetXDisplay() != NULL)
-		HTSetPresentation(mime_type, viewer, 1.0, 3.0, 0.0, 0);
+		SetViewer(mime_type, viewer);
 	} else if (!strcasecomp(environment, "NON_XWINDOWS")) {
 	    if (LYgetXDisplay() == NULL)
-		HTSetPresentation(mime_type, viewer, 1.0, 3.0, 0.0, 0);
+		SetViewer(mime_type, viewer);
 	} else {
-	    HTSetPresentation(mime_type, viewer, 1.0, 3.0, 0.0, 0);
+	    SetViewer(mime_type, viewer);
 	}
     } else {
 	remove_backslashes(viewer);
-	HTSetPresentation(mime_type, viewer, 1.0, 3.0, 0.0, 0);
+	SetViewer(mime_type, viewer);
     }
 
     return 0;
@@ -1412,7 +1415,9 @@ static Config_Type Config_Table [] =
      PARSE_STR(RC_PERSONAL_EXTENSION_MAP, personal_extension_map),
      PARSE_STR(RC_PERSONAL_MAILCAP,     personal_type_map),
      PARSE_STR(RC_PREFERRED_CHARSET,    pref_charset),
+     PARSE_ENU(RC_PREFERRED_ENCODING,   LYAcceptEncoding, tbl_preferred_encoding),
      PARSE_STR(RC_PREFERRED_LANGUAGE,   language),
+     PARSE_ENU(RC_PREFERRED_MEDIA_TYPES, LYAcceptMedia, tbl_preferred_media),
      PARSE_SET(RC_PREPEND_BASE_TO_SOURCE, LYPrependBaseToSource),
      PARSE_SET(RC_PREPEND_CHARSET_TO_SOURCE, LYPrependCharsetToSource),
 #ifdef USE_PRETTYSRC

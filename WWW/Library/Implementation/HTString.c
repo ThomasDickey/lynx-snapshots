@@ -238,7 +238,7 @@ int AS_ncmp(const char *p,
     const char *a = p;
     int diff;
 
-    for (; (p - a) < n; p++, q++) {
+    for (; (unsigned) (p - a) < n; p++, q++) {
 	if (!(*p && *q))
 	    return (UCH(*p) - UCH(*q));
 	diff = TOASCII(*p)
@@ -247,15 +247,6 @@ int AS_ncmp(const char *p,
 	    return diff;
     }
     return 0;			/*   Match up to n characters */
-}
-
-/*	With ASCII collating sequence
- *	----------------
- */
-int AS_cmp(const char *p,
-	   const char *q)
-{
-    return (AS_ncmp(p, q, -1));
 }
 #endif /* NOT_ASCII */
 

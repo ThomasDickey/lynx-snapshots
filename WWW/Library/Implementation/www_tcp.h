@@ -836,8 +836,11 @@ typedef struct sockaddr_in SockA;	/* See netinet/in.h */
 #define SOCKADDR_LEN(soc_address) ((struct sockaddr *)&soc_address)->sa_len
 #else
 #ifndef SA_LEN
-#define SA_LEN(x) (((x)->sa_family == AF_INET6)?sizeof(struct sockaddr_in6): \
-       (((x)->sa_family == AF_INET)?sizeof(struct sockaddr_in):sizeof(struct sockaddr)))
+#define SA_LEN(x) (((x)->sa_family == AF_INET6) \
+		   ? sizeof(struct sockaddr_in6) \
+		   : (((x)->sa_family == AF_INET) \
+		      ? sizeof(struct sockaddr_in) \
+		      : sizeof(struct sockaddr)))
 #endif
 #define SOCKADDR_LEN(soc_address) SA_LEN((struct sockaddr *)&soc_address)
 #endif /* SIN6_LEN */

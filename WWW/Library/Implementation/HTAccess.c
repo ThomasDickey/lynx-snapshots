@@ -1075,7 +1075,7 @@ static BOOL HTLoadDocument(const char *full_address,	/* may include #fragment */
 	fprintf(stderr,
 		gettext("**** HTAccess: socket or file number returned by obsolete load routine!\n"));
 	fprintf(stderr,
-		gettext("**** HTAccess: Internal software error.  Please mail lynx-dev@sig.net!\n"));
+		gettext("**** HTAccess: Internal software error.  Please mail lynx-dev@nongnu.org!\n"));
 	fprintf(stderr, gettext("**** HTAccess: Status returned was: %d\n"), status);
 	exit(EXIT_FAILURE);
     }

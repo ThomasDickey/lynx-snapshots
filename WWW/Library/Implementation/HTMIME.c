@@ -292,7 +292,12 @@ static int pumpData(HTStream *me)
 						UCT_STAGE_HTEXT,
 						UCT_SETBY_DEFAULT);
 		    }
-		    if (p_in->enc != UCT_ENC_CJK) {
+		    if ((p_in->enc != UCT_ENC_CJK)
+#ifndef EXP_JAPANESEUTF8_SUPPORT
+			&& ((p_in->enc != UCT_ENC_UTF8)
+			    || (p_out->enc != UCT_ENC_CJK))
+#endif
+			) {
 			HTCJK = NOCJK;
 			if (!(p_in->codepoints &
 			      UCT_CP_SUBSETOF_LAT1) &&

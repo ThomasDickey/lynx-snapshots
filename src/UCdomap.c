@@ -29,6 +29,10 @@
 #include <langinfo.h>
 #endif
 
+#ifdef EXP_JAPANESEUTF8_SUPPORT
+#include <iconv.h>
+#endif
+
 #include <LYLeaks.h>
 
 /*
@@ -928,6 +932,35 @@ int UCTransUniCharStr(char *outbuf,
 	}
     }
     if (isdefault || trydefault) {
+#ifdef EXP_JAPANESEUTF8_SUPPORT
+	if ((strcmp(LYCharSet_UC[charset_out].MIMEname, "shift_jis") == 0) ||
+	    (strcmp(LYCharSet_UC[charset_out].MIMEname, "euc-jp") == 0)) {
+	    iconv_t cd;
+	    char str[3], *pin, *pout;
+	    size_t inleft, outleft;
+
+	    str[0] = unicode >> 8;
+	    str[1] = unicode & 0xFF;
+	    str[2] = 0;
+	    pin = str;
+	    inleft = 2;
+	    pout = outbuf, outleft = buflen;
+	    cd = iconv_open(LYCharSet_UC[charset_out].MIMEname,
+			    "UTF-16BE//TRANSLIT");
+	    rc = iconv(cd, &pin, &inleft, &pout, &outleft);
+	    iconv_close(cd);
+	    if ((pout - outbuf) == 3) {
+		CTRACE((tfp,
+			"It seems to be a JIS X 0201 code(%ld). Not supported.\n", unicode));
+		pin = str;
+		inleft = 2;
+		pout = outbuf, outleft = buflen;
+	    } else if (rc >= 0) {
+		*pout = '\0';
+		return (strlen(outbuf));
+	    }
+	}
+#endif
 	rc = conv_uni_to_str(outbuf, buflen, unicode, 1);
 	if (rc >= 0)
 	    return (strlen(outbuf));

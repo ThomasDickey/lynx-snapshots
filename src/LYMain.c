@@ -481,6 +481,8 @@ FALSE				/* see 2001-08-15  */
 
 BOOLEAN LYShowTransferRate = TRUE;
 int LYTransferRate = rateKB;
+int LYAcceptEncoding = encodingALL;
+int LYAcceptMedia = mediaOpt1;
 char *LYTransferName = NULL;
 
 char *XLoadImageCommand = NULL;	/* Default image viewer for X */
@@ -988,7 +990,7 @@ int main(int argc,
 
 	err = WSAStartup(wVerReq, &WSAData);
 	if (err != 0) {
-	    printf(gettext("No Winsock found, sorry."));
+	    puts(gettext("No Winsock found, sorry."));
 	    sleep(5);
 	    return 1;
 	}
@@ -1190,7 +1192,7 @@ int main(int argc,
 	StrAllocCopy(lynx_temp_space, TEMP_SPACE);
 #else
     {
-	printf(gettext("You MUST define a valid TMP or TEMP area!\n"));
+	puts(gettext("You MUST define a valid TMP or TEMP area!"));
 	exit(EXIT_FAILURE);
     }
 #endif
@@ -3128,18 +3130,17 @@ static int version_fun(char *next_arg GCC_UNUSED)
 #endif /* __CYGWIN__ */
 #endif
 
-    printf("\n");
-    printf(gettext("Copyrights held by the University of Kansas, CERN, and other contributors.\n"
-	   ));
-    printf(gettext("Distributed under the GNU General Public License.\n"));
-    printf(gettext("See http://lynx.isc.org/ and the online help for more information.\n\n"
-	   ));
+    puts("");
+    puts(gettext("Copyrights held by the University of Kansas, CERN, and other contributors."));
+    puts(gettext("Distributed under the GNU General Public License."));
+    puts(gettext("See http://lynx.isc.org/ and the online help for more information."));
+    puts("");
 #ifdef USE_SSL
-    printf("See http://www.moxienet.com/lynx/ for information about SSL for Lynx.\n");
+    puts("See http://www.moxienet.com/lynx/ for information about SSL for Lynx.");
 #ifdef OPENSSL_VERSION_TEXT
-    printf("See http://www.openssl.org/ for information about OpenSSL.\n");
+    puts("See http://www.openssl.org/ for information about OpenSSL.");
 #endif /* OPENSSL_VERSION_TEXT */
-    printf("\n");
+    puts("");
 #endif /* USE_SSL */
 
     SetOutputMode(O_BINARY);

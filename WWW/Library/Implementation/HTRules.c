@@ -501,7 +501,8 @@ int HTSetConfiguration(char *config)
 			  status >= 1 ? quality : 1.0,
 			  status >= 2 ? secs : 0.0,
 			  status >= 3 ? secs_per_byte : 0.0,
-			  status >= 4 ? maxbytes : 0);
+			  status >= 4 ? maxbytes : 0,
+			  mediaCFG);
 
     } else if (0 == strncasecomp(word1, "htbin", 5) ||
 	       0 == strncasecomp(word1, "bindir", 6)) {

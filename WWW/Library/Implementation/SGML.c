@@ -389,9 +389,12 @@ static void set_chartrans_handling(HTStream *context, HTParentAnchor *anchor,
      * would be better to call a Lynx_HTML_parser function to set an element in
      * its HTStructured object, itself, if this were needed.  - FM
      */
+#ifndef EXP_JAPANESEUTF8_SUPPORT
     if (HTCJK != NOCJK) {
 	context->current_tag_charset = -1;
-    } else if (context->T.transp) {
+    } else
+#endif
+    if (context->T.transp) {
 	context->current_tag_charset = context->inUCLYhndl;
     } else if (context->T.decode_utf8) {
 	context->current_tag_charset = context->inUCLYhndl;
@@ -1729,7 +1732,11 @@ static void SGML_character(HTStream *context, char c_in)
      * we have to care them here. -- TH
      */
     if ((HTCJK == JAPANESE) && (context->state == S_in_kanji) &&
-	!IS_JAPANESE_2BYTE(context->kanji_buf, UCH(c))) {
+	!IS_JAPANESE_2BYTE(context->kanji_buf, UCH(c))
+#ifdef EXP_JAPANESEUTF8_SUPPORT
+	&& !context->T.decode_utf8
+#endif
+	) {
 #ifdef CONV_JISX0201KANA_JISX0208KANA
 	if (IS_SJIS_X0201KANA(context->kanji_buf)) {
 	    unsigned char sjis_hi, sjis_lo;
@@ -1780,7 +1787,11 @@ static void SGML_character(HTStream *context, char c_in)
 	}
 	/* fall through in any case! */
     case S_text:
-	if (HTCJK != NOCJK && (TOASCII(c) & 0200) != 0) {	/* S/390 -- gil -- 0864 */
+	if ((HTCJK != NOCJK) && ((TOASCII(c) & 0200) != 0)
+#ifdef EXP_JAPANESEUTF8_SUPPORT
+	    && !context->T.decode_utf8
+#endif
+	    ) {			/* S/390 -- gil -- 0864 */
 	    /*
 	     * Setting up for Kanji multibyte handling (based on Takuya ASADA's
 	     * (asada@three-a.co.jp) CJK Lynx).  Note that if the input is not

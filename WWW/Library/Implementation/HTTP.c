@@ -39,6 +39,7 @@
 #include <LYGlobalDefs.h>
 #include <GridText.h>
 #include <LYStrings.h>
+#include <LYrcFile.h>
 #include <LYLeaks.h>
 
 struct _HTStream {
@@ -332,7 +333,6 @@ int ws_netread(int fd, char *buf, int len)
 
 /*
  * Strip any username from the given string so we retain only the host.
- * If the
  */
 static void strip_userid(char *host)
 {
@@ -526,17 +526,10 @@ static int HTLoadHTTP(const char *arg,
 	status = HT_NOT_LOADED;
 	goto done;
     }
-
-/* *sob*  All this needs to be converted to handle binary strings
- * if we're going to be able to handle binary form uploads...
- * This is a nice long function as well.  *sigh*  -RJP
- */
-
 #ifdef USE_SSL
   use_tunnel:
     /*
-     * If this is an https document
-     * then do the SSL stuff here
+     * If this is an https document, then do the SSL stuff here.
      */
     if (did_connect || !strncmp(url, "https", 5)) {
 	SSL_handle = handle = HTGetSSLHandle();
@@ -632,8 +625,7 @@ static int HTLoadHTTP(const char *arg,
     }
 #endif /* USE_SSL */
 
-    /*    Ask that node for the document,
-     * omitting the host name & anchor
+    /* Ask that node for the document, omitting the host name & anchor
      */
     {
 	char *p1 = (HTParse(url, "", PARSE_PATH | PARSE_PUNCTUATION));
@@ -739,29 +731,35 @@ static int HTLoadHTTP(const char *arg,
 	len = 0;
 
 	/*
-	 * FIXME:  suppressing the "Accept-Encoding" in this case is done to work
-	 * around limitations of the presentation logic used for the command-line
-	 * "-base" option.  The remote site may transmit the document gzip'd, but
-	 * the ensuing logic in HTSaveToFile() would see the mime-type as gzip
-	 * rather than text/html, and not prepend the base URL.  This is less
-	 * efficient than accepting the compressed data and uncompressing it,
-	 * adding the base URL but is simpler than augmenting the dump's
-	 * presentation logic -TD
+	 * FIXME:  suppressing the "Accept-Encoding" in this case is done to
+	 * work around limitations of the presentation logic used for the
+	 * command-line "-base" option.  The remote site may transmit the
+	 * document gzip'd, but the ensuing logic in HTSaveToFile() would see
+	 * the mime-type as gzip rather than text/html, and not prepend the
+	 * base URL.  This is less efficient than accepting the compressed data
+	 * and uncompressing it, adding the base URL but is simpler than
+	 * augmenting the dump's presentation logic -TD
 	 */
 	if (LYPrependBaseToSource && dump_output_immediately) {
 	    CTRACE((tfp,
 		    "omit Accept-Encoding to work-around interaction with -source\n"));
 	} else {
 	    char *list = 0;
+	    int j, k;
 
-#if defined(USE_ZLIB) || defined(GZIP_PATH)
-	    StrAllocCopy(list, "gzip");
-#endif
-#if defined(USE_ZLIB) || defined(COMPRESS_PATH)
-	    if (list != 0)
-		StrAllocCat(list, ", ");
-	    StrAllocCat(list, "compress");
-#endif
+	    for (j = 1; j < encodingALL; j <<= 1) {
+		if ((j & LYAcceptEncoding) != 0) {
+		    for (k = 0; tbl_preferred_encoding[k].name != 0; ++k) {
+			if (tbl_preferred_encoding[k].value == j) {
+			    if (list != 0)
+				StrAllocCat(list, ", ");
+			    StrAllocCat(list, tbl_preferred_encoding[k].name);
+			    break;
+			}
+		    }
+		}
+	    }
+
 	    if (list != 0) {
 		HTBprintf(&command, "Accept-Encoding: %s%c%c", list, CR, LF);
 		free(list);
@@ -1092,12 +1090,12 @@ static int HTLoadHTTP(const char *arg,
 
 #ifdef    NOT_ASCII		/* S/390 -- gil -- 0548 */
     {
-	char *p;
+	char *p2;
 
-	for (p = BStrData(command);
-	     p < BStrData(command) + BStrLen(command);
-	     p++)
-	    *p = TOASCII(*p);
+	for (p2 = BStrData(command);
+	     p2 < BStrData(command) + BStrLen(command);
+	     p2++)
+	    *p2 = TOASCII(*p2);
     }
 #endif /* NOT_ASCII */
     status = HTTP_NETWRITE(s, BStrData(command), BStrLen(command), handle);
@@ -1209,12 +1207,12 @@ static int HTLoadHTTP(const char *arg,
 	    }
 #ifdef    NOT_ASCII		/* S/390 -- gil -- 0564 */
 	    {
-		char *p;
+		char *p2;
 
-		for (p = line_buffer + length;
-		     p < line_buffer + length + status;
-		     p++)
-		    *p = FROMASCII(*p);
+		for (p2 = line_buffer + length;
+		     p2 < line_buffer + length + status;
+		     p2++)
+		    *p2 = FROMASCII(*p2);
 	    }
 #endif /* NOT_ASCII */
 

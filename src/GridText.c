@@ -11444,18 +11444,22 @@ void HText_setKcode(HText *text, const char *charset,
 		     !strcmp(charset, "x-sjis") ||	/* 1997/11/28 (Fri) 18:11:33 */
 		     !strcmp(charset, "x-shift-jis"))) {
 	text->kcode = SJIS;
-    } else if (explicit && ((p_in && (p_in->enc == UCT_ENC_CJK)) ||
-			    !strcmp(charset, "x-euc") ||	/* 1997/11/28 (Fri) 18:11:24 */
-			    !strcmp(charset, "euc-jp") ||
-			    !strncmp(charset, "x-euc-", 6) ||
-			    !strcmp(charset, "euc-kr") ||
-			    !strcmp(charset, "iso-2022-kr") ||
-			    !strcmp(charset, "big5") ||
-			    !strcmp(charset, "cn-big5") ||
-			    !strcmp(charset, "euc-cn") ||
-			    !strcmp(charset, "gb2312") ||
-			    !strncmp(charset, "cn-gb", 5) ||
-			    !strcmp(charset, "iso-2022-cn"))) {
+    } else if (explicit
+#ifdef EXP_JAPANESEUTF8_SUPPORT
+	       && strcmp(charset, "utf-8")
+#endif
+	       && ((p_in && (p_in->enc == UCT_ENC_CJK)) ||
+		   !strcmp(charset, "x-euc") ||		/* 1997/11/28 (Fri) 18:11:24 */
+		   !strcmp(charset, "euc-jp") ||
+		   !strncmp(charset, "x-euc-", 6) ||
+		   !strcmp(charset, "euc-kr") ||
+		   !strcmp(charset, "iso-2022-kr") ||
+		   !strcmp(charset, "big5") ||
+		   !strcmp(charset, "cn-big5") ||
+		   !strcmp(charset, "euc-cn") ||
+		   !strcmp(charset, "gb2312") ||
+		   !strncmp(charset, "cn-gb", 5) ||
+		   !strcmp(charset, "iso-2022-cn"))) {
 	text->kcode = EUC;
     } else {
 	/*
@@ -11464,13 +11468,23 @@ void HText_setKcode(HText *text, const char *charset,
 	 */
 	text->kcode = NOKANJI;
 	if (HTCJK != NOCJK) {
-	    if (!p_in || p_in->enc != UCT_ENC_CJK)
+	    if (!p_in || ((p_in->enc != UCT_ENC_CJK)
+#ifdef EXP_JAPANESEUTF8_SUPPORT
+			  && (p_in->enc != UCT_ENC_UTF8)
+#endif
+		)) {
 		HTCJK = NOCJK;
+	    }
 	}
     }
-    if (explicit)
+
+    if (explicit
+#ifdef EXP_JAPANESEUTF8_SUPPORT
+	&& strcmp(charset, "utf-8")
+#endif
+	) {
 	text->specified_kcode = text->kcode;
-    else {
+    } else {
 	if (UCAssume_MIMEcharset) {
 	    if (!strcmp(UCAssume_MIMEcharset, "euc-jp"))
 		text->kcode = text->specified_kcode = EUC;

@@ -297,17 +297,17 @@ extern char *LYTrimNewline(char *buffer);
 extern void LYTrimTrailing(char *buffer);
 extern void LYTrimAllStartfile(char *buffer);
 extern BOOLEAN LYTrimStartfile(char *buffer);
-extern void LYSetupEdit(EditFieldData * edit, char *old,
+extern void LYSetupEdit(EditFieldData *edit, char *old,
 			int maxstr,
 			int maxdsp);
-extern void LYRefreshEdit(EditFieldData * edit);
+extern void LYRefreshEdit(EditFieldData *edit);
 extern int EditBinding(int ch);	/* in LYEditmap.c */
 extern BOOL LYRemapEditBinding(int xlkc,
 			       int lec,
 			       int select_edi);		/* in LYEditmap.c */
 extern int LYKeyForEditAction(int lec);		/* in LYEditmap.c */
 extern int LYEditKeyForAction(int lac, int *pmodkey);	/* LYEditmap.c */
-extern int LYEdit1(EditFieldData * edit, int ch,
+extern int LYEdit1(EditFieldData *edit, int ch,
 		   int action,
 		   BOOL maxMessage);
 extern void LYCloseCloset(RecallType recall);
@@ -332,12 +332,14 @@ extern const char *LYLineeditHelpURL(void);
 
 extern int escape_bound;
 
-#define LYLineEdit(e,c,m) LYEdit1(e,c,EditBinding(c)&~LYE_DF,m)
+#define LYLineEdit(e,c,m) LYEdit1(e, c, EditBinding(c) & ~LYE_DF, m)
 
 /* Dummy initializer for LYEditmap.c */
 extern int LYEditmapDeclared(void);
 
-int LYEditInsert(EditFieldData * edit, unsigned char *s, int len, int
-		 map_active, BOOL maxMessage);
+extern int LYEditInsert(EditFieldData *edit,
+			unsigned char *s,
+			int len, int map_active,
+			BOOL maxMessage);
 
 #endif /* LYSTRINGS_H */

@@ -1,9 +1,46 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2004-05-23 (2.8.6dev.4)
+* use puts() rather than printf() in some messages to avoid chance of "%" in
+  the translation -TD
+* add experimental option --enable-japanese-utf8 for using libiconv for
+  Japanese and UTF-8 -TH, TD
+* update makelynx.bat -Victor Schneider
+* modify configure script CF_ADD_CFLAGS to put definitions of quoted strings
+  in EXTRA_CPPFLAGS -TD
+* fixes from Thorsten Glaser:
+  + check for arc4random as a possible random function.
+  + modify configure script CF_CHECK_CACHE to look for config.guess in
+    $ac_aux_dir if it is not in the source directory.
+* fix naming conflict with AS_cmp() function when NOT_ASCII is defined -PG
+* read user's ".newsauth" file for news-server authentication information
+  (prompted by A R Vener request) -TD
+* modify HTSaveAndExecute() to check first for result from HTFileSuffix()
+  before choosing between BIN_SUFFIX and HTML_SUFFIX.  This allows the PDF
+  viewer on OS X to get the proper suffix (.pdf) rather than .bin -PG, TD
+* filter out extra screen-repainting when a charset change is made -IZ
+* update README and other documentation to reflect new mailing list -TD
+* add PREFERRED_ENCODING to lynx.cfg, along with an options-menu selection for
+  this, to set "Accept-Encoding:" string -TD
+* add PREFERRED_MEDIA_TYPES to lynx.cfg, corresponding to the option for
+  HTFilterPresentations().  A minimal set of media types is used by default,
+  though the old behavior can be selected -TD
+* modify HTFilterPresentations() to use new option menu entry for specifying
+  what parts of the user- and system-mailcap data to use in Accept's.  The
+  intent is to provide easily managed subsets of the Accept string, to work
+  with servers that do not accept long Accept strings (prompted by discussion
+  on lynx-dev mailing list) -TD
+* Remove logic from HTFilterPresentations() which reduced the Accept strings
+  based on wildcards since RFC 2616 says wildcards are lower precedance than
+  other settings -TD
+* improve matching for mailcap test-commands in HTInit.c by eliminating
+  unnecessary whitespace with TrimCommand() -TD
+* remove obsolete note about SSL patches in lynx_url_support.html -TD
+
 2004-05-06 (2.8.6dev.3)
-+ add scripts/indent.sh, use this to reindent C source files -TD
-+ bump version in makefile.in to 2.8.6 -TD
+* add scripts/indent.sh, use this to reindent C source files -TD
+* bump version in makefile.in to 2.8.6 -TD
 
 2004-04-27 (2.8.6dev.2)
 * modify CF_NCURSES_LIBS to only look for -lmytinfo when building with ncurses.

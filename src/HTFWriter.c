@@ -17,10 +17,6 @@
 #include <HTParse.h>
 #endif
 
-#ifdef _WIN_CC
-extern int exec_command(char *cmd, int wait_flag);	/* xsystem.c */
-#endif
-
 #include <HTFormat.h>
 #include <UCDefs.h>
 #include <HTAlert.h>
@@ -729,12 +725,14 @@ HTStream *HTSaveAndExecute(HTPresentation *pres,
 	    suffix = HTML_SUFFIX;
 	} else if (!strncasecomp(pres->rep->name, "text/", 5)) {
 	    suffix = TEXT_SUFFIX;
-	} else if (!strncasecomp(pres->rep->name, "application/", 12)) {
-	    suffix = BIN_SUFFIX;
 	} else if ((suffix = HTFileSuffix(pres->rep,
 					  anchor->content_encoding)) == 0
 		   || *suffix != '.') {
-	    suffix = HTML_SUFFIX;
+	    if (!strncasecomp(pres->rep->name, "application/", 12)) {
+		suffix = BIN_SUFFIX;
+	    } else {
+		suffix = HTML_SUFFIX;
+	    }
 	}
 	me->fp = LYOpenTemp(fnam, suffix, BIN_W);
     }

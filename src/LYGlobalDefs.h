@@ -207,10 +207,9 @@ extern BOOLEAN child_lynx;	/* TRUE to exit with an arrow */
 extern BOOLEAN dump_output_immediately;
 extern BOOLEAN emacs_keys;	/* TRUE to turn on emacs-like key movement */
 extern BOOLEAN error_logging;	/* TRUE to mail error messages */
+extern BOOLEAN ftp_local_passive;
 extern BOOLEAN ftp_ok;
 extern BOOLEAN ftp_passive;	/* TRUE if we want to use passive mode ftp */
-extern BOOLEAN ftp_local_passive;
-extern char *ftp_lasthost;
 extern BOOLEAN goto_buffer;	/* TRUE if offering default goto URL */
 extern BOOLEAN is_www_index;
 extern BOOLEAN jump_buffer;	/* TRUE if offering default shortcut */
@@ -226,6 +225,7 @@ extern BOOLEAN system_editor;	/* True if locked-down editor */
 extern BOOLEAN telnet_ok;
 extern BOOLEAN verbose_img;	/* display filenames of images?     */
 extern BOOLEAN vi_keys;		/* TRUE to turn on vi-like key movement */
+
 extern char *LYRequestReferer;	/* Referer, may be set in getfile() */
 extern char *LYRequestTitle;	/* newdoc.title in calls to getfile() */
 extern char *LYTransferName;	/* abbreviation for Kilobytes */
@@ -234,6 +234,7 @@ extern char *LynxSigFile;	/* Signature file, in or off home */
 extern char *checked_box;	/* form boxes */
 extern char *checked_radio;	/* form radio buttons */
 extern char *empty_string;
+extern char *ftp_lasthost;
 extern char *helpfile;
 extern char *helpfilepath;
 extern char *jumpprompt;	/* The default jump statusline prompt */
@@ -254,6 +255,9 @@ extern char *system_mail_flags;
 extern char *unchecked_box;	/* form boxes */
 extern char *unchecked_radio;	/* form radio buttons */
 extern char *x_display;
+
+extern int LYAcceptEncoding;
+extern int LYAcceptMedia;
 extern int LYTransferRate;	/* see enum TransferRate */
 extern int display_lines;	/* number of lines in the display */
 extern int dump_output_width;

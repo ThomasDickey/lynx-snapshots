@@ -400,6 +400,9 @@ II. Compile instructions -- UNIX
   --enable-ipv6         		(define ENABLE_IPV6)
 	use experimental IPV6 (with IPV4) logic.
 
+  --enable-japanese-utf8		(define EXP_JAPANESEUTF8_SUPPORT)
+	use experimental Japanese UTF-8 logic.
+
   --enable-justify-elts			(define EXP_JUSTIFY_ELTS)
 	use experimental element-justification logic.
 

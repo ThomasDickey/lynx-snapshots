@@ -2,7 +2,7 @@
 <html>
 <head>
 <title>Lynx Users Guide v2.8.5</title>
-<link rev="made" href="mailto:lynx-dev@sig.net">
+<link rev="made" href="mailto:lynx-dev@nongnu.org">
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
 </head>
 
@@ -535,6 +535,8 @@ HREF="keystrokes/option_help.html">HELP!</A>
 
   Headers Transferred to Remote Servers
   Personal mail address            : __________________________________________
+  Preferred media type (!)         : [Accept lynx's internal types]
+  Preferred encoding (!)           : [All_____]
   Preferred document character set : _________________________________
   Preferred document language      : _________________________________
   User-Agent header (!)            : __________________________________________
@@ -825,6 +827,38 @@ return to Lynx or the '<em>&gt;</em>' command to save the options to a
             of preference explicit by using q factors as defined by the
             HTTP protocol, for servers which understand it, for example:
             iso-8859-5,&nbsp;utf-8;q=0.8
+
+   <dt>Preferred Encoding
+        <dd>When doing a GET, lynx tells what types of compressed data it can
+            decompress (the "Accept-Encoding:" string).  This is determined by
+            compiled-in support for decompression or external decompression
+            programs.  Use this option to select none, one or all of the
+            supported decompression types.
+
+   <dt>Preferred Media Type
+        <dd>When doing a GET, lynx lists the MIME types which it knows how
+            to present (the "Accept:" string).  Depending on your system
+            configuration, the mime.types or other data given by the
+            GLOBAL_EXTENSION_MAP may include many entries that lynx really does
+            not handle.  Use this option to select one of the built-in subsets
+            of the MIME types that lynx could list in the Accept.
+            <dl>
+               <dt>Accept lynx's internal types
+                   <dd>list only the types that are compiled into lynx.
+               <dt>Also accept lynx.cfg's types
+                   <dd>lists types defined in lynx.cfg, e.g., the VIEWER and
+                       Cern RULE or RULESFILE settings.
+               <dt>Also accept user's types
+                   <dd>lists types from the PERSONAL_EXTENSION_MAP setting in
+                       lynx.cfg
+               <dt>Also accept system's types
+                   <dd>lists types from the GLOBAL_EXTENSION_MAP setting in
+                       lynx.cfg
+               <dt>Accept all types
+                   <dd>adds the types that are in lynx's built-in tables for
+                       external programs that may be used to present a
+                       document.
+            </dl>
 
    <dt>Raw 8-bit or CJK Mode
         <dd>Whether 8-bit characters are assumed to correspond with the
