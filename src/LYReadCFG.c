@@ -297,7 +297,7 @@ PRIVATE void add_printer_to_list ARGS2(
 int default_fg = COLOR_WHITE;
 int default_bg = COLOR_BLACK;
 
-static char *Color_Strings[16] =
+static CONST char *Color_Strings[16] =
 {
     "black",
     "red",
@@ -463,6 +463,7 @@ typedef union {
 #define PARSE_SET(n,t,v) {n,t,	  0, &v,  0,  0,  0,  0}
 #define PARSE_INT(n,t,v) {n,t,	  0,  0, &v,  0,  0,  0}
 #define PARSE_STR(n,t,v) {n,t,	  0,  0,  0, &v,  0,  0}
+#define PARSE_ENV(n,t,v) {n,t,	  0,  0,  0,  v,  0,  0}
 #define PARSE_FUN(n,t,v) {n,t,	  0,  0,  0,  0,  v,  0}
 #define PARSE_DEF(n,t,v) {n,t,	  0,  0,  0,  0,  0,  v}
 #else
@@ -471,13 +472,14 @@ typedef union {
 #define PARSE_SET(n,t,v) {n,t,	 (long)&(v)}
 #define PARSE_INT(n,t,v) {n,t,	 (long)&(v)}
 #define PARSE_STR(n,t,v) {n,t,	 (long)&(v)}
+#define PARSE_ENV(n,t,v) {n,t,	 (long) (v)}
 #define PARSE_FUN(n,t,v) {n,t,	 (long) (v)}
 #define PARSE_DEF(n,t,v) {n,t,	 (long) (v)}
 #endif
 
 typedef struct
 {
-   char *name;
+   CONST char *name;
    int type;
 #define CONF_BOOL		1      /* BOOLEAN type */
 #define CONF_FUN		2
@@ -804,7 +806,7 @@ static Config_Type Config_Table [] =
 #ifdef USE_COLOR_TABLE
      PARSE_FUN("color", CONF_FUN, color_fun),
 #endif
-     PARSE_STR("cso_proxy", CONF_ENV, cso_proxy_putenv_cmd ),
+     PARSE_ENV("cso_proxy", CONF_ENV, 0 ),
 #ifdef VMS
      PARSE_STR("CSWING_PATH", CONF_STR, LYCSwingPath),
 #endif
@@ -826,17 +828,17 @@ static Config_Type Config_Table [] =
 #ifdef USE_EXTERNALS
      PARSE_ADD("external", CONF_ADD_ITEM, externals),
 #endif
-     PARSE_STR("finger_proxy", CONF_ENV, finger_proxy_putenv_cmd ),
+     PARSE_ENV("finger_proxy", CONF_ENV, 0 ),
      PARSE_SET("force_ssl_cookies_secure", CONF_BOOL, LYForceSSLCookiesSecure),
-     PARSE_STR("ftp_proxy", CONF_ENV, ftp_proxy_putenv_cmd ),
+     PARSE_ENV("ftp_proxy", CONF_ENV, 0 ),
      PARSE_STR("global_extension_map", CONF_STR, global_extension_map),
      PARSE_STR("global_mailcap", CONF_STR, global_type_map),
-     PARSE_STR("gopher_proxy", CONF_ENV, gopher_proxy_putenv_cmd ),
+     PARSE_ENV("gopher_proxy", CONF_ENV, 0 ),
      PARSE_SET("gotobuffer", CONF_BOOL, goto_buffer),
      PARSE_STR("helpfile", CONF_STR, helpfile),
      PARSE_SET("historical_comments", CONF_BOOL, historical_comments),
-     PARSE_STR("http_proxy", CONF_ENV, http_proxy_putenv_cmd ),
-     PARSE_STR("https_proxy", CONF_ENV, https_proxy_putenv_cmd ),
+     PARSE_ENV("http_proxy", CONF_ENV, 0 ),
+     PARSE_ENV("https_proxy", CONF_ENV, 0 ),
      PARSE_FUN("include", CONF_INCLUDE, 0),
      PARSE_INT("infosecs", CONF_INT, InfoSecs),
      PARSE_STR("jump_prompt", CONF_STR, jumpprompt),
@@ -874,11 +876,11 @@ static Config_Type Config_Table [] =
      PARSE_FUN("news_chunk_size", CONF_FUN, news_chunk_size_fun),
      PARSE_FUN("news_max_chunk", CONF_FUN, news_max_chunk_fun),
      PARSE_FUN("news_posting", CONF_FUN, news_posting_fun),
-     PARSE_STR("news_proxy", CONF_ENV, news_proxy_putenv_cmd),
-     PARSE_STR("newspost_proxy", CONF_ENV, newspost_proxy_putenv_cmd),
-     PARSE_STR("newsreply_proxy", CONF_ENV, newsreply_proxy_putenv_cmd),
-     PARSE_STR("nntp_proxy", CONF_ENV, nntp_proxy_putenv_cmd),
-     PARSE_STR("nntpserver", CONF_ENV, NNTPSERVER_putenv_cmd),
+     PARSE_ENV("news_proxy", CONF_ENV, 0),
+     PARSE_ENV("newspost_proxy", CONF_ENV, 0),
+     PARSE_ENV("newsreply_proxy", CONF_ENV, 0),
+     PARSE_ENV("nntp_proxy", CONF_ENV, 0),
+     PARSE_ENV("nntpserver", CONF_ENV, 0),
      PARSE_SET("no_dot_files", CONF_BOOL, no_dotfiles),
      PARSE_SET("no_file_referer", CONF_BOOL, no_filereferer),
 #ifndef VMS
@@ -886,7 +888,7 @@ static Config_Type Config_Table [] =
 #endif
      PARSE_SET("no_from_header", CONF_BOOL, LYNoFromHeader),
      PARSE_SET("no_ismap_if_usemap", CONF_BOOL, LYNoISMAPifUSEMAP),
-     PARSE_STR("no_proxy", CONF_ENV, no_proxy_putenv_cmd ),
+     PARSE_ENV("no_proxy", CONF_ENV, 0 ),
      PARSE_SET("no_referer_header", CONF_BOOL, LYNoRefererHeader),
 #ifdef DISP_PARTIAL
      PARSE_SET("partial", CONF_BOOL, display_partial),
@@ -898,9 +900,6 @@ static Config_Type Config_Table [] =
      PARSE_SET("prepend_base_to_source", CONF_BOOL, LYPrependBaseToSource),
      PARSE_SET("prepend_charset_to_source", CONF_BOOL, LYPrependCharsetToSource),
      PARSE_FUN("printer", CONF_FUN, printer_fun),
-#ifdef RAWDOSKEYHACK
-     PARSE_SET("raw_dos_key_hack", CONF_BOOL, raw_dos_key_hack),
-#endif
      PARSE_SET("quit_default_yes", CONF_BOOL, LYQuitDefaultYes),
      PARSE_STR("save_space", CONF_STR, lynx_save_space),
      PARSE_SET("scan_for_buried_news_refs", CONF_BOOL, scan_for_buried_news_references),
@@ -908,9 +907,9 @@ static Config_Type Config_Table [] =
      PARSE_SET("seek_frag_map_in_cur", CONF_BOOL, LYSeekFragMAPinCur),
      PARSE_SET("set_cookies", CONF_BOOL, LYSetCookies),
      PARSE_SET("show_cursor", CONF_BOOL, LYShowCursor),
-     PARSE_STR("snews_proxy", CONF_ENV, snews_proxy_putenv_cmd ),
-     PARSE_STR("snewspost_proxy", CONF_ENV, snewspost_proxy_putenv_cmd ),
-     PARSE_STR("snewsreply_proxy", CONF_ENV, snewsreply_proxy_putenv_cmd ),
+     PARSE_ENV("snews_proxy", CONF_ENV, 0 ),
+     PARSE_ENV("snewspost_proxy", CONF_ENV, 0 ),
+     PARSE_ENV("snewsreply_proxy", CONF_ENV, 0 ),
      PARSE_SET("soft_dquotes", CONF_BOOL, soft_dquotes),
      PARSE_STR("startfile", CONF_STR, startfile),
      PARSE_SET("strip_dotdot_urls", CONF_BOOL, LYStripDotDotURLs),
@@ -940,11 +939,37 @@ static Config_Type Config_Table [] =
      PARSE_SET("verbose_images", CONF_BOOL, verbose_img),
      PARSE_SET("vi_keys_always_on", CONF_BOOL, vi_keys),
      PARSE_FUN("viewer", CONF_FUN, viewer_fun),
-     PARSE_STR("wais_proxy", CONF_ENV, wais_proxy_putenv_cmd ),
+     PARSE_ENV("wais_proxy", CONF_ENV, 0 ),
      PARSE_STR("xloadimage_command", CONF_STR, XLoadImageCommand),
 
      {0}
 };
+
+/*
+ * Free memory allocated in 'read_cfg()'
+ */
+PUBLIC void free_lynx_cfg NOARGS
+{
+    Config_Type *tbl;
+
+    for (tbl = Config_Table; tbl->name != 0; tbl++) {
+#ifdef PARSE_DEBUG
+	Config_Type *q = tbl;
+#else
+	ConfigUnion *q = (ConfigUnion *)(&(tbl->value));
+#endif
+	switch (tbl->type) {
+	case CONF_ENV:
+	    if (q->str_value != 0) {
+		FREE(*(q->str_value));
+		free((char *)q->str_value);
+	    }
+	    break;
+	default:
+	    break;
+	}
+    }
+}
 
 /*
  * Process the configuration file (lynx.cfg).
@@ -1092,6 +1117,7 @@ PUBLIC void read_cfg ARGS3(
 #else
 		char tmpbuf[MAX_LINE_BUFFER_LEN];
 		sprintf (tmpbuf, "%s=%s", tbl->name, value);
+		q->str_value = (char **)calloc(1, sizeof(char **));
 		StrAllocCopy(*(q->str_value), tmpbuf);
 		putenv (*(q->str_value));
 #endif

@@ -42,7 +42,7 @@ for mapname in acs_map _acs_map
 do
 	AC_TRY_LINK([
 #include <${cf_cv_ncurses_header-curses.h}>
-	],[chtype x = acs_map['l']; acs_map['m'] = 0],
+	],[chtype x = $mapname['l']; $mapname['m'] = 0],
 	[cf_cv_alt_char_set=$mapname
 	 break],  
 	[cf_cv_alt_char_set=no])
@@ -1351,11 +1351,43 @@ test $cf_result = no && LIBS="$cf_slang_LIBS3"
 dnl ---------------------------------------------------------------------------
 dnl Check for socks5 configuration
 AC_DEFUN([CF_SOCKS5],[
-AC_MSG_CHECKING(if we can link against socks5 library)
-AC_CACHE_VAL(cf_cv_lib_socks5,[
+
+# check in nonstandard locations
+AC_CACHE_CHECK(if we have socks.h,cf_cv_socks_incdir,[
+AC_TRY_COMPILE([#include <socks.h>],[],
+	[cf_cv_socks_incdir=yes],
+	[cf_cv_socks_incdir=no
+	CF_HEADER_PATH(cf_search,socks)
+	for cf_incdir in $cf_search
+	do
+		if test -f $cf_incdir/socks.h ; then
+			cf_cv_socks_incdir=$cf_incdir
+			break
+		fi
+	done
+])])
+
+case $cf_cv_socks_incdir in #(vi
+no)
+	AC_ERROR(Sorry.  Cannot find socks.h)
+	;;
+yes) #(vi
+	;;
+*)
+	CF_ADD_INCDIR($cf_cv_socks_incdir)
+	;;
+esac
+
+AC_CACHE_CHECK(if we can link against socks5 library,cf_cv_lib_socks5,[
 LIBS="$LIBS -lsocks5"
+
+# Try twice in case we're on AIX with a nonstandard binding
+for cf_redefine in yes getpeername ; do
 AC_TRY_LINK([
 #define SOCKS
+#ifdef _AIX
+#define $cf_redefine 1
+#endif
 #include <socks.h>],[
 #ifdef USE_SOCKS4_PREFIX
 	Rinit((char *)0);
@@ -1363,14 +1395,21 @@ AC_TRY_LINK([
 	SOCKSinit((char *)0);
 #endif
 	getpeername(0, (struct sockaddr *)0, (int *)0);],
-	[cf_cv_lib_socks5=yes],
+	[cf_cv_lib_socks5=$cf_redefine
+	 break],
 	[cf_cv_lib_socks5=no])
+done
 ])
-AC_MSG_RESULT($cf_cv_lib_socks5)
-if test $cf_cv_lib_socks5 = yes ; then
-	AC_DEFINE(USE_SOCKS5)
-else
+if test $cf_cv_lib_socks5 = no ; then
 	AC_ERROR(Sorry.  Cannot link against socks5 library)
+else 
+	AC_DEFINE(USE_SOCKS5)
+	if test $cf_cv_lib_socks5 != yes ; then
+		AC_DEFINE(getpeername)
+		AC_DEFINE(getsockname)
+		AC_DEFINE(accept)
+		AC_DEFINE(recvfrom)
+	fi
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------

@@ -1936,7 +1936,7 @@ PUBLIC void statusline ARGS1(
     return;
 }
 
-static char *novice_lines[] = {
+static CONST char *novice_lines[] = {
 #ifndef NOVICE_LINE_TWO_A
 #define NOVICE_LINE_TWO_A	NOVICE_LINE_TWO
 #define NOVICE_LINE_TWO_B	""
@@ -1979,7 +1979,7 @@ PUBLIC void noviceline ARGS1(
     if (LYUseNoviceLineTwo)
 	addstr(NOVICE_LINE_TWO);
     else
-	addstr(novice_lines[lineno]);
+	addstr((char *)novice_lines[lineno]);
 
 #ifdef NOTDEFINED
     if (is_www_index && more_flag) {
@@ -2138,7 +2138,7 @@ PUBLIC int HTCheckForInterrupt NOARGS
 	    break;
 	case LYK_END:
 	    if (HText_canScrollDown())
-		Newline_partial = HText_getNumOfLines() - display_lines + 2;
+		Newline_partial = HText_getNumOfLines() - display_lines + 1;
 		/* set "current" value */
 	    break;
 	case LYK_REFRESH :
@@ -2259,12 +2259,13 @@ PUBLIC BOOLEAN LYisLocalHost ARGS1(
 #ifdef VMS
     if ((0==strcasecomp(host, "localhost") ||
 	 0==strcasecomp(host, LYHostName) ||
-	 0==strcasecomp(host, HTHostName()))) {
+	 0==strcasecomp(host, HTHostName())))
 #else
     if ((0==strcmp(host, "localhost") ||
 	 0==strcmp(host, LYHostName) ||
-	 0==strcmp(host, HTHostName()))) {
+	 0==strcmp(host, HTHostName())))
 #endif /* VMS */
+    {
 	    FREE(host);
 	    return YES;
     }
@@ -2342,10 +2343,11 @@ PUBLIC BOOLEAN LYisLocalAlias ARGS1(
 
     while (NULL != (alias = (char *)HTList_nextObject(cur))) {
 #ifdef VMS
-	if (0==strcasecomp(host, alias)) {
+	if (0==strcasecomp(host, alias))
 #else
-	if (0==strcmp(host, alias)) {
+	if (0==strcmp(host, alias))
 #endif /* VMS */
+	{
 	    FREE(host);
 	    return YES;
 	}
@@ -2414,7 +2416,7 @@ PUBLIC int LYCheckForProxyURL ARGS1(
  */
 static BOOLEAN compare_type ARGS3(
 	char *, 	tst,
-	char *, 	cmp,
+	CONST char *, 	cmp,
 	size_t, 	len)
 {
     if (!strncasecomp(tst, cmp, len)) {
@@ -3323,7 +3325,7 @@ PUBLIC int number2arrows ARGS1(
  *  parse_restrictions takes a string of comma-separated restrictions
  *  and sets the corresponding flags to restrict the facilities available.
  */
-PRIVATE char *restrict_name[] = {
+PRIVATE CONST char *restrict_name[] = {
        "inside_telnet" ,
        "outside_telnet",
        "telnet_port"   ,
@@ -3410,10 +3412,10 @@ PRIVATE BOOLEAN *restrict_flag[] = {
        (BOOLEAN *) 0  };
 
 PUBLIC void parse_restrictions ARGS1(
-	char *, 	s)
+	CONST char *, 	s)
 {
-      char *p;
-      char *word;
+      CONST char *p;
+      CONST char *word;
       int i;
 
       if (STREQ("all", s)) {
@@ -3468,17 +3470,15 @@ PUBLIC void parse_restrictions ARGS1(
 
       p = s;
       while (*p) {
-	  p = LYSkipBlanks(p);
+	  p = LYSkipCBlanks(p);
 	  if (*p == '\0')
 	      break;
 	  word = p;
 	  while (*p != ',' && *p != '\0')
 	      p++;
-	  if (*p)
-	      *p++ = '\0';
 
 	  for (i=0; restrict_name[i]; i++)
-	     if (STREQ(word, restrict_name[i])) {
+	     if (STRNEQ(word, restrict_name[i], p-word)) {
 		 *restrict_flag[i] = TRUE;
 		 break;
 	     }
@@ -3628,7 +3628,7 @@ PUBLIC int LYCheckMail NOARGS
 */
 PUBLIC void LYEnsureAbsoluteURL ARGS2(
 	char **,	href,
-	char *, 	name)
+	CONST char *, 	name)
 {
     char *temp = NULL;
 
@@ -3790,7 +3790,6 @@ PUBLIC void LYConvertToURL ARGS1(
 		    strcat(url_file, old_string);
 		    CTRACE(tfp, "Can't find '%s'  Will assume it's a bad path.\n",
 				old_string);
-		    }
 		    StrAllocCat(*AllocatedString, url_file);
 		} else {
 		    /*
@@ -5384,18 +5383,40 @@ int remove ARGS1(char *, name)
 
 #ifdef UNIX
 /*
- * Open a file that we don't want other users to see.  For new files, the umask
- * will suffice; however if the file already exists we'll change permissions
- * first, before opening it.  If the chmod fails because of some reason other
- * than a non-existent file, there's no point in trying to open it.
+ * Open a file that we don't want other users to see.
  */
 PRIVATE FILE *OpenHiddenFile ARGS2(char *, name, char *, mode)
 {
-    int save = umask(HIDE_UMASK);
     FILE *fp = 0;
-    if (chmod(name, HIDE_CHMOD) == 0 || errno == ENOENT)
-	fp = fopen(name, mode);
-    umask(save);
+
+#if defined(O_CREAT) && defined(O_EXCL) /* we have fcntl.h or kindred? */
+    /*
+     * This is the preferred method for creating new files, since it ensures
+     * that no one has an existing file or link that they happen to own.
+     */
+    if (*mode == 'w') {
+	int fd = open(name, O_CREAT|O_EXCL|O_WRONLY, HIDE_CHMOD);
+	if (fd >= 0) {
+	    fp = fdopen(fd, mode);
+	}
+    }
+    else
+#endif
+    /*
+     * This is less stringent, but reasonably portable.  For new files, the
+     * umask will suffice; however if the file already exists we'll change
+     * permissions first, before opening it.  If the chmod fails because of
+     * some reason other than a non-existent file, there's no point in trying
+     * to open it.
+     *
+     * This won't work properly if the user is root, since the chmod succeeds.
+     */
+    {
+	int save = umask(HIDE_UMASK);
+	if (chmod(name, HIDE_CHMOD) == 0 || errno == ENOENT)
+	    fp = fopen(name, mode);
+	umask(save);
+    }
     return fp;
 }
 #else
@@ -5468,13 +5489,13 @@ PUBLIC void LYRelaxFilePermissions ARGS1(CONST char *, name)
  */
 PUBLIC BOOLEAN LYCachedTemp ARGS2(
 	char *, 	result,
-	char *, 	cached)
+	char **, 	cached)
 {
     FILE *fp;
 
-    if (cached) {
-	strcpy(result, cached);
-	FREE(cached);
+    if (*cached) {
+	strcpy(result, *cached);
+	FREE(*cached);
 	if ((fp = fopen(result, "r")) != NULL) {
 	    fclose(fp);
 	    remove(result);

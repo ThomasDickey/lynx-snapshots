@@ -808,6 +808,7 @@ PUBLIC int HTLoadWAIS ARGS4(
 	    while((c=getc(fp))!=EOF) PUTC(c);	/* Transfer file */
 	    END(HTML_PRE);
 	    fclose(fp);
+	}
 #endif
 	START(HTML_P);
 	PUTS("\nEnter the 's'earch command and then specify search words.\n");

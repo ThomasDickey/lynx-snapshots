@@ -23,7 +23,7 @@ extern int LYgetstr PARAMS((
 	int		recall));
 extern char * LYstrstr PARAMS((
 	char *		chptr,
-	char *		tarptr));
+	CONST char *	tarptr));
 extern char * LYmbcsstrncpy PARAMS((
 	char *		dst,
 	CONST char *	src,

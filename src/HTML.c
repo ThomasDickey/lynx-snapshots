@@ -2427,8 +2427,8 @@ PRIVATE void HTML_start_element ARGS6(
 	    if (!url_type && !strncmp(href, "/foo/..", 7) &&
 		(!strncmp(me->node_anchor->address, "ftp:", 4) ||
 		 !strncmp(me->node_anchor->address, "file:", 5))) {
-		for (i = 0; href[i]; i++)
-		    href[i] = href[i+7];
+		for (i = 0; (href[i] = href[i+7]) != 0; i++)
+		    ;
 	    }
 
 	    /*

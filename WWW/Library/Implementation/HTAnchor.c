@@ -182,10 +182,11 @@ PUBLIC HTChildAnchor * HTAnchor_findChild ARGS2(
 	if (tag && *tag) {		/* TBL */
 	    while (NULL != (child=(HTChildAnchor *)HTList_nextObject(kids))) {
 #ifdef CASE_INSENSITIVE_ANCHORS
-		if (HTEquivalent(child->tag, tag)) { /* Case insensitive */
+		if (HTEquivalent(child->tag, tag)) /* Case insensitive */
 #else
-		if (HTIdentical(child->tag, tag)) {  /* Case sensitive - FM */
+		if (HTIdentical(child->tag, tag)) /* Case sensitive - FM */
 #endif /* CASE_INSENSITIVE_ANCHORS */
+		{
 		    CTRACE(tfp, "Child anchor %p of parent %p with name `%s' already exists.\n",
 				(void *)child, (void *)parent, tag);
 		    return child;

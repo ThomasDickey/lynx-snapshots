@@ -1,4 +1,3 @@
-
 #ifndef LYCOOKIES_H
 #define LYCOOKIES_H
 
@@ -11,8 +10,10 @@ extern char *LYCookie PARAMS((
 	CONST char *	partialpath,
 	int		port,
 	BOOL		secure));
+extern void LYLoadCookies PARAMS((
+	CONST char * 	cookie_file));
 
-typedef enum {ACCEPT_ALWAYS, REJECT_ALWAYS, QUERY_USER} behaviour;
+typedef enum {ACCEPT_ALWAYS, REJECT_ALWAYS, QUERY_USER, FROM_FILE} behaviour;
 
 struct _domain_entry {
     char *	domain;  /* Domain for which these cookies are valid */

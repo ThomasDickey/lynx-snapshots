@@ -44,6 +44,7 @@
 #define NO_UNISTD_H
 #define NO_KEYPAD
 #define NO_UTMP
+#define NO_FILIO_H
 #endif
 
 /* FIXME: these will be removed after completing auto-configure script */

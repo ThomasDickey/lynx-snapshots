@@ -402,10 +402,11 @@ PRIVATE unsigned LYRead_Jumpfile ARGS1(struct JumpTable *,jtp)
 	    return 0;
 	}
     } else
-    if ((fd=open(jtp->file, O_RDONLY, "mbc=32")) < 0) {
+    if ((fd=open(jtp->file, O_RDONLY, "mbc=32")) < 0)
 #else
-    if ((fd=open(jtp->file, O_RDONLY)) < 0) {
+    if ((fd=open(jtp->file, O_RDONLY)) < 0)
 #endif /* VMS */
+    {
 	HTAlert(CANNOT_OPEN_JUMP_FILE);
 	FREE(mp);
 	return 0;

@@ -57,7 +57,7 @@ PUBLIC int LYNumCharsets = 0; /* Will be initialized later by UC_Register. */
 **
 **	This MUST match exactly the table referred to in the DTD!
 */
-PRIVATE char * ISO_Latin1[] = {
+PRIVATE CONST char * ISO_Latin1[] = {
 	"\306", /* capital AE diphthong (ligature) (&#198;) - AElig */
 	"\301", /* capital A, acute accent (&#193;) - Aacute */
 	"\302", /* capital A, circumflex accent (&#194;) - Acirc */
@@ -176,7 +176,7 @@ PRIVATE char * ISO_Latin1[] = {
 **
 **	This MUST match exactly the table referred to in the DTD!
 */
-PUBLIC char * SevenBitApproximations[] = {
+PUBLIC CONST char * SevenBitApproximations[] = {
 	"AE",	/* capital AE diphthong (ligature) (&#198;) - AElig */
 	"A",	/* capital A, acute accent (&#193;) - Aacute */
 	"A",	/* capital A, circumflex accent (&#194;) - Acirc */
@@ -323,7 +323,7 @@ PUBLIC char * SevenBitApproximations[] = {
 /*
  *  Add the array name to LYCharSets
  */
-PUBLIC char ** LYCharSets[MAXCHARSETS]={
+PUBLIC CONST char ** LYCharSets[MAXCHARSETS]={
 	ISO_Latin1,		/* ISO Latin 1		*/
 	SevenBitApproximations, /* DosLatin1 (cp850)	*/
 	SevenBitApproximations, /* WinLatin1 (cp1252)	*/
@@ -459,7 +459,7 @@ PUBLIC int LYlowest_eightbit[MAXCHARSETS]={
  *  'o'ptions (.lynxrc) to
  *  set a different default.
  */
-PUBLIC char** p_entity_values = ISO_Latin1;	/* Pointer to translation */
+PUBLIC CONST char** p_entity_values = ISO_Latin1; /* Pointer to translation */
 PUBLIC int current_char_set = 0;		/* Index for translation */
 
 /*

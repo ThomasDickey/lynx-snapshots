@@ -645,6 +645,7 @@ PRIVATE canclose_t can_close ARGS2(
 	return ((stacked_tag->tagclass & new_tag->canclose) ?
 		close_error : close_NO);
 }
+
 PRIVATE void do_close_stacked ARGS1(
     HTStream *, context)
 {
@@ -661,6 +662,7 @@ PRIVATE void do_close_stacked ARGS1(
     context->element_stack = stacked->next;
     FREE(stacked);
 }
+
 PRIVATE int is_on_stack ARGS2(
 	HTStream *,	context,
 	HTTag *,	old_tag)
@@ -758,10 +760,11 @@ PRIVATE void end_element ARGS2(
 	return;
     }
 #ifdef WIND_DOWN_STACK
-    while (context->element_stack) { /* Loop is error path only */
+    while (context->element_stack) /* Loop is error path only */
 #else
-    if (context->element_stack) { /* Substitute and remove one stack element */
+    if (context->element_stack) /* Substitute and remove one stack element */
 #endif /* WIND_DOWN_STACK */
+    {
 	HTElement * N = context->element_stack;
 	HTTag * t = N->tag;
 

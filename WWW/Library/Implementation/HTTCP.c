@@ -726,6 +726,7 @@ PUBLIC int HTDoConnect ARGS4(
     /*
     **	Set up defaults.
     */
+    memset(soc_in, 0, sizeof(*soc_in));
     soc_in->sin_family = AF_INET;
     soc_in->sin_port = htons(default_port);
 

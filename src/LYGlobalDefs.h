@@ -29,22 +29,6 @@ extern BOOLEAN UseFixedRecords; /* convert binary files to FIXED 512 records */
 #endif /* VMS */
 
 #ifndef VMS
-extern char *NNTPSERVER_putenv_cmd;
-extern char *http_proxy_putenv_cmd;
-extern char *https_proxy_putenv_cmd;
-extern char *ftp_proxy_putenv_cmd;
-extern char *gopher_proxy_putenv_cmd;
-extern char *cso_proxy_putenv_cmd;
-extern char *news_proxy_putenv_cmd;
-extern char *newspost_proxy_putenv_cmd;
-extern char *newsreply_proxy_putenv_cmd;
-extern char *snews_proxy_putenv_cmd;
-extern char *snewspost_proxy_putenv_cmd;
-extern char *snewsreply_proxy_putenv_cmd;
-extern char *nntp_proxy_putenv_cmd;
-extern char *wais_proxy_putenv_cmd;
-extern char *finger_proxy_putenv_cmd;
-extern char *no_proxy_putenv_cmd;
 extern char *list_format;
 #endif /* !VMS */
 
@@ -55,7 +39,7 @@ extern char *LYCSwingPath;
 #ifdef DIRED_SUPPORT
 extern BOOLEAN lynx_edit_mode;
 extern BOOLEAN no_dired_support;
-extern BOOLEAN dir_list_style;
+extern int dir_list_style;
 extern HTList *tagged;
 #define FILES_FIRST 1
 #define MIXED_STYLE 2
@@ -150,7 +134,7 @@ extern BOOLEAN LYforce_no_cache;
 extern BOOLEAN LYoverride_no_cache;  /* don't need fresh copy, from history */
 extern BOOLEAN LYinternal_flag; /* don't need fresh copy, was internal link */
 extern BOOLEAN LYresubmit_posts;
-extern BOOLEAN user_mode; /* novice or advanced */
+extern int user_mode; /* novice or advanced */
 extern BOOLEAN is_www_index;
 extern BOOLEAN dump_output_immediately;
 extern int dump_output_width;
@@ -170,7 +154,7 @@ extern BOOLEAN error_logging;     /* TRUE to mail error messages */
 extern BOOLEAN check_mail;        /* TRUE to report unread/new mail messages */
 extern BOOLEAN vi_keys;           /* TRUE to turn on vi-like key movement */
 extern BOOLEAN emacs_keys;        /* TRUE to turn on emacs-like key movement */
-extern BOOLEAN keypad_mode;       /* is set to either NUMBERS_AS_ARROWS *
+extern int keypad_mode;           /* is set to either NUMBERS_AS_ARROWS *
 				   * or LINKS_ARE_NUMBERED 		*/
 extern BOOLEAN case_sensitive;    /* TRUE to turn on case sensitive search */
 extern BOOLEAN no_inside_telnet;  /* this and following are restrictions */
@@ -331,10 +315,6 @@ extern BOOLEAN LYPreparsedSource;	/* Show source as preparsed?	 */
 extern BOOLEAN LYPrependBaseToSource;
 extern BOOLEAN LYPrependCharsetToSource;
 extern BOOLEAN LYQuitDefaultYes;
-
-#ifdef RAWDOSKEYHACK
-extern BOOLEAN raw_dos_key_hack; /* Turn on and off DOS key hack */
-#endif /* RAWDOSKEYHACK */
 
 #ifndef VMS
 extern BOOLEAN LYNoCore;

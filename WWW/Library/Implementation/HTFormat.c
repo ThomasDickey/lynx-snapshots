@@ -475,6 +475,36 @@ PUBLIC float HTStackValue ARGS4(
 
 }
 
+/*	Display the page while transfer in progress
+**	-------------------------------------------
+**
+**   Repaint the page only when necessary.
+**
+*/
+#ifdef DISP_PARTIAL
+PRIVATE void HTDisplayPartial NOARGS
+{
+    if (display_partial) {
+	/*
+	**  HText_getNumOfLines() = "current" number of lines received
+	**  NumOfLines_partial = number of lines at the moment of last repaint.
+	**
+	**  Update NumOfLines_partial only if we repaint the display,
+	**  so it corresponds to real number of displayed lines.
+	**  Repaint the page only if Newline_partial
+	**  in our hand is fact:
+	*/
+	if ((Newline_partial <= HText_getNumOfLines()) &&
+		((Newline_partial + display_lines) > NumOfLines_partial))  {
+	    NumOfLines_partial = HText_getNumOfLines();
+	    HText_pageDisplay(Newline_partial, "");
+	}
+    }
+}
+#else
+#define HTDisplayPartial() /*nothing*/
+#endif
+
 /*	Push data from a socket down a stream
 **	-------------------------------------
 **
@@ -575,17 +605,9 @@ PUBLIC int HTCopy ARGS4(
 #endif /* NOT_ASCII */
 
 	(*targetClass.put_block)(sink, input_buffer, status);
-
-#ifdef DISP_PARTIAL
-	if (display_partial &&
-		((Newline_partial + display_lines) > NumOfLines_partial))  {
-	    NumOfLines_partial = HText_getNumOfLines();
-	    HText_pageDisplay(Newline_partial, "");
-	}
-#endif /* DISP_PARTIAL */
-
 	bytes += status;
         HTReadProgress(bytes, anchor ? anchor->content_length : 0);
+	HTDisplayPartial();
 
     } /* next bufferload */
 
@@ -636,18 +658,12 @@ PUBLIC int HTFileCopy ARGS2(
 	    }
 	    break;
 	}
+
 	(*targetClass.put_block)(sink, input_buffer, status);
-
-#ifdef DISP_PARTIAL
-	if (display_partial &&
-		((Newline_partial + display_lines) > NumOfLines_partial))  {
-	    NumOfLines_partial = HText_getNumOfLines();
-	    HText_pageDisplay(Newline_partial, "");
-	}
-#endif /* DISP_PARTIAL */
-
 	bytes += status;
-	HTReadProgress(bytes, -2);
+	HTReadProgress(bytes, 0);
+	HTDisplayPartial();
+
 	if (HTCheckForInterrupt()) {
 	    _HTProgress ("Data transfer interrupted.");
 	    if (bytes) {
@@ -709,18 +725,12 @@ PRIVATE int HTGzFileCopy ARGS2(
 	    }
 	    break;
 	}
+
 	(*targetClass.put_block)(sink, input_buffer, status);
-
-#ifdef DISP_PARTIAL
-	if (display_partial &&
-		((Newline_partial + display_lines) > NumOfLines_partial))  {
-	    NumOfLines_partial = HText_getNumOfLines();
-	    HText_pageDisplay(Newline_partial, "");
-	}
-#endif /* DISP_PARTIAL */
-
 	bytes += status;
-	HTReadProgress(bytes, -2);
+	HTReadProgress(bytes, -1);
+	HTDisplayPartial();
+
 	if (HTCheckForInterrupt()) {
 	    _HTProgress ("Data transfer interrupted.");
 	    if (bytes) {

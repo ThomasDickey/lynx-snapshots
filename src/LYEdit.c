@@ -74,14 +74,15 @@ PUBLIC int edit_current_file ARGS3(
 	if (strlen(filename)>1) filename++;
 #endif
 #ifdef DOSPATH
-	if ((fp = fopen(HTDOS_name(filename),"r")) == NULL) {
+	if ((fp = fopen(HTDOS_name(filename),"r")) == NULL)
 #else
 #ifdef VMS
-	if ((fp = fopen(HTVMS_name("", filename), "r")) == NULL) {
+	if ((fp = fopen(HTVMS_name("", filename), "r")) == NULL)
 #else
-	if ((fp = fopen(filename, "r")) == NULL) {
+	if ((fp = fopen(filename, "r")) == NULL)
 #endif /* VMS */
 #endif /* DOSPATH */
+	{
 	    HTAlert(COULD_NOT_ACCESS_FILE);
 	    FREE(filename);
 	    goto failure;
@@ -96,14 +97,15 @@ PUBLIC int edit_current_file ARGS3(
      *  Don't allow editing if user lacks append access.
      */
 #ifdef DOSPATH
-    if ((fp = fopen(HTDOS_name("", filename), "a")) == NULL) {
+    if ((fp = fopen(HTDOS_name("", filename), "a")) == NULL)
 #else
 #ifdef VMS
-    if ((fp = fopen(HTVMS_name("", filename), "a")) == NULL) {
+    if ((fp = fopen(HTVMS_name("", filename), "a")) == NULL)
 #else
-    if ((fp = fopen(filename, "a")) == NULL) {
+    if ((fp = fopen(filename, "a")) == NULL)
 #endif /* VMS */
 #endif /* DOSPATH */
+    {
 	_statusline(NOAUTH_TO_EDIT_FILE);
 	sleep(MessageSecs);
 	goto failure;

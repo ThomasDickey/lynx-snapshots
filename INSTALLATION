@@ -218,6 +218,10 @@ II. Compile instructions -- UNIX
   --disable-parent-dir-refs		(define NO_PARENT_DIR_REFERENCE)
   	Use this option to disable "Up-to" parent-links in directory listings.
 
+  --disable-partial			(define DISP_PARTIAL)
+	Turn off code that lets Lynx display parts of a long page while loading
+	it.
+
   --enable-8bit-toupper			(define EXP_8BIT_TOUPPER)
 	Use experimental 8-bit case-conversion, e.g., for case-insensitive
 	searches in non-ASCII display character set, this overrides locale
@@ -254,8 +258,13 @@ II. Compile instructions -- UNIX
   --enable-nsl-fork			(define NSL_FORK)
 	Use this option to allow NSL requests to be aborted at will.
 
-  --enable-partial			(define DISP_PARTIAL)
-	Use code that lets Lynx display parts of a long page while loading it.
+  --enable-persistent-cookies		(define EXP_PERSISTENT_COOKIES)
+	Use this option to compile-in support for saving cookies to a file,
+	for subsequent reuse.  This creates a file named 'cookies' in the
+	current directory.
+
+  --enable-syslog			(define SYSLOG_REQUESTED_URLS)
+	Use this option to log NSL requests via syslog().
 
   --enable-underlines			(define UNDERLINE_LINKS)
 	Use this option underline links rather than using boldface.
@@ -331,7 +340,7 @@ II. Compile instructions -- UNIX
 	setenv RESOLVLIB -lbind
 
 	#!/bin/csh -f
-	setenv CPPFLAGS "-SYSLOG_REQUESTED_URLS -I$HOME/slang \
+	setenv CPPFLAGS "-DSYSLOG_REQUESTED_URLS -I$HOME/slang \
 		-I$HOME/.usr/include"
 	setenv LIBS "-L$HOME/.slang/lib -L$HOME/.usr/lib"
 	./configure --exec-prefix=$HOME --bindir=$HOME/.lynx \
@@ -525,31 +534,47 @@ V. Compile instructions -- 386 DOS
     curses package and a TCP package.  You can use PDCurses (available at
     "http://www.lightlink.com/hessling/") and the DJGPP port of WATTCP
     (available in two different versions at "ftp://neonatal.sm.ic.ac.uk/"
-    and in "http://www.fdisk.com/doslynx/wlynx/source/djgpp.zip").
-    You can also use slang ("ftp://space.mit.edu/pub/davis/slang") as your
-    curses library.  It has not been fully ported to DOS yet, however.
-    See "http://www.flora.org/lynx-dev/html/month1097/msg00390.html".  You
-    need to compile these before you go any further. If you wish to use the
-    beta version of PDCurses 2.3, you need to first apply a patch (available at
+    and in "http://www.fdisk.com/doslynx/wlynx/source/djgpp.zip"). You
+    can also use slang ("ftp://space.mit.edu/pub/davis/slang") as your
+    curses library. You need to compile these before you go any further.
+    If you wish to use the beta version of PDCurses 2.3, you need to
+    first apply a patch (available at
     "http://www.flora.org/lynx-dev/html/month0997/msg00441.html").
     Most of the patch has already been applied if you get the latest
     beta version. If you have trouble applying the patch, we recommend
     that you use the "patch" program,
-    ("http://www.simtel.net/pub/simtelnet/gnu/djgpp/v2gnu/pat25b.zip").
-    The WATTCP TCPLIB sources also need to be patched prior to compilation.
-    See "http://www.flora.org/lynx-dev/html/month1197/msg00403.html".
+    ("http://www.simtel.net/pub/simtelnet/gnu/djgpp/v2gnu/pat25b.zip"). The
+    WATTCP TCPLIB sources also need to be patched prior to compilation. See
+    "http://www.flora.org/lynx-dev/html/month1197/msg00403.html".
 
     To read the Unix man style documentation, use, for example, "less"
     ("http://www.simtel.net/pub/simtelnet/gnu/djgpp/v2gnu/lss332b.zip").
     Compile or place your compiled PDCurses library in lynx2-*/curses, and
     compile or place your compiled WATTCP library in lynx2-*/djgpp/tcplib.
+    If using the SLANG library, put libslang.a in your DJGPP/lib
+    directory and put slang.h and slcurses.h in your DJGPP/include
+    directory, or in the appropriate directories specified by LIBRARY_PATH
+    and INCLUDE_PATH in your DJGPP.ENV file.
 
-    Move to the "lynx2-*/WWW/Library/djgpp" directory and do "make".  This
-    should compile libwww.a.  Next move to the "lynx2-*/src/chrtrans"
+    Move to the "lynx2-*/WWW/Library/djgpp" directory and do "make". This
+    should compile libwww.a. Next move to the "lynx2-*/src/chrtrans"
     directory and do "make -f makefile.dos" to compile the character tables.
-    Then move to the "lynx2-*/src" directory and do "make -f makefile.dos".
+    Then move to the "lynx2-*/src" directory. There are three choices for
+    compiling at this point. You can do "make -f makefile.dos" to compile
+    with PDCurses, "make -f makefile.wsl" to compile with SLANG, or
+    "make -f makefile.dsl" to compile with SLANG and the DJGPP keyhandler.
+    At the time of this writing, it is not clear what the advantages and
+    disadvantages of each version are. The PDCurses version has the most
+    experience and allows remapping of ALT and Function keys. The SLANG
+    version seems to have better screen handling. It allows mapping of
+    function keys, but not ALT keys. The SLANG with DJGPP keyhandler allows
+    mapping of ALT and Function keys, but has the risk of incompatibilities
+    from mixing different programs.
+
     If all goes well, you will have a lynx.exe file.  If you have trouble,
     check to be sure djgpp.env is the way it came in the original package.
+    To compile lynx with DJGPP you may need about 20Mb of free disk space
+    for virtual memory.
 
     To test Lynx_386 you must have a packet driver installed.  The simplest
     method is to use a null packet driver that just allows Lynx to start up,
@@ -566,8 +591,21 @@ V. Compile instructions -- 386 DOS
     "ftp://jazz.trumpet.com.au/slipper".  To remove it from memory use
     termin.com (usage "termin 0x60"), available in the CRYNWR package.  To
     connect over a dialup PPP connection you need dosppp or klos' pppshare.
-    (Find at "http://www.simtel.net/pub/simtelnet/msdos/pktdrvr/dosppp05.zip"
-    and "ftp://ftp.klos.com/demo/pppshare.exe".)
+    (Find at:
+    "http://mvmpc9.ciw.uni-karlsruhe.de/c:/user/toni/dosppp/dosppp06.zip",
+    "http://personal.redestb.es/tonilop/dosppp/dosppp06.zip", or
+    "ftp://ftp.agate.net/users/01935/internet/dosppp06.zip";
+    "ftp://ftp.klos.com/demo/pppshare.exe".)
+
+
+    File access looks like this:
+
+    file:///c:/
+    file:///c:/dos
+    file:///c:/dos/command.com
+    file://localhost/c:/
+    file://localhost/c:/dos
+    file://localhost/c:/dos/command.com
 
     See "http://www.fdisk.com/doslynx/lynxport.htm" for more hints and some
     precompiled libraries.  One problem you can run into is when editing
@@ -763,25 +801,46 @@ VII. Setting environment variables before running Lynx (optional)
     The proxy and no_proxy variables also can be set at run time via
     lynx.cfg.
 
-2. Win32 (95/NT) and 386 DOS (adapted from "readme.txt" by Wayne Buttles)
+2. Win32 (95/NT) and 386 DOS (adapted from "readme.txt" by Wayne Buttles and
+   "readme.dos" by Doug Kaufman)
+
+    Here are some environment variables that should be set, usually in a
+    batch file that runs the lynx executable. Make sure that you have enough
+    room left in your environment. You may need to change your "SHELL="
+    setting in config.sys. In addition, lynx looks for a "SHELL" environment
+    variable when shelling to DOS.  If  you wish to preserve the environment
+    space when shelling, put a line like this in your AUTOEXEC.BAT file also
+    "SET SHELL=C:\COMMAND.COM /E:2048". It should match CONFIG.SYS.
 
     HOME         Where to keep the bookmark file and personal config files.
-    LYNX_CFG     The full path and filename for lynx.cfg
     TEMP or TMP  Bookmarks are kept here with no HOME.  Temp files here.
-    TERM         Set TERM=vt100 to stop that annoying terminal type message.
-    USER         Tells Lynx you are real instead of an anonymous user(?)
+    USER         Set to your login name
+    LYNX_CFG     Set to the full path and filename for lynx.cfg
 
     386 version only:
-    WATTCP.CFG   Where to find the wattcp.cfg file.
+    WATTCP.CFG   Set to the full path for the WATTCP.CFG directory
     (Depending on how you compiled libtcp.a, you may have to use WATCONF.)
 
     Define these in your batch file for running Lynx.  For example, if your
-    application line is "D:\win32\lynx.bat", lynx.bat may look like:
+    application line is "D:\win32\lynx.bat", lynx.bat for Win32 may look like:
 	@ECHO OFF
 	set home=d:\win32
 	set temp=d:\tmp
 	set lynx_cfg=d:\win32\lynx.cfg
 	d:\win32\lynx.exe %1 %2 %3 %4 %5
+
+    In lynx_386, a typical batch file might look like:
+
+        @echo off
+        set HOME=f:/lynx2-8
+        set USER=your_login_name
+        set LYNX_CFG=%HOME%/lynx.cfg
+        set WATTCP.CFG=%HOME%
+        f:\lynx2-8\lynx %1 %2 %3 %4 %5 %6 %7 %8 %9
+
+    You will also need to make sure that the WATTCP.CFG file has the
+    correct information for IP number, Gateway, Netmask, and Domain Name
+    Server. This can also be automated in the batch file.
 
 
 VIII. Acknowledgment

@@ -62,30 +62,46 @@ PUBLIC void HTReadProgress ARGS2(
 	long,		bytes,
 	long,		total)
 {
-    static long kb_units = 1024000;
+    static long kb_units = 1024;
     static time_t first, last;
+    static long bytes_last;
+    long transfer_rate;
     char line[80];
-    time_t now = time((time_t *)0);
+    time_t now = time((time_t *)0);  /* once per second */
     char *units = "bytes";
 
     if (bytes == 0) {
 	first = last = now;
-    } else if (bytes > 0) {
-	if (now != last) {
-	    last = now;
+	bytes_last = bytes;
+    } else if ((bytes > 0) &&
+	       (now != first))
+	       /* 1 sec delay for transfer_rate calculation :-( */ {
+	transfer_rate = (bytes) / (now - first);   /* bytes/sec */
+
+	/* optimal refresh time: every 0.2 sec */
+	if ((bytes - bytes_last) > (transfer_rate / 5)) {
+
+	    bytes_last += (transfer_rate / 5);  /* until we got next second */
+
+	    if (now != last) {
+		last = now;
+		bytes_last = bytes;
+	    }
 	    if (total >= kb_units || bytes >= kb_units) {
-		if (bytes > 0) bytes /= 1024;
+		bytes /= 1024;
 		if (total > 0) total /= 1024;
 		units = "KB";
 	    }
-	    if (total > 0) {
+
+	    if (total >  0)
 		sprintf (line, "Read %ld of %ld %s of data.", bytes, total, units);
-	    } else if (total < 0) {
-		sprintf (line, "Read %ld uncompressed %s of data.", bytes, units);
+	    if (total <= 0)
+		sprintf (line, "Read %ld %s of data.", bytes, units);
+	     if (transfer_rate > 0)
+	        sprintf (line + strlen(line), " %ld kb/sec.", transfer_rate / 1024);
+	    if (total <  0) {
 		if (total < -1)
 		    strcat(line, " (Press 'z' to abort)");
-	    } else {
-		sprintf (line, "Read %ld %s of data.", bytes, units);
 	    }
 	    _HTProgress(line);
 	}
@@ -117,9 +133,9 @@ PUBLIC BOOL HTConfirm ARGS1(CONST char *, Msg)
 #ifdef VMS
 	extern BOOLEAN HadVMSInterrupt;
 #endif /* VMS */
-	
+
 	_user_message("%s (y/n) ", Msg);
-	
+
 	while (1) {
 	    c = LYgetch();
 #ifdef VMS
@@ -152,7 +168,7 @@ PUBLIC char * HTPrompt ARGS2(
     Tmp[199] = '\0';
 
     _statusline(Msg);
-    if (deflt) 
+    if (deflt)
         strncpy(Tmp, deflt, 199);
 
     if (!dump_output_immediately)
@@ -219,7 +235,7 @@ PUBLIC void HTPromptUsernameAndPassword ARGS4(
 	 authentication_info[0] && authentication_info[1]) ||
 	(IsProxy == TRUE &&
 	 proxyauth_info[0] && proxyauth_info[1])) {
-	/* 
+	/*
 	**  The -auth or -pauth parameter gave us both the username
 	**  and password to use for the first realm or proxy server,
 	**  respectively, so just use them without any prompting. - FM
@@ -351,11 +367,9 @@ PUBLIC void HTPromptUsernameAndPassword ARGS4(
 **	Returns FALSE on cancel,
 **		TRUE if the cookie should be set.
 */
-PUBLIC BOOL HTConfirmCookie ARGS6(
+PUBLIC BOOL HTConfirmCookie ARGS4(
 	void *,		dp,
 	CONST char *,	server,
-	CONST char *,	domain,
-	CONST char *,	path,
 	CONST char *,	name,
 	CONST char *,	value)
 {
@@ -369,11 +383,11 @@ PUBLIC BOOL HTConfirmCookie ARGS6(
 
     if ((de = (domain_entry *)dp) == NULL)
         return FALSE;
-  
+
     /*
     **  If the user has specified a constant action, don't prompt at all.
     */
-    if (de->bv == ACCEPT_ALWAYS)
+    if (de->bv == ACCEPT_ALWAYS || de->bv == FROM_FILE)
         return TRUE;
     if (de->bv == REJECT_ALWAYS)
         return FALSE;
@@ -393,9 +407,9 @@ PUBLIC BOOL HTConfirmCookie ARGS6(
     **  minus the length of the %s directives (10 chars)
     */
     if (de != NULL) {
-        if (de->bv == ACCEPT_ALWAYS) 
+        if (de->bv == ACCEPT_ALWAYS)
 	    return TRUE;
-	if (de->bv == REJECT_ALWAYS) 
+	if (de->bv == REJECT_ALWAYS)
 	    return FALSE;
     }
     space_free = (((LYcols - 1) - 37) - strlen(server));
@@ -547,7 +561,7 @@ PUBLIC int HTConfirmPostRedirect ARGS2(
 	StrAllocCat(show_POST_url, Redirecting_url);
     }
     while (1) {
-	int c;  
+	int c;
 
 	switch (on_screen) {
 	    case 0:
@@ -564,7 +578,7 @@ PUBLIC int HTConfirmPostRedirect ARGS2(
 		**  with same method and POST content. - FM
 		*/
 	        FREE(show_POST_url);
-		return 1;	
+		return 1;
 
  	    case 7:
  	    case 'C':

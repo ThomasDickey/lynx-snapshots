@@ -155,7 +155,7 @@ PROG_EXT=
 TRY_CFLAGS=
 case $host_os in
 aix4*)
-	CFLAGS="$CFLAGS -DAIX4 -D_BSD=44" 
+	CFLAGS="$CFLAGS -DAIX4 -D_BSD=44 -D_AIX" 
 	LIBS="$LIBS -lbsd"
 	;;
 aix*)
@@ -441,6 +441,14 @@ CF_ARG_ENABLE(8bit-toupper,
 AC_MSG_RESULT($use_8bit_toupper)
 test $use_8bit_toupper != no && AC_DEFINE(EXP_8BIT_TOUPPER)
 
+AC_MSG_CHECKING(if experimental persistent-cookie logic should be used)
+CF_ARG_ENABLE(persistent-cookies,
+[  --enable-persistent-cookies   use experimental persistent-cookie support],
+	[use_filed_cookies=$enableval],
+	[use_filed_cookies=no])
+AC_MSG_RESULT($use_filed_cookies)
+test $use_filed_cookies != no && AC_DEFINE(EXP_PERSISTENT_COOKIES)
+
 AC_MSG_CHECKING(if color-style code should be used)
 CF_ARG_ENABLE(color-style,
 [  --enable-color-style    use optional/experimental color style],
@@ -477,8 +485,8 @@ esac
 AC_SUBST(INSTALL_LSS)
 
 AC_MSG_CHECKING(if partial-display should be used)
-CF_ARG_ENABLE(partial,
-[  --enable-partial        use partial-display logic],
+CF_ARG_DISABLE(partial,
+[  --disable-partial       use partial-display logic],
 	[use_partial_display=$enableval],
 	[use_partial_display=yes])
 AC_MSG_RESULT($use_partial_display)
@@ -537,6 +545,14 @@ CF_ARG_ENABLE(nsl-fork,
 	[use_nsl_fork=no])
 AC_MSG_RESULT($use_nsl_fork)
 test $use_nsl_fork = yes && AC_DEFINE(NSL_FORK)
+
+AC_MSG_CHECKING(if you want to log URL requests via syslog)
+CF_ARG_ENABLE(syslog,
+[  --enable-syslog         log URL requests via syslog],
+	[use_syslog=yes],
+	[use_syslog=no])
+AC_MSG_RESULT($use_syslog)
+test $use_syslog = yes && AC_DEFINE(SYSLOG_REQUESTED_URLS)
 
 AC_MSG_CHECKING(if you want to underline links)
 CF_ARG_ENABLE(underlines,

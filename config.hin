@@ -17,8 +17,9 @@
 #undef DIRED_SUPPORT		/* AC_ARG_WITH(dired) */
 #undef DISP_PARTIAL		/* CF_ARG_ENABLE(partial) */
 #undef DONT_TRACK_INTERNAL_LINKS /* CF_ARG_DISABLE(internal-links) */
-#undef EXP_8BIT_TOUPPER		/* AC_ARG_WITH(8bit-toupper) */
-#undef EXP_CHARTRANS_AUTOSWITCH	/* AC_ARG_WITH(font-switch) */
+#undef EXP_8BIT_TOUPPER		/* AC_ARG_ENABLE(8bit-toupper) */
+#undef EXP_CHARTRANS_AUTOSWITCH	/* AC_ARG_ENABLE(font-switch) */
+#undef EXP_PERSISTENT_COOKIES	/* AC_ARG_ENABLE(persistent-cookies) */
 #undef FANCY_CURSES		/* defined by CF_FANCY_CURSES */
 #undef GCC_UNUSED		/* CF_GCC_ATTRIBUTES */
 #undef GZIP_PATH		/* CF_PATH_PROG(gzip) */
@@ -47,8 +48,8 @@
 #undef HAVE_SYS_IOCTL_H		/* have <sys/ioctl.h> */
 #undef HAVE_SYS_NDIR_H		/* defined by AC_HEADER_DIRENT */
 #undef HAVE_SYS_WAIT_H		/* have <sys/wait.h> */
-#undef HAVE_TERMIO_H		/* have <termio.h> */
 #undef HAVE_TERMIOS_H		/* have <termios.h> */
+#undef HAVE_TERMIO_H		/* have <termio.h> */
 #undef HAVE_TTYTYPE
 #undef HAVE_TYPE_UNIONWAIT	/* CF_UNION_WAIT */
 #undef HAVE_UNISTD_H		/* have <unistd.h> */
@@ -85,6 +86,7 @@
 #undef OK_ZIP			/* CF_ARG_DISABLE(dired-zip) */
 #undef RM_PATH			/* CF_PATH_PROG(rm) */
 #undef STDC_HEADERS
+#undef SYSLOG_REQUESTED_URLS	/* CF_ARG_ENABLE(syslog) */
 #undef SYSTEM_MAIL		/* CF_DEFINE_PROG */
 #undef SYSTEM_MAIL_FLAGS	/* defined by CF_SYSTEM_MAIL_FLAGS */
 #undef TAR_PATH			/* CF_PATH_PROG(tar) */
@@ -111,9 +113,13 @@
 #undef WAIT_USES_UNION		/* CF_FUNC_WAIT */
 #undef ZCAT_PATH		/* CF_PATH_PROG(zcat) */
 #undef ZIP_PATH			/* CF_PATH_PROG(zip) */
+#undef accept			/* CF_SOCKS5 */
 #undef const			/* defined by AC_C_CONST */
-#undef pid_t			/* defined by AC_TYPE_PID_T */
+#undef getpeername		/* CF_SOCKS5 */
+#undef getsockname		/* CF_SOCKS5 */
 #undef mode_t			/* defined by AC_TYPE_MODE_T */
+#undef pid_t			/* defined by AC_TYPE_PID_T */
+#undef recvfrom			/* CF_SOCKS5 */
 #undef uid_t			/* defined by AC_TYPE_UID_T */
 #undef vfork			/* defined by AC_FUNC_FORK */
 
@@ -131,7 +137,6 @@
 /* FIXME:SNAKE */
 /* FIXME:SOCKS */
 /* FIXME:SVR4_BSDSELECT */
-/* FIXME:SYSLOG_REQUESTED_URLS */
 
 #ifndef HAVE_LSTAT
 #define lstat stat

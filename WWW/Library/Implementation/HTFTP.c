@@ -110,6 +110,7 @@ BUGS:	@@@	Limit connection cache size!
 #define IPPORT_FTP	21
 #endif /* !IPORT_FTP */
 
+#include <LYUtils.h>
 #include <LYStrings.h>
 #include <LYLeaks.h>
 
@@ -144,7 +145,7 @@ struct _HTStructured {
 /*	Global Variables
 **	---------------------
 */
-PUBLIC BOOLEAN HTfileSortMethod = FILE_BY_NAME;
+PUBLIC int HTfileSortMethod = FILE_BY_NAME;
 PRIVATE char ThisYear[8];
 PRIVATE char LastYear[8];
 PRIVATE int TheDate;

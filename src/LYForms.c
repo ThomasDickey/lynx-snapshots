@@ -34,9 +34,8 @@ PRIVATE int popup_options PARAMS((
 	int		i_length,
 	int		disabled));
 
-PUBLIC int change_form_link ARGS6(
+PUBLIC int change_form_link ARGS5(
 	struct link *,	form_link,
-	int,		mode,
 	document *,	newdoc,
 	BOOLEAN *,	refresh_screen,
 	char *,		link_name,

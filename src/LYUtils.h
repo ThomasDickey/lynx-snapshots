@@ -30,10 +30,10 @@ extern void HTSugFilenames_free NOPARAMS;
 extern void HTAddSugFilename PARAMS((char *fname));
 extern void change_sug_filename PARAMS((char *fname));
 extern int number2arrows PARAMS((int number));
-extern void parse_restrictions PARAMS((char *s));
+extern void parse_restrictions PARAMS((CONST char *s));
 extern void checkmail NOPARAMS;
 extern int LYCheckMail NOPARAMS;
-extern void LYEnsureAbsoluteURL PARAMS((char **href, char *name));
+extern void LYEnsureAbsoluteURL PARAMS((char **href, CONST char *name));
 extern void LYConvertToURL PARAMS((char **AllocatedString));
 extern BOOLEAN LYExpandHostForURL PARAMS((
 	char **AllocatedString, char *prefix_list, char *suffix_list));
@@ -60,7 +60,7 @@ extern FILE *LYAppendToTxtFile PARAMS((char * name));
 #ifdef UNIX
 extern void LYRelaxFilePermissions PARAMS((CONST char * name));
 #endif
-extern BOOLEAN LYCachedTemp PARAMS((char *result, char *cached));
+extern BOOLEAN LYCachedTemp PARAMS((char *result, char **cached));
 extern FILE *LYOpenTemp PARAMS((char *result, CONST char *suffix, CONST char *mode));
 extern FILE *LYReopenTemp PARAMS((char *name));
 extern FILE *LYOpenScratch PARAMS((char *result, CONST char *prefix));

@@ -265,7 +265,7 @@ PRIVATE int con_insert_unipair PARAMS((
 	int		fordefault));
 PRIVATE int con_insert_unipair_str PARAMS((
 	u16		unicode,
-	char *		replace_str,
+	CONST char *	replace_str,
 	int		fordefault));
 PRIVATE void con_clear_unimap PARAMS((
 	int		fordefault));
@@ -306,7 +306,7 @@ PRIVATE int UC_FindGN_byMIME PARAMS((
 	CONST char *	UC_MIMEcharset));
 PRIVATE void UCreset_allocated_LYCharSets NOPARAMS;
 PRIVATE void UCfree_allocated_LYCharSets NOPARAMS;
-PRIVATE char ** UC_setup_LYCharSets_repl PARAMS((
+PRIVATE CONST char ** UC_setup_LYCharSets_repl PARAMS((
 	int		UC_charset_in_hndl,
 	unsigned	lowest8));
 PRIVATE int UC_Register_with_LYCharSets PARAMS((
@@ -602,11 +602,12 @@ PRIVATE int con_insert_unipair ARGS3(
 
 PRIVATE int con_insert_unipair_str ARGS3(
 	u16,		unicode,
-	char *, 	replace_str,
+	CONST char *, 	replace_str,
 	int,		fordefault)
 {
     int i, n;
-    char ***p1, **p2;
+    char ***p1;
+    CONST char **p2;
 
     if(fordefault)
 	p1 = unidefault_pagedir_str[n = unicode >> 11];
@@ -626,15 +627,18 @@ PRIVATE int con_insert_unipair_str ARGS3(
 	}
     }
 
-    if (!(p2 = p1[n = (unicode >> 6) & 0x1f])) {
-	p2 = p1[n] = (char* *)malloc(64*sizeof(char *));
-	if (!p2)
+    n = ((unicode >> 6) & 0x1f);
+    if (!p1[n]) {
+	p1[n] = (char **)malloc(64*sizeof(char *));
+	if (!p1[n])
 	    return -ENOMEM;
 
+	p2 = (CONST char **)p1[n];
 	for (i = 0; i < 64; i++) {
 	    p2[i] = NULL;	/* No replace string this character (yet) */
 	}
     }
+    p2 = (CONST char **)p1[n];
 
     p2[unicode & 0x3f] = replace_str;
 
@@ -1649,7 +1653,7 @@ PUBLIC int UCGetLYhndl_byMIME ARGS1(
 /*
  *  We need to remember which ones were allocated and which are static.
  */
-PRIVATE char ** remember_allocated_LYCharSets[MAXCHARSETS];
+PRIVATE CONST char ** remember_allocated_LYCharSets[MAXCHARSETS];
 
 PRIVATE void UCreset_allocated_LYCharSets NOARGS
 {
@@ -1671,17 +1675,17 @@ PRIVATE void UCfree_allocated_LYCharSets NOARGS
     }
 }
 
-PRIVATE char ** UC_setup_LYCharSets_repl ARGS2(
+PRIVATE CONST char ** UC_setup_LYCharSets_repl ARGS2(
 	int,		UC_charset_in_hndl,
 	unsigned,	lowest8)
 {
-    char **ISO_Latin1 = LYCharSets[0];
-    char **p;
+    CONST char **ISO_Latin1 = LYCharSets[0];
+    CONST char **p;
     char **prepl;
     u16 *pp;
-    char **tp;
-    char *s7;
-    char *s8;
+    CONST char **tp;
+    CONST char *s7;
+    CONST char *s8;
     size_t i;
     int j, changed;
     u16 k;
@@ -1690,7 +1694,7 @@ PRIVATE char ** UC_setup_LYCharSets_repl ARGS2(
     /*
      *	Create a temporary table for reverse lookup of latin1 codes:
      */
-    tp = (char **)malloc(96 * sizeof(char *));
+    tp = (CONST char **)malloc(96 * sizeof(CONST char *));
     if (!tp)
 	return NULL;
     for (i = 0; i < 96; i++)
@@ -1744,12 +1748,14 @@ PRIVATE char ** UC_setup_LYCharSets_repl ARGS2(
      *	Now allocate a new table compatible with LYCharSets[]
      *	and with the HTMLDTD for entities.
      *	We don't know yet whether we'll keep it around. */
-    p = prepl = (char **)malloc(HTML_dtd.number_of_entities * sizeof(char *));
-    if (!p) {
+    prepl = (char **)malloc(HTML_dtd.number_of_entities * sizeof(char *));
+    if (!prepl) {
 	FREE(tp);
 	FREE(ti);
-	return NULL;
+	return 0;
     }
+
+    p = (CONST char **)prepl;
     changed = 0;
     for (i = 0; i < HTML_dtd.number_of_entities; i++, p++) {
 	/*
@@ -1820,7 +1826,7 @@ PRIVATE char ** UC_setup_LYCharSets_repl ARGS2(
 	FREE(prepl);
 	return NULL;
     }
-    return prepl;
+    return (CONST char **)prepl;
 }
 
 /*
@@ -1833,7 +1839,7 @@ PRIVATE int UC_Register_with_LYCharSets ARGS4(
 	int,		lowest_eightbit)
 {
     int i, LYhndl, found;
-    char **repl;
+    CONST char **repl;
 
     LYhndl = -1;
     if (LYNumCharsets == 0) {
@@ -1912,7 +1918,7 @@ PRIVATE int UC_Register_with_LYCharSets ARGS4(
 	    /*
 	     *	Remember to FREE at exit.
 	     */
-	    remember_allocated_LYCharSets[LYhndl]=repl;
+	    remember_allocated_LYCharSets[LYhndl] = repl;
 	}
     }
     return LYhndl;

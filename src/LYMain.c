@@ -33,6 +33,7 @@
 #ifdef DOSPATH
 #include <HTDOS.h>
 #endif
+#include <LYCookie.h>
 
 #ifdef __DJGPP__
 #include <dos.h>
@@ -109,7 +110,7 @@ PUBLIC char *LYCSwingPath = NULL;
 #ifdef DIRED_SUPPORT
 PUBLIC BOOLEAN lynx_edit_mode = FALSE;
 PUBLIC BOOLEAN no_dired_support = FALSE;
-PUBLIC BOOLEAN dir_list_style = MIXED_STYLE;
+PUBLIC int dir_list_style = MIXED_STYLE;
 PUBLIC HTList *tagged = NULL;
 #ifdef OK_OVERRIDE
 PUBLIC BOOLEAN prev_lynx_edit_mode = FALSE;
@@ -179,7 +180,7 @@ PUBLIC BOOLEAN LYJumpFileURL = FALSE;	 /* always FALSE the first time */
 PUBLIC BOOLEAN jump_buffer = JUMPBUFFER; /* TRUE if offering default shortcut */
 PUBLIC BOOLEAN goto_buffer = GOTOBUFFER; /* TRUE if offering default goto URL */
 PUBLIC BOOLEAN recent_sizechange = FALSE;/* the window size changed recently? */
-PUBLIC BOOLEAN user_mode = NOVICE_MODE;
+PUBLIC int user_mode = NOVICE_MODE;
 PUBLIC BOOLEAN dump_output_immediately = FALSE;
 PUBLIC BOOLEAN is_www_index = FALSE;
 PUBLIC BOOLEAN lynx_mode = NORMAL_LYNX_MODE;
@@ -198,7 +199,7 @@ PUBLIC BOOLEAN error_logging = MAIL_SYSTEM_ERROR_LOGGING;
 PUBLIC BOOLEAN check_mail = CHECKMAIL;
 PUBLIC BOOLEAN vi_keys = VI_KEYS_ALWAYS_ON;
 PUBLIC BOOLEAN emacs_keys = EMACS_KEYS_ALWAYS_ON;
-PUBLIC BOOLEAN keypad_mode = DEFAULT_KEYPAD_MODE;
+PUBLIC int keypad_mode = DEFAULT_KEYPAD_MODE;
 PUBLIC BOOLEAN case_sensitive = CASE_SENSITIVE_ALWAYS_ON;
 PUBLIC BOOLEAN telnet_ok = TRUE;
 PUBLIC BOOLEAN news_ok = TRUE;
@@ -208,9 +209,6 @@ PUBLIC BOOLEAN system_editor = FALSE;
 #ifdef USE_EXTERNALS
 PUBLIC BOOLEAN no_externals = FALSE;
 #endif
-#ifdef RAWDOSKEYHACK
-PUBLIC BOOLEAN raw_dos_key_hack = TRUE;
-#endif /* RAWDOSKEYHACK */
 PUBLIC BOOLEAN no_inside_telnet = FALSE;
 PUBLIC BOOLEAN no_outside_telnet = FALSE;
 PUBLIC BOOLEAN no_telnet_port = FALSE;
@@ -441,23 +439,7 @@ PRIVATE void free_lynx_globals NOARGS
 #ifdef LYNXCGI_LINKS  /* WebSter Mods -jkt */
     FREE(LYCgiDocumentRoot);
 #endif /* LYNXCGI_LINKS */
-    FREE(lynx_version_putenv_command);
-    FREE(NNTPSERVER_putenv_cmd);
-    FREE(http_proxy_putenv_cmd);
-    FREE(https_proxy_putenv_cmd);
-    FREE(ftp_proxy_putenv_cmd);
-    FREE(gopher_proxy_putenv_cmd);
-    FREE(cso_proxy_putenv_cmd);
-    FREE(news_proxy_putenv_cmd);
-    FREE(newspost_proxy_putenv_cmd);
-    FREE(newsreply_proxy_putenv_cmd);
-    FREE(snews_proxy_putenv_cmd);
-    FREE(snewspost_proxy_putenv_cmd);
-    FREE(snewsreply_proxy_putenv_cmd);
-    FREE(nntp_proxy_putenv_cmd);
-    FREE(wais_proxy_putenv_cmd);
-    FREE(finger_proxy_putenv_cmd);
-    FREE(no_proxy_putenv_cmd);
+    free_lynx_cfg();
 #endif /* !VMS */
 
 #ifdef VMS
@@ -595,7 +577,7 @@ PUBLIC int main ARGS2(
      * Where necessary we should open and (close!) TEXT mode.
      */
     _fmode = O_BINARY;
-    setmode( fileno( stdout ), O_BINARY );
+    SetOutputMode( O_BINARY );
 #endif
 
 #ifdef DOSPATH
@@ -1543,6 +1525,14 @@ PUBLIC int main ARGS2(
      */
     HTMLUseCharacterSet(current_char_set);
 
+#ifdef EXP_PERSISTENT_COOKIES 
+    /* 
+     *	Sod it, this looks like a reasonable place to load the 
+     *	cookies file, probably.  - RP 
+     */ 
+    LYLoadCookies("cookies"); /* add command line options! */ 
+#endif
+	 
     /*
      *	If startfile is a file URL and the host is defaulted,
      *	force in "//localhost", and if it's not an absolute URL,
@@ -1822,7 +1812,7 @@ typedef union {
 
 typedef struct parse_args_type
 {
-   char *name;
+   CONST char *name;
    int type;
 #define IGNORE_ARG		0x000
 #define TOGGLE_ARG		0x001
@@ -1845,7 +1835,7 @@ typedef struct parse_args_type
     */
 
    ParseData;
-   char *help_string;
+   CONST char *help_string;
 }
 Parse_Args_Type;
 
@@ -1907,10 +1897,10 @@ static int assume_charset_fun ARGS3(
     if (next_arg == 0) {
 	UCLYhndl_for_unspec = 0;
     } else {
-        LYLowerCase(next_arg);
-        StrAllocCopy(UCAssume_MIMEcharset, next_arg);
-        if (UCAssume_MIMEcharset && *UCAssume_MIMEcharset)
-            UCLYhndl_for_unspec = UCGetLYhndl_byMIME(UCAssume_MIMEcharset);
+	LYLowerCase(next_arg);
+	StrAllocCopy(UCAssume_MIMEcharset, next_arg);
+	if (UCAssume_MIMEcharset && *UCAssume_MIMEcharset)
+	    UCLYhndl_for_unspec = UCGetLYhndl_byMIME(UCAssume_MIMEcharset);
     }
     return 0;
 }
@@ -1924,11 +1914,11 @@ static int assume_local_charset_fun ARGS3(
     if (next_arg == 0) {
 	UCLYhndl_HTFile_for_unspec = 0;
     } else {
-        LYLowerCase(next_arg);
-        StrAllocCopy(UCAssume_localMIMEcharset, next_arg);
-        if (UCAssume_localMIMEcharset && *UCAssume_localMIMEcharset)
-            UCLYhndl_HTFile_for_unspec =
-	        UCGetLYhndl_byMIME(UCAssume_localMIMEcharset);
+	LYLowerCase(next_arg);
+	StrAllocCopy(UCAssume_localMIMEcharset, next_arg);
+	if (UCAssume_localMIMEcharset && *UCAssume_localMIMEcharset)
+	    UCLYhndl_HTFile_for_unspec =
+		UCGetLYhndl_byMIME(UCAssume_localMIMEcharset);
     }
     return 0;
 }
@@ -1976,7 +1966,7 @@ static int base_fun ARGS3(
      */
     LYPrependBase = TRUE;
     if (HTOutputFormat == HTAtom_for("www/dump"))
-        HTOutputFormat = HTAtom_for("www/download");
+	HTOutputFormat = HTAtom_for("www/download");
 
     return 0;
 }
@@ -1984,9 +1974,9 @@ static int base_fun ARGS3(
 #ifdef USE_SLANG
 /* -blink */
 static int blink_fun ARGS3(
-	Parse_Args_Type*,	p,
-	char **,		argv,
-	char *,			next_arg)
+	Parse_Args_Type*,	p GCC_UNUSED,
+	char **,		argv GCC_UNUSED,
+	char *,			next_arg GCC_UNUSED)
 {
     Lynx_Color_Flags |= SL_LYNX_USE_BLINK;
     return 0;
@@ -2000,7 +1990,7 @@ static int cache_fun ARGS3(
 	char *,			next_arg)
 {
     if (next_arg != 0)
-        HTCacheSize = atoi(next_arg);
+	HTCacheSize = atoi(next_arg);
     /*
      *  Limit size.
      */
@@ -2023,14 +2013,14 @@ static int child_fun ARGS3(
 #ifdef USE_SLANG
 /* -color */
 static int color_fun ARGS3(
-	Parse_Args_Type*,	p,
-	char **,		argv,
-	char *,			next_arg)
+	Parse_Args_Type*,	p GCC_UNUSED,
+	char **,		argv GCC_UNUSED,
+	char *,			next_arg GCC_UNUSED)
 {
     Lynx_Color_Flags |= SL_LYNX_USE_COLOR;
 
     if (LYShowColor != SHOW_COLOR_ALWAYS)
-        LYShowColor = SHOW_COLOR_ON;
+	LYShowColor = SHOW_COLOR_ON;
 
     return 0;
 }
@@ -2106,7 +2096,7 @@ static int error_file_fun ARGS3(
      *  of an HTTP transaction.
      */
     if (next_arg != 0)
-        http_error_file = next_arg;
+	http_error_file = next_arg;
     return 0;
 }
 
@@ -2159,13 +2149,13 @@ static int get_data_fun ARGS3(
      */
     while (fgets(buf, sizeof(buf), stdin) &&
 	  strncmp(buf, "---", 3) != 0) {
-        int j;
+	int j;
 
-        for (j = strlen(buf) - 1; j >= 0 && /* Strip line terminators */
+	for (j = strlen(buf) - 1; j >= 0 && /* Strip line terminators */
 	    (buf[j] == CR || buf[j] == LF); j--)
 	    buf[j] = '\0';
 
-        StrAllocCat(*get_data, buf);
+	StrAllocCat(*get_data, buf);
     }
 
     return 0;
@@ -2197,7 +2187,7 @@ static int hiddenlinks_fun ARGS3(
 	else
 	    print_help_and_exit (-1);
     } else {
-        LYHiddenLinks = HIDDENLINKS_MERGE;
+	LYHiddenLinks = HIDDENLINKS_MERGE;
     }
 
     return 0;
@@ -2458,9 +2448,9 @@ static int restrictions_fun ARGS3(
     if (next_arg != 0) {
 	parse_restrictions(next_arg);
     } else {
-        for (n = 0; n < sizeof(Usage)/sizeof(Usage[0]); n++)
-            printf("%s\n", Usage[n]);
-        exit(0);
+	for (n = 0; n < sizeof(Usage)/sizeof(Usage[0]); n++)
+	    printf("%s\n", Usage[n]);
+	exit(0);
     }
     return 0;
 }
@@ -2939,6 +2929,10 @@ treated '>' as a co-terminator for double-quotes and tags"
       "validate",	IGNORE_ARG,		0,
       "accept only http URLs (for validation)"
    ),
+   PARSE_SET(
+      "verbose",	TOGGLE_ARG,		&verbose_img,
+      "toggles [LINK], [IMAGE] and [INLINE] comments \nwith filenames of these images"
+   ),
    PARSE_FUN(
       "version",	FUNCTION_ARG,		version_fun,
       "print Lynx version information"
@@ -2955,8 +2949,8 @@ treated '>' as a co-terminator for double-quotes and tags"
 };
 
 static void print_help_strings ARGS2(
-	char *,	name,
-	char *,	help)
+	CONST char *,	name,
+	CONST char *,	help)
 {
     int pad;
     int c;
@@ -2989,11 +2983,11 @@ static void print_help_strings ARGS2(
 		} else {
 		    c = ' ';
 		}
-	        fputc (c, stdout);
+		fputc (c, stdout);
 		while (pad--)
 		    fputc (' ', stdout);
 	    } else {
-	        fputc (c, stdout);
+		fputc (c, stdout);
 	    }
 	    help++;
 	    first--;
@@ -3008,6 +3002,8 @@ static void print_help_and_exit ARGS1(int, exit_status)
 
     if (pgm == NULL) pgm = "lynx";
 
+    SetOutputMode( O_TEXT );
+
     fprintf (stdout, "USAGE: %s [options] [file]\n", pgm);
     fprintf (stdout, "Options are:\n");
     print_help_strings("",
@@ -3016,6 +3012,8 @@ in double-quotes (\"-\") on VMS)");
 
     for (p = Arg_Table; p->name != 0; p++)
 	print_help_strings(p->name, p->help_string);
+
+    SetOutputMode( O_BINARY );
 
     exit (exit_status);
 }
@@ -3029,7 +3027,7 @@ in double-quotes (\"-\") on VMS)");
  * If a and b match, it returns 1.  Otherwise 0 is returned.
  */
 static int arg_eqs_parse ARGS3(
-	char *,		a,
+	CONST char *,	a,
 	char *,		b,
 	char **,	c)
 {
@@ -3103,7 +3101,7 @@ PRIVATE void parse_arg ARGS2(
      *	special handling. - FM
      */
     if (*arg_name == 0)
-        return;
+	return;
 
     p = Arg_Table;
     while (p->name != 0) {
@@ -3124,7 +3122,7 @@ PRIVATE void parse_arg ARGS2(
 	if ((p->type & NEED_NEXT_ARG) && (next_arg == 0)) {
 	    next_arg = argv[1];
 	    if ((i != 0) && (next_arg != 0))
-	        (*i)++;
+		(*i)++;
 	}
 
 	switch (p->type & ARG_TYPE_MASK) {
@@ -3163,17 +3161,17 @@ PRIVATE void parse_arg ARGS2(
 
 	case LYSTRING_ARG:
 	     if ((q->str_value != 0) && (next_arg != 0))
-	         StrAllocCopy(*(q->str_value), next_arg);
+		 StrAllocCopy(*(q->str_value), next_arg);
 	     break;
 
 	case INT_ARG:
 	     if ((q->int_value != 0) && (next_arg != 0))
-	         *(q->int_value) = atoi (next_arg);
+		 *(q->int_value) = atoi (next_arg);
 	     break;
 
 	case STRING_ARG:
 	     if ((q->str_value != 0) && (next_arg != 0))
-	        *(q->str_value) = next_arg;
+		*(q->str_value) = next_arg;
 	     break;
 
 	case IGNORE_ARG:

@@ -690,13 +690,6 @@ try_again:
 		goto clean_up;
 	    }
 	}
-#ifdef DISP_PARTIAL
-/*  retrieving HTTP headers: never use display_partial mode at this point!
-
-	else if (display_partial)
-	    HText_pageDisplay(Newline_partial,"");
-*/
-#endif /* DISP_PARTIAL */
 
 	bytes_already_read += status;
 	HTReadProgress (bytes_already_read, 0);
