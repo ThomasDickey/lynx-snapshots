@@ -446,8 +446,8 @@ PRIVATE void parse_color ARGS1(
     *bg++ = '\0';
 
 #if defined(USE_SLANG)
-    if ((check_color(fg, default_fg) < 0) ||
-	(check_color(bg, default_bg) < 0))
+    if ((check_color(fg, default_fg) == ERR_COLOR) ||
+	(check_color(bg, default_bg) == ERR_COLOR))
 	exit_with_color_syntax(temp);
 
     SLtt_set_color(color, NULL, fg, bg);

@@ -1,6 +1,15 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2000-07-17 (2.8.4dev.6)
+* move special case statement for os390 compiler before AC_PROG_CC macro in
+  configure.in and regenerate configure script (reported by PG) -TD
+* correct check for return values of check_color() in parse_color() for slang
+  configuration, which prevented use of "default" color.  This applies to
+  2.8.3rel.1 as well -TD
+* correct draw_option() functions in LYForms.c and LYStrings.c for slang
+  configuration broken in dev.5 by wrong cut/paste (report by IC) -TD
+
 2000-07-16 (2.8.4dev.5)
 * remove "*:OS/390:*:*" item from config.guess -PG
 * add os390 item to $host_os case-statement in configure.in -PG
