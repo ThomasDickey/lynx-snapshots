@@ -365,12 +365,7 @@ PUBLIC void LYFillLocalFileURL ARGS2(
 	temp2 = HTVMS_wwwName(getenv("PATH"));
 #else
 	char curdir[LY_MAXPATH];
-#if HAVE_GETCWD
-	getcwd (curdir, sizeof(curdir));
-#else
-	getwd (curdir);
-#endif /* NO_GETCWD */
-	temp2 = wwwName(curdir);
+	temp2 = wwwName(Current_Dir(curdir));
 #endif /* VMS */
 	LYAddHtmlSep(href);
 	/*

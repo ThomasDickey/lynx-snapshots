@@ -261,11 +261,11 @@ PUBLIC char * HTPrompt ARGS2(
     char Tmp[200];
 
     Tmp[0] = '\0';
-    Tmp[199] = '\0';
+    Tmp[sizeof(Tmp)-1] = '\0';
 
     _statusline(Msg);
     if (deflt)
-	strncpy(Tmp, deflt, 199);
+	strncpy(Tmp, deflt, sizeof(Tmp)-1);
 
     if (!dump_output_immediately)
 	LYgetstr(Tmp, VISIBLE, sizeof(Tmp), NORECALL);

@@ -298,6 +298,10 @@ force numbering of links.
 .B -partial
 display partial pages while downloading.
 .TP
+.B partial_thres\fR=\fINUMBER
+number of lines to render before repainting display
+with partial-display logic
+.TP
 .B -pauth\fR=\fIID\fR:\fIPASSWD
 set authorization ID and password for a protected proxy
 server at startup.  Be sure to protect any script files

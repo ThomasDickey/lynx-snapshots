@@ -667,7 +667,7 @@ if test ".$system_name" != ".$cf_cv_system_name" ; then
 fi
 
 
-ALL_LINGUAS="de es fr it ko nl no pl pt sl sv"
+test -z "$ALL_LINGUAS" && ALL_LINGUAS=`test -d $srcdir/po && cd $srcdir/po && echo *.po|sed -e 's/\.po//g' -e 's/*//'`
 
 
 
@@ -3400,7 +3400,7 @@ test $use_our_messages = yes && USE_OUR_MESSAGES=
 
 if test "$USE_INCLUDED_LIBINTL" = yes ; then
         if test "$nls_cv_force_use_gnu_gettext" = yes ; then
-		echo "configure: warning: Using included gettext anyway" 1>&2
+		echo "configure: warning: Using included gettext anyway, since none was found" 1>&2
 		SUB_MAKEFILE="intl/makefile"
 	else
 		INTLDIR_MAKE="#"

@@ -268,6 +268,7 @@ PUBLIC char *bookmark_page = NULL; /* the name of the default bookmark page */
 PUBLIC char *BookmarkPage = NULL;  /* the name of the current bookmark page */
 PUBLIC char *LynxHome = NULL;	/* the default Home HREF. */
 PUBLIC char *homepage = NULL;  /* home page or main screen */
+PUBLIC char *original_dir = NULL; /* the original directory */
 PUBLIC char *startfile = NULL;	/* the first file */
 PUBLIC char *helpfile = NULL;	/* the main help file */
 PUBLIC char *helpfilepath = NULL;   /* the path to the help file set */
@@ -479,6 +480,7 @@ PRIVATE void free_lynx_globals NOARGS
 
     FREE(LynxHome);
     FREE(homepage);
+    FREE(original_dir);
     FREE(startfile);
     FREE(helpfile);
     FREE(helpfilepath);
@@ -1325,6 +1327,16 @@ PUBLIC int main ARGS2(
      */
     lynx_setup_colors();
 #endif /* USE_COLOR_TABLE */
+
+    /*
+     *  Set the original directory, used for default download
+     */
+    if (!strcmp(Current_Dir(filename), ".")) {
+	if ((cp = getenv("PWD")) != 0)
+	    StrAllocCopy(original_dir, cp);
+    } else {
+	StrAllocCopy(original_dir, filename);
+    }
 
     /*
      *	Set the compilation default signature file. - FM
