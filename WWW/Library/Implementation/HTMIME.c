@@ -20,6 +20,7 @@
 #include <UCAux.h>
 
 #include <LYCharSets.h>
+#include <LYStrings.h>
 #include <LYLeaks.h>
 
 #define FREE(x) if (x) {free(x); x = NULL;}
@@ -331,8 +332,7 @@ PRIVATE void HTMIME_put_character ARGS2(
 		    **	we'll make sure they're still gone from any
 		    **	charset parameter we check. - FM
 		    */
-		    for (i = 0; cp[i]; i++)
-			cp[i] = TOLOWER(cp[i]);
+		    LYLowerCase(cp);
 		    if ((cp1 = strchr(cp, ';')) != NULL) {
 			BOOL chartrans_ok = NO;
 			if ((cp2 = strstr(cp1, "charset")) != NULL) {
@@ -1248,8 +1248,7 @@ PRIVATE void HTMIME_put_character ARGS2(
 		/*
 		**  Convert to lowercase and indicate in anchor. - FM
 		*/
-		for (i = 0; me->value[i]; i++)
-		    me->value[i] = TOLOWER(me->value[i]);
+		LYLowerCase(me->value);
 		StrAllocCopy(me->anchor->cache_control, me->value);
 		/*
 		**  Check whether to set no_cache for the anchor. - FM
@@ -1373,8 +1372,7 @@ PRIVATE void HTMIME_put_character ARGS2(
 		/*
 		**  Convert to lowercase and indicate in anchor. - FM
 		*/
-		for (i = 0; me->value[i]; i++)
-		    me->value[i] = TOLOWER(me->value[i]);
+		LYLowerCase(me->value);
 		StrAllocCopy(me->anchor->content_encoding, me->value);
 		FREE(me->compression_encoding);
 		if (!strcmp(me->value, "8bit") ||
@@ -1407,8 +1405,7 @@ PRIVATE void HTMIME_put_character ARGS2(
 		/*
 		**  Convert to lowercase and indicate in anchor. - FM
 		*/
-		for (i = 0; me->value[i]; i++)
-		    me->value[i] = TOLOWER(me->value[i]);
+		LYLowerCase(me->value);
 		StrAllocCopy(me->anchor->content_language, me->value);
 		break;
 	    case miCONTENT_LENGTH:
@@ -1463,8 +1460,7 @@ PRIVATE void HTMIME_put_character ARGS2(
 		**  Force the Content-Transfer-Encoding value
 		**  to all lower case. - FM
 		*/
-		for (i = 0; me->value[i]; i++)
-		    me->value[i] = TOLOWER(me->value[i]);
+		LYLowerCase(me->value);
 		me->encoding = HTAtom_for(me->value);
 		break;
 	    case miCONTENT_TYPE:
@@ -2021,8 +2017,7 @@ PUBLIC void HTmmdecode ARGS2(
 			int LYhndl;
 
 			*qm2 = '\0';
-			for (p = s+2; *p; p++)
-			    *p = TOLOWER(*p);
+			LYLowerCase(s+2);
 			invalid = ((LYhndl = UCGetLYhndl_byMIME(s+2)) < 0 ||
 				   UCCanTranslateFromTo(LYhndl,
 						 current_char_set));

@@ -292,7 +292,7 @@ extern char *URLDomainSuffixes;
 extern BOOLEAN startfile_ok;
 extern BOOLEAN LYSelectPopups;		/* Cast popups to radio buttons? */
 extern BOOLEAN LYUseDefSelPop;		/* Command line -popup toggle    */
-extern int LYMultiBookmarks;    	/* Multi bookmark support on?	 */
+extern BOOLEAN LYMultiBookmarks;    	/* Multi bookmark support on?	 */
 extern BOOLEAN LYMBMBlocked;		/* Force MBM support off?	 */
 extern BOOLEAN LYMBMAdvanced;		/* MBM statusline for ADVANCED?	 */
 extern int LYStatusLine;		/* Line for statusline() or -1   */

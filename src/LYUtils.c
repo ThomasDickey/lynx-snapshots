@@ -1713,26 +1713,6 @@ PUBLIC void free_and_clear ARGS1(
 }
 
 /*
- *  Collapse (REMOVE) all spaces in the string.
- */
-PUBLIC void collapse_spaces ARGS1(
-	char *, 	string)
-{
-    int i=0;
-    int j=0;
-
-    if (!string)
-	return;
-
-    for (; string[i] != '\0'; i++)
-	if (!isspace((unsigned char)string[i]))
-	    string[j++] = string[i];
-
-    string[j] = '\0';  /* terminate */
-    return;
-}
-
-/*
  *  Convert single or serial newlines to single spaces throughout a string
  *  (ignore newlines if the preceding character is a space) and convert
  *  tabs to single spaces.  Don't ignore any explicit tabs or spaces if
@@ -1838,9 +1818,9 @@ PUBLIC void statusline ARGS1(
 	if ((temp = (unsigned char *)calloc(1, strlen(text) + 1)) == NULL)
 	    outofmem(__FILE__, "statusline");
 	if (kanji_code == EUC) {
-	    TO_EUC((unsigned char *)text, temp);
+	    TO_EUC(text, temp);
 	} else if (kanji_code == SJIS) {
-	    TO_SJIS((unsigned char *)text, temp);
+	    TO_SJIS(text, temp);
 	} else {
 	    for (i = 0, j = 0; text[i]; i++) {
 		if (text[i] != '\033') {
@@ -2343,8 +2323,7 @@ PUBLIC int LYCheckForProxyURL ARGS1(
 	return(0);
 
     /* kill beginning spaces */
-    while (isspace((unsigned char)*cp))
-	cp++;
+    cp = LYSkipBlanks(cp);
 
     /*
      * Check for a colon, and if present,
@@ -2373,6 +2352,26 @@ PUBLIC int LYCheckForProxyURL ARGS1(
 }
 
 /*
+ * Compare a "type:" string, replacing it by the comparison-string if it
+ * matches (and return true in that case).
+ */
+static BOOLEAN compare_type ARGS3(
+	char *,		tst,
+	char *,		cmp,
+	size_t,		len)
+{
+    if (!strncasecomp(tst, cmp, len)) {
+	if (strncmp(tst, cmp, len)) {
+	    size_t i;
+	    for (i = 0; i < len; i++)
+		tst[i] = cmp[i];
+	}
+	return TRUE;
+    }
+    return FALSE;
+}
+
+/*
 **  Must recognize a URL and return the type.
 **  If recognized, based on a case-insensitive
 **  analyis of the scheme field, ensures that
@@ -2389,7 +2388,6 @@ PUBLIC int is_url ARGS1(
 {
     char *cp = filename;
     char *cp1;
-    int i;
 
     /*
      *	Don't crash on an empty argument.
@@ -2406,8 +2404,7 @@ PUBLIC int is_url ARGS1(
     /*
      *	Kill beginning spaces.
      */
-    while (isspace((unsigned char)*cp))
-	cp++;
+    cp = LYSkipBlanks(cp);
 
     /*
      *	Can't be a URL if it starts with a slash.
@@ -2424,79 +2421,43 @@ PUBLIC int is_url ARGS1(
 	    StrAllocCat(cp,"/");
 #endif
 
-    if (!strncasecomp(cp, "news:", 5)) {
-	if (strncmp(cp, "news", 4)) {
-	    for (i = 0; i < 4; i++)
-		cp[i] = TOLOWER(cp[i]);
-	}
+    if (compare_type(cp, "news:", 5)) {
 	return(NEWS_URL_TYPE);
 
-    } else if (!strncasecomp(cp, "nntp:", 5)) {
-	if (strncmp(cp, "nntp", 4)) {
-	    for (i = 0; i < 4; i++)
-		cp[i] = TOLOWER(cp[i]);
-	}
+    } else if (compare_type(cp, "nntp:", 5)) {
 	return(NNTP_URL_TYPE);
 
-    } else if (!strncasecomp(cp, "snews:", 6)) {
-	if (strncmp(cp, "snews", 5)) {
-	    for (i = 0; i < 5; i++)
-		cp[i] = TOLOWER(cp[i]);
-	}
+    } else if (compare_type(cp, "snews:", 6)) {
 	return(SNEWS_URL_TYPE);
 
-    } else if (!strncasecomp(cp, "newspost:", 9)) {
+    } else if (compare_type(cp, "newspost:", 9)) {
 	/*
 	 *  Special Lynx type to handle news posts.
 	 */
-	if (strncmp(cp, "newspost", 8)) {
-	    for (i = 0; i < 8; i++)
-		cp[i] = TOLOWER(cp[i]);
-	}
 	return(NEWSPOST_URL_TYPE);
 
-    } else if (!strncasecomp(cp, "newsreply:", 10)) {
+    } else if (compare_type(cp, "newsreply:", 10)) {
 	/*
 	 *  Special Lynx type to handle news replies (followups).
 	 */
-	if (strncmp(cp, "newsreply", 9)) {
-	    for (i = 0; i < 9; i++)
-		cp[i] = TOLOWER(cp[i]);
-	}
 	return(NEWSREPLY_URL_TYPE);
 
-    } else if (!strncasecomp(cp, "snewspost:", 10)) {
+    } else if (compare_type(cp, "snewspost:", 10)) {
 	/*
 	 *  Special Lynx type to handle snews posts.
 	 */
-	if (strncmp(cp, "snewspost", 9)) {
-	    for (i = 0; i < 9; i++)
-		cp[i] = TOLOWER(cp[i]);
-	}
 	return(NEWSPOST_URL_TYPE);
 
-    } else if (!strncasecomp(cp, "snewsreply:", 11)) {
+    } else if (compare_type(cp, "snewsreply:", 11)) {
 	/*
 	 *  Special Lynx type to handle snews replies (followups).
 	 */
-	if (strncmp(cp, "snewsreply", 10)) {
-	    for (i = 0; i < 10; i++)
-		cp[i] = TOLOWER(cp[i]);
-	}
 	return(NEWSREPLY_URL_TYPE);
 
-    } else if (!strncasecomp(cp, "mailto:", 7)) {
-	if (strncmp(cp, "mailto", 6)) {
-	    for (i = 0; i < 6; i++)
-		cp[i] = TOLOWER(cp[i]);
-	}
+    } else if (compare_type(cp, "mailto:", 7)) {
 	return(MAILTO_URL_TYPE);
 
-    } else if (!strncasecomp(cp, "file:", 5)) {
-	if (strncmp(cp, "file", 4)) {
-	    for (i = 0; i < 4; i++)
-		cp[i] = TOLOWER(cp[i]);
-	}
+    } else if (compare_type(cp, "file:", 5)) {
 	if (LYisLocalFile(cp)) {
 	    return(FILE_URL_TYPE);
 	} else if (cp[5] == '/' && cp[6] == '/') {
@@ -2505,116 +2466,72 @@ PUBLIC int is_url ARGS1(
 	    return(0);
 	}
 
-    } else if (!strncasecomp(cp, "data:", 5)) {
-	if (strncmp(cp, "data", 4)) {
-	    for (i = 0; i < 4; i++)
-		cp[i] = TOLOWER(cp[i]);
-	}
+    } else if (compare_type(cp, "data:", 5)) {
 	return(DATA_URL_TYPE);
 
-    } else if (!strncasecomp(cp, "lynxexec:", 9)) {
+    } else if (compare_type(cp, "lynxexec:", 9)) {
 	/*
 	 *  Special External Lynx type to handle execution
 	 *  of commands or scripts which require a pause to
 	 *  read the screen upon completion.
 	 */
-	if (strncmp(cp, "lynxexec", 8)) {
-	    for (i = 0; i < 8; i++)
-		cp[i] = TOLOWER(cp[i]);
-	}
 	return(LYNXEXEC_URL_TYPE);
 
-    } else if (!strncasecomp(cp, "lynxprog:", 9)) {
+    } else if (compare_type(cp, "lynxprog:", 9)) {
 	/*
 	 *  Special External Lynx type to handle execution
 	 *  of commans, sriptis or programs with do not
 	 *  require a pause to read screen upon completion.
 	 */
-	if (strncmp(cp, "lynxprog", 8)) {
-	    for (i = 0; i < 8; i++)
-		cp[i] = TOLOWER(cp[i]);
-	}
 	return(LYNXPROG_URL_TYPE);
 
-    } else if (!strncasecomp(cp, "lynxcgi:", 8)) {
+    } else if (compare_type(cp, "lynxcgi:", 8)) {
 	/*
 	 *  Special External Lynx type to handle cgi scripts.
 	 */
-	if (strncmp(cp, "lynxcgi", 7)) {
-	    for (i = 0; i < 7; i++)
-		cp[i] = TOLOWER(cp[i]);
-	}
 	return(LYNXCGI_URL_TYPE);
 
-    } else if (!strncasecomp(cp, "LYNXPRINT:", 10)) {
+    } else if (compare_type(cp, "LYNXPRINT:", 10)) {
 	/*
 	 *  Special Internal Lynx type.
 	 */
-	if (strncmp(cp, "LYNXPRINT", 9)) {
-	    for (i = 0; i < 9; i++)
-		cp[i] = TOUPPER(cp[i]);
-	}
 	return(LYNXPRINT_URL_TYPE);
 
-    } else if (!strncasecomp(cp, "LYNXDOWNLOAD:", 13)) {
+    } else if (compare_type(cp, "LYNXDOWNLOAD:", 13)) {
 	/*
 	 *  Special Internal Lynx type.
 	 */
-	if (strncmp(cp, "LYDOWNLOAD", 12)) {
-	    for (i = 0; i < 12; i++)
-		cp[i] = TOUPPER(cp[i]);
-	}
 	return(LYNXDOWNLOAD_URL_TYPE);
 
-    } else if (!strncasecomp(cp, "LYNXDIRED:", 10)) {
+    } else if (compare_type(cp, "LYNXDIRED:", 10)) {
 	/*
 	 *  Special Internal Lynx type.
 	 */
-	if (strncmp(cp, "LYNXDIRED", 9)) {
-	    for (i = 0; i < 9; i++)
-		cp[i] = TOUPPER(cp[i]);
-	}
 	return(LYNXDIRED_URL_TYPE);
 
-    } else if (!strncasecomp(cp, "LYNXHIST:", 9)) {
+    } else if (compare_type(cp, "LYNXHIST:", 9)) {
 	/*
 	 *  Special Internal Lynx type.
 	 */
-	if (strncmp(cp, "LYNXHIST", 8)) {
-	    for (i = 0; i < 8; i++)
-		cp[i] = TOUPPER(cp[i]);
-	}
 	return(LYNXHIST_URL_TYPE);
 
-    } else if (!strncasecomp(cp, "LYNXKEYMAP:", 11)) {
+    } else if (compare_type(cp, "LYNXKEYMAP:", 11)) {
 	/*
 	 *  Special Internal Lynx type.
 	 */
-	if (strncmp(cp, "LYNXKEYMAP", 10)) {
-	    for (i = 0; i < 10; i++)
-		cp[i] = TOUPPER(cp[i]);
-	}
 	return(LYNXKEYMAP_URL_TYPE);
 
-    } else if (!strncasecomp(cp, "LYNXIMGMAP:", 11)) {
+    } else if (compare_type(cp, "LYNXIMGMAP:", 11)) {
 	/*
 	 *  Special Internal Lynx type.
 	 */
-	if (strncmp(cp, "LYNXIMGMAP", 10)) {
-	    for (i = 0; i < 10; i++)
-		cp[i] = TOUPPER(cp[i]);
-	}
 	(void)is_url(&cp[11]);
 	return(LYNXIMGMAP_URL_TYPE);
 
-    } else if (!strncasecomp(cp, "LYNXCOOKIE:", 11)) {
+    } else if (compare_type(cp, "LYNXCOOKIE:", 11)) {
 	/*
 	 *  Special Internal Lynx type.
 	 */
-	if (strncmp(cp, "LYNXCOOKIE", 10)) {
-	    for (i = 0; i < 10; i++)
-		cp[i] = TOUPPER(cp[i]);
-	}
 	return(LYNXCOOKIE_URL_TYPE);
 
     } else if (strstr((cp+3), "://") == NULL) {
@@ -2626,25 +2543,13 @@ PUBLIC int is_url ARGS1(
 	 */
 	return(LYCheckForProxyURL(filename));
 
-    } else if (!strncasecomp(cp, "http:", 5)) {
-	if (strncmp(cp, "http", 4)) {
-	    for (i = 0; i < 4; i++)
-		cp[i] = TOLOWER(cp[i]);
-	}
+    } else if (compare_type(cp, "http:", 5)) {
 	return(HTTP_URL_TYPE);
 
-    } else if (!strncasecomp(cp, "https:", 6)) {
-	if (strncmp(cp, "https", 5)) {
-	    for (i = 0; i < 5; i++)
-		cp[i] = TOLOWER(cp[i]);
-	}
+    } else if (compare_type(cp, "https:", 6)) {
 	return(HTTPS_URL_TYPE);
 
-    } else if (!strncasecomp(cp, "gopher:", 7)) {
-	if (strncmp(cp, "gopher", 6)) {
-	    for (i = 0; i < 6; i++)
-		cp[i] = TOLOWER(cp[i]);
-	}
+    } else if (compare_type(cp, "gopher:", 7)) {
 	if ((cp1 = strchr(cp+11,'/')) != NULL) {
 
 	    if (TOUPPER(*(cp1+1)) == 'H' || *(cp1+1) == 'w')
@@ -2660,67 +2565,31 @@ PUBLIC int is_url ARGS1(
 	    return(GOPHER_URL_TYPE);
 	}
 
-    } else if (!strncasecomp(cp, "ftp:", 4)) {
-	if (strncmp(cp, "ftp", 3)) {
-	    for (i = 0; i < 3; i++)
-		cp[i] = TOLOWER(cp[i]);
-	}
+    } else if (compare_type(cp, "ftp:", 4)) {
 	return(FTP_URL_TYPE);
 
-    } else if (!strncasecomp(cp, "wais:", 5)) {
-	if (strncmp(cp, "wais", 4)) {
-	    for (i = 0; i < 4; i++)
-		cp[i] = TOLOWER(cp[i]);
-	}
+    } else if (compare_type(cp, "wais:", 5)) {
 	return(WAIS_URL_TYPE);
 
-    } else if (!strncasecomp(cp, "telnet:", 7)) {
-	if (strncmp(cp, "telnet", 6)) {
-	    for (i = 0; i < 6; i++)
-		cp[i] = TOLOWER(cp[i]);
-	}
+    } else if (compare_type(cp, "telnet:", 7)) {
 	return(TELNET_URL_TYPE);
 
-    } else if (!strncasecomp(cp, "tn3270:", 7)) {
-	if (strncmp(cp, "tn", 2)) {
-	    for (i = 0; i < 2; i++)
-		cp[i] = TOLOWER(cp[i]);
-	}
+    } else if (compare_type(cp, "tn3270:", 7)) {
 	return(TN3270_URL_TYPE);
 
-    } else if (!strncasecomp(cp, "rlogin:", 7)) {
-	if (strncmp(cp, "rlogin", 6)) {
-	    for (i = 0; i < 6; i++)
-		cp[i] = TOLOWER(cp[i]);
-	}
+    } else if (compare_type(cp, "rlogin:", 7)) {
 	return(RLOGIN_URL_TYPE);
 
-    } else if (!strncasecomp(cp, "cso:", 4)) {
-	if (strncmp(cp, "cso", 3)) {
-	    for (i = 0; i < 3; i++)
-		cp[i] = TOLOWER(cp[i]);
-	}
+    } else if (compare_type(cp, "cso:", 4)) {
 	return(CSO_URL_TYPE);
 
-    } else if (!strncasecomp(cp, "finger:", 7)) {
-	if (strncmp(cp, "finger", 6)) {
-	    for (i = 0; i < 6; i++)
-		cp[i] = TOLOWER(cp[i]);
-	}
+    } else if (compare_type(cp, "finger:", 7)) {
 	return(FINGER_URL_TYPE);
 
-    } else if (!strncasecomp(cp, "afs:", 4)) {
-	if (strncmp(cp, "afs", 3)) {
-	    for (i = 0; i < 3; i++)
-		cp[i] = TOLOWER(cp[i]);
-	}
+    } else if (compare_type(cp, "afs:", 4)) {
 	return(AFS_URL_TYPE);
 
-    } else if (!strncasecomp(cp, "prospero:", 9)) {
-	if (strncmp(cp, "prospero", 8)) {
-	    for (i = 0; i < 8; i++)
-		cp[i] = TOLOWER(cp[i]);
-	}
+    } else if (compare_type(cp, "prospero:", 9)) {
 	return(PROSPERO_URL_TYPE);
 
     } else {
@@ -3311,44 +3180,64 @@ PUBLIC void change_sug_filename ARGS1(
 }
 
 /*
+ * Construct a name for 'tempname()'
+ */
+PRIVATE char *fmt_tempname ARGS3(
+	char *,		result,
+	unsigned,	counter,
+	char *,		suffix)
+{
+    sprintf(result,
+#ifdef FNAMES_8_3
+	"%s%u%u%s",
+#else
+	"%sL%u-%uTMP%s",
+#endif
+	lynx_temp_space, (unsigned)getpid(), counter, suffix);
+    return result;
+}
+
+/*
+ * 'tempname()' requires that the resulting file does not exist.  Test this
+ * by trying to open it.
+ */
+PRIVATE BOOLEAN bad_tempname ARGS3(
+	char *,		result,
+	unsigned,	counter,
+	char *,		suffix)
+{
+    FILE *fp;
+
+    if ((fp = fopen(fmt_tempname(result, counter, suffix), "r")) != 0) {
+	fclose(fp);
+	CTRACE(tfp, "tempname: file '%s' already exists!\n", result);
+	return TRUE;
+    }
+
+    return FALSE;
+}
+
+/*
  *  To create standard temporary file names.
  */
 PUBLIC void tempname ARGS2(
 	char *, 	namebuffer,
 	int,		action)
 {
-    static int counter = 0;
-    FILE *fp = NULL;
+    static unsigned counter = 0;
 #ifdef FNAMES_8_3
-    int LYMaxTempCount = 1000; /* Arbitrary limit.  Make it configurable? */
+    unsigned LYMaxTempCount = 1000; /* Arbitrary limit.  Make it configurable? */
 #else
-    int LYMaxTempCount = 10000; /* Arbitrary limit.  Make it configurable? */
+    unsigned LYMaxTempCount = 10000; /* Arbitrary limit.  Make it configurable? */
 #endif /* FNAMES_8_3 */
 
     if (action == REMOVE_FILES) {
 	/*
 	 *  Remove all temporary files with .txt or .html suffixes. - FM
 	 */
-	for (; counter > 0; counter--) {
-#ifdef FNAMES_8_3
-	    sprintf(namebuffer,
-		    "%s%d%u.txt",
-		    lynx_temp_space, (int)getpid(), counter-1);
-	    remove(namebuffer);
-	    sprintf(namebuffer,
-		    "%s%d%u%s",
-		    lynx_temp_space, (int)getpid(), counter-1, HTML_SUFFIX);
-	    remove(namebuffer);
-#else
-	    sprintf(namebuffer,
-		    "%sL%d-%uTMP.txt",
-		    lynx_temp_space, (int)getpid(), counter-1);
-	    remove(namebuffer);
-	    sprintf(namebuffer,
-		    "%sL%d-%uTMP%s",
-		    lynx_temp_space, (int)getpid(), counter-1, HTML_SUFFIX);
-	    remove(namebuffer);
-#endif /* FNAMES_8_3 */
+	for (; counter != 0; counter--) {
+	    remove(fmt_tempname(namebuffer, counter-1, ".txt"));
+	    remove(fmt_tempname(namebuffer, counter-1, HTML_SUFFIX));
 	}
     } else {
 	/*
@@ -3368,51 +3257,9 @@ PUBLIC void tempname ARGS2(
 	     *	should be done consistently by always using HTML_SUFFIX
 	     *	where filenames are generated for new local files. - kw
 	     */
-#ifdef FNAMES_8_3
-	    sprintf(namebuffer,
-		    "%s%d%u.txt",
-		    lynx_temp_space, (int)getpid(), counter);
-#else
-	    sprintf(namebuffer,
-		    "%sL%d-%uTMP.txt",
-		    lynx_temp_space, (int)getpid(), counter);
-#endif /* FNAMES_8_3 */
-	    if ((fp = fopen(namebuffer, "r")) != NULL) {
-		fclose(fp);
-		CTRACE(tfp, "tempname: file '%s' already exists!\n",
-			    namebuffer);
-		counter++;
-		continue;
-	    }
-#ifdef FNAMES_8_3
-	    sprintf(namebuffer,
-		    "%s%d%u.bin",
-		    lynx_temp_space, (int)getpid(), counter);
-#else
-	    sprintf(namebuffer,
-		    "%sL%d-%uTMP.bin",
-		    lynx_temp_space, (int)getpid(), counter);
-#endif /* FNAMES_8_3 */
-	    if ((fp = fopen(namebuffer, "r")) != NULL) {
-		fclose(fp);
-		CTRACE(tfp, "tempname: file '%s' already exists!\n",
-			    namebuffer);
-		counter++;
-		continue;
-	    }
-#ifdef FNAMES_8_3
-	    sprintf(namebuffer,
-		    "%s%d%u%s",
-		    lynx_temp_space, (int)getpid(), counter++, HTML_SUFFIX);
-#else
-	    sprintf(namebuffer,
-		    "%sL%d-%uTMP%s",
-		    lynx_temp_space, (int)getpid(), counter++, HTML_SUFFIX);
-#endif /* FNAMES_8_3 */
-	    if ((fp = fopen(namebuffer, "r")) != NULL) {
-		fclose(fp);
-		CTRACE(tfp, "tempname: file '%s' already exists!\n",
-			    namebuffer);
+	    if (bad_tempname(namebuffer, counter, ".txt")
+	     || bad_tempname(namebuffer, counter, ".bin")
+	     || bad_tempname(namebuffer, counter, HTML_SUFFIX)) {
 		continue;
 	    }
 	    /*
@@ -3423,7 +3270,7 @@ PUBLIC void tempname ARGS2(
 	     *	a spoof.  The file name can be reused if it is written
 	     *	to on receipt of this name, and thereafter accessed
 	     *	for reading.  Note that if writing to a file is to
-	     *	be followed by reading it, as it the usual case for
+	     *	be followed by reading it, as is the usual case for
 	     *	Lynx, the spoof attempt will be apparent, and the user
 	     *	can take appropriate action. - FM
 	     */
@@ -3452,7 +3299,7 @@ PUBLIC int number2arrows ARGS1(
 {
     switch(number) {
 	case '1':
-	    number=END;
+	    number=END_KEY;
 	    break;
 	case '2':
 	    number=DNARROW;
@@ -3632,8 +3479,7 @@ PUBLIC void parse_restrictions ARGS1(
 
       p = s;
       while (*p) {
-	  while (isspace((unsigned char)*p))
-	      p++;
+	  p = LYSkipBlanks(p);
 	  if (*p == '\0')
 	      break;
 	  word = p;
@@ -3699,12 +3545,7 @@ PUBLIC int LYCheckMail NOARGS
 	    return 0;
 	}
 	user[userlen] = '\0';
-	while (user[0] &&
-	       /*
-		*  Suck up trailing spaces.
-		*/
-	       isspace((unsigned char)user[--userlen]))
-	    user[userlen] = '\0';
+	LYTrimTrailing(user);
     }
 
     /* Minimum report interval is 60 sec. */
@@ -3909,9 +3750,7 @@ PUBLIC void LYConvertToURL ARGS1(
 	    if ((cp = strchr(file_name, ';')) != NULL) {
 		*cp = '\0';
 	    }
-	    for (cp = file_name; *cp; cp++) {
-		*cp = TOLOWER(*cp);
-	    }
+	    LYLowerCase(file_name);
 	    StrAllocCat(*AllocatedString, HTVMS_wwwName(file_name));
 	    if ((cp = strchr(old_string, ';')) != NULL) {
 		StrAllocCat(*AllocatedString, cp);
@@ -3934,9 +3773,7 @@ PUBLIC void LYConvertToURL ARGS1(
 		/*
 		 * Yup, we got it!
 		 */
-		for (cp = dir_name; *cp; cp++) {
-		    *cp = TOLOWER(*cp);
-		}
+		LYLowerCase(dir_name);
 		StrAllocCat(*AllocatedString, dir_name);
 		if (fragment != NULL) {
 		    StrAllocCat(*AllocatedString, fragment);
@@ -5476,10 +5313,6 @@ extern int errno;
 
 #if defined(STDC_HEADERS) || defined(USG)
 #include <string.h>
-#ifdef NOTDEFINED
-#define index strchr
-#define bcopy(s, d, n) memcpy((d), (s), (n))
-#endif /* NOTDEFINED */
 #else /* Not (STDC_HEADERS or USG): */
 #include <strings.h>
 #endif /* STDC_HEADERS or USG */

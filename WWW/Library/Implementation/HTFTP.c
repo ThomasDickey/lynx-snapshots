@@ -110,6 +110,7 @@ BUGS:	@@@	Limit connection cache size!
 #define IPPORT_FTP	21
 #endif /* !IPORT_FTP */
 
+#include <LYStrings.h>
 #include <LYLeaks.h>
 
 typedef struct _connection {
@@ -1417,8 +1418,8 @@ PRIVATE void parse_vms_dir_entry ARGS2(
 
     /** Cast VMS non-README file and directory names to lowercase. **/
     if (strstr(entry_info->filename, "READ") == NULL) {
-	for (i = 0; entry_info->filename[i]; i++)
-	    entry_info->filename[i] = TOLOWER(entry_info->filename[i]);
+	LYLowerCase(entry_info->filename);
+	i = strlen(entry_info->filename);
     } else {
 	i = ((strstr(entry_info->filename, "READ") - entry_info->filename) + 4);
 	if (!strncmp((char *)&entry_info->filename[i], "ME", 2)) {
@@ -1431,8 +1432,7 @@ PRIVATE void parse_vms_dir_entry ARGS2(
 	} else {
 	    i = 0;
 	}
-	for (; entry_info->filename[i]; i++)
-	    entry_info->filename[i] = TOLOWER(entry_info->filename[i]);
+	LYLowerCase(entry_info->filename + i);
     }
 
     /** Uppercase terminal .z's or _z's. **/
@@ -1553,28 +1553,22 @@ PRIVATE void parse_ms_windows_dir_entry ARGS2(
     char *end = line + strlen(line);
 
     /**  Get rid of blank or junk lines.  **/
-    while (*cp && isspace(*cp))
-	cp++;
+    cp = LYSkipBlanks(cp);
     if (!(*cp)) {
 	entry_info->display = FALSE;
 	return;
     }
 
     /** Cut out file or directory name. **/
-    cps = cp;
-    while (*cps && !isspace(*cps))
-	cps++;
+    cps = LYSkipNonBlanks(cp);
     *cps++ ='\0';
     cpd = cps;
     StrAllocCopy(entry_info->filename, cp);
 
     /** Track down the size **/
     if (cps < end) {
-	while (*cps && isspace(*cps))
-	    cps++;
-	cpd = cps;
-	while (*cpd && !isspace(*cpd))
-	    cpd++;
+	cps = LYSkipBlanks(cps);
+	cpd = LYSkipNonBlanks(cps);
 	*cpd++ = '\0';
 	if (isdigit(*cps)) {
 	    entry_info->size = atoi(cps);
@@ -1592,8 +1586,7 @@ PRIVATE void parse_ms_windows_dir_entry ARGS2(
 
     /** Track down the date. **/
     if (cpd < end) {
-	while (*cpd && isspace(*cpd))
-	    cpd++;
+	cpd = LYSkipBlanks(cpd);
 	if (strlen(cpd) > 17) {
 	    *(cpd+6)  = '\0';  /* Month and Day */
 	    *(cpd+11) = '\0';  /* Year */
@@ -1635,8 +1628,7 @@ PRIVATE void parse_windows_nt_dir_entry ARGS2(
     int i;
 
     /**  Get rid of blank or junk lines.  **/
-    while (*cp && isspace(*cp))
-	cp++;
+    cp = LYSkipBlanks(cp);
     if (!(*cp)) {
 	entry_info->display = FALSE;
 	return;
@@ -1644,9 +1636,7 @@ PRIVATE void parse_windows_nt_dir_entry ARGS2(
 
     /** Cut out file or directory name. **/
     cpd = cp;
-    cps = (end-1);
-    while (cps >= cpd && !isspace(*cps))
-	cps--;
+    cps = LYSkipNonBlanks(end-1);
     cp = (cps+1);
     if (!strcmp(cp, ".") || !strcmp(cp, "..")) {
 	entry_info->display = FALSE;
@@ -1665,18 +1655,14 @@ PRIVATE void parse_windows_nt_dir_entry ARGS2(
 
     /** Cut out the date. **/
     cp = cps = cpd;
-    while (*cps && !isspace(*cps))
-	cps++;
+    cps = LYSkipNonBlanks(cps);
     *cps++ ='\0';
     if (cps > end) {
 	entry_info->display = FALSE;
 	return;
     }
-    while (*cps && isspace(*cps))
-	cps++;
-    cpd = cps;
-    while (*cps && !isspace(*cps))
-	cps++;
+    cps = LYSkipBlanks(cps);
+    cpd = LYSkipNonBlanks(cps);
     *cps++ ='\0';
     if (cps > end || cpd == cps || strlen(cpd) < 7) {
 	entry_info->display = FALSE;
@@ -1717,11 +1703,8 @@ PRIVATE void parse_windows_nt_dir_entry ARGS2(
 
     /** Track down the size **/
     if (cps < end) {
-	while (*cps && isspace(*cps))
-	    cps++;
-	cpd = cps;
-	while (*cpd && !isspace(*cpd))
-	    cpd++;
+	cps = LYSkipBlanks(cps);
+	cpd = LYSkipNonBlanks(cps);
 	*cpd = '\0';
 	if (isdigit(*cps)) {
 	    entry_info->size = atoi(cps);
@@ -1758,25 +1741,20 @@ PRIVATE void parse_cms_dir_entry ARGS2(
     int i;
 
     /**  Get rid of blank or junk lines.  **/
-    while (*cp && isspace(*cp))
-	cp++;
+    cp = LYSkipBlanks(cp);
     if (!(*cp)) {
 	entry_info->display = FALSE;
 	return;
     }
 
     /** Cut out file or directory name. **/
-    cps = cp;
-    while (*cps && !isspace(*cps))
-	cps++;
+    cps = LYSkipNonBlanks(cp);
     *cps++ ='\0';
     StrAllocCopy(entry_info->filename, cp);
     if (strchr(entry_info->filename, '.') != NULL)
 	/** If we already have a dot, we did an NLST. **/
 	return;
-    cp = cps;
-    while (*cp && isspace(*cp))
-	cp++;
+    cp = LYSkipBlanks(cps);
     if (!(*cp)) {
 	/** If we don't have more, we've misparsed. **/
 	FREE(entry_info->filename);
@@ -1784,9 +1762,7 @@ PRIVATE void parse_cms_dir_entry ARGS2(
 	entry_info->display = FALSE;
 	return;
     }
-    cps = cp;
-    while (*cps && !isspace(*cps))
-	cps++;
+    cps = LYSkipNonBlanks(cp);
     *cps++ ='\0';
     if ((0 == strcasecomp(cp, "DIR")) && (cp - line) > 17) {
 	/** It's an SFS directory. **/
@@ -1801,11 +1777,8 @@ PRIVATE void parse_cms_dir_entry ARGS2(
 	/** Track down the VM/CMS RECFM or type. **/
 	cp = cps;
 	if (cp < end) {
-	    while (*cp && isspace(*cp))
-		cp++;
-	    cps = cp;
-	    while (*cps && !isspace(*cps))
-		cps++;
+	    cp = LYSkipBlanks(cp);
+	    cps = LYSkipNonBlanks(cp);
 	    *cps++ = '\0';
 	    /** Check cp here, if it's relevant someday. **/
 	}
@@ -1814,11 +1787,8 @@ PRIVATE void parse_cms_dir_entry ARGS2(
     /** Track down the record length or dash. **/
     cp = cps;
     if (cp < end) {
-	while (*cp && isspace(*cp))
-	    cp++;
-	cps = cp;
-	while (*cps && !isspace(*cps))
-	    cps++;
+	cp = LYSkipBlanks(cp);
+	cps = LYSkipNonBlanks(cp);
 	*cps++ = '\0';
 	if (isdigit(*cp)) {
 	    RecordLength = atoi(cp);
@@ -1828,11 +1798,8 @@ PRIVATE void parse_cms_dir_entry ARGS2(
     /** Track down the number of records or the dash. **/
     cp = cps;
     if (cps < end) {
-	while (*cp && isspace(*cp))
-	    cp++;
-	cps = cp;
-	while (*cps && !isspace(*cps))
-	    cps++;
+	cp = LYSkipBlanks(cp);
+	cps = LYSkipNonBlanks(cp);
 	*cps++ = '\0';
 	if (isdigit(*cp)) {
 	    Records = atoi(cp);

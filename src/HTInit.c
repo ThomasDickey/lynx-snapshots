@@ -23,6 +23,7 @@
 
 #include <HTSaveToFile.h>  /* LJM */
 #include <userdefs.h>
+#include <LYStrings.h>
 #include <LYUtils.h>
 #include <LYGlobalDefs.h>
 #include <LYSignal.h>
@@ -279,27 +280,16 @@ PRIVATE char *GetCommand ARGS2(
 PRIVATE char *Cleanse ARGS1(
 	char *,		s)
 {
-    char *tmp, *news;
-
-    /* strip leading white space */
-    while (*s && isspace((unsigned char) *s))
-	++s;
-    news = s;
-    /* put in lower case */
-    for (tmp=s; *tmp; ++tmp) {
-	*tmp = TOLOWER ((unsigned char)*tmp);
-    }
-    /* strip trailing white space */
-    while ((tmp > news) && *--tmp && isspace((unsigned char) *tmp))
-	*tmp = '\0';
-    return(news);
+    LYTrimLeading(s);
+    LYTrimTrailing(s);
+    LYLowerCase(s);
+    return(s);
 }
 
 PRIVATE int ProcessMailcapEntry ARGS2(
 	FILE *,			fp,
 	struct MailcapEntry *,	mc)
 {
-    int i, j;
     size_t rawentryalloc = 2000, len;
     char *rawentry, *s, *t, *LineBuf;
 
@@ -335,8 +325,7 @@ PRIVATE int ProcessMailcapEntry ARGS2(
 
     FREE(LineBuf);
 
-    for (s = rawentry; *s && isspace((unsigned char) *s); ++s)
-	;
+    s = LYSkipBlanks(rawentry);
     if (!*s) {
 	/* totally blank entry -- quietly ignore */
 	FREE(rawentry);
@@ -359,12 +348,9 @@ PRIVATE int ProcessMailcapEntry ARGS2(
 	FREE(rawentry);
 	return(0);
     }
-    for (i = 0, j = 0; rawentry[i]; i++) {
-	if (rawentry[i] != ' ') {
-	    rawentry[j++] = TOLOWER(rawentry[i]);
-	}
-    }
-    rawentry[j] = '\0';
+    LYRemoveBlanks(rawentry);
+    LYLowerCase(rawentry);
+
     mc->needsterminal = 0;
     mc->copiousoutput = 0;
     mc->needtofree = 1;
@@ -381,8 +367,7 @@ PRIVATE int ProcessMailcapEntry ARGS2(
     if (!t) {
 	goto assign_presentation;
     }
-    s = t;
-    while (s && *s && isspace((unsigned char) *s)) ++s;
+    s = LYSkipBlanks(t);
     while (s) {
 	char *arg, *eq, *mallocd_string;
 
@@ -957,7 +942,7 @@ PRIVATE int HTLoadExtensionsConfigFile ARGS1(
 {
     char l[MAX_STRING_LEN],w[MAX_STRING_LEN],*ct;
     FILE *f;
-    int x, count = 0;
+    int count = 0;
 
     CTRACE(tfp, "HTLoadExtensionsConfigFile: Loading file '%s'.\n", fn);
 
@@ -974,8 +959,7 @@ PRIVATE int HTLoadExtensionsConfigFile ARGS1(
 	if (!ct)
 	    outofmem(__FILE__, "HTLoadExtensionsConfigFile");
 	strcpy(ct,w);
-	for (x = 0; ct[x]; x++)
-	    ct[x] = TOLOWER(ct[x]);
+	LYLowerCase(ct);
 
 	while(l[0]) {
 	    HTGetWord(w, l, ' ', '\t');
@@ -984,10 +968,8 @@ PRIVATE int HTLoadExtensionsConfigFile ARGS1(
 	        if (!ct)
 	            outofmem(__FILE__, "HTLoadExtensionsConfigFile");
 
-		for (x = 0; w[x]; x++)
-		    ext[x+1] = TOLOWER(w[x]);
-		ext[0] = '.';
-		ext[strlen(w)+1] = '\0';
+		sprintf(ext, ".%s", w);
+		LYLowerCase(ext);
 
 		CTRACE (tfp, "SETTING SUFFIX '%s' to '%s'.\n", ext, ct);
 

@@ -50,7 +50,7 @@ PUBLIC void HTProgress ARGS1(
 	CONST char *,	Msg)
 {
     if (TRACE)
-        fprintf(stderr, "%s\n", Msg);
+        fprintf(tfp, "%s\n", Msg);
     else
         statusline(Msg);
 }

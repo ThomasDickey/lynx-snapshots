@@ -72,7 +72,7 @@ extern int HText_sourceAnchors PARAMS((HText * text));
 extern void HText_setStale PARAMS((HText * text));
 extern void HText_refresh PARAMS((HText * text));
 extern char * HText_getTitle NOPARAMS;
-extern char * HText_getSugFname NOPARAMS;
+extern CONST char * HText_getSugFname NOPARAMS;
 extern void HTCheckFnameForCompression PARAMS((
 	char **			fname,
 	HTParentAnchor *	anchor,
@@ -81,8 +81,8 @@ extern char * HText_getLastModified NOPARAMS;
 extern char * HText_getDate NOPARAMS;
 extern char * HText_getServer NOPARAMS;
 extern char * HText_getOwner NOPARAMS;
-extern char * HText_getContentBase NOPARAMS;
-extern char * HText_getContentLocation NOPARAMS;
+extern CONST char * HText_getContentBase NOPARAMS;
+extern CONST char * HText_getContentLocation NOPARAMS;
 #ifdef USE_HASH
 extern char * HText_getStyle NOPARAMS;
 #endif

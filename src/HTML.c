@@ -42,6 +42,7 @@
 #include <HTNestedList.h>
 #include <GridText.h>
 #include <LYSignal.h>
+#include <LYStrings.h>
 #include <LYUtils.h>
 #include <LYMap.h>
 #include <LYList.h>
@@ -1908,16 +1909,14 @@ PRIVATE void HTML_start_element ARGS6(
 		(!strcasecomp(value[HTML_NOTE_CLASS], "CAUTION") ||
 		 !strcasecomp(value[HTML_NOTE_CLASS], "WARNING"))) {
 		StrAllocCopy(note, value[HTML_NOTE_CLASS]);
-		for (i = 0; note[i] != '\0'; i++)
-		    note[i] = TOUPPER(note[i]);
+		LYUpperCase(note);
 		StrAllocCat(note, ":");
 	    } else if (present && present[HTML_NOTE_ROLE] &&
 		       value[HTML_NOTE_ROLE] &&
 		       (!strcasecomp(value[HTML_NOTE_ROLE], "CAUTION") ||
 			!strcasecomp(value[HTML_NOTE_ROLE], "WARNING"))) {
 		StrAllocCopy(note, value[HTML_NOTE_ROLE]);
-		for (i = 0; note[i] != '\0'; i++)
-		    note[i] = TOUPPER(note[i]);
+		LYUpperCase(note);
 		StrAllocCat(note, ":");
 	    } else {
 		StrAllocCopy(note, "NOTE:");
@@ -3527,7 +3526,7 @@ PRIVATE void HTML_start_element ARGS6(
 	    if (present[HTML_APPLET_CODEBASE] &&
 		value[HTML_APPLET_CODEBASE] && *value[HTML_APPLET_CODEBASE]) {
 		StrAllocCopy(base, value[HTML_APPLET_CODEBASE]);
-		collapse_spaces(base);
+		LYRemoveBlanks(base);
 		TRANSLATE_AND_UNESCAPE_TO_STD(&base);
 		/*
 		 *  Force it to be a directory. - FM
@@ -3959,11 +3958,7 @@ PRIVATE void HTML_start_element ARGS6(
 	    if (present && present[HTML_FORM_ENCTYPE] &&
 		value[HTML_FORM_ENCTYPE] && *value[HTML_FORM_ENCTYPE]) {
 		StrAllocCopy(enctype, value[HTML_FORM_ENCTYPE]);
-		/*
-		 *  Force the enctype value to all lower case. - FM
-		 */
-		for (cp = enctype; *cp; cp++)
-		    *cp = TOLOWER(*cp);
+		LYLowerCase(enctype);
 	    }
 
 	    if (present) {

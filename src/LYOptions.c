@@ -524,12 +524,8 @@ draw_options:
 		 *  Set the new DISPLAY variable. - FM
 		 */
 #ifdef VMS
-		{
-		    int i;
-		    for (i = 0; display_option[i]; i++)
-			display_option[i] = TOUPPER(display_option[i]);
-		    Define_VMSLogical(DISPLAY, display_option);
-		}
+		LYUpperCase(display_option);
+		Define_VMSLogical(DISPLAY, display_option);
 #else
 		sprintf(putenv_command, "DISPLAY=%s", display_option);
 		putenv(putenv_command);
@@ -875,7 +871,7 @@ draw_options:
 		}
 		break;
 
-	    case 'c':	/* Change charset setting. */
+	    case 'c':	/* Change display charset setting. */
 	    case 'C':
 		if (!LYSelectPopups) {
 		    current_char_set = boolean_choice(current_char_set,

@@ -1115,11 +1115,7 @@ PUBLIC int HTVMSBrowseDir ARGS4(
                 dot = strstr(entry_info->filename, ".DIR");
                 if (dot)
                    *dot = '\0';
-		cp = entry_info->filename;
-		while (cp && *cp) {
-		    *cp = TOLOWER(*cp);
-		    cp++;
-		}
+		LYLowerCase(entry_info->filename);
 		StrAllocCopy(entry_info->type, "Directory");
 	    } else {
 	        if ((cp = strstr(entry_info->filename, "READ")) == NULL) {
@@ -1138,10 +1134,7 @@ PUBLIC int HTVMSBrowseDir ARGS4(
 		        cp = entry_info->filename;
 		    }
 		}
-		while (cp && *cp) {
-		    *cp = TOLOWER(*cp);
-		    cp++;
-		}
+		LYLowerCase(cp);
 		if (((len = strlen(entry_info->filename)) > 2) &&
 		    entry_info->filename[len-1] == 'z') {
 		    if (entry_info->filename[len-2] == '.' ||

@@ -619,9 +619,9 @@ PUBLIC int LYdownload_options ARGS2(
 	tempname(tempfile, NEW_FILE);
 	first = FALSE;
 #if defined (VMS) || defined (DOSPATH) || defined (__EMX__)
-    sprintf(download_filename, "file://localhost/%s", tempfile);
+        sprintf(download_filename, "file://localhost/%s", tempfile);
 #else
-    sprintf(download_filename, "file://localhost%s", tempfile);
+        sprintf(download_filename, "file://localhost%s", tempfile);
 #endif /* VMS */
 #ifdef VMS
     } else {

@@ -484,7 +484,7 @@ PUBLIC void remove_bookmark_link ARGS2(
      *	Explicitly preserve bookmark file mode on Unix. - DSL
      */
     if (stat(filename_buffer, &stat_buf) == 0) {
-	mode = ((stat_buf.st_mode & 0777) | HIDE_CHMOD);
+	mode = ((stat_buf.st_mode & 0777) | 0600); /* make it writable */
 	(void) fclose(nfp);
 	nfp = NULL;
 	(void) chmod(newfile, mode);
@@ -547,6 +547,29 @@ PUBLIC void remove_bookmark_link ARGS2(
 #ifdef DOSPATH
     remove(filename_buffer);
 #endif /* DOSPATH */
+
+#ifdef UNIX
+    /*
+     *	By copying onto the bookmark file, rather than renaming it, we
+     *	can preserve the original ownership of the file, provided that
+     *	it is writable by the current process.
+     *	Changed to copy  1998-04-26 -- gil
+     */
+    {   char buffer[3072];
+
+	sprintf(buffer, "%s %s %s && %s %s",
+	    COPY_PATH, newfile, filename_buffer,
+	    RM_PATH, newfile);
+
+	CTRACE(tfp, "remove_bookmark_link: %s\n", buffer);
+	if( system( buffer ) ) {
+	    _statusline(BOOKTEMP_COPY_FAIL);
+	    sleep(AlertSecs);
+	} else {
+	    return;
+	}
+    }
+#else  /* UNIX */
     if (rename(newfile, filename_buffer) != -1) {
 #ifdef VMS
 	char VMSfilename[256];
@@ -571,10 +594,11 @@ PUBLIC void remove_bookmark_link ARGS2(
 	 *  Used to be ODD_RENAME
 	 */
 #ifdef _WINDOWS
-	if (errno == ENOTSAM) {
+	if (errno == ENOTSAM)
 #else
-	if (errno == EXDEV) {
+	if (errno == EXDEV)
 #endif /* WINDOWS */
+	{
 	    char buffer[2048];
 	    sprintf(buffer, "%s %s %s", MV_PATH, newfile, filename_buffer);
 	    system(buffer);
@@ -591,6 +615,7 @@ PUBLIC void remove_bookmark_link ARGS2(
 	    perror("renaming the file");
 	sleep(AlertSecs);
     }
+#endif /* UNIX */
 
 failure:
     _statusline(BOOKMARK_DEL_FAILED);

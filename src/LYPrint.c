@@ -132,7 +132,7 @@ PUBLIC int printfile ARGS1(
      */
     if (HText_getContentBase()) {
 	StrAllocCopy(content_base, HText_getContentBase());
-	collapse_spaces(content_base);
+	LYRemoveBlanks(content_base);
 	if (!(content_base && *content_base)) {
 	    FREE(content_base);
 	}
@@ -144,7 +144,7 @@ PUBLIC int printfile ARGS1(
     if (HTisDocumentSource()) {
 	if (HText_getContentLocation()) {
 	    StrAllocCopy(content_location, HText_getContentLocation());
-	    collapse_spaces(content_location);
+	    LYRemoveBlanks(content_location);
 	    if (!(content_location && *content_location)) {
 		FREE(content_location);
 	    }
@@ -164,7 +164,7 @@ PUBLIC int printfile ARGS1(
     /*
      *	Load the suggested filename string. - FM
      */
-    if (HText_getSugFname() != NULL)
+    if (HText_getSugFname() != 0)
 	StrAllocCopy(sug_filename, HText_getSugFname()); /* must be freed */
     else
 	StrAllocCopy(sug_filename, newdoc->address); /* must be freed */

@@ -3188,7 +3188,7 @@ new_cmd:  /*
 		    HTUnEscapeSome(user_input_buffer, " \r\n\t");
 		    convert_to_spaces(user_input_buffer, TRUE);
 		} else {
-		    collapse_spaces(user_input_buffer);
+		    LYRemoveBlanks(user_input_buffer);
 		}
 		if (user_input_buffer[0] != '\0') {
 		    goto check_goto_URL;
@@ -3275,7 +3275,7 @@ new_cmd:  /*
 		    HTUnEscapeSome(user_input_buffer, " \r\n\t");
 		    convert_to_spaces(user_input_buffer, TRUE);
 		} else {
-		    collapse_spaces(user_input_buffer);
+		    LYRemoveBlanks(user_input_buffer);
 		}
 		if (user_input_buffer[0] != '\0') {
 		    goto check_goto_URL;
@@ -3350,7 +3350,7 @@ check_recall:
 		HTUnEscapeSome(user_input_buffer, " \r\n\t");
 		convert_to_spaces(user_input_buffer, TRUE);
 	    } else {
-		collapse_spaces(user_input_buffer);
+		LYRemoveBlanks(user_input_buffer);
 	    }
 	    if (*user_input_buffer == '\0' &&
 		!(recall && (ch == UPARROW || ch == DNARROW))) {
@@ -5452,7 +5452,7 @@ check_add_bookmark_to_self:
 			    HTUnEscapeSome(ret, " \r\n\t");
 			    convert_to_spaces(ret, TRUE);
 			} else {
-			    collapse_spaces(user_input_buffer);
+			    LYRemoveBlanks(user_input_buffer);
 			}
 			StrAllocCopy(newdoc.address, ret);
 			StrAllocCopy(lynxjumpfile, ret);

@@ -80,6 +80,7 @@
 #include <LYexit.h>
 #include <LYCharSets.h>
 #include <LYGlobalDefs.h>
+#include <LYStrings.h>
 #include <LYUtils.h>
 #include <LYLeaks.h>
 
@@ -867,12 +868,10 @@ PUBLIC HTFormat HTCharsetFormat ARGS3(
     char *cp = NULL, *cp1, *cp2, *cp3 = NULL, *cp4;
     BOOL chartrans_ok = FALSE;
     int chndl = -1;
-    int i;
 
     FREE(anchor->charset);
     StrAllocCopy(cp, format->name);
-    for (i = 0; cp[i]; i++)
-	cp[i] = TOLOWER(cp[i]);
+    LYLowerCase(cp);
     if (((cp1 = strchr(cp, ';')) != NULL) &&
 	(cp2 = strstr(cp1, "charset")) != NULL) {
 	CTRACE(tfp, "HTCharsetFormat: Extended MIME Content-Type is %s\n",

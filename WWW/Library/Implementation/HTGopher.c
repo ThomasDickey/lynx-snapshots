@@ -74,6 +74,7 @@
 */
 #include <HTML.h>
 
+#include <LYStrings.h>
 #include <LYLeaks.h>
 
 #define PUTC(c) (*targetClass.put_character)(target, c)
@@ -884,7 +885,6 @@ PRIVATE int interpret_cso_key ARGS5(
 PRIVATE int parse_cso_field_info ARGS1(
 	CSOfield_info *,	blk)
 {
-    int i;
     char *info, *max_spec;
 
     /*
@@ -898,8 +898,7 @@ PRIVATE int parse_cso_field_info ARGS1(
     **	are converted to all lower-case for comparison.
     */
     info = blk->attributes;
-    for (i = 0; info[i]; i++)
-	info[i] = TOLOWER(info[i]);
+    LYLowerCase(info);
     if (strstr(info, "indexed "))
 	blk->indexed = 1;
     if (strstr(info, "default "))

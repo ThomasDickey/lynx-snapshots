@@ -1754,6 +1754,7 @@ U+266e:Mx
 U+266f:#
 0x58	U+2713	U+2717	# check marks -> x
 U+2720:-X
+#  CJK area: 
 0x20	U+3000	# ideographic space
 U+3001:,_
 U+3002:._
@@ -2014,6 +2015,10 @@ U+3229:10c
 U+327f:KSC
 U+33c2:am
 U+33d8:pm
+#  end of CJK area (up to U+e000). 
+ 
+#  Characters in Private Use Area (e000-f8ff) do not have unassigned numbers. 
+ 
 U+fb00:ff
 U+fb01:fi
 U+fb02:fl
@@ -2208,8 +2213,6 @@ U+009a:SC
 #U+009d:OC
 #U+009e:PM
 #U+009f:AC
-
-# Characters in Private Use Area (e000-f8ff) do not have ussigned numbers.
 
 # Let's try to show a question mark for character that cannot
 # be shown.  U+fffd is used for invalid characters.

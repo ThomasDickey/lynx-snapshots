@@ -968,29 +968,30 @@ PRIVATE BOOL HTLoadDocument ARGS4(
 	return NO;
     }
 
-    if (status <= 0) {		/* Failure in accessing a document */
-	char *temp = NULL;
-	StrAllocCopy(temp, "Can't Access `");
-	StrAllocCat(temp, full_address);
-	StrAllocCat(temp, "'");
-	_HTProgress(temp);
-	FREE(temp);
-	CTRACE(tfp, "HTAccess: Can't access `%s'\n", full_address);
-	HTLoadError(sink, 500, "Unable to access document.");
-	return NO;
+    if (status > 0) {
+	/*
+	**	If you get this, then please find which routine is returning
+	**	a positive unrecognised error code!
+	*/
+	fprintf(stderr,
+ "**** HTAccess: socket or file number returned by obsolete load routine!\n");
+	fprintf(stderr,
+ "**** HTAccess: Internal software error. Please mail lynx_dev@sig.net!\n");
+	fprintf(stderr, "**** HTAccess: Status returned was: %d\n",status);
+	exit(-1);
     }
 
-    /*
-    **	If you get this, then please find which routine is returning
-    **	a positive unrecognised error code!
-    */
-    fprintf(tfp,
- "**** HTAccess: socket or file number returned by obsolete load routine!\n");
-    fprintf(tfp,
- "**** HTAccess: Internal software error. Please mail lynx_dev@sig.net!\n");
-    fprintf(tfp, "**** HTAccess: Status returned was: %d\n",status);
-    exit(-1);
+    /* Failure in accessing a document */
+    cp = NULL;
+    StrAllocCopy(cp, "Can't Access `");
+    StrAllocCat(cp, full_address);
+    StrAllocCat(cp, "'");
+    _HTProgress(cp);
+    FREE(cp);
 
+    CTRACE(tfp, "HTAccess: Can't access `%s'\n", full_address);
+    HTLoadError(sink, 500, "Unable to access document.");
+    return NO;
 } /* HTLoadDocument */
 
 /*	Load a document from absolute name.		HTLoadAbsolute()

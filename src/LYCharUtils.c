@@ -31,6 +31,7 @@
 #include <HTNestedList.h>
 #include <GridText.h>
 #include <LYSignal.h>
+#include <LYStrings.h>
 #include <LYUtils.h>
 #include <LYMap.h>
 #include <LYBookmark.h>
@@ -1512,8 +1513,8 @@ PRIVATE char * UCPutUtf8ToBuffer ARGS3(char *, q, UCode_t, code, BOOL, terminate
 PRIVATE char *hex = "0123456789ABCDEF";
 
 /*
- *	  Any raw 8-bit or multibyte characters already have been 
- *	  handled in relation to the display character set        
+ *	  Any raw 8-bit or multibyte characters already have been
+ *	  handled in relation to the display character set
  *	  in SGML_character(), including named and numeric entities.
  *
 **  This function used for translations HTML special fields inside tags
@@ -2204,8 +2205,15 @@ PRIVATE char ** LYUCFullyTranslateString_1 ARGS9(
 	case S_check_name:
 	    /*
 	    **	Seek the Unicode value for the named entity.
+	    **
+	    **	!!!! We manually recover the case of '=' terminator which
+	    **	is commonly found on query to CGI-scripts
+	    **	enclosed as href= URLs like  "somepath/?x=1&yz=2"
+	    **	Without this dirty fix, submission of such URLs was broken
+	    **	if &yz string happend to be a recognized entity name. - LP
 	    */
-	    if ((code = HTMLGetEntityUCValue(name)) > 0) {
+	   if ( ((code = HTMLGetEntityUCValue(name)) > 0) &&
+		!((cpe == '=') && (stype == st_URL)) ) {
 		state = S_check_uni;
 		break;
 	    }
@@ -2368,7 +2376,7 @@ PUBLIC void LYHandleMETA ARGS4(
     char *http_equiv = NULL, *name = NULL, *content = NULL;
     char *href = NULL, *id_string = NULL, *temp = NULL;
     char *cp, *cp0, *cp1 = NULL;
-    int url_type = 0, i;
+    int url_type = 0;
 
     if (!me || !present)
 	return;
@@ -2456,8 +2464,7 @@ PUBLIC void LYHandleMETA ARGS4(
 	 */
 	if ((!me->node_anchor->cache_control) &&
 	    !strcasecomp((http_equiv ? http_equiv : ""), "Cache-Control")) {
-	    for (i = 0; content[i]; i++)
-		 content[i] = TOLOWER(content[i]);
+	    LYLowerCase(content);
 	    StrAllocCopy(me->node_anchor->cache_control, content);
 	    if (me->node_anchor->no_cache == FALSE) {
 		cp0 = content;
@@ -2559,11 +2566,7 @@ PUBLIC void LYHandleMETA ARGS4(
 				 NO, NO, YES, st_other);
 	LYTrimHead(content);
 	LYTrimTail(content);
-	/*
-	 *  Force the Content-type value to all lower case. - FM
-	 */
-	for (cp = content; *cp; cp++)
-	    *cp = TOLOWER(*cp);
+	LYLowerCase(content);
 
 	if ((cp = strstr(content, "text/html;")) != NULL &&
 	    (cp1 = strstr(content, "charset")) != NULL &&
@@ -2743,9 +2746,7 @@ PUBLIC void LYHandleMETA ARGS4(
 	/*
 	 *  Look for the Seconds field. - FM
 	 */
-	cp = content;
-	while (*cp && isspace((unsigned char)*cp))
-	    cp++;
+	cp = LYSkipBlanks(content);
 	if (*cp && isdigit(*cp)) {
 	    cp1 = cp;
 	    while (*cp1 && isdigit(*cp1))
@@ -3143,7 +3144,7 @@ PUBLIC void LYHandleSELECT ARGS5(
 	     *	Let the size be determined by the number of OPTIONs. - FM
 	     */
 	    CTRACE(tfp, "LYHandleSELECT: Ignoring SIZE=\"%s\" for SELECT.\n",
-			(char *)value[HTML_SELECT_SIZE]);
+			value[HTML_SELECT_SIZE]);
 #endif /* NOTDEFINED */
 	}
 
@@ -3332,7 +3333,7 @@ PUBLIC int LYLegitimizeHREF ARGS4(
 	    *pound = '\0';
 	    convert_to_spaces(fragment, FALSE);
 	}
-	collapse_spaces(*href);
+	LYRemoveBlanks(*href);
 	if (fragment != NULL) {
 	    StrAllocCat(*href, fragment);
 	    FREE(fragment);
@@ -3451,7 +3452,7 @@ PUBLIC void LYCheckForContentBase ARGS1(
 	if (*me->node_anchor->content_base == '\0')
 	    return;
 	StrAllocCopy(cp, me->node_anchor->content_base);
-	collapse_spaces(cp);
+	LYRemoveBlanks(cp);
     } else if (me->node_anchor->content_location != NULL) {
 	/*
 	 *  We didn't have a Content-Base value, but do
@@ -3461,7 +3462,7 @@ PUBLIC void LYCheckForContentBase ARGS1(
 	if (*me->node_anchor->content_location == '\0')
 	    return;
 	StrAllocCopy(cp, me->node_anchor->content_location);
-	collapse_spaces(cp);
+	LYRemoveBlanks(cp);
 	if (!is_url(cp)) {
 	    FREE(cp);
 	    return;

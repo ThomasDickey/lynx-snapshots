@@ -77,7 +77,7 @@ extern char * SNACat PARAMS((
 #define PGDOWN		260	/* 0x104 */
 #define PGUP		261	/* 0x105 */
 #define HOME		262	/* 0x106 */
-#define END		263	/* 0x107 */
+#define END_KEY		263	/* 0x107 */
 #define F1		264	/* 0x108 */
 #define DO_KEY		265	/* 0x109 */
 #define FIND_KEY	266	/* 0x10A */
@@ -144,6 +144,24 @@ typedef struct _EditFieldData {
 
 #define LYE_AIX   (LYE_LKCMD +1)  /* Hex 97		   */
 
+extern void LYLowerCase PARAMS((
+	char *		buffer));
+extern void LYUpperCase PARAMS((
+	char *		buffer));
+extern void LYRemoveBlanks PARAMS((
+	char *		buffer));
+extern char * LYSkipBlanks PARAMS((
+	char *		buffer));
+extern char * LYSkipNonBlanks PARAMS((
+	char *		buffer));
+extern CONST char * LYSkipCBlanks PARAMS((
+	CONST char *	buffer));
+extern CONST char * LYSkipCNonBlanks PARAMS((
+	CONST char *	buffer));
+extern void LYTrimLeading PARAMS((
+	char *		buffer));
+extern void LYTrimTrailing PARAMS((
+	char *		buffer));
 extern void LYSetupEdit PARAMS((
 	EditFieldData *	edit,
 	char *		old,

@@ -146,13 +146,13 @@ PRIVATE HTAAUser *decompose_auth_string ARGS2(char *,		authstring,
 
 
 
-PRIVATE BOOL HTAA_checkTimeStamp ARGS1(CONST char *, timestamp)
+PRIVATE BOOL HTAA_checkTimeStamp ARGS1(CONST char *, timestamp GCC_UNUSED)
 {
     return NO;		/* This is just a stub */
 }
 
 
-PRIVATE BOOL HTAA_checkInetAddress ARGS1(CONST char *, i_net_adr)
+PRIVATE BOOL HTAA_checkInetAddress ARGS1(CONST char *, i_net_adr GCC_UNUSED)
 {
     return NO;		/* This is just a stub */
 }

@@ -706,9 +706,7 @@ PRIVATE void LYProcessSetCookies ARGS6(
     }
     while (NumCookies <= 50 && *p) {
 	attr_start = attr_end = value_start = value_end = NULL;
-	while (*p != '\0' && isspace((unsigned char)*p)) {
-	    p++;
-	}
+	p = LYSkipCBlanks(p);
 	/*
 	 *  Get the attribute name.
 	 */
@@ -717,9 +715,7 @@ PRIVATE void LYProcessSetCookies ARGS6(
 	       *p != '=' && *p != ';' && *p != ',')
 	    p++;
 	attr_end = p;
-	while (*p != '\0' && isspace((unsigned char)*p)) {
-	    p++;
-	}
+	p = LYSkipCBlanks(p);
 
 	/*
 	 *  Check for an '=' delimiter, or an 'expires' name followed
@@ -739,9 +735,7 @@ PRIVATE void LYProcessSetCookies ARGS6(
 	    if (*p == '=') {
 		p++;
 	    }
-	    while (*p != '\0' && isspace((unsigned char)*p)) {
-		p++;
-	    }
+	    p = LYSkipCBlanks(p);
 	    /*
 	     *	Hack alert!  We must handle Netscape-style cookies with
 	     *		"Expires=Mon, 01-Jan-96 13:45:35 GMT" or
@@ -803,20 +797,16 @@ PRIVATE void LYProcessSetCookies ARGS6(
 		    while (isdigit((unsigned char)*p))
 			p++;
 		    value_end = p;
-		    while (isspace((unsigned char)*p))
-			p++;
+		    p = LYSkipCBlanks(p);
 		    if (*p == '\0' || *p == ';')
 			break;
 		    if (*p == ',') {
-			cp = (p + 1);
-			while (*cp != '\0' && isspace((unsigned char)*cp))
-			    cp++;
+			cp = LYSkipCBlanks(p + 1);
 			if (*cp != '\0' && isdigit((unsigned char)*cp)) {
 			    cp1 = cp;
 			    while (isdigit((unsigned char)*cp1))
 				cp1++;
-			    while (*cp != '\0' && isspace((unsigned char)*cp))
-				cp1++;
+			    cp1 = LYSkipCBlanks(cp1);
 			    if (*cp1 == '\0' || *cp1 == ',' || *cp1 == ';') {
 				p = cp;
 				continue;
@@ -1193,9 +1183,7 @@ PRIVATE void LYProcessSetCookies ARGS6(
     }
     while (NumCookies <= 50 && *p) {
 	attr_start = attr_end = value_start = value_end = NULL;
-	while (*p != '\0' && isspace((unsigned char)*p)) {
-	    p++;
-	}
+	p = LYSkipCBlanks(p);
 	/*
 	 *  Get the attribute name.
 	 */
@@ -1204,9 +1192,7 @@ PRIVATE void LYProcessSetCookies ARGS6(
 	       *p != '=' && *p != ';' && *p != ',')
 	    p++;
 	attr_end = p;
-	while (*p != '\0' && isspace((unsigned char)*p)) {
-	    p++;
-	}
+	p = LYSkipCBlanks(p);
 
 	/*
 	 *  Check for an '=' delimiter, or an 'expires' name followed
@@ -1222,9 +1208,7 @@ PRIVATE void LYProcessSetCookies ARGS6(
 	    if (*p == '=') {
 		p++;
 	    }
-	    while (*p != '\0' && isspace((unsigned char)*p)) {
-		p++;
-	    }
+	    p = LYSkipCBlanks(p);
 	    /*
 	     *	Hack alert!  We must handle Netscape-style cookies with
 	     *		"Expires=Mon, 01-Jan-96 13:45:35 GMT" or
@@ -1286,20 +1270,16 @@ PRIVATE void LYProcessSetCookies ARGS6(
 		    while (isdigit((unsigned char)*p))
 			p++;
 		    value_end = p;
-		    while (isspace((unsigned char)*p))
-			p++;
+		    p = LYSkipCBlanks(p);
 		    if (*p == '\0' || *p == ';')
 			break;
 		    if (*p == ',') {
-			cp = (p + 1);
-			while (*cp != '\0' && isspace((unsigned char)*cp))
-			    cp++;
+			cp = LYSkipCBlanks(p + 1);
 			if (*cp != '\0' && isdigit((unsigned char)*cp)) {
 			    cp1 = cp;
 			    while (isdigit((unsigned char)*cp1))
 				cp1++;
-			    while (*cp != '\0' && isspace((unsigned char)*cp))
-				cp1++;
+			    cp1 = LYSkipCBlanks(cp1);
 			    if (*cp1 == '\0' || *cp1 == ',' || *cp1 == ';') {
 				p = cp;
 				continue;
