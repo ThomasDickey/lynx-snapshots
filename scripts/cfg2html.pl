@@ -22,6 +22,35 @@
 
 require "getopts.pl";
 
+# Options:
+#	-a	show all options, not only those that are available.
+#	-m	mark unavailable options with an '*'.  Data for this is read
+#		from standard input.
+#	-s	sort entries in body.html
+&Getopts('ams');
+
+if ( defined $opt_m ) {
+	@settings_ = <STDIN>;
+	%settings_avail = ();
+	foreach $l (@settings_) {
+		chop $l;
+		if ($l =~ /^[a-zA-Z_][a-zA-Z_0-9]*$/) {
+			$settings_avail{uc $l} = 1;
+		}
+	}
+} else {
+	$opt_a = 1;
+}
+
+# This sub tells whether the support for the given setting was enabled at
+# compile time.
+sub ok {
+	local ($name) = @_;
+	local ($ret) = defined $opt_a || defined($settings_avail{uc $name})+0;
+	$ret;
+}
+
+
 if ( $#ARGV < 0 ) {
 	&doit("lynx.cfg");
 } else {
@@ -30,6 +59,7 @@ if ( $#ARGV < 0 ) {
 	}
 }
 exit (0);
+
 
 # process a Lynx configuration-file
 sub doit {
@@ -83,7 +113,7 @@ EOF
 		if ( $input[$n] =~ /^\.h2\s*[A-Z][A-Z0-9_]*$/ ) {
 			$minor[$m] = $input[$n];
 			$minor[$m] =~ s/^.h2\s*//;
-			$m++;
+			$m++ if (ok($minor[$m]) || defined $opt_a);
 		}
 	}
 	@minor = sort @minor;
@@ -104,14 +134,23 @@ EOF
 			printf FP "<h2><a name=%s>%s</a></h2>\n", $d, $d;
 			$c=$d;
 		}
-		printf FP "<a href=\"body.html#%s\">%s</a>&nbsp;&nbsp;\n", $minor[$n], $minor[$n];
+		local ($avail = ok($minor[$n]));
+		local ($mark = !$avail && defined $opt_m ? "*" : "");
+		if (defined $opt_a || $avail) {
+		    printf FP "<a href=\"body.html#%s\">%s</a>&nbsp;&nbsp;\n", $minor[$n], $minor[$n] . $mark;
+		};
 	}
-	print FP <<'EOF';
+	$str = <<'EOF'
 <p>
 <a href=cattoc.html>To list of settings by category</a>
+EOF
+. (defined $opt_a && defined $opt_m ?
+"<p>Support for all settings suffixed with '*' was disabled at compile time.\n" :
+ "") . <<'EOF'
 </body>
 </html>
 EOF
+	;print FP $str;
 	close(FP);
 }
 
@@ -148,6 +187,14 @@ EOF
 	$next = 0;
 	$left = 0;
 	undef %keys;
+
+	local (@optnames);
+	local (%optname_to_fname);#this maps optname to fname - will be used
+	    #for alphabetical output of the content
+	local ($curfilename = "tmp000");#will be incremented each time
+	local ($tmpdir = "./");#temp files will be created there
+	close(FP);
+
 	for $n (0..$#input) {
 		if ( $next ) {
 			$next--;
@@ -190,6 +237,14 @@ EOF
 		} elsif ( $c =~ /^$/ ) {
 			if ( $m > 1 ) {
 				for $j (1..$#h2) {
+					close(FP);++$curfilename;
+					push @optnames,$h2[$j];
+					open(FP,">$tmpdir/$curfilename") || do {
+						print STDERR "Can't open tmpfile: $!\n";
+						return;
+					};
+					$optname_to_fname{$h2[$j]} = $curfilename;
+
 					printf FP "<hr>\n";
 					printf FP "<h2><kbd><a name=\"%s\">%s</a></kbd>\n", $h2[$j], $h2[$j];
 					if ( $h1 ne "" ) {
@@ -205,6 +260,14 @@ EOF
 			$first = 1;
 		} elsif ( $c =~ /^[#A-Za-z]/ && $m != 0 ) {
 			if ( $first ) {
+				close(FP);++$curfilename;
+				push @optnames,$h2[0];
+				open(FP,">$tmpdir/$curfilename") || do {
+				    print STDERR "Can't open tmpfile: $!\n";
+				    return;
+				};
+				$optname_to_fname{$h2[0]} = $curfilename;
+
 				if ( $any ) {
 					printf FP "<hr>\n";
 				}
@@ -231,7 +294,8 @@ EOF
 			$c =~ s/&/&amp;/g;
 			$c =~ s/>/&gt;/g;
 			$c =~ s/</&lt;/g;
-			$c =~ s/'([^ ])'/`<strong>$1<\/strong>'/g;
+			#hvv - something wrong was with next statement
+			$c =~ s/'([^ ])'/"<strong>$1<\/strong>"/g;
 
 			# Do a line-break each time the margin changes.  We 
 			# could get fancier, but HTML doesn't really support
@@ -294,6 +358,43 @@ EOF
 			}
 		}
 	}
+	close(FP);
+	# Here we collect files with description of needed lynx.cfg
+	# options in the proper (natural or sorted) order.
+	open(FP,">>$output") || do {
+		print STDERR "Can't open $output: $!\n";
+		return;
+	};
+	{
+	    local (@ordered = (defined $opt_s ? (sort keys(%optname_to_fname)) : @optnames));
+	    if (defined $opt_s) {
+		print FP "Options are sorted by name.\n";
+	    } else {
+		print FP "Options are in the same order as lynx.cfg.\n";
+	    }
+	    foreach $l (@ordered) {
+		local ($fnm = $tmpdir . $optname_to_fname{$l});
+		open(FP1,"<$fnm") || do {
+		    print STDERR "Can't open $fnm: $!\n";
+		    return;
+		};
+		local ($avail = ok($l));
+		if (defined $opt_a || $avail) {
+		    local(@lines) = <FP1>;
+		    print FP @lines;
+		    if (!$avail && defined $opt_m) {
+			print FP <<'EOF';
+<p>Support for this setting was disabled at compile-time.
+EOF
+		    }
+		}
+		close(FP1);
+	    }
+	    foreach $l (values(%optname_to_fname)) {
+		unlink $l;
+	    }
+	}
+
 	print FP <<'EOF';
 </body>
 </html>
@@ -308,6 +409,7 @@ sub gen_cattoc {
 	local (@index);
 	local ($n, $m, $c, $d, $found, $h1);
 	local ($output="cattoc.html");
+
 	open(FP,">$output") || do {
 		print STDERR "Can't open $output: $!\n";
 		return;
@@ -358,7 +460,8 @@ EOF
 		if ( $m >= 0 && $input[$n] =~ /^\.h2\s/ ) {
 			$c = $input[$n];
 			$c =~ s/^.h2\s*//;
-			$index{$major[$m]} .= $c . "\n";
+			$index{$major[$m]} .= $c . "\n"
+			    if (defined $opt_a || ok($c));
 		}
 	}
 	@major = sort @major;
@@ -380,17 +483,24 @@ EOF
 			printf FP "<p>Here is a list of settings that belong to this category\n";
 			printf FP "<ul>\n";
 			for $m (0..$#c) {
-				printf FP "<li><a href=\"body.html#%s\">%s</a>\n", $c[$m], $c[$m];
+				local($avail = ok($c[$m]));
+				local($mark = !$avail && defined $opt_m ? "*" : "");
+				printf FP "<li><a href=\"body.html#%s\">%s</a>\n", $c[$m], $c[$m] . $mark;
 			}
 			printf FP "</ul>\n";
 		}
 	}
-	print FP <<'EOF';
+	$str = <<'EOF'
 <p>
 <a href=alphatoc.html>To list of settings by name</a>
+EOF
+. (defined $opt_a && defined $opt_m ?
+"<p>Support for all settings suffixed with '*' was disabled at compile time." :
+ "") . <<'EOF'
 </body>
 </html>
 EOF
+	;print FP $str;
 	close(FP);
 	return @cats;
 }

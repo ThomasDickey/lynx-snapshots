@@ -52,13 +52,17 @@ extern int exec_command(char * cmd, int wait_flag); /* xsystem.c */
 #ifdef UTMPX_FOR_UTMP
 #include <utmpx.h>
 #define utmp utmpx
+#ifdef UTMPX_FILE
 #ifdef UTMP_FILE
 #undef UTMP_FILE
 #endif /* UTMP_FILE */
-#ifdef    UTMPX_FILE
 #define UTMP_FILE UTMPX_FILE
 #else
+#ifdef __UTMPX_FILE
 #define UTMP_FILE __UTMPX_FILE  /* at least in OS/390  S/390 -- gil -- 2100 */
+#else
+#define UTMP_FILE "/var/adm/utmpx" /* Digital Unix 4.0 */
+#endif
 #endif /* UTMPX_FILE */
 #else
 #include <utmp.h>
@@ -3168,42 +3172,42 @@ extern char *ttyname PARAMS((int fd));
  */
 PUBLIC BOOLEAN inlocaldomain NOARGS
 {
-#if ! HAVE_UTMP
-    CTRACE((tfp, "LYUtils: inlocaldomain() not support.\n"));
-    return(TRUE);
-#else
+#if HAVE_UTMP
     int n;
     FILE *fp;
     struct utmp me;
     char *cp, *mytty = NULL;
 
-    if ((cp=ttyname(0)))
+    if ((cp = ttyname(0)))
 	mytty = strrchr(cp, '/');
 
-    if (mytty && (fp=fopen(UTMP_FILE, "r")) != NULL) {
-	    mytty++;
-	    do {
-		n = fread((char *) &me, sizeof(struct utmp), 1, fp);
-	    } while (n>0 && !STREQ(me.ut_line,mytty));
-	    (void) fclose(fp);
+    if (mytty && (fp = fopen(UTMP_FILE, "r")) != NULL) {
+	mytty++;
+	do {
+	    n = fread((char *) &me, sizeof(struct utmp), 1, fp);
+	} while (n > 0 && !STREQ(me.ut_line, mytty));
+	(void) fclose(fp);
 
-	    if (n > 0 &&
-		strlen(me.ut_host) > strlen(LYLocalDomain) &&
-		STREQ(LYLocalDomain,
-		  me.ut_host+strlen(me.ut_host)-strlen(LYLocalDomain)) )
-		return(TRUE);
+	if (n > 0 &&
+	    strlen(me.ut_host) > strlen(LYLocalDomain) &&
+	    STREQ(LYLocalDomain,
+		  me.ut_host + strlen(me.ut_host) - strlen(LYLocalDomain)) )
+	    return(TRUE);
 #ifdef LINUX
 /* Linux fix to check for local user. J.Cullen 11Jul94		*/
-	    if ((n > 0) && (strlen(me.ut_host) == 0))
-		return(TRUE);
+	if ((n > 0) && (strlen(me.ut_host) == 0))
+	    return(TRUE);
 #endif /* LINUX */
 
     } else {
-	CTRACE((tfp,"Could not get ttyname or open UTMP file %s\n", UTMP_FILE));
+	CTRACE((tfp, "Could not get ttyname or open UTMP file %s\n", UTMP_FILE));
     }
 
     return(FALSE);
-#endif /* !HAVE_UTMP */
+#else
+    CTRACE((tfp, "LYUtils: inlocaldomain() not support.\n"));
+    return(TRUE);
+#endif /* HAVE_UTMP */
 }
 
 #if HAVE_SIGACTION
@@ -6455,6 +6459,46 @@ PUBLIC FILE *LYOpenTemp ARGS3(
 	}
     }
 
+    /*
+     * Verify if the given space looks secure enough.  Otherwise, make a
+     * secure subdirectory of that.
+     */
+#if defined(UNIX) && defined(HAVE_MKTEMP)
+    if (lynx_temp_subspace == 0)
+    {
+	BOOL make_it = FALSE;
+	struct stat sb;
+
+	if (lstat(lynx_temp_space, &sb) == 0
+	 && S_ISDIR(sb.st_mode)) {
+	    if (sb.st_uid != getuid()
+	     || (sb.st_mode & (S_IWOTH | S_IWGRP)) != 0) {
+		make_it = TRUE;
+		CTRACE((tfp, "lynx_temp_space is not our directory %s owner %d mode %03o\n",
+			     lynx_temp_space, sb.st_uid, sb.st_mode & 0777));
+	    }
+	} else {
+	    make_it = TRUE;
+	    CTRACE((tfp, "lynx_temp_space is not a directory %s\n", lynx_temp_space));
+	}
+	if (make_it) {
+	    int old_mask = umask(HIDE_UMASK);
+	    StrAllocCat(lynx_temp_space, "XXXXXX");
+	    if (mktemp(lynx_temp_space) == 0
+	     || mkdir(lynx_temp_space, 0700) < 0) {
+		printf("%s: %s\n", lynx_temp_space, LYStrerror(errno));
+		exit(-1);
+	    }
+	    umask(old_mask);
+	    lynx_temp_subspace = 1;
+	    StrAllocCat(lynx_temp_space, "/");
+	    CTRACE((tfp, "made subdirectory %s\n", lynx_temp_space));
+	} else {
+	    lynx_temp_subspace = -1;
+	}
+    }
+#endif
+
     do {
 	if (!fmt_tempname(result, lynx_temp_space, suffix))
 	    return 0;
@@ -6782,13 +6826,13 @@ PUBLIC void LYCleanupTemp NOARGS
 	LYRemoveTemp(ly_temp->name);
     }
 #ifdef UNIX
-    if (lynx_temp_subspace) {
+    if (lynx_temp_subspace > 0) {
 	char result[LY_MAXPATH];
 	LYstrncpy(result, lynx_temp_space, sizeof(result)-1);
 	LYTrimPathSep(result);
 	CTRACE((tfp, "LYCleanupTemp removing %s\n", result));
 	rmdir(result);
-	lynx_temp_subspace = FALSE;
+	lynx_temp_subspace = -1;
     }
 #endif
 }

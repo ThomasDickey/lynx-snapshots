@@ -230,7 +230,7 @@ clean:
 @INTLDIR_MAKE@	cd intl && $(MAKE) $@
 @MSG_DIR_MAKE@	cd po && $(MAKE) $@
 	rm -f *.b src/lynx$x *.leaks cfg_defs.h LYHelp.h lint.*
-@LYNXCFG_MAKE@	-rm -f alphatoc.html body.html cattoc.html
+@LYNXCFG_MAKE@	-rm -f alphatoc.html body.html cattoc.html tmp007
 	rm -f help_files.sed
 	rm -f core *.core
 
@@ -245,6 +245,7 @@ distclean: clean
 	-cd src && $(MAKE) $@
 	-cd src/chrtrans && $(MAKE) $@
 @INTLDIR_MAKE@	cd intl && $(MAKE) $@
+	-rm -f intl/libintl.h
 @MSG_DIR_MAKE@	-rmdir intl
 @MSG_DIR_MAKE@	cd po && $(MAKE) $@
 @MSG_DIR_MAKE@	-rmdir po
@@ -360,13 +361,17 @@ help_files.sed : makefile $(srcdir)/lynx_help/help_files.txt
 install-help : help_files.sed $(HELPDIR)
 	(cd $(HELPDIR) && WD=`pwd` && HEAD=`echo $$WD|sed -e 's@/lynx_help$$@@'` && test $$WD != $$HEAD && rm -rf *)
 @LYNXCFG_MAKE@	@echo 'Making htmlized lynx.cfg'
+@LYNXCFG_MAKE@	cd src && make LYReadCFG.i
 @LYNXCFG_MAKE@	@-rm -f alphatoc.html body.html cattoc.html
-@LYNXCFG_MAKE@	perl $(srcdir)/scripts/cfg2html.pl $(srcdir)/lynx.cfg
+@LYNXCFG_MAKE@	sed -n -e '/Config_Type  *Config_Table/,/{0, *0, *0}/ p' src/LYReadCFG.i | \
+@LYNXCFG_MAKE@	sed  -e 's/ *{ *"\([^"]*\)".*/\1/' | \
+@LYNXCFG_MAKE@	perl $(srcdir)/scripts/cfg2html.pl -ms $(srcdir)/lynx.cfg
 	@echo Translating/copying html files
 	@cat help_files.sed > $(HELPDIR)/help_files.sed
 @LYNXCFG_MAKE@	@$(SHELL) -c 'for f in alphatoc.html body.html cattoc.html ; do \
 @LYNXCFG_MAKE@		sed -f $(HELPDIR)/help_files.sed $$f > $(HELPDIR)/$$f ; \
 @LYNXCFG_MAKE@		done'
+@LYNXCFG_MAKE@	-rm -f src/LYReadCFG.i
 	@ECHO_CC@$(SHELL) -c 'cd $(srcdir)/lynx_help && ( \
 		dirs=keystrokes; \
 		(cd $(HELPDIR) && mkdir $$dirs 2>/dev/null ) ; \

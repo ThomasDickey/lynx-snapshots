@@ -567,6 +567,10 @@ disable SIGINT cleanup handler
 .B -startfile_ok
 allow non-http startfile and homepage with -validate.
 .TP
+.B -stdin
+read the startfile from standard input
+(UNIX only).
+.TP
 .B -tagsoup
 initialize parser, using Tag Soup DTD rather than SortaSGML.
 .TP
