@@ -10,11 +10,104 @@ README.configure), and miscellaneous other changes.  Note that the 2.7 ->
 2.7.1 changes (which are listed at the beginning of the current CHANGES
 file) are duplicated here. - KW]
 
+1997-08-16
+* Mini tweaks for the win-dos ports.  One fix for the pull down boxes
+  and the rest mostly maintence. - WB
+1997-08-15
+* Hack in highlight() to preserve a '-' character at the end of line
+  within anchor text, which can result from splitting at the position
+  of a &shy; or <SHY> or SOFT HYPHEN character. - KW
+* Tweaks in print_wwwfile_to_fd print_crawl_to_fd to output a soft hyphen
+  character if it is present at the end of a line.  For -dump, a raw
+  ISO 8859 SOFT HYPHEN character may be written if the Display Character
+  Set (default from lynx.cfg or saved value in .lynxrc) is an ISO 8859
+  character set, but this may be overridden with the -raw toggle.
+  Otherwise represent soft hyphen with '-' as usual. - KW
+* Modified the news gateway to try XGTITLE for wildcarded lists of
+  available newsgroups (e.g., news:bionet.* for the bionet hierarchy,
+  or news:* for all of its served newsgroups).  If that fails, Lynx
+  retries with the old behavior of using LIST NEWSGROUPS and parsing
+  the reply itself for the desired groups.  Note that LIST NEWSGROUPS
+  can take a wildcarded argument for some nntp servers, but not all,
+  so we don't risk it. - FM
+* Fixed a bug in HTHandleAuthInfo() of yesterday's HTNews.c which could
+  yield an infinite while() loop. - FM
+* Various tweaks in HTNews.c to HTHandleAuthInfo() and elsewhere, to
+  keep connections open more often in some common cases of non-fatal
+  errors, and also avoid trying to use the network socket after some
+  recognized case of closing by the server.  Only based on some testing
+  with INN's nnrpd, not on any written specs. - KW
+1997-08-14
+* Added nntp authorization (AUTHINFO) handling to the news gateway. - FM
+* Added a "Loading cfg file '%s'." trace message in LYMain.c to indicate
+  the absolute path of the configuration (lynx.cfg) file which was used
+  at startup (if Lynx is invoked with the -trace command line switch). - FM
+* Added code in HTFWriter.c to avoid calling HTLoadFile() on the temporary
+  file which results from decompression of a temporary file created by
+  HTCompressed(), if this would just result in making a copy of the file
+  and then invoking an external viewer.  Instead the viewer command is
+  now invoked directly from the HTFWriter_free of the HTCompressed()
+  stream after decompression. - KW
+* Added code in HTFWriter.c, HTFile.c, and HTFormat.c to support reading
+  of gzipped local files directly, using functions from the zlib library.
+  Note that gzipped files from remote servers are still first copied to
+  a temporary file before lynx can process them further, and an external
+  GZIP_PATH command is still needed at least for passing such files to an
+  external viewer, as well as for various DIRED_SUPPORT File menu functions.
+  To activate this code, the symbol USE_ZLIB has to be defined, it is
+  currently not set by the auto-config script.  The zlib library may be
+  already installed on your system (probably called libz.a or libz.so.1
+  or similar, the required header files are zlib.h and zconf.h), otherwise
+  it is available through <http://www.cdrom.com/pub/infozip/zlib/>, it
+  appears to support all platforms for which lynx is available (including
+  VMS, DOS, MS Win32).  Note that this library would probably also be
+  needed if in the future support for the HTTP/1.1 "deflate" content-coding
+  is added. - KW
+* Don't send MIME types in Accept headers whose q values are outside of the
+  allowed range 0.0 <= q <= 1.0 - KW
+* Tweaks in HTInit.c to use the official names for image/png and image/tiff,
+  but still support the image/x-* forms. - KW
+1997-08-13
+* Tweaks of LYConvertToURL() in LYUtils.c and HTParseInet() in HTTCP.c
+  to deal more coherantly with 'z'ap attempts during gethostbyname()
+  calls. - FM
+* Tweaks of split_line() and HText_endAppend() in GridText.c to handle
+  trimming of spaces from the tails of link names more effectively. - FM
+* Expanded the OL nesting depth and type counters to track up to 12 list
+  depths before punting to the lowest negative number.  Note that the
+  indentations still are limited to 6 nested depths, so use the TYPE
+  attribute to distinquish OLs with deeper nestings. - FM
+1997-08-12
+* Mods of LYMainLoop.c to maintain treatment of a local startfile as
+  text/html source when it does not have a suffix mapped to that MIME
+  type and the -force_html switch was used. - FM
+* Added .phtml to the default suffix mappings for text/html. - FM
+* Mods of LYCurses.c to avoid using /dev/tty arbitrarily for stdin on
+  Unix when compiling with slang versions greater than 0.99-35, based
+  on JED's suggestion to lynx-dev. - FM
+* Tweaks of HTCheckFnameForCompression() in GridText.c to avoid warnings
+  from some compilers. - FM
+1997-08-09
+* Changed the code of 1997-08-06 which modifies suggested filenames for a
+  'D'ownload to be more cautious: don't remove a '.gz', '.Z' etc. suffix
+  if there is no header indication that we have a compressed file.  Not
+  all servers and gateways (including the internal FTP gateawy) detect
+  and label compressed content reliably. - KW
+1997-08-08
+* Mods of HTTP.c so that download requests are converted to presentation
+  requests for interactive users, and traversal requests are converted to
+  cancels, when servers return non-success statuses with bodies which
+  should be displayed to interactive users. - FM
+* Added the "DosCyrillic (cp866)" display character set to the chartrans
+  support, and tweaked the other Cyrillic charset tables. - AAC & KW
+* Tweaked MULTI_SUFFIX support in HTFile.c, so that it now somewhat
+  works.  Dunno whether it's useful for anybody. - KW
 1997-08-07
+* Tweaks of yesterdays mods in GridText.c. - FM
 * Correct storage class of variables in UCMap.h, from -warn-common linker
-  option.
+  option. - TD
 * Refine configure tests for acs_map, ttytype to accommodate broken linker
-  on FreeBSD 2.1.5
+  on FreeBSD 2.1.5 - TD
 * Modify README.configure to indicate the associated definitions for
   each configure option, as suggested by Klaus Weide. - TD
 * Correct duplicate declaration of Current_Attr, which Linux linker ignores
@@ -35,6 +128,24 @@ file) are duplicated here. - KW]
   a loop forcing the entries of acs_map[] to 8-bits. - TD
 * Many minor tweaks for the DJGPP version by DK - WB
 * A rename of about_lynx_dev.html to lynx_dev.html for 8.3 systems - WB
+1997-08-06
+* Modified HTMIME.c and LYCharUtils.c so that setting of suggested filenames
+  via a filename=value pair in Content-Disposition headers and META elements
+  is not restricted to the file disposition type. - FM
+* Mods in GridText.c, LYGetFile.c and HTAnchor.c so that suggested filenames
+  will have appropriate suffixes when 'd'ownloading, based on whether or not
+  the file is gzipped or Unix compressed. - FM
+1997-08-05
+* Mods of the lead relative symbolic element stripping for http/https
+  URLs in cases for which they would persist when resolved to an
+  absolute URL.  The lastest URL draft is ambiguous about whether this
+  should be considered an error, and leaves the handling of it up to the
+  UA.  So we now get rid of all lead relative symbolic elements from the
+  resolved http/https URLs, but no others, and still issue a Bad Partial
+  Reference statusline message. - FM
+* Tweaks of title handling in LYMainLoop.c and LYShowInfo.c so that the
+  known title, or link name associated with ACTIVATE-ion, form submission,
+  or a HEAD request, will be used in the INFO ('=') display. - FM & KW
 1997-08-04
 * Fixed header parsing in HTMIME.c so that "Safe:" is recognized. - KW
 * Changed confirmation prompts for HEAD (']') commands acting on a POST
@@ -49,9 +160,33 @@ file) are duplicated here. - KW]
   is retried without forking if the child process exits without returning
   enough data.  Also added trace output, to show whether something
   unusual has happened to the child process. - KW
+* The IETF has indicated intent to adopt KW's "status 307" proposal for
+  dealing with the status 302 problems, so HTTP.c and HTAlert.c implement
+  that now.  The 302 status is "General (temporary) Redirection" which
+  can be handled as 303 at the UA's discretion, so we do that in all cases,
+  rather than prompting the user whether to do that when the 302 is for
+  a POST submission.  The 307 (and 305) for POST submissions invokes a
+  prompt whether to P)roceed or C)ancel, without the Use G)ET option.
+  The 301 is treated as permanent, normally, but for POST submissions
+  still is treated as temporary and invokes a prompt which includes the
+  Use G)ET option, because scripts written to empirical behavior may
+  still be expecting that (it's virtually never encountered in redirections
+  of POSTs, though, because the document containing the form typically
+  is redirected, so the user only sees the form if a local copy has been
+  made, and it would be best to C)ancel and get a new local copy of the
+  document from the correct http/https URL, to serve as a BASE for the
+  form's ACTION). - FM
 * Changed the typedef for HTCoord in HTStyle.h from float to int, for
   significant speedup of rendering on machines without floating-point
-  hardware. - KW
+  hardware based on DW's, KW's, BL's analyses.  Note that this should 
+  be taken into account when/if external style sheet support is added
+  for page formatting (e.g., for optimum handling by speech synthesizers
+  and braille interfaces), beyond the current emphasis on colorizing. - FM
+1997-08-02
+* The cookie pre-draft has been adopted as an IETF ID:
+  ftp://ds.internic.net/internet-drafts/draft-ietf-http-state-man-mec-03.txt
+  so the code for combining Set-Cookie and Set-Cookie2 headers has been
+  eliminated in LYCookie.c (see mods for 1997-07-31). - FM
 1997-08-01
 * Fixed typos in LYCookie.c. - FM
 1997-07-31

@@ -705,7 +705,8 @@ PUBLIC HTFormat HTFileFormat ARGS2(
     if (!HTSuffixes)
         HTFileInit();
 #endif /* !NO_INIT */
-    *pencoding = NULL;
+    if (pencoding)
+	*pencoding = NULL;
     lf  = strlen(filename);
     n = HTList_count(HTSuffixes);
     for (i = 0; i < n; i++) {
@@ -714,7 +715,8 @@ PUBLIC HTFormat HTFileFormat ARGS2(
 	ls = strlen(suff->suffix);
 	if ((ls <= lf) && 0 == strcasecomp(suff->suffix, filename + lf - ls)) {
 	    int j;
-	    *pencoding = suff->encoding;
+	    if (pencoding)
+		*pencoding = suff->encoding;
 	    if (suff->rep) {
 #ifdef VMS
 		if (semicolon != NULL)
@@ -750,7 +752,7 @@ PUBLIC HTFormat HTFileFormat ARGS2(
     /*
     **  Set default encoding unless found with suffix already.
     */
-    if (!*pencoding)
+    if (pencoding && !*pencoding)
         *pencoding = suff->encoding ? suff->encoding
 				    : HTAtom_for("binary");
 #ifdef VMS
@@ -772,7 +774,6 @@ PUBLIC HTFormat HTCharsetFormat ARGS3(
 	HTFormat,		format,
 	HTParentAnchor *,	anchor,
 	int,			default_LYhndl)
-
 {
     char *cp = NULL, *cp1, *cp2, *cp3 = NULL, *cp4;
     BOOL chartrans_ok = FALSE;
@@ -794,9 +795,9 @@ PUBLIC HTFormat HTCharsetFormat ARGS3(
 	    cp2++;
 #ifdef EXP_CHARTRANS
 	StrAllocCopy(cp3, cp2); /* copy to mutilate more */
-	for (cp4=cp3; (*cp4 != '\0' && *cp4 != '"' &&
-		       *cp4 != ';'  && *cp4 != ':' &&
-		       !WHITE(*cp4)); cp4++) {
+	for (cp4 = cp3; (*cp4 != '\0' && *cp4 != '"' &&
+			 *cp4 != ';'  && *cp4 != ':' &&
+			 !WHITE(*cp4)); cp4++) {
 	    ; /* do nothing */
 	}
 	*cp4 = '\0';
@@ -813,29 +814,29 @@ PUBLIC HTFormat HTCharsetFormat ARGS3(
 	    }
 	}
 	if (UCCanTranslateFromTo(chndl, current_char_set)) {
-				chartrans_ok = YES;
-				*cp1 = '\0';
-				format = HTAtom_for(cp);
-				StrAllocCopy(anchor->charset, cp4);
-				HTAnchor_setUCInfoStage(anchor, chndl,
-				   UCT_STAGE_MIME, UCT_SETBY_MIME);
+	    chartrans_ok = YES;
+	    *cp1 = '\0';
+	    format = HTAtom_for(cp);
+	    StrAllocCopy(anchor->charset, cp4);
+	    HTAnchor_setUCInfoStage(anchor, chndl,
+				    UCT_STAGE_MIME, UCT_SETBY_MIME);
 	} else if (chndl < 0) {
 	    /*
 	    **  Got something but we don't recognize it.
 	    */
-				chndl = UCLYhndl_for_unrec;
+	    chndl = UCLYhndl_for_unrec;
 	    if (UCCanTranslateFromTo(chndl, current_char_set)) {
-				    chartrans_ok = YES;
-				    HTAnchor_setUCInfoStage(anchor, chndl,
-				       UCT_STAGE_MIME, UCT_SETBY_DEFAULT);
-				}
-			    }
-			    FREE(cp3);
-			    if (chartrans_ok) {
+		chartrans_ok = YES;
+		HTAnchor_setUCInfoStage(anchor, chndl,
+					UCT_STAGE_MIME, UCT_SETBY_DEFAULT);
+	    }
+	}
+	FREE(cp3);
+	if (chartrans_ok) {
 	    LYUCcharset *p_in = HTAnchor_getUCInfoStage(anchor,
-							     UCT_STAGE_MIME);
+							UCT_STAGE_MIME);
 	    LYUCcharset *p_out = HTAnchor_setUCInfoStage(anchor,
-							    current_char_set,
+							 current_char_set,
 							 UCT_STAGE_HTEXT,
 							 UCT_SETBY_DEFAULT);
 	    if (!p_out) {
@@ -861,7 +862,7 @@ PUBLIC HTFormat HTCharsetFormat ARGS3(
 					UCT_SETBY_DEFAULT);
 	    }
 	    if (!(p_in->enc & UCT_ENC_CJK) &&
-		(p_in->codepoints & UCT_CP_SUBSETOF_LAT1)){
+		(p_in->codepoints & UCT_CP_SUBSETOF_LAT1)) {
 		HTCJK = NOCJK;
 	    } else if (chndl == current_char_set) {
 		HTPassEightBitRaw = TRUE;
@@ -1421,6 +1422,10 @@ PUBLIC int HTLoadFile ARGS4(
 #else
     extern char *list_format;
 #endif /* VMS */
+#ifdef USE_ZLIB
+    gzFile gzfp;
+    BOOL use_gzread = NO;
+#endif /* USE_ZLIB */
 
     /*
     **  Reduce the filename to a basic form (hopefully unique!).
@@ -1436,11 +1441,11 @@ PUBLIC int HTLoadFile ARGS4(
     if (strcmp("ftp", access) == 0 ||
        (strcmp("localhost", nodename) != 0 &&
 #ifdef VMS
-        strcasecomp(nodename, HTHostName()) != 0))
+        strcasecomp(nodename, HTHostName()) != 0
 #else
-        strcmp(nodename, HTHostName()) != 0))
+        strcmp(nodename, HTHostName()) != 0
 #endif /* VMS */
-    {
+    )) {
         FREE(newname);
 	FREE(filename);
 	FREE(nodename);
@@ -1540,7 +1545,6 @@ PUBLIC int HTLoadFile ARGS4(
 	    int len;
 	    char *cp = NULL;
 	    char *semicolon = NULL;
-            int status;
 
 	    if (HTEditable(vmsname)) {
 		HTAtom * put = HTAtom_for("PUT");
@@ -1588,7 +1592,20 @@ PUBLIC int HTLoadFile ARGS4(
 						 UCLYhndl_HTFile_for_unspec);
 			StrAllocCopy(anchor->content_type, format->name);
 			StrAllocCopy(anchor->content_encoding, "x-gzip");
+#ifdef USE_ZLIB
+			if (strcmp(format_out->name, "www/download") != 0) {
+			    fclose(fp);
+			    gzfp = gzopen(localname, "rb");
+
+			    if (TRACE)
+				fprintf(stderr,
+				       "HTLoadFile: gzopen of `%s' gives %p\n",
+					localname, (void*)gzfp);
+			    use_gzread = YES;
+			}
+#else  /* USE_ZLIB */
 			format = HTAtom_for("www/compressed");
+#endif  /* USE_ZLIB */
 		    }
 		}
 	    }
@@ -1596,8 +1613,43 @@ PUBLIC int HTLoadFile ARGS4(
 	        *semicolon = ';';
 	    FREE(filename);
 	    FREE(nodename);
-	    status = HTParseFile(format, format_out, anchor, fp, sink);
-	    fclose(fp);
+#ifdef USE_ZLIB
+	    if (use_gzread) {
+		if (gzfp) {
+		    char * sugfname = NULL;
+		    if (anchor->SugFname) {
+			StrAllocCopy(sugfname, anchor->SugFname);
+		    } else {
+			char * anchor_path = HTParse(anchor->address, "",
+						     PARSE_PATH + PARSE_PUNCTUATION);
+			char * lastslash;
+			HTUnEscape(anchor_path);
+			lastslash = strrchr(anchor_path, '/');
+			if (lastslash)
+			    StrAllocCopy(sugfname, lastslash + 1);
+			FREE(anchor_path);
+		    }
+		    FREE(anchor->content_encoding);
+		    if (sugfname && *sugfname)
+			HTCheckFnameForCompression(&sugfname, anchor,
+						   TRUE);
+		    if (sugfname && *sugfname)
+			StrAllocCopy(anchor->SugFname, sugfname);
+		    FREE(sugfname);
+		    status = HTParseGzFile(format, format_out,
+					   anchor,
+					   gzfp, sink);
+		} else {
+		    status = HTLoadError(NULL,
+					 -(HT_ERROR),
+					 "Could not open file for decompression!");
+		}
+	    } else
+#endif /* USE_GZREAD */
+	    {
+		status = HTParseFile(format, format_out, anchor, fp, sink);
+		fclose(fp);
+	    }
 	    return status;
         }  /* If successfull open */
 	FREE(filename);
@@ -1635,7 +1687,7 @@ PUBLIC int HTLoadFile ARGS4(
 	    STRUCT_DIRENT * dirbuf;
 	    float best = NO_VALUE_FOUND;	/* So far best is bad */
 	    HTFormat best_rep = NULL;	/* Set when rep found */
-	    STRUCT_DIRENT best_dirbuf;	/* Best dir entry so far */
+	    char * best_name = NULL;	/* Best dir entry so far */
 
 	    char *base = strrchr(localname, '/');
 	    int baselen;
@@ -1665,10 +1717,55 @@ forget_multi:
 #endif
 		if ((int)strlen(dirbuf->d_name) > baselen &&     /* Match? */
 		    !strncmp(dirbuf->d_name, base, baselen)) {	
-		    HTFormat rep = HTFileFormat(dirbuf->d_name, &encoding);
+		    HTFormat rep = HTFileFormat(dirbuf->d_name, NULL);
+		    float filevalue = HTFileValue(dirbuf->d_name);
 		    float value = HTStackValue(rep, format_out,
-		    				HTFileValue(dirbuf->d_name),
-						0.0  /* @@@@@@ */);
+		    				filevalue,
+						0L  /* @@@@@@ */);
+		    if (value <= 0.0) {
+			char * cp = NULL;
+			int len = strlen(dirbuf->d_name);
+    			if (len > 2 &&
+			    dirbuf->d_name[len - 1] == 'Z' &&
+			    dirbuf->d_name[len - 2] == '.') {
+			    StrAllocCopy(cp, dirbuf->d_name);
+			    cp[len - 2] = '\0';
+			    format = HTFileFormat(cp, NULL);
+			    FREE(cp);
+			    value = HTStackValue(format, format_out,
+						 filevalue, 0);
+			    if (value <= 0.0) {
+				format = HTAtom_for("application/x-compressed");
+				value = HTStackValue(format, format_out,
+						     filevalue, 0);
+			    }
+			    if (value <= 0.0) {
+				format = HTAtom_for("www/compressed");
+				value = HTStackValue(format, format_out,
+						     filevalue, 0);
+			    }
+			} else if ((len > 3) &&
+				   !strcasecomp((char *)&dirbuf->d_name[len - 2],
+						"gz") &&
+				   dirbuf->d_name[len - 3] == '.') {
+			    StrAllocCopy(cp, dirbuf->d_name);
+			    cp[len - 3] = '\0';
+			    format = HTFileFormat(cp, NULL);
+			    FREE(cp);
+			    value = HTStackValue(format, format_out,
+						 filevalue, 0);
+			    if (value <= 0.0) {
+				format = HTAtom_for("application/x-gzip");
+				value = HTStackValue(format, format_out,
+						     filevalue, 0);
+			    }
+			    if (value <= 0.0) {
+				format = HTAtom_for("www/compressed");
+				value = HTStackValue(format, format_out,
+						     filevalue, 0);
+			    }
+			}
+		    }
 		    if (value != NO_VALUE_FOUND) {
 		        if (TRACE)
 			    fprintf(stderr,
@@ -1677,7 +1774,7 @@ forget_multi:
 			if  (value > best) {
 			    best_rep = rep;
 			    best = value;
-			    best_dirbuf = *dirbuf;
+			    StrAllocCopy(best_name, dirbuf->d_name);
 		       }
 		    }	/* if best so far */ 		    
 		 } /* if match */  
@@ -1689,8 +1786,9 @@ forget_multi:
 		format = best_rep;
 		base[-1] = '/';		/* Restore directory name */
 		base[0] = '\0';
-		StrAllocCat(localname, best_dirbuf.d_name);
-		goto open_file;
+		StrAllocCat(localname, best_name);
+                FREE(best_name);
+                /* goto open_file; */  /* Nope - might be a directory - kw */
 		
 	    } else { 			/* If not found suitable file */
 		FREE(localname);
@@ -1711,10 +1809,11 @@ forget_multi:
 	**  to point to the current directory being read.
 	*/
 #ifdef _WINDOWS
-	if (!exists(localname)) {
+	if (!exists(localname))
 #else
-	if (stat(localname,&dir_info) == -1) {     /* get file information */
+	if (stat(localname,&dir_info) == -1)	   /* get file information */
 #endif
+	{
 	                               /* if can't read file information */
 	    if (TRACE)
 	        fprintf(stderr, "HTLoadFile: can't stat %s\n", localname);
@@ -1966,6 +2065,11 @@ forget_multi:
 				          "Subirectories:" : "Files:");
 				       END(HTML_EM);
 				    }
+				    END(HTML_H2);
+#ifndef LONG_LIST
+				    START(HTML_DIR);
+#endif /* !LONG_LIST */
+				}
 #else
 				if (state != *(char *)(HTBTree_object(
 							 next_element))) {
@@ -1981,12 +2085,12 @@ forget_multi:
 				    PUTS(state == 'D' ?
 				    "Subdirectories:" : "Files:");
 				    END(HTML_EM);
-#endif /* DIRED_SUPPORT */
 				    END(HTML_H2);
 #ifndef LONG_LIST
 				    START(HTML_DIR);
 #endif /* !LONG_LIST */
 				}
+#endif /* DIRED_SUPPORT */
 #ifndef LONG_LIST
 			        START(HTML_LI);
 #endif /* !LONG_LIST */
@@ -2053,7 +2157,6 @@ open_file:
 	    if (fp) {		/* Good! */
 	        int len;
 		char *cp = NULL;
-		int status;
 
 		if (HTEditable(localname)) {
 		    HTAtom * put = HTAtom_for("PUT");
@@ -2089,13 +2192,61 @@ open_file:
 						 UCLYhndl_HTFile_for_unspec);
 			StrAllocCopy(anchor->content_type, format->name);
 			StrAllocCopy(anchor->content_encoding, "x-gzip");
+#ifdef USE_ZLIB
+			if (strcmp(format_out->name, "www/download") != 0) {
+			    fclose(fp);
+			    gzfp = gzopen(localname, "rb");
+
+			    if (TRACE)
+				fprintf(stderr,
+				       "HTLoadFile: gzopen of `%s' gives %p\n",
+					localname, (void*)gzfp);
+			    use_gzread = YES;
+			}
+#else  /* USE_ZLIB */
 			format = HTAtom_for("www/compressed");
+#endif  /* USE_ZLIB */
 		    }
 		}
 		FREE(localname);
 		FREE(nodename);
-		status = HTParseFile(format, format_out, anchor, fp, sink);
-		fclose(fp);
+#ifdef USE_ZLIB
+		if (use_gzread) {
+		    if (gzfp) {
+			char * sugfname = NULL;
+			if (anchor->SugFname) {
+			    StrAllocCopy(sugfname, anchor->SugFname);
+			} else {
+			    char * anchor_path = HTParse(anchor->address, "",
+							 PARSE_PATH + PARSE_PUNCTUATION);
+			    char * lastslash;
+			    HTUnEscape(anchor_path);
+			    lastslash = strrchr(anchor_path, '/');
+			    if (lastslash)
+				StrAllocCopy(sugfname, lastslash + 1);
+			    FREE(anchor_path);
+			}
+			FREE(anchor->content_encoding);
+			if (sugfname && *sugfname)
+			    HTCheckFnameForCompression(&sugfname, anchor,
+						       TRUE);
+			if (sugfname && *sugfname)
+			    StrAllocCopy(anchor->SugFname, sugfname);
+			FREE(sugfname);
+			status = HTParseGzFile(format, format_out,
+					       anchor,
+					       gzfp, sink);
+		    } else {
+			status = HTLoadError(NULL,
+					     -(HT_ERROR),
+				     "Could not open file for decompression!");
+		    }
+		} else
+#endif /* USE_GZREAD */
+		{
+		    status = HTParseFile(format, format_out, anchor, fp, sink);
+		    fclose(fp);
+		}
 		return status;
 	    }  /* If succesfull open */
 	}    /* scope of fp */

@@ -364,6 +364,8 @@ Sucess (>=0) and failure (<0) codes
 #define HT_NOT_LOADED -29999
 #define HT_OK           0               /* Generic success*/
 
+#define HT_ERROR                -1      /* Generic failure */
+
 #define HT_NO_ACCESS    -10             /* Access not available */
 #define HT_FORBIDDEN    -11             /* Access forbidden */
 #define HT_INTERNAL     -12             /* Weird -- should never happen. */

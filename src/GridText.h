@@ -71,6 +71,10 @@ extern void HText_setStale PARAMS((HText * text));
 extern void HText_refresh PARAMS((HText * text));
 extern char * HText_getTitle NOPARAMS;
 extern char * HText_getSugFname NOPARAMS;
+extern void HTCheckFnameForCompression PARAMS((
+	char **			fname,
+	HTParentAnchor *	anchor,
+	BOOLEAN			strip_ok));
 extern char * HText_getLastModified NOPARAMS;
 extern char * HText_getDate NOPARAMS;
 extern char * HText_getServer NOPARAMS;

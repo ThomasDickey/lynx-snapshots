@@ -313,10 +313,22 @@ extern void HTAnchor_setRevTitle PARAMS((
 	CONST char *		title));
 
 /*	Suggested filename handling. - FM
-**	(will be loaded if we had a Content-disposition
-**	 header with file; filename=name.suffix)
+**	(will be loaded if we had a Content-Disposition
+**	 header or META element with filename=name.suffix)
 */
 extern CONST char * HTAnchor_SugFname PARAMS((
+	HTParentAnchor *	me));
+
+/*	Content-Type handling. - FM
+*/
+extern CONST char * HTAnchor_content_type PARAMS((
+	HTParentAnchor *	me));
+
+/*	Content-Encoding handling. - FM
+**	(will be loaded if we had a Content-Encoding
+**	 header.)
+*/
+extern CONST char * HTAnchor_content_encoding PARAMS((
 	HTParentAnchor *	me));
 
 /*	Last-Modified header handling. - FM

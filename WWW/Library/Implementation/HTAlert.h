@@ -112,6 +112,7 @@ extern BOOL HTConfirmCookie PARAMS((
 **	----------------------------
 **  On entry,
 **      redirecting_url             is the Location.
+**	server_status		    is the server status code.
 **
 **  On exit,
 **      Returns 0 on cancel,
@@ -119,7 +120,8 @@ extern BOOL HTConfirmCookie PARAMS((
 **	303 for redirect as GET without content
 */
 extern int HTConfirmPostRedirect PARAMS((
-	CONST char *	redirecting_url));
+	CONST char *	redirecting_url,
+	int		server_status));
 
 /*
 

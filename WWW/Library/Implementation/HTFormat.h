@@ -359,6 +359,26 @@ extern int HTParseFile PARAMS((
         FILE            *fp,
         HTStream*       sink));
 
+#ifdef USE_ZLIB
+
+#ifdef USE_ZLIB
+#include <zlib.h>
+#endif /* USE_ZLIB */
+/*
+HTParseGzFile: Parse a gzipped File through a file pointer
+
+   This routine is called by protocols modules to load an object. uses HTStreamStack and
+   HTGzFileCopy .  Returns HT_LOADED if succesful, <0 if not.
+ */
+extern int HTParseGzFile PARAMS((
+        HTFormat        format_in,
+        HTFormat        format_out,
+        HTParentAnchor  *anchor,
+        gzFile          gzfp,
+        HTStream*       sink));
+
+#endif /* USE_ZLIB */
+
 /*
 
 HTNetToText: Convert Net ASCII to local representation

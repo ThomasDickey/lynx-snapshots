@@ -69,12 +69,13 @@ PUBLIC BOOL UCCanTranslateFromTo ARGS2(
 
 	if (!strcmp(fromname, "koi8-r") || /* from cyrillic */
 	    !strcmp(fromname, "iso-8859-5") ||
+	    !strcmp(fromname, "cp866") ||
 	    !strcmp(fromname, "windows-1251") ||
 	    !strcmp(fromname, "koi-8")) {
 	    if (strcmp(toname, "iso-8859-5") &&
 		strcmp(toname, "koi8-r") &&
-		strcmp(toname, "windows-1251") &&
-		strcmp(toname, "iso-8859-2"))
+		strcmp(toname, "cp866") &&
+		strcmp(toname, "windows-1251"))
 		return NO;
 	}
     }

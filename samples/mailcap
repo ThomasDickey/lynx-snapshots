@@ -30,7 +30,7 @@
 # for the existance of a DISPLAY environment variable.
 # Lynx actually uses a getenv() call for DISPLAY (DECW$DISPLAY
 # on VMS) when it encounters   test=test -n "$DISPLAY"  or
-# test=test -z "$DISPAY"  in a viewer assignment, instead of
+# test=test -z "$DISPLAY"  in a viewer assignment, instead of
 # spawning to execute "test" via a system() call, i.e., those
 # two strings, respectively, are handled equivalently to the
 # :XWINDOWS and :NON_XWINDOWS flags for VIEWER: assignments

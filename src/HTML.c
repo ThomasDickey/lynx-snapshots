@@ -546,11 +546,11 @@ PRIVATE void HTML_start_element ARGS5(
                 strcat (Style_className, class_string);
                 strcat (myHash, ".");
                 strcat (myHash, class_string);
-#if !defined(PREVAIL)
-        }
-#else /* PREVAIL */
+#ifdef PREVAIL
                 strcpy (prevailing_class, class_string);
+#endif
         }
+#ifdef PREVAIL
         else if (prevailing_class[0])
         {
                 strcat (Style_className, ".");
@@ -558,7 +558,7 @@ PRIVATE void HTML_start_element ARGS5(
                 strcat (myHash, ".");
                 strcat (myHash, prevailing_class);
         }
-#endif /* !PREVAIL */
+#endif /* PREVAIL */
         class_string[0]='\0';
         strtolower(myHash);
         hcode=hash_code(myHash);
@@ -2031,8 +2031,8 @@ PRIVATE void HTML_start_element ARGS5(
 	/*
 	 * Set the default TYPE.
 	 */
-	 me->OL_Type[(me->List_Nesting_Level < 5 ?
-			me->List_Nesting_Level+1 : 6)] = '1';
+	 me->OL_Type[(me->List_Nesting_Level < 11 ?
+			 me->List_Nesting_Level+1 : 11)] = '1';
 
 	/*
 	 *  Check whether we have a starting sequence number,
@@ -2065,23 +2065,23 @@ PRIVATE void HTML_start_element ARGS5(
 	     */
 	    if (present[HTML_OL_TYPE] && value[HTML_OL_TYPE]) {
 	        if (*value[HTML_OL_TYPE] == 'A') {
-		    me->OL_Type[(me->List_Nesting_Level < 5 ?
-				   me->List_Nesting_Level+1 : 6)] = 'A';
+		    me->OL_Type[(me->List_Nesting_Level < 11 ?
+				    me->List_Nesting_Level+1 : 11)] = 'A';
 		    if (seqnum < 1)
 		        seqnum = 1;
 		} else if (*value[HTML_OL_TYPE] == 'a') {
-		    me->OL_Type[(me->List_Nesting_Level < 5 ?
-				   me->List_Nesting_Level+1 : 6)] = 'a';
+		    me->OL_Type[(me->List_Nesting_Level < 11 ?
+				    me->List_Nesting_Level+1 : 11)] = 'a';
 		    if (seqnum < 1)
 		        seqnum = 1;
 		} else if (*value[HTML_OL_TYPE] == 'I') {
-		    me->OL_Type[(me->List_Nesting_Level < 5 ?
-				   me->List_Nesting_Level+1 : 6)] = 'I';
+		    me->OL_Type[(me->List_Nesting_Level < 11 ?
+				    me->List_Nesting_Level+1 : 11)] = 'I';
 		    if (seqnum < 1)
 		        seqnum = 1;
 		} else if (*value[HTML_OL_TYPE] == 'i') {
-		    me->OL_Type[(me->List_Nesting_Level < 5 ?
-				   me->List_Nesting_Level+1 : 6)] = 'i';
+		    me->OL_Type[(me->List_Nesting_Level < 11 ?
+				    me->List_Nesting_Level+1 : 11)] = 'i';
 		    if (seqnum < 1)
 		        seqnum = 1;
 		} else {
@@ -2092,29 +2092,29 @@ PRIVATE void HTML_start_element ARGS5(
 	        seqnum = OL_VOID + 1;
 	    }
 
-	    me->OL_Counter[(me->List_Nesting_Level < 5 ?
-	    		      me->List_Nesting_Level+1 : 6)] = seqnum;
+	    me->OL_Counter[(me->List_Nesting_Level < 11 ?
+	    		       me->List_Nesting_Level+1 : 11)] = seqnum;
 
 	} else if (present && present[HTML_OL_CONTINUE]) {
-	    me->OL_Counter[me->List_Nesting_Level < 5 ?
-			     me->List_Nesting_Level+1 : 6] = OL_CONTINUE;
+	    me->OL_Counter[me->List_Nesting_Level < 11 ?
+			      me->List_Nesting_Level+1 : 11] = OL_CONTINUE;
 
 	} else {
-	    me->OL_Counter[(me->List_Nesting_Level < 5 ?
-			      me->List_Nesting_Level+1 : 6)] = 1;
+	    me->OL_Counter[(me->List_Nesting_Level < 11 ?
+			       me->List_Nesting_Level+1 : 11)] = 1;
 	    if (present && present[HTML_OL_TYPE] && value[HTML_OL_TYPE]) {
 	        if (*value[HTML_OL_TYPE] == 'A') {
-		    me->OL_Type[(me->List_Nesting_Level < 5 ?
-				   me->List_Nesting_Level+1 : 6)] = 'A';
+		    me->OL_Type[(me->List_Nesting_Level < 11 ?
+				    me->List_Nesting_Level+1 : 11)] = 'A';
 		} else if (*value[HTML_OL_TYPE] == 'a') {
-		    me->OL_Type[(me->List_Nesting_Level < 5 ?
-				   me->List_Nesting_Level+1 : 6)] = 'a';
+		    me->OL_Type[(me->List_Nesting_Level < 11 ?
+				    me->List_Nesting_Level+1 : 11)] = 'a';
 		} else if (*value[HTML_OL_TYPE] == 'I') {
-		    me->OL_Type[(me->List_Nesting_Level < 5 ?
-				   me->List_Nesting_Level+1 : 6)] = 'I';
+		    me->OL_Type[(me->List_Nesting_Level < 11 ?
+				    me->List_Nesting_Level+1 : 11)] = 'I';
 		} else if (*value[HTML_OL_TYPE] == 'i') {
-		    me->OL_Type[(me->List_Nesting_Level < 5 ?
-				   me->List_Nesting_Level+1 : 6)] = 'i';
+		    me->OL_Type[(me->List_Nesting_Level < 11 ?
+				    me->List_Nesting_Level+1 : 11)] = 'i';
 		}
 	    }
 	}
@@ -2214,7 +2214,8 @@ PRIVATE void HTML_start_element ARGS5(
 	    int counter, seqnum;
 	    char seqtype;
 
-	    counter = me->List_Nesting_Level < 6 ? me->List_Nesting_Level : 6;
+	    counter = me->List_Nesting_Level < 11 ?
+			   me->List_Nesting_Level : 11;
 	    if (present && present[HTML_LI_TYPE] && value[HTML_LI_TYPE]) {
 	        if (*value[HTML_LI_TYPE] == '1') {
 		    me->OL_Type[counter] = '1';
@@ -5855,20 +5856,22 @@ PRIVATE void HTML_end_element ARGS3(
 	break;
 
     case HTML_OL:
-        me->OL_Counter[me->List_Nesting_Level < 6 ?
-			   me->List_Nesting_Level : 6] = OL_VOID;
+        me->OL_Counter[me->List_Nesting_Level < 11 ?
+			    me->List_Nesting_Level : 11] = OL_VOID;
     case HTML_DL:
     case HTML_UL:
     case HTML_MENU:
     case HTML_DIR:
 	me->List_Nesting_Level--;
-	if (TRACE)
-	    fprintf(stderr, "Reducing List Nesting Level to %d\n",
-			    me->List_Nesting_Level);
+	if (TRACE) {
+	    fprintf(stderr,
+		    "HTML_end_element: Reducing List Nesting Level to %d\n",
+		    me->List_Nesting_Level);
+	}
 	change_paragraph_style(me, me->sp->style);  /* Often won't really change */
 	UPDATE_STYLE;
 	if (me->List_Nesting_Level >= 0)
-	    HText_NegateLineOne(me->text);
+	    LYEnsureSingleSpace(me);
         break;
 
     case HTML_SPAN:
@@ -7151,7 +7154,7 @@ PUBLIC HTStructured* HTML_new ARGS3(
      *  Used for nested lists. - FM
      */
     me->List_Nesting_Level = -1; /* counter for list nesting level */
-    LYZero_OL_Counter(me);	 /* Initializes OL_Counter[7] and OL_Type[7] */
+    LYZero_OL_Counter(me);	 /* Initializes OL_Counter[] and OL_Type[] */
     me->Last_OL_Count = 0;	 /* last count in ordered lists */
     me->Last_OL_Type = '1';	 /* last type in ordered lists */
 

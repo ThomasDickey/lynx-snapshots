@@ -501,10 +501,13 @@
 #define UNSUPPORTED_DATA_URL "Unsupported data: URL!  Use SHOWINFO, for now."
 #define ILLEGAL_REDIRECTION_URL "Illegal redirection URL received from server!"
 #define	SERVER_ASKED_FOR_REDIRECTION \
- "Server asked for redirection of POST content to"
+ "Server asked for %d redirection of POST content to"
 #define	PROCEED_GET_CANCEL "P)roceed, use G)ET or C)ancel "
-#define	ADVANCED_POST_REDIRECT \
+#define	PROCEED_OR_CANCEL "P)roceed, or C)ancel "
+#define	ADVANCED_POST_GET_REDIRECT \
  "Redirection of POST content. P)roceed, see U)RL, use G)ET or C)ancel"
+#define	ADVANCED_POST_REDIRECT \
+ "Redirection of POST content. P)roceed, see U)RL, or C)ancel"
 #define CONFIRM_POST_RESUBMISSION \
  "Document from Form with POST content.  Resubmit?"
 #define CONFIRM_POST_DOC_HEAD \
@@ -598,9 +601,10 @@
 #define PROMTING_TO_ALLOW_COOKIES "'P'rompting to allow from domain '%s'."
 #define DELETE_ALL_COOKIES_IN_DOMAIN "Delete all cookies in this domain?"
 #define ALL_COOKIES_EATEN "All of the cookies in the jar have been eaten!"
-#define PORT_INVALID "URL contains an invalid port number."
 #define PORT_NINETEEN_INVALID "Port 19 not permitted in URLs."
 #define PORT_TWENTYFIVE_INVALID "Port 25 not permitted in URLs."
+#define PORT_INVALID "Port %lu not permitted in URLs."
+#define URL_PORT_BAD "URL has a bad port field."
 #define HTML_STACK_OVERRUN "Maximum nesting of HTML elements exceeded."
 #define BAD_PARTIAL_REFERENCE "Bad partial reference! Stripping lead dots."
 #define TRACELOG_OPEN_FAILED "Trace Log open failed.  Trace off!."

@@ -313,6 +313,7 @@ SITE_DEFS = $(DIR_DEFS) $(RP_DEFS) -DEXP_CHARTRANS -DNSL_FORK -DLYNXCGI_LINKS -D
 #                  (needed in SITE_DEFS *and* SITE_LYDEFS !)
 # -DEXP_CHARTRANS_AUTOSWITCH also let lynx switch term mode(Linux console only)
 # -DSLANG_MBCS_HACK prevent cutoff lines when using UTF8 console (slang only)
+# -DUSE_ZLIB       To use some functions from zlib library if you have it.
 #
 # if you are linking to freeWAIS-0.202 or older, you should define this
 # in MCFLAGS (SITE_DEFS)

@@ -72,6 +72,7 @@ struct _HTStream {
 	FILE *			fp;		/* The file we've opened */
 	char * 			end_command;	/* What to do on _free.	 */
 	char * 			remove_command;	/* What to do on _abort. */
+	char * 			viewer_command;	/* saved external viewer */
 	HTFormat		input_format;  /* Original pres->rep     */
 	HTFormat		output_format; /* Original pres->rep_out */
 	HTParentAnchor *	anchor;	    /* Original stream's anchor. */
@@ -124,7 +125,7 @@ PRIVATE void HTFWriter_write ARGS3(HTStream *, me, CONST char*, s, int, l)
 */
 PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 {
-    FILE *fp;
+    FILE *fp = NULL;
     int len;
     char *path = NULL;
     char *addr = NULL;
@@ -132,6 +133,7 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
     extern int HTLoadFile PARAMS((
     	CONST char *addr,	HTParentAnchor *anchor,
 	HTFormat format_out,	HTStream *sink));
+    BOOL use_gzread = NO;
 
     fflush(me->fp);
     if (me->end_command) {		/* Temp file */
@@ -162,6 +164,7 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 	     *  a temporary file for uncompression. - FM
 	     */
 	    if (me->anchor->FileCache != NULL) {
+		BOOL skip_loadfile = (me->viewer_command != NULL);
 	        /*
 		 *  Save the path with the "gz" or "Z" suffix trimmed,
 		 *  and remove any previous uncompressed copy. - FM
@@ -169,27 +172,38 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 	        StrAllocCopy(path, me->anchor->FileCache);
 		if ((len = strlen(path)) > 2) {
 		    if (!strcasecomp((char *)&path[len-2], "gz")) {
-		        path[len-3] = '\0';
-		        remove(path);
+#ifdef USE_ZLIB
+			if (!skip_loadfile) {
+			    use_gzread = YES;
+			} else
+#endif /* USE_ZLIB */
+			{
+			    path[len-3] = '\0';
+			    remove(path);
+			}
 		    } else if (!strcasecomp((char *)&path[len-1], "Z")) {
 		        path[len-2] = '\0';
 		        remove(path);
 		    }
 		}
-		if (!dump_output_immediately) {
+		if (!use_gzread) {
+		    if (!dump_output_immediately) {
+			/*
+			 *  Tell user what's happening. - FM
+			 */
+			_HTProgress(me->end_command);
+		    }
 		    /*
-		     *  Tell user what's happening. - FM
+		     *  Uncompress it. - FM
 		     */
-		    _HTProgress(me->end_command);
+		    if (me->end_command && me->end_command[0])
+			system(me->end_command);
+		    fp = fopen(me->anchor->FileCache, "r");
 		}
-		/*
-		 *  Uncompress it. - FM
-		 */
-		system(me->end_command);
-		if ((fp = fopen(me->anchor->FileCache, "r")) != NULL) {
+		if (fp != NULL) {
 		    /*
-		     *  It's still there with the "gz" of "Z" suffix,
-		     *  so the uncompression failed. - FM
+		     *  It's still there with the "gz" of "Z" suffix when
+		     *  it shouldn't, so the uncompression failed. - FM
 		     */
 		    fclose(fp);
 		    fp = NULL;
@@ -217,19 +231,23 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 		    StrAllocCat(addr, path);
 #endif /* VMS */
 #endif /* DOSPATH */
-		    StrAllocCopy(me->anchor->FileCache, path);
+		    if (!use_gzread) {
+			StrAllocCopy(me->anchor->FileCache, path);
+			FREE(me->anchor->content_encoding);
+		    }
 		    FREE(path);
-		    FREE(me->anchor->content_encoding);
 #ifdef EXP_CHARTRANS
 		    /*
 		     *  Lock the chartrans info we may possibly have,
 		     *  so HTCharsetFormat() will not apply the default
 		     *  for local files. - KW
 		     */
-		    HTAnchor_copyUCInfoStage(me->anchor,
-					     UCT_STAGE_PARSER,
-					     UCT_STAGE_MIME,
-					     UCT_SETBY_PARSER);
+		    if (!skip_loadfile) {
+			HTAnchor_copyUCInfoStage(me->anchor,
+						 UCT_STAGE_PARSER,
+						 UCT_STAGE_MIME,
+						 UCT_SETBY_PARSER);
+		    }
 #endif
 		    /*
 		     *  Now have HTLoadFile() handle the uncompressed
@@ -241,6 +259,49 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 			 */
 			_user_message(WWW_USING_MESSAGE, addr);
 		    }
+
+		    if (skip_loadfile) {
+			/*
+			 *  It's a temporary file we're passing to a
+			 *  viewer or helper application.
+			 *  Loading the temp file through HTLoadFile()
+			 *  would result in yet another HTStream (created
+			 *  with HTSaveAndExecute()) which would just
+			 *  copy the temp file to another temp file
+			 *  (or even the same!).  We can skip this
+			 *  needless duplication by using the
+			 *  viewer_command which has already been 
+			 *  determind when the HTCompressed stream was
+			 *  created. - kw
+			 */
+			FREE(me->end_command);
+			me->end_command = (char *)calloc (
+			    (strlen (me->viewer_command) + 10 +
+			     strlen(me->anchor->FileCache))
+			    * sizeof (char),1);
+			if (me->end_command == NULL)
+			    outofmem(__FILE__, "HTFWriter_free (HTCompressed)");
+    
+			sprintf(me->end_command,
+				me->viewer_command, me->anchor->FileCache,
+				"", "", "", "", "", "");
+			if (!dump_output_immediately) {
+			    /*
+			     *  Tell user what's happening. - FM
+			     */
+			    HTProgress(me->end_command);
+			    stop_curses();
+			}
+			system(me->end_command);
+
+			if (me->remove_command) {
+			    /* NEVER REMOVE THE FILE unless during an abort!!!*/
+			    /* system(me->remove_command); */
+			    FREE(me->remove_command);
+			}
+			if (!dump_output_immediately)
+			    start_curses();
+		    } else
 		    status = HTLoadFile(addr,
 			    		me->anchor,
 			    		me->output_format,
@@ -252,6 +313,7 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 			FREE(me->anchor->FileCache);
 			FREE(me->remove_command);
 			FREE(me->end_command);
+			FREE(me->viewer_command);
 			FREE(me);
 		        return;
 		    }
@@ -298,6 +360,7 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 	}
 	FREE(me->end_command);
     }
+    FREE(me->viewer_command);
 
     if (dump_output_immediately) {
         if (me->anchor->FileCache)
@@ -330,6 +393,7 @@ PRIVATE void HTFWriter_abort ARGS2(HTStream *, me, HTError, e)
         fprintf(stderr,"HTFWriter_abort called\n");
 
     fclose(me->fp);
+    FREE(me->viewer_command);
     if (me->end_command) {              /* Temp file */
         if (TRACE)
 	    fprintf(stderr, "HTFWriter: Aborting: file not executed.\n");
@@ -523,6 +587,7 @@ SaveAndExecute_tempname:
     }
     chmod(fnam, 0600);
 
+    StrAllocCopy(me->viewer_command, pres->command);
     /*
      *  Make command to process file.
      */
@@ -773,7 +838,8 @@ SaveToFile_tempname:
 
     StrAllocCopy(anchor->FileCache, fnam);
 Prepend_BASE:
-    if (!strncasecomp(pres->rep->name, "text/html", 9)) {
+    if (!strncasecomp(pres->rep->name, "text/html", 9) &&
+	!anchor->content_encoding) {
         /*
 	 *  Add the document's base as a BASE tag at the top of the file,
 	 *  so that any partial or relative URLs within it will be resolved
@@ -986,13 +1052,44 @@ Compressed_tempname:
     chmod(fnam, 0600);
 
     /*
+     *  me->viewer_command will be NULL if the converter Pres found above
+     *  is not for an external viewer but an internal HTStream converter.
+     *  We also don't set it under conditions where HTSaveAndExecute would
+     *  disallow execution of the command. - kw
+     */
+    if (!dump_output_immediately && !traversal
+#if defined(EXEC_LINKS) || defined(EXEC_SCRIPTS)
+	&& (Pres->quality != 999.0 ||
+	    (!no_exec && 	/* allowed exec link or script ? */
+	     (local_exec ||
+	      (local_exec_on_local_files &&
+	       (LYJumpFileURL ||
+		!strncmp(anchor->address,"file://localhost",16))))))
+#endif /* EXEC_LINKS || EXEC_SCRIPTS */
+	) {
+	StrAllocCopy(me->viewer_command, Pres->command);
+    }
+
+    /*
      *  Make command to process file. - FM
      */
-    me->end_command = (char *)calloc(1, (strlen(uncompress_mask) + 10 +
-    					 strlen(fnam)) * sizeof(char));
-    if (me->end_command == NULL)
-        outofmem(__FILE__, "HTCompressed");
-    sprintf(me->end_command, uncompress_mask, fnam, "", "", "", "", "", "");
+#if USE_ZLIB
+    if (compress_suffix[0] == 'g' && /* must be gzip */
+	!me->viewer_command) {
+	/*
+	 *  We won't call gzip externally, so we don't need to supply
+	 *  a command for it. - kw
+	 */
+	StrAllocCopy(me->end_command, "");
+    } else
+#endif /* USE_ZLIB */
+    {
+	me->end_command = (char *)calloc(1, (strlen(uncompress_mask) + 10 +
+					     strlen(fnam)) * sizeof(char));
+	if (me->end_command == NULL)
+	    outofmem(__FILE__, "HTCompressed");
+	sprintf(me->end_command, uncompress_mask, fnam, "", "", "", "", "", "");
+    }
     FREE(uncompress_mask);
 
     /*

@@ -661,6 +661,99 @@ PUBLIC int HTFileCopy ARGS2(
     return rv;
 }
 
+#ifdef USE_ZLIB
+/*	Push data from a gzip file pointer down a stream
+**	-------------------------------------
+**
+**   This routine is responsible for creating and PRESENTING any
+**   graphic (or other) objects described by the file.
+**
+**
+*/
+PRIVATE int HTGzFileCopy ARGS2(
+	gzFile,			gzfp,
+	HTStream*,		sink)
+{
+    HTStreamClass targetClass;    
+    char line[256];
+    int status, bytes = 0, nreads = 0, nprogr = 0;
+    int gzerrnum;
+    int rv = HT_OK;
+    
+    /*  Push the data down the stream
+    */
+    targetClass = *(sink->isa);	/* Copy pointers to procedures */
+
+    /*	read and inflate gzipped file, and push binary down sink
+    */
+    for (;;) {
+	status = gzread(gzfp, input_buffer, INPUT_BUFFER_SIZE);
+	nreads++;
+	if (status <= 0) { /* EOF or error */
+	    if (status == 0) {
+		rv = HT_LOADED;
+	        break;
+	    }
+	    if (TRACE) {
+	        fprintf(stderr,
+			"HTGzFileCopy: Read error, gzread returns %d\n",
+			status);
+	        fprintf(stderr,
+			"gzerror   : %s\n",
+			gzerror(gzfp, &gzerrnum));
+		if (gzerrnum == Z_ERRNO)
+		    perror("gzerror   ");
+	    }
+	    if (bytes) {
+		rv = HT_PARTIAL_CONTENT;
+	    } else {
+		rv = -1;
+	    }
+	    break;
+	}
+	(*targetClass.put_block)(sink, input_buffer, status);
+
+	bytes += status;
+	if (nreads >= 100) {
+	    /*
+	    **  Show progress messages for local files, and check for
+	    **  user interruption.  Start doing so only after a certain
+	    **  number of reads have been done, and don't update it on
+	    **  every read (normally reading in a local file should be
+	    **  speedy). - KW
+	    */
+	    if (nprogr == 0) {
+		if (bytes < 1024000) {
+		    sprintf(line,
+			    "Read %d uncompressed bytes of data.", bytes);
+		} else {
+		    sprintf(line, "Read %d uncompressed KB of data. %s",
+				  bytes/1024,
+		    "(Press 'z' to abort.)");
+		}
+		HTProgress(line);
+		if (HTCheckForInterrupt()) {
+		    _HTProgress ("Data transfer interrupted.");
+		    if (bytes) {
+			rv = HT_INTERRUPTED;
+		    } else {
+			rv = -1;
+		    }
+		    break;
+		}
+		nprogr++;
+	    } else if (nprogr == 25) {
+		nprogr = 0;
+	    } else {
+		nprogr++;
+	    }
+	}
+    } /* next bufferload */
+
+    return rv;
+}
+#endif /* USE_ZLIB */
+
 /*	Push data from a socket down a stream STRIPPING CR
 **	--------------------------------------------------
 **
@@ -806,6 +899,78 @@ PUBLIC int HTParseFile ARGS5(
     else
 	return HT_LOADED;
 }
+
+#ifdef USE_ZLIB
+PRIVATE int HTCloseGzFile ARGS1(
+	gzFile,			gzfp)
+{
+    int gzres;
+    if (gzfp == NULL)
+	return 0;
+    gzres = gzclose(gzfp);
+    if (TRACE) {
+	if (gzres == Z_ERRNO) {
+	    perror("gzclose   ");
+	} else if (gzres != Z_OK) {
+	    fprintf(stderr, "gzclose   : error number %d\n", gzres);
+	}
+    }
+    return(gzres);
+}
+    
+PUBLIC int HTParseGzFile ARGS5(
+	HTFormat,		rep_in,
+	HTFormat,		format_out,
+	HTParentAnchor *,	anchor,
+	gzFile,			gzfp,
+	HTStream*,		sink)
+{
+    HTStream * stream;
+    HTStreamClass targetClass;    
+    int rv;
+
+    stream = HTStreamStack(rep_in,
+			format_out,
+	 		sink , anchor);
+    
+    if (!stream) {
+        char buffer[1024];	/* @@@@@@@@ */
+	extern char LYCancelDownload;
+	HTCloseGzFile(gzfp);
+        if (LYCancelDownload) {
+	    LYCancelDownload = FALSE;
+	    return -1;
+	}
+	sprintf(buffer, "Sorry, can't convert from %s to %s.",
+		HTAtom_name(rep_in), HTAtom_name(format_out));
+	if (TRACE)
+	    fprintf(stderr, "HTFormat(in HTParseGzFile): %s\n", buffer);
+        return HTLoadError(sink, 501, buffer);
+    }
+    
+    /*  Push the data down the stream
+    **
+    **  @@  Bug:  This decision ought to be made based on "encoding"
+    **  rather than on content-type.  @@@  When we handle encoding.
+    **  The current method smells anyway.
+    */
+    targetClass = *(stream->isa);	/* Copy pointers to procedures */
+    rv = HTGzFileCopy(gzfp, stream);
+    if (rv == -1 || rv == HT_INTERRUPTED) {
+        (*targetClass._abort)(stream, NULL);
+    } else {
+	(*targetClass._free)(stream);
+    }
+
+    HTCloseGzFile(gzfp);
+    if (rv == -1)
+	return HT_NO_DATA;
+    else if (rv == HT_INTERRUPTED || (rv > 0 && rv != HT_LOADED))
+	return HT_PARTIAL_CONTENT;
+    else
+	return HT_LOADED;
+}
+#endif /* USE_ZLIB */
 
 /*	Converter stream: Network Telnet to internal character text
 **	-----------------------------------------------------------

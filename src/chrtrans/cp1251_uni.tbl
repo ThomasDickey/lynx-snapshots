@@ -21,6 +21,7 @@ OWinCyrillic (cp1251)
 #
 #    The entries are in cp1251_WinCyrillic order
 #
+0x20-0x7f       idem
 0x80    U+0402  #CYRILLIC CAPITAL LETTER DJE
 0x81    U+0403  #CYRILLIC CAPITAL LETTER GJE
 0x82    U+201A  #SINGLE LOW-9 QUOTATION MARK

@@ -9,6 +9,7 @@
 #include "HTChunk.h"
 #include "HText.h"
 #include "HTStyle.h"
+#include "HTMIME.h"
 #include "HTML.h"
 
 #include "HTCJK.h"
@@ -1673,7 +1674,7 @@ PUBLIC void LYZero_OL_Counter ARGS1(
     if (!me)
         return;
 
-    for (i = 0; i < 7; i++) {
+    for (i = 0; i < 12; i++) {
         me->OL_Counter[i] = OL_VOID;
 	me->OL_Type[i] = '1';
     }
@@ -2227,25 +2228,37 @@ PUBLIC void LYHandleMETA ARGS4(
 
     /*
      *  Check for a suggested filename via a Content-Disposition with
-     *  file; filename=name.suffix in it, if we don't already have it
+     *  a filename=name.suffix in it, if we don't already have it
      *  via a server header. - FM
      */
     } else if (!(me->node_anchor->SugFname && *me->node_anchor->SugFname) &&
     	       !strcasecomp((http_equiv ?
 	       		     http_equiv : ""), "Content-Disposition")) {
 	cp = content;
-	while (*cp != '\0' && strncasecomp(cp, "file;", 5))
+	while (*cp != '\0' && strncasecomp(cp, "filename", 8))
 	    cp++;
 	if (*cp != '\0') {
-	    cp += 5;
+	    cp += 8;
+	    while ((*cp != '\0') && (WHITE(*cp) || *cp == '='))
+	        cp++;
 	    while (*cp != '\0' && WHITE(*cp))
 	        cp++;
 	    if (*cp != '\0') {
-	        while (*cp != '\0' && strncasecomp(cp, "filename=", 9))
-		    cp++;
-		if (*cp != '\0') {
-		    StrAllocCopy(me->node_anchor->SugFname, (cp + 9));
-		    cp = me->node_anchor->SugFname;
+		StrAllocCopy(me->node_anchor->SugFname, cp);
+		if (*me->node_anchor->SugFname == '\"') {
+		    if ((cp = strchr((me->node_anchor->SugFname + 1),
+		    		     '\"')) != NULL) {
+			*(cp + 1) = '\0';
+			HTMIME_TrimDoubleQuotes(me->node_anchor->SugFname);
+		    } else {
+			FREE(me->node_anchor->SugFname);
+		    }
+		    if (me->node_anchor->SugFname != NULL &&
+		        *me->node_anchor->SugFname == '\0') {
+			FREE(me->node_anchor->SugFname);
+		    }
+		}
+		if ((cp = me->node_anchor->SugFname) != NULL) {
 		    while (*cp != '\0' && !WHITE(*cp))
 			cp++;
 		    *cp = '\0';
@@ -2685,54 +2698,64 @@ PUBLIC int LYLegitimizeHREF ARGS4(
 		       "http", 4)) {
 	/*
 	 *  We will be resolving a partial reference versus an http
-	 *  or https URL, and it has lead dots, which are retained
-	 *  when resolving, in compliance with the URL specs, but
-	 *  the request would fail if the first element of the
-	 *  resultant path is two dots, because no http or https
-	 *  server accepts such paths, so if that's the case, and
-	 *  strip_dots is TRUE, we'll strip that element now, but
-	 *  issue a message about this as "immediate feedback",
-	 *  such that the bad partial reference might get corrected
-	 *  by the document provider.  Note that if the second and
-	 *  further symbolic elements also contain(s) only dots,
-	 *  those will still be retained, and the resolved URL may
-	 *  still fail, but it should, IMHO, if the partial reference
-	 *  is that much out of compliance with the URL specs. - FM
+	 *  or https URL, and it has lead dots, which may be retained
+	 *  when resolving via HTParse(), but the request would fail
+	 *  if the first element of the resultant path is two dots,
+	 *  because no http or https server accepts such paths, and
+	 *  the current URL draft, likely to become an RFC, says that
+	 *  it's optional for the UA to strip them as a form of error
+	 *  recovery.  So we will, recursively, for http/https URLs,
+	 *  like the "major market browsers" which made this problem
+	 *  so common on the Web, but we'll also issue a message about
+	 *  it, such that the bad partial reference might get corrected
+	 *  by the document provider. - FM
 	 */
         int i = 0, j = 0;
-	char *temp = NULL, *str = "";
+	char *temp = NULL, *path = NULL, *str = "", *cp;
 
-	if (((temp = HTParse((me->inBASE ?
+	if (((temp = HTParse(*href,
+			     (me->inBASE ?
 			   me->base_href : me->node_anchor->address),
-			     "", PARSE_PATH+PARSE_PUNCTUATION)) == NULL) ||
-	    temp[0] == '\0' ||
-	    !strchr((char *)&temp[1], '/')) {
-	    FREE(temp);
-	    temp = *href;
-	    if ((me->inBASE ?
-	   me->base_href[4] : me->node_anchor->address[4]) == 's')
-	        str = "s";
-	    while (temp[j] == '.')
-		j++;
-	    if ((j == 2) && (temp[j] == '/' || temp[j] == '\0')) {
+			     PARSE_ALL)) != NULL && temp[0] != '\0') &&
+	    (path = HTParse(temp, "",
+			    PARSE_PATH+PARSE_PUNCTUATION)) != NULL &&
+	    !strncmp(path, "/..", 3)) {
+	    cp = (path + 3);
+	    if (*cp == '/' || *cp == '\0') {
+		if ((me->inBASE ?
+	       me->base_href[4] : me->node_anchor->address[4]) == 's') {
+		    str = "s";
+		}
 		if (TRACE) {
 		    fprintf(stderr,
 			 "LYLegitimizeHREF: Bad value '%s' for http%s URL.\n",
 			   *href, str);
 		    fprintf(stderr,
-			   "                  Stripping lead dots.\n");
+			 "                  Stripping lead dots.\n");
 		} else if (!me->inBadHREF) {
 		    _statusline(BAD_PARTIAL_REFERENCE);
 		    me->inBadHREF = TRUE;
 		    sleep(AlertSecs);
 		}
-		while (temp[j] != '\0')
-		    temp[i++] = temp[j++];
-		temp[i] = '\0';
 	    }
-	    temp = NULL;
+	    if (*cp == '\0') {
+		StrAllocCopy(*href, "/");
+	    } else if (*cp == '/') {
+		while (!strncmp(cp, "/..", 3)) {
+		    if (*(cp + 3) == '/') {
+			cp += 3;
+			continue;
+		    } else if (*(cp + 3) == '\0') {
+		        *(cp + 1) = '\0';
+		        *(cp + 2) = '\0';
+		    }
+		    break;
+		}
+		StrAllocCopy(*href, cp);
+	    }
 	}
 	FREE(temp);
+	FREE(path);
     }
     return(url_type); 
 }

@@ -60,9 +60,11 @@ PUBLIC void HTFormatInit NOARGS
   HTSetPresentation("image/gif",        XLoadImageCommand,  1.0, 3.0, 0.0, 0);
   HTSetPresentation("image/x-xbm",      XLoadImageCommand,  1.0, 3.0, 0.0, 0);
   HTSetPresentation("image/x-xbitmap",  XLoadImageCommand,  1.0, 3.0, 0.0, 0);
-  HTSetPresentation("image/x-png",      XLoadImageCommand,  1.0, 3.0, 0.0, 0);
+  HTSetPresentation("image/x-png",      XLoadImageCommand,  2.0, 3.0, 0.0, 0);
+  HTSetPresentation("image/png",	XLoadImageCommand,  1.0, 3.0, 0.0, 0);
   HTSetPresentation("image/x-rgb",      XLoadImageCommand,  1.0, 3.0, 0.0, 0);
-  HTSetPresentation("image/x-tiff",     XLoadImageCommand,  1.0, 3.0, 0.0, 0);
+  HTSetPresentation("image/x-tiff",     XLoadImageCommand,  2.0, 3.0, 0.0, 0);
+  HTSetPresentation("image/tiff",	XLoadImageCommand,  1.0, 3.0, 0.0, 0);
   HTSetPresentation("image/jpeg",       XLoadImageCommand,  1.0, 3.0, 0.0, 0);
   HTSetPresentation("video/mpeg",       "mpeg_play %s &",   1.0, 3.0, 0.0, 0);
 
@@ -810,7 +812,7 @@ PUBLIC void HTFileInit NOARGS
     HTSetSuffix(".pbm",		"image/x-portable-bitmap", "binary", 1.0);
     HTSetSuffix(".pgm",		"image/x-portable-graymap", "binary", 1.0);
     HTSetSuffix(".ppm",		"image/x-portable-pixmap", "binary", 1.0);
-    HTSetSuffix(".png",		"image/x-png", "binary", 1.0);
+    HTSetSuffix(".png",		"image/png", "binary", 1.0);
     HTSetSuffix(".rgb",		"image/x-rgb", "binary", 1.0);
     HTSetSuffix(".xbm",		"image/x-xbitmap", "binary", 1.0);
     HTSetSuffix(".xpm",		"image/x-xpixmap", "binary", 1.0);
@@ -842,6 +844,7 @@ PUBLIC void HTFileInit NOARGS
     HTSetSuffix(".htm",		"text/html", "8bit", 1.0);
     HTSetSuffix(".html3",	"text/html", "8bit", 1.0);
     HTSetSuffix(".ht3",		"text/html", "8bit", 1.0);
+    HTSetSuffix(".phtml",	"text/html", "8bit", 1.0);
     HTSetSuffix(".shtml",	"text/html", "8bit", 1.0);
     HTSetSuffix(".htmlx",	"text/html", "8bit", 1.0);
     HTSetSuffix(".html",	"text/html", "8bit", 1.0);

@@ -48,6 +48,7 @@
 PRIVATE int fix_http_urls PARAMS((document *doc));
 extern char * WWW_Download_File;
 extern char LYCancelDownload;
+extern BOOL redirect_post_content;
 #ifdef VMS
 extern BOOLEAN LYDidRename;
 #endif /* VMS */
@@ -127,13 +128,15 @@ Try_Redirected_URL:
 	redirect_post_content = FALSE;
 
 	if (TRACE) {
-	    fprintf(stderr,"LYGetFile: getting %s\n\n",doc->address);
+	    fprintf(stderr,"getfile: getting %s\n\n",doc->address);
 	}
 
 	/*
 	 *  Protect against denial of service attacks
 	 *  via the port 19 CHARGEN service, and block
-	 *  connections to the port 25 ESMTP service. - FM
+	 *  connections to the port 25 ESMTP service.
+	 *  Also reject any likely spoof attempts via
+	 *  wrap arounds at 65536. - FM
 	 */
 	if ((temp = HTParse(doc->address, "", PARSE_HOST)) != NULL &&
 	    strlen(temp) > 3) {
@@ -146,21 +149,27 @@ Try_Redirected_URL:
 
 		cp++;
 	        if (sscanf(cp, "%ld", &value) == 1) {
-		    if (value > 65535 || value < 0) {
-			HTAlert(PORT_INVALID);
-			FREE(temp);
-			return(NULLFILE); 
-		    }
-		    if (value == 19) {
+		    if (value == 19 || value == 65555) {
 			HTAlert(PORT_NINETEEN_INVALID);
 			FREE(temp);
 			return(NULLFILE); 
 		    }
-		    if (value == 25) {
+		    if (value == 25 || value == 65561) {
 			HTAlert(PORT_TWENTYFIVE_INVALID);
 			FREE(temp);
 			return(NULLFILE);
 		    } 
+		    if (value > 65535 || value < 0) {
+		        char msg[265];
+			sprintf(msg, PORT_INVALID, (unsigned long)value);
+			HTAlert(msg);
+			FREE(temp);
+			return(NULLFILE);
+		    } 
+		} else if (isdigit((unsigned char)*cp)) {
+		    HTAlert(URL_PORT_BAD);
+		    FREE(temp);
+		    return(NULLFILE);
 		}
 	    }
 	}
@@ -591,7 +600,7 @@ Try_Redirected_URL:
 			    StrAllocCopy(tmp, "http://");
 			    if (TRACE)
 			        fprintf(stderr,
-					"LYGetFile: URL %s\n",
+					"getfile: URL '%s'\n",
 					doc->address);
 			    *cp = '\0';
 			    StrAllocCat(tmp, doc->address+9);
@@ -606,7 +615,7 @@ Try_Redirected_URL:
 			        StrAllocCat(tmp, cp+8);
 			    StrAllocCopy(doc->address, tmp);
 			    if (TRACE)
-			        fprintf(stderr, "    changed to %s\n",
+			        fprintf(stderr, "  changed to '%s'\n",
 						doc->address);
 			    FREE(tmp);
 			    url_type = HTTP_URL_TYPE;
@@ -639,7 +648,7 @@ Try_Redirected_URL:
 			    char *cp2;
 
 			    if (TRACE)
-			        fprintf(stderr, "LYGetFile: URL %s\n",
+			        fprintf(stderr, "getfile: URL '%s'\n",
 						doc->address);
 			    *cp1 = '\0';
 			    cp1 += 2;
@@ -661,7 +670,7 @@ Try_Redirected_URL:
 			    StrAllocCopy(doc->address, temp);
 			    FREE(temp);
 			    if (TRACE)
-			        fprintf(stderr, "    changed to %s\n",
+			        fprintf(stderr, "  changed to '%s'\n",
 						doc->address);
 			    WWWDoc.address = doc->address;
 			}
@@ -862,6 +871,15 @@ Try_Redirected_URL:
 					     HTAnchor_SugFname(tmpanchor));
 			    } else {
 			        StrAllocCopy(fname, doc->address);
+			    }
+			    /*
+			     *  Check whether this is a compressed file,
+			     *  which we don't uncompress for downloads,
+			     *  and adjust any suffix appropriately. - FM
+			     */
+			    if (tmpanchor != NULL) {
+				HTCheckFnameForCompression(&fname, tmpanchor,
+							   FALSE);
 			    }
 			    if (LYdownload_options(&fname,
 						   WWW_Download_File) < 0) {
@@ -1295,10 +1313,10 @@ PRIVATE int fix_http_urls ARGS1(
 	 *  If we get to here, trim the trailing slash. - FM
 	 */
 	if (TRACE)
-	    fprintf(stderr,"LYGetFile: URL %s\n", doc->address);
+	    fprintf(stderr, "fix_http_urls: URL '%s'\n", doc->address);
 	doc->address[strlen(doc->address)-1] = '\0';
 	if (TRACE) {
-	    fprintf(stderr,"    changed to %s\n", doc->address);
+	    fprintf(stderr, "        changed to '%s'\n", doc->address);
 	    sleep(MessageSecs);
 	}
     }
@@ -1312,10 +1330,10 @@ PRIVATE int fix_http_urls ARGS1(
 	}
     }
     if (TRACE)
-        fprintf(stderr,"LYGetFile: URL %s\n", doc->address);
+        fprintf(stderr, "fix_http_urls: URL '%s'\n", doc->address);
     StrAllocCat(doc->address, "/");
     if (TRACE) {
-        fprintf(stderr,"    changed to %s\n",doc->address);
+        fprintf(stderr, "        changed to '%s'\n",doc->address);
 	sleep(MessageSecs);
     }
 

@@ -46,6 +46,7 @@
 #include "[.chrtrans]cp437_uni.h"
 #include "[.chrtrans]cp850_uni.h"
 #include "[.chrtrans]cp852_uni.h"
+#include "[.chrtrans]cp866_uni.h"
 #include "[.chrtrans]cp1250_uni.h"
 #include "[.chrtrans]cp1251_uni.h"
 #include "[.chrtrans]cp1252_uni.h"
@@ -69,6 +70,7 @@
 #include "chrtrans/cp437_uni.h"
 #include "chrtrans/cp850_uni.h"
 #include "chrtrans/cp852_uni.h"
+#include "chrtrans/cp866_uni.h"
 #include "chrtrans/cp1250_uni.h"
 #include "chrtrans/cp1251_uni.h"
 #include "chrtrans/cp1252_uni.h"
@@ -1670,6 +1672,7 @@ PUBLIC void UCInit NOARGS
     UC_CHARSET_SETUP_cp437;
     UC_CHARSET_SETUP_cp850;
     UC_CHARSET_SETUP_cp852;
+    UC_CHARSET_SETUP_cp866;
     UC_CHARSET_SETUP_windows_1250;
     UC_CHARSET_SETUP_windows_1251;
     UC_CHARSET_SETUP_iso_8859_1_windows_;

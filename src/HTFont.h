@@ -6,7 +6,7 @@
 #ifndef HTFONT_H
 #define HTFONT_H
 
-typedef long int HTLMFont;	/* For now */
+typedef long int HTMLFont;	/* For now */
 
 #define HT_NON_BREAK_SPACE ((char)1)	/* For now */
 #define HT_EM_SPACE ((char)2) 		/* For now */
