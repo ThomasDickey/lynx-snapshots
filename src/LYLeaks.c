@@ -129,7 +129,6 @@ PUBLIC void LYLeaks NOARGS
 		}
 	    }
 	    fprintf(Fp_leakagesink, "\n");
-	    FREE(ALp_head->vp_Alloced);
 	    fprintf(Fp_leakagesink, "%s\t%d\n",
 				    gettext("ByteSize:"),
 				    (int)(ALp_head->st_Bytes));
@@ -151,6 +150,8 @@ PUBLIC void LYLeaks NOARGS
 			gettext("LineCount:"),
 			ALp_head->SL_realloc.ssi_LineNumber);
 	    }
+	    fflush(Fp_leakagesink);
+	    FREE(ALp_head->vp_Alloced);
 	}
 
 	/*

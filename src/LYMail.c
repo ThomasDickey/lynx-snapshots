@@ -1852,7 +1852,7 @@ PUBLIC void reply_by_mail ARGS4(
     sleep(AlertSecs);
     start_curses();
     goto cleandown;
-#else /* Unix: */
+#else /* not VMS: */
     /*
      *	Send the tmpfile into sendmail.
      */

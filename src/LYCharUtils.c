@@ -133,8 +133,8 @@ PUBLIC void LYEntify ARGS2(
 	    *q++ = *p;
 	}
     }
-    StrAllocCopy(*str, cp);
-    FREE(cp);
+    FREE(*str);
+    *str = cp;
 }
 
 /*
@@ -367,7 +367,8 @@ PUBLIC void LYFillLocalFileURL ARGS2(
 	char curdir[LY_MAXPATH];
 	temp2 = wwwName(Current_Dir(curdir));
 #endif /* VMS */
-	LYAddHtmlSep(href);
+	if (!LYIsHtmlSep(*temp2))
+	    LYAddHtmlSep(href);
 	/*
 	 *  Check for pathological cases - current dir has chars which
 	 *  MUST BE URL-escaped - kw
@@ -3084,11 +3085,12 @@ free_META_copies:
 **  current paragraph and subsequent text when a P
 **  end tag is present or not in the markup. - FM
 */
-PUBLIC void LYHandleP ARGS5(
+PUBLIC void LYHandlePlike ARGS6(
 	HTStructured *, 	me,
 	CONST BOOL*,		present,
 	CONST char **,		value,
 	char **,		include GCC_UNUSED,
+	int,			align_idx,
 	BOOL,			start)
 {
     if (TRUE) {
@@ -3151,7 +3153,8 @@ PUBLIC void LYHandleP ARGS5(
 
 	if (LYoverride_default_alignment(me)) {
 	    me->sp->style->alignment = LYstyles(me->sp[0].tag_number)->alignment;
-	} else if (me->List_Nesting_Level >= 0 ||
+	} else if ((me->List_Nesting_Level >= 0 &&
+		    strncmp(me->sp->style->name, "Div", 3)) ||
 		   ((me->Division_Level < 0) &&
 		    (!strcmp(me->sp->style->name, "Normal") ||
 		     !strcmp(me->sp->style->name, "Preformatted")))) {
@@ -3161,19 +3164,18 @@ PUBLIC void LYHandleP ARGS5(
 	}
 
 	if (start) {
-	    if (present && present[HTML_P_ALIGN] && value[HTML_P_ALIGN]) {
-		if (!strcasecomp(value[HTML_P_ALIGN], "center") &&
+	    if (present && present[align_idx] && value[align_idx]) {
+		if (!strcasecomp(value[align_idx], "center") &&
 		    !(me->List_Nesting_Level >= 0 && !me->inP))
 		    me->sp->style->alignment = HT_CENTER;
-		else if (!strcasecomp(value[HTML_P_ALIGN], "right") &&
+		else if (!strcasecomp(value[align_idx], "right") &&
 		    !(me->List_Nesting_Level >= 0 && !me->inP))
 		    me->sp->style->alignment = HT_RIGHT;
-		else if (!strcasecomp(value[HTML_P_ALIGN], "left") ||
-			 !strcasecomp(value[HTML_P_ALIGN], "justify"))
+		else if (!strcasecomp(value[align_idx], "left") ||
+			 !strcasecomp(value[align_idx], "justify"))
 		    me->sp->style->alignment = HT_LEFT;
 	    }
 
-	    CHECK_ID(HTML_P_ID);
 	}
 
 	/*

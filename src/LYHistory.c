@@ -395,13 +395,18 @@ PUBLIC void LYpop_num ARGS2(
 PUBLIC int showhistory ARGS1(
 	char **,	newfile)
 {
-    static char tempfile[LY_MAXPATH];
+    static char tempfile[LY_MAXPATH] = "\0";
     char *Title = NULL;
     int x = 0;
     FILE *fp0;
 
-    LYRemoveTemp(tempfile);
-    if ((fp0 = LYOpenTemp(tempfile, HTML_SUFFIX, "w")) == NULL) {
+    if (LYReuseTempfiles) {
+	fp0 = LYOpenTempRewrite(tempfile, HTML_SUFFIX, "w");
+    } else {
+	LYRemoveTemp(tempfile);
+	fp0 = LYOpenTemp(tempfile, HTML_SUFFIX, "w");
+    }
+    if (fp0 == NULL) {
 	HTAlert(CANNOT_OPEN_TEMP);
 	return(-1);
     }
@@ -413,7 +418,7 @@ PUBLIC int showhistory ARGS1(
 
     BeginInternalPage(fp0, HISTORY_PAGE_TITLE, HISTORY_PAGE_HELP);
 
-    fprintf(fp0, "<tr align=right> <a href=\"LYNXMESSAGES:\">[%s]</a> </tr>\n",
+    fprintf(fp0, "<p align=right> <a href=\"LYNXMESSAGES:\">[%s]</a>\n",
 		 STATUSLINES_TITLE);
 
     fprintf(fp0, "<pre>\n");
@@ -557,7 +562,7 @@ PUBLIC BOOLEAN historytarget ARGS1(
 PUBLIC int LYShowVisitedLinks ARGS1(
 	char **,	newfile)
 {
-    static char tempfile[LY_MAXPATH];
+    static char tempfile[LY_MAXPATH] = "\0";
     char *Title = NULL;
     char *Address = NULL;
     int x;
@@ -568,8 +573,13 @@ PUBLIC int LYShowVisitedLinks ARGS1(
     if (!cur)
 	return(-1);
 
-    LYRemoveTemp(tempfile);
-    if ((fp0 = LYOpenTemp(tempfile, HTML_SUFFIX, "w")) == NULL) {
+    if (LYReuseTempfiles) {
+	fp0 = LYOpenTempRewrite(tempfile, HTML_SUFFIX, "w");
+    } else {
+	LYRemoveTemp(tempfile);
+	fp0 = LYOpenTemp(tempfile, HTML_SUFFIX, "w");
+    }
+    if (fp0 == NULL) {
 	HTAlert(CANNOT_OPEN_TEMP);
 	return(-1);
     }
@@ -683,13 +693,19 @@ PRIVATE void to_stack ARGS1(char *, str)
 PUBLIC int LYshow_statusline_messages ARGS1(
     document *,			      newdoc)
 {
-    static char tempfile[LY_MAXPATH];
+    static char tempfile[LY_MAXPATH] = "\0";
     static char *info_url;
     FILE *fp0;
     int i;
+    char *temp = NULL;
 
-    LYRemoveTemp(tempfile);
-    if ((fp0 = LYOpenTemp (tempfile, HTML_SUFFIX, "w")) == 0) {
+    if (LYReuseTempfiles) {
+	fp0 = LYOpenTempRewrite(tempfile, HTML_SUFFIX, "w");
+    } else {
+	LYRemoveTemp(tempfile);
+	fp0 = LYOpenTemp(tempfile, HTML_SUFFIX, "w");
+    }
+    if (fp0 == NULL) {
 	HTAlert(CANNOT_OPEN_TEMP);
 	return(NOT_FOUND);
     }
@@ -704,13 +720,19 @@ PUBLIC int LYshow_statusline_messages ARGS1(
     /* print messages in reverse order: */
     i = topOfStack;
     while (--i >= 0) {
-	if (buffstack[i] != NULL)
-	    fprintf(fp0,  "<li> <em>%s</em>\n",  buffstack[i]);
+	if (buffstack[i] != NULL) {
+	    StrAllocCopy(temp, buffstack[i]);
+	    LYEntify(&temp, TRUE);
+	    fprintf(fp0,  "<li> <em>%s</em>\n",	 temp);
+	}
     }
     i = STATUSBUFSIZE;
     while (--i >= topOfStack) {
-	if (buffstack[i] != NULL)
-	fprintf(fp0,  "<li> <em>%s</em>\n",  buffstack[i]);
+	if (buffstack[i] != NULL) {
+	    StrAllocCopy(temp, buffstack[i]);
+	    LYEntify(&temp, TRUE);
+	    fprintf(fp0,  "<li> <em>%s</em>\n",	 temp);
+	}
     }
 
     fprintf(fp0, "</ol>\n");
@@ -772,6 +794,7 @@ PUBLIC void LYstore_message2 ARGS2(
     if (message != NULL) {
 	char *temp = NULL;
 	HTSprintf(&temp, message, (argument == 0) ? "" : argument);
+	LYEntify(&temp, TRUE);
 	to_stack(temp);
     }
 }
@@ -782,6 +805,7 @@ PUBLIC void LYstore_message ARGS1(
     if (message != NULL) {
 	char *temp = NULL;
 	StrAllocCopy(temp, message);
+	LYEntify(&temp, TRUE);
 	to_stack(temp);
     }
 }

@@ -306,8 +306,8 @@ extern int  lynx_chg_color PARAMS((int, int, int));
 #undef  standend
 #define standend() 		lynx_standout(FALSE)
 #else
-#define LYaddAttr		attrset
-#define LYaddWAttr		wattrset
+#define LYaddAttr		attron
+#define LYaddWAttr		wattron
 #define LYsubAttr		attroff
 #define LYsubWAttr		wattroff
 #endif

@@ -409,6 +409,7 @@ PUBLIC int partial_threshold = -1;  /* # of lines to be d/l'ed until we repaint 
 #endif
 
 PUBLIC BOOLEAN LYNonRestartingSIGWINCH = FALSE;
+PUBLIC BOOLEAN LYReuseTempfiles = FALSE;
 
 /* These are declared in cutil.h for current freeWAIS libraries. - FM */
 #ifdef DECLARE_WAIS_LOGFILES
@@ -2561,6 +2562,7 @@ static int restrictions_fun ARGS1(
 #ifndef NO_CONFIG_INFO
 ,"   lynxcfg_xinfo   disable extended lynx.cfg viewing and reloading"
 #endif
+,"   mail            disallow mail"
 ,"   multibook       disallow multiple bookmark files"
 ,"   news_post       disallow USENET News posting."
 ,"   option_save     disallow saving options in .lynxrc"

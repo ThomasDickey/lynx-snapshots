@@ -743,6 +743,7 @@ try_again:
 		    LYCancelledFetch = FALSE;
 		    ForcePush = FALSE;
 		    LYforce_HTML_mode = FALSE;
+		    force_old_UCLYhndl_on_reload = FALSE;
 		    if (traversal) {
 			crawl_ok = FALSE;
 			if (traversal_link_to_add) {
@@ -1121,6 +1122,7 @@ try_again:
 	   LYPermitURL = FALSE;		/* only for LYValidate or check_realm */
 	   ForcePush = FALSE;		/* only set for some PRINT requests. */
 	   LYforce_HTML_mode = FALSE;
+	   force_old_UCLYhndl_on_reload = FALSE;
 	   popped_doc = FALSE;
 
 	} /* end if (LYforce_no_cache || force_load || are_different(...)) */
@@ -1761,6 +1763,7 @@ new_cmd:  /*
 	   *  back through the getch() loop.
 	   */
 
+	force_old_UCLYhndl_on_reload = FALSE;
 	CTRACE_FLUSH(tfp);
 
 	switch(cmd) {
@@ -3329,6 +3332,9 @@ new_cmd:  /*
 			 (strcmp(curdoc.address, LYPermitFileURL) ||
 			  strcmp((curdoc.title ? curdoc.title : ""),
 				PERMIT_OPTIONS_TITLE)) &&
+#ifdef OK_INSTALL
+			 strcmp(curdoc.address, LYInstallFileURL) &&
+#endif /* OK_INSTALL */
 			 (strcmp(curdoc.address, LYUploadFileURL) ||
 			  strcmp((curdoc.title ? curdoc.title : ""),
 				UPLOAD_OPTIONS_TITLE))) ||
@@ -3509,7 +3515,9 @@ new_cmd:  /*
 			   *  unescaping of other chars. - KW
 			   */
 			  HTUnEscapeSome(newdoc.address,"/");
-			  strip_trailing_slash(newdoc.address);
+			  /* avoid stripping final slash for root dir - kw */
+			  if (strcasecomp(newdoc.address, "file://localhost/"))
+			      strip_trailing_slash(newdoc.address);
 		    }
 #endif /* DIRED_SUPPORT  && !__DJGPP__ */
 		    if (!strncmp(curdoc.address, "LYNXCOOKIE:", 11)) {
@@ -4738,12 +4746,12 @@ if (!LYUseFormsOptions) {
 	    }
 	    break;
 
-#ifdef DIRED_SUPPORT
+#if defined(DIRED_SUPPORT) && defined(OK_INSTALL)
 	case LYK_INSTALL:  /* install a file into system area */
 	    if (lynx_edit_mode && nlinks > 0 && !no_dired_support)
 		local_install(NULL, links[curdoc.link].lname, &newdoc.address);
 	    break;
-#endif /* DIRED_SUPPORT */
+#endif /* DIRED_SUPPORT && OK_INSTALL */
 
 	case LYK_INFO:	/* show document info */
 	    /*

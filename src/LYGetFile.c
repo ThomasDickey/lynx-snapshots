@@ -54,7 +54,7 @@ PUBLIC int HTNoDataOK = 0;
 
 /*
  *  getfile is the main mechanism to load a new document (or a previously
- *  laoded one whose rendering is cached in a HText structure) from
+ *  loaded one whose rendering is cached in a HText structure) from
  *  mainloop, nearly everything goes through it.
  *  It should return one of the values
  *     NORMAL     - requested document loaded successfully, usually [always?]

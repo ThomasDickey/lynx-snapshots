@@ -986,6 +986,7 @@ PRIVATE void send_file_to_screen ARGS3(
     if (Lpansi) {
 	printf("\n\014");	/* Form feed */
 	printf("\033[4i");
+	fflush(stdout);  /* refresh to screen */
 	Lpansi = FALSE;
     } else {
 	fprintf(stdout,"\n\n%s", PRESS_RETURN_TO_FINISH);
@@ -995,7 +996,6 @@ PRIVATE void send_file_to_screen ARGS3(
 	HadVMSInterrupt = FALSE;
 #endif /* VMS */
     }
-    fflush(stdout);  /* refresh to screen */
     start_curses();
 
 done:
@@ -1237,15 +1237,20 @@ PUBLIC int print_options ARGS3(
 	char **,	printed_url,
 	int,		lines_in_file)
 {
-    static char my_temp[LY_MAXPATH];
+    static char my_temp[LY_MAXPATH] = "\0";
     char *buffer = 0;
     int count;
     int pages;
     FILE *fp0;
     lynx_printer_item_type *cur_printer;
 
-    LYRemoveTemp(my_temp);
-    if ((fp0 = LYOpenTemp(my_temp, HTML_SUFFIX, "w")) == NULL) {
+    if (LYReuseTempfiles) {
+	fp0 = LYOpenTempRewrite(my_temp, HTML_SUFFIX, "w");
+    } else {
+	LYRemoveTemp(my_temp);
+	fp0 = LYOpenTemp(my_temp, HTML_SUFFIX, "w");
+    }
+    if (fp0 == NULL) {
 	HTAlert(UNABLE_TO_OPEN_PRINTOP_FILE);
 	return(-1);
     }

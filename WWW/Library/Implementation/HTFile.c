@@ -26,7 +26,6 @@
 #ifdef DOSPATH
 #define LONG_LIST  /* Define this for long style unix listings (ls -l),
 		     the actual style is configurable from lynx.cfg */
-#define lstat stat
 #endif
 /* #define NO_PARENT_DIR_REFERENCE */ /* Define this for no parent links */
 #endif /* !VMS */
@@ -558,6 +557,50 @@ PRIVATE int HTCreatePath ARGS1(CONST char *,path)
 }
 #endif /* NOT_IMPLEMENTED */
 
+/*	Convert filename from URL-path syntax to local path format
+**	----------------------------------------------------------
+**	Input name is assumed to be the URL-path of a local file
+**      URL, i.e. what comes after the "file://localhost".
+**      '#'-fragments to be treated as such must already be stripped.
+**      If expand_all is FALSE, unescape only escaped '/'. - kw
+**
+**  On exit:
+**	Returns a malloc'ed string which must be freed by the caller.
+*/
+PUBLIC char * HTURLPath_toFile ARGS2(
+	CONST char *,	name,
+	BOOL,		expand_all)
+{
+    char * path = NULL;
+    char * result = NULL;
+
+    StrAllocCopy(path, name);
+    if (expand_all)
+    	HTUnEscape(path);		/* Interpret all % signs */
+    else
+	HTUnEscapeSome(path, "/");	/* Interpret % signs for path delims */
+
+    CTRACE(tfp, "URLPath `%s' means path `%s'\n", name, path);
+#ifdef DOSPATH
+    StrAllocCopy(result, HTDOS_name(path));
+#else
+#ifdef __EMX__
+    if (path[0] == '/'
+	&& isalpha(path[1])
+	&& path[2] == ':') /* pesky leading slash */
+	StrAllocCopy(result, path+1);
+    else
+	StrAllocCopy(result, path);
+    CTRACE(tfp, "EMX hack changed `%s' to `%s'\n", path, result);
+#else
+    StrAllocCopy(result, path);
+#endif /* __EMX__ */
+#endif /* DOSPATH */
+
+    FREE(path);
+
+    return result;
+}
 /*	Convert filenames between local and WWW formats.
 **	------------------------------------------------
 **	Make up a suitable name for saving the node in
@@ -567,6 +610,11 @@ PRIVATE int HTCreatePath ARGS1(CONST char *,path)
 **
 **  On exit:
 **	Returns a malloc'ed string which must be freed by the caller.
+*/
+/* NOTE: Don't use this function if you know that the input is a URL path
+	 rather than a full URL, use HTURLPath_toFile instead.  Otherwise
+	 this function will return the wrong thing for some unusual
+	 paths (like ones containing "//", possibly escaped). - kw
 */
 PUBLIC char * HTnameOfFile_WWW ARGS3(
 	CONST char *,	name,
@@ -579,9 +627,9 @@ PUBLIC char * HTnameOfFile_WWW ARGS3(
     char * home;
     char * result = NULL;
 
-    if (expand_all)
+    if (expand_all) {
 	HTUnEscape(path);		/* Interpret all % signs */
-    else
+    } else
 	HTUnEscapeSome(path, "/");	/* Interpret % signs for path delims */
 
     if (0 == strcmp(acc_method, "file")	/* local file */
@@ -1193,9 +1241,9 @@ PUBLIC void HTDirEntry ARGS3(
 **  On exit:
 **	Returns TRUE if an "Up to <parent>" link was not created
 **	for a readable local directory because LONG_LIST is defined
-**	and NO_PARENT_DIR_REFERENCE is not defined, such that the
-**	calling function use LYListFmtParse() to create a link to
-**	the parent directory.  Otherwise, it returns FALSE. - FM
+**	and NO_PARENT_DIR_REFERENCE is not defined, so that the
+**	calling function should use LYListFmtParse() to create a link
+**	to the parent directory.  Otherwise, it returns FALSE. - FM
 */
 PUBLIC BOOL HTDirTitles ARGS3(
 	HTStructured *, target,
@@ -1211,7 +1259,7 @@ PUBLIC BOOL HTDirTitles ARGS3(
 
 #ifdef DOSPATH
     BOOL local_link = FALSE;
-    if (logical[18] == ':') local_link = TRUE;
+    if (strlen(logical) > 18 && logical[18] == ':') local_link = TRUE;
 #endif
     /*
     **	Check tildeIsTop for treating home directory as Welcome
@@ -1246,10 +1294,11 @@ PUBLIC BOOL HTDirTitles ARGS3(
       char * printable = NULL;
 
 #ifdef DIRED_SUPPORT
-      printable = HTfullURL_toFile(
+      printable = HTURLPath_toFile(
 	    (0 == strncasecomp(path, "/%2F", 4))	/* "//" ? */
 	    ? (path+1)
-	    : path);
+	    : path,
+	    TRUE);
       if (0 == strncasecomp(printable, "/vmsysu:", 8) ||
 	  0 == strncasecomp(printable, "/anonymou.", 10)) {
 	  StrAllocCopy(cp, (printable+1));
@@ -1441,8 +1490,8 @@ PRIVATE void do_readme ARGS2(HTStructured *, target, CONST char *, localname)
 	targetClass =  *target->isa;	/* (Can't init agregate in K&R) */
 	START(HTML_PRE);
 	for (;;){
-	    char c = fgetc(fp);
-	    if (c == (char)EOF) break;
+	    int c = fgetc(fp);
+	    if (c == EOF) break;
 #ifdef NOTDEFINED
 	    switch (c) {
 		case '&':
@@ -1458,10 +1507,10 @@ PRIVATE void do_readme ARGS2(HTStructured *, target, CONST char *, localname)
 			PUTC('\r');
 Bug removed thanks to joe@athena.mit.edu */
 		default:
-			PUTC(c);
+			PUTC((char)c);
 	    }
 #else
-	    PUTC(c);
+	    PUTC((char)c);
 #endif /* NOTDEFINED */
 	}
 	END(HTML_PRE);
@@ -1652,7 +1701,7 @@ PRIVATE int print_local_dir ARGS5(
 	{
 	    HTBTElement * next_element = HTBTree_next(bt,NULL);
 		/* pick up the first element of the list */
-	    int num_of_entries_partial = 0; /* lines counter */
+	    int num_of_entries_output = 0; /* lines counter */
 
 	    char state;
 		/* I for initial (.. file),
@@ -1667,19 +1716,28 @@ PRIVATE int print_local_dir ARGS5(
 	    while (next_element != NULL) {
 		char *entry, *file_extra;
 
+#ifndef DISP_PARTIAL
+		if (num_of_entries_output % HTMAX(display_lines,10) == 0) {
+		    if (HTCheckForInterrupt()) {
+			_HTProgress ("Data transfer interrupted.");
+			status = HT_PARTIAL_CONTENT;
+			break;
+		    }
+		}
+#endif
 		StrAllocCopy(tmpfilename,localname);
 		if (strcmp(localname, "/"))
 		    /*
 		    **	If filename is not root directory.
 		    */
-		    StrAllocCat(tmpfilename, "/");
+		    LYAddHtmlSep(&tmpfilename);
 
-		StrAllocCat(tmpfilename,
-			    (char *)HTBTree_object(next_element)+1);
+		entry = (char*)HTBTree_object(next_element)+1;
 		/*
 		**  Append the current entry's filename
 		**  to the path.
 		*/
+		StrAllocCat(tmpfilename, entry);
 		HTSimplify(tmpfilename);
 		/*
 		**  Output the directory entry.
@@ -1753,7 +1811,6 @@ PRIVATE int print_local_dir ARGS5(
 		    START(HTML_LI);
 #endif /* !LONG_LIST */
 		}
-		entry = (char*)HTBTree_object(next_element)+1;
 		file_extra = NULL;
 
 #ifdef LONG_LIST
@@ -1777,10 +1834,10 @@ PRIVATE int print_local_dir ARGS5(
 
 		/* optimize for expensive operation: */
 #ifdef DISP_PARTIAL
-		if (num_of_entries_partial %
+		if (num_of_entries_output %
 		    (partial_threshold > 0 ? partial_threshold : display_lines)
 		    == 0) {
-		    /* num_of_entries, num_of_entries_partial... */
+		    /* num_of_entries, num_of_entries_output... */
 		    /* HTReadProgress...(bytes, 0); */
 		    HTDisplayPartial();
 
@@ -1790,7 +1847,7 @@ PRIVATE int print_local_dir ARGS5(
 			break;
 		    }
 		}
-		num_of_entries_partial++;
+		num_of_entries_output++;
 #endif /* DISP_PARTIAL */
 
 	    } /* end while next_element */
@@ -2131,7 +2188,7 @@ PUBLIC int HTLoadFile ARGS4(
 	FREE(filename);
     }
 
-#else /* Unix: */
+#else /* not VMS: */
 
     FREE(filename);
 

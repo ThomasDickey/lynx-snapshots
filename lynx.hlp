@@ -51,10 +51,10 @@
               apply restrictions for anonymous account, see  also
               -restrictions.
 
-       -assume_charset=ID:MIMEname
+       -assume_charset=MIMEname
               charset for documents that don't specify it.
 
-       -assume_local_charset=ID:MIMEname
+       -assume_local_charset=MIMEname
               charset assumed for local files.
 
        -assume_unrec_charset=MIMEname

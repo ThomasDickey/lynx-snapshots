@@ -91,7 +91,14 @@ PUBLIC void LYDownload ARGS1(
 #ifdef DIRED_SUPPORT
     /* FIXME: use HTLocalName */
     if (!strncmp(file, "file://localhost", 16))
+#ifdef __DJGPP__
+    {
+	file += 17;
+	file = HTDOS_name(file);
+    }
+#else
 	file += 16;
+#endif /* __DJGPP__ */
     else if (!strncmp(file, "file:", 5))
 	file += 5;
     HTUnEscape(file);
@@ -469,7 +476,7 @@ PUBLIC int LYdownload_options ARGS2(
 	char **,	newfile,
 	char *, 	data_file)
 {
-    static char tempfile[LY_MAXPATH];
+    static char tempfile[LY_MAXPATH] = "\0";
     char *downloaded_url = NULL;
     char *sug_filename = NULL;
     FILE *fp0;
@@ -482,8 +489,13 @@ PUBLIC int LYdownload_options ARGS2(
     StrAllocCopy(sug_filename, *newfile);
     change_sug_filename(sug_filename);
 
-    LYRemoveTemp(tempfile);
-    if ((fp0 = LYOpenTemp(tempfile, HTML_SUFFIX, "w")) == NULL) {
+    if (LYReuseTempfiles) {
+	fp0 = LYOpenTempRewrite(tempfile, HTML_SUFFIX, "w");
+    } else {
+	LYRemoveTemp(tempfile);
+	fp0 = LYOpenTemp(tempfile, HTML_SUFFIX, "w");
+    }
+    if (fp0 == NULL) {
 	HTAlert(CANNOT_OPEN_TEMP);
 	return(-1);
     }

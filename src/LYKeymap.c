@@ -893,7 +893,7 @@ PUBLIC int lkcstring_to_lkc ARGS1(
 #ifndef USE_SLANG
 	   if (c >= 0) {
 	       if ((c&LKC_MASK) > 255 && !(c & LKC_ISLKC))
-		   return (-1);	/* Don't accept untranslatable curses KEY_* */
+		   return (-1);	/* Don't accept untranslated curses KEY_* */
 	       else
 		   c &= ~LKC_ISLKC;
 	   }

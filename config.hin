@@ -135,6 +135,7 @@
 #undef NO_PARENT_DIR_REFERENCE	/* configure --disable-parent-dir */
 #undef NSL_FORK			/* CF_ARG_ENABLE(nsl-fork) */
 #undef OK_GZIP			/* CF_ARG_DISABLE(dired-gzip) */
+#undef OK_INSTALL
 #undef OK_OVERRIDE		/* CF_ARG_DISABLE(dired-override) */
 #undef OK_PERMIT		/* CF_ARG_DISABLE(dired-permit) */
 #undef OK_TAR			/* CF_ARG_DISABLE(dired-tar) */

@@ -224,7 +224,9 @@ $srcdir*) # (vi
 	AC_DEFINE_UNQUOTED(INSTALL_PATH,"install")
 	;;
 *) # (vi
-	AC_DEFINE_UNQUOTED(INSTALL_PATH,"$INSTALL")
+	cf_save_INSTALL="$INSTALL"
+	CF_PATH_PROG(INSTALL,	install)
+	INSTALL="$cf_save_INSTALL"
 	;;
 esac
 

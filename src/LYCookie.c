@@ -74,6 +74,9 @@
 #define max_cookies_global 500
 #define max_cookies_buffer 4096
 
+/* default for new domains, one of the invcheck_behaviour_t values: */
+#define DEFAULT_INVCHECK_BV INVCHECK_QUERY
+
 /*
 **  The first level of the cookie list is a list indexed by the domain
 **  string; cookies with the same domain will be placed in the same
@@ -271,6 +274,9 @@ PRIVATE void store_cookie ARGS3(
     CONST char *ptr;
     domain_entry *de = NULL;
     BOOL Replacement = FALSE;
+    int invprompt_reasons = 0;	/* what is wrong with this cookie - kw */
+#define FAILS_COND1 0x01
+#define FAILS_COND4 0x02
 
     if (co == NULL)
 	return;
@@ -294,7 +300,7 @@ PRIVATE void store_cookie ARGS3(
     for (hl = domain_list; hl != NULL; hl = hl->next) {
 	de = (domain_entry *)hl->object;
 	if ((de != NULL && de->domain != NULL) &&
-	    !strcmp(co->domain, de->domain)) {
+	    !strcasecomp(co->domain, de->domain)) {
 		cookie_list = de->cookie_list;
 		break;
 	}
@@ -316,32 +322,21 @@ PRIVATE void store_cookie ARGS3(
      * if set to INVCHECK_QUERY.
      */
     if (strncmp(co->path, path, co->pathlen) != 0) {
-	if((de != NULL && de->invcheck_bv != INVCHECK_LOOSE)
-	    || de == NULL) {
-		if(de != NULL && de->invcheck_bv == INVCHECK_STRICT) {
-		    CTRACE(tfp, "store_cookie: Rejecting because '%s' is not a prefix of '%s'.\n",
-			co->path, path);
-		    freeCookie(co);
-		    co = NULL;
-		    return;
-		} else if ((de != NULL
-		    && de->invcheck_bv == INVCHECK_QUERY)
-		    || de == NULL) {
-			char *msg = 0;
-			HTSprintf0(&msg,
-			    INVALID_COOKIE_PATH_CONFIRMATION,
-			    co->path, path);
-			if (!HTConfirm(msg)) {
-			    CTRACE(tfp, "store_cookie: Rejecting because '%s' is not a prefix of '%s'.\n",
-				co->path, path);
-			    freeCookie(co);
-			    co = NULL;
-			    FREE(msg);
-			    return;
-			} else {
-			    FREE(msg);
-			}
-		}
+	invcheck_behaviour_t invcheck_bv = (de ? de->invcheck_bv
+	    				       : DEFAULT_INVCHECK_BV);
+	switch (invcheck_bv) {
+	case INVCHECK_LOOSE:
+	    break;		/* continue as if nothing were wrong */
+
+	case INVCHECK_QUERY:
+	    invprompt_reasons |= FAILS_COND1;
+	    break;		/* will prompt later if we get that far */
+
+	case INVCHECK_STRICT:
+	    CTRACE(tfp, "store_cookie: Rejecting because '%s' is not a prefix of '%s'.\n",
+		   co->path, path);
+	    freeCookie(co);
+	    return;
 	}
     }
     /*
@@ -356,7 +351,6 @@ PRIVATE void store_cookie ARGS3(
 	    CTRACE(tfp, "store_cookie: Rejecting because '%s' has no dot.\n",
 		    hostname);
 	    freeCookie(co);
-	    co = NULL;
 	    return;
 	}
 
@@ -371,7 +365,6 @@ PRIVATE void store_cookie ARGS3(
 	    CTRACE(tfp, "store_cookie: Rejecting domain '%s'.\n",
 		    co->domain);
 	    freeCookie(co);
-	    co = NULL;
 	    return;
 	}
 	ptr = strchr((co->domain + 1), '.');
@@ -379,7 +372,6 @@ PRIVATE void store_cookie ARGS3(
 	    CTRACE(tfp, "store_cookie: Rejecting domain '%s'.\n",
 		    co->domain);
 	    freeCookie(co);
-	    co = NULL;
 	    return;
 	}
 
@@ -391,7 +383,6 @@ PRIVATE void store_cookie ARGS3(
 	    CTRACE(tfp, "store_cookie: Rejecting domain '%s' for host '%s'.\n",
 		    co->domain, hostname);
 	    freeCookie(co);
-	    co = NULL;
 	    return;
 	}
 
@@ -406,36 +397,61 @@ PRIVATE void store_cookie ARGS3(
 	 */
 	ptr = ((hostname + strlen(hostname)) - strlen(co->domain));
 	if (strchr(hostname, '.') < ptr) {
-		if((de != NULL && de->invcheck_bv != INVCHECK_LOOSE)
-		    || de == NULL) {
-			if(de != NULL && de->invcheck_bv == INVCHECK_STRICT) {
-			    CTRACE(tfp, "store_cookie: Rejecting domain '%s' for host '%s'.\n",
-				co->domain,
-				hostname);
-			    freeCookie(co);
-			    co = NULL;
-			    return;
-			} else if ((de != NULL
-			    && de->invcheck_bv == INVCHECK_QUERY)
-			    || de == NULL) {
-				char *msg = 0;
-				HTSprintf0(&msg,
-				    INVALID_COOKIE_DOMAIN_CONFIRMATION,
-				    co->domain,
-				    hostname);
-				if (!HTConfirm(msg)) {
-				    CTRACE(tfp, "store_cookie: Rejecting domain '%s' for host '%s'.\n",
+	    invcheck_behaviour_t invcheck_bv = (de ? de->invcheck_bv
+						   : DEFAULT_INVCHECK_BV);
+	    switch (invcheck_bv) {
+	    case INVCHECK_LOOSE:
+		break;		/* continue as if nothing were wrong */
+
+	    case INVCHECK_QUERY:
+		invprompt_reasons |= FAILS_COND4;
+		break;		/* will prompt later if we get that far */
+
+	    case INVCHECK_STRICT:
+		CTRACE(tfp, "store_cookie: Rejecting because '%s' is not a prefix of '%s'.\n",
+		       co->path, path);
+		freeCookie(co);
+		return;
+	    }
+	}
+    }
+
+    /*
+     *  If we found reasons for issuing an invalid cookie confirmation
+     *  prompt, do that now.  Rejection by the user here is the last
+     *  chance to completely ignore this cookie; after it passes this
+     *  hurdle, it may at least supersede a previous cookie (even if
+     *  it finally gets rejected). - kw
+     */
+    if (invprompt_reasons) {
+	char *msg = 0;
+	if (invprompt_reasons & FAILS_COND4) {
+	    HTSprintf0(&msg,
+		       INVALID_COOKIE_DOMAIN_CONFIRMATION,
+		       co->domain,
+		       hostname);
+	    if (!HTConfirmDefault(msg, NO)) {
+		CTRACE(tfp, "store_cookie: Rejecting domain '%s' for host '%s'.\n",
 					co->domain,
 					hostname);
-				    freeCookie(co);
-				    co = NULL;
-				    FREE(msg);
-				    return;
-				}
-				FREE(msg);
-			}
-		}
+		freeCookie(co);
+		FREE(msg);
+		return;
+	    }
 	}
+	if (invprompt_reasons & FAILS_COND1) {
+	    HTSprintf0(&msg,
+		       INVALID_COOKIE_PATH_CONFIRMATION,
+		       co->path, path);
+	    if (!HTConfirmDefault(msg, NO)) {
+		CTRACE(tfp, "store_cookie: Rejecting because '%s' is not a prefix of '%s'.\n",
+		       co->path, path);
+		freeCookie(co);
+		FREE(msg);
+		return;
+	    }
+	}
+	FREE(msg);
     }
 
     if (hl == NULL) {
@@ -447,21 +463,20 @@ PRIVATE void store_cookie ARGS3(
 	    outofmem(__FILE__, "store_cookie");
 #if 0	/* was: ifdef EXP_PERSISTENT_COOKIES */
 	/*
-	 * Ok, this is a problem.  The first cookie for a domain
-	 * effectively sets the policy for that whole domain - for
-	 * something like Netlink, where there are lots of websites
-	 * under www.netlink.co.uk, this isn't sensible.  However,
-	 * taking this sort of decision down to cookie level also
-	 * isn't sensible.  Perhaps something based on the domain
-	 * and the path in conjunction makes more sense?  - RP
+	 * The default behavior for this new domain could be set
+	 * differently if the cookie comes from a file, as the
+	 * code had it originally, but there doesn't seem to be
+	 * a good reason for it any more; setting more permissive
+	 * behavior for individual domains is now possible via
+	 * configuration options. - kw
 	 */
 	if (persistent_cookies
 	 && (co->flags & COOKIE_FLAG_FROM_FILE))
-	    de->bv = FROM_FILE;
+	    de->bv = ACCEPT_ALWAYS; /* ?? */
 	else
 #endif
 	    de->bv = QUERY_USER;
-	de->invcheck_bv = INVCHECK_QUERY; /* should this go here? */
+	de->invcheck_bv = DEFAULT_INVCHECK_BV; /* should this go here? */
 	cookie_list = de->cookie_list = HTList_new();
 	StrAllocCopy(de->domain, co->domain);
 	HTList_appendObject(domain_list, de);
@@ -490,7 +505,7 @@ PRIVATE void store_cookie ARGS3(
 	 *  Check if this cookie matches the one we're inserting.
 	 */
 	} else if ((c2) &&
-		   !strcmp(co->domain, c2->domain) &&
+		   !strcasecomp(co->domain, c2->domain) &&
 		   !strcmp(co->path, c2->path) &&
 		   !strcmp(co->name, c2->name)) {
 	    HTList_removeObject(cookie_list, c2);
@@ -547,7 +562,12 @@ PRIVATE void store_cookie ARGS3(
     /*
      * Don't add the cookie if the value is NULL. - BJP
      */
-    } else if (co->value[0] == '\0') {
+	/*
+	 * Presence of value is now needed (indicated normally by '='),
+	 * but it can now be an empty string.
+	 * - kw 1999-06-24
+	 */
+    } else if (co->value == NULL) { /* should not happen - kw */
 	CTRACE(tfp, "store_cookie: Value is NULL! Not storing cookie.\n");
 	freeCookie(co);
 	co = NULL;
@@ -940,16 +960,27 @@ PRIVATE void LYProcessSetCookies ARGS6(
 		    break;
 		}
 	    } else if (*p == '"') {
+		BOOLEAN escaped = FALSE;
 		/*
-		 *  It's a quoted string.
+		 *  It looks like quoted string.
 		 */
 		p++;
 		value_start = p;
-		while (*p != '\0' && *p != '"')
+		while (*p != '\0' && (*p != '"' || escaped)) {
+		    escaped = (!escaped && *p == '\\');
 		    p++;
-		value_end = p;
-		if (*p == '"')
+		}
+		if (p != value_start && *p == '"' && !escaped) {
+		    value_end = p;
 		    p++;
+		    Quoted = TRUE;
+		} else {
+		    value_start--;
+		    value_end = p;
+		    if (*p)
+			p++;
+		    Quoted = FALSE;
+		}
 	    } else {
 		/*
 		 *  Otherwise, it's an unquoted string.
@@ -987,7 +1018,12 @@ PRIVATE void LYProcessSetCookies ARGS6(
 	    BOOLEAN known_attr = NO;
 	    char *value = NULL;
 
-	    if (value_end > value_start) {
+	    if (value_start && value_end >= value_start) {
+		/*
+		 * Presence of value is now needed (indicated normally by '=')
+		 * to start a cookie, but it can now be an empty string.
+		 * - kw 1999-06-24
+		 */
 		int value_len = (value_end - value_start);
 
 		if (value_len > max_cookies_buffer) {
@@ -1218,8 +1254,11 @@ PRIVATE void LYProcessSetCookies ARGS6(
 	     * no value?  This seems to be needed for sites that reset a
 	     * cookie by nulling out the value.  If this causes problems,
 	     * we can go back to the original behavior above.  - BJP
+	     *
+	     * Presence of value is now needed (indicated normally by '='),
+	     * but it can now be an empty string. - kw 1999-06-24
 	     */
-	    if (!known_attr) {
+	    if (!known_attr && value && value_end >= value_start) {
 		/*
 		 *  If we've started a cookie, and it's not too big,
 		 *  save it in the CombinedCookies list. - FM
@@ -1441,17 +1480,27 @@ PRIVATE void LYProcessSetCookies ARGS6(
 		    break;
 		}
 	    } else if (*p == '"') {
+		BOOLEAN escaped = FALSE;
 		/*
-		 *  It's a quoted string.
+		 *  It looks like quoted string.
 		 */
 		p++;
 		value_start = p;
-		while (*p != '\0' && *p != '"')
+		while (*p != '\0' && (*p != '"' || escaped)) {
+		    escaped = (!escaped && *p == '\\');
 		    p++;
-		value_end = p;
-		if (*p == '"')
+		}
+		if (p != value_start && *p == '"' && !escaped) {
+		    value_end = p;
 		    p++;
-		Quoted = TRUE;
+		    Quoted = TRUE;
+		} else {
+		    value_start--;
+		    value_end = p;
+		    if (*p)
+			p++;
+		    Quoted = FALSE;
+		}
 	    } else {
 		/*
 		 *  Otherwise, it's an unquoted string.
@@ -1489,7 +1538,12 @@ PRIVATE void LYProcessSetCookies ARGS6(
 	    BOOLEAN known_attr = NO;
 	    char *value = NULL;
 
-	    if (value_end > value_start) {
+	    if (value_start && value_end >= value_start) {
+		/*
+		 * Presence of value is now needed (indicated normally by '=')
+		 * to start a cookie, but it can now be an empty string.
+		 * - kw 1999-06-24
+		 */
 		int value_len = (value_end - value_start);
 
 		if (value_len > max_cookies_buffer) {
@@ -1497,7 +1551,7 @@ PRIVATE void LYProcessSetCookies ARGS6(
 		}
 		value = (char *)calloc(1, value_len + 1);
 		if (value == NULL)
-		    outofmem(__FILE__, "LYProcessSetCookie");
+		    outofmem(__FILE__, "LYProcessSetCookies");
 		LYstrncpy(value, value_start, value_len);
 	    }
 	    if (len == 6 && !strncasecomp(attr_start, "secure", 6)) {
@@ -1705,8 +1759,11 @@ PRIVATE void LYProcessSetCookies ARGS6(
 	     * no value?  This seems to be needed for sites that reset a
 	     * cookie by nulling out the value.  If this causes problems,
 	     * we can go back to the original behavior above.  - BJP
+	     *
+	     * Presence of value is now needed (indicated normally by '='),
+	     * but it can now be an empty string. - kw 1999-06-24
 	     */
-	    if (!known_attr) {
+	    if (!known_attr && value && value_end >= value_start) {
 		/*
 		 *  If we've started a cookie, and it's not too big,
 		 *  save it in the CombinedCookies list. - FM
@@ -1924,7 +1981,7 @@ PUBLIC char * LYCookie ARGS4(
 		 */
 		header = scan_cookie_sublist(hostname, path, port,
 					     de->cookie_list, header, secure);
-	    } else if (de->bv == QUERY_USER && de->invcheck_bv == INVCHECK_QUERY) {
+	    } else if (de->bv == QUERY_USER && de->invcheck_bv == DEFAULT_INVCHECK_BV) {
 		/*
 		 *  No cookies in this domain, and no default
 		 *  accept/reject choice was set by the user,
@@ -1998,7 +2055,10 @@ PUBLIC void LYLoadCookies ARGS1 (
 	while(buf[i] != '\n' && buf[i] != 0) {
 	    i++;
 	}
-	buf[i] = '\0';
+	if (buf[i] == '\n') {
+	    buf[i++] = '\t';	/* add sep after line if enough space - kw */
+	    buf[i] = '\0';
+	}
 
 	/*
 	 * Tokenise the cookie line into its component parts -
@@ -2009,6 +2069,12 @@ PUBLIC void LYLoadCookies ARGS1 (
 	 *
 	 * 'fixed' by using strsep instead of strtok.  No idea
 	 * what kind of platform problems this might introduce. - RP
+	 */
+	/*
+	 * This fails when the path is blank
+	 *
+	 * sscanf(buf, "%s\t%s\t%s\t%s\t%d\t%s\t%[ -~]",
+	 *  domain, what, path, secure, &expires, name, value);
 	 */
 	CTRACE(tfp, "LYLoadCookies: tokenising %s\n", buf);
 	tok_ptr = buf;
@@ -2025,15 +2091,14 @@ PUBLIC void LYLoadCookies ARGS1 (
 	     */
 	    tok_out = LYstrsep(&tok_ptr, "\t");
 	}
+
+	if (tok_values[tok_loop].s) {
+	    /* tok_out in above loop must have been NULL prematurely - kw */
+	    CTRACE(tfp, "*** wrong format: not enough tokens, ignoring line!\n");
+	    continue;
+	}
+
 	expires = atol(expires_a);
-
-	/*
-	 * This fails when the path is blank
-	 *
-	 * sscanf(buf, "%s\t%s\t%s\t%s\t%d\t%s\t%[ -~]",
-	 *  domain, what, path, secure, &expires, name, value);
-	 */
-
 	CTRACE(tfp, "expires:\t%s\n", ctime(&expires));
 /* 	CTRACE(tfp, "%s\t%s\t%s\t%s\t%ld\t%s\t%s\tREADCOOKIE\n", */
 /* 	    domain, what, path, secure, (long) expires, name, value); */
@@ -2041,7 +2106,15 @@ PUBLIC void LYLoadCookies ARGS1 (
 	StrAllocCopy(moo->domain, domain);
 	StrAllocCopy(moo->path, path);
 	StrAllocCopy(moo->name, name);
-	StrAllocCopy(moo->value, value);
+	if (value && value[0] == '"' &&
+	    value[1] && value[strlen(value)-1] == '"' &&
+	    value[strlen(value)-2] != '\\') {
+	    value[strlen(value)-1] = '\0';
+	    StrAllocCopy(moo->value, value+1);
+	    moo->quoted = TRUE;
+	} else {
+	    StrAllocCopy(moo->value, value);
+	}
 	moo->pathlen = strlen(moo->path);
 	/*
 	 *  Justification for following flags:
@@ -2171,11 +2244,15 @@ PUBLIC void LYStoreCookies ARGS1 (
 		continue;
 	    }
 
-	    fprintf(cookie_handle, "%s\t%s\t%s\t%s\t%ld\t%s\t%s\n",
+	    fprintf(cookie_handle, "%s\t%s\t%s\t%s\t%ld\t%s\t%s%s%s\n",
 		de->domain,
-		"FALSE", co->path,
+		    (de->domain[0] == '.') ? "TRUE" : "FALSE",
+		    co->path,
 		co->flags & COOKIE_FLAG_SECURE ? "TRUE" : "FALSE",
-		(long) co->expires, co->name, co->value);
+		(long) co->expires, co->name,
+		    (co->quoted ? "\"" : ""),
+		    co->value,
+		    (co->quoted ? "\"" : ""));
 
 	    CTRACE(tfp, "STORED\n");
 	}
@@ -2264,7 +2341,7 @@ PRIVATE int LYHandleCookies ARGS4 (
 		 *  First object in the list always is empty. - FM
 		 */
 		continue;
-	    if (!strcmp(domain, de->domain)) {
+	    if (!strcasecomp(domain, de->domain)) {
 		FREE(domain);
 		/*
 		 *  We found the domain.  Check
@@ -2527,11 +2604,6 @@ Delete_all_cookies_in_domain:
 	    case (QUERY_USER):
 		HTSprintf0(&buf, COOKIES_ALLOWED_VIA_PROMPT);
 		break;
-	    case (FROM_FILE):
-#if 0 /* not used any more - kw */
-		HTSprintf0(&buf, COOKIES_READ_FROM_FILE);
-#endif
-		break;
 	}
 	PUTS(buf);
 	HTSprintf0(&buf, "\n");
@@ -2673,8 +2745,11 @@ PUBLIC void cookie_domain_flag_set ARGS2(
     char *strsmall = NULL;
     int isexisting = FALSE;
 
-    if (str == NULL)
-	outofmem(__FILE__, "cookie_set_invcheck");
+    if (str == NULL) {
+	HTAlwaysAlert(gettext("Internal"),
+		      gettext("cookie_domain_flag_set error, aborting program"));
+	exit_immediately(-1);
+    }
 
     /*
      * Is this the first domain we're handling?  If so, initialize
@@ -2695,6 +2770,11 @@ PUBLIC void cookie_domain_flag_set ARGS2(
 
     while ((strsmall = LYstrsep(str, ",")) != 0) {
 
+	if (*strsmall == '\0')
+	    /* Never add a domain for empty string.  It would actually
+	     * make more sense to use strtok here. - kw */
+	    continue;
+
 	/*
 	 * Check the list of existing domains to see if this is a
 	 * re-setting of an already existing domains -- if so, just
@@ -2704,7 +2784,7 @@ PUBLIC void cookie_domain_flag_set ARGS2(
 	for (hl = domain_list; hl != NULL; hl = hl->next) {
 	    de2 = (domain_entry *)hl->object;
 	    if ((de2 != NULL && de2->domain != NULL) &&
-		!strcmp(strsmall, de2->domain)) {
+		!strcasecomp(strsmall, de2->domain)) {
 			isexisting = TRUE;
 			break;
 	    } else {
@@ -2720,16 +2800,13 @@ PUBLIC void cookie_domain_flag_set ARGS2(
 
 	    switch(flag) {
 		case (FLAG_ACCEPT_ALWAYS): de->bv = ACCEPT_ALWAYS;
-					   de->invcheck_bv = INVCHECK_QUERY;
+					   de->invcheck_bv = DEFAULT_INVCHECK_BV;
 					   break;
 		case (FLAG_REJECT_ALWAYS): de->bv = REJECT_ALWAYS;
-					   de->invcheck_bv = INVCHECK_QUERY;
+					   de->invcheck_bv = DEFAULT_INVCHECK_BV;
 					   break;
 		case (FLAG_QUERY_USER):    de->bv = QUERY_USER;
-					   de->invcheck_bv = INVCHECK_QUERY;
-					   break;
-		case (FLAG_FROM_FILE):     de->bv = FROM_FILE;
-					   de->invcheck_bv = INVCHECK_QUERY;
+					   de->invcheck_bv = DEFAULT_INVCHECK_BV;
 					   break;
 		case (FLAG_INVCHECK_QUERY): de->invcheck_bv = INVCHECK_QUERY;
 					    de->bv = QUERY_USER;
@@ -2752,8 +2829,6 @@ PUBLIC void cookie_domain_flag_set ARGS2(
 		case (FLAG_REJECT_ALWAYS): de2->bv = REJECT_ALWAYS;
 					   break;
 		case (FLAG_QUERY_USER): de2->bv = QUERY_USER;
-					   break;
-		case (FLAG_FROM_FILE): de2->bv = FROM_FILE;
 					   break;
 		case (FLAG_INVCHECK_QUERY): de2->invcheck_bv = INVCHECK_QUERY;
 					   break;

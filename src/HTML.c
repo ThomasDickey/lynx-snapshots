@@ -1720,11 +1720,33 @@ PRIVATE void HTML_start_element ARGS6(
 		"HTML: ****** Maximum nesting of %d divisions exceeded!\n",
 		MAX_NESTING);
 	}
+	if (me->inP)
+	    LYEnsureSingleSpace(me); /* always at least break line - kw */
 	if (ElementNumber == HTML_CENTER) {
 	    me->DivisionAlignments[me->Division_Level] = HT_CENTER;
 	    change_paragraph_style(me, styles[HTML_DCENTER]);
 	    UPDATE_STYLE;
 	    me->current_default_alignment = styles[HTML_DCENTER]->alignment;
+	} else if (me->List_Nesting_Level >= 0 &&
+		   !(present && present[HTML_DIV_ALIGN] &&
+		     value[HTML_DIV_ALIGN] &&
+		     (!strcasecomp(value[HTML_DIV_ALIGN], "center") ||
+		      !strcasecomp(value[HTML_DIV_ALIGN], "right")))) {
+	    if (present && present[HTML_DIV_ALIGN])
+		me->current_default_alignment = HT_LEFT;
+	    else if (me->Division_Level == 0)
+		me->current_default_alignment = HT_LEFT;
+	    else if (me->sp[0].tag_number == HTML_UL ||
+		     me->sp[0].tag_number == HTML_OL ||
+		     me->sp[0].tag_number == HTML_MENU ||
+		     me->sp[0].tag_number == HTML_DIR ||
+		     me->sp[0].tag_number == HTML_LI ||
+		     me->sp[0].tag_number == HTML_LH ||
+		     me->sp[0].tag_number == HTML_DD)
+		me->current_default_alignment = HT_LEFT;
+	    LYHandlePlike(me, present, value, include, HTML_DIV_ALIGN, TRUE);
+	    me->DivisionAlignments[me->Division_Level] =
+		me->current_default_alignment;
 	} else if (present && present[HTML_DIV_ALIGN] &&
 		   value[HTML_DIV_ALIGN] && *value[HTML_DIV_ALIGN]) {
 	    if (!strcasecomp(value[HTML_DIV_ALIGN], "center")) {
@@ -1779,7 +1801,8 @@ PRIVATE void HTML_start_element ARGS6(
 	    (me->sp[0].tag_number == HTML_UL ||
 	     me->sp[0].tag_number == HTML_OL ||
 	     me->sp[0].tag_number == HTML_MENU ||
-	     me->sp[0].tag_number == HTML_DIR)) {
+	     me->sp[0].tag_number == HTML_DIR ||
+	     me->sp[0].tag_number == HTML_LI)) {
 	    if (HTML_dtd.tags[HTML_LH].contents == SGML_EMPTY) {
 		ElementNumber = HTML_LH;
 	    } else {
@@ -1844,7 +1867,8 @@ PRIVATE void HTML_start_element ARGS6(
 	break;
 
     case HTML_P:
-	LYHandleP(me, present, value, include, TRUE);
+	LYHandlePlike(me, present, value, include, HTML_P_ALIGN, TRUE);
+	CHECK_ID(HTML_P_ID);
 	break;
 
     case HTML_BR:
@@ -2525,97 +2549,107 @@ PRIVATE void HTML_start_element ARGS6(
 	HText_appendParagraph(me->text);
 	me->sp->style->alignment = HT_LEFT;
 	CHECK_ID(HTML_LI_ID);
-	if (me->sp[0].tag_number == HTML_OL) {
-	    char number_string[20];
-	    int counter, seqnum;
-	    char seqtype;
+	{
+	    int surrounding_tag_number = me->sp[0].tag_number;
+	    /*
+	     *  No, a LI should never occur directly within another LI,
+	     *  but this may result from incomplete error recovery.
+	     *  So check one more surrounding level in this case. - kw
+	     */
+	    if (surrounding_tag_number == HTML_LI &&
+		me->sp < (me->stack + MAX_NESTING - 1))
+		surrounding_tag_number = me->sp[1].tag_number;
+	    if (surrounding_tag_number == HTML_OL) {
+		char number_string[20];
+		int counter, seqnum;
+		char seqtype;
 
-	    counter = me->List_Nesting_Level < 11 ?
-			   me->List_Nesting_Level : 11;
-	    if (present && present[HTML_LI_TYPE] && value[HTML_LI_TYPE]) {
-		if (*value[HTML_LI_TYPE] == '1') {
-		    me->OL_Type[counter] = '1';
-		} else if (*value[HTML_LI_TYPE] == 'A') {
-		    me->OL_Type[counter] = 'A';
-		} else if (*value[HTML_LI_TYPE] == 'a') {
-		    me->OL_Type[counter] = 'a';
-		} else if (*value[HTML_LI_TYPE] == 'I') {
-		    me->OL_Type[counter] = 'I';
-		} else if (*value[HTML_LI_TYPE] == 'i') {
-		    me->OL_Type[counter] = 'i';
-		}
-	    }
-	    if (present && present[HTML_LI_VALUE] &&
-		((value[HTML_LI_VALUE] != NULL) &&
-		 (*value[HTML_LI_VALUE] != '\0')) &&
-		((isdigit(*value[HTML_LI_VALUE])) ||
-		 (*value[HTML_LI_VALUE] == '-' &&
-		  isdigit(*(value[HTML_LI_VALUE] + 1))))) {
-		seqnum = atoi(value[HTML_LI_VALUE]);
-		if (seqnum <= OL_VOID)
-		    seqnum = OL_VOID + 1;
-		seqtype = me->OL_Type[counter];
-		if (seqtype != '1' && seqnum < 1)
-		    seqnum = 1;
-		me->OL_Counter[counter] = seqnum + 1;
-	    } else if (me->OL_Counter[counter] >= OL_VOID) {
-		seqnum = me->OL_Counter[counter]++;
-		seqtype = me->OL_Type[counter];
-		if (seqtype != '1' && seqnum < 1) {
-		    seqnum = 1;
-		    me->OL_Counter[counter] = seqnum + 1;
-		}
-	    } else {
-		seqnum = me->Last_OL_Count + 1;
-		seqtype = me->Last_OL_Type;
-		for (i = (counter - 1); i >= 0; i--) {
-		    if (me->OL_Counter[i] > OL_VOID) {
-			seqnum = me->OL_Counter[i]++;
-			seqtype = me->OL_Type[i];
-			i = 0;
+		counter = me->List_Nesting_Level < 11 ?
+		    me->List_Nesting_Level : 11;
+		if (present && present[HTML_LI_TYPE] && value[HTML_LI_TYPE]) {
+		    if (*value[HTML_LI_TYPE] == '1') {
+			me->OL_Type[counter] = '1';
+		    } else if (*value[HTML_LI_TYPE] == 'A') {
+			me->OL_Type[counter] = 'A';
+		    } else if (*value[HTML_LI_TYPE] == 'a') {
+			me->OL_Type[counter] = 'a';
+		    } else if (*value[HTML_LI_TYPE] == 'I') {
+			me->OL_Type[counter] = 'I';
+		    } else if (*value[HTML_LI_TYPE] == 'i') {
+			me->OL_Type[counter] = 'i';
 		    }
 		}
-	    }
-	    if (seqtype == 'A') {
-		sprintf(number_string, LYUppercaseA_OL_String(seqnum));
-	    } else if (seqtype == 'a') {
-		sprintf(number_string, LYLowercaseA_OL_String(seqnum));
-	    } else if (seqtype == 'I') {
-		sprintf(number_string, LYUppercaseI_OL_String(seqnum));
-	    } else if (seqtype == 'i') {
-		sprintf(number_string, LYLowercaseI_OL_String(seqnum));
-	    } else {
-		sprintf(number_string, "%2d.", seqnum);
-	    }
-	    me->Last_OL_Count = seqnum;
-	    me->Last_OL_Type = seqtype;
-	    /*
-	     *	Hack, because there is no append string!
-	     */
-	    for (i = 0; number_string[i] != '\0'; i++)
-		if (number_string[i] == ' ')
-		    HTML_put_character(me, HT_NON_BREAK_SPACE);
-		else
-		    HTML_put_character(me, number_string[i]);
+		if (present && present[HTML_LI_VALUE] &&
+		    ((value[HTML_LI_VALUE] != NULL) &&
+		     (*value[HTML_LI_VALUE] != '\0')) &&
+		    ((isdigit(*value[HTML_LI_VALUE])) ||
+		     (*value[HTML_LI_VALUE] == '-' &&
+		      isdigit(*(value[HTML_LI_VALUE] + 1))))) {
+		    seqnum = atoi(value[HTML_LI_VALUE]);
+		    if (seqnum <= OL_VOID)
+			seqnum = OL_VOID + 1;
+		    seqtype = me->OL_Type[counter];
+		    if (seqtype != '1' && seqnum < 1)
+			seqnum = 1;
+		    me->OL_Counter[counter] = seqnum + 1;
+		} else if (me->OL_Counter[counter] >= OL_VOID) {
+		    seqnum = me->OL_Counter[counter]++;
+		    seqtype = me->OL_Type[counter];
+		    if (seqtype != '1' && seqnum < 1) {
+			seqnum = 1;
+			me->OL_Counter[counter] = seqnum + 1;
+		    }
+		} else {
+		    seqnum = me->Last_OL_Count + 1;
+		    seqtype = me->Last_OL_Type;
+		    for (i = (counter - 1); i >= 0; i--) {
+			if (me->OL_Counter[i] > OL_VOID) {
+			    seqnum = me->OL_Counter[i]++;
+			    seqtype = me->OL_Type[i];
+			    i = 0;
+			}
+		    }
+		}
+		if (seqtype == 'A') {
+		    sprintf(number_string, LYUppercaseA_OL_String(seqnum));
+		} else if (seqtype == 'a') {
+		    sprintf(number_string, LYLowercaseA_OL_String(seqnum));
+		} else if (seqtype == 'I') {
+		    sprintf(number_string, LYUppercaseI_OL_String(seqnum));
+		} else if (seqtype == 'i') {
+		    sprintf(number_string, LYLowercaseI_OL_String(seqnum));
+		} else {
+		    sprintf(number_string, "%2d.", seqnum);
+		}
+		me->Last_OL_Count = seqnum;
+		me->Last_OL_Type = seqtype;
+		/*
+		 *	Hack, because there is no append string!
+		 */
+		for (i = 0; number_string[i] != '\0'; i++)
+		    if (number_string[i] == ' ')
+			HTML_put_character(me, HT_NON_BREAK_SPACE);
+		    else
+			HTML_put_character(me, number_string[i]);
 
-	    /*
-	     *	Use HTML_put_character so that any other spaces
-	     *	coming through will be collapsed.  We'll use
-	     *	nbsp, so it won't break at the spacing character
-	     *	if there are no spaces in the subsequent text up
-	     *	to the right margin, but will declare it as a
-	     *	normal space to ensure collapsing if a normal
-	     *	space does immediately follow it. - FM
-	     */
-	    HTML_put_character(me, HT_NON_BREAK_SPACE);
-	    HText_setLastChar(me->text, ' ');
-	} else if (me->sp[0].tag_number == HTML_UL) {
-	    /*
-	     *	Hack, because there is no append string!
-	     */
-	    HTML_put_character(me, HT_NON_BREAK_SPACE);
-	    HTML_put_character(me, HT_NON_BREAK_SPACE);
-	    switch(me->List_Nesting_Level % 7) {
+		/*
+		 *	Use HTML_put_character so that any other spaces
+		 *	coming through will be collapsed.  We'll use
+		 *	nbsp, so it won't break at the spacing character
+		 *	if there are no spaces in the subsequent text up
+		 *	to the right margin, but will declare it as a
+		 *	normal space to ensure collapsing if a normal
+		 *	space does immediately follow it. - FM
+		 */
+		HTML_put_character(me, HT_NON_BREAK_SPACE);
+		HText_setLastChar(me->text, ' ');
+	    } else if (surrounding_tag_number == HTML_UL) {
+		/*
+		 *	Hack, because there is no append string!
+		 */
+		HTML_put_character(me, HT_NON_BREAK_SPACE);
+		HTML_put_character(me, HT_NON_BREAK_SPACE);
+		switch(me->List_Nesting_Level % 7) {
 		case 0:
 		    HTML_put_character(me, '*');
 		    break;
@@ -2638,25 +2672,26 @@ PRIVATE void HTML_start_element ARGS6(
 		    HTML_put_character(me, '=');
 		    break;
 
+		}
+		/*
+		 *	Keep using HTML_put_character so that any other
+		 *	spaces coming through will be collapsed.  We use
+		 *	nbsp, so we won't wrap at the spacing character
+		 *	if there are no spaces in the subsequent text up
+		 *	to the right margin, but will declare it as a
+		 *	normal space to ensure collapsing if a normal
+		 *	space does immediately follow it. - FM
+		 */
+		HTML_put_character(me, HT_NON_BREAK_SPACE);
+		HText_setLastChar(me->text, ' ');
+	    } else {
+		/*
+		 *	Hack, because there is no append string!
+		 */
+		HTML_put_character(me, HT_NON_BREAK_SPACE);
+		HTML_put_character(me, HT_NON_BREAK_SPACE);
+		HText_setLastChar(me->text, ' ');
 	    }
-	    /*
-	     *	Keep using HTML_put_character so that any other
-	     *	spaces coming through will be collapsed.  We use
-	     *	nbsp, so we won't wrap at the spacing character
-	     *	if there are no spaces in the subsequent text up
-	     *	to the right margin, but will declare it as a
-	     *	normal space to ensure collapsing if a normal
-	     *	space does immediately follow it. - FM
-	     */
-	    HTML_put_character(me, HT_NON_BREAK_SPACE);
-	    HText_setLastChar(me->text, ' ');
-	} else {
-	    /*
-	     *	Hack, because there is no append string!
-	     */
-	    HTML_put_character(me, HT_NON_BREAK_SPACE);
-	    HTML_put_character(me, HT_NON_BREAK_SPACE);
-	    HText_setLastChar(me->text, ' ');
 	}
 	me->in_word = NO;
 	me->inP = FALSE;
@@ -4628,7 +4663,7 @@ PRIVATE void HTML_start_element ARGS6(
 			HText_appendCharacter(me->text,
 					      LY_UNDERLINE_END_CHAR);
 		    }
-#else 
+#else
 		    CTRACE(tfp, "Attempting to fake as: %s\n", I.type);
 #endif /* EXP_FILE_UPLOAD */
 #ifdef NOTDEFINED
@@ -5696,7 +5731,8 @@ PRIVATE void HTML_end_element ARGS3(
 	    (me->sp[0].tag_number == HTML_UL ||
 	     me->sp[0].tag_number == HTML_OL ||
 	     me->sp[0].tag_number == HTML_MENU ||
-	     me->sp[0].tag_number == HTML_DIR) &&
+	     me->sp[0].tag_number == HTML_DIR ||
+	     me->sp[0].tag_number == HTML_LI) &&
 	    (element_number == HTML_H1 ||
 	     element_number == HTML_H2 ||
 	     element_number == HTML_H3 ||
@@ -5742,7 +5778,8 @@ PRIVATE void HTML_end_element ARGS3(
 	    (me->sp[0].tag_number == HTML_UL ||
 	     me->sp[0].tag_number == HTML_OL ||
 	     me->sp[0].tag_number == HTML_MENU ||
-	     me->sp[0].tag_number == HTML_DIR) &&
+	     me->sp[0].tag_number == HTML_DIR ||
+	     me->sp[0].tag_number == HTML_LI) &&
 	    (element_number == HTML_H1 ||
 	     element_number == HTML_H2 ||
 	     element_number == HTML_H3 ||
@@ -5944,14 +5981,23 @@ PRIVATE void HTML_end_element ARGS3(
     case HTML_DIV:
 	if (me->Division_Level >= 0)
 	    me->Division_Level--;
-	if (me->Division_Level >= 0)
-	    me->sp->style->alignment =
+	if (me->Division_Level >= 0) {
+	    if (me->sp->style->alignment !=
+		me->DivisionAlignments[me->Division_Level]) {
+		if (me->inP)
+		    LYEnsureSingleSpace(me);
+		me->sp->style->alignment =
 				me->DivisionAlignments[me->Division_Level];
+	    }
+	}
 	change_paragraph_style(me, me->sp->style);
-	UPDATE_STYLE;
+	if (me->style_change) {
+	    actually_set_style(me);
+	    if (me->List_Nesting_Level >= 0)
+		HText_NegateLineOne(me->text);
+	} else if (me->inP)
+	    LYEnsureSingleSpace(me);
 	me->current_default_alignment = me->sp->style->alignment;
-	if (me->List_Nesting_Level >= 0)
-	    HText_NegateLineOne(me->text);
 	break;
 
     case HTML_H1:			/* header styles */
@@ -5988,9 +6034,9 @@ PRIVATE void HTML_end_element ARGS3(
 	break;
 
     case HTML_P:
-	LYHandleP(me,
+	LYHandlePlike(me,
 		 (CONST BOOL*)0, (CONST char **)0,
-		 include,
+		 include, 0,
 		 FALSE);
 	break;
 

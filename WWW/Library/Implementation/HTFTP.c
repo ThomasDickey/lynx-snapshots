@@ -177,6 +177,7 @@ PRIVATE char *last_username_and_host = NULL;
 #define MSDOS_SERVER	  11
 #define APPLESHARE_SERVER 12
 #define NETPRESENZ_SERVER 13
+#define DLS_SERVER	  14
 
 PRIVATE int	server_type = GENERIC_SERVER;	/* the type of ftp host */
 PRIVATE int	unsure_type = FALSE;		/* sure about the type? */
@@ -606,6 +607,45 @@ PRIVATE void get_ftp_pwd ARGS2(
     }
 }
 
+/* This function turns MSDOS-like directory output off for
+ * Windows NT servers.
+ */
+
+PRIVATE void set_unix_dirstyle ARGS2(
+	int *,		ServerType,
+	BOOLEAN *,	UseList)
+{
+
+    char *cp;
+    /* This is a toggle.  It seems we have to toggle in order to see
+     * the current state (after toggling), so we may end up toggling
+     * twice.  - kw
+     */
+    int status = response("SITE DIRSTYLE\r\n");
+    if (status != 2) {
+	*ServerType = GENERIC_SERVER;
+	CTRACE(tfp, "HTFTP: DIRSTYLE failed, treating as Generic server.\n");
+	return;
+    } else {
+	*UseList = TRUE;
+	/* Expecting one of:
+	 * 200 MSDOS-like directory output is off
+	 * 200 MSDOS-like directory output is on
+	 * The following code doesn't look for the full exact string -
+	 * who knows how the wording may change in some future version.
+	 * If the first response isn't recognized, we toggle again
+	 * anyway, under the assumption that it's more likely that
+	 * the MSDOS setting was "off" originally. - kw
+	 */
+	cp = strstr(response_text+4, "MSDOS");
+	if (cp && strstr(cp, " off")) {
+	    return;		/* already off now. */
+	} else {
+	    response("SITE DIRSTYLE\r\n");
+	}
+    }
+}
+
 /*	Get a valid connection to the host
 **	----------------------------------
 **
@@ -889,6 +929,7 @@ PRIVATE int get_connection ARGS2(
 	} else if (strstr(response_text+4, "UNIX") != NULL ||
 		   strstr(response_text+4, "Unix") != NULL) {
 	    server_type = UNIX_SERVER;
+	    unsure_type = FALSE; /* to the best of out knowledge... */
 	    use_list = TRUE;
 	    CTRACE(tfp, "HTFTP: Treating as Unix server.\n");
 
@@ -931,8 +972,8 @@ PRIVATE int get_connection ARGS2(
 
 	} else if (strncmp(response_text+4, "Windows_NT", 10) == 0) {
 	    server_type = WINDOWS_NT_SERVER;
-	    use_list = TRUE;
 	    CTRACE(tfp, "HTFTP: Treating as Window_NT server.\n");
+	    set_unix_dirstyle(&server_type, &use_list);
 
 	} else if (strncmp(response_text+4, "MS Windows", 10) == 0) {
 	    server_type = MS_WINDOWS_SERVER;
@@ -1402,6 +1443,111 @@ PRIVATE void parse_ls_line ARGS2(
     entry_info->size = size_num;
     StrAllocCopy(entry_info->filename, &line[i + 1]);
 } /* parse_ls_line() */
+
+/*
+ * parse_sls_line() --
+ *	Extract the name and size info and whether it refers to a
+ *      directory from a LIST line in OS/2 "dls" format.
+ */
+PRIVATE void parse_dls_line ARGS3(
+	char *,		line,
+	EntryInfo *,	entry_info,
+	char **,	pspilledname)
+{
+    short  j;
+    int    base=1;
+    int    size_num=0;
+    int    len;
+    char *cps = NULL;
+
+    /* README              763  Information about this server\0
+       bin/                  -  \0
+       etc/                  =  \0
+       ls-lR                 0  \0
+       ls-lR.Z               3  \0
+       pub/                  =  Public area\0
+       usr/                  -  \0
+       morgan               14  -> ../real/morgan\0
+       TIMIT.mostlikely.Z\0
+                         79215  \0
+	*/
+
+    len = strlen(line);
+    if (len == 0) {
+	FREE(*pspilledname);
+	entry_info->display = FALSE;
+	return;
+    }
+    cps = LYSkipNonBlanks(line);
+    if (*cps == '\0') {		/* only a filename, save it and return. */
+	StrAllocCopy(*pspilledname, line);
+	entry_info->display = FALSE;
+	return;
+    }
+    if (len < 24 || line[23] != ' ' ||
+	(isspace(line[0]) && !*pspilledname)) {
+	/* this isn't the expected "dls" format! */
+	if (!isspace(line[0]))
+	    *cps = '\0';
+	if (*pspilledname && !*line) {
+	    entry_info->filename = *pspilledname;
+	    *pspilledname = NULL;
+	    if (entry_info->filename[strlen(entry_info->filename)-1] == '/')
+		StrAllocCopy(entry_info->type, ENTRY_IS_DIRECTORY);
+	    else
+		StrAllocCopy(entry_info->type, "");
+	} else {
+	    StrAllocCopy(entry_info->filename, line);
+	    if (cps && cps != line && *(cps-1) == '/')
+		StrAllocCopy(entry_info->type, ENTRY_IS_DIRECTORY);
+	    else
+		StrAllocCopy(entry_info->type, "");
+	    FREE(*pspilledname);
+	}
+	return;
+    }
+
+    j = 22;
+    if (line[j] == '=' || line[j] == '-') {
+	StrAllocCopy(entry_info->type, ENTRY_IS_DIRECTORY);
+    } else {
+	while (isdigit(line[j])) {
+	    size_num += (line[j] - '0') * base;
+	    base *= 10;
+	    j--;
+	}
+    }
+    entry_info->size = size_num;
+
+    cps = LYSkipBlanks(&line[23]);
+    if (!strncmp(cps, "-> ", 3) && cps[3] != '\0' && cps[3] != ' ') {
+	StrAllocCopy(entry_info->type, gettext("Symbolic Link"));
+	entry_info->size = 0;	/* don't display size */
+    }
+
+    if (j > 0)
+	line[j] = '\0';
+
+    LYTrimTrailing(line);
+
+    len = strlen(line);
+    if (len == 0 && *pspilledname && **pspilledname) {
+	line = *pspilledname;
+	len = strlen(*pspilledname);
+    }
+    if (len > 0 && line[len-1] == '/') {
+		/*
+		**  It's a dir, remove / and mark it as such.
+		*/
+	if (len > 1)
+	    line[len-1] = '\0';
+	if (!entry_info->type)
+	    StrAllocCopy(entry_info->type, ENTRY_IS_DIRECTORY);
+    }
+
+    StrAllocCopy(entry_info->filename, line);
+    FREE(*pspilledname);
+} /* parse_dls_line() */
 
 /*
  * parse_vms_dir_entry()
@@ -1884,9 +2030,10 @@ PRIVATE void parse_cms_dir_entry ARGS2(
  *	If first is true, this is the first name in a directory.
  */
 
-PRIVATE EntryInfo * parse_dir_entry ARGS2(
+PRIVATE EntryInfo * parse_dir_entry ARGS3(
 	char *,		entry,
-	BOOLEAN *,	first)
+	BOOLEAN *,	first,
+	char **,	pspilledname)
 {
     EntryInfo *entry_info;
     int  i;
@@ -1904,6 +2051,51 @@ PRIVATE EntryInfo * parse_dir_entry ARGS2(
     entry_info->display = TRUE;
 
     switch (server_type) {
+	case DLS_SERVER:
+
+	    /*
+	    **	Interpret and edit LIST output from OS/2 server in
+	    **  "dls" format.
+	    **  This one must have claimed to be Unix in order to
+	    **  get here; if the first line looks fishy, we revert
+	    **  to Unix and hope that fits better (this recovery is
+	    **  untested). - kw
+	    */
+
+	    if (*first) {
+		len = strlen(entry);
+		if (!len || entry[0] == ' ' ||
+		    (len >= 24 && entry[23] != ' ') ||
+		    (len < 24 && strchr(entry, ' '))) {
+		    server_type = UNIX_SERVER;
+		    CTRACE(tfp,
+			   "HTFTP: Falling back to treating as Unix server.\n");
+		} else {
+		    *first = FALSE;
+		}
+	    }
+
+	    if (server_type == DLS_SERVER) {
+		/* if still unchanged... */
+		parse_dls_line(entry, entry_info, pspilledname);
+
+		if (!entry_info->filename || *entry_info->filename == '\0') {
+		    entry_info->display = FALSE;
+		    return(entry_info);
+		}
+		if (!strcmp(entry_info->filename,"..") ||
+		    !strcmp(entry_info->filename,"."))
+		    entry_info->display = FALSE;
+		if (entry_info->type && *entry_info->type == '\0') {
+		    FREE(entry_info->type);
+		    return(entry_info);
+		}
+		/*
+		**	Goto the bottom and get real type.
+		*/
+		break;
+	    } /* fall through if server_type changed for *first == TRUE ! */
+
 	case UNIX_SERVER:
 	case PETER_LEWIS_SERVER:
 	case MACHTEN_SERVER:
@@ -2365,6 +2557,7 @@ PRIVATE int read_directory ARGS4(
 	int BytesReceived = 0;
 	int BytesReported = 0;
 	char NumBytes[64];
+	char *spilledname = NULL;
 	PUTC('\n');  /* prettier LJM */
 	for (ic = 0; ic != EOF;) {	/* For each entry in the directory */
 	    HTChunkClear(chunk);
@@ -2376,6 +2569,7 @@ PRIVATE int read_directory ARGS4(
 		} else {
 		    ABORT_TARGET;
 		    HTBTreeAndObject_free(bt);
+		    FREE(spilledname);
 		    return HT_INTERRUPTED;
 		}
 	    }
@@ -2392,6 +2586,7 @@ AgainForMultiNet:
 		    } else {
 			ABORT_TARGET;
 			HTBTreeAndObject_free(bt);
+			FREE(spilledname);
 			return HT_INTERRUPTED;
 		    }
 		} else if ((char)ic == CR || (char)ic == LF) {    /* Terminator? */
@@ -2447,8 +2642,9 @@ AgainForMultiNet:
 	    CTRACE(tfp, "HTFTP: Line in %s is %s\n",
 			lastpath, chunk->data);
 
-	    entry_info = parse_dir_entry(chunk->data, &first);
+	    entry_info = parse_dir_entry(chunk->data, &first, &spilledname);
 	    if (entry_info->display) {
+		FREE(spilledname);
 		CTRACE(tfp, "Adding file to BTree: %s\n",
 			    entry_info->filename);
 		HTBTree_add(bt, (EntryInfo *)entry_info);
@@ -2462,6 +2658,7 @@ AgainForMultiNet:
 unload_btree:
 
 	HTChunkFree(chunk);
+	FREE(spilledname);
 
 	/* print out the handy help message if it exits :) */
 	if (help_message_cache_non_empty()) {
@@ -3185,6 +3382,12 @@ listen:
 /* @@ */
 #endif /* LISTEN */
     if (isDirectory) {
+	if (server_type == UNIX_SERVER && !unsure_type &&
+	    !strcmp(response_text,
+		    "150 Opening ASCII mode data connection for /bin/dl.\n")) {
+	    CTRACE(tfp, "HTFTP: Treating as OS/2 \"dls\" server.\n");
+	    server_type = DLS_SERVER;
+	}
 	status = read_directory (anchor, name, format_out, sink);
 	NETCLOSE(data_soc);
 	NETCLOSE(control->socket);

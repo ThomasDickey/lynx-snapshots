@@ -490,7 +490,7 @@ PUBLIC void HTDisplayPartial NOARGS
 #ifdef DISP_PARTIAL
     if (display_partial) {
 	/*
-	**  HText_getNumOfLines() = "current" number of lines received
+	**  HText_getNumOfLines() = "current" number of complete lines received
 	**  NumOfLines_partial = number of lines at the moment of last repaint.
 	**
 	**  We update NumOfLines_partial only when we repaint the display.
