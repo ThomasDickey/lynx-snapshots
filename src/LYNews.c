@@ -29,12 +29,15 @@ PRIVATE void terminate_message  PARAMS((int sig));
 extern HTCJKlang HTCJK;
 #endif
 
-PRIVATE BOOLEAN message_has_content ARGS1(
-    CONST char *,		filename)
+PRIVATE BOOLEAN message_has_content ARGS2(
+    CONST char *,	filename,
+    BOOLEAN *,		nonspaces)
 {
     FILE *fp;
     char *buffer = NULL;
     BOOLEAN in_headers = TRUE;
+
+    *nonspaces = FALSE;
 
     if (!filename || (fp = fopen(filename, "r")) == NULL) {
 	CTRACE((tfp, "Failed to open file %s for reading!\n",
@@ -53,14 +56,19 @@ PRIVATE BOOLEAN message_has_content ARGS1(
 	    } else if (*cp != ' ') {
 		if (!firstnonblank && isgraph((unsigned char)*cp)) {
 		    firstnonblank = *cp;
+		} else if (!isspace((unsigned char)*cp)) {
+		    *nonspaces = TRUE;
 		}
 	    }
 	}
 	if (*cp != '\n') {
 	    int c;
-	    while ((c = getc(fp)) != EOF && c != (int)(unsigned char)'\n') {
-		if (!firstnonblank && isgraph((unsigned char)c))
+	    while ((c = getc(fp)) != EOF && c != '\n') {
+		if (!firstnonblank && isgraph((unsigned char)c)) {
 		    firstnonblank = (char)c;
+		} else if (!isspace((unsigned char)*cp)) {
+		    *nonspaces = TRUE;
+		}
 	    }
 	}
 	if (firstnonblank && firstnonblank != '>') {
@@ -109,6 +117,7 @@ PUBLIC char *LYNewsPost ARGS2(
     char *org = NULL;
     FILE *fp = NULL;
     BOOLEAN nonempty = FALSE;
+    BOOLEAN nonspaces = FALSE;
 
     /*
      *  Make sure a non-zero length newspost, newsreply,
@@ -378,7 +387,7 @@ PUBLIC char *LYNewsPost ARGS2(
 	    start_curses();
 	}
 
-	nonempty = message_has_content(my_tempfile);
+	nonempty = message_has_content(my_tempfile, &nonspaces);
 
     } else {
 	/*
@@ -417,20 +426,23 @@ PUBLIC char *LYNewsPost ARGS2(
 	scrollok(stdscr, FALSE);	/* Stop scrolling.	*/
     }
 
-    if (!nonempty) {
+    if (nonempty) {
+	/*
+	 *  Confirm whether to post, and if so,
+	 *  whether to append the sig file. - FM
+	 */
+	LYStatusLine = (LYlines - 1);
+	c = HTConfirm(POST_MSG_PROMPT);
+	LYStatusLine = -1;
+	if (c != YES) {
+	    clear();  /* clear the screen */
+	    goto cleanup;
+	}
+    } else {
 	HTAlert(gettext("Message has no original text!"));
-	goto cleanup;
-    }
-    /*
-     *  Confirm whether to post, and if so,
-     *  whether to append the sig file. - FM
-     */
-    LYStatusLine = (LYlines - 1);
-    c = HTConfirm(POST_MSG_PROMPT);
-    LYStatusLine = -1;
-    if (c != YES) {
-	clear();  /* clear the screen */
-	goto cleanup;
+	if (!nonspaces
+	 || HTConfirmDefault(POST_MSG_PROMPT, NO) != YES)
+	    goto cleanup;
     }
     if ((LynxSigFile != NULL) && (fp = fopen(LynxSigFile, TXT_R)) != NULL) {
 	char *msg = NULL;

@@ -144,6 +144,11 @@ toggles handling of Set-Cookie headers.
 .B -cookie_file\fR=\fIFILENAME
 specifies a file to use to store cookies.
 .TP
+.B -connect_timeout\fR=\fIN
+Sets the connection timeout, where N is given in seconds.
+This is not available under DOS (use the sockdelay
+parameter of WATTCP under DOS).
+.TP
 .B -core
 toggles forced core dumps on fatal errors.
 .TP
@@ -569,6 +574,9 @@ tell Lynx what terminal type to assume it is talking to.
 (This may be useful for remote execution, when, for example,
 Lynx connects to a remote TCP/IP port that starts a script that,
 in turn, starts another Lynx process.)
+.TP
+.B -timeout\fR=\fIN
+For win32, sets the network read-timeout, where N is given in seconds.
 .TP
 .B -tlog
 toggles between using a Lynx Trace Log and stderr for trace output

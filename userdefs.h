@@ -496,6 +496,12 @@
 #define GOTOBUFFER	  FALSE
 
 /*****************************
+ * If FTP_PASSIVE is set to TRUE here or in lynx.cfg, ftp transfers will
+ * be done in passive mode.
+ */
+#define FTP_PASSIVE	  FALSE
+
+/*****************************
  * JUMPFILE is the default local file checked for shortcut URLs when
  * the user presses the 'J' (JUMP) key.  The user will be prompted for
  * a shortcut entry (analogously to 'g'oto), and can enter one
@@ -1302,12 +1308,12 @@
  * the version definition with the Project Version on checkout.  Just
  * ignore it. - kw */
 /* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
-#define LYNX_VERSION "2.8.3dev.20"
+#define LYNX_VERSION "2.8.3dev.21"
 #define LYNX_WWW_HOME "http://lynx.browser.org/"
 #define LYNX_WWW_DIST "http://www.slcc.edu/lynx/current/"
 #define LYNX_RELEASE FALSE
 /* $Format: "#define LYNX_DATE \"$ProjectDate$\""$ */
-#define LYNX_DATE "Tue, 15 Feb 2000 04:01:32 -0800"
+#define LYNX_DATE "Fri, 25 Feb 2000 04:38:35 -0800"
 #define LYNX_DATE_OFF 5		/* truncate the automatically-generated date */
 #define LYNX_DATE_LEN 11	/* truncate the automatically-generated date */
 #define LYNX_RELEASE_DATE "1999"

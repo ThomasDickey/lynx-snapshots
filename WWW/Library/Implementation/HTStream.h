@@ -63,7 +63,7 @@ typedef struct _HTStreamClass {
    example from the network.
 
  */
-extern HTStream * HTErrorStream (void);
+extern HTStream * HTErrorStream NOPARAMS;
 
 #endif /* HTSTREAM_H */
 

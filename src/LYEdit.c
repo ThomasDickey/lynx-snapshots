@@ -13,15 +13,30 @@
 
 PUBLIC BOOLEAN editor_can_position NOARGS
 {
+    static CONST char *table[] = {
 #ifdef VMS
-    return (strstr(editor, "sedt") || strstr(editor, "SEDT"));
+	"sedt",
+	"SEDT"
 #else
-    return (strstr(editor, "emacs") || strstr(editor, "vi") ||
-	strstr(editor, "pico")  || strstr(editor, "jove")   ||
-	strstr(editor, "jed")   || strstr(editor, "joe")    ||
-	strstr(editor, "jstar") || strstr(editor, "jmacs")  ||
-	strstr(editor, "rjoe")  || strstr(editor, "jpico"));
+	"emacs",
+	"jed",
+	"jmacs",
+	"joe",
+	"jove",
+	"jpico",
+	"jstar",
+	"pico",
+	"rjoe",
+	"vi"
 #endif
+    };
+    unsigned n;
+    for (n = 0; n < TABLESIZE(table); n++) {
+	if (strstr(editor, table[n]) != 0) {
+	    return TRUE;
+	}
+    }
+    return FALSE;
 }
 
 /*

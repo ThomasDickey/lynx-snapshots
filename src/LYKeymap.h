@@ -136,6 +136,8 @@ typedef enum {
   , LYK_REFRESH
   , LYK_HOME
   , LYK_END
+  , LYK_FIRST_LINK
+  , LYK_LAST_LINK
   , LYK_PREV_LINK
   , LYK_NEXT_LINK
   , LYK_LPOS_PREV_LINK
@@ -206,6 +208,8 @@ typedef enum {
 
 #ifdef USE_EXTERNALS
   , LYK_EXTERN
+#else
+#define LYK_EXTERN        LYK_UNKNOWN
 #endif /* !defined(USE_EXTERNALS) */
 
 #if defined(VMS) || defined(DIRED_SUPPORT)

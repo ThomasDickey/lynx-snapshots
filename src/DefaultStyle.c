@@ -4,8 +4,8 @@
 */
 
 #include <HTUtils.h>
-#include <HTStyle.h>
 #include <HTFont.h>
+#include <HTStyle.h>
 
 #include <LYLeaks.h>
 

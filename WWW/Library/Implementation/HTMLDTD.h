@@ -13,19 +13,7 @@
 #define HTMLDTD_H
 
 #include <SGML.h>
-
-/*
-**  Lynx internal character representations.
-*/
-#ifndef HT_NON_BREAK_SPACE
-#define HT_NON_BREAK_SPACE	((char)1)	/* For now */
-#endif /* !HT_NON_BREAK_SPACE */
-#ifndef HT_EN_SPACE
-#define HT_EN_SPACE		((char)2)	/* For now */
-#endif /* !HT_EN_SPACE */
-#ifndef LY_SOFT_HYPHEN
-#define LY_SOFT_HYPHEN		((char)7)
-#endif /* !LY_SOFT_HYPHEN */
+#include <HTFont.h>
 
 /*
 **  Valid mane chars for tag parsing.
