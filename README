@@ -50,8 +50,12 @@ LICENSE
 
    Certain portions of the Lynx source distribution were originally
    created by CERN and have been modified during the development of
-   Lynx.  See WWW/FreeOfCharge.html for copyright info regarding CERN
+   Lynx.  See WWW/FreeofCharge.html for copyright info regarding CERN
    products used in Lynx.
+
+   Note that Lynx is not self-contained; typically it is built with a
+   variety of add-on libraries, including those for compression, IPv6,
+   SOCKS and SSL support.
 
 YEAR 2000 COMPLIANCE
 

@@ -4,7 +4,7 @@ dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
 dnl and Philippe De Muyter <phdm@macqel.be>
 dnl
 dnl Created: 1997/1/28
-dnl Updated: 2000/10/12
+dnl Updated: 2000/12/31
 dnl
 dnl The autoconf used in Lynx development is GNU autoconf, patched
 dnl by Tom Dickey.  See your local GNU archives, and this URL:
@@ -181,6 +181,7 @@ dnl AM_PATH_PROG_WITH_TEST(VARIABLE, PROG-TO-CHECK-FOR,
 dnl   TEST-PERFORMED-ON-FOUND_PROGRAM [, VALUE-IF-NOT-FOUND [, PATH]])
 AC_DEFUN(AM_PATH_PROG_WITH_TEST,
 [# Extract the first word of "$2", so it can be a program name with args.
+AC_REQUIRE([CF_PATHSEP])
 set dummy $2; ac_word=[$]2
 AC_MSG_CHECKING([for $ac_word])
 AC_CACHE_VAL(ac_cv_path_$1,
@@ -189,7 +190,7 @@ AC_CACHE_VAL(ac_cv_path_$1,
   ac_cv_path_$1="[$]$1" # Let the user override the test with a path.
   ;;
   *)
-  IFS="${IFS= 	}"; ac_save_ifs="$IFS"; IFS="${IFS}:"
+  IFS="${IFS= 	}"; ac_save_ifs="$IFS"; IFS="${IFS}${PATHSEP}"
   for ac_dir in ifelse([$5], , $PATH, [$5]); do
     test -z "$ac_dir" && ac_dir=.
     if test -f $ac_dir/$ac_word; then
@@ -428,6 +429,28 @@ AC_DEFUN(AM_WITH_NLS,
     AC_SUBST(POSUB)
   ])
 dnl ---------------------------------------------------------------------------
+dnl Copy non-preprocessor flags to $CFLAGS, preprocessor flags to $CPPFLAGS
+AC_DEFUN([CF_ADD_CFLAGS],
+[
+for cf_add_cflags in $1
+do
+	case $cf_add_cflags in #(vi
+	-undef|-nostdinc*|-I*|-D*|-U*|-E|-P|-C) #(vi
+		case "$CPPFLAGS" in
+		*$cf_add_cflags)
+			;;
+		*)
+			CPPFLAGS="$CPPFLAGS $cf_add_cflags"
+			;;
+		esac
+		;;
+	*)
+		CFLAGS="$CFLAGS $cf_add_cflags"
+		;;
+	esac
+done
+])dnl
+dnl ---------------------------------------------------------------------------
 dnl Add an include-directory to $CPPFLAGS.  Don't add /usr/include, since it's
 dnl redundant.  We don't normally need to add -I/usr/local/include for gcc,
 dnl but old versions (and some misinstalled ones) need that.
@@ -480,6 +503,7 @@ AC_MSG_CHECKING(for ${CC-cc} option to accept ANSI C)
 AC_CACHE_VAL(cf_cv_ansi_cc,[
 cf_cv_ansi_cc=no
 cf_save_CFLAGS="$CFLAGS"
+cf_save_CPPFLAGS="$CPPFLAGS"
 # Don't try gcc -ansi; that turns off useful extensions and
 # breaks some systems' header files.
 # AIX			-qlanglvl=ansi
@@ -495,7 +519,7 @@ for cf_arg in "-DCC_HAS_PROTOS" \
 	"-Aa -D_HPUX_SOURCE" \
 	-Xc
 do
-	CFLAGS="$cf_save_CFLAGS $cf_arg"
+	CF_ADD_CFLAGS($cf_arg)
 	AC_TRY_COMPILE(
 [
 #ifndef CC_HAS_PROTOS
@@ -510,12 +534,13 @@ choke me
 	[cf_cv_ansi_cc="$cf_arg"; break])
 done
 CFLAGS="$cf_save_CFLAGS"
+CPPFLAGS="$cf_save_CPPFLAGS"
 ])
 AC_MSG_RESULT($cf_cv_ansi_cc)
 
 if test "$cf_cv_ansi_cc" != "no"; then
 if test ".$cf_cv_ansi_cc" != ".-DCC_HAS_PROTOS"; then
-	CFLAGS="$CFLAGS $cf_cv_ansi_cc"
+	CF_ADD_CFLAGS($cf_cv_ansi_cc)
 else
 	AC_DEFINE(CC_HAS_PROTOS)
 fi
@@ -896,13 +921,13 @@ freebsd*) #(vi
 hpux10.*|hpux11.*) #(vi
 	AC_CHECK_LIB(cur_colr,initscr,[
 		LIBS="-lcur_colr $LIBS"
-		CFLAGS="-I/usr/include/curses_colr $CFLAGS"
+		CPPFLAGS="-I/usr/include/curses_colr $CPPFLAGS"
 		ac_cv_func_initscr=yes
 		],[
 	AC_CHECK_LIB(Hcurses,initscr,[
 		# HP's header uses __HP_CURSES, but user claims _HP_CURSES.
 		LIBS="-lHcurses $LIBS"
-		CFLAGS="-D__HP_CURSES -D_HP_CURSES $CFLAGS"
+		CPPFLAGS="-D__HP_CURSES -D_HP_CURSES $CPPFLAGS"
 		ac_cv_func_initscr=yes
 		])])
 	;;
@@ -1057,32 +1082,6 @@ AC_SUBST(SHOW_CC)
 AC_SUBST(ECHO_CC)
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl Check whether character set is EBCDIC.
-AC_DEFUN([CF_EBCDIC],[
-AC_MSG_CHECKING(if character set is EBCDIC)
-AC_CACHE_VAL(cf_cv_ebcdic,[
-	AC_TRY_COMPILE([ ],
-[ /* TryCompile function for CharSet.
-   Treat any failure as ASCII for compatibility with existing art.
-   Use compile-time rather than run-time tests for cross-compiler
-   tolerance.  */
-#if '0'!=240
-make an error "Character set is not EBCDIC"
-#endif ],
-[ # TryCompile action if true
-cf_cv_ebcdic=yes ],
-[ # TryCompile action if false
-cf_cv_ebcdic=no])
-# end of TryCompile ])
-# end of CacheVal CvEbcdic
-AC_MSG_RESULT($cf_cv_ebcdic)
-case "$cf_cv_ebcdic" in  #(vi
-    yes) AC_DEFINE(EBCDIC)
-         AC_DEFINE(NOT_ASCII);; #(vi
-    *)   ;;
-esac
-])dnl
-dnl ---------------------------------------------------------------------------
 dnl Check if 'errno' is declared in <errno.h>
 AC_DEFUN([CF_ERRNO],
 [
@@ -1162,7 +1161,7 @@ if test "$cf_ipv6lib" != "none"; then
 		cf_header=$cf_incdir/netinet/ip6.h
 		if test -f $cf_header
 		then
-			CFLAGS="$CFLAGS -I$cf_incdir"
+			CPPFLAGS="$CPPFLAGS -I$cf_incdir"
 			test -n "$verbose" && echo "	... found $cf_header" 1>&AC_FD_MSG
 			break
 		fi
@@ -1649,18 +1648,18 @@ AC_TRY_COMPILE([#include <sys/types.h>],[
 make an error
 #endif],
 	[cf_cv_gnu_source=no],
-	[cf_save="$CFLAGS"
-	 CFLAGS="$CFLAGS -D_GNU_SOURCE"
+	[cf_save="$CPPFLAGS"
+	 CPPFLAGS="$CPPFLAGS -D_GNU_SOURCE"
 	 AC_TRY_COMPILE([#include <sys/types.h>],[
 #ifdef _XOPEN_SOURCE
 make an error
 #endif],
 	[cf_cv_gnu_source=no],
 	[cf_cv_gnu_source=yes])
-	CFLAGS="$cf_save"
+	CPPFLAGS="$cf_save"
 	])
 ])
-test "$cf_cv_gnu_source" = yes && CFLAGS="$CFLAGS -D_GNU_SOURCE"
+test "$cf_cv_gnu_source" = yes && CPPFLAGS="$CPPFLAGS -D_GNU_SOURCE"
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl Construct a search-list for a nonstandard header-file
@@ -2131,6 +2130,17 @@ test $use_our_messages = yes && USE_OUR_MESSAGES=
 AC_SUBST(USE_OUR_MESSAGES)
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl Provide a value for the $PATH and similar separator
+AC_DEFUN([CF_PATHSEP],
+[
+	case $cf_cv_system_name in
+	os2)	PATHSEP=';'  ;;
+	*)	PATHSEP=':'  ;;
+	esac
+ifelse($1,,,[$1=$PATHSEP])
+	AC_SUBST(PATHSEP)
+])dnl
+dnl ---------------------------------------------------------------------------
 dnl Check for a given program, defining corresponding symbol.
 dnl	$1 = environment variable, which is suffixed by "_PATH" in the #define.
 dnl	$2 = program name to find.
@@ -2209,7 +2219,7 @@ dnl Configure for PDCurses' X11 library
 AC_DEFUN([CF_PDCURSES_X11],[
 AC_REQUIRE([CF_X_ATHENA])
 LDFLAGS="$LDFLAGS $X_LIBS"
-CFLAGS="$CFLAGS $X_CFLAGS"
+CF_ADD_CFLAGS($X_CFLAGS)
 AC_CHECK_LIB(X11,XOpenDisplay,
 	[LIBS="-lX11 $LIBS"],,
 	[$X_PRE_LIBS $LIBS $X_EXTRA_LIBS])
@@ -2312,13 +2322,13 @@ AC_DEFUN([CF_SIZECHANGE],
 AC_REQUIRE([CF_STRUCT_TERMIOS])
 AC_CACHE_CHECK(declaration of size-change, cf_cv_sizechange,[
     cf_cv_sizechange=unknown
-    cf_save_CFLAGS="$CFLAGS"
+    cf_save_CPPFLAGS="$CPPFLAGS"
 
 for cf_opts in "" "NEED_PTEM_H"
 do
 
-    CFLAGS="$cf_save_CFLAGS"
-    test -n "$cf_opts" && CFLAGS="$CFLAGS -D$cf_opts"
+    CPPFLAGS="$cf_save_CPPFLAGS"
+    test -n "$cf_opts" && CPPFLAGS="$CPPFLAGS -D$cf_opts"
     AC_TRY_COMPILE([#include <sys/types.h>
 #ifdef HAVE_TERMIOS_H
 #include <termios.h>
@@ -2355,7 +2365,7 @@ do
 	[cf_cv_sizechange=yes],
 	[cf_cv_sizechange=no])
 
-	CFLAGS="$cf_save_CFLAGS"
+	CPPFLAGS="$cf_save_CPPFLAGS"
 	if test "$cf_cv_sizechange" = yes ; then
 		echo "size-change succeeded ($cf_opts)" >&AC_FD_CC
 		test -n "$cf_opts" && cf_cv_sizechange="$cf_opts"
@@ -2475,13 +2485,22 @@ test $cf_cv_slang_unix = yes && AC_DEFINE(REAL_UNIX_SYSTEM)
 dnl ---------------------------------------------------------------------------
 dnl Check for socks library
 dnl $1 = the [optional] directory in which the library may be found
-dnl $2 = the [optional] name of the library
 AC_DEFUN([CF_SOCKS],[
 case "$1" in #(vi
 no|yes) #(vi
   ;;
 *)
-  LIBS="$LIBS -L$1"
+  if test -d $1 ; then
+    if test -d $1/include ; then
+      CPPFLAGS="$CPPFLAGS -I$1/include"
+      LIBS="$LIBS -L$1/lib"
+    else
+      LIBS="$LIBS -L$1"
+      test -d $1/../include && CPPFLAGS="$CPPFLAGS -I$1/../include"
+    fi
+  else
+    AC_MSG_WARN(expected a directory: $1)
+  fi
   ;;
 esac
 LIBS="$LIBS -lsocks"
@@ -2507,14 +2526,24 @@ case "$1" in #(vi
 no|yes) #(vi
   ;;
 *)
-  LIBS="$LIBS -L$1"
-  CFLAGS="$CFLAGS -I$1/../include"
+  if test -d $1 ; then
+    if test -d $1/include ; then
+      CPPFLAGS="$CPPFLAGS -I$1/include"
+      LIBS="$LIBS -L$1/lib"
+    else
+      LIBS="$LIBS -L$1"
+      test -d $1/../include && CPPFLAGS="$CPPFLAGS -I$1/../include"
+    fi
+  else
+    AC_MSG_WARN(expected a directory: $1)
+  fi
   ;;
 esac
 LIBS="$LIBS -lsocks5"
 AC_DEFINE(USE_SOCKS5)
 AC_DEFINE(SOCKS)
 AC_MSG_CHECKING(if the socks library uses socks4 prefix)
+cf_use_socks4=error
 AC_TRY_LINK([
 #include <socks.h>],[
 	Rinit((char *)0)],
@@ -2539,6 +2568,80 @@ else
 	AC_DEFINE(getpeername,SOCKSgetpeername)
 	AC_DEFINE(getsockname,SOCKSgetsockname)
 	AC_DEFINE(recvfrom,SOCKSrecvfrom)
+fi
+AC_MSG_CHECKING(if socks5p.h is available)
+AC_TRY_COMPILE([
+#define INCLUDE_PROTOTYPES
+#include <socks.h>],[
+	init((char *)0)],
+	[cf_use_socks5p_h=yes],
+	[cf_use_socks5p_h=no])
+AC_MSG_RESULT($cf_use_socks5p_h)
+test "$cf_use_socks5p_h" = yes && AC_DEFINE(INCLUDE_PROTOTYPES)
+])dnl
+dnl ---------------------------------------------------------------------------
+dnl Check for ssl library
+dnl $1 = the [optional] directory in which the library may be found
+AC_DEFUN([CF_SSL],[
+cf_ssl_library="-lssl -lcrypto"
+case "$1" in #(vi
+no) #(vi
+  ;;
+yes) #(vi
+  AC_CHECK_LIB(ssl, SSL_get_version,[],[
+  	if test -d /usr/local/ssl ; then
+		CF_VERBOSE(assume it is in /usr/local/ssl)
+		cf_ssl_library="-L/usr/local/ssl/lib $cf_ssl_library"
+		CPPFLAGS="-I/usr/local/ssl/include $CPPFLAGS"
+	else
+		AC_MSG_ERROR(cannot find ssl library)
+	fi
+	],
+	[-lcrypto])
+  ;;
+*)
+  if test -d $1 ; then
+    if test -d $1/include ; then
+      CPPFLAGS="$CPPFLAGS -I$1/include"
+      cf_ssl_library="-L$1/lib $cf_ssl_library"
+    else
+      cf_ssl_library="-L$1 $cf_ssl_library"
+      test -d $1/../include && CPPFLAGS="$CPPFLAGS -I$1/../include"
+    fi
+  else
+    AC_MSG_WARN(expected a directory: $1)
+  fi
+  ;;
+esac
+LIBS="$cf_ssl_library $LIBS"
+
+AC_MSG_CHECKING(for openssl include directory)
+AC_TRY_COMPILE([
+#include <stdio.h>
+#include <openssl/ssl.h>],
+	[SSL_shutdown((SSL *)0)],
+	[cf_openssl_incl=yes],
+	[cf_openssl_incl=no])
+AC_MSG_RESULT($cf_openssl_incl)
+test "$cf_openssl_incl" = yes && AC_DEFINE(USE_OPENSSL_INCL)
+
+AC_MSG_CHECKING(if we can link to ssl library)
+AC_TRY_LINK([
+#include <stdio.h>
+#ifdef USE_OPENSSL_INCL
+#include <openssl/ssl.h>
+#else
+#include <ssl.h>
+#endif
+],
+	[SSL_shutdown((SSL *)0)],
+	[cf_ssl_library=yes],
+	[cf_ssl_library=no])
+AC_MSG_RESULT($cf_ssl_library)
+if test "$cf_ssl_library" = yes ; then
+	AC_DEFINE(USE_SSL)
+else
+	AC_ERROR(Cannot link with ssl library)
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
@@ -2565,7 +2668,7 @@ if test "$ISC" = yes ; then
 	AC_CHECK_HEADERS( sys/termio.h )
 fi
 if test "$ac_cv_header_termios_h" = yes ; then
-	case "$CFLAGS" in
+	case "$CFLAGS $CPPFLAGS" in
 	*-D_POSIX_SOURCE*)
 		termios_bad=dunno ;;
 	*)	termios_bad=maybe ;;
@@ -2693,8 +2796,8 @@ dnl FIXME: this is too Lynx-specific
 AC_DEFUN([CF_TERMIO_AND_CURSES],
 [
 AC_CACHE_CHECK(if we can include termio.h with curses,cf_cv_termio_and_curses,[
-    cf_save_CFLAGS="$CFLAGS"
-    CFLAGS="$CFLAGS -DHAVE_CONFIG_H -I. -I${srcdir-.} -I${srcdir-.}/src -I${srcdir-.}/WWW/Library/Implementation"
+    cf_save_CFLAGS="$CPPFLAGS"
+    CPPFLAGS="$CPPFLAGS -DHAVE_CONFIG_H -I. -I${srcdir-.} -I${srcdir-.}/src -I${srcdir-.}/WWW/Library/Implementation"
     touch lynx_cfg.h
     AC_TRY_COMPILE([
 #include <$1>
@@ -2702,7 +2805,7 @@ AC_CACHE_CHECK(if we can include termio.h with curses,cf_cv_termio_and_curses,[
     [putchar(0x0a)],
     [cf_cv_termio_and_curses=yes],
     [cf_cv_termio_and_curses=no])
-    CFLAGS="$cf_save_CFLAGS"
+    CPPFLAGS="$cf_save_CFLAGS"
     rm -f lynx_cfg.h
 ])
 
@@ -3039,7 +3142,7 @@ AC_TRY_LINK([
 	long x = winnstr(stdscr, "", 0)],
 	[cf_cv_need_xopen_extension=yes],
 	[cf_cv_need_xopen_extension=no])])])
-test $cf_cv_need_xopen_extension = yes && CFLAGS="$CFLAGS -D_XOPEN_SOURCE_EXTENDED"
+test $cf_cv_need_xopen_extension = yes && CPPFLAGS="$CPPFLAGS -D_XOPEN_SOURCE_EXTENDED"
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl Check for Xaw (Athena) libraries
@@ -3071,10 +3174,10 @@ for cf_path in default \
 do
 
 	if test -z "$cf_x_athena_include" ; then
-		cf_save="$CFLAGS"
+		cf_save="$CPPFLAGS"
 		cf_test=X11/$cf_x_athena/SimpleMenu.h
 		if test $cf_path != default ; then
-			CFLAGS="-I$cf_path/include $cf_save"
+			CPPFLAGS="-I$cf_path/include $cf_save"
 			AC_MSG_CHECKING(for $cf_test in $cf_path)
 		else
 			AC_MSG_CHECKING(for $cf_test)
@@ -3088,7 +3191,7 @@ do
 		if test "$cf_result" = yes ; then
 			cf_x_athena_include=$cf_path
 		else
-			CFLAGS="$cf_save"
+			CPPFLAGS="$cf_save"
 		fi
 	fi
 
@@ -3172,7 +3275,7 @@ esac
 if test $cf_have_X_LIBS = no ; then
 	AC_PATH_XTRA
 	LDFLAGS="$LDFLAGS $X_LIBS"
-	CFLAGS="$CFLAGS $X_CFLAGS"
+	CF_ADD_CFLAGS($X_CFLAGS)
 	AC_CHECK_LIB(X11,XOpenDisplay,
 		[LIBS="-lX11 $LIBS"],,
 		[$X_PRE_LIBS $LIBS $X_EXTRA_LIBS])
@@ -3183,7 +3286,7 @@ if test $cf_have_X_LIBS = no ; then
 		[$X_PRE_LIBS $LIBS $X_EXTRA_LIBS])
 else
 	LDFLAGS="$LDFLAGS $X_LIBS"
-	CFLAGS="$CFLAGS $X_CFLAGS"
+	CF_ADD_CFLAGS($X_CFLAGS)
 fi
 
 if test $cf_have_X_LIBS = no ; then

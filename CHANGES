@@ -1,19 +1,35 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2001-01-01 (2.8.4dev.16)
+* add ja.po message file (overlooked in dev.15, reported by Atsuhito Kohda
+  <kohda@nsx.pm.tokushima-u.ac.jp>)
+* use C preprocessor at build-time to replace CF_EBCDIC configure macro -PG
+* integrated SSL patch from http://www.moxienet.com/lynx/ as a configure
+  option, --with-ssl -TD
+* add configure check for delscreen(), which is not available in some older
+  SVr3 curses libraries -TD
+* add configure check for socks5p.h, to allow socks5 build to use function
+  prototypes -TD
+* updated config.sub, config.guess -TD
+* modify some configure macros to use CF_PATHSEP, for path-separator which is
+  usually colon on Unix, and semicolon on MSDOS, etc.  -TD
+* modify several configure macros to use $CFLAGS consistently for compiler
+  options and $CPPFLAGS for C preprocessor options -TD
+
 2000-12-21 (2.8.4dev.15)
-+ add .po files to main distribution, remove stubs for files that were not
+* add .po files to main distribution, remove stubs for files that were not
   implemented, use msgmerge to resync against the current lynx.pot
   (prompted by discussion with Morten Bo Johansen <mojo@image.dk>) -TD
-+ corrected dev.13 changes for EXP_READPROGRESS, to make the
+* corrected dev.13 changes for EXP_READPROGRESS, to make the
   non-EXP_READPROGRESS configuration build and work with .lynxrc settings -DK
-+ use EXIT_SUCCESS/EXIT_FAILURE in exit() and exit_immediately() calls -TD
-+ improve check for lynx_temp_space by ensuring that the directory actually
+* use EXIT_SUCCESS/EXIT_FAILURE in exit() and exit_immediately() calls -TD
+* improve check for lynx_temp_space by ensuring that the directory actually
   exists; attempt to create the directory if it does not, e.g., ~/tmp/, to
   resolve problem introduced by Mandrake's patch -TD
-+ modify SetOutputMode() to flush stdout to work around buffering problem with
+* modify SetOutputMode() to flush stdout to work around buffering problem with
   cygwin on error exit from Lynx (reported by Brad Town <btown@ceddec.com>) -TD
-+ change definitions for LYCharINTERRUPT1 and LYCharINTERRUPT2 to not use
+* change definitions for LYCharINTERRUPT1 and LYCharINTERRUPT2 to not use
   FROMASCII() in the EBCDIC configuration, since those symbols are used in case
   statements which otherwise would not compile -PG
 

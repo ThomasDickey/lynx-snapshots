@@ -27,7 +27,6 @@
 #undef DISABLE_NEWS		/* CF_ARG_DISABLE(news) */
 #undef DISP_PARTIAL		/* CF_ARG_ENABLE(partial) */
 #undef DONT_TRACK_INTERNAL_LINKS /* CF_ARG_DISABLE(internal-links) */
-#undef EBCDIC			/* CF_EBCDIC */
 #undef ENABLE_IPV6		/* CF_CHECK_IPV6 */
 #undef ENABLE_NLS		/* defined if NLS is requested */
 #undef ENABLE_OPTS_CHANGE_EXEC	/* CF_ARG_ENABLE(change-exec) */
@@ -147,6 +146,7 @@
 #undef HAVE___ARGZ_STRINGIFY	/* defined by AM_GNU_GETTEXT */
 #undef IGNORE_CTRL_C		/* FIXME: make tests? */
 #undef INSTALL_ARGS		/* CF_PATH_PROG(install) */
+#undef INCLUDE_PROTOTYPES	/* CF_SOCKS5 */
 #undef INSTALL_PATH		/* CF_PATH_PROG(install) */
 #undef LINKEDSTYLES		/* see USE_COLOR_STYLE */
 #undef LINUX			/* FIXME: make tests? */
@@ -163,7 +163,6 @@
 #undef NEED_PTEM_H		/* defined by CF_SIZECHANGE */
 #undef NEED_REMOVE		/* defined by CF_REMOVE_BROKEN */
 #undef NGROUPS			/* defined by CF_NGROUPS */
-#undef NOT_ASCII		/* CF_NOT_ASCII */
 #undef NO_CHANGE_EXECUTE_PERMS	/* CF_ARG_DISABLE(dired-xpermit) */
 #undef NO_CONFIG_INFO		/* CF_ARG_DISABLE(config-info) */
 #undef NO_EXTENDED_HTMLDTD	/* CF_ARG_DISABLE(extended-dtd) */
@@ -205,12 +204,14 @@
 #undef USE_EXTERNALS		/* CF_ARG_ENABLE(externs) */
 #undef USE_FCNTL		/* CF_FIONBIO */
 #undef USE_HASH			/* see USE_COLOR_STYLE */
+#undef USE_OPENSSL_INCL		/* CF_SSL */
 #undef USE_PRETTYSRC		/* CF_ARG_ENABLE(prettysrc) */
 #undef USE_SCROLLBAR		/* CF_ARG_ENABLE(scrollbar) */
 #undef USE_SIZECHANGEHACK	/* FIXME: find a case where this works! */
 #undef USE_SLANG		/* AC_ARG_WITH(screen=slang) */
 #undef USE_SOCKS4_PREFIX	/* CF_SOCKS5 */
 #undef USE_SOCKS5		/* CF_SOCKS5 */
+#undef USE_SSL			/* CF_SSL */
 #undef USE_SYSV_UTMP		/* CF_UTMP */
 #undef USE_ZLIB			/* AC_ARG_WITH(zlib) */
 #undef UTMPX_FOR_UTMP		/* use <utmpx.h> since <utmp.h> not found */
