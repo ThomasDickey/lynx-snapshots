@@ -502,13 +502,13 @@ PUBLIC void HTMLSetCharacterHandling ARGS1(int,i)
     /* some diagnostics */
     if (TRACE) {
 	if (LYRawMode_flag != LYRawMode)
-	    CTRACE(tfp, "HTMLSetCharacterHandling: LYRawMode changed %s -> %s\n",
+	    CTRACE((tfp, "HTMLSetCharacterHandling: LYRawMode changed %s -> %s\n",
 			(LYRawMode_flag ? "ON" : "OFF"),
-			(LYRawMode	? "ON" : "OFF"));
+			(LYRawMode	? "ON" : "OFF")));
 	if (UCLYhndl_for_unspec_flag != UCLYhndl_for_unspec)
-	    CTRACE(tfp, "HTMLSetCharacterHandling: UCLYhndl_for_unspec changed %d -> %d\n",
+	    CTRACE((tfp, "HTMLSetCharacterHandling: UCLYhndl_for_unspec changed %d -> %d\n",
 			UCLYhndl_for_unspec_flag,
-			UCLYhndl_for_unspec);
+			UCLYhndl_for_unspec));
     }
 
     return;

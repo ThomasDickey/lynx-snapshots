@@ -44,7 +44,7 @@ void (*function)();
      *  Check for available space.
      */
     if (topOfStack == ATEXITSIZE) {
-	CTRACE(tfp, "(LY)atexit: Too many functions, ignoring one!\n");
+	CTRACE((tfp, "(LY)atexit: Too many functions, ignoring one!\n"));
 	return(-1);
     }
 

@@ -2130,15 +2130,15 @@ PUBLIC void LYFakeZap ARGS1(
     BOOL,	set)
 {
     if (set && fake_zap < 1) {
-	CTRACE(tfp, "\r *** Set simulated 'Z'");
+	CTRACE((tfp, "\r *** Set simulated 'Z'"));
 	if (fake_zap)
-	    CTRACE(tfp, ", %d pending", fake_zap);
-	CTRACE(tfp, " ***\n");
+	    CTRACE((tfp, ", %d pending", fake_zap));
+	CTRACE((tfp, " ***\n"));
 	fake_zap++;
     } else if (!set && fake_zap) {
-	CTRACE(tfp, "\r *** Unset simulated 'Z'");
-	CTRACE(tfp, ", %d pending", fake_zap);
-	CTRACE(tfp, " ***\n");
+	CTRACE((tfp, "\r *** Unset simulated 'Z'"));
+	CTRACE((tfp, ", %d pending", fake_zap));
+	CTRACE((tfp, " ***\n"));
 	fake_zap = 0;
     }
 
@@ -2185,7 +2185,7 @@ PUBLIC int HTCheckForInterrupt NOARGS
 
     if (fake_zap > 0) {
 	fake_zap--;
-	CTRACE(tfp, "\r *** Got simulated 'Z' ***\n");
+	CTRACE((tfp, "\r *** Got simulated 'Z' ***\n"));
 	CTRACE_FLUSH(tfp);
 	CTRACE_SLEEP(AlertSecs);
 	return((int)TRUE);
@@ -2249,7 +2249,7 @@ PUBLIC int HTCheckForInterrupt NOARGS
 
     if (fake_zap > 0) {
 	fake_zap--;
-	CTRACE(tfp, "\r *** Got simulated 'Z' ***\n");
+	CTRACE((tfp, "\r *** Got simulated 'Z' ***\n"));
 	CTRACE_FLUSH(tfp);
 	CTRACE_SLEEP(AlertSecs);
 	return((int)TRUE);
@@ -2923,7 +2923,7 @@ PUBLIC void LYFixCursesOn ARGS1(
     if (dump_output_immediately || LYCursesON)
 	return;
     if (reason) {
-	CTRACE(tfp, "Forcing curses on to %s\n", reason);
+	CTRACE((tfp, "Forcing curses on to %s\n", reason));
     }
     start_curses();
 }
@@ -3088,7 +3088,7 @@ extern char *ttyname PARAMS((int fd));
 PUBLIC BOOLEAN inlocaldomain NOARGS
 {
 #if ! HAVE_UTMP
-    CTRACE(tfp, "LYUtils: inlocaldomain() not support.\n");
+    CTRACE((tfp, "LYUtils: inlocaldomain() not support.\n"));
     return(TRUE);
 #else
     int n;
@@ -3118,7 +3118,7 @@ PUBLIC BOOLEAN inlocaldomain NOARGS
 #endif /* LINUX */
 
     } else {
-	CTRACE(tfp,"Could not get ttyname or open UTMP file %s\n", UTMP_FILE);
+	CTRACE((tfp,"Could not get ttyname or open UTMP file %s\n", UTMP_FILE));
     }
 
     return(FALSE);
@@ -3194,7 +3194,7 @@ PRIVATE BOOLEAN LYToggleSigDfl ARGS3(
 	rv = sigaction(sig, where, NULL);
     }
     if (rv != 0) {
-	CTRACE(tfp, "Error in LYToggleSigDfl: %s\n", LYStrerror(errno));
+	CTRACE((tfp, "Error in LYToggleSigDfl: %s\n", LYStrerror(errno)));
 	return FALSE;
     } else
 	return TRUE;
@@ -3291,8 +3291,8 @@ PUBLIC void size_change ARGS1(
      */
     if (LYlines != old_lines || LYcols != old_cols) {
 	recent_sizechange = TRUE;
-	CTRACE(tfp, "Window size changed from (%d,%d) to (%d,%d)\n",
-		old_lines, old_cols, LYlines, LYcols);
+	CTRACE((tfp, "Window size changed from (%d,%d) to (%d,%d)\n",
+		old_lines, old_cols, LYlines, LYcols));
     }
 #ifdef SIGWINCH
     LYExtSignal (SIGWINCH, size_change);
@@ -3725,7 +3725,7 @@ PRIVATE int fmt_tempname ARGS3(
 	sprintf(result, "%.*s", LY_MAXPATH-1, leaf);
 	code = FALSE;
     }
-    CTRACE(tfp, "-> '%s'\n", result);
+    CTRACE((tfp, "-> '%s'\n", result));
     return (code);
 }
 
@@ -4209,8 +4209,8 @@ PUBLIC void LYEnsureAbsoluteURL ARGS3(
 	StrAllocCat(*href, "/*");
     }
     if (!is_url(*href)) {
-	CTRACE(tfp, "%s%s'%s' is not a URL\n",
-		    (name ? name : ""), (name ? " " : ""), *href);
+	CTRACE((tfp, "%s%s'%s' is not a URL\n",
+		    (name ? name : ""), (name ? " " : ""), *href));
 	LYConvertToURL(href, fixit);
     }
     if ((temp = HTParse(*href, "", PARSE_ALL)) != NULL && *temp != '\0')
@@ -4349,8 +4349,8 @@ PUBLIC void LYConvertToURL ARGS2(
 		     */
 		    strcpy(url_file, "/");
 		    strcat(url_file, old_string);
-		    CTRACE(tfp, "Can't find '%s'  Will assume it's a bad path.\n",
-				old_string);
+		    CTRACE((tfp, "Can't find '%s'  Will assume it's a bad path.\n",
+				old_string));
 		    StrAllocCat(*AllocatedString, url_file);
 		} else {
 		    /*
@@ -4388,8 +4388,8 @@ PUBLIC void LYConvertToURL ARGS2(
 		 */
 		strcpy(url_file, "/");
 		strcat(url_file, old_string);
-		CTRACE(tfp, "Can't find '%s'  Will assume it's a bad path.\n",
-			    old_string);
+		CTRACE((tfp, "Can't find '%s'  Will assume it's a bad path.\n",
+			    old_string));
 		StrAllocCat(*AllocatedString, url_file);
 	    } else {
 		/*
@@ -4407,7 +4407,7 @@ PUBLIC void LYConvertToURL ARGS2(
 	lib$find_file_end(&context);
 	FREE(cur_dir);
 have_VMS_URL:
-	CTRACE(tfp, "Trying: '%s'\n", *AllocatedString);
+	CTRACE((tfp, "Trying: '%s'\n", *AllocatedString));
 #else /* not VMS: */
 #if defined(DOSPATH)
 #ifdef _WINDOWS
@@ -4422,8 +4422,8 @@ have_VMS_URL:
 		StrAllocCopy(temp, HTDOS_wwwName(fullpath));
 		StrAllocCat(*AllocatedString, temp);
 		FREE(temp);
-		CTRACE(tfp, "Converted '%s' to '%s'\n",
-				old_string, *AllocatedString);
+		CTRACE((tfp, "Converted '%s' to '%s'\n",
+				old_string, *AllocatedString));
 	    } else {
 		StrAllocCat(*AllocatedString, old_string);
 	    }
@@ -4437,8 +4437,8 @@ have_VMS_URL:
 	    StrAllocCopy(temp, wwwName(Current_Dir(curdir)));
 	    StrAllocCat(*AllocatedString, temp);
 	    FREE(temp);
-	    CTRACE(tfp, "Converted '%s' to '%s'\n",
-			old_string, *AllocatedString);
+	    CTRACE((tfp, "Converted '%s' to '%s'\n",
+			old_string, *AllocatedString));
 	}
 #endif
 	else
@@ -4459,8 +4459,8 @@ have_VMS_URL:
 		StrAllocCat(*AllocatedString, temp);
 		FREE(temp);
 	    }
-	    CTRACE(tfp, "Converted '%s' to '%s'\n",
-			old_string, *AllocatedString);
+	    CTRACE((tfp, "Converted '%s' to '%s'\n",
+			old_string, *AllocatedString));
 	} else {
 	    /*
 	     *	Create a full path to the current default directory.
@@ -4499,7 +4499,7 @@ have_VMS_URL:
 	    StrAllocCat(temp, old_string);
 #endif /* DOSPATH */
 	    LYTrimRelFromAbsPath(temp);
-	    CTRACE(tfp, "Converted '%s' to '%s'\n", old_string, temp);
+	    CTRACE((tfp, "Converted '%s' to '%s'\n", old_string, temp));
 	    if ((stat(temp, &st) > -1) ||
 		(fptemp = fopen(temp, "r")) != NULL) {
 		/*
@@ -4519,8 +4519,8 @@ have_VMS_URL:
 #endif /* DOSPATH */
 		StrAllocCat(*AllocatedString, cp);
 		FREE(cp);
-		CTRACE(tfp, "Converted '%s' to '%s'\n",
-			    old_string, *AllocatedString);
+		CTRACE((tfp, "Converted '%s' to '%s'\n",
+			    old_string, *AllocatedString));
 		is_local = TRUE;
 	    } else {
 		char *cp2 = NULL;
@@ -4563,8 +4563,8 @@ have_VMS_URL:
 			}
 		    }
 		    StrAllocCat(*AllocatedString, temp);
-		    CTRACE(tfp, "Converted '%s' to '%s'\n",
-				old_string, *AllocatedString);
+		    CTRACE((tfp, "Converted '%s' to '%s'\n",
+				old_string, *AllocatedString));
 		    is_local = TRUE;
 
 		} else if (strchr(curdir, '#') != NULL ||
@@ -4602,8 +4602,8 @@ have_VMS_URL:
 		 *  local system, so assume it's a URL request and guess
 		 *  the scheme with "http://" as the default.
 		 */
-		CTRACE(tfp, "Can't stat() or fopen() '%s'\n",
-			    temp2 ? temp2 : temp);
+		CTRACE((tfp, "Can't stat() or fopen() '%s'\n",
+			    temp2 ? temp2 : temp));
 #ifdef WIN_EX  /* 1998/01/13 (Tue) 09:07:37 */
 		{
 		    char *p, *q, buff[LY_MAXPATH + 128];
@@ -4639,7 +4639,7 @@ have_VMS_URL:
 #ifdef WIN_EX
 	Retry:
 #endif
-		CTRACE(tfp, "Trying: '%s'\n", *AllocatedString);
+		CTRACE((tfp, "Trying: '%s'\n", *AllocatedString));
 	    }
 	    FREE(temp);
 	    FREE(temp2);
@@ -4671,7 +4671,7 @@ have_VMS_URL:
 	     */
 	    StrAllocCopy(temp, old_string);
 	    LYTrimRelFromAbsPath(temp);
-	    CTRACE(tfp, "Converted '%s' to '%s'\n", old_string, temp);
+	    CTRACE((tfp, "Converted '%s' to '%s'\n", old_string, temp));
 	    cp = HTEscape(temp, URL_PATH);
 	    StrAllocCat(*AllocatedString, cp);
 	    FREE(cp);
@@ -4680,8 +4680,8 @@ have_VMS_URL:
 		fclose(fptemp);
 		fptemp = NULL;
 	    }
-	    CTRACE(tfp, "Converted '%s' to '%s'\n",
-			old_string, *AllocatedString);
+	    CTRACE((tfp, "Converted '%s' to '%s'\n",
+			old_string, *AllocatedString));
 #endif /* VMS */
 	} else if (old_string[1] == '~') {
 	    /*
@@ -4710,8 +4710,8 @@ have_VMS_URL:
 	    StrAllocCat(*AllocatedString, temp);
 	    FREE(temp);
 	}
-	CTRACE(tfp, "Converted '%s' to '%s'\n",
-		    old_string, *AllocatedString);
+	CTRACE((tfp, "Converted '%s' to '%s'\n",
+		    old_string, *AllocatedString));
     }
     FREE(old_string);
     /* Pause so we can read the messages before invoking curses */
@@ -4864,9 +4864,9 @@ PUBLIC BOOLEAN LYExpandHostForURL ARGS3(
 	 *  Clear any residual interrupt. - FM
 	 */
 	if (LYCursesON && HTCheckForInterrupt()) {
-	    CTRACE(tfp,
+	    CTRACE((tfp,
 	    "LYExpandHostForURL: Ignoring interrupt because '%s' resolved.\n",
-			host);
+			host));
 	}
 
 	/*
@@ -4887,9 +4887,9 @@ PUBLIC BOOLEAN LYExpandHostForURL ARGS3(
 	/*
 	 *  Give the user chance to interrupt lookup cycles. - KW & FM
 	 */
-	CTRACE(tfp,
+	CTRACE((tfp,
 	"LYExpandHostForURL: Interrupted while '%s' failed to resolve.\n",
-		    host);
+		    host));
 
 	/*
 	 *  Return failure. - FM
@@ -4993,9 +4993,9 @@ PUBLIC BOOLEAN LYExpandHostForURL ARGS3(
 		if (LYCursesON && (lynx_nsl_status == HT_INTERRUPTED))
 #endif
 		{
-		    CTRACE(tfp,
+		    CTRACE((tfp,
 	"LYExpandHostForURL: Interrupted while '%s' failed to resolve.\n",
-				host);
+				host));
 		    FREE(Str);
 		    FREE(MsgStr);
 		    FREE(Host);
@@ -5060,9 +5060,9 @@ PUBLIC BOOLEAN LYExpandHostForURL ARGS3(
      *	Clear any residual interrupt. - FM
      */
     if (LYCursesON && HTCheckForInterrupt()) {
-	CTRACE(tfp, "LYExpandHostForURL: Ignoring interrupt because '%s' %s.\n",
+	CTRACE((tfp, "LYExpandHostForURL: Ignoring interrupt because '%s' %s.\n",
 		    host,
-		    (GotHost ? "resolved" : "timed out"));
+		    (GotHost ? "resolved" : "timed out")));
     }
 
     /*
@@ -5760,7 +5760,7 @@ PUBLIC time_t LYmktime ARGS2(
     if (!(string && *string))
 	return(0);
     s = string;
-    CTRACE(tfp, "LYmktime: Parsing '%s'\n", s);
+    CTRACE((tfp, "LYmktime: Parsing '%s'\n", s));
 
     /*
      *	Skip any lead alphabetic "Day, " field and
@@ -5977,9 +5977,9 @@ PUBLIC time_t LYmktime ARGS2(
     if (absolute == FALSE && clock2 <= time(NULL))
 	clock2 = (time_t)0;
     if (clock2 > 0)
-	CTRACE(tfp, "LYmktime: clock=%ld, ctime=%s",
+	CTRACE((tfp, "LYmktime: clock=%ld, ctime=%s",
 		    (long) clock2,
-		    ctime(&clock2));
+		    ctime(&clock2)));
 
     return(clock2);
 }
@@ -6324,7 +6324,7 @@ PUBLIC FILE *LYOpenTemp ARGS3(
     BOOL wrt = 'r';
     LY_TEMP *p;
 
-    CTRACE(tfp, "LYOpenTemp(,%s,%s)\n", suffix, mode);
+    CTRACE((tfp, "LYOpenTemp(,%s,%s)\n", suffix, mode));
     if (result == 0)
 	return 0;
 
@@ -6334,7 +6334,7 @@ PUBLIC FILE *LYOpenTemp ARGS3(
 	case 'a':	wrt = 'a';	break;
 	case 'b':	txt = FALSE;	break;
 	default:
-		CTRACE(tfp, "%s @%d: BUG\n", __FILE__, __LINE__);
+		CTRACE((tfp, "%s @%d: BUG\n", __FILE__, __LINE__));
 		return fp;
 	}
     }
@@ -6361,8 +6361,8 @@ PUBLIC FILE *LYOpenTemp ARGS3(
 	 */
 #ifdef EEXIST	/* FIXME (need a better test) in fcntl.h or unistd.h */
 	if ((fp == 0) && (errno != EEXIST)) {
-	    CTRACE(tfp, "... LYOpenTemp(%s) failed: %s\n",
-		   result, LYStrerror(errno));
+	    CTRACE((tfp, "... LYOpenTemp(%s) failed: %s\n",
+		   result, LYStrerror(errno)));
 	    return 0;
 	}
 #endif
@@ -6377,7 +6377,7 @@ PUBLIC FILE *LYOpenTemp ARGS3(
 	outofmem(__FILE__, "LYOpenTemp");
     }
 
-    CTRACE(tfp, "... LYOpenTemp(%s)\n", result);
+    CTRACE((tfp, "... LYOpenTemp(%s)\n", result));
     return fp;
 }
 
@@ -6430,7 +6430,7 @@ PUBLIC FILE *LYOpenTempRewrite ARGS3(
     LY_TEMP *p;
     struct stat stat_buf;
 
-    CTRACE(tfp, "LYOpenTempRewrite(%s,%s,%s)\n", fname, suffix, mode);
+    CTRACE((tfp, "LYOpenTempRewrite(%s,%s,%s)\n", fname, suffix, mode));
     if (*fname == '\0')		/* first time, no filename yet */
 	return (LYOpenTemp(fname, suffix, mode));
 
@@ -6439,8 +6439,8 @@ PUBLIC FILE *LYOpenTempRewrite ARGS3(
 	    registered = YES;
 	    if (p->file != 0)
 		still_open = YES;
-	    CTRACE(tfp, "...used before%s\n",
-		still_open ? ", still open!" : ".");
+	    CTRACE((tfp, "...used before%s\n",
+		still_open ? ", still open!" : "."));
 	    break;
 	}
     }
@@ -6448,8 +6448,10 @@ PUBLIC FILE *LYOpenTempRewrite ARGS3(
     if (registered) {
 #ifndef NO_GROUPS
 	writable_exists = HTEditable(fname); /* existing, can write */
+#define CTRACE_EXISTS "exists and is writable"
 #else
 	writable_exists = (BOOL) (stat(fname, &stat_buf) == 0); /* existing, assume can write */
+#define CTRACE_EXISTS "exists"
 #endif
 
 	if (writable_exists) {
@@ -6459,15 +6461,9 @@ PUBLIC FILE *LYOpenTempRewrite ARGS3(
 	    is_ours = TRUE;	/* assume ok, if we get to here */
 #endif
 	}
-	CTRACE(tfp, "...%s%s\n",
-	       writable_exists ?
-#ifndef NO_GROUPS
-	       "exists and is writable, "
-#else
-	       "exists, "
-#endif
-	       : "",
-	       is_ours ? "is our file." : "is NOT our file.");
+	CTRACE((tfp, "...%s%s\n",
+	       writable_exists ? CTRACE_EXISTS : "",
+	       is_ours ? "is our file." : "is NOT our file."));
     }
 
     /*
@@ -6491,8 +6487,8 @@ PUBLIC FILE *LYOpenTempRewrite ARGS3(
 	 */
 #if HAVE_TRUNCATE
 	if (truncate(fname, 0) != 0) {
-	    CTRACE(tfp, "... truncate(%s,0) failed: %s\n",
-		   fname, LYStrerror(errno));
+	    CTRACE((tfp, "... truncate(%s,0) failed: %s\n",
+		   fname, LYStrerror(errno)));
 	    return (LYOpenTemp(fname, suffix, mode));
 	}
 #endif
@@ -6530,7 +6526,7 @@ PUBLIC FILE *LYOpenTempRewrite ARGS3(
 	case 'a':	wrt = 'a';	break;
 	case 'b':	txt = FALSE;	break;
 	default:
-		CTRACE(tfp, "%s @%d: BUG\n", __FILE__, __LINE__);
+		CTRACE((tfp, "%s @%d: BUG\n", __FILE__, __LINE__));
 		return fp;
 	}
     }
@@ -6549,8 +6545,8 @@ PUBLIC FILE *LYOpenTempRewrite ARGS3(
     }
     p->file = fp;
 
-    CTRACE(tfp, "... LYOpenTempRewrite(%s), %s\n", fname,
-	   (fp) ? "ok" : "failed");
+    CTRACE((tfp, "... LYOpenTempRewrite(%s), %s\n", fname,
+	   (fp) ? "ok" : "failed"));
     /*
      *  We could fall back to trying LYOpenTemp() here in case of failure.
      *  After all the checks already done above a filure here should be
@@ -6584,7 +6580,7 @@ PUBLIC FILE *LYOpenScratch ARGS2(
 	    outofmem(__FILE__, "LYOpenScratch");
 	}
     }
-    CTRACE(tfp, "LYOpenScratch(%s)\n", result);
+    CTRACE((tfp, "LYOpenScratch(%s)\n", result));
     return fp;
 }
 
@@ -6596,11 +6592,11 @@ PUBLIC void LYCloseTemp ARGS1(
 {
     LY_TEMP *p;
 
-    CTRACE(tfp, "LYCloseTemp(%s)\n", name);
+    CTRACE((tfp, "LYCloseTemp(%s)\n", name));
     for (p = ly_temp; p != 0; p = p->next) {
 	if (!strcmp(name, p->name)) {
-	    CTRACE(tfp, "...LYCloseTemp(%s)%s\n", name,
-		(p->file != 0) ? ", closed" : "");
+	    CTRACE((tfp, "...LYCloseTemp(%s)%s\n", name,
+		(p->file != 0) ? ", closed" : ""));
 	    if (p->file != 0) {
 		fclose(p->file);
 		p->file = 0;
@@ -6618,12 +6614,12 @@ PUBLIC void LYCloseTempFP ARGS1(
 {
     LY_TEMP *p;
 
-    CTRACE(tfp, "LYCloseTempFP\n");
+    CTRACE((tfp, "LYCloseTempFP\n"));
     for (p = ly_temp; p != 0; p = p->next) {
 	if (p->file == fp) {
 	    fclose(p->file);
 	    p->file = 0;
-	    CTRACE(tfp, "...LYCloseTempFP(%s)\n", p->name);
+	    CTRACE((tfp, "...LYCloseTempFP(%s)\n", p->name));
 	    break;
 	}
     }
@@ -6639,7 +6635,7 @@ PUBLIC void LYRemoveTemp ARGS1(
     int code;
 
     if (name != 0 && *name != 0) {
-	CTRACE(tfp, "LYRemoveTemp(%s)\n", name);
+	CTRACE((tfp, "LYRemoveTemp(%s)\n", name));
 	for (p = ly_temp, q = 0; p != 0; q = p, p = p->next) {
 	    if (!strcmp(name, p->name)) {
 		if (q != 0) {
@@ -6650,8 +6646,8 @@ PUBLIC void LYRemoveTemp ARGS1(
 		if (p->file != 0)
 		    fclose(p->file);
 		code = HTSYS_remove(name);
-		CTRACE(tfp, "...LYRemoveTemp done(%d)%s\n", code,
-		       (p->file != 0) ? ", closed" : "");
+		CTRACE((tfp, "...LYRemoveTemp done(%d)%s\n", code,
+		       (p->file != 0) ? ", closed" : ""));
 		CTRACE_FLUSH(tfp);
 		FREE(p->name);
 		FREE(p);
@@ -6681,7 +6677,7 @@ PUBLIC void LYRenamedTemp ARGS2(
 {
     LY_TEMP *p;
 
-    CTRACE(tfp, "LYRenamedTemp(old=%s, new=%s)\n", oldname, newname);
+    CTRACE((tfp, "LYRenamedTemp(old=%s, new=%s)\n", oldname, newname));
     for (p = ly_temp; p != 0; p = p->next) {
 	if (!strcmp(oldname, p->name)) {
 	    StrAllocCopy((p->name), newname);
@@ -7086,7 +7082,7 @@ PUBLIC int LYCopyFile ARGS2(
     HTAddParam(&the_command, COPY_COMMAND, 3, dst);
     HTEndParam(&the_command, COPY_COMMAND, 3);
 
-    CTRACE(tfp, "command: %s\n", the_command);
+    CTRACE((tfp, "command: %s\n", the_command));
     stop_curses();
     code = LYSystem(the_command);
     start_curses();
@@ -7112,7 +7108,7 @@ PUBLIC int LYSystem ARGS1(
 
     fflush(stdout);
     fflush(stderr);
-    CTRACE(tfp, "LYSystem(%s)\n", command);
+    CTRACE((tfp, "LYSystem(%s)\n", command));
     CTRACE_FLUSH(tfp);
 
 #ifdef __DJGPP__
@@ -7601,7 +7597,7 @@ PUBLIC void LYSyslog ARGS1(
     char *colon2;
     char *atsign;
 
-    CTRACE(tfp, "LYSyslog %s\n", arg);
+    CTRACE((tfp, "LYSyslog %s\n", arg));
 
     if (is_url(arg)) {	/* proto://user:password@host/path:port */
 			/*	^this colon		    */
@@ -7618,7 +7614,7 @@ PUBLIC void LYSyslog ARGS1(
 	    StrAllocCat(buf, "******");
 	    StrAllocCat(buf, atsign);
 	    syslog (LOG_INFO|LOG_LOCAL5, buf);
-	    CTRACE(tfp, "...alter %s\n", buf);
+	    CTRACE((tfp, "...alter %s\n", buf));
 	    FREE(buf);
 	    return;
         }

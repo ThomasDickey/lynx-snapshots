@@ -130,7 +130,7 @@ retry:
 	/*
 	 *  See if we can write to it.
 	 */
-	CTRACE(tfp, "LYUpload: filename is %s", buffer);
+	CTRACE((tfp, "LYUpload: filename is %s", buffer));
 
 	if ((fp = fopen(buffer, "w")) != NULL) {
 	    fclose(fp);
@@ -151,7 +151,7 @@ retry:
     HTEndParam(&the_command, SUBDIR_COMMAND, 1);
     StrAllocCat(the_command, the_upload);
 
-    CTRACE(tfp, "command: %s\n", the_command);
+    CTRACE((tfp, "command: %s\n", the_command));
 
     stop_curses();
     LYSystem(the_command);

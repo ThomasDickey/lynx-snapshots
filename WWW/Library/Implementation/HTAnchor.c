@@ -187,7 +187,7 @@ PUBLIC HTChildAnchor * HTAnchor_findChild ARGS2(
     HTList *kids;
 
     if (!parent) {
-	CTRACE(tfp, "HTAnchor_findChild called with NULL parent.\n");
+	CTRACE((tfp, "HTAnchor_findChild called with NULL parent.\n"));
 	return(NULL);
     }
     if ((kids = parent->children) != 0) {
@@ -202,8 +202,8 @@ PUBLIC HTChildAnchor * HTAnchor_findChild ARGS2(
 		if (HTIdentical(child->tag, tag)) /* Case sensitive - FM */
 #endif /* CASE_INSENSITIVE_ANCHORS */
 		{
-		    CTRACE(tfp, "Child anchor %p of parent %p with name `%s' already exists.\n",
-				(void *)child, (void *)parent, tag);
+		    CTRACE((tfp, "Child anchor %p of parent %p with name `%s' already exists.\n",
+				(void *)child, (void *)parent, tag));
 		    return(child);
 		}
 	    }
@@ -213,10 +213,10 @@ PUBLIC HTChildAnchor * HTAnchor_findChild ARGS2(
     }
 
     child = HTChildAnchor_new();
-    CTRACE(tfp, "HTAnchor: New Anchor %p named `%s' is child of %p\n",
+    CTRACE((tfp, "HTAnchor: New Anchor %p named `%s' is child of %p\n",
 		(void *)child,
 		tag ? tag : (CONST char *)"",
-		(void *)parent); /* int for apollo */
+		(void *)parent)); /* int for apollo */
     HTList_addObject (parent->children, child);
     child->parent = parent;
     StrAllocCopy(child->tag, tag);
@@ -239,7 +239,7 @@ PUBLIC HTChildAnchor * HTAnchor_findChildAndLink ARGS4(
 {
     HTChildAnchor * child = HTAnchor_findChild(parent, tag);
 
-    CTRACE(tfp,"Entered HTAnchor_findChildAndLink\n");
+    CTRACE((tfp,"Entered HTAnchor_findChildAndLink\n"));
 
     if (href && *href) {
 	char *relative_to = HTAnchor_address((HTAnchor *)parent);
@@ -273,15 +273,15 @@ PUBLIC HTChildAnchor * HTAnchor_findChildAndLink ARGS4(
 	    testdest1 = child->mainLink.dest;
 	    if (testdest1) {
 		nlinks = 1 + HTList_count(child->links);
-		CTRACE(tfp,
+		CTRACE((tfp,
 		       "*** Duplicate ChildAnchor %p named `%s' with %d links",
-		       child, tag, nlinks);
+		       child, tag, nlinks));
 		if (dest == testdest1 && ltype == child->mainLink.type) {
-		    CTRACE(tfp,", same dest %p and type, keeping it\n",
-			   testdest1);
+		    CTRACE((tfp,", same dest %p and type, keeping it\n",
+			   testdest1));
 		} else {
-		    CTRACE(tfp,", different dest %p, creating unnamed child\n",
-			   testdest1);
+		    CTRACE((tfp,", different dest %p, creating unnamed child\n",
+			   testdest1));
 		    child = HTAnchor_findChild(parent, 0);
 		}
 	    }
@@ -318,11 +318,11 @@ PRIVATE void free_adult_table NOARGS
 	    adult_table[i_counter] = HTAp_freeme->next;
 	    if (HTAp_freeme->object) {
 		parent = (HTParentAnchor *)HTAp_freeme->object;
-		CTRACE(tfp, "delete anchor:%d/%d,%d,%d %s\n",
+		CTRACE((tfp, "delete anchor:%d/%d,%d,%d %s\n",
 		       i_counter, HTList_count(HTAp_freeme) + 1,
 		       (parent->physical ? 1 : 0),
 		       (int)parent->underway,
-		       (parent->address ? parent->address : "(no address)"));
+		       (parent->address ? parent->address : "(no address)")));
 		parent->underway = FALSE;
 		HTAnchor_delete(parent);
 	    }
@@ -347,7 +347,7 @@ PUBLIC HTAnchor * HTAnchor_findAddress ARGS1(
     /* Anchor tag specified ? */
     char *tag = HTParse(newdoc->address, "", PARSE_ANCHOR);
 
-    CTRACE(tfp,"Entered HTAnchor_findAddress\n");
+    CTRACE((tfp,"Entered HTAnchor_findAddress\n"));
 
     /*
     **	If the address represents a sub-anchor, we recursively load its
@@ -415,8 +415,8 @@ PUBLIC HTAnchor * HTAnchor_findAddress ARGS1(
 		foundAnchor->isHEAD == newdoc->isHEAD)
 #endif /* CASE_INSENSITIVE_ANCHORS */
 	    {
-		CTRACE(tfp, "Anchor %p with address `%s' already exists.\n",
-			    (void *)foundAnchor, newdoc->address);
+		CTRACE((tfp, "Anchor %p with address `%s' already exists.\n",
+			    (void *)foundAnchor, newdoc->address));
 		 return (HTAnchor *)foundAnchor;
 	     }
 	}
@@ -425,8 +425,8 @@ PUBLIC HTAnchor * HTAnchor_findAddress ARGS1(
 	**  Node not found: create new anchor.
 	*/
 	foundAnchor = HTParentAnchor_new();
-	CTRACE(tfp, "New anchor %p has hash %d and address `%s'\n",
-		    (void *)foundAnchor, hash, newdoc->address);
+	CTRACE((tfp, "New anchor %p has hash %d and address `%s'\n",
+		    (void *)foundAnchor, hash, newdoc->address));
 	StrAllocCopy(foundAnchor->address, newdoc->address);
 	if (newdoc->post_data)
 	    StrAllocCopy(foundAnchor->post_data, newdoc->post_data);
@@ -708,14 +708,14 @@ PUBLIC BOOL HTAnchor_delete ARGS1(
      * Clean up the source cache, if any.
      */
     if (me->source_cache_file) {
-	CTRACE(tfp, "Removing source cache file %s\n",
-	       me->source_cache_file);
+	CTRACE((tfp, "Removing source cache file %s\n",
+	       me->source_cache_file));
 	LYRemoveTemp(me->source_cache_file);
 	FREE(me->source_cache_file);
     }
     if (me->source_cache_chunk) {
-	CTRACE(tfp, "Removing memory source cache %p\n",
-	       (void *)me->source_cache_chunk);
+	CTRACE((tfp, "Removing memory source cache %p\n",
+	       (void *)me->source_cache_chunk));
 	HTChunkFree(me->source_cache_chunk);
     }
 #endif
@@ -943,12 +943,12 @@ PUBLIC void HTAnchor_setTitle ARGS2(
 		}
 	    }
 	} else {
-	    CTRACE(tfp,"HTAnchor_setTitle: New title is NULL! ");
+	    CTRACE((tfp,"HTAnchor_setTitle: New title is NULL! "));
 	    if (me->title) {
-		CTRACE(tfp,"Old title was \"%s\".\n", me->title);
+		CTRACE((tfp,"Old title was \"%s\".\n", me->title));
 		FREE(me->title);
 	    } else {
-		CTRACE(tfp,"Old title was NULL.\n");
+		CTRACE((tfp,"Old title was NULL.\n"));
 	    }
 	}
     }
@@ -1153,7 +1153,7 @@ PUBLIC BOOL HTAnchor_link ARGS3(
 {
     if (!(source && destination))
 	return(NO);  /* Can't link to/from non-existing anchor */
-    CTRACE(tfp, "Linking anchor %p to anchor %p\n", source, destination);
+    CTRACE((tfp, "Linking anchor %p to anchor %p\n", source, destination));
     if (!source->mainLink.dest) {
 	source->mainLink.dest = destination;
 	source->mainLink.type = type;

@@ -3986,11 +3986,11 @@ PUBLIC int postoptions ARGS1(
      *  Exit: working around the previous document.
      *  Being out of mainloop()/getfile() cycle, do things manually.
      */
-    CTRACE(tfp, "\nLYOptions.c/postoptions(): exiting...\n");
-    CTRACE(tfp, "                            need_reload = %s\n",
-                    need_reload ? "TRUE" : "FALSE");
-    CTRACE(tfp, "                            need_end_reload = %s\n",
-		    need_end_reload ? "TRUE" : "FALSE");
+    CTRACE((tfp, "\nLYOptions.c/postoptions(): exiting...\n"));
+    CTRACE((tfp, "                            need_reload = %s\n",
+                    need_reload ? "TRUE" : "FALSE"));
+    CTRACE((tfp, "                            need_end_reload = %s\n",
+		    need_end_reload ? "TRUE" : "FALSE"));
 
     /*  Options menu was pushed before postoptions(), so pop-up. */
     LYpop(newdoc);
@@ -4070,7 +4070,7 @@ PUBLIC int postoptions ARGS1(
 
     if (need_reload == FALSE) {
 	/*  no uncache, already loaded */
-	CTRACE(tfp, "LYOptions.c/postoptions(): now really exit.\n\n");
+	CTRACE((tfp, "LYOptions.c/postoptions(): now really exit.\n\n"));
 	return(NORMAL);
     } else {
 	/*  update HText cache */
@@ -4092,7 +4092,7 @@ PUBLIC int postoptions ARGS1(
 	if (reloading == FALSE) {
 	    /* one more attempt to be smart enough: */
 	    if (HTreparse_document()) {
-		CTRACE(tfp, "LYOptions.c/postoptions(): now really exit.\n\n");
+		CTRACE((tfp, "LYOptions.c/postoptions(): now really exit.\n\n"));
 		return(NORMAL);
 	    }
 	}
@@ -4101,7 +4101,7 @@ PUBLIC int postoptions ARGS1(
 	/*  uncache and load again */
 	HTuncache_current_document();
 	LYpush(newdoc, FALSE);
-	CTRACE(tfp, "LYOptions.c/postoptions(): now really exit.\n\n");
+	CTRACE((tfp, "LYOptions.c/postoptions(): now really exit.\n\n"));
 	return(NULLFILE);
     }
 

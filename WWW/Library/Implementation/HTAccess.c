@@ -409,7 +409,7 @@ PRIVATE int get_physical ARGS2(
     }
     if (anchor->isISMAPScript == TRUE) {
 	StrAllocCat(physical, "?0,0");
-	CTRACE(tfp, "HTAccess: Appending '?0,0' coordinate pair.\n");
+	CTRACE((tfp, "HTAccess: Appending '?0,0' coordinate pair.\n"));
     }
     if (!strncmp(physical, "Proxied=", 8)) {
 	HTAnchor_setPhysical(anchor, physical + 8);
@@ -425,7 +425,7 @@ PRIVATE int get_physical ARGS2(
     if (anchor->isISMAPScript == TRUE) {
 	StrAllocCopy(physical, addr);
 	StrAllocCat(physical, "?0,0");
-	CTRACE(tfp, "HTAccess: Appending '?0,0' coordinate pair.\n");
+	CTRACE((tfp, "HTAccess: Appending '?0,0' coordinate pair.\n"));
 	HTAnchor_setPhysical(anchor, physical);
 	FREE(physical);			/* free our copy */
     } else {
@@ -518,9 +518,9 @@ PRIVATE int get_physical ARGS2(
 	FREE(gateway_parameter);
 
 	if (gateway)
-	    CTRACE(tfp, "Gateway found: %s\n", gateway);
+	    CTRACE((tfp, "Gateway found: %s\n", gateway));
 	if (proxy)
-	    CTRACE(tfp, "proxy server found: %s\n", proxy);
+	    CTRACE((tfp, "proxy server found: %s\n", proxy));
 
 	/*
 	**  Proxy servers have precedence over gateway servers.
@@ -623,9 +623,9 @@ PUBLIC void LYUCPushAssumed ARGS1(
 	    pushed_assume_LYhndl = anchor_LYhndl;
 	    /* some diagnostics */
 	    if (UCLYhndl_for_unspec != anchor_LYhndl)
-	    CTRACE(tfp, "LYUCPushAssumed: UCLYhndl_for_unspec changed %d -> %d\n",
+	    CTRACE((tfp, "LYUCPushAssumed: UCLYhndl_for_unspec changed %d -> %d\n",
 			UCLYhndl_for_unspec,
-			anchor_LYhndl);
+			anchor_LYhndl));
 	    UCLYhndl_for_unspec = anchor_LYhndl;
 	    return;
 	}
@@ -644,9 +644,9 @@ PUBLIC int LYUCPopAssumed NOARGS
     if (pushed_assume_LYhndl >= 0) {
 	/* some diagnostics */
 	if (UCLYhndl_for_unspec != pushed_assume_LYhndl)
-	CTRACE(tfp, "LYUCPopAssumed: UCLYhndl_for_unspec changed %d -> %d\n",
+	CTRACE((tfp, "LYUCPopAssumed: UCLYhndl_for_unspec changed %d -> %d\n",
 		    UCLYhndl_for_unspec,
-		    pushed_assume_LYhndl);
+		    pushed_assume_LYhndl));
 	UCLYhndl_for_unspec = pushed_assume_LYhndl;
 	pushed_assume_LYhndl = -1;
 	FREE(UCAssume_MIMEcharset);
@@ -747,7 +747,7 @@ PRIVATE BOOL HTLoadDocument ARGS4(
     char *cp;
     BOOL ForcingNoCache = LYforce_no_cache;
 
-    CTRACE (tfp, "HTAccess: loading document %s\n", address_to_load);
+    CTRACE((tfp, "HTAccess: loading document %s\n", address_to_load));
 
     /*
     **	Free use_this_url_instead and reset permanent_redirection
@@ -803,9 +803,9 @@ PRIVATE BOOL HTLoadDocument ARGS4(
 	       !strncmp(cp, "Location=", 9)) {
 	    DocAddress NewDoc;
 
-	    CTRACE (tfp, "HTAccess: '%s' is a redirection URL.\n",
-			  anchor->address);
-	    CTRACE (tfp, "HTAccess: Redirecting to '%s'\n", cp+9);
+	    CTRACE((tfp, "HTAccess: '%s' is a redirection URL.\n",
+			  anchor->address));
+	    CTRACE((tfp, "HTAccess: Redirecting to '%s'\n", cp+9));
 
 	    /*
 	    **	Don't exceed the redirection_attempts limit. - FM
@@ -903,7 +903,7 @@ PRIVATE BOOL HTLoadDocument ARGS4(
 	     strncmp(full_address, "LYNXIMGMAP:", 11)))
 #endif /* TRACK_INTERNAL_LINKS */
 	{
-	    CTRACE(tfp, "HTAccess: Document already in memory.\n");
+	    CTRACE((tfp, "HTAccess: Document already in memory.\n"));
 	    HText_select(text);
 
 #ifdef DIRED_SUPPORT
@@ -914,7 +914,7 @@ PRIVATE BOOL HTLoadDocument ARGS4(
 	    return YES;
 	} else {
 	    ForcingNoCache = YES;
-	    CTRACE(tfp, "HTAccess: Auto-reloading document.\n");
+	    CTRACE((tfp, "HTAccess: Auto-reloading document.\n"));
 	}
     }
 
@@ -929,7 +929,7 @@ PRIVATE BOOL HTLoadDocument ARGS4(
 	FREE(anchor->title);
     }
     status = HTLoad(address_to_load, anchor, format_out, sink);
-    CTRACE(tfp, "HTAccess:  status=%d\n", status);
+    CTRACE((tfp, "HTAccess:  status=%d\n", status));
 
     /*
     **	Log the access if necessary.
@@ -943,11 +943,11 @@ PRIVATE BOOL HTLoadDocument ARGS4(
 		status < 0 ? "FAIL" : "GET",
 		full_address);
 	fflush(HTlogfile);	/* Actually update it on disk */
-	CTRACE(tfp, "Log: %24.24s %s %s %s\n",
+	CTRACE((tfp, "Log: %24.24s %s %s %s\n",
 		    ctime(&theTime),
 		    HTClientHost ? HTClientHost : "local",
 		    status < 0 ? "FAIL" : "GET",
-		    full_address);
+		    full_address));
     }
 
     /*
@@ -972,10 +972,10 @@ PRIVATE BOOL HTLoadDocument ARGS4(
 	**  in LYGetFile.c when the status is HT_REDIRECTING.  This may
 	**  seem bizarre, but it works like a charm! - FM
 	*/
-	CTRACE(tfp, "HTAccess: '%s' is a redirection URL.\n",
-		    address_to_load);
-	CTRACE(tfp, "HTAccess: Redirecting to '%s'\n",
-		     redirecting_url);
+	CTRACE((tfp, "HTAccess: '%s' is a redirection URL.\n",
+		    address_to_load));
+	CTRACE((tfp, "HTAccess: Redirecting to '%s'\n",
+		     redirecting_url));
 	/*
 	**  Prevent circular references.
 	*/
@@ -1015,32 +1015,32 @@ PRIVATE BOOL HTLoadDocument ARGS4(
     permanent_redirection = FALSE;
 
     if (status == HT_LOADED) {
-	CTRACE(tfp, "HTAccess: `%s' has been accessed.\n",
-		    full_address);
+	CTRACE((tfp, "HTAccess: `%s' has been accessed.\n",
+		    full_address));
 	return YES;
     }
     if (status == HT_PARTIAL_CONTENT) {
 	HTAlert(gettext("Loading incomplete."));
-	CTRACE(tfp, "HTAccess: `%s' has been accessed, partial content.\n",
-		    full_address);
+	CTRACE((tfp, "HTAccess: `%s' has been accessed, partial content.\n",
+		    full_address));
 	return YES;
     }
 
     if (status == HT_NO_DATA) {
-	CTRACE(tfp, "HTAccess: `%s' has been accessed, No data left.\n",
-		    full_address);
+	CTRACE((tfp, "HTAccess: `%s' has been accessed, No data left.\n",
+		    full_address));
 	return NO;
     }
 
     if (status == HT_NOT_LOADED) {
-	CTRACE(tfp, "HTAccess: `%s' has been accessed, No data loaded.\n",
-		    full_address);
+	CTRACE((tfp, "HTAccess: `%s' has been accessed, No data loaded.\n",
+		    full_address));
 	return NO;
     }
 
     if (status == HT_INTERRUPTED) {
-	CTRACE(tfp, "HTAccess: `%s' has been accessed, transfer interrupted.\n",
-		    full_address);
+	CTRACE((tfp, "HTAccess: `%s' has been accessed, transfer interrupted.\n",
+		    full_address));
 	return NO;
     }
 
@@ -1066,7 +1066,7 @@ PRIVATE BOOL HTLoadDocument ARGS4(
     _HTProgress(cp);
     FREE(cp);
 
-    CTRACE(tfp, "HTAccess: Can't access `%s'\n", full_address);
+    CTRACE((tfp, "HTAccess: Can't access `%s'\n", full_address));
     HTLoadError(sink, 500, gettext("Unable to access document."));
     return NO;
 } /* HTLoadDocument */
@@ -1389,8 +1389,8 @@ PUBLIC HTParentAnchor * HTHomeAnchor NOARGS
 	if (fp) {
 	    fclose(fp);
 	} else {
-	    CTRACE(tfp, "HTBrowse: No local home document ~/%s or %s\n",
-			PERSONAL_DEFAULT, LOCAL_DEFAULT_FILE);
+	    CTRACE((tfp, "HTBrowse: No local home document ~/%s or %s\n",
+			PERSONAL_DEFAULT, LOCAL_DEFAULT_FILE));
 	    FREE(my_home_document);
 	}
     }
@@ -1401,8 +1401,8 @@ PUBLIC HTParentAnchor * HTHomeAnchor NOARGS
 		  "file:",
 		  PARSE_ACCESS|PARSE_HOST|PARSE_PATH|PARSE_PUNCTUATION);
     if (my_home_document) {
-	CTRACE(tfp, "HTAccess: Using custom home page %s i.e., address %s\n",
-		    my_home_document, ref);
+	CTRACE((tfp, "HTAccess: Using custom home page %s i.e., address %s\n",
+		    my_home_document, ref));
 	FREE(my_home_document);
     }
     anchor = (HTParentAnchor*)HTAnchor_findAddress(ref);

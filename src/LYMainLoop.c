@@ -289,29 +289,29 @@ PUBLIC BOOLEAN LYOpenTraceLog NOARGS
 	 */
 	if (LYValidate) {
 	    if (LYRestricted && had_restrictions_default) {
-		CTRACE(tfp, "Validate and some anonymous restrictions are set.\n");
+		CTRACE((tfp, "Validate and some anonymous restrictions are set.\n"));
 	    } else if (had_restrictions_default) {
-		CTRACE(tfp, "Validate restrictions set, restriction \"default\" was given.\n");
+		CTRACE((tfp, "Validate restrictions set, restriction \"default\" was given.\n"));
 	    } else if (LYRestricted) {
-		CTRACE(tfp, "Validate restrictions set, additional anonymous restrictions ignored.\n");
+		CTRACE((tfp, "Validate restrictions set, additional anonymous restrictions ignored.\n"));
 	    } else {
-		CTRACE(tfp, "Validate restrictions are set.\n");
+		CTRACE((tfp, "Validate restrictions are set.\n"));
 	    }
 	    /* But none of the above can actually happen, since there should
 	     * never be a Trace Log with -validate.  If it appears in a log
 	     * file something went wrong! */
 	} else if (LYRestricted) {
 	    if (had_restrictions_all) {
-		CTRACE(tfp, "Anonymous restrictions set, restriction \"all\" was given.\n");
+		CTRACE((tfp, "Anonymous restrictions set, restriction \"all\" was given.\n"));
 	    } else {
-		CTRACE(tfp, "Anonymous restrictions are set.\n");
+		CTRACE((tfp, "Anonymous restrictions are set.\n"));
 	    }
 	} else if (had_restrictions_all && had_restrictions_default) {
-	    CTRACE(tfp, "Restrictions \"all\" and \"default\" were given.\n");
+	    CTRACE((tfp, "Restrictions \"all\" and \"default\" were given.\n"));
 	} else if (had_restrictions_default) {
-	    CTRACE(tfp, "Restriction \"default\" was given.\n");
+	    CTRACE((tfp, "Restriction \"default\" was given.\n"));
 	} else if (had_restrictions_all) {
-	    CTRACE(tfp, "\"all\" restrictions are set.\n");
+	    CTRACE((tfp, "\"all\" restrictions are set.\n"));
 	}
     }
     return TRUE;
@@ -329,7 +329,7 @@ PUBLIC void LYCloseTracelog NOARGS
 
 PRIVATE BOOLEAN LYReopenTracelog ARGS1(BOOLEAN *, trace_flag_ptr)
 {
-    CTRACE(tfp, "\nTurning off TRACE for fetch of log.\n");
+    CTRACE((tfp, "\nTurning off TRACE for fetch of log.\n"));
     LYCloseTracelog();
     if ((LYTraceLogFP = LYAppendToTxtFile(LYTraceLogPath)) == NULL) {
 	TracelogOpenFailed();
@@ -589,7 +589,7 @@ initialize:
 	refresh();
     }
 #endif /* USE_SLANG */
-    CTRACE(tfp,"Entering mainloop, startfile=%s\n",startfile);
+    CTRACE((tfp,"Entering mainloop, startfile=%s\n",startfile));
 
     if (form_post_data) {
 	StrAllocCopy(newdoc.post_data, form_post_data);
@@ -624,7 +624,7 @@ initialize:
 		FREE(newdoc.post_content_type);
 		newdoc.isHEAD = FALSE;
 		newdoc.safe = FALSE;
-		CTRACE(tfp, "Using bookmarks=%s\n", newdoc.address);
+		CTRACE((tfp, "Using bookmarks=%s\n", newdoc.address));
 	    } else {
 		HTUserMsg(BOOKMARKS_NOT_OPEN);
 		bookmark_start = FALSE;
@@ -1198,8 +1198,8 @@ try_again:
 				    if (!strcmp(homepage, startfile))
 					StrAllocCopy(homepage, newdoc.address);
 				    StrAllocCopy(startfile, newdoc.address);
-				    CTRACE(tfp, "Reloading as bookmarks=%s\n",
-						newdoc.address);
+				    CTRACE((tfp, "Reloading as bookmarks=%s\n",
+						newdoc.address));
 				    goto try_again;
 				}
 			    }
@@ -1466,7 +1466,7 @@ try_again:
 		}
 	    }
 	    FREE(temp);
-	    CTRACE(tfp, "Starting realm is '%s'\n\n", startrealm);
+	    CTRACE((tfp, "Starting realm is '%s'\n\n", startrealm));
 	    if (traversal) {
 		/*
 		 *  Set up the crawl output stuff.
@@ -1495,7 +1495,7 @@ try_again:
 		    }
 		    FREE(temp);
 		}
-		CTRACE(tfp, "Traversal host is '%s'\n\n", traversal_host);
+		CTRACE((tfp, "Traversal host is '%s'\n\n", traversal_host));
 	    }
 	    if (startfile) {
 		/*
@@ -3497,8 +3497,8 @@ new_cmd:  /*
 				    links[curdoc.link].form->submit_action,
 					  "lynxprog:", 9)) {
 			    HTAlert(SPECIAL_ACTION_DISALLOWED);
-			    CTRACE(tfp, "LYMainLoop: Rejected '%s'\n",
-					links[curdoc.link].form->submit_action);
+			    CTRACE((tfp, "LYMainLoop: Rejected '%s'\n",
+					links[curdoc.link].form->submit_action));
 			    HTOutputFormat = WWW_PRESENT;
 			    LYforce_no_cache = FALSE;
 			    reloading = FALSE;
@@ -5490,7 +5490,7 @@ if (!LYUseFormsOptions) {
 		cp = HTParse(curdoc.address, "", PARSE_PATH|PARSE_PUNCTUATION);
 		HTUnEscape(cp);
 		if (HTStat(cp, &stat_info) == -1) {
-		    CTRACE(tfp, "mainloop: Can't stat %s\n", cp);
+		    CTRACE((tfp, "mainloop: Can't stat %s\n", cp));
 		    FREE(cp);
 		    temp = (char *)calloc(1, (strlen(LYCSwingPath) + 4));
 		    if (temp == NULL)
@@ -6942,7 +6942,7 @@ PRIVATE void status_link ARGS3(
 		    buf[cut_from_pos + 4 + n] = buf[cut_to_pos + n];
 	    }
 	    _user_message(format, buf);
-	    CTRACE(tfp,"lastline = %s\n",buf); /* don't forget to erase me */
+	    CTRACE((tfp,"lastline = %s\n",buf)); /* don't forget to erase me */
 	    FREE(buf);
 	} else {	/* show (possibly truncated) url */
 	    _user_message(format, curlink_name);

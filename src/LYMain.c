@@ -1102,8 +1102,8 @@ PUBLIC int main ARGS2(
 		StrAllocCopy(lynx_lss_file, argv[i+1]);
 		i++;
 	    }
-	    CTRACE(tfp, "LYMain found -lss flag, lss file is %s\n",
-		    lynx_lss_file ? lynx_lss_file : "<NONE>");
+	    CTRACE((tfp, "LYMain found -lss flag, lss file is %s\n",
+		    lynx_lss_file ? lynx_lss_file : "<NONE>"));
 #endif
 	}
     }
@@ -1179,8 +1179,8 @@ PUBLIC int main ARGS2(
 		    if (*cp)
 			StrAllocCopy(lynx_lss_file, cp);
 		}
-		CTRACE(tfp, "LYMain found -lss flag, lss file is %s\n",
-			lynx_lss_file ? lynx_lss_file : "<NONE>");
+		CTRACE((tfp, "LYMain found -lss flag, lss file is %s\n",
+			lynx_lss_file ? lynx_lss_file : "<NONE>"));
 #endif
 	    } else if (argcmp(buf, "-get_data") == 0) {
 		/*
@@ -1339,7 +1339,7 @@ PUBLIC int main ARGS2(
 	} else {
 	    sprintf(temp, "JUMPFILE:%s", jumpfile);
 	    if (!LYJumpInit(temp)) {
-		CTRACE(tfp, "Failed to register %s\n", temp);
+		CTRACE((tfp, "Failed to register %s\n", temp));
 	    }
 	    FREE(temp);
 	}
@@ -1504,9 +1504,9 @@ PUBLIC int main ARGS2(
 	StrAllocCopy(LynxSigFile, filename);
 	LYAddPathToHome(filename, sizeof(filename), LynxSigFile);
 	StrAllocCopy(LynxSigFile, filename);
-	CTRACE(tfp, "LYNX_SIG_FILE set to '%s'\n", LynxSigFile);
+	CTRACE((tfp, "LYNX_SIG_FILE set to '%s'\n", LynxSigFile));
     } else {
-	CTRACE(tfp, "LYNX_SIG_FILE '%s' is bad. Ignoring.\n", LYNX_SIG_FILE);
+	CTRACE((tfp, "LYNX_SIG_FILE '%s' is bad. Ignoring.\n", LYNX_SIG_FILE));
     }
 
 #ifdef USE_PSRC
@@ -1906,7 +1906,7 @@ PUBLIC int main ARGS2(
 	ftp_ok = (BOOL)(!no_inside_ftp && !no_outside_ftp && ftp_ok);
 	rlogin_ok = (BOOL)(!no_inside_rlogin && !no_outside_rlogin && rlogin_ok);
 #else
-	CTRACE(tfp, "LYMain: User in Local domain\n");
+	CTRACE((tfp, "LYMain: User in Local domain\n"));
 	telnet_ok = (BOOL)(!no_inside_telnet && telnet_ok);
 #ifndef DISABLE_NEWS
 	news_ok = (BOOL)(!no_inside_news && news_ok);
@@ -1915,7 +1915,7 @@ PUBLIC int main ARGS2(
 	rlogin_ok = (BOOL)(!no_inside_rlogin && rlogin_ok);
 #endif /* !HAVE_UTMP || VMS */
     } else {
-	CTRACE(tfp, "LYMain: User in REMOTE domain\n");
+	CTRACE((tfp, "LYMain: User in REMOTE domain\n"));
 	telnet_ok = (BOOL)(!no_outside_telnet && telnet_ok);
 #ifndef DISABLE_NEWS
 	news_ok = (BOOL)(!no_outside_news && news_ok);
@@ -2154,7 +2154,7 @@ PUBLIC void reload_read_cfg NOARGS
 	}
 	if (strcmp(LYCookieFile, LYCookieFile_flag)) {
 	    StrAllocCopy(LYCookieFile, LYCookieFile_flag);
-	    CTRACE(tfp, "cookies file can be changed in next session only, restored.\n");
+	    CTRACE((tfp, "cookies file can be changed in next session only, restored.\n"));
 	}
 	FREE(LYCookieFile_flag);
 #endif

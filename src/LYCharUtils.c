@@ -1000,8 +1000,8 @@ PUBLIC void LYExpandString ARGS2(
 	**  The chartrans procedure failed, so we don't
 	**  do anything, and hope for the best. - FM
 	*/
-	CTRACE(tfp, "LYExpandString: Bad in (%d) or out (%d) handle(s).\n",
-		    me->inUCLYhndl, me->outUCLYhndl);
+	CTRACE((tfp, "LYExpandString: Bad in (%d) or out (%d) handle(s).\n",
+		    me->inUCLYhndl, me->outUCLYhndl));
 	return;
     }
 
@@ -1414,7 +1414,7 @@ PUBLIC void LYExpandString ARGS2(
 	*/
 	if (code == 8204 || code == 8205 ||
 	    code == 8206 || code == 8207) {
-	    CTRACE(tfp, "LYExpandString: Ignoring '%ld'.\n", code);
+	    CTRACE((tfp, "LYExpandString: Ignoring '%ld'.\n", code));
 	    if (me->T.decode_utf8 && *utf_buf) {
 		utf_buf[0] == '\0';
 		utf_buf_p = utf_buf;
@@ -2371,7 +2371,7 @@ PRIVATE char ** LYUCFullyTranslateString_1 ARGS9(
 		    */
 		} else if (code == 8204 || code == 8205 ||
 			   code == 8206 || code == 8207) {
-		    CTRACE(tfp, "LYUCFullyTranslateString: Ignoring '%ld'.\n", code);
+		    CTRACE((tfp, "LYUCFullyTranslateString: Ignoring '%ld'.\n", code));
 		    replace_buf[0] = '\0';
 		    state = S_got_outstring;
 		    break;
@@ -2705,10 +2705,10 @@ PUBLIC void LYHandleMETA ARGS4(
 	    FREE(content);
 	}
     }
-    CTRACE(tfp, "LYHandleMETA: HTTP-EQUIV=\"%s\" NAME=\"%s\" CONTENT=\"%s\"\n",
+    CTRACE((tfp, "LYHandleMETA: HTTP-EQUIV=\"%s\" NAME=\"%s\" CONTENT=\"%s\"\n",
 		(http_equiv ? http_equiv : "NULL"),
 		(name ? name : "NULL"),
-		(content ? content : "NULL"));
+		(content ? content : "NULL")));
 
     /*
      *	Make sure we have META name/value pairs to handle. - FM
@@ -2986,9 +2986,9 @@ PUBLIC void LYHandleMETA ARGS4(
 	    FREE(cp3);
 
 	    if (me->node_anchor->charset) {
-		CTRACE(tfp,
+		CTRACE((tfp,
 			"LYHandleMETA: New charset: %s\n",
-			me->node_anchor->charset);
+			me->node_anchor->charset));
 	    }
 	}
 	/*
@@ -3401,8 +3401,8 @@ PUBLIC void LYHandleSELECT ARGS5(
 	    /*
 	     *	Let the size be determined by the number of OPTIONs. - FM
 	     */
-	    CTRACE(tfp, "LYHandleSELECT: Ignoring SIZE=\"%s\" for SELECT.\n",
-			value[HTML_SELECT_SIZE]);
+	    CTRACE((tfp, "LYHandleSELECT: Ignoring SIZE=\"%s\" for SELECT.\n",
+			value[HTML_SELECT_SIZE]));
 #endif /* NOTDEFINED */
 	}
 

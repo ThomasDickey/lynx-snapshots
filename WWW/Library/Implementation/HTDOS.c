@@ -101,7 +101,7 @@ char * HTDOS_name ARGS1(char *, wwwname)
     char *result, *ret;
     int joe;
 
-    CTRACE(tfp, "HTDOS_name changed `%s'\n", wwwname);
+    CTRACE((tfp, "HTDOS_name changed `%s'\n", wwwname));
     copy_plus(&cp_url, wwwname);
 
     for (joe = 0; cp_url[joe] != '\0'; joe++)	{
@@ -137,7 +137,7 @@ char * HTDOS_name ARGS1(char *, wwwname)
     ret = result;
 #endif
 
-    CTRACE(tfp, "HTDOS_name changed `%s' to `%s'\n", wwwname, ret);
+    CTRACE((tfp, "HTDOS_name changed `%s' to `%s'\n", wwwname, ret));
     return (ret);
 }
 

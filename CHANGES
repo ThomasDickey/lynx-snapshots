@@ -1,6 +1,17 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+1999-09-29 (2.8.3dev.10)
+* change CTRACE macro to double-parenthesis form, to allow ifdef'ing most
+  trace statements -TD
+* fix the creation of a new bookmark file and takes care that older bookmarks
+  files do not fall into the same bug anymore by making sure the <ol> tag is in
+  a line by itself.  This correction will only be activated when the first
+  bookmark is attempted to be erased (patch by Eduardo Chappa L)
+* change a trace/error message in HTInit.c to say "Lynx" rather than "metamail",
+  to avoid confusion -HN
+* change <tab> formatting in user's guide, etc., to <pre> sections, thereby
+  appeasing Dave Raggett's "tidy" program -TD
 1999-09-13 (2.8.3dev.9)
 * add -nobold, -noreverse, -nounderline options to disable corresponding
   video attributes (based on a patch by John Hawkinson <jhawk@MIT.EDU>) -TD
@@ -27,7 +38,7 @@ Changes since Lynx 2.8 release
 * add links in online help to FAQ-o-matic -JS
 * more fixes to build with slang under cygwin32 - DK
 * add/use LYwaddstr(), etc to fix more const-casts (reported by PG) -TD
-* modify HTTCP.c to prevent telnet and similar applications from inadvertantly
+* modify HTTCP.c to prevent telnet and similar applications from inadvertently
   using hostname tokens which look like command-line options -KW
 * modify configure script's --with-charsets option so that if --without-charsets
   is selected, then it will use a 'minimal' set.  The keyword 'minimal' is

@@ -460,7 +460,7 @@ The local equivalents of CR and LF
 #define LF   FROMASCII('\012')  /* ASCII line feed LOCAL EQUIVALENT */
 #define CR   FROMASCII('\015')  /* Will be converted to ^M for transmission */
 
-#define CTRACE if(TRACE)fprintf
+#define CTRACE(p) if(TRACE)fprintf p
 #define tfp TraceFP()
 #define CTRACE_SLEEP(secs) if (TRACE && LYTraceLogFP == 0) sleep(secs)
 #define CTRACE_FLUSH(fp) if(TRACE) fflush(fp)

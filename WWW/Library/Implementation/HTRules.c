@@ -110,14 +110,14 @@ PUBLIC int HTAddRule ARGS5(
 
     strcpy(pPattern, pattern);
     if (equiv) {
-	CTRACE(tfp, "Rule: For `%s' op %d `%s'", pattern, op, equiv);
+	CTRACE((tfp, "Rule: For `%s' op %d `%s'", pattern, op, equiv));
     } else {
-	CTRACE(tfp, "Rule: For `%s' op %d", pattern, op);
+	CTRACE((tfp, "Rule: For `%s' op %d", pattern, op));
     }
     if (cond_op) {
-	CTRACE(tfp, "\t%s %s\n", cond_op, cond ? cond : "<null>");
+	CTRACE((tfp, "\t%s %s\n", cond_op, cond ? cond : "<null>"));
     } else {
-	CTRACE(tfp, "\n");
+	CTRACE((tfp, "\n"));
     }
 
     if (!rules) {
@@ -172,8 +172,8 @@ PRIVATE BOOL rule_cond_ok ARGS1(
     if (!r->condition_op)
 	return YES;
     if (strcmp(r->condition_op, "if") && strcmp(r->condition_op, "unless")) {
-	CTRACE(tfp, "....... rule ignored, unrecognized `%s'!\n",
-	       r->condition_op);
+	CTRACE((tfp, "....... rule ignored, unrecognized `%s'!\n",
+	       r->condition_op));
 	return NO;
     }
     if (!strcmp(r->condition, "redirected"))
@@ -181,8 +181,8 @@ PRIVATE BOOL rule_cond_ok ARGS1(
     else if (!strcmp(r->condition, "userspec"))
 	result = LYUserSpecifiedURL;
     else {
-	CTRACE(tfp, "....... rule ignored, unrecognized `%s %s'!\n",
-	       r->condition_op, r->condition ? r->condition : "<null>");
+	CTRACE((tfp, "....... rule ignored, unrecognized `%s %s'!\n",
+	       r->condition_op, r->condition ? r->condition : "<null>"));
 	return NO;
     }
     if (!strcmp(r->condition_op, "if"))
@@ -251,12 +251,12 @@ char * HTTranslate ARGS1(
 		char *eff_ids = NULL;
 		char *prot_file = NULL;
 
-		CTRACE(tfp, "HTRule: `%s' matched %s %s: `%s'\n",
+		CTRACE((tfp, "HTRule: `%s' matched %s %s: `%s'\n",
 			    current,
 			    (r->op==HT_Protect ? "Protect" : "DefProt"),
 			    "rule, setup",
 			    (r->equiv ? r->equiv :
-			     (r->op==HT_Protect ?"DEFAULT" :"NULL!!")));
+			     (r->op==HT_Protect ?"DEFAULT" :"NULL!!"))));
 
 		if (r->equiv) {
 		    StrAllocCopy(local_copy, r->equiv);
@@ -303,29 +303,29 @@ char * HTTranslate ARGS1(
 	    break;
 
 	case HT_PermitRedir:			/* Set special flag */
-		    permitredir_flag = 1;
-		    CTRACE(tfp, "HTRule: Mark for redirection permitted\n");
-		    break;
+	    permitredir_flag = 1;
+	    CTRACE((tfp, "HTRule: Mark for redirection permitted\n"));
+	    break;
 
 	case HT_Pass:				/* Authorised */
-		if (!r->equiv) {
-		    if (proxy_none_flag) {
-			char * temp = NULL;
-			StrAllocCopy(temp, "NoProxy=");
-			StrAllocCat(temp, current);
-			FREE(current);
-			current = temp;
-		    }
-		    CTRACE(tfp, "HTRule: Pass `%s'\n", current);
-		    return current;
+	    if (!r->equiv) {
+		if (proxy_none_flag) {
+		    char * temp = NULL;
+		    StrAllocCopy(temp, "NoProxy=");
+		    StrAllocCat(temp, current);
+		    FREE(current);
+		    current = temp;
 		}
-		/* Else fall through ...to map and pass */
+		CTRACE((tfp, "HTRule: Pass `%s'\n", current));
+		return current;
+	    }
+	    /* Else fall through ...to map and pass */
 
 	case HT_Map:
 	case HT_Redirect:
 	case HT_RedirectPerm:
 	    if (*p == *q) { /* End of both strings, no wildcard */
-		  CTRACE(tfp, "For `%s' using `%s'\n", current, r->equiv);
+		  CTRACE((tfp, "For `%s' using `%s'\n", current, r->equiv));
 		  StrAllocCopy(current, r->equiv); /* use entire translation */
 	    } else {
 		  char * ins = strchr(r->equiv, '*');	/* Insertion point */
@@ -338,8 +338,8 @@ char * HTTranslate ARGS1(
 			/* Note: temp may be unterminated now! */
 			strncpy(temp+(ins-r->equiv), q, m);  /* Matched bit */
 			strcpy (temp+(ins-r->equiv)+m, ins+1);	/* Last bit */
-			CTRACE(tfp, "For `%s' using `%s'\n",
-				    current, temp);
+			CTRACE((tfp, "For `%s' using `%s'\n",
+				    current, temp));
 			FREE(current);
 			current = temp; 		/* Use this */
 
@@ -348,8 +348,8 @@ char * HTTranslate ARGS1(
 			if (temp==NULL)
 			    outofmem(__FILE__, "HTTranslate"); /* NT & AS */
 			strcpy(temp, r->equiv);
-			CTRACE(tfp, "For `%s' using `%s'\n",
-						current, temp);
+			CTRACE((tfp, "For `%s' using `%s'\n",
+						current, temp));
 			FREE(current);
 			current = temp; 		/* Use this */
 		    } /* If no insertion point exists */
@@ -362,18 +362,18 @@ char * HTTranslate ARGS1(
 			FREE(current);
 			current = temp;
 		    }
-		    CTRACE(tfp, "HTRule: ...and pass `%s'\n",
-				current);
+		    CTRACE((tfp, "HTRule: ...and pass `%s'\n",
+				current));
 		    return current;
 		} else if (r->op == HT_Redirect) {
-		    CTRACE(tfp, "HTRule: ...and redirect to `%s'\n",
-				current);
+		    CTRACE((tfp, "HTRule: ...and redirect to `%s'\n",
+				current));
 		    redirecting_url = current;
 		    HTPermitRedir = (BOOL) (permitredir_flag == 1);
 		    return (char *)0;
 		} else if (r->op == HT_RedirectPerm) {
-		    CTRACE(tfp, "HTRule: ...and redirect like 301 to `%s'\n",
-				current);
+		    CTRACE((tfp, "HTRule: ...and redirect like 301 to `%s'\n",
+				current));
 		    redirecting_url = current;
 		    permanent_redirection = TRUE;
 		    HTPermitRedir = (BOOL) (permitredir_flag == 1);
@@ -383,19 +383,19 @@ char * HTTranslate ARGS1(
 
 	case HT_UseProxy:
 		if (r->equiv && 0==strcasecomp(r->equiv, "none")) {
-		    CTRACE(tfp, "For `%s' will not use proxy\n", current);
+		    CTRACE((tfp, "For `%s' will not use proxy\n", current));
 		    proxy_none_flag = 1;
 		} else if (proxy_none_flag) {
-		    CTRACE(tfp, "For `%s' proxy server ignored: %s\n",
+		    CTRACE((tfp, "For `%s' proxy server ignored: %s\n",
 			   current,
-			   r->equiv ? r->equiv : "<null>");
+			   r->equiv ? r->equiv : "<null>"));
 		} else {
 		    char * temp = NULL;
 		    StrAllocCopy(temp, "Proxied=");
 		    StrAllocCat(temp, r->equiv);
 		    StrAllocCat(temp, current);
-		    CTRACE(tfp, "HTRule: proxy server found: %s\n",
-			   r->equiv ? r->equiv : "<null>");
+		    CTRACE((tfp, "HTRule: proxy server found: %s\n",
+			   r->equiv ? r->equiv : "<null>"));
 		    FREE(current);
 		    return temp;
 		}
@@ -403,8 +403,8 @@ char * HTTranslate ARGS1(
 
 	case HT_Invalid:
 	case HT_Fail:				/* Unauthorised */
-		CTRACE(tfp, "HTRule: *** FAIL `%s'\n",
-			    current);
+		CTRACE((tfp, "HTRule: *** FAIL `%s'\n",
+			    current));
 		FREE(current);
 		return (char *)0;
 	} /* if tail matches ... switch operation */
@@ -547,7 +547,7 @@ PUBLIC int  HTSetConfiguration ARGS1(
 				 0==strcmp(word2, "303") ||
 				 0==strcasecomp(word2, "temp") ||
 				 0==strcasecomp(word2, "seeother"))) {
-			CTRACE(tfp, "Rule: Ignoring `%s' in Redirect\n", word2);
+			CTRACE((tfp, "Rule: Ignoring `%s' in Redirect\n", word2));
 		    }
 		    word2 = word3;
 		    word3 = cond_op; /* cond_op isn't condition op after all */
@@ -638,7 +638,7 @@ int HTLoadRules ARGS1(
     char line[LINE_LENGTH+1];
 
     if (!fp) {
-	CTRACE(tfp, "HTRules: Can't open rules file %s\n", filename);
+	CTRACE((tfp, "HTRules: Can't open rules file %s\n", filename));
 	return -1; /* File open error */
     }
     for(;;) {

@@ -37,8 +37,8 @@ PRIVATE BOOLEAN message_has_content ARGS1(
     BOOLEAN in_headers = TRUE;
 
     if (!filename || (fp = fopen(filename, "r")) == NULL) {
-	CTRACE(tfp, "Failed to open file %s for reading!\n",
-	       filename ? filename : "(<null>)");
+	CTRACE((tfp, "Failed to open file %s for reading!\n",
+	       filename ? filename : "(<null>)"));
 	return FALSE;
     }
     while (LYSafeGets(&buffer, fp) != NULL) {

@@ -340,7 +340,7 @@ PRIVATE int close_connection ARGS1(
     connection * scan;
     int status = NETCLOSE(con->socket);
     if (TRACE) {
-	CTRACE(tfp, "HTFTP: Closing control socket %d\n", con->socket);
+	CTRACE((tfp, "HTFTP: Closing control socket %d\n", con->socket));
 #ifdef UNIX
 	if (status != 0)
 	    perror("HTFTP:close_connection");
@@ -377,7 +377,7 @@ PRIVATE void help_message_cache_add ARGS1(
     else
 	StrAllocCopy(help_message_buffer, string);
 
-    CTRACE(tfp,"Adding message to help cache: %s\n",string);
+    CTRACE((tfp,"Adding message to help cache: %s\n",string));
 }
 
 PRIVATE char *help_message_cache_non_empty NOARGS
@@ -418,12 +418,12 @@ PRIVATE int response ARGS1(
     int status;
 
     if (!control) {
-	CTRACE(tfp, "HTFTP: No control connection set up!!\n");
+	CTRACE((tfp, "HTFTP: No control connection set up!!\n"));
 	return -99;
     }
 
     if (cmd) {
-	CTRACE(tfp, "  Tx: %s", cmd);
+	CTRACE((tfp, "  Tx: %s", cmd));
 #ifdef NOT_ASCII
 	{
 	    char * p;
@@ -434,8 +434,8 @@ PRIVATE int response ARGS1(
 #endif /* NOT_ASCII */
 	status = NETWRITE(control->socket, cmd, (int)strlen(cmd));
 	if (status < 0) {
-	    CTRACE(tfp, "HTFTP: Error %d sending command: closing socket %d\n",
-			status, control->socket);
+	    CTRACE((tfp, "HTFTP: Error %d sending command: closing socket %d\n",
+			status, control->socket));
 	    close_connection(control);
 	    return status;
 	}
@@ -451,14 +451,14 @@ PRIVATE int response ARGS1(
 		char continuation;
 
 		if (interrupted_in_htgetcharacter) {
-		    CTRACE (tfp, "HTFTP: Interrupted in HTGetCharacter, apparently.\n");
+		    CTRACE((tfp, "HTFTP: Interrupted in HTGetCharacter, apparently.\n"));
 		    NETCLOSE (control->socket);
 		    control->socket = -1;
 		    return HT_INTERRUPTED;
 		}
 
 		*p = '\0';			/* Terminate the string */
-		CTRACE(tfp, "    Rx: %s", response_text);
+		CTRACE((tfp, "    Rx: %s", response_text));
 
 		/* Check for login or help messages */
 		if (!strncmp(response_text,"230-",4) ||
@@ -479,15 +479,15 @@ PRIVATE int response ARGS1(
 	    } /* if end of line */
 
 	    if (interrupted_in_htgetcharacter) {
-		CTRACE (tfp, "HTFTP: Interrupted in HTGetCharacter, apparently.\n");
+		CTRACE((tfp, "HTFTP: Interrupted in HTGetCharacter, apparently.\n"));
 		NETCLOSE (control->socket);
 		control->socket = -1;
 		return HT_INTERRUPTED;
 	    }
 
 	    if (ich == EOF) {
-		CTRACE(tfp, "Error on rx: closing socket %d\n",
-			    control->socket);
+		CTRACE((tfp, "Error on rx: closing socket %d\n",
+			    control->socket));
 		strcpy(response_text, "000 *** TCP read error on response\n");
 		close_connection(control);
 		return -1;	/* End of file on response */
@@ -497,8 +497,8 @@ PRIVATE int response ARGS1(
     } while (continuation_response != -1);
 
     if (result == 421) {
-	CTRACE(tfp, "HTFTP: They close so we close socket %d\n",
-		    control->socket);
+	CTRACE((tfp, "HTFTP: They close so we close socket %d\n",
+		    control->socket));
 	close_connection(control);
 	return -1;
     }
@@ -575,30 +575,30 @@ PRIVATE void get_ftp_pwd ARGS2(
 	if (*ServerType == TCPC_SERVER) {
 	    *ServerType = ((response_text[5] == '/') ?
 					  NCSA_SERVER : TCPC_SERVER);
-	    CTRACE(tfp, "HTFTP: Treating as %s server.\n",
+	    CTRACE((tfp, "HTFTP: Treating as %s server.\n",
 			 ((*ServerType == NCSA_SERVER) ?
-						 "NCSA" : "TCPC"));
+						 "NCSA" : "TCPC")));
 	} else if (response_text[5] == '/') {
 	    /* path names beginning with / imply Unix,
 	     * right?
 	     */
 	    if (set_mac_binary(*ServerType)) {
 		*ServerType = NCSA_SERVER;
-		CTRACE(tfp, "HTFTP: Treating as NCSA server.\n");
+		CTRACE((tfp, "HTFTP: Treating as NCSA server.\n"));
 	    } else {
 		 *ServerType = UNIX_SERVER;
 		 *UseList = TRUE;
-		 CTRACE(tfp, "HTFTP: Treating as Unix server.\n");
+		 CTRACE((tfp, "HTFTP: Treating as Unix server.\n"));
 	    }
 	    return;
 	} else if (response_text[strlen(response_text)-1] == ']') {
 	    /* path names ending with ] imply VMS, right? */
 	    *ServerType = VMS_SERVER;
 	    *UseList = TRUE;
-	    CTRACE(tfp, "HTFTP: Treating as VMS server.\n");
+	    CTRACE((tfp, "HTFTP: Treating as VMS server.\n"));
 	} else {
 	    *ServerType = GENERIC_SERVER;
-	    CTRACE(tfp, "HTFTP: Treating as Generic server.\n");
+	    CTRACE((tfp, "HTFTP: Treating as Generic server.\n"));
 	}
 
 	if ((*ServerType == NCSA_SERVER) ||
@@ -626,7 +626,7 @@ PRIVATE void set_unix_dirstyle ARGS2(
     int status = response("SITE DIRSTYLE\r\n");
     if (status != 2) {
 	*ServerType = GENERIC_SERVER;
-	CTRACE(tfp, "HTFTP: DIRSTYLE failed, treating as Generic server.\n");
+	CTRACE((tfp, "HTFTP: DIRSTYLE failed, treating as Generic server.\n"));
 	return;
     } else {
 	*UseList = TRUE;
@@ -765,10 +765,10 @@ PRIVATE int get_connection ARGS2(
 
     if (status < 0) {
 	if (status == HT_INTERRUPTED) {
-	    CTRACE (tfp, "HTFTP: Interrupted on connect\n");
+	    CTRACE((tfp, "HTFTP: Interrupted on connect\n"));
 	} else {
-	    CTRACE(tfp, "HTFTP: Unable to connect to remote host for `%s'.\n",
-			arg);
+	    CTRACE((tfp, "HTFTP: Unable to connect to remote host for `%s'.\n",
+			arg));
 	}
 	if (status == HT_INTERRUPTED) {
 	    _HTProgress (CONNECTION_INTERRUPTED);
@@ -788,8 +788,8 @@ PRIVATE int get_connection ARGS2(
 	return status;			/* Bad return */
     }
 
-    CTRACE(tfp, "FTP connected, socket %d  control %ld\n",
-		con->socket, (long)con);
+    CTRACE((tfp, "FTP connected, socket %d  control %ld\n",
+		con->socket, (long)con));
     control = con;		/* Current control connection */
 
     /* Initialise buffering for control connection */
@@ -802,7 +802,7 @@ PRIVATE int get_connection ARGS2(
     status = response((char *)0);	/* Get greeting */
 
     if (status == HT_INTERRUPTED) {
-	CTRACE (tfp, "HTFTP: Interrupted at beginning of login.\n");
+	CTRACE((tfp, "HTFTP: Interrupted at beginning of login.\n"));
 	_HTProgress (CONNECTION_INTERRUPTED);
 	NETCLOSE(control->socket);
 	control->socket = -1;
@@ -831,7 +831,7 @@ PRIVATE int get_connection ARGS2(
 			    : "anonymous");
 
 	if (status == HT_INTERRUPTED) {
-	    CTRACE (tfp, "HTFTP: Interrupted while sending username.\n");
+	    CTRACE((tfp, "HTFTP: Interrupted while sending username.\n"));
 	    _HTProgress (CONNECTION_INTERRUPTED);
 	    NETCLOSE(control->socket);
 	    control->socket = -1;
@@ -888,8 +888,8 @@ PRIVATE int get_connection ARGS2(
 	status = response(command);
 	FREE(command);
 	if (status == HT_INTERRUPTED) {
-	    CTRACE (tfp,
-		       "HTFTP: Interrupted while sending password.\n");
+	    CTRACE((tfp,
+		       "HTFTP: Interrupted while sending password.\n"));
 	    _HTProgress (CONNECTION_INTERRUPTED);
 	    NETCLOSE(control->socket);
 	    control->socket = -1;
@@ -901,7 +901,7 @@ PRIVATE int get_connection ARGS2(
     if (status == 3) {
 	status = send_cmd_1("ACCT noaccount");
 	if (status == HT_INTERRUPTED) {
-	    CTRACE (tfp, "HTFTP: Interrupted while sending password.\n");
+	    CTRACE((tfp, "HTFTP: Interrupted while sending password.\n"));
 	    _HTProgress (CONNECTION_INTERRUPTED);
 	    NETCLOSE(control->socket);
 	    control->socket = -1;
@@ -910,11 +910,11 @@ PRIVATE int get_connection ARGS2(
 
     }
     if (status != 2) {
-	CTRACE(tfp, "HTFTP: Login fail: %s", response_text);
+	CTRACE((tfp, "HTFTP: Login fail: %s", response_text));
 	/* if (control->socket > 0) close_connection(control->socket); */
 	return -1;		/* Bad return */
     }
-    CTRACE(tfp, "HTFTP: Logged in.\n");
+    CTRACE((tfp, "HTFTP: Logged in.\n"));
 
     /** Check for host type **/
     if (server_type != NETPRESENZ_SERVER)
@@ -926,72 +926,72 @@ PRIVATE int get_connection ARGS2(
 		    "UNIX Type: L8 MAC-OS MachTen", 28) == 0) {
 	    server_type = MACHTEN_SERVER;
 	    use_list = TRUE;
-	    CTRACE(tfp, "HTFTP: Treating as MachTen server.\n");
+	    CTRACE((tfp, "HTFTP: Treating as MachTen server.\n"));
 
 	} else if (strstr(response_text+4, "UNIX") != NULL ||
 		   strstr(response_text+4, "Unix") != NULL) {
 	    server_type = UNIX_SERVER;
 	    unsure_type = FALSE; /* to the best of out knowledge... */
 	    use_list = TRUE;
-	    CTRACE(tfp, "HTFTP: Treating as Unix server.\n");
+	    CTRACE((tfp, "HTFTP: Treating as Unix server.\n"));
 
 	} else if (strstr(response_text+4, "MSDOS") != NULL) {
 	    server_type = MSDOS_SERVER;
 	    use_list = TRUE;
-	    CTRACE(tfp, "HTFTP: Treating as MSDOS (Unix emulation) server.\n");
+	    CTRACE((tfp, "HTFTP: Treating as MSDOS (Unix emulation) server.\n"));
 
 	} else if (strncmp(response_text+4, "VMS", 3) == 0) {
 	    server_type = VMS_SERVER;
 	    use_list = TRUE;
-	    CTRACE(tfp, "HTFTP: Treating as VMS server.\n");
+	    CTRACE((tfp, "HTFTP: Treating as VMS server.\n"));
 
 	} else if ((strncmp(response_text+4, "VM/CMS", 6) == 0) ||
 		   (strncmp(response_text+4, "VM ", 3) == 0)) {
 	    server_type = CMS_SERVER;
 	    use_list = TRUE;
-	    CTRACE(tfp, "HTFTP: Treating as CMS server.\n");
+	    CTRACE((tfp, "HTFTP: Treating as CMS server.\n"));
 
 	} else if (strncmp(response_text+4, "DCTS", 4) == 0) {
 	    server_type = DCTS_SERVER;
-	    CTRACE(tfp, "HTFTP: Treating as DCTS server.\n");
+	    CTRACE((tfp, "HTFTP: Treating as DCTS server.\n"));
 
 	} else if (strstr(response_text+4, "MAC-OS TCP/Connect II") != NULL) {
 	    server_type = TCPC_SERVER;
-	    CTRACE(tfp, "HTFTP: Looks like a TCPC server.\n");
+	    CTRACE((tfp, "HTFTP: Looks like a TCPC server.\n"));
 	    get_ftp_pwd(&server_type, &use_list);
 	    unsure_type = TRUE;
 
 	} else if (server_type == NETPRESENZ_SERVER) { /* already set above */
 	    use_list = TRUE;
 	    set_mac_binary(server_type);
-	    CTRACE(tfp, "HTFTP: Treating as NetPresenz (MACOS) server.\n");
+	    CTRACE((tfp, "HTFTP: Treating as NetPresenz (MACOS) server.\n"));
 
 	} else if (strncmp(response_text+4, "MACOS Peter's Server", 20) == 0) {
 	    server_type = PETER_LEWIS_SERVER;
 	    use_list = TRUE;
 	    set_mac_binary(server_type);
-	    CTRACE(tfp, "HTFTP: Treating as Peter Lewis (MACOS) server.\n");
+	    CTRACE((tfp, "HTFTP: Treating as Peter Lewis (MACOS) server.\n"));
 
 	} else if (strncmp(response_text+4, "Windows_NT", 10) == 0) {
 	    server_type = WINDOWS_NT_SERVER;
-	    CTRACE(tfp, "HTFTP: Treating as Window_NT server.\n");
+	    CTRACE((tfp, "HTFTP: Treating as Window_NT server.\n"));
 	    set_unix_dirstyle(&server_type, &use_list);
 
 	} else if (strncmp(response_text+4, "MS Windows", 10) == 0) {
 	    server_type = MS_WINDOWS_SERVER;
 	    use_list = TRUE;
-	    CTRACE(tfp, "HTFTP: Treating as MS Windows server.\n");
+	    CTRACE((tfp, "HTFTP: Treating as MS Windows server.\n"));
 
 	} else if (strncmp(response_text+4,
 			   "MACOS AppleShare IP FTP Server", 30) == 0) {
 	    server_type = APPLESHARE_SERVER;
 	    use_list = TRUE;
 	    set_mac_binary(server_type);
-	    CTRACE(tfp, "HTFTP: Treating as AppleShare server.\n");
+	    CTRACE((tfp, "HTFTP: Treating as AppleShare server.\n"));
 
 	} else	{
 	    server_type = GENERIC_SERVER;
-	    CTRACE(tfp, "HTFTP: Ugh!  A Generic server.\n");
+	    CTRACE((tfp, "HTFTP: Ugh!  A Generic server.\n"));
 	    get_ftp_pwd(&server_type, &use_list);
 	    unsure_type = TRUE;
 	 }
@@ -1010,7 +1010,7 @@ PRIVATE int get_connection ARGS2(
 		close_connection(control->socket);
 	    return -status;		/* Bad return */
 	}
-	CTRACE(tfp, "HTFTP: Port defined.\n");
+	CTRACE((tfp, "HTFTP: Port defined.\n"));
     }
 #endif /* NOTREPEAT_PORT */
     return con->socket;			/* Good return */
@@ -1031,7 +1031,7 @@ PRIVATE int close_master_socket NOARGS
     if (master_socket != -1)
 	FD_CLR( (unsigned) master_socket, &open_sockets);
     status = NETCLOSE(master_socket);
-    CTRACE(tfp, "HTFTP: Closed master socket %d\n", master_socket);
+    CTRACE((tfp, "HTFTP: Closed master socket %d\n", master_socket));
     master_socket = -1;
     if (status < 0)
 	return HTInetStatus(gettext("close master socket"));
@@ -1076,7 +1076,7 @@ PRIVATE int get_listen_socket NOARGS
     if (new_socket < 0)
 	return HTInetStatus(gettext("socket for master socket"));
 
-    CTRACE(tfp, "HTFTP: Opened master socket number %d\n", new_socket);
+    CTRACE((tfp, "HTFTP: Opened master socket number %d\n", new_socket));
 
 /*  Search for a free port.
 */
@@ -1111,8 +1111,8 @@ PRIVATE int get_listen_socket NOARGS
 			    /* Cast to generic sockaddr */
 		    sizeof(soc_address))) == 0)
 		break;
-	    CTRACE(tfp, "TCP bind attempt to port %d yields %d, errno=%d\n",
-		port_number, status, SOCKET_ERRNO);
+	    CTRACE((tfp, "TCP bind attempt to port %d yields %d, errno=%d\n",
+		port_number, status, SOCKET_ERRNO));
 	} /* for */
     }
 #else
@@ -1130,8 +1130,8 @@ PRIVATE int get_listen_socket NOARGS
 			     (struct sockaddr *)&soc_address,
 			     (void *)&address_length);
 	if (status<0) return HTInetStatus("getsockname");
-	CTRACE(tfp, "HTFTP: This host is %s\n",
-	    HTInetString(soc_in));
+	CTRACE((tfp, "HTFTP: This host is %s\n",
+	    HTInetString(soc_in)));
 
 	soc_address.sin_port = 0;	/* Unspecified: please allocate */
 #ifdef SOCKS
@@ -1167,9 +1167,9 @@ PRIVATE int get_listen_socket NOARGS
     }
 #endif /* POLL_PORTS */
 
-    CTRACE(tfp, "HTFTP: bound to port %d on %s\n",
+    CTRACE((tfp, "HTFTP: bound to port %d on %s\n",
 		(int)ntohs(soc_in->sin_port),
-		HTInetString(soc_in));
+		HTInetString(soc_in)));
 
 #ifdef REPEAT_LISTEN
     if (master_socket >= 0)
@@ -1206,7 +1206,7 @@ PRIVATE int get_listen_socket NOARGS
 	return HTInetStatus("listen");
     }
   }
-    CTRACE(tfp, "TCP: Master socket(), bind() and listen() all OK\n");
+    CTRACE((tfp, "TCP: Master socket(), bind() and listen() all OK\n"));
     FD_SET( (unsigned) master_socket, &open_sockets);
     if ((master_socket+1) > num_sockets)
 	num_sockets = master_socket+1;
@@ -1691,10 +1691,10 @@ PRIVATE void parse_vms_dir_entry ARGS2(
     }
 
     /** Wrap it up **/
-    CTRACE(tfp, "HTFTP: VMS filename: %s  date: %s  size: %d\n",
+    CTRACE((tfp, "HTFTP: VMS filename: %s  date: %s  size: %d\n",
 		entry_info->filename,
 		entry_info->date ? entry_info->date : "",
-		entry_info->size);
+		entry_info->size));
     return;
 } /* parse_vms_dir_entry() */
 
@@ -1764,10 +1764,10 @@ PRIVATE void parse_ms_windows_dir_entry ARGS2(
     }
 
     /** Wrap it up **/
-    CTRACE(tfp, "HTFTP: MS Windows filename: %s  date: %s  size: %d\n",
+    CTRACE((tfp, "HTFTP: MS Windows filename: %s  date: %s  size: %d\n",
 		entry_info->filename,
 		entry_info->date ? entry_info->date : "",
-		entry_info->size);
+		entry_info->size));
     return;
 } /* parse_ms_windows_dir_entry */
 
@@ -1875,10 +1875,10 @@ PRIVATE void parse_windows_nt_dir_entry ARGS2(
     }
 
     /** Wrap it up **/
-    CTRACE(tfp, "HTFTP: Windows NT filename: %s  date: %s  size: %d\n",
+    CTRACE((tfp, "HTFTP: Windows NT filename: %s  date: %s  size: %d\n",
 		entry_info->filename,
 		entry_info->date ? entry_info->date : "",
-		entry_info->size);
+		entry_info->size));
     return;
 } /* parse_windows_nt_dir_entry */
 #endif /* NOTDEFINED */
@@ -2017,10 +2017,10 @@ PRIVATE void parse_cms_dir_entry ARGS2(
     }
 
     /** Wrap it up. **/
-    CTRACE(tfp, "HTFTP: VM/CMS filename: %s  date: %s  size: %d\n",
+    CTRACE((tfp, "HTFTP: VM/CMS filename: %s  date: %s  size: %d\n",
 		entry_info->filename,
 		entry_info->date ? entry_info->date : "",
-		entry_info->size);
+		entry_info->size));
     return;
 } /* parse_cms_dir_entry */
 
@@ -2070,8 +2070,8 @@ PRIVATE EntryInfo * parse_dir_entry ARGS3(
 		    (len >= 24 && entry[23] != ' ') ||
 		    (len < 24 && strchr(entry, ' '))) {
 		    server_type = UNIX_SERVER;
-		    CTRACE(tfp,
-			   "HTFTP: Falling back to treating as Unix server.\n");
+		    CTRACE((tfp,
+			   "HTFTP: Falling back to treating as Unix server.\n"));
 		} else {
 		    *first = FALSE;
 		}
@@ -2648,14 +2648,14 @@ AgainForMultiNet:
 	    if (ic == EOF && chunk->size == 1)
 	    /* 1 means empty: includes terminating 0 */
 		break;
-	    CTRACE(tfp, "HTFTP: Line in %s is %s\n",
-			lastpath, chunk->data);
+	    CTRACE((tfp, "HTFTP: Line in %s is %s\n",
+			lastpath, chunk->data));
 
 	    entry_info = parse_dir_entry(chunk->data, &first, &spilledname);
 	    if (entry_info->display) {
 		FREE(spilledname);
-		CTRACE(tfp, "Adding file to BTree: %s\n",
-			    entry_info->filename);
+		CTRACE((tfp, "Adding file to BTree: %s\n",
+			    entry_info->filename));
 		HTBTree_add(bt, (EntryInfo *)entry_info);
 	    } else {
 		free_entryinfo_struct_contents(entry_info);
@@ -2851,7 +2851,7 @@ PUBLIC int HTFTPLoad ARGS4(
 	{
 	    status = response(port_command);
 	    if (status == HT_INTERRUPTED) {
-		CTRACE (tfp, "HTFTP: Interrupted in response (port_command)\n");
+		CTRACE((tfp, "HTFTP: Interrupted in response (port_command)\n"));
 		_HTProgress (CONNECTION_INTERRUPTED);
 		NETCLOSE (control->socket);
 		control->socket = -1;
@@ -2863,7 +2863,7 @@ PUBLIC int HTFTPLoad ARGS4(
 		    continue;		/* try again - net error*/
 		return -status;		/* bad reply */
 	    }
-	    CTRACE(tfp, "HTFTP: Port defined.\n");
+	    CTRACE((tfp, "HTFTP: Port defined.\n"));
 	}
 #endif /* REPEAT_PORT */
 #else	/* Use PASV */
@@ -2895,8 +2895,8 @@ PUBLIC int HTFTPLoad ARGS4(
 	       return -99;
 	   }
 	   passive_port = (p0<<8) + p1;
-	   CTRACE(tfp, "HTFTP: Server is listening on port %d\n",
-			passive_port);
+	   CTRACE((tfp, "HTFTP: Server is listening on port %d\n",
+			passive_port));
 
 
 /*	Open connection for data:
@@ -2911,7 +2911,7 @@ PUBLIC int HTFTPLoad ARGS4(
 		return status;			/* Bad return */
 	    }
 
-	    CTRACE(tfp, "FTP data connected, socket %d\n", data_soc);
+	    CTRACE((tfp, "FTP data connected, socket %d\n", data_soc));
 	}
 #endif /* use PASV */
 	status = 0;
@@ -2938,7 +2938,7 @@ PUBLIC int HTFTPLoad ARGS4(
 		init_help_message_cache();  /* to free memory */
 		NETCLOSE(control->socket);
 		control->socket = -1;
-		CTRACE(tfp, "HTFTP: Rejecting path due to illegal escaped slash.\n");
+		CTRACE((tfp, "HTFTP: Rejecting path due to illegal escaped slash.\n"));
 		return -1;
 	    }
 	}
@@ -2974,11 +2974,11 @@ PUBLIC int HTFTPLoad ARGS4(
 		}
 	    }
 	    if (*type != '\0') {
-		CTRACE(tfp, "HTFTP: type=%s\n", type);
+		CTRACE((tfp, "HTFTP: type=%s\n", type));
 	    }
 	}
 	HTUnEscape(filename);
-	CTRACE(tfp, "HTFTP: UnEscaped %s\n", filename);
+	CTRACE((tfp, "HTFTP: UnEscaped %s\n", filename));
 	if (filename[1] == '~') {
 	    /*
 	    ** Check if translation of HOME as tilde is supported,
@@ -3093,7 +3093,7 @@ PUBLIC int HTFTPLoad ARGS4(
 		init_help_message_cache();  /* to free memory */
 		NETCLOSE(control->socket);
 		control->socket = -1;
-		CTRACE(tfp, "HTFTP: Rejecting path due to non-Unix-style syntax.\n");
+		CTRACE((tfp, "HTFTP: Rejecting path due to non-Unix-style syntax.\n"));
 		return -1;
 	    }
 	    /** Handle any unescaped "/%2F" path **/
@@ -3103,15 +3103,15 @@ PUBLIC int HTFTPLoad ARGS4(
 		for (i = 0; filename[(i+1)]; i++)
 		    filename[i] = filename[(i+1)];
 		filename[i] = '\0';
-		CTRACE(tfp, "HTFTP: Trimmed '%s'\n", filename);
+		CTRACE((tfp, "HTFTP: Trimmed '%s'\n", filename));
 		cp = HTMake_VMS_name("", filename);
-		CTRACE(tfp, "HTFTP: VMSized '%s'\n", cp);
+		CTRACE((tfp, "HTFTP: VMSized '%s'\n", cp));
 		if ((cp1=strrchr(cp, ']')) != NULL) {
 		    cp1++;
 		    for (i = 0; cp1[i]; i++)
 			filename[i] = cp1[i];
 		    filename[i] = '\0';
-		    CTRACE(tfp, "HTFTP: Filename '%s'\n", filename);
+		    CTRACE((tfp, "HTFTP: Filename '%s'\n", filename));
 		    *cp1 = '\0';
 		    status = send_cwd(cp);
 		    if (status != 2) {
@@ -3152,7 +3152,7 @@ PUBLIC int HTFTPLoad ARGS4(
 			for (i = 0; cp1[i]; i++)
 			    filename[i] = cp1[i];
 			filename[i] = '\0';
-			CTRACE(tfp, "HTFTP: Filename '%s'\n", filename);
+			CTRACE((tfp, "HTFTP: Filename '%s'\n", filename));
 			*cp1 = '\0';
 			strcat(cp, "[");
 			strcat(cp, filename);
@@ -3259,7 +3259,7 @@ PUBLIC int HTFTPLoad ARGS4(
 	    /** Otherwise, go to appropriate directory and doctor filename **/
 	    if (!strncmp(filename, "/~", 2))
 		filename += 2;
-	    CTRACE(tfp, "check '%s' to translate x/y/ to [.x.y]\n", filename);
+	    CTRACE((tfp, "check '%s' to translate x/y/ to [.x.y]\n", filename));
 	    if (!included_device &&
 		(cp = strchr(filename, '/')) != NULL &&
 		(cp1 = strrchr(cp, '/')) != NULL &&
@@ -3268,10 +3268,10 @@ PUBLIC int HTFTPLoad ARGS4(
 
 		HTSprintf0(&tmp, "[.%.*s]", cp1-cp-1, cp+1);
 
-		CTRACE(tfp, "change path '%s'\n", tmp);
+		CTRACE((tfp, "change path '%s'\n", tmp));
 		while ((cp2 = strrchr(tmp, '/')) != NULL)
 		    *cp2 = '.';
-		CTRACE(tfp, "...to  path '%s'\n", tmp);
+		CTRACE((tfp, "...to  path '%s'\n", tmp));
 
 		status = send_cwd(tmp);
 		FREE(tmp);
@@ -3423,7 +3423,7 @@ listen:
 	    init_help_message_cache();	/* to free memory */
 	    return HTInetStatus("accept");
 	}
-	CTRACE(tfp, "TCP: Accepted new socket %d\n", status);
+	CTRACE((tfp, "TCP: Accepted new socket %d\n", status));
 	data_soc = status;
     }
 #else
@@ -3433,7 +3433,7 @@ listen:
 	if (server_type == UNIX_SERVER && !unsure_type &&
 	    !strcmp(response_text,
 		    "150 Opening ASCII mode data connection for /bin/dl.\n")) {
-	    CTRACE(tfp, "HTFTP: Treating as OS/2 \"dls\" server.\n");
+	    CTRACE((tfp, "HTFTP: Treating as OS/2 \"dls\" server.\n"));
 	    server_type = DLS_SERVER;
 	}
 	status = read_directory (anchor, name, format_out, sink);
@@ -3501,7 +3501,7 @@ listen:
 	/* Reset buffering to control connection DD 921208 */
 
 	status = NETCLOSE(data_soc);
-	CTRACE(tfp, "HTFTP: Closing data socket %d\n", data_soc);
+	CTRACE((tfp, "HTFTP: Closing data socket %d\n", data_soc));
 	if (status < 0 && rv != HT_INTERRUPTED && rv != -1) {
 	    (void) HTInetStatus("close");	/* Comment only */
 	    data_soc = -1;			/* invalidate it */

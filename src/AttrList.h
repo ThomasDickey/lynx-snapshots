@@ -47,7 +47,7 @@ typedef struct {
  int cattr; /* attributes to go with the color */
 } HTCharStyle;
 
-#define HText_characterStyle CTRACE(tfp,"HTC called from %s/%d\n",__FILE__,__LINE__);_internal_HTC
+#define HText_characterStyle CTRACE((tfp,"HTC called from %s/%d\n",__FILE__,__LINE__));_internal_HTC
 
 #undef HText_characterStyle
 #define HText_characterStyle _internal_HTC

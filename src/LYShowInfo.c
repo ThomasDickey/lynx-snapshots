@@ -120,7 +120,7 @@ PUBLIC int showinfo ARGS4(
 	FREE(s);
 
 	if (lstat(temp, &dir_info) == -1) {
-	    CTRACE(tfp, "lstat(%s) failed, errno=%d\n", temp, errno);
+	    CTRACE((tfp, "lstat(%s) failed, errno=%d\n", temp, errno));
 	    HTAlert(CURRENT_LINK_STATUS_FAILED);
 	} else {
 	    char modes[80];

@@ -1,6 +1,6 @@
 /* character level styles for Lynx
  * (c) 1996 Rob Partington -- donated to the Lyncei (if they want it :-)
- * @Id: LYStyle.c 1.32 Thu, 26 Aug 1999 05:31:19 -0600 dickey @
+ * @Id: LYStyle.c 1.33 Wed, 29 Sep 1999 05:40:39 -0600 dickey @
  */
 #include <HTUtils.h>
 #include <HTML.h>
@@ -84,7 +84,7 @@ PRIVATE void parse_attributes ARGS5(char*,mono,char*,fg,char*,bg,int,style,char*
     int mA = 0, fA = default_fg, bA = default_bg, cA = A_NORMAL;
     int newstyle = hash_code(element);
 
-    CTRACE(tfp, "CSS(PA):style d=%d / h=%d, e=%s\n", style, newstyle,element);
+    CTRACE((tfp, "CSS(PA):style d=%d / h=%d, e=%s\n", style, newstyle,element));
 
     for (i = 0; i < (int)TABLESIZE(Mono_Strings); i++)
     {
@@ -121,13 +121,13 @@ PRIVATE void parse_attributes ARGS5(char*,mono,char*,fg,char*,bg,int,style,char*
 	    }
 	}
     }
-    CTRACE(tfp, "CSS(CP):%d\n", colorPairs);
+    CTRACE((tfp, "CSS(CP):%d\n", colorPairs));
 
     fA = check_color(fg, default_fg);
     bA = check_color(bg, default_bg);
 
     if (style == -1) {			/* default */
-	CTRACE(tfp, "CSS(DEF):default_fg=%d, default_bg=%d\n", fA, bA);
+	CTRACE((tfp, "CSS(DEF):default_fg=%d, default_bg=%d\n", fA, bA));
 	default_fg = fA;
 	default_bg = bA;
 	return;
@@ -167,7 +167,7 @@ PRIVATE void parse_attributes ARGS5(char*,mono,char*,fg,char*,bg,int,style,char*
 	     && curPair < 255)
 		our_pairs[cA == A_BOLD][fA][bA] = curPair + 1;
 	}
-	CTRACE(tfp, "CSS(CURPAIR):%d\n", colorPairs);
+	CTRACE((tfp, "CSS(CURPAIR):%d\n", colorPairs));
 	if (style < DSTYLE_ELEMENTS)
 	    setStyle(style, COLOR_PAIR(curPair)|cA, cA, mA);
 	setHashStyle(newstyle, COLOR_PAIR(curPair)|cA, cA, mA, element);
@@ -175,7 +175,7 @@ PRIVATE void parse_attributes ARGS5(char*,mono,char*,fg,char*,bg,int,style,char*
     else
     {
 	if (lynx_has_color && fA != NO_COLOR) {
-	    CTRACE(tfp, "CSS(NC): maximum of %d colorpairs exhausted\n", COLOR_PAIRS - 1);
+	    CTRACE((tfp, "CSS(NC): maximum of %d colorpairs exhausted\n", COLOR_PAIRS - 1));
 	}
 	/* only mono is set */
 	if (style < DSTYLE_ELEMENTS)
@@ -235,9 +235,9 @@ where OBJECT is one of EM,STRONG,B,I,U,BLINK etc.\n\n"), buffer);
 	}
     }
 
-    CTRACE(tfp, "CSSPARSE:%s => %d %s\n",
+    CTRACE((tfp, "CSSPARSE:%s => %d %s\n",
 		element, hash_code(element),
-		(hashStyles[hash_code(element)].name ? "used" : ""));
+		(hashStyles[hash_code(element)].name ? "used" : "")));
 
     strtolower(element);
 
@@ -300,7 +300,7 @@ where OBJECT is one of EM,STRONG,B,I,U,BLINK etc.\n\n"), buffer);
 	{
 	    if (!strcasecomp (HTML_dtd.tags[i].name, element))
 	    {
-		CTRACE(tfp, "PARSECSS:applying style <%s,%s,%s> for HTML_%s\n",mono,fg,bg,HTML_dtd.tags[i].name);
+		CTRACE((tfp, "PARSECSS:applying style <%s,%s,%s> for HTML_%s\n",mono,fg,bg,HTML_dtd.tags[i].name));
 			parse_attributes(mono,fg,bg,i+STARTAT,element);
 		break;
 	    }
@@ -392,7 +392,7 @@ PUBLIC void parse_userstyles NOARGS
 
 	while ((name = HTList_nextObject(cur)) != NULL)
 	{
-		CTRACE(tfp, "LSS:%s\n", name ? name : "!?! empty !?!");
+		CTRACE((tfp, "LSS:%s\n", name ? name : "!?! empty !?!"));
 		if (name != NULL)
 		    parse_style(name);
 	}
@@ -407,7 +407,7 @@ PUBLIC void HStyle_addStyle ARGS1(char*,buffer)
 	if (lss_styles == NULL)
 		lss_styles = HTList_new();
 	strtolower(name);
-	CTRACE(tfp, "READCSS:%s\n", name ? name : "!?! empty !?!");
+	CTRACE((tfp, "READCSS:%s\n", name ? name : "!?! empty !?!"));
 	HTList_addObject (lss_styles, name);
 }
 
@@ -438,14 +438,14 @@ PRIVATE int style_readFromFileREC ARGS2(char*, file, int, toplevel)
     char *buffer = NULL;
     int len;
 
-    CTRACE(tfp, "CSS:Reading styles from file: %s\n", file ? file : "?!? empty ?!?");
+    CTRACE((tfp, "CSS:Reading styles from file: %s\n", file ? file : "?!? empty ?!?"));
     if (file == NULL || *file == '\0')
 	return -1;
     fh = fopen(file, TXT_R);
     if (!fh)
     {
 	/* this should probably be an alert or something */
-	CTRACE(tfp, "CSS:Can't open style file %s, using defaults\n", file);
+	CTRACE((tfp, "CSS:Can't open style file %s, using defaults\n", file));
 	return -1;
     }
 
@@ -508,8 +508,8 @@ PUBLIC void TrimColorClass ARGS3(
 	    *end='\0';
     }
     *phcode = hash_code(lookfrom && *lookfrom ? lookfrom : &tmp[1]);
-    CTRACE(tfp, "CSS:%s (trimmed %s)\n",
-	   (styleclassname ? styleclassname : "<null>"), tmp);
+    CTRACE((tfp, "CSS:%s (trimmed %s)\n",
+	   (styleclassname ? styleclassname : "<null>"), tmp));
 }
 
 /* This function is designed as faster analog to TrimColorClass.

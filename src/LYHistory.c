@@ -309,24 +309,24 @@ PUBLIC void LYpush ARGS2(
 			history[nhist].intern_seq_start =
 			    history[nhist-1].intern_seq_start >= 0 ?
 			    history[nhist-1].intern_seq_start : nhist-1;
-			CTRACE(tfp, "\nLYpush: pushed as internal link, OK\n");
+			CTRACE((tfp, "\nLYpush: pushed as internal link, OK\n"));
 		    }
 		}
 	    }
 	    if (!history[nhist].internal_link) {
-		CTRACE(tfp, "\nLYpush: push as internal link requested, %s\n",
-			    "but didn't check out!");
+		CTRACE((tfp, "\nLYpush: push as internal link requested, %s\n",
+			    "but didn't check out!"));
 	    }
 	}
-	CTRACE(tfp, "\nLYpush[%d]: address:%s\n        title:%s\n",
-		    nhist, doc->address, doc->title);
+	CTRACE((tfp, "\nLYpush[%d]: address:%s\n        title:%s\n",
+		    nhist, doc->address, doc->title));
 	nhist++;
     } else {
 	if (LYCursesON) {
 	    HTAlert(MAXHIST_REACHED);
 	}
-	CTRACE(tfp, "\nLYpush: MAXHIST reached for:\n        address:%s\n        title:%s\n",
-		    doc->address, doc->title);
+	CTRACE((tfp, "\nLYpush: MAXHIST reached for:\n        address:%s\n        title:%s\n",
+		    doc->address, doc->title));
     }
 }
 
@@ -357,8 +357,8 @@ PUBLIC void LYpop ARGS1(
 	/* assume we pop the 'doc' to show it soon... */
 	Newline_partial = doc->line;	/* reinitialize */
 #endif /* DISP_PARTIAL */
-	CTRACE(tfp, "LYpop[%d]: address:%s\n     title:%s\n",
-		    nhist, doc->address, doc->title);
+	CTRACE((tfp, "LYpop[%d]: address:%s\n     title:%s\n",
+		    nhist, doc->address, doc->title));
     }
 }
 

@@ -617,7 +617,7 @@ static int jumpfile_fun ARGS1(
 
     HTSprintf0 (&buffer, "JUMPFILE:%s", value);
     if (!LYJumpInit(buffer))
-	CTRACE(tfp, "Failed to register %s\n", buffer);
+	CTRACE((tfp, "Failed to register %s\n", buffer));
     FREE(buffer);
 
     return 0;
@@ -628,7 +628,7 @@ static int keyboard_layout_fun ARGS1(
 	char *,		key)
 {
     if (!LYSetKbLayout(key))
-	CTRACE(tfp, "Failed to set keyboard layout %s\n", key);
+	CTRACE((tfp, "Failed to set keyboard layout %s\n", key));
     return 0;
 }
 #endif /* EXP_KEYBOARD_LAYOUT */
@@ -719,9 +719,9 @@ static int lynx_sig_file_fun ARGS1(
 	StrAllocCopy(LynxSigFile, temp);
 	LYAddPathToHome(temp, sizeof(temp), LynxSigFile);
 	StrAllocCopy(LynxSigFile, temp);
-	CTRACE(tfp, "LYNX_SIG_FILE set to '%s'\n", LynxSigFile);
+	CTRACE((tfp, "LYNX_SIG_FILE set to '%s'\n", LynxSigFile));
     } else {
-	CTRACE(tfp, "LYNX_SIG_FILE '%s' is bad. Ignoring.\n", LYNX_SIG_FILE);
+	CTRACE((tfp, "LYNX_SIG_FILE '%s' is bad. Ignoring.\n", LYNX_SIG_FILE));
     }
     return 0;
 }
@@ -938,11 +938,11 @@ PRIVATE int parse_charset_choice ARGS2(
     /*only one charset choice is allowed per line!*/
     LYTrimHead(p);
     LYTrimTail(p);
-    CTRACE(tfp, "parsing charset choice for %s:\"%s\"",
-	(display_charset ? "display charset" : "assumed doc charset"), p);
+    CTRACE((tfp, "parsing charset choice for %s:\"%s\"",
+	(display_charset ? "display charset" : "assumed doc charset"), p));
     len = strlen(p);
     if (!len) {
-	CTRACE(tfp," - EMPTY STRING\n");
+	CTRACE((tfp," - EMPTY STRING\n"));
 	return 1;
     }
     if (*p == '*' && len == 1) {
@@ -952,7 +952,7 @@ PRIVATE int parse_charset_choice ARGS2(
 	else
 	    for (custom_assumed_doc_charset = TRUE, i = 0; i < LYNumCharsets; ++i)
 		charset_subsets[i].hide_assumed = FALSE;
-	CTRACE(tfp," - all unhidden\n");
+	CTRACE((tfp," - all unhidden\n"));
 	return 0;
     }
     if (p[len-1] == '*') {
@@ -964,19 +964,19 @@ PRIVATE int parse_charset_choice ARGS2(
 		matched_charset_choice(display_charset, i);
 	    }
 	}
-	CTRACE(tfp," - %d matches\n", matches);
+	CTRACE((tfp," - %d matches\n", matches));
 	return 0;
     } else {
 	for (i = 0; i < LYNumCharsets; ++i) {
 	    if ((!strcasecmp(p,LYchar_set_names[i])) ||
 		(!strcasecmp(p,LYCharSet_UC[i].MIMEname)) ) {
 		matched_charset_choice(display_charset, i);
-		CTRACE(tfp," - OK\n");
+		CTRACE((tfp," - OK\n"));
 		++matches;
 		return 0;
 	    }
 	}
-	CTRACE(tfp," - NOT recognised\n");
+	CTRACE((tfp," - NOT recognised\n"));
 	return 1;
     }
 }
@@ -1070,12 +1070,12 @@ static int read_htmlsrc_attrname_xform ARGS1( char*,str)
     int val;
     if ( 1 == sscanf(str, "%d", &val) ) {
 	if (val<0 || val >2) {
-	    CTRACE(tfp,"bad value for htmlsrc_attrname_xform (ignored - must be one of 0,1,2): %d\n", val);
+	    CTRACE((tfp,"bad value for htmlsrc_attrname_xform (ignored - must be one of 0,1,2): %d\n", val));
 	} else
 	    attrname_transform = val;
     } else {
-	CTRACE(tfp,"bad value for htmlsrc_attrname_xform (ignored): %s\n",
-		    str);
+	CTRACE((tfp,"bad value for htmlsrc_attrname_xform (ignored): %s\n",
+		    str));
     }
     return 0;
 }
@@ -1085,12 +1085,12 @@ static int read_htmlsrc_tagname_xform ARGS1( char*,str)
     int val;
     if ( 1 == sscanf(str,"%d",&val) ) {
 	if (val<0 || val >2) {
-	    CTRACE(tfp,"bad value for htmlsrc_tagname_xform (ignored - must be one of 0,1,2): %d\n", val);
+	    CTRACE((tfp,"bad value for htmlsrc_tagname_xform (ignored - must be one of 0,1,2): %d\n", val));
 	} else
 	    tagname_transform = val;
     } else {
-	CTRACE(tfp,"bad value for htmlsrc_tagname_xform (ignored): %s\n",
-		    str);
+	CTRACE((tfp,"bad value for htmlsrc_tagname_xform (ignored): %s\n",
+		    str));
     }
     return 0;
 }
@@ -1457,7 +1457,7 @@ PRIVATE void do_read_cfg ARGS5(
     char mypath[LY_MAXPATH];
     char *buffer = 0;
 
-    CTRACE(tfp, "Loading cfg file '%s'.\n", cfg_filename);
+    CTRACE((tfp, "Loading cfg file '%s'.\n", cfg_filename));
 
     /*
      *	Don't get hung up by an include file loop.  Arbitrary max depth
@@ -1475,7 +1475,7 @@ PRIVATE void do_read_cfg ARGS5(
      *	Locate and open the file.
      */
     if (!cfg_filename || strlen(cfg_filename) == 0) {
-	CTRACE(tfp,"No filename following -cfg switch!\n");
+	CTRACE((tfp,"No filename following -cfg switch!\n"));
 	return;
     }
     if (!strncmp(cfg_filename, "~/", 2)) {
@@ -1484,7 +1484,7 @@ PRIVATE void do_read_cfg ARGS5(
 	cfg_filename = mypath;
     }
     if ((fp = fopen(cfg_filename, TXT_R)) == 0) {
-	CTRACE(tfp,"lynx.cfg file not found as %s\n",cfg_filename);
+	CTRACE((tfp,"lynx.cfg file not found as %s\n",cfg_filename));
 	return;
     }
     have_read_cfg = TRUE;

@@ -81,9 +81,9 @@ PRIVATE void syntax_error ARGS3(FILE *,	 fp,
 	if (cnt < 40) buffer[cnt++] = (char) ch;
     buffer[cnt] = (char)0;
 
-    CTRACE(tfp, "%s %d before: '%s'\nHTGroup.c: %s (got %s)\n",
+    CTRACE((tfp, "%s %d before: '%s'\nHTGroup.c: %s (got %s)\n",
 		"HTGroup.c: Syntax error in rule file at line",
-		HTlex_line, buffer, msg, lex_verbose(lex_item));
+		HTlex_line, buffer, msg, lex_verbose(lex_item)));
     HTlex_line++;
 }
 
@@ -506,8 +506,8 @@ PRIVATE BOOL part_match ARGS2(CONST char *, tcur,
     actual[cnt] = (char)0;
 
     status = HTAA_templateMatch(required, actual);
-    CTRACE(tfp, "part_match: req: '%s' act: '%s' match: %s\n",
-		required, actual, (status ? "yes" : "no"));
+    CTRACE((tfp, "part_match: req: '%s' act: '%s' match: %s\n",
+		required, actual, (status ? "yes" : "no")));
 
     return status;
 }
@@ -660,21 +660,21 @@ PUBLIC GroupDefList *HTAA_readGroupFile ARGS1(CONST char *, filename)
 
 	while (NULL != (group_cache = (GroupCache*)HTList_nextObject(cur))) {
 	    if (!strcmp(filename, group_cache->group_filename)) {
-		CTRACE(tfp, "%s '%s' %s\n",
+		CTRACE((tfp, "%s '%s' %s\n",
 			    "HTAA_readGroupFile: group file",
-			    filename, "already found in cache");
+			    filename, "already found in cache"));
 		return group_cache->group_list;
 	    } /* if cache match */
 	} /* while cached files remain */
     } /* cache exists */
 
-    CTRACE(tfp, "HTAA_readGroupFile: reading group file `%s'\n",
-		filename);
+    CTRACE((tfp, "HTAA_readGroupFile: reading group file `%s'\n",
+		filename));
 
     if (!(fp = fopen(filename, "r"))) {
-	CTRACE(tfp, "%s '%s'\n",
+	CTRACE((tfp, "%s '%s'\n",
 		    "HTAA_readGroupFile: unable to open group file",
-		    filename);
+		    filename));
 	return NULL;
     }
 
@@ -687,7 +687,7 @@ PUBLIC GroupDefList *HTAA_readGroupFile ARGS1(CONST char *, filename)
     HTList_addObject(group_cache_list, (void*)group_cache);
     fclose(fp);
 
-    CTRACE(tfp, "Read group file '%s', results follow:\n", filename);
+    CTRACE((tfp, "Read group file '%s', results follow:\n", filename));
     if (TRACE)
 	print_group_def_list(group_cache->group_list);
 

@@ -157,10 +157,9 @@ PUBLIC void UCSetTransParams ARGS5(
     int,		cs_out,
     CONST LYUCcharset*,	p_out)
 {
-    CTRACE(tfp, "UCSetTransParams: from %s(%d) to %s(%d)\n",
-/*	   p_in->MIMEname, p_in->UChndl, p_out->MIMEname, p_out->UChndl); */
+    CTRACE((tfp, "UCSetTransParams: from %s(%d) to %s(%d)\n",
 	   p_in->MIMEname,  UCGetLYhndl_byMIME(p_in->MIMEname),
-	   p_out->MIMEname, UCGetLYhndl_byMIME(p_out->MIMEname));
+	   p_out->MIMEname, UCGetLYhndl_byMIME(p_out->MIMEname)));
 
     /*
     **  Initialize this element to FALSE, and set it TRUE

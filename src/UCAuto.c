@@ -77,7 +77,7 @@ PRIVATE void call_setfont ARGS3(
     }
 
     if (T_setfont_cmd) {
-	CTRACE(tfp, "Executing setfont: '%s'\n", T_setfont_cmd);
+	CTRACE((tfp, "Executing setfont: '%s'\n", T_setfont_cmd));
 	LYSystem(T_setfont_cmd);
 	FREE(T_setfont_cmd);
     }
@@ -145,7 +145,7 @@ PUBLIC void UCChangeTerminalCodepage ARGS2(
 		    HTSprintf0(&tmpbuf1, "%s %s %s",
 			    SETFONT, old_font, NOOUTPUT);
 		}
-		CTRACE(tfp, "Executing setfont to restore: '%s'\n", tmpbuf1);
+		CTRACE((tfp, "Executing setfont to restore: '%s'\n", tmpbuf1));
 		LYSystem(tmpbuf1);
 		FREE(tmpbuf1);
 	    }
@@ -177,7 +177,7 @@ PUBLIC void UCChangeTerminalCodepage ARGS2(
 	    char *rp;
 	    HTSprintf0(&tmpbuf1, "%s -o %s -ou %s %s",
 		       SETFONT, old_font, old_umap, NOOUTPUT);
-	    CTRACE(tfp, "Executing setfont to save: '%s'\n", tmpbuf1);
+	    CTRACE((tfp, "Executing setfont to save: '%s'\n", tmpbuf1));
 	    LYSystem(tmpbuf1);
 	    FREE(tmpbuf1);
 	    LYCloseTempFP(fp1);
@@ -371,10 +371,10 @@ PUBLIC void UCChangeTerminalCodepage ARGS2(
 
     if (p->codepage) {
 	res = VioSetCp(0, p->codepage, 0);
-	CTRACE(tfp, "UCChangeTerminalCodepage: VioSetCp(%d) returned %d\n", p->codepage, res);
+	CTRACE((tfp, "UCChangeTerminalCodepage: VioSetCp(%d) returned %d\n", p->codepage, res));
     }
 #else
-    CTRACE(tfp, "UCChangeTerminalCodepage: Called, but not implemented!");
+    CTRACE((tfp, "UCChangeTerminalCodepage: Called, but not implemented!"));
 #endif
 }
 #endif /* LINUX */
@@ -387,6 +387,6 @@ PUBLIC void UCChangeTerminalCodepage ARGS2(
 	int,		newcs GCC_UNUSED,
 	LYUCcharset *,	p GCC_UNUSED)
 {
-    CTRACE(tfp, "UCChangeTerminalCodepage: Called, but not implemented!");
+    CTRACE((tfp, "UCChangeTerminalCodepage: Called, but not implemented!"));
 }
 #endif /* EXP_CHARTRANS_AUTOSWITCH */

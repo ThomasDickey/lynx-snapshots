@@ -191,7 +191,7 @@ PRIVATE void write_anchor ARGS2(CONST char *,text, CONST char *,addr)
     present[HTML_A_TITLE] = YES;
     ((CONST char **)value)[HTML_A_TITLE] = text;
 
-    CTRACE(tfp,"HTGopher: adding URL: %s\n",addr);
+    CTRACE((tfp,"HTGopher: adding URL: %s\n",addr));
 
     HT_Is_Gopher_URL = TRUE;  /* tell HTML.c that this is a Gopher URL */
     (*targetClass.start_element)(target, HTML_A, present,
@@ -251,7 +251,7 @@ PRIVATE void parse_menu ARGS2(
     while ((ich=NEXT_CHAR) != EOF) {
 
 	if (interrupted_in_htgetcharacter) {
-	    CTRACE(tfp, "HTGopher: Interrupted in HTGetCharacter, apparently.\n");
+	    CTRACE((tfp, "HTGopher: Interrupted in HTGetCharacter, apparently.\n"));
 	    goto end_html;
 	}
 
@@ -264,7 +264,7 @@ PRIVATE void parse_menu ARGS2(
 	    bytes += p-line;	/* add size */
 	    p = line;		/* Scan it to parse it */
 	    port = 0;		/* Flag "not parsed" */
-	    CTRACE(tfp, "HTGopher: Menu item: %s\n", line);
+	    CTRACE((tfp, "HTGopher: Menu item: %s\n", line));
 	    gtype = *p++;
 
 	    if (bytes > BytesReported + 1024) {
@@ -421,7 +421,7 @@ PRIVATE void parse_menu ARGS2(
 		    PUTS(name);
 		FREE(address);
 	    } else { /* parse error */
-		CTRACE(tfp, "HTGopher: Bad menu item.\n");
+		CTRACE((tfp, "HTGopher: Bad menu item.\n"));
 		PUTS(line);
 
 	    } /* parse error */
@@ -940,7 +940,7 @@ PRIVATE int parse_cso_fields ARGS2(
     */
     while ((ich = NEXT_CHAR) != EOF) {
 	if (interrupted_in_htgetcharacter) {
-	    CTRACE(tfp, "HTLoadCSO: Interrupted in HTGetCharacter, apparently.\n");
+	    CTRACE((tfp, "HTLoadCSO: Interrupted in HTGetCharacter, apparently.\n"));
 	    free_CSOfields();
 	    buf[0] = '\0';
 	    return HT_INTERRUPTED;
@@ -1237,7 +1237,7 @@ PRIVATE int generate_cso_report ARGS1(
     */
     while (!stop && (ich = NEXT_CHAR) != EOF) {
 	if (interrupted_in_htgetcharacter) {
-	    CTRACE(tfp, "HTLoadCSO: Interrupted in HTGetCharacter, apparently.\n");
+	    CTRACE((tfp, "HTLoadCSO: Interrupted in HTGetCharacter, apparently.\n"));
 	    _HTProgress (CONNECTION_INTERRUPTED);
 	    goto end_CSOreport;
 	}
@@ -1459,7 +1459,7 @@ PRIVATE int HTLoadCSO ARGS4(
 	return -3;		/* Bad if no name sepcified	*/
     if (!*arg)
 	return -2;		/* Bad if name had zero length	*/
-    CTRACE(tfp, "HTLoadCSO: Looking for %s\n", arg);
+    CTRACE((tfp, "HTLoadCSO: Looking for %s\n", arg));
 
     /*
     **	Set up a socket to the server for the data.
@@ -1469,26 +1469,26 @@ PRIVATE int HTLoadCSO ARGS4(
 	/*
 	**  Interrupt cleanly.
 	*/
-	CTRACE(tfp, "HTLoadCSO: Interrupted on connect; recovering cleanly.\n");
+	CTRACE((tfp, "HTLoadCSO: Interrupted on connect; recovering cleanly.\n"));
 	_HTProgress (CONNECTION_INTERRUPTED);
 	return HT_NOT_LOADED;
     }
     if (status < 0) {
-	CTRACE(tfp, "HTLoadCSO: Unable to connect to remote host for `%s'.\n",
-		    arg);
+	CTRACE((tfp, "HTLoadCSO: Unable to connect to remote host for `%s'.\n",
+		    arg));
 	return HTInetStatus("connect");
     }
 
     HTInitInput(s);		/* Set up input buffering */
 
     HTSprintf0(&command, "fields%c%c", CR, LF);
-    CTRACE(tfp, "HTLoadCSO: Connected, writing command `%s' to socket %d\n",
-		command, s);
+    CTRACE((tfp, "HTLoadCSO: Connected, writing command `%s' to socket %d\n",
+		command, s));
     _HTProgress (GOPHER_SENDING_CSO_REQUEST);
     status = NETWRITE(s, command, (int)strlen(command));
     FREE(command);
     if (status < 0) {
-	CTRACE(tfp, "HTLoadCSO: Unable to send command.\n");
+	CTRACE((tfp, "HTLoadCSO: Unable to send command.\n"));
 	return HTInetStatus("send");
     }
     _HTProgress (GOPHER_SENT_CSO_REQUEST);
@@ -1655,12 +1655,12 @@ PRIVATE int HTLoadCSO ARGS4(
     (*Target->isa->put_block)(Target, command, strlen(command));
     strcpy(buf, "</H2>\n");
     (*Target->isa->put_block)(Target, buf, strlen(buf));
-    CTRACE(tfp, "HTLoadCSO: Writing command `%s' to socket %d\n",
-		command, s);
+    CTRACE((tfp, "HTLoadCSO: Writing command `%s' to socket %d\n",
+		command, s));
     status = NETWRITE(s, command, strlen(command));
     FREE(command);
     if (status < 0) {
-	CTRACE(tfp, "HTLoadCSO: Unable to send command.\n");
+	CTRACE((tfp, "HTLoadCSO: Unable to send command.\n"));
 	free_CSOfields();
 	return HTInetStatus("send");
     }
@@ -1697,7 +1697,7 @@ PRIVATE int HTLoadGopher ARGS4(
 	return -3;		/* Bad if no name sepcified	*/
     if (!*arg)
 	return -2;		/* Bad if name had zero length	*/
-    CTRACE(tfp, "HTGopher: Looking for %s\n", arg);
+    CTRACE((tfp, "HTGopher: Looking for %s\n", arg));
 
     /*
     **	If it's a port 105 GOPHER_CSO gtype with no ISINDEX token ('?'),
@@ -1710,7 +1710,7 @@ PRIVATE int HTLoadGopher ARGS4(
 	if ((len = strlen(arg)) > 5) {
 	    if (0 == strcmp((CONST char *)&arg[len-6], ":105/2")) {
 		/* Use CSO gateway. */
-		CTRACE(tfp, "HTGopher: Passing to CSO/PH gateway.\n");
+		CTRACE((tfp, "HTGopher: Passing to CSO/PH gateway.\n"));
 		return HTLoadCSO(arg, anAnchor, format_out, sink);
 	    }
 	}
@@ -1721,7 +1721,7 @@ PRIVATE int HTLoadGopher ARGS4(
     */
     if (strstr(arg, ":79/0") != NULL) {
 #ifndef DISABLE_FINGER
-	CTRACE(tfp, "HTGopher: Passing to finger gateway.\n");
+	CTRACE((tfp, "HTGopher: Passing to finger gateway.\n"));
 	return HTLoadFinger(arg, anAnchor, format_out, sink);
 #else /* finger is disabled */
 	HTAlert(gettext("Unable to access document!"));
@@ -1824,22 +1824,22 @@ PRIVATE int HTLoadGopher ARGS4(
 	/*
 	**  Interrupt cleanly.
 	*/
-	CTRACE(tfp, "HTGopher: Interrupted on connect; recovering cleanly.\n");
+	CTRACE((tfp, "HTGopher: Interrupted on connect; recovering cleanly.\n"));
 	_HTProgress (CONNECTION_INTERRUPTED);
 	FREE(command);
 	return HT_NOT_LOADED;
     }
     if (status < 0) {
-	CTRACE(tfp, "HTGopher: Unable to connect to remote host for `%s'.\n",
-		    arg);
+	CTRACE((tfp, "HTGopher: Unable to connect to remote host for `%s'.\n",
+		    arg));
 	FREE(command);
 	return HTInetStatus("connect");
     }
 
     HTInitInput(s);		/* Set up input buffering */
 
-    CTRACE(tfp, "HTGopher: Connected, writing command `%s' to socket %d\n",
-		command, s);
+    CTRACE((tfp, "HTGopher: Connected, writing command `%s' to socket %d\n",
+		command, s));
 
 #ifdef NOT_ASCII
     {
@@ -1855,7 +1855,7 @@ PRIVATE int HTLoadGopher ARGS4(
     status = NETWRITE(s, command, (int)strlen(command));
     FREE(command);
     if (status < 0) {
-	CTRACE(tfp, "HTGopher: Unable to send command.\n");
+	CTRACE((tfp, "HTGopher: Unable to send command.\n"));
 	return HTInetStatus("send");
     }
 

@@ -1651,10 +1651,10 @@ PUBLIC void HTSwitchDTD ARGS1(
     BOOL,		new)
 {
     if (TRACE)
-	CTRACE(tfp,"HTMLDTD: Copying DTD element info of size %d, %d * %d\n",
+	CTRACE((tfp,"HTMLDTD: Copying DTD element info of size %d, %d * %d\n",
 		(int) (new ? sizeof(tags_new) : sizeof(tags_old)),
 		HTML_ELEMENTS,
-		(int) sizeof(HTTag));
+		(int) sizeof(HTTag)));
     if (new)
 	memcpy(tags, tags_new, HTML_ELEMENTS * sizeof(HTTag));
     else

@@ -94,8 +94,8 @@ PUBLIC char * get_bookmark_filename ARGS1(
     LYAddPathToHome(filename_buffer,
 		    sizeof(filename_buffer),
 		    BookmarkPage);
-    CTRACE(tfp, "\nget_bookmark_filename: SEEKING %s\n   AS %s\n\n",
-		BookmarkPage, filename_buffer);
+    CTRACE((tfp, "\nget_bookmark_filename: SEEKING %s\n   AS %s\n\n",
+		BookmarkPage, filename_buffer));
     if ((fp = fopen(filename_buffer, TXT_R)) != NULL) {
 	goto success;
     }
@@ -350,8 +350,8 @@ PUBLIC void save_bookmark_link ARGS2(
 			sizeof(filename_buffer),
 			BookmarkPage);
     }
-    CTRACE(tfp, "\nsave_bookmark_link: SEEKING %s\n   AS %s\n\n",
-		BookmarkPage, filename_buffer);
+    CTRACE((tfp, "\nsave_bookmark_link: SEEKING %s\n   AS %s\n\n",
+		BookmarkPage, filename_buffer));
     if ((fp = fopen(filename_buffer, (first_time ? "w" : "a+"))) == NULL) {
 	LYMBM_statusline(BOOKMARK_OPEN_FAILED);
 	sleep(AlertSecs);
@@ -387,7 +387,7 @@ PUBLIC void save_bookmark_link ARGS2(
 	fprintf(fp,
 	    gettext("     You can delete links by the 'R' key<br>\n<ol>\n"));
 #else
-	fprintf(fp, "%s<br>\n%s\n\n<!--\n%s\n-->\n\n<p>\n<ol>",
+	fprintf(fp, "%s<br>\n%s\n\n<!--\n%s\n-->\n\n<p>\n<ol>\n",
 		    gettext("\
      You can delete links using the remove bookmark command.  It is usually\n\
      the 'R' key but may have been remapped by you or your system\n\
@@ -482,15 +482,15 @@ PUBLIC void remove_bookmark_link ARGS2(
 #endif /* VMS */
     char homepath[LY_MAXPATH];
 
-    CTRACE(tfp, "remove_bookmark_link: deleting link number: %d\n", cur);
+    CTRACE((tfp, "remove_bookmark_link: deleting link number: %d\n", cur));
 
     if (!cur_bookmark_page)
 	return;
     LYAddPathToHome(filename_buffer,
 		    sizeof(filename_buffer),
 		    cur_bookmark_page);
-    CTRACE(tfp, "\nremove_bookmark_link: SEEKING %s\n   AS %s\n\n",
-		cur_bookmark_page, filename_buffer);
+    CTRACE((tfp, "\nremove_bookmark_link: SEEKING %s\n   AS %s\n\n",
+		cur_bookmark_page, filename_buffer));
     if ((fp = fopen(filename_buffer, TXT_R)) == NULL) {
 	HTAlert(BOOKMARK_OPEN_FAILED_FOR_DEL);
 	return;
@@ -530,15 +530,19 @@ PUBLIC void remove_bookmark_link ARGS2(
 	}
 
     } else {
-	char *cp;
+	char *cp, *cp2;
 	BOOLEAN retain;
 	int seen;
 
 	n = -1;
 	while (LYSafeGets(&buf, fp) != NULL) {
+	    int keep_ol = FALSE;
 	    retain = TRUE;
 	    seen = 0;
 	    cp = buf;
+	    if ((cur == 0) && (cp2 = LYstrstr(cp,"<ol><LI>")))
+		keep_ol = TRUE; /* Do not erase, this corrects a bug in an
+				   older version */
 	    while (n < cur && (cp = LYstrstr(cp, "<a href="))) {
 		seen++;
 		if (++n == cur) {
@@ -547,7 +551,9 @@ PUBLIC void remove_bookmark_link ARGS2(
 			HTAlert(BOOKMARK_LINK_NOT_ONE_LINE);
 			goto failure;
 		    }
-		    CTRACE(tfp, "remove_bookmark_link: skipping link %d\n", n);
+		    CTRACE((tfp, "remove_bookmark_link: skipping link %d\n", n));
+		    if (keep_ol)
+			fprintf(nfp,"<ol>\n");
 		    retain = FALSE;
 		}
 		cp += 8;
@@ -557,8 +563,8 @@ PUBLIC void remove_bookmark_link ARGS2(
 	}
     }
 
-    CTRACE(tfp, "remove_bookmark_link: files: %s %s\n",
-			newfile, filename_buffer);
+    CTRACE((tfp, "remove_bookmark_link: files: %s %s\n",
+			newfile, filename_buffer));
 
     fclose(fp);
     fp = NULL;

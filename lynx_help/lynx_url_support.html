@@ -76,8 +76,10 @@ according to the rules specified in RFC1808 and subsequent IETF drafts.
 <H2><a name="http">The <em>http</em> and <em>https</em> URLs:</a></H2>
 
 Lynx handles http URLs exactly as specified in RFC1738.  The format
-is:<BR>
-<tab indent="12"><em>http://host:port/path?searchpart#fragment</em><BR>
+is:
+<pre>
+      <em>http://host:port/path?searchpart#fragment</em>
+</pre>
 where <em>:port</em> is optional and defaults to <em>:80</em>,
 <em>/path</em> if present is a slash-separated series of symbolic
 elements, and <em>?searchpart</em> if present is the query for an ISINDEX
@@ -100,8 +102,10 @@ in the general distributions of freeware WWW clients such as Lynx.  Sorry.
 >The <em>telnet</em>, <em>tn3270</em>, and <em>rlogin</em> URLs:</a></H2>
 
 A <em>telnet</em> URL generally results in Lynx spawning a telnet
-session.  Lynx implements the complete telnet URL scheme, i.e.:<BR>
-<tab indent="12"><em>telnet://user:password@host:port</em>
+session.  Lynx implements the complete telnet URL scheme, i.e.:
+<pre>
+      <em>telnet://user:password@host:port</em>
+</pre>
 
 <p>The <em>user</em> and/or <em>:password</em> fields may be omitted, and
 the <em>@</em> should be omitted if neither is present.  The port defaults
@@ -120,8 +124,10 @@ or not one was included in the URL.
 
 <H2><a name="gopher">The <em>gopher</em> URL:</a></H2>
 
-The gopher URL takes the form:<BR>
-<tab indent="12"><em>gopher://host:port/gopher-path</em><BR>
+The gopher URL takes the form:
+<pre>
+      <em>gopher://host:port/gopher-path</em>
+</pre>
 where <em>:port</em> is optional and defaults to <em>:70</em>, and the
 <em>/gopher-path</em> is opaque (not fully equivalent to the
 slash-separated series of symbolic elements of http paths) as explained
@@ -150,9 +156,13 @@ but other WWW clients may mishandle it.
 <p>For the <em>gophertype</em> which signifies HTML (<em>h</em>), if the
 <em>selector</em> begins with <em>GET%20/</em> Lynx will convert the gopher
 URL to an http URL, e.g.:<BR>
-<tab indent="12"><em>gopher://www.wfbr.edu:80/hGET%20/</em><BR>
+<pre>
+<em>gopher://www.wfbr.edu:80/hGET%20/</em>
+</pre>
 will become:<BR>
-<tab indent="12"><em>http://www.wfbr.edu/</em><BR>
+<pre>
+<em>http://www.wfbr.edu/</em>
+</pre>
 The port field will be retained if it is not <em>:80</em>, and will default
 to <em>:70</em> if it was defaulted originally.  These conventions were
 adopted during development of the University of Minnesota gopher software
@@ -166,23 +176,27 @@ and UMN Gopherisms.
 The file URL is used to retrieve files or generate a directory listing
 on the local host.  The host field can be <em>localhost</em> or a domain
 name for the local host:<BR>
-<tab indent="12"><em>file://localhost/path</em><BR>
+<pre>
+<em>file://localhost/path</em>
+</pre>
 If you do not use <em>localhost</em> or a domain name for the local host,
 Lynx will substitute <em>ftp://</em> for <em>file://</em> and treat it
 as an ftp URL.
 
 <p>The <em>/path</em> is treated as originating at the root, unless
-you include a tilde (<em>~</em>), e.g.:<BR>
-<tab indent="12"><em>file://localhost/~/foo</em>
-<tab indent="60">will be converted to:<BR>
-<tab indent="12"><em>file://localhost/your/login/directory/foo</em><BR>
+you include a tilde (<em>~</em>), e.g.:
+<pre>
+      <em>file://localhost/~/foo</em>   will be converted to:
+      <em>file://localhost/your/login/directory/foo</em>
+</pre>
 The latter feature is a Lynxism, is done homologously on Unix and VMS,
 and should be used ONLY in local documents intended for Lynx.
 
 <p>On VMS, the first element of the path, if not a tilde, is assumed to
-be a device, e.g.:<BR>
-<tab indent="12"
-><em>file://localhost/www_root/directory/filename.suffix</em><BR>
+be a device, e.g.:
+<pre>
+      <em>file://localhost/www_root/directory/filename.suffix</em>
+</pre>
 should be used for: <em>www_root:[directory]filename.suffix</em><BR>
 If you are unsure how to specify a file URL in local documents on
 VMS, invoke Lynx with the desired file or directory as the
@@ -193,9 +207,10 @@ URL which Lynx created for it.
 
 <H2><a name="ftp">The <em>ftp</em> URL:</a></H2>
 
-The ftp URL has the general format:<BR>
-<tab indent="12"
-><em>ftp://username:password@host:port/path;type=[D,I, or A]</em><BR>
+The ftp URL has the general format:
+<pre>
+      <em>ftp://username:password@host:port/path;type=[D,I, or A]</em>
+</pre>
 
 <p>The default port is <em>:21</em> and the default <em>username</em>
 is <em>anonymous</em>.  If <em>username</em> is included but not
@@ -221,12 +236,16 @@ string if present is treated as in or under the login directory.  For
 VMS ftp servers, if you wish to have the first element treated as a
 device rather than file or subdirectory name, begin it with a hex-escaped
 slash (<em>%2f</em>), e.g.:<BR>
-<tab indent="12"><em>ftp://user@myhost/%2fsys$common/syshlp</em><BR>
+<pre>
+<em>ftp://user@myhost/%2fsys$common/syshlp</em>
+</pre>
 can be used for a listing of sys$common:[syshlp]<BR>
 Also, on VM/CMS ftp servers, if the <em>path</em> string begins
 with <em>vmsysu%3a</em> it receives special handling as an SFS
-path, e.g.:<BR>
-<tab indent="12"><em>ftp://ubvm.cc.buffalo.edu/vmsysu%3alistserv.webshare</em>
+path, e.g.:
+<pre>
+      <em>ftp://ubvm.cc.buffalo.edu/vmsysu%3alistserv.webshare</em>
+</pre>
 
 <p>For Unix and Unix-emulation ftp servers, RFC1738 is not respected
 and the lead slash is treated as the root, i.e., the <em>/path</em> is
@@ -235,17 +254,21 @@ irrelevant for anonymous ftp, but matters when using ftp for
 non-anonymous accounts.  If you are using ftp with a Unix server and
 do wish to get a listing of the login directory or have the <em>path</em>
 string treated as a file or path under the login directory, include a
-tilde (<em>~</em>) as for <a href="#file">file</a> URLs, e.g.:<BR>
-<tab indent="12"><em>ftp://user@myhost/~</em>
+tilde (<em>~</em>) as for <a href="#file">file</a> URLs, e.g.:
+<pre>
+      <em>ftp://user@myhost/~</em>
+</pre>
 <HR>
 
 <H2><a name="wais">The <em>wais</em> URL:</a></H2>
 
 The wais URL is used to retrieve resources using the Wide Area Information
-System protocol.  The format is:<BR>
-<tab indent="12"><em>wais://host:port/database</em><BR>
-<tab indent="12"><em>wais://host:port/database?wais_query</em><BR>
-<tab indent="12"><em>wais://host:port/database/wais_type/wais_path</em><BR>
+System protocol.  The format is:
+<pre>
+      <em>wais://host:port/database</em>
+      <em>wais://host:port/database?wais_query</em>
+      <em>wais://host:port/database/wais_type/wais_path</em>
+</pre>
 where <em>:port</em> defaults to <em>:210</em>
 
 <p>Direct wais support is built into Lynx for VMS, and can be compiled
@@ -275,15 +298,14 @@ but cannot be included in the general distribution (sorry, see <a
 href="#http">http and https</a>).
 
 <p>The formats are:<BR>
-<tab indent="12"><em>news:newsgroup</em> <tab
-id="ng">(retrieves list of messages in newsgroup)<BR>
-<tab indent="12"><em>news:messageID</em> <tab
-to="ng">(retrieves the message)<BR>
-<tab indent="12"><em>news:*</em> <tab
-to="ng">(retrieves list of all available newsgroups)<BR>
-<tab indent="12"><em>nntp://host:port/newsgroup</em><BR>
-<tab indent="12"><em>nntp://host:port/messageID</em><BR>
-<tab indent="12"><em>nntp://host:port/*</em><BR>
+<pre>
+      <em>news:newsgroup</em> (retrieves list of messages in newsgroup)
+      <em>news:messageID</em> (retrieves the message)
+      <em>news:*</em> (retrieves list of all available newsgroups)
+      <em>nntp://host:port/newsgroup</em>
+      <em>nntp://host:port/messageID</em>
+      <em>nntp://host:port/*</em>
+</pre>
 (snews same as nntp, but the default port is <em>:563</em>)
 
 <p>The <em>messageID</em> is the message's unique identifier, consisting
@@ -291,9 +313,11 @@ of an identification string and the host of origin for the message
 (<em>ident_string@origin_host</em>).
 
 <p>Lynx also supports wildcarding via an asterisk for listings of news
-hierarchies or sub-hierarchies, e.g.:<BR>
-<tab indent="12"><em>news:comp.infosystems.*</em><BR>
-<tab indent="12"><em>nntp://host:port/comp.infosystems.*</em><BR>
+hierarchies or sub-hierarchies, e.g.:
+<pre>
+      <em>news:comp.infosystems.*</em>
+      <em>nntp://host:port/comp.infosystems.*</em>
+</pre>
 (snews same as nntp, but the default port is <em>:563</em>)<BR>
 This is not in RFC1738 and may not be supported by all other clients.
 
@@ -306,12 +330,12 @@ snewspost, snewsreply</a>).
 with a supported scheme into a link for accessing that URL.
 
 <p>Lynx also supports the newsgroup and message number URL scheme:<BR>
-<tab indent="12"><em>news:newsgroup/startNo-endNo</em> <tab
-id="ngno">(lists message range in newsgroup)<BR>
-<tab indent="12"><em>news:newsgroup/messageNo</em> <tab
-to="ngno">(retrieves the message by number)<BR>
-<tab indent="12"><em>nntp://host:port/newsgroup/startNo-endNo</em><BR>
-<tab indent="12"><em>nntp://host:port/newsgroup/messageNo</em><BR>
+<pre>
+      <em>news:newsgroup/startNo-endNo</em> (lists message range in newsgroup)
+      <em>news:newsgroup/messageNo</em>     (retrieves the message by number)
+      <em>nntp://host:port/newsgroup/startNo-endNo</em>
+      <em>nntp://host:port/newsgroup/messageNo</em>
+</pre>
 (snews same as nntp, but the default port is <em>:563</em>)<BR>
 Use of this scheme is not recommended, because the message numbers
 are specific to each nntp server, unlike the unique identifiers for
@@ -336,11 +360,11 @@ with SSL capable nntp servers, but the latter requires patches for built
 in SSL support, or use of a daemon which handles the secure communications
 on behalf of Lynx.
 
-<p>The formats are:<BR>
-<tab indent="12"><em>newspost://host:port/newsgroup(s)</em>&nbsp;&nbsp;<tab
-id="ngp">(post a new message)<BR>
-<tab indent="12"><em>newsreply://host:port/newsgroup(s)</em> <tab
-to="ngp">(post a followup message)<BR>
+<p>The formats are:
+<pre>
+      <em>newspost://host:port/newsgroup(s)</em>&nbsp;&nbsp;(post a new message)
+      <em>newsreply://host:port/newsgroup(s)</em> (post a followup message)
+</pre>
 (snewspost and snewsreply have the same formats, but the default port is
 <em>:563</em>)
 
@@ -368,8 +392,10 @@ are supported only by Lynx.
 
 The mailto URL is used to provide links that when activated can be
 used to send a comment or the content of a FORM to an Internet email
-address (user@host).  The format is:<BR>
-<tab indent="12"><em>mailto:user@host</em>
+address (user@host).  The format is:
+<pre>
+      <em>mailto:user@host</em>
+</pre>
 
 <p>The description of the mailto URL in RFC1738 has been interpreted by
 some as allowing only a single recipient, but Lynx invented the mailto URL,
@@ -383,18 +409,18 @@ at the <em>?</em>, and uses the value as the default Subject: for
 the message or FORM content mailing.  This is not recommended practice.
 The preferred way to indicate the default Subject: for a LINK or Anchor
 with a mailto HREF, or a FORM with a mailto ACTION, is via a TITLE
-attribute with the subject string as its value, e.g.:<BR>
-<tab indent="12"><em>&lt;LINK <tab id="rev">REV="made"<BR>
-<tab to="rev">HREF="mailto:me@myhost,her@herhost" TITLE="The Subject"&gt;</em>
+attribute with the subject string as its value, e.g.:
+<pre>
+      <em>&lt;LINK REV="made"
+            HREF="mailto:me@myhost,her@herhost" TITLE="The Subject"&gt;</em>
 
-<p><tab indent="12"><em>&lt;A
-HREF="mailto:user@host" TITLE="The Subject"&gt;...&lt;/A&gt;</em>
+      <em>&lt;A HREF="mailto:user@host" TITLE="The Subject"&gt;...&lt;/A&gt;</em>
 
-<p><tab indent="12"><em>&lt;FORM <tab id="met">METHOD="post"
-ENCTYPE="text/plain"<BR>
-<tab to="met">ACTION="mailto:WebMaster@host" TITLE="The Subject"&gt;<BR>
-<tab indent="14">...<BR>
-<tab indent="12">&lt;/FORM&gt;</em>
+      <em>&lt;FORM METHOD="post" ENCTYPE="text/plain"
+            ACTION="mailto:WebMaster@host" TITLE="The Subject"&gt;
+       ...
+      &lt;/FORM&gt;</em>
+</pre>
 
 <p>Note that a TITLE attribute for FORM is now included in the HTML
 specifications.  Some clients use a SUBJECT attribute for this purpose
@@ -425,14 +451,14 @@ normally would lead to a new scheme being used (e.g., <em>mail:</em>, or
 ACTION, Lynx will not hex escape the name=value pairs of the FORM's content,
 and will use physical newlines instead of '<em>&amp;</em>' or '<em>;</em>'
 to separate the pairs, so that the content will be readable directly.
-Otherwise, Lynx will mail the content with the default:<BR>
-<tab indent="12"
-><em>ENCTYPE="application/x-www-form-urlencoded"</em> <tab id="enc">('<em
->&amp;</em>' separates pairs)<BR>
-or:<BR>
-<tab indent="12"
-><em>ENCTYPE="application/sgml-form-urlencoded"</em> <tab to="enc">('<em
->;</em>' separates pairs)<BR>
+Otherwise, Lynx will mail the content with the default:
+<pre>
+      <em>ENCTYPE="application/x-www-form-urlencoded"</em> ('<em >&amp;</em>' separates pairs)
+</pre>
+or:
+<pre>
+      <em>ENCTYPE="application/sgml-form-urlencoded"</em> ('<em >;</em>' separates pairs)
+</pre>
 if the latter was indicated.
 
 <p>Note that when mailing FORM content Lynx wraps any lines longer than 78
@@ -489,11 +515,15 @@ creation of links for any strings which appear to be supported URLs.
 The cso URL is intended to provide a gateway to CSO/PH (QI) servers.
 The requests are made on port 105 by default (<em>:105</em>), with the
 following overt cso URL format:<BR>
-<tab indent="12"><em>cso://host</em><BR>
+<pre>
+<em>cso://host</em>
+</pre>
 
 <p>You also can use a gopher URL format with port 105 and the CSO
-(<em>2</em>) <em>gophertype</em> specified:<BR>
-<tab indent="12"><em>gopher://host:105/2</em>
+(<em>2</em>) <em>gophertype</em> specified:
+<pre>
+      <em>gopher://host:105/2</em>
+</pre>
 
 <p>Lynx will parse the stream returned by the server for the above
 URLs and create a FORM for submitting additional requests (searches)
@@ -508,12 +538,12 @@ If execution of spawned commands has been enabled in your Lynx image, the
 lynxexec and lynxprog URLs can be used to execute arbitrary system commands
 or invoke system utilities.  Any system command and associated switches
 or qualifiers can be used, with the syntax appropriate for a shell running
-Lynx on Unix, or for DCL on VMS, e.g.:<BR>
-<tab indent="12"><em>lynxexec:dir/date/size foo:[blah]</em> <tab
-id="listing">(VMS)<BR>
-<tab indent="12"><em>lynxexec:ls -l /foo/blah</em> <tab
-to="listing">(Unix)<BR>
-<tab indent="12"><em>lynxprog:news</em><BR>
+Lynx on Unix, or for DCL on VMS, e.g.:
+<pre>
+      <em>lynxexec:dir/date/size foo:[blah]</em> (VMS)
+      <em>lynxexec:ls -l /foo/blah</em>          (Unix)
+      <em>lynxprog:news</em>
+</pre>
 (Note, however, that restrictions on acceptable commands or utilities
 may be imposed by the system administrator.)
 
@@ -532,10 +562,11 @@ solely for Lynx.
 <H2><a name="cgi">The <em>lynxcgi</em> URL:</a></H2>
 
 The lynxcgi URL is implemented only on Unix, can be used as the
-ACTION for a FORM, and if enabled in your Lynx image has the format:<BR>
-<tab indent="12"><em>ly<tab id="lh">
-nxcgi://localhost/path_to_CGI_script</em><BR>
-<tab to="lh">where <em>//localhost/</em> is optional and always implied.
+ACTION for a FORM, and if enabled in your Lynx image has the format:
+<pre>
+      <em>lynxcgi://localhost/path_to_CGI_script</em>
+</pre>
+where <em>//localhost/</em> is optional and always implied.
 The output of the script should be text/html and is rendered and displayed
 by Lynx. (Note that restrictions on acceptable paths can be imposed
 by the system administrator.)
@@ -559,15 +590,17 @@ objects for communication among its display modules.  If you discover
 what they are, and are tempted to use them externally in documents,
 find the self-restraint to <em>resist</em> that temptation!!!
 
-<p>For example, tempting though it might be, do <em>not</em> use these:<BR>
-<tab indent="12"
-><em>Return to your &lt;A HREF="LYNXHIST:0"&gt;Startfile&lt;/A&gt;</em><BR>
-<tab indent="12"
-><em>Review your &lt;A HREF="LYNXKEYMAP:"&gt;Keymap&lt;/A&gt;</em><BR>
+<p>For example, tempting though it might be, do <em>not</em> use these:
+<pre>
+      <em>Return to your &lt;A HREF="LYNXHIST:0"&gt;Startfile&lt;/A&gt;</em>
+      <em>Review your &lt;A HREF="LYNXKEYMAP:"&gt;Keymap&lt;/A&gt;</em>
+</pre>
 (Yes, they'll work.  No, they won't do any harm.  But...)
 
 <p>If you <em>must</em> try one, the second is OK from the command line:<BR>
-<tab indent="12"><em>lynx LYNXKEYMAP:</em><BR>
+<pre>
+      <em>lynx LYNXKEYMAP:</em>
+</pre>
 But within Lynx, use the '<em>K</em>' keystroke command.
 </BODY>
 </HTML>
