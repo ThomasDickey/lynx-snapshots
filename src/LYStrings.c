@@ -61,13 +61,13 @@ PRIVATE int set_clicked_link ARGS2(int,x,int,y)
     /* Check the first line of the link */
     if ( links[i].hightext != NULL && 
 	 links[i].ly == y && 
-	 (x - links[i].lx) < strlen(links[i].hightext ) ) {
+	 (x - links[i].lx) < (int)strlen(links[i].hightext ) ) {
       mouse_link=i;
     }
     /* Check the second line */
     if (links[i].hightext2 != NULL &&
 	1+links[i].ly == y &&
-	(x - links[i].hightext2_offset) < strlen(links[i].hightext2) ) {
+	(x - links[i].hightext2_offset) < (int)strlen(links[i].hightext2) ) {
       mouse_link=i;
     }
   }

@@ -1599,8 +1599,9 @@ PUBLIC void lynx_start_link_color ARGS2(
 	if (SLtt_Use_Ansi_Colors)
 	    start_underline ();
 #endif /* USE_SLANG */
-#if defined(FANCY_CURSES)
-	start_underline ();
+#if defined(FANCY_CURSES) && defined(COLOR_CURSES)
+	if (lynx_uses_color && LYShowColor >= SHOW_COLOR_ON)
+	    start_underline ();
 #endif /* USE_SLANG */
      } else {
 	start_bold();
@@ -1626,8 +1627,9 @@ PUBLIC void lynx_stop_link_color ARGS2(
 	if (SLtt_Use_Ansi_Colors)
 	stop_underline ();
 #endif /* USE_SLANG */
-#if defined(FANCY_CURSES)
-	stop_underline ();
+#if defined(FANCY_CURSES) && defined(COLOR_CURSES)
+	if (lynx_uses_color && LYShowColor >= SHOW_COLOR_ON)
+	    stop_underline ();
 #endif /* USE_SLANG */
     } else {
 	stop_bold();

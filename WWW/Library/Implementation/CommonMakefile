@@ -264,7 +264,7 @@ $(LOB)/HTRules.o : $(OE) $(CMN)HTRules.c $(CMN)HTUtils.h $(CMN)Version.make \
 	 $(CMN)HTAAServ.h $(CMN)HTAAProt.h
 	$(CC) -c -o $@ $(CFLAGS2) -DVC=\"$(VC)\" $(CMN)HTRules.c
 
-$(LOB)/SGML.o : $(OE) $(CMN)SGML.c $(CMN)HTUtils.h
+$(LOB)/SGML.o : $(OE) $(CMN)SGML.c $(CMN)HTUtils.h $(CMN)UCAux.h
 	$(CC) -c -o $@ $(CFLAGS2) $(CMN)SGML.c
 
 $(LOB)/HTMLGen.o : $(OE) $(CMN)HTMLGen.c $(CMN)HTUtils.h $(CMN)HTMLDTD.h
@@ -273,7 +273,7 @@ $(LOB)/HTMLGen.o : $(OE) $(CMN)HTMLGen.c $(CMN)HTUtils.h $(CMN)HTMLDTD.h
 $(LOB)/HTMLDTD.o : $(OE) $(CMN)HTMLDTD.c $(CMN)SGML.h
 	$(CC) -c -o $@ $(CFLAGS2) $(CMN)HTMLDTD.c
 
-$(LOB)/HTPlain.o : $(OE) $(CMN)HTPlain.c $(CMN)HTPlain.h $(CMN)HTStream.h
+$(LOB)/HTPlain.o : $(OE) $(CMN)HTPlain.c $(CMN)HTPlain.h $(CMN)HTStream.h $(CMN)UCAux.h
 	$(CC) -c -o $@ $(CFLAGS2) $(CMN)HTPlain.c
 
 $(LOB)/HTWAIS.o : $(OE) $(CMN)HTWAIS.c $(CMN)HTUtils.h $(CMN)HTList.h

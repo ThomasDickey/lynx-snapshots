@@ -9,6 +9,11 @@
    Tant pis.
    
  */
+
+#define HT_NON_BREAK_SPACE ((char)1)	/* For now */
+#define HT_EM_SPACE ((char)2)
+#define LY_SOFT_HYPHEN		'\007'
+
 #ifndef HTMLDTD_H
 #define HTMLDTD_H
 

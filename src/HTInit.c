@@ -50,7 +50,8 @@ PUBLIC void HTFormatInit NOARGS
 
 #ifdef NeXT
   HTSetPresentation("application/postscript",   "open %s", 1.0, 2.0, 0.0, 0);
-  HTSetPresentation("image/x-tiff",             "open %s", 1.0, 2.0, 0.0, 0);
+  HTSetPresentation("image/x-tiff",             "open %s", 2.0, 2.0, 0.0, 0);
+  HTSetPresentation("image/tiff",               "open %s", 1.0, 2.0, 0.0, 0);
   HTSetPresentation("audio/basic",              "open %s", 1.0, 2.0, 0.0, 0);
   HTSetPresentation("*",                        "open %s", 1.0, 0.0, 0.0, 0);
 #else
@@ -118,7 +119,7 @@ PUBLIC void HTFormatInit NOARGS
  HTSetConversion("application/x-wais-source", "www/source",  	     
 					HTPlainPresent,	1.0, 0.0, 0.0, 0);
  HTSetConversion("application/x-wais-source", "www/present",  	     
-				        HTWSRCConvert,	1.0, 0.0, 0.0, 0);
+				        HTWSRCConvert,	2.0, 0.0, 0.0, 0);
  HTSetConversion("application/x-wais-source", "www/download",  	     
 					HTWSRCConvert,	1.0, 0.0, 0.0, 0);
  HTSetConversion("application/x-wais-source", "www/dump",  	     
@@ -179,6 +180,14 @@ PUBLIC void HTFormatInit NOARGS
      HTLoadTypesConfigFile(buffer);
  }
 
+}
+
+PUBLIC void HTPreparsedFormatInit NOARGS
+{
+ if (LYPreparsedSource) {
+     HTSetConversion("text/html", "www/source", HTMLParsedPresent, 1.0, 0.0, 0.0, 0);
+     HTSetConversion("text/html", "www/dump",	HTMLParsedPresent, 1.0, 0.0, 0.0, 0);
+ }
 }
 
 /* Some of the following is taken from: */
@@ -281,8 +290,7 @@ PRIVATE char *Cleanse ARGS1(char *,s)
 PRIVATE int ProcessMailcapEntry ARGS2(FILE *,fp, struct MailcapEntry *,mc)
 {
     int i, j;
-    size_t rawentryalloc = 2000;
-    size_t len;
+    size_t rawentryalloc = 2000, len;
     char *rawentry, *s, *t, *LineBuf;
 
     LineBuf = malloc(LINE_BUF_SIZE);

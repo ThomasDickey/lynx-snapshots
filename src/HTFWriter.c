@@ -243,10 +243,17 @@ PRIVATE void HTFWriter_free ARGS1(HTStream *, me)
 		     *  for local files. - KW
 		     */
 		    if (!skip_loadfile) {
+			if (HTAnchor_getUCLYhndl(me->anchor,
+						 UCT_STAGE_PARSER) < 0 ) {
+			    /* If not yet set - kw */
+			    HTAnchor_copyUCInfoStage(me->anchor,
+						     UCT_STAGE_PARSER,
+						     UCT_STAGE_MIME,
+						     UCT_SETBY_DEFAULT+1);
+			}
 			HTAnchor_copyUCInfoStage(me->anchor,
 						 UCT_STAGE_PARSER,
-						 UCT_STAGE_MIME,
-						 UCT_SETBY_PARSER);
+						 UCT_STAGE_MIME, -1);
 		    }
 #endif
 		    /*

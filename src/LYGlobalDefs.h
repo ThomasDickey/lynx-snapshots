@@ -323,6 +323,7 @@ extern BOOLEAN LYSeekFragAREAinCur;
 extern BOOLEAN LYStripDotDotURLs;	/* Try to fix ../ in some URLs?  */
 extern BOOLEAN LYForceSSLCookiesSecure;
 extern BOOLEAN LYNoCc;
+extern BOOLEAN LYPreparsedSource;	/* Show source as preparsed?	 */
 
 #ifndef VMS
 extern BOOLEAN LYNoCore;

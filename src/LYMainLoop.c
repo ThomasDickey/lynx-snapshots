@@ -430,19 +430,19 @@ try_again:
 		    }
 		}
 		if (try_internal) {
-		    char *cp = strchr(newdoc.address,'#');
-		    if (cp) {
-			HTFindPoundSelector(cp+1);
+		    char *hashp = strchr(newdoc.address,'#');
+		    if (hashp) {
+			HTFindPoundSelector(hashp+1);
 		    }
 		    getresult = (HTMainText != NULL) ? NORMAL : NOT_FOUND;
 		    try_internal = FALSE; /* done */
 		    /* fix up newdoc.address which may have been fragment-only */
-		    if (getresult == NORMAL && (!cp || cp == newdoc.address)) {
-			if (!cp) {
+		    if (getresult == NORMAL && (!hashp || hashp == newdoc.address)) {
+			if (!hashp) {
 			    StrAllocCopy(newdoc.address, HTLoadedDocumentURL());
 			} else {
 			    StrAllocCopy(temp, HTLoadedDocumentURL());
-			    StrAllocCat(temp, cp); /* append fragment */
+			    StrAllocCat(temp, hashp); /* append fragment */
 			    StrAllocCopy(newdoc.address, temp);
 			    FREE(temp);
 			}
@@ -450,15 +450,15 @@ try_again:
 		} else {
 		    if (newdoc.internal_link && newdoc.address &&
 			*newdoc.address == '#' && nhist > 0) {
-			char *cp;
+			char *cp0;
 			if (0==strncmp(history[nhist-1].address, "LYNXIMGMAP:", 11))
-			    cp = history[nhist-1].address + 11;
+			    cp0 = history[nhist-1].address + 11;
 			else
-			    cp = history[nhist-1].address;
-			StrAllocCopy(temp, cp);
-			cp = strchr(temp, '#');
-			if (cp)
-			    *cp = '\0';
+			    cp0 = history[nhist-1].address;
+			StrAllocCopy(temp, cp0);
+			cp0 = strchr(temp, '#');
+			if (cp0)
+			    *cp0 = '\0';
 			StrAllocCat(temp, newdoc.address);
 			FREE(newdoc.address);
 			newdoc.address = temp;
@@ -1883,6 +1883,14 @@ new_cmd:  /*
 		_statusline(WILL_NOT_RELOAD_DOC);
 		sleep(InfoSecs);
 	    } else {
+		/*
+		 *  If currently viewing preparsed source, switching
+		 *  to the other DTD parsing may show source differences,
+		 *  so stay in source view - kw
+		 */
+		if (HTisDocumentSource() && LYPreparsedSource) {
+                        HTOutputFormat = WWW_SOURCE;
+		}
 	        HTuncache_current_document();
 		StrAllocCopy(newdoc.address, curdoc.address);
 		FREE(curdoc.address);

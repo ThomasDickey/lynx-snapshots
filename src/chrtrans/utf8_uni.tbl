@@ -21,8 +21,8 @@ O UNICODE UTF 8
 # but for completeness (from UCDefs.h):
 #  #define UCT_ENC_7BIT 0
 #  #define UCT_ENC_8BIT 1
-#  #define UCT_ENC_8859 2		/* ??? */
-#  #define UCT_ENC_2022 3
+#  #define UCT_ENC_8859 2
+#  #define UCT_ENC_8BIT_C0 3
 #  #define UCT_ENC_MAYBE2022 4
 #  #define UCT_ENC_CJK 5
 #  #define UCT_ENC_16BIT 6

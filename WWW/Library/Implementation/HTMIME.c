@@ -442,7 +442,7 @@ PRIVATE void HTMIME_put_character ARGS2(
 							    UCT_STAGE_MIME),
 				       UCT_STAGE_HTEXT, UCT_SETBY_DEFAULT);
 				}
-				if (!(p_in->enc & UCT_ENC_CJK) &&
+				if (p_in->enc != UCT_ENC_CJK &&
 				    (p_in->codepoints & UCT_CP_SUBSETOF_LAT1)){
 				    HTCJK = NOCJK;
 				} else if (chndl == current_char_set) {
@@ -1610,7 +1610,8 @@ PRIVATE void HTMIME_put_character ARGS2(
                     fprintf(stderr,
                        "HTMIME: PICKED UP Content-Encoding: '%s'\n",
                             me->value);
-		if (!(me->value && *me->value))
+		if (!(me->value && *me->value) ||
+		    !strcasecomp(me->value, "identity"))
 		    break;
 		/*
 		**  Convert to lowercase and indicate in anchor. - FM

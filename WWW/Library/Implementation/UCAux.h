@@ -16,6 +16,8 @@ struct _UCTransParams
     BOOL pass_160_173_raw;
     BOOL do_8bitraw;
     BOOL trans_to_uni;
+    BOOL trans_C0_to_uni;
+    BOOL repl_translated_C0;
     BOOL trans_from_uni;
 };
 typedef struct _UCTransParams UCTransParams;

@@ -22,6 +22,10 @@
 #ifndef USERDEFS_H
 #define USERDEFS_H
 
+#ifdef HAVE_CONFIG_H
+#include <lynx_cfg.h>
+#endif
+
 /*******************************************************************
  * Things you must change
  *  Section 1. 
@@ -581,34 +585,41 @@
  * will be used as the default.  Also see lynx.cfg for information about
  * the -raw switch and LYE_RAW_TOGGLE command.
  * The default character sets include:
- *    ISO Latin 1
- *    ISO Latin 2
- *    Other ISO Latin
- *    DEC Multinational
- *    IBM PC character set
- *    IBM PC codepage 850
- *    Macintosh (8 bit)
- *    NeXT character set
- *    KOI8-R character set
- *    Chinese
- *    Japanese (EUC)
- *    Japanese (SJIS)
- *    Korean
- *    Taipei (Big5)
- *    7 bit approximations
- *    Transparent
- *    ISO Latin 3
- *    ISO Latin 4
- *    ISO Latin 5 Cyrillic
- *    ISO Latin 7 Greek
- *    ISO Latin 9 (Latin 5)
- *    ISO Latin 10
- *    PC Latin2 CP 852
- *    MS Windows CP 1250
- *    MS Windows CP 1252
- *    UNICODE UTF 8
- *    RFC 1345 w/o Intro
- *    RFC1345 Mnemonic
+ *   Display Character Set name		MIME name
+ *   ==========================		=========
+ *   ISO Latin 1			iso-8859-1
+ *   ISO Latin 2			iso-8859-2
+ *   Other ISO Latin			x-iso-8859-other
+ *   DEC Multinational			dec-mcs
+ *   IBM PC character set		cp437
+ *   IBM PC codepage 850		cp850
+ *   Macintosh (8 bit)			macintosh
+ *   NeXT character set			x-next
+ *   KOI8-R character set		koi8-r
+ *   Chinese				euc-cn
+ *   Japanese (EUC)			euc-jp
+ *   Japanese (SJIS)			shift_jis
+ *   Korean				euc-kr
+ *   Taipei (Big5)			big5
+ *   7 bit approximations		us-ascii
+ *   Transparent			x-transparent
+ *   ISO Latin 3			iso-8859-3
+ *   ISO Latin 4			iso-8859-4
+ *   ISO Latin 5 Cyrillic		iso-8859-5
+ *   ISO Latin 6 Arabic			iso-8859-6
+ *   ISO Latin 7 Greek			iso-8859-7
+ *   ISO Latin 8 Hebrew			iso-8859-8
+ *   ISO Latin 9 (Latin 5)		iso-8859-9
+ *   ISO Latin 10			iso-8859-10
+ *   PC Latin2 CP 852			cp852
+ *   DosCyrillic (cp866)		cp866
+ *   MS Windows CP 1250			windows-1250
+ *   WinCyrillic (cp1251)		windows-1251
+ *   MS Windows CP 1252			iso-8859-1-windows-3.1-latin-1
+ *   Vietnamese (VISCII)		viscii
+ *   UNICODE UTF 8			unicode-1-1-utf-8
+ *   RFC 1345 w/o Intro			mnemonic+ascii+0
+ *   RFC 1345 Mnemonic			mnemonic
  */
 #define CHARACTER_SET "ISO Latin 1"
 
@@ -1260,7 +1271,7 @@
  * the version definition with the Project Version on checkout. Just
  * ignore it. - kw */
 /* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
-#define LYNX_VERSION "2.7.1ac-0.46"
+#define LYNX_VERSION "2.7.1ac-0.64"
 
 /****************************************************************
  * The LYMessages_en.h header defines default, English strings

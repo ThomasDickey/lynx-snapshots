@@ -15,7 +15,6 @@ extern char * LYstrstr PARAMS((char *chptr, char *tarptr));
 extern char * LYno_attr_char_strstr PARAMS((char *chptr, char *tarptr));
 extern char * LYno_attr_char_case_strstr PARAMS((char *chptr, char *tarptr));
 
-#ifdef EXP_CHARTRANS
 extern char * LYno_attr_mbcs_strstr PARAMS((
 	char *		chptr,
 	char *		tarptr,
@@ -28,6 +27,7 @@ extern char * LYno_attr_mbcs_case_strstr PARAMS((
 	BOOL		utf_flag,
 	int *		nstartp,
 	int *		nendp));
+#ifdef EXP_CHARTRANS
 extern int LYmbcsstrlen PARAMS((
 	char *		str,
 	BOOL		utf_flag));

@@ -81,6 +81,7 @@ PUBLIC int printfile ARGS1(
     HTAtom *encoding;
     BOOL use_mime, use_cte, use_type;
     char *disp_charset;
+    static BOOLEAN first_mail_preparsed = TRUE;
 #ifdef VMS
     extern BOOLEAN HadVMSInterrupt;
 #else
@@ -474,6 +475,32 @@ PUBLIC int printfile ARGS1(
 		break;
 
 	case MAIL: 
+	    if (LYPreparsedSource && first_mail_preparsed &&
+		HTisDocumentSource()) {
+		_statusline(CONFIRM_MAIL_SOURCE_PREPARSED);
+		c = 0;
+		while (TOUPPER(c)!='Y' && TOUPPER(c)!='N' &&
+		       c != 7 && c != 3)
+		    c = LYgetch();
+#ifdef VMS
+		if (HadVMSInterrupt) {
+		    HadVMSInterrupt = FALSE;
+		    _statusline(MAIL_REQUEST_CANCELLED);
+		    sleep(InfoSecs);
+		    break;
+		}
+#endif /* VMS */
+		if (c == RTARROW || c == 'y' || c== 'Y'
+		    || c == '\n' || c == '\r') {
+		    addstr("   Ok...");
+		    first_mail_preparsed = FALSE;
+		} else  {
+		    _statusline(MAIL_REQUEST_CANCELLED);
+		    sleep(InfoSecs);
+		    break;
+		}
+	    }
+
 		_statusline(MAIL_ADDRESS_PROMPT);
 		strcpy(user_response, (personal_mail_address ?
 				       personal_mail_address : ""));

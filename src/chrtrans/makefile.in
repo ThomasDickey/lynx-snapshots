@@ -41,7 +41,9 @@ TABLES= $(CHRTR)iso02_uni.h \
  $(CHRTR)iso03_uni.h \
  $(CHRTR)iso04_uni.h \
  $(CHRTR)iso05_uni.h \
+ $(CHRTR)iso06_uni.h \
  $(CHRTR)iso07_uni.h \
+ $(CHRTR)iso08_uni.h \
  $(CHRTR)iso09_uni.h \
  $(CHRTR)iso10_uni.h \
  $(CHRTR)koi8r_uni.h \
@@ -52,6 +54,7 @@ TABLES= $(CHRTR)iso02_uni.h \
  $(CHRTR)cp1250_uni.h \
  $(CHRTR)cp1251_uni.h \
  $(CHRTR)cp1252_uni.h \
+ $(CHRTR)viscii_uni.h \
  $(CHRTR)utf8_uni.h \
  $(CHRTR)rfc_suni.h \
  $(CHRTR)mnemonic_suni.h \
@@ -77,22 +80,28 @@ makeuctb: makeuctb.c UCkd.h
 .tbl.h:
 	./makeuctb $*.tbl > $@
 
+# table files listed here once again to get the make dependencies
+# right, in case makeuctb was recompiled.
 iso01_uni.h: iso01_uni.tbl makeuctb
 iso02_uni.h: iso02_uni.tbl makeuctb
 def7_uni.h: def7_uni.tbl makeuctb
 iso03_uni.h: iso03_uni.tbl makeuctb
 iso04_uni.h: iso04_uni.tbl makeuctb
 iso05_uni.h: iso05_uni.tbl makeuctb
+iso06_uni.h: iso06_uni.tbl makeuctb
 iso07_uni.h: iso07_uni.tbl makeuctb
+iso08_uni.h: iso08_uni.tbl makeuctb
 iso09_uni.h: iso09_uni.tbl makeuctb
 iso10_uni.h: iso10_uni.tbl makeuctb
 koi8r_uni.h: koi8r_uni.tbl makeuctb
 cp437_uni.h: cp437_uni.tbl makeuctb
 cp850_uni.h: cp850_uni.tbl makeuctb
 cp852_uni.h: cp852_uni.tbl makeuctb
+cp852_uni.h: cp866_uni.tbl makeuctb
 cp1250_uni.h: cp1250_uni.tbl makeuctb
 cp1251_uni.h: cp1251_uni.tbl makeuctb
 cp1252_uni.h: cp1252_uni.tbl makeuctb
+viscii_uni.h: viscii_uni.tbl makeuctb
 utf8_uni.h: utf8_uni.tbl makeuctb
 mnemonic_suni.h: mnemonic_suni.tbl makeuctb
 mnem_suni.h: mnem_suni.tbl makeuctb

@@ -31,6 +31,28 @@ UNIX & VMS Step 1c. (optional)
       On Unix you can define NOPORT in the top Makefile instead
       of changing HTFTP.c
 
+UNIX Extra Step: !! CONFIGURATION !!
+    There now is a configure script which takes care of system-dependent
+    setting automatically.  See the file README.configure for more details.
+    You may want to run "./configure --help" first to see what flags are
+    available.
+
+    Run configure, eg "./configure", and
+    wait while it figures out what software is on your
+    computer, what type of computer and operating system
+    you have, etc, and then finally uses makefile.in
+    to produce the makefile that will get used when
+    you finally (later on) say "make".
+
+    The rest of this file has not yet been updated for installation with
+    the configure script.  The information in README.configure is newer
+    and should be consulted.  In particular UNIX Steps 1f and 2 below should
+    not be necessary on most systems after "./configure" has been run
+    (running "make" is of course still required, but it does not reqire
+    specifying a system type).  Other points mostly still apply.  If you
+    need or want to make manual change in addition to the auto configuration,
+    note that "makefile" is now used instead of "Makefile".
+
 UNIX Step 1d.  (WAIS support is built into Lynx for VMS, skip to step 1e)
     Adding Direct WAIS support.
     Get the freeWAIS distribution from:

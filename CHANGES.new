@@ -10,7 +10,68 @@ README.configure), and miscellaneous other changes.  Note that the 2.7 ->
 2.7.1 changes (which are listed at the beginning of the current CHANGES
 file) are duplicated here. - KW]
 
-97-09-06
+97-09-11
+* Tweaks in HTMLGen.c for display of spacial characters and line breaking
+  with -preparsed. - KW
+* Got rid of use of underlining together with reverse for non-current 
+  links for (n)curses if color is not used. - KW
+* Small HTMLDTD.c changes for new parsing. - KW
+* Change in SGML.c to always recognize SOFT HYPHEN when given as &#173. - KW
+97-09-10
+* Modify CF_WITH_PATH to allow substitution of --libdir and other
+  configure options pathnames, e.g., for --with-cfg-file. - TD
+* Include lynx_cfg.h in userdefs.h to resolve redefinition reported by
+  AC. - TD
+* Remove Ultrix/sony_news -specific ifdef's for curses headers,
+  replace with configure-tests. - TD
+* Remove AIX/NeXT/sony_news -specific ifdef's for wait vs waitpid,
+  replace with configure-tests. - TD
+* Add/use CF_HELP_MESSAGE macro to visually break down the very long
+  help message into sections. - TD
+* Move the development options to the beginning of the configure script,
+  to facilitate adjustment of compiler options (especially for Ultrix)
+  to reduce the number of spurious warnings from miscombining -g/-O
+  options. - TD
+* Correct misplaced assignment to cf_cv_ncurses_header in configure.in,
+  which caused misconfigure against vendor curses, reported by Hynek Med
+  (Ultrix) and Roger Hill (HP-UX 10.x). - TD
+1997-09-09
+* Added arguments to the multinet_htons() and multinet_ntohs() declarations
+  in tcp.h. - FM
+* Tweak of the this_MIMEcharset[] and this_LYNXcharset[] checks in
+  makeuctb.c. - FM
+* Replaced the index() and bcopy() with strchr() and memcpy() in the
+  putenv() for NeXT in LYUtils.c. - FM
+1997-09-08
+* Added a -preparsed flag, to be used with -source or with SOURCE view.
+  When invoked with this flag, show HTML text as it is output from the SGML
+  parsing stage, regenerated via HTMLGen.c functions, rather than the usual
+  more raw rendering (in SOURCE view) or the original byte stream (as with
+  the -source flag, possibly with BASE information prepended).  Lynx will
+  attempt to wrap the text to screen width (or 80 cols for the -source flag),
+  but will not always succeed.  Unrecognized tags and attributes as well as 
+  comments are dropped, attributes reordered, missing end tags supplied, 
+  abd other changes made, showing how Lynx internally treats the document's
+  structure.  This is probably most useful for debugging (of either Lynx's
+  parsing or of HTML documents, although a real validator should be used for 
+  the latter!).  It can also be instructive to switch the DTD parsing mode
+  (with the ^V key) while viewing preparsed source.
+  Note that this doesn't work so well now with character translations and 
+  entity expansion don't work well now, showing some of the same problems
+  which appear for rendered documents and dropping some characters.  Making
+  those problems of parsing more directly visible was one of the motivations
+  for this flag.  Also note that META tags which may contain charset info
+  are never interpreted when using -source (with or without the -preparsed
+  flag), but when interactively switching to SOURCE view, Lynx MAY remember
+  that charset info from the previous non-SOURCE full parsing (again this
+  applies with or without -preparsed); the INFO screen should always show
+  the assumption currently in effect. - KW
+* Updated some HTMLGenerator functions to use line wrapping logic found in
+  newer libwww versions, and further mods in HTMLGen.c. - KW
+* Tweaks to use of chartrans stages, should now better preserve charset
+  info from META tags even in compressed HTML files. - KW
+* Fixed a problem with LYCheckForCSI which could lead to crashes. - KW
+1997-09-06
 * Modifications to allow the Lynx lynxcgi feature to process
   PATH_INFO in addition to QUERY_STRINGS in URLs.  DOCUMENT_ROOT
   may be set by the user in lynx.cfg and is then passed as well.
@@ -34,6 +95,13 @@ file) are duplicated here. - KW]
   before so that they are still regarded as part of the query or search
   string. If PATHINFO is present, unescaped '#' characters in it will
   still be rejected by exec_ok(). - KW
+* added a bit of text about running ./configure to INSTALLATION file.
+  - David Combs <dkcombs@netcom.com> & KW
+* Added a translation table for Vietnamese (VISCII), and associated code
+  changes.  See the file viscii_uni.tbl. - KW
+1997-09-05
+* Mods in LYGetFile.c to retain a fragment on redirection if the redirection
+  URL does not include a fragment. - FM
 97-09-04
 * Correct ifdef'ing for getbkgd function calls. - TD
 * Correct ifdef'ing for remaining inline chmod calls. - TD
@@ -51,6 +119,25 @@ file) are duplicated here. - KW]
 * Don't cache configure options except where essential (e.g., the
   setting of 'screen').  - TD
 * Change some configure options to disable/enable for consistency.  - TD
+1997-09-03
+* Tweaks in HTML_put_string() and LYUnEscapeEntities() to deal with line-
+  breaks within attributes more consistently, and more independently of
+  which convention is used (CRLF, CR, or LF). - KW
+* Tweaks to prevent a few compiler warnings. - KW
+* Tweaks of the iso06_uni.tbl and iso08_uni.tbl files now compiled in.
+  Note that a replacement character or string to replace invalid or
+  unrecognized characters chan be defiend by mapping the Unicode value
+  U+FFFD, which is done here (for testing, and because these two charsets
+  have a lot of undefined code points).  Also some mods in default 7-bit
+  table for some Hebrew characters and points. - KW
+1997-09-02
+* Mods to include "ISO 8859-6 Arabic" and "ISO 8859-8 Hebrew" in the display
+  character set options (Note, though, that Lynx presently has no code to
+  deal overtly with non-Latin directionalities.). - DK & FM
+1997-08-31
+* Mod of HTMIME.c to ignore any Content-Encoding header with a value of
+  "identity" (case insensitive).  Shouldn't happen, but better safe than
+  sorry. - FM
 1997-08-28
 * Correct a quoting error in CF_RECHECK_FUNC macro. - TD
 1997-08-27
@@ -60,6 +147,10 @@ file) are duplicated here. - KW]
 * Add-back test for -lm to support slang shared libraries. - TD
 * Modify test for disentangling ncurses library from mytinfo on FreeBSD
   to workaround linker limitation. - AC
+1997-08-22
+* Fixed typo in LYReadCFG.c when checking for a NOVICE mode default. - JN
+  (Note that this and other lynx.cfg defaults which have 'o'ptions settings
+  are overridden when the 'o'ptions are saved to the RC file. - FM)
 1997-08-21
 * Tweak to LYHistory.c to better remember last position on page. - KW
 * Eliminated two more MIME types (application/html and text/x-sgml) from

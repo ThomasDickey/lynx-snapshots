@@ -137,6 +137,8 @@
 #define COMMENT_REQUEST_CANCELLED "Comment request cancelled!!!"
 #define INC_ORIG_MSG_PROMPT \
  "Do you wish to include the original message? (y/n) "
+#define INC_PREPARSED_MSG_PROMPT \
+ "Do you wish to include the preparsed source? (y/n) "
 #define SPAWNING_EDITOR_FOR_MAIL \
  "Spawning your selected editor to edit mail message"
 #define ERROR_SPAWNING_EDITOR \
@@ -437,6 +439,8 @@
 #define HAVE_NEW_MAIL_MSG "*** You have new mail. ***"
 #define SAVE_REQUEST_CANCELLED "Save request cancelled!!!"
 #define MAIL_REQUEST_CANCELLED "Mail request cancelled!!!"
+#define CONFIRM_MAIL_SOURCE_PREPARSED \
+ "Viewing preparsed source.  Are you sure you want to mail it? [y]"
 #define MAILING_FILE "Mailing file.  Please wait..."
 #define MAIL_REQUEST_FAILED "ERROR - Unable to mail file"
 #define CONFIRM_LONG_SCREEN_PRINT \

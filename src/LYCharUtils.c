@@ -1377,6 +1377,12 @@ PUBLIC char * LYUnEscapeEntities ARGS3(
 		    HTCJK != NOCJK)))) {
 	        *q++ = ' ';
 		p++;
+	    } else if (!hidden && *p == 10 && q != str && *(q-1) == 13) {
+		/*
+		 *  If this is not a hidden string, and the current char
+		 *  is the LF ('\n') of a CRLF pair, drop the CR ('\r'). - kw
+		 */
+	        *(q-1) = *p++;
 	    } else {
 	        *q++ = *p++;
 	    }
@@ -1999,7 +2005,7 @@ PUBLIC void LYHandleMETA ARGS4(
 						     UCT_STAGE_HTEXT,
 						     UCT_SETBY_DEFAULT);
 		}
-		if (!(p_in->enc & UCT_ENC_CJK) &&
+		if (p_in->enc != UCT_ENC_CJK &&
 		    (p_in->codepoints & UCT_CP_SUBSETOF_LAT1)) {
 		    HTCJK = NOCJK;
 		} else if (chndl == current_char_set) {
@@ -2994,18 +3000,18 @@ PUBLIC void LYResetParagraphAlignment ARGS1(
 }
 
 PUBLIC BOOLEAN LYCheckForCSI ARGS2(
-	HTStructured *, 	me,
+	HTParentAnchor *, 	anchor,
 	char **,		url)
 {
-    if (!(me && me->node_anchor && me->node_anchor->address))
+    if (!(anchor && anchor->address))
         return FALSE;
 
-    if (strncasecomp(me->node_anchor->address, "file:", 5))
+    if (strncasecomp(anchor->address, "file:", 5))
         return FALSE;
 
-    if (!LYisLocalHost(me->node_anchor->address))
+    if (!LYisLocalHost(anchor->address))
         return FALSE;
      
-    StrAllocCopy(*url, me->node_anchor->address);
+    StrAllocCopy(*url, anchor->address);
     return TRUE;
 }

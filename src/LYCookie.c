@@ -521,7 +521,7 @@ PRIVATE char * scan_cookie_sublist ARGS6(
 
 	if (TRACE && co) {
 	    fprintf(stderr, "Checking cookie %lx %s=%s\n",
-		    	    (long) hl,
+		    	    (long)hl,
 			    (co->name ? co->name : "(no name)"),
 			    (co->value ? co->value : "(no value)"));
 	    fprintf(stderr, "%s %s %i %s %s %i%s\n",
@@ -1694,7 +1694,7 @@ PRIVATE void LYProcessSetCookies ARGS6(
 			    (co->value ? co->value : "[no value]"));
 	    if (co->expires > 0) {
 		fprintf(stderr, "                    expires: %ld, %s\n",
-				 (long) co->expires,
+				 (long)co->expires,
 				 ctime(&co->expires));
 	    }
 	}

@@ -28,7 +28,9 @@ TABLES= $(CHRTR)iso02_uni.h \
  $(CHRTR)iso03_uni.h \
  $(CHRTR)iso04_uni.h \
  $(CHRTR)iso05_uni.h \
+ $(CHRTR)iso06_uni.h \
  $(CHRTR)iso07_uni.h \
+ $(CHRTR)iso08_uni.h \
  $(CHRTR)iso09_uni.h \
  $(CHRTR)iso10_uni.h \
  $(CHRTR)koi8r_uni.h \
@@ -39,6 +41,7 @@ TABLES= $(CHRTR)iso02_uni.h \
  $(CHRTR)cp1250_uni.h \
  $(CHRTR)cp1251_uni.h \
  $(CHRTR)cp1252_uni.h \
+ $(CHRTR)viscii_uni.h \
  $(CHRTR)utf8_uni.h \
  $(CHRTR)rfc_suni.h \
  $(CHRTR)mnemonic_suni.h \
@@ -60,7 +63,9 @@ def7_uni.h: def7_uni.tbl makeuctb
 iso03_uni.h: iso03_uni.tbl makeuctb
 iso04_uni.h: iso04_uni.tbl makeuctb
 iso05_uni.h: iso05_uni.tbl makeuctb
+iso06_uni.h: iso06_uni.tbl makeuctb
 iso07_uni.h: iso07_uni.tbl makeuctb
+iso08_uni.h: iso08_uni.tbl makeuctb
 iso09_uni.h: iso09_uni.tbl makeuctb
 iso10_uni.h: iso10_uni.tbl makeuctb
 koi8r_uni.h: koi8r_uni.tbl makeuctb

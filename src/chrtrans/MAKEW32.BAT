@@ -19,6 +19,7 @@ makeuctb cp852_uni.tbl > cp852_uni.h
 makeuctb cp1250_uni.tbl > cp1250_uni.h
 makeuctb cp1251_uni.tbl > cp1251_uni.h
 makeuctb cp1252_uni.tbl > cp1252_uni.h
+makeuctb viscii_uni.tbl > viscii_uni.h
 makeuctb utf8_uni.tbl > utf8_uni.h
 makeuctb mnemonic_suni.tbl > mnemonic_suni.h
 makeuctb mnem_suni.tbl > mnem_suni.h

@@ -43,51 +43,37 @@
 #define REDEFINE_CR
 #endif /* CR */
 
-#ifdef DOSPATH
-#   include "curses.h"
-#else
-#ifdef NCURSES
-# ifdef HAVE_CONFIG_H
+#ifdef HAVE_CONFIG_H
 # ifdef HAVE_NCURSES_H
 #  include <ncurses.h>
 # else
-#  include <curses.h>
+#  ifdef HAVE_CURSESX_H
+#   include <cursesX.h>		/* Ultrix */
+#  else
+#   ifdef HAVE_JCURSES_H
+#    include <jcurses.h>	/* sony_news */
+#   else
+#    include <curses.h>		/* default */
+#   endif
+#  endif
 # endif
 
-# ifdef wgetbkgd
+# if defined(wgetbkgd) && !defined(getbkgd)
 #  define getbkgd(w) wgetbkgd(w)	/* workaround pre-1.9.9g bug */
 # endif
 
+# ifdef NCURSES
 extern void LYsubwindow PARAMS((WINDOW * param));
-
-# else /* FIXME: remove this after configure script is complete */
-# ifndef HAVE_NCURSES_H
-#  include <ncurses/curses.h>
-# else
-#  ifdef __NetBSD__
-#    include <ncurses/ncurses.h>
-#  else
-#    include <ncurses.h>
-#  endif /* __NetBSD__ */
-# endif /* HAVE_CONFIG_H */
-# endif /* HAVE_NCURSES_H */
+# endif /* NCURSES */
 
 #else
-# ifdef ULTRIX
-#  include <cursesX.h>  /* ultrix */
+# if defined(VMS) && defined(__GNUC__)
+#  include "LYGCurses.h"
 # else
-#  if defined(VMS) && defined(__GNUC__)
-#   include "LYGCurses.h"
-#  else
-#   if defined(sony_news)
-#    include "/usr/sony/include/jcurses.h"  /* sony_news */
-#   else
-#    include <curses.h>  /* everything else */
-#   endif /* sony_news */
-#  endif /* VMS && __GNUC__ */
-# endif /* ULTRIX */
-#endif /* NCURSES */
-#endif /* DOSPATH */
+#  include <curses.h>  /* everything else */
+# endif /* VMS && __GNUC__ */
+#endif /* HAVE_CONFIG_H */
+
 #endif /* USE_SLANG */
 
 

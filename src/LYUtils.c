@@ -5238,8 +5238,10 @@ extern int errno;
 
 #if defined(STDC_HEADERS) || defined(USG)
 #include <string.h>
+#ifdef NOTDEFINED
 #define index strchr
 #define bcopy(s, d, n) memcpy((d), (s), (n))
+#endif /* NOTDEFINED */
 #else /* Not (STDC_HEADERS or USG): */
 #include <strings.h>
 #endif /* STDC_HEADERS or USG */
@@ -5260,7 +5262,7 @@ extern char **environ;
 PUBLIC int putenv ARGS1(
 	CONST char *,	string)
 {
-  char *name_end = index (string, '=');
+  char *name_end = strchr(string, '=');
   register size_t size;
   register char **ep;
 
@@ -5291,10 +5293,10 @@ PUBLIC int putenv ARGS1(
   if (*ep == NULL)
     {
       static char **last_environ = NULL;
-      char **new_environ = (char **) malloc ((size + 2)  * sizeof (char *));
+      char **new_environ = (char **) malloc ((size + 2) * sizeof (char *));
       if (new_environ == NULL)
 	return -1;
-      (void) bcopy ((char *) environ, (char *)  new_environ, size * sizeof (char *));
+      (void) memcpy((char *)new_environ, (char *)environ, size * sizeof(char *));
       new_environ[size] = (char *) string;
       new_environ[size + 1] = NULL;
       if (last_environ != NULL)
