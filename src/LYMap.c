@@ -429,7 +429,11 @@ PRIVATE int LYLoadIMGmap ARGS4 (
     if (!theList) {
 	if (anAnchor->post_data && !WWWDoc.safe &&
 	    ((underlying && underlying->document && !LYforce_no_cache) ||
-	     HTConfirm("LYNXIMGMAP: " CONFIRM_POST_RESUBMISSION) != TRUE)) {
+	     HTConfirm(
+#if __STDC__
+		"LYNXIMGMAP: "
+#endif
+		CONFIRM_POST_RESUBMISSION) != TRUE)) {
 	    HTAlert("Image map from POST response not available!");
 	    return(HT_NOT_LOADED);
 	}
@@ -466,7 +470,11 @@ PRIVATE int LYLoadIMGmap ARGS4 (
     if (!(theMap && theMap->elements)) {
 	if (anAnchor->post_data && !WWWDoc.safe &&
 	    ((underlying && underlying->document && !LYforce_no_cache) ||
-	    HTConfirm("LYNXIMGMAP: " CONFIRM_POST_RESUBMISSION) != TRUE)) {
+	    HTConfirm(
+#if __STDC__
+		"LYNXIMGMAP: "
+#endif
+		CONFIRM_POST_RESUBMISSION) != TRUE)) {
 	    HTAlert("Image map from POST response not available!");
 	    return(HT_NOT_LOADED);
 	}

@@ -34,12 +34,15 @@ b) directives:
 	The name for this charset in MIME syntax (one word with digits
         and some other non-letters allowed, should be IANA registered)
     Default
-	This is the default (fallback) translation table, it will be used
-	for Unicode -> 8bit (or 7bit) translation if no translation is found
-	in the specific table.
+	If "Y[es]" or "1", this is the default (fallback) translation table,
+	it will be used for Unicode -> 8bit (or 7bit) translation if no
+	translation is found in the specific table.
     FallBack
 	Whether to use the default table if no translation is found in
-	this table.  Normally fallback is used, "FallBack NO" disables it.
+	this table.  Normally fallback is used, "FallBack NO" or "FallBack 0"
+	disables it (actually, other values than "FallBack Y[es]" or
+	"FallBack 1" disable it).
+
     RawOrEnc
 	a number which flags some special property (encoding) for this
         charset [see utf8.uni for example, see UCDefs.h for details].
@@ -103,7 +106,7 @@ d) string replacement definitions:
  * and <unicode> ::= U+<h><h><h><h>
  * and <h> ::= <hexadecimal digit>
  * and <replace> any string not containing '\n' or '\0', taken verbatim
- * and <C replace> any string, with backslash having the usual C meaning
+ * and <C replace> any string, with backslash having the usual C meaning.
 
 Motivation:
 

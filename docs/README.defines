@@ -81,6 +81,11 @@ Using curses or ncurses library:
                    for UNIX handled by ./configure
 # -DUNDERLINE_LINKS  Define if you want links underlined instead of bold.
 # -DHP_TERMINAL    For DIM workaround to REVERSE problems on HP terminals.
+# -DNO_SIZECHANGE (old) or HAVE_SIZECHANGE (new) whether using code to detect
+                   new size after size changes of the terminal (window).
+                   for UNIX handled by ./configure, may be set in HTUtils.h
+# -DNO_SIZECHANGEHACK  disable hack for size increase handling.
+
 Using slang library:
 # -DUSE_SLANG      (see README.configure)
 # -DSLANG_MBCS_HACK prevent cutoff lines when using UTF8 console (slang only)

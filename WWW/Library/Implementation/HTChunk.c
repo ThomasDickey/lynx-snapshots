@@ -116,14 +116,15 @@ PUBLIC void HTChunkPutb ARGS3 (HTChunk *,ch, CONST char *,b, int,l)
     ch->size += l;
 }
 
-#ifdef EXP_CHARTRANS
-
 #define PUTC(code) ch->data[ch->size++] = (char)(code)
 #define PUTC2(code) ch->data[ch->size++] = (char)(0x80|(0x3f &(code)))
 
-PUBLIC void HTChunkPutUtf8Char ARGS2 (HTChunk *,ch, UCode_t,code)
+PUBLIC void HTChunkPutUtf8Char ARGS2(
+	HTChunk *,	ch,
+	UCode_t,	code)
 {
     int utflen;
+
     if (code < 128)
 	utflen = 1;
     else if   (code <     0x800L) {
@@ -148,7 +149,7 @@ PUBLIC void HTChunkPutUtf8Char ARGS2 (HTChunk *,ch, UCode_t,code)
           outofmem(__FILE__, "HTChunkPutUtf8Char");
     }
 
-    switch(utflen) {
+    switch (utflen) {
     case 0:
 	return;
     case 1:
@@ -169,7 +170,7 @@ PUBLIC void HTChunkPutUtf8Char ARGS2 (HTChunk *,ch, UCode_t,code)
     case 6:
 	PUTC(0xfc | (code>>30));
     }
-    switch(utflen) {
+    switch (utflen) {
     case 6:
 	PUTC2(code>>24);
     case 5:
@@ -182,8 +183,6 @@ PUBLIC void HTChunkPutUtf8Char ARGS2 (HTChunk *,ch, UCode_t,code)
 	PUTC2(code);
     }
 }
-
-#endif /* EXP_CHARTRANS */
 
 /*	Terminate a chunk
 **	-----------------

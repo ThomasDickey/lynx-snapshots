@@ -256,7 +256,8 @@ PUBLIC int main ARGS2(
 	if ((p = strchr(buffer, '\n')) != NULL) {
 	    *p = '\0';
 	} else {
-	    fprintf(stderr, "%s: Warning: line too long or incomplete\n",
+	    fprintf(stderr,
+		    "%s: Warning: line too long or incomplete.\n",
 		    tblname);
 	}
 
@@ -276,7 +277,7 @@ PUBLIC int main ARGS2(
 	 *  and <unicode> ::= U+<h><h><h><h>
 	 *  and <h> ::= <hexadecimal digit>
 	 *  and <replace> any string not containing '\n' or '\0'
-	 *  and <C replace> any string with C backslash escapes 
+	 *  and <C replace> any string with C backslash escapes.
 	 */
 	p = buffer;
 	while (*p == ' ' || *p == '\t') {
@@ -416,19 +417,20 @@ PUBLIC int main ARGS2(
 		continue;
 	    }
 
-	    tbuf = (char *) malloc (4*strlen(p));
+	    tbuf = (char *)malloc(4*strlen(p));
+
 	    if (!(p1 = tbuf)) {
 		fprintf(stderr, "%s: Out of memory\n", tblname);
 		exit(EX_DATAERR);
 	    }
 	    if (*p == '"') {
 		/*
-		 *  handle "<C replace>"
+		 *  Handle "<C replace>".
 		 *  Copy chars verbatim until first '"' not \-escaped or
-		 *  end of buffer
+		 *  end of buffer.
 		 */
 		int escaped = 0;
-		for (ch = *++p; (ch = *p) != '\0'; p++) {
+		for (ch = *(++p); (ch = *p) != '\0'; p++) {
 		    if (escaped) {
 			escaped = 0;
 		    } else if (ch == '"') {
@@ -444,12 +446,17 @@ PUBLIC int main ARGS2(
 		    if (escaped)
 			*p1++ = '\n';
 		}
-	    } else {		/* we had ':' */
-		for (ch = *++p; (ch = *p) != '\0'; p++, p1++) {
+	    } else {
+		/*
+		 *  We had ':'.
+		 */
+		for (ch = *(++p); (ch = *p) != '\0'; p++, p1++) {
 		    if ((unsigned char)ch < 32 || ch == '\\' || ch == '\"' ||
 			(unsigned char)ch >= 127) {
 			sprintf(p1, "\\%.3o", (unsigned char)ch); 
-/*		    fprintf(stderr, "%s\n", tbuf); */
+#ifdef NOTDEFINED
+			fprintf(stderr, "%s\n", tbuf);
+#endif /* NOTDEFINED */
 			p1 += 3;
 		    } else {
 			*p1 = ch;
@@ -458,16 +465,19 @@ PUBLIC int main ARGS2(
 	    }
 	    *p1 = '\0';
 	    for (i = un0; i <= un1; i++) {
-/*		printf("U+0x%x:%s\n", i, tbuf); */
+#ifdef NOTDEFINED
+		printf("U+0x%x:%s\n", i, tbuf); */
+#endif /* NOTDEFINED */
 		addpair_str(tbuf,i);
 	    }
 	    continue;
 	}
 
-/* Input line (after skipping spaces) doesn't start with one
-   of the specially recognized characters, so try to interpret
-   it as starting with a fontpos.
-*/
+	/*
+	 *  Input line (after skipping spaces) doesn't start with one
+	 *  of the specially recognized characters, so try to interpret
+	 *  it as starting with a fontpos.
+	 */
 	fp0 = strtol(p, &p1, 0);
 	if (p1 == p) {
 	    fprintf(stderr, "Bad input line: %s\n", buffer);

@@ -2,7 +2,13 @@
 #ifndef LYCHARSETS_H
 #define LYCHARSETS_H
 
-/* LYchar_set_name[current_char_set] points to the currently active set */
+#ifndef UCMAP_H
+#include "UCMap.h"
+#endif /* !UCMAP_H */
+
+/*
+ *  LYchar_set_name[current_char_set] points to the currently active set.
+ */
 extern int current_char_set;
 extern CONST char * LYchar_set_names[];
 
@@ -28,6 +34,7 @@ extern void HTMLSetUseDefaultRawMode PARAMS((int i, BOOLEAN modeflag));
 extern void HTMLSetHaveCJKCharacterSet PARAMS((int i));
 extern CONST char * LYEntityNames[];
 extern CONST char * HTMLGetEntityName PARAMS((int i));
+extern UCode_t HTMLGetEntityUCValue PARAMS((CONST char *name));
 extern char HTMLGetLatinOneValue PARAMS((int i));
 extern void HTMLUseCharacterSet PARAMS((int i));
 

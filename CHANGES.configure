@@ -1,3 +1,9 @@
+97-11-12
+--------
+* remove options --with-lss-file and --with-cfg-file, since the corresponding
+  files will always be installed under $(libdir), reported by Hynek Med. - TD
+* modify configure script and makefile templates to permit builds with the
+  --srcdir option, noted by Philippe De Muyter. - TD
 97-11-07
 --------
 * add logic to make install-directories as needed. - TD

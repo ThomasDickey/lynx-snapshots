@@ -873,16 +873,6 @@ PUBLIC HTFormat HTCharsetFormat ARGS3(
 	*cp4 = '\0';
 	cp4 = cp3;
 	chndl = UCGetLYhndl_byMIME(cp3);
-	if (chndl < 0) {
-	    if (!strcmp(cp4, "cn-big5")) {
-		cp4 += 3;
-		chndl = UCGetLYhndl_byMIME(cp4);
-	    } else if (!strncmp(cp4, "cn-gb", 5)) {
-		StrAllocCopy(cp3, "gb2312");
-		cp4 = cp3;
-		chndl = UCGetLYhndl_byMIME(cp4);
-	    }
-	}
 	if (UCCanTranslateFromTo(chndl, current_char_set)) {
 	    chartrans_ok = YES;
 	    *cp1 = '\0';
@@ -1010,7 +1000,7 @@ PUBLIC HTFormat HTCharsetFormat ARGS3(
 	    HTAlert(anchor->charset);
 	} else if (!strncmp(cp2, "koi8-r", 6) &&
 		   !strncmp(LYchar_set_names[current_char_set],
-			    "KOI8-R character set", 20)) {
+			    "KOI8-R Cyrillic", 15)) {
 	    *cp1 = '\0';
 	    format = HTAtom_for(cp);
 	    StrAllocCopy(anchor->charset, "koi8-r");
@@ -2446,7 +2436,7 @@ PUBLIC int HTLoadFile ARGS4(
 		return status;
 	    }  /* If succesfull open */
 	    FREE(localname);
-	}    /* scope of fp */
+	}  /* scope of fp */
     }  /* local unix file system */    
 #endif /* !NO_UNIX_IO */
 #endif /* VMS */
@@ -2487,8 +2477,6 @@ PUBLIC int HTLoadFile ARGS4(
 
 	return HTLoadError(sink, 403, "Can't access requested file.");
     }
-    
- 
 }
 
 /*

@@ -364,10 +364,20 @@ try_again:
       }
 
       if (!(LYUserSpecifiedURL ||
-      	    LYNoRefererHeader || LYNoRefererForThis) &&
-         strcmp((char *)HTLoadedDocumentURL(), "")) {
+	    LYNoRefererHeader || LYNoRefererForThis) &&
+	  strcmp(HTLoadedDocumentURL(), "")) {
+	  char *cp = HTLoadedDocumentURL();
           StrAllocCat(command, "Referer: ");
-          StrAllocCat(command, (char *)HTLoadedDocumentURL());
+	  if (!strncasecomp(cp, "LYNXIMGMAP:", 11)) {
+	      char *cp1 = strchr(cp, '#');
+	      if (cp1)
+		  *cp1 = '\0';
+	      StrAllocCat(command, cp + 11);
+	      if (cp1)
+		  *cp1 = '#';
+	  } else {
+	      StrAllocCat(command, cp);
+	  }
           sprintf(line, "%c%c", CR, LF);
           StrAllocCat(command, line);
       }
@@ -653,7 +663,7 @@ try_again:
     BOOL end_of_file = NO;
     int buffer_length = INIT_LINE_SIZE;
 
-    line_buffer = (char *) calloc(1, buffer_length * sizeof(char));
+    line_buffer = (char *)calloc(1, (buffer_length * sizeof(char)));
 
     do {/* Loop to read in the first line */
         /*
@@ -662,7 +672,7 @@ try_again:
         if (buffer_length - length < LINE_EXTEND_THRESH) {
             buffer_length = buffer_length + buffer_length;
             line_buffer = 
-              (char *) realloc(line_buffer, buffer_length * sizeof(char));
+              (char *)realloc(line_buffer, (buffer_length * sizeof(char)));
         }
         if (TRACE)
             fprintf (stderr, "HTTP: Trying to read %d\n",
@@ -672,8 +682,10 @@ try_again:
         if (TRACE)
             fprintf (stderr, "HTTP: Read %d\n", status);
         if (status <= 0) {
-            /* Retry if we get nothing back too; 
-               bomb out if we get nothing twice. */
+            /*
+	     *  Retry if we get nothing back too.
+             *  Bomb out if we get nothing twice.
+	     */
             if (status == HT_INTERRUPTED) {
                 if (TRACE)
                     fprintf (stderr, "HTTP: Interrupted initial read.\n");
@@ -728,7 +740,7 @@ try_again:
 
         if (line_buffer) {
             FREE(line_kept_clean);
-            line_kept_clean = (char *)malloc (buffer_length * sizeof (char));
+            line_kept_clean = (char *)malloc(buffer_length * sizeof(char));
             memcpy(line_kept_clean, line_buffer, buffer_length);
         }
 
@@ -924,8 +936,9 @@ try_again:
 		 *  No Content.
 		 */
 	        HTAlert(line_buffer);
+                HTTP_NETCLOSE(s, handle);
 	        status = HT_NO_DATA;
-	        goto done;
+	        goto clean_up;
 		break;
 
 	      case 205:
@@ -937,8 +950,9 @@ try_again:
 		 *  document. - FM
 		 */
 	        HTAlert("Request fulfilled.  Reset Content.");
+                HTTP_NETCLOSE(s, handle);
 	        status = HT_NO_DATA;
-	        goto done;
+	        goto clean_up;
 		break;
 
 	      case 206:
@@ -951,7 +965,7 @@ try_again:
 	        HTAlert(line_buffer);
                 HTTP_NETCLOSE(s, handle);
 	        status = HT_NO_DATA;
-	        goto done;
+	        goto clean_up;
 		break;
 
 	      default:

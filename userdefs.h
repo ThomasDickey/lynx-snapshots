@@ -621,9 +621,8 @@
  *   ISO Latin 1			iso-8859-1
  *   ISO Latin 2			iso-8859-2
  *   Other ISO Latin			x-iso-8859-other
+ *   WinLatin1 (cp1252)			iso-8859-1-windows-3.1-latin-1
  *   DEC Multinational			dec-mcs
- *   IBM PC character set		cp437
- *   IBM PC codepage 850		cp850
  *   Macintosh (8 bit)			macintosh
  *   NeXT character set			x-next
  *   KOI8-R character set		koi8-r
@@ -632,14 +631,22 @@
  *   Japanese (SJIS)			shift_jis
  *   Korean				euc-kr
  *   Taipei (Big5)			big5
+ *   Vietnamese (VISCII)		viscii
  *   7 bit approximations		us-ascii
  *   Transparent			x-transparent
+ *   IBM PC character set		cp437
+ *   IBM PC codepage 850		cp850
  *   PC Latin2 CP 852			cp852
  *   DosCyrillic (cp866)		cp866
- *   MS Windows CP 1252			iso-8859-1-windows-3.1-latin-1
- *   MS Windows CP 1250			windows-1250
+ *   DosGreek (cp737)			cp737
+ *   DosGreek2 (cp869)			cp869
+ *   DosArabic (cp864)			cp864
+ *   DosHebrew (cp862)			cp862
+ *   WinLatin2 (cp1250)			windows-1250
  *   WinCyrillic (cp1251)		windows-1251
- *   Vietnamese (VISCII)		viscii
+ *   WinGreek (cp1253)			windows-1253
+ *   WinHebrew (cp1255)			windows-1255
+ *   WinArabic (cp1256)			windows-1256
  *   ISO Latin 3			iso-8859-3
  *   ISO Latin 4			iso-8859-4
  *   ISO 8859-5 Cyrillic		iso-8859-5
@@ -867,9 +874,9 @@
 #define BOXVERT 0
 #define BOXHORI 0
 #else
-#define BOXVERT '*'
+#define BOXVERT '|'
 /* #define BOXVERT 0 */
-#define BOXHORI '*'
+#define BOXHORI '-'
 /* #define BOXHORI 0 */
 #endif /* DOSPATH */
 #endif	/* !HAVE_CONFIG_H */
@@ -1181,7 +1188,7 @@
  * the version definition with the Project Version on checkout. Just
  * ignore it. - kw */
 /* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
-#define LYNX_VERSION "2.7.1ac-0.89"
+#define LYNX_VERSION "2.7.1ac-0.95"
 
 #ifndef MAXINT
 #define MAXINT 2147483647	/* max integer */
@@ -1199,8 +1206,8 @@
 #define SEARCH_GOAL_LINE 4	/* try to position search target there */
 #endif
 
-#define MAXCHARSETS 40		/* max character sets supported */
-#define MAXCHARSETSP 41		/* always one more than MAXCHARSETS */
+#define MAXCHARSETS 50		/* max character sets supported */
+#define MAXCHARSETSP 51		/* always one more than MAXCHARSETS */
 
 #ifdef __DJGPP__
 #define FNAMES_8_3

@@ -7,9 +7,8 @@
 #include "LYSignal.h"
 #include "LYClean.h"
 #include "LYStrings.h"
-#ifdef USE_SLANG
 #include "LYCharSets.h"
-#endif /* USE_SLANG */
+#include "UCAux.h"
 
 #include "LYexit.h"
 #include "LYLeaks.h"
@@ -67,10 +66,12 @@ PUBLIC int PHYSICAL_SLtt_Screen_Cols = 10;
 PUBLIC void LY_SLrefresh NOARGS
 {
     if (FullRefresh) {
-	SLsmg_touch_lines(0, LYlines);
+	SLsmg_suspend_smg();
+	SLsmg_resume_smg();
 	FullRefresh = FALSE;
+    } else {
+	SLsmg_refresh();
     }
-    SLsmg_refresh();
 
     return;
 }
@@ -171,6 +172,82 @@ PRIVATE void sl_suspend ARGS1(
 #endif /* SIGSTOP */
    return;
 }
+
+#else  /* Not slang: */
+
+#ifdef VMS
+/*
+**  This function boxes windows with graphic characters for
+**  VMS curses.  Pass it the window, it's height, and it's
+**  width. - FM
+*/
+PUBLIC void VMSbox ARGS3(
+	WINDOW *,	win,
+	int,		height,
+	int,		width)
+{
+    int i;
+
+    wmove(win, 0, 0);
+    waddstr(win, "\033)0\016l");
+    for (i = 1; i < width; i++)
+       waddch(win, 'q');
+    waddch(win, 'k');
+    for (i = 1; i < height-1; i++) {
+        wmove(win, i, 0);
+	waddch(win, 'x');
+        wmove(win, i, width-1);
+	waddch(win, 'x');
+    }
+    wmove(win, i, 0);
+    waddch(win, 'm');
+    for (i = 1; i < width; i++)
+       waddch(win, 'q');
+    waddstr(win, "j\017");
+}
+#else
+/*
+**  This function boxes windows for non-VMS (n)curses.
+**  Pass it the window. - FM
+*/
+PUBLIC void LYbox ARGS2(
+	WINDOW *,	win,
+	BOOLEAN,	formfield)
+{
+    /*
+     *  If the terminal is in UTF-8 mode, it probably cannot understand
+     *  box drawing characters as (n)curses handles them.  (This may also
+     *  be true for other display character sets, but isn't currently
+     *  checked.)  In that case, substitute ASCII characters for BOXVERT
+     *  and BOXHORI if they were defined to 0 for automatic use of box
+     *  drawing characters.  They'll stay as they are otherwise. - KW & FM
+     */
+    int boxvert, boxhori;
+
+    UCSetBoxChars(current_char_set, &boxvert, &boxhori, BOXVERT, BOXHORI);
+#ifdef CSS
+    if (formfield)
+	wcurses_css(win, "frame", ABS_ON);
+#endif
+    /*
+     *  If we don't have explicitly specified characters for either
+     *  vertical or horizontal lines, the characters that box() would
+     *  use for the corners probably also won't work well.  So we
+     *  specifiy our own ASCII characters for the corners and call
+     *  wborder() instead of box(). - kw
+     */
+    if (!boxvert || !boxhori)
+	box(win, boxvert, boxhori);
+    else if (boxvert == '*' || boxhori == '*')
+	wborder(win, boxvert, boxvert, boxhori, boxhori, '*', '*', '*', '*');
+    else
+	wborder(win, boxvert, boxvert, boxhori, boxhori, '/', '\\', '\\', '/');
+#ifdef CSS
+    if (formfield)
+	wcurses_css(win, "frame", ABS_OFF);
+#endif
+}
+#endif /* VMS */
 #endif /* USE_SLANG */
 
 #if defined(USE_COLOR_STYLE)
@@ -912,6 +989,27 @@ PUBLIC BOOLEAN setup ARGS1(
 {
     static char term_putenv[120];
     char buffer[120];
+#if !defined(NO_SIZECHANGEHACK)
+#if defined(HAVE_SIZECHANGE) && !defined(USE_SLANG)
+/*
+ *  Hack to deal with a problem in sysV curses, that screen can't be
+ *  resized to greater than the size used by initscr, which can only
+ *  be called once.  So set environment variables LINES and COLUMNS
+ *  to some suitably large size to force initscr to allocate enough
+ *  space.  Later we get the real window size for setting LYlines
+ *  and LYcols. - AJL & FM
+ */
+    char *lines_putenv = NULL;
+    char *cols_putenv = NULL;
+
+    if (getenv("LINES") == NULL && getenv("COLUMNS") == NULL) {
+	StrAllocCopy(lines_putenv, "LINES=120");
+	(void) putenv(lines_putenv);
+	StrAllocCopy(cols_putenv, "COLUMNS=240");
+	(void) putenv(cols_putenv);
+    }
+#endif /* !NO_SIZECHANGE && !USE_SLANG */
+#endif /* !NO_SIZECHANGEHACK */
 
    /*
     *  If the display was not set by a command line option then
@@ -958,8 +1056,26 @@ PUBLIC BOOLEAN setup ARGS1(
     }
 #endif /* HAVE_TTYTYPE */
 
+#if defined(HAVE_SIZECHANGE) && !defined(USE_SLANG) && !defined(NO_SIZECHANGEHACK)
+    if (lines_putenv != NULL) {
+	/*
+	 *  Use SIGWINCH handler to set the true window size. - AJL && FM
+	 */
+	size_change(0);
+	lines_putenv[6] = '\0';
+	(void) putenv(lines_putenv);
+	cols_putenv[8] = '\0';
+	(void) putenv(cols_putenv);
+	FREE(lines_putenv);
+	FREE(cols_putenv);
+    } else {
+        LYlines = LINES;
+        LYcols = COLS;
+    }
+#else
     LYlines = LINES;
     LYcols = COLS;
+#endif /* !NO_SIZECHANGE && !USE_SLANG && !NO_SIZECHANGEHACK */
     if (LYlines <= 0)
 	LYlines = 24;
     if (LYcols <= 0)
@@ -1522,37 +1638,6 @@ PUBLIC int DCLsystem ARGS1(
       */
      return(status);
 }
-
-#ifndef USE_SLANG
-/*
-**  This function boxes windows with graphic characters for curses.
-**  Pass it the window, it's height, and it's width. - FM
-*/
-PUBLIC void VMSbox ARGS3(
-	WINDOW *,	win,
-	int,		height,
-	int,		width)
-{
-    int i;
-
-    wmove(win, 0, 0);
-    waddstr(win, "\033)0\016l");
-    for (i = 1; i < width; i++)
-       waddch(win, 'q');
-    waddch(win, 'k');
-    for (i = 1; i < height-1; i++) {
-	wmove(win, i, 0);
-	waddch(win, 'x');
-	wmove(win, i, width-1);
-	waddch(win, 'x');
-    }
-    wmove(win, i, 0);
-    waddch(win, 'm');
-    for (i = 1; i < width; i++)
-       waddch(win, 'q');
-    waddstr(win, "j\017");
-}
-#endif /* !USE_SLANG */
 #endif /* VMS */
 
 PUBLIC void lynx_force_repaint NOARGS

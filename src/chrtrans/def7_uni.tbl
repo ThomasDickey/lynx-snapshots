@@ -20,24 +20,24 @@ U+00a3:Pd
 U+00a4:CUR
 U+00a5:Ye
 U+00a6:|
-U+00a7:SE
+U+00a7:S:
 U+00a8:"
-U+00a9:(C)
+U+00a9:(c)
 U+00aa:-a
 U+00ab:<<
-U+00ac:NO
+U+00ac:NOT
 U+00ad:-
 U+00ae:(R)
 U+00af:-
-U+00b0:DG
+U+00b0:DEG
 U+00b1:+-
 U+00b2:^2
 U+00b3:^3
 U+00b4:'
 # My -> u
-U+00b6:u
-U+00b6:PI
-U+00b7:.M
+U+00b5:u
+U+00b6:P:
+U+00b7:.
 U+00b8:,
 U+00b9:^1
 U+00ba:-o
@@ -1325,9 +1325,9 @@ U+211e:Rx
 U+2120:(SM)
 U+2122:(TM)
 U+2126:Ohm
-U+212E:est.
 0x4b	U+212A	# Kelvin sign - K
 U+212b:Ang.
+U+212E:est.
 U+2135:Aleph 
 U+2153: 1/3
 U+2154: 2/3

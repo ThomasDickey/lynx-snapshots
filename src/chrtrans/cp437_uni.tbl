@@ -18,7 +18,7 @@ OIBM PC character set
 #    General notes: none
 #
 #    Format: Three tab-separated columns
-#        Column #1 is the cp1255_WinHebrew code (in hex)
+#        Column #1 is the cp437 code (in hex)
 #        Column #2 is the Unicode (in hex as U+XXXX)
 #        Column #3 is the Unicode name (follows a comment sign, '#')
 #

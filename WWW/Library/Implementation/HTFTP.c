@@ -759,21 +759,21 @@ PRIVATE int get_connection ARGS2(
       }
     server_type = GENERIC_SERVER;	/* reset */
     if (status == 2) {		/* Send username */
-	{
-	    char *cp;		/* look at greeting text */
-	    if (strlen(response_text) > 4) {
-		if ((cp = strstr(response_text, " awaits your command")) ||
-		    (cp = strstr(response_text, " ready."))) {
-		    *cp = '\0';
-		}
-		cp = response_text + 4;
-		if (!strncasecomp(cp, "NetPresenz", 10))
-		    server_type = NETPRESENZ_SERVER;
-	    } else {
-		cp = response_text;
+	char *cp;		/* look at greeting text */
+
+	if (strlen(response_text) > 4) {
+	    if ((cp = strstr(response_text, " awaits your command")) ||
+		(cp = strstr(response_text, " ready."))) {
+		*cp = '\0';
 	    }
-	    StrAllocCopy(anchor->server, cp);
+	    cp = response_text + 4;
+	    if (!strncasecomp(cp, "NetPresenz", 10))
+		server_type = NETPRESENZ_SERVER;
+	} else {
+	    cp = response_text;
 	}
+	StrAllocCopy(anchor->server, cp);
+
 	if (username && *username) {
 	    command = (char*)malloc(10+strlen(username)+2+1);
 	    if (command == NULL)
@@ -2232,7 +2232,7 @@ PRIVATE EntryInfo * parse_dir_entry ARGS2(
     return(entry_info);
 } /* parse_dir_entry */
 
-PUBLIC int compare_EntryInfo_structs ARGS2(
+PRIVATE int compare_EntryInfo_structs ARGS2(
 	EntryInfo *,	entry1, 
 	EntryInfo *,	entry2)
 {

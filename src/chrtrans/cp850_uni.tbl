@@ -1,7 +1,5 @@
 #Shall this become the "default" translation?
-#Meaning of that is currently unclear...  It's different
-#from the default input or defualt output charset...
-#but there has to be exactly one table marked as "default".
+#There has to be exactly one table marked as "default".
 D0
 #
 #The MIME name of this charset. 

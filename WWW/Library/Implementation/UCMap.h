@@ -17,7 +17,10 @@ extern int UCTransChar PARAMS((
 	char		ch_in,
 	int		charset_in,
 	int		charset_out));
-PUBLIC int UCReverseTransChar PARAMS((char ch_out, int charset_in, int charset_out));
+extern int UCReverseTransChar PARAMS((
+	char		ch_out,
+	int		charset_in,
+	int		charset_out));
 extern int UCTransCharStr PARAMS((
 	char *		outbuf,
 	int		buflen,

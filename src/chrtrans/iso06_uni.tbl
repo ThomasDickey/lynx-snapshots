@@ -109,4 +109,5 @@ U+2122:(TM)
 
 # Let's try to show a question mark for character that cannot
 # be shown.  U+fffd is used for invalid characters.
-U+fffd:?
+# It works, but let's stick with UHHH representatiion. - FM
+#U+fffd:?

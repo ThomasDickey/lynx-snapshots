@@ -199,6 +199,8 @@ distclean: clean
 	-cd src/chrtrans && $(MAKE) $@
 	-rm -f *~ *.bak *.sav
 	-rm -f WWW/Library/unix/makefile src/makefile src/chrtrans/makefile
+	-rmdir WWW/Library/unix && rmdir WWW/Library && rmdir WWW
+	-rmdir src/chrtrans && rmdir src
 	-rm -f makefile lynx_cfg.h config.status config.log config.cache
 	-rm -f lynx
 

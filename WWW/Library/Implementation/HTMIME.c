@@ -377,16 +377,6 @@ PRIVATE void HTMIME_put_character ARGS2(
 			    *cp4 = '\0';
 			    cp4 = cp3;
 			    chndl = UCGetLYhndl_byMIME(cp3);
-			    if (chndl < 0) {
-				if (!strcmp(cp4, "cn-big5")) {
-				    cp4 += 3;
-				    chndl = UCGetLYhndl_byMIME(cp4);
-				} else if (!strncmp(cp4, "cn-gb", 5)) {
-				    StrAllocCopy(cp3, "gb2312");
-				    cp4 = cp3;
-				    chndl = UCGetLYhndl_byMIME(cp4);
-				}
-			    }
 			    if (UCCanTranslateFromTo(chndl,
 						     current_char_set)) {
 				chartrans_ok = YES;
@@ -535,7 +525,7 @@ PRIVATE void HTMIME_put_character ARGS2(
 			    } else if
 			       (!strncmp(cp2, "koi8-r", 6) &&
 				!strncmp(LYchar_set_names[current_char_set],
-					 "KOI8-R character set", 20)) {
+					 "KOI8-R Cyrillic", 15)) {
 				*cp1 = '\0';
 				me->format = HTAtom_for(cp);
 				StrAllocCopy(me->anchor->charset,

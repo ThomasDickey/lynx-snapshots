@@ -2328,11 +2328,7 @@ redraw:
 #ifdef VMS
     VMSbox(form_window, (bottom - top), (Lnum + width + 4));
 #else
-    {
-	int boxvert, boxhori;
-	UCSetBoxChars(current_char_set, &boxvert, &boxhori, BOXVERT, BOXHORI);
-	box(form_window, boxvert, boxhori);
-    }
+    LYbox(form_window, FALSE);
 #endif /* VMS */
     wrefresh(form_window);
 #endif /* USE_SLANG */

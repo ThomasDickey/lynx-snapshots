@@ -761,7 +761,8 @@ PUBLIC void reset_numbers_as_arrows NOARGS
     did_number_keys = FALSE;
 }
 
-PUBLIC char *key_for_func ARGS1 (int,func)
+PUBLIC char *key_for_func ARGS1 (
+	int,		func)
 {
 	static char buf[512];
 	size_t i;
@@ -779,16 +780,34 @@ PUBLIC char *key_for_func ARGS1 (int,func)
 
 /*
  *  This function returns TRUE if the ch is non-alphanumeric
- *  and maps to keyname (LYK_foo in the keymap[] array). - FM
+ *  and maps to key_name (LYK_foo in the keymap[] array). - FM
  */ 
 PUBLIC BOOL LYisNonAlnumKeyname ARGS2(
 	int,	ch,
-	int,	keyname)
+	int,	key_name)
 {
     if ((ch >= '0' && ch <= '9') ||
         (ch >= 'A' && ch <= 'z') ||
 	ch < 0 || ch > 269)
 	return (FALSE);
 
-    return(keymap[ch+1] == keyname);
+    return(keymap[ch+1] == key_name);
+}
+
+/*
+ *  This function returns the (int)ch mapped to the
+ *  LYK_foo value passed to it as an argument. - FM
+ */
+PUBLIC int LYReverseKeymap ARGS1(
+	int,		key_name)
+{
+    int i;
+
+    for (i = 1; i < sizeof(keymap); i++) {
+	if (keymap[i] == key_name) {
+	    return(i - 1);
+	}
+    }
+
+    return(0);
 }

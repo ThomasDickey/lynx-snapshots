@@ -146,12 +146,46 @@ struct _HTStructured {
 
     BOOL		needBoldH;
 
-#ifdef EXP_CHARTRANS
-    LYUCcharset	* UCI;	/* pointer to node_anchor's UCInfo */
-    int	UCLYhndl;		/* tells us what charset we are fed */
-    UCTransParams T;
+    /*
+    **  UCI and UCLYhndl give the UCInfo and charset registered for
+    **  the HTML parser in the node_anchor's UCStages structure.  It
+    **  indicates what is fed to the HTML parser as the stream of character
+    **  data (not necessarily tags and attributes).  It should currently
+    **  always be set to be the same as UCI and UCLhndl for the HTEXT stage
+    **  in the node_anchor's UCStages structure, since the HTML parser sends
+    **  its input character data to the output without further charset
+    **  translation.
+    */
+    LYUCcharset	*	UCI;
+    int			UCLYhndl;
+    /*
+    **  inUCI and inUCLYhndl indicate the UCInfo and charset which the
+    **  HTML parser treats at the input charset.  It is normally set
+    **  to the UCI and UCLhndl for the SGML parser in the node_anchor's
+    **  UCStages structure (which may be a dummy, based on the MIME
+    **  parser's UCI and UCLhndl in that structure, when we are handling
+    **  a local file or non-http(s) gateway).  It could be changed
+    **  temporarily by the HTML parser, for conversions of attribute
+    **  strings, but should be reset once done. - FM
+    */
+    LYUCcharset	*	inUCI;
+    int			inUCLYhndl;
+    /*
+    **  outUCI and outUCLYhndl indicate the UCInfo and charset which
+    **  the HTML parser treats as the output charset.  It is normally
+    **  set to its own UCI and UCLhndl.  It could be changed for
+    **  conversions of attribute strings, but should be reset once
+    **  done. - FM
+    */
+    LYUCcharset	*	outUCI;
+    int			outUCLYhndl;
+    /*
+    **  T holds the transformation rules for conversions of strings
+    **  between the input and output charsets by the HTML parser. - FM
+    */
+    UCTransParams	T;
+
     int 		tag_charset; /* charset for attribute values etc. */
-#endif
 };
 
 struct _HTStream {

@@ -151,6 +151,7 @@ PUBLIC void HTFormatInit NOARGS
  HTSetConversion("text/sgml", "www/source",  HTPlainPresent, 1.0, 0.0, 0.0, 0);
  HTSetConversion("text/sgml", "www/present", HTMLPresent,    1.0, 0.0, 0.0, 0);
  HTSetConversion("text/plain","www/present", HTPlainPresent, 1.0, 0.0, 0.0, 0);
+ HTSetConversion("text/plain","www/source",  HTPlainPresent, 1.0, 0.0, 0.0, 0);
  HTSetConversion("text/html", "www/source",  HTPlainPresent, 1.0, 0.0, 0.0, 0);
  HTSetConversion("text/html", "text/x-c",    HTMLToC, 	     0.5, 0.0, 0.0, 0);
  HTSetConversion("text/html", "text/plain",  HTMLToPlain,    0.5, 0.0, 0.0, 0);
@@ -235,10 +236,12 @@ struct MailcapEntry {
 PRIVATE int ExitWithError PARAMS((char *txt));
 PRIVATE int PassesTest PARAMS((struct MailcapEntry *mc));
 
-#define LINE_BUF_SIZE       2000
-#define TMPFILE_NAME_SIZE 256
+#define LINE_BUF_SIZE		2048
+#define TMPFILE_NAME_SIZE	256
 
-PRIVATE char *GetCommand ARGS2(char *,s, char **,t)
+PRIVATE char *GetCommand ARGS2(
+	char *,		s,
+	char **,	t)
 {
     char *s2;
     int quoted = 0;
@@ -257,7 +260,7 @@ PRIVATE char *GetCommand ARGS2(char *,s, char **,t)
 	    quoted = 0;
 	} else {
 	    if (*s == ';') {
-                *s2 = 0;
+                *s2 = '\0';
 		return(++s);
 	    }
 	    if (*s == '\\') {
@@ -268,12 +271,13 @@ PRIVATE char *GetCommand ARGS2(char *,s, char **,t)
 	    }
 	}
     }
-    *s2 = 0;
+    *s2 = '\0';
     return(NULL);
 }	
 
 /* no leading or trailing space, all lower case */
-PRIVATE char *Cleanse ARGS1(char *,s) 
+PRIVATE char *Cleanse ARGS1(
+	char *,		s) 
 {
     char *tmp, *news;
     
@@ -291,19 +295,21 @@ PRIVATE char *Cleanse ARGS1(char *,s)
     return(news);
 }
 
-PRIVATE int ProcessMailcapEntry ARGS2(FILE *,fp, struct MailcapEntry *,mc)
+PRIVATE int ProcessMailcapEntry ARGS2(
+	FILE *,			fp,
+	struct MailcapEntry *,	mc)
 {
     int i, j;
     size_t rawentryalloc = 2000, len;
     char *rawentry, *s, *t, *LineBuf;
 
-    LineBuf = malloc(LINE_BUF_SIZE);
+    LineBuf = (char *)malloc(LINE_BUF_SIZE);
     if (!LineBuf) 
         ExitWithError("Out of memory");
-    rawentry = malloc(1 + rawentryalloc);
+    rawentry = (char *)malloc(1 + rawentryalloc);
     if (!rawentry) 
         ExitWithError("Out of memory");
-    *rawentry = 0;
+    *rawentry = '\0';
     while (fgets(LineBuf, LINE_BUF_SIZE, fp)) {
 	if (LineBuf[0] == '#') 
 	    continue;
@@ -311,7 +317,7 @@ PRIVATE int ProcessMailcapEntry ARGS2(FILE *,fp, struct MailcapEntry *,mc)
         if (len == 0) 
 	    continue;
         if (LineBuf[len-1] == '\n') 
-	    LineBuf[--len] = 0;
+	    LineBuf[--len] = '\0';
 	if ((len + strlen(rawentry)) > rawentryalloc) {
 	    rawentryalloc += 2000;
 	    rawentry = realloc(rawentry, rawentryalloc+1);
@@ -319,7 +325,7 @@ PRIVATE int ProcessMailcapEntry ARGS2(FILE *,fp, struct MailcapEntry *,mc)
 	        ExitWithError("Out of memory");
 	}
 	if (len > 0 && LineBuf[len-1] == '\\') {
-            LineBuf[len-1] = 0;
+            LineBuf[len-1] = '\0';
 	    strcat(rawentry, LineBuf);
 	} else {
 	    strcat(rawentry, LineBuf);
@@ -340,20 +346,20 @@ PRIVATE int ProcessMailcapEntry ARGS2(FILE *,fp, struct MailcapEntry *,mc)
     if (s == NULL) {
 	if (TRACE) {
 		fprintf(stderr,
-			"metamail: Ignoring invalid mailcap entry: %s\n",
+		 "ProcessMailcapEntry: Ignoring invalid mailcap entry: %s\n",
 			rawentry);
 	}
 	FREE(rawentry);
 	return(0);
     }
-    *s++ = 0;
+    *s++ = '\0';
     if (!strncasecomp(rawentry, "text/html", 9) ||
         !strncasecomp(rawentry, "text/plain", 10)) {
 	--s;
 	*s = ';';
 	if (TRACE) {
 		fprintf(stderr,
-			"metamail: Ignoring mailcap entry: %s\n",
+			"ProcessMailcapEntry: Ignoring mailcap entry: %s\n",
 			rawentry);
 	}
 	FREE(rawentry);
@@ -371,7 +377,7 @@ PRIVATE int ProcessMailcapEntry ARGS2(FILE *,fp, struct MailcapEntry *,mc)
     mc->testcommand = NULL;
     mc->label = NULL;
     mc->printcommand = NULL;
-    mc->contenttype = malloc(1+strlen(rawentry));
+    mc->contenttype = (char *)malloc(1 + strlen(rawentry));
     if (!mc->contenttype)
         ExitWithError("Out of memory");
     strcpy(mc->contenttype, rawentry);
@@ -389,7 +395,9 @@ PRIVATE int ProcessMailcapEntry ARGS2(FILE *,fp, struct MailcapEntry *,mc)
         t = GetCommand(s, &mallocd_string);
 	arg = mallocd_string;
         eq = strchr(arg, '=');
-        if (eq) *eq++ = 0;
+        if (eq) {
+	    *eq++ = '\0';
+	}
 	if (arg && *arg) {
 	    arg = Cleanse(arg);
 	    if (!strcmp(arg, "needsterminal")) {
@@ -401,7 +409,7 @@ PRIVATE int ProcessMailcapEntry ARGS2(FILE *,fp, struct MailcapEntry *,mc)
 		StrAllocCopy(mc->testcommand, eq);
 		if (TRACE)
 		    fprintf(stderr,
-		    	    "[HTInit]: found testcommand:%s\n",
+		    	    "ProcessMailcapEntry: Found testcommand:%s\n",
 			    mc->testcommand);
 	    } else if (eq && !strcmp(arg, "description")) {
 		mc->label = eq;
@@ -423,7 +431,8 @@ PRIVATE int ProcessMailcapEntry ARGS2(FILE *,fp, struct MailcapEntry *,mc)
 	    } else if (strcmp(arg, "notes")) { /* IGNORE notes field */
 		if (*arg && TRACE)
 		    fprintf(stderr,
-		    	    "metamail: Ignoring mailcap flag: %s\n", arg);
+			"ProcessMailcapEntry: Ignoring mailcap flag '%s'.\n",
+			    arg);
 	    }
 
 	}
@@ -437,7 +446,7 @@ assign_presentation:
     if (PassesTest(mc)) {
 	if (TRACE)
 	    fprintf(stderr,
-	    	    "[HTInit] Setting up conversion %s : %s\n",
+	    	    "ProcessMailcapEntry Setting up conversion %s : %s\n",
 		    mc->contenttype, mc->command);
 	HTSetPresentation(mc->contenttype, mc->command,
 			  mc->quality, 3.0, 0.0, mc->maxbytes);
@@ -449,11 +458,11 @@ assign_presentation:
 }
 
 PRIVATE void BuildCommand ARGS5(
-    char **, 	pBuf,
-    size_t,	Bufsize,
-    char *,	controlstring, 
-    char *,	TmpFileName,
-    size_t,	TmpFileLen)
+	char **, 	pBuf,
+	size_t,		Bufsize,
+	char *,		controlstring, 
+	char *,		TmpFileName,
+	size_t,		TmpFileLen)
 {
     char *from, *to;
     int prefixed = 0; 
@@ -469,7 +478,7 @@ PRIVATE void BuildCommand ARGS5(
 		case 'F':
 		    if (TRACE) {
 		        fprintf(stderr,
-				"metamail: Bad mailcap \"test\" clause: %s\n",
+			     "BuildCommand: Bad mailcap \"test\" clause: %s\n",
 				controlstring);
 		    }
 		case 's':
@@ -478,7 +487,9 @@ PRIVATE void BuildCommand ARGS5(
 			    *to = '\0';
 			    if (TRACE) {
 				fprintf(stderr,
-			"Too long mailcap \"test\" clause, ignoring: %s%s...\n",
+			"BuildCommand: Too long mailcap \"test\" clause,\n");
+				fprintf(stderr,
+			"	       ignoring: %s%s...\n",
 					*pBuf, TmpFileName);
 			    }
 			    **pBuf = '\0';
@@ -491,7 +502,7 @@ PRIVATE void BuildCommand ARGS5(
                 default:
 		    if (TRACE) {
                     	fprintf(stderr,
-		"Ignoring unrecognized format code in mailcap file: %%%c\n",
+  "BuildCommand: Ignoring unrecognized format code in mailcap file '%%%c'.\n",
 			*from);
 		    }
                     break;
@@ -505,17 +516,20 @@ PRIVATE void BuildCommand ARGS5(
 	    (*pBuf)[Bufsize - 1] = '\0';
 	    if (TRACE) {
 		fprintf(stderr,
-			"Too long mailcap \"test\" clause, ignoring: %s...\n",
+			"BuildCommand: Too long mailcap \"test\" clause,\n");
+		fprintf(stderr,
+			"              ignoring: %s...\n",
 			*pBuf);
 	    }
             **pBuf = '\0';
 	    return;
 	}
     }
-    *to = 0;
+    *to = '\0';
 }
 
-PRIVATE int PassesTest ARGS1(struct MailcapEntry *,mc)
+PRIVATE int PassesTest ARGS1(
+	struct MailcapEntry *,	mc)
 {
     int result;
     char *cmd, TmpFileName[TMPFILE_NAME_SIZE];
@@ -533,28 +547,30 @@ PRIVATE int PassesTest ARGS1(struct MailcapEntry *,mc)
     if (0 == strcasecomp(mc->testcommand, "test -n \"$DISPLAY\"")) {
         FREE(mc->testcommand);
         if (TRACE)
-	    fprintf(stderr,"Testing for XWINDOWS environment.\n");
+	    fprintf(stderr,
+		    "PassesTest: Testing for XWINDOWS environment - ");
     	if ((cp = getenv(DISPLAY)) != NULL && *cp != '\0') {
 	    if (TRACE)
-	        fprintf(stderr,"[HTInit] Test passed!\n");
+	        fprintf(stderr,"passed!\n");
 	    return(0 == 0);
 	} else {
 	    if (TRACE)
-	        fprintf(stderr,"[HTInit] Test failed!\n");
+	        fprintf(stderr,"failed!\n");
 	    return(-1 == 0);
 	}
     }
     if (0 == strcasecomp(mc->testcommand, "test -z \"$DISPLAY\"")) {
         FREE(mc->testcommand);
         if (TRACE)
-	    fprintf(stderr,"Testing for NON_XWINDOWS environment.\n");
+	    fprintf(stderr,
+		    "PassesTest: Testing for NON_XWINDOWS environment - ");
     	if (!((cp = getenv(DISPLAY)) != NULL && *cp != '\0')) {
 	    if (TRACE)
-	        fprintf(stderr,"[HTInit] Test passed!\n");
+	        fprintf(stderr,"passed!\n");
 	    return(0 == 0);
 	} else {
 	    if (TRACE)
-	        fprintf(stderr,"[HTInit] Test failed!\n");
+	        fprintf(stderr,"failed!\n");
 	    return(-1 == 0);
 	}
     }
@@ -565,8 +581,9 @@ PRIVATE int PassesTest ARGS1(struct MailcapEntry *,mc)
     if (0 == strcasecomp(mc->testcommand, "test -n \"$LYNX_VERSION\"")){
         FREE(mc->testcommand);
         if (TRACE) {
-	    fprintf(stderr,"Testing for LYNX environment.\n");
-	    fprintf(stderr,"[HTInit] Test passed!\n");
+	    fprintf(stderr,
+		    "PassesTest: Testing for LYNX environment - ");
+	    fprintf(stderr,"passed, of course!\n");
 	}
 	return(0 == 0);
     } else
@@ -576,8 +593,9 @@ PRIVATE int PassesTest ARGS1(struct MailcapEntry *,mc)
     if (0 == strcasecomp(mc->testcommand, "test -z \"$LYNX_VERSION\"")) {
         FREE(mc->testcommand);
         if (TRACE) {
-	    fprintf(stderr,"Testing for non-LYNX environment.\n");
-	    fprintf(stderr,"[HTInit] Test failed!\n");
+	    fprintf(stderr,
+		    "PassesTest: Testing for non-LYNX environment - ");
+	    fprintf(stderr,"failed, of course!\n");
 	}
 	return(-1 == 0);
     }
@@ -591,9 +609,10 @@ PRIVATE int PassesTest ARGS1(struct MailcapEntry *,mc)
         ExitWithError("Out of memory");
     BuildCommand(&cmd, 1024,
 		 mc->testcommand,
-		 TmpFileName, strlen(TmpFileName));
+		 TmpFileName,
+		 strlen(TmpFileName));
     if (TRACE)
-        fprintf(stderr,"Executing test command: %s\n", cmd);
+        fprintf(stderr,"PassesTest: Executing test command: %s\n", cmd);
     result = system(cmd);
     FREE(cmd);
 
@@ -604,24 +623,28 @@ PRIVATE int PassesTest ARGS1(struct MailcapEntry *,mc)
     FREE(mc->testcommand);
 
     if (TRACE && result)
-	fprintf(stderr,"[HTInit] Test failed!\n");
+	fprintf(stderr,"PassesTest: Test failed!\n");
     else if (TRACE)
-	fprintf(stderr,"[HTInit] Test passed!\n");
+	fprintf(stderr,"PassesTest: Test passed!\n");
 	
     return(result == 0);
 }
 
-PRIVATE int ProcessMailcapFile ARGS1(char *,file)
+PRIVATE int ProcessMailcapFile ARGS1(
+	char *,		file)
 {
     struct MailcapEntry mc;
     FILE *fp;
 
     if (TRACE)
-        fprintf (stderr, "Loading types config file '%s'\n", file);
-
+        fprintf(stderr,
+		"ProcessMailcapFile: Loading file '%s'.\n",
+		file);
     if ((fp = fopen(file, "r")) == NULL) {
         if (TRACE)
-	    fprintf (stderr, "Could not open types config file '%s'\n",file);
+	    fprintf(stderr,
+		"ProcessMailcapFile: Could not open '%s'.\n",
+		    file);
 	return(-1 == 0);
     }
 
@@ -632,7 +655,8 @@ PRIVATE int ProcessMailcapFile ARGS1(char *,file)
     return(0 == 0);
 }
 
-PRIVATE int ExitWithError ARGS1(char *,txt)
+PRIVATE int ExitWithError ARGS1(
+	char *,		txt)
 {
     if (txt)
         fprintf(stderr, "metamail: %s\n", txt);
@@ -652,7 +676,8 @@ PRIVATE int ExitWithError ARGS1(char *,txt)
 }
 
 
-PRIVATE int HTLoadTypesConfigFile ARGS1(char *,fn)
+PRIVATE int HTLoadTypesConfigFile ARGS1(
+	char *,		fn)
 {
   return ProcessMailcapFile(fn);
 }
@@ -680,7 +705,8 @@ PUBLIC void HTFileInit NOARGS
     FILE *fp;
 
     if (TRACE)
-        fprintf (stderr, "@@@ Using default extension map\n");
+        fprintf(stderr,
+		"HTFileInit: Loading default (HTInit) extension maps.\n");
 
     /* default suffix interpretation */
     HTSetSuffix("*",		"text/plain", "7bit", 1.0);
@@ -908,13 +934,19 @@ PUBLIC void HTFileInit NOARGS
 
 /* -------------------- Extension config file reading --------------------- */
 
-/* The following is lifted from NCSA httpd 1.0a1, by Rob McCool;
-   NCSA httpd is in the public domain, as is this code. */
-/* modified Oct 97 - kw */
+/*
+ *  The following is lifted from NCSA httpd 1.0a1, by Rob McCool;
+ *  NCSA httpd is in the public domain, as is this code.
+ *
+ *  Modified Oct 97 - KW
+ */
 
 #define MAX_STRING_LEN 256
 
-PRIVATE int HTGetLine ARGS3(char *,s, int,n, FILE *,f) 
+PRIVATE int HTGetLine ARGS3(
+	char *,		s,
+	int,		n,
+	FILE *,		f) 
 {
     register int i = 0, r;
 
@@ -941,7 +973,11 @@ PRIVATE int HTGetLine ARGS3(char *,s, int,n, FILE *,f)
     }
 }
 
-PRIVATE void HTGetWord ARGS4(char *,word, char *,line, char ,stop, char ,stop2) 
+PRIVATE void HTGetWord ARGS4(
+	char *,		word,
+	char *,		line,
+	char ,		stop,
+	char ,		stop2) 
 {
     int x = 0, y;
 
@@ -960,18 +996,21 @@ PRIVATE void HTGetWord ARGS4(char *,word, char *,line, char ,stop, char ,stop2)
     return;
 }
 
-PRIVATE int HTLoadExtensionsConfigFile ARGS1(char *,fn)
+PRIVATE int HTLoadExtensionsConfigFile ARGS1(
+	char *,		fn)
 {
     char l[MAX_STRING_LEN],w[MAX_STRING_LEN],*ct;
     FILE *f;
     int x, count = 0;
 
     if (TRACE)
-        fprintf (stderr, "Loading extensions config file '%s'\n", fn);
+        fprintf(stderr,
+		"HTLoadExtensionsConfigFile: Loading file '%s'.\n", fn);
 
     if ((f = fopen(fn,"r")) == NULL) {
         if (TRACE)
-            fprintf(stderr, "Could not open extensions config file '%s'\n",fn);
+            fprintf(stderr,
+		    "HTLoadExtensionsConfigFile: Could not open '%s'.\n", fn);
 	    return count;
     }
 
@@ -996,10 +1035,12 @@ PRIVATE int HTLoadExtensionsConfigFile ARGS1(char *,fn)
                 for (x = 0; w[x]; x++)
                     ext[x+1] = TOLOWER(w[x]);
                 ext[0] = '.';
-                ext[strlen(w)+1] = 0;
+                ext[strlen(w)+1] = '\0';
 
-                if (TRACE)
-                    fprintf (stderr, "SETTING SUFFIX '%s' to '%s'\n", ext, ct);
+                if (TRACE) {
+                    fprintf (stderr,
+			     "SETTING SUFFIX '%s' to '%s'.\n", ext, ct);
+		}
 
 	        if (strstr(ct, "tex") != NULL ||
 	            strstr(ct, "postscript") != NULL ||

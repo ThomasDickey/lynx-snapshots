@@ -175,6 +175,7 @@ int mainloop NOARGS
     BOOLEAN FirstURLRecall = TRUE;
     char *temp = NULL;
     BOOLEAN ForcePush = FALSE;
+    BOOLEAN override_LYresubmit_posts = FALSE;
     unsigned int len;
     int i;
 
@@ -332,10 +333,7 @@ try_again:
 		} else if (!newdoc.address) {
 		    /*
 		     *  If newdoc.address is empty then pop a file
-		     *  and load it.  Force a no_cache override unless
-		     *  it's a bookmark file, or it has POST content
-		     *  and LYresubmit_posts is set without safe also
-		     *  set.
+		     *  and load it.  - FM
 		     */
                     LYpop(&newdoc);
 		    popped_doc = TRUE;
@@ -366,15 +364,27 @@ try_again:
 			try_internal = TRUE;
 		    } else
 #endif /* TRACK_INTERNAL_LINKS */
+			/*
+			 * Force a no_cache override unless
+			 *  it's a bookmark file, or it has POST content
+			 *  and LYresubmit_posts is set without safe also
+			 *  set, and we are not going to another position
+		     	 *  in the current document or restoring the previous
+			 *  document due to a NOT_FOUND or NULLFILE return
+			 *  value from getfile(). - FM
+			 */
 			if ((newdoc.bookmark != NULL) ||
-			(newdoc.post_data != NULL && !newdoc.safe &&
+			(newdoc.post_data != NULL &&
+			 !newdoc.safe &&
 			 LYresubmit_posts &&
+			 !override_LYresubmit_posts &&
 			    NO_INTERNAL_OR_DIFFERENT(&curdoc, &newdoc))) {
 		        LYoverride_no_cache = FALSE;
 		    } else {
 		        LYoverride_no_cache = TRUE;
 		    }
 		}
+		override_LYresubmit_posts = FALSE;
 
 		if (HEAD_request) {
 		    /*
@@ -709,6 +719,10 @@ try_again:
 		    */
 		   if (history[nhist - 1].post_data &&
 		       !history[nhist - 1].safe) {
+		       if (HText_POSTReplyLoaded((document *)&history[(nhist - 1)])) {
+			   override_LYresubmit_posts = TRUE;
+			   goto try_again;
+		       }
                        /*  Set newdoc fields, just in case the PREV_DOC
                         *  gets cancelled. - kw */
 		       if (!curdoc.address) {
@@ -740,6 +754,7 @@ try_again:
 		       cmd = LYK_PREV_DOC;
 		       goto new_cmd;
 		       }
+		    override_LYresubmit_posts = TRUE;
 		    goto try_again;
                     break;
 
@@ -939,8 +954,9 @@ try_again:
 		}  /* end switch */
 
 	    if (TRACE) {
-		if (!LYTraceLogFP || trace_mode_flag)
+		if (!LYTraceLogFP || trace_mode_flag) {
 		    sleep(AlertSecs); /* allow me to look at the results */
+		}
 	    }
 
 	    /*
@@ -1149,8 +1165,9 @@ try_again:
 	    }
 	    if (TRACE) {
 		refresh_screen = TRUE;
-		if (!LYTraceLogFP || trace_mode_flag)
+		if (!LYTraceLogFP || trace_mode_flag) {
 		    sleep(AlertSecs);
+		}
 	    }
 	}
 
@@ -1905,7 +1922,7 @@ new_cmd:  /*
 		LYUCPushAssumed(HTMainAnchor);
 	        HTOutputFormat = WWW_SOURCE;
 	    }
-	    HTuncache_current_document();
+	    LYforce_no_cache = TRUE;
 	    FREE(curdoc.address); /* so it doesn't get pushed */
 	    break;
 
@@ -1929,7 +1946,11 @@ new_cmd:  /*
 		HTOutputFormat = WWW_SOURCE;
 	    }
 	    HEAD_request = HTLoadedDocumentIsHEAD();
-	    HTuncache_current_document();
+	    if (real_cmd == LYK_RELOAD) {
+		HTuncache_current_document();
+	    } else {
+		LYforce_no_cache = TRUE;
+	    }
 #ifdef NO_ASSUME_SAME_DOC
 	    /*
 	     *  Don't assume the reloaded document will be the same. - FM
@@ -3606,7 +3627,6 @@ check_goto_URL:
 		    sleep(InfoSecs);
 	    
 		} else {
-		    LYforce_no_cache = TRUE;
 		    StrAllocCopy(newdoc.address, curdoc.address);
 		    if (((strcmp(CurrentUserAgent, (LYUserAgent ?
 					    LYUserAgent : "")) ||
@@ -3637,7 +3657,6 @@ check_goto_URL:
 			HTOutputFormat = WWW_SOURCE;
 		    }
 		    HEAD_request = HTLoadedDocumentIsHEAD();
-		    HTuncache_current_document();
 #ifdef NO_ASSUME_SAME_DOC
 		    newdoc.line = 1;
 		    newdoc.link = 0;
@@ -3647,7 +3666,8 @@ check_goto_URL:
 		    newdoc.link = ((curdoc.link > -1) ?
 					  curdoc.link : 0);
 #endif /* NO_ASSUME_SAME_DOC */
-		    FREE(curdoc.address);
+		    LYforce_no_cache = TRUE;
+		    FREE(curdoc.address); /* So it doesn't get pushed. */
 		}
 	    }
 	    keypad_mode_flag = keypad_mode;
@@ -3974,8 +3994,7 @@ check_goto_URL:
 	        if (local_create(&curdoc)) {
 		    HTuncache_current_document();
 		    StrAllocCopy(newdoc.address, curdoc.address);
-		    FREE(curdoc.address);	
-		    FREE(curdoc.address);	
+		    FREE(curdoc.address);
 		    FREE(newdoc.post_data);
 		    FREE(newdoc.post_content_type);
 		    FREE(newdoc.bookmark);

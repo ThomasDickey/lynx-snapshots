@@ -6175,16 +6175,19 @@ PUBLIC char * HText_setLastOptionValue ARGS7(
 	     *  No option items yet.
 	     */
 	    if (text->last_anchor->input_field->type != F_OPTION_LIST_TYPE) {
-		if (TRACE)
+		if (TRACE) {
 		    fprintf(stderr,
-   "HText_setLastOptionValue: last input_field not OPTION_LIST_TYPE but %d, ignoring!\n",
+   "HText_setLastOptionValue: last input_field not F_OPTION_LIST_TYPE (%d)\n",
+			    F_OPTION_LIST_TYPE);
+		    fprintf(stderr,
+   "                          but %d, ignoring!\n",
 			    text->last_anchor->input_field->type);
+		}
 		return NULL;
 	    }
 
-
 	    new_ptr = text->last_anchor->input_field->select_list = 
-				(OptionType *) calloc(1, sizeof(OptionType));
+				(OptionType *)calloc(1, sizeof(OptionType));
 	    if (new_ptr == NULL)
 	        outofmem(__FILE__, "HText_setLastOptionValue");
 
@@ -6197,7 +6200,7 @@ PUBLIC char * HText_setLastOptionValue ARGS7(
 	    number++;  /* add one more */
 
 	    op_ptr->next = new_ptr =
-	    			(OptionType *) calloc(1, sizeof(OptionType));
+	    			(OptionType *)calloc(1, sizeof(OptionType));
 	    if (new_ptr == NULL)
 	        outofmem(__FILE__, "HText_setLastOptionValue");
 	}
@@ -8222,8 +8225,10 @@ PUBLIC void HText_setKcode ARGS3(
 	       !strcmp(charset, "euc-kr") ||
 	       !strcmp(charset, "iso-2022-kr") ||
 	       !strcmp(charset, "big5") ||
+	       !strcmp(charset, "cn-big5") ||
 	       !strcmp(charset, "euc-cn") ||
 	       !strcmp(charset, "gb2312") ||
+	       !strncmp(charset, "cn-gb", 5) ||
 	       !strcmp(charset, "iso-2022-cn")) {
 	text->kcode = EUC;
     } else {

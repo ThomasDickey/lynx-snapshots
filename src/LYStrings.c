@@ -153,6 +153,37 @@ PUBLIC char * LYmbcsstrncpy ARGS5(char *,dst, CONST char *,src, int,n_bytes,
 #endif /* EXP_CHARTRANS */
 
 /*
+ *  LYmbcs_skip_glyphs() skips a given number of display positions
+ *  in a string and returns the resulting pointer.  It takes account
+ *  of UTF-8 encoded characters. - kw
+ */
+PUBLIC char * LYmbcs_skip_glyphs ARGS3(
+	char *,		data,
+	int,		n_glyphs,
+	BOOL,		utf_flag)
+{
+    int i_glyphs = 0;
+
+    if (n_glyphs < 0)
+        n_glyphs = 0;
+
+    if (!data)
+	return NULL;
+    if (!utf_flag)
+	return (data + n_glyphs);
+
+    while(*data) {
+	if (IS_NEW_GLYPH(*data)) {
+	    if (i_glyphs++ >= n_glyphs) {
+		return data;
+	    }
+	}
+	data++;
+    }
+    return data;
+}
+
+/*
  *  LYmbcsstrlen() returns the printable length of a string
  *  that might contain IsSpecial or multibyte (CJK or UTF8)
  *  characters. - FM
@@ -190,6 +221,7 @@ PUBLIC int LYmbcsstrlen ARGS2(
 
     return(len);
 }
+
 #undef GetChar
 
 #ifdef USE_SLANG
@@ -506,8 +538,9 @@ re_read:
 	default:
 	   if (TRACE) {
 		fprintf(stderr,"Unknown key sequence: %d:%d:%d\n",c,b,a);
-		if (!LYTraceLogFP)
+		if (!LYTraceLogFP) {
 		    sleep(MessageSecs);
+		}
 	   }
         }
 	if (isdigit(a) && (b == '[' || c == 155) && d != -1 && d != '~')
@@ -1053,8 +1086,16 @@ again:
 	    return(-1);
             break;
 
+	case LYE_LINKN:
+	    /*
+	     *  Used only in form_getstr() for invoking
+	     *  the LYK_F_LINK_NUM prompt when in form
+	     *  text fields. - FM
+	     */
+	    break;
+
         default:
-            LYLineEdit(&MyEdit,ch, FALSE);
+            LYLineEdit(&MyEdit, ch, FALSE);
         }
     }
 }
