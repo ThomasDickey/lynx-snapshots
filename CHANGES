@@ -1,6 +1,10 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2000-10-25 (2.8.4dev.13)
+* fix missing ifdef for EXP_READPROGRESS in LYOptions.c (reported by
+  Atsuhito Kohda) -TD
+
 2000-10-25 (2.8.4dev.12)
 * add a configure check for video library on OS/2 EMX, needed to link with
   slang.  Arrow keys do not work -TD
