@@ -3,17 +3,15 @@
 
 #include <string.h>
 
-#if !defined(EXP_8BIT_TOUPPER) && (!defined(LOCALE) || defined(__DJGPP__))
+#if !defined(EXP_8BIT_TOUPPER) && !defined(LOCALE)
 #define EXP_8BIT_TOUPPER
 #endif
 
-#ifdef EXP_8BIT_TOUPPER
+/*  UPPER8(ch1,ch2) is an extension of (TOUPPER(ch1) - TOUPPER(ch2))  */
 extern int UPPER8  PARAMS((
 	int		ch1,
 	int		ch2));
-#else
-#define UPPER8(a,b) (TOUPPER(a) - TOUPPER(b))
-#endif
+
 extern int get_mouse_link NOPARAMS;
 extern char * LYstrncpy PARAMS((
 	char *		dst,

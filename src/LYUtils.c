@@ -4122,14 +4122,17 @@ have_VMS_URL:
 		/*
 		 *  It is a subdirectory or file on the local system.
 		 */
-#ifndef DOSPATH
-		cp = HTEscape(temp, URL_PATH);
-#else
-		/* We need not escape DOS local paths such as c:    */
-		/* especially when we really have file://localhost/ */
-		/* at the beginning.				    */
+#ifdef DOSPATH
+		/* Don't want to see DOS local paths like c: escaped */
+		/* especially when we really have file://localhost/  */
+		/* at the beginning. To avoid any confusion we allow */
+		/* escaping the path if URL specials % or # present. */
+		if (strchr(temp, '#') == NULL &&
+			   strchr(temp, '%') == NULL)
 		StrAllocCopy(cp, temp);
+		else
 #endif /* DOSPATH */
+		cp = HTEscape(temp, URL_PATH);
 		StrAllocCat(*AllocatedString, cp);
 		FREE(cp);
 		if (TRACE) {

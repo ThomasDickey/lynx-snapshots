@@ -94,6 +94,22 @@ II. Compile instructions -- UNIX
 
     NOTE:  Configure has a number of useful options.  Please see below.
 
+    NOTE:  The 'configure' script generates auxiliary files "config.status"
+    "config.cache" and "config.log".  Normally you will not notice these;
+    they are created automatically and removed by a "make distclean".
+    
+	+ If you wish to rebuild Lynx with a new host, or change ANY of the
+	  parameters which are stored in config.cache, you MUST first remove
+	  the config.cache file before running configure; its options do NOT
+	  override the settings in that file.
+    
+	+ The config.status file is a script which creates (or regenerates) the
+	  files created by the configure script.
+
+    Please report problems in the configure/make process by including a copy of
+    config.status, config.cache and config.log, as well as the pertinent
+    compiler diagnostics.
+
     NOTE:  Lynx is a curses-based application, so you must have a curses
     library available to link to.  Native curses (on the system when it was
     installed) are often broken, so you may get superior performance if you
@@ -240,7 +256,7 @@ II. Compile instructions -- UNIX
   --enable-warnings
 	Use this option to turn on GCC compiler warnings.
 
-  --libdir
+  --libdir				(affect LYNX_CFG_FILE)
 	Defines the location where you want the lynx.cfg file installed.
 	The configure script defines the symbol LYNX_CFG_FILE to correspond
 	with the $libdir environment variable.  (For platforms which do not

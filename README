@@ -3,11 +3,11 @@
 
 Lynx Version 2.8 is the latest "official" release.  This release is based on
 the lynx2.7.1ac-0.118 development code set, and includes bug fixes through
-February 28, 1998.  See the CHANGES2.8 file in the docs subdirectory for a
-complete record of all changes and bug fixes in this release.  New releases
-are announced on the lynx-dev mailing list (see below).
+March 8, 1998.  See the CHANGES2.8 file in the docs subdirectory for a complete
+record of all changes and bug fixes in this release.  New releases are
+announced on the lynx-dev mailing list (see below).
 
-                                       
+
 WHAT IS LYNX?
 
    Lynx is a fully-featured World Wide Web (WWW) client for users running
@@ -19,12 +19,12 @@ WHAT IS LYNX?
    finger, or cso/ph/qi servers, and services accessible via logins to
    telnet, tn3270 or rlogin accounts.  Current versions of Lynx run on
    Unix, VMS, Windows95/NT, 386DOS and OS/2 EMX.
-   
+
    Lynx can be used to access information on the WWW, or to establish
    information systems intended primarily for local access. Lynx has been
    used to build several Campus Wide Information Systems (CWIS).  Lynx can
    also be used to build systems isolated within a single LAN.
-   
+
    Links to the current sources and support materials for Lynx are
    maintained at:
 			  "Lynx links"
@@ -33,7 +33,7 @@ WHAT IS LYNX?
 			"Lynx Information"
 		  <URL:http://lynx.browser.org/>.
    View these pages for information about Lynx, including new updates.
-   
+
    Lynx is distributed under the GNU General Public License (GPL) without
    restrictions on usage or redistribution.  The Lynx copyright statement,
    "COPYHEADER", and GNU GPL, "COPYING", are included in the top-level
@@ -69,13 +69,16 @@ DOCUMENTATION
    your site in order to lessen the load on http servers. This also will
    allow you to customize the help menu system for your site and greatly
    speed up access for those using Lynx over a slow connection.
-   
-   To install the help menu system, copy COPYHEADER and COPYING into the
+
+   For Unix and related systems which support the autoconf configure script,
+   the help menu system is installed by the "make install-help" command.
+
+   For other systems (such as VMS), copy COPYHEADER and COPYING into the
    lynx_help/ subdirectory.  Then copy the lynx_help subdirectory to a public
    place on your system, or into your $HOME directory if you are a single
    user.  Finally, edit the lynx.cfg file  so that the HELPFILE line is
    defined as follows:
-   
+
       HELPFILE:file://localhost/[public_path]/lynx_help/lynx_help_main.html
 
    where [public_path] is the absolute path to the lynx_help directory.
@@ -83,12 +86,12 @@ DOCUMENTATION
    HTML files.  Additional information about installing and customizing
    the help file set is available at <URL:http://www.irm.nara.kindai.ac.jp/
    lynxdev/README.help>.
-   
+
 INSTALLING LYNX
 
    To install Lynx, follow the steps in the INSTALLATION file, which is
    located in the top directory of the source distribution.
-   
+
 PROBLEMS
 
    If you experience problems configuring, compiling or installing Lynx,
@@ -100,8 +103,8 @@ PROBLEMS
 LYNX-DEV MAILING LIST
 
    To subscribe to lynx-dev, send email to majordomo@sig.net with only the
-   following message in the body: 
-   
+   following message in the body:
+
       SUBSCRIBE LYNX-DEV address
 
    where inclusion of your email address is optional if it can be obtained,
