@@ -980,9 +980,9 @@ PUBLIC void LYEntify ARGS2(
 }
 
 /*
-** This function trims characters <= that of a space (32),
-** including HT_NON_BREAK_SPACE (1) and HT_EM_SPACE (2),
-** but not ESC, from the tails of strings. - FM
+**  This function trims characters <= that of a space (32),
+**  including HT_NON_BREAK_SPACE (1) and HT_EM_SPACE (2),
+**  but not ESC, from the heads of strings. - FM
 */
 PUBLIC void LYTrimHead ARGS1(
 	char *, str)
@@ -1003,9 +1003,9 @@ PUBLIC void LYTrimHead ARGS1(
 }
 
 /*
-** This function trims characters <= that of a space (32),
-** including HT_NON_BREAK_SPACE (1), HT_EM_SPACE (2), and
-** ESC from the tails of strings. - FM
+**  This function trims characters <= that of a space (32),
+**  including HT_NON_BREAK_SPACE (1), HT_EM_SPACE (2), and
+**  ESC from the tails of strings. - FM
 */
 PUBLIC void LYTrimTail ARGS1(
 	char *, str)
@@ -1584,7 +1584,7 @@ PUBLIC void LYHandleMETA ARGS4(
     if (present[HTML_META_HTTP_EQUIV] &&
 	value[HTML_META_HTTP_EQUIV] && *value[HTML_META_HTTP_EQUIV]) {
 	StrAllocCopy(http_equiv, value[HTML_META_HTTP_EQUIV]);
-	convert_to_spaces(http_equiv);
+	convert_to_spaces(http_equiv, TRUE);
 	LYUnEscapeToLatinOne(&http_equiv, FALSE);
 	LYTrimHead(http_equiv);
 	LYTrimTail(http_equiv);
@@ -1595,7 +1595,7 @@ PUBLIC void LYHandleMETA ARGS4(
     if (present[HTML_META_NAME] &&
 	value[HTML_META_NAME] && *value[HTML_META_NAME]) {
 	StrAllocCopy(name, value[HTML_META_NAME]);
-	convert_to_spaces(name);
+	convert_to_spaces(name, TRUE);
 	LYUnEscapeToLatinOne(&name, FALSE);
 	LYTrimHead(name);
 	LYTrimTail(name);
@@ -1617,7 +1617,7 @@ PUBLIC void LYHandleMETA ARGS4(
 	 *  of it might be sent to the screen. - FM
 	 */
 	StrAllocCopy(content, value[HTML_META_CONTENT]);
-	convert_to_spaces(content);
+	convert_to_spaces(content, FALSE);
 	LYTrimHead(content);
 	LYTrimTail(content);
 	if (*content == '\0') {
@@ -2017,7 +2017,23 @@ PUBLIC int LYLegitimizeHREF ARGS3(
     if (!me || !href || *href == NULL || *(*href) == '\0')
         return(url_type);
 
-    collapse_spaces(*href);
+    LYTrimHead(*href);
+    if (!strncasecomp(*href, "lynxexec:", 9) ||
+        !strncasecomp(*href, "lynxprog:", 9)) {
+	/*
+	 *  The original implementions of these schemes expected
+	 *  white space without hex escaping, and did not check
+	 *  for hex escaping, so we'll continue to support that,
+	 *  until that code is redone in conformance with SGML
+	 *  principles.  - FM
+	 */
+	HTUnEscapeSome(*href, " \r\n\t");
+	convert_to_spaces(*href, TRUE);
+    } else {
+        collapse_spaces(*href);
+    }
+    if (*(*href) == '\0')
+        return(url_type);
     LYUnEscapeToLatinOne(&(*href), TRUE);
     url_type = is_url(*href);
     if (!url_type && force_slash &&

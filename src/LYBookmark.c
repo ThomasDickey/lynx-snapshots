@@ -285,7 +285,7 @@ PUBLIC void save_bookmark_link ARGS2(
      */
     string_buffer[255] = '\0';
     LYstrncpy(string_buffer, title, 255);
-    convert_to_spaces(string_buffer);
+    convert_to_spaces(string_buffer, FALSE);
     LYMBM_statusline(TITLE_PROMPT);
     LYgetstr(string_buffer, VISIBLE, sizeof(string_buffer), NORECALL);
     if (*string_buffer == '\0') {

@@ -40,7 +40,7 @@ PRIVATE void flush ARGS1(HTStream *, me)
     char *read_pointer 	= me->buffer;
     char *write_pointer = me->write_pointer;
 
-#ifdef NOT_ASCCII
+#ifdef NOT_ASCII
     if (me->make_ascii) {
     	char * p;
 	for(p = me->buffer; p < me->write_pointer; p++)

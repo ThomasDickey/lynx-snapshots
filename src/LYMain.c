@@ -305,6 +305,7 @@ PUBLIC BOOLEAN LYMBMAdvanced = TRUE;
 PUBLIC int LYStatusLine = -1;		 /* Line for statusline() if > -1 */
 PUBLIC BOOLEAN LYCollapseBRs = COLLAPSE_BR_TAGS;  /* Collapse serial BRs? */
 PUBLIC BOOLEAN LYSetCookies = SET_COOKIES; /* Process Set-Cookie headers? */
+PUBLIC char *XLoadImageCommand = NULL;	/* Default image viewer for X */
 
 /* These are declared in cutil.h for current freeWAIS libraries. - FM */
 #ifdef DECLARE_WAIS_LOGFILES
@@ -323,6 +324,7 @@ PRIVATE BOOLEAN stack_dump = FALSE;
 PRIVATE char *terminal = NULL;
 PRIVATE char *pgm;
 PRIVATE BOOLEAN number_links = FALSE;
+PRIVATE BOOLEAN LYPrependBase = FALSE;
 
 PRIVATE void parse_arg PARAMS((char **arg, int *i, int argc));
 #ifndef VMS
@@ -397,6 +399,7 @@ PRIVATE void free_lynx_globals NOARGS
     FREE(personal_mail_address);
     FREE(URLDomainPrefixes);
     FREE(URLDomainSuffixes);
+    FREE(XLoadImageCommand);
     for (i = 0; i < nlinks; i++) {
         FREE(links[i].lname);
     }
@@ -479,6 +482,19 @@ PUBLIC int main ARGS2(
     AlertSecs   = (int)ALERTSECS;
     StrAllocCopy(helpfile, HELPFILE);
     StrAllocCopy(startfile, STARTFILE);
+    LYTrimHead(startfile);
+    if (!strncasecomp(startfile, "lynxexec:", 9) ||
+        !strncasecomp(startfile, "lynxprog:", 9)) {
+	/*
+	 *  The original implementions of these schemes expected
+	 *  white space without hex escaping, and did not check
+	 *  for hex escaping, so we'll continue to support that,
+	 *  until that code is redone in conformance with SGML
+	 *  principles.  - FM
+	 */
+	HTUnEscapeSome(startfile, " \r\n\t");
+	convert_to_spaces(startfile, TRUE);
+    }
     StrAllocCopy(jumpprompt, JUMP_PROMPT);
 #ifdef JUMPFILE
     StrAllocCopy(jumpfile, JUMPFILE);
@@ -579,7 +595,7 @@ PUBLIC int main ARGS2(
     StrAllocCopy(LYLocalDomain, LOCAL_DOMAIN);
     StrAllocCopy(URLDomainPrefixes, URL_DOMAIN_PREFIXES);
     StrAllocCopy(URLDomainSuffixes, URL_DOMAIN_SUFFIXES);
-
+    StrAllocCopy(XLoadImageCommand, XLOADIMAGE_COMMAND);
     /*
      *  Set up the compilation default character set. - FM
      */
@@ -786,8 +802,22 @@ PUBLIC int main ARGS2(
     /*
      *  Get WWW_HOME environment variable if it exists.
      */
-    if ((cp = getenv("WWW_HOME")) != NULL)
+    if ((cp = getenv("WWW_HOME")) != NULL) {
 	StrAllocCopy(startfile, cp);
+	LYTrimHead(startfile);
+	if (!strncasecomp(startfile, "lynxexec:", 9) ||
+	    !strncasecomp(startfile, "lynxprog:", 9)) {
+	    /*
+	     *  The original implementions of these schemes expected
+	     *  white space without hex escaping, and did not check
+	     *  for hex escaping, so we'll continue to support that,
+	     *  until that code is redone in conformance with SGML
+	     *  principles.  - FM
+	     */
+	    HTUnEscapeSome(startfile, " \r\n\t");
+	    convert_to_spaces(startfile, TRUE);
+	}
+    }
 
     /*
      *  Set the LynxHome URL.  If it's a file URL and the
@@ -1189,6 +1219,19 @@ PRIVATE void parse_arg ARGS3(
      */
     if (argv[0][0] != '-') {
 	StrAllocCopy(startfile, argv[0]);
+	LYTrimHead(startfile);
+	if (!strncasecomp(startfile, "lynxexec:", 9) ||
+	    !strncasecomp(startfile, "lynxprog:", 9)) {
+	    /*
+	     *  The original implementions of these schemes expected
+	     *  white space without hex escaping, and did not check
+	     *  for hex escaping, so we'll continue to support that,
+	     *  until that code is redone in conformance with SGML
+	     *  principles.  - FM
+	     */
+	    HTUnEscapeSome(startfile, " \r\n\t");
+	    convert_to_spaces(startfile, TRUE);
+	}
 	return;
     }
 
@@ -1236,7 +1279,17 @@ PRIVATE void parse_arg ARGS3(
     break;
 
     case 'b':
-    if (strcmp(argv[0], "-book") == 0) {
+    if (strcmp(argv[0], "-base") == 0) {
+        /*
+	 *  Treat -source equivalently to an interactive
+	 *  download, so that a BASE tag is prepended for
+	 *  text/html content types. - FM
+	 */
+	LYPrependBase = TRUE;
+	if (HTOutputFormat == HTAtom_for("www/dump"))
+	    HTOutputFormat = HTAtom_for("www/download");
+
+    } else if (strcmp(argv[0], "-book") == 0) {
         /*
 	 *  Use bookmarks as startfile.
 	 */
@@ -1447,9 +1500,22 @@ PRIVATE void parse_arg ARGS3(
 	    historical_comments = TRUE;
 
     } else if (strncmp(argv[0], "-homepage", 9) == 0) {
-	if (nextarg)
-	    StrAllocCopy(homepage,cp);
-
+	if (nextarg) {
+	    StrAllocCopy(homepage, cp);
+	    LYTrimHead(homepage);
+	    if (!strncasecomp(homepage, "lynxexec:", 9) ||
+	        !strncasecomp(homepage, "lynxprog:", 9)) {
+		/*
+		 *  The original implementions of these schemes expected
+		 *  white space without hex escaping, and did not check
+		 *  for hex escaping, so we'll continue to support that,
+		 *  until that code is redone in conformance with SGML
+		 *  principles.  - FM
+		 */
+		HTUnEscapeSome(homepage, " \r\n\t");
+		convert_to_spaces(homepage, TRUE);
+	    }
+	}
     } else {
         goto Output_Error_and_Help_List;
     }
@@ -1496,7 +1562,8 @@ PRIVATE void parse_arg ARGS3(
 	 */
 	keep_mime_headers = TRUE;
 	dump_output_immediately = TRUE;
-	HTOutputFormat = HTAtom_for("www/dump");
+	HTOutputFormat = (LYPrependBase ?
+	     HTAtom_for("www/download") : HTAtom_for("www/dump"));
 	LYcols=999;
 
     } else if (strncmp(argv[0], "-minimal", 11) == 0) {
@@ -1776,7 +1843,8 @@ PRIVATE void parse_arg ARGS3(
 
     } else if (strncmp(argv[0], "-source", 7) == 0) {
 	dump_output_immediately = TRUE;
-	HTOutputFormat = HTAtom_for("www/dump");
+	HTOutputFormat = (LYPrependBase ?
+	     HTAtom_for("www/download") : HTAtom_for("www/dump"));
 	LYcols=999;
 
     } else if (strncmp(argv[0], "-stack_dump", 11) == 0) {
@@ -1843,7 +1911,7 @@ PRIVATE void parse_arg ARGS3(
 	parse_restrictions("all");
 
     } else if (strncmp(argv[0], "-version", 8) == 0) {
-	printf("\n%s Version %s\n(c)1996 GNU General Public License\n\
+	printf("\n%s Version %s\n(c)1997 GNU General Public License\n\
 <URL:http://lynx.browser.org/>\n\n",
 		LYNX_NAME, LYNX_VERSION);
 	exit(0);
@@ -1874,6 +1942,8 @@ Output_Help_List:
     printf("                     in double-quotes (\"-\") on VMS)\n");
     printf("    -anonymous       used to specify the anonymous account\n");
     printf("    -auth=id:pw      authentication information for protected forms\n");
+    printf("    -base            prepend a request URL comment and BASE tag to text/html\n");
+    printf("                     outputs for -source or -mime_header dumps\n");
     printf("    -book            use the bookmark page as the startfile\n");
     printf("    -buried_news     toggles scanning of news articles for buried references\n");
     printf("    -cache=NUMBER    NUMBER of documents cached in memory (default is %d)\n",DEFAULT_CACHE_SIZE);

@@ -230,12 +230,15 @@ PUBLIC void collapse_spaces ARGS1(
 }
 
 /*
- * Convert single or serial newlines to single spaces throughout a string
- * (ignore newlines if the preceding character is a space) and convert
- * tabs to single spaces (but don't ignore any explicit tabs or spaces).
+ *  Convert single or serial newlines to single spaces throughout a string
+ *  (ignore newlines if the preceding character is a space) and convert
+ *  tabs to single spaces.  Don't ignore any explicit tabs or spaces if
+ *  the condense argument is FALSE, otherwise, condense any serial spaces
+ *  or tabs to one space. - FM
  */
-PUBLIC void convert_to_spaces ARGS1(
-	char *,		string)
+PUBLIC void convert_to_spaces ARGS2(
+	char *,		string,
+	BOOL,		condense)
 {
     char *s = string;
     char *ns = string;
@@ -248,7 +251,8 @@ PUBLIC void convert_to_spaces ARGS1(
 	switch (*s) {
 	    case ' ':
 	    case '\t':
-		*(ns++) = ' ';
+	        if (!(condense && last_is_space))
+		    *(ns++) = ' ';
 		last_is_space = TRUE;
 		break;
 
@@ -347,7 +351,7 @@ PUBLIC void statusline ARGS1(
         /*
 	 *  Deal with any newlines or tabs in the string. - FM
 	 */
-	convert_to_spaces((char *)temp);
+	convert_to_spaces((char *)temp, FALSE);
 
 	/*
 	 *  Handle the Kanji, making sure the text is not
@@ -382,7 +386,7 @@ PUBLIC void statusline ARGS1(
         /*
 	 *  Deal with any newlines or tabs in the string. - FM
 	 */
-	convert_to_spaces(buffer);
+	convert_to_spaces(buffer, FALSE);
     }
 
     /*

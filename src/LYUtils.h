@@ -11,7 +11,7 @@
 extern void highlight PARAMS((int flag, int cur));
 extern void free_and_clear PARAMS((char **obj));
 extern void collapse_spaces PARAMS((char *string));
-extern void convert_to_spaces PARAMS((char *string));
+extern void convert_to_spaces PARAMS((char *string, BOOL condense));
 extern char * strip_trailing_slash PARAMS((char * dirname));
 extern void statusline PARAMS((char *text));
 extern void toggle_novice_line NOPARAMS;

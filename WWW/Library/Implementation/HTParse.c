@@ -374,7 +374,11 @@ PUBLIC char * HTParse ARGS3(
 	    if (TRACE)
 	        fprintf(stderr, "4\n");
 	} else {  /* No inheritance */
-	    strcat(result, "/");
+	    if (strncasecomp(aName, "lynxcgi:", 8) &&
+	        strncasecomp(aName, "lynxexec:", 9) &&
+		strncasecomp(aName, "lynxprog:", 9)) {
+		strcat(result, "/");
+	    }
 	    if (!strcmp(result, "news:/"))
 	        result[5] = '*';
 	    if (TRACE)

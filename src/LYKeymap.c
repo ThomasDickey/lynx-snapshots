@@ -416,7 +416,7 @@ PRIVATE struct rmap revmap[] = {
 { "DOWN_LINK",		"move down the page to another link" },
 { "RIGHT_LINK",		"move right to another link" },
 { "LEFT_LINK",		"move left to a previous link" },
-{ "HISTORY",		"display a list of previously viewed documents" },
+{ "HISTORY",		"display stack of currently-suspended documents" },
 { "PREV_DOC",		"go back to the previous document" },
 { "ACTIVATE",		"go to the document given by the current link" },
 { "GOTO",		"go to a document given as a URL" },

@@ -20,13 +20,8 @@ static char *sccsid = "@(#)inews.c	1.16	(Berkeley) 8/27/89";
 #include <ctype.h>
 #include "conf.h"
 #include "nntp.h"
-#ifndef FOR_NN
-#ifdef USG
+#include "clientlib.h"
 #include <string.h>
-#else not USG
-#include <strings.h>
-#endif not USG
-#endif
 
 #define	MAX_SIGNATURE	4
 
@@ -160,6 +155,7 @@ char	*argv[];
 	close_server();
 
 	exit(0);
+	return(0);
 }
 
 /*
@@ -174,7 +170,7 @@ append_signature()
 	char	*cp;
 	struct	passwd	*passwd;
 	FILE	*fp;
-	char	*index(), *getenv();
+	char	*getenv();
 	int	count = 0;
 	char	*dotdir;
 
@@ -221,7 +217,7 @@ append_signature()
 			MAX_SIGNATURE);
 			break;
 		}
-		if (cp = index(line, '\n'))
+		if (cp = strchr(line, '\n'))
 			*cp = '\0';
 		fprintf(ser_wr_fp, "%s\r\n", line);
 	}
@@ -247,14 +243,14 @@ gen_frompath()
 	char	*full_name;
 	char	*cp;
 	struct	passwd *passwd;
-	char	*index(), *getenv();
+	char	*getenv();
 
 	passwd = getpwuid(getuid());
 
 	full_name = getenv("NAME");
 	if (full_name == NULL) {
 		full_name = passwd->pw_gecos;
-		if ((cp = index(full_name, ',')))
+		if ((cp = strchr(full_name, ',')))
 			*cp = '\0';
 	}
 
@@ -267,7 +263,7 @@ gen_frompath()
 
 	/* A heuristic to see if we should tack on a domain */
 
-	cp = index(host_name, '.');
+	cp = strchr(host_name, '.');
 	if (cp)
 		fprintf(ser_wr_fp, "From: %s@%s (",
 			passwd->pw_name,
@@ -372,7 +368,6 @@ register char c;
 int valid_header(h)
 register char *h;
 {
-  char *index();
   char *colon, *space;
 
   /*
@@ -385,8 +380,8 @@ register char *h;
    * just check for initial letter, colon, and space to make
    * sure we discard only invalid headers
    */
-  colon = index(h, ':');
-  space = index(h, ' ');
+  colon = strchr(h, ':');
+  space = strchr(h, ' ');
   if (isalpha(h[0]) && colon && space == colon + 1)
     return (1);
 

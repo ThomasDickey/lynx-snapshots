@@ -1382,7 +1382,8 @@ PUBLIC int local_dired ARGS1(
 	tp = quote_pathname(line+20);
 	*cp++ = '\0';
 	cp = quote_pathname(line+20);
-	sprintf(buffer,"%s -qdc %s | (cd %s; %s -xfe -)",GZIP_PATH, tp,cp, TAR_PATH);
+	sprintf(buffer, "%s -qdc %s | (cd %s; %s -xf -)",
+			GZIP_PATH, tp, cp, TAR_PATH);
 	FREE(cp);
 	FREE(tp);
 #  endif /* OK_GZIP */
@@ -1391,7 +1392,8 @@ PUBLIC int local_dired ARGS1(
 	tp = quote_pathname(line+19);
 	*cp++ = '\0';
 	cp = quote_pathname(line+19);
-	sprintf(buffer,"%s %s | (cd %s; %s -xfe -)", ZCAT_PATH, tp,cp,TAR_PATH);
+	sprintf(buffer, "%s %s | (cd %s; %s -xf -)",
+			ZCAT_PATH, tp, cp, TAR_PATH);
 	FREE(cp);
 	FREE(tp);
 
@@ -1399,7 +1401,7 @@ PUBLIC int local_dired ARGS1(
 	tp = quote_pathname(line+17);
 	*cp++ = '\0';
 	cp = quote_pathname(line+17);
-	sprintf(buffer,"cd %s; %s -xfe %s", cp,TAR_PATH, tp);
+	sprintf(buffer,"cd %s; %s -xf %s", cp, TAR_PATH, tp);
 	FREE(cp);
 	FREE(tp);
 # endif /* !ARCHIVE_ONLY */
@@ -1409,7 +1411,8 @@ PUBLIC int local_dired ARGS1(
 	*cp++ = '\0';
 	cp = quote_pathname(cp);
 	tp = quote_pathname(line+18);
-	sprintf(buffer,"(cd %s; %s -cfe - %s) | %s -qc >%s/%s.tar.gz",tp, TAR_PATH, cp, GZIP_PATH, tp,cp);
+	sprintf(buffer, "(cd %s; %s -cf - %s) | %s -qc >%s/%s.tar.gz",
+			tp, TAR_PATH, cp, GZIP_PATH, tp, cp);
 	FREE(cp);
 	FREE(tp);
 # endif /* OK_GZIP */
@@ -1418,7 +1421,8 @@ PUBLIC int local_dired ARGS1(
 	*cp++ = '\0';
         cp = quote_pathname(cp);
 	tp = quote_pathname(line+17);
-	sprintf(buffer,"(cd %s; %s -cfe - %s) | %s >%s/%s.tar.Z",tp,TAR_PATH, cp,COMPRESS_PATH, tp,cp);
+	sprintf(buffer, "(cd %s; %s -cf - %s) | %s >%s/%s.tar.Z",
+			tp, TAR_PATH, cp, COMPRESS_PATH, tp, cp);
 	FREE(cp);
 	FREE(tp);
 
@@ -1426,7 +1430,7 @@ PUBLIC int local_dired ARGS1(
 	*cp++ = '\0';
         cp = quote_pathname(cp);
 	tp = quote_pathname(line+15);
-	sprintf(buffer,"(cd %s; %s -cfe %s.tar %s)",tp,TAR_PATH, cp, cp);
+	sprintf(buffer,"(cd %s; %s -cf %s.tar %s)", tp, TAR_PATH, cp, cp);
 	FREE(cp);
 	FREE(tp);
 #endif /* OK_TAR */

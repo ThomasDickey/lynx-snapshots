@@ -1,3 +1,63 @@
+02-06-97
+* Added support for both hex escaped and unescaped white characters
+  in lynxexec and lynxprog URLs.  Normally, Lynx strips out any white
+  characters that are not hex escaped in attribute values that are
+  to be resolved as URLs, on the assumption that they were derived
+  from wrapping in the markup.  Any serial white characters in
+  lynxexec and lynxprog URLs are condensed to one space (' '), and
+  any lead or trailing white characters are trimmed.  Note that we
+  still require hex escaping of spaces in mailto URLs, e.g,
+  HREF="mailto:lynx-dev@sig.net%20(I%20found%20a%20bug.)". - FM
+* Removed the 'e' switch from tar commands in LYLocal.c for greater
+  portability across all supported Unix flavors. - FM
+* Expanded the information in the PROBLEMS file on how to deal with
+  DECC and MultiNet header incompatibilites for different combinations
+  of the VMS compiler and socket library versions. - FM
+* Added TRACE message of the edit command created for the system()
+  call in LYEdit.c. - LWV
+* Fixed a typo in the userdefs.h comments. - NHE 
+02-04-97
+* Mod in LYMainLoop.c to bypass mailing "not found" messages when
+  MAIL_SYSTEM_ERROR_LOGGING was set TRUE (which it should NOT be,
+  indescriminately) if the document's owner is the lynx-dev list. - FM
+* Added crash protection checks for the actual presence of anchors
+  in all HText structure anchor scans in GridText.c, based on a crash
+  report and suggested fix for one of them from Jonathan Sergent
+  (sergent@hillres55-129.cc.purdue.edu). - FM
+* Eliminated the typecast for ttytype (apparently varies across flavors,
+  and each flavor should know it's own typing; we'll see) in LYCurses.c,
+  and moved VMS system definitions with non-ANSI conformant tokens to a
+  separate header for VMS (LYVMSdef.h). - BL
+* Made the description of HISTORY in the 'k'eymap page more clear that
+  it invokes a list of the "suspended" documents currently held in the
+  history stack. - DC
+* Typo fixes in the help files and lynx.cfg. - LWV
+02-03-97
+* Today's distribution is a pre-release of v2.7.  The projected official
+  release date is 02-15-97.  All header, help and documentation files,
+  and the top directory name, have been updated for v2.7. - FM
+* Made xli, which is freeware, the default XLOADIMAGE_COMMAND for Unix
+  in userdefs.h (still xv on VMS, since its port is freeware), and
+  expanded the "self-documentation" to indicate where to get this
+  freeware.  Added XLOADIMAGE_COMMAND as a configuration symbol in
+  lynx.cfg, so that the compilation default can be overridden on
+  systems which have and prefer xv (all users can override the default
+  mappings for image helper apps via their mailcap files) - FM
+* Added a -base command line switch which can be used with -source or
+  -mime_header to prepend the request URL as a comment, and a BASE tag
+  (which may or may not be the same as the request URL, depending on
+  HTTP/1.1 headers) for text/html documents, equivalent to the prepend
+  kludge for 'd'ownloads (see 09-20-96 mods). - FM
+* Added a check for an "ORGANIZATION" environment variable for inclusion
+  as a news post header on Unix (all system logicals intended for news
+  post headers automatically are included on VMS), and a sleep() before
+  restoring curses mode after the post, to allow reading of any error
+  messages from the news software. - FM
+* Fixed bug which yielded a "[LINK]" instead of "[INLINE]" pseduo-ALT
+  for ALT-less IMG tags used as the content for NAME-ed Anchors without
+  an HREF. - FM
+* Portability tweaks for the mini inews utility. - FM
+* Fixed an old and irrelevant typo in HTWriter.c. - JS
 01-29-97
 * Added more REL tokens that are acceptible for banner links. - FM
 * Ifdef'ed the standard foo_PATH definitions for FreeBSD at the bottom of

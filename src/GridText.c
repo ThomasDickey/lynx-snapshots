@@ -3342,7 +3342,7 @@ PUBLIC void HText_endForm ARGS1(
 	/*
 	 *  Go through list of anchors and get our input field. - FM
 	 */
-	while (1) {
+	while (a) {
 	    if (a->link_type == INPUT_ANCHOR &&
 	        a->input_field->number == HTFormNumber &&
 		a->input_field->type == F_TEXT_TYPE) {
@@ -3482,7 +3482,7 @@ PUBLIC char * HText_setLastOptionValue ARGS5(
 	/*
 	 *  Deal with newlines or tabs.
 	 */
-	convert_to_spaces(value);
+	convert_to_spaces(value, FALSE);
 
 	if (!op_ptr) {
 	    /*
@@ -3650,7 +3650,7 @@ PUBLIC int HText_beginInput ARGS2(
 	} else {
 	    TextAnchor * b = text->first_anchor;
 	    int i = 0;
-	    while (1) {
+	    while (b) {
 	        if (b->link_type == INPUT_ANCHOR &&
 		    b->input_field->type == F_RADIO_TYPE &&
                     b->input_field->number == HTFormNumber) {
@@ -4020,7 +4020,7 @@ PUBLIC void HText_SubmitForm ARGS4(
     /*
      *  Go through list of anchors and get size first.
      */
-    while (1) {
+    while (anchor_ptr) {
         if (anchor_ptr->link_type == INPUT_ANCHOR) {
    	    if (anchor_ptr->input_field->number == form_number) {
 
@@ -4135,7 +4135,7 @@ PUBLIC void HText_SubmitForm ARGS4(
     /*
      *  Go through list of anchors and assemble URL query.
      */
-    while (1) {
+    while (anchor_ptr) {
         if (anchor_ptr->link_type == INPUT_ANCHOR) {
 	    if (anchor_ptr->input_field->number == form_number) {
 
@@ -4681,7 +4681,7 @@ PUBLIC void HText_DisableCurrentForm NOARGS
     /*
      *  Go through list of anchors and set the disabled flag.
      */
-    while (1) {
+    while (anchor_ptr) {
         if (anchor_ptr->link_type == INPUT_ANCHOR &&
             anchor_ptr->input_field->number == HTFormNumber) {
 
@@ -4708,7 +4708,7 @@ PUBLIC void HText_ResetForm ARGS1(
     /*
      *  Go through list of anchors and reset values.
      */
-    while (1) {
+    while (anchor_ptr) {
         if (anchor_ptr->link_type == INPUT_ANCHOR) {
             if (anchor_ptr->input_field->number == form->number) {
 
@@ -4752,7 +4752,7 @@ PUBLIC void HText_activateRadioButton ARGS1(
     TextAnchor * anchor_ptr = HTMainText->first_anchor;
     int form_number = form->number;
 
-    while (1) {
+    while (anchor_ptr) {
         if (anchor_ptr->link_type == INPUT_ANCHOR &&
                 anchor_ptr->input_field->type == F_RADIO_TYPE) {
                     

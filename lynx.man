@@ -66,6 +66,10 @@ used to specify the anonymous account.
 set authorization ID and password for protected documents at
 startup.
 .TP
+.B -base
+prepend a request URL comment and BASE tag to text/html
+outputs for -source or -mime_header dumps.
+.TP
 .B -book
 use the bookmark page as the startfile.  The default or command
 line startfile is still set for the Main screen command, and will
@@ -426,7 +430,7 @@ of key-stroke commands.
 o Type \fB"k"\fR for a complete list of the current key-stroke 
 command mappings.
 .SH NOTES
-This is the Lynx v2.6 Release for Unix/VMS
+This is the Lynx v2.7 Release for Unix/VMS
 .PP
 If you wish to contribute to the further development
 of \fILynx\fR, subscribe to our mailing list.  Send email to
@@ -451,7 +455,7 @@ Lynx rely on the WWW client library code developed by Tim Berners-Lee
 and the WWW community.  Also a special thanks to Foteos Macrides who ported
 much of Lynx to VMS and did or organized most of its development since the
 departures of Lou Montulli and Garrett Blythe from the University of Kansas
-in the summer of 1994 through the current release of v2.6, and to everyone
+in the summer of 1994 through the current release of v2.7, and to everyone
 on the net who has contributed to Lynx's development either directly (through
 patches, comments or bug reports) or indirectly (through inspiration and
 development of other systems).

@@ -264,5 +264,5 @@ extern BOOLEAN LYMBMAdvanced;		/* MBM statusline for ADVANCED?	 */
 extern int LYStatusLine;		/* Line for statusline() or -1   */
 extern BOOLEAN LYCollapseBRs;		/* Collapse serial BRs?		 */
 extern BOOLEAN LYSetCookies;		/* Process Set-Cookie headers?	 */
-
+extern char *XLoadImageCommand;		/* Default image viewer for X	 */
 #endif /* LYGLOBALDEFS_H */

@@ -13,6 +13,7 @@
 #include "LYHistory.h"
 #include "LYSystem.h"
 #include "GridText.h"
+#include "LYSignal.h"
 
 #include "LYGlobalDefs.h"
 
@@ -159,14 +160,20 @@ PUBLIC int LYNewsPost ARGS2(document *,newdoc, BOOLEAN,followup)
 #else
 	fprintf(fd,"%s\n",user_input);
 
-	/* add Organization: */
-	{ FILE *fp;
+	/*
+	 *  Add Organization: header.
+	 */
+	{
+	    FILE *fp;
+	    char *org;
 
-	  if (fp = fopen("/etc/organization", "r")) {
-	     if (fgets(user_input, sizeof(user_input), fp) != NULL)
-		fprintf(fd, "Organization: %s", user_input);
-	     fclose(fp);
-	  }
+	    if ((org = getenv("ORGANIZATION")) != NULL && *org != '\0') {
+	        fprintf(fd, "Organization: %s\n", org);
+	    } else if (fp = fopen("/etc/organization", "r")) {
+	        if (fgets(user_input, sizeof(user_input), fp) != NULL)
+		    fprintf(fd, "Organization: %s", user_input);
+		fclose(fp);
+	    }
 	}
 
 	/* add Newsgroups: summary: and Keywords: */
@@ -260,6 +267,7 @@ PUBLIC int LYNewsPost ARGS2(document *,newdoc, BOOLEAN,followup)
         stop_curses();
 	printf("Posting your message:\n\n%s\n\nPlease wait...", cmd);
 	system(cmd);
+	sleep(MessageSecs);
 	start_curses();
 
 	/* come here to cleanup and exit */
