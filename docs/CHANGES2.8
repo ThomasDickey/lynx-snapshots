@@ -1,7 +1,14 @@
 =======================================================================
----      Release of Lynx2-8pre.5 as Lynx v2.8 (March 7, 1998)       ---
+---            Release of Lynx v2.8 (March 10, 1998)                ---
 =======================================================================
 
+1998-03-10
+* omit platform-specifics about release (recommended by HN). - TD
+* drop samples/lynx.cfg since it is redundant (recommended by HN).  - TD
+* modify makefile.in so that "make install-cfg" does not edit lynx.cfg
+  to point at local helpfiles, while "make install-help" will now do
+  that (reported by LP). - TD
+* one more patch to UPPER8 function. - LP
 1998-03-07
 * move ifdef's for EXP_8BIT_TOUPPER inside UPPER8 function to allow
   check for DOS/WINDOWS display charsets. - LP
