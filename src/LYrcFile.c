@@ -17,12 +17,24 @@
 #define FNAME_LYNXRC ".lynxrc"
 #endif /* FNAMES_8_3 */
 
+#define FIND_KEYWORD(cp, keyword) \
+    ((cp = LYstrstr(line_buffer, keyword)) != NULL && \
+     (cp - line_buffer) < number_sign)
+
+PRIVATE char *SkipEquals ARGS1(char *, src)
+{
+    char *tmp;
+    if ((tmp = (char *)strchr(src, '=')) != NULL)
+	src = tmp + 1;
+    return LYSkipBlanks(src);
+}
+
 PUBLIC void read_rc NOPARAMS
 {
     char line_buffer[LINESIZE];
     char rcfile[LY_MAXPATH];
     FILE *fp;
-    char *cp, *cp2;
+    char *cp;
     int number_sign;
     char MBM_line[256];
     int  MBM_counter;
@@ -73,24 +85,17 @@ PUBLIC void read_rc NOPARAMS
 	/*
 	 *  File editor.
 	 */
-	if (!system_editor &&
-	    (cp = LYstrstr(line_buffer, "file_editor")) != NULL &&
-	    cp-line_buffer < number_sign) {
+	if (!system_editor && FIND_KEYWORD(cp, "file_editor")) {
 
-	    if ((cp2 = (char *)strchr(cp, '=')) != NULL)
-		cp = cp2 + 1;
-	    cp = LYSkipBlanks(cp);
+	    cp = SkipEquals(cp);
 	    StrAllocCopy(editor, cp);
 
 	/*
 	 *  Default bookmark file.
 	 */
-	} else if ((cp = LYstrstr(line_buffer, "bookmark_file")) != NULL &&
-		    cp-line_buffer < number_sign) {
+	} else if (FIND_KEYWORD(cp, "bookmark_file")) {
 
-	    if ((cp2 = (char *)strchr(cp,'=')) != NULL)
-		cp = cp2 + 1;
-	    cp = LYSkipBlanks(cp);
+	    cp = SkipEquals(cp);
 
 	    /*
 	     *  Since this is the "Default Bookmark File", we save it
@@ -104,12 +109,9 @@ PUBLIC void read_rc NOPARAMS
 	/*
 	 *  Multiple (sub)bookmark support settings.
 	 */
-	} else if ((cp = LYstrstr(line_buffer, "sub_bookmarks")) != NULL &&
-		   cp-line_buffer < number_sign) {
+	} else if (FIND_KEYWORD(cp, "sub_bookmarks")) {
 
-	   if ((cp2 = (char *)strchr(cp, '=')) != NULL)
-		cp = (cp2 + 1);
-	   cp = LYSkipBlanks(cp);
+	   cp = SkipEquals(cp);
 	   if (!strncasecomp(cp, "standard", 8)) {
 	      LYMultiBookmarks = TRUE;
 	      LYMBMAdvanced = FALSE;
@@ -123,8 +125,7 @@ PUBLIC void read_rc NOPARAMS
 	/*
 	 *  Multiple (sub)bookmark definitions and descriptions.
 	 */
-	} else if ((cp = LYstrstr(line_buffer, "multi_bookmark")) != NULL &&
-		   cp-line_buffer < number_sign) {
+	} else if (FIND_KEYWORD(cp, "multi_bookmark")) {
 
 	    /*
 	     *  Found the root, now cycle through all the
@@ -134,8 +135,7 @@ PUBLIC void read_rc NOPARAMS
 		 MBM_counter <= MBM_V_MAXFILES; MBM_counter++) {
 		sprintf(MBM_line, "multi_bookmark%c", (MBM_counter + 'A'));
 
-		if ((cp = LYstrstr(line_buffer, MBM_line)) != NULL &&
-		    cp-line_buffer < number_sign) {
+		if (FIND_KEYWORD(cp, MBM_line)) {
 		    if ((MBM_cp1 = (char *)strchr(cp, '=')) == NULL) {
 			break;
 		    } else {
@@ -193,13 +193,9 @@ PUBLIC void read_rc NOPARAMS
 	/*
 	 *  FTP/file sorting method.
 	 */
-	} else if ((cp = LYstrstr(line_buffer,
-				  "file_sorting_method")) != NULL &&
-		   cp-line_buffer < number_sign) {
+	} else if (FIND_KEYWORD(cp, "file_sorting_method")) {
 
-	   if ((cp2 = (char *)strchr(cp, '=')) != NULL)
-		cp = cp2 + 1;
-	   cp = LYSkipBlanks(cp);
+	   cp = SkipEquals(cp);
 	   if (!strncasecomp(cp, "BY_FILENAME", 11))
 		HTfileSortMethod = FILE_BY_NAME;
 	   else if (!strncasecomp(cp, "BY_TYPE", 7))
@@ -212,25 +208,17 @@ PUBLIC void read_rc NOPARAMS
 	/*
 	 *  Personal mail address.
 	 */
-	} else if ((cp = LYstrstr(line_buffer,
-				  "personal_mail_address")) != NULL &&
-		   cp-line_buffer < number_sign) {
+	} else if (FIND_KEYWORD(cp, "personal_mail_address")) {
 
-	    if ((cp2 = (char *)strchr(cp, '=')) != NULL)
-		cp = cp2 + 1;
-	    cp = LYSkipBlanks(cp);
+	    cp = SkipEquals(cp);
 	    StrAllocCopy(personal_mail_address, cp);
 
 	/*
 	 *  Searching type.
 	 */
-	} else if ((cp = LYstrstr(line_buffer,
-				  "case_sensitive_searching")) != NULL &&
-		   cp-line_buffer < number_sign) {
+	} else if (FIND_KEYWORD(cp, "case_sensitive_searching")) {
 
-	    if ((cp2 = (char *)strchr(cp, '=')) != NULL)
-		cp = cp2 + 1;
-	    cp = LYSkipBlanks(cp);
+	    cp = SkipEquals(cp);
 	    if (!strncasecomp(cp, "on", 2))
 		case_sensitive = TRUE;
 	    else
@@ -239,14 +227,11 @@ PUBLIC void read_rc NOPARAMS
 	/*
 	 *  Character set.
 	 */
-	} else if ((cp = LYstrstr(line_buffer, "character_set")) != NULL &&
-		   cp-line_buffer < number_sign) {
+	} else if (FIND_KEYWORD(cp, "character_set")) {
 
 	    int i = 0;
 
-	    if ((cp2 = (char *)strchr(cp, '=')) != NULL)
-		cp = cp2 + 1;
-	    cp = LYSkipBlanks(cp);
+	    cp = SkipEquals(cp);
 
 	    i = UCGetLYhndl_byAnyName(cp); /* by MIME or full name */
 	    if (i < 0)
@@ -257,36 +242,25 @@ PUBLIC void read_rc NOPARAMS
 	/*
 	 *  Preferred language.
 	 */
-	} else if ((cp = LYstrstr(line_buffer,
-				  "preferred_language")) != NULL &&
-		   cp-line_buffer < number_sign) {
+	} else if (FIND_KEYWORD(cp, "preferred_language")) {
 
-	    if ((cp2 = (char *)strchr(cp, '=')) != NULL)
-		cp = cp2 + 1;
-	    cp = LYSkipBlanks(cp);
+	    cp = SkipEquals(cp);
 	    StrAllocCopy(language, cp);
 
 	/*
 	 *  Preferred charset.
 	 */
-	} else if ((cp = LYstrstr(line_buffer,
-				  "preferred_charset")) != NULL &&
-		   cp-line_buffer < number_sign) {
+	} else if (FIND_KEYWORD(cp, "preferred_charset")) {
 
-	    if ((cp2 = (char *)strchr(cp, '=')) != NULL)
-		cp = cp2 + 1;
-	    cp = LYSkipBlanks(cp);
+	    cp = SkipEquals(cp);
 	    StrAllocCopy(pref_charset, cp);
 
 	/*
 	 *  VI keys.
 	 */
-	} else if ((cp = LYstrstr(line_buffer, "vi_keys")) != NULL &&
-		   cp-line_buffer < number_sign) {
+	} else if (FIND_KEYWORD(cp, "vi_keys")) {
 
-	    if ((cp2 = (char * )strchr(cp, '=')) != NULL)
-		cp = cp2 + 1;
-	    cp = LYSkipBlanks(cp);
+	    cp = SkipEquals(cp);
 	    if (!strncasecomp(cp, "on", 2))
 		vi_keys = TRUE;
 	    else
@@ -295,12 +269,9 @@ PUBLIC void read_rc NOPARAMS
 	/*
 	 *  EMACS keys.
 	 */
-	} else if ((cp = LYstrstr(line_buffer, "emacs_keys")) != NULL &&
-		   cp-line_buffer < number_sign) {
+	} else if (FIND_KEYWORD(cp, "emacs_keys")) {
 
-	    if ((cp2 = (char *)strchr(cp, '=')) != NULL)
-		cp = cp2 + 1;
-	    cp = LYSkipBlanks(cp);
+	    cp = SkipEquals(cp);
 	    if (!strncasecomp(cp, "on", 2))
 		emacs_keys = TRUE;
 	    else
@@ -309,12 +280,9 @@ PUBLIC void read_rc NOPARAMS
 	/*
 	 *  Show dot files.
 	 */
-	} else if ((cp = LYstrstr(line_buffer, "show_dotfiles")) != NULL &&
-		   cp-line_buffer < number_sign) {
+	} else if (FIND_KEYWORD(cp, "show_dotfiles")) {
 
-	    if ((cp2 = (char * )strchr(cp, '=')) != NULL)
-		cp = cp2 + 1;
-	    cp = LYSkipBlanks(cp);
+	    cp = SkipEquals(cp);
 	    if (!strncasecomp(cp, "on", 2))
 		show_dotfiles = TRUE;
 	    else
@@ -323,12 +291,9 @@ PUBLIC void read_rc NOPARAMS
 	/*
 	 *  Show color.
 	 */
-	} else if ((cp = LYstrstr(line_buffer, "show_color")) != NULL &&
-		   cp-line_buffer < number_sign) {
+	} else if (FIND_KEYWORD(cp, "show_color")) {
 
-	    if ((cp2 = (char * )strchr(cp, '=')) != NULL)
-		cp = cp2 + 1;
-	    cp = LYSkipBlanks(cp);
+	    cp = SkipEquals(cp);
 	    if (!strncasecomp(cp, "always", 6)) {
 		LYrcShowColor = SHOW_COLOR_ALWAYS;
 #if defined(USE_SLANG) || defined(COLOR_CURSES)
@@ -346,12 +311,9 @@ PUBLIC void read_rc NOPARAMS
 	/*
 	 *  Select popups.
 	 */
-	} else if ((cp = LYstrstr(line_buffer, "select_popups")) != NULL &&
-		   cp-line_buffer < number_sign) {
+	} else if (FIND_KEYWORD(cp, "select_popups")) {
 
-	    if ((cp2 = (char * )strchr(cp, '=')) != NULL)
-		cp = cp2 + 1;
-	    cp = LYSkipBlanks(cp);
+	    cp = SkipEquals(cp);
 	    if (!strncasecomp(cp, "off", 3))
 		LYSelectPopups = FALSE;
 	    else
@@ -360,12 +322,9 @@ PUBLIC void read_rc NOPARAMS
 	/*
 	 *  Show cursor.
 	 */
-	} else if ((cp = LYstrstr(line_buffer, "show_cursor")) != NULL &&
-		   cp-line_buffer < number_sign) {
+	} else if (FIND_KEYWORD(cp, "show_cursor")) {
 
-	    if ((cp2 = (char * )strchr(cp, '=')) != NULL)
-		cp = cp2 + 1;
-	    cp = LYSkipBlanks(cp);
+	    cp = SkipEquals(cp);
 	    if (!strncasecomp(cp, "off", 3))
 		LYShowCursor = FALSE;
 	    else
@@ -374,12 +333,9 @@ PUBLIC void read_rc NOPARAMS
 	/*
 	 *  Keypad mode.
 	 */
-	} else if ((cp = LYstrstr(line_buffer, "keypad_mode")) != NULL &&
-		   cp-line_buffer < number_sign) {
+	} else if (FIND_KEYWORD(cp, "keypad_mode")) {
 
-	    if ((cp2 = (char *)strchr(cp, '=')) != NULL)
-		cp = cp2 + 1;
-	    cp = LYSkipBlanks(cp);
+	    cp = SkipEquals(cp);
 	    if (LYstrstr(cp, "LINKS_ARE_NUMBERED"))
 		keypad_mode = LINKS_ARE_NUMBERED;
 	    else if (LYstrstr(cp, "LINKS_AND_FORM_FIELDS_ARE_NUMBERED"))
@@ -391,14 +347,11 @@ PUBLIC void read_rc NOPARAMS
 	 *  Keyboard layout.
 	 */
 #ifdef EXP_KEYBOARD_LAYOUT
-	} else if ((cp = LYstrstr(line_buffer, "kblayout")) != NULL &&
-		   cp-line_buffer < number_sign) {
+	} else if (FIND_KEYWORD(cp, "kblayout")) {
 
 	    int i = 0;
 
-	    if ((cp2 = (char *)strchr(cp, '=')) != NULL)
-		cp = cp2 + 1;
-	    cp = LYSkipBlanks(cp);
+	    cp = SkipEquals(cp);
 	    for (; LYKbLayoutNames[i]; i++) {
 		if (!strcmp(cp, LYKbLayoutNames[i])) {
 		    current_layout = i;
@@ -410,14 +363,11 @@ PUBLIC void read_rc NOPARAMS
 	/*
 	 *  Line edit mode.
 	 */
-	} else if ((cp = LYstrstr(line_buffer, "lineedit_mode")) != NULL &&
-		   cp-line_buffer < number_sign) {
+	} else if (FIND_KEYWORD(cp, "lineedit_mode")) {
 
 	    int i = 0;
 
-	    if ((cp2 = (char *)strchr(cp, '=')) != NULL)
-		cp = cp2 + 1;
-	    cp = LYSkipBlanks(cp);
+	    cp = SkipEquals(cp);
 	    for (; LYLineeditNames[i]; i++) {
 		if (!strncmp(cp, LYLineeditNames[i], strlen(cp))) {
 		    current_lineedit = i;
@@ -429,12 +379,9 @@ PUBLIC void read_rc NOPARAMS
 	/*
 	 *  Directory list style.
 	 */
-	} else if ((cp = LYstrstr(line_buffer, "dir_list_style")) != NULL &&
-		   cp-line_buffer < number_sign) {
+	} else if (FIND_KEYWORD(cp, "dir_list_style")) {
 
-	    if ((cp2 = (char *)strchr(cp,'=')) != NULL)
-		cp = cp2 + 1;
-	    cp = LYSkipBlanks(cp);
+	    cp = SkipEquals(cp);
 	    if (LYstrstr(cp, "FILES_FIRST") != NULL) {
 		dir_list_style = FILES_FIRST;
 	    } else if (LYstrstr(cp,"DIRECTORIES_FIRST") != NULL) {
@@ -447,12 +394,8 @@ PUBLIC void read_rc NOPARAMS
 	/*
 	 *  Accept cookies from all domains?
 	 */
-	} else if ((cp = LYstrstr(line_buffer, "accept_all_cookies")) != NULL &&
-		   cp-line_buffer < number_sign) {
-	    if((cp2 = (char *)strchr(cp,'=')) != NULL)
-		cp = cp2 + 1;
-	    while (isspace(*cp))
-		cp++; /* get rid of spaces */
+	} else if (FIND_KEYWORD(cp, "accept_all_cookies")) {
+	    cp = SkipEquals(cp);
 	    if (LYstrstr(cp,"TRUE") != NULL) {
 		LYAcceptAllCookies = TRUE;
 	    } else {
@@ -463,49 +406,65 @@ PUBLIC void read_rc NOPARAMS
 	/*
 	 *  Accept all cookies from certain domains?
 	 */
-	} else if ((cp = LYstrstr(line_buffer, "cookie_accept_domains"))
-		!= NULL && cp-line_buffer < number_sign) {
-	    if((cp2 = (char *)strchr(cp,'=')) != NULL)
-		cp = cp2 + 1;
-	    while (isspace(*cp))
-		cp++; /* get rid of spaces */
+	} else if (FIND_KEYWORD(cp, "cookie_accept_domains")) {
+	    cp = SkipEquals(cp);
 	    cookie_add_acceptlist(cp);
+	    if(LYCookieAcceptDomains != NULL) { 
+		StrAllocCat(LYCookieAcceptDomains, ","); 
+	    } 
+	    StrAllocCat(LYCookieAcceptDomains, cp); 
 
 
 	/*
 	 *  Reject all cookies from certain domains?
 	 */
-	} else if ((cp = LYstrstr(line_buffer, "cookie_reject_domains"))
-		!= NULL && cp-line_buffer < number_sign) {
-	    if((cp2 = (char *)strchr(cp,'=')) != NULL)
-		cp = cp2 + 1;
-	    while (isspace(*cp))
-		cp++; /* get rid of spaces */
+	} else if (FIND_KEYWORD(cp, "cookie_reject_domains")) {
+	    cp = SkipEquals(cp);
 	    cookie_add_rejectlist(cp);
+	    if(LYCookieRejectDomains != NULL) { 
+		StrAllocCat(LYCookieRejectDomains, ","); 
+	    } 
+	    StrAllocCat(LYCookieRejectDomains, cp); 
+
+	/*
+	 *  Cookie domains to perform loose checks?
+	 */
+	} else if (FIND_KEYWORD(cp, "cookie_loose_invalid_domains")) {
+	    cp = SkipEquals(cp);
+	    StrAllocCopy(LYCookieLooseCheckDomains, cp);
+	    cookie_set_invcheck(LYCookieLooseCheckDomains, INVCHECK_LOOSE);
+
+	/*
+	 *  Cookie domains to perform strict checks?
+	 */
+	} else if (FIND_KEYWORD(cp, "cookie_strict_invalid_domains")) {
+	    cp = SkipEquals(cp);
+	    StrAllocCopy(LYCookieStrictCheckDomains, cp);
+	    cookie_set_invcheck(LYCookieStrictCheckDomains, INVCHECK_STRICT);
+
+	/*
+	 *  Cookie domains to query user over invalid cookies?
+	 */
+	} else if (FIND_KEYWORD(cp, "cookie_query_invalid_domains")) {
+	    cp = SkipEquals(cp);
+	    StrAllocCopy(LYCookieQueryCheckDomains, cp);
+	    cookie_set_invcheck(LYCookieQueryCheckDomains, INVCHECK_QUERY);
 
 #ifdef EXP_PERSISTENT_COOKIES
 	/*
-	 *  File to store cookies in.
+	 *  File in which to store persistent cookies. 
 	 */
-	} else if ((cp = LYstrstr(line_buffer, "cookie_file"))
-		!= NULL && cp-line_buffer < number_sign) {
-	    if((cp2 = (char *)strchr(cp,'=')) != NULL)
-		cp = cp2 + 1;
-	    while (isspace(*cp))
-		cp++; /* get rid of spaces */
-
+	} else if (FIND_KEYWORD(cp, "cookie_file")) {
+	    cp = SkipEquals(cp);
 	    StrAllocCopy(LYCookieFile, cp);
 #endif /* EXP_PERSISTENT_COOKIES */
 
 	/*
 	 *  User mode.
 	 */
-	} else if ((cp = LYstrstr(line_buffer, "user_mode")) != NULL &&
-		   cp-line_buffer < number_sign) {
+	} else if (FIND_KEYWORD(cp, "user_mode")) {
 
-	    if ((cp2 = (char *)strchr(cp, '=')) != NULL)
-		cp = cp2 + 1;
-	    cp = LYSkipBlanks(cp);
+	    cp = SkipEquals(cp);
 	    if (LYstrstr(cp, "ADVANCED") != NULL) {
 		user_mode = ADVANCED_MODE;
 	    } else if (LYstrstr(cp,"INTERMEDIATE") != NULL) {
@@ -518,13 +477,9 @@ PUBLIC void read_rc NOPARAMS
 	/*
 	 *  Local execution mode - all links.
 	 */
-	} else if ((cp = LYstrstr(line_buffer,
-				  "run_all_execution_links")) != NULL &&
-		   cp-line_buffer < number_sign) {
+	} else if (FIND_KEYWORD(cp, "run_all_execution_links")) {
 
-	    if ((cp2 = (char *)strchr(cp, '=')) != NULL)
-		cp = cp2 + 1;
-	    cp = LYSkipBlanks(cp);
+	    cp = SkipEquals(cp);
 	    if (!strncasecomp(cp, "on", 2))
 		local_exec = TRUE;
 	     else
@@ -535,11 +490,8 @@ PUBLIC void read_rc NOPARAMS
 	 *  Partial display logic--set the threshold # of lines before
 	 *  Lynx redraws the screen
 	 */
-	} else if ((cp = LYstrstr(line_buffer, "partial_thres")) != NULL &&
-		   cp-line_buffer < number_sign) {
-	    if ((cp2 = (char *)strchr(cp, '=')) != NULL)
-	        cp = cp2 + 1;
-	    cp = LYSkipBlanks(cp);
+	} else if (FIND_KEYWORD(cp, "partial_thres")) {
+	    cp = SkipEquals(cp);
 	    if (atoi(cp) != 0)
 	        partial_threshold = atoi(cp);
 #endif /* DISP_PARTIAL */
@@ -547,26 +499,16 @@ PUBLIC void read_rc NOPARAMS
 	/*
 	 *  Local execution mode - only links in local files.
 	 */
-	} else if ((cp = LYstrstr(line_buffer,
-			"run_execution_links_on_local_files")) != NULL &&
-		   cp-line_buffer < number_sign) {
-
-	    if ((cp2 = (char *)strchr(cp, '=')) != NULL)
-		cp = cp2 + 1;
-	    cp = LYSkipBlanks(cp);
+	} else if (FIND_KEYWORD(cp, "run_execution_links_on_local_files")) {
+	    cp = SkipEquals(cp);
 	    if (!strncasecomp(cp, "on", 2))
 		local_exec_on_local_files = TRUE;
 	    else
 		local_exec_on_local_files=FALSE;
 #endif /* ALLOW_USERS_TO_CHANGE_EXEC_WITHIN_OPTIONS */
 
-	} else if ((cp = LYstrstr(line_buffer,
-				  "verbose_images")) != NULL &&
-		   cp-line_buffer < number_sign) {
-
-	   if ((cp2 = (char *)strchr(cp, '=')) != NULL)
-		cp = cp2 + 1;
-	   cp = LYSkipBlanks(cp);
+	} else if (FIND_KEYWORD(cp, "verbose_images")) {
+	   cp = SkipEquals(cp);
 	   if (!strncasecomp(cp, "on", 2))
 		verbose_img = 1;
 	   else if (!strncasecomp(cp, "off", 3))
@@ -960,14 +902,29 @@ PUBLIC int save_rc NOPARAMS
 # override any settings made here.  If a single domain is specified in\n\
 # both cookie_accept_domains and in cookie_reject_domains, the rejection\n\
 # will take precedence.\n"));
-    fprintf(fp, "# cookie_accept_domains=\n");
-    fprintf(fp, "# cookie_reject_domains=\n\n");
+    fprintf(fp, "cookie_accept_domains=%s\n", 
+		    (LYCookieAcceptDomains == NULL ? ""  
+		    : LYCookieAcceptDomains)); 
+    fprintf(fp, "cookie_reject_domains=%s\n\n", 
+		    (LYCookieRejectDomains == NULL ? ""  
+		    : LYCookieRejectDomains)); 
 
-    /*
-     *  cookie_accept_domains and cookie_reject_domains not set here because
-     *  there's not currently a method on the options menu (maybe later?)
-     *  to set them.
-     */
+
+    fprintf(fp, gettext("\
+# cookie_loose_invalid_domains, cookie_strict_invalid_domains, and\n\
+# cookie_query_invalid_domains control checking incoming cookies'\n\
+# conformance to RFCNNNN.\n\
+# XXX FIXME\n"));
+    fprintf(fp, "cookie_loose_invalid_domains=%s\n",
+	    (LYCookieLooseCheckDomains == NULL) ? ""
+		    : LYCookieLooseCheckDomains);
+    fprintf(fp, "cookie_strict_invalid_domains=%s\n",
+	    (LYCookieStrictCheckDomains == NULL) ? ""
+		    : LYCookieStrictCheckDomains);
+    fprintf(fp, "cookie_query_invalid_domains=%s\n\n",
+	    (LYCookieQueryCheckDomains == NULL) ? ""
+		    : LYCookieQueryCheckDomains);
+
 
 #ifdef EXP_PERSISTENT_COOKIES
     /*
@@ -979,6 +936,8 @@ PUBLIC int save_rc NOPARAMS
     fprintf(fp, "cookie_file=%s\n\n",
 		(LYCookieFile == NULL ? "~/.lynx_cookies" : LYCookieFile));
 #endif /* EXP_PERSISTENT_COOKIES */
+
+
 
 #if defined(EXEC_LINKS) || defined(EXEC_SCRIPTS)
     /*

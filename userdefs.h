@@ -293,21 +293,6 @@
 #define PERSONAL_MAILCAP ".mailcap"
 
 /**************************
- * the full path and name of the telnet command
- */
-#define TELNET_COMMAND "telnet"
-
-/**************************
- * the full path and name of the tn3270 command
- */
-#define TN3270_COMMAND "tn3270"
-
-/**************************
- * the full path and name of the rlogin command
- */
-#define RLOGIN_COMMAND "rlogin"
-
-/**************************
  * XLOADIMAGE_COMMAND will be used as a default in src/HTInit.c for
  * viewing image content types when the DISPLAY environment variable
  * is set.  Make it the full path and name of the xli (also known as
@@ -1217,12 +1202,12 @@
  * the version definition with the Project Version on checkout.  Just
  * ignore it. - kw */
 /* $Format: "#define LYNX_VERSION \"$ProjectVersion$\""$ */
-#define LYNX_VERSION "2.8.2dev.15"
+#define LYNX_VERSION "2.8.2dev.16"
 #define LYNX_WWW_HOME "http://lynx.browser.org/"
 #define LYNX_WWW_DIST "http://www.slcc.edu/lynx/current/"
 #define LYNX_RELEASE FALSE
 /* $Format: "#define LYNX_DATE \"$ProjectDate$\""$ */
-#define LYNX_DATE "Thu, 28 Jan 1999 09:31:29 -0700"
+#define LYNX_DATE "Mon, 08 Feb 1999 03:32:59 -0700"
 #define LYNX_DATE_OFF 5		/* truncate the automatically-generated date */
 #define LYNX_DATE_LEN 11	/* truncate the automatically-generated date */
 #define LYNX_RELEASE_DATE "1998"
@@ -1263,6 +1248,9 @@
 #define UNCOMPRESS_PATH  "gzip -d"
 #define GZIP_PATH       "gzip"
 #define BZIP2_PATH      "bzip2"
+#define TELNET_PATH     "telnet"
+#define TN3270_PATH     "tn3270"
+#define RLOGIN_PATH     "rlogin"
 
 #else
 
@@ -1295,6 +1283,9 @@
 #define RM_PATH         "rm"
 #define COPY_PATH       "cp"
 #define CHMOD_PATH      "chmod"
+#define TELNET_PATH     "telnet"
+#define TN3270_PATH     "tn3270"
+#define RLOGIN_PATH     "rlogin"
 
 #else	/* Unix */
 	/* Standard locations are defined via the configure script.  When

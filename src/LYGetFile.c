@@ -420,13 +420,24 @@ Try_Redirected_URL:
 		    } else {
 			HTParentAnchor *tmpanchor;
 			CONST char *title;
+			char *tmptitle = NULL;
 
 			title = "";
 			if ((tmpanchor = HTAnchor_parent(
 						HTAnchor_findAddress(&WWWDoc)
-							)) != NULL) {
-			    if (HTAnchor_title(tmpanchor)) {
+							)) != NULL &&
+			    HTAnchor_title(tmpanchor)) {
 				title = HTAnchor_title(tmpanchor);
+			} else if (HTMainAnchor && !LYUserSpecifiedURL) {
+			    title = HTAnchor_subject(HTMainAnchor);
+			    if (title && *title) {
+				if (strncasecomp(title, "Re:", 3)) {
+				    StrAllocCopy(tmptitle, "Re: ");
+				    StrAllocCat(tmptitle, title);
+				    title = tmptitle;
+				}
+			    } else {
+				title = "";
 			    }
 			}
 			cp = (char *)strchr(doc->address,':')+1;
@@ -434,7 +445,10 @@ Try_Redirected_URL:
 				      ((HTMainAnchor && !LYUserSpecifiedURL) ?
 				       (char *)HTMainAnchor->address :
 				       (char *)doc->address),
-				      title);
+				      title,
+				      (HTMainAnchor && !LYUserSpecifiedURL) ?
+				       HTMainAnchor->message_id : NULL);
+			FREE(tmptitle);
 		    }
 		    return(NULLFILE);
 

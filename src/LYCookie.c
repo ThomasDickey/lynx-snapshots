@@ -414,6 +414,7 @@ PRIVATE void store_cookie ARGS3(
 	else
 #endif
 	    de->bv = QUERY_USER;
+	de->invcheck_bv = QUERY_USER; /* should this go here? */
 	cookie_list = de->cookie_list = HTList_new();
 	StrAllocCopy(de->domain, co->domain);
 	HTList_addObject(domain_list, de);
@@ -2004,7 +2005,7 @@ PUBLIC void LYLoadCookies ARGS1 (
 	 *  COOKIE_FLAG_EXPIRES_SET  It must have had an explicit
 	 *			     expiration originally, otherwise
 	 *			     it would not be in the file.
-	 *  COOKIE_FLAG_DOMAN_SET,   We don't know whether these were
+	 *  COOKIE_FLAG_DOMAIN_SET,  We don't know whether these were
 	 *   COOKIE_FLAG_PATH_SET    explicit or implicit, but this
 	 *			     only matters for sending version 1
 	 *			     cookies; the cookies read from the
@@ -2617,8 +2618,11 @@ PUBLIC void cookie_add_acceptlist ARGS1(
     char *strsmall = NULL;
     int isexisting = FALSE;
 
+    if (str == NULL)
+	outofmem(__FILE__, "cookie_add_acceptlist");
+
     /*
-     * Is this the first cookie we're handling?  If so, initialize
+     * Is this the first domain we're handling?  If so, initialize
      * domain_list.
      */
 
@@ -2635,8 +2639,8 @@ PUBLIC void cookie_add_acceptlist ARGS1(
     while ((strsmall = LYstrsep(str, ",")) != 0) {
 
 	/*
-	 * Check the list of existing cookies to see if this is a
-	 * re-setting of an already existing cookie -- if so, just
+	 * Check the list of existing domains to see if this is a
+	 * re-setting of an already existing domains -- if so, just
 	 * change the behavior, if not, create a new domain entry.
 	 */
 
@@ -2693,8 +2697,11 @@ PUBLIC void cookie_add_rejectlist ARGS1(
     char *strsmall = NULL;
     int isexisting = FALSE;
 
+    if (str == NULL)
+	outofmem(__FILE__, "cookie_add_rejectlist");
+
     /*
-     * Is this the first cookie we're handling?  If so, initialize
+     * Is this the first domain we're handling?  If so, initialize
      * domain_list.
      */
 
@@ -2711,8 +2718,8 @@ PUBLIC void cookie_add_rejectlist ARGS1(
     while ((strsmall = LYstrsep(str, ",")) != 0) {
 
 	/*
-	 * Check the list of existing cookies to see if this is a
-	 * re-setting of an already existing cookie -- if so, just
+	 * Check the list of existing domains to see if this is a
+	 * re-setting of an already existing domains -- if so, just
 	 * change the behavior, if not, create a new domain entry.
 	 */
 
@@ -2746,6 +2753,82 @@ PUBLIC void cookie_add_rejectlist ARGS1(
     FREE(str);
     FREE(strsmall);
     FREE(rstr);
+}
+
+/*      cookie_set_invcheck
+**      -------------------
+**
+**   Is passed a comma-delimited string of domains and a particular
+**   behaviour to set their invcheck_bv to. - BJP
+*/
+
+PUBLIC void cookie_set_invcheck ARGS2(
+	char *, 	domains,
+        invcheck_behaviour,		setting)
+{
+    domain_entry *de = NULL;
+    domain_entry *de2 = NULL;
+    HTList *hl = NULL;
+    char **str = (char **)calloc(1, sizeof(domains));
+    char *dstr = NULL;
+    char *strsmall = NULL;
+    int isexisting = FALSE;
+
+    if (str == NULL)
+	outofmem(__FILE__, "cookie_set_invcheck");
+
+    /*
+     * Is this the first cookie we're handling?  If so, initialize
+     * domain_list.
+     */
+
+    if (domain_list == NULL) {
+	atexit(LYCookieJar_free);
+	domain_list = HTList_new();
+	total_cookies = 0;
+    }
+
+    StrAllocCopy(dstr, domains);
+
+    *str = dstr;
+
+    while ((strsmall = LYstrsep(str, ",")) != 0) {
+
+	/*
+	 * Check the list of existing cookies to see if this is a
+	 * re-setting of an already existing cookie -- if so, just
+	 * change the behavior, if not, create a new domain entry.
+	 */
+	for (hl = domain_list; hl != NULL; hl = hl->next) {
+	    de2 = (domain_entry *)hl->object;
+	    if ((de2 != NULL && de2->domain != NULL)
+	     && !strcmp(strsmall, de2->domain)) {
+		isexisting = TRUE;
+		break;
+	    } else {
+		isexisting = FALSE;
+	    }
+	}
+
+	if (!isexisting) {
+	    de = (domain_entry *)calloc(1, sizeof(domain_entry));
+
+	    if (de == NULL)
+		outofmem(__FILE__, "cookie_set_invcheck");
+
+	    de->invcheck_bv = setting;
+
+	    StrAllocCopy(de->domain, strsmall);
+	    de->cookie_list = HTList_new();
+	    HTList_addObject(domain_list, de);
+	} else {
+	    de2->invcheck_bv = setting;
+	}
+    }
+
+    FREE(str);
+    FREE(strsmall);
+    FREE(dstr);
 }
 
 #ifdef GLOBALDEF_IS_MACRO

@@ -1,12 +1,10 @@
 
                              Lynx README file
 
-Lynx Version 2.8.1 is the latest release.  This release is based on the
-lynx2.8pre.11 development code set, and includes bug fixes through October 24,
-1998.  See the CHANGES file for a complete record of all changes and bug fixes
-in this release.  New releases are announced on the lynx-dev mailing list (see
-below).
-
+Lynx version 2.8.1 is the latest stable release.  The version in this
+directory is the "current" version and includes changes and bug fixes as
+documented in the CHANGES file.  New releases are announced on the lynx-dev
+mailing list (see below).
 
 WHAT IS LYNX?
 
@@ -90,7 +88,9 @@ DOCUMENTATION
 INSTALLING LYNX
 
    To install Lynx, follow the steps in the INSTALLATION file, which is
-   located in the top directory of the source distribution.
+   located in the top directory of the source distribution.  Win32 users
+   who need pre-compiled distributions should visit the site
+   <URL:http://www.fdisk.com/doslynx/lynxport.htm>.
 
 PROBLEMS
 

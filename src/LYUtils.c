@@ -2000,6 +2000,43 @@ PUBLIC void noviceline ARGS1(
     return;
 }
 
+#ifdef NSL_FORK
+/*
+ *  Returns the file descriptor from which keyboard input is expected,
+ *  or INVSOC (-1) if not available.
+ *  If need_selectable is true, returns non-INVSOC fd only if select()
+ *  is possible - actually, currently only checks if fd is connected
+ *  to a tty. - kw
+ */
+PUBLIC int LYConsoleInputFD ARGS1(
+    BOOLEAN,		need_selectable)
+{
+    int fd = INVSOC;
+#ifdef USE_SLANG
+    if (!LYCursesON)
+	fd = fileno(stdin);
+#if SLANG_VERSION >= 9919
+    /* SLang_TT_Read_FD introduced in slang 0.99.19, from its changelog:
+     *   SLang_TT_Read_FD variable is now available for unix.  This is the file
+     *   descriptor used by SLang_getkey. */
+    else
+	fd = SLang_TT_Read_FD;
+#endif /* SLANG_VERSION >= 9919 */
+#else  /* !USE_SLANG */
+    fd = fileno(stdin);
+#endif /* !USE_SLANG */
+
+    if (need_selectable && fd != INVSOC) {
+	if (isatty(fd)) {
+	    return fd;
+	} else {
+	    return INVSOC;
+	}
+    }
+    return fd;
+}
+#endif /* NSL_FORK */
+
 PRIVATE int fake_zap = 0;
 
 PUBLIC void LYFakeZap ARGS1(
@@ -2975,6 +3012,8 @@ PUBLIC void change_sug_filename ARGS1(
      *	Rename any temporary files.
      */
     temp = (char *)calloc(1, (strlen(lynx_temp_space) + 60));
+    if (temp == NULL)
+	outofmem(__FILE__, "change_sug_filename");
     cp = wwwName(lynx_temp_space);
     if (LYIsHtmlSep(*cp)) {
 	sprintf(temp, "file://localhost%s%d", cp, (int)getpid());
@@ -4138,8 +4177,6 @@ PUBLIC BOOLEAN LYExpandHostForURL ARGS3(
     char *Host = NULL, *HostColon = NULL, *host = NULL;
     char *Path = NULL;
     char *Fragment = NULL;
-    int hoststat;
-    SockA sock;
     BOOLEAN GotHost = FALSE;
     BOOLEAN Startup = (helpfilepath == NULL);
 
@@ -4214,8 +4251,7 @@ PUBLIC BOOLEAN LYExpandHostForURL ARGS3(
 	fprintf(stdout, "%s '%s'%s\n", WWW_FIND_MESSAGE, host, FIRST_SEGMENT);
     }
 #ifndef DJGPP
-    sock.sin_port = htons(80);
-    if ((hoststat = HTParseInet(&sock, host)) == 0)
+    if (LYGetHostByName(host) != NULL)
 #else
     if (resolve(host) != 0)
 #endif /* DJGPP */
@@ -4237,7 +4273,7 @@ PUBLIC BOOLEAN LYExpandHostForURL ARGS3(
 	FREE(MsgStr);
 	return GotHost;
 #ifndef DJGPP
-    } else if (LYCursesON && (hoststat == HT_INTERRUPTED)) {
+    } else if (LYCursesON && (lynx_nsl_status == HT_INTERRUPTED)) {
 #else /* DJGPP */
     } else if (LYCursesON && HTCheckForInterrupt()) {
 #endif /* DJGPP */
@@ -4336,8 +4372,7 @@ PUBLIC BOOLEAN LYExpandHostForURL ARGS3(
 		fprintf(stdout, "%s '%s'%s\n", WWW_FIND_MESSAGE, host, GUESSING_SEGMENT);
 	    }
 #ifndef DJGPP
-	    sock.sin_port = htons(80);
-	    GotHost = ((hoststat = HTParseInet(&sock, host)) == 0);
+	    GotHost = (LYGetHostByName(host) != NULL);
 #else
 	    GotHost = (resolve(host) != 0);
 #endif /* DJGPP */
@@ -4349,7 +4384,7 @@ PUBLIC BOOLEAN LYExpandHostForURL ARGS3(
 		 *  Give the user chance to interrupt lookup cycles. - KW
 		 */
 #ifndef DJGPP
-		if (LYCursesON && (hoststat == HT_INTERRUPTED))
+		if (LYCursesON && (lynx_nsl_status == HT_INTERRUPTED))
 #else /* DJGPP */
 		if (LYCursesON && HTCheckForInterrupt())
 #endif /* DJGPP */
@@ -5024,6 +5059,8 @@ PUBLIC void LYAddPathToHome ARGS3(
 	     */
 	    char *temp = (char *)calloc(1,
 					(strlen(home) + strlen(file) + 10));
+	    if (temp == NULL)
+		outofmem(__FILE__, "LYAddPathToHome");
 	    sprintf(temp, "%s%s", HTVMS_wwwName(home), (file + 1));
 	    sprintf(fbuffer, "%.*s",
 		    (fbuffer_size - 1), HTVMS_name("", temp));
@@ -5638,7 +5675,6 @@ PUBLIC FILE *LYOpenTemp ARGS3(
 	CONST char *,	mode)
 {
     FILE *fp = 0;
-    BOOL first = TRUE;
     BOOL txt = TRUE;
     BOOL wrt = 'r';
     LY_TEMP *p;
@@ -5674,19 +5710,15 @@ PUBLIC FILE *LYOpenTemp ARGS3(
 	    fp = LYNewBinFile (result);
 	}
 	/*
-	 * If we get a failure to make a temporary file, double check if the
-	 * directory is writable.
+	 * If we get a failure to make a temporary file, don't bother to try a
+	 * different name unless the failure was because the file already
+	 * exists.
 	 */
-#ifdef W_OK	/* FIXME (need a better test) in fcntl.h or unistd.h */
-	if (first) {
-	    first = FALSE;
-	    if (fp == 0) {
-		*LYPathLeaf(result) = 0;
-		if (*result == 0)
-		    strcpy(result, ".");
-		if (access(result, W_OK) < 0)
-		    return 0;
-	    }
+#ifdef EEXIST	/* FIXME (need a better test) in fcntl.h or unistd.h */
+	if ((fp == 0) && (errno != EEXIST)) {
+	    CTRACE(tfp, "... LYOpenTemp(%s) failed: %s\n",
+		   result, LYStrerror(errno));
+	    return 0;
 	}
 #endif
     } while (fp == 0);
@@ -5696,6 +5728,8 @@ PUBLIC FILE *LYOpenTemp ARGS3(
 	StrAllocCopy((p->name), result);
 	p->file = fp;
 	ly_temp = p;
+    } else {
+	outofmem(__FILE__, "LYOpenTemp");
     }
 
     CTRACE(tfp, "... LYOpenTemp(%s)\n", result);
@@ -5741,6 +5775,8 @@ PUBLIC FILE *LYOpenScratch ARGS2(
 	    StrAllocCopy((p->name), result);
 	    p->file = fp;
 	    ly_temp = p;
+	} else {
+	    outofmem(__FILE__, "LYOpenScratch");
 	}
     }
     CTRACE(tfp, "LYOpenScratch(%s)\n", result);

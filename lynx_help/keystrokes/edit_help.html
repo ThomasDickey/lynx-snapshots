@@ -35,7 +35,7 @@ is the <A HREF="alt_edit_help.html">Alternate Bindings</A> keymap.
      EOL    Go to end   of  line  -  Ctrl-E, End,  Select
 
      DELP   Delete prev     char  -  Ctrl-H, DELETE, Remove
-     DELN   Delete next [*] char  -  Ctrl-D, Ctrl-R
+     DELN   Delete next [1] char  -  Ctrl-D, Ctrl-R
      DELPW  Delete prev     word  -  Ctrl-B
      DELNW  Delete next     word  -  Ctrl-F
      DELEL  Delete to end of line -  Ctrl-_
@@ -43,12 +43,15 @@ is the <A HREF="alt_edit_help.html">Alternate Bindings</A> keymap.
      UPPER  Upper case the line   -  Ctrl-T
      LOWER  Lower case the line   -  Ctrl-K
 
-     LKCMD  Invoke cmd prompt     -  Ctrl-V (in form text fields, only)
+     LKCMD  Invoke cmd prompt     -  Ctrl-V (in form input fields, only) [2] 
      SWMAP  Switch input keymap   -  Ctrl-^
 
-[*] "next" means the character "under" a box or underline style cursor; it
+[1] "next" means the character "under" a box or underline style cursor; it
      means "to the immediate right of" an I-beam (between characters) type
      cursor.
+
+[2]  Follow Ctrl-V with the key "e" bound to the EDIT function, 
+     to edit the form's textarea field using an external editor. 
 </pre>
 </body>
 </html>

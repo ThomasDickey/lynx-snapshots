@@ -314,6 +314,9 @@ extern BOOLEAN LYSetCookies;		/* Process Set-Cookie headers?	 */
 extern BOOLEAN LYAcceptAllCookies;      /* accept ALL cookies?           */
 extern char *LYCookieAcceptDomains;     /* domains to accept all cookies */
 extern char *LYCookieRejectDomains;     /* domains to reject all cookies */
+extern char *LYCookieStrictCheckDomains; /* domains to check strictly    */
+extern char *LYCookieLooseCheckDomains; /* domains to check loosely      */
+extern char *LYCookieQueryCheckDomains; /* domains to check w/a query    */
 #ifdef EXP_PERSISTENT_COOKIES
 extern BOOLEAN persistent_cookies;
 extern char *LYCookieFile;              /* file to store cookies in      */

@@ -67,6 +67,9 @@
 #include <rfc_suni.h>		/* RFC 1345 w/o Intro	*/
 #include <utf8_uni.h>		/* UNICODE UTF 8	*/
 #include <viscii_uni.h> 	/* Vietnamese (VISCII)	*/
+#include <iso9945_uni.h>	/* Ukrainian Cyrillic (ISO 9945-2) */
+#include <cp866u_uni.h>		/* Ukrainian Cyrillic (866) */
+#include <koi8u_uni.h>		/* Ukrainian Cyrillic (koi8-u */
 #ifdef NOTDEFINED
 #include <mnem_suni.h>
 #endif /* NOTDEFINED */
@@ -2054,6 +2057,9 @@ PUBLIC void UCInit NOARGS
     UC_CHARSET_SETUP_utf_8;		  /* UNICODE UTF-8	  */
     UC_CHARSET_SETUP_mnemonic_ascii_0;	  /* RFC 1345 w/o Intro   */
     UC_CHARSET_SETUP_mnemonic;		  /* RFC 1345 Mnemonic	  */
+    UC_CHARSET_SETUP_iso_9945_2;	  /* Ukrainian Cyrillic (ISO 9945-2) */
+    UC_CHARSET_SETUP_cp866u;		  /* Ukrainian Cyrillic (866) */
+    UC_CHARSET_SETUP_koi8_u;		  /* Ukrainian Cyrillic (koi8-u) */
 #ifdef NOTDEFINED
     UC_CHARSET_SETUP_mnem;
 #endif /* NOTDEFINED */

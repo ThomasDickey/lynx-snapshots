@@ -65,6 +65,7 @@ extern char *LYSysShell NOPARAMS;
 extern char *LYgetXDisplay NOPARAMS;
 extern char *strip_trailing_slash PARAMS((char * my_dirname));
 extern char *wwwName PARAMS((CONST char *pathname));
+extern int LYConsoleInputFD PARAMS((BOOLEAN need_selectable));
 extern int HTCheckForInterrupt NOPARAMS;
 extern int LYCheckForProxyURL PARAMS((char *filename));
 extern int LYCopyFile PARAMS((char *src, char *dst));

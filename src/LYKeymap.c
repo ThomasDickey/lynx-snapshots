@@ -577,7 +577,7 @@ PRIVATE struct rmap revmap[] = {
 { "WHEREIS",		"search within the current document" },
 { "NEXT",		"search for the next occurence" },
 { "COMMENT",		"send a comment to the author of the current document" },
-{ "EDIT",		"edit the current document" },
+{ "EDIT",		"edit the current document or a form's textarea" },
 { "INFO",		"display information on the current document and link" },
 { "PRINT",		"display choices for printing the current document" },
 { "ADD_BOOKMARK",	"add to your personal bookmark list" },
@@ -607,7 +607,7 @@ PRIVATE struct rmap revmap[] = {
 { "SWITCH_DTD",		"switch between two ways of parsing HTML" },
 { "ELGOTO",		"edit the current link's URL or ACTION and go to it" },
 { "CHANGE_LINK",	"force reset of the current link on the page" },
-{ "EDITTEXTAREA",	"use defined external editor to edit the text area" },
+{ "EDITTEXTAREA",	"use an external editor to edit a form's textarea" },
 #ifdef USE_EXTERNALS
 { "EXTERN",		"run external program with url" },
 #endif

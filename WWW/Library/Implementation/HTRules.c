@@ -38,6 +38,8 @@ typedef struct _rule {
 	char *		equiv;
 } rule;
 
+#ifndef NO_RULES
+
 /*	Global variables
 **	----------------
 */
@@ -400,4 +402,4 @@ int HTLoadRules ARGS1(
     return 0;		/* No error or syntax errors ignored */
 }
 
-
+#endif /* NO_RULES */

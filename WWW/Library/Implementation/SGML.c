@@ -504,6 +504,8 @@ PRIVATE void handle_comment ARGS1(
 	strncmp(s, "!--#", 4) == 0 &&
 	LYCheckForCSI(context->node_anchor, (char **)&context->url) == TRUE) {
 	LYDoCSI(context->url, s, (char **)&context->csi);
+    } else {
+	LYCommentHacks(context->node_anchor, context->string->data);
     }
 
     return;

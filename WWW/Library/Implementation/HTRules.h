@@ -29,6 +29,8 @@ typedef enum _HTRuleOp {
         HT_Protect
 } HTRuleOp;
 
+#ifndef NO_RULES
+
 #ifdef SHORT_NAMES
 #define HTSearchScript	HTSearSc
 #endif /*SHORT_NAMES*/
@@ -141,5 +143,5 @@ extern int HTLoadRules PARAMS((CONST char * filename));
 
  */
 
-
+#endif /* NO_RULES */
 #endif /* HTUtils.h */

@@ -64,6 +64,7 @@
 #undef HAVE_POPEN
 #undef HAVE_PUTENV
 #undef HAVE_READDIR
+#undef HAVE_RESOLV_H
 #undef HAVE_SETENV		/* defined by AM_GNU_GETTEXT */
 #undef HAVE_SETLOCALE
 #undef HAVE_SIZECHANGE		/* defined by CF_SIZECHANGE */
@@ -127,6 +128,7 @@
 #undef OK_TAR			/* CF_ARG_DISABLE(dired-tar) */
 #undef OK_UUDECODE		/* CF_ARG_DISABLE(dired-uudecode) */
 #undef OK_ZIP			/* CF_ARG_DISABLE(dired-zip) */
+#undef RLOGIN_PATH		/* CF_PATH_PROG(rlogin) */
 #undef RM_PATH			/* CF_PATH_PROG(rm) */
 #undef SOCKS			/* CF_SOCKS, CF_SOCKS5 */
 #undef STDC_HEADERS
@@ -134,8 +136,10 @@
 #undef SYSTEM_MAIL		/* CF_DEFINE_PROG */
 #undef SYSTEM_MAIL_FLAGS	/* defined by CF_SYSTEM_MAIL_FLAGS */
 #undef TAR_PATH			/* CF_PATH_PROG(tar) */
+#undef TELNET_PATH		/* CF_PATH_PROG(telnet) */
 #undef TERMIO_AND_CURSES	/* CF_TERMIO_AND_CURSES workaround */
 #undef TERMIO_AND_TERMIOS	/* CF_TERMIO_AND_TERMIOS workaround */
+#undef TN3270_PATH		/* CF_PATH_PROG(tn3270) */
 #undef TOUCH_PATH		/* CF_PATH_PROG(touch) */
 #undef ULTRIX			/* config.sub */
 #undef UNCOMPRESS_PATH		/* CF_PATH_PROG(gunzip) */

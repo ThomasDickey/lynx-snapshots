@@ -269,6 +269,7 @@ int mainloop NOARGS
     BOOLEAN override_LYresubmit_posts = FALSE;
     unsigned int len;
     int i;
+    int n;
 
 #ifdef DIRED_SUPPORT
     char *tp = NULL;
@@ -1449,11 +1450,16 @@ try_again:
 			    statusline(FORM_LINK_RESET_MESSAGE);
 			break;
 		    case F_TEXT_TYPE:
-		    case F_TEXTAREA_TYPE:
 			if (links[curdoc.link].form->disabled == YES)
 			    statusline(FORM_LINK_TEXT_UNM_MSG);
 			else
 			    statusline(FORM_LINK_TEXT_MESSAGE);
+			break;
+		    case F_TEXTAREA_TYPE:
+			if (links[curdoc.link].form->disabled == YES)
+			    statusline(FORM_LINK_TEXT_UNM_MSG);
+			else
+			    statusline(FORM_LINK_TEXTAREA_MESSAGE);
 			break;
 		    }
 		} else {
@@ -4025,17 +4031,31 @@ if (!LYUseFormsOptions) {
 			 *  The owner_address is a mailto: URL.
 			 */
 			CONST char *kp = HText_getRevTitle();
+			CONST char *id = HText_getMessageID();
+			char *tmptitle = NULL;
+			if (!kp && HTMainAnchor) {
+			    kp = HTAnchor_subject(HTMainAnchor);
+			    if (kp && *kp) {
+				if (strncasecomp(kp, "Re: ", 4)) {
+				    StrAllocCopy(tmptitle, "Re: ");
+				    StrAllocCat(tmptitle, kp);
+				    kp = tmptitle;
+				}
+			    }
+			}
+
 			if (strchr(owner_address,':')!=NULL)
 			     /*
 			      *  Send a reply.	The address is after the colon.
 			      */
 			     reply_by_mail(strchr(owner_address,':')+1,
 					   curdoc.address,
-					   (kp ? kp : ""));
+					   (kp ? kp : ""), id);
 			else
 			    reply_by_mail(owner_address, curdoc.address,
-					  (kp ? kp : ""));
+					  (kp ? kp : ""), id);
 
+			FREE(tmptitle);
 			refresh_screen = TRUE;	/* to force a showpage */
 		   }
 	       }
@@ -4140,6 +4160,28 @@ if (!LYUseFormsOptions) {
 		    HTUserMsg(EDIT_DISABLED);
 		}
 		break;
+	    }
+
+	    /*
+	     *  If we're in a forms TEXTAREA, invoke the editor on it.
+	     */
+	    if (links[curdoc.link].type       == WWW_FORM_LINK_TYPE &&
+		links[curdoc.link].form->type == F_TEXTAREA_TYPE)   {
+	       cmd = LYK_EDIT_TEXTAREA;
+	       goto new_cmd;
+	    }
+
+	    /*
+	     *  If we're in a forms TEXT type, tell user the request
+	     *  is bogus (though in reality, without this trap, if the
+	     *  document with the TEXT field is local, the editor *would*
+	     *  be invoked on the source .html file; eg, the o(ptions)
+	     *  form tempfile).
+	     */
+	    if (links[curdoc.link].type       == WWW_FORM_LINK_TYPE &&
+		links[curdoc.link].form->type == F_TEXT_TYPE)       {
+	       HTUserMsg(CANNOT_EDIT_FIELD);
+	       break;
 	    }
 
 #ifdef DIRED_SUPPORT
@@ -4304,25 +4346,37 @@ if (!LYUseFormsOptions) {
 		break;
 	    }
 
-		/* is curent link part of a textarea */
-	    if (links[curdoc.link].type == WWW_FORM_LINK_TYPE &&
-		links[curdoc.link].form->type == F_TEXTAREA_TYPE) {
+	    /*
+	     *  See if the current link is in a form TEXTAREA.
+	     */
+	    if (links[curdoc.link].type       == WWW_FORM_LINK_TYPE &&
+		links[curdoc.link].form->type == F_TEXTAREA_TYPE)   {
 
 		/* stop screen */
 		stop_curses();
 
-		HText_ExtEditForm (&links[curdoc.link]);
+		n = HText_ExtEditForm (&links[curdoc.link]);
+
+		lines_in_file = HText_getNumOfLines();
+
+		/*
+		 *  TODO: Move cursor "n" lines from the current line to
+		 *        position it on the 1st trailing blank line in
+		 *        the now edited TEXTAREA.  If the target line/
+		 *        anchor requires us to scroll up/down, position
+		 *        the target in the approximate center of the
+		 *        screen.
+		 */
+
+		/* curdoc.link += n;*/	/* works, except for page crossing, */
+					/* damnit; why is nothing ever easy */
 
 		/* start screen */
 		start_curses();
 		refresh_screen = TRUE;
 
-		/*
-		cmd = LYK_REFRESH;
-		goto new_cmd;
-		*/
-
 	    } else {
+
 		HTInfoMsg (NOT_IN_TEXTAREA);
 	    }
 	    break;

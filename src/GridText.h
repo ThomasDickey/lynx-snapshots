@@ -27,6 +27,13 @@
 
 #define IsSpecialAttrChar(a)  ((a > '\002') && (a <= '\010'))
 
+#define TABSTOP 8
+#define SPACES  "        "  /* must be at least TABSTOP spaces long */
+#define SPLAT   '.'
+
+#define NOCHOP 0
+#define CHOP   1
+
 /* just for information:
 US-ASCII control characters <32 which are not defined in Unicode standard
 =00	U+0000	NULL
@@ -125,6 +132,7 @@ extern CONST char * HText_getServer NOPARAMS;
 extern CONST char * HText_getOwner NOPARAMS;
 extern CONST char * HText_getContentBase NOPARAMS;
 extern CONST char * HText_getContentLocation NOPARAMS;
+extern CONST char * HText_getMessageID NOPARAMS;
 extern CONST char * HText_getRevTitle NOPARAMS;
 #ifdef USE_HASH
 extern CONST char * HText_getStyle NOPARAMS;
@@ -248,7 +256,7 @@ extern BOOL HText_AreDifferent PARAMS((
 	HTParentAnchor *	anchor,
 	CONST char *		full_address));
 
-extern void HText_ExtEditForm PARAMS((
+extern int HText_ExtEditForm PARAMS((
 	struct link *	form_link));
 
 #endif /* LYGRIDTEXT_H */

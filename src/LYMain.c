@@ -341,6 +341,9 @@ PUBLIC BOOLEAN LYSetCookies = SET_COOKIES; /* Process Set-Cookie headers? */
 PUBLIC BOOLEAN LYAcceptAllCookies = ACCEPT_ALL_COOKIES; /* take all cookies? */
 PUBLIC char *LYCookieAcceptDomains = NULL; /* domains to accept all cookies */
 PUBLIC char *LYCookieRejectDomains = NULL; /* domains to reject all cookies */
+PUBLIC char *LYCookieStrictCheckDomains = NULL; /* check strictly  */
+PUBLIC char *LYCookieLooseCheckDomains = NULL;  /* check loosely   */
+PUBLIC char *LYCookieQueryCheckDomains = NULL;  /* check w/a query */
 #ifdef EXP_PERSISTENT_COOKIES
 BOOLEAN persistent_cookies = TRUE;
 PUBLIC char *LYCookieFile = NULL;          /* default cookie file */
@@ -487,6 +490,7 @@ PRIVATE void free_lynx_globals NOARGS
     FREE(URLDomainPrefixes);
     FREE(URLDomainSuffixes);
     FREE(XLoadImageCommand);
+    FREE(lynx_version_putenv_command);
     FREE(LYTraceLogPath);
     FREE(lynx_cfg_file);
 #if defined(USE_HASH)

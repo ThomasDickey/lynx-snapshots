@@ -859,7 +859,10 @@ static Config_Type Config_Table [] =
 #ifdef EXP_PERSISTENT_COOKIES
      PARSE_STR("cookie_file", CONF_STR, LYCookieFile),
 #endif /* EXP_PERSISTENT_COOKIES */
+     PARSE_STR("cookie_loose_invalid_domains", CONF_STR, LYCookieLooseCheckDomains),
+     PARSE_STR("cookie_query_invalid_domains", CONF_STR, LYCookieQueryCheckDomains),
      PARSE_STR("cookie_reject_domains", CONF_STR, LYCookieRejectDomains),
+     PARSE_STR("cookie_strict_invalid_domains", CONF_STR, LYCookieStrictCheckDomains),
      PARSE_ENV("cso_proxy", CONF_ENV, 0 ),
 #ifdef VMS
      PARSE_STR("CSWING_PATH", CONF_STR, LYCSwingPath),
@@ -1210,8 +1213,10 @@ PUBLIC void read_cfg ARGS4(
 		char tmpbuf[MAX_LINE_BUFFER_LEN];
 		sprintf (tmpbuf, "%s=%s", name, value);
 		if ((q->str_value = (char **)calloc(1, sizeof(char **))) != 0) {
-			StrAllocCopy(*(q->str_value), tmpbuf);
-			putenv (*(q->str_value));
+		    StrAllocCopy(*(q->str_value), tmpbuf);
+		    putenv (*(q->str_value));
+		} else {
+		    outofmem(__FILE__, "read_cfg");
 		}
 #endif
 	    }
@@ -1283,6 +1288,8 @@ PUBLIC void read_cfg ARGS4(
      * If any COOKIE_{ACCEPT,REJECT}_DOMAINS have been defined,
      * process them.  These are comma delimited lists of
      * domains. - BJP
+     *
+     * And for query/strict/loose invalid cookie checking. - BJP
      */
 
     if (LYCookieAcceptDomains != NULL) {
@@ -1292,6 +1299,19 @@ PUBLIC void read_cfg ARGS4(
     if (LYCookieRejectDomains != NULL) {
 	cookie_add_rejectlist(LYCookieRejectDomains);
     }
+
+    if (LYCookieStrictCheckDomains != NULL) {
+	cookie_set_invcheck(LYCookieStrictCheckDomains, INVCHECK_STRICT);
+    }
+
+    if (LYCookieLooseCheckDomains != NULL) {
+	cookie_set_invcheck(LYCookieLooseCheckDomains, INVCHECK_LOOSE);
+    }
+
+    if (LYCookieQueryCheckDomains != NULL) {
+	cookie_set_invcheck(LYCookieQueryCheckDomains, INVCHECK_QUERY);
+    }
+
 }
 
 /*

@@ -333,6 +333,8 @@ are generally not the response status from any specific protocol.
 #define HT_FORBIDDEN            -403    /* Access forbidden */
 #define HT_NOT_ACCEPTABLE       -406    /* Not Acceptable */
 
+#define HT_H_ERRNO_VALID 	-800	/* see h_errno for resolver error */
+
 #define HT_INTERNAL             -900    /* Weird -- should never happen. */
 #define HT_BAD_EOF      -12             /* Premature EOF */
 

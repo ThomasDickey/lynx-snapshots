@@ -4,6 +4,19 @@
 #include <HTUtils.h>
 #include <HTList.h>
 
+typedef enum {ACCEPT_ALWAYS, REJECT_ALWAYS, QUERY_USER, FROM_FILE} behaviour;
+typedef enum {INVCHECK_QUERY,
+	      INVCHECK_STRICT,
+	      INVCHECK_LOOSE} invcheck_behaviour;
+
+struct _domain_entry {
+    char *	domain;  /* Domain for which these cookies are valid */
+    behaviour	bv;
+    invcheck_behaviour	invcheck_bv;
+    HTList *	cookie_list;
+};
+typedef struct _domain_entry domain_entry;
+
 extern void LYSetCookie PARAMS((
 	CONST char *	SetCookie,
 	CONST char *	SetCookie2,
@@ -21,14 +34,8 @@ extern void cookie_add_acceptlist PARAMS((
 	char *		acceptdomains));
 extern void cookie_add_rejectlist PARAMS((
 	char *		rejectdomains));
-
-typedef enum {ACCEPT_ALWAYS, REJECT_ALWAYS, QUERY_USER, FROM_FILE} behaviour;
-
-struct _domain_entry {
-    char *	domain;  /* Domain for which these cookies are valid */
-    behaviour	bv;
-    HTList *	cookie_list;
-};
-typedef struct _domain_entry domain_entry;
+extern void cookie_set_invcheck PARAMS((
+	char *	 	domains,
+        invcheck_behaviour setting));
 
 #endif /* LYCOOKIES_H */

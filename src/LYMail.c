@@ -506,7 +506,7 @@ PUBLIC void mailform ARGS4(
 	 *  temporary buffer (i.e., about 500 chars). - BL
 	 */
 	if (strlen(address_ptr1) > 3 &&
-            strlen(address_ptr1) + strlen(mail_adrs) < sizeof(cmd)) {
+	    strlen(address_ptr1) + strlen(mail_adrs) < sizeof(cmd)) {
 	    if (!first) {
 		StrAllocCat(command, ",");
 	    }
@@ -539,7 +539,7 @@ PUBLIC void mailform ARGS4(
 	     *  temporary buffer (i.e., about 500 chars). - BL
 	     */
 	    if (strlen(address_ptr1) > 3 &&
-                strlen(address_ptr1) + strlen(mail_adrs) < sizeof(cmd)) {
+		strlen(address_ptr1) + strlen(mail_adrs) < sizeof(cmd)) {
 		StrAllocCat(command, ",");
 		sprintf(cmd, mail_adrs, address_ptr1);
 		if (isPMDF) {
@@ -800,7 +800,7 @@ PUBLIC void mailmsg ARGS4(
 	 *  temporary buffer (i.e., about 500 chars). - BL
 	 */
 	if (strlen(address) > 3 &&
-            strlen(address) + strlen(mail_adrs) < sizeof(cmd)) {
+	    strlen(address) + strlen(mail_adrs) < sizeof(cmd)) {
 	    if (!first) {
 		StrAllocCat(command, ",");
 	    }
@@ -852,10 +852,11 @@ PUBLIC void mailmsg ARGS4(
 **  reply_by_mail() invokes sendmail on Unix or mail on VMS to send
 **  a comment  from the users to the owner
 */
-PUBLIC void reply_by_mail ARGS3(
+PUBLIC void reply_by_mail ARGS4(
 	char *, 	mail_address,
 	char *, 	filename,
-	CONST char *,	title)
+	CONST char *,	title,
+	CONST char *,	refid)
 {
     char user_input[1000];
     FILE *fd, *fp;
@@ -886,11 +887,6 @@ PUBLIC void reply_by_mail ARGS3(
     char hdrfile[LY_MAXPATH];
     FILE *hfd;
 
-    CTRACE(tfp, "reply_by_mail(\"%s\", \"%s\", \"%s\")\n",
-	mail_address?mail_address:"<nil>",
-	filename?filename:"<nil>",
-	title?title:"<nil>");
-
     if (!strncasecomp(system_mail, "PMDF SEND", 9)) {
 	isPMDF = TRUE;
     }
@@ -899,6 +895,12 @@ PUBLIC void reply_by_mail ARGS3(
     char *header = NULL;
     int n;
 #endif /* VMS */
+
+    CTRACE(tfp, "reply_by_mail(\"%s\", \"%s\", \"%s\", \"%s\")\n",
+	mail_address?mail_address:"<nil>",
+	filename?filename:"<nil>",
+	title?title:"<nil>",
+	refid?refid:"<nil>");
 
     term_letter = FALSE;
 
@@ -1255,15 +1257,21 @@ PUBLIC void reply_by_mail ARGS3(
      */
     StrAllocCat(header, "X-URL: ");
     if (filename && *filename) {
-        StrAllocCat(header, filename);
+	StrAllocCat(header, filename);
     }
     else {
-        StrAllocCat(header, "mailto:");
-        StrAllocCat(header, address);
+	StrAllocCat(header, "mailto:");
+	StrAllocCat(header, address);
     }
     StrAllocCat(header, "\n");
     sprintf(buf, "X-Mailer: Lynx, Version %s\n", LYNX_VERSION);
     StrAllocCat(header, buf);
+
+    if (refid && *refid) {
+	StrAllocCat(header, "In-Reply-To: <");
+	StrAllocCat(header, refid);
+	StrAllocCat(header, ">\n");
+    }
 #endif /* VMS */
 
     /*
@@ -1492,9 +1500,9 @@ PUBLIC void reply_by_mail ARGS3(
 
 #ifdef DOSPATH
     if (*address) {
-        StrAllocCat(header, "To: ");
-        StrAllocCat(header, address);
-        StrAllocCat(header, "\n");
+	StrAllocCat(header, "To: ");
+	StrAllocCat(header, address);
+	StrAllocCat(header, "\n");
     }
 #endif
 
@@ -1769,7 +1777,7 @@ PUBLIC void reply_by_mail ARGS3(
 	 *  temporary buffer (i.e., about 500 chars). - BL
 	 */
 	if (strlen(address_ptr1) > 3 &&
-            strlen(address_ptr1) + strlen(mail_adrs) < sizeof(cmd)) {
+	    strlen(address_ptr1) + strlen(mail_adrs) < sizeof(cmd)) {
 	    if (!first) {
 		StrAllocCat(command, ",");
 	    }
@@ -1802,7 +1810,7 @@ PUBLIC void reply_by_mail ARGS3(
 	     *  temporary buffer (i.e., about 500 chars). - BL
 	     */
 	    if (strlen(address_ptr1) > 3 &&
-                strlen(address_ptr1) + strlen(mail_adrs) < sizeof(cmd)) {
+		strlen(address_ptr1) + strlen(mail_adrs) < sizeof(cmd)) {
 		StrAllocCat(command, ",");
 		sprintf(cmd, mail_adrs, address_ptr1);
 		if (isPMDF) {

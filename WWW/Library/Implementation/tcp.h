@@ -53,6 +53,9 @@ Default values
 #define GOT_PIPE
 #endif /* unix */
 
+#define INVSOC (-1)             /* Unix invalid socket */
+		/* NB: newer libwww has something different for Windows */
+
 typedef struct sockaddr_in SockA;  /* See netinet/in.h */
 
 #ifndef VMS

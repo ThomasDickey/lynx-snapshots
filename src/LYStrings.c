@@ -288,6 +288,21 @@ PRIVATE int set_clicked_link ARGS3(
 
 
 /*
+ *  LYstrerror emulates the ANSI strerror() function.
+ */
+#ifdef LYStrerror
+    /* defined as macro in .h file. */
+#else
+PUBLIC char *LYStrerror ARGS1(int, code)
+{
+    static char temp[80];
+    sprintf(temp, "System errno is %d.\r\n", code);
+    return temp;
+}
+#endif /* HAVE_STRERROR */
+
+
+/*
  *  LYstrncpy() terminates strings with a null byte.
  *  Writes a null byte into the n+1 byte of dst.
  */
