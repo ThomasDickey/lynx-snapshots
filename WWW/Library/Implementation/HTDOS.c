@@ -9,6 +9,10 @@
 
 #include <LYLeaks.h>
 
+#ifdef _WINDOWS
+#include <LYGlobalDefs.h>
+#endif
+
 /*
  * Make a copy of the source argument in the result, allowing some extra
  * space so we can append directly onto the result without reallocating.
@@ -100,10 +104,6 @@ char *HTDOS_slashes(char *path)
  */
 char *HTDOS_name(char *wwwname)
 {
-#ifdef _WINDOWS			/* 1998/04/02 (Thu) 08:47:20 */
-    extern char windows_drive[];
-    char temp_buff[LY_MAXPATH];
-#endif
     static char *result = NULL;
     int joe;
 
@@ -129,6 +129,8 @@ char *HTDOS_name(char *wwwname)
 #ifdef _WINDOWS			/* 1998/04/02 (Thu) 08:59:48 */
     if (LYLastPathSep(result) != NULL
 	&& !LYIsDosDrive(result)) {
+	char temp_buff[LY_MAXPATH];
+
 	sprintf(temp_buff, "%.3s\\%.*s", windows_drive,
 		(int) (sizeof(temp_buff) - 5), result);
 	StrAllocCopy(result, temp_buff);

@@ -31,7 +31,7 @@ static void exit_with_perror(const char *msg)
     exit_immediately(EXIT_FAILURE);
 }
 
-BOOLEAN lookup(char *target)
+BOOLEAN lookup_link(char *target)
 {
     FILE *ifp;
     char *buffer = NULL;
@@ -119,6 +119,8 @@ void add_to_reject_list(char *target)
 
     FILE *ifp;
 
+    CTRACE((tfp, "add_to_reject_list(%s)\n", target));
+
     if ((ifp = LYAppendToTxtFile(TRAVERSE_REJECT_FILE)) == NULL) {
 	exit_with_perror(CANNOT_OPEN_REJ_FILE);
     }
@@ -149,7 +151,7 @@ BOOLEAN lookup_reject(char *target)
 	return (FALSE);
     }
 
-    HTSprintf0(&line, "%s\n", target);
+    HTSprintf0(&line, "%s", target);
 
     while (LYSafeGets(&buffer, ifp) != NULL && !result) {
 	LYTrimTrailing(buffer);
@@ -171,5 +173,7 @@ BOOLEAN lookup_reject(char *target)
     FREE(line);
 
     LYCloseInput(ifp);
+
+    CTRACE((tfp, "lookup_reject(%s) -> %d\n", target, result));
     return (BOOL) (result);
 }

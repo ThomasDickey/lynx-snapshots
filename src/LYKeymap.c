@@ -16,6 +16,8 @@
 #include <rot13_kb.h>
 #endif
 
+#define PUTS(buf)    (*target->isa->put_block)(target, buf, strlen(buf))
+
 #ifdef EXP_KEYBOARD_LAYOUT
 int current_layout = 0;		/* Index into LYKbLayouts[]   */
 
@@ -1292,14 +1294,14 @@ static void print_binding(HTStream *target, int i,
     if (prev_lynx_edit_mode && !no_dired_support &&
 	(lac1 = key_override[i]) != LYK_UNKNOWN) {
 	if ((buf = format_binding(key_override, i)) != 0) {
-	    (*target->isa->put_block) (target, buf, strlen(buf));
+	    PUTS(buf);
 	    FREE(buf);
 	}
     } else
 #endif /* DIRED_SUPPORT && OK_OVERRIDE */
     if ((buf = format_binding(keymap, i)) != 0) {
 	lac1 = keymap[i];
-	(*target->isa->put_block) (target, buf, strlen(buf));
+	PUTS(buf);
 	FREE(buf);
     }
 
@@ -1311,13 +1313,13 @@ static void print_binding(HTStream *target, int i,
     if (prev_lynx_edit_mode && !no_dired_support && key_override[i]) {
 	if (key_override[i] != lac1 &&
 	    (buf = format_binding(key_override, i)) != 0) {
-	    (*target->isa->put_block) (target, buf, strlen(buf));
+	    PUTS(buf);
 	    FREE(buf);
 	}
     } else
 #endif /* DIRED_SUPPORT && OK_OVERRIDE */
     if (keymap[i] != lac1 && (buf = format_binding(keymap, i)) != 0) {
-	(*target->isa->put_block) (target, buf, strlen(buf));
+	PUTS(buf);
 	FREE(buf);
     }
 }
@@ -1413,8 +1415,6 @@ static int LYLoadKeymap(const char *arg GCC_UNUSED,
 	return (HT_NOT_LOADED);
     }
     anAnchor->no_cache = TRUE;
-
-#define PUTS(buf)    (*target->isa->put_block)(target, buf, strlen(buf))
 
     HTSprintf0(&buf, "<html>\n<head>\n<title>%s</title>\n</head>\n<body>\n",
 	       CURRENT_KEYMAP_TITLE);

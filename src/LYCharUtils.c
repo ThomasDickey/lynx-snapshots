@@ -2599,9 +2599,9 @@ void LYHandleMETA(HTStructured * me, const BOOL *present,
 		cp++;
 	    if (*cp != '\0') {
 		StrAllocCopy(me->node_anchor->SugFname, cp);
-		if (*me->node_anchor->SugFname == '\"') {
+		if (*me->node_anchor->SugFname == '"') {
 		    if ((cp = strchr((me->node_anchor->SugFname + 1),
-				     '\"')) != NULL) {
+				     '"')) != NULL) {
 			*(cp + 1) = '\0';
 			HTMIME_TrimDoubleQuotes(me->node_anchor->SugFname);
 		    } else {
@@ -2852,7 +2852,7 @@ void LYHandleSELECT(HTStructured * me, const BOOL *present,
 	if ((multiple == NO && LYSelectPopups == TRUE) &&
 	    (me->sp[0].tag_number == HTML_PRE || me->inPRE == TRUE ||
 	     !me->sp->style->freeFormat) &&
-	    HText_LastLineSize(me->text, FALSE) > (LYcols - 8)) {
+	    HText_LastLineSize(me->text, FALSE) > (LYcolLimit - 7)) {
 	    /*
 	     * Force a newline when we're using a popup in a PRE block and are
 	     * within 7 columns from the right margin.  This will allow for the

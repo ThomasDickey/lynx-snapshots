@@ -103,7 +103,7 @@ static char *format_command(char *command,
     char *cmdbuf = NULL;
 
 #if defined(WIN_EX)
-    if (*param != '\"' && strchr(param, ' ') != NULL) {
+    if (*param != '"' && strchr(param, ' ') != NULL) {
 	char *cp = quote_pathname(param);
 
 	format(&cmdbuf, command, cp);
@@ -148,7 +148,7 @@ static char *format_command(char *command,
 		format(&cmdbuf,
 		       command, HTDOS_short_name(e_buff));
 	    } else {
-		if (*e_buff != '\"' && strchr(e_buff, ' ') != NULL) {
+		if (*e_buff != '"' && strchr(e_buff, ' ') != NULL) {
 		    p = quote_pathname(e_buff);
 		    LYstrncpy(e_buff, p, sizeof(e_buff) - 1);
 		    FREE(p);

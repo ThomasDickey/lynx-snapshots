@@ -95,8 +95,6 @@ static void HTFWriter_put_character(HTStream *me, char c)
 
 /*	String handling
  *	---------------
- *
- *	Strings must be smaller than this buffer size.
  */
 static void HTFWriter_put_string(HTStream *me, const char *s)
 {

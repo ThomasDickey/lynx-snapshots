@@ -481,7 +481,7 @@ BOOL confirm_post_resub(const char *address,
     char buf[240];
     char *temp = NULL;
     BOOL res;
-    size_t maxlen = LYcols - 6;
+    size_t maxlen = LYcolLimit - 5;
 
     if (!address) {
 	return (NO);
@@ -791,7 +791,7 @@ BOOL HTConfirmCookie(domain_entry * de, const char *server,
 	int namelen, valuelen, space_free, percentage;
 	char *message = 0;
 
-	space_free = ((LYcols - 1)
+	space_free = (LYcolLimit
 		      - (strlen(prompt)
 			 - 10)	/* %s and %.*s and %.*s chars */
 		      -strlen(server));
@@ -818,27 +818,27 @@ BOOL HTConfirmCookie(domain_entry * de, const char *server,
 	    ch = 'A';
 	} else {
 	    ch = LYgetch_single();
-#if defined(LOCALE) && defined(HAVE_GETTEXT) && !defined(gettext)
-	    /*
-	     * Special-purpose workaround for gettext support (we should do
-	     * this in a more general way -- after 2.8.3).
-	     *
-	     * NOTE TO TRANSLATORS:  If the prompt has been rendered into
-	     * another language, and if yes/no are distinct, assume the
-	     * translator can make an ordered list in parentheses with one
-	     * capital letter for each as we assumed in HTConfirmDefault().
-	     * The list has to be in the same order as in the original message,
-	     * and the four capital letters chosen to not match those in the
-	     * original unless they have the same position.
-	     *
-	     * Example:
-	     * (Y/N/Always/neVer)              - English (original)
-	     * (O/N/Toujours/Jamais)           - French
-	     */
+#if defined(LOCALE) && defined(HAVE_GETTEXT)
 	    {
 #define L_PAREN '('
 #define R_PAREN ')'
-		char *p;
+		/*
+		 * Special-purpose workaround for gettext support (we should do
+		 * this in a more general way) -TD
+		 *
+		 * NOTE TO TRANSLATORS:  If the prompt has been rendered into
+		 * another language, and if yes/no are distinct, assume the
+		 * translator can make an ordered list in parentheses with one
+		 * capital letter for each as we assumed in HTConfirmDefault().
+		 * The list has to be in the same order as in the original message,
+		 * and the four capital letters chosen to not match those in the
+		 * original unless they have the same position.
+		 *
+		 * Example:
+		 * (Y/N/Always/neVer)              - English (original)
+		 * (O/N/Toujours/Jamais)           - French
+		 */
+		char *p = gettext("Y/N/A/V");	/* placeholder for comment */
 		char *s = "YNAV\007\003";	/* see ADVANCED_COOKIE_CONFIRMATION */
 
 		if (strchr(s, ch) == 0
@@ -965,7 +965,7 @@ int HTConfirmPostRedirect(const char *Redirecting_url, int server_status)
 	LYclrtoeol();
 	LYmove(LYlines - 1, 0);
 	HTSprintf0(&url, "URL: %.*s",
-		   (LYcols < 250 ? LYcols - 6 : 250), Redirecting_url);
+		   (LYcols < 250 ? LYcolLimit - 5 : 250), Redirecting_url);
 	LYaddstr(url);
 	LYclrtoeol();
 	if (server_status == 301) {

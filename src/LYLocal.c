@@ -1939,7 +1939,7 @@ int local_dired(DocInfo *doc)
 	buffer = build_command(line, dirname, arg);
 
 	if (buffer != 0) {
-	    if ((int) strlen(buffer) < LYcols - 15) {
+	    if ((int) strlen(buffer) < LYcolLimit - 14) {
 		HTSprintf0(&tmpbuf, gettext("Executing %s "), buffer);
 	    } else {
 		HTSprintf0(&tmpbuf,
@@ -2326,7 +2326,7 @@ BOOLEAN local_install(char *destpath,
 				2);
 	if (n <= 0) {
 	    src = 0;
-	    HTAlert(gettext("Error buiding install args"));
+	    HTAlert(gettext("Error building install args"));
 	    FREE(tmpdest);
 	    return 0;
 	}

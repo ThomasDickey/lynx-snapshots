@@ -1386,6 +1386,7 @@ static void set_years_and_date(void)
 
 typedef struct _EntryInfo {
     char *filename;
+    char *linkname;
     char *type;
     char *date;
     unsigned int size;
@@ -1396,6 +1397,7 @@ static void free_entryinfo_struct_contents(EntryInfo *entry_info)
 {
     if (entry_info) {
 	FREE(entry_info->filename);
+	FREE(entry_info->linkname);
 	FREE(entry_info->type);
 	FREE(entry_info->date);
     }
@@ -1646,6 +1648,7 @@ static void parse_dls_line(char *line,
     cps = LYSkipBlanks(&line[23]);
     if (!strncmp(cps, "-> ", 3) && cps[3] != '\0' && cps[3] != ' ') {
 	StrAllocCopy(entry_info->type, gettext("Symbolic Link"));
+	StrAllocCopy(entry_info->linkname, LYSkipBlanks(cps + 3));
 	entry_info->size = 0;	/* don't display size */
     }
 
@@ -2154,6 +2157,7 @@ static EntryInfo *parse_dir_entry(char *entry,
     if (entry_info == NULL)
 	outofmem(__FILE__, "parse_dir_entry");
     entry_info->filename = NULL;
+    entry_info->linkname = NULL;
     entry_info->type = NULL;
     entry_info->date = NULL;
     entry_info->size = 0;
@@ -2273,6 +2277,7 @@ static EntryInfo *parse_dir_entry(char *entry,
 	    if (i > 3) {
 		entry[i - 3] = '\0';
 		len = i - 3;
+		StrAllocCopy(entry_info->linkname, LYSkipBlanks(entry + i));
 	    }
 	}
 	/* link */
@@ -2811,7 +2816,7 @@ static int read_directory(HTParentAnchor *parent,
 	    int name_len, dot_len;
 
 #define	FNAME_WIDTH	30
-#define	FILE_GAP	2
+#define	FILE_GAP	1
 
 #endif
 	    HTBTElement *ele;
@@ -2841,13 +2846,13 @@ static int read_directory(HTParentAnchor *parent,
 #ifdef SH_EX			/* 1997/10/18 (Sat) 16:00 */
 		name_len = strlen(entry_info->filename);
 
-		sprintf(name_buff, "%-30s", entry_info->filename);
+		sprintf(name_buff, "%-*s", FNAME_WIDTH, entry_info->filename);
 
 		if (name_len < FNAME_WIDTH) {
 		    dot_len = FNAME_WIDTH - FILE_GAP - name_len;
 		    if (dot_len > 0) {
 			p = name_buff + name_len + 1;
-			while (dot_len--)
+			while (dot_len-- > 0)
 			    *p++ = '.';
 		    }
 		} else {
@@ -2877,6 +2882,9 @@ static int read_directory(HTParentAnchor *parent,
 				entry_info->size / 1024);
 #endif
 		    PUTS(string_buffer);
+		} else if (entry_info->linkname != 0) {
+		    PUTS(" -> ");
+		    PUTS(entry_info->linkname);
 		}
 
 		PUTC('\n');	/* end of this entry */

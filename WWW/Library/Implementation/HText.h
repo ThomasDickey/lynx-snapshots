@@ -29,6 +29,9 @@ typedef CHyperText HText;
 extern HText *HTMainText;	/* Pointer to current main text */
 extern HTParentAnchor *HTMainAnchor;	/* Pointer to current text's anchor */
 
+extern char *HTAppName;		/* Application name */
+extern char *HTAppVersion;	/* Application version */
+
 /*
 
 Creation and deletion

@@ -17,6 +17,7 @@
 #include <LYStrings.h>
 #include <LYCharSets.h>
 #include <UCAux.h>
+#include <HTFont.h>
 
 #include <LYexit.h>
 #include <LYLeaks.h>
@@ -1331,8 +1332,9 @@ void lynx_nl2crlf(int normal GCC_UNUSED)
 
 void stop_curses(void)
 {
-    if (LYCursesON)
+    if (LYCursesON) {
 	echo();
+    }
 #if defined(PDCURSES) && defined(PDC_BUILD) && PDC_BUILD >= 2401
     resetty();
 #endif
@@ -1601,8 +1603,8 @@ void LYpaddstr(WINDOW * the_window, int width,
     int actual = strlen(the_string);
 
     getyx(the_window, y, x);
-    if (width + x >= LYcols)
-	width = LYcols - x - 1;
+    if (width + x > LYcolLimit)
+	width = LYcolLimit - x;
     if (actual > width)
 	actual = width;
     LYwaddnstr(the_window, the_string, actual);
@@ -1645,26 +1647,35 @@ WINDOW *LYtopwindow(void)
 }
 #endif
 
-WINDOW *LYstartPopup(
-			int top_y,
-			int left_x,
-			int height,
-			int width)
+WINDOW *LYstartPopup(int *top_y,
+		     int *left_x,
+		     int *height,
+		     int *width)
 {
     WINDOW *form_window = 0;
 
 #ifdef USE_SLANG
     static WINDOW fake_window;
 
-    SLsmg_fill_region(top_y, left_x - 1, height, width + 4, ' ');
+    if (*left_x < 1 || (*left_x + *width + 4) >= LYcolLimit) {
+	*left_x = 1;
+	*width = LYcolLimit - 5;
+    }
+
+    SLsmg_fill_region(*top_y, *left_x - 1, *height, *width + 4, ' ');
     form_window = &fake_window;
-    form_window->top_y = top_y;
-    form_window->left_x = left_x;
-    form_window->height = height;
-    form_window->width = width;
+    form_window->top_y = *top_y;
+    form_window->left_x = *left_x;
+    form_window->height = *height;
+    form_window->width = *width;
 #else
-    if (!(form_window = newwin(height, width + 4, top_y, left_x - 1)) &&
-	!(form_window = newwin(height, 0, top_y, 0))) {
+    if (*left_x > 0 && (*left_x + *width + 4) < LYcolLimit)
+	form_window = newwin(*height, *width + 4, *top_y, *left_x - 1);
+    if (form_window == 0) {
+	*width = LYcolLimit - 4;
+	form_window = newwin(*height, LYcolLimit, *top_y, 0);
+    }
+    if (form_window == 0) {
 	HTAlert(POPUP_FAILED);
     } else {
 	LYsubwindow(form_window);
@@ -1750,7 +1761,8 @@ void LYtouchline(int row)
 /*
  * Wrapper for waddnstr().
  */
-void LYwaddnstr(WINDOW * w, const char *src,
+void LYwaddnstr(WINDOW * w GCC_UNUSED,
+		const char *src,
 		size_t len)
 {
     /*
@@ -1890,6 +1902,81 @@ void LYwaddnstr(WINDOW * w, const char *src,
 	len -= use;
     }
 #endif
+}
+
+/*
+ * Determine the number of cells the given string would take up on the screen,
+ * limited by the maxCells parameter.  This is used for constructing aligned
+ * text in the options and similar forms.
+ *
+ * FIXME: make this account for wrapping, too.
+ * FIXME: make this useful for "lynx -dump", which hasn't initialized curses.
+ */
+int LYstrExtent(const char *string, int len, int maxCells)
+{
+    int result = 0;
+    int used;
+
+    if (len < 0)
+	used = strlen(string);
+    else
+	used = len;
+
+    result = used;
+#ifdef WIDEC_CURSES
+    if (used > 0 && lynx_called_initscr) {
+	static WINDOW *fake_win;
+	static int fake_max;
+	int n;
+
+	if (fake_max < maxCells) {
+	    fake_max = (maxCells + 1) * 2;
+	    if (fake_win != 0) {
+		delwin(fake_win);
+		fake_win = 0;
+	    }
+	}
+	if (fake_win == 0) {
+	    fake_win = newwin(2, fake_max, 0, 0);
+	}
+	if (fake_win != 0) {
+	    int new_x = 0;
+	    int new_y = 0;
+
+	    result = 0;
+	    wmove(fake_win, 0, 0);
+	    for (n = 0; n < used; ++n) {
+		if (IsNormalChar(string[n])) {
+		    waddch(fake_win, UCH(string[n]));
+		    getyx(fake_win, new_y, new_x);
+		    if (new_y > 0 || new_x > maxCells)
+			break;
+		    result = new_x;
+		}
+	    }
+	}
+    }
+#endif
+    if (result > maxCells)
+	result = maxCells;
+    return result;
+}
+
+/*
+ * A simple call that relies upon the coincidence that multicell characters
+ * use at least as many bytes as cells.
+ */
+int LYstrExtent2(const char *string, int len)
+{
+    return LYstrExtent(string, len, len);
+}
+
+/*
+ * Returns the total number of cells that the string would use.
+ */
+int LYstrCells(const char *string)
+{
+    return LYstrExtent2(string, strlen(string));
 }
 
 #ifdef VMS
@@ -2448,8 +2535,8 @@ void LYrefresh(void)
 	int y, x;
 
 	getyx(LYwin, y, x);
-	if (x >= LYcols)
-	    x = LYcols - 1;
+	if (x > LYcolLimit)
+	    x = LYcolLimit;
 	wmove(stdscr, y, x);
 
 	wnoutrefresh(stdscr);

@@ -156,7 +156,6 @@ SITE_DEFS = # Your defines here
 
 all lynx$x: cfg_defs.h LYHelp.h
 @MSG_DIR_MAKE@	$(SHELL) $(srcdir)/fixtext.sh $(srcdir)/LYMessages_en.h >LYMessages.c
-@INTLDIR_MAKE@	cd intl && $(MAKE) CC="$(CC)"
 @MSG_DIR_MAKE@	cd po && $(MAKE) CC="$(CC)"
 	cd $(WWWINC) && $(MAKE) CC="$(CC)" \
 		LY_CFLAGS="$(CFLAGS)" \
@@ -200,7 +199,6 @@ clean:
 	rm -f WWW/Library/*/.created
 	cd src && $(MAKE) clean
 @MSG_DIR_MAKE@	rm -f LYMessages.c
-@INTLDIR_MAKE@	cd intl && $(MAKE) $@
 @MSG_DIR_MAKE@	cd po && $(MAKE) $@
 	rm -f *.b src/lynx$x *.leaks cfg_defs.h LYHelp.h lint.*
 @LYNXCFG_MAKE@	-rm -f alphatoc.html body.html cattoc.html tmp007
@@ -217,9 +215,6 @@ distclean: clean
 	-rm -rf src/obsolete
 	-cd src && $(MAKE) $@
 	-cd src/chrtrans && $(MAKE) $@
-@INTLDIR_MAKE@	cd intl && $(MAKE) $@
-	-rm -f intl/libintl.h
-@MSG_DIR_MAKE@	-rmdir intl
 @MSG_DIR_MAKE@	cd po && $(MAKE) $@
 @MSG_DIR_MAKE@	-rmdir po
 	-rm -f *~ *.bak *.sav tags TAGS

@@ -399,7 +399,7 @@ static BOOL show_whereis_targets(int flag,
 		      (LYGetHiliteStr(cur, count) ?
 		       LYGetHiliteStr(cur, count) : ""),
 		      (sizeof(buffer) - 1),
-		      ((LYcols - 1) - LYGetHilitePos(cur, count)),
+		      (LYcolLimit - LYGetHilitePos(cur, count)),
 		      utf_flag);
 	hlen = strlen(buffer);
 	hLen = ((HTCJK != NOCJK || utf_flag) ?
@@ -1047,7 +1047,7 @@ void LYhighlight(int flag,
 
 	if (links[cur].type == WWW_FORM_LINK_TYPE) {
 	    int len;
-	    int avail_space = (LYcols - links[cur].lx) - 1;
+	    int avail_space = (LYcolLimit - links[cur].lx);
 	    char *text = LYGetHiliteStr(cur, 0);
 
 	    if (avail_space > links[cur].l_form->size)
@@ -1079,7 +1079,7 @@ void LYhighlight(int flag,
 			  (LYGetHiliteStr(cur, 0) ?
 			   LYGetHiliteStr(cur, 0) : ""),
 			  (sizeof(buffer) - 1),
-			  ((LYcols - 1) - links[cur].lx),
+			  (LYcolLimit - links[cur].lx),
 			  utf_flag);
 	    LYaddstr(buffer);
 	}
@@ -1277,8 +1277,9 @@ void statusline(const char *text)
      * set selected, otherwise, strip any escapes.  Also, make sure text is not
      * longer than the statusline window.  - FM
      */
-    max_length = ((LYcols - 2) < (int) sizeof(buffer))
-	? (LYcols - 2) : (int) sizeof(buffer) - 1;
+    max_length = (((LYcolLimit - 1) < (int) sizeof(buffer))
+		  ? (LYcolLimit - 1)
+		  : (int) sizeof(buffer) - 1);
     if ((text_buff[0] != '\0') &&
 	(LYHaveCJKCharacterSet)) {
 	/*
@@ -2788,11 +2789,11 @@ void size_change(int sig GCC_UNUSED)
 #ifdef SLANG_MBCS_HACK
     PHYSICAL_SLtt_Screen_Cols = LYcols;
 #ifdef SLANG_NO_LIMIT		/* define this if slang has been fixed */
-    SLtt_Screen_Cols = (LYcols - 1) * 6;
+    SLtt_Screen_Cols = LYcolLimit * 6;
 #else
     /* Needs to be limited: fixed buffer bugs in slang can cause crash,
        see slang's SLtt_smart_puts - kw */
-    SLtt_Screen_Cols = HTMIN((LYcols - 1) * 6, 255);
+    SLtt_Screen_Cols = HTMIN(LYcolLimit * 6, 255);
 #endif
 #endif /* SLANG_MBCS_HACK */
     if (sig == 0)
@@ -3049,7 +3050,7 @@ void change_sug_filename(char *fname)
 	     * Replace with dashes.
 	     */
 	} else if (*cp == '!' || *cp == '?' || *cp == '\'' ||
-		   *cp == ',' || *cp == ':' || *cp == '\"' ||
+		   *cp == ',' || *cp == ':' || *cp == '"' ||
 		   *cp == '+' || *cp == '@' || *cp == '\\' ||
 		   *cp == '(' || *cp == ')' || *cp == '=' ||
 		   *cp == '<' || *cp == '>' || *cp == '#' ||
@@ -3203,7 +3204,7 @@ void change_sug_filename(char *fname)
     for (cp = fname; *cp != '\0'; cp++) {
 	switch (*cp) {
 	case '\'':
-	case '\"':
+	case '"':
 	case '/':
 	case ' ':
 	    *cp = '-';
@@ -5969,7 +5970,7 @@ FILE *LYOpenTemp(char *result,
 	if (make_it) {
 	    int old_mask = umask(HIDE_UMASK);
 
-	    StrAllocCat(lynx_temp_space, "XXXXXXXXXX");
+	    StrAllocCat(lynx_temp_space, "lynxXXXXXXXXXX");
 	    if (mkdtemp(lynx_temp_space) == 0) {
 		printf("%s: %s\n", lynx_temp_space, LYStrerror(errno));
 		exit(EXIT_FAILURE);
@@ -6720,8 +6721,10 @@ FILE *InternalPageFP(char *filename,
     return fp;
 }
 
-void BeginInternalPage(FILE *fp0, char *Title,
-		       char *HelpURL)
+/*
+ * This part is shared by all internal pages.
+ */
+void WriteInternalTitle(FILE *fp0, char *Title)
 {
     fprintf(fp0,
 	    "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">\n");
@@ -6743,8 +6746,17 @@ void BeginInternalPage(FILE *fp0, char *Title,
 	    FREE(Address);
 	}
     }
-    fprintf(fp0, "<title>%s</title>\n</head>\n<body>\n",
-	    Title);
+    fprintf(fp0, "<title>%s</title>\n</head>\n<body>\n", Title);
+}
+
+/*
+ * This is used to start most internal pages, except for special cases where
+ * the embedded HREF's in the title differ.
+ */
+void BeginInternalPage(FILE *fp0, char *Title,
+		       char *HelpURL)
+{
+    WriteInternalTitle(fp0, Title);
 
     if ((user_mode == NOVICE_MODE)
 	&& LYwouldPush(Title, NULL)
@@ -7459,6 +7471,30 @@ int put_clip(char *s)
 #  endif			/* !defined(WIN_EX) && defined(HAVE_POPEN) */
 
 #endif /* __EMX__ */
+
+/*
+ * Sleep for a number of milli-sec.
+ */
+void LYmsec_delay(unsigned msec)
+{
+#if defined(_WINDOWS)
+    Sleep(msec);
+
+#elif defined(HAVE_NAPMS)
+    napms(msec);
+
+#elif defined(DJGPP) || defined(HAVE_USLEEP)
+    usleep(1000 * msec);
+
+#else
+    struct timeval tv;
+    unsigned long usec = 1000UL * msec;
+
+    tv.tv_sec  = usec / 1000000UL;
+    tv.tv_usec = usec % 1000000UL;
+    select (0, NULL, NULL, NULL, &tv);
+#endif
+}
 
 #if defined(WIN_EX)		/* 1997/10/16 (Thu) 20:13:28 */
 

@@ -2841,6 +2841,7 @@ int postoptions(DocInfo *newdoc)
 	if (!strcmp(data[i].tag, show_scrollbar_string)
 	    && GetOptValues(bool_values, data[i].value, &code)) {
 	    LYShowScrollbar = (BOOL) code;
+	    need_reload = TRUE;
 	}
 #endif
 
@@ -3248,16 +3249,26 @@ static char *NewSecureValue(void)
 static void PutLabel(FILE *fp, char *name,
 		     char *value)
 {
-    if (will_save_rc(value) && !no_option_save) {
-	fprintf(fp, "  %-*s: ", LABEL_LEN, name);
-    } else {
-	int l = strlen(name);
+    int have = strlen(name);
+    int want = LABEL_LEN;
+    int need = LYstrExtent(name, have, want);
 
-	fprintf(fp, "  %s", name);
-	fprintf(fp, "%s%-*s: ",
-		(l < (LABEL_LEN - 3)) ? " " : "",
-		(l < (LABEL_LEN - 3)) ? (LABEL_LEN - 1) - l : 3, "(!)");
+    fprintf(fp, "&nbsp;&nbsp;%s", name);
+    if (will_save_rc(value) && !no_option_save) {
+	while (need++ < want)
+	    fprintf(fp, "&nbsp;");
+    } else {
+	want -= 3;
+	if (need < want) {
+	    fprintf(fp, "&nbsp;");
+	    ++need;
+	}
+	fprintf(fp, "(!)");
+	while (need++ < want) {
+	    fprintf(fp, "&nbsp;");
+	}
     }
+    fprintf(fp, ": ");
 }
 
 /*

@@ -254,10 +254,10 @@ void printlist(FILE *fp, BOOLEAN titles)
 	return;
     } else {
 	fprintf(fp, "\n%s\n\n", gettext("References"));
+	if (LYHiddenLinks == HIDDENLINKS_IGNORE)
+	    hidden_links = 0;
 	if (hidden_links > 0) {
 	    fprintf(fp, "   %s\n", gettext("Visible links"));
-	    if (LYHiddenLinks == HIDDENLINKS_IGNORE)
-		hidden_links = 0;
 	}
 	helper = NULL;		/* init */
 	for (cnt = 1; cnt <= refs; cnt++) {
@@ -304,21 +304,22 @@ void printlist(FILE *fp, BOOLEAN titles)
 #endif /* VMS */
 	}
 
-	if (hidden_links > 0)
+	if (hidden_links > 0) {
 	    fprintf(fp, "%s   %s\n", ((refs > 0) ? "\n" : ""),
 		    gettext("Hidden links:"));
-	for (cnt = 0; cnt < hidden_links; cnt++) {
-	    StrAllocCopy(address, HText_HiddenLinkAt(HTMainText, cnt));
-	    if (!(address && *address)) {
+	    for (cnt = 0; cnt < hidden_links; cnt++) {
+		StrAllocCopy(address, HText_HiddenLinkAt(HTMainText, cnt));
+		if (!(address && *address)) {
+		    FREE(address);
+		    continue;
+		}
+		fprintf(fp, "%4d. %s\n", ((cnt + 1) + refs), address);
 		FREE(address);
-		continue;
-	    }
-	    fprintf(fp, "%4d. %s\n", ((cnt + 1) + refs), address);
-	    FREE(address);
 #ifdef VMS
-	    if (HadVMSInterrupt)
-		break;
+		if (HadVMSInterrupt)
+		    break;
 #endif /* VMS */
+	    }
 	}
     }
     return;
