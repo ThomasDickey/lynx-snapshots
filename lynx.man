@@ -171,7 +171,7 @@ dumps the formatted output of the default document or one
 specified on the command line to standard output.
 This can be used in the following way:
 .sp
-lynx -dump http://www.crl.com/~subir/lynx.html
+lynx -dump http://www.trill-home.com/lynx.html
 .TP
 .B -editor\fR=\fIEDITOR
 enable external editing, using the specified

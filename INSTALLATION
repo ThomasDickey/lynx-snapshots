@@ -321,7 +321,8 @@ II. Compile instructions -- UNIX
 	charsets for normal use.
 
   --enable-cjk				(define CJK_EX)
-	Add special logic for supporting CJK documents.
+	Add experimental logic for supporting CJK documents.  (This is not
+	necessary for CJK support and may go away in a future release.)
 
   --enable-color-style			(define USE_COLOR_STYLE)
   	Use this option to enable optional and *experimental* color style.

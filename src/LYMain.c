@@ -2056,7 +2056,6 @@ PUBLIC int main ARGS2(
 	if (persistent_cookies)
 	    LYStoreCookies(LYCookieSaveFile);
 #endif /* EXP_PERSISTENT_COOKIES */
-	cleanup_files();	/* if someone starts with LYNXfoo: page */
 	exit_immediately(status);
     } else {
 	/*

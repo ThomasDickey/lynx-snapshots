@@ -370,6 +370,9 @@ EOF
 	for $n (0..$#major) {
 		printf FP "\n";
 		printf FP "<h2><a name=\"%s\">%s</a></h2>\n", $cats{$major[$n]}, $major[$n];
+		if ($descs{$major[$n]} !~ /^$/) {
+			printf FP "<h3>Description</h3>\n%s\n", $descs{$major[$n]};
+		}
 		$c = $index{$major[$n]};
 		if ( $c ne "" ) {
 			@c = split(/\n/, $c);

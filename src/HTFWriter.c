@@ -891,8 +891,8 @@ Prepend_BASE:
 	    fprintf(ret_obj->fp,
 		"<!-- Date: %s -->\n", anchor->date);
 	    if (anchor->last_modified && *anchor->last_modified
-			&& !strcmp(anchor->last_modified, anchor->date)
-			&& !strcmp(anchor->last_modified, ctime((time_t)0))) {
+			&& strcmp(anchor->last_modified, anchor->date)
+			&& strcmp(anchor->last_modified, "Thu, 01 Jan 1970 00:00:01 GMT")) {
 		fprintf(ret_obj->fp,
 		    "<!-- Last-Modified: %s -->\n", anchor->last_modified);
 	    }

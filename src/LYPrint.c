@@ -406,8 +406,8 @@ check_recall:
 	    fprintf(outfile_fp,
 		"<!-- Date: %s -->\n", HText_getDate());
 	    if (HText_getLastModified() != NULL
-			&& !strcmp(HText_getLastModified(), HText_getDate())
-			&& !strcmp(HText_getLastModified(), ctime((time_t)0))) {
+			&& strcmp(HText_getLastModified(), HText_getDate())
+			&& strcmp(HText_getLastModified(), "Thu, 01 Jan 1970 00:00:01 GMT")) {
 		fprintf(outfile_fp,
 		    "<!-- Last-Modified: %s -->\n", HText_getLastModified());
 	    }

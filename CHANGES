@@ -1,6 +1,18 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2000-04-13 (2.8.3pre.5)
+* fix printing of Last-Modified field in downloaded/printed source -LP
+* update URL for RFC 1942 -LV, DK
+* update Subir Grewal's Lynx links URL to the newest location
+  http://www.trill-home.com/lynx.html -LV, TD
+* move assignment to donelookup in LYGetHostByName() to avoid race with
+  CreateThread() -Alexei Anatski
+* modify LYexecv() in LYLocal.c for MINGW32 -HS, Victor Schneider
+* re-correct logic for .h1 comments in cattoc.html by cfg2html.pl (reported
+  by LP) -TD
+* move call to cleanup_files() into LYexit(), to fix stray temporary directory
+  left, e.g,. when doing "lynx -version" -TD
 2000-04-11 (2.8.3pre.4)
 * add to logic of --with-charsets configure option, checking for charset names
   that happen to be built-into UCdomap.c rather than defined via .tbl files
@@ -14,10 +26,10 @@ Changes since Lynx 2.8 release
   with USE_MOUSE (and modifier when necessary) -LP
 * windows makefiles: add new symbols SOURCE_CACHE and USE_PRETTYSRC,
   remove obsolete EXP_CHARTRANS and unused EXP_CHARTRANS_AUTOSWITCH -LP
-* fixed a bug with psrcview on lss-enabled lynx. Code such as <a blah href=.> 
-  (i.e. unknown attribute and then some other attribute) was causing calls to 
-  PSRCSTOP(barattr) twice (and lynx was switched to "non-preformatted" mode 
-  losing all white spaces of the document after that piece of code) -VH 
+* fixed a bug with psrcview on lss-enabled lynx. Code such as <a blah href=.>
+  (i.e. unknown attribute and then some other attribute) was causing calls to
+  PSRCSTOP(barattr) twice (and lynx was switched to "non-preformatted" mode
+  losing all white spaces of the document after that piece of code) -VH
 * add configure option --with-screen=pdcurses, mainly for checking ifdef
   conflicts between ncurses and pdcurses.  This builds/runs with the PDCurses
   X11 library, but is not recommended for general use -TD
@@ -102,8 +114,8 @@ Changes since Lynx 2.8 release
   the same name during a session.  Define EXP_NAME_TEMPNAME in userdefs.h -TD
 * add Last-Modified header into the printed/downloaded source, in addition to
   the Date header (it is there for years).  (Last-Modified field will not be
-  printed if it is not present, or equal to 1 Jan 1970 (i.e., ctime(0)),
-  a common mistake in scripts) -LP
+  printed if it is not present, or equal to the Date header or equal to
+  "Thu, 01 Jan 1970 00:00:01 GMT", a common mistake in scripts) -LP
 * defined DIRED_SUPPORT in makefile.msc -TD
 * several small fixes in LYLocal.c for dired support, mostly win32-specific -TD
 * modify PDCurses mouse logic to use BUTTON_PRESSED mask rather than
@@ -352,8 +364,8 @@ Changes since Lynx 2.8 release
   (LYNXCOOKIE:, LYNXKEYMAP:, LYNXMESSAGES:) -KW
 * now check directly in postoptions() whether the loaded document is one from
   which submission of option changes can be accepted, using the new tracking
-  mechanism.  Only the form-based Options Menu and Visited Links are allowed. 
-  Relying on a good random generator to prevent spoofing is not necessary. 
+  mechanism.  Only the form-based Options Menu and Visited Links are allowed.
+  Relying on a good random generator to prevent spoofing is not necessary.
   Kept the secure_string check, but it should be only regarded as an aid to the
   user, it prevents changing options from an instance of the form-based Options
   Menu that is not the most recent one (this can happen if an Options Menu page

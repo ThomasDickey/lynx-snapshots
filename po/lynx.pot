@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2000-04-02 10:23-0400\n"
+"POT-Creation-Date: 2000-04-12 20:22-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -27,7 +27,7 @@ msgstr ""
 #. * Links to collections of alternate definitions, developed by the Lynx
 #. * User Community, are maintained in Lynx links:
 #. *
-#. *    http://www.crl.com/~subir/lynx.html
+#. *    http://www.trill-home.com/lynx.html
 #. *
 #. * See ABOUT-NLS and po/readme for details and location of contributed
 #. * translations.  When no translation is available, the English default is
@@ -2865,7 +2865,7 @@ msgstr ""
 #. * hack: if we fail in HTAccess.c
 #. * avoid duplicating URL, oh.
 #.
-#: WWW/Library/Implementation/HTAccess.c:1065 src/LYMainLoop.c:7540
+#: WWW/Library/Implementation/HTAccess.c:1065 src/LYMainLoop.c:7542
 msgid "Can't Access"
 msgstr ""
 
@@ -3444,34 +3444,34 @@ msgstr ""
 msgid "unknown form field"
 msgstr ""
 
-#: src/GridText.c:11046
+#: src/GridText.c:11050
 #, c-format
 msgid "Submitting %s"
 msgstr ""
 
-#: src/GridText.c:12369
+#: src/GridText.c:12373
 msgid "Editor killed by signal"
 msgstr ""
 
-#: src/GridText.c:12371
+#: src/GridText.c:12375
 #, c-format
 msgid "Editor returned with error status, %s"
 msgstr ""
 
-#: src/GridText.c:12372
+#: src/GridText.c:12376
 msgid "reason unknown."
 msgstr ""
 
 #. don't show previous state
-#: src/GridText.c:12468
+#: src/GridText.c:12472
 msgid "Wrap lines to fit displayed area?"
 msgstr ""
 
-#: src/GridText.c:12520
+#: src/GridText.c:12524
 msgid "Very long lines have been wrapped!"
 msgstr ""
 
-#: src/GridText.c:12973
+#: src/GridText.c:12977
 msgid "Very long lines have been truncated!"
 msgstr ""
 
@@ -3677,38 +3677,38 @@ msgstr ""
 msgid "cookie_domain_flag_set error, aborting program"
 msgstr ""
 
-#: src/LYCurses.c:800
+#: src/LYCurses.c:795
 msgid "Terminal initialisation failed - unknown terminal type?"
 msgstr ""
 
-#: src/LYCurses.c:1101
+#: src/LYCurses.c:1102
 msgid "Terminal ="
 msgstr ""
 
-#: src/LYCurses.c:1106
+#: src/LYCurses.c:1107
 msgid "You must use a vt100, 200, etc. terminal with this program."
 msgstr ""
 
-#: src/LYCurses.c:1184
+#: src/LYCurses.c:1185
 msgid "Your Terminal type is unknown!"
 msgstr ""
 
-#: src/LYCurses.c:1185
+#: src/LYCurses.c:1186
 msgid "Enter a terminal type:"
 msgstr ""
 
-#: src/LYCurses.c:1198
+#: src/LYCurses.c:1199
 msgid "TERMINAL TYPE IS SET TO"
 msgstr ""
 
-#: src/LYCurses.c:1504
+#: src/LYCurses.c:1505
 #, c-format
 msgid ""
 "\n"
 "A Fatal error has occurred in %s Ver. %s\n"
 msgstr ""
 
-#: src/LYCurses.c:1506
+#: src/LYCurses.c:1507
 msgid ""
 "\n"
 "Please notify your system administrator to confirm a bug, and if\n"
@@ -4100,13 +4100,13 @@ msgstr ""
 msgid "Temporary URL or list would be too long."
 msgstr ""
 
-#: src/LYLocal.c:2401
+#: src/LYLocal.c:2405
 #, c-format
 msgid "Unable to %s due to system error!"
 msgstr ""
 
 #. error return
-#: src/LYLocal.c:2430
+#: src/LYLocal.c:2434
 #, c-format
 msgid "Probable failure to %s due to system error!"
 msgstr ""
@@ -4155,15 +4155,15 @@ msgstr ""
 msgid "Personal Name: "
 msgstr ""
 
-#: src/LYMain.c:846
+#: src/LYMain.c:852
 msgid "No Winsock found, sorry."
 msgstr ""
 
-#: src/LYMain.c:1031
+#: src/LYMain.c:1037
 msgid "You MUST define a valid TMP or TEMP area!\n"
 msgstr ""
 
-#: src/LYMain.c:1438
+#: src/LYMain.c:1444
 #, c-format
 msgid ""
 "\n"
@@ -4171,21 +4171,21 @@ msgid ""
 "\n"
 msgstr ""
 
-#: src/LYMain.c:1454
+#: src/LYMain.c:1460
 msgid ""
 "\n"
 "Lynx character sets not declared.\n"
 "\n"
 msgstr ""
 
-#: src/LYMain.c:1478
+#: src/LYMain.c:1484
 msgid ""
 "\n"
 "Lynx edit map not declared.\n"
 "\n"
 msgstr ""
 
-#: src/LYMain.c:1507
+#: src/LYMain.c:1513
 #, c-format
 msgid ""
 "\n"
@@ -4193,61 +4193,61 @@ msgid ""
 "\n"
 msgstr ""
 
-#: src/LYMain.c:1712
+#: src/LYMain.c:1718
 msgid "Warning:"
 msgstr ""
 
-#: src/LYMain.c:2265
+#: src/LYMain.c:2270
 msgid "persistent cookies state will be changed in next session only."
 msgstr ""
 
-#: src/LYMain.c:2544
+#: src/LYMain.c:2549
 #, c-format
 msgid "Lynx: ignoring unrecognized charset=%s\n"
 msgstr ""
 
-#: src/LYMain.c:3030
+#: src/LYMain.c:3035
 #, c-format
 msgid ""
 "\n"
 "%s Version %s (%.*s)\n"
 msgstr ""
 
-#: src/LYMain.c:3042
+#: src/LYMain.c:3047
 #, c-format
 msgid "Built on %s %s %s\n"
 msgstr ""
 
-#: src/LYMain.c:3046
+#: src/LYMain.c:3051
 msgid ""
 "Copyrights held by the University of Kansas, CERN, and other contributors.\n"
 msgstr ""
 
-#: src/LYMain.c:3048
+#: src/LYMain.c:3053
 msgid "Distributed under the GNU General Public License.\n"
 msgstr ""
 
-#: src/LYMain.c:3050
+#: src/LYMain.c:3055
 msgid ""
 "See http://lynx.browser.org/ and the online help for more information.\n"
 "\n"
 msgstr ""
 
-#: src/LYMain.c:3727
+#: src/LYMain.c:3732
 #, c-format
 msgid "USAGE: %s [options] [file]\n"
 msgstr ""
 
-#: src/LYMain.c:3728
+#: src/LYMain.c:3733
 msgid "Options are:\n"
 msgstr ""
 
-#: src/LYMain.c:3965
+#: src/LYMain.c:3970
 #, c-format
 msgid "%s: Invalid Option: %s\n"
 msgstr ""
 
-#: src/LYMainLoop.c:462
+#: src/LYMainLoop.c:463
 #, c-format
 msgid "Internal error: Invalid mouse link %d!"
 msgstr ""
@@ -4255,63 +4255,63 @@ msgstr ""
 #.
 #. * Make a name for this new URL.
 #.
-#: src/LYMainLoop.c:616
+#: src/LYMainLoop.c:618
 msgid "A URL specified by the user"
 msgstr ""
 
-#: src/LYMainLoop.c:1104
+#: src/LYMainLoop.c:1106
 msgid "Enctype multipart/form-data not yet supported!  Cannot submit."
 msgstr ""
 
 #.
 #. *  Make a name for this help file.
 #.
-#: src/LYMainLoop.c:3051
+#: src/LYMainLoop.c:3053
 msgid "Help Screen"
 msgstr ""
 
-#: src/LYMainLoop.c:3192
+#: src/LYMainLoop.c:3194
 msgid "System Index"
 msgstr ""
 
-#: src/LYMainLoop.c:3578 src/LYMainLoop.c:5131
+#: src/LYMainLoop.c:3580 src/LYMainLoop.c:5133
 msgid "Entry into main screen"
 msgstr ""
 
-#: src/LYMainLoop.c:4153
+#: src/LYMainLoop.c:4155
 msgid "charset for this document specified explicitly, sorry..."
 msgstr ""
 
-#: src/LYMainLoop.c:6083
+#: src/LYMainLoop.c:6085
 msgid "Reparsing document under current settings..."
 msgstr ""
 
-#: src/LYMainLoop.c:6371 src/LYMainLoop.c:6375
+#: src/LYMainLoop.c:6373 src/LYMainLoop.c:6377
 #, c-format
 msgid "Fatal error - could not open output file %s\n"
 msgstr ""
 
-#: src/LYMainLoop.c:7417 src/LYMainLoop.c:7598
+#: src/LYMainLoop.c:7419 src/LYMainLoop.c:7600
 msgid "-index-"
 msgstr ""
 
-#: src/LYMainLoop.c:7459
+#: src/LYMainLoop.c:7461
 msgid "Inactive text input, activate to edit (e.g., press ENTER)"
 msgstr ""
 
-#: src/LYMainLoop.c:7535
+#: src/LYMainLoop.c:7537
 msgid "lynx: Can't access startfile"
 msgstr ""
 
-#: src/LYMainLoop.c:7548
+#: src/LYMainLoop.c:7550
 msgid "lynx: Start file could not be found or is not text/html or text/plain"
 msgstr ""
 
-#: src/LYMainLoop.c:7549
+#: src/LYMainLoop.c:7551
 msgid "      Exiting..."
 msgstr ""
 
-#: src/LYMainLoop.c:7592
+#: src/LYMainLoop.c:7594
 msgid "-more-"
 msgstr ""
 
