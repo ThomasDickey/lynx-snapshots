@@ -380,6 +380,8 @@ BOOLEAN keep_mime_headers = FALSE;	/* Include mime headers with source dump */
 BOOLEAN more = FALSE;		/* is there more text to display? */
 BOOLEAN more_links = FALSE;	/* Links beyond a displayed page with no links? */
 BOOLEAN no_list = FALSE;
+BOOLEAN no_margins = FALSE;
+BOOLEAN no_title = FALSE;
 BOOLEAN no_url_redirection = FALSE;	/* Don't follow URL redirections */
 BOOLEAN pseudo_inline_alts = MAKE_PSEUDO_ALTS_FOR_INLINES;
 BOOLEAN scan_for_buried_news_references = TRUE;
@@ -3581,6 +3583,10 @@ keys (may be incompatible with some curses packages)"
       "nolog",		4|UNSET_ARG,		error_logging,
       "disable mailing of error messages to document owners"
    ),
+   PARSE_SET(
+      "nomargins",	4|SET_ARG,		no_margins,
+      "disable the right/left margins in the default style-sheet"
+   ),
 #if defined(HAVE_SIGACTION) && defined(SIGWINCH)
    PARSE_SET(
       "nonrestarting_sigwinch", 4|SET_ARG,	LYNonRestartingSIGWINCH,
@@ -3620,6 +3626,10 @@ keys (may be incompatible with some curses packages)"
    PARSE_SET(
       "nostatus",	4|SET_ARG,		no_statusline,
       "disable the miscellaneous information messages"
+   ),
+   PARSE_SET(
+      "notitle",	4|SET_ARG,		no_title,
+      "disable the title at the top of each page"
    ),
    PARSE_FUN(
       "nounderline",	4|FUNCTION_ARG,		nounderline_fun,
@@ -4047,8 +4057,8 @@ static int arg_eqs_parse(const char *a,
     return result;
 }
 
-#define is_true(s)  (*s == '1' || *s == '+' || !strcmp(s, "on"))
-#define is_false(s) (*s == '0' || *s == '-' || !strcmp(s, "off"))
+#define is_true(s)  (*s == '1' || *s == '+' || !strcasecomp(s, "on")  || !strcasecomp(s, "true"))
+#define is_false(s) (*s == '0' || *s == '-' || !strcasecomp(s, "off") || !strcasecomp(s, "false"))
 
 /*
  * Parse an option.

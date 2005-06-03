@@ -1192,7 +1192,7 @@ int LYStringToKeycode(char *src)
 	char *dst = 0;
 
 	key = strtol(src, &dst, 0);
-	if (isEmpty(dst))
+	if (!isEmpty(dst))
 	    key = -1;
     } else if (len > 6 && !strncasecomp(src, "key-", 4)) {
 	char *dst = 0;

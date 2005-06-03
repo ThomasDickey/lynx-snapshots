@@ -1,6 +1,6 @@
 /* character level styles for Lynx
  * (c) 1996 Rob Partington -- donated to the Lyncei (if they want it :-)
- * @Id: LYStyle.c 1.59 Sun, 02 Jan 2005 15:35:21 -0800 dickey @
+ * @Id: LYStyle.c 1.60 Thu, 02 Jun 2005 15:36:59 -0700 dickey @
  */
 #include <HTUtils.h>
 #include <HTML.h>
@@ -99,6 +99,13 @@ static unsigned char our_pairs[2]
 [MAX_BLINK]
 [MAX_COLOR + 1]
 [MAX_COLOR + 1];
+
+static char *TrimLowercase(char *buffer)
+{
+    LYRemoveBlanks(buffer);
+    strtolower(buffer);
+    return buffer;
+}
 
 /*
  * Parse a string containing a combination of video attributes and color.
@@ -282,6 +289,7 @@ static void parse_style(char *param)
     if (buffer == 0)
 	return;
 
+    TrimLowercase(buffer);
     if ((tmp = strchr(buffer, ':')) == 0) {
 	fprintf(stderr, gettext("\
 Syntax Error parsing style in lss file:\n\
@@ -291,7 +299,6 @@ OBJECT:MONO:COLOR (ie em:bold:brightblue:white)\n\
 where OBJECT is one of EM,STRONG,B,I,U,BLINK etc.\n\n"), buffer);
 	exit_immediately(EXIT_FAILURE);
     }
-    strtolower(buffer);
     *tmp = '\0';
     element = buffer;
 
@@ -317,8 +324,6 @@ where OBJECT is one of EM,STRONG,B,I,U,BLINK etc.\n\n"), buffer);
 			  element, hash_code(element),
 			  (hashStyles[hash_code(element)].name ? "used" : "")));
 
-    strtolower(element);
-
     /*
      * We use some pseudo-elements, so catch these first
      */
@@ -333,14 +338,15 @@ where OBJECT is one of EM,STRONG,B,I,U,BLINK etc.\n\n"), buffer);
     }
 
     if (found) {
-	;
-    } else if (!strcasecomp(element, "normal"))		/* added - kw */
-    {
-	parse_attributes(mono, fg, bg, DSTYLE_NORMAL, "html");
-	s_normal = hash_code("html");	/* rather bizarre... - kw */
-    }
-    /* It must be a HTML element, so look through the list until we find it. */
-    else {
+	if (!strcasecomp(element, "normal")) {
+	    /* added - kw */
+	    parse_attributes(mono, fg, bg, DSTYLE_NORMAL, "html");
+	    s_normal = hash_code("html");	/* rather bizarre... - kw */
+
+	    LYnormalColor();
+	}
+    } else {
+	/* It must be a HTML element, so look through the list until we find it. */
 	int element_number = -1;
 	HTTag *t = SGMLFindTag(&HTML_dtd, element);
 
@@ -348,10 +354,11 @@ where OBJECT is one of EM,STRONG,B,I,U,BLINK etc.\n\n"), buffer);
 	    element_number = t - HTML_dtd.tags;
 	}
 	if (element_number >= HTML_A &&
-	    element_number < HTML_ELEMENTS)
+	    element_number < HTML_ELEMENTS) {
 	    parse_attributes(mono, fg, bg, element_number + STARTAT, element);
-	else
+	} else {
 	    parse_attributes(mono, fg, bg, DSTYLE_ELEMENTS, element);
+	}
     }
     FREE(buffer);
 }
@@ -480,12 +487,15 @@ static void HStyle_addStyle(char *buffer)
     char *name = NULL;
 
     CTRACE((tfp, "HStyle_addStyle(%s)\n", buffer));
+
     StrAllocCopy(name, buffer);
+    TrimLowercase(name);
+
     if (lss_styles == NULL)
 	lss_styles = HTList_new();
-    strtolower(name);
-    if (!strncasecomp(name, "default:", 8))	/* default fg/bg */
-    {
+
+    if (!strncasecomp(name, "default:", 8)) {
+	/* default fg/bg */
 	CTRACE2(TRACE_STYLE, (tfp, "READCSS.default%s:%s\n",
 			      (default_color_reset ? ".ignore" : ""),
 			      name ? name : "!?! empty !?!"));
@@ -531,7 +541,7 @@ static int style_readFromFileREC(char *lss_filename,
 	LYTrimTail(buffer);
 	LYTrimHead(buffer);
 	if (!strncasecomp(buffer, "include:", 8))
-	    style_readFromFileREC(buffer + 8, lss_filename);
+	    style_readFromFileREC(LYSkipBlanks(buffer + 8), lss_filename);
 	else if (buffer[0] != '#' && (len = strlen(buffer)) > 0)
 	    HStyle_addStyle(buffer);
     }
@@ -557,7 +567,7 @@ void TrimColorClass(const char *tagname,
     char tmp[64];
 
     sprintf(tmp, ";%.*s", (int) sizeof(tmp) - 3, tagname);
-    strtolower(tmp);
+    TrimLowercase(tmp);
 
     if ((lookfrom = styleclassname) != 0) {
 	do {

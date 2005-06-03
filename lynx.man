@@ -62,10 +62,40 @@ names can begin with double dash as well,
 underscores and dashes can be intermixed in
 option names (in the reference below options
 are with one dash before them and with underscores).
+.PP
+\fILynx\fR provides many command-line options.
+Some options require a value (string, number or keyword).
+These are noted in the reference below.
+The other options set boolean values in the program.
+There are three types of boolean options: set, unset and toggle.
+If no option value is given, these have the obvious meaning:
+set (to true), unset (to false), or toggle (between true/false).
+For any of these, an explicit value can be given in different
+forms to allow for operating system constraints,
+e.g.,
+.RS
+.nf
+\fB-center:off\fP
+\fB-center=off\fP
+\fB-center-\fP
+.fi
+.RE
+\fILynx\fR recognizes
+"1", "+", "on" and "true" for true values, and
+"0", "-", "off" and "false" for false values.
+Other option-values are ignored.
+.PP
+The default boolean, number and string option values that are compiled
+into lynx are displayed in the help-message provided by \fBlynx -help\fP.
+Some of those may differ according to how lynx was built;
+see the help message itself for these values.
+The \fB-help\fP option is processed before any option, including those
+that control reading from the lynx.cfg file.
+Therefore runtime configuration values are not reflected in the help-message.
 .TP
 .B \-
 If the argument is only '-', then Lynx expects to receive
-the arguments from stdin.  This is to allow for the
+the arguments from the standard input.  This is to allow for the
 potentially very long command line that can be associated
 with the \fB\-get_data\fR or \fB\-post_data\fR arguments (see below).
 It can also be used to avoid having sensitive information
@@ -197,7 +227,8 @@ Turn this option off to ask \fILynx\fP to force a core dump if a fatal error occ
 .TP
 .B \-crawl
 with \fB\-traversal,\fR output each page to a file.
-with \fB\-dump\fR, format output as with \fB\-traversal\fR, but to stdout.
+with \fB\-dump\fR, format output as with \fB\-traversal\fR,
+but to the standard output.
 .TP
 .B \-curses_pads
 toggles the use of curses "pad" feature which supports
@@ -273,7 +304,7 @@ disable ftp access.
 .TP
 .B \-get_data
 properly formatted data for a get form are read in from
-stdin and passed to the form.
+the standard input and passed to the form.
 Input is terminated by a line that starts with '---'.
 .TP
 .B \-head
@@ -378,6 +409,9 @@ disable the link list feature in dumps.
 .B \-nolog
 disable mailing of error messages to document owners.
 .TP
+.B \-nomargins
+disable left/right margins in the default style sheet.
+.TP
 .B \-nonrestarting_sigwinch
 This flag is not available on all systems,
 Lynx needs to be compiled with HAVE_SIGACTION defined.
@@ -411,6 +445,9 @@ disable SOCKS proxy usage by a SOCKSified Lynx.
 .B \-nostatus
 disable the retrieval status messages.
 .TP
+.B \-notitle
+disable title and blank line from top of page.
+.TP
 .B \-nounderline
 disable underline video-attribute.
 .TP
@@ -438,7 +475,7 @@ popup windows or as lists of radio buttons.
 .TP
 .B \-post_data
 properly formatted data for a post form are read in from
-stdin and passed to the form.
+the standard input and passed to the form.
 Input is terminated by a line that starts with '---'.
 .TP
 .B \-preparsed

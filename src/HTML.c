@@ -100,6 +100,7 @@ struct _HTStream {
     FILE *fp;
     char *filename;
     HTChunk *chunk;
+    HTChunk *last_chunk;	/* the last chunk in a chain! */
     const HTStreamClass *actions;
     HTStream *target;
     int status;
@@ -7645,6 +7646,8 @@ HTStructured *HTML_new(HTParentAnchor *anchor,
 
     HTStructured *me;
 
+    CTRACE((tfp, "start HTML_new\n"));
+
     if (format_out != WWW_PLAINTEXT && format_out != WWW_PRESENT) {
 	HTStream *intermediate = HTStreamStack(WWW_HTML, format_out,
 					       stream, anchor);
@@ -7878,7 +7881,7 @@ static void CacheThru_do_free(HTStream *me)
 	    CTRACE((tfp, "SourceCacheWriter: memory chunk %p had errors.\n",
 		    me->chunk));
 	    HTChunkFree(me->chunk);
-	    me->chunk = NULL;
+	    me->chunk = me->last_chunk = NULL;
 	}
 	HTAlert(gettext("Source cache error - not enough memory!"));
     }
@@ -7926,45 +7929,50 @@ static void CacheThru_abort(HTStream *me, HTError e)
     FREE(me);
 }
 
+/*
+ * FIXME: never used!
+ */
 static void CacheThru_put_character(HTStream *me, char c_in)
 {
     if (me->status == HT_OK) {
 	if (me->fp) {
 	    fputc(c_in, me->fp);
 	} else if (me->chunk) {
-	    HTChunkPutc(me->chunk, c_in);
-	    if (me->chunk->allocated == 0)
+	    me->last_chunk = HTChunkPutc2(me->last_chunk, c_in);
+	    if (me->last_chunk == NULL || me->last_chunk->allocated == 0)
 		me->status = HT_ERROR;
 	}
     }
     (*me->actions->put_character) (me->target, c_in);
 }
 
+/*
+ * FIXME: never used!
+ */
 static void CacheThru_put_string(HTStream *me, const char *str)
 {
     if (me->status == HT_OK) {
 	if (me->fp) {
 	    fputs(str, me->fp);
 	} else if (me->chunk) {
-	    HTChunkPuts(me->chunk, str);
-	    if (me->chunk->allocated == 0 && *str)
+	    me->last_chunk = HTChunkPuts2(me->last_chunk, str);
+	    if (me->last_chunk == NULL || me->last_chunk->allocated == 0)
 		me->status = HT_ERROR;
 	}
     }
     (*me->actions->put_string) (me->target, str);
 }
 
-static void CacheThru_write(HTStream *me, const char *str,
-			    int l)
+static void CacheThru_write(HTStream *me, const char *str, int l)
 {
-    if (me->status == HT_OK) {
+    if (me->status == HT_OK && l != 0) {
 	if (me->fp) {
 	    fwrite(str, 1, l, me->fp);
 	    if (ferror(me->fp))
 		me->status = HT_ERROR;
 	} else if (me->chunk) {
-	    HTChunkPutb(me->chunk, str, l);
-	    if (me->chunk->allocated == 0 && l != 0)
+	    me->last_chunk = HTChunkPutb2(me->last_chunk, str, l);
+	    if (me->last_chunk == NULL || me->last_chunk->allocated == 0)
 		me->status = HT_ERROR;
 	}
     }
@@ -8000,12 +8008,14 @@ static HTStream *CacheThru_new(HTParentAnchor *anchor,
     /*  oh, assume http protocol:                                          */
     if (strcmp(p->name, "http") != 0
 	&& strcmp(p->name, "https") != 0) {
-	CTRACE((tfp, "SourceCacheWriter: Protocol is \"%s\"; not caching\n", p->name));
+	CTRACE((tfp, "SourceCacheWriter: Protocol is \"%s\"; not cached\n", p->name));
 	return target;
     }
 #else
     /* all HTStreams will be cached */
 #endif
+
+    CTRACE((tfp, "start CacheThru_new\n"));
 
     stream = (HTStream *) malloc(sizeof(*stream));
     if (!stream)
@@ -8058,11 +8068,7 @@ static HTStream *CacheThru_new(HTParentAnchor *anchor,
 		    "SourceCacheWriter: If successful, will replace memory chunk %p\n",
 		    (void *) anchor->source_cache_chunk));
 	}
-#ifdef SAVE_TIME_NOT_SPACE
-	stream->chunk = HTChunkCreateMayFail(4096, 1);
-#else
-	stream->chunk = HTChunkCreateMayFail(128, 1);
-#endif
+	stream->chunk = stream->last_chunk = HTChunkCreateMayFail(4096, 1);
 	if (!stream->chunk)	/* failed already? pretty bad... - kw */
 	    stream->status = HT_ERROR;
 

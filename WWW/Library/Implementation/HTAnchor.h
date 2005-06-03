@@ -32,7 +32,7 @@ extern "C" {
 #endif
 /*			Main definition of anchor
  *			=========================
-				 */ struct _HTAnchor {
+ */ struct _HTAnchor {
 	/* Generic anchor */
 	HTParentAnchor0 *parent;	/* Parent of this anchor (self for adults) */
     };

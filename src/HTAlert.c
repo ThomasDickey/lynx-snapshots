@@ -792,7 +792,7 @@ BOOL HTConfirmCookie(domain_entry * de, const char *server,
 	char *message = 0;
 
 	space_free = (LYcolLimit
-		      - (strlen(prompt)
+		      - (LYstrCells(prompt)
 			 - 10)	/* %s and %.*s and %.*s chars */
 		      -strlen(server));
 	if (space_free < 0)

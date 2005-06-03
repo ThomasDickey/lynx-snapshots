@@ -89,8 +89,6 @@ struct _HTStream {		/* only know it as object */
     /* ... */
 };
 
-#define TITLE_LINES  1
-
 #define IS_UTF_EXTRA(ch) (text->T.output_utf8 && \
 			  (UCH((ch))&0xc0) == 0x80)
 
@@ -369,6 +367,7 @@ typedef struct {
 typedef struct _TextAnchor {
     struct _TextAnchor *next;
     struct _TextAnchor *prev;	/* www_user_search only! */
+    int sgml_offset;		/* used for updating position after reparsing */
     int number;			/* For user interface */
     int line_num;		/* Place in document */
     short line_pos;		/* Bytes/chars - extent too */
@@ -420,7 +419,7 @@ typedef enum {
 } eEUC_status;
 #endif
 
-/*	Notes on struct _Htext:
+/*	Notes on struct _HText:
  *	next_line is valid if stale is false.
  *	top_of_screen line means the line at the top of the screen
  *			or just under the title if there is one.
@@ -1292,7 +1291,9 @@ void HText_free(HText *self)
 /*	Output a line
  *	-------------
  */
-static int display_line(HTLine *line, HText *text, int scrline GCC_UNUSED,
+static int display_line(HTLine *line,
+			HText *text,
+			int scrline GCC_UNUSED,
 			const char *target GCC_UNUSED)
 {
     register int i, j;
@@ -1893,17 +1894,18 @@ static void display_scrollbar(HText *text)
 /*	Output a page
  *	-------------
  */
-static void display_page(HText *text, int line_number,
+static void display_page(HText *text,
+			 int line_number,
 			 const char *target)
 {
     HTLine *line = NULL;
     int i;
+    int title_lines = TITLE_LINES;
 
 #if defined(USE_COLOR_STYLE) && defined(SHOW_WHEREIS_TARGETS)
     const char *cp;
 #endif
     char tmp[7];
-    int last_screen;
     TextAnchor *Anchor_ptr = NULL;
     int stop_before_for_anchors;
     FormInfo *FormInfo_ptr;
@@ -1953,18 +1955,8 @@ static void display_page(HText *text, int line_number,
 	return;
     }
 
-    last_screen = text->Lines - (display_lines - 2);
     line = text->last_line->prev;
-
-    /*
-     * Constrain the line number to be within the document.
-     */
-    if (text->Lines < (display_lines))
-	line_number = 0;
-    else if (line_number > text->Lines)
-	line_number = last_screen;
-    else if (line_number < 0)
-	line_number = 0;
+    line_number = HText_getPreferredTopLine(text, line_number);
 
     for (i = 0, line = FirstHTLine(text);	/* Find line */
 	 i < line_number && (line != text->last_line);
@@ -2031,7 +2023,12 @@ static void display_page(HText *text, int line_number,
 
     text->top_of_screen = line_number;
     text->top_of_screen_line = line;
-    display_title(text);	/* will move cursor to top of screen */
+    if (no_title) {
+	LYmove(0, 0);
+	title_lines = 0;
+    } else {
+	display_title(text);	/* will move cursor to top of screen */
+    }
     display_flag = TRUE;
 
 #ifdef USE_COLOR_STYLE
@@ -2093,7 +2090,7 @@ static void display_page(HText *text, int line_number,
 	    if (!display_partial &&
 		line_number == text->first_lineno_last_disp_partial &&
 		i + line_number <= text->last_lineno_last_disp_partial)
-		LYmove((i + 2), 0);
+		LYmove((i + title_lines + 1), 0);
 	    else
 #endif
 		display_line(line, text, i + 1, target);
@@ -2144,7 +2141,7 @@ static void display_page(HText *text, int line_number,
 			    /*
 			     * First printable character of target.
 			     */
-			    LYmove((i + 1), x_pos);
+			    LYmove((i + title_lines), x_pos);
 			}
 			/*
 			 * Output all the printable target chars.
@@ -2187,7 +2184,7 @@ static void display_page(HText *text, int line_number,
 		 * the end of the line, or not have another hit
 		 * in it.  -FM
 		 */
-		LYmove((i + 2), 0);
+		LYmove((i + title_lines + 1), 0);
 	    }			/* end while */
 #endif /* USE_COLOR_STYLE */
 #endif /* SHOW_WHEREIS_TARGETS */
@@ -2201,7 +2198,7 @@ static void display_page(HText *text, int line_number,
 		 * Clear remaining lines of display.
 		 */
 		for (i++; i < (display_lines); i++) {
-		    LYmove((i + 1), 0);
+		    LYmove((i + title_lines), 0);
 		    LYclrtoeol();
 		}
 		break;
@@ -2257,6 +2254,7 @@ static void display_page(HText *text, int line_number,
 
 		links[nlinks].inUnderline = Anchor_ptr->inUnderline;
 
+		links[nlinks].sgml_offset = Anchor_ptr->sgml_offset;
 		links[nlinks].anchor_number = Anchor_ptr->number;
 		links[nlinks].anchor_line_num = Anchor_ptr->line_num;
 
@@ -2321,6 +2319,7 @@ static void display_page(HText *text, int line_number,
 
 		FormInfo_ptr = Anchor_ptr->input_field;
 
+		links[nlinks].sgml_offset = Anchor_ptr->sgml_offset;
 		links[nlinks].anchor_number = Anchor_ptr->number;
 		links[nlinks].anchor_line_num = Anchor_ptr->line_num;
 
@@ -2574,10 +2573,11 @@ static void move_anchors_in_region(HTLine *line, int line_number,
 	    head_processed = 1;
 	}
 	/* Fix the end */
-	if (last < ebyte)
+	if (last < ebyte) {
 	    a->extent += shift;
-	else
+	} else {
 	    break;		/* Keep this `a' for the next step */
+	}
     }
     *prev_anchor = a;
     *prev_head_processed = head_processed;
@@ -3112,9 +3112,10 @@ static void split_line(HText *text, unsigned split)
 
 	/* @@ first line indent */
 #ifdef WIDEC_CURSES
-	spare = WRAP_COLS(text) -
-	    (int) style->rightIndent - indent +
-	    ctrl_chars_on_previous_line - LYstrExtent2(previous->data, previous->size);
+	spare = WRAP_COLS(text)
+	    - (int) style->rightIndent
+	    - indent
+	    - LYstrExtent2(previous->data, previous->size);
 	if (spare < 0 && LYwideLines)	/* Can be wider than screen */
 	    spare = 0;
 #else
@@ -3362,7 +3363,7 @@ static void split_line(HText *text, unsigned split)
 	    jline = insert_blanks_in_line(previous, CurLine, text,
 					  &last_anchor_of_previous_line /*updates++ */ ,
 					  ht_num_runs - 1, oldpos, newpos);
-	    free((char *) oldpos);
+	    free(oldpos);
 	    if (jline == NULL)
 		outofmem(__FILE__, "split_line_4");
 	    previous->next->prev = jline;
@@ -3371,13 +3372,12 @@ static void split_line(HText *text, unsigned split)
 	    freeHTLine(text, previous);
 
 	    previous = jline;
-	} {			/* (ht_num_runs==1) */
-	    if (justify_start_position) {
-		char *p2 = previous->data;
+	}
+	if (justify_start_position) {
+	    char *p2 = previous->data;
 
-		for (; p2 < previous->data + justify_start_position; ++p2)
-		    *p2 = (*p2 == HT_NON_BREAK_SPACE ? ' ' : *p2);
-	    }
+	    for (; p2 < previous->data + justify_start_position; ++p2)
+		*p2 = (*p2 == HT_NON_BREAK_SPACE ? ' ' : *p2);
 	}
     } else {
 	if (REALLY_CAN_JUSTIFY(text)) {
@@ -3430,10 +3430,14 @@ static void blank_lines(HText *text, int newlines)
 {
     if (HText_LastLineEmpty(text, FALSE)) {	/* No text on current line */
 	HTLine *line = text->last_line->prev;
+	BOOL first = (line == text->last_line);
+
+	if (no_title && first)
+	    return;
 
 #ifdef USE_COLOR_STYLE
 	/* Style-change petty requests at the start of the document: */
-	if (line == text->last_line && newlines == 1)
+	if (first && newlines == 1)
 	    return;		/* Do not add a blank line at start */
 #endif
 
@@ -4238,17 +4242,17 @@ void HText_appendCharacter(HText *text, int ch)
 	      ((line->size > 0) &&
 	       (int) (line->data[line->size - 1] == LY_SOFT_HYPHEN ? 1 : 0)));
 
-    if (text->T.output_utf8) {
-	actual += (UTFXTRA_ON_THIS_LINE - ctrl_chars_on_this_line + UTF_XLEN(ch));
-	limit = LYcols_cu(text);
-    } else {
-	actual +=
-	    (int) style->rightIndent - ctrl_chars_on_this_line +
-	    (((HTCJK != NOCJK) && text->kanji_buf) ? 1 : 0);
-	limit = WRAP_COLS(text);
-    }
-
-    if (actual >= limit) {
+    if ((actual
+	 + (int) style->rightIndent
+	 - ctrl_chars_on_this_line
+	 + (((HTCJK != NOCJK) && text->kanji_buf) ? 1 : 0)
+	) >= (WRAP_COLS(text) - 1)
+	|| (text->T.output_utf8
+	    && ((actual
+		 + UTFXTRA_ON_THIS_LINE
+		 - ctrl_chars_on_this_line
+		 + UTF_XLEN(ch)
+		) >= (LYcols_cu(text) - 1)))) {
 
 	if (style->wordWrap && HTOutputFormat != WWW_SOURCE) {
 #ifdef EXP_JUSTIFY_ELTS
@@ -5041,6 +5045,7 @@ int HText_beginAnchor(HText *text, BOOL underline,
 	outofmem(__FILE__, "HText_beginAnchor");
     a->inUnderline = underline;
 
+    a->sgml_offset = SGML_offset();
     a->line_num = text->Lines;
     a->line_pos = text->last_line->size;
     if (text->last_anchor) {
@@ -5685,7 +5690,8 @@ void HText_endAppend(HText *text)
  *  This needs to be done so that display_page finds the anchors in the
  *  form it expects when it sets the links[] elements.
  */
-static void HText_trimHightext(HText *text, BOOLEAN final,
+static void HText_trimHightext(HText *text,
+			       BOOLEAN final,
 			       int stop_before)
 {
     int cur_line, cur_shift;
@@ -5774,9 +5780,12 @@ static void HText_trimHightext(HText *text, BOOLEAN final,
 	    anchor_ptr->line_num = cur_line;
 	}
 	CTRACE((tfp,
-		"GridText: Anchor found on line:%d col:%d [%d] ext:%d\n",
-		cur_line, anchor_ptr->line_pos,
-		anchor_ptr->number, anchor_ptr->extent));
+		"GridText: Anchor found on line:%d col:%d [%05d:%d] ext:%d\n",
+		cur_line,
+		anchor_ptr->line_pos,
+		anchor_ptr->sgml_offset,
+		anchor_ptr->number,
+		anchor_ptr->extent));
 
 	cur_shift = 0;
 	/*
@@ -5915,11 +5924,11 @@ static void HText_trimHightext(HText *text, BOOLEAN final,
 	if (anchor_ptr->line_pos > 0) {
 	    /*
 	     * LYstrExtent filters out the formatting characters, so we do not
-	     * have to count them here.
-	     *
-	     * FIXME: do we have to count soft-newlines?
+	     * have to count them here, except for soft newlines.
 	     */
 	    anchor_ptr->line_pos = LYstrExtent2(line_ptr->data, anchor_col);
+	    if (line_ptr->data[0] == LY_SOFT_NEWLINE)
+		anchor_ptr->line_pos += 1;
 	}
 #else /* 8-bit curses, etc.  */
 	if (anchor_ptr->line_pos > 0) {
@@ -6411,7 +6420,7 @@ BOOL HText_TAHasMoreLines(int curlink,
  *		 are treated as different fields, as usual;
  *		 if TRUE, fields of the same textarea are treated as a
  *		 group for skipping.
- * The caller wants a information for positioning on the new link to be
+ * The caller wants information for positioning on the new link to be
  * deposited in *go_line and (if linknum is not NULL) *linknum.
  *
  * On failure (no more links in the requested direction) returns NO
@@ -7010,10 +7019,142 @@ BOOL HText_pageHasPrevTarget(void)
 }
 
 /*
+ * Find the number of the closest anchor to the given document offset.  Used
+ * in reparsing, this will usually find an exact match, as a link shifts around
+ * on the display.  It will not find a match when (for example) the source view
+ * shows images that are not links in the html.
+ */
+int HText_closestAnchor(HText *text, int offset)
+{
+    int result = -1;
+    int absdiff = 0;
+    int newdiff;
+    TextAnchor *Anchor_ptr = NULL;
+    TextAnchor *closest = NULL;
+
+    for (Anchor_ptr = text->first_anchor;
+	 Anchor_ptr != NULL;
+	 Anchor_ptr = Anchor_ptr->next) {
+	if (Anchor_ptr->sgml_offset == offset) {
+	    result = Anchor_ptr->number;
+	    break;
+	} else {
+	    newdiff = abs(Anchor_ptr->sgml_offset - offset);
+	    if (absdiff == 0 || absdiff > newdiff) {
+		absdiff = newdiff;
+		closest = Anchor_ptr;
+	    }
+	}
+    }
+    if (result < 0 && closest != 0) {
+	result = closest->number;
+    }
+
+    return result;
+}
+
+/*
+ * Find the offset for the given anchor, e.g., the inverse of
+ * HText_closestAnchor().
+ */
+int HText_locateAnchor(HText *text, int anchor_number)
+{
+    int result = -1;
+    TextAnchor *Anchor_ptr = NULL;
+
+    for (Anchor_ptr = text->first_anchor;
+	 Anchor_ptr != NULL;
+	 Anchor_ptr = Anchor_ptr->next) {
+	if (Anchor_ptr->number == anchor_number) {
+	    result = Anchor_ptr->sgml_offset;
+	    break;
+	}
+    }
+
+    return result;
+}
+
+/*
+ * This is supposed to give the same result as the inline checks in
+ * display_page(), so we can decide which anchors will be visible.
+ */
+static BOOL anchor_is_numbered(TextAnchor *Anchor_ptr)
+{
+    BOOL result = FALSE;
+
+    if (Anchor_ptr->show_anchor
+    /* FIXME: && non_empty(hi_string) */
+	&& (Anchor_ptr->link_type & HYPERTEXT_ANCHOR)) {
+	result = TRUE;
+    } else if (Anchor_ptr->link_type == INPUT_ANCHOR
+	       && Anchor_ptr->input_field->type != F_HIDDEN_TYPE) {
+	result = TRUE;
+    }
+    return result;
+}
+
+/*
+ * Return the absolute line number (counting from the beginning of the
+ * document) for the given absolute anchor number.  Normally line numbers are
+ * computed within the screen, and for that we use the links[] array.  A few
+ * uses require the absolute anchor number.  For example, reparsing a document,
+ * e.g., switching between normal and source views will alter the line numbers
+ * of each link, and may require adjusting the top line number used for the
+ * display, before we recompute the links[] array.
+ */
+int HText_getAbsLineNumber(HText *text,
+			   int anchor_number)
+{
+    int result = -1;
+
+    if (anchor_number >= 0 && text != 0) {
+	TextAnchor *Anchor_ptr = NULL;
+
+	for (Anchor_ptr = text->first_anchor;
+	     Anchor_ptr != NULL;
+	     Anchor_ptr = Anchor_ptr->next) {
+	    if (anchor_is_numbered(Anchor_ptr)
+		&& Anchor_ptr->number == anchor_number) {
+		result = Anchor_ptr->line_num;
+		break;
+	    }
+	}
+    }
+    return result;
+}
+
+/*
+ * Compute the link-number in a page, given the top line number of the page and
+ * the absolute anchor number.
+ */
+int HText_anchorRelativeTo(HText *text, int top_lineno, int anchor_number)
+{
+    int result = 0;
+    int from_top = 0;
+    TextAnchor *Anchor_ptr = NULL;
+
+    for (Anchor_ptr = text->first_anchor;
+	 Anchor_ptr != NULL;
+	 Anchor_ptr = Anchor_ptr->next) {
+	if (Anchor_ptr->number == anchor_number) {
+	    result = from_top;
+	    break;
+	}
+	if (!anchor_is_numbered(Anchor_ptr))
+	    continue;
+	if (Anchor_ptr->line_num >= top_lineno) {
+	    ++from_top;
+	}
+    }
+    return result;
+}
+
+/*
  * HText_LinksInLines returns the number of links in the
  * 'Lines' number of lines beginning with 'line_num'-1.  -FM
  */
-int HText_LinksInLines(HText *text, int line_num,
+int HText_LinksInLines(HText *text,
+		       int line_num,
 		       int Lines)
 {
     int total = 0;
@@ -7137,8 +7278,6 @@ BOOL HText_select(HText *text)
 	 */
 	if (loaded_texts && HTList_removeObject(loaded_texts, text))
 	    HTList_addObject(loaded_texts, text);
-	/* let lynx do it */
-	/* display_page(text, text->top_of_screen, ""); */
     }
     return YES;
 }
@@ -7326,6 +7465,24 @@ int HText_getTopOfScreen(void)
 int HText_getLines(HText *text)
 {
     return text->Lines;
+}
+
+/*
+ * Constrain the line number to be within the document.  The line number is
+ * zero-based.
+ */
+int HText_getPreferredTopLine(HText *text, int line_number)
+{
+    int last_screen = text->Lines - (display_lines - 2);
+
+    if (text->Lines < display_lines) {
+	line_number = 0;
+    } else if (line_number > text->Lines) {
+	line_number = last_screen;
+    } else if (line_number < 0) {
+	line_number = 0;
+    }
+    return line_number;
 }
 
 HTAnchor *HText_linkSelTo(HText *me GCC_UNUSED,
@@ -8356,9 +8513,8 @@ BOOLEAN HTreparse_document(void)
 	ok = (BOOL) (ret == HT_LOADED || ret == HT_PARTIAL_CONTENT);
 
 	CTRACE((tfp, "Reparse file %s\n", (ok ? "succeeded" : "failed")));
-    }
 
-    if (useMemoryCache()) {
+    } else if (useMemoryCache()) {
 	HTFormat format = WWW_HTML;
 	int ret;
 
@@ -8377,12 +8533,12 @@ BOOLEAN HTreparse_document(void)
 	    format = HTAtom_for(HTMainAnchor->content_type);
 	} else {
 	    /*
-	     * This is only done to make things aligned with SOURCE_CACHE_NONE and
-	     * SOURCE_CACHE_FILE when switching to source mode since the original
-	     * document's charset will be LYPushAssumed() and then LYPopAssumed().
-	     * See LYK_SOURCE in mainloop if you change something here.  No
-	     * user-visible benefits, seems just '=' Info Page will show source's
-	     * effective charset as "(assumed)".
+	     * This is only done to make things aligned with SOURCE_CACHE_NONE
+	     * and SOURCE_CACHE_FILE when switching to source mode since the
+	     * original document's charset will be LYPushAssumed() and then
+	     * LYPopAssumed().  See LYK_SOURCE in mainloop if you change
+	     * something here.  No user-visible benefits, seems just '=' Info
+	     * Page will show source's effective charset as "(assumed)".
 	     */
 	    format = HTCharsetFormat(format, HTMainAnchor,
 				     UCLYhndl_for_unspec);
@@ -9197,6 +9353,7 @@ char *HText_setLastOptionValue(HText *text, char *value,
     if (!(value
 	  && text
 	  && text->last_anchor
+	  && text->last_anchor->input_field
 	  && text->last_anchor->link_type == INPUT_ANCHOR)) {
 	CTRACE((tfp, "HText_setLastOptionValue: invalid call!  value:%s!\n",
 		(value ? value : "<NULL>")));
@@ -9419,6 +9576,8 @@ char *HText_setLastOptionValue(HText *text, char *value,
 	    /*
 	     * Change the value.
 	     */
+	    if (HTCurSelectedOptionValue == 0)
+		StrAllocCopy(HTCurSelectedOptionValue, "");
 	    text->last_anchor->input_field->size =
 		strlen(HTCurSelectedOptionValue);
 	    ret_Value = HTCurSelectedOptionValue;
@@ -9474,6 +9633,7 @@ int HText_beginInput(HText *text, BOOL underline,
     if (a == NULL || f == NULL)
 	outofmem(__FILE__, "HText_beginInput");
 
+    a->sgml_offset = SGML_offset();
     a->inUnderline = underline;
     a->line_num = text->Lines;
     a->line_pos = text->last_line->size;
@@ -12161,6 +12321,7 @@ static void insert_new_textarea_anchor(TextAnchor **curr_anchor, HTLine **exit_h
     a->number = anchor->number;
     a->line_pos = anchor->line_pos;
     a->extent = anchor->extent;
+    a->sgml_offset = SGML_offset();
     a->line_num = anchor->line_num + 1;
     LYCopyHiText(a, anchor);
     a->link_type = anchor->link_type;
@@ -12982,6 +13143,7 @@ int HText_InsertFile(LinkInfo * form_link)
     a->number = anchor_ptr->number;
     a->line_pos = anchor_ptr->line_pos;
     a->extent = anchor_ptr->extent;
+    a->sgml_offset = SGML_offset();
     a->line_num = anchor_ptr->line_num;
     LYCopyHiText(a, anchor_ptr);
     a->link_type = anchor_ptr->link_type;
@@ -13318,7 +13480,7 @@ static void redraw_part_of_line(HTLine *line, const char *str,
  *
  * Eventually the two sets of function should be unified, and should handle
  * UTF-8 positioning, both lines of hypertext anchors, and WHEREIS in all
- * cases.  If possible.  The complex WHEREIS target logic in highlight()
+ * cases.  If possible.  The complex WHEREIS target logic in LYhighlight()
  * could then be completely removed.  - kw
  */
 static void move_to_glyph(int YP,
@@ -13360,6 +13522,9 @@ static void move_to_glyph(int YP,
     int linkvlen;
 
     int len;
+
+    if (no_title)
+	YP -= TITLE_LINES;
 
     if (flags & 1)
 	flag = YES;
@@ -13862,18 +14027,17 @@ void LYMoveToLink(int cur,
 	move_to_glyph(links[cur].ly, links[cur].lx, XP_draw_min,
 		      "", 0, links[cur].lx,
 		      target, hightext, flags, utf_flag);
-	/* LYmove(links[cur].ly, links[cur].lx); */
     }
 }
 #endif /* !USE_COLOR_STYLE */
 
 /*
- * This is used only if compiled with lss support.  It's called to draw regular
- * link (1st two lines of link) when it's being unhighlighted in LYhighlight().
+ * This is used only if compiled with lss support.  It's called to redraw a
+ * regular link when it's being unhighlighted in LYhighlight().
  */
+#ifdef USE_COLOR_STYLE
 void redraw_lines_of_link(int cur GCC_UNUSED)
 {
-#ifdef USE_COLOR_STYLE
 #define pvtTITLE_HEIGHT 1
     HTLine *todr1;
     int lines_back;
@@ -13892,6 +14056,9 @@ void redraw_lines_of_link(int cur GCC_UNUSED)
 	todr1 = todr1->prev;
 
     row = links[cur].ly;
+    if (no_title)
+	row -= TITLE_LINES;
+
     for (count = 0;
 	 row <= display_lines && (text = LYGetHiliteStr(cur, count)) != NULL;
 	 ++count) {
@@ -13901,11 +14068,9 @@ void redraw_lines_of_link(int cur GCC_UNUSED)
 	todr1 = todr1->next;
     }
 #undef pvtTITLE_HEIGHT
-#else
-    /* no dead code ! */
-#endif
     return;
 }
+#endif
 
 #ifdef USE_PRETTYSRC
 void HTMark_asSource(void)

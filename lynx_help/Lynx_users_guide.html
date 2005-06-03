@@ -2330,17 +2330,44 @@ where
              <li>If a URL is specified, the file will be retrieved,
                  and only the server base directory will be relevant
                  to further accesses.
+             <li>If more than one local file or remote URL is listed on the
+                 command line, Lynx will open only the last interactively.  All
+                 of the names (local files and remote URLs) are added to the
+                 G)oto history.
           </ul>
    <dt><code>options</code>
-        <dd>can be selected from the following list, where items in all-caps
-            indicate that a substitution must be made.  Many options are
-            "toggles", meaning that they will change the default action,
-            however it was specified.  To always set the option on, use the
-            syntax "-option+", "-option=on", or "-option:on".  To always set
-            the option off, use the syntax "-option-", "-option=off", or
-            "-option:off".  The syntax with the "=" may not work under DOS
-            because of operating system constraints.  Use one of the other
-            forms in that case.
+        <dd>Lynx uses only long option names.  Option names can begin with
+            double dash as well, underscores and dashes can be intermixed in
+            option names (in the reference below options are with one dash
+            before them and with underscores).
+            <p>
+            Lynx provides many command-line options.  Some options require a
+            value (string, number or keyword).  These are noted in the
+            reference below.  The other options set boolean values in the
+            program.  There are three types of boolean options:  set, unset and
+            toggle.  If no option value is given, these have the obvious
+            meaning:  set (to true), unset (to false), or toggle (between
+            true/false).  For any of these, an explicit value can be given in
+            different forms to allow for operating system constraints, e.g.,
+            <pre><code>
+              -center:off
+              -center=off
+              -center-</code></pre>
+            Lynx recognizes "1", "+", "on" and "true" for true values, and "0",
+            "-", "off" and "false" for false values. Other  option-values  are
+            ignored.
+            <p>
+            The default boolean, number and string option values that are
+            compiled into lynx are displayed in the help-message provided by
+            lynx -help.  Some of those may differ according to how lynx was
+            built; see the help message itself for these values.  The -help
+            option is processed before any option, including those that control
+            reading from the lynx.cfg file.  Therefore runtime configuration
+            values are not reflected in the help-message.
+            <p>
+            Capitalized items in the option summary
+            indicate that a substitution must be made.
+            These are the options:
            <dl>
              <dt><code>-</code>
                 <dd>If the argument is only '<code>-</code>' (dash), then Lynx
@@ -2605,6 +2632,8 @@ where
                 <dd>disable the link list feature in dumps.
              <dt><code>-nolog</code>
                 <dd>disable mailing of error messages to document owners.
+             <dt><code>-nomargins</code>
+                <dd>disable left/right margins in the default style sheet.
              <dt><code>-nonrestarting_sigwinch</code>
                 <dd>make window size change handler non-restarting.
                 This flag is not available on all systems,
@@ -2626,6 +2655,8 @@ where
                 <dd>disable SOCKS proxy usage by a SOCKSified Lynx.
              <dt><code>-nostatus</code>
                 <dd>disable the retrieval status messages.
+             <dt><code>-notitle</code>
+                <dd>disable title and blank line from top of page.
              <dt><code>-nounderline</code>
                 <dd>disable underline video-attribute.
              <dt><code>-number_fields</code>

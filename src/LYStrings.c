@@ -827,9 +827,21 @@ void ena_csi(BOOLEAN flag)
 
 #ifdef USE_SLANG
 #define define_key(string, code) \
-	SLkm_define_keysym (string, code, Keymap_List)
+	SLkm_define_keysym ((char*)(string), code, Keymap_List)
+#if SLANG_VERSION < 20000
 #define expand_substring(dst, first, last, final) \
-	(SLexpand_escaped_string(dst, (char *)first, (char *)last), 1)
+ 	(SLexpand_escaped_string(dst, (char *)first, (char *)last), 1)
+static int SLang_get_error(void)
+{
+    return SLang_Error;
+}
+#else
+int LY_Slang_UTF8_Mode = 0;
+
+#define expand_substring(dst, first, last, final) \
+	(SLexpand_escaped_string(dst, (char *)first, (char *)last, LY_Slang_UTF8_Mode), 1)
+#endif
+
 static SLKeyMap_List_Type *Keymap_List;
 
 /* This value should be larger than anything in LYStrings.h */
@@ -1248,7 +1260,7 @@ static int unsetkey_cmd(char *parse)
 	 * occasionally find useful).
 	 */
 	SLang_undefine_key(parse, Keymap_List);
-	if (SLang_Error)
+	if (SLang_get_error())
 	    return -1;
 #endif
     }
@@ -1391,7 +1403,7 @@ int lynx_initialize_keymaps(void)
     setup_vtXXX_keymap();
     define_key("\033[M", MOUSE_KEYSYM);
 
-    if (SLang_Error)
+    if (SLang_get_error())
 	SLang_exit_error("Unable to initialize keymaps");
 #else
     setup_vtXXX_keymap();

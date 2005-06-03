@@ -186,6 +186,8 @@ extern "C" {
 #  define rateEtaKB_maybe	rateKB
 #endif
 
+#define TITLE_LINES  1
+
     extern BOOLEAN LYCursesON;	/* start_curses()->TRUE, stop_curses()->FALSE */
     extern BOOLEAN LYJumpFileURL;	/* URL from the jump file shortcuts? */
     extern BOOLEAN LYNewsPosting;	/* News posting supported if TRUE */
@@ -357,6 +359,8 @@ extern "C" {
     extern char *LYLocalDomain;
     extern BOOLEAN use_underscore;
     extern BOOLEAN no_list;
+    extern BOOLEAN no_margins;
+    extern BOOLEAN no_title;
     extern BOOLEAN historical_comments;
     extern BOOLEAN minimal_comments;
     extern BOOLEAN soft_dquotes;

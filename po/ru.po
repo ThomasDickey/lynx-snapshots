@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: lynx 2.8.5pre15\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2005-01-02 09:33-0500\n"
+"POT-Creation-Date: 2005-05-30 18:03-0400\n"
 "PO-Revision-Date: 2003-06-03 17:40+0400\n"
 "Last-Translator: Dmitry S. Sivachenko <mitya@cavia.pp.ru>\n"
 "Language-Team: Russian <ru@li.org>\n"
@@ -2244,7 +2244,7 @@ msgstr "(Нет имени.)"
 msgid "(No value.)"
 msgstr "(Нет значения.)"
 
-#: LYMessages.c:713 src/LYOptions.c:2384
+#: LYMessages.c:713 src/LYOptions.c:2382
 msgid "None"
 msgstr "Нет"
 
@@ -2779,33 +2779,33 @@ msgstr "Требуется проверка прав для прокси -- повтор"
 msgid "Access without authorization denied -- retrying"
 msgstr "Доступ без проверки прав запрещен -- повтор"
 
-#: WWW/Library/Implementation/HTAccess.c:685
+#: WWW/Library/Implementation/HTAccess.c:684
 msgid "Access forbidden by rule"
 msgstr "Доступ запрещен правилом"
 
-#: WWW/Library/Implementation/HTAccess.c:782
+#: WWW/Library/Implementation/HTAccess.c:781
 msgid "Document with POST content not found in cache.  Resubmit?"
 msgstr "Документ с содержимым POST не найден в кэше.  Послать снова?"
 
-#: WWW/Library/Implementation/HTAccess.c:936
+#: WWW/Library/Implementation/HTAccess.c:935
 msgid "Loading failed, use a previous copy."
 msgstr ""
 
-#: WWW/Library/Implementation/HTAccess.c:1045 src/GridText.c:8351
+#: WWW/Library/Implementation/HTAccess.c:1044 src/GridText.c:8508
 msgid "Loading incomplete."
 msgstr "Загрузка завершена не полностью."
 
-#: WWW/Library/Implementation/HTAccess.c:1076
+#: WWW/Library/Implementation/HTAccess.c:1075
 #, c-format
 msgid "**** HTAccess: socket or file number returned by obsolete load routine!\n"
 msgstr "**** HTAccess: номер сокета или файла возвращен устаревшей программой загрузки!\n"
 
-#: WWW/Library/Implementation/HTAccess.c:1078
+#: WWW/Library/Implementation/HTAccess.c:1077
 #, c-format
 msgid "**** HTAccess: Internal software error.  Please mail lynx-dev@nongnu.org!\n"
 msgstr "**** HTAccess: Внутренняя программная ошибка. Пожалуйста, напишите в lynx-dev@nongnu.org!\n"
 
-#: WWW/Library/Implementation/HTAccess.c:1079
+#: WWW/Library/Implementation/HTAccess.c:1078
 #, c-format
 msgid "**** HTAccess: Status returned was: %d\n"
 msgstr "**** HTAccess: Возвращенный статус: %d\n"
@@ -2814,11 +2814,11 @@ msgstr "**** HTAccess: Возвращенный статус: %d\n"
 #. * hack: if we fail in HTAccess.c
 #. * avoid duplicating URL, oh.
 #.
-#: WWW/Library/Implementation/HTAccess.c:1085 src/LYMainLoop.c:7669
+#: WWW/Library/Implementation/HTAccess.c:1084 src/LYMainLoop.c:7745
 msgid "Can't Access"
 msgstr "Нет доступа"
 
-#: WWW/Library/Implementation/HTAccess.c:1093
+#: WWW/Library/Implementation/HTAccess.c:1092
 msgid "Unable to access document."
 msgstr "Ошибка доступа к документу."
 
@@ -2843,24 +2843,24 @@ msgstr "сокет для ведущего сокета"
 #. * It's a symbolic link, does the user care about knowing if it is
 #. * symbolic?  I think so since it might be a directory.
 #.
-#: WWW/Library/Implementation/HTFTP.c:1701 WWW/Library/Implementation/HTFTP.c:2318
+#: WWW/Library/Implementation/HTFTP.c:1697 WWW/Library/Implementation/HTFTP.c:2314
 msgid "Symbolic Link"
 msgstr "Символьная ссылка"
 
-#: WWW/Library/Implementation/HTFTP.c:2675
+#: WWW/Library/Implementation/HTFTP.c:2671
 msgid "Receiving FTP directory."
 msgstr "Получение FTP-каталога."
 
-#: WWW/Library/Implementation/HTFTP.c:2811
+#: WWW/Library/Implementation/HTFTP.c:2807
 #, c-format
 msgid "Transferred %d bytes (%5d)"
 msgstr "Передано %d байт (%5d)"
 
-#: WWW/Library/Implementation/HTFTP.c:3158
+#: WWW/Library/Implementation/HTFTP.c:3154
 msgid "connect for data"
 msgstr "соединение для данных"
 
-#: WWW/Library/Implementation/HTFTP.c:3822
+#: WWW/Library/Implementation/HTFTP.c:3818
 msgid "Receiving FTP file."
 msgstr "Получение FTP-файла."
 
@@ -3051,62 +3051,62 @@ msgstr "ошибка сокета: семейство %d адрес %s порт %s."
 msgid "Could not make connection non-blocking."
 msgstr ""
 
-#: WWW/Library/Implementation/HTTCP.c:1698
+#: WWW/Library/Implementation/HTTCP.c:1697
 msgid "Connection failed (too many retries)."
 msgstr "Не удается установить соединение (слишком много попыток)."
 
-#: WWW/Library/Implementation/HTTCP.c:1897
+#: WWW/Library/Implementation/HTTCP.c:1896
 msgid "Could not restore socket to blocking."
 msgstr ""
 
-#: WWW/Library/Implementation/HTTCP.c:1963
+#: WWW/Library/Implementation/HTTCP.c:1962
 msgid "Socket read failed for 180,000 tries."
 msgstr "Ошибка при чтении сокета в течение 180,000 попыток."
 
-#: WWW/Library/Implementation/HTTP.c:346
+#: WWW/Library/Implementation/HTTP.c:348
 #, c-format
 msgid "Address contains a username: %s"
 msgstr "Адрес содержит имя пользователя: %s"
 
-#: WWW/Library/Implementation/HTTP.c:534
+#: WWW/Library/Implementation/HTTP.c:536
 msgid "This client does not contain support for HTTPS URLs."
 msgstr "Этот клиент не содержит поддержки для URL HTTPS."
 
-#: WWW/Library/Implementation/HTTP.c:559
+#: WWW/Library/Implementation/HTTP.c:561
 msgid "Unable to connect to remote host."
 msgstr "Не удается установить соединение с удаленной машиной."
 
-#: WWW/Library/Implementation/HTTP.c:581
+#: WWW/Library/Implementation/HTTP.c:583
 msgid "Retrying connection without TLS."
 msgstr "Попытка установить соединение без TLS."
 
-#: WWW/Library/Implementation/HTTP.c:624
+#: WWW/Library/Implementation/HTTP.c:626
 msgid "SSL error:Can't find common name in certificate-Continue?"
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:641
+#: WWW/Library/Implementation/HTTP.c:643
 #, c-format
 msgid "SSL error:host(%s)!=cert(%s)-Continue?"
 msgstr "Ошибка SSL:host(%s)!=cert(%s)-Продолжить?"
 
-#: WWW/Library/Implementation/HTTP.c:653
+#: WWW/Library/Implementation/HTTP.c:655
 #, c-format
 msgid "Secure %d-bit %s (%s) HTTP connection"
 msgstr "Безопасное HTTP-соединение: %d бит %s (%s)"
 
-#: WWW/Library/Implementation/HTTP.c:1123
+#: WWW/Library/Implementation/HTTP.c:1125
 msgid "Sending HTTP request."
 msgstr "Посылка HTTP-запроса."
 
-#: WWW/Library/Implementation/HTTP.c:1162
+#: WWW/Library/Implementation/HTTP.c:1164
 msgid "Unexpected network write error; connection aborted."
 msgstr "Неожиданная ошибка записи по сети; соединение прервано."
 
-#: WWW/Library/Implementation/HTTP.c:1168
+#: WWW/Library/Implementation/HTTP.c:1170
 msgid "HTTP request sent; waiting for response."
 msgstr "HTTP-запрос послан; ожидается ответ."
 
-#: WWW/Library/Implementation/HTTP.c:1236
+#: WWW/Library/Implementation/HTTP.c:1238
 msgid "Unexpected network read error; connection aborted."
 msgstr "Неожиданная ошибка чтения по сети; соединение прервано."
 
@@ -3119,7 +3119,7 @@ msgstr "Неожиданная ошибка чтения по сети; соединение прервано."
 #. * line and possibly other headers, so we'll deal with them by
 #. * showing the full header to the user as text/plain.  - FM
 #.
-#: WWW/Library/Implementation/HTTP.c:1430
+#: WWW/Library/Implementation/HTTP.c:1432
 msgid "Got unexpected Informational Status."
 msgstr "Получен неожиданный Информационный Статус."
 
@@ -3129,7 +3129,7 @@ msgstr "Получен неожиданный Информационный Статус."
 #. * content.  We'll instruct the user to do that, and
 #. * restore the current document.  - FM
 #.
-#: WWW/Library/Implementation/HTTP.c:1464
+#: WWW/Library/Implementation/HTTP.c:1466
 msgid "Request fulfilled.  Reset Content."
 msgstr "Запрос выполнен.  Обновление Содержимого."
 
@@ -3139,27 +3139,27 @@ msgstr "Запрос выполнен.  Обновление Содержимого."
 #. * status is inappropriate.  We'll deal with it by showing
 #. * the full header to the user as text/plain.  - FM
 #.
-#: WWW/Library/Implementation/HTTP.c:1581
+#: WWW/Library/Implementation/HTTP.c:1583
 msgid "Got unexpected 304 Not Modified status."
 msgstr "Получен неожиданный статус 304 (Не Модифицировано)."
 
-#: WWW/Library/Implementation/HTTP.c:1644
+#: WWW/Library/Implementation/HTTP.c:1646
 msgid "Redirection of POST content requires user approval."
 msgstr "Перенаправление содержимого POST требует подтверждения пользователя."
 
-#: WWW/Library/Implementation/HTTP.c:1659
+#: WWW/Library/Implementation/HTTP.c:1661
 msgid "Have POST content.  Treating Permanent Redirection as Temporary.\n"
 msgstr "Имеется содержимое POST. Трактовка Постоянного Перенаправления как Временного.\n"
 
-#: WWW/Library/Implementation/HTTP.c:1701
+#: WWW/Library/Implementation/HTTP.c:1703
 msgid "Retrying with access authorization information."
 msgstr "Повторение с информацией о правах доступа."
 
-#: WWW/Library/Implementation/HTTP.c:1713
+#: WWW/Library/Implementation/HTTP.c:1715
 msgid "Show the 401 message body?"
 msgstr "Показывать тело сообщения 401?"
 
-#: WWW/Library/Implementation/HTTP.c:1756
+#: WWW/Library/Implementation/HTTP.c:1758
 msgid "Show the 407 message body?"
 msgstr "Показывать тело сообщения 407?"
 
@@ -3167,7 +3167,7 @@ msgstr "Показывать тело сообщения 407?"
 #. * Bad or unknown server_status number.  Take a chance and hope
 #. * there is something to display.  - FM
 #.
-#: WWW/Library/Implementation/HTTP.c:1856
+#: WWW/Library/Implementation/HTTP.c:1858
 msgid "Unknown status reply from server!"
 msgstr "Неизвестный статус ответа от сервера!"
 
@@ -3355,106 +3355,106 @@ msgstr "Ответственный"
 msgid "Host"
 msgstr "Машина"
 
-#: src/GridText.c:710
+#: src/GridText.c:709
 msgid "Memory exhausted, display interrupted!"
 msgstr "Память исчерпана, отображение прервано!"
 
-#: src/GridText.c:715
+#: src/GridText.c:714
 msgid "Memory exhausted, will interrupt transfer!"
 msgstr "Память исчерпана, передача данных будет прервана!"
 
-#: src/GridText.c:3590
+#: src/GridText.c:3594
 msgid " *** MEMORY EXHAUSTED ***"
 msgstr " *** ПАМЯТЬ ИСЧЕРПАНА ***"
 
-#: src/GridText.c:6004 src/GridText.c:6011 src/LYList.c:248
+#: src/GridText.c:6013 src/GridText.c:6020 src/LYList.c:248
 msgid "unknown field or link"
 msgstr "неизвестное поле или ссылка"
 
-#: src/GridText.c:6020
+#: src/GridText.c:6029
 msgid "text entry field"
 msgstr "поле ввода текста"
 
-#: src/GridText.c:6023
+#: src/GridText.c:6032
 msgid "password entry field"
 msgstr "поле ввода пароля"
 
-#: src/GridText.c:6026
+#: src/GridText.c:6035
 msgid "checkbox"
 msgstr "независимая кнопка"
 
-#: src/GridText.c:6029
+#: src/GridText.c:6038
 msgid "radio button"
 msgstr "зависимая кнопка"
 
-#: src/GridText.c:6032
+#: src/GridText.c:6041
 msgid "submit button"
 msgstr "кнопка посылки"
 
-#: src/GridText.c:6035
+#: src/GridText.c:6044
 msgid "reset button"
 msgstr "кнопка очистки"
 
-#: src/GridText.c:6038
+#: src/GridText.c:6047
 msgid "popup menu"
 msgstr "всплывающее меню"
 
-#: src/GridText.c:6041
+#: src/GridText.c:6050
 msgid "hidden form field"
 msgstr "скрытое поле формы"
 
-#: src/GridText.c:6044
+#: src/GridText.c:6053
 msgid "text entry area"
 msgstr "область ввода текста"
 
-#: src/GridText.c:6047
+#: src/GridText.c:6056
 msgid "range entry field"
 msgstr "поле ввода диапазона"
 
-#: src/GridText.c:6050
+#: src/GridText.c:6059
 msgid "file entry field"
 msgstr "поле ввода файла"
 
-#: src/GridText.c:6053
+#: src/GridText.c:6062
 msgid "text-submit field"
 msgstr "текстовое поле посылки"
 
-#: src/GridText.c:6056
+#: src/GridText.c:6065
 msgid "image-submit button"
 msgstr "графическая кнопка посылки"
 
-#: src/GridText.c:6059
+#: src/GridText.c:6068
 msgid "keygen field"
 msgstr "поле keygen"
 
-#: src/GridText.c:6062
+#: src/GridText.c:6071
 msgid "unknown form field"
 msgstr "неизвестное поле формы"
 
-#: src/GridText.c:10074
+#: src/GridText.c:10231
 msgid "Can't open file for uploading"
 msgstr "Не удается открыть файл для загрузки!"
 
-#: src/GridText.c:11227
+#: src/GridText.c:11384
 #, c-format
 msgid "Submitting %s"
 msgstr "Посылка %s"
 
 #. ugliness has happened; inform user and do the best we can
-#: src/GridText.c:12375
+#: src/GridText.c:12533
 msgid "Hang Detect: TextAnchor struct corrupted - suggest aborting!"
 msgstr ""
 
 #. don't show previous state
-#: src/GridText.c:12580
+#: src/GridText.c:12738
 msgid "Wrap lines to fit displayed area?"
 msgstr "Перенести строки, чтобы попасть в область отображения?"
 
-#: src/GridText.c:12632
+#: src/GridText.c:12790
 msgid "Very long lines have been wrapped!"
 msgstr "Очень длинные строки были перенесены!"
 
-#: src/GridText.c:13073
+#: src/GridText.c:13232
 msgid "Very long lines have been truncated!"
 msgstr "Очень длинные строки были усечены!"
 
@@ -3544,31 +3544,31 @@ msgstr "no"
 msgid "Y/N/A/V"
 msgstr ""
 
-#: src/HTML.c:5914
+#: src/HTML.c:5915
 msgid "Description:"
 msgstr "Описание:"
 
-#: src/HTML.c:5919
+#: src/HTML.c:5920
 msgid "(none)"
 msgstr "(нет)"
 
-#: src/HTML.c:5923
+#: src/HTML.c:5924
 msgid "Filepath:"
 msgstr "Путь к файлу:"
 
-#: src/HTML.c:5929
+#: src/HTML.c:5930
 msgid "(unknown)"
 msgstr "(неизвестный)"
 
-#: src/HTML.c:7373
+#: src/HTML.c:7374
 msgid "Document has only hidden links.  Use the 'l'ist command."
 msgstr "Документ имеет только скрытые ссылки.  Используйте команду 'l'ist."
 
-#: src/HTML.c:7870
+#: src/HTML.c:7873
 msgid "Source cache error - disk full?"
 msgstr "Ошибка кэширования исходных файлов - переполнение диска?"
 
-#: src/HTML.c:7883
+#: src/HTML.c:7886
 msgid "Source cache error - not enough memory!"
 msgstr "Ошибка кэширования исходных файлов - не хватает памяти!"
 
@@ -3673,31 +3673,31 @@ msgstr "Внутренний"
 msgid "cookie_domain_flag_set error, aborting program"
 msgstr "ошибка cookie_domain_flag_set error, преграмма прерывается"
 
-#: src/LYCurses.c:1018
+#: src/LYCurses.c:1017
 msgid "Terminal initialisation failed - unknown terminal type?"
 msgstr "Ошибка при инициализации терминала - неизвестный тип терминала?"
 
-#: src/LYCurses.c:1443
+#: src/LYCurses.c:1442
 msgid "Terminal ="
 msgstr "Терминал ="
 
-#: src/LYCurses.c:1447
+#: src/LYCurses.c:1446
 msgid "You must use a vt100, 200, etc. terminal with this program."
 msgstr "С этой программой вы должны использовать терминал vt100, 200, и т.д."
 
-#: src/LYCurses.c:1496
+#: src/LYCurses.c:1495
 msgid "Your Terminal type is unknown!"
 msgstr "Тип вашего Терминала неизвестен!"
 
-#: src/LYCurses.c:1497
+#: src/LYCurses.c:1496
 msgid "Enter a terminal type:"
 msgstr "Введите тип терминала:"
 
-#: src/LYCurses.c:1511
+#: src/LYCurses.c:1510
 msgid "TERMINAL TYPE IS SET TO"
 msgstr "ТИП ТЕРМИНАЛА УСТАНОВЛЕН В"
 
-#: src/LYCurses.c:2088
+#: src/LYCurses.c:2007
 #, c-format
 msgid ""
 "\n"
@@ -3706,7 +3706,7 @@ msgstr ""
 "\n"
 " В %s Вер. %s произошла фатальная ошибка.\n"
 
-#: src/LYCurses.c:2091
+#: src/LYCurses.c:2010
 #, c-format
 msgid ""
 "\n"
@@ -4187,19 +4187,19 @@ msgstr "Это сообщение было автоматически сгенерировано"
 msgid "No system mailer configured"
 msgstr ""
 
-#: src/LYMain.c:998
+#: src/LYMain.c:1000
 msgid "No Winsock found, sorry."
 msgstr "К сожалению Winsock не найден."
 
-#: src/LYMain.c:1193
+#: src/LYMain.c:1195
 msgid "You MUST define a valid TMP or TEMP area!"
 msgstr "Вы ДОЛЖНЫ определить правильную область TMP или TEMP!"
 
-#: src/LYMain.c:1246 src/LYMainLoop.c:4977
+#: src/LYMain.c:1248 src/LYMainLoop.c:5052
 msgid "No such directory"
 msgstr "Нет каталога"
 
-#: src/LYMain.c:1453
+#: src/LYMain.c:1455
 #, c-format
 msgid ""
 "\n"
@@ -4210,7 +4210,7 @@ msgstr ""
 "Конфигурационный файл %s не доступен.\n"
 "\n"
 
-#: src/LYMain.c:1463
+#: src/LYMain.c:1465
 #, c-format
 msgid ""
 "\n"
@@ -4221,7 +4221,7 @@ msgstr ""
 "Кодировки Lynx не определены.\n"
 "\n"
 
-#: src/LYMain.c:1492
+#: src/LYMain.c:1494
 #, c-format
 msgid ""
 "\n"
@@ -4229,7 +4229,7 @@ msgid ""
 "\n"
 msgstr ""
 
-#: src/LYMain.c:1518
+#: src/LYMain.c:1520
 #, c-format
 msgid ""
 "\n"
@@ -4240,158 +4240,158 @@ msgstr ""
 "Файл Lynx %s не доступен.\n"
 "\n"
 
-#: src/LYMain.c:1761
+#: src/LYMain.c:1763
 msgid "Warning:"
 msgstr "Предупреждение:"
 
-#: src/LYMain.c:2326
+#: src/LYMain.c:2328
 msgid "persistent cookies state will be changed in next session only."
 msgstr "состояние постоянных cookie будет изменено только в следующем сеансе."
 
-#: src/LYMain.c:2563 src/LYMain.c:2608
+#: src/LYMain.c:2565 src/LYMain.c:2610
 #, c-format
 msgid "Lynx: ignoring unrecognized charset=%s\n"
 msgstr "Lynx: нераспознанная кодировка=%s игнорируется\n"
 
-#: src/LYMain.c:3119
+#: src/LYMain.c:3121
 #, fuzzy, c-format
 msgid "%s Version %s (%s)"
 msgstr "%s Версия %s (%s)\n"
 
-#: src/LYMain.c:3154
+#: src/LYMain.c:3156
 #, c-format
 msgid "Built on %s %s %s\n"
 msgstr "Собрано %s %s %s\n"
 
-#: src/LYMain.c:3176
+#: src/LYMain.c:3178
 msgid "Copyrights held by the University of Kansas, CERN, and other contributors."
 msgstr "Авторские права принадлежат университету Канзаса, CERN, и другим участникам."
 
-#: src/LYMain.c:3177
+#: src/LYMain.c:3179
 msgid "Distributed under the GNU General Public License."
 msgstr "Распространяется в рамках Универсальной Общественной Лицензии GNU."
 
-#: src/LYMain.c:3178
+#: src/LYMain.c:3180
 msgid "See http://lynx.isc.org/ and the online help for more information."
 msgstr "См. http://lynx.isc.org/ и помощь для дополнительной информации."
 
-#: src/LYMain.c:3942
+#: src/LYMain.c:3952
 #, c-format
 msgid "USAGE: %s [options] [file]\n"
 msgstr "ИСПОЛЬЗОВАНИЕ: %s [ключи] [файл]\n"
 
-#: src/LYMain.c:3943
+#: src/LYMain.c:3953
 #, c-format
 msgid "Options are:\n"
 msgstr "Ключи:\n"
 
-#: src/LYMain.c:4242
+#: src/LYMain.c:4252
 #, c-format
 msgid "%s: Invalid Option: %s\n"
 msgstr "%s: Неверная опция: %s\n"
 
-#: src/LYMainLoop.c:572
+#: src/LYMainLoop.c:575
 #, c-format
 msgid "Internal error: Invalid mouse link %d!"
 msgstr "Внутренняя ошибка: Неверная ссылка мыши %d!"
 
-#: src/LYMainLoop.c:689 src/LYMainLoop.c:4999
+#: src/LYMainLoop.c:692 src/LYMainLoop.c:5074
 msgid "A URL specified by the user"
 msgstr "URL, указанный пользователем"
 
-#: src/LYMainLoop.c:1145
+#: src/LYMainLoop.c:1148
 msgid "Enctype multipart/form-data not yet supported!  Cannot submit."
 msgstr "Enctype multipart/form-data еще не поддерживается!  Не удается послать."
 
 #.
 #. * Make a name for this help file.
 #.
-#: src/LYMainLoop.c:3047
+#: src/LYMainLoop.c:3050
 msgid "Help Screen"
 msgstr "Экран Помощи"
 
-#: src/LYMainLoop.c:3168
+#: src/LYMainLoop.c:3171
 msgid "System Index"
 msgstr "Системный Индекс"
 
-#: src/LYMainLoop.c:3528 src/LYMainLoop.c:5223
+#: src/LYMainLoop.c:3531 src/LYMainLoop.c:5298
 msgid "Entry into main screen"
 msgstr "Вход на главный экран"
 
-#: src/LYMainLoop.c:3791
+#: src/LYMainLoop.c:3794
 msgid "No next document present"
 msgstr "Следующий документ отсутствует"
 
-#: src/LYMainLoop.c:4089
+#: src/LYMainLoop.c:4093
 msgid "charset for this document specified explicitly, sorry..."
 msgstr "извините, кодировка для этого документа указана явно..."
 
-#: src/LYMainLoop.c:4953
+#: src/LYMainLoop.c:5028
 msgid "cd to:"
 msgstr "перейти в:"
 
-#: src/LYMainLoop.c:4980
+#: src/LYMainLoop.c:5055
 msgid "A component of path is not a directory"
 msgstr "Компонента пути не является каталогом"
 
-#: src/LYMainLoop.c:4983
+#: src/LYMainLoop.c:5058
 msgid "failed to change directory"
 msgstr "не удалось изменить каталог"
 
-#: src/LYMainLoop.c:6144
+#: src/LYMainLoop.c:6219
 msgid "Reparsing document under current settings..."
 msgstr "Документ разбирается заново с учетом текущих установок..."
 
-#: src/LYMainLoop.c:6433
+#: src/LYMainLoop.c:6509
 #, c-format
 msgid "Fatal error - could not open output file %s\n"
 msgstr "Фатальная ошибка - не удается открыть выходной файл %s\n"
 
-#: src/LYMainLoop.c:6777
+#: src/LYMainLoop.c:6853
 msgid "TABLE center enable."
 msgstr ""
 
-#: src/LYMainLoop.c:6780
+#: src/LYMainLoop.c:6856
 msgid "TABLE center disable."
 msgstr ""
 
-#: src/LYMainLoop.c:6857
+#: src/LYMainLoop.c:6933
 msgid "Current URL is empty."
 msgstr "Текущий URL пуст."
 
-#: src/LYMainLoop.c:6859 src/LYUtils.c:1702
+#: src/LYMainLoop.c:6935 src/LYUtils.c:1714
 msgid "Copy to clipboard failed."
 msgstr "Ощибка при копировании в буфер обмена."
 
-#: src/LYMainLoop.c:6861
+#: src/LYMainLoop.c:6937
 msgid "Document URL put to clipboard."
 msgstr "URL документа помещен в буфер обмена."
 
-#: src/LYMainLoop.c:6863
+#: src/LYMainLoop.c:6939
 msgid "Link URL put to clipboard."
 msgstr "URL ссылки помещен в буфер обмена."
 
-#: src/LYMainLoop.c:6890
+#: src/LYMainLoop.c:6966
 msgid "No URL in the clipboard."
 msgstr "URL в буфере обмена отсутствует."
 
-#: src/LYMainLoop.c:7554 src/LYMainLoop.c:7724
+#: src/LYMainLoop.c:7630 src/LYMainLoop.c:7800
 msgid "-index-"
 msgstr "-индекс-"
 
-#: src/LYMainLoop.c:7664
+#: src/LYMainLoop.c:7740
 msgid "lynx: Can't access startfile"
 msgstr "lynx: Нет доступа к начальному файлу"
 
-#: src/LYMainLoop.c:7676
+#: src/LYMainLoop.c:7752
 msgid "lynx: Start file could not be found or is not text/html or text/plain"
 msgstr "lynx: Начальный файл либо не удается найти, либо он не text/html или text/plain"
 
-#: src/LYMainLoop.c:7677
+#: src/LYMainLoop.c:7753
 msgid "      Exiting..."
 msgstr "      Выход..."
 
-#: src/LYMainLoop.c:7718
+#: src/LYMainLoop.c:7794
 msgid "-more-"
 msgstr "-далее-"
 
@@ -4455,357 +4455,357 @@ msgstr ""
 msgid "Message has no original text!"
 msgstr "Сообщение не имеет первоначального текста!"
 
-#: src/LYOptions.c:760
+#: src/LYOptions.c:758
 msgid "review/edit B)ookmarks files"
 msgstr "просмотреть/отредактировать файлы B)закладок"
 
-#: src/LYOptions.c:762
+#: src/LYOptions.c:760
 msgid "B)ookmark file: "
 msgstr "Файл B)закладок: "
 
-#: src/LYOptions.c:2125 src/LYOptions.c:2132
+#: src/LYOptions.c:2123 src/LYOptions.c:2130
 msgid "ON"
 msgstr ""
 
 #. verbose_img variable
-#: src/LYOptions.c:2126 src/LYOptions.c:2131 src/LYOptions.c:2279 src/LYOptions.c:2290
+#: src/LYOptions.c:2124 src/LYOptions.c:2129 src/LYOptions.c:2277 src/LYOptions.c:2288
 msgid "OFF"
 msgstr ""
 
-#: src/LYOptions.c:2127
+#: src/LYOptions.c:2125
 msgid "NEVER"
 msgstr ""
 
-#: src/LYOptions.c:2128
+#: src/LYOptions.c:2126
 msgid "ALWAYS"
 msgstr ""
 
-#: src/LYOptions.c:2144 src/LYOptions.c:2271
+#: src/LYOptions.c:2142 src/LYOptions.c:2269
 msgid "ignore"
 msgstr ""
 
-#: src/LYOptions.c:2145
+#: src/LYOptions.c:2143
 msgid "ask user"
 msgstr ""
 
-#: src/LYOptions.c:2146
+#: src/LYOptions.c:2144
 msgid "accept all"
 msgstr ""
 
-#: src/LYOptions.c:2158
+#: src/LYOptions.c:2156
 msgid "ALWAYS OFF"
 msgstr ""
 
-#: src/LYOptions.c:2159
+#: src/LYOptions.c:2157
 msgid "FOR LOCAL FILES ONLY"
 msgstr ""
 
-#: src/LYOptions.c:2161
+#: src/LYOptions.c:2159
 msgid "ALWAYS ON"
 msgstr ""
 
-#: src/LYOptions.c:2173
+#: src/LYOptions.c:2171
 msgid "Numbers act as arrows"
 msgstr ""
 
-#: src/LYOptions.c:2175
+#: src/LYOptions.c:2173
 msgid "Links are numbered"
 msgstr ""
 
-#: src/LYOptions.c:2178
+#: src/LYOptions.c:2176
 msgid "Links and form fields are numbered"
 msgstr ""
 
-#: src/LYOptions.c:2181
+#: src/LYOptions.c:2179
 msgid "Form fields are numbered"
 msgstr ""
 
-#: src/LYOptions.c:2191
+#: src/LYOptions.c:2189
 msgid "Case insensitive"
 msgstr ""
 
-#: src/LYOptions.c:2192
+#: src/LYOptions.c:2190
 msgid "Case sensitive"
 msgstr ""
 
-#: src/LYOptions.c:2216
+#: src/LYOptions.c:2214
 msgid "prompt normally"
 msgstr ""
 
-#: src/LYOptions.c:2217
+#: src/LYOptions.c:2215
 msgid "force yes-response"
 msgstr ""
 
-#: src/LYOptions.c:2218
+#: src/LYOptions.c:2216
 msgid "force no-response"
 msgstr ""
 
-#: src/LYOptions.c:2236
+#: src/LYOptions.c:2234
 #, fuzzy
 msgid "Novice"
 msgstr "Нет"
 
-#: src/LYOptions.c:2237
+#: src/LYOptions.c:2235
 #, fuzzy
 msgid "Intermediate"
 msgstr "Внутренний"
 
-#: src/LYOptions.c:2238
+#: src/LYOptions.c:2236
 msgid "Advanced"
 msgstr ""
 
-#: src/LYOptions.c:2247
+#: src/LYOptions.c:2245
 msgid "By First Visit"
 msgstr ""
 
-#: src/LYOptions.c:2249
+#: src/LYOptions.c:2247
 msgid "By First Visit Reversed"
 msgstr ""
 
-#: src/LYOptions.c:2250
+#: src/LYOptions.c:2248
 msgid "As Visit Tree"
 msgstr ""
 
-#: src/LYOptions.c:2251
+#: src/LYOptions.c:2249
 msgid "By Last Visit"
 msgstr ""
 
-#: src/LYOptions.c:2253
+#: src/LYOptions.c:2251
 msgid "By Last Visit Reversed"
 msgstr ""
 
 #. Old_DTD variable
-#: src/LYOptions.c:2264
+#: src/LYOptions.c:2262
 msgid "relaxed (TagSoup mode)"
 msgstr ""
 
-#: src/LYOptions.c:2265
+#: src/LYOptions.c:2263
 msgid "strict (SortaSGML mode)"
 msgstr ""
 
-#: src/LYOptions.c:2272
+#: src/LYOptions.c:2270
 msgid "as labels"
 msgstr ""
 
-#: src/LYOptions.c:2273
+#: src/LYOptions.c:2271
 #, fuzzy
 msgid "as links"
 msgstr "эту ссылку"
 
-#: src/LYOptions.c:2280
+#: src/LYOptions.c:2278
 #, fuzzy
 msgid "show filename"
 msgstr " (неверное имя файла)"
 
-#: src/LYOptions.c:2291
+#: src/LYOptions.c:2289
 msgid "STANDARD"
 msgstr ""
 
-#: src/LYOptions.c:2292
+#: src/LYOptions.c:2290
 msgid "ADVANCED"
 msgstr ""
 
-#: src/LYOptions.c:2318
+#: src/LYOptions.c:2316
 #, fuzzy
 msgid "Directories first"
 msgstr "Подкаталоги:"
 
-#: src/LYOptions.c:2319
+#: src/LYOptions.c:2317
 #, fuzzy
 msgid "Files first"
 msgstr " сначала"
 
-#: src/LYOptions.c:2320
+#: src/LYOptions.c:2318
 #, fuzzy
 msgid "Mixed style"
 msgstr "Стиль редактирования строк"
 
-#: src/LYOptions.c:2328 src/LYOptions.c:2345
+#: src/LYOptions.c:2326 src/LYOptions.c:2343
 #, fuzzy
 msgid "By Name"
 msgstr "Имя:"
 
-#: src/LYOptions.c:2329 src/LYOptions.c:2346
+#: src/LYOptions.c:2327 src/LYOptions.c:2344
 msgid "By Type"
 msgstr ""
 
-#: src/LYOptions.c:2330 src/LYOptions.c:2347
+#: src/LYOptions.c:2328 src/LYOptions.c:2345
 #, fuzzy
 msgid "By Size"
 msgstr "РазмерБайта:"
 
-#: src/LYOptions.c:2331 src/LYOptions.c:2348
+#: src/LYOptions.c:2329 src/LYOptions.c:2346
 #, fuzzy
 msgid "By Date"
 msgstr "Дата:"
 
-#: src/LYOptions.c:2332
+#: src/LYOptions.c:2330
 msgid "By Mode"
 msgstr ""
 
-#: src/LYOptions.c:2334
+#: src/LYOptions.c:2332
 msgid "By User"
 msgstr ""
 
-#: src/LYOptions.c:2335
+#: src/LYOptions.c:2333
 #, fuzzy
 msgid "By Group"
 msgstr "Группа"
 
-#: src/LYOptions.c:2356
+#: src/LYOptions.c:2354
 msgid "Do not show rate"
 msgstr ""
 
-#: src/LYOptions.c:2357 src/LYOptions.c:2358
+#: src/LYOptions.c:2355 src/LYOptions.c:2356
 #, fuzzy, c-format
 msgid "Show %s/sec rate"
 msgstr "Показывать скорость передачи"
 
-#: src/LYOptions.c:2360 src/LYOptions.c:2361
+#: src/LYOptions.c:2358 src/LYOptions.c:2359
 #, c-format
 msgid "Show %s/sec, ETA"
 msgstr ""
 
-#: src/LYOptions.c:2373
+#: src/LYOptions.c:2371
 msgid "Accept lynx's internal types"
 msgstr ""
 
-#: src/LYOptions.c:2374
+#: src/LYOptions.c:2372
 msgid "Also accept lynx.cfg's types"
 msgstr ""
 
-#: src/LYOptions.c:2375
+#: src/LYOptions.c:2373
 msgid "Also accept user's types"
 msgstr ""
 
-#: src/LYOptions.c:2376
+#: src/LYOptions.c:2374
 msgid "Also accept system's types"
 msgstr ""
 
-#: src/LYOptions.c:2377
+#: src/LYOptions.c:2375
 #, fuzzy
 msgid "Accept all types"
 msgstr "Принять изменения"
 
-#: src/LYOptions.c:2386
+#: src/LYOptions.c:2384
 msgid "gzip"
 msgstr ""
 
-#: src/LYOptions.c:2387
+#: src/LYOptions.c:2385
 msgid "deflate"
 msgstr ""
 
-#: src/LYOptions.c:2390
+#: src/LYOptions.c:2388
 msgid "compress"
 msgstr ""
 
-#: src/LYOptions.c:2393
+#: src/LYOptions.c:2391
 msgid "bzip2"
 msgstr ""
 
-#: src/LYOptions.c:2395
+#: src/LYOptions.c:2393
 msgid "All"
 msgstr ""
 
-#: src/LYOptions.c:2660 src/LYOptions.c:2684
+#: src/LYOptions.c:2658 src/LYOptions.c:2682
 #, c-format
 msgid "Use %s to invoke the Options menu!"
 msgstr "Используйте %s для вызова меню Параметров!"
 
-#: src/LYOptions.c:3431
+#: src/LYOptions.c:3429
 msgid "(options marked with (!) will not be saved)"
 msgstr "(параметры, отмеченные (!) сохранены не будут)"
 
-#: src/LYOptions.c:3439
+#: src/LYOptions.c:3437
 msgid "General Preferences"
 msgstr "Общие Предпочтения"
 
 #. ***************************************************************
 #. User Mode: SELECT
-#: src/LYOptions.c:3443
+#: src/LYOptions.c:3441
 msgid "User mode"
 msgstr "Режим пользователя"
 
 #. Editor: INPUT
-#: src/LYOptions.c:3449
+#: src/LYOptions.c:3447
 msgid "Editor"
 msgstr "Редактор"
 
 #. Search Type: SELECT
-#: src/LYOptions.c:3454
+#: src/LYOptions.c:3452
 msgid "Type of Search"
 msgstr "Тип поиска"
 
-#: src/LYOptions.c:3459
+#: src/LYOptions.c:3457
 msgid "Security and Privacy"
 msgstr ""
 
 #. ***************************************************************
 #. Cookies: SELECT
-#: src/LYOptions.c:3463
+#: src/LYOptions.c:3461
 msgid "Cookies"
 msgstr "Cookie"
 
 #. Cookie Prompting: SELECT
-#: src/LYOptions.c:3477
+#: src/LYOptions.c:3475
 msgid "Invalid-Cookie Prompting"
 msgstr ""
 
 #. SSL Prompting: SELECT
-#: src/LYOptions.c:3484
+#: src/LYOptions.c:3482
 msgid "SSL Prompting"
 msgstr ""
 
-#: src/LYOptions.c:3490
+#: src/LYOptions.c:3488
 msgid "Keyboard Input"
 msgstr "Ввод с клавиатуры"
 
 #. ***************************************************************
 #. Keypad Mode: SELECT
-#: src/LYOptions.c:3494
+#: src/LYOptions.c:3492
 msgid "Keypad mode"
 msgstr "Режим дополнительной клавиатуры"
 
 #. Emacs keys: ON/OFF
-#: src/LYOptions.c:3500
+#: src/LYOptions.c:3498
 msgid "Emacs keys"
 msgstr "Клавиши Emacs"
 
 #. VI Keys: ON/OFF
-#: src/LYOptions.c:3506
+#: src/LYOptions.c:3504
 msgid "VI keys"
 msgstr "Клавиши VI"
 
 #. Line edit style: SELECT
 #. well, at least 2 line edit styles available
-#: src/LYOptions.c:3513
+#: src/LYOptions.c:3511
 msgid "Line edit style"
 msgstr "Стиль редактирования строк"
 
 #. Keyboard layout: SELECT
-#: src/LYOptions.c:3525
+#: src/LYOptions.c:3523
 msgid "Keyboard layout"
 msgstr "Раскладка клавиатуры"
 
 #.
 #. * Display and Character Set
 #.
-#: src/LYOptions.c:3539
+#: src/LYOptions.c:3537
 msgid "Display and Character Set"
 msgstr "Отображение и Набор Символов"
 
 #. Use locale-based character set: ON/OFF
-#: src/LYOptions.c:3544
+#: src/LYOptions.c:3542
 #, fuzzy
 msgid "Use locale-based character set"
 msgstr "Подразумеваемая кодировка документа"
 
 #. Display Character Set: SELECT
-#: src/LYOptions.c:3553
+#: src/LYOptions.c:3551
 msgid "Display character set"
 msgstr "Кодировка отображения"
 
-#: src/LYOptions.c:3584
+#: src/LYOptions.c:3582
 msgid "Assumed document character set"
 msgstr "Подразумеваемая кодировка документа"
 
@@ -4814,173 +4814,173 @@ msgstr "Подразумеваемая кодировка документа"
 #. * we split the header to make it more readable:
 #. * "CJK mode" for CJK display charsets, and "Raw 8-bit" for others.
 #.
-#: src/LYOptions.c:3604
+#: src/LYOptions.c:3602
 msgid "CJK mode"
 msgstr "Режим CJK"
 
-#: src/LYOptions.c:3606
+#: src/LYOptions.c:3604
 msgid "Raw 8-bit"
 msgstr "Необработанный 8-битный режим"
 
 #. X Display: INPUT
-#: src/LYOptions.c:3614
+#: src/LYOptions.c:3612
 msgid "X Display"
 msgstr "Экран X"
 
 #.
 #. * Document Appearance
 #.
-#: src/LYOptions.c:3620
+#: src/LYOptions.c:3618
 msgid "Document Appearance"
 msgstr "Внешний вид документа"
 
-#: src/LYOptions.c:3626
+#: src/LYOptions.c:3624
 msgid "Show color"
 msgstr "Показывать цвет"
 
 #. Show cursor: ON/OFF
-#: src/LYOptions.c:3650
+#: src/LYOptions.c:3648
 msgid "Show cursor"
 msgstr "Показывать курсор"
 
 #. Underline links: ON/OFF
-#: src/LYOptions.c:3656
+#: src/LYOptions.c:3654
 #, fuzzy
 msgid "Underline links"
 msgstr "Скрытых ссылок:"
 
 #. Show scrollbar: ON/OFF
-#: src/LYOptions.c:3663
+#: src/LYOptions.c:3661
 msgid "Show scrollbar"
 msgstr "Показывать полосу прокрутки"
 
 #. Select Popups: ON/OFF
-#: src/LYOptions.c:3670
+#: src/LYOptions.c:3668
 msgid "Popups for select fields"
 msgstr "Всплывающие меню для выбранных полей"
 
 #. HTML error recovery: SELECT
-#: src/LYOptions.c:3676
+#: src/LYOptions.c:3674
 msgid "HTML error recovery"
 msgstr "Восстановление от ошибок в HTML"
 
 #. Show Images: SELECT
-#: src/LYOptions.c:3682
+#: src/LYOptions.c:3680
 msgid "Show images"
 msgstr "Показать изображения"
 
 #. Verbose Images: ON/OFF
-#: src/LYOptions.c:3696
+#: src/LYOptions.c:3694
 msgid "Verbose images"
 msgstr "Заменять изображения на адреса"
 
-#: src/LYOptions.c:3705
+#: src/LYOptions.c:3703
 msgid "Headers Transferred to Remote Servers"
 msgstr "Заголовки, переданные на удаленные серверы"
 
 #. ***************************************************************
 #. Mail Address: INPUT
-#: src/LYOptions.c:3709
+#: src/LYOptions.c:3707
 msgid "Personal mail address"
 msgstr "Персональный почтовый адрес"
 
 #. Mail Address: INPUT
-#: src/LYOptions.c:3714
+#: src/LYOptions.c:3712
 #, fuzzy
 msgid "Password for anonymous ftp"
 msgstr "Пароль для узла новостей '%s':"
 
 #. Preferred media type: SELECT
-#: src/LYOptions.c:3719
+#: src/LYOptions.c:3717
 #, fuzzy
 msgid "Preferred media type"
 msgstr "Передано %d байт"
 
 #. Preferred encoding: SELECT
-#: src/LYOptions.c:3725
+#: src/LYOptions.c:3723
 #, fuzzy
 msgid "Preferred encoding"
 msgstr "Предпочитаемый язык документа"
 
 #. Preferred Document Character Set: INPUT
-#: src/LYOptions.c:3731
+#: src/LYOptions.c:3729
 msgid "Preferred document character set"
 msgstr "Предпочитаемая кодировка документа"
 
 #. Preferred Document Language: INPUT
-#: src/LYOptions.c:3736
+#: src/LYOptions.c:3734
 msgid "Preferred document language"
 msgstr "Предпочитаемый язык документа"
 
-#: src/LYOptions.c:3742
+#: src/LYOptions.c:3740
 msgid "User-Agent header"
 msgstr "Заголовок User-Agent"
 
 #.
 #. * Listing and Accessing Files
 #.
-#: src/LYOptions.c:3750
+#: src/LYOptions.c:3748
 msgid "Listing and Accessing Files"
 msgstr "Вывод списка файлов и доступ к ним"
 
 #. ***************************************************************
 #. FTP sort: SELECT
-#: src/LYOptions.c:3754
+#: src/LYOptions.c:3752
 msgid "FTP sort criteria"
 msgstr "Критерий сортировки FTP"
 
 #. Local Directory Sort: SELECT
-#: src/LYOptions.c:3761
+#: src/LYOptions.c:3759
 msgid "Local directory sort criteria"
 msgstr "Критерий сортировки локального каталога"
 
 #. Local Directory Order: SELECT
-#: src/LYOptions.c:3767
+#: src/LYOptions.c:3765
 msgid "Local directory sort order"
 msgstr "Критерий сортировки локального каталога"
 
-#: src/LYOptions.c:3776
+#: src/LYOptions.c:3774
 msgid "Show dot files"
 msgstr "Показывать dot-файлы"
 
-#: src/LYOptions.c:3784
+#: src/LYOptions.c:3782
 msgid "Execution links"
 msgstr "Выполнение ссылок"
 
 #. Show transfer rate: SELECT
-#: src/LYOptions.c:3804
+#: src/LYOptions.c:3802
 msgid "Show transfer rate"
 msgstr "Показывать скорость передачи"
 
 #.
 #. * Special Files and Screens
 #.
-#: src/LYOptions.c:3824
+#: src/LYOptions.c:3822
 msgid "Special Files and Screens"
 msgstr "Специальные файлы и экраны"
 
-#: src/LYOptions.c:3829
+#: src/LYOptions.c:3827
 msgid "Multi-bookmarks"
 msgstr "Множественные закладки"
 
-#: src/LYOptions.c:3837
+#: src/LYOptions.c:3835
 msgid "Review/edit Bookmarks files"
 msgstr "Просмотреть/отредактировать файла закладок"
 
-#: src/LYOptions.c:3839
+#: src/LYOptions.c:3837
 msgid "Goto multi-bookmark menu"
 msgstr "Переход к меню множественных закладок"
 
-#: src/LYOptions.c:3841
+#: src/LYOptions.c:3839
 msgid "Bookmarks file"
 msgstr "Файл закладок"
 
 #. Visited Pages: SELECT
-#: src/LYOptions.c:3847
+#: src/LYOptions.c:3845
 msgid "Visited Pages"
 msgstr "Посещенные страницы"
 
-#: src/LYOptions.c:3852
+#: src/LYOptions.c:3850
 msgid "View the file "
 msgstr "Просмотреть файл"
 
@@ -5356,7 +5356,7 @@ msgstr "На этой странице нет ссылок"
 msgid "Server Headers:"
 msgstr "Сервер:"
 
-#: src/LYStyle.c:286
+#: src/LYStyle.c:294
 #, c-format
 msgid ""
 "Syntax Error parsing style in lss file:\n"
@@ -5405,33 +5405,33 @@ msgstr "Загрузить в:"
 msgid "Upload options:"
 msgstr "Опции загрузки:"
 
-#: src/LYUtils.c:1704
+#: src/LYUtils.c:1716
 msgid "Download document URL put to clipboard."
 msgstr ""
 
-#: src/LYUtils.c:2481
+#: src/LYUtils.c:2493
 msgid "Unexpected access protocol for this URL scheme."
 msgstr "Неожиданный протокол доступа для этой схемы URL."
 
-#: src/LYUtils.c:3289
+#: src/LYUtils.c:3301
 msgid "Too many tempfiles"
 msgstr "Слишком много временных файлов"
 
-#: src/LYUtils.c:3593
+#: src/LYUtils.c:3605
 msgid "unknown restriction"
 msgstr "неизвестное ограничение"
 
-#: src/LYUtils.c:3623
+#: src/LYUtils.c:3635
 #, c-format
 msgid "No restrictions set.\n"
 msgstr "Ограничений не установлены.\n"
 
-#: src/LYUtils.c:3626
+#: src/LYUtils.c:3638
 #, c-format
 msgid "Restrictions set:\n"
 msgstr "Установленные ограничения:\n"
 
-#: src/LYUtils.c:5010
+#: src/LYUtils.c:5022
 msgid "Cannot find HOME directory"
 msgstr "Домашний каталог не найден"
 

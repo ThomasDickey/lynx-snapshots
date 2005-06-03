@@ -389,10 +389,13 @@ void LYSetNewline(int value)
     Newline = value;
 }
 
+#define LYSetNewline(value)	Newline = value
+
 int LYGetNewline(void)
 {
     return Newline;
 }
+#define LYGetNewline()		Newline
 
 #ifdef USE_SOURCE_CACHE
 static BOOLEAN from_source_cache = FALSE;
@@ -402,15 +405,15 @@ static BOOLEAN from_source_cache = FALSE;
  */
 static BOOLEAN reparse_document(void)
 {
-    BOOLEAN ok;
+    BOOLEAN result;
 
     from_source_cache = TRUE;	/* set for LYMainLoop_pageDisplay() */
-    if ((ok = HTreparse_document()) != FALSE) {
+    if ((result = HTreparse_document()) != FALSE) {
 	from_source_cache = TRUE;	/* set for mainloop refresh */
-	return ok;
+    } else {
+	from_source_cache = FALSE;
     }
-    from_source_cache = FALSE;
-    return ok;
+    return result;
 }
 #endif /* USE_SOURCE_CACHE */
 
@@ -463,13 +466,13 @@ static void move_address(DocInfo *dst, DocInfo *src)
 BOOL LYMainLoop_pageDisplay(int line_num)
 {
     const char *pound;
-    int prev_newline = Newline;
+    int prev_newline = LYGetNewline();
 
     /*
      * Override Newline with a new value if user scrolled the document while
      * loading (in LYUtils.c).
      */
-    Newline = line_num;
+    LYSetNewline(line_num);
 
 #ifdef USE_SOURCE_CACHE
     /*
@@ -494,14 +497,14 @@ BOOL LYMainLoop_pageDisplay(int line_num)
 	    && *pound && *(pound + 1)) {
 	    if (HTFindPoundSelector(pound + 1)) {
 		/* HTFindPoundSelector will initialize www_search_result */
-		Newline = www_search_result;
+		LYSetNewline(www_search_result);
 	    } else {
-		Newline = prev_newline;		/* restore ??? */
+		LYSetNewline(prev_newline);	/* restore ??? */
 		return NO;	/* no repaint */
 	    }
 	}
 
-    HText_pageDisplay(Newline, prev_target);
+    HText_pageDisplay(LYGetNewline(), prev_target);
     return YES;
 }
 #endif /* DISP_PARTIAL */
@@ -2233,14 +2236,14 @@ static void handle_LYK_DOWN_LINK(int *follow_col,
 	if (newlink > -1) {
 	    set_curdoc_link(newlink);
 	} else if (more) {	/* next page */
-	    Newline += (display_lines);
+	    Newline += display_lines;
 	} else if (*old_c != real_c) {
 	    *old_c = real_c;
 	    HTUserMsg(NO_LINKS_BELOW);
 	    return;
 	}
     } else if (more) {		/* next page */
-	Newline += (display_lines);
+	Newline += display_lines;
 
     } else if (*old_c != real_c) {
 	*old_c = real_c;
@@ -2413,7 +2416,7 @@ static void handle_LYK_EDIT(int *old_c,
 		    if (S_ISREG(dir_info.st_mode)) {
 			StrAllocCopy(tp, links[curdoc.link].lname);
 			HTUnEscapeSome(tp, "/");
-			if (edit_current_file(tp, curdoc.link, Newline)) {
+			if (edit_current_file(tp, curdoc.link, LYGetNewline())) {
 			    DIRED_UNCACHE_1;
 			    move_address(&newdoc, &curdoc);
 #ifdef NO_SEEK_OLD_POSITION
@@ -2439,7 +2442,7 @@ static void handle_LYK_EDIT(int *old_c,
     } else
 #endif /* DIRED_SUPPORT */
     if (non_empty(editor)) {
-	if (edit_current_file(newdoc.address, curdoc.link, Newline)) {
+	if (edit_current_file(newdoc.address, curdoc.link, LYGetNewline())) {
 	    HTuncache_current_document();
 	    LYforce_no_cache = TRUE;	/*force reload of document */
 	    free_address(&curdoc);	/* so it doesn't get pushed */
@@ -2517,7 +2520,8 @@ static void handle_LYK_EDIT_TEXTAREA(BOOLEAN *refresh_screen,
 	 * the approximate center of the screen.
 	 */
 
-/* curdoc.link += n; *//* works, except for page crossing, */
+	/* curdoc.link += n; */
+	/* works, except for page crossing, */
 	/* damnit; why is nothing ever easy */
 
 	/* start screen */
@@ -2648,6 +2652,7 @@ static BOOLEAN handle_LYK_FASTBACKW_LINK(int *cmd,
 {
     int samepage = 0, nextlink = curdoc.link;
     int res;
+    int code = FALSE;
 
     if (nlinks > 1) {
 
@@ -2674,7 +2679,7 @@ static BOOLEAN handle_LYK_FASTBACKW_LINK(int *cmd,
 		     sametext(links[nextlink].l_form->name, thisname));
 		samepage = 1;
 
-	    } else if (!more && Newline == 1 &&
+	    } else if (!more && LYGetNewline() == 1 &&
 		       (links[0].type == WWW_FORM_LINK_TYPE &&
 			links[0].l_form->type == F_TEXTAREA_TYPE &&
 			links[0].l_form->number == thisgroup &&
@@ -2686,18 +2691,19 @@ static BOOLEAN handle_LYK_FASTBACKW_LINK(int *cmd,
 		nextlink = nlinks - 1;
 		samepage = 1;
 
-	    } else if (!more && Newline == 1 && curdoc.link > 0) {
+	    } else if (!more && LYGetNewline() == 1 && curdoc.link > 0) {
 		nextlink = 0;
 		samepage = 1;
 	    }
 	} else if (curdoc.link > 0) {
 	    nextlink--;
 	    samepage = 1;
-	} else if (!more && Newline == 1) {
+	} else if (!more && LYGetNewline() == 1) {
 	    nextlink = nlinks - 1;
 	    samepage = 1;
 	}
     }
+
     if (samepage) {
 	/*
 	 * If the link as determined so far is part of a group of textarea
@@ -2726,9 +2732,8 @@ static BOOLEAN handle_LYK_FASTBACKW_LINK(int *cmd,
 		}
 	}
 	set_curdoc_link(nextlink);
-	return FALSE;		/* and we are done. */
 
-    } else if (Newline > 1 &&	/* need a previous page */
+    } else if (LYGetNewline() > 1 &&	/* need a previous page */
 	       (res = HTGetLinkOrFieldStart(curdoc.link,
 					    &Newline, &newdoc.link,
 					    -1, TRUE)) != NO) {
@@ -2740,16 +2745,15 @@ static BOOLEAN handle_LYK_FASTBACKW_LINK(int *cmd,
 	    if (nlinks > 0)
 		curdoc.link = 0;
 	    *cmd = LYK_PREV_LINK;
-	    return TRUE;
+	    code = TRUE;
+	} else {
+	    Newline++;		/* our line counting starts with 1 not 0 */
 	}
-	Newline++;		/* our line counting starts with 1 not 0 */
-	/* nothing more to do here */
-
     } else if (*old_c != real_c) {
 	*old_c = real_c;
 	HTInfoMsg(NO_LINKS_ABOVE);
     }
-    return FALSE;
+    return code;
 }
 
 static void handle_LYK_FASTFORW_LINK(int *old_c,
@@ -2781,27 +2785,26 @@ static void handle_LYK_FASTFORW_LINK(int *old_c,
 		     links[nextlink].l_form->number == thisgroup &&
 		     sametext(links[nextlink].l_form->name, thisname));
 		samepage = 1;
-	    } else if (!more && Newline == 1 && curdoc.link > 0) {
+	    } else if (!more && LYGetNewline() == 1 && curdoc.link > 0) {
 		nextlink = 0;
 		samepage = 1;
 	    }
 	} else if (curdoc.link < nlinks - 1) {
 	    nextlink++;
 	    samepage = 1;
-	} else if (!more && Newline == 1 && curdoc.link > 0) {
+	} else if (!more && LYGetNewline() == 1 && curdoc.link > 0) {
 	    nextlink = 0;
 	    samepage = 1;
 	}
     }
+
     if (samepage) {
 	set_curdoc_link(nextlink);
-	return;			/* and we are done. */
-
+    } else if (!more && LYGetNewline() == 1 && curdoc.link == nlinks - 1) {
 	/*
 	 * At the bottom of list and there is only one page.  Move to the top
 	 * link on the page.
 	 */
-    } else if (!more && Newline == 1 && curdoc.link == nlinks - 1) {
 	set_curdoc_link(0);
 
     } else if (more &&		/* need a later page */
@@ -3215,7 +3218,7 @@ static void handle_LYK_INDEX_SEARCH(BOOLEAN *force_load,
 	    StrAllocCopy(newdoc.post_content_type, curdoc.post_content_type);
 	    newdoc.internal_link = FALSE;
 	    curdoc.line = -1;
-	    Newline = 0;
+	    LYSetNewline(0);
 	} else if (use_this_url_instead != NULL) {
 	    /*
 	     * Got back a redirecting URL.  Check it out.
@@ -3824,11 +3827,11 @@ static void handle_LYK_NEXT_LINK(int c,
 	 * At the bottom of list and there is only one page.  Move to the top
 	 * link on the page.
 	 */
-    } else if (!more && Newline == 1 && curdoc.link == nlinks - 1) {
+    } else if (!more && LYGetNewline() == 1 && curdoc.link == nlinks - 1) {
 	set_curdoc_link(0);
 
     } else if (more) {		/* next page */
-	Newline += (display_lines);
+	Newline += display_lines;
 
     } else if (*old_c != real_c) {
 	*old_c = real_c;
@@ -3878,7 +3881,7 @@ static void handle_LYK_PREV_LINK(int *arrowup,
 	set_curdoc_link(curdoc.link - 1);
 
     } else if (!more &&
-	       curdoc.link == 0 && Newline == 1) {	/* at the top of list */
+	       curdoc.link == 0 && LYGetNewline() == 1) {	/* at the top of list */
 	/*
 	 * If there is only one page of data and the user goes off the top,
 	 * just move the cursor to last link on the page.
@@ -3889,8 +3892,9 @@ static void handle_LYK_PREV_LINK(int *arrowup,
 	/*
 	 * Go back to the previous page.
 	 */
-	int scrollamount = (Newline > display_lines ?
-			    display_lines : Newline - 1);
+	int scrollamount = (LYGetNewline() > display_lines
+			    ? display_lines
+			    : LYGetNewline() - 1);
 
 	Newline -= scrollamount;
 	if (scrollamount < display_lines &&
@@ -4020,7 +4024,7 @@ static int handle_PREV_DOC(int *cmd,
 static void handle_LYK_PREV_PAGE(int *old_c,
 				 int real_c)
 {
-    if (Newline > 1) {
+    if (LYGetNewline() > 1) {
 	Newline -= display_lines;
     } else if (curdoc.link > 0) {
 	set_curdoc_link(0);
@@ -4239,15 +4243,84 @@ static void handle_LYK_SOFT_DQUOTES(void)
     return;
 }
 
+#define GetAnchorNumber(link) \
+			((nlinks > 0 && link >= 0) \
+    			 ? links[link].anchor_number \
+			 : -1)
+#define GetAnchorLineNo(link) \
+			((nlinks > 0 && link >= 0) \
+    			 ? links[link].anchor_line_num \
+			 : -1)
+
+/*
+ * Adjust the top-of-screen line number for the new document if the redisplayed
+ * screen would not show the given link-number.
+ */
+#ifdef USE_SOURCE_CACHE
+static int wrap_reparse_document(void)
+{
+    int result;
+    int anchor_number = GetAnchorNumber(curdoc.link);
+    int old_line_num = HText_getAbsLineNumber(HTMainText, anchor_number);
+    int old_from_top = old_line_num - LYGetNewline() + 1;
+
+    /* get the offset for the current anchor */
+    int old_offset = ((nlinks > 0 && curdoc.link >= 0)
+		      ? links[curdoc.link].sgml_offset
+		      : -1);
+
+    CTRACE((tfp, "original anchor %d, topline %d, link %d, offset %d\n",
+	    anchor_number, old_line_num, curdoc.link, old_offset));
+
+    /* reparse the document (producing a new anchor list) */
+    result = reparse_document();
+
+    /* readjust top-line and link-number */
+    if (result && old_offset >= 0) {
+	int new_anchor = HText_closestAnchor(HTMainText, old_offset);
+	int new_lineno = HText_getAbsLineNumber(HTMainText, new_anchor);
+	int top_lineno;
+
+	CTRACE((tfp, "old anchor %d -> new anchor %d\n", anchor_number, new_anchor));
+
+	if (new_lineno - old_from_top < 0)
+	    old_from_top = new_lineno;
+
+	/* Newline and newdoc.line are 1-based,
+	 * but 0-based lines are simpler to work with.
+	 */
+	top_lineno = HText_getPreferredTopLine(HTMainText, new_lineno -
+					       old_from_top) + 1;
+	CTRACE((tfp, "preferred top %d\n", top_lineno));
+
+	if (top_lineno != LYGetNewline()) {
+	    LYSetNewline(top_lineno);
+	    newdoc.link = HText_anchorRelativeTo(HTMainText, top_lineno - 1, new_anchor);
+	    curdoc.link = newdoc.link;
+	    CTRACE((tfp,
+		    "adjusted anchor %d, topline %d, link %d, offset %d\n",
+		    new_anchor,
+		    top_lineno,
+		    curdoc.link,
+		    HText_locateAnchor(HTMainText, new_anchor)));
+	} else {
+	    newdoc.link = curdoc.link;
+	}
+    }
+    return result;
+}
+#endif /* USE_SOURCE_CACHE */
+
 static void handle_LYK_SOURCE(char **ownerS_address_p)
 {
+#ifdef USE_SOURCE_CACHE
+    BOOLEAN canreparse_post = FALSE;
+#endif
+
     /*
      * Check if this is a reply from a POST, and if so,
      * seek confirmation if the safe element is not set.  - FM
      */
-#ifdef USE_SOURCE_CACHE
-    BOOLEAN canreparse_post = FALSE;
-#endif
     if ((curdoc.post_data != NULL &&
 	 curdoc.safe != TRUE) &&
 #ifdef USE_SOURCE_CACHE
@@ -4269,7 +4342,7 @@ static void handle_LYK_SOURCE(char **ownerS_address_p)
     }
 
 #ifdef USE_SOURCE_CACHE
-    if (reparse_document()) {
+    if (wrap_reparse_document()) {
 	/*
 	 * These normally get cleaned up after getfile() returns;
 	 * since we're not calling getfile(), we have to clean them
@@ -4295,6 +4368,7 @@ static void handle_LYK_SOURCE(char **ownerS_address_p)
 
     if (curdoc.title)
 	StrAllocCopy(newdoc.title, curdoc.title);
+
     free_address(&curdoc);	/* so it doesn't get pushed */
     LYforce_no_cache = TRUE;
 }
@@ -4398,7 +4472,7 @@ static void handle_LYK_TAG_LINK(void)
 	}
 	if (curdoc.link < nlinks - 1) {
 	    set_curdoc_link(curdoc.link + 1);
-	} else if (!more && Newline == 1 && curdoc.link == nlinks - 1) {
+	} else if (!more && LYGetNewline() == 1 && curdoc.link == nlinks - 1) {
 	    set_curdoc_link(0);
 	} else if (more) {	/* next page */
 	    Newline += (display_lines);
@@ -4516,17 +4590,17 @@ static void handle_LYK_UP_HALF(int *arrowup,
 			       int *old_c,
 			       int real_c)
 {
-    if (Newline > 1) {
+    if (LYGetNewline() > 1) {
 	int scrollamount = display_lines / 2;
 
-	if (Newline - scrollamount < 1)
-	    scrollamount = Newline - 1;
+	if (LYGetNewline() - scrollamount < 1)
+	    scrollamount = LYGetNewline() - 1;
 	Newline -= scrollamount;
 	if (nlinks > 0 && curdoc.link > -1) {
 	    if (links[curdoc.link].ly + scrollamount <= display_lines) {
 		newdoc.link = curdoc.link +
 		    HText_LinksInLines(HTMainText,
-				       Newline,
+				       LYGetNewline(),
 				       scrollamount);
 	    } else {
 		*arrowup = TRUE;
@@ -4545,7 +4619,7 @@ static void handle_LYK_UP_LINK(int *follow_col,
 {
     if (curdoc.link > 0 &&
 	(links[0].ly != links[curdoc.link].ly ||
-	 !HText_LinksInLines(HTMainText, 1, Newline - 1))) {
+	 !HText_LinksInLines(HTMainText, 1, LYGetNewline() - 1))) {
 	/* more links before this on screen, and first of them on
 	   a different line or no previous links before this screen? */
 	int newlink;
@@ -4567,9 +4641,10 @@ static void handle_LYK_UP_LINK(int *follow_col,
 	    HTUserMsg(NO_LINKS_ABOVE);
 	}
 
-    } else if (curdoc.line > 1 && Newline > 1) {	/* previous page */
-	int scrollamount = (Newline > display_lines ?
-			    display_lines : Newline - 1);
+    } else if (curdoc.line > 1 && LYGetNewline() > 1) {		/* previous page */
+	int scrollamount = (LYGetNewline() > display_lines
+			    ? display_lines
+			    : LYGetNewline() - 1);
 
 	Newline -= scrollamount;
 	if (scrollamount < display_lines &&
@@ -4592,15 +4667,15 @@ static void handle_LYK_UP_TWO(int *arrowup,
 			      int *old_c,
 			      int real_c)
 {
-    if (Newline > 1) {
-	int scrollamount = (Newline > 2 ? 2 : 1);
+    if (LYGetNewline() > 1) {
+	int scrollamount = (LYGetNewline() > 2 ? 2 : 1);
 
 	Newline -= scrollamount;
 	if (nlinks > 0 && curdoc.link > -1) {
 	    if (links[curdoc.link].ly + scrollamount <= display_lines) {
 		newdoc.link = curdoc.link +
 		    HText_LinksInLines(HTMainText,
-				       Newline, scrollamount);
+				       LYGetNewline(), scrollamount);
 	    } else {
 		*arrowup = TRUE;
 	    }
@@ -4873,9 +4948,9 @@ static void handle_LYK_digit(int c,
 	/*
 	 * Position on a normal link, don't follow it.  - KW
 	 */
-	Newline = newdoc.line;
+	LYSetNewline(newdoc.line);
 	newdoc.line = 1;
-	if (Newline == curdoc.line) {
+	if (LYGetNewline() == curdoc.line) {
 	    /*
 	     * It's a link in the current page.  - FM
 	     */
@@ -4907,14 +4982,14 @@ static void handle_LYK_digit(int c,
 	/*
 	 * Position on a page in this document.  - FM
 	 */
-	Newline = newdoc.line;
+	LYSetNewline(newdoc.line);
 	newdoc.line = 1;
-	if (Newline == curdoc.line) {
+	if (LYGetNewline() == curdoc.line) {
 	    /*
 	     * It's the current page, so issue a statusline message for the
 	     * typo-prone users (like me 8-).  - FM
 	     */
-	    if (Newline <= 1) {
+	    if (LYGetNewline() <= 1) {
 		HTInfoMsg(ALREADY_AT_BEGIN);
 	    } else if (!more) {
 		HTInfoMsg(ALREADY_AT_END);
@@ -5433,7 +5508,7 @@ int mainloop(void)
 	     * (was previously implemented in case NORMAL).
 	     */
 	    *prev_target = '\0';	/* Reset for new coming document */
-	    Newline = newdoc.line;	/* set for LYGetNewline() */
+	    LYSetNewline(newdoc.line);	/* set for LYGetNewline() */
 
 #ifdef USE_PRETTYSRC
 	    psrc_first_tag = TRUE;
@@ -5878,7 +5953,7 @@ int mainloop(void)
 		 * If we are going to a target line or the first page of a
 		 * popped document, override any www_search line result.
 		 */
-		if (Newline > 1 || popped_doc == TRUE)
+		if (LYGetNewline() > 1 || popped_doc == TRUE)
 		    www_search_result = -1;
 
 		/*
@@ -6022,7 +6097,7 @@ int mainloop(void)
 	    /*
 	     * This was a WWW search, set the line to the result of the search.
 	     */
-	    Newline = www_search_result;
+	    LYSetNewline(www_search_result);
 	    www_search_result = -1;	/* reset */
 	}
 
@@ -6170,14 +6245,14 @@ int mainloop(void)
 	 * If we got new HTMainText go this way.  All display_partial calls
 	 * ends here for final redraw.
 	 */
-	if (curdoc.line != Newline) {
+	if (curdoc.line != LYGetNewline()) {
 #ifdef INACTIVE_INPUT_STYLE_VH
 	    textinput_redrawn = FALSE;
 #endif
 
 	    refresh_screen = FALSE;
 
-	    HText_pageDisplay(Newline, prev_target);
+	    HText_pageDisplay(LYGetNewline(), prev_target);
 
 #ifdef DIRED_SUPPORT
 	    if (lynx_edit_mode && nlinks > 0 && !HTList_isEmpty(tagged))
@@ -6189,8 +6264,9 @@ int mainloop(void)
 	     */
 	    more = HText_canScrollDown();
 	    if (newdoc.link < 0)
-		goto_line(Newline);
-	    curdoc.line = Newline = HText_getTopOfScreen() + 1;
+		goto_line(LYGetNewline());
+	    LYSetNewline(HText_getTopOfScreen() + 1);
+	    curdoc.line = LYGetNewline();
 
 	    if (curdoc.title == NULL) {
 		/*
@@ -6241,7 +6317,7 @@ int mainloop(void)
 	    show_help = FALSE;	/* reset */
 	    newdoc.line = 1;
 	    newdoc.link = 0;
-	    curdoc.line = Newline;	/* set */
+	    curdoc.line = LYGetNewline();	/* set */
 	} else if (newdoc.link < 0) {
 	    newdoc.link = 0;	/* ...just in case getfile set this */
 	}
@@ -6259,7 +6335,7 @@ int mainloop(void)
 #else
 	    LYclear();
 #endif /* FANCY_CURSES || USE_SLANG */
-	    HText_pageDisplay(Newline, prev_target);
+	    HText_pageDisplay(LYGetNewline(), prev_target);
 
 #ifdef DIRED_SUPPORT
 	    if (lynx_edit_mode && nlinks > 0 && !HTList_isEmpty(tagged))
@@ -6957,9 +7033,9 @@ int mainloop(void)
 	    break;
 
 	case LYK_HOME:
-	    if (curdoc.line > 1)
-		Newline = 1;
-	    else {
+	    if (curdoc.line > 1) {
+		LYSetNewline(1);
+	    } else {
 		cmd = LYK_PREV_PAGE;
 		goto new_cmd;
 	    }
@@ -6967,8 +7043,8 @@ int mainloop(void)
 
 	case LYK_END:
 	    i = HText_getNumOfLines() - display_lines + 2;
-	    if (i >= 1 && Newline != i) {
-		Newline = i;	/* go to end of file */
+	    if (i >= 1 && LYGetNewline() != i) {
+		LYSetNewline(i);	/* go to end of file */
 		arrowup = TRUE;	/* position on last link */
 	    } else {
 		cmd = LYK_NEXT_PAGE;

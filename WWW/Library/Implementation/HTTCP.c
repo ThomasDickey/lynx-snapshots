@@ -1643,11 +1643,10 @@ int HTDoConnect(const char *url,
 #else
 	    status = Rconnect(*s, (struct sockaddr *) &soc_address,
 			      sizeof(soc_address));
-#endif /* INET6 */
-	    /*
-	     * For long Rbind.
-	     */
+#ifndef SHORTENED_RBIND
 	    socks_bind_remoteAddr = soc_address.sin_addr.s_addr;
+#endif
+#endif /* INET6 */
 	} else
 #endif /* SOCKS */
 #ifdef INET6

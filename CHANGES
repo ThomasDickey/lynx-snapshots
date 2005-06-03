@@ -1,6 +1,77 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2005-06-02 (2.8.6dev.12)
+* add rw.po, vi.po from
+    http://www.iro.umontreal.ca/translation/maint/lynx/
+* modify ".lss" files to work equally well on terminals setup with white text
+  on black background, or the reverse.  This also required fixing a few places
+  in LYsubwindow() and curses_w_style() to make window backgrounds use the
+  colors given in the ".lss" default- and normal-colors lines -TD
+* make ".lss" example files somewhat readable by modifying parser to remove
+  blanks from the color description lines and modifying the example files to
+  use this feature -TD
+* modify scripts/cfg2html.pl to use strict variable checking, Getopt::Std
+  to eliminate a uninitialized variable warning -TD
+* modified fix for slang 2.0 which makes it clearer that the last parameter
+  of SLexpand_escaped_string is for UTF-8 -JED
+* when SOURCE_CACHE_MEMORY is used, avoid repeated realloc's of the same
+  memory chunk (really annoying for a long document) -LP
+* HTChunk extended to a linked list of chunks, additional put methods added.
+  Useful for pool infrastructure -LP
+* add ".h" to .SUFFIXES rule in src/chrtrans/makefile.in to work around change
+  made in NetBSD "make" late in 2003, incorporated into the 2.0 release.
+  The CVS change notes:
+	  Trim .SUFFIXES to only contain those used in this file.
+  (reported by Stef Caunter, comments by Klaus Klein and Martin Husemann) -TD
+* modify LYhighlight() to allow for the case where a form link extends for
+  several lines.  It was not providing enough padding to fill in the "_"
+  characters past the first line of the link -TD
+* modify LYwaddnstr() to account for the case where LYhighlight calls it to
+  display a link which extends beyond the current line, i.e., it should be
+  wrapped.  When lynx is built to use curses-pads, the highlighting was instead
+  truncated since it was computed according to the pad's limits.  Fixing this
+  exposes some related problems with off-by-one's in GridText.c -TD
+* correct parsing of "key 0xNN" lines in command-scripts, had omitted a "!"
+  to invert a check (report by Silvio Moioli) -TD
+* correct off-by-one in expression for LYHideCursor(), since dev.6 changes
+  modified the LYcolLimit variable, changing it from the last usable column
+  value to the number of columns (report by DK) -TD
+* correct expression in HText_appendCharacter() which was simplified in
+  2.8.5dev.4, but broke a comparison used for text-justification -TD 
+* adjust wide-character offset computation in HText_trimHightext() to account
+  for soft newlines, i.e., the cell reserved to show continuation lines -TD
+* modify source-view toggle to keep the current anchor visible.  Toggling
+  source view may change the line number on which the anchor is found,
+  requiring some adjustment.  This feature is implemented only for source
+  cached pages -TD
+* remove obsolete ifdef in LYwaddnstr() for ncurses 5.1's experimental UTF-8
+  support -TD
+* modify HTConfirmCookie() and statusline() to allow cookie prompt message in
+  Japanese to not be truncated when using wide-curses -TD
+* modify logic for locale_charset configuration variable so it is not modified
+  simply by saving the .lynxrc while in running in a non-locale configuration.
+  That does not alter the display charset used by lynx -TD
+* correct calculation of extra space available for justification in
+  split_line() for the wide-curses configuration.  Changes from dev.6
+  made this count formatting control characters twice, resulting in some
+  lines too long when justification was enabled -TD
+* improve description of command-line option syntax in the manpage, including
+  noting how to find the default values for most options (Debian #292393) -TD
+* modify is_true/is_false macros for processing command-line options to accept
+  "true" and "false" strings for consistency with the lynx.cfg parser, and to
+  ignore case of the boolean option values -TD
+* add -notitle option to suppress title line and following blank line to
+  maximize screen use for small displays (request by Daniele Baggio) -TD
+* add -nomargins option to suppress left/right margins to maximize screen use
+  for small displays (request by Daniele Baggio) -TD
+* add null-pointer checks in HText_setLastOptionValue() to guard against empty
+  <select> (report by Al Viro) -TD
+* fixes to allow compiling with slang 2.0 prerelease 5 -GV
+* fix to avoid divide-by-zero in ws_netread() -GV
+* modify ifdef for popup_choice() to work with handle_LYK_LINEWRAP_TOGGLE() on
+  NetBSD 2.0 (report by Gabor Z Papp) -TD
+
 2005-01-05 (2.8.6dev.11)
 * add presentation type for application/xml and text/xml mime types as per
     http://www.w3.org/TR/xhtml-media-types/
@@ -2498,7 +2569,7 @@ recently, FreeBSD 4.1, NetBSD 1.5 and OpenBSD 2.8 (curses/ncurses).
   ttyname(), and adding fallback definitions for Win32 and VMS -TD
 * for slang configurations past 1.3.6, call SLsmg_touch_screen() in
   start_curses to ensure that the screen is properly initialized for non-bce
-  terminals (John Davis)
+  terminals -JED (John Davis)
 * move call on lynx_initialize_keymaps() for slang configuration into the
   start_curses() function, avoiding premature reference to $TERM, especially
   when Lynx is running in dump mode, e.g., via cron (report by Hamish Moffatt

@@ -19,13 +19,16 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-    typedef struct {
+    typedef struct _HTChunk HTChunk;
+
+    struct _HTChunk {
 	int size;		/* In bytes                     */
 	int growby;		/* Allocation unit in bytes     */
 	int allocated;		/* Current size of *data        */
 	char *data;		/* Pointer to malloc'd area or 0 */
 	int failok;		/* allowed to fail without exiting program? */
-    } HTChunk;
+	HTChunk *next;		/* pointer to the next chunk */
+    };
 
 /*
  * Initialize a chunk's allocation data and allocation-increment.
@@ -190,6 +193,31 @@ extern "C" {
  */
 
     extern void HTChunkTerminate(HTChunk *ch);
+
+/* like the above but no realloc: extend to another chunk if necessary */
+/*
+ *
+ * Append a character (string, data) to a chunk
+ *
+ *   ON ENTRY,
+ *
+ *   ch                        A valid chunk pointer made by HTChunkCreate()
+ *
+ *   c                 The character to be appended
+ *
+ *   ON EXIT,
+ *
+ *   returns           original chunk or a pointer to the new chunk
+ *                     (orginal chunk is referenced to the new one
+ *                     by the field 'next')
+ *
+ */
+    extern HTChunk *HTChunkPutc2(HTChunk *ch, char c);
+    extern HTChunk *HTChunkPuts2(HTChunk *ch, const char *str);
+    extern HTChunk *HTChunkPutb2(HTChunk *ch, const char *b, int l);
+
+/* New pool infrastructure: UNlike the above, store data using alignment */
+    extern HTChunk *HTChunkPutb0(HTChunk *ch, const char *b, int l);
 
 #ifdef __cplusplus
 }

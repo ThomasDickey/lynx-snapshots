@@ -82,6 +82,11 @@ US-ASCII control characters <32 which are not defined in Unicode standard
 
     extern int HText_LinksInLines(HText *text, int line_num, int Lines);
 
+    extern int HText_getAbsLineNumber(HText *text, int anchor_number);
+    extern int HText_closestAnchor(HText *text, int offset);
+    extern int HText_locateAnchor(HText *text, int anchor_number);
+    extern int HText_anchorRelativeTo(HText *text, int top_lineno, int anchor_num);
+
     extern void HText_setLastChar(HText *text, char ch);
     extern char HText_getLastChar(HText *text);
     extern void HText_setIgnoreExcess(HText *text, BOOL ignore);
@@ -163,6 +168,7 @@ US-ASCII control characters <32 which are not defined in Unicode standard
     extern int HText_getMaximumColumn(HText *text);
     extern int HText_getNumOfBytes(void);
     extern int HText_getNumOfLines(void);
+    extern int HText_getPreferredTopLine(HText *text, int line_number);
     extern int HText_getTabIDColumn(HText *text, const char *name);
     extern int HText_getTopOfScreen(void);
     extern int do_www_search(DocInfo *doc);

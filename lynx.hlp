@@ -1,4 +1,4 @@
-1 LYNX
+1
 2 Name
        lynx  - a general purpose distributed information browser for the World
        Wide Web
@@ -38,13 +38,36 @@
        (in  the reference below options are with one dash before them and with
        underscores).
 
-       -      If the argument is only `-', then Lynx expects  to  receive  the
-              arguments from stdin.  This is to allow for the potentially very
-              long command line that can be associated with the  -get_data  or
-              -post_data  arguments (see below).  It can also be used to avoid
-              having sensitive information in the invoking command line (which
-              would be visible to other processes on most systems), especially
-              when the -auth or -pauth options are used.
+       Lynx provides many command-line options.  Some options require a  value
+       (string,  number  or keyword).  These are noted in the reference below.
+       The other options set boolean values in the program.  There  are  three
+       types of boolean options: set, unset and toggle.  If no option value is
+       given, these have the obvious meaning: set (to true), unset (to false),
+       or  toggle  (between  true/false).  For any of these, an explicit value
+       can  be  given  in  different  forms  to  allow  for  operating  system
+       constraints, e.g.,
+              -center:off
+              -center=off
+              -center-
+       Lynx  recognizes  "1",  "+",  "on" and "true" for true values, and "0",
+       "-", "off" and "false"  for  false  values.   Other  option-values  are
+       ignored.
+
+       The  default boolean, number and string option values that are compiled
+       into lynx are displayed in the help-message  provided  by  lynx  -help.
+       Some  of those may differ according to how lynx was built; see the help
+       message itself for these values.  The -help option is processed  before
+       any  option,  including  those  that  control reading from the lynx.cfg
+       file.  Therefore runtime configuration values are not reflected in  the
+       help-message.
+
+       -      If  the  argument  is only `-', then Lynx expects to receive the
+              arguments from the standard input.  This is  to  allow  for  the
+              potentially  very  long command line that can be associated with
+              the -get_data or -post_data arguments (see below).  It can  also
+              be  used  to  avoid having sensitive information in the invoking
+              command line (which would be visible to other processes on  most
+              systems),  especially when the -auth or -pauth options are used.
 
        -accept_all_cookies
               accept all cookies.
@@ -158,7 +181,7 @@
               to ask Lynx to force a core dump if a fatal error occurs.
 
        -crawl with -traversal, output each page to a file.  with -dump, format
-              output as with -traversal, but to stdout.
+              output as with -traversal, but to the standard output.
 
        -curses_pads
               toggles   the   use  of  curses  "pad"  feature  which  supports
@@ -228,9 +251,9 @@
        -ftp   disable ftp access.
 
        -get_data
-              properly  formatted  data  for a get form are read in from stdin
-              and passed to the form.  Input is  terminated  by  a  line  that
-              starts with `---'.
+              properly  formatted  data  for  a  get form are read in from the
+              standard input and passed to the form.  Input is terminated by a
+              line that starts with `---'.
 
        -head  send a HEAD request for the mime headers.
 
@@ -326,6 +349,9 @@
 
        -nolog disable mailing of error messages to document owners.
 
+       -nomargins
+              disable left/right margins in the default style sheet.
+
        -nonrestarting_sigwinch
               This  flag  is  not  available  on all systems, Lynx needs to be
               compiled with HAVE_SIGACTION defined.  If available,  this  flag
@@ -358,6 +384,9 @@
        -nostatus
               disable the retrieval status messages.
 
+       -notitle
+              disable title and blank line from top of page.
+
        -nounderline
               disable underline video-attribute.
 
@@ -383,9 +412,9 @@
               windows or as lists of radio buttons.
 
        -post_data
-              properly formatted data for a post form are read in  from  stdin
-              and  passed  to  the  form.   Input is terminated by a line that
-              starts with `---'.
+              properly formatted data for a post form are  read  in  from  the
+              standard input and passed to the form.  Input is terminated by a
+              line that starts with `---'.
 
        -preparsed
               show HTML  source  preparsed  and  reformatted  when  used  with

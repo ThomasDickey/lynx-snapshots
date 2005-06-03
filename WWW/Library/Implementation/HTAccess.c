@@ -637,7 +637,6 @@ void LYUCPushAssumed(HTParentAnchor *anchor)
  */
 int LYUCPopAssumed(void)
 {
-
     if (pushed_assume_LYhndl >= 0) {
 	/* some diagnostics */
 	if (UCLYhndl_for_unspec != pushed_assume_LYhndl)

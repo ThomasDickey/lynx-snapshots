@@ -20,7 +20,8 @@
 
 #include <SGML.h>
 #include <HTMLDTD.h>
-#include <HTCJK.h>
+#include <HTAccess.h>
+#include <HTCJK.h>		/* FIXME: this doesn't belong in SGML.c */
 #include <UCMap.h>
 #include <UCDefs.h>
 #include <UCAux.h>
@@ -33,6 +34,7 @@
 #include <LYGlobalDefs.h>
 #include <LYStrings.h>
 #include <LYLeaks.h>
+#include <LYUtils.h>
 
 #ifdef USE_COLOR_STYLE
 # include <LYStyle.h>
@@ -42,6 +44,8 @@
 #endif
 
 #define INVALID (-1)
+
+static int sgml_offset;
 
 #ifdef USE_PRETTYSRC
 
@@ -854,9 +858,9 @@ static void handle_marked(HTStream *context)
 	   charset once it is in include - kw */
 
     } else if (!strncmp(context->string->data, "![CDATA[", 8)) {
-	(*context->actions->_write) (context->target,
-				     context->string->data + 8,
-				     context->string->size - 11);
+	(*context->actions->put_block) (context->target,
+					context->string->data + 8,
+					context->string->size - 11);
 
     }
     return;
@@ -1498,6 +1502,8 @@ static void SGML_character(HTStream *context, char c_in)
     char c;
 #endif
     char saved_char_in = '\0';
+
+    ++sgml_offset;
 
     /*
      * Now some fun with the preprocessor.  Use copies for c and unsign_c ==
@@ -4474,7 +4480,21 @@ HTStream *SGML_new(const SGML_dtd * dtd,
     }
 #endif
 
+    sgml_offset = 0;
     return context;
+}
+
+/*
+ * Return the offset within the document where we're parsing.  This is used
+ * to help identify anchors which shift around while reparsing.
+ */
+int SGML_offset(void)
+{
+#ifdef USE_PRETTYSRC
+    return sgml_offset + psrc_view;
+#else
+    return sgml_offset;
+#endif
 }
 
 /*		Asian character conversion functions

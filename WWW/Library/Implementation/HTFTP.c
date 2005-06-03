@@ -130,7 +130,7 @@ typedef struct _connection {
 #elif defined(SYS_HPUX)
 #  if defined(_XOPEN_SOURCE_EXTENDED) && defined(SO_PROTOTYPE)
 #    define LY_SOCKLEN socklen_t
-#  else	/* HPUX 10.20, etc. */
+#  else				/* HPUX 10.20, etc. */
 #    define LY_SOCKLEN int
 #  endif
 #elif defined(SYS_TRU64)
@@ -1278,11 +1278,7 @@ static int get_listen_socket(void)
 	    /* Cast to generic sockaddr */
 			   sizeof(soc_address)
 #ifndef SHORTENED_RBIND
-#ifdef INET6
-			   socks_bind_remoteAddr
-#else
 			   ,socks_bind_remoteAddr
-#endif /* INET6 */
 #endif /* !SHORTENED_RBIND */
 		);
 	else

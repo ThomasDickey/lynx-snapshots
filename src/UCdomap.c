@@ -2289,11 +2289,9 @@ void LYFindLocaleCharset(void)
 		current_char_set = value;
 	    } else {
 		CTRACE((tfp, "Cannot find a handle for MIME name \"%s\"\n", name));
-		LYLocaleCharset = FALSE;
 	    }
 	} else {
 	    CTRACE((tfp, "Cannot find a MIME name for locale\n"));
-	    LYLocaleCharset = FALSE;
 	}
     }
 }
