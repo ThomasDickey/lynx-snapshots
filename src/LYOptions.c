@@ -34,9 +34,7 @@ static int LYChosenShowColor = SHOW_COLOR_UNKNOWN;	/* whether to show and save *
 
 static void terminate_options(int sig);
 
-#if !defined(NO_OPTION_MENU) || (defined(USE_MOUSE) && (defined(NCURSES) || defined(PDCURSES)))
 #define COL_OPTION_VALUES 36	/* display column where option values start */
-#endif
 
 #if defined(USE_SLANG) || defined(COLOR_CURSES)
 static BOOLEAN can_do_colors = FALSE;
@@ -2050,7 +2048,7 @@ void edit_bookmarks(void)
     signal(SIGINT, cleanup_sig);
 }
 
-#if !defined(NO_OPTION_MENU) || (defined(USE_MOUSE) && (defined(NCURSES) || defined(PDCURSES)))
+#if defined(USE_CURSES_PADS) || !defined(NO_OPTION_MENU) || (defined(USE_MOUSE) && (defined(NCURSES) || defined(PDCURSES)))
 
 /*
  * This function offers the choices for values of an option via a popup window

@@ -968,24 +968,18 @@ int HTMemCopy(HTChunk *chunk, HTStream *sink)
 {
     HTStreamClass targetClass;
     int bytes = 0;
-    const char *data = chunk->data;
     int rv = HT_OK;
 
     targetClass = *(sink->isa);
     HTReadProgress(0, 0);
-    for (;;) {
+    for (; chunk != NULL; chunk = chunk->next) {
+
 	/* Push the data down the stream a piece at a time, in case we're
 	 * running a large document on a slow machine.
 	 */
-	int n = INPUT_BUFFER_SIZE;
+	(*targetClass.put_block) (sink, chunk->data, chunk->size);
+	bytes += chunk->size;
 
-	if (n > chunk->size - bytes)
-	    n = chunk->size - bytes;
-	if (n == 0)
-	    break;
-	(*targetClass.put_block) (sink, data, n);
-	bytes += n;
-	data += n;
 	HTReadProgress(bytes, 0);
 	HTDisplayPartial();
 

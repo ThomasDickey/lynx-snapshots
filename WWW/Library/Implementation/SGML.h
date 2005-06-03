@@ -25,9 +25,9 @@
 extern "C" {
 #endif
 /*
-
-SGML content types
-
+ *
+ * SGML content types
+ *
  */ typedef enum {
 	SGML_EMPTY,		/* No content. */
 	SGML_LITTERAL,		/* Literal character data.  Recognize exact close tag only.
@@ -203,8 +203,9 @@ Structured Object definition
 
 	void (*put_string) (HTStructured * me, const char *str);
 
-	void (*_write) (HTStructured * me, const char *str,
-			int len);
+	void (*put_block) (HTStructured * me, const char *str, int len);
+
+	/* HTStreamClass ends here */
 
 	int (*start_element) (HTStructured * me, int element_number,
 			      const BOOL *attribute_present,
@@ -237,6 +238,11 @@ Find a Tag by Name
  */
     extern HTTag *SGMLFindTag(const SGML_dtd * dtd,
 			      const char *string);
+
+/*
+ * Return the current offset within the file that SGML is parsing
+ */
+    extern int SGML_offset(void);
 
 /*
 

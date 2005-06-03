@@ -7,6 +7,7 @@
 #include <HTFont.h>
 #include <HTStyle.h>
 
+#include <LYGlobalDefs.h>
 #include <LYLeaks.h>
 
 /*	Tab arrays:
@@ -462,6 +463,11 @@ HTStyleSheet *DefaultStyle(HTStyle ***result_array)
 	for (p = sheet.styles; p != 0; p = p->next) {
 	    q = HTStyleNew();
 	    *q = *p;
+	    if (no_margins) {
+		q->indent1st = 0;
+		q->leftIndent = 0;
+		q->rightIndent = 0;
+	    }
 	    st_array[q->id] = q;
 	    q->next = result->styles;
 	    result->styles = q;
@@ -473,6 +479,11 @@ HTStyleSheet *DefaultStyle(HTStyle ***result_array)
 	    HTStyle *r = q->next;
 
 	    *q = *p;
+	    if (no_margins) {
+		q->indent1st = 0;
+		q->leftIndent = 0;
+		q->rightIndent = 0;
+	    }
 	    st_array[q->id] = q;
 	    q->next = r;
 	}

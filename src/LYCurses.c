@@ -411,12 +411,12 @@ static void LYAttrset(WINDOW * win, int color,
     if (lynx_has_color
 	&& LYShowColor >= SHOW_COLOR_ON
 	&& color >= 0) {
-	CTRACE2(TRACE_STYLE, (tfp, "CSS:LYAttrset color (%s)\n",
-			      attr_to_string(color)));
+	CTRACE2(TRACE_STYLE, (tfp, "CSS:LYAttrset color %#x -> (%s)\n",
+			      color, attr_to_string(color)));
 	wattrset(win, color);
     } else if (mono >= 0) {
-	CTRACE2(TRACE_STYLE, (tfp, "CSS:LYAttrset mono (%s)\n",
-			      attr_to_string(mono)));
+	CTRACE2(TRACE_STYLE, (tfp, "CSS:LYAttrset mono %#x -> (%s)\n",
+			      mono, attr_to_string(mono)));
 	wattrset(win, mono);
     } else {
 	CTRACE2(TRACE_STYLE, (tfp, "CSS:LYAttrset (A_NORMAL)\n"));
@@ -450,14 +450,14 @@ void curses_w_style(WINDOW * win, int style,
 #endif
     }
 
-    CTRACE2(TRACE_STYLE, (tfp, "CSS.CS:<%s%s> (%d)\n",
+    CTRACE2(TRACE_STYLE, (tfp, "CSS.CS:<%s%s> code %#x, color %#x\n",
 			  (dir ? "" : "/"),
-			  ds->name, ds->code));
+			  ds->name, ds->code, ds->color));
 
     getyx(win, YP, XP);
 
     if (style == s_normal && dir) {
-	wattrset(win, A_NORMAL);
+	LYAttrset(win, ds->color, ds->mono);
 	if (win == LYwin)
 	    cached_styles[YP][XP] = s_normal;
 	return;
@@ -723,8 +723,7 @@ static void lynx_map_color(int n)
  */
 int lynx_chg_color(int color,
 		   int fg,
-		   int bg
-)
+		   int bg)
 {
     if (fg == ERR_COLOR || bg == ERR_COLOR)
 	return -1;
@@ -1609,7 +1608,7 @@ void LYpaddstr(WINDOW * the_window, int width,
 }
 
 /*
- * Workaround a bug in ncurses order-of-refresh by setting a pointer to
+ * Work around limitation of curses's order-of-refresh by setting a pointer to
  * the topmost window that should be displayed.
  *
  * FIXME: the associated call on 'keypad()' is not needed for Unix, but
@@ -1623,9 +1622,16 @@ void LYsubwindow(WINDOW * param)
 	my_subwindow = param;
 #if defined(NCURSES) || defined(PDCURSES)
 	keypad(my_subwindow, TRUE);
-#if defined(HAVE_GETBKGD)	/* not defined in ncurses 1.8.7 */
+#if defined(USE_COLOR_STYLE)
+	LynxWChangeStyle(my_subwindow, s_menu_bg, STACK_ON);
+	{
+	    long b = LYgetattrs(my_subwindow);
+
+	    wbkgd(my_subwindow, b | ' ');
+	}
+	LynxWChangeStyle(my_subwindow, s_menu_bg, STACK_OFF);
+#elif defined(HAVE_GETBKGD)	/* not defined in ncurses 1.8.7 */
 	wbkgd(my_subwindow, getbkgd(LYwin));
-	wbkgdset(my_subwindow, getbkgd(LYwin));
 #endif
 #endif
 	scrollok(my_subwindow, TRUE);
@@ -1674,22 +1680,6 @@ WINDOW *LYstartPopup(int *top_y,
 	HTAlert(POPUP_FAILED);
     } else {
 	LYsubwindow(form_window);
-#  ifdef USE_COLOR_STYLE
-	{
-	    long b;
-
-	    /* Get a proper value for the attribute */
-	    LynxWChangeStyle(form_window, s_menu_bg, STACK_ON);
-	    b = LYgetattrs(form_window);
-	    LynxWChangeStyle(form_window, s_menu_bg, STACK_OFF);
-	    wbkgd(form_window, b | ' ');
-	    /* wbkgdset does not make a lot of sense with USE_COLOR_STYLE
-	       since it *forces* attributes on all the cells in the window.
-	       Undo the change done in LYsubwindow, since we set our styles.
-	     */
-	    wbkgdset(form_window, (b & ~(A_BOLD | A_BLINK)) | ' ');
-	}
-#  endif
     }
 #endif /* USE_SLANG */
     return form_window;
@@ -1760,6 +1750,46 @@ void LYwaddnstr(WINDOW * w GCC_UNUSED,
 		const char *src,
 		size_t len)
 {
+#ifdef USE_CURSES_PADS
+    /*
+     * If we've configured to use pads for left/right scrolling, that can
+     * interfere with calls to this function that assume they're wrapping. 
+     * Writing to a pad which is wider than the screen will simply not wrap.
+     *
+     * Link-highlighting uses wrapping.  You can see this by viewing the
+     * options screen in a terminal which is narrower than 80 columns.
+     *
+     * Check for that case, and split up the call into segments for each line.
+     */
+    int y0, x0;
+
+    getyx(LYwin, y0, x0);
+
+    if (LYuseCursesPads
+	&& LYshiftWin == 0
+	&& LYwideLines == FALSE
+	&& ((int) len > (LYcolLimit - x0))) {
+	int start = 0;
+	int piece = (LYcolLimit - x0);
+
+	CTRACE((tfp, "LYwaddnstr wrapping src:%s, len:%d:%d\n", src, len, LYcolLimit));
+	for (;;) {
+	    int y, x;
+
+	    getyx(LYwin, y, x);
+	    CTRACE((tfp, "piece src:%.*s, len:%d\n", piece, src + start, piece));
+	    LYwaddnstr(w, src + start, piece);
+	    start += piece;
+	    if (start >= (int) len)
+		break;
+	    LYmove(y + 1, 0);
+	    piece = LYcolLimit;
+	    if ((start + piece) > (int) len)
+		piece = len - start;
+	}
+	return;
+    }
+#endif
     /*
      * We only want to trace this function for the color-style code.  It would
      * be too much logging if not needed.
@@ -1774,116 +1804,6 @@ void LYwaddnstr(WINDOW * w GCC_UNUSED,
     }
 #endif
     /*
-     * Wide (multibyte) characters are always written as part of a string.  So
-     * we can handle the conversion in one place.
-     *
-     * X/Open curses documents addstr() as able to handle multibyte sequences
-     * directly, but that is not (2001/11/5) yet implemented in ncurses.  Two
-     * alternatives are possible:  translating the string to an array of
-     * wchar_t's or to an array of cchar_t's.  The former is more direct.  Both
-     * have problems with combining-characters in this version of ncurses
-     * (successive calls are not merged), so I'm using them for testing -TD
-     */
-#if 0				/* defined(WIDEC_CURSES) && defined(HAVE_MBSTATE_T) */
-#if 1				/* array of wchar_t's */
-    {
-	static wchar_t *temp = 0;
-	static size_t used = 0;
-
-	wchar_t wch;
-	int l = 0;
-	mbstate_t state;
-	size_t rc;
-	int width;
-	unsigned j;
-	size_t need;
-
-	memset(&state, 0, sizeof(state));
-	need = 1 + len;
-	if (need > used) {
-	    used = 2 * need;
-	    CTRACE((tfp, "allocated %d (%d)\n", used, len));
-	    FREE(temp);
-	    temp = typecallocn(wchar_t, used);
-	}
-	for (j = 0; j < len; j++) {
-	    rc = mbrtowc(&wch, src + j, len - j, &state);
-	    if (rc == 0 || rc == (size_t) (-1) || rc == (size_t) (-2))
-		break;
-	    j += rc - 1;
-	    if ((width = wcwidth(wch)) < 0)
-		break;
-	    temp[l++] = wch;
-	}
-	temp[l] = L'\0';
-	waddnwstr(w, temp, l);
-#ifdef LY_FIND_LEAKS
-	FREE(temp);
-	used = 0;
-#endif
-    }
-#else /* array of cchar_t's */
-    {
-	static cchar_t *temp = 0;
-	static size_t used = 0;
-
-	wchar_t wch;
-	wchar_t wstr[CCHARW_MAX + 1];
-	int l = 0;
-	mbstate_t state;
-	size_t rc;
-	int width;
-	int y, x;
-	unsigned j, k;
-	size_t need;
-	attr_t attr;
-	short pair;
-
-	wattr_get(w, &attr, &pair, (void *) 0);
-
-	memset(&state, 0, sizeof(state));
-	need = 1 + len;
-	if (need > used) {
-	    used = 2 * need;
-	    CTRACE((tfp, "allocated %d (%d)\n", used, len));
-	    FREE(temp);
-	    temp = typecallocn(cchar_t, used);
-	}
-	for (j = k = 0; j < len; j++) {
-	    rc = mbrtowc(&wch, src + j, len - j, &state);
-	    if (rc == 0 || rc == (size_t) (-1) || rc == (size_t) (-2))
-		break;
-	    j += rc - 1;
-	    if ((width = wcwidth(wch)) < 0)
-		break;
-	    if ((width > 0 && l > 0) || l == CCHARW_MAX) {
-		wstr[l] = L'\0';
-		l = 0;
-		if (setcchar(temp + k, wstr, attr, 0, NULL) != OK)
-		    break;
-		++k;
-	    }
-	    if (width == 0 && l == 0)
-		wstr[l++] = L' ';
-	    wstr[l++] = wch;
-	}
-	if (l > 0) {
-	    wstr[l] = L'\0';
-	    if (setcchar(temp + k, wstr, attr, 0, NULL) == OK)
-		++k;
-	}
-	setcchar(temp + k, L"", 0, 0, NULL);
-	wadd_wchnstr(w, temp, k);
-	getyx(w, y, x);		/* we didn't move - do it now */
-	wmove(w, y, x + k);
-#ifdef LY_FIND_LEAKS
-	FREE(temp);
-	used = 0;
-#endif
-    }
-#endif
-#else
-    /*
      * There's no guarantee that a library won't temporarily write on its input.
      * Be safe and copy it when we have const-data.
      */
@@ -1896,7 +1816,6 @@ void LYwaddnstr(WINDOW * w GCC_UNUSED,
 	waddstr(w, temp);
 	len -= use;
     }
-#endif
 }
 
 /*
@@ -2476,6 +2395,20 @@ int LYscreenWidth(void)
 }
 
 /*
+ * Set the window's background color (make the pad's color agree), e.g., when
+ * we have just parsed it from the config file, or after clearing the screen.
+ */
+void LYnormalColor(void)
+{
+#if defined(USE_COLOR_STYLE) && USE_CURSES_PADS
+    if (LYwin != stdscr) {
+	wbkgd(LYwin, displayStyles[DSTYLE_NORMAL].color | ' ');
+	LYrefresh();
+    }
+#endif
+}
+
+/*
  * The functions ifdef'd with USE_CURSES_PADS are implemented that way so we
  * don't break the slang configuration.
  */
@@ -2486,6 +2419,7 @@ void LYclear(void)
 #else
     clear();
 #endif
+    LYnormalColor();
 }
 
 void LYclrtoeol(void)
@@ -2504,6 +2438,7 @@ void LYerase(void)
 #else
     erase();
 #endif
+    LYnormalColor();
 }
 
 void LYmove(int y, int x)
@@ -2750,13 +2685,13 @@ void lynx_stop_underline(void)
  * the current option's highlighting or color without the distraction of a
  * blinking cursor in the window.  - FM
  */
-void LYstowCursor(WINDOW * win, int row,
-		  int col)
+void LYstowCursor(WINDOW * win, int row, int col)
 {
-    if (LYShowCursor)
+    if (LYShowCursor) {
 	wmove(win, row, col);
-    else
+    } else {
 	LYHideCursor();
+    }
 #ifdef USE_SLANG
     SLsmg_refresh();
 #else
@@ -2794,6 +2729,10 @@ long LYgetattrs(WINDOW * win)
     attr_t result = 0;
     short pair = 0;
 
+    /*
+     * FIXME: this ignores the color-pair, which for most implementations is
+     * not stored in the attribute value.
+     */
     wattr_get(win, &result, &pair, NULL);
 #endif
     return result;

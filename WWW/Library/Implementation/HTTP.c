@@ -304,11 +304,13 @@ int ws_netread(int fd, char *buf, int len)
 		HTInfoMsg("Thread terminate Failed");
 	    }
 	    now_TickCount = GetTickCount();
-	    if (now_TickCount > save_TickCount)
+	    if (now_TickCount >= save_TickCount)
 		process_time = now_TickCount - save_TickCount;
 	    else
 		process_time = now_TickCount + (0xffffffff - save_TickCount);
 
+	    if (process_time == 0)
+		process_time = 1;
 	    g_total_times += process_time;
 	    g_total_bytes += exitcode;
 
@@ -326,7 +328,7 @@ int ws_netread(int fd, char *buf, int len)
     LeaveCriticalSection(&critSec_READ);
     return ret_val;
 }
-#endif
+#endif /* _WINDOWS */
 
 /*
  * Strip any username from the given string so we retain only the host.

@@ -13,7 +13,7 @@
  *	(c) Copyright CERN 1991 - See Copyright.html
  */
 
-#define HASH_SIZE 101		/* Arbitrary prime.  Memory/speed tradeoff */
+#define HASH_SIZE 1001		/* Arbitrary prime.  Memory/speed tradeoff */
 
 #include <HTUtils.h>
 #include <HTAnchor.h>

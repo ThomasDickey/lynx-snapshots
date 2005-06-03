@@ -114,7 +114,7 @@ $(MAKEUCTB) : makeuctb$o
 
 makeuctb$o : $(srcdir)/UCkd.h $(srcdir)/makeuctb.c
 
-.SUFFIXES : $o .tbl .i
+.SUFFIXES : $o .tbl .i .h
 
 .c$o:
 @RULE_CC@

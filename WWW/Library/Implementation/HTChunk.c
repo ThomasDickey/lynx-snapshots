@@ -83,13 +83,19 @@ void HTChunkClear(HTChunk *ch)
     ch->allocated = 0;
 }
 
-/*	Free a chunk
- *	------------
+/*     Free a chunk (and it's chain, if any)
+ *     -------------------------------------
  */
 void HTChunkFree(HTChunk *ch)
 {
-    FREE(ch->data);
-    FREE(ch);
+    HTChunk *next;
+
+    do {
+	next = ch->next;
+	FREE(ch->data);
+	FREE(ch);
+	ch = next;
+    } while (ch != NULL);
 }
 
 /*	Realloc the chunk
@@ -119,8 +125,6 @@ BOOL HTChunkRealloc(HTChunk *ch, int growby)
 /*	Append a character
  *	------------------
  */
-/* Warning: the code of this function is defined as macro in SGML.c. Change
-  the macro or undefine it in SGML.c when changing this function. -VH */
 void HTChunkPutc(HTChunk *ch, char c)
 {
     if (ch->size >= ch->allocated) {
@@ -128,6 +132,20 @@ void HTChunkPutc(HTChunk *ch, char c)
 	    return;
     }
     ch->data[ch->size++] = c;
+}
+
+/* like above but no realloc: extend to another chunk if necessary */
+HTChunk *HTChunkPutc2(HTChunk *ch, char c)
+{
+    if (ch->size >= ch->allocated) {
+	HTChunk *chunk = HTChunkCreateMayFail(ch->growby, ch->failok);
+
+	ch->next = chunk;
+	HTChunkPutc(chunk, c);
+	return chunk;
+    }
+    ch->data[ch->size++] = c;
+    return ch;
 }
 
 /*	Ensure a certain size
@@ -139,13 +157,17 @@ void HTChunkEnsure(HTChunk *ch, int needed)
 	return;
     ch->allocated = needed - 1 - ((needed - 1) % ch->growby)
 	+ ch->growby;		/* Round up */
-    ch->data = ch->data ? (char *) realloc(ch->data, ch->allocated)
-	: typecallocn(char, ch->allocated);
+    ch->data = (ch->data
+		? (char *) realloc(ch->data, ch->allocated)
+		: typecallocn(char, ch->allocated));
 
     if (ch->data == NULL)
 	outofmem(__FILE__, "HTChunkEnsure");
 }
 
+/*
+ * Append a block of characters.
+ */
 void HTChunkPutb(HTChunk *ch, const char *b, int l)
 {
     if (l <= 0)
@@ -160,9 +182,34 @@ void HTChunkPutb(HTChunk *ch, const char *b, int l)
     ch->size += l;
 }
 
+/* like above but no realloc: extend to another chunk if necessary */
+HTChunk *HTChunkPutb2(HTChunk *ch, const char *b, int l)
+{
+    if (l <= 0)
+	return ch;
+    if (ch->size + l > ch->allocated) {
+	HTChunk *chunk;
+	int m = ch->allocated - ch->size;
+
+	memcpy(ch->data + ch->size, b, m);
+	ch->size += m;
+
+	chunk = HTChunkCreateMayFail(ch->growby, ch->failok);
+	ch->next = chunk;
+	HTChunkPutb(chunk, b + m, l - m);
+	return chunk;
+    }
+    memcpy(ch->data + ch->size, b, l);
+    ch->size += l;
+    return ch;
+}
+
 #define PUTC(code)  ch->data[ch->size++] = (char)(code)
 #define PUTC2(code) ch->data[ch->size++] = (char)(0x80|(0x3f &(code)))
 
+/*
+ * Append a character encoded as UTF-8.
+ */
 void HTChunkPutUtf8Char(HTChunk *ch, UCode_t code)
 {
     int utflen;
@@ -254,4 +301,24 @@ void HTChunkPuts(HTChunk *ch, const char *s)
 	    ch->data[ch->size++] = *p;
 	}
     }
+}
+
+/* like above but no realloc: extend to another chunk if necessary */
+HTChunk *HTChunkPuts2(HTChunk *ch, const char *s)
+{
+    const char *p;
+
+    if (s != NULL) {
+	for (p = s; *p; p++) {
+	    if (ch->size >= ch->allocated) {
+		HTChunk *chunk = HTChunkCreateMayFail(ch->growby, ch->failok);
+
+		ch->next = chunk;
+		HTChunkPuts(chunk, p);
+		return chunk;
+	    }
+	    ch->data[ch->size++] = *p;
+	}
+    }
+    return ch;
 }

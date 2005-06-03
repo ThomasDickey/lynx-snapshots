@@ -29,6 +29,7 @@ extern "C" {
 	int lx;
 	int ly;
 	int type;		/* Type of link, Forms, WWW, etc. */
+	int sgml_offset;	/* document offset used in reparsing */
 	int anchor_number;	/* The anchor number within the HText structure.  */
 	int anchor_line_num;	/* The anchor line number in the HText structure. */
 	HiliteList list;

@@ -277,6 +277,9 @@ void LYFreeHilites(int first, int last)
     }
 }
 
+#define LXP (links[cur].lx)
+#define LYP (links[cur].ly)
+
 /*
  * Set the initial highlight information for a given link.
  */
@@ -340,12 +343,9 @@ int LYGetHilitePos(int cur,
     else if (count > 0)
 	result = links[cur].list.hl_info[count - 1].hl_x;
     else
-	result = links[cur].lx;
+	result = LXP;
     return result;
 }
-
-#define LXP (links[cur].lx)
-#define LYP (links[cur].ly)
 
 #ifdef SHOW_WHEREIS_TARGETS
 
@@ -388,7 +388,7 @@ static BOOL show_whereis_targets(int flag,
     if (non_empty(target)
 	&& (links[cur].type & WWW_LINK_TYPE)
 	&& non_empty(LYGetHiliteStr(cur, count))
-	&& links[cur].ly + count < display_lines
+	&& LYP + count < display_lines
 	&& HText_getFirstTargetInLine(HTMainText,
 				      links[cur].anchor_line_num + count,
 				      utf_flag,
@@ -400,7 +400,7 @@ static BOOL show_whereis_targets(int flag,
 	const char *data;
 	int tlen = strlen(target);
 	int hlen, hLen;
-	int hLine = links[cur].ly + count;
+	int hLine = LYP + count;
 	int hoffset = LYGetHilitePos(cur, count);
 	size_t utf_extra = 0;
 
@@ -1005,6 +1005,7 @@ void LYhighlight(int flag,
     int i;
     int hi_count;
     int hi_offset;
+    int title_adjust = (no_title ? -TITLE_LINES : 0);
     char tmp[7];
     const char *hi_string;
 
@@ -1038,7 +1039,7 @@ void LYhighlight(int flag,
     if (nlinks > 0) {
 #ifdef USE_COLOR_STYLE
 	if (flag == ON || links[cur].type == WWW_FORM_LINK_TYPE) {
-	    LYmove(LYP, LXP);
+	    LYmove(LYP + title_adjust, LXP);
 	    LynxChangeStyle(find_cached_style(cur, flag), STACK_ON);
 	}
 #else
@@ -1059,7 +1060,7 @@ void LYhighlight(int flag,
 
 	if (links[cur].type == WWW_FORM_LINK_TYPE) {
 	    int len;
-	    int avail_space = (LYcolLimit - links[cur].lx);
+	    int avail_space = (LYcolLimit - LXP) + (LYcolLimit * (LYlines - LYP));
 	    const char *text = LYGetHiliteStr(cur, 0);
 
 	    if (avail_space > links[cur].l_form->size)
@@ -1068,11 +1069,12 @@ void LYhighlight(int flag,
 		avail_space = (int) sizeof(buffer) - 1;
 
 	    LYstrncpy(buffer, NonNull(text), avail_space);
-	    LYaddstr(buffer);
-
 	    len = strlen(buffer);
-	    for (; len < links[cur].l_form->size && len < avail_space; len++)
-		LYaddch('_');
+	    while (len < avail_space) {
+		buffer[len++] = '_';
+	    }
+	    buffer[len] = 0;
+	    LYaddstr(buffer);
 
 #ifdef USE_COLOR_STYLE
 	} else if (flag == OFF) {
@@ -1090,7 +1092,7 @@ void LYhighlight(int flag,
 	    LYmbcsstrncpy(buffer,
 			  NonNull(LYGetHiliteStr(cur, 0)),
 			  (sizeof(buffer) - 1),
-			  (LYcolLimit - links[cur].lx),
+			  (LYcolLimit - LXP),
 			  utf_flag);
 	    LYaddstr(buffer);
 	}
@@ -1104,17 +1106,18 @@ void LYhighlight(int flag,
 	{
 	    for (hi_count = 1;
 		 (hi_string = LYGetHiliteStr(cur, hi_count)) != NULL
-		 && links[cur].ly + hi_count <= display_lines;
+		 && LYP + hi_count <= display_lines;
 		 ++hi_count) {
+		int row = LYP + hi_count + title_adjust;
 
 		hi_offset = LYGetHilitePos(cur, hi_count);
 		lynx_stop_link_color(flag == ON, links[cur].inUnderline);
-		LYmove(links[cur].ly + hi_count, hi_offset);
+		LYmove(row, hi_offset);
 
 #ifdef USE_COLOR_STYLE
 		CTRACE2(TRACE_STYLE,
 			(tfp, "STYLE.highlight.line2: @(%d,%d), style=%d.\n",
-			 links[cur].ly + hi_count, hi_offset,
+			 row, hi_offset,
 			 flag == ON ? s_alink : s_a));
 		LynxChangeStyle(flag == ON ? s_alink : s_a, ABS_ON);
 #else
@@ -1161,8 +1164,7 @@ void LYhighlight(int flag,
 	    /*
 	     * Never hide the cursor if there's no FANCY CURSES or SLANG.
 	     */
-	    LYmove(links[cur].ly,
-		   ((links[cur].lx > 0) ? (links[cur].lx - 1) : 0));
+	    LYmove(LYP + title_adjust, ((LXP > 0) ? (LXP - 1) : 0));
 
 	if (flag)
 	    LYrefresh();
@@ -1346,6 +1348,19 @@ void statusline(const char *text)
 	FREE(temp);
     } else {
 	/*
+	 * Deal with any newlines or tabs in the string.  - FM
+	 */
+	LYReduceBlanks(text_buff);
+#ifdef WIDEC_CURSES
+	len = strlen(text_buff);
+	if (len >= (int) (sizeof(buffer) - 1))
+	    len = (int) (sizeof(buffer) - 1);
+	strncpy(buffer, text_buff, len)[len] = '\0';
+	/* FIXME: a binary search might be faster */
+	while (len > 0 && LYstrExtent(buffer, len, len) > max_length)
+	    buffer[--len] = '\0';
+#else
+	/*
 	 * Strip any escapes, and shorten text if necessary.  Note that we
 	 * don't deal with the possibility of UTF-8 characters in the string. 
 	 * This is unlikely, but if strings with such characters are used in
@@ -1359,10 +1374,7 @@ void statusline(const char *text)
 	    }
 	}
 	buffer[len] = '\0';
-	/*
-	 * Deal with any newlines or tabs in the string.  - FM
-	 */
-	LYReduceBlanks(buffer);
+#endif
     }
 
     /*
@@ -1382,7 +1394,7 @@ void statusline(const char *text)
     }
     LYclrtoeol();
 
-    if (text != NULL && text[0] != '\0') {
+    if (non_empty(buffer)) {
 	BOOLEAN has_CJK = FALSE;
 
 	if (HTCJK != NOCJK) {
@@ -1408,10 +1420,10 @@ void statusline(const char *text)
 #else
 	/* draw the status bar in the STATUS style */
 	{
-	    int a = (strncmp(buffer, ALERT_FORMAT, ALERT_PREFIX_LEN)
-		     || !hashStyles[s_alert].name)
-	    ? s_status
-	    : s_alert;
+	    int a = ((strncmp(buffer, ALERT_FORMAT, ALERT_PREFIX_LEN)
+		      || !hashStyles[s_alert].name)
+		     ? s_status
+		     : s_alert);
 
 	    LynxChangeStyle(a, STACK_ON);
 	    LYaddstr(buffer);

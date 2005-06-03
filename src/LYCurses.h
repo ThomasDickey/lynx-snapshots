@@ -422,6 +422,7 @@ extern "C" {
     extern void LYerase(void);
     extern void LYmove(int y, int x);
     extern void LYnoVideo(int mask);
+    extern void LYnormalColor(void);
     extern void LYpaddstr(WINDOW * w, int width, const char *s);
     extern void LYrefresh(void);
     extern void LYstartTargetEmphasis(void);
@@ -432,8 +433,6 @@ extern "C" {
     extern void stop_curses(void);
 
 #define LYaddstr(s)      LYwaddnstr(LYwin, s, strlen(s))
-#define LYaddnstr(s,len) LYwaddnstr(LYwin, s, len)
-#define LYwaddstr(w,s)   LYwaddnstr(w, s, strlen(s))
 
 #ifdef VMS
     extern int DCLsystem(char *command);
@@ -755,9 +754,9 @@ FANCY_CURSES.  Check your config.log to see why the FANCY_CURSES test failed.
  * Adjust our "hidden" cursor position accordingly.
  */
 #if defined(FANCY_CURSES) || defined(USE_SLANG)
-#define LYHideCursor() LYmove((LYlines - 1), (LYcolLimit))
-#else
 #define LYHideCursor() LYmove((LYlines - 1), (LYcolLimit - 1))
+#else
+#define LYHideCursor() LYmove((LYlines - 1), (LYcolLimit - 2))
 #endif
 
     extern void LYstowCursor(WINDOW * win, int row, int col);
