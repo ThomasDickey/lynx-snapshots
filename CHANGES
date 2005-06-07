@@ -1,6 +1,16 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2005-06-07 (2.8.6dev.13)
++ add a check in LYnormalColor() to ensure that the color value is really
+  a color, i.e., do not do anything for monochrome displays (reports by
+  OpenMacNews and Jens Schleusener) -TD
++ make -nomargins option apply to Options menu layout -TD
++ changes to LYwaddnstr() in dev.12 exposed a case from dev.6 where the title
+  string was not truncated to avoid wrapping (report by PG) -TD
++ changes to LYwaddnstr() in dev.12 allowed recursion in a case that was only
+  designed for iteration (report by OpenMacNews) -TD
+
 2005-06-02 (2.8.6dev.12)
 * add rw.po, vi.po from
     http://www.iro.umontreal.ca/translation/maint/lynx/
