@@ -30,6 +30,9 @@ BOOLEAN term_options;
 #define TOP_LINK  "/"
 #define MBM_LINK  "//MBM_MENU"
 
+#define MARGIN_STR (no_margins ? "" : "&nbsp;&nbsp;")
+#define MARGIN_LEN (no_margins ?  0 : 2)
+
 static int LYChosenShowColor = SHOW_COLOR_UNKNOWN;	/* whether to show and save */
 
 static void terminate_options(int sig);
@@ -2401,6 +2404,9 @@ static const char *preferred_doc_char_string = RC_PREFERRED_CHARSET;
 static const char *preferred_doc_lang_string = RC_PREFERRED_LANGUAGE;
 static const char *user_agent_string = RC_USERAGENT;
 
+#define PutHeader(fp, Name) \
+	fprintf(fp, "\n%s<em>%s</em>\n", MARGIN_STR, Name);
+
 #define PutTextInput(fp, Name, Value, Size, disable) \
 	fprintf(fp,\
 	"<input size=%d type=\"text\" name=\"%s\" value=\"%s\" %s>\n",\
@@ -3261,7 +3267,8 @@ static void PutLabel(FILE *fp, const char *name,
     int want = LABEL_LEN;
     int need = LYstrExtent(name, have, want);
 
-    fprintf(fp, "&nbsp;&nbsp;%s", name);
+    fprintf(fp, "%s%s", MARGIN_STR, name);
+
     if (will_save_rc(value) && !no_option_save) {
 	while (need++ < want)
 	    fprintf(fp, "&nbsp;");
@@ -3361,7 +3368,9 @@ static int gen_options(char **newfile)
     BOOLEAN disable_all = FALSE;
     FILE *fp0;
     size_t cset_len = 0;
-    size_t text_len = LYscreenWidth() > 45 ? LYscreenWidth() - 38 : 7;	/* cf: PutLabel */
+    size_t text_len = ((LYcolLimit > 45)
+		       ? LYcolLimit - (LABEL_LEN + 2 + MARGIN_LEN)
+		       : 7);	/* cf: PutLabel */
 
     if ((fp0 = InternalPageFP(tempfile, TRUE)) == 0)
 	return (NOT_FOUND);
@@ -3434,7 +3443,7 @@ static int gen_options(char **newfile)
      */
     fprintf(fp0, "<pre>\n");
 
-    fprintf(fp0, "\n  <em>%s</em>\n", gettext("General Preferences"));
+    PutHeader(fp0, gettext("General Preferences"));
     /*****************************************************************/
 
     /* User Mode: SELECT */
@@ -3454,7 +3463,7 @@ static int gen_options(char **newfile)
     PutOptValues(fp0, case_sensitive, search_type_values);
     EndSelect(fp0);
 
-    fprintf(fp0, "\n  <em>%s</em>\n", gettext("Security and Privacy"));
+    PutHeader(fp0, gettext("Security and Privacy"));
     /*****************************************************************/
 
     /* Cookies: SELECT */
@@ -3485,7 +3494,7 @@ static int gen_options(char **newfile)
     EndSelect(fp0);
 #endif
 
-    fprintf(fp0, "\n  <em>%s</em>\n", gettext("Keyboard Input"));
+    PutHeader(fp0, gettext("Keyboard Input"));
     /*****************************************************************/
 
     /* Keypad Mode: SELECT */
@@ -3534,7 +3543,7 @@ static int gen_options(char **newfile)
     /*
      * Display and Character Set
      */
-    fprintf(fp0, "\n  <em>%s</em>\n", gettext("Display and Character Set"));
+    PutHeader(fp0, gettext("Display and Character Set"));
     /*****************************************************************/
 
 #ifdef EXP_LOCALE_CHARSET
@@ -3615,7 +3624,7 @@ static int gen_options(char **newfile)
     /*
      * Document Appearance
      */
-    fprintf(fp0, "\n  <em>%s</em>\n", gettext("Document Appearance"));
+    PutHeader(fp0, gettext("Document Appearance"));
     /*****************************************************************/
 
     /* Show Color: SELECT */
@@ -3699,8 +3708,7 @@ static int gen_options(char **newfile)
     /*
      * Headers Transferred to Remote Servers
      */
-    fprintf(fp0, "\n  <em>%s</em>\n",
-	    gettext("Headers Transferred to Remote Servers"));
+    PutHeader(fp0, gettext("Headers Transferred to Remote Servers"));
     /*****************************************************************/
 
     /* Mail Address: INPUT */
@@ -3745,7 +3753,7 @@ static int gen_options(char **newfile)
     /*
      * Listing and Accessing Files
      */
-    fprintf(fp0, "\n  <em>%s</em>\n", gettext("Listing and Accessing Files"));
+    PutHeader(fp0, gettext("Listing and Accessing Files"));
     /*****************************************************************/
 
     /* FTP sort: SELECT */
@@ -3819,7 +3827,7 @@ static int gen_options(char **newfile)
     /*
      * Special Files and Screens
      */
-    fprintf(fp0, "\n  <em>%s</em>\n", gettext("Special Files and Screens"));
+    PutHeader(fp0, gettext("Special Files and Screens"));
     /*****************************************************************/
 
     /* Multi-Bookmark Mode: SELECT */

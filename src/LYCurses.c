@@ -1773,6 +1773,7 @@ void LYwaddnstr(WINDOW * w GCC_UNUSED,
 	int piece = (LYcolLimit - x0);
 
 	CTRACE((tfp, "LYwaddnstr wrapping src:%s, len:%d:%d\n", src, len, LYcolLimit));
+	LYwideLines = TRUE;	/* prevent recursion */
 	for (;;) {
 	    int y, x;
 
@@ -1787,6 +1788,7 @@ void LYwaddnstr(WINDOW * w GCC_UNUSED,
 	    if ((start + piece) > (int) len)
 		piece = len - start;
 	}
+	LYwideLines = FALSE;
 	return;
     }
 #endif
@@ -2402,8 +2404,12 @@ void LYnormalColor(void)
 {
 #if defined(USE_COLOR_STYLE) && USE_CURSES_PADS
     if (LYwin != stdscr) {
-	wbkgd(LYwin, displayStyles[DSTYLE_NORMAL].color | ' ');
-	LYrefresh();
+	int color = displayStyles[DSTYLE_NORMAL].color;
+
+	if (color >= 0) {
+	    wbkgd(LYwin, color | ' ');
+	    LYrefresh();
+	}
     }
 #endif
 }

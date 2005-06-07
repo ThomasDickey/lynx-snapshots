@@ -1726,8 +1726,15 @@ static void display_title(HText *text)
 #endif /* USE_COLOR_STYLE */
 #ifdef WIDEC_CURSES
     i = limit - LYbarWidth - strlen(percent) - LYstrCells(title);
-    if (i <= 0)
+    if (i <= 0) {		/* title is truncated */
+	i = limit - LYbarWidth - strlen(percent) - 3;
+	if (i <= 0) {		/* no room at all */
+	    title[0] = '\0';
+	} else {
+	    strcpy(title + LYstrExtent2(title, i), "...");
+	}
 	i = 0;
+    }
     LYmove(0, i);
 #else
     i = (limit - 1) - strlen(percent) - strlen(title);
