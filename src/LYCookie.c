@@ -305,7 +305,7 @@ static domain_entry *find_domain_entry(const char *name)
 	    if (de != NULL && de->domain != NULL) {
 		CTRACE2(TRACE_CFG,
 			(tfp,
-			 "...test_domain_entry(%s) bv:%d, invcheck_bv:%d\n",
+			 "...test_domain_entry(%s) bv:%u, invcheck_bv:%u\n",
 			 de->domain,
 			 de->bv,
 			 de->invcheck_bv));
@@ -2643,7 +2643,7 @@ static void cookie_domain_flag_set(char *domainstr,
 	    break;
 	}
 	CTRACE((tfp,
-		"cookie_domain_flag_set (%s, bv=%d, invcheck_bv=%d)\n",
+		"cookie_domain_flag_set (%s, bv=%u, invcheck_bv=%u)\n",
 		strsmall, de->bv, de->invcheck_bv));
     }
 

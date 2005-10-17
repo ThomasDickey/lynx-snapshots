@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: lynx 2.8.6-dev8\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2005-05-30 18:03-0400\n"
+"POT-Creation-Date: 2005-10-16 19:03-0400\n"
 "PO-Revision-Date: 2004-11-12 17:30+0100\n"
 "Last-Translator: Morten Bo Johansen <mojo@mbjnet.dk>\n"
 "Language-Team: Danish <dansk@klid.dk>\n"
@@ -2245,7 +2245,7 @@ msgstr "(Ingen navn.)"
 msgid "(No value.)"
 msgstr "(Ingen værdi.)"
 
-#: LYMessages.c:713 src/LYOptions.c:2382
+#: LYMessages.c:713 src/LYOptions.c:2385
 msgid "None"
 msgstr "Ingen"
 
@@ -2791,7 +2791,7 @@ msgstr "Dokument med 'POST'-indhold ikke fundet i cache. Genindsend?"
 msgid "Loading failed, use a previous copy."
 msgstr "Indlæsning slog fejl, brug en foregående kopi."
 
-#: WWW/Library/Implementation/HTAccess.c:1044 src/GridText.c:8508
+#: WWW/Library/Implementation/HTAccess.c:1044 src/GridText.c:8515
 msgid "Loading incomplete."
 msgstr "Indlæsning ikke fuldført."
 
@@ -2906,12 +2906,12 @@ msgstr "Adgangskode for nyhedsvært (news) '%s':"
 msgid "Change password?"
 msgstr "Skift adgangskode?"
 
-#: WWW/Library/Implementation/HTNews.c:1736
+#: WWW/Library/Implementation/HTNews.c:1706
 #, c-format
 msgid "No matches for: %s"
 msgstr "Ingen resultater for: %s"
 
-#: WWW/Library/Implementation/HTNews.c:1789
+#: WWW/Library/Implementation/HTNews.c:1756
 msgid ""
 "\n"
 "No articles in this group.\n"
@@ -2919,7 +2919,7 @@ msgstr ""
 "\n"
 "Ingen artikler i denne gruppe.\n"
 
-#: WWW/Library/Implementation/HTNews.c:1801
+#: WWW/Library/Implementation/HTNews.c:1768
 msgid ""
 "\n"
 "No articles in this range.\n"
@@ -2930,16 +2930,16 @@ msgstr ""
 #.
 #. * Set window title.
 #.
-#: WWW/Library/Implementation/HTNews.c:1814
+#: WWW/Library/Implementation/HTNews.c:1781
 #, c-format
 msgid "%s,  Articles %d-%d"
 msgstr "%s,  Artikler %d-%d"
 
-#: WWW/Library/Implementation/HTNews.c:1837
+#: WWW/Library/Implementation/HTNews.c:1804
 msgid "Earlier articles"
 msgstr "Tidligere artikler"
 
-#: WWW/Library/Implementation/HTNews.c:1850
+#: WWW/Library/Implementation/HTNews.c:1817
 #, c-format
 msgid ""
 "\n"
@@ -2949,41 +2949,41 @@ msgstr ""
 "\n"
 "Der er i øjeblikket ca. %d artikler i %s, ID'er som følger:\n"
 
-#: WWW/Library/Implementation/HTNews.c:1912
+#: WWW/Library/Implementation/HTNews.c:1879
 msgid "All available articles in "
 msgstr "Alle tilgængelige artikler i "
 
-#: WWW/Library/Implementation/HTNews.c:2133
+#: WWW/Library/Implementation/HTNews.c:2093
 msgid "Later articles"
 msgstr "Nyere artikler"
 
-#: WWW/Library/Implementation/HTNews.c:2156
+#: WWW/Library/Implementation/HTNews.c:2116
 msgid "Post to "
 msgstr "Send til "
 
-#: WWW/Library/Implementation/HTNews.c:2377
+#: WWW/Library/Implementation/HTNews.c:2337
 msgid "This client does not contain support for SNEWS URLs."
 msgstr "Denne klient kan ikke bruge SNEWS-adresser."
 
-#: WWW/Library/Implementation/HTNews.c:2585
+#: WWW/Library/Implementation/HTNews.c:2545
 msgid "No target for raw text!"
 msgstr "Intet mål for rå tekst!"
 
-#: WWW/Library/Implementation/HTNews.c:2616
+#: WWW/Library/Implementation/HTNews.c:2576
 msgid "Connecting to NewsHost ..."
 msgstr "Kontakter nyhedsvært ..."
 
-#: WWW/Library/Implementation/HTNews.c:2668
+#: WWW/Library/Implementation/HTNews.c:2628
 #, c-format
 msgid "Could not access %s."
 msgstr "Kunne ikke tilgå %s."
 
-#: WWW/Library/Implementation/HTNews.c:2774
+#: WWW/Library/Implementation/HTNews.c:2734
 #, c-format
 msgid "Can't read news info.  News host %.20s responded: %.200s"
 msgstr "Kan ikke læse nyhedsinfo. Nyhedsvært %.20s svarede: %.200s"
 
-#: WWW/Library/Implementation/HTNews.c:2778
+#: WWW/Library/Implementation/HTNews.c:2738
 #, c-format
 msgid "Can't read news info, empty response from host %s"
 msgstr "Kan ikke læse nyhedsinfo, tomt svar fra vært %s"
@@ -2991,22 +2991,22 @@ msgstr "Kan ikke læse nyhedsinfo, tomt svar fra vært %s"
 #.
 #. * List available newsgroups.  - FM
 #.
-#: WWW/Library/Implementation/HTNews.c:2982
+#: WWW/Library/Implementation/HTNews.c:2942
 msgid "Reading list of available newsgroups."
 msgstr "Indlæser liste over tilgængelige nyhedsgrupper.."
 
-#: WWW/Library/Implementation/HTNews.c:3003
+#: WWW/Library/Implementation/HTNews.c:2963
 msgid "Reading list of articles in newsgroup."
 msgstr "Indlæser liste over artikler i nyhedsgruppe.."
 
 #.
 #. * Get an article from a news group.  - FM
 #.
-#: WWW/Library/Implementation/HTNews.c:3009
+#: WWW/Library/Implementation/HTNews.c:2969
 msgid "Reading news article."
 msgstr "Læser nyhedsartikel.."
 
-#: WWW/Library/Implementation/HTNews.c:3039
+#: WWW/Library/Implementation/HTNews.c:2999
 msgid "Sorry, could not load requested news."
 msgstr "Beklager, kunne ikke indlæse artikler."
 
@@ -3014,11 +3014,11 @@ msgstr "Beklager, kunne ikke indlæse artikler."
 msgid "Address has invalid port"
 msgstr "Adresse har en ugyldig port"
 
-#: WWW/Library/Implementation/HTTCP.c:1320
+#: WWW/Library/Implementation/HTTCP.c:1308
 msgid "Address length looks invalid"
 msgstr "Adresselængde forekommer ugyldig"
 
-#: WWW/Library/Implementation/HTTCP.c:1552 WWW/Library/Implementation/HTTCP.c:1570
+#: WWW/Library/Implementation/HTTCP.c:1539 WWW/Library/Implementation/HTTCP.c:1557
 #, c-format
 msgid "Unable to locate remote host %s."
 msgstr "Ude af stand til at finde fremmed vært %s."
@@ -3027,38 +3027,38 @@ msgstr "Ude af stand til at finde fremmed vært %s."
 #. * but not HTAlert, because typically there will be other
 #. * alerts from the callers.  - kw
 #.
-#: WWW/Library/Implementation/HTTCP.c:1567 WWW/Library/Implementation/HTTelnet.c:108
+#: WWW/Library/Implementation/HTTCP.c:1554 WWW/Library/Implementation/HTTelnet.c:108
 #, c-format
 msgid "Invalid hostname %s"
 msgstr "Ugyldigt værtsnavn %s"
 
-#: WWW/Library/Implementation/HTTCP.c:1581
+#: WWW/Library/Implementation/HTTCP.c:1568
 #, c-format
 msgid "Making %s connection to %s"
 msgstr "Opretter %s-forbindelse til %s"
 
-#: WWW/Library/Implementation/HTTCP.c:1592
+#: WWW/Library/Implementation/HTTCP.c:1579
 msgid "socket failed."
 msgstr "sokkel fejlede."
 
-#: WWW/Library/Implementation/HTTCP.c:1605
+#: WWW/Library/Implementation/HTTCP.c:1592
 #, c-format
 msgid "socket failed: family %d addr %s port %s."
 msgstr "sokkel fejlede: familie %d adr. %s port %s."
 
-#: WWW/Library/Implementation/HTTCP.c:1629
+#: WWW/Library/Implementation/HTTCP.c:1616
 msgid "Could not make connection non-blocking."
 msgstr "Kunne ikke oprette en ikke-blokerende forbindelse."
 
-#: WWW/Library/Implementation/HTTCP.c:1697
+#: WWW/Library/Implementation/HTTCP.c:1684
 msgid "Connection failed (too many retries)."
 msgstr "Forbindelse opgivet (for mange forsøg)."
 
-#: WWW/Library/Implementation/HTTCP.c:1896
+#: WWW/Library/Implementation/HTTCP.c:1883
 msgid "Could not restore socket to blocking."
 msgstr "Kunne ikke få sokkel til at blokere."
 
-#: WWW/Library/Implementation/HTTCP.c:1962
+#: WWW/Library/Implementation/HTTCP.c:1949
 msgid "Socket read failed for 180,000 tries."
 msgstr "Læsning af sokkel slog fejl i 180.000 forsøg."
 
@@ -3362,98 +3362,98 @@ msgstr "Hukommelse opbrugt, fremvisning afbrudt!"
 msgid "Memory exhausted, will interrupt transfer!"
 msgstr "Hukommelse opbrugt, vil afbryde overførsel!"
 
-#: src/GridText.c:3594
+#: src/GridText.c:3601
 msgid " *** MEMORY EXHAUSTED ***"
 msgstr " *** HUKOMMELSE OPBRUGT ***"
 
-#: src/GridText.c:6013 src/GridText.c:6020 src/LYList.c:248
+#: src/GridText.c:6020 src/GridText.c:6027 src/LYList.c:248
 msgid "unknown field or link"
 msgstr "ukendt felt eller link"
 
-#: src/GridText.c:6029
+#: src/GridText.c:6036
 msgid "text entry field"
 msgstr "indtast tekst"
 
-#: src/GridText.c:6032
+#: src/GridText.c:6039
 msgid "password entry field"
 msgstr "indtast adgangskode"
 
-#: src/GridText.c:6035
+#: src/GridText.c:6042
 msgid "checkbox"
 msgstr "afkrydsningsboks"
 
-#: src/GridText.c:6038
+#: src/GridText.c:6045
 msgid "radio button"
 msgstr "radioknap"
 
-#: src/GridText.c:6041
+#: src/GridText.c:6048
 msgid "submit button"
 msgstr "indsendelsesknap"
 
-#: src/GridText.c:6044
+#: src/GridText.c:6051
 msgid "reset button"
 msgstr "nulstillingsknap"
 
-#: src/GridText.c:6047
+#: src/GridText.c:6054
 msgid "popup menu"
 msgstr "pop up-menu"
 
-#: src/GridText.c:6050
+#: src/GridText.c:6057
 msgid "hidden form field"
 msgstr "skjult formularfelt"
 
-#: src/GridText.c:6053
+#: src/GridText.c:6060
 msgid "text entry area"
 msgstr "indtast tekst"
 
-#: src/GridText.c:6056
+#: src/GridText.c:6063
 msgid "range entry field"
 msgstr "angiv interval"
 
-#: src/GridText.c:6059
+#: src/GridText.c:6066
 msgid "file entry field"
 msgstr "angiv fil"
 
-#: src/GridText.c:6062
+#: src/GridText.c:6069
 msgid "text-submit field"
 msgstr "tekstindsendelsesfelt"
 
-#: src/GridText.c:6065
+#: src/GridText.c:6072
 msgid "image-submit button"
 msgstr "Billedindsendelsesknap"
 
-#: src/GridText.c:6068
+#: src/GridText.c:6075
 msgid "keygen field"
 msgstr "nøglegen-felt"
 
-#: src/GridText.c:6071
+#: src/GridText.c:6078
 msgid "unknown form field"
 msgstr "ukendt formularfelt"
 
-#: src/GridText.c:10231
+#: src/GridText.c:10244
 msgid "Can't open file for uploading"
 msgstr "Kan ikke åbne fil til upload"
 
-#: src/GridText.c:11384
+#: src/GridText.c:11397
 #, c-format
 msgid "Submitting %s"
 msgstr "Indsender %s"
 
 #. ugliness has happened; inform user and do the best we can
-#: src/GridText.c:12533
+#: src/GridText.c:12546
 msgid "Hang Detect: TextAnchor struct corrupted - suggest aborting!"
 msgstr "Program hænger: TextAnchor-struktur ødelagt - det er bedst at afbryde!"
 
 #. don't show previous state
-#: src/GridText.c:12738
+#: src/GridText.c:12751
 msgid "Wrap lines to fit displayed area?"
 msgstr "Ombryd linjer så de passer til det viste område?"
 
-#: src/GridText.c:12790
+#: src/GridText.c:12803
 msgid "Very long lines have been wrapped!"
 msgstr "Meget lange linjer er blevet ombrudt!"
 
-#: src/GridText.c:13232
+#: src/GridText.c:13245
 msgid "Very long lines have been truncated!"
 msgstr "Meget lange linjer er blevet afkortet!"
 
@@ -3559,15 +3559,15 @@ msgstr "Filsti:"
 msgid "(unknown)"
 msgstr "(ukendt)"
 
-#: src/HTML.c:7374
+#: src/HTML.c:7375
 msgid "Document has only hidden links.  Use the 'l'ist command."
 msgstr "Dokument har kun skjulte links. Brug 'l'istekommandoen."
 
-#: src/HTML.c:7873
+#: src/HTML.c:7874
 msgid "Source cache error - disk full?"
 msgstr "Cache-fejl - diskplads opbrugt?"
 
-#: src/HTML.c:7886
+#: src/HTML.c:7887
 msgid "Source cache error - not enough memory!"
 msgstr "Cache-fejl - ikke nok hukommelse!"
 
@@ -3672,31 +3672,31 @@ msgstr "Intern"
 msgid "cookie_domain_flag_set error, aborting program"
 msgstr "'cookie_domain_set_flag'-fejl, afbryder program"
 
-#: src/LYCurses.c:1017
+#: src/LYCurses.c:1034
 msgid "Terminal initialisation failed - unknown terminal type?"
 msgstr "Klargøring af terminal slog fejl - ukendt terminaltype?"
 
-#: src/LYCurses.c:1442
+#: src/LYCurses.c:1459
 msgid "Terminal ="
 msgstr "Terminal ="
 
-#: src/LYCurses.c:1446
+#: src/LYCurses.c:1463
 msgid "You must use a vt100, 200, etc. terminal with this program."
 msgstr "Du skal bruge en vt100, 200, etc. terminal med dette program."
 
-#: src/LYCurses.c:1495
+#: src/LYCurses.c:1512
 msgid "Your Terminal type is unknown!"
 msgstr "Din terminaltype er ukendt!"
 
-#: src/LYCurses.c:1496
+#: src/LYCurses.c:1513
 msgid "Enter a terminal type:"
 msgstr "Anfør en terminaltype:"
 
-#: src/LYCurses.c:1510
+#: src/LYCurses.c:1527
 msgid "TERMINAL TYPE IS SET TO"
 msgstr "TERMINAL-TYPE SAT TIL"
 
-#: src/LYCurses.c:2007
+#: src/LYCurses.c:2031
 #, c-format
 msgid ""
 "\n"
@@ -3705,7 +3705,7 @@ msgstr ""
 "\n"
 "En kritisk fejl opstod i %s Ver. %s\n"
 
-#: src/LYCurses.c:2010
+#: src/LYCurses.c:2034
 #, c-format
 msgid ""
 "\n"
@@ -4241,52 +4241,52 @@ msgstr ""
 "Lynx-fil %s er ikke tilgængelig.\n"
 "\n"
 
-#: src/LYMain.c:1763
+#: src/LYMain.c:1750
 msgid "Warning:"
 msgstr "Advarsel:"
 
-#: src/LYMain.c:2328
+#: src/LYMain.c:2315
 msgid "persistent cookies state will be changed in next session only."
 msgstr "Ændring for varige cookier vil kun gælde næste session."
 
-#: src/LYMain.c:2565 src/LYMain.c:2610
+#: src/LYMain.c:2552 src/LYMain.c:2597
 #, c-format
 msgid "Lynx: ignoring unrecognized charset=%s\n"
 msgstr "Lynx: Ignorerer ukendt tegnsæt=%s\n"
 
-#: src/LYMain.c:3121
+#: src/LYMain.c:3108
 #, c-format
 msgid "%s Version %s (%s)"
 msgstr "%s Version %s (%s)"
 
-#: src/LYMain.c:3156
+#: src/LYMain.c:3143
 #, c-format
 msgid "Built on %s %s %s\n"
 msgstr "Bygget på %s %s %s\n"
 
-#: src/LYMain.c:3178
+#: src/LYMain.c:3165
 msgid "Copyrights held by the University of Kansas, CERN, and other contributors."
 msgstr "Ophavsret indehaves af University of Kansas, CERN og andre bidragydere."
 
-#: src/LYMain.c:3179
+#: src/LYMain.c:3166
 msgid "Distributed under the GNU General Public License."
 msgstr "Distribueret under GNU General Public License."
 
-#: src/LYMain.c:3180
+#: src/LYMain.c:3167
 msgid "See http://lynx.isc.org/ and the online help for more information."
 msgstr "Se http://lynx.isc.org/ og online-hjælpen for flere oplysninger."
 
-#: src/LYMain.c:3952
+#: src/LYMain.c:3939
 #, c-format
 msgid "USAGE: %s [options] [file]\n"
 msgstr "BRUG: %s [valgmuligheder] [fil]\n"
 
-#: src/LYMain.c:3953
+#: src/LYMain.c:3940
 #, c-format
 msgid "Options are:\n"
 msgstr "Valgmuligheder er:\n"
 
-#: src/LYMain.c:4252
+#: src/LYMain.c:4239
 #, c-format
 msgid "%s: Invalid Option: %s\n"
 msgstr "%s: Ugyldig indstilling: %s\n"
@@ -4360,7 +4360,7 @@ msgstr "TABEL-centrering slået fra."
 msgid "Current URL is empty."
 msgstr "Aktuelle adresse er tom."
 
-#: src/LYMainLoop.c:6935 src/LYUtils.c:1714
+#: src/LYMainLoop.c:6935 src/LYUtils.c:1775
 msgid "Copy to clipboard failed."
 msgstr "Kopiering til klippebord slog fejl."
 
@@ -4456,345 +4456,345 @@ msgstr ""
 msgid "Message has no original text!"
 msgstr "Indlæg har ingen oprindelig tekst!"
 
-#: src/LYOptions.c:758
+#: src/LYOptions.c:761
 msgid "review/edit B)ookmarks files"
 msgstr "gennemse/rediger B)ogmærkefiler"
 
-#: src/LYOptions.c:760
+#: src/LYOptions.c:763
 msgid "B)ookmark file: "
 msgstr "B)ogmærkefil: "
 
-#: src/LYOptions.c:2123 src/LYOptions.c:2130
+#: src/LYOptions.c:2126 src/LYOptions.c:2133
 msgid "ON"
 msgstr "SLÅET TIL"
 
 #. verbose_img variable
-#: src/LYOptions.c:2124 src/LYOptions.c:2129 src/LYOptions.c:2277 src/LYOptions.c:2288
+#: src/LYOptions.c:2127 src/LYOptions.c:2132 src/LYOptions.c:2280 src/LYOptions.c:2291
 msgid "OFF"
 msgstr "SLÅET FRA"
 
-#: src/LYOptions.c:2125
+#: src/LYOptions.c:2128
 msgid "NEVER"
 msgstr "ALDRIG"
 
-#: src/LYOptions.c:2126
+#: src/LYOptions.c:2129
 msgid "ALWAYS"
 msgstr "ALTID"
 
-#: src/LYOptions.c:2142 src/LYOptions.c:2269
+#: src/LYOptions.c:2145 src/LYOptions.c:2272
 msgid "ignore"
 msgstr "ignorér"
 
-#: src/LYOptions.c:2143
+#: src/LYOptions.c:2146
 msgid "ask user"
 msgstr "spørg bruger"
 
-#: src/LYOptions.c:2144
+#: src/LYOptions.c:2147
 msgid "accept all"
 msgstr "godtag alle"
 
-#: src/LYOptions.c:2156
+#: src/LYOptions.c:2159
 msgid "ALWAYS OFF"
 msgstr "ALTID SLÅET FRA"
 
-#: src/LYOptions.c:2157
+#: src/LYOptions.c:2160
 msgid "FOR LOCAL FILES ONLY"
 msgstr "KUN FOR LOKALE FILER"
 
-#: src/LYOptions.c:2159
+#: src/LYOptions.c:2162
 msgid "ALWAYS ON"
 msgstr "ALTID SLÅET TIL"
 
-#: src/LYOptions.c:2171
+#: src/LYOptions.c:2174
 msgid "Numbers act as arrows"
 msgstr "Pile på numerisk tastatur aktive"
 
-#: src/LYOptions.c:2173
+#: src/LYOptions.c:2176
 msgid "Links are numbered"
 msgstr "Links er nummererede"
 
-#: src/LYOptions.c:2176
+#: src/LYOptions.c:2179
 msgid "Links and form fields are numbered"
 msgstr "Links og formularfelter er nummererede"
 
-#: src/LYOptions.c:2179
+#: src/LYOptions.c:2182
 msgid "Form fields are numbered"
 msgstr "Formularfelter er nummererede"
 
-#: src/LYOptions.c:2189
+#: src/LYOptions.c:2192
 msgid "Case insensitive"
 msgstr "Ikke versalfølsom"
 
-#: src/LYOptions.c:2190
+#: src/LYOptions.c:2193
 msgid "Case sensitive"
 msgstr "Versalfølsom"
 
-#: src/LYOptions.c:2214
+#: src/LYOptions.c:2217
 msgid "prompt normally"
 msgstr "normal prompt"
 
-#: src/LYOptions.c:2215
+#: src/LYOptions.c:2218
 msgid "force yes-response"
 msgstr "gennemtving bekræftende svar"
 
-#: src/LYOptions.c:2216
+#: src/LYOptions.c:2219
 msgid "force no-response"
 msgstr "gennemtving benægtende svar"
 
-#: src/LYOptions.c:2234
+#: src/LYOptions.c:2237
 msgid "Novice"
 msgstr "Begynder"
 
-#: src/LYOptions.c:2235
+#: src/LYOptions.c:2238
 msgid "Intermediate"
 msgstr "Videregående"
 
-#: src/LYOptions.c:2236
+#: src/LYOptions.c:2239
 msgid "Advanced"
 msgstr "Avanceret"
 
-#: src/LYOptions.c:2245
+#: src/LYOptions.c:2248
 msgid "By First Visit"
 msgstr "Ved første besøg"
 
-#: src/LYOptions.c:2247
+#: src/LYOptions.c:2250
 msgid "By First Visit Reversed"
 msgstr "Ved første besøg, i omvendt orden"
 
-#: src/LYOptions.c:2248
+#: src/LYOptions.c:2251
 msgid "As Visit Tree"
 msgstr "Som træstruktur over besøg"
 
-#: src/LYOptions.c:2249
+#: src/LYOptions.c:2252
 msgid "By Last Visit"
 msgstr "Efter sidste besøg"
 
-#: src/LYOptions.c:2251
+#: src/LYOptions.c:2254
 msgid "By Last Visit Reversed"
 msgstr "Efter sidste besøg, i omvendt orden"
 
 #. Old_DTD variable
-#: src/LYOptions.c:2262
+#: src/LYOptions.c:2265
 msgid "relaxed (TagSoup mode)"
 msgstr "afslappet (TagSoup-tilstand)"
 
-#: src/LYOptions.c:2263
+#: src/LYOptions.c:2266
 msgid "strict (SortaSGML mode)"
 msgstr "striks (SortaSGML-tilstand)"
 
-#: src/LYOptions.c:2270
+#: src/LYOptions.c:2273
 msgid "as labels"
 msgstr "som etiketter"
 
-#: src/LYOptions.c:2271
+#: src/LYOptions.c:2274
 msgid "as links"
 msgstr "som links"
 
-#: src/LYOptions.c:2278
+#: src/LYOptions.c:2281
 msgid "show filename"
 msgstr "vis filnavn"
 
-#: src/LYOptions.c:2289
+#: src/LYOptions.c:2292
 msgid "STANDARD"
 msgstr "STANDARD"
 
-#: src/LYOptions.c:2290
+#: src/LYOptions.c:2293
 msgid "ADVANCED"
 msgstr "AVANCERET"
 
-#: src/LYOptions.c:2316
+#: src/LYOptions.c:2319
 msgid "Directories first"
 msgstr "Filkataloger først"
 
-#: src/LYOptions.c:2317
+#: src/LYOptions.c:2320
 msgid "Files first"
 msgstr "Filer først"
 
-#: src/LYOptions.c:2318
+#: src/LYOptions.c:2321
 msgid "Mixed style"
 msgstr "Blandet stil"
 
-#: src/LYOptions.c:2326 src/LYOptions.c:2343
+#: src/LYOptions.c:2329 src/LYOptions.c:2346
 msgid "By Name"
 msgstr "Efter navn"
 
-#: src/LYOptions.c:2327 src/LYOptions.c:2344
+#: src/LYOptions.c:2330 src/LYOptions.c:2347
 msgid "By Type"
 msgstr "Efter type"
 
-#: src/LYOptions.c:2328 src/LYOptions.c:2345
+#: src/LYOptions.c:2331 src/LYOptions.c:2348
 msgid "By Size"
 msgstr "Efter størrelse"
 
-#: src/LYOptions.c:2329 src/LYOptions.c:2346
+#: src/LYOptions.c:2332 src/LYOptions.c:2349
 msgid "By Date"
 msgstr "Efter dato"
 
-#: src/LYOptions.c:2330
+#: src/LYOptions.c:2333
 msgid "By Mode"
 msgstr "Efter tilstand"
 
-#: src/LYOptions.c:2332
+#: src/LYOptions.c:2335
 msgid "By User"
 msgstr "Efter bruger"
 
-#: src/LYOptions.c:2333
+#: src/LYOptions.c:2336
 msgid "By Group"
 msgstr "Efter gruppe"
 
-#: src/LYOptions.c:2354
+#: src/LYOptions.c:2357
 msgid "Do not show rate"
 msgstr "Vis ikke overførselshastighed"
 
-#: src/LYOptions.c:2355 src/LYOptions.c:2356
+#: src/LYOptions.c:2358 src/LYOptions.c:2359
 #, c-format
 msgid "Show %s/sec rate"
 msgstr "Vis hastighed i %s/sek "
 
-#: src/LYOptions.c:2358 src/LYOptions.c:2359
+#: src/LYOptions.c:2361 src/LYOptions.c:2362
 #, c-format
 msgid "Show %s/sec, ETA"
 msgstr "Vis %s/sek, ETA"
 
 # types = mime-types
-#: src/LYOptions.c:2371
+#: src/LYOptions.c:2374
 msgid "Accept lynx's internal types"
 msgstr "Godtag Lynx' indbyggede MIME-typer"
 
-#: src/LYOptions.c:2372
+#: src/LYOptions.c:2375
 msgid "Also accept lynx.cfg's types"
 msgstr "Godtag også MIME-typer i lynx.cfg"
 
-#: src/LYOptions.c:2373
+#: src/LYOptions.c:2376
 msgid "Also accept user's types"
 msgstr "Godtag også brugerens MIME-typer"
 
-#: src/LYOptions.c:2374
+#: src/LYOptions.c:2377
 msgid "Also accept system's types"
 msgstr "Godtag også systemets MIME-typer"
 
-#: src/LYOptions.c:2375
+#: src/LYOptions.c:2378
 msgid "Accept all types"
 msgstr "Godtag alle MIME-typer"
 
-#: src/LYOptions.c:2384
+#: src/LYOptions.c:2387
 msgid "gzip"
 msgstr "gzip"
 
-#: src/LYOptions.c:2385
+#: src/LYOptions.c:2388
 msgid "deflate"
 msgstr "deflate"
 
-#: src/LYOptions.c:2388
+#: src/LYOptions.c:2391
 msgid "compress"
 msgstr "compress"
 
-#: src/LYOptions.c:2391
+#: src/LYOptions.c:2394
 msgid "bzip2"
 msgstr "bzip2"
 
-#: src/LYOptions.c:2393
+#: src/LYOptions.c:2396
 msgid "All"
 msgstr "Alle"
 
-#: src/LYOptions.c:2658 src/LYOptions.c:2682
+#: src/LYOptions.c:2664 src/LYOptions.c:2688
 #, c-format
 msgid "Use %s to invoke the Options menu!"
 msgstr "Brug %s for at aktivere menu over valgmuligheder!"
 
-#: src/LYOptions.c:3429
+#: src/LYOptions.c:3438
 msgid "(options marked with (!) will not be saved)"
 msgstr "(indstillinger markeret med (!) vil ikke blive gemt)"
 
-#: src/LYOptions.c:3437
+#: src/LYOptions.c:3446
 msgid "General Preferences"
 msgstr "Generelle indstillinger"
 
 #. ***************************************************************
 #. User Mode: SELECT
-#: src/LYOptions.c:3441
+#: src/LYOptions.c:3450
 msgid "User mode"
 msgstr "Brugertilstand"
 
 #. Editor: INPUT
-#: src/LYOptions.c:3447
+#: src/LYOptions.c:3456
 msgid "Editor"
 msgstr "Editor"
 
 #. Search Type: SELECT
-#: src/LYOptions.c:3452
+#: src/LYOptions.c:3461
 msgid "Type of Search"
 msgstr "Søgningstype"
 
-#: src/LYOptions.c:3457
+#: src/LYOptions.c:3466
 msgid "Security and Privacy"
 msgstr "Sikkerhed og beskyttelse af persondata"
 
 #. ***************************************************************
 #. Cookies: SELECT
-#: src/LYOptions.c:3461
+#: src/LYOptions.c:3470
 msgid "Cookies"
 msgstr "Cookier"
 
 #. Cookie Prompting: SELECT
-#: src/LYOptions.c:3475
+#: src/LYOptions.c:3484
 msgid "Invalid-Cookie Prompting"
 msgstr "Prompt ved ugyldig cookie"
 
 #. SSL Prompting: SELECT
-#: src/LYOptions.c:3482
+#: src/LYOptions.c:3491
 msgid "SSL Prompting"
 msgstr "Prompt ved SSL"
 
-#: src/LYOptions.c:3488
+#: src/LYOptions.c:3497
 msgid "Keyboard Input"
 msgstr "Tastatur-inddata"
 
 #. ***************************************************************
 #. Keypad Mode: SELECT
-#: src/LYOptions.c:3492
+#: src/LYOptions.c:3501
 msgid "Keypad mode"
 msgstr "Numerisk tastaturtilstand"
 
 #. Emacs keys: ON/OFF
-#: src/LYOptions.c:3498
+#: src/LYOptions.c:3507
 msgid "Emacs keys"
 msgstr "Emacs-taster"
 
 #. VI Keys: ON/OFF
-#: src/LYOptions.c:3504
+#: src/LYOptions.c:3513
 msgid "VI keys"
 msgstr "VI-taster"
 
 #. Line edit style: SELECT
 #. well, at least 2 line edit styles available
-#: src/LYOptions.c:3511
+#: src/LYOptions.c:3520
 msgid "Line edit style"
 msgstr "Linjeredigeringsstil"
 
 #. Keyboard layout: SELECT
-#: src/LYOptions.c:3523
+#: src/LYOptions.c:3532
 msgid "Keyboard layout"
 msgstr "Tastaturudlægning"
 
 #.
 #. * Display and Character Set
 #.
-#: src/LYOptions.c:3537
+#: src/LYOptions.c:3546
 msgid "Display and Character Set"
 msgstr "Skærm og tegnsæt"
 
 #. Use locale-based character set: ON/OFF
-#: src/LYOptions.c:3542
+#: src/LYOptions.c:3551
 msgid "Use locale-based character set"
 msgstr "Brug tegnsæt baseret på lokaliseringsindstillinger"
 
 #. Display Character Set: SELECT
-#: src/LYOptions.c:3551
+#: src/LYOptions.c:3560
 msgid "Display character set"
 msgstr "Skærmtegnsæt"
 
-#: src/LYOptions.c:3582
+#: src/LYOptions.c:3591
 msgid "Assumed document character set"
 msgstr "Formodet dokumenttegnsæt"
 
@@ -4803,171 +4803,174 @@ msgstr "Formodet dokumenttegnsæt"
 #. * we split the header to make it more readable:
 #. * "CJK mode" for CJK display charsets, and "Raw 8-bit" for others.
 #.
-#: src/LYOptions.c:3602
+#: src/LYOptions.c:3611
 msgid "CJK mode"
 msgstr "CJK-tilstand"
 
-#: src/LYOptions.c:3604
+#: src/LYOptions.c:3613
 msgid "Raw 8-bit"
 msgstr "Rå 8-bit"
 
 #. X Display: INPUT
-#: src/LYOptions.c:3612
+#: src/LYOptions.c:3621
 msgid "X Display"
 msgstr "X-skærm"
 
 #.
 #. * Document Appearance
 #.
-#: src/LYOptions.c:3618
+#: src/LYOptions.c:3627
 msgid "Document Appearance"
 msgstr "Udseende af dokument"
 
-#: src/LYOptions.c:3624
+#: src/LYOptions.c:3633
 msgid "Show color"
 msgstr "Vis farver"
 
 #. Show cursor: ON/OFF
-#: src/LYOptions.c:3648
+#: src/LYOptions.c:3657
 msgid "Show cursor"
 msgstr "Vis markør"
 
 #. Underline links: ON/OFF
-#: src/LYOptions.c:3654
+#: src/LYOptions.c:3663
 msgid "Underline links"
 msgstr "Understreg links"
 
 #. Show scrollbar: ON/OFF
-#: src/LYOptions.c:3661
+#: src/LYOptions.c:3670
 msgid "Show scrollbar"
 msgstr "Vis rullebjælke"
 
 #. Select Popups: ON/OFF
-#: src/LYOptions.c:3668
+#: src/LYOptions.c:3677
 msgid "Popups for select fields"
 msgstr "Pop op-vinduer for valgte felter"
 
 #. HTML error recovery: SELECT
-#: src/LYOptions.c:3674
+#: src/LYOptions.c:3683
 msgid "HTML error recovery"
 msgstr "HTML-fejlgenopretning"
 
 #. Show Images: SELECT
-#: src/LYOptions.c:3680
+#: src/LYOptions.c:3689
 msgid "Show images"
 msgstr "Vis billeder"
 
 #. Verbose Images: ON/OFF
-#: src/LYOptions.c:3694
+#: src/LYOptions.c:3703
 msgid "Verbose images"
 msgstr "Billedtekst"
 
-#: src/LYOptions.c:3703
+#.
+#. * Headers Transferred to Remote Servers
+#.
+#: src/LYOptions.c:3711
 msgid "Headers Transferred to Remote Servers"
 msgstr "Information til fremmede servere"
 
 #. ***************************************************************
 #. Mail Address: INPUT
-#: src/LYOptions.c:3707
+#: src/LYOptions.c:3715
 msgid "Personal mail address"
 msgstr "Personlig e-post-adresse"
 
 #. Mail Address: INPUT
-#: src/LYOptions.c:3712
+#: src/LYOptions.c:3720
 #, fuzzy
 msgid "Password for anonymous ftp"
 msgstr "Adgangskode for nyhedsvært (news) '%s':"
 
 # media type refererer til content-type headeren, eks: image/xyz
 #. Preferred media type: SELECT
-#: src/LYOptions.c:3717
+#: src/LYOptions.c:3725
 msgid "Preferred media type"
 msgstr "Foretrukket medietype"
 
 #. Preferred encoding: SELECT
-#: src/LYOptions.c:3723
+#: src/LYOptions.c:3731
 msgid "Preferred encoding"
 msgstr "Foretrukket kodning"
 
 #. Preferred Document Character Set: INPUT
-#: src/LYOptions.c:3729
+#: src/LYOptions.c:3737
 msgid "Preferred document character set"
 msgstr "Foretrukket dokumenttegnsæt"
 
 #. Preferred Document Language: INPUT
-#: src/LYOptions.c:3734
+#: src/LYOptions.c:3742
 msgid "Preferred document language"
 msgstr "Foretrukket dokumentsprog"
 
-#: src/LYOptions.c:3740
+#: src/LYOptions.c:3748
 msgid "User-Agent header"
 msgstr "User-Agent-linje"
 
 #.
 #. * Listing and Accessing Files
 #.
-#: src/LYOptions.c:3748
+#: src/LYOptions.c:3756
 msgid "Listing and Accessing Files"
 msgstr "Filoversigt og Filadgang"
 
 #. ***************************************************************
 #. FTP sort: SELECT
-#: src/LYOptions.c:3752
+#: src/LYOptions.c:3760
 msgid "FTP sort criteria"
 msgstr "FTP-sorteringskriterie"
 
 #. Local Directory Sort: SELECT
-#: src/LYOptions.c:3759
+#: src/LYOptions.c:3767
 msgid "Local directory sort criteria"
 msgstr "Sortering af lokale filkataloger"
 
 #. Local Directory Order: SELECT
-#: src/LYOptions.c:3765
+#: src/LYOptions.c:3773
 msgid "Local directory sort order"
 msgstr "Sortering af lokale filkataloger"
 
-#: src/LYOptions.c:3774
+#: src/LYOptions.c:3782
 msgid "Show dot files"
 msgstr "Vis punktumfiler"
 
-#: src/LYOptions.c:3782
+#: src/LYOptions.c:3790
 msgid "Execution links"
 msgstr "Links til programafvikling"
 
 #. Show transfer rate: SELECT
-#: src/LYOptions.c:3802
+#: src/LYOptions.c:3810
 msgid "Show transfer rate"
 msgstr "Vis overførselshastighed"
 
 #.
 #. * Special Files and Screens
 #.
-#: src/LYOptions.c:3822
+#: src/LYOptions.c:3830
 msgid "Special Files and Screens"
 msgstr "Særlige filer og skærmbilleder"
 
-#: src/LYOptions.c:3827
+#: src/LYOptions.c:3835
 msgid "Multi-bookmarks"
 msgstr "Multi-bogmærker"
 
-#: src/LYOptions.c:3835
+#: src/LYOptions.c:3843
 msgid "Review/edit Bookmarks files"
 msgstr "Gennemse/ret bogmærkefiler"
 
-#: src/LYOptions.c:3837
+#: src/LYOptions.c:3845
 msgid "Goto multi-bookmark menu"
 msgstr "Gå til multi-bogmærkemenu"
 
-#: src/LYOptions.c:3839
+#: src/LYOptions.c:3847
 msgid "Bookmarks file"
 msgstr "Bogmærkefil"
 
 #. Visited Pages: SELECT
-#: src/LYOptions.c:3845
+#: src/LYOptions.c:3853
 msgid "Visited Pages"
 msgstr "Besøgte sider"
 
-#: src/LYOptions.c:3850
+#: src/LYOptions.c:3858
 msgid "View the file "
 msgstr "Vis filen "
 
@@ -5087,38 +5090,38 @@ msgstr "Lynx: Kan ikke starte op, CERN-regelfil %s findes ikke\n"
 msgid "(no name)"
 msgstr "(intet navn)"
 
-#: src/LYReadCFG.c:1782
+#: src/LYReadCFG.c:1784
 #, c-format
 msgid "More than %d nested lynx.cfg includes -- perhaps there is a loop?!?\n"
 msgstr "Flere end %d inkluderingsfiler i lynx.cfg - måske en sløjfe!?\n"
 
-#: src/LYReadCFG.c:1784
+#: src/LYReadCFG.c:1786
 #, c-format
 msgid "Last attempted include was '%s',\n"
 msgstr "Sidste inkluderingsfil der forsøgtes indlæst var '%s',\n"
 
-#: src/LYReadCFG.c:1785
+#: src/LYReadCFG.c:1787
 #, c-format
 msgid "included from '%s'.\n"
 msgstr "inkluderet fra '%s'.\n"
 
-#: src/LYReadCFG.c:2192 src/LYReadCFG.c:2205 src/LYReadCFG.c:2263
+#: src/LYReadCFG.c:2194 src/LYReadCFG.c:2207 src/LYReadCFG.c:2265
 msgid "The following is read from your lynx.cfg file."
 msgstr "Følgende er læst fra din lynx.cfg-fil."
 
-#: src/LYReadCFG.c:2193 src/LYReadCFG.c:2206
+#: src/LYReadCFG.c:2195 src/LYReadCFG.c:2208
 msgid "Please read the distribution"
 msgstr "Læs venligst distributionen"
 
-#: src/LYReadCFG.c:2199 src/LYReadCFG.c:2209
+#: src/LYReadCFG.c:2201 src/LYReadCFG.c:2211
 msgid "for more comments."
 msgstr "for flere kommentarer."
 
-#: src/LYReadCFG.c:2245
+#: src/LYReadCFG.c:2247
 msgid "RELOAD THE CHANGES"
 msgstr "GENINDLÆS ÆNDRINGERNE"
 
-#: src/LYReadCFG.c:2253
+#: src/LYReadCFG.c:2255
 msgid "Your primary configuration"
 msgstr "Din primære opsætning"
 
@@ -5387,33 +5390,33 @@ msgstr "Upload til:"
 msgid "Upload options:"
 msgstr "Valgmuligheder for uploads:"
 
-#: src/LYUtils.c:1716
+#: src/LYUtils.c:1777
 msgid "Download document URL put to clipboard."
 msgstr "Hjemtag dokument fra adressen på klippebord."
 
-#: src/LYUtils.c:2493
+#: src/LYUtils.c:2554
 msgid "Unexpected access protocol for this URL scheme."
 msgstr "Uventet adgangsprotokol for denne adressetype."
 
-#: src/LYUtils.c:3301
+#: src/LYUtils.c:3362
 msgid "Too many tempfiles"
 msgstr "For mange tempfiler"
 
-#: src/LYUtils.c:3605
+#: src/LYUtils.c:3666
 msgid "unknown restriction"
 msgstr "ukendt begrænsning"
 
-#: src/LYUtils.c:3635
+#: src/LYUtils.c:3696
 #, c-format
 msgid "No restrictions set.\n"
 msgstr "Ingen begrænsninger sat.\n"
 
-#: src/LYUtils.c:3638
+#: src/LYUtils.c:3699
 #, c-format
 msgid "Restrictions set:\n"
 msgstr "Begrænsninger sat:\n"
 
-#: src/LYUtils.c:5022
+#: src/LYUtils.c:5077
 msgid "Cannot find HOME directory"
 msgstr "Kan ikke finde HOME-katalog"
 

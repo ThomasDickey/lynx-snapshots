@@ -570,6 +570,10 @@ int lynx_default_colors(void)
 	    default_fg = DEFAULT_COLOR;
 	    default_bg = DEFAULT_COLOR;
 	    code = 1;
+	} else {
+	    default_fg = COLOR_WHITE;
+	    default_bg = COLOR_BLACK;
+	    default_color_reset = TRUE;
 	}
     }
     return code;
@@ -859,6 +863,12 @@ void start_curses(void)
     }
 
     if (slinit == 0) {
+#if defined(HAVE_TTYNAME)
+	if (isatty(fileno(stdout)) && LYReopenInput() < 0) {
+	    fprintf(stderr, "Cannot open tty input\n");
+	    exit_immediately(EXIT_FAILURE);
+	}
+#endif
 #if defined(USE_KEYMAPS)
 	if (-1 == lynx_initialize_keymaps())
 	    exit_immediately(EXIT_FAILURE);
@@ -966,6 +976,13 @@ void start_curses(void)
     CTRACE((tfp, "Screen size: initscr()\n"));
     initscr();			/* start curses */
 #else /* Unix: */
+
+#if defined(HAVE_TTYNAME)
+    if (isatty(fileno(stdout)) && LYReopenInput() < 0) {
+	fprintf(stderr, "Cannot open tty input\n");
+	exit_immediately(EXIT_FAILURE);
+    }
+#endif
 
 #ifdef __CYGWIN__
     /*
@@ -1110,7 +1127,7 @@ void start_curses(void)
 			lynx_color_cfg[n].fg = default_fg;
 		    if (default_bg >= 0 && lynx_color_cfg[n].bg < 0)
 			lynx_color_cfg[n].bg = default_bg;
-		    CTRACE((tfp, "color_cfg[%d] = %d/%d\n", n,
+		    CTRACE((tfp, "color_cfg[%u] = %d/%d\n", n,
 			    lynx_color_cfg[n].fg,
 			    lynx_color_cfg[n].bg));
 		}
@@ -1673,8 +1690,13 @@ WINDOW *LYstartPopup(int *top_y,
     if (*left_x > 0 && (*left_x + *width + 4) < LYcolLimit)
 	form_window = newwin(*height, *width + 4, *top_y, *left_x - 1);
     if (form_window == 0) {
-	*width = LYcolLimit - 4;
-	form_window = newwin(*height, LYcolLimit, *top_y, 0);
+	if (*width > LYcolLimit - 4) {
+	    *width = LYcolLimit - 4;
+	    *left_x = 1;
+	} else {
+	    *left_x = LYcolLimit - 4 - *width;
+	}
+	form_window = newwin(*height, *width + 4, *top_y, *left_x - 1);
     }
     if (form_window == 0) {
 	HTAlert(POPUP_FAILED);
@@ -1772,9 +1794,9 @@ void LYwaddnstr(WINDOW * w GCC_UNUSED,
 	int start = 0;
 	int piece = (LYcolLimit - x0);
 
-	CTRACE((tfp, "LYwaddnstr wrapping src:%s, len:%d:%d\n", src, len, LYcolLimit));
+	CTRACE((tfp, "LYwaddnstr wrapping src:%s, len:%u:%d\n", src, len, LYcolLimit));
 	LYwideLines = TRUE;	/* prevent recursion */
-	for (;;) {
+	while (piece > 0) {
 	    int y, x;
 
 	    getyx(LYwin, y, x);
@@ -1801,15 +1823,15 @@ void LYwaddnstr(WINDOW * w GCC_UNUSED,
 	int y, x;
 
 	LYGetYX(y, x);
-	CTRACE2(TRACE_STYLE, (tfp, "[%2d,%2d] LYwaddnstr(%.*s)\n",
-			      y, x, (int) len, src));
+	CTRACE2(TRACE_STYLE, (tfp, "[%2d,%2d] LYwaddnstr(%.*s, %u)\n",
+			      y, x, (int) len, src, (unsigned) len));
     }
 #endif
     /*
      * There's no guarantee that a library won't temporarily write on its input.
      * Be safe and copy it when we have const-data.
      */
-    while (len > 0) {
+    while ((int) len > 0) {
 	char temp[MAX_LINE];
 	size_t use = (len >= MAX_LINE) ? MAX_LINE - 1 : len;
 

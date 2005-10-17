@@ -1098,6 +1098,30 @@ int UCTransChar(char ch_in,
     return rc;
 }
 
+#ifdef EXP_JAPANESEUTF8_SUPPORT
+long int UCTransJPToUni(char *inbuf,
+			int buflen,
+			int charset_in)
+{
+    char outbuf[3], *pin, *pout;
+    size_t rc, ilen, olen;
+    iconv_t cd;
+
+    pin = inbuf;
+    pout = outbuf;
+    ilen = 2;
+    olen = buflen;
+
+    cd = iconv_open("UTF-16BE", LYCharSet_UC[charset_in].MIMEname);
+    rc = iconv(cd, &pin, &ilen, &pout, &olen);
+    iconv_close(cd);
+    if ((ilen == 0) && (olen == 0)) {
+	return (((unsigned char) outbuf[0]) << 8) + (unsigned char) outbuf[1];
+    }
+    return -11;
+}
+#endif
+
 long int UCTransToUni(char ch_in,
 		      int charset_in)
 {
@@ -1109,6 +1133,68 @@ long int UCTransToUni(char ch_in,
 #ifndef UC_NO_SHORTCUTS
     if (charset_in == LATIN1)
 	return ch_iu;
+#ifdef EXP_JAPANESEUTF8_SUPPORT
+    if ((strcmp(LYCharSet_UC[charset_in].MIMEname, "shift_jis") == 0) ||
+	(strcmp(LYCharSet_UC[charset_in].MIMEname, "euc-jp") == 0)) {
+	static char buffer[3];
+	char obuffer[3], *pin, *pout;
+	static int inx = 0;
+	size_t rc, ilen, olen;
+	iconv_t cd;
+
+	pin = buffer;
+	pout = obuffer;
+	ilen = olen = 2;
+	if (strcmp(LYCharSet_UC[charset_in].MIMEname, "shift_jis") == 0) {
+	    if (inx == 0) {
+		if (IS_SJIS_HI1((unsigned char) ch_in) ||
+		    IS_SJIS_HI2((unsigned char) ch_in)) {
+		    buffer[0] = ch_in;
+		    inx = 1;
+		    return -11;
+		}
+	    } else {
+		if (IS_SJIS_LO((unsigned char) ch_in)) {
+		    buffer[1] = ch_in;
+		    buffer[2] = 0;
+
+		    cd = iconv_open("UTF-16BE", "Shift_JIS");
+		    rc = iconv(cd, &pin, &ilen, &pout, &olen);
+		    iconv_close(cd);
+		    inx = 0;
+		    if ((ilen == 0) && (olen == 0)) {
+			return (((unsigned char) obuffer[0]) << 8)
+			    + (unsigned char) obuffer[1];
+		    }
+		}
+	    }
+	}
+	if (strcmp(LYCharSet_UC[charset_in].MIMEname, "euc-jp") == 0) {
+	    if (inx == 0) {
+		if (IS_EUC_HI((unsigned char) ch_in)) {
+		    buffer[0] = ch_in;
+		    inx = 1;
+		    return -11;
+		}
+	    } else {
+		if (IS_EUC_LOX((unsigned char) ch_in)) {
+		    buffer[1] = ch_in;
+		    buffer[2] = 0;
+
+		    cd = iconv_open("UTF-16BE", "EUC-JP");
+		    rc = iconv(cd, &pin, &ilen, &pout, &olen);
+		    iconv_close(cd);
+		    inx = 0;
+		    if ((ilen == 0) && (olen == 0)) {
+			return (((unsigned char) obuffer[0]) << 8)
+			    + (unsigned char) obuffer[1];
+		    }
+		}
+	    }
+	}
+	inx = 0;
+    }
+#endif
     if (UCH(ch_in) < 128 && UCH(ch_in) >= 32)
 	return ch_iu;
 #endif /* UC_NO_SHORTCUTS */

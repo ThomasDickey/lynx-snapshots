@@ -1755,7 +1755,7 @@ int Stbl_finishTABLE(STable_info *me)
 	    continue;		/* Not a continuation line */
 	minoffset = nextrow[-1].offset;		/* Line before first continuation */
 	CTRACE2(TRACE_TRST, (tfp,
-			     "TRST:Stbl_finishTABLE, l=%d, offset=%d, ended=%d.\n",
+			     "TRST:Stbl_finishTABLE, l=%d, offset=%d, ended=%u.\n",
 			     i, nextrow[-1].offset, nextrow[-1].ended));
 
 	/* Find the common part of the requested offsets */
@@ -1769,7 +1769,7 @@ int Stbl_finishTABLE(STable_info *me)
 		minoffset = nextrow->offset;
 	    CTRACE2(TRACE_TRST,
 		    (tfp,
-		     "TRST:Stbl_finishTABLE, l=%d, offset=%d, ended=%d.\n",
+		     "TRST:Stbl_finishTABLE, l=%d, offset=%d, ended=%u.\n",
 		     j, nextrow->offset, nextrow[-1].ended));
 	    nextrow++;
 	    j++;

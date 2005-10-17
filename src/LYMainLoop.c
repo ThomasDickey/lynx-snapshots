@@ -5235,9 +5235,9 @@ int mainloop(void)
     char cfile[128];
     FILE *cfp;
     char *cp;
-    int ch;
-    RecallType recall;
-    int URLTotal;
+    int ch = 0;
+    RecallType recall = NORECALL;
+    int URLTotal = 0;
     int URLNum;
     BOOLEAN FirstURLRecall = TRUE;
     char *temp = NULL;

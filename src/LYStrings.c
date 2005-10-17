@@ -1062,7 +1062,7 @@ static BOOLEAN unescape_string(char *src, char *dst, char *final)
     BOOLEAN ok = FALSE;
 
     if (*src == SQUOTE) {
-	int keysym;
+	int keysym = -1;
 
 	unescaped_char(src, &keysym);
 	if (keysym >= 0) {
@@ -1677,42 +1677,18 @@ static int LYgetch_for(int code)
 	 || (c == 0xFFFF)
 #endif
 	)) {
-	int fd, kbd_fd;
 
 	CTRACE((tfp,
 		"nozap: Got EOF, curses %s, stdin is %p, LYNoZapKey reduced from %d to 0.\n",
 		LYCursesON ? "on" : "off", stdin, LYNoZapKey));
 	LYNoZapKey = 0;		/* 2 -> 0 */
-	if ((fd = fileno(stdin)) == 0 && !isatty(fd) &&
-	    (kbd_fd = LYConsoleInputFD(FALSE)) == fd) {
-	    char *term_name;
-	    int new_fd = INVSOC;
-
-	    if ((term_name = ttyname(fileno(stdout))) != NULL)
-		new_fd = open(term_name, O_RDONLY);
-	    if (new_fd == INVSOC &&
-		(term_name = ttyname(fileno(stderr))) != NULL)
-		new_fd = open(term_name, O_RDONLY);
-	    if (new_fd == INVSOC) {
-		term_name = ctermid(NULL);
-		new_fd = open(term_name, O_RDONLY);
+	if (LYReopenInput() > 0) {
+	    if (LYCursesON) {
+		stop_curses();
+		start_curses();
+		LYrefresh();
 	    }
-	    CTRACE((tfp, "nozap: open(%s) returned %d.\n", term_name, new_fd));
-	    if (new_fd >= 0) {
-		FILE *frp;
-
-		close(new_fd);
-		frp = freopen(term_name, "r", stdin);
-		CTRACE((tfp,
-			"nozap: freopen(%s,\"r\",stdin) returned %p, stdin is now %p with fd %d.\n",
-			term_name, frp, stdin, fileno(stdin)));
-		if (LYCursesON) {
-		    stop_curses();
-		    start_curses();
-		    LYrefresh();
-		}
-		goto re_read;
-	    }
+	    goto re_read;
 	}
     }
 #endif /* MISC_EXP */
@@ -2864,7 +2840,7 @@ static int map_active = 0;
 
 int LYEditInsert(EDREC * edit, unsigned const char *s,
 		 int len,
-		 int map,
+		 int map GCC_UNUSED,
 		 BOOL maxMessage)
 {
     int length = strlen(Buf);

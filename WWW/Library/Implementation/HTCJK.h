@@ -21,10 +21,6 @@ extern "C" {
 /*
  *	STATUS CHANGE CODES
  */
-#ifdef ESC
-#undef ESC
-#endif				/* ESC */
-#define ESC		CH_ESC	/* S/390 -- gil -- 0098 */
 #define TO_2BCODE	'$'
 #define TO_1BCODE	'('
 #define TO_KANA		'\016'

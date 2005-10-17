@@ -29,6 +29,11 @@ extern "C" {
 			      int charset_in,
 			      int charset_out,
 			      int chk_single_flag);
+#ifdef EXP_JAPANESEUTF8_SUPPORT
+    extern UCode_t UCTransJPToUni(char *inbuf,
+				  int buflen,
+				  int charset_in);
+#endif
     extern UCode_t UCTransToUni(char ch_in,
 				int charset_in);
     extern int UCGetRawUniMode_byLYhndl(int i);

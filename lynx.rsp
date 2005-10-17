@@ -80,3 +80,4 @@
 ../obj/xsystem.obj
 ../curses/PDCURSES.LIB
 ../curses/ZLIB.LIB
+../curses/iconv.lib

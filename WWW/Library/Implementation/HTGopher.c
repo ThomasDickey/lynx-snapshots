@@ -455,7 +455,7 @@ static void parse_cso(const char *arg,
     int ich;
     char line[BIG];
     char *p = line;
-    char *second_colon, last_char = '\0';
+    char *first_colon, *second_colon, last_char = '\0';
     const char *title;
 
     START(HTML_HEAD);
@@ -524,7 +524,11 @@ static void parse_cso(const char *arg,
 		/*
 		 * Find the second_colon.
 		 */
-		second_colon = strchr(strchr(p, ':') + 1, ':');
+		second_colon = NULL;
+		first_colon = strchr(p, ':');
+		if (first_colon != NULL) {
+		    second_colon = strchr(first_colon + 1, ':');
+		}
 
 		if (second_colon != NULL) {	/* error check */
 
@@ -1107,6 +1111,7 @@ static int generate_cso_form(char *host,
     };
 
     out = 0;
+    memset(&ctx, 0, sizeof(ctx));
     ctx.host = host;
     ctx.seek = (char *) 0;
     ctx.port = port;

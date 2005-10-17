@@ -285,6 +285,11 @@ II. Compile instructions -- UNIX
 	requested, the configure script will otherwise use the messages in the
 	./po subdirectory.
 
+  --disable-largefiles			(prevent defining LONG_LIST)
+
+	Use this option to disable the compiler and linker options that
+	provide largefile interfaces.
+
   --disable-long-list			(prevent defining LONG_LIST)
 	Use this option to disable long "ls -l" directory listings (when
 	enabled, the actual directory style is configurable from lynx.cfg).

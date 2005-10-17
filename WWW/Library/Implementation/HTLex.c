@@ -44,9 +44,9 @@ LexItem lex(FILE *fp)
 
     if (fp != cache) {		/* This cache doesn't work ok because the system  */
 	cache = fp;		/* often assign same FILE structure the next open */
-	HTlex_line = 1;		/* file.  So, if there are syntax errors in setup */
+	HTlex_line = 1;		/* file.  So, if there are syntax errors in setup *
+				   files it may confuse things later on.      */
     }
-    /* files it may confuse things later on.      */
     if (lex_pushed_back != LEX_NONE) {
 	LexItem ret = lex_pushed_back;
 
@@ -93,11 +93,13 @@ LexItem lex(FILE *fp)
 		    return LEX_CLOSE_PAREN;
 		case '@':
 		    return LEX_AT_SIGN;
-		default:;	/* Leading white space ignored (SP,TAB,CR) */
+		default:	/* Leading white space ignored (SP,TAB,CR) */
+		    break;
 		}
 	    break;
 	default:
-	    HTlex_buffer[lex_cnt++] = (char) ch;
+	    if (lex_cnt < (int) (sizeof(HTlex_buffer) - 1))
+		HTlex_buffer[lex_cnt++] = (char) ch;
 	    HTlex_buffer[lex_cnt] = '\0';
 	    if ('*' == ch)
 		lex_template = YES;
@@ -107,7 +109,7 @@ LexItem lex(FILE *fp)
 
 const char *lex_verbose(LexItem lex_item)
 {
-    static char msg[100];	/* @@@@@@@@ */
+    static char msg[sizeof(HTlex_buffer) + 30];		/* @@@@@@@@ */
 
     switch (lex_item) {
     case LEX_NONE:		/* Internally used      */
@@ -127,10 +129,12 @@ const char *lex_verbose(LexItem lex_item)
     case LEX_AT_SIGN:		/* Address qualifier    */
 	return "address qualifier '@'";
     case LEX_ALPH_STR:		/* Alphanumeric string  */
-	sprintf(msg, "alphanumeric string '%.70s'", HTlex_buffer);
+	sprintf(msg, "alphanumeric string '%.*s'",
+		(int) sizeof(HTlex_buffer), HTlex_buffer);
 	return msg;
     case LEX_TMPL_STR:		/* Template string      */
-	sprintf(msg, "template string '%.70s'", HTlex_buffer);
+	sprintf(msg, "template string '%.*s'",
+		(int) sizeof(HTlex_buffer), HTlex_buffer);
 	return msg;
     default:
 	return "UNKNOWN-LEX-ITEM";

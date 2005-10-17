@@ -144,6 +144,7 @@ extern "C" {
     extern int LYCopyFile(char *src, char *dst);
     extern int LYGetHilitePos(int cur, int count);
     extern int LYRemoveTemp(char *name);
+    extern int LYReopenInput(void);
     extern int LYSystem(char *command);
     extern int LYValidateOutput(char *filename);
     extern int find_restriction(const char *name, int len);

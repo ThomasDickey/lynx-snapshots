@@ -970,7 +970,7 @@ static int find_cached_style(int cur,
 			    s = cached_styles[LYP][x];
 			    cached_styles[LYP][LXP] = s;
 			}
-			CTRACE((tfp, "found %d, x_offset=%d.\n",
+			CTRACE((tfp, "found %u, x_offset=%d.\n",
 				cached_styles[LYP][x], (int) x - LXP));
 			break;
 		    }
@@ -1496,7 +1496,68 @@ void noviceline(int more_flag GCC_UNUSED)
     return;
 }
 
-#if defined(NSL_FORK) || defined(MISC_EXP)
+#if defined(MISC_EXP) || defined(TTY_DEVICE) || defined(HAVE_TTYNAME)
+/*
+ * If the standard input is not a tty, and Lynx is really reading from the
+ * standard input, attempt to reopen it, pointing to a real tty.  Normally
+ * this would happen if the user pipes data to Lynx and wants to run
+ * interactively after that.
+ *
+ * Returns:
+ *     1  if successfully reopened
+ *    -1  if we cannot reopen
+ *     0  if we do not have to reopen
+ */
+int LYReopenInput(void)
+{
+    int result = 0;
+    int fd;
+
+    if ((fd = fileno(stdin)) == 0
+	&& !isatty(fd)
+	&& LYConsoleInputFD(FALSE) == fd) {
+	char *term_name = NULL;
+	int new_fd = -1;
+
+#ifdef HAVE_TTYNAME
+	if (isatty(fileno(stdout)) &&
+	    (term_name = ttyname(fileno(stdout))) != NULL)
+	    new_fd = open(term_name, O_RDONLY);
+
+	if (new_fd == -1 &&
+	    isatty(fileno(stderr)) &&
+	    (term_name = ttyname(fileno(stderr))) != NULL)
+	    new_fd = open(term_name, O_RDONLY);
+
+	if (new_fd == -1 &&
+	    (term_name = ctermid(NULL)) != NULL)
+	    new_fd = open(term_name, O_RDONLY);
+#endif
+
+#ifdef TTY_DEVICE
+	if (new_fd == -1)
+	    new_fd = open(term_name = TTY_DEVICE, O_RDONLY);
+#endif
+
+	CTRACE((tfp, "LYReopenInput open(%s) returned %d.\n", term_name, new_fd));
+	if (new_fd >= 0) {
+	    FILE *frp;
+
+	    close(new_fd);
+	    frp = freopen(term_name, "r", stdin);
+	    CTRACE((tfp,
+		    "LYReopenInput freopen(%s,\"r\",stdin) returned %p, stdin is now %p with fd %d.\n",
+		    term_name, frp, stdin, fileno(stdin)));
+	    result = 1;
+	} else {
+	    result = -1;
+	}
+    }
+    return result;
+}
+#endif
+
+#if defined(NSL_FORK) || defined(MISC_EXP) || defined (TTY_DEVICE) || defined(HAVE_TTYNAME)
 /*
  * Returns the file descriptor from which keyboard input is expected, or INVSOC
  * (-1) if not available.  If need_selectable is true, returns non-INVSOC fd
@@ -4365,9 +4426,9 @@ BOOLEAN LYExpandHostForURL(char **AllocatedString,
 			   char *prefix_list,
 			   char *suffix_list)
 {
-    char DomainPrefix[80];
+    char *DomainPrefix = NULL;
     const char *StartP, *EndP;
-    char DomainSuffix[80];
+    char *DomainSuffix = NULL;
     const char *StartS, *EndS;
     char *Str = NULL, *StrColon = NULL, *MsgStr = NULL;
     char *Host = NULL, *HostColon = NULL, *host = NULL;
@@ -4425,8 +4486,7 @@ BOOLEAN LYExpandHostForURL(char **AllocatedString,
     if ((StrColon = strrchr(Str, ':')) != NULL &&
 	isdigit(UCH(StrColon[1]))) {
 	if (StrColon == Str) {
-	    FREE(Str);
-	    return GotHost;
+	    goto cleanup;
 	}
 	*StrColon = '\0';
     }
@@ -4468,10 +4528,7 @@ BOOLEAN LYExpandHostForURL(char **AllocatedString,
 	 * Return success.  - FM
 	 */
 	GotHost = TRUE;
-	FREE(host);
-	FREE(Str);
-	FREE(MsgStr);
-	return GotHost;
+	goto cleanup;
     } else if (LYCursesON && (lynx_nsl_status == HT_INTERRUPTED)) {
 	/*
 	 * Give the user chance to interrupt lookup cycles.  - KW & FM
@@ -4483,10 +4540,7 @@ BOOLEAN LYExpandHostForURL(char **AllocatedString,
 	/*
 	 * Return failure.  - FM
 	 */
-	FREE(host);
-	FREE(Str);
-	FREE(MsgStr);
-	return FALSE;
+	goto cleanup;
     }
 
     /*
@@ -4521,7 +4575,8 @@ BOOLEAN LYExpandHostForURL(char **AllocatedString,
     while (*EndP && !WHITE(*EndP) && *EndP != ',') {
 	EndP++;			/* Find separator */
     }
-    LYstrncpy(DomainPrefix, StartP, (EndP - StartP));
+    StrAllocCopy(DomainPrefix, StartP);
+    DomainPrefix[EndP - StartP] = '\0';
 
     /*
      * Test each prefix with each suffix.  - FM
@@ -4541,7 +4596,8 @@ BOOLEAN LYExpandHostForURL(char **AllocatedString,
 	while (*EndS && !WHITE(*EndS) && *EndS != ',') {
 	    EndS++;		/* Find separator */
 	}
-	LYstrncpy(DomainSuffix, StartS, (EndS - StartS));
+	StrAllocCopy(DomainSuffix, StartS);
+	DomainSuffix[EndS - StartS] = '\0';
 
 	/*
 	 * Create domain names and do DNS tests.  - FM
@@ -4579,11 +4635,7 @@ BOOLEAN LYExpandHostForURL(char **AllocatedString,
 		    CTRACE((tfp,
 			    "LYExpandHostForURL: Interrupted while '%s' failed to resolve.\n",
 			    host));
-		    FREE(Str);
-		    FREE(MsgStr);
-		    FREE(Host);
-		    FREE(host);
-		    return FALSE;	/* We didn't find a valid name. */
+		    goto cleanup;	/* We didn't find a valid name. */
 		}
 
 		/*
@@ -4651,6 +4703,9 @@ BOOLEAN LYExpandHostForURL(char **AllocatedString,
     /*
      * Clean up and return the last test result.  - FM
      */
+  cleanup:
+    FREE(DomainPrefix);
+    FREE(DomainSuffix);
     FREE(Str);
     FREE(MsgStr);
     FREE(Host);
