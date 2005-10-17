@@ -69,17 +69,11 @@ extern "C" {
   For handling Japanese headers.
 
 */
-    extern void HTmmdec_base64(char *t,
-			       char *s);
+    extern void HTmmdecode(char **target,
+			   char *source);
 
-    extern void HTmmdec_quote(char *t,
-			      char *s);
-
-    extern void HTmmdecode(char *trg,
-			   char *str);
-
-    extern int HTrjis(char *t,
-		      char *s);
+    extern int HTrjis(char **target,
+		      char *source);
 
     extern int HTmaybekanji(int c1,
 			    int c2);

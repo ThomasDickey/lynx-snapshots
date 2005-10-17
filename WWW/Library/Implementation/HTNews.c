@@ -980,7 +980,6 @@ static void post_article(char *postfile)
     }
 }
 
-#ifdef SH_EX			/* for MIME */
 #ifdef NEWS_DEBUG
 /* for DEBUG 1997/11/07 (Fri) 17:20:16 */
 void debug_print(unsigned char *p)
@@ -1002,44 +1001,15 @@ void debug_print(unsigned char *p)
 }
 #endif
 
-static char *decode_mime(char *str)
+static char *decode_mime(char **str)
 {
-    char temp[LINE_LENGTH];	/* FIXME: what determines the actual size? */
-    char *p, *q;
-
-    if (str == NULL)
-	return "";
-
+#ifdef SH_EX
     if (HTCJK != JAPANESE)
-	return str;
-
-    LYstrncpy(temp, str, sizeof(temp) - 1);
-    q = temp;
-    while ((p = strchr(q, '=')) != 0) {
-	if (p[1] == '?') {
-	    HTmmdecode(p, p);
-	    q = p + 2;
-	} else {
-	    q = p + 1;
-	}
-    }
-#ifdef NEWS_DEBUG
-    printf("new=[");
-    debug_print(temp);
+	return *str;
 #endif
-    HTrjis(temp, temp);
-    strcpy(str, temp);
-
-    return str;
+    HTmmdecode(str, *str);
+    return HTrjis(str, *str) ? *str : "";
 }
-#else /* !SH_EX */
-static char *decode_mime(char *str)
-{
-    HTmmdecode(str, str);
-    HTrjis(str, str);
-    return str;
-}
-#endif
 
 /*	Read in an Article					read_article
  *	------------------
@@ -1128,22 +1098,22 @@ static int read_article(HTParentAnchor *thisanchor)
 
 		} else if (match(full_line, "SUBJECT:")) {
 		    StrAllocCopy(subject, HTStrip(strchr(full_line, ':') + 1));
-		    decode_mime(subject);
+		    decode_mime(&subject);
 		} else if (match(full_line, "DATE:")) {
 		    StrAllocCopy(date, HTStrip(strchr(full_line, ':') + 1));
 
 		} else if (match(full_line, "ORGANIZATION:")) {
 		    StrAllocCopy(organization,
 				 HTStrip(strchr(full_line, ':') + 1));
-		    decode_mime(organization);
+		    decode_mime(&organization);
 
 		} else if (match(full_line, "FROM:")) {
 		    StrAllocCopy(from, HTStrip(strchr(full_line, ':') + 1));
-		    decode_mime(from);
+		    decode_mime(&from);
 
 		} else if (match(full_line, "REPLY-TO:")) {
 		    StrAllocCopy(replyto, HTStrip(strchr(full_line, ':') + 1));
-		    decode_mime(replyto);
+		    decode_mime(&replyto);
 
 		} else if (match(full_line, "NEWSGROUPS:")) {
 		    StrAllocCopy(newsgroups, HTStrip(strchr(full_line, ':') + 1));
@@ -1756,8 +1726,8 @@ static int read_group(const char *groupName,
 		      int last_required)
 {
     char line[LINE_LENGTH + 1];
-    char author[LINE_LENGTH + 1];
-    char subject[LINE_LENGTH + 1];
+    char *author = NULL;
+    char *subject = NULL;
     char *date = NULL;
     int i;
     char *p;
@@ -1769,9 +1739,6 @@ static int read_group(const char *groupName,
     int art;			/* Article number WITHIN GROUP */
     int status, count, first, last;	/* Response fields */
 
-    /* count is only an upper limit */
-
-    author[0] = '\0';
     START(HTML_HEAD);
     PUTC('\n');
     START(HTML_TITLE);
@@ -1995,8 +1962,8 @@ static int read_group(const char *groupName,
 			case 'S':
 			case 's':
 			    if (match(line, "SUBJECT:")) {
-				LYstrncpy(subject, line + 9, sizeof(subject) - 1);	/* Save subject */
-				decode_mime(subject);
+				StrAllocCopy(subject, line + 9);
+				decode_mime(&subject);
 			    }
 			    break;
 
@@ -2015,10 +1982,8 @@ static int read_group(const char *groupName,
 			    if (match(line, "FROM:")) {
 				char *p2;
 
-				LYstrncpy(author,
-					  author_name(strchr(line, ':') + 1),
-					  sizeof(author) - 1);
-				decode_mime(author);
+				StrAllocCopy(author, strchr(line, ':') + 1);
+				decode_mime(&author);
 				p2 = author + strlen(author) - 1;
 				if (*p2 == LF)
 				    *p2 = '\0';		/* Chop off newline */
@@ -2039,11 +2004,8 @@ static int read_group(const char *groupName,
 
 		PUTC('\n');
 		START(HTML_LI);
-#ifdef SH_EX			/* for MIME */
-		HTSprintf0(&temp, "\"%s\"", decode_mime(subject));
-#else
-		HTSprintf0(&temp, "\"%s\"", subject);
-#endif
+		p = decode_mime(&subject);
+		HTSprintf0(&temp, "\"%s\"", NonNull(p));
 		if (reference) {
 		    write_anchor(temp, reference);
 		    FREE(reference);
@@ -2052,18 +2014,14 @@ static int read_group(const char *groupName,
 		}
 		FREE(temp);
 
-		if (author[0] != '\0') {
+		if (author != NULL) {
 		    PUTS(" - ");
 		    if (LYListNewsDates)
 			START(HTML_I);
-#ifdef SH_EX			/* for MIME */
-		    PUTS(decode_mime(author));
-#else
-		    PUTS(author);
-#endif
+		    PUTS(decode_mime(&author));
 		    if (LYListNewsDates)
 			END(HTML_I);
-		    author[0] = '\0';
+		    FREE(author);
 		}
 		if (date) {
 		    if (!diagnostic) {
@@ -2107,6 +2065,8 @@ static int read_group(const char *groupName,
 		MAYBE_END(HTML_LI);
 	    }			/* Handle response to HEAD request */
 	}			/* Loop over article */
+	FREE(author);
+	FREE(subject);
     }				/* If read headers */
     PUTC('\n');
     if (LYListNewsNumbers)

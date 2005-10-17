@@ -69,6 +69,7 @@ int change_form_link_ex(int cur,
     int newdoc_changed = 0;
     int c = DO_NOTHING;
     int OrigNumValue;
+    int title_adjust = (no_title ? -TITLE_LINES : 0);
     char **my_data = 0;
 
     /*
@@ -82,7 +83,7 @@ int change_form_link_ex(int cur,
     /*
      * Move to the link position.
      */
-    LYmove(links[cur].ly, links[cur].lx);
+    LYmove(links[cur].ly + title_adjust, links[cur].lx);
 
     switch (form->type) {
     case F_CHECKBOX_TYPE:

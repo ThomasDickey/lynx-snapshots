@@ -1,14 +1,72 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2005-10-17 (2.8.6dev.14)
+* add configure script support for large files; some changes made be needed to
+  the C code in dev.15 to exploit this -TD
+* work around part of the forms-menu extra wrapping from dev.12 by adjusting
+  text-field maximum size in HText_beginInput().  There is still wrapping of
+  options lists, which has to be treated differently.  The cause for this
+  is the fix made to HText_appendCharacter() in dev.12 -TD
+* extend experimental option --enable-japanese-utf8, allowing lynx to convert
+  EUC-JP and Shift_JIS strings to UTF-8 -TH
+* modify CF_BUILD_CC to avoid clobbering environment variable $BUILD_CC
+  (from ncurses changes) -TD
+* remove special case in CF_XOPEN_SOURCE which suppresses _XOPEN_SOURCE
+  definition for Darwin (request by Emanuele Giaquinta)
+* fix an off-by-one error in comparison in HText_appendCharacter(), from dev.12
+  changes which showed up as wrapped lines in the options menu -TD
+* use h_addr_list[0] rather than h_addr in HTTCP.c for POSIX compatibility
+  (Emanuele Giaquinta)
+* remove references to LIBCMU in HTTCP.c, since it is long obsolete -TD
+* force a newline in HTML_end_element() after a </pre>, which causes lines
+  containing only whitespace before the </pre> to display a new line, rather
+  than putting that whitespace before text that follows the </pre> (report by
+  Thorsten Glaser for http://gcc.gnu.org/gcc-4.1/changes.html) -TD
+* improve fix for LYstartPopup() in dev.6 by keeping the menu width as-is and
+  adjusting its position rather than simply using the full screen-width when
+  the first try fails (report by Gene Small) -TD
+* correct logic in lynx_default_colors() so the color-style configuration does
+  not attempt to use default colors on a terminal which does not support it
+  (report by Bryan Henderson) -TD
+* add/improve limit checks in HTLex.c -Ulf Harnhammar, TD
+* ifdef'd out unused code in HTGroup.c -TD
+* eliminate fixed-size buffers in LYExpandHostForURL() to guard against
+  buffer overflow resulting from too-long domain prefix/suffix data from
+  lynx.cfg (report by Ulf Harnhammar, CAN-2005-3120) -TD
+* add a check for missing ':' in gopher response, to recover from the error
+  (patch by Ulf Harnhammar)
+* eliminate fixed-size buffers in HTrjis() and related functions to avoid
+  potential buffer overflow in nntp pages (report by Ulf Harnhammar) -TD
+* correct "escape" character used in HTMake822Word, which was literally an
+  ASCII escape character rather than the RFC-822 backslash from 2.8.2dev.3
+  changes (report by Frederic Briere, Debian #318034) -TD
+* fix:  when first "option" element of "select" had "disabled" attribute, Lynx
+  turned the entire "option/choice list" UNMODIFIABLE.  The "disabled"
+  attribute of later "option" elements within the same "select" did not have
+  this effect.  If the "disabled" attribute is honored, it should disable only
+  that element, not parent element or sibling elements (report by Paavo
+  Hartikainen) -TD
+* make CF_TAR_OPTIONS configure macro work with DJGPP by using $EXEEXT -DK
+* update config.guess (2005-09-19) and config.sub (2005-07-08)
+* configure script updates from tin and ncurses -TD
+* modify LYwaddnstr() to avoid sign-extension from changes in dev.12 (report
+  by FLWM) -TD
+* modify initialization so that
+	cat options.txt | lynx -
+  will allow interactive use (report by Arne Kowallik) -TD
+* add NO_MARGINS and NO_TITLE to lynx.cfg (request by Stef Caunter) -TD
+* adjust line-position for form fields when -notitle option is used (report by
+  Arne Kowallik) -TD
+
 2005-06-07 (2.8.6dev.13)
-+ add a check in LYnormalColor() to ensure that the color value is really
+* add a check in LYnormalColor() to ensure that the color value is really
   a color, i.e., do not do anything for monochrome displays (reports by
   OpenMacNews and Jens Schleusener) -TD
-+ make -nomargins option apply to Options menu layout -TD
-+ changes to LYwaddnstr() in dev.12 exposed a case from dev.6 where the title
+* make -nomargins option apply to Options menu layout -TD
+* changes to LYwaddnstr() in dev.12 exposed a case from dev.6 where the title
   string was not truncated to avoid wrapping (report by PG) -TD
-+ changes to LYwaddnstr() in dev.12 allowed recursion in a case that was only
+* changes to LYwaddnstr() in dev.12 allowed recursion in a case that was only
   designed for iteration (report by OpenMacNews) -TD
 
 2005-06-02 (2.8.6dev.12)
@@ -48,7 +106,7 @@ Changes since Lynx 2.8 release
   modified the LYcolLimit variable, changing it from the last usable column
   value to the number of columns (report by DK) -TD
 * correct expression in HText_appendCharacter() which was simplified in
-  2.8.5dev.4, but broke a comparison used for text-justification -TD 
+  2.8.5dev.4, but broke a comparison used for text-justification -TD
 * adjust wide-character offset computation in HText_trimHightext() to account
   for soft newlines, i.e., the cell reserved to show continuation lines -TD
 * modify source-view toggle to keep the current anchor visible.  Toggling

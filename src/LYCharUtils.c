@@ -1145,6 +1145,7 @@ char **LYUCFullyTranslateString(char **str,
     if ((HTCJK != NOCJK)
 #ifdef EXP_JAPANESEUTF8_SUPPORT
 	&& (strcmp(LYCharSet_UC[cs_from].MIMEname, "utf-8") != 0)
+	&& (strcmp(LYCharSet_UC[cs_to].MIMEname, "utf-8") != 0)
 #endif
 	) {
 	no_bytetrans = TRUE;
@@ -1392,6 +1393,20 @@ char **LYUCFullyTranslateString(char **str,
 		    } else {
 			*(unsigned char *) p = UCH(173);
 		    }
+#ifdef EXP_JAPANESEUTF8_SUPPORT
+		} else if (output_utf8) {
+		    if ((!strcmp(LYCharSet_UC[cs_from].MIMEname, "euc-jp") &&
+			 (IS_EUC((unsigned char) (*p),
+				 (unsigned char) (*(p + 1))))) ||
+			(!strcmp(LYCharSet_UC[cs_from].MIMEname, "shift_jis") &&
+			 (IS_SJIS_2BYTE((unsigned char) (*p),
+					(unsigned char) (*(p + 1)))))) {
+			code = UCTransJPToUni(p, 2, cs_from);
+			p++;
+			state = S_check_uni;
+			break;
+		    }
+#endif
 		} else if (code < 127 || T.transp) {
 		    state = S_got_outchar;
 		    break;

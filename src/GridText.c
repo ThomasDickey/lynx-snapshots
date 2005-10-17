@@ -2809,14 +2809,14 @@ static void split_line(HText *text, unsigned split)
     }
     if (split > previous->size) {
 	CTRACE((tfp,
-		"*** split_line: split==%d greater than last_line->size==%d !\n",
+		"*** split_line: split==%u greater than last_line->size==%d !\n",
 		split, previous->size));
 	if (split > MAX_LINE) {
 	    split = previous->size;
 	    if ((cp = strrchr(previous->data, ' ')) &&
 		cp - previous->data > 1)
 		split = cp - previous->data;
-	    CTRACE((tfp, "                split adjusted to %d.\n", split));
+	    CTRACE((tfp, "                split adjusted to %u.\n", split));
 	}
     }
 
@@ -2965,7 +2965,7 @@ static void split_line(HText *text, unsigned split)
 #ifdef DEBUG_APPCH
     if (s != (int) split)
 #endif
-	CTRACE((tfp, "GridText: split_line(%d [now:%d]) called\n", split, s));
+	CTRACE((tfp, "GridText: split_line(%u [now:%d]) called\n", split, s));
 #endif
 
 #if defined(USE_COLOR_STYLE)
@@ -4253,7 +4253,7 @@ void HText_appendCharacter(HText *text, int ch)
 	 + (int) style->rightIndent
 	 - ctrl_chars_on_this_line
 	 + (((HTCJK != NOCJK) && text->kanji_buf) ? 1 : 0)
-	) >= (WRAP_COLS(text) - 1)
+	) >= WRAP_COLS(text)
 	|| (text->T.output_utf8
 	    && ((actual
 		 + UTFXTRA_ON_THIS_LINE
@@ -9696,7 +9696,7 @@ int HText_beginInput(HText *text, BOOL underline,
 
     f->select_list = 0;
     f->number = HTFormNumber;
-    f->disabled = (HTFormDisabled ? TRUE : I->disabled);
+    f->disabled = HTFormDisabled;
     f->no_cache = NO;
 
     HTFormFields++;
@@ -9983,14 +9983,13 @@ int HText_beginInput(HText *text, BOOL underline,
     }
     if (fields_are_numbered() && (a->number > 0)) {
 	sprintf(marker, "[%d]", a->number);
+	adjust_marker = strlen(marker);
 	if (number_fields_on_left) {
 	    BOOL had_bracket = (f->type == F_OPTION_LIST_TYPE);
 
 	    HText_appendText(text, had_bracket ? (marker + 1) : marker);
 	    if (had_bracket)
 		HText_appendCharacter(text, '[');
-	} else {
-	    adjust_marker = strlen(marker);
 	}
 	a->line_num = text->Lines;
 	a->line_pos = text->last_line->size;
@@ -10049,6 +10048,10 @@ int HText_beginInput(HText *text, BOOL underline,
 	MaximumSize -= 10;
 	break;
     }
+
+    if (MaximumSize < 1)
+	MaximumSize = 1;
+
     if (f->size > MaximumSize)
 	f->size = MaximumSize;
 
@@ -10099,6 +10102,9 @@ int HText_beginInput(HText *text, BOOL underline,
     /*
      * Return the SIZE of the input field.
      */
+    if (I->size && f->size > adjust_marker) {
+	f->size -= adjust_marker;
+    }
     return (f->size);
 }
 
@@ -10654,9 +10660,9 @@ int HText_SubmitForm(FormInfo * submit_item, DocInfo *doc, char *link_name,
 	    !anchor_ptr->input_field->disabled) {
 
 	    FormInfo *form_ptr = anchor_ptr->input_field;
-	    char *val = form_ptr->cp_submit_value != NULL
-	    ? form_ptr->cp_submit_value
-	    : form_ptr->value;
+	    char *val = (form_ptr->cp_submit_value != NULL
+			 ? form_ptr->cp_submit_value
+			 : form_ptr->value);
 
 	    unsigned field_is_special = check_form_specialchars(val);
 	    unsigned name_is_special = check_form_specialchars(form_ptr->name);
@@ -10897,9 +10903,9 @@ int HText_SubmitForm(FormInfo * submit_item, DocInfo *doc, char *link_name,
 		    CTRACE((tfp, "field \"%s\" %d %s -> %d %s %s\n",
 			    NonNull(form_ptr->name),
 			    form_ptr->value_cs,
-			    form_ptr->value_cs >= 0
-			    ? LYCharSet_UC[form_ptr->value_cs].MIMEname
-			    : "???",
+			    ((form_ptr->value_cs >= 0)
+			     ? LYCharSet_UC[form_ptr->value_cs].MIMEname
+			     : "???"),
 			    target_cs,
 			    target_csname ? target_csname : "???",
 			    success ? "OK" : "FAILED"));
@@ -10960,9 +10966,9 @@ int HText_SubmitForm(FormInfo * submit_item, DocInfo *doc, char *link_name,
 		    CTRACE((tfp, "name \"%s\" %d %s -> %d %s %s\n",
 			    NonNull(form_ptr->name),
 			    form_ptr->name_cs,
-			    form_ptr->name_cs >= 0
-			    ? LYCharSet_UC[form_ptr->name_cs].MIMEname
-			    : "???",
+			    ((form_ptr->name_cs >= 0)
+			     ? LYCharSet_UC[form_ptr->name_cs].MIMEname
+			     : "???"),
 			    target_cs,
 			    target_csname ? target_csname : "???",
 			    success ? "OK" : "FAILED"));

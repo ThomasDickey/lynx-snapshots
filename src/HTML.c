@@ -3037,9 +3037,10 @@ static int HTML_start_element(HTStructured * me, int element_number,
 	     * set, we'll use the current document's URL for resolving. 
 	     * Otherwise use the BASE.  - kw
 	     */
-	    Base = (me->inBASE &&
-		    !(*map_href == '#' && LYSeekFragMAPinCur == TRUE)) ?
-		me->base_href : me->node_anchor->address;
+	    Base = ((me->inBASE &&
+		     !(*map_href == '#' && LYSeekFragMAPinCur == TRUE))
+		    ? me->base_href
+		    : me->node_anchor->address);
 	    HTParseALL(&map_href, Base);
 
 	    /*
@@ -3511,9 +3512,10 @@ static int HTML_start_element(HTStructured * me, int element_number,
 	     * itself, unless the HREF is a lone fragment and
 	     * LYSeekFragAREAinCur is set.  - FM
 	     */
-	    Base = ((me->inBASE && *href != '\0') &&
-		    !(*href == '#' && LYSeekFragAREAinCur == TRUE)) ?
-		me->base_href : me->node_anchor->address;
+	    Base = (((me->inBASE && *href != '\0') &&
+		     !(*href == '#' && LYSeekFragAREAinCur == TRUE))
+		    ? me->base_href
+		    : me->node_anchor->address);
 	    HTParseALL(&href, Base);
 
 	    /*
@@ -4442,8 +4444,9 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		 */
 		for (i = 0; I.value[i]; i++) {
 		    HTML_put_character(me,
-				       (char) (I.value[i] == ' ' ?
-					       HT_NON_BREAK_SPACE : I.value[i]));
+				       (I.value[i] == ' ')
+				       ? HT_NON_BREAK_SPACE
+				       : I.value[i]);
 		}
 		while (i++ < chars) {
 		    HTML_put_character(me, HT_NON_BREAK_SPACE);
@@ -4628,6 +4631,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		UNESCAPE_FIELDNAME_TO_STD(&I_name);
 		I.name = I_name;
 	    }
+
 	    if ((present && present[HTML_INPUT_ALT] &&
 		 non_empty(value[HTML_INPUT_ALT]) &&
 		 I.type && !strcasecomp(I.type, "image")) &&
@@ -4815,12 +4819,10 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		I.md = value[HTML_INPUT_MD];
 
 	    chars = HText_beginInput(me->text, me->inUnderline, &I);
-#ifndef USE_FILE_UPLOAD
 	    CTRACE((tfp,
 		    "I.%s have %d chars, or something\n",
 		    NONNULL(I.type),
 		    chars));
-#endif
 	    /*
 	     * Submit and reset buttons have values which don't change, so
 	     * HText_beginInput() sets I.value to the string which should be
@@ -4890,9 +4892,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		}
 		HText_setIgnoreExcess(me->text, TRUE);
 	    }
-#ifndef USE_FILE_UPLOAD
 	    CTRACE((tfp, "I.%s, %d\n", NONNULL(I.type), IsSubmitOrReset));
-#endif
 	    if (IsSubmitOrReset == FALSE) {
 		/*
 		 * This is not a submit or reset button, so output the rest of
@@ -6163,6 +6163,7 @@ static int HTML_end_element(HTStructured * me, int element_number,
 	/*
 	 * Set to know that we are no longer in a PRE block.
 	 */
+	HText_appendCharacter(me->text, '\n');
 	me->inPRE = FALSE;
 	/* FALLTHRU */
     case HTML_LISTING:		/* Literal text */

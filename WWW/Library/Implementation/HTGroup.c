@@ -293,6 +293,7 @@ GroupDef *HTAA_parseGroupDef(FILE *fp)
     return group_def;
 }
 
+#if 0
 static GroupDef *parse_group_decl(FILE *fp)
 {
     char *group_name = NULL;
@@ -381,6 +382,7 @@ static GroupDefList *parse_group_file(FILE *fp)
 
     return group_def_list;
 }
+#endif
 
 /*
  * Trace functions
@@ -442,6 +444,7 @@ void HTAA_printGroupDef(GroupDef *group_def)
     fprintf(tfp, "\n");
 }
 
+#if 0
 static void print_group_def_list(GroupDefList *group_list)
 {
     GroupDefList *cur = group_list;
@@ -748,3 +751,4 @@ void GroupDef_delete(GroupDef *group_def)
 	FREE(group_def);
     }
 }
+#endif

@@ -1605,9 +1605,45 @@ static void SGML_character(HTStream *context, char c_in)
      * If we want the raw input converted to Unicode, try that now.  - FM
      */
     if (context->T.trans_to_uni &&
-	((TOASCII(unsign_c) >= LYlowest_eightbit[context->inUCLYhndl]) ||	/* S/390 -- gil -- 0744 */
-	 (unsign_c < ' ' && unsign_c != 0 &&
-	  context->T.trans_C0_to_uni))) {
+#ifdef EXP_JAPANESEUTF8_SUPPORT
+	((strcmp(LYCharSet_UC[context->inUCLYhndl].MIMEname, "euc-jp") == 0) ||
+	 (strcmp(LYCharSet_UC[context->inUCLYhndl].MIMEname, "shift_jis") == 0))) {
+	if (strcmp(LYCharSet_UC[context->inUCLYhndl].MIMEname, "shift_jis") == 0) {
+	    if (context->utf_count == 0) {
+		if (IS_SJIS_HI1((unsigned char) c) ||
+		    IS_SJIS_HI2((unsigned char) c)) {
+		    context->utf_buf[0] = c;
+		    context->utf_count = 1;
+		    clong = -11;
+		}
+	    } else {
+		if (IS_SJIS_LO((unsigned char) c)) {
+		    context->utf_buf[1] = c;
+		    clong = UCTransJPToUni(context->utf_buf, 2, context->inUCLYhndl);
+		}
+		context->utf_count = 0;
+	    }
+	} else {
+	    if (context->utf_count == 0) {
+		if (IS_EUC_HI((unsigned char) c)) {
+		    context->utf_buf[0] = c;
+		    context->utf_count = 1;
+		    clong = -11;
+		}
+	    } else {
+		if (IS_EUC_LOX((unsigned char) c)) {
+		    context->utf_buf[1] = c;
+		    clong = UCTransJPToUni(context->utf_buf, 2, context->inUCLYhndl);
+		}
+		context->utf_count = 0;
+	    }
+	}
+	goto top1;
+    } else if (context->T.trans_to_uni &&
+#endif
+	       ((TOASCII(unsign_c) >= LYlowest_eightbit[context->inUCLYhndl]) ||	/* S/390 -- gil -- 0744 */
+		(unsign_c < ' ' && unsign_c != 0 &&
+		 context->T.trans_C0_to_uni))) {
 	/*
 	 * Convert the octet to Unicode.  - FM
 	 */
@@ -4851,7 +4887,7 @@ unsigned char *TO_EUC(const unsigned char *jis,
 		}
 	    }
 	}
-	if (c == ESC) {
+	if (c == CH_ESC) {
 	    if (*s == to2B) {
 		if ((s[1] == 'B') || (s[1] == '@')) {
 		    jis_stat = 0x80;

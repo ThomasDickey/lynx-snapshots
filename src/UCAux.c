@@ -11,8 +11,10 @@ BOOL UCCanUniTranslateFrom(int from)
 {
     if (from < 0)
 	return NO;
+#ifndef EXP_JAPANESEUTF8_SUPPORT
     if (LYCharSet_UC[from].enc == UCT_ENC_CJK)
 	return NO;
+#endif
     if (!strcmp(LYCharSet_UC[from].MIMEname, "x-transparent"))
 	return NO;
 
@@ -313,7 +315,7 @@ void UCTransParams_clear(UCTransParams * pT)
  *  chars to displayable ASCII chars if '0' was requested.  They'll
  *  stay as they are otherwise. - kw
  */
-void UCSetBoxChars(int cset,
+void UCSetBoxChars(int cset GCC_UNUSED,
 		   int *pvert_out,
 		   int *phori_out,
 		   int vert_in,

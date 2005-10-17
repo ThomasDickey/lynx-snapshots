@@ -629,7 +629,7 @@ extern int h_errno;
  *  itself, in a buffer of size REHOSTENT_SIZE.  If not everything fits,
  *  some info is omitted, but the function is careful to still return
  *  a valid structure, without truncating strings; it tries to return,
- *  in order of decreasing priority, the first address (h_addr), the
+ *  in order of decreasing priority, the first address (h_addr_list[0]), the
  *  official name (h_name), the additional addresses, then alias names.
  *
  *  If NULL is returned, the reason is made available in the global
@@ -1293,7 +1293,7 @@ static int HTParseInet(SockA * soc_in, const char *str)
 	phost = LYGetHostByName(host);	/* See above */
 	if (!phost)
 	    goto failed;
-	memcpy((void *) &soc_in->sin_addr, phost->h_addr, phost->h_length);
+	memcpy((void *) &soc_in->sin_addr, phost->h_addr_list[0], phost->h_length);
 #else /* !_WINDOWS_NSL */
 	{
 	    LYNX_HOSTENT *phost;
@@ -1302,25 +1302,12 @@ static int HTParseInet(SockA * soc_in, const char *str)
 
 	    if (!phost)
 		goto failed;
-#if defined(VMS) && defined(CMU_TCP)
-	    /*
-	     * In LIBCMU, phost->h_length contains not the length of one
-	     * address (four bytes) but the number of bytes in *h_addr, i.e.,
-	     * some multiple of four.  Thus we need to hard code the value
-	     * here, and remember to change it if/when IP addresses change in
-	     * size.  :-( LIBCMU is no longer supported, and CMU users are
-	     * encouraged to obtain and use SOCKETSHR/NETLIB instead.  - S. 
-	     * Bjorndahl
-	     */
-	    memcpy((void *) &soc_in->sin_addr, phost->h_addr, 4);
-#else
 	    if (!phost)
 		goto failed;
 	    if (phost->h_length != sizeof soc_in->sin_addr) {
 		HTAlwaysAlert(host, gettext("Address length looks invalid"));
 	    }
-	    memcpy((void *) &soc_in->sin_addr, phost->h_addr, phost->h_length);
-#endif /* VMS && CMU_TCP */
+	    memcpy((void *) &soc_in->sin_addr, phost->h_addr_list[0], phost->h_length);
 	}
 #endif /* _WINDOWS_NSL */
 
@@ -1478,7 +1465,7 @@ static void get_host_details(void)
 	return;			/* Fail! */
     }
     StrAllocCopy(hostname, phost->h_name);
-    memcpy(&HTHostAddress, &phost->h_addr, phost->h_length);
+    memcpy(&HTHostAddress, &phost->h_addr_list[0], phost->h_length);
 #endif /* INET6 */
     CTRACE((tfp, "     Name server says that I am `%s' = %s\n",
 	    hostname, HTInetString(&HTHostAddress)));

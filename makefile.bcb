@@ -77,7 +77,8 @@ CC_FLAGS = $(DEBUG) $(CS_DEFS) $(SOCK_DEFS) \
 -DVC="2.14FM" \
 -DWIN_EX \
 -D_WINDOWS \
--D_WIN_CC=1
+-D_WIN_CC=1 \
+-DEXP_JAPANESEUTF8_SUPPORT
 
 #
 # Dependency List
@@ -97,6 +98,7 @@ clean :
 Dep_lynxdexe = \
    $(ETC_LIB)/zlib.lib\
    $(ETC_LIB)/pdcurses.lib\
+   $(ETC_LIB)/iconv.lib\
    $(OBJ)/DefaultStyle.obj\
    $(OBJ)/GridText.obj\
    $(OBJ)/HTAABrow.obj\

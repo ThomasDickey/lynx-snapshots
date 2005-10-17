@@ -1272,7 +1272,7 @@ static Config_Type Config_Table [] =
      PARSE_STR(RC_COOKIE_SAVE_FILE,     LYCookieSaveFile),
 #endif /* USE_PERSISTENT_COOKIES */
      PARSE_STR(RC_COOKIE_STRICT_INVALID_DOMAIN, LYCookieSStrictCheckDomains),
-     PARSE_Env(RC_CSO_PROXY,		0),
+     PARSE_Env(RC_CSO_PROXY,            0),
 #ifdef VMS
      PARSE_PRG(RC_CSWING_PATH,          ppCSWING),
 #endif
@@ -1406,9 +1406,11 @@ static Config_Type Config_Table [] =
 #endif
      PARSE_SET(RC_NO_FROM_HEADER,       LYNoFromHeader),
      PARSE_SET(RC_NO_ISMAP_IF_USEMAP,   LYNoISMAPifUSEMAP),
+     PARSE_SET(RC_NO_MARGINS,           no_margins),
      PARSE_Env(RC_NO_PROXY,             0),
      PARSE_SET(RC_NO_REFERER_HEADER,    LYNoRefererHeader),
      PARSE_SET(RC_NO_TABLE_CENTER,      no_table_center),
+     PARSE_SET(RC_NO_TITLE,             no_title),
      PARSE_FUN(RC_NONRESTARTING_SIGWINCH, nonrest_sigwinch_fun),
      PARSE_FUN(RC_OUTGOING_MAIL_CHARSET, outgoing_mail_charset_fun),
 #ifdef DISP_PARTIAL
@@ -1474,7 +1476,7 @@ static Config_Type Config_Table [] =
      PARSE_FUN(RC_SUFFIX_ORDER,         suffix_order_fun),
 #ifdef SYSLOG_REQUESTED_URLS
      PARSE_SET(RC_SYSLOG_REQUESTED_URLS, syslog_requested_urls),
-     PARSE_SET(RC_SYSLOG_TEXT,		syslog_txt),
+     PARSE_SET(RC_SYSLOG_TEXT,          syslog_txt),
 #endif
      PARSE_FUN(RC_SYSTEM_EDITOR,        system_editor_fun),
      PARSE_STR(RC_SYSTEM_MAIL,          system_mail),

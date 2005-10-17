@@ -5,7 +5,7 @@ dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
 dnl
 dnl ask PRCS to plug-in the project-version for the configure-script.
 dnl $Format: "AC_REVISION($ProjectVersion$)"$
-AC_REVISION(2.8.6dev.13)
+AC_REVISION(2.8.6dev.14)
 
 # Save the original $CFLAGS so we can distinguish whether the user set those
 # in the environment, or whether autoconf added -O and -g options:
@@ -37,7 +37,7 @@ AC_ARG_WITH(system-type,
 PACKAGE=lynx
 dnl ask PRCS to plug-in the project-version for the packages.
 # $Format: "VERSION=$ProjectVersion$"$
-VERSION=2.8.6dev.13
+VERSION=2.8.6dev.14
 AC_SUBST(PACKAGE)
 AC_SUBST(VERSION)
 AC_SUBST(DESTDIR)
@@ -318,6 +318,8 @@ dnl --------------------------------------------------------------------------
 CF_HELP_MESSAGE(
 Basic Configuration Options:)
 
+CF_LARGEFILE
+
 dnl internationalization macros
 CF_BUNDLED_INTL(makefile,disable)
 
@@ -369,7 +371,7 @@ dnl --------------------------------------------------------------------------
 ### are used in a lot of places.
 AC_CACHE_CHECK(if you want ssl library,cf_cv_use_libssl,[
 AC_ARG_WITH(ssl,
-	[  --with-ssl[=path]       link with ssl library if available],
+	[  --with-ssl{=path}       link with ssl library if available],
 	[cf_cv_use_libssl=$withval],
 	[cf_cv_use_libssl=no])
 ])
@@ -377,7 +379,7 @@ AC_ARG_WITH(ssl,
 if test "x$cf_cv_use_libssl" = "xno" ; then
 AC_CACHE_CHECK(if you want experimental gnutls support,cf_cv_use_libgnutls,[
 AC_ARG_WITH(gnutls,
-	[  --with-gnutls[=path]    link with experimental gnutls support],
+	[  --with-gnutls{=path}    link with experimental gnutls support],
 	[cf_cv_use_libgnutls=$withval],
 	[cf_cv_use_libgnutls=no])
 ])
@@ -385,14 +387,14 @@ fi
 
 AC_CACHE_CHECK(if you want socks library,cf_cv_use_libsocks,[
 AC_ARG_WITH(socks,
-	[  --with-socks[=path]     link with socks library if available],
+	[  --with-socks{=path}     link with socks library if available],
 	[cf_cv_use_libsocks=$withval],
 	[cf_cv_use_libsocks=no])
 ])
 
 AC_CACHE_CHECK(if you want socks5 library,cf_cv_use_libsocks5,[
 AC_ARG_WITH(socks5,
-	[  --with-socks5[=path]    link with socks5 library if available],
+	[  --with-socks5{=path}    link with socks5 library if available],
 	[cf_cv_use_libsocks5=$withval],
 	[cf_cv_use_libsocks5=no])
 ])

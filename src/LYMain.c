@@ -1620,19 +1620,13 @@ int main(int argc,
     /*
      * If we are told to read the startfile from standard input, do it now,
      * after we have read all of the option data from standard input.
+     * Later we'll use LYReopenInput().
      */
     if (startfile_stdin) {
 	char result[LY_MAXPATH];
 	char *buf = NULL;
-	const char *tty = NULL;
 
-# ifdef HAVE_TTYNAME
-	tty = ttyname(fileno(stderr));
-# endif
-	if (tty == NULL)
-	    tty = isatty(fileno(stdin)) ? TTY_DEVICE : NUL_DEVICE;
-
-	CTRACE((tfp, "processing stdin startfile, tty=%s\n", tty));
+	CTRACE((tfp, "processing stdin startfile\n"));
 	if ((fp = LYOpenTemp(result, HTML_SUFFIX, "w")) != 0) {
 	    StrAllocCopy(startfile, result);
 	    while (GetStdin(&buf, FALSE)) {
@@ -1643,13 +1637,6 @@ int main(int argc,
 	    LYCloseTempFP(fp);
 	}
 	CTRACE((tfp, "...done stdin startfile\n"));
-	if ((freopen(tty, "r", stdin)) == 0) {
-	    CTRACE((tfp, "cannot open a terminal (%s)\n", tty));
-	    if (!dump_output_immediately) {
-		fprintf(stderr, "cannot open a terminal (%s)\n", tty);
-		exit_immediately(1);
-	    }
-	}
     }
 #endif
 
@@ -4080,7 +4067,7 @@ static BOOL parse_arg(char **argv,
 #endif
 
     arg_name = argv[0];
-    CTRACE((tfp, "parse_arg(arg_name=%s, mask=%d, count=%d)\n",
+    CTRACE((tfp, "parse_arg(arg_name=%s, mask=%u, count=%d)\n",
 	    arg_name, mask, countp ? *countp : -1));
 
 #if EXTENDED_STARTFILE_RECALL
@@ -4178,7 +4165,7 @@ static BOOL parse_arg(char **argv,
 
 	/* ignore option if it's not our turn */
 	if ((p->type & mask) == 0) {
-	    CTRACE((tfp, "...skip (mask %d/%d)\n", mask, p->type & 7));
+	    CTRACE((tfp, "...skip (mask %u/%d)\n", mask, p->type & 7));
 	    return FALSE;
 	}
 

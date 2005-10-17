@@ -1113,6 +1113,12 @@ static const unsigned char crfc[96] =
 	 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3 };	/* 7X  pqrstuvwxyz{|}~	DEL */
 /* *INDENT-ON* */
 
+#define ASCII_TAB '\011'
+#define ASCII_LF  '\012'
+#define ASCII_CR  '\015'
+#define ASCII_SPC '\040'
+#define ASCII_BAK '\134'
+
 /*
  *  Turn a string which is not a RFC 822 token into a quoted-string. - KW
  *  The "quoted" parameter tells whether we need the beginning/ending quote
@@ -1163,11 +1169,13 @@ void HTMake822Word(char **str,
     /* S/390 -- gil -- 0268 */
     for (p = *str; *p; p++) {
 	a = TOASCII(*p);
-	if ((a != '\011') && ((a & 127) < 32 ||
-			      (a < 128 && ((crfc[a - 32]) & 2))))
-	    *q++ = '\033';
+	if ((a != ASCII_TAB) &&
+	    ((a & 127) < ASCII_SPC ||
+	     (a < 128 && ((crfc[a - 32]) & 2))))
+	    *q++ = ASCII_BAK;
 	*q++ = *p;
-	if (a == '\012' || (a == '\015' && (TOASCII(*(p + 1)) != '\012')))
+	if (a == ASCII_LF ||
+	    (a == ASCII_CR && (TOASCII(*(p + 1)) != ASCII_LF)))
 	    *q++ = ' ';
     }
     if (quoted)

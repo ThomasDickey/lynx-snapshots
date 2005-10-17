@@ -475,7 +475,7 @@ static unsigned LYRead_Jumpfile(struct JumpTable *jtp)
 	if (cp == NULL)
 	    break;
 	cp++;
-	CTRACE((tfp, "Read jumpfile[%d] key='%s', url='%s'\n",
+	CTRACE((tfp, "Read jumpfile[%u] key='%s', url='%s'\n",
 		i, jtp->table[i].key, jtp->table[i].url));
 	i++;
 	if (!cp)

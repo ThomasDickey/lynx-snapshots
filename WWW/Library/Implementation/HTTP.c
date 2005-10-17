@@ -431,7 +431,7 @@ static int HTLoadHTTP(const char *arg,
     BOOL had_header;		/* Have we had at least one header? */
     char *line_buffer;
     char *line_kept_clean;
-    int real_length_of_line;
+    int real_length_of_line = 0;
     BOOL extensions;		/* Assume good HTTP server */
     char *linebuf = NULL;
     char temp[80];

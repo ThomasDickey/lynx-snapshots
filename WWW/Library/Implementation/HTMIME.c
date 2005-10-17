@@ -2122,26 +2122,23 @@ HTStream *HTMIMERedirect(HTPresentation *pres,
  *
  *	Written by S. Ichikawa,
  *	partially inspired by encdec.c of <jh@efd.lth.se>.
- *	Assume caller's buffer is LINE_LENGTH bytes, these decode to
- *	no longer than the input strings.
+ *	Caller's buffers decode to no longer than the input strings.
  */
-#define LINE_LENGTH 512		/* Maximum length of line of ARTICLE etc */
-#ifdef ESC
-#undef ESC
-#endif /* ESC */
 #include <LYCharVals.h>		/* S/390 -- gil -- 0163 */
-#define ESC	CH_ESC
 
 static char HTmm64[] =
 "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 static char HTmmquote[] = "0123456789ABCDEF";
 static int HTmmcont = 0;
 
-void HTmmdec_base64(char *t,
-		    char *s)
+static void HTmmdec_base64(char **t,
+			   char *s)
 {
     int d, count, j, val;
-    char buf[LINE_LENGTH], *bp, nw[4], *p;
+    char *buf, *bp, nw[4], *p;
+
+    if ((buf = malloc(strlen(s) * 3 + 1)) == 0)
+	outofmem(__FILE__, "HTmmdec_base64");
 
     for (bp = buf; *s; s += 4) {
 	val = 0;
@@ -2172,13 +2169,17 @@ void HTmmdec_base64(char *t,
 	    *bp++ = nw[2];
     }
     *bp = '\0';
-    strcpy(t, buf);
+    StrAllocCopy(*t, buf);
+    FREE(buf);
 }
 
-void HTmmdec_quote(char *t,
-		   char *s)
+static void HTmmdec_quote(char **t,
+			  char *s)
 {
-    char buf[LINE_LENGTH], cval, *bp, *p;
+    char *buf, cval, *bp, *p;
+
+    if ((buf = malloc(strlen(s) + 1)) == 0)
+	outofmem(__FILE__, "HTmmdec_quote");
 
     for (bp = buf; *s;) {
 	if (*s == '=') {
@@ -2205,22 +2206,26 @@ void HTmmdec_quote(char *t,
 	}
     }
     *bp = '\0';
-    strcpy(t, buf);
+    StrAllocCopy(*t, buf);
+    FREE(buf);
 }
 
 /*
  *	HTmmdecode for ISO-2022-JP - FM
  */
-void HTmmdecode(char *trg,
-		char *str)
+void HTmmdecode(char **target,
+		char *source)
 {
-    char buf[LINE_LENGTH], mmbuf[LINE_LENGTH];
+    char *buf;
+    char *mmbuf = NULL;
+    char *m2buf = NULL;
     char *s, *t, *u;
     int base64, quote;
 
-    buf[0] = '\0';
+    if ((buf = malloc(strlen(source) + 1)) == 0)
+	outofmem(__FILE__, "HTmmdecode");
 
-    for (s = str, u = buf; *s;) {
+    for (s = source, u = buf; *s;) {
 	if (!strncasecomp(s, "=?ISO-2022-JP?B?", 16)) {
 	    base64 = 1;
 	} else {
@@ -2234,15 +2239,18 @@ void HTmmdecode(char *trg,
 	if (base64 || quote) {
 	    if (HTmmcont) {
 		for (t = s - 1;
-		     t >= str && (*t == ' ' || *t == '\t'); t--) {
+		     t >= source && (*t == ' ' || *t == '\t'); t--) {
 		    u--;
 		}
 	    }
+	    if (mmbuf == 0)	/* allocate buffer big enough for source */
+		StrAllocCopy(mmbuf, source);
 	    for (s += 16, t = mmbuf; *s;) {
 		if (s[0] == '?' && s[1] == '=') {
 		    break;
 		} else {
 		    *t++ = *s++;
+		    *t = '\0';
 		}
 	    }
 	    if (s[0] != '?' || s[1] != '=') {
@@ -2252,14 +2260,12 @@ void HTmmdecode(char *trg,
 		*t = '\0';
 	    }
 	    if (base64)
-		HTmmdec_base64(mmbuf, mmbuf);
+		HTmmdec_base64(&m2buf, mmbuf);
 	    if (quote)
-		HTmmdec_quote(mmbuf, mmbuf);
-	    for (t = mmbuf; *t;)
+		HTmmdec_quote(&m2buf, mmbuf);
+	    for (t = m2buf; *t;)
 		*u++ = *t++;
 	    HTmmcont = 1;
-	    /* if (*s == ' ' || *s == '\t') *u++ = *s; */
-	    /* for ( ; *s == ' ' || *s == '\t'; s++) ; */
 	} else {
 	    if (*s != ' ' && *s != '\t')
 		HTmmcont = 0;
@@ -2268,29 +2274,37 @@ void HTmmdecode(char *trg,
     }
     *u = '\0';
   end:
-    strcpy(trg, buf);
+    StrAllocCopy(*target, buf);
+    FREE(m2buf);
+    FREE(mmbuf);
+    FREE(buf);
 }
 
 /*
  *  Insert ESC where it seems lost.
  *  (The author of this function "rjis" is S. Ichikawa.)
  */
-int HTrjis(char *t,
+int HTrjis(char **t,
 	   char *s)
 {
-    char *p, buf[LINE_LENGTH];
+    char *p;
+    char *buf = NULL;
     int kanji = 0;
 
-    if (strchr(s, ESC) || !strchr(s, '$')) {
-	if (s != t)
-	    strcpy(t, s);
+    if (strchr(s, CH_ESC) || !strchr(s, '$')) {
+	if (s != *t)
+	    StrAllocCopy(*t, s);
 	return 1;
     }
+
+    if ((buf = malloc(strlen(s) * 2 + 1)) == 0)
+	outofmem(__FILE__, "HTrjis");
+
     for (p = buf; *s;) {
 	if (!kanji && s[0] == '$' && (s[1] == '@' || s[1] == 'B')) {
 	    if (HTmaybekanji((int) s[2], (int) s[3])) {
 		kanji = 1;
-		*p++ = ESC;
+		*p++ = CH_ESC;
 		*p++ = *s++;
 		*p++ = *s++;
 		*p++ = *s++;
@@ -2302,7 +2316,7 @@ int HTrjis(char *t,
 	}
 	if (kanji && s[0] == '(' && (s[1] == 'J' || s[1] == 'B')) {
 	    kanji = 0;
-	    *p++ = ESC;
+	    *p++ = CH_ESC;
 	    *p++ = *s++;
 	    *p++ = *s++;
 	    continue;
@@ -2311,7 +2325,8 @@ int HTrjis(char *t,
     }
     *p = *s;			/* terminate string */
 
-    strcpy(t, buf);
+    StrAllocCopy(*t, buf);
+    FREE(buf);
     return 0;
 }
 

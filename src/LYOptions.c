@@ -2589,7 +2589,7 @@ int postoptions(DocInfo *newdoc)
     PostPair *data = 0;
     DocAddress WWWDoc;		/* need on exit */
     int i;
-    int code;
+    int code = 0;
     BOOLEAN save_all = FALSE;
     int display_char_set_old = current_char_set;
     int old_media_value = LYAcceptMedia;
@@ -2748,7 +2748,7 @@ int postoptions(DocInfo *newdoc)
 
 	/* Keypad Mode: SELECT */
 	if (!strcmp(data[i].tag, keypad_mode_string)) {
-	    int newval;
+	    int newval = 0;
 
 	    if (GetOptValues(keypad_mode_values, data[i].value, &newval)
 		&& keypad_mode != newval) {
