@@ -149,6 +149,40 @@ static int LYLoadCGI(const char *arg,
     return -1;
 }
 #else
+#ifdef LYNXCGI_LINKS
+/*
+ * Wrapper for exec_ok(), confirming with user if the link text is not visible
+ * in the status line.
+ */
+static BOOL can_exec_cgi(const char *linktext, const char *linkargs)
+{
+    const char *format = gettext("Do you want to execute \"%s\"?");
+    char *message = NULL;
+    char *command = NULL;
+    char *p;
+    BOOL result = TRUE;
+
+    if (!exec_ok(HTLoadedDocumentURL(), linktext, CGI_PATH)) {
+	/* exec_ok gives out msg. */
+	result = FALSE;
+    } else if (user_mode < ADVANCED_MODE) {
+	StrAllocCopy(command, linktext);
+	if (non_empty(linkargs)) {
+	    HTSprintf(&command, " %s", linkargs);
+	}
+	HTUnEscape(command);
+	for (p = command; *p; ++p)
+	    if (*p == '+')
+		*p = ' ';
+	HTSprintf0(&message, format, command);
+	result = HTConfirm(message);
+	FREE(message);
+	FREE(command);
+    }
+    return result;
+}
+#endif /* LYNXCGI_LINKS */
+
 static int LYLoadCGI(const char *arg,
 		     HTParentAnchor *anAnchor,
 		     HTFormat format_out,
@@ -281,8 +315,7 @@ static int LYLoadCGI(const char *arg,
 	       strcmp(arg, HTLoadedDocumentURL()) &&
 	       HText_AreDifferent(anAnchor, arg) &&
 	       HTUnEscape(orig_pgm) &&
-	       !exec_ok(HTLoadedDocumentURL(), orig_pgm,
-			CGI_PATH)) {	/* exec_ok gives out msg. */
+	       !can_exec_cgi(orig_pgm, "")) {
 	/*
 	 * If we have extra path info and are not just reloading the current,
 	 * check the full file path (after unescaping) now to catch forbidden
@@ -312,8 +345,7 @@ static int LYLoadCGI(const char *arg,
 	       !(reloading && anAnchor->document) &&
 	       strcmp(arg, HTLoadedDocumentURL()) &&
 	       HText_AreDifferent(anAnchor, arg) &&
-	       !exec_ok(HTLoadedDocumentURL(), pgm,
-			CGI_PATH)) {	/* exec_ok gives out msg. */
+	       !can_exec_cgi(pgm, pgm_args)) {
 	/*
 	 * If we are reloading a lynxcgi document that had already been loaded,
 	 * the various checks above should allow it even if exec_ok() would
@@ -675,7 +707,7 @@ static int LYLoadCGI(const char *arg,
     PUTS(buf);
 
     HTSprintf0(&buf,
-	       "href=\"http://kcgl1.eng.ohio-state.edu/www/doc/serverinfo.html\"\n");
+	       "href=\"http://www.ecr6.ohio-state.edu/www/doc/serverinfo.html\"\n");
     PUTS(buf);
 
     HTSprintf0(&buf, ">%s</a>.\n", gettext("this link"));

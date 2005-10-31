@@ -1474,6 +1474,8 @@ BOOLEAN exec_ok(const char *source,
 	    if (strstr(command, "//") == linktext) {
 		command += 2;
 	    }
+	    CTRACE((tfp, "comparing source\n\t'%s'\n\t'%s'\n", source, tp->src));
+	    CTRACE((tfp, "comparing command\n\t'%s'\n\t'%s'\n", command, tp->path));
 	    if (STRNADDRCOMP(source, tp->src, strlen(tp->src)) == 0 &&
 		STRNADDRCOMP(command, tp->path, strlen(tp->path)) == 0)
 		return TRUE;
