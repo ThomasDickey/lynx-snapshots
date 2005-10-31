@@ -1,6 +1,14 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2005-10-30 (2.8.6dev.15)
+* update URL for VMS server information in LYCgi.c
+* modify LYLoadCGI() to prompt user, displaying the command that would be
+  executed, to confirm that it should be.  This makes it easier to notice when
+  a local program would be run by activating a lynxcgi link.  This is not done
+  in advanced mode, since the URL is already visible in the status line (report
+  by vade79, comments by Greg MacManus) -TD
+
 2005-10-17 (2.8.6dev.14)
 * add configure script support for large files; some changes made be needed to
   the C code in dev.15 to exploit this -TD
@@ -33,11 +41,12 @@ Changes since Lynx 2.8 release
 * ifdef'd out unused code in HTGroup.c -TD
 * eliminate fixed-size buffers in LYExpandHostForURL() to guard against
   buffer overflow resulting from too-long domain prefix/suffix data from
-  lynx.cfg (report by Ulf Harnhammar, CAN-2005-3120) -TD
+  lynx.cfg (report by Ulf Harnhammar) -TD
 * add a check for missing ':' in gopher response, to recover from the error
   (patch by Ulf Harnhammar)
 * eliminate fixed-size buffers in HTrjis() and related functions to avoid
-  potential buffer overflow in nntp pages (report by Ulf Harnhammar) -TD
+  potential buffer overflow in nntp pages (report by Ulf Harnhammar,
+  CAN-2005-3120) -TD
 * correct "escape" character used in HTMake822Word, which was literally an
   ASCII escape character rather than the RFC-822 backslash from 2.8.2dev.3
   changes (report by Frederic Briere, Debian #318034) -TD
