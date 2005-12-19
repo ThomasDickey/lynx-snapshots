@@ -221,7 +221,7 @@ extern "C" {
     extern BOOLEAN jump_buffer;	/* TRUE if offering default shortcut */
     extern BOOLEAN long_url_ok;
     extern BOOLEAN lynx_mode;
-    extern BOOLEAN more;	/* is there more document to display? */
+    extern BOOLEAN more_text;	/* is there more document to display? */
     extern BOOLEAN news_ok;
     extern BOOLEAN number_fields_on_left;
     extern BOOLEAN number_links_on_left;

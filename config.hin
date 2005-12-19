@@ -57,6 +57,7 @@
 #undef HAVE_BSD_TOUCHLINE	/* CF_CURS_TOUCHLINE */
 #undef HAVE_CATGETS		/* defined if you want to use non-GNU catgets */
 #undef HAVE_CBREAK
+#undef HAVE_CTERMID
 #undef HAVE_CURSESX_H
 #undef HAVE_CURSES_VERSION	/* CF_FUNC_CURSES_VERSION */
 #undef HAVE_CUSERID
@@ -146,6 +147,7 @@
 #undef HAVE_UNISTD_H		/* have <unistd.h> */
 #undef HAVE_UNSETENV
 #undef HAVE_USE_DEFAULT_COLORS	/* ncurses extension */
+#undef HAVE_USE_LEGACY_CODING	/* ncurses extension */
 #undef HAVE_USLEEP
 #undef HAVE_UTMP		/* CF_UTMP */
 #undef HAVE_UTMP_UT_HOST	/* CF_UTMP_UT_HOST */
@@ -200,6 +202,7 @@
 #undef REAL_UNIX_SYSTEM		/* CF_SLANG_UNIX_DEFS */
 #undef RLOGIN_PATH		/* CF_PATH_PROG(rlogin) */
 #undef RM_PATH			/* CF_PATH_PROG(rm) */
+#undef SETFONT_PATH		/* CF_PATH_PROG(setfont) */
 #undef SOCKS			/* CF_SOCKS, CF_SOCKS5 */
 #undef STDC_HEADERS
 #undef SYSTEM_MAIL		/* CF_DEFINE_PROG */

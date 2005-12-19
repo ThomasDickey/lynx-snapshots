@@ -21,11 +21,18 @@
 #include <UCDefs.h>
 #include <UCAuto.h>
 #include <LYGlobalDefs.h>
+#include <LYStrings.h>
 #include <LYClean.h>
 #include <LYLeaks.h>
 #include <LYCharSets.h>
 
 #ifdef EXP_CHARTRANS_AUTOSWITCH
+
+#include <HTFile.h>
+
+#ifdef LINUX
+#include <sysexits.h>		/* EX_DATAERR, etc. */
+#endif
 
 #  ifdef CAN_SWITCH_DISPLAY_CHARSET
 char *charset_switch_rules;
@@ -37,6 +44,10 @@ int real_charsets[2] =
 int switch_display_charsets;
 
 #  endif
+
+#ifdef HAVE_USE_LEGACY_CODING
+static int original_coding = 0;
+#endif
 
 #  ifdef __EMX__
 /* If we "just include" <os2.h>, BOOLEAN conflicts. */
@@ -50,20 +61,56 @@ int switch_display_charsets;
 
 #ifdef LINUX
 typedef enum {
-    Is_Unset, Is_Set, Dunno, Dont_Care
+    Is_Unset,
+    Is_Set,
+    Dunno,
+    Dont_Care
 } TGen_state_t;
+
+/*
+ * List the states the console has been set to via SCS (select character-set).
+ */
 typedef enum {
-    G0, G1
-} TGNstate_t;
-typedef enum {
-    GN_Blat1, GN_0decgraf, GN_Ucp437, GN_Kuser, GN_dunno, GN_dontCare
+    GN_Blat1,			/* Latin-1 */
+    GN_0decgraf,		/* VT100 graphics */
+    GN_Ucp437,			/* PC -> PC */
+    GN_Kuser,			/* user-defined */
+    GN_dunno,
+    GN_dontCare
 } TTransT_t;
 
-static char *T_font_fn = NULL;
-static char *T_umap_fn = NULL;
+static char *T_font_fn = NULL;	/* font filename */
+static char *T_umap_fn = NULL;	/* unicode-map filename */
 
-#define SETFONT "setfont"
 #define NOOUTPUT "2>/dev/null >/dev/null"
+
+/*
+ * Return the configured path of the setfont/consolechars program.
+ */
+static const char *GetSetfontPath(void)
+{
+    return HTGetProgramPath(ppSETFONT);
+}
+
+/*
+ * setfont and consolechars have different options and available data.
+ */
+static BOOL isSetFont(void)
+{
+    const char *program = GetSetfontPath();
+    const char *slash = strrchr(program, '/');
+    const char *leaf = (slash ? slash + 1 : program);
+
+    return !strcmp(leaf, "setfont");
+}
+
+/*
+ * Here are the differences in options which affect lynx:
+ */
+#define setfont_u()    (isSetFont() ? "-u "  : "--sfm ")
+#define setfont_o()    (isSetFont() ? "-o "  : "--old-font-raw ")
+#define setfont_ou()   (isSetFont() ? "-ou " : "--old-sfm ")
+#define console_font() (isSetFont() ? ""     : "--font ")
 
 /*
  * call_setfont - execute "setfont" command via system()
@@ -75,8 +122,15 @@ static int call_setfont(const char *font,
 			const char *fnsuffix,
 			const char *umap)
 {
+    const char *program = GetSetfontPath();
     char *T_setfont_cmd = NULL;
     int rv;
+
+    /*
+     * console-data package has only a few unicode maps.
+     */
+    if (!isSetFont())
+	umap = 0;
 
     if ((font && T_font_fn && !strcmp(font, T_font_fn))
 	&& (umap && T_umap_fn && !strcmp(umap, T_umap_fn))) {
@@ -93,33 +147,42 @@ static int call_setfont(const char *font,
     if (!*fnsuffix)
 	fnsuffix = "";
 
-    if (umap && *umap && font && *font) {
-	HTSprintf0(&T_setfont_cmd, "%s %s%s -u %s %s",
-		   SETFONT, font, fnsuffix, umap, NOOUTPUT);
-    } else if (font && *font) {
+    if (non_empty(umap) && non_empty(font)) {
+	HTSprintf0(&T_setfont_cmd, "%s %s%s%s %s%s %s",
+		   program,
+		   console_font(), font, fnsuffix,
+		   setfont_u(), umap,
+		   NOOUTPUT);
+    } else if (non_empty(font)) {
+	HTSprintf0(&T_setfont_cmd, "%s %s%s%s %s",
+		   program,
+		   console_font(), font, fnsuffix,
+		   NOOUTPUT);
+    } else if (non_empty(umap)) {
 	HTSprintf0(&T_setfont_cmd, "%s %s%s %s",
-		   SETFONT, font, fnsuffix, NOOUTPUT);
-    } else if (umap && *umap) {
-	HTSprintf0(&T_setfont_cmd, "%s -u %s %s",
-		   SETFONT, umap, NOOUTPUT);
+		   program,
+		   setfont_u(), umap,
+		   NOOUTPUT);
     }
 
     if (T_setfont_cmd) {
-	CTRACE((tfp, "Executing setfont: '%s'\n", T_setfont_cmd));
+	CTRACE((tfp, "Changing font: '%s'\n", T_setfont_cmd));
 	rv = LYSystem(T_setfont_cmd);
 	FREE(T_setfont_cmd);
 	if (rv) {
 	    CTRACE((tfp, "call_setfont: system returned %d (0x%x)!\n",
 		    rv, rv));
-	    if ((rv == 0x4200 || rv == 0x4100) && umap && *umap)
+	    if ((rv == (EX_DATAERR << 8) ||
+		 rv == (EX_NOINPUT << 8)) &&
+		non_empty(umap)) {
 		/*
-		 * It seems setfont returns 65 or 66 to the shell if
-		 * the font was loaded ok but something was wrong with
-		 * the umap file. - kw
+		 * Check if the font was loaded ok but something was wrong with
+		 * the umap file.
 		 */
 		return 1;
-	    else
+	    } else {
 		return -1;
+	    }
 	}
     }
     return 0;
@@ -144,12 +207,25 @@ static int nonempty_file(const char *p)
 	    (sb.st_size != 0));
 }
 
+static BOOL on_console(void)
+{
+    if ((x_display != NULL) ||
+	LYgetXDisplay() != NULL) {
+	/*
+	 * We won't do anything in an xterm.  Better that way...
+	 */
+	return FALSE;
+    }
+    return TRUE;
+}
+
 /*
  * This is the thing that actually gets called from display_page().
  */
 void UCChangeTerminalCodepage(int newcs,
 			      LYUCcharset *p)
 {
+    const char *program = GetSetfontPath();
     static int lastcs = -1;
     static const char *lastname = NULL;
     static TTransT_t lastTransT = GN_dunno;
@@ -168,25 +244,41 @@ void UCChangeTerminalCodepage(int newcs,
     char *tmpbuf2 = NULL;
     int status = 0;
 
+    if (!on_console()) return;
+
+#ifdef HAVE_USE_LEGACY_CODING
+    if (newcs < 0) {
+	use_legacy_coding(original_coding);
+    } else {
+	original_coding = use_legacy_coding(2);
+    }
+#endif
+
     /*
      * Restore the original character set.
      */
     if (newcs < 0 || p == 0) {
-	if (old_font && *old_font &&
-	    old_umap && *old_umap) {
-	    int have_font = nonempty_file(old_font);
-	    int have_umap = nonempty_file(old_umap);
+	if (non_empty(old_font) &&
+	    non_empty(old_umap)) {
 
-	    if (have_font) {
-		if (have_umap) {
-		    HTSprintf0(&tmpbuf1, "%s %s -u %s %s",
-			       SETFONT, old_font, old_umap, NOOUTPUT);
+	    if (nonempty_file(old_font)) {
+		if (nonempty_file(old_umap)) {
+		    HTSprintf0(&tmpbuf1, "%s %s%s %s%s %s",
+			       program,
+			       console_font(), old_font,
+			       setfont_u(), old_umap,
+			       NOOUTPUT);
 		} else {
-		    HTSprintf0(&tmpbuf1, "%s %s %s",
-			       SETFONT, old_font, NOOUTPUT);
+		    HTSprintf0(&tmpbuf1, "%s %s%s %s",
+			       program,
+			       console_font(), old_font,
+			       NOOUTPUT);
 		}
-		CTRACE((tfp, "Executing setfont to restore: '%s'\n", tmpbuf1));
+		CTRACE((tfp, "Restoring font: '%s'\n", tmpbuf1));
 		status = LYSystem(tmpbuf1);
+		if (status != 0) {
+		    CTRACE((tfp, "...system returned %d (0x%x)\n", status, status));
+		}
 		FREE(tmpbuf1);
 	    }
 	}
@@ -208,29 +300,38 @@ void UCChangeTerminalCodepage(int newcs,
     } else if (lastcs < 0 && old_umap == 0 && old_font == 0) {
 	FILE *fp1;
 	FILE *fp2 = NULL;
-	if ((old_font = typecallocn(char, LY_MAXPATH)))
+
+	if ((old_font = typecallocn(char, LY_MAXPATH)) != 0)
 	      old_umap = typecallocn(char, LY_MAXPATH);
 
-	if ((fp1 = LYOpenTemp(old_font, ".fnt", BIN_W)))
+	if ((fp1 = LYOpenTemp(old_font, ".fnt", BIN_W)) != 0)
 	    fp2 = LYOpenTemp(old_umap, ".uni", BIN_W);
+
 	if (fp1 && fp2) {
 	    size_t nlen;
-	    char *rp;
+	    int rv;
 
-	    HTSprintf0(&tmpbuf1, "%s -o %s -ou %s %s",
-		       SETFONT, old_font, old_umap, NOOUTPUT);
-	    CTRACE((tfp, "Executing setfont to save: '%s'\n", tmpbuf1));
-	    LYSystem(tmpbuf1);
+	    HTSprintf0(&tmpbuf1, "%s %s%s %s%s %s",
+		       program,
+		       setfont_o(), old_font,
+		       setfont_ou(), old_umap,
+		       NOOUTPUT);
+
+	    CTRACE((tfp, "Saving font: '%s'\n", tmpbuf1));
+	    rv = LYSystem(tmpbuf1);
+	    if (rv != 0) {
+		CTRACE((tfp, "...system returned %d (0x%x)\n", rv, rv));
+	    }
 	    FREE(tmpbuf1);
 	    LYCloseTempFP(fp1);
 	    LYCloseTempFP(fp2);
-	    if ((nlen = strlen(old_font)) + 1 < LY_MAXPATH &&
-		(rp = typeRealloc(char, old_font, nlen + 1)))
-		  old_font = rp;
 
-	    if ((nlen = strlen(old_umap)) + 1 < LY_MAXPATH &&
-		(rp = typeRealloc(char, old_umap, nlen + 1)))
-		  old_umap = rp;
+	    /* free up a few bytes */
+	    if ((nlen = strlen(old_font) + 1) < LY_MAXPATH)
+		old_font = typeRealloc(char, old_font, nlen);
+
+	    if ((nlen = strlen(old_umap) + 1) < LY_MAXPATH)
+		old_umap = typeRealloc(char, old_umap, nlen);
 	} else {
 	    if (fp1)
 		LYRemoveTemp(old_font);
@@ -251,27 +352,16 @@ void UCChangeTerminalCodepage(int newcs,
 #define SUFF3 "-8x16"
 #define SUFF4 "8x16"
 #define SUFF5 ".cp -16"
-
-    /*
-     * Use this for output of escape sequences.
-     */
-    if ((x_display != NULL) ||
-	LYgetXDisplay() != NULL) {
-	/*
-	 * We won't do anything in an xterm.  Better that way...
-	 */
-	return;
-    }
+#define SUFF6 "_8x16"
 
     /* NOTE: `!!umap not in kbd!!' comments below means that the *.uni file
-       is not found in kbd package.  Reference Debian Package: kbd-data,
-       Version: 0.96a-14.  They should be located elsewhere or generated.
-       Also some cpNNN fonts used below are not in the kbd-data.  - kw
+     * is not found in kbd package.  Reference Debian Package: kbd-data,
+     * Version: 0.96a-14.  They should be located elsewhere or generated.
+     * Also some cpNNN fonts used below are not in the kbd-data.  - kw
      */
 
     if (!strncmp(name, "iso-8859-1", 10) &&
-	(!name[10] || !isdigit(UCH(name[10])))
-	) {
+	(!name[10] || !isdigit(UCH(name[10])))) {
 	if ((lastHasUmap == Is_Set) && !strcmp(lastname, "cp850")) {
 	    /*
 	     * cp850 already contains all latin1 characters.
@@ -324,8 +414,18 @@ void UCChangeTerminalCodepage(int newcs,
     } else if (!strcmp(name, "koi8-r")) {
 	/*
 	 * "setfont koi8-8x16"
+	 * !!umap not in kbd!!
 	 */
-	status = call_setfont("koi8", SUFF3, "koi8r.uni");	/* !!umap not in kbd!! */
+	status = call_setfont("koi8", SUFF3, "koi8r.uni");
+	TransT = GN_Kuser;
+	HasUmap = Is_Set;
+	Utf = Is_Unset;
+    } else if (!strcmp(name, "koi8-u")) {
+	/*
+	 * "setfont koi8u_8x16"
+	 * !!umap not in kbd!!
+	 */
+	status = call_setfont("koi8u", SUFF6, "koi8u.uni");
 	TransT = GN_Kuser;
 	HasUmap = Is_Set;
 	Utf = Is_Unset;
@@ -343,8 +443,9 @@ void UCChangeTerminalCodepage(int newcs,
     } else if (!strcmp(name, "cp850")) {
 	/*
 	 * "setfont cp850-8x16 -u cp850.uni"
+	 * !!umap not in kbd!!
 	 */
-	status = call_setfont("cp850", SUFF3, "cp850.uni");	/* !!umap not in kbd!! */
+	status = call_setfont("cp850", SUFF3, "cp850.uni");
 	TransT = GN_Kuser;
 	HasUmap = Is_Set;
 	Utf = Is_Unset;
@@ -354,8 +455,9 @@ void UCChangeTerminalCodepage(int newcs,
 	HTSprintf0(&tmpbuf2, "%s.uni", name);
 	/*
 	 * "setfont cpNNN.f16"
+	 * !!umap not in kbd!!
 	 */
-	status = call_setfont(name, SUFF1, tmpbuf2);	/* !!umap not in kbd!! */
+	status = call_setfont(name, SUFF1, tmpbuf2);
 	FREE(tmpbuf2);
 	TransT = GN_Kuser;
 	HasUmap = Is_Set;
@@ -363,8 +465,18 @@ void UCChangeTerminalCodepage(int newcs,
     } else if (!strcmp(name, "cp737")) {
 	/*
 	 * "setfont cp737.cp"
+	 * !!umap not in kbd!!
 	 */
-	status = call_setfont("737", SUFF5, "cp737.uni");	/* !!umap not in kbd!! */
+	if (isSetFont()) {
+	    status = call_setfont("737", SUFF5, "cp737.uni");
+	} else {
+	    status = call_setfont("greek", "", "cp737.uni");
+	}
+	TransT = GN_Kuser;
+	HasUmap = Is_Set;
+	Utf = Is_Unset;
+    } else if (!strcmp(name, "cp857")) {
+	status = call_setfont("cp857", SUFF3, "cp857.uni");
 	TransT = GN_Kuser;
 	HasUmap = Is_Set;
 	Utf = Is_Unset;
@@ -448,6 +560,14 @@ void UCChangeTerminalCodepage(int newcs,
 {
 #ifdef __EMX__
     int res = 0;
+
+#ifdef HAVE_USE_LEGACY_CODING
+    if (newcs < 0) {
+	use_legacy_coding(original_coding);
+    } else {
+	original_coding = use_legacy_coding(2);
+    }
+#endif
 
     if (newcs < 0)
 	newcs = auto_display_charset;
@@ -667,14 +787,7 @@ int Switch_Display_Charset(const int ord, const enum switch_display_charset_t re
     int res;
     static int repeated;
 
-    if (!switch_display_charsets
-	&& (really == SWITCH_DISPLAY_CHARSET_MAYBE
-#ifdef SWITCH_DISPLAY_CHARSET_NOT_NEEDED_ANY_MORE
-    /* The first switch is not due to an interactive action */
-	    || (really == SWITCH_DISPLAY_CHARSET_REALLY
-		&& !(repeated++))
-#endif
-	))
+    if (!switch_display_charsets)
 	return 0;
     res = _Switch_Display_Charset(ord, really);
     if (res < 0 || prev == res)	/* No change */

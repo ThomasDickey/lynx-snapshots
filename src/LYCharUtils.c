@@ -2334,8 +2334,7 @@ void LYHandleMETA(HTStructured * me, const BOOL *present,
 	    if (Switch_Display_Charset(chndl, SWITCH_DISPLAY_CHARSET_MAYBE)) {
 		/* UCT_STAGE_STRUCTURED and UCT_STAGE_HTEXT
 		   should have the same setting for UCInfoStage. */
-		int structured = HTAnchor_getUCInfoStage(me->node_anchor,
-							 UCT_STAGE_STRUCTURED);
+		HTAnchor_getUCInfoStage(me->node_anchor, UCT_STAGE_STRUCTURED);
 
 		me->outUCLYhndl = current_char_set;
 		HTAnchor_setUCInfoStage(me->node_anchor,

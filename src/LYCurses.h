@@ -387,7 +387,11 @@ extern "C" {
  * Usable limits for display:
  */
 #if defined(FANCY_CURSES) || defined(USE_SLANG)
+#if defined(PDCURSES)
+#define LYcolLimit (LYcols - LYbarWidth - 1)	/* PDCurses wrapping is buggy */
+#else
 #define LYcolLimit (LYcols - LYbarWidth)
+#endif
 #else
 #define LYcolLimit (LYcols - 1)
 #endif
@@ -519,11 +523,23 @@ extern "C" {
 #endif
 
 #define LYaddch(ch)   SLsmg_write_char(ch)
+
+#if SLANG_VERSION >= 20000
+#define addch_raw(ch) do {                                \
+                        SLsmg_Char_Type buf;              \
+                        buf.nchars = 1;                   \
+                        buf.wchars[0] = ch;               \
+                        buf.color = Current_Attr;         \
+                        SLsmg_write_raw (&buf, 1);        \
+                      } while (0)
+#else
 #define addch_raw(ch) do {                                \
                         SLsmg_Char_Type buf;              \
                         buf = (ch) | (Current_Attr << 4); \
                         SLsmg_write_raw (&buf, 1);        \
                       } while (0)
+#endif /* SLANG_VERSION >= 20000 */
+
 #define echo()
 #define printw        SLsmg_printf
 

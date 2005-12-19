@@ -38,6 +38,7 @@ TABLES= \
  cp775_uni.h \
  cp850_uni.h \
  cp852_uni.h \
+ cp857_uni.h \
  cp862_uni.h \
  cp864_uni.h \
  cp866_uni.h \
@@ -56,6 +57,8 @@ TABLES= \
  iso08_uni.h \
  iso09_uni.h \
  iso10_uni.h \
+ iso13_uni.h \
+ iso14_uni.h \
  iso15_uni.h \
  koi8r_uni.h \
  koi8u_uni.h \
@@ -91,6 +94,7 @@ cp737_uni.h:		cp737_uni.tbl		makeuctb.exe
 cp775_uni.h:		cp775_uni.tbl		makeuctb.exe
 cp850_uni.h:		cp850_uni.tbl		makeuctb.exe
 cp852_uni.h:		cp852_uni.tbl		makeuctb.exe
+cp857_uni.h:		cp857_uni.tbl		makeuctb.exe
 cp862_uni.h:		cp862_uni.tbl		makeuctb.exe
 cp864_uni.h:		cp864_uni.tbl		makeuctb.exe
 cp866_uni.h:		cp866_uni.tbl		makeuctb.exe
@@ -109,6 +113,8 @@ iso07_uni.h:		iso07_uni.tbl		makeuctb.exe
 iso08_uni.h:		iso08_uni.tbl		makeuctb.exe
 iso09_uni.h:		iso09_uni.tbl		makeuctb.exe
 iso10_uni.h:		iso10_uni.tbl		makeuctb.exe
+iso13_uni.h:		iso13_uni.tbl		makeuctb.exe
+iso14_uni.h:		iso14_uni.tbl		makeuctb.exe
 iso15_uni.h:		iso15_uni.tbl		makeuctb.exe
 koi8r_uni.h:		koi8r_uni.tbl		makeuctb.exe
 koi8u_uni.h:		koi8u_uni.tbl		makeuctb.exe

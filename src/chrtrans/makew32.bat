@@ -22,6 +22,7 @@ makeuctb cp737_uni.tbl
 makeuctb cp775_uni.tbl
 makeuctb cp850_uni.tbl
 makeuctb cp852_uni.tbl
+makeuctb cp857_uni.tbl
 makeuctb cp862_uni.tbl
 makeuctb cp864_uni.tbl
 makeuctb cp866_uni.tbl
@@ -40,6 +41,8 @@ makeuctb iso07_uni.tbl
 makeuctb iso08_uni.tbl
 makeuctb iso09_uni.tbl
 makeuctb iso10_uni.tbl
+makeuctb iso13_uni.tbl
+makeuctb iso14_uni.tbl
 makeuctb iso15_uni.tbl
 makeuctb koi8r_uni.tbl
 makeuctb koi8u_uni.tbl

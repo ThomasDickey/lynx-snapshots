@@ -56,7 +56,7 @@ char *XCursesProgramName = "Lynx";
 #if defined(USE_COLOR_STYLE) && !defined(USE_COLOR_TABLE)
 #define COLOR_BKGD ((s_normal != NOSTYLE) ? hashStyles[s_normal].color : A_NORMAL)
 #else
-#define COLOR_BKGD ((COLOR_PAIRS >= 9) ? get_color_pair(9) : A_NORMAL)
+#define COLOR_BKGD ((COLOR_PAIRS >= 9) ? (chtype) get_color_pair(9) : A_NORMAL)
 #endif
 
 #ifdef USE_CURSES_PADS
@@ -320,14 +320,6 @@ void LYbox(WINDOW * win, BOOLEAN formfield GCC_UNUSED)
 	waddch(win, 'q');
     waddstr(win, "j\017");
 #else /* !VMS */
-    /*
-     * If the terminal is in UTF-8 mode, it probably cannot understand box
-     * drawing characters as (n)curses handles them.  (This may also be true
-     * for other display character sets, but isn't currently checked.) In that
-     * case, substitute ASCII characters for BOXVERT and BOXHORI if they were
-     * defined to 0 for automatic use of box drawing characters.  They'll stay
-     * as they are otherwise.  - KW & FM
-     */
     int boxvert, boxhori;
 
     UCSetBoxChars(current_char_set, &boxvert, &boxhori, BOXVERT, BOXHORI);
@@ -564,16 +556,18 @@ int lynx_default_colors(void)
 {
     int code = 0;
 
-    if (lynx_called_initscr) {
-	code = -1;
-	if (!default_color_reset && use_default_colors() == OK) {
-	    default_fg = DEFAULT_COLOR;
-	    default_bg = DEFAULT_COLOR;
-	    code = 1;
-	} else {
-	    default_fg = COLOR_WHITE;
-	    default_bg = COLOR_BLACK;
-	    default_color_reset = TRUE;
+    if (!default_color_reset) {
+	if (lynx_called_initscr) {
+	    code = -1;
+	    if (use_default_colors() == OK) {
+		default_fg = DEFAULT_COLOR;
+		default_bg = DEFAULT_COLOR;
+		code = 1;
+	    } else {
+		default_fg = COLOR_WHITE;
+		default_bg = COLOR_BLACK;
+		default_color_reset = TRUE;
+	    }
 	}
     }
     return code;
@@ -746,7 +740,7 @@ void lynx_set_color(int a)
     if (lynx_has_color && LYShowColor >= SHOW_COLOR_ON) {
 	wattrset(LYwin, lynx_color_cfg_attr(a)
 		 | (((a + 1) < COLOR_PAIRS)
-		    ? get_color_pair(a + 1)
+		    ? (chtype) get_color_pair(a + 1)
 		    : A_NORMAL));
     }
 }
@@ -2749,7 +2743,7 @@ static void make_blink_boldbg(void)
  */
 long LYgetattrs(WINDOW * win)
 {
-#if ( defined(HAVE_GETATTRS) && ( !defined(NCURSES_MAJOR_VERSION) || NCURSES_VERSION_MAJOR < 5 ) )
+#if ( defined(HAVE_GETATTRS) && ( !defined(NCURSES_VERSION_MAJOR) || NCURSES_VERSION_MAJOR < 5 ) )
     long result = 0;
 
     result = getattrs(win);
@@ -2766,3 +2760,33 @@ long LYgetattrs(WINDOW * win)
     return result;
 }
 #endif /* HAVE_WATTR_GET */
+
+#if defined(NCURSES_VERSION_PATCH) && NCURSES_VERSION_PATCH > 20021012
+#ifndef HAVE_USE_LEGACY_CODING
+/*
+ * Between ncurses 5.3 and 5.4 as part of fixes for wide-character mode, the
+ * locale support no longer allows characters in the range 128-159 to be
+ * treated as printable characters.  Here is a workaround to fool
+ * waddch_nosync() into treating "all" 8-bit characters as printable.
+ */
+NCURSES_CONST char *unctrl(chtype ch)
+{
+    static char result[3];
+    unsigned data = (unsigned char)ch;
+
+    if (data < 32) {
+	result[0] = '^';
+	result[1] = ch | '@';
+	result[2] = 0;
+    } else if (data == 127) {
+	result[0] = '^';
+	result[1] = '?';
+	result[2] = 0;
+    } else {
+	result[0] = data;
+	result[1] = 0;
+    }
+    return result;
+}
+#endif /* HAVE_USE_LEGACY_CODING */
+#endif

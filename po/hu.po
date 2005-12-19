@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: lynx 2.8.6-dev8\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2005-10-16 19:03-0400\n"
+"POT-Creation-Date: 2005-12-18 16:51-0500\n"
 "PO-Revision-Date: 2004-11-14 19:52+0100\n"
 "Last-Translator: Mihály Gyulai <gyulai@fbi.hu>\n"
 "Language-Team: Hungarian <translation-team-hu@lists.sourceforge.net>\n"
@@ -2789,7 +2789,7 @@ msgstr "POST tartalommal rendelkezõ dokumentum nem található a gyorstárban. Újra
 msgid "Loading failed, use a previous copy."
 msgstr "A betöltés sikertelen, korábbi példány használata."
 
-#: WWW/Library/Implementation/HTAccess.c:1044 src/GridText.c:8515
+#: WWW/Library/Implementation/HTAccess.c:1044 src/GridText.c:8507
 msgid "Loading incomplete."
 msgstr "A betöltés nem teljes."
 
@@ -2812,7 +2812,7 @@ msgstr "**** HTAccess: Visszatérési állapot: %d\n"
 #. * hack: if we fail in HTAccess.c
 #. * avoid duplicating URL, oh.
 #.
-#: WWW/Library/Implementation/HTAccess.c:1084 src/LYMainLoop.c:7745
+#: WWW/Library/Implementation/HTAccess.c:1084 src/LYMainLoop.c:7748
 msgid "Can't Access"
 msgstr "Nem lehet elérni"
 
@@ -3009,15 +3009,15 @@ msgstr "Cikk olvasása."
 msgid "Sorry, could not load requested news."
 msgstr "Sajnálom, nem tudom betölteni a hírt."
 
-#: WWW/Library/Implementation/HTTCP.c:1232
+#: WWW/Library/Implementation/HTTCP.c:1255
 msgid "Address has invalid port"
 msgstr "A címben érvénytelen a port"
 
-#: WWW/Library/Implementation/HTTCP.c:1308
+#: WWW/Library/Implementation/HTTCP.c:1331
 msgid "Address length looks invalid"
 msgstr "A cím hosszúsága érvénytelen"
 
-#: WWW/Library/Implementation/HTTCP.c:1539 WWW/Library/Implementation/HTTCP.c:1557
+#: WWW/Library/Implementation/HTTCP.c:1562 WWW/Library/Implementation/HTTCP.c:1580
 #, c-format
 msgid "Unable to locate remote host %s."
 msgstr "Nem találom a %s távoli számítógépet."
@@ -3026,38 +3026,38 @@ msgstr "Nem találom a %s távoli számítógépet."
 #. * but not HTAlert, because typically there will be other
 #. * alerts from the callers.  - kw
 #.
-#: WWW/Library/Implementation/HTTCP.c:1554 WWW/Library/Implementation/HTTelnet.c:108
+#: WWW/Library/Implementation/HTTCP.c:1577 WWW/Library/Implementation/HTTelnet.c:108
 #, c-format
 msgid "Invalid hostname %s"
 msgstr "A %s helytelen gépnév"
 
-#: WWW/Library/Implementation/HTTCP.c:1568
+#: WWW/Library/Implementation/HTTCP.c:1591
 #, c-format
 msgid "Making %s connection to %s"
 msgstr "%s csatlakozás létrehozása ide: %s"
 
-#: WWW/Library/Implementation/HTTCP.c:1579
+#: WWW/Library/Implementation/HTTCP.c:1602
 msgid "socket failed."
 msgstr "az illesztõpont sérült."
 
-#: WWW/Library/Implementation/HTTCP.c:1592
+#: WWW/Library/Implementation/HTTCP.c:1615
 #, c-format
 msgid "socket failed: family %d addr %s port %s."
 msgstr "az illesztõpont sérült: család: %d cím: %s port: %s."
 
-#: WWW/Library/Implementation/HTTCP.c:1616
+#: WWW/Library/Implementation/HTTCP.c:1639
 msgid "Could not make connection non-blocking."
 msgstr "Nem sikerült a nem blokkolt csatlakozás."
 
-#: WWW/Library/Implementation/HTTCP.c:1684
+#: WWW/Library/Implementation/HTTCP.c:1707
 msgid "Connection failed (too many retries)."
 msgstr "A kapcsolat sikertelen (túl sok próbálkozás)."
 
-#: WWW/Library/Implementation/HTTCP.c:1883
+#: WWW/Library/Implementation/HTTCP.c:1906
 msgid "Could not restore socket to blocking."
 msgstr "Nem lehet visszaállítani az illesztõpontot blokkoltra."
 
-#: WWW/Library/Implementation/HTTCP.c:1949
+#: WWW/Library/Implementation/HTTCP.c:1972
 msgid "Socket read failed for 180,000 tries."
 msgstr "Az illesztõpont 180.000 olvasás után is sikertelen."
 
@@ -3361,98 +3361,98 @@ msgstr "A memória elfogyott, megjelenítés megszakítva!"
 msgid "Memory exhausted, will interrupt transfer!"
 msgstr "A memória elfogyott, az átvitel meg lesz szakítva!"
 
-#: src/GridText.c:3601
+#: src/GridText.c:3590
 msgid " *** MEMORY EXHAUSTED ***"
 msgstr " *** A MEMÓRIA ELFOGYOTT ***"
 
-#: src/GridText.c:6020 src/GridText.c:6027 src/LYList.c:248
+#: src/GridText.c:6009 src/GridText.c:6016 src/LYList.c:239
 msgid "unknown field or link"
 msgstr "ismeretlen mezõ vagy hivatkozás"
 
-#: src/GridText.c:6036
+#: src/GridText.c:6025
 msgid "text entry field"
 msgstr "szöveg bejegyzés mezõ"
 
-#: src/GridText.c:6039
+#: src/GridText.c:6028
 msgid "password entry field"
 msgstr "jelszó bejegyzés mezõ"
 
-#: src/GridText.c:6042
+#: src/GridText.c:6031
 msgid "checkbox"
 msgstr "jelölõnégyzet"
 
-#: src/GridText.c:6045
+#: src/GridText.c:6034
 msgid "radio button"
 msgstr "választógomb"
 
-#: src/GridText.c:6048
+#: src/GridText.c:6037
 msgid "submit button"
 msgstr "küldõ gomb"
 
-#: src/GridText.c:6051
+#: src/GridText.c:6040
 msgid "reset button"
 msgstr "törlés gomb"
 
-#: src/GridText.c:6054
+#: src/GridText.c:6043
 msgid "popup menu"
 msgstr "felbukkanó menü"
 
-#: src/GridText.c:6057
+#: src/GridText.c:6046
 msgid "hidden form field"
 msgstr "rejtett ûrlap mezõ"
 
-#: src/GridText.c:6060
+#: src/GridText.c:6049
 msgid "text entry area"
 msgstr "szöveg bejegyzés terület"
 
-#: src/GridText.c:6063
+#: src/GridText.c:6052
 msgid "range entry field"
 msgstr "tartomány bejegyzés mezõ"
 
-#: src/GridText.c:6066
+#: src/GridText.c:6055
 msgid "file entry field"
 msgstr "fájl bejegyzés mezõ"
 
-#: src/GridText.c:6069
+#: src/GridText.c:6058
 msgid "text-submit field"
 msgstr "szöveg-küldõ mezõ"
 
-#: src/GridText.c:6072
+#: src/GridText.c:6061
 msgid "image-submit button"
 msgstr "kép-küldõ mezõ"
 
-#: src/GridText.c:6075
+#: src/GridText.c:6064
 msgid "keygen field"
 msgstr "kulcsgeneráló mezõ"
 
-#: src/GridText.c:6078
+#: src/GridText.c:6067
 msgid "unknown form field"
 msgstr "ismeretlen ûrlap mezõ"
 
-#: src/GridText.c:10244
+#: src/GridText.c:10238
 msgid "Can't open file for uploading"
 msgstr "Nem lehet megnyitni a fájlt a feltöltéshez"
 
-#: src/GridText.c:11397
+#: src/GridText.c:11391
 #, c-format
 msgid "Submitting %s"
 msgstr "%s továbbítása"
 
 #. ugliness has happened; inform user and do the best we can
-#: src/GridText.c:12546
+#: src/GridText.c:12540
 msgid "Hang Detect: TextAnchor struct corrupted - suggest aborting!"
 msgstr "Akadásjelzés: A TextAnchor szerkezete sérült - javaslom a megszakítást!"
 
 #. don't show previous state
-#: src/GridText.c:12751
+#: src/GridText.c:12745
 msgid "Wrap lines to fit displayed area?"
 msgstr "Tördeljem a sorokat, hogy kiférjenek?"
 
-#: src/GridText.c:12803
+#: src/GridText.c:12797
 msgid "Very long lines have been wrapped!"
 msgstr "A hosszú sorokat új sorba tördeltem!"
 
-#: src/GridText.c:13245
+#: src/GridText.c:13239
 msgid "Very long lines have been truncated!"
 msgstr "A hosszú sorok végét levágtam!"
 
@@ -3542,31 +3542,31 @@ msgstr "nem"
 msgid "Y/N/A/V"
 msgstr "I/N/M/S"
 
-#: src/HTML.c:5915
+#: src/HTML.c:5918
 msgid "Description:"
 msgstr "Leírás:"
 
-#: src/HTML.c:5920
+#: src/HTML.c:5923
 msgid "(none)"
 msgstr "(nincs)"
 
-#: src/HTML.c:5924
+#: src/HTML.c:5927
 msgid "Filepath:"
 msgstr "Útvonal:"
 
-#: src/HTML.c:5930
+#: src/HTML.c:5933
 msgid "(unknown)"
 msgstr "(ismeretlen)"
 
-#: src/HTML.c:7375
+#: src/HTML.c:7378
 msgid "Document has only hidden links.  Use the 'l'ist command."
 msgstr "(A dokumentum csak rejtett hivatkozásokat tartalmaz. Használja az 'L' parancsot."
 
-#: src/HTML.c:7874
+#: src/HTML.c:7877
 msgid "Source cache error - disk full?"
 msgstr "Forrás gyorstárazási hiba - a lemez megtelt?"
 
-#: src/HTML.c:7887
+#: src/HTML.c:7890
 msgid "Source cache error - not enough memory!"
 msgstr "Forrás gyorstárazási hiba - nincs elég memória!"
 
@@ -3625,27 +3625,32 @@ msgstr ""
 msgid "File may be recoverable from %s during this session"
 msgstr "A fájl még helyreállítható innen: %s, ebben a folyamatban"
 
+#: src/LYCgi.c:159
+#, c-format
+msgid "Do you want to execute \"%s\"?"
+msgstr ""
+
 #.
 #. * Neither the path as given nor any components examined by backing up
 #. * were stat()able.  - kw
 #.
-#: src/LYCgi.c:240
+#: src/LYCgi.c:274
 msgid "Unable to access cgi script"
 msgstr "Nem lehet elérni a cgi alkalmazói programot"
 
-#: src/LYCgi.c:667 src/LYCgi.c:670
+#: src/LYCgi.c:699 src/LYCgi.c:702
 msgid "Good Advice"
 msgstr "Jó tanács"
 
-#: src/LYCgi.c:674
+#: src/LYCgi.c:706
 msgid "An excellent http server for VMS is available via"
 msgstr "Egy kitûnõ http szerver VMS-hez rendelkezésre áll"
 
-#: src/LYCgi.c:681
+#: src/LYCgi.c:713
 msgid "this link"
 msgstr "ezen a linken keresztül"
 
-#: src/LYCgi.c:685
+#: src/LYCgi.c:717
 msgid "It provides state of the art CGI script support.\n"
 msgstr "Nagyon jól támogatja a CGI szkripteket.\n"
 
@@ -3669,31 +3674,31 @@ msgstr "Belsõ"
 msgid "cookie_domain_flag_set error, aborting program"
 msgstr "cookie_domain_flag_set hiba, program megszakítva"
 
-#: src/LYCurses.c:1034
+#: src/LYCurses.c:1028
 msgid "Terminal initialisation failed - unknown terminal type?"
 msgstr "Terminál megnyitás sikertelen - ismeretlen terminál típus?"
 
-#: src/LYCurses.c:1459
+#: src/LYCurses.c:1453
 msgid "Terminal ="
 msgstr "Terminál ="
 
-#: src/LYCurses.c:1463
+#: src/LYCurses.c:1457
 msgid "You must use a vt100, 200, etc. terminal with this program."
 msgstr "Önnek vt100, 200 stb.-t kell használnia ehhez a programhoz."
 
-#: src/LYCurses.c:1512
+#: src/LYCurses.c:1506
 msgid "Your Terminal type is unknown!"
 msgstr "A terminál típus ismeretlen!"
 
-#: src/LYCurses.c:1513
+#: src/LYCurses.c:1507
 msgid "Enter a terminal type:"
 msgstr "Kérem a terminál típusát:"
 
-#: src/LYCurses.c:1527
+#: src/LYCurses.c:1521
 msgid "TERMINAL TYPE IS SET TO"
 msgstr "A TERMINÁL TÍPUS BEÁLLÍTVA:"
 
-#: src/LYCurses.c:2031
+#: src/LYCurses.c:2025
 #, c-format
 msgid ""
 "\n"
@@ -3702,7 +3707,7 @@ msgstr ""
 "\n"
 "Végzetes hiba lépett fel a %s %s verzióban\n"
 
-#: src/LYCurses.c:2034
+#: src/LYCurses.c:2028
 #, c-format
 msgid ""
 "\n"
@@ -3853,27 +3858,27 @@ msgstr "Össz 'malloc'"
 msgid "Total frees"
 msgstr "Össz 'free'"
 
-#: src/LYList.c:83
+#: src/LYList.c:84
 msgid "References in "
 msgstr "Hivatkozások itt: "
 
-#: src/LYList.c:86
+#: src/LYList.c:87
 msgid "this document:"
 msgstr "ez a dokumentum:"
 
-#: src/LYList.c:92
+#: src/LYList.c:93
 msgid "Visible links:"
 msgstr "Látható hivatkozás:"
 
-#: src/LYList.c:193 src/LYList.c:311
+#: src/LYList.c:194 src/LYList.c:293
 msgid "Hidden links:"
 msgstr "Rejtett hivatkozás:"
 
-#: src/LYList.c:258
+#: src/LYList.c:326
 msgid "References"
 msgstr "Hivatkozások"
 
-#: src/LYList.c:262
+#: src/LYList.c:330
 msgid "Visible links"
 msgstr "Látható hivatkozás"
 
@@ -4188,7 +4193,7 @@ msgstr "Nem találtam Winsock-ot, sajnálom."
 msgid "You MUST define a valid TMP or TEMP area!"
 msgstr "Önnek meg kell adnia egy érvényes TMP vagy TEMP területet"
 
-#: src/LYMain.c:1248 src/LYMainLoop.c:5052
+#: src/LYMain.c:1248 src/LYMainLoop.c:5053
 msgid "No such directory"
 msgstr "Nincs ilyen könyvtár"
 
@@ -4291,7 +4296,7 @@ msgstr "%s: Érvénytelen opció: %s \n"
 msgid "Internal error: Invalid mouse link %d!"
 msgstr "Belsõ hiba: Hibás egér hivatkozás %d!"
 
-#: src/LYMainLoop.c:692 src/LYMainLoop.c:5074
+#: src/LYMainLoop.c:692 src/LYMainLoop.c:5075
 msgid "A URL specified by the user"
 msgstr "Felhasználó által megadott URL"
 
@@ -4310,7 +4315,7 @@ msgstr "Súgó képernyõ"
 msgid "System Index"
 msgstr "Rendszer index"
 
-#: src/LYMainLoop.c:3531 src/LYMainLoop.c:5298
+#: src/LYMainLoop.c:3531 src/LYMainLoop.c:5299
 msgid "Entry into main screen"
 msgstr "Belépés a fõképernyõbe"
 
@@ -4322,72 +4327,72 @@ msgstr "Nincs további dokumentum"
 msgid "charset for this document specified explicitly, sorry..."
 msgstr "a dokumentum karakterkészlete már be van állítva..."
 
-#: src/LYMainLoop.c:5028
+#: src/LYMainLoop.c:5029
 msgid "cd to:"
 msgstr "könyvtárváltás:"
 
-#: src/LYMainLoop.c:5055
+#: src/LYMainLoop.c:5056
 msgid "A component of path is not a directory"
 msgstr "Az útvonal egy összetevõje nem könyvtár"
 
-#: src/LYMainLoop.c:5058
+#: src/LYMainLoop.c:5059
 msgid "failed to change directory"
 msgstr "nem sikerült a  könyvtárváltás"
 
-#: src/LYMainLoop.c:6219
+#: src/LYMainLoop.c:6220
 msgid "Reparsing document under current settings..."
 msgstr "A dokumentumot átalakítom az aktuális beállításoknak megfelelõen..."
 
-#: src/LYMainLoop.c:6509
+#: src/LYMainLoop.c:6511
 #, c-format
 msgid "Fatal error - could not open output file %s\n"
 msgstr "Végzetes hiba: nem lehet megnyitni a(z) '%s' kimeneti fájlt\n"
 
-#: src/LYMainLoop.c:6853
+#: src/LYMainLoop.c:6856
 msgid "TABLE center enable."
 msgstr "'Táblázat középre' engedélyezve."
 
-#: src/LYMainLoop.c:6856
+#: src/LYMainLoop.c:6859
 msgid "TABLE center disable."
 msgstr "'Táblázat középre' tiltva."
 
-#: src/LYMainLoop.c:6933
+#: src/LYMainLoop.c:6936
 msgid "Current URL is empty."
 msgstr "Üres a pillanatnyi URL."
 
-#: src/LYMainLoop.c:6935 src/LYUtils.c:1775
+#: src/LYMainLoop.c:6938 src/LYUtils.c:1790
 msgid "Copy to clipboard failed."
 msgstr "Sikertelen a vágólapra másolás."
 
-#: src/LYMainLoop.c:6937
+#: src/LYMainLoop.c:6940
 msgid "Document URL put to clipboard."
 msgstr "A dokumentum URL-jét a vágólapra tesszük."
 
-#: src/LYMainLoop.c:6939
+#: src/LYMainLoop.c:6942
 msgid "Link URL put to clipboard."
 msgstr "A link URL-jét a vágólapra tesszük."
 
-#: src/LYMainLoop.c:6966
+#: src/LYMainLoop.c:6969
 msgid "No URL in the clipboard."
 msgstr "Nincsen URL a vágólapon."
 
-#: src/LYMainLoop.c:7630 src/LYMainLoop.c:7800
+#: src/LYMainLoop.c:7633 src/LYMainLoop.c:7803
 msgid "-index-"
 msgstr "-index-"
 
-#: src/LYMainLoop.c:7740
+#: src/LYMainLoop.c:7743
 msgid "lynx: Can't access startfile"
 msgstr "lynx: Nincs kezdõfájl!"
 
-#: src/LYMainLoop.c:7752
+#: src/LYMainLoop.c:7755
 msgid "lynx: Start file could not be found or is not text/html or text/plain"
 msgstr "lynx: A kezdõfájlt nem találom (sem HTML szöveget, sem sima szöveget)"
 
-#: src/LYMainLoop.c:7753
+#: src/LYMainLoop.c:7756
 msgid "      Exiting..."
 msgstr "      Kilépés..."
 
-#: src/LYMainLoop.c:7794
+#: src/LYMainLoop.c:7797
 msgid "-more-"
 msgstr "-tovább-"
 
@@ -5383,33 +5388,33 @@ msgstr "Feltöltés:"
 msgid "Upload options:"
 msgstr "Feltöltési beállítások:"
 
-#: src/LYUtils.c:1777
+#: src/LYUtils.c:1792
 msgid "Download document URL put to clipboard."
 msgstr "A letöltendõ dokumentum URL-jét a vágólapra tesszük."
 
-#: src/LYUtils.c:2554
+#: src/LYUtils.c:2569
 msgid "Unexpected access protocol for this URL scheme."
 msgstr "Nem támogatott elérési protokoll ezen az URL sémán."
 
-#: src/LYUtils.c:3362
+#: src/LYUtils.c:3377
 msgid "Too many tempfiles"
 msgstr "Túl sok átmeneti fájl"
 
-#: src/LYUtils.c:3666
+#: src/LYUtils.c:3681
 msgid "unknown restriction"
 msgstr "ismeretlen szigorítás"
 
-#: src/LYUtils.c:3696
+#: src/LYUtils.c:3711
 #, c-format
 msgid "No restrictions set.\n"
 msgstr "Nincs szigorítás beállítva.\n"
 
-#: src/LYUtils.c:3699
+#: src/LYUtils.c:3714
 #, c-format
 msgid "Restrictions set:\n"
 msgstr "Szigorítási beállítás:\n"
 
-#: src/LYUtils.c:5077
+#: src/LYUtils.c:5092
 msgid "Cannot find HOME directory"
 msgstr "Nem találom a HOME könyvtárat"
 

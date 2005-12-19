@@ -1642,33 +1642,25 @@ static void display_title(HText *text)
      */
     limit = LYscreenWidth();
     if (limit < 10) {
-	percent[0] = '\0';	/* Null string */
+	percent[0] = '\0';
     } else if ((display_lines) <= 0 && LYlines > 0 &&
 	       text->top_of_screen <= 99999 && text->Lines <= 999999) {
 	sprintf(percent, " (l%d of %d)",
 		text->top_of_screen, text->Lines);
-    } else if ((text->Lines + 1) > (display_lines) &&
-	       (display_lines) > 0) {
-	/*
-	 * In a small attempt to correct the number of pages counted....
-	 * GAB 07-14-94
-	 *
-	 * In a bigger attempt (hope it holds up 8-)....
-	 * FM 02-08-95
-	 */
-	int total_pages =
-	(((text->Lines + 1) + (display_lines - 1)) / (display_lines));
-	int start_of_last_page =
-	((text->Lines + 1) < display_lines) ? 0 :
-	((text->Lines + 1) - display_lines);
+    } else if ((text->Lines >= display_lines) && (display_lines > 0)) {
+	int total_pages = ((text->Lines + display_lines - 1)
+			   / display_lines);
+	int start_of_last_page = ((text->Lines <= display_lines)
+				  ? 0
+				  : (text->Lines - display_lines));
 
 	sprintf(percent, " (p%d of %d)",
-		((text->top_of_screen >= start_of_last_page) ?
-		 total_pages :
-		 ((text->top_of_screen + display_lines) / (display_lines))),
+		((text->top_of_screen >= start_of_last_page)
+		 ? total_pages
+		 : ((text->top_of_screen + display_lines) / (display_lines))),
 		total_pages);
     } else {
-	percent[0] = '\0';	/* Null string */
+	percent[0] = '\0';
     }
 
     /*
@@ -1678,7 +1670,7 @@ static void display_title(HText *text)
      */
     if (HTCJK != NOCJK) {
 	if (*title &&
-	    (tmp = typecallocn(unsigned char, (strlen(title) + 256)))) {
+	    (tmp = typecallocn(unsigned char, (strlen(title) * 2 + 256)))) {
 	    if (kanji_code == EUC) {
 		TO_EUC((unsigned char *) title, tmp);
 	    } else if (kanji_code == SJIS) {
@@ -1796,12 +1788,12 @@ static void display_scrollbar(HText *text)
 
     LYsb_begin = LYsb_end = -1;
     if (!LYShowScrollbar || !text || h <= 2
-	|| (text->Lines + 1) <= display_lines)
+	|| text->Lines <= display_lines)
 	return;
 
-    if (text->top_of_screen >= text->Lines + 1 - display_lines) {
+    if (text->top_of_screen >= text->Lines - display_lines) {
 	/* Only part of the screen shows actual text */
-	shown = text->Lines + 1 - text->top_of_screen;
+	shown = text->Lines - text->top_of_screen;
 
 	if (shown <= 0)
 	    shown = 1;
@@ -1809,7 +1801,7 @@ static void display_scrollbar(HText *text)
 	shown = display_lines;
     /* Each cell of scrollbar represents text->Lines/h lines of text. */
     /* Always smaller than h */
-    sh = (shown * h + text->Lines / 2) / (text->Lines + 1);
+    sh = (shown * h + text->Lines / 2) / text->Lines;
     if (sh <= 0)
 	sh = 1;
     if (sh >= h - 1)
@@ -1996,9 +1988,6 @@ static void display_page(HText *text,
      */
 	LYCursesON) {
 #ifdef EXP_CHARTRANS_AUTOSWITCH
-	/*
-	 * Currently implemented only for LINUX
-	 */
 	UCChangeTerminalCodepage(current_char_set,
 				 &LYCharSet_UC[current_char_set]);
 #endif /* EXP_CHARTRANS_AUTOSWITCH */
@@ -7207,12 +7196,15 @@ BOOL HText_canScrollUp(HText *text)
     return (BOOL) (text->top_of_screen != 0);
 }
 
+/*
+ * Check if there is more info below this page.
+ */
 BOOL HText_canScrollDown(void)
 {
     HText *text = HTMainText;
 
     return (BOOL) ((text != 0)
-		   && ((text->top_of_screen + display_lines) < text->Lines + 1));
+		   && ((text->top_of_screen + display_lines) < text->Lines));
 }
 
 /*		Scroll actions
@@ -9495,7 +9487,7 @@ char *HText_setLastOptionValue(HText *text, char *value,
 	cp[j] = '\0';
 	if (HTCJK != NOCJK) {
 	    if (cp &&
-		(tmp = typecallocn(unsigned char, strlen(cp) + 1)) != 0) {
+		(tmp = typecallocn(unsigned char, strlen(cp) * 2 + 1)) != 0) {
 		if (tmp == NULL)
 		    outofmem(__FILE__, "HText_setLastOptionValue");
 		if (kanji_code == EUC) {
@@ -9558,7 +9550,9 @@ char *HText_setLastOptionValue(HText *text, char *value,
 
 	if (checked) {
 	    int curlen = strlen(new_ptr->name);
-	    int newlen = strlen(HTCurSelectedOptionValue);
+	    int newlen = (HTCurSelectedOptionValue
+			  ? strlen(HTCurSelectedOptionValue)
+			  : 0);
 	    FormInfo *last_input = text->last_anchor->input_field;
 
 	    /*
@@ -9713,7 +9707,7 @@ int HText_beginInput(HText *text, BOOL underline,
     if (I->value)
 	StrAllocCopy(IValue, I->value);
     if (IValue && HTCJK != NOCJK) {
-	if ((tmp = typecallocn(unsigned char, strlen(IValue) + 1)) != 0) {
+	if ((tmp = typecallocn(unsigned char, strlen(IValue) * 2 + 1)) != 0) {
 	    if (kanji_code == EUC) {
 		TO_EUC((unsigned char *) IValue, tmp);
 		I->value_cs = current_char_set;
@@ -12535,7 +12529,7 @@ static void update_subsequent_anchors(int newlines,
     HTMainText->Lines += newlines;
     HTMainText->last_anchor_number += newlines;
 
-    more = HText_canScrollDown();
+    more_text = HText_canScrollDown();
 
     CTRACE((tfp, "GridText: TextAnchor and HTLine struct's adjusted\n"));
 

@@ -20,6 +20,7 @@ BOOL force_old_UCLYhndl_on_reload = FALSE;
 int forced_UCLYhdnl;
 int LYNumCharsets = 0;		/* Will be initialized later by UC_Register. */
 int current_char_set = -1;	/* will be intitialized later in LYMain.c */
+int linedrawing_char_set = -1;
 const char **p_entity_values = NULL;	/* Pointer, for HTML_put_entity() */
 
 			      /* obsolete and probably not used(???)        */

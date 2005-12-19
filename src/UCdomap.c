@@ -50,6 +50,7 @@
 #include <cp775_uni.h>		/* DosBaltRim (cp775)   */
 #include <cp850_uni.h>		/* DosLatin1 (cp850)    */
 #include <cp852_uni.h>		/* DosLatin2 (cp852)    */
+#include <cp857_uni.h>		/* DosTurkish (cp857)   */
 #include <cp862_uni.h>		/* DosHebrew (cp862)    */
 #include <cp864_uni.h>		/* DosArabic (cp864)    */
 #include <cp866_uni.h>		/* DosCyrillic (cp866)  */
@@ -67,6 +68,8 @@
 #include <iso08_uni.h>		/* ISO 8859-8 Hebrew    */
 #include <iso09_uni.h>		/* ISO 8859-9 (Latin 5) */
 #include <iso10_uni.h>		/* ISO 8859-10          */
+#include <iso13_uni.h>		/* ISO 8859-13 (Latin 7) */
+#include <iso14_uni.h>		/* ISO 8859-14 (Latin 8) */
 #include <iso15_uni.h>		/* ISO 8859-15 (Latin 9) */
 #include <koi8r_uni.h>		/* KOI8-R Cyrillic      */
 #include <mac_uni.h>		/* Macintosh (8 bit)    */
@@ -1574,6 +1577,9 @@ int UCGetLYhndl_byMIME(const char *value)
 	return UCGetLYhndl_byMIME("koi8-r");
     }
 #endif
+    if (!strcasecomp(value, "ANSI_X3.4-1968")) {
+	return US_ASCII;
+    }
     /* no more synonyms if come here... */
 
     CTRACE((tfp, "UCGetLYhndl_byMIME: unrecognized MIME name \"%s\"\n", value));
@@ -2040,6 +2046,7 @@ static void UCcleanup_mem(void)
 }
 #endif /* LY_FIND_LEAKS */
 
+#ifdef EXP_CHARTRANS_AUTOSWITCH
 #ifdef CAN_AUTODETECT_DISPLAY_CHARSET
 #  ifdef __EMX__
 static int CpOrdinal(const unsigned long cp, const int other)
@@ -2080,6 +2087,7 @@ static int CpOrdinal(const unsigned long cp, const int other)
 }
 #  endif			/* __EMX__ */
 #endif /* CAN_AUTODETECT_DISPLAY_CHARSET */
+#endif /* EXP_CHARTRANS_AUTOSWITCH */
 
 void UCInit(void)
 {
@@ -2123,8 +2131,10 @@ void UCInit(void)
     UC_CHARSET_SETUP_iso_8859_2;	/* ISO Latin 2          */
     UC_CHARSET_SETUP_cp852;	/* DosLatin2 (cp852)    */
     UC_CHARSET_SETUP_windows_1250;	/* WinLatin2 (cp1250)   */
+
     UC_CHARSET_SETUP_iso_8859_3;	/* ISO Latin 3          */
     UC_CHARSET_SETUP_iso_8859_4;	/* ISO Latin 4          */
+    UC_CHARSET_SETUP_iso_8859_13;	/* ISO 8859-13 Baltic Rim */
     UC_CHARSET_SETUP_cp775;	/* DosBaltRim (cp775)   */
     UC_CHARSET_SETUP_windows_1257;	/* WinBaltRim (cp1257)  */
     UC_CHARSET_SETUP_iso_8859_5;	/* ISO 8859-5 Cyrillic  */
@@ -2134,6 +2144,7 @@ void UCInit(void)
     UC_CHARSET_SETUP_iso_8859_6;	/* ISO 8869-6 Arabic    */
     UC_CHARSET_SETUP_cp864;	/* DosArabic (cp864)    */
     UC_CHARSET_SETUP_windows_1256;	/* WinArabic (cp1256)   */
+    UC_CHARSET_SETUP_iso_8859_14;	/* ISO 8859-14 Celtic   */
     UC_CHARSET_SETUP_iso_8859_7;	/* ISO 8859-7 Greek     */
     UC_CHARSET_SETUP_cp737;	/* DosGreek (cp737)     */
     UC_CHARSET_SETUP_cp869;	/* DosGreek2 (cp869)    */
@@ -2142,7 +2153,8 @@ void UCInit(void)
     UC_CHARSET_SETUP_cp862;	/* DosHebrew (cp862)    */
     UC_CHARSET_SETUP_windows_1255;	/* WinHebrew (cp1255)   */
     UC_CHARSET_SETUP_iso_8859_9;	/* ISO 8859-9 (Latin 5) */
-    UC_CHARSET_SETUP_iso_8859_10;	/* ISO 8859-10          */
+    UC_CHARSET_SETUP_cp857;	/* DosTurkish (cp857) */
+    UC_CHARSET_SETUP_iso_8859_10;	/* ISO 8859-10 North European */
 
     UC_CHARSET_SETUP_utf_8;		  /*** UNICODE UTF-8	  */
     UC_CHARSET_SETUP_mnemonic_ascii_0;	/* RFC 1345 w/o Intro   */
@@ -2151,6 +2163,7 @@ void UCInit(void)
     UC_CHARSET_SETUP_koi8_u;	/* Ukrainian Cyrillic (koi8-u) */
     UC_CHARSET_SETUP_ptcp154;	/* Cyrillic-Asian (PT154) */
 
+#ifdef EXP_CHARTRANS_AUTOSWITCH
 #ifdef CAN_AUTODETECT_DISPLAY_CHARSET
 #  ifdef __EMX__
     {
@@ -2173,6 +2186,7 @@ void UCInit(void)
 	}
     }
 #  endif
+#endif
 #endif
 
 /*
@@ -2364,21 +2378,28 @@ static char *nl_langinfo(nl_item item)
  */
 void LYFindLocaleCharset(void)
 {
+    BOOL found = FALSE;
+    char *name;
+
     CTRACE((tfp, "LYFindLocaleCharset(%d)\n", LYLocaleCharset));
-    if (LYLocaleCharset) {
-	char *name = nl_langinfo(CODESET);
+    name = nl_langinfo(CODESET);
 
-	if (name != 0) {
-	    int value = UCGetLYhndl_byMIME(name);
+    if (name != 0) {
+	int value = UCGetLYhndl_byMIME(name);
 
-	    if (value >= 0) {
-		current_char_set = value;
-	    } else {
-		CTRACE((tfp, "Cannot find a handle for MIME name \"%s\"\n", name));
-	    }
+	if (value >= 0) {
+	    found = TRUE;
+	    linedrawing_char_set = value;
+	    CTRACE((tfp, "Found name \"%s\" -> %d\n", name, value));
 	} else {
-	    CTRACE((tfp, "Cannot find a MIME name for locale\n"));
+	    CTRACE((tfp, "Cannot find a handle for MIME name \"%s\"\n", name));
 	}
+    } else {
+	CTRACE((tfp, "Cannot find a MIME name for locale\n"));
+    }
+
+    if (found && LYLocaleCharset) {
+	current_char_set = linedrawing_char_set;
     }
 }
 #endif /* EXP_LOCALE_CHARSET */

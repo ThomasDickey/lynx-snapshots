@@ -5,7 +5,7 @@ dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
 dnl
 dnl ask PRCS to plug-in the project-version for the configure-script.
 dnl $Format: "AC_REVISION($ProjectVersion$)"$
-AC_REVISION(2.8.6dev.15)
+AC_REVISION(2.8.6dev.16)
 
 # Save the original $CFLAGS so we can distinguish whether the user set those
 # in the environment, or whether autoconf added -O and -g options:
@@ -37,7 +37,7 @@ AC_ARG_WITH(system-type,
 PACKAGE=lynx
 dnl ask PRCS to plug-in the project-version for the packages.
 # $Format: "VERSION=$ProjectVersion$"$
-VERSION=2.8.6dev.15
+VERSION=2.8.6dev.16
 AC_SUBST(PACKAGE)
 AC_SUBST(VERSION)
 AC_SUBST(DESTDIR)
@@ -572,6 +572,7 @@ CF_FIONBIO
 CF_REMOVE_BROKEN
 CF_FUNC_LSTAT
 AC_CHECK_FUNCS( \
+	ctermid \
 	cuserid \
 	ftime \
 	getcwd \
@@ -758,14 +759,6 @@ if test "$enableval" = "yes"; then
 fi
 dnl AC_REPLACE_FUNCS(getaddrinfo getnameinfo)
 
-AC_MSG_CHECKING(if experimental element-justification logic should be used)
-CF_ARG_ENABLE(justify-elts,
-[  --enable-justify-elts   use experimental element-justification logic],
-	[use_exp_justify_elts=$enableval],
-	[use_exp_justify_elts=no])
-AC_MSG_RESULT($use_exp_justify_elts)
-test $use_exp_justify_elts != no && AC_DEFINE(EXP_JUSTIFY_ELTS)
-
 AC_MSG_CHECKING(if experimental keyboard-layout logic should be used)
 CF_ARG_ENABLE(kbd-layout,
 [  --enable-kbd-layout     use experimental keyboard-layout support],
@@ -836,6 +829,14 @@ CF_ARG_DISABLE(file-upload,
 AC_MSG_RESULT($use_file_upload)
 test $use_file_upload != no && AC_DEFINE(USE_FILE_UPLOAD)
 
+AC_MSG_CHECKING(if element-justification logic should be used)
+CF_ARG_DISABLE(justify-elts,
+[  --enable-justify-elts   use element-justification logic],
+	[use_justify_elts=$enableval],
+	[use_justify_elts=yes])
+AC_MSG_RESULT($use_justify_elts)
+test $use_justify_elts != no && AC_DEFINE(EXP_JUSTIFY_ELTS)
+
 AC_MSG_CHECKING(if partial-display should be used)
 CF_ARG_DISABLE(partial,
 [  --disable-partial       use partial-display logic],
@@ -893,7 +894,22 @@ CF_ARG_ENABLE(font-switch,
 	[use_setfont=yes],
 	[use_setfont=no])
 AC_MSG_RESULT($use_setfont)
-test $use_setfont = yes && AC_DEFINE(EXP_CHARTRANS_AUTOSWITCH)
+if test $use_setfont = yes ; then
+	case $host_os in
+	linux*)
+		CF_PATH_PROG(SETFONT, consolechars, setfont)
+		;;
+	*)
+		SETFONT=unknown
+		CF_VERBOSE(Assume $host_os has font-switching)
+		;;
+	esac
+	if test -n "$SETFONT" ; then
+		AC_DEFINE(EXP_CHARTRANS_AUTOSWITCH)
+	else
+		AC_MSG_WARN(Cannot find a font-setting program)
+	fi
+fi
 
 AC_MSG_CHECKING(if you want cgi-link support)
 CF_ARG_ENABLE(cgi-links,
@@ -1187,6 +1203,7 @@ if test $cf_cv_screen != slang ; then
 		touchline \
 		touchwin \
 		use_default_colors \
+		use_legacy_coding \
 		wattr_get \
 		wborder \
 		wredrawln \

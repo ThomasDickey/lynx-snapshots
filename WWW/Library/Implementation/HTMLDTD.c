@@ -1736,11 +1736,11 @@ void HTStartAnchor5(HTStructured * obj, const char *name,
 	present[HTML_A_NAME] = YES;
 	value[HTML_A_NAME] = name;
     }
-    if (href) {
+    if (href && *href) {
 	present[HTML_A_HREF] = YES;
 	value[HTML_A_HREF] = href;
     }
-    if (linktype) {
+    if (linktype && *linktype) {
 	present[HTML_A_TYPE] = YES;
 	value[HTML_A_TYPE] = linktype;
     }

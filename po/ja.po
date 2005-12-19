@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: lynx 2.8.5pre9\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2005-10-16 19:03-0400\n"
+"POT-Creation-Date: 2005-12-18 16:51-0500\n"
 "PO-Revision-Date: 2003-04-19 20:40+0900\n"
 "Last-Translator: Masayuki Hatta <mhatta@po.airs.net>\n"
 "Language-Team: Japanese <translation-team-ja@lists.sourceforge.net>\n"
@@ -2790,7 +2790,7 @@ msgstr "POST ¥³¥ó¥Æ¥ó¥Ä¤ò´Þ¤à¥É¥­¥å¥á¥ó¥È¤Ï¥­¥ã¥Ã¥·¥å¤ÎÃæ¤Ë¤¢¤ê¤Þ¤»¤ó¤Ç¤·¤¿¡£ºÆÁ
 msgid "Loading failed, use a previous copy."
 msgstr ""
 
-#: WWW/Library/Implementation/HTAccess.c:1044 src/GridText.c:8515
+#: WWW/Library/Implementation/HTAccess.c:1044 src/GridText.c:8507
 msgid "Loading incomplete."
 msgstr "ÆÉ¤ß¹þ¤ß¤¬ÃæÃÇ¤µ¤ì¤Þ¤·¤¿¡£"
 
@@ -2813,7 +2813,7 @@ msgstr "**** HTAccess: ÊÖ¤Ã¤Æ¤­¤¿¥¹¥Æ¡¼¥¿¥¹¤Ï: %d\n"
 #. * hack: if we fail in HTAccess.c
 #. * avoid duplicating URL, oh.
 #.
-#: WWW/Library/Implementation/HTAccess.c:1084 src/LYMainLoop.c:7745
+#: WWW/Library/Implementation/HTAccess.c:1084 src/LYMainLoop.c:7748
 msgid "Can't Access"
 msgstr "¥¢¥¯¥»¥¹¤Ç¤­¤Þ¤»¤ó¡£"
 
@@ -3010,15 +3010,15 @@ msgstr "¥Ë¥å¡¼¥¹µ­»ö¤òÆÉ¤ß¹þ¤ßÃæ¡£"
 msgid "Sorry, could not load requested news."
 msgstr "¤¦¤¦¤à¡¢Í×µá¤µ¤ì¤¿¥Ë¥å¡¼¥¹¤òÆÉ¤ß¹þ¤á¤Þ¤»¤ó¤Ç¤·¤¿¡£"
 
-#: WWW/Library/Implementation/HTTCP.c:1232
+#: WWW/Library/Implementation/HTTCP.c:1255
 msgid "Address has invalid port"
 msgstr "¥¢¥É¥ì¥¹¤ËÉÔÀµ¤Ê¥Ý¡¼¥È¤¬»ØÄê¤µ¤ì¤Æ¤¤¤Þ¤¹"
 
-#: WWW/Library/Implementation/HTTCP.c:1308
+#: WWW/Library/Implementation/HTTCP.c:1331
 msgid "Address length looks invalid"
 msgstr "¥¢¥É¥ì¥¹Ä¹¤¬ÉÔÀµ¤Î¤è¤¦¤Ç¤¹"
 
-#: WWW/Library/Implementation/HTTCP.c:1539 WWW/Library/Implementation/HTTCP.c:1557
+#: WWW/Library/Implementation/HTTCP.c:1562 WWW/Library/Implementation/HTTCP.c:1580
 #, c-format
 msgid "Unable to locate remote host %s."
 msgstr "¥ê¥â¡¼¥È¥Û¥¹¥È %s ¤Î°ÌÃÖ¤òÆÃÄê¤Ç¤­¤Þ¤»¤ó¡£"
@@ -3027,38 +3027,38 @@ msgstr "¥ê¥â¡¼¥È¥Û¥¹¥È %s ¤Î°ÌÃÖ¤òÆÃÄê¤Ç¤­¤Þ¤»¤ó¡£"
 #. * but not HTAlert, because typically there will be other
 #. * alerts from the callers.  - kw
 #.
-#: WWW/Library/Implementation/HTTCP.c:1554 WWW/Library/Implementation/HTTelnet.c:108
+#: WWW/Library/Implementation/HTTCP.c:1577 WWW/Library/Implementation/HTTelnet.c:108
 #, c-format
 msgid "Invalid hostname %s"
 msgstr "%s ¤ÏÉÔÀµ¤Ê¥Û¥¹¥ÈÌ¾¤Ç¤¹"
 
-#: WWW/Library/Implementation/HTTCP.c:1568
+#: WWW/Library/Implementation/HTTCP.c:1591
 #, c-format
 msgid "Making %s connection to %s"
 msgstr "%s ¤Ç %s ¤ËÀÜÂ³Ãæ"
 
-#: WWW/Library/Implementation/HTTCP.c:1579
+#: WWW/Library/Implementation/HTTCP.c:1602
 msgid "socket failed."
 msgstr "¥½¥±¥Ã¥È¤¬¼ºÇÔ¤·¤Þ¤·¤¿¡£"
 
-#: WWW/Library/Implementation/HTTCP.c:1592
+#: WWW/Library/Implementation/HTTCP.c:1615
 #, c-format
 msgid "socket failed: family %d addr %s port %s."
 msgstr "¥½¥±¥Ã¥È¤¬¼ºÇÔ¤·¤Þ¤·¤¿: ¥Õ¥¡¥ß¥ê %d ¥¢¥É¥ì¥¹ %s ¥Ý¡¼¥È %s¡£"
 
-#: WWW/Library/Implementation/HTTCP.c:1616
+#: WWW/Library/Implementation/HTTCP.c:1639
 msgid "Could not make connection non-blocking."
 msgstr "ÀÜÂ³¤òÈó¥Ö¥í¥Ã¥­¥ó¥°¤Ë¤Ç¤­¤Þ¤»¤ó¤Ç¤·¤¿¡£"
 
-#: WWW/Library/Implementation/HTTCP.c:1684
+#: WWW/Library/Implementation/HTTCP.c:1707
 msgid "Connection failed (too many retries)."
 msgstr "ÀÜÂ³¤Ë¼ºÇÔ¤·¤Þ¤·¤¿ (ºÆ»î¹Ô¤¬Â¿¤¹¤®¤Þ¤¹)"
 
-#: WWW/Library/Implementation/HTTCP.c:1883
+#: WWW/Library/Implementation/HTTCP.c:1906
 msgid "Could not restore socket to blocking."
 msgstr "¥Ö¥í¥Ã¥­¥ó¥°¤Î¤¿¤á¤Î¥½¥±¥Ã¥È¤òÉüµì¤Ç¤­¤Þ¤»¤ó¤Ç¤·¤¿¡£"
 
-#: WWW/Library/Implementation/HTTCP.c:1949
+#: WWW/Library/Implementation/HTTCP.c:1972
 msgid "Socket read failed for 180,000 tries."
 msgstr "180,000 ²ó»î¹Ô¤·¤Þ¤·¤¿¤¬¥½¥±¥Ã¥È¤ÎÆÉ¤ß¹þ¤ß¤Ë¼ºÇÔ¤·¤Þ¤·¤¿¡£"
 
@@ -3362,98 +3362,98 @@ msgstr "¥á¥â¥ê¤ò»È¤¤¤­¤ê¤Þ¤·¤¿¡£É½¼¨¤òÃæÃÇ¤·¤Þ¤¹!"
 msgid "Memory exhausted, will interrupt transfer!"
 msgstr "¥á¥â¥ê¤ò»È¤¤¤­¤ê¤Þ¤·¤¿¡£Å¾Á÷¤òÃæÃÇ¤·¤Þ¤¹!"
 
-#: src/GridText.c:3601
+#: src/GridText.c:3590
 msgid " *** MEMORY EXHAUSTED ***"
 msgstr "*** ¥á¥â¥ê¤ò»È¤¤¤­¤ê¤Þ¤·¤¿ ***"
 
-#: src/GridText.c:6020 src/GridText.c:6027 src/LYList.c:248
+#: src/GridText.c:6009 src/GridText.c:6016 src/LYList.c:239
 msgid "unknown field or link"
 msgstr "Ì¤ÃÎ¤Î¥Õ¥£¡¼¥ë¥É¤Þ¤¿¤Ï¥ê¥ó¥¯¤Ç¤¹"
 
-#: src/GridText.c:6036
+#: src/GridText.c:6025
 msgid "text entry field"
 msgstr "¥Æ¥­¥¹¥ÈÆþÎÏ¥Õ¥£¡¼¥ë¥É"
 
-#: src/GridText.c:6039
+#: src/GridText.c:6028
 msgid "password entry field"
 msgstr "¥Ñ¥¹¥ï¡¼¥ÉÆþÎÏ¥Õ¥£¡¼¥ë¥É"
 
-#: src/GridText.c:6042
+#: src/GridText.c:6031
 msgid "checkbox"
 msgstr "¥Á¥§¥Ã¥¯¥Ü¥Ã¥¯¥¹"
 
-#: src/GridText.c:6045
+#: src/GridText.c:6034
 msgid "radio button"
 msgstr "¥é¥¸¥ª¥Ü¥¿¥ó"
 
-#: src/GridText.c:6048
+#: src/GridText.c:6037
 msgid "submit button"
 msgstr "Á÷¿®¥Ü¥¿¥ó"
 
-#: src/GridText.c:6051
+#: src/GridText.c:6040
 msgid "reset button"
 msgstr "¥ê¥»¥Ã¥È¥Ü¥¿¥ó"
 
-#: src/GridText.c:6054
+#: src/GridText.c:6043
 msgid "popup menu"
 msgstr "¥Ý¥Ã¥×¥¢¥Ã¥×¥á¥Ë¥å¡¼"
 
-#: src/GridText.c:6057
+#: src/GridText.c:6046
 msgid "hidden form field"
 msgstr "±£¤µ¤ì¤¿¥Õ¥©¡¼¥à¥Õ¥£¡¼¥ë¥É"
 
-#: src/GridText.c:6060
+#: src/GridText.c:6049
 msgid "text entry area"
 msgstr "¥Æ¥­¥¹¥ÈÆþÎÏ¥¨¥ê¥¢"
 
-#: src/GridText.c:6063
+#: src/GridText.c:6052
 msgid "range entry field"
 msgstr "ÈÏ°ÏÆþÎÏ¥Õ¥£¡¼¥ë¥É"
 
-#: src/GridText.c:6066
+#: src/GridText.c:6055
 msgid "file entry field"
 msgstr "¥Õ¥¡¥¤¥ëÆþÎÏ¥Õ¥£¡¼¥ë¥É"
 
-#: src/GridText.c:6069
+#: src/GridText.c:6058
 msgid "text-submit field"
 msgstr "¥Æ¥­¥¹¥ÈÁ÷¿®¥Õ¥£¡¼¥ë¥É"
 
-#: src/GridText.c:6072
+#: src/GridText.c:6061
 msgid "image-submit button"
 msgstr "²èÁüÁ÷¿®¥Ü¥¿¥ó"
 
-#: src/GridText.c:6075
+#: src/GridText.c:6064
 msgid "keygen field"
 msgstr "keygen ¥Õ¥£¡¼¥ë¥É"
 
-#: src/GridText.c:6078
+#: src/GridText.c:6067
 msgid "unknown form field"
 msgstr "Ì¤ÃÎ¤Î¥Õ¥©¡¼¥à¥Õ¥£¡¼¥ë¥É"
 
-#: src/GridText.c:10244
+#: src/GridText.c:10238
 msgid "Can't open file for uploading"
 msgstr "¥¢¥Ã¥×¥í¡¼¥É¤¹¤ë¥Õ¥¡¥¤¥ë¤¬³«¤±¤Þ¤»¤ó¡£"
 
-#: src/GridText.c:11397
+#: src/GridText.c:11391
 #, c-format
 msgid "Submitting %s"
 msgstr "%s ¤òÁ÷¿®Ãæ"
 
 #. ugliness has happened; inform user and do the best we can
-#: src/GridText.c:12546
+#: src/GridText.c:12540
 msgid "Hang Detect: TextAnchor struct corrupted - suggest aborting!"
 msgstr "¥Ï¥ó¥°¸¡½Ð: TextAnchor ¹½Â¤ÂÎ¤¬²õ¤ì¤Þ¤·¤¿ - ½ªÎ»¤ò¤ª´«¤á¤·¤Þ¤¹!"
 
 #. don't show previous state
-#: src/GridText.c:12751
+#: src/GridText.c:12745
 msgid "Wrap lines to fit displayed area?"
 msgstr "É½¼¨ÎÎ°è¤Ë¼ý¤Þ¤ë¤è¤¦¹Ô¤òÀÞ¤êÊÖ¤·¤Þ¤¹¤«?"
 
-#: src/GridText.c:12803
+#: src/GridText.c:12797
 msgid "Very long lines have been wrapped!"
 msgstr "Ä¹¤¹¤®¤ë¹Ô¤ÏÀÞ¤êÊÖ¤µ¤ì¤Þ¤¹!"
 
-#: src/GridText.c:13245
+#: src/GridText.c:13239
 msgid "Very long lines have been truncated!"
 msgstr "Ä¹¤¹¤®¤ë¹Ô¤ÏÀÚ¤êµÍ¤á¤é¤ì¤Þ¤¹!"
 
@@ -3543,31 +3543,31 @@ msgstr "no"
 msgid "Y/N/A/V"
 msgstr ""
 
-#: src/HTML.c:5915
+#: src/HTML.c:5918
 msgid "Description:"
 msgstr "ÀâÌÀ:"
 
-#: src/HTML.c:5920
+#: src/HTML.c:5923
 msgid "(none)"
 msgstr "(¤Ê¤·)"
 
-#: src/HTML.c:5924
+#: src/HTML.c:5927
 msgid "Filepath:"
 msgstr "¥Õ¥¡¥¤¥ë¤Ø¤Î¥Ñ¥¹:"
 
-#: src/HTML.c:5930
+#: src/HTML.c:5933
 msgid "(unknown)"
 msgstr "(ÉÔÌÀ)"
 
-#: src/HTML.c:7375
+#: src/HTML.c:7378
 msgid "Document has only hidden links.  Use the 'l'ist command."
 msgstr "Ê¸½ñ¤Ë¤Ï±£¤·¥ê¥ó¥¯¤·¤«¤¢¤ê¤Þ¤»¤ó¡£[l]¤«¤éÃ©¤Ã¤Æ¤¯¤À¤µ¤¤¡£"
 
-#: src/HTML.c:7874
+#: src/HTML.c:7877
 msgid "Source cache error - disk full?"
 msgstr "¥½¡¼¥¹¥­¥ã¥Ã¥·¥å¥¨¥é¡¼¤Ç¤¹ - ¥Ç¥£¥¹¥¯¤¬°ìÇÕ¤«¤â?"
 
-#: src/HTML.c:7887
+#: src/HTML.c:7890
 msgid "Source cache error - not enough memory!"
 msgstr "¥½¡¼¥¹¥­¥ã¥Ã¥·¥å¥¨¥é¡¼¤Ç¤¹ - ¥á¥â¥ê¤¬Â­¤ê¤Þ¤»¤ó!"
 
@@ -3627,27 +3627,32 @@ msgstr ""
 msgid "File may be recoverable from %s during this session"
 msgstr "¤³¤Î¥»¥Ã¥·¥ç¥ó¤Î´Ö¤Ï %s ¤«¤é¥Õ¥¡¥¤¥ë¤òÉüµì¤¹¤ë¤³¤È¤¬¤Ç¤­¤ë¤«¤â¤·¤ì¤Þ¤»¤ó"
 
+#: src/LYCgi.c:159
+#, c-format
+msgid "Do you want to execute \"%s\"?"
+msgstr ""
+
 #.
 #. * Neither the path as given nor any components examined by backing up
 #. * were stat()able.  - kw
 #.
-#: src/LYCgi.c:240
+#: src/LYCgi.c:274
 msgid "Unable to access cgi script"
 msgstr "cgi ¥¹¥¯¥ê¥×¥È¤Ë¥¢¥¯¥»¥¹¤Ç¤­¤Þ¤»¤ó"
 
-#: src/LYCgi.c:667 src/LYCgi.c:670
+#: src/LYCgi.c:699 src/LYCgi.c:702
 msgid "Good Advice"
 msgstr "ÎÉ¤¤¥¢¥É¥Ð¥¤¥¹"
 
-#: src/LYCgi.c:674
+#: src/LYCgi.c:706
 msgid "An excellent http server for VMS is available via"
 msgstr "VMS ¤Ë¤·¤Æ¤Ï¤Ê¤«¤Ê¤«Í¥¤ì¤¿ http ¥µ¡¼¥Ð¤¬°Ê²¼¤«¤éÍøÍÑ²ÄÇ½¤Ç¤¹: "
 
-#: src/LYCgi.c:681
+#: src/LYCgi.c:713
 msgid "this link"
 msgstr "¤³¤Î¥ê¥ó¥¯"
 
-#: src/LYCgi.c:685
+#: src/LYCgi.c:717
 msgid "It provides state of the art CGI script support.\n"
 msgstr "¸½ºßË¾¤ß¤¦¤ëºÇ¹â¿å½à¤Î CGI ¥¹¥¯¥ê¥×¥È¥µ¥Ý¡¼¥È¤òÈ÷¤¨¤Æ¤¤¤Þ¤¹¡£\n"
 
@@ -3671,31 +3676,31 @@ msgstr "ÆâÉô"
 msgid "cookie_domain_flag_set error, aborting program"
 msgstr "cookie_domain_flag_set ¥¨¥é¡¼¡¢¥×¥í¥°¥é¥à¤ò½ªÎ»¤·¤Þ¤¹"
 
-#: src/LYCurses.c:1034
+#: src/LYCurses.c:1028
 msgid "Terminal initialisation failed - unknown terminal type?"
 msgstr "Ã¼Ëö¤Î½é´ü²½¤Ë¼ºÇÔ¤·¤Þ¤·¤¿ - Ã¼Ëö¤Î¥¿¥¤¥×¤¬ÉÔÌÀ?"
 
-#: src/LYCurses.c:1459
+#: src/LYCurses.c:1453
 msgid "Terminal ="
 msgstr "Ã¼Ëö ="
 
-#: src/LYCurses.c:1463
+#: src/LYCurses.c:1457
 msgid "You must use a vt100, 200, etc. terminal with this program."
 msgstr "¤³¤Î¥×¥í¥°¥é¥à¤Ï vt100¡¢200 ¤Ê¤É¤ÎÃ¼Ëö¾å¤Ç¼Â¹Ô¤·¤Æ¤¯¤À¤µ¤¤¡£"
 
-#: src/LYCurses.c:1512
+#: src/LYCurses.c:1506
 msgid "Your Terminal type is unknown!"
 msgstr "¤ª»È¤¤¤ÎÃ¼Ëö¥¿¥¤¥×¤¬Ê¬¤«¤ê¤Þ¤»¤ó!"
 
-#: src/LYCurses.c:1513
+#: src/LYCurses.c:1507
 msgid "Enter a terminal type:"
 msgstr "Ã¼Ëö¥¿¥¤¥×¤òÆþÎÏ:"
 
-#: src/LYCurses.c:1527
+#: src/LYCurses.c:1521
 msgid "TERMINAL TYPE IS SET TO"
 msgstr "ÀßÄê¤µ¤ì¤ëÃ¼Ëö¥¿¥¤¥×¤Ï"
 
-#: src/LYCurses.c:2031
+#: src/LYCurses.c:2025
 #, c-format
 msgid ""
 "\n"
@@ -3704,7 +3709,7 @@ msgstr ""
 "\n"
 "Ã×Ì¿Åª¤Ê¥¨¥é¡¼¤¬ %s ¥Ð¡¼¥¸¥ç¥ó %s ¤ÇÈ¯À¸¤·¤Þ¤·¤¿\n"
 
-#: src/LYCurses.c:2034
+#: src/LYCurses.c:2028
 #, c-format
 msgid ""
 "\n"
@@ -3856,27 +3861,27 @@ msgstr ""
 msgid "Total frees"
 msgstr ""
 
-#: src/LYList.c:83
+#: src/LYList.c:84
 msgid "References in "
 msgstr "±¦¤«¤é¤Î»²¾È: "
 
-#: src/LYList.c:86
+#: src/LYList.c:87
 msgid "this document:"
 msgstr "¤³¤ÎÊ¸½ñ:"
 
-#: src/LYList.c:92
+#: src/LYList.c:93
 msgid "Visible links:"
 msgstr "¸«¤¨¤ë¥ê¥ó¥¯:"
 
-#: src/LYList.c:193 src/LYList.c:311
+#: src/LYList.c:194 src/LYList.c:293
 msgid "Hidden links:"
 msgstr "±£¤µ¤ì¤¿¥ê¥ó¥¯:"
 
-#: src/LYList.c:258
+#: src/LYList.c:326
 msgid "References"
 msgstr "»²¾È"
 
-#: src/LYList.c:262
+#: src/LYList.c:330
 msgid "Visible links"
 msgstr "¸«¤¨¤ë¥ê¥ó¥¯"
 
@@ -4192,7 +4197,7 @@ msgstr "Winsock ¤¬¸«¤Ä¤«¤ê¤Þ¤»¤ó¡£"
 msgid "You MUST define a valid TMP or TEMP area!"
 msgstr "TMP ¤Ê¤¤¤· TEMP ÎÎ°è¤òÀµ¤·¤¯ÄêµÁ¤·¤Ê¤±¤ì¤Ð*¤Ê¤ê¤Þ¤»¤ó*!"
 
-#: src/LYMain.c:1248 src/LYMainLoop.c:5052
+#: src/LYMain.c:1248 src/LYMainLoop.c:5053
 msgid "No such directory"
 msgstr "¤½¤ó¤Ê¥Ç¥£¥ì¥¯¥È¥ê¤Ï¤¢¤ê¤Þ¤»¤ó"
 
@@ -4295,7 +4300,7 @@ msgstr "%s: ÉÔÀµ¤Ê¥ª¥×¥·¥ç¥ó¤Ç¤¹: %s\n"
 msgid "Internal error: Invalid mouse link %d!"
 msgstr "ÆâÉô¥¨¥é¡¼: %d ¤ÏÉÔÀµ¤Ê¥Þ¥¦¥¹¥ê¥ó¥¯¤Ç¤¹!"
 
-#: src/LYMainLoop.c:692 src/LYMainLoop.c:5074
+#: src/LYMainLoop.c:692 src/LYMainLoop.c:5075
 msgid "A URL specified by the user"
 msgstr "¥æ¡¼¥¶¤Ë¤è¤Ã¤Æ»ØÄê¤µ¤ì¤¿ URL"
 
@@ -4314,7 +4319,7 @@ msgstr "¥Ø¥ë¥×²èÌÌ"
 msgid "System Index"
 msgstr "¥·¥¹¥Æ¥à¥¤¥ó¥Ç¥Ã¥¯¥¹"
 
-#: src/LYMainLoop.c:3531 src/LYMainLoop.c:5298
+#: src/LYMainLoop.c:3531 src/LYMainLoop.c:5299
 msgid "Entry into main screen"
 msgstr "¥á¥¤¥ó²èÌÌ¤Ø¤ÎÆþÎÏ"
 
@@ -4326,73 +4331,73 @@ msgstr "¼¡¤Î¥É¥­¥å¥á¥ó¥È¤¬Â¸ºß¤·¤Þ¤»¤ó"
 msgid "charset for this document specified explicitly, sorry..."
 msgstr "¤³¤ÎÊ¸½ñ¤Î¥­¥ã¥é¥¯¥¿¥»¥Ã¥È¤ÏÌÀ¼¨Åª¤Ë»ØÄê¤µ¤ì¤Æ¤¤¤Þ¤¹..."
 
-#: src/LYMainLoop.c:5028
+#: src/LYMainLoop.c:5029
 msgid "cd to:"
 msgstr "°Ê²¼¤Ø°ÜÆ°:"
 
-#: src/LYMainLoop.c:5055
+#: src/LYMainLoop.c:5056
 msgid "A component of path is not a directory"
 msgstr "¥Ñ¥¹¤Î°ìÉô¤¬¥Ç¥£¥ì¥¯¥È¥ê¤Ç¤Ï¤¢¤ê¤Þ¤»¤ó"
 
-#: src/LYMainLoop.c:5058
+#: src/LYMainLoop.c:5059
 msgid "failed to change directory"
 msgstr "¥Ç¥£¥ì¥¯¥È¥ê¤òÊÑ¹¹¤Ç¤­¤Þ¤»¤ó"
 
-#: src/LYMainLoop.c:6219
+#: src/LYMainLoop.c:6220
 msgid "Reparsing document under current settings..."
 msgstr "¸½ºß¤ÎÀßÄê¤Î²¼¤ÇÊ¸½ñ¤òºÆ²ò¼áÃæ..."
 
-#: src/LYMainLoop.c:6509
+#: src/LYMainLoop.c:6511
 #, c-format
 msgid "Fatal error - could not open output file %s\n"
 msgstr "Ã×Ì¿Åª¥¨¥é¡¼ - ½ÐÎÏ¥Õ¥¡¥¤¥ë %s ¤¬³«¤±¤Þ¤»¤ó\n"
 
-#: src/LYMainLoop.c:6853
+#: src/LYMainLoop.c:6856
 msgid "TABLE center enable."
 msgstr ""
 
-#: src/LYMainLoop.c:6856
+#: src/LYMainLoop.c:6859
 msgid "TABLE center disable."
 msgstr ""
 
-#: src/LYMainLoop.c:6933
+#: src/LYMainLoop.c:6936
 #, fuzzy
 msgid "Current URL is empty."
 msgstr "¸½ºß¤Î¥Ç¥£¥ì¥¯¥È¥ê:"
 
-#: src/LYMainLoop.c:6935 src/LYUtils.c:1775
+#: src/LYMainLoop.c:6938 src/LYUtils.c:1790
 msgid "Copy to clipboard failed."
 msgstr ""
 
-#: src/LYMainLoop.c:6937
+#: src/LYMainLoop.c:6940
 msgid "Document URL put to clipboard."
 msgstr ""
 
-#: src/LYMainLoop.c:6939
+#: src/LYMainLoop.c:6942
 msgid "Link URL put to clipboard."
 msgstr ""
 
-#: src/LYMainLoop.c:6966
+#: src/LYMainLoop.c:6969
 msgid "No URL in the clipboard."
 msgstr ""
 
-#: src/LYMainLoop.c:7630 src/LYMainLoop.c:7800
+#: src/LYMainLoop.c:7633 src/LYMainLoop.c:7803
 msgid "-index-"
 msgstr "-¥¤¥ó¥Ç¥Ã¥¯¥¹-"
 
-#: src/LYMainLoop.c:7740
+#: src/LYMainLoop.c:7743
 msgid "lynx: Can't access startfile"
 msgstr "lynx: ¥¹¥¿¡¼¥È¥Õ¥¡¥¤¥ë¤Ë¥¢¥¯¥»¥¹¤Ç¤­¤Þ¤»¤ó"
 
-#: src/LYMainLoop.c:7752
+#: src/LYMainLoop.c:7755
 msgid "lynx: Start file could not be found or is not text/html or text/plain"
 msgstr "lynx: ¥¹¥¿¡¼¥È¥Õ¥¡¥¤¥ë¤¬¸«¤Ä¤«¤é¤Ê¤¤¤«¡¢text/html ¤Ê¤¤¤· text/plain ¤Ç¤Ï¤¢¤ê¤Þ¤»¤ó"
 
-#: src/LYMainLoop.c:7753
+#: src/LYMainLoop.c:7756
 msgid "      Exiting..."
 msgstr "      ½ªÎ»¤·¤Þ¤¹..."
 
-#: src/LYMainLoop.c:7794
+#: src/LYMainLoop.c:7797
 msgid "-more-"
 msgstr "-Â³¤­¤¢¤ê-"
 
@@ -5255,7 +5260,7 @@ msgstr "ºÇ½ª¹¹¿·:"
 #: src/LYShowInfo.c:350
 #, fuzzy
 msgid "Expires:"
-msgstr "&nbsp;Í­¸ú´ü¸Â:"
+msgstr "Í­¸ú´ü¸Â:"
 
 #: src/LYShowInfo.c:353
 msgid "Cache-Control:"
@@ -5409,33 +5414,33 @@ msgstr "°Ê²¼¤Ë¥¢¥Ã¥×¥í¡¼¥É:"
 msgid "Upload options:"
 msgstr "¥¢¥Ã¥×¥í¡¼¥É¥ª¥×¥·¥ç¥ó:"
 
-#: src/LYUtils.c:1777
+#: src/LYUtils.c:1792
 msgid "Download document URL put to clipboard."
 msgstr ""
 
-#: src/LYUtils.c:2554
+#: src/LYUtils.c:2569
 msgid "Unexpected access protocol for this URL scheme."
 msgstr "¤³¤Î URL ¥¹¥­¡¼¥à¤Ç¤ÏÁÛÄê¤µ¤ì¤Æ¤¤¤Ê¤¤¥¢¥¯¥»¥¹¥×¥í¥È¥³¥ë¤Ç¤¹¡£"
 
-#: src/LYUtils.c:3362
+#: src/LYUtils.c:3377
 msgid "Too many tempfiles"
 msgstr "°ì»þ¥Õ¥¡¥¤¥ë¤¬Â¿¤¹¤®¤Þ¤¹"
 
-#: src/LYUtils.c:3666
+#: src/LYUtils.c:3681
 msgid "unknown restriction"
 msgstr "ÉÔÌÀ¤ÊÀ©¸Â"
 
-#: src/LYUtils.c:3696
+#: src/LYUtils.c:3711
 #, c-format
 msgid "No restrictions set.\n"
 msgstr "À©¸Â¤ÏÀßÄê¤µ¤ì¤Æ¤¤¤Þ¤»¤ó¡£\n"
 
-#: src/LYUtils.c:3699
+#: src/LYUtils.c:3714
 #, c-format
 msgid "Restrictions set:\n"
 msgstr "À©¸Â¤ò°Ê²¼¤ËÀßÄê:\n"
 
-#: src/LYUtils.c:5077
+#: src/LYUtils.c:5092
 msgid "Cannot find HOME directory"
 msgstr "HOME ¥Ç¥£¥ì¥¯¥È¥ê¤¬¸«¤Ä¤«¤ê¤Þ¤»¤ó"
 

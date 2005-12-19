@@ -377,7 +377,7 @@ BOOLEAN check_realm = FALSE;	/* Restrict to the starting realm? */
 BOOLEAN clickable_images = MAKE_LINKS_FOR_ALL_IMAGES;
 BOOLEAN crawl = FALSE;		/* Do crawl? */
 BOOLEAN keep_mime_headers = FALSE;	/* Include mime headers with source dump */
-BOOLEAN more = FALSE;		/* is there more text to display? */
+BOOLEAN more_text = FALSE;	/* is there more text to display? */
 BOOLEAN more_links = FALSE;	/* Links beyond a displayed page with no links? */
 BOOLEAN no_list = FALSE;
 BOOLEAN no_margins = FALSE;
@@ -534,7 +534,7 @@ int ssl_noprompt = FORCE_PROMPT_DFT;
 int connect_timeout = 18000; /*=180000*0.1 - used in HTDoConnect.*/
 
 #ifdef EXP_JUSTIFY_ELTS
-BOOL ok_justify = TRUE;
+BOOL ok_justify = FALSE;
 int justify_max_void_percent = 35;
 #endif
 
