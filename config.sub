@@ -3,7 +3,7 @@
 #   Copyright (C) 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
 #   2000, 2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
 
-timestamp='2005-07-08'
+timestamp='2005-11-13'
 
 # This file is (in principle) common to ALL GNU software.
 # The presence of a machine in this file suggests that SOME GNU software
@@ -171,6 +171,10 @@ case $os in
 	-hiux*)
 		os=-hiuxwe2
 		;;
+	-sco6)
+		os=-sco5v6
+		basic_machine=`echo $1 | sed -e 's/86-.*/86-pc/'`
+		;;
 	-sco5)
 		os=-sco3.2v5
 		basic_machine=`echo $1 | sed -e 's/86-.*/86-pc/'`
@@ -184,6 +188,10 @@ case $os in
 		basic_machine=`echo $1 | sed -e 's/86-.*/86-pc/'`
 		;;
 	-sco3.2v[4-9]*)
+		# Don't forget version if it is 3.2v4 or newer.
+		basic_machine=`echo $1 | sed -e 's/86-.*/86-pc/'`
+		;;
+	-sco5v6*)
 		# Don't forget version if it is 3.2v4 or newer.
 		basic_machine=`echo $1 | sed -e 's/86-.*/86-pc/'`
 		;;
@@ -291,8 +299,8 @@ case $basic_machine in
 	# because (1) that's what they normally are, and
 	# (2) the word "unknown" tends to confuse beginning users.
 	i*86 | x86_64)
-	  basic_machine=$basic_machine-pc
-	  ;;
+		basic_machine=$basic_machine-pc
+		;;
 	# Object if more than one company name word.
 	*-*-*)
 		echo Invalid configuration \`$1\': machine \`$basic_machine\' not recognized 1>&2
@@ -377,7 +385,7 @@ case $basic_machine in
 		basic_machine=a29k-amd
 		os=-udi
 		;;
-    	abacus)
+	abacus)
 		basic_machine=abacus-unknown
 		;;
 	adobe68k)
@@ -1145,8 +1153,8 @@ esac
 if [ x"$os" != x"" ]
 then
 case $os in
-        # First match some system type aliases
-        # that might get confused with valid system types.
+	# First match some system type aliases
+	# that might get confused with valid system types.
 	# -solaris* is a basic system type, with this one exception.
 	-solaris1 | -solaris1.*)
 		os=`echo $os | sed -e 's|solaris1|sunos4|'`
@@ -1188,7 +1196,7 @@ case $os in
 	      | -os2* | -vos* | -palmos* | -uclinux* | -nucleus* \
 	      | -morphos* | -superux* | -rtmk* | -rtmk-nova* | -windiss* \
 	      | -powermax* | -dnix* | -nx6 | -nx7 | -sei* | -dragonfly* \
-	      | -skyos* | -haiku*)
+	      | -skyos* | haiku*)
 	# Remember, each alternative MUST END IN *, to match a version number.
 		;;
 	-qnx*)
@@ -1227,7 +1235,7 @@ case $os in
 	-opened*)
 		os=-openedition
 		;;
-        -os400*)
+	-os400*)
 		os=-os400
 		;;
 	-wince*)
@@ -1276,7 +1284,7 @@ case $os in
 	-sinix*)
 		os=-sysv4
 		;;
-        -tpf*)
+	-tpf*)
 		os=-tpf
 		;;
 	-triton*)
@@ -1349,9 +1357,9 @@ case $basic_machine in
 	arm*-semi)
 		os=-aout
 		;;
-    c4x-* | tic4x-*)
-        os=-coff
-        ;;
+	c4x-* | tic4x-*)
+		os=-coff
+		;;
 	# This must come before the *-dec entry.
 	pdp10-*)
 		os=-tops20
@@ -1401,7 +1409,7 @@ case $basic_machine in
 	*-ibm)
 		os=-aix
 		;;
-    	*-knuth)
+	*-knuth)
 		os=-mmixware
 		;;
 	*-wec)

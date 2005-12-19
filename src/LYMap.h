@@ -14,6 +14,7 @@ extern "C" {
     extern BOOL LYMapsOnly;
 
     extern void ImageMapList_free(HTList *list);
+    extern void LYPrintImgMaps(FILE *fp);
     extern BOOL LYAddImageMap(char *address, char *title,
 			      HTParentAnchor *node_anchor);
     extern BOOL LYAddMapElement(char *map, char *address, char *title,

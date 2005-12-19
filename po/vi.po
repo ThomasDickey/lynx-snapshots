@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: lynx-2.8.6-dev8\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2005-10-16 19:03-0400\n"
+"POT-Creation-Date: 2005-12-18 16:51-0500\n"
 "PO-Revision-Date: 2005-05-07 01:43+0400\n"
 "Last-Translator: Phan Vinh Thinh <teppi82@gmail.com>\n"
 "Language-Team: Vietnamese <gnomevi-list@lists.sourceforge.net>\n"
@@ -2789,7 +2789,7 @@ msgstr "Không tìm thấy tài liệu với nội dung GỬI trong cache.  Gử
 msgid "Loading failed, use a previous copy."
 msgstr "Nạp không thành công, hãy sử dụng bản sao trước đây."
 
-#: WWW/Library/Implementation/HTAccess.c:1044 src/GridText.c:8515
+#: WWW/Library/Implementation/HTAccess.c:1044 src/GridText.c:8507
 msgid "Loading incomplete."
 msgstr "Nạp thành công."
 
@@ -2812,7 +2812,7 @@ msgstr "**** HTAccess: Trạng thái trả lại là: %d\n"
 #. * hack: if we fail in HTAccess.c
 #. * avoid duplicating URL, oh.
 #.
-#: WWW/Library/Implementation/HTAccess.c:1084 src/LYMainLoop.c:7745
+#: WWW/Library/Implementation/HTAccess.c:1084 src/LYMainLoop.c:7748
 msgid "Can't Access"
 msgstr "Không truy cập được"
 
@@ -3009,15 +3009,15 @@ msgstr "Đang đọc tin tức."
 msgid "Sorry, could not load requested news."
 msgstr "Rất tiếc, không nạp được tin tức yêu cầu."
 
-#: WWW/Library/Implementation/HTTCP.c:1232
+#: WWW/Library/Implementation/HTTCP.c:1255
 msgid "Address has invalid port"
 msgstr "Địa chỉ có cổng sai"
 
-#: WWW/Library/Implementation/HTTCP.c:1308
+#: WWW/Library/Implementation/HTTCP.c:1331
 msgid "Address length looks invalid"
 msgstr "Chiều dài địa chỉ có vẻ không đúng"
 
-#: WWW/Library/Implementation/HTTCP.c:1539 WWW/Library/Implementation/HTTCP.c:1557
+#: WWW/Library/Implementation/HTTCP.c:1562 WWW/Library/Implementation/HTTCP.c:1580
 #, c-format
 msgid "Unable to locate remote host %s."
 msgstr "Không định vị được máy ở xa %s."
@@ -3026,38 +3026,38 @@ msgstr "Không định vị được máy ở xa %s."
 #. * but not HTAlert, because typically there will be other
 #. * alerts from the callers.  - kw
 #.
-#: WWW/Library/Implementation/HTTCP.c:1554 WWW/Library/Implementation/HTTelnet.c:108
+#: WWW/Library/Implementation/HTTCP.c:1577 WWW/Library/Implementation/HTTelnet.c:108
 #, c-format
 msgid "Invalid hostname %s"
 msgstr "Tên máy không đúng %s"
 
-#: WWW/Library/Implementation/HTTCP.c:1568
+#: WWW/Library/Implementation/HTTCP.c:1591
 #, c-format
 msgid "Making %s connection to %s"
 msgstr "Đang tạo %s kết nối tới %s"
 
-#: WWW/Library/Implementation/HTTCP.c:1579
+#: WWW/Library/Implementation/HTTCP.c:1602
 msgid "socket failed."
 msgstr "lỗi socket."
 
-#: WWW/Library/Implementation/HTTCP.c:1592
+#: WWW/Library/Implementation/HTTCP.c:1615
 #, c-format
 msgid "socket failed: family %d addr %s port %s."
 msgstr "lỗi socket: family %d địa chỉ %s cổng %s."
 
-#: WWW/Library/Implementation/HTTCP.c:1616
+#: WWW/Library/Implementation/HTTCP.c:1639
 msgid "Could not make connection non-blocking."
 msgstr "Không tạo được kết nối không phải khối."
 
-#: WWW/Library/Implementation/HTTCP.c:1684
+#: WWW/Library/Implementation/HTTCP.c:1707
 msgid "Connection failed (too many retries)."
 msgstr "Kết nối không thành công (quá nhiều lần thử)."
 
-#: WWW/Library/Implementation/HTTCP.c:1883
+#: WWW/Library/Implementation/HTTCP.c:1906
 msgid "Could not restore socket to blocking."
 msgstr "Không phục hồi được socket thành khối."
 
-#: WWW/Library/Implementation/HTTCP.c:1949
+#: WWW/Library/Implementation/HTTCP.c:1972
 msgid "Socket read failed for 180,000 tries."
 msgstr "Đọc socket không thành công 180 000 lần."
 
@@ -3361,98 +3361,98 @@ msgstr "Cạn bộ nhớ, đã gián đoạn hiển thị!"
 msgid "Memory exhausted, will interrupt transfer!"
 msgstr "Cạn bộ nhớ, sẽ gián đoạn truyền tải!"
 
-#: src/GridText.c:3601
+#: src/GridText.c:3590
 msgid " *** MEMORY EXHAUSTED ***"
 msgstr " *** CẠN BỘ NHỚ ***"
 
-#: src/GridText.c:6020 src/GridText.c:6027 src/LYList.c:248
+#: src/GridText.c:6009 src/GridText.c:6016 src/LYList.c:239
 msgid "unknown field or link"
 msgstr "không rõ vùng hay liên kết"
 
-#: src/GridText.c:6036
+#: src/GridText.c:6025
 msgid "text entry field"
 msgstr "vùng mục văn bản"
 
-#: src/GridText.c:6039
+#: src/GridText.c:6028
 msgid "password entry field"
 msgstr "vùng mục mật khẩu"
 
-#: src/GridText.c:6042
+#: src/GridText.c:6031
 msgid "checkbox"
 msgstr "hộp kiểm tra"
 
-#: src/GridText.c:6045
+#: src/GridText.c:6034
 msgid "radio button"
 msgstr "nút radio"
 
-#: src/GridText.c:6048
+#: src/GridText.c:6037
 msgid "submit button"
 msgstr "nút gửi đi"
 
-#: src/GridText.c:6051
+#: src/GridText.c:6040
 msgid "reset button"
 msgstr "nút đặt lại"
 
-#: src/GridText.c:6054
+#: src/GridText.c:6043
 msgid "popup menu"
 msgstr "trình đơn tự mở ra"
 
-#: src/GridText.c:6057
+#: src/GridText.c:6046
 msgid "hidden form field"
 msgstr "vùng biểu mẫu ẩn"
 
-#: src/GridText.c:6060
+#: src/GridText.c:6049
 msgid "text entry area"
 msgstr "phạm vi mục văn bản"
 
-#: src/GridText.c:6063
+#: src/GridText.c:6052
 msgid "range entry field"
 msgstr "vùng mục sắp xếp"
 
-#: src/GridText.c:6066
+#: src/GridText.c:6055
 msgid "file entry field"
 msgstr "vùng mục tập tin"
 
-#: src/GridText.c:6069
+#: src/GridText.c:6058
 msgid "text-submit field"
 msgstr "vùng gửi đi văn bản"
 
-#: src/GridText.c:6072
+#: src/GridText.c:6061
 msgid "image-submit button"
 msgstr "nút gửi đi hình ảnh"
 
-#: src/GridText.c:6075
+#: src/GridText.c:6064
 msgid "keygen field"
 msgstr "vùng keygen"
 
-#: src/GridText.c:6078
+#: src/GridText.c:6067
 msgid "unknown form field"
 msgstr "vùng biểu mẫu không rõ"
 
-#: src/GridText.c:10244
+#: src/GridText.c:10238
 msgid "Can't open file for uploading"
 msgstr "Không mở được tập tin để tải lên"
 
-#: src/GridText.c:11397
+#: src/GridText.c:11391
 #, c-format
 msgid "Submitting %s"
 msgstr "Đang gửi đi %s"
 
 #. ugliness has happened; inform user and do the best we can
-#: src/GridText.c:12546
+#: src/GridText.c:12540
 msgid "Hang Detect: TextAnchor struct corrupted - suggest aborting!"
 msgstr "Tìm ra Treo: cấu trúc TextAnchor bị lỗi - đề nghị thoát!"
 
 #. don't show previous state
-#: src/GridText.c:12751
+#: src/GridText.c:12745
 msgid "Wrap lines to fit displayed area?"
 msgstr "Ngắt dòng cho hợp với vùng hiển thị?"
 
-#: src/GridText.c:12803
+#: src/GridText.c:12797
 msgid "Very long lines have been wrapped!"
 msgstr "Những dòng rất dài đã bị ngắt!"
 
-#: src/GridText.c:13245
+#: src/GridText.c:13239
 msgid "Very long lines have been truncated!"
 msgstr "Những dòng rất dài đã bị xén bớt!"
 
@@ -3542,31 +3542,31 @@ msgstr "không"
 msgid "Y/N/A/V"
 msgstr "Y/N/A/V"
 
-#: src/HTML.c:5915
+#: src/HTML.c:5918
 msgid "Description:"
 msgstr "Mô tả:"
 
-#: src/HTML.c:5920
+#: src/HTML.c:5923
 msgid "(none)"
 msgstr "(không)"
 
-#: src/HTML.c:5924
+#: src/HTML.c:5927
 msgid "Filepath:"
 msgstr "Đường dẫn tập tin:"
 
-#: src/HTML.c:5930
+#: src/HTML.c:5933
 msgid "(unknown)"
 msgstr "(không rõ)"
 
-#: src/HTML.c:7375
+#: src/HTML.c:7378
 msgid "Document has only hidden links.  Use the 'l'ist command."
 msgstr "Tài liệu chỉ có các liên kết ẩn.  Hãy dùng câu lệnh 'l'ist."
 
-#: src/HTML.c:7874
+#: src/HTML.c:7877
 msgid "Source cache error - disk full?"
 msgstr "Lỗi nguồn cache - đĩa đầy?"
 
-#: src/HTML.c:7887
+#: src/HTML.c:7890
 msgid "Source cache error - not enough memory!"
 msgstr "Lỗi nguồn cache - không đủ bộ nhớ!"
 
@@ -3625,27 +3625,32 @@ msgstr ""
 msgid "File may be recoverable from %s during this session"
 msgstr "Có thể phục hồi tập tin từ %s trong buổi làm việc này"
 
+#: src/LYCgi.c:159
+#, c-format
+msgid "Do you want to execute \"%s\"?"
+msgstr ""
+
 #.
 #. * Neither the path as given nor any components examined by backing up
 #. * were stat()able.  - kw
 #.
-#: src/LYCgi.c:240
+#: src/LYCgi.c:274
 msgid "Unable to access cgi script"
 msgstr "Không truy cập được script cgi"
 
-#: src/LYCgi.c:667 src/LYCgi.c:670
+#: src/LYCgi.c:699 src/LYCgi.c:702
 msgid "Good Advice"
 msgstr "Lời khuyên Tốt"
 
-#: src/LYCgi.c:674
+#: src/LYCgi.c:706
 msgid "An excellent http server for VMS is available via"
 msgstr "Một máy chủ http tuyệt với cho VMS có tại"
 
-#: src/LYCgi.c:681
+#: src/LYCgi.c:713
 msgid "this link"
 msgstr "liên kết này"
 
-#: src/LYCgi.c:685
+#: src/LYCgi.c:717
 msgid "It provides state of the art CGI script support.\n"
 msgstr "Nó cung cấp hỗ trợ cho trạng thái của script CGI.\n"
 
@@ -3669,31 +3674,31 @@ msgstr "Nội bộ"
 msgid "cookie_domain_flag_set error, aborting program"
 msgstr "lỗi cookie_domain_flag_set, đang thoát chương trình"
 
-#: src/LYCurses.c:1034
+#: src/LYCurses.c:1028
 msgid "Terminal initialisation failed - unknown terminal type?"
 msgstr "Cấu hình terminal không thành công - không rõ dạng terminal?"
 
-#: src/LYCurses.c:1459
+#: src/LYCurses.c:1453
 msgid "Terminal ="
 msgstr "Terminal ="
 
-#: src/LYCurses.c:1463
+#: src/LYCurses.c:1457
 msgid "You must use a vt100, 200, etc. terminal with this program."
 msgstr "Cần sử dụng một terminal vt100, 200, v.v... với chương trình này."
 
-#: src/LYCurses.c:1512
+#: src/LYCurses.c:1506
 msgid "Your Terminal type is unknown!"
 msgstr "Dạng Terminal không biết đến!"
 
-#: src/LYCurses.c:1513
+#: src/LYCurses.c:1507
 msgid "Enter a terminal type:"
 msgstr "Hãy nhập một dạng terminal:"
 
-#: src/LYCurses.c:1527
+#: src/LYCurses.c:1521
 msgid "TERMINAL TYPE IS SET TO"
 msgstr "DẠNG TERMINAL ĐẶT THÀNH"
 
-#: src/LYCurses.c:2031
+#: src/LYCurses.c:2025
 #, c-format
 msgid ""
 "\n"
@@ -3702,7 +3707,7 @@ msgstr ""
 "\n"
 "Một lỗi Nặng xuất hiện trong %s Phiên bản %s\n"
 
-#: src/LYCurses.c:2034
+#: src/LYCurses.c:2028
 #, c-format
 msgid ""
 "\n"
@@ -3853,27 +3858,27 @@ msgstr "Tổng số phân phối"
 msgid "Total frees"
 msgstr "Tổng số còn dư"
 
-#: src/LYList.c:83
+#: src/LYList.c:84
 msgid "References in "
 msgstr "Liên kết trong "
 
-#: src/LYList.c:86
+#: src/LYList.c:87
 msgid "this document:"
 msgstr "tài liệu này:"
 
-#: src/LYList.c:92
+#: src/LYList.c:93
 msgid "Visible links:"
 msgstr "Liên kết hiện:"
 
-#: src/LYList.c:193 src/LYList.c:311
+#: src/LYList.c:194 src/LYList.c:293
 msgid "Hidden links:"
 msgstr "Liên kết ẩn:"
 
-#: src/LYList.c:258
+#: src/LYList.c:326
 msgid "References"
 msgstr "Liên kết"
 
-#: src/LYList.c:262
+#: src/LYList.c:330
 msgid "Visible links"
 msgstr "Liên kết hiện"
 
@@ -4188,7 +4193,7 @@ msgstr "Rất tiếc, không tìm thấy Winsock."
 msgid "You MUST define a valid TMP or TEMP area!"
 msgstr "PHẢI chỉ ra một vùng TMP hoặc TEMP!"
 
-#: src/LYMain.c:1248 src/LYMainLoop.c:5052
+#: src/LYMain.c:1248 src/LYMainLoop.c:5053
 msgid "No such directory"
 msgstr "Không có thư mục đó"
 
@@ -4291,7 +4296,7 @@ msgstr "%s: Tùy chọn sai: %s\n"
 msgid "Internal error: Invalid mouse link %d!"
 msgstr "Lỗi nội bộ: Liên kết chuột sai %d!"
 
-#: src/LYMainLoop.c:692 src/LYMainLoop.c:5074
+#: src/LYMainLoop.c:692 src/LYMainLoop.c:5075
 msgid "A URL specified by the user"
 msgstr "Một URL do người dùng chỉ ra"
 
@@ -4310,7 +4315,7 @@ msgstr "Màn hình Trợ giúp"
 msgid "System Index"
 msgstr "Chỉ mục Hệ thống"
 
-#: src/LYMainLoop.c:3531 src/LYMainLoop.c:5298
+#: src/LYMainLoop.c:3531 src/LYMainLoop.c:5299
 msgid "Entry into main screen"
 msgstr "Đi tới màn hình chính"
 
@@ -4322,72 +4327,72 @@ msgstr "Không có tài liệu tiếp theo"
 msgid "charset for this document specified explicitly, sorry..."
 msgstr "bảng mã của tài liệu này được chỉ ra rõ ràng, rất tiếc..."
 
-#: src/LYMainLoop.c:5028
+#: src/LYMainLoop.c:5029
 msgid "cd to:"
 msgstr "cd tới:"
 
-#: src/LYMainLoop.c:5055
+#: src/LYMainLoop.c:5056
 msgid "A component of path is not a directory"
 msgstr "Một thành phần của đường dẫn không phải là tập tin"
 
-#: src/LYMainLoop.c:5058
+#: src/LYMainLoop.c:5059
 msgid "failed to change directory"
 msgstr "thay đổi thư mục bị thất bại"
 
-#: src/LYMainLoop.c:6219
+#: src/LYMainLoop.c:6220
 msgid "Reparsing document under current settings..."
 msgstr "Phân tích lại tài liệu dưới thiết lập hiện thời..."
 
-#: src/LYMainLoop.c:6509
+#: src/LYMainLoop.c:6511
 #, c-format
 msgid "Fatal error - could not open output file %s\n"
 msgstr "Lỗi nặng - không mở được tập tin đầu ra %s\n"
 
-#: src/LYMainLoop.c:6853
+#: src/LYMainLoop.c:6856
 msgid "TABLE center enable."
 msgstr "BẢNG ở giữa bật."
 
-#: src/LYMainLoop.c:6856
+#: src/LYMainLoop.c:6859
 msgid "TABLE center disable."
 msgstr "BẢNG ở giữa tắt."
 
-#: src/LYMainLoop.c:6933
+#: src/LYMainLoop.c:6936
 msgid "Current URL is empty."
 msgstr "URL hiện thời là rỗng."
 
-#: src/LYMainLoop.c:6935 src/LYUtils.c:1775
+#: src/LYMainLoop.c:6938 src/LYUtils.c:1790
 msgid "Copy to clipboard failed."
 msgstr "Sao chép tới clipboard không thành công."
 
-#: src/LYMainLoop.c:6937
+#: src/LYMainLoop.c:6940
 msgid "Document URL put to clipboard."
 msgstr "Đã đặt URL tài liệu vào clipboard."
 
-#: src/LYMainLoop.c:6939
+#: src/LYMainLoop.c:6942
 msgid "Link URL put to clipboard."
 msgstr "Đã đặt URL liên kết vào clipboard."
 
-#: src/LYMainLoop.c:6966
+#: src/LYMainLoop.c:6969
 msgid "No URL in the clipboard."
 msgstr "Không có URL trong clipboard."
 
-#: src/LYMainLoop.c:7630 src/LYMainLoop.c:7800
+#: src/LYMainLoop.c:7633 src/LYMainLoop.c:7803
 msgid "-index-"
 msgstr "-chỉ mục-"
 
-#: src/LYMainLoop.c:7740
+#: src/LYMainLoop.c:7743
 msgid "lynx: Can't access startfile"
 msgstr "lynx: Không truy cập được tập tin bắt đầu"
 
-#: src/LYMainLoop.c:7752
+#: src/LYMainLoop.c:7755
 msgid "lynx: Start file could not be found or is not text/html or text/plain"
 msgstr "lynx: Không tìm thấy tập tin bắt đầu hoặc không phải là text/html hay text/plain"
 
-#: src/LYMainLoop.c:7753
+#: src/LYMainLoop.c:7756
 msgid "      Exiting..."
 msgstr "      Đang thoát..."
 
-#: src/LYMainLoop.c:7794
+#: src/LYMainLoop.c:7797
 msgid "-more-"
 msgstr "-còn nữa-"
 
@@ -5387,33 +5392,33 @@ msgstr "Tải lên:"
 msgid "Upload options:"
 msgstr "Tùy chọn tải lên:"
 
-#: src/LYUtils.c:1777
+#: src/LYUtils.c:1792
 msgid "Download document URL put to clipboard."
 msgstr "URL của tài liệu tải xuống đặt vào clipboard."
 
-#: src/LYUtils.c:2554
+#: src/LYUtils.c:2569
 msgid "Unexpected access protocol for this URL scheme."
 msgstr "Giao thức truy cập không mong đợi cho sơ đồ URL này."
 
-#: src/LYUtils.c:3362
+#: src/LYUtils.c:3377
 msgid "Too many tempfiles"
 msgstr "Quá nhiều tập tin tạm thời"
 
-#: src/LYUtils.c:3666
+#: src/LYUtils.c:3681
 msgid "unknown restriction"
 msgstr "giới hạn không rõ"
 
-#: src/LYUtils.c:3696
+#: src/LYUtils.c:3711
 #, c-format
 msgid "No restrictions set.\n"
 msgstr "Không có bộ các giới hạn.\n"
 
-#: src/LYUtils.c:3699
+#: src/LYUtils.c:3714
 #, c-format
 msgid "Restrictions set:\n"
 msgstr "Bộ các giới hạn:\n"
 
-#: src/LYUtils.c:5077
+#: src/LYUtils.c:5092
 msgid "Cannot find HOME directory"
 msgstr "Không tìm thấy thư mục HOME"
 

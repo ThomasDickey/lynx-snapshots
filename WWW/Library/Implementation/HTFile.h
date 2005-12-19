@@ -301,6 +301,7 @@ extern "C" {
 	,ppRLOGIN
 	,ppRM
 	,ppRMDIR
+	,ppSETFONT
 	,ppTAR
 	,ppTELNET
 	,ppTN3270

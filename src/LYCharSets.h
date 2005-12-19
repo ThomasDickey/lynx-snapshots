@@ -29,6 +29,10 @@ extern "C" {
  *  currently active character set (internal handler)
  */
     extern int current_char_set;
+/*
+ *  character set where it is safe to draw lines on boxes.
+ */
+    extern int linedrawing_char_set;
 
 /*
  *  Initializer, calls initialization function for the

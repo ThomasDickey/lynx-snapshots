@@ -74,6 +74,7 @@ TABLES= \
  cp775_uni.h \
  cp850_uni.h \
  cp852_uni.h \
+ cp857_uni.h \
  cp862_uni.h \
  cp864_uni.h \
  cp866_uni.h \
@@ -92,6 +93,8 @@ TABLES= \
  iso08_uni.h \
  iso09_uni.h \
  iso10_uni.h \
+ iso13_uni.h \
+ iso14_uni.h \
  iso15_uni.h \
  koi8r_uni.h \
  koi8u_uni.h \
@@ -141,6 +144,7 @@ cp737_uni.h:		$(srcdir)/cp737_uni.tbl		$(MAKEUCTB)
 cp775_uni.h:		$(srcdir)/cp775_uni.tbl		$(MAKEUCTB)
 cp850_uni.h:		$(srcdir)/cp850_uni.tbl		$(MAKEUCTB)
 cp852_uni.h:		$(srcdir)/cp852_uni.tbl		$(MAKEUCTB)
+cp857_uni.h:		$(srcdir)/cp857_uni.tbl		$(MAKEUCTB)
 cp862_uni.h:		$(srcdir)/cp862_uni.tbl		$(MAKEUCTB)
 cp864_uni.h:		$(srcdir)/cp864_uni.tbl		$(MAKEUCTB)
 cp866_uni.h:		$(srcdir)/cp866_uni.tbl		$(MAKEUCTB)
@@ -159,6 +163,8 @@ iso07_uni.h:		$(srcdir)/iso07_uni.tbl		$(MAKEUCTB)
 iso08_uni.h:		$(srcdir)/iso08_uni.tbl		$(MAKEUCTB)
 iso09_uni.h:		$(srcdir)/iso09_uni.tbl		$(MAKEUCTB)
 iso10_uni.h:		$(srcdir)/iso10_uni.tbl		$(MAKEUCTB)
+iso13_uni.h:		$(srcdir)/iso13_uni.tbl		$(MAKEUCTB)
+iso14_uni.h:		$(srcdir)/iso14_uni.tbl		$(MAKEUCTB)
 iso15_uni.h:		$(srcdir)/iso15_uni.tbl		$(MAKEUCTB)
 koi8r_uni.h:		$(srcdir)/koi8r_uni.tbl		$(MAKEUCTB)
 koi8u_uni.h:		$(srcdir)/koi8u_uni.tbl		$(MAKEUCTB)

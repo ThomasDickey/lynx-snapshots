@@ -308,29 +308,56 @@ void UCTransParams_clear(UCTransParams * pT)
 }
 
 /*
- *  If terminal is in UTF-8 mode, it probably cannot understand
- *  box drawing chars as (n)curses handles them.  (This may also
- *  be true for other display character sets, but isn't currently
- *  checked.)  In that case set the chars for hori and vert drawing
- *  chars to displayable ASCII chars if '0' was requested.  They'll
- *  stay as they are otherwise. - kw
+ * If terminal is in UTF-8 mode, it probably cannot understand box drawing
+ * chars as the 8-bit (n)curses handles them.  (This may also be true for other
+ * display character sets, but isn't currently checked.) In that case set the
+ * chars for horizontal and vertical drawing chars to displayable ASCII chars
+ * if '0' was requested.  They'll stay as they are otherwise.  -KW, TD
+ *
+ * If we're able to obtain a character set based on the locale settings,
+ * assume that the user has setup $TERM and the fonts already so line-drawing
+ * works.
  */
-void UCSetBoxChars(int cset GCC_UNUSED,
+void UCSetBoxChars(int cset,
 		   int *pvert_out,
 		   int *phori_out,
 		   int vert_in,
 		   int hori_in)
 {
+    BOOL fix_lines = FALSE;
+
+    if (cset >= 0) {
 #ifndef WIDEC_CURSES
-    if (cset >= -1 && LYCharSet_UC[cset].enc == UCT_ENC_UTF8) {
-	*pvert_out = (vert_in ? vert_in : '|');
-	*phori_out = (hori_in ? hori_in : '-');
-    } else
+	if (LYCharSet_UC[cset].enc == UCT_ENC_UTF8) {
+	    fix_lines = TRUE;
+	}
 #endif
-    {
-	*pvert_out = vert_in;
-	*phori_out = hori_in;
+	/*
+	 * If we've identified a charset that works, require it.
+	 * This is important if we have loaded a font, which would
+	 * confuse curses.
+	 */
+#ifdef EXP_CHARTRANS_AUTOSWITCH
+	if (linedrawing_char_set >= 0) {
+	    /* US-ASCII vs Latin-1 is safe (usually) */
+	    if (cset == US_ASCII && linedrawing_char_set == LATIN1) {
+		;
+	    } else if (cset == LATIN1 && linedrawing_char_set == US_ASCII) {
+		;
+	    } else if (cset != linedrawing_char_set) {
+		fix_lines = TRUE;
+	    }
+	}
+#endif
     }
+    if (fix_lines) {
+	if (!vert_in)
+	    vert_in = '|';
+	if (!hori_in)
+	    hori_in = '-';
+    }
+    *pvert_out = vert_in;
+    *phori_out = hori_in;
 }
 
 /*

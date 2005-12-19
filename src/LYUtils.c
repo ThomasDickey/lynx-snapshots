@@ -1247,6 +1247,19 @@ char *strip_trailing_slash(char *dirname)
 }
 
 /*
+ * Remove most blanks, but restore one trailing blank to make prompts nicer.
+ */
+static void remove_most_blanks(char *buffer)
+{
+    int length = strlen(buffer);
+    BOOL trailing = (length != 0) && (buffer[length - 1] == ' ');
+
+    LYReduceBlanks(buffer);
+    if (trailing)
+	strcat(buffer, " ");
+}
+
+/*
  * Display (or hide) the status line.
  */
 BOOLEAN mustshow = FALSE;
@@ -1324,7 +1337,7 @@ void statusline(const char *text)
 	/*
 	 * Deal with any newlines or tabs in the string.  - FM
 	 */
-	LYReduceBlanks((char *) temp);
+	remove_most_blanks((char *) temp);
 
 	/*
 	 * Handle the Kanji, making sure the text is not longer than the
@@ -1350,7 +1363,7 @@ void statusline(const char *text)
 	/*
 	 * Deal with any newlines or tabs in the string.  - FM
 	 */
-	LYReduceBlanks(text_buff);
+	remove_most_blanks(text_buff);
 #ifdef WIDEC_CURSES
 	len = strlen(text_buff);
 	if (len >= (int) (sizeof(buffer) - 1))
@@ -1528,7 +1541,9 @@ int LYReopenInput(void)
 	    isatty(fileno(stderr)) &&
 	    (term_name = ttyname(fileno(stderr))) != NULL)
 	    new_fd = open(term_name, O_RDONLY);
+#endif
 
+#ifdef HAVE_CTERMID
 	if (new_fd == -1 &&
 	    (term_name = ctermid(NULL)) != NULL)
 	    new_fd = open(term_name, O_RDONLY);
@@ -7268,6 +7283,8 @@ const char *LYSysShell(void)
     if (shell) {
 	if (access(shell, 0) != 0)
 	    shell = LYGetEnv("COMSPEC");
+    } else {
+	shell = LYGetEnv("COMSPEC");
     }
     if (shell == NULL) {
 	if (system_is_NT)

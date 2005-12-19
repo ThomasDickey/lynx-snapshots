@@ -2202,7 +2202,7 @@ static void handle_LYK_DOWN_HALF(int *old_c,
 {
     int i;
 
-    if (more) {
+    if (more_text) {
 	Newline += (display_lines / 2);
 	if (nlinks > 0 && curdoc.link > -1 &&
 	    links[curdoc.link].ly > display_lines / 2) {
@@ -2235,14 +2235,14 @@ static void handle_LYK_DOWN_LINK(int *follow_col,
 	newlink = find_link_near_col(*follow_col, 1);
 	if (newlink > -1) {
 	    set_curdoc_link(newlink);
-	} else if (more) {	/* next page */
+	} else if (more_text) {	/* next page */
 	    Newline += display_lines;
 	} else if (*old_c != real_c) {
 	    *old_c = real_c;
 	    HTUserMsg(NO_LINKS_BELOW);
 	    return;
 	}
-    } else if (more) {		/* next page */
+    } else if (more_text) {	/* next page */
 	Newline += display_lines;
 
     } else if (*old_c != real_c) {
@@ -2256,7 +2256,7 @@ static void handle_LYK_DOWN_TWO(int *old_c,
 {
     int i;
 
-    if (more) {
+    if (more_text) {
 	Newline += 2;
 	if (nlinks > 0 && curdoc.link > -1 &&
 	    links[curdoc.link].ly > 2) {
@@ -2679,7 +2679,7 @@ static BOOLEAN handle_LYK_FASTBACKW_LINK(int *cmd,
 		     sametext(links[nextlink].l_form->name, thisname));
 		samepage = 1;
 
-	    } else if (!more && LYGetNewline() == 1 &&
+	    } else if (!more_text && LYGetNewline() == 1 &&
 		       (links[0].type == WWW_FORM_LINK_TYPE &&
 			links[0].l_form->type == F_TEXTAREA_TYPE &&
 			links[0].l_form->number == thisgroup &&
@@ -2691,14 +2691,14 @@ static BOOLEAN handle_LYK_FASTBACKW_LINK(int *cmd,
 		nextlink = nlinks - 1;
 		samepage = 1;
 
-	    } else if (!more && LYGetNewline() == 1 && curdoc.link > 0) {
+	    } else if (!more_text && LYGetNewline() == 1 && curdoc.link > 0) {
 		nextlink = 0;
 		samepage = 1;
 	    }
 	} else if (curdoc.link > 0) {
 	    nextlink--;
 	    samepage = 1;
-	} else if (!more && LYGetNewline() == 1) {
+	} else if (!more_text && LYGetNewline() == 1) {
 	    nextlink = nlinks - 1;
 	    samepage = 1;
 	}
@@ -2785,14 +2785,14 @@ static void handle_LYK_FASTFORW_LINK(int *old_c,
 		     links[nextlink].l_form->number == thisgroup &&
 		     sametext(links[nextlink].l_form->name, thisname));
 		samepage = 1;
-	    } else if (!more && LYGetNewline() == 1 && curdoc.link > 0) {
+	    } else if (!more_text && LYGetNewline() == 1 && curdoc.link > 0) {
 		nextlink = 0;
 		samepage = 1;
 	    }
 	} else if (curdoc.link < nlinks - 1) {
 	    nextlink++;
 	    samepage = 1;
-	} else if (!more && LYGetNewline() == 1 && curdoc.link > 0) {
+	} else if (!more_text && LYGetNewline() == 1 && curdoc.link > 0) {
 	    nextlink = 0;
 	    samepage = 1;
 	}
@@ -2800,14 +2800,14 @@ static void handle_LYK_FASTFORW_LINK(int *old_c,
 
     if (samepage) {
 	set_curdoc_link(nextlink);
-    } else if (!more && LYGetNewline() == 1 && curdoc.link == nlinks - 1) {
+    } else if (!more_text && LYGetNewline() == 1 && curdoc.link == nlinks - 1) {
 	/*
 	 * At the bottom of list and there is only one page.  Move to the top
 	 * link on the page.
 	 */
 	set_curdoc_link(0);
 
-    } else if (more &&		/* need a later page */
+    } else if (more_text &&	/* need a later page */
 	       HTGetLinkOrFieldStart(curdoc.link,
 				     &Newline, &newdoc.link,
 				     1, TRUE) != NO) {
@@ -3827,10 +3827,10 @@ static void handle_LYK_NEXT_LINK(int c,
 	 * At the bottom of list and there is only one page.  Move to the top
 	 * link on the page.
 	 */
-    } else if (!more && LYGetNewline() == 1 && curdoc.link == nlinks - 1) {
+    } else if (!more_text && LYGetNewline() == 1 && curdoc.link == nlinks - 1) {
 	set_curdoc_link(0);
 
-    } else if (more) {		/* next page */
+    } else if (more_text) {	/* next page */
 	Newline += display_lines;
 
     } else if (*old_c != real_c) {
@@ -3842,7 +3842,7 @@ static void handle_LYK_NEXT_LINK(int c,
 static void handle_LYK_NEXT_PAGE(int *old_c,
 				 int real_c)
 {
-    if (more) {
+    if (more_text) {
 	Newline += display_lines;
     } else if (curdoc.link < nlinks - 1) {
 	set_curdoc_link(nlinks - 1);
@@ -3880,7 +3880,7 @@ static void handle_LYK_PREV_LINK(int *arrowup,
     if (curdoc.link > 0) {	/* previous link */
 	set_curdoc_link(curdoc.link - 1);
 
-    } else if (!more &&
+    } else if (!more_text &&
 	       curdoc.link == 0 && LYGetNewline() == 1) {	/* at the top of list */
 	/*
 	 * If there is only one page of data and the user goes off the top,
@@ -4472,9 +4472,10 @@ static void handle_LYK_TAG_LINK(void)
 	}
 	if (curdoc.link < nlinks - 1) {
 	    set_curdoc_link(curdoc.link + 1);
-	} else if (!more && LYGetNewline() == 1 && curdoc.link == nlinks - 1) {
+	} else if (!more_text && LYGetNewline() == 1 && curdoc.link == nlinks
+		   - 1) {
 	    set_curdoc_link(0);
-	} else if (more) {	/* next page */
+	} else if (more_text) {	/* next page */
 	    Newline += (display_lines);
 	}
     }
@@ -4485,7 +4486,7 @@ static void handle_LYK_TOGGLE_HELP(void)
 {
     if (user_mode == NOVICE_MODE) {
 	toggle_novice_line();
-	noviceline(more);
+	noviceline(more_text);
     }
 }
 
@@ -4991,7 +4992,7 @@ static void handle_LYK_digit(int c,
 	     */
 	    if (LYGetNewline() <= 1) {
 		HTInfoMsg(ALREADY_AT_BEGIN);
-	    } else if (!more) {
+	    } else if (!more_text) {
 		HTInfoMsg(ALREADY_AT_END);
 	    } else {
 		StrAllocCopy(temp, user_input_buffer);
@@ -6260,9 +6261,10 @@ int mainloop(void)
 #endif /* DIRED_SUPPORT */
 
 	    /*
-	     * If more equals TRUE, then there is more info below this page.
+	     * Check if there is more info below this page.
 	     */
-	    more = HText_canScrollDown();
+	    more_text = HText_canScrollDown();
+
 	    if (newdoc.link < 0)
 		goto_line(LYGetNewline());
 	    LYSetNewline(HText_getTopOfScreen() + 1);
@@ -6343,9 +6345,9 @@ int mainloop(void)
 #endif /* DIRED_SUPPORT */
 
 	    /*
-	     * If more equals TRUE, then there is more info below this page.
+	     * Check if there is more info below this page.
 	     */
-	    more = HText_canScrollDown();
+	    more_text = HText_canScrollDown();
 
 	    /*
 	     * Adjust curdoc.link as above; nlinks may have changed, if the
@@ -6360,7 +6362,7 @@ int mainloop(void)
 	    }
 
 	    if (user_mode == NOVICE_MODE)
-		noviceline(more);	/* print help message */
+		noviceline(more_text);	/* print help message */
 	    refresh_screen = FALSE;
 
 	}
@@ -6574,7 +6576,7 @@ int mainloop(void)
 			       && strcmp(links[curdoc.link].l_form->name,
 					 links[curdoc.link + 1].l_form->name)
 			       == 0) ||
-			      (curdoc.link == nlinks - 1 && more &&
+			      (curdoc.link == nlinks - 1 && more_text &&
 			       HText_TAHasMoreLines(curdoc.link, 1)))) ||
 			    ((LKC_TO_LAC(keymap, real_c) == LYK_PREV_LINK ||
 			      LKC_TO_LAC(keymap, real_c) == LYK_LPOS_PREV_LINK ||
@@ -6618,7 +6620,8 @@ int mainloop(void)
 			if ((links[curdoc.link].type == WWW_FORM_LINK_TYPE &&
 			     links[curdoc.link].l_form->type == F_TEXTAREA_TYPE)
 			    && ((curdoc.link == nlinks - 1 &&
-				 !(more && HText_TAHasMoreLines(curdoc.link, 1)))
+				 !(more_text &&
+				   HText_TAHasMoreLines(curdoc.link, 1)))
 				||
 				((curdoc.link < nlinks - 1) &&
 				 !(links[curdoc.link + 1].type == WWW_FORM_LINK_TYPE
@@ -6802,7 +6805,7 @@ int mainloop(void)
 		} else
 #endif
 		    show_main_statusline(links[curdoc.link], FOR_INPUT);
-	    } else if (more) {
+	    } else if (more_text) {
 		HTInfoMsg(MOREHELP);
 	    } else {
 		HTInfoMsg(HELP);
@@ -7592,7 +7595,7 @@ static void show_main_statusline(const LinkInfo curlink,
      * Make sure form novice lines are replaced.
      */
     if (user_mode == NOVICE_MODE && for_what != FOR_INPUT) {
-	noviceline(more);
+	noviceline(more_text);
     }
 
     if (HTisDocumentSource()) {
@@ -7647,8 +7650,8 @@ static void show_main_statusline(const LinkInfo curlink,
 	}
 	if (!cp)
 	    cp = curlink.lname;
-	status_link(cp, more, is_www_index);
-    } else if (is_www_index && more) {
+	status_link(cp, more_text, is_www_index);
+    } else if (is_www_index && more_text) {
 	char buf[128];
 
 	sprintf(buf, WWW_INDEX_MORE_MESSAGE, key_for_func(LYK_INDEX_SEARCH));
@@ -7658,7 +7661,7 @@ static void show_main_statusline(const LinkInfo curlink,
 
 	sprintf(buf, WWW_INDEX_MESSAGE, key_for_func(LYK_INDEX_SEARCH));
 	_statusline(buf);
-    } else if (more) {
+    } else if (more_text) {
 	if (user_mode == NOVICE_MODE)
 	    _statusline(MORE);
 	else

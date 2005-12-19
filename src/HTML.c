@@ -1259,7 +1259,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 	    /*
 	     * Prepare to do housekeeping on the reference.  - FM
 	     */
-	    if (!value[HTML_LINK_HREF]) {
+	    if (isEmpty(value[HTML_LINK_HREF])) {
 		Base = (me->inBASE)
 		    ? me->base_href
 		    : me->node_anchor->address;
@@ -2083,7 +2083,8 @@ static int HTML_start_element(HTStructured * me, int element_number,
 	    int enval = 2;
 
 	    column = HText_getCurrentColumn(me->text);
-	    if (present[HTML_TAB_TO]) {
+	    if (present[HTML_TAB_TO] &&
+		non_empty(value[HTML_TAB_TO])) {
 		/*
 		 * TO has priority over INDENT if both are present.  - FM
 		 */
@@ -2848,9 +2849,10 @@ static int HTML_start_element(HTStructured * me, int element_number,
 	     */
 	    me->inBoldA = TRUE;
 
-	    StrAllocCopy(href, value[HTML_A_HREF]);
-	    if (isEmpty(href))
+	    if (isEmpty(value[HTML_A_HREF]))
 		StrAllocCopy(href, "#");
+	    else
+		StrAllocCopy(href, value[HTML_A_HREF]);
 	    CHECK_FOR_INTERN(intern_flag, href);	/* '#' */
 
 	    if (intern_flag) { /*** FAST WAY: ***/
@@ -3600,7 +3602,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 	if (!me->object_started) {
 	    /*
 	     * This is an outer OBJECT start tag, i.e., not a nested OBJECT, so
-	     * save it's relevant attributes.  - FM
+	     * save its relevant attributes.  - FM
 	     */
 	    if (present) {
 		if (present[HTML_OBJECT_DECLARE])
@@ -3654,8 +3656,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		    }
 		}
 		if (present[HTML_OBJECT_CLASSID] &&
-		    value[HTML_OBJECT_CLASSID] &&
-		    *value[HTML_OBJECT_CLASSID]) {
+		    non_empty(value[HTML_OBJECT_CLASSID])) {
 		    StrAllocCopy(me->object_classid,
 				 value[HTML_OBJECT_CLASSID]);
 		    TRANSLATE_AND_UNESCAPE_ENTITIES(&me->object_classid, TRUE, FALSE);
@@ -3666,8 +3667,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		    }
 		}
 		if (present[HTML_OBJECT_CODEBASE] &&
-		    value[HTML_OBJECT_CODEBASE] &&
-		    *value[HTML_OBJECT_CODEBASE]) {
+		    non_empty(value[HTML_OBJECT_CODEBASE])) {
 		    StrAllocCopy(me->object_codebase,
 				 value[HTML_OBJECT_CODEBASE]);
 		    TRANSLATE_AND_UNESCAPE_TO_STD(&me->object_codebase);
@@ -3676,8 +3676,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		    }
 		}
 		if (present[HTML_OBJECT_CODETYPE] &&
-		    value[HTML_OBJECT_CODETYPE] &&
-		    *value[HTML_OBJECT_CODETYPE]) {
+		    non_empty(value[HTML_OBJECT_CODETYPE])) {
 		    StrAllocCopy(me->object_codetype,
 				 value[HTML_OBJECT_CODETYPE]);
 		    TRANSLATE_AND_UNESCAPE_ENTITIES(&me->object_codetype,
@@ -3725,8 +3724,9 @@ static int HTML_start_element(HTStructured * me, int element_number,
 			FREE(me->object_data);
 		    if (me->object_data) {
 			HTStartAnchor5(me,
-				       me->object_id ? value[HTML_OBJECT_ID]
-				       : NULL,
+				       (me->object_id
+					? value[HTML_OBJECT_ID]
+					: NULL),
 				       value[HTML_OBJECT_DATA],
 				       value[HTML_OBJECT_TYPE],
 				       tag_charset);
@@ -4173,8 +4173,9 @@ static int HTML_start_element(HTStructured * me, int element_number,
 	    EMIT_IFDEF_EXP_JUSTIFY_ELTS(form_in_htext = TRUE);
 
 	    if (present && present[HTML_FORM_ACCEPT_CHARSET]) {
-		accept_cs = value[HTML_FORM_ACCEPT_CHARSET] ?
-		    value[HTML_FORM_ACCEPT_CHARSET] : "UNKNOWN";
+		accept_cs = (value[HTML_FORM_ACCEPT_CHARSET]
+			     ? value[HTML_FORM_ACCEPT_CHARSET]
+			     : "UNKNOWN");
 	    }
 
 	    Base = (me->inBASE)
@@ -4217,8 +4218,9 @@ static int HTML_start_element(HTStructured * me, int element_number,
 	    }
 
 	    if (present && present[HTML_FORM_METHOD])
-		StrAllocCopy(method, value[HTML_FORM_METHOD] ?
-			     value[HTML_FORM_METHOD] : "GET");
+		StrAllocCopy(method, (value[HTML_FORM_METHOD]
+				      ? value[HTML_FORM_METHOD]
+				      : "GET"));
 
 	    if (present && present[HTML_FORM_ENCTYPE] &&
 		non_empty(value[HTML_FORM_ENCTYPE])) {
@@ -4232,12 +4234,10 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		 * for a SUBJECT attribute as a synonym.  - FM
 		 */
 		if (present[HTML_FORM_TITLE] &&
-		    value[HTML_FORM_TITLE] &&
-		    *value[HTML_FORM_TITLE] != '\0') {
+		    non_empty(value[HTML_FORM_TITLE])) {
 		    StrAllocCopy(title, value[HTML_FORM_TITLE]);
 		} else if (present[HTML_FORM_SUBJECT] &&
-			   value[HTML_FORM_SUBJECT] &&
-			   *value[HTML_FORM_SUBJECT] != '\0') {
+			   non_empty(value[HTML_FORM_SUBJECT])) {
 		    StrAllocCopy(title, value[HTML_FORM_SUBJECT]);
 		}
 		if (non_empty(title)) {
@@ -4528,9 +4528,11 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		I.type = value[HTML_INPUT_TYPE];
 
 		if (!strcasecomp(I.type, "range")) {
-		    if (present[HTML_INPUT_MIN])
+		    if (present[HTML_INPUT_MIN] &&
+			non_empty(value[HTML_INPUT_MIN]))
 			I.min = value[HTML_INPUT_MIN];
-		    if (present[HTML_INPUT_MAX])
+		    if (present[HTML_INPUT_MAX] &&
+			non_empty(value[HTML_INPUT_MAX]))
 			I.max = value[HTML_INPUT_MAX];
 		    /*
 		     * Not yet implemented.
@@ -4544,7 +4546,8 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		    break;
 
 		} else if (!strcasecomp(I.type, "file")) {
-		    if (present[HTML_INPUT_ACCEPT])
+		    if (present[HTML_INPUT_ACCEPT] &&
+			non_empty(value[HTML_INPUT_ACCEPT]))
 			I.accept = value[HTML_INPUT_ACCEPT];
 #ifndef USE_FILE_UPLOAD
 		    not_impl = "[FILE Input]";
@@ -4622,7 +4625,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 	     * Handle the INPUT as for a FORM.  - FM
 	     */
 	    if (!(present && present[HTML_INPUT_NAME] &&
-		  value[HTML_INPUT_NAME])) {
+		  non_empty(value[HTML_INPUT_NAME]))) {
 		I.name = "";
 	    } else if (strchr(value[HTML_INPUT_NAME], '&') == NULL) {
 		I.name = value[HTML_INPUT_NAME];
@@ -4727,9 +4730,9 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		}
 
 		StrAllocCopy(I_value,
-			     ((UseALTasVALUE == TRUE) ?
-			      value[HTML_INPUT_ALT] :
-			      value[HTML_INPUT_VALUE]));
+			     ((UseALTasVALUE == TRUE)
+			      ? value[HTML_INPUT_ALT]
+			      : value[HTML_INPUT_VALUE]));
 		if (me->UsePlainSpace && !me->HiddenValue) {
 		    I.value_cs = current_char_set;
 		}
@@ -8292,7 +8295,9 @@ static char *MakeNewImageValue(const char **value)
     char *newtitle = NULL;
 
     StrAllocCopy(newtitle, "[");
-    ptr = strrchr(value[HTML_INPUT_SRC], '/');
+    ptr = (value[HTML_INPUT_SRC]
+	   ? strrchr(value[HTML_INPUT_SRC], '/')
+	   : 0);
     if (!ptr) {
 	StrAllocCat(newtitle, value[HTML_INPUT_SRC]);
     } else {

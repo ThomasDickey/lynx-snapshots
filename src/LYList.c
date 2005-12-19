@@ -10,6 +10,7 @@
 #include <LYUtils.h>
 #include <GridText.h>
 #include <LYList.h>
+#include <LYMap.h>
 #include <LYClean.h>
 #include <LYGlobalDefs.h>
 #include <LYCharUtils.h>
@@ -231,6 +232,80 @@ int showlist(DocInfo *newdoc, BOOLEAN titles)
     return (0);
 }
 
+static void print_refs(FILE *fp, BOOLEAN titles, int refs)
+{
+    int cnt;
+    char *address = NULL;
+    const char *desc = gettext("unknown field or link");
+    void *helper = NULL;	/* init */
+
+    for (cnt = 1; cnt <= refs; cnt++) {
+	HTChildAnchor *child = HText_childNextNumber(cnt, &helper);
+	HTAnchor *dest;
+	HTParentAnchor *parent;
+	const char *title;
+
+	if (child == 0) {
+	    /*
+	     * child should not be 0 unless form field numbering is on and
+	     * cnt is the number of a form input field. 
+	     * HText_FormDescNumber() will set desc to a description of
+	     * what type of input field this is.  We'll create a
+	     * within-document link to ensure that the link numbers on the
+	     * list page match the numbering in the original document, but
+	     * won't create a forward link to the form.  - FM && LE
+	     */
+	    if (fields_are_numbered()) {
+		HText_FormDescNumber(cnt, &desc);
+		fprintf(fp, "%4d. form field = %s\n", cnt, desc);
+	    }
+	    continue;
+	}
+	dest = HTAnchor_followLink(child);
+	/*
+	 * Ignore if child anchor points to itself, i.e., we had something
+	 * like <A NAME=xyz HREF="#xyz"> and it is not treated as a hidden
+	 * link.  Useful if someone 'P'rints the List Page (which isn't a
+	 * very useful action to do, but anyway...) - kw
+	 */
+	if (dest == (HTAnchor *) child)
+	    continue;
+	parent = HTAnchor_parent(dest);
+	title = titles ? HTAnchor_title(parent) : NULL;
+	address = HTAnchor_address(dest);
+	fprintf(fp, "%4d. %s%s\n", cnt,
+		((HTAnchor *) parent != dest) && title ? "in " : "",
+		(title ? title : address));
+	FREE(address);
+#ifdef VMS
+	if (HadVMSInterrupt)
+	    break;
+#endif /* VMS */
+    }
+}
+
+static void print_hidden_refs(FILE *fp, int refs, int hidden_links)
+{
+    int cnt;
+    char *address = NULL;
+
+    fprintf(fp, "%s   %s\n", ((refs > 0) ? "\n" : ""),
+	    gettext("Hidden links:"));
+    for (cnt = 0; cnt < hidden_links; cnt++) {
+	StrAllocCopy(address, HText_HiddenLinkAt(HTMainText, cnt));
+	if (isEmpty(address)) {
+	    FREE(address);
+	    continue;
+	}
+	fprintf(fp, "%4d. %s\n", ((cnt + 1) + refs), address);
+	FREE(address);
+#ifdef VMS
+	if (HadVMSInterrupt)
+	    break;
+#endif /* VMS */
+    }
+}
+
 /*	printlist - F.Macrides (macrides@sci.wfeb.edu)
  *	---------
  *	Print a text/plain list of HyperText References
@@ -242,87 +317,25 @@ int showlist(DocInfo *newdoc, BOOLEAN titles)
  */
 void printlist(FILE *fp, BOOLEAN titles)
 {
-    int cnt;
     int refs, hidden_links;
-    char *address = NULL;
-    const char *desc = gettext("unknown field or link");
-    void *helper;
 
     refs = HText_sourceAnchors(HTMainText);
-    if (refs <= 0 && LYHiddenLinks != HIDDENLINKS_SEPARATE)
-	return;
-    hidden_links = HText_HiddenLinkCount(HTMainText);
-    if (refs <= 0 && hidden_links <= 0) {
-	return;
-    } else {
-	fprintf(fp, "\n%s\n\n", gettext("References"));
-	if (LYHiddenLinks == HIDDENLINKS_IGNORE)
-	    hidden_links = 0;
-	if (hidden_links > 0) {
-	    fprintf(fp, "   %s\n", gettext("Visible links"));
-	}
-	helper = NULL;		/* init */
-	for (cnt = 1; cnt <= refs; cnt++) {
-	    HTChildAnchor *child = HText_childNextNumber(cnt, &helper);
-	    HTAnchor *dest;
-	    HTParentAnchor *parent;
-	    const char *title;
-
-	    if (child == 0) {
-		/*
-		 * child should not be 0 unless form field numbering is on and
-		 * cnt is the number of a form input field. 
-		 * HText_FormDescNumber() will set desc to a description of
-		 * what type of input field this is.  We'll create a
-		 * within-document link to ensure that the link numbers on the
-		 * list page match the numbering in the original document, but
-		 * won't create a forward link to the form.  - FM && LE
-		 */
-		if (fields_are_numbered()) {
-		    HText_FormDescNumber(cnt, &desc);
-		    fprintf(fp, "%4d. form field = %s\n", cnt, desc);
-		}
-		continue;
+    if (refs > 0 || LYHiddenLinks == HIDDENLINKS_SEPARATE) {
+	hidden_links = HText_HiddenLinkCount(HTMainText);
+	if (refs > 0 || hidden_links > 0) {
+	    fprintf(fp, "\n%s\n\n", gettext("References"));
+	    if (LYHiddenLinks == HIDDENLINKS_IGNORE)
+		hidden_links = 0;
+	    if (hidden_links > 0) {
+		fprintf(fp, "   %s\n", gettext("Visible links"));
 	    }
-	    dest = HTAnchor_followLink(child);
-	    /*
-	     * Ignore if child anchor points to itself, i.e., we had something
-	     * like <A NAME=xyz HREF="#xyz"> and it is not treated as a hidden
-	     * link.  Useful if someone 'P'rints the List Page (which isn't a
-	     * very useful action to do, but anyway...) - kw
-	     */
-	    if (dest == (HTAnchor *) child)
-		continue;
-	    parent = HTAnchor_parent(dest);
-	    title = titles ? HTAnchor_title(parent) : NULL;
-	    address = HTAnchor_address(dest);
-	    fprintf(fp, "%4d. %s%s\n", cnt,
-		    ((HTAnchor *) parent != dest) && title ? "in " : "",
-		    (title ? title : address));
-	    FREE(address);
-#ifdef VMS
-	    if (HadVMSInterrupt)
-		break;
-#endif /* VMS */
-	}
+	    print_refs(fp, titles, refs);
 
-	if (hidden_links > 0) {
-	    fprintf(fp, "%s   %s\n", ((refs > 0) ? "\n" : ""),
-		    gettext("Hidden links:"));
-	    for (cnt = 0; cnt < hidden_links; cnt++) {
-		StrAllocCopy(address, HText_HiddenLinkAt(HTMainText, cnt));
-		if (isEmpty(address)) {
-		    FREE(address);
-		    continue;
-		}
-		fprintf(fp, "%4d. %s\n", ((cnt + 1) + refs), address);
-		FREE(address);
-#ifdef VMS
-		if (HadVMSInterrupt)
-		    break;
-#endif /* VMS */
+	    if (hidden_links > 0) {
+		print_hidden_refs(fp, refs, hidden_links);
 	    }
 	}
     }
+    LYPrintImgMaps(fp);
     return;
 }

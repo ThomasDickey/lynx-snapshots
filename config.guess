@@ -3,7 +3,7 @@
 #   Copyright (C) 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
 #   2000, 2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
 
-timestamp='2005-09-19'
+timestamp='2005-11-11'
 
 # This file is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by
@@ -214,11 +214,11 @@ case "${UNAME_MACHINE}:${UNAME_SYSTEM}:${UNAME_RELEASE}:${UNAME_VERSION}" in
 	exit ;;
     alpha:OSF1:*:*)
 	case $UNAME_RELEASE in
-	*4.0)
+	    *4.0)
 		UNAME_RELEASE=`/usr/sbin/sizer -v | awk '{print $3}'`
 		;;
-	*5.*)
-	        UNAME_RELEASE=`/usr/sbin/sizer -v | awk '{print $4}'`
+	    *5.*)
+		UNAME_RELEASE=`/usr/sbin/sizer -v | awk '{print $4}'`
 		;;
 	esac
 	# According to Compaq, /usr/sbin/psrinfo has been available on
@@ -290,7 +290,7 @@ case "${UNAME_MACHINE}:${UNAME_SYSTEM}:${UNAME_RELEASE}:${UNAME_VERSION}" in
 	echo s390-ibm-zvmoe
 	exit ;;
     *:OS400:*:*)
-        echo powerpc-ibm-os400
+	echo powerpc-ibm-os400
 	exit ;;
     arm:RISC*:1.[012]*:*|arm:riscix:1.[012]*:*)
 	echo arm-acorn-riscix${UNAME_RELEASE}
@@ -745,14 +745,14 @@ EOF
 	exit ;;
     F30[01]:UNIX_System_V:*:* | F700:UNIX_System_V:*:*)
 	FUJITSU_PROC=`uname -m | tr 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' 'abcdefghijklmnopqrstuvwxyz'`
-        FUJITSU_SYS=`uname -p | tr 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' 'abcdefghijklmnopqrstuvwxyz' | sed -e 's/\///'`
-        FUJITSU_REL=`echo ${UNAME_RELEASE} | sed -e 's/ /_/'`
-        echo "${FUJITSU_PROC}-fujitsu-${FUJITSU_SYS}${FUJITSU_REL}"
+	FUJITSU_SYS=`uname -p | tr 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' 'abcdefghijklmnopqrstuvwxyz' | sed -e 's/\///'`
+	FUJITSU_REL=`echo ${UNAME_RELEASE} | sed -e 's/ /_/'`
+	echo "${FUJITSU_PROC}-fujitsu-${FUJITSU_SYS}${FUJITSU_REL}"
         exit ;;
     5000:UNIX_System_V:4.*:*)
-        FUJITSU_SYS=`uname -p | tr 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' 'abcdefghijklmnopqrstuvwxyz' | sed -e 's/\///'`
-        FUJITSU_REL=`echo ${UNAME_RELEASE} | tr 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' 'abcdefghijklmnopqrstuvwxyz' | sed -e 's/ /_/'`
-        echo "sparc-fujitsu-${FUJITSU_SYS}${FUJITSU_REL}"
+	FUJITSU_SYS=`uname -p | tr 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' 'abcdefghijklmnopqrstuvwxyz' | sed -e 's/\///'`
+	FUJITSU_REL=`echo ${UNAME_RELEASE} | tr 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' 'abcdefghijklmnopqrstuvwxyz' | sed -e 's/ /_/'`
+	echo "sparc-fujitsu-${FUJITSU_SYS}${FUJITSU_REL}"
 	exit ;;
     i*86:BSD/386:*:* | i*86:BSD/OS:*:* | *:Ascend\ Embedded/OS:*:*)
 	echo ${UNAME_MACHINE}-pc-bsdi${UNAME_RELEASE}
@@ -773,13 +773,13 @@ EOF
 	echo ${UNAME_MACHINE}-pc-mingw32
 	exit ;;
     i*:windows32*:*)
-    	# uname -m includes "-pc" on this system.
-    	echo ${UNAME_MACHINE}-mingw32
+	# uname -m includes "-pc" on this system.
+	echo ${UNAME_MACHINE}-mingw32
 	exit ;;
     i*:PW*:*)
 	echo ${UNAME_MACHINE}-pc-pw32
 	exit ;;
-    x86:Interix*:[34]*)
+    x86:Interix*:[345]*)
 	echo i586-pc-interix${UNAME_RELEASE}|sed -e 's/\..*//'
 	exit ;;
     [345]86:Windows_95:* | [345]86:Windows_98:* | [345]86:Windows_NT:*)
@@ -824,7 +824,7 @@ EOF
 	echo crisv32-axis-linux-gnu
 	exit ;;
     frv:Linux:*:*)
-    	echo frv-unknown-linux-gnu
+	echo frv-unknown-linux-gnu
 	exit ;;
     ia64:Linux:*:*)
 	echo ${UNAME_MACHINE}-unknown-linux-gnu
@@ -874,8 +874,8 @@ EOF
 	test x"${CPU}" != x && { echo "${CPU}-unknown-linux-gnu"; exit; }
 	;;
     or32:Linux:*:*)
-	echo or32-unknown-linux-gnu
-	exit ;;
+    	echo or32-unknown-linux-gnu
+    	exit ;;
     ppc:Linux:*:*)
 	echo powerpc-unknown-linux-gnu
 	exit ;;
@@ -911,7 +911,7 @@ EOF
 	echo ${UNAME_MACHINE}-ibm-linux
 	exit ;;
     sh64*:Linux:*:*)
-    	echo ${UNAME_MACHINE}-unknown-linux-gnu
+	echo ${UNAME_MACHINE}-unknown-linux-gnu
 	exit ;;
     sh*:Linux:*:*)
 	echo ${UNAME_MACHINE}-unknown-linux-gnu
@@ -1024,7 +1024,7 @@ EOF
 	fi
 	exit ;;
     i*86:*:5:[678]*)
-    	# UnixWare 7.x, OpenUNIX and OpenServer 6.
+	# UnixWare 7.x, OpenUNIX and OpenServer 6.
 	case `/bin/uname -X | grep "^Machine"` in
 	    *486*)	     UNAME_MACHINE=i486 ;;
 	    *Pentium)	     UNAME_MACHINE=i586 ;;
@@ -1192,8 +1192,8 @@ EOF
     *:procnto*:*:* | *:QNX:[0123456789]*:*)
 	UNAME_PROCESSOR=`uname -p`
 	if test "$UNAME_PROCESSOR" = "x86"; then
-		UNAME_PROCESSOR=i386
-		UNAME_MACHINE=pc
+	    UNAME_PROCESSOR=i386
+	    UNAME_MACHINE=pc
 	fi
 	echo ${UNAME_PROCESSOR}-${UNAME_MACHINE}-nto-qnx${UNAME_RELEASE}
 	exit ;;
@@ -1245,13 +1245,13 @@ EOF
 	echo pdp10-unknown-its
 	exit ;;
     SEI:*:*:SEIUX)
-        echo mips-sei-seiux${UNAME_RELEASE}
+	echo mips-sei-seiux${UNAME_RELEASE}
 	exit ;;
     *:DragonFly:*:*)
 	echo ${UNAME_MACHINE}-unknown-dragonfly`echo ${UNAME_RELEASE}|sed -e 's/[-(].*//'`
 	exit ;;
     *:*VMS:*:*)
-    	UNAME_MACHINE=`(uname -p) 2>/dev/null`
+	UNAME_MACHINE=`(uname -p) 2>/dev/null`
 	case "${UNAME_MACHINE}" in
 	    A*) echo alpha-dec-vms ; exit ;;
 	    I*) echo ia64-dec-vms ; exit ;;

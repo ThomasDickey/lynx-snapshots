@@ -29,6 +29,8 @@
 #include <LYexit.h>
 #include <LYLeaks.h>
 
+#define NO_MAP_TITLE "[USEMAP]"
+
 typedef struct _LYMapElement {
     char *address;
     char *title;
@@ -204,7 +206,7 @@ BOOL LYAddImageMap(char *address,
 }
 
 /*
- * Utility for adding LYMapElements to LYImageMaps
+ * Utility for adding LYMapElement's to LYImageMap's
  * in the appropriate list. - FM
  */
 BOOL LYAddMapElement(char *map,
@@ -238,8 +240,9 @@ BOOL LYAddMapElement(char *map,
 	 * therefore represent a POST response, so use the specific list.  - kw
 	 */
 	theList = node_anchor->imaps;
-	if (!theList)
+	if (!theList) {
 	    return FALSE;
+	}
     } else
 #endif
     {
@@ -283,6 +286,11 @@ BOOL LYAddMapElement(char *map,
     tmp->intern_flag = intern_flag;
 #endif
     HTList_appendObject(theMap->elements, tmp);
+
+    CTRACE((tfp,
+	    "LYAddMapElement\n\tmap     %s\n\taddress %s\n\ttitle   %s)\n",
+	    NonNull(map), NonNull(address), NonNull(title)));
+
     return TRUE;
 }
 
@@ -530,13 +538,13 @@ static int LYLoadIMGmap(const char *arg,
     } else if (non_empty(anAnchor->title)) {
 	StrAllocCopy(MapTitle, anAnchor->title);
     } else if (non_empty(LYRequestTitle) &&
-	       strcasecomp(LYRequestTitle, "[USEMAP]")) {
+	       strcasecomp(LYRequestTitle, NO_MAP_TITLE)) {
 	StrAllocCopy(MapTitle, LYRequestTitle);
     } else if ((cp = strchr(address, '#')) != NULL) {
 	StrAllocCopy(MapTitle, (cp + 1));
     }
     if (isEmpty(MapTitle)) {
-	StrAllocCopy(MapTitle, "[USEMAP]");
+	StrAllocCopy(MapTitle, NO_MAP_TITLE);
     } else {
 	LYEntify(&MapTitle, TRUE);
     }
@@ -551,8 +559,8 @@ static int LYLoadIMGmap(const char *arg,
     PUTS(buf);
     /*
      * This page is a list of titles and anchors for them.  Since titles
-     * already passed SGML/HTML stage they converted to current_char_set.  That
-     * is why we insist on META charset for this page.
+     * already passed SGML/HTML stage they are converted to current_char_set. 
+     * That is why we insist on META charset for this page.
      */
     HTSprintf0(&buf, "<title>%s</title>\n", MapTitle);
     PUTS(buf);
@@ -598,6 +606,32 @@ static int LYLoadIMGmap(const char *arg,
     FREE(MapTitle);
     FREE(buf);
     return (HT_LOADED);
+}
+
+void LYPrintImgMaps(FILE *fp)
+{
+    HTList *outer = LynxMaps;
+    HTList *inner;
+    LYImageMap *map;
+    LYMapElement *elt;
+    int count;
+
+    if (HTList_count(outer) > 0) {
+	while (NULL != (map = (LYImageMap *) HTList_nextObject(outer))) {
+	    fprintf(fp, "\n%s\n", isEmpty(map->title) ? NO_MAP_TITLE : map->title);
+	    fprintf(fp, "%s\n", map->address);
+	    inner = map->elements;
+	    count = 0;
+	    while (NULL != (elt = (LYMapElement *) HTList_nextObject(inner))) {
+		fprintf(fp, "%4d. %s", ++count, elt->address);
+#ifndef DONT_TRACK_INTERNAL_LINKS
+		if (map->intern_flag)
+		    fprintf(fp, " TYPE=\"internal link\"");
+#endif
+		fprintf(fp, "\n");
+	    }
+	}
+    }
 }
 
 #ifdef GLOBALDEF_IS_MACRO

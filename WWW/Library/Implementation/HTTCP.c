@@ -608,6 +608,28 @@ extern int h_errno;
 #endif
 #endif
 
+/*
+ * Even though it is a small amount, we cannot count on reading the whole
+ * struct via a pipe in one read -TD
+ */
+static unsigned readit(int fd, char *buffer, unsigned length)
+{
+    unsigned result = 0;
+
+    while (length != 0) {
+	unsigned got = read(fd, buffer, length);
+
+	if (got != 0) {
+	    result += got;
+	    buffer += got;
+	    length -= got;
+	} else {
+	    break;
+	}
+    }
+    return result;
+}
+
 /*	Resolve an internet hostname, like gethostbyname
  *	------------------------------------------------
  *
@@ -883,6 +905,7 @@ LYNX_HOSTENT *LYGetHostByName(char *str)
 		 * Return our resulting rehostent through pipe...
 		 */
 		write(pfd[1], rehostent, rehostentlen);
+		close(pfd[1]);
 		_exit(0);
 	    } else {
 		/*
@@ -952,7 +975,7 @@ LYNX_HOSTENT *LYGetHostByName(char *str)
 		/*
 		 * First get status, including length of address.  -BL, kw
 		 */
-		readret = read(pfd[0], &statuses, sizeof(statuses));
+		readret = readit(pfd[0], (char *) &statuses, sizeof(statuses));
 		if (readret == sizeof(statuses)) {
 		    h_errno = statuses.child_h_errno;
 		    set_errno(statuses.child_errno);
@@ -997,7 +1020,7 @@ LYNX_HOSTENT *LYGetHostByName(char *str)
 			/*
 			 * Then get the full reorganized hostent.  -BL, kw
 			 */
-			readret = read(pfd[0], rehostent, statuses.rehostentlen);
+			readret = readit(pfd[0], rehostent, statuses.rehostentlen);
 #ifdef DEBUG_HOSTENT
 			dump_hostent("Read from pipe", (LYNX_HOSTENT *) rehostent);
 #endif

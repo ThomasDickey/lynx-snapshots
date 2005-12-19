@@ -1,6 +1,76 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2005-12-18 (2.8.6dev.16)
+* change configure option default for --enable-justify-elts to true -TD
+* change default for JUSTIFY to "false" (suggested by Bela Lubkin) -TD
+* update config.guess (2005-11-11) and config.sub (2005-11-13)
+* print the contents of image maps, if any, at the end of a dump (Debian
+  #335593) -TD
+* fix off-by-one line calculation that allowed the last page to be blank
+  (Debian #330413) -TD
+* modify statusline() to retain one trailing blank if the given string has a
+  trailing blank.  This makes prompts easier to read (report by Karl-Heinz
+  Weirich) -TD
+* modify pipe read in LYGetHostByName() to retry until either the pipe closes
+  or the struct passed back from the child process completes.  This is needed
+  for OS/2 EMX (report by Karl-Heinz Weirich) -TD
+* strip unneeded "&nbsp;" from translation when building info page using
+  wide curses (Debian #342877) -TD
+* add scripts/tbl2html.pl, which can be used to generate test pages for the
+  charsets from src/chrtrans/*.tbl -TD
+* add ISO-8859-13 and ISO-8859-14 chrtrans tables, revise ISO-8859-10
+  based on
+    http://czyborra.com/charsets/iso8859.html
+  Change display name for ISO-8859-10 to indicate the region -TD
+* add codepage 857 (DOSTurkish), since console-tools package provides a
+  suitable font -TD
+* improve UCSetBoxChars(), checking if the current character set does not
+  match the character set inferred from the locale.  This reduces the number
+  of cases where line-drawing in the options menu does not work -TD
+* rename test/iso8859-1.html and test/iso88592.html to test/iso-8859-1.html
+  and test/isoi-8859-2.html, corresponding to the proper MIME names to
+  simplify test-scripts -TD
+* update Linux console font support to use console-tools package (tested on
+  Debian).  The configure script checks for consolechars and setfont programs
+  (must find at least one).  The corresponding SETFONT_PATH can be set in
+  lynx.cfg to provide a choice between the two -TD
+* strip special characters such as '%' from parameters passed to external
+  programs for EXTERNAL mechanism on Windows platform.  This is ifdef'd
+  with WIN_EX (Takeshi Hataguchi).
+* modify definition of addch_raw() to allow scrollbar to work with slang2
+  (this only works on the Windows platform) -GV
+* modify LYSysShell() to use $COMSPEC if $SHELL is not defined -GV
+* workaround for codepage support on OS/2 by changing the effect of unctrl().
+  Add/use new preferred function use_legacy_coding() to ncurses which provides
+  the same effect with the wide-character ncursesw (report by Karl-Heinz
+  Weirich) -TD
+* fixes for de.po (Debian #313789, patch by Jens Seidel).
+* add a null pointer check for HTCurSelectedOptionValue in HText_setLastOptionValue()
+  to improve handling of this fragment:
+    <FORM><SELECT><OPTION><FORM><SELECT>
+  (Alexey Dobriyan).
+* add a null pointer check in HTML_TAB case of HTML_start_element() to handle
+  this fragment:
+    <TAB INDENT=1 TO>
+  (Alexey Dobriyan).
+* remove pointer to 
+     http://www.moxienet.com/lynx/
+  since it no longer has useful information about SSL for Lynx (Crouton).
+* add description of configure --with-build-cc, etc., to INSTALLATION -TD
+* modify Switch_Display_Charset() so the font-switching feature can be turned
+  off at runtime, rather than silently re-enabling it every time a new page is
+  viewed.  The automatic switching is enabled if the user has configured lynx
+  to use one of the automatically-detected fonts -TD
+* fix ifdef's to allow building --without-font-switch with OS/2 EMX -TD
+* work around bug in PDCurses wrapping by adjusting LYcolLimit macro.  The
+  dev.14 change to HText_appendCharacter() exposed this bug in the Options menu
+  (report by Hataguchi Takeshi) -TD
+* fix change to lynx_default_colors() from dev.14 change to work with the
+  bright-blue.lss file (report by FLWM) -TD
+* add a configure test for ctermid(), needed for OS/2 EMX (report by
+  YANAGIHARA Nobuyuki) -TD
+
 2005-10-30 (2.8.6dev.15)
 * update URL for VMS server information in LYCgi.c
 * modify LYLoadCGI() to prompt user, displaying the command that would be
@@ -183,7 +253,7 @@ Changes since Lynx 2.8 release
 * remove fixed limit on history[] array (report by Richard Eyre) -TD
 * improve logic for highlighting links which extend to multiple lines by
   ensuring that if they cover a blank line that the following lines of the
-  link will be highlighted rather than the blank line (report Hataguchi
+  link will be highlighted rather than the blank line (report by Hataguchi
   Takeshi).
 * replace most instances of exit() by exit_immediately(), except those needed
   for the leak-checking code, to add an ifdef'd call to _nc_freeall() which

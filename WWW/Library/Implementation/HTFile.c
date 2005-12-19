@@ -2929,6 +2929,11 @@ void HTInitProgramPaths(void)
 	    path = RMDIR_PATH;
 	    break;
 #endif
+#ifdef SETFONT_PATH
+	case ppSETFONT:
+	    path = SETFONT_PATH;
+	    break;
+#endif
 #ifdef TAR_PATH
 	case ppTAR:
 	    path = TAR_PATH;
