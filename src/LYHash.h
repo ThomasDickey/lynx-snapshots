@@ -80,6 +80,7 @@ extern "C" {
 #define CACHEH 64
 
     extern unsigned cached_styles[CACHEH][CACHEW];
+#define CACHE_VALIDATE_YX(y, x) ((y) >= 0 && (x) >= 0 && (y) < CACHEH && (x) < CACHEW)
 
 #ifdef __cplusplus
 }

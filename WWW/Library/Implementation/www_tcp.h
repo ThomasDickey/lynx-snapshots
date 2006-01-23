@@ -204,6 +204,10 @@ extern int ws_netread(int fd, char *buf, int len);
 #error Define "WIN32_LEAN_AND_MEAN" in your makefile
 #endif
 
+#ifdef _WINSOCKAPI_
+#error windows.h included before winsock2.h
+#endif
+
 #if defined(_MSC_VER) && (!defined(_WIN32_WINNT) || _WIN32_WINNT < 0x0501)
 /*
  * Needed to pull in the real getaddrinfo() and not the inline version

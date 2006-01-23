@@ -625,7 +625,7 @@ void LYPrintImgMaps(FILE *fp)
 	    while (NULL != (elt = (LYMapElement *) HTList_nextObject(inner))) {
 		fprintf(fp, "%4d. %s", ++count, elt->address);
 #ifndef DONT_TRACK_INTERNAL_LINKS
-		if (map->intern_flag)
+		if (elt->intern_flag)
 		    fprintf(fp, " TYPE=\"internal link\"");
 #endif
 		fprintf(fp, "\n");

@@ -65,6 +65,12 @@ extern "C" {
     extern char *HTCacheFileName(const char *name);
 
 /*
+ *  Generate fragments of HTML for source-view:
+ */
+    extern void HTStructured_doctype(HTStructured * target, HTFormat format_out);
+
+    extern void HTStructured_meta(HTStructured * target, HTFormat format_out);
+/*
  *  Output directory titles
  *
  * This is (like the next one) used by HTFTP. It is common code to generate
@@ -74,6 +80,7 @@ extern "C" {
  * FALSE otherwise - KW
  */
     extern BOOL HTDirTitles(HTStructured * target, HTParentAnchor *anchor,
+			    HTFormat format_out,
 			    BOOL tildeIsTop);
 
 /*

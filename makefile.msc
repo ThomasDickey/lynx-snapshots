@@ -2,6 +2,17 @@
 # Makefile for `Lynx' browser for Microsoft Visual C++ 4.2 or later
 #
 
+###############################################################################
+# These are the symbols that you may wish to set on the command line:
+#	DEBUG    - nonempty for debugging
+#	ETC_LIB  - the directory containing PDCurses and ZLib (libraries and headers)
+#	OPT_CS   - nonempty to use color-style
+#	OPT_SOCK - nonempty to build with winsock2
+#	OPT_SSL  - nonempty to build with OpenSSL
+#	SSL_DIR  - directory containing OpenSSL
+#	PROGNAME - name of executable (lynx.exe)
+###############################################################################
+
 CC       = cl
 LD       = link
 
@@ -9,20 +20,30 @@ SRC_DIR = src
 WWW_DIR = WWW\Library\Implementation
 
 # pdcurses.lib panel.lib dirent.obj curses.h panel.h dirent.h
+!if "$(ETC_LIB)" == ""
 ETC_LIB = lib
+!endif
 
-# Uncomment the CS_DEFS and CS_OBJS lines if you wish to build the color-style
+# Enable the CS_DEFS and CS_OBJS lines if you wish to build the color-style
 # configuration.
-#CS_DEFS = /D "CHAR_BIT=8" /D "USE_COLOR_STYLE"
-#CS_OBJS = "LYHash.obj" "LYStyle.obj"
+!if "$(OPT_CS)" != ""
+CS_DEFS = /D "CHAR_BIT=8" /D "USE_COLOR_STYLE"
+CS_OBJS = "LYHash.obj" "LYStyle.obj"
+!endif
 
-# Uncomment SOCK_DEFS if you wish to build with winsock2.
-#SOCK_DEFS = /D "USE_WINSOCK2_H" /D "_WIN32_WINNT=0x0400"
+# Enable SOCK_DEFS if you wish to build with winsock2.
+!if "$(OPT_SOCK)" != ""
+SOCK_DEFS = /D "USE_WINSOCK2_H" /D "_WIN32_WINNT=0x0400"
+!endif
 
-# Uncomment these to build with OpenSSL, adjusting SSL_DIR as needed.
-#SSL_DIR = C:\OpenSSL
-#SSL_DEFS = /D "USE_SSL" -I "$(SSL_DIR)\include" -I"$(SSL_DIR)\include\openssl"
-#SSL_LIBS = "$(SSL_DIR)\lib\ssleay32.lib" "$(SSL_DIR)\lib\libeay32.lib"
+# Enable these to build with OpenSSL, adjusting SSL_DIR as needed.
+!if "$(OPT_SSL)" != ""
+!if "$(SSL_DIR)" == ""
+SSL_DIR = C:\OpenSSL
+!endif
+SSL_DEFS = /D "USE_SSL" -I "$(SSL_DIR)\include" -I"$(SSL_DIR)\include\openssl"
+SSL_LIBS = "$(SSL_DIR)\lib\ssleay32.lib" "$(SSL_DIR)\lib\libeay32.lib"
+!endif
 
 INCLUDES = \
  /I "." \
@@ -74,11 +95,15 @@ DEFS = $(CS_DEFS) $(SOCK_DEFS) $(SSL_DEFS) \
  /D LY_MAXPATH="1024"  \
  /D _WIN_CC="1" \
  /D VC="2.14FM"
-CFLAGS   = /nologo /MT /W3 /GX /O2 /c
-#CFLAGS   = /nologo /MT /W3 /GX /Zi /c
 
+!if "$(DEBUG)" == ""
+CFLAGS   = /nologo /MT /W3 /GX /O2 /c
 LDFLAGS  = /nologo /subsystem:console /incremental:no /machine:I386
-#LDFLAGS  = /debug /nologo /subsystem:console /incremental:no /machine:I386
+!else
+CFLAGS   = /nologo /MT /W3 /GX /Zi /c
+LDFLAGS  = /debug /nologo /subsystem:console /incremental:no /machine:I386
+!endif
+
 LIBS     = kernel32.lib user32.lib wsock32.lib /NODEFAULTLIB:libc\
  $(ETC_LIB)\pdcurses.lib $(ETC_LIB)\zlib.lib dirent.obj $(SSL_LIBS)
 
@@ -174,14 +199,18 @@ OBJS = $(CS_OBJS) \
 .c.i :
 	$(CC) $(INCLUDES) $(DEFS) /P $<
 
-all : lynx.exe
+!if "$(PROGNAME)" == ""
+PROGNAME = lynx.exe
+!endif
+
+all : $(PROGNAME)
 
 clean :
 	-del *.map
 	-del *.obj
 	-del/f/s/q *.i
 
-lynx.exe: $(OBJS) dirent.obj
+$(PROGNAME) : $(OBJS) dirent.obj
 	$(LINK) $(OBJS) $(LIBS)
 
 DefaultStyle.obj : $(SRC_DIR)\DefaultStyle.c
@@ -441,4 +470,3 @@ HTWSRC.obj : $(WWW_DIR)\HTWSRC.c
 
 SGML.obj : $(WWW_DIR)\SGML.c
 	$(COMPILE) $(WWW_DIR)\SGML.c
-

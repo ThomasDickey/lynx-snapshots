@@ -74,6 +74,11 @@
 #include <LYGlobalDefs.h>
 #include <LYStrings.h>
 #include <LYUtils.h>
+
+#ifdef USE_PRETTYSRC
+# include <LYPrettySrc.h>
+#endif
+
 #include <LYLeaks.h>
 
 typedef struct _HTSuffix {
@@ -251,7 +256,6 @@ static void LYListFmtParse(const char *fmtstr,
     StrAllocCopy(str, fmtstr);
     s = str;
     end = str + strlen(str);
-    START(HTML_PRE);
     while (*s) {
 	start = s;
 	while (*s) {
@@ -464,7 +468,6 @@ static void LYListFmtParse(const char *fmtstr,
 	s++;
     }
     FREE(buf);
-    END(HTML_PRE);
     PUTC('\n');
     FREE(str);
 }
@@ -1372,7 +1375,7 @@ void HTDirEntry(HTStructured * target, const char *tail,
 	}
     }
 
-    if (tail == NULL || *tail == '\0') {
+    if (isEmpty(tail)) {
 	/*
 	 * Handle extra slash at end of path.
 	 */
@@ -1393,6 +1396,37 @@ void HTDirEntry(HTStructured * target, const char *tail,
     FREE(escaped);
 }
 
+static BOOL view_structured(HTFormat format_out)
+{
+    BOOL result = FALSE;
+
+#ifdef USE_PRETTYSRC
+    if (psrc_view
+	|| (format_out == HTAtom_for("www/dump")))
+	result = TRUE;
+#else
+    if (format_out == WWW_SOURCE)
+	result = TRUE;
+#endif
+    return result;
+}
+
+/*
+ * Write a DOCTYPE to the given stream if we happen to want to see the
+ * source view, or are dumping source.  This is not needed when the source
+ * is not visible, since the document is rendered from a HTStructured object.
+ */
+void HTStructured_doctype(HTStructured * target, HTFormat format_out)
+{
+    if (view_structured(format_out))
+	PUTS("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">\n");
+}
+
+void HTStructured_meta(HTStructured * target, HTFormat format_out)
+{
+    if (view_structured(format_out))
+	PUTS("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=iso-8859-1\">\n");
+}
 /*	Output parent directory entry.
  *	------------------------------
  *
@@ -1407,6 +1441,7 @@ void HTDirEntry(HTStructured * target, const char *tail,
  *	to the parent directory.  Otherwise, it returns FALSE. - FM
  */
 BOOL HTDirTitles(HTStructured * target, HTParentAnchor *anchor,
+		 HTFormat format_out,
 		 BOOL tildeIsTop)
 {
     const char *logical = anchor->address;
@@ -1475,6 +1510,8 @@ BOOL HTDirTitles(HTStructured * target, HTParentAnchor *anchor,
 	HTUnEscape(printable);
 #endif /* DIRED_SUPPORT */
 
+	HTStructured_doctype(target, format_out);
+
 	START(HTML_HEAD);
 	PUTC('\n');
 	START(HTML_TITLE);
@@ -1482,7 +1519,11 @@ BOOL HTDirTitles(HTStructured * target, HTParentAnchor *anchor,
 	PUTS(SEGMENT_DIRECTORY);
 	END(HTML_TITLE);
 	PUTC('\n');
+	HTStructured_meta(target, format_out);
 	END(HTML_HEAD);
+	PUTC('\n');
+
+	START(HTML_BODY);
 	PUTC('\n');
 
 #ifdef DIRED_SUPPORT
@@ -1727,16 +1768,23 @@ static int print_local_dir(DIR *dp, char *localname,
 			   HTStream *sink)
 {
     HTStructured *target;	/* HTML object */
+    HTBTree *bt;
     HTStructuredClass targetClass;
     STRUCT_DIRENT *dirbuf;
     char *pathname = NULL;
     char *tail = NULL;
+    char *p;
     BOOL present[HTML_A_ATTRIBUTES];
     char *tmpfilename = NULL;
     BOOL need_parent_link = FALSE;
+    BOOL preformatted = FALSE;
     int status;
     int i;
     struct stat *actual_info;
+
+#ifdef DISP_PARTIAL
+    int num_of_entries = 0;	/* lines counter */
+#endif
 
 #ifdef S_IFLNK
     struct stat link_info;
@@ -1747,27 +1795,9 @@ static int print_local_dir(DIR *dp, char *localname,
     pathname = HTParse(anchor->address, "",
 		       PARSE_PATH + PARSE_PUNCTUATION);
 
-    if (!strcmp(pathname, "/")) {
-	/*
-	 * Root path.
-	 */
-	StrAllocCopy(tail, "/foo/..");
-    } else {
-	char *p = strrchr(pathname, '/');	/* find last slash */
-
-	if (!p) {
-	    /*
-	     * This probably should not happen, but be prepared if it does.  -
-	     * KW
-	     */
-	    StrAllocCopy(tail, "/foo/..");
-	} else {
-	    /*
-	     * Take slash off the beginning.
-	     */
-	    StrAllocCopy(tail, (p + 1));
-	}
-    }
+    if ((p = strrchr(pathname, '/')) == 0)
+	p = "/";
+    StrAllocCopy(tail, (p + 1));
     FREE(pathname);
 
     if (UCLYhndl_HTFile_for_unspec >= 0) {
@@ -1789,7 +1819,7 @@ static int print_local_dir(DIR *dp, char *localname,
      * defined and NO_PARENT_DIR_REFERENCE is not defined so that need we to
      * create the link via an LYListFmtParse() call.  - FM
      */
-    need_parent_link = HTDirTitles(target, anchor, FALSE);
+    need_parent_link = HTDirTitles(target, anchor, format_out, FALSE);
 
 #ifdef DIRED_SUPPORT
     if (!isLYNXCGI(anchor->address)) {
@@ -1800,288 +1830,306 @@ static int print_local_dir(DIR *dp, char *localname,
     if (HTDirReadme == HT_DIR_README_TOP)
 	do_readme(target, localname);
 
-    {
-	HTBTree *bt = HTBTree_new(dired_cmp);
-	int num_of_entries = 0;	/* lines counter */
+    bt = HTBTree_new(dired_cmp);
 
-	_HTProgress(READING_DIRECTORY);
-	status = HT_LOADED;	/* assume we don't get interrupted */
-	while ((dirbuf = readdir(dp)) != NULL) {
-	    /*
-	     * While there are directory entries to be read...
-	     */
-	    DIRED *data = NULL;
+    _HTProgress(READING_DIRECTORY);
+    status = HT_LOADED;		/* assume we don't get interrupted */
+    while ((dirbuf = readdir(dp)) != NULL) {
+	/*
+	 * While there are directory entries to be read...
+	 */
+	DIRED *data = NULL;
 
 #if !(defined(DOSPATH) || defined(__EMX__))
-	    if (dirbuf->d_ino == 0)
-		/*
-		 * If the entry is not being used, skip it.
-		 */
-		continue;
+	if (dirbuf->d_ino == 0)
+	    /*
+	     * If the entry is not being used, skip it.
+	     */
+	    continue;
 #endif
-	    /*
-	     * Skip self, parent if handled in HTDirTitles() or if
-	     * NO_PARENT_DIR_REFERENCE is not defined, and any dot files if
-	     * no_dotfiles is set or show_dotfiles is not set.  - FM
-	     */
-	    if (!strcmp(dirbuf->d_name, ".") /* self       */ ||
-		(!strcmp(dirbuf->d_name, "..") /* parent */ &&
-		 need_parent_link == FALSE) ||
-		((strcmp(dirbuf->d_name, "..")) &&
-		 (dirbuf->d_name[0] == '.' &&
-		  (no_dotfiles || !show_dotfiles))))
-		continue;
+	/*
+	 * Skip self, parent if handled in HTDirTitles() or if
+	 * NO_PARENT_DIR_REFERENCE is not defined, and any dot files if
+	 * no_dotfiles is set or show_dotfiles is not set.  - FM
+	 */
+	if (!strcmp(dirbuf->d_name, ".") /* self       */ ||
+	    (!strcmp(dirbuf->d_name, "..") /* parent */ &&
+	     need_parent_link == FALSE) ||
+	    ((strcmp(dirbuf->d_name, "..")) &&
+	     (dirbuf->d_name[0] == '.' &&
+	      (no_dotfiles || !show_dotfiles))))
+	    continue;
 
-	    StrAllocCopy(tmpfilename, localname);
-	    /*
-	     * If filename is not root directory, add trailing separator.
-	     */
-	    LYAddPathSep(&tmpfilename);
+	StrAllocCopy(tmpfilename, localname);
+	/*
+	 * If filename is not root directory, add trailing separator.
+	 */
+	LYAddPathSep(&tmpfilename);
 
-	    StrAllocCat(tmpfilename, dirbuf->d_name);
-	    data = (DIRED *) malloc(sizeof(DIRED) + strlen(dirbuf->d_name) + 4);
-	    if (data == NULL) {
+	StrAllocCat(tmpfilename, dirbuf->d_name);
+	data = (DIRED *) malloc(sizeof(DIRED) + strlen(dirbuf->d_name) + 4);
+	if (data == NULL) {
+	    status = HT_PARTIAL_CONTENT;
+	    break;
+	}
+	LYTrimPathSep(tmpfilename);
+
+	actual_info = &(data->file_info);
+#ifdef S_IFLNK
+	if (lstat(tmpfilename, actual_info) < 0) {
+	    actual_info->st_mode = 0;
+	} else {
+	    if (S_ISLNK(actual_info->st_mode)) {
+		actual_info = &link_info;
+		if (stat(tmpfilename, actual_info) < 0)
+		    actual_info->st_mode = 0;
+	    }
+	}
+#else
+	if (stat(tmpfilename, actual_info) < 0)
+	    actual_info->st_mode = 0;
+#endif
+
+	strcpy(data->file_name, dirbuf->d_name);
+#ifndef DIRED_SUPPORT
+	if (S_ISDIR(actual_info->st_mode)) {
+	    data->sort_tags = 'D';
+	} else {
+	    data->sort_tags = 'F';
+	    /* D & F to have first directories, then files */
+	}
+#else
+	if (S_ISDIR(actual_info->st_mode)) {
+	    if (dir_list_style == MIXED_STYLE) {
+		data->sort_tags = ' ';
+		LYAddPathSep0(data->file_name);
+	    } else if (!strcmp(dirbuf->d_name, "..")) {
+		data->sort_tags = 'A';
+	    } else {
+		data->sort_tags = 'D';
+	    }
+	} else if (dir_list_style == MIXED_STYLE) {
+	    data->sort_tags = ' ';
+	} else if (dir_list_style == FILES_FIRST) {
+	    data->sort_tags = 'C';
+	    /* C & D to have first files, then directories */
+	} else {
+	    data->sort_tags = 'F';
+	}
+#endif /* !DIRED_SUPPORT */
+	/*
+	 * Sort dirname in the tree bt.
+	 */
+	HTBTree_add(bt, data);
+
+#ifdef DISP_PARTIAL
+	/* optimize for expensive operation: */
+	if (num_of_entries % (partial_threshold > 0 ?
+			      partial_threshold : display_lines)
+	    == 0) {
+	    if (HTCheckForInterrupt()) {
 		status = HT_PARTIAL_CONTENT;
 		break;
 	    }
-	    LYTrimPathSep(tmpfilename);
+	}
+	num_of_entries++;
+#endif /* DISP_PARTIAL */
 
-	    actual_info = &(data->file_info);
-#ifdef S_IFLNK
-	    if (lstat(tmpfilename, actual_info) < 0) {
-		actual_info->st_mode = 0;
-	    } else {
-		if (S_ISLNK(actual_info->st_mode)) {
-		    actual_info = &link_info;
-		    if (stat(tmpfilename, actual_info) < 0)
-			actual_info->st_mode = 0;
-		}
-	    }
-#else
-	    if (stat(tmpfilename, actual_info) < 0)
-		actual_info->st_mode = 0;
-#endif
+    }				/* end while directory entries left to read */
 
-	    strcpy(data->file_name, dirbuf->d_name);
-#ifndef DIRED_SUPPORT
-	    if (S_ISDIR(actual_info->st_mode)) {
-		data->sort_tags = 'D';
-	    } else {
-		data->sort_tags = 'F';
-		/* D & F to have first directories, then files */
-	    }
-#else
-	    if (S_ISDIR(actual_info->st_mode)) {
-		if (dir_list_style == MIXED_STYLE) {
-		    data->sort_tags = ' ';
-		    LYAddPathSep0(data->file_name);
-		} else if (!strcmp(dirbuf->d_name, "..")) {
-		    data->sort_tags = 'A';
-		} else {
-		    data->sort_tags = 'D';
-		}
-	    } else if (dir_list_style == MIXED_STYLE) {
-		data->sort_tags = ' ';
-	    } else if (dir_list_style == FILES_FIRST) {
-		data->sort_tags = 'C';
-		/* C & D to have first files, then directories */
-	    } else {
-		data->sort_tags = 'F';
-	    }
-#endif /* !DIRED_SUPPORT */
-	    /*
-	     * Sort dirname in the tree bt.
-	     */
-	    HTBTree_add(bt, data);
+    if (status != HT_PARTIAL_CONTENT)
+	_HTProgress(OPERATION_OK);
+    else
+	CTRACE((tfp, "Reading the directory interrupted by user\n"));
 
-#ifdef DISP_PARTIAL
-	    /* optimize for expensive operation: */
-	    if (num_of_entries % (partial_threshold > 0 ?
-				  partial_threshold : display_lines)
-		== 0) {
+    /*
+     * Run through tree printing out in order.
+     */
+    {
+	HTBTElement *next_element = HTBTree_next(bt, NULL);
+
+	/* pick up the first element of the list */
+	int num_of_entries_output = 0;	/* lines counter */
+
+	char state;
+
+	/* I for initial (.. file),
+	   D for directory file,
+	   F for file */
+
+#ifdef DIRED_SUPPORT
+	char test;
+#endif /* DIRED_SUPPORT */
+	state = 'I';
+
+	while (next_element != NULL) {
+	    DIRED *entry;
+
+#ifndef DISP_PARTIAL
+	    if (num_of_entries_output % HTMAX(display_lines, 10) == 0) {
 		if (HTCheckForInterrupt()) {
+		    _HTProgress(TRANSFER_INTERRUPTED);
 		    status = HT_PARTIAL_CONTENT;
 		    break;
 		}
 	    }
-	    num_of_entries++;
-#endif /* DISP_PARTIAL */
-
-	}			/* end while directory entries left to read */
-
-	if (status != HT_PARTIAL_CONTENT)
-	    _HTProgress(OPERATION_OK);
-	else
-	    CTRACE((tfp, "Reading the directory interrupted by user\n"));
-
-	/*
-	 * Run through tree printing out in order.
-	 */
-	{
-	    HTBTElement *next_element = HTBTree_next(bt, NULL);
-
-	    /* pick up the first element of the list */
-	    int num_of_entries_output = 0;	/* lines counter */
-
-	    char state;
-
-	    /* I for initial (.. file),
-	       D for directory file,
-	       F for file */
-
-#ifdef DIRED_SUPPORT
-	    char test;
-#endif /* DIRED_SUPPORT */
-	    state = 'I';
-
-	    while (next_element != NULL) {
-		DIRED *entry;
-
-#ifndef DISP_PARTIAL
-		if (num_of_entries_output % HTMAX(display_lines, 10) == 0) {
-		    if (HTCheckForInterrupt()) {
-			_HTProgress(TRANSFER_INTERRUPTED);
-			status = HT_PARTIAL_CONTENT;
-			break;
-		    }
-		}
 #endif
-		StrAllocCopy(tmpfilename, localname);
-		/*
-		 * If filename is not root directory.
-		 */
-		LYAddPathSep(&tmpfilename);
+	    StrAllocCopy(tmpfilename, localname);
+	    /*
+	     * If filename is not root directory.
+	     */
+	    LYAddPathSep(&tmpfilename);
 
-		entry = (DIRED *) (HTBTree_object(next_element));
-		/*
-		 * Append the current entry's filename to the path.
-		 */
-		StrAllocCat(tmpfilename, entry->file_name);
-		HTSimplify(tmpfilename);
-		/*
-		 * Output the directory entry.
-		 */
-		if (strcmp(DIRED_NAME(HTBTree_object(next_element)), "..")) {
+	    entry = (DIRED *) (HTBTree_object(next_element));
+	    /*
+	     * Append the current entry's filename to the path.
+	     */
+	    StrAllocCat(tmpfilename, entry->file_name);
+	    HTSimplify(tmpfilename);
+	    /*
+	     * Output the directory entry.
+	     */
+	    if (strcmp(DIRED_NAME(HTBTree_object(next_element)), "..")) {
 #ifdef DIRED_SUPPORT
-		    test = (DIRED_BLOK(HTBTree_object(next_element))
-			    == 'D' ? 'D' : 'F');
-		    if (state != test) {
+		test = (DIRED_BLOK(HTBTree_object(next_element))
+			== 'D' ? 'D' : 'F');
+		if (state != test) {
 #ifndef LONG_LIST
-			if (dir_list_style == FILES_FIRST) {
-			    if (state == 'F') {
-				END(HTML_DIR);
-				PUTC('\n');
-			    }
-			} else if (dir_list_style != MIXED_STYLE)
-			    if (state == 'D') {
-				END(HTML_DIR);
-				PUTC('\n');
-			    }
-#endif /* !LONG_LIST */
-			state =
-			    (char) (DIRED_BLOK(HTBTree_object(next_element))
-				    == 'D' ? 'D' : 'F');
-			START(HTML_H2);
-			if (dir_list_style != MIXED_STYLE) {
-			    START(HTML_EM);
-			    PUTS(state == 'D'
-				 ? LABEL_SUBDIRECTORIES
-				 : LABEL_FILES);
-			    END(HTML_EM);
+		    if (dir_list_style == FILES_FIRST) {
+			if (state == 'F') {
+			    END(HTML_DIR);
+			    PUTC('\n');
 			}
-			END(HTML_H2);
-			PUTC('\n');
-#ifndef LONG_LIST
-			START(HTML_DIR);
-			PUTC('\n');
-#endif /* !LONG_LIST */
-		    }
-#else
-		    if (state != DIRED_BLOK(HTBTree_object(next_element))) {
-#ifndef LONG_LIST
+		    } else if (dir_list_style != MIXED_STYLE)
 			if (state == 'D') {
 			    END(HTML_DIR);
 			    PUTC('\n');
 			}
 #endif /* !LONG_LIST */
-			state =
-			    (char) (DIRED_BLOK(HTBTree_object(next_element))
-				    == 'D' ? 'D' : 'F');
-			START(HTML_H2);
+		    state =
+			(char) (DIRED_BLOK(HTBTree_object(next_element))
+				== 'D' ? 'D' : 'F');
+		    if (preformatted) {
+			END(HTML_PRE);
+			PUTC('\n');
+			preformatted = FALSE;
+		    }
+		    START(HTML_H2);
+		    if (dir_list_style != MIXED_STYLE) {
 			START(HTML_EM);
 			PUTS(state == 'D'
 			     ? LABEL_SUBDIRECTORIES
 			     : LABEL_FILES);
 			END(HTML_EM);
-			END(HTML_H2);
-			PUTC('\n');
-#ifndef LONG_LIST
-			START(HTML_DIR);
-			PUTC('\n');
-#endif /* !LONG_LIST */
 		    }
+		    END(HTML_H2);
+		    PUTC('\n');
+#ifndef LONG_LIST
+		    START(HTML_DIR);
+		    PUTC('\n');
+#endif /* !LONG_LIST */
+		}
+#else
+		if (state != DIRED_BLOK(HTBTree_object(next_element))) {
+#ifndef LONG_LIST
+		    if (state == 'D') {
+			END(HTML_DIR);
+			PUTC('\n');
+		    }
+#endif /* !LONG_LIST */
+		    state =
+			(char) (DIRED_BLOK(HTBTree_object(next_element))
+				== 'D' ? 'D' : 'F');
+		    if (preformatted) {
+			END(HTML_PRE);
+			PUTC('\n');
+			preformatted = FALSE;
+		    }
+		    START(HTML_H2);
+		    START(HTML_EM);
+		    PUTS(state == 'D'
+			 ? LABEL_SUBDIRECTORIES
+			 : LABEL_FILES);
+		    END(HTML_EM);
+		    END(HTML_H2);
+		    PUTC('\n');
+#ifndef LONG_LIST
+		    START(HTML_DIR);
+		    PUTC('\n');
+#endif /* !LONG_LIST */
+		}
 #endif /* DIRED_SUPPORT */
 #ifndef LONG_LIST
-		    START(HTML_LI);
-#endif /* !LONG_LIST */
-		}
-#ifdef LONG_LIST
-		LYListFmtParse(list_format, entry, tmpfilename, target, tail);
-#else
-		HTDirEntry(target, tail, entry->file_name);
-		PUTS(entry->file_name);
-		END(HTML_A);
-		MAYBE_END(HTML_LI);
-		PUTC('\n');
-#endif /* LONG_LIST */
-
-		next_element = HTBTree_next(bt, next_element);
-		/* pick up the next element of the list;
-		   if none, return NULL */
-
-		/* optimize for expensive operation: */
-#ifdef DISP_PARTIAL
-		if (num_of_entries_output %
-		    (partial_threshold > 0 ? partial_threshold : display_lines)
-		    == 0) {
-		    /* num_of_entries, num_of_entries_output... */
-		    /* HTReadProgress...(bytes, 0); */
-		    HTDisplayPartial();
-
-		    if (HTCheckForInterrupt()) {
-			_HTProgress(TRANSFER_INTERRUPTED);
-			status = HT_PARTIAL_CONTENT;
-			break;
-		    }
-		}
-		num_of_entries_output++;
-#endif /* DISP_PARTIAL */
-
-	    }			/* end while next_element */
-
-	    if (status == HT_LOADED) {
-		if (state == 'I') {
-		    START(HTML_P);
-		    PUTS("Empty Directory");
-		}
-#ifndef LONG_LIST
-		else
-		    END(HTML_DIR);
+		START(HTML_LI);
 #endif /* !LONG_LIST */
 	    }
-	}			/* end printing out the tree in order */
+	    if (!preformatted) {
+		START(HTML_PRE);
+		PUTC('\n');
+		preformatted = TRUE;
+	    }
+#ifdef LONG_LIST
+	    LYListFmtParse(list_format, entry, tmpfilename, target, tail);
+#else
+	    HTDirEntry(target, tail, entry->file_name);
+	    PUTS(entry->file_name);
+	    END(HTML_A);
+	    MAYBE_END(HTML_LI);
+	    PUTC('\n');
+#endif /* LONG_LIST */
 
-	FREE(tmpfilename);
-	FREE(tail);
-	HTBTreeAndObject_free(bt);
+	    next_element = HTBTree_next(bt, next_element);
+	    /* pick up the next element of the list;
+	       if none, return NULL */
+
+	    /* optimize for expensive operation: */
+#ifdef DISP_PARTIAL
+	    if (num_of_entries_output %
+		(partial_threshold > 0 ? partial_threshold : display_lines)
+		== 0) {
+		/* num_of_entries, num_of_entries_output... */
+		/* HTReadProgress...(bytes, 0); */
+		HTDisplayPartial();
+
+		if (HTCheckForInterrupt()) {
+		    _HTProgress(TRANSFER_INTERRUPTED);
+		    status = HT_PARTIAL_CONTENT;
+		    break;
+		}
+	    }
+	    num_of_entries_output++;
+#endif /* DISP_PARTIAL */
+
+	}			/* end while next_element */
 
 	if (status == HT_LOADED) {
-	    if (HTDirReadme == HT_DIR_README_BOTTOM)
-		do_readme(target, localname);
-	    FREE_TARGET;
-	} else {
-	    ABORT_TARGET;
+	    if (state == 'I') {
+		START(HTML_P);
+		PUTS("Empty Directory");
+	    }
+#ifndef LONG_LIST
+	    else
+		END(HTML_DIR);
+#endif /* !LONG_LIST */
 	}
+    }				/* end printing out the tree in order */
+    if (preformatted) {
+	END(HTML_PRE);
+	PUTC('\n');
+    }
+    END(HTML_BODY);
+    PUTC('\n');
+
+    FREE(tmpfilename);
+    FREE(tail);
+    HTBTreeAndObject_free(bt);
+
+    if (status == HT_LOADED) {
+	if (HTDirReadme == HT_DIR_README_BOTTOM)
+	    do_readme(target, localname);
+	FREE_TARGET;
+    } else {
+	ABORT_TARGET;
     }
     HTFinishDisplayPartial();
     return status;		/* document loaded, maybe partial */
@@ -2401,12 +2449,15 @@ int HTLoadFile(const char *addr,
 {
     char *filename = NULL;
     char *acc_method = NULL;
-    char *ftp_newhost;
     HTFormat format;
     char *nodename = NULL;
     char *newname = NULL;	/* Simplified name of file */
     HTAtom *myEncoding = NULL;	/* enc of this file, may be gzip etc. */
     int status = -1;
+
+#ifndef DISABLE_FTP
+    char *ftp_newhost;
+#endif
 
 #ifdef VMS
     struct stat stat_info;

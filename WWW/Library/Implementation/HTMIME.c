@@ -308,7 +308,7 @@ static int pumpData(HTStream *me)
 						UCT_SETBY_DEFAULT);
 		    }
 		    if ((p_in->enc != UCT_ENC_CJK)
-#ifndef EXP_JAPANESEUTF8_SUPPORT
+#ifdef EXP_JAPANESEUTF8_SUPPORT
 			&& ((p_in->enc != UCT_ENC_UTF8)
 			    || (p_out->enc != UCT_ENC_CJK))
 #endif
