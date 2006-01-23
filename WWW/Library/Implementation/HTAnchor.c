@@ -316,8 +316,9 @@ HTChildAnchor *HTAnchor_findChildAndLink(HTParentAnchor *parent,	/* May not be 0
 	if (ltype == HTInternalLink && *href == '#') {
 	    dest = parent->parent;
 	} else {
-	    const char *relative_to = (parent->inBASE && *href != '#') ?
-	    parent->content_base : parent->address;
+	    const char *relative_to = ((parent->inBASE && *href != '#')
+				       ? parent->content_base
+				       : parent->address);
 	    DocAddress parsed_doc;
 
 	    parsed_doc.address = HTParse(href, relative_to,

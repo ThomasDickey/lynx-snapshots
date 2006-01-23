@@ -1761,8 +1761,8 @@ char *key_for_func_ext(int lac,
  * This function returns TRUE if the ch is non-alphanumeric and maps to KeyName
  * (LYK_foo in the keymap[] array).  - FM
  */
-BOOL LYisNonAlnumKeyname(int ch,
-			 int KeyName)
+BOOLEAN LYisNonAlnumKeyname(int ch,
+			    int KeyName)
 {
     if (ch < 0 || ch >= KEYMAP_SIZE)
 	return (FALSE);

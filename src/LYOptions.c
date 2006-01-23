@@ -33,15 +33,19 @@ BOOLEAN term_options;
 #define MARGIN_STR (no_margins ? "" : "&nbsp;&nbsp;")
 #define MARGIN_LEN (no_margins ?  0 : 2)
 
-static int LYChosenShowColor = SHOW_COLOR_UNKNOWN;	/* whether to show and save */
-
 static void terminate_options(int sig);
 
 #define COL_OPTION_VALUES 36	/* display column where option values start */
 
+#ifndef NO_OPTION_MENU
+
 #if defined(USE_SLANG) || defined(COLOR_CURSES)
 static BOOLEAN can_do_colors = FALSE;
 #endif
+
+static int LYChosenShowColor = SHOW_COLOR_UNKNOWN;	/* whether to show and save */
+
+#endif /* NO_OPTION_MENU */
 
 BOOLEAN LYCheckUserAgent(void)
 {
@@ -56,6 +60,7 @@ BOOLEAN LYCheckUserAgent(void)
     return TRUE;
 }
 
+#ifndef NO_OPTION_MENU
 static void SetupChosenShowColor(void)
 {
 #if defined(USE_SLANG) || defined(COLOR_CURSES)
@@ -123,7 +128,6 @@ static void summarize_x_display(char *display_option)
     }
 }
 
-#ifndef NO_OPTION_MENU
 static int boolean_choice(int status,
 			  int line,
 			  int column,

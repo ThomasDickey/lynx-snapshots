@@ -958,7 +958,7 @@ static int find_cached_style(int cur,
 	 * change saved at just the right position, we look at preceding
 	 * positions in the same line until we find one.
 	 */
-	if (LYP >= 0 && LYP < CACHEH && LXP >= 0 && LXP < CACHEW) {
+	if (CACHE_VALIDATE_YX(LYP, LXP)) {
 	    CTRACE2(TRACE_STYLE,
 		    (tfp, "STYLE.highlight.off: cached style @(%d,%d): ",
 		     LYP, LXP));
@@ -3356,22 +3356,24 @@ static int fmt_tempname(char *result,
      * support long filenames.
      */
     counter = MAX_TEMPNAME;
-    while (names_used < MAX_TEMPNAME) {
+    if (names_used < MAX_TEMPNAME) {
 	counter = (unsigned) (((float) MAX_TEMPNAME * lynx_rand()) /
 			      LYNX_RAND_MAX + 1);
-	counter %= SIZE_TEMPNAME;	/* just in case... */
 	/*
 	 * Avoid reusing a temporary name, since there are places in the code
 	 * which can refer to a temporary filename even after it has been
 	 * closed and removed from the filesystem.
 	 */
-	offset = counter / BITS_PER_CHAR;
-	mask = 1 << (counter % BITS_PER_CHAR);
-	if ((used_tempname[offset] & mask) == 0) {
-	    names_used++;
-	    used_tempname[offset] |= mask;
-	    break;
-	}
+	do {
+	    counter %= MAX_TEMPNAME;
+	    offset = counter / BITS_PER_CHAR;
+	    mask = 1 << (counter % BITS_PER_CHAR);
+	    if ((used_tempname[offset] & mask) == 0) {
+		names_used++;
+		used_tempname[offset] |= mask;
+		break;
+	    }
+	} while ((used_tempname[offset] & mask) == 0);
     }
     if (names_used >= MAX_TEMPNAME)
 	HTAlert(gettext("Too many tempfiles"));

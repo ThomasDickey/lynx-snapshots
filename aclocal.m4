@@ -376,8 +376,9 @@ AC_DEFUN([AM_WITH_NLS],
         define(gt_cv_func_gnugettext_libc, [gt_cv_func_gnugettext]ifelse([$2], need-ngettext, 2, 1)[_libc])
         define(gt_cv_func_gnugettext_libintl, [gt_cv_func_gnugettext]ifelse([$2], need-ngettext, 2, 1)[_libintl])
 
-	AC_CHECK_HEADER(libintl.h,
-	  [AC_CACHE_CHECK([for GNU gettext in libc], gt_cv_func_gnugettext_libc,
+	CF_FIND_HEADER(libintl.h,gettext,
+	  [AC_DEFINE(HAVE_LIBINTL_H)
+	   AC_CACHE_CHECK([for GNU gettext in libc], gt_cv_func_gnugettext_libc,
 	    [AC_TRY_LINK([#include <libintl.h>
 extern int _nl_msg_cat_cntr;],
 	       [bindtextdomain ("", "");
@@ -386,17 +387,13 @@ return (int) gettext ("")]ifelse([$2], need-ngettext, [ + (int) ngettext ("", ""
 	       gt_cv_func_gnugettext_libc=no)])
 
 	   if test "$gt_cv_func_gnugettext_libc" != "yes"; then
-	     AC_CACHE_CHECK([for GNU gettext in libintl],
-	       gt_cv_func_gnugettext_libintl,
-	       [gt_save_LIBS="$LIBS"
-		LIBS="$LIBS -lintl $LIBICONV"
-		AC_TRY_LINK([#include <libintl.h>
+	     CF_FIND_LINKAGE([#include <libintl.h>
 extern int _nl_msg_cat_cntr;],
 		  [bindtextdomain ("", "");
 return (int) gettext ("")]ifelse([$2], need-ngettext, [ + (int) ngettext ("", "", 0)], [])[ + _nl_msg_cat_cntr],
+intl,
 		  gt_cv_func_gnugettext_libintl=yes,
 		  gt_cv_func_gnugettext_libintl=no)
-		LIBS="$gt_save_LIBS"])
 	   fi
 
 	   dnl If an already present or preinstalled GNU gettext() is found,
@@ -2478,9 +2475,79 @@ make an error
 test "$cf_cv_gnu_source" = yes && CPPFLAGS="$CPPFLAGS -D_GNU_SOURCE"
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl Find a library, searching for it if it is not already in the library path.
+dnl
+dnl	$1 = headers for library entrypoint
+dnl	$2 = code fragment for library entrypoint
+dnl	$3 = the library name without the "-l" option or ".so" suffix.
+dnl	$4 = action to perform if successful
+dnl	$5 = action to perform if not successful
+AC_DEFUN([CF_FIND_LINKAGE],[
+AC_TRY_LINK([$1],[$2],
+	cf_find_linkage=yes,[
+	cf_find_linkage=no
+CF_LIBRARY_PATH(cf_search,$3)
+cf_save_LIBS="$LIBS"
+cf_save_LDFLAGS="$LDFLAGS"
+for cf_libdir in $cf_search
+do
+	if test -d $cf_libdir ; then
+		LIBS="-l$3 $cf_save_LIBS"
+		LDFLAGS="$cf_save_LDFLAGS -L$cf_libdir"
+		AC_TRY_LINK([$1],[$2],[
+			CF_VERBOSE(... found in $cf_libdir)
+			cf_find_linkage=yes
+			break],[
+			LIBS="$cf_save_LIBS"
+			LDFLAGS="$cf_save_LDFLAGS"])
+	fi
+	CF_VERBOSE(... tested $cf_libdir)
+done
+])
+
+if test "$cf_find_linkage" = yes ; then
+ifelse([$4],,:,[$4])
+ifelse([$5],,,[else
+$5])
+fi
+])dnl
+dnl ---------------------------------------------------------------------------
+dnl Find a header file, searching for it if it is not already in the include
+dnl path.
+dnl
+dnl	$1 = the header filename
+dnl	$2 = the package name
+dnl	$3 = action to perform if successful
+dnl	$4 = action to perform if not successful
+AC_DEFUN([CF_FIND_HEADER],[
+AC_CHECK_HEADER([$1],
+	cf_find_header=yes,[
+	cf_find_header=no
+CF_HEADER_PATH(cf_search,$2)
+for cf_incdir in $cf_search
+do
+	if test -f $cf_incdir/$1 ; then
+		CF_ADD_CFLAGS(-I$cf_incdir)
+		CF_VERBOSE(... found in $cf_incdir)
+		cf_find_header=yes
+		break
+	fi
+	CF_VERBOSE(... tested $cf_incdir)
+done
+])
+if test "$cf_find_header" = yes ; then
+ifelse([$3],,:,[$3])
+ifelse([$4],,,[else
+$4])
+fi
+])dnl
+dnl ---------------------------------------------------------------------------
 dnl CF_HEADER_PATH version: 8 updated: 2002/11/10 14:46:59
 dnl --------------
 dnl Construct a search-list for a nonstandard header-file
+dnl
+dnl	$1 = the variable to return as result
+dnl	$2 = the package name
 AC_DEFUN([CF_HEADER_PATH],
 [CF_SUBDIR_PATH($1,$2,include)
 test "$includedir" != NONE && \

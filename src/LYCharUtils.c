@@ -2607,11 +2607,10 @@ void LYHandleMETA(HTStructured * me, const BOOL *present,
 	while (*cp != '\0' && strncasecomp(cp, "filename", 8))
 	    cp++;
 	if (*cp != '\0') {
-	    cp += 8;
-	    while ((*cp != '\0') && (WHITE(*cp) || *cp == '='))
+	    cp = LYSkipBlanks(cp + 8);
+	    if (*cp == '=')
 		cp++;
-	    while (*cp != '\0' && WHITE(*cp))
-		cp++;
+	    cp = LYSkipBlanks(cp);
 	    if (*cp != '\0') {
 		StrAllocCopy(me->node_anchor->SugFname, cp);
 		if (*me->node_anchor->SugFname == '"') {
@@ -2619,21 +2618,26 @@ void LYHandleMETA(HTStructured * me, const BOOL *present,
 				     '"')) != NULL) {
 			*(cp + 1) = '\0';
 			HTMIME_TrimDoubleQuotes(me->node_anchor->SugFname);
+			if (isEmpty(me->node_anchor->SugFname)) {
+			    FREE(me->node_anchor->SugFname);
+			}
 		    } else {
 			FREE(me->node_anchor->SugFname);
 		    }
-		    if (me->node_anchor->SugFname != NULL &&
-			*me->node_anchor->SugFname == '\0') {
-			FREE(me->node_anchor->SugFname);
+		}
+#if defined(UNIX) && !defined(DOSPATH)
+		/*
+		 * If blanks are not legal for local filenames, replace them
+		 * with underscores.
+		 */
+		if ((cp = me->node_anchor->SugFname) != NULL) {
+		    while (*cp != '\0') {
+			if (isspace(UCH(*cp)))
+			    *cp = '_';
+			++cp;
 		    }
 		}
-		if ((cp = me->node_anchor->SugFname) != NULL) {
-		    while (*cp != '\0' && !WHITE(*cp))
-			cp++;
-		    *cp = '\0';
-		    if (*me->node_anchor->SugFname == '\0')
-			FREE(me->node_anchor->SugFname);
-		}
+#endif
 	    }
 	}
 	/*

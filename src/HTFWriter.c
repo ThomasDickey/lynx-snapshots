@@ -50,7 +50,7 @@ static char *FIXED_RECORD_COMMAND = NULL;
 #define FIXED_RECORD_COMMAND_MASK "@Lynx_Dir:FIXED512 %s"
 #else
 #define FIXED_RECORD_COMMAND_MASK "%s"
-unsigned long LYVMS_FixedLengthRecords(char *filename);
+static unsigned long LYVMS_FixedLengthRecords(char *filename);
 #endif /* USE_COMMAND_FILE */
 #endif /* VMS */
 
@@ -340,11 +340,12 @@ static void HTFWriter_free(HTStream *me)
 			    start_curses();
 #endif
 			}
-		    } else
+		    } else {
 			status = HTLoadFile(addr,
 					    me->anchor,
 					    me->output_format,
 					    me->sink);
+		    }
 		    if (dump_output_immediately &&
 			me->output_format == HTAtom_for("www/present")) {
 			FREE(addr);
@@ -1280,7 +1281,7 @@ extern unsigned long sys$open(), sys$qiow(), sys$dassgn();
  * Force a file to be marked as having fixed-length, 512 byte records
  * without implied carriage control, and with best_try_contiguous set.
  */
-unsigned long LYVMS_FixedLengthRecords(char *filename)
+static unsigned long LYVMS_FixedLengthRecords(char *filename)
 {
     struct FAB fab;		/* RMS file access block */
     struct fibdef fib;		/* XQP file information block */

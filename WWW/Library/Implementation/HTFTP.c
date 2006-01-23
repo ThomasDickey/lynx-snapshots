@@ -2688,7 +2688,7 @@ static int read_directory(HTParentAnchor *parent,
      * directory listings if LONG_LIST was defined on compilation, but we could
      * someday set up an equivalent listing for Unix ftp servers.  - FM
      */
-    need_parent_link = HTDirTitles(target, parent, tildeIsTop);
+    need_parent_link = HTDirTitles(target, parent, format_out, tildeIsTop);
 
     data_read_pointer = data_write_pointer = data_buffer;
 
@@ -2941,6 +2941,7 @@ static int read_directory(HTParentAnchor *parent,
 	    }
 	}
 	END(HTML_PRE);
+	END(HTML_BODY);
 	FREE_TARGET;
 	HTBTreeAndObject_free(bt);
     }

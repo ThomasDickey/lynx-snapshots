@@ -307,8 +307,8 @@ static void HTMLGen_write(HTStructured * me, const char *s,
 /*	Start Element
  *	-------------
  *
- *	Within the opening tag, there may be spaces
- *	and the line may be broken at these spaces.
+ * Within the opening tag, there may be spaces and the line may be broken at
+ * these spaces.
  */
 static int HTMLGen_start_element(HTStructured * me, int element_number,
 				 const BOOL *present,
@@ -362,8 +362,7 @@ static int HTMLGen_start_element(HTStructured * me, int element_number,
 		fprintf(tfp, " ca=%d\n", hashStyles[hcode].color);
 	}
 
-	if (displayStyles[element_number + STARTAT].color > -2)		/* actually set */
-	{
+	if (displayStyles[element_number + STARTAT].color > -2) {
 	    CTRACE2(TRACE_STYLE,
 		    (tfp, "CSSTRIM: start_element: top <%s>\n",
 		     HTML_dtd.tags[element_number].name));
@@ -514,13 +513,11 @@ static int HTMLGen_start_element(HTStructured * me, int element_number,
 /*		End Element
  *		-----------
  *
- */
-/*	When we end an element, the style must be returned to that
- *	in effect before that element.	Note that anchors (etc?)
- *	don't have an associated style, so that we must scan down the
- *	stack for an element with a defined style. (In fact, the styles
- *	should be linked to the whole stack not just the top one.)
- *	TBL 921119
+ * When we end an element, the style must be returned to that in effect before
+ * that element.  Note that anchors (etc?) don't have an associated style, so
+ * that we must scan down the stack for an element with a defined style.  (In
+ * fact, the styles should be linked to the whole stack not just the top one.)
+ * TBL 921119
  */
 static int HTMLGen_end_element(HTStructured * me, int element_number,
 			       char **insert GCC_UNUSED)

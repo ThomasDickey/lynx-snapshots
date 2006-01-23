@@ -170,12 +170,24 @@ char *alloca();
 #undef FILE_DOES_NOT_EXIST	/* see <w32api/winnt.h> */
 #endif
 
-#if defined(_WINDOWS) && !defined(__CYGWIN__)	/* SCW */
+/*
+ * VS .NET 2003 includes winsock.h unconditionally from windows.h,
+ * so we do not want to include windows.h if we want winsock2.h
+ */
+#if defined(_WINDOWS) && !defined(__CYGWIN__)
+
+#if defined(USE_WINSOCK2_H)
+#include <winsock2.h>		/* includes windows.h, in turn windef.h */
+#else
 #include <windows.h>		/* #include "windef.h" */
+#endif
+
 #define BOOLEAN_DEFINED
+
 #if !_WIN_CC			/* 1999/09/29 (Wed) 22:00:53 */
 #include <dos.h>
 #endif
+
 #undef sleep			/* 1998/06/23 (Tue) 16:54:53 */
 extern void sleep(unsigned __seconds);
 
@@ -338,8 +350,12 @@ typedef char BOOLEAN;		/* Logical value */
 #define BOOLEAN_DEFINED
 #endif /* _WINDOWS */
 
+#if defined(_MSC_VER) && (_MSC_VER >= 1300)
+/* it declares BOOL/BOOLEAN as BYTE/int */
+#else
 #ifndef BOOL
 #define BOOL BOOLEAN
+#endif
 #endif
 
 #ifndef YES

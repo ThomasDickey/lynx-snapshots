@@ -1,8 +1,8 @@
 /*                  /Net/dxcern/userd/timbl/hypertext/WWW/Library/Implementation/HTMLGen.html
                                       HTML GENERATOR
                                              
-   This module converts structed stream into stream.  That is, given a stream to write to,
-   it will give you a structured stream to
+   This module converts structed stream into stream.  That is, given a stream
+   to write to, it will give you a structured stream to
    
  */
 #ifndef HTMLGEN_H
@@ -14,9 +14,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-/* Subclass:
-*//* extern const HTStructuredClass HTMLGeneration; *//* Special Creation:
- */ extern HTStructured *HTMLGenerator(HTStream *output);
+    extern HTStructured *HTMLGenerator(HTStream *output);
 
     extern HTStream *HTPlainToHTML(HTPresentation *pres,
 				   HTParentAnchor *anchor,

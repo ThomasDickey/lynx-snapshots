@@ -6,6 +6,7 @@
 #include <HTStream.h>
 #include <UCAux.h>
 #include <LYCharSets.h>
+#include <LYCurses.h>
 
 BOOL UCCanUniTranslateFrom(int from)
 {
@@ -338,16 +339,83 @@ void UCSetBoxChars(int cset,
 	 * confuse curses.
 	 */
 #ifdef EXP_CHARTRANS_AUTOSWITCH
-	if (linedrawing_char_set >= 0) {
-	    /* US-ASCII vs Latin-1 is safe (usually) */
-	    if (cset == US_ASCII && linedrawing_char_set == LATIN1) {
-		;
-	    } else if (cset == LATIN1 && linedrawing_char_set == US_ASCII) {
-		;
-	    } else if (cset != linedrawing_char_set) {
-		fix_lines = TRUE;
+	/* US-ASCII vs Latin-1 is safe (usually) */
+	if (cset == US_ASCII && linedrawing_char_set == LATIN1) {
+	    ;
+	} else if (cset == LATIN1 && linedrawing_char_set == US_ASCII) {
+	    ;
+	}
+#if defined(NCURSES_VERSION) || defined(HAVE_TIGETSTR)
+	else {
+	    static BOOL first = TRUE;
+	    static int last_cset = -99;
+	    static BOOL last_result = TRUE;
+	    /* *INDENT-OFF* */
+	    static struct {
+		int mapping;
+		int internal;
+		int external;
+	    } table[] = {
+		{ 'j', 0x2518, 0 }, /* BOX DRAWINGS LIGHT UP AND LEFT */
+		{ 'k', 0x2510, 0 }, /* BOX DRAWINGS LIGHT DOWN AND LEFT */
+		{ 'l', 0x250c, 0 }, /* BOX DRAWINGS LIGHT DOWN AND RIGHT */
+		{ 'm', 0x2514, 0 }, /* BOX DRAWINGS LIGHT UP AND RIGHT */
+		{ 'n', 0x253c, 0 }, /* BOX DRAWINGS LIGHT VERTICAL AND HORIZONTAL */
+		{ 'q', 0x2500, 0 }, /* BOX DRAWINGS LIGHT HORIZONTAL */
+		{ 't', 0x251c, 0 }, /* BOX DRAWINGS LIGHT VERTICAL AND RIGHT */
+		{ 'u', 0x2524, 0 }, /* BOX DRAWINGS LIGHT VERTICAL AND LEFT */
+		{ 'v', 0x2534, 0 }, /* BOX DRAWINGS LIGHT UP AND HORIZONTAL */
+		{ 'w', 0x252c, 0 }, /* BOX DRAWINGS LIGHT DOWN AND HORIZONTAL */
+		{ 'x', 0x2502, 0 }, /* BOX DRAWINGS LIGHT VERTICAL */
+	    };
+	    /* *INDENT-ON* */
+
+	    unsigned n;
+
+	    if (first) {
+		char *map = tigetstr("acsc");
+
+		if (map != 0) {
+		    CTRACE((tfp, "check terminal line-drawing map\n"));
+		    while (map[0] != 0 && map[1] != 0) {
+			for (n = 0; n < TABLESIZE(table); ++n) {
+			    if (table[n].mapping == map[0]) {
+				table[n].external = UCH(map[1]);
+				CTRACE((tfp, "  map[%c] %#x -> %#x\n",
+					table[n].mapping,
+					table[n].internal,
+					table[n].external));
+				break;
+			    }
+			}
+			map += 2;
+		    }
+		}
+		first = FALSE;
+	    }
+
+	    if (cset == last_cset) {
+		fix_lines = last_result;
+	    } else {
+		for (n = 0; n < TABLESIZE(table); ++n) {
+		    int test = UCTransUniChar(table[n].internal, cset);
+
+		    if (test != table[n].external) {
+			CTRACE((tfp, "line-drawing map %c mismatch\n",
+				table[n].mapping));
+			fix_lines = TRUE;
+			break;
+		    }
+		}
+		last_result = fix_lines;
+		last_cset = cset;
 	    }
 	}
+#else
+	else if (cset != linedrawing_char_set && linedrawing_char_set >= 0) {
+	    fix_lines = TRUE;
+	}
+#endif
 #endif
     }
     if (fix_lines) {

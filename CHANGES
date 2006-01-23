@@ -1,6 +1,47 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2006-01-22 (2.8.6dev.17)
+* improve EXP_JAPANESEUTF8_SUPPORT -TH
+  + correct an ifdef in HTMIME.c
+  + correct the behavior of encoding a text in input element, 
+    when the type is hidden and the text is japanese encoded utf-8.
+  + correct "//TRANSLIT" position in iconv_open() parameter.
+* remove redundant size-check in change for HText_trimHightext() in 2.8.5dev.8
+  to fix highlighting for this case:
+    <a href>Line 1<p>Line 2<p>Line 3</a>
+  (report by Andrew Belov).
+* add U+213B FAX to def7_uni.tbl (Debian #344275)
+* adjust anchor extent to discount trailing blank which is trimmed when
+  rendering.  If the blank is not trimmed, link highlighting in color-style
+  will show a spurious character (report by Karl-Heinz Weirich) -TD
+* fixes to source-view of ftp:// and file:// URLs, i.e., eliminate redundant
+  PRE's, add DOCTYPE and meta tags (Debian #347989) -TD
+* modify makefile.msc to ease scripted building of various configurations
+  without needing to edit that file -TD
+* fixes to allow building with Visual C++ .NET 2003 -TD
+* modify configure script checks for gettext to supply include- and lib-paths,
+  e.g., to work on partly broken platforms such as FreeBSD -TD
+* modify parsing of filename from Content-Disposition so that the name is not
+  truncated on embedded whitespace.  For most systems, the blanks will be
+  retained.  For VMS and MSDOS, the blanks are translated to underscores
+  (Debian #291716) -TD
+* add a range-check for references to the style cache -Andrew Belov
+* modify fmt_tempname() to avoid the possibility of long random sequences that
+  do not yield an unused filename (report by FLWM) -TD
+* modify install rules for lynx.cfg to allow for pathnames on OS/2 EMX that
+  begin with a drive letter rather than a slash -TD
+* move scripts that are not part of the configure script into scripts
+  subdirectory: cfg_defs.sh, cfg_edit, fixtext.sh -TD
+* improve workaround for line-drawing characters with font-switching by
+  checking if the loaded font has line-drawing characters in the same positions
+  as the terminal description, rather than simply ignoring line-drawing when
+  the codeset differs (report by Karl-Heinz Weirich) -TD
+* fix some ifdef's that did not work when disabling all features -TD
+* fix a typo in LYMap.c from Debian #335593 changes (report by Jens
+  Schleusener) -TD
+* really remove pointer to moxienet (report by Stef Caunter).
+
 2005-12-18 (2.8.6dev.16)
 * change configure option default for --enable-justify-elts to true -TD
 * change default for JUSTIFY to "false" (suggested by Bela Lubkin) -TD

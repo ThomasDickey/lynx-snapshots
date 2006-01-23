@@ -612,6 +612,7 @@ extern int h_errno;
  * Even though it is a small amount, we cannot count on reading the whole
  * struct via a pipe in one read -TD
  */
+#ifdef NSL_FORK
 static unsigned readit(int fd, char *buffer, unsigned length)
 {
     unsigned result = 0;
@@ -629,6 +630,7 @@ static unsigned readit(int fd, char *buffer, unsigned length)
     }
     return result;
 }
+#endif /* NSL_FORK */
 
 /*	Resolve an internet hostname, like gethostbyname
  *	------------------------------------------------

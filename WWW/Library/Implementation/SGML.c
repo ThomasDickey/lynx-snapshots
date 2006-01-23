@@ -228,7 +228,9 @@ struct _HTStream {
 #endif
 };
 
-#ifndef NO_LYNX_TRACE
+#ifdef NO_LYNX_TRACE
+#define state_name(n) "state"
+#else
 static const char *state_name(sgml_state n)
 {
     const char *result = "?";

@@ -538,7 +538,7 @@ extern "C" {
                         buf = (ch) | (Current_Attr << 4); \
                         SLsmg_write_raw (&buf, 1);        \
                       } while (0)
-#endif /* SLANG_VERSION >= 20000 */
+#endif				/* SLANG_VERSION >= 20000 */
 
 #define echo()
 #define printw        SLsmg_printf

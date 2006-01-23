@@ -5138,6 +5138,20 @@ static BOOL HText_endAnchor0(HText *text, int number,
 
 	/* Find the length taken by the anchor */
 	l = text->Lines;	/* lineno of last */
+
+	/* the last line of an anchor may contain a trailing blank,
+	 * which will be trimmed later.  Discount it from the extent.
+	 */
+	if (l > a->line_num) {
+	    for (i = start->size; i > 0; --i) {
+		if (isspace(UCH(start->data[i - 1]))) {
+		    --extent_adjust;
+		} else {
+		    break;
+		}
+	    }
+	}
+
 	while (l > a->line_num) {
 	    extent_adjust += start->size;
 	    start = start->prev;
@@ -5873,8 +5887,7 @@ static void HText_trimHightext(HText *text,
 	     * Double check that we have a line pointer, and if so, copy into
 	     * highlight text.
 	     */
-	    if (line_ptr2
-		&& line_ptr2->size) {
+	    if (line_ptr2) {
 		char *hi_string = NULL;
 		int hi_offset = line_ptr2->offset;
 
@@ -6762,7 +6775,7 @@ const char *HText_getSugFname(void)
  */
 void HTCheckFnameForCompression(char **fname,
 				HTParentAnchor *anchor,
-				BOOL strip_ok)
+				BOOLEAN strip_ok)
 {
     char *fn = *fname;
     char *dot = NULL;
@@ -9706,7 +9719,9 @@ int HText_beginInput(HText *text, BOOL underline,
      */
     if (I->value)
 	StrAllocCopy(IValue, I->value);
-    if (IValue && HTCJK != NOCJK) {
+    if (IValue &&
+	HTCJK != NOCJK &&
+	((I->type == NULL) || strcasecomp(I->type, "hidden"))) {
 	if ((tmp = typecallocn(unsigned char, strlen(IValue) * 2 + 1)) != 0) {
 	    if (kanji_code == EUC) {
 		TO_EUC((unsigned char *) IValue, tmp);

@@ -244,7 +244,8 @@ void UCChangeTerminalCodepage(int newcs,
     char *tmpbuf2 = NULL;
     int status = 0;
 
-    if (!on_console()) return;
+    if (!on_console())
+	return;
 
 #ifdef HAVE_USE_LEGACY_CODING
     if (newcs < 0) {

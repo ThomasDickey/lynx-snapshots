@@ -941,6 +941,7 @@ int UCTransUniCharStr(char *outbuf,
 	    iconv_t cd;
 	    char str[3], *pin, *pout;
 	    size_t inleft, outleft;
+	    char *tocode = NULL;
 
 	    str[0] = unicode >> 8;
 	    str[1] = unicode & 0xFF;
@@ -948,9 +949,10 @@ int UCTransUniCharStr(char *outbuf,
 	    pin = str;
 	    inleft = 2;
 	    pout = outbuf, outleft = buflen;
-	    cd = iconv_open(LYCharSet_UC[charset_out].MIMEname,
-			    "UTF-16BE//TRANSLIT");
-	    rc = iconv(cd, &pin, &inleft, &pout, &outleft);
+	    HTSprintf0(&tocode, "%s//TRANSLIT", LYCharSet_UC[charset_out].MIMEname);
+	    cd = iconv_open(tocode, "UTF-16BE");
+	    FREE(tocode)
+		rc = iconv(cd, &pin, &inleft, &pout, &outleft);
 	    iconv_close(cd);
 	    if ((pout - outbuf) == 3) {
 		CTRACE((tfp,

@@ -2197,23 +2197,30 @@ static int handle_LYK_DOWNLOAD(int *cmd,
     return 0;
 }
 
-static void handle_LYK_DOWN_HALF(int *old_c,
-				 int real_c)
+static void handle_LYK_DOWN_xxx(int *old_c,
+				int real_c,
+				int scroll_by)
 {
     int i;
 
     if (more_text) {
-	Newline += (display_lines / 2);
+	Newline += scroll_by;
 	if (nlinks > 0 && curdoc.link > -1 &&
-	    links[curdoc.link].ly > display_lines / 2) {
+	    links[curdoc.link].ly > scroll_by) {
 	    newdoc.link = curdoc.link;
-	    for (i = 0; links[i].ly <= (display_lines / 2); i++)
+	    for (i = 0; links[i].ly <= scroll_by; i++)
 		--newdoc.link;
 	}
     } else if (*old_c != real_c) {
 	*old_c = real_c;
 	HTInfoMsg(ALREADY_AT_END);
     }
+}
+
+static void handle_LYK_DOWN_HALF(int *old_c,
+				 int real_c)
+{
+    handle_LYK_DOWN_xxx(old_c, real_c, display_lines / 2);
 }
 
 static void handle_LYK_DOWN_LINK(int *follow_col,
@@ -2254,20 +2261,7 @@ static void handle_LYK_DOWN_LINK(int *follow_col,
 static void handle_LYK_DOWN_TWO(int *old_c,
 				int real_c)
 {
-    int i;
-
-    if (more_text) {
-	Newline += 2;
-	if (nlinks > 0 && curdoc.link > -1 &&
-	    links[curdoc.link].ly > 2) {
-	    newdoc.link = curdoc.link;
-	    for (i = 0; links[i].ly <= 2; i++)
-		--newdoc.link;
-	}
-    } else if (*old_c != real_c) {
-	*old_c = real_c;
-	HTInfoMsg(ALREADY_AT_END);
-    }
+    handle_LYK_DOWN_xxx(old_c, real_c, 2);
 }
 
 static int handle_LYK_DWIMEDIT(int *cmd,
@@ -4587,22 +4581,21 @@ static void handle_LYK_UPLOAD(void)
 }
 #endif /* DIRED_SUPPORT */
 
-static void handle_LYK_UP_HALF(int *arrowup,
-			       int *old_c,
-			       int real_c)
+static void handle_LYK_UP_xxx(int *arrowup,
+			      int *old_c,
+			      int real_c,
+			      int scroll_by)
 {
     if (LYGetNewline() > 1) {
-	int scrollamount = display_lines / 2;
-
-	if (LYGetNewline() - scrollamount < 1)
-	    scrollamount = LYGetNewline() - 1;
-	Newline -= scrollamount;
+	if (LYGetNewline() - scroll_by < 1)
+	    scroll_by = LYGetNewline() - 1;
+	Newline -= scroll_by;
 	if (nlinks > 0 && curdoc.link > -1) {
-	    if (links[curdoc.link].ly + scrollamount <= display_lines) {
+	    if (links[curdoc.link].ly + scroll_by <= display_lines) {
 		newdoc.link = curdoc.link +
 		    HText_LinksInLines(HTMainText,
 				       LYGetNewline(),
-				       scrollamount);
+				       scroll_by);
 	    } else {
 		*arrowup = TRUE;
 	    }
@@ -4611,6 +4604,13 @@ static void handle_LYK_UP_HALF(int *arrowup,
 	*old_c = real_c;
 	HTInfoMsg(ALREADY_AT_BEGIN);
     }
+}
+
+static void handle_LYK_UP_HALF(int *arrowup,
+			       int *old_c,
+			       int real_c)
+{
+    handle_LYK_UP_xxx(arrowup, old_c, real_c, display_lines / 2);
 }
 
 static void handle_LYK_UP_LINK(int *follow_col,
@@ -4668,23 +4668,7 @@ static void handle_LYK_UP_TWO(int *arrowup,
 			      int *old_c,
 			      int real_c)
 {
-    if (LYGetNewline() > 1) {
-	int scrollamount = (LYGetNewline() > 2 ? 2 : 1);
-
-	Newline -= scrollamount;
-	if (nlinks > 0 && curdoc.link > -1) {
-	    if (links[curdoc.link].ly + scrollamount <= display_lines) {
-		newdoc.link = curdoc.link +
-		    HText_LinksInLines(HTMainText,
-				       LYGetNewline(), scrollamount);
-	    } else {
-		*arrowup = TRUE;
-	    }
-	}
-    } else if (*old_c != real_c) {
-	*old_c = real_c;
-	HTInfoMsg(ALREADY_AT_BEGIN);
-    }
+    handle_LYK_UP_xxx(arrowup, old_c, real_c, 2);
 }
 
 static void handle_LYK_VIEW_BOOKMARK(BOOLEAN *refresh_screen,
