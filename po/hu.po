@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: lynx 2.8.6-dev8\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2006-01-22 18:14-0500\n"
+"POT-Creation-Date: 2006-05-29 16:55-0400\n"
 "PO-Revision-Date: 2004-11-14 19:52+0100\n"
 "Last-Translator: Mihály Gyulai <gyulai@fbi.hu>\n"
 "Language-Team: Hungarian <translation-team-hu@lists.sourceforge.net>\n"
@@ -2812,7 +2812,7 @@ msgstr "**** HTAccess: Visszatérési állapot: %d\n"
 #. * hack: if we fail in HTAccess.c
 #. * avoid duplicating URL, oh.
 #.
-#: WWW/Library/Implementation/HTAccess.c:1084 src/LYMainLoop.c:7732
+#: WWW/Library/Implementation/HTAccess.c:1084 src/LYMainLoop.c:7733
 msgid "Can't Access"
 msgstr "Nem lehet elérni"
 
@@ -3009,15 +3009,15 @@ msgstr "Cikk olvasása."
 msgid "Sorry, could not load requested news."
 msgstr "Sajnálom, nem tudom betölteni a hírt."
 
-#: WWW/Library/Implementation/HTTCP.c:1257
+#: WWW/Library/Implementation/HTTCP.c:1273
 msgid "Address has invalid port"
 msgstr "A címben érvénytelen a port"
 
-#: WWW/Library/Implementation/HTTCP.c:1333
+#: WWW/Library/Implementation/HTTCP.c:1349
 msgid "Address length looks invalid"
 msgstr "A cím hosszúsága érvénytelen"
 
-#: WWW/Library/Implementation/HTTCP.c:1564 WWW/Library/Implementation/HTTCP.c:1582
+#: WWW/Library/Implementation/HTTCP.c:1580 WWW/Library/Implementation/HTTCP.c:1598
 #, c-format
 msgid "Unable to locate remote host %s."
 msgstr "Nem találom a %s távoli számítógépet."
@@ -3026,38 +3026,38 @@ msgstr "Nem találom a %s távoli számítógépet."
 #. * but not HTAlert, because typically there will be other
 #. * alerts from the callers.  - kw
 #.
-#: WWW/Library/Implementation/HTTCP.c:1579 WWW/Library/Implementation/HTTelnet.c:108
+#: WWW/Library/Implementation/HTTCP.c:1595 WWW/Library/Implementation/HTTelnet.c:108
 #, c-format
 msgid "Invalid hostname %s"
 msgstr "A %s helytelen gépnév"
 
-#: WWW/Library/Implementation/HTTCP.c:1593
+#: WWW/Library/Implementation/HTTCP.c:1609
 #, c-format
 msgid "Making %s connection to %s"
 msgstr "%s csatlakozás létrehozása ide: %s"
 
-#: WWW/Library/Implementation/HTTCP.c:1604
+#: WWW/Library/Implementation/HTTCP.c:1620
 msgid "socket failed."
 msgstr "az illesztõpont sérült."
 
-#: WWW/Library/Implementation/HTTCP.c:1617
+#: WWW/Library/Implementation/HTTCP.c:1633
 #, c-format
 msgid "socket failed: family %d addr %s port %s."
 msgstr "az illesztõpont sérült: család: %d cím: %s port: %s."
 
-#: WWW/Library/Implementation/HTTCP.c:1641
+#: WWW/Library/Implementation/HTTCP.c:1657
 msgid "Could not make connection non-blocking."
 msgstr "Nem sikerült a nem blokkolt csatlakozás."
 
-#: WWW/Library/Implementation/HTTCP.c:1709
+#: WWW/Library/Implementation/HTTCP.c:1725
 msgid "Connection failed (too many retries)."
 msgstr "A kapcsolat sikertelen (túl sok próbálkozás)."
 
-#: WWW/Library/Implementation/HTTCP.c:1908
+#: WWW/Library/Implementation/HTTCP.c:1924
 msgid "Could not restore socket to blocking."
 msgstr "Nem lehet visszaállítani az illesztõpontot blokkoltra."
 
-#: WWW/Library/Implementation/HTTCP.c:1974
+#: WWW/Library/Implementation/HTTCP.c:1990
 msgid "Socket read failed for 180,000 tries."
 msgstr "Az illesztõpont 180.000 olvasás után is sikertelen."
 
@@ -3066,45 +3066,50 @@ msgstr "Az illesztõpont 180.000 olvasás után is sikertelen."
 msgid "Address contains a username: %s"
 msgstr "A cím felhasználói nevet tartalmaz: %s"
 
-#: WWW/Library/Implementation/HTTP.c:536
+#: WWW/Library/Implementation/HTTP.c:539
 msgid "This client does not contain support for HTTPS URLs."
 msgstr "Ez az ügyfél nem támogatja a HTTPS URL-eket."
 
-#: WWW/Library/Implementation/HTTP.c:561
+#: WWW/Library/Implementation/HTTP.c:564
 msgid "Unable to connect to remote host."
 msgstr "Nem lehet kapcsolódni a távoli számítógéphez."
 
-#: WWW/Library/Implementation/HTTP.c:583
+#: WWW/Library/Implementation/HTTP.c:586
 msgid "Retrying connection without TLS."
 msgstr "Újbóli csatlakozás TLS nélkül."
 
-#: WWW/Library/Implementation/HTTP.c:626
+#: WWW/Library/Implementation/HTTP.c:661
+#, c-format
+msgid "Verified connection to %s (cert=%s)"
+msgstr ""
+
+#: WWW/Library/Implementation/HTTP.c:685
 msgid "SSL error:Can't find common name in certificate-Continue?"
 msgstr "SSL hiba: nem található azonos név a bizonyítványban - folytatjuk?"
 
-#: WWW/Library/Implementation/HTTP.c:643
+#: WWW/Library/Implementation/HTTP.c:688
 #, c-format
 msgid "SSL error:host(%s)!=cert(%s)-Continue?"
 msgstr "SSL hiba:host(%s)!=cert(%s)-Tovább?"
 
-#: WWW/Library/Implementation/HTTP.c:655
+#: WWW/Library/Implementation/HTTP.c:703
 #, c-format
 msgid "Secure %d-bit %s (%s) HTTP connection"
 msgstr "Biztonságos %d-bit %s (%s) HTTP csatlakozás"
 
-#: WWW/Library/Implementation/HTTP.c:1125
+#: WWW/Library/Implementation/HTTP.c:1173
 msgid "Sending HTTP request."
 msgstr "HTTP kérés küldése."
 
-#: WWW/Library/Implementation/HTTP.c:1164
+#: WWW/Library/Implementation/HTTP.c:1212
 msgid "Unexpected network write error; connection aborted."
 msgstr "Váratlan hálózati írási hiba; a csatlakozás megszakítva."
 
-#: WWW/Library/Implementation/HTTP.c:1170
+#: WWW/Library/Implementation/HTTP.c:1218
 msgid "HTTP request sent; waiting for response."
 msgstr "HTTP kérés elküldve, várakozás a válaszra."
 
-#: WWW/Library/Implementation/HTTP.c:1238
+#: WWW/Library/Implementation/HTTP.c:1286
 msgid "Unexpected network read error; connection aborted."
 msgstr "Váratlan hálózati olvasási hiba, a csatlakozás megszakítva."
 
@@ -3117,7 +3122,7 @@ msgstr "Váratlan hálózati olvasási hiba, a csatlakozás megszakítva."
 #. * line and possibly other headers, so we'll deal with them by
 #. * showing the full header to the user as text/plain.  - FM
 #.
-#: WWW/Library/Implementation/HTTP.c:1432
+#: WWW/Library/Implementation/HTTP.c:1480
 msgid "Got unexpected Informational Status."
 msgstr "Váratlan tájékoztatást kaptam az állapotról."
 
@@ -3127,7 +3132,7 @@ msgstr "Váratlan tájékoztatást kaptam az állapotról."
 #. * content.  We'll instruct the user to do that, and
 #. * restore the current document.  - FM
 #.
-#: WWW/Library/Implementation/HTTP.c:1466
+#: WWW/Library/Implementation/HTTP.c:1514
 msgid "Request fulfilled.  Reset Content."
 msgstr "Kérés teljesítve. Állítsa vissza a tartalmat."
 
@@ -3137,27 +3142,27 @@ msgstr "Kérés teljesítve. Állítsa vissza a tartalmat."
 #. * status is inappropriate.  We'll deal with it by showing
 #. * the full header to the user as text/plain.  - FM
 #.
-#: WWW/Library/Implementation/HTTP.c:1583
+#: WWW/Library/Implementation/HTTP.c:1631
 msgid "Got unexpected 304 Not Modified status."
 msgstr "Váratlan 304-es hiba: Nem lett módosítva az állapot."
 
-#: WWW/Library/Implementation/HTTP.c:1646
+#: WWW/Library/Implementation/HTTP.c:1694
 msgid "Redirection of POST content requires user approval."
 msgstr "A POST tartalom átirányításához felhasználói engedély kell."
 
-#: WWW/Library/Implementation/HTTP.c:1661
+#: WWW/Library/Implementation/HTTP.c:1709
 msgid "Have POST content.  Treating Permanent Redirection as Temporary.\n"
 msgstr "POST tartalom. Az állandó átirányítást átmenetiként kezelem.\n"
 
-#: WWW/Library/Implementation/HTTP.c:1703
+#: WWW/Library/Implementation/HTTP.c:1751
 msgid "Retrying with access authorization information."
 msgstr "Újra próbálom elérés felhatalmazási információval."
 
-#: WWW/Library/Implementation/HTTP.c:1715
+#: WWW/Library/Implementation/HTTP.c:1763
 msgid "Show the 401 message body?"
 msgstr "Mutassam a 401-es üzenet szövegét?"
 
-#: WWW/Library/Implementation/HTTP.c:1758
+#: WWW/Library/Implementation/HTTP.c:1806
 msgid "Show the 407 message body?"
 msgstr "Mutassam a 407-es üzenet szövegét?"
 
@@ -3165,7 +3170,7 @@ msgstr "Mutassam a 407-es üzenet szövegét?"
 #. * Bad or unknown server_status number.  Take a chance and hope
 #. * there is something to display.  - FM
 #.
-#: WWW/Library/Implementation/HTTP.c:1858
+#: WWW/Library/Implementation/HTTP.c:1906
 msgid "Unknown status reply from server!"
 msgstr "A szerver válasza: Ismeretlen állapot!"
 
@@ -3765,12 +3770,11 @@ msgstr "Átmeneti fájl nézése"
 msgid "Save to disk disabled."
 msgstr "Mentés lemezre le van tiltva."
 
-#: src/LYDownload.c:555 src/LYPrint.c:1319
+#: src/LYDownload.c:555 src/LYPrint.c:1309
 msgid "Local additions:"
 msgstr "Helyi adalékok:"
 
 #: src/LYDownload.c:566 src/LYUpload.c:211
-#, c-format
 msgid "No Name Given"
 msgstr "Nincs név megadva"
 
@@ -4193,7 +4197,7 @@ msgstr "Nem találtam Winsock-ot, sajnálom."
 msgid "You MUST define a valid TMP or TEMP area!"
 msgstr "Önnek meg kell adnia egy érvényes TMP vagy TEMP területet"
 
-#: src/LYMain.c:1248 src/LYMainLoop.c:5037
+#: src/LYMain.c:1248 src/LYMainLoop.c:5038
 msgid "No such directory"
 msgstr "Nincs ilyen könyvtár"
 
@@ -4296,7 +4300,7 @@ msgstr "%s: Érvénytelen opció: %s \n"
 msgid "Internal error: Invalid mouse link %d!"
 msgstr "Belsõ hiba: Hibás egér hivatkozás %d!"
 
-#: src/LYMainLoop.c:692 src/LYMainLoop.c:5059
+#: src/LYMainLoop.c:692 src/LYMainLoop.c:5060
 msgid "A URL specified by the user"
 msgstr "Felhasználó által megadott URL"
 
@@ -4307,92 +4311,92 @@ msgstr "Enctype multipart/form-data még nincs támogatva! Nem tudjuk elküldeni."
 #.
 #. * Make a name for this help file.
 #.
-#: src/LYMainLoop.c:3044
+#: src/LYMainLoop.c:3045
 msgid "Help Screen"
 msgstr "Súgó képernyõ"
 
-#: src/LYMainLoop.c:3165
+#: src/LYMainLoop.c:3166
 msgid "System Index"
 msgstr "Rendszer index"
 
-#: src/LYMainLoop.c:3525 src/LYMainLoop.c:5283
+#: src/LYMainLoop.c:3526 src/LYMainLoop.c:5284
 msgid "Entry into main screen"
 msgstr "Belépés a fõképernyõbe"
 
-#: src/LYMainLoop.c:3788
+#: src/LYMainLoop.c:3789
 msgid "No next document present"
 msgstr "Nincs további dokumentum"
 
-#: src/LYMainLoop.c:4087
+#: src/LYMainLoop.c:4088
 msgid "charset for this document specified explicitly, sorry..."
 msgstr "a dokumentum karakterkészlete már be van állítva..."
 
-#: src/LYMainLoop.c:5013
+#: src/LYMainLoop.c:5014
 msgid "cd to:"
 msgstr "könyvtárváltás:"
 
-#: src/LYMainLoop.c:5040
+#: src/LYMainLoop.c:5041
 msgid "A component of path is not a directory"
 msgstr "Az útvonal egy összetevõje nem könyvtár"
 
-#: src/LYMainLoop.c:5043
+#: src/LYMainLoop.c:5044
 msgid "failed to change directory"
 msgstr "nem sikerült a  könyvtárváltás"
 
-#: src/LYMainLoop.c:6204
+#: src/LYMainLoop.c:6205
 msgid "Reparsing document under current settings..."
 msgstr "A dokumentumot átalakítom az aktuális beállításoknak megfelelõen..."
 
-#: src/LYMainLoop.c:6495
+#: src/LYMainLoop.c:6496
 #, c-format
 msgid "Fatal error - could not open output file %s\n"
 msgstr "Végzetes hiba: nem lehet megnyitni a(z) '%s' kimeneti fájlt\n"
 
-#: src/LYMainLoop.c:6840
+#: src/LYMainLoop.c:6841
 msgid "TABLE center enable."
 msgstr "'Táblázat középre' engedélyezve."
 
-#: src/LYMainLoop.c:6843
+#: src/LYMainLoop.c:6844
 msgid "TABLE center disable."
 msgstr "'Táblázat középre' tiltva."
 
-#: src/LYMainLoop.c:6920
+#: src/LYMainLoop.c:6921
 msgid "Current URL is empty."
 msgstr "Üres a pillanatnyi URL."
 
-#: src/LYMainLoop.c:6922 src/LYUtils.c:1790
+#: src/LYMainLoop.c:6923 src/LYUtils.c:1790
 msgid "Copy to clipboard failed."
 msgstr "Sikertelen a vágólapra másolás."
 
-#: src/LYMainLoop.c:6924
+#: src/LYMainLoop.c:6925
 msgid "Document URL put to clipboard."
 msgstr "A dokumentum URL-jét a vágólapra tesszük."
 
-#: src/LYMainLoop.c:6926
+#: src/LYMainLoop.c:6927
 msgid "Link URL put to clipboard."
 msgstr "A link URL-jét a vágólapra tesszük."
 
-#: src/LYMainLoop.c:6953
+#: src/LYMainLoop.c:6954
 msgid "No URL in the clipboard."
 msgstr "Nincsen URL a vágólapon."
 
-#: src/LYMainLoop.c:7617 src/LYMainLoop.c:7787
+#: src/LYMainLoop.c:7618 src/LYMainLoop.c:7788
 msgid "-index-"
 msgstr "-index-"
 
-#: src/LYMainLoop.c:7727
+#: src/LYMainLoop.c:7728
 msgid "lynx: Can't access startfile"
 msgstr "lynx: Nincs kezdõfájl!"
 
-#: src/LYMainLoop.c:7739
+#: src/LYMainLoop.c:7740
 msgid "lynx: Start file could not be found or is not text/html or text/plain"
 msgstr "lynx: A kezdõfájlt nem találom (sem HTML szöveget, sem sima szöveget)"
 
-#: src/LYMainLoop.c:7740
+#: src/LYMainLoop.c:7741
 msgid "      Exiting..."
 msgstr "      Kilépés..."
 
-#: src/LYMainLoop.c:7781
+#: src/LYMainLoop.c:7782
 msgid "-more-"
 msgstr "-tovább-"
 
@@ -4972,64 +4976,64 @@ msgstr "Meglátogatott lapok"
 msgid "View the file "
 msgstr "A fájl nézése "
 
-#: src/LYPrint.c:946
+#: src/LYPrint.c:936
 #, c-format
 msgid " Print job complete.\n"
 msgstr "Nyomtatási munka kész.\n"
 
-#: src/LYPrint.c:1271
+#: src/LYPrint.c:1261
 msgid "Document:"
 msgstr "Dokumentum:"
 
-#: src/LYPrint.c:1272
+#: src/LYPrint.c:1262
 msgid "Number of lines:"
 msgstr "Sorok száma:"
 
-#: src/LYPrint.c:1273
+#: src/LYPrint.c:1263
 msgid "Number of pages:"
 msgstr "Oldalak száma:"
 
-#: src/LYPrint.c:1274
+#: src/LYPrint.c:1264
 msgid "pages"
 msgstr "oldal"
 
-#: src/LYPrint.c:1274
+#: src/LYPrint.c:1264
 msgid "page"
 msgstr "oldal"
 
-#: src/LYPrint.c:1275
+#: src/LYPrint.c:1265
 msgid "(approximately)"
 msgstr "(körülbelül)"
 
-#: src/LYPrint.c:1282
+#: src/LYPrint.c:1272
 msgid "Some print functions have been disabled!"
 msgstr "Néhány nyomtatási funkció le van tiltva!"
 
-#: src/LYPrint.c:1286
+#: src/LYPrint.c:1276
 msgid "Standard print options:"
 msgstr "Nyomtatási alapbeállítások: "
 
-#: src/LYPrint.c:1287
+#: src/LYPrint.c:1277
 msgid "Print options:"
 msgstr "Nyomtatási beállítások:"
 
-#: src/LYPrint.c:1294
+#: src/LYPrint.c:1284
 msgid "Save to a local file"
 msgstr "Mentés helyi fájlba"
 
-#: src/LYPrint.c:1296
+#: src/LYPrint.c:1286
 msgid "Save to disk disabled"
 msgstr "A lemezre mentés le van tiltva"
 
-#: src/LYPrint.c:1303
+#: src/LYPrint.c:1293
 msgid "Mail the file"
 msgstr "Fájl küldése levélben"
 
-#: src/LYPrint.c:1310
+#: src/LYPrint.c:1300
 msgid "Print to the screen"
 msgstr "Nyomtatás a képernyõre"
 
-#: src/LYPrint.c:1315
+#: src/LYPrint.c:1305
 msgid "Print out on a printer attached to your vt100 terminal"
 msgstr "Nyomtatás a vt100-as terminálhoz csatlakozó nyomtatóra."
 

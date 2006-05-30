@@ -3167,7 +3167,7 @@ static int version_fun(char *next_arg GCC_UNUSED)
     puts(gettext("See http://lynx.isc.org/ and the online help for more information."));
     puts("");
 #ifdef USE_SSL
-#ifdef OPENSSL_VERSION_TEXT
+#if defined(OPENSSL_VERSION_TEXT) && !defined(LIBGNUTLS_VERSION)
     puts("See http://www.openssl.org/ for information about OpenSSL.");
 #endif /* OPENSSL_VERSION_TEXT */
     puts("");

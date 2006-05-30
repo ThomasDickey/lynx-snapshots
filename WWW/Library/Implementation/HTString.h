@@ -45,6 +45,8 @@ Case-insensitive string comparison
     extern int strcasecomp8(const char *a, const char *b);
     extern int strncasecomp8(const char *a, const char *b, int n);
 
+    extern int strcasecomp_asterisk(const char *a, const char *b);
+
     /*
      * strcasecomp8 and strncasecomp8 are variants of strcasecomp and
      * strncasecomp, but use 8bit upper/lower case information from the

@@ -493,7 +493,7 @@ static int remote_session(char *acc_method, char *host)
  *	addr		must point to the fully qualified hypertext reference.
  *
  * On exit,
- *	returns		<0	Error has occured.
+ *	returns		<0	Error has occurred.
  *			>=0	Value of file descriptor or socket to be used
  *				 to read data.
  *	*pFormat	Set to the format of the file, if known.

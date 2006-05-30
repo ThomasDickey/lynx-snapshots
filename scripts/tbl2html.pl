@@ -25,7 +25,8 @@ sub field($$) {
 sub notes($) {
 	my $value = $_[0];
 
-	$value =~ s/^[^#]*#//;
+	$value =~ s/^[^#]*//;
+	$value =~ s/^#//;
 	$value =~ s/^\s+//;
 
 	return $value;
@@ -40,20 +41,28 @@ sub make_header($$$) {
 	printf FP "<HTML>\n";
 	printf FP "<HEAD>\n";
 	printf FP "<!-- $source -->\n";
-	printf FP "<TITLE>%s table</TITLE>\n", $official;
-	printf FP "<META HTTP-EQUIV=\"Content-Type\" CONTENT=\"text/html; charset=%s\">\n", $charset;
+	printf FP "<TITLE>%s table</TITLE>\n", escaped($official);
+	printf FP "<META HTTP-EQUIV=\"Content-Type\" CONTENT=\"text/html; charset=%s\">\n", escaped($charset);
 	printf FP "</HEAD>\n";
 	printf FP "\n";
 	printf FP "<BODY> \n";
 	printf FP "\n";
-	printf FP "<H1 ALIGN=center>%s table</H1> \n", $charset;
+	printf FP "<H1 ALIGN=center>%s table</H1> \n", escaped($charset);
 	printf FP "\n";
 	printf FP "<PRE>\n";
-	printf FP "Code  Char  Entity  Render  Description\n";
+	printf FP "Code  Char  Entity   Render          Description\n";
 }
 
 sub make_mark() {
-	printf FP "----  ----  ------  ------  -----------------------------------\n";
+	printf FP "----  ----  ------   ------          -----------------------------------\n";
+}
+
+sub escaped($) {
+	my $result = $_[0];
+	$result =~ s/&/&amp;/g;
+	$result =~ s/</&lt;/g;
+	$result =~ s/>/&gt;/g;
+	return $result;
 }
 
 sub make_row($$$) {
@@ -61,26 +70,162 @@ sub make_row($$$) {
 	my $new_code = $_[1];
 	my $comments = $_[2];
 
+	# printf "# make_row %d %d %s\n", $old_code, $new_code, $comments;
 	my $visible = sprintf("&amp;#%d;      ", $new_code);
-	printf FP " %02x    %c    %.13s &#%d;     %s\n",
-		$old_code, $old_code,
-		$visible, $new_code,
-		$comments;
+	if ($old_code < 256) {
+		printf FP "%4x    %c   %.13s  &#%d;             %s\n",
+			$old_code, $old_code,
+			$visible, $new_code,
+			escaped($comments);
+	} else {
+		printf FP "%4x    .   %.13s  &#%d;             %s\n",
+			$old_code,
+			$visible, $new_code,
+			escaped($comments);
+	}
 }
 
 sub null_row($$) {
 	my $old_code = $_[0];
 	my $comments = $_[1];
 
-	printf FP " %02x    %c                     %s\n",
-		$old_code, $old_code,
-		$comments;
+	if ($old_code < 256) {
+		printf FP "%4x    %c                     %s\n",
+			$old_code, $old_code,
+			escaped($comments);
+	} else {
+		printf FP "%4x    .                     %s\n",
+			$old_code,
+			escaped($comments);
+	}
 }
 
 sub make_footer() {
 	printf FP "</PRE>\n";
 	printf FP "</BODY>\n";
 	printf FP "</HTML>\n";
+}
+
+# return true if the string describes a range
+sub is_range($) {
+	return ($_[0] =~ /.*-.*/);
+}
+
+# convert the U+'s to 0x's so strtod() can convert them.
+sub zeroxes($) {
+	my $result = $_[0];
+	$result =~ s/^U\+/0x/;
+	$result =~ s/-U\+/-0x/;
+	return $result;
+}
+
+# convert a string to a number (-1's are outside the range of Unicode).
+sub value_of($) {
+	my ($result, $oops) = strtod($_[0]);
+	$result = -1 if ($oops ne 0);
+	return $result;
+}
+
+# return the first number in a range
+sub first_of($) {
+	my $range = zeroxes($_[0]);
+	$range =~ s/-.*//;
+	return value_of($range);
+}
+
+# return the last number in a range
+sub last_of($) {
+	my $range = zeroxes($_[0]);
+	$range =~ s/^.*-//;
+	return value_of($range);
+}
+
+sub one_many($$$) {
+	my $oldcode = $_[0];
+	my $newcode = zeroxes($_[1]);
+	my $comment = $_[2];
+
+	my $old_code = value_of($oldcode);
+	if ( $old_code lt 0 ) {
+		printf "? Problem with number \"%s\"\n", $oldcode;
+	} else {
+		make_mark if (( $old_code % 8 ) == 0 );
+
+		if ( $newcode =~ /^#.*/ ) {
+			null_row($old_code, $comment);
+		} elsif ( is_range($newcode) ) {
+			my $first_item = first_of($newcode);
+			my $last_item  = last_of($newcode);
+			my $item;
+
+			if ( $first_item lt 0 or $last_item lt 0 ) {
+				printf "? Problem with one:many numbers \"%s\"\n", $newcode;
+			} else {
+				if ( $comment =~ /^$/ ) {
+					$comment = sprintf("mapped: %#x to %#x..%#x", $old_code, $first_item, $last_item);
+				} else {
+					$comment = $comment . " (range)";
+				}
+				for $item ( $first_item..$last_item) {
+					make_row($old_code, $item, $comment);
+				}
+			}
+		} else {
+			my $new_code = value_of($newcode);
+			if ( $new_code lt 0 ) {
+				printf "? Problem with number \"%s\"\n", $newcode;
+			} else {
+				if ( $comment =~ /^$/ ) {
+					$comment = sprintf("mapped: %#x to %#x", $old_code, $new_code);
+				}
+				make_row($old_code, $new_code, $comment);
+			}
+		}
+	}
+}
+
+sub many_many($$$) {
+	my $oldcode = $_[0];
+	my $newcode = $_[1];
+	my $comment = $_[2];
+
+	my $first_old = first_of($oldcode);
+	my $last_old  = last_of($oldcode);
+	my $item;
+
+	if (is_range($newcode)) {
+		my $first_new = first_of($newcode);
+		my $last_new  = last_of($newcode);
+		for $item ( $first_old..$last_old) {
+			one_many($item, $first_new, $comment);
+			$first_new += 1;
+		}
+	} else {
+		for $item ( $first_old..$last_old) {
+			one_many($item, $newcode, $comment);
+		}
+	}
+}
+
+sub approximate($$$) {
+	my $values = $_[0];
+	my $expect = sprintf("%-8s", $_[1]);
+	my $comment = $_[2];
+
+	my $visible = sprintf("&amp;#%d;      ", $values);
+	if ($values < 256) {
+		printf FP "%4x    %c   %.13s  &#%d;             approx: %s\n",
+			$values, $values,
+			$visible,
+			$values,
+			escaped($expect);
+	} else {
+		printf FP "%4x    .   %.13s  &#%d;             approx: %s\n",
+			$values,
+			$visible,
+			$values,
+			escaped($expect);
+	}
 }
 
 sub doit($) {
@@ -96,6 +241,7 @@ sub doit($) {
 		return;
 	};
 	my (@input) = <FP>;
+	chomp @input;
 	close(FP);
 
 	my $n;
@@ -134,32 +280,44 @@ sub doit($) {
 			next if ( $newcode eq "" );
 
 			my $oldcode = field($input[$n], 0);
-			if ( $oldcode =~ /.*-.*/ ) {
-				printf "FIXME range %s\n", $oldcode;
-				next;
+			if ( is_range($oldcode) ) {
+				many_many($oldcode, $newcode, notes($input[$n]));
+			} else {
+				one_many($oldcode, $newcode, notes($input[$n]));
 			}
-			my ($old_code, $old_oops) = strtod($oldcode);
-			if ( $old_oops ne 0 ) {
-				printf "FIXME number %s\n", $oldcode;
-				next;
-			}
-			make_mark if (( $old_code % 8 ) == 0 );
+		} elsif ( $input[$n] =~ /^U\+/ ) {
+			if ( $input[$n] =~ /^U\+\w+:/ ) {
+				my $values = $input[$n];
+				my $expect = $input[$n];
 
-			my $comment = notes($input[$n]);
+				$values =~ s/:.*//;
+				$values = zeroxes($values);
+				$expect =~ s/^[^:]+://;
 
-			$newcode =~ s/^U\+/0x/;
-			if ( $newcode =~ /^#.*/ ) {
-				null_row($old_code, $comment);
-				next;
+				if ( is_range($values) ) {
+					# printf "fixme:%s(%s)(%s)\n", $input[$n], $values, $expect;
+				} else {
+					approximate(value_of($values), $expect, notes($input[$n]));
+				}
+			} else {
+				my $value = $input[$n];
+				$value =~ s/\s*".*//;
+				$value = value_of(zeroxes($value));
+				if ($value gt 0) {
+					my $quote = $input[$n];
+					my $comment = notes($input[$n]);
+					$quote =~ s/^[^"]*"//;
+					$quote =~ s/".*//;
+					$quote =~ s/\\134/\\/g;
+					$quote =~ s/\\015/\&#13\;/g;
+					$quote =~ s/\\012/\&#10\;/g;
+					approximate($value, $quote, $comment);
+				} else {
+					printf "fixme:%s(%s)\n", $input[$n];
+				}
 			}
-			my ($new_code, $new_oops) = strtod($newcode);
-			if ( $new_oops ne 0 ) {
-				printf "FIXME number %s\n", $newcode;
-				next;
-			}
-			make_row($old_code, $new_code, $comment);
 		} else {
-			next;
+			# printf "skipping line %d:%s\n", $n + 1, $input[$n];
 		}
 	}
 	if ( ! $empty ) {
@@ -169,7 +327,12 @@ sub doit($) {
 }
 
 sub usage() {
-	# FIXME
+	print <<USAGE;
+Usage: $0 [tbl-files]
+
+The script writes a new ".html" file for each input, using
+the same name as the input, stripping the ".tbl" suffix.
+USAGE
 	exit(1);
 }
 

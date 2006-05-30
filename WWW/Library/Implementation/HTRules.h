@@ -119,7 +119,7 @@ HTTranslate: Translate by rules
   ON EXIT,
 
   returns                 the address of the equivalent string allocated from the heap
-                         which the CALLER MUST FREE. If no translation occured, then it is
+                         which the CALLER MUST FREE. If no translation occurred, then it is
                          a copy of the original.
 
  */

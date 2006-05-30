@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: lynx 2.8.6-dev8\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2006-01-22 18:14-0500\n"
+"POT-Creation-Date: 2006-05-29 16:55-0400\n"
 "PO-Revision-Date: 2004-11-12 17:30+0100\n"
 "Last-Translator: Morten Bo Johansen <mojo@mbjnet.dk>\n"
 "Language-Team: Danish <dansk@klid.dk>\n"
@@ -2814,7 +2814,7 @@ msgstr "**** HTAccess: Statustilbagemelding var: %d\n"
 #. * hack: if we fail in HTAccess.c
 #. * avoid duplicating URL, oh.
 #.
-#: WWW/Library/Implementation/HTAccess.c:1084 src/LYMainLoop.c:7732
+#: WWW/Library/Implementation/HTAccess.c:1084 src/LYMainLoop.c:7733
 msgid "Can't Access"
 msgstr "Kan ikke tilgå"
 
@@ -3010,15 +3010,15 @@ msgstr "Læser nyhedsartikel.."
 msgid "Sorry, could not load requested news."
 msgstr "Beklager, kunne ikke indlæse artikler."
 
-#: WWW/Library/Implementation/HTTCP.c:1257
+#: WWW/Library/Implementation/HTTCP.c:1273
 msgid "Address has invalid port"
 msgstr "Adresse har en ugyldig port"
 
-#: WWW/Library/Implementation/HTTCP.c:1333
+#: WWW/Library/Implementation/HTTCP.c:1349
 msgid "Address length looks invalid"
 msgstr "Adresselængde forekommer ugyldig"
 
-#: WWW/Library/Implementation/HTTCP.c:1564 WWW/Library/Implementation/HTTCP.c:1582
+#: WWW/Library/Implementation/HTTCP.c:1580 WWW/Library/Implementation/HTTCP.c:1598
 #, c-format
 msgid "Unable to locate remote host %s."
 msgstr "Ude af stand til at finde fremmed vært %s."
@@ -3027,38 +3027,38 @@ msgstr "Ude af stand til at finde fremmed vært %s."
 #. * but not HTAlert, because typically there will be other
 #. * alerts from the callers.  - kw
 #.
-#: WWW/Library/Implementation/HTTCP.c:1579 WWW/Library/Implementation/HTTelnet.c:108
+#: WWW/Library/Implementation/HTTCP.c:1595 WWW/Library/Implementation/HTTelnet.c:108
 #, c-format
 msgid "Invalid hostname %s"
 msgstr "Ugyldigt værtsnavn %s"
 
-#: WWW/Library/Implementation/HTTCP.c:1593
+#: WWW/Library/Implementation/HTTCP.c:1609
 #, c-format
 msgid "Making %s connection to %s"
 msgstr "Opretter %s-forbindelse til %s"
 
-#: WWW/Library/Implementation/HTTCP.c:1604
+#: WWW/Library/Implementation/HTTCP.c:1620
 msgid "socket failed."
 msgstr "sokkel fejlede."
 
-#: WWW/Library/Implementation/HTTCP.c:1617
+#: WWW/Library/Implementation/HTTCP.c:1633
 #, c-format
 msgid "socket failed: family %d addr %s port %s."
 msgstr "sokkel fejlede: familie %d adr. %s port %s."
 
-#: WWW/Library/Implementation/HTTCP.c:1641
+#: WWW/Library/Implementation/HTTCP.c:1657
 msgid "Could not make connection non-blocking."
 msgstr "Kunne ikke oprette en ikke-blokerende forbindelse."
 
-#: WWW/Library/Implementation/HTTCP.c:1709
+#: WWW/Library/Implementation/HTTCP.c:1725
 msgid "Connection failed (too many retries)."
 msgstr "Forbindelse opgivet (for mange forsøg)."
 
-#: WWW/Library/Implementation/HTTCP.c:1908
+#: WWW/Library/Implementation/HTTCP.c:1924
 msgid "Could not restore socket to blocking."
 msgstr "Kunne ikke få sokkel til at blokere."
 
-#: WWW/Library/Implementation/HTTCP.c:1974
+#: WWW/Library/Implementation/HTTCP.c:1990
 msgid "Socket read failed for 180,000 tries."
 msgstr "Læsning af sokkel slog fejl i 180.000 forsøg."
 
@@ -3067,45 +3067,50 @@ msgstr "Læsning af sokkel slog fejl i 180.000 forsøg."
 msgid "Address contains a username: %s"
 msgstr "Adresse indeholder et brugernavn: %s"
 
-#: WWW/Library/Implementation/HTTP.c:536
+#: WWW/Library/Implementation/HTTP.c:539
 msgid "This client does not contain support for HTTPS URLs."
 msgstr "Denne klient kan ikke bruge HTTPS-adresser."
 
-#: WWW/Library/Implementation/HTTP.c:561
+#: WWW/Library/Implementation/HTTP.c:564
 msgid "Unable to connect to remote host."
 msgstr "Kan ikke forbinde til fremmed vært."
 
-#: WWW/Library/Implementation/HTTP.c:583
+#: WWW/Library/Implementation/HTTP.c:586
 msgid "Retrying connection without TLS."
 msgstr "Forsøger at genetablere forbindelsen uden TLS."
 
-#: WWW/Library/Implementation/HTTP.c:626
+#: WWW/Library/Implementation/HTTP.c:661
+#, c-format
+msgid "Verified connection to %s (cert=%s)"
+msgstr ""
+
+#: WWW/Library/Implementation/HTTP.c:685
 msgid "SSL error:Can't find common name in certificate-Continue?"
 msgstr "SSL-fejl: Kan ikke finde fælles navn i certifikat - fortsæt?"
 
-#: WWW/Library/Implementation/HTTP.c:643
+#: WWW/Library/Implementation/HTTP.c:688
 #, c-format
 msgid "SSL error:host(%s)!=cert(%s)-Continue?"
 msgstr "SSL-fejl:vært(%s)!=cert(%s) - fortsæt?"
 
-#: WWW/Library/Implementation/HTTP.c:655
+#: WWW/Library/Implementation/HTTP.c:703
 #, c-format
 msgid "Secure %d-bit %s (%s) HTTP connection"
 msgstr "Sikker %d-bit %s (%s) HTTP-forbindelse"
 
-#: WWW/Library/Implementation/HTTP.c:1125
+#: WWW/Library/Implementation/HTTP.c:1173
 msgid "Sending HTTP request."
 msgstr "Sender HTTP-anmodning."
 
-#: WWW/Library/Implementation/HTTP.c:1164
+#: WWW/Library/Implementation/HTTP.c:1212
 msgid "Unexpected network write error; connection aborted."
 msgstr "Uventet skrivningsfejl i netværk; forbindelse afbrudt."
 
-#: WWW/Library/Implementation/HTTP.c:1170
+#: WWW/Library/Implementation/HTTP.c:1218
 msgid "HTTP request sent; waiting for response."
 msgstr "HTTP-anmodning sendt; venter på svar."
 
-#: WWW/Library/Implementation/HTTP.c:1238
+#: WWW/Library/Implementation/HTTP.c:1286
 msgid "Unexpected network read error; connection aborted."
 msgstr "Uventet læsningsfejl i netværk; forbindelse afbrudt"
 
@@ -3118,7 +3123,7 @@ msgstr "Uventet læsningsfejl i netværk; forbindelse afbrudt"
 #. * line and possibly other headers, so we'll deal with them by
 #. * showing the full header to the user as text/plain.  - FM
 #.
-#: WWW/Library/Implementation/HTTP.c:1432
+#: WWW/Library/Implementation/HTTP.c:1480
 msgid "Got unexpected Informational Status."
 msgstr "Modtog uventet \"Informational Status\"."
 
@@ -3128,7 +3133,7 @@ msgstr "Modtog uventet \"Informational Status\"."
 #. * content.  We'll instruct the user to do that, and
 #. * restore the current document.  - FM
 #.
-#: WWW/Library/Implementation/HTTP.c:1466
+#: WWW/Library/Implementation/HTTP.c:1514
 msgid "Request fulfilled.  Reset Content."
 msgstr "Anmodning imødekommet. Nulstil indhold."
 
@@ -3138,27 +3143,27 @@ msgstr "Anmodning imødekommet. Nulstil indhold."
 #. * status is inappropriate.  We'll deal with it by showing
 #. * the full header to the user as text/plain.  - FM
 #.
-#: WWW/Library/Implementation/HTTP.c:1583
+#: WWW/Library/Implementation/HTTP.c:1631
 msgid "Got unexpected 304 Not Modified status."
 msgstr "Modtog uventet 304 \"Not Modified status\"."
 
-#: WWW/Library/Implementation/HTTP.c:1646
+#: WWW/Library/Implementation/HTTP.c:1694
 msgid "Redirection of POST content requires user approval."
 msgstr "Omdirigering af POST-indhold kræver brugers godkendelse."
 
-#: WWW/Library/Implementation/HTTP.c:1661
+#: WWW/Library/Implementation/HTTP.c:1709
 msgid "Have POST content.  Treating Permanent Redirection as Temporary.\n"
 msgstr "Har POST-indhold. Behandler varig omdirigering som midlertidig.\n"
 
-#: WWW/Library/Implementation/HTTP.c:1703
+#: WWW/Library/Implementation/HTTP.c:1751
 msgid "Retrying with access authorization information."
 msgstr "Prøver igen med oplysning om adgangstilladelse."
 
-#: WWW/Library/Implementation/HTTP.c:1715
+#: WWW/Library/Implementation/HTTP.c:1763
 msgid "Show the 401 message body?"
 msgstr "Vis indhold af 401-meddelelse?"
 
-#: WWW/Library/Implementation/HTTP.c:1758
+#: WWW/Library/Implementation/HTTP.c:1806
 msgid "Show the 407 message body?"
 msgstr "Vis indhold af 407-meddelelse?"
 
@@ -3166,7 +3171,7 @@ msgstr "Vis indhold af 407-meddelelse?"
 #. * Bad or unknown server_status number.  Take a chance and hope
 #. * there is something to display.  - FM
 #.
-#: WWW/Library/Implementation/HTTP.c:1858
+#: WWW/Library/Implementation/HTTP.c:1906
 msgid "Unknown status reply from server!"
 msgstr "Ukendt statussvar fra server!"
 
@@ -3770,12 +3775,11 @@ msgstr "Vis midlertidig file"
 msgid "Save to disk disabled."
 msgstr "Gem på disk deaktiveret."
 
-#: src/LYDownload.c:555 src/LYPrint.c:1319
+#: src/LYDownload.c:555 src/LYPrint.c:1309
 msgid "Local additions:"
 msgstr "Egne tilføjelser:"
 
 #: src/LYDownload.c:566 src/LYUpload.c:211
-#, c-format
 msgid "No Name Given"
 msgstr "Intet navn givet"
 
@@ -4198,7 +4202,7 @@ msgstr "Ingen \"Winsock\" fundet, beklager."
 msgid "You MUST define a valid TMP or TEMP area!"
 msgstr "Du SKAL definere et gyldigt TMP- eller TEMP-område!"
 
-#: src/LYMain.c:1248 src/LYMainLoop.c:5037
+#: src/LYMain.c:1248 src/LYMainLoop.c:5038
 msgid "No such directory"
 msgstr "Intet sådant filkatalog"
 
@@ -4301,7 +4305,7 @@ msgstr "%s: Ugyldig indstilling: %s\n"
 msgid "Internal error: Invalid mouse link %d!"
 msgstr "Intern fejl: Ugyldigt muselink %d!"
 
-#: src/LYMainLoop.c:692 src/LYMainLoop.c:5059
+#: src/LYMainLoop.c:692 src/LYMainLoop.c:5060
 msgid "A URL specified by the user"
 msgstr "En adresse angivet af brugeren"
 
@@ -4312,92 +4316,92 @@ msgstr "Kodningstype \"multipart/form-data\" ej understøttet! Kan ikke indsende.
 #.
 #. * Make a name for this help file.
 #.
-#: src/LYMainLoop.c:3044
+#: src/LYMainLoop.c:3045
 msgid "Help Screen"
 msgstr "Hjælpeskærm"
 
-#: src/LYMainLoop.c:3165
+#: src/LYMainLoop.c:3166
 msgid "System Index"
 msgstr "Systemfortegnelse"
 
-#: src/LYMainLoop.c:3525 src/LYMainLoop.c:5283
+#: src/LYMainLoop.c:3526 src/LYMainLoop.c:5284
 msgid "Entry into main screen"
 msgstr "Indgang til hovedskærm"
 
-#: src/LYMainLoop.c:3788
+#: src/LYMainLoop.c:3789
 msgid "No next document present"
 msgstr "Ingen yderligere dokumenter"
 
-#: src/LYMainLoop.c:4087
+#: src/LYMainLoop.c:4088
 msgid "charset for this document specified explicitly, sorry..."
 msgstr "dette dokuments tegnsæt er udtrykkeligt angivet, beklager ..."
 
-#: src/LYMainLoop.c:5013
+#: src/LYMainLoop.c:5014
 msgid "cd to:"
 msgstr "cd til: "
 
-#: src/LYMainLoop.c:5040
+#: src/LYMainLoop.c:5041
 msgid "A component of path is not a directory"
 msgstr "En del af stien er ikke et filkatalog"
 
-#: src/LYMainLoop.c:5043
+#: src/LYMainLoop.c:5044
 msgid "failed to change directory"
 msgstr "kunne ikke skifte filkatalog."
 
-#: src/LYMainLoop.c:6204
+#: src/LYMainLoop.c:6205
 msgid "Reparsing document under current settings..."
 msgstr "Genfortolker dokument under nuværende indstillinger ..."
 
-#: src/LYMainLoop.c:6495
+#: src/LYMainLoop.c:6496
 #, c-format
 msgid "Fatal error - could not open output file %s\n"
 msgstr "Kritisk fejl - kunne ikke åbne uddatafil %s\n"
 
-#: src/LYMainLoop.c:6840
+#: src/LYMainLoop.c:6841
 msgid "TABLE center enable."
 msgstr "TABEL-centrering slået til."
 
-#: src/LYMainLoop.c:6843
+#: src/LYMainLoop.c:6844
 msgid "TABLE center disable."
 msgstr "TABEL-centrering slået fra."
 
-#: src/LYMainLoop.c:6920
+#: src/LYMainLoop.c:6921
 msgid "Current URL is empty."
 msgstr "Aktuelle adresse er tom."
 
-#: src/LYMainLoop.c:6922 src/LYUtils.c:1790
+#: src/LYMainLoop.c:6923 src/LYUtils.c:1790
 msgid "Copy to clipboard failed."
 msgstr "Kopiering til klippebord slog fejl."
 
-#: src/LYMainLoop.c:6924
+#: src/LYMainLoop.c:6925
 msgid "Document URL put to clipboard."
 msgstr "Dokumentets adresse overført til klippebord."
 
-#: src/LYMainLoop.c:6926
+#: src/LYMainLoop.c:6927
 msgid "Link URL put to clipboard."
 msgstr "Linkets adresse overført til klippebord."
 
-#: src/LYMainLoop.c:6953
+#: src/LYMainLoop.c:6954
 msgid "No URL in the clipboard."
 msgstr "Ingen adresse ligger på klippebord."
 
-#: src/LYMainLoop.c:7617 src/LYMainLoop.c:7787
+#: src/LYMainLoop.c:7618 src/LYMainLoop.c:7788
 msgid "-index-"
 msgstr "-indeks-"
 
-#: src/LYMainLoop.c:7727
+#: src/LYMainLoop.c:7728
 msgid "lynx: Can't access startfile"
 msgstr "lynx: Kan ikke få adgang til startfil"
 
-#: src/LYMainLoop.c:7739
+#: src/LYMainLoop.c:7740
 msgid "lynx: Start file could not be found or is not text/html or text/plain"
 msgstr "lynx: startfil fandtes ikke eller er ikke i text/html, text/plain format"
 
-#: src/LYMainLoop.c:7740
+#: src/LYMainLoop.c:7741
 msgid "      Exiting..."
 msgstr "      Afslutter ..."
 
-#: src/LYMainLoop.c:7781
+#: src/LYMainLoop.c:7782
 msgid "-more-"
 msgstr "-mere-"
 
@@ -4979,64 +4983,64 @@ msgstr "Besøgte sider"
 msgid "View the file "
 msgstr "Vis filen "
 
-#: src/LYPrint.c:946
+#: src/LYPrint.c:936
 #, c-format
 msgid " Print job complete.\n"
 msgstr " Udskrivningsjob fuldført.\n"
 
-#: src/LYPrint.c:1271
+#: src/LYPrint.c:1261
 msgid "Document:"
 msgstr "Dokument:"
 
-#: src/LYPrint.c:1272
+#: src/LYPrint.c:1262
 msgid "Number of lines:"
 msgstr "Antal linjer:"
 
-#: src/LYPrint.c:1273
+#: src/LYPrint.c:1263
 msgid "Number of pages:"
 msgstr "Antal sider:"
 
-#: src/LYPrint.c:1274
+#: src/LYPrint.c:1264
 msgid "pages"
 msgstr "sider"
 
-#: src/LYPrint.c:1274
+#: src/LYPrint.c:1264
 msgid "page"
 msgstr "side"
 
-#: src/LYPrint.c:1275
+#: src/LYPrint.c:1265
 msgid "(approximately)"
 msgstr "(cirka)"
 
-#: src/LYPrint.c:1282
+#: src/LYPrint.c:1272
 msgid "Some print functions have been disabled!"
 msgstr "Visse udskrivningsfunktioner er slået fra!"
 
-#: src/LYPrint.c:1286
+#: src/LYPrint.c:1276
 msgid "Standard print options:"
 msgstr "Forvalg for udskrivning:"
 
-#: src/LYPrint.c:1287
+#: src/LYPrint.c:1277
 msgid "Print options:"
 msgstr "Valgmuligheder for udskrivning:"
 
-#: src/LYPrint.c:1294
+#: src/LYPrint.c:1284
 msgid "Save to a local file"
 msgstr "Gem i lokal fil"
 
-#: src/LYPrint.c:1296
+#: src/LYPrint.c:1286
 msgid "Save to disk disabled"
 msgstr "Gem på disk er slået fra"
 
-#: src/LYPrint.c:1303
+#: src/LYPrint.c:1293
 msgid "Mail the file"
 msgstr "Send fil med post"
 
-#: src/LYPrint.c:1310
+#: src/LYPrint.c:1300
 msgid "Print to the screen"
 msgstr "Udskriv til skærm"
 
-#: src/LYPrint.c:1315
+#: src/LYPrint.c:1305
 msgid "Print out on a printer attached to your vt100 terminal"
 msgstr "Udskriv på printer tilknyttet en vt100-terminal"
 
