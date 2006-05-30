@@ -100,33 +100,6 @@ static int ResolveYield(void)
 }
 #endif
 
-/*
- * This chunk of code is used in both win32 and cygwin.
- */
-#if defined(_WINDOWS_NSL)
-static LYNX_HOSTENT *phost;	/* Pointer to host - See netdb.h */
-static int donelookup;
-
-static unsigned long __stdcall _fork_func(void *arg)
-{
-    const char *host = (const char *) arg;
-
-#ifdef SH_EX
-    unsigned long addr;
-
-    addr = (unsigned long) inet_addr(host);
-    if (addr != INADDR_NONE)
-	phost = gethostbyaddr((char *) &addr, sizeof(addr), AF_INET);
-    else
-	phost = gethostbyname(host);
-#else
-    phost = gethostbyname(host);
-#endif
-    donelookup = TRUE;
-    return (unsigned long) (phost);
-}
-#endif /* _WINDOWS_NSL */
-
 #if defined(VMS) && defined(UCX)
 /*
  *  A routine to mimic the ioctl function for UCX.
@@ -462,7 +435,7 @@ static void dump_hostent(const char *msgprefix,
  *  cast to a LYNX_HOSTENT. - kw
  *  See also description of LYGetHostByName.
  */
-#ifdef NSL_FORK
+#if defined(NSL_FORK) || defined(_WINDOWS_NSL)
 
 #define REHOSTENT_SIZE 128	/* not bigger than pipe buffer! */
 
@@ -595,6 +568,49 @@ static size_t fill_rehostent(char *rehostent,
     curlen = p_next_char - (char *) rehostent;
     return curlen;
 }
+
+/*
+ * This chunk of code is used in both win32 and cygwin.
+ */
+#if defined(_WINDOWS_NSL)
+static LYNX_HOSTENT *gbl_phost;	/* Pointer to host - See netdb.h */
+
+#ifndef __CYGWIN__
+static int donelookup;
+
+static unsigned long __stdcall _fork_func(void *arg)
+{
+    const char *host = (const char *) arg;
+    static AlignedHOSTENT aligned_full_rehostent;
+    char *rehostent = (char *) &aligned_full_rehostent;
+    size_t rehostentlen = 0;
+
+#ifdef SH_EX
+    unsigned long addr;
+
+    addr = (unsigned long) inet_addr(host);
+    if (addr != INADDR_NONE)
+	gbl_phost = gethostbyaddr((char *) &addr, sizeof(addr), AF_INET);
+    else
+	gbl_phost = gethostbyname(host);
+#else
+    gbl_phost = gethostbyname(host);
+#endif
+
+    if (gbl_phost) {
+	rehostentlen = fill_rehostent(rehostent, REHOSTENT_SIZE, gbl_phost);
+	if (rehostentlen == 0) {
+	    gbl_phost = (LYNX_HOSTENT *) NULL;
+	} else {
+	    gbl_phost = (LYNX_HOSTENT *) rehostent;
+	}
+    }
+
+    donelookup = TRUE;
+    return (unsigned long) (gbl_phost);
+}
+#endif /* __CYGWIN__ */
+#endif /* _WINDOWS_NSL */
 #endif /* NSL_FORK */
 
 #ifndef HAVE_H_ERRNO
@@ -742,7 +758,7 @@ LYNX_HOSTENT *LYGetHostByName(char *str)
 #ifdef NSL_FORK
     statuses.h_errno_valid = NO;
     /*
-     * Start block for fork-based gethostbyname() with checks for interrupts. 
+     * Start block for fork-based gethostbyname() with checks for interrupts.
      * - Tom Zerucha (tz@execpc.com) & FM
      */
     {
@@ -772,7 +788,7 @@ LYNX_HOSTENT *LYGetHostByName(char *str)
 	int child_exited = 0;
 
 	/*
-	 * Reap any children that have terminated since last time through. 
+	 * Reap any children that have terminated since last time through.
 	 * This might include children that we killed, then waited with WNOHANG
 	 * before they were actually ready to be reaped.  (Should be max of 1
 	 * in this state, but the loop is safe if waitpid() is implemented
@@ -945,7 +961,7 @@ LYNX_HOSTENT *LYGetHostByName(char *str)
 	     * least I don't know how), so SLANG users must live with up-to-1s
 	     * timeout.  -BL
 	     *
-	     * Whoops -- we need to make sure stdin is actually selectable! 
+	     * Whoops -- we need to make sure stdin is actually selectable!
 	     * /dev/null isn't, on some systems, which makes some useful Lynx
 	     * invocations fail.  -BL
 	     */
@@ -1124,12 +1140,12 @@ LYNX_HOSTENT *LYGetHostByName(char *str)
 
 	    t = (unsigned long) inet_addr(host);
 	    if (t != INADDR_NONE)
-		phost = gethostbyaddr((char *) &t, sizeof(t), AF_INET);
+		gbl_phost = gethostbyaddr((char *) &t, sizeof(t), AF_INET);
 	    else
-		phost = gethostbyname(host);
+		gbl_phost = gethostbyname(host);
 	} else {		/* for Windows NT */
 #endif /* !__CYGWIN__ */
-	    phost = (LYNX_HOSTENT *) NULL;
+	    gbl_phost = (LYNX_HOSTENT *) NULL;
 	    donelookup = FALSE;
 	    WSASetLastError(WSAHOST_NOT_FOUND);
 
@@ -1154,9 +1170,9 @@ LYNX_HOSTENT *LYGetHostByName(char *str)
 #ifndef __CYGWIN__
 	}
 #endif /* !__CYGWIN__ */
-	if (phost) {
+	if (gbl_phost) {
 	    lynx_nsl_status = HT_OK;
-	    result_phost = phost;
+	    result_phost = gbl_phost;
 	} else {
 	    lynx_nsl_status = HT_ERROR;
 	    goto failed;
@@ -1315,10 +1331,10 @@ static int HTParseInet(SockA * soc_in, const char *str)
 #endif /* MVS */
 
 #ifdef _WINDOWS_NSL
-	phost = LYGetHostByName(host);	/* See above */
-	if (!phost)
+	gbl_phost = LYGetHostByName(host);	/* See above */
+	if (!gbl_phost)
 	    goto failed;
-	memcpy((void *) &soc_in->sin_addr, phost->h_addr_list[0], phost->h_length);
+	memcpy((void *) &soc_in->sin_addr, gbl_phost->h_addr_list[0], gbl_phost->h_length);
 #else /* !_WINDOWS_NSL */
 	{
 	    LYNX_HOSTENT *phost;
@@ -1759,7 +1775,7 @@ int HTDoConnect(const char *url,
 		 *              ous  connection attempt has not yet been
 		 *              completed.
 		 * Thus if the SOCKET_ERRNO is NOT EALREADY we have a real
-		 * error, and should break out here and return that error. 
+		 * error, and should break out here and return that error.
 		 * Otherwise if it is EALREADY keep on trying to complete the
 		 * connection.
 		 */
@@ -1992,7 +2008,7 @@ int HTDoRead(int fildes,
 #endif
 
 	/*
-	 * If we suspend, then it is possible that select will be interrupted. 
+	 * If we suspend, then it is possible that select will be interrupted.
 	 * Allow for this possibility.  - JED
 	 */
 	do {

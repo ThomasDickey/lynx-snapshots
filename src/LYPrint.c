@@ -109,7 +109,8 @@ static void set_environ(int name,
 
 static char *suggested_filename(DocInfo *newdoc)
 {
-    char *cp, *sug_filename = 0;
+    char *sug_filename = 0;
+    int rootlen;
 
     /*
      * Load the suggested filename string.  - FM
@@ -119,25 +120,12 @@ static char *suggested_filename(DocInfo *newdoc)
     else
 	StrAllocCopy(sug_filename, newdoc->address);	/* must be freed */
     /*
-     * Strip any gzip or compress suffix, if present.  - FM
+     * Strip suffix for compressed-files, if present.
      */
-    cp = NULL;
-    if (strlen(sug_filename) > 3) {
-	cp = (char *) &sug_filename[(strlen(sug_filename) - 3)];
-	if ((*cp == '.' || *cp == '-' || *cp == '_') &&
-	    !strcasecomp((cp + 1), "gz")) {
-	    *cp = '\0';
-	} else {
-	    cp = NULL;
-	}
-    }
-    if ((cp == NULL) && strlen(sug_filename) > 2) {
-	cp = (char *) &sug_filename[(strlen(sug_filename) - 2)];
-	if ((*cp == '.' || *cp == '-' || *cp == '_') &&
-	    !strcasecomp((cp + 1), "Z")) {
-	    *cp = '\0';
-	}
-    }
+    if (HTCompressFileType(sug_filename, ".", &rootlen) != cftNone)
+	sug_filename[rootlen] = '\0';
+
+    CTRACE((tfp, "suggest %s\n", sug_filename));
     return sug_filename;
 }
 
@@ -153,13 +141,15 @@ static void SetupFilename(char *filename,
     change_sug_filename(filename);
     if (!(HTisDocumentSource())
 	&& (cp = strrchr(filename, '.')) != NULL
-	&& (cp - filename) < LY_MAXPATH - 5) {
+	&& (cp - filename) < (LY_MAXPATH - (int) (sizeof(TEXT_SUFFIX) + 1))) {
 	format = HTFileFormat(filename, &encoding, NULL);
+	CTRACE((tfp, "... format %s\n", format->name));
 	if (!strcasecomp(format->name, "text/html") ||
 	    !IsUnityEnc(encoding)) {
 	    strcpy(cp, TEXT_SUFFIX);
 	}
     }
+    CTRACE((tfp, "... result %s\n", filename));
 }
 
 #define FN_INIT 0
@@ -1325,8 +1315,8 @@ int print_options(char **newfile,
 		    "   <a href=\"%s//PRINTER/number=%d/pagelen=%d/lines=%d\">",
 		    STR_LYNXPRINT,
 		    count, cur_printer->pagelen, lines_in_file);
-	    fprintf(fp0, (cur_printer->name ?
-			  cur_printer->name : "No Name Given"));
+	    fprintf(fp0, "%s", (cur_printer->name ?
+				cur_printer->name : "No Name Given"));
 	    fprintf(fp0, "</a>\n");
 	}
     fprintf(fp0, "</pre>\n");

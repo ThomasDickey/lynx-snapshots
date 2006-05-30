@@ -1840,7 +1840,7 @@ static int print_local_dir(DIR *dp, char *localname,
 	 */
 	DIRED *data = NULL;
 
-#if !(defined(DOSPATH) || defined(__EMX__))
+#ifdef STRUCT_DIRENT__D_INO
 	if (dirbuf->d_ino == 0)
 	    /*
 	     * If the entry is not being used, skip it.
@@ -2645,7 +2645,7 @@ int HTLoadFile(const char *addr,
 		/*
 		 * While there are directory entries to be read...
 		 */
-#if !(defined(DOSPATH) || defined(__EMX__))
+#ifdef STRUCT_DIRENT__D_INO
 		if (dirbuf->d_ino == 0)
 		    continue;	/* if the entry is not being used, skip it */
 #endif

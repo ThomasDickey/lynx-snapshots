@@ -114,6 +114,7 @@ void HTFormatInit(void)
      */
     SET_INTERNL("application/html", "text/x-c", HTMLToC, 0.5);
     SET_INTERNL("application/html", "text/plain", HTMLToPlain, 0.5);
+    SET_INTERNL("text/css", "text/plain", HTMLToPlain, 0.5);
     SET_INTERNL("application/html", "www/present", HTMLPresent, 2.0);
     SET_INTERNL("application/xhtml+xml", "www/present", HTMLPresent, 2.0);
     SET_INTERNL("application/xml", "www/present", HTMLPresent, 2.0);
@@ -143,6 +144,7 @@ void HTFormatInit(void)
     SET_INTERNL("text/x-sgml", "www/present", HTMLPresent, 2.0);
     SET_INTERNL("text/sgml", "www/source", HTPlainPresent, 1.0);
     SET_INTERNL("text/sgml", "www/present", HTMLPresent, 1.0);
+    SET_INTERNL("text/css", "www/present", HTPlainPresent, 1.0);
     SET_INTERNL("text/plain", "www/present", HTPlainPresent, 1.0);
     SET_INTERNL("text/plain", "www/source", HTPlainPresent, 1.0);
     SET_INTERNL("text/html", "www/source", HTPlainPresent, 1.0);
@@ -1287,6 +1289,7 @@ void HTFileInit(void)
 	SET_SUFFIX1(".c",	"text/plain",			"8bit");
 	SET_SUFFIX1(".cc",	"text/plain",			"8bit");
 	SET_SUFFIX1(".c++",	"text/plain",			"8bit");
+	SET_SUFFIX1(".css",	"text/plain",			"8bit");
 	SET_SUFFIX1(".h",	"text/plain",			"8bit");
 	SET_SUFFIX1(".pl",	"text/plain",			"8bit");
 	SET_SUFFIX1(".text",	"text/plain",			"8bit");

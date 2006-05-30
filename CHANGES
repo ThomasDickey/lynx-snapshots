@@ -1,10 +1,51 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2006-05-29 (2.8.6dev.18)
+* suppress OpenSSL URL from version message if it happens to be built using
+  GNU TLS -TD  
+* change default for DEFAULT_INDEX_FILE in lynx.cfg to http://lynx.isc.org/
+  since the Mosaic MetaIndex file is defunct (suggested by Stef Caunter)
+* update makelynx.bat (report by FLWM) -TD
+* add presentation for text/css, to allow browsing ".css" files -Stef Caunter
+* modify LYPrint.c suggested_filename() to strip bzip2's ".bz2" suffixes as
+  well as ".zz" suffixes -TD
+* modify configure script macro AM_PATH_PROG_WITH_TEST to allow for DOS device
+  letter, and to override $PATHSEP with $PATH_SEPARATOR if the latter is
+  set -DK 
+* modify ifdef in LYCurses.c to avoid using nonfunctional PDCurses 2.7
+  newterm() -DK
+* update config.guess (2006-04-26) and config.sub (2006-05-13)
+* improvements to configure script macros -TD
+  + don't use curses_colr on HPUX 11
+  + split-out CF_CURSES_HEADER to simplify comparison with CF_NCURSES_HEADER
+  + modify AM_WITH_NLS	to make it look in non-system locations, e.g., to
+    work with FreeBSD ports system
+* modify HTLoadHTTP() to interpret leading asterisks in common name fields as
+  wildcards -Thorsten Glaser
+* remove SH_EX hardcoded Latin-1 table for strcasecomp() -TD
+* fixes for compiling in Cygwin environment -TD
+  + modify not to check d_ino when __CYGWIN__ is defined because it
+    does not seem to be supported by Cygwin now.
+  + modify to use fill_rehostent to avoid segfault in _fork_func,
+    which is used in Win32 environment (includes Cygwin).
+* fix some printf formats -Thorsten Glaser
+* fix some non-POSIX syntax in scripts/cfg_path.sh -PG
+* modify makefile.in to ensure that scripts are prefixed with $(SHELL), in
+  case packager has stripped executable permissions from scripts, e.g., by
+  using CVS (report by Atsuhito Kohda) -TD
+* add a null-pointer check in handle_LYK_HEAD() to cover a case where doing
+  a HEAD on a link failed because there was no submit action associated with
+  the link (report by Walter Ian Kaye, Stef Caunter) -TD
+* improve tbl2html.pl script to cover the ranges and approximations used in
+  def7_uni.tbl -TD
+* additional def7_uni.tbl conversions (patch by Tim Larson).
+* fix ifdef's for repeated-include of winsock.h for Visual Studio 6 -TD
+
 2006-01-22 (2.8.6dev.17)
 * improve EXP_JAPANESEUTF8_SUPPORT -TH
   + correct an ifdef in HTMIME.c
-  + correct the behavior of encoding a text in input element, 
+  + correct the behavior of encoding a text in input element,
     when the type is hidden and the text is japanese encoded utf-8.
   + correct "//TRANSLIT" position in iconv_open() parameter.
 * remove redundant size-check in change for HText_trimHightext() in 2.8.5dev.8
@@ -95,7 +136,7 @@ Changes since Lynx 2.8 release
   this fragment:
     <TAB INDENT=1 TO>
   (Alexey Dobriyan).
-* remove pointer to 
+* remove pointer to
      http://www.moxienet.com/lynx/
   since it no longer has useful information about SSL for Lynx (Crouton).
 * add description of configure --with-build-cc, etc., to INSTALLATION -TD

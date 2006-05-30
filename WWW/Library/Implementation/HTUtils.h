@@ -176,7 +176,7 @@ char *alloca();
  */
 #if defined(_WINDOWS) && !defined(__CYGWIN__)
 
-#if defined(USE_WINSOCK2_H)
+#if defined(USE_WINSOCK2_H) && (_MSC_VER >= 1300) && (_MSC_VER < 1400)
 #include <winsock2.h>		/* includes windows.h, in turn windef.h */
 #else
 #include <windows.h>		/* #include "windef.h" */

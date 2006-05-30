@@ -370,8 +370,8 @@ install-help : help_files.sed $(HELPDIR)
 	@ECHO_CC@sed	-e '/^HELPFILE:http/s!^!#!' \
 		-e '/^#HELPFILE:file/s!#!!' \
 		$(LIBDIR)/lynx.tmp | \
-	$(SHELL) -c "$(scripts_dir)/cfg_path.sh lynx_help $(helpdir)" | \
-	$(SHELL) -c "$(scripts_dir)/cfg_path.sh lynx_doc  $(helpdir)" | \
+	$(SHELL) $(scripts_dir)/cfg_path.sh lynx_help $(helpdir) | \
+	$(SHELL) $(scripts_dir)/cfg_path.sh lynx_doc  $(helpdir) | \
 	sed	-e '/^HELPFILE:file/s!$$!$(COMPRESS_EXT)!' \
 		-e '/^HELPFILE:file/s!$(COMPRESS_EXT)$(COMPRESS_EXT)$$!$(COMPRESS_EXT)!' \
 		>$(LIBDIR)/lynx.cfg
@@ -398,7 +398,7 @@ cfg_defs.h : $(scripts_dir)/cfg_defs.sh $(scripts_dir)/cfg_edit.sh config.cache 
 	$(SHELL) -c 'SHELL=$(SHELL) $(SHELL) $(scripts_dir)/cfg_defs.sh $(srcdir)'
 
 install-cfg : $(LIBDIR)
-	@$(SHELL) -c '$(scripts_dir)/install-cfg.sh "$(INSTALL_DATA)" $(srcdir)/lynx.cfg $(LIBDIR)/lynx.cfg'
+	@$(SHELL) $(scripts_dir)/install-cfg.sh "$(INSTALL_DATA)" $(srcdir)/lynx.cfg $(LIBDIR)/lynx.cfg
 
 install-lss : $(LIBDIR)
 	-mv -f $(LIBDIR)/lynx.lss $(LIBDIR)/lynx.oldlss

@@ -2058,7 +2058,7 @@ static int CpOrdinal(const unsigned long cp, const int other)
     char *mimeName, *mName = NULL, *lName = NULL;
     int s, i, exists = 0, ret;
 
-    CTRACE((tfp, "CpOrdinal(cp=%ul, other=%d).\n", cp, other));
+    CTRACE((tfp, "CpOrdinal(cp=%lu, other=%d).\n", cp, other));
     sprintf(myMimeName, "auto%s-cp%lu", (other ? "2" : ""), cp);
     mimeName = myMimeName + 5 + (other != 0);
     sprintf(lyName, "AutoDetect%s (cp%lu)",

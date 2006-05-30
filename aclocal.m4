@@ -4,10 +4,10 @@ dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
 dnl and Philippe De Muyter <phdm@macqel.be>
 dnl
 dnl Created: 1997/1/28
-dnl Updated: 2005/10/16
+dnl Updated: 2006/5/29
 dnl
 dnl The autoconf used in Lynx development is GNU autoconf 2.13 or 2.52, patched
-dnl by Tom Dickey.  See your local GNU archives, and this URL:
+dnl by Thomas Dickey.  See your local GNU archives, and this URL:
 dnl http://invisible-island.net/autoconf/autoconf.html
 dnl
 dnl ---------------------------------------------------------------------------
@@ -227,7 +227,7 @@ AC_DEFUN([AM_LC_MESSAGES],
     fi
   fi])dnl
 dnl ---------------------------------------------------------------------------
-dnl AM_PATH_PROG_WITH_TEST version: 5 updated: 2002/10/27 23:21:42
+dnl AM_PATH_PROG_WITH_TEST version: 6 updated: 2006/05/29 11:25:53
 dnl ----------------------
 dnl Inserted as requested by gettext 0.10.40
 dnl File from /usr/share/aclocal
@@ -256,10 +256,11 @@ set dummy $2; ac_word=[$]2
 AC_MSG_CHECKING([for $ac_word])
 AC_CACHE_VAL(ac_cv_path_$1,
 [case "[$]$1" in
-  /*)
+  [[\\/]*|?:[\\/]]*)
   ac_cv_path_$1="[$]$1" # Let the user override the test with a path.
   ;;
   *)
+  if test -n "$PATH_SEPARATOR"; then PATHSEP="$PATH_SEPARATOR"; fi
   IFS="${IFS= 	}"; ac_save_ifs="$IFS"; IFS="${IFS}${PATHSEP}"
   for ac_dir in ifelse([$5], , $PATH, [$5]); do
     test -z "$ac_dir" && ac_dir=.
@@ -286,7 +287,7 @@ fi
 AC_SUBST($1)dnl
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl AM_WITH_NLS version: 17 updated: 2004/01/23 19:52:21
+dnl AM_WITH_NLS version: 18 updated: 2006/01/22 20:26:00
 dnl -----------
 dnl Inserted as requested by gettext 0.10.40
 dnl File from /usr/share/aclocal
@@ -1316,7 +1317,7 @@ if test $cf_cv_color_curses = yes ; then
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_CURSES_CPPFLAGS version: 7 updated: 2003/06/06 00:48:41
+dnl CF_CURSES_CPPFLAGS version: 9 updated: 2006/02/04 19:44:43
 dnl ------------------
 dnl Look for the curses headers.
 AC_DEFUN([CF_CURSES_CPPFLAGS],[
@@ -1324,7 +1325,7 @@ AC_DEFUN([CF_CURSES_CPPFLAGS],[
 AC_CACHE_CHECK(for extra include directories,cf_cv_curses_incdir,[
 cf_cv_curses_incdir=no
 case $host_os in #(vi
-hpux10.*|hpux11.*) #(vi
+hpux10.*) #(vi
 	test -d /usr/include/curses_colr && \
 	cf_cv_curses_incdir="-I/usr/include/curses_colr"
 	;;
@@ -1337,27 +1338,8 @@ esac
 ])
 test "$cf_cv_curses_incdir" != no && CPPFLAGS="$cf_cv_curses_incdir $CPPFLAGS"
 
-AC_CACHE_CHECK(if we have identified curses headers,cf_cv_ncurses_header,[
-cf_cv_ncurses_header=none
-for cf_header in \
-	curses.h \
-	ncurses.h \
-	ncurses/curses.h \
-	ncurses/ncurses.h
-do
-AC_TRY_COMPILE([#include <${cf_header}>],
-	[initscr(); tgoto("?", 0,0)],
-	[cf_cv_ncurses_header=$cf_header; break],[])
-done
-])
-
-if test "$cf_cv_ncurses_header" = none ; then
-	AC_MSG_ERROR(No curses header-files found)
-fi
-
-# cheat, to get the right #define's for HAVE_NCURSES_H, etc.
-AC_CHECK_HEADERS($cf_cv_ncurses_header)
-
+CF_CURSES_HEADER
+CF_TERM_HEADER
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl CF_CURSES_FUNCS version: 12 updated: 2003/11/06 19:59:57
@@ -1414,7 +1396,36 @@ exit(foo == 0);
 done
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_CURSES_LIBS version: 23 updated: 2003/11/06 19:59:57
+dnl CF_CURSES_HEADER version: 1 updated: 2005/12/31 13:28:25
+dnl ----------------
+dnl Find a "curses" header file, e.g,. "curses.h", or one of the more common
+dnl variations of ncurses' installs.
+dnl
+dnl See also CF_NCURSES_HEADER, which sets the same cache variable.
+AC_DEFUN([CF_CURSES_HEADER],[
+AC_CACHE_CHECK(if we have identified curses headers,cf_cv_ncurses_header,[
+cf_cv_ncurses_header=none
+for cf_header in \
+	curses.h \
+	ncurses.h \
+	ncurses/curses.h \
+	ncurses/ncurses.h
+do
+AC_TRY_COMPILE([#include <${cf_header}>],
+	[initscr(); tgoto("?", 0,0)],
+	[cf_cv_ncurses_header=$cf_header; break],[])
+done
+])
+
+if test "$cf_cv_ncurses_header" = none ; then
+	AC_MSG_ERROR(No curses header-files found)
+fi
+
+# cheat, to get the right #define's for HAVE_NCURSES_H, etc.
+AC_CHECK_HEADERS($cf_cv_ncurses_header)
+])dnl
+dnl ---------------------------------------------------------------------------
+dnl CF_CURSES_LIBS version: 24 updated: 2006/02/04 19:44:43
 dnl --------------
 dnl Look for the curses libraries.  Older curses implementations may require
 dnl termcap/termlib to be linked as well.  Call CF_CURSES_CPPFLAGS first.
@@ -1433,7 +1444,7 @@ case $host_os in #(vi
 freebsd*) #(vi
 	AC_CHECK_LIB(mytinfo,tgoto,[LIBS="-lmytinfo $LIBS"])
 	;;
-hpux10.*|hpux11.*) #(vi
+hpux10.*) #(vi
 	AC_CHECK_LIB(cur_colr,initscr,[
 		LIBS="-lcur_colr $LIBS"
 		ac_cv_func_initscr=yes
@@ -1703,6 +1714,38 @@ AC_MSG_RESULT($cf_cv_fancy_curses)
 test $cf_cv_fancy_curses = yes && AC_DEFINE(FANCY_CURSES)
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_FIND_HEADER version: 1 updated: 2006/01/22 20:26:00
+dnl --------------
+dnl Find a header file, searching for it if it is not already in the include
+dnl path.
+dnl
+dnl	$1 = the header filename
+dnl	$2 = the package name
+dnl	$3 = action to perform if successful
+dnl	$4 = action to perform if not successful
+AC_DEFUN([CF_FIND_HEADER],[
+AC_CHECK_HEADER([$1],
+	cf_find_header=yes,[
+	cf_find_header=no
+CF_HEADER_PATH(cf_search,$2)
+for cf_incdir in $cf_search
+do
+	if test -f $cf_incdir/$1 ; then
+		CF_ADD_CFLAGS(-I$cf_incdir)
+		CF_VERBOSE(... found in $cf_incdir)
+		cf_find_header=yes
+		break
+	fi
+	CF_VERBOSE(... tested $cf_incdir)
+done
+])
+if test "$cf_find_header" = yes ; then
+ifelse([$3],,:,[$3])
+ifelse([$4],,,[else
+$4])
+fi
+])dnl
+dnl ---------------------------------------------------------------------------
 dnl CF_FIND_IPV6_LIBS version: 6 updated: 2002/11/09 09:05:18
 dnl -----------------
 dnl Based on the IPV6 stack type, look for the corresponding library.
@@ -1912,6 +1955,45 @@ if test $cf_found_library = no ; then
 	AC_ERROR(Cannot link $1 library)
 fi
 ])
+])dnl
+dnl ---------------------------------------------------------------------------
+dnl CF_FIND_LINKAGE version: 1 updated: 2006/01/22 20:26:00
+dnl ---------------
+dnl Find a library, searching for it if it is not already in the library path.
+dnl
+dnl	$1 = headers for library entrypoint
+dnl	$2 = code fragment for library entrypoint
+dnl	$3 = the library name without the "-l" option or ".so" suffix.
+dnl	$4 = action to perform if successful
+dnl	$5 = action to perform if not successful
+AC_DEFUN([CF_FIND_LINKAGE],[
+AC_TRY_LINK([$1],[$2],
+	cf_find_linkage=yes,[
+	cf_find_linkage=no
+CF_LIBRARY_PATH(cf_search,$3)
+cf_save_LIBS="$LIBS"
+cf_save_LDFLAGS="$LDFLAGS"
+for cf_libdir in $cf_search
+do
+	if test -d $cf_libdir ; then
+		LIBS="-l$3 $cf_save_LIBS"
+		LDFLAGS="$cf_save_LDFLAGS -L$cf_libdir"
+		AC_TRY_LINK([$1],[$2],[
+			CF_VERBOSE(... found in $cf_libdir)
+			cf_find_linkage=yes
+			break],[
+			LIBS="$cf_save_LIBS"
+			LDFLAGS="$cf_save_LDFLAGS"])
+	fi
+	CF_VERBOSE(... tested $cf_libdir)
+done
+])
+
+if test "$cf_find_linkage" = yes ; then
+ifelse([$4],,:,[$4])
+ifelse([$5],,,[else
+$5])
+fi
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl CF_FIONBIO version: 2 updated: 1998/02/24 06:51:46
@@ -2475,79 +2557,9 @@ make an error
 test "$cf_cv_gnu_source" = yes && CPPFLAGS="$CPPFLAGS -D_GNU_SOURCE"
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl Find a library, searching for it if it is not already in the library path.
-dnl
-dnl	$1 = headers for library entrypoint
-dnl	$2 = code fragment for library entrypoint
-dnl	$3 = the library name without the "-l" option or ".so" suffix.
-dnl	$4 = action to perform if successful
-dnl	$5 = action to perform if not successful
-AC_DEFUN([CF_FIND_LINKAGE],[
-AC_TRY_LINK([$1],[$2],
-	cf_find_linkage=yes,[
-	cf_find_linkage=no
-CF_LIBRARY_PATH(cf_search,$3)
-cf_save_LIBS="$LIBS"
-cf_save_LDFLAGS="$LDFLAGS"
-for cf_libdir in $cf_search
-do
-	if test -d $cf_libdir ; then
-		LIBS="-l$3 $cf_save_LIBS"
-		LDFLAGS="$cf_save_LDFLAGS -L$cf_libdir"
-		AC_TRY_LINK([$1],[$2],[
-			CF_VERBOSE(... found in $cf_libdir)
-			cf_find_linkage=yes
-			break],[
-			LIBS="$cf_save_LIBS"
-			LDFLAGS="$cf_save_LDFLAGS"])
-	fi
-	CF_VERBOSE(... tested $cf_libdir)
-done
-])
-
-if test "$cf_find_linkage" = yes ; then
-ifelse([$4],,:,[$4])
-ifelse([$5],,,[else
-$5])
-fi
-])dnl
-dnl ---------------------------------------------------------------------------
-dnl Find a header file, searching for it if it is not already in the include
-dnl path.
-dnl
-dnl	$1 = the header filename
-dnl	$2 = the package name
-dnl	$3 = action to perform if successful
-dnl	$4 = action to perform if not successful
-AC_DEFUN([CF_FIND_HEADER],[
-AC_CHECK_HEADER([$1],
-	cf_find_header=yes,[
-	cf_find_header=no
-CF_HEADER_PATH(cf_search,$2)
-for cf_incdir in $cf_search
-do
-	if test -f $cf_incdir/$1 ; then
-		CF_ADD_CFLAGS(-I$cf_incdir)
-		CF_VERBOSE(... found in $cf_incdir)
-		cf_find_header=yes
-		break
-	fi
-	CF_VERBOSE(... tested $cf_incdir)
-done
-])
-if test "$cf_find_header" = yes ; then
-ifelse([$3],,:,[$3])
-ifelse([$4],,,[else
-$4])
-fi
-])dnl
-dnl ---------------------------------------------------------------------------
 dnl CF_HEADER_PATH version: 8 updated: 2002/11/10 14:46:59
 dnl --------------
 dnl Construct a search-list for a nonstandard header-file
-dnl
-dnl	$1 = the variable to return as result
-dnl	$2 = the package name
 AC_DEFUN([CF_HEADER_PATH],
 [CF_SUBDIR_PATH($1,$2,include)
 test "$includedir" != NONE && \
@@ -2820,7 +2832,7 @@ printf("old\n");
 	,[$1=no])
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_NCURSES_CPPFLAGS version: 17 updated: 2003/11/06 19:59:57
+dnl CF_NCURSES_CPPFLAGS version: 18 updated: 2005/12/31 13:26:39
 dnl -------------------
 dnl Look for the SVr4 curses clone 'ncurses' in the standard places, adjusting
 dnl the CPPFLAGS variable so we can include its header.
@@ -2861,9 +2873,27 @@ AC_CACHE_CHECK(for $cf_ncuhdr_root header in include-path, cf_cv_ncurses_h,[
 	done
 ])
 
+CF_NCURSES_HEADER
+CF_TERM_HEADER
+
+# some applications need this, but should check for NCURSES_VERSION
+AC_DEFINE(NCURSES)
+
+CF_NCURSES_VERSION
+])dnl
+dnl ---------------------------------------------------------------------------
+dnl CF_NCURSES_HEADER version: 1 updated: 2005/12/31 13:28:37
+dnl -----------------
+dnl Find a "curses" header file, e.g,. "curses.h", or one of the more common
+dnl variations of ncurses' installs.
+dnl
+dnl See also CF_CURSES_HEADER, which sets the same cache variable.
+AC_DEFUN([CF_NCURSES_HEADER],[
+
 if test "$cf_cv_ncurses_h" != no ; then
 	cf_cv_ncurses_header=$cf_cv_ncurses_h
 else
+
 AC_CACHE_CHECK(for $cf_ncuhdr_root include-path, cf_cv_ncurses_h2,[
 	test -n "$verbose" && echo
 	CF_HEADER_PATH(cf_search,$cf_ncuhdr_root)
@@ -2899,7 +2929,7 @@ AC_CACHE_CHECK(for $cf_ncuhdr_root include-path, cf_cv_ncurses_h2,[
 
 fi
 
-AC_DEFINE(NCURSES)
+# Set definitions to allow ifdef'ing for ncurses.h
 
 case $cf_cv_ncurses_header in # (vi
 *ncurses.h)
@@ -2916,7 +2946,6 @@ ncursesw/curses.h|ncursesw/ncurses.h)
 	;;
 esac
 
-CF_NCURSES_VERSION
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl CF_NCURSES_LIBS version: 12 updated: 2004/04/27 16:26:05
@@ -3230,7 +3259,7 @@ if test -n "$cf_path_prog" ; then
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_PATH_SYNTAX version: 9 updated: 2002/09/17 23:03:38
+dnl CF_PATH_SYNTAX version: 10 updated: 2006/01/02 19:36:00
 dnl --------------
 dnl Check the argument to see that it looks like a pathname.  Rewrite it if it
 dnl begins with one of the prefix/exec_prefix variables, and then again if the
@@ -3252,7 +3281,7 @@ case ".[$]$1" in #(vi
     ;;
   esac
   ;; #(vi
-.NONE/*)
+.no|.NONE/*)
   $1=`echo [$]$1 | sed -e s%NONE%$ac_default_prefix%`
   ;;
 *)
@@ -4265,6 +4294,53 @@ AC_MSG_RESULT($cf_cv_termio_and_termios)
 test $cf_cv_termio_and_termios = no && AC_DEFINE(TERMIO_AND_TERMIOS)
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_TERM_HEADER version: 1 updated: 2005/12/31 13:26:39
+dnl --------------
+dnl Look for term.h, which is part of X/Open curses.  It defines the interface
+dnl to terminfo database.  Usually it is in the same include-path as curses.h,
+dnl but some packagers change this, breaking various applications.
+AC_DEFUN([CF_TERM_HEADER],[
+AC_CACHE_CHECK(for terminfo header, cf_cv_term_header,[
+case ${cf_cv_ncurses_header} in #(vi
+*/ncurses.h|*/ncursesw.h) #(vi
+	cf_term_header=`echo "$cf_cv_ncurses_header" | sed -e 's%ncurses[[^.]]*\.h$%term.h%'`
+	;;
+*)
+	cf_term_header=term.h
+	;;
+esac
+
+for cf_test in $cf_term_header "ncurses/term.h" "ncursesw/term.h"
+do
+AC_TRY_COMPILE([#include <stdio.h>
+#include <${cf_cv_ncurses_header-curses.h}>
+#include <$cf_test>
+],[int x = auto_left_margin],[
+	cf_cv_term_header="$cf_test"],[
+	cf_cv_term_header=unknown
+	])
+	test "$cf_cv_term_header" != unknown && break
+done
+])
+
+# Set definitions to allow ifdef'ing to accommodate subdirectories
+
+case $cf_cv_term_header in # (vi
+*term.h)
+	AC_DEFINE(HAVE_TERM_H)
+	;;
+esac
+
+case $cf_cv_term_header in # (vi
+ncurses/term.h) #(vi
+	AC_DEFINE(HAVE_NCURSES_TERM_H)
+	;;
+ncursesw/term.h)
+	AC_DEFINE(HAVE_NCURSESW_TERM_H)
+	;;
+esac
+])dnl
+dnl ---------------------------------------------------------------------------
 dnl CF_TTYTYPE version: 4 updated: 2002/10/27 18:21:42
 dnl ----------
 AC_DEFUN([CF_TTYTYPE],
@@ -4773,10 +4849,11 @@ AC_TRY_LINK([
 test $cf_cv_need_xopen_extension = yes && CPPFLAGS="$CPPFLAGS -D_XOPEN_SOURCE_EXTENDED"
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_XOPEN_SOURCE version: 23 updated: 2005/10/15 16:39:05
+dnl CF_XOPEN_SOURCE version: 24 updated: 2006/04/02 16:41:09
 dnl ---------------
 dnl Try to get _XOPEN_SOURCE defined properly that we can use POSIX functions,
-dnl or adapt to the vendor's definitions to get equivalent functionality.
+dnl or adapt to the vendor's definitions to get equivalent functionality,
+dnl without losing the common non-POSIX features.
 dnl
 dnl Parameters:
 dnl	$1 is the nominal value for _XOPEN_SOURCE

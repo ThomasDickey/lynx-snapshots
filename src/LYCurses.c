@@ -811,7 +811,7 @@ void LYnoVideo(int a)
  * If newterm is not defined, assume a curses subset which
  * supports only initscr.  --gil
  */
-#if defined(HAVE_NEWTERM) && defined(HAVE_DELSCREEN) && !(defined(NCURSES) && defined(HAVE_RESIZETERM))
+#if defined(HAVE_NEWTERM) && defined(HAVE_DELSCREEN) && !defined(PDCURSES) && !(defined(NCURSES) && defined(HAVE_RESIZETERM))
 static SCREEN *LYscreen = NULL;
 
 #define LYDELSCR() { \

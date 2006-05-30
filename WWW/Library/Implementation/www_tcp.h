@@ -93,6 +93,11 @@ Default values
 #  include <ndir.h>
 # endif
 #endif /* HAVE_DIRENT_H */
+
+#if !(defined(DOSPATH) || defined(__EMX__) || defined(__CYGWIN__))
+#define STRUCT_DIRENT__D_INO 1
+#endif
+
 #endif /* !VMS */
 
 #ifdef TIME_WITH_SYS_TIME

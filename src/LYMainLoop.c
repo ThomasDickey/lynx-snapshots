@@ -2955,6 +2955,7 @@ static BOOLEAN handle_LYK_HEAD(int *cmd)
 		       links[curdoc.link].l_form->disabled) {
 		HTUserMsg(FORM_ACTION_DISABLED);
 	    } else if (links[curdoc.link].type == WWW_FORM_LINK_TYPE &&
+		       links[curdoc.link].l_form->submit_action != 0 &&
 		       !isLYNXCGI(links[curdoc.link].l_form->submit_action) &&
 		       strncmp(links[curdoc.link].l_form->submit_action,
 			       "http", 4)) {
