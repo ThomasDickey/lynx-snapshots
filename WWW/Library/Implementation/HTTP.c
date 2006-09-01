@@ -62,14 +62,14 @@ static void free_ssl_ctx(void)
 	SSL_CTX_free(ssl_ctx);
 }
 
-static int HTSSLCallback(int preverify_ok, X509_STORE_CTX * x509_ctx)
+static int HTSSLCallback(int preverify_ok, X509_STORE_CTX * x509_ctx GCC_UNUSED)
 {
     char *msg = NULL;
     int result = 1;
 
     if (!(preverify_ok || ssl_okay || ssl_noprompt)) {
 #ifdef USE_X509_SUPPORT
-	HTSprintf0(&msg, "SSL error:%s-Continue?",
+	HTSprintf0(&msg, SSL_FORCED_PROMPT,
 		   X509_verify_cert_error_string(X509_STORE_CTX_get_error(x509_ctx)));
 	if (HTForcedPrompt(ssl_noprompt, msg, YES))
 	    ssl_okay = 1;
@@ -84,6 +84,10 @@ static int HTSSLCallback(int preverify_ok, X509_STORE_CTX * x509_ctx)
 
 SSL *HTGetSSLHandle(void)
 {
+#ifdef USE_GNUTLS_INCL
+    static char *certfile = NULL;
+#endif
+
     if (ssl_ctx == NULL) {
 	/*
 	 * First time only.
@@ -98,8 +102,19 @@ SSL *HTGetSSLHandle(void)
 	SSL_CTX_set_default_verify_paths(ssl_ctx);
 	SSL_CTX_set_verify(ssl_ctx, SSL_VERIFY_PEER, HTSSLCallback);
 #endif /* SSLEAY_VERSION_NUMBER < 0x0800 */
+#ifdef USE_GNUTLS_INCL
+	if ((certfile = LYGetEnv("SSL_CERT_FILE")) != NULL) {
+	    CTRACE((tfp,
+		    "HTGetSSLHandle: certfile is set to %s by SSL_CERT_FILE\n",
+		    certfile));
+	}
+#endif
 	atexit(free_ssl_ctx);
     }
+#ifdef USE_GNUTLS_INCL
+    ssl_ctx->certfile = certfile;
+    ssl_ctx->certfile_type = GNUTLS_X509_FMT_PEM;
+#endif
     ssl_okay = 0;
     return (SSL_new(ssl_ctx));
 }
@@ -206,9 +221,12 @@ static int ws_read(int fd, char *buf, int len)
     return res;
 }
 
+#define DWORD_ERR ((DWORD)-1)
+
 static DWORD __stdcall _thread_func(void *p)
 {
-    int i, val, ret;
+    DWORD result;
+    int i, val;
     recv_data_t *q = (recv_data_t *) p;
 
     i = 0;
@@ -224,12 +242,12 @@ static DWORD __stdcall _thread_func(void *p)
 		i, ws_errno, q->fd, q->len);
 	MessageBox(NULL, buff, BOX_TITLE, BOX_FLAG);
 #endif
-	ret = -1;
+	result = DWORD_ERR;
     } else {
-	ret = val;
+	result = val;
     }
 
-    return ((DWORD) ret);
+    return result;
 }
 
 /* The same like read, but takes care of EINTR and uses select to
@@ -244,7 +262,8 @@ int ws_netread(int fd, char *buf, int len)
     HANDLE hThread;
     DWORD dwThreadID;
     DWORD exitcode = 0;
-    DWORD ret_val = -1, val, process_time, now_TickCount, save_TickCount;
+    DWORD ret_val = DWORD_ERR;
+    DWORD val, process_time, now_TickCount, save_TickCount;
 
     static recv_data_t para;
 
@@ -279,7 +298,7 @@ int ws_netread(int fd, char *buf, int len)
 	i++;
 	if (val == WAIT_FAILED) {
 	    HTInfoMsg("Wait Failed");
-	    ret_val = -1;
+	    ret_val = DWORD_ERR;
 	    break;
 	} else if (val == WAIT_TIMEOUT) {
 	    i++;
@@ -298,7 +317,7 @@ int ws_netread(int fd, char *buf, int len)
 	    }
 	} else if (val == WAIT_OBJECT_0) {
 	    if (GetExitCodeThread(hThread, &exitcode) == FALSE) {
-		exitcode = -1;
+		exitcode = DWORD_ERR;
 	    }
 	    if (CloseHandle(hThread) == FALSE) {
 		HTInfoMsg("Thread terminate Failed");
@@ -312,13 +331,22 @@ int ws_netread(int fd, char *buf, int len)
 	    if (process_time == 0)
 		process_time = 1;
 	    g_total_times += process_time;
-	    g_total_bytes += exitcode;
 
-	    if (g_total_bytes > 2000000) {
-		ws_read_per_sec = g_total_bytes / (g_total_times / 1000);
+	    /*
+	     * DWORD is unsigned, and could be an error code which is signed.
+	     */
+	    if ((long) exitcode > 0)
+		g_total_bytes += exitcode;
+
+	    ws_read_per_sec = g_total_bytes;
+	    if (ws_read_per_sec > 2000000) {
+		if (g_total_times > 1000)
+		    ws_read_per_sec /= (g_total_times / 1000);
 	    } else {
-		ws_read_per_sec = g_total_bytes * 1000 / g_total_times;
+		ws_read_per_sec *= 1000;
+		ws_read_per_sec /= g_total_times;
 	    }
+
 	    ret_val = exitcode;
 	    break;
 	}
@@ -459,6 +487,11 @@ static int HTLoadHTTP(const char *arg,
     int status_sslcertcheck;
     char *ssl_dn_start;
     char *ssl_all_cns;
+
+#ifdef USE_GNUTLS_INCL
+    int ret;
+    unsigned tls_status;
+#endif
 
 #if SSLEAY_VERSION_NUMBER >= 0x0900
     BOOL try_tls = TRUE;
@@ -621,9 +654,62 @@ static int HTLoadHTTP(const char *arg,
 	    goto done;
 #endif /* SSLEAY_VERSION_NUMBER >= 0x0900 */
 	}
+#ifdef USE_GNUTLS_INCL
+	ret = gnutls_certificate_verify_peers2(handle->gnutls_state, &tls_status);
+	if ((ret < 0) || tls_status) {
+	    int flag_continue = 1;
+	    char *msg2;
+
+	    if (tls_status & GNUTLS_CERT_SIGNER_NOT_FOUND) {
+		msg2 = gettext("no issuer was found");
+	    } else if (tls_status & GNUTLS_CERT_SIGNER_NOT_CA) {
+		msg2 = gettext("issuer is not a CA");
+	    } else if (tls_status & GNUTLS_CERT_SIGNER_NOT_FOUND) {
+		msg2 = gettext("the certificate has no known issuer");
+	    } else if (tls_status & GNUTLS_CERT_REVOKED) {
+		msg2 = gettext("the certificate has been revoked");
+	    } else {
+		msg2 = gettext("the certificate is not trusted");
+	    }
+	    HTSprintf0(&msg, SSL_FORCED_PROMPT, msg2);
+	    CTRACE((tfp, "HTLoadHTTP: %s\n", msg));
+	    if (!ssl_noprompt) {
+		if (!HTForcedPrompt(ssl_noprompt, msg, YES)) {
+		    flag_continue = 0;
+		}
+	    } else if (ssl_noprompt == FORCE_PROMPT_NO) {
+		flag_continue = 0;
+	    }
+	    FREE(msg);
+	    if (flag_continue == 0) {
+		status = HT_NOT_LOADED;
+		FREE(msg);
+		goto done;
+	    }
+	}
+#endif
 
 	X509_NAME_oneline(X509_get_subject_name(SSL_get_peer_certificate(handle)),
+#ifndef USE_GNUTLS_INCL
 			  ssl_dn, sizeof(ssl_dn));
+#else
+			  ssl_dn + 1, sizeof(ssl_dn) - 1);
+
+	/* Iterate over DN in incompatible GnuTLS format to bring it into OpenSSL format */
+	ssl_dn[0] = '/';
+	ssl_dn_start = ssl_dn;
+	while (*ssl_dn_start) {
+	    if ((*ssl_dn_start == ',') && (*(ssl_dn_start + 1) == ' ')) {
+		*ssl_dn_start++ = '/';
+		if (*(p = ssl_dn_start) != 0) {
+		    while ((p[0] = p[1]) != 0)
+			++p;
+		}
+	    } else {
+		ssl_dn_start++;
+	    }
+	}
+#endif
 
 	/*
 	 * X.509 DN validation taking ALL CN fields into account
@@ -681,8 +767,8 @@ static int HTLoadHTTP(const char *arg,
 
 	/* if an error occurred, format the appropriate message */
 	if (status_sslcertcheck == 0) {
-	    HTSprintf0(&msg,
-		       gettext("SSL error:Can't find common name in certificate-Continue?"));
+	    HTSprintf0(&msg, SSL_FORCED_PROMPT,
+		       gettext("Can't find common name in certificate"));
 	} else if (status_sslcertcheck == 1) {
 	    HTSprintf0(&msg,
 		       gettext("SSL error:host(%s)!=cert(%s)-Continue?"),

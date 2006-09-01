@@ -793,6 +793,7 @@
 #define FAILED_RETRY_WITH_AUTH  gettext("Can't retry with authorization!  Contact the server's WebMaster.")
 #define FAILED_RETRY_WITH_PROXY gettext("Can't retry with proxy authorization!  Contact the server's WebMaster.")
 #define HTTP_RETRY_WITH_PROXY   gettext("Retrying with proxy authorization information.")
+#define SSL_FORCED_PROMPT	gettext("SSL error:%s-Continue?")
 
 /* HTWAIS.c */
 #define HTWAIS_MESSAGE_TOO_BIG  gettext("HTWAIS: Return message too large.")

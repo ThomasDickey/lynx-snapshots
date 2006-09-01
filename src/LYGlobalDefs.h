@@ -211,6 +211,7 @@ extern "C" {
     extern BOOLEAN child_lynx;	/* TRUE to exit with an arrow */
     extern BOOLEAN dump_links_only;
     extern BOOLEAN dump_output_immediately;
+    extern BOOLEAN dump_to_stderr;
     extern BOOLEAN emacs_keys;	/* TRUE to turn on emacs-like key movement */
     extern BOOLEAN error_logging;	/* TRUE to mail error messages */
     extern BOOLEAN ftp_local_passive;

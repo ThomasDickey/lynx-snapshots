@@ -681,12 +681,32 @@ treated '>' as a co-terminator for double-quotes and tags.
 .B \-source
 works the same as dump but outputs HTML source instead of
 formatted text.
+For example
+.sp
+.RS
+lynx -source . >foo.html
+.RE
+.IP
+generates HTML source listing the files in the current directory.
+Each file is marked by an HREF relative to the parent directory.
+Add a trailing slash to make the HREF's relative to the current directory:
+.sp
+.RS
+lynx -source ./ >foo.html
+.RE
 .TP
 .B \-stack_dump
 disable SIGINT cleanup handler
 .TP
 .B \-startfile_ok
 allow non-http startfile and homepage with \fB\-validate\fR.
+.TP
+.B \-stderr
+When dumping a document using \fB\-dump\fR or \fB\-source\fR,
+Lynx normally does not display alert (error)
+messages that you see on the screen in the status line.
+Use the \fB\-stderr\fR option to tell Lynx to write these messages
+to the standard error.
 .TP
 .B \-stdin
 read the startfile from standard input

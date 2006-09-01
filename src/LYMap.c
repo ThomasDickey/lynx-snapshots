@@ -610,6 +610,8 @@ static int LYLoadIMGmap(const char *arg,
 
 void LYPrintImgMaps(FILE *fp)
 {
+    const char *only = HTLoadedDocumentURL();
+    int only_len = strlen(only);
     HTList *outer = LynxMaps;
     HTList *inner;
     LYImageMap *map;
@@ -618,6 +620,13 @@ void LYPrintImgMaps(FILE *fp)
 
     if (HTList_count(outer) > 0) {
 	while (NULL != (map = (LYImageMap *) HTList_nextObject(outer))) {
+	    if (only_len != 0) {
+		if (strncmp(only, map->address, only_len)
+		    || (map->address[only_len] != '\0'
+			&& map->address[only_len] != '#')) {
+		    continue;
+		}
+	    }
 	    fprintf(fp, "\n%s\n", isEmpty(map->title) ? NO_MAP_TITLE : map->title);
 	    fprintf(fp, "%s\n", map->address);
 	    inner = map->elements;

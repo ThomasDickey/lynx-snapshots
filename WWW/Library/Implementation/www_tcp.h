@@ -169,9 +169,21 @@ error Host character set is not ASCII.
 #define UCH(ch) ((unsigned char)(ch))
 
 /*
+ * These parameters were provided by Nigel Horne, using BeOS professional 5.0
+ */
+#ifdef  __BEOS__
+#undef NETREAD
+#undef NETWRITE
+#undef NETCLOSE
+#define NETREAD(s,b,l)  recv((s),(b),(l),0)
+#define NETWRITE(s,b,l) send((s),(b),(l),0)
+#define NETCLOSE(s)     closesocket(s)
+#endif
+
+/*
 IBM-PC running Windows NT
 
-	These parameters providede by  Susan C. Weber <sweber@kyle.eitech.com>.
+	These parameters provided by  Susan C. Weber <sweber@kyle.eitech.com>.
 */
 
 #ifdef _WINDOWS
@@ -705,7 +717,11 @@ typedef unsigned short mode_t;
 #define DECL_SYS_ERRLIST 1
 #endif
 
+#if defined(VMS)
+#define socklen_t unsigned
+#else
 #define socklen_t int		/* used for default LY_SOCKLEN definition */
+#endif
 
 #endif /* !HAVE_CONFIG_H */
 

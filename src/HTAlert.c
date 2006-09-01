@@ -50,6 +50,13 @@ void HTAlert(const char *Msg)
     _user_message(ALERT_FORMAT, Msg);
     LYstore_message2(ALERT_FORMAT, Msg);
 
+    if (dump_output_immediately && dump_to_stderr) {
+	fflush(stdout);
+	fprintf(stderr, ALERT_FORMAT, Msg);
+	fputc('\n', stderr);
+	fflush(stderr);
+    }
+
     LYSleepAlert();
 }
 

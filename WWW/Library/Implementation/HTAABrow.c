@@ -736,9 +736,11 @@ static HTAAScheme HTAA_selectScheme(HTAASetup * setup)
     int scheme;
 
     if (setup && setup->valid_schemes) {
-	for (scheme = HTAA_BASIC; scheme < HTAA_MAX_SCHEMES; scheme++)
-	    if (-1 < HTList_indexOf(setup->valid_schemes, (void *) scheme))
+	for (scheme = HTAA_BASIC; scheme < HTAA_MAX_SCHEMES; scheme++) {
+	    void *object = (void *) scheme;
+	    if (-1 < HTList_indexOf(setup->valid_schemes, object))
 		return (HTAAScheme) scheme;
+	}
     }
     return HTAA_BASIC;
 }

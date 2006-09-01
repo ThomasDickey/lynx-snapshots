@@ -1371,7 +1371,7 @@ commands.
             ability to create a log can be toggled on with
             the <em>-tlog</em> switch.   Note that this ability is
             probably disabled in anonymous or validation accounts.
-   <dt><A NAME="*-key"><em>*</em></A>
+   <dt><A NAME="asterisk-key"><em>*</em></A>
         <dd>The '<em>*</em>' command toggles image_links mode on and off.
             When on, links will be created for all images, including inline images.
             If you have an image viewer mapped to the image's MIME type, you
@@ -1382,7 +1382,7 @@ commands.
             When on, the charset is assumed to match the selected character
             set and 8-bit characters are not reverse translated with respect
             to the ISO-8859-1 conversion tables.
-   <dt><A NAME="[-key"><em>[</em></A>
+   <dt><A NAME="lbracket-key"><em>[</em></A>
         <dd>The '<em>[</em>' command toggles pseudo_inlines mode on and off.
             When on, inline images which have no ALT string specified will
             have an <em>[INLINE]</em> pseudo-ALT string inserted in the Lynx
@@ -2884,12 +2884,28 @@ where
                     double-quotes and tags.
              <dt><code>-source</code>
                 <dd>works the same as dump but outputs HTML source instead of
-                    formatted text.
+                    formatted text.  For example
+                    <pre><tt>
+                    lynx -source . >foo.html
+                    </tt></pre>
+                    generates HTML source listing the  files  in  the  current
+                    directory. Each file is marked by an HREF relative to  the
+                    parent directory. Add a trailing slash  to make the HREF's
+                    relative to the current directory:
+                    <pre><tt>
+                    lynx -source ./ >foo.html
+                    </tt></pre>
              <dt><code>-stack_dump</code>
                 <dd>disable SIGINT cleanup handler.
              <dt><code>-startfile_ok</code>
                 <dd>allow non-http startfile and homepage with
                     <em>-validate</em>.
+             <dt><code>-stderr</code>
+                <dd>When dumping a document using <code>-dump</code> or
+                    <code>-source</code>, Lynx normally does not display alert
+                    (error) messages that you see on the screen in the status
+                    line.  Use the <code>-stderr</code> option to tell Lynx to
+                    write these messages to the standard error.
              <dt><code>-stdin</code>
                 <dd>read the startfile from standard input
                     (UNIX only).

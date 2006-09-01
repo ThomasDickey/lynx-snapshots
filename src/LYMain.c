@@ -201,6 +201,7 @@ BOOLEAN check_mail = CHECKMAIL;
 BOOLEAN child_lynx = FALSE;
 BOOLEAN dump_links_only = FALSE;
 BOOLEAN dump_output_immediately = FALSE;
+BOOLEAN dump_to_stderr = FALSE;
 BOOLEAN emacs_keys = EMACS_KEYS_ALWAYS_ON;
 BOOLEAN error_logging = MAIL_SYSTEM_ERROR_LOGGING;
 BOOLEAN ftp_passive = FTP_PASSIVE;	/* TRUE if doing ftp in passive mode */
@@ -628,7 +629,8 @@ static void FatalProblem(int sig);
 #endif /* !VMS */
 
 #if defined(USE_COLOR_STYLE)
-char *lynx_lss_file = NULL;
+char *lynx_lss_file2 = NULL;	/* from command-line options */
+char *lynx_lss_file = NULL;	/* from config-file, etc. */
 #endif
 
 #ifdef __DJGPP__
@@ -759,6 +761,7 @@ static void free_lynx_globals(void)
     FREE(LYTraceLogPath);
     FREE(lynx_cfg_file);
 #if defined(USE_COLOR_STYLE)
+    FREE(lynx_lss_file2);
     FREE(lynx_lss_file);
 #endif
     FREE(UCAssume_MIMEcharset);
@@ -1094,11 +1097,9 @@ int main(int argc,
 #endif /* LOCALE */
     /* Set the text message domain.  */
 #if defined(HAVE_LIBINTL_H) || defined(HAVE_LIBGETTEXT_H)
-#ifndef __DJGPP__
     if ((cp = LYGetEnv("LYNX_LOCALEDIR")) == 0)
 	cp = LOCALEDIR;
     bindtextdomain("lynx", cp);
-#endif /* !__DJGPP__ */
     textdomain("lynx");
 #endif /* HAVE_LIBINTL_H */
 
@@ -1452,7 +1453,7 @@ int main(int argc,
      */
     if (!LYCanReadFile(lynx_cfg_file)) {
 	fprintf(stderr,
-		gettext("\nConfiguration file %s is not available.\n\n"),
+		gettext("\nConfiguration file \"%s\" is not available.\n\n"),
 		lynx_cfg_file);
 	exit_immediately(EXIT_FAILURE);
     }
@@ -1494,36 +1495,6 @@ int main(int argc,
 	fprintf(stderr, gettext("\nLynx edit map not declared.\n\n"));
 	exit_immediately(EXIT_FAILURE);
     }
-#if defined(USE_COLOR_STYLE)
-    /*
-     * If no alternate lynx-style file was specified on the command line, see
-     * if it's in the environment.
-     */
-    if (!lynx_lss_file) {
-	if (((cp = LYGetEnv("LYNX_LSS")) != NULL) ||
-	    (cp = LYGetEnv("lynx_lss")) != NULL)
-	    StrAllocCopy(lynx_lss_file, cp);
-    }
-
-    /*
-     * If we still don't have a lynx-style file, use the userdefs.h definition.
-     */
-    if (!lynx_lss_file)
-	StrAllocCopy(lynx_lss_file, LYNX_LSS_FILE);
-
-    tildeExpand(&lynx_lss_file, TRUE);
-
-    /*
-     * If the lynx-style file is not available, inform the user and exit.
-     */
-    if (!LYCanReadFile(lynx_lss_file)) {
-	fprintf(stderr, gettext("\nLynx file %s is not available.\n\n"),
-		lynx_lss_file);
-    } else {
-	style_readFromFile(lynx_lss_file);
-    }
-#endif /* USE_COLOR_STYLE */
-
 #ifdef USE_COLOR_TABLE
     /*
      * Set up default foreground and background colors.
@@ -1563,6 +1534,47 @@ int main(int argc,
      * Process the configuration file.
      */
     read_cfg(lynx_cfg_file, "main program", 1, (FILE *) 0);
+
+#if defined(USE_COLOR_STYLE)
+    /*
+     * A command-line "-lss" always overrides the config-file, even if it is
+     * an empty string such as -lss="".
+     */
+    if (lynx_lss_file2 != 0) {
+	FREE(lynx_lss_file);
+	lynx_lss_file = lynx_lss_file2;
+	lynx_lss_file2 = 0;
+    }
+
+    /*
+     * If no alternate lynx-style file was specified on the command line, see
+     * if it's in the environment.
+     */
+    if (!lynx_lss_file) {
+	if (((cp = LYGetEnv("LYNX_LSS")) != NULL) ||
+	    (cp = LYGetEnv("lynx_lss")) != NULL)
+	    StrAllocCopy(lynx_lss_file, cp);
+    }
+
+    /*
+     * If we still don't have a lynx-style file, use the userdefs.h definition.
+     */
+    if (!lynx_lss_file)
+	StrAllocCopy(lynx_lss_file, LYNX_LSS_FILE);
+
+    tildeExpand(&lynx_lss_file, TRUE);
+
+    /*
+     * If the lynx-style file is not available, inform the user and exit.
+     */
+    if (!isEmpty(lynx_lss_file) && !LYCanReadFile(lynx_lss_file)) {
+	fprintf(stderr, gettext("\nLynx file \"%s\" is not available.\n\n"),
+		lynx_lss_file);
+	exit_immediately(EXIT_FAILURE);
+    } else {
+	style_readFromFile(lynx_lss_file);
+    }
+#endif /* USE_COLOR_STYLE */
 
     /*
      * Process the RC file.
@@ -3501,7 +3513,7 @@ keys (may be incompatible with some curses packages)"
 #endif /* EXEC_LINKS || EXEC_SCRIPTS */
 #if defined(USE_COLOR_STYLE)
    PARSE_STR(
-      "lss",		2|NEED_LYSTRING_ARG,	lynx_lss_file,
+      "lss",		2|NEED_LYSTRING_ARG,	lynx_lss_file2,
       "=FILENAME\nspecifies a lynx.lss file other than the default"
    ),
 #endif
@@ -3760,6 +3772,10 @@ treated '>' as a co-terminator for double-quotes and tags"
    PARSE_SET(
       "startfile_ok",	4|SET_ARG,		startfile_ok,
       "allow non-http startfile and homepage with -validate"
+   ),
+   PARSE_SET(
+      "stderr",		4|SET_ARG,		dump_to_stderr,
+      "write warning messages to standard error when -dump -or -source is used"
    ),
    PARSE_SET(
       "stdin",		4|SET_ARG,		startfile_stdin,

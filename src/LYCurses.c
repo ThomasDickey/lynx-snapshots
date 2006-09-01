@@ -80,11 +80,11 @@ static void make_blink_boldbg(void);
 #endif
 
 #if defined(USE_COLOR_TABLE) || defined(USE_SLANG)
-int Current_Attr, Masked_Attr;
+static int Current_Attr, Masked_Attr;
 #endif
 
 #ifdef USE_SLANG
-unsigned int Lynx_Color_Flags = 0;
+unsigned Lynx_Color_Flags = 0;
 BOOLEAN FullRefresh = FALSE;
 int curscr = 0;
 
@@ -442,9 +442,9 @@ void curses_w_style(WINDOW * win, int style,
 #endif
     }
 
-    CTRACE2(TRACE_STYLE, (tfp, "CSS.CS:<%s%s> code %#x, color %#x\n",
+    CTRACE2(TRACE_STYLE, (tfp, "CSS.CS:<%s%s> style %d code %#x, color %#x\n",
 			  (dir ? "" : "/"),
-			  ds->name, ds->code, ds->color));
+			  ds->name, style, ds->code, ds->color));
 
     getyx(win, YP, XP);
 
@@ -615,7 +615,8 @@ static struct {
 static int get_color_pair(int n)
 {
 #ifdef USE_CURSES_PAIR_0
-    if (lynx_color_pairs[n].fg == default_fg
+    if ((n < (int) TABLESIZE(lynx_color_pairs))
+	&& lynx_color_pairs[n].fg == default_fg
 	&& lynx_color_pairs[n].bg == default_bg)
 	return 0;
 #endif
@@ -649,40 +650,106 @@ static int lynx_color_cfg_attr(int code)
     return result;
 }
 
+static int encode_color_attr(int color_attr)
+{
+    int result;
+    int code = 0;
+    int offs = 1;
+
+    if (color_attr & A_BOLD)
+	code |= 1;
+    if (color_attr & (A_REVERSE | A_DIM))
+	code |= 2;
+    if (color_attr & A_UNDERLINE)
+	code |= 4;
+    result = lynx_color_cfg_attr(code);
+
+    if (code + offs < COLOR_PAIRS) {
+	result |= get_color_pair(code + offs);
+    }
+    return result;
+}
+
+static int decode_mono_code(int mono_code)
+{
+    int result = 0;
+
+    if (mono_code & 1)
+	result |= A_BOLD;
+    if (mono_code & 2)
+	result |= A_REVERSE;
+    if (mono_code & 4)
+	result |= A_UNDERLINE;
+
+    return result;
+}
+
 /*
  * Map the SGR attributes (0-7) into ANSI colors, modified with the actual BOLD
- * attribute we'll get 16 colors.
+ * attribute to get 16 colors.
  */
-static void LYsetWAttr(WINDOW * win)
+int LYgetTableAttr(void)
 {
+    int result;
+
     if (lynx_has_color && LYShowColor >= SHOW_COLOR_ON) {
-	int code = 0;
-	int attr = A_NORMAL;
-	int offs = 1;
-
-	if (Current_Attr & A_BOLD)
-	    code |= 1;
-	if (Current_Attr & A_REVERSE)
-	    code |= 2;
-	if (Current_Attr & A_UNDERLINE)
-	    code |= 4;
-	attr = lynx_color_cfg_attr(code);
-
-	if (code + offs < COLOR_PAIRS) {
-	    attr |= get_color_pair(code + offs);
-	}
-
-	wattrset(win, attr & ~Masked_Attr);
+	result = encode_color_attr(Current_Attr);
     } else {
-	wattrset(win, Current_Attr & ~Masked_Attr);
+	result = Current_Attr;
     }
+    return result & ~Masked_Attr;
 }
+
+#ifdef USE_COLOR_STYLE
+/*
+ * Return a string that corresponds to the attributes that would be returned by
+ * LYgetTableAttr().
+ */
+char *LYgetTableString(int code)
+{
+    int mask = decode_mono_code(code);
+    int second = encode_color_attr(mask);
+    int pair = PAIR_NUMBER(second);
+    int mono = second & A_ATTRIBUTES;
+    int fg = lynx_color_pairs[pair].fg;
+    int bg = lynx_color_pairs[pair].bg;
+    unsigned n;
+    char *result = 0;
+
+    CTRACE((tfp, "LYgetTableString(%d)\n", code));
+
+    if (fg == 0 && bg == 0) {
+	fg = COLOR_WHITE;
+    }
+    CTRACE((tfp, "%#x -> %#x (%d) fg=%d, bg=%d\n", mask, second, pair, fg, bg));
+    for (n = 0; n < TABLESIZE(Mono_Attrs); ++n) {
+	if ((Mono_Attrs[n].code & mono) != 0) {
+	    if (result != 0)
+		StrAllocCat(result, "+");
+	    StrAllocCat(result, Mono_Attrs[n].name);
+	}
+    }
+    if (result == 0)
+	StrAllocCopy(result, "normal");
+    StrAllocCat(result, ":");
+    StrAllocCat(result, lookup_color(fg));
+    if (bg >= 0) {
+	StrAllocCat(result, ":");
+	StrAllocCat(result, lookup_color(bg));
+    }
+    CTRACE((tfp, "->%s\n", result));
+    return result;
+}
+#endif
 
 /*
  * Initialize a curses color-pair based on our configured color values.
  */
 static void lynx_init_color_pair(int n)
 {
+#ifdef USE_COLOR_STYLE
+    (void) n;			/* we only use lynx_color_pairs[] data */
+#else
     int m;
 
     if (lynx_called_initscr) {
@@ -694,23 +761,27 @@ static void lynx_init_color_pair(int n)
 			  (short) map2bold(lynx_color_pairs[pair].fg),
 			  (short) map2bold(lynx_color_pairs[pair].bg));
 	}
-	if (n == 0 && LYShowColor >= SHOW_COLOR_ON)
+	if (n == 0 && LYShowColor >= SHOW_COLOR_ON) {
 	    wbkgd(LYwin, COLOR_BKGD | ' ');
+	}
     }
+#endif
 }
 
 static void lynx_map_color(int n)
 {
     CTRACE((tfp, "lynx_map_color(%d)\n", n));
 
-    lynx_color_pairs[n + 1].fg = lynx_color_cfg[n].fg;
-    lynx_color_pairs[n + 1].bg = lynx_color_cfg[n].bg;
+    if (n + 1 < (int) TABLESIZE(lynx_color_pairs)) {
+	lynx_color_pairs[n + 1].fg = lynx_color_cfg[n].fg;
+	lynx_color_pairs[n + 1].bg = lynx_color_cfg[n].bg;
 
-    lynx_color_pairs[n + 9].fg = lynx_color_cfg[n].fg;
-    lynx_color_pairs[n + 9].bg = lynx_color_cfg[0].bg;
+	lynx_color_pairs[n + 9].fg = lynx_color_cfg[n].fg;
+	lynx_color_pairs[n + 9].bg = lynx_color_cfg[0].bg;
 
-    lynx_color_pairs[n + 17].fg = lynx_color_cfg[n].bg;
-    lynx_color_pairs[n + 17].bg = lynx_color_cfg[n].bg;
+	lynx_color_pairs[n + 17].fg = lynx_color_cfg[n].bg;
+	lynx_color_pairs[n + 17].bg = lynx_color_cfg[n].bg;
+    }
 
     lynx_init_color_pair(n);
 }
@@ -723,6 +794,8 @@ int lynx_chg_color(int color,
 		   int fg,
 		   int bg)
 {
+    CTRACE((tfp, "lynx_chg_color(color=%d, fg=%d, bg=%d)\n", color, fg, bg));
+
     if (fg == ERR_COLOR || bg == ERR_COLOR)
 	return -1;
     if (color >= 0 && color < 8) {
@@ -795,12 +868,7 @@ void LYnoVideo(int a)
     lynx_setup_attrs();
 #else
 #ifdef USE_COLOR_TABLE
-    if (a & 1)
-	Masked_Attr |= A_BOLD;
-    if (a & 2)
-	Masked_Attr |= A_REVERSE;
-    if (a & 4)
-	Masked_Attr |= A_UNDERLINE;
+    Masked_Attr = decode_mono_code(a);
 #endif
 #endif
 }
@@ -1141,7 +1209,7 @@ void start_curses(void)
 #endif
 #ifdef USE_COLOR_TABLE
 	lynx_init_colors();
-#endif /* USE_COLOR_TABLE */
+#endif
     }
 #ifdef __DJGPP__
     _eth_init();
@@ -1219,6 +1287,8 @@ void lynx_enable_mouse(int state)
 	return;
     }
 #endif
+
+    (void) state;
 
     if (LYUseMouse == 0)
 	return;
@@ -1382,9 +1452,11 @@ void stop_curses(void)
 	int i;
 
 	for (i = 0; i <= 3; i++) {
-	    fprintf(stdout, "\r\n");
+	    printf("\r\n");
 	}
     }
+#else
+    printf("\r");		/* PDCurses may leave the cursor randomly */
 #endif
 
     fflush(stdout);
@@ -1567,6 +1639,11 @@ static int dumbterm(char *terminal)
 #ifdef FANCY_CURSES
 #ifndef USE_COLOR_STYLE
 #ifdef USE_COLOR_TABLE
+static void LYsetWAttr(WINDOW * win)
+{
+    wattrset(win, LYgetTableAttr());
+}
+
 void LYaddWAttr(WINDOW * win, int a)
 {
     Current_Attr |= a;
@@ -1775,36 +1852,30 @@ void LYwaddnstr(WINDOW * w GCC_UNUSED,
      * Link-highlighting uses wrapping.  You can see this by viewing the
      * options screen in a terminal which is narrower than 80 columns.
      *
-     * Check for that case, and split up the call into segments for each line.
+     * Check for that case, and use curses's wrapping in a derived window to
+     * simplify things, e.g., in case the string contains multibyte or
+     * multicolumn characters.
      */
     int y0, x0;
 
     getyx(LYwin, y0, x0);
 
     if (LYuseCursesPads
-	&& LYshiftWin == 0
+	&& (LYwin == w)		/* popups do not wrap */
+	&&LYshiftWin == 0
 	&& LYwideLines == FALSE
-	&& ((int) len > (LYcolLimit - x0))) {
-	int start = 0;
-	int piece = (LYcolLimit - x0);
+	&& ((int) len > (LYcolLimit - x0))
+	&& (x0 < LYcolLimit)) {
+	WINDOW *sub = derwin(LYwin, LYlines, LYcolLimit, 0, 0);
 
-	CTRACE((tfp, "LYwaddnstr wrapping src:%s, len:%u:%d\n", src, len, LYcolLimit));
-	LYwideLines = TRUE;	/* prevent recursion */
-	while (piece > 0) {
-	    int y, x;
-
-	    getyx(LYwin, y, x);
-	    CTRACE((tfp, "piece src:%.*s, len:%d\n", piece, src + start, piece));
-	    LYwaddnstr(w, src + start, piece);
-	    start += piece;
-	    if (start >= (int) len)
-		break;
-	    LYmove(y + 1, 0);
-	    piece = LYcolLimit;
-	    if ((start + piece) > (int) len)
-		piece = len - start;
+	if (sub != 0) {
+	    wmove(sub, y0, x0);
+	    LYwideLines = TRUE;
+	    LYwaddnstr(sub, src, len);
+	    delwin(sub);
 	}
 	LYwideLines = FALSE;
+
 	return;
     }
 #endif
@@ -2418,7 +2489,7 @@ int LYscreenWidth(void)
  */
 void LYnormalColor(void)
 {
-#if defined(USE_COLOR_STYLE) && USE_CURSES_PADS
+#if defined(USE_COLOR_STYLE) && defined(USE_CURSES_PADS)
     if (LYwin != stdscr) {
 	int color = displayStyles[DSTYLE_NORMAL].color;
 

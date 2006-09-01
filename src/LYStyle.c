@@ -1,6 +1,6 @@
 /* character level styles for Lynx
  * (c) 1996 Rob Partington -- donated to the Lyncei (if they want it :-)
- * @Id: LYStyle.c 1.60 Thu, 02 Jun 2005 15:36:59 -0700 dickey @
+ * @Id: LYStyle.c 1.61 Thu, 31 Aug 2006 16:37:53 -0700 dickey @
  */
 #include <HTUtils.h>
 #include <HTML.h>
@@ -372,28 +372,113 @@ static void free_colorstylestuff(void)
 #endif
 
 /*
- * initialise the default style sheet
- * This should be able to be read from a file in CSS format :-)
+ * Initialise the default style sheet to match the vanilla-curses lynx.
  */
 static void initialise_default_stylesheet(void)
 {
-    static const char *table[] =
-    {
-	"a:bold:green",
-	"alert:bold:yellow:red",
-	"alink:reverse:yellow:black",
-	"label:normal:magenta",
-	"status:reverse:yellow:blue",
-	"title:normal:magenta",
-	"whereis:reverse+underline:magenta:cyan"
+    /* Use the data setup in USE_COLOR_TABLE */
+    /* *INDENT-OFF* */
+    static const struct {
+	int		color;	/* index into lynx_color_pairs[] */
+	const char	*type;
+    } table2[] = {
+	/*
+	 * non-color-style colors encode bold/reverse/underline as a 0-7
+	 * index like this:
+	 *  b,r,u 0
+	 *  b,r,U 1
+	 *  b,R,u 2
+	 *  b,R,U 3
+	 *  B,r,u 4
+	 *  B,r,U 5
+	 *  B,R,u 6
+	 *  B,R,U 7
+	 */
+	{ 0,	"normal" },
+	{ 1,	"a" },
+	{ 2,	"status" },
+	{ 4,	"b" },
+	{ 4,	"blink" },
+	{ 4,	"cite" },
+	{ 4,	"del" },
+	{ 4,	"em" },
+	{ 4,	"i" },
+	{ 4,	"ins" },
+	{ 4,	"strike" },
+	{ 4,	"strong" },
+	{ 4,	"u" },
+#if 0
+	{ 5,	"a.b" },
+	{ 5,	"b.a" },
+	{ 5,	"var.a" },
+#endif
+	{ 6,	"alink" },
+	{ 7,	"whereis" },
+#if 0
+	{ 0,	"h2.link" },
+	{ 0,	"link.h2" },
+#endif
+#ifdef USE_PRETTYSRC
+	/* FIXME: HTL_tagspecs_defaults[] has similar info */
+	{ 4,	"span.htmlsrc_comment" },
+	{ 4,	"span.htmlsrc_tag" },
+	{ 4,	"span.htmlsrc_attrib" },
+	{ 4,	"span.htmlsrc_attrval" },
+	{ 4,	"span.htmlsrc_abracket" },
+	{ 4,	"span.htmlsrc_entity" },
+	{ 4,	"span.htmlsrc_href" },
+	{ 4,	"span.htmlsrc_entire" },
+	{ 4,	"span.htmlsrc_badseq" },
+	{ 4,	"span.htmlsrc_badtag" },
+	{ 4,	"span.htmlsrc_badattr" },
+	{ 4,	"span.htmlsrc_sgmlspecial" },
+#endif
     };
-    unsigned n;
-    char temp[80];
+    /* *INDENT-ON* */
 
-    CTRACE((tfp, "initialize_default_stylesheet\n"));
-    for (n = 0; n < TABLESIZE(table); n++) {
-	parse_style(strcpy(temp, table[n]));
+    unsigned n;
+    char *normal = LYgetTableString(0);
+    char *strong = LYgetTableString(4);
+
+    CTRACE((tfp, "initialise_default_stylesheet\n"));
+
+    /*
+     * For debugging this function, create hash codes for all of the tags.
+     * That makes it simpler to find the cases that are overlooked in the
+     * table.
+     */
+    for (n = 0; n < (unsigned) HTML_dtd.number_of_tags; ++n) {
+	char *name = 0;
+
+	HTSprintf0(&name, "%s:%s", HTML_dtd.tags[n].name, normal);
+	parse_style(name);
+	FREE(name);
     }
+
+    for (n = 0; n < TABLESIZE(table2); ++n) {
+	int code = table2[n].color;
+	char *name = 0;
+	char *value = 0;
+
+	switch (code) {
+	case 0:
+	    value = normal;
+	    break;
+	case 4:
+	    value = strong;
+	    break;
+	default:
+	    value = LYgetTableString(code);
+	    break;
+	}
+	HTSprintf0(&name, "%s:%s", table2[n].type, value);
+	parse_style(name);
+	FREE(name);
+	if (value != normal && value != strong && value != 0)
+	    free(value);
+    }
+    FREE(normal);
+    FREE(strong);
 }
 
 /* Set all the buckets in the hash table to be empty */
@@ -444,7 +529,6 @@ void parse_userstyles(void)
     colorPairs = 0;
     style_initialiseHashTable();
 
-    /* set our styles to be the same as vanilla-curses-lynx */
     if (HTList_isEmpty(cur)) {
 	initialise_default_stylesheet();
     } else {

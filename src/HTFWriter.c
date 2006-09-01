@@ -81,8 +81,26 @@ struct _HTStream {
  *
  *			A C T I O N	R O U T I N E S
  *  Bug:
- *	All errors are ignored.
+ *	Most errors are ignored.
  */
+
+/*	Error handling
+ *	------------------
+ */
+static void HTFWriter_error(HTStream *me, char *id)
+{
+    char buf[200];
+
+    sprintf(buf, "%.60s: %.60s: %.60s",
+	    id,
+	    me->isa->name,
+	    LYStrerror(errno));
+    HTAlert(buf);
+/*
+ * Only disaster results from:
+ *	me->isa->_abort(me, NULL);
+ */
+}
 
 /*	Character handling
  *	------------------
@@ -109,8 +127,13 @@ static void HTFWriter_put_string(HTStream *me, const char *s)
  */
 static void HTFWriter_write(HTStream *me, const char *s, int l)
 {
+    size_t result;
+
     if (me->fp) {
-	fwrite(s, 1, l, me->fp);
+	result = fwrite(s, 1, l, me->fp);
+	if (result != (size_t) l) {
+	    HTFWriter_error(me, "HTFWriter_write");
+	}
     }
 }
 
@@ -487,7 +510,8 @@ static const HTStreamClass HTFWriter =	/* As opposed to print etc */
     "FileWriter",
     HTFWriter_free,
     HTFWriter_abort,
-    HTFWriter_put_character, HTFWriter_put_string,
+    HTFWriter_put_character,
+    HTFWriter_put_string,
     HTFWriter_write
 };
 

@@ -22,6 +22,7 @@
 #define NO_FILIO_H
 #endif
 
+#define DONT_USE_GETTEXT
 #define DONT_USE_SOCKS5
 #include <UCDefs.h>
 #include <UCkd.h>

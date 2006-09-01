@@ -77,7 +77,7 @@ OBJS	= \
 	LYLeaks$o LYexit$o LYJump$o LYList$o LYCgi$o \
 	LYTraversal$o LYEditmap$o LYCharSets$o LYCharUtils$o \
 	LYMap$o LYCookie$o LYStyle$o LYHash$o LYPrettySrc$o \
-	TRSTable$o $(CHARTRANS_OBJS) @LIBOBJS@
+	TRSTable$o $(CHARTRANS_OBJS) @EXTRA_OBJS@ @LIBOBJS@
 
 C_SRC	= $(OBJS:$o=.c)
 

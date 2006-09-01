@@ -111,6 +111,10 @@ int fancy_mouse(WINDOW * win, int row,
 {
     int cmd = LYK_DO_NOTHING;
 
+    (void) win;
+    (void) row;
+    (void) position;
+
 #ifdef USE_MOUSE
 /*********************************************************************/
 
@@ -733,6 +737,17 @@ static int myGetChar(void)
 	    break;
 	}
     } while (!done);
+
+    /* PDCurses - until version 2.7 in 2005 - defined ERR as 0, unlike other
+     * versions of curses.  Generally both EOF and ERR are defined as -1's,
+     * making lynx's code work nicely when mixing curses and stdio functions.
+     * Accommodate PDCurses by making it follow that convention.
+     */
+#if defined(ERR) && ((ERR) != -1)
+    if (c == ERR)
+	c = -1;
+#endif
+
     return c;
 }
 #define GetChar() myGetChar()
@@ -1070,8 +1085,10 @@ static BOOLEAN unescape_string(char *src, char *dst, char *final)
 	    dst[1] = '\0';
 	    ok = TRUE;
 	}
-    } else if (*src == DQUOTE)
+    } else if (*src == DQUOTE) {
 	ok = expand_substring(dst, src + 1, src + strlen(src) - 1, final);
+	(void) final;
+    }
     return ok;
 }
 
@@ -1110,15 +1127,16 @@ int map_string_to_keysym(const char *str, int *keysym)
 	if (*str) {
 	    size_t len = strlen(str);
 
-	    if (len == 1)
+	    if (len == 1) {
 		return (*keysym = (UCH(str[0])) | modifier);
-	    else if (len == 2 && str[0] == '^' &&
-		     (isalpha(UCH(str[1])) ||
-		      (TOASCII(str[1]) >= '@' && TOASCII(str[1]) <= '_')))
+	    } else if (len == 2 && str[0] == '^' &&
+		       (isalpha(UCH(str[1])) ||
+			(TOASCII(str[1]) >= '@' && TOASCII(str[1]) <= '_'))) {
 		return (*keysym = FROMASCII(UCH(str[1] & 0x1f)) | modifier);
-	    else if (len == 2 && str[0] == '^' &&
-		     str[1] == '?')
+	    } else if (len == 2 && str[0] == '^' &&
+		       str[1] == '?') {
 		return (*keysym = CH_DEL | modifier);
+	    }
 	    if (*str == '^' || *str == '\\') {
 		char buf[BUFSIZ];
 
@@ -1636,6 +1654,8 @@ static int LYgetch_for(int code)
     int a, b, c, d = -1;
     int current_modifier = 0;
     BOOLEAN done_esc = FALSE;
+
+    (void) code;
 
     have_levent = 0;
 
@@ -3799,6 +3819,8 @@ static void draw_option(WINDOW * win, int entry,
 			const char *value)
 {
     char Cnum[MAX_LINE];
+
+    (void) width;
 
     FormatChoiceNum(Cnum, num_choices, number, "");
 #ifdef USE_SLANG

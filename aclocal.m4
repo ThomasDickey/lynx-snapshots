@@ -4,12 +4,37 @@ dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
 dnl and Philippe De Muyter <phdm@macqel.be>
 dnl
 dnl Created: 1997/1/28
-dnl Updated: 2006/5/29
+dnl Updated: 2006/8/4
 dnl
 dnl The autoconf used in Lynx development is GNU autoconf 2.13 or 2.52, patched
 dnl by Thomas Dickey.  See your local GNU archives, and this URL:
 dnl http://invisible-island.net/autoconf/autoconf.html
 dnl
+dnl ---------------------------------------------------------------------------
+dnl
+dnl Copyright 1997-2005,2006 by Thomas E. Dickey
+dnl 
+dnl Permission to use, copy, modify, and distribute this software and its
+dnl documentation for any purpose and without fee is hereby granted,
+dnl provided that the above copyright notice appear in all copies and that
+dnl both that copyright notice and this permission notice appear in
+dnl supporting documentation, and that the name of the above listed
+dnl copyright holder(s) not be used in advertising or publicity pertaining
+dnl to distribution of the software without specific, written prior
+dnl permission.
+dnl 
+dnl THE ABOVE LISTED COPYRIGHT HOLDER(S) DISCLAIM ALL WARRANTIES WITH REGARD
+dnl TO THIS SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+dnl AND FITNESS, IN NO EVENT SHALL THE ABOVE LISTED COPYRIGHT HOLDER(S) BE
+dnl LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+dnl WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+dnl ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+dnl OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+dnl
+dnl ---------------------------------------------------------------------------
+dnl A few macros (the AM_xxx ones) are originally from gettext 0.10.35 (but
+dnl are modified), and are part of this file due to mechanical limitations of
+dnl autoconf.
 dnl ---------------------------------------------------------------------------
 dnl ---------------------------------------------------------------------------
 dnl AM_GNU_GETTEXT version: 11 updated: 2004/01/26 20:58:40
@@ -227,7 +252,7 @@ AC_DEFUN([AM_LC_MESSAGES],
     fi
   fi])dnl
 dnl ---------------------------------------------------------------------------
-dnl AM_PATH_PROG_WITH_TEST version: 6 updated: 2006/05/29 11:25:53
+dnl AM_PATH_PROG_WITH_TEST version: 7 updated: 2006/08/06 19:45:29
 dnl ----------------------
 dnl Inserted as requested by gettext 0.10.40
 dnl File from /usr/share/aclocal
@@ -264,9 +289,9 @@ AC_CACHE_VAL(ac_cv_path_$1,
   IFS="${IFS= 	}"; ac_save_ifs="$IFS"; IFS="${IFS}${PATHSEP}"
   for ac_dir in ifelse([$5], , $PATH, [$5]); do
     test -z "$ac_dir" && ac_dir=.
-    if test -f $ac_dir/$ac_word; then
+    if test -f $ac_dir/$ac_word$ac_exeext; then
       if [$3]; then
-	ac_cv_path_$1="$ac_dir/$ac_word"
+	ac_cv_path_$1="$ac_dir/$ac_word$ac_exeext"
 	break
       fi
     fi
@@ -3544,6 +3569,65 @@ int main()
 test "$cf_cv_set_errno" != no && AC_DEFINE(CAN_SET_ERRNO)
 ])dnl
 dnl ---------------------------------------------------------------------------
+dnl CF_SIGWINCH version: 1 updated: 2006/04/02 16:41:09
+dnl -----------
+dnl Use this macro after CF_XOPEN_SOURCE, but do not require it (not all
+dnl programs need this test).
+dnl
+dnl This is really a MacOS X 10.4.3 workaround.  Defining _POSIX_C_SOURCE
+dnl forces SIGWINCH to be undefined (breaks xterm, ncurses).  Oddly, the struct
+dnl winsize declaration is left alone - we may revisit this if Apple choose to
+dnl break that part of the interface as well.
+AC_DEFUN([CF_SIGWINCH],
+[
+AC_CACHE_CHECK(if SIGWINCH is defined,cf_cv_define_sigwinch,[
+	AC_TRY_COMPILE([
+#include <sys/types.h>
+#include <sys/signal.h>
+],[int x = SIGWINCH],
+	[cf_cv_define_sigwinch=yes],
+	[AC_TRY_COMPILE([
+#undef _XOPEN_SOURCE
+#undef _POSIX_SOURCE
+#undef _POSIX_C_SOURCE
+#include <sys/types.h>
+#include <sys/signal.h>
+],[int x = SIGWINCH],
+	[cf_cv_define_sigwinch=maybe],
+	[cf_cv_define_sigwinch=no])
+])
+])
+
+if test "$cf_cv_define_sigwinch" = maybe ; then
+AC_CACHE_CHECK(for actual SIGWINCH definition,cf_cv_fixup_sigwinch,[
+cf_cv_fixup_sigwinch=unknown
+cf_sigwinch=32
+while test $cf_sigwinch != 1
+do
+	AC_TRY_COMPILE([
+#undef _XOPEN_SOURCE
+#undef _POSIX_SOURCE
+#undef _POSIX_C_SOURCE
+#include <sys/types.h>
+#include <sys/signal.h>
+],[
+#if SIGWINCH != $cf_sigwinch
+make an error
+#endif
+int x = SIGWINCH],
+	[cf_cv_fixup_sigwinch=$cf_sigwinch
+	 break])
+
+cf_sigwinch=`expr $cf_sigwinch - 1`
+done
+])
+
+	if test "$cf_cv_fixup_sigwinch" != unknown ; then
+		CPPFLAGS="$CPPFLAGS -DSIGWINCH=$cf_cv_fixup_sigwinch"
+	fi
+fi
+])dnl
+dnl ---------------------------------------------------------------------------
 dnl CF_SIZECHANGE version: 8 updated: 2000/11/04 12:22:16
 dnl -------------
 dnl Check for definitions & structures needed for window size-changing
@@ -4090,7 +4174,7 @@ test -d /usr && {
 }
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_SUBST version: 2 updated: 1997/09/06 23:41:28
+dnl CF_SUBST version: 4 updated: 2006/06/17 12:33:03
 dnl --------
 dnl	Shorthand macro for substituting things that the user may override
 dnl	with an environment variable.
@@ -4101,11 +4185,29 @@ dnl	$3 = default value
 AC_DEFUN([CF_SUBST],
 [AC_CACHE_VAL(cf_cv_subst_$2,[
 AC_MSG_CHECKING(for $1 (symbol $2))
-test -z "[$]$2" && $2=$3
+CF_SUBST_IF([-z "[$]$2"], [$2], [$3])
+cf_cv_subst_$2=[$]$2
 AC_MSG_RESULT([$]$2)
+])
+])dnl
+dnl ---------------------------------------------------------------------------
+dnl CF_SUBST_IF version: 2 updated: 2006/06/17 12:33:03
+dnl -----------
+dnl	Shorthand macro for substituting things that the user may override
+dnl	with an environment variable.
+dnl
+dnl	$1 = condition to pass to "test"
+dnl	$2 = environment variable
+dnl	$3 = value if the test succeeds
+dnl	$4 = value if the test fails
+AC_DEFUN([CF_SUBST_IF],
+[
+if test $1 ; then
+	$2=$3
+ifelse($4,,,[else
+	$2=$4])
+fi
 AC_SUBST($2)
-cf_cv_subst_$2=[$]$2])
-$2=${cf_cv_subst_$2}
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl CF_SYSTEM_MAIL_FLAGS version: 3 updated: 1998/11/18 14:45:34
@@ -4776,7 +4878,7 @@ AC_ARG_WITH(curses-dir,
 	[cf_cv_curses_dir=no])
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_WITH_PATH version: 6 updated: 1998/10/11 00:40:17
+dnl CF_WITH_PATH version: 7 updated: 2006/08/03 15:20:08
 dnl ------------
 dnl Wrapper for AC_ARG_WITH to ensure that user supplies a pathname, not just
 dnl defaulting to yes/no.
@@ -4791,7 +4893,7 @@ AC_DEFUN([CF_WITH_PATH],
 [AC_ARG_WITH($1,[$2 ](default: ifelse($4,,empty,$4)),,
 ifelse($4,,[withval="${$3}"],[withval="${$3-ifelse($5,,$4,$5)}"]))dnl
 CF_PATH_SYNTAX(withval)
-eval $3="$withval"
+$3="$withval"
 AC_SUBST($3)dnl
 ])dnl
 dnl ---------------------------------------------------------------------------
