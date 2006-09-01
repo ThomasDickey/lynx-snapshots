@@ -1132,7 +1132,8 @@ LYNX_HOSTENT *LYGetHostByName(char *str)
 
 #ifdef _WINDOWS_NSL
     {
-	HANDLE hThread, dwThreadID;
+	HANDLE hThread;
+	DWORD dwThreadID;
 
 #ifndef __CYGWIN__
 	if (!system_is_NT) {	/* for Windows9x */
@@ -1150,7 +1151,7 @@ LYNX_HOSTENT *LYGetHostByName(char *str)
 	    WSASetLastError(WSAHOST_NOT_FOUND);
 
 	    hThread = CreateThread(NULL, 4096UL, _fork_func, host, 0UL,
-				   (unsigned long *) &dwThreadID);
+				   &dwThreadID);
 	    if (!hThread)
 		MessageBox(NULL, "CreateThread",
 			   "CreateThread Failed", 0L);
@@ -1954,7 +1955,7 @@ int HTDoRead(int fildes,
     int nb;
 #endif /* UCX, BSN */
 
-#ifdef UNIX
+#if defined(UNIX) && !defined(__BEOS__)
     if (fildes == 0) {
 	/*
 	 * 0 can be a valid socket fd, but if it's a tty something must have

@@ -126,6 +126,13 @@ char *alloca();
 
 #endif /* HAVE_CONFIG_H */
 
+/* suppress inadvertant use of gettext in makeuctb when cross-compiling */
+#ifdef DONT_USE_GETTEXT
+#undef HAVE_GETTEXT
+#undef HAVE_LIBGETTEXT_H
+#undef HAVE_LIBINTL_H
+#endif
+
 #ifndef lynx_srand
 #define lynx_srand srand
 #endif

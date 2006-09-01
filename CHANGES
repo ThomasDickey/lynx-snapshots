@@ -1,6 +1,80 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2006-08-31 (2.8.6pre.1)
+2006-08-31 (2.8.6dev.19)
+* add --enable-widec configure option to allow building lynx without wide
+  character support using ncursesw, to accommodate users with older releases
+  of ncurses (request by Emanuele Giaquinta) -TD
+* add -stderr option to write error messages when doing a -dump -or -source.
+  Normally these are written to the status line but that does not exist when
+  dumping to standard output (Debian #375736) -TD
+* fixes for GNU TLS configuration (also addresses Debian #231609) -TG, TH
+* add check for failure to write to disk, e.g., on disk full, and report
+  error condition via HTAlert() -PG
+* updated README.sslcerts -Stef Caunter
+* add example of -source in manpage to explain how HREF's are constructed
+  (Debian #347989) -TD
+* fixes to make redraw_part_of_line() to work with double-width characters.
+  This is used in color-style to repaint an inactive hyperlink -TD
+* ensure the number of "extra" blanks in a line is greater than zero before
+  attempting to perform text-justification (Debian #363538) -TD
+* improve wrapping logic in LYwaddnstr() by using a derived window.  This fixes
+  a problem with wrapping of multibyte character links -TD
+* repair fix for Debian #171312 by ensuring that it is only invoked if the
+  document was not being reloaded, or popped off the history stack (report
+  by TH) -TD
+* add error-reporting for the PRETTYSRC_SPEC data in lynx.cfg
+  (prompted by discussion by OpenMacNews and Thorsten Glaser) -TD
+* add a carriage-return in stop_curses() to work around PDCurses leaving the
+  cursor position other places than lower-level when stopping curses (report
+  by DK) -TD
+* add an explicit wmove() in display_line() to accommodate some wide-character
+  pages which are not handled well by the nested-table logic, resulting in
+  unexpected wrapping (report by Dan Jacobson) -TD
+* modify limit for CDK double-byte characters in display_line() to accommodate
+  a test-case rightSideEdgeTest.html provided by TH -TD
+* add a workaround in LYStrings.c myGetChar() for PDCurses, which may return an
+  ERR value which is not -1 (reports by DK, William McBrine) -TD
+* remove ifdef from 2.8.2dev.14 which omitted bindtextdomain() call from DJGPP
+  NLS configuration -DK
+* modify autoconf macro AM_PATH_PROG_WITH_TEST to account for executable suffix
+  in win32 environment -DK
+* correct a mistyped parameter to CreateThread() (report by DK) -TD
+* do not use LIBOBJS symbol directly in configure script except to support
+  AC_REPLACE_FUNCS, since the autoconf macros dealing with that symbol changed
+  incompatibly in autoconf 2.54 (report by DK) -TD
+* fixes to work with BeOS 5.0 -Nigel Horne
+* use portable TXT_R rather than "rt" for popen() mode in clip_grab() (reported
+  by Antonio Maria Borneo) -TD
+* modify makeutcb.c to avoid compile-time dependency upon gettext, in case it
+  is used in cross-compiling -TD
+* modify expression for ws_read_per_sec in ws_netread() to avoid potential
+  divide-by-zero on a network error
+  (reported by David Potter) -Takeshi Hataguchi, -TD
+* modify fix for Debian #335593 to ensure that only image maps for the current
+  page are listed (report by DK) -TD
+* correct URL for HTML'ized description of all settings in lynx.cfg (report
+  by DK) -TD
+* use configure macro CF_SIGWINCH to work around special case on Mac OS X
+  which leaves SIGWINCH undefined -TD
+* add configure options --with-cfg-file and --with-lss-file to allow one to
+  specify the names and paths of the default configuration and color-style
+  files -TD   
+* change configure script --enable-color-style so it is enabled by default 
+  (prompted by request by Jason Spiro) -TD
+* add COLOR_STYLE setting to lynx.cfg -TD
+* change default initialization of color-style code when no lss file is given
+  to simulate the non-color-style code.  There are some visual differences,
+  e.g., links that contain a mixture of styles will display with mixed colors,
+  but overall the visual effect matches the non-color-style code well enough
+  to change the default configuration.  cf: 2000-07-16 (2.8.4dev.5) -TD
+* fix a sign-extension in alignment case-statement in split_line() which could
+  cause a large indent for lines which are wider than the display (Debian
+  #360832, #372670) -TD
+* fix ifdef's in LYOptions.c to make --disable-menu-options work (report by
+  PW) -TD
+
 2006-05-29 (2.8.6dev.18)
 * suppress OpenSSL URL from version message if it happens to be built using
   GNU TLS -TD  
@@ -24,7 +98,7 @@ Changes since Lynx 2.8 release
 * modify HTLoadHTTP() to interpret leading asterisks in common name fields as
   wildcards -Thorsten Glaser
 * remove SH_EX hardcoded Latin-1 table for strcasecomp() -TD
-* fixes for compiling in Cygwin environment -TD
+* fixes for compiling in Cygwin environment -TH
   + modify not to check d_ino when __CYGWIN__ is defined because it
     does not seem to be supported by Cygwin now.
   + modify to use fill_rehostent to avoid segfault in _fork_func,
@@ -848,7 +922,7 @@ FreeBSD 4.1, 4.8, NetBSD 1.5, 1.6 and OpenBSD 2.8 (curses/ncurses).
   (report by Atsuhito Kohda) -TD
 * modify ifdef's to use mkdtemp() if it is available (prompted by MirBSD
   patch) -TD
-* several fixes from Thorsten Glaser (MirBSD):
+* several fixes from (TG) (Thorsten Glaser - MirBSD):
   + workaround for invoking shell scripts when executable permissions are
     discarded as a result from using CVS.
   + adjust buffer-size used in a readlink() call in case the result is too

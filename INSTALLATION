@@ -179,6 +179,15 @@ II. Compile instructions -- UNIX
   --disable-bibp-urls			(define DISABLE_BIBP)
 	Disable (do not compile code) support for bibp: URLs.
 
+  --disable-color-style			(define USE_COLOR_STYLE)
+	Use this option to disable optional color style.  This is implemented
+	for modern curses implementations, e.g., those that support color.
+
+	Before lynx 2.8.6dev.18, this option was disabled by default.
+	You can achieve a similar color effect to match the non-color-style
+	(but still allowing users to use color-style) by using the
+	--without-lss-file option.
+
   --disable-config-info			(define NO_CONFIG_INFO)
   	Use this option to disable extended browsable configuration information
 	(a screen that shows the result of the configuration script, as well
@@ -360,11 +369,6 @@ II. Compile instructions -- UNIX
 	Add experimental logic for supporting CJK documents.  (This is not
 	necessary for CJK support and may go away in a future release.)
 
-  --enable-color-style			(define USE_COLOR_STYLE)
-  	Use this option to enable optional and *experimental* color style.
-	This is implemented for curses (if it supports color), ncurses and
-	PDCurses, but not slang.
-
   --enable-debug			(The symbol DEBUG is always defined.)
         Use this option to compile-in support for debugging.
         Note that this flag is ignored if the CFLAGS environment
@@ -467,6 +471,13 @@ II. Compile instructions -- UNIX
   --enable-warnings
 	Use this option to turn on GCC compiler warnings.
 
+  --enable-widec
+	Use this option to allow the configure script to look for wide-curses
+	features.  If you do not specify the option, the configure script
+	will look for these features if --with-screen=ncursesw is given.
+	For this release of Lynx, we recommend the ncursew library built from
+	ncurses 5.5.
+
   --libdir				(affect LYNX_CFG_FILE)
 	Defines the location where you want the lynx.cfg file installed.
 	The configure script defines the symbol LYNX_CFG_FILE to correspond
@@ -485,6 +496,11 @@ II. Compile instructions -- UNIX
   --with-charsets=list			(define ALL_CHARSETS)
  	Limit the number of charsets that are compiled-in to the specified
 	list of comma-separated MIME names.
+
+  --with-cfg-file			(define LYNX_CFG_FILE)
+	Specify the default configuration file's name.  Use --without-cfg-file
+	to force the user to specify the configuration file on the command
+	line.
 
   --with-curses-dir
 	Specify directory under which curses/ncurses is installed.  This
@@ -515,6 +531,10 @@ II. Compile instructions -- UNIX
   --with-libiconv-prefix=DIR
 	search for libiconv in DIR/include and DIR/lib
 
+  --with-lss-file{=path}		(define LYNX_LSS_FILE)
+	Specify the default style-sheet file's name.  Use --without-lss-file
+	to make the default behavior match the non-color-style (if no --lss
+	option is given, and no COLOR_STYLE setting is in lynx.cfg).
 
   --with-neXtaw
 	This option allows you to specify the X libraries used if you
@@ -541,7 +561,7 @@ II. Compile instructions -- UNIX
 	Note that some systems may have a default curses library which
 	does not support color, while on others, ncurses is installed as
 	the curses library.  The variant ncursesw is the wide-character
-	version of ncurses.
+	version of ncurses.  See also the --enable-widec option.
 
 	The pdcurses selection supported by the configure script is a UNIX-only
 	library which uses X11.  If you are configuring with DJGPP, the likely

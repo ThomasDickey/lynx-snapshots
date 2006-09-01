@@ -34,6 +34,7 @@
 #define RC_CHMOD_PATH                   "chmod_path"
 #define RC_COLLAPSE_BR_TAGS             "collapse_br_tags"
 #define RC_COLOR                        "color"
+#define RC_COLOR_STYLE                  "color_style"
 #define RC_COMPRESS_PATH                "compress_path"
 #define RC_CONNECT_TIMEOUT              "connect_timeout"
 #define RC_COOKIE_ACCEPT_DOMAINS        "cookie_accept_domains"

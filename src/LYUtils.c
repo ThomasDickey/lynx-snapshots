@@ -1023,6 +1023,9 @@ void LYhighlight(int flag,
 #endif
     tmp[0] = tmp[1] = tmp[2] = '\0';
 
+    CTRACE((tfp, "LYhighlight %s %d:%s\n",
+	    flag ? "on" : "off", cur, NONNULL(target)));
+
     /*
      * Bugs in the history code might cause -1 to be sent for cur, which yields
      * a crash when LYstrncpy() is called with a nonsense pointer.  As far as I
@@ -1442,7 +1445,7 @@ void statusline(const char *text)
 	    LYaddstr(buffer);
 	    wbkgdset(LYwin,
 		     ((lynx_has_color && LYShowColor >= SHOW_COLOR_ON)
-		      ? hashStyles[a].color
+		      ? (chtype) hashStyles[a].color
 		      : A_NORMAL) | ' ');
 	    LYclrtoeol();
 	    if (!(lynx_has_color && LYShowColor >= SHOW_COLOR_ON))
@@ -2706,8 +2709,10 @@ BOOLEAN LYCanReadFile(const char *filename)
 {
     FILE *fp;
 
-    if ((fp = fopen(filename, "r")) != 0) {
-	return LYCloseInput(fp);
+    if (!isEmpty(filename)) {
+	if ((fp = fopen(filename, "r")) != 0) {
+	    return LYCloseInput(fp);
+	}
     }
     return FALSE;
 }
@@ -7505,7 +7510,7 @@ static int clip_grab(void)
     if (!cmd)
 	return 0;
 
-    paste_handle = popen(cmd, "rt");
+    paste_handle = popen(cmd, TXT_R);
     if (!paste_handle)
 	return 0;
     return 1;
@@ -7551,7 +7556,7 @@ int put_clip(const char *s)
     if (!cmd)
 	return -1;
 
-    fh = popen(cmd, "wt");
+    fh = popen(cmd, TXT_W);
     if (!fh)
 	return -1;
     res = fwrite(s, 1, l, fh);

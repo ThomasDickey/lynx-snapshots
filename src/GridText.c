@@ -54,6 +54,12 @@ unsigned int cached_styles[CACHEH][CACHEW];
 
 #include <LYJustify.h>
 
+#ifdef CONV_JISX0201KANA_JISX0208KANA
+#define is_CJK2(b) (HTCJK != NOCJK && is8bits(UCH(b)))
+#else
+#define is_CJK2(b) (HTCJK != NOCJK && is8bits(UCH(b)) && kanji_code != SJIS)
+#endif
+
 #ifdef USE_CURSES_PADS
 #  define DISPLAY_COLS    (LYwideLines ? MAX_COLS : LYcols)
 #  define WRAP_COLS(text) ((text)->stbl ?				\
@@ -722,6 +728,48 @@ static void *LY_check_calloc(size_t nmemb, size_t size)
 
 #endif /* CHECK_FREE_MEM */
 
+#ifdef USE_COLOR_STYLE
+/*
+ * Color style information is stored with the multibyte-character offset into
+ * the string at which the style would apply.  Compute the corresponding column
+ * so we can compare it with the updated column value after writing strings
+ * with curses.
+ *
+ * The offsets count multibyte characters.  Other parts of the code assume each
+ * character uses one cell, but some CJK (or UTF-8) codes use two cells.  We
+ * need to know the number of cells.
+ */
+static int StyleToCols(HText *text, HTLine *line, int nstyle)
+{
+    int result = line->offset;	/* this much is spaces one byte/cell */
+    int nchars = line->styles[nstyle].horizpos;
+    char *data = line->data;
+    char *last = line->size + data;
+    int utf_extra;
+
+    while (nchars > 0 && data < last) {
+	if (IsSpecialAttrChar(*data) && *data != LY_SOFT_NEWLINE) {
+	    ++data;
+	} else {
+	    utf_extra = utf8_length(text->T.output_utf8, data);
+	    if (utf_extra++) {
+		result += LYstrExtent(data, utf_extra, 2);
+		data += utf_extra;
+	    } else if (is_CJK2(*data)) {
+		data += 2;
+		result += 2;
+	    } else {
+		++data;
+		++result;
+	    }
+	    --nchars;
+	}
+    }
+
+    return result;
+}
+#endif
+
 /*
  * Clear highlight information for a given anchor
  * (text was allocated in the pool).
@@ -1324,6 +1372,15 @@ static int display_line(HTLine *line,
     text->has_utf8 = NO;	/* use as per-line flag, except with ncurses */
 #endif
 
+#if defined(WIDEC_CURSES)
+    /*
+     * FIXME: this should not be necessary, but in some wide-character pages
+     * the output line wraps, foiling our attempt to just use newlines to
+     * advance to the next page.
+     */
+    wmove(LYwin, scrline + TITLE_LINES - 1, 0);
+#endif
+
     /*
      * Set up the multibyte character buffer,
      * and clear the line to which we will be
@@ -1416,7 +1473,7 @@ static int display_line(HTLine *line,
 
 	data++;
 
-#if defined(USE_COLOR_STYLE) || defined(SLSC)
+#if defined(USE_COLOR_STYLE)
 #define CStyle line->styles[current_style]
 
 	while (current_style < line->numstyles &&
@@ -1494,14 +1551,13 @@ static int display_line(HTLine *line,
 		isspace(UCH(LastDisplayChar)) ||
 		LastDisplayChar == '-') {
 		/*
-		 * Ignore the soft hyphen if it is not the last
-		 * character in the line.  Also ignore it if it
-		 * first character following the margin, or if it
-		 * is preceded by a white character (we loaded 'M'
-		 * into LastDisplayChar if it was a multibyte
-		 * character) or hyphen, though it should have
-		 * been excluded by HText_appendCharacter() or by
-		 * split_line() in those cases.  -FM
+		 * Ignore the soft hyphen if it is not the last character in
+		 * the line.  Also ignore it if it first character following
+		 * the margin, or if it is preceded by a white character (we
+		 * loaded 'M' into LastDisplayChar if it was a multibyte
+		 * character) or hyphen, though it should have been excluded by
+		 * HText_appendCharacter() or by split_line() in those cases. 
+		 * -FM
 		 */
 		break;
 	    } else {
@@ -1526,7 +1582,6 @@ static int display_line(HTLine *line,
 	    }
 #endif /* SHOW_WHEREIS_TARGETS */
 #endif /* USE_COLOR_STYLE */
-	    i++;
 	    if (text->T.output_utf8 && is8bits(buffer[0])) {
 		text->has_utf8 = YES;
 		utf_extra = utf8_length(text->T.output_utf8, data - 1);
@@ -1539,15 +1594,11 @@ static int display_line(HTLine *line,
 		buffer[1] = '\0';
 		data += utf_extra;
 		utf_extra = 0;
-	    } else if (HTCJK != NOCJK && is8bits(buffer[0])
-#ifndef CONV_JISX0201KANA_JISX0208KANA
-		       && kanji_code != SJIS
-#endif
-		) {
+	    } else if (is_CJK2(buffer[0])) {
 		/*
 		 * For CJK strings, by Masanobu Kimura.
 		 */
-		if (i < DISPLAY_COLS) {
+		if (i <= DISPLAY_COLS) {
 		    buffer[1] = *data;
 		    buffer[2] = '\0';
 		    data++;
@@ -1564,11 +1615,21 @@ static int display_line(HTLine *line,
 		     * used.  -FM
 		     */
 		    LastDisplayChar = 'M';
+#ifndef USE_SLANG
+		    {
+			int y, x;
+
+			getyx(LYwin, y, x);
+			if (x >= DISPLAY_COLS || x == 0)
+			    break;
+		    }
+#endif
 		}
 	    } else {
 		LYaddstr(buffer);
 		LastDisplayChar = buffer[0];
 	    }
+	    i++;
 	}			/* end of switch */
     }				/* end of while */
 
@@ -2725,8 +2786,9 @@ static HTStyleChange *skip_matched_and_correct_offsets(HTStyleChange *end,
 	    } else
 		return 0;
 	}
-	if (tmp->horizpos > split_pos)
+	if (tmp->horizpos > split_pos) {
 	    tmp->horizpos = split_pos;
+	}
     }
     return 0;
 }
@@ -2739,6 +2801,7 @@ static void split_line(HText *text, unsigned split)
     int indent = (text->in_line_1
 		  ? text->style->indent1st
 		  : text->style->leftIndent);
+    int new_offset;
     short alignment;
     TextAnchor *a;
     int CurLine = text->Lines;
@@ -2778,6 +2841,7 @@ static void split_line(HText *text, unsigned split)
 #endif
 
     cp = previous->data;
+
     /* Float LY_SOFT_NEWLINE to the start */
     if (cp[0] == LY_BOLD_START_CHAR
 	|| cp[0] == LY_UNDERLINE_START_CHAR) {
@@ -2974,14 +3038,15 @@ static void split_line(HText *text, unsigned split)
 	 * The second loop below may then handle remaining changes.  - kw */
 	while (from >= previous->styles && to >= line->styles) {
 	    *to = *from;
-	    if ((int) to->horizpos > s_post)
+	    if ((int) to->horizpos > s_post) {
 		to->horizpos += -s_post + SpecialAttrChars;
-	    else if ((int) to->horizpos > s_pre &&
-		     (to->direction == STACK_ON ||
-		      to->direction == ABS_ON))
+	    } else if ((int) to->horizpos > s_pre &&
+		       (to->direction == STACK_ON ||
+			to->direction == ABS_ON)) {
 		to->horizpos = ((int) to->horizpos < s) ? 0 : SpecialAttrChars;
-	    else
+	    } else {
 		break;
+	    }
 	    to--;
 	    from--;
 	}
@@ -3037,8 +3102,9 @@ static void split_line(HText *text, unsigned split)
 		    break;
 		}
 	    }
-	    if ((int) scan->horizpos > s_pre)
+	    if ((int) scan->horizpos > s_pre) {
 		scan->horizpos = s_pre;
+	    }
 	    scan--;
 	}
 	line->numstyles = line->styles + MAX_STYLES_ON_LINE - 1 - to;
@@ -3047,11 +3113,13 @@ static void split_line(HText *text, unsigned split)
 
 	    for (n = 0; n < line->numstyles; n++)
 		line->styles[n] = to[n + 1];
-	} else if (line->numstyles == 0)
+	} else if (line->numstyles == 0) {
 	    line->styles[0].horizpos = ~0;	/* ?!!! */
+	}
 	previous->numstyles = at_end - previous->styles + 1;
-	if (previous->numstyles == 0)
+	if (previous->numstyles == 0) {
 	    previous->styles[0].horizpos = ~0;	/* ?!!! */
+	}
     }
 #endif /*USE_COLOR_STYLE */
 
@@ -3169,19 +3237,21 @@ static void split_line(HText *text, unsigned split)
 #endif
     }
 
+    new_offset = previous->offset;
     switch (style->alignment) {
     case HT_CENTER:
-	previous->offset = previous->offset + indent + spare / 2;
+	new_offset += indent + spare / 2;
 	break;
     case HT_RIGHT:
-	previous->offset = previous->offset + indent + spare;
+	new_offset += indent + spare;
 	break;
     case HT_LEFT:
     case HT_JUSTIFY:		/* Not implemented */
     default:
-	previous->offset = previous->offset + indent;
+	new_offset += indent;
 	break;
     }				/* switch */
+    previous->offset = ((new_offset < 0) ? 0 : new_offset);
 
     if (text->stbl)
 	/*
@@ -3286,7 +3356,7 @@ static void split_line(HText *text, unsigned split)
     /* now perform justification - by VH */
 
     if (this_line_was_split
-	&& spare
+	&& spare > 0
 	&& !text->stbl		/* We don't inform TRST on the cell width change yet */
 	&& justify_max_void_percent > 0
 	&& justify_max_void_percent <= 100
@@ -4147,7 +4217,7 @@ void HText_appendCharacter(HText *text, int ch)
 	    if (target_cu > WRAP_COLS(text))
 		target -= target_cu - WRAP_COLS(text);
 	    if (line->size == 0) {
-		line->offset = line->offset + target - here;
+		line->offset += (target - here);
 	    } else {
 		for (; here < target; here++) {
 		    /* Put character into line */
@@ -4472,8 +4542,9 @@ void _internal_HTC(HText *text, int style, int dir)
 	     * And in UTF-8 display mode all non-initial bytes are
 	     * counted as ctrl_chars.  - kw
 	     */
-	    if ((int) line->styles[line->numstyles].horizpos >= ctrl_chars_on_this_line)
+	    if ((int) line->styles[line->numstyles].horizpos >= ctrl_chars_on_this_line) {
 		line->styles[line->numstyles].horizpos -= ctrl_chars_on_this_line;
+	    }
 	    line->styles[line->numstyles].style = style;
 	    line->styles[line->numstyles].direction = dir;
 	    line->numstyles++;
@@ -4747,7 +4818,9 @@ static int HText_insertBlanksInStblLines(HText *me, int ncols)
 	    }
 #endif
 	    CTRACE((tfp, " %d:%d", lineno, table_offset - line->offset));
-	    line->offset = table_offset;
+	    line->offset = (table_offset > 0
+			    ? table_offset
+			    : 0);
 	}
     }
 #ifdef EXP_NESTED_TABLES
@@ -7343,6 +7416,7 @@ BOOL HTFindPoundSelector(const char *selector)
 {
     TextAnchor *a;
 
+    CTRACE((tfp, "FindPound: searching for \"%s\"\n", selector));
     for (a = HTMainText->first_anchor; a != 0; a = a->next) {
 
 	if (a->anchor && a->anchor->tag) {
@@ -13316,6 +13390,39 @@ int HText_InsertFile(LinkInfo * form_link)
     return (newlines);
 }
 
+#ifdef USE_COLOR_STYLE
+static int GetColumn(void)
+{
+    int result;
+
+#ifdef USE_SLANG
+    result = SLsmg_get_column();
+#else
+    int y, x;
+
+    LYGetYX(y, x);
+    result = x;
+    (void) y;
+#endif
+    return result;
+}
+
+static BOOL DidWrap(int y0, int x0)
+{
+    BOOL result = NO;
+
+#ifndef USE_SLANG
+    int y, x;
+
+    LYGetYX(y, x);
+    (void) x0;
+    if (x >= DISPLAY_COLS || ((x == 0) && (y != y0)))
+	result = YES;
+#endif
+    return result;
+}
+#endif /* USE_COLOR_STYLE */
+
 /*
  * This function draws the part of line 'line', pointed by 'str' (which can be
  * non terminated with null - i.e., is line->data+N) drawing 'len' bytes (not
@@ -13339,6 +13446,7 @@ static void redraw_part_of_line(HTLine *line, const char *str,
 
 #ifdef USE_COLOR_STYLE
     int current_style = 0;
+    int tcols, scols;
 #endif
     char LastDisplayChar = ' ';
     int YP, XP;
@@ -13359,13 +13467,17 @@ static void redraw_part_of_line(HTLine *line, const char *str,
 	buffer[0] = *data;
 	data++;
 
-#if defined(USE_COLOR_STYLE) || defined(SLSC)
+#if defined(USE_COLOR_STYLE)
 #define CStyle line->styles[current_style]
 
+	tcols = GetColumn();
+	scols = StyleToCols(text, line, current_style);
+
 	while (current_style < line->numstyles &&
-	       i >= (int) (CStyle.horizpos + line->offset + 1)) {
+	       tcols >= scols) {
 	    LynxChangeStyle(CStyle.style, CStyle.direction);
 	    current_style++;
+	    scols = StyleToCols(text, line, current_style);
 	}
 #endif
 	switch (buffer[0]) {
@@ -13399,8 +13511,10 @@ static void redraw_part_of_line(HTLine *line, const char *str,
 
 #endif
 	case LY_SOFT_NEWLINE:
-	    if (!dump_output_immediately)
+	    if (!dump_output_immediately) {
 		LYaddch('+');
+		i++;
+	    }
 	    break;
 
 	case LY_SOFT_HYPHEN:
@@ -13408,14 +13522,13 @@ static void redraw_part_of_line(HTLine *line, const char *str,
 		isspace(UCH(LastDisplayChar)) ||
 		LastDisplayChar == '-') {
 		/*
-		 * Ignore the soft hyphen if it is not the last
-		 * character in the line.  Also ignore it if it
-		 * first character following the margin, or if it
-		 * is preceded by a white character (we loaded 'M'
-		 * into LastDisplayChar if it was a multibyte
-		 * character) or hyphen, though it should have
-		 * been excluded by HText_appendCharacter() or by
-		 * split_line() in those cases.  -FM
+		 * Ignore the soft hyphen if it is not the last character in
+		 * the line.  Also ignore it if it first character following
+		 * the margin, or if it is preceded by a white character (we
+		 * loaded 'M' into LastDisplayChar if it was a multibyte
+		 * character) or hyphen, though it should have been excluded by
+		 * HText_appendCharacter() or by split_line() in those cases. 
+		 * -FM
 		 */
 		break;
 	    } else {
@@ -13423,12 +13536,10 @@ static void redraw_part_of_line(HTLine *line, const char *str,
 		 * Make it a hard hyphen and fall through.  -FM
 		 */
 		buffer[0] = '-';
-		i++;
 	    }
 	    /* FALLTHRU */
 
 	default:
-	    i++;
 	    if (text->T.output_utf8 && is8bits(buffer[0])) {
 		utf_extra = utf8_length(text->T.output_utf8, data - 1);
 		LastDisplayChar = 'M';
@@ -13440,30 +13551,35 @@ static void redraw_part_of_line(HTLine *line, const char *str,
 		buffer[1] = '\0';
 		data += utf_extra;
 		utf_extra = 0;
-	    } else if (HTCJK != NOCJK && is8bits(buffer[0])) {
+	    } else if (is_CJK2(buffer[0])) {
 		/*
 		 * For CJK strings, by Masanobu Kimura.
 		 */
-		buffer[1] = *data;
-		data++;
-		LYaddstr(buffer);
-		buffer[1] = '\0';
-		/*
-		 * For now, load 'M' into LastDisplayChar,
-		 * but we should check whether it's white
-		 * and if so, use ' '.  I don't know if
-		 * there actually are white CJK characters,
-		 * and we're loading ' ' for multibyte
-		 * spacing characters in this code set,
-		 * but this will become an issue when
-		 * the development code set's multibyte
-		 * character handling is used.  -FM
-		 */
-		LastDisplayChar = 'M';
+		if (i <= DISPLAY_COLS) {
+		    buffer[1] = *data;
+		    buffer[2] = '\0';
+		    data++;
+		    i++;
+		    LYaddstr(buffer);
+		    buffer[1] = '\0';
+		    /*
+		     * For now, load 'M' into LastDisplayChar, but we should
+		     * check whether it's white and if so, use ' '.  I don't
+		     * know if there actually are white CJK characters, and
+		     * we're loading ' ' for multibyte spacing characters in
+		     * this code set, but this will become an issue when the
+		     * development code set's multibyte character handling is
+		     * used.  -FM
+		     */
+		    LastDisplayChar = 'M';
+		}
 	    } else {
 		LYaddstr(buffer);
 		LastDisplayChar = buffer[0];
 	    }
+	    if (DidWrap(YP, XP))
+		break;
+	    i++;
 	}			/* end of switch */
     }				/* end of while */
 
@@ -14058,7 +14174,7 @@ void LYMoveToLink(int cur,
  * regular link when it's being unhighlighted in LYhighlight().
  */
 #ifdef USE_COLOR_STYLE
-void redraw_lines_of_link(int cur GCC_UNUSED)
+void redraw_lines_of_link(int cur)
 {
 #define pvtTITLE_HEIGHT 1
     HTLine *todr1;

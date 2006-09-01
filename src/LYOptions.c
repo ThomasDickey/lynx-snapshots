@@ -37,15 +37,11 @@ static void terminate_options(int sig);
 
 #define COL_OPTION_VALUES 36	/* display column where option values start */
 
-#ifndef NO_OPTION_MENU
-
 #if defined(USE_SLANG) || defined(COLOR_CURSES)
 static BOOLEAN can_do_colors = FALSE;
 #endif
 
 static int LYChosenShowColor = SHOW_COLOR_UNKNOWN;	/* whether to show and save */
-
-#endif /* NO_OPTION_MENU */
 
 BOOLEAN LYCheckUserAgent(void)
 {
@@ -60,7 +56,37 @@ BOOLEAN LYCheckUserAgent(void)
     return TRUE;
 }
 
-#ifndef NO_OPTION_MENU
+static void validate_x_display(void)
+{
+    char *cp;
+
+    if ((cp = LYgetXDisplay()) != NULL) {
+	StrAllocCopy(x_display, cp);
+    } else {
+	FREE(x_display);
+    }
+}
+
+static void summarize_x_display(char *display_option)
+{
+    if ((x_display == NULL && *display_option == '\0') ||
+	(x_display != NULL && !strcmp(x_display, display_option))) {
+	if (x_display == NULL && LYisConfiguredForX == TRUE) {
+	    _statusline(VALUE_ACCEPTED_WARNING_X);
+	} else if (x_display != NULL && LYisConfiguredForX == FALSE) {
+	    _statusline(VALUE_ACCEPTED_WARNING_NONX);
+	} else {
+	    _statusline(VALUE_ACCEPTED);
+	}
+    } else {
+	if (*display_option) {
+	    _statusline(FAILED_TO_SET_DISPLAY);
+	} else {
+	    _statusline(FAILED_CLEAR_SET_DISPLAY);
+	}
+    }
+}
+
 static void SetupChosenShowColor(void)
 {
 #if defined(USE_SLANG) || defined(COLOR_CURSES)
@@ -97,37 +123,7 @@ static void SetupChosenShowColor(void)
 #endif /* USE_SLANG || COLOR_CURSES */
 }
 
-static void validate_x_display(void)
-{
-    char *cp;
-
-    if ((cp = LYgetXDisplay()) != NULL) {
-	StrAllocCopy(x_display, cp);
-    } else {
-	FREE(x_display);
-    }
-}
-
-static void summarize_x_display(char *display_option)
-{
-    if ((x_display == NULL && *display_option == '\0') ||
-	(x_display != NULL && !strcmp(x_display, display_option))) {
-	if (x_display == NULL && LYisConfiguredForX == TRUE) {
-	    _statusline(VALUE_ACCEPTED_WARNING_X);
-	} else if (x_display != NULL && LYisConfiguredForX == FALSE) {
-	    _statusline(VALUE_ACCEPTED_WARNING_NONX);
-	} else {
-	    _statusline(VALUE_ACCEPTED);
-	}
-    } else {
-	if (*display_option) {
-	    _statusline(FAILED_TO_SET_DISPLAY);
-	} else {
-	    _statusline(FAILED_CLEAR_SET_DISPLAY);
-	}
-    }
-}
-
+#ifndef NO_OPTION_MENU
 static int boolean_choice(int status,
 			  int line,
 			  int column,

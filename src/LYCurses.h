@@ -32,7 +32,9 @@
  */
 #undef USE_COLOR_TABLE
 
-#ifndef USE_COLOR_STYLE
+#ifdef USE_COLOR_STYLE
+#define USE_COLOR_TABLE 1	/* default color logic is used */
+#else
 #if defined(USE_SLANG) || defined(COLOR_CURSES)
 #define USE_COLOR_TABLE 1
 #endif
@@ -410,11 +412,6 @@ extern "C" {
 #define LYtableCols	0
 #endif
 
-#if defined(USE_COLOR_TABLE) || defined(USE_SLANG)
-    extern int Current_Attr;
-    extern int Masked_Attr;
-#endif
-
     extern BOOLEAN setup(char *terminal);
     extern int LYscreenHeight(void);
     extern int LYscreenWidth(void);
@@ -465,7 +462,7 @@ extern "C" {
     extern void LYaddAttr(int a);
     extern void LYsubAttr(int a);
     extern void lynx_setup_colors(void);
-    extern unsigned int Lynx_Color_Flags;
+    extern unsigned Lynx_Color_Flags;
 #endif
 
 #ifdef USE_SLANG
@@ -594,14 +591,11 @@ extern "C" {
  *  our own functions to add or subtract the
  *  A_foo attributes. - FM
  */
-#ifdef USE_COLOR_TABLE
+#if defined(USE_COLOR_TABLE) && !defined(USE_COLOR_STYLE)
     extern void LYaddWAttr(WINDOW * win, int a);
     extern void LYsubWAttr(WINDOW * win, int a);
     extern void LYaddWAttr(WINDOW * win, int a);
     extern void LYsubWAttr(WINDOW * win, int a);
-    extern void lynx_set_color(int a);
-    extern void lynx_standout(int a);
-    extern int lynx_chg_color(int, int, int);
 
 #undef  standout
 #define standout() 		lynx_standout(TRUE)
@@ -612,6 +606,14 @@ extern "C" {
 #define LYaddWAttr(win,attr)	wattron(win,attr)
 #define LYsubAttr(attr)		LYsubWAttr(LYwin,attr)
 #define LYsubWAttr(win,attr)	wattroff(win,attr)
+#endif
+
+#if defined(USE_COLOR_TABLE)
+    extern void lynx_set_color(int a);
+    extern void lynx_standout(int a);
+    extern char *LYgetTableString(int code);
+    extern int LYgetTableAttr(void);
+    extern int lynx_chg_color(int, int, int);
 #endif
 
 #define start_bold()		LYaddAttr(LYUnderlineLinks ? A_UNDERLINE : A_BOLD)

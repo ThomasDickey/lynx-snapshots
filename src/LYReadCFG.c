@@ -1100,8 +1100,8 @@ static int parse_html_src_spec(HTlexeme lexeme_code, char *value,
     CTRACE((tfp, "ReadCFG - parsing tagspec '%s:%s' for option '%s'\n",
 	    value, ts2, option_name));
     html_src_clean_item(lexeme_code);
-    if (html_src_parse_tagspec(value, lexeme_code, TRUE, TRUE)
-	|| html_src_parse_tagspec(ts2, lexeme_code, TRUE, TRUE)) {
+    if (!html_src_parse_tagspec(value, lexeme_code, TRUE, TRUE)
+	|| !html_src_parse_tagspec(ts2, lexeme_code, TRUE, TRUE)) {
 	*ts2 = ':';
 	BS();
     }
@@ -1257,6 +1257,9 @@ static Config_Type Config_Table [] =
      PARSE_SET(RC_COLLAPSE_BR_TAGS,     LYCollapseBRs),
 #ifdef USE_COLOR_TABLE
      PARSE_FUN(RC_COLOR,                color_fun),
+#endif
+#ifdef USE_COLOR_STYLE
+     PARSE_STR(RC_COLOR_STYLE,          lynx_lss_file),
 #endif
      PARSE_PRG(RC_COMPRESS_PATH,        ppCOMPRESS),
      PARSE_PRG(RC_COPY_PATH,            ppCOPY),

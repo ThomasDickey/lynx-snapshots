@@ -395,7 +395,15 @@ int LYGetNewline(void)
 {
     return Newline;
 }
+
 #define LYGetNewline()		Newline
+
+void LYChgNewline(int adjust)
+{
+    LYSetNewline(Newline + adjust);
+}
+
+#define LYChgNewline(adjust)	Newline += (adjust)
 
 #ifdef USE_SOURCE_CACHE
 static BOOLEAN from_source_cache = FALSE;
@@ -2204,7 +2212,7 @@ static void handle_LYK_DOWN_xxx(int *old_c,
     int i;
 
     if (more_text) {
-	Newline += scroll_by;
+	LYChgNewline(scroll_by);
 	if (nlinks > 0 && curdoc.link > -1 &&
 	    links[curdoc.link].ly > scroll_by) {
 	    newdoc.link = curdoc.link;
@@ -2243,15 +2251,14 @@ static void handle_LYK_DOWN_LINK(int *follow_col,
 	if (newlink > -1) {
 	    set_curdoc_link(newlink);
 	} else if (more_text) {	/* next page */
-	    Newline += display_lines;
+	    LYChgNewline(display_lines);
 	} else if (*old_c != real_c) {
 	    *old_c = real_c;
 	    HTUserMsg(NO_LINKS_BELOW);
 	    return;
 	}
     } else if (more_text) {	/* next page */
-	Newline += display_lines;
-
+	LYChgNewline(display_lines);
     } else if (*old_c != real_c) {
 	*old_c = real_c;
 	HTInfoMsg(ALREADY_AT_END);
@@ -2741,7 +2748,7 @@ static BOOLEAN handle_LYK_FASTBACKW_LINK(int *cmd,
 	    *cmd = LYK_PREV_LINK;
 	    code = TRUE;
 	} else {
-	    Newline++;		/* our line counting starts with 1 not 0 */
+	    LYChgNewline(1);	/* our line counting starts with 1 not 0 */
 	}
     } else if (*old_c != real_c) {
 	*old_c = real_c;
@@ -2805,7 +2812,7 @@ static void handle_LYK_FASTFORW_LINK(int *old_c,
 	       HTGetLinkOrFieldStart(curdoc.link,
 				     &Newline, &newdoc.link,
 				     1, TRUE) != NO) {
-	Newline++;		/* our line counting starts with 1 not 0 */
+	LYChgNewline(1);	/* our line counting starts with 1 not 0 */
 	/* nothing more to do here */
 
     } else if (*old_c != real_c) {
@@ -3720,13 +3727,8 @@ static BOOLEAN handle_LYK_OPTIONS(int *cmd,
 
 		HEAD_request = HTLoadedDocumentIsHEAD();
 		HText_setNoCache(HTMainText);
-#ifdef NO_ASSUME_SAME_DOC
-		newdoc.line = 1;
-		newdoc.link = 0;
-#else
 		newdoc.line = curdoc.line;
 		newdoc.link = curdoc.link;
-#endif /* NO_ASSUME_SAME_DOC */
 		LYforce_no_cache = TRUE;
 		free_address(&curdoc);	/* So it doesn't get pushed. */
 	    }
@@ -3826,8 +3828,7 @@ static void handle_LYK_NEXT_LINK(int c,
 	set_curdoc_link(0);
 
     } else if (more_text) {	/* next page */
-	Newline += display_lines;
-
+	LYChgNewline(display_lines);
     } else if (*old_c != real_c) {
 	*old_c = real_c;
 	HTInfoMsg(ALREADY_AT_END);
@@ -3838,7 +3839,7 @@ static void handle_LYK_NEXT_PAGE(int *old_c,
 				 int real_c)
 {
     if (more_text) {
-	Newline += display_lines;
+	LYChgNewline(display_lines);
     } else if (curdoc.link < nlinks - 1) {
 	set_curdoc_link(nlinks - 1);
     } else if (*old_c != real_c) {
@@ -3891,7 +3892,7 @@ static void handle_LYK_PREV_LINK(int *arrowup,
 			    ? display_lines
 			    : LYGetNewline() - 1);
 
-	Newline -= scrollamount;
+	LYChgNewline(-scrollamount);
 	if (scrollamount < display_lines &&
 	    nlinks > 0 && curdoc.link == 0 &&
 	    links[0].ly - 1 + scrollamount <= display_lines) {
@@ -4020,7 +4021,7 @@ static void handle_LYK_PREV_PAGE(int *old_c,
 				 int real_c)
 {
     if (LYGetNewline() > 1) {
-	Newline -= display_lines;
+	LYChgNewline(-display_lines);
     } else if (curdoc.link > 0) {
 	set_curdoc_link(0);
     } else if (*old_c != real_c) {
@@ -4120,13 +4121,6 @@ static void handle_LYK_RELOAD(int real_cmd)
 
     HEAD_request = HTLoadedDocumentIsHEAD();
     HText_setNoCache(HTMainText);
-#ifdef NO_ASSUME_SAME_DOC
-    /*
-     * Don't assume the reloaded document will be the same.  - FM
-     */
-    newdoc.line = 1;
-    newdoc.link = 0;
-#else
     /*
      * Do assume the reloaded document will be the same.  - FM
      *
@@ -4135,7 +4129,6 @@ static void handle_LYK_RELOAD(int real_cmd)
      */
     newdoc.line = curdoc.line;
     newdoc.link = curdoc.link;
-#endif /* NO_ASSUME_SAME_DOC */
     free_address(&curdoc);	/* so it doesn't get pushed */
 #ifdef VMS
     lynx_force_repaint();
@@ -4401,13 +4394,8 @@ static void handle_LYK_SWITCH_DTD(void)
 	    }
 	    HText_setNoCache(HTMainText);
 	    move_address(&newdoc, &curdoc);
-#ifdef NO_ASSUME_SAME_DOC
-	    newdoc.line = 1;
-	    newdoc.link = 0;
-#else
 	    newdoc.line = curdoc.line;
 	    newdoc.link = curdoc.link;
-#endif /* NO_ASSUME_SAME_DOC */
 	}
 #ifdef USE_SOURCE_CACHE
     }				/* end if no bypass */
@@ -4471,7 +4459,7 @@ static void handle_LYK_TAG_LINK(void)
 		   - 1) {
 	    set_curdoc_link(0);
 	} else if (more_text) {	/* next page */
-	    Newline += (display_lines);
+	    LYChgNewline(display_lines);
 	}
     }
 }
@@ -4590,7 +4578,7 @@ static void handle_LYK_UP_xxx(int *arrowup,
     if (LYGetNewline() > 1) {
 	if (LYGetNewline() - scroll_by < 1)
 	    scroll_by = LYGetNewline() - 1;
-	Newline -= scroll_by;
+	LYChgNewline(-scroll_by);
 	if (nlinks > 0 && curdoc.link > -1) {
 	    if (links[curdoc.link].ly + scroll_by <= display_lines) {
 		newdoc.link = curdoc.link +
@@ -4648,7 +4636,7 @@ static void handle_LYK_UP_LINK(int *follow_col,
 			    ? display_lines
 			    : LYGetNewline() - 1);
 
-	Newline -= scrollamount;
+	LYChgNewline(-scrollamount);
 	if (scrollamount < display_lines &&
 	    nlinks > 0 && curdoc.link > -1 &&
 	    links[0].ly - 1 + scrollamount <= display_lines) {
@@ -5235,6 +5223,7 @@ int mainloop(void)
     unsigned int len;
     int i;
     int follow_col = -1, key_count = 0, last_key = 0;
+    int tmpNewline;
 
     /* "internal" means "within the same document, with certainty".  It includes a
      * space so it cannot conflict with any (valid) "TYPE" attributes on A
@@ -5558,10 +5547,18 @@ int mainloop(void)
 		    newdoc.address = temp;
 		    temp = NULL;
 		}
-		getresult = getfile(&newdoc, &Newline);
+		tmpNewline = -1;
+		getresult = getfile(&newdoc, &tmpNewline);
+		if (!reloading && !popped_doc && (tmpNewline >= 0)) {
+		    LYSetNewline(tmpNewline);
+		}
 	    }
 #else /* TRACK_INTERNAL_LINKS */
-	    getresult = getfile(&newdoc, &Newline);
+	    tmpNewline = -1;
+	    getresult = getfile(&newdoc, &tmpNewline);
+	    if (!reloading && !popped_doc && (tmpNewline >= 0)) {
+		LYSetNewline(tmpNewline);
+	    }
 #endif /* TRACK_INTERNAL_LINKS */
 
 #ifdef INACTIVE_INPUT_STYLE_VH
@@ -6225,8 +6222,8 @@ int mainloop(void)
 
 	/*
 	 * If the curdoc.line is different than Newline then there must have
-	 * been a change since last update.  Run HText_pageDisplay() create a
-	 * fresh screen of text out.
+	 * been a change since last update.  Run HText_pageDisplay() to create
+	 * a fresh screen of text output.
 	 *
 	 * If we got new HTMainText go this way.  All display_partial calls
 	 * ends here for final redraw.
@@ -6625,10 +6622,8 @@ int mainloop(void)
 
 			    if (links[curdoc.link].ly < display_lines) {
 				refresh_screen = TRUE;
-
 			    } else {
-
-				Newline += (display_lines / 2);
+				LYChgNewline(display_lines / 2);
 				if (nlinks > 0 && curdoc.link > -1 &&
 				    links[curdoc.link].ly > display_lines / 2) {
 				    newdoc.link = curdoc.link;

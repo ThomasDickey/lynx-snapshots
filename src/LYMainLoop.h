@@ -17,6 +17,7 @@ extern "C" {
     extern int LYGetNewline(void);
     extern int mainloop(void);
     extern void HTAddGotoURL(char *url);
+    extern void LYChgNewline(int adjust);
     extern void LYCloseTracelog(void);
     extern void LYSetNewline(int value);
     extern void handle_LYK_TRACE_TOGGLE(void);
