@@ -1,6 +1,28 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2006-09-03 (2.8.6pre.2)
+* change configure script to put the ".cfg" and ".lss" files by default in the
+  --sysconfdir, e.g., $prefix/etc, and the help-files in lynx_doc and lynx_help
+  directories under --datadir, e.g., $prefix/share/lynx_doc,
+  $prefix/share/lynx_doc.  To obtain the old behavior, use
+	configure --sysconfdir=/usr/local/lib --datadir=/usr/local/lib
+  (patch by Rado Smiljanic).
+* simplified stop_curses(), ensuring that it does what it claims (report by
+  William McBrine) -TD
+* corrected placement of statements used for quiet compiler warnings for unused
+  variables in fancy_mouse() (reported by Rado Smiljanic, Nelson Beebe) -TD
+* simplify ifdef's in HTCheckForInterrupt() to make it clearer that the win32
+  PDCurses configuration uses nodelay() as an alternative to select() -TD
+* correct fix for PDCurses on win32, i.e., the workaround in LYStrings.c
+  myGetChar() (report by William McBrine) -TD
+* replace a couple of wmove(LYwin,y,x) calls with LYmove(y,x) -TD
+* modify configure macro CF_PATH_SYNTAX to account for the --prefix and
+  --exec-prefix options, making the --with-cfg-file and --with-lss-file options
+  have the expected behavior of using the given prefix (reported by PG) -TD
+* modify ifdef's for Current_Attr variable to allow scrollbar feature to build
+  with slang configuration on Windows (report by Gisle Vanem) -TD
+
 2006-08-31 (2.8.6pre.1)
 2006-08-31 (2.8.6dev.19)
 * add --enable-widec configure option to allow building lynx without wide
@@ -68,7 +90,11 @@ Changes since Lynx 2.8 release
   to simulate the non-color-style code.  There are some visual differences,
   e.g., links that contain a mixture of styles will display with mixed colors,
   but overall the visual effect matches the non-color-style code well enough
-  to change the default configuration.  cf: 2000-07-16 (2.8.4dev.5) -TD
+  to change the default configuration.
+  If an empty string is given for the lss filename, this is treated as an
+  empty style file, and lynx will not use its built-in default color style.
+  To make the behavior easier to diagnose, lynx will now exit with an error
+  if it cannot find the lss file.  cf: 2000-07-16 (2.8.4dev.5) -TD
 * fix a sign-extension in alignment case-statement in split_line() which could
   cause a large indent for lines which are wider than the display (Debian
   #360832, #372670) -TD

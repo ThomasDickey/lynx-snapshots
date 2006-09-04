@@ -56,15 +56,15 @@ mandir= @mandir@/man1
 MANDIR= $(DESTDIR)$(mandir)
 
 ## Where you want the lynx.cfg file installed
-libdir= @libdir@
-LIBDIR= $(DESTDIR)$(libdir)
+sysconfdir= @sysconfdir@
+SYSCONFDIR= $(DESTDIR)$(sysconfdir)
 
 ## Where you want the doc-files installed
-docdir= @libdir@/lynx_doc
+docdir= @datadir@/lynx_doc
 DOCDIR= $(DESTDIR)$(docdir)
 
 ## Where you want the help-files installed
-helpdir= @libdir@/lynx_help
+helpdir= @datadir@/lynx_help
 HELPDIR= $(DESTDIR)$(helpdir)
 
 ##set the relative location of the WWW library Implementation directory,
@@ -360,23 +360,23 @@ install-help : help_files.sed $(HELPDIR)
 		if test "$(COMPRESS_PROG)" != "" ; then \
 			(cd $(HELPDIR) && $(COMPRESS_PROG) $$files ) \
 		fi'
-	@echo Updating $(libdir)/lynx.cfg
-	@ECHO_CC@$(SHELL) -c 'if test -f $(LIBDIR)/lynx.cfg ; then \
-		mv $(LIBDIR)/lynx.cfg $(LIBDIR)/lynx.tmp ; \
+	@echo Updating $(sysconfdir)/lynx.cfg
+	@ECHO_CC@$(SHELL) -c 'if test -f $(SYSCONFDIR)/lynx.cfg ; then \
+		mv $(SYSCONFDIR)/lynx.cfg $(SYSCONFDIR)/lynx.tmp ; \
 	else \
-		cp $(srcdir)/lynx.cfg $(LIBDIR)/lynx.tmp ; \
+		cp $(srcdir)/lynx.cfg $(SYSCONFDIR)/lynx.tmp ; \
 	fi'
-	@echo Updating $(libdir)/lynx.cfg to point to installed help-files
+	@echo Updating $(sysconfdir)/lynx.cfg to point to installed help-files
 	@ECHO_CC@sed	-e '/^HELPFILE:http/s!^!#!' \
 		-e '/^#HELPFILE:file/s!#!!' \
-		$(LIBDIR)/lynx.tmp | \
+		$(SYSCONFDIR)/lynx.tmp | \
 	$(SHELL) $(scripts_dir)/cfg_path.sh lynx_help $(helpdir) | \
 	$(SHELL) $(scripts_dir)/cfg_path.sh lynx_doc  $(helpdir) | \
 	sed	-e '/^HELPFILE:file/s!$$!$(COMPRESS_EXT)!' \
 		-e '/^HELPFILE:file/s!$(COMPRESS_EXT)$(COMPRESS_EXT)$$!$(COMPRESS_EXT)!' \
-		>$(LIBDIR)/lynx.cfg
-	chmod 644 $(LIBDIR)/lynx.cfg
-	-rm -f $(LIBDIR)/lynx.tmp
+		>$(SYSCONFDIR)/lynx.cfg
+	chmod 644 $(SYSCONFDIR)/lynx.cfg
+	-rm -f $(SYSCONFDIR)/lynx.tmp
 
 LYHelp.h : help_files.sed LYHelp.hin
 	@echo Creating $@
@@ -397,19 +397,19 @@ cfg_defs.h : $(scripts_dir)/cfg_defs.sh $(scripts_dir)/cfg_edit.sh config.cache 
 	@rm -f $@
 	$(SHELL) -c 'SHELL=$(SHELL) $(SHELL) $(scripts_dir)/cfg_defs.sh $(srcdir)'
 
-install-cfg : $(LIBDIR)
-	@$(SHELL) $(scripts_dir)/install-cfg.sh "$(INSTALL_DATA)" $(srcdir)/lynx.cfg $(LIBDIR)/lynx.cfg
+install-cfg : $(SYSCONFDIR)
+	@$(SHELL) $(scripts_dir)/install-cfg.sh "$(INSTALL_DATA)" $(srcdir)/lynx.cfg $(SYSCONFDIR)/lynx.cfg
 
-install-lss : $(LIBDIR)
-	-mv -f $(LIBDIR)/lynx.lss $(LIBDIR)/lynx.oldlss
-	$(INSTALL_DATA) $(srcdir)/samples/lynx.lss $(LIBDIR)/lynx.lss
+install-lss : $(SYSCONFDIR)
+	-mv -f $(SYSCONFDIR)/lynx.lss $(SYSCONFDIR)/lynx.oldlss
+	$(INSTALL_DATA) $(srcdir)/samples/lynx.lss $(SYSCONFDIR)/lynx.lss
 
 uninstall ::
 @MSG_DIR_MAKE@	cd po && $(MAKE) CC="$(CC)" uninstall
 	-rm -f $(BINDIR)/lynx$x
 	-rm -f $(MANDIR)/lynx.1
-	-rm -f $(LIBDIR)/lynx.cfg
-	-rm -f $(LIBDIR)/lynx.lss
+	-rm -f $(SYSCONFDIR)/lynx.cfg
+	-rm -f $(SYSCONFDIR)/lynx.lss
 
 uninstall \
 uninstall-help ::
@@ -422,7 +422,7 @@ uninstall-doc ::
 
 $(BINDIR) \
 $(MANDIR) \
-$(LIBDIR) \
+$(SYSCONFDIR) \
 $(HELPDIR) \
 $(DOCDIR) :
 	$(SHELL) $(MKINSTALLDIRS) $@

@@ -1378,7 +1378,7 @@ static int display_line(HTLine *line,
      * the output line wraps, foiling our attempt to just use newlines to
      * advance to the next page.
      */
-    wmove(LYwin, scrline + TITLE_LINES - 1, 0);
+    LYmove(scrline + TITLE_LINES - 1, 0);
 #endif
 
     /*

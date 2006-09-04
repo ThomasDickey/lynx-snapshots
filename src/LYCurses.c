@@ -80,7 +80,8 @@ static void make_blink_boldbg(void);
 #endif
 
 #if defined(USE_COLOR_TABLE) || defined(USE_SLANG)
-static int Current_Attr, Masked_Attr;
+int Current_Attr;
+static int Masked_Attr;
 #endif
 
 #ifdef USE_SLANG
@@ -1418,46 +1419,43 @@ void stop_curses(void)
 #if defined(PDCURSES) && defined(PDC_BUILD) && PDC_BUILD >= 2401
     resetty();
 #endif
+
 #ifdef __DJGPP__
     _eth_release();
 #endif /* __DJGPP__ */
 
 #if defined(DOSPATH) && !(defined(USE_SLANG) || defined(_WIN_CC))
+#if defined(PDCURSES)
+    endwin();
+#else /* !PDCURSES */
 #ifdef __DJGPP__
     ScreenClear();
-#else
+#else /* some flavor of win32?  */
 #ifdef __MINGW32__
     clear();
 #else
     clrscr();
 #endif
-#endif
+#endif /* win32 */
+#endif /* PDCURSES */
 #else
 
     if (LYCursesON == TRUE) {
 	lynx_nl2crlf(TRUE);
 	lynx_enable_mouse(0);
-#if 1 /* (!defined(WIN_EX) || defined(__CYGWIN__)) */	/* @@@ */
-#ifdef WIN_EX
-	if (system_is_NT)
-#endif
-	    if (LYscreen || lynx_called_initscr) {
-		endwin();	/* stop curses */
-		LYDELSCR();
-	    }
-#endif
-    }
+	if (LYscreen || lynx_called_initscr) {
+	    endwin();		/* stop curses */
+	    LYDELSCR();
+	}
+    } else {
 #ifdef SH_EX
-    {
 	int i;
 
 	for (i = 0; i <= 3; i++) {
 	    printf("\r\n");
 	}
-    }
-#else
-    printf("\r");		/* PDCurses may leave the cursor randomly */
 #endif
+    }
 
     fflush(stdout);
 #endif /* defined(DOSPATH) && !(defined(USE_SLANG) || defined(_WIN_CC)) */

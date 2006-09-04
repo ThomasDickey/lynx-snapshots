@@ -33,7 +33,7 @@ Step 1.  Compile-time Variables.
   and there are others you may want to change.
 
   Lynx MUST be able to find lynx.cfg at start-up: using configure
-  (e.g. with UNIX or Cygwin), its location is best set with --libdir ;
+  (e.g. with UNIX or Cygwin), its location is best set with --sysconfdir ;
   you can check in lynx_cfg.h after configure has run, if you wish.
   otherwise, you can use LYNX_CFG_FILE in userdefs.h ,
   environment variable LYNX_CFG or the -cfg command-line option.
@@ -478,10 +478,10 @@ II. Compile instructions -- UNIX
 	For this release of Lynx, we recommend the ncursew library built from
 	ncurses 5.5.
 
-  --libdir				(affect LYNX_CFG_FILE)
+  --sysconfdir				(affect LYNX_CFG_FILE)
 	Defines the location where you want the lynx.cfg file installed.
 	The configure script defines the symbol LYNX_CFG_FILE to correspond
-	with the $libdir environment variable.  (For platforms which do not
+	with the $sysconfdir environment variable.  (For platforms which do not
 	support a configure script, such as MS-DOS, Win32 and VMS, you must
 	edit userdefs.h if you wish to specify the location of lynx.cfg).
 
@@ -689,7 +689,7 @@ II. Compile instructions -- UNIX
 	setenv CPPFLAGS "-I$HOME/slang -I$HOME/.usr/include"
 	setenv LIBS "-L$HOME/.slang/lib -L$HOME/.usr/lib"
 	./configure --exec-prefix=$HOME --bindir=$HOME/.lynx \
-		--mandir=$HOME/.usr/man --libdir=$HOME/.usr/lib \
+		--mandir=$HOME/.usr/man --sysconfdir=$HOME/.usr/lib \
 		--with-screen=slang --with-zlib
 
     CPPFLAGS in this example defines the full path to the slang and zlib header
@@ -697,7 +697,7 @@ II. Compile instructions -- UNIX
     the nonstandard locations of libslang.a and libz.a.  Setting the option
     --bindir tells the configure script where I want to install the lynx
     binary; setting --mandir tells it where to put the lynx.1 man page, and
-    setting --libdir tells it (while at the same time defining LYNX_CFG_FILE)
+    setting --sysconfdir tells it (while at the same time defining LYNX_CFG_FILE)
     where to put the configuration file "lynx.cfg", when I type "make install".
     The --with-screen=slang and --with-zlib options are explained above.
 
@@ -1175,7 +1175,7 @@ V. Compile instructions -- 386 DOS
     --enable-file-upload \
     --enable-nested-tables \
     --enable-nls \
-    --libdir=d:/djgpp/lynx-rel/lynx-cnf \
+    --sysconfdir=d:/djgpp/lynx-rel/lynx-cnf \
     --with-bzlib \
     --with-zlib \
     --with-ssl

@@ -465,6 +465,10 @@ extern "C" {
     extern unsigned Lynx_Color_Flags;
 #endif
 
+#if defined(USE_COLOR_TABLE) || defined(USE_SLANG)
+    extern int Current_Attr;
+#endif
+
 #ifdef USE_SLANG
 #define SHOW_WHEREIS_TARGETS 1
 

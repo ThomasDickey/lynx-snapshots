@@ -728,6 +728,12 @@ static int LYLoadCGI(const char *arg,
     HTUserMsg(CGI_NOT_COMPILED);
     status = HT_NOT_LOADED;
 #endif /* LYNXCGI_LINKS */
+
+    (void) arg;
+    (void) anAnchor;
+    (void) format_out;
+    (void) sink;
+
     return (status);
 }
 #endif /* __MINGW32__ */

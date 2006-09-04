@@ -111,10 +111,6 @@ int fancy_mouse(WINDOW * win, int row,
 {
     int cmd = LYK_DO_NOTHING;
 
-    (void) win;
-    (void) row;
-    (void) position;
-
 #ifdef USE_MOUSE
 /*********************************************************************/
 
@@ -251,6 +247,10 @@ int fancy_mouse(WINDOW * win, int row,
 
 /************************************************************************/
 #endif /* USE_MOUSE */
+    (void) win;
+    (void) row;
+    (void) position;
+
     return cmd;
 }
 
@@ -739,14 +739,19 @@ static int myGetChar(void)
     } while (!done);
 
     /* PDCurses - until version 2.7 in 2005 - defined ERR as 0, unlike other
-     * versions of curses.  Generally both EOF and ERR are defined as -1's,
-     * making lynx's code work nicely when mixing curses and stdio functions.
-     * Accommodate PDCurses by making it follow that convention.
+     * versions of curses.  Generally both EOF and ERR are defined as -1's. 
+     * However, there is a special case (see HTCheckForInterrupt()) to handle
+     * a case where no select() function in used the win32 environment.
+     *
+     * HTCheckForInterrupt() uses nodelay() in this special case to check for
+     * pending input.  That normally returns ERR.  But LYgetch_for() checks
+     * the return value of this function for EOF (to handle some antique
+     * runtime libraries which did not set the state for feof/ferror). 
+     * Returning a zero (0) is safer since normally that is not mapped to any
+     * commands, and will be ignored by lynx.
      */
-#if defined(ERR) && ((ERR) != -1)
-    if (c == ERR)
-	c = -1;
-#endif
+    if (c == -1)
+	c = 0;
 
     return c;
 }
@@ -4924,7 +4929,7 @@ int LYgetstr(char *inputline,
 			    _statusline(": ");
 			reinsertEdit(&MyEdit, data[cur_choice]);
 		    }
-		    wmove(LYwin, old_y, old_x);
+		    LYmove(old_y, old_x);
 		    FREE(data);
 		}
 	    } else {
