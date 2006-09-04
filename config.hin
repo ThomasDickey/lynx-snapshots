@@ -175,8 +175,8 @@
 #undef LOCALE			/* for locale support */
 #undef LONG_LIST		/* CF_ARG_DISABLE(long-list) */
 #undef LYNXCGI_LINKS		/* CF_ARG_ENABLE(cgi-links) */
-#undef LYNX_CFG_FILE		/* $libdir/lynx.cfg */
-#undef LYNX_LSS_FILE		/* $libdir/lynx.lss */
+#undef LYNX_CFG_FILE		/* $sysconfdir/lynx.cfg */
+#undef LYNX_LSS_FILE		/* $sysconfdir/lynx.lss */
 #undef LYNX_RAND_MAX		/* CF_SRAND */
 #undef LY_FIND_LEAKS		/* CF_ARG_ENABLE(find-leaks) */
 #undef LY_TRACELINE		/* CF_ARG_ENABLE(vertrace) */

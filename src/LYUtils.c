@@ -6,7 +6,7 @@
 #include <HTAlert.h>
 
 #ifdef __MINGW32__
-int kbhit(void);
+int kbhit(void);		/* FIXME: use conio.h */
 
 #ifdef UNIX
 #undef UNIX
@@ -1673,13 +1673,6 @@ int HTCheckForInterrupt(void)
     int c;
     int cmd;
 
-#ifndef VMS			/* UNIX stuff: */
-#if !defined(USE_SLANG)
-    struct timeval socket_timeout;
-    int ret = 0;
-    fd_set readfds;
-#endif /* !USE_SLANG */
-
     if (fake_zap > 0) {
 	fake_zap--;
 	CTRACE((tfp, "\r *** Got simulated 'Z' ***\n"));
@@ -1692,7 +1685,13 @@ int HTCheckForInterrupt(void)
     if (DontCheck())
 	return ((int) FALSE);
 
+#ifndef VMS			/* UNIX stuff: */
+
 #if !defined(_WINDOWS) || defined(__MINGW32__)
+
+    /*
+     * First, check if there is a character.
+     */
 #ifdef USE_SLANG
     /** No keystroke was entered
 	Note that this isn't taking possible SOCKSification
@@ -1700,59 +1699,54 @@ int HTCheckForInterrupt(void)
 	slang library's select() when SOCKSified. - FM **/
 #ifdef DJGPP_KEYHANDLER
     if (0 == _bios_keybrd(_NKEYBRD_READY))
+	return (FALSE);
 #else
     if (0 == SLang_input_pending(0))
-#endif /* DJGPP_KEYHANDLER */
 	return (FALSE);
+#endif /* DJGPP_KEYHANDLER */
 
 #else /* Unix curses: */
+    {
+	struct timeval socket_timeout;
+	int ret = 0;
+	fd_set readfds;
 
-    socket_timeout.tv_sec = 0;
-    socket_timeout.tv_usec = 0;
-    FD_ZERO(&readfds);
-    FD_SET(0, &readfds);
+	socket_timeout.tv_sec = 0;
+	socket_timeout.tv_usec = 0;
+	FD_ZERO(&readfds);
+	FD_SET(0, &readfds);
 #ifdef SOCKS
-    if (socks_flag)
-	ret = Rselect(1, &readfds, NULL, NULL, &socket_timeout);
-    else
+	if (socks_flag)
+	    ret = Rselect(1, &readfds, NULL, NULL, &socket_timeout);
+	else
 #endif /* SOCKS */
-	ret = select(1, &readfds, NULL, NULL, &socket_timeout);
+	    ret = select(1, &readfds, NULL, NULL, &socket_timeout);
 
-    /** Suspended? **/
-    if ((ret == -1) && (SOCKET_ERRNO == EINTR))
-	return ((int) FALSE);
+	/** Suspended? **/
+	if ((ret == -1) && (SOCKET_ERRNO == EINTR))
+	    return ((int) FALSE);
 
-    /** No keystroke was entered? **/
-    if (!FD_ISSET(0, &readfds))
-	return ((int) FALSE);
+	/** No keystroke was entered? **/
+	if (!FD_ISSET(0, &readfds))
+	    return ((int) FALSE);
+    }
 #endif /* USE_SLANG */
+
 #endif /* !_WINDOWS */
 
+    /*
+     * Now, read the character.
+     */
 #if defined(PDCURSES)
     nodelay(LYwin, TRUE);
-#endif /* PDCURSES */
-    /*
-     * 'c' contains whatever character we're able to read from keyboard
-     */
     c = LYgetch();
-#if defined(PDCURSES)
     nodelay(LYwin, FALSE);
-#endif /* PDCURSES */
+#else
+    c = LYgetch();
+#endif
 
 #else /* VMS: */
     extern int typeahead(void);
-
-    if (fake_zap > 0) {
-	fake_zap--;
-	CTRACE((tfp, "\r *** Got simulated 'Z' ***\n"));
-	CTRACE_FLUSH(tfp);
-	CTRACE_SLEEP(AlertSecs);
-	return ((int) TRUE);
-    }
-
-    /** Curses or slang setup was not invoked **/
-    if (DontCheck())
-	return ((int) FALSE);
 
     /** Control-C or Control-Y and a 'N'o reply to exit query **/
     if (HadVMSInterrupt) {
@@ -1760,9 +1754,6 @@ int HTCheckForInterrupt(void)
 	return ((int) TRUE);
     }
 
-    /*
-     * 'c' contains whatever character we're able to read from keyboard
-     */
     c = typeahead();
 
 #endif /* !VMS */
@@ -1771,7 +1762,7 @@ int HTCheckForInterrupt(void)
      * 'c' contains whatever character we're able to read from keyboard
      */
 
-	/** Keyboard 'Z' or 'z', or Control-G or Control-C **/
+    /** Keyboard 'Z' or 'z', or Control-G or Control-C **/
     if (LYCharIsINTERRUPT(c))
 	return ((int) TRUE);
 

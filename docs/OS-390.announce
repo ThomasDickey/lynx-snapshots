@@ -43,7 +43,7 @@ o Run the configure script:
   The definitions select the ANSI C compiler (c89) and options
   to select the right header file directories.  You may also
   find it useful to set the installation directories with
-  the --prefix=, --libdir=, and --exec_prefix= options.
+  the --prefix=, --sysconfdir=, and --exec_prefix= options.
 
 ========================================================================
 o Build Lynx
