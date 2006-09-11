@@ -1023,17 +1023,25 @@ void LYhighlight(int flag,
 #endif
     tmp[0] = tmp[1] = tmp[2] = '\0';
 
-    CTRACE((tfp, "LYhighlight %s %d:%s\n",
-	    flag ? "on" : "off", cur, NONNULL(target)));
-
     /*
      * Bugs in the history code might cause -1 to be sent for cur, which yields
      * a crash when LYstrncpy() is called with a nonsense pointer.  As far as I
      * know, such bugs have been squashed, but if they should reappear, this
      * works around them.  -FM
      */
-    if (cur < 0)
+    if (cur < 0) {
+	CTRACE((tfp, "LYhighlight cur %d (bug workaround)\n", cur));
 	cur = 0;
+    }
+
+    CTRACE((tfp, "LYhighlight %s %d [%d]:%s\n",
+	    (flag
+	     ? "on"
+	     : "off"),
+	    cur,
+	    links[cur].anchor_number,
+	    NONNULL(target)));
+
 #if defined(TEXTFIELDS_MAY_NEED_ACTIVATION) && defined(INACTIVE_INPUT_STYLE_VH)
     if (flag == OFF)
 	textinput_redrawn = FALSE;
@@ -1272,6 +1280,7 @@ void statusline(const char *text)
     char buffer[MAX_LINE];
     unsigned char *temp = NULL;
     int max_length, len, i, j;
+    int at_lineno;
     unsigned char k;
     char *p;
     char text_buff[MAX_LINE];
@@ -1399,15 +1408,16 @@ void statusline(const char *text)
      */
     if (LYStatusLine >= 0) {
 	if (LYStatusLine < LYlines - 1) {
-	    LYmove(LYStatusLine, 0);
+	    at_lineno = LYStatusLine;
 	} else {
-	    LYmove(LYlines - 1, 0);
+	    at_lineno = LYlines - 1;
 	}
     } else if (user_mode == NOVICE_MODE) {
-	LYmove(LYlines - 3, 0);
+	at_lineno = LYlines - 3;
     } else {
-	LYmove(LYlines - 1, 0);
+	at_lineno = LYlines - 1;
     }
+    LYmove(at_lineno, 0);
     LYclrtoeol();
 
     if (non_empty(buffer)) {
@@ -1436,6 +1446,7 @@ void statusline(const char *text)
 #else
 	/* draw the status bar in the STATUS style */
 	{
+	    int y, x;
 	    int a = ((strncmp(buffer, ALERT_FORMAT, ALERT_PREFIX_LEN)
 		      || !hashStyles[s_alert].name)
 		     ? s_status
@@ -1447,7 +1458,10 @@ void statusline(const char *text)
 		     ((lynx_has_color && LYShowColor >= SHOW_COLOR_ON)
 		      ? (chtype) hashStyles[a].color
 		      : A_NORMAL) | ' ');
-	    LYclrtoeol();
+	    LYGetYX(y, x);
+	    if (y == at_lineno) {
+		LYclrtoeol();
+	    }
 	    if (!(lynx_has_color && LYShowColor >= SHOW_COLOR_ON))
 		wbkgdset(LYwin, A_NORMAL | ' ');
 	    else if (s_normal != NOSTYLE)
@@ -1493,9 +1507,10 @@ void noviceline(int more_flag GCC_UNUSED)
 	return;
 
     LYmove(LYlines - 2, 0);
-    /* lynx_stop_reverse(); */
     LYclrtoeol();
     LYaddstr(NOVICE_LINE_ONE);
+
+    LYmove(LYlines - 1, 0);
     LYclrtoeol();
 #if defined(DIRED_SUPPORT ) && defined(OK_OVERRIDE)
     if (lynx_edit_mode && !no_dired_support)
@@ -1741,6 +1756,10 @@ int HTCheckForInterrupt(void)
     nodelay(LYwin, TRUE);
     c = LYgetch();
     nodelay(LYwin, FALSE);
+#elif defined(USE_SLANG) && defined(_WINDOWS)
+    if (!SLang_input_pending(0))
+	return ((int) FALSE);
+    c = LYgetch();
 #else
     c = LYgetch();
 #endif

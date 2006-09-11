@@ -1,3 +1,17 @@
+Most of the content of the lynx release is the work of developers on the
+lynx-dev mailing list, who have agreed to distribute their work under the
+terms and conditions of the GNU Public License (Version 2).
+
+Any licensing questions should be directed to the mailing list:
+
+	lynx-dev@nongnu.org
+
+or to the maintainer (Thomas E. Dickey):
+
+	dickey@invisible-island.net
+
+For reference, below is the original copyright notice for Lynx (2.4.2).
+------------------------------------------------------------------------------
 /* Copyright (C) 1995 University of Kansas.
 
    This file is part of Lynx, a text-based WWW browser. 

@@ -5224,6 +5224,7 @@ int mainloop(void)
     int i;
     int follow_col = -1, key_count = 0, last_key = 0;
     int tmpNewline;
+    DocInfo tmpDocInfo;
 
     /* "internal" means "within the same document, with certainty".  It includes a
      * space so it cannot conflict with any (valid) "TYPE" attributes on A
@@ -5547,17 +5548,23 @@ int mainloop(void)
 		    newdoc.address = temp;
 		    temp = NULL;
 		}
+		tmpDocInfo = newdoc;
 		tmpNewline = -1;
 		getresult = getfile(&newdoc, &tmpNewline);
 		if (!reloading && !popped_doc && (tmpNewline >= 0)) {
 		    LYSetNewline(tmpNewline);
+		} else {
+		    newdoc.link = tmpDocInfo.link;
 		}
 	    }
 #else /* TRACK_INTERNAL_LINKS */
+	    tmpDocInfo = newdoc;
 	    tmpNewline = -1;
 	    getresult = getfile(&newdoc, &tmpNewline);
 	    if (!reloading && !popped_doc && (tmpNewline >= 0)) {
 		LYSetNewline(tmpNewline);
+	    } else {
+		newdoc.link = tmpDocInfo.link;
 	    }
 #endif /* TRACK_INTERNAL_LINKS */
 

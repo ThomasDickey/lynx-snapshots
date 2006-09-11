@@ -711,7 +711,7 @@ char *LYgetTableString(int code)
     int mask = decode_mono_code(code);
     int second = encode_color_attr(mask);
     int pair = PAIR_NUMBER(second);
-    int mono = second & A_ATTRIBUTES;
+    int mono = mask & A_ATTRIBUTES;
     int fg = lynx_color_pairs[pair].fg;
     int bg = lynx_color_pairs[pair].bg;
     unsigned n;
@@ -722,7 +722,7 @@ char *LYgetTableString(int code)
     if (fg == 0 && bg == 0) {
 	fg = COLOR_WHITE;
     }
-    CTRACE((tfp, "%#x -> %#x (%d) fg=%d, bg=%d\n", mask, second, pair, fg, bg));
+    CTRACE((tfp, "%#x -> %#x (mono %#x pair %d) fg=%d, bg=%d\n", mask, second, mono, pair, fg, bg));
     for (n = 0; n < TABLESIZE(Mono_Attrs); ++n) {
 	if ((Mono_Attrs[n].code & mono) != 0) {
 	    if (result != 0)
@@ -1870,7 +1870,9 @@ void LYwaddnstr(WINDOW * w GCC_UNUSED,
 	    wmove(sub, y0, x0);
 	    LYwideLines = TRUE;
 	    LYwaddnstr(sub, src, len);
+	    getyx(sub, y0, x0);
 	    delwin(sub);
+	    wmove(LYwin, y0, x0);
 	}
 	LYwideLines = FALSE;
 

@@ -1366,7 +1366,7 @@ static void setup_vtXXX_keymap(void)
 	INTERN_KEY( "\033OP",	F1,		KEY_F(1) ),
 	INTERN_KEY( "\033[OP",	F1,		KEY_F(1) ),
 	INTERN_KEY( "\033[29~",	DO_KEY,		KEY_F(16) ),
-#if defined(USE_SLANG) && defined(__MINGW32__)
+#if defined(USE_SLANG) && (defined(__WIN32__) || defined(__MINGW32__))
 	INTERN_KEY( "\xE0H",	UPARROW,	KEY_UP ),
 	INTERN_KEY( "\xE0P",	DNARROW,	KEY_DOWN ),
 	INTERN_KEY( "\xE0M",	RTARROW,	KEY_RIGHT ),
@@ -1575,7 +1575,7 @@ static int LYgetch_for(int code)
 
     key = SLang_do_key(Keymap_List, myGetChar);
     if ((key == NULL) || (key->type != SLKEY_F_KEYSYM)) {
-#ifdef __MINGW32__
+#if defined(__WIN32__) || defined(__MINGW32__)
 	if ((key == NULL) && (current_sl_modifier == LKC_ISLKC)) {
 	    key = SLang_do_key(Keymap_List, myGetChar);
 	    keysym = key->f.keysym;

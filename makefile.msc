@@ -10,6 +10,7 @@
 #	OPT_SOCK - nonempty to build with winsock2
 #	OPT_SSL  - nonempty to build with OpenSSL
 #	SSL_DIR  - directory containing OpenSSL
+#	SCREEN   - name of screen-library (pdcurses)
 #	PROGNAME - name of executable (lynx.exe)
 ###############################################################################
 
@@ -22,6 +23,11 @@ WWW_DIR = WWW\Library\Implementation
 # pdcurses.lib panel.lib dirent.obj curses.h panel.h dirent.h
 !if "$(ETC_LIB)" == ""
 ETC_LIB = lib
+!endif
+
+# Select a screen-library
+!if "$(SCREEN)" == ""
+SCREEN = pdcurses
 !endif
 
 # Enable the CS_DEFS and CS_OBJS lines if you wish to build the color-style
@@ -45,16 +51,23 @@ SSL_DEFS = /D "USE_SSL" -I "$(SSL_DIR)\include" -I"$(SSL_DIR)\include\openssl"
 SSL_LIBS = "$(SSL_DIR)\lib\ssleay32.lib" "$(SSL_DIR)\lib\libeay32.lib"
 !endif
 
+!if "$(SCREEN)" == "pdcurses"
+SCREEN_DEFS = /D "PDCURSES" /D "COLOR_CURSES" /D "FANCY_CURSES"
+SCREEN_LIB  = pdcurses
+!else
+SCREEN_DEFS = /D "USE_SLANG"
+SCREEN_LIB  = wslang32
+!endif
+
 INCLUDES = \
  /I "." \
  /I "$(SRC_DIR)" \
  /I "$(SRC_DIR)\chrtrans" \
  /I "$(WWW_DIR)" \
  /I "$(ETC_LIB)"
-DEFS = $(CS_DEFS) $(SOCK_DEFS) $(SSL_DEFS) \
+DEFS = $(CS_DEFS) $(SOCK_DEFS) $(SSL_DEFS) $(SCREEN_DEFS) \
  /D "ACCESS_AUTH" \
  /D "CJK_EX" \
- /D "COLOR_CURSES" \
  /D "DIRED_SUPPORT" \
  /D "DISP_PARTIAL" \
  /D "DOSPATH" \
@@ -62,7 +75,6 @@ DEFS = $(CS_DEFS) $(SOCK_DEFS) $(SSL_DEFS) \
  /D "EXP_CMD_LOGGING" \
  /D "EXP_JUSTIFY_ELTS" \
  /D "EXP_NESTED_TABLES" \
- /D "FANCY_CURSES" \
  /D "HAVE_KEYPAD" \
  /D "LONG_LIST" \
  /D "NDEBUG" \
@@ -75,7 +87,6 @@ DEFS = $(CS_DEFS) $(SOCK_DEFS) $(SSL_DEFS) \
  /D "NO_UNISTD_H" \
  /D "NO_UTMP" \
  /D "OK_OVERRIDE" \
- /D "PDCURSES" \
  /D "SH_EX" \
  /D "USE_EXTERNALS" \
  /D "USE_FILE_UPLOAD" \
@@ -105,7 +116,7 @@ LDFLAGS  = /debug /nologo /subsystem:console /incremental:no /machine:I386
 !endif
 
 LIBS     = kernel32.lib user32.lib wsock32.lib /NODEFAULTLIB:libc\
- $(ETC_LIB)\pdcurses.lib $(ETC_LIB)\zlib.lib dirent.obj $(SSL_LIBS)
+ $(ETC_LIB)\$(SCREEN_LIB).lib $(ETC_LIB)\zlib.lib dirent.obj $(SSL_LIBS)
 
 COMPILE = $(CC) $(CFLAGS) $(INCLUDES) $(DEFS)
 LINK    = $(LD) $(LDFLAGS) /map:lynx.map /out:$@

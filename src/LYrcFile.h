@@ -133,6 +133,7 @@
 #define RC_MULTI_BOOKMARK_SUPPORT       "multi_bookmark_support"
 #define RC_MV_PATH                      "mv_path"
 #define RC_NCR_IN_BOOKMARKS             "ncr_in_bookmarks"
+#define RC_NESTED_TABLES                "nested_tables"
 #define RC_NEWSPOST_PROXY               "newspost_proxy"
 #define RC_NEWSREPLY_PROXY              "newsreply_proxy"
 #define RC_NEWS_CHUNK_SIZE              "news_chunk_size"
