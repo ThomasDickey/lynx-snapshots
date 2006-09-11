@@ -1,6 +1,30 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2006-09-10 (2.8.6pre.3)
+* add NESTED_TABLES setting to lynx.cfg to allow site override of the built-in
+  default (see 2001-08-15 comments by TH) -TD
+* update tr.po from
+    http://www.iro.umontreal.ca/translation/maint/lynx/
+* fix a different aspect of Debian #171312, ensuring that if the side-effect
+  of getfile() is unneeded, we restore the link number as well as the line
+  number (Debian #386561) -TD
+* modify makefile.msc to allow building with slang configuration -TD
+* fixes for keyboard input of slang configuration in win32 (not mingw) which
+  was broken in 2.8.3dev.5 -TD
+* fix LYgetTableString(), making the monochome appearance with an empty ".lss"
+  file for color-style look like the non-color-style (Debian #386216) -TD
+* fix change made to LYwaddnstr() which did not update the position in LYwin
+  after writing text to a subwindow.  This caused some cases where the status
+  line would be cleared by the filler color -TD 
+* modify noviceline() function to account for trailing newlines in the message
+  text which caused the message to be displayed on the wrong lines (report
+  by Atsuhito Kohda) -TD
+* make "lynx -version" work in the absence of ".cfg" or ".lss" files -TD
+* add docs/README.metrics to support the changes to COPYHEADER -TD
+* update COPYHEADER to reflect the ten years of development after release
+  of Lynx 2.4.2 -TD
+
 2006-09-03 (2.8.6pre.2)
 * change configure script to put the ".cfg" and ".lss" files by default in the
   --sysconfdir, e.g., $prefix/etc, and the help-files in lynx_doc and lynx_help
@@ -44,8 +68,8 @@ Changes since Lynx 2.8 release
 * improve wrapping logic in LYwaddnstr() by using a derived window.  This fixes
   a problem with wrapping of multibyte character links -TD
 * repair fix for Debian #171312 by ensuring that it is only invoked if the
-  document was not being reloaded, or popped off the history stack (report
-  by TH) -TD
+  document was not being reloaded, or popped off the history stack.  See logic
+  for popped_doc vs LYSetNewline() in LYMainLoop.c (report by TH) -TD
 * add error-reporting for the PRETTYSRC_SPEC data in lynx.cfg
   (prompted by discussion by OpenMacNews and Thorsten Glaser) -TD
 * add a carriage-return in stop_curses() to work around PDCurses leaving the

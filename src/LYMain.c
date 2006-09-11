@@ -3864,7 +3864,7 @@ treated '>' as a co-terminator for double-quotes and tags"
       "toggles [LINK], [IMAGE] and [INLINE] comments \nwith filenames of these images"
    ),
    PARSE_FUN(
-      "version",	4|FUNCTION_ARG,		version_fun,
+      "version",	1|FUNCTION_ARG,		version_fun,
       "print Lynx version information"
    ),
    PARSE_SET(

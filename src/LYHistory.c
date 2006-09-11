@@ -629,6 +629,13 @@ void LYpop_num(int number,
 	/* assume we pop the 'doc' to show it soon... */
 	LYSetNewline(doc->line);	/* reinitialize */
 #endif /* DISP_PARTIAL */
+	if (TRACE) {
+	    CTRACE((tfp, "LYpop_num(%d)\n", number));
+	    CTRACE((tfp, "  link    %d\n", doc->link));
+	    CTRACE((tfp, "  line    %d\n", doc->line));
+	    CTRACE((tfp, "  title   %s\n", NonNull(doc->title)));
+	    CTRACE((tfp, "  address %s\n", NonNull(doc->address)));
+	}
     }
 }
 

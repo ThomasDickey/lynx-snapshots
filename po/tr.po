@@ -1,20 +1,19 @@
-# translation of lynx-2.8.6-dev8.po to Turkish
-# lynx-2.8.6-dev8.po'nun Türkçe çevirisi
-# Copyright (C) 2002, 2004 Free Software Foundation, Inc.
-# Eyüp Hakan Duran <hakan_duran@hotmail.com>, 2002, 2004.
-#
+# translation of lynx-2.8.6-dev19.po to Turkish
+# lynx-2.8.6-dev19.po'nun Türkçe çevirisi
+# Copyright (C) 2002, 2004, 2006 Free Software Foundation, Inc.
+# Eyüp Hakan Duran <hakan_duran@hotmail.com>, 2006.
 msgid ""
 msgstr ""
-"Project-Id-Version: lynx-2.8.6-dev8\n"
+"Project-Id-Version: lynx-2.8.6-dev19\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2006-08-31 18:50-0400\n"
-"PO-Revision-Date: 2004-11-19 22:25+0200\n"
+"PO-Revision-Date: 2006-09-10 15:30-0400\n"
 "Last-Translator: Eyüp Hakan Duran <hakan_duran@hotmail.com>\n"
 "Language-Team: Turkish <gnu-tr-u12a@lists.sourceforge.net>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=ISO-8859-9\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: KBabel 1.3\n"
+"X-Generator: KBabel 1.10.2\n"
 
 #. ******************************************************************
 #. * The following definitions are for status line prompts, messages, or
@@ -2552,9 +2551,9 @@ msgid "Retrying with proxy authorization information."
 msgstr "Vekil(proxy) yetkilendirme bilgisiyle yeniden deneniyor."
 
 #: LYMessages.c:796
-#, fuzzy, c-format
+#, c-format
 msgid "SSL error:%s-Continue?"
-msgstr "SSL hatasý:makina(%s)!=sert(%s)-Devam edilsin mi?"
+msgstr "SSL hatasý:%s-Devam edilsin mi?"
 
 #. HTWAIS.c
 #: LYMessages.c:799
@@ -2847,7 +2846,8 @@ msgstr "ana soket için soket"
 #. * It's a symbolic link, does the user care about knowing if it is
 #. * symbolic?  I think so since it might be a directory.
 #.
-#: WWW/Library/Implementation/HTFTP.c:1697 WWW/Library/Implementation/HTFTP.c:2314
+#: WWW/Library/Implementation/HTFTP.c:1697
+#: WWW/Library/Implementation/HTFTP.c:2314
 msgid "Symbolic Link"
 msgstr "Simgesel Link"
 
@@ -3023,7 +3023,8 @@ msgstr "Adres portu geçersiz"
 msgid "Address length looks invalid"
 msgstr "Adres uzunluðu geçersiz görünüyor"
 
-#: WWW/Library/Implementation/HTTCP.c:1581 WWW/Library/Implementation/HTTCP.c:1599
+#: WWW/Library/Implementation/HTTCP.c:1581
+#: WWW/Library/Implementation/HTTCP.c:1599
 #, c-format
 msgid "Unable to locate remote host %s."
 msgstr "%s adlý karþý makina konumlandýrýlamýyor."
@@ -3032,7 +3033,8 @@ msgstr "%s adlý karþý makina konumlandýrýlamýyor."
 #. * but not HTAlert, because typically there will be other
 #. * alerts from the callers.  - kw
 #.
-#: WWW/Library/Implementation/HTTCP.c:1596 WWW/Library/Implementation/HTTelnet.c:108
+#: WWW/Library/Implementation/HTTCP.c:1596
+#: WWW/Library/Implementation/HTTelnet.c:108
 #, c-format
 msgid "Invalid hostname %s"
 msgstr "Geçersiz makina adý %s"
@@ -3086,34 +3088,32 @@ msgstr "Baðlantý, TLS'siz tekrar deneniyor."
 
 #: WWW/Library/Implementation/HTTP.c:664
 msgid "no issuer was found"
-msgstr ""
+msgstr "yayýnlayýcý bulunamadý"
 
 #: WWW/Library/Implementation/HTTP.c:666
 msgid "issuer is not a CA"
-msgstr ""
+msgstr "yayýnlayýcý bir CA deðil"
 
 #: WWW/Library/Implementation/HTTP.c:668
 msgid "the certificate has no known issuer"
-msgstr ""
+msgstr "sertifikanýn bilinen bir yayýnlayýcýsý yok"
 
 #: WWW/Library/Implementation/HTTP.c:670
-#, fuzzy
 msgid "the certificate has been revoked"
-msgstr "Çerez yendi!"
+msgstr "sertifika hükümsüz kýlýnmýþ"
 
 #: WWW/Library/Implementation/HTTP.c:672
 msgid "the certificate is not trusted"
-msgstr ""
+msgstr "sertifikaya güvenilmiyor"
 
 #: WWW/Library/Implementation/HTTP.c:747
 #, c-format
 msgid "Verified connection to %s (cert=%s)"
-msgstr ""
+msgstr "%1$s'e doðrulanmýþ baðlantý (cert=%2$s)"
 
 #: WWW/Library/Implementation/HTTP.c:771
-#, fuzzy
 msgid "Can't find common name in certificate"
-msgstr "SSL hatasý:sertifikada ortak ad bulunamadý-Devam?"
+msgstr "Sertifikada ortak ad bulunamadý"
 
 #: WWW/Library/Implementation/HTTP.c:774
 #, c-format
@@ -3662,7 +3662,7 @@ msgstr "Dosya, bu oturum boyunca %s'den kurtarýlabilir"
 #: src/LYCgi.c:159
 #, c-format
 msgid "Do you want to execute \"%s\"?"
-msgstr ""
+msgstr "\"%s\"'i çalýþtýrmak ister misiniz?"
 
 #.
 #. * Neither the path as given nor any components examined by backing up
@@ -4238,7 +4238,7 @@ msgid ""
 "\n"
 msgstr ""
 "\n"
-"Ayarlama dosyasý %s temin edilemiyor.\n"
+"Ayarlama dosyasý \"%s\" temin edilemiyor.\n"
 "\n"
 
 #: src/LYMain.c:1466
@@ -4271,7 +4271,7 @@ msgid ""
 "\n"
 msgstr ""
 "\n"
-"Lynx dosyasý %s temin edilemiyor.\n"
+"Lynx dosyasý \"%s\" temin edilemiyor.\n"
 "\n"
 
 #: src/LYMain.c:1762
@@ -4502,7 +4502,8 @@ msgid "ON"
 msgstr "AÇIK"
 
 #. verbose_img variable
-#: src/LYOptions.c:2127 src/LYOptions.c:2132 src/LYOptions.c:2280 src/LYOptions.c:2291
+#: src/LYOptions.c:2127 src/LYOptions.c:2132 src/LYOptions.c:2280
+#: src/LYOptions.c:2291
 msgid "OFF"
 msgstr "KAPALI"
 
@@ -4909,9 +4910,8 @@ msgstr "Kiþisel mektup adresi"
 
 #. Mail Address: INPUT
 #: src/LYOptions.c:3720
-#, fuzzy
 msgid "Password for anonymous ftp"
-msgstr "'%s' adlý haber makinasý için parola:"
+msgstr "Anonim ftp için parola"
 
 #. Preferred media type: SELECT
 #: src/LYOptions.c:3725
@@ -5280,9 +5280,8 @@ msgid "Content-Length:"
 msgstr "Ýçerik Uzunluðu:"
 
 #: src/LYShowInfo.c:360
-#, fuzzy
 msgid "Length:"
-msgstr "Ýçerik Uzunluðu:"
+msgstr "Uzunluk:"
 
 #: src/LYShowInfo.c:365
 msgid "Language:"
@@ -5474,6 +5473,9 @@ msgid ""
 "Lynx will use the personal email address.  Set anonftp_password\n"
 "to a different value if you choose.\n"
 msgstr ""
+"anonftp_password ile kullanýcý Lynx'e kiþisel e-posta adresini\n"
+"anonim ftp için parola olarak kullanmasýný bildirir.  Eðer bir deðer verilmezse,\n"
+"Lynx kiþisel e-posta adresini kullanacaktýr.  anonftp_password'ü baþka bir deðere kurmayý seçebilirsiniz.\n"
 
 #: src/LYrcFile.c:331
 msgid ""
@@ -5994,12 +5996,3 @@ msgstr ""
 "Eðer genel ayarlama dosyasýný arýyorsanýz - normalde lynx.cfg olarak\n"
 "anýlýr, onun farklý bir içeriði ve biçemi vardýr.\n"
 "O, bu dosya deðildir.\n"
-
-#~ msgid "KB"
-#~ msgstr "KB"
-
-#~ msgid "Remove '%s' and all of its contents?"
-#~ msgstr "'%s' ve tüm içeriði çýkartýlsýn mý?"
-
-#~ msgid "Remove directory and all of its contents?"
-#~ msgstr "Dizin ve tüm içeriði çýkartýlsýn mý?"

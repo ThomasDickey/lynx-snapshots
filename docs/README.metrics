@@ -1,0 +1,29 @@
+This is a short summary of code metrics showing how lynx has grown from
+release to release.  It also shows how the original codebase has
+been almost completely replaced by contributors after the release of
+lynx 2.4.2 in 1996.  The numbers shown are for lines of text, to keep
+the presentation simple.
+
+Release         Current                 Original
+-------------------------------------------------------------------------------
+                Text    C-code          Text    C-code  % Text  % Code
+-------------------------------------------------------------------------------
+2.4.2            77210   63463          77210   63463   100     100
+2.6             112970   92869          58859   49665    52      53
+2.7.1           125723  103489          54121   45111    43      43
+2.7.2           162228  123130          48979   40655    30      33
+2.8.1           191738  133778          37286   33582    19      25
+2.8.2           227160  147485          32227   29004    14      19
+2.8.3           248646  166833          29035   26346    11      15
+2.8.4           310436  168108          28364   25751     9      15
+2.8.5           362834  167358          26900   24355     7      14
+2.8.6           395237  169885          23380   20801     5      12
+
+Beginning with 2.8.6, the fraction of remaining original codebase is an
+estimate, since all C source code is automatically indented using the
+indent.sh script.  That added 7216 lines of change since it was not possible
+to completely match the hand-edited indention scheme.
+
+Current lynx releases contain a large amount of text other than C code.
+That includes plain text, html, message libraries, custom and generated
+scripts.

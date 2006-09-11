@@ -376,7 +376,7 @@ void UCSetBoxChars(int cset,
 		char *map = tigetstr("acsc");
 
 		if (map != 0) {
-		    CTRACE((tfp, "check terminal line-drawing map\n"));
+		    CTRACE((tfp, "build terminal line-drawing map\n"));
 		    while (map[0] != 0 && map[1] != 0) {
 			for (n = 0; n < TABLESIZE(table); ++n) {
 			    if (table[n].mapping == map[0]) {
@@ -397,12 +397,14 @@ void UCSetBoxChars(int cset,
 	    if (cset == last_cset) {
 		fix_lines = last_result;
 	    } else {
+		CTRACE((tfp, "check terminal line-drawing map\n"));
 		for (n = 0; n < TABLESIZE(table); ++n) {
 		    int test = UCTransUniChar(table[n].internal, cset);
 
 		    if (test != table[n].external) {
-			CTRACE((tfp, "line-drawing map %c mismatch\n",
-				table[n].mapping));
+			CTRACE((tfp, "line-drawing map %c mismatch (have %#x, want %#x)\n",
+				table[n].mapping,
+				test, table[n].external));
 			fix_lines = TRUE;
 			break;
 		    }
