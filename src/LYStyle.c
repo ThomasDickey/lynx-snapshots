@@ -1,6 +1,6 @@
 /* character level styles for Lynx
  * (c) 1996 Rob Partington -- donated to the Lyncei (if they want it :-)
- * @Id: LYStyle.c 1.61 Thu, 31 Aug 2006 16:37:53 -0700 dickey @
+ * @Id: LYStyle.c 1.62 Mon, 18 Sep 2006 17:28:28 -0700 dickey @
  */
 #include <HTUtils.h>
 #include <HTML.h>
@@ -251,7 +251,6 @@ static void parse_style(char *param)
 	{ "status",		DSTYLE_STATUS,		0 }, /* status bar */
 	{ "label",		DSTYLE_OPTION,		0 }, /* [INLINE]'s */
 	{ "value",		DSTYLE_VALUE,		0 }, /* [INLINE]'s */
-	{ "high",		DSTYLE_HIGH,		0 }, /* [INLINE]'s */
 	{ "normal",		DSTYLE_NORMAL,		0 },
 	{ "candy",		DSTYLE_CANDY,		0 }, /* [INLINE]'s */
 	{ "whereis",		DSTYLE_WHEREIS,		&s_whereis },

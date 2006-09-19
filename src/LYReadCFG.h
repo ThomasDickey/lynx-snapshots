@@ -41,10 +41,6 @@ extern "C" {
     extern int default_bg;
     extern BOOL default_color_reset;
 
-#if defined(HAVE_USE_DEFAULT_COLORS) && defined(USE_DEFAULT_COLORS)
-    extern int lynx_default_colors(void);
-#endif
-
     extern int check_color(char *color, int the_default);
     extern const char *lookup_color(int code);
 #endif

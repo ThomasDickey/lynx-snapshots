@@ -23,7 +23,6 @@ extern "C" {
 	DSTYLE_NORMAL,		/* default attributes */
 	DSTYLE_OPTION,		/* option on the option screen */
 	DSTYLE_VALUE,		/* value on the option screen */
-	DSTYLE_HIGH,
 	DSTYLE_CANDY,		/* possibly going to vanish */
 	DSTYLE_WHEREIS,		/* whereis search target */
 	DSTYLE_ELEMENTS

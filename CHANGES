@@ -1,6 +1,19 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2006-09-18 (2.8.6pre.4)
+* updated link in user's guide to HTML 3.0 reference (report by TH) -TD
+* remove coloring for lh- and high-tags from LYStyle.c and sample ".lss" files
+  since that tag is nonstandard (report by TH) -TD
+* update da.po from
+    http://www.iro.umontreal.ca/translation/maint/lynx/
+* add script samples/oldlynx, which gives the non-color-style scheme using
+  an executable built for color-style -TD
+* add DEFAULT_COLORS item to lynx.cfg to allow disabling the default colors
+  feature at runtime, allowing better matching of old color scheme via a
+  script -TD
+* update VMS descrip.mms files, adding the ability to build with slang -TD
+
 2006-09-10 (2.8.6pre.3)
 * add NESTED_TABLES setting to lynx.cfg to allow site override of the built-in
   default (see 2001-08-15 comments by TH) -TD

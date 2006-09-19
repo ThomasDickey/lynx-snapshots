@@ -35,13 +35,11 @@ tt:		dim:			gray:		blue
 h1:		bold:			yellow:		blue 
 label:		normal:			magenta:	blue 
 value:		normal:			green:		blue 
-high:		bold:			brightmagenta:	blue 
 q:		normal:			yellow:		magenta 
 small:		dim:			gray:		blue 
 big:		bold:			yellow:		blue 
 sup:		bold:			yellow:		blue 
 sub:		dim:			gray:		blue 
-lh:		bold:			yellow:		magenta 
  
 # glitch fixes 
 area:		normal:			lightgray:	blue 

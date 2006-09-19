@@ -36,13 +36,11 @@ tt:		normal:			white:		black
 h1:		bold:			cyan:		black
 label:		normal:			cyan
 value:		normal:			cyan
-high:		bold:			cyan
 q:		normal:			cyan
 small:		dim:			cyan
 big:		bold:			cyan
 sup:		bold:			cyan
 sub:		dim:			cyan
-lh:		bold:			cyan
 code:		normal:			cyan
 
 span.htmlsrc_comment:normal:white

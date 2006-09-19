@@ -1,14 +1,14 @@
 # Danish translation of the Lynx browser message catalog
 # Copyright (C) 2000 Free Software Foundation, Inc.
-# Morten Bo Johansen <mojo@mbjnet.dk>, 2000-2004
+# Morten Bo Johansen <mbj@spamcop.net>, 2000-2006
 msgid ""
 msgstr ""
-"Project-Id-Version: lynx 2.8.6-dev8\n"
+"Project-Id-Version: lynx 2.8.6-dev19\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2006-08-31 18:50-0400\n"
-"PO-Revision-Date: 2004-11-12 17:30+0100\n"
+"PO-Revision-Date: 2006-09-17 14:07+0200\n"
 "Last-Translator: Morten Bo Johansen <mojo@mbjnet.dk>\n"
-"Language-Team: Danish <dansk@klid.dk>\n"
+"Language-Team: Danish <dansk@dansk-gruppen.dk>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=iso-8859-1\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -235,7 +235,7 @@ msgstr "SKRIVEBESKYTTET adgangskodeformular. Pil OP/NED el. TAB forlader felt."
 #. #define FORM_LINK_CHECKBOX_MESSAGE
 #: LYMessages.c:104
 msgid "(Checkbox Field)   Use right-arrow or <return> to toggle."
-msgstr "(Afkrydsningsfelt)   Højrepil el. <retur> slår til/fra."
+msgstr "(Afkrydsningsfelt) Højrepil eller <retur> (de)aktiverer."
 
 #. #define FORM_LINK_CHECKBOX_UNM_MSG
 #: LYMessages.c:106
@@ -593,7 +593,7 @@ msgstr "'d'ownload-kommandoen er deaktiveret i øjeblikket."
 
 #: LYMessages.c:233
 msgid "You cannot download an input field."
-msgstr "Kan ikke hente et inddatafelt."
+msgstr "Kan ikke hente et indtastningsfelt."
 
 #: LYMessages.c:234
 msgid "Form has a mailto action!  Cannot download."
@@ -820,7 +820,7 @@ msgstr "Gem L)ink i bogmærkefil eller A)fbryd? (l,a): "
 #. #define NOBOOK_POST_FORM
 #: LYMessages.c:306
 msgid "Documents from forms with POST content cannot be saved as bookmarks."
-msgstr "Formulardokumenter med 'POST'-indhold kan ikke gemmes som bogmærker."
+msgstr "Formulardokumenter med POST-indhold kan ikke gemmes som bogmærker."
 
 #: LYMessages.c:307
 msgid "Cannot save form fields/links"
@@ -2553,9 +2553,9 @@ msgid "Retrying with proxy authorization information."
 msgstr "Prøver igen med godkendelsesinformation fra proxyvært."
 
 #: LYMessages.c:796
-#, fuzzy, c-format
+#, c-format
 msgid "SSL error:%s-Continue?"
-msgstr "SSL-fejl:vært(%s)!=cert(%s) - fortsæt?"
+msgstr "SSL-fejl:%s - fortsæt?"
 
 #. HTWAIS.c
 #: LYMessages.c:799
@@ -2848,7 +2848,8 @@ msgstr "sokkel til primær sokkel"
 #. * It's a symbolic link, does the user care about knowing if it is
 #. * symbolic?  I think so since it might be a directory.
 #.
-#: WWW/Library/Implementation/HTFTP.c:1697 WWW/Library/Implementation/HTFTP.c:2314
+#: WWW/Library/Implementation/HTFTP.c:1697
+#: WWW/Library/Implementation/HTFTP.c:2314
 msgid "Symbolic Link"
 msgstr "Symbolsk link"
 
@@ -3023,7 +3024,8 @@ msgstr "Adresse har en ugyldig port"
 msgid "Address length looks invalid"
 msgstr "Adresselængde forekommer ugyldig"
 
-#: WWW/Library/Implementation/HTTCP.c:1581 WWW/Library/Implementation/HTTCP.c:1599
+#: WWW/Library/Implementation/HTTCP.c:1581
+#: WWW/Library/Implementation/HTTCP.c:1599
 #, c-format
 msgid "Unable to locate remote host %s."
 msgstr "Ude af stand til at finde fremmed vært %s."
@@ -3032,7 +3034,8 @@ msgstr "Ude af stand til at finde fremmed vært %s."
 #. * but not HTAlert, because typically there will be other
 #. * alerts from the callers.  - kw
 #.
-#: WWW/Library/Implementation/HTTCP.c:1596 WWW/Library/Implementation/HTTelnet.c:108
+#: WWW/Library/Implementation/HTTCP.c:1596
+#: WWW/Library/Implementation/HTTelnet.c:108
 #, c-format
 msgid "Invalid hostname %s"
 msgstr "Ugyldigt værtsnavn %s"
@@ -3086,34 +3089,33 @@ msgstr "Forsøger at genetablere forbindelsen uden TLS."
 
 #: WWW/Library/Implementation/HTTP.c:664
 msgid "no issuer was found"
-msgstr ""
+msgstr "ingen udsteder fundet"
 
+# CA = Certification Authority
 #: WWW/Library/Implementation/HTTP.c:666
 msgid "issuer is not a CA"
-msgstr ""
+msgstr "udsteder er ikke en certificeringsmyndighed"
 
 #: WWW/Library/Implementation/HTTP.c:668
 msgid "the certificate has no known issuer"
-msgstr ""
+msgstr "certifikatet har ingen kendt udsteder"
 
 #: WWW/Library/Implementation/HTTP.c:670
-#, fuzzy
 msgid "the certificate has been revoked"
-msgstr "Cookier er blevet slettet!"
+msgstr "certifikatet er blevet tilbagekaldt"
 
 #: WWW/Library/Implementation/HTTP.c:672
 msgid "the certificate is not trusted"
-msgstr ""
+msgstr "certifikatet er ikke troværdigt"
 
 #: WWW/Library/Implementation/HTTP.c:747
 #, c-format
 msgid "Verified connection to %s (cert=%s)"
-msgstr ""
+msgstr "Verificerede forbindelse til %s (cert=%s)"
 
 #: WWW/Library/Implementation/HTTP.c:771
-#, fuzzy
 msgid "Can't find common name in certificate"
-msgstr "SSL-fejl: Kan ikke finde fælles navn i certifikat - fortsæt?"
+msgstr "Kan ikke finde fælles navn i certifikat"
 
 #: WWW/Library/Implementation/HTTP.c:774
 #, c-format
@@ -3663,7 +3665,7 @@ msgstr "Fil kan måske genskabes fra %s under denne session"
 #: src/LYCgi.c:159
 #, c-format
 msgid "Do you want to execute \"%s\"?"
-msgstr ""
+msgstr "Vil du udføre \"%s\"?"
 
 #.
 #. * Neither the path as given nor any components examined by backing up
@@ -4241,7 +4243,7 @@ msgid ""
 "\n"
 msgstr ""
 "\n"
-"Opsætningsfil %s er ikke tilgængelig.\n"
+"Opsætningsfil \"%s\" er ikke tilgængelig.\n"
 "\n"
 
 #: src/LYMain.c:1466
@@ -4274,7 +4276,7 @@ msgid ""
 "\n"
 msgstr ""
 "\n"
-"Lynx-fil %s er ikke tilgængelig.\n"
+"Lynx-fil \"%s\" er ikke tilgængelig.\n"
 "\n"
 
 #: src/LYMain.c:1762
@@ -4505,7 +4507,8 @@ msgid "ON"
 msgstr "SLÅET TIL"
 
 #. verbose_img variable
-#: src/LYOptions.c:2127 src/LYOptions.c:2132 src/LYOptions.c:2280 src/LYOptions.c:2291
+#: src/LYOptions.c:2127 src/LYOptions.c:2132 src/LYOptions.c:2280
+#: src/LYOptions.c:2291
 msgid "OFF"
 msgstr "SLÅET FRA"
 
@@ -4913,9 +4916,8 @@ msgstr "Personlig e-post-adresse"
 
 #. Mail Address: INPUT
 #: src/LYOptions.c:3720
-#, fuzzy
 msgid "Password for anonymous ftp"
-msgstr "Adgangskode for nyhedsvært (news) '%s':"
+msgstr "Adgangskode til anonymous ftp"
 
 # media type refererer til content-type headeren, eks: image/xyz
 #. Preferred media type: SELECT
@@ -5285,9 +5287,8 @@ msgid "Content-Length:"
 msgstr "'Content-Length':"
 
 #: src/LYShowInfo.c:360
-#, fuzzy
 msgid "Length:"
-msgstr "'Content-Length':"
+msgstr "Længde:"
 
 #: src/LYShowInfo.c:365
 msgid "Language:"
@@ -5295,11 +5296,11 @@ msgstr "Sprog:"
 
 #: src/LYShowInfo.c:372
 msgid "Post Data:"
-msgstr "'Post Data:'"
+msgstr "POST-data:"
 
 #: src/LYShowInfo.c:375
 msgid "Post Content Type:"
-msgstr "'Post Content Type:'"
+msgstr "POST-indholdstype:"
 
 #: src/LYShowInfo.c:378
 msgid "Owner(s):"
@@ -5359,7 +5360,7 @@ msgstr "Metode:"
 
 #: src/LYShowInfo.c:428
 msgid "Enctype:"
-msgstr "Kodtype:"
+msgstr "Kod.type:"
 
 #: src/LYShowInfo.c:434
 msgid "Action:"
@@ -5436,7 +5437,7 @@ msgstr "Uventet adgangsprotokol for denne adressetype."
 
 #: src/LYUtils.c:3384
 msgid "Too many tempfiles"
-msgstr "For mange tempfiler"
+msgstr "For mange midlertidige filer"
 
 #: src/LYUtils.c:3688
 msgid "unknown restriction"
@@ -5479,6 +5480,10 @@ msgid ""
 "Lynx will use the personal email address.  Set anonftp_password\n"
 "to a different value if you choose.\n"
 msgstr ""
+"anonftp_password lader brugeren instruere Lynx om at bruge den personlige\n"
+"e-post-adresse som adgangskode ved anonymous ftp. Hvis der ikke er angivet\n"
+"en værdi, vil Lynx bruge den personlige e-post-adresse. Sæt anonftp_password\n"
+"til en anden værdi hvis du ønsker det.\n"
 
 #: src/LYrcFile.c:331
 msgid ""
@@ -5547,9 +5552,9 @@ msgid ""
 msgstr ""
 "cookie_loose_invalid_domains, cookie_strict_invalid_domains, og\n"
 "cookie_query_invalid_domains er en kommasepareret liste over hvilke\n"
-"domæner der skal underkastes varierende grader af gyldighedstjek. hvis\n"
-"et domæne er sat til strengt tjek, vil en streng overholdelse af RFC2109\n"
-"blive krævet. Et domæne med et afslappet tjek vil blive tilladt at sende\n"
+"domæner der skal underkastes varierende grader af gyldighedskontrol. hvis\n"
+"et domæne er sat til streng kontrol, vil en streng overholdelse af RFC2109\n"
+"blive krævet. Et domæne med et løs kontrol vil blive tilladt at sende\n"
 "cookier med en ugyldig sti eller domæneattribut. Alle domæner vil som\n"
 "standard spørge brugeren om en ugyldig sti eller domæne.\n"
 

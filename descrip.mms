@@ -23,6 +23,7 @@
 !	     avoid any confusion with official releases at UKans.
 !  07/29/95 (macrides@sci.wfeb.edu)
 !	     Added support for GNUC.
+!  15 Sep 06 (TD)	Cleanup...
 !
 ! Instructions:
 !	Use the correct command line for your TCP/IP implementation:
@@ -51,42 +52,49 @@
 !	$ MMS /Macro = (TCPWARE=1, GNU_C=1)	for GNUC - TCPWare TCP/IP
 !	$ MMS /Macro = (DECNET=1, GNU_C=1)	for GNUC - socket emulation over DECnet
 
-.ifdef MULTINET
-TCPM = MULTINET
+.ifdef DEC_C
+COMPILE_DEF = DEC_C
+.else
+.ifdef GNU_C
+COMPILE_DEF = GNU_C
+.else
+COMPILE_DEF = VAX_C
+.endif
+.endif
+
+.ifdef SLANG
+SCREEN_DEF = SLANG
+.else
+SCREEN_DEF = VMS_CURSES
 .endif
 
 .ifdef WIN_TCP
-TCPM = WIN_TCP
-.endif
-
-.ifdef UCX
-TCPM = UCX
-.endif
-
-.ifdef CMU_TCP
-TCPM = CMU_TCP
-.endif
-
-.ifdef SOCKETSHR_TCP
-TCPM = SOCKETSHR_TCP
-.endif
-
-.ifdef TCPWARE
-TCPM = TCPWARE
-.endif
-
-.ifdef DECNET
-TCPM = DECNET
-.endif
-
-.ifdef TCPM
+NETWORK_DEF = WIN_TCP
 .else
-TCPM = MULTINET	!Default to MultiNet
-.endif
+.ifdef CMU_TCP
+NETWORK_DEF = CMU_TCP
+.else
+.ifdef SOCKETSHR_TCP
+NETWORK_DEF = SOCKETSHR_TCP
+.else
+.ifdef UCX
+NETWORK_DEF = UCX
+.else
+.ifdef TCPWARE
+NETWORK_DEF = TCPWARE
+.else
+.ifdef DECnet
+NETWORK_DEF = DECNET
+.else !  Default to MultiNet
+NETWORK_DEF = MULTINET
+.endif !  DECnet
+.endif !  TCPWARE
+.endif !  UCX
+.endif !  SOCKETSHR_TCP
+.endif !  CMU_TCP
+.endif !  WIN_TCP
 
-.ifdef GNU_C
-CC = gcc
-.endif
+RECURS_DEFS = /Macro=($(NETWORK_DEF)=1, $(SCREEN_DEF)=1, $(COMPILE_DEF)=1)
 
 lynx :	lynx.exe
 	! Finished Building LYNX for VMS!!!
@@ -96,30 +104,13 @@ lynx.exe : library exe
 
 library :
 	Set Default [.www.library.implementation]
-.ifdef DEC_C
-	$(MMS) $(MMSQUALIFIERS) /Description = [-.VMS]DESCRIP.MMS /Macro = ($(TCPM)=1, DEC_C=1) Library
-.else
-.ifdef GNU_C
-	$(MMS) $(MMSQUALIFIERS) /Description = [-.VMS]DESCRIP.MMS /Macro = ($(TCPM)=1, GNU_C=1) Library
-.else
-	$(MMS) $(MMSQUALIFIERS) /Description = [-.VMS]DESCRIP.MMS /Macro = ($(TCPM)=1) Library
-.endif
-.endif
+	$(MMS) $(MMSQUALIFIERS) /Description = [-.VMS]DESCRIP.MMS $(RECURS_DEFS) Library
 	Set Default [---]
 
 exe :
 	Set Default [.src]
-.ifdef DEC_C
-	$(MMS) $(MMSQUALIFIERS) /Macro = ($(TCPM)=1, DEC_C=1) Lynx
-.else
-.ifdef GNU_C
-	$(MMS) $(MMSQUALIFIERS) /Macro = ($(TCPM)=1, GNU_C=1) Lynx
-.else
-	$(MMS) $(MMSQUALIFIERS) /Macro = ($(TCPM)=1) Lynx
-.endif
-.endif
-	Copy /NoLog /NoConfirm lynx.exe [-]
-	Set Protection = (Owner:RWE, World:RE) [-]lynx.exe
+	$(MMS) $(MMSQUALIFIERS) $(RECURS_DEFS) Lynx
+	Copy /NoLog /NoConfirm lynx.exe [-];
 	Set Default [-]
 
 clean :

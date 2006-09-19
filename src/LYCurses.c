@@ -548,34 +548,9 @@ void curses_style(int style,
 
 static BOOL lynx_called_initscr = FALSE;
 
-#if defined(HAVE_USE_DEFAULT_COLORS) && defined(USE_DEFAULT_COLORS)
-/*
- * If we find a "default" color while reading the config-file, set default
- * colors on the screen.
- */
-int lynx_default_colors(void)
-{
-    int code = 0;
-
-    if (!default_color_reset) {
-	if (lynx_called_initscr) {
-	    code = -1;
-	    if (use_default_colors() == OK) {
-		default_fg = DEFAULT_COLOR;
-		default_bg = DEFAULT_COLOR;
-		code = 1;
-	    } else {
-		default_fg = COLOR_WHITE;
-		default_bg = COLOR_BLACK;
-		default_color_reset = TRUE;
-	    }
-	}
-    }
-    return code;
-}
-#endif /* HAVE_USE_DEFAULT_COLORS && USE_DEFAULT_COLORS */
-
 #if defined(USE_COLOR_TABLE) && defined(COLOR_CURSES)
+#define COLOR_CFG_MAX 8
+
 /*
  * This block of code is designed to produce the same color effects using SVr4
  * curses as the slang library's implementation in this module.  That maps the
@@ -585,19 +560,22 @@ int lynx_default_colors(void)
  * 1997/1/19 - T.E.Dickey <dickey@clark.net>
  */
 /* *INDENT-OFF* */
+#define COLOR_CFG(c) c, (c) == DEFAULT_COLOR
 static struct {
-    int fg, bg;
+    int fg, dft_fg, bg, dft_bg;
 } lynx_color_cfg[] = {
-    /*0*/ { DEFAULT_FG,    DEFAULT_BG},
-    /*1*/ { COLOR_BLUE,    DEFAULT_BG},
-    /*2*/ { COLOR_YELLOW+8,COLOR_BLUE},
-    /*3*/ { COLOR_GREEN,   DEFAULT_BG},
-    /*4*/ { COLOR_MAGENTA, DEFAULT_BG},
-    /*5*/ { COLOR_BLUE,    DEFAULT_BG},
-    /*6*/ { COLOR_RED,	   DEFAULT_BG},
-    /*7*/ { COLOR_MAGENTA, COLOR_CYAN}
+    /*0*/ { COLOR_CFG(DEFAULT_FG),     COLOR_CFG(DEFAULT_BG)},
+    /*1*/ { COLOR_CFG(COLOR_BLUE),     COLOR_CFG(DEFAULT_BG)},
+    /*2*/ { COLOR_CFG(COLOR_YELLOW+8), COLOR_CFG(COLOR_BLUE)},
+    /*3*/ { COLOR_CFG(COLOR_GREEN),    COLOR_CFG(DEFAULT_BG)},
+    /*4*/ { COLOR_CFG(COLOR_MAGENTA),  COLOR_CFG(DEFAULT_BG)},
+    /*5*/ { COLOR_CFG(COLOR_BLUE),     COLOR_CFG(DEFAULT_BG)},
+    /*6*/ { COLOR_CFG(COLOR_RED),      COLOR_CFG(DEFAULT_BG)},
+    /*7*/ { COLOR_CFG(COLOR_MAGENTA),  COLOR_CFG(COLOR_CYAN)}
 };
 /* *INDENT-ON* */
+
+#define COLOR_PAIRS_MAX (COLOR_CFG_MAX * 3 + 1)
 
 /*
  * Hold the codes for color-pairs here until 'initscr()' is called.
@@ -605,7 +583,7 @@ static struct {
 static struct {
     int fg;
     int bg;
-} lynx_color_pairs[25];
+} lynx_color_pairs[COLOR_PAIRS_MAX];
 
 /*
  * If we find an exact match for the given default colors, force curses to use
@@ -642,7 +620,7 @@ static int lynx_color_cfg_attr(int code)
 {
     int result = A_NORMAL;
 
-    if (code >= 0 && code < 8) {
+    if (code >= 0 && code < COLOR_CFG_MAX) {
 	int fg = lynx_color_cfg[code].fg;
 
 	if (is_boldc(fg) && (fg & COLORS))
@@ -722,7 +700,8 @@ char *LYgetTableString(int code)
     if (fg == 0 && bg == 0) {
 	fg = COLOR_WHITE;
     }
-    CTRACE((tfp, "%#x -> %#x (mono %#x pair %d) fg=%d, bg=%d\n", mask, second, mono, pair, fg, bg));
+    CTRACE((tfp, "%#x -> %#x (mono %#x pair %d) fg=%d, bg=%d\n",
+	    mask, second, mono, pair, fg, bg));
     for (n = 0; n < TABLESIZE(Mono_Attrs); ++n) {
 	if ((Mono_Attrs[n].code & mono) != 0) {
 	    if (result != 0)
@@ -771,17 +750,18 @@ static void lynx_init_color_pair(int n)
 
 static void lynx_map_color(int n)
 {
+    int j;
+
     CTRACE((tfp, "lynx_map_color(%d)\n", n));
 
     if (n + 1 < (int) TABLESIZE(lynx_color_pairs)) {
-	lynx_color_pairs[n + 1].fg = lynx_color_cfg[n].fg;
-	lynx_color_pairs[n + 1].bg = lynx_color_cfg[n].bg;
+	for (j = n + 1; j < COLOR_PAIRS_MAX; j += COLOR_CFG_MAX) {
+	    lynx_color_pairs[j].fg = lynx_color_cfg[n].fg;
+	    lynx_color_pairs[j].bg = lynx_color_cfg[n].bg;
+	}
 
-	lynx_color_pairs[n + 9].fg = lynx_color_cfg[n].fg;
-	lynx_color_pairs[n + 9].bg = lynx_color_cfg[0].bg;
-
-	lynx_color_pairs[n + 17].fg = lynx_color_cfg[n].bg;
-	lynx_color_pairs[n + 17].bg = lynx_color_cfg[n].bg;
+	/* special case (does not apply to 3rd set) */
+	lynx_color_pairs[n + 1 + COLOR_CFG_MAX].bg = lynx_color_cfg[0].bg;
     }
 
     lynx_init_color_pair(n);
@@ -799,7 +779,7 @@ int lynx_chg_color(int color,
 
     if (fg == ERR_COLOR || bg == ERR_COLOR)
 	return -1;
-    if (color >= 0 && color < 8) {
+    if (color >= 0 && color < COLOR_CFG_MAX) {
 	lynx_color_cfg[color].fg = fg;
 	lynx_color_cfg[color].bg = bg;
 	lynx_map_color(color);
@@ -851,7 +831,17 @@ void lynx_setup_colors(void)
     int n;
 
     CTRACE((tfp, "lynx_setup_colors\n"));
-    for (n = 0; n < 8; n++)
+#ifdef USE_DEFAULT_COLORS
+    if (!LYuse_default_colors) {
+	for (n = 0; n < COLOR_CFG_MAX; n++) {
+	    if (lynx_color_cfg[n].dft_fg)
+		lynx_color_cfg[n].fg = COLOR_BLACK;
+	    if (lynx_color_cfg[n].dft_bg)
+		lynx_color_cfg[n].bg = COLOR_WHITE;
+	}
+    }
+#endif
+    for (n = 0; n < COLOR_CFG_MAX; n++)
 	lynx_map_color(n);
 }
 #endif /* USE_COLOR_TABLE */
@@ -1171,36 +1161,49 @@ void start_curses(void)
 #endif
 
 #ifdef USE_DEFAULT_COLORS
+	    if (LYuse_default_colors) {
 #if defined(EXP_ASSUMED_COLOR) && defined(USE_COLOR_TABLE)
-	    /*
-	     * Adjust the color mapping table to match the ASSUMED_COLOR
-	     * setting in lynx.cfg
-	     */
-	    if (assume_default_colors(default_fg, default_bg) != OK) {
-		default_fg = COLOR_WHITE;
-		default_bg = COLOR_BLACK;
-	    }
-	    CTRACE((tfp, "initializing default colors %d/%d\n",
-		    default_fg, default_bg));
-	    if (default_fg >= 0 || default_bg >= 0) {
-		unsigned n;
-
-		for (n = 0; n < TABLESIZE(lynx_color_cfg); n++) {
-		    if (default_fg >= 0 && lynx_color_cfg[n].fg < 0)
-			lynx_color_cfg[n].fg = default_fg;
-		    if (default_bg >= 0 && lynx_color_cfg[n].bg < 0)
-			lynx_color_cfg[n].bg = default_bg;
-		    CTRACE((tfp, "color_cfg[%u] = %d/%d\n", n,
-			    lynx_color_cfg[n].fg,
-			    lynx_color_cfg[n].bg));
+		/*
+		 * Adjust the color mapping table to match the ASSUMED_COLOR
+		 * setting in lynx.cfg
+		 */
+		if (assume_default_colors(default_fg, default_bg) != OK) {
+		    default_fg = COLOR_WHITE;
+		    default_bg = COLOR_BLACK;
 		}
-		lynx_setup_colors();
-	    }
+		CTRACE((tfp, "initializing default colors %d/%d\n",
+			default_fg, default_bg));
+		if (default_fg >= 0 || default_bg >= 0) {
+		    unsigned n;
+
+		    for (n = 0; n < TABLESIZE(lynx_color_cfg); n++) {
+			if (default_fg >= 0 && lynx_color_cfg[n].fg < 0)
+			    lynx_color_cfg[n].fg = default_fg;
+			if (default_bg >= 0 && lynx_color_cfg[n].bg < 0)
+			    lynx_color_cfg[n].bg = default_bg;
+			CTRACE((tfp, "color_cfg[%u] = %d/%d\n", n,
+				lynx_color_cfg[n].fg,
+				lynx_color_cfg[n].bg));
+		    }
+		    lynx_setup_colors();
+		}
 #else
 #if defined(HAVE_USE_DEFAULT_COLORS)
-	    lynx_default_colors();
+		if (!default_color_reset) {
+		    if (lynx_called_initscr) {
+			if (LYuse_default_colors && (use_default_colors() == OK)) {
+			    default_fg = DEFAULT_COLOR;
+			    default_bg = DEFAULT_COLOR;
+			} else {
+			    default_fg = COLOR_WHITE;
+			    default_bg = COLOR_BLACK;
+			    default_color_reset = TRUE;
+			}
+		    }
+		}
 #endif /* HAVE_USE_DEFAULT_COLORS */
 #endif /* EXP_ASSUMED_COLOR */
+	    }
 #endif /* USE_DEFAULT_COLORS */
 	}
 #endif /* USE_COLOR_STYLE || USE_COLOR_TABLE */

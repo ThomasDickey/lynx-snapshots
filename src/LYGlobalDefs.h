@@ -577,6 +577,10 @@ extern "C" {
     extern char *lynx_lss_file;
 #endif
 
+#ifdef USE_DEFAULT_COLORS
+    extern BOOLEAN LYuse_default_colors;
+#endif
+
     extern int HTNoDataOK;	/* HT_NO_DATA-is-ok hack */
     extern BOOLEAN FileInitAlreadyDone;
 

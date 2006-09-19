@@ -297,7 +297,7 @@ int check_color(char *color,
     CTRACE2(TRACE_STYLE, (tfp, "check_color(%s,%d)\n", color, the_default));
     if (!strcasecomp(color, "default")) {
 #ifdef USE_DEFAULT_COLORS
-	if (!default_color_reset)
+	if (LYuse_default_colors && !default_color_reset)
 	    the_default = DEFAULT_COLOR;
 #endif /* USE_DEFAULT_COLORS */
 	CTRACE2(TRACE_STYLE, (tfp, "=> default %d\n", the_default));
@@ -510,32 +510,37 @@ static int assumed_color_fun(char *buffer)
     char *fg = buffer, *bg;
     char *temp = 0;
 
-    StrAllocCopy(temp, buffer);	/* save a copy, for error messages */
+    if (LYuse_default_colors) {
+	StrAllocCopy(temp, buffer);	/* save a copy, for error messages */
 
-    /*
-     * We are expecting a line of the form:
-     *    FOREGROUND:BACKGROUND
-     */
-    if (NULL == (bg = find_colon(fg)))
-	exit_with_color_syntax(temp);
-    *bg++ = '\0';
+	/*
+	 * We are expecting a line of the form:
+	 *    FOREGROUND:BACKGROUND
+	 */
+	if (NULL == (bg = find_colon(fg)))
+	    exit_with_color_syntax(temp);
+	*bg++ = '\0';
 
-    default_fg = check_color(fg, default_fg);
-    default_bg = check_color(bg, default_bg);
+	default_fg = check_color(fg, default_fg);
+	default_bg = check_color(bg, default_bg);
 
-    if (default_fg == ERR_COLOR
-	|| default_bg == ERR_COLOR)
-	exit_with_color_syntax(temp);
+	if (default_fg == ERR_COLOR
+	    || default_bg == ERR_COLOR)
+	    exit_with_color_syntax(temp);
 #ifdef USE_SLANG
-    /*
-     * Sorry - the order of initialization of slang precludes setting the
-     * default colors from the lynx.cfg file, since slang is already
-     * initialized before the file is read, and there is no interface defined
-     * for setting it from the application (that's one of the problems with
-     * using environment variables rather than a programmable interface) -TD
-     */
+	/*
+	 * Sorry - the order of initialization of slang precludes setting the
+	 * default colors from the lynx.cfg file, since slang is already
+	 * initialized before the file is read, and there is no interface
+	 * defined for setting it from the application (that's one of the
+	 * problems with using environment variables rather than a programmable
+	 * interface) -TD
+	 */
 #endif
-    FREE(temp);
+	FREE(temp);
+    } else {
+	CTRACE((tfp, "...ignored since DEFAULT_COLORS:off\n"));
+    }
     return 0;
 }
 #endif /* EXP_ASSUMED_COLOR */
@@ -544,6 +549,26 @@ static int assumed_color_fun(char *buffer)
 static int color_fun(char *value)
 {
     parse_color(value);
+    return 0;
+}
+#endif
+
+#ifdef USE_DEFAULT_COLORS
+static int default_colors_fun(char *value)
+{
+    LYuse_default_colors = is_true(value);
+    if (LYuse_default_colors) {
+	default_fg = DEFAULT_COLOR;
+	default_bg = DEFAULT_COLOR;
+    } else {
+	default_color_reset = TRUE;
+	if (default_fg == DEFAULT_COLOR ||
+	    default_bg == DEFAULT_COLOR) {
+	    default_fg = COLOR_WHITE;
+	    default_bg = COLOR_BLACK;
+	    lynx_setup_colors();
+	}
+    }
     return 0;
 }
 #endif
@@ -1282,6 +1307,9 @@ static Config_Type Config_Table [] =
      PARSE_TIM(RC_DELAYSECS,            DebugSecs),
      PARSE_FUN(RC_DEFAULT_BOOKMARK_FILE, default_bookmark_file_fun),
      PARSE_FUN(RC_DEFAULT_CACHE_SIZE,   default_cache_size_fun),
+#ifdef USE_DEFAULT_COLORS
+     PARSE_FUN(RC_DEFAULT_COLORS,       default_colors_fun),
+#endif
      PARSE_FUN(RC_DEFAULT_EDITOR,       default_editor_fun),
      PARSE_STR(RC_DEFAULT_INDEX_FILE,   indexfile),
      PARSE_ENU(RC_DEFAULT_KEYPAD_MODE,  keypad_mode, tbl_keypad_mode),

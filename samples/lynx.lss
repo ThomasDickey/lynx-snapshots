@@ -33,7 +33,6 @@ small:		dim:			default
 big:		bold:			yellow
 sup:		bold:			yellow
 sub:		dim:			gray
-lh:		bold:			yellow:		magenta
 li:		normal:			magenta
 code:		normal:			cyan
 cite:		normal:			cyan
@@ -57,7 +56,6 @@ alert:		bold:			yellow:		red
 whereis:	reverse+underline:	magenta:	cyan
 # currently not used
 #value:normal:green
-#high:bold:brightmagenta
 
 menu.bg:	normal:			black:		lightgray
 menu.frame:	normal:			black:		lightgray
