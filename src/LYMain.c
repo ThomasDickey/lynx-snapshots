@@ -633,6 +633,10 @@ char *lynx_lss_file2 = NULL;	/* from command-line options */
 char *lynx_lss_file = NULL;	/* from config-file, etc. */
 #endif
 
+#ifdef USE_DEFAULT_COLORS
+BOOLEAN LYuse_default_colors = TRUE;
+#endif
+
 #ifdef __DJGPP__
 static void LY_set_ctrl_break(int setting)
 {

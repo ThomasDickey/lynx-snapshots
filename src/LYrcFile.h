@@ -49,6 +49,7 @@
 #define RC_CSWING_PATH                  "cswing_path"
 #define RC_DEFAULT_BOOKMARK_FILE        "default_bookmark_file"
 #define RC_DEFAULT_CACHE_SIZE           "default_cache_size"
+#define RC_DEFAULT_COLORS               "default_colors"
 #define RC_DEFAULT_EDITOR               "default_editor"
 #define RC_DEFAULT_INDEX_FILE           "default_index_file"
 #define RC_DEFAULT_KEYPAD_MODE          "default_keypad_mode"
