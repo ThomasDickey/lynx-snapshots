@@ -772,7 +772,7 @@ static void write_anchor(const char *text, const char *addr)
 	strncat(q, addr, p - addr);	/* Make complete hypertext reference */
     } else {
 	q = NULL;
-	HTSprintf0(&q, "%s%.*s", NewsHREF, p - addr, addr);
+	HTSprintf0(&q, "%s%.*s", NewsHREF, (int) (p - addr), addr);
     }
 
     start_anchor(q);

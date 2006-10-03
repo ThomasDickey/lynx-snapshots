@@ -114,6 +114,7 @@ BccW32.cfg :
 
 clean :
 	-del *_uni.h
+	-del *_suni.h
 	-del *.exe
 	-del *.map
 	-del *.obj

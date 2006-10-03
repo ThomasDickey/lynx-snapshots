@@ -23,13 +23,13 @@ use strict;
 
 use Getopt::Std;
 
-our ($opt_a, $opt_m, $opt_s);
+use vars qw($opt_a $opt_m $opt_s);
 
-our (@cats);
-our (%cats);
+use vars qw(@cats);
+use vars qw(%cats);
 
-our (@settings_avail);
-our (%settings_avail);
+use vars qw(@settings_avail);
+use vars qw(%settings_avail);
 
 # Options:
 #	-a	show all options, not only those that are available.

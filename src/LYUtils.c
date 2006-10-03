@@ -1752,7 +1752,7 @@ int HTCheckForInterrupt(void)
     /*
      * Now, read the character.
      */
-#if defined(PDCURSES)
+#if defined(USE_CURSES_NODELAY)
     nodelay(LYwin, TRUE);
     c = LYgetch();
     nodelay(LYwin, FALSE);
@@ -3695,7 +3695,8 @@ void parse_restrictions(const char *s)
 	    }
 	}
 	if (!found) {
-	    printf("%s: %.*s\n", gettext("unknown restriction"), p - word, word);
+	    printf("%s: %.*s\n", gettext("unknown restriction"),
+		   (int) (p - word), word);
 	    exit_immediately(EXIT_FAILURE);
 	}
 	if (*p)

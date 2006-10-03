@@ -172,6 +172,13 @@ II. Compile instructions -- UNIX
     order shown by the -help option is different.  See "docs/README.defines"
     for information on defines for which there are no option switches.
 
+  --datadir
+	Defines the location where you want the documentation files installed. 
+	The configure script constructs makefile actions to install lynx.cfg
+	modified to reflect this in the HELPFILE setting.  (For platforms which
+	do not support a configure script, such as MS-DOS, Win32 and VMS, you
+	must edit lynx.cfg).
+
   --disable-alt-bindings 		(prevent defining EXP_ALT_BINDINGS)
 	Compiles-in an alternative set of line-edit bindings, in addition
 	to the default bindings.

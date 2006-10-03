@@ -846,7 +846,7 @@ static int modify_name(char *testpath)
 	} else if (strlen(tmpbuf)) {
 	    if ((cp = LYLastPathSep(testpath)) != NULL)
 		HTSprintf0(&newpath, "%.*s%s",
-			   (cp - testpath + 1), testpath, tmpbuf);
+			   (int) (cp - testpath + 1), testpath, tmpbuf);
 	    else
 		StrAllocCopy(newpath, tmpbuf);
 

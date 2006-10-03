@@ -253,6 +253,24 @@ typedef struct {
 #endif
 
 /*
+ * For systems where select() does not work for TTY's, we can poll using
+ * curses.
+ */
+#if defined(_WINDOWS) || defined(__MINGW32__)
+#if defined(PDCURSES) && defined(PDC_BUILD) && PDC_BUILD >= 2401
+#define USE_CURSES_NODELAY 1
+#endif
+
+#if defined(NCURSES_VERSION)
+#define USE_CURSES_NODELAY 1
+#endif
+#endif	/* _WINDOWS || __MINGW32__ */
+
+#if defined(NCURSES_VERSION) && defined(__BEOS__)
+#define USE_CURSES_NODELAY 1
+#endif
+
+/*
  * If we have pads, use them to implement left/right scrolling.
  */
 #if defined(HAVE_NEWPAD) && defined(HAVE_PNOUTREFRESH) && !defined(PDCURSES)
