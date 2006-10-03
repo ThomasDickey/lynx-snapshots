@@ -272,7 +272,7 @@ static char *attr_to_string(int code)
     if (pair != 0) {
 	short f, b;
 
-	if (pair_content(pair, &f, &b) != ERR) {
+	if (pair_content((short) pair, &f, &b) != ERR) {
 	    const char *fg = lookup_color(bold ? f + COLORS : f);
 	    const char *bg = lookup_color(b);
 
@@ -1209,6 +1209,12 @@ void start_curses(void)
 #endif /* USE_COLOR_STYLE || USE_COLOR_TABLE */
 
 #ifdef USE_COLOR_STYLE
+#ifdef PDCURSES
+	/* PDCurses forgets color settings when we call endwin() */
+	if (!isEmpty(lynx_lss_file) && LYCanReadFile(lynx_lss_file)) {
+	    style_readFromFile(lynx_lss_file);
+	}
+#endif
 	parse_userstyles();
 #endif
 #ifdef USE_COLOR_TABLE

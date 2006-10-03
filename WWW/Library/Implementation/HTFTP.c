@@ -3436,15 +3436,17 @@ int HTFTPLoad(const char *name,
 			       strchr(cp, ']') == NULL) {
 			cp1++;
 			if (*cp1 != '\0') {
+			    int cplen = (int) (cp1 - cp);
+
 			    strcpy(filename, cp1);
 			    CTRACE((tfp, "HTFTP: Filename '%s'\n", filename));
-			    HTSprintf0(&vmsname, "%.*s[%s]", cp1 - cp, cp, filename);
+			    HTSprintf0(&vmsname, "%.*s[%s]", cplen, cp, filename);
 			    status = send_cwd(vmsname);
 			    if (status != 2) {
-				HTSprintf(&vmsname, "%.*s[000000]", cp1 - cp, cp);
+				HTSprintf(&vmsname, "%.*s[000000]", cplen, cp);
 				status = send_cwd(vmsname);
 				if (status != 2) {
-				    HTSprintf(&vmsname, "%.*s", cp1 - cp, cp);
+				    HTSprintf(&vmsname, "%.*s", cplen, cp);
 				    status = send_cwd(vmsname);
 				    if (status != 2) {
 					FREE(fname);
@@ -3549,7 +3551,7 @@ int HTFTPLoad(const char *name,
 		    (cp1 - cp) > 1) {
 		    char *tmp = 0;
 
-		    HTSprintf0(&tmp, "[.%.*s]", cp1 - cp - 1, cp + 1);
+		    HTSprintf0(&tmp, "[.%.*s]", (int) (cp1 - cp - 1), cp + 1);
 
 		    CTRACE((tfp, "change path '%s'\n", tmp));
 		    while ((cp2 = strrchr(tmp, '/')) != NULL)

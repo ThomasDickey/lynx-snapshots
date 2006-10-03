@@ -19,8 +19,6 @@ extern "C" {
 /* Set all the buckets in the hash table to be empty */
     extern void parse_userstyles(void);
 
-    extern void style_deleteStyleList(void);
-
     extern void style_defaultStyleSheet(void);
 
     extern int style_readFromFile(char *file);

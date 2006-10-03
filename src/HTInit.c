@@ -699,7 +699,7 @@ static int BuildCommand(HTChunk *cmd,
 		    if (params != 0) {
 			++from;
 			name = 0;
-			HTSprintf0(&name, "%.*s", next - from, from);
+			HTSprintf0(&name, "%.*s", (int) (next - from), from);
 			if ((value = LYGetContentType(name, params)) != 0) {
 			    HTChunkPuts(cmd, value);
 			    FREE(value);

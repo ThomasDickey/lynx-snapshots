@@ -1,6 +1,21 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2006-10-02 (2.8.6pre.5)
+* modify cfg2html.pl to use "use vars" rather than "our", to allow it to work
+  with perl version 5.5 -TD
+* use curses nodelay() function for BeOS to make HTCheckForInterrupt() work
+  on that platform -TD
+* filter out obsolete URLs from the customizations saved during install of
+  lynx.cfg -TD
+* add a configure check for zError() to allow using old zlib's -TD
+* fix configure --disable-largefile (from ncurses changes) -TD
+* applied lynx's changes to updated files from ftp.unicode.org to take
+  advantage of less restrictive copyright (report by Klaus Singvogel).
+* workaround for PDCurses versus color-style; reload color style information
+  in start_curses() since PDCurses discards that information in endwin()
+  (report by Lawrence Armstrong) -TD
+
 2006-09-18 (2.8.6pre.4)
 * updated link in user's guide to HTML 3.0 reference (report by TH) -TD
 * remove coloring for lh- and high-tags from LYStyle.c and sample ".lss" files

@@ -175,7 +175,7 @@ static void append_open_tag(char *tagname,
 #define isNextP(p) ((isalnum(UCH(*p)) || *p == '_'))
 
 #define FMT_AT " at column %d:\n\t%s\n"
-#define TXT_AT (1 + p - ts), ts
+#define TXT_AT (int) (1 + p - ts), ts
 
 /* returns FALSE if incorrect */
 int html_src_parse_tagspec(char *ts,

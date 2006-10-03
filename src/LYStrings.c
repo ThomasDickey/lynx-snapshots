@@ -708,9 +708,36 @@ int LYmbcsstrlen(const char *str,
 #else /* curses */
 #if defined(DJGPP)
 #define GetChar() (djgpp_idle_loop(), wgetch(LYtopwindow()))
+#elif defined(NCURSES_VERSION) && defined(__BEOS__)
+#define GetChar() myGetCharNodelay()
 #elif defined(NCURSES)
 #define GetChar() wgetch(LYtopwindow())
 #endif
+#endif
+
+#ifdef USE_CURSES_NODELAY
+/* PDCurses - until version 2.7 in 2005 - defined ERR as 0, unlike other
+ * versions of curses.  Generally both EOF and ERR are defined as -1's. 
+ * However, there is a special case (see HTCheckForInterrupt()) to handle a
+ * case where no select() function is used in the win32 environment.
+ *
+ * HTCheckForInterrupt() uses nodelay() in this special case to check for
+ * pending input.  That normally returns ERR.  But LYgetch_for() checks the
+ * return value of this function for EOF (to handle some antique runtime
+ * libraries which did not set the state for feof/ferror).  Returning a zero
+ * (0) is safer since normally that is not mapped to any commands, and will be
+ * ignored by lynx.
+ */
+static int myGetCharNodelay(void)
+{
+    int c = wgetch(LYwin);
+    if (c == -1)
+	c = 0;
+
+    return c;
+}
+#else
+#define myGetCharNodelay() wgetch(LYwin)
 #endif
 
 #if !defined(GetChar) && defined(PDCURSES) && defined(PDC_BUILD) && PDC_BUILD >= 2401
@@ -723,7 +750,7 @@ static int myGetChar(void)
     BOOL done = FALSE;
 
     do {
-	switch (c = wgetch(LYwin)) {
+	switch (c = myGetCharNodelay()) {
 	case KEY_SHIFT_L:
 	case KEY_SHIFT_R:
 	case KEY_CONTROL_L:
@@ -737,21 +764,6 @@ static int myGetChar(void)
 	    break;
 	}
     } while (!done);
-
-    /* PDCurses - until version 2.7 in 2005 - defined ERR as 0, unlike other
-     * versions of curses.  Generally both EOF and ERR are defined as -1's. 
-     * However, there is a special case (see HTCheckForInterrupt()) to handle
-     * a case where no select() function in used the win32 environment.
-     *
-     * HTCheckForInterrupt() uses nodelay() in this special case to check for
-     * pending input.  That normally returns ERR.  But LYgetch_for() checks
-     * the return value of this function for EOF (to handle some antique
-     * runtime libraries which did not set the state for feof/ferror). 
-     * Returning a zero (0) is safer since normally that is not mapped to any
-     * commands, and will be ignored by lynx.
-     */
-    if (c == -1)
-	c = 0;
 
     return c;
 }

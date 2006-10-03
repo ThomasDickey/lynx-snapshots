@@ -345,7 +345,7 @@ char *HTTranslate(const char *required)
 		    char *temp = NULL;
 
 		    HTSprintf0(&temp, "%.*s%.*s%s",
-			       ins - r->equiv,
+			       (int) (ins - r->equiv),
 			       r->equiv,
 			       m,
 			       q,

@@ -1928,7 +1928,7 @@ void LYLoadCookies(char *cookie_file)
 	tok_out = LYstrsep(&tok_ptr, "\t");
 	for (tok_loop = 0; tok_out && tok_values[tok_loop].s; tok_loop++) {
 	    CTRACE((tfp, "\t%d:[%03d]:[%s]\n",
-		    tok_loop, tok_out - buf, tok_out));
+		    tok_loop, (int) (tok_out - buf), tok_out));
 	    LYstrncpy(tok_values[tok_loop].s,
 		      tok_out,
 		      tok_values[tok_loop].n);

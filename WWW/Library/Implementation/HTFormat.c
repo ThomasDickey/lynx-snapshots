@@ -1077,6 +1077,16 @@ static int HTGzFileCopy(gzFile gzfp, HTStream *sink)
     return rv;
 }
 
+#ifndef HAVE_ZERROR
+#define zError(s) LynxZError(s)
+static const char *zError(int status)
+{
+    static char result[80];
+    sprintf(result, "zlib error %d", status);
+    return result;
+}
+#endif
+
 /*	Push data from a deflate file pointer down a stream
  *	-------------------------------------
  *

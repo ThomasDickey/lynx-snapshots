@@ -1135,3 +1135,7 @@ Foteos Macrides
 Worcester Foundation for Biomedical Research
 .br
 Shrewsbury, Massachusetts 01545
+.PP
+Thomas E. Dickey
+.br
+<dickey@invisible-island.net>

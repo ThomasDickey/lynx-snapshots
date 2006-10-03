@@ -18,8 +18,10 @@
 
 #ifndef HAVE_CONFIG_H
 /* override HTUtils.h fallbacks for cross-compiling */
-#define HAVE_LSTAT
-#define NO_FILIO_H
+#undef HAVE_LSTAT
+#undef NO_FILIO_H
+#define HAVE_LSTAT 1
+#define NO_FILIO_H 1
 #endif
 
 #define DONT_USE_GETTEXT

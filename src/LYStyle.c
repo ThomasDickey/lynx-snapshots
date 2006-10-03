@@ -1,6 +1,6 @@
 /* character level styles for Lynx
  * (c) 1996 Rob Partington -- donated to the Lyncei (if they want it :-)
- * @Id: LYStyle.c 1.62 Mon, 18 Sep 2006 17:28:28 -0700 dickey @
+ * @Id: LYStyle.c 1.63 Mon, 02 Oct 2006 12:56:53 -0700 dickey @
  */
 #include <HTUtils.h>
 #include <HTML.h>
@@ -26,6 +26,12 @@
 #ifdef USE_COLOR_STYLE
 
 static void style_initialiseHashTable(void);
+
+/* because curses isn't started when we parse the config file, we
+ * need to remember the STYLE: lines we encounter and parse them
+ * after curses has started
+ */
+static HTList *lss_styles = NULL;
 
 /* stack of attributes during page rendering */
 int last_styles[MAX_LAST_STYLES] =
@@ -95,6 +101,7 @@ static int colorPairs = 0;
 #  define M_BLINK	0
 #endif
 
+#define MAX_PAIR 255		/* because our_pairs[] type is unsigned-char */
 static unsigned char our_pairs[2]
 [MAX_BLINK]
 [MAX_COLOR + 1]
@@ -207,7 +214,7 @@ static void parse_attributes(char *mono,
 #ifdef USE_CURSES_PAIR_0
 	    && (cA != A_NORMAL || fA != default_fg || bA != default_bg)
 #endif
-	    && curPair < 255) {
+	    && curPair < MAX_PAIR) {
 	    if (our_pairs[iBold][iBlink][iFg][iBg] != 0) {
 		curPair = our_pairs[iBold][iBlink][iFg][iBg];
 	    } else {
@@ -362,13 +369,18 @@ where OBJECT is one of EM,STRONG,B,I,U,BLINK etc.\n\n"), buffer);
     FREE(buffer);
 }
 
-#ifdef LY_FIND_LEAKS
+static void style_deleteStyleList(void)
+{
+    LYFreeStringList(lss_styles);
+    lss_styles = NULL;
+}
+
 static void free_colorstylestuff(void)
 {
     style_initialiseHashTable();
     style_deleteStyleList();
+    memset(our_pairs, 0, sizeof(our_pairs));
 }
-#endif
 
 /*
  * Initialise the default style sheet to match the vanilla-curses lynx.
@@ -514,12 +526,6 @@ static void style_initialiseHashTable(void)
 #endif
 }
 
-/* because curses isn't started when we parse the config file, we
- * need to remember the STYLE: lines we encounter and parse them
- * after curses has started
- */
-static HTList *lss_styles = NULL;
-
 void parse_userstyles(void)
 {
     char *name;
@@ -590,12 +596,6 @@ static void HStyle_addStyle(char *buffer)
     HTList_addObject(lss_styles, name);
 }
 
-void style_deleteStyleList(void)
-{
-    LYFreeStringList(lss_styles);
-    lss_styles = NULL;
-}
-
 static int style_readFromFileREC(char *lss_filename,
 				 char *parent_filename)
 {
@@ -615,8 +615,7 @@ static int style_readFromFileREC(char *lss_filename,
     }
 
     if (parent_filename == 0) {
-	style_initialiseHashTable();
-	style_deleteStyleList();
+	free_colorstylestuff();
     }
 
     while (LYSafeGets(&buffer, fh) != NULL) {
