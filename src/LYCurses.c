@@ -879,7 +879,7 @@ if (recent_sizechange) { \
     delscreen(LYscreen); \
     LYscreen = NULL; } }
 /*
- * Surrogates for newterm annd delscreen
+ * Surrogates for newterm and delscreen
  */
 #else /* HAVE_NEWTERM   */
 static WINDOW *LYscreen = NULL;
@@ -1209,12 +1209,10 @@ void start_curses(void)
 #endif /* USE_COLOR_STYLE || USE_COLOR_TABLE */
 
 #ifdef USE_COLOR_STYLE
-#ifdef PDCURSES
-	/* PDCurses forgets color settings when we call endwin() */
+	/* Curses forgets color settings when we call delscreen() */
 	if (!isEmpty(lynx_lss_file) && LYCanReadFile(lynx_lss_file)) {
 	    style_readFromFile(lynx_lss_file);
 	}
-#endif
 	parse_userstyles();
 #endif
 #ifdef USE_COLOR_TABLE
