@@ -1,6 +1,8 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2006-10-10 (2.8.6rel.1)
+
 2006-10-10 (2.8.6pre.6)
 * minor formatting fixes to CHANGES and CHANGES2.8 to facilitate scripted
   analysis of contributions -TD
