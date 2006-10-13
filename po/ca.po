@@ -11,7 +11,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: lynx 2.8.5pre15\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2006-08-31 18:50-0400\n"
+"POT-Creation-Date: 2006-10-12 19:59-0400\n"
 "PO-Revision-Date: 2003-07-06 18:12+0200\n"
 "Last-Translator: Carles Sadurní Anguita <isard@ctv.es>\n"
 "Language-Team: Catalan <ca@dodds.net>\n"
@@ -2819,7 +2819,7 @@ msgstr ""
 #. * hack: if we fail in HTAccess.c
 #. * avoid duplicating URL, oh.
 #.
-#: WWW/Library/Implementation/HTAccess.c:1084 src/LYMainLoop.c:7728
+#: WWW/Library/Implementation/HTAccess.c:1084 src/LYMainLoop.c:7735
 msgid "Can't Access"
 msgstr "No ha estat possible accedir-hi"
 
@@ -2865,7 +2865,7 @@ msgstr "%d (%5d) bytes transferits"
 msgid "connect for data"
 msgstr ""
 
-#: WWW/Library/Implementation/HTFTP.c:3819
+#: WWW/Library/Implementation/HTFTP.c:3821
 msgid "Receiving FTP file."
 msgstr "Rebent arxiu d'FTP"
 
@@ -3701,31 +3701,31 @@ msgstr ""
 msgid "cookie_domain_flag_set error, aborting program"
 msgstr ""
 
-#: src/LYCurses.c:1096
+#: src/LYCurses.c:1087
 msgid "Terminal initialisation failed - unknown terminal type?"
 msgstr "Ha fallat la inicialització del terminal: potser és un tipus de terminal desconegut."
 
-#: src/LYCurses.c:1525
+#: src/LYCurses.c:1530
 msgid "Terminal ="
 msgstr "Terminal ="
 
-#: src/LYCurses.c:1529
+#: src/LYCurses.c:1534
 msgid "You must use a vt100, 200, etc. terminal with this program."
 msgstr "Heu d'usar un terminal vt100, 300, etc. amb aquest programa."
 
-#: src/LYCurses.c:1578
+#: src/LYCurses.c:1583
 msgid "Your Terminal type is unknown!"
 msgstr "El terminal especificat és desconegut!"
 
-#: src/LYCurses.c:1579
+#: src/LYCurses.c:1584
 msgid "Enter a terminal type:"
 msgstr "Introduïu un tipus de terminal:"
 
-#: src/LYCurses.c:1593
+#: src/LYCurses.c:1598
 msgid "TERMINAL TYPE IS SET TO"
 msgstr "EL TIPUS DE TERMINAL ESTÀ FIXAT A"
 
-#: src/LYCurses.c:2096
+#: src/LYCurses.c:2103
 #, c-format
 msgid ""
 "\n"
@@ -3734,7 +3734,7 @@ msgstr ""
 "\n"
 "S'ha produït un error fatal en %s Ver. %s\n"
 
-#: src/LYCurses.c:2099
+#: src/LYCurses.c:2106
 #, c-format
 msgid ""
 "\n"
@@ -3798,31 +3798,31 @@ msgstr "Addicions locals:"
 msgid "No Name Given"
 msgstr "No heu donat cap nom"
 
-#: src/LYHistory.c:660
+#: src/LYHistory.c:667
 msgid "You selected:"
 msgstr "Heu triat:"
 
-#: src/LYHistory.c:684 src/LYHistory.c:913
+#: src/LYHistory.c:691 src/LYHistory.c:920
 msgid "(no address)"
 msgstr "(cap adreça)"
 
-#: src/LYHistory.c:688
+#: src/LYHistory.c:695
 msgid " (internal)"
 msgstr " (intern)"
 
-#: src/LYHistory.c:690
+#: src/LYHistory.c:697
 msgid " (was internal)"
 msgstr " (era intern)"
 
-#: src/LYHistory.c:788
+#: src/LYHistory.c:795
 msgid " (From History)"
 msgstr " (De l'historial)"
 
-#: src/LYHistory.c:833
+#: src/LYHistory.c:840
 msgid "You visited (POSTs, bookmark, menu and list files excluded):"
 msgstr "Heu visitat (excepte POSTs, adreces d'interés, fitxers del menúi de la llista:"
 
-#: src/LYHistory.c:1123
+#: src/LYHistory.c:1130
 msgid "(No messages yet)"
 msgstr "(Cap missatge encara)"
 
@@ -4210,19 +4210,19 @@ msgstr "Aquest missatge va ser generat automàticament per"
 msgid "No system mailer configured"
 msgstr ""
 
-#: src/LYMain.c:1003
+#: src/LYMain.c:1027
 msgid "No Winsock found, sorry."
 msgstr "No s'ha trobat Winsock."
 
-#: src/LYMain.c:1196
+#: src/LYMain.c:1208
 msgid "You MUST define a valid TMP or TEMP area!"
 msgstr "Heu de definir una àrea TMP o TEMP vàlida!"
 
-#: src/LYMain.c:1249 src/LYMainLoop.c:5026
+#: src/LYMain.c:1261 src/LYMainLoop.c:5026
 msgid "No such directory"
 msgstr "No existeix el directori"
 
-#: src/LYMain.c:1456
+#: src/LYMain.c:1468
 #, c-format
 msgid ""
 "\n"
@@ -4233,7 +4233,7 @@ msgstr ""
 "El fitxer de configuració %s no està disponible\n"
 "\n"
 
-#: src/LYMain.c:1466
+#: src/LYMain.c:1478
 #, c-format
 msgid ""
 "\n"
@@ -4243,7 +4243,7 @@ msgstr ""
 "\n"
 "Els jocs de caràcters no estan declarats.\n"
 
-#: src/LYMain.c:1495
+#: src/LYMain.c:1507
 #, c-format
 msgid ""
 "\n"
@@ -4251,7 +4251,7 @@ msgid ""
 "\n"
 msgstr ""
 
-#: src/LYMain.c:1571
+#: src/LYMain.c:1583
 #, c-format
 msgid ""
 "\n"
@@ -4262,54 +4262,60 @@ msgstr ""
 "El fitxer %s no està disponible.\n"
 "\n"
 
-#: src/LYMain.c:1762
+#: src/LYMain.c:1774
 msgid "Warning:"
 msgstr "Alerta:"
 
-#: src/LYMain.c:2327
+#: src/LYMain.c:2339
 msgid "persistent cookies state will be changed in next session only."
 msgstr "l'estat de les cookies persistents no es canviarà fins la següent sessió"
 
-#: src/LYMain.c:2564 src/LYMain.c:2609
+#: src/LYMain.c:2576 src/LYMain.c:2621
 #, c-format
 msgid "Lynx: ignoring unrecognized charset=%s\n"
 msgstr "Lynx: joc de caràcters %s no reconegut. S'ignorarà.\n"
 
-#: src/LYMain.c:3120
+#: src/LYMain.c:3133
 #, fuzzy, c-format
 msgid "%s Version %s (%s)"
 msgstr "%s Versió %s (%s)\n"
 
-#: src/LYMain.c:3155
+#: src/LYMain.c:3168
 #, c-format
 msgid "Built on %s %s %s\n"
 msgstr "Compilat per a %s el %s a les %s\n"
 
-#: src/LYMain.c:3177
-msgid "Copyrights held by the University of Kansas, CERN, and other contributors."
+#: src/LYMain.c:3190
+msgid "Copyrights held by the Lynx Developers Group,"
+msgstr ""
+
+#: src/LYMain.c:3191
+#, fuzzy
+msgid "the University of Kansas, CERN, and other contributors."
 msgstr ""
 "Els drets de còpia pertanyen a la Universitat de Kansas, el CERN i altres\n"
 "contribuïdors."
 
-#: src/LYMain.c:3178
-msgid "Distributed under the GNU General Public License."
+#: src/LYMain.c:3192
+#, fuzzy
+msgid "Distributed under the GNU General Public License (Version 2)."
 msgstr "Distribuït sota la Llicència Pública General."
 
-#: src/LYMain.c:3179
+#: src/LYMain.c:3193
 msgid "See http://lynx.isc.org/ and the online help for more information."
 msgstr "Vegeu http://lynx.isc.org/ i l'ajuda en línia per a més informació."
 
-#: src/LYMain.c:3954
+#: src/LYMain.c:3968
 #, c-format
 msgid "USAGE: %s [options] [file]\n"
 msgstr "UTILITZACIÓ: %s [opcions] [arxiu]\n"
 
-#: src/LYMain.c:3955
+#: src/LYMain.c:3969
 #, c-format
 msgid "Options are:\n"
 msgstr "Les opcions són:\n"
 
-#: src/LYMain.c:4254
+#: src/LYMain.c:4268
 #, c-format
 msgid "%s: Invalid Option: %s\n"
 msgstr "%s: l'opció no és vàlida: %s\n"
@@ -4338,7 +4344,7 @@ msgstr "Pantalla d'ajuda"
 msgid "System Index"
 msgstr "Índex del sistema"
 
-#: src/LYMainLoop.c:3533 src/LYMainLoop.c:5273
+#: src/LYMainLoop.c:3533 src/LYMainLoop.c:5274
 msgid "Entry into main screen"
 msgstr "Entrar en la pantalla principal"
 
@@ -4362,60 +4368,60 @@ msgstr "Un component del camí no és un directori"
 msgid "failed to change directory"
 msgstr "no ha estat possible canviar de directori"
 
-#: src/LYMainLoop.c:6202
+#: src/LYMainLoop.c:6209
 msgid "Reparsing document under current settings..."
 msgstr "Tornant a analitzar el document amb les opcions actuals..."
 
-#: src/LYMainLoop.c:6493
+#: src/LYMainLoop.c:6500
 #, c-format
 msgid "Fatal error - could not open output file %s\n"
 msgstr "Error fatal: no s'ha pogut obrir el fitxer d'eixida %s\n"
 
-#: src/LYMainLoop.c:6836
+#: src/LYMainLoop.c:6843
 msgid "TABLE center enable."
 msgstr ""
 
-#: src/LYMainLoop.c:6839
+#: src/LYMainLoop.c:6846
 msgid "TABLE center disable."
 msgstr ""
 
-#: src/LYMainLoop.c:6916
+#: src/LYMainLoop.c:6923
 msgid "Current URL is empty."
 msgstr "La URL actual és buida."
 
-#: src/LYMainLoop.c:6918 src/LYUtils.c:1793
+#: src/LYMainLoop.c:6925 src/LYUtils.c:1803
 msgid "Copy to clipboard failed."
 msgstr "No s'ha pogut copiar al porta-retalls."
 
-#: src/LYMainLoop.c:6920
+#: src/LYMainLoop.c:6927
 msgid "Document URL put to clipboard."
 msgstr "La URL del document s'ha copiat al porta-retalls."
 
-#: src/LYMainLoop.c:6922
+#: src/LYMainLoop.c:6929
 msgid "Link URL put to clipboard."
 msgstr "La URL de l'enllaç s'ha copiat al porta-retalls."
 
-#: src/LYMainLoop.c:6949
+#: src/LYMainLoop.c:6956
 msgid "No URL in the clipboard."
 msgstr "No hi ha cap URL al porta-retalls."
 
-#: src/LYMainLoop.c:7613 src/LYMainLoop.c:7783
+#: src/LYMainLoop.c:7620 src/LYMainLoop.c:7790
 msgid "-index-"
 msgstr "-índex-"
 
-#: src/LYMainLoop.c:7723
+#: src/LYMainLoop.c:7730
 msgid "lynx: Can't access startfile"
 msgstr "lynx: No s'ha pogut accedir al fitxer inicial"
 
-#: src/LYMainLoop.c:7735
+#: src/LYMainLoop.c:7742
 msgid "lynx: Start file could not be found or is not text/html or text/plain"
 msgstr "lynx: No s'ha trobat el fitxer o no és text/html ni text/plain"
 
-#: src/LYMainLoop.c:7736
+#: src/LYMainLoop.c:7743
 msgid "      Exiting..."
 msgstr "      Eixint..."
 
-#: src/LYMainLoop.c:7777
+#: src/LYMainLoop.c:7784
 msgid "-more-"
 msgstr "-més-"
 
@@ -5091,72 +5097,72 @@ msgstr ""
 msgid "Offending line:"
 msgstr "Línia incorrecta:"
 
-#: src/LYReadCFG.c:625
+#: src/LYReadCFG.c:650
 #, c-format
 msgid "key remapping of %s to %s for %s failed\n"
 msgstr "el remapatge de %s a %s per a %s ha fallat\n"
 
-#: src/LYReadCFG.c:632
+#: src/LYReadCFG.c:657
 #, c-format
 msgid "key remapping of %s to %s failed\n"
 msgstr "el remapatge de %s a %s ha fallat\n"
 
-#: src/LYReadCFG.c:653
+#: src/LYReadCFG.c:678
 #, c-format
 msgid "invalid line-editor selection %s for key %s, selecting all\n"
 msgstr ""
 
-#: src/LYReadCFG.c:678 src/LYReadCFG.c:690
+#: src/LYReadCFG.c:703 src/LYReadCFG.c:715
 #, c-format
 msgid "setting of line-editor binding for key %s (0x%x) to 0x%x for %s failed\n"
 msgstr ""
 
-#: src/LYReadCFG.c:694
+#: src/LYReadCFG.c:719
 #, c-format
 msgid "setting of line-editor binding for key %s (0x%x) for %s failed\n"
 msgstr ""
 
-#: src/LYReadCFG.c:792
+#: src/LYReadCFG.c:817
 #, c-format
 msgid "Lynx: cannot start, CERN rules file %s is not available\n"
 msgstr "Lynx: impossible iniciar, el fitxer de regles del CERN %s no estàdisponible\n"
 
-#: src/LYReadCFG.c:793
+#: src/LYReadCFG.c:818
 msgid "(no name)"
 msgstr "(sense nom)"
 
-#: src/LYReadCFG.c:1787
+#: src/LYReadCFG.c:1818
 #, c-format
 msgid "More than %d nested lynx.cfg includes -- perhaps there is a loop?!?\n"
 msgstr "Més de %d includes imbricats en lynx.cfg: potser hi ha un bucle?\n"
 
-#: src/LYReadCFG.c:1789
+#: src/LYReadCFG.c:1820
 #, c-format
 msgid "Last attempted include was '%s',\n"
 msgstr "L'últim include ha estat \"%s\", \n"
 
-#: src/LYReadCFG.c:1790
+#: src/LYReadCFG.c:1821
 #, c-format
 msgid "included from '%s'.\n"
 msgstr "inclós des de \"%s\".\n"
 
-#: src/LYReadCFG.c:2197 src/LYReadCFG.c:2210 src/LYReadCFG.c:2268
+#: src/LYReadCFG.c:2228 src/LYReadCFG.c:2241 src/LYReadCFG.c:2299
 msgid "The following is read from your lynx.cfg file."
 msgstr "Les dades següents s'han llegit del vostre fitxer lynx.cfg."
 
-#: src/LYReadCFG.c:2198 src/LYReadCFG.c:2211
+#: src/LYReadCFG.c:2229 src/LYReadCFG.c:2242
 msgid "Please read the distribution"
 msgstr "Per favor, llegiu "
 
-#: src/LYReadCFG.c:2204 src/LYReadCFG.c:2214
+#: src/LYReadCFG.c:2235 src/LYReadCFG.c:2245
 msgid "for more comments."
 msgstr "si necessiteu més informació."
 
-#: src/LYReadCFG.c:2250
+#: src/LYReadCFG.c:2281
 msgid "RELOAD THE CHANGES"
 msgstr "RECARREGAR ELS CANVIS"
 
-#: src/LYReadCFG.c:2258
+#: src/LYReadCFG.c:2289
 msgid "Your primary configuration"
 msgstr "Configuració primària"
 
@@ -5380,7 +5386,7 @@ msgstr "No hi ha enllaços en aquesta pàgina"
 msgid "Server Headers:"
 msgstr "Servidor:"
 
-#: src/LYStyle.c:294
+#: src/LYStyle.c:300
 #, c-format
 msgid ""
 "Syntax Error parsing style in lss file:\n"
@@ -5423,33 +5429,33 @@ msgstr "Carregar a:"
 msgid "Upload options:"
 msgstr "Opcions de càrrega:"
 
-#: src/LYUtils.c:1795
+#: src/LYUtils.c:1805
 msgid "Download document URL put to clipboard."
 msgstr ""
 
-#: src/LYUtils.c:2572
+#: src/LYUtils.c:2582
 msgid "Unexpected access protocol for this URL scheme."
 msgstr ""
 
-#: src/LYUtils.c:3384
+#: src/LYUtils.c:3394
 msgid "Too many tempfiles"
 msgstr "Massa fitxers temporals"
 
-#: src/LYUtils.c:3688
+#: src/LYUtils.c:3698
 msgid "unknown restriction"
 msgstr "restricció desconeguda"
 
-#: src/LYUtils.c:3718
+#: src/LYUtils.c:3729
 #, c-format
 msgid "No restrictions set.\n"
 msgstr "No s'hi han establert restriccions.\n"
 
-#: src/LYUtils.c:3721
+#: src/LYUtils.c:3732
 #, c-format
 msgid "Restrictions set:\n"
 msgstr "Restriccions:\n"
 
-#: src/LYUtils.c:5099
+#: src/LYUtils.c:5110
 msgid "Cannot find HOME directory"
 msgstr "No s'ha trobat el directori d'inici (HOME)"
 

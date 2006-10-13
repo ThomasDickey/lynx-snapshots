@@ -1,6 +1,14 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2006-10-12 (2.8.7dev.1)
+* update embedded version numbers for starting 2.8.7 development -TD
+* setup locale before writing version-message -TD
+* update version message to reflect the fact that most of Lynx is copyright
+  the Lynx Developers Group (this would have altered message files) -TD
+* update the ".po" files line-numbers (not done during the release cycle since
+  no new messages were added) -TD
+
 2006-10-12 (2.8.6rel.2)
 * update version numbers in documentation -TD
 * change embedded URL for HTML'ized lynx.cfg to point to example in current

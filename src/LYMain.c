@@ -955,6 +955,26 @@ static void append_ssl_version(char **target,
 }
 #endif /* USE_SSL */
 
+static void SetLocale(void)
+{
+#ifdef LOCALE
+    /*
+     * LOCALE support for international characters.
+     */
+    setlocale(LC_ALL, "");
+#endif /* LOCALE */
+    /* Set the text message domain.  */
+#if defined(HAVE_LIBINTL_H) || defined(HAVE_LIBGETTEXT_H)
+    {
+	char *cp;
+	if ((cp = LYGetEnv("LYNX_LOCALEDIR")) == 0)
+	    cp = LOCALEDIR;
+	bindtextdomain("lynx", cp);
+	textdomain("lynx");
+    }
+#endif /* HAVE_LIBINTL_H */
+}
+
 /*
  * Wow!  Someone wants to start up Lynx.
  */
@@ -1093,19 +1113,7 @@ int main(int argc,
     atexit(free_lynx_globals);
 #endif /* LY_FIND_LEAKS */
 
-#ifdef LOCALE
-    /*
-     * LOCALE support for international characters.
-     */
-    setlocale(LC_ALL, "");
-#endif /* LOCALE */
-    /* Set the text message domain.  */
-#if defined(HAVE_LIBINTL_H) || defined(HAVE_LIBGETTEXT_H)
-    if ((cp = LYGetEnv("LYNX_LOCALEDIR")) == 0)
-	cp = LOCALEDIR;
-    bindtextdomain("lynx", cp);
-    textdomain("lynx");
-#endif /* HAVE_LIBINTL_H */
+    SetLocale();
 
     /*
      * Initialize our startup and global variables.
@@ -3119,6 +3127,7 @@ static int version_fun(char *next_arg GCC_UNUSED)
 {
     char *result = NULL;
 
+    SetLocale();
     SetOutputMode(O_TEXT);
 
     HTSprintf0(&result, gettext("%s Version %s (%s)"),
@@ -3178,8 +3187,9 @@ static int version_fun(char *next_arg GCC_UNUSED)
 #endif
 
     puts("");
-    puts(gettext("Copyrights held by the University of Kansas, CERN, and other contributors."));
-    puts(gettext("Distributed under the GNU General Public License."));
+    puts(gettext("Copyrights held by the Lynx Developers Group,"));
+    puts(gettext("the University of Kansas, CERN, and other contributors."));
+    puts(gettext("Distributed under the GNU General Public License (Version 2)."));
     puts(gettext("See http://lynx.isc.org/ and the online help for more information."));
     puts("");
 #ifdef USE_SSL

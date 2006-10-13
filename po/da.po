@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: lynx 2.8.6-dev19\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2006-08-31 18:50-0400\n"
+"POT-Creation-Date: 2006-10-12 19:59-0400\n"
 "PO-Revision-Date: 2006-09-17 14:07+0200\n"
 "Last-Translator: Morten Bo Johansen <mojo@mbjnet.dk>\n"
 "Language-Team: Danish <dansk@dansk-gruppen.dk>\n"
@@ -2819,7 +2819,7 @@ msgstr "**** HTAccess: Statustilbagemelding var: %d\n"
 #. * hack: if we fail in HTAccess.c
 #. * avoid duplicating URL, oh.
 #.
-#: WWW/Library/Implementation/HTAccess.c:1084 src/LYMainLoop.c:7728
+#: WWW/Library/Implementation/HTAccess.c:1084 src/LYMainLoop.c:7735
 msgid "Can't Access"
 msgstr "Kan ikke tilgå"
 
@@ -2848,8 +2848,7 @@ msgstr "sokkel til primær sokkel"
 #. * It's a symbolic link, does the user care about knowing if it is
 #. * symbolic?  I think so since it might be a directory.
 #.
-#: WWW/Library/Implementation/HTFTP.c:1697
-#: WWW/Library/Implementation/HTFTP.c:2314
+#: WWW/Library/Implementation/HTFTP.c:1697 WWW/Library/Implementation/HTFTP.c:2314
 msgid "Symbolic Link"
 msgstr "Symbolsk link"
 
@@ -2866,7 +2865,7 @@ msgstr "Overført %d bytes (%5d)"
 msgid "connect for data"
 msgstr "dataforbindelse åben"
 
-#: WWW/Library/Implementation/HTFTP.c:3819
+#: WWW/Library/Implementation/HTFTP.c:3821
 msgid "Receiving FTP file."
 msgstr "Modtager FTP-fil."
 
@@ -3024,8 +3023,7 @@ msgstr "Adresse har en ugyldig port"
 msgid "Address length looks invalid"
 msgstr "Adresselængde forekommer ugyldig"
 
-#: WWW/Library/Implementation/HTTCP.c:1581
-#: WWW/Library/Implementation/HTTCP.c:1599
+#: WWW/Library/Implementation/HTTCP.c:1581 WWW/Library/Implementation/HTTCP.c:1599
 #, c-format
 msgid "Unable to locate remote host %s."
 msgstr "Ude af stand til at finde fremmed vært %s."
@@ -3034,8 +3032,7 @@ msgstr "Ude af stand til at finde fremmed vært %s."
 #. * but not HTAlert, because typically there will be other
 #. * alerts from the callers.  - kw
 #.
-#: WWW/Library/Implementation/HTTCP.c:1596
-#: WWW/Library/Implementation/HTTelnet.c:108
+#: WWW/Library/Implementation/HTTCP.c:1596 WWW/Library/Implementation/HTTelnet.c:108
 #, c-format
 msgid "Invalid hostname %s"
 msgstr "Ugyldigt værtsnavn %s"
@@ -3711,31 +3708,31 @@ msgstr "Intern"
 msgid "cookie_domain_flag_set error, aborting program"
 msgstr "'cookie_domain_set_flag'-fejl, afbryder program"
 
-#: src/LYCurses.c:1096
+#: src/LYCurses.c:1087
 msgid "Terminal initialisation failed - unknown terminal type?"
 msgstr "Klargøring af terminal slog fejl - ukendt terminaltype?"
 
-#: src/LYCurses.c:1525
+#: src/LYCurses.c:1530
 msgid "Terminal ="
 msgstr "Terminal ="
 
-#: src/LYCurses.c:1529
+#: src/LYCurses.c:1534
 msgid "You must use a vt100, 200, etc. terminal with this program."
 msgstr "Du skal bruge en vt100, 200, etc. terminal med dette program."
 
-#: src/LYCurses.c:1578
+#: src/LYCurses.c:1583
 msgid "Your Terminal type is unknown!"
 msgstr "Din terminaltype er ukendt!"
 
-#: src/LYCurses.c:1579
+#: src/LYCurses.c:1584
 msgid "Enter a terminal type:"
 msgstr "Anfør en terminaltype:"
 
-#: src/LYCurses.c:1593
+#: src/LYCurses.c:1598
 msgid "TERMINAL TYPE IS SET TO"
 msgstr "TERMINAL-TYPE SAT TIL"
 
-#: src/LYCurses.c:2096
+#: src/LYCurses.c:2103
 #, c-format
 msgid ""
 "\n"
@@ -3744,7 +3741,7 @@ msgstr ""
 "\n"
 "En kritisk fejl opstod i %s Ver. %s\n"
 
-#: src/LYCurses.c:2099
+#: src/LYCurses.c:2106
 #, c-format
 msgid ""
 "\n"
@@ -3812,31 +3809,31 @@ msgstr "Egne tilføjelser:"
 msgid "No Name Given"
 msgstr "Intet navn givet"
 
-#: src/LYHistory.c:660
+#: src/LYHistory.c:667
 msgid "You selected:"
 msgstr "Du valgte:"
 
-#: src/LYHistory.c:684 src/LYHistory.c:913
+#: src/LYHistory.c:691 src/LYHistory.c:920
 msgid "(no address)"
 msgstr "(ingen adresse)"
 
-#: src/LYHistory.c:688
+#: src/LYHistory.c:695
 msgid " (internal)"
 msgstr " (intern)"
 
-#: src/LYHistory.c:690
+#: src/LYHistory.c:697
 msgid " (was internal)"
 msgstr " (var intern)"
 
-#: src/LYHistory.c:788
+#: src/LYHistory.c:795
 msgid " (From History)"
 msgstr " (Fra historik)"
 
-#: src/LYHistory.c:833
+#: src/LYHistory.c:840
 msgid "You visited (POSTs, bookmark, menu and list files excluded):"
 msgstr "Du har besøgt: ('POSTs', bogmærke-, menu- og listefiler undtaget)"
 
-#: src/LYHistory.c:1123
+#: src/LYHistory.c:1130
 msgid "(No messages yet)"
 msgstr "(Ingen meddelelser endnu)"
 
@@ -4223,19 +4220,19 @@ msgstr "Denne meddelelse blev automatisk lavet af"
 msgid "No system mailer configured"
 msgstr "Systemets postprogram er ikke sat op"
 
-#: src/LYMain.c:1003
+#: src/LYMain.c:1027
 msgid "No Winsock found, sorry."
 msgstr "Ingen \"Winsock\" fundet, beklager."
 
-#: src/LYMain.c:1196
+#: src/LYMain.c:1208
 msgid "You MUST define a valid TMP or TEMP area!"
 msgstr "Du SKAL definere et gyldigt TMP- eller TEMP-område!"
 
-#: src/LYMain.c:1249 src/LYMainLoop.c:5026
+#: src/LYMain.c:1261 src/LYMainLoop.c:5026
 msgid "No such directory"
 msgstr "Intet sådant filkatalog"
 
-#: src/LYMain.c:1456
+#: src/LYMain.c:1468
 #, c-format
 msgid ""
 "\n"
@@ -4246,7 +4243,7 @@ msgstr ""
 "Opsætningsfil \"%s\" er ikke tilgængelig.\n"
 "\n"
 
-#: src/LYMain.c:1466
+#: src/LYMain.c:1478
 #, c-format
 msgid ""
 "\n"
@@ -4257,7 +4254,7 @@ msgstr ""
 "Lynx' tegnsæt er ikke angivet.\n"
 "\n"
 
-#: src/LYMain.c:1495
+#: src/LYMain.c:1507
 #, c-format
 msgid ""
 "\n"
@@ -4268,7 +4265,7 @@ msgstr ""
 "Lynx \"edit map\" er ikke angivet.\n"
 "\n"
 
-#: src/LYMain.c:1571
+#: src/LYMain.c:1583
 #, c-format
 msgid ""
 "\n"
@@ -4279,52 +4276,58 @@ msgstr ""
 "Lynx-fil \"%s\" er ikke tilgængelig.\n"
 "\n"
 
-#: src/LYMain.c:1762
+#: src/LYMain.c:1774
 msgid "Warning:"
 msgstr "Advarsel:"
 
-#: src/LYMain.c:2327
+#: src/LYMain.c:2339
 msgid "persistent cookies state will be changed in next session only."
 msgstr "Ændring for varige cookier vil kun gælde næste session."
 
-#: src/LYMain.c:2564 src/LYMain.c:2609
+#: src/LYMain.c:2576 src/LYMain.c:2621
 #, c-format
 msgid "Lynx: ignoring unrecognized charset=%s\n"
 msgstr "Lynx: Ignorerer ukendt tegnsæt=%s\n"
 
-#: src/LYMain.c:3120
+#: src/LYMain.c:3133
 #, c-format
 msgid "%s Version %s (%s)"
 msgstr "%s Version %s (%s)"
 
-#: src/LYMain.c:3155
+#: src/LYMain.c:3168
 #, c-format
 msgid "Built on %s %s %s\n"
 msgstr "Bygget på %s %s %s\n"
 
-#: src/LYMain.c:3177
-msgid "Copyrights held by the University of Kansas, CERN, and other contributors."
+#: src/LYMain.c:3190
+msgid "Copyrights held by the Lynx Developers Group,"
+msgstr ""
+
+#: src/LYMain.c:3191
+#, fuzzy
+msgid "the University of Kansas, CERN, and other contributors."
 msgstr "Ophavsret indehaves af University of Kansas, CERN og andre bidragydere."
 
-#: src/LYMain.c:3178
-msgid "Distributed under the GNU General Public License."
+#: src/LYMain.c:3192
+#, fuzzy
+msgid "Distributed under the GNU General Public License (Version 2)."
 msgstr "Distribueret under GNU General Public License."
 
-#: src/LYMain.c:3179
+#: src/LYMain.c:3193
 msgid "See http://lynx.isc.org/ and the online help for more information."
 msgstr "Se http://lynx.isc.org/ og online-hjælpen for flere oplysninger."
 
-#: src/LYMain.c:3954
+#: src/LYMain.c:3968
 #, c-format
 msgid "USAGE: %s [options] [file]\n"
 msgstr "BRUG: %s [valgmuligheder] [fil]\n"
 
-#: src/LYMain.c:3955
+#: src/LYMain.c:3969
 #, c-format
 msgid "Options are:\n"
 msgstr "Valgmuligheder er:\n"
 
-#: src/LYMain.c:4254
+#: src/LYMain.c:4268
 #, c-format
 msgid "%s: Invalid Option: %s\n"
 msgstr "%s: Ugyldig indstilling: %s\n"
@@ -4353,7 +4356,7 @@ msgstr "Hjælpeskærm"
 msgid "System Index"
 msgstr "Systemfortegnelse"
 
-#: src/LYMainLoop.c:3533 src/LYMainLoop.c:5273
+#: src/LYMainLoop.c:3533 src/LYMainLoop.c:5274
 msgid "Entry into main screen"
 msgstr "Indgang til hovedskærm"
 
@@ -4377,60 +4380,60 @@ msgstr "En del af stien er ikke et filkatalog"
 msgid "failed to change directory"
 msgstr "kunne ikke skifte filkatalog."
 
-#: src/LYMainLoop.c:6202
+#: src/LYMainLoop.c:6209
 msgid "Reparsing document under current settings..."
 msgstr "Genfortolker dokument under nuværende indstillinger ..."
 
-#: src/LYMainLoop.c:6493
+#: src/LYMainLoop.c:6500
 #, c-format
 msgid "Fatal error - could not open output file %s\n"
 msgstr "Kritisk fejl - kunne ikke åbne uddatafil %s\n"
 
-#: src/LYMainLoop.c:6836
+#: src/LYMainLoop.c:6843
 msgid "TABLE center enable."
 msgstr "TABEL-centrering slået til."
 
-#: src/LYMainLoop.c:6839
+#: src/LYMainLoop.c:6846
 msgid "TABLE center disable."
 msgstr "TABEL-centrering slået fra."
 
-#: src/LYMainLoop.c:6916
+#: src/LYMainLoop.c:6923
 msgid "Current URL is empty."
 msgstr "Aktuelle adresse er tom."
 
-#: src/LYMainLoop.c:6918 src/LYUtils.c:1793
+#: src/LYMainLoop.c:6925 src/LYUtils.c:1803
 msgid "Copy to clipboard failed."
 msgstr "Kopiering til klippebord slog fejl."
 
-#: src/LYMainLoop.c:6920
+#: src/LYMainLoop.c:6927
 msgid "Document URL put to clipboard."
 msgstr "Dokumentets adresse overført til klippebord."
 
-#: src/LYMainLoop.c:6922
+#: src/LYMainLoop.c:6929
 msgid "Link URL put to clipboard."
 msgstr "Linkets adresse overført til klippebord."
 
-#: src/LYMainLoop.c:6949
+#: src/LYMainLoop.c:6956
 msgid "No URL in the clipboard."
 msgstr "Ingen adresse ligger på klippebord."
 
-#: src/LYMainLoop.c:7613 src/LYMainLoop.c:7783
+#: src/LYMainLoop.c:7620 src/LYMainLoop.c:7790
 msgid "-index-"
 msgstr "-indeks-"
 
-#: src/LYMainLoop.c:7723
+#: src/LYMainLoop.c:7730
 msgid "lynx: Can't access startfile"
 msgstr "lynx: Kan ikke få adgang til startfil"
 
-#: src/LYMainLoop.c:7735
+#: src/LYMainLoop.c:7742
 msgid "lynx: Start file could not be found or is not text/html or text/plain"
 msgstr "lynx: startfil fandtes ikke eller er ikke i text/html, text/plain format"
 
-#: src/LYMainLoop.c:7736
+#: src/LYMainLoop.c:7743
 msgid "      Exiting..."
 msgstr "      Afslutter ..."
 
-#: src/LYMainLoop.c:7777
+#: src/LYMainLoop.c:7784
 msgid "-more-"
 msgstr "-mere-"
 
@@ -4507,8 +4510,7 @@ msgid "ON"
 msgstr "SLÅET TIL"
 
 #. verbose_img variable
-#: src/LYOptions.c:2127 src/LYOptions.c:2132 src/LYOptions.c:2280
-#: src/LYOptions.c:2291
+#: src/LYOptions.c:2127 src/LYOptions.c:2132 src/LYOptions.c:2280 src/LYOptions.c:2291
 msgid "OFF"
 msgstr "SLÅET FRA"
 
@@ -5094,72 +5096,72 @@ msgstr ""
 msgid "Offending line:"
 msgstr "Problemskabende linje:"
 
-#: src/LYReadCFG.c:625
+#: src/LYReadCFG.c:650
 #, c-format
 msgid "key remapping of %s to %s for %s failed\n"
 msgstr "Omtildeling af tasten %s til %s i %s slog fejl\n"
 
-#: src/LYReadCFG.c:632
+#: src/LYReadCFG.c:657
 #, c-format
 msgid "key remapping of %s to %s failed\n"
 msgstr "Omtildeling af tasten %s til %s slog fejl\n"
 
-#: src/LYReadCFG.c:653
+#: src/LYReadCFG.c:678
 #, c-format
 msgid "invalid line-editor selection %s for key %s, selecting all\n"
 msgstr "ugyldigt linje-editorvalg %s for taste %s, vælger alle\n"
 
-#: src/LYReadCFG.c:678 src/LYReadCFG.c:690
+#: src/LYReadCFG.c:703 src/LYReadCFG.c:715
 #, c-format
 msgid "setting of line-editor binding for key %s (0x%x) to 0x%x for %s failed\n"
 msgstr "tildeling af taste %s (0x%x) til 0x%x for %s i linje-editor slog fejl\n"
 
-#: src/LYReadCFG.c:694
+#: src/LYReadCFG.c:719
 #, c-format
 msgid "setting of line-editor binding for key %s (0x%x) for %s failed\n"
 msgstr "tildeling af tasten %s (0x%x) til %s i linje-editor slog fejl\n"
 
-#: src/LYReadCFG.c:792
+#: src/LYReadCFG.c:817
 #, c-format
 msgid "Lynx: cannot start, CERN rules file %s is not available\n"
 msgstr "Lynx: Kan ikke starte op, CERN-regelfil %s findes ikke\n"
 
-#: src/LYReadCFG.c:793
+#: src/LYReadCFG.c:818
 msgid "(no name)"
 msgstr "(intet navn)"
 
-#: src/LYReadCFG.c:1787
+#: src/LYReadCFG.c:1818
 #, c-format
 msgid "More than %d nested lynx.cfg includes -- perhaps there is a loop?!?\n"
 msgstr "Flere end %d inkluderingsfiler i lynx.cfg - måske en sløjfe!?\n"
 
-#: src/LYReadCFG.c:1789
+#: src/LYReadCFG.c:1820
 #, c-format
 msgid "Last attempted include was '%s',\n"
 msgstr "Sidste inkluderingsfil der forsøgtes indlæst var '%s',\n"
 
-#: src/LYReadCFG.c:1790
+#: src/LYReadCFG.c:1821
 #, c-format
 msgid "included from '%s'.\n"
 msgstr "inkluderet fra '%s'.\n"
 
-#: src/LYReadCFG.c:2197 src/LYReadCFG.c:2210 src/LYReadCFG.c:2268
+#: src/LYReadCFG.c:2228 src/LYReadCFG.c:2241 src/LYReadCFG.c:2299
 msgid "The following is read from your lynx.cfg file."
 msgstr "Følgende er læst fra din lynx.cfg-fil."
 
-#: src/LYReadCFG.c:2198 src/LYReadCFG.c:2211
+#: src/LYReadCFG.c:2229 src/LYReadCFG.c:2242
 msgid "Please read the distribution"
 msgstr "Læs venligst distributionen"
 
-#: src/LYReadCFG.c:2204 src/LYReadCFG.c:2214
+#: src/LYReadCFG.c:2235 src/LYReadCFG.c:2245
 msgid "for more comments."
 msgstr "for flere kommentarer."
 
-#: src/LYReadCFG.c:2250
+#: src/LYReadCFG.c:2281
 msgid "RELOAD THE CHANGES"
 msgstr "GENINDLÆS ÆNDRINGERNE"
 
-#: src/LYReadCFG.c:2258
+#: src/LYReadCFG.c:2289
 msgid "Your primary configuration"
 msgstr "Din primære opsætning"
 
@@ -5378,7 +5380,7 @@ msgstr "Ingen links på denne side"
 msgid "Server Headers:"
 msgstr "Server-info:"
 
-#: src/LYStyle.c:294
+#: src/LYStyle.c:300
 #, c-format
 msgid ""
 "Syntax Error parsing style in lss file:\n"
@@ -5427,33 +5429,33 @@ msgstr "Upload til:"
 msgid "Upload options:"
 msgstr "Valgmuligheder for uploads:"
 
-#: src/LYUtils.c:1795
+#: src/LYUtils.c:1805
 msgid "Download document URL put to clipboard."
 msgstr "Hjemtag dokument fra adressen på klippebord."
 
-#: src/LYUtils.c:2572
+#: src/LYUtils.c:2582
 msgid "Unexpected access protocol for this URL scheme."
 msgstr "Uventet adgangsprotokol for denne adressetype."
 
-#: src/LYUtils.c:3384
+#: src/LYUtils.c:3394
 msgid "Too many tempfiles"
 msgstr "For mange midlertidige filer"
 
-#: src/LYUtils.c:3688
+#: src/LYUtils.c:3698
 msgid "unknown restriction"
 msgstr "ukendt begrænsning"
 
-#: src/LYUtils.c:3718
+#: src/LYUtils.c:3729
 #, c-format
 msgid "No restrictions set.\n"
 msgstr "Ingen begrænsninger sat.\n"
 
-#: src/LYUtils.c:3721
+#: src/LYUtils.c:3732
 #, c-format
 msgid "Restrictions set:\n"
 msgstr "Begrænsninger sat:\n"
 
-#: src/LYUtils.c:5099
+#: src/LYUtils.c:5110
 msgid "Cannot find HOME directory"
 msgstr "Kan ikke finde HOME-katalog"
 
