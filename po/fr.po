@@ -29,7 +29,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: lynx 2.8.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2006-08-31 18:50-0400\n"
+"POT-Creation-Date: 2006-10-12 19:59-0400\n"
 "PO-Revision-Date: 1999-06-05 15:18-0400\n"
 "Last-Translator: Jim Spath <jspath@bcpl.net>\n"
 "Language-Team: (none yet, address for now:) French <lynx-dev@nongnu.org>\n"
@@ -2880,7 +2880,7 @@ msgstr "**** HTAccess: L'état retourné était: %d\n"
 #. * hack: if we fail in HTAccess.c
 #. * avoid duplicating URL, oh.
 #.
-#: WWW/Library/Implementation/HTAccess.c:1084 src/LYMainLoop.c:7728
+#: WWW/Library/Implementation/HTAccess.c:1084 src/LYMainLoop.c:7735
 msgid "Can't Access"
 msgstr "Accès impossible"
 
@@ -2926,7 +2926,7 @@ msgstr "%d bytes téléchargées (%5d)"
 msgid "connect for data"
 msgstr "connection pour données"
 
-#: WWW/Library/Implementation/HTFTP.c:3819
+#: WWW/Library/Implementation/HTFTP.c:3821
 msgid "Receiving FTP file."
 msgstr "Réception du fichier FTP"
 
@@ -3786,31 +3786,31 @@ msgstr "Interne"
 msgid "cookie_domain_flag_set error, aborting program"
 msgstr "erreur de mise en place de flag de domaine de cookie, fermeture du programme"
 
-#: src/LYCurses.c:1096
+#: src/LYCurses.c:1087
 msgid "Terminal initialisation failed - unknown terminal type?"
 msgstr "Défaut d'initialisation au terminal; type de terminal inconnu?"
 
-#: src/LYCurses.c:1525
+#: src/LYCurses.c:1530
 msgid "Terminal ="
 msgstr "Terminal ="
 
-#: src/LYCurses.c:1529
+#: src/LYCurses.c:1534
 msgid "You must use a vt100, 200, etc. terminal with this program."
 msgstr "Il faut utiliser un terminal vt100, 200, etc. avec ce programme."
 
-#: src/LYCurses.c:1578
+#: src/LYCurses.c:1583
 msgid "Your Terminal type is unknown!"
 msgstr "Votre type de terminal n'est pas reconnu."
 
-#: src/LYCurses.c:1579
+#: src/LYCurses.c:1584
 msgid "Enter a terminal type:"
 msgstr "Entrez un type de terminal"
 
-#: src/LYCurses.c:1593
+#: src/LYCurses.c:1598
 msgid "TERMINAL TYPE IS SET TO"
 msgstr "TYPE DE TERMINAL RÉGLÉ À"
 
-#: src/LYCurses.c:2096
+#: src/LYCurses.c:2103
 #, c-format
 msgid ""
 "\n"
@@ -3819,7 +3819,7 @@ msgstr ""
 "\n"
 "Une erreur fatale s'est produite dans %s Ver. %s\n"
 
-#: src/LYCurses.c:2099
+#: src/LYCurses.c:2106
 #, c-format
 msgid ""
 "\n"
@@ -3888,31 +3888,31 @@ msgstr "Ajout local:"
 msgid "No Name Given"
 msgstr "Aucun nom donné"
 
-#: src/LYHistory.c:660
+#: src/LYHistory.c:667
 msgid "You selected:"
 msgstr "Vous avez choisi :"
 
-#: src/LYHistory.c:684 src/LYHistory.c:913
+#: src/LYHistory.c:691 src/LYHistory.c:920
 msgid "(no address)"
 msgstr "(aucune adresse)"
 
-#: src/LYHistory.c:688
+#: src/LYHistory.c:695
 msgid " (internal)"
 msgstr " (interne)"
 
-#: src/LYHistory.c:690
+#: src/LYHistory.c:697
 msgid " (was internal)"
 msgstr " (était interne)"
 
-#: src/LYHistory.c:788
+#: src/LYHistory.c:795
 msgid " (From History)"
 msgstr " (de l'Historique)"
 
-#: src/LYHistory.c:833
+#: src/LYHistory.c:840
 msgid "You visited (POSTs, bookmark, menu and list files excluded):"
 msgstr "Vous avez consulté (fichiers POST, références et signets exclus):"
 
-#: src/LYHistory.c:1123
+#: src/LYHistory.c:1130
 msgid "(No messages yet)"
 msgstr "(Pas encore de message)"
 
@@ -4301,19 +4301,19 @@ msgstr "Ce message est généré automatiquement par"
 msgid "No system mailer configured"
 msgstr ""
 
-#: src/LYMain.c:1003
+#: src/LYMain.c:1027
 msgid "No Winsock found, sorry."
 msgstr "Pas de Winsock trouvée, désolé."
 
-#: src/LYMain.c:1196
+#: src/LYMain.c:1208
 msgid "You MUST define a valid TMP or TEMP area!"
 msgstr "vous DEVEZ définir une zone TMP ou TEMP valide !"
 
-#: src/LYMain.c:1249 src/LYMainLoop.c:5026
+#: src/LYMain.c:1261 src/LYMainLoop.c:5026
 msgid "No such directory"
 msgstr "Pas de tel répertoire"
 
-#: src/LYMain.c:1456
+#: src/LYMain.c:1468
 #, c-format
 msgid ""
 "\n"
@@ -4325,7 +4325,7 @@ msgstr ""
 "\n"
 
 # src/LYMain.c
-#: src/LYMain.c:1466
+#: src/LYMain.c:1478
 #, c-format
 msgid ""
 "\n"
@@ -4336,7 +4336,7 @@ msgstr ""
 "Jeux de caractères Lynx non précisés.\n"
 "\n"
 
-#: src/LYMain.c:1495
+#: src/LYMain.c:1507
 #, c-format
 msgid ""
 "\n"
@@ -4347,7 +4347,7 @@ msgstr ""
 "Relevé de liens Lynx non déclaré.\n"
 "\n"
 
-#: src/LYMain.c:1571
+#: src/LYMain.c:1583
 #, c-format
 msgid ""
 "\n"
@@ -4358,52 +4358,58 @@ msgstr ""
 "Le fichier Lynx %s n'est pas disponible.\n"
 "\n"
 
-#: src/LYMain.c:1762
+#: src/LYMain.c:1774
 msgid "Warning:"
 msgstr "Attention:"
 
-#: src/LYMain.c:2327
+#: src/LYMain.c:2339
 msgid "persistent cookies state will be changed in next session only."
 msgstr "L'état des cookies persistant ne seront changés qu'au cours de la prochaine session."
 
-#: src/LYMain.c:2564 src/LYMain.c:2609
+#: src/LYMain.c:2576 src/LYMain.c:2621
 #, c-format
 msgid "Lynx: ignoring unrecognized charset=%s\n"
 msgstr "Lynx: ignorer le charset=%s inconnu\n"
 
-#: src/LYMain.c:3120
+#: src/LYMain.c:3133
 #, fuzzy, c-format
 msgid "%s Version %s (%s)"
 msgstr "%s Version %s (%s)\n"
 
-#: src/LYMain.c:3155
+#: src/LYMain.c:3168
 #, c-format
 msgid "Built on %s %s %s\n"
 msgstr "Compilé le %s %s %s\n"
 
-#: src/LYMain.c:3177
-msgid "Copyrights held by the University of Kansas, CERN, and other contributors."
+#: src/LYMain.c:3190
+msgid "Copyrights held by the Lynx Developers Group,"
+msgstr ""
+
+#: src/LYMain.c:3191
+#, fuzzy
+msgid "the University of Kansas, CERN, and other contributors."
 msgstr "Copyright tenu par l'université du Kansas, du CERN, et d'autres contribuants"
 
-#: src/LYMain.c:3178
-msgid "Distributed under the GNU General Public License."
+#: src/LYMain.c:3192
+#, fuzzy
+msgid "Distributed under the GNU General Public License (Version 2)."
 msgstr "Distribué sous le permis de grand public de GNU"
 
-#: src/LYMain.c:3179
+#: src/LYMain.c:3193
 msgid "See http://lynx.isc.org/ and the online help for more information."
 msgstr "Voyez http://lynx.isc.org/ et d'aide en ligne pour plus d'information."
 
-#: src/LYMain.c:3954
+#: src/LYMain.c:3968
 #, c-format
 msgid "USAGE: %s [options] [file]\n"
 msgstr "USAGE : %s [options] [fichier]\n"
 
-#: src/LYMain.c:3955
+#: src/LYMain.c:3969
 #, c-format
 msgid "Options are:\n"
 msgstr "Les options sont :\n"
 
-#: src/LYMain.c:4254
+#: src/LYMain.c:4268
 #, c-format
 msgid "%s: Invalid Option: %s\n"
 msgstr "%s : Option non valide : %s\n"
@@ -4432,7 +4438,7 @@ msgstr "L'écran de Aide"
 msgid "System Index"
 msgstr "Index système"
 
-#: src/LYMainLoop.c:3533 src/LYMainLoop.c:5273
+#: src/LYMainLoop.c:3533 src/LYMainLoop.c:5274
 msgid "Entry into main screen"
 msgstr "Entrée dans l'écran principal"
 
@@ -4456,61 +4462,61 @@ msgstr "Une partie du chemin n'est pas un répertoire."
 msgid "failed to change directory"
 msgstr "Changement de répertoire impossible"
 
-#: src/LYMainLoop.c:6202
+#: src/LYMainLoop.c:6209
 msgid "Reparsing document under current settings..."
 msgstr "Relecture du document avec les paramètres actuels."
 
-#: src/LYMainLoop.c:6493
+#: src/LYMainLoop.c:6500
 #, c-format
 msgid "Fatal error - could not open output file %s\n"
 msgstr "Erreur fatale - impossible d'ouvrir le fichier de sortie %s\n"
 
-#: src/LYMainLoop.c:6836
+#: src/LYMainLoop.c:6843
 msgid "TABLE center enable."
 msgstr ""
 
-#: src/LYMainLoop.c:6839
+#: src/LYMainLoop.c:6846
 msgid "TABLE center disable."
 msgstr ""
 
-#: src/LYMainLoop.c:6916
+#: src/LYMainLoop.c:6923
 #, fuzzy
 msgid "Current URL is empty."
 msgstr "Le répertoire courant:"
 
-#: src/LYMainLoop.c:6918 src/LYUtils.c:1793
+#: src/LYMainLoop.c:6925 src/LYUtils.c:1803
 msgid "Copy to clipboard failed."
 msgstr ""
 
-#: src/LYMainLoop.c:6920
+#: src/LYMainLoop.c:6927
 msgid "Document URL put to clipboard."
 msgstr ""
 
-#: src/LYMainLoop.c:6922
+#: src/LYMainLoop.c:6929
 msgid "Link URL put to clipboard."
 msgstr ""
 
-#: src/LYMainLoop.c:6949
+#: src/LYMainLoop.c:6956
 msgid "No URL in the clipboard."
 msgstr ""
 
-#: src/LYMainLoop.c:7613 src/LYMainLoop.c:7783
+#: src/LYMainLoop.c:7620 src/LYMainLoop.c:7790
 msgid "-index-"
 msgstr "-index-"
 
-#: src/LYMainLoop.c:7723
+#: src/LYMainLoop.c:7730
 msgid "lynx: Can't access startfile"
 msgstr "lynx : accès impossible au fichier de départ"
 
-#: src/LYMainLoop.c:7735
+#: src/LYMainLoop.c:7742
 msgid "lynx: Start file could not be found or is not text/html or text/plain"
 msgstr "lynx : fichier de départ introuvable ou son mode n'est pas reconnu"
 
-#: src/LYMainLoop.c:7736
+#: src/LYMainLoop.c:7743
 msgid "      Exiting..."
 msgstr "Sortie"
 
-#: src/LYMainLoop.c:7777
+#: src/LYMainLoop.c:7784
 msgid "-more-"
 msgstr "-suite-"
 
@@ -5191,72 +5197,72 @@ msgstr ""
 msgid "Offending line:"
 msgstr "Ligne fautive :"
 
-#: src/LYReadCFG.c:625
+#: src/LYReadCFG.c:650
 #, c-format
 msgid "key remapping of %s to %s for %s failed\n"
 msgstr "Le changement de touche de %s vers %s pour %s a échoué\n"
 
-#: src/LYReadCFG.c:632
+#: src/LYReadCFG.c:657
 #, c-format
 msgid "key remapping of %s to %s failed\n"
 msgstr "Le changement de touche de %s vers %s a échoué\n"
 
-#: src/LYReadCFG.c:653
+#: src/LYReadCFG.c:678
 #, c-format
 msgid "invalid line-editor selection %s for key %s, selecting all\n"
 msgstr "Sélection d'édition de ligne de %s pour la touche %s invalide. Sélection de tous.\n"
 
-#: src/LYReadCFG.c:678 src/LYReadCFG.c:690
+#: src/LYReadCFG.c:703 src/LYReadCFG.c:715
 #, c-format
 msgid "setting of line-editor binding for key %s (0x%x) to 0x%x for %s failed\n"
 msgstr "La définition du lien d'éditeur de ligne pour la touche %s (0x%x) vers 0x%x pour %s a échoué.\n"
 
-#: src/LYReadCFG.c:694
+#: src/LYReadCFG.c:719
 #, c-format
 msgid "setting of line-editor binding for key %s (0x%x) for %s failed\n"
 msgstr "La définition de lien d'éditeur de ligne pour la touche %s (0x%x) pour %s a échoué.\n"
 
-#: src/LYReadCFG.c:792
+#: src/LYReadCFG.c:817
 #, c-format
 msgid "Lynx: cannot start, CERN rules file %s is not available\n"
 msgstr "Lynx: impossible de démarrer. Le fichier de règles CERN %s n'est pas accessible.\n"
 
-#: src/LYReadCFG.c:793
+#: src/LYReadCFG.c:818
 msgid "(no name)"
 msgstr "(pas de nom)"
 
-#: src/LYReadCFG.c:1787
+#: src/LYReadCFG.c:1818
 #, c-format
 msgid "More than %d nested lynx.cfg includes -- perhaps there is a loop?!?\n"
 msgstr "Plus de %d inclusions de lynx.cfg imbriquées. Peut être y a t'il une boucle ?\n"
 
-#: src/LYReadCFG.c:1789
+#: src/LYReadCFG.c:1820
 #, c-format
 msgid "Last attempted include was '%s',\n"
 msgstr "Le dernier include tenté était: '%s',\n"
 
-#: src/LYReadCFG.c:1790
+#: src/LYReadCFG.c:1821
 #, c-format
 msgid "included from '%s'.\n"
 msgstr "include de '%s'.\n"
 
-#: src/LYReadCFG.c:2197 src/LYReadCFG.c:2210 src/LYReadCFG.c:2268
+#: src/LYReadCFG.c:2228 src/LYReadCFG.c:2241 src/LYReadCFG.c:2299
 msgid "The following is read from your lynx.cfg file."
 msgstr "Les données suivantes sont lues à partie de votre fichier lynx.cfg."
 
-#: src/LYReadCFG.c:2198 src/LYReadCFG.c:2211
+#: src/LYReadCFG.c:2229 src/LYReadCFG.c:2242
 msgid "Please read the distribution"
 msgstr "Merci de lire la distribution"
 
-#: src/LYReadCFG.c:2204 src/LYReadCFG.c:2214
+#: src/LYReadCFG.c:2235 src/LYReadCFG.c:2245
 msgid "for more comments."
 msgstr "pour plus de commentaires."
 
-#: src/LYReadCFG.c:2250
+#: src/LYReadCFG.c:2281
 msgid "RELOAD THE CHANGES"
 msgstr "RECHARGER LES MODIFICATIONS"
 
-#: src/LYReadCFG.c:2258
+#: src/LYReadCFG.c:2289
 msgid "Your primary configuration"
 msgstr "Votre configuration principale"
 
@@ -5481,7 +5487,7 @@ msgstr "Aucun lien dans la page courante"
 msgid "Server Headers:"
 msgstr "Serveur :"
 
-#: src/LYStyle.c:294
+#: src/LYStyle.c:300
 #, c-format
 msgid ""
 "Syntax Error parsing style in lss file:\n"
@@ -5530,34 +5536,34 @@ msgstr "Téléchargement vers:"
 msgid "Upload options:"
 msgstr "Options de chargement de fichier :"
 
-#: src/LYUtils.c:1795
+#: src/LYUtils.c:1805
 msgid "Download document URL put to clipboard."
 msgstr ""
 
-#: src/LYUtils.c:2572
+#: src/LYUtils.c:2582
 msgid "Unexpected access protocol for this URL scheme."
 msgstr "Protocole d'accès inattendu pour ce schéma l'URL"
 
-#: src/LYUtils.c:3384
+#: src/LYUtils.c:3394
 msgid "Too many tempfiles"
 msgstr ""
 
-#: src/LYUtils.c:3688
+#: src/LYUtils.c:3698
 #, fuzzy
 msgid "unknown restriction"
 msgstr "Pas de restriction définies."
 
-#: src/LYUtils.c:3718
+#: src/LYUtils.c:3729
 #, c-format
 msgid "No restrictions set.\n"
 msgstr "Pas de restriction définies.\n"
 
-#: src/LYUtils.c:3721
+#: src/LYUtils.c:3732
 #, c-format
 msgid "Restrictions set:\n"
 msgstr "Définition de restriction:\n"
 
-#: src/LYUtils.c:5099
+#: src/LYUtils.c:5110
 msgid "Cannot find HOME directory"
 msgstr ""
 

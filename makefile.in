@@ -36,10 +36,10 @@ TAR_DOWN	= $(TAR) @TAR_DOWN_OPTIONS@ @TAR_PIPE_OPTIONS@
 
 ## This is the version which we are developing (or, upon release, make this
 ## the same).  Use no dots in the name, since it must work on VMS and MS-DOS.
-VERSION		= 2-8-6
+VERSION		= 2-8-7
 
 ##this is the name of the directory the lynx source code is in.
-##(e.g., lynx2-8-6, not the full path)
+##(e.g., lynx2-8-7, not the full path)
 lynxdir= lynx$(VERSION)
 lynxname= lynx$(VERSION)
 
