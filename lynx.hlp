@@ -947,7 +947,7 @@
                            for message catalogs.
 
 2 Notes
-       This  is the Lynx v2.8.5 Release; development is in progress for 2.8.6.
+       This  is the Lynx v2.8.6 Release; development is in progress for 2.8.7.
 
        If you wish to contribute to the further development of Lynx, subscribe
        to  our mailing list.  Send email to <lynx-dev-request@nongnu.org> with
@@ -1004,3 +1004,6 @@
        Foteos Macrides
        Worcester Foundation for Biomedical Research
        Shrewsbury, Massachusetts 01545
+
+       Thomas E. Dickey
+       <dickey@invisible-island.net>

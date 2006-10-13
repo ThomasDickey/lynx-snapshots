@@ -1,6 +1,11 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2006-10-12 (2.8.6rel.2)
+* update version numbers in documentation -TD
+* change embedded URL for HTML'ized lynx.cfg to point to example in current
+  release -TD
+
 2006-10-10 (2.8.6rel.1)
 
 2006-10-10 (2.8.6pre.6)
@@ -116,7 +121,7 @@ Changes since Lynx 2.8 release
 * add an explicit wmove() in display_line() to accommodate some wide-character
   pages which are not handled well by the nested-table logic, resulting in
   unexpected wrapping (report by Dan Jacobson) -TD
-* modify limit for CDK double-byte characters in display_line() to accommodate
+* modify limit for CJK double-byte characters in display_line() to accommodate
   a test-case rightSideEdgeTest.html provided by TH -TD
 * add a workaround in LYStrings.c myGetChar() for PDCurses, which may return an
   ERR value which is not -1 (reports by DK, William McBrine) -TD

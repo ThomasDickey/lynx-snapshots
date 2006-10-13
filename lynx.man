@@ -1064,7 +1064,7 @@ codes.  Currently, it is hard-coded to a wish list.
 .B NLSPATH
 This variable, if set, is used as the path prefix for message catalogs.
 .SH NOTES
-This is the Lynx v2.8.5 Release; development is in progress for 2.8.6.
+This is the Lynx v2.8.6 Release; development is in progress for 2.8.7.
 .PP
 If you wish to contribute to the further development
 of \fILynx\fR, subscribe to our mailing list.  Send email to
