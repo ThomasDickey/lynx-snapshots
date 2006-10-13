@@ -32,8 +32,8 @@ scripts.
 
 -------------------------------------------------------------------------------
 
-Here is a count of contributions (from the changelogs) since the start of the
-2.8 series:
+Here is a count of contributions (from CHANGES and docs/CHANGES2.8) since the
+start of the 2.8 series:
 
     0.5	AJL
     3  	Al Gilman
