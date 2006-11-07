@@ -4,7 +4,7 @@ dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
 dnl and Philippe De Muyter <phdm@macqel.be>
 dnl
 dnl Created: 1997/1/28
-dnl Updated: 2006/9/2
+dnl Updated: 2006/10/29
 dnl
 dnl The autoconf used in Lynx development is GNU autoconf 2.13 or 2.52, patched
 dnl by Thomas Dickey.  See your local GNU archives, and this URL:
@@ -890,7 +890,7 @@ if test "$cf_cv_bool_defs" = no ; then
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_BUILD_CC version: 5 updated: 2005/09/24 17:55:52
+dnl CF_BUILD_CC version: 6 updated: 2006/10/14 15:23:15
 dnl -----------
 dnl If we're cross-compiling, allow the user to override the tools and their
 dnl options.  The configure script is oriented toward identifying the host
@@ -922,7 +922,7 @@ if test "$cross_compiling" = yes ; then
 	AC_ARG_WITH(build-cpp,
 		[  --with-build-cpp=XXX    the build C preprocessor ($BUILD_CPP)],
 		[BUILD_CPP="$withval"],
-		[BUILD_CPP='$(BUILD_CC) -E'])
+		[BUILD_CPP='${BUILD_CC} -E'])
 	AC_MSG_RESULT($BUILD_CPP)
 
 	AC_MSG_CHECKING(for native build C flags)
@@ -945,7 +945,7 @@ if test "$cross_compiling" = yes ; then
 
 	AC_MSG_CHECKING(for native build linker-libraries)
 	AC_ARG_WITH(build-libs,
-		[  --with-build-libs=XXX   the build libraries ($(BUILD_LIBS)],
+		[  --with-build-libs=XXX   the build libraries (${BUILD_LIBS})],
 		[BUILD_LIBS="$withval"])
 	AC_MSG_RESULT($BUILD_LIBS)
 
@@ -953,20 +953,20 @@ if test "$cross_compiling" = yes ; then
 	BUILD_EXEEXT=
 	BUILD_OBJEXT=o
 
-	: ${BUILD_CC:='$(CC)'}
+	: ${BUILD_CC:='${CC}'}
 
-	if ( test "$BUILD_CC" = "$CC" || test "$BUILD_CC" = '$(CC)' ) ; then
+	if ( test "$BUILD_CC" = "$CC" || test "$BUILD_CC" = '${CC}' ) ; then
 		AC_MSG_ERROR([Cross-build requires two compilers.
 Use --with-build-cc to specify the native compiler.])
 	fi
 
 else
-	: ${BUILD_CC:='$(CC)'}
-	: ${BUILD_CPP:='$(CPP)'}
-	: ${BUILD_CFLAGS:='$(CFLAGS)'}
-	: ${BUILD_CPPFLAGS:='$(CPPFLAGS)'}
-	: ${BUILD_LDFLAGS:='$(LDFLAGS)'}
-	: ${BUILD_LIBS:='$(LIBS)'}
+	: ${BUILD_CC:='${CC}'}
+	: ${BUILD_CPP:='${CPP}'}
+	: ${BUILD_CFLAGS:='${CFLAGS}'}
+	: ${BUILD_CPPFLAGS:='${CPPFLAGS}'}
+	: ${BUILD_LDFLAGS:='${LDFLAGS}'}
+	: ${BUILD_LIBS:='${LIBS}'}
 	: ${BUILD_EXEEXT:='$x'}
 	: ${BUILD_OBJEXT:='o'}
 fi
@@ -1340,6 +1340,18 @@ if test $cf_cv_color_curses = yes ; then
 	AC_DEFINE(COLOR_CURSES)
 	test ".$cf_cv_ncurses_broken" != .yes && AC_DEFINE(HAVE_GETBKGD)
 fi
+])dnl
+dnl ---------------------------------------------------------------------------
+dnl CF_CURSES_CONFIG version: 2 updated: 2006/10/29 11:06:27
+dnl ----------------
+dnl Tie together the configure-script macros for curses.  It may be ncurses,
+dnl but unless asked, we do not make a special search for ncurses.  However,
+dnl still check for the ncurses version number, for use in other macros.
+AC_DEFUN([CF_CURSES_CONFIG],
+[
+CF_CURSES_CPPFLAGS
+CF_NCURSES_VERSION
+CF_CURSES_LIBS
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl CF_CURSES_CPPFLAGS version: 9 updated: 2006/02/04 19:44:43
@@ -2701,13 +2713,14 @@ cf_save_CFLAGS="$cf_save_CFLAGS -we147 -no-gcc"
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_LARGEFILE version: 5 updated: 2005/07/17 11:03:36
+dnl CF_LARGEFILE version: 6 updated: 2006/09/23 19:07:52
 dnl ------------
 dnl Add checks for large file support.
 AC_DEFUN([CF_LARGEFILE],[
 ifdef([AC_FUNC_FSEEKO],[
+    AC_SYS_LARGEFILE
+    if test "$enable_largefile" != no ; then
 	AC_FUNC_FSEEKO
-	AC_SYS_LARGEFILE
 
 	# Normally we would collect these definitions in the config.h,
 	# but (like _XOPEN_SOURCE), some environments rely on having these
@@ -2734,6 +2747,7 @@ ifdef([AC_FUNC_FSEEKO],[
 		[cf_cv_struct_dirent64=no])
 	])
 	test "$cf_cv_struct_dirent64" = yes && AC_DEFINE(HAVE_STRUCT_DIRENT64)
+    fi
 ])
 ])
 dnl ---------------------------------------------------------------------------
@@ -2855,6 +2869,45 @@ printf("old\n");
 	]
 	,[$1=$cf_header]
 	,[$1=no])
+])dnl
+dnl ---------------------------------------------------------------------------
+dnl CF_NCURSES_CONFIG version: 4 updated: 2006/10/28 14:36:12
+dnl -----------------
+dnl Tie together the configure-script macros for ncurses.
+dnl Prefer the "-config" script from ncurses 5.6, to simplify analysis.
+dnl Allow that to be overridden using the $NCURSES_CONFIG environment variable.
+dnl
+dnl $1 is the root library name (default: "ncurses")
+AC_DEFUN([CF_NCURSES_CONFIG],
+[
+cf_ncuconfig_root=ifelse($1,,ncurses,$1)
+
+echo "Looking for ${cf_ncuconfig_root}-config"
+AC_PATH_PROGS(NCURSES_CONFIG,${cf_ncuconfig_root}6-config ${cf_ncuconfig_root}5-config,none)
+
+if test "$NCURSES_CONFIG" != none ; then
+
+cf_cv_ncurses_header=curses.h
+
+CPPFLAGS="`$NCURSES_CONFIG --cflags` $CPPFLAGS"
+LIBS="`$NCURSES_CONFIG --libs` $LIBS"
+
+dnl like CF_NCURSES_CPPFLAGS
+AC_DEFINE(NCURSES)
+
+dnl like CF_NCURSES_LIBS
+CF_UPPER(cf_nculib_ROOT,HAVE_LIB$cf_ncuconfig_root)
+AC_DEFINE_UNQUOTED($cf_nculib_ROOT)
+
+dnl like CF_NCURSES_VERSION
+cf_cv_ncurses_version=`$NCURSES_CONFIG --version`
+
+else
+
+CF_NCURSES_CPPFLAGS(ifelse($1,,ncurses,$1))
+CF_NCURSES_LIBS(ifelse($1,,ncurses,$1))
+
+fi
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl CF_NCURSES_CPPFLAGS version: 18 updated: 2005/12/31 13:26:39
@@ -4300,9 +4353,11 @@ AC_SUBST(TAR_FILE_OPTIONS)
 AC_SUBST(TAR_PIPE_OPTIONS)
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_TERMCAP_LIBS version: 10 updated: 2001/10/18 20:42:39
+dnl CF_TERMCAP_LIBS version: 11 updated: 2006/10/28 15:15:38
 dnl ---------------
 dnl Look for termcap libraries, or the equivalent in terminfo.
+dnl
+dnl The optional parameter may be "ncurses", "ncursesw".
 AC_DEFUN([CF_TERMCAP_LIBS],
 [
 AC_CACHE_VAL(cf_cv_termlib,[
@@ -4316,8 +4371,7 @@ AC_TRY_LINK([],[char *x=(char*)tgoto("",0,0)],
 ifelse([$1],,,[
 case "$1" in # (vi
 ncurses*)
-	CF_NCURSES_CPPFLAGS($1)
-	CF_NCURSES_LIBS($1)
+	CF_NCURSES_CONFIG($1)
 	cf_cv_termlib=terminfo
 	;;
 esac

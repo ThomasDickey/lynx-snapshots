@@ -196,6 +196,12 @@ extern "C" {
     extern void statusline(const char *text);
     extern void toggle_novice_line(void);
 
+#if defined(MULTI_USER_UNIX)
+    extern BOOL IsOurFile(const char *name);
+#else
+#define IsOurFile(name) TRUE
+#endif
+
 #ifdef EXP_ASCII_CTYPES
     extern int ascii_tolower(int i);
     extern int ascii_toupper(int i);

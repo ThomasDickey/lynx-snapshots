@@ -153,15 +153,16 @@ void HTFormatInit(void)
     SET_INTERNL("text/html", "www/present", HTMLPresent, 1.0);
     SET_INTERNL("text/xml", "www/present", HTMLPresent, 2.0);
 
-    /*
-     * These should override the default types as necessary.
-     */
-    HTLoadTypesConfigFile(global_type_map, mediaSYS);
+    if (LYisAbsPath(global_type_map)) {
+	/* These should override the default types as necessary.  */
+	HTLoadTypesConfigFile(global_type_map, mediaSYS);
+    }
 
     /*
      * Load the local maps.
      */
-    if (LYCanReadFile(personal_type_map)) {
+    if (IsOurFile(personal_type_map)
+	&& LYCanReadFile(personal_type_map)) {
 	/* These should override everything else. */
 	HTLoadTypesConfigFile(personal_type_map, mediaUSR);
     } else {
@@ -1332,17 +1333,22 @@ void HTFileInit(void)
     SET_SUFFIX1(".html", "text/html", "8bit");
 #endif /* BUILTIN_SUFFIX_MAPS */
 
-    /* These should override the default extensions as necessary. */
-    HTLoadExtensionsConfigFile(global_extension_map);
+    if (LYisAbsPath(global_extension_map)) {
+	/* These should override the default extensions as necessary. */
+	HTLoadExtensionsConfigFile(global_extension_map);
+    }
 
-    if (LYCanReadFile(personal_extension_map)) {
+    /*
+     * Load the local maps.
+     */
+    if (IsOurFile(personal_extension_map)
+	&& LYCanReadFile(personal_extension_map)) {
 	/* These should override everything else. */
 	HTLoadExtensionsConfigFile(personal_extension_map);
     } else {
 	char buffer[LY_MAXPATH];
 
 	LYAddPathToHome(buffer, sizeof(buffer), personal_extension_map);
-	/* These should override everything else. */
 	HTLoadExtensionsConfigFile(buffer);
     }
 }
