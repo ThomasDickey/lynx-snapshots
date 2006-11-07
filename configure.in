@@ -25,7 +25,7 @@ dnl ---------------------------------------------------------------------------
 dnl
 dnl ask PRCS to plug-in the project-version for the configure-script.
 dnl $Format: "AC_REVISION($ProjectVersion$)"$
-AC_REVISION(2.8.7dev.1)
+AC_REVISION(2.8.7dev.2)
 
 # Save the original $CFLAGS so we can distinguish whether the user set those
 # in the environment, or whether autoconf added -O and -g options:
@@ -57,7 +57,7 @@ AC_ARG_WITH(system-type,
 PACKAGE=lynx
 dnl ask PRCS to plug-in the project-version for the packages.
 # $Format: "VERSION=$ProjectVersion$"$
-VERSION=2.8.7dev.1
+VERSION=2.8.7dev.2
 AC_SUBST(PACKAGE)
 AC_SUBST(VERSION)
 AC_SUBST(DESTDIR)
@@ -459,22 +459,16 @@ cf_wide_curses=no
 dft_color_style=yes
 case $cf_cv_screen in
 curses)
-	CF_CURSES_CPPFLAGS
-	CF_NCURSES_VERSION
-	CF_CURSES_LIBS
+	CF_CURSES_CONFIG
 	CF_CURS_PERFORMANCE
 	CF_CURS_TOUCHLINE
 	;;
 ncurses)
-	CF_NCURSES_CPPFLAGS
-	CF_NCURSES_LIBS
-	CF_NCURSES_VERSION
+	CF_NCURSES_CONFIG
 	;;
 ncursesw)
 	CF_UTF8_LIB
-	CF_NCURSES_CPPFLAGS(ncursesw)
-	CF_NCURSES_LIBS(ncursesw)
-	CF_NCURSES_VERSION
+	CF_NCURSES_CONFIG(ncursesw)
 	cf_wide_curses=yes
 	;;
 pdcurses)
