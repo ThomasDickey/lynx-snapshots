@@ -96,6 +96,7 @@ extern "C" {
 #define LYIsListpageTitle(name) \
     (!strcmp((name), LIST_PAGE_TITLE))
 #endif
+#define LYIsTilde(ch)     ((ch) == '~')
 #define LYIsHtmlSep(ch) ((ch) == '/')
 #define findPoundSelector(address) strchr(address, '#')
 #define restorePoundSelector(pound) if ((pound) != NULL) *(pound) = '#'
@@ -107,8 +108,8 @@ extern "C" {
     extern BOOLEAN LYCanWriteFile(const char *name);
     extern BOOLEAN LYCloseInput(FILE *fp);
     extern BOOLEAN LYCloseOutput(FILE *fp);
-    extern BOOLEAN LYExpandHostForURL(char **AllocatedString, char
-				      *prefix_list, char *suffix_list);
+    extern BOOLEAN LYExpandHostForURL(char **AllocatedString,
+				      char *prefix_list, char *suffix_list);
     extern BOOLEAN LYFixCursesOnForAccess(const char *addr, const char *physical);
     extern BOOLEAN LYPathOffHomeOK(char *fbuffer, size_t fbuffer_size);
     extern BOOLEAN LYValidateFilename(char *result, char *given);
@@ -127,10 +128,12 @@ extern "C" {
     extern FILE *LYOpenTempRewrite(char *result, const char *suffix, const char *mode);
     extern FILE *LYReopenTemp(char *name);
     extern char *Current_Dir(char *pathname);
+    extern char *LYAbsOrHomePath(char **fname);
     extern char *LYAddPathToSave(char *fname);
     extern char *LYGetEnv(const char *name);
     extern char *LYLastPathSep(const char *path);
     extern char *LYPathLeaf(char *pathname);
+    extern char *LYTildeExpand(char **pathname, BOOL embedded);
     extern char *LYgetXDisplay(void);
     extern char *strip_trailing_slash(char *my_dirname);
     extern char *trimPoundSelector(char *address);

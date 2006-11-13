@@ -313,12 +313,14 @@ install-doc : $(DOCDIR) $(HELPDIR)
 # So we limit sed delimiters to '!' and '%', depending on the expected text.
 FIX_SED = tr '=' '"'
 
+LYNXCFG_URL='http://lynx.isc.org/release/lynx2-8-6/lynx_help/'
+
 help_files.sed : makefile $(srcdir)/lynx_help/help_files.txt
 	@echo Constructing sed-script $@
 	@-rm -f $@ help_files.tmp
 	@cat $(srcdir)/lynx_help/help_files.txt > help_files.tmp
-@LYNXCFG_MAKE@	@echo 's!http://www.hippo.ru/%7Ehvv/lynxcfg_toc.html#alphatoc!alphatoc.html!g' >> help_files.tmp
-@LYNXCFG_MAKE@	@echo 's!http://www.hippo.ru/%7Ehvv/lynxcfg_toc.html!cattoc.html!g' >> help_files.tmp
+@LYNXCFG_MAKE@	@echo 's!$(LYNXCFG_URL)alphatoc.html!alphatoc.html!g' >> help_files.tmp
+@LYNXCFG_MAKE@	@echo 's!$(LYNXCFG_URL)cattoc.html!cattoc.html!g' >> help_files.tmp
 @LYNXCFG_MAKE@	@echo 's!alphatoc\.html!alphatoc.html$(COMPRESS_EXT)!g' >> help_files.tmp
 @LYNXCFG_MAKE@	@echo 's!cattoc\.html!cattoc.html$(COMPRESS_EXT)!g' >> help_files.tmp
 @LYNXCFG_MAKE@	@echo 's!body\.html!body.html$(COMPRESS_EXT)!g' >> help_files.tmp

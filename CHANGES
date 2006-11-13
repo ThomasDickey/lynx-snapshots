@@ -1,9 +1,28 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2006-11-12 (2.8.7dev.3)
+* change the default HELPFILE to the 2.8.6 release directory since the
+  page on subir.com contains obsolete information -TD
+* eliminate references to obsolete url
+	http://www.hippo.ru/%7Ehvv/
+  using the 2.8.6 release directory instead, e.g.,
+	http://lynx.isc.org/release/lynx2-8-6/lynx_help/
+  This is useful mainly for platforms which do not use the configure script -TD
+* update et.po from
+    http://www.iro.umontreal.ca/translation/maint/lynx/
+* modify CF_PDCURSES_X11 to use xcurses-config script if available -TD
+* improve parsing for embedded "~", ensuring that it is interpreted as a
+  user's home directory only if it follows a pathname separator (Debian
+  #388622) -TD
+* ensure that PERSONAL_EXTENSION_MAP and PERSONAL_MAILCAP are absolute
+  pathnames, performing tilde expansion as needed.  Pathnames that are not
+  given in absolute form will be sought under the user's home directory as if
+  they began with "~/" -TD
+
 2006-11-06 (2.8.7dev.2)
-* ensure that the configured values for PERSONAL_EXTENSION_MAP and
-  PERSONAL_MAILCAP are absolute pathnames -TD
+* ensure that the configured values for GLOBAL_EXTENSION_MAP and GLOBAL_MAILCAP
+  are absolute pathnames -TD
 * modify logic for reading PERSONAL_EXTENSION_MAP and PERSONAL_MAILCAP to
   ensure that they are files that are controlled only by the user.  The
   default values for these allow lynx to read configuration information

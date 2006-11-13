@@ -781,13 +781,10 @@ CF_ARG_ENABLE(htmlized-cfg,
 AC_MSG_RESULT($use_exp_htmlized_cfg)
 
 LYNXCFG_MAKE=''
-LYNXCFG_URL=''
 if test $use_exp_htmlized_cfg = no ; then
 	LYNXCFG_MAKE='#'
-	LYNXCFG_URL='http://www.hippo.ru/%7Ehvv/'
 fi
 AC_SUBST(LYNXCFG_MAKE)
-AC_SUBST(LYNXCFG_URL)
 
 ### check for ipv6 support
 AC_MSG_CHECKING([whether to enable ipv6])

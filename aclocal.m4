@@ -4,7 +4,7 @@ dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
 dnl and Philippe De Muyter <phdm@macqel.be>
 dnl
 dnl Created: 1997/1/28
-dnl Updated: 2006/10/29
+dnl Updated: 2006/11/12
 dnl
 dnl The autoconf used in Lynx development is GNU autoconf 2.13 or 2.52, patched
 dnl by Thomas Dickey.  See your local GNU archives, and this URL:
@@ -3374,11 +3374,23 @@ case ".[$]$1" in #(vi
 esac
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_PDCURSES_X11 version: 6 updated: 2002/10/27 18:21:42
+dnl CF_PDCURSES_X11 version: 7 updated: 2006/11/12 17:31:59
 dnl ---------------
 dnl Configure for PDCurses' X11 library
 AC_DEFUN([CF_PDCURSES_X11],[
 AC_REQUIRE([CF_X_ATHENA])
+
+AC_PATH_PROGS(XCURSES_CONFIG,xcurses-config,none)
+
+if test "$XCURSES_CONFIG" != none ; then
+
+CPPFLAGS="`$XCURSES_CONFIG --cflags` $CPPFLAGS"
+LIBS="`$XCURSES_CONFIG --libs` $LIBS"
+
+cf_cv_lib_XCurses=yes
+
+else
+
 LDFLAGS="$LDFLAGS $X_LIBS"
 CF_CHECK_CFLAGS($X_CFLAGS)
 AC_CHECK_LIB(X11,XOpenDisplay,
@@ -3393,6 +3405,9 @@ char *XCursesProgramName = "test";
 [cf_cv_lib_XCurses=yes],
 [cf_cv_lib_XCurses=no])
 ])
+
+fi
+
 if test $cf_cv_lib_XCurses = yes ; then
 	AC_DEFINE(UNIX)
 	AC_DEFINE(XCURSES)

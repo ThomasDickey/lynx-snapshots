@@ -1,13 +1,13 @@
 # Estonian translations for lynx
 # Copyright (C) 2001 Free Software Foundation, Inc.
-# Toomas Soome <Toomas.Soome@microlink.ee>, 2004.
+# Toomas Soome <Toomas.Soome@microlink.ee>, 2006.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: lynx 2.8.6-dev8\n"
+"Project-Id-Version: lynx 2.8.6-dev19\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2006-10-12 19:59-0400\n"
-"PO-Revision-Date: 2004-11-12 13:06+0200\n"
+"POT-Creation-Date: 2006-11-12 20:07-0500\n"
+"PO-Revision-Date: 2006-10-26 14:26+0300\n"
 "Last-Translator: Toomas Soome <Toomas.Soome@microlink.ee>\n"
 "Language-Team: Estonian <et@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -2242,7 +2242,7 @@ msgstr "(Nimeta.)"
 msgid "(No value.)"
 msgstr "(Väärtuseta.)"
 
-#: LYMessages.c:713 src/LYOptions.c:2385
+#: LYMessages.c:713 src/LYOptions.c:2387
 msgid "None"
 msgstr "Puudub"
 
@@ -2550,9 +2550,9 @@ msgid "Retrying with proxy authorization information."
 msgstr "Proovin uuesti proksi autoriseerimise infoga."
 
 #: LYMessages.c:796
-#, fuzzy, c-format
+#, c-format
 msgid "SSL error:%s-Continue?"
-msgstr "SSL viga:host(%s)!=sert(%s)-Jätkan?"
+msgstr "SSL viga:%s-Jätkan?"
 
 #. HTWAIS.c
 #: LYMessages.c:799
@@ -2816,7 +2816,7 @@ msgstr "**** HTAccess: Tagastatud olek oli: %d\n"
 #. * hack: if we fail in HTAccess.c
 #. * avoid duplicating URL, oh.
 #.
-#: WWW/Library/Implementation/HTAccess.c:1084 src/LYMainLoop.c:7735
+#: WWW/Library/Implementation/HTAccess.c:1084 src/LYMainLoop.c:7733
 msgid "Can't Access"
 msgstr "Ei saa kasutada"
 
@@ -3084,34 +3084,32 @@ msgstr "Üritan ühendust uuesti luua TLS kasutamata."
 
 #: WWW/Library/Implementation/HTTP.c:664
 msgid "no issuer was found"
-msgstr ""
+msgstr "väljaandja puudub"
 
 #: WWW/Library/Implementation/HTTP.c:666
 msgid "issuer is not a CA"
-msgstr ""
+msgstr "väljaandja pole CA"
 
 #: WWW/Library/Implementation/HTTP.c:668
 msgid "the certificate has no known issuer"
-msgstr ""
+msgstr "sertifikaadil puudub tuntud väljaandja"
 
 #: WWW/Library/Implementation/HTTP.c:670
-#, fuzzy
 msgid "the certificate has been revoked"
-msgstr "Präänik on söödud!"
+msgstr "sertifikaat on kehtivuse kaotanud"
 
 #: WWW/Library/Implementation/HTTP.c:672
 msgid "the certificate is not trusted"
-msgstr ""
+msgstr "sertifikaat pole usaldusväärne"
 
 #: WWW/Library/Implementation/HTTP.c:747
 #, c-format
 msgid "Verified connection to %s (cert=%s)"
-msgstr ""
+msgstr "Kontrollitud ühendus serveriga %s (sertifikaat=%s)"
 
 #: WWW/Library/Implementation/HTTP.c:771
-#, fuzzy
 msgid "Can't find common name in certificate"
-msgstr "SSL viga: Sertifikaadis puudub ühine nimi - jätkan?"
+msgstr "Sertifikaadis puudub ühine nimi"
 
 #: WWW/Library/Implementation/HTTP.c:774
 #, c-format
@@ -3660,7 +3658,7 @@ msgstr "Fail võib selle sessiooni jooksul olla taastatav failist %s"
 #: src/LYCgi.c:159
 #, c-format
 msgid "Do you want to execute \"%s\"?"
-msgstr ""
+msgstr "Kas soovite \"%s\" käivitada?"
 
 #.
 #. * Neither the path as given nor any components examined by backing up
@@ -4026,158 +4024,158 @@ msgstr "Muuda nime või asukohta (n või l): "
 msgid "This feature not yet implemented!"
 msgstr "Seda omadust ei ole veel realiseeritud!"
 
-#: src/LYLocal.c:1043
+#: src/LYLocal.c:1046
 msgid "Enter name of file to create: "
 msgstr "Sisestage loodavale failile nimi: "
 
-#: src/LYLocal.c:1051 src/LYLocal.c:1092
+#: src/LYLocal.c:1050 src/LYLocal.c:1086
 msgid "Illegal redirection \"//\" found! Request ignored."
 msgstr "Leiti vigane ümbersuunamine \"//\"! Ignoreerin päringut."
 
-#: src/LYLocal.c:1084
+#: src/LYLocal.c:1082
 msgid "Enter name for new directory: "
 msgstr "Sisestage nimi uuele kataloogile: "
 
-#: src/LYLocal.c:1128
+#: src/LYLocal.c:1122
 msgid "Create file or directory (f or d): "
 msgstr "Luua fail või kataloog (f või d): "
 
-#: src/LYLocal.c:1170
+#: src/LYLocal.c:1164
 #, c-format
 msgid "Remove directory '%s'?"
 msgstr "Kustutan kataloogi '%s'?"
 
-#: src/LYLocal.c:1173
+#: src/LYLocal.c:1167
 msgid "Remove directory?"
 msgstr "Kustutan kataloogi?"
 
-#: src/LYLocal.c:1178
+#: src/LYLocal.c:1172
 #, c-format
 msgid "Remove file '%s'?"
 msgstr "Eemaldan faili '%s'?"
 
-#: src/LYLocal.c:1180
+#: src/LYLocal.c:1174
 msgid "Remove file?"
 msgstr "Eemaldan faili?"
 
-#: src/LYLocal.c:1185
+#: src/LYLocal.c:1179
 #, c-format
 msgid "Remove symbolic link '%s'?"
 msgstr "Eemaldan nimeviite '%s'?"
 
-#: src/LYLocal.c:1187
+#: src/LYLocal.c:1181
 msgid "Remove symbolic link?"
 msgstr "Eemaldan nimeviite?"
 
-#: src/LYLocal.c:1282
+#: src/LYLocal.c:1276
 msgid "Sorry, don't know how to permit non-UNIX files yet."
 msgstr "Vabandust, ma ei tea veel, kuidas sedada mitte-UNIX failide õiguseid."
 
-#: src/LYLocal.c:1312
+#: src/LYLocal.c:1306
 msgid "Unable to open permit options file"
 msgstr "Õiguste seadete faili avamine ebaõnnestus"
 
-#: src/LYLocal.c:1342
+#: src/LYLocal.c:1336
 msgid "Specify permissions below:"
 msgstr "Määrake õigused allpool:"
 
-#: src/LYLocal.c:1343 src/LYShowInfo.c:259
+#: src/LYLocal.c:1337 src/LYShowInfo.c:259
 msgid "Owner:"
 msgstr "Omanik:"
 
-#: src/LYLocal.c:1359
+#: src/LYLocal.c:1353
 msgid "Group"
 msgstr "Grupp:"
 
-#: src/LYLocal.c:1375
+#: src/LYLocal.c:1369
 msgid "Others:"
 msgstr "Ülejäänud:"
 
-#: src/LYLocal.c:1393
+#: src/LYLocal.c:1387
 msgid "form to permit"
 msgstr "vorm seadmaks õiguseid"
 
-#: src/LYLocal.c:1488
+#: src/LYLocal.c:1482
 msgid "Invalid mode format."
 msgstr "Vigane moodi formaat."
 
-#: src/LYLocal.c:1492
+#: src/LYLocal.c:1486
 msgid "Invalid syntax format."
 msgstr "Vigane süntaksi formaat."
 
-#: src/LYLocal.c:1674
+#: src/LYLocal.c:1668
 msgid "Warning!  UUDecoded file will exist in the directory you started Lynx."
 msgstr "Hoiatus! UUdekodeeritud fail luuakse kataloogi, kus Lynx käivitati."
 
-#: src/LYLocal.c:1864
+#: src/LYLocal.c:1858
 msgid "NULL URL pointer"
 msgstr "NULL URL viit"
 
-#: src/LYLocal.c:1946
+#: src/LYLocal.c:1940
 #, c-format
 msgid "Executing %s "
 msgstr "Täidan %s "
 
-#: src/LYLocal.c:1949
+#: src/LYLocal.c:1943
 msgid "Executing system command. This might take a while."
 msgstr "Täidan süsteemse käsu. See võib kesta mõne aja."
 
-#: src/LYLocal.c:2021
+#: src/LYLocal.c:2015
 msgid "Current directory:"
 msgstr "Jooksev kataloog:"
 
-#: src/LYLocal.c:2024 src/LYLocal.c:2042
+#: src/LYLocal.c:2018 src/LYLocal.c:2036
 msgid "Current selection:"
 msgstr "Praegune valik:"
 
-#: src/LYLocal.c:2028
+#: src/LYLocal.c:2022
 msgid "Nothing currently selected."
 msgstr "Midagi ei ole valitud."
 
-#: src/LYLocal.c:2044
+#: src/LYLocal.c:2038
 msgid "tagged item:"
 msgstr "märgitud element:"
 
-#: src/LYLocal.c:2045
+#: src/LYLocal.c:2039
 msgid "tagged items:"
 msgstr "märgitud elemendid:"
 
-#: src/LYLocal.c:2142 src/LYLocal.c:2153
+#: src/LYLocal.c:2136 src/LYLocal.c:2147
 msgid "Illegal filename; request ignored."
 msgstr "Vigane failinimi; ignoreerin päringut."
 
 #. directory not writable
-#: src/LYLocal.c:2251 src/LYLocal.c:2310
+#: src/LYLocal.c:2245 src/LYLocal.c:2304
 msgid "Install in the selected directory not permitted."
 msgstr "Valitud kataloogi ei ole lubatud installeerida."
 
-#: src/LYLocal.c:2306
+#: src/LYLocal.c:2300
 msgid "The selected item is not a directory!  Request ignored."
 msgstr "Valik ei ole kataloog! Ignoreerin päringut."
 
-#: src/LYLocal.c:2315
+#: src/LYLocal.c:2309
 msgid "Just a moment, ..."
 msgstr "Üks hetk, ..."
 
-#: src/LYLocal.c:2332
+#: src/LYLocal.c:2326
 msgid "Error building install args"
 msgstr "Viga installi argumentide koostamisel"
 
-#: src/LYLocal.c:2347 src/LYLocal.c:2378
+#: src/LYLocal.c:2341 src/LYLocal.c:2372
 #, c-format
 msgid "Source and target are the same: %s"
 msgstr "Lähte ja sihtkoht on samad: %s"
 
-#: src/LYLocal.c:2354 src/LYLocal.c:2385
+#: src/LYLocal.c:2348 src/LYLocal.c:2379
 #, c-format
 msgid "Already in target directory: %s"
 msgstr "On juba sihtkataloogis: %s"
 
-#: src/LYLocal.c:2403
+#: src/LYLocal.c:2397
 msgid "Installation complete"
 msgstr "Installeerimine on valmis"
 
-#: src/LYLocal.c:2590
+#: src/LYLocal.c:2584
 msgid "Temporary URL or list would be too long."
 msgstr "Ajutine URL või loend oleks liiga pikk."
 
@@ -4216,19 +4214,19 @@ msgstr "See teade on automaatselt loodud"
 msgid "No system mailer configured"
 msgstr "Süsteemset e-posti programmi ei ole seadistatud"
 
-#: src/LYMain.c:1027
+#: src/LYMain.c:997
 msgid "No Winsock found, sorry."
 msgstr "Winsock puudub, kahju."
 
-#: src/LYMain.c:1208
+#: src/LYMain.c:1178
 msgid "You MUST define a valid TMP or TEMP area!"
 msgstr "Te PEATE defineerima kehtiva TMP või TEMP piirkonna!"
 
-#: src/LYMain.c:1261 src/LYMainLoop.c:5026
+#: src/LYMain.c:1231 src/LYMainLoop.c:5024
 msgid "No such directory"
 msgstr "Sellist kataloogi ei ole"
 
-#: src/LYMain.c:1468
+#: src/LYMain.c:1438
 #, c-format
 msgid ""
 "\n"
@@ -4236,10 +4234,10 @@ msgid ""
 "\n"
 msgstr ""
 "\n"
-"Seadete faili %s ei ole.\n"
+"Seadete faili \"%s\" ei ole.\n"
 "\n"
 
-#: src/LYMain.c:1478
+#: src/LYMain.c:1448
 #, c-format
 msgid ""
 "\n"
@@ -4250,7 +4248,7 @@ msgstr ""
 "Lynx kooditabeleid ei ole deklareeritud.\n"
 "\n"
 
-#: src/LYMain.c:1507
+#: src/LYMain.c:1477
 #, c-format
 msgid ""
 "\n"
@@ -4261,7 +4259,7 @@ msgstr ""
 "Lynx kaadri toimeti ei ole deklareeritud.\n"
 "\n"
 
-#: src/LYMain.c:1583
+#: src/LYMain.c:1553
 #, c-format
 msgid ""
 "\n"
@@ -4269,61 +4267,61 @@ msgid ""
 "\n"
 msgstr ""
 "\n"
-"Lynx fail %s ei ole kasutatav.\n"
+"Lynx fail \"%s\" ei ole kasutatav.\n"
 "\n"
 
-#: src/LYMain.c:1774
+#: src/LYMain.c:1744
 msgid "Warning:"
 msgstr "Hoiatus:"
 
-#: src/LYMain.c:2339
+#: src/LYMain.c:2309
 msgid "persistent cookies state will be changed in next session only."
 msgstr "püsivate präänikute olekut muudetakse alles järgmise sessiooniga."
 
-#: src/LYMain.c:2576 src/LYMain.c:2621
+#: src/LYMain.c:2546 src/LYMain.c:2591
 #, c-format
 msgid "Lynx: ignoring unrecognized charset=%s\n"
 msgstr "Lynx: ignoreerin tundmatut kooditabelit %s\n"
 
-#: src/LYMain.c:3133
+#: src/LYMain.c:3103
 #, c-format
 msgid "%s Version %s (%s)"
 msgstr "%s Versioon %s (%s)"
 
-#: src/LYMain.c:3168
+#: src/LYMain.c:3138
 #, c-format
 msgid "Built on %s %s %s\n"
 msgstr "Ehitatud %s masinal %s %s\n"
 
-#: src/LYMain.c:3190
+#: src/LYMain.c:3160
 msgid "Copyrights held by the Lynx Developers Group,"
 msgstr ""
 
-#: src/LYMain.c:3191
+#: src/LYMain.c:3161
 #, fuzzy
 msgid "the University of Kansas, CERN, and other contributors."
 msgstr "Autoriõiguseid omavad University of Kansas, CERN ja teised."
 
-#: src/LYMain.c:3192
+#: src/LYMain.c:3162
 #, fuzzy
 msgid "Distributed under the GNU General Public License (Version 2)."
 msgstr "Levitatakse GNU üldise avaliku litsensiga."
 
-#: src/LYMain.c:3193
+#: src/LYMain.c:3163
 msgid "See http://lynx.isc.org/ and the online help for more information."
 msgstr "Abi ja muud infot leiate aadressil http://lynx.isc.org/."
 
-#: src/LYMain.c:3968
+#: src/LYMain.c:3938
 #, c-format
 msgid "USAGE: %s [options] [file]\n"
 msgstr "KASUTAMINE: %s [võtmed] [fail]\n"
 
-#: src/LYMain.c:3969
+#: src/LYMain.c:3939
 #, c-format
 msgid "Options are:\n"
 msgstr "Võtmed on:\n"
 
-#: src/LYMain.c:4268
+#: src/LYMain.c:4238
 #, c-format
 msgid "%s: Invalid Option: %s\n"
 msgstr "%s: Vigane võti: %s\n"
@@ -4333,7 +4331,7 @@ msgstr "%s: Vigane võti: %s\n"
 msgid "Internal error: Invalid mouse link %d!"
 msgstr "Sisemine viga: Vigane hiire viide %d!"
 
-#: src/LYMainLoop.c:700 src/LYMainLoop.c:5048
+#: src/LYMainLoop.c:700 src/LYMainLoop.c:5046
 msgid "A URL specified by the user"
 msgstr "Kasutaja poolt antud URL"
 
@@ -4352,7 +4350,7 @@ msgstr "Abiinfo ekraan"
 msgid "System Index"
 msgstr "Süsteemi indeks"
 
-#: src/LYMainLoop.c:3533 src/LYMainLoop.c:5274
+#: src/LYMainLoop.c:3533 src/LYMainLoop.c:5272
 msgid "Entry into main screen"
 msgstr "Sisenemine põhiekraanile"
 
@@ -4368,68 +4366,68 @@ msgstr "kahjuks on selle dokumendi kooditabel üheselt määratud..."
 msgid "cd to:"
 msgstr "mine kataloogi:"
 
-#: src/LYMainLoop.c:5029
+#: src/LYMainLoop.c:5027
 msgid "A component of path is not a directory"
 msgstr "Tee komponent ei ole kataloog"
 
-#: src/LYMainLoop.c:5032
+#: src/LYMainLoop.c:5030
 msgid "failed to change directory"
 msgstr "kataloogi ei õnnestu vahetada"
 
-#: src/LYMainLoop.c:6209
+#: src/LYMainLoop.c:6207
 msgid "Reparsing document under current settings..."
 msgstr "Parsin dokumendi uuesti jooksvate seadetega..."
 
-#: src/LYMainLoop.c:6500
+#: src/LYMainLoop.c:6498
 #, c-format
 msgid "Fatal error - could not open output file %s\n"
 msgstr "Fataalne viga - ei õnnestu avada väljundfaili %s\n"
 
-#: src/LYMainLoop.c:6843
+#: src/LYMainLoop.c:6841
 msgid "TABLE center enable."
 msgstr "TABELI tsentreerimine lubatud."
 
-#: src/LYMainLoop.c:6846
+#: src/LYMainLoop.c:6844
 msgid "TABLE center disable."
 msgstr "TABELI tsentreerimine blokeeritud."
 
-#: src/LYMainLoop.c:6923
+#: src/LYMainLoop.c:6921
 msgid "Current URL is empty."
 msgstr "Jooksev URL on tühi."
 
-#: src/LYMainLoop.c:6925 src/LYUtils.c:1803
+#: src/LYMainLoop.c:6923 src/LYUtils.c:1803
 msgid "Copy to clipboard failed."
 msgstr "Lõikepuhvrisse kopeerimine ebaõnnestus."
 
-#: src/LYMainLoop.c:6927
+#: src/LYMainLoop.c:6925
 msgid "Document URL put to clipboard."
 msgstr "Panin dokumendi URLi lõikepuhvrisse."
 
-#: src/LYMainLoop.c:6929
+#: src/LYMainLoop.c:6927
 msgid "Link URL put to clipboard."
 msgstr "Panin viite URLi lõikepuhvrisse."
 
-#: src/LYMainLoop.c:6956
+#: src/LYMainLoop.c:6954
 msgid "No URL in the clipboard."
 msgstr "Lõikepuhvris URLe ei ole."
 
-#: src/LYMainLoop.c:7620 src/LYMainLoop.c:7790
+#: src/LYMainLoop.c:7618 src/LYMainLoop.c:7788
 msgid "-index-"
 msgstr "-indeks-"
 
-#: src/LYMainLoop.c:7730
+#: src/LYMainLoop.c:7728
 msgid "lynx: Can't access startfile"
 msgstr "lynx: Ei õnnestu laadida esilehte"
 
-#: src/LYMainLoop.c:7742
+#: src/LYMainLoop.c:7740
 msgid "lynx: Start file could not be found or is not text/html or text/plain"
 msgstr "lynx: Esilehte pole või ei ole text/html ega text/plain tüüpi"
 
-#: src/LYMainLoop.c:7743
+#: src/LYMainLoop.c:7741
 msgid "      Exiting..."
 msgstr "      Lõpetan..."
 
-#: src/LYMainLoop.c:7784
+#: src/LYMainLoop.c:7782
 msgid "-more-"
 msgstr "-veel-"
 
@@ -4501,336 +4499,336 @@ msgstr "vaara/toimeta B=järgede faile"
 msgid "B)ookmark file: "
 msgstr "B=järgede fail: "
 
-#: src/LYOptions.c:2126 src/LYOptions.c:2133
+#: src/LYOptions.c:2128 src/LYOptions.c:2135
 msgid "ON"
 msgstr "SEES"
 
 #. verbose_img variable
-#: src/LYOptions.c:2127 src/LYOptions.c:2132 src/LYOptions.c:2280 src/LYOptions.c:2291
+#: src/LYOptions.c:2129 src/LYOptions.c:2134 src/LYOptions.c:2282 src/LYOptions.c:2293
 msgid "OFF"
 msgstr "VÄLJAS"
 
-#: src/LYOptions.c:2128
+#: src/LYOptions.c:2130
 msgid "NEVER"
 msgstr "MITTE KUNAGI"
 
-#: src/LYOptions.c:2129
+#: src/LYOptions.c:2131
 msgid "ALWAYS"
 msgstr "ALATI"
 
-#: src/LYOptions.c:2145 src/LYOptions.c:2272
+#: src/LYOptions.c:2147 src/LYOptions.c:2274
 msgid "ignore"
 msgstr "ignoreeri"
 
-#: src/LYOptions.c:2146
+#: src/LYOptions.c:2148
 msgid "ask user"
 msgstr "küsi kasutajalt"
 
-#: src/LYOptions.c:2147
+#: src/LYOptions.c:2149
 msgid "accept all"
 msgstr "luba kõik"
 
-#: src/LYOptions.c:2159
+#: src/LYOptions.c:2161
 msgid "ALWAYS OFF"
 msgstr "ALATI VÄLJAS"
 
-#: src/LYOptions.c:2160
+#: src/LYOptions.c:2162
 msgid "FOR LOCAL FILES ONLY"
 msgstr "AINULT KOHALIKELE FAILIDELE"
 
-#: src/LYOptions.c:2162
+#: src/LYOptions.c:2164
 msgid "ALWAYS ON"
 msgstr "ALATI SEES"
 
-#: src/LYOptions.c:2174
+#: src/LYOptions.c:2176
 msgid "Numbers act as arrows"
 msgstr "numbrid käituvad nooltena"
 
-#: src/LYOptions.c:2176
+#: src/LYOptions.c:2178
 msgid "Links are numbered"
 msgstr "Viited on nummerdatud"
 
-#: src/LYOptions.c:2179
+#: src/LYOptions.c:2181
 msgid "Links and form fields are numbered"
 msgstr "Viited ja vormide väljad on nummerdatud"
 
-#: src/LYOptions.c:2182
+#: src/LYOptions.c:2184
 msgid "Form fields are numbered"
 msgstr "Vormide väljad on nummerdatud"
 
-#: src/LYOptions.c:2192
+#: src/LYOptions.c:2194
 msgid "Case insensitive"
 msgstr "Tõstutundetu"
 
-#: src/LYOptions.c:2193
+#: src/LYOptions.c:2195
 msgid "Case sensitive"
 msgstr "Tõstutundlik"
 
-#: src/LYOptions.c:2217
+#: src/LYOptions.c:2219
 msgid "prompt normally"
 msgstr "küsi tavapäraselt"
 
-#: src/LYOptions.c:2218
+#: src/LYOptions.c:2220
 msgid "force yes-response"
 msgstr "paku jah-vastus"
 
-#: src/LYOptions.c:2219
+#: src/LYOptions.c:2221
 msgid "force no-response"
 msgstr "paku ei-vastus"
 
-#: src/LYOptions.c:2237
+#: src/LYOptions.c:2239
 msgid "Novice"
 msgstr "Algaja"
 
-#: src/LYOptions.c:2238
+#: src/LYOptions.c:2240
 msgid "Intermediate"
 msgstr "Vahepealne"
 
-#: src/LYOptions.c:2239
+#: src/LYOptions.c:2241
 msgid "Advanced"
 msgstr "Edasijõudnud"
 
-#: src/LYOptions.c:2248
+#: src/LYOptions.c:2250
 msgid "By First Visit"
 msgstr "Esmase külastuse järgi"
 
-#: src/LYOptions.c:2250
+#: src/LYOptions.c:2252
 msgid "By First Visit Reversed"
 msgstr "Pööratud esmase külastuse järgi"
 
-#: src/LYOptions.c:2251
+#: src/LYOptions.c:2253
 msgid "As Visit Tree"
 msgstr "Külastuste puu"
 
-#: src/LYOptions.c:2252
+#: src/LYOptions.c:2254
 msgid "By Last Visit"
 msgstr "Viimase külastuse järgi"
 
-#: src/LYOptions.c:2254
+#: src/LYOptions.c:2256
 msgid "By Last Visit Reversed"
 msgstr "Pööratud viimase külastuse järgi"
 
 #. Old_DTD variable
-#: src/LYOptions.c:2265
+#: src/LYOptions.c:2267
 msgid "relaxed (TagSoup mode)"
 msgstr "lõtv (TagSoup mood)"
 
-#: src/LYOptions.c:2266
+#: src/LYOptions.c:2268
 msgid "strict (SortaSGML mode)"
 msgstr "range (SortaSGML mood)"
 
-#: src/LYOptions.c:2273
+#: src/LYOptions.c:2275
 msgid "as labels"
 msgstr "kui märgendid"
 
-#: src/LYOptions.c:2274
+#: src/LYOptions.c:2276
 msgid "as links"
 msgstr "kui viited"
 
-#: src/LYOptions.c:2281
+#: src/LYOptions.c:2283
 msgid "show filename"
 msgstr "näita failinime"
 
-#: src/LYOptions.c:2292
+#: src/LYOptions.c:2294
 msgid "STANDARD"
 msgstr "STANDARD"
 
-#: src/LYOptions.c:2293
+#: src/LYOptions.c:2295
 msgid "ADVANCED"
 msgstr "LAIENDATUD"
 
-#: src/LYOptions.c:2319
+#: src/LYOptions.c:2321
 msgid "Directories first"
 msgstr "Esmalt kataloogid"
 
-#: src/LYOptions.c:2320
+#: src/LYOptions.c:2322
 msgid "Files first"
 msgstr "Esimalt failid"
 
-#: src/LYOptions.c:2321
+#: src/LYOptions.c:2323
 msgid "Mixed style"
 msgstr "Segastiil"
 
-#: src/LYOptions.c:2329 src/LYOptions.c:2346
+#: src/LYOptions.c:2331 src/LYOptions.c:2348
 msgid "By Name"
 msgstr "Nime järgi"
 
-#: src/LYOptions.c:2330 src/LYOptions.c:2347
+#: src/LYOptions.c:2332 src/LYOptions.c:2349
 msgid "By Type"
 msgstr "Tüübi järgi"
 
-#: src/LYOptions.c:2331 src/LYOptions.c:2348
+#: src/LYOptions.c:2333 src/LYOptions.c:2350
 msgid "By Size"
 msgstr "Mahu järgi"
 
-#: src/LYOptions.c:2332 src/LYOptions.c:2349
+#: src/LYOptions.c:2334 src/LYOptions.c:2351
 msgid "By Date"
 msgstr "Kuupäeva järgi"
 
-#: src/LYOptions.c:2333
+#: src/LYOptions.c:2335
 msgid "By Mode"
 msgstr "moodi järgi"
 
-#: src/LYOptions.c:2335
+#: src/LYOptions.c:2337
 msgid "By User"
 msgstr "Kasutaja järgi"
 
-#: src/LYOptions.c:2336
+#: src/LYOptions.c:2338
 msgid "By Group"
 msgstr "Grupi järgi"
 
-#: src/LYOptions.c:2357
+#: src/LYOptions.c:2359
 msgid "Do not show rate"
 msgstr "Ära näita kiirust"
 
-#: src/LYOptions.c:2358 src/LYOptions.c:2359
+#: src/LYOptions.c:2360 src/LYOptions.c:2361
 #, c-format
 msgid "Show %s/sec rate"
 msgstr "Näita %s/sek kiirust"
 
-#: src/LYOptions.c:2361 src/LYOptions.c:2362
+#: src/LYOptions.c:2363 src/LYOptions.c:2364
 #, c-format
 msgid "Show %s/sec, ETA"
 msgstr "Näita %s/sek, ETA"
 
-#: src/LYOptions.c:2374
+#: src/LYOptions.c:2376
 msgid "Accept lynx's internal types"
 msgstr "Luba lynxi sisemised tüübid"
 
-#: src/LYOptions.c:2375
+#: src/LYOptions.c:2377
 msgid "Also accept lynx.cfg's types"
 msgstr "Luba ka lynx.cfg tüübid"
 
-#: src/LYOptions.c:2376
+#: src/LYOptions.c:2378
 msgid "Also accept user's types"
 msgstr "Luba ka kasutaja tüübid"
 
-#: src/LYOptions.c:2377
+#: src/LYOptions.c:2379
 msgid "Also accept system's types"
 msgstr "Luba ka süsteemsed tüübid"
 
-#: src/LYOptions.c:2378
+#: src/LYOptions.c:2380
 msgid "Accept all types"
 msgstr "Luba kõik tüübid"
 
-#: src/LYOptions.c:2387
+#: src/LYOptions.c:2389
 msgid "gzip"
 msgstr "gzip"
 
-#: src/LYOptions.c:2388
+#: src/LYOptions.c:2390
 msgid "deflate"
 msgstr "kahanda"
 
-#: src/LYOptions.c:2391
+#: src/LYOptions.c:2393
 msgid "compress"
 msgstr "compress"
 
-#: src/LYOptions.c:2394
+#: src/LYOptions.c:2396
 msgid "bzip2"
 msgstr "bzip2"
 
-#: src/LYOptions.c:2396
+#: src/LYOptions.c:2398
 msgid "All"
 msgstr "Kõik"
 
-#: src/LYOptions.c:2664 src/LYOptions.c:2688
+#: src/LYOptions.c:2666 src/LYOptions.c:2690
 #, c-format
 msgid "Use %s to invoke the Options menu!"
 msgstr "Seadete menüü saamiseks kasutage %s!"
 
-#: src/LYOptions.c:3438
+#: src/LYOptions.c:3440
 msgid "(options marked with (!) will not be saved)"
 msgstr "((!) märgitud seadeid ei salvestata)"
 
-#: src/LYOptions.c:3446
+#: src/LYOptions.c:3448
 msgid "General Preferences"
 msgstr "Üldised seaded"
 
 #. ***************************************************************
 #. User Mode: SELECT
-#: src/LYOptions.c:3450
+#: src/LYOptions.c:3452
 msgid "User mode"
 msgstr "Kasutaja mood"
 
 #. Editor: INPUT
-#: src/LYOptions.c:3456
+#: src/LYOptions.c:3458
 msgid "Editor"
 msgstr "Toimeti"
 
 #. Search Type: SELECT
-#: src/LYOptions.c:3461
+#: src/LYOptions.c:3463
 msgid "Type of Search"
 msgstr "Otsingutüüp"
 
-#: src/LYOptions.c:3466
+#: src/LYOptions.c:3468
 msgid "Security and Privacy"
 msgstr "Turvalisus ja privaatsus"
 
 #. ***************************************************************
 #. Cookies: SELECT
-#: src/LYOptions.c:3470
+#: src/LYOptions.c:3472
 msgid "Cookies"
 msgstr "Präänikud"
 
 #. Cookie Prompting: SELECT
-#: src/LYOptions.c:3484
+#: src/LYOptions.c:3486
 msgid "Invalid-Cookie Prompting"
 msgstr "Vigase prääniku küsimine"
 
 #. SSL Prompting: SELECT
-#: src/LYOptions.c:3491
+#: src/LYOptions.c:3493
 msgid "SSL Prompting"
 msgstr "SSL küsimine"
 
-#: src/LYOptions.c:3497
+#: src/LYOptions.c:3499
 msgid "Keyboard Input"
 msgstr "Sisend klaviatuurilt"
 
 #. ***************************************************************
 #. Keypad Mode: SELECT
-#: src/LYOptions.c:3501
+#: src/LYOptions.c:3503
 msgid "Keypad mode"
 msgstr "Klahvistiku mood"
 
 #. Emacs keys: ON/OFF
-#: src/LYOptions.c:3507
+#: src/LYOptions.c:3509
 msgid "Emacs keys"
 msgstr "Emacs klahvid"
 
 #. VI Keys: ON/OFF
-#: src/LYOptions.c:3513
+#: src/LYOptions.c:3515
 msgid "VI keys"
 msgstr "VI klahvid"
 
 #. Line edit style: SELECT
 #. well, at least 2 line edit styles available
-#: src/LYOptions.c:3520
+#: src/LYOptions.c:3522
 msgid "Line edit style"
 msgstr "Reatoimeti mood"
 
 #. Keyboard layout: SELECT
-#: src/LYOptions.c:3532
+#: src/LYOptions.c:3534
 msgid "Keyboard layout"
 msgstr "Klaviatuuri asetus"
 
 #.
 #. * Display and Character Set
 #.
-#: src/LYOptions.c:3546
+#: src/LYOptions.c:3548
 msgid "Display and Character Set"
 msgstr "Ekraan ja kooditabel"
 
 #. Use locale-based character set: ON/OFF
-#: src/LYOptions.c:3551
+#: src/LYOptions.c:3553
 msgid "Use locale-based character set"
 msgstr "Kasuta lokaadi põhist kooditabelit"
 
 #. Display Character Set: SELECT
-#: src/LYOptions.c:3560
+#: src/LYOptions.c:3562
 msgid "Display character set"
 msgstr "Ekraani kooditabel"
 
-#: src/LYOptions.c:3591
+#: src/LYOptions.c:3593
 msgid "Assumed document character set"
 msgstr "Eeldatav dokumendi kooditabel"
 
@@ -4839,173 +4837,172 @@ msgstr "Eeldatav dokumendi kooditabel"
 #. * we split the header to make it more readable:
 #. * "CJK mode" for CJK display charsets, and "Raw 8-bit" for others.
 #.
-#: src/LYOptions.c:3611
+#: src/LYOptions.c:3613
 msgid "CJK mode"
 msgstr "CJK mood"
 
-#: src/LYOptions.c:3613
+#: src/LYOptions.c:3615
 msgid "Raw 8-bit"
 msgstr "Puhas 8-bitti"
 
 #. X Display: INPUT
-#: src/LYOptions.c:3621
+#: src/LYOptions.c:3623
 msgid "X Display"
 msgstr "X Ekraan"
 
 #.
 #. * Document Appearance
 #.
-#: src/LYOptions.c:3627
+#: src/LYOptions.c:3629
 msgid "Document Appearance"
 msgstr "Dokumendi esitamine"
 
-#: src/LYOptions.c:3633
+#: src/LYOptions.c:3635
 msgid "Show color"
 msgstr "Näita värve"
 
 #. Show cursor: ON/OFF
-#: src/LYOptions.c:3657
+#: src/LYOptions.c:3659
 msgid "Show cursor"
 msgstr "Näita kursorit"
 
 #. Underline links: ON/OFF
-#: src/LYOptions.c:3663
+#: src/LYOptions.c:3665
 msgid "Underline links"
 msgstr "Jooni viited"
 
 #. Show scrollbar: ON/OFF
-#: src/LYOptions.c:3670
+#: src/LYOptions.c:3672
 msgid "Show scrollbar"
 msgstr "Näita kerimisriba"
 
 #. Select Popups: ON/OFF
-#: src/LYOptions.c:3677
+#: src/LYOptions.c:3679
 msgid "Popups for select fields"
 msgstr "Hüpikud valikuväljadele"
 
 #. HTML error recovery: SELECT
-#: src/LYOptions.c:3683
+#: src/LYOptions.c:3685
 msgid "HTML error recovery"
 msgstr "HTML veatöötlus"
 
 #. Show Images: SELECT
-#: src/LYOptions.c:3689
+#: src/LYOptions.c:3691
 msgid "Show images"
 msgstr "Näita pilte"
 
 #. Verbose Images: ON/OFF
-#: src/LYOptions.c:3703
+#: src/LYOptions.c:3705
 msgid "Verbose images"
 msgstr "Verbaalsed pildid"
 
 #.
 #. * Headers Transferred to Remote Servers
 #.
-#: src/LYOptions.c:3711
+#: src/LYOptions.c:3713
 msgid "Headers Transferred to Remote Servers"
 msgstr "Serverile saadetavad päised"
 
 #. ***************************************************************
 #. Mail Address: INPUT
-#: src/LYOptions.c:3715
+#: src/LYOptions.c:3717
 msgid "Personal mail address"
 msgstr "Isiklik e-posti aadress"
 
 #. Mail Address: INPUT
-#: src/LYOptions.c:3720
-#, fuzzy
+#: src/LYOptions.c:3722
 msgid "Password for anonymous ftp"
-msgstr "Parool uudiseserverile '%s':"
+msgstr "Anonüümse ftp parool"
 
 #. Preferred media type: SELECT
-#: src/LYOptions.c:3725
+#: src/LYOptions.c:3727
 msgid "Preferred media type"
 msgstr "Eelistatud meedia tüüp"
 
 #. Preferred encoding: SELECT
-#: src/LYOptions.c:3731
+#: src/LYOptions.c:3733
 msgid "Preferred encoding"
 msgstr "Eelistatud kodeering"
 
 #. Preferred Document Character Set: INPUT
-#: src/LYOptions.c:3737
+#: src/LYOptions.c:3739
 msgid "Preferred document character set"
 msgstr "Eelistatuim dokumendi kooditabel"
 
 #. Preferred Document Language: INPUT
-#: src/LYOptions.c:3742
+#: src/LYOptions.c:3744
 msgid "Preferred document language"
 msgstr "Eelistatuim dokumendi keel"
 
-#: src/LYOptions.c:3748
+#: src/LYOptions.c:3750
 msgid "User-Agent header"
 msgstr "User-Agent päis"
 
 #.
 #. * Listing and Accessing Files
 #.
-#: src/LYOptions.c:3756
+#: src/LYOptions.c:3758
 msgid "Listing and Accessing Files"
 msgstr "Failide näitamine ja kasutamine"
 
 #. ***************************************************************
 #. FTP sort: SELECT
-#: src/LYOptions.c:3760
+#: src/LYOptions.c:3762
 msgid "FTP sort criteria"
 msgstr "FTP järjestamine"
 
 #. Local Directory Sort: SELECT
-#: src/LYOptions.c:3767
+#: src/LYOptions.c:3769
 msgid "Local directory sort criteria"
 msgstr "Lokaalse kataloogi järjestamine"
 
 #. Local Directory Order: SELECT
-#: src/LYOptions.c:3773
+#: src/LYOptions.c:3775
 msgid "Local directory sort order"
 msgstr "Lokaalse kataloogi järjestamine"
 
-#: src/LYOptions.c:3782
+#: src/LYOptions.c:3784
 msgid "Show dot files"
 msgstr "Näita punktiga faile"
 
-#: src/LYOptions.c:3790
+#: src/LYOptions.c:3792
 msgid "Execution links"
 msgstr "Täidetavad viited"
 
 #. Show transfer rate: SELECT
-#: src/LYOptions.c:3810
+#: src/LYOptions.c:3812
 msgid "Show transfer rate"
 msgstr "Näita laadimise kiirust"
 
 #.
 #. * Special Files and Screens
 #.
-#: src/LYOptions.c:3830
+#: src/LYOptions.c:3832
 msgid "Special Files and Screens"
 msgstr "Spetsiaalfailid ja ekraanid"
 
-#: src/LYOptions.c:3835
+#: src/LYOptions.c:3837
 msgid "Multi-bookmarks"
 msgstr "Järgede failid"
 
-#: src/LYOptions.c:3843
+#: src/LYOptions.c:3845
 msgid "Review/edit Bookmarks files"
 msgstr "vaata/toimeta järgede faile"
 
-#: src/LYOptions.c:3845
+#: src/LYOptions.c:3847
 msgid "Goto multi-bookmark menu"
 msgstr "Mine mitme-järje menüüsse"
 
-#: src/LYOptions.c:3847
+#: src/LYOptions.c:3849
 msgid "Bookmarks file"
 msgstr "Järgede fail"
 
 #. Visited Pages: SELECT
-#: src/LYOptions.c:3853
+#: src/LYOptions.c:3855
 msgid "Visited Pages"
 msgstr "Külastatud lehed"
 
-#: src/LYOptions.c:3858
+#: src/LYOptions.c:3860
 msgid "View the file "
 msgstr "Vaata faili"
 
@@ -5116,47 +5113,47 @@ msgstr "rea-toimeti klahviseose seadmine %s (0x%x) -> 0x%x %s jaoks ebaõnnestus\
 msgid "setting of line-editor binding for key %s (0x%x) for %s failed\n"
 msgstr "rea-toimeti klahviseose seadmine klahv %s (0x%x) %s jaoks ebaõnnestus\n"
 
-#: src/LYReadCFG.c:817
+#: src/LYReadCFG.c:815
 #, c-format
 msgid "Lynx: cannot start, CERN rules file %s is not available\n"
 msgstr "Lynx: ei saa startida, CERN reeglite fail %s ei ole kasutatav\n"
 
-#: src/LYReadCFG.c:818
+#: src/LYReadCFG.c:816
 msgid "(no name)"
 msgstr "(nimetu)"
 
-#: src/LYReadCFG.c:1818
+#: src/LYReadCFG.c:1816
 #, c-format
 msgid "More than %d nested lynx.cfg includes -- perhaps there is a loop?!?\n"
 msgstr "Rohkem kui %d lynx.cfg kaasamist -- vahest on tekkinud tsükkel?!?\n"
 
-#: src/LYReadCFG.c:1820
+#: src/LYReadCFG.c:1818
 #, c-format
 msgid "Last attempted include was '%s',\n"
 msgstr "Viimane kaasata üritatud fail oli '%s',\n"
 
-#: src/LYReadCFG.c:1821
+#: src/LYReadCFG.c:1819
 #, c-format
 msgid "included from '%s'.\n"
 msgstr "kaasatud failist '%s'.\n"
 
-#: src/LYReadCFG.c:2228 src/LYReadCFG.c:2241 src/LYReadCFG.c:2299
+#: src/LYReadCFG.c:2226 src/LYReadCFG.c:2239 src/LYReadCFG.c:2297
 msgid "The following is read from your lynx.cfg file."
 msgstr "Järgnev on loetud teie lynx.cfg failist."
 
-#: src/LYReadCFG.c:2229 src/LYReadCFG.c:2242
+#: src/LYReadCFG.c:2227 src/LYReadCFG.c:2240
 msgid "Please read the distribution"
 msgstr "Lisainfo jaoks lugege palun"
 
-#: src/LYReadCFG.c:2235 src/LYReadCFG.c:2245
+#: src/LYReadCFG.c:2233 src/LYReadCFG.c:2243
 msgid "for more comments."
 msgstr "paketis olevat faili."
 
-#: src/LYReadCFG.c:2281
+#: src/LYReadCFG.c:2279
 msgid "RELOAD THE CHANGES"
 msgstr "MUUTUSTE LAADIMINE"
 
-#: src/LYReadCFG.c:2289
+#: src/LYReadCFG.c:2287
 msgid "Your primary configuration"
 msgstr "Teie primaarsed seaded"
 
@@ -5284,9 +5281,8 @@ msgid "Content-Length:"
 msgstr "Sisu-pikkus:"
 
 #: src/LYShowInfo.c:360
-#, fuzzy
 msgid "Length:"
-msgstr "Sisu-pikkus:"
+msgstr "Pikkus:"
 
 #: src/LYShowInfo.c:365
 msgid "Language:"
@@ -5478,6 +5474,9 @@ msgid ""
 "Lynx will use the personal email address.  Set anonftp_password\n"
 "to a different value if you choose.\n"
 msgstr ""
+"anonftp_password võimaldab kasutajal määrata anonüümse ftp parooliks\n"
+"isiklik e-posti aadress. Kui väärtust ei anta, kasutab Lynx isiklikku\n"
+"e-posti aadressi. Vajadusel saab kasutada ka mingit muud e-posti aadressi.\n"
 
 #: src/LYrcFile.c:331
 msgid ""

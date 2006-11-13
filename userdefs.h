@@ -289,6 +289,10 @@
 #endif /* LYNX_CFG_FILE */
 #endif /* HAVE_CONFIG_H */
 
+#ifndef MIME_LIBDIR
+#define MIME_LIBDIR "/usr/local/lib/mosaic/"
+#endif
+
 /**************************
  * The EXTENSION_MAP file allows you to map file suffixes to
  * mime types.
@@ -296,8 +300,8 @@
  * Mappings in these global and personal files override any SUFFIX
  * definitions in lynx.cfg and built-in defaults from src/HTInit.c.
  */
-#define GLOBAL_EXTENSION_MAP "/usr/local/lib/mosaic/mime.types"
-#define PERSONAL_EXTENSION_MAP ".mime.types"
+#define GLOBAL_EXTENSION_MAP MIME_LIBDIR "mime.types"
+#define PERSONAL_EXTENSION_MAP "~/.mime.types"
 
 /**************************
  * The MAILCAP file allows you to map file MIME types to
@@ -306,8 +310,8 @@
  * Mappings in these global and personal files override any VIEWER
  * definitions in lynx.cfg and built-in defaults from src/HTInit.c.
  */
-#define GLOBAL_MAILCAP "/usr/local/lib/mosaic/mailcap"
-#define PERSONAL_MAILCAP ".mailcap"
+#define GLOBAL_MAILCAP MIME_LIBDIR "mailcap"
+#define PERSONAL_MAILCAP "~/.mailcap"
 
 /**************************
  * XLOADIMAGE_COMMAND will be used as a default in src/HTInit.c for
@@ -471,10 +475,10 @@
  *   for this distribution (use SHELL syntax including the device
  *   on VMS systems).
  * The default HELPFILE is:
- * http://www.subir.com/lynx/lynx_help/lynx_help_main.html
+ * http://lynx.isc.org/release/lynx2-8-6/lynx_help/lynx_help_main.html
  *   This should be changed here or in lynx.cfg to the local path.
  */
-#define HELPFILE "http://www.subir.com/lynx/lynx_help/lynx_help_main.html"
+#define HELPFILE "http://lynx.isc.org/release/lynx2-8-6/lynx_help/lynx_help_main.html"
 /* #define HELPFILE "file://localhost/PATH_TO/lynx_help/lynx_help_main.html" */
 
 /*****************************

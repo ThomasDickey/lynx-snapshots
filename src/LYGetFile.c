@@ -465,15 +465,9 @@ int getfile(DocInfo *doc, int *target)
 		/*
 		 * Convert '~' to $HOME.
 		 */
-		if ((cp = strchr(doc->address, '~'))) {
-		    HTSprintf0(&p, "%.*s%s%s",
-			       cp - doc->address,
-			       doc->address,
-			       wwwName(Home_Dir()),
-			       cp + 1);
-		} else {
-		    StrAllocCopy(p, doc->address);
-		}
+		StrAllocCopy(p, doc->address);
+		LYTildeExpand(&p, TRUE);
+
 		/*
 		 * Show URL before executing it.
 		 */
@@ -785,33 +779,7 @@ int getfile(DocInfo *doc, int *target)
 	     * was entered, simplifying, and eliminating any residual
 	     * relative elements.  - FM
 	     */
-	    if (((cp = HTParse(doc->address, "",
-			       PARSE_PATH + PARSE_ANCHOR + PARSE_PUNCTUATION))
-		 != NULL) &&
-		!strncmp(cp, "/~", 2)) {
-		char *cp1 = strstr(doc->address, "/~");
-		char *cp2;
-
-		CTRACE((tfp, "getfile: URL '%s'\n",
-			doc->address));
-		*cp1 = '\0';
-		cp1 += 2;
-		StrAllocCopy(temp, doc->address);
-		StrAllocCopy(cp, wwwName(Home_Dir()));
-		if (!LYIsHtmlSep(*cp))
-		    LYAddHtmlSep(&temp);
-		StrAllocCat(temp, cp);
-		if ((cp2 = strchr(cp1, '/')) != NULL) {
-		    LYTrimRelFromAbsPath(cp2);
-		    StrAllocCat(temp, cp2);
-		}
-		StrAllocCopy(doc->address, temp);
-		FREE(temp);
-		CTRACE((tfp, "  changed to '%s'\n",
-			doc->address));
-		WWWDoc.address = doc->address;
-	    }
-	    FREE(cp);
+	    LYTildeExpand(&(doc->address), TRUE);
 	}
 	CTRACE_SLEEP(MessageSecs);
 	user_message(WWW_WAIT_MESSAGE, doc->address);

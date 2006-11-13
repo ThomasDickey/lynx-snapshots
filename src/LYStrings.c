@@ -731,6 +731,7 @@ int LYmbcsstrlen(const char *str,
 static int myGetCharNodelay(void)
 {
     int c = wgetch(LYwin);
+
     if (c == -1)
 	c = 0;
 
@@ -1665,6 +1666,7 @@ static int LYgetch_for(int code)
  * LYgetch() translates some escape sequences and may fake noecho.
  */
 #define found_CSI(first,second) ((second) == '[' || (first) == 155)
+#define found_TLD(value)	((value) == '~')
 
 static int LYgetch_for(int code)
 {
@@ -1880,18 +1882,18 @@ static int LYgetch_for(int code)
 		c = '0';	/* keypad 0 */
 	    break;
 	case '1':		/* VTxxx  Find  */
-	    if (found_CSI(c, b) && (d = GetChar()) == '~')
+	    if (found_CSI(c, b) && found_TLD(d = GetChar()))
 		c = FIND_KEY;
 	    else
 		done_esc = FALSE;	/* we have another look below - kw */
 	    break;
 	case '2':
 	    if (found_CSI(c, b)) {
-		if ((d = GetChar()) == '~')	/* VTxxx Insert */
+		if (found_TLD(d = GetChar()))	/* VTxxx Insert */
 		    c = INSERT_KEY;
 		else if ((d == '8' ||
 			  d == '9') &&
-			 GetChar() == '~') {
+			 found_TLD(GetChar())) {
 		    if (d == '8')	/* VTxxx   Help */
 			c = F1;
 		    else if (d == '9')	/* VTxxx    Do  */
@@ -1902,25 +1904,25 @@ static int LYgetch_for(int code)
 		done_esc = FALSE;	/* we have another look below - kw */
 	    break;
 	case '3':			     /** VTxxx Delete **/
-	    if (found_CSI(c, b) && (d = GetChar()) == '~')
+	    if (found_CSI(c, b) && found_TLD(d = GetChar()))
 		c = REMOVE_KEY;
 	    else
 		done_esc = FALSE;	/* we have another look below - kw */
 	    break;
 	case '4':			     /** VTxxx Select **/
-	    if (found_CSI(c, b) && (d = GetChar()) == '~')
+	    if (found_CSI(c, b) && found_TLD(d = GetChar()))
 		c = SELECT_KEY;
 	    else
 		done_esc = FALSE;	/* we have another look below - kw */
 	    break;
 	case '5':			     /** VTxxx PrevScreen **/
-	    if (found_CSI(c, b) && (d = GetChar()) == '~')
+	    if (found_CSI(c, b) && found_TLD(d = GetChar()))
 		c = PGUP;
 	    else
 		done_esc = FALSE;	/* we have another look below - kw */
 	    break;
 	case '6':			     /** VTxxx NextScreen **/
-	    if (found_CSI(c, b) && (d = GetChar()) == '~')
+	    if (found_CSI(c, b) && found_TLD(d = GetChar()))
 		c = PGDOWN;
 	    else
 		done_esc = FALSE;	/* we have another look below - kw */
@@ -1944,7 +1946,7 @@ static int LYgetch_for(int code)
 	    CTRACE_SLEEP(MessageSecs);
 	    break;
 	}
-	if (isdigit(a) && found_CSI(c, b) && d != -1 && d != '~')
+	if (isdigit(a) && found_CSI(c, b) && d != -1 && !found_TLD(d))
 	    d = GetChar();
 	if (!done_esc && (a & ~0xFF) == 0) {
 	    if (a == b && !found_CSI(c, b) && c == CH_ESC) {

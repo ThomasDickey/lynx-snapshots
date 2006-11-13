@@ -856,37 +856,6 @@ static void FixCharacters(void)
 }
 #endif /* EBCDIC */
 
-static void tildeExpand(char **pathname,
-			BOOLEAN embedded)
-{
-    char *temp = *pathname;
-
-    if (embedded) {
-	if (temp != NULL) {
-	    temp = strstr(*pathname, "/~");
-	    if (temp != 0)
-		temp++;
-	    else
-		temp = *pathname;
-	}
-    }
-
-    if (temp != NULL
-	&& temp[0] == '~') {
-	if (temp[1] == '/'
-	    && temp[2] != '\0') {
-	    temp = NULL;
-	    StrAllocCopy(temp, *pathname + 2);
-	    StrAllocCopy(*pathname, wwwName(Home_Dir()));
-	    LYAddPathSep(pathname);
-	    StrAllocCat(*pathname, temp);
-	    FREE(temp);
-	} else if (temp[1] == '\0') {
-	    StrAllocCopy(*pathname, wwwName(Home_Dir()));
-	}
-    }
-}
-
 static BOOL GetStdin(char **buf,
 		     BOOL marker)
 {
@@ -967,6 +936,7 @@ static void SetLocale(void)
 #if defined(HAVE_LIBINTL_H) || defined(HAVE_LIBGETTEXT_H)
     {
 	char *cp;
+
 	if ((cp = LYGetEnv("LYNX_LOCALEDIR")) == 0)
 	    cp = LOCALEDIR;
 	bindtextdomain("lynx", cp);
@@ -1213,7 +1183,7 @@ int main(int argc,
 #ifdef WIN_EX			/* for Windows 2000 ... 1999/08/23 (Mon) 08:24:35 */
     if (access(lynx_temp_space, 0) != 0)
 #endif
-	tildeExpand(&lynx_temp_space, TRUE);
+	LYTildeExpand(&lynx_temp_space, TRUE);
 
     if ((cp = strstr(lynx_temp_space, "$USER")) != NULL) {
 	char *cp1;
@@ -1411,14 +1381,14 @@ int main(int argc,
      * Open command-script, if specified
      */
     if (lynx_cmd_script != 0) {
-	tildeExpand(&lynx_cmd_script, TRUE);
+	LYTildeExpand(&lynx_cmd_script, TRUE);
 	LYOpenCmdScript();
     }
     /*
      * Open command-logging, if specified
      */
     if (lynx_cmd_logfile != 0) {
-	tildeExpand(&lynx_cmd_logfile, TRUE);
+	LYTildeExpand(&lynx_cmd_logfile, TRUE);
 	LYOpenCmdLogfile(argc, argv);
     }
 #endif
@@ -1457,7 +1427,7 @@ int main(int argc,
 	StrAllocCopy(lynx_cfg_file, LYNX_CFG_FILE);
 
 #ifndef _WINDOWS		/* avoid the whole ~ thing for now */
-    tildeExpand(&lynx_cfg_file, FALSE);
+    LYTildeExpand(&lynx_cfg_file, FALSE);
 #endif
 
     /*
@@ -1574,7 +1544,7 @@ int main(int argc,
     if (!lynx_lss_file)
 	StrAllocCopy(lynx_lss_file, LYNX_LSS_FILE);
 
-    tildeExpand(&lynx_lss_file, TRUE);
+    LYTildeExpand(&lynx_lss_file, TRUE);
 
     /*
      * If the lynx-style file is not available, inform the user and exit.
@@ -1692,14 +1662,14 @@ int main(int argc,
 
 	    LYAddPathToHome(LYCookieFile, LY_MAXPATH, COOKIE_FILE);
 	} else {
-	    tildeExpand(&LYCookieFile, FALSE);
+	    LYTildeExpand(&LYCookieFile, FALSE);
 	}
 	LYLoadCookies(LYCookieFile);
     }
 
     /* tilde-expand LYCookieSaveFile */
     if (LYCookieSaveFile != NULL) {
-	tildeExpand(&LYCookieSaveFile, FALSE);
+	LYTildeExpand(&LYCookieSaveFile, FALSE);
     }
 
     /*
@@ -1738,7 +1708,7 @@ int main(int argc,
 	FREE(lynx_save_space);
     }
     if (lynx_save_space) {
-	tildeExpand(&lynx_save_space, TRUE);
+	LYTildeExpand(&lynx_save_space, TRUE);
 #ifdef VMS
 	LYLowerCase(lynx_save_space);
 	if (strchr(lynx_save_space, '/') != NULL) {
