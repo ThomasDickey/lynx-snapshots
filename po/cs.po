@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: lynx 2.8.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2006-10-12 19:59-0400\n"
+"POT-Creation-Date: 2006-11-12 20:07-0500\n"
 "PO-Revision-Date: 1999-12-11 12:55+0100\n"
 "Last-Translator: Jiøí Pavlovský  <pavlovsk@ff.cuni.cz>\n"
 "Language-Team: Czech <cs@li.org>\n"
@@ -2242,7 +2242,7 @@ msgstr "(®ádné jméno)"
 msgid "(No value.)"
 msgstr "(®ádná hodnota)"
 
-#: LYMessages.c:713 src/LYOptions.c:2385
+#: LYMessages.c:713 src/LYOptions.c:2387
 msgid "None"
 msgstr "Nic"
 
@@ -2821,7 +2821,7 @@ msgstr "**** HTAccess: Návratový status: %d\n"
 #. * hack: if we fail in HTAccess.c
 #. * avoid duplicating URL, oh.
 #.
-#: WWW/Library/Implementation/HTAccess.c:1084 src/LYMainLoop.c:7735
+#: WWW/Library/Implementation/HTAccess.c:1084 src/LYMainLoop.c:7733
 msgid "Can't Access"
 msgstr "Nelze získat pøístup"
 
@@ -4028,159 +4028,159 @@ msgstr "Zmìnit jméno èi umístìní? (n èi l): "
 msgid "This feature not yet implemented!"
 msgstr "Tato funkce zatím nebyla implementována!"
 
-#: src/LYLocal.c:1043
+#: src/LYLocal.c:1046
 msgid "Enter name of file to create: "
 msgstr "Zadejte jméno souboru, který mám vytvoøit: "
 
-#: src/LYLocal.c:1051 src/LYLocal.c:1092
+#: src/LYLocal.c:1050 src/LYLocal.c:1086
 msgid "Illegal redirection \"//\" found! Request ignored."
 msgstr "Nalezeno chybné pøesmìrování \"//\"! Po¾adavek ignorován."
 
-#: src/LYLocal.c:1084
+#: src/LYLocal.c:1082
 msgid "Enter name for new directory: "
 msgstr "Zadejte nové jméno adresáøe: "
 
-#: src/LYLocal.c:1128
+#: src/LYLocal.c:1122
 msgid "Create file or directory (f or d): "
 msgstr "Vytvoøit soubor èi adresáø? (f èi d):"
 
-#: src/LYLocal.c:1170
+#: src/LYLocal.c:1164
 #, fuzzy, c-format
 msgid "Remove directory '%s'?"
 msgstr "Smazat soubor '%s': "
 
-#: src/LYLocal.c:1173
+#: src/LYLocal.c:1167
 #, fuzzy
 msgid "Remove directory?"
 msgstr " adresáø"
 
-#: src/LYLocal.c:1178
+#: src/LYLocal.c:1172
 #, c-format
 msgid "Remove file '%s'?"
 msgstr "Smazat soubor '%s': "
 
-#: src/LYLocal.c:1180
+#: src/LYLocal.c:1174
 msgid "Remove file?"
 msgstr "Smazat soubor: "
 
-#: src/LYLocal.c:1185
+#: src/LYLocal.c:1179
 #, c-format
 msgid "Remove symbolic link '%s'?"
 msgstr "Smazat symbolický odkaz '%s': "
 
-#: src/LYLocal.c:1187
+#: src/LYLocal.c:1181
 msgid "Remove symbolic link?"
 msgstr "Smazat symbolický odkaz: "
 
-#: src/LYLocal.c:1282
+#: src/LYLocal.c:1276
 msgid "Sorry, don't know how to permit non-UNIX files yet."
 msgstr "Nevím jak nastavit pøístupová práva na ne-UNIXOVÉM systému souborù"
 
-#: src/LYLocal.c:1312
+#: src/LYLocal.c:1306
 msgid "Unable to open permit options file"
 msgstr "Soubor s menu nastavení práv souborù nelze otevøít."
 
-#: src/LYLocal.c:1342
+#: src/LYLocal.c:1336
 msgid "Specify permissions below:"
 msgstr "Zadejte pøístupová práva:"
 
-#: src/LYLocal.c:1343 src/LYShowInfo.c:259
+#: src/LYLocal.c:1337 src/LYShowInfo.c:259
 msgid "Owner:"
 msgstr "Vlastník:"
 
-#: src/LYLocal.c:1359
+#: src/LYLocal.c:1353
 msgid "Group"
 msgstr "Skupina"
 
-#: src/LYLocal.c:1375
+#: src/LYLocal.c:1369
 msgid "Others:"
 msgstr "Ostatní:"
 
-#: src/LYLocal.c:1393
+#: src/LYLocal.c:1387
 msgid "form to permit"
 msgstr "formuláø"
 
-#: src/LYLocal.c:1488
+#: src/LYLocal.c:1482
 msgid "Invalid mode format."
 msgstr "Chybný formát."
 
-#: src/LYLocal.c:1492
+#: src/LYLocal.c:1486
 msgid "Invalid syntax format."
 msgstr "Chybná syntaxe."
 
-#: src/LYLocal.c:1674
+#: src/LYLocal.c:1668
 msgid "Warning!  UUDecoded file will exist in the directory you started Lynx."
 msgstr "Varování! UUdekódovaný soubor bude vytvoøen v adresáøi, ze kterého byl Lynx spu¹tìn."
 
-#: src/LYLocal.c:1864
+#: src/LYLocal.c:1858
 msgid "NULL URL pointer"
 msgstr "NULOVÝ URL ukazatel"
 
-#: src/LYLocal.c:1946
+#: src/LYLocal.c:1940
 #, c-format
 msgid "Executing %s "
 msgstr "Spou¹tím %s "
 
-#: src/LYLocal.c:1949
+#: src/LYLocal.c:1943
 msgid "Executing system command. This might take a while."
 msgstr "Spou¹tí se systémový pøíkaz. Okam¾ik, prosím."
 
-#: src/LYLocal.c:2021
+#: src/LYLocal.c:2015
 msgid "Current directory:"
 msgstr "Aktuální adresáø:"
 
-#: src/LYLocal.c:2024 src/LYLocal.c:2042
+#: src/LYLocal.c:2018 src/LYLocal.c:2036
 msgid "Current selection:"
 msgstr "Zvolené polo¾ky:"
 
-#: src/LYLocal.c:2028
+#: src/LYLocal.c:2022
 msgid "Nothing currently selected."
 msgstr "®ádné polo¾ky nejsou zvoleny."
 
-#: src/LYLocal.c:2044
+#: src/LYLocal.c:2038
 msgid "tagged item:"
 msgstr "oznaèena polo¾ka:"
 
-#: src/LYLocal.c:2045
+#: src/LYLocal.c:2039
 msgid "tagged items:"
 msgstr "oznaèené polo¾ky:"
 
-#: src/LYLocal.c:2142 src/LYLocal.c:2153
+#: src/LYLocal.c:2136 src/LYLocal.c:2147
 msgid "Illegal filename; request ignored."
 msgstr "Chybné jméno souboru; po¾adavek ignorován."
 
 #. directory not writable
-#: src/LYLocal.c:2251 src/LYLocal.c:2310
+#: src/LYLocal.c:2245 src/LYLocal.c:2304
 msgid "Install in the selected directory not permitted."
 msgstr "Instalace do zvoleného adresáøe není povolena."
 
-#: src/LYLocal.c:2306
+#: src/LYLocal.c:2300
 msgid "The selected item is not a directory!  Request ignored."
 msgstr "Zvolená polo¾ka není adresáøem! Po¾adavek ignorován."
 
-#: src/LYLocal.c:2315
+#: src/LYLocal.c:2309
 msgid "Just a moment, ..."
 msgstr "Okam¾ik, prosím ..."
 
-#: src/LYLocal.c:2332
+#: src/LYLocal.c:2326
 msgid "Error building install args"
 msgstr ""
 
-#: src/LYLocal.c:2347 src/LYLocal.c:2378
+#: src/LYLocal.c:2341 src/LYLocal.c:2372
 #, c-format
 msgid "Source and target are the same: %s"
 msgstr ""
 
-#: src/LYLocal.c:2354 src/LYLocal.c:2385
+#: src/LYLocal.c:2348 src/LYLocal.c:2379
 #, c-format
 msgid "Already in target directory: %s"
 msgstr "Ètu adresáø: %s"
 
-#: src/LYLocal.c:2403
+#: src/LYLocal.c:2397
 msgid "Installation complete"
 msgstr "Instalace dokonèena"
 
-#: src/LYLocal.c:2590
+#: src/LYLocal.c:2584
 msgid "Temporary URL or list would be too long."
 msgstr "Doèasné URL nebo seznam by bylo pøíli¹ dlouhé."
 
@@ -4219,19 +4219,19 @@ msgstr "Tato zpráva byla vytvoøena automaticky programem"
 msgid "No system mailer configured"
 msgstr ""
 
-#: src/LYMain.c:1027
+#: src/LYMain.c:997
 msgid "No Winsock found, sorry."
 msgstr "Winsock nenalezen. lituji."
 
-#: src/LYMain.c:1208
+#: src/LYMain.c:1178
 msgid "You MUST define a valid TMP or TEMP area!"
 msgstr "MUSÍTE zadat platný TMP èi TEMP prostor!"
 
-#: src/LYMain.c:1261 src/LYMainLoop.c:5026
+#: src/LYMain.c:1231 src/LYMainLoop.c:5024
 msgid "No such directory"
 msgstr " adresáø"
 
-#: src/LYMain.c:1468
+#: src/LYMain.c:1438
 #, c-format
 msgid ""
 "\n"
@@ -4242,7 +4242,7 @@ msgstr ""
 "Konfiguraèní soubor %s je nedostupný.\n"
 "\n"
 
-#: src/LYMain.c:1478
+#: src/LYMain.c:1448
 #, c-format
 msgid ""
 "\n"
@@ -4253,7 +4253,7 @@ msgstr ""
 "Znakové sady Lynxu nejsou deklarovány.\n"
 "\n"
 
-#: src/LYMain.c:1507
+#: src/LYMain.c:1477
 #, c-format
 msgid ""
 "\n"
@@ -4264,7 +4264,7 @@ msgstr ""
 "Editovací mapy Lynxu nejsou deklarovány.\n"
 "\n"
 
-#: src/LYMain.c:1583
+#: src/LYMain.c:1553
 #, c-format
 msgid ""
 "\n"
@@ -4275,58 +4275,58 @@ msgstr ""
 "Soubor %s není dostupný.\n"
 "\n"
 
-#: src/LYMain.c:1774
+#: src/LYMain.c:1744
 msgid "Warning:"
 msgstr ""
 
-#: src/LYMain.c:2339
+#: src/LYMain.c:2309
 msgid "persistent cookies state will be changed in next session only."
 msgstr "Stav trvalých cookies bude zmìnìn a¾ pøi pøí¹tím sezení."
 
-#: src/LYMain.c:2576 src/LYMain.c:2621
+#: src/LYMain.c:2546 src/LYMain.c:2591
 #, c-format
 msgid "Lynx: ignoring unrecognized charset=%s\n"
 msgstr ""
 
-#: src/LYMain.c:3133
+#: src/LYMain.c:3103
 #, fuzzy, c-format
 msgid "%s Version %s (%s)"
 msgstr "%s verze %s (%s)\n"
 
-#: src/LYMain.c:3168
+#: src/LYMain.c:3138
 #, c-format
 msgid "Built on %s %s %s\n"
 msgstr "Pøelo¾en na %s %s %s\n"
 
-#: src/LYMain.c:3190
+#: src/LYMain.c:3160
 msgid "Copyrights held by the Lynx Developers Group,"
 msgstr ""
 
-#: src/LYMain.c:3191
+#: src/LYMain.c:3161
 #, fuzzy
 msgid "the University of Kansas, CERN, and other contributors."
 msgstr "Autorská práva patøí Kansaské univerzitì, CERN a ostatním autorùm."
 
-#: src/LYMain.c:3192
+#: src/LYMain.c:3162
 #, fuzzy
 msgid "Distributed under the GNU General Public License (Version 2)."
 msgstr "Roz¹iøován podle podmínek Obecné veøejné licence GNU."
 
-#: src/LYMain.c:3193
+#: src/LYMain.c:3163
 msgid "See http://lynx.isc.org/ and the online help for more information."
 msgstr "Podrobnìj¹í informace získáte na http://lynx.isc.org/ a z nápovìdy k programu."
 
-#: src/LYMain.c:3968
+#: src/LYMain.c:3938
 #, c-format
 msgid "USAGE: %s [options] [file]\n"
 msgstr "Pou¾ití: %s [pøepínaèe] [soubor]\n"
 
-#: src/LYMain.c:3969
+#: src/LYMain.c:3939
 #, c-format
 msgid "Options are:\n"
 msgstr "Pøepínaèe:\n"
 
-#: src/LYMain.c:4268
+#: src/LYMain.c:4238
 #, c-format
 msgid "%s: Invalid Option: %s\n"
 msgstr "%s: Chybný pøepínaè %s\n"
@@ -4336,7 +4336,7 @@ msgstr "%s: Chybný pøepínaè %s\n"
 msgid "Internal error: Invalid mouse link %d!"
 msgstr ""
 
-#: src/LYMainLoop.c:700 src/LYMainLoop.c:5048
+#: src/LYMainLoop.c:700 src/LYMainLoop.c:5046
 msgid "A URL specified by the user"
 msgstr "URL zadané u¾ivatelem"
 
@@ -4355,7 +4355,7 @@ msgstr "Nápovìda"
 msgid "System Index"
 msgstr "Systémový index"
 
-#: src/LYMainLoop.c:3533 src/LYMainLoop.c:5274
+#: src/LYMainLoop.c:3533 src/LYMainLoop.c:5272
 msgid "Entry into main screen"
 msgstr "Vstup na hlavní obrazovku"
 
@@ -4371,69 +4371,69 @@ msgstr "znaková sada tohoto dokumentu je explicitnì zadána, lituji..."
 msgid "cd to:"
 msgstr " do "
 
-#: src/LYMainLoop.c:5029
+#: src/LYMainLoop.c:5027
 msgid "A component of path is not a directory"
 msgstr ""
 
-#: src/LYMainLoop.c:5032
+#: src/LYMainLoop.c:5030
 msgid "failed to change directory"
 msgstr "Adresáø není dostupný."
 
-#: src/LYMainLoop.c:6209
+#: src/LYMainLoop.c:6207
 msgid "Reparsing document under current settings..."
 msgstr "Znovu zpracovávám dokument za pou¾ití nových nastavení..."
 
-#: src/LYMainLoop.c:6500
+#: src/LYMainLoop.c:6498
 #, c-format
 msgid "Fatal error - could not open output file %s\n"
 msgstr "Fatální chyba - výstupní soubor %s nelze otevøít\n"
 
-#: src/LYMainLoop.c:6843
+#: src/LYMainLoop.c:6841
 msgid "TABLE center enable."
 msgstr ""
 
-#: src/LYMainLoop.c:6846
+#: src/LYMainLoop.c:6844
 msgid "TABLE center disable."
 msgstr ""
 
-#: src/LYMainLoop.c:6923
+#: src/LYMainLoop.c:6921
 #, fuzzy
 msgid "Current URL is empty."
 msgstr "Aktuální adresáø:"
 
-#: src/LYMainLoop.c:6925 src/LYUtils.c:1803
+#: src/LYMainLoop.c:6923 src/LYUtils.c:1803
 msgid "Copy to clipboard failed."
 msgstr ""
 
-#: src/LYMainLoop.c:6927
+#: src/LYMainLoop.c:6925
 msgid "Document URL put to clipboard."
 msgstr ""
 
-#: src/LYMainLoop.c:6929
+#: src/LYMainLoop.c:6927
 msgid "Link URL put to clipboard."
 msgstr ""
 
-#: src/LYMainLoop.c:6956
+#: src/LYMainLoop.c:6954
 msgid "No URL in the clipboard."
 msgstr ""
 
-#: src/LYMainLoop.c:7620 src/LYMainLoop.c:7790
+#: src/LYMainLoop.c:7618 src/LYMainLoop.c:7788
 msgid "-index-"
 msgstr " rejstøík"
 
-#: src/LYMainLoop.c:7730
+#: src/LYMainLoop.c:7728
 msgid "lynx: Can't access startfile"
 msgstr "lynx: startovní soubor nelze otevøít"
 
-#: src/LYMainLoop.c:7742
+#: src/LYMainLoop.c:7740
 msgid "lynx: Start file could not be found or is not text/html or text/plain"
 msgstr "lynx: startovní soubor nelze nalézt, nebo není ani typu text/html ani text/plain."
 
-#: src/LYMainLoop.c:7743
+#: src/LYMainLoop.c:7741
 msgid "      Exiting..."
 msgstr "      Konèím..."
 
-#: src/LYMainLoop.c:7784
+#: src/LYMainLoop.c:7782
 msgid "-more-"
 msgstr ""
 
@@ -4505,348 +4505,348 @@ msgstr "zobrazit/editovat soubory se zálo¾kami B>"
 msgid "B)ookmark file: "
 msgstr "Soubor se zálo¾kami B>:"
 
-#: src/LYOptions.c:2126 src/LYOptions.c:2133
+#: src/LYOptions.c:2128 src/LYOptions.c:2135
 msgid "ON"
 msgstr ""
 
 #. verbose_img variable
-#: src/LYOptions.c:2127 src/LYOptions.c:2132 src/LYOptions.c:2280 src/LYOptions.c:2291
+#: src/LYOptions.c:2129 src/LYOptions.c:2134 src/LYOptions.c:2282 src/LYOptions.c:2293
 msgid "OFF"
 msgstr ""
 
-#: src/LYOptions.c:2128
+#: src/LYOptions.c:2130
 msgid "NEVER"
 msgstr ""
 
-#: src/LYOptions.c:2129
+#: src/LYOptions.c:2131
 msgid "ALWAYS"
 msgstr ""
 
-#: src/LYOptions.c:2145 src/LYOptions.c:2272
+#: src/LYOptions.c:2147 src/LYOptions.c:2274
 msgid "ignore"
 msgstr ""
 
-#: src/LYOptions.c:2146
+#: src/LYOptions.c:2148
 msgid "ask user"
 msgstr ""
 
-#: src/LYOptions.c:2147
+#: src/LYOptions.c:2149
 msgid "accept all"
 msgstr ""
 
-#: src/LYOptions.c:2159
+#: src/LYOptions.c:2161
 msgid "ALWAYS OFF"
 msgstr ""
 
-#: src/LYOptions.c:2160
+#: src/LYOptions.c:2162
 msgid "FOR LOCAL FILES ONLY"
 msgstr ""
 
-#: src/LYOptions.c:2162
+#: src/LYOptions.c:2164
 msgid "ALWAYS ON"
 msgstr ""
 
-#: src/LYOptions.c:2174
+#: src/LYOptions.c:2176
 msgid "Numbers act as arrows"
 msgstr ""
 
-#: src/LYOptions.c:2176
+#: src/LYOptions.c:2178
 msgid "Links are numbered"
 msgstr ""
 
-#: src/LYOptions.c:2179
+#: src/LYOptions.c:2181
 msgid "Links and form fields are numbered"
 msgstr ""
 
-#: src/LYOptions.c:2182
+#: src/LYOptions.c:2184
 msgid "Form fields are numbered"
 msgstr ""
 
-#: src/LYOptions.c:2192
+#: src/LYOptions.c:2194
 msgid "Case insensitive"
 msgstr ""
 
-#: src/LYOptions.c:2193
+#: src/LYOptions.c:2195
 msgid "Case sensitive"
 msgstr ""
 
-#: src/LYOptions.c:2217
+#: src/LYOptions.c:2219
 msgid "prompt normally"
 msgstr ""
 
-#: src/LYOptions.c:2218
+#: src/LYOptions.c:2220
 msgid "force yes-response"
 msgstr ""
 
-#: src/LYOptions.c:2219
+#: src/LYOptions.c:2221
 msgid "force no-response"
 msgstr ""
 
-#: src/LYOptions.c:2237
+#: src/LYOptions.c:2239
 #, fuzzy
 msgid "Novice"
 msgstr "Nic"
 
-#: src/LYOptions.c:2238
+#: src/LYOptions.c:2240
 #, fuzzy
 msgid "Intermediate"
 msgstr " (vnitøní)"
 
-#: src/LYOptions.c:2239
+#: src/LYOptions.c:2241
 msgid "Advanced"
 msgstr ""
 
-#: src/LYOptions.c:2248
+#: src/LYOptions.c:2250
 msgid "By First Visit"
 msgstr ""
 
-#: src/LYOptions.c:2250
+#: src/LYOptions.c:2252
 msgid "By First Visit Reversed"
 msgstr ""
 
-#: src/LYOptions.c:2251
+#: src/LYOptions.c:2253
 msgid "As Visit Tree"
 msgstr ""
 
-#: src/LYOptions.c:2252
+#: src/LYOptions.c:2254
 msgid "By Last Visit"
 msgstr ""
 
-#: src/LYOptions.c:2254
+#: src/LYOptions.c:2256
 msgid "By Last Visit Reversed"
 msgstr ""
 
 #. Old_DTD variable
-#: src/LYOptions.c:2265
+#: src/LYOptions.c:2267
 msgid "relaxed (TagSoup mode)"
 msgstr ""
 
-#: src/LYOptions.c:2266
+#: src/LYOptions.c:2268
 msgid "strict (SortaSGML mode)"
 msgstr ""
 
-#: src/LYOptions.c:2273
+#: src/LYOptions.c:2275
 msgid "as labels"
 msgstr ""
 
-#: src/LYOptions.c:2274
+#: src/LYOptions.c:2276
 #, fuzzy
 msgid "as links"
 msgstr "tento odkaz."
 
-#: src/LYOptions.c:2281
+#: src/LYOptions.c:2283
 #, fuzzy
 msgid "show filename"
 msgstr " (chybné jméno souboru)"
 
-#: src/LYOptions.c:2292
+#: src/LYOptions.c:2294
 msgid "STANDARD"
 msgstr ""
 
-#: src/LYOptions.c:2293
+#: src/LYOptions.c:2295
 msgid "ADVANCED"
 msgstr ""
 
-#: src/LYOptions.c:2319
+#: src/LYOptions.c:2321
 #, fuzzy
 msgid "Directories first"
 msgstr "Podadresáøe:"
 
-#: src/LYOptions.c:2320
+#: src/LYOptions.c:2322
 #, fuzzy
 msgid "Files first"
 msgstr " jako první."
 
-#: src/LYOptions.c:2321
+#: src/LYOptions.c:2323
 msgid "Mixed style"
-msgstr ""
-
-#: src/LYOptions.c:2329 src/LYOptions.c:2346
-#, fuzzy
-msgid "By Name"
-msgstr "Jméno:"
-
-#: src/LYOptions.c:2330 src/LYOptions.c:2347
-msgid "By Type"
 msgstr ""
 
 #: src/LYOptions.c:2331 src/LYOptions.c:2348
 #, fuzzy
+msgid "By Name"
+msgstr "Jméno:"
+
+#: src/LYOptions.c:2332 src/LYOptions.c:2349
+msgid "By Type"
+msgstr ""
+
+#: src/LYOptions.c:2333 src/LYOptions.c:2350
+#, fuzzy
 msgid "By Size"
 msgstr "Velikost v bajtech:"
 
-#: src/LYOptions.c:2332 src/LYOptions.c:2349
+#: src/LYOptions.c:2334 src/LYOptions.c:2351
 #, fuzzy
 msgid "By Date"
 msgstr "Datum:"
 
-#: src/LYOptions.c:2333
+#: src/LYOptions.c:2335
 msgid "By Mode"
 msgstr ""
 
-#: src/LYOptions.c:2335
+#: src/LYOptions.c:2337
 msgid "By User"
 msgstr ""
 
-#: src/LYOptions.c:2336
+#: src/LYOptions.c:2338
 #, fuzzy
 msgid "By Group"
 msgstr "Skupina"
 
-#: src/LYOptions.c:2357
+#: src/LYOptions.c:2359
 msgid "Do not show rate"
 msgstr ""
 
-#: src/LYOptions.c:2358 src/LYOptions.c:2359
+#: src/LYOptions.c:2360 src/LYOptions.c:2361
 #, fuzzy, c-format
 msgid "Show %s/sec rate"
 msgstr "Pøenos dat dokonèen"
 
-#: src/LYOptions.c:2361 src/LYOptions.c:2362
+#: src/LYOptions.c:2363 src/LYOptions.c:2364
 #, c-format
 msgid "Show %s/sec, ETA"
 msgstr ""
 
-#: src/LYOptions.c:2374
+#: src/LYOptions.c:2376
 msgid "Accept lynx's internal types"
 msgstr ""
 
-#: src/LYOptions.c:2375
+#: src/LYOptions.c:2377
 msgid "Also accept lynx.cfg's types"
 msgstr ""
 
-#: src/LYOptions.c:2376
+#: src/LYOptions.c:2378
 msgid "Also accept user's types"
 msgstr ""
 
-#: src/LYOptions.c:2377
+#: src/LYOptions.c:2379
 msgid "Also accept system's types"
 msgstr ""
 
-#: src/LYOptions.c:2378
+#: src/LYOptions.c:2380
 #, fuzzy
 msgid "Accept all types"
 msgstr "Pøijmout zmìny"
 
-#: src/LYOptions.c:2387
+#: src/LYOptions.c:2389
 msgid "gzip"
 msgstr ""
 
-#: src/LYOptions.c:2388
+#: src/LYOptions.c:2390
 msgid "deflate"
 msgstr ""
 
-#: src/LYOptions.c:2391
+#: src/LYOptions.c:2393
 msgid "compress"
 msgstr ""
 
-#: src/LYOptions.c:2394
+#: src/LYOptions.c:2396
 msgid "bzip2"
 msgstr ""
 
-#: src/LYOptions.c:2396
+#: src/LYOptions.c:2398
 msgid "All"
 msgstr ""
 
-#: src/LYOptions.c:2664 src/LYOptions.c:2688
+#: src/LYOptions.c:2666 src/LYOptions.c:2690
 #, c-format
 msgid "Use %s to invoke the Options menu!"
 msgstr ""
 
-#: src/LYOptions.c:3438
+#: src/LYOptions.c:3440
 msgid "(options marked with (!) will not be saved)"
 msgstr ""
 
-#: src/LYOptions.c:3446
+#: src/LYOptions.c:3448
 msgid "General Preferences"
 msgstr "Osobní nastavení"
 
 #. ***************************************************************
 #. User Mode: SELECT
-#: src/LYOptions.c:3450
+#: src/LYOptions.c:3452
 msgid "User mode"
 msgstr "U¾ivatelský re¾im"
 
 #. Editor: INPUT
-#: src/LYOptions.c:3456
+#: src/LYOptions.c:3458
 msgid "Editor"
 msgstr "Editor"
 
 #. Search Type: SELECT
-#: src/LYOptions.c:3461
+#: src/LYOptions.c:3463
 msgid "Type of Search"
 msgstr ""
 
-#: src/LYOptions.c:3466
+#: src/LYOptions.c:3468
 msgid "Security and Privacy"
 msgstr ""
 
 #. ***************************************************************
 #. Cookies: SELECT
-#: src/LYOptions.c:3470
+#: src/LYOptions.c:3472
 msgid "Cookies"
 msgstr "Cookies"
 
 #. Cookie Prompting: SELECT
-#: src/LYOptions.c:3484
+#: src/LYOptions.c:3486
 msgid "Invalid-Cookie Prompting"
 msgstr ""
 
 #. SSL Prompting: SELECT
-#: src/LYOptions.c:3491
+#: src/LYOptions.c:3493
 msgid "SSL Prompting"
 msgstr ""
 
-#: src/LYOptions.c:3497
+#: src/LYOptions.c:3499
 msgid "Keyboard Input"
 msgstr ""
 
 #. ***************************************************************
 #. Keypad Mode: SELECT
-#: src/LYOptions.c:3501
+#: src/LYOptions.c:3503
 msgid "Keypad mode"
 msgstr "Re¾im numerické klávesnice"
 
 #. Emacs keys: ON/OFF
-#: src/LYOptions.c:3507
+#: src/LYOptions.c:3509
 msgid "Emacs keys"
 msgstr "Emacs klávesy"
 
 #. VI Keys: ON/OFF
-#: src/LYOptions.c:3513
+#: src/LYOptions.c:3515
 msgid "VI keys"
 msgstr "VI klávesy"
 
 #. Line edit style: SELECT
 #. well, at least 2 line edit styles available
-#: src/LYOptions.c:3520
+#: src/LYOptions.c:3522
 msgid "Line edit style"
 msgstr ""
 
 #. Keyboard layout: SELECT
-#: src/LYOptions.c:3532
+#: src/LYOptions.c:3534
 msgid "Keyboard layout"
 msgstr ""
 
 #.
 #. * Display and Character Set
 #.
-#: src/LYOptions.c:3546
+#: src/LYOptions.c:3548
 msgid "Display and Character Set"
 msgstr "Místní znaková sada"
 
 #. Use locale-based character set: ON/OFF
-#: src/LYOptions.c:3551
+#: src/LYOptions.c:3553
 #, fuzzy
 msgid "Use locale-based character set"
 msgstr "Pøedpokládaná znaková sada"
 
 #. Display Character Set: SELECT
-#: src/LYOptions.c:3560
+#: src/LYOptions.c:3562
 msgid "Display character set"
 msgstr "Místní znaková sada"
 
-#: src/LYOptions.c:3591
+#: src/LYOptions.c:3593
 msgid "Assumed document character set"
 msgstr "Pøedpokládaná znaková sada"
 
@@ -4855,178 +4855,178 @@ msgstr "Pøedpokládaná znaková sada"
 #. * we split the header to make it more readable:
 #. * "CJK mode" for CJK display charsets, and "Raw 8-bit" for others.
 #.
-#: src/LYOptions.c:3611
+#: src/LYOptions.c:3613
 msgid "CJK mode"
 msgstr "CJK re¾im"
 
-#: src/LYOptions.c:3613
+#: src/LYOptions.c:3615
 msgid "Raw 8-bit"
 msgstr "Pøímý 8bitový re¾im"
 
 #. X Display: INPUT
-#: src/LYOptions.c:3621
+#: src/LYOptions.c:3623
 msgid "X Display"
 msgstr "X Display"
 
 #.
 #. * Document Appearance
 #.
-#: src/LYOptions.c:3627
+#: src/LYOptions.c:3629
 msgid "Document Appearance"
 msgstr ""
 
-#: src/LYOptions.c:3633
+#: src/LYOptions.c:3635
 msgid "Show color"
 msgstr "Zobrazovat barvy"
 
 #. Show cursor: ON/OFF
-#: src/LYOptions.c:3657
+#: src/LYOptions.c:3659
 msgid "Show cursor"
 msgstr "Zobrazovat kurzor"
 
 #. Underline links: ON/OFF
-#: src/LYOptions.c:3663
+#: src/LYOptions.c:3665
 #, fuzzy
 msgid "Underline links"
 msgstr "Skryté odkazy:"
 
 #. Show scrollbar: ON/OFF
-#: src/LYOptions.c:3670
+#: src/LYOptions.c:3672
 #, fuzzy
 msgid "Show scrollbar"
 msgstr "Zobrazovat barvy"
 
 #. Select Popups: ON/OFF
-#: src/LYOptions.c:3677
+#: src/LYOptions.c:3679
 msgid "Popups for select fields"
 msgstr "Vyskakovací menu pro zvolená pole"
 
 #. HTML error recovery: SELECT
-#: src/LYOptions.c:3683
+#: src/LYOptions.c:3685
 msgid "HTML error recovery"
 msgstr "Zotavení po chybách HTML"
 
 #. Show Images: SELECT
-#: src/LYOptions.c:3689
+#: src/LYOptions.c:3691
 msgid "Show images"
 msgstr "Zobrazení obrázkù"
 
 #. Verbose Images: ON/OFF
-#: src/LYOptions.c:3703
+#: src/LYOptions.c:3705
 msgid "Verbose images"
 msgstr "Doslovné obrázky"
 
 #.
 #. * Headers Transferred to Remote Servers
 #.
-#: src/LYOptions.c:3711
+#: src/LYOptions.c:3713
 msgid "Headers Transferred to Remote Servers"
 msgstr "HTTP hlavièky"
 
 #. ***************************************************************
 #. Mail Address: INPUT
-#: src/LYOptions.c:3715
+#: src/LYOptions.c:3717
 msgid "Personal mail address"
 msgstr "Osobní adresa elektronické po¹ty"
 
 #. Mail Address: INPUT
-#: src/LYOptions.c:3720
+#: src/LYOptions.c:3722
 #, fuzzy
 msgid "Password for anonymous ftp"
 msgstr "Heslo na news serveru '%s':"
 
 #. Preferred media type: SELECT
-#: src/LYOptions.c:3725
+#: src/LYOptions.c:3727
 #, fuzzy
 msgid "Preferred media type"
 msgstr "Pøeneseno bajtù: %d"
 
 #. Preferred encoding: SELECT
-#: src/LYOptions.c:3731
+#: src/LYOptions.c:3733
 #, fuzzy
 msgid "Preferred encoding"
 msgstr "Upøednostòovaný jazyk dokumentu"
 
 #. Preferred Document Character Set: INPUT
-#: src/LYOptions.c:3737
+#: src/LYOptions.c:3739
 msgid "Preferred document character set"
 msgstr "Upøednostòovaná znaková sada"
 
 #. Preferred Document Language: INPUT
-#: src/LYOptions.c:3742
+#: src/LYOptions.c:3744
 msgid "Preferred document language"
 msgstr "Upøednostòovaný jazyk dokumentu"
 
-#: src/LYOptions.c:3748
+#: src/LYOptions.c:3750
 msgid "User-Agent header"
 msgstr "Hlavièka 'User-Agent'"
 
 #.
 #. * Listing and Accessing Files
 #.
-#: src/LYOptions.c:3756
+#: src/LYOptions.c:3758
 msgid "Listing and Accessing Files"
 msgstr ""
 
 #. ***************************************************************
 #. FTP sort: SELECT
-#: src/LYOptions.c:3760
+#: src/LYOptions.c:3762
 msgid "FTP sort criteria"
 msgstr "Øazení FTP adresáøù"
 
 #. Local Directory Sort: SELECT
-#: src/LYOptions.c:3767
+#: src/LYOptions.c:3769
 msgid "Local directory sort criteria"
 msgstr "Øazení lokálních adresáøù"
 
 #. Local Directory Order: SELECT
-#: src/LYOptions.c:3773
+#: src/LYOptions.c:3775
 #, fuzzy
 msgid "Local directory sort order"
 msgstr "Øazení lokálních adresáøù"
 
-#: src/LYOptions.c:3782
+#: src/LYOptions.c:3784
 msgid "Show dot files"
 msgstr "Zobrazovat teèkové soubory"
 
-#: src/LYOptions.c:3790
+#: src/LYOptions.c:3792
 msgid "Execution links"
 msgstr "Spustitelné odkazy"
 
 #. Show transfer rate: SELECT
-#: src/LYOptions.c:3810
+#: src/LYOptions.c:3812
 msgid "Show transfer rate"
 msgstr "Pøenos dat dokonèen"
 
 #.
 #. * Special Files and Screens
 #.
-#: src/LYOptions.c:3830
+#: src/LYOptions.c:3832
 msgid "Special Files and Screens"
 msgstr ""
 
-#: src/LYOptions.c:3835
+#: src/LYOptions.c:3837
 msgid "Multi-bookmarks"
 msgstr "Dìlené zálo¾ky"
 
-#: src/LYOptions.c:3843
+#: src/LYOptions.c:3845
 msgid "Review/edit Bookmarks files"
 msgstr "Editace podsouborù se zálo¾kami"
 
-#: src/LYOptions.c:3845
+#: src/LYOptions.c:3847
 msgid "Goto multi-bookmark menu"
 msgstr "Menu dìlených zálo¾ek"
 
-#: src/LYOptions.c:3847
+#: src/LYOptions.c:3849
 msgid "Bookmarks file"
 msgstr "Soubor se zálo¾kami"
 
 #. Visited Pages: SELECT
-#: src/LYOptions.c:3853
+#: src/LYOptions.c:3855
 msgid "Visited Pages"
 msgstr "Nav¹tívené odkazy"
 
-#: src/LYOptions.c:3858
+#: src/LYOptions.c:3860
 #, fuzzy
 msgid "View the file "
 msgstr "Poslat soubor po¹tou"
@@ -5136,47 +5136,47 @@ msgstr ""
 msgid "setting of line-editor binding for key %s (0x%x) for %s failed\n"
 msgstr ""
 
-#: src/LYReadCFG.c:817
+#: src/LYReadCFG.c:815
 #, c-format
 msgid "Lynx: cannot start, CERN rules file %s is not available\n"
 msgstr "Lynx: nelze spustit, soubor %s s pravidly CERN není dostupný\n"
 
-#: src/LYReadCFG.c:818
+#: src/LYReadCFG.c:816
 msgid "(no name)"
 msgstr "(¾ádné jméno)"
 
-#: src/LYReadCFG.c:1818
+#: src/LYReadCFG.c:1816
 #, c-format
 msgid "More than %d nested lynx.cfg includes -- perhaps there is a loop?!?\n"
 msgstr "Více ne¾ %d vnoøených vlo¾ení z lynx.cfg -- nejedná se o nekoneènou smyèku?!?\n"
 
-#: src/LYReadCFG.c:1820
+#: src/LYReadCFG.c:1818
 #, c-format
 msgid "Last attempted include was '%s',\n"
 msgstr "Poslední vlo¾ený soubor je '%s'.\n"
 
-#: src/LYReadCFG.c:1821
+#: src/LYReadCFG.c:1819
 #, c-format
 msgid "included from '%s'.\n"
 msgstr "vlo¾ený z '%s'.\n"
 
-#: src/LYReadCFG.c:2228 src/LYReadCFG.c:2241 src/LYReadCFG.c:2299
+#: src/LYReadCFG.c:2226 src/LYReadCFG.c:2239 src/LYReadCFG.c:2297
 msgid "The following is read from your lynx.cfg file."
 msgstr "Následující údaje jsou èteny z va¹eho lynx.cfg."
 
-#: src/LYReadCFG.c:2229 src/LYReadCFG.c:2242
+#: src/LYReadCFG.c:2227 src/LYReadCFG.c:2240
 msgid "Please read the distribution"
 msgstr "Pøeètìte si implicitní dodávaný s distribucí"
 
-#: src/LYReadCFG.c:2235 src/LYReadCFG.c:2245
+#: src/LYReadCFG.c:2233 src/LYReadCFG.c:2243
 msgid "for more comments."
 msgstr "pro více informací."
 
-#: src/LYReadCFG.c:2281
+#: src/LYReadCFG.c:2279
 msgid "RELOAD THE CHANGES"
 msgstr "NAÈÍST ZMÌNY"
 
-#: src/LYReadCFG.c:2289
+#: src/LYReadCFG.c:2287
 msgid "Your primary configuration"
 msgstr "Va¹e primární konfigurace"
 

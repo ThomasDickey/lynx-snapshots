@@ -2762,7 +2762,7 @@ BOOLEAN inlocaldomain(void)
     char *cp, *mytty = NULL;
 
     if ((cp = ttyname(0)))
-	mytty = strrchr(cp, '/');
+	mytty = LYLastPathSep(cp);
 
     if (mytty && (fp = fopen(UTMP_FILE, "r")) != NULL) {
 	mytty++;
@@ -3974,7 +3974,7 @@ void LYConvertToURL(char **AllocatedString,
 
 	$DESCRIPTOR(url_file_dsc, url_file);
 	$DESCRIPTOR(file_name_dsc, file_name);
-	if (*old_string == '~') {
+	if (LYIsTilde(*old_string)) {
 	    /*
 	     * On VMS, we'll accept '~' on the command line as Home_Dir(), and
 	     * assume the rest of the path, if any, has SHELL syntax.
@@ -4142,7 +4142,7 @@ void LYConvertToURL(char **AllocatedString,
 #endif
 	else
 #endif /* USE_DOS_DRIVES */
-	if (*old_string == '~') {
+	if (LYIsTilde(*old_string)) {
 	    /*
 	     * On Unix, convert '~' to Home_Dir().
 	     */
@@ -4371,7 +4371,7 @@ void LYConvertToURL(char **AllocatedString,
 	    CTRACE((tfp, "Converted '%s' to '%s'\n",
 		    old_string, *AllocatedString));
 #endif /* VMS */
-	} else if (old_string[1] == '~') {
+	} else if (LYIsTilde(old_string[1])) {
 	    /*
 	     * Has a Home_Dir() reference.  Handle it as if there weren't a
 	     * lead slash.  - FM
@@ -5197,9 +5197,9 @@ BOOLEAN LYPathOffHomeOK(char *fbuffer,
 	}
     }
 #endif /* VMS */
-    if (*cp == '~') {
-	if (*(cp + 1) == '/') {
-	    if (*(cp + 2) != '\0') {
+    if (LYIsTilde(cp[0])) {
+	if (LYIsPathSep(cp[1])) {
+	    if (cp[2] != '\0') {
 		if ((cp1 = strchr((cp + 2), '/')) != NULL) {
 		    /*
 		     * Convert "~/subdir(s)/file" to "./subdir(s)/file".  - FM
@@ -5314,6 +5314,89 @@ BOOLEAN LYPathOffHomeOK(char *fbuffer,
     }
     FREE(file);
     return (TRUE);
+}
+
+/*
+ * Search for a leading tilde, optionally embedded.  If found, return a pointer
+ * to the tilde.  If not found, return the original parameter.
+ */
+static char *FindLeadingTilde(char *pathname, BOOL embedded)
+{
+    char *result = pathname;
+
+    if (pathname != NULL) {
+	if (embedded) {
+	    while (pathname[0] != '\0') {
+		if (LYIsPathSep(pathname[0])) {
+		    if (LYIsTilde(pathname[1])) {
+			++pathname;
+			break;
+		    }
+		}
+		++pathname;
+	    }
+	}
+	if (LYIsTilde(*pathname))
+	    result = pathname;
+    }
+    return result;
+}
+
+/*
+ * Convert a non-absolute path to one which is off the home directory.  Expand
+ * tildes as a side-effect.  Return a pointer to the converted result.
+ */
+char *LYAbsOrHomePath(char **fname)
+{
+    if (!LYisAbsPath(*fname)) {
+	if (LYIsTilde((*fname)[0])) {
+	    LYTildeExpand(fname, FALSE);
+	} else {
+	    char temp[LY_MAXPATH];
+
+	    LYAddPathToHome(temp, sizeof(temp), *fname);
+	    StrAllocCopy(*fname, temp);
+	}
+    }
+    return *fname;
+}
+
+/*
+ * Expand a "leading" tilde into the user's home directory in WWW format.  If
+ * "embedded" is true, allow that "leading" tilde to follow a path separator.
+ */
+char *LYTildeExpand(char **pathname,
+		    BOOL embedded)
+{
+    char *temp = FindLeadingTilde(*pathname, embedded);
+
+    if (temp != NULL
+	&& LYIsTilde(temp[0])) {
+
+	CTRACE((tfp, "LYTildeExpand %s\n", *pathname));
+	if (LYIsPathSep(temp[1])
+	    && temp[2] != '\0') {
+	    char *first = NULL;
+	    char *second = NULL;
+
+	    StrAllocCopy(first, *pathname);
+	    first[temp - *pathname] = '\0';
+
+	    StrAllocCopy(second, temp + 2);
+
+	    StrAllocCopy(*pathname, first);
+	    StrAllocCat(*pathname, wwwName(Home_Dir()));
+	    LYAddPathSep(pathname);
+	    StrAllocCat(*pathname, second);
+
+	    FREE(first);
+	    FREE(second);
+	} else if (temp[1] == '\0') {
+	    StrAllocCopy(*pathname, wwwName(Home_Dir()));
+	}
+	CTRACE((tfp, "expanded path %s\n", *pathname));
+    }
+    return *pathname;
 }
 
 /*
@@ -5800,7 +5883,8 @@ BOOL IsOurFile(const char *name)
     BOOL result = FALSE;
     struct stat data;
 
-    if (lstat(name, &data) == 0
+    if (!LYIsTilde(name[0])
+	&& lstat(name, &data) == 0
 	&& S_ISREG(data.st_mode)
 	&& (data.st_mode & (S_IWOTH | S_IWGRP)) == 0
 	&& data.st_nlink == 1
@@ -6666,7 +6750,7 @@ BOOLEAN LYValidateFilename(char *result,
 	return TRUE;
     }
 #endif
-    if ((cp = strchr(given, '~')) != 0
+    if ((cp = FindLeadingTilde(given, TRUE)) != 0
 	&& (cp2 = wwwName(Home_Dir())) != 0
 	&& strlen(cp2) + strlen(given) < LY_MAXPATH) {
 	*(cp++) = '\0';

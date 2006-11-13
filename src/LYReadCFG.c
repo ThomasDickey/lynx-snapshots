@@ -801,12 +801,10 @@ static int cern_rulesfile_fun(char *value)
     StrAllocCopy(rulesfile1, value);
     LYTrimLeading(value);
     LYTrimTrailing(value);
-    if (!strncmp(value, "~/", 2)) {
-	StrAllocCopy(rulesfile2, Home_Dir());
-	StrAllocCat(rulesfile2, value + 1);
-    } else {
-	StrAllocCopy(rulesfile2, value);
-    }
+
+    StrAllocCopy(rulesfile2, value);
+    LYTildeExpand(&rulesfile2, FALSE);
+
     if (strcmp(rulesfile1, rulesfile2) &&
 	HTLoadRules(rulesfile2) >= 0) {
 	FREE(rulesfile1);
@@ -1650,7 +1648,7 @@ static char *actual_filename(const char *cfg_filename,
 
     if (!LYisAbsPath(cfg_filename)
 	&& !(parent_filename == 0 && LYCanReadFile(cfg_filename))) {
-	if (!strncmp(cfg_filename, "~/", 2)) {
+	if (LYIsTilde(cfg_filename[0]) && LYIsPathSep(cfg_filename[1])) {
 	    HTSprintf0(&my_filename, "%s%s", Home_Dir(), cfg_filename + 1);
 	} else {
 	    if (parent_filename != 0) {

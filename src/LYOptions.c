@@ -336,7 +336,7 @@ void LYoptions(void)
     /*
      * If the user changes the display we need memory to put it in.
      */
-    char display_option[256];
+    char display_option[MAX_LINE];
     char *choices[MAXCHOICES];
     int CurrentCharSet = current_char_set;
     int CurrentAssumeCharSet = UCLYhndl_for_unspec;
@@ -1772,8 +1772,7 @@ void edit_bookmarks(void)
 
 #define MULTI_OFFSET 8
     int a;			/* misc counter */
-    char MBM_tmp_line[256];	/* buffer for LYgetstr */
-    char ehead_buffer[265];
+    char MBM_tmp_line[LY_MAXPATH];	/* buffer for LYgetstr */
 
     /*
      * We need (MBM_V_MAXFILES + MULTI_OFFSET) lines to display the whole list
@@ -1801,8 +1800,11 @@ void edit_bookmarks(void)
     LYmove(0, 5);
     lynx_start_h1_color();
     if (LYlines < (MBM_V_MAXFILES + MULTI_OFFSET)) {
-	sprintf(ehead_buffer, MULTIBOOKMARKS_EHEAD_MASK, MBM_current);
+	char *ehead_buffer = 0;
+
+	HTSprintf0(&ehead_buffer, MULTIBOOKMARKS_EHEAD_MASK, MBM_current);
 	LYaddstr(ehead_buffer);
+	FREE(ehead_buffer);
     } else {
 	LYaddstr(MULTIBOOKMARKS_EHEAD);
     }

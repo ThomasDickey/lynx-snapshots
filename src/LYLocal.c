@@ -734,7 +734,7 @@ static int modify_tagged(char *testpath)
 	/*
 	 * Replace ~/ references to the home directory.
 	 */
-	if (!strncmp(tmpbuf, "~/", 2)) {
+	if (LYIsTilde(tmpbuf[0]) && LYIsPathSep(tmpbuf[1])) {
 	    char *cp1 = NULL;
 
 	    StrAllocCopy(cp1, Home_Dir());
@@ -913,8 +913,8 @@ static int modify_location(char *testpath)
 	/*
 	 * Allow ~/ references to the home directory.
 	 */
-	if (!strncmp(tmpbuf, "~/", 2)
-	    || !strcmp(tmpbuf, "~")) {
+	if (LYIsTilde(tmpbuf[0])
+	    && (tmpbuf[1] == '\0' || LYIsPathSep(tmpbuf[1]))) {
 	    StrAllocCopy(newpath, Home_Dir());
 	    StrAllocCat(newpath, (tmpbuf + 1));
 	    LYstrncpy(tmpbuf, newpath, sizeof(tmpbuf) - 1);
@@ -1029,6 +1029,10 @@ int local_modify(DocInfo *doc, char **newpath)
     return 0;
 }
 
+#define BadChars() ((!no_dotfiles && show_dotfiles) \
+		    ? "~/" \
+		    : ".~/")
+
 /*
  * Create a new empty file in the current directory.
  */
@@ -1037,19 +1041,14 @@ static int create_file(char *current_location)
     int code = FALSE;
     char tmpbuf[DIRED_MAXBUF];
     char *testpath = NULL;
-    const char *bad_chars = ".~/";
 
     tmpbuf[0] = '\0';
     if (get_filename(gettext("Enter name of file to create: "),
 		     tmpbuf, sizeof(tmpbuf)) != NULL) {
 
-	if (!no_dotfiles && show_dotfiles) {
-	    bad_chars = "~/";
-	}
-
 	if (strstr(tmpbuf, "//") != NULL) {
 	    HTAlert(gettext("Illegal redirection \"//\" found! Request ignored."));
-	} else if (strlen(tmpbuf) && strchr(bad_chars, tmpbuf[0]) == NULL) {
+	} else if (strlen(tmpbuf) && strchr(BadChars(), tmpbuf[0]) == NULL) {
 	    StrAllocCopy(testpath, current_location);
 	    LYAddPathSep(&testpath);
 
@@ -1078,19 +1077,14 @@ static int create_directory(char *current_location)
     int code = FALSE;
     char tmpbuf[DIRED_MAXBUF];
     char *testpath = NULL;
-    const char *bad_chars = ".~/";
 
     tmpbuf[0] = '\0';
     if (get_filename(gettext("Enter name for new directory: "),
 		     tmpbuf, sizeof(tmpbuf)) != NULL) {
 
-	if (!no_dotfiles && show_dotfiles) {
-	    bad_chars = "~/";
-	}
-
 	if (strstr(tmpbuf, "//") != NULL) {
 	    HTAlert(gettext("Illegal redirection \"//\" found! Request ignored."));
-	} else if (strlen(tmpbuf) && strchr(bad_chars, tmpbuf[0]) == NULL) {
+	} else if (strlen(tmpbuf) && strchr(BadChars(), tmpbuf[0]) == NULL) {
 	    StrAllocCopy(testpath, current_location);
 	    LYAddPathSep(&testpath);
 
@@ -2280,11 +2274,11 @@ BOOLEAN local_install(char *destpath,
     }
 
     /* deal with ~/ or /~/ at the beginning - kw */
-    if (destpath[0] == '~' &&
-	(destpath[1] == '/' || destpath[1] == '\0')) {
+    if (LYIsTilde(destpath[0]) &&
+	(LYIsPathSep(destpath[1]) || destpath[1] == '\0')) {
 	cp = &destpath[1];
-    } else if (destpath[0] == '/' && destpath[1] == '~' &&
-	       (destpath[2] == '/' || destpath[2] == '\0')) {
+    } else if (LYIsPathSep(destpath[0]) && LYIsTilde(destpath[1]) &&
+	       (LYIsPathSep(destpath[2]) || destpath[2] == '\0')) {
 	cp = &destpath[2];
     }
     if (cp) {

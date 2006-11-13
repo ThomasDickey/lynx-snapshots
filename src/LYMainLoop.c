@@ -1736,7 +1736,7 @@ static void handle_LYK_COMMENT(BOOLEAN *refresh_screen,
 
 		if (temp != NULL) {
 		    HTUnEscape(temp);
-		    if (*temp == '~' && strlen(temp) > 1) {
+		    if (LYIsTilde(*temp) && strlen(temp) > 1) {
 			/*
 			 * It's a ~user URL so guess user@host.  - FM
 			 */
@@ -5008,9 +5008,7 @@ void handle_LYK_CHDIR(void)
 	return;
     }
 
-    if (*buf == '~' && !buf[1]) {
-	StrAllocCopy(p, Home_Dir());
-    } else if (*buf == '~') {
+    if (LYIsTilde(*buf) && (LYIsPathSep(buf[1]) || buf[1] == '\0')) {
 	HTSprintf0(&p, "%s%s", Home_Dir(), buf + 1);
     } else {
 	StrAllocCopy(p, buf);
