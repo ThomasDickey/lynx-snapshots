@@ -37,10 +37,16 @@ int kbhit(void);		/* FIXME: use conio.h */
 #endif
 
 #ifdef _WINDOWS			/* 1998/04/30 (Thu) 19:04:25 */
-#define GETPID()	(getpid() & 0xffff)
+#define GETPID()	(unsigned) (getpid() & 0xffff)
 #else
-#define GETPID()	getpid()
+#define GETPID()	(unsigned) getpid()
 #endif /* _WINDOWS */
+
+#ifdef FNAMES_8_3
+#define PID_FMT "%04x"
+#else
+#define PID_FMT "%u"
+#endif
 
 #ifdef DJGPP_KEYHANDLER
 #include <bios.h>
@@ -3065,19 +3071,11 @@ void change_sug_filename(char *fname)
      * Rename any temporary files.
      */
     cp2 = wwwName(lynx_temp_space);
-#ifdef FNAMES_8_3
     if (LYIsHtmlSep(*cp2)) {
-	HTSprintf0(&temp, "file://localhost%s%04x", cp2, GETPID());
+	HTSprintf0(&temp, "file://localhost%s" PID_FMT, cp2, GETPID());
     } else {
-	HTSprintf0(&temp, "file://localhost/%s%04x", cp2, GETPID());
+	HTSprintf0(&temp, "file://localhost/%s" PID_FMT, cp2, GETPID());
     }
-#else
-    if (LYIsHtmlSep(*cp2)) {
-	HTSprintf0(&temp, "file://localhost%s%d", cp2, (int) getpid());
-    } else {
-	HTSprintf0(&temp, "file://localhost/%s%d", cp2, (int) getpid());
-    }
-#endif
     if (!strncmp(fname, temp, strlen(temp))) {
 	cp = strrchr(fname, '.');
 	if (strlen(cp) > (strlen(temp) - 4))
@@ -3403,11 +3401,7 @@ static int fmt_tempname(char *result,
      * the suffix may contain more than a ".htm", e.g., "-txt.gz", so we trim
      * off from the filename portion to make room.
      */
-#ifdef _WINDOWS
-    sprintf(leaf, "%04x%04x", counter, (unsigned) GETPID());
-#else
-    sprintf(leaf, "%u%u", counter, (unsigned) getpid());
-#endif
+    sprintf(leaf, PID_FMT PID_FMT, counter, GETPID());
     if (strlen(leaf) > 8)
 	leaf[8] = 0;
     if (strlen(suffix) > 4 || *suffix != '.') {
@@ -3420,7 +3414,7 @@ static int fmt_tempname(char *result,
     }
     strcat(leaf, suffix);
 #else
-    sprintf(leaf, "L%u-%uTMP%s", (unsigned) getpid(), counter, suffix);
+    sprintf(leaf, "L" PID_FMT "-%uTMP%s", GETPID(), counter, suffix);
 #endif
     /*
      * Someone could have configured the temporary pathname to be too long.
@@ -5370,8 +5364,7 @@ char *LYTildeExpand(char **pathname,
 {
     char *temp = FindLeadingTilde(*pathname, embedded);
 
-    if (temp != NULL
-	&& LYIsTilde(temp[0])) {
+    if (LYIsTilde(temp[0])) {
 
 	CTRACE((tfp, "LYTildeExpand %s\n", *pathname));
 	if (LYIsPathSep(temp[1])
@@ -6750,7 +6743,7 @@ BOOLEAN LYValidateFilename(char *result,
 	return TRUE;
     }
 #endif
-    if ((cp = FindLeadingTilde(given, TRUE)) != 0
+    if ((cp = FindLeadingTilde(given, TRUE)) != given
 	&& (cp2 = wwwName(Home_Dir())) != 0
 	&& strlen(cp2) + strlen(given) < LY_MAXPATH) {
 	*(cp++) = '\0';
