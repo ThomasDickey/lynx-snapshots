@@ -1,6 +1,12 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2006-11-14 (2.8.7dev.4)
+* use RFC-822 encoding for filenames passed via file-upload forms (Debian
+  #181165) -TD
+* correct check of return-value from FindLeadingTilde() in dev.3 cleanup of
+  "~" parsing -TD
+
 2006-11-12 (2.8.7dev.3)
 * change the default HELPFILE to the 2.8.6 release directory since the
   page on subir.com contains obsolete information -TD
