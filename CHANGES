@@ -1,6 +1,11 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2007-02-25 (2.8.7dev.5)
+* updated configure script macros CF_SUBDIR_PATH, CF_XOPEN_SOURCE,
+  CF_X_ATHENA_LIBS, CF_X_TOOLKIT -TD
+* updated config.guess, config.sub
+
 2006-11-14 (2.8.7dev.4)
 * use RFC-822 encoding for filenames passed via file-upload forms (Debian
   #181165) -TD
