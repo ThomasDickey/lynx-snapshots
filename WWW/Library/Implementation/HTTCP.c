@@ -575,7 +575,7 @@ static size_t fill_rehostent(char *rehostent,
 #if defined(_WINDOWS_NSL)
 static LYNX_HOSTENT *gbl_phost;	/* Pointer to host - See netdb.h */
 
-#ifndef __CYGWIN__
+#if !(defined(__CYGWIN__) && defined(NSL_FORK))
 static int donelookup;
 
 static unsigned long __stdcall _fork_func(void *arg)
@@ -1148,7 +1148,12 @@ LYNX_HOSTENT *LYGetHostByName(char *str)
 #endif /* !__CYGWIN__ */
 	    gbl_phost = (LYNX_HOSTENT *) NULL;
 	    donelookup = FALSE;
+
+#if defined(__CYGWIN__) || defined(USE_WINSOCK2_H)
+	    SetLastError(WSAHOST_NOT_FOUND);
+#else
 	    WSASetLastError(WSAHOST_NOT_FOUND);
+#endif
 
 	    hThread = CreateThread(NULL, 4096UL, _fork_func, host, 0UL,
 				   &dwThreadID);

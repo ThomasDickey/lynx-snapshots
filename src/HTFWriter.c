@@ -315,7 +315,7 @@ static void HTFWriter_free(HTStream *me)
 			/*
 			 * Tell user what's happening.  - FM
 			 */
-			HTUserMsg2(WWW_USING_MESSAGE, addr);
+			HTInfoMsg2(WWW_USING_MESSAGE, addr);
 		    }
 
 		    if (skip_loadfile) {
@@ -873,7 +873,7 @@ HTStream *HTSaveToFile(HTPresentation *pres,
      * to help sort that out later.  Unix folks don't need to know this, but
      * we'll show it to them, too.  - FM
      */
-    HTUserMsg2(CONTENT_TYPE_MSG, pres->rep->name);
+    HTInfoMsg2(CONTENT_TYPE_MSG, pres->rep->name);
 
     StrAllocCopy(WWW_Download_File, fnam);
 

@@ -1086,7 +1086,7 @@ static attr ulist_attr[] = {		/* UL attributes */
 
    Descriptive or analytic markup: EM, STRONG, DFN, CODE, SAMP, KBD, VAR, CITE, Q, LANG, AU,
 				   2   2       2    2	  2	2    2	  2	2  2 n	 2
-   AUTHOR, PERSON, ACRONYM, ABBREV, INS, DEL, and SPAN
+   AUTHOR, PERSON, ACRONYM, ABBR, INS, DEL, and SPAN
    2	   2 n	   2	    2	    2	 2	  2
    Visual markup:S, STRIKE, I, B, TT, U,?NOBR,?WBR, BR, BIG, SMALL, FONT, STYLE, BLINK, TAB,
 		 1  1	    1  1  1   1  ?1 n ?1nE? 1 E  1   1	    1	  1 l	 1	1 E?
@@ -1121,8 +1121,8 @@ static attr ulist_attr[] = {		/* UL attributes */
 /*			self	contain icont'n contn'd icont'd canclos flags*/
  /* { "A"	, a_attr,	HTML_A_ATTRIBUTES,	SGML_MIXED }, */
 #define T_A		0x0008, 0x0B007,0x0FF17,0x37787,0x77BA7,0x8604F,0x00014
- /* { "ABBREV"	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED }, */
-#define T_ABBREV	0x0002, 0x8B04F,0x8FFFF,0xA778F,0xF7FBF,0x00003,0x00000
+ /* { "ABBR"	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED }, */
+#define T_ABBR		0x0002, 0x8B04F,0x8FFFF,0xA778F,0xF7FBF,0x00003,0x00000
  /* { "ACRONYM" , gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED }, */
 #define T_ACRONYM	0x0002, 0x8B04F,0x8FFFF,0xA778F,0xF7FBF,0x00003,0x00000
  /* { "ADDRESS" , address_attr, HTML_ADDRESS_ATTRIBUTES, SGML_MIXED }, */
@@ -1390,7 +1390,7 @@ static attr ulist_attr[] = {		/* UL attributes */
 /* *INDENT-OFF* */
 static const HTTag tags_old[HTML_ALL_ELEMENTS] = {
  { P("A")	, a_attr,	HTML_A_ATTRIBUTES,	SGML_EMPTY,T_A},
- { P("ABBREV")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_ABBREV},
+ { P("ABBR")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_ABBR},
  { P("ACRONYM") , gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_ACRONYM},
  { P("ADDRESS") , address_attr, HTML_ADDRESS_ATTRIBUTES, SGML_MIXED,T_ADDRESS},
  { P("APPLET")	, applet_attr,	HTML_APPLET_ATTRIBUTES, SGML_MIXED,T_APPLET},
@@ -1515,7 +1515,7 @@ static const HTTag tags_old[HTML_ALL_ELEMENTS] = {
 
 static const HTTag tags_new[HTML_ALL_ELEMENTS] = {
  { P("A")	, a_attr,	HTML_A_ATTRIBUTES,	SGML_MIXED,T_A},
- { P("ABBREV")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_ABBREV},
+ { P("ABBR")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_ABBR},
  { P("ACRONYM") , gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_ACRONYM},
  { P("ADDRESS") , address_attr, HTML_ADDRESS_ATTRIBUTES, SGML_MIXED,T_ADDRESS},
  { P("APPLET")	, applet_attr,	HTML_APPLET_ATTRIBUTES, SGML_MIXED,T_APPLET},

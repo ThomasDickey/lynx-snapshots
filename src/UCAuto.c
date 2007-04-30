@@ -172,9 +172,11 @@ static int call_setfont(const char *font,
 	if (rv) {
 	    CTRACE((tfp, "call_setfont: system returned %d (0x%x)!\n",
 		    rv, rv));
-	    if ((rv == (EX_DATAERR << 8) ||
-		 rv == (EX_NOINPUT << 8)) &&
-		non_empty(umap)) {
+	    if (rv == -1 || WIFSIGNALED(rv) || !WIFEXITED(rv)) {
+		return -1;
+	    } else if ((WEXITSTATUS(rv) == EX_DATAERR ||
+			WEXITSTATUS(rv) == EX_NOINPUT) &&
+		       non_empty(umap)) {
 		/*
 		 * Check if the font was loaded ok but something was wrong with
 		 * the umap file.

@@ -8392,19 +8392,15 @@ void www_user_search(int start_line,
 void user_message(const char *message,
 		  const char *argument)
 {
-    char *temp = NULL;
-
     if (message == NULL) {
 	mustshow = FALSE;
-	return;
+    } else {
+	char *temp = NULL;
+
+	HTSprintf0(&temp, message, NonNull(argument));
+	statusline(temp);
+	FREE(temp);
     }
-
-    HTSprintf0(&temp, message, NonNull(argument));
-
-    statusline(temp);
-
-    FREE(temp);
-    return;
 }
 
 /*

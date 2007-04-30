@@ -39,7 +39,7 @@ Element Numbers
 
  */ typedef enum {
 	HTML_A,
-	HTML_ABBREV,
+	HTML_ABBR,
 	HTML_ACRONYM,
 	HTML_ADDRESS,
 	HTML_APPLET,
