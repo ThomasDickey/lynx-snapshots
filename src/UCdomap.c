@@ -951,8 +951,8 @@ int UCTransUniCharStr(char *outbuf,
 	    pout = outbuf, outleft = buflen;
 	    HTSprintf0(&tocode, "%s//TRANSLIT", LYCharSet_UC[charset_out].MIMEname);
 	    cd = iconv_open(tocode, "UTF-16BE");
-	    FREE(tocode)
-		rc = iconv(cd, &pin, &inleft, &pout, &outleft);
+	    FREE(tocode);
+	    rc = iconv(cd, &pin, &inleft, &pout, &outleft);
 	    iconv_close(cd);
 	    if ((pout - outbuf) == 3) {
 		CTRACE((tfp,

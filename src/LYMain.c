@@ -1605,6 +1605,33 @@ int main(int argc,
 	}
 	LYStdinArgs_free();
     }
+#ifdef HAVE_TTYNAME
+    /*
+     * If the input is not a tty, we are either running in cron, or are
+     * getting input via a pipe:
+     *
+     * a) in cron, none of stdin/stdout/stderr are tty's.
+     * b) from a pipe, we should have either "-" or "-stdin" options.
+     */
+    if (!LYGetStdinArgs
+	&& !startfile_stdin
+	&& !isatty(fileno(stdin))
+	&& (isatty(fileno(stdout) || isatty(fileno(stderr))))) {
+	int ignored = 0;
+	int ch;
+
+	while ((ch = fgetc(stdin)) != EOF) {
+	    ++ignored;
+	}
+	if (ignored) {
+	    fprintf(stderr,
+		    gettext("Ignored %d characters from standard input.\n"), ignored);
+	    fprintf(stderr,
+		    gettext("Use \"-stdin\" or \"-\" to tell how to handle piped input.\n"));
+	}
+    }
+#endif /* HAVE_TTYNAME */
+
 #ifdef CAN_SWITCH_DISPLAY_CHARSET
     if (current_char_set == auto_display_charset)	/* Better: explicit option */
 	switch_display_charsets = 1;
@@ -2275,20 +2302,6 @@ void reload_read_cfg(void)
 #ifdef EXP_CHARSET_CHOICE
 	init_charset_subsets();
 #endif
-
-	/* We are not interested in startfile here */
-	/* but other things may be lost: */
-
-	/*
-	 * Process any command line arguments not already handled.
-	 */
-	/* Not implemented yet here */
-
-	/*
-	 * Process any stdin-derived arguments for a lone "-" which we've
-	 * loaded into LYStdinArgs.
-	 */
-	/* Not implemented yet here */
 
 	/*
 	 * Initialize other things based on the configuration read.

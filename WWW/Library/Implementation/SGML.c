@@ -3470,8 +3470,10 @@ static void SGML_character(HTStream *context, char c_in)
 	break;
 
     case S_tag_gap:		/* Expecting attribute or '>' */
-	if (WHITE(c))
+	if (WHITE(c)) {
+	    /* PUTC(c); - no, done as special case */
 	    break;		/* Gap between attributes */
+	}
 	if (c == '>') {		/* End of tag */
 #ifdef USE_PRETTYSRC
 	    if (!psrc_view)
@@ -3521,9 +3523,9 @@ static void SGML_character(HTStream *context, char c_in)
 			LYUpperCase(string->data);
 		}
 		PUTS(string->data);
-		if (c == '=')
-		    PUTC('=');
-		if (c == '=' || c == '>') {
+		if (c == '=' || WHITE(c))
+		    PUTC(c);
+		if (c == '=' || c == '>' || c == ' ') {
 		    if (context->current_attribute_number == INVALID)
 			PSRCSTOP(badattr);
 		    else
@@ -3546,8 +3548,10 @@ static void SGML_character(HTStream *context, char c_in)
 	break;
 
     case S_attr_gap:		/* Expecting attribute or '=' or '>' */
-	if (WHITE(c))
+	if (WHITE(c)) {
+	    PUTC(c);
 	    break;		/* Gap after attribute */
+	}
 	if (c == '>') {		/* End of tag */
 #ifdef USE_PRETTYSRC
 	    if (psrc_view) {
@@ -3584,8 +3588,10 @@ static void SGML_character(HTStream *context, char c_in)
 	break;
 
     case S_equals:		/* After attr = */
-	if (WHITE(c))
+	if (WHITE(c)) {
+	    PUTC(c);
 	    break;		/* Before attribute value */
+	}
 	if (c == '>') {		/* End of tag */
 	    CTRACE((tfp, "SGML: found = but no value\n"));
 #ifdef USE_PRETTYSRC

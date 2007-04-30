@@ -98,6 +98,18 @@ void HTInfoMsg(const char *Msg)
     }
 }
 
+void HTInfoMsg2(const char *Msg2, const char *Arg)
+{
+    _user_message(Msg2, Arg);
+    if (non_empty(Msg2)) {
+	CTRACE((tfp, "Info message: "));
+	CTRACE((tfp, Msg2, Arg));
+	CTRACE((tfp, "\n"));
+	LYstore_message2(Msg2, Arg);
+	LYSleepInfo();
+    }
+}
+
 /*	Issue an important message.			HTUserMsg()
  *	--------------------------------
  */

@@ -1,7 +1,26 @@
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2007-02-25 (2.8.7dev.5)
+2007-0?-?? (2.8.7dev.5)
+* improve pretty-src in a few places by passing-through whitespace as
+  demonstrated by
+	http://www.w3.org/TR/html401/index/elements.html
+  (report by Rado Smiljanic) -TD
+* change user-messages in HTFWriter.c to info-messages, which are generally
+  faster (prompted by patch by Rado Smiljanic) -TD
+* fix pretty-src for "attribute without value" case (patch by Rado Smiljanic)
+* correct tab "abbr", was "abbrev" (patch by Rado Smiljanic)
+* modify ifdef's in HTTCP.c to allow building Cygwin configuration without
+  NSL_FORK, broken in 2.8.5dev.5 (report by Holger Lange) -TD
+* modify IsOurFile() to allow its parameter to be a symbolic link to one of
+  the user's files (report by Rado Smiljanic) -TD
+* check if there is piped-in data when starting without "-" or "-stdin"
+  options, warn about the ignored input data in that case (prompted by report
+  by Toralf Foerster) -TD
+* use POSIX macros for decoding system() return value in UCAuto.c -TD
+* use POSIX macros for decoding system() return value in LYEdit.c
+  (adapted from an incomplete change in OpenBSD CVS) -TD
+* modify CF_SRAND to recognize the asymmetric variant of arc4random() -TD
 * updated configure script macros CF_SUBDIR_PATH, CF_XOPEN_SOURCE,
   CF_X_ATHENA_LIBS, CF_X_TOOLKIT -TD
 * updated config.guess, config.sub

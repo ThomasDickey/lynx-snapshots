@@ -2194,7 +2194,7 @@ static int HTML_start_element(HTStructured * me, int element_number,
 	}
 	break;
 
-    case HTML_ABBREV:		/* Miscellaneous character containers */
+    case HTML_ABBR:		/* Miscellaneous character containers */
     case HTML_ACRONYM:
     case HTML_AU:
     case HTML_AUTHOR:
@@ -6104,7 +6104,7 @@ static int HTML_end_element(HTStructured * me, int element_number,
 	}
 	break;
 
-    case HTML_ABBREV:		/* Miscellaneous character containers */
+    case HTML_ABBR:		/* Miscellaneous character containers */
     case HTML_ACRONYM:
     case HTML_AU:
     case HTML_AUTHOR:

@@ -10,6 +10,7 @@
 #endif /* VMS */
 
 #include <LYLeaks.h>
+#include <www_wait.h>
 
 BOOLEAN editor_can_position(void)
 {
@@ -242,18 +243,25 @@ void edit_temporary_file(char *filename,
 	 */
 	{
 #ifdef UNIX
-	    int rvhi = (rv >> 8);
+	    int save_err = errno;
 
 	    CTRACE((tfp, "ExtEditForm: system() returned %d (0x%x), %s\n",
-		    rv, rv, errno ? LYStrerror(errno) : "reason unknown"));
+		    rv, rv,
+		    (save_err
+		     ? LYStrerror(save_err)
+		     : "reason unknown")));
 	    LYFixCursesOn("show error warning:");
-	    if (rv != -1 && (rv && 0xff) && !rvhi) {
+	    if (rv == -1) {
+		HTUserMsg2(gettext("Error starting editor, %s"),
+			   LYStrerror(save_err));
+	    } else if (WIFSIGNALED(rv)) {
 		HTAlwaysAlert(NULL, gettext("Editor killed by signal"));
-	    } else if (!(rv == -1 || (rvhi == 127 && errno))) {
-		HTUserMsg2(gettext("Editor returned with error status, %s"),
-			   (errno
-			    ? LYStrerror(errno)
-			    : gettext("reason unknown.")));
+	    } else if (WIFEXITED(rv) && WEXITSTATUS(rv) != 127) {
+		char exitcode[80];
+
+		sprintf(exitcode, "%d", WEXITSTATUS(rv));
+		HTUserMsg2(gettext("Editor returned with error status %s"),
+			   exitcode);
 	    } else
 #endif
 		HTAlwaysAlert(NULL, ERROR_SPAWNING_EDITOR);

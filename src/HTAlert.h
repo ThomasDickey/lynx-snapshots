@@ -31,6 +31,7 @@ extern "C" {
     extern void HTAlert(const char *Msg);
     extern void HTAlwaysAlert(const char *extra_prefix, const char *Msg);
     extern void HTInfoMsg(const char *Msg);
+    extern void HTInfoMsg2(const char *Msg, const char *Arg);
     extern void HTUserMsg(const char *Msg);
     extern void HTUserMsg2(const char *Msg, const char *Arg);
 

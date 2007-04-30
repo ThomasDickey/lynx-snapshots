@@ -1082,6 +1082,7 @@ static int HTGzFileCopy(gzFile gzfp, HTStream *sink)
 static const char *zError(int status)
 {
     static char result[80];
+
     sprintf(result, "zlib error %d", status);
     return result;
 }

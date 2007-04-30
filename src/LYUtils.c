@@ -5866,6 +5866,34 @@ int remove(char *name)
 #endif
 
 #if defined(MULTI_USER_UNIX)
+
+#if defined(HAVE_LSTAT) && defined(S_IFLNK)
+/*
+ * If IsOurFile() is checking a symbolic link, ensure that the target
+ * points to the user's file as well.
+ */
+static BOOL IsOurSymlink(const char *name)
+{
+    BOOL result = FALSE;
+    int size = LY_MAXPATH;
+    char *buffer = malloc(size);
+
+    if (buffer != 0) {
+	while (readlink(name, buffer, size) == -1) {
+	    buffer = realloc(buffer, size *= 2);
+	    if (buffer == 0)
+		break;
+	}
+    }
+    if (buffer != 0) {
+	CTRACE2(TRACE_CFG, (tfp, "IsOurSymlink(%s -> %s)\n", name, buffer));
+	result = IsOurFile(buffer);
+	FREE(buffer);
+    }
+    return result;
+}
+#endif
+
 /*
  * Verify if this is really a file, not accessed by a link, except for the
  * special case of its directory being pointed to by a link from a directory
@@ -5878,10 +5906,14 @@ BOOL IsOurFile(const char *name)
 
     if (!LYIsTilde(name[0])
 	&& lstat(name, &data) == 0
-	&& S_ISREG(data.st_mode)
-	&& (data.st_mode & (S_IWOTH | S_IWGRP)) == 0
-	&& data.st_nlink == 1
-	&& data.st_uid == getuid()) {
+	&& ((S_ISREG(data.st_mode)
+	     && (data.st_mode & (S_IWOTH | S_IWGRP)) == 0
+	     && data.st_nlink == 1
+	     && data.st_uid == getuid())
+#if defined(HAVE_LSTAT) && defined(S_IFLNK)
+	    || (S_ISLNK(data.st_mode) && IsOurSymlink(name))
+#endif
+	)) {
 	int linked = FALSE;
 
 	/*
