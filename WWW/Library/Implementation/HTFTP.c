@@ -179,21 +179,20 @@ static char *user_entered_password = NULL;
 static char *last_username_and_host = NULL;
 
 /*
- * ProFTPD 1.2.5rc1 is known to have a broken implementation of RETR.  If asked
- * to retrieve a directory, it gets confused and fails subsequent commands such
- * as CWD and LIST.  Since this is an unusual bug, we should remove this ifdef
- * at some point - TD 2004/1/1.
+ * Some ftp servers are known to have a broken implementation of RETR.  If
+ * asked to retrieve a directory, they get confused and fail subsequent
+ * commands such as CWD and LIST.
  */
-#define BROKEN_PROFTPD 1
-static int ProFTPD_bugs = FALSE;
+static int Broken_RETR = FALSE;
 
 /*
- * wu-ftpd 2.6.2(12) is known to have a broken implementation of EPSV.  The
+ * Some ftp servers are known to have a broken implementation of EPSV.  The
  * server will hang for a long time when we attempt to connect after issuing
- * this command - TD 2004/12/28
+ * this command.
  */
-#define BROKEN_WUFTPD 1
-static int WU_FTPD_bugs = FALSE;
+#ifdef INET6
+static int Broken_EPSV = FALSE;
+#endif
 
 typedef enum {
     GENERIC_SERVER
@@ -470,6 +469,25 @@ static int write_cmd(const char *cmd)
     return 1;
 }
 
+/*
+ * For each string in the list, check if it is found in the response text.
+ * If so, return TRUE.
+ */
+static BOOL find_response(HTList *list)
+{
+    BOOL result = FALSE;
+    HTList *p = list;
+    char *value;
+
+    while ((value = (char *) HTList_nextObject(p)) != NULL) {
+	if (LYstrstr(response_text, value)) {
+	    result = TRUE;
+	    break;
+	}
+    }
+    return result;
+}
+
 /*	Execute Command and get Response
  *	--------------------------------
  *
@@ -537,16 +555,13 @@ static int response(const char *cmd)
 			continuation == ' ')
 			continuation_response = -1;	/* ended */
 		}
-#ifdef BROKEN_PROFTPD
-		if (result == 220 && LYstrstr(response_text, "ProFTPD 1.2.5")) {
-		    ProFTPD_bugs = TRUE;
+		if (result == 220 && find_response(broken_ftp_retr)) {
+		    Broken_RETR = TRUE;
 		    CTRACE((tfp, "This server is broken (RETR)\n"));
 		}
-#endif
-#ifdef BROKEN_WUFTPD
-		if (result == 220 && LYstrstr(response_text,
-					      "(Version wu-2.6.2-12)")) {
-		    WU_FTPD_bugs = TRUE;
+#ifdef INET6
+		if (result == 220 && find_response(broken_ftp_epsv)) {
+		    Broken_EPSV = TRUE;
 		    CTRACE((tfp, "This server is broken (EPSV)\n"));
 		}
 #endif
@@ -2984,8 +2999,11 @@ static int setup_connection(const char *name,
      */
     use_list = FALSE;
     server_type = GENERIC_SERVER;
-    ProFTPD_bugs = FALSE;
-    WU_FTPD_bugs = FALSE;
+    Broken_RETR = FALSE;
+
+#ifdef INET6
+    Broken_EPSV = FALSE;
+#endif
 
     for (retry = 0; retry < 2; retry++) {	/* For timed out/broken connections */
 	status = get_connection(name, anchor);
@@ -3042,7 +3060,7 @@ static int setup_connection(const char *name,
 
 #ifdef INET6
 	    /* see RFC 2428 */
-	    if (WU_FTPD_bugs)
+	    if (Broken_EPSV)
 		status = 1;
 	    else
 		status = send_cmd_1(p = "EPSV");
@@ -3658,14 +3676,10 @@ int HTFTPLoad(const char *name,
 	 */
 	if (!(type) || (type && *type != 'D')) {
 	    status = send_cmd_2("RETR", filename);
-#ifdef BROKEN_PROFTPD
-	    /*
-	     * ProFTPD 1.2.5rc1 gets confused when asked to RETR a directory.
-	     */
 	    if (status >= 5) {
 		int check;
 
-		if (ProFTPD_bugs) {
+		if (Broken_RETR) {
 		    CTRACE((tfp, "{{reconnecting...\n"));
 		    close_connection(control);
 		    check = setup_connection(name, anchor);
@@ -3674,7 +3688,6 @@ int HTFTPLoad(const char *name,
 			return check;
 		}
 	    }
-#endif
 	} else {
 	    status = 5;		/* Failed status set as flag. - FM */
 	}

@@ -204,9 +204,6 @@ BOOLEAN dump_output_immediately = FALSE;
 BOOLEAN dump_to_stderr = FALSE;
 BOOLEAN emacs_keys = EMACS_KEYS_ALWAYS_ON;
 BOOLEAN error_logging = MAIL_SYSTEM_ERROR_LOGGING;
-BOOLEAN ftp_passive = FTP_PASSIVE;	/* TRUE if doing ftp in passive mode */
-BOOLEAN ftp_local_passive;
-char *ftp_lasthost;
 BOOLEAN goto_buffer = GOTOBUFFER;	/* TRUE if offering default goto URL */
 BOOLEAN historical_comments = FALSE;
 BOOLEAN is_www_index = FALSE;
@@ -280,6 +277,14 @@ BOOLEAN no_shell = FALSE;
 BOOLEAN no_suspend = FALSE;
 BOOLEAN no_telnet_port = FALSE;
 BOOLEAN no_useragent = FALSE;
+
+#ifndef DISABLE_FTP
+BOOLEAN ftp_passive = FTP_PASSIVE;	/* TRUE if doing ftp in passive mode */
+BOOLEAN ftp_local_passive;
+HTList *broken_ftp_epsv = NULL;
+HTList *broken_ftp_retr = NULL;
+char *ftp_lasthost = NULL;
+#endif
 
 #ifndef DISABLE_NEWS
 BOOLEAN no_goto_news = FALSE;
@@ -753,7 +758,11 @@ static void free_lynx_globals(void)
     FREE(proxyauth_info[0]);
     FREE(proxyauth_info[1]);
     FREE(lynxjumpfile);
+#ifndef DISABLE_FTP
     FREE(ftp_lasthost);
+    LYFreeStringList(broken_ftp_epsv);
+    LYFreeStringList(broken_ftp_retr);
+#endif
     FREE(startrealm);
     FREE(personal_mail_address);
     FREE(anonftp_password);
@@ -2048,6 +2057,17 @@ int main(int argc,
 	ftp_ok = (BOOL) (!no_outside_ftp && ftp_ok);
 	rlogin_ok = (BOOL) (!no_outside_rlogin && rlogin_ok);
     }
+#ifdef DISABLE_FTP
+    ftp_ok = FALSE;
+#else
+    /* predefine some known broken ftp servers */
+    LYSetConfigValue(RC_BROKEN_FTP_RETR, "ProFTPD 1.2.5");
+    LYSetConfigValue(RC_BROKEN_FTP_RETR, "spftp/");
+    LYSetConfigValue(RC_BROKEN_FTP_EPSV, "(Version wu-2.6.2-12)");
+#ifdef LY_FIND_LEAKS
+    atexit(broken_ftp_free);
+#endif
+#endif
 
     /*
      * Make sure our bookmark default strings are all allocated and
@@ -3444,10 +3464,12 @@ keys (may be incompatible with some curses packages)"
       "from",		4|TOGGLE_ARG,		LYNoFromHeader,
       "toggle transmission of From headers"
    ),
+#ifndef DISABLE_FTP
    PARSE_SET(
       "ftp",		4|UNSET_ARG,		ftp_ok,
       "disable ftp access"
    ),
+#endif
    PARSE_FUN(
       "get_data",	2|FUNCTION_ARG,		get_data_fun,
       "user data for get forms, read from stdin,\nterminated by '---' on a line"
@@ -3653,6 +3675,12 @@ keys (may be incompatible with some curses packages)"
       "partial_thres",	4|NEED_INT_ARG,		partial_threshold,
       "[=NUMBER]\nnumber of lines to render before repainting display\n\
 with partial-display logic"
+   ),
+#endif
+#ifndef DISABLE_FTP
+   PARSE_SET(
+      "passive-ftp",	4|TOGGLE_ARG,		ftp_passive,
+      "toggles passive ftp connection"
    ),
 #endif
    PARSE_FUN(

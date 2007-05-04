@@ -24,6 +24,8 @@
 #define RC_BOLD_HEADERS                 "bold_headers"
 #define RC_BOLD_NAME_ANCHORS            "bold_name_anchors"
 #define RC_BOOKMARK_FILE                "bookmark_file"
+#define RC_BROKEN_FTP_EPSV              "broken_ftp_epsv"
+#define RC_BROKEN_FTP_RETR              "broken_ftp_retr"
 #define RC_BZIP2_PATH                   "bzip2_path"
 #define RC_CASE_SENSITIVE_ALWAYS_ON     "case_sensitive_always_on"
 #define RC_CASE_SENSITIVE_SEARCHING     "case_sensitive_searching"

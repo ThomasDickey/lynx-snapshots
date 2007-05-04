@@ -2,6 +2,16 @@ Changes since Lynx 2.8 release
 ===============================================================================
 
 2007-0?-?? (2.8.7dev.5)
+* replace BROKEN_PROFTPD and BROKEN_WU_FTPD logic with configurable list of
+  strings in lynx.cfg, i.e., BROKEN_FTP_RETR and BROKEN_FTP_EPSV, and add
+  "spftp/" to the predefined values for the former.  Prompted by report by
+  Fred Kasner for
+	ftp.symantec.com/AVDEFS/norton_antivirus
+  which has a broken RETR command -TD
+* add -passive-ftp option -TD
+* ifdef'd -ftp option in case ftp is disabled, for consistency -TD
+* ifdef'd options menu so that if ftp is disabled, the corresponding options
+  are not shown -TD
 * improve pretty-src in a few places by passing-through whitespace as
   demonstrated by
 	http://www.w3.org/TR/html401/index/elements.html

@@ -140,7 +140,8 @@ extern "C" {
 	int *     int_value; \
 	char **   str_value; \
 	ParseFunc fun_value; \
-	long	  def_value
+	long	  def_value; \
+	HTList**  lst_value
 
     typedef union {
 	ParseUnionMembers;
@@ -150,13 +151,14 @@ extern "C" {
 #define ParseUnionPtr Config_Type *
 #define ParseUnionOf(tbl) tbl
 #define ParseData ParseUnionMembers
-#define UNION_ADD(v) &v,  0,  0,  0,  0,  0
-#define UNION_SET(v)  0, &v,  0,  0,  0,  0
-#define UNION_INT(v)  0,  0, &v,  0,  0,  0
-#define UNION_STR(v)  0,  0,  0, &v,  0,  0
-#define UNION_ENV(v)  0,  0,  0,  v,  0,  0
-#define UNION_FUN(v)  0,  0,  0,  0,  v,  0
-#define UNION_DEF(v)  0,  0,  0,  0,  0,  v
+#define UNION_ADD(v) &v,  0,  0,  0,  0,  0,  0
+#define UNION_SET(v)  0, &v,  0,  0,  0,  0,  0
+#define UNION_INT(v)  0,  0, &v,  0,  0,  0,  0
+#define UNION_STR(v)  0,  0,  0, &v,  0,  0,  0
+#define UNION_ENV(v)  0,  0,  0,  v,  0,  0,  0
+#define UNION_FUN(v)  0,  0,  0,  0,  v,  0,  0
+#define UNION_DEF(v)  0,  0,  0,  0,  0,  v,  0
+#define UNION_LST(v)  0,  0,  0,  0,  0,  0, &v
 #else
 #define ParseUnionPtr ParseUnion *
 #define ParseUnionOf(tbl) (ParseUnionPtr)(&(tbl->value))
@@ -168,6 +170,7 @@ extern "C" {
 #define UNION_ENV(v) (long) (v)
 #define UNION_FUN(v) (long) (v)
 #define UNION_DEF(v) (long) (v)
+#define UNION_LST(v) (long)&(v)
 #endif
 
 #ifdef __cplusplus

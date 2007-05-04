@@ -214,9 +214,7 @@ extern "C" {
     extern BOOLEAN dump_to_stderr;
     extern BOOLEAN emacs_keys;	/* TRUE to turn on emacs-like key movement */
     extern BOOLEAN error_logging;	/* TRUE to mail error messages */
-    extern BOOLEAN ftp_local_passive;
     extern BOOLEAN ftp_ok;
-    extern BOOLEAN ftp_passive;	/* TRUE if we want to use passive mode ftp */
     extern BOOLEAN goto_buffer;	/* TRUE if offering default goto URL */
     extern BOOLEAN is_www_index;
     extern BOOLEAN jump_buffer;	/* TRUE if offering default shortcut */
@@ -241,7 +239,6 @@ extern "C" {
     extern char *LYTransferName;	/* abbreviation for Kilobytes */
     extern char *LynxHome;
     extern char *LynxSigFile;	/* Signature file, in or off home */
-    extern char *ftp_lasthost;
     extern char *helpfile;
     extern char *helpfilepath;
     extern char *jumpprompt;	/* The default jump statusline prompt */
@@ -470,6 +467,14 @@ extern "C" {
     extern char *BibP_bibhost;	/* local server for bibp: links  */
     extern BOOLEAN BibP_bibhost_checked;	/* bibhost has been checked      */
     extern BOOLEAN BibP_bibhost_available;	/* bibhost is responding         */
+#endif
+
+#ifndef DISABLE_FTP
+    extern BOOLEAN ftp_local_passive;
+    extern BOOLEAN ftp_passive;	/* TRUE if we want to use passive mode ftp */
+    extern HTList *broken_ftp_epsv;
+    extern HTList *broken_ftp_retr;
+    extern char *ftp_lasthost;
 #endif
 
 #ifdef USE_PERSISTENT_COOKIES
