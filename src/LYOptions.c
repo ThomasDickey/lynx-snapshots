@@ -2187,8 +2187,12 @@ static OptValues keypad_mode_values[] =
 };
 static const char *lineedit_mode_string = RC_LINEEDIT_MODE;
 static const char *mail_address_string = RC_PERSONAL_MAIL_ADDRESS;
-static const char *anonftp_password_string = RC_ANONFTP_PASSWORD;
 static const char *search_type_string = RC_CASE_SENSITIVE_SEARCHING;
+
+#ifndef DISABLE_FTP
+static const char *anonftp_password_string = RC_ANONFTP_PASSWORD;
+#endif
+
 static OptValues search_type_values[] =
 {
     {FALSE, N_("Case insensitive"), "case_insensitive"},
@@ -2796,10 +2800,12 @@ int postoptions(DocInfo *newdoc)
 	}
 
 	/* Anonymous FTP Password: INPUT */
+#ifndef DISABLE_FTP
 	if (!strcmp(data[i].tag, anonftp_password_string)) {
 	    FREE(anonftp_password);
 	    StrAllocCopy(anonftp_password, data[i].value);
 	}
+#endif
 
 	/* Search Type: SELECT */
 	if (!strcmp(data[i].tag, search_type_string)
@@ -3719,9 +3725,11 @@ static int gen_options(char **newfile)
 		 NonNull(personal_mail_address), text_len, "");
 
     /* Mail Address: INPUT */
+#ifndef DISABLE_FTP
     PutLabel(fp0, gettext("Password for anonymous ftp"), mail_address_string);
     PutTextInput(fp0, anonftp_password_string,
 		 NonNull(anonftp_password), text_len, "");
+#endif
 
     /* Preferred media type: SELECT */
     PutLabel(fp0, gettext("Preferred media type"), preferred_media_string);
@@ -3758,6 +3766,7 @@ static int gen_options(char **newfile)
     PutHeader(fp0, gettext("Listing and Accessing Files"));
     /*****************************************************************/
 
+#ifndef DISABLE_FTP
     /* FTP sort: SELECT */
     PutLabel(fp0, gettext("FTP sort criteria"), ftp_sort_string);
     BeginSelect(fp0, ftp_sort_string);
@@ -3786,6 +3795,7 @@ static int gen_options(char **newfile)
 	PutOptValues(fp0, show_dotfiles, bool_values);
 	EndSelect(fp0);
     }
+#endif /* DISABLE_FTP */
 
     /* Execution links: SELECT */
 #if defined(ENABLE_OPTS_CHANGE_EXEC) && (defined(EXEC_LINKS) || defined(EXEC_SCRIPTS))

@@ -464,6 +464,9 @@ toggles display partial pages while loading.
 number of lines to render before repainting display
 with partial-display logic
 .TP
+.B \-passive-ftp
+toggles passive ftp connections.
+.TP
 .B \-pauth\fR=\fIID\fR:\fIPASSWD
 set authorization ID and password for a protected proxy
 server at startup.  Be sure to protect any script files

@@ -5876,14 +5876,16 @@ static BOOL IsOurSymlink(const char *name)
 {
     BOOL result = FALSE;
     int size = LY_MAXPATH;
+    int used;
     char *buffer = malloc(size);
 
     if (buffer != 0) {
-	while (readlink(name, buffer, size) == -1) {
+	while ((used = readlink(name, buffer, size)) == -1) {
 	    buffer = realloc(buffer, size *= 2);
 	    if (buffer == 0)
 		break;
 	}
+	buffer[used] = '\0';
     }
     if (buffer != 0) {
 	CTRACE2(TRACE_CFG, (tfp, "IsOurSymlink(%s -> %s)\n", name, buffer));

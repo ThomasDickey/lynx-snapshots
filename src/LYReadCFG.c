@@ -425,6 +425,7 @@ static Config_Enum tbl_abort_source_cache[] = {
 #define PARSE_ENV(n,v)   {n, CONF_ENV2,        UNION_ENV(v), 0}
 #define PARSE_FUN(n,v)   {n, CONF_FUN,         UNION_FUN(v), 0}
 #define PARSE_REQ(n,v)   {n, CONF_INCLUDE,     UNION_FUN(v), 0}
+#define PARSE_LST(n,v)   {n, CONF_ADD_STRING,  UNION_LST(v), 0}
 #define PARSE_DEF(n,v)   {n, CONF_ADD_TRUSTED, UNION_DEF(v), 0}
 #define PARSE_NIL        {NULL, CONF_NIL,      UNION_DEF(0), 0}
 
@@ -441,6 +442,7 @@ typedef enum {
     ,CONF_ENV2			/* from environment VARIABLE */
     ,CONF_INCLUDE		/* include file-- handle special */
     ,CONF_ADD_ITEM
+    ,CONF_ADD_STRING
     ,CONF_ADD_TRUSTED
 } Conf_Types;
 
@@ -818,12 +820,6 @@ static int cern_rulesfile_fun(char *value)
     return 0;			/* though redundant, for compiler-warnings */
 }
 #endif /* NO_RULES */
-
-static int printer_fun(char *value)
-{
-    add_item_to_list(value, &printers, TRUE);
-    return 0;
-}
 
 static int referer_with_query_fun(char *value)
 {
@@ -1268,6 +1264,10 @@ static Config_Type Config_Table [] =
      PARSE_SET(RC_BOLD_H1,              bold_H1),
      PARSE_SET(RC_BOLD_HEADERS,         bold_headers),
      PARSE_SET(RC_BOLD_NAME_ANCHORS,    bold_name_anchors),
+#ifndef DISABLE_FTP
+     PARSE_LST(RC_BROKEN_FTP_EPSV,      broken_ftp_epsv),
+     PARSE_LST(RC_BROKEN_FTP_RETR,      broken_ftp_retr),
+#endif
      PARSE_PRG(RC_BZIP2_PATH,           ppBZIP2),
      PARSE_SET(RC_CASE_SENSITIVE_ALWAYS_ON, case_sensitive),
      PARSE_FUN(RC_CHARACTER_SET,        character_set_fun),
@@ -1343,7 +1343,9 @@ static Config_Type Config_Table [] =
 #if !defined(NO_OPTION_FORMS) && !defined(NO_OPTION_MENU)
      PARSE_SET(RC_FORMS_OPTIONS,        LYUseFormsOptions),
 #endif
+#ifndef DISABLE_FTP
      PARSE_SET(RC_FTP_PASSIVE,          ftp_passive),
+#endif
      PARSE_Env(RC_FTP_PROXY,            0),
      PARSE_STR(RC_GLOBAL_EXTENSION_MAP, global_extension_map),
      PARSE_STR(RC_GLOBAL_MAILCAP,       global_type_map),
@@ -1465,7 +1467,7 @@ static Config_Type Config_Table [] =
      PARSE_FUN(RC_PRETTYSRC_SPEC,       psrcspec_fun),
      PARSE_SET(RC_PRETTYSRC_VIEW_NO_ANCHOR_NUM, psrcview_no_anchor_numbering),
 #endif
-     PARSE_FUN(RC_PRINTER,              printer_fun),
+     PARSE_ADD(RC_PRINTER,              printers),
      PARSE_SET(RC_QUIT_DEFAULT_YES,     LYQuitDefaultYes),
      PARSE_FUN(RC_REFERER_WITH_QUERY,   referer_with_query_fun),
 #ifdef EXP_CMD_LOGGING
@@ -1770,7 +1772,19 @@ void LYSetConfigValue(char *name,
 	break;
     case CONF_ADD_ITEM:
 	if (q->add_value != 0)
-	    add_item_to_list(value, q->add_value, FALSE);
+	    add_item_to_list(value, q->add_value, (q->add_value == &printers));
+	break;
+
+    case CONF_ADD_STRING:
+	if (*(q->lst_value) == NULL) {
+	    *(q->lst_value) = HTList_new();
+	}
+	if (q->lst_value != 0) {
+	    char *my_value = NULL;
+
+	    StrAllocCopy(my_value, value);
+	    HTList_appendObject(*(q->lst_value), my_value);
+	}
 	break;
 
 #if defined(EXEC_LINKS) || defined(LYNXCGI_LINKS)
@@ -1924,6 +1938,7 @@ static void do_read_cfg(const char *cfg_filename,
 	case CONF_ENV2:
 	case CONF_PRG:
 	case CONF_ADD_ITEM:
+	case CONF_ADD_STRING:
 	case CONF_ADD_TRUSTED:
 	    LYSetConfigValue(name, value);
 	    break;
