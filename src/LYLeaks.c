@@ -1,5 +1,8 @@
 /*
+ * $LynxId: LYLeaks.c,v 1.29 2007/05/06 21:43:33 tom Exp $
+ *
  *	Copyright (c) 1994, University of Kansas, All Rights Reserved
+ *	(this file was rewritten twice - 1998/1999 and 2003/2004)
  *
  *	This code will be used only if LY_FIND_LEAKS is defined.
  *
@@ -174,6 +177,8 @@ void LYLeaks(void)
     size_t st_total = (size_t) 0;
     FILE *Fp_leakagesink;
 
+    CTRACE((tfp, "entering LYLeaks, flag=%d\n", LYfind_leaks));
+
     if (LYfind_leaks == FALSE)
 	return;
 
@@ -308,9 +313,6 @@ void LYLeaks(void)
     fclose(Fp_leakagesink);
 
     HTSYS_purge(LEAKAGE_SINK);
-#if defined(NCURSES) && defined(HAVE__NC_FREEALL)
-    _nc_freeall();
-#endif
 }
 
 /*

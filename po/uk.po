@@ -3,7 +3,7 @@
 # Volodymyr M. Lisivka <lvm@mystery.lviv.net>, 2003
 # Dmytro O. Redchuk <dor@kiev-online.net>, 2001-2002
 # Olexander Kunytsa <kunia@snark.ukma.kiev.ua>, 2000-2001
-# @Id: uk.po 1.20 Thu, 12 Oct 2006 17:15:18 -0700 dickey @
+# $LynxId: uk.po,v 1.22 2006/11/13 01:11:22 tom Exp $
 #
 msgid ""
 msgstr ""

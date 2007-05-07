@@ -1,8 +1,13 @@
 /*
+ * $LynxId: userdefs.h,v 1.224 2007/05/06 17:08:48 tom Exp $
+ *
  * Lynx - Hypertext navigation system
  *
  *   (c) Copyright 1992, 1993, 1994 University of Kansas
  *	 1995, 1996: GNU General Public License
+ *
+ *   Copyrights 1996-2007 Lynx Developers Group
+ *   Note: GNU General Public License is not a copyright.
  */
 
 /*******************************************************************
@@ -290,7 +295,7 @@
 #endif /* HAVE_CONFIG_H */
 
 #ifndef MIME_LIBDIR
-#define MIME_LIBDIR "/usr/local/lib/mosaic/"
+#define MIME_LIBDIR "/etc"
 #endif
 
 /**************************
@@ -1500,12 +1505,12 @@
 #endif /* VMS */
 
 
-/***************************** 
+/*****************************
  * I have not ported multibyte support for EBCDIC.  In fact, some multibyte
  * code in LYLowerCase() crashes on EBCDIC strings.  -- gil
  */
 #if       ! defined(NOT_ASCII)
-/***************************** 
+/*****************************
  * SUPPORT_MULTIBYTE_EDIT provides better support of CJK characters to
  * Lynx's Line Editor.  JIS X0201 Kana is partially supported.  The
  * reason why I didn't support it fully is I think supporting it is not
@@ -1514,7 +1519,7 @@
 #define SUPPORT_MULTIBYTE_EDIT
 #endif /* ! defined(NOT_ASCII) */
 
-/***************************** 
+/*****************************
  * SUPPORT_CHDIR provides CD command (bound to 'C' by default).  It allows
  * changing directory to arbitrary location (if OS allows them).  If dired is
  * enabled, user will be able to visit any directory and view any file allowed
@@ -1522,42 +1527,42 @@
  */
 #define SUPPORT_CHDIR
 
-/***************************** 
+/*****************************
  * MARK_HIDDEN_LINKS controls whether hidden links are shown with the title
  * set by the HIDDEN_LINK_MARKER string in lynx.cfg
  */
 #define MARK_HIDDEN_LINKS
 
 /*****************************
- * USE_TH_JP_AUTO_DETECT, CONV_JISX0201KANA_JISX0208KANA,  
- * and KANJI_CODE_OVERRIDE are the macros for Japanese. - TH 
- */ 
-/***************************** 
- * USE_TH_JP_AUTO_DETECT enables a new Japanese charset detection routine. 
- * With the old detection strategy, Lynx always thought a document was 
- * written in mixture of three kanji codes (JIS, EUC and SJIS).  The new 
- * strategy is for Lynx to first assume the document is written in one code 
- * or JIS + one other kanji code (JIS, EUC, SJIS, EUC+JIS and SJIS+JIS). 
- * The first assumption is usually correct, but if the assumption is wrong, 
- * Lynx falls back to the old assumption of the three kanji codes mixed. 
- */ 
-#define USE_TH_JP_AUTO_DETECT 
- 
-/***************************** 
- * If CONV_JISX0201KANA_JISX0208KANA is set, Lynx will convert 
- * JIS X0201 Kana to JIS X0208 Kana, i.e., convert half-width kana 
- * to full-width. 
- */ 
-#define CONV_JISX0201KANA_JISX0208KANA 
- 
-/***************************** 
- * Uncomment the following line to enable the kanji code override routine. 
- * The code can be changed by pressing ^L.  More precisely, this allows 
- * the user to override the assumption about the kanji code for the document 
- * which Lynx has made on the basis of a META tag and HTTP response. 
- */ 
-/*#define KANJI_CODE_OVERRIDE */ 
- 
+ * USE_TH_JP_AUTO_DETECT, CONV_JISX0201KANA_JISX0208KANA,
+ * and KANJI_CODE_OVERRIDE are the macros for Japanese. - TH
+ */
+/*****************************
+ * USE_TH_JP_AUTO_DETECT enables a new Japanese charset detection routine.
+ * With the old detection strategy, Lynx always thought a document was
+ * written in mixture of three kanji codes (JIS, EUC and SJIS).  The new
+ * strategy is for Lynx to first assume the document is written in one code
+ * or JIS + one other kanji code (JIS, EUC, SJIS, EUC+JIS and SJIS+JIS).
+ * The first assumption is usually correct, but if the assumption is wrong,
+ * Lynx falls back to the old assumption of the three kanji codes mixed.
+ */
+#define USE_TH_JP_AUTO_DETECT
+
+/*****************************
+ * If CONV_JISX0201KANA_JISX0208KANA is set, Lynx will convert
+ * JIS X0201 Kana to JIS X0208 Kana, i.e., convert half-width kana
+ * to full-width.
+ */
+#define CONV_JISX0201KANA_JISX0208KANA
+
+/*****************************
+ * Uncomment the following line to enable the kanji code override routine.
+ * The code can be changed by pressing ^L.  More precisely, this allows
+ * the user to override the assumption about the kanji code for the document
+ * which Lynx has made on the basis of a META tag and HTTP response.
+ */
+/*#define KANJI_CODE_OVERRIDE */
+
 
 /****************************************************************
  *  Section 4.  Things you MUST check only if you plan to use Lynx

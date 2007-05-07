@@ -1,3 +1,4 @@
+/* $LynxId: LYrcFile.c,v 1.66 2007/05/06 19:22:33 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <LYUtils.h>
@@ -322,12 +323,14 @@ prompt for each cookie.  Set accept_all_cookies to \"TRUE\" to accept\n\
 all cookies.\n\
 ")),
     MAYBE_FUN(RC_ASSUME_CHARSET,        get_assume_charset, put_assume_charset, MSG_ENABLE_LYNXRC),
+#ifndef DISABLE_FTP
     PARSE_STR(RC_ANONFTP_PASSWORD,      anonftp_password, N_("\
 anonftp_password allows the user to tell Lynx to use the personal\n\
 email address as the password for anonymous ftp.  If no value is given,\n\
 Lynx will use the personal email address.  Set anonftp_password\n\
 to a different value if you choose.\n\
 ")),
+#endif
     PARSE_STR(RC_BOOKMARK_FILE,         bookmark_page,     N_("\
 bookmark_file specifies the name and location of the default bookmark\n\
 file into which the user can paste links for easy access at a later\n\
@@ -397,6 +400,7 @@ or sending mail.  If no editor is specified, then file editing is disabled\n\
 unless it is activated from the command line, and the built-in line editor\n\
 will be used for sending mail.\n\
 ")),
+#ifndef DISABLE_FTP
     PARSE_ENU(RC_FILE_SORTING_METHOD,   HTfileSortMethod,   tbl_file_sort, N_("\
 The file_sorting_method specifies which value to sort on when viewing\n\
 file lists such as FTP directories.  The options are:\n\
@@ -405,11 +409,15 @@ file lists such as FTP directories.  The options are:\n\
    BY_SIZE     -- sorts on the size of the file\n\
    BY_DATE     -- sorts on the date of the file\n\
 ")),
+#endif
     MAYBE_ENU(RC_FORCE_COOKIE_PROMPT,   cookie_noprompt,    tbl_force_prompt,
 	      MSG_ENABLE_LYNXRC),
 #ifdef USE_SSL
     MAYBE_ENU(RC_FORCE_SSL_PROMPT,      ssl_noprompt,       tbl_force_prompt,
 	      MSG_ENABLE_LYNXRC),
+#endif
+#ifndef DISABLE_FTP
+    MAYBE_SET(RC_FTP_PASSIVE,           ftp_passive,        MSG_ENABLE_LYNXRC),
 #endif
 #ifdef EXP_KEYBOARD_LAYOUT
     PARSE_ARY(RC_KBLAYOUT,              current_layout,     LYKbLayoutNames, NULL),
@@ -428,7 +436,7 @@ the following control characters are used for moving and deleting:\n\
 \n\
 Current lineedit modes are:\n\
 ")),
-#ifdef EXP_LOCALE_CHARSET
+#ifdef USE_LOCALE_CHARSET
     MAYBE_SET(RC_LOCALE_CHARSET,      LYLocaleCharset,        MSG_ENABLE_LYNXRC),
 #endif
     MAYBE_SET(RC_MAKE_PSEUDO_ALTS_FOR_INLINES, pseudo_inline_alts, MSG_ENABLE_LYNXRC),

@@ -1,5 +1,8 @@
 /*
+ * $LynxId: LYexit.c,v 1.33 2007/05/06 21:41:43 tom Exp $
+ *
  *	Copyright (c) 1994, University of Kansas, All Rights Reserved
+ *	(most of this file was rewritten in 1996 and 2004).
  */
 #include <HTUtils.h>
 #include <LYexit.h>
@@ -164,6 +167,15 @@ void LYexit(int status)
     LYCloseTracelog();
 #endif /* !VMS */
     show_alloc();
+
+#if defined(NCURSES_VERSION) && defined(LY_FIND_LEAKS)
+#if defined(HAVE__NC_FREE_AND_EXIT)
+    _nc_free_and_exit(status);
+#elif defined(HAVE__NC_FREEALL)
+    _nc_freeall();
+#endif
+#endif /* NCURSES_VERSION */
+
     exit(status);
 }
 

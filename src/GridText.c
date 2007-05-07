@@ -8035,7 +8035,7 @@ void print_crawl_to_fd(FILE *fp, char *thelink,
 	 * Add data.
 	 */
 	limit = TrimmedLength(line->data);
-	for (i = 0; limit; i++) {
+	for (i = 0; i < limit; i++) {
 	    int ch = UCH(line->data[i]);
 
 	    if (!IsSpecialAttrChar(ch)) {

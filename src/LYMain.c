@@ -1,3 +1,4 @@
+/* $LynxId: LYMain.c,v 1.170 2007/05/06 21:36:43 tom Exp $ */
 #include <HTUtils.h>
 #include <HTTP.h>
 #include <HTParse.h>
@@ -544,7 +545,7 @@ BOOL ok_justify = FALSE;
 int justify_max_void_percent = 35;
 #endif
 
-#ifdef EXP_LOCALE_CHARSET
+#ifdef USE_LOCALE_CHARSET
 BOOLEAN LYLocaleCharset = FALSE;
 #endif
 
@@ -818,9 +819,6 @@ void reset_signals(void)
 void exit_immediately(int code)
 {
     reset_signals();
-#ifdef NCURSES_NO_LEAKS
-    _nc_freeall();
-#endif
     exit(code);
 }
 
@@ -1083,7 +1081,7 @@ int main(int argc,
 #ifdef LY_FIND_LEAKS
     /*
      * Register the final function to be executed when being exited.  Will
-     * display memory leaks if LY_FIND_LEAKS is defined.
+     * display memory leaks if the -find-leaks option is used.
      */
     atexit(LYLeaks);
     /*
@@ -1572,7 +1570,7 @@ int main(int argc,
      */
     read_rc(NULL);
 
-#ifdef EXP_LOCALE_CHARSET
+#ifdef USE_LOCALE_CHARSET
     LYFindLocaleCharset();
 #endif
 
@@ -2064,9 +2062,6 @@ int main(int argc,
     LYSetConfigValue(RC_BROKEN_FTP_RETR, "ProFTPD 1.2.5");
     LYSetConfigValue(RC_BROKEN_FTP_RETR, "spftp/");
     LYSetConfigValue(RC_BROKEN_FTP_EPSV, "(Version wu-2.6.2-12)");
-#ifdef LY_FIND_LEAKS
-    atexit(broken_ftp_free);
-#endif
 #endif
 
     /*

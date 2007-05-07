@@ -429,7 +429,7 @@ II. Compile instructions -- UNIX
         inappropriate resubmission of form content.
 
   --enable-ipv6         		(define ENABLE_IPV6)
-	use experimental IPV6 (with IPV4) logic.
+	use IPV6 (with IPV4) logic.
 
   --enable-japanese-utf8		(define EXP_JAPANESEUTF8_SUPPORT)
 	use experimental Japanese UTF-8 logic.
@@ -445,7 +445,12 @@ II. Compile instructions -- UNIX
   	Disabled by default; used for ifdef'ing JavaScript interface.
 	Currently dummy: no JavaScript support implemented in Lynx yet.
 
-  --enable-locale-charset		(define EXP_LOCALE_CHARSET)
+  --enable-local-docs
+	On install, modify link from help-page to point to the local
+	doc-directory, e.g., with README files.  Normally this points
+	to the current release directory.
+
+  --enable-locale-charset		(define USE_LOCALE_CHARSET)
   	Use nl_langinfo(CODESET) to determine initial value for display
 	charset, overrides character_set value in .lynxrc file.
 
@@ -461,9 +466,8 @@ II. Compile instructions -- UNIX
 	so that `z' will stop the `look-up' phase of a connection.
 
   --enable-scrollbar			(define USE_SCROLLBAR)
-	Compile-in experimental support for scrollbar on the right-margin of
-	the screen.  If you configure with ncurses, this works with the mouse
-	on xterm, etc.
+	Compile-in support for scrollbar on the right-margin of the screen.  If
+	you configure with ncurses, this works with the mouse on xterm, etc.
 
   --enable-syslog			(define SYSLOG_REQUESTED_URLS)
 	Use this option to log NSL requests via syslog().
@@ -542,6 +546,10 @@ II. Compile instructions -- UNIX
 	Specify the default style-sheet file's name.  Use --without-lss-file
 	to make the default behavior match the non-color-style (if no --lss
 	option is given, and no COLOR_STYLE setting is in lynx.cfg).
+
+  --with-mime-libdir=list		(define MIME_LIBDIR)
+	Use this option to specify the system directory containing the
+	mime.types and mailcap files.
 
   --with-neXtaw
 	This option allows you to specify the X libraries used if you
@@ -1289,3 +1297,5 @@ VIII. Acknowledgment
    installation manual as accurate and complete as possible.
 
 -- 1999/04/24 - H. Nelson <lynx-admin@irm.nara.kindai.ac.jp>
+-- vile:txtmode
+-- $LynxId: INSTALLATION,v 1.98 2007/05/06 18:26:14 tom Exp $

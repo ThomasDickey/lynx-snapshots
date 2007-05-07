@@ -1,3 +1,4 @@
+/* $LynxId: LYGlobalDefs.h,v 1.105 2007/05/06 18:20:29 tom Exp $ */
 /* global variable definitions */
 
 #ifndef LYGLOBALDEFS_H
@@ -538,7 +539,7 @@ extern "C" {
     extern int justify_max_void_percent;
 #endif
 
-#ifdef EXP_LOCALE_CHARSET
+#ifdef USE_LOCALE_CHARSET
     extern BOOLEAN LYLocaleCharset;
 #endif
 

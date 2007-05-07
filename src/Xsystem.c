@@ -1,4 +1,4 @@
-/* @Id: Xsystem.c 1.15 Thu, 30 Dec 2004 04:11:59 -0800 dickey @
+/* $LynxId: Xsystem.c,v 1.16 2004/12/30 12:20:28 tom Exp $
  *	like system("cmd") but return with exit code of "cmd"
  *	for Turbo-C/MS-C/LSI-C
  *  This code is in the public domain.
