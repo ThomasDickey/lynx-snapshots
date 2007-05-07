@@ -1,3 +1,4 @@
+/* $LynxId: LYCurses.h,v 1.76 2007/05/06 20:46:34 tom Exp $ */
 #ifndef LYCURSES_H
 #define LYCURSES_H
 
@@ -264,7 +265,7 @@ typedef struct {
 #if defined(NCURSES_VERSION)
 #define USE_CURSES_NODELAY 1
 #endif
-#endif	/* _WINDOWS || __MINGW32__ */
+#endif /* _WINDOWS || __MINGW32__ */
 
 #if defined(NCURSES_VERSION) && defined(__BEOS__)
 #define USE_CURSES_NODELAY 1
@@ -361,6 +362,11 @@ extern "C" {
 #define SECS2Secs(n) (n)
 #define Secs2SECS(n) (n)
 #define SECS_FMT "%.0f"
+#endif
+
+#ifdef NCURSES_VERSION
+    extern void _nc_freeall(void);	/* HAVE__NC_FREEALL */
+    extern void _nc_free_and_exit(int);		/* HAVE__NC_FREE_AND_EXIT */
 #endif
 
 /* Both slang and curses: */

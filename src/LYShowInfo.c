@@ -1,3 +1,4 @@
+/* $LynxId: LYShowInfo.c,v 1.65 2007/05/06 19:08:31 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFile.h>
 #include <HTParse.h>
@@ -115,7 +116,6 @@ int LYShowInfo(DocInfo *doc,
     int url_type;
     FILE *fp0;
     char *Title = NULL;
-    const char *name;
     const char *cp;
     char *temp = 0;
 
@@ -124,6 +124,7 @@ int LYShowInfo(DocInfo *doc,
 #endif
 #ifdef DIRED_SUPPORT
     struct stat dir_info;
+    const char *name;
 #endif /* DIRED_SUPPORT */
 
     if (LYReuseTempfiles) {

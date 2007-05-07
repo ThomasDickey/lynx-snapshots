@@ -40,7 +40,7 @@ extern "C" {
     extern int UCGetLYhndl_byMIME(const char *p);	/* returns -1 if name not recognized */
     extern int safeUCGetLYhndl_byMIME(const char *p);	/* returns LATIN1 if name not recognized */
 
-#ifdef EXP_LOCALE_CHARSET
+#ifdef USE_LOCALE_CHARSET
     extern void LYFindLocaleCharset(void);
 #endif
 

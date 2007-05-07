@@ -1,9 +1,10 @@
+dnl $LynxId: configure.in,v 1.150 2007/05/06 20:33:58 tom Exp $
 dnl Process this file with autoconf to produce a configure script.
-dnl written jan/1997
+dnl created jan/1997
 dnl by T.E.Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
 dnl ---------------------------------------------------------------------------
-dnl Copyright 1997-2005,2006 by Thomas E. Dickey
+dnl Copyright 1997-2006,2007 by Thomas E. Dickey
 dnl 
 dnl Permission to use, copy, modify, and distribute this software and its
 dnl documentation for any purpose and without fee is hereby granted,
@@ -398,9 +399,9 @@ AC_ARG_WITH(ssl,
 ])
 
 if test "x$cf_cv_use_libssl" = "xno" ; then
-AC_CACHE_CHECK(if you want experimental gnutls support,cf_cv_use_libgnutls,[
+AC_CACHE_CHECK(if you want gnutls support,cf_cv_use_libgnutls,[
 AC_ARG_WITH(gnutls,
-	[  --with-gnutls{=path}    link with experimental gnutls support],
+	[  --with-gnutls{=path}    link with gnutls support],
 	[cf_cv_use_libgnutls=$withval],
 	[cf_cv_use_libgnutls=no])
 ])
@@ -434,6 +435,19 @@ elif test "x$cf_cv_use_libgnutls" != xno ; then
 	CF_GNUTLS($cf_cv_use_libgnutls)
 fi
 
+dnl --------------------------------------------------------------------------
+### check for ipv6 support
+AC_MSG_CHECKING([whether to enable ipv6])
+CF_ARG_ENABLE(ipv6,
+[  --enable-ipv6           use ipv6 (with ipv4) support],
+	[AC_DEFINE(ENABLE_IPV6)])
+AC_MSG_RESULT($enableval)
+if test "$enableval" = "yes"; then
+	CF_CHECK_IPV6
+fi
+dnl AC_REPLACE_FUNCS(getaddrinfo getnameinfo)
+
+dnl --------------------------------------------------------------------------
 dnl This has to be cached, since there's a lot of interdependent tests.
 AC_CACHE_CHECK(for screen type, cf_cv_screen,[
 AC_ARG_WITH(screen,
@@ -488,6 +502,42 @@ CF_ARG_ENABLE(widec,
 	[use_wide_curses=$cf_wide_curses])
 AC_MSG_RESULT($use_wide_curses)
 
+AC_MSG_CHECKING(if color-style code should be used)
+CF_ARG_DISABLE(color-style,
+[  --disable-color-style   use color style (ncurses/curses)],
+	[use_color_style=$enableval],
+	[use_color_style=$dft_color_style])
+
+case $use_color_style in
+no)
+	AC_MSG_RESULT(no)
+	INSTALL_LSS=
+	;;
+*)
+	AC_DEFINE(USE_COLOR_STYLE)
+	AC_MSG_RESULT(yes)
+
+	AC_MSG_CHECKING(for location of style-sheet file)
+
+CF_WITH_PATH(lss-file,
+[  --with-lss-file{=path}  specify the default style-sheet file
+                         ],
+LYNX_LSS_FILE,
+SYSCONFDIR/lynx.lss,
+$sysconfdir/lynx.lss)
+
+	AC_MSG_RESULT($LYNX_LSS_FILE)
+
+	test "$LYNX_LSS_FILE" = no && LYNX_LSS_FILE=
+	AC_DEFINE_UNQUOTED(LYNX_LSS_FILE,"$LYNX_LSS_FILE")
+
+	INSTALL_LSS=install-lss
+	;;
+esac
+AC_SUBST(INSTALL_LSS)
+
+dnl --------------------------------------------------------------------------
+
 AC_MSG_CHECKING(for the default configuration-file)
 
 CF_WITH_PATH(cfg-file,
@@ -497,10 +547,60 @@ LYNX_CFG_FILE,
 SYSCONFDIR/lynx.cfg,
 $sysconfdir/lynx.cfg)
 
+dnl --------------------------------------------------------------------------
+
 AC_MSG_RESULT($LYNX_CFG_FILE)
 
 test "$LYNX_CFG_FILE" = no && LYNX_CFG_FILE=
 AC_DEFINE_UNQUOTED(LYNX_CFG_FILE,"$LYNX_CFG_FILE")
+
+dnl --------------------------------------------------------------------------
+AC_MSG_CHECKING(if htmlized lynx.cfg should be built)
+CF_ARG_ENABLE(htmlized-cfg,
+[  --enable-htmlized-cfg   build htmlized lynx.cfg],
+	[use_htmlized_cfg=$enableval],
+	[use_htmlized_cfg=no])
+AC_MSG_RESULT($use_htmlized_cfg)
+
+LYNXCFG_MAKE=''
+if test $use_htmlized_cfg = no ; then
+	LYNXCFG_MAKE='#'
+fi
+AC_SUBST(LYNXCFG_MAKE)
+
+dnl --------------------------------------------------------------------------
+AC_MSG_CHECKING(if local doc directory should be linked to help page)
+CF_ARG_ENABLE(local-docs,
+[  --enable-local-docs     link local doc-directory to help-page],
+	[use_local_docs=$enableval],
+	[use_local_docs=no])
+AC_MSG_RESULT($use_local_docs)
+
+LYNXDOC_MAKE=''
+if test $use_local_docs = no ; then
+	LYNXDOC_MAKE='#'
+fi
+AC_SUBST(LYNXDOC_MAKE)
+
+dnl --------------------------------------------------------------------------
+
+AC_MSG_CHECKING(for MIME library directory)
+CF_WITH_PATH(mime-libdir,
+[  --with-mime-libdir=DIR  MIME data, mime.types and mailcap],
+MIME_LIBDIR,
+[/etc])
+AC_MSG_RESULT($MIME_LIBDIR)
+
+AC_DEFINE_UNQUOTED(MIME_LIBDIR,"$MIME_LIBDIR")
+
+dnl --------------------------------------------------------------------------
+AC_MSG_CHECKING(if locale-charset selection logic should be used)
+CF_ARG_ENABLE(locale-charset,
+[  --enable-locale-charset use locale-charset selection logic],
+	[use_locale_charset=$enableval],
+	[use_locale_charset=yes])
+AC_MSG_RESULT($use_locale_charset)
+test $use_locale_charset != no && AC_DEFINE(USE_LOCALE_CHARSET)
 
 dnl --------------------------------------------------------------------------
 dnl Check for subsets of compiled-in tables.
@@ -722,40 +822,6 @@ if test $use_ja_utf8 != no ; then
 	AC_CHECK_LIB(iconv,libiconv_open)
 fi
 
-AC_MSG_CHECKING(if color-style code should be used)
-CF_ARG_DISABLE(color-style,
-[  --disable-color-style   use color style (ncurses/curses)],
-	[use_color_style=$enableval],
-	[use_color_style=$dft_color_style])
-
-case $use_color_style in
-no)
-	AC_MSG_RESULT(no)
-	INSTALL_LSS=
-	;;
-*)
-	AC_DEFINE(USE_COLOR_STYLE)
-	AC_MSG_RESULT(yes)
-
-	AC_MSG_CHECKING(for location of style-sheet file)
-
-CF_WITH_PATH(lss-file,
-[  --with-lss-file{=path}  specify the default style-sheet file
-                         ],
-LYNX_LSS_FILE,
-SYSCONFDIR/lynx.lss,
-$sysconfdir/lynx.lss)
-
-	AC_MSG_RESULT($LYNX_LSS_FILE)
-
-	test "$LYNX_LSS_FILE" = no && LYNX_LSS_FILE=
-	AC_DEFINE_UNQUOTED(LYNX_LSS_FILE,"$LYNX_LSS_FILE")
-
-	INSTALL_LSS=install-lss
-	;;
-esac
-AC_SUBST(INSTALL_LSS)
-
 use_dft_colors=no
 case $cf_cv_screen in
 curses|slang|ncurses*)
@@ -773,30 +839,7 @@ AC_MSG_RESULT($use_dft_colors)
 test $use_dft_colors = "yes" && AC_DEFINE(USE_DEFAULT_COLORS)
 fi
 
-AC_MSG_CHECKING(if experimental htmlized lynx.cfg should be built)
-CF_ARG_ENABLE(htmlized-cfg,
-[  --enable-htmlized-cfg   build experimental htmlized lynx.cfg],
-	[use_exp_htmlized_cfg=$enableval],
-	[use_exp_htmlized_cfg=no])
-AC_MSG_RESULT($use_exp_htmlized_cfg)
-
-LYNXCFG_MAKE=''
-if test $use_exp_htmlized_cfg = no ; then
-	LYNXCFG_MAKE='#'
-fi
-AC_SUBST(LYNXCFG_MAKE)
-
-### check for ipv6 support
-AC_MSG_CHECKING([whether to enable ipv6])
-CF_ARG_ENABLE(ipv6,
-	[  --enable-ipv6           use experimental ipv6 (with ipv4) support],
-[AC_DEFINE(ENABLE_IPV6)])
-AC_MSG_RESULT($enableval)
-if test "$enableval" = "yes"; then
-	CF_CHECK_IPV6
-fi
-dnl AC_REPLACE_FUNCS(getaddrinfo getnameinfo)
-
+dnl --------------------------------------------------------------------------
 AC_MSG_CHECKING(if experimental keyboard-layout logic should be used)
 CF_ARG_ENABLE(kbd-layout,
 [  --enable-kbd-layout     use experimental keyboard-layout support],
@@ -813,14 +856,7 @@ dnl 	[use_libjs=no])
 dnl AC_MSG_RESULT($use_libjs)
 dnl test $use_libjs != no && AC_DEFINE(EXP_LIBJS)
 
-AC_MSG_CHECKING(if experimental locale-charset selection logic should be used)
-CF_ARG_ENABLE(locale-charset,
-[  --enable-locale-charset use experimental locale-charset selection logic],
-	[use_locale_charset=$enableval],
-	[use_locale_charset=yes])
-AC_MSG_RESULT($use_locale_charset)
-test $use_locale_charset != no && AC_DEFINE(EXP_LOCALE_CHARSET)
-
+dnl --------------------------------------------------------------------------
 AC_MSG_CHECKING(if experimental nested-table logic should be used)
 CF_ARG_ENABLE(nested-tables,
 [  --enable-nested-tables  use experimental nested-table support],
@@ -829,6 +865,7 @@ CF_ARG_ENABLE(nested-tables,
 AC_MSG_RESULT($use_nested_tables)
 test $use_nested_tables != no && AC_DEFINE(EXP_NESTED_TABLES)
 
+dnl --------------------------------------------------------------------------
 AC_MSG_CHECKING(if scrollbar code should be used)
 CF_ARG_ENABLE(scrollbar,
 [  --enable-scrollbar      use experimental scrollbar, with mouse],
@@ -843,6 +880,7 @@ dnl --------------------------------------------------------------------------
 CF_HELP_MESSAGE(
 Miscellaneous Options:)
 
+dnl --------------------------------------------------------------------------
 AC_MSG_CHECKING(if alternative line-edit bindings should be used)
 CF_ARG_ENABLE(alt-bindings,
 [  --disable-alt-bindings  disable alternative line-edit bindings],
@@ -851,6 +889,7 @@ CF_ARG_ENABLE(alt-bindings,
 AC_MSG_RESULT($use_alt_bindings)
 test $use_alt_bindings != no && AC_DEFINE(EXP_ALT_BINDINGS)
 
+dnl --------------------------------------------------------------------------
 AC_MSG_CHECKING(if you want to use extended HTML DTD logic)
 CF_ARG_DISABLE(extended-dtd,
 [  --disable-extended-dtd  disable extended HTML DTD logic],
@@ -859,6 +898,7 @@ CF_ARG_DISABLE(extended-dtd,
 AC_MSG_RESULT($use_ext_htmldtd)
 test $use_ext_htmldtd = "no" && AC_DEFINE(NO_EXTENDED_HTMLDTD)
 
+dnl --------------------------------------------------------------------------
 AC_MSG_CHECKING(if file-upload logic should be used)
 CF_ARG_DISABLE(file-upload,
 [  --disable-file-upload   use file-upload support],
@@ -867,6 +907,7 @@ CF_ARG_DISABLE(file-upload,
 AC_MSG_RESULT($use_file_upload)
 test $use_file_upload != no && AC_DEFINE(USE_FILE_UPLOAD)
 
+dnl --------------------------------------------------------------------------
 AC_MSG_CHECKING(if element-justification logic should be used)
 CF_ARG_DISABLE(justify-elts,
 [  --enable-justify-elts   use element-justification logic],
@@ -875,6 +916,7 @@ CF_ARG_DISABLE(justify-elts,
 AC_MSG_RESULT($use_justify_elts)
 test $use_justify_elts != no && AC_DEFINE(EXP_JUSTIFY_ELTS)
 
+dnl --------------------------------------------------------------------------
 AC_MSG_CHECKING(if partial-display should be used)
 CF_ARG_DISABLE(partial,
 [  --disable-partial       use partial-display logic],
@@ -883,6 +925,7 @@ CF_ARG_DISABLE(partial,
 AC_MSG_RESULT($use_partial_display)
 test $use_partial_display != no && AC_DEFINE(DISP_PARTIAL)
 
+dnl --------------------------------------------------------------------------
 AC_MSG_CHECKING(if persistent-cookie logic should be used)
 CF_ARG_DISABLE(persistent-cookies,
 [  --disable-persistent-cookies  disable persistent-cookie support],
@@ -891,6 +934,7 @@ CF_ARG_DISABLE(persistent-cookies,
 AC_MSG_RESULT($use_filed_cookies)
 test $use_filed_cookies != no && AC_DEFINE(USE_PERSISTENT_COOKIES)
 
+dnl --------------------------------------------------------------------------
 AC_MSG_CHECKING(if html source should be colorized)
 CF_ARG_DISABLE(prettysrc,
 [  --disable-prettysrc     colorize HTML source],
@@ -899,6 +943,7 @@ CF_ARG_DISABLE(prettysrc,
 AC_MSG_RESULT($use_prettysrc)
 test $use_prettysrc != no && AC_DEFINE(USE_PRETTYSRC)
 
+dnl --------------------------------------------------------------------------
 AC_MSG_CHECKING(if read-progress message should show ETA)
 CF_ARG_DISABLE(read-eta,
 [  --disable-read-eta      read-progress message shows ETA],
@@ -907,6 +952,7 @@ CF_ARG_DISABLE(read-eta,
 AC_MSG_RESULT($use_read_eta)
 test $use_read_eta != no && AC_DEFINE(USE_READPROGRESS)
 
+dnl --------------------------------------------------------------------------
 AC_MSG_CHECKING(if source caching should be used)
 CF_ARG_DISABLE(source-cache,
 [  --disable-source-cache  cache HTML source for parse mode changes],
@@ -917,6 +963,7 @@ test $use_source_cache != no && AC_DEFINE(USE_SOURCE_CACHE)
 
 AC_SUBST(EXTRA_OBJS)
 
+dnl --------------------------------------------------------------------------
 AC_MSG_CHECKING(if you want to use external commands)
 CF_ARG_ENABLE(externs,
 [  --enable-externs        use external commands],
@@ -928,6 +975,7 @@ if test $use_externs != "no" ; then
 	EXTRA_OBJS="$EXTRA_OBJS LYExtern\$o"
 fi
 
+dnl --------------------------------------------------------------------------
 AC_MSG_CHECKING(if you want to use setfont support)
 CF_ARG_ENABLE(font-switch,
 [  --enable-font-switch    use Linux setfont for character-translation],
@@ -951,12 +999,14 @@ if test $use_setfont = yes ; then
 	fi
 fi
 
+dnl --------------------------------------------------------------------------
 AC_MSG_CHECKING(if you want cgi-link support)
 CF_ARG_ENABLE(cgi-links,
 [  --enable-cgi-links      support cgi links w/o a http daemon],
 	[AC_DEFINE(LYNXCGI_LINKS)])
 AC_MSG_RESULT($enableval)
 
+dnl --------------------------------------------------------------------------
 AC_MSG_CHECKING(if you want change-exec support)
 CF_ARG_ENABLE(change-exec,
 [  --enable-change-exec    allow users to change exec options],
@@ -965,6 +1015,7 @@ CF_ARG_ENABLE(change-exec,
 AC_MSG_RESULT($use_change_exec)
 test $use_change_exec = yes && AC_DEFINE(ENABLE_OPTS_CHANGE_EXEC)
 
+dnl --------------------------------------------------------------------------
 AC_MSG_CHECKING(if you want exec-links support)
 CF_ARG_OPTION(exec-links,
 [  --enable-exec-links     allow lynx to execute programs accessed via a link],
@@ -974,6 +1025,7 @@ CF_ARG_OPTION(exec-links,
 AC_MSG_RESULT($use_exec_links)
 test $use_exec_links = yes && AC_DEFINE(EXEC_LINKS)
 
+dnl --------------------------------------------------------------------------
 AC_MSG_CHECKING(if you want exec-scripts support)
 CF_ARG_OPTION(exec-scripts,
 [  --enable-exec-scripts   allow lynx to execute programs inferred from a link],
@@ -983,6 +1035,7 @@ CF_ARG_OPTION(exec-scripts,
 AC_MSG_RESULT($use_exec_scripts)
 test $use_exec_scripts = yes && AC_DEFINE(EXEC_SCRIPTS)
 
+dnl --------------------------------------------------------------------------
 AC_MSG_CHECKING(if you want internal-links feature)
 CF_ARG_ENABLE(internal-links,
 [  --enable-internal-links handle following links to same doc differently],
@@ -991,6 +1044,7 @@ CF_ARG_ENABLE(internal-links,
 AC_MSG_RESULT($use_internal_links)
 test $use_internal_links = no && AC_DEFINE(DONT_TRACK_INTERNAL_LINKS)
 
+dnl --------------------------------------------------------------------------
 AC_MSG_CHECKING(if you want to fork NSL requests)
 CF_ARG_ENABLE(nsl-fork,
 [  --enable-nsl-fork       fork NSL requests, allowing them to be aborted],
@@ -999,6 +1053,7 @@ CF_ARG_ENABLE(nsl-fork,
 AC_MSG_RESULT($use_nsl_fork)
 test $use_nsl_fork = yes && AC_DEFINE(NSL_FORK)
 
+dnl --------------------------------------------------------------------------
 AC_MSG_CHECKING(if you want to log URL requests via syslog)
 CF_ARG_ENABLE(syslog,
 [  --enable-syslog         log URL requests via syslog],
@@ -1007,6 +1062,7 @@ CF_ARG_ENABLE(syslog,
 AC_MSG_RESULT($use_syslog)
 test $use_syslog = yes && AC_DEFINE(SYSLOG_REQUESTED_URLS)
 
+dnl --------------------------------------------------------------------------
 AC_MSG_CHECKING(if you want to underline links)
 CF_ARG_ENABLE(underlines,
 [  --enable-underlines     underline links rather than using boldface],
@@ -1016,6 +1072,7 @@ AC_MSG_RESULT($use_underline)
 test $use_underline = yes && AC_DEFINE(UNDERLINE_LINKS,1)
 test $use_underline = no  && AC_DEFINE(UNDERLINE_LINKS,0)
 
+dnl --------------------------------------------------------------------------
 AC_MSG_CHECKING(if help files should be gzip'ed)
 CF_ARG_ENABLE(gzip-help,
 [  --enable-gzip-help      install gzip'ed help files],
@@ -1023,6 +1080,7 @@ CF_ARG_ENABLE(gzip-help,
 	[use_gzip_help=no])
 AC_MSG_RESULT($use_gzip_help)
 
+dnl --------------------------------------------------------------------------
 AC_MSG_CHECKING(if you want to use libbz2 for decompression of some bzip2 files)
 AC_ARG_WITH(bzlib,
 [  --with-bzlib            use libbz2 for decompression of some bzip2 files],
@@ -1035,6 +1093,7 @@ if test ".$use_bzlib" != ".no" ; then
 	AC_DEFINE(USE_BZLIB)
 fi
 
+dnl --------------------------------------------------------------------------
 AC_MSG_CHECKING(if you want to use zlib for decompression of some gzip files)
 AC_ARG_WITH(zlib,
 [  --with-zlib             use zlib for decompression of some gzip files],
@@ -1047,9 +1106,11 @@ if test ".$use_zlib" != ".no" ; then
 	AC_DEFINE(USE_ZLIB)
 fi
 
+dnl --------------------------------------------------------------------------
 CF_HELP_MESSAGE(
 Other Network Services:)
 
+dnl --------------------------------------------------------------------------
 AC_MSG_CHECKING(if you want to exclude FINGER code)
 CF_ARG_DISABLE(finger,
 [  --disable-finger        disable FINGER logic],
@@ -1058,6 +1119,7 @@ CF_ARG_DISABLE(finger,
 AC_MSG_RESULT($use_finger)
 test $use_finger != "no" && AC_DEFINE(DISABLE_FINGER)
 
+dnl --------------------------------------------------------------------------
 AC_MSG_CHECKING(if you want to exclude GOPHER code)
 CF_ARG_DISABLE(gopher,
 [  --disable-gopher        disable GOPHER logic],
@@ -1066,6 +1128,7 @@ CF_ARG_DISABLE(gopher,
 AC_MSG_RESULT($use_gopher)
 test $use_gopher != "no" && AC_DEFINE(DISABLE_GOPHER)
 
+dnl --------------------------------------------------------------------------
 AC_MSG_CHECKING(if you want to exclude NEWS code)
 CF_ARG_DISABLE(news,
 [  --disable-news          disable NEWS logic],
@@ -1074,6 +1137,7 @@ CF_ARG_DISABLE(news,
 AC_MSG_RESULT($use_news)
 test $use_news != "no" && AC_DEFINE(DISABLE_NEWS)
 
+dnl --------------------------------------------------------------------------
 AC_MSG_CHECKING(if you want to exclude FTP code)
 CF_ARG_DISABLE(ftp,
 [  --disable-ftp           disable FTP logic],
@@ -1143,12 +1207,14 @@ if test ".$use_dired" != ".no" ; then
 	AC_MSG_RESULT($enableval)
 fi
 
+dnl --------------------------------------------------------------------------
 AC_MSG_CHECKING(if you want long-directory listings)
 CF_ARG_DISABLE(long-list,
 [  --disable-long-list     disable long "ls -l" directory listings],,
 	[AC_DEFINE(LONG_LIST)])
 AC_MSG_RESULT($enableval)
 
+dnl --------------------------------------------------------------------------
 AC_MSG_CHECKING(if parent-directory references are permitted)
 CF_ARG_DISABLE(parent-dir-refs,
 [  --disable-parent-dir-refs
@@ -1156,6 +1222,7 @@ CF_ARG_DISABLE(parent-dir-refs,
 	[AC_DEFINE(NO_PARENT_DIR_REFERENCE)])
 AC_MSG_RESULT($enableval)
 
+dnl --------------------------------------------------------------------------
 CF_PATH_PROG(TELNET,	telnet)
 CF_PATH_PROG(TN3270,	tn3270)
 CF_PATH_PROG(RLOGIN,	rlogin)
@@ -1250,6 +1317,10 @@ if test $cf_cv_screen != slang ; then
 		wborder \
 		wredrawln \
 		wresize \
+		)
+	AC_CHECK_FUNCS( \
+		_nc_free_and_exit \
+		_nc_freeall \
 		)
 fi
 

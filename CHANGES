@@ -1,7 +1,29 @@
+-- $LynxId: CHANGES,v 1.204 2007/05/06 22:22:46 tom Exp $
+===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
 2007-0?-?? (2.8.7dev.5)
+* improve change for UCSetBoxChars() from 2.8.6dev.16 for
+  EXP_CHARTRANS_AUTOSWITCH which assumed that the line-drawing character set
+  was always different from the display character set.  If both are US_ASCII
+  for example, ASCII lines would be drawn, which is not good -TD
+* change exit's in configure script test-programs to return's to reduce
+  problems with declaration of exit() -TD
+* use "install-sh" rather than "install.sh" to reduce problems with Sun make
+  program -TD
+* add configure-check for ncurses functions _nc_freeall() and
+  _nc_free_and_exit(), to help with memory-leak checking -TD
+* change a few options such as --enable-locale-charset option to
+  non-experimental -TD
+* correct lynx.cfg parsing of SYSLOG_TEXT which is miscoded as a boolean -TD
+* add --enable-local-docs option to link doc-directory from help-page
+  (request by PW) -TD
+* change default for MIME_LIBDIR from /usr/local/lib/mosaic to /etc -TD
+* add --with-mime-libdir option to set MIME_LIBDIR in userdefs.h file -TD
+* remove "lynxstuff" from help-page, it no longer exists (report by PW) -TD
+* correct loop-limit in print_crawl_to_fd(), which broke
+  "lynx -crawl -dump" from 2.8.6dev.9 changes (Mandriva #29785) -TD
 * replace BROKEN_PROFTPD and BROKEN_WU_FTPD logic with configurable list of
   strings in lynx.cfg, i.e., BROKEN_FTP_RETR and BROKEN_FTP_EPSV, and add
   "spftp/" to the predefined values for the former.  Prompted by report by

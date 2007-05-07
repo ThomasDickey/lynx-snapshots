@@ -1,3 +1,4 @@
+/* $LynxId: LYReadCFG.c,v 1.122 2007/05/06 18:17:23 tom Exp $ */
 #ifndef NO_RULES
 #include <HTRules.h>
 #else
@@ -1386,7 +1387,7 @@ static Config_Type Config_Table [] =
      PARSE_SET(RC_LIST_NEWS_DATES,      LYListNewsDates),
      PARSE_SET(RC_LIST_NEWS_NUMBERS,    LYListNewsNumbers),
 #endif
-#ifdef EXP_LOCALE_CHARSET
+#ifdef USE_LOCALE_CHARSET
      PARSE_SET(RC_LOCALE_CHARSET,       LYLocaleCharset),
 #endif
      PARSE_STR(RC_LOCAL_DOMAIN,         LYLocalDomain),
@@ -1510,7 +1511,7 @@ static Config_Type Config_Table [] =
      PARSE_FUN(RC_SUFFIX_ORDER,         suffix_order_fun),
 #ifdef SYSLOG_REQUESTED_URLS
      PARSE_SET(RC_SYSLOG_REQUESTED_URLS, syslog_requested_urls),
-     PARSE_SET(RC_SYSLOG_TEXT,          syslog_txt),
+     PARSE_STR(RC_SYSLOG_TEXT,          syslog_txt),
 #endif
      PARSE_FUN(RC_SYSTEM_EDITOR,        system_editor_fun),
      PARSE_STR(RC_SYSTEM_MAIL,          system_mail),

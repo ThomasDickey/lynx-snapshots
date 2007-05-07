@@ -1,3 +1,4 @@
+/* $LynxId: LYOptions.c,v 1.120 2007/05/06 19:08:41 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <HTTP.h>		/* 'reloading' flag */
@@ -279,6 +280,8 @@ void LYoptions(void)
 	"CASE SENSITIVE",
 	NULL
     };
+
+#ifdef DIRED_SUPPORT
     static const char *dirList_choices[] =
     {
 	"Directories first",
@@ -286,6 +289,7 @@ void LYoptions(void)
 	"Mixed style",
 	NULL
     };
+#endif
 
 #if defined(ENABLE_OPTS_CHANGE_EXEC) && (defined(EXEC_LINKS) || defined(EXEC_SCRIPTS))
     static const char *exec_choices[] =
@@ -2309,7 +2313,7 @@ static const char *assume_char_set_string = RC_ASSUME_CHARSET;
 static const char *display_char_set_string = RC_CHARACTER_SET;
 static const char *raw_mode_string = RC_RAW_MODE;
 
-#ifdef EXP_LOCALE_CHARSET
+#ifdef USE_LOCALE_CHARSET
 static const char *locale_charset_string = RC_LOCALE_CHARSET;
 #endif
 
@@ -2346,6 +2350,9 @@ static OptValues dired_sort_values[] =
 #endif /* LONG_LIST */
 #endif /* DIRED_SUPPORT */
 
+#ifndef DISABLE_FTP
+static const char *passive_ftp_string = RC_FTP_PASSIVE;
+
 static const char *ftp_sort_string = RC_FILE_SORTING_METHOD;
 static OptValues ftp_sort_values[] =
 {
@@ -2355,6 +2362,7 @@ static OptValues ftp_sort_values[] =
     {FILE_BY_DATE, N_("By Date"), "ftp_by_date"},
     {0, 0, 0}
 };
+#endif
 
 #ifdef USE_READPROGRESS
 static const char *show_rate_string = RC_SHOW_KB_RATE;
@@ -2956,7 +2964,7 @@ int postoptions(DocInfo *newdoc)
 		assume_char_set_changed = TRUE;
 	    }
 	}
-#ifdef EXP_LOCALE_CHARSET
+#ifdef USE_LOCALE_CHARSET
 	/* Use locale-based character set: ON/OFF */
 	if (!strcmp(data[i].tag, locale_charset_string)
 	    && GetOptValues(bool_values, data[i].value, &code)) {
@@ -2981,6 +2989,13 @@ int postoptions(DocInfo *newdoc)
 	    && GetOptValues(bool_values, data[i].value, &code)) {
 	    LYRawMode = (BOOL) code;
 	}
+#ifndef DISABLE_FTP
+	/*
+	 * passive ftp: ON/OFF
+	 */
+	if (!strcmp(data[i].tag, passive_ftp_string)) {
+	    ftp_passive = (BOOL) code;
+	}
 
 	/*
 	 * ftp sort: SELECT
@@ -2988,6 +3003,8 @@ int postoptions(DocInfo *newdoc)
 	if (!strcmp(data[i].tag, ftp_sort_string)) {
 	    GetOptValues(ftp_sort_values, data[i].value, &HTfileSortMethod);
 	}
+#endif /* DISABLE_FTP */
+
 #ifdef DIRED_SUPPORT
 	/* Local Directory Style: SELECT */
 	if (!strcmp(data[i].tag, dired_list_string)) {
@@ -3062,7 +3079,7 @@ int postoptions(DocInfo *newdoc)
     /*
      * Process the flags:
      */
-#ifdef EXP_LOCALE_CHARSET
+#ifdef USE_LOCALE_CHARSET
     LYFindLocaleCharset();
 #endif
 
@@ -3554,7 +3571,7 @@ static int gen_options(char **newfile)
     PutHeader(fp0, gettext("Display and Character Set"));
     /*****************************************************************/
 
-#ifdef EXP_LOCALE_CHARSET
+#ifdef USE_LOCALE_CHARSET
     /* Use locale-based character set: ON/OFF */
     PutLabel(fp0, gettext("Use locale-based character set"), locale_charset_string);
     BeginSelect(fp0, locale_charset_string);
@@ -3724,7 +3741,7 @@ static int gen_options(char **newfile)
     PutTextInput(fp0, mail_address_string,
 		 NonNull(personal_mail_address), text_len, "");
 
-    /* Mail Address: INPUT */
+    /* Anonymous FTP Address: INPUT */
 #ifndef DISABLE_FTP
     PutLabel(fp0, gettext("Password for anonymous ftp"), mail_address_string);
     PutTextInput(fp0, anonftp_password_string,
@@ -3768,10 +3785,17 @@ static int gen_options(char **newfile)
 
 #ifndef DISABLE_FTP
     /* FTP sort: SELECT */
+    PutLabel(fp0, gettext("Use Passive FTP"), passive_ftp_string);
+    BeginSelect(fp0, passive_ftp_string);
+    PutOptValues(fp0, ftp_passive, bool_values);
+    EndSelect(fp0);
+
+    /* FTP sort: SELECT */
     PutLabel(fp0, gettext("FTP sort criteria"), ftp_sort_string);
     BeginSelect(fp0, ftp_sort_string);
     PutOptValues(fp0, HTfileSortMethod, ftp_sort_values);
     EndSelect(fp0);
+#endif /* DISABLE_FTP */
 
 #ifdef DIRED_SUPPORT
     /* Local Directory Sort: SELECT */
@@ -3795,7 +3819,6 @@ static int gen_options(char **newfile)
 	PutOptValues(fp0, show_dotfiles, bool_values);
 	EndSelect(fp0);
     }
-#endif /* DISABLE_FTP */
 
     /* Execution links: SELECT */
 #if defined(ENABLE_OPTS_CHANGE_EXEC) && (defined(EXEC_LINKS) || defined(EXEC_SCRIPTS))

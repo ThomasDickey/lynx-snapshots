@@ -340,9 +340,10 @@ void UCSetBoxChars(int cset,
 	 */
 #ifdef EXP_CHARTRANS_AUTOSWITCH
 	/* US-ASCII vs Latin-1 is safe (usually) */
-	if (cset == US_ASCII && linedrawing_char_set == LATIN1) {
-	    ;
-	} else if (cset == LATIN1 && linedrawing_char_set == US_ASCII) {
+	if ((cset == US_ASCII
+	     || cset == LATIN1)
+	    && (linedrawing_char_set == US_ASCII
+		|| linedrawing_char_set == LATIN1)) {
 	    ;
 	}
 #if defined(NCURSES_VERSION) || defined(HAVE_TIGETSTR)
@@ -402,7 +403,8 @@ void UCSetBoxChars(int cset,
 		    int test = UCTransUniChar(table[n].internal, cset);
 
 		    if (test != table[n].external) {
-			CTRACE((tfp, "line-drawing map %c mismatch (have %#x, want %#x)\n",
+			CTRACE((tfp,
+				"line-drawing map %c mismatch (have %#x, want %#x)\n",
 				table[n].mapping,
 				test, table[n].external));
 			fix_lines = TRUE;

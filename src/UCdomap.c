@@ -1,4 +1,6 @@
 /*
+ * $LynxId: UCdomap.c,v 1.64 2007/05/06 18:20:48 tom Exp $
+ *
  *  UCdomap.c
  *  =========
  *
@@ -25,7 +27,7 @@
 #include <UCDefs.h>
 #include <LYCharSets.h>
 
-#if defined(EXP_LOCALE_CHARSET) && defined(HAVE_LANGINFO_CODESET)
+#if defined(USE_LOCALE_CHARSET) && defined(HAVE_LANGINFO_CODESET)
 #include <langinfo.h>
 #endif
 
@@ -2219,9 +2221,9 @@ int safeUCGetLYhndl_byMIME(const char *value)
     return (i);
 }
 
-#ifdef EXP_LOCALE_CHARSET
+#ifdef USE_LOCALE_CHARSET
 
-#if defined(EXP_LOCALE_CHARSET) && !defined(HAVE_LANGINFO_CODESET)
+#if defined(USE_LOCALE_CHARSET) && !defined(HAVE_LANGINFO_CODESET)
 /*
  * This is a quick-and-dirty emulator of the nl_langinfo(CODESET)
  * function defined in the Single Unix Specification for those systems
@@ -2361,7 +2363,7 @@ static char *nl_langinfo(nl_item item)
     }
     return C_CODESET;
 }
-#endif /* defined(EXP_LOCALE_CHARSET) && !defined(HAVE_LANGINFO_CODESET) */
+#endif /* defined(USE_LOCALE_CHARSET) && !defined(HAVE_LANGINFO_CODESET) */
 
 /*
  * If LYLocaleCharset is true, use the current locale to lookup a MIME name
@@ -2404,4 +2406,4 @@ void LYFindLocaleCharset(void)
 	current_char_set = linedrawing_char_set;
     }
 }
-#endif /* EXP_LOCALE_CHARSET */
+#endif /* USE_LOCALE_CHARSET */

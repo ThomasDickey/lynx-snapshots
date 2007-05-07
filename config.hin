@@ -1,4 +1,9 @@
-/* The configure script translates "config.hin" into "lynx_cfg.h" */
+/*
+ * $LynxId: config.hin,v 1.96 2007/05/06 19:47:52 tom Exp $
+ * vile:cmode
+ *
+ * The configure script translates "config.hin" into "lynx_cfg.h"
+ */
 #ifndef LYNX_CFG_H
 #define LYNX_CFG_H 1
 
@@ -40,7 +45,6 @@
 #undef EXP_JAPANESEUTF8_SUPPORT	/* CF_ARG_ENABLE(japanese-utf8) */
 #undef EXP_JUSTIFY_ELTS		/* CF_ARG_ENABLE(justify-elts) */
 #undef EXP_KEYBOARD_LAYOUT	/* CF_ARG_ENABLE(kbd-layout) */
-#undef EXP_LOCALE_CHARSET	/* CF_ARG_ENABLE(locale-charset) */
 #undef EXP_LIBJS		/* CF_ARG_ENABLE(libjs) */
 #undef EXP_NESTED_TABLES	/* CF_ARG_ENABLE(nested-tables) */
 #undef FANCY_CURSES		/* CF_FANCY_CURSES */
@@ -165,6 +169,8 @@
 #undef HAVE_WRESIZE
 #undef HAVE_XCURSES		/* CF_PDCURSES_X11 */
 #undef HAVE_ZERROR
+#undef HAVE__NC_FREEALL		/* ncurses debugging extension */
+#undef HAVE__NC_FREE_AND_EXIT	/* ncurses debugging extension */
 #undef HAVE___ARGZ_COUNT	/* AM_GNU_GETTEXT */
 #undef HAVE___ARGZ_NEXT		/* AM_GNU_GETTEXT */
 #undef HAVE___ARGZ_STRINGIFY	/* AM_GNU_GETTEXT */
@@ -181,6 +187,7 @@
 #undef LYNX_RAND_MAX		/* CF_SRAND */
 #undef LY_FIND_LEAKS		/* CF_ARG_ENABLE(find-leaks) */
 #undef LY_TRACELINE		/* CF_ARG_ENABLE(vertrace) */
+#undef MIME_LIBDIR		/* CF_WITH_PATH(mime-libdir */
 #undef MKDIR_PATH		/* CF_PATH_PROG(mkdir) */
 #undef MV_PATH			/* CF_PATH_PROG(mv) */
 #undef NCURSES			/* defined for ncurses support */
@@ -232,6 +239,7 @@
 #undef USE_FCNTL		/* CF_FIONBIO */
 #undef USE_FILE_UPLOAD		/* CF_ARG_ENABLE(file-upload) */
 #undef USE_GNUTLS_INCL		/* CF_GNUTLS */
+#undef USE_LOCALE_CHARSET	/* CF_ARG_ENABLE(locale-charset) */
 #undef USE_OPENSSL_INCL		/* CF_SSL */
 #undef USE_PERSISTENT_COOKIES	/* CF_ARG_ENABLE(persistent-cookies) */
 #undef USE_PRETTYSRC		/* CF_ARG_ENABLE(prettysrc) */
