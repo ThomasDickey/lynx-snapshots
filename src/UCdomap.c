@@ -1,5 +1,5 @@
 /*
- * $LynxId: UCdomap.c,v 1.64 2007/05/06 18:20:48 tom Exp $
+ * $LynxId: UCdomap.c,v 1.65 2007/05/13 16:09:19 Thorsten.Glaser Exp $
  *
  *  UCdomap.c
  *  =========
@@ -954,6 +954,8 @@ int UCTransUniCharStr(char *outbuf,
 	    HTSprintf0(&tocode, "%s//TRANSLIT", LYCharSet_UC[charset_out].MIMEname);
 	    cd = iconv_open(tocode, "UTF-16BE");
 	    FREE(tocode);
+	    if (cd == (iconv_t) - 1)
+		cd = iconv_open(LYCharSet_UC[charset_out].MIMEname, "UTF-16BE");
 	    rc = iconv(cd, &pin, &inleft, &pout, &outleft);
 	    iconv_close(cd);
 	    if ((pout - outbuf) == 3) {
@@ -1596,7 +1598,7 @@ int UCGetLYhndl_byMIME(const char *value)
  * "old method".  Maybe not nice (maybe not even necessary any more), but it
  * works (as far as it goes..).
  *
- * We try to be conservative and only allocate new memory for this if needed. 
+ * We try to be conservative and only allocate new memory for this if needed.
  * If not needed, just point to SevenBitApproximations[i].  [Could do the same
  * for ISO_Latin1[] if it's identical to that, but would make it even *more*
  * messy than it already is...] This the only function in this file that knows,

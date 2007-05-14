@@ -1,4 +1,4 @@
-/* $LynxId: LYMain.c,v 1.170 2007/05/06 21:36:43 tom Exp $ */
+/* $LynxId: LYMain.c,v 1.171 2007/05/13 22:45:47 Chuck.Houpt Exp $ */
 #include <HTUtils.h>
 #include <HTTP.h>
 #include <HTParse.h>
@@ -1719,6 +1719,13 @@ int main(int argc,
 	}
     }
 #endif
+
+    /*
+     * Check for a help file URL in the environment. Overiding
+     * compiled-in default and configuration file setting, if found.
+     */
+    if ((cp = LYGetEnv("LYNX_HELPFILE")) != NULL)
+	StrAllocCopy(helpfile, cp);
 
     /*
      * Set up our help and about file base paths. - FM

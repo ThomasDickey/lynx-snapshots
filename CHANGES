@@ -1,9 +1,49 @@
--- $LynxId: CHANGES,v 1.204 2007/05/06 22:22:46 tom Exp $
+-- $LynxId: CHANGES,v 1.215 2007/05/13 23:42:13 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
 2007-0?-?? (2.8.7dev.5)
+* build/install "en" po file so that GNU gettext LANGUAGE environment variable
+  can find the corresponding English message file (request by Chuck Houpt) -TD
+* add LYNX_HELPFILE environment variable to allow override of location of the
+  help-file -Chuck Houpt
+* make install-bin and install-lss makefile rules a little quieter (prompted
+  by discussion by Chuck Houpt and TG) -TD
+* fix an off-by-one in HText_canScrollDown() and total_pages in GridText.c -TH
+* rewrite strcasecomp_asterisk() to support wildcards as in RFC 2818 -TD
+* improve X.509 certificate validation -TG
+  This is tested for OpenSSL, ifdef'd to not break gnutls.  Changes:
+  + peer certificate is cached, no need to call SSL_get_peer_certificate()
+    twice
+  + support foo.domain:port and [ip.add.re.ss] and [ip.add.re.ss]:port and
+    [i:p:v:6:ad:dr:es:s] and [i:p:v:6:ad:dr:es:s]:port
+  + add support for checking X.509v3 SubjectAltName extensions (of type DNS -
+    tested - and IP - untested) when the X.509 commonName check fails.
+  + when displaying a list of failed CNs, change format from foo:bar:baz to
+    CN<foo>:CN<bar>:CN<baz>:SAN<DNS=foo>:SAN<IP=1.2.3.4> so that we know where
+    what comes from (in "Your recent statusline messages")
+  + if the peer certificate can *NOT* be verified, output a message to the log
+    as well
+  + fix a possible use of an uninitialised value ssl_all_cns
+  + output certificate issuer to the logs as well (so that you can, before
+    entering your online banking PIN, see if the certificate has been issued
+    not only _to_ your bank but also _from_ a place you trust, in case
+    /etc/ssl/certs/ contains a lot of Root CA certs)
+* quiet a gcc warning regarding do_system() -TG
+* if iconv_open() using transliteration fails, retry without the
+  transliteration feature -TG
+* change keymap for "CHANGE_KCODE" from CTRL-L to "J" -TG
+* remove "local" section from lynx manpage -TG
+* log SSL/TLS (HTTPS connection) X.509 certificate issuer information into the
+  "recent statusline messages" (accessible via the backspace key) -TG
+* modify po/makefile.inn to use DESTDIR -Thomas Klausner, TD
+* add --with-destdir configure option to set a default value for the DESTDIR
+  variable in makefiles, and modified makefiles to ensure that setting
+  DESTDIR in the top-level makefile propagates to lower levels (prompted by
+  NetBSD patch for port) -TD
+* correct two places in HTML.c which compared element_number to HTML_H6
+  twice rather also to HTML_H5 (report by hsv@tbbs.net) -TD
 * improve change for UCSetBoxChars() from 2.8.6dev.16 for
   EXP_CHARTRANS_AUTOSWITCH which assumed that the line-drawing character set
   was always different from the display character set.  If both are US_ASCII
@@ -158,7 +198,7 @@ Changes since Lynx 2.8 release
   file for color-style look like the non-color-style (Debian #386216) -TD
 * fix change made to LYwaddnstr() which did not update the position in LYwin
   after writing text to a subwindow.  This caused some cases where the status
-  line would be cleared by the filler color -TD 
+  line would be cleared by the filler color -TD
 * modify noviceline() function to account for trailing newlines in the message
   text which caused the message to be displayed on the wrong lines (report
   by Atsuhito Kohda) -TD
@@ -248,8 +288,8 @@ Changes since Lynx 2.8 release
   which leaves SIGWINCH undefined -TD
 * add configure options --with-cfg-file and --with-lss-file to allow one to
   specify the names and paths of the default configuration and color-style
-  files -TD   
-* change configure script --enable-color-style so it is enabled by default 
+  files -TD
+* change configure script --enable-color-style so it is enabled by default
   (prompted by request by Jason Spiro) -TD
 * add COLOR_STYLE setting to lynx.cfg -TD
 * change default initialization of color-style code when no lss file is given
@@ -269,7 +309,7 @@ Changes since Lynx 2.8 release
 
 2006-05-29 (2.8.6dev.18)
 * suppress OpenSSL URL from version message if it happens to be built using
-  GNU TLS -TD  
+  GNU TLS -TD
 * change default for DEFAULT_INDEX_FILE in lynx.cfg to http://lynx.isc.org/
   since the Mosaic MetaIndex file is defunct (suggested by Stef Caunter)
 * update makelynx.bat (report by FLWM) -TD
@@ -278,7 +318,7 @@ Changes since Lynx 2.8 release
   well as ".zz" suffixes -TD
 * modify configure script macro AM_PATH_PROG_WITH_TEST to allow for DOS device
   letter, and to override $PATHSEP with $PATH_SEPARATOR if the latter is
-  set -DK 
+  set -DK
 * modify ifdef in LYCurses.c to avoid using nonfunctional PDCurses 2.7
   newterm() -DK
 * update config.guess (2006-04-26) and config.sub (2006-05-13)

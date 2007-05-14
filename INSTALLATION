@@ -520,6 +520,13 @@ II. Compile instructions -- UNIX
   --with-dbmalloc
 	use Conor Cahill's dbmalloc library
 
+  --with-destdir=XXX
+	set DESTDIR variable in makefiles.  This is prefixed to all directories
+	in the actual install, but is not really part of the compiled-in or
+	configured directory names.  It is convenient for packaging the
+	installed files.  If you do not provide the option, the configure
+	script uses your $DESTDIR environment variable.
+
   --with-dmalloc
 	use Gray Watson's dmalloc library
 
@@ -1298,4 +1305,4 @@ VIII. Acknowledgment
 
 -- 1999/04/24 - H. Nelson <lynx-admin@irm.nara.kindai.ac.jp>
 -- vile:txtmode
--- $LynxId: INSTALLATION,v 1.98 2007/05/06 18:26:14 tom Exp $
+-- $LynxId: INSTALLATION,v 1.99 2007/05/13 13:47:59 tom Exp $

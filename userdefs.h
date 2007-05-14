@@ -1,5 +1,5 @@
 /*
- * $LynxId: userdefs.h,v 1.224 2007/05/06 17:08:48 tom Exp $
+ * $LynxId: userdefs.h,v 1.225 2007/05/13 22:45:47 Chuck.Houpt Exp $
  *
  * Lynx - Hypertext navigation system
  *
@@ -482,6 +482,8 @@
  * The default HELPFILE is:
  * http://lynx.isc.org/release/lynx2-8-6/lynx_help/lynx_help_main.html
  *   This should be changed here or in lynx.cfg to the local path.
+ * The definition here can be overridden at run time by defining a
+ * "LYNX_HELPFILE" environment variable.
  */
 #define HELPFILE "http://lynx.isc.org/release/lynx2-8-6/lynx_help/lynx_help_main.html"
 /* #define HELPFILE "file://localhost/PATH_TO/lynx_help/lynx_help_main.html" */

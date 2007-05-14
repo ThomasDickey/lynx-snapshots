@@ -1,4 +1,4 @@
-dnl $LynxId: configure.in,v 1.150 2007/05/06 20:33:58 tom Exp $
+dnl $LynxId: configure.in,v 1.153 2007/05/13 23:26:12 tom Exp $
 dnl Process this file with autoconf to produce a configure script.
 dnl created jan/1997
 dnl by T.E.Dickey <dickey@invisible-island.net>
@@ -48,6 +48,7 @@ rm -f config.cache; touch config.cache
 
 CONFIG_H=lynx_cfg.h
 AC_CONFIG_HEADER($CONFIG_H:config.hin)
+AC_SUBST(CONFIG_H)
 
 CF_CHECK_CACHE([AC_CANONICAL_SYSTEM])
 AC_ARG_WITH(system-type,
@@ -59,13 +60,17 @@ PACKAGE=lynx
 dnl ask PRCS to plug-in the project-version for the packages.
 # $Format: "VERSION=$ProjectVersion$"$
 VERSION=2.8.7dev.4
+
 AC_SUBST(PACKAGE)
 AC_SUBST(VERSION)
-AC_SUBST(DESTDIR)
-AC_SUBST(CONFIG_H)
 
-dnl Set of available languages (based on source distribution)
-test -z "$ALL_LINGUAS" && ALL_LINGUAS=`test -d $srcdir/po && cd $srcdir/po && echo *.po|sed -e 's/\.po//g' -e 's/*//'`
+AC_MSG_CHECKING(for DESTDIR)
+CF_WITH_PATH(destdir,
+[  --with-destdir=XXX      set DESTDIR destination for install],
+DESTDIR,
+[$DESTDIR],
+[$DESTDIR])
+AC_MSG_RESULT($DESTDIR)
 
 AC_PREFIX_DEFAULT(/usr/local)
 
@@ -341,7 +346,16 @@ Basic Configuration Options:)
 
 CF_LARGEFILE
 
+dnl --------------------------------------------------------------------------
 dnl internationalization macros
+dnl --------------------------------------------------------------------------
+
+dnl Set of available languages (based on source distribution)
+if test -z "$ALL_LINGUAS" ; then
+	ALL_LINGUAS=`test -d $srcdir/po && cd $srcdir/po && echo *.po|sed -e 's/\.po//g' -e 's/*//'`
+	ALL_LINGUAS="$ALL_LINGUAS en"
+fi
+
 CF_BUNDLED_INTL(makefile,disable)
 
 INTLDIR_CPPFLAGS="#"
@@ -357,6 +371,7 @@ NLS_DATADIR,
 [PREFIX/DATADIR],
 [$prefix/$DATADIRNAME])
 
+dnl --------------------------------------------------------------------------
 AC_MSG_CHECKING(if you want full utility pathnames)
 CF_ARG_DISABLE(full-paths,
 	[  --disable-full-paths    control whether full utility pathnames are used],
@@ -377,6 +392,7 @@ if test $with_full_paths = no ; then
 fi
 fi
 
+dnl --------------------------------------------------------------------------
 CF_XOPEN_SOURCE(600,199506L)
 CF_SIGWINCH
 

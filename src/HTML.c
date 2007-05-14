@@ -1,4 +1,7 @@
-/*		Structured stream to Rich hypertext converter
+/*
+ * $LynxId: HTML.c,v 1.112 2007/05/10 00:20:31 tom Exp $
+ *
+ *		Structured stream to Rich hypertext converter
  *		============================================
  *
  *	This generates a hypertext object.  It converts from the
@@ -5726,7 +5729,7 @@ static int HTML_end_element(HTStructured * me, int element_number,
 	     element_number == HTML_H2 ||
 	     element_number == HTML_H3 ||
 	     element_number == HTML_H4 ||
-	     element_number == HTML_H6 ||
+	     element_number == HTML_H5 ||
 	     element_number == HTML_H6)) {
 	    /*
 	     * Set the break flag if we're popping a dummy HTML_LH substituted
@@ -5792,7 +5795,7 @@ static int HTML_end_element(HTStructured * me, int element_number,
 		    element_number == HTML_H2 ||
 		    element_number == HTML_H3 ||
 		    element_number == HTML_H4 ||
-		    element_number == HTML_H6 ||
+		    element_number == HTML_H5 ||
 		    element_number == HTML_H6)) {
 	    /*
 	     * It's an H# for which we substituted an HTML_LH, which we've
