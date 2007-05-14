@@ -403,6 +403,9 @@
               number  of  lines  to  render  before  repainting  display  with
               partial-display logic
 
+       -passive-ftp
+              toggles passive ftp connections.
+
        -pauth=ID:PASSWD
               set  authorization  ID and password for a protected proxy server
               at startup.  Be sure to protect any script files which use  this
@@ -737,6 +740,9 @@
                            LYNX_CFG_FILE  constant  in  the  userdefs.h  file,
                            during installation.  See the userdefs.h  file  for
                            more information.
+
+       LYNX_HELPFILE       If set, this variable overrides the compiled-in URL
+                           and configuration file URL for the lynx help  file.
 
        LYNX_LOCALEDIR      If  set,  this  variable  overrides the compiled-in
                            location of the  locale  directory  which  contains

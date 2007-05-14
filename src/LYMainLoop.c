@@ -1,3 +1,4 @@
+/* $LynxId: LYMainLoop.c,v 1.146 2007/05/13 16:16:30 tom Exp $ */
 #include <HTUtils.h>
 #include <HTAccess.h>
 #include <HTParse.h>
@@ -6991,7 +6992,7 @@ int mainloop(void)
 #endif
 
 #ifdef KANJI_CODE_OVERRIDE
-	case LYK_CHG_KCODE:	/* ^L */
+	case LYK_CHG_KCODE:
 	    if (LYRawMode && (HTCJK == JAPANESE)) {
 		switch (last_kcode) {
 		case NOKANJI:

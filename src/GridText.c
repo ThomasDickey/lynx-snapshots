@@ -1,4 +1,7 @@
-/*		Character grid hypertext object
+/*
+ * $LynxId: GridText.c,v 1.140 2007/05/13 20:42:37 Takeshi.Hataguchi Exp $
+ *
+ *		Character grid hypertext object
  *		===============================
  */
 
@@ -1709,14 +1712,14 @@ static void display_title(HText *text)
 	sprintf(percent, " (l%d of %d)",
 		text->top_of_screen, text->Lines);
     } else if ((text->Lines >= display_lines) && (display_lines > 0)) {
-	int total_pages = ((text->Lines + display_lines - 1)
+	int total_pages = ((text->Lines + display_lines)
 			   / display_lines);
 	int start_of_last_page = ((text->Lines <= display_lines)
 				  ? 0
 				  : (text->Lines - display_lines));
 
 	sprintf(percent, " (p%d of %d)",
-		((text->top_of_screen >= start_of_last_page)
+		((text->top_of_screen > start_of_last_page)
 		 ? total_pages
 		 : ((text->top_of_screen + display_lines) / (display_lines))),
 		total_pages);
@@ -7290,7 +7293,7 @@ BOOL HText_canScrollDown(void)
     HText *text = HTMainText;
 
     return (BOOL) ((text != 0)
-		   && ((text->top_of_screen + display_lines) < text->Lines));
+		   && ((text->top_of_screen + display_lines) <= text->Lines));
 }
 
 /*		Scroll actions

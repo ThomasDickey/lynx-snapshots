@@ -1,4 +1,7 @@
-/*		Telnet Acees, Roligin, etc			HTTelnet.c
+/*
+ * $LynxId: HTTelnet.c,v 1.37 2007/05/13 16:27:23 tom Exp $
+ *
+ *		Telnet Access, Rlogin, etc			HTTelnet.c
  *		==========================
  *
  * Authors
@@ -34,6 +37,10 @@
 #include <LYStrings.h>
 #include <LYClean.h>
 #include <LYLeaks.h>
+
+#ifdef __GNUC__
+static void do_system(char *) GCC_UNUSED;
+#endif
 
 static void do_system(char *command)
 {

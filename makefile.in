@@ -1,4 +1,4 @@
-# $LynxId: makefile.in,v 1.95 2007/05/06 20:35:18 tom Exp $
+# $LynxId: makefile.in,v 1.97 2007/05/13 22:29:46 tom Exp $
 ##makefile for lynx
 
 SHELL		= @CONFIG_SHELL@
@@ -82,6 +82,8 @@ COMPRESS_EXT=@COMPRESS_EXT@
 # Path of scripts directory
 scripts_dir=$(srcdir)/scripts
 
+MAKE_RECUR = $(MAKE) DESTDIR="$(DESTDIR)" CC="$(CC)"
+
 # !!!!!!!!!!! SUN resolv LIBRARY !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 # To include resolv in the LIBS="" list for SUN 3, 4 or Solaris OS,
 # point RESOLVLIB to that library.  You need this if you get the message
@@ -158,33 +160,28 @@ SITE_DEFS = # Your defines here
 #
 # for installation of local execution links, please see the file userdefs.h
 
+WWW_CFLAGS = \
+	LY_CFLAGS="$(CFLAGS)" \
+	CPPFLAGS="$(CPPFLAGS)" \
+	LYFLAGS="$(SITE_LYDEFS)"
+
+SRC_CFLAGS = \
+	CFLAGS="$(CFLAGS)" \
+	CPPFLAGS="$(CPPFLAGS)" \
+	LIBS="$(LIBS) $(RESOLVLIB) $(WAISLIB) $(SITE_LIBS)" \
+	SITE_DEFS="$(SITE_DEFS)" \
+	WWWINC=$(WWWINC) \
+	WWWLIB="../$(WWWINC)/libwww.a"
+
 all lynx$x: cfg_defs.h LYHelp.h
 @MSG_DIR_MAKE@	$(SHELL) $(scripts_dir)/fixtext.sh $(srcdir)/LYMessages_en.h >LYMessages.c
-@MSG_DIR_MAKE@	cd po && $(MAKE) CC="$(CC)"
-	cd $(WWWINC) && $(MAKE) CC="$(CC)" \
-		LY_CFLAGS="$(CFLAGS)" \
-		CPPFLAGS="$(CPPFLAGS)" \
-		LYFLAGS="$(SITE_LYDEFS)"
-	cd src && $(MAKE) all CC="$(CC)" \
-		CFLAGS="$(CFLAGS)" \
-		CPPFLAGS="$(CPPFLAGS)" \
-		LIBS="$(LIBS) $(RESOLVLIB) $(WAISLIB) $(SITE_LIBS)" \
-		SITE_DEFS="$(SITE_DEFS)" \
-		WWWINC=$(WWWINC) \
-		WWWLIB="../$(WWWINC)/libwww.a"
+@MSG_DIR_MAKE@	cd po && $(MAKE_RECUR)
+	cd $(WWWINC) && $(MAKE_RECUR) $(WWW_CFLAGS)
+	cd src && $(MAKE_RECUR) all $(SRC_CFLAGS)
 
 lint:
-	cd $(WWWINC) && $(MAKE) LINT="$(LINT)" CC="$(CC)" \
-		LY_CFLAGS="$(CFLAGS)" \
-		CPPFLAGS="$(CPPFLAGS)" \
-		LYFLAGS="$(SITE_LYDEFS)" lint
-	cd src && $(MAKE) all LINT="$(LINT)" CC="$(CC)" \
-		CFLAGS="$(CFLAGS)" \
-		CPPFLAGS="$(CPPFLAGS)" \
-		LIBS="$(LIBS) $(RESOLVLIB) $(WAISLIB) $(SITE_LIBS)" \
-		SITE_DEFS="$(SITE_DEFS)" \
-		WWWINC=$(WWWINC) \
-		WWWLIB="../$(WWWINC)/libwww.a" lint
+	cd $(WWWINC) && $(MAKE_RECUR) LINT="$(LINT)" $(WWW_CFLAGS) $@
+	cd src && $(MAKE_RECUR) LINT="$(LINT)" $(SRC_CFLAGS) $@
 
 help:
 	@echo
@@ -201,25 +198,25 @@ help:
 clean:
 	rm -f WWW/Library/*/*.[aoib]
 	rm -f WWW/Library/*/.created
-	cd src && $(MAKE) clean
+	cd src && $(MAKE_RECUR) clean
 @MSG_DIR_MAKE@	rm -f LYMessages.c
-@MSG_DIR_MAKE@	cd po && $(MAKE) $@
+@MSG_DIR_MAKE@	cd po && $(MAKE_RECUR) $@
 	rm -f *.b src/lynx$x *.leaks cfg_defs.h LYHelp.h lint.*
 @LYNXCFG_MAKE@	-rm -f alphatoc.html body.html cattoc.html tmp007
 	rm -f help_files.sed
 	rm -f core *.core
 
 depend: cfg_defs.h LYHelp.h
-	cd $(WWWINC) && $(MAKE) $@
-	cd src && $(MAKE) $@
+	cd $(WWWINC) && $(MAKE_RECUR) $@
+	cd src && $(MAKE_RECUR) $@
 
 distclean: clean
 	-rm -f WWW/Library/*/*~
 	-rm -f WWW/Library/*/*.bak
 	-rm -rf src/obsolete
-	-cd src && $(MAKE) $@
-	-cd src/chrtrans && $(MAKE) $@
-@MSG_DIR_MAKE@	cd po && $(MAKE) $@
+	-cd src && $(MAKE_RECUR) $@
+	-cd src/chrtrans && $(MAKE_RECUR) $@
+@MSG_DIR_MAKE@	cd po && $(MAKE_RECUR) $@
 @MSG_DIR_MAKE@	-rmdir po
 	-rm -f *~ *.bak *.sav tags TAGS
 	-rm -f $(WWWINC)/makefile src/makefile src/chrtrans/makefile
@@ -288,8 +285,10 @@ install-full: install install-help install-doc
 	@echo Full installation complete.
 
 install-bin: $(BINDIR) lynx$x
-@MSG_DIR_MAKE@	cd po && $(MAKE) CC="$(CC)" install
-	-mv -f $(BINDIR)/lynx$x $(BINDIR)/lynx.old
+@MSG_DIR_MAKE@	cd po && $(MAKE_RECUR) install
+	@ECHO_CC@$(SHELL) -c \
+	'if test -f $(BINDIR)/lynx$x ; then \
+	      mv -f $(BINDIR)/lynx$x $(BINDIR)/lynx.old; fi'
 	$(INSTALL_PROGRAM) lynx$x $(BINDIR)/lynx$x
 
 install-man : $(MANDIR)
@@ -367,7 +366,8 @@ install-help : help_files.sed $(HELPDIR)
 			(cd $(HELPDIR) && $(COMPRESS_PROG) $$files ) \
 		fi'
 	@echo Updating $(sysconfdir)/lynx.cfg
-	@ECHO_CC@$(SHELL) -c 'if test -f $(SYSCONFDIR)/lynx.cfg ; then \
+	@ECHO_CC@$(SHELL) -c \
+	'if test -f $(SYSCONFDIR)/lynx.cfg ; then \
 		mv $(SYSCONFDIR)/lynx.cfg $(SYSCONFDIR)/lynx.tmp ; \
 	else \
 		cp $(srcdir)/lynx.cfg $(SYSCONFDIR)/lynx.tmp ; \
@@ -407,11 +407,10 @@ install-cfg : $(SYSCONFDIR)
 	@$(SHELL) $(scripts_dir)/install-cfg.sh "$(INSTALL_DATA)" $(srcdir)/lynx.cfg $(SYSCONFDIR)/lynx.cfg
 
 install-lss : $(SYSCONFDIR)
-	-mv -f $(SYSCONFDIR)/lynx.lss $(SYSCONFDIR)/lynx.oldlss
-	$(INSTALL_DATA) $(srcdir)/samples/lynx.lss $(SYSCONFDIR)/lynx.lss
+	@$(SHELL) $(scripts_dir)/install-lss.sh "$(INSTALL_DATA)" $(srcdir)/samples/lynx.lss $(SYSCONFDIR)/lynx.lss
 
 uninstall ::
-@MSG_DIR_MAKE@	cd po && $(MAKE) CC="$(CC)" uninstall
+@MSG_DIR_MAKE@	cd po && $(MAKE_RECUR) uninstall
 	-rm -f $(BINDIR)/lynx$x
 	-rm -f $(MANDIR)/lynx.1
 	-rm -f $(SYSCONFDIR)/lynx.cfg

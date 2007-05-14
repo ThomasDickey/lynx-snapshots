@@ -1,5 +1,8 @@
-/*	HyperText Tranfer Protocol	- Client implementation		HTTP.c
- *	==========================
+/*
+ * $LynxId: HTTP.c,v 1.85 2007/05/13 21:08:19 tom Exp $
+ *
+ * HyperText Tranfer Protocol	- Client implementation		HTTP.c
+ * ==========================
  * Modified:
  * 27 Jan 1994	PDM  Added Ari Luotonen's Fix for Reload when using proxy
  *		     servers.
@@ -41,6 +44,15 @@
 #include <LYStrings.h>
 #include <LYrcFile.h>
 #include <LYLeaks.h>
+
+#ifdef USE_SSL
+#ifdef USE_OPENSSL_INCL
+#include <openssl/x509v3.h>
+#endif
+#ifdef USE_GNUTLS_INCL
+#include <gnutls/x509.h>
+#endif
+#endif
 
 struct _HTStream {
     HTStreamClass *isa;
@@ -419,6 +431,23 @@ static BOOL acceptEncoding(int code)
     return result;
 }
 
+#ifdef USE_SSL
+static void show_cert_issuer(X509 * peer_cert)
+{
+#if defined(USE_OPENSSL_INCL)
+    char ssl_dn[1024];
+    char *msg = NULL;
+
+    X509_NAME_oneline(X509_get_issuer_name(peer_cert), ssl_dn, sizeof(ssl_dn));
+    HTSprintf0(&msg, gettext("Certificate issued by: %s"), ssl_dn);
+    _HTProgress(msg);
+    FREE(msg);
+#elif defined(USE_GNUTLS_INCL)
+    /* the OpenSSL code compiles but dumps core with GNU TLS */
+#endif
+}
+#endif
+
 /*		Load Document from HTTP Server			HTLoadHTTP()
  *		==============================
  *
@@ -479,6 +508,7 @@ static int HTLoadHTTP(const char *arg,
     const char *connect_url = NULL;	/* The URL being proxied */
     char *connect_host = NULL;	/* The host being proxied */
     SSL *handle = NULL;		/* The SSL handle */
+    X509 *peer_cert;		/* The peer certificate */
     char ssl_dn[1024];
     char *cert_host;
     char *ssl_host;
@@ -486,7 +516,7 @@ static int HTLoadHTTP(const char *arg,
     char *msg = NULL;
     int status_sslcertcheck;
     char *ssl_dn_start;
-    char *ssl_all_cns;
+    char *ssl_all_cns = NULL;
 
 #ifdef USE_GNUTLS_INCL
     int ret;
@@ -689,7 +719,8 @@ static int HTLoadHTTP(const char *arg,
 	}
 #endif
 
-	X509_NAME_oneline(X509_get_subject_name(SSL_get_peer_certificate(handle)),
+	peer_cert = SSL_get_peer_certificate(handle);
+	X509_NAME_oneline(X509_get_subject_name(peer_cert),
 #ifndef USE_GNUTLS_INCL
 			  ssl_dn, sizeof(ssl_dn));
 #else
@@ -719,13 +750,16 @@ static int HTLoadHTTP(const char *arg,
 	/* initialise status information */
 	status_sslcertcheck = 0;	/* 0 = no CN found in DN */
 	ssl_dn_start = ssl_dn;
-	ssl_all_cns = NULL;
 	/* get host we're connecting to */
 	ssl_host = HTParse(url, "", PARSE_HOST);
-	/* strip port number */
-	if ((p = strchr(ssl_host, ':')) != NULL)
+	/* strip port number or extract hostname component */
+	if ((p = strchr(ssl_host, (ssl_host[0] == '[') ? ']' : ':')) != NULL)
 	    *p = '\0';
+	if (ssl_host[0] == '[')
+	    ssl_host++;
+
 	/* validate all CNs found in DN */
+	CTRACE((tfp, "Validating CNs in '%s'\n", ssl_dn_start));
 	while ((cert_host = strstr(ssl_dn_start, "/CN=")) != NULL) {
 	    status_sslcertcheck = 1;	/* 1 = could not verify CN */
 	    /* start of CommonName */
@@ -736,34 +770,103 @@ static int HTLoadHTTP(const char *arg,
 		ssl_dn_start = p;	/* yes this points to the NUL byte */
 	    } else
 		ssl_dn_start = NULL;
-	    /* strip port number */
-	    if ((p = strchr(cert_host, ':')) != NULL)
+	    /* strip port number (XXX [ip]:port encap here too? -TG) */
+	    if ((p = strchr(cert_host,
+			    (cert_host[0] == '[') ? ']' : ':')) != NULL)
 		*p = '\0';
+	    if (cert_host[0] == '[')
+		cert_host++;
+
 	    /* verify this CN */
+	    CTRACE((tfp, "Matching\n\tssl_host  '%s'\n\tcert_host '%s'\n",
+		    ssl_host, cert_host));
 	    if (!strcasecomp_asterisk(ssl_host, cert_host)) {
 		status_sslcertcheck = 2;	/* 2 = verified peer */
-		/* I think this is cool to have in the logs --mirabilos */
+		/* I think this is cool to have in the logs -TG */
 		HTSprintf0(&msg,
 			   gettext("Verified connection to %s (cert=%s)"),
 			   ssl_host, cert_host);
 		_HTProgress(msg);
 		FREE(msg);
+		show_cert_issuer(SSL_get_peer_certificate(handle));
 		/* no need to continue the verification loop */
 		break;
 	    }
+
 	    /* add this CN to list of failed CNs */
-	    if (ssl_all_cns == NULL) {
-		StrAllocCopy(ssl_all_cns, cert_host);
-	    } else {
-		StrAllocCat(ssl_all_cns, ":");
-		StrAllocCat(ssl_all_cns, cert_host);
-	    }
+	    if (ssl_all_cns == NULL)
+		StrAllocCopy(ssl_all_cns, "CN<");
+	    else
+		StrAllocCat(ssl_all_cns, ":CN<");
+	    StrAllocCat(ssl_all_cns, cert_host);
+	    StrAllocCat(ssl_all_cns, ">");
 	    /* if we cannot retry, don't try it */
 	    if (ssl_dn_start == NULL)
 		break;
 	    /* now retry next CN found in DN */
 	    *ssl_dn_start = '/';	/* formerly NUL byte */
 	}
+
+	/* check the X.509v3 Subject Alternative Name */
+#ifdef USE_OPENSSL_INCL
+	if (status_sslcertcheck < 2) {
+	    STACK_OF(GENERAL_NAME) * gens;
+	    int i, numalts;
+	    const GENERAL_NAME *gn;
+
+	    if ((gens = X509_get_ext_d2i(peer_cert, NID_subject_alt_name,
+					 NULL, NULL)) != NULL) {
+		numalts = sk_GENERAL_NAME_num(gens);
+		for (i = 0; i < numalts; ++i) {
+		    gn = sk_GENERAL_NAME_value(gens, i);
+		    if (gn->type == GEN_DNS)
+			cert_host = (char *) ASN1_STRING_data(gn->d.ia5);
+		    else if (gn->type == GEN_IPADD) {
+			/* XXX untested -TG */
+			size_t j = ASN1_STRING_length(gn->d.ia5);
+
+			cert_host = malloc(j + 1);
+			memcpy(cert_host, ASN1_STRING_data(gn->d.ia5), j);
+			cert_host[j] = '\0';
+		    } else
+			continue;
+		    status_sslcertcheck = 1;	/* got at least one */
+		    /* verify this SubjectAltName (see above) */
+		    if ((p = strchr(cert_host,
+				    (cert_host[0] == '[') ? ']' : ':')) != NULL)
+			*p = '\0';
+		    if (cert_host[0] == '[')
+			cert_host++;
+		    if (!(gn->type == GEN_IPADD ? strcasecomp :
+			  strcasecomp_asterisk) (ssl_host, cert_host)) {
+			status_sslcertcheck = 2;
+			HTSprintf0(&msg,
+				   gettext("Verified connection to %s (subj=%s)"),
+				   ssl_host, cert_host);
+			_HTProgress(msg);
+			FREE(msg);
+			if (gn->type == GEN_IPADD)
+			    free(cert_host);
+			break;
+		    }
+		    /* add to list of failed CNs */
+		    if (ssl_all_cns == NULL)
+			StrAllocCopy(ssl_all_cns, "SAN<");
+		    else
+			StrAllocCat(ssl_all_cns, ":SAN<");
+		    if (gn->type == GEN_DNS)
+			StrAllocCat(ssl_all_cns, "DNS=");
+		    else if (gn->type == GEN_IPADD)
+			StrAllocCat(ssl_all_cns, "IP=");
+		    StrAllocCat(ssl_all_cns, cert_host);
+		    StrAllocCat(ssl_all_cns, ">");
+		    if (gn->type == GEN_IPADD)
+			free(cert_host);
+		}
+		sk_GENERAL_NAME_free(gens);
+	    }
+	}
+#endif /* USE_OPENSSL_INCL */
 
 	/* if an error occurred, format the appropriate message */
 	if (status_sslcertcheck == 0) {
@@ -783,7 +886,14 @@ static int HTLoadHTTP(const char *arg,
 		FREE(ssl_all_cns);
 		goto done;
 	    }
+	    HTSprintf0(&msg,
+		       gettext("UNVERIFIED connection to %s (cert=%s)"),
+		       ssl_host, ssl_all_cns ? ssl_all_cns : "NONE");
+	    _HTProgress(msg);
+	    FREE(msg);
 	}
+
+	show_cert_issuer(peer_cert);
 
 	HTSprintf0(&msg,
 		   gettext("Secure %d-bit %s (%s) HTTP connection"),

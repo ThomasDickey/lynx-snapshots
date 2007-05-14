@@ -1,4 +1,7 @@
-/*			File Access				HTFile.c
+/*
+ * $LynxId: HTFile.c,v 1.102 2007/05/13 17:29:41 tom Exp $
+ *
+ *			File Access				HTFile.c
  *			===========
  *
  *	This is unix-specific code in general, with some VMS bits.
@@ -2250,7 +2253,9 @@ static int decompressAndParse(HTParentAnchor *anchor,
 	     * this is a compressed file, no need to look at the filename
 	     * again.  - kw
 	     */
+#if defined(USE_ZLIB) || defined(USE_BZLIB)
 	    CompressFileType method = HTEncodingToCompressType(HTAtom_name(myEncoding));
+#endif
 
 #define isDOWNLOAD(m) (strcmp(format_out->name, "www/download") && (method == m))
 #ifdef USE_ZLIB

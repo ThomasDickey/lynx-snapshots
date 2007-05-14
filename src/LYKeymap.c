@@ -1,3 +1,4 @@
+/* $LynxId: LYKeymap.c,v 1.64 2007/05/13 15:34:50 Thorsten.Glaser Exp $ */
 #include <HTUtils.h>
 #include <LYUtils.h>
 #include <LYGlobalDefs.h>
@@ -72,14 +73,8 @@ LYK_ABORT,          LYK_END,        LYK_NEXT_PAGE,     0,
 LYK_HISTORY,    LYK_FASTFORW_LINK,  LYK_ACTIVATE,  LYK_COOKIE_JAR,
 /* bs */            /* ht */        /* nl */       /* ^K */
 
-#ifdef KANJI_CODE_OVERRIDE
-LYK_CHG_KCODE,    LYK_ACTIVATE,     LYK_DOWN_TWO,      0,
-/* ^L */            /* cr */        /* ^N */       /* ^O */
-
-#else
 LYK_REFRESH,      LYK_ACTIVATE,     LYK_DOWN_TWO,      0,
 /* ^L */            /* cr */        /* ^N */       /* ^O */
-#endif
 
 LYK_UP_TWO,       LYK_CHG_CENTER,   LYK_RELOAD,    LYK_TO_CLIPBOARD,
 /* ^P */            /* XON */       /* ^R */       /* ^S */
@@ -128,8 +123,14 @@ LYK_RAW_TOGGLE,      LYK_ADDRLIST, LYK_PREV_PAGE,   LYK_CHDIR,
 LYK_DOWNLOAD,        LYK_ELGOTO,  LYK_DIRED_MENU,   LYK_ECGOTO,
 /* D */              /* E */         /* F */        /* G */
 
+#ifdef KANJI_CODE_OVERRIDE
+LYK_HELP,            LYK_INDEX,      LYK_CHG_KCODE, LYK_KEYMAP,
+/* H */              /* I */         /* J */        /* K */
+
+#else
 LYK_HELP,            LYK_INDEX,      LYK_JUMP,      LYK_KEYMAP,
 /* H */              /* I */         /* J */        /* K */
+#endif
 
 LYK_LIST,          LYK_MAIN_MENU,    LYK_PREV,      LYK_OPTIONS,
 /* L */              /* M */         /* N */        /* O */

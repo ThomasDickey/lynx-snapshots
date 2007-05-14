@@ -1,4 +1,7 @@
-/*		Case-independent string comparison		HTString.c
+/*
+ * $LynxId: HTString.c,v 1.48 2007/05/13 19:08:59 tom Exp $
+ *
+ *	Case-independent string comparison		HTString.c
  *
  *	Original version came with listserv implementation.
  *	Version TBL Oct 91 replaces one which modified the strings.
@@ -129,53 +132,48 @@ int strncasecomp(const char *a,
     }
     /*NOTREACHED */
 }
+#endif /* VM */
+
+#define end_component(p) (*(p) == '.' || *(p) == '\0')
 
 /*
- * Compare strings, ignoring case.  If either begins with an asterisk, treat
- * that as a wildcard to match zero-or-more characters.  This does not test
- * for embedded wildcards.
+ * Compare names as described in RFC 2818: ignore case, allow wildcards. 
+ * Return zero on a match, nonzero on mismatch.
+ *
+ * From RFC 2818:
+ * Names may contain the wildcard character * which is considered to match any
+ * single domain name component or component fragment.  E.g., *.a.com matches
+ * foo.a.com but not bar.foo.a.com.  f*.com matches foo.com but not bar.com.
  */
 int strcasecomp_asterisk(const char *a, const char *b)
 {
-    unsigned const char *us1 = (unsigned const char *) a;
-    unsigned const char *us2 = (unsigned const char *) b;
+    const char *p;
     int result = 0;
 
-    if ((*a != '*') && (*b != '*')) {
-	result = strcasecomp(a, b);
-    } else {
-	int dir = 1;
-
-	if (*b == '*') {
-	    us1 = us2;
-	    us2 = (unsigned const char *) a;
-	    dir = -1;
-	}
-
-	if (strlen((const char *) us2) < (strlen((const char *) us1) - 1)) {
-	    result = 1;
-	} else {
-	    while (*++us1 != '\0') ;
-	    while (*++us2 != '\0') ;
-
-	    while (1) {
-		unsigned char a1 = TOLOWER(*us1);
-		unsigned char b1 = TOLOWER(*us2);
-
-		if (a1 != b1) {
-		    result = (a1 > b1) ? dir : -dir;
-		    break;
-		} else if ((*--us1) == '*') {
-		    result = 0;
+    while (!result && *a != '\0' && *b != '\0') {
+	if (*a == '*') {
+	    p = b;
+	    ++a;
+	    for (;;) {
+		if (strcasecomp_asterisk(a, p) && !end_component(p)) {
+		    ++p;
+		    result = 1;	/* could not match */
+		} else {
+		    b = p;
+		    result = 0;	/* found a match starting here */
 		    break;
 		}
-		--us2;
 	    }
+	} else if (*b == '*') {
+	    result = strcasecomp_asterisk(b, a);
+	} else if (TOLOWER(UCH(*a)) != TOLOWER(UCH(*b))) {
+	    result = 1;
 	}
+	++a;
+	++b;
     }
     return result;
 }
-#endif /* VM */
 
 #ifdef NOT_ASCII
 
