@@ -1,9 +1,9 @@
--- $LynxId: CHANGES,v 1.215 2007/05/13 23:42:13 tom Exp $
+-- $LynxId: CHANGES,v 1.219 2007/05/16 21:51:47 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2007-0?-?? (2.8.7dev.5)
+2007-05-17 (2.8.7dev.5)
 * build/install "en" po file so that GNU gettext LANGUAGE environment variable
   can find the corresponding English message file (request by Chuck Houpt) -TD
 * add LYNX_HELPFILE environment variable to allow override of location of the
@@ -11,7 +11,8 @@ Changes since Lynx 2.8 release
 * make install-bin and install-lss makefile rules a little quieter (prompted
   by discussion by Chuck Houpt and TG) -TD
 * fix an off-by-one in HText_canScrollDown() and total_pages in GridText.c -TH
-* rewrite strcasecomp_asterisk() to support wildcards as in RFC 2818 -TD
+* rewrite strcasecomp_asterisk() to support wildcards as in RFC 2818 (prompted
+  by less-complete Debian patch for #401447, see also #268102) -TD
 * improve X.509 certificate validation -TG
   This is tested for OpenSSL, ifdef'd to not break gnutls.  Changes:
   + peer certificate is cached, no need to call SSL_get_peer_certificate()
@@ -95,7 +96,7 @@ Changes since Lynx 2.8 release
 * modify CF_SRAND to recognize the asymmetric variant of arc4random() -TD
 * updated configure script macros CF_SUBDIR_PATH, CF_XOPEN_SOURCE,
   CF_X_ATHENA_LIBS, CF_X_TOOLKIT -TD
-* updated config.guess, config.sub
+* updated config.guess, config.sub -TD
 
 2006-11-14 (2.8.7dev.4)
 * use RFC-822 encoding for filenames passed via file-upload forms (Debian
@@ -2167,8 +2168,8 @@ FreeBSD 4.1, 4.8, NetBSD 1.5, 1.6 and OpenBSD 2.8 (curses/ncurses).
 * correct order of checks for wrapping in www_search_forward() and
   www_search_backward(), which would allow an infinite loop if there were no
   anchors on the current page (report by Frederic L W Meunier) -TD
-* add a missing chunk to reverted change of SGML_character()
-  -NSH <nsh@horae.dti.ne.jp>
+* add a missing chunk to reverted change of SGML_character() -NSH
+  <nsh@horae.dti.ne.jp>
 
 2001-07-07 (2.8.4pre.3)
 * review/add descriptions of new command-line options in lynx.man, lynx.hlp and
