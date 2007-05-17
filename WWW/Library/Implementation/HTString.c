@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTString.c,v 1.48 2007/05/13 19:08:59 tom Exp $
+ * $LynxId: HTString.c,v 1.49 2007/05/16 21:44:23 tom Exp $
  *
  *	Case-independent string comparison		HTString.c
  *
@@ -136,9 +136,21 @@ int strncasecomp(const char *a,
 
 #define end_component(p) (*(p) == '.' || *(p) == '\0')
 
+#ifdef DEBUG_ASTERISK
+#define SHOW_ASTERISK CTRACE
+#else
+#define SHOW_ASTERISK(p)	/* nothing */
+#endif
+
+#define SHOW_ASTERISK_NUM(a,b,c)  \
+	SHOW_ASTERISK((tfp, "test @%d, '%s' vs '%s' (%d)\n", __LINE__, a,b,c))
+
+#define SHOW_ASTERISK_TXT(a,b,c)  \
+	SHOW_ASTERISK((tfp, "test @%d, '%s' vs '%s' %s\n", __LINE__, a,b,c))
+
 /*
  * Compare names as described in RFC 2818: ignore case, allow wildcards. 
- * Return zero on a match, nonzero on mismatch.
+ * Return zero on a match, nonzero on mismatch -TD
  *
  * From RFC 2818:
  * Names may contain the wildcard character * which is considered to match any
@@ -149,31 +161,89 @@ int strcasecomp_asterisk(const char *a, const char *b)
 {
     const char *p;
     int result = 0;
+    int done = FALSE;
 
-    while (!result && *a != '\0' && *b != '\0') {
+    while (!result && !done) {
+	SHOW_ASTERISK_TXT(a, b, "main");
 	if (*a == '*') {
 	    p = b;
-	    ++a;
 	    for (;;) {
-		if (strcasecomp_asterisk(a, p) && !end_component(p)) {
+		SHOW_ASTERISK_TXT(a, p, "loop");
+		if (end_component(p)) {
+		    if (end_component(a + 1)) {
+			b = p - 1;
+			result = 0;
+		    } else {
+			result = 1;
+		    }
+		    break;
+		} else if (strcasecomp_asterisk(a + 1, p)) {
 		    ++p;
 		    result = 1;	/* could not match */
 		} else {
-		    b = p;
-		    result = 0;	/* found a match starting here */
+		    b = p - 1;
+		    result = 0;	/* found a match starting at 'p' */
+		    done = TRUE;
 		    break;
 		}
 	    }
+	    SHOW_ASTERISK_NUM(a, b, result);
 	} else if (*b == '*') {
 	    result = strcasecomp_asterisk(b, a);
+	    SHOW_ASTERISK_NUM(a, b, result);
+	    done = (result == 0);
+	} else if (*a == '\0' || *b == '\0') {
+	    result = (*a != *b);
+	    SHOW_ASTERISK_NUM(a, b, result);
+	    break;
 	} else if (TOLOWER(UCH(*a)) != TOLOWER(UCH(*b))) {
 	    result = 1;
+	    SHOW_ASTERISK_NUM(a, b, result);
+	    break;
 	}
 	++a;
 	++b;
     }
     return result;
 }
+
+#ifdef DEBUG_ASTERISK
+void mismatch_asterisk(void)
+{
+    /* *INDENT-OFF* */
+    static struct {
+	const char *a;
+	const char *b;
+	int	    code;
+    } table[] = {
+	{ "foo.bar",	 "*.*",	      0 },
+	{ "foo.bar",	 "*.b*",      0 },
+	{ "foo.bar",	 "*.ba*",     0 },
+	{ "foo.bar",	 "*.bar*",    0 },
+	{ "foo.bar",	 "*.*bar*",   0 },
+	{ "foo.bar",	 "*.*.",      1 },
+	{ "foo.bar",	 "fo*.b*",    0 },
+	{ "*oo.bar",	 "fo*.b*",    0 },
+	{ "*oo.bar.com", "fo*.b*",    1 },
+	{ "*oo.bar.com", "fo*.b*m",   1 },
+	{ "*oo.bar.com", "fo*.b*.c*", 0 },
+    };
+    /* *INDENT-ON* */
+
+    unsigned n;
+    int code;
+
+    CTRACE((tfp, "mismatch_asterisk testing\n"));
+    for (n = 0; n < TABLESIZE(table); ++n) {
+	CTRACE((tfp, "-------%d\n", n));
+	code = strcasecomp_asterisk(table[n].a, table[n].b);
+	if (code != table[n].code) {
+	    CTRACE((tfp, "mismatch_asterisk '%s' '%s' got %d, want %d\n",
+		    table[n].a, table[n].b, code, table[n].code));
+	}
+    }
+}
+#endif
 
 #ifdef NOT_ASCII
 
