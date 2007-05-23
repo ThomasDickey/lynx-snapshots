@@ -1,4 +1,4 @@
-/* $LynxId: LYReadCFG.c,v 1.122 2007/05/06 18:17:23 tom Exp $ */
+/* $LynxId: LYReadCFG.c,v 1.123 2007/05/23 00:17:02 tom Exp $ */
 #ifndef NO_RULES
 #include <HTRules.h>
 #else
@@ -1117,8 +1117,9 @@ static int parse_html_src_spec(HTlexeme lexeme_code, char *value,
 	BS();
     *ts2 = '\0';
 
-    CTRACE((tfp, "ReadCFG - parsing tagspec '%s:%s' for option '%s'\n",
-	    value, ts2, option_name));
+    CTRACE2(TRACE_CFG, (tfp,
+			"LYReadCFG - parsing tagspec '%s:%s' for option '%s'\n",
+			value, ts2, option_name));
     html_src_clean_item(lexeme_code);
     if (!html_src_parse_tagspec(value, lexeme_code, TRUE, TRUE)
 	|| !html_src_parse_tagspec(ts2, lexeme_code, TRUE, TRUE)) {

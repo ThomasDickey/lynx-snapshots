@@ -1,5 +1,5 @@
 /*
- * $LynxId: userdefs.h,v 1.226 2007/05/17 23:10:27 tom Exp $
+ * $LynxId: userdefs.h,v 1.227 2007/05/23 00:38:33 tom Exp $
  *
  * Lynx - Hypertext navigation system
  *
@@ -295,7 +295,7 @@
 #endif /* HAVE_CONFIG_H */
 
 #ifndef MIME_LIBDIR
-#define MIME_LIBDIR "/etc"
+#define MIME_LIBDIR "/etc/"
 #endif
 
 /**************************

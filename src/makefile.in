@@ -1,3 +1,4 @@
+# $LynxId: makefile.in,v 1.50 2007/05/23 00:19:09 tom Exp $
 # template-makefile for Lynx src directory
 
 SHELL		= @CONFIG_SHELL@
@@ -48,7 +49,7 @@ WWWLIB		= $(top_builddir)/WWW/Library/Implementation/libwww.a
 INTLLIB		= @INTLLIBS@
 INTLDIR_CPPFLAGS= @INTLDIR_CPPFLAGS@-I$(top_srcdir)/intl
 
-CPP_OPTS	= $(EXTRA_CPPFLAGS) $(CPPFLAGS) $(DEFS) $(CHARSET_DEFS) \
+CPP_OPTS	= $(DEFS) $(CHARSET_DEFS) \
 		-DLOCALEDIR=\"$(localedir)\" \
 		-I. \
 		-I$(top_builddir) \
@@ -57,7 +58,7 @@ CPP_OPTS	= $(EXTRA_CPPFLAGS) $(CPPFLAGS) $(DEFS) $(CHARSET_DEFS) \
 		-I$(top_srcdir) \
 		-I$(top_srcdir)/src \
 		-I$(top_srcdir)/$(WWWINC) \
-		$(INTLDIR_CPPFLAGS) $(SITE_DEFS)
+		$(INTLDIR_CPPFLAGS) $(SITE_DEFS) $(EXTRA_CPPFLAGS) $(CPPFLAGS)
 CC_OPTS		= $(CPP_OPTS) $(CFLAGS)
 
 LINT		= @LINT@

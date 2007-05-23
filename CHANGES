@@ -1,8 +1,19 @@
--- $LynxId: CHANGES,v 1.219 2007/05/16 21:51:47 tom Exp $
+-- $LynxId: CHANGES,v 1.225 2007/05/23 00:55:56 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
+2007-0?-?? (2.8.7dev.6)
+* change order of includes (-I options) in makefiles so build-tree is found
+  first -TD
+* ensure MIME_LIBDIR has a trailing "/" -TD
+* add new -trace-mask codes to cleanup the trace file a little -TD
+* remove redundant call to show_cert_issuer() -TG
+* correct typo in Lynx_users_guide.html (prompted by TG's patch) -TD
+* modify HTDoRead() to add elapsed time to its debug trace -TD
+* fix a case in LYGetfile.c which was broken by 2.8.7dev.3 changes to use
+  LYTildeExpand() to expand embedded "~" -TG
+ 
 2007-05-17 (2.8.7dev.5)
 * build/install "en" po file so that GNU gettext LANGUAGE environment variable
   can find the corresponding English message file (request by Chuck Houpt) -TD

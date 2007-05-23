@@ -1,8 +1,11 @@
-dnl $LynxId: configure.in,v 1.154 2007/05/17 23:10:27 tom Exp $
+dnl $LynxId: configure.in,v 1.155 2007/05/23 00:42:34 tom Exp $
+dnl
 dnl Process this file with autoconf to produce a configure script.
+dnl
 dnl created jan/1997
 dnl by T.E.Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
+dnl
 dnl ---------------------------------------------------------------------------
 dnl Copyright 1997-2006,2007 by Thomas E. Dickey
 dnl 
@@ -606,7 +609,7 @@ CF_WITH_PATH(mime-libdir,
 MIME_LIBDIR,
 [/etc])
 AC_MSG_RESULT($MIME_LIBDIR)
-
+MIME_LIBDIR=`echo "$MIME_LIBDIR" | sed -e 's,/$,,' -e 's,$,/,'`
 AC_DEFINE_UNQUOTED(MIME_LIBDIR,"$MIME_LIBDIR")
 
 dnl --------------------------------------------------------------------------

@@ -1,6 +1,6 @@
 /* character level styles for Lynx
  * (c) 1996 Rob Partington -- donated to the Lyncei (if they want it :-)
- * $LynxId: LYStyle.c,v 1.57 2006/10/02 20:07:15 tom Exp $
+ * $LynxId: LYStyle.c,v 1.58 2007/05/23 00:32:21 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTML.h>
@@ -22,6 +22,8 @@
 #include <LYexit.h>
 #include <LYLeaks.h>
 #include <LYStrings.h>
+
+#define CTRACE1(p) CTRACE2(TRACE_CFG || TRACE_STYLE, p)
 
 #ifdef USE_COLOR_STYLE
 
@@ -451,7 +453,7 @@ static void initialise_default_stylesheet(void)
     char *normal = LYgetTableString(0);
     char *strong = LYgetTableString(4);
 
-    CTRACE((tfp, "initialise_default_stylesheet\n"));
+    CTRACE1((tfp, "initialise_default_stylesheet\n"));
 
     /*
      * For debugging this function, create hash codes for all of the tags.
@@ -575,7 +577,7 @@ static void HStyle_addStyle(char *buffer)
 {
     char *name = NULL;
 
-    CTRACE((tfp, "HStyle_addStyle(%s)\n", buffer));
+    CTRACE1((tfp, "HStyle_addStyle(%s)\n", buffer));
 
     StrAllocCopy(name, buffer);
     TrimLowercase(name);
