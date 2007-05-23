@@ -1,4 +1,7 @@
-/*			Generic Communication Code		HTTCP.c
+/*
+ * $LynxId: HTTCP.c,v 1.93 2007/05/22 23:54:43 tom Exp $
+ *
+ *			Generic Communication Code		HTTCP.c
  *			==========================
  *
  *	This code is in common between client and server sides.
@@ -1527,6 +1530,24 @@ const char *HTHostName(void)
     return hostname;
 }
 
+#ifdef _WINDOWS
+#define SET_EINTR WSASetLastError(EINTR)
+#else
+#define SET_EINTR SOCKET_ERRNO = EINTR
+#endif
+
+static BOOL HTWasInterrupted(int *status)
+{
+    BOOL result = FALSE;
+
+    if (HTCheckForInterrupt()) {
+	result = TRUE;
+	*status = HT_INTERRUPTED;
+	SET_EINTR;
+    }
+    return result;
+}
+
 #ifndef MULTINET		/* SOCKET_ERRNO != errno ? */
 #if !defined(UCX) || !defined(VAXC)	/* errno not modifiable ? */
 #define SOCKET_DEBUG_TRACE	/* show errno status after some system calls */
@@ -1874,14 +1895,8 @@ int HTDoConnect(const char *url,
 			break;
 		    }
 		}
-		if (HTCheckForInterrupt()) {
+		if (HTWasInterrupted(&status)) {
 		    CTRACE((tfp, "*** INTERRUPTED in middle of connect.\n"));
-		    status = HT_INTERRUPTED;
-#ifdef _WINDOWS
-		    WSASetLastError(EINTR);
-#else
-		    SOCKET_ERRNO = EINTR;
-#endif
 		    break;
 		}
 	    }
@@ -1947,7 +1962,11 @@ int HTDoRead(int fildes,
 	     void *buf,
 	     unsigned nbyte)
 {
-    int ready, ret;
+    int result;
+    BOOL ready;
+
+#if !defined(NO_IOCTL)
+    int ret;
     fd_set readfds;
     struct timeval select_timeout;
     int tries = 0;
@@ -1955,10 +1974,9 @@ int HTDoRead(int fildes,
 #ifdef USE_READPROGRESS
     int otries = 0;
     time_t otime = time((time_t *) 0);
+    time_t start = otime;
 #endif
-#if defined(UNIX) || defined(UCX)
-    int nb;
-#endif /* UCX, BSN */
+#endif /* !NO_IOCTL */
 
 #if defined(UNIX) && !defined(__BEOS__)
     if (fildes == 0) {
@@ -1972,34 +1990,28 @@ int HTDoRead(int fildes,
 	}
     } else
 #endif
-    if (fildes <= 0)
+    if (fildes <= 0) {
+	CTRACE((tfp, "HTDoRead - no file descriptor!\n"));
 	return -1;
-
-    if (HTCheckForInterrupt()) {
-#ifdef _WINDOWS
-	WSASetLastError(EINTR);
-#else
-	SOCKET_ERRNO = EINTR;
-#endif
-	return (HT_INTERRUPTED);
     }
-#if !defined(NO_IOCTL)
-    ready = 0;
+
+    if (HTWasInterrupted(&result)) {
+	CTRACE((tfp, "HTDoRead - interrupted before starting!\n"));
+	return (result);
+    }
+#if defined(NO_IOCTL)
+    ready = TRUE;
 #else
-    ready = 1;
-#endif /* bypass for NO_IOCTL */
+    ready = FALSE;
     while (!ready) {
 	/*
 	 * Protect against an infinite loop.
 	 */
 	if (tries++ >= 180000) {
 	    HTAlert(gettext("Socket read failed for 180,000 tries."));
-#ifdef _WINDOWS
-	    WSASetLastError(EINTR);
-#else
-	    SOCKET_ERRNO = EINTR;
-#endif
-	    return HT_INTERRUPTED;
+	    SET_EINTR;
+	    result = HT_INTERRUPTED;
+	    break;
 	}
 #ifdef USE_READPROGRESS
 	if (tries - otries > 10) {
@@ -2033,55 +2045,56 @@ int HTDoRead(int fildes,
 	} while ((ret == -1) && (errno == EINTR));
 
 	if (ret < 0) {
-	    return -1;
+	    result = -1;
+	    break;
 	} else if (ret > 0) {
-	    ready = 1;
-	} else if (HTCheckForInterrupt()) {
-#ifdef _WINDOWS
-	    WSASetLastError(EINTR);
-#else
-	    SOCKET_ERRNO = EINTR;
-#endif
-	    return HT_INTERRUPTED;
+	    ready = TRUE;
+	} else if (HTWasInterrupted(&result)) {
+	    break;
 	}
     }
+#endif /* !NO_IOCTL */
 
-#if !defined(UCX) || !defined(VAXC)
+    if (ready) {
+#if defined(UCX) && defined(VAXC)
+	/*
+	 * VAXC and UCX problem only.
+	 */
+	errno = vaxc$errno = 0;
+	result = SOCKET_READ(fildes, buf, nbyte);
+	CTRACE((tfp,
+		"Read - result,errno,vaxc$errno: %d %d %d\n", result, errno, vaxc$errno));
+	if ((result <= 0) && TRACE)
+	    perror("HTTCP.C:HTDoRead:read");	/* RJF */
+	/*
+	 * An errno value of EPIPE and result < 0 indicates end-of-file on VAXC.
+	 */
+	if ((result <= 0) && (errno == EPIPE)) {
+	    result = 0;
+	    set_errno(0);
+	}
+#else
 #ifdef UNIX
-    while ((nb = SOCKET_READ(fildes, buf, nbyte)) == -1) {
-	if (errno == EINTR)
-	    continue;
+	while ((result = SOCKET_READ(fildes, buf, nbyte)) == -1) {
+	    if (errno == EINTR)
+		continue;
 #ifdef ERESTARTSYS
-	if (errno == ERESTARTSYS)
-	    continue;
+	    if (errno == ERESTARTSYS)
+		continue;
 #endif /* ERESTARTSYS */
-	HTInetStatus("read");
-	break;
-    }
-    return nb;
+	    HTInetStatus("read");
+	    break;
+	}
 #else /* UNIX */
-    return SOCKET_READ(fildes, buf, nbyte);
+	result = SOCKET_READ(fildes, buf, nbyte);
 #endif /* !UNIX */
-
-#else /* UCX && VAXC */
-    /*
-     * VAXC and UCX problem only.
-     */
-    errno = vaxc$errno = 0;
-    nb = SOCKET_READ(fildes, buf, nbyte);
-    CTRACE((tfp,
-	    "Read - nb,errno,vaxc$errno: %d %d %d\n", nb, errno, vaxc$errno));
-    if ((nb <= 0) && TRACE)
-	perror("HTTCP.C:HTDoRead:read");	/* RJF */
-    /*
-     * An errno value of EPIPE and nb < 0 indicates end-of-file on VAXC.
-     */
-    if ((nb <= 0) && (errno == EPIPE)) {
-	nb = 0;
-	set_errno(0);
+#endif /* UCX && VAXC */
     }
-    return nb;
-#endif /* UCX, BSN */
+#ifdef USE_READPROGRESS
+    CTRACE2(TRACE_TIMING, (tfp, "...HTDoRead returns %d (%ld seconds)\n",
+			   result, (long) (time((time_t *) 0) - start)));
+#endif
+    return result;
 }
 
 #ifdef SVR4_BSDSELECT

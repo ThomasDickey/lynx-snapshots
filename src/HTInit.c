@@ -1,4 +1,7 @@
-/*		Configuration-specific Initialization		HTInit.c
+/*
+ * $LynxId: HTInit.c,v 1.67 2007/05/23 00:50:46 tom Exp $
+ *
+ *		Configuration-specific Initialization		HTInit.c
  *		----------------------------------------
  */
 
@@ -1430,7 +1433,8 @@ static int HTLoadExtensionsConfigFile(char *fn)
 		HTSprintf0(&ext, ".%s", word);
 		LYLowerCase(ext);
 
-		CTRACE((tfp, "SETTING SUFFIX '%s' to '%s'.\n", ext, ct));
+		CTRACE2(TRACE_CFG,
+			(tfp, "setting suffix '%s' to '%s'.\n", ext, ct));
 
 		if (strstr(ct, "tex") != NULL ||
 		    strstr(ct, "postscript") != NULL ||

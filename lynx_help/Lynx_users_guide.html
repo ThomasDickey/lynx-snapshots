@@ -1,5 +1,5 @@
 <!DOCTYPE html PUBLIC "-//IETF//DTD HTML 3.0//EN">
-<!-- $LynxId: Lynx_users_guide.html,v 1.89 2007/05/06 19:17:57 tom Exp $ -->
+<!-- $LynxId: Lynx_users_guide.html,v 1.91 2007/05/22 22:06:06 tom Exp $ -->
 <html>
 <head>
 <title>Lynx Users Guide v2.8.6</title>
@@ -66,7 +66,7 @@ within a single LAN.
 <li><a href="#Refresh" NAME="ToC-Refresh">Lynx and Client-Side-Pull</a>
 <li><a href="#Cookies" NAME="ToC-Cookies">Lynx and State Management</a> (Me want <em>cookie</em>!)
 <li><A HREF="#Invoking" NAME="ToC-Invoking">The Lynx command line</A>
-<li><A HREF="#Environment" NAME="ToC-Environments">Environment variables used by Lynx</A>
+<li><A HREF="#Environment" NAME="ToC-Environment">Environment variables used by Lynx</A>
 <li><A HREF="#lynx.cfg" NAME="ToC-lynx.cfg">Main configuration file lynx.cfg</A>
 <li><A HREF="#Hist" NAME="ToC-Hist">Lynx development history</A>
 </ul>
@@ -790,10 +790,6 @@ return to Lynx or the '<em>&gt;</em>' command to save the options to a
             file, but can enter '<em>=</em>' to invoke the STANDARD selection
             menu, or <em>RETURN</em> for the default bookmark file.
 
-   <dt>Password FTP
-	<dd>This allows you to change whether Lynx uses passive ftp
-	    connections.
-
    <dt>Password for anonymous ftp
         <dd>If this is blank, Lynx will use your personal mail address
             as the anonymous ftp password.  Though that is the convention,
@@ -961,6 +957,10 @@ return to Lynx or the '<em>&gt;</em>' command to save the options to a
 
    <dt>Underline links
         <dd>Use underline-attribute rather than bold for links.
+
+   <dt>Use Passive FTP
+	<dd>This allows you to change whether Lynx uses passive ftp
+	    connections.
 
    <dt>User Agent
         <dd>The header string which Lynx sends to HTTP servers to indicate the

@@ -1,3 +1,4 @@
+/* $LynxId: LYGetFile.c,v 1.77 2007/05/20 23:28:43 Thorsten.Glaser Exp $ */
 #include <HTUtils.h>
 #include <HTTP.h>
 #include <HTAnchor.h>		/* Anchor class */
@@ -780,6 +781,7 @@ int getfile(DocInfo *doc, int *target)
 	     * relative elements.  - FM
 	     */
 	    LYTildeExpand(&(doc->address), TRUE);
+	    WWWDoc.address = doc->address;
 	}
 	CTRACE_SLEEP(MessageSecs);
 	user_message(WWW_WAIT_MESSAGE, doc->address);

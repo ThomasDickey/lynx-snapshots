@@ -1,4 +1,4 @@
-.\" $LynxId: lynx.man,v 1.73 2007/05/13 22:45:47 Chuck.Houpt Exp $
+.\" $LynxId: lynx.man,v 1.74 2007/05/23 00:53:51 tom Exp $
 .nr N -1
 .nr D 5
 .TH LYNX 1
@@ -758,9 +758,17 @@ Logically OR the values to combine options:
 .br
 4=TRST (table layout)
 .br
-8=config (lynx.cfg and .lynxrc contents)
+8=config (lynx.cfg, .lynxrc, .lynx-keymaps, mime.types and mailcap contents)
 .br
 16=binary string copy/append, used in form data construction.
+.br
+32=cookies
+.br
+64=character sets
+.br
+128=GridText parsing
+.br
+256=timing
 .TP
 .B \-traversal
 traverse all http links derived from startfile.  When used with

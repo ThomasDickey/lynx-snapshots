@@ -1,4 +1,7 @@
-/*			File Transfer Protocol (FTP) Client
+/*
+ * $LynxId: HTFTP.c,v 1.78 2007/05/22 23:47:17 tom Exp $
+ *
+ *			File Transfer Protocol (FTP) Client
  *			for a WorldWideWeb browser
  *			===================================
  *
@@ -344,7 +347,7 @@ static int next_data_char(void)
 	if (status == HT_INTERRUPTED)
 	    interrupted_in_next_data_char = 1;
 	if (status <= 0)
-	    return -1;
+	    return EOF;
 	data_write_pointer = data_buffer + status;
 	data_read_pointer = data_buffer;
     }

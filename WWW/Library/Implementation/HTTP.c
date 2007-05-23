@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTP.c,v 1.85 2007/05/13 21:08:19 tom Exp $
+ * $LynxId: HTTP.c,v 1.86 2007/05/22 22:42:12 Thorsten.Glaser Exp $
  *
  * HyperText Tranfer Protocol	- Client implementation		HTTP.c
  * ==========================
@@ -788,7 +788,6 @@ static int HTLoadHTTP(const char *arg,
 			   ssl_host, cert_host);
 		_HTProgress(msg);
 		FREE(msg);
-		show_cert_issuer(SSL_get_peer_certificate(handle));
 		/* no need to continue the verification loop */
 		break;
 	    }

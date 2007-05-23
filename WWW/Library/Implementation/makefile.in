@@ -1,5 +1,6 @@
-#  Make WWW under unix for a.n.other unix system (bsd)
-#   Use this as a template
+# $LynxId: makefile.in,v 1.14 2007/05/23 00:57:38 tom Exp $
+# Make WWW under unix for a.n.other unix system (bsd)
+# Use this as a template
 
 # For W3 distribution, machine type for subdirectories
 WWW_MACH	= Implementation
@@ -26,12 +27,12 @@ o		= .@OBJEXT@
 INTLDIR_CPPFLAGS= @INTLDIR_CPPFLAGS@ -I$(top_srcdir)/intl
 
 CPP		= @CPP@
-CPPOPTS		= $(DEFS) $(EXTRA_CPPFLAGS) $(CPPFLAGS) $(LYFLAGS) \
+CPPOPTS		= $(DEFS) $(LYFLAGS) \
 		-I../../.. \
 		-I../../../src \
 		-I$(top_srcdir) \
 		-I$(top_srcdir)/src \
-		$(INTLDIR_CPPFLAGS) -I$(WWWINC)
+		$(INTLDIR_CPPFLAGS) -I$(WWWINC) $(EXTRA_CPPFLAGS) $(CPPFLAGS)
 
 LY_CFLAGS	= @CFLAGS@
 CFLAGS		= $(CPPOPTS) $(LY_CFLAGS)

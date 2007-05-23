@@ -1,4 +1,7 @@
-/*			       Lynx Cookie Support		   LYCookie.c
+/*
+ * $LynxId: LYCookie.c,v 1.87 2007/05/23 00:21:04 tom Exp $
+ *
+ *			       Lynx Cookie Support		   LYCookie.c
  *			       ===================
  *
  *	Author: AMK	A.M. Kuchling (amk@magnet.com)	12/25/96
@@ -72,6 +75,8 @@
 
 /* default for new domains, one of the invcheck_behaviour_t values: */
 #define DEFAULT_INVCHECK_BV INVCHECK_QUERY
+
+#define CTrace(p) CTRACE2(TRACE_COOKIES, p)
 
 /*
  *  The first level of the cookie list is a list indexed by the domain
@@ -168,10 +173,10 @@ static void LYCookieJar_free(void)
     HTList *cl = NULL, *next = NULL;
     cookie *co = NULL;
 
-    CTRACE((tfp, "LYCookieJar_free\n"));
+    CTrace((tfp, "LYCookieJar_free\n"));
     while (dl) {
 	if ((de = dl->object) != NULL) {
-	    CTRACE((tfp, "...LYCookieJar_free domain %s\n", de->domain));
+	    CTrace((tfp, "...LYCookieJar_free domain %s\n", de->domain));
 	    cl = de->cookie_list;
 	    while (cl) {
 		next = cl->next;
@@ -303,12 +308,11 @@ static domain_entry *find_domain_entry(const char *name)
 	for (hl = domain_list; hl != NULL; hl = hl->next) {
 	    de = (domain_entry *) hl->object;
 	    if (de != NULL && de->domain != NULL) {
-		CTRACE2(TRACE_CFG,
-			(tfp,
-			 "...test_domain_entry(%s) bv:%u, invcheck_bv:%u\n",
-			 de->domain,
-			 de->bv,
-			 de->invcheck_bv));
+		CTrace((tfp,
+			"...test_domain_entry(%s) bv:%u, invcheck_bv:%u\n",
+			de->domain,
+			de->bv,
+			de->invcheck_bv));
 		if (!strcasecomp(name, de->domain)) {
 		    break;
 		}
@@ -316,7 +320,7 @@ static domain_entry *find_domain_entry(const char *name)
 	    de = NULL;
 	}
     }
-    CTRACE((tfp, "find_domain_entry(%s) bv:%d, invcheck_bv:%d\n",
+    CTrace((tfp, "find_domain_entry(%s) bv:%d, invcheck_bv:%d\n",
 	    name,
 	    de ? (int) de->bv : -1,
 	    de ? (int) de->invcheck_bv : -1));
@@ -386,7 +390,7 @@ static void store_cookie(cookie * co, const char *hostname,
 	    break;		/* will prompt later if we get that far */
 
 	case INVCHECK_STRICT:
-	    CTRACE((tfp,
+	    CTrace((tfp,
 		    "store_cookie: Rejecting because '%s' is not a prefix of '%s'.\n",
 		    co->path, path));
 	    freeCookie(co);
@@ -403,7 +407,7 @@ static void store_cookie(cookie * co, const char *hostname,
 	 * The hostname does not contain a dot.
 	 */
 	if (strchr(hostname, '.') == NULL) {
-	    CTRACE((tfp, "store_cookie: Rejecting because '%s' has no dot.\n",
+	    CTrace((tfp, "store_cookie: Rejecting because '%s' has no dot.\n",
 		    hostname));
 	    freeCookie(co);
 	    return;
@@ -417,13 +421,13 @@ static void store_cookie(cookie * co, const char *hostname,
 	 * qualified.  - FM
 	 */
 	if (co->domain[0] != '.' || co->domain[1] == '\0') {
-	    CTRACE((tfp, "store_cookie: Rejecting domain '%s'.\n", co->domain));
+	    CTrace((tfp, "store_cookie: Rejecting domain '%s'.\n", co->domain));
 	    freeCookie(co);
 	    return;
 	}
 	ptr = strchr((co->domain + 1), '.');
 	if (ptr == NULL || ptr[1] == '\0') {
-	    CTRACE((tfp, "store_cookie: Rejecting domain '%s'.\n", co->domain));
+	    CTrace((tfp, "store_cookie: Rejecting domain '%s'.\n", co->domain));
 	    freeCookie(co);
 	    return;
 	}
@@ -433,7 +437,7 @@ static void store_cookie(cookie * co, const char *hostname,
 	 * domain-match the Domain attribute.
 	 */
 	if (!host_matches(hostname, co->domain)) {
-	    CTRACE((tfp,
+	    CTrace((tfp,
 		    "store_cookie: Rejecting domain '%s' for host '%s'.\n",
 		    co->domain, hostname));
 	    freeCookie(co);
@@ -463,7 +467,7 @@ static void store_cookie(cookie * co, const char *hostname,
 		break;		/* will prompt later if we get that far */
 
 	    case INVCHECK_STRICT:
-		CTRACE((tfp,
+		CTrace((tfp,
 			"store_cookie: Rejecting because '%s' is not a prefix of '%s'.\n",
 			co->path, path));
 		freeCookie(co);
@@ -488,7 +492,7 @@ static void store_cookie(cookie * co, const char *hostname,
 		       co->domain,
 		       hostname);
 	    if (!HTForcedPrompt(cookie_noprompt, msg, NO)) {
-		CTRACE((tfp,
+		CTrace((tfp,
 			"store_cookie: Rejecting domain '%s' for host '%s'.\n",
 			co->domain,
 			hostname));
@@ -502,7 +506,7 @@ static void store_cookie(cookie * co, const char *hostname,
 		       INVALID_COOKIE_PATH_CONFIRMATION,
 		       co->path, path);
 	    if (!HTForcedPrompt(cookie_noprompt, msg, NO)) {
-		CTRACE((tfp,
+		CTrace((tfp,
 			"store_cookie: Rejecting because '%s' is not a prefix of '%s'.\n",
 			co->path, path));
 		freeCookie(co);
@@ -591,7 +595,7 @@ static void store_cookie(cookie * co, const char *hostname,
 	 * Don't add the cookie if we're over the domain's limit.  - FM
 	 */
     } else if (HTList_count(cookie_list) > max_cookies_domain) {
-	CTRACE((tfp,
+	CTrace((tfp,
 		"store_cookie: Domain's cookie limit exceeded!  Rejecting cookie.\n"));
 	freeCookie(co);
 	co = NULL;
@@ -600,7 +604,7 @@ static void store_cookie(cookie * co, const char *hostname,
 	 * Don't add the cookie if we're over the total cookie limit.  - FM
 	 */
     } else if (total_cookies > max_cookies_global) {
-	CTRACE((tfp,
+	CTrace((tfp,
 		"store_cookie: Total cookie limit exceeded!  Rejecting cookie.\n"));
 	freeCookie(co);
 	co = NULL;
@@ -614,7 +618,7 @@ static void store_cookie(cookie * co, const char *hostname,
 	 * - kw 1999-06-24
 	 */
     } else if (co->value == NULL) {	/* should not happen - kw */
-	CTRACE((tfp, "store_cookie: Value is NULL! Not storing cookie.\n"));
+	CTrace((tfp, "store_cookie: Value is NULL! Not storing cookie.\n"));
 	freeCookie(co);
 	co = NULL;
 
@@ -675,11 +679,11 @@ static char *scan_cookie_sublist(char *hostname,
 
 	if ((co) &&		/* speed-up host_matches() and limit trace output */
 	    (LYstrstr(hostname, co->domain) != NULL)) {
-	    CTRACE((tfp, "Checking cookie %p %s=%s\n",
+	    CTrace((tfp, "Checking cookie %p %s=%s\n",
 		    hl,
 		    (co->name ? co->name : "(no name)"),
 		    (co->value ? co->value : "(no value)")));
-	    CTRACE((tfp, "\t%s %s %d %s %s %d%s\n",
+	    CTrace((tfp, "\t%s %s %d %s %s %d%s\n",
 		    hostname,
 		    (co->domain ? co->domain : "(no domain)"),
 		    host_matches(hostname, co->domain),
@@ -927,7 +931,7 @@ static unsigned parse_attribute(unsigned flags,
 		 url_type == HTTPS_URL_TYPE)) {
 		*cookie_len += strlen(cur_cookie->commentURL);
 	    } else {
-		CTRACE((tfp,
+		CTrace((tfp,
 			"LYProcessSetCookies: Rejecting commentURL value '%s'\n",
 			cur_cookie->commentURL));
 		FREE(cur_cookie->commentURL);
@@ -957,7 +961,7 @@ static unsigned parse_attribute(unsigned flags,
 			   isdigit(UCH(*ptr)))
 			ptr++;
 		    if (*ptr != '\0') {
-			CTRACE((tfp,
+			CTrace((tfp,
 				"LYProcessSetCookies: Adding lead dot for domain value '%s'\n",
 				value));
 			StrAllocCopy(cur_cookie->domain, ".");
@@ -1047,7 +1051,7 @@ static unsigned parse_attribute(unsigned flags,
 		cur_cookie->expires = (time_t) 0;
 	    } else {
 		cur_cookie->expires = (time(NULL) + temp);
-		CTRACE((tfp, "LYSetCookie: expires %ld, %s",
+		CTrace((tfp, "LYSetCookie: expires %ld, %s",
 			(long) cur_cookie->expires,
 			ctime(&cur_cookie->expires)));
 	    }
@@ -1068,7 +1072,7 @@ static unsigned parse_attribute(unsigned flags,
 		cur_cookie->flags |= COOKIE_FLAG_EXPIRES_SET;
 		cur_cookie->expires = LYmktime(value, FALSE);
 		if (cur_cookie->expires > 0) {
-		    CTRACE((tfp, "LYSetCookie: expires %ld, %s",
+		    CTrace((tfp, "LYSetCookie: expires %ld, %s",
 			    (long) cur_cookie->expires,
 			    ctime(&cur_cookie->expires)));
 		}
@@ -1124,7 +1128,7 @@ static void LYProcessSetCookies(const char *SetCookie,
      */
     p = NonNull(SetCookie2);
     if (SetCookie && *p) {
-	CTRACE((tfp, "LYProcessSetCookies: Using Set-Cookie2 header.\n"));
+	CTrace((tfp, "LYProcessSetCookies: Using Set-Cookie2 header.\n"));
     }
     while (NumCookies <= max_cookies_domain && *p) {
 	attr_start = attr_end = value_start = value_end = NULL;
@@ -1341,13 +1345,13 @@ static void LYProcessSetCookies(const char *SetCookie,
 		    }
 		    HTList_appendObject(CombinedCookies, cur_cookie);
 		} else if (cur_cookie != NULL) {
-		    CTRACE((tfp,
+		    CTrace((tfp,
 			    "LYProcessSetCookies: Rejecting Set-Cookie2: %s=%s\n",
 			    (cur_cookie->name ?
 			     cur_cookie->name : "[no name]"),
 			    (cur_cookie->value ?
 			     cur_cookie->value : "[no value]")));
-		    CTRACE((tfp,
+		    CTrace((tfp,
 			    (parse_flags & FLAGS_INVALID_PORT) ?
 			    "                     due to excessive length!\n"
 			    : "                     due to invalid port!\n"));
@@ -1391,10 +1395,10 @@ static void LYProcessSetCookies(const char *SetCookie,
 	}
 	HTList_appendObject(CombinedCookies, cur_cookie);
     } else if (cur_cookie != NULL && !(parse_flags & FLAGS_INVALID_PORT)) {
-	CTRACE((tfp, "LYProcessSetCookies: Rejecting Set-Cookie2: %s=%s\n",
+	CTrace((tfp, "LYProcessSetCookies: Rejecting Set-Cookie2: %s=%s\n",
 		(cur_cookie->name ? cur_cookie->name : "[no name]"),
 		(cur_cookie->value ? cur_cookie->value : "[no value]")));
-	CTRACE((tfp, "                     due to excessive %s%s%s\n",
+	CTrace((tfp, "                     due to excessive %s%s%s\n",
 		(cookie_len > max_cookies_buffer ? "length" : ""),
 		(cookie_len > max_cookies_buffer &&
 		 NumCookies > max_cookies_domain
@@ -1404,10 +1408,10 @@ static void LYProcessSetCookies(const char *SetCookie,
 	freeCookie(cur_cookie);
 	cur_cookie = NULL;
     } else if (cur_cookie != NULL) {	/* invalidport */
-	CTRACE((tfp, "LYProcessSetCookies: Rejecting Set-Cookie2: %s=%s\n",
+	CTrace((tfp, "LYProcessSetCookies: Rejecting Set-Cookie2: %s=%s\n",
 		(cur_cookie->name ? cur_cookie->name : "[no name]"),
 		(cur_cookie->value ? cur_cookie->value : "[no value]")));
-	CTRACE((tfp, "                     due to invalid port!\n"));
+	CTrace((tfp, "                     due to invalid port!\n"));
 	NumCookies--;
 	freeCookie(cur_cookie);
 	cur_cookie = NULL;
@@ -1422,7 +1426,7 @@ static void LYProcessSetCookies(const char *SetCookie,
     cur_cookie = NULL;
     p = ((SetCookie && isEmpty(SetCookie2)) ? SetCookie : "");
     if (SetCookie2 && *p) {
-	CTRACE((tfp, "LYProcessSetCookies: Using Set-Cookie header.\n"));
+	CTrace((tfp, "LYProcessSetCookies: Using Set-Cookie header.\n"));
     }
     while (NumCookies <= max_cookies_domain && *p) {
 	attr_start = attr_end = value_start = value_end = NULL;
@@ -1638,13 +1642,13 @@ static void LYProcessSetCookies(const char *SetCookie,
 		    }
 		    HTList_appendObject(CombinedCookies, cur_cookie);
 		} else if (cur_cookie != NULL) {
-		    CTRACE((tfp,
+		    CTrace((tfp,
 			    "LYProcessSetCookies: Rejecting Set-Cookie: %s=%s\n",
 			    (cur_cookie->name ?
 			     cur_cookie->name : "[no name]"),
 			    (cur_cookie->value ?
 			     cur_cookie->value : "[no value]")));
-		    CTRACE((tfp,
+		    CTrace((tfp,
 			    "                     due to excessive length!\n"));
 		    freeCookie(cur_cookie);
 		    cur_cookie = NULL;
@@ -1686,10 +1690,10 @@ static void LYProcessSetCookies(const char *SetCookie,
 	}
 	HTList_appendObject(CombinedCookies, cur_cookie);
     } else if (cur_cookie != NULL) {
-	CTRACE((tfp, "LYProcessSetCookies: Rejecting Set-Cookie: %s=%s\n",
+	CTrace((tfp, "LYProcessSetCookies: Rejecting Set-Cookie: %s=%s\n",
 		(cur_cookie->name ? cur_cookie->name : "[no name]"),
 		(cur_cookie->value ? cur_cookie->value : "[no value]")));
-	CTRACE((tfp, "                     due to excessive %s%s%s\n",
+	CTrace((tfp, "                     due to excessive %s%s%s\n",
 		(cookie_len > max_cookies_buffer ? "length" : ""),
 		(cookie_len > max_cookies_buffer && NumCookies > max_cookies_domain
 		 ? " and "
@@ -1705,11 +1709,11 @@ static void LYProcessSetCookies(const char *SetCookie,
      */
     cl = CombinedCookies;
     while (NULL != (co = (cookie *) HTList_nextObject(cl))) {
-	CTRACE((tfp, "LYProcessSetCookie: attr=value pair: '%s=%s'\n",
+	CTrace((tfp, "LYProcessSetCookie: attr=value pair: '%s=%s'\n",
 		(co->name ? co->name : "[no name]"),
 		(co->value ? co->value : "[no value]")));
 	if (co->expires > 0) {
-	    CTRACE((tfp, "                    expires: %ld, %s\n",
+	    CTrace((tfp, "                    expires: %ld, %s\n",
 		    (long) co->expires,
 		    ctime(&co->expires)));
 	}
@@ -1717,7 +1721,7 @@ static void LYProcessSetCookies(const char *SetCookie,
 	    LYForceSSLCookiesSecure == TRUE &&
 	    !(co->flags & COOKIE_FLAG_SECURE)) {
 	    co->flags |= COOKIE_FLAG_SECURE;
-	    CTRACE((tfp, "                    Forced the 'secure' flag on.\n"));
+	    CTrace((tfp, "                    Forced the 'secure' flag on.\n"));
 	}
 	store_cookie(co, hostname, path);
     }
@@ -1773,17 +1777,17 @@ void LYSetCookie(const char *SetCookie,
 	 */
 	BadHeaders = TRUE;
     }
-    CTRACE((tfp, "LYSetCookie called with host '%s', path '%s',\n",
+    CTrace((tfp, "LYSetCookie called with host '%s', path '%s',\n",
 	    NonNull(hostname),
 	    NonNull(path)));
     if (SetCookie) {
-	CTRACE((tfp, "    and Set-Cookie: '%s'\n", SetCookie));
+	CTrace((tfp, "    and Set-Cookie: '%s'\n", SetCookie));
     }
     if (SetCookie2) {
-	CTRACE((tfp, "    and Set-Cookie2: '%s'\n", SetCookie2));
+	CTrace((tfp, "    and Set-Cookie2: '%s'\n", SetCookie2));
     }
     if (LYSetCookies == FALSE || BadHeaders == TRUE) {
-	CTRACE((tfp, "    Ignoring this Set-Cookie/Set-Cookie2 request.\n"));
+	CTrace((tfp, "    Ignoring this Set-Cookie/Set-Cookie2 request.\n"));
     }
 
     /*
@@ -1817,7 +1821,7 @@ char *LYAddCookieHeader(char *hostname,
     HTList *hl = domain_list, *next = NULL;
     domain_entry *de;
 
-    CTRACE((tfp, "LYCookie: Searching for '%s:%d', '%s'.\n",
+    CTrace((tfp, "LYCookie: Searching for '%s:%d', '%s'.\n",
 	    NONNULL(hostname),
 	    port,
 	    NONNULL(path)));
@@ -1890,7 +1894,7 @@ void LYLoadCookies(char *cookie_file)
     if (!cookie_handle)
 	return;
 
-    CTRACE((tfp, "LYLoadCookies: reading cookies from %s\n", cookie_file));
+    CTrace((tfp, "LYLoadCookies: reading cookies from %s\n", cookie_file));
 
     number_of_file_cookies = 0;
     while (LYSafeGets(&buf, cookie_handle) != 0) {
@@ -1923,11 +1927,11 @@ void LYLoadCookies(char *cookie_file)
 	 * sscanf(buf, "%s\t%s\t%s\t%s\t%d\t%s\t%[ -~]",
 	 *  domain, what, path, secure, &expires, name, value);
 	 */
-	CTRACE((tfp, "LYLoadCookies: tokenising %s\n", buf));
+	CTrace((tfp, "LYLoadCookies: tokenising %s\n", buf));
 	tok_ptr = buf;
 	tok_out = LYstrsep(&tok_ptr, "\t");
 	for (tok_loop = 0; tok_out && tok_values[tok_loop].s; tok_loop++) {
-	    CTRACE((tfp, "\t%d:[%03d]:[%s]\n",
+	    CTrace((tfp, "\t%d:[%03d]:[%s]\n",
 		    tok_loop, (int) (tok_out - buf), tok_out));
 	    LYstrncpy(tok_values[tok_loop].s,
 		      tok_out,
@@ -1943,14 +1947,14 @@ void LYLoadCookies(char *cookie_file)
 
 	if (tok_values[tok_loop].s) {
 	    /* tok_out in above loop must have been NULL prematurely - kw */
-	    CTRACE((tfp,
+	    CTrace((tfp,
 		    "*** wrong format: not enough tokens, ignoring line!\n"));
 	    continue;
 	}
 
 	expires = atol(expires_a);
-	CTRACE((tfp, "expires:\t%s\n", ctime(&expires)));
-/*	CTRACE((tfp, "%s\t%s\t%s\t%s\t%ld\t%s\t%s\tREADCOOKIE\n", */
+	CTrace((tfp, "expires:\t%s\n", ctime(&expires)));
+/*	CTrace((tfp, "%s\t%s\t%s\t%s\t%ld\t%s\t%s\tREADCOOKIE\n", */
 /*	    domain, what, path, secure, (long) expires, name, value)); */
 	moo = newCookie();
 	StrAllocCopy(moo->domain, domain);
@@ -2042,7 +2046,7 @@ void LYStoreCookies(char *cookie_file)
 	return;
     }
 
-    CTRACE((tfp, "LYStoreCookies: save cookies to %s on exit\n", cookie_file));
+    CTrace((tfp, "LYStoreCookies: save cookies to %s on exit\n", cookie_file));
 
     cookie_handle = LYNewTxtFile(cookie_file);
     if (cookie_handle == NULL)
@@ -2065,17 +2069,17 @@ void LYStoreCookies(char *cookie_file)
 	    if ((co = (cookie *) cl->object) == NULL)
 		continue;
 
-	    CTRACE((tfp, "LYStoreCookies: %ld cf %ld ",
+	    CTrace((tfp, "LYStoreCookies: %ld cf %ld ",
 		    (long) now, (long) co->expires));
 
 	    if ((co->flags & COOKIE_FLAG_DISCARD)) {
-		CTRACE((tfp, "not stored - DISCARD\n"));
+		CTrace((tfp, "not stored - DISCARD\n"));
 		continue;
 	    } else if (!(co->flags & COOKIE_FLAG_EXPIRES_SET)) {
-		CTRACE((tfp, "not stored - no expiration time\n"));
+		CTrace((tfp, "not stored - no expiration time\n"));
 		continue;
 	    } else if (co->expires <= now) {
-		CTRACE((tfp, "not stored - EXPIRED\n"));
+		CTrace((tfp, "not stored - EXPIRED\n"));
 		continue;
 	    }
 
@@ -2089,7 +2093,7 @@ void LYStoreCookies(char *cookie_file)
 		    NonNull(co->value),
 		    (co->quoted ? "\"" : ""));
 
-	    CTRACE((tfp, "STORED\n"));
+	    CTrace((tfp, "STORED\n"));
 	}
     }
     LYCloseOutput(cookie_handle);
@@ -2642,7 +2646,7 @@ static void cookie_domain_flag_set(char *domainstr,
 	    de->invcheck_bv = INVCHECK_LOOSE;
 	    break;
 	}
-	CTRACE((tfp,
+	CTrace((tfp,
 		"cookie_domain_flag_set (%s, bv=%u, invcheck_bv=%u)\n",
 		strsmall, de->bv, de->invcheck_bv));
     }
