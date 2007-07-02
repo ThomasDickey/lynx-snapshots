@@ -1,3 +1,4 @@
+/* $LynxId: LYPrint.c,v 1.84 2007/07/01 23:39:36 Andrew.Belov Exp $ */
 #include <HTUtils.h>
 #include <HTAccess.h>
 #include <HTList.h>
@@ -1182,7 +1183,7 @@ static int remove_quotes(char *string)
 #endif /* USE_VMS_MAILER */
 
 /*
- * Mail subject may have 8-bit characters and they are in display charset. 
+ * Mail subject may have 8-bit characters and they are in display charset.
  * There is no stable practice for 8-bit subject encodings:  MIME defines
  * "quoted-printable" which holds charset info but most mailers still don't
  * support it.  On the other hand many mailers send open 8-bit subjects without
@@ -1266,7 +1267,7 @@ int print_options(char **newfile,
     fputs(buffer, fp0);
     FREE(buffer);
 
-    if (no_print || no_disk_save || child_lynx || no_mail)
+    if (no_print || no_disk_save || no_mail)
 	fprintf(fp0,
 		"   <em>%s</em>\n",
 		gettext("Some print functions have been disabled!"));
@@ -1276,7 +1277,7 @@ int print_options(char **newfile,
 	    ? gettext("Standard print options:")
 	    : gettext("Print options:"));
 
-    if (child_lynx == FALSE && no_disk_save == FALSE && no_print == FALSE) {
+    if (no_disk_save == FALSE && no_print == FALSE) {
 	fprintf(fp0,
 		"   <a href=\"%s//LOCAL_FILE/lines=%d\">%s</a>\n",
 		STR_LYNXPRINT,
@@ -1285,7 +1286,7 @@ int print_options(char **newfile,
     } else {
 	fprintf(fp0, "   <em>%s</em>\n", gettext("Save to disk disabled"));
     }
-    if (child_lynx == FALSE && no_mail == FALSE && local_host_only == FALSE)
+    if (no_mail == FALSE && local_host_only == FALSE)
 	fprintf(fp0,
 		"   <a href=\"%s//MAIL_FILE/lines=%d\">%s</a>\n",
 		STR_LYNXPRINT,

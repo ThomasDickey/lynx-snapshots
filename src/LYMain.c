@@ -1,4 +1,4 @@
-/* $LynxId: LYMain.c,v 1.171 2007/05/13 22:45:47 Chuck.Houpt Exp $ */
+/* $LynxId: LYMain.c,v 1.174 2007/07/02 00:07:27 tom Exp $ */
 #include <HTUtils.h>
 #include <HTTP.h>
 #include <HTParse.h>
@@ -1292,7 +1292,7 @@ int main(int argc,
      * feature is to allow for the potentially very long command line that can
      * be associated with post or get data.  The original implementation
      * required that the lone "-" be the only command line argument, but that
-     * precluded its use when the lynx command is aliased with other arguments. 
+     * precluded its use when the lynx command is aliased with other arguments.
      * When interactive, the stdin input is terminated by by Control-D on Unix
      * or Control-Z on VMS, and each argument is terminated by a RETURN.  When
      * the argument is -get_data or -post_data, the data are terminated by a
@@ -2143,7 +2143,7 @@ int main(int argc,
 #endif
 #ifdef USE_PERSISTENT_COOKIES
 	/*
-	 * We want to save cookies picked up when in immediate dump mode. 
+	 * We want to save cookies picked up when in immediate dump mode.
 	 * Instead of calling cleanup() here, let's only call this one.  - BJP
 	 */
 	if (persistent_cookies)
@@ -2173,7 +2173,6 @@ int main(int argc,
 	status = mainloop();
 	LYCloseCloset(RECALL_URL);
 	LYCloseCloset(RECALL_MAIL);
-	cleanup();
 #if defined(PDCURSES) && defined(PDC_BUILD) && PDC_BUILD >= 2401
 	if (!isendwin()) {
 	    if ((saved_scrsize_x != 0) && (saved_scrsize_y != 0)) {
@@ -2181,6 +2180,7 @@ int main(int argc,
 	    }
 	}
 #endif
+	cleanup();
 	exit_immediately(status);
     }
 
@@ -2188,7 +2188,7 @@ int main(int argc,
 }
 
 /*
- * Called by HTAccessInit to register any protocols supported by lynx. 
+ * Called by HTAccessInit to register any protocols supported by lynx.
  * Protocols added by lynx:
  *    LYNXKEYMAP, lynxcgi, LYNXIMGMAP, LYNXCOOKIE, LYNXMESSAGES
  */
@@ -2328,11 +2328,7 @@ void reload_read_cfg(void)
 	/*
 	 * Initialize other things based on the configuration read.
 	 */
-	if (user_mode == NOVICE_MODE) {
-	    display_lines = LYlines - 4;
-	} else {
-	    display_lines = LYlines - 2;
-	}
+	LYSetDisplayLines();
 	/* Not implemented yet here,
 	 * a major problem: file paths
 	 * like lynx_save_space, LYCookieFile etc.
@@ -2534,6 +2530,14 @@ static int child_fun(char *next_arg GCC_UNUSED)
 {
     child_lynx = TRUE;
     no_disk_save = TRUE;
+    no_mail = TRUE;
+    return 0;
+}
+
+/* -child_relaxed */
+static int child_relaxed_fun(char *next_arg GCC_UNUSED)
+{
+    child_lynx = TRUE;
     return 0;
 }
 
@@ -2679,7 +2683,7 @@ static int get_data_fun(char *next_arg GCC_UNUSED)
     char *buf = NULL;
 
     /*
-     * On Unix, conflicts with curses when interactive so let's force a dump. 
+     * On Unix, conflicts with curses when interactive so let's force a dump.
      * -CL
      *
      * On VMS, mods have been made in LYCurses.c to deal with potential
@@ -3322,6 +3326,10 @@ static Config_Type Arg_Table [] =
    PARSE_FUN(
       "child",		4|FUNCTION_ARG,		child_fun,
       "exit on left-arrow in startfile, and disable save to disk"
+   ),
+   PARSE_FUN(
+      "child_relaxed",	4|FUNCTION_ARG,		child_relaxed_fun,
+      "exit on left-arrow in startfile (allows save to disk)"
    ),
 #ifdef EXP_CMD_LOGGING
    PARSE_STR(

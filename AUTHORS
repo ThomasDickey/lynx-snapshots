@@ -1,3 +1,5 @@
+-- $LynxId: AUTHORS,v 1.3 2007/06/24 21:33:25 tom Exp $
+-- vile:txtmode
 Most of the people who have contributed more than one patch to Lynx (as well as
 a few who have only one) are noted in the changelogs by their initials (to keep
 the changelog short).  Here is a summary of those initials and the
@@ -31,6 +33,7 @@ LE	Laura Eaves
 LP	Leonid Pauzner
 LV	Larry W Virden
 NSH	nsh@horae.dti.ne.jp
+PBM	onemda@gmail.com
 PC	Peter Canning
 PDS	Paul D Smith
 PG	Paul Gilmartin

@@ -1,4 +1,4 @@
-.\" $LynxId: lynx.man,v 1.74 2007/05/23 00:53:51 tom Exp $
+.\" $LynxId: lynx.man,v 1.75 2007/07/01 23:42:16 tom Exp $
 .nr N -1
 .nr D 5
 .TH LYNX 1
@@ -164,7 +164,12 @@ specifies a Lynx configuration file other than the default
 lynx.cfg.
 .TP
 .B \-child
-exit on left-arrow in startfile, and disable save to disk.
+exit on left-arrow in startfile, and disable save to disk and associated
+print/mail options.
+.TP
+.B \-child_relaxed
+exit on left-arrow in startfile, but allow save to disk and associated
+print/mail options.
 .TP
 .B \-cmd_log\fR=\fIFILENAME
 write keystroke commands and related information to the specified file.

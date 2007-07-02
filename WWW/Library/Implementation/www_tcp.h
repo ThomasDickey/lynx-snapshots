@@ -1,4 +1,6 @@
 /*                System dependencies in the W3 library
+ * $LynxId: www_tcp.h,v 1.35 2007/07/01 17:38:38 tom Exp $
+ *
                                    SYSTEM DEPENDENCIES
 
    System-system differences for TCP include files and macros.  This
@@ -297,12 +299,13 @@ VAX/VMS
 
   UCX                     DEC's "Ultrix connection" (default)
   CMU_TCP                 Available via FTP from sacusr.mp.usbr.gov
-  SOCKETSHR		  Eckhart Meyer's interface to NETLIB
+  SOCKETSHR               Eckhart Meyer's interface to NETLIB
   WIN_TCP                 From Wollongong, now GEC software.
   MULTINET                From SRI, became TGV, then Cisco.
   DECNET                  Cern's TCP socket emulation over DECnet
+  TCPIP_SERVICES          TCP/IP Services (newer than UCX)
 
-   The last three do not interfere with the
+   WIN_TCP, MULTINET and DECNET do not interfere with the
    unix i/o library, and so they need special calls to read, write and
    close sockets.  In these cases the socket number is a VMS channel
    number, so we make the @@@ HORRIBLE @@@ assumption that a channel
@@ -381,6 +384,18 @@ extern int socket_ioctl();
 #define NETCLOSE(s) (si_get_sdc((s)) != 0 ? si_close((s)) : close((s)))
 #define IOCTL si_ioctl
 #endif /* SOCKETSHR_TCP */
+
+#ifdef TCPIP_SERVICES
+/*
+ * TCPIP Services has all of the entrypoints including ioctl().
+ */
+#undef NETWRITE
+#define NETWRITE(s,b,l) send((s),(char *)(b),(l))
+
+#define TYPE_FD_SET 1
+typedef int fd_set;
+
+#endif /* TCPIP_SERVICES */
 
 #include <string.h>
 
@@ -514,6 +529,18 @@ struct timeval {
 #define TCP_INCLUDES_DONE
 #endif /* SOCKETSHR_TCP */
 
+#ifdef TCPIP_SERVICES
+#include <types.h>
+#include <errno.h>
+#include <time.h>
+#include <ioctl.h>
+#include <socket.h>
+#include <in.h>
+#include <inet.h>
+#include <netdb.h>
+#define TCP_INCLUDES_DONE
+#endif /* TCPIP_SERVICES */
+
 #ifdef WIN_TCP
 #include <types.h>
 #include <errno.h>
@@ -554,11 +581,8 @@ struct timeval {
 #endif /* !TCP_INCLUDES_DONE */
 
 /*
-
-   On VMS machines, the linker needs to be told to put global data sections into
- a data
-   segment using these storage classes. (MarkDonszelmann)
-
+ * On VMS machines, the linker needs to be told to put global data sections
+ * into a data segment using these storage classes.  (MarkDonszelmann)
  */
 #if defined(VAXC) && !defined(__DECC)
 #define GLOBALDEF globaldef
@@ -717,7 +741,7 @@ typedef unsigned short mode_t;
 #define DECL_SYS_ERRLIST 1
 #endif
 
-#if defined(VMS)
+#if defined(VMS) && !defined(TCPIP_SERVICES)
 #define socklen_t unsigned
 #else
 #define socklen_t int		/* used for default LY_SOCKLEN definition */
@@ -849,7 +873,10 @@ ROUGH ESTIMATE OF MAX PATH LENGTH
  */
 #ifdef SELECT
 #ifndef FD_SET
+#ifndef TYPE_FD_SET
+#define TYPE_FD_SET 1
 typedef unsigned int fd_set;
+#endif /* !TYPE_FD_SET */
 
 #define FD_SET(fd,pmask) (*(pmask)) |=  (1<<(fd))
 #define FD_CLR(fd,pmask) (*(pmask)) &= ~(1<<(fd))

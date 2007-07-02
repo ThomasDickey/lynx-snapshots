@@ -1,11 +1,23 @@
--- $LynxId: CHANGES,v 1.225 2007/05/23 00:55:56 tom Exp $
+-- $LynxId: CHANGES,v 1.231 2007/07/02 00:15:38 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
 2007-0?-?? (2.8.7dev.6)
+* correct display_lines when -notitle is used while in novice mode -PBM, TD
+* add -child_relaxed option (patch by Andrew Belov).
+* minor typos from OpenBSD (patch by Daniel Dickman).
+* modify VMS build-scripts to accept "TCPIP" parameter, for TCPIP Services
+  (discussion with Dominic Stephens) -TD
+* add IDE-files for building with Visual Studio 6, 2003 and 2005 Express.
+  These are respectively the files in BUILD-VS6, BUILD-VS2003 and
+  BUILD-VS2005X -TD
+* modify def7_uni.tbl to display U+2212 without a leading blank
+  (Debian #428536) -TD
+* add definition for _FILE_OFFSET_BITS in CF_LARGEFILE, needed for Solaris
+  64-bit compiles (from ncurses) -TD
 * change order of includes (-I options) in makefiles so build-tree is found
-  first -TD
+  first (report by PBM) -TD
 * ensure MIME_LIBDIR has a trailing "/" -TD
 * add new -trace-mask codes to cleanup the trace file a little -TD
 * remove redundant call to show_cert_issuer() -TG

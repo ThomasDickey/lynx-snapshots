@@ -1,5 +1,5 @@
 /*
- * $LynxId: UCdomap.c,v 1.65 2007/05/13 16:09:19 Thorsten.Glaser Exp $
+ * $LynxId: UCdomap.c,v 1.66 2007/07/01 22:02:38 Thorsten.Glaser Exp $
  *
  *  UCdomap.c
  *  =========
@@ -954,7 +954,7 @@ int UCTransUniCharStr(char *outbuf,
 	    HTSprintf0(&tocode, "%s//TRANSLIT", LYCharSet_UC[charset_out].MIMEname);
 	    cd = iconv_open(tocode, "UTF-16BE");
 	    FREE(tocode);
-	    if (cd == (iconv_t) - 1)
+	    if (cd == (iconv_t) (-1))
 		cd = iconv_open(LYCharSet_UC[charset_out].MIMEname, "UTF-16BE");
 	    rc = iconv(cd, &pin, &inleft, &pout, &outleft);
 	    iconv_close(cd);

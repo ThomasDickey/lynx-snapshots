@@ -1,4 +1,4 @@
-dnl $LynxId: configure.in,v 1.155 2007/05/23 00:42:34 tom Exp $
+dnl $LynxId: configure.in,v 1.156 2007/06/24 21:22:53 tom Exp $
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -192,25 +192,8 @@ then
 fi
 fi
 
-AC_MSG_CHECKING(if you want to link with dbmalloc for testing)
-AC_ARG_WITH(dbmalloc,
-	[  --with-dbmalloc         test: use Conor Cahill's dbmalloc library],
-	[with_dbmalloc=$withval],
-	[with_dbmalloc=no])
-AC_MSG_RESULT($with_dbmalloc)
-if test $with_dbmalloc = yes ; then
-	AC_CHECK_LIB(dbmalloc,debug_malloc)
-fi
-
-AC_MSG_CHECKING(if you want to link with dmalloc for testing)
-AC_ARG_WITH(dmalloc,
-	[  --with-dmalloc          test: use Gray Watson's dmalloc library],
-	[with_dmalloc=$withval],
-	[with_dmalloc=no])
-AC_MSG_RESULT($with_dmalloc)
-if test $with_dmalloc = yes ; then
-	AC_CHECK_LIB(dmalloc,dmalloc_debug)
-fi
+CF_WITH_DBMALLOC
+CF_WITH_DMALLOC
 
 dnl --------------------------------------------------------------------------
 dnl Checks for compiler & standard-library characteristics

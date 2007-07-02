@@ -1,4 +1,4 @@
-/* $LynxId: LYCurses.h,v 1.76 2007/05/06 20:46:34 tom Exp $ */
+/* $LynxId: LYCurses.h,v 1.77 2007/07/02 00:09:00 tom Exp $ */
 #ifndef LYCURSES_H
 #define LYCURSES_H
 
@@ -806,6 +806,7 @@ FANCY_CURSES.  Check your config.log to see why the FANCY_CURSES test failed.
 #endif
 
     extern void LYstowCursor(WINDOW * win, int row, int col);
+    extern void LYSetDisplayLines(void);
 
 #ifdef __cplusplus
 }

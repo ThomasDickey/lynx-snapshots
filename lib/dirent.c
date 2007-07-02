@@ -1,5 +1,7 @@
-/* 
-   dir.c for MS-DOS by Samuel Lam <skl@van-bc.UUCP>, June/87 
+/*
+ * $LynxId: dirent.c,v 1.2 2007/06/29 23:03:08 tom Exp $
+ *
+ * dir.c for MS-DOS by Samuel Lam <skl@van-bc.UUCP>, June/87 
  */
 
 /* #ifdef WIN32 */
@@ -22,11 +24,16 @@
 /*Includes: 
  *    crt 
  */
+#ifdef HAVE_CONFIG_H
+#include "lynx_cfg.h"
+#endif
+
 #include <windows.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys\types.h>
 #include <sys\stat.h>
+
 #include "dirent.h"
 
 #define stat _stat
@@ -42,6 +49,10 @@
 #define HDIR        HANDLE
 #define HFILE       HANDLE
 #define PHFILE      PHANDLE
+
+#ifndef INVALID_HANDLE_VALUE
+#define INVALID_HANDLE_VALUE ((HDIR) 0xffffffff)
+#endif
 
 /* 
  *    local functions 
@@ -236,7 +247,7 @@ static char *getdirent(char *dir)
 
     if (dir != NULL) {		/* get first entry */
 	if ((FindHandle = FindFirstFile(dir, &FileFindData))
-	    == (HDIR) 0xffffffff) {
+	    == INVALID_HANDLE_VALUE) {
 	    return NULL;
 	}
 	got_dirent = 1;

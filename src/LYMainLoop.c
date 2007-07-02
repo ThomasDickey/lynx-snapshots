@@ -1,4 +1,4 @@
-/* $LynxId: LYMainLoop.c,v 1.146 2007/05/13 16:16:30 tom Exp $ */
+/* $LynxId: LYMainLoop.c,v 1.148 2007/07/02 00:09:22 tom Exp $ */
 #include <HTUtils.h>
 #include <HTAccess.h>
 #include <HTParse.h>
@@ -5330,10 +5330,7 @@ int mainloop(void)
     FREE(form_post_data);
     FREE(form_get_data);
 
-    if (user_mode == NOVICE_MODE)
-	display_lines = LYlines - 4;
-    else
-	display_lines = LYlines - 2;
+    LYSetDisplayLines();
 
     while (TRUE) {
 #ifdef USE_COLOR_STYLE
@@ -6075,11 +6072,8 @@ int mainloop(void)
 	    if (HTMainText)	/* to REALLY force it... - kw */
 		HText_setStale(HTMainText);
 	    recent_sizechange = FALSE;
-	    if (user_mode == NOVICE_MODE) {
-		display_lines = LYlines - 4;
-	    } else {
-		display_lines = LYlines - 2;
-	    }
+
+	    LYSetDisplayLines();
 	}
 
 	if (www_search_result != -1) {

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTelnet.c,v 1.37 2007/05/13 16:27:23 tom Exp $
+ * $LynxId: HTTelnet.c,v 1.38 2007/07/01 23:13:22 Daniel.Dickman Exp $
  *
  *		Telnet Access, Rlogin, etc			HTTelnet.c
  *		==========================
@@ -77,7 +77,7 @@ static int remote_session(char *acc_method, char *host)
      */
     /* prevent telnet://hostname;rm -rf *  URL's (VERY BAD)
      *  *cp=0;        // terminate at any ;,<,>,`,|,",' or space or return
-     * or tab to prevent security whole
+     * or tab to prevent security hole
      */
     for (cp = (strchr(host, '@') ? strchr(host, '@') : host); *cp != '\0';
 	 cp++) {

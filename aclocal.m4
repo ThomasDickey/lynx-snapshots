@@ -1,4 +1,4 @@
-dnl $LynxId: aclocal.m4,v 1.108 2007/05/13 17:18:11 tom Exp $
+dnl $LynxId: aclocal.m4,v 1.110 2007/06/27 22:12:15 tom Exp $
 dnl Macros for auto-configure script.
 dnl by T.E.Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
@@ -2351,7 +2351,7 @@ if test "$GCC" = yes ; then
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_GCC_WARNINGS version: 20 updated: 2005/08/06 18:37:29
+dnl CF_GCC_WARNINGS version: 21 updated: 2007/06/27 18:12:15
 dnl ---------------
 dnl Check if the compiler supports useful warning options.  There's a few that
 dnl we don't use, simply because they're too noisy:
@@ -2397,7 +2397,7 @@ then
 	AC_CHECKING([for $CC warning options])
 	cf_save_CFLAGS="$CFLAGS"
 	EXTRA_CFLAGS="-Wall"
-	for cf_opt in $1 \
+	for cf_opt in \
 		wd1419 \
 		wd1682 \
 		wd1683 \
@@ -2714,7 +2714,7 @@ cf_save_CFLAGS="$cf_save_CFLAGS -we147 -no-gcc"
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_LARGEFILE version: 6 updated: 2006/09/23 19:07:52
+dnl CF_LARGEFILE version: 7 updated: 2007/06/02 11:58:50
 dnl ------------
 dnl Add checks for large file support.
 AC_DEFUN([CF_LARGEFILE],[
@@ -2732,6 +2732,7 @@ ifdef([AC_FUNC_FSEEKO],[
 	# the config.h
 	test "$ac_cv_sys_large_files"      != no && CPPFLAGS="$CPPFLAGS -D_LARGE_FILES "
 	test "$ac_cv_sys_largefile_source" != no && CPPFLAGS="$CPPFLAGS -D_LARGEFILE_SOURCE "
+	test "$ac_cv_sys_file_offset_bits" != no && CPPFLAGS="$CPPFLAGS -D_FILE_OFFSET_BITS=$ac_cv_sys_file_offset_bits "
 
 	AC_CACHE_CHECK(whether to use struct dirent64, cf_cv_struct_dirent64,[
 		AC_TRY_COMPILE([
@@ -3234,6 +3235,35 @@ if test "$cf_cv_ngroups" = no ; then
 elif test "$cf_cv_ngroups" = NGROUPS_MAX ; then
 	AC_DEFINE(NGROUPS,NGROUPS_MAX)
 fi
+])dnl
+dnl ---------------------------------------------------------------------------
+dnl CF_NO_LEAKS_OPTION version: 4 updated: 2006/12/16 14:24:05
+dnl ------------------
+dnl see CF_WITH_NO_LEAKS
+AC_DEFUN([CF_NO_LEAKS_OPTION],[
+AC_MSG_CHECKING(if you want to use $1 for testing)
+AC_ARG_WITH($1,
+	[$2],
+	[AC_DEFINE($3)ifelse([$4],,[
+	 $4
+])
+	: ${with_cflags:=-g}
+	: ${with_no_leaks:=yes}
+	 with_$1=yes],
+	[with_$1=])
+AC_MSG_RESULT(${with_$1:-no})
+
+case .$with_cflags in #(vi
+.*-g*)
+	case .$CFLAGS in #(vi
+	.*-g*) #(vi
+		;;
+	*)
+		CF_ADD_CFLAGS([-g])
+		;;
+	esac
+	;;
+esac
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl CF_OUR_MESSAGES version: 7 updated: 2004/09/12 19:45:55
@@ -4969,6 +4999,36 @@ AC_ARG_WITH(curses-dir,
 	[CF_PATH_SYNTAX(withval)
 	 cf_cv_curses_dir=$withval],
 	[cf_cv_curses_dir=no])
+])dnl
+dnl ---------------------------------------------------------------------------
+dnl CF_WITH_DBMALLOC version: 6 updated: 2006/12/16 14:24:05
+dnl ----------------
+dnl Configure-option for dbmalloc.  The optional parameter is used to override
+dnl the updating of $LIBS, e.g., to avoid conflict with subsequent tests.
+AC_DEFUN([CF_WITH_DBMALLOC],[
+CF_NO_LEAKS_OPTION(dbmalloc,
+	[  --with-dbmalloc         test: use Conor Cahill's dbmalloc library],
+	[USE_DBMALLOC])
+
+if test "$with_dbmalloc" = yes ; then
+	AC_CHECK_HEADER(dbmalloc.h,
+		[AC_CHECK_LIB(dbmalloc,[debug_malloc]ifelse($1,,[],[,$1]))])
+fi
+])dnl
+dnl ---------------------------------------------------------------------------
+dnl CF_WITH_DMALLOC version: 6 updated: 2006/12/16 14:24:05
+dnl ---------------
+dnl Configure-option for dmalloc.  The optional parameter is used to override
+dnl the updating of $LIBS, e.g., to avoid conflict with subsequent tests.
+AC_DEFUN([CF_WITH_DMALLOC],[
+CF_NO_LEAKS_OPTION(dmalloc,
+	[  --with-dmalloc          test: use Gray Watson's dmalloc library],
+	[USE_DMALLOC])
+
+if test "$with_dmalloc" = yes ; then
+	AC_CHECK_HEADER(dmalloc.h,
+		[AC_CHECK_LIB(dmalloc,[dmalloc_debug]ifelse($1,,[],[,$1]))])
+fi
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl CF_WITH_PATH version: 8 updated: 2007/05/13 13:16:35
