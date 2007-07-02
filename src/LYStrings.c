@@ -1,4 +1,4 @@
-/* $LynxId: LYStrings.c,v 1.126 2007/05/23 00:30:24 tom Exp $ */
+/* $LynxId: LYStrings.c,v 1.127 2007/07/01 23:16:31 Daniel.Dickman Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <UCAux.h>
@@ -5729,7 +5729,7 @@ char *LYSafeGets(char **src,
     if (result != 0)
 	*result = 0;
 
-    while (fgets(buffer, sizeof(buffer), fp) != 0) {
+    while (fgets(buffer, sizeof(buffer), fp) != NULL) {
 	if (*buffer)
 	    result = StrAllocCat(result, buffer);
 	if (strchr(buffer, '\n') != 0)

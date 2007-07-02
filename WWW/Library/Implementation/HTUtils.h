@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTUtils.h,v 1.76 2007/05/22 23:51:40 tom Exp $
+ * $LynxId: HTUtils.h,v 1.77 2007/07/01 15:30:33 tom Exp $
  *
  * Utility macros for the W3 code library
  * MACROS FOR GENERAL USE
@@ -59,12 +59,17 @@ char *alloca();
 /* Explicit system-configure */
 #ifdef VMS
 #define NO_SIZECHANGE
+
 #if defined(VAXC) && !defined(__DECC)
 #define NO_UNISTD_H		/* DEC C has unistd.h, but not VAX C */
 #endif
+
 #define NO_KEYPAD
 #define NO_UTMP
+
+#undef NO_FILIO_H
 #define NO_FILIO_H
+
 #define NOUSERS
 #define DISP_PARTIAL		/* experimental */
 #endif

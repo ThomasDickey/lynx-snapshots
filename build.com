@@ -1,11 +1,14 @@
 $ v0 = 0
 $ v = f$verify(v0)
+$! $LynxId: build.com,v 1.14 2007/07/01 16:40:21 tom Exp $
 $!			BUILD.COM
 $!
 $!   Command file to build LYNX.EXE on VMS systems.
 $!   Also invokes build of the WWWLibrary if its
 $!    object library does not already exist.
 $!
+$!   01-Jul-2007	T.Dickey
+$!	add support for "TCPIP" (TCPIP Services)
 $!   04-Nov-2004	T.Dickey
 $!	workarounds to build with IA64 platform.
 $!   23-Oct-2004	T.Dickey
@@ -97,17 +100,21 @@ $ 	write sys$output " [3] WIN_TCP"
 $	write sys$output " [4] CMU_TCP"
 $	write sys$output " [5] SOCKETSHR_TCP"
 $	write sys$output " [6] TCPWARE"
-$ 	read sys$command/prompt="Agent [1,2,3,4,5,6] (RETURN = [1]) " agent
+$	write sys$output " [7] DECNET"
+$	write sys$output " [8] TCPIP"
+$ 	read sys$command/prompt="Agent [1,2,3,4,5,6,7,8] (RETURN = [1]) " agent
 $   EndIf
 $ ENDIF
 $ option = ""
 $ if agent .eq. 1 .or. agent .eqs. "" .or. p1 .eqs. "" .or. p1 .eqs. "MULTINET" then -
     option = "MULTINET"
-$ if agent .eq. 2 .or. p1 .eqs. "UCX" then option = "UCX"
-$ if agent .eq. 3 .or. p1 .eqs. "WIN_TCP" then option = "WIN_TCP"
-$ if agent .eq. 4 .or. p1 .eqs. "CMU_TCP" then option = "CMU_TCP"
+$ if agent .eq. 2 .or. p1 .eqs. "UCX"           then option = "UCX"
+$ if agent .eq. 3 .or. p1 .eqs. "WIN_TCP"       then option = "WIN_TCP"
+$ if agent .eq. 4 .or. p1 .eqs. "CMU_TCP"       then option = "CMU_TCP"
 $ if agent .eq. 5 .or. p1 .eqs. "SOCKETSHR_TCP" then option = "SOCKETSHR_TCP"
-$ if agent .eq. 6 .or. p1 .eqs. "TCPWARE" then option = "TCPWARE"
+$ if agent .eq. 6 .or. p1 .eqs. "TCPWARE"       then option = "TCPWARE"
+$ if agent .eq. 7 .or. p1 .eqs. "DECNET"        then option = "DECNET"
+$ if agent .eq. 8 .or. p1 .eqs. "TCPIP"         then option = "TCPIP"
 $!
 $ if option .eqs. ""
 $ then
@@ -263,11 +270,16 @@ $ IF f$getsyi("ARCH_NAME") .eqs. "Alpha" .or. -
      f$trnlnm("DECC$CC_DEFAULT") .eqs. "/VAXC"
 $ THEN
 $  compiler := "DECC"
-$  if option .eqs. "UCX" then optfile = "UCXSHR"
-$  if option .eqs. "TCPWARE" then optfile = "TCPWARESHR"
+$!
+$  if option .eqs. "UCX"           then optfile = "UCXSHR"
+$  if option .eqs. "TCPIP"         then optfile = "TCPIPSHR"
+$  if option .eqs. "TCPWARE"       then optfile = "TCPWARESHR"
+$!
 $  if option .eqs. "SOCKETSHR_TCP" then extra_defs = extra_defs + ",_DECC_V4_SOURCE"
+$  if option .eqs. "TCPIP"         then extra_defs = extra_defs + ",_DECC_V4_SOURCE,TCPIP_SERVICES"
 $  if option .eqs. "MULTINET" then -
 	extra_defs = extra_defs + ",_DECC_V4_SOURCE,__SOCKET_TYPEDEFS"
+$!
 $  v1 = f$verify(1)
 $! DECC:
 $  cc := cc/decc/prefix=all/nomember'cc_opts' -
@@ -275,8 +287,9 @@ $  cc := cc/decc/prefix=all/nomember'cc_opts' -
 	   /INCLUDE=([],[-],[-.WWW.Library.Implementation],[.chrtrans]'extra_incs')
 $  v1 = f$verify(v0)
 $ ELSE
-$  if option .eqs. "UCX" then optfile = "UCXOLB"
-$  if option .eqs. "TCPWARE" then optfile = "TCPWAREOLB"
+$  if option .eqs. "UCX"           then optfile = "UCXOLB"
+$  if option .eqs. "TCPIP"         then optfile = "TCPIPOLB"
+$  if option .eqs. "TCPWARE"       then optfile = "TCPWAREOLB"
 $  IF f$search("gnu_cc:[000000]gcclib.olb") .nes. ""
 $  THEN
 $   compiler := "GNUC"

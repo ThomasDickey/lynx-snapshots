@@ -1,4 +1,4 @@
-/* $LynxId: LYOptions.c,v 1.120 2007/05/06 19:08:41 tom Exp $ */
+/* $LynxId: LYOptions.c,v 1.121 2007/07/02 00:09:49 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <HTTP.h>		/* 'reloading' flag */
@@ -1411,11 +1411,7 @@ void LYoptions(void)
 		}
 #endif /* VMS || USE_SLANG */
 	    }
-	    if (user_mode == NOVICE_MODE) {
-		display_lines = (LYlines - 4);
-	    } else {
-		display_lines = LYlines - 2;
-	    }
+	    LYSetDisplayLines();
 	    response = ' ';
 	    if (LYSelectPopups) {
 		HANDLE_LYOPTIONS;
@@ -2886,11 +2882,7 @@ int postoptions(DocInfo *newdoc)
 	/* User Mode: SELECT */
 	if (!strcmp(data[i].tag, user_mode_string)
 	    && GetOptValues(user_mode_values, data[i].value, &user_mode)) {
-	    if (user_mode == NOVICE_MODE) {
-		display_lines = (LYlines - 4);
-	    } else {
-		display_lines = LYlines - 2;
-	    }
+	    LYSetDisplayLines();
 	}
 
 	/* Type of visited pages page: SELECT */

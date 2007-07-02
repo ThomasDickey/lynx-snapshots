@@ -1,3 +1,4 @@
+/* $LynxId: LYCurses.c,v 1.129 2007/07/02 00:11:35 tom Exp $ */
 #include <HTUtils.h>
 #include <HTAlert.h>
 
@@ -2774,6 +2775,20 @@ void lynx_stop_reverse(void)
 void lynx_stop_underline(void)
 {
     stop_underline();
+}
+
+void LYSetDisplayLines(void)
+{
+    if (!no_title) {
+	if (user_mode == NOVICE_MODE)
+	    display_lines = LYlines - 4;
+	else
+	    display_lines = LYlines - 2;
+    } else if (user_mode == NOVICE_MODE) {
+	display_lines = LYlines - 3;
+    } else {
+	display_lines = LYlines - 1;
+    }
 }
 
 /*

@@ -1,3 +1,4 @@
+# $LynxId: def7_uni.tbl,v 1.26 2007/06/24 23:47:14 tom Exp $
 # Default 7bit replacements.
 #
 # This table is very important and should not be excluded from the distribution
@@ -1551,7 +1552,7 @@ U+220d:-)
 U+220e " qed"
 U+220f:\prod
 U+2211:\sum
-U+2212: -
+U+2212:-
 U+2213:-/+
 U+2214:.+
 0x2f	U+2215
