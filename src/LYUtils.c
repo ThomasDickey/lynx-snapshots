@@ -1,4 +1,4 @@
-/* $LynxId: LYUtils.c,v 1.157 2007/05/20 23:28:43 Thorsten.Glaser Exp $ */
+/* $LynxId: LYUtils.c,v 1.161 2007/07/22 23:53:16 tom Exp $ */
 #include <HTUtils.h>
 #include <HTTCP.h>
 #include <HTParse.h>
@@ -6,12 +6,19 @@
 #include <HTCJK.h>
 #include <HTAlert.h>
 
-#ifdef __MINGW32__
-int kbhit(void);		/* FIXME: use conio.h */
+#if defined(__MINGW32__)
 
-#ifdef UNIX
+extern int kbhit(void);		/* FIXME: use conio.h */
+
 #undef UNIX
-#endif /* UNIX */
+
+#elif defined(_WINDOWS)
+
+#include <conio.h>
+#if !defined(kbhit) && defined(_WCONIO_DEFINED)
+#define kbhit() _kbhit()	/* reasonably recent conio.h */
+#endif
+
 #endif /* __MINGW32__ */
 
 #include <LYCurses.h>
@@ -960,25 +967,22 @@ static int find_cached_style(int cur,
 
 	/*
 	 * This is where we try to restore the original style when a link is
-	 * unhighlighted.  The purpose of cached_styles[][] is to save the
-	 * original style just for this case.  If it doesn't have a color
-	 * change saved at just the right position, we look at preceding
-	 * positions in the same line until we find one.
+	 * unhighlighted.  The cached styles array saves the original style
+	 * just for this case.  If it doesn't have a color change saved at just
+	 * the right position, we look at preceding positions in the same line
+	 * until we find one.
 	 */
-	if (CACHE_VALIDATE_YX(LYP, LXP)) {
+	if (ValidCachedStyle(LYP, LXP)) {
 	    CTRACE2(TRACE_STYLE,
 		    (tfp, "STYLE.highlight.off: cached style @(%d,%d): ",
 		     LYP, LXP));
-	    s = cached_styles[LYP][LXP];
+	    s = GetCachedStyle(LYP, LXP);
 	    if (s == 0) {
 		for (x = LXP - 1; x >= 0; x--) {
-		    if (cached_styles[LYP][x]) {
-			if (cached_styles[LYP][x] > 0) {
-			    s = cached_styles[LYP][x];
-			    cached_styles[LYP][LXP] = s;
-			}
-			CTRACE((tfp, "found %u, x_offset=%d.\n",
-				cached_styles[LYP][x], (int) x - LXP));
+		    s = GetCachedStyle(LYP, x);
+		    if (s != 0) {
+			SetCachedStyle(LYP, LXP, s);
+			CTRACE((tfp, "found %u, x_offset=%d.\n", s, x - LXP));
 			break;
 		    }
 		}
@@ -5877,11 +5881,12 @@ static BOOL IsOurSymlink(const char *name)
     BOOL result = FALSE;
     int size = LY_MAXPATH;
     int used;
-    char *buffer = malloc(size);
+    char *buffer = typeMallocn(char, size);
 
     if (buffer != 0) {
 	while ((used = readlink(name, buffer, size)) == -1) {
-	    buffer = realloc(buffer, size *= 2);
+	    buffer = typeRealloc(char, buffer, size *= 2);
+
 	    if (buffer == 0)
 		break;
 	}

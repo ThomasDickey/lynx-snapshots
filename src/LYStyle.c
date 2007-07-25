@@ -1,6 +1,8 @@
-/* character level styles for Lynx
+/*
+ * $LynxId: LYStyle.c,v 1.61 2007/07/23 19:57:17 tom Exp $
+ *
+ * character level styles for Lynx
  * (c) 1996 Rob Partington -- donated to the Lyncei (if they want it :-)
- * $LynxId: LYStyle.c,v 1.58 2007/05/23 00:32:21 tom Exp $
  */
 #include <HTUtils.h>
 #include <HTML.h>
@@ -22,6 +24,7 @@
 #include <LYexit.h>
 #include <LYLeaks.h>
 #include <LYStrings.h>
+#include <LYHash.h>
 
 #define CTRACE1(p) CTRACE2(TRACE_CFG || TRACE_STYLE, p)
 
@@ -34,6 +37,13 @@ static void style_initialiseHashTable(void);
  * after curses has started
  */
 static HTList *lss_styles = NULL;
+
+#define CACHEW 128
+#define CACHEH 64
+
+static unsigned *cached_styles_ptr = NULL;
+static int cached_styles_rows = 0;
+static int cached_styles_cols = 0;
 
 /* stack of attributes during page rendering */
 int last_styles[MAX_LAST_STYLES] =
@@ -382,6 +392,7 @@ static void free_colorstylestuff(void)
     style_initialiseHashTable();
     style_deleteStyleList();
     memset(our_pairs, 0, sizeof(our_pairs));
+    FreeCachedStyles();
 }
 
 /*
@@ -701,9 +712,9 @@ void FastTrimColorClass(const char *tag_name,
     *phcode = hash_code(tag_start + 1);
 }
 
- /* This is called each time lss styles are read. It will fill
-  * each elt of 'cached_tag_styles' -HV
-  */
+/* This is called each time lss styles are read. It will fill
+ * each element of 'cached_tag_styles' -HV
+ */
 void cache_tag_styles(void)
 {
     char buf[200];
@@ -713,6 +724,67 @@ void cache_tag_styles(void)
 	LYstrncpy(buf, HTML_dtd.tags[i].name, sizeof(buf) - 1);
 	LYLowerCase(buf);
 	cached_tag_styles[i] = hash_code(buf);
+    }
+}
+
+#define SIZEOF_CACHED_STYLES (cached_styles_rows * cached_styles_cols)
+
+static unsigned *RefCachedStyle(int y, int x)
+{
+    unsigned *result = 0;
+
+    if (cached_styles_ptr == 0) {
+	cached_styles_rows = display_lines;
+	cached_styles_cols = LYcols;
+	cached_styles_ptr = typecallocn(unsigned, SIZEOF_CACHED_STYLES);
+    }
+    if (y >= 0 &&
+	x >= 0 &&
+	y < cached_styles_rows &&
+	x < cached_styles_cols) {
+	result = cached_styles_ptr + (y * cached_styles_cols) + x;
+    }
+    return result;
+}
+
+BOOL ValidCachedStyle(int y, int x)
+{
+    return (RefCachedStyle(y, x) != 0);
+}
+
+unsigned GetCachedStyle(int y, int x)
+{
+    unsigned value = 0;
+    unsigned *cache = RefCachedStyle(y, x);
+
+    if (cache != 0) {
+	value = *cache;
+    }
+    return value;
+}
+
+void SetCachedStyle(int y, int x, unsigned value)
+{
+    unsigned *cache = RefCachedStyle(y, x);
+
+    if (cache != 0) {
+	*cache = value;
+    }
+}
+
+void ResetCachedStyles(void)
+{
+    if (cached_styles_ptr != NULL) {
+	memset(cached_styles_ptr, 0, sizeof(unsigned) * SIZEOF_CACHED_STYLES);
+    }
+}
+
+void FreeCachedStyles(void)
+{
+    if (cached_styles_ptr != NULL) {
+	FREE(cached_styles_ptr);
+	cached_styles_rows = 0;
+	cached_styles_cols = 0;
     }
 }
 

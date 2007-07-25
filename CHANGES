@@ -1,9 +1,16 @@
--- $LynxId: CHANGES,v 1.231 2007/07/02 00:15:38 tom Exp $
+-- $LynxId: CHANGES,v 1.235 2007/07/24 22:44:39 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
 2007-0?-?? (2.8.7dev.6)
+* modify popup for externals added in 2.8.4dev.20 to number the entries if
+  keypad mode is set to one of the numbered forms -PBM
+* free leaks of LYLeaks.c, to make it simpler to check it with a second
+  tool such as valgrind -TD
+* rewrote cached_styles[][] to use memory allocated to match screen size
+  (report by RS) -TD
+* fix typo in SGML.C -RS
 * correct display_lines when -notitle is used while in novice mode -PBM, TD
 * add -child_relaxed option (patch by Andrew Belov).
 * minor typos from OpenBSD (patch by Daniel Dickman).
@@ -25,6 +32,7 @@ Changes since Lynx 2.8 release
 * modify HTDoRead() to add elapsed time to its debug trace -TD
 * fix a case in LYGetfile.c which was broken by 2.8.7dev.3 changes to use
   LYTildeExpand() to expand embedded "~" -TG
+* updated config.guess (2007-05-17), config.sub (2007-06-28)
  
 2007-05-17 (2.8.7dev.5)
 * build/install "en" po file so that GNU gettext LANGUAGE environment variable
@@ -119,7 +127,7 @@ Changes since Lynx 2.8 release
 * modify CF_SRAND to recognize the asymmetric variant of arc4random() -TD
 * updated configure script macros CF_SUBDIR_PATH, CF_XOPEN_SOURCE,
   CF_X_ATHENA_LIBS, CF_X_TOOLKIT -TD
-* updated config.guess, config.sub -TD
+* updated config.guess (2006-12-22), config.sub (2006-12-08)
 
 2006-11-14 (2.8.7dev.4)
 * use RFC-822 encoding for filenames passed via file-upload forms (Debian

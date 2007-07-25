@@ -1,4 +1,7 @@
-/*		Parse HyperText Document Address		HTParse.c
+/*
+ * $LynxId: HTParse.c,v 1.47 2007/07/22 22:24:37 tom Exp $
+ *
+ *		Parse HyperText Document Address		HTParse.c
  *		================================
  */
 
@@ -212,7 +215,7 @@ char *HTParse(const char *aName,
     char *result = NULL;
     char *tail = NULL;		/* a pointer to the end of the 'result' string */
     char *return_value = NULL;
-    int len, len1, len2;
+    unsigned len, len1, len2;
     char *name = NULL;
     char *rel = NULL;
     char *p, *q;
@@ -900,12 +903,12 @@ char *HTEscape(const char *str,
     const char *p;
     char *q;
     char *result;
-    int unacceptable = 0;
+    unsigned unacceptable = 0;
 
     for (p = str; *p; p++)
 	if (!ACCEPTABLE(UCH(TOASCII(*p))))
 	    unacceptable++;
-    result = typecallocn(char, p - str + unacceptable + unacceptable + 1);
+    result = typecallocn(char, (p - str) + (unacceptable * 2) + 1);
 
     if (result == NULL)
 	outofmem(__FILE__, "HTEscape");
@@ -940,12 +943,12 @@ char *HTEscapeUnsafe(const char *str)
     const char *p;
     char *q;
     char *result;
-    int unacceptable = 0;
+    unsigned unacceptable = 0;
 
     for (p = str; *p; p++)
 	if (UNSAFE(UCH(TOASCII(*p))))
 	    unacceptable++;
-    result = typecallocn(char, p - str + unacceptable + unacceptable + 1);
+    result = typecallocn(char, (p - str) + (unacceptable * 2) + 1);
 
     if (result == NULL)
 	outofmem(__FILE__, "HTEscapeUnsafe");
@@ -980,12 +983,12 @@ char *HTEscapeSP(const char *str,
     const char *p;
     char *q;
     char *result;
-    int unacceptable = 0;
+    unsigned unacceptable = 0;
 
     for (p = str; *p; p++)
 	if (!(*p == ' ' || ACCEPTABLE(UCH(TOASCII(*p)))))
 	    unacceptable++;
-    result = typecallocn(char, p - str + unacceptable + unacceptable + 1);
+    result = typecallocn(char, (p - str) + (unacceptable * 2) + 1);
 
     if (result == NULL)
 	outofmem(__FILE__, "HTEscape");
@@ -1131,7 +1134,7 @@ void HTMake822Word(char **str,
     char *q;
     char *result;
     unsigned char a;
-    int added = 0;
+    unsigned added = 0;
 
     if (isEmpty(*str)) {
 	StrAllocCopy(*str, quoted ? "\"\"" : "");

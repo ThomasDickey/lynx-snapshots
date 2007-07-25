@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTML.c,v 1.112 2007/05/10 00:20:31 tom Exp $
+ * $LynxId: HTML.c,v 1.113 2007/07/02 23:43:40 tom Exp $
  *
  *		Structured stream to Rich hypertext converter
  *		============================================
@@ -4447,9 +4447,9 @@ static int HTML_start_element(HTStructured * me, int element_number,
 		 */
 		for (i = 0; I.value[i]; i++) {
 		    HTML_put_character(me,
-				       (I.value[i] == ' ')
-				       ? HT_NON_BREAK_SPACE
-				       : I.value[i]);
+				       (char) ((I.value[i] == ' ')
+					       ? HT_NON_BREAK_SPACE
+					       : I.value[i]));
 		}
 		while (i++ < chars) {
 		    HTML_put_character(me, HT_NON_BREAK_SPACE);

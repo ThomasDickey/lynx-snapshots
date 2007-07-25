@@ -1,4 +1,4 @@
-/* $LynxId: LYMain.c,v 1.174 2007/07/02 00:07:27 tom Exp $ */
+/* $LynxId: LYMain.c,v 1.175 2007/07/02 22:41:49 tom Exp $ */
 #include <HTUtils.h>
 #include <HTTP.h>
 #include <HTParse.h>
@@ -4121,7 +4121,7 @@ static BOOL parse_arg(char **argv,
 	    arg_name, mask, countp ? *countp : -1));
 
 #if EXTENDED_STARTFILE_RECALL
-    if (mask == ((countp != 0) ? 0 : 1)) {
+    if (mask == (unsigned) ((countp != 0) ? 0 : 1)) {
 	no_options_further = FALSE;
 	/* want to reset nonoption when beginning scan for --stdin */
 	if (nonoption != 0) {

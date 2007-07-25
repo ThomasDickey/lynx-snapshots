@@ -1,5 +1,5 @@
 /*                System dependencies in the W3 library
- * $LynxId: www_tcp.h,v 1.35 2007/07/01 17:38:38 tom Exp $
+ * $LynxId: www_tcp.h,v 1.36 2007/07/02 23:05:01 tom Exp $
  *
                                    SYSTEM DEPENDENCIES
 
@@ -392,8 +392,8 @@ extern int socket_ioctl();
 #undef NETWRITE
 #define NETWRITE(s,b,l) send((s),(char *)(b),(l))
 
-#define TYPE_FD_SET 1
-typedef int fd_set;
+#define TYPE_FD_SET int
+typedef TYPE_FD_SET fd_set;
 
 #endif /* TCPIP_SERVICES */
 
@@ -874,14 +874,14 @@ ROUGH ESTIMATE OF MAX PATH LENGTH
 #ifdef SELECT
 #ifndef FD_SET
 #ifndef TYPE_FD_SET
-#define TYPE_FD_SET 1
-typedef unsigned int fd_set;
+#define TYPE_FD_SET unsigned
+typedef TYPE_FD_SET fd_set;
 #endif /* !TYPE_FD_SET */
 
-#define FD_SET(fd,pmask) (*(pmask)) |=  (1<<(fd))
-#define FD_CLR(fd,pmask) (*(pmask)) &= ~(1<<(fd))
-#define FD_ZERO(pmask)   (*(pmask))=0
-#define FD_ISSET(fd,pmask) (*(pmask) & (1<<(fd)))
+#define FD_SET(fd,pmask)   (*(pmask)) |=  (1 << (fd))
+#define FD_CLR(fd,pmask)   (*(pmask)) &= ~(1 << (fd))
+#define FD_ZERO(pmask)     (*(pmask)) = 0
+#define FD_ISSET(fd,pmask) (*(pmask) & (1 << (fd)))
 #endif /* !FD_SET */
 #endif /* SELECT */
 
