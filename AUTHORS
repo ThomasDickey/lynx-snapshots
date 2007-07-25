@@ -1,4 +1,4 @@
--- $LynxId: AUTHORS,v 1.3 2007/06/24 21:33:25 tom Exp $
+-- $LynxId: AUTHORS,v 1.4 2007/07/22 21:58:00 tom Exp $
 -- vile:txtmode
 Most of the people who have contributed more than one patch to Lynx (as well as
 a few who have only one) are noted in the changelogs by their initials (to keep
@@ -40,6 +40,7 @@ PG	Paul Gilmartin
 PHDM	Philippe De Muyter
 PW	Philip Webb
 RN	Ryan Nielsen
+RS	Rado Smiljanic
 SC	Stef Caunter
 SH	Hiroyuki Senshu
 SKY	Sinan Kaan Yerli

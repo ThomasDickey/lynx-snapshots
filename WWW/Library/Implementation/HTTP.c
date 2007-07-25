@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTP.c,v 1.86 2007/05/22 22:42:12 Thorsten.Glaser Exp $
+ * $LynxId: HTTP.c,v 1.87 2007/07/03 00:20:33 tom Exp $
  *
  * HyperText Tranfer Protocol	- Client implementation		HTTP.c
  * ==========================
@@ -813,8 +813,10 @@ static int HTLoadHTTP(const char *arg,
 	    int i, numalts;
 	    const GENERAL_NAME *gn;
 
-	    if ((gens = X509_get_ext_d2i(peer_cert, NID_subject_alt_name,
-					 NULL, NULL)) != NULL) {
+	    gens = (STACK_OF(GENERAL_NAME) *)
+		X509_get_ext_d2i(peer_cert, NID_subject_alt_name, NULL, NULL);
+
+	    if (gens != NULL) {
 		numalts = sk_GENERAL_NAME_num(gens);
 		for (i = 0; i < numalts; ++i) {
 		    gn = sk_GENERAL_NAME_value(gens, i);
@@ -824,7 +826,7 @@ static int HTLoadHTTP(const char *arg,
 			/* XXX untested -TG */
 			size_t j = ASN1_STRING_length(gn->d.ia5);
 
-			cert_host = malloc(j + 1);
+			cert_host = (char *) malloc(j + 1);
 			memcpy(cert_host, ASN1_STRING_data(gn->d.ia5), j);
 			cert_host[j] = '\0';
 		    } else

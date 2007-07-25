@@ -1,4 +1,7 @@
-/*			NEWS ACCESS				HTNews.c
+/*
+ * $LynxId: HTNews.c,v 1.57 2007/07/03 00:13:21 tom Exp $
+ *
+ *			NEWS ACCESS				HTNews.c
  *			===========
  *
  * History:
@@ -1003,12 +1006,14 @@ void debug_print(unsigned char *p)
 
 static char *decode_mime(char **str)
 {
+    static char empty[] = "";
+
 #ifdef SH_EX
     if (HTCJK != JAPANESE)
 	return *str;
 #endif
     HTmmdecode(str, *str);
-    return HTrjis(str, *str) ? *str : "";
+    return HTrjis(str, *str) ? *str : empty;
 }
 
 /*	Read in an Article					read_article

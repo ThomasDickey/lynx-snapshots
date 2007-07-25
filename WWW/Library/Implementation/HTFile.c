@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFile.c,v 1.102 2007/05/13 17:29:41 tom Exp $
+ * $LynxId: HTFile.c,v 1.103 2007/07/22 22:31:01 tom Exp $
  *
  *			File Access				HTFile.c
  *			===========
@@ -2629,7 +2629,7 @@ int HTLoadFile(const char *addr,
 	    char *best_name = NULL;	/* Best dir entry so far */
 
 	    char *base = strrchr(localname, '/');
-	    int baselen = 0;
+	    unsigned baselen = 0;
 
 	    if (!base || base == localname) {
 		forget_multi = YES;
@@ -2654,7 +2654,7 @@ int HTLoadFile(const char *addr,
 		if (dirbuf->d_ino == 0)
 		    continue;	/* if the entry is not being used, skip it */
 #endif
-		if ((int) strlen(dirbuf->d_name) > baselen &&	/* Match? */
+		if (strlen(dirbuf->d_name) > baselen &&		/* Match? */
 		    !strncmp(dirbuf->d_name, base, baselen)) {
 		    HTAtom *enc;
 		    HTFormat rep = HTFileFormat(dirbuf->d_name, &enc, NULL);

@@ -1,4 +1,7 @@
-/*			General SGML Parser code		SGML.c
+/*
+ * $LynxId: SGML.c,v 1.92 2007/07/22 21:52:43 Rado.Smiljanic Exp $
+ *
+ *			General SGML Parser code		SGML.c
  *			========================
  *
  *	This module implements an HTStream object.  To parse an
@@ -2466,7 +2469,7 @@ static void SGML_character(HTStream *context, char c_in)
 	    /*
 	     * Terminate the numeric entity and try to handle it.  - FM
 	     */
-	    UCode_t code;
+	    unsigned long code;
 	    int i;
 
 	    HTChunkTerminate(string);
@@ -2474,7 +2477,7 @@ static void SGML_character(HTStream *context, char c_in)
 	    entity_string = string->data;
 #endif
 	    if ((context->isHex ? sscanf(string->data, "%lx", &code) :
-		 sscanf(string->data, "%ld", &code)) == 1) {
+		 sscanf(string->data, "%lu", &code)) == 1) {
 /* =============== work in ASCII below here ===============  S/390 -- gil -- 1092 */
 		if ((code == 1) ||
 		    (code > 127 && code < 156)) {
@@ -3525,7 +3528,7 @@ static void SGML_character(HTStream *context, char c_in)
 		PUTS(string->data);
 		if (c == '=' || WHITE(c))
 		    PUTC(c);
-		if (c == '=' || c == '>' || c == ' ') {
+		if (c == '=' || c == '>' || WHITE(c)) {
 		    if (context->current_attribute_number == INVALID)
 			PSRCSTOP(badattr);
 		    else

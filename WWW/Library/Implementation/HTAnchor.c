@@ -1,4 +1,7 @@
-/*	Hypertext "Anchor" Object				HTAnchor.c
+/*
+ * $LynxId: HTAnchor.c,v 1.59 2007/07/02 23:42:54 tom Exp $
+ *
+ *	Hypertext "Anchor" Object				HTAnchor.c
  *	==========================
  *
  * An anchor represents a region of a hypertext document which is linked to
@@ -27,21 +30,25 @@
 #include <LYCharSets.h>
 #include <LYLeaks.h>
 
+#define HASH_TYPE unsigned short
+
 #ifdef NOT_DEFINED
 /*
  *	This is the hashing function used to determine which list in the
  *		adult_table a parent anchor should be put in.  This is a
  *		much simpler function than the original used.
  */
-#define HASH_FUNCTION(cp_address) ((unsigned short int)strlen(cp_address) *\
-	(unsigned short int)TOUPPER(*cp_address) % HASH_SIZE)
+#define HASH_FUNCTION(cp_address) \
+	( (HASH_TYPE)strlen(cp_address) *\
+	  (HASH_TYPE)TOUPPER(*cp_address) % HASH_SIZE )
 #endif /* NOT_DEFINED */
+
 /*
  *	This is the original function.	We'll use it again. - FM
  */
-static int HASH_FUNCTION(const char *cp_address)
+static HASH_TYPE HASH_FUNCTION(const char *cp_address)
 {
-    int hash;
+    HASH_TYPE hash;
     const unsigned char *p;
 
     for (p = (const unsigned char *) cp_address, hash = 0; *p; p++)
@@ -71,7 +78,7 @@ static HTList adult_table[HASH_SIZE] =
  *	anchor you are creating : use newWithParent or newWithAddress.
  */
 static HTParentAnchor0 *HTParentAnchor0_new(const char *address,
-					    short hash)
+					    HASH_TYPE hash)
 {
     HTParentAnchor0 *newAnchor = typecalloc(HTParentAnchor0);
 
@@ -416,7 +423,7 @@ static HTParentAnchor0 *HTAnchor_findAddress_in_adult_table(const DocAddress *ne
     /*
      * Check whether we have this node.
      */
-    int hash;
+    HASH_TYPE hash;
     HTList *adults;
     HTList *grownups;
     HTParentAnchor0 *foundAnchor;

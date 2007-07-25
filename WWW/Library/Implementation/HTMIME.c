@@ -1,4 +1,7 @@
-/*			MIME Message Parse			HTMIME.c
+/*
+ * $LynxId: HTMIME.c,v 1.62 2007/07/03 00:16:30 tom Exp $
+ *
+ *			MIME Message Parse			HTMIME.c
  *			==================
  *
  *	This is RFC 1341-specific code.
@@ -2137,8 +2140,8 @@ static void HTmmdec_base64(char **t,
     int d, count, j, val;
     char *buf, *bp, nw[4], *p;
 
-    if ((buf = malloc(strlen(s) * 3 + 1)) == 0)
-	outofmem(__FILE__, "HTmmdec_base64");
+    if ((buf = typeMallocn(char, strlen(s) * 3 + 1)) == 0)
+	  outofmem(__FILE__, "HTmmdec_base64");
 
     for (bp = buf; *s; s += 4) {
 	val = 0;
@@ -2178,8 +2181,8 @@ static void HTmmdec_quote(char **t,
 {
     char *buf, cval, *bp, *p;
 
-    if ((buf = malloc(strlen(s) + 1)) == 0)
-	outofmem(__FILE__, "HTmmdec_quote");
+    if ((buf = typeMallocn(char, strlen(s) + 1)) == 0)
+	  outofmem(__FILE__, "HTmmdec_quote");
 
     for (bp = buf; *s;) {
 	if (*s == '=') {
@@ -2222,8 +2225,8 @@ void HTmmdecode(char **target,
     char *s, *t, *u;
     int base64, quote;
 
-    if ((buf = malloc(strlen(source) + 1)) == 0)
-	outofmem(__FILE__, "HTmmdecode");
+    if ((buf = typeMallocn(char, strlen(source) + 1)) == 0)
+	  outofmem(__FILE__, "HTmmdecode");
 
     for (s = source, u = buf; *s;) {
 	if (!strncasecomp(s, "=?ISO-2022-JP?B?", 16)) {
@@ -2297,8 +2300,8 @@ int HTrjis(char **t,
 	return 1;
     }
 
-    if ((buf = malloc(strlen(s) * 2 + 1)) == 0)
-	outofmem(__FILE__, "HTrjis");
+    if ((buf = typeMallocn(char, strlen(s) * 2 + 1)) == 0)
+	  outofmem(__FILE__, "HTrjis");
 
     for (p = buf; *s;) {
 	if (!kanji && s[0] == '$' && (s[1] == '@' || s[1] == 'B')) {

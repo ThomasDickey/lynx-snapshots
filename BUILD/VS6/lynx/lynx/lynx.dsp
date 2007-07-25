@@ -49,7 +49,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /machine:I386
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib   wsock32.lib pdcurses.lib zlib.lib /nologo /subsystem:console /machine:I386 /nodefaultlib:"libcmt" /libpath:"..\..\..\..\lib"
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib wsock32.lib pdcurses.lib zlib.lib /nologo /subsystem:console /machine:I386 /nodefaultlib:"libcmt" /libpath:"..\..\..\..\lib"
 
 !ELSEIF  "$(CFG)" == "lynx - Win32 Debug"
 
@@ -428,6 +428,410 @@ SOURCE=..\..\..\..\src\Xsystem.c
 # Begin Group "Header Files"
 
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
+# Begin Source File
+
+SOURCE=..\..\..\..\src\AttrList.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\src\GridText.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\WWW\Library\Implementation\HTAABrow.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\WWW\Library\Implementation\HTAAProt.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\WWW\Library\Implementation\HTAAUtil.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\WWW\Library\Implementation\HTAccess.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\src\HTAlert.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\WWW\Library\Implementation\HTAnchor.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\WWW\Library\Implementation\HTAssoc.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\WWW\Library\Implementation\HTAtom.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\WWW\Library\Implementation\HTBTree.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\WWW\Library\Implementation\HTChunk.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\WWW\Library\Implementation\HTCJK.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\WWW\Library\Implementation\HTDOS.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\WWW\Library\Implementation\HText.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\WWW\Library\Implementation\HTFile.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\WWW\Library\Implementation\HTFinger.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\src\HTFont.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\WWW\Library\Implementation\HTFormat.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\src\HTForms.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\WWW\Library\Implementation\HTFTP.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\WWW\Library\Implementation\HTFWriter.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\WWW\Library\Implementation\HTGopher.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\WWW\Library\Implementation\HTGroup.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\WWW\Library\Implementation\HTInit.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\WWW\Library\Implementation\HTioctl.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\WWW\Library\Implementation\HTLex.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\WWW\Library\Implementation\HTList.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\WWW\Library\Implementation\HTMIME.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\src\HTML.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\WWW\Library\Implementation\HTMLDTD.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\WWW\Library\Implementation\HTMLGen.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\src\HTNestedList.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\WWW\Library\Implementation\HTNews.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\WWW\Library\Implementation\HTParse.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\WWW\Library\Implementation\HTPlain.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\WWW\Library\Implementation\HTRules.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\src\HTSaveToFile.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\WWW\Library\Implementation\HTStream.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\WWW\Library\Implementation\HTString.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\WWW\Library\Implementation\HTStyle.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\WWW\Library\Implementation\HTTCP.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\WWW\Library\Implementation\HTTelnet.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\WWW\Library\Implementation\HTTP.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\WWW\Library\Implementation\htutils.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\WWW\Library\Implementation\HTUU.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\WWW\Library\Implementation\HTWSRC.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\src\LYBookmark.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\src\LYCgi.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\src\LYCharSets.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\src\LYCharUtils.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\src\LYCharVals.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\src\LYClean.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\src\LYCookie.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\src\LYCurses.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\src\LYDownload.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\src\LYEdit.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\WWW\Library\Implementation\LYexit.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\src\LYExtern.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\src\LYGCurses.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\src\LYGetFile.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\src\LYGlobalDefs.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\src\LYHash.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\src\LYHistory.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\src\LYJump.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\src\LYJustify.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\src\LYKeymap.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\WWW\Library\Implementation\LYLeaks.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\src\LYList.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\src\LYLocal.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\src\LYMail.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\src\LYMainLoop.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\src\LYMap.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\LYMessages_en.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\src\LYNews.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\src\LYOptions.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\src\LYPrettySrc.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\src\LYPrint.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\src\LYrcFile.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\src\LYReadCFG.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\src\LYSearch.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\src\LYShowInfo.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\src\LYSignal.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\src\LYStrings.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\src\LYStructs.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\src\LYStyle.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\src\LYTraversal.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\src\LYUpload.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\src\LYUtils.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\src\LYVMSdef.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\WWW\Library\Implementation\SGML.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\src\structdump.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\src\TRSTable.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\src\UCAuto.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\WWW\Library\Implementation\UCAux.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\WWW\Library\Implementation\UCDefs.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\src\UCdomap.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\WWW\Library\Implementation\UCMap.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\userdefs.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\WWW\Library\Implementation\www_tcp.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\WWW\Library\Implementation\www_wait.h
+# End Source File
 # End Group
 # Begin Group "Resource Files"
 

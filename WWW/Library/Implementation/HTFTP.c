@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFTP.c,v 1.78 2007/05/22 23:47:17 tom Exp $
+ * $LynxId: HTFTP.c,v 1.79 2007/07/02 23:05:12 tom Exp $
  *
  *			File Transfer Protocol (FTP) Client
  *			for a WorldWideWeb browser
@@ -226,10 +226,12 @@ static int interrupted_in_next_data_char = FALSE;
 static PortNumber port_number = FIRST_TCP_PORT;
 #endif /* POLL_PORTS */
 
-static int master_socket = -1;	/* Listening socket = invalid   */
+static BOOL have_socket = FALSE;	/* true if master_socket is valid */
+static unsigned master_socket;	/* Listening socket = invalid */
+
 static char port_command[255];	/* Command for setting the port */
 static fd_set open_sockets;	/* Mask of active channels */
-static int num_sockets;		/* Number of sockets to scan */
+static unsigned num_sockets;	/* Number of sockets to scan */
 static PortNumber passive_port;	/* Port server specified for data */
 
 #define NEXT_CHAR HTGetCharacter()	/* Use function in HTFormat.c */
@@ -1117,6 +1119,18 @@ static int get_connection(const char *arg,
     return con->socket;		/* Good return */
 }
 
+static void reset_master_socket(void)
+{
+    have_socket = FALSE;
+}
+
+static void set_master_socket(int value)
+{
+    have_socket = (value >= 0);
+    if (have_socket)
+	master_socket = value;
+}
+
 /*	Close Master (listening) socket
  *	-------------------------------
  *
@@ -1126,11 +1140,14 @@ static int close_master_socket(void)
 {
     int status;
 
-    if (master_socket != -1)
+    if (have_socket)
 	FD_CLR(master_socket, &open_sockets);
+
     status = NETCLOSE(master_socket);
     CTRACE((tfp, "HTFTP: Closed master socket %d\n", master_socket));
-    master_socket = -1;
+
+    reset_master_socket();
+
     if (status < 0)
 	return HTInetStatus(gettext("close master socket"));
     else
@@ -1144,6 +1161,7 @@ static int close_master_socket(void)
  *	connect with the data.
  *
  * On entry,
+ *	have_socket	Must be false, if master_socket is not setup already
  *	master_socket	Must be negative if not set up already.
  * On exit,
  *	Returns		socket number if good
@@ -1169,7 +1187,7 @@ static int get_listen_socket(void)
     num_sockets = 0;
 
 #ifndef REPEAT_LISTEN
-    if (master_socket >= 0)
+    if (have_socket)
 	return master_socket;	/* Done already */
 #endif /* !REPEAT_LISTEN */
 
@@ -1336,11 +1354,11 @@ static int get_listen_socket(void)
 #endif /* INET6 */
 
 #ifdef REPEAT_LISTEN
-    if (master_socket >= 0)
+    if (have_socket)
 	(void) close_master_socket();
 #endif /* REPEAT_LISTEN */
 
-    master_socket = new_socket;
+    set_master_socket(new_socket);
 
 /*	Now we must find out who we are to tell the other guy
 */
@@ -1392,7 +1410,7 @@ static int get_listen_socket(void)
 #endif /* SOCKS */
 	    status = listen(master_socket, 1);
 	if (status < 0) {
-	    master_socket = -1;
+	    reset_master_socket();
 	    return HTInetStatus("listen");
 	}
     }
@@ -3020,7 +3038,7 @@ static int setup_connection(const char *name,
 		NETCLOSE(control->socket);
 		control->socket = -1;
 #ifdef INET6
-		if (master_socket >= 0)
+		if (have_socket)
 		    (void) close_master_socket();
 #else
 		close_master_socket();

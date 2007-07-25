@@ -1,3 +1,4 @@
+/* $LynxId: LYUtils.h,v 1.76 2007/07/02 23:43:21 tom Exp $ */
 #ifndef LYUTILS_H
 #define LYUTILS_H
 
@@ -215,7 +216,7 @@ extern "C" {
     extern int Cygwin_Shell(void);
 #endif
 
-#ifdef _WIN_CC
+#if defined(_WIN_CC) || defined(WIN_EX)
     extern int exec_command(char *cmd, int wait_flag);	/* xsystem.c */
     extern int xsystem(char *cmd);
 #endif

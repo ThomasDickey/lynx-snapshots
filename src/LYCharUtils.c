@@ -1,4 +1,6 @@
 /*
+ * $LynxId: LYCharUtils.c,v 1.88 2007/07/02 23:58:53 tom Exp $
+ *
  *  Functions associated with LYCharSets.c and the Lynx version of HTML.c - FM
  *  ==========================================================================
  */
@@ -1079,7 +1081,7 @@ char **LYUCFullyTranslateString(char **str,
     int uck;
     int lowest_8;
     UCode_t code = 0;
-    long int lcode;
+    unsigned long lcode;
     BOOL output_utf8 = 0, repl_translated_C0 = 0;
     size_t len;
     const char *name = NULL;
@@ -1523,9 +1525,10 @@ char **LYUCFullyTranslateString(char **str,
 	     * (3) Is 127 and we don't have HTPassHighCtrlRaw or HTCJK set.
 	     * (4) Is 128 - 159 and we don't have HTPassHighCtrlNum set.
 	     */
-	    if ((((what == P_hex) ? sscanf(cp, "%lx", &lcode) :
-		  sscanf(cp, "%ld", &lcode)) != 1) ||
-		lcode > 0x7fffffffL || lcode < 0) {
+	    if ((((what == P_hex)
+		  ? sscanf(cp, "%lx", &lcode)
+		  : sscanf(cp, "%lu", &lcode)) != 1) ||
+		lcode > 0x7fffffffL) {
 		state = S_recover;
 		break;
 	    } else {

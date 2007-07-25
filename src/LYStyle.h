@@ -1,3 +1,4 @@
+/* $LynxId: LYStyle.h,v 1.15 2007/07/23 19:21:54 tom Exp $ */
 #ifndef LYSTYLE_H
 #define LYSTYLE_H
 
@@ -62,6 +63,15 @@ extern "C" {
 				   char *stylename,
 				   char **pstylename_end,
 				   int *hcode);
+
+/*
+ * Functions for cached-styles
+ */
+    extern BOOL ValidCachedStyle(int y, int x);
+    extern unsigned GetCachedStyle(int y, int x);
+    extern void FreeCachedStyles(void);
+    extern void ResetCachedStyles(void);
+    extern void SetCachedStyle(int y, int x, unsigned value);
 
 #ifdef __cplusplus
 }
