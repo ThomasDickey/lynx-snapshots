@@ -651,11 +651,21 @@ II. Compile instructions -- UNIX
 	If cross-compiling, the host libraries.  You might need to do this if
 	the target environment requires unusual libraries.
 
-  --with-bzlib				(define USE_BZLIB)
+  --with-bzlib[=XXX]			(define USE_BZLIB)
 	Use libbz2 for decompression of some bzip2 files.
 
-  --with-zlib				(define USE_ZLIB)
+	The optional value XXX specifies the directory in which the library
+	can be found, and may be either the path of the "lib" directory,
+	or one level above.  In either case, the corresponding header files
+	are assumed to be in the parallel "include" directory.
+
+  --with-zlib[=XXX]			(define USE_ZLIB)
 	Use zlib for decompression of some gzip files.
+
+	The optional value XXX specifies the directory in which the library
+	can be found, and may be either the path of the "lib" directory,
+	or one level above.  In either case, the corresponding header files
+	are assumed to be in the parallel "include" directory.
 
 1d. Environment variables
     The configure script looks for programs and libraries in known/standard
@@ -1305,4 +1315,4 @@ VIII. Acknowledgment
 
 -- 1999/04/24 - H. Nelson <lynx-admin@irm.nara.kindai.ac.jp>
 -- vile:txtmode
--- $LynxId: INSTALLATION,v 1.99 2007/05/13 13:47:59 tom Exp $
+-- $LynxId: INSTALLATION,v 1.100 2007/07/29 17:23:43 tom Exp $

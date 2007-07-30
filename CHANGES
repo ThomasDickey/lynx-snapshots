@@ -1,9 +1,12 @@
--- $LynxId: CHANGES,v 1.235 2007/07/24 22:44:39 tom Exp $
+-- $LynxId: CHANGES,v 1.237 2007/07/29 17:27:03 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
 2007-0?-?? (2.8.7dev.6)
+* rewrote several autoconf macros to use extended searches in non-system
+  locations, i.e., AM_ICONV, AM_WITH_NLS, CF_GNUTLS, CF_SSL, CF_WITH_BZLIB
+  and CF_WITH_ZLIB (prompted by LV comments) -TD
 * modify popup for externals added in 2.8.4dev.20 to number the entries if
   keypad mode is set to one of the numbered forms -PBM
 * free leaks of LYLeaks.c, to make it simpler to check it with a second

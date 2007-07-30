@@ -1,4 +1,4 @@
-dnl $LynxId: configure.in,v 1.156 2007/06/24 21:22:53 tom Exp $
+dnl $LynxId: configure.in,v 1.157 2007/07/29 17:17:01 tom Exp $
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -821,7 +821,7 @@ CF_ARG_ENABLE(japanese-utf8,
 AC_MSG_RESULT($use_ja_utf8)
 if test $use_ja_utf8 != no ; then
 	AC_DEFINE(EXP_JAPANESEUTF8_SUPPORT)
-	AC_CHECK_LIB(iconv,libiconv_open)
+	AM_ICONV
 fi
 
 use_dft_colors=no
@@ -1091,7 +1091,7 @@ AC_ARG_WITH(bzlib,
 AC_MSG_RESULT($use_bzlib)
 
 if test ".$use_bzlib" != ".no" ; then
-	CF_WITH_BZLIB
+	CF_WITH_BZLIB($use_bzlib)
 	AC_DEFINE(USE_BZLIB)
 fi
 
@@ -1104,7 +1104,7 @@ AC_ARG_WITH(zlib,
 AC_MSG_RESULT($use_zlib)
 
 if test ".$use_zlib" != ".no" ; then
-	CF_WITH_ZLIB
+	CF_WITH_ZLIB($use_zlib)
 	AC_DEFINE(USE_ZLIB)
 fi
 
