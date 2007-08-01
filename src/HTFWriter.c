@@ -1,4 +1,7 @@
-/*		FILE WRITER				HTFWrite.h
+/*
+ * $LynxId: HTFWriter.c,v 1.89 2007/07/31 20:57:23 tom Exp $
+ *
+ *		FILE WRITER				HTFWrite.h
  *		===========
  *
  *	This version of the stream object just writes to a C file.
@@ -34,6 +37,7 @@
 #include <LYLeaks.h>
 #include <LYKeymap.h>
 #include <LYGetFile.h>
+#include <LYHistory.h>		/* store statusline messages */
 
 #ifdef USE_PERSISTENT_COOKIES
 #include <LYCookie.h>
@@ -314,8 +318,10 @@ static void HTFWriter_free(HTStream *me)
 		    if (!dump_output_immediately) {
 			/*
 			 * Tell user what's happening.  - FM
+			 * HTInfoMsg2(WWW_USING_MESSAGE, addr);
+			 * but only in the history, not on screen -RS
 			 */
-			HTInfoMsg2(WWW_USING_MESSAGE, addr);
+			LYstore_message2(WWW_USING_MESSAGE, addr);
 		    }
 
 		    if (skip_loadfile) {

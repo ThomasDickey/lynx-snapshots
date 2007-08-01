@@ -1,4 +1,6 @@
 /*
+ * $LynxId: makeuctb.c,v 1.35 2007/07/31 20:32:32 Tim.Larson Exp $
+ *
  *  makeuctb.c, derived from conmakehash.c   - kw
  *
  *    Original comments from conmakehash.c:
@@ -152,7 +154,7 @@ static int Raw_found = 0;	/* whether explicit R directive found */
 static int CodePage = 0;
 static int CodePage_found = 0;	/* whether explicit C directive found */
 
-#define MAX_UNIPAIRS 2500
+#define MAX_UNIPAIRS 4500
 
 static void addpair_str(char *str, int un)
 {

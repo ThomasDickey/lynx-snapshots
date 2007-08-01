@@ -1,4 +1,4 @@
-/* $LynxId: LYUtils.c,v 1.161 2007/07/22 23:53:16 tom Exp $ */
+/* $LynxId: LYUtils.c,v 1.162 2007/07/31 00:45:03 tom Exp $ */
 #include <HTUtils.h>
 #include <HTTCP.h>
 #include <HTParse.h>
@@ -5884,15 +5884,31 @@ static BOOL IsOurSymlink(const char *name)
     char *buffer = typeMallocn(char, size);
 
     if (buffer != 0) {
-	while ((used = readlink(name, buffer, size)) == -1) {
+	while ((used = readlink(name, buffer, size - 1)) == size - 1) {
 	    buffer = typeRealloc(char, buffer, size *= 2);
 
 	    if (buffer == 0)
 		break;
 	}
-	buffer[used] = '\0';
+	if (used > 0) {
+	    buffer[used] = '\0';
+	} else {
+	    FREE(buffer);
+	}
     }
     if (buffer != 0) {
+	if (!LYisAbsPath(buffer)) {
+	    char *cutoff = LYLastPathSep(name);
+	    char *clone = NULL;
+
+	    if (cutoff != 0) {
+		HTSprintf0(&clone, "%.*s%s%s",
+			   cutoff - name,
+			   name, PATHSEP_STR, buffer);
+		FREE(buffer);
+		buffer = clone;
+	    }
+	}
 	CTRACE2(TRACE_CFG, (tfp, "IsOurSymlink(%s -> %s)\n", name, buffer));
 	result = IsOurFile(buffer);
 	FREE(buffer);

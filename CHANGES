@@ -1,9 +1,13 @@
--- $LynxId: CHANGES,v 1.237 2007/07/29 17:27:03 tom Exp $
+-- $LynxId: CHANGES,v 1.239 2007/07/31 20:45:28 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2007-0?-?? (2.8.7dev.6)
+2007-08-02 (2.8.7dev.6)
+* additional def7_uni.tbl conversions (patch by Tim Larson).
+* quiet a message in HTFWriter.c -RS
+* improve IsOurSymlink() from 2.8.7dev.5 changes, allowing the symbolic link
+  to be relative to the directory -RS, TD
 * rewrote several autoconf macros to use extended searches in non-system
   locations, i.e., AM_ICONV, AM_WITH_NLS, CF_GNUTLS, CF_SSL, CF_WITH_BZLIB
   and CF_WITH_ZLIB (prompted by LV comments) -TD

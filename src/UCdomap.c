@@ -1,5 +1,5 @@
 /*
- * $LynxId: UCdomap.c,v 1.66 2007/07/01 22:02:38 Thorsten.Glaser Exp $
+ * $LynxId: UCdomap.c,v 1.67 2007/07/30 19:43:05 tom Exp $
  *
  *  UCdomap.c
  *  =========
@@ -956,7 +956,7 @@ int UCTransUniCharStr(char *outbuf,
 	    FREE(tocode);
 	    if (cd == (iconv_t) (-1))
 		cd = iconv_open(LYCharSet_UC[charset_out].MIMEname, "UTF-16BE");
-	    rc = iconv(cd, &pin, &inleft, &pout, &outleft);
+	    rc = iconv(cd, (ICONV_CONST char **) &pin, &inleft, &pout, &outleft);
 	    iconv_close(cd);
 	    if ((pout - outbuf) == 3) {
 		CTRACE((tfp,
@@ -1122,7 +1122,7 @@ long int UCTransJPToUni(char *inbuf,
     olen = buflen;
 
     cd = iconv_open("UTF-16BE", LYCharSet_UC[charset_in].MIMEname);
-    rc = iconv(cd, &pin, &ilen, &pout, &olen);
+    rc = iconv(cd, (ICONV_CONST char **) &pin, &ilen, &pout, &olen);
     iconv_close(cd);
     if ((ilen == 0) && (olen == 0)) {
 	return (((unsigned char) outbuf[0]) << 8) + (unsigned char) outbuf[1];
@@ -1168,7 +1168,7 @@ long int UCTransToUni(char ch_in,
 		    buffer[2] = 0;
 
 		    cd = iconv_open("UTF-16BE", "Shift_JIS");
-		    rc = iconv(cd, &pin, &ilen, &pout, &olen);
+		    rc = iconv(cd, (ICONV_CONST char **) &pin, &ilen, &pout, &olen);
 		    iconv_close(cd);
 		    inx = 0;
 		    if ((ilen == 0) && (olen == 0)) {
@@ -1191,7 +1191,7 @@ long int UCTransToUni(char ch_in,
 		    buffer[2] = 0;
 
 		    cd = iconv_open("UTF-16BE", "EUC-JP");
-		    rc = iconv(cd, &pin, &ilen, &pout, &olen);
+		    rc = iconv(cd, (ICONV_CONST char **) &pin, &ilen, &pout, &olen);
 		    iconv_close(cd);
 		    inx = 0;
 		    if ((ilen == 0) && (olen == 0)) {

@@ -1,4 +1,4 @@
-dnl $LynxId: configure.in,v 1.157 2007/07/29 17:17:01 tom Exp $
+dnl $LynxId: configure.in,v 1.158 2007/07/30 22:12:37 tom Exp $
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -822,6 +822,9 @@ AC_MSG_RESULT($use_ja_utf8)
 if test $use_ja_utf8 != no ; then
 	AC_DEFINE(EXP_JAPANESEUTF8_SUPPORT)
 	AM_ICONV
+	if test "$USE_NLS" != yes ; then
+	  LIBS="$LIBICONV $LIBS"
+	fi
 fi
 
 use_dft_colors=no
@@ -989,15 +992,19 @@ if test $use_setfont = yes ; then
 	linux*)
 		CF_PATH_PROG(SETFONT, consolechars, setfont)
 		;;
-	*)
-		SETFONT=unknown
+	os2*)
+		SETFONT=built-in
 		CF_VERBOSE(Assume $host_os has font-switching)
 		;;
+	*)
+		SETFONT=unknown
+		CF_VERBOSE(Assume $host_os has no font-switching)
+		;;
 	esac
-	if test -n "$SETFONT" ; then
-		AC_DEFINE(EXP_CHARTRANS_AUTOSWITCH)
-	else
+	if test -z "$SETFONT" ; then
 		AC_MSG_WARN(Cannot find a font-setting program)
+	elif test "$SETFONT" != unknown ; then
+		AC_DEFINE(EXP_CHARTRANS_AUTOSWITCH)
 	fi
 fi
 
