@@ -1,4 +1,4 @@
-dnl $LynxId: aclocal.m4,v 1.119 2007/07/30 00:49:10 tom Exp $
+dnl $LynxId: aclocal.m4,v 1.121 2007/07/30 23:23:37 tom Exp $
 dnl Macros for auto-configure script.
 dnl by T.E.Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
@@ -123,7 +123,7 @@ strdup strtoul tsearch __argz_count __argz_stringify __argz_next])
    AC_SUBST(INTL_LIBTOOL_SUFFIX_PREFIX)
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl AM_ICONV version: 11 updated: 2007/07/29 13:35:20
+dnl AM_ICONV version: 12 updated: 2007/07/30 19:12:03
 dnl --------
 dnl Inserted as requested by gettext 0.10.40
 dnl File from /usr/share/aclocal
@@ -186,7 +186,7 @@ size_t iconv();
   LIBICONV=
   if test "$cf_cv_find_linkage_iconv" = yes; then
     CF_ADD_INCDIR($cf_cv_header_path_iconv)
-    if test -n "$cf_cv_library_path_iconv" ; then
+    if test -n "$cf_cv_library_file_iconv" ; then
       LIBICONV="-liconv"
       CF_ADD_LIBDIR($cf_cv_library_path_iconv)
     fi
@@ -698,7 +698,7 @@ AC_SUBST(EXTRA_CPPFLAGS)
 
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_ADD_INCDIR version: 6 updated: 2007/07/29 12:32:41
+dnl CF_ADD_INCDIR version: 8 updated: 2007/07/30 19:22:58
 dnl -------------
 dnl Add an include-directory to $CPPFLAGS.  Don't add /usr/include, since it's
 dnl redundant.  We don't normally need to add -I/usr/local/include for gcc,
@@ -710,35 +710,52 @@ AC_DEFUN([CF_ADD_INCDIR],
 if test -n "$1" ; then
   for cf_add_incdir in $1
   do
-      while true
-      do
-          case $cf_add_incdir in
-          /usr/include) # (vi
-              ;;
-          /usr/local/include) # (vi
-              if test "$GCC" = yes
-              then
-                  cf_save_CPPFLAGS="$CPPFLAGS"
-                  CPPFLAGS="$CPPFLAGS -I$cf_add_incdir"
-                  AC_TRY_COMPILE([#include <stdio.h>],
-                          [printf("Hello")],
-                          [],
-                          [CPPFLAGS="$cf_save_CPPFLAGS"])
-              fi
-              ;;
-          *) # (vi
-              CPPFLAGS="$CPPFLAGS -I$cf_add_incdir"
-              ;;
-          esac
+	while test $cf_add_incdir != /usr/include
+	do
+	  if test -d $cf_add_incdir
+	  then
+		cf_have_incdir=no
+		if test -n "$CFLAGS$CPPFLAGS" ; then
+		  # a loop is needed to ensure we can add subdirs of existing dirs
+		  for cf_test_incdir in $CFLAGS $CPPFLAGS ; do
+			if test ".$cf_test_incdir" = ".-I$cf_add_incdir" ; then
+			  cf_have_incdir=yes; break
+			fi
+		  done
+		fi
+
+		if test "$cf_have_incdir" = no ; then
+          if test "$cf_add_incdir" = /usr/local/include ; then
+			if test "$GCC" = yes
+			then
+			  cf_save_CPPFLAGS=$CPPFLAGS
+			  CPPFLAGS="$CPPFLAGS -I$cf_add_incdir"
+			  AC_TRY_COMPILE([#include <stdio.h>],
+				  [printf("Hello")],
+				  [],
+				  [cf_have_incdir=yes])
+			  CPPFLAGS=$cf_save_CPPFLAGS
+			fi
+		  fi
+		fi
+
+		if test "$cf_have_incdir" = no ; then
+		  AC_VERBOSE(adding $cf_add_incdir to include-path)
+		  ifelse($2,,CPPFLAGS,$2)="-I$cf_add_incdir $ifelse($2,,CPPFLAGS,[$]$2)"
+
           cf_top_incdir=`echo $cf_add_incdir | sed -e 's%/include/.*$%/include%'`
           test "$cf_top_incdir" = "$cf_add_incdir" && break
           cf_add_incdir="$cf_top_incdir"
-      done
+		else
+		  break
+		fi
+	  fi
+	done
   done
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_ADD_LIBDIR version: 4 updated: 2007/07/29 12:32:41
+dnl CF_ADD_LIBDIR version: 5 updated: 2007/07/30 19:12:03
 dnl -------------
 dnl	Adds to the library-path
 dnl
@@ -757,11 +774,11 @@ if test -n "$1" ; then
     elif test -d $cf_add_libdir
     then
       cf_have_libdir=no
-      if test -n "$LDFLAGS" ; then
+      if test -n "$LDFLAGS$LIBS" ; then
         # a loop is needed to ensure we can add subdirs of existing dirs
-        for cf_test_libdir in "$LDFLAGS" ; do
+        for cf_test_libdir in $LDFLAGS $LIBS ; do
           if test ".$cf_test_libdir" = ".-L$cf_add_libdir" ; then
-            cf_have_libdir = yes; break
+            cf_have_libdir=yes; break
           fi
         done
       fi
@@ -1383,7 +1400,7 @@ fi
 
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_CHECK_SSL_X509 version: 1 updated: 2007/07/29 11:32:00
+dnl CF_CHECK_SSL_X509 version: 2 updated: 2007/07/30 19:12:03
 dnl -----------------
 dnl Check for X509 support in the SSL library.
 AC_DEFUN([CF_CHECK_SSL_X509],[
