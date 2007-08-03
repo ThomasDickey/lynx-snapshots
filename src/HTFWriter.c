@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFWriter.c,v 1.89 2007/07/31 20:57:23 tom Exp $
+ * $LynxId: HTFWriter.c,v 1.90 2007/08/02 19:40:50 tom Exp $
  *
  *		FILE WRITER				HTFWrite.h
  *		===========
@@ -595,7 +595,7 @@ HTStream *HTSaveAndExecute(HTPresentation *pres,
 	return (NULL);
     }
 #if defined(EXEC_LINKS) || defined(EXEC_SCRIPTS)
-    if (pres->quality == 999.0) {	/* exec link */
+    if (pres->quality >= 999.0) {	/* exec link */
 	if (dump_output_immediately) {
 	    LYCancelledFetch = TRUE;
 	    return (NULL);
@@ -1190,7 +1190,7 @@ HTStream *HTCompressed(HTPresentation *pres,
      */
     if (!dump_output_immediately && !traversal
 #if defined(EXEC_LINKS) || defined(EXEC_SCRIPTS)
-	&& (Pres->quality != 999.0 ||
+	&& (Pres->quality < 999.0 ||
 	    (!no_exec &&	/* allowed exec link or script ? */
 	     (local_exec ||
 	      (local_exec_on_local_files &&

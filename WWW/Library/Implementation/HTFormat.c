@@ -1,4 +1,7 @@
-/*		Manage different file formats			HTFormat.c
+/*
+ * $LynxId: HTFormat.c,v 1.62 2007/08/02 20:12:22 tom Exp $
+ *
+ *		Manage different file formats			HTFormat.c
  *		=============================
  *
  * Bugs:
@@ -606,7 +609,7 @@ float HTStackValue(HTFormat rep_in,
 		(pres->rep_out == rep_out || pres->rep_out == wildcard)) {
 		float value = initial_value * pres->quality;
 
-		if (HTMaxSecs != 0.0)
+		if (HTMaxSecs > 0.0)
 		    value = value - (length * pres->secs_per_byte + pres->secs)
 			/ HTMaxSecs;
 		return value;
@@ -799,7 +802,6 @@ int HTCopy(HTParentAnchor *anchor,
 		    CTRACE((tfp,
 			    "HTCopy: Unexpected server disconnect. Treating as completed.\n"));
 		    status = 0;
-		    break;
 #else /* !UNIX */
 		    /*
 		     * Treat what we've gotten already as the complete
@@ -808,7 +810,6 @@ int HTCopy(HTParentAnchor *anchor,
 		    CTRACE((tfp,
 			    "HTCopy: Unexpected server disconnect.  Treating as completed.\n"));
 		    status = 0;
-		    break;
 #endif /* UNIX */
 		}
 #ifdef UNIX

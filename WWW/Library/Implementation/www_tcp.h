@@ -1,5 +1,5 @@
 /*                System dependencies in the W3 library
- * $LynxId: www_tcp.h,v 1.36 2007/07/02 23:05:01 tom Exp $
+ * $LynxId: www_tcp.h,v 1.37 2007/08/02 20:06:10 tom Exp $
  *
                                    SYSTEM DEPENDENCIES
 
@@ -95,6 +95,11 @@ Default values
 #  include <ndir.h>
 # endif
 #endif /* HAVE_DIRENT_H */
+
+#ifdef HAVE_STRUCT_DIRENT64
+# undef STRUCT_DIRENT
+# define STRUCT_DIRENT struct dirent64
+#endif
 
 #if !(defined(DOSPATH) || defined(__EMX__) || defined(__CYGWIN__))
 #define STRUCT_DIRENT__D_INO 1

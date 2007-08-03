@@ -1,4 +1,4 @@
-/* $LynxId: LYStrings.c,v 1.127 2007/07/01 23:16:31 Daniel.Dickman Exp $ */
+/* $LynxId: LYStrings.c,v 1.128 2007/08/02 19:24:50 tom Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <UCAux.h>
@@ -3127,7 +3127,7 @@ int LYEdit1(EDREC * edit, int ch,
 	    while (is8bits(Buf[Pos]))
 		Pos += 2;
 	} else {
-	    while (!is8bits(Buf[Pos]) && isalnum(Buf[Pos]))
+	    while (!is8bits(Buf[Pos]) && isalnum(UCH(Buf[Pos])))
 		Pos++;		/* '\0' is not a/n */
 	}
 	while ((HTCJK == NOCJK || !is8bits(Buf[Pos])) &&

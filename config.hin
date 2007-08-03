@@ -1,5 +1,5 @@
 /*
- * $LynxId: config.hin,v 1.97 2007/07/30 23:15:45 tom Exp $
+ * $LynxId: config.hin,v 1.98 2007/08/02 20:04:37 tom Exp $
  * vile:cmode
  *
  * The configure script translates "config.hin" into "lynx_cfg.h"
@@ -130,6 +130,7 @@
 #undef HAVE_STRCHR		/* AM_GNU_GETTEXT */
 #undef HAVE_STRERROR
 #undef HAVE_STRING_H
+#undef HAVE_STRUCT_DIRENT64	/* CF_LARGEFILE */
 #undef HAVE_SYSLOG_H
 #undef HAVE_SYSV_TOUCHLINE	/* CF_CURS_TOUCHLINE */
 #undef HAVE_SYS_DIR_H		/* AC_HEADER_DIRENT */

@@ -1,4 +1,4 @@
-/* $LynxId: LYReadCFG.c,v 1.123 2007/05/23 00:17:02 tom Exp $ */
+/* $LynxId: LYReadCFG.c,v 1.124 2007/08/02 19:40:31 tom Exp $ */
 #ifndef NO_RULES
 #include <HTRules.h>
 #else
@@ -899,7 +899,7 @@ static int suffix_fun(char *value)
     } else {
 	double df = strtod(sq, &p);
 
-	if (p == sq && df == 0.0) {
+	if (p == sq && df <= 0.0) {
 	    CTRACE((tfp, "Invalid q=%s for SUFFIX:%s, using -1.0\n",
 		    sq, value));
 	    q = -1.0;

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCharUtils.c,v 1.88 2007/07/02 23:58:53 tom Exp $
+ * $LynxId: LYCharUtils.c,v 1.89 2007/08/02 19:31:34 tom Exp $
  *
  *  Functions associated with LYCharSets.c and the Lynx version of HTML.c - FM
  *  ==========================================================================
@@ -2076,7 +2076,7 @@ char *LYParseTagParam(char *from,
 	    return NULL;
     } while (strncasecomp(string, name, len) != 0);
     string += len;
-    while (*string != '\0' && (UCH(isspace(*string)) || *string == '=')) {
+    while (*string != '\0' && (isspace(UCH(*string)) || *string == '=')) {
 	string++;
     }
 
@@ -3021,7 +3021,7 @@ int LYLegitimizeHREF(HTStructured * me, char **href,
 	 */
 
 	/*  Before working on spaces check if we have any, usually none. */
-	for (p = *href; (*p && !isspace(*p)); p++) ;
+	p = LYSkipNonBlanks(*href);
 
 	if (*p) {		/* p == first space character */
 	    /* no reallocs below, all converted in place */

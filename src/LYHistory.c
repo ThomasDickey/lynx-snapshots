@@ -115,7 +115,7 @@ void LYAddVisitedLink(DocInfo *doc)
 	    LYIsUIPage(doc->address, UIP_VLINKS) ||
 	    LYIsUIPage(doc->address, UIP_SHOWINFO) ||
 	    isLYNXMESSAGES(doc->address) ||
-	    (related = 0) ||
+	    ((related = 0) == 0) ||
 #ifdef DIRED_SUPPORT
 	    LYIsUIPage(doc->address, UIP_DIRED_MENU) ||
 	    LYIsUIPage(doc->address, UIP_UPLOAD_OPTIONS) ||
