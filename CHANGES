@@ -1,7 +1,10 @@
--- $LynxId: CHANGES,v 1.243 2007/08/02 23:46:42 tom Exp $
+-- $LynxId: CHANGES,v 1.244 2007/08/03 00:04:46 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
+
+2007-08-02 (2.8.7dev.7)
+* restore top-level descrip.mms due to error in patch -TD
 
 2007-08-02 (2.8.7dev.6)
 * update cs.po from
