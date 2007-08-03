@@ -1,4 +1,7 @@
-/*	Configuration manager for Hypertext Daemon		HTRules.c
+/*
+ * $LynxId: HTRules.c,v 1.30 2007/08/02 20:12:40 tom Exp $
+ *
+ *	Configuration manager for Hypertext Daemon		HTRules.c
  *	==========================================
  *
  *
@@ -103,9 +106,9 @@ int HTAddRule(HTRuleOp op, const char *pattern,
     temp->op = op;
 
     if (equiv) {
-	CTRACE((tfp, "Rule: For `%s' op %d `%s'", pattern, op, equiv));
+	CTRACE((tfp, "Rule: For `%s' op %d `%s'", pattern, (int) op, equiv));
     } else {
-	CTRACE((tfp, "Rule: For `%s' op %d", pattern, op));
+	CTRACE((tfp, "Rule: For `%s' op %d", pattern, (int) op));
     }
     if (cond_op) {
 	CTRACE((tfp, "\t%s %s\n", cond_op, NONNULL(cond)));

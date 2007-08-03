@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.141 2007/07/22 23:04:06 tom Exp $
+ * $LynxId: GridText.c,v 1.142 2007/08/02 19:30:32 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -7847,7 +7847,7 @@ static int TrimmedLength(char *string)
 {
     int result = strlen(string);
     int adjust = result;
-    int ch;
+    unsigned ch;
 
     while (adjust > 0) {
 	ch = UCH(string[adjust - 1]);
@@ -10383,7 +10383,7 @@ static void UpdateBoundary(char **Boundary,
 	    && !memcmp(want, text + j, have)) {
 	    char temp[2];
 
-	    temp[0] = isdigit(text[have + j]) ? 'a' : '0';
+	    temp[0] = isdigit(UCH(text[have + j])) ? 'a' : '0';
 	    temp[1] = '\0';
 	    StrAllocCat(want, temp);
 	    ++have;

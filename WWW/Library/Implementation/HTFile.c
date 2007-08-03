@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFile.c,v 1.103 2007/07/22 22:31:01 tom Exp $
+ * $LynxId: HTFile.c,v 1.104 2007/08/02 19:46:01 tom Exp $
  *
  *			File Access				HTFile.c
  *			===========
@@ -2711,7 +2711,7 @@ int HTLoadFile(const char *addr,
 			    }
 			}
 		    }
-		    if (value != NO_VALUE_FOUND) {
+		    if (value < NO_VALUE_FOUND) {
 			CTRACE((tfp,
 				"HTLoadFile: value of presenting %s is %f\n",
 				HTAtom_name(rep), value));

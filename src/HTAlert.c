@@ -248,7 +248,7 @@ void HTReadProgress(long bytes, long total)
 	total = total_last;
     }
     if ((bytes > 0) &&
-	(now != first))
+	(now > first))
 	/* 1 sec delay for transfer_rate calculation without g-t-o-d */  {
 	if (transfer_rate <= 0)	/* the very first time */
 	    transfer_rate = (long) ((bytes) / (now - first));	/* bytes/sec */
@@ -272,7 +272,7 @@ void HTReadProgress(long bytes, long total)
 	}
 #endif
 	if (renew) {
-	    if (now != last) {
+	    if (now > last) {
 		last = now;
 		if (bytes_last != bytes)
 		    last_active = now;

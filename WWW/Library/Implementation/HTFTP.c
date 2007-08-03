@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFTP.c,v 1.79 2007/07/02 23:05:12 tom Exp $
+ * $LynxId: HTFTP.c,v 1.80 2007/08/02 19:55:46 tom Exp $
  *
  *			File Transfer Protocol (FTP) Client
  *			for a WorldWideWeb browser
@@ -1144,7 +1144,7 @@ static int close_master_socket(void)
 	FD_CLR(master_socket, &open_sockets);
 
     status = NETCLOSE(master_socket);
-    CTRACE((tfp, "HTFTP: Closed master socket %d\n", master_socket));
+    CTRACE((tfp, "HTFTP: Closed master socket %u\n", master_socket));
 
     reset_master_socket();
 

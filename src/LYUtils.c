@@ -1,4 +1,4 @@
-/* $LynxId: LYUtils.c,v 1.162 2007/07/31 00:45:03 tom Exp $ */
+/* $LynxId: LYUtils.c,v 1.163 2007/08/02 20:18:36 tom Exp $ */
 #include <HTUtils.h>
 #include <HTTCP.h>
 #include <HTParse.h>
@@ -982,7 +982,7 @@ static int find_cached_style(int cur,
 		    s = GetCachedStyle(LYP, x);
 		    if (s != 0) {
 			SetCachedStyle(LYP, LXP, s);
-			CTRACE((tfp, "found %u, x_offset=%d.\n", s, x - LXP));
+			CTRACE((tfp, "found %d, x_offset=%d.\n", s, x - LXP));
 			break;
 		    }
 		}
@@ -1224,7 +1224,7 @@ void convert_to_spaces(char *string,
     if (!s)
 	return;
 
-    for (; (*s && !isspace(*s)); s++) ;
+    s = LYSkipNonBlanks(s);
     ns = s;
 
     while (*s) {

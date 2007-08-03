@@ -1,9 +1,17 @@
--- $LynxId: CHANGES,v 1.239 2007/07/31 20:45:28 tom Exp $
+-- $LynxId: CHANGES,v 1.242 2007/08/02 21:36:53 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
 2007-08-02 (2.8.7dev.6)
+* update cs.po from
+    http://translationproject.org/latest/lynx/
+* add a script for Inno Setup, incorporate/adapt configuration files from
+  an installer created by Claudio Santambrogio -TD
+* amend a change from 2.8.3dev.15 which prevented LYAddVisitedLink() from
+  filtering out related links such as the download page from the visited
+  links page -TD
+* use struct dirent64 when it is declared via configure script -TD
 * additional def7_uni.tbl conversions (patch by Tim Larson).
 * quiet a message in HTFWriter.c -RS
 * improve IsOurSymlink() from 2.8.7dev.5 changes, allowing the symbolic link
