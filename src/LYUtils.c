@@ -1,4 +1,4 @@
-/* $LynxId: LYUtils.c,v 1.163 2007/08/02 20:18:36 tom Exp $ */
+/* $LynxId: LYUtils.c,v 1.164 2007/11/12 00:54:18 tom Exp $ */
 #include <HTUtils.h>
 #include <HTTCP.h>
 #include <HTParse.h>
@@ -1431,7 +1431,7 @@ void statusline(const char *text)
     LYmove(at_lineno, 0);
     LYclrtoeol();
 
-    if (non_empty(buffer)) {
+    if (buffer[0] != '\0') {
 	BOOLEAN has_CJK = FALSE;
 
 	if (HTCJK != NOCJK) {

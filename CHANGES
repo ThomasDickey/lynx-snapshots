@@ -1,7 +1,11 @@
--- $LynxId: CHANGES,v 1.244 2007/08/03 00:04:46 tom Exp $
+-- $LynxId: CHANGES,v 1.245 2007/11/12 01:13:08 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
+
+2007-??-?? (2.8.7dev.8)
+* add null-pointer checks to cover a special case of exit on error while
+  reading from the standard input (report by Pascal Terjan) -TD
 
 2007-08-02 (2.8.7dev.7)
 * restore top-level descrip.mms due to error in patch -TD

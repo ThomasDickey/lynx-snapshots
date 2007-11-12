@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCookie.c,v 1.87 2007/05/23 00:21:04 tom Exp $
+ * $LynxId: LYCookie.c,v 1.88 2007/11/12 01:11:06 tom Exp $
  *
  *			       Lynx Cookie Support		   LYCookie.c
  *			       ===================
@@ -1954,13 +1954,11 @@ void LYLoadCookies(char *cookie_file)
 
 	expires = atol(expires_a);
 	CTrace((tfp, "expires:\t%s\n", ctime(&expires)));
-/*	CTrace((tfp, "%s\t%s\t%s\t%s\t%ld\t%s\t%s\tREADCOOKIE\n", */
-/*	    domain, what, path, secure, (long) expires, name, value)); */
 	moo = newCookie();
 	StrAllocCopy(moo->domain, domain);
 	StrAllocCopy(moo->path, path);
 	StrAllocCopy(moo->name, name);
-	if (value && value[0] == '"' &&
+	if (value[0] == '"' &&
 	    value[1] && value[strlen(value) - 1] == '"' &&
 	    value[strlen(value) - 2] != '\\') {
 	    value[strlen(value) - 1] = '\0';
@@ -2030,7 +2028,7 @@ void LYStoreCookies(char *cookie_file)
     FILE *cookie_handle;
     time_t now = time(NULL);	/* system specific? - RP */
 
-    if (!strcmp(cookie_file, "/dev/null")) {
+    if (isEmpty(cookie_file) || !strcmp(cookie_file, "/dev/null")) {
 	/* We give /dev/null the Unix meaning, regardless of OS */
 	return;
     }

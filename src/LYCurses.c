@@ -1,4 +1,4 @@
-/* $LynxId: LYCurses.c,v 1.131 2007/07/24 21:58:34 tom Exp $ */
+/* $LynxId: LYCurses.c,v 1.132 2007/11/12 01:05:49 tom Exp $ */
 #include <HTUtils.h>
 #include <HTAlert.h>
 
@@ -1390,14 +1390,18 @@ void lynx_nl2crlf(int normal GCC_UNUSED)
     static int can_fix = TRUE;
 
     if (!did_save) {
-	saved_tty = cur_term->Nttyb;
-	did_save = TRUE;
-#if NCURSES_VERSION_PATCH < 20010529
-	/* workaround for optimizer bug with nonl() */
-	if ((tigetstr("cud1") != 0 && *tigetstr("cud1") == '\n')
-	    || (tigetstr("ind") != 0 && *tigetstr("ind") == '\n'))
+	if (cur_term == 0) {
 	    can_fix = FALSE;
+	} else {
+	    saved_tty = cur_term->Nttyb;
+	    did_save = TRUE;
+#if NCURSES_VERSION_PATCH < 20010529
+	    /* workaround for optimizer bug with nonl() */
+	    if ((tigetstr("cud1") != 0 && *tigetstr("cud1") == '\n')
+		|| (tigetstr("ind") != 0 && *tigetstr("ind") == '\n'))
+		can_fix = FALSE;
 #endif
+	}
     }
     if (can_fix) {
 	if (normal) {
