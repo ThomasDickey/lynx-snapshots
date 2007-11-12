@@ -643,7 +643,7 @@ void mailform(const char *mailto_address,
     /*
      * Allow user to edit the default Subject - FM
      */
-    if (isEmpty(subject)) {
+    if (subject[0] == '\0') {
 	if (!isEmpty(mailto_subject)) {
 	    LYstrncpy(subject, mailto_subject, MAX_SUBJECT);
 	} else {
@@ -1227,7 +1227,7 @@ void reply_by_mail(char *mail_address,
     /*
      * Set the default subject.  - FM
      */
-    if (isEmpty(default_subject) && !isEmpty(title)) {
+    if ((default_subject[0] == '\0') && !isEmpty(title)) {
 	strncpy(default_subject, title, MAX_SUBJECT);
 	default_subject[MAX_SUBJECT] = '\0';
     }
