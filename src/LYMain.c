@@ -1,4 +1,4 @@
-/* $LynxId: LYMain.c,v 1.175 2007/07/02 22:41:49 tom Exp $ */
+/* $LynxId: LYMain.c,v 1.176 2008/01/03 00:41:55 Joey.Schulze Exp $ */
 #include <HTUtils.h>
 #include <HTTP.h>
 #include <HTParse.h>
@@ -511,6 +511,8 @@ char *LYTransferName = NULL;
 char *XLoadImageCommand = NULL;	/* Default image viewer for X */
 BOOLEAN LYNoISMAPifUSEMAP = FALSE;	/* Omit ISMAP link if MAP present? */
 int LYHiddenLinks = HIDDENLINKS_SEPARATE;	/* Show hidden links? */
+
+char *SSL_cert_file = NULL;	/* Default CA CERT file */
 
 int Old_DTD = NO;
 static BOOL DTD_recovery = NO;
@@ -1255,6 +1257,7 @@ int main(int argc,
     StrAllocCopy(URLDomainPrefixes, URL_DOMAIN_PREFIXES);
     StrAllocCopy(URLDomainSuffixes, URL_DOMAIN_SUFFIXES);
     StrAllocCopy(XLoadImageCommand, XLOADIMAGE_COMMAND);
+    StrAllocCopy(SSL_cert_file, SSL_CERT_FILE);
 
 #ifndef DISABLE_BIBP
     StrAllocCopy(BibP_globalserver, BIBP_GLOBAL_SERVER);

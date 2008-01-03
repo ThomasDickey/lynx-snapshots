@@ -1,9 +1,12 @@
--- $LynxId: CHANGES,v 1.245 2007/11/12 01:13:08 tom Exp $
+-- $LynxId: CHANGES,v 1.248 2008/01/03 01:16:19 Joey.Schulze Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
 2007-??-?? (2.8.7dev.8)
+* add support for the X.509 extension subjectAltName using GNUTLS -Joey Schulze
+* add SSL_CERT_FILE to lynx.cfg -Joey Schulze
+* fix spelling error in HTAccess.h comment (report by Paul de Weerd).
 * add null-pointer checks to cover a special case of exit on error while
   reading from the standard input (report by Pascal Terjan) -TD
 

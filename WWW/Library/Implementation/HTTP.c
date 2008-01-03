@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTP.c,v 1.87 2007/07/03 00:20:33 tom Exp $
+ * $LynxId: HTTP.c,v 1.89 2008/01/03 01:05:46 Joey.Schulze Exp $
  *
  * HyperText Tranfer Protocol	- Client implementation		HTTP.c
  * ==========================
@@ -119,6 +119,13 @@ SSL *HTGetSSLHandle(void)
 	    CTRACE((tfp,
 		    "HTGetSSLHandle: certfile is set to %s by SSL_CERT_FILE\n",
 		    certfile));
+	} else {
+	    if (non_empty(SSL_cert_file)) {
+		certfile = SSL_cert_file;
+		CTRACE((tfp,
+			"HTGetSSLHandle: certfile is set to %s by config SSL_CERT_FILE\n",
+			certfile));
+	    }
 	}
 #endif
 	atexit(free_ssl_ctx);
@@ -807,6 +814,42 @@ static int HTLoadHTTP(const char *arg,
 	}
 
 	/* check the X.509v3 Subject Alternative Name */
+#ifdef USE_GNUTLS_INCL
+	if (status_sslcertcheck < 2) {
+	    int i;
+	    size_t size;
+	    gnutls_x509_crt cert;
+	    static char buf[2048];
+
+	    /* import the certificate to the x509_crt format */
+	    if (gnutls_x509_crt_init(&cert) == 0) {
+
+		if (gnutls_x509_crt_import(cert, peer_cert,
+					   GNUTLS_X509_FMT_DER) < 0) {
+		    gnutls_x509_crt_deinit(cert);
+		    goto done;
+		}
+
+		ret = 0;
+		for (i = 0; !(ret < 0); i++) {
+		    size = sizeof(buf);
+		    ret = gnutls_x509_crt_get_subject_alt_name(cert, i, buf,
+							       &size, NULL);
+
+		    if (strcasecomp_asterisk(ssl_host, buf) == 0) {
+			status_sslcertcheck = 2;
+			HTSprintf0(&msg,
+				   gettext("Verified connection to %s (subj=%s)"),
+				   ssl_host, buf);
+			_HTProgress(msg);
+			FREE(msg);
+			break;
+		    }
+
+		}
+	    }
+	}
+#endif
 #ifdef USE_OPENSSL_INCL
 	if (status_sslcertcheck < 2) {
 	    STACK_OF(GENERAL_NAME) * gens;
