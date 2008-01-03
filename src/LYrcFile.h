@@ -1,3 +1,6 @@
+/*
+ * $LynxId: LYrcFile.h,v 1.23 2008/01/03 00:42:21 Joey.Schulze Exp $
+ */
 #ifndef LYRCFILE_H
 #define LYRCFILE_H
 
@@ -248,6 +251,7 @@
 #define RC_XLOADIMAGE_COMMAND           "xloadimage_command"
 #define RC_ZCAT_PATH                    "zcat_path"
 #define RC_ZIP_PATH                     "zip_path"
+#define RC_SSL_CERT_FILE                "ssl_cert_file"
 
 extern Config_Enum tbl_force_prompt[];
 extern Config_Enum tbl_keypad_mode[];

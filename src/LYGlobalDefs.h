@@ -1,4 +1,4 @@
-/* $LynxId: LYGlobalDefs.h,v 1.105 2007/05/06 18:20:29 tom Exp $ */
+/* $LynxId: LYGlobalDefs.h,v 1.106 2008/01/03 00:41:02 Joey.Schulze Exp $ */
 /* global variable definitions */
 
 #ifndef LYGLOBALDEFS_H
@@ -492,6 +492,8 @@ extern "C" {
 
     extern BOOLEAN LYNoISMAPifUSEMAP;	/* Omit ISMAP link if MAP present? */
     extern int LYHiddenLinks;
+
+    extern char *SSL_cert_file;	/* Default CA CERT file */
 
     extern int Old_DTD;
 

@@ -1,5 +1,5 @@
 /*
- * $LynxId: userdefs.h,v 1.229 2007/08/03 00:21:48 tom Exp $
+ * $LynxId: userdefs.h,v 1.230 2008/01/03 00:51:36 Joey.Schulze Exp $
  *
  * Lynx - Hypertext navigation system
  *
@@ -1564,6 +1564,12 @@
  * which Lynx has made on the basis of a META tag and HTTP response.
  */
 /*#define KANJI_CODE_OVERRIDE */
+
+/**************************
+ * SSL_CERT_FILE contains valid SSL CA certificates.  Set this to a string
+ * to provide a runtime default value.
+ */
+#define SSL_CERT_FILE NULL
 
 
 /****************************************************************

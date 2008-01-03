@@ -1,4 +1,4 @@
-/* $LynxId: LYReadCFG.c,v 1.124 2007/08/02 19:40:31 tom Exp $ */
+/* $LynxId: LYReadCFG.c,v 1.125 2008/01/03 00:50:26 Joey.Schulze Exp $ */
 #ifndef NO_RULES
 #include <HTRules.h>
 #else
@@ -1505,6 +1505,7 @@ static Config_Type Config_Table [] =
      PARSE_ENU(RC_SOURCE_CACHE,         LYCacheSource, tbl_source_cache),
      PARSE_ENU(RC_SOURCE_CACHE_FOR_ABORTED, LYCacheSourceForAborted, tbl_abort_source_cache),
 #endif
+     PARSE_STR(RC_SSL_CERT_FILE,        SSL_cert_file),
      PARSE_STR(RC_STARTFILE,            startfile),
      PARSE_SET(RC_STRIP_DOTDOT_URLS,    LYStripDotDotURLs),
      PARSE_SET(RC_SUBSTITUTE_UNDERSCORES, use_underscore),
