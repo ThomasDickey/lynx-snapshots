@@ -1,11 +1,11 @@
-dnl $LynxId: aclocal.m4,v 1.121 2007/07/30 23:23:37 tom Exp $
+dnl $LynxId: aclocal.m4,v 1.122 2008/01/06 20:43:00 Thorsten.Glaser Exp $
 dnl Macros for auto-configure script.
 dnl by T.E.Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
 dnl and Philippe De Muyter <phdm@macqel.be>
 dnl
 dnl Created: 1997/1/28
-dnl Updated: 2007/07/27
+dnl Updated: 2008/01/06
 dnl
 dnl The autoconf used in Lynx development is GNU autoconf 2.13 or 2.52, patched
 dnl by Thomas Dickey.  See your local GNU archives, and this URL:
@@ -1400,14 +1400,14 @@ fi
 
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_CHECK_SSL_X509 version: 2 updated: 2007/07/30 19:12:03
+dnl CF_CHECK_SSL_X509 version: 3 updated: 2008/01/06 14:56:47
 dnl -----------------
 dnl Check for X509 support in the SSL library.
 AC_DEFUN([CF_CHECK_SSL_X509],[
 AC_MSG_CHECKING(for X509 support)
 AC_TRY_LINK(CF__SSL_HEAD [
 #include <openssl/x509.h>],
-	[X509_verify_cert_error_string(X509_STORE_CTX_get_error(X509_STORE_CTX *0))],
+	[X509_verify_cert_error_string(X509_STORE_CTX_get_error(NULL))],
 	[cf_x509_support=yes],
 	[cf_x509_support=no])
 AC_MSG_RESULT($cf_x509_support)
@@ -1417,16 +1417,19 @@ if test "$cf_x509_support" = yes ; then
 fi
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_CHECK_TYPE version: 1 updated: 2005/01/01 12:49:48
+dnl CF_CHECK_TYPE version: 2 updated: 2008/01/06 14:56:47
 dnl -------------
 dnl Add a 3rd parameter to AC_CHECK_TYPE, working around autoconf 2.5x's
 dnl deliberate incompatibility.
 dnl	$1 = name of type to check for
 dnl	$2 = default type
 dnl	$3 = additional #include's and related preprocessor lines.
+ifdef([m4_HAS_AC_CT_FOURARGS], [m4_undefine([m4_HAS_AC_CT_FOURARGS])])dnl
+ifelse(m4_PACKAGE_VERSION, [fnord_acsalt], [],
+[ifdef([m4_version_compare],[m4_define([m4_HAS_AC_CT_FOURARGS])])])dnl
 AC_DEFUN([CF_CHECK_TYPE],
 [
-ifdef([m4_version_compare],[
+ifdef([m4_HAS_AC_CT_FOURARGS],[
 	AC_CHECK_TYPE([$1],ac_cv_type_$1=yes,ac_cv_type_$1=no,[$3])
 	],[
 	AC_MSG_CHECKING(for $1)
@@ -4212,7 +4215,7 @@ define([CF_SRAND_PARSE],[
 	esac
 ])dnl
 dnl ---------------------------------------------------------------------------
-dnl CF_SSL version: 11 updated: 2007/07/29 12:32:41
+dnl CF_SSL version: 12 updated: 2008/01/06 14:56:47
 dnl ------
 dnl Check for ssl library
 dnl $1 = the [optional] directory in which the library may be found
@@ -4246,11 +4249,11 @@ AC_DEFUN([CF_SSL],[
       esac
 
     fi
-    CF_CHECK_SSL_X509
     if test -n "$cf_cv_library_path_ssl" ; then
       CF_ADD_LIBDIR($cf_cv_library_path_ssl)
     fi
     LIBS="-lssl -lcrypto $LIBS"
+    CF_CHECK_SSL_X509
   fi
 ])dnl
 dnl ---------------------------------------------------------------------------

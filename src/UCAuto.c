@@ -1,4 +1,6 @@
 /*
+ * $LynxId: UCAuto.c,v 1.37 2008/01/07 23:51:16 tom Exp $
+ *
  *  This file contains code for changing the Linux console mode.
  *  Currently some names for font files are hardwired in here.
  *  You have to change this code if it needs accommodation for your
@@ -29,6 +31,7 @@
 #ifdef EXP_CHARTRANS_AUTOSWITCH
 
 #include <HTFile.h>
+#include <www_wait.h>
 
 #ifdef LINUX
 #include <sysexits.h>		/* EX_DATAERR, etc. */

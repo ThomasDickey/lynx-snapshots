@@ -1,4 +1,4 @@
-/* $LynxId: LYMain.c,v 1.176 2008/01/03 00:41:55 Joey.Schulze Exp $ */
+/* $LynxId: LYMain.c,v 1.177 2008/01/06 18:55:37 tom Exp $ */
 #include <HTUtils.h>
 #include <HTTP.h>
 #include <HTParse.h>
@@ -60,14 +60,6 @@
 
 #include <LYexit.h>
 #include <LYLeaks.h>
-
-#ifdef FNAMES_8_3
-#define COOKIE_FILE "cookies"
-#define TRACE_FILE "LY-TRACE.LOG"
-#else
-#define COOKIE_FILE ".lynx_cookies"
-#define TRACE_FILE "Lynx.trace"
-#endif /* FNAMES_8_3 */
 
 /* ahhhhhhhhhh!! Global variables :-< */
 #ifdef SOCKS
@@ -1379,7 +1371,7 @@ int main(int argc,
      * Set up the TRACE log path, and logging if appropriate.  - FM
      */
     if ((cp = LYGetEnv("LYNX_TRACE_FILE")) == 0)
-	cp = TRACE_FILE;
+	cp = FNAME_LYNX_TRACE;
     LYTraceLogPath = typeMallocn(char, LY_MAXPATH);
 
     LYAddPathToHome(LYTraceLogPath, LY_MAXPATH, cp);
@@ -1697,7 +1689,7 @@ int main(int argc,
 	if (LYCookieFile == NULL) {
 	    LYCookieFile = typeMallocn(char, LY_MAXPATH);
 
-	    LYAddPathToHome(LYCookieFile, LY_MAXPATH, COOKIE_FILE);
+	    LYAddPathToHome(LYCookieFile, LY_MAXPATH, FNAME_LYNX_COOKIES);
 	} else {
 	    LYTildeExpand(&LYCookieFile, FALSE);
 	}

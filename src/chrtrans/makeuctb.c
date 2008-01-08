@@ -1,5 +1,5 @@
 /*
- * $LynxId: makeuctb.c,v 1.35 2007/07/31 20:32:32 Tim.Larson Exp $
+ * $LynxId: makeuctb.c,v 1.36 2008/01/06 18:23:33 tom Exp $
  *
  *  makeuctb.c, derived from conmakehash.c   - kw
  *
@@ -294,7 +294,7 @@ int main(int argc, char **argv)
 
     FILE *ctbl;
     char buffer[65536];
-    char outname[256];
+    char *outname = 0;
     unsigned n;
     int fontlen;
     int i, nuni, nent;
@@ -327,12 +327,15 @@ int main(int argc, char **argv)
     } else if (ctbl == stdin) {
 	chdr = stdout;
 	hdrname = "stdout";
-    } else {
+    } else if ((outname = malloc(strlen(tblname) + 3)) != 0) {
 	strcpy(outname, tblname);
 	hdrname = outname;
 	if ((p = strrchr(outname, '.')) == 0)
 	    p = outname + strlen(outname);
 	strcpy(p, ".h");
+    } else {
+	perror("malloc");
+	done(EX_NOINPUT);
     }
 
     if (chdr == 0) {
@@ -541,7 +544,11 @@ int main(int argc, char **argv)
 		continue;
 	    }
 
-	    tbuf = (char *) malloc(4 * strlen(p));
+	    /*
+	     * Allocate a string large enough for the worst-case use in the
+	     * loop using sprintf.
+	     */
+	    tbuf = (char *) malloc(5 * strlen(p));
 
 	    if (!(p1 = tbuf)) {
 		fprintf(stderr, "%s: Out of memory\n", tblname);

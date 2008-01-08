@@ -1,4 +1,4 @@
-.\" $LynxId: lynx.man,v 1.75 2007/07/01 23:42:16 tom Exp $
+.\" $LynxId: lynx.man,v 1.76 2008/01/06 17:04:42 tom Exp $
 .nr N -1
 .nr D 5
 .TH LYNX 1
@@ -371,6 +371,8 @@ Lynx was compiled with local execution enabled).
 .B \-lss\fR=\fIFILENAME
 specify filename containing color-style information.
 The default is lynx.lss.
+If you give an empty filename, \fBlynx\fP uses a built-in monochrome
+scheme which imitates the non-color-style configuration.
 .TP
 .B \-mime_header
 prints the MIME header of a fetched document along with its

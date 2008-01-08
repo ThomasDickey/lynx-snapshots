@@ -1,9 +1,17 @@
--- $LynxId: CHANGES,v 1.248 2008/01/03 01:16:19 Joey.Schulze Exp $
+-- $LynxId: CHANGES,v 1.250 2008/01/06 20:35:55 Thorsten.Glaser Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
 2007-??-?? (2.8.7dev.8)
+* several small changes to configure script to work with MirBSD build
+  environment -TG
+* show progress message in X509 callback -TG
+* modify definition of lynxrc and cookies files in LYMain.c and LYrcFile.c to
+  make it simpler for build script to override -TD
+* reviewed patches at
+    http://www.mirbsd.org/cvs.cgi/ports/www/lynx/patches/
+  improved buffer allocation limits in makeuctb.c -TD
 * add support for the X.509 extension subjectAltName using GNUTLS -Joey Schulze
 * add SSL_CERT_FILE to lynx.cfg -Joey Schulze
 * fix spelling error in HTAccess.h comment (report by Paul de Weerd).
