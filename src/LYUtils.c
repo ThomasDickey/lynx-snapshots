@@ -1,4 +1,4 @@
-/* $LynxId: LYUtils.c,v 1.164 2007/11/12 00:54:18 tom Exp $ */
+/* $LynxId: LYUtils.c,v 1.165 2008/01/06 18:31:26 Thorsten.Glaser Exp $ */
 #include <HTUtils.h>
 #include <HTTCP.h>
 #include <HTParse.h>
@@ -5903,7 +5903,7 @@ static BOOL IsOurSymlink(const char *name)
 
 	    if (cutoff != 0) {
 		HTSprintf0(&clone, "%.*s%s%s",
-			   cutoff - name,
+			   (int) (cutoff - name),
 			   name, PATHSEP_STR, buffer);
 		FREE(buffer);
 		buffer = clone;

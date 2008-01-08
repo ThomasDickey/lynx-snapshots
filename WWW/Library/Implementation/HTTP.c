@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTP.c,v 1.89 2008/01/03 01:05:46 Joey.Schulze Exp $
+ * $LynxId: HTTP.c,v 1.90 2008/01/06 19:50:35 tom Exp $
  *
  * HyperText Tranfer Protocol	- Client implementation		HTTP.c
  * ==========================
@@ -78,6 +78,15 @@ static int HTSSLCallback(int preverify_ok, X509_STORE_CTX * x509_ctx GCC_UNUSED)
 {
     char *msg = NULL;
     int result = 1;
+
+#ifdef USE_X509_SUPPORT
+    HTSprintf0(&msg,
+	       gettext("SSL callback:%s, preverify_ok=%d, ssl_okay=%d"),
+	       X509_verify_cert_error_string(X509_STORE_CTX_get_error(x509_ctx)),
+	       preverify_ok, ssl_okay);
+    _HTProgress(msg);
+    FREE(msg);
+#endif
 
     if (!(preverify_ok || ssl_okay || ssl_noprompt)) {
 #ifdef USE_X509_SUPPORT
@@ -439,7 +448,7 @@ static BOOL acceptEncoding(int code)
 }
 
 #ifdef USE_SSL
-static void show_cert_issuer(X509 * peer_cert)
+static void show_cert_issuer(X509 * peer_cert GCC_UNUSED)
 {
 #if defined(USE_OPENSSL_INCL)
     char ssl_dn[1024];
