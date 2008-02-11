@@ -1,4 +1,4 @@
-/* $LynxId: LYSession.c,v 1.3 2008/01/12 01:32:08 tom Exp $ */
+/* $LynxId: LYSession.c,v 1.4 2008/02/11 00:00:19 Paul.B.Mahol Exp $ */
 
 #include <LYSession.h>
 
@@ -55,19 +55,18 @@ static char *get_filename(char *given_name)
 /* Restore session from file, pretty slow, but it should be fine
  * for everyday, normal use.
  */
-BOOLEAN RestoreSession(void)
+void RestoreSession(void)
 {
-    int code;
     char *my_filename = get_filename(sessionin_file);
     FILE *fp;
     char *buffer = 0;
     DocInfo doc;
     VisitedLink *vl;
     int i = 0;
-    short errors = 10;		/* how much syntax errors are allowed in
+    short errors = 10;		/* how many syntax errors are allowed in
 
-				   session file before abort. */
-    char *value1, *value2, *line, *linktext, *level;
+				   session file before aborting. */
+    char *value1, *value2, *rsline, *linktext, *rslevel;
 
     /*
      * This should be done only once, here:  iff USE_SESSIONS is defined or: 
@@ -77,13 +76,12 @@ BOOLEAN RestoreSession(void)
 
     if (my_filename == NULL) {
 	/* nothing to do, so exit */
-	return (TRUE);
+	return;
     }
 
     CTRACE((tfp, "RestoreSession %s\n", my_filename));
     SetDefaultMode(O_TEXT);
     if ((fp = fopen(my_filename, TXT_R)) != NULL) {
-	code = TRUE;
 
 	/*
 	 * This should be safe, entries are added to lynx until memory i
@@ -111,11 +109,11 @@ BOOLEAN RestoreSession(void)
 #endif /* GOTOURL_OUT_SESSION */
 	    } else if (*buffer == 'h') {
 #ifdef HISTORY_OUT_SESSION
-		if ((line = strchr(buffer, ' ')) == 0)
+		if ((rsline = strchr(buffer, ' ')) == 0)
 		    continue;
 		else {
-		    line++;
-		    if ((linktext = strchr(line, ' ')) == 0)
+		    rsline++;
+		    if ((linktext = strchr(rsline, ' ')) == 0)
 			continue;
 		    else
 			*linktext++ = 0;
@@ -125,7 +123,7 @@ BOOLEAN RestoreSession(void)
 			*value1++ = 0;
 		    if ((value2 = strchr(value1, '\t')) != 0) {
 			*value2++ = 0;
-			doc.line = atoi(line);
+			doc.line = atoi(rsline);
 			doc.link = atoi(linktext);
 			StrAllocCopy(doc.address, value1);
 			StrAllocCopy(doc.title, value2);
@@ -135,11 +133,11 @@ BOOLEAN RestoreSession(void)
 #endif /* HISTORY_OUT_SESSION */
 	    } else if (*buffer == 'V') {
 #ifdef VLINK_OUT_SESSION
-		if ((level = strchr(buffer, ' ')) == 0)
+		if ((rslevel = strchr(buffer, ' ')) == 0)
 		    continue;
 		else {
-		    level++;
-		    if ((value1 = strchr(level, ' ')) == 0)
+		    rslevel++;
+		    if ((value1 = strchr(rslevel, ' ')) == 0)
 			continue;
 		    else
 			*value1++ = 0;
@@ -151,7 +149,7 @@ BOOLEAN RestoreSession(void)
 			vl = (VisitedLink *)
 			    HTList_objectAt(Visited_Links, i);
 			if (vl != NULL) {
-			    vl->level = atoi(level);
+			    vl->level = atoi(rslevel);
 			    i++;
 			}
 		    }
@@ -170,17 +168,13 @@ BOOLEAN RestoreSession(void)
 	LYCloseOutput(fp);
     }
     SetDefaultMode(O_BINARY);
-    return (TRUE);
 }
 
-/* Save session to file, overwriting one.
- * Fast as much as lynx allow.
- * If it is still slow for you improve following functions:
- * HTListObjectAt() and HTList_count().
+/*
+ * Save session to file, overwriting one.
  */
-BOOLEAN SaveSession(void)
+void SaveSession(void)
 {
-    int code = FALSE;
     char *my_filename = get_filename(sessionout_file);
     FILE *fp;
     VisitedLink *vl;
@@ -188,19 +182,19 @@ BOOLEAN SaveSession(void)
 
     if (my_filename == NULL) {
 	/* nothing to do, so exit */
-	return (TRUE);
+	return;
     }
 
     CTRACE((tfp, "SaveSession %s\n", my_filename));
 
     SetDefaultMode(O_TEXT);
     if ((fp = fopen(my_filename, TXT_W)) != NULL) {
-	code = TRUE;
 
 	fprintf(fp, "# lynx session\n");	/* @@@ simple for now */
 
 	/* Note use of session_limit, the most recent entries in list,
-	   from end of list, are saved */
+	 * from the end of list, are saved.
+	 */
 
 #ifdef SEARCH_IN_SESSION
 	k = HTList_count(search_queries);
@@ -264,7 +258,6 @@ BOOLEAN SaveSession(void)
 
     }
     SetDefaultMode(O_BINARY);
-    return (code);
 }
 
 #endif /* USE_SESSIONS */

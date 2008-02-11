@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAlert.c,v 1.78 2008/02/10 21:39:42 tom Exp $
+ * $LynxId: HTAlert.c,v 1.79 2008/02/11 00:28:56 tom Exp $
  *
  *	Displaying messages and getting input for Lynx Browser
  *	==========================================================
@@ -316,10 +316,12 @@ void HTReadProgress(long bytes, long total)
 		break;
 #endif
 	    default:
-		if (total > 0)
-		    HTSprintf0(&line, gettext("Read %s of %s of data"), bytesp, totalp);
-		else
+		if (total > 0) {
+		    HTSprintf0(&line, gettext("Read %s of %s of data"),
+			       bytesp, totalp);
+		} else {
 		    HTSprintf0(&line, gettext("Read %s of data"), bytesp);
+		}
 
 		if (LYTransferRate != rateOFF
 		    && transfer_rate > 0) {

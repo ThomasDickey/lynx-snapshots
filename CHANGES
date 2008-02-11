@@ -1,9 +1,12 @@
--- $LynxId: CHANGES,v 1.253 2008/01/11 00:45:24 tom Exp $
+-- $LynxId: CHANGES,v 1.254 2008/02/11 00:58:27 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
 2007-??-?? (2.8.7dev.8)
++ add XWINDOWS / NON_XWINDOWS environment-variable field to DOWNLOAD, etc., in
+  lynx.cfg to specify whether a downloader (printer, etc) is enabled when
+  the X display variable is set -PBM
 * add configure script options --enable-session-cache and --enable-progressbar
   for PBM's experimental session and progressbar features -TD
 * add session save/restore feature -PBM

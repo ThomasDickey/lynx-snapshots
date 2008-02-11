@@ -1,4 +1,4 @@
-/* $LynxId: LYSession.h,v 1.2 2008/01/10 23:50:45 tom Exp $ */
+/* $LynxId: LYSession.h,v 1.3 2008/02/10 23:47:39 Paul.B.Mahol Exp $ */
 #ifndef LYSESSION_H
 #define LYSESSION_H
 
@@ -7,8 +7,8 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-    extern BOOLEAN RestoreSession(void);
-    extern BOOLEAN SaveSession(void);
+    extern void RestoreSession(void);
+    extern void SaveSession(void);
 
 #ifdef __cplusplus
 }

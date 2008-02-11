@@ -1,4 +1,4 @@
-/* $LynxId: LYMain.c,v 1.178 2008/01/08 00:48:59 tom Exp $ */
+/* $LynxId: LYMain.c,v 1.179 2008/02/11 00:41:46 Paul.B.Mahol Exp $ */
 #include <HTUtils.h>
 #include <HTTP.h>
 #include <HTParse.h>
@@ -2185,11 +2185,8 @@ int main(int argc,
 	ena_csi((BOOLEAN) (LYlowest_eightbit[current_char_set] > 155));
 #ifdef USE_SESSIONS
 	RestoreSession();
+#endif /* USE_SESSIONS */
 	status = mainloop();
-	SaveSession();
-#else
-	status = mainloop();
-#endif
 	LYCloseCloset(RECALL_URL);
 	LYCloseCloset(RECALL_MAIL);
 #if defined(PDCURSES) && defined(PDC_BUILD) && PDC_BUILD >= 2401
@@ -3315,7 +3312,8 @@ static Config_Type Arg_Table [] =
    ),
    PARSE_FUN(
       "base",		4|FUNCTION_ARG,		base_fun,
-      "prepend a request URL comment and BASE tag to text/html\noutputs for -source dumps"
+      "prepend a request URL comment and BASE tag to text/html\n\
+outputs for -source dumps"
    ),
 #ifndef DISABLE_BIBP
    PARSE_STR(
@@ -3484,7 +3482,8 @@ keys (may be incompatible with some curses packages)"
 #endif
    PARSE_SET(
       "force_empty_hrefless_a",	4|SET_ARG,	force_empty_hrefless_a,
-      "\nforce HREF-less 'A' elements to be empty (close them as\nsoon as they are seen)"
+      "\nforce HREF-less 'A' elements to be empty (close them as\n\
+soon as they are seen)"
    ),
    PARSE_SET(
       "force_html",	4|SET_ARG,		LYforce_HTML_mode,
@@ -3642,7 +3641,7 @@ keys (may be incompatible with some curses packages)"
    ),
    PARSE_SET(
       "nomargins",	4|SET_ARG,		no_margins,
-      "disable the right/left margins in the default style-sheet"
+      "disable the right/left margins in the default\nstyle-sheet"
    ),
 #if defined(HAVE_SIGACTION) && defined(SIGWINCH)
    PARSE_SET(
@@ -3729,11 +3728,13 @@ with partial-display logic"
    ),
    PARSE_SET(
       "popup",		4|UNSET_ARG,		LYUseDefSelPop,
-      "toggles handling of single-choice SELECT options via\npopup windows or as lists of radio buttons"
+      "toggles handling of single-choice SELECT options via\n\
+popup windows or as lists of radio buttons"
    ),
    PARSE_FUN(
       "post_data",	2|FUNCTION_ARG,		post_data_fun,
-      "user data for post forms, read from stdin,\nterminated by '---' on a line"
+      "user data for post forms, read from stdin,\n\
+terminated by '---' on a line"
    ),
    PARSE_SET(
       "preparsed",	4|SET_ARG,		LYPreparsedSource,
@@ -3804,7 +3805,8 @@ with the PREV_DOC command or from the History List"
 #ifdef USE_SESSIONS
    PARSE_STR(
       "session",	2|NEED_LYSTRING_ARG,	session_file,
-      "=FILENAME\nresumes from specified file on startup and saves session to that file on exit"
+      "=FILENAME\nresumes from specified file on startup and\n\
+saves session to that file on exit"
    ),
    PARSE_STR(
       "sessionin",	2|NEED_LYSTRING_ARG,	sessionin_file,
@@ -3837,8 +3839,8 @@ with the PREV_DOC command or from the History List"
 #endif
    PARSE_SET(
       "soft_dquotes",	4|TOGGLE_ARG,		soft_dquotes,
-      "toggles emulation of the old Netscape and Mosaic bug which\n\
-treated '>' as a co-terminator for double-quotes and tags"
+      "toggles emulation of the old Netscape and Mosaic\n\
+bug which treated '>' as a co-terminator for\ndouble-quotes and tags"
    ),
    PARSE_FUN(
       "source",		4|FUNCTION_ARG,		source_fun,
@@ -3854,7 +3856,7 @@ treated '>' as a co-terminator for double-quotes and tags"
    ),
    PARSE_SET(
       "stderr",		4|SET_ARG,		dump_to_stderr,
-      "write warning messages to standard error when -dump -or -source is used"
+      "write warning messages to standard error when -dump\nor -source is used"
    ),
    PARSE_SET(
       "stdin",		4|SET_ARG,		startfile_stdin,
@@ -3890,7 +3892,7 @@ treated '>' as a co-terminator for double-quotes and tags"
 #endif
    PARSE_SET(
       "tlog",		2|TOGGLE_ARG,		LYUseTraceLog,
-      "toggles use of a Lynx Trace Log for the current session"
+      "toggles use of a Lynx Trace Log for the current\nsession"
    ),
 #ifdef TEXTFIELDS_MAY_NEED_ACTIVATION
    PARSE_SET(
@@ -3914,7 +3916,7 @@ treated '>' as a co-terminator for double-quotes and tags"
    ),
    PARSE_SET(
       "trim_input_fields", 2|SET_ARG,		LYtrimInputFields,
-      "trim input text/textarea fields in forms"
+      "\ntrim input text/textarea fields in forms"
    ),
    PARSE_SET(
       "underline_links",4|TOGGLE_ARG,		LYUnderlineLinks,
@@ -3936,11 +3938,14 @@ treated '>' as a co-terminator for double-quotes and tags"
    ),
    PARSE_SET(
       "validate",	2|SET_ARG,		LYValidate,
-      "accept only http URLs (meant for validation)\nimplies more restrictions than -anonymous, but\ngoto is allowed for http and https"
+      "accept only http URLs (meant for validation)\n\
+implies more restrictions than -anonymous, but\n\
+goto is allowed for http and https"
    ),
    PARSE_SET(
       "verbose",	4|TOGGLE_ARG,		verbose_img,
-      "toggles [LINK], [IMAGE] and [INLINE] comments \nwith filenames of these images"
+      "toggles [LINK], [IMAGE] and [INLINE] comments\n\
+with filenames of these images"
    ),
    PARSE_FUN(
       "version",	1|FUNCTION_ARG,		version_fun,

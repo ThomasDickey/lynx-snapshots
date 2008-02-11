@@ -1,4 +1,4 @@
-.\" $LynxId: lynx.man,v 1.77 2008/01/08 00:19:25 tom Exp $
+.\" $LynxId: lynx.man,v 1.79 2008/02/11 00:27:34 tom Exp $
 .nr N -1
 .nr D 5
 .TH LYNX 1
@@ -358,7 +358,7 @@ do justification of text.
 .B \-link\fR=\fINUMBER
 starting count for lnk#.dat files produced by \fB\-crawl\fR.
 .TP
-.B -listonly
+.B \-listonly
 for \fB-dump\fR, show only the list of links.
 .TP
 .B \-localhost
@@ -792,7 +792,7 @@ traverse all http links derived from startfile.  When used with
 is output to a file, intended for indexing.  See CRAWL.announce
 for more information.
 .TP
-.B trim_input_fields
+.B \-trim_input_fields
 trim input text/textarea fields in forms.
 .TP
 .B \-underline_links

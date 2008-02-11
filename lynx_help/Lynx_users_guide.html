@@ -1,5 +1,5 @@
 <!DOCTYPE html PUBLIC "-//IETF//DTD HTML 3.0//EN">
-<!-- $LynxId: Lynx_users_guide.html,v 1.92 2008/01/10 21:44:53 tom Exp $ -->
+<!-- $LynxId: Lynx_users_guide.html,v 1.93 2008/02/11 00:23:06 tom Exp $ -->
 <html>
 <head>
 <title>Lynx Users Guide v2.8.6</title>
@@ -2326,7 +2326,7 @@ as well as the maxmimum amount of memory used by the cache.
 
 <p>The structure of <em>Cache Jar</em> is simple:
 <ul>
-<li>Each entry starts with its ordinal number (within session),
+<li>Each entry starts with its ordinal number (within the session),
 recently added documents in cache have a smaller number than documents
 which are added before, and are positioned at the end of <em>Cache Jar</em>
 
@@ -2340,10 +2340,23 @@ Activating this link, lynx displays the corresponding cached document.
 
 <li>Below each cached document URL lynx shows
 the document properties which include:
-Lines,
-Size, File-Cache, Content-Type, Content-Language, Content-Encoding,
-Content-Location, Subject, Owner, Date, Expires, Last-Modified, ETag, Server, and
-Source-Cache-File.
+<ul>
+<li>Lines,
+<li>Size,
+<li>File-Cache,
+<li>Content-Type,
+<li>Content-Language,
+<li>Content-Encoding,
+<li>Content-Location,
+<li>Subject,
+<li>Owner,
+<li>Date,
+<li>Expires,
+<li>Last-Modified,
+<li>ETag,
+<li>Server, and
+<li>Source-Cache-File.
+</ul>
 </ul>
 
 <p>This feature can be enabled by default using the USE_CACHEJAR symbol in the
