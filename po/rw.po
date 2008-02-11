@@ -2406,12 +2406,6 @@ msgstr "a Bidakora Ku Ntangiriro bushyinguro"
 msgid "Maximum links per page exceeded!  Use half-page or two-line scrolling."
 msgstr "amahuza Ipaji Ipaji Cyangwa Umurongo"
 
-#. #define MAXHIST_REACHED
-#: LYMessages.c:657
-#, fuzzy
-msgid "History List maximum reached!  Document not pushed."
-msgstr "Kinini OYA"
-
 #: LYMessages.c:658
 #, fuzzy
 msgid "No previously visited links available!"

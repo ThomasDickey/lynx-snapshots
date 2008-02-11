@@ -345,6 +345,10 @@ II. Compile instructions -- UNIX
 	completion), as well as the amount of time stalled without any data
 	transferred.
 
+  --disable-session-cache		(define USE_CACHE_JAR)
+	Use this option to compile-in support for saving/restoring session
+	information in files.  Configurable from lynx.cfg
+
   --disable-source-cache		(define USE_SOURCE_CACHE)
 	Use this option to compile-in support for caching HTML pages locally,
 	in files or in memory.	Configurable from lynx.cfg
@@ -1315,4 +1319,4 @@ VIII. Acknowledgment
 
 -- 1999/04/24 - H. Nelson <lynx-admin@irm.nara.kindai.ac.jp>
 -- vile:txtmode
--- $LynxId: INSTALLATION,v 1.100 2007/07/29 17:23:43 tom Exp $
+-- $LynxId: INSTALLATION,v 1.101 2008/01/10 01:42:27 tom Exp $

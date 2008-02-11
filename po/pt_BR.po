@@ -1989,11 +1989,6 @@ msgstr "Use o caminho de seu diretório padrão!"
 msgid "Maximum links per page exceeded!  Use half-page or two-line scrolling."
 msgstr "Limite de ligações atingido! Use uma página menor ou rolagem de tela dupla."
 
-#. #define MAXHIST_REACHED
-#: LYMessages.c:657
-msgid "History List maximum reached!  Document not pushed."
-msgstr "Máximo do histórico atingido. O documento não foi acrescentado."
-
 #: LYMessages.c:658
 msgid "No previously visited links available!"
 msgstr "Não há ligações visitadas antes desta disponíveis!"

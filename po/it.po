@@ -2025,11 +2025,6 @@ msgstr "Il percorso del file deve essere relativo alla directory home."
 msgid "Maximum links per page exceeded!  Use half-page or two-line scrolling."
 msgstr "Troppi link nella pagina. Scorrere di due righe o di mezza pagina."
 
-#. #define MAXHIST_REACHED
-#: LYMessages.c:657
-msgid "History List maximum reached!  Document not pushed."
-msgstr "L'elenco della storia ha raggiunto il massimo. Documento non inserito."
-
 #: LYMessages.c:658
 msgid "No previously visited links available!"
 msgstr "Non è disponibile alcun link consultato in precedenza!"

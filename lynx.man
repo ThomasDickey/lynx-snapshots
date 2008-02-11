@@ -1,4 +1,4 @@
-.\" $LynxId: lynx.man,v 1.76 2008/01/06 17:04:42 tom Exp $
+.\" $LynxId: lynx.man,v 1.77 2008/01/08 00:19:25 tom Exp $
 .nr N -1
 .nr D 5
 .TH LYNX 1
@@ -666,6 +666,15 @@ toggles showing arrows at ends of the scrollbar.
 .TP
 .B \-selective
 require .www_browsable files to browse directories.
+.TP
+.B \-session\fR=\fIFILENAME
+resumes from specified file on startup and saves session to that file on exit.
+.TP
+.B \-sessionin\fR=\fIFILENAME
+resumes session from specified file.
+.TP
+.B \-sessionout\fR=\fIFILENAME
+saves session to specified file.
 .TP
 .B \-short_url
 show very long URLs in the status line with "..." to represent the

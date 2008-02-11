@@ -66,6 +66,7 @@
 ../obj/LYPrettySrc.obj
 ../obj/LYReadCFG.obj
 ../obj/LYSearch.obj
+../obj/LYSession.obj
 ../obj/LYShowInfo.obj
 ../obj/LYStrings.obj
 ../obj/LYTraversal.obj

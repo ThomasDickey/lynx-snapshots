@@ -1,4 +1,4 @@
-/* $LynxId: LYMain.c,v 1.177 2008/01/06 18:55:37 tom Exp $ */
+/* $LynxId: LYMain.c,v 1.178 2008/01/08 00:48:59 tom Exp $ */
 #include <HTUtils.h>
 #include <HTTP.h>
 #include <HTParse.h>
@@ -27,6 +27,11 @@
 #include <HTForms.h>
 #include <LYList.h>
 #include <LYJump.h>
+
+#ifdef USE_SESSIONS
+#include <LYSession.h>
+#endif
+
 #include <LYMainLoop.h>
 #include <LYBookmark.h>
 #include <LYCookie.h>
@@ -440,6 +445,19 @@ char *personal_type_map = NULL;	/* .mailcap */
 char *pref_charset = NULL;	/* preferred character set */
 char *proxyauth_info[2] =
 {NULL, NULL};			/* Id:Password for protected proxy servers */
+
+#ifdef USE_SESSIONS
+BOOLEAN LYAutoSession = FALSE;	/* enable/disable auto saving/restoring of
+
+				   session */
+char *LYSessionFile = NULL;	/* the session file from lynx.cfg */
+char *session_file = NULL;	/* the current session file */
+char *sessionin_file = NULL;	/* only resume session from this file */
+char *sessionout_file = NULL;	/* only save session to this file */
+short session_limit = 250;	/* maximal number of entries saved for
+
+				   session file, rest will be ignored */
+#endif /* USE_SESSIONS */
 char *startfile = NULL;		/* the first file */
 char *startrealm = NULL;	/* the startfile realm */
 char *system_mail = NULL;	/* The path for sending mail */
@@ -2165,7 +2183,13 @@ int main(int argc,
 #endif
 
 	ena_csi((BOOLEAN) (LYlowest_eightbit[current_char_set] > 155));
+#ifdef USE_SESSIONS
+	RestoreSession();
 	status = mainloop();
+	SaveSession();
+#else
+	status = mainloop();
+#endif
 	LYCloseCloset(RECALL_URL);
 	LYCloseCloset(RECALL_MAIL);
 #if defined(PDCURSES) && defined(PDC_BUILD) && PDC_BUILD >= 2401
@@ -2185,13 +2209,17 @@ int main(int argc,
 /*
  * Called by HTAccessInit to register any protocols supported by lynx.
  * Protocols added by lynx:
- *    LYNXKEYMAP, lynxcgi, LYNXIMGMAP, LYNXCOOKIE, LYNXMESSAGES
+ *    LYNXKEYMAP, lynxcgi, LYNXIMGMAP, LYNXCOOKIE, LYNXCACHE, LYNXMESSAGES
  */
 #ifdef GLOBALREF_IS_MACRO
 extern GLOBALREF (HTProtocol, LYLynxKeymap);
 extern GLOBALREF (HTProtocol, LYLynxCGI);
 extern GLOBALREF (HTProtocol, LYLynxIMGmap);
 extern GLOBALREF (HTProtocol, LYLynxCookies);
+
+#ifdef USE_CACHEJAR
+extern GLOBALREF (HTProtocol, LYLynxCache);
+#endif
 extern GLOBALREF (HTProtocol, LYLynxStatusMessages);
 
 #else
@@ -2199,6 +2227,10 @@ GLOBALREF HTProtocol LYLynxKeymap;
 GLOBALREF HTProtocol LYLynxCGI;
 GLOBALREF HTProtocol LYLynxIMGmap;
 GLOBALREF HTProtocol LYLynxCookies;
+
+#ifdef USE_CACHEJAR
+GLOBALREF HTProtocol LYLynxCache;
+#endif
 GLOBALREF HTProtocol LYLynxStatusMessages;
 #endif /* GLOBALREF_IS_MACRO */
 
@@ -2208,6 +2240,9 @@ void LYRegisterLynxProtocols(void)
     HTRegisterProtocol(&LYLynxCGI);
     HTRegisterProtocol(&LYLynxIMGmap);
     HTRegisterProtocol(&LYLynxCookies);
+#ifdef USE_CACHEJAR
+    HTRegisterProtocol(&LYLynxCache);
+#endif
     HTRegisterProtocol(&LYLynxStatusMessages);
 }
 
@@ -3766,6 +3801,20 @@ with the PREV_DOC command or from the History List"
       "selective",	4|FUNCTION_ARG,		selective_fun,
       "require .www_browsable files to browse directories"
    ),
+#ifdef USE_SESSIONS
+   PARSE_STR(
+      "session",	2|NEED_LYSTRING_ARG,	session_file,
+      "=FILENAME\nresumes from specified file on startup and saves session to that file on exit"
+   ),
+   PARSE_STR(
+      "sessionin",	2|NEED_LYSTRING_ARG,	sessionin_file,
+      "=FILENAME\nresumes session from specified file"
+   ),
+   PARSE_STR(
+      "sessionout",	2|NEED_LYSTRING_ARG,	sessionout_file,
+      "=FILENAME\nsaves session to specified file"
+   ),
+#endif /* USE_SESSIONS */
    PARSE_SET(
       "short_url",	4|SET_ARG,		long_url_ok,
       "enables examination of beginning and end of long URL in\nstatus line"

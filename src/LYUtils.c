@@ -1,4 +1,4 @@
-/* $LynxId: LYUtils.c,v 1.165 2008/01/06 18:31:26 Thorsten.Glaser Exp $ */
+/* $LynxId: LYUtils.c,v 1.166 2008/01/08 00:48:59 tom Exp $ */
 #include <HTUtils.h>
 #include <HTTCP.h>
 #include <HTParse.h>
@@ -2315,6 +2315,14 @@ UrlTypes is_url(char *filename)
 		 * Special Internal Lynx type.
 		 */
 		result = LYNXHIST_URL_TYPE;
+
+#ifdef USE_CACHEJAR
+	    } else if (compare_type(cp, STR_LYNXCACHE, LEN_LYNXCACHE)) {
+		/* 
+		 * Special Internal Lynx type.
+		 */
+		result = LYNXCACHE_URL_TYPE;
+#endif
 
 	    } else if (compare_type(cp, STR_LYNXKEYMAP, LEN_LYNXKEYMAP)) {
 		/*

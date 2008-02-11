@@ -1,7 +1,7 @@
 # Slovenian translation of Lynx WWW browser.
 # Copyright (C) 1999 Free Software Foundation, Inc.
 # Roman Maurer <roman.maurer@hermes.si>, 1999.
-# $LynxId: sl.po,v 1.30 2007/08/02 21:31:42 tom Exp $
+# $LynxId: sl.po,v 1.31 2008/01/08 00:19:25 tom Exp $
 # @Source: po/sl.po @
 #
 msgid ""
@@ -1990,11 +1990,6 @@ msgstr "Uporabite ime poti od va¹ega domaèega imenika!"
 #: LYMessages.c:655
 msgid "Maximum links per page exceeded!  Use half-page or two-line scrolling."
 msgstr "Prese¾eno najveèje ¹tevilo povezav na stran!  Uporabite polovièno stran ali dvovrstièno pomikanje."
-
-#. #define MAXHIST_REACHED
-#: LYMessages.c:657
-msgid "History List maximum reached!  Document not pushed."
-msgstr ""
 
 #: LYMessages.c:658
 msgid "No previously visited links available!"

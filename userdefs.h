@@ -1,5 +1,5 @@
 /*
- * $LynxId: userdefs.h,v 1.232 2008/01/06 19:01:29 tom Exp $
+ * $LynxId: userdefs.h,v 1.233 2008/02/10 23:30:04 tom Exp $
  *
  * Lynx - Hypertext navigation system
  *
@@ -1357,6 +1357,52 @@
  * in the visited_links_tbl table).
  */
 #define DEFAULT_VISITED_LINKS (VISITED_LINKS_AS_LATEST | VISITED_LINKS_REVERSE)
+
+/****************************************************************
+ * If USE_CACHEJAR is set to TRUE the user will be able to view,
+ * access and delete cached documents in current lynx session.
+ */
+#ifndef USE_CACHEJAR
+/* #define USE_CACHEJAR TRUE */
+#endif
+
+/****************************************************************
+ * If USE_SESSIONS is set to TRUE the user will be able to save,
+ * resume and in general manipulate with lynx sessions.
+ */
+#ifndef USE_SESSIONS
+/* #define USE_SESSIONS TRUE */
+#endif
+
+#define MAX_SESSIONS	10000
+
+/*
+ * If USE_SESSIONS is TRUE you may tune it fine how it will work:
+ */
+#define GOTOURL_IN_SESSION	/* Allow to save goto url */
+#define GOTOURL_OUT_SESSION	/* Allow to restore goto url */
+#define HISTORY_IN_SESSION	/* Allow to save history */
+#define HISTORY_OUT_SESSION	/* Allow to restore history */
+#define SEARCH_IN_SESSION	/* Allow to save search string */
+#define SEARCH_OUT_SESSION	/* Allow to restore search string */
+#define VLINK_IN_SESSION	/* Allow to save visited link */
+#define VLINK_OUT_SESSION	/* Allow to restore visited link */
+
+/****************************************************************
+ * The STATUSBUFSIZE defines how many entries will be stored in
+ * cyclic buffer of statusline messages. This is specially useful
+ * for users who use lynx on a terminal with more than 40 lines.
+ */
+/* #define STATUSBUFSIZE 90 */
+
+/****************************************************************
+ * If USE_PROGRESSBAR is TRUE the user will be able to set
+ * download progress as odometer(thermometer) display, ie:
+ *
+ * 80% IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+ *
+ */
+/* #define USE_PROGRESSBAR TRUE */
 
 /****************************************************************
  *   Section 3.   Things that you should not change until you

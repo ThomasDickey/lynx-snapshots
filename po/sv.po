@@ -1989,11 +1989,6 @@ msgstr "Använd en sökväg från din hemkatalog!"
 msgid "Maximum links per page exceeded!  Use half-page or two-line scrolling."
 msgstr "Max antal länkar per sida överskreds! Använd halvsides- eller tvåradsrullning."
 
-#. #define MAXHIST_REACHED
-#: LYMessages.c:657
-msgid "History List maximum reached!  Document not pushed."
-msgstr "Historiklistemaximum nått! Dokumentet lagrades inte."
-
 #: LYMessages.c:658
 msgid "No previously visited links available!"
 msgstr "Inga tidigare besökta länkar tillgängliga!"

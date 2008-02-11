@@ -1,4 +1,4 @@
-/* $LynxId: LYStrings.c,v 1.128 2007/08/02 19:24:50 tom Exp $ */
+/* $LynxId: LYStrings.c,v 1.129 2008/01/08 00:19:25 tom Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <UCAux.h>
@@ -1487,6 +1487,9 @@ static int LYmouse_menu(int x, int y, int atlink, int code)
 	{"End of document",		LYK_END,		ENT_ONLY_DOC},
 	{"Bookmarks",			LYK_VIEW_BOOKMARK,	ENT_ONLY_DOC},
 	{"Cookie jar",			LYK_COOKIE_JAR,		ENT_ONLY_DOC},
+#ifdef USE_CACHEJAR
+	{"Cache jar",			LYK_CACHE_JAR,		ENT_ONLY_DOC},
+#endif
 	{"Search index",		LYK_INDEX_SEARCH,	ENT_ONLY_DOC},
 	{"Set Options",			LYK_OPTIONS,		ENT_ONLY_DOC},
 	{"Activate this link",		LYK_SUBMIT,		ENT_ONLY_LINK},
@@ -1553,6 +1556,9 @@ static int LYmouse_menu(int x, int y, int atlink, int code)
 	case LYK_END:
 	case LYK_VIEW_BOOKMARK:
 	case LYK_COOKIE_JAR:
+#ifdef USE_CACHEJAR
+	case LYK_CACHE_JAR:
+#endif
 	case LYK_INDEX_SEARCH:
 	case LYK_OPTIONS:
 	    mouse_link = -3;	/* so LYgetch_for() passes it on - kw */
@@ -4086,8 +4092,9 @@ int LYhandlePopupList(int cur_choice,
     /*
      * Clear the command line and write the popup statusline.  - FM
      */
-    LYmove((LYlines - 2), 0);
-    LYclrtoeol();
+    /* nothing usefull, these two lines bellow should be removed */
+/*    LYmove((LYlines - 2), 0);
+    LYclrtoeol(); */
     if (disabled) {
 	popup_status_msg = CHOICE_LIST_UNM_MSG;
     } else if (!for_mouse) {

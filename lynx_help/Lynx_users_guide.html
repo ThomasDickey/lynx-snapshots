@@ -1,5 +1,5 @@
 <!DOCTYPE html PUBLIC "-//IETF//DTD HTML 3.0//EN">
-<!-- $LynxId: Lynx_users_guide.html,v 1.91 2007/05/22 22:06:06 tom Exp $ -->
+<!-- $LynxId: Lynx_users_guide.html,v 1.92 2008/01/10 21:44:53 tom Exp $ -->
 <html>
 <head>
 <title>Lynx Users Guide v2.8.6</title>
@@ -65,6 +65,8 @@ within a single LAN.
 <li><a href="#USEMAP" NAME="ToC-USEMAP">Lynx and Client-Side-Image-Maps</a>
 <li><a href="#Refresh" NAME="ToC-Refresh">Lynx and Client-Side-Pull</a>
 <li><a href="#Cookies" NAME="ToC-Cookies">Lynx and State Management</a> (Me want <em>cookie</em>!)
+<li><a href="#Cache" NAME="ToC-Cache">Lynx and Cached Documents</a>
+<li><a href="#Sessions" NAME="ToC-Sessions">Lynx and Sessions</a>
 <li><A HREF="#Invoking" NAME="ToC-Invoking">The Lynx command line</A>
 <li><A HREF="#Environment" NAME="ToC-Environment">Environment variables used by Lynx</A>
 <li><A HREF="#lynx.cfg" NAME="ToC-lynx.cfg">Main configuration file lynx.cfg</A>
@@ -959,8 +961,8 @@ return to Lynx or the '<em>&gt;</em>' command to save the options to a
         <dd>Use underline-attribute rather than bold for links.
 
    <dt>Use Passive FTP
-	<dd>This allows you to change whether Lynx uses passive ftp
-	    connections.
+        <dd>This allows you to change whether Lynx uses passive ftp
+            connections.
 
    <dt>User Agent
         <dd>The header string which Lynx sends to HTTP servers to indicate the
@@ -1410,6 +1412,10 @@ commands.
         <dd><em>Control-K</em> invokes the <a
             href="keystrokes/cookie_help.html">Cookie Jar Page</a>
             if it contains cookies.
+   <dt><em>^X</em>
+        <dd><em>Control-X</em> invokes the <a
+            href="#Cache">Cache Jar Page</a>
+            if it contains cached documents.
    <dt><em>z</em>
         <dd>Lynx supports completely interruptible I/O processes.  Press the
             '<em>z</em>' key at any time during a connect or transfer process
@@ -2305,6 +2311,76 @@ and/or change the 'allow' setting for its <em>domain</em> via the <a
 href="keystrokes/cookie_help.html">Cookie Jar Page</a>.
 [<A HREF="#ToC-Cookies">ToC</A>]
 
+<h2 ID="Cache"><A NAME="Cache"><em>Cached Documents</em></A></h2>
+
+A list of documents which are in lynx's internal cache is accessible through
+hypothetical <em>Cache Jar</em> which can be examined via the CACHE_JAR
+keystroke command, normally mapped to <em>Ctrl-X</em>.
+
+<p>Entries in the <em>Cache Jar</em> are ordered
+from oldest (at the top) to newest.
+The user can easily access any document which is in the cache,
+especially those which may be soon removed due to
+configurable limits on the maximum number of cached documents,
+as well as the maxmimum amount of memory used by the cache.
+
+<p>The structure of <em>Cache Jar</em> is simple:
+<ul>
+<li>Each entry starts with its ordinal number (within session),
+recently added documents in cache have a smaller number than documents
+which are added before, and are positioned at the end of <em>Cache Jar</em>
+
+<li>Following its ordinal number is the document title, which is also a link.
+On activating this link,
+the user is prompted if they want to delete the document
+from <em>Cache Jar</em>.
+The document's address (also a link) follows the title.
+It is distinguished by a <code>URL:</code> label preceding the link.
+Activating this link, lynx displays the corresponding cached document.
+
+<li>Below each cached document URL lynx shows
+the document properties which include:
+Lines,
+Size, File-Cache, Content-Type, Content-Language, Content-Encoding,
+Content-Location, Subject, Owner, Date, Expires, Last-Modified, ETag, Server, and
+Source-Cache-File.
+</ul>
+
+<p>This feature can be enabled by default using the USE_CACHEJAR symbol in the
+compilation (<code>userdefs.h</code>),
+as well as enabled in lynx.cfg
+[<A HREF="#ToC-Cache">ToC</A>]
+
+<h2 ID="Sessions"><A NAME="Sessions"><em>Sessions</em></A></h2>
+
+Lynx's current state (all information about the user's
+current activity with lynx) is called a session.
+Sessions are useful in particular if you are in the middle
+of exploring something on the web and you were forced to stop abruptly,
+losing any trace of your current work.
+
+<p>A session can be automatically restored as lynx starts after a clean exit.
+The session data is saved if lynx is invoked with
+the <em>-session=FILENAME</em> switch.
+The <em>FILENAME</em> is the name of the file where the session will be stored.
+
+<p>There are also switches for only restoring:
+<em>-sessionin=FILENAME</em>
+and for only saving:
+<em>-sessionout=FILENAME</em> sesions:
+
+<p>If you do not want to specify these options at each lynx startup,
+there is an option in <em>lynx.cfg</em> to enable automatic
+saving/restoring of session.
+To keep lynx startup/exit reasonable fast there is
+also an option in <em>lynx.cfg</em> specifying
+how much information about the current lynx session will be stored in file.
+
+<p>The syntax of the session file is rather self explanatory.
+You can use a text editor to modify, add
+new entries, or remove URLs you no longer want.
+[<A HREF="#ToC-Sessions">ToC</A>]
+
 <h2 ID="Invoking"><A NAME="Invoking"><em>The Lynx command line</em></A></h2>
 
 A summary of the Lynx command line options (switches) is returned to
@@ -2442,6 +2518,9 @@ where
                     <A HREF="#lynx.cfg">lynx.cfg</A>.
              <dt><code>-child</code>
                 <dd>exit on left-arrow in startfile, and disable save to disk.
+             <dt><code>-child_relaxed</code>
+                <dd>exit on left-arrow in startfile, but allow save to disk and
+                    associated print/mail options.
              <dt><code>-cmd_log=FILENAME</code>
                 <dd>write keystroke commands and related information to the
                     specified file.
@@ -2866,6 +2945,13 @@ where
                 <dd>toggles showing arrows at ends of the scrollbar.
              <dt><code>-selective</code>
                 <dd>require .www_browsable files to browse directories.
+             <dt><code>-session=FILENAME</code>
+                <dd>resumes from specified file on startup and saves session
+                    to that file on exit.
+             <dt><code>-sessionin=FILENAME</code>
+                <dd>resumes session from specified file.
+             <dt><code>-sessionout=FILENAME=</code>
+                <dd>saves session to specified file.
              <dt><code>-short_url</code>
                 <dd>show very long URLs in the status line with "..." to
                     represent the portion which cannot be displayed.  The

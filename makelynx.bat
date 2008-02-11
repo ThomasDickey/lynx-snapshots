@@ -1,4 +1,5 @@
 @echo off
+@rem $LynxId: makelynx.bat,v 1.13 2008/01/08 00:53:30 tom Exp $
 @echo Windows/Dos batch makefile for MingW32 and lynx.exe
 @echo Remember to precede this by "command /E:8192" for Windows prior to
 @echo W2000 and "cmd.exe /E:8192" for subsequent Window versions and to
@@ -312,6 +313,8 @@ if errorlevel 1 PAUSE
 %COMPILE_CMD% LYReadCFG.c
 if errorlevel 1 PAUSE
 %COMPILE_CMD% LYSearch.c
+if errorlevel 1 PAUSE
+%COMPILE_CMD% LYSession.c
 if errorlevel 1 PAUSE
 %COMPILE_CMD% LYShowInfo.c
 if errorlevel 1 PAUSE

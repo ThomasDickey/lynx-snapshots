@@ -1990,11 +1990,6 @@ msgstr "Gebruik een bestandspad vanuit uw thuismap!"
 msgid "Maximum links per page exceeded!  Use half-page or two-line scrolling."
 msgstr "Teveel links per pagina!  Blader per halve-pagina of twee-regelig."
 
-#. #define MAXHIST_REACHED
-#: LYMessages.c:657
-msgid "History List maximum reached!  Document not pushed."
-msgstr "Maximum van Historie Lijst bereikt!  Document niet toegevoegd."
-
 #: LYMessages.c:658
 msgid "No previously visited links available!"
 msgstr "Geen voorgaande bezochte links beschikbaar!"

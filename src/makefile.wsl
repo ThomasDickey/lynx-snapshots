@@ -1,8 +1,9 @@
+# $LynxId: makefile.wsl,v 1.13 2008/01/08 00:53:56 tom Exp $
 OBJS= UCdomap.o UCAux.o UCAuto.o \
 LYClean.o LYShowInfo.o LYEdit.o LYStrings.o \
 LYMail.o HTAlert.o GridText.o LYGetFile.o \
 LYMain.o LYMainLoop.o LYCurses.o LYBookmark.o LYUtils.o \
-LYOptions.o LYReadCFG.o LYSearch.o LYHistory.o \
+LYOptions.o LYReadCFG.o LYSearch.o LYHistory.o LYSession.o \
 LYForms.o LYPrint.o LYrcFile.o LYDownload.o LYNews.o LYKeymap.o \
 HTML.o HTFWriter.o HTInit.o DefaultStyle.o LYLocal.o LYUpload.o \
 LYLeaks.o LYexit.o LYJump.o LYList.o LYCgi.o LYTraversal.o \

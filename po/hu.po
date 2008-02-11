@@ -1990,11 +1990,6 @@ msgstr "Használja a HOME könyvtártól az útvonalat!"
 msgid "Maximum links per page exceeded!  Use half-page or two-line scrolling."
 msgstr "Elértük az oldalankénti maximális hivatkozások számát! Használjon fél oldalt vagy kétsoros görgetést."
 
-#. #define MAXHIST_REACHED
-#: LYMessages.c:657
-msgid "History List maximum reached!  Document not pushed."
-msgstr "Elértük az elõzménylista maximális hosszát! A dokumentum nem lett berakva."
-
 #: LYMessages.c:658
 msgid "No previously visited links available!"
 msgstr "Nem áll rendelkezésre meglátogatott hivatkozás!"

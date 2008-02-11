@@ -1,4 +1,4 @@
-/* $LynxId: LYrcFile.c,v 1.71 2008/01/06 18:51:40 tom Exp $ */
+/* $LynxId: LYrcFile.c,v 1.72 2008/01/08 00:19:25 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <LYUtils.h>
@@ -122,6 +122,10 @@ Config_Enum tbl_transfer_rate[] = {
 #ifdef USE_READPROGRESS
     { "KB,ETA",		rateEtaKB },
     { "BYTES,ETA",	rateEtaBYTES },
+#endif
+#ifdef USE_PROGRESSBAR
+    { "METER",		rateBAR },
+    { "FALSE",		rateBAR },
 #endif
     { NULL,		-1 },
 };

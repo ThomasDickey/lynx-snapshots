@@ -1,5 +1,5 @@
 /*
- * $LynxId: makeuctb.c,v 1.36 2008/01/06 18:23:33 tom Exp $
+ * $LynxId: makeuctb.c,v 1.37 2008/01/09 23:29:20 tom Exp $
  *
  *  makeuctb.c, derived from conmakehash.c   - kw
  *
@@ -327,7 +327,7 @@ int main(int argc, char **argv)
     } else if (ctbl == stdin) {
 	chdr = stdout;
 	hdrname = "stdout";
-    } else if ((outname = malloc(strlen(tblname) + 3)) != 0) {
+    } else if ((outname = (char *) malloc(strlen(tblname) + 3)) != 0) {
 	strcpy(outname, tblname);
 	hdrname = outname;
 	if ((p = strrchr(outname, '.')) == 0)

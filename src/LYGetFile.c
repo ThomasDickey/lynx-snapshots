@@ -1,4 +1,4 @@
-/* $LynxId: LYGetFile.c,v 1.77 2007/05/20 23:28:43 Thorsten.Glaser Exp $ */
+/* $LynxId: LYGetFile.c,v 1.78 2008/01/08 00:19:25 tom Exp $ */
 #include <HTUtils.h>
 #include <HTTP.h>
 #include <HTAnchor.h>		/* Anchor class */
@@ -192,6 +192,9 @@ int getfile(DocInfo *doc, int *target)
 		  url_type == LYNXKEYMAP_URL_TYPE ||
 		  url_type == LYNXIMGMAP_URL_TYPE ||
 		  url_type == LYNXCOOKIE_URL_TYPE ||
+#ifdef USE_CACHEJAR
+		  url_type == LYNXCACHE_URL_TYPE ||
+#endif
 		  url_type == LYNXMESSAGES_URL_TYPE ||
 		  (url_type == LYNXOPTIONS_URL_TYPE &&
 		   WWWDoc.post_data) ||
@@ -225,6 +228,9 @@ int getfile(DocInfo *doc, int *target)
 		  url_type == LYNXKEYMAP_URL_TYPE ||
 		  url_type == LYNXIMGMAP_URL_TYPE ||
 		  url_type == LYNXCOOKIE_URL_TYPE ||
+#ifdef USE_CACHEJAR
+		  url_type == LYNXCACHE_URL_TYPE ||
+#endif
 		  url_type == LYNXPRINT_URL_TYPE ||
 		  url_type == LYNXOPTIONS_URL_TYPE ||
 		  url_type == LYNXCFG_URL_TYPE ||
@@ -560,6 +566,9 @@ int getfile(DocInfo *doc, int *target)
 		   url_type != LYNXIMGMAP_URL_TYPE &&
 		   url_type != LYNXCOOKIE_URL_TYPE &&
 		   url_type != LYNXMESSAGES_URL_TYPE &&
+#ifdef USE_CACHEJAR
+		   url_type != LYNXCACHE_URL_TYPE &&
+#endif
 		   url_type != LYNXCGI_URL_TYPE &&
 		   !(url_type == NEWS_URL_TYPE &&
 		     strncmp(doc->address, "news://", 7)) &&
@@ -840,6 +849,9 @@ int getfile(DocInfo *doc, int *target)
 		     url_type == LYNXCOMPILE_OPTS_URL_TYPE ||
 		     url_type == LYNXHIST_URL_TYPE ||
 		     url_type == LYNXCOOKIE_URL_TYPE ||
+#ifdef USE_CACHEJAR
+		     url_type == LYNXCACHE_URL_TYPE ||
+#endif
 		     url_type == LYNXMESSAGES_URL_TYPE ||
 		     (LYValidate &&
 		      url_type != HTTP_URL_TYPE &&

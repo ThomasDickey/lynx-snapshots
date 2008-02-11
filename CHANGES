@@ -1,9 +1,17 @@
--- $LynxId: CHANGES,v 1.250 2008/01/06 20:35:55 Thorsten.Glaser Exp $
+-- $LynxId: CHANGES,v 1.253 2008/01/11 00:45:24 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
 2007-??-?? (2.8.7dev.8)
+* add configure script options --enable-session-cache and --enable-progressbar
+  for PBM's experimental session and progressbar features -TD
+* add session save/restore feature -PBM
+  + bind ^X to toggle view of page showing session information
+  + add binding for ^U to previous-document (outside of line-editing).
+  + documented command-line options and configuration data for this feature.
+  + document -child_relaxed option in Lynx users's guide.
+* use vasprintf() if available, fixes Fedora #462449 -TD
 * several small changes to configure script to work with MirBSD build
   environment -TG
 * show progress message in X509 callback -TG

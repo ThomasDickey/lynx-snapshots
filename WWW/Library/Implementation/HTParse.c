@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTParse.c,v 1.47 2007/07/22 22:24:37 tom Exp $
+ * $LynxId: HTParse.c,v 1.48 2008/01/10 00:57:31 tom Exp $
  *
  *		Parse HyperText Document Address		HTParse.c
  *		================================
@@ -294,11 +294,14 @@ char *HTParse(const char *aName,
     if (given.access && given.host && !given.relative && !given.absolute) {
 	if (!strcmp(given.access, "http") ||
 	    !strcmp(given.access, "https") ||
-	    !strcmp(given.access, "ftp"))
+	    !strcmp(given.access, "ftp")) {
+	    static char empty_string[] = "";
+
 	    /*
 	     * Assume root.
 	     */
-	    given.absolute = "";
+	    given.absolute = empty_string;
+	}
     }
     acc_method = given.access ? given.access : related.access;
     if (wanted & PARSE_ACCESS) {
@@ -574,6 +577,7 @@ char *HTParse(const char *aName,
 	case LYNXKEYMAP_URL_TYPE:
 	case LYNXIMGMAP_URL_TYPE:
 	case LYNXCOOKIE_URL_TYPE:
+	case LYNXCACHE_URL_TYPE:
 	case LYNXDIRED_URL_TYPE:
 	case LYNXOPTIONS_URL_TYPE:
 	case LYNXCFG_URL_TYPE:

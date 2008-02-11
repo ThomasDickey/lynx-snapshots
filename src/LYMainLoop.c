@@ -1,4 +1,4 @@
-/* $LynxId: LYMainLoop.c,v 1.148 2007/07/02 00:09:22 tom Exp $ */
+/* $LynxId: LYMainLoop.c,v 1.149 2008/02/10 23:02:08 tom Exp $ */
 #include <HTUtils.h>
 #include <HTAccess.h>
 #include <HTParse.h>
@@ -39,6 +39,10 @@
 #include <LYCookie.h>
 #include <LYMainLoop.h>
 #include <LYPrettySrc.h>
+
+#ifdef USE_SESSIONS
+#include <LYSession.h>
+#endif
 
 #ifdef KANJI_CODE_OVERRIDE
 #include <HTCJK.h>
@@ -641,6 +645,9 @@ static void do_check_goto_URL(char *user_input_buffer,
 	{ STR_LYNXCFG,		&no_goto_configinfo },
 	{ STR_LYNXCFLAGS,	&no_goto_configinfo },
 	{ STR_LYNXCOOKIE,	&always },
+#ifdef USE_CACHEJAR
+	{ STR_LYNXCACHE,	&always },
+#endif
 	{ STR_LYNXDIRED,	&always },
 	{ STR_LYNXDOWNLOAD,	&always },
 	{ STR_LYNXOPTIONS,	&always },
@@ -1118,6 +1125,9 @@ static int handle_LYK_ACTIVATE(int *c,
 		 * FM
 		 */
 		if (isLYNXCOOKIE(links[curdoc.link].l_form->submit_action) ||
+#ifdef USE_CACHEJAR
+		    isLYNXCACHE(links[curdoc.link].l_form->submit_action) ||
+#endif
 #ifdef DIRED_SUPPORT
 #ifdef OK_PERMIT
 		    (isLYNXDIRED(links[curdoc.link].l_form->submit_action) &&
@@ -1288,7 +1298,12 @@ static int handle_LYK_ACTIVATE(int *c,
 	    if (no_file_url && isFILE_URL(links[curdoc.link].lname)) {
 		if (!isFILE_URL(curdoc.address) &&
 		    !((isLYNXKEYMAP(curdoc.address) ||
+#ifndef USE_CACHEJAR
 		       isLYNXCOOKIE(curdoc.address)) &&
+#else
+		       isLYNXCOOKIE(curdoc.address) ||
+		       isLYNXCACHE(curdoc.address)) &&
+#endif
 		      !strncmp(links[curdoc.link].lname,
 			       helpfilepath,
 			       strlen(helpfilepath)))) {
@@ -1308,6 +1323,11 @@ static int handle_LYK_ACTIVATE(int *c,
 	    if ((isLYNXCOOKIE(links[curdoc.link].lname) &&
 		 (strcmp(NonNull(curdoc.title), COOKIE_JAR_TITLE) ||
 		  !isLYNXCOOKIE(curdoc.address))) ||
+#ifdef USE_CACHEJAR
+		(isLYNXCACHE(links[curdoc.link].lname) &&
+		 (strcmp(NonNull(curdoc.title), CACHE_JAR_TITLE) ||
+		  !isLYNXCACHE(curdoc.address))) ||
+#endif
 #ifdef DIRED_SUPPORT
 		(isLYNXDIRED(links[curdoc.link].lname) &&
 		 !LYIsUIPage(curdoc.address, UIP_DIRED_MENU) &&
@@ -1474,7 +1494,11 @@ static int handle_LYK_ACTIVATE(int *c,
 		    strip_trailing_slash(newdoc.address);
 	    }
 #endif /* DIRED_SUPPORT  && !__DJGPP__ */
+#ifndef USE_CACHEJAR
 	    if (isLYNXCOOKIE(curdoc.address)) {
+#else
+	    if (isLYNXCOOKIE(curdoc.address) || isLYNXCACHE(curdoc.address)) {
+#endif
 		HTuncache_current_document();
 	    }
 	}
@@ -1540,6 +1564,9 @@ static void handle_LYK_ADD_BOOKMARK(BOOLEAN *refresh_screen,
 #endif /* DIRED_SUPPORT */
 	!LYIsUIPage(curdoc.address, UIP_DOWNLOAD_OPTIONS) &&
 	!isLYNXCOOKIE(curdoc.address) &&
+#ifdef USE_CACHEJAR
+	!isLYNXCACHE(curdoc.address) &&
+#endif
 	!LYIsUIPage(curdoc.address, UIP_OPTIONS_MENU) &&
 	((nlinks <= 0) ||
 	 (links[curdoc.link].lname != NULL &&
@@ -1548,6 +1575,9 @@ static void handle_LYK_ADD_BOOKMARK(BOOLEAN *refresh_screen,
 	  !isLYNXDIRED(links[curdoc.link].lname) &&
 	  !isLYNXDOWNLOAD(links[curdoc.link].lname) &&
 	  !isLYNXCOOKIE(links[curdoc.link].lname) &&
+#ifdef USE_CACHEJAR
+	  !isLYNXCACHE(links[curdoc.link].lname) &&
+#endif
 	  !isLYNXPRINT(links[curdoc.link].lname)))) {
 	if (nlinks > 0) {
 	    if (curdoc.post_data == NULL &&
@@ -1810,6 +1840,34 @@ static void handle_LYK_COMMENT(BOOLEAN *refresh_screen,
     }
 }
 
+#ifdef USE_CACHEJAR
+static BOOLEAN handle_LYK_CACHE_JAR(int *cmd)
+{
+    /*
+     * Don't do this if already viewing cache jar.
+     */
+    if (!isLYNXCACHE(curdoc.address)) {
+	set_address(&newdoc, STR_LYNXCACHE "/");
+	LYFreePostData(&newdoc);
+	FREE(newdoc.bookmark);
+	newdoc.isHEAD = FALSE;
+	newdoc.safe = FALSE;
+	newdoc.internal_link = FALSE;
+	LYforce_no_cache = TRUE;
+	if (LYValidate || check_realm) {
+	    LYPermitURL = TRUE;
+	}
+    } else {
+	/*
+	 * If already in the cache jar, get out.
+	 */
+	*cmd = LYK_PREV_DOC;
+	return TRUE;
+    }
+    return FALSE;
+}
+#endif /* USE_CACHEJAR */
+
 static BOOLEAN handle_LYK_COOKIE_JAR(int *cmd)
 {
     /*
@@ -2055,7 +2113,6 @@ static int handle_LYK_DOWNLOAD(int *cmd,
 		*old_c = real_c;
 		HTUserMsg(NO_DOWNLOAD_COOKIES);
 	    }
-
 	} else if (LYIsUIPage(curdoc.address, UIP_PRINT_OPTIONS)) {
 	    if (*old_c != real_c) {
 		*old_c = real_c;
@@ -2136,6 +2193,9 @@ static int handle_LYK_DOWNLOAD(int *cmd,
 	    }
 
 	} else if (isLYNXCOOKIE(links[curdoc.link].lname) ||
+#ifdef USE_CACHEJAR
+		   isLYNXCACHE(links[curdoc.link].lname) ||
+#endif
 		   isLYNXDIRED(links[curdoc.link].lname) ||
 		   isLYNXDOWNLOAD(links[curdoc.link].lname) ||
 		   isLYNXPRINT(links[curdoc.link].lname) ||
@@ -5260,7 +5320,9 @@ int mainloop(void)
     curdoc.style = NULL;
     newdoc.style = NULL;
 #endif
+#ifndef USE_SESSIONS
     nhist = 0;
+#endif
     user_input_buffer[(sizeof(user_input_buffer) - 1)] = '\0';
     *prev_target = '\0';
     *user_input_buffer = '\0';
@@ -5591,6 +5653,9 @@ int mainloop(void)
 			HTMainText &&
 			nlinks > 0 && curdoc.link < nlinks &&
 			!isLYNXHIST(NonNull(newdoc.address)) &&
+#ifdef USE_CACHEJAR
+			!isLYNXCACHE(NonNull(newdoc.address)) &&
+#endif
 			!isLYNXCOOKIE(NonNull(newdoc.address))) {
 			char *mail_owner = NULL;
 
@@ -7090,6 +7155,13 @@ int mainloop(void)
 	    if (handle_LYK_COOKIE_JAR(&cmd))
 		goto new_cmd;
 	    break;
+
+#ifdef USE_CACHEJAR
+	case LYK_CACHE_JAR:	/* show the cache jar */
+	    if (handle_LYK_CACHE_JAR(&cmd))
+		goto new_cmd;
+	    break;
+#endif
 
 	case LYK_HISTORY:	/* show the history page */
 	    if (handle_LYK_HISTORY(ForcePush))

@@ -1,4 +1,4 @@
-/* $LynxId: LYReadCFG.c,v 1.125 2008/01/03 00:50:26 Joey.Schulze Exp $ */
+/* $LynxId: LYReadCFG.c,v 1.126 2008/02/10 22:05:02 tom Exp $ */
 #ifndef NO_RULES
 #include <HTRules.h>
 #else
@@ -1212,6 +1212,18 @@ static int read_htmlsrc_tagname_xform(char *str)
 }
 #endif
 
+#ifdef USE_SESSIONS
+static int session_limit_fun(char *value)
+{
+    session_limit = (short) atoi(value);
+    if (session_limit < 1)
+	session_limit = 1;
+    else if (session_limit > MAX_SESSIONS)
+	session_limit = MAX_SESSIONS;
+    return 0;
+}
+#endif /* USE_SESSIONS */
+
 #if defined(PDCURSES) && defined(PDC_BUILD) && PDC_BUILD >= 2401
 static int screen_size_fun(char *value)
 {
@@ -1493,6 +1505,11 @@ static Config_Type Config_Table [] =
 #endif
      PARSE_SET(RC_SEEK_FRAG_AREA_IN_CUR, LYSeekFragAREAinCur),
      PARSE_SET(RC_SEEK_FRAG_MAP_IN_CUR, LYSeekFragMAPinCur),
+#ifdef USE_SESSIONS
+     PARSE_SET(RC_AUTO_SESSION,         LYAutoSession),
+     PARSE_STR(RC_SESSION_FILE,         LYSessionFile),
+     PARSE_FUN(RC_SESSION_LIMIT,        session_limit_fun),
+#endif
      PARSE_SET(RC_SET_COOKIES,          LYSetCookies),
      PARSE_SET(RC_SHOW_CURSOR,          LYShowCursor),
      PARSE_STR(RC_SHOW_KB_NAME,         LYTransferName),

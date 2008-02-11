@@ -468,6 +468,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\src\LYSession.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\src\LYShowInfo.c"
 				>
 			</File>
@@ -843,6 +847,10 @@
 			</File>
 			<File
 				RelativePath="..\..\..\src\LYSearch.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\LYSession.h"
 				>
 			</File>
 			<File
