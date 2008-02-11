@@ -1,3 +1,6 @@
+/*
+ * $LynxId: LYHistory.h,v 1.19 2008/02/11 01:05:04 tom Exp $
+ */
 #ifndef LYHISTORY_H
 #define LYHISTORY_H
 

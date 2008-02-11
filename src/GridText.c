@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.143 2008/02/10 23:25:38 tom Exp $
+ * $LynxId: GridText.c,v 1.144 2008/02/11 00:07:05 Paul.B.Mahol Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -14253,6 +14253,9 @@ static int LYHandleCache(const char *arg,
     char *content_language = NULL;
     char *content_encoding = NULL;
     char *content_location = NULL;
+    char *content_disposition = NULL;
+    char *content_md5 = NULL;
+    char *message_id = NULL;
     char *date = NULL;
     char *owner = NULL;
     char *subject = NULL;
@@ -14328,9 +14331,6 @@ static int LYHandleCache(const char *arg,
 	       helpfilepath, CACHE_JAR_HELP, CACHE_JAR_TITLE);
     PUTS(buf);
 
-    HTSprintf0(&buf, "<pre>\n");
-    PUTS(buf);
-
     /*
      * Max number of cached documents is always same as HTCacheSize.
      * We count them from oldest to newest. Currently cached document
@@ -14347,39 +14347,41 @@ static int LYHandleCache(const char *arg,
 	if (cachedoc != 0) {
 	    HTParentAnchor *docanchor = cachedoc->node_anchor;
 
-	    Size = docanchor->content_length;
 	    if (docanchor != 0) {
 #ifdef USE_SOURCE_CACHE
 		source_cache_file = docanchor->source_cache_file;
 #endif
-		title = docanchor->title;
-		address = docanchor->address;
+		Size = docanchor->content_length;
+		StrAllocCopy(title, docanchor->title);
+		StrAllocCopy(address, docanchor->address);
 		content_type = docanchor->content_type;
 		content_language = docanchor->content_language;
 		content_encoding = docanchor->content_encoding;
 		content_location = docanchor->content_location;
+		content_disposition = docanchor->content_disposition;
+		content_md5 = docanchor->content_md5;
+		message_id = docanchor->message_id;
 		owner = docanchor->owner;
-		subject = docanchor->subject;
+		StrAllocCopy(subject, docanchor->subject);
 		date = docanchor->date;
 		expires = docanchor->expires;
 		ETag = docanchor->ETag;
-		server = docanchor->server;
+		StrAllocCopy(server, docanchor->server);
 		FileCache = docanchor->FileCache;
 		last_modified = docanchor->last_modified;
 		cache_control = docanchor->cache_control;
 	    }
 	}
 
-	HTSprintf0(&buf, "%s<em>%d</em>. <tab id=t%d>",
-		   (x > 99 ? "" : x < 10 ? "  " : " "), x, x);
-	PUTS(buf);
-	HTSprintf0(&buf, "<a href=\"%s%d\">", STR_LYNXCACHE, x);
-	PUTS(buf);
-	HTSprintf0(&buf, "%s</a>\n%s", title == NULL ? address : title,
-		   (x > 99 ? " " : x < 10 ? "   " : "  "));
-	PUTS(buf);
-	HTSprintf0(&buf, "URL: <a href=\"%s\">%s</a>\n%s", address, address,
-		   (x > 99 ? "  " : x < 10 ? "    " : "   "));
+	LYEntify(&address, TRUE);
+	if (isEmpty(title))
+	    StrAllocCopy(title, NO_TITLE);
+	else
+	    LYEntify(&title, TRUE);
+
+	HTSprintf0(&buf,
+		   "<p><em>%d.</em> Title: <a href=\"%s%d\">%s</a><br />URL: <a href=\"%s\">%s</a><br />",
+		   x, STR_LYNXCACHE, x, title, address, address);
 	PUTS(buf);
 	if (Size > 0) {
 	    HTSprintf0(&buf, "Size: %d  ", Size);
@@ -14390,7 +14392,8 @@ static int LYHandleCache(const char *arg,
 	    PUTS(buf);
 	}
 	if (FileCache != NULL) {
-	    HTSprintf0(&buf, "File-Cache: %s  ", FileCache);
+	    HTSprintf0(&buf, "File-Cache: <a href=\"file://%s\">%s</a>  ",
+		       FileCache, FileCache);
 	    PUTS(buf);
 	}
 	if (cache_control != NULL) {
@@ -14413,12 +14416,25 @@ static int LYHandleCache(const char *arg,
 	    HTSprintf0(&buf, "Content-Location: %s  ", content_location);
 	    PUTS(buf);
 	}
+	if (content_disposition != NULL) {
+	    HTSprintf0(&buf, "Content-Disposition: %s  ", content_disposition);
+	    PUTS(buf);
+	}
+	if (content_md5 != NULL) {
+	    HTSprintf0(&buf, "Content-MD5: %s  ", content_md5);
+	    PUTS(buf);
+	}
+	if (message_id != NULL) {
+	    HTSprintf0(&buf, "Message-ID: %s  ", message_id);
+	    PUTS(buf);
+	}
 	if (subject != NULL) {
+	    LYEntify(&subject, TRUE);
 	    HTSprintf0(&buf, "Subject: %s  ", subject);
 	    PUTS(buf);
 	}
 	if (owner != NULL) {
-	    HTSprintf0(&buf, "Owner: %s  ", owner);
+	    HTSprintf0(&buf, "Owner: <a href=%s>%s</a>  ", owner, owner);
 	    PUTS(buf);
 	}
 	if (date != NULL) {
@@ -14438,7 +14454,8 @@ static int LYHandleCache(const char *arg,
 	    PUTS(buf);
 	}
 	if (server != NULL) {
-	    HTSprintf0(&buf, "Server: %s  ", server);
+	    LYEntify(&server, TRUE);
+	    HTSprintf0(&buf, "Server: <em>%s</em>  ", server);
 	    PUTS(buf);
 	}
 #ifdef USE_SOURCE_CACHE
@@ -14449,11 +14466,15 @@ static int LYHandleCache(const char *arg,
 	    PUTS(buf);
 	}
 #endif
-	HTSprintf0(&buf, "<tab to=t%d>\n", x);
+	HTSprintf0(&buf, "<br />");
 	PUTS(buf);
     }
-    HTSprintf0(&buf, "</pre>\n</body>\n</html>\n");
+    HTSprintf0(&buf, "</body></html>");
     PUTS(buf);
+    FREE(subject);
+    FREE(title);
+    FREE(address);
+    FREE(server);
 
     /*
      * Free the target to complete loading of the Cache Jar Page, and report a

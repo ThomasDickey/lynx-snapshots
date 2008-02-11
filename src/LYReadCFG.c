@@ -1,4 +1,4 @@
-/* $LynxId: LYReadCFG.c,v 1.126 2008/02/10 22:05:02 tom Exp $ */
+/* $LynxId: LYReadCFG.c,v 1.127 2008/02/11 00:54:34 Paul.B.Mahol Exp $ */
 #ifndef NO_RULES
 #include <HTRules.h>
 #else
@@ -111,14 +111,40 @@ static void free_all_item_lists(void)
 }
 
 /*
- * Process string buffer fields for DOWNLOADER or UPLOADER menus.
+ * Process string buffer fields for DOWNLOADER or UPLOADER
+ *                               or PRINTERS   or EXTERNALS menus
  */
 static void add_item_to_list(char *buffer,
 			     lynx_list_item_type **list_ptr,
 			     int special)
 {
-    char *colon, *next_colon;
+    char *colon, *next_colon, *last_colon;
     lynx_list_item_type *cur_item, *prev_item;
+
+    /*
+     * Check if the XWINDOWS or NON_XWINDOWS keyword is present in the last
+     * field, and act properly when found depending if external environment
+     * $DISPLAY variable is set.
+     */
+    if ((last_colon = strrchr(buffer, ':')) != NULL && *(last_colon - 1) != '\\') {
+	*last_colon++ = '\0';
+	/*
+	 * If last_colon equals XWINDOWS then only continue
+	 * if there is a $DISPLAY variable
+	 */
+	if (!strcasecomp(last_colon, "XWINDOWS")) {
+	    if (LYgetXDisplay() == NULL)
+		return;
+	}
+	/*
+	 * If last_colon equals NON_XWINDOWS then only continue
+	 * if there is no $DISPLAY variable
+	 */
+	else if (!strcasecomp(last_colon, "NON_XWINDOWS")) {
+	    if (LYgetXDisplay() != NULL)
+		return;
+	}
+    }
 
     /*
      * Make a linked list
