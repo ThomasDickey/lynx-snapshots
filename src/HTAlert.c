@@ -1,4 +1,7 @@
-/*	Displaying messages and getting input for Lynx Browser
+/*
+ * $LynxId: HTAlert.c,v 1.78 2008/02/10 21:39:42 tom Exp $
+ *
+ *	Displaying messages and getting input for Lynx Browser
  *	==========================================================
  *
  *	REPLACE THIS MODULE with a GUI version in a GUI environment!
@@ -247,9 +250,10 @@ void HTReadProgress(long bytes, long total)
 	bytes = bytes_last;
 	total = total_last;
     }
+
+    /* 1 sec delay for transfer_rate calculation without g-t-o-d */
     if ((bytes > 0) &&
-	(now > first))
-	/* 1 sec delay for transfer_rate calculation without g-t-o-d */  {
+	(now > first)) {
 	if (transfer_rate <= 0)	/* the very first time */
 	    transfer_rate = (long) ((bytes) / (now - first));	/* bytes/sec */
 	total_last = total;
@@ -286,16 +290,45 @@ void HTReadProgress(long bytes, long total)
 		was_units = 0;
 	    sprint_bytes(bytesp, bytes, was_units);
 
-	    if (total > 0)
-		HTSprintf0(&line, gettext("Read %s of %s of data"), bytesp, totalp);
-	    else
+	    switch ((TransferRate) LYTransferRate) {
+#ifdef USE_PROGRESSBAR
+	    case rateBAR:
+		/*
+		 * If we know the total size of the file, we can compute
+		 * a percentage, and show a corresponding progress bar.
+		 */
 		HTSprintf0(&line, gettext("Read %s of data"), bytesp);
 
-	    if (LYTransferRate != rateOFF
-		&& transfer_rate > 0) {
-		sprint_bytes(transferp, transfer_rate, 0);
-		HTSprintf(&line, gettext(", %s/sec"), transferp);
+		if (total > 0) {
+		    float percent = bytes / (float) total;
+		    int meter = (LYcolLimit * percent) - 5;
+
+		    CTRACE((tfp, "rateBAR: bytes: %ld, total: %ld\n", bytes, total));
+		    CTRACE((tfp, "meter = %d\n", meter));
+
+		    HTSprintf0(&line, "%d%% ", (int) (percent * 100));
+		    while (meter-- > 0)
+			StrAllocCat(line, "I");
+
+		    CTRACE((tfp, "%s\n", line));
+		    CTRACE_FLUSH(tfp);
+		}
+		break;
+#endif
+	    default:
+		if (total > 0)
+		    HTSprintf0(&line, gettext("Read %s of %s of data"), bytesp, totalp);
+		else
+		    HTSprintf0(&line, gettext("Read %s of data"), bytesp);
+
+		if (LYTransferRate != rateOFF
+		    && transfer_rate > 0) {
+		    sprint_bytes(transferp, transfer_rate, 0);
+		    HTSprintf(&line, gettext(", %s/sec"), transferp);
+		}
+		break;
 	    }
+
 #ifdef USE_READPROGRESS
 	    if (LYTransferRate == rateEtaBYTES
 		|| LYTransferRate == rateEtaKB) {
@@ -312,7 +345,22 @@ void HTReadProgress(long bytes, long total)
 	    }
 #endif
 
-	    StrAllocCat(line, ".");
+	    switch ((TransferRate) LYTransferRate) {
+#ifdef USE_PROGRESSBAR
+	    case rateBAR:
+		/*
+		 * If we were not able to show a progress bar, just show
+		 * a "." for progress.
+		 */
+		if (total <= 0)
+		    StrAllocCat(line, ".");
+		break;
+#endif
+	    default:
+		StrAllocCat(line, ".");
+		break;
+	    }
+
 	    if (total < -1)
 		StrAllocCat(line, gettext(" (Press 'z' to abort)"));
 
@@ -320,7 +368,7 @@ void HTReadProgress(long bytes, long total)
 	    statusline(line);
 	    CTRACE((tfp, "%s\n", line));
 	}
-	}
+    }
 #ifdef LY_FIND_LEAKS
     FREE(line);
 #endif

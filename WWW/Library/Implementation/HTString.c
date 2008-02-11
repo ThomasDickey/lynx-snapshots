@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTString.c,v 1.49 2007/05/16 21:44:23 tom Exp $
+ * $LynxId: HTString.c,v 1.50 2008/01/09 00:06:06 tom Exp $
  *
  *	Case-independent string comparison		HTString.c
  *
@@ -619,6 +619,46 @@ PUBLIC_IF_FIND_LEAKS char *StrAllocVsprintf(char **pstr,
 					    const char *fmt,
 					    va_list * ap)
 {
+#ifdef HAVE_VASPRINTF
+    /*
+     * Use vasprintf() if we have it, since it is simplest.
+     */
+    char *result = 0;
+    char *temp = 0;
+
+    /* discard old destination if no length was given */
+    if (pstr && !dst_len) {
+	if (*pstr)
+	    FREE(*pstr);
+    }
+
+    if (vasprintf(&temp, fmt, *ap) >= 0) {
+	if (dst_len != 0) {
+	    int src_len = strlen(temp);
+	    int new_len = dst_len + src_len + 1;
+
+	    result = HTAlloc(pstr ? *pstr : 0, new_len);
+	    if (result != 0) {
+		strcpy(result + dst_len, temp);
+		mark_malloced(temp, new_len);
+	    }
+	    free(temp);
+	} else {
+	    result = temp;
+	    mark_malloced(temp, strlen(temp));
+	}
+    }
+
+    if (pstr != 0)
+	*pstr = result;
+
+    return result;
+#else /* !HAVE_VASPRINTF */
+    /*
+     * If vasprintf() is not available, this works - but does not implement
+     * the POSIX '$' formatting character which may be used in some of the
+     * ".po" files.
+     */
 #ifdef SAVE_TIME_NOT_SPACE
     static size_t tmp_len = 0;
     static size_t fmt_len = 0;
@@ -634,19 +674,8 @@ PUBLIC_IF_FIND_LEAKS char *StrAllocVsprintf(char **pstr,
     char *dst_ptr = *pstr;
     const char *format = fmt;
 
-    if (fmt == 0 || *fmt == '\0')
+    if (isEmpty(fmt))
 	return 0;
-
-#ifdef USE_VASPRINTF
-    if (pstr && !dst_len) {
-	if (*pstr)
-	    FREE(*pstr);
-	if (vasprintf(pstr, fmt, *ap) >= 0) {
-	    mark_malloced(*pstr, strlen(*pstr) + 1);
-	    return (*pstr);
-	}
-    }
-#endif /* USE_VASPRINTF */
 
     need = strlen(fmt) + 1;
 #ifdef SAVE_TIME_NOT_SPACE
@@ -848,6 +877,7 @@ PUBLIC_IF_FIND_LEAKS char *StrAllocVsprintf(char **pstr,
     if (pstr)
 	*pstr = dst_ptr;
     return (dst_ptr);
+#endif /* HAVE_VASPRINTF */
 }
 #undef SAVE_TIME_NOT_SPACE
 
@@ -895,16 +925,7 @@ char *HTSprintf0(char **pstr, const char *fmt,...)
 
     LYva_start(ap, fmt);
     {
-#ifdef USE_VASPRINTF
-	if (pstr) {
-	    if (*pstr)
-		FREE(*pstr);
-	    if (vasprintf(pstr, fmt, ap) >= 0)	/* else call outofmem?? */
-		mark_malloced(*pstr, strlen(*pstr) + 1);
-	    result = *pstr;
-	} else
-#endif /* USE_VASPRINTF */
-	    result = StrAllocVsprintf(pstr, 0, fmt, &ap);
+	result = StrAllocVsprintf(pstr, 0, fmt, &ap);
     }
     va_end(ap);
 

@@ -1,3 +1,4 @@
+# $LynxId: makefile.bcb,v 1.11 2008/01/08 00:53:05 tom Exp $
 #
 # Borland C++ / C++ builder
 # 1997/11/08 (Sat) 10:45:37
@@ -167,6 +168,7 @@ Dep_lynxdexe = \
    $(OBJ)/LYPrint.obj\
    $(OBJ)/LYReadCFG.obj\
    $(OBJ)/LYSearch.obj\
+   $(OBJ)/LYSession.obj\
    $(OBJ)/LYShowInfo.obj\
    $(OBJ)/LYStrings.obj\
    $(OBJ)/LYTraversal.obj\
@@ -555,6 +557,11 @@ $(OBJ)/LYReadCFG.obj :  src/LYReadCFG.c
 $(OBJ)/LYSearch.obj :  src/LYSearch.c
   $(BCC32) -P- -c @&&|
  $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ src/LYSearch.c
+|
+
+$(OBJ)/LYSession.obj :  src/LYSession.c
+  $(BCC32) -P- -c @&&|
+ $(CEAT_lynxdexe) $(CC_FLAGS) -o$@ src/LYSession.c
 |
 
 $(OBJ)/LYShowInfo.obj :  src/LYShowInfo.c

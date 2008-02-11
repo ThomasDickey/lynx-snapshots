@@ -1,3 +1,4 @@
+/* $LynxId: LYHistory.c,v 1.71 2008/02/10 21:48:35 tom Exp $ */
 #include <HTUtils.h>
 #include <HTTP.h>
 #include <GridText.h>
@@ -29,8 +30,9 @@
 #include <LYLeaks.h>
 #include <HTCJK.h>
 
-static HTList *Visited_Links = NULL;	/* List of safe popped docs. */
+HTList *Visited_Links = NULL;	/* List of safe popped docs. */
 int Visited_Links_As = VISITED_LINKS_AS_LATEST | VISITED_LINKS_REVERSE;
+
 static VisitedLink *PrevVisitedLink = NULL;	/* NULL on auxillary */
 static VisitedLink *PrevActiveVisitedLink = NULL;	/* Last non-auxillary */
 static VisitedLink Latest_first;
@@ -383,8 +385,10 @@ int LYpush(DocInfo *doc, BOOLEAN force_push)
 
     /*
      * If file is identical to one before it, don't push it.
+     * But do not duplicate it if there is only one on the stack,
+     * note that HDOC() starts from 0, so nhist should be > 0.
      */
-    if (nhist > 1 && are_identical(&(history[nhist - 1]), doc)) {
+    if (nhist >= 1 && are_identical(&(history[nhist - 1]), doc)) {
 	if (HDOC(nhist - 1).internal_link == doc->internal_link) {
 	    /* But it is nice to have the last position remembered!
 	       - kw */
@@ -945,8 +949,11 @@ int LYShowVisitedLinks(char **newfile)
 
 /*
  * Keep cycled buffer for statusline messages.
+ * But allow user to change how big it will be from userdefs.h
  */
+#ifndef STATUSBUFSIZE
 #define STATUSBUFSIZE   40
+#endif
 static char *buffstack[STATUSBUFSIZE];
 static int topOfStack = 0;
 

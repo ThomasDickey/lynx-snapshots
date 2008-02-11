@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYrcFile.h,v 1.23 2008/01/03 00:42:21 Joey.Schulze Exp $
+ * $LynxId: LYrcFile.h,v 1.24 2008/02/10 22:45:46 tom Exp $
  */
 #ifndef LYRCFILE_H
 #define LYRCFILE_H
@@ -19,6 +19,7 @@
 #define RC_ASSUME_CHARSET               "assume_charset"
 #define RC_ASSUME_LOCAL_CHARSET         "assume_local_charset"
 #define RC_ASSUME_UNREC_CHARSET         "assume_unrec_charset"
+#define RC_AUTO_SESSION                 "auto_session"
 #define RC_AUTO_UNCACHE_DIRLISTS        "auto_uncache_dirlists"
 #define RC_BIBP_BIBHOST                 "bibp_bibhost"
 #define RC_BIBP_GLOBALSERVER            "bibp_globalserver"
@@ -129,9 +130,9 @@
 #define RC_MAIL_SYSTEM_ERROR_LOGGING    "mail_system_error_logging"
 #define RC_MAKE_LINKS_FOR_ALL_IMAGES    "make_links_for_all_images"
 #define RC_MAKE_PSEUDO_ALTS_FOR_INLINES "make_pseudo_alts_for_inlines"
-#define RC_MAX_COOKIES_BUFFER		"max_cookies_buffer"
-#define RC_MAX_COOKIES_DOMAIN		"max_cookies_domain"
-#define RC_MAX_COOKIES_GLOBAL		"max_cookies_global"
+#define RC_MAX_COOKIES_BUFFER           "max_cookies_buffer"
+#define RC_MAX_COOKIES_DOMAIN           "max_cookies_domain"
+#define RC_MAX_COOKIES_GLOBAL           "max_cookies_global"
 #define RC_MESSAGESECS                  "messagesecs"
 #define RC_MINIMAL_COMMENTS             "minimal_comments"
 #define RC_MKDIR_PATH                   "mkdir_path"
@@ -169,9 +170,9 @@
 #define RC_PERSONAL_MAILCAP             "personal_mailcap"
 #define RC_PERSONAL_MAIL_ADDRESS        "personal_mail_address"
 #define RC_PREFERRED_CHARSET            "preferred_charset"
-#define RC_PREFERRED_MEDIA_TYPES        "preferred_media_types"
 #define RC_PREFERRED_ENCODING           "preferred_encoding"
 #define RC_PREFERRED_LANGUAGE           "preferred_language"
+#define RC_PREFERRED_MEDIA_TYPES        "preferred_media_types"
 #define RC_PREPEND_BASE_TO_SOURCE       "prepend_base_to_source"
 #define RC_PREPEND_CHARSET_TO_SOURCE    "prepend_charset_to_source"
 #define RC_PRETTYSRC                    "prettysrc"
@@ -197,6 +198,8 @@
 #define RC_SEEK_FRAG_AREA_IN_CUR        "seek_frag_area_in_cur"
 #define RC_SEEK_FRAG_MAP_IN_CUR         "seek_frag_map_in_cur"
 #define RC_SELECT_POPUPS                "select_popups"
+#define RC_SESSION_FILE                 "session_file"
+#define RC_SESSION_LIMIT                "session_limit"
 #define RC_SET_COOKIES                  "set_cookies"
 #define RC_SHOW_COLOR                   "show_color"
 #define RC_SHOW_CURSOR                  "show_cursor"
@@ -209,6 +212,7 @@
 #define RC_SOFT_DQUOTES                 "soft_dquotes"
 #define RC_SOURCE_CACHE                 "source_cache"
 #define RC_SOURCE_CACHE_FOR_ABORTED     "source_cache_for_aborted"
+#define RC_SSL_CERT_FILE                "ssl_cert_file"
 #define RC_STARTFILE                    "startfile"
 #define RC_STRIP_DOTDOT_URLS            "strip_dotdot_urls"
 #define RC_SUBSTITUTE_UNDERSCORES       "substitute_underscores"
@@ -251,7 +255,6 @@
 #define RC_XLOADIMAGE_COMMAND           "xloadimage_command"
 #define RC_ZCAT_PATH                    "zcat_path"
 #define RC_ZIP_PATH                     "zip_path"
-#define RC_SSL_CERT_FILE                "ssl_cert_file"
 
 extern Config_Enum tbl_force_prompt[];
 extern Config_Enum tbl_keypad_mode[];

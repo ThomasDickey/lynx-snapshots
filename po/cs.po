@@ -1989,11 +1989,6 @@ msgstr "Pou¾ijte jméno cesty z domácího adresáøe!"
 msgid "Maximum links per page exceeded!  Use half-page or two-line scrolling."
 msgstr "Maximální poèet odkazù na stránku dosa¾en! Pou¾ijte posun o 1/2 strany èi 2 øádky."
 
-#. #define MAXHIST_REACHED
-#: LYMessages.c:657
-msgid "History List maximum reached!  Document not pushed."
-msgstr "Maximální velikost seznamu historie dosa¾ena! Dokument nebyl zaznamenán."
-
 #: LYMessages.c:658
 msgid "No previously visited links available!"
 msgstr "®ádné nav¹tívené odkazy nejsou k dispozici!"

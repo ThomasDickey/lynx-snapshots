@@ -1,3 +1,4 @@
+# $LynxId: makefile.msc,v 1.17 2008/01/08 00:53:14 tom Exp $
 #
 # Makefile for `Lynx' browser for Microsoft Visual C++ 4.2 or later
 #
@@ -189,6 +190,7 @@ OBJS = $(CS_OBJS) \
 	"LYPrint.obj" \
 	"LYReadCFG.obj" \
 	"LYSearch.obj" \
+	"LYSession.obj" \
 	"LYShowInfo.obj" \
 	"LYStrings.obj" \
 	"LYTraversal.obj" \
@@ -337,6 +339,9 @@ LYReadCFG.obj : $(SRC_DIR)\LYReadCFG.c
 
 LYSearch.obj : $(SRC_DIR)\LYSearch.c
 	$(COMPILE) $(SRC_DIR)\LYSearch.c
+
+LYSession.obj : $(SRC_DIR)\LYSession.c
+	$(COMPILE) $(SRC_DIR)\LYSession.c
 
 LYShowInfo.obj : $(SRC_DIR)\LYShowInfo.c
 	$(COMPILE) $(SRC_DIR)\LYShowInfo.c

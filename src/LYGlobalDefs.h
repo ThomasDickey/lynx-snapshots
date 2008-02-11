@@ -1,4 +1,4 @@
-/* $LynxId: LYGlobalDefs.h,v 1.106 2008/01/03 00:41:02 Joey.Schulze Exp $ */
+/* $LynxId: LYGlobalDefs.h,v 1.107 2008/01/10 23:26:25 tom Exp $ */
 /* global variable definitions */
 
 #ifndef LYGLOBALDEFS_H
@@ -22,6 +22,7 @@
 #define ALT_EDIT_HELP		"keystrokes/alt_edit_help.html"
 #define BASHLIKE_EDIT_HELP	"keystrokes/bashlike_edit_help.html"
 #define COOKIE_JAR_HELP		"Lynx_users_guide.html#Cookies"
+#define CACHE_JAR_HELP		"Lynx_users_guide.html#Cache"
 #define CURRENT_KEYMAP_HELP	"keystrokes/keystroke_help.html"
 #define DIRED_MENU_HELP		"keystrokes/dired_help.html"
 #define DOWNLOAD_OPTIONS_HELP	"Lynx_users_guide.html#RemoteSource"
@@ -179,6 +180,9 @@ extern "C" {
 	,rateEtaBYTES
 	,rateEtaKB
 #endif
+#ifdef USE_PROGRESSBAR
+	,rateBAR
+#endif
     } TransferRate;
 
 #ifdef USE_READPROGRESS
@@ -192,6 +196,9 @@ extern "C" {
     extern BOOLEAN LYCursesON;	/* start_curses()->TRUE, stop_curses()->FALSE */
     extern BOOLEAN LYJumpFileURL;	/* URL from the jump file shortcuts? */
     extern BOOLEAN LYNewsPosting;	/* News posting supported if TRUE */
+#ifdef USE_SESSIONS
+    extern BOOLEAN LYAutoSession;	/* Auto restore/save session? */
+#endif
     extern BOOLEAN LYShowCursor;	/* Show the cursor or hide it?      */
     extern BOOLEAN LYShowTransferRate;
     extern BOOLEAN LYUnderlineLinks;	/* Show the links underlined vs bold */
@@ -239,6 +246,12 @@ extern "C" {
     extern char *LYRequestTitle;	/* newdoc.title in calls to getfile() */
     extern char *LYTransferName;	/* abbreviation for Kilobytes */
     extern char *LynxHome;
+#ifdef USE_SESSIONS
+    extern char *LYSessionFile;	/* file for auto-session */
+    extern char *session_file;	/* file for -session= */
+    extern char *sessionin_file;	/* file for -sessionin= */
+    extern char *sessionout_file;	/* file for -sessionout= */
+#endif
     extern char *LynxSigFile;	/* Signature file, in or off home */
     extern char *helpfile;
     extern char *helpfilepath;
@@ -276,6 +289,10 @@ extern "C" {
     extern int max_cookies_buffer;
     extern int max_cookies_domain;
     extern int max_cookies_global;
+#ifdef USE_SESSIONS
+    extern short session_limit;	/* maximal entries saved/restored
+				   in session file */
+#endif
     extern int user_mode;	/* novice or advanced */
     extern int www_search_result;
 

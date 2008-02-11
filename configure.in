@@ -1,4 +1,4 @@
-dnl $LynxId: configure.in,v 1.160 2007/08/03 00:21:48 tom Exp $
+dnl $LynxId: configure.in,v 1.161 2008/02/10 20:07:42 tom Exp $
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -750,6 +750,8 @@ CF_SYS_ERRLIST
 CF_UTMP
 CF_CHECK_EXTERN_DATA(h_errno,int)
 
+AC_SUBST(EXTRA_OBJS)
+
 dnl --------------------------------------------------------------------------
 dnl Experimental options that don't need to test system features
 dnl --------------------------------------------------------------------------
@@ -871,12 +873,34 @@ AC_MSG_RESULT($use_nested_tables)
 test $use_nested_tables != no && AC_DEFINE(EXP_NESTED_TABLES)
 
 dnl --------------------------------------------------------------------------
+AC_MSG_CHECKING(if progress-bar code should be used)
+CF_ARG_ENABLE(progressbar,
+[  --enable-progressbar    use experimental progress-bar],
+	[use_progressbar=$enableval],
+	[use_progressbar=no])
+AC_MSG_RESULT($use_progressbar)
+test $use_progressbar != no && AC_DEFINE(USE_PROGRESSBAR)
+
+dnl --------------------------------------------------------------------------
 AC_MSG_CHECKING(if scrollbar code should be used)
 CF_ARG_ENABLE(scrollbar,
 [  --enable-scrollbar      use experimental scrollbar, with mouse],
 	[use_scrollbar=$enableval],
 	[use_scrollbar=no])
 AC_MSG_RESULT($use_scrollbar)
+
+dnl --------------------------------------------------------------------------
+AC_MSG_CHECKING(if session-caching code should be used)
+CF_ARG_ENABLE(session-cache,
+[  --enable-session-cache  use experimental session-caching code],
+	[use_session_cache=$enableval],
+	[use_session_cache=no])
+AC_MSG_RESULT($use_session_cache)
+if test $use_session_cache != no ; then
+    AC_DEFINE(USE_CACHEJAR)
+    AC_DEFINE(USE_SESSIONS)
+	EXTRA_OBJS="$EXTRA_OBJS LYSession\$o"
+fi
 
 dnl --------------------------------------------------------------------------
 dnl Miscellaneous options that don't need to test system features
@@ -965,8 +989,6 @@ CF_ARG_DISABLE(source-cache,
 	[use_source_cache=yes])
 AC_MSG_RESULT($use_source_cache)
 test $use_source_cache != no && AC_DEFINE(USE_SOURCE_CACHE)
-
-AC_SUBST(EXTRA_OBJS)
 
 dnl --------------------------------------------------------------------------
 AC_MSG_CHECKING(if you want to use external commands)

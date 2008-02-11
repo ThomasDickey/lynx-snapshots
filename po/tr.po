@@ -1990,11 +1990,6 @@ msgstr "Ana dizininiz dýþýnda bir dosyayolu kullanýn!"
 msgid "Maximum links per page exceeded!  Use half-page or two-line scrolling."
 msgstr "Sayfa baþýna maksimum link aþýldý!  Yarým sayfa ya da iki satýrlýk kaydýrma kullanýn."
 
-#. #define MAXHIST_REACHED
-#: LYMessages.c:657
-msgid "History List maximum reached!  Document not pushed."
-msgstr "Tarihçe Listesi'nin maksimumuna ulaþýldý!  Belge zorlanmadý."
-
 #: LYMessages.c:658
 msgid "No previously visited links available!"
 msgstr "Önceden uðranmýþ link mevcut deðil!.."

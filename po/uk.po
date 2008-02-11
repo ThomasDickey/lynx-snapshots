@@ -3,7 +3,7 @@
 # Volodymyr M. Lisivka <lvm@mystery.lviv.net>, 2003
 # Dmytro O. Redchuk <dor@kiev-online.net>, 2001-2002
 # Olexander Kunytsa <kunia@snark.ukma.kiev.ua>, 2000-2001
-# $LynxId: uk.po,v 1.23 2007/08/02 21:31:43 tom Exp $
+# $LynxId: uk.po,v 1.24 2008/01/08 00:19:25 tom Exp $
 #
 msgid ""
 msgstr ""
@@ -2049,11 +2049,6 @@ msgstr ""
 #. #define MAXLINKS_REACHED
 #: LYMessages.c:655
 msgid "Maximum links per page exceeded!  Use half-page or two-line scrolling."
-msgstr ""
-
-#. #define MAXHIST_REACHED
-#: LYMessages.c:657
-msgid "History List maximum reached!  Document not pushed."
 msgstr ""
 
 #: LYMessages.c:658

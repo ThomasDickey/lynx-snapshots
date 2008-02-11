@@ -1,6 +1,6 @@
 $ v0 = 0
 $ v = f$verify(v0)
-$! $LynxId: build.com,v 1.14 2007/07/01 16:40:21 tom Exp $
+$! $LynxId: build.com,v 1.15 2008/01/08 00:19:25 tom Exp $
 $!			BUILD.COM
 $!
 $!   Command file to build LYNX.EXE on VMS systems.
@@ -345,6 +345,7 @@ $ cc LYPrint
 $ cc LYrcFile
 $ cc LYReadCFG
 $ cc LYSearch
+$ cc LYSession
 $ cc LYShowInfo
 $ cc LYStrings
 $ cc LYTraversal
@@ -399,6 +400,7 @@ LYPrint.obj, -
 LYrcFile.obj, -
 LYReadCFG.obj, -
 LYSearch.obj, -
+LYSession.obj, -
 LYShowInfo.obj, -
 LYStrings.obj, -
 LYTraversal.obj, -

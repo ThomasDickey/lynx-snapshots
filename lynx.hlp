@@ -560,6 +560,16 @@
        -selective
               require .www_browsable files to browse directories.
 
+       -session=FILENAME
+              resumes from specified file on startup and saves session to that
+              file on exit.
+
+       -sessionin=FILENAME
+              resumes session from specified file.
+
+       -sessionout=FILENAME
+              saves session to specified file.
+
        -short_url
               show very long URLs in the status line with "..."  to  represent
               the portion which cannot be displayed.  The beginning and end of

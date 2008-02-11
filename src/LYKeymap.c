@@ -1,4 +1,4 @@
-/* $LynxId: LYKeymap.c,v 1.64 2007/05/13 15:34:50 Thorsten.Glaser Exp $ */
+/* $LynxId: LYKeymap.c,v 1.65 2008/01/08 00:19:25 tom Exp $ */
 #include <HTUtils.h>
 #include <LYUtils.h>
 #include <LYGlobalDefs.h>
@@ -79,11 +79,16 @@ LYK_REFRESH,      LYK_ACTIVATE,     LYK_DOWN_TWO,      0,
 LYK_UP_TWO,       LYK_CHG_CENTER,   LYK_RELOAD,    LYK_TO_CLIPBOARD,
 /* ^P */            /* XON */       /* ^R */       /* ^S */
 
-LYK_TRACE_TOGGLE,       0,        LYK_SWITCH_DTD,  LYK_REFRESH,
+LYK_TRACE_TOGGLE,  LYK_NEXT_DOC,  LYK_SWITCH_DTD,  LYK_REFRESH,
 /* ^T */            /* ^U */        /* ^V */       /* ^W */
 
+#ifdef USE_CACHEJAR
+LYK_CACHE_JAR,          0,              0,             0,
+/* ^X */            /* ^Y */        /* ^Z */       /* ESC */
+#else
 0,                      0,              0,             0,
 /* ^X */            /* ^Y */        /* ^Z */       /* ESC */
+#endif
 
 0,                      0,              0,             0,
 /* ^\ */            /* ^] */        /* ^^ */       /* ^_ */
@@ -382,7 +387,7 @@ LYKeymap_t key_override[KEYMAP_SIZE] = {
     0,                  0,              0,            0,
 /* ^P */            /* XON */       /* ^R */      /* XOFF */
 
-    0,            LYK_PREV_DOC,         0,            0,
+    0,            LYK_NEXT_DOC,         0,            0,
 /* ^T */            /* ^U */        /* ^V */      /* ^W */
 
     0,                  0,              0,            0,
@@ -971,6 +976,11 @@ static Kcmd revmap[] = {
     DATA(
 	LYK_NESTED_TABLES, "NESTED_TABLES",
 	"toggle nested-table parsing on/off" ),
+#endif
+#ifdef USE_CACHEJAR
+    DATA(
+	LYK_CACHE_JAR, "CACHE_JAR",
+	"examine list of cached documents" ),
 #endif
     DATA(
 	LYK_UNKNOWN, NULL,

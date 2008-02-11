@@ -1,4 +1,4 @@
-/* $LynxId: LYOptions.c,v 1.121 2007/07/02 00:09:49 tom Exp $ */
+/* $LynxId: LYOptions.c,v 1.122 2008/01/08 00:48:58 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <HTTP.h>		/* 'reloading' flag */
@@ -2302,6 +2302,11 @@ static OptValues mbm_values[] =
 
 static const char *single_bookmark_string = RC_BOOKMARK_FILE;
 
+#ifdef USE_SESSIONS
+static const char *auto_session_string = RC_AUTO_SESSION;
+static const char *single_session_string = RC_SESSION_FILE;
+#endif
+
 /*
  * Character Set Options
  */
@@ -2370,6 +2375,9 @@ static OptValues rate_values[] =
 #ifdef USE_READPROGRESS
     {rateEtaBYTES, N_("Show %s/sec, ETA"), "rate_eta_bytes"},
     {rateEtaKB, N_("Show %s/sec, ETA"), "rate_eta_kb"},
+#endif
+#ifdef USE_PROGRESSBAR
+    {rateBAR, N_("Show progressbar"), "rate_bar"},
 #endif
     {0, 0, 0}
 };
@@ -2939,6 +2947,21 @@ int postoptions(DocInfo *newdoc)
 		StrAllocCopy(bookmark_page, data[i].value);
 	    }
 	}
+#ifdef USE_SESSIONS
+	/* Auto Session: ON/OFF */
+	if (!strcmp(data[i].tag, auto_session_string)
+	    && GetOptValues(bool_values, data[i].value, &code)) {
+	    LYAutoSession = (BOOL) code;
+	}
+
+	/* Default Session filename: INPUT */
+	if (!strcmp(data[i].tag, single_session_string)) {
+	    if (strcmp(data[i].value, "")) {
+		FREE(LYSessionFile);
+		StrAllocCopy(LYSessionFile, data[i].value);
+	    }
+	}
+#endif
 
 	/* Assume Character Set: SELECT */
 	if (!strcmp(data[i].tag, assume_char_set_string)) {
@@ -3875,6 +3898,19 @@ static int gen_options(char **newfile)
 	PutTextInput(fp0, single_bookmark_string,
 		     NonNull(bookmark_page), text_len, "");
     }
+
+#ifdef USE_SESSIONS
+    /* Auto Session: ON/OFF */
+    PutLabel(fp0, gettext("Auto Session"), auto_session_string);
+    BeginSelect(fp0, auto_session_string);
+    PutOptValues(fp0, LYAutoSession, bool_values);
+    EndSelect(fp0);
+
+    /* Session File Menu: INPUT */
+    PutLabel(fp0, gettext("Session file"), single_session_string);
+    PutTextInput(fp0, single_session_string,
+		 NonNull(LYSessionFile), text_len, "");
+#endif
 
     /* Visited Pages: SELECT */
     PutLabel(fp0, gettext("Visited Pages"), visited_links_string);

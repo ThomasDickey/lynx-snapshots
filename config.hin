@@ -1,5 +1,5 @@
 /*
- * $LynxId: config.hin,v 1.99 2008/01/06 20:33:15 tom Exp $
+ * $LynxId: config.hin,v 1.100 2008/01/11 00:52:49 tom Exp $
  * vile:cmode
  *
  * The configure script translates "config.hin" into "lynx_cfg.h"
@@ -235,6 +235,7 @@
 #undef UNIX
 #undef UNZIP_PATH		/* CF_PATH_PROG(unzip) */
 #undef USE_BZLIB		/* AC_ARG_WITH(bzlib) */
+#undef USE_CACHEJAR		/* CF_ARG_ENABLE(session-cache) */
 #undef USE_COLOR_STYLE		/* CF_ARG_ENABLE(color-style) */
 #undef USE_DEFAULT_COLORS	/* CF_ARG_ENABLE(default-colors) */
 #undef USE_EXECVP		/* CF_ARG_DISABLE(full-paths) */
@@ -246,8 +247,10 @@
 #undef USE_OPENSSL_INCL		/* CF_SSL */
 #undef USE_PERSISTENT_COOKIES	/* CF_ARG_ENABLE(persistent-cookies) */
 #undef USE_PRETTYSRC		/* CF_ARG_ENABLE(prettysrc) */
+#undef USE_PROGRESSBAR		/* CF_ARG_ENABLE(progressbar) */
 #undef USE_READPROGRESS		/* CF_ARG_ENABLE(read-eta) */
 #undef USE_SCROLLBAR		/* CF_ARG_ENABLE(scrollbar) */
+#undef USE_SESSIONS		/* CF_ARG_ENABLE(session-cache) */
 #undef USE_SLANG		/* AC_ARG_WITH(screen=slang) */
 #undef USE_SOCKS4_PREFIX	/* CF_SOCKS5 */
 #undef USE_SOCKS5		/* CF_SOCKS5 */
