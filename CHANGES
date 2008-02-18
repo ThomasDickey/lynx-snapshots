@@ -1,10 +1,17 @@
--- $LynxId: CHANGES,v 1.254 2008/02/11 00:58:27 tom Exp $
+-- $LynxId: CHANGES,v 1.259 2008/02/17 20:05:07 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2007-??-?? (2.8.7dev.8)
-+ add XWINDOWS / NON_XWINDOWS environment-variable field to DOWNLOAD, etc., in
+2008-02-17 (2.8.7dev.8)
+* add "nano" to list of editors accepting +number option (patch by Tim Chase)
+* add configure --with-nss-compat option, for building with NSS library's
+  OpenSSL-compatible interface (patch by Zdenek Prikryl)
+* minor fix for version message to ensure WWW version shows when not building
+  with OpenSSL -GV
+* make "--more--" message configuable -PBM
+* improve multibyte editing (patch by Sergej Kvachonok)
+* add XWINDOWS / NON_XWINDOWS environment-variable field to DOWNLOAD, etc., in
   lynx.cfg to specify whether a downloader (printer, etc) is enabled when
   the X display variable is set -PBM
 * add configure script options --enable-session-cache and --enable-progressbar
@@ -25,7 +32,7 @@ Changes since Lynx 2.8 release
   improved buffer allocation limits in makeuctb.c -TD
 * add support for the X.509 extension subjectAltName using GNUTLS -Joey Schulze
 * add SSL_CERT_FILE to lynx.cfg -Joey Schulze
-* fix spelling error in HTAccess.h comment (report by Paul de Weerd).
+* fix spelling error in HTAccess.h comment (report by Paul de Weerd) -TD
 * add null-pointer checks to cover a special case of exit on error while
   reading from the standard input (report by Pascal Terjan) -TD
 

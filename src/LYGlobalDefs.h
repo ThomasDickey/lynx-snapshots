@@ -1,4 +1,4 @@
-/* $LynxId: LYGlobalDefs.h,v 1.107 2008/01/10 23:26:25 tom Exp $ */
+/* $LynxId: LYGlobalDefs.h,v 1.108 2008/02/17 19:14:40 Paul.B.Mahol Exp $ */
 /* global variable definitions */
 
 #ifndef LYGLOBALDEFS_H
@@ -432,6 +432,7 @@ extern "C" {
     extern BOOLEAN LYCancelledFetch;
     extern const char *LYToolbarName;
 
+    extern BOOLEAN nomore;
     extern int AlertSecs;
     extern int InfoSecs;
     extern int MessageSecs;

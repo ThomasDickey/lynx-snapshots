@@ -1,14 +1,14 @@
 # Slovenian translation of Lynx WWW browser.
 # Copyright (C) 1999 Free Software Foundation, Inc.
 # Roman Maurer <roman.maurer@hermes.si>, 1999.
-# $LynxId: sl.po,v 1.31 2008/01/08 00:19:25 tom Exp $
+# $LynxId: sl.po,v 1.32 2008/02/17 20:16:05 tom Exp $
 # @Source: po/sl.po @
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: lynx 2.8.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2007-08-02 17:31-0400\n"
+"POT-Creation-Date: 2008-02-17 15:14-0500\n"
 "PO-Revision-Date: 1999-12-29 12:30 +0200\n"
 "Last-Translator: Roman Maurer <roman.maurer@hermes.si>\n"
 "Language-Team: Slovenian <sl@li.org>\n"
@@ -35,1996 +35,2001 @@ msgstr ""
 #. * translations.  When no translation is available, the English default is
 #. * used.
 #.
-#: LYMessages.c:30
+#: LYMessages.c:32
 #, c-format
 msgid "Alert!: %s"
 msgstr "Pozor!: %s"
 
-#: LYMessages.c:31
+#: LYMessages.c:33
 msgid "Welcome"
 msgstr "Dobrodo¹li"
 
-#: LYMessages.c:32
+#: LYMessages.c:34
 msgid "Are you sure you want to quit?"
 msgstr "Ste preprièani, da ¾elite konèati?"
 
-#: LYMessages.c:34
+#: LYMessages.c:36
 msgid "Really exit from Lynx?"
 msgstr "Zares zapustim Lynx?"
 
-#: LYMessages.c:36
+#: LYMessages.c:38
 msgid "Connection interrupted."
 msgstr "Povezava prekinjena."
 
-#: LYMessages.c:37
+#: LYMessages.c:39
 msgid "Data transfer interrupted."
 msgstr "Podatkovni prenos prekinjen."
 
-#: LYMessages.c:38
+#: LYMessages.c:40
 msgid "Cancelled!!!"
 msgstr "Preklicano!!!"
 
-#: LYMessages.c:39
+#: LYMessages.c:41
 msgid "Cancelling!"
 msgstr "Preklicujem!"
 
-#: LYMessages.c:40
+#: LYMessages.c:42
 msgid "Excellent!!!"
 msgstr "Izvrstno!!!"
 
-#: LYMessages.c:41
+#: LYMessages.c:43
 msgid "OK"
 msgstr "V redu."
 
-#: LYMessages.c:42
+#: LYMessages.c:44
 msgid "Done!"
 msgstr "Opravljeno!"
 
-#: LYMessages.c:43
+#: LYMessages.c:45
 msgid "Bad request!"
 msgstr "Slaba zahteva!"
 
-#: LYMessages.c:44
+#: LYMessages.c:46
 msgid "previous"
 msgstr "prej¹nji"
 
-#: LYMessages.c:45
+#: LYMessages.c:47
 msgid "next screen"
 msgstr "naslednji zaslon"
 
-#: LYMessages.c:46
+#: LYMessages.c:48
 msgid "HELP!"
 msgstr "POMOÈ!"
 
-#: LYMessages.c:47
+#: LYMessages.c:49
 msgid ", help on "
 msgstr ", pomoè za "
 
 #. #define HELP
-#: LYMessages.c:49
+#: LYMessages.c:51
 msgid "Commands: Use arrow keys to move, '?' for help, 'q' to quit, '<-' to go back."
 msgstr "Ukazi: pu¹èice za premikanje ,?` za pomoè, ,q` za izhod, vraèalka za povratek."
 
 #. #define MOREHELP
-#: LYMessages.c:51
+#: LYMessages.c:53
 msgid "-- press space for more, use arrow keys to move, '?' for help, 'q' to quit."
 msgstr "-- pritisnite presledek za veè, pu¹èice za premik, ,?` za pomoè, ,q` za izhod."
 
-#: LYMessages.c:52
+#: LYMessages.c:54
 msgid "-- press space for next page --"
 msgstr "-- pritisnite presledek za naslednjo stran --"
 
-#: LYMessages.c:53
+#: LYMessages.c:55
 msgid "URL too long"
 msgstr "Predolga pot"
 
 #. Inactive input fields, messages used with -tna option - kw
 #. #define FORM_LINK_TEXT_MESSAGE_INA
-#: LYMessages.c:59
+#: LYMessages.c:61
 msgid "(Text entry field) Inactive.  Press <return> to activate."
 msgstr ""
 
 #. #define FORM_LINK_TEXTAREA_MESSAGE_INA
-#: LYMessages.c:61
+#: LYMessages.c:63
 msgid "(Textarea) Inactive.  Press <return> to activate."
 msgstr ""
 
 #. #define FORM_LINK_TEXTAREA_MESSAGE_INA_E
-#: LYMessages.c:63
+#: LYMessages.c:65
 #, c-format
 msgid "(Textarea) Inactive.  Press <return> to activate (%s for editor)."
 msgstr "(Besedilo) Vnesite besedilo. Uporabljajte GOR/DOL ali TAB (%s za urejevalnik)."
 
 #. #define FORM_LINK_TEXT_SUBMIT_MESSAGE_INA
-#: LYMessages.c:65
+#: LYMessages.c:67
 msgid "(Form field) Inactive.  Use <return> to edit."
 msgstr "(Vnosno polje) Vnesite besedilo.  Na koncu uporabite <return> ('x' brez predpomnenja)."
 
 #. #define FORM_TEXT_SUBMIT_MESSAGE_INA_X
-#: LYMessages.c:67
+#: LYMessages.c:69
 #, c-format
 msgid "(Form field) Inactive.  Use <return> to edit (%s to submit with no cache)."
 msgstr "(Vnosno polje) Vnesite besedilo.  Na koncu uporabite <return> (%s brez predpomnenja)."
 
 #. #define FORM_TEXT_RESUBMIT_MESSAGE_INA
-#: LYMessages.c:69
+#: LYMessages.c:71
 msgid "(Form field) Inactive. Press <return> to edit, press <return> twice to submit."
 msgstr "(Vnosno polje) Vnesite besedilo.  Na koncu uporabite <return>, pu¹èice ali tab za premik."
 
 #. #define FORM_TEXT_SUBMIT_MAILTO_MSG_INA
-#: LYMessages.c:71
+#: LYMessages.c:73
 msgid "(mailto form field) Inactive.  Press <return> to change."
 msgstr ""
 
 #. #define FORM_LINK_PASSWORD_MESSAGE_INA
-#: LYMessages.c:73
+#: LYMessages.c:75
 msgid "(Password entry field) Inactive.  Press <return> to activate."
 msgstr ""
 
 #. #define FORM_LINK_FILE_UNM_MSG
-#: LYMessages.c:76
+#: LYMessages.c:78
 msgid "UNMODIFIABLE file entry field.  Use UP or DOWN arrows or tab to move off."
 msgstr "NESPREMENLJIVO datoteèno polje. Uporabljajte GOR/DOL ali tab."
 
 #. #define FORM_LINK_FILE_MESSAGE
-#: LYMessages.c:78
+#: LYMessages.c:80
 msgid "(File entry field) Enter filename.  Use UP or DOWN arrows or tab to move off."
 msgstr "(Datoteèno polje) Vnesite ime datoteke. Uporabljajte GOR/DOL ali tab."
 
 #. #define FORM_LINK_TEXT_MESSAGE
-#: LYMessages.c:80
+#: LYMessages.c:82
 msgid "(Text entry field) Enter text.  Use UP or DOWN arrows or tab to move off."
 msgstr "(Tekstovno vnosno polje) Vnesite besedilo. Uporabljajte pu¹èici GOR/DOL ali tab."
 
 #. #define FORM_LINK_TEXTAREA_MESSAGE
-#: LYMessages.c:82
+#: LYMessages.c:84
 msgid "(Textarea) Enter text. Use UP/DOWN arrows or TAB to move off."
 msgstr "(Besedilo) Vnesite besedilo. Uporabljajte GOR/DOL ali TAB (^Ve za urejevalnik)."
 
 #. #define FORM_LINK_TEXTAREA_MESSAGE_E
-#: LYMessages.c:84
+#: LYMessages.c:86
 #, c-format
 msgid "(Textarea) Enter text. Use UP/DOWN arrows or TAB to move off (%s for editor)."
 msgstr "(Besedilo) Vnesite besedilo. Uporabljajte GOR/DOL ali TAB (%s za urejevalnik)."
 
 #. #define FORM_LINK_TEXT_UNM_MSG
-#: LYMessages.c:86
+#: LYMessages.c:88
 msgid "UNMODIFIABLE form text field.  Use UP or DOWN arrows or tab to move off."
 msgstr "NESPREMENLJIVO vnosno polje.  Za premik uporabite pu¹èici gor ali dol ali Tab."
 
 #. #define FORM_LINK_TEXT_SUBMIT_MESSAGE
-#: LYMessages.c:88
+#: LYMessages.c:90
 msgid "(Form field) Enter text.  Use <return> to submit."
 msgstr "(Vnosno polje) Vnesite besedilo.  Na koncu uporabite <return> ('x' brez predpomnenja)."
 
 #. #define FORM_LINK_TEXT_SUBMIT_MESSAGE_X
-#: LYMessages.c:90
+#: LYMessages.c:92
 #, c-format
 msgid "(Form field) Enter text.  Use <return> to submit (%s for no cache)."
 msgstr "(Vnosno polje) Vnesite besedilo.  Na koncu uporabite <return> (%s brez predpomnenja)."
 
 #. #define FORM_LINK_TEXT_RESUBMIT_MESSAGE
-#: LYMessages.c:92
+#: LYMessages.c:94
 msgid "(Form field) Enter text.  Use <return> to submit, arrows or tab to move off."
 msgstr "(Vnosno polje) Vnesite besedilo.  Na koncu uporabite <return>, pu¹èice ali tab za premik."
 
 #. #define FORM_LINK_TEXT_SUBMIT_UNM_MSG
-#: LYMessages.c:94
+#: LYMessages.c:96
 msgid "UNMODIFIABLE form field.  Use UP or DOWN arrows or tab to move off."
 msgstr "NESPREMENLJIVO polje obrazca.  Uporabite tipke gor, dol ali tab za premik drugam."
 
 #. #define FORM_LINK_TEXT_SUBMIT_MAILTO_MSG
-#: LYMessages.c:96
+#: LYMessages.c:98
 msgid "(mailto form field) Enter text.  Use <return> to submit, arrows to move off."
 msgstr ""
 
 #. #define FORM_LINK_TEXT_SUBMIT_MAILTO_DIS_MSG
-#: LYMessages.c:98
+#: LYMessages.c:100
 msgid "(mailto form field) Mail is disallowed so you cannot submit."
 msgstr ""
 
 #. #define FORM_LINK_PASSWORD_MESSAGE
-#: LYMessages.c:100
+#: LYMessages.c:102
 msgid "(Password entry field) Enter text.  Use UP or DOWN arrows or tab to move off."
 msgstr ""
 
 #. #define FORM_LINK_PASSWORD_UNM_MSG
-#: LYMessages.c:102
+#: LYMessages.c:104
 msgid "UNMODIFIABLE form password.  Use UP or DOWN arrows or tab to move off."
 msgstr ""
 
 #. #define FORM_LINK_CHECKBOX_MESSAGE
-#: LYMessages.c:104
+#: LYMessages.c:106
 msgid "(Checkbox Field)   Use right-arrow or <return> to toggle."
 msgstr ""
 
 #. #define FORM_LINK_CHECKBOX_UNM_MSG
-#: LYMessages.c:106
+#: LYMessages.c:108
 msgid "UNMODIFIABLE form checkbox.  Use UP or DOWN arrows or tab to move off."
 msgstr ""
 
 #. #define FORM_LINK_RADIO_MESSAGE
-#: LYMessages.c:108
+#: LYMessages.c:110
 msgid "(Radio Button)   Use right-arrow or <return> to toggle."
 msgstr ""
 
 #. #define FORM_LINK_RADIO_UNM_MSG
-#: LYMessages.c:110
+#: LYMessages.c:112
 msgid "UNMODIFIABLE form radio button.  Use UP or DOWN arrows or tab to move off."
 msgstr ""
 
 #. #define FORM_LINK_SUBMIT_PREFIX
-#: LYMessages.c:112
+#: LYMessages.c:114
 msgid "Submit ('x' for no cache) to "
 msgstr ""
 
 #. #define FORM_LINK_RESUBMIT_PREFIX
-#: LYMessages.c:114
+#: LYMessages.c:116
 msgid "Submit to "
 msgstr ""
 
 #. #define FORM_LINK_SUBMIT_MESSAGE
-#: LYMessages.c:116
+#: LYMessages.c:118
 msgid "(Form submit button) Use right-arrow or <return> to submit ('x' for no cache)."
 msgstr ""
 
 #. #define FORM_LINK_RESUBMIT_MESSAGE
-#: LYMessages.c:118
+#: LYMessages.c:120
 msgid "(Form submit button) Use right-arrow or <return> to submit."
 msgstr ""
 
 #. #define FORM_LINK_SUBMIT_DIS_MSG
-#: LYMessages.c:120
+#: LYMessages.c:122
 msgid "DISABLED form submit button.  Use UP or DOWN arrows or tab to move off."
 msgstr ""
 
 #. #define FORM_LINK_SUBMIT_MAILTO_PREFIX
-#: LYMessages.c:122
+#: LYMessages.c:124
 msgid "Submit mailto form to "
 msgstr ""
 
 #. #define FORM_LINK_SUBMIT_MAILTO_MSG
-#: LYMessages.c:124
+#: LYMessages.c:126
 msgid "(mailto form submit button) Use right-arrow or <return> to submit."
 msgstr ""
 
 #. #define FORM_LINK_SUBMIT_MAILTO_DIS_MSG
-#: LYMessages.c:126
+#: LYMessages.c:128
 msgid "(mailto form submit button) Mail is disallowed so you cannot submit."
 msgstr ""
 
 #. #define FORM_LINK_RESET_MESSAGE
-#: LYMessages.c:128
+#: LYMessages.c:130
 msgid "(Form reset button)   Use right-arrow or <return> to reset form to defaults."
 msgstr ""
 
 #. #define FORM_LINK_RESET_DIS_MSG
-#: LYMessages.c:130
+#: LYMessages.c:132
 msgid "DISABLED form reset button.  Use UP or DOWN arrows or tab to move off."
 msgstr ""
 
 #. #define FORM_LINK_OPTION_LIST_MESSAGE
-#: LYMessages.c:132
+#: LYMessages.c:134
 msgid "(Option list) Hit return and use arrow keys and return to select option."
 msgstr ""
 
 #. #define CHOICE_LIST_MESSAGE
-#: LYMessages.c:134
+#: LYMessages.c:136
 msgid "(Choice list) Hit return and use arrow keys and return to select option."
 msgstr ""
 
 #. #define FORM_LINK_OPTION_LIST_UNM_MSG
-#: LYMessages.c:136
+#: LYMessages.c:138
 msgid "UNMODIFIABLE option list.  Use return or arrow keys to review or leave."
 msgstr ""
 
 #. #define CHOICE_LIST_UNM_MSG
-#: LYMessages.c:138
+#: LYMessages.c:140
 msgid "UNMODIFIABLE choice list.  Use return or arrow keys to review or leave."
 msgstr ""
 
-#: LYMessages.c:139
+#: LYMessages.c:141
 msgid "Submitting form..."
 msgstr "Po¹iljamo obrazec..."
 
-#: LYMessages.c:140
+#: LYMessages.c:142
 msgid "Resetting form..."
 msgstr "Resetiramo obrazec..."
 
 #. #define RELOADING_FORM
-#: LYMessages.c:142
+#: LYMessages.c:144
 msgid "Reloading document.  Any form entries will be lost!"
 msgstr "Ponovno nalagamo dokument.  Vsi vnosi v obrazcu bodo izgubljeni!"
 
-#: LYMessages.c:143
+#: LYMessages.c:145
 #, c-format
 msgid "Warning: Cannot transcode form data to charset %s!"
 msgstr "Pozor: Prevedba podatkov v znakovni nabor %s ni mogoèa!"
 
 #. #define NORMAL_LINK_MESSAGE
-#: LYMessages.c:146
+#: LYMessages.c:148
 msgid "(NORMAL LINK)   Use right-arrow or <return> to activate."
 msgstr ""
 
-#: LYMessages.c:147
+#: LYMessages.c:149
 msgid "The resource requested is not available at this time."
 msgstr ""
 
-#: LYMessages.c:148
+#: LYMessages.c:150
 msgid "Enter Lynx keystroke command: "
 msgstr "Vnesite tipkovni ukaz Lynxu: "
 
-#: LYMessages.c:149
+#: LYMessages.c:151
 msgid "Looking up "
 msgstr "I¹èemo "
 
-#: LYMessages.c:150
+#: LYMessages.c:152
 #, c-format
 msgid "Getting %s"
 msgstr "Prena¹amo %s"
 
-#: LYMessages.c:151
+#: LYMessages.c:153
 #, c-format
 msgid "Skipping %s"
 msgstr "Preskakujemo %s"
 
-#: LYMessages.c:152
+#: LYMessages.c:154
 #, c-format
 msgid "Using %s"
 msgstr "Uporabljamo %s"
 
-#: LYMessages.c:153
+#: LYMessages.c:155
 #, c-format
 msgid "Illegal URL: %s"
 msgstr "Nepravilni URL: %s"
 
-#: LYMessages.c:154
+#: LYMessages.c:156
 #, c-format
 msgid "Badly formed address %s"
 msgstr "Slabo oblikovan naslov %s"
 
-#: LYMessages.c:155
+#: LYMessages.c:157
 #, c-format
 msgid "URL: %s"
 msgstr "URL: %s"
 
-#: LYMessages.c:156
+#: LYMessages.c:158
 msgid "Unable to access WWW file!!!"
 msgstr "Dostop do spletne datoteke ni mogoè!!!"
 
-#: LYMessages.c:157
+#: LYMessages.c:159
 #, c-format
 msgid "This is a searchable index.  Use %s to search."
 msgstr "To je kazalo z mo¾nostjo iskanja.  Uporabite %s za iskanje."
 
 #. #define WWW_INDEX_MORE_MESSAGE
-#: LYMessages.c:159
+#: LYMessages.c:161
 #, c-format
 msgid "--More--  This is a searchable index.  Use %s to search."
 msgstr "--Naprej--  To je kazalo z mo¾nostjo iskanja.  Uporabite %s za iskanje."
 
-#: LYMessages.c:160
+#: LYMessages.c:162
 msgid "You have entered an invalid link number."
 msgstr "Vnesli ste neveljavno ¹tevilko povezave."
 
 #. #define SOURCE_HELP
-#: LYMessages.c:162
+#: LYMessages.c:164
 msgid "Currently viewing document source.  Press '\\' to return to rendered version."
 msgstr ""
 
 #. #define NOVICE_LINE_ONE
-#: LYMessages.c:164
+#: LYMessages.c:166
 msgid "  Arrow keys: Up and Down to move.  Right to follow a link; Left to go back.  \n"
 msgstr ""
 
 #. #define NOVICE_LINE_TWO
-#: LYMessages.c:166
+#: LYMessages.c:168
 msgid " H)elp O)ptions P)rint G)o M)ain screen Q)uit /=search [delete]=history list \n"
 msgstr ""
 
 #. #define NOVICE_LINE_TWO_A
-#: LYMessages.c:168
+#: LYMessages.c:170
 msgid "  O)ther cmds  H)elp  K)eymap  G)oto  P)rint  M)ain screen  o)ptions  Q)uit  \n"
 msgstr ""
 
 #. #define NOVICE_LINE_TWO_B
-#: LYMessages.c:170
+#: LYMessages.c:172
 msgid "  O)ther cmds  B)ack  E)dit  D)ownload ^R)eload ^W)ipe screen  search doc: / \n"
 msgstr ""
 
 #. #define NOVICE_LINE_TWO_C
-#: LYMessages.c:172
+#: LYMessages.c:174
 msgid "O)ther cmds  C)omment  History: <backspace>  Bookmarks: V)iew, A)dd, R)emove \n"
 msgstr ""
 
 #. #define FORM_NOVICELINE_ONE
-#: LYMessages.c:174
+#: LYMessages.c:176
 msgid "            Enter text into the field by typing on the keyboard              "
 msgstr ""
 
 #. #define FORM_NOVICELINE_TWO
-#: LYMessages.c:176
+#: LYMessages.c:178
 msgid "    Ctrl-U to delete all text in field, [Backspace] to delete a character    "
 msgstr ""
 
 #. #define FORM_NOVICELINE_TWO_DELBL
-#: LYMessages.c:178
+#: LYMessages.c:180
 msgid "      Ctrl-U to delete text in field, [Backspace] to delete a character    "
 msgstr ""
 
 #. #define FORM_NOVICELINE_TWO_VAR
-#: LYMessages.c:180
+#: LYMessages.c:182
 #, c-format
 msgid "    %s to delete all text in field, [Backspace] to delete a character    "
 msgstr ""
 
 #. #define FORM_NOVICELINE_TWO_DELBL_VAR
-#: LYMessages.c:182
+#: LYMessages.c:184
 #, c-format
 msgid "      %s to delete text in field, [Backspace] to delete a character    "
 msgstr ""
 
 #. mailto
-#: LYMessages.c:185
+#: LYMessages.c:187
 msgid "Malformed mailto form submission!  Cancelled!"
 msgstr ""
 
-#: LYMessages.c:186
+#: LYMessages.c:188
 msgid "Warning!  Control codes in mail address replaced by ?"
 msgstr ""
 
-#: LYMessages.c:187
+#: LYMessages.c:189
 msgid "Mail disallowed!  Cannot submit."
 msgstr ""
 
-#: LYMessages.c:188
+#: LYMessages.c:190
 msgid "Mailto form submission failed!"
 msgstr ""
 
-#: LYMessages.c:189
+#: LYMessages.c:191
 msgid "Mailto form submission Cancelled!!!"
 msgstr ""
 
-#: LYMessages.c:190
+#: LYMessages.c:192
 msgid "Sending form content..."
 msgstr ""
 
-#: LYMessages.c:191
+#: LYMessages.c:193
 msgid "No email address is present in mailto URL!"
 msgstr ""
 
 #. #define MAILTO_URL_TEMPOPEN_FAILED
-#: LYMessages.c:193
+#: LYMessages.c:195
 msgid "Unable to open temporary file for mailto URL!"
 msgstr ""
 
 #. #define INC_ORIG_MSG_PROMPT
-#: LYMessages.c:195
+#: LYMessages.c:197
 msgid "Do you wish to include the original message?"
 msgstr ""
 
 #. #define INC_PREPARSED_MSG_PROMPT
-#: LYMessages.c:197
+#: LYMessages.c:199
 msgid "Do you wish to include the preparsed source?"
 msgstr ""
 
 #. #define SPAWNING_EDITOR_FOR_MAIL
-#: LYMessages.c:199
+#: LYMessages.c:201
 msgid "Spawning your selected editor to edit mail message"
 msgstr ""
 
 #. #define ERROR_SPAWNING_EDITOR
-#: LYMessages.c:201
+#: LYMessages.c:203
 msgid "Error spawning editor, check your editor definition in the options menu"
 msgstr ""
 
-#: LYMessages.c:202
+#: LYMessages.c:204
 msgid "Send this comment?"
 msgstr "Po¹ljemo ta komentar?"
 
-#: LYMessages.c:203
+#: LYMessages.c:205
 msgid "Send this message?"
 msgstr "Po¹ljemo to sporoèilo?"
 
-#: LYMessages.c:204
+#: LYMessages.c:206
 msgid "Sending your message..."
 msgstr "Po¹iljamo va¹e sporoèilo..."
 
-#: LYMessages.c:205
+#: LYMessages.c:207
 msgid "Sending your comment:"
 msgstr "Po¹iljamo va¹ komentar:"
 
 #. textarea
-#: LYMessages.c:208
+#: LYMessages.c:210
 msgid "Not in a TEXTAREA; cannot use external editor."
 msgstr ""
 
-#: LYMessages.c:209
+#: LYMessages.c:211
 msgid "Not in a TEXTAREA; cannot use command."
 msgstr ""
 
-#: LYMessages.c:211
+#: LYMessages.c:213
 msgid "file: ACTIONs are disallowed!"
 msgstr ""
 
 #. #define FILE_SERVED_LINKS_DISALLOWED
-#: LYMessages.c:213
+#: LYMessages.c:215
 msgid "file: URLs via served links are disallowed!"
 msgstr ""
 
-#: LYMessages.c:214
+#: LYMessages.c:216
 msgid "Access to local files denied."
 msgstr ""
 
-#: LYMessages.c:215
+#: LYMessages.c:217
 msgid "file: URLs via bookmarks are disallowed!"
 msgstr ""
 
 #. #define SPECIAL_VIA_EXTERNAL_DISALLOWED
-#: LYMessages.c:217
+#: LYMessages.c:219
 msgid "This special URL is not allowed in external documents!"
 msgstr ""
 
-#: LYMessages.c:218
+#: LYMessages.c:220
 msgid "Press <return> to return to Lynx."
 msgstr "Pritisnite <return> za vrnitev v Lynx."
 
 #. #define SPAWNING_MSG
-#: LYMessages.c:221
+#: LYMessages.c:223
 msgid "Spawning DCL subprocess.  Use 'logout' to return to Lynx.\n"
 msgstr ""
 
 #. #define SPAWNING_MSG
-#: LYMessages.c:225
+#: LYMessages.c:227
 msgid "Type EXIT to return to Lynx.\n"
 msgstr "Napi¹ite EXIT za vrnitev v Lynx.\n"
 
 #. #define SPAWNING_MSG
-#: LYMessages.c:228
+#: LYMessages.c:230
 msgid "Spawning your default shell.  Use 'exit' to return to Lynx.\n"
 msgstr ""
 
-#: LYMessages.c:231
+#: LYMessages.c:233
 msgid "Spawning is currently disabled."
 msgstr ""
 
-#: LYMessages.c:232
+#: LYMessages.c:234
 msgid "The 'd'ownload command is currently disabled."
 msgstr ""
 
-#: LYMessages.c:233
+#: LYMessages.c:235
 msgid "You cannot download an input field."
 msgstr ""
 
-#: LYMessages.c:234
+#: LYMessages.c:236
 msgid "Form has a mailto action!  Cannot download."
 msgstr ""
 
-#: LYMessages.c:235
+#: LYMessages.c:237
 msgid "You cannot download a mailto: link."
 msgstr ""
 
-#: LYMessages.c:236
+#: LYMessages.c:238
 msgid "You cannot download cookies."
 msgstr "Ne morete prenesti pi¹kotov."
 
-#: LYMessages.c:237
+#: LYMessages.c:239
 msgid "You cannot download a printing option."
 msgstr "Ne morete prenesti tiskalni¹ke izbire."
 
-#: LYMessages.c:238
+#: LYMessages.c:240
 msgid "You cannot download an upload option."
 msgstr "Ne morete prenesti izbire za po¹iljanje."
 
-#: LYMessages.c:239
+#: LYMessages.c:241
 msgid "You cannot download an permit option."
 msgstr "Ne morete prenesti izbire za dovoljenje."
 
-#: LYMessages.c:240
+#: LYMessages.c:242
 msgid "This special URL cannot be downloaded!"
 msgstr ""
 
-#: LYMessages.c:241
+#: LYMessages.c:243
 msgid "Nothing to download."
 msgstr "Nièesar ni za prenesti."
 
-#: LYMessages.c:242
+#: LYMessages.c:244
 msgid "Trace ON!"
 msgstr "Sledenje VKLJUÈENO!"
 
-#: LYMessages.c:243
+#: LYMessages.c:245
 msgid "Trace OFF!"
 msgstr "Sledenje IZKLJUÈENO!"
 
 #. #define CLICKABLE_IMAGES_ON
-#: LYMessages.c:245
+#: LYMessages.c:247
 msgid "Links will be included for all images!  Reloading..."
 msgstr ""
 
 #. #define CLICKABLE_IMAGES_OFF
-#: LYMessages.c:247
+#: LYMessages.c:249
 msgid "Standard image handling restored!  Reloading..."
 msgstr ""
 
 #. #define PSEUDO_INLINE_ALTS_ON
-#: LYMessages.c:249
+#: LYMessages.c:251
 msgid "Pseudo_ALTs will be inserted for inlines without ALT strings!  Reloading..."
 msgstr ""
 
 #. #define PSEUDO_INLINE_ALTS_OFF
-#: LYMessages.c:251
+#: LYMessages.c:253
 msgid "Inlines without an ALT string specified will be ignored!  Reloading..."
 msgstr ""
 
-#: LYMessages.c:252
+#: LYMessages.c:254
 msgid "Raw 8-bit or CJK mode toggled OFF!  Reloading..."
 msgstr ""
 
-#: LYMessages.c:253
+#: LYMessages.c:255
 msgid "Raw 8-bit or CJK mode toggled ON!  Reloading..."
 msgstr ""
 
 #. #define HEAD_D_L_OR_CANCEL
-#: LYMessages.c:255
+#: LYMessages.c:257
 msgid "Send HEAD request for D)ocument or L)ink, or C)ancel? (d,l,c): "
 msgstr ""
 
 #. #define HEAD_D_OR_CANCEL
-#: LYMessages.c:257
+#: LYMessages.c:259
 msgid "Send HEAD request for D)ocument, or C)ancel? (d,c): "
 msgstr ""
 
-#: LYMessages.c:258
+#: LYMessages.c:260
 msgid "Sorry, the document is not an http URL."
 msgstr "Oprostite, sestavek ni URL vrste http."
 
-#: LYMessages.c:259
+#: LYMessages.c:261
 msgid "Sorry, the link is not an http URL."
 msgstr "Oprostite, povezava ni URL vrste http."
 
-#: LYMessages.c:260
+#: LYMessages.c:262
 msgid "Sorry, the ACTION for this form is disabled."
 msgstr ""
 
 #. #define FORM_ACTION_NOT_HTTP_URL
-#: LYMessages.c:262
+#: LYMessages.c:264
 msgid "Sorry, the ACTION for this form is not an http URL."
 msgstr ""
 
-#: LYMessages.c:263
+#: LYMessages.c:265
 msgid "Not an http URL or form ACTION!"
 msgstr ""
 
-#: LYMessages.c:264
+#: LYMessages.c:266
 msgid "This special URL cannot be a form ACTION!"
 msgstr ""
 
-#: LYMessages.c:265
+#: LYMessages.c:267
 msgid "URL is not in starting realm!"
 msgstr ""
 
-#: LYMessages.c:266
+#: LYMessages.c:268
 msgid "News posting is disabled!"
 msgstr ""
 
-#: LYMessages.c:267
+#: LYMessages.c:269
 msgid "File management support is disabled!"
 msgstr ""
 
-#: LYMessages.c:268
+#: LYMessages.c:270
 msgid "No jump file is currently available."
 msgstr ""
 
-#: LYMessages.c:269
+#: LYMessages.c:271
 msgid "Jump to (use '?' for list): "
 msgstr ""
 
-#: LYMessages.c:270
+#: LYMessages.c:272
 msgid "Jumping to a shortcut URL is disallowed!"
 msgstr ""
 
-#: LYMessages.c:271
+#: LYMessages.c:273
 msgid "Random URL is disallowed!  Use a shortcut."
 msgstr ""
 
-#: LYMessages.c:272
+#: LYMessages.c:274
 msgid "No random URLs have been used thus far."
 msgstr ""
 
-#: LYMessages.c:273
+#: LYMessages.c:275
 msgid "Bookmark features are currently disabled."
 msgstr ""
 
-#: LYMessages.c:274
+#: LYMessages.c:276
 msgid "Execution via bookmarks is disabled."
 msgstr ""
 
 #. #define BOOKMARK_FILE_NOT_DEFINED
-#: LYMessages.c:276
+#: LYMessages.c:278
 #, c-format
 msgid "Bookmark file is not defined. Use %s to see options."
 msgstr ""
 
 #. #define NO_TEMP_FOR_HOTLIST
-#: LYMessages.c:278
+#: LYMessages.c:280
 msgid "Unable to open tempfile for X Mosaic hotlist conversion."
 msgstr ""
 
-#: LYMessages.c:279
+#: LYMessages.c:281
 msgid "ERROR - unable to open bookmark file."
 msgstr ""
 
 #. #define BOOKMARK_OPEN_FAILED_FOR_DEL
-#: LYMessages.c:281
+#: LYMessages.c:283
 msgid "Unable to open bookmark file for deletion of link."
 msgstr ""
 
 #. #define BOOKSCRA_OPEN_FAILED_FOR_DEL
-#: LYMessages.c:283
+#: LYMessages.c:285
 msgid "Unable to open scratch file for deletion of link."
 msgstr ""
 
-#: LYMessages.c:285
+#: LYMessages.c:287
 msgid "Error renaming scratch file."
 msgstr ""
 
-#: LYMessages.c:287
+#: LYMessages.c:289
 msgid "Error renaming temporary file."
 msgstr ""
 
 #. #define BOOKTEMP_COPY_FAIL
-#: LYMessages.c:289
+#: LYMessages.c:291
 msgid "Unable to copy temporary file for deletion of link."
 msgstr ""
 
 #. #define BOOKTEMP_REOPEN_FAIL_FOR_DEL
-#: LYMessages.c:291
+#: LYMessages.c:293
 msgid "Unable to reopen temporary file for deletion of link."
 msgstr ""
 
 #. #define BOOKMARK_LINK_NOT_ONE_LINE
-#: LYMessages.c:294
+#: LYMessages.c:296
 msgid "Link is not by itself all on one line in bookmark file."
 msgstr ""
 
-#: LYMessages.c:295
+#: LYMessages.c:297
 msgid "Bookmark deletion failed."
 msgstr ""
 
 #. #define BOOKMARKS_NOT_TRAVERSED
-#: LYMessages.c:297
+#: LYMessages.c:299
 msgid "Bookmark files cannot be traversed (only http URLs)."
 msgstr ""
 
 #. #define BOOKMARKS_NOT_OPEN
-#: LYMessages.c:299
+#: LYMessages.c:301
 msgid "Unable to open bookmark file, use 'a' to save a link first"
 msgstr ""
 
-#: LYMessages.c:300
+#: LYMessages.c:302
 msgid "There are no links in this bookmark file!"
 msgstr ""
 
+#. #define CACHE_D_OR_CANCEL
+#: LYMessages.c:304
+msgid "D)elete cached document or C)ancel? (d,c): "
+msgstr ""
+
 #. #define BOOK_D_L_OR_CANCEL
-#: LYMessages.c:302
+#: LYMessages.c:306
 msgid "Save D)ocument or L)ink to bookmark file or C)ancel? (d,l,c): "
 msgstr ""
 
-#: LYMessages.c:303
+#: LYMessages.c:307
 msgid "Save D)ocument to bookmark file or C)ancel? (d,c): "
 msgstr ""
 
-#: LYMessages.c:304
+#: LYMessages.c:308
 msgid "Save L)ink to bookmark file or C)ancel? (l,c): "
 msgstr ""
 
 #. #define NOBOOK_POST_FORM
-#: LYMessages.c:306
+#: LYMessages.c:310
 msgid "Documents from forms with POST content cannot be saved as bookmarks."
 msgstr ""
 
-#: LYMessages.c:307
+#: LYMessages.c:311
 msgid "Cannot save form fields/links"
 msgstr ""
 
 #. #define NOBOOK_HSML
-#: LYMessages.c:309
+#: LYMessages.c:313
 msgid "History, showinfo, menu and list files cannot be saved as bookmarks."
 msgstr ""
 
 #. #define CONFIRM_BOOKMARK_DELETE
-#: LYMessages.c:311
+#: LYMessages.c:315
 msgid "Do you really want to delete this link from your bookmark file?"
 msgstr ""
 
-#: LYMessages.c:312
+#: LYMessages.c:316
 msgid "Malformed address."
 msgstr "Zmalièen naslov."
 
 #. #define HISTORICAL_ON_MINIMAL_OFF
-#: LYMessages.c:314
+#: LYMessages.c:318
 msgid "Historical comment parsing ON (Minimal is overridden)!"
 msgstr ""
 
 #. #define HISTORICAL_OFF_MINIMAL_ON
-#: LYMessages.c:316
+#: LYMessages.c:320
 msgid "Historical comment parsing OFF (Minimal is in effect)!"
 msgstr ""
 
 #. #define HISTORICAL_ON_VALID_OFF
-#: LYMessages.c:318
+#: LYMessages.c:322
 msgid "Historical comment parsing ON (Valid is overridden)!"
 msgstr ""
 
 #. #define HISTORICAL_OFF_VALID_ON
-#: LYMessages.c:320
+#: LYMessages.c:324
 msgid "Historical comment parsing OFF (Valid is in effect)!"
 msgstr ""
 
 #. #define MINIMAL_ON_IN_EFFECT
-#: LYMessages.c:322
+#: LYMessages.c:326
 msgid "Minimal comment parsing ON (and in effect)!"
 msgstr ""
 
 #. #define MINIMAL_OFF_VALID_ON
-#: LYMessages.c:324
+#: LYMessages.c:328
 msgid "Minimal comment parsing OFF (Valid is in effect)!"
 msgstr ""
 
 #. #define MINIMAL_ON_BUT_HISTORICAL
-#: LYMessages.c:326
+#: LYMessages.c:330
 msgid "Minimal comment parsing ON (but Historical is in effect)!"
 msgstr ""
 
 #. #define MINIMAL_OFF_HISTORICAL_ON
-#: LYMessages.c:328
+#: LYMessages.c:332
 msgid "Minimal comment parsing OFF (Historical is in effect)!"
 msgstr ""
 
-#: LYMessages.c:329
+#: LYMessages.c:333
 msgid "Soft double-quote parsing ON!"
 msgstr ""
 
-#: LYMessages.c:330
+#: LYMessages.c:334
 msgid "Soft double-quote parsing OFF!"
 msgstr ""
 
-#: LYMessages.c:331
+#: LYMessages.c:335
 msgid "Now using TagSoup parsing of HTML."
 msgstr ""
 
-#: LYMessages.c:332
+#: LYMessages.c:336
 msgid "Now using SortaSGML parsing of HTML!"
 msgstr ""
 
-#: LYMessages.c:333
+#: LYMessages.c:337
 msgid "You are already at the end of this document."
 msgstr ""
 
-#: LYMessages.c:334
+#: LYMessages.c:338
 msgid "You are already at the beginning of this document."
 msgstr ""
 
-#: LYMessages.c:335
+#: LYMessages.c:339
 #, c-format
 msgid "You are already at page %d of this document."
 msgstr ""
 
-#: LYMessages.c:336
+#: LYMessages.c:340
 #, c-format
 msgid "Link number %d already is current."
 msgstr ""
 
-#: LYMessages.c:337
+#: LYMessages.c:341
 msgid "You are already at the first document"
 msgstr ""
 
-#: LYMessages.c:338
+#: LYMessages.c:342
 msgid "There are no links above this line of the document."
 msgstr ""
 
-#: LYMessages.c:339
+#: LYMessages.c:343
 msgid "There are no links below this line of the document."
 msgstr ""
 
 #. #define MAXLEN_REACHED_DEL_OR_MOV
-#: LYMessages.c:341
+#: LYMessages.c:345
 msgid "Maximum length reached!  Delete text or move off field."
 msgstr ""
 
 #. #define NOT_ON_SUBMIT_OR_LINK
-#: LYMessages.c:343
+#: LYMessages.c:347
 msgid "You are not on a form submission button or normal link."
 msgstr ""
 
 #. #define NEED_CHECKED_RADIO_BUTTON
-#: LYMessages.c:345
+#: LYMessages.c:349
 msgid "One radio button must be checked at all times!"
 msgstr ""
 
-#: LYMessages.c:346
+#: LYMessages.c:350
 msgid "No submit button for this form, submit single text field?"
 msgstr ""
 
-#: LYMessages.c:347
+#: LYMessages.c:351
 msgid "Do you want to go back to the previous document?"
 msgstr ""
 
-#: LYMessages.c:348
+#: LYMessages.c:352
 msgid "Use arrows or tab to move off of field."
 msgstr "Uporabite pu¹èice ali tab za premik drugam."
 
 #. #define ENTER_TEXT_ARROWS_OR_TAB
-#: LYMessages.c:350
+#: LYMessages.c:354
 msgid "Enter text.  Use arrows or tab to move off of field."
 msgstr "Vnesite besedilo.  Uporabite pu¹èice ali tab za premik drugam."
 
-#: LYMessages.c:351
+#: LYMessages.c:355
 msgid "** Bad HTML!!  No form action defined. **"
 msgstr "** Slab HTML!!  V obrazcu ni definirane akcije. **"
 
-#: LYMessages.c:352
+#: LYMessages.c:356
 msgid "Bad HTML!!  Unable to create popup window!"
 msgstr ""
 
-#: LYMessages.c:353
+#: LYMessages.c:357
 msgid "Unable to create popup window!"
 msgstr ""
 
-#: LYMessages.c:354
+#: LYMessages.c:358
 msgid "Goto a random URL is disallowed!"
 msgstr ""
 
-#: LYMessages.c:355
+#: LYMessages.c:359
 msgid "Goto a non-http URL is disallowed!"
 msgstr "Premik na URL, ki ni http, ni dovoljen!"
 
-#: LYMessages.c:356
+#: LYMessages.c:360
 #, c-format
 msgid "You are not allowed to goto \"%s\" URLs"
 msgstr "Ni vam dovoljeno odpreti URL-jev \"%s\""
 
-#: LYMessages.c:357
+#: LYMessages.c:361
 msgid "URL to open: "
 msgstr "URL za odpiranje: "
 
-#: LYMessages.c:358
+#: LYMessages.c:362
 msgid "Edit the current Goto URL: "
 msgstr ""
 
-#: LYMessages.c:359
+#: LYMessages.c:363
 msgid "Edit the previous Goto URL: "
 msgstr ""
 
-#: LYMessages.c:360
+#: LYMessages.c:364
 msgid "Edit a previous Goto URL: "
 msgstr ""
 
-#: LYMessages.c:361
+#: LYMessages.c:365
 msgid "Current document has POST data."
 msgstr ""
 
-#: LYMessages.c:362
+#: LYMessages.c:366
 msgid "Edit this document's URL: "
 msgstr "Uredimo URL tega sestavka: "
 
-#: LYMessages.c:363
+#: LYMessages.c:367
 msgid "Edit the current link's URL: "
 msgstr "Uredimo URL trenutne povezave: "
 
-#: LYMessages.c:364
+#: LYMessages.c:368
 msgid "You cannot edit File Management URLs"
 msgstr ""
 
-#: LYMessages.c:365
+#: LYMessages.c:369
 msgid "Enter a database query: "
 msgstr ""
 
-#: LYMessages.c:366
+#: LYMessages.c:370
 msgid "Enter a whereis query: "
 msgstr ""
 
-#: LYMessages.c:367
+#: LYMessages.c:371
 msgid "Edit the current query: "
 msgstr ""
 
-#: LYMessages.c:368
+#: LYMessages.c:372
 msgid "Edit the previous query: "
 msgstr ""
 
-#: LYMessages.c:369
+#: LYMessages.c:373
 msgid "Edit a previous query: "
 msgstr ""
 
 #. #define USE_C_R_TO_RESUB_CUR_QUERY
-#: LYMessages.c:371
+#: LYMessages.c:375
 msgid "Use Control-R to resubmit the current query."
 msgstr ""
 
-#: LYMessages.c:372
+#: LYMessages.c:376
 msgid "Edit the current shortcut: "
 msgstr ""
 
-#: LYMessages.c:373
+#: LYMessages.c:377
 msgid "Edit the previous shortcut: "
 msgstr ""
 
-#: LYMessages.c:374
+#: LYMessages.c:378
 msgid "Edit a previous shortcut: "
 msgstr ""
 
-#: LYMessages.c:375
+#: LYMessages.c:379
 #, c-format
 msgid "Key '%c' is not mapped to a jump file!"
 msgstr ""
 
-#: LYMessages.c:376
+#: LYMessages.c:380
 msgid "Cannot locate jump file!"
 msgstr ""
 
-#: LYMessages.c:377
+#: LYMessages.c:381
 msgid "Cannot open jump file!"
 msgstr ""
 
-#: LYMessages.c:378
+#: LYMessages.c:382
 msgid "Error reading jump file!"
 msgstr ""
 
-#: LYMessages.c:379
+#: LYMessages.c:383
 msgid "Out of memory reading jump file!"
 msgstr ""
 
-#: LYMessages.c:380
+#: LYMessages.c:384
 msgid "Out of memory reading jump table!"
 msgstr ""
 
-#: LYMessages.c:381
+#: LYMessages.c:385
 msgid "No index is currently available."
 msgstr "Trenutno ni dostopno nobeno kazalo."
 
 #. #define CONFIRM_MAIN_SCREEN
-#: LYMessages.c:383
+#: LYMessages.c:387
 msgid "Do you really want to go to the Main screen?"
 msgstr "Ali res ¾elite skoèiti na Glavni zaslon?"
 
-#: LYMessages.c:384
+#: LYMessages.c:388
 msgid "You are already at main screen!"
 msgstr "®e zdaj smo v glavnem zaslonu!"
 
 #. #define NOT_ISINDEX
-#: LYMessages.c:386
+#: LYMessages.c:390
 msgid "Not a searchable indexed document -- press '/' to search for a text string"
 msgstr ""
 
 #. #define NO_OWNER
-#: LYMessages.c:388
+#: LYMessages.c:392
 msgid "No owner is defined for this file so you cannot send a comment"
 msgstr "Za to datoteko ni definiranega lastnika, torej ne morete poslati komentarja"
 
-#: LYMessages.c:389
+#: LYMessages.c:393
 #, c-format
 msgid "No owner is defined. Use %s?"
 msgstr "Lastnik ni definiran.  Uporabimo %s?"
 
-#: LYMessages.c:390
+#: LYMessages.c:394
 msgid "Do you wish to send a comment?"
 msgstr "Ali ¾elite poslati komentar?"
 
-#: LYMessages.c:391
+#: LYMessages.c:395
 msgid "Mail is disallowed so you cannot send a comment"
 msgstr "Po¹ta je onemogoèena, zato ne moremo poslati komentarja"
 
-#: LYMessages.c:392
+#: LYMessages.c:396
 msgid "The 'e'dit command is currently disabled."
 msgstr "Ukaz ur,e`di je trenutno onemogoèen."
 
-#: LYMessages.c:393
+#: LYMessages.c:397
 msgid "External editing is currently disabled."
 msgstr "Zunanja podpora je trenutno onemogoèena."
 
-#: LYMessages.c:394
+#: LYMessages.c:398
 msgid "System error - failure to get status."
 msgstr "Sistemska napaka - ne moremo dobiti statusa."
 
-#: LYMessages.c:395
+#: LYMessages.c:399
 msgid "No editor is defined!"
 msgstr "Ni definiranega urejevalnika!"
 
-#: LYMessages.c:396
+#: LYMessages.c:400
 msgid "The 'p'rint command is currently disabled."
 msgstr "Ukaz natisni (p) je trenutno onemogoèen."
 
-#: LYMessages.c:397
+#: LYMessages.c:401
 msgid "Document has no Toolbar links or Banner."
 msgstr ""
 
-#: LYMessages.c:398
+#: LYMessages.c:402
 msgid "Unable to open traversal file."
 msgstr ""
 
-#: LYMessages.c:399
+#: LYMessages.c:403
 msgid "Unable to open traversal found file."
 msgstr ""
 
-#: LYMessages.c:400
+#: LYMessages.c:404
 msgid "Unable to open reject file."
 msgstr "Ne moremo odpreti datoteke z zavrnjenimi URL-ji."
 
-#: LYMessages.c:401
+#: LYMessages.c:405
 msgid "Unable to open traversal errors output file"
 msgstr ""
 
-#: LYMessages.c:402
+#: LYMessages.c:406
 msgid "TRAVERSAL WAS INTERRUPTED"
 msgstr ""
 
-#: LYMessages.c:403
+#: LYMessages.c:407
 msgid "Follow link (or goto link or page) number: "
 msgstr ""
 
-#: LYMessages.c:404
+#: LYMessages.c:408
 msgid "Select option (or page) number: "
 msgstr "Izberite ¹tevilko mo¾nosti (ali strani): "
 
-#: LYMessages.c:405
+#: LYMessages.c:409
 #, c-format
 msgid "Option number %d already is current."
 msgstr "Mo¾nost ¹tevilka %d je ¾e zdaj trenutna."
 
 #. #define ALREADY_AT_OPTION_END
-#: LYMessages.c:407
+#: LYMessages.c:411
 msgid "You are already at the end of this option list."
 msgstr "®e zdaj smo na vrhu tega seznama izbir."
 
 #. #define ALREADY_AT_OPTION_BEGIN
-#: LYMessages.c:409
+#: LYMessages.c:413
 msgid "You are already at the beginning of this option list."
 msgstr "®e zdaj smo na zaèetku tega seznama mo¾nosti."
 
 #. #define ALREADY_AT_OPTION_PAGE
-#: LYMessages.c:411
+#: LYMessages.c:415
 #, c-format
 msgid "You are already at page %d of this option list."
 msgstr "®e zdaj smo na strani %d tega seznama mo¾nosti."
 
-#: LYMessages.c:412
+#: LYMessages.c:416
 msgid "You have entered an invalid option number."
 msgstr "Vnesli ste neveljavno ¹tevilko mo¾nosti."
 
-#: LYMessages.c:413
+#: LYMessages.c:417
 msgid "** Bad HTML!!  Use -trace to diagnose. **"
 msgstr "** Slab HTML!!  Uporabite -trace za diagnozo. **"
 
-#: LYMessages.c:414
+#: LYMessages.c:418
 msgid "Give name of file to save in"
 msgstr "Podajte ime datoteke za shranitev"
 
-#: LYMessages.c:415
+#: LYMessages.c:419
 msgid "Can't save data to file -- please run WWW locally"
 msgstr "Ne moremo posneti podatkov v datoteko -- prosim, po¾enite WWW lokalno"
 
-#: LYMessages.c:416
+#: LYMessages.c:420
 msgid "Can't open temporary file!"
 msgstr "Ne moremo odpreti zaèasne datoteke!"
 
-#: LYMessages.c:417
+#: LYMessages.c:421
 msgid "Can't open output file!  Cancelling!"
 msgstr "Ne moremo odpreti izhodne datoteke!  Prekinitev!"
 
-#: LYMessages.c:418
+#: LYMessages.c:422
 msgid "Execution is disabled."
 msgstr "Izvajanje je onemogoèeno."
 
 #. #define EXECUTION_DISABLED_FOR_FILE
-#: LYMessages.c:420
+#: LYMessages.c:424
 #, c-format
 msgid "Execution is not enabled for this file.  See the Options menu (use %s)."
 msgstr "Izvajanje za to datoteko ni omogoèeno.  Poglejte menu Izbire (uporabite %s)."
 
 #. #define EXECUTION_NOT_COMPILED
-#: LYMessages.c:422
+#: LYMessages.c:426
 msgid "Execution capabilities are not compiled into this version."
 msgstr "Zmo¾nosti izvajanja niso prevedene v to razlièico."
 
-#: LYMessages.c:423
+#: LYMessages.c:427
 msgid "This file cannot be displayed on this terminal."
 msgstr "Ta datoteka ne more biti prikazana na tem terminalu."
 
 #. #define CANNOT_DISPLAY_FILE_D_OR_C
-#: LYMessages.c:425
+#: LYMessages.c:429
 msgid "This file cannot be displayed on this terminal:  D)ownload, or C)ancel"
 msgstr "Ta datoteka ne more biti prikazana na tem terminalu: D) prenos ali C) prekinitev"
 
-#: LYMessages.c:426
+#: LYMessages.c:430
 #, c-format
 msgid "%s  D)ownload, or C)ancel"
 msgstr "%s  D) prenos, ali C) prekinitev"
 
-#: LYMessages.c:427
+#: LYMessages.c:431
 msgid "Cancelling file."
 msgstr "Prekinjamo z datoteko."
 
-#: LYMessages.c:428
+#: LYMessages.c:432
 msgid "Retrieving file.  - PLEASE WAIT -"
 msgstr "Jemljemo datoteko.   - PROSIM, POÈAKAJTE -"
 
-#: LYMessages.c:429
+#: LYMessages.c:433
 msgid "Enter a filename: "
 msgstr "Vnesite ime datoteke: "
 
-#: LYMessages.c:430
+#: LYMessages.c:434
 msgid "Edit the previous filename: "
 msgstr "Uredite prej¹nje ime datoteke: "
 
-#: LYMessages.c:431
+#: LYMessages.c:435
 msgid "Edit a previous filename: "
 msgstr "Uredite kak¹no prej¹nje ime datoteke: "
 
-#: LYMessages.c:432
+#: LYMessages.c:436
 msgid "Enter a new filename: "
 msgstr "Vnesite novo ime datoteke: "
 
-#: LYMessages.c:433
+#: LYMessages.c:437
 msgid "File name may not begin with a dot."
 msgstr "Ime datoteke se ne sme zaèeti s piko."
 
-#: LYMessages.c:435
+#: LYMessages.c:439
 msgid "File exists.  Create higher version?"
 msgstr "Datoteka obstaja.  Ustvarimo vi¹jo razlièico?"
 
-#: LYMessages.c:437
+#: LYMessages.c:441
 msgid "File exists.  Overwrite?"
 msgstr "Datoteka obstaja.  Prepi¹emo?"
 
-#: LYMessages.c:439
+#: LYMessages.c:443
 msgid "Cannot write to file."
 msgstr "Ne moremo pisati v datoteko."
 
-#: LYMessages.c:440
+#: LYMessages.c:444
 msgid "ERROR! - download command is misconfigured."
 msgstr "NAPAKA! - ukaz za jemanje je napaèno nastavljen."
 
-#: LYMessages.c:441
+#: LYMessages.c:445
 msgid "Unable to download file."
 msgstr "Ne moremo prenesti datoteke."
 
-#: LYMessages.c:442
+#: LYMessages.c:446
 msgid "Reading directory..."
 msgstr "Beremo imenik..."
 
-#: LYMessages.c:443
+#: LYMessages.c:447
 msgid "Building directory listing..."
 msgstr "Gradimo seznam vsebine imenika ..."
 
-#: LYMessages.c:444
+#: LYMessages.c:448
 msgid "Saving..."
 msgstr "Shranjujemo ..."
 
-#: LYMessages.c:445
+#: LYMessages.c:449
 #, c-format
 msgid "Could not edit file '%s'."
 msgstr "Ne moremo urediti datoteke ,%s`."
 
-#: LYMessages.c:446
+#: LYMessages.c:450
 msgid "Unable to access document!"
 msgstr "Ne moremo dostopati do sestavka!"
 
-#: LYMessages.c:447
+#: LYMessages.c:451
 msgid "Could not access file."
 msgstr "Ne moremo dostopati do datoteke."
 
-#: LYMessages.c:448
+#: LYMessages.c:452
 msgid "Could not access directory."
 msgstr "Ne moremo dostopati do imenika."
 
-#: LYMessages.c:449
+#: LYMessages.c:453
 msgid "Could not load data."
 msgstr "Ne moremo nalo¾iti podatkov."
 
 #. #define CANNOT_EDIT_REMOTE_FILES
-#: LYMessages.c:451
+#: LYMessages.c:455
 msgid "Lynx cannot currently (e)dit remote WWW files."
 msgstr "Lynx trenutno ne zmore ur(e)diti oddaljenih spletnih datotek."
 
 #. #define CANNOT_EDIT_FIELD
-#: LYMessages.c:453
+#: LYMessages.c:457
 msgid "This field cannot be (e)dited with an external editor."
 msgstr "To polje ne more biti ur(e)jeno z zunanjim urejevalnikom."
 
-#: LYMessages.c:454
+#: LYMessages.c:458
 msgid "Bad rule"
 msgstr "Slabo pravilo"
 
-#: LYMessages.c:455
+#: LYMessages.c:459
 msgid "Insufficient operands:"
 msgstr "Premalo operandov:"
 
-#: LYMessages.c:456
+#: LYMessages.c:460
 msgid "You are not authorized to edit this file."
 msgstr "Niste poobla¹èeni za urejanje te datoteke."
 
-#: LYMessages.c:457
+#: LYMessages.c:461
 msgid "Title: "
 msgstr "Naslov: "
 
-#: LYMessages.c:458
+#: LYMessages.c:462
 msgid "Subject: "
 msgstr "Predmet: "
 
-#: LYMessages.c:459
+#: LYMessages.c:463
 msgid "Username: "
 msgstr "Uporabni¹ko ime: "
 
-#: LYMessages.c:460
+#: LYMessages.c:464
 msgid "Password: "
 msgstr "Geslo: "
 
-#: LYMessages.c:461
+#: LYMessages.c:465
 msgid "lynx: Username and Password required!!!"
 msgstr "lynx: Uporabni¹ko ime in geslo sta zahtevani!!!"
 
-#: LYMessages.c:462
+#: LYMessages.c:466
 msgid "lynx: Password required!!!"
 msgstr "lynx: Geslo je zahtevano!!!"
 
-#: LYMessages.c:463
+#: LYMessages.c:467
 msgid "Clear all authorization info for this session?"
 msgstr "Pobri¹emo vse avtorizacijske podatke za to sejo?"
 
-#: LYMessages.c:464
+#: LYMessages.c:468
 msgid "Authorization info cleared."
 msgstr "Avtorizacijski podatki pobrisani."
 
-#: LYMessages.c:465
+#: LYMessages.c:469
 msgid "Authorization failed.  Retry?"
 msgstr "Avtorizaciji je spodletelo.  Poskusimo ¹e enkrat?"
 
-#: LYMessages.c:466
+#: LYMessages.c:470
 msgid "cgi support has been disabled."
 msgstr "Sistemski upravitelj je onemogoèil podporo CGI."
 
 #. #define CGI_NOT_COMPILED
-#: LYMessages.c:468
+#: LYMessages.c:472
 msgid "Lynxcgi capabilities are not compiled into this version."
 msgstr "V tej razlièici ni prevedene mo¾nosti Lynxcgi."
 
-#: LYMessages.c:469
+#: LYMessages.c:473
 #, c-format
 msgid "Sorry, no known way of converting %s to %s."
 msgstr "®al, ni znanega naèina za pretvarjanje %s v %s."
 
-#: LYMessages.c:470
+#: LYMessages.c:474
 msgid "Unable to set up connection."
 msgstr "Ne moremo nastaviti povezave."
 
-#: LYMessages.c:471
+#: LYMessages.c:475
 msgid "Unable to make connection"
 msgstr "Ne moremo vzpostaviti povezave."
 
 #. #define MALFORMED_EXEC_REQUEST
-#: LYMessages.c:473
+#: LYMessages.c:477
 msgid "Executable link rejected due to malformed request."
 msgstr "Izvedljiva povezava zavrnjena zaradi zmalièenega zahtevka."
 
 #. #define BADCHAR_IN_EXEC_LINK
-#: LYMessages.c:475
+#: LYMessages.c:479
 #, c-format
 msgid "Executable link rejected due to `%c' character."
 msgstr "Izvedljiva povezava zavrnjena zaradi znaka ,%c`."
 
 #. #define RELPATH_IN_EXEC_LINK
-#: LYMessages.c:477
+#: LYMessages.c:481
 msgid "Executable link rejected due to relative path string ('../')."
 msgstr "Izvedljiva povezava zavrnjena zaradi niza za relativno pot (,../`)."
 
 #. #define BADLOCPATH_IN_EXEC_LINK
-#: LYMessages.c:479
+#: LYMessages.c:483
 msgid "Executable link rejected due to location or path."
 msgstr "Izvedljiva povezava zavrnjena zaradi lokacije ali poti."
 
-#: LYMessages.c:480
+#: LYMessages.c:484
 msgid "Mail access is disabled!"
 msgstr "Po¹tni dostop je onemogoèen!"
 
 #. #define ACCESS_ONLY_LOCALHOST
-#: LYMessages.c:482
+#: LYMessages.c:486
 msgid "Only files and servers on the local host can be accessed."
 msgstr "Dostopne so le datoteke in stre¾niki na lokalnem raèunalniku."
 
-#: LYMessages.c:483
+#: LYMessages.c:487
 msgid "Telnet access is disabled!"
 msgstr "Dostop prek telneta je onemogoèen!"
 
 #. #define TELNET_PORT_SPECS_DISABLED
-#: LYMessages.c:485
+#: LYMessages.c:489
 msgid "Telnet port specifications are disabled."
 msgstr ""
 
-#: LYMessages.c:486
+#: LYMessages.c:490
 msgid "USENET news access is disabled!"
 msgstr "Dostop novièarskih skupin USENET je onemogoèen!"
 
-#: LYMessages.c:487
+#: LYMessages.c:491
 msgid "Rlogin access is disabled!"
 msgstr "Dostop s programom rlogin je onemogoèen!"
 
-#: LYMessages.c:488
+#: LYMessages.c:492
 msgid "Ftp access is disabled!"
 msgstr "Dostop prek FTP je onemogoèen!"
 
-#: LYMessages.c:489
+#: LYMessages.c:493
 msgid "There are no references from this document."
 msgstr "Iz tega dokumenta ni sklicevanj."
 
-#: LYMessages.c:490
+#: LYMessages.c:494
 msgid "There are only hidden links from this document."
 msgstr "Iz tega dokumenta vodijo le skrite povezave."
 
-#: LYMessages.c:492
+#: LYMessages.c:496
 msgid "Unable to open command file."
 msgstr "Ne moremo odpreti ukazne datoteke."
 
-#: LYMessages.c:494
+#: LYMessages.c:498
 msgid "News Post Cancelled!!!"
 msgstr "Po¹iljanje novièarskega èlanka preklicano!!!"
 
 #. #define SPAWNING_EDITOR_FOR_NEWS
-#: LYMessages.c:496
+#: LYMessages.c:500
 msgid "Spawning your selected editor to edit news message"
 msgstr ""
 
-#: LYMessages.c:497
+#: LYMessages.c:501
 msgid "Post this message?"
 msgstr "Po¹ljemo to sporoèilo?"
 
-#: LYMessages.c:498
+#: LYMessages.c:502
 #, c-format
 msgid "Append '%s'?"
 msgstr "Pripnemo na konec ,%s`?"
 
-#: LYMessages.c:499
+#: LYMessages.c:503
 msgid "Posting to newsgroup(s)..."
 msgstr "Po¹iljamo v novièarske skupine ..."
 
-#: LYMessages.c:501
+#: LYMessages.c:505
 msgid "*** You have unread mail. ***"
 msgstr "*** Imate neprebrano po¹to. ***"
 
-#: LYMessages.c:503
+#: LYMessages.c:507
 msgid "*** You have mail. ***"
 msgstr "*** Imate po¹to. ***"
 
-#: LYMessages.c:505
+#: LYMessages.c:509
 msgid "*** You have new mail. ***"
 msgstr "*** Imate novo po¹to. ***"
 
-#: LYMessages.c:506
+#: LYMessages.c:510
 msgid "File insert cancelled!!!"
 msgstr ""
 
-#: LYMessages.c:507
+#: LYMessages.c:511
 msgid "Not enough memory for file!"
 msgstr "Ne moremo odpreti zaèasne datoteke!"
 
-#: LYMessages.c:508
+#: LYMessages.c:512
 msgid "Can't open file for reading."
 msgstr "Ne moremo odpreti izhodne datoteke!  Prekinitev!"
 
-#: LYMessages.c:509
+#: LYMessages.c:513
 msgid "File does not exist."
 msgstr "Datoteka ne obstaja."
 
-#: LYMessages.c:510
+#: LYMessages.c:514
 msgid "File does not exist - reenter or cancel:"
 msgstr "Datoteka ne obstaja - ponovni vnos ali preklic:"
 
-#: LYMessages.c:511
+#: LYMessages.c:515
 msgid "File is not readable."
 msgstr "Datoteka ni berlljiva."
 
-#: LYMessages.c:512
+#: LYMessages.c:516
 msgid "File is not readable - reenter or cancel:"
 msgstr "Datoteka ni berljiva - ponovni vnos ali preklic:"
 
-#: LYMessages.c:513
+#: LYMessages.c:517
 msgid "Nothing to insert - file is 0-length."
 msgstr "Nièesar za vnesti - datoteka je dolga 0 zlogov."
 
-#: LYMessages.c:514
+#: LYMessages.c:518
 msgid "Save request cancelled!!!"
 msgstr "Preklicana zahteva za shranjevanje!!!"
 
-#: LYMessages.c:515
+#: LYMessages.c:519
 msgid "Mail request cancelled!!!"
 msgstr "Preklicana po¹tna zahteva!!!"
 
 #. #define CONFIRM_MAIL_SOURCE_PREPARSED
-#: LYMessages.c:517
+#: LYMessages.c:521
 msgid "Viewing preparsed source.  Are you sure you want to mail it?"
 msgstr ""
 
-#: LYMessages.c:518
+#: LYMessages.c:522
 msgid "Please wait..."
 msgstr "Prosim, poèakajte ..."
 
-#: LYMessages.c:519
+#: LYMessages.c:523
 msgid "Mailing file.  Please wait..."
 msgstr "Po¹iljamo datoteko.  Prosimo, poèakajte ..."
 
-#: LYMessages.c:520
+#: LYMessages.c:524
 msgid "ERROR - Unable to mail file"
 msgstr "NAPAKA - Ne moremo poslati datoteke"
 
 #. #define CONFIRM_LONG_SCREEN_PRINT
-#: LYMessages.c:522
+#: LYMessages.c:526
 #, c-format
 msgid "File is %d screens long.  Are you sure you want to print?"
 msgstr "Datoteka je dolga %d zaslonov.  Ste preprièani, da jo ¾elite natisniti?"
 
-#: LYMessages.c:523
+#: LYMessages.c:527
 msgid "Print request cancelled!!!"
 msgstr "Tiskalni¹ka zahteva preklicana!!!"
 
-#: LYMessages.c:524
+#: LYMessages.c:528
 msgid "Press <return> to begin: "
 msgstr "Pritisnite <return > za zaèetek: "
 
-#: LYMessages.c:525
+#: LYMessages.c:529
 msgid "Press <return> to finish: "
 msgstr "Pritisnite <return> za konec: "
 
 #. #define CONFIRM_LONG_PAGE_PRINT
-#: LYMessages.c:527
+#: LYMessages.c:531
 #, c-format
 msgid "File is %d pages long.  Are you sure you want to print?"
 msgstr "Datoteka je dolga %d strani.  Ste preprièani, da jo ¾elite natisniti?"
 
 #. #define CHECK_PRINTER
-#: LYMessages.c:529
+#: LYMessages.c:533
 msgid "Be sure your printer is on-line.  Press <return> to start printing:"
 msgstr "Preprièajte se, da je tiskalnik na zvezi.  Pritisnite <return> za zaèetek tiskanja:"
 
-#: LYMessages.c:530
+#: LYMessages.c:534
 msgid "ERROR - Unable to allocate file space!!!"
 msgstr "NAPAKA - Ne moremo doloèiti prostora za datoteko!!!"
 
-#: LYMessages.c:531
+#: LYMessages.c:535
 msgid "Unable to open tempfile"
 msgstr "Ne moremo odpreti zaèasne datoteke"
 
-#: LYMessages.c:532
+#: LYMessages.c:536
 msgid "Unable to open print options file"
 msgstr "Ne moremo odpreti datoteke s tiskalni¹kimi izbirami"
 
-#: LYMessages.c:533
+#: LYMessages.c:537
 msgid "Printing file.  Please wait..."
 msgstr "Tiskamo datoteko.  Prosim, poèakajte ..."
 
-#: LYMessages.c:534
+#: LYMessages.c:538
 msgid "Please enter a valid internet mail address: "
 msgstr "Prosim, vnesite veljavni internetni po¹tni naslov: "
 
-#: LYMessages.c:535
+#: LYMessages.c:539
 msgid "ERROR! - printer is misconfigured!"
 msgstr "NAPAKA! - tiskalnik je nepravilno nastavljen!"
 
-#: LYMessages.c:536
+#: LYMessages.c:540
 msgid "Image map from POST response not available!"
 msgstr ""
 
-#: LYMessages.c:537
+#: LYMessages.c:541
 msgid "Misdirected client-side image MAP request!"
 msgstr ""
 
-#: LYMessages.c:538
+#: LYMessages.c:542
 msgid "Client-side image MAP is not accessible!"
 msgstr ""
 
-#: LYMessages.c:539
+#: LYMessages.c:543
 msgid "No client-side image MAPs are available!"
 msgstr ""
 
-#: LYMessages.c:540
+#: LYMessages.c:544
 msgid "Client-side image MAP is not available!"
 msgstr ""
 
 #. #define OPTION_SCREEN_NEEDS_24
-#: LYMessages.c:543
+#: LYMessages.c:547
 msgid "Screen height must be at least 24 lines for the Options menu!"
 msgstr "Za menu Mo¾nosti mora biti zaslon visok vsaj 24 vrstic!"
 
 #. #define OPTION_SCREEN_NEEDS_23
-#: LYMessages.c:545
+#: LYMessages.c:549
 msgid "Screen height must be at least 23 lines for the Options menu!"
 msgstr "Za menu Mo¾nosti mora biti zaslon visok vsaj 23 vrstic!"
 
 #. #define OPTION_SCREEN_NEEDS_22
-#: LYMessages.c:547
+#: LYMessages.c:551
 msgid "Screen height must be at least 22 lines for the Options menu!"
 msgstr "Za menu Mo¾nosti mora biti zaslon visok vsaj 22 vrstic!"
 
-#: LYMessages.c:549
+#: LYMessages.c:553
 msgid "That key requires Advanced User mode."
 msgstr "Ta tipka zahteva naèin dela Izku¹eni uporabnik."
 
-#: LYMessages.c:550
+#: LYMessages.c:554
 #, c-format
 msgid "Content-type: %s"
 msgstr "Content-type: %s"
 
-#: LYMessages.c:551
+#: LYMessages.c:555
 msgid "Command: "
 msgstr "Ukaz: "
 
-#: LYMessages.c:552
+#: LYMessages.c:556
 msgid "Unknown or ambiguous command"
 msgstr ""
 
-#: LYMessages.c:553
+#: LYMessages.c:557
 msgid " Version "
 msgstr " Razlièica "
 
-#: LYMessages.c:554
+#: LYMessages.c:558
 msgid " first"
 msgstr " najprej."
 
-#: LYMessages.c:555
+#: LYMessages.c:559
 msgid ", guessing..."
 msgstr ", ugibamo ..."
 
-#: LYMessages.c:556
+#: LYMessages.c:560
 msgid "Permissions for "
 msgstr "Dovoljenja za "
 
-#: LYMessages.c:557
+#: LYMessages.c:561
 msgid "Select "
 msgstr "Izberite "
 
-#: LYMessages.c:558
+#: LYMessages.c:562
 msgid "capital letter"
 msgstr "veliko èrko"
 
-#: LYMessages.c:559
+#: LYMessages.c:563
 msgid " of option line,"
 msgstr " v vrstici z mo¾nostmi,"
 
-#: LYMessages.c:560
+#: LYMessages.c:564
 msgid " to save,"
 msgstr " za shranjevanje,"
 
-#: LYMessages.c:561
+#: LYMessages.c:565
 msgid " to "
 msgstr " v "
 
-#: LYMessages.c:562
+#: LYMessages.c:566
 msgid " or "
 msgstr " ali "
 
-#: LYMessages.c:563
+#: LYMessages.c:567
 msgid " index"
 msgstr " stvarno kazalo"
 
-#: LYMessages.c:564
+#: LYMessages.c:568
 msgid " to return to Lynx."
 msgstr " za vrnitev v Lynx."
 
-#: LYMessages.c:565
+#: LYMessages.c:569
 msgid "Accept Changes"
 msgstr "Sprejmimo spremembe"
 
-#: LYMessages.c:566
+#: LYMessages.c:570
 msgid "Reset Changes"
 msgstr "Iznièimo spremembe"
 
-#: LYMessages.c:567
+#: LYMessages.c:571
 msgid "Left Arrow cancels changes"
 msgstr "Z levo pu¹èico iznièimo spremembe"
 
-#: LYMessages.c:568
+#: LYMessages.c:572
 msgid "Save options to disk"
 msgstr "Shranimo izbire v disk"
 
-#: LYMessages.c:569
+#: LYMessages.c:573
 msgid "Hit RETURN to accept entered data."
 msgstr ""
 
 #. #define ACCEPT_DATA_OR_DEFAULT
-#: LYMessages.c:571
+#: LYMessages.c:575
 msgid "Hit RETURN to accept entered data.  Delete data to invoke the default."
 msgstr ""
 
-#: LYMessages.c:572
+#: LYMessages.c:576
 msgid "Value accepted!"
 msgstr "Vrednost sprejeta!"
 
 #. #define VALUE_ACCEPTED_WARNING_X
-#: LYMessages.c:574
+#: LYMessages.c:578
 msgid "Value accepted! -- WARNING: Lynx is configured for XWINDOWS!"
 msgstr "Vrednost sprejeta! -- POZOR: Lynx je nastavljen za XWINDOWS!"
 
 #. #define VALUE_ACCEPTED_WARNING_NONX
-#: LYMessages.c:576
+#: LYMessages.c:580
 msgid "Value accepted! -- WARNING: Lynx is NOT configured for XWINDOWS!"
 msgstr "Vrednost sprejeta! -- POZOR: Lynx NI nastavljen za XWINDOWS!"
 
-#: LYMessages.c:577
+#: LYMessages.c:581
 msgid "You are not allowed to change which editor to use!"
 msgstr ""
 
-#: LYMessages.c:578
+#: LYMessages.c:582
 msgid "Failed to set DISPLAY variable!"
 msgstr ""
 
-#: LYMessages.c:579
+#: LYMessages.c:583
 msgid "Failed to clear DISPLAY variable!"
 msgstr ""
 
 #. #define BOOKMARK_CHANGE_DISALLOWED
-#: LYMessages.c:581
+#: LYMessages.c:585
 msgid "You are not allowed to change the bookmark file!"
 msgstr ""
 
-#: LYMessages.c:582
+#: LYMessages.c:586
 msgid "Terminal does not support color"
 msgstr "Terminal ne podpira barv"
 
-#: LYMessages.c:583
+#: LYMessages.c:587
 #, c-format
 msgid "Your '%s' terminal does not support color."
 msgstr ""
 
-#: LYMessages.c:584
+#: LYMessages.c:588
 msgid "Access to dot files is disabled!"
 msgstr ""
 
 #. #define UA_NO_LYNX_WARNING
-#: LYMessages.c:586
+#: LYMessages.c:590
 msgid "User-Agent string does not contain \"Lynx\" or \"L_y_n_x\""
 msgstr ""
 
 #. #define UA_PLEASE_USE_LYNX
-#: LYMessages.c:588
+#: LYMessages.c:592
 msgid "Use \"L_y_n_x\" or \"Lynx\" in User-Agent, or it looks like intentional deception!"
 msgstr ""
 
 #. #define UA_CHANGE_DISABLED
-#: LYMessages.c:590
+#: LYMessages.c:594
 msgid "Changing of the User-Agent string is disabled!"
 msgstr ""
 
 #. #define CHANGE_OF_SETTING_DISALLOWED
-#: LYMessages.c:592
+#: LYMessages.c:596
 msgid "You are not allowed to change this setting."
 msgstr ""
 
-#: LYMessages.c:593
+#: LYMessages.c:597
 msgid "Saving Options..."
 msgstr "Shranjujemo mo¾nosti ..."
 
-#: LYMessages.c:594
+#: LYMessages.c:598
 msgid "Options saved!"
 msgstr "Mo¾nosti shranjene!"
 
-#: LYMessages.c:595
+#: LYMessages.c:599
 msgid "Unable to save Options!"
 msgstr ""
 
-#: LYMessages.c:596
+#: LYMessages.c:600
 msgid " 'r' to return to Lynx "
 msgstr ""
 
-#: LYMessages.c:597
+#: LYMessages.c:601
 msgid " '>' to save, or 'r' to return to Lynx "
 msgstr ""
 
 #. #define ANY_KEY_CHANGE_RET_ACCEPT
-#: LYMessages.c:599
+#: LYMessages.c:603
 msgid "Hit any key to change value; RETURN to accept."
 msgstr "Pritisnite katerokoli tipko za spremembo vrednosti; RETURN za sprejem."
 
-#: LYMessages.c:600
+#: LYMessages.c:604
 msgid "Error uncompressing temporary file!"
 msgstr "Napaka pri raz¹irjanju zaèasne datoteke!"
 
-#: LYMessages.c:601
+#: LYMessages.c:605
 msgid "Unsupported URL scheme!"
 msgstr "Nepodprta shema URL!"
 
-#: LYMessages.c:602
+#: LYMessages.c:606
 msgid "Unsupported data: URL!  Use SHOWINFO, for now."
 msgstr "Nepodprti podatki: URL!  Zaenkrat uporabite SHOWINFO."
 
-#: LYMessages.c:603
+#: LYMessages.c:607
 msgid "Redirection limit of 10 URL's reached."
 msgstr "Dose¾ena je bila omejitev 10 preumerjenih URL-jve."
 
-#: LYMessages.c:604
+#: LYMessages.c:608
 msgid "Illegal redirection URL received from server!"
 msgstr "Stre¾nik je poslal URL z neveljavno preusmeritvijo!"
 
 #. #define SERVER_ASKED_FOR_REDIRECTION
-#: LYMessages.c:606
+#: LYMessages.c:610
 #, c-format
 msgid "Server asked for %d redirection of POST content to"
 msgstr "Server je prosil za preusmeritev %d vsebine POST na"
 
-#: LYMessages.c:609
+#: LYMessages.c:613
 msgid "P)roceed, use G)ET or C)ancel "
 msgstr "P)nadaljevanje, uporabite G)poberi ali C)preklièi"
 
-#: LYMessages.c:610
+#: LYMessages.c:614
 msgid "P)roceed, or C)ancel "
 msgstr "P)nadaljevanje ali C)preklic"
 
 #. #define ADVANCED_POST_GET_REDIRECT
-#: LYMessages.c:612
+#: LYMessages.c:616
 msgid "Redirection of POST content.  P)roceed, see U)RL, use G)ET or C)ancel"
 msgstr "Preusmeritev vsebine POST.  P)nadaljevanje, ogled U)RL, G)pobiranje ali C)preklic"
 
 #. #define ADVANCED_POST_REDIRECT
-#: LYMessages.c:614
+#: LYMessages.c:618
 msgid "Redirection of POST content.  P)roceed, see U)RL, or C)ancel"
 msgstr "Preusmeritev vsebine POST.  P)nadaljevanje, ogled U)URL ali C)preklic"
 
 #. #define CONFIRM_POST_RESUBMISSION
-#: LYMessages.c:616
+#: LYMessages.c:620
 msgid "Document from Form with POST content.  Resubmit?"
 msgstr "Spis iz obrazca brez vsebine POST.  Ponovno po¹ljemo zahtevo?"
 
 #. #define CONFIRM_POST_RESUBMISSION_TO
-#: LYMessages.c:618
+#: LYMessages.c:622
 #, c-format
 msgid "Resubmit POST content to %s ?"
 msgstr "Ponovno po¹ljemo vsebino POST na %s ?"
 
 #. #define CONFIRM_POST_LIST_RELOAD
-#: LYMessages.c:620
+#: LYMessages.c:624
 #, c-format
 msgid "List from document with POST data.  Reload %s ?"
 msgstr "Seznam iz dokumenta s podatki POST.  Ponovno nalo¾imo %s ?"
 
 #. #define CONFIRM_POST_DOC_HEAD
-#: LYMessages.c:622
+#: LYMessages.c:626
 msgid "Document from POST action, HEAD may not be understood.  Proceed?"
 msgstr ""
 
 #. #define CONFIRM_POST_LINK_HEAD
-#: LYMessages.c:624
+#: LYMessages.c:628
 msgid "Form submit action is POST, HEAD may not be understood.  Proceed?"
 msgstr ""
 
-#: LYMessages.c:625
+#: LYMessages.c:629
 msgid "Proceed without a username and password?"
 msgstr "Nadaljujemo brez uporabni¹kega imena in gesla?"
 
-#: LYMessages.c:626
+#: LYMessages.c:630
 #, c-format
 msgid "Proceed (%s)?"
 msgstr "Nadaljujemo (%s)?"
 
-#: LYMessages.c:627
+#: LYMessages.c:631
 msgid "Cannot POST to this host."
 msgstr "Ne moremo poslati POST temu gostitelju."
 
-#: LYMessages.c:628
+#: LYMessages.c:632
 msgid "POST not supported for this URL - ignoring POST data!"
 msgstr "POST ni podprt za ta URL - zanemarjamo podatke POST!"
 
-#: LYMessages.c:629
+#: LYMessages.c:633
 msgid "Discarding POST data..."
 msgstr "Zanemarjamo podatke POST..."
 
-#: LYMessages.c:630
+#: LYMessages.c:634
 msgid "Document will not be reloaded!"
 msgstr "Dokument ne bo ponovno nalo¾en!"
 
-#: LYMessages.c:631
+#: LYMessages.c:635
 msgid "Location: "
 msgstr "Lokacija: "
 
-#: LYMessages.c:632
+#: LYMessages.c:636
 #, c-format
 msgid "'%s' not found!"
 msgstr ",%s` ni bil najden!"
 
-#: LYMessages.c:633
+#: LYMessages.c:637
 msgid "Default Bookmark File"
 msgstr "Privzeta datoteka z zaznamki"
 
-#: LYMessages.c:634
+#: LYMessages.c:638
 msgid "Screen too small! (8x35 min)"
 msgstr "Premajhen zaslon! (najmanj 8×35)"
 
-#: LYMessages.c:635
+#: LYMessages.c:639
 msgid "Select destination or ^G to Cancel: "
 msgstr "Izberite cilj ali ^G za preklic: "
 
 #. #define MULTIBOOKMARKS_SELECT
-#: LYMessages.c:637
+#: LYMessages.c:641
 msgid "Select subbookmark, '=' for menu, or ^G to cancel: "
 msgstr "Izberite podzaznamek, ,=` za menu ali ^G za preklic: "
 
 #. #define MULTIBOOKMARKS_SELF
-#: LYMessages.c:639
+#: LYMessages.c:643
 msgid "Reproduce L)ink in this bookmark file or C)ancel? (l,c): "
 msgstr "Reproduciramo L)povezavo v tej datoteki z zaznamki ali C)preklièemo? (l,c): "
 
-#: LYMessages.c:640
+#: LYMessages.c:644
 msgid "Multiple bookmark support is not available."
 msgstr "Podpora za veè zaznamkov ni dostopna."
 
-#: LYMessages.c:641
+#: LYMessages.c:645
 #, c-format
 msgid " Select Bookmark (screen %d of %d)"
 msgstr ""
 
-#: LYMessages.c:642
+#: LYMessages.c:646
 msgid "       Select Bookmark"
 msgstr "       Izberimo zaznamek"
 
 #. #define MULTIBOOKMARKS_EHEAD_MASK
-#: LYMessages.c:644
+#: LYMessages.c:648
 #, c-format
 msgid "Editing Bookmark DESCRIPTION and FILEPATH (%d of 2)"
 msgstr "Urejamo OPIS in POT DO DATOTEKE zaznamka (%d od 2)"
 
 #. #define MULTIBOOKMARKS_EHEAD
-#: LYMessages.c:646
+#: LYMessages.c:650
 msgid "         Editing Bookmark DESCRIPTION and FILEPATH"
 msgstr "         Urejamo OPIS in POT DO DATOTEKE zaznamka"
 
-#: LYMessages.c:647
+#: LYMessages.c:651
 msgid "Letter: "
 msgstr "Pismo: "
 
 #. #define USE_PATH_OFF_HOME
-#: LYMessages.c:650
+#: LYMessages.c:654
 msgid "Use a filepath off your login directory in SHELL syntax!"
 msgstr "Uporabite pot do datoteke od va¹ega prijavnega imenika v skladnji za lupino!"
 
-#: LYMessages.c:652
+#: LYMessages.c:656
 msgid "Use a filepath off your home directory!"
 msgstr "Uporabite ime poti od va¹ega domaèega imenika!"
 
 #. #define MAXLINKS_REACHED
-#: LYMessages.c:655
+#: LYMessages.c:659
 msgid "Maximum links per page exceeded!  Use half-page or two-line scrolling."
 msgstr "Prese¾eno najveèje ¹tevilo povezav na stran!  Uporabite polovièno stran ali dvovrstièno pomikanje."
 
-#: LYMessages.c:658
+#: LYMessages.c:660
 msgid "No previously visited links available!"
 msgstr ""
 
-#: LYMessages.c:659
+#: LYMessages.c:661
 msgid "Memory exhausted!  Program aborted!"
 msgstr "Zmanjkalo pomnilnika!  Program je prekinjen!"
 
-#: LYMessages.c:660
+#: LYMessages.c:662
 msgid "Memory exhausted!  Aborting..."
 msgstr "Zmanjkalo pomnilnika!  Konèujemo..."
 
-#: LYMessages.c:661
+#: LYMessages.c:663
 msgid "Not enough memory!"
 msgstr ""
 
-#: LYMessages.c:662
+#: LYMessages.c:664
 msgid "Directory/File Manager not available"
 msgstr "Urejevalnik imenikov/datotek ni dostopen"
 
-#: LYMessages.c:663
+#: LYMessages.c:665
 msgid "HREF in BASE tag is not an absolute URL."
 msgstr "HREF v oznaki BASE ni absolutni URL."
 
-#: LYMessages.c:664
+#: LYMessages.c:666
 msgid "Location URL is not absolute."
 msgstr "URL lokacije ni absoluten."
 
-#: LYMessages.c:665
+#: LYMessages.c:667
 msgid "Refresh URL is not absolute."
 msgstr "URL za osve¾itev strani ni absoluten."
 
 #. #define SENDING_MESSAGE_WITH_BODY_TO
-#: LYMessages.c:667
+#: LYMessages.c:669
 msgid ""
 "You are sending a message with body to:\n"
 "  "
@@ -2032,7 +2037,7 @@ msgstr ""
 "Po¹iljate sporoèilo s telesom na:\n"
 "  "
 
-#: LYMessages.c:668
+#: LYMessages.c:670
 msgid ""
 "You are sending a comment to:\n"
 "  "
@@ -2040,7 +2045,7 @@ msgstr ""
 "Po¹iljate komentar prejemniku:\n"
 "  "
 
-#: LYMessages.c:669
+#: LYMessages.c:671
 msgid ""
 "\n"
 " With copy to:\n"
@@ -2050,7 +2055,7 @@ msgstr ""
 "S kopijo prejemniku:\n"
 "  "
 
-#: LYMessages.c:670
+#: LYMessages.c:672
 msgid ""
 "\n"
 " With copies to:\n"
@@ -2061,7 +2066,7 @@ msgstr ""
 "  "
 
 #. #define CTRL_G_TO_CANCEL_SEND
-#: LYMessages.c:672
+#: LYMessages.c:674
 msgid ""
 "\n"
 "\n"
@@ -2072,7 +2077,7 @@ msgstr ""
 "Èe ne ¾elite poslati sporoèila, uporabite Ctrl-G za preklic\n"
 
 #. #define ENTER_NAME_OR_BLANK
-#: LYMessages.c:674
+#: LYMessages.c:676
 msgid ""
 "\n"
 " Please enter your name, or leave it blank to remain anonymous\n"
@@ -2081,7 +2086,7 @@ msgstr ""
 " Prosim, vnesite svoje ime ali pustite prazno polje za anonimnost\n"
 
 #. #define ENTER_MAIL_ADDRESS_OR_OTHER
-#: LYMessages.c:676
+#: LYMessages.c:678
 msgid ""
 "\n"
 " Please enter a mail address or some other\n"
@@ -2090,11 +2095,11 @@ msgstr ""
 " Prosim, vnesite po¹tni naslov ali kaj drugega\n"
 
 #. #define MEANS_TO_CONTACT_FOR_RESPONSE
-#: LYMessages.c:678
+#: LYMessages.c:680
 msgid " means to contact you, if you desire a response.\n"
 msgstr " naèini za kontaktiranje, èe ¾elite odziv.\n"
 
-#: LYMessages.c:679
+#: LYMessages.c:681
 msgid ""
 "\n"
 " Please enter a subject line.\n"
@@ -2103,7 +2108,7 @@ msgstr ""
 " Prosim, vnesite vrstico s predmetom.\n"
 
 #. #define ENTER_ADDRESS_FOR_CC
-#: LYMessages.c:681
+#: LYMessages.c:683
 msgid ""
 "\n"
 " Enter a mail address for a CC of your message.\n"
@@ -2111,11 +2116,11 @@ msgstr ""
 "\n"
 " Vnesite po¹tni naslov za kopijo (CC) va¹ega sporoèila.\n"
 
-#: LYMessages.c:682
+#: LYMessages.c:684
 msgid " (Leave blank if you don't want a copy.)\n"
 msgstr " (Pustite prazno, èe ne ¾elite kopije.)\n"
 
-#: LYMessages.c:683
+#: LYMessages.c:685
 msgid ""
 "\n"
 " Please review the message body:\n"
@@ -2125,7 +2130,7 @@ msgstr ""
 " Prosim, preglejte telo sporoèila:\n"
 "\n"
 
-#: LYMessages.c:684
+#: LYMessages.c:686
 msgid ""
 "\n"
 "Press RETURN to continue: "
@@ -2133,7 +2138,7 @@ msgstr ""
 "\n"
 "Pritisnite RETURN za nadaljevanje: "
 
-#: LYMessages.c:685
+#: LYMessages.c:687
 msgid ""
 "\n"
 "Press RETURN to clean up: "
@@ -2141,11 +2146,11 @@ msgstr ""
 "\n"
 "Pritisnite RETURN za èi¹èenje: "
 
-#: LYMessages.c:686
+#: LYMessages.c:688
 msgid " Use Control-U to erase the default.\n"
 msgstr " Uporabite Control-U za izbris privzete vrednosti.\n"
 
-#: LYMessages.c:687
+#: LYMessages.c:689
 msgid ""
 "\n"
 " Please enter your message below."
@@ -2154,7 +2159,7 @@ msgstr ""
 " Prosim, spodaj vnesite svoje sporoèilo."
 
 #. #define ENTER_PERIOD_WHEN_DONE_A
-#: LYMessages.c:689 src/LYNews.c:357
+#: LYMessages.c:691 src/LYNews.c:357
 msgid ""
 "\n"
 " When you are done, press enter and put a single period (.)"
@@ -2163,7 +2168,7 @@ msgstr ""
 " Ko opravite, pritisnite Enter in vstavite eno samo piko (.)"
 
 #. #define ENTER_PERIOD_WHEN_DONE_B
-#: LYMessages.c:691 src/LYNews.c:358
+#: LYMessages.c:693 src/LYNews.c:358
 msgid ""
 "\n"
 " on a line and press enter again."
@@ -2173,248 +2178,253 @@ msgstr ""
 
 #. Cookies messages
 #. #define ADVANCED_COOKIE_CONFIRMATION
-#: LYMessages.c:695
+#: LYMessages.c:697
 #, c-format
 msgid "%s cookie: %.*s=%.*s  Allow? (Y/N/Always/neVer)"
 msgstr "pi¹kot %s: %.*s=%.*s  Dovolimo? (Y-da/N-ne/A-vedno/V-nikoli)"
 
 #. #define INVALID_COOKIE_DOMAIN_CONFIRMATION
-#: LYMessages.c:697
+#: LYMessages.c:699
 #, c-format
 msgid "Accept invalid cookie domain=%s for '%s'?"
 msgstr "Sprejmemo neveljavno domeno=%s za pi¹kote za ,%s`?"
 
 #. #define INVALID_COOKIE_PATH_CONFIRMATION
-#: LYMessages.c:699
+#: LYMessages.c:701
 #, c-format
 msgid "Accept invalid cookie path=%s as a prefix of '%s'?"
 msgstr "Sprejmemo neveljavno pot=%s za pi¹kote s predpono ,%s`?"
 
-#: LYMessages.c:700
+#: LYMessages.c:702
 msgid "Allowing this cookie."
 msgstr "Sprejmemo ta pi¹kot."
 
-#: LYMessages.c:701
+#: LYMessages.c:703
 msgid "Rejecting this cookie."
 msgstr "Zavraèamo ta pi¹kot."
 
-#: LYMessages.c:702
+#: LYMessages.c:704
 msgid "The Cookie Jar is empty."
 msgstr "Posoda s pi¹koti je prazna."
 
+#: LYMessages.c:705
+#, fuzzy
+msgid "The Cache Jar is empty."
+msgstr "Posoda s pi¹koti je prazna."
+
 #. #define ACTIVATE_TO_GOBBLE
-#: LYMessages.c:704
+#: LYMessages.c:707
 msgid "Activate links to gobble up cookies or entire domains,"
 msgstr ""
 
-#: LYMessages.c:705
+#: LYMessages.c:708
 msgid "or to change a domain's 'allow' setting."
 msgstr ""
 
-#: LYMessages.c:706
+#: LYMessages.c:709
 msgid "(Cookies never allowed.)"
 msgstr "(Pi¹koti nikoli dovoljeni.)"
 
-#: LYMessages.c:707
+#: LYMessages.c:710
 msgid "(Cookies always allowed.)"
 msgstr "(Pi¹koti vedno dobrodo¹li.)"
 
-#: LYMessages.c:708
+#: LYMessages.c:711
 msgid "(Cookies allowed via prompt.)"
 msgstr "(Pi¹koti dovoljeni po vpra¹anju.)"
 
-#: LYMessages.c:709
+#: LYMessages.c:712
 msgid "(Persistent Cookies.)"
 msgstr "(Obstojni pi¹koti.)"
 
-#: LYMessages.c:710
+#: LYMessages.c:713
 msgid "(No title.)"
 msgstr "(Brez naslova.)"
 
-#: LYMessages.c:711
+#: LYMessages.c:714
 msgid "(No name.)"
 msgstr "(Brez imena.)"
 
-#: LYMessages.c:712
+#: LYMessages.c:715
 msgid "(No value.)"
 msgstr "(Brez vrednosti.)"
 
-#: LYMessages.c:713 src/LYOptions.c:2395
+#: LYMessages.c:716 src/LYOptions.c:2403
 msgid "None"
 msgstr "Niè"
 
-#: LYMessages.c:714
+#: LYMessages.c:717
 msgid "(End of session.)"
 msgstr "(Konec seje.)"
 
-#: LYMessages.c:715
+#: LYMessages.c:718
 msgid "Delete this cookie?"
 msgstr "Odstranimo ta pi¹kot?"
 
-#: LYMessages.c:716
+#: LYMessages.c:719
 msgid "The cookie has been eaten!"
 msgstr "Pi¹kot smo pojedli!"
 
-#: LYMessages.c:717
+#: LYMessages.c:720
 msgid "Delete this empty domain?"
 msgstr "Pobri¹emo to prazno domeno?"
 
-#: LYMessages.c:718
+#: LYMessages.c:721
 msgid "The domain has been eaten!"
 msgstr "Domeno smo pojedli!"
 
 #. #define DELETE_COOKIES_SET_ALLOW_OR_CANCEL
-#: LYMessages.c:720
+#: LYMessages.c:723
 msgid "D)elete domain's cookies, set allow A)lways/P)rompt/neV)er, or C)ancel? "
 msgstr ""
 
 #. #define DELETE_DOMAIN_SET_ALLOW_OR_CANCEL
-#: LYMessages.c:722
+#: LYMessages.c:725
 msgid "D)elete domain, set allow A)lways/P)rompt/neV)er, or C)ancel? "
 msgstr ""
 
-#: LYMessages.c:723
+#: LYMessages.c:726
 msgid "All cookies in the domain have been eaten!"
 msgstr "Pojedli smo vse pi¹kote v domeni!"
 
-#: LYMessages.c:724
+#: LYMessages.c:727
 #, c-format
 msgid "'A'lways allowing from domain '%s'."
 msgstr "A)Vedno dovolimo iz domene ,%s`."
 
-#: LYMessages.c:725
+#: LYMessages.c:728
 #, c-format
 msgid "ne'V'er allowing from domain '%s'."
 msgstr "V)Nikoli ne dovolimo iz domene ,%s`."
 
-#: LYMessages.c:726
+#: LYMessages.c:729
 #, c-format
 msgid "'P'rompting to allow from domain '%s'."
 msgstr "P)Vpra¹amo za dovoljenje za pi¹kote iz domene ,%s`."
 
-#: LYMessages.c:727
+#: LYMessages.c:730
 msgid "Delete all cookies in this domain?"
 msgstr "Odstranimo vse pi¹kote v tej domeni?"
 
-#: LYMessages.c:728
+#: LYMessages.c:731
 msgid "All of the cookies in the jar have been eaten!"
 msgstr "Vse pi¹kote v posodi smo pojedli!"
 
-#: LYMessages.c:730
+#: LYMessages.c:733
 msgid "Port 19 not permitted in URLs."
 msgstr "Vrata 19 niso dovoljena v URL-jih."
 
-#: LYMessages.c:731
+#: LYMessages.c:734
 msgid "Port 25 not permitted in URLs."
 msgstr "Vrata 25 niso dovoljena v URL-jih."
 
-#: LYMessages.c:732
+#: LYMessages.c:735
 #, c-format
 msgid "Port %lu not permitted in URLs."
 msgstr "Vrata %lu niso dovoljena v URL-jih."
 
-#: LYMessages.c:733
+#: LYMessages.c:736
 msgid "URL has a bad port field."
 msgstr "URL ima slabo polje z vrati."
 
-#: LYMessages.c:734
+#: LYMessages.c:737
 msgid "Maximum nesting of HTML elements exceeded."
 msgstr "Dose¾eno najgloblje gnezdenje gradnikov HTML."
 
-#: LYMessages.c:735
+#: LYMessages.c:738
 msgid "Bad partial reference!  Stripping lead dots."
 msgstr "Slab delni sklic!  Odstranjujemo vodilne pike."
 
-#: LYMessages.c:736
+#: LYMessages.c:739
 msgid "Trace Log open failed.  Trace off!"
 msgstr "Odpiranje dnevnika za sledenje spodletelo.  Sledenje izkljuèeno!"
 
-#: LYMessages.c:737
+#: LYMessages.c:740
 msgid "Lynx Trace Log"
 msgstr "Dnevnik za sledenje Lynxu"
 
-#: LYMessages.c:738
+#: LYMessages.c:741
 msgid "No trace log has been started for this session."
 msgstr "V tej seji ni bilo zagnanega dnevnika za sledenje."
 
 #. #define MAX_TEMPCOUNT_REACHED
-#: LYMessages.c:740
+#: LYMessages.c:743
 msgid "The maximum temporary file count has been reached!"
 msgstr ""
 
 #. #define FORM_VALUE_TOO_LONG
-#: LYMessages.c:742
+#: LYMessages.c:745
 msgid "Form field value exceeds buffer length!  Trim the tail."
 msgstr ""
 
 #. #define FORM_TAIL_COMBINED_WITH_HEAD
-#: LYMessages.c:744
+#: LYMessages.c:747
 msgid "Modified tail combined with head of form field value."
 msgstr ""
 
 #. HTFile.c
-#: LYMessages.c:747
+#: LYMessages.c:750
 msgid "Directory"
 msgstr "Imenik"
 
-#: LYMessages.c:748
+#: LYMessages.c:751
 msgid "Directory browsing is not allowed."
 msgstr "Brskanje po imeniku ni dovoljeno."
 
-#: LYMessages.c:749
+#: LYMessages.c:752
 msgid "Selective access is not enabled for this directory"
 msgstr ""
 
-#: LYMessages.c:750
+#: LYMessages.c:753
 msgid "Multiformat: directory scan failed."
 msgstr ""
 
-#: LYMessages.c:751
+#: LYMessages.c:754
 msgid "This directory is not readable."
 msgstr "Tega imenika ni mogoèe brati."
 
-#: LYMessages.c:752
+#: LYMessages.c:755
 msgid "Can't access requested file."
 msgstr "Ne moremo dostopati do zahtevane datoteke."
 
-#: LYMessages.c:753
+#: LYMessages.c:756
 msgid "Could not find suitable representation for transmission."
 msgstr ""
 
-#: LYMessages.c:754
+#: LYMessages.c:757
 msgid "Could not open file for decompression!"
 msgstr ""
 
-#: LYMessages.c:755
+#: LYMessages.c:758
 msgid "Files:"
 msgstr "Datoteke:"
 
-#: LYMessages.c:756
+#: LYMessages.c:759
 msgid "Subdirectories:"
 msgstr "Podimeniki:"
 
-#: LYMessages.c:757
+#: LYMessages.c:760
 msgid " directory"
 msgstr " imenik"
 
-#: LYMessages.c:758
+#: LYMessages.c:761
 msgid "Up to "
 msgstr "Do "
 
-#: LYMessages.c:759
+#: LYMessages.c:762
 msgid "Current directory is "
 msgstr "Trenutni imenik je "
 
 #. HTGopher.c
-#: LYMessages.c:762
+#: LYMessages.c:765
 msgid "No response from server!"
 msgstr "Ni odgovora od stre¾nika!"
 
-#: LYMessages.c:763
+#: LYMessages.c:766
 msgid "CSO index"
 msgstr "Indeks CSO"
 
-#: LYMessages.c:764
+#: LYMessages.c:767
 msgid ""
 "\n"
 "This is a searchable index of a CSO database.\n"
@@ -2422,16 +2432,16 @@ msgstr ""
 "\n"
 "To je iskalni indeks za zbirko podatkov CSO.\n"
 
-#: LYMessages.c:765
+#: LYMessages.c:768
 msgid "CSO Search Results"
 msgstr "Iskalni rezultati CSO"
 
-#: LYMessages.c:766
+#: LYMessages.c:769
 #, c-format
 msgid "Seek fail on %s\n"
 msgstr "Napaka pri iskanju pri %s\n"
 
-#: LYMessages.c:767
+#: LYMessages.c:770
 msgid ""
 "\n"
 "Press the 's' key and enter search keywords.\n"
@@ -2439,7 +2449,7 @@ msgstr ""
 "\n"
 "Pritisnite tipko ,s` in vnesite iskane kljuène besede.\n"
 
-#: LYMessages.c:768
+#: LYMessages.c:771
 msgid ""
 "\n"
 "This is a searchable Gopher index.\n"
@@ -2447,35 +2457,35 @@ msgstr ""
 "\n"
 "To je iskalno kazalo po Gopherju.\n"
 
-#: LYMessages.c:769
+#: LYMessages.c:772
 msgid "Gopher index"
 msgstr "Kazalo po Gopherju"
 
-#: LYMessages.c:770
+#: LYMessages.c:773
 msgid "Gopher Menu"
 msgstr "Menu Gopherja"
 
-#: LYMessages.c:771
+#: LYMessages.c:774
 msgid " Search Results"
 msgstr " Rezultati iskanja"
 
-#: LYMessages.c:772
+#: LYMessages.c:775
 msgid "Sending CSO/PH request."
 msgstr "Po¹iljamo zahtevek CSO/PH."
 
-#: LYMessages.c:773
+#: LYMessages.c:776
 msgid "Sending Gopher request."
 msgstr "Po¹iljamo zahtevek Gopherju."
 
-#: LYMessages.c:774
+#: LYMessages.c:777
 msgid "CSO/PH request sent; waiting for response."
 msgstr "Zahtevek CSO/PH poslan; èakamo na odgovor."
 
-#: LYMessages.c:775
+#: LYMessages.c:778
 msgid "Gopher request sent; waiting for response."
 msgstr "Zahteva Gopherju poslana; èakamo na odgovor."
 
-#: LYMessages.c:776
+#: LYMessages.c:779
 msgid ""
 "\n"
 "Please enter search keywords.\n"
@@ -2483,7 +2493,7 @@ msgstr ""
 "\n"
 "Prosim, vnesite iskane kljuène besede.\n"
 
-#: LYMessages.c:777
+#: LYMessages.c:780
 msgid ""
 "\n"
 "The keywords that you enter will allow you to search on a"
@@ -2491,197 +2501,202 @@ msgstr ""
 "\n"
 "Kljuène besede, ki jih boste vnesli, bodo omogoèile iskanje po"
 
-#: LYMessages.c:778
+#: LYMessages.c:781
 msgid " person's name in the database.\n"
 msgstr " imenu osebe v zbirki podatkov.\n"
 
 #. HTNews.c
-#: LYMessages.c:781
+#: LYMessages.c:784
 msgid "Connection closed ???"
 msgstr "Povezava zaprta???"
 
-#: LYMessages.c:782
+#: LYMessages.c:785
 msgid "Cannot open temporary file for news POST."
 msgstr "Ne moremo odpreti zaèasne datoteke za PO©ILJANJE novic."
 
-#: LYMessages.c:783
+#: LYMessages.c:786
 msgid "This client does not contain support for posting to news with SSL."
 msgstr "Ta odjemnik ne vsebuje podpore za po¹iljanje novic s SSL."
 
 #. HTStyle.c
-#: LYMessages.c:786
+#: LYMessages.c:789
 #, c-format
 msgid "Style %d `%s' SGML:%s.  Font %s %.1f point.\n"
 msgstr "Slog %d ,%s` SGML:%s.  Pisava %s %.1f pik.\n"
 
-#: LYMessages.c:788
+#: LYMessages.c:791
 #, c-format
 msgid "\tAlign=%d, %d tabs. (%.0f before, %.0f after)\n"
 msgstr "\tPoravnava=%d, %d predelènikov. (%.0f prej, %.0f pozneje)\n"
 
-#: LYMessages.c:789
+#: LYMessages.c:792
 #, c-format
 msgid "\t\tTab kind=%d at %.0f\n"
 msgstr "\t\tVrsta predelènika=%d na %.0f\n"
 
 #. HTTP.c
-#: LYMessages.c:792
+#: LYMessages.c:795
 msgid "Can't proceed without a username and password."
 msgstr "Ne moremo nadaljevati brez uporabni¹kega imena in gesla."
 
-#: LYMessages.c:793
+#: LYMessages.c:796
 msgid "Can't retry with authorization!  Contact the server's WebMaster."
 msgstr "Ne moremo ponovno poskusiti brez avtorizacije!  Povpra¹ajte upravitelja spletnega stre¾nika."
 
-#: LYMessages.c:794
+#: LYMessages.c:797
 msgid "Can't retry with proxy authorization!  Contact the server's WebMaster."
 msgstr "Ne moremo ponovno poskusiti brez avtorizacije za proxy!  Povpra¹ajte upravitelja spletnega stre¾nika."
 
-#: LYMessages.c:795
+#: LYMessages.c:798
 msgid "Retrying with proxy authorization information."
 msgstr "Posku¹amo ponovno z avtorizacijo za proxy."
 
-#: LYMessages.c:796
+#: LYMessages.c:799
 #, c-format
 msgid "SSL error:%s-Continue?"
 msgstr ""
 
 #. HTWAIS.c
-#: LYMessages.c:799
+#: LYMessages.c:802
 msgid "HTWAIS: Return message too large."
 msgstr "HTWAIS: Sporoèilo z odgovorom je predolgo."
 
-#: LYMessages.c:800
+#: LYMessages.c:803
 msgid "Enter WAIS query: "
 msgstr "Vnesite zahtevek za WAIS: "
 
 #. Miscellaneous status
-#: LYMessages.c:803
+#: LYMessages.c:806
 msgid "Retrying as HTTP0 request."
 msgstr "Ponovno posku¹amo z zahtevkom HTTP0."
 
-#: LYMessages.c:804
+#: LYMessages.c:807
 #, c-format
 msgid "Transferred %d bytes"
 msgstr "Preneseno %d zlogov"
 
-#: LYMessages.c:805
+#: LYMessages.c:808
 msgid "Data transfer complete"
 msgstr "Prenos podatkov konèan"
 
-#: LYMessages.c:806
+#: LYMessages.c:809
 #, c-format
 msgid "Error processing line %d of %s\n"
 msgstr "Napaka pri obdelavi vrstice %d datoteke %s\n"
 
 #. Lynx internal page titles
-#: LYMessages.c:809
+#: LYMessages.c:812
 msgid "Address List Page"
 msgstr "Stran z imenikom naslovov"
 
-#: LYMessages.c:810
+#: LYMessages.c:813
 msgid "Bookmark file"
 msgstr "Datoteka z zaznamki"
 
-#: LYMessages.c:811
+#: LYMessages.c:814
 msgid "Configuration Definitions"
 msgstr "Definicije nastavitev"
 
-#: LYMessages.c:812
+#: LYMessages.c:815
 msgid "Cookie Jar"
 msgstr "Posoda s pi¹koti"
 
-#: LYMessages.c:813
+#: LYMessages.c:816
 msgid "Current Key Map"
 msgstr "Trenutna tipkovnica"
 
-#: LYMessages.c:814
+#: LYMessages.c:817
 msgid "File Management Options"
 msgstr "Izbire upravljanja datotek"
 
-#: LYMessages.c:815
+#: LYMessages.c:818
 msgid "Download Options"
 msgstr "Izbire za jemanje"
 
-#: LYMessages.c:816
+#: LYMessages.c:819
 msgid "History Page"
 msgstr "Stran z zgodovino"
 
-#: LYMessages.c:817
+#: LYMessages.c:820
+#, fuzzy
+msgid "Cache Jar"
+msgstr "Posoda s pi¹koti"
+
+#: LYMessages.c:821
 msgid "List Page"
 msgstr "Stran s seznamom"
 
-#: LYMessages.c:818
+#: LYMessages.c:822
 msgid "Lynx.cfg Information"
 msgstr "Informacije o Lynx.cfg"
 
-#: LYMessages.c:819
+#: LYMessages.c:823
 msgid "Converted Mosaic Hotlist"
 msgstr ""
 
-#: LYMessages.c:820
+#: LYMessages.c:824
 msgid "Options Menu"
 msgstr "Menu izbir"
 
-#: LYMessages.c:821
+#: LYMessages.c:825
 msgid "File Permission Options"
 msgstr "Izbire za dovoljenja datotek"
 
-#: LYMessages.c:822
+#: LYMessages.c:826
 msgid "Printing Options"
 msgstr "Izbire tiskanja"
 
-#: LYMessages.c:823
+#: LYMessages.c:827
 msgid "Information about the current document"
 msgstr "Informacije o trenutnem dokumentu"
 
-#: LYMessages.c:824
+#: LYMessages.c:828
 msgid "Your recent statusline messages"
 msgstr "Novej¹a sporoèila v vrstici stanja"
 
-#: LYMessages.c:825
+#: LYMessages.c:829
 msgid "Upload Options"
 msgstr "Izbire po¹iljanja"
 
-#: LYMessages.c:826
+#: LYMessages.c:830
 msgid "Visited Links Page"
 msgstr "Stran z obiskanimi povezavami"
 
 #. CONFIG_DEF_TITLE subtitles
-#: LYMessages.c:829
+#: LYMessages.c:833
 msgid "See also"
 msgstr "Glejte tudi"
 
-#: LYMessages.c:830
+#: LYMessages.c:834
 msgid "your"
 msgstr "va¹"
 
-#: LYMessages.c:831
+#: LYMessages.c:835
 msgid "for runtime options"
 msgstr "za izbire med tekom"
 
-#: LYMessages.c:832
+#: LYMessages.c:836
 msgid "compile time options"
 msgstr "izbire ob prevajanju"
 
-#: LYMessages.c:833
+#: LYMessages.c:837
 msgid "color-style configuration"
 msgstr ""
 
-#: LYMessages.c:834
+#: LYMessages.c:838
 msgid "latest release"
 msgstr "zadnjo razlièico"
 
-#: LYMessages.c:835
+#: LYMessages.c:839
 msgid "pre-release version"
 msgstr "razvojno razlièico"
 
-#: LYMessages.c:836
+#: LYMessages.c:840
 msgid "development version"
 msgstr "razvojno razlièico"
 
 #. #define AUTOCONF_CONFIG_CACHE
-#: LYMessages.c:838
+#: LYMessages.c:842
 msgid ""
 "The following data were derived during the automatic configuration/build\n"
 "process of this copy of Lynx.  When reporting a bug, please include a copy\n"
@@ -2689,63 +2704,63 @@ msgid ""
 msgstr ""
 
 #. #define AUTOCONF_LYNXCFG_H
-#: LYMessages.c:842
+#: LYMessages.c:846
 msgid ""
 "The following data were used as automatically-configured compile-time\n"
 "definitions when this copy of Lynx was built."
 msgstr ""
 
 #. #define DIRED_NOVICELINE
-#: LYMessages.c:847
+#: LYMessages.c:851
 msgid "  C)reate  D)ownload  E)dit  F)ull menu  M)odify  R)emove  T)ag  U)pload     \n"
 msgstr ""
 
-#: LYMessages.c:848
+#: LYMessages.c:852
 msgid "Failed to obtain status of current link!"
 msgstr "Nismo mogli dobiti stanja trenutne povezave!"
 
 #. #define INVALID_PERMIT_URL
-#: LYMessages.c:851
+#: LYMessages.c:855
 msgid "Special URL only valid from current File Permission menu!"
 msgstr ""
 
-#: LYMessages.c:855
+#: LYMessages.c:859
 msgid "External support is currently disabled."
 msgstr "Zunanja podpora je trenutno onemogoèena."
 
 #. new with 2.8.4dev.21
-#: LYMessages.c:859
+#: LYMessages.c:863
 #, fuzzy
 msgid "Changing working-directory is currently disabled."
 msgstr "Ukaz natisni (p) je trenutno onemogoèen."
 
-#: LYMessages.c:860
+#: LYMessages.c:864
 #, fuzzy
 msgid "Linewrap OFF!"
 msgstr "Sledenje IZKLJUÈENO!"
 
-#: LYMessages.c:861
+#: LYMessages.c:865
 msgid "Linewrap ON!"
 msgstr ""
 
-#: LYMessages.c:862
+#: LYMessages.c:866
 msgid "Parsing nested-tables toggled OFF!  Reloading..."
 msgstr ""
 
-#: LYMessages.c:863
+#: LYMessages.c:867
 msgid "Parsing nested-tables toggled ON!  Reloading..."
 msgstr ""
 
-#: LYMessages.c:864
+#: LYMessages.c:868
 msgid "Shifting is disabled while line-wrap is in effect"
 msgstr ""
 
-#: LYMessages.c:865
+#: LYMessages.c:869
 #, fuzzy
 msgid "Trace not supported"
 msgstr "Terminal ne podpira barv"
 
-#: LYMessages.c:787
+#: LYMessages.c:790
 #, c-format
 msgid "\tIndents: first=%.0f others=%.0f, Height=%.1f Desc=%.1f\n"
 msgstr "\tZamiki: prvi=%.0f ostali=%.0f, vi¹ina=%.1f globina=%.1f\n"
@@ -2811,7 +2826,7 @@ msgstr ""
 #. * hack: if we fail in HTAccess.c
 #. * avoid duplicating URL, oh.
 #.
-#: WWW/Library/Implementation/HTAccess.c:1084 src/LYMainLoop.c:7728
+#: WWW/Library/Implementation/HTAccess.c:1084 src/LYMainLoop.c:7800
 msgid "Can't Access"
 msgstr "Ne moremo dostopati"
 
@@ -3055,91 +3070,96 @@ msgstr ""
 msgid "Socket read failed for 180,000 tries."
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:388
+#: WWW/Library/Implementation/HTTP.c:84
+#, c-format
+msgid "SSL callback:%s, preverify_ok=%d, ssl_okay=%d"
+msgstr ""
+
+#: WWW/Library/Implementation/HTTP.c:406
 #, c-format
 msgid "Address contains a username: %s"
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:442
+#: WWW/Library/Implementation/HTTP.c:460
 #, c-format
 msgid "Certificate issued by: %s"
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:602
+#: WWW/Library/Implementation/HTTP.c:620
 msgid "This client does not contain support for HTTPS URLs."
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:627
+#: WWW/Library/Implementation/HTTP.c:645
 msgid "Unable to connect to remote host."
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:649
+#: WWW/Library/Implementation/HTTP.c:669
 msgid "Retrying connection without TLS."
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:694
+#: WWW/Library/Implementation/HTTP.c:714
 msgid "no issuer was found"
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:696
+#: WWW/Library/Implementation/HTTP.c:716
 msgid "issuer is not a CA"
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:698
+#: WWW/Library/Implementation/HTTP.c:718
 msgid "the certificate has no known issuer"
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:700
+#: WWW/Library/Implementation/HTTP.c:720
 #, fuzzy
 msgid "the certificate has been revoked"
 msgstr "Pi¹kot smo pojedli!"
 
-#: WWW/Library/Implementation/HTTP.c:702
+#: WWW/Library/Implementation/HTTP.c:722
 msgid "the certificate is not trusted"
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:787
+#: WWW/Library/Implementation/HTTP.c:807
 #, c-format
 msgid "Verified connection to %s (cert=%s)"
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:845
+#: WWW/Library/Implementation/HTTP.c:855 WWW/Library/Implementation/HTTP.c:901
 #, c-format
 msgid "Verified connection to %s (subj=%s)"
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:875
+#: WWW/Library/Implementation/HTTP.c:931
 msgid "Can't find common name in certificate"
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:878
+#: WWW/Library/Implementation/HTTP.c:934
 #, c-format
 msgid "SSL error:host(%s)!=cert(%s)-Continue?"
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:891
+#: WWW/Library/Implementation/HTTP.c:947
 #, c-format
 msgid "UNVERIFIED connection to %s (cert=%s)"
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:900
+#: WWW/Library/Implementation/HTTP.c:956
 #, c-format
 msgid "Secure %d-bit %s (%s) HTTP connection"
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:1370
+#: WWW/Library/Implementation/HTTP.c:1426
 msgid "Sending HTTP request."
 msgstr "Po¹iljamo zahtevek HTTP."
 
-#: WWW/Library/Implementation/HTTP.c:1409
+#: WWW/Library/Implementation/HTTP.c:1465
 msgid "Unexpected network write error; connection aborted."
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:1415
+#: WWW/Library/Implementation/HTTP.c:1471
 msgid "HTTP request sent; waiting for response."
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:1483
+#: WWW/Library/Implementation/HTTP.c:1539
 msgid "Unexpected network read error; connection aborted."
 msgstr ""
 
@@ -3152,7 +3172,7 @@ msgstr ""
 #. * line and possibly other headers, so we'll deal with them by
 #. * showing the full header to the user as text/plain.  - FM
 #.
-#: WWW/Library/Implementation/HTTP.c:1677
+#: WWW/Library/Implementation/HTTP.c:1733
 msgid "Got unexpected Informational Status."
 msgstr ""
 
@@ -3162,7 +3182,7 @@ msgstr ""
 #. * content.  We'll instruct the user to do that, and
 #. * restore the current document.  - FM
 #.
-#: WWW/Library/Implementation/HTTP.c:1711
+#: WWW/Library/Implementation/HTTP.c:1767
 msgid "Request fulfilled.  Reset Content."
 msgstr ""
 
@@ -3172,27 +3192,27 @@ msgstr ""
 #. * status is inappropriate.  We'll deal with it by showing
 #. * the full header to the user as text/plain.  - FM
 #.
-#: WWW/Library/Implementation/HTTP.c:1828
+#: WWW/Library/Implementation/HTTP.c:1884
 msgid "Got unexpected 304 Not Modified status."
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:1891
+#: WWW/Library/Implementation/HTTP.c:1947
 msgid "Redirection of POST content requires user approval."
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:1906
+#: WWW/Library/Implementation/HTTP.c:1962
 msgid "Have POST content.  Treating Permanent Redirection as Temporary.\n"
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:1948
+#: WWW/Library/Implementation/HTTP.c:2004
 msgid "Retrying with access authorization information."
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:1960
+#: WWW/Library/Implementation/HTTP.c:2016
 msgid "Show the 401 message body?"
 msgstr ""
 
-#: WWW/Library/Implementation/HTTP.c:2003
+#: WWW/Library/Implementation/HTTP.c:2059
 msgid "Show the 407 message body?"
 msgstr ""
 
@@ -3200,7 +3220,7 @@ msgstr ""
 #. * Bad or unknown server_status number.  Take a chance and hope
 #. * there is something to display.  - FM
 #.
-#: WWW/Library/Implementation/HTTP.c:2103
+#: WWW/Library/Implementation/HTTP.c:2159
 msgid "Unknown status reply from server!"
 msgstr ""
 
@@ -3488,36 +3508,40 @@ msgstr ""
 msgid "Very long lines have been truncated!"
 msgstr ""
 
-#: src/HTAlert.c:161 src/LYShowInfo.c:359 src/LYShowInfo.c:363
+#: src/HTAlert.c:164 src/LYShowInfo.c:359 src/LYShowInfo.c:363
 msgid "bytes"
 msgstr "zlogov"
 
-#: src/HTAlert.c:290
-#, c-format
-msgid "Read %s of %s of data"
-msgstr "Prebrano %s od %s podatkov"
-
-#: src/HTAlert.c:292
+#.
+#. * If we know the total size of the file, we can compute
+#. * a percentage, and show a corresponding progress bar.
+#.
+#: src/HTAlert.c:300 src/HTAlert.c:323
 #, c-format
 msgid "Read %s of data"
 msgstr "Prebrano %s podatkov"
 
-#: src/HTAlert.c:297
+#: src/HTAlert.c:320
+#, c-format
+msgid "Read %s of %s of data"
+msgstr "Prebrano %s od %s podatkov"
+
+#: src/HTAlert.c:329
 #, c-format
 msgid ", %s/sec"
 msgstr ", %s/sek."
 
-#: src/HTAlert.c:306
+#: src/HTAlert.c:341
 #, c-format
 msgid " (stalled for %s)"
 msgstr ""
 
-#: src/HTAlert.c:310
+#: src/HTAlert.c:345
 #, fuzzy, c-format
 msgid ", ETA %s"
 msgstr ", ETA %ld sek."
 
-#: src/HTAlert.c:317
+#: src/HTAlert.c:367
 msgid " (Press 'z' to abort)"
 msgstr " (Pritisnite ,z` za prenehanje)"
 
@@ -3546,11 +3570,11 @@ msgstr " (Pritisnite ,z` za prenehanje)"
 #. * Lynx will also accept y Y n N as responses unless there is a conflict
 #. * with the first letter of the "yes" or "no" translation.
 #.
-#: src/HTAlert.c:355 src/HTAlert.c:403
+#: src/HTAlert.c:405 src/HTAlert.c:453
 msgid "yes"
 msgstr "da"
 
-#: src/HTAlert.c:358 src/HTAlert.c:404
+#: src/HTAlert.c:408 src/HTAlert.c:454
 msgid "no"
 msgstr "ne"
 
@@ -3570,7 +3594,7 @@ msgstr "ne"
 #. * (Y/N/Always/neVer)              - English (original)
 #. * (O/N/Toujours/Jamais)           - French
 #.
-#: src/HTAlert.c:860
+#: src/HTAlert.c:910
 msgid "Y/N/A/V"
 msgstr ""
 
@@ -3672,23 +3696,23 @@ msgstr "te povezave"
 msgid "It provides state of the art CGI script support.\n"
 msgstr "Ponuja naravnost umetni¹ko podporo za skripte CGI.\n"
 
-#: src/LYClean.c:120
+#: src/LYClean.c:122
 msgid "Exiting via interrupt:"
 msgstr "Zapu¹èamo program prek prekinitve:"
 
-#: src/LYCookie.c:2462
+#: src/LYCookie.c:2460
 msgid "(from a previous session)"
 msgstr "(iz prej¹nje seje)"
 
-#: src/LYCookie.c:2523
+#: src/LYCookie.c:2521
 msgid "Maximum Gobble Date:"
 msgstr ""
 
-#: src/LYCookie.c:2563
+#: src/LYCookie.c:2561
 msgid "Internal"
 msgstr " (notranji)"
 
-#: src/LYCookie.c:2564
+#: src/LYCookie.c:2562
 msgid "cookie_domain_flag_set error, aborting program"
 msgstr ""
 
@@ -3696,27 +3720,27 @@ msgstr ""
 msgid "Terminal initialisation failed - unknown terminal type?"
 msgstr ""
 
-#: src/LYCurses.c:1534
+#: src/LYCurses.c:1538
 msgid "Terminal ="
 msgstr "Terminal ="
 
-#: src/LYCurses.c:1538
+#: src/LYCurses.c:1542
 msgid "You must use a vt100, 200, etc. terminal with this program."
 msgstr "V tem programu morate uporabljati terminal vt100, 200, ipd."
 
-#: src/LYCurses.c:1587
+#: src/LYCurses.c:1591
 msgid "Your Terminal type is unknown!"
 msgstr "Vrsta va¹ega terminala je neznana!"
 
-#: src/LYCurses.c:1588
+#: src/LYCurses.c:1592
 msgid "Enter a terminal type:"
 msgstr "Vnesite vrsto terminala:"
 
-#: src/LYCurses.c:1602
+#: src/LYCurses.c:1606
 msgid "TERMINAL TYPE IS SET TO"
 msgstr "VRSTA TERMINALA JE NASTAVLJENA NA"
 
-#: src/LYCurses.c:2107
+#: src/LYCurses.c:2111
 #, c-format
 msgid ""
 "\n"
@@ -3725,7 +3749,7 @@ msgstr ""
 "\n"
 "Usodna napaka se je pojavila v %s Ver. %s\n"
 
-#: src/LYCurses.c:2110
+#: src/LYCurses.c:2114
 #, c-format
 msgid ""
 "\n"
@@ -3743,16 +3767,16 @@ msgstr ""
 "TCP/IP, podatke TRACEBACK, èe jih je mogoèe zajeti, in vse druge\n"
 "pomembne podatke.\n"
 
-#: src/LYEdit.c:255
+#: src/LYEdit.c:256
 #, fuzzy, c-format
 msgid "Error starting editor, %s"
 msgstr "Napaka pri obdelavi vrstice %d datoteke %s\n"
 
-#: src/LYEdit.c:258
+#: src/LYEdit.c:259
 msgid "Editor killed by signal"
 msgstr ""
 
-#: src/LYEdit.c:263
+#: src/LYEdit.c:264
 #, c-format
 msgid "Editor returned with error status %s"
 msgstr ""
@@ -3794,31 +3818,31 @@ msgstr "Lokalni dodatki:"
 msgid "No Name Given"
 msgstr "Ni podanega imena"
 
-#: src/LYHistory.c:667
+#: src/LYHistory.c:671
 msgid "You selected:"
 msgstr "Izbrali ste:"
 
-#: src/LYHistory.c:691 src/LYHistory.c:920
+#: src/LYHistory.c:695 src/LYHistory.c:924
 msgid "(no address)"
 msgstr "(ni naslova)"
 
-#: src/LYHistory.c:695
+#: src/LYHistory.c:699
 msgid " (internal)"
 msgstr " (notranji)"
 
-#: src/LYHistory.c:697
+#: src/LYHistory.c:701
 msgid " (was internal)"
 msgstr " (je bil notranji)"
 
-#: src/LYHistory.c:795
+#: src/LYHistory.c:799
 msgid " (From History)"
 msgstr " (iz Zgodovine)"
 
-#: src/LYHistory.c:840
+#: src/LYHistory.c:844
 msgid "You visited (POSTs, bookmark, menu and list files excluded):"
 msgstr ""
 
-#: src/LYHistory.c:1130
+#: src/LYHistory.c:1137
 msgid "(No messages yet)"
 msgstr ""
 
@@ -4206,19 +4230,19 @@ msgstr ""
 msgid "No system mailer configured"
 msgstr ""
 
-#: src/LYMain.c:1004
+#: src/LYMain.c:1017
 msgid "No Winsock found, sorry."
 msgstr "Vtiènica Winsock ¾al ni bila najdena."
 
-#: src/LYMain.c:1185
+#: src/LYMain.c:1198
 msgid "You MUST define a valid TMP or TEMP area!"
 msgstr "MORATE nastaviti veljavno podroèje TMP ali TEMP!"
 
-#: src/LYMain.c:1238 src/LYMainLoop.c:5025
+#: src/LYMain.c:1251 src/LYMainLoop.c:5085
 msgid "No such directory"
 msgstr " imenik"
 
-#: src/LYMain.c:1445
+#: src/LYMain.c:1459
 #, c-format
 msgid ""
 "\n"
@@ -4229,7 +4253,7 @@ msgstr ""
 "Nastavitvena datoteka %s ni dostopna.\n"
 "\n"
 
-#: src/LYMain.c:1455
+#: src/LYMain.c:1469
 #, c-format
 msgid ""
 "\n"
@@ -4240,7 +4264,7 @@ msgstr ""
 "Nabor znakov za Lynx ni bil doloèen.\n"
 "\n"
 
-#: src/LYMain.c:1484
+#: src/LYMain.c:1498
 #, c-format
 msgid ""
 "\n"
@@ -4251,7 +4275,7 @@ msgstr ""
 "Urejevalna preslikava za Lynx ni bila doloèena.\n"
 "\n"
 
-#: src/LYMain.c:1560
+#: src/LYMain.c:1574
 #, c-format
 msgid ""
 "\n"
@@ -4262,175 +4286,175 @@ msgstr ""
 "Datoteka %s za Lynx< ni dostopna.\n"
 "\n"
 
-#: src/LYMain.c:1635
+#: src/LYMain.c:1649
 #, c-format
 msgid "Ignored %d characters from standard input.\n"
 msgstr ""
 
-#: src/LYMain.c:1637
+#: src/LYMain.c:1651
 #, c-format
 msgid "Use \"-stdin\" or \"-\" to tell how to handle piped input.\n"
 msgstr ""
 
-#: src/LYMain.c:1785
+#: src/LYMain.c:1799
 msgid "Warning:"
 msgstr ""
 
-#: src/LYMain.c:2340
+#: src/LYMain.c:2368
 msgid "persistent cookies state will be changed in next session only."
 msgstr "stanje obstojnih pi¹kotov bo spremenjeno le v naslednji seji."
 
-#: src/LYMain.c:2585 src/LYMain.c:2630
+#: src/LYMain.c:2613 src/LYMain.c:2658
 #, c-format
 msgid "Lynx: ignoring unrecognized charset=%s\n"
 msgstr ""
 
-#: src/LYMain.c:3142
+#: src/LYMain.c:3177
 #, fuzzy, c-format
 msgid "%s Version %s (%s)"
 msgstr "%s Razlièica %s (%s)\n"
 
-#: src/LYMain.c:3177
+#: src/LYMain.c:3215
 #, c-format
 msgid "Built on %s %s %s\n"
 msgstr "Zgrajena na %s %s %s\n"
 
-#: src/LYMain.c:3199
+#: src/LYMain.c:3237
 msgid "Copyrights held by the Lynx Developers Group,"
 msgstr ""
 
-#: src/LYMain.c:3200
+#: src/LYMain.c:3238
 #, fuzzy
 msgid "the University of Kansas, CERN, and other contributors."
 msgstr "Pravice raz¹irjanja imajo Univerza v Kansasu, CERN in drugi sodelavci."
 
-#: src/LYMain.c:3201
+#: src/LYMain.c:3239
 #, fuzzy
 msgid "Distributed under the GNU General Public License (Version 2)."
 msgstr "Raz¹irjano pod Splo¹no licenco GNU."
 
-#: src/LYMain.c:3202
+#: src/LYMain.c:3240
 msgid "See http://lynx.isc.org/ and the online help for more information."
 msgstr ""
 
-#: src/LYMain.c:3989
+#: src/LYMain.c:4053
 #, c-format
 msgid "USAGE: %s [options] [file]\n"
 msgstr ""
 
-#: src/LYMain.c:3990
+#: src/LYMain.c:4054
 #, c-format
 msgid "Options are:\n"
 msgstr ""
 
-#: src/LYMain.c:4289
+#: src/LYMain.c:4353
 #, c-format
 msgid "%s: Invalid Option: %s\n"
 msgstr ""
 
-#: src/LYMainLoop.c:584
+#: src/LYMainLoop.c:588
 #, c-format
 msgid "Internal error: Invalid mouse link %d!"
 msgstr ""
 
-#: src/LYMainLoop.c:701 src/LYMainLoop.c:5047
+#: src/LYMainLoop.c:708 src/LYMainLoop.c:5107
 msgid "A URL specified by the user"
 msgstr ""
 
-#: src/LYMainLoop.c:1157
+#: src/LYMainLoop.c:1167
 msgid "Enctype multipart/form-data not yet supported!  Cannot submit."
 msgstr ""
 
 #.
 #. * Make a name for this help file.
 #.
-#: src/LYMainLoop.c:3053
+#: src/LYMainLoop.c:3113
 msgid "Help Screen"
 msgstr ""
 
-#: src/LYMainLoop.c:3174
+#: src/LYMainLoop.c:3234
 msgid "System Index"
 msgstr ""
 
-#: src/LYMainLoop.c:3534 src/LYMainLoop.c:5273
+#: src/LYMainLoop.c:3594 src/LYMainLoop.c:5335
 msgid "Entry into main screen"
 msgstr ""
 
-#: src/LYMainLoop.c:3792
+#: src/LYMainLoop.c:3852
 msgid "No next document present"
 msgstr ""
 
-#: src/LYMainLoop.c:4090
+#: src/LYMainLoop.c:4150
 msgid "charset for this document specified explicitly, sorry..."
 msgstr ""
 
-#: src/LYMainLoop.c:5003
+#: src/LYMainLoop.c:5063
 msgid "cd to:"
 msgstr " v "
 
-#: src/LYMainLoop.c:5028
+#: src/LYMainLoop.c:5088
 msgid "A component of path is not a directory"
 msgstr ""
 
-#: src/LYMainLoop.c:5031
+#: src/LYMainLoop.c:5091
 msgid "failed to change directory"
 msgstr "Ne moremo dostopati do imenika."
 
-#: src/LYMainLoop.c:6202
+#: src/LYMainLoop.c:6267
 msgid "Reparsing document under current settings..."
 msgstr ""
 
-#: src/LYMainLoop.c:6493
+#: src/LYMainLoop.c:6558
 #, c-format
 msgid "Fatal error - could not open output file %s\n"
 msgstr ""
 
-#: src/LYMainLoop.c:6836
+#: src/LYMainLoop.c:6901
 msgid "TABLE center enable."
 msgstr ""
 
-#: src/LYMainLoop.c:6839
+#: src/LYMainLoop.c:6904
 msgid "TABLE center disable."
 msgstr ""
 
-#: src/LYMainLoop.c:6916
+#: src/LYMainLoop.c:6981
 #, fuzzy
 msgid "Current URL is empty."
 msgstr "Trenutni imenik:"
 
-#: src/LYMainLoop.c:6918 src/LYUtils.c:1814
+#: src/LYMainLoop.c:6983 src/LYUtils.c:1810
 msgid "Copy to clipboard failed."
 msgstr ""
 
-#: src/LYMainLoop.c:6920
+#: src/LYMainLoop.c:6985
 msgid "Document URL put to clipboard."
 msgstr ""
 
-#: src/LYMainLoop.c:6922
+#: src/LYMainLoop.c:6987
 msgid "Link URL put to clipboard."
 msgstr ""
 
-#: src/LYMainLoop.c:6949
+#: src/LYMainLoop.c:7014
 msgid "No URL in the clipboard."
 msgstr ""
 
-#: src/LYMainLoop.c:7613 src/LYMainLoop.c:7783
+#: src/LYMainLoop.c:7685 src/LYMainLoop.c:7855
 msgid "-index-"
 msgstr " stvarno kazalo"
 
-#: src/LYMainLoop.c:7723
+#: src/LYMainLoop.c:7795
 msgid "lynx: Can't access startfile"
 msgstr ""
 
-#: src/LYMainLoop.c:7735
+#: src/LYMainLoop.c:7807
 msgid "lynx: Start file could not be found or is not text/html or text/plain"
 msgstr ""
 
-#: src/LYMainLoop.c:7736
+#: src/LYMainLoop.c:7808
 msgid "      Exiting..."
 msgstr ""
 
-#: src/LYMainLoop.c:7777
+#: src/LYMainLoop.c:7849
 msgid "-more-"
 msgstr ""
 
@@ -4632,204 +4656,208 @@ msgstr ""
 msgid "ADVANCED"
 msgstr ""
 
-#: src/LYOptions.c:2325
+#: src/LYOptions.c:2330
 #, fuzzy
 msgid "Directories first"
 msgstr "Podimeniki:"
 
-#: src/LYOptions.c:2326
+#: src/LYOptions.c:2331
 #, fuzzy
 msgid "Files first"
 msgstr " najprej."
 
-#: src/LYOptions.c:2327
+#: src/LYOptions.c:2332
 msgid "Mixed style"
 msgstr ""
 
-#: src/LYOptions.c:2335 src/LYOptions.c:2355
+#: src/LYOptions.c:2340 src/LYOptions.c:2360
 #, fuzzy
 msgid "By Name"
 msgstr "Ime:"
 
-#: src/LYOptions.c:2336 src/LYOptions.c:2356
+#: src/LYOptions.c:2341 src/LYOptions.c:2361
 msgid "By Type"
 msgstr ""
 
-#: src/LYOptions.c:2337 src/LYOptions.c:2357
+#: src/LYOptions.c:2342 src/LYOptions.c:2362
 #, fuzzy
 msgid "By Size"
 msgstr "Velikost zlogov:"
 
-#: src/LYOptions.c:2338 src/LYOptions.c:2358
+#: src/LYOptions.c:2343 src/LYOptions.c:2363
 msgid "By Date"
 msgstr ""
 
-#: src/LYOptions.c:2339
+#: src/LYOptions.c:2344
 msgid "By Mode"
 msgstr ""
 
-#: src/LYOptions.c:2341
+#: src/LYOptions.c:2346
 msgid "By User"
 msgstr ""
 
-#: src/LYOptions.c:2342
+#: src/LYOptions.c:2347
 #, fuzzy
 msgid "By Group"
 msgstr "Skupina"
 
-#: src/LYOptions.c:2367
+#: src/LYOptions.c:2372
 msgid "Do not show rate"
 msgstr ""
 
-#: src/LYOptions.c:2368 src/LYOptions.c:2369
+#: src/LYOptions.c:2373 src/LYOptions.c:2374
 #, fuzzy, c-format
 msgid "Show %s/sec rate"
 msgstr "Prenos podatkov konèan"
 
-#: src/LYOptions.c:2371 src/LYOptions.c:2372
+#: src/LYOptions.c:2376 src/LYOptions.c:2377
 #, c-format
 msgid "Show %s/sec, ETA"
 msgstr ""
 
-#: src/LYOptions.c:2384
+#: src/LYOptions.c:2380
+msgid "Show progressbar"
+msgstr ""
+
+#: src/LYOptions.c:2392
 msgid "Accept lynx's internal types"
 msgstr ""
 
-#: src/LYOptions.c:2385
+#: src/LYOptions.c:2393
 msgid "Also accept lynx.cfg's types"
 msgstr ""
 
-#: src/LYOptions.c:2386
+#: src/LYOptions.c:2394
 msgid "Also accept user's types"
 msgstr ""
 
-#: src/LYOptions.c:2387
+#: src/LYOptions.c:2395
 msgid "Also accept system's types"
 msgstr ""
 
-#: src/LYOptions.c:2388
+#: src/LYOptions.c:2396
 #, fuzzy
 msgid "Accept all types"
 msgstr "Sprejmimo spremembe"
 
-#: src/LYOptions.c:2397
+#: src/LYOptions.c:2405
 msgid "gzip"
 msgstr ""
 
-#: src/LYOptions.c:2398
+#: src/LYOptions.c:2406
 msgid "deflate"
 msgstr ""
 
-#: src/LYOptions.c:2401
+#: src/LYOptions.c:2409
 msgid "compress"
 msgstr ""
 
-#: src/LYOptions.c:2404
+#: src/LYOptions.c:2412
 msgid "bzip2"
 msgstr ""
 
-#: src/LYOptions.c:2406
+#: src/LYOptions.c:2414
 msgid "All"
 msgstr ""
 
-#: src/LYOptions.c:2674 src/LYOptions.c:2698
+#: src/LYOptions.c:2682 src/LYOptions.c:2706
 #, c-format
 msgid "Use %s to invoke the Options menu!"
 msgstr ""
 
-#: src/LYOptions.c:3455
+#: src/LYOptions.c:3478
 msgid "(options marked with (!) will not be saved)"
 msgstr ""
 
-#: src/LYOptions.c:3463
+#: src/LYOptions.c:3486
 msgid "General Preferences"
 msgstr "Sklici"
 
 #. ***************************************************************
 #. User Mode: SELECT
-#: src/LYOptions.c:3467
+#: src/LYOptions.c:3490
 msgid "User mode"
 msgstr ""
 
 #. Editor: INPUT
-#: src/LYOptions.c:3473
+#: src/LYOptions.c:3496
 msgid "Editor"
 msgstr ""
 
 #. Search Type: SELECT
-#: src/LYOptions.c:3478
+#: src/LYOptions.c:3501
 msgid "Type of Search"
 msgstr ""
 
-#: src/LYOptions.c:3483
+#: src/LYOptions.c:3506
 msgid "Security and Privacy"
 msgstr ""
 
 #. ***************************************************************
 #. Cookies: SELECT
-#: src/LYOptions.c:3487
+#: src/LYOptions.c:3510
 msgid "Cookies"
 msgstr ""
 
 #. Cookie Prompting: SELECT
-#: src/LYOptions.c:3501
+#: src/LYOptions.c:3524
 msgid "Invalid-Cookie Prompting"
 msgstr ""
 
 #. SSL Prompting: SELECT
-#: src/LYOptions.c:3508
+#: src/LYOptions.c:3531
 msgid "SSL Prompting"
 msgstr ""
 
-#: src/LYOptions.c:3514
+#: src/LYOptions.c:3537
 msgid "Keyboard Input"
 msgstr ""
 
 #. ***************************************************************
 #. Keypad Mode: SELECT
-#: src/LYOptions.c:3518
+#: src/LYOptions.c:3541
 msgid "Keypad mode"
 msgstr ""
 
 #. Emacs keys: ON/OFF
-#: src/LYOptions.c:3524
+#: src/LYOptions.c:3547
 msgid "Emacs keys"
 msgstr ""
 
 #. VI Keys: ON/OFF
-#: src/LYOptions.c:3530
+#: src/LYOptions.c:3553
 msgid "VI keys"
 msgstr ""
 
 #. Line edit style: SELECT
 #. well, at least 2 line edit styles available
-#: src/LYOptions.c:3537
+#: src/LYOptions.c:3560
 msgid "Line edit style"
 msgstr ""
 
 #. Keyboard layout: SELECT
-#: src/LYOptions.c:3549
+#: src/LYOptions.c:3572
 msgid "Keyboard layout"
 msgstr ""
 
 #.
 #. * Display and Character Set
 #.
-#: src/LYOptions.c:3563
+#: src/LYOptions.c:3586
 msgid "Display and Character Set"
 msgstr ""
 
 #. Use locale-based character set: ON/OFF
-#: src/LYOptions.c:3568
+#: src/LYOptions.c:3591
 msgid "Use locale-based character set"
 msgstr ""
 
 #. Display Character Set: SELECT
-#: src/LYOptions.c:3577
+#: src/LYOptions.c:3600
 msgid "Display character set"
 msgstr ""
 
-#: src/LYOptions.c:3608
+#: src/LYOptions.c:3631
 msgid "Assumed document character set"
 msgstr ""
 
@@ -4838,179 +4866,189 @@ msgstr ""
 #. * we split the header to make it more readable:
 #. * "CJK mode" for CJK display charsets, and "Raw 8-bit" for others.
 #.
-#: src/LYOptions.c:3628
+#: src/LYOptions.c:3651
 msgid "CJK mode"
 msgstr ""
 
-#: src/LYOptions.c:3630
+#: src/LYOptions.c:3653
 msgid "Raw 8-bit"
 msgstr ""
 
 #. X Display: INPUT
-#: src/LYOptions.c:3638
+#: src/LYOptions.c:3661
 msgid "X Display"
 msgstr ""
 
 #.
 #. * Document Appearance
 #.
-#: src/LYOptions.c:3644
+#: src/LYOptions.c:3667
 msgid "Document Appearance"
 msgstr ""
 
-#: src/LYOptions.c:3650
+#: src/LYOptions.c:3673
 msgid "Show color"
 msgstr ""
 
 #. Show cursor: ON/OFF
-#: src/LYOptions.c:3674
+#: src/LYOptions.c:3697
 msgid "Show cursor"
 msgstr ""
 
 #. Underline links: ON/OFF
-#: src/LYOptions.c:3680
+#: src/LYOptions.c:3703
 #, fuzzy
 msgid "Underline links"
 msgstr "Skrite povezave:"
 
 #. Show scrollbar: ON/OFF
-#: src/LYOptions.c:3687
+#: src/LYOptions.c:3710
 msgid "Show scrollbar"
 msgstr ""
 
 #. Select Popups: ON/OFF
-#: src/LYOptions.c:3694
+#: src/LYOptions.c:3717
 msgid "Popups for select fields"
 msgstr ""
 
 #. HTML error recovery: SELECT
-#: src/LYOptions.c:3700
+#: src/LYOptions.c:3723
 msgid "HTML error recovery"
 msgstr ""
 
 #. Show Images: SELECT
-#: src/LYOptions.c:3706
+#: src/LYOptions.c:3729
 msgid "Show images"
 msgstr ""
 
 #. Verbose Images: ON/OFF
-#: src/LYOptions.c:3720
+#: src/LYOptions.c:3743
 msgid "Verbose images"
 msgstr ""
 
 #.
 #. * Headers Transferred to Remote Servers
 #.
-#: src/LYOptions.c:3728
+#: src/LYOptions.c:3751
 msgid "Headers Transferred to Remote Servers"
 msgstr ""
 
 #. ***************************************************************
 #. Mail Address: INPUT
-#: src/LYOptions.c:3732
+#: src/LYOptions.c:3755
 msgid "Personal mail address"
 msgstr ""
 
-#: src/LYOptions.c:3738
+#: src/LYOptions.c:3761
 #, fuzzy
 msgid "Password for anonymous ftp"
 msgstr "Geslo za novièarski stre¾nik ,%s`:"
 
 #. Preferred media type: SELECT
-#: src/LYOptions.c:3744
+#: src/LYOptions.c:3767
 #, fuzzy
 msgid "Preferred media type"
 msgstr "Preneseno %d zlogov"
 
 #. Preferred encoding: SELECT
-#: src/LYOptions.c:3750
+#: src/LYOptions.c:3773
 msgid "Preferred encoding"
 msgstr ""
 
 #. Preferred Document Character Set: INPUT
-#: src/LYOptions.c:3756
+#: src/LYOptions.c:3779
 msgid "Preferred document character set"
 msgstr ""
 
 #. Preferred Document Language: INPUT
-#: src/LYOptions.c:3761
+#: src/LYOptions.c:3784
 msgid "Preferred document language"
 msgstr ""
 
-#: src/LYOptions.c:3767
+#: src/LYOptions.c:3790
 msgid "User-Agent header"
 msgstr ""
 
 #.
 #. * Listing and Accessing Files
 #.
-#: src/LYOptions.c:3775
+#: src/LYOptions.c:3798
 msgid "Listing and Accessing Files"
 msgstr ""
 
 #. FTP sort: SELECT
-#: src/LYOptions.c:3780
+#: src/LYOptions.c:3803
 msgid "Use Passive FTP"
 msgstr ""
 
 #. FTP sort: SELECT
-#: src/LYOptions.c:3786
+#: src/LYOptions.c:3809
 msgid "FTP sort criteria"
 msgstr ""
 
 #. Local Directory Sort: SELECT
-#: src/LYOptions.c:3794
+#: src/LYOptions.c:3817
 msgid "Local directory sort criteria"
 msgstr ""
 
 #. Local Directory Order: SELECT
-#: src/LYOptions.c:3800
+#: src/LYOptions.c:3823
 #, fuzzy
 msgid "Local directory sort order"
 msgstr "Tega imenika ni mogoèe brati."
 
-#: src/LYOptions.c:3809
+#: src/LYOptions.c:3832
 msgid "Show dot files"
 msgstr ""
 
-#: src/LYOptions.c:3817
+#: src/LYOptions.c:3840
 msgid "Execution links"
 msgstr ""
 
 #. Show transfer rate: SELECT
-#: src/LYOptions.c:3837
+#: src/LYOptions.c:3860
 msgid "Show transfer rate"
 msgstr "Prenos podatkov konèan"
 
 #.
 #. * Special Files and Screens
 #.
-#: src/LYOptions.c:3857
+#: src/LYOptions.c:3880
 msgid "Special Files and Screens"
 msgstr ""
 
-#: src/LYOptions.c:3862
+#: src/LYOptions.c:3885
 msgid "Multi-bookmarks"
 msgstr ""
 
-#: src/LYOptions.c:3870
+#: src/LYOptions.c:3893
 msgid "Review/edit Bookmarks files"
 msgstr ""
 
-#: src/LYOptions.c:3872
+#: src/LYOptions.c:3895
 msgid "Goto multi-bookmark menu"
 msgstr ""
 
-#: src/LYOptions.c:3874
+#: src/LYOptions.c:3897
 msgid "Bookmarks file"
 msgstr ""
 
+#. Auto Session: ON/OFF
+#: src/LYOptions.c:3904
+msgid "Auto Session"
+msgstr ""
+
+#. Session File Menu: INPUT
+#: src/LYOptions.c:3910
+msgid "Session file"
+msgstr ""
+
 #. Visited Pages: SELECT
-#: src/LYOptions.c:3880
+#: src/LYOptions.c:3916
 msgid "Visited Pages"
 msgstr "Stran z obiskanimi povezavami"
 
-#: src/LYOptions.c:3885
+#: src/LYOptions.c:3921
 msgid "View the file "
 msgstr ""
 
@@ -5075,7 +5113,7 @@ msgstr ""
 msgid "Print out on a printer attached to your vt100 terminal"
 msgstr ""
 
-#: src/LYReadCFG.c:343
+#: src/LYReadCFG.c:369
 #, c-format
 msgid ""
 "Syntax Error parsing COLOR in configuration file:\n"
@@ -5086,76 +5124,76 @@ msgid ""
 "The special strings 'nocolor' or 'default', or\n"
 msgstr ""
 
-#: src/LYReadCFG.c:356
+#: src/LYReadCFG.c:382
 msgid "Offending line:"
 msgstr ""
 
-#: src/LYReadCFG.c:653
+#: src/LYReadCFG.c:679
 #, c-format
 msgid "key remapping of %s to %s for %s failed\n"
 msgstr ""
 
-#: src/LYReadCFG.c:660
+#: src/LYReadCFG.c:686
 #, c-format
 msgid "key remapping of %s to %s failed\n"
 msgstr ""
 
-#: src/LYReadCFG.c:681
+#: src/LYReadCFG.c:707
 #, c-format
 msgid "invalid line-editor selection %s for key %s, selecting all\n"
 msgstr ""
 
-#: src/LYReadCFG.c:706 src/LYReadCFG.c:718
+#: src/LYReadCFG.c:732 src/LYReadCFG.c:744
 #, c-format
 msgid "setting of line-editor binding for key %s (0x%x) to 0x%x for %s failed\n"
 msgstr ""
 
-#: src/LYReadCFG.c:722
+#: src/LYReadCFG.c:748
 #, c-format
 msgid "setting of line-editor binding for key %s (0x%x) for %s failed\n"
 msgstr ""
 
-#: src/LYReadCFG.c:818
+#: src/LYReadCFG.c:844
 #, c-format
 msgid "Lynx: cannot start, CERN rules file %s is not available\n"
 msgstr ""
 
-#: src/LYReadCFG.c:819
+#: src/LYReadCFG.c:845
 msgid "(no name)"
 msgstr "(brez imena)"
 
-#: src/LYReadCFG.c:1832
+#: src/LYReadCFG.c:1876
 #, c-format
 msgid "More than %d nested lynx.cfg includes -- perhaps there is a loop?!?\n"
 msgstr ""
 
-#: src/LYReadCFG.c:1834
+#: src/LYReadCFG.c:1878
 #, c-format
 msgid "Last attempted include was '%s',\n"
 msgstr ""
 
-#: src/LYReadCFG.c:1835
+#: src/LYReadCFG.c:1879
 #, c-format
 msgid "included from '%s'.\n"
 msgstr ""
 
-#: src/LYReadCFG.c:2243 src/LYReadCFG.c:2256 src/LYReadCFG.c:2314
+#: src/LYReadCFG.c:2287 src/LYReadCFG.c:2300 src/LYReadCFG.c:2358
 msgid "The following is read from your lynx.cfg file."
 msgstr ""
 
-#: src/LYReadCFG.c:2244 src/LYReadCFG.c:2257
+#: src/LYReadCFG.c:2288 src/LYReadCFG.c:2301
 msgid "Please read the distribution"
 msgstr "Prosim, preberite dokumentacijo v distribuciji"
 
-#: src/LYReadCFG.c:2250 src/LYReadCFG.c:2260
+#: src/LYReadCFG.c:2294 src/LYReadCFG.c:2304
 msgid "for more comments."
 msgstr "za veè pripomb."
 
-#: src/LYReadCFG.c:2296
+#: src/LYReadCFG.c:2340
 msgid "RELOAD THE CHANGES"
 msgstr ""
 
-#: src/LYReadCFG.c:2304
+#: src/LYReadCFG.c:2348
 msgid "Your primary configuration"
 msgstr ""
 
@@ -5420,42 +5458,42 @@ msgstr ""
 msgid "Upload options:"
 msgstr ""
 
-#: src/LYUtils.c:1816
+#: src/LYUtils.c:1812
 msgid "Download document URL put to clipboard."
 msgstr ""
 
-#: src/LYUtils.c:2593
+#: src/LYUtils.c:2597
 msgid "Unexpected access protocol for this URL scheme."
 msgstr ""
 
-#: src/LYUtils.c:3397
+#: src/LYUtils.c:3401
 msgid "Too many tempfiles"
 msgstr ""
 
-#: src/LYUtils.c:3697
+#: src/LYUtils.c:3701
 #, fuzzy
 msgid "unknown restriction"
 msgstr "neznano polje ali povezava"
 
-#: src/LYUtils.c:3728
+#: src/LYUtils.c:3732
 #, c-format
 msgid "No restrictions set.\n"
 msgstr ""
 
-#: src/LYUtils.c:3731
+#: src/LYUtils.c:3735
 #, c-format
 msgid "Restrictions set:\n"
 msgstr "Opis:\n"
 
-#: src/LYUtils.c:5109
+#: src/LYUtils.c:5113
 msgid "Cannot find HOME directory"
 msgstr ""
 
-#: src/LYrcFile.c:22
+#: src/LYrcFile.c:16
 msgid "Normally disabled.  See ENABLE_LYNXRC in lynx.cfg\n"
 msgstr ""
 
-#: src/LYrcFile.c:319
+#: src/LYrcFile.c:317
 msgid ""
 "accept_all_cookies allows the user to tell Lynx to automatically\n"
 "accept all cookies if desired.  The default is \"FALSE\" which will\n"
@@ -5463,7 +5501,7 @@ msgid ""
 "all cookies.\n"
 msgstr ""
 
-#: src/LYrcFile.c:327
+#: src/LYrcFile.c:325
 msgid ""
 "anonftp_password allows the user to tell Lynx to use the personal\n"
 "email address as the password for anonymous ftp.  If no value is given,\n"
@@ -5471,21 +5509,21 @@ msgid ""
 "to a different value if you choose.\n"
 msgstr ""
 
-#: src/LYrcFile.c:334
+#: src/LYrcFile.c:332
 msgid ""
 "bookmark_file specifies the name and location of the default bookmark\n"
 "file into which the user can paste links for easy access at a later\n"
 "date.\n"
 msgstr ""
 
-#: src/LYrcFile.c:339
+#: src/LYrcFile.c:337
 msgid ""
 "If case_sensitive_searching is \"on\" then when the user invokes a search\n"
 "using the 's' or '/' keys, the search performed will be case sensitive\n"
 "instead of case INsensitive.  The default is usually \"off\".\n"
 msgstr ""
 
-#: src/LYrcFile.c:344
+#: src/LYrcFile.c:342
 msgid ""
 "The character_set definition controls the representation of 8 bit\n"
 "characters for your terminal.  If 8 bit characters do not show up\n"
@@ -5494,7 +5532,7 @@ msgid ""
 "Current valid characters sets are:\n"
 msgstr ""
 
-#: src/LYrcFile.c:351
+#: src/LYrcFile.c:349
 msgid ""
 "cookie_accept_domains and cookie_reject_domains are comma-delimited\n"
 "lists of domains from which Lynx should automatically accept or reject\n"
@@ -5503,15 +5541,16 @@ msgid ""
 "settings made here.\n"
 msgstr ""
 
-#: src/LYrcFile.c:359
+#: src/LYrcFile.c:357
+#, fuzzy
 msgid ""
 "cookie_file specifies the file from which to read persistent cookies.\n"
-"The default is ~/.lynx_cookies.\n"
+"The default is ~/"
 msgstr ""
 "cookie_file doloèa datoteko, v kateri naj se hranijo obstojni pi¹koti.\n"
 "Privzeta je ~/.lynx_cookies.\n"
 
-#: src/LYrcFile.c:364
+#: src/LYrcFile.c:362
 msgid ""
 "cookie_loose_invalid_domains, cookie_strict_invalid_domains, and\n"
 "cookie_query_invalid_domains are comma-delimited lists of which domains\n"
@@ -5522,13 +5561,13 @@ msgid ""
 "querying the user for an invalid path or domain.\n"
 msgstr ""
 
-#: src/LYrcFile.c:378
+#: src/LYrcFile.c:376
 msgid ""
 "dir_list_order specifies the directory list order under DIRED_SUPPORT\n"
 "(if implemented).  The default is \"ORDER_BY_NAME\"\n"
 msgstr ""
 
-#: src/LYrcFile.c:383
+#: src/LYrcFile.c:381
 msgid ""
 "dir_list_styles specifies the directory list style under DIRED_SUPPORT\n"
 "(if implemented).  The default is \"MIXED_STYLE\", which sorts both\n"
@@ -5536,7 +5575,7 @@ msgid ""
 "\"DIRECTORIES_FIRST\" lists directories first.\n"
 msgstr ""
 
-#: src/LYrcFile.c:391
+#: src/LYrcFile.c:389
 msgid ""
 "If emacs_keys is to \"on\" then the normal EMACS movement keys:\n"
 "  ^N = down    ^P = up\n"
@@ -5544,7 +5583,7 @@ msgid ""
 "will be enabled.\n"
 msgstr ""
 
-#: src/LYrcFile.c:397
+#: src/LYrcFile.c:395
 msgid ""
 "file_editor specifies the editor to be invoked when editing local files\n"
 "or sending mail.  If no editor is specified, then file editing is disabled\n"
@@ -5552,7 +5591,7 @@ msgid ""
 "will be used for sending mail.\n"
 msgstr ""
 
-#: src/LYrcFile.c:404
+#: src/LYrcFile.c:402
 msgid ""
 "The file_sorting_method specifies which value to sort on when viewing\n"
 "file lists such as FTP directories.  The options are:\n"
@@ -5562,7 +5601,7 @@ msgid ""
 "   BY_DATE     -- sorts on the date of the file\n"
 msgstr ""
 
-#: src/LYrcFile.c:426
+#: src/LYrcFile.c:424
 msgid ""
 "lineedit_mode specifies the key binding used for inputting strings in\n"
 "prompts and forms.  If lineedit_mode is set to \"Default Binding\" then\n"
@@ -5577,7 +5616,7 @@ msgid ""
 "Current lineedit modes are:\n"
 msgstr ""
 
-#: src/LYrcFile.c:444
+#: src/LYrcFile.c:442
 msgid ""
 "The following allow you to define sub-bookmark files and descriptions.\n"
 "The format is multi_bookmark<capital_letter>=<filename>,<description>\n"
@@ -5585,7 +5624,7 @@ msgid ""
 "We start with \"multi_bookmarkB\" since 'A' is the default (see above).\n"
 msgstr ""
 
-#: src/LYrcFile.c:450
+#: src/LYrcFile.c:448
 msgid ""
 "personal_mail_address specifies your personal mail address.  The\n"
 "address will be sent during HTTP file transfers for authorization and\n"
@@ -5596,7 +5635,7 @@ msgid ""
 "your mailed comments.\n"
 msgstr ""
 
-#: src/LYrcFile.c:459
+#: src/LYrcFile.c:457
 msgid ""
 "preferred_charset specifies the character set in MIME notation (e.g.,\n"
 "ISO-8859-2, ISO-8859-5) which Lynx will indicate you prefer in requests\n"
@@ -5612,7 +5651,7 @@ msgid ""
 "is also allowed.\n"
 msgstr ""
 
-#: src/LYrcFile.c:475
+#: src/LYrcFile.c:473
 msgid ""
 "preferred_language specifies the language in MIME notation (e.g., en,\n"
 "fr, may be a comma-separated list in decreasing preference)\n"
@@ -5621,7 +5660,7 @@ msgid ""
 "Otherwise, the server will send the file in its default language.\n"
 msgstr ""
 
-#: src/LYrcFile.c:486
+#: src/LYrcFile.c:484
 msgid ""
 "If run_all_execution_links is set \"on\" then all local execution links\n"
 "will be executed when they are selected.\n"
@@ -5643,7 +5682,7 @@ msgstr ""
 "        bilo nastavljeno na \"on\" le, èe pregledujete zaupen vir\n"
 "        informacij.\n"
 
-#: src/LYrcFile.c:497
+#: src/LYrcFile.c:495
 msgid ""
 "If run_execution_links_on_local_files is set \"on\" then all local\n"
 "execution links that are found in LOCAL files will be executed when they\n"
@@ -5670,7 +5709,7 @@ msgstr ""
 "        pobri¹ejo datoteke ali ogrozijo varnost.  To naj bi bilo\n"
 "        nastavljeno na \"on\" le, èe pregledujete zaupen vir informacij.\n"
 
-#: src/LYrcFile.c:515
+#: src/LYrcFile.c:513
 msgid ""
 "select_popups specifies whether the OPTIONs in a SELECT block which\n"
 "lacks a MULTIPLE attribute are presented as a vertical list of radio\n"
@@ -5681,7 +5720,7 @@ msgid ""
 "The default can be overridden via the -popup command line toggle.\n"
 msgstr ""
 
-#: src/LYrcFile.c:525
+#: src/LYrcFile.c:523
 msgid ""
 "show_color specifies how to set the color mode at startup.  A value of\n"
 "\"never\" will force color mode off (treat the terminal as monochrome)\n"
@@ -5700,7 +5739,7 @@ msgid ""
 "\"off\" \"show color\" settings will be treated as \"default\".\n"
 msgstr ""
 
-#: src/LYrcFile.c:542
+#: src/LYrcFile.c:540
 msgid ""
 "show_cursor specifies whether to 'hide' the cursor to the right (and\n"
 "bottom, if possible) of the screen, or to place it to the left of the\n"
@@ -5713,7 +5752,7 @@ msgid ""
 "The default can be overridden via the -show_cursor command line toggle.\n"
 msgstr ""
 
-#: src/LYrcFile.c:553
+#: src/LYrcFile.c:551
 msgid ""
 "show_dotfiles specifies that the directory listing should include\n"
 "\"hidden\" (dot) files/directories.  If set \"on\", this will be\n"
@@ -5722,7 +5761,7 @@ msgid ""
 "is disabled, creation of such files via Lynx also is disabled.\n"
 msgstr ""
 
-#: src/LYrcFile.c:564
+#: src/LYrcFile.c:562
 msgid ""
 "If sub_bookmarks is not turned \"off\", and multiple bookmarks have\n"
 "been defined (see below), then all bookmark operations will first\n"
@@ -5735,7 +5774,7 @@ msgid ""
 "presented regardless of user mode.\n"
 msgstr ""
 
-#: src/LYrcFile.c:578
+#: src/LYrcFile.c:576
 msgid ""
 "user_mode specifies the users level of knowledge with Lynx.  The\n"
 "default is \"NOVICE\" which displays two extra lines of help at the\n"
@@ -5745,14 +5784,14 @@ msgid ""
 "bottom of the screen.\n"
 msgstr ""
 
-#: src/LYrcFile.c:587
+#: src/LYrcFile.c:585
 msgid ""
 "If verbose_images is \"on\", lynx will print the name of the image\n"
 "source file in place of [INLINE], [LINK] or [IMAGE]\n"
 "See also VERBOSE_IMAGES in lynx.cfg\n"
 msgstr ""
 
-#: src/LYrcFile.c:592
+#: src/LYrcFile.c:590
 msgid ""
 "If vi_keys is set to \"on\", then the normal VI movement keys:\n"
 "  j = down    k = up\n"
@@ -5762,13 +5801,13 @@ msgid ""
 "and the keymap display, respectively.\n"
 msgstr ""
 
-#: src/LYrcFile.c:600
+#: src/LYrcFile.c:598
 msgid ""
 "The visited_links setting controls how Lynx organizes the information\n"
 "in the Visited Links Page.\n"
 msgstr ""
 
-#: src/LYrcFile.c:818
+#: src/LYrcFile.c:816
 msgid ""
 "If keypad_mode is set to \"NUMBERS_AS_ARROWS\", then the numbers on\n"
 "your keypad when the numlock is on will act as arrow keys:\n"
@@ -5779,13 +5818,13 @@ msgid ""
 "regardless of whether numlock is on.\n"
 msgstr ""
 
-#: src/LYrcFile.c:827
+#: src/LYrcFile.c:825
 msgid ""
 "If keypad_mode is set to \"LINKS_ARE_NUMBERED\", then numbers will\n"
 "appear next to each link and numbers are used to select links.\n"
 msgstr ""
 
-#: src/LYrcFile.c:831
+#: src/LYrcFile.c:829
 msgid ""
 "If keypad_mode is set to \"LINKS_AND_FORM_FIELDS_ARE_NUMBERED\", then\n"
 "numbers will appear next to each link and visible form input field.\n"
@@ -5796,14 +5835,14 @@ msgid ""
 "lists and output from the list command also enumerate form inputs.\n"
 msgstr ""
 
-#: src/LYrcFile.c:840
+#: src/LYrcFile.c:838
 msgid ""
 "NOTE: Some fixed format documents may look disfigured when\n"
 "\"LINKS_ARE_NUMBERED\" or \"LINKS_AND_FORM_FIELDS_ARE_NUMBERED\" are\n"
 "enabled.\n"
 msgstr ""
 
-#: src/LYrcFile.c:872
+#: src/LYrcFile.c:870
 msgid ""
 "Lynx User Defaults File\n"
 "\n"

@@ -1,4 +1,4 @@
-/* $LynxId: LYMain.c,v 1.179 2008/02/11 00:41:46 Paul.B.Mahol Exp $ */
+/* $LynxId: LYMain.c,v 1.181 2008/02/17 19:30:56 Gisle.Vanem Exp $ */
 #include <HTUtils.h>
 #include <HTTP.h>
 #include <HTParse.h>
@@ -470,6 +470,7 @@ int size_history;		/* number of allocated history entries */
 
 LinkInfo links[MAXLINKS];
 
+BOOLEAN nomore = FALSE;		/* display -more- string in statusline messages */
 int AlertSecs;			/* time-delay for HTAlert() messages   */
 int DebugSecs;			/* time-delay for HTProgress messages */
 int InfoSecs;			/* time-delay for Information messages */
@@ -2853,6 +2854,13 @@ static int nopause_fun(char *next_arg GCC_UNUSED)
     return 0;
 }
 
+/* -nomore */
+static int nomore_fun(char *next_arg GCC_UNUSED)
+{
+    nomore = TRUE;
+    return 0;
+}
+
 /* -noreverse */
 static int noreverse_fun(char *next_arg GCC_UNUSED)
 {
@@ -3169,10 +3177,13 @@ static int version_fun(char *next_arg GCC_UNUSED)
     HTSprintf0(&result, gettext("%s Version %s (%s)"),
 	       LYNX_NAME, LYNX_VERSION,
 	       LYVersionDate());
-#ifdef USE_SSL
+
     StrAllocCat(result, "\n");
+#ifdef USE_SSL
     HTSprintf(&result, "libwww-FM %s,", HTLibraryVersion);
     append_ssl_version(&result, " ");
+#else
+    HTSprintf(&result, "libwww-FM %s", HTLibraryVersion);
 #endif /* USE_SSL */
 
 #if defined(NCURSES) && defined(HAVE_CURSES_VERSION)
@@ -3642,6 +3653,10 @@ soon as they are seen)"
    PARSE_SET(
       "nomargins",	4|SET_ARG,		no_margins,
       "disable the right/left margins in the default\nstyle-sheet"
+   ),
+   PARSE_FUN(
+      "nomore",		4|FUNCTION_ARG,		nomore_fun,
+      "disable -more- string in statusline messages"
    ),
 #if defined(HAVE_SIGACTION) && defined(SIGWINCH)
    PARSE_SET(
