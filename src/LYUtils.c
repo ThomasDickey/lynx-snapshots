@@ -1,4 +1,4 @@
-/* $LynxId: LYUtils.c,v 1.166 2008/01/08 00:48:59 tom Exp $ */
+/* $LynxId: LYUtils.c,v 1.167 2008/02/17 18:30:19 ravenexp Exp $ */
 #include <HTUtils.h>
 #include <HTTCP.h>
 #include <HTParse.h>
@@ -1081,22 +1081,18 @@ void LYhighlight(int flag,
 #endif
 
 	if (links[cur].type == WWW_FORM_LINK_TYPE) {
-	    int len;
+	    int len, gllen;
 	    int avail_space = (LYcolLimit - LXP) + (LYcolLimit * (LYlines - LYP));
 	    const char *text = LYGetHiliteStr(cur, 0);
 
 	    if (avail_space > links[cur].l_form->size)
 		avail_space = links[cur].l_form->size;
-	    if (avail_space > (int) sizeof(buffer) - 1)
-		avail_space = (int) sizeof(buffer) - 1;
 
-	    LYstrncpy(buffer, NonNull(text), avail_space);
-	    len = strlen(buffer);
-	    while (len < avail_space) {
-		buffer[len++] = '_';
-	    }
-	    buffer[len] = 0;
-	    LYaddstr(buffer);
+	    gllen = LYmbcsstrlen(NonNull(text), utf_flag, NO);
+	    len = LYmbcs_skip_glyphs(NonNull(text), avail_space, utf_flag) - text;
+	    LYwaddnstr(LYwin, NonNull(text), len);
+	    while (gllen++ < avail_space)
+		LYaddch('_');
 
 #ifdef USE_COLOR_STYLE
 	} else if (flag == OFF) {

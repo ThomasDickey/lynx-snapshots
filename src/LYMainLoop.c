@@ -1,4 +1,4 @@
-/* $LynxId: LYMainLoop.c,v 1.149 2008/02/10 23:02:08 tom Exp $ */
+/* $LynxId: LYMainLoop.c,v 1.150 2008/02/17 19:14:40 Paul.B.Mahol Exp $ */
 #include <HTUtils.h>
 #include <HTAccess.h>
 #include <HTParse.h>
@@ -7843,7 +7843,7 @@ static void status_link(char *curlink_name,
     int length;
 
     *format = 0;
-    if (show_more) {
+    if (show_more && !nomore) {
 	sprintf(format, "%.*s ",
 		(int) (sizeof(format) - 2),
 		gettext("-more-"));

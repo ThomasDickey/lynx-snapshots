@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTUtils.h,v 1.77 2007/07/01 15:30:33 tom Exp $
+ * $LynxId: HTUtils.h,v 1.78 2008/02/17 19:36:08 Zdenek.Prikryl Exp $
  *
  * Utility macros for the W3 code library
  * MACROS FOR GENERAL USE
@@ -602,6 +602,7 @@ extern int WWW_TraceMask;
 #define SHORTENED_RBIND		/* FIXME: do this in configure-script */
 
 #ifdef USE_SSL
+
 #define free_func free__func
 
 #ifdef USE_OPENSSL_INCL
@@ -621,6 +622,10 @@ extern int WWW_TraceMask;
 #ifndef SSL_VERIFY_PEER
 #define SSL_VERIFY_PEER			0x01
 #endif
+#else
+
+#ifdef USE_NSS_COMPAT_INCL
+#include <nss_compat_ossl/nss_compat_ossl.h>
 
 #else /* assume SSLeay */
 #include <ssl.h>
@@ -628,10 +633,10 @@ extern int WWW_TraceMask;
 #include <rand.h>
 #include <err.h>
 #endif
+#endif
 #endif /* USE_OPENSSL_INCL */
 
 #undef free_func
-
 #endif /* USE_SSL */
 
 #ifdef HAVE_LIBDMALLOC

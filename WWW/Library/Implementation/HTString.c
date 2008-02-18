@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTString.c,v 1.50 2008/01/09 00:06:06 tom Exp $
+ * $LynxId: HTString.c,v 1.51 2008/02/17 19:30:56 Gisle.Vanem Exp $
  *
  *	Case-independent string comparison		HTString.c
  *
@@ -25,12 +25,7 @@ int WWW_TraceMask = 0;		/* Global trace flag for ALL W3 code */
 #define VC "2.14"
 #endif /* !VC */
 
-#ifdef _WINDOWS
-const char *HTLibraryVersion = "2.14FM";	/* String for help screen etc */
-
-#else
 const char *HTLibraryVersion = VC;	/* String for help screen etc */
-#endif
 
 /*
  *     strcasecomp8 is a variant of strcasecomp (below)

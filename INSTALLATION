@@ -572,6 +572,16 @@ II. Compile instructions -- UNIX
 	default value is derived at configure time, and depends on whether GNU
 	or native gettext is used.
 
+  --with-nss-compat[=XXX]		(define USE_NSS_COMPAT_INCL)
+	Use this option to configure with the NSS library's OpenSSL-compatible
+	interface.
+	See docs/README.ssl for additional information.
+
+	The optional value XXX specifies the directory in which the library
+	can be found, and may be either the path of the "lib" directory,
+	or one level above.  In either case, the corresponding header files
+	are assumed to be in the parallel "include" directory.
+
   --with-screen=XXX
 	Use this option to select the screen type.  The option value, XXX
 	must be one of curses (the default), ncurses, ncursesw, pdcurses or
@@ -1319,4 +1329,4 @@ VIII. Acknowledgment
 
 -- 1999/04/24 - H. Nelson <lynx-admin@irm.nara.kindai.ac.jp>
 -- vile:txtmode
--- $LynxId: INSTALLATION,v 1.101 2008/01/10 01:42:27 tom Exp $
+-- $LynxId: INSTALLATION,v 1.102 2008/02/17 19:58:25 tom Exp $

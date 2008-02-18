@@ -1,4 +1,4 @@
-dnl $LynxId: configure.in,v 1.161 2008/02/10 20:07:42 tom Exp $
+dnl $LynxId: configure.in,v 1.162 2008/02/17 19:44:13 Zdenek.Prikryl Exp $
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -393,6 +393,13 @@ dnl --------------------------------------------------------------------------
 
 ### Look for network libraries first, since some functions (such as gethostname)
 ### are used in a lot of places.
+AC_CACHE_CHECK(if you want NSS compatible SSL libraries,cf_cv_use_libnss_compat,[
+AC_ARG_WITH(nss-compat,
+	[  --with-nss-compat{=path}       link with nss_compat library if available],
+	[cf_cv_use_libnss_compat=$withval],
+	[cf_cv_use_libnss_compat=no])
+])
+
 AC_CACHE_CHECK(if you want ssl library,cf_cv_use_libssl,[
 AC_ARG_WITH(ssl,
 	[  --with-ssl{=path}       link with ssl library if available],
@@ -400,14 +407,12 @@ AC_ARG_WITH(ssl,
 	[cf_cv_use_libssl=no])
 ])
 
-if test "x$cf_cv_use_libssl" = "xno" ; then
 AC_CACHE_CHECK(if you want gnutls support,cf_cv_use_libgnutls,[
 AC_ARG_WITH(gnutls,
 	[  --with-gnutls{=path}    link with gnutls support],
 	[cf_cv_use_libgnutls=$withval],
 	[cf_cv_use_libgnutls=no])
 ])
-fi
 
 AC_CACHE_CHECK(if you want socks library,cf_cv_use_libsocks,[
 AC_ARG_WITH(socks,
@@ -435,6 +440,8 @@ if test "x$cf_cv_use_libssl"  != xno ; then
 	CF_SSL($cf_cv_use_libssl)
 elif test "x$cf_cv_use_libgnutls" != xno ; then
 	CF_GNUTLS($cf_cv_use_libgnutls)
+elif test "x$cf_cv_use_libnss_compat"  != xno ; then
+	CF_NSS_COMPAT($cf_cv_use_libnss_compat)
 fi
 
 dnl --------------------------------------------------------------------------

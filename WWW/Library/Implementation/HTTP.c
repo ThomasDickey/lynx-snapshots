@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTP.c,v 1.90 2008/01/06 19:50:35 tom Exp $
+ * $LynxId: HTTP.c,v 1.91 2008/02/17 19:36:08 Zdenek.Prikryl Exp $
  *
  * HyperText Tranfer Protocol	- Client implementation		HTTP.c
  * ==========================
@@ -88,6 +88,7 @@ static int HTSSLCallback(int preverify_ok, X509_STORE_CTX * x509_ctx GCC_UNUSED)
     FREE(msg);
 #endif
 
+#ifndef USE_NSS_COMPAT_INCL
     if (!(preverify_ok || ssl_okay || ssl_noprompt)) {
 #ifdef USE_X509_SUPPORT
 	HTSprintf0(&msg, SSL_FORCED_PROMPT,
@@ -100,6 +101,7 @@ static int HTSSLCallback(int preverify_ok, X509_STORE_CTX * x509_ctx GCC_UNUSED)
 
 	FREE(msg);
     }
+#endif
     return result;
 }
 
@@ -653,8 +655,10 @@ static int HTLoadHTTP(const char *arg,
 	SSL_handle = handle = HTGetSSLHandle();
 	SSL_set_fd(handle, s);
 #if SSLEAY_VERSION_NUMBER >= 0x0900
+#ifndef USE_NSS_COMPAT_INCL
 	if (!try_tls)
 	    handle->options |= SSL_OP_NO_TLSv1;
+#endif
 #endif /* SSLEAY_VERSION_NUMBER >= 0x0900 */
 	HTSSLInitPRNG();
 	status = SSL_connect(handle);

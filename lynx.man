@@ -1,4 +1,4 @@
-.\" $LynxId: lynx.man,v 1.79 2008/02/11 00:27:34 tom Exp $
+.\" $LynxId: lynx.man,v 1.80 2008/02/17 19:14:40 Paul.B.Mahol Exp $
 .nr N -1
 .nr D 5
 .TH LYNX 1
@@ -419,6 +419,9 @@ disable mailing of error messages to document owners.
 .TP
 .B \-nomargins
 disable left/right margins in the default style sheet.
+.TP
+.B \-nomore
+disable -more- string in statusline messages.
 .TP
 .B \-nonrestarting_sigwinch
 This flag is not available on all systems,

@@ -1,4 +1,4 @@
-/* $LynxId: LYStrings.c,v 1.129 2008/01/08 00:19:25 tom Exp $ */
+/* $LynxId: LYStrings.c,v 1.131 2008/02/17 19:18:44 tom Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <UCAux.h>
@@ -2854,31 +2854,69 @@ void LYSetupEdit(EDREC * edit, char *old,
 
 #ifdef SUPPORT_MULTIBYTE_EDIT
 
-static int prev_pos(EDREC * edit, int pos)
+/*
+ * MBCS positioning routines below are specific to SUPPORT_MULTIBYTE_EDIT code.
+ * Currently they handle UTF-8 and (hopefully) CJK.
+ * Current encoding is recognized using defines below.
+ *
+ * LYmbcs* functions don't look very convenient to use here...
+ * Do we really need utf_flag as an argument?
+ * It is set LYCharSet_UC[current_char_set].enc == UCT_ENC_UTF8 for every
+ * invocation out there, and they use HTCJK flag internally anyway.
+ * Something like LYmbcsstrnlen == mbcs_glyphs would be useful to work
+ * with string slices.
+ */
+
+#define IS_UTF8_TTY (LYCharSet_UC[current_char_set].enc == UCT_ENC_UTF8)
+#define IS_CJK_TTY (HTCJK != NOCJK)
+
+#define IS_UTF8_EXTRA(x) (((unsigned char)(x) & 0300) == 0200)
+
+/*
+ * Counts glyphs in a multibyte (sub)string s of length len.
+ */
+static int mbcs_glyphs(char *s, int len)
 {
-    int i = 0;
+    int glyphs = 0;
+    int i;
 
-    if (pos <= 0)
-	return 0;
-    if (HTCJK == NOCJK)
-	return (pos - 1);
-    else {
-	while (i < pos - 1) {
-	    int c;
-
-	    c = Buf[i];
-	    if (is8bits(c) &&
-		!((kanji_code == SJIS) && IS_SJIS_X0201KANA(UCH(c)))) {
+    if (IS_UTF8_TTY) {
+	for (i = 0; s[i] && i < len; i++)
+	    if (!IS_UTF8_EXTRA(s[i]))
+		glyphs++;
+    } else if (IS_CJK_TTY) {
+	for (i = 0; s[i] && i < len; i++, glyphs++)
+	    if (is8bits(s[i]))
 		i++;
-	    }
-	    i++;
-	}
-	if (i == pos)
-	    return (i - 2);
-	else
-	    return i;
-    }
+    } else
+	glyphs = len;
+    return glyphs;
 }
+
+/*
+ * Calculates offset in bytes of a glyph at cell position pos.
+ */
+static int mbcs_skip(char *s, int pos)
+{
+    int p, i;
+
+    if (IS_UTF8_TTY) {
+	for (i = 0, p = 0; s[i]; i++) {
+	    if (!IS_UTF8_EXTRA(s[i]))
+		p++;
+	    if (p > pos)
+		break;
+	}
+    } else if (IS_CJK_TTY) {
+	for (p = i = 0; s[i] && p < pos; p++, i++)
+	    if (is8bits(s[i]))
+		i++;
+    } else
+	i = pos;
+
+    return i;
+}
+
 #endif /* SUPPORT_MULTIBYTE_EDIT */
 
 #ifdef EXP_KEYBOARD_LAYOUT
@@ -3008,6 +3046,7 @@ int LYEdit1(EDREC * edit, int ch,
     int i;
     int length;
     unsigned char uch;
+    int offset;
 
     if (MaxLen <= 0)
 	return (0);		/* Be defensive */
@@ -3077,46 +3116,21 @@ int LYEdit1(EDREC * edit, int ch,
 	break;
 
     case LYE_BACKW:
-#ifndef SUPPORT_MULTIBYTE_EDIT
 	/*
 	 * Backword.
 	 * Definition of word is very naive:  1 or more a/n characters.
 	 */
+#ifndef SUPPORT_MULTIBYTE_EDIT
 	while (Pos && !isalnum(Buf[Pos - 1]))
 	    Pos--;
 	while (Pos && isalnum(Buf[Pos - 1]))
 	    Pos--;
-#else /* SUPPORT_MULTIBYTE_EDIT */
-	/*
-	 * Backword.
-	 * Definition of word is very naive:  1 or more a/n characters, or 1 or
-	 * more multibyte character.
-	 */
-	{
-	    int pos0;
-
-	    pos0 = prev_pos(edit, Pos);
-	    while (Pos &&
-		   (HTCJK == NOCJK || !is8bits(Buf[pos0])) &&
-		   !isalnum(UCH(Buf[pos0]))) {
-		Pos = pos0;
-		pos0 = prev_pos(edit, Pos);
-	    }
-	    if (HTCJK != NOCJK && is8bits(Buf[pos0])) {
-		while (Pos && is8bits(Buf[pos0])) {
-		    Pos = pos0;
-		    pos0 = prev_pos(edit, Pos);
-		}
-	    } else {
-		while (Pos
-		       && !is8bits(Buf[pos0])
-		       && isalnum(UCH(Buf[pos0]))) {
-		    Pos = pos0;
-		    pos0 = prev_pos(edit, Pos);
-		}
-	    }
-	}
-#endif /* SUPPORT_MULTIBYTE_EDIT */
+#else
+	while (Pos && !(isalnum(Buf[Pos - 1]) || is8bits(Buf[Pos - 1])))
+	    Pos--;
+	while (Pos && (isalnum(Buf[Pos - 1]) || is8bits(Buf[Pos - 1])))
+	    Pos--;
+#endif
 	break;
 
     case LYE_FORWW:
@@ -3128,18 +3142,12 @@ int LYEdit1(EDREC * edit, int ch,
 	    Pos++;		/* '\0' is not a/n */
 	while (!isalnum(Buf[Pos]) && Buf[Pos])
 	    Pos++;
-#else /* SUPPORT_MULTIBYTE_EDIT */
-	if (HTCJK != NOCJK && is8bits(Buf[Pos])) {
-	    while (is8bits(Buf[Pos]))
-		Pos += 2;
-	} else {
-	    while (!is8bits(Buf[Pos]) && isalnum(UCH(Buf[Pos])))
-		Pos++;		/* '\0' is not a/n */
-	}
-	while ((HTCJK == NOCJK || !is8bits(Buf[Pos])) &&
-	       !isalnum(UCH(Buf[Pos])) && Buf[Pos])
+#else
+	while (isalnum(Buf[Pos]) || is8bits(Buf[Pos]))
+	    Pos++;		/* '\0' is not a/n */
+	while (!(isalnum(Buf[Pos]) || is8bits(Buf[Pos])) && Buf[Pos])
 	    Pos++;
-#endif /* SUPPORT_MULTIBYTE_EDIT */
+#endif
 	break;
 
     case LYE_ERASE:
@@ -3170,53 +3178,64 @@ int LYEdit1(EDREC * edit, int ch,
 	/*
 	 * Delete next word.
 	 */
-	{
-	    int pos0 = Pos;
+	offset = Pos;
+	LYEdit1(edit, 0, LYE_FORWW, FALSE);
+	offset = Pos - offset;
+	Pos -= offset;
 
-	    LYEdit1(edit, 0, LYE_FORWW, FALSE);
-	    while (Pos > pos0)
-		LYEdit1(edit, 0, LYE_DELP, FALSE);
-	}
-	break;
+	goto shrink;		/* right below */
 
     case LYE_DELPW:
 	/*
 	 * Delete previous word.
 	 */
-	{
-	    int pos0 = Pos;
+	offset = Pos;
+	LYEdit1(edit, 0, LYE_BACKW, FALSE);
+	offset -= Pos;
 
-	    LYEdit1(edit, 0, LYE_BACKW, FALSE);
-	    pos0 -= Pos;
-	    while (pos0--)
-		LYEdit1(edit, 0, LYE_DELN, FALSE);
-	}
+      shrink:
+	for (i = Pos; i < length - offset + 1; i++)
+	    Buf[i] = Buf[i + offset];
+#ifdef ENHANCED_LINEEDIT
+	if (Mark >= 0)
+	    Mark = -1 - Mark;	/* Disable it */
+	if (Mark <= -1 - Pos - offset)
+	    Mark += offset;	/* Shift it */
+	if (-1 - Pos - offset < Mark && Mark < -1 - Pos)
+	    Mark = -1 - Pos;	/* Set to the current position */
+#endif
+
 	break;
 
     case LYE_DELBL:
 	/*
 	 * Delete from current cursor position back to BOL.
 	 */
-	{
-	    int pos0 = Pos;
+	for (i = Pos; i < length + 1; i++)
+	    Buf[i - Pos] = Buf[i];
 
-	    while (pos0--)
-		LYEdit1(edit, 0, LYE_DELP, FALSE);
-	}
+#ifdef ENHANCED_LINEEDIT
+	if (Mark >= 0)
+	    Mark = -1 - Mark;	/* Disable it */
+	if (Mark <= -1 - Pos)
+	    Mark += Pos;	/* Shift it */
+	else
+	    Mark = -1;		/* Reset it */
+#endif
+	Pos = 0;
 	break;
 
     case LYE_DELEL:		/* @@@ */
 	/*
 	 * Delete from current cursor position thru EOL.
 	 */
-	{
-	    int pos0 = Pos;
-
-	    LYEdit1(edit, 0, LYE_EOL, FALSE);
-	    pos0 = Pos - pos0;
-	    while (pos0--)
-		LYEdit1(edit, 0, LYE_DELP, FALSE);
-	}
+	Buf[Pos] = '\0';
+#ifdef ENHANCED_LINEEDIT
+	if (Mark >= 0)
+	    Mark = -1 - Mark;	/* Disable it */
+	if (Mark <= -1 - Pos)
+	    Mark = -1;		/* Reset it */
+#endif
 	break;
 
     case LYE_DELN:
@@ -3226,20 +3245,21 @@ int LYEdit1(EDREC * edit, int ch,
 	 */
 	if (Pos >= length)
 	    break;
-#ifdef SUPPORT_MULTIBYTE_EDIT
-	if (HTCJK != NOCJK && is8bits(Buf[Pos]))
-	    Pos++;
-#endif
+#ifndef SUPPORT_MULTIBYTE_EDIT
 	Pos++;
+#else
+	Pos += mbcs_skip(Buf + Pos, 1);
+#endif
 	/* fall through - DO NOT RELOCATE the LYE_DELN case wrt LYE_DELP */
 
     case LYE_DELP:
 	/*
 	 * Delete preceding character.
 	 */
-#ifndef SUPPORT_MULTIBYTE_EDIT
 	if (length == 0 || Pos == 0)
 	    break;
+
+#ifndef SUPPORT_MULTIBYTE_EDIT
 #ifdef ENHANCED_LINEEDIT
 	if (Mark >= 0)
 	    Mark = -1 - Mark;	/* Disable it */
@@ -3249,31 +3269,20 @@ int LYEdit1(EDREC * edit, int ch,
 	Pos--;
 	for (i = Pos; i < length; i++)
 	    Buf[i] = Buf[i + 1];
-	i--;
 #else /* SUPPORT_MULTIBYTE_EDIT */
-	{
-	    int offset = 1;
-	    int pos0 = Pos;
+	offset = Pos - mbcs_skip(Buf, mbcs_glyphs(Buf, Pos) - 1);
+	Pos -= offset;
+	for (i = Pos; i < length - offset + 1; i++)
+	    Buf[i] = Buf[i + offset];
 
-	    if (length == 0 || Pos == 0)
-		break;
-	    if (HTCJK != NOCJK) {
-		Pos = prev_pos(edit, pos0);
-		offset = pos0 - Pos;
-	    } else
-		Pos--;
-	    for (i = Pos; i < length; i++)
-		Buf[i] = Buf[i + offset];
-	    i -= offset;
 #ifdef ENHANCED_LINEEDIT
-	    if (Mark >= 0)
-		Mark = -1 - Mark;	/* Disable it */
-	    if (Mark <= -1 - Pos)
-		Mark += offset;
+	if (Mark >= 0)
+	    Mark = -1 - Mark;	/* Disable it */
+	if (Mark <= -1 - Pos)
+	    Mark += offset;	/* Shift it */
 #endif
-	}
+
 #endif /* SUPPORT_MULTIBYTE_EDIT */
-	Buf[i] = 0;
 	break;
 
     case LYE_FORW_RL:
@@ -3284,13 +3293,10 @@ int LYEdit1(EDREC * edit, int ch,
 #ifndef SUPPORT_MULTIBYTE_EDIT
 	if (Pos < length)
 	    Pos++;
-#else /* SUPPORT_MULTIBYTE_EDIT */
-	if (Pos < length) {
-	    Pos++;
-	    if (HTCJK != NOCJK && is8bits(Buf[Pos - 1]))
-		Pos++;
-	}
-#endif /* SUPPORT_MULTIBYTE_EDIT */
+#else
+	if (Pos < length)
+	    Pos += mbcs_skip(Buf + Pos, 1);
+#endif
 	else if (action == LYE_FORW_RL)
 	    return -ch;
 	break;
@@ -3303,14 +3309,10 @@ int LYEdit1(EDREC * edit, int ch,
 #ifndef SUPPORT_MULTIBYTE_EDIT
 	if (Pos > 0)
 	    Pos--;
-#else /* SUPPORT_MULTIBYTE_EDIT */
-	if (Pos > 0) {
-	    if (HTCJK != NOCJK)
-		Pos = prev_pos(edit, Pos);
-	    else
-		Pos--;
-	}
-#endif /* SUPPORT_MULTIBYTE_EDIT */
+#else
+	if (Pos > 0)
+	    Pos = mbcs_skip(Buf, mbcs_glyphs(Buf, Pos) - 1);
+#endif
 	else if (action == LYE_BACK_LL)
 	    return -ch;
 	break;
@@ -3320,6 +3322,12 @@ int LYEdit1(EDREC * edit, int ch,
 	/*
 	 * Transpose characters - bash or ksh(emacs not gmacs) style
 	 */
+
+#ifdef SUPPORT_MULTIBYTE_EDIT
+	if (IS_UTF8_TTY || IS_CJK_TTY)
+	    break;		/* Can't help it now */
+#endif
+
 	if (length <= 1 || Pos == 0)
 	    return (ch);
 	if (Pos == length)
@@ -3507,23 +3515,35 @@ void LYRefreshEdit(EDREC * edit)
     int nrdisplayed;
     int padsize;
     char *str;
-    char buffer[3];
 
 #ifdef SUPPORT_MULTIBYTE_EDIT
-    int begin_multi = 0;
-    int end_multi = 0;
-#endif /* SUPPORT_MULTIBYTE_EDIT */
+/*
+ * Multibyte string display code.
+ * EDREC fields retain their values as byte offsets,
+ * while glXXXX variables hold corresponding glyph counts.
+ * All external logic still works fine with byte values.
+ */
+    int glDspStart, glPos, gllength;
+    int glnrdisplayed;
+#endif
+
 #ifdef USE_COLOR_STYLE
     int estyle, prompting = 0;
 #endif
 
-    buffer[0] = buffer[1] = buffer[2] = '\0';
     if (!edit->dirty || (DspWdth == 0))
 	return;
     edit->dirty = FALSE;
 
     length = strlen(&Buf[0]);
     edit->strlen = length;
+
+#ifdef SUPPORT_MULTIBYTE_EDIT
+    glDspStart = mbcs_glyphs(Buf, DspStart);
+    glPos = mbcs_glyphs(Buf, Pos);
+    gllength = mbcs_glyphs(Buf, length);
+#endif
+
     /*
      * Now we have:
      *                .--DspWdth---.
@@ -3539,60 +3559,49 @@ void LYRefreshEdit(EDREC * edit)
      * extending the string.  Looks awful, but that way we can keep up with
      * data entry at low baudrates.
      */
-    if ((DspStart + DspWdth) <= length) {
-	if (Pos >= (DspStart + DspWdth) - Margin) {
+
 #ifndef SUPPORT_MULTIBYTE_EDIT
+    if ((DspStart + DspWdth) <= length)
+	if (Pos >= (DspStart + DspWdth) - Margin)
 	    DspStart = (Pos - DspWdth) + Margin;
-#else /* SUPPORT_MULTIBYTE_EDIT */
-	    if (HTCJK != NOCJK) {
-		int tmp = (Pos - DspWdth) + Margin;
-
-		while (DspStart < tmp) {
-		    if (is8bits(Buf[DspStart]))
-			DspStart++;
-		    DspStart++;
-		}
-	    } else {
-		DspStart = (Pos - DspWdth) + Margin;
-	    }
-#endif /* SUPPORT_MULTIBYTE_EDIT */
+#else
+    if ((glDspStart + DspWdth) <= gllength)
+	if (glPos >= (glDspStart + DspWdth) - Margin) {
+	    glDspStart = (glPos - DspWdth) + Margin;
+	    DspStart = mbcs_skip(Buf, glDspStart);
 	}
-    }
+#endif /* SUPPORT_MULTIBYTE_EDIT */
 
-    if (Pos < DspStart + Margin) {
 #ifndef SUPPORT_MULTIBYTE_EDIT
+    if (Pos < DspStart + Margin) {
 	DspStart = Pos - Margin;
 	if (DspStart < 0)
 	    DspStart = 0;
-#else /* SUPPORT_MULTIBYTE_EDIT */
-	if (HTCJK != NOCJK) {
-	    int tmp = Pos - Margin;
-
-	    DspStart = 0;
-	    while (DspStart < tmp) {
-		if (is8bits(Buf[DspStart]))
-		    DspStart++;
-		DspStart++;
-	    }
-	} else {
-	    DspStart = Pos - Margin;
-	    if (DspStart < 0)
-		DspStart = 0;
-	}
-#endif /* SUPPORT_MULTIBYTE_EDIT */
     }
+#else /* SUPPORT_MULTIBYTE_EDIT */
+    if (glPos < glDspStart + Margin) {
+	glDspStart = glPos - Margin;
+	if (glDspStart < 0)
+	    glDspStart = 0;
+	DspStart = mbcs_skip(Buf, glDspStart);
+    }
+#endif /* SUPPORT_MULTIBYTE_EDIT */
 
     str = &Buf[DspStart];
-#ifdef SUPPORT_MULTIBYTE_EDIT
-    if (HTCJK != NOCJK && is8bits(str[0]))
-	begin_multi = 1;
-#endif /* SUPPORT_MULTIBYTE_EDIT */
 
+#ifndef SUPPORT_MULTIBYTE_EDIT
     nrdisplayed = length - DspStart;
     if (nrdisplayed > DspWdth)
 	nrdisplayed = DspWdth;
+#else
+    glnrdisplayed = gllength - glDspStart;
+    if (glnrdisplayed > DspWdth)
+	glnrdisplayed = DspWdth;
+    nrdisplayed = mbcs_skip(Buf + DspStart, glnrdisplayed);
+#endif /* SUPPORT_MULTIBYTE_EDIT */
 
     LYmove(edit->sy, edit->sx);
+
 #ifdef USE_COLOR_STYLE
     /*
      * If this is the last screen line, set attributes to normal, should only
@@ -3614,8 +3623,13 @@ void LYRefreshEdit(EDREC * edit)
 	wattrset(LYwin, A_NORMAL);	/* need to do something about colors? */
 #endif
     if (edit->hidden) {
+#ifndef SUPPORT_MULTIBYTE_EDIT
 	for (i = 0; i < nrdisplayed; i++)
 	    LYaddch('*');
+#else
+	for (i = 0; i < glnrdisplayed; i++)
+	    LYaddch('*');
+#endif
     } else {
 #if defined(ENHANCED_LINEEDIT) && defined(USE_COLOR_STYLE)
 	if (Mark >= 0 && DspStart > Mark)
@@ -3630,44 +3644,15 @@ void LYRefreshEdit(EDREC * edit)
 			      || (DspStart + i == Pos && Pos > Mark)))
 		TmpStyleOff(prompting ? s_prompt_sel : s_aedit_sel);
 #endif
-	    if ((buffer[0] = str[i]) == 1 || buffer[0] == 2 ||
-		(UCH(buffer[0]) == 160 &&
+	    if (str[i] == 1 || str[i] == 2 ||
+		(UCH(str[i]) == 160 &&
 		 !(HTPassHighCtrlRaw || HTCJK != NOCJK ||
 		   (LYCharSet_UC[current_char_set].enc != UCT_ENC_8859 &&
 		    !(LYCharSet_UC[current_char_set].like8859
 		      & UCT_R_8859SPECL))))) {
 		LYaddch(' ');
-#ifdef SUPPORT_MULTIBYTE_EDIT
-		end_multi = 0;
-#endif /* SUPPORT_MULTIBYTE_EDIT */
-	    } else {
-		/* For CJK strings, by Masanobu Kimura */
-		if (HTCJK != NOCJK && is8bits(buffer[0])) {
-		    if (i < (nrdisplayed - 1))
-			buffer[1] = str[++i];
-#ifdef SUPPORT_MULTIBYTE_EDIT
-		    end_multi = (i < nrdisplayed);
-#if !(defined(USE_SLANG) || defined(WIDEC_CURSES))
-		    {
-			int ii, yy, xx;
-
-			LYGetYX(yy, xx);
-			for (ii = 0; buffer[ii] != '\0'; ++ii)
-			    LYaddch(' ');
-			LYrefresh();
-			LYmove(yy, xx);
-		    }
-#endif /* USE_SLANG */
-#endif /* SUPPORT_MULTIBYTE_EDIT */
-		    LYaddstr(buffer);
-		    buffer[1] = '\0';
-		} else {
-		    LYaddstr(buffer);
-#ifdef SUPPORT_MULTIBYTE_EDIT
-		    end_multi = 0;
-#endif /* SUPPORT_MULTIBYTE_EDIT */
-		}
-	    }
+	    } else
+		LYaddch(UCH(str[i]));
 	}
 #if defined(ENHANCED_LINEEDIT) && defined(USE_COLOR_STYLE)
 	if (Mark >= 0 &&
@@ -3681,7 +3666,11 @@ void LYRefreshEdit(EDREC * edit)
     /*
      * Erase rest of input area.
      */
+#ifndef SUPPORT_MULTIBYTE_EDIT
     padsize = DspWdth - nrdisplayed;
+#else
+    padsize = DspWdth - glnrdisplayed;
+#endif
     if (padsize) {
 	TmpStyleOn(prompting ? s_prompt_edit_pad : s_aedit_pad);
 	while (padsize--)
@@ -3694,16 +3683,12 @@ void LYRefreshEdit(EDREC * edit)
      */
     if (edit->panon) {
 	if ((DspStart + nrdisplayed) < length) {
-	    int add_space = 0;
-
 	    TmpStyleOn(prompting ? s_prompt_edit_arr : s_aedit_arr);
-#ifdef SUPPORT_MULTIBYTE_EDIT
-	    if (end_multi)
-		add_space = 1;
+#ifndef SUPPORT_MULTIBYTE_EDIT
+	    LYmove(edit->sy, edit->sx + nrdisplayed - 1);
+#else
+	    LYmove(edit->sy, edit->sx + glnrdisplayed - 1);
 #endif
-	    LYmove(edit->sy, edit->sx + nrdisplayed - 1 - add_space);
-	    if (add_space)
-		LYaddch(' ');	/* Needed with styles? */
 	    LYaddch(ACS_RARROW);
 	    TmpStyleOff(prompting ? s_prompt_edit_arr : s_aedit_arr);
 	}
@@ -3711,15 +3696,14 @@ void LYRefreshEdit(EDREC * edit)
 	    TmpStyleOn(prompting ? s_prompt_edit_arr : s_aedit_arr);
 	    LYmove(edit->sy, edit->sx);
 	    LYaddch(ACS_LARROW);
-#ifdef SUPPORT_MULTIBYTE_EDIT
-	    if (begin_multi)
-		LYaddch(' ');	/* Needed with styles? */
-#endif /* SUPPORT_MULTIBYTE_EDIT */
 	    TmpStyleOff(prompting ? s_prompt_edit_arr : s_aedit_arr);
 	}
     }
-
+#ifndef SUPPORT_MULTIBYTE_EDIT
     LYmove(edit->sy, edit->sx + Pos - DspStart);
+#else
+    LYmove(edit->sy, edit->sx + glPos - glDspStart);
+#endif
 
 #ifdef USE_COLOR_STYLE
     if (estyle != NOSTYLE)
@@ -4092,9 +4076,6 @@ int LYhandlePopupList(int cur_choice,
     /*
      * Clear the command line and write the popup statusline.  - FM
      */
-    /* nothing usefull, these two lines bellow should be removed */
-/*    LYmove((LYlines - 2), 0);
-    LYclrtoeol(); */
     if (disabled) {
 	popup_status_msg = CHOICE_LIST_UNM_MSG;
     } else if (!for_mouse) {
