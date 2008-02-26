@@ -1,4 +1,4 @@
-/* $LynxId: LYMain.c,v 1.181 2008/02/17 19:30:56 Gisle.Vanem Exp $ */
+/* $LynxId: LYMain.c,v 1.182 2008/02/19 00:53:35 tom Exp $ */
 #include <HTUtils.h>
 #include <HTTP.h>
 #include <HTParse.h>
@@ -2142,8 +2142,7 @@ int main(int argc,
 		    i + 1, HTList_count(Goto_URLs), startfile));
 	    status = mainloop();
 	    if (!no_list &&
-		!crawl &&	/* For -crawl it has already been done! */
-		links_are_numbered())
+		!crawl)		/* For -crawl it has already been done! */
 		printlist(stdout, FALSE);
 	    if (i != 0)
 		printf("\n");

@@ -1,7 +1,17 @@
--- $LynxId: CHANGES,v 1.259 2008/02/17 20:05:07 tom Exp $
+-- $LynxId: CHANGES,v 1.262 2008/02/26 01:17:18 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
+
+2008-02-?? (2.8.7dev.9)
+* use TRST_MAXROWSPAN and TRST_MAXCOLSPAN limits in Stbl_reserveCellsInTable(),
+  to help the non-color-style version work with table using rowspan/colspan
+  set to "0" (report by George Sigletos) -TD
+* modify behavior of "-nonumbers" option for -dump so it can be combined with
+  -listonly to obtain a list of the URLs without reference numbers (Debian
+  #398283) -TD
+* typo in description of SESSION_FILE in lynx.cfg -PBM
+* build-fix for WWW version on Windows -TD
 
 2008-02-17 (2.8.7dev.8)
 * add "nano" to list of editors accepting +number option (patch by Tim Chase)

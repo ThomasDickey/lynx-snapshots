@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTString.c,v 1.51 2008/02/17 19:30:56 Gisle.Vanem Exp $
+ * $LynxId: HTString.c,v 1.52 2008/02/18 00:04:16 tom Exp $
  *
  *	Case-independent string comparison		HTString.c
  *
@@ -19,6 +19,11 @@
 #ifndef NO_LYNX_TRACE
 BOOLEAN WWW_TraceFlag = 0;	/* Global trace flag for ALL W3 code */
 int WWW_TraceMask = 0;		/* Global trace flag for ALL W3 code */
+#endif
+
+#ifdef _WINDOWS
+#undef VC
+#define VC "2.14FM"
 #endif
 
 #ifndef VC
