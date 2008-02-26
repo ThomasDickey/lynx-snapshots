@@ -1,4 +1,6 @@
-/*		Simple table object
+/*
+ * $LynxId: TRSTable.c,v 1.20 2008/02/26 01:09:13 tom Exp $
+ *		Simple table object
  *		===================
  * Authors
  *	KW	Klaus Weide <kweide@enteract.com>
@@ -957,6 +959,10 @@ static int Stbl_reserveCellsInTable(STable_info *me, int icell,
     int growby;
     int i;
 
+    if (colspan > TRST_MAXCOLSPAN)
+	return -1;
+    if (rowspan > TRST_MAXROWSPAN)
+	return -1;
     if (me->nrows <= 0)
 	return -1;		/* must already have at least one row */
 

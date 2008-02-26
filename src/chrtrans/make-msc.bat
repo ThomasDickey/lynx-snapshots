@@ -1,6 +1,6 @@
-@rem $LynxId: make-msc.bat,v 1.5 2007/06/28 21:07:24 tom Exp $
+@rem $LynxId: make-msc.bat,v 1.6 2008/02/18 00:34:44 tom Exp $
 @echo off
 
-nmake -f makefile.msc
+nmake -f makefile.msc %1 %2 %3 %4 %5 %6 %7 %8 %9
 
-call makehdrs
+if exist makeuctb.exe call makehdrs
