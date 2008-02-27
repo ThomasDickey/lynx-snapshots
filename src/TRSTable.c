@@ -1,5 +1,5 @@
 /*
- * $LynxId: TRSTable.c,v 1.20 2008/02/26 01:09:13 tom Exp $
+ * $LynxId: TRSTable.c,v 1.23 2008/02/27 01:58:47 tom Exp $
  *		Simple table object
  *		===================
  * Authors
@@ -515,7 +515,7 @@ static int Stbl_reserveCellsInRow(STable_rowinfo *me, int icell,
 {
     STable_cellinfo *cells;
     int i;
-    int growby = icell + colspan - me->allocated;
+    int growby = 1 + icell + colspan - me->allocated;
 
     CTRACE2(TRACE_TRST,
 	    (tfp, "TRST:Stbl_reserveCellsInRow(icell=%d, colspan=%d\n",
@@ -959,10 +959,20 @@ static int Stbl_reserveCellsInTable(STable_info *me, int icell,
     int growby;
     int i;
 
-    if (colspan > TRST_MAXCOLSPAN)
+    if (colspan > TRST_MAXCOLSPAN) {
+	CTRACE2(TRACE_TRST,
+		(tfp,
+		 "TRST:*** COLSPAN=%d is too large, ignored!\n",
+		 colspan));
 	return -1;
-    if (rowspan > TRST_MAXROWSPAN)
+    }
+    if (rowspan > TRST_MAXROWSPAN) {
+	CTRACE2(TRACE_TRST,
+		(tfp,
+		 "TRST:*** ROWSPAN=%d is too large, ignored!\n",
+		 rowspan));
 	return -1;
+    }
     if (me->nrows <= 0)
 	return -1;		/* must already have at least one row */
 
@@ -972,7 +982,8 @@ static int Stbl_reserveCellsInTable(STable_info *me, int icell,
 	     icell, colspan, rowspan));
     if (rowspan == 0) {
 	if (!me->rowspans2eog.cells) {
-	    me->rowspans2eog.cells = typecallocn(STable_cellinfo, icell + colspan);
+	    me->rowspans2eog.cells = typecallocn(STable_cellinfo,
+						 HTMAX(1, icell + colspan));
 
 	    if (!me->rowspans2eog.cells)
 		return 0;	/* fail silently */
@@ -1017,7 +1028,7 @@ static int Stbl_reserveCellsInTable(STable_info *me, int icell,
 	 i < (rowspan == 0 ? me->allocated_rows : me->nrows + rowspan - 1);
 	 i++) {
 	if (!me->rows[i].allocated) {
-	    me->rows[i].cells = typecallocn(STable_cellinfo, icell + colspan);
+	    me->rows[i].cells = typecallocn(STable_cellinfo, HTMAX(1, icell + colspan));
 
 	    if (!me->rows[i].cells)
 		return 0;	/* fail silently */
@@ -1229,7 +1240,7 @@ static int get_remaining_colspan(STable_rowinfo *me,
     me->cells[me->ncells - 1].colspan : 1;
 
     if (ncolinfo == 0 || me->ncells + last_colspan > ncolinfo) {
-	colspan = HTMAX(TRST_MAXCOLSPAN,
+	colspan = HTMIN(TRST_MAXCOLSPAN,
 			ncols_sofar - (me->ncells + last_colspan - 1));
     } else {
 	for (i = me->ncells + last_colspan - 1; i < ncolinfo - 1; i++)
@@ -1237,6 +1248,9 @@ static int get_remaining_colspan(STable_rowinfo *me,
 		break;
 	colspan = i - (me->ncells + last_colspan - 2);
     }
+    CTRACE2(TRACE_TRST,
+	    (tfp, "TRST:get_remaining_colspan; colspan = %d\n",
+	     colspan));
     return colspan;
 }
 

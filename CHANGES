@@ -1,4 +1,4 @@
--- $LynxId: CHANGES,v 1.262 2008/02/26 01:17:18 tom Exp $
+-- $LynxId: CHANGES,v 1.263 2008/02/27 01:45:58 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
@@ -6,7 +6,8 @@ Changes since Lynx 2.8 release
 2008-02-?? (2.8.7dev.9)
 * use TRST_MAXROWSPAN and TRST_MAXCOLSPAN limits in Stbl_reserveCellsInTable(),
   to help the non-color-style version work with table using rowspan/colspan
-  set to "0" (report by George Sigletos) -TD
+  set to "0", as well as correcting limits from original 2.8.3dev.14 changes
+  (report by George Sigletos) -TD, PBM
 * modify behavior of "-nonumbers" option for -dump so it can be combined with
   -listonly to obtain a list of the URLs without reference numbers (Debian
   #398283) -TD
