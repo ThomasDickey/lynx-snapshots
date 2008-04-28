@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTP.c,v 1.91 2008/02/17 19:36:08 Zdenek.Prikryl Exp $
+ * $LynxId: HTTP.c,v 1.94 2008/04/27 17:05:55 tom Exp $
  *
  * HyperText Tranfer Protocol	- Client implementation		HTTP.c
  * ==========================
@@ -452,7 +452,7 @@ static BOOL acceptEncoding(int code)
 #ifdef USE_SSL
 static void show_cert_issuer(X509 * peer_cert GCC_UNUSED)
 {
-#if defined(USE_OPENSSL_INCL)
+#if defined(USE_OPENSSL_INCL) || defined(USE_GNUTLS_FUNCS)
     char ssl_dn[1024];
     char *msg = NULL;
 
@@ -461,7 +461,7 @@ static void show_cert_issuer(X509 * peer_cert GCC_UNUSED)
     _HTProgress(msg);
     FREE(msg);
 #elif defined(USE_GNUTLS_INCL)
-    /* the OpenSSL code compiles but dumps core with GNU TLS */
+    /* the OpenSSL "compat" code compiles but dumps core with GNU TLS */
 #endif
 }
 #endif

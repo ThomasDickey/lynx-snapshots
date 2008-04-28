@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: lynx 2.8.3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-02-17 15:14-0500\n"
+"POT-Creation-Date: 2008-04-27 19:12-0400\n"
 "PO-Revision-Date: 2000-07-09 13:30+0200\n"
 "Last-Translator: Jiøí Pavlovský  <pavlovsk@ff.cuni.cz>\n"
 "Language-Team: Czech <cs@li.org>\n"
@@ -3793,16 +3793,16 @@ msgstr ""
 "struèný popis pøíkazu a/nebo URL, který ji zpùsobil, jméno a verzi operaèního\n"
 "systému, TCPIP implementaci, TRACEBACK a v¹echny dal¹í relevantní informace.\n"
 
-#: src/LYEdit.c:256
+#: src/LYEdit.c:266
 #, fuzzy, c-format
 msgid "Error starting editor, %s"
 msgstr "Chyba pøi zpracování %d. øádku souboru%s\n"
 
-#: src/LYEdit.c:259
+#: src/LYEdit.c:269
 msgid "Editor killed by signal"
 msgstr "Editor ukonèen signálem."
 
-#: src/LYEdit.c:264
+#: src/LYEdit.c:274
 #, fuzzy, c-format
 msgid "Editor returned with error status %s"
 msgstr "Editor skonèil s chybovým návratovým statusem %s"
@@ -3941,15 +3941,15 @@ msgstr "v tomto dokumentu:"
 msgid "Visible links:"
 msgstr "Viditelné odkazy:"
 
-#: src/LYList.c:194 src/LYList.c:293
+#: src/LYList.c:194 src/LYList.c:295
 msgid "Hidden links:"
 msgstr "Skryté odkazy:"
 
-#: src/LYList.c:326
+#: src/LYList.c:332
 msgid "References"
 msgstr "Reference"
 
-#: src/LYList.c:330
+#: src/LYList.c:336
 msgid "Visible links"
 msgstr "Viditelné odkazy"
 
@@ -4258,21 +4258,21 @@ msgstr "Tato zpráva byla vytvoøena automaticky programem"
 msgid "No system mailer configured"
 msgstr ""
 
-#: src/LYMain.c:1017
+#: src/LYMain.c:1019
 msgid "No Winsock found, sorry."
 msgstr "Winsock nenalezen. lituji."
 
-#: src/LYMain.c:1198
+#: src/LYMain.c:1200
 #, fuzzy
 msgid "You MUST define a valid TMP or TEMP area!"
 msgstr "MUSÍTE zadat platný TMP èi TEMP prostor!\n"
 
-#: src/LYMain.c:1251 src/LYMainLoop.c:5085
+#: src/LYMain.c:1253 src/LYMainLoop.c:5085
 #, fuzzy
 msgid "No such directory"
 msgstr " adresáø"
 
-#: src/LYMain.c:1459
+#: src/LYMain.c:1461
 #, fuzzy, c-format
 msgid ""
 "\n"
@@ -4283,7 +4283,7 @@ msgstr ""
 "Konfiguraèní soubor %s je nedostupný.\n"
 "\n"
 
-#: src/LYMain.c:1469
+#: src/LYMain.c:1471
 #, c-format
 msgid ""
 "\n"
@@ -4294,7 +4294,7 @@ msgstr ""
 "Znakové sady Lynxu nejsou deklarovány.\n"
 "\n"
 
-#: src/LYMain.c:1498
+#: src/LYMain.c:1500
 #, c-format
 msgid ""
 "\n"
@@ -4305,7 +4305,7 @@ msgstr ""
 "Editovací mapy Lynxu nejsou deklarovány.\n"
 "\n"
 
-#: src/LYMain.c:1574
+#: src/LYMain.c:1576
 #, fuzzy, c-format
 msgid ""
 "\n"
@@ -4316,73 +4316,73 @@ msgstr ""
 "Soubor %s není dostupný.\n"
 "\n"
 
-#: src/LYMain.c:1649
+#: src/LYMain.c:1651
 #, c-format
 msgid "Ignored %d characters from standard input.\n"
 msgstr ""
 
-#: src/LYMain.c:1651
+#: src/LYMain.c:1653
 #, c-format
 msgid "Use \"-stdin\" or \"-\" to tell how to handle piped input.\n"
 msgstr ""
 
-#: src/LYMain.c:1799
+#: src/LYMain.c:1801
 msgid "Warning:"
 msgstr "Varování:"
 
-#: src/LYMain.c:2368
+#: src/LYMain.c:2369
 msgid "persistent cookies state will be changed in next session only."
 msgstr "Stav trvalých cookies bude zmìnìn a¾ pøi pøí¹tím sezení."
 
-#: src/LYMain.c:2613 src/LYMain.c:2658
+#: src/LYMain.c:2614 src/LYMain.c:2659
 #, c-format
 msgid "Lynx: ignoring unrecognized charset=%s\n"
 msgstr "Lynx: Ignoruji neznámou znakovou sadu %s\n"
 
-#: src/LYMain.c:3177
+#: src/LYMain.c:3178
 #, fuzzy, c-format
 msgid "%s Version %s (%s)"
 msgstr ""
 "\n"
 "%s verze %s (%s)\n"
 
-#: src/LYMain.c:3215
+#: src/LYMain.c:3216
 #, c-format
 msgid "Built on %s %s %s\n"
 msgstr "Pøelo¾en na %s %s %s\n"
 
-#: src/LYMain.c:3237
+#: src/LYMain.c:3238
 msgid "Copyrights held by the Lynx Developers Group,"
 msgstr ""
 
-#: src/LYMain.c:3238
+#: src/LYMain.c:3239
 #, fuzzy
 msgid "the University of Kansas, CERN, and other contributors."
 msgstr "Autorská práva patøí Kansaské univerzitì, CERN a ostatním autorùm.\n"
 
-#: src/LYMain.c:3239
+#: src/LYMain.c:3240
 #, fuzzy
 msgid "Distributed under the GNU General Public License (Version 2)."
 msgstr "Roz¹iøován podle podmínek Obecné veøejné licence GNU.\n"
 
-#: src/LYMain.c:3240
+#: src/LYMain.c:3241
 #, fuzzy
 msgid "See http://lynx.isc.org/ and the online help for more information."
 msgstr ""
 "Podrobnìj¹í informace získáte na http://lynx.browser.org a z nápovìdy k programu.\n"
 "\n"
 
-#: src/LYMain.c:4053
+#: src/LYMain.c:4054
 #, c-format
 msgid "USAGE: %s [options] [file]\n"
 msgstr "Pou¾ití: %s [pøepínaèe] [soubor]\n"
 
-#: src/LYMain.c:4054
+#: src/LYMain.c:4055
 #, c-format
 msgid "Options are:\n"
 msgstr "Pøepínaèe:\n"
 
-#: src/LYMain.c:4353
+#: src/LYMain.c:4354
 #, c-format
 msgid "%s: Invalid Option: %s\n"
 msgstr "%s: Chybný pøepínaè %s\n"
@@ -5223,38 +5223,38 @@ msgstr "Lynx: nelze spustit, soubor %s s pravidly CERN není dostupný\n"
 msgid "(no name)"
 msgstr "(¾ádné jméno)"
 
-#: src/LYReadCFG.c:1876
+#: src/LYReadCFG.c:1877
 #, c-format
 msgid "More than %d nested lynx.cfg includes -- perhaps there is a loop?!?\n"
 msgstr "Více ne¾ %d vnoøených vlo¾ení z lynx.cfg -- nejedná se o nekoneènou smyèku?!?\n"
 
-#: src/LYReadCFG.c:1878
+#: src/LYReadCFG.c:1879
 #, c-format
 msgid "Last attempted include was '%s',\n"
 msgstr "Poslední vlo¾ený soubor je '%s'.\n"
 
-#: src/LYReadCFG.c:1879
+#: src/LYReadCFG.c:1880
 #, c-format
 msgid "included from '%s'.\n"
 msgstr "vlo¾ený z '%s'.\n"
 
-#: src/LYReadCFG.c:2287 src/LYReadCFG.c:2300 src/LYReadCFG.c:2358
+#: src/LYReadCFG.c:2288 src/LYReadCFG.c:2301 src/LYReadCFG.c:2359
 msgid "The following is read from your lynx.cfg file."
 msgstr "Následující údaje jsou èteny z va¹eho lynx.cfg."
 
-#: src/LYReadCFG.c:2288 src/LYReadCFG.c:2301
+#: src/LYReadCFG.c:2289 src/LYReadCFG.c:2302
 msgid "Please read the distribution"
 msgstr "Pøeètìte si implicitní dodávaný s distribucí"
 
-#: src/LYReadCFG.c:2294 src/LYReadCFG.c:2304
+#: src/LYReadCFG.c:2295 src/LYReadCFG.c:2305
 msgid "for more comments."
 msgstr "pro více informací."
 
-#: src/LYReadCFG.c:2340
+#: src/LYReadCFG.c:2341
 msgid "RELOAD THE CHANGES"
 msgstr "NAÈÍST ZMÌNY"
 
-#: src/LYReadCFG.c:2348
+#: src/LYReadCFG.c:2349
 msgid "Your primary configuration"
 msgstr "Va¹e primární konfigurace"
 

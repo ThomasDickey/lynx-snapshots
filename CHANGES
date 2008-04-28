@@ -1,9 +1,23 @@
--- $LynxId: CHANGES,v 1.263 2008/02/27 01:45:58 tom Exp $
+-- $LynxId: CHANGES,v 1.271 2008/04/27 23:03:14 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
-2008-02-?? (2.8.7dev.9)
+2008-04-27 (2.8.7dev.9)
+* update nl.po, vi.po from
+    http://translationproject.org/latest/lynx/
+* additional def7_uni.tbl conversions (patch by Tim Larson).
+* update config.guess (2008-03-12), config.sub (2008-03-08)
+* add --enable-gnutls-compat option and associated files to configure with
+  GNU TLS without its gnutls-openssl library, whose newer versions are
+  available only under a restrictive license (reports by Andreas Metzler,
+  Atsuhito Kohda) -TD
+* update README.sslcerts -SC
+* add POSITIONAL_EDITOR setting to configure editors which accept a "+line"
+  parameter -PBM
+* pass a newline after the start of PRE-section in HTGopher.c to force the
+  first newline between records to be seen and cause the lines to split
+  (report by Ciprian Dorin Craciun) -TD
 * use TRST_MAXROWSPAN and TRST_MAXCOLSPAN limits in Stbl_reserveCellsInTable(),
   to help the non-color-style version work with table using rowspan/colspan
   set to "0", as well as correcting limits from original 2.8.3dev.14 changes
@@ -91,7 +105,7 @@ Changes since Lynx 2.8 release
 * modify HTDoRead() to add elapsed time to its debug trace -TD
 * fix a case in LYGetfile.c which was broken by 2.8.7dev.3 changes to use
   LYTildeExpand() to expand embedded "~" -TG
-* updated config.guess (2007-05-17), config.sub (2007-06-28)
+* update config.guess (2007-05-17), config.sub (2007-06-28)
  
 2007-05-17 (2.8.7dev.5)
 * build/install "en" po file so that GNU gettext LANGUAGE environment variable
@@ -186,7 +200,7 @@ Changes since Lynx 2.8 release
 * modify CF_SRAND to recognize the asymmetric variant of arc4random() -TD
 * updated configure script macros CF_SUBDIR_PATH, CF_XOPEN_SOURCE,
   CF_X_ATHENA_LIBS, CF_X_TOOLKIT -TD
-* updated config.guess (2006-12-22), config.sub (2006-12-08)
+* update config.guess (2006-12-22), config.sub (2006-12-08)
 
 2006-11-14 (2.8.7dev.4)
 * use RFC-822 encoding for filenames passed via file-upload forms (Debian
@@ -331,7 +345,7 @@ Changes since Lynx 2.8 release
 * fixes for GNU TLS configuration (also addresses Debian #231609) -TG, TH
 * add check for failure to write to disk, e.g., on disk full, and report
   error condition via HTAlert() -PG
-* updated README.sslcerts -Stef Caunter
+* updated README.sslcerts -SC
 * add example of -source in manpage to explain how HREF's are constructed
   (Debian #347989) -TD
 * fixes to make redraw_part_of_line() to work with double-width characters.
@@ -402,9 +416,9 @@ Changes since Lynx 2.8 release
 * suppress OpenSSL URL from version message if it happens to be built using
   GNU TLS -TD
 * change default for DEFAULT_INDEX_FILE in lynx.cfg to http://lynx.isc.org/
-  since the Mosaic MetaIndex file is defunct (suggested by Stef Caunter)
+  since the Mosaic MetaIndex file is defunct (suggested by SC)
 * update makelynx.bat (report by FLWM) -TD
-* add presentation for text/css, to allow browsing ".css" files -Stef Caunter
+* add presentation for text/css, to allow browsing ".css" files -SC
 * modify LYPrint.c suggested_filename() to strip bzip2's ".bz2" suffixes as
   well as ".zz" suffixes -TD
 * modify configure script macro AM_PATH_PROG_WITH_TEST to allow for DOS device
@@ -433,7 +447,7 @@ Changes since Lynx 2.8 release
   using CVS (report by Atsuhito Kohda) -TD
 * add a null-pointer check in handle_LYK_HEAD() to cover a case where doing
   a HEAD on a link failed because there was no submit action associated with
-  the link (report by Walter Ian Kaye, Stef Caunter) -TD
+  the link (report by Walter Ian Kaye, SC) -TD
 * improve tbl2html.pl script to cover the ranges and approximations used in
   def7_uni.tbl -TD
 * additional def7_uni.tbl conversions (patch by Tim Larson).
@@ -478,7 +492,7 @@ Changes since Lynx 2.8 release
 * fix some ifdef's that did not work when disabling all features -TD
 * fix a typo in LYMap.c from Debian #335593 changes (report by Jens
   Schleusener) -TD
-* really remove pointer to moxienet (report by Stef Caunter) -TD
+* really remove pointer to moxienet (report by SC) -TD
 
 2005-12-18 (2.8.6dev.16)
 * change configure option default for --enable-justify-elts to true -TD
@@ -613,7 +627,7 @@ Changes since Lynx 2.8 release
 * modify initialization so that
 	cat options.txt | lynx -
   will allow interactive use (report by Arne Kowallik) -TD
-* add NO_MARGINS and NO_TITLE to lynx.cfg (request by Stef Caunter) -TD
+* add NO_MARGINS and NO_TITLE to lynx.cfg (request by SC) -TD
 * adjust line-position for form fields when -notitle option is used (report by
   Arne Kowallik) -TD
 
@@ -649,7 +663,7 @@ Changes since Lynx 2.8 release
   made in NetBSD "make" late in 2003, incorporated into the 2.0 release.
   The CVS change notes:
 	  Trim .SUFFIXES to only contain those used in this file.
-  (reported by Stef Caunter, comments by Klaus Klein and Martin Husemann) -TD
+  (reported by SC, comments by Klaus Klein and Martin Husemann) -TD
 * modify LYhighlight() to allow for the case where a form link extends for
   several lines.  It was not providing enough padding to fill in the "_"
   characters past the first line of the link -TD
@@ -726,7 +740,7 @@ Changes since Lynx 2.8 release
 * correct leak-checking for result of LYcommandList(), which was not freeing
   the associated strings -TD
 * correct pointer initialization in LYCheckForProxyURL() broken by fix for
-  Debian #240237 (reported by GV, Stef Caunter) -TD
+  Debian #240237 (reported by GV, SC) -TD
 
 2004-12-30 (2.8.6dev.9)
 * remove fixed limit on history[] array (report by Richard Eyre) -TD
@@ -1079,7 +1093,7 @@ Changes since Lynx 2.8 release
 * remove intl subdirectory (gettext-0.10.35), since some of the ".po" files
   have been modified to rely upon newer features of gettext.  Modified
   configure script macro to report this properly -TD
-* add SSL_CERT_DIR, SSL_CERT_FILE to lynx.man (suggested by Stef Caunter) -TD
+* add SSL_CERT_DIR, SSL_CERT_FILE to lynx.man (suggested by SC) -TD
 * documentation updates for DJGPP -DK, LP, FLWM
 * update address for Free Software Foundation in COPYHEADER and COPYING
   (Atsuhito Kohda).
@@ -1103,7 +1117,7 @@ Changes since Lynx 2.8 release
   Frederic L W Meunier) -TD
 
 2004-01-19 (2.8.5pre.2)
-* update URLs in docs/README.ssl (Stef Caunter, DK).
+* update URLs in docs/README.ssl (SC, DK).
 * use http://search.lycos.com rather than the messy http://www.lycos.com -DK
 * update some URLs in lynx_help -FLWM (Frederic L W Meunier)
 * remove a few unnecessary #include's (reported by Frederic L W Meunier) -TD
@@ -1153,12 +1167,12 @@ FreeBSD 4.1, 4.8, NetBSD 1.5, 1.6 and OpenBSD 2.8 (curses/ncurses).
 * fix ifdef's for alloca(), e.g., on AIX 4 -TD
 * fix misspelled LYGetEnv/LYgetenv in DJGPP configuration -DK
 * a few portability fixes to allow building on OS/2, AIX, Tru64 and HPUX -TD
-* add docs/README.rootcerts -IZ, Stef Caunter, Johannes Hromadka
+* add docs/README.rootcerts -IZ, SC, Johannes Hromadka
 * update po files (ca.po, da.po, de.po, et.po, hu.po, ru.po, sv.po, tr.po and
   zh_CN.po) from
   http://www.iro.umontreal.ca/contrib/po/maint/lynx/
 * correct some mismatches between INSTALLATION and "configure --help" (prompted
-  by discussion with Stef Caunter) -TD
+  by discussion with SC) -TD
 * undef conflicting symbols "small" and FILE_DOES_NOT_EXIST which are
   misdefined in Cygwin's w32api headers (report by Frederic L W Meunier) -TD
 * amend check for refresh-URL to ensure it only prepends a link for text/html
@@ -1269,7 +1283,7 @@ FreeBSD 4.1, 4.8, NetBSD 1.5, 1.6 and OpenBSD 2.8 (curses/ncurses).
   platforms when POSIXLY_CORRECT (sic) is set -TD
 * fix configure script check for term.h, which may be <ncursesw/term.h> -TD
 * modify an ifdef in HTCheckForInterrupt() to allow compile with DJGPP -GV
-* add docs/README.sslcerts (Stef Caunter <cauntes@mail.mohawkc.on.ca>).
+* add docs/README.sslcerts (Stefan Caunter <cauntes@mail.mohawkc.on.ca>).
 * modify LYLocalFileToURL() to allow for CurrentDir() returning a value that
   does not begin with a slash, e.g., with DJGPP which returns a drive-letter
   first -DK

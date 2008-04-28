@@ -1,5 +1,5 @@
 /*
- * $LynxId: config.hin,v 1.100 2008/01/11 00:52:49 tom Exp $
+ * $LynxId: config.hin,v 1.101 2008/04/13 14:55:42 tom Exp $
  * vile:cmode
  *
  * The configure script translates "config.hin" into "lynx_cfg.h"
@@ -242,6 +242,7 @@
 #undef USE_EXTERNALS		/* CF_ARG_ENABLE(externs) */
 #undef USE_FCNTL		/* CF_FIONBIO */
 #undef USE_FILE_UPLOAD		/* CF_ARG_ENABLE(file-upload) */
+#undef USE_GNUTLS_FUNCS		/* CF_GNUTLS */
 #undef USE_GNUTLS_INCL		/* CF_GNUTLS */
 #undef USE_LOCALE_CHARSET	/* CF_ARG_ENABLE(locale-charset) */
 #undef USE_OPENSSL_INCL		/* CF_SSL */

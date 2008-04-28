@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTUtils.h,v 1.78 2008/02/17 19:36:08 Zdenek.Prikryl Exp $
+ * $LynxId: HTUtils.h,v 1.79 2008/04/13 14:43:32 tom Exp $
  *
  * Utility macros for the W3 code library
  * MACROS FOR GENERAL USE
@@ -613,7 +613,10 @@ extern int WWW_TraceMask;
 
 #else
 
-#ifdef USE_GNUTLS_INCL
+#if defined(USE_GNUTLS_FUNCS)
+#include <tidy_tls.h>
+#define USE_GNUTLS_INCL 1		/* do this for the ".c" ifdef's */
+#elif defined(USE_GNUTLS_INCL)
 #include <gnutls/openssl.h>
 /*
  * GNUTLS's implementation of OpenSSL is very incomplete and rudimentary.

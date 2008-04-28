@@ -1,4 +1,4 @@
-dnl $LynxId: configure.in,v 1.162 2008/02/17 19:44:13 Zdenek.Prikryl Exp $
+dnl $LynxId: configure.in,v 1.164 2008/04/13 20:05:41 tom Exp $
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -414,6 +414,14 @@ AC_ARG_WITH(gnutls,
 	[cf_cv_use_libgnutls=no])
 ])
 
+# this option is mainly for comparing with/without Lynx's wrapper for GNUTLS.
+AC_CACHE_CHECK(if you want gnutls-openssl compat,cf_cv_gnutls_compat,[
+AC_ARG_ENABLE(gnutls-compat,
+	[  --with-gnutls{=path}    link with gnutls-openssl compat],
+	[cf_cv_gnutls_compat=$withval],
+	[cf_cv_gnutls_compat=no])
+])
+
 AC_CACHE_CHECK(if you want socks library,cf_cv_use_libsocks,[
 AC_ARG_WITH(socks,
 	[  --with-socks{=path}     link with socks library if available],
@@ -435,11 +443,17 @@ elif test "x$cf_cv_use_libsocks5" != xno ; then
 else
 	CF_NETLIBS
 fi
+
 CF_INET_ADDR
+
 if test "x$cf_cv_use_libssl"  != xno ; then
 	CF_SSL($cf_cv_use_libssl)
 elif test "x$cf_cv_use_libgnutls" != xno ; then
-	CF_GNUTLS($cf_cv_use_libgnutls)
+    if test "x$cf_cv_gnutls_compat" = xno ; then
+        CF_GNUTLS($cf_cv_use_libgnutls,tidy_tls\$o)
+    else
+        CF_GNUTLS($cf_cv_use_libgnutls)
+    fi
 elif test "x$cf_cv_use_libnss_compat"  != xno ; then
 	CF_NSS_COMPAT($cf_cv_use_libnss_compat)
 fi

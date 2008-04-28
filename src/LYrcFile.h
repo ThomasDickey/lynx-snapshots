@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYrcFile.h,v 1.24 2008/02/10 22:45:46 tom Exp $
+ * $LynxId: LYrcFile.h,v 1.25 2008/03/18 00:38:10 Paul.B.Mahol Exp $
  */
 #ifndef LYRCFILE_H
 #define LYRCFILE_H
@@ -70,6 +70,7 @@
 #define RC_DISPLAY                      "display"
 #define RC_DISPLAY_CHARSET_CHOICE       "display_charset_choice"
 #define RC_DOWNLOADER                   "downloader"
+#define RC_POSITIONABLE_EDITOR		"positionable_editor"
 #define RC_EMACS_KEYS                   "emacs_keys"
 #define RC_EMACS_KEYS_ALWAYS_ON         "emacs_keys_always_on"
 #define RC_ENABLE_LYNXRC                "enable_lynxrc"

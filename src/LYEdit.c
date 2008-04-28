@@ -1,3 +1,4 @@
+/* $LynxId: LYEdit.c,v 1.37 2008/03/18 00:39:05 Paul.B.Mahol Exp $ */
 #include <HTUtils.h>
 #include <HTParse.h>
 #include <HTAlert.h>
@@ -14,6 +15,8 @@
 
 BOOLEAN editor_can_position(void)
 {
+    char *value;
+    HTList *p = positionable_editor;
     static const char *table[] =
     {
 #ifdef VMS
@@ -38,6 +41,13 @@ BOOLEAN editor_can_position(void)
     for (n = 0; n < TABLESIZE(table); n++) {
 	if (strstr(editor, table[n]) != 0) {
 	    return TRUE;
+	}
+    }
+    if (positionable_editor != NULL) {
+	while ((value = (char *) HTList_nextObject(p)) != NULL) {
+	    if (strcmp(editor, value) == 0) {
+		return TRUE;
+	    }
 	}
     }
     return FALSE;
