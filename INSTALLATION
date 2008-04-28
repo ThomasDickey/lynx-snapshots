@@ -413,6 +413,10 @@ II. Compile instructions -- UNIX
 	fonts) according to the current Display Character Set.  (Linux console
 	only.  *Use with discretion.*  See docs/README.chartrans.)
 
+  --enable-gnutls-compat		(define USE_GNUTLS_FUNCS)
+	When --with-gnutls is used, tell whether to use GNUTLS's OpenSSL
+	compatibility library or use GNUTLS's low-level API directly.
+
   --enable-gzip-help
 	Install the lynx help files in gzip'd format [*.gz] to save space.
 
@@ -534,7 +538,7 @@ II. Compile instructions -- UNIX
   --with-dmalloc
 	use Gray Watson's dmalloc library
 
-  --with-gnutls[=XXX]			(define USE_SSL)
+  --with-gnutls[=XXX]			(define USE_SSL, USE_GNUTLS_INCL)
 	Use this option to configure with the GNU TLS library.
 	See docs/README.ssl for additional information.
 
@@ -543,6 +547,8 @@ II. Compile instructions -- UNIX
 	or one level above.  In either case, the corresponding header files
 	are assumed to be in the parallel "include" directory.  The default
 	is /usr/local/gnutls.
+
+	See the "--enable-gnutls-compat" option.
 
   --with-included-gettext
 	not supported in this package.  The configure script uses macros which
@@ -1329,4 +1335,4 @@ VIII. Acknowledgment
 
 -- 1999/04/24 - H. Nelson <lynx-admin@irm.nara.kindai.ac.jp>
 -- vile:txtmode
--- $LynxId: INSTALLATION,v 1.102 2008/02/17 19:58:25 tom Exp $
+-- $LynxId: INSTALLATION,v 1.103 2008/04/13 16:22:59 tom Exp $

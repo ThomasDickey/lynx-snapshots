@@ -1,4 +1,4 @@
-# $LynxId: def7_uni.tbl,v 1.27 2007/07/31 20:36:52 Tim.Larson Exp $
+# $LynxId: def7_uni.tbl,v 1.28 2008/04/15 19:38:41 Tim.Larson Exp $
 # Default 7bit replacements.
 #
 # This table is very important and should not be excluded from the distribution
@@ -1345,7 +1345,7 @@ U+1fed:!:
 U+1fef:!*
 U+1ffe:;;
 # General punctuation:
-0x20	U+2000 U+2002	U+2004-U+2009	# spaces
+0x20	U+2000 U+2002	U+2004-U+2009	U+205F	# spaces
 U+2001 "  "
 U+2003 "  "
 U+200e:(->)
@@ -1361,6 +1361,7 @@ U+2017:=2
 U+2020:/-
 U+2021:/=
 U+2022 " o "
+U+2023 " > "
 0x2e	U+2024
 U+2025:..
 U+2026:...
@@ -1383,7 +1384,7 @@ U+2034:'''
 U+2035:`
 U+2036:``
 U+2037:```
-U+2038:Ca
+U+2038:^
 U+2039:<
 U+203a:>
 U+203b::X
@@ -1391,11 +1392,25 @@ U+203c:!!
 U+203d:?!
 U+203e:'-
 U+2042:***
+U+2043 " - "
+U+2044:/
+U+2045:[-
+U+2046:-]
+U+2047:??
+U+2048:?!
+U+2049:!?
+U+204b:|P
+U+204e:*
 U+2051:**
 U+2052:./.
+U+2053:~
+U+2056 " .: "
 U+2057:''''
+U+2058 " .:. "
+U+2059 " :.: "
 U+205a " : "
-0x2d   U+2043  # HYPHEN BULLET ?
+U+205b " .:. "
+U+205c ":+:"
 U+2044:/
 U+2047:??
 U+2048:?!
@@ -1431,12 +1446,26 @@ U+208d:(
 U+208e:)
 # Old euro currency sign glyph:
 #U+20A0:CE
+U+20a1:C//
+U+20a2:Cr
 U+20a3:Ff
 U+20a4:Li
+U+20a5:m/
+U+20a6:N=
 U+20a7:Pt
+U+20a8:Rs
 U+20a9:W=
+U+20aa:rJ
+U+20ab:d_
 # New euro currency sign glyph:
 U+20AC:EUR
+U+20ad:K-
+U+20ae:T//
+U+20af:Dp
+U+20b1:P=
+U+20b2:G|
+U+20b3:A=
+U+20b5:C|
 U+2100:a/c
 U+2101:a/s
 U+2103:oC
@@ -2419,6 +2448,16 @@ U+2b0e:-v
 U+2b0f:-^
 U+2b10:v-
 U+2b11:^-
+# Supplemental punctuation
+U+2e0f:__
+U+2e1e:.~
+U+2e1f:~.
+U+2e28:((
+U+2e29:))
+U+2e2a ":."
+U+2e2b ".:"
+U+2e2c "::"
+U+2e2f:~
 #  CJK area:
 0x20	U+3000	# ideographic space
 U+3001:,_

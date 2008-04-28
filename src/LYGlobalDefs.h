@@ -1,4 +1,4 @@
-/* $LynxId: LYGlobalDefs.h,v 1.108 2008/02/17 19:14:40 Paul.B.Mahol Exp $ */
+/* $LynxId: LYGlobalDefs.h,v 1.109 2008/03/18 00:38:10 Paul.B.Mahol Exp $ */
 /* global variable definitions */
 
 #ifndef LYGLOBALDEFS_H
@@ -241,6 +241,7 @@ extern "C" {
     extern BOOLEAN vi_keys;	/* TRUE to turn on vi-like key movement */
 
     extern HTList *Goto_URLs;
+    extern HTList *positionable_editor;
 
     extern char *LYRequestReferer;	/* Referer, may be set in getfile() */
     extern char *LYRequestTitle;	/* newdoc.title in calls to getfile() */

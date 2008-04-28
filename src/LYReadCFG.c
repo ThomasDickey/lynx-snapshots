@@ -1,4 +1,4 @@
-/* $LynxId: LYReadCFG.c,v 1.127 2008/02/11 00:54:34 Paul.B.Mahol Exp $ */
+/* $LynxId: LYReadCFG.c,v 1.128 2008/03/18 00:38:10 Paul.B.Mahol Exp $ */
 #ifndef NO_RULES
 #include <HTRules.h>
 #else
@@ -1496,6 +1496,7 @@ static Config_Type Config_Table [] =
 #endif /* USE_PERSISTENT_COOKIES */
      PARSE_STR(RC_PERSONAL_EXTENSION_MAP, personal_extension_map),
      PARSE_STR(RC_PERSONAL_MAILCAP,     personal_type_map),
+     PARSE_LST(RC_POSITIONABLE_EDITOR,	positionable_editor),
      PARSE_STR(RC_PREFERRED_CHARSET,    pref_charset),
      PARSE_ENU(RC_PREFERRED_ENCODING,   LYAcceptEncoding, tbl_preferred_encoding),
      PARSE_STR(RC_PREFERRED_LANGUAGE,   language),

@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: lynx 2.8.5pre15\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-02-17 15:14-0500\n"
+"POT-Creation-Date: 2008-04-27 19:12-0400\n"
 "PO-Revision-Date: 2003-06-03 17:40+0400\n"
 "Last-Translator: Dmitry S. Sivachenko <mitya@cavia.pp.ru>\n"
 "Language-Team: Russian <ru@li.org>\n"
@@ -3795,16 +3795,16 @@ msgstr ""
 "реализацию TCPIP, след вызовов TRACEBACK, если его можно получить, и любую\n"
 "другую относящуюся к делу информацию.\n"
 
-#: src/LYEdit.c:256
+#: src/LYEdit.c:266
 #, fuzzy, c-format
 msgid "Error starting editor, %s"
 msgstr "Ошибка при обработке строки %d из %s\n"
 
-#: src/LYEdit.c:259
+#: src/LYEdit.c:269
 msgid "Editor killed by signal"
 msgstr "Редактор убит сигналом"
 
-#: src/LYEdit.c:264
+#: src/LYEdit.c:274
 #, fuzzy, c-format
 msgid "Editor returned with error status %s"
 msgstr "Редактор завершился со статусом ошибки, %s"
@@ -3942,15 +3942,15 @@ msgstr "этом документе:"
 msgid "Visible links:"
 msgstr "Видимых ссылок:"
 
-#: src/LYList.c:194 src/LYList.c:293
+#: src/LYList.c:194 src/LYList.c:295
 msgid "Hidden links:"
 msgstr "Скрытых ссылок:"
 
-#: src/LYList.c:326
+#: src/LYList.c:332
 msgid "References"
 msgstr "Ссылки"
 
-#: src/LYList.c:330
+#: src/LYList.c:336
 msgid "Visible links"
 msgstr "Видимые ссылки"
 
@@ -4258,19 +4258,19 @@ msgstr "Это сообщение было автоматически сгенерировано"
 msgid "No system mailer configured"
 msgstr ""
 
-#: src/LYMain.c:1017
+#: src/LYMain.c:1019
 msgid "No Winsock found, sorry."
 msgstr "К сожалению Winsock не найден."
 
-#: src/LYMain.c:1198
+#: src/LYMain.c:1200
 msgid "You MUST define a valid TMP or TEMP area!"
 msgstr "Вы ДОЛЖНЫ определить правильную область TMP или TEMP!"
 
-#: src/LYMain.c:1251 src/LYMainLoop.c:5085
+#: src/LYMain.c:1253 src/LYMainLoop.c:5085
 msgid "No such directory"
 msgstr "Нет каталога"
 
-#: src/LYMain.c:1459
+#: src/LYMain.c:1461
 #, c-format
 msgid ""
 "\n"
@@ -4281,7 +4281,7 @@ msgstr ""
 "Конфигурационный файл %s не доступен.\n"
 "\n"
 
-#: src/LYMain.c:1469
+#: src/LYMain.c:1471
 #, c-format
 msgid ""
 "\n"
@@ -4292,7 +4292,7 @@ msgstr ""
 "Кодировки Lynx не определены.\n"
 "\n"
 
-#: src/LYMain.c:1498
+#: src/LYMain.c:1500
 #, c-format
 msgid ""
 "\n"
@@ -4300,7 +4300,7 @@ msgid ""
 "\n"
 msgstr ""
 
-#: src/LYMain.c:1574
+#: src/LYMain.c:1576
 #, c-format
 msgid ""
 "\n"
@@ -4311,68 +4311,68 @@ msgstr ""
 "Файл Lynx %s не доступен.\n"
 "\n"
 
-#: src/LYMain.c:1649
+#: src/LYMain.c:1651
 #, c-format
 msgid "Ignored %d characters from standard input.\n"
 msgstr ""
 
-#: src/LYMain.c:1651
+#: src/LYMain.c:1653
 #, c-format
 msgid "Use \"-stdin\" or \"-\" to tell how to handle piped input.\n"
 msgstr ""
 
-#: src/LYMain.c:1799
+#: src/LYMain.c:1801
 msgid "Warning:"
 msgstr "Предупреждение:"
 
-#: src/LYMain.c:2368
+#: src/LYMain.c:2369
 msgid "persistent cookies state will be changed in next session only."
 msgstr "состояние постоянных cookie будет изменено только в следующем сеансе."
 
-#: src/LYMain.c:2613 src/LYMain.c:2658
+#: src/LYMain.c:2614 src/LYMain.c:2659
 #, c-format
 msgid "Lynx: ignoring unrecognized charset=%s\n"
 msgstr "Lynx: нераспознанная кодировка=%s игнорируется\n"
 
-#: src/LYMain.c:3177
+#: src/LYMain.c:3178
 #, fuzzy, c-format
 msgid "%s Version %s (%s)"
 msgstr "%s Версия %s (%s)\n"
 
-#: src/LYMain.c:3215
+#: src/LYMain.c:3216
 #, c-format
 msgid "Built on %s %s %s\n"
 msgstr "Собрано %s %s %s\n"
 
-#: src/LYMain.c:3237
+#: src/LYMain.c:3238
 msgid "Copyrights held by the Lynx Developers Group,"
 msgstr ""
 
-#: src/LYMain.c:3238
+#: src/LYMain.c:3239
 #, fuzzy
 msgid "the University of Kansas, CERN, and other contributors."
 msgstr "Авторские права принадлежат университету Канзаса, CERN, и другим участникам."
 
-#: src/LYMain.c:3239
+#: src/LYMain.c:3240
 #, fuzzy
 msgid "Distributed under the GNU General Public License (Version 2)."
 msgstr "Распространяется в рамках Универсальной Общественной Лицензии GNU."
 
-#: src/LYMain.c:3240
+#: src/LYMain.c:3241
 msgid "See http://lynx.isc.org/ and the online help for more information."
 msgstr "См. http://lynx.isc.org/ и помощь для дополнительной информации."
 
-#: src/LYMain.c:4053
+#: src/LYMain.c:4054
 #, c-format
 msgid "USAGE: %s [options] [file]\n"
 msgstr "ИСПОЛЬЗОВАНИЕ: %s [ключи] [файл]\n"
 
-#: src/LYMain.c:4054
+#: src/LYMain.c:4055
 #, c-format
 msgid "Options are:\n"
 msgstr "Ключи:\n"
 
-#: src/LYMain.c:4353
+#: src/LYMain.c:4354
 #, c-format
 msgid "%s: Invalid Option: %s\n"
 msgstr "%s: Неверная опция: %s\n"
@@ -5208,38 +5208,38 @@ msgstr "Lynx: ошибка старта, файл с правилами CERN %s не доступен\n"
 msgid "(no name)"
 msgstr "(нет имени)"
 
-#: src/LYReadCFG.c:1876
+#: src/LYReadCFG.c:1877
 #, c-format
 msgid "More than %d nested lynx.cfg includes -- perhaps there is a loop?!?\n"
 msgstr "Больше чем %d вложенных включений lynx.cfg -- возможно цикл?!?\n"
 
-#: src/LYReadCFG.c:1878
+#: src/LYReadCFG.c:1879
 #, c-format
 msgid "Last attempted include was '%s',\n"
 msgstr "Последняя попытка включения была '%s',\n"
 
-#: src/LYReadCFG.c:1879
+#: src/LYReadCFG.c:1880
 #, c-format
 msgid "included from '%s'.\n"
 msgstr "включено из '%s'.\n"
 
-#: src/LYReadCFG.c:2287 src/LYReadCFG.c:2300 src/LYReadCFG.c:2358
+#: src/LYReadCFG.c:2288 src/LYReadCFG.c:2301 src/LYReadCFG.c:2359
 msgid "The following is read from your lynx.cfg file."
 msgstr "Следующее читается из вашего файла lynx.cfg."
 
-#: src/LYReadCFG.c:2288 src/LYReadCFG.c:2301
+#: src/LYReadCFG.c:2289 src/LYReadCFG.c:2302
 msgid "Please read the distribution"
 msgstr "Пожалуйста, прочитайте исходный"
 
-#: src/LYReadCFG.c:2294 src/LYReadCFG.c:2304
+#: src/LYReadCFG.c:2295 src/LYReadCFG.c:2305
 msgid "for more comments."
 msgstr "для получения дополнительных комментариев."
 
-#: src/LYReadCFG.c:2340
+#: src/LYReadCFG.c:2341
 msgid "RELOAD THE CHANGES"
 msgstr "ОБНОВИТЬ ИЗМЕНЕНИЯ"
 
-#: src/LYReadCFG.c:2348
+#: src/LYReadCFG.c:2349
 msgid "Your primary configuration"
 msgstr "Ваша основная конфигурация"
 

@@ -1,14 +1,14 @@
 # Slovenian translation of Lynx WWW browser.
 # Copyright (C) 1999 Free Software Foundation, Inc.
 # Roman Maurer <roman.maurer@hermes.si>, 1999.
-# $LynxId: sl.po,v 1.32 2008/02/17 20:16:05 tom Exp $
+# $LynxId: sl.po,v 1.33 2008/04/27 23:12:03 tom Exp $
 # @Source: po/sl.po @
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: lynx 2.8.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-02-17 15:14-0500\n"
+"POT-Creation-Date: 2008-04-27 19:12-0400\n"
 "PO-Revision-Date: 1999-12-29 12:30 +0200\n"
 "Last-Translator: Roman Maurer <roman.maurer@hermes.si>\n"
 "Language-Team: Slovenian <sl@li.org>\n"
@@ -3767,16 +3767,16 @@ msgstr ""
 "TCP/IP, podatke TRACEBACK, èe jih je mogoèe zajeti, in vse druge\n"
 "pomembne podatke.\n"
 
-#: src/LYEdit.c:256
+#: src/LYEdit.c:266
 #, fuzzy, c-format
 msgid "Error starting editor, %s"
 msgstr "Napaka pri obdelavi vrstice %d datoteke %s\n"
 
-#: src/LYEdit.c:259
+#: src/LYEdit.c:269
 msgid "Editor killed by signal"
 msgstr ""
 
-#: src/LYEdit.c:264
+#: src/LYEdit.c:274
 #, c-format
 msgid "Editor returned with error status %s"
 msgstr ""
@@ -3914,15 +3914,15 @@ msgstr ""
 msgid "Visible links:"
 msgstr ""
 
-#: src/LYList.c:194 src/LYList.c:293
+#: src/LYList.c:194 src/LYList.c:295
 msgid "Hidden links:"
 msgstr "Skrite povezave:"
 
-#: src/LYList.c:326
+#: src/LYList.c:332
 msgid "References"
 msgstr "Sklici"
 
-#: src/LYList.c:330
+#: src/LYList.c:336
 msgid "Visible links"
 msgstr "Vidne povezave"
 
@@ -4230,19 +4230,19 @@ msgstr ""
 msgid "No system mailer configured"
 msgstr ""
 
-#: src/LYMain.c:1017
+#: src/LYMain.c:1019
 msgid "No Winsock found, sorry."
 msgstr "Vtiènica Winsock ¾al ni bila najdena."
 
-#: src/LYMain.c:1198
+#: src/LYMain.c:1200
 msgid "You MUST define a valid TMP or TEMP area!"
 msgstr "MORATE nastaviti veljavno podroèje TMP ali TEMP!"
 
-#: src/LYMain.c:1251 src/LYMainLoop.c:5085
+#: src/LYMain.c:1253 src/LYMainLoop.c:5085
 msgid "No such directory"
 msgstr " imenik"
 
-#: src/LYMain.c:1459
+#: src/LYMain.c:1461
 #, c-format
 msgid ""
 "\n"
@@ -4253,7 +4253,7 @@ msgstr ""
 "Nastavitvena datoteka %s ni dostopna.\n"
 "\n"
 
-#: src/LYMain.c:1469
+#: src/LYMain.c:1471
 #, c-format
 msgid ""
 "\n"
@@ -4264,7 +4264,7 @@ msgstr ""
 "Nabor znakov za Lynx ni bil doloèen.\n"
 "\n"
 
-#: src/LYMain.c:1498
+#: src/LYMain.c:1500
 #, c-format
 msgid ""
 "\n"
@@ -4275,7 +4275,7 @@ msgstr ""
 "Urejevalna preslikava za Lynx ni bila doloèena.\n"
 "\n"
 
-#: src/LYMain.c:1574
+#: src/LYMain.c:1576
 #, c-format
 msgid ""
 "\n"
@@ -4286,68 +4286,68 @@ msgstr ""
 "Datoteka %s za Lynx< ni dostopna.\n"
 "\n"
 
-#: src/LYMain.c:1649
+#: src/LYMain.c:1651
 #, c-format
 msgid "Ignored %d characters from standard input.\n"
 msgstr ""
 
-#: src/LYMain.c:1651
+#: src/LYMain.c:1653
 #, c-format
 msgid "Use \"-stdin\" or \"-\" to tell how to handle piped input.\n"
 msgstr ""
 
-#: src/LYMain.c:1799
+#: src/LYMain.c:1801
 msgid "Warning:"
 msgstr ""
 
-#: src/LYMain.c:2368
+#: src/LYMain.c:2369
 msgid "persistent cookies state will be changed in next session only."
 msgstr "stanje obstojnih pi¹kotov bo spremenjeno le v naslednji seji."
 
-#: src/LYMain.c:2613 src/LYMain.c:2658
+#: src/LYMain.c:2614 src/LYMain.c:2659
 #, c-format
 msgid "Lynx: ignoring unrecognized charset=%s\n"
 msgstr ""
 
-#: src/LYMain.c:3177
+#: src/LYMain.c:3178
 #, fuzzy, c-format
 msgid "%s Version %s (%s)"
 msgstr "%s Razlièica %s (%s)\n"
 
-#: src/LYMain.c:3215
+#: src/LYMain.c:3216
 #, c-format
 msgid "Built on %s %s %s\n"
 msgstr "Zgrajena na %s %s %s\n"
 
-#: src/LYMain.c:3237
+#: src/LYMain.c:3238
 msgid "Copyrights held by the Lynx Developers Group,"
 msgstr ""
 
-#: src/LYMain.c:3238
+#: src/LYMain.c:3239
 #, fuzzy
 msgid "the University of Kansas, CERN, and other contributors."
 msgstr "Pravice raz¹irjanja imajo Univerza v Kansasu, CERN in drugi sodelavci."
 
-#: src/LYMain.c:3239
+#: src/LYMain.c:3240
 #, fuzzy
 msgid "Distributed under the GNU General Public License (Version 2)."
 msgstr "Raz¹irjano pod Splo¹no licenco GNU."
 
-#: src/LYMain.c:3240
+#: src/LYMain.c:3241
 msgid "See http://lynx.isc.org/ and the online help for more information."
-msgstr ""
-
-#: src/LYMain.c:4053
-#, c-format
-msgid "USAGE: %s [options] [file]\n"
 msgstr ""
 
 #: src/LYMain.c:4054
 #, c-format
+msgid "USAGE: %s [options] [file]\n"
+msgstr ""
+
+#: src/LYMain.c:4055
+#, c-format
 msgid "Options are:\n"
 msgstr ""
 
-#: src/LYMain.c:4353
+#: src/LYMain.c:4354
 #, c-format
 msgid "%s: Invalid Option: %s\n"
 msgstr ""
@@ -5162,38 +5162,38 @@ msgstr ""
 msgid "(no name)"
 msgstr "(brez imena)"
 
-#: src/LYReadCFG.c:1876
+#: src/LYReadCFG.c:1877
 #, c-format
 msgid "More than %d nested lynx.cfg includes -- perhaps there is a loop?!?\n"
 msgstr ""
 
-#: src/LYReadCFG.c:1878
+#: src/LYReadCFG.c:1879
 #, c-format
 msgid "Last attempted include was '%s',\n"
 msgstr ""
 
-#: src/LYReadCFG.c:1879
+#: src/LYReadCFG.c:1880
 #, c-format
 msgid "included from '%s'.\n"
 msgstr ""
 
-#: src/LYReadCFG.c:2287 src/LYReadCFG.c:2300 src/LYReadCFG.c:2358
+#: src/LYReadCFG.c:2288 src/LYReadCFG.c:2301 src/LYReadCFG.c:2359
 msgid "The following is read from your lynx.cfg file."
 msgstr ""
 
-#: src/LYReadCFG.c:2288 src/LYReadCFG.c:2301
+#: src/LYReadCFG.c:2289 src/LYReadCFG.c:2302
 msgid "Please read the distribution"
 msgstr "Prosim, preberite dokumentacijo v distribuciji"
 
-#: src/LYReadCFG.c:2294 src/LYReadCFG.c:2304
+#: src/LYReadCFG.c:2295 src/LYReadCFG.c:2305
 msgid "for more comments."
 msgstr "za veè pripomb."
 
-#: src/LYReadCFG.c:2340
+#: src/LYReadCFG.c:2341
 msgid "RELOAD THE CHANGES"
 msgstr ""
 
-#: src/LYReadCFG.c:2348
+#: src/LYReadCFG.c:2349
 msgid "Your primary configuration"
 msgstr ""
 

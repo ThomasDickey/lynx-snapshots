@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: lynx 2.8.6-dev19\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-02-17 15:14-0500\n"
+"POT-Creation-Date: 2008-04-27 19:12-0400\n"
 "PO-Revision-Date: 2006-10-26 14:26+0300\n"
 "Last-Translator: Toomas Soome <Toomas.Soome@microlink.ee>\n"
 "Language-Team: Estonian <et@li.org>\n"
@@ -3789,16 +3789,16 @@ msgstr ""
 "mis vea põhjustas, operatsioonisüsteemi nimi ja versiooni number,\n"
 "info TCPIP realisatsioonist ja muu asjakohane info.\n"
 
-#: src/LYEdit.c:256
+#: src/LYEdit.c:266
 #, fuzzy, c-format
 msgid "Error starting editor, %s"
 msgstr "Viga rea %d töötlemisel (%s)\n"
 
-#: src/LYEdit.c:259
+#: src/LYEdit.c:269
 msgid "Editor killed by signal"
 msgstr "Toimeti tapeti signaaliga"
 
-#: src/LYEdit.c:264
+#: src/LYEdit.c:274
 #, fuzzy, c-format
 msgid "Editor returned with error status %s"
 msgstr "Toimeti lõpetas veakoodiga, %s"
@@ -3935,15 +3935,15 @@ msgstr "see dokument:"
 msgid "Visible links:"
 msgstr "Nähtavad viited:"
 
-#: src/LYList.c:194 src/LYList.c:293
+#: src/LYList.c:194 src/LYList.c:295
 msgid "Hidden links:"
 msgstr "Peidetud viited:"
 
-#: src/LYList.c:326
+#: src/LYList.c:332
 msgid "References"
 msgstr "Viited"
 
-#: src/LYList.c:330
+#: src/LYList.c:336
 msgid "Visible links"
 msgstr "Nähtavad viited"
 
@@ -4250,19 +4250,19 @@ msgstr "See teade on automaatselt loodud"
 msgid "No system mailer configured"
 msgstr "Süsteemset e-posti programmi ei ole seadistatud"
 
-#: src/LYMain.c:1017
+#: src/LYMain.c:1019
 msgid "No Winsock found, sorry."
 msgstr "Winsock puudub, kahju."
 
-#: src/LYMain.c:1198
+#: src/LYMain.c:1200
 msgid "You MUST define a valid TMP or TEMP area!"
 msgstr "Te PEATE defineerima kehtiva TMP või TEMP piirkonna!"
 
-#: src/LYMain.c:1251 src/LYMainLoop.c:5085
+#: src/LYMain.c:1253 src/LYMainLoop.c:5085
 msgid "No such directory"
 msgstr "Sellist kataloogi ei ole"
 
-#: src/LYMain.c:1459
+#: src/LYMain.c:1461
 #, c-format
 msgid ""
 "\n"
@@ -4273,7 +4273,7 @@ msgstr ""
 "Seadete faili \"%s\" ei ole.\n"
 "\n"
 
-#: src/LYMain.c:1469
+#: src/LYMain.c:1471
 #, c-format
 msgid ""
 "\n"
@@ -4284,7 +4284,7 @@ msgstr ""
 "Lynx kooditabeleid ei ole deklareeritud.\n"
 "\n"
 
-#: src/LYMain.c:1498
+#: src/LYMain.c:1500
 #, c-format
 msgid ""
 "\n"
@@ -4295,7 +4295,7 @@ msgstr ""
 "Lynx kaadri toimeti ei ole deklareeritud.\n"
 "\n"
 
-#: src/LYMain.c:1574
+#: src/LYMain.c:1576
 #, c-format
 msgid ""
 "\n"
@@ -4306,68 +4306,68 @@ msgstr ""
 "Lynx fail \"%s\" ei ole kasutatav.\n"
 "\n"
 
-#: src/LYMain.c:1649
+#: src/LYMain.c:1651
 #, c-format
 msgid "Ignored %d characters from standard input.\n"
 msgstr ""
 
-#: src/LYMain.c:1651
+#: src/LYMain.c:1653
 #, c-format
 msgid "Use \"-stdin\" or \"-\" to tell how to handle piped input.\n"
 msgstr ""
 
-#: src/LYMain.c:1799
+#: src/LYMain.c:1801
 msgid "Warning:"
 msgstr "Hoiatus:"
 
-#: src/LYMain.c:2368
+#: src/LYMain.c:2369
 msgid "persistent cookies state will be changed in next session only."
 msgstr "püsivate präänikute olekut muudetakse alles järgmise sessiooniga."
 
-#: src/LYMain.c:2613 src/LYMain.c:2658
+#: src/LYMain.c:2614 src/LYMain.c:2659
 #, c-format
 msgid "Lynx: ignoring unrecognized charset=%s\n"
 msgstr "Lynx: ignoreerin tundmatut kooditabelit %s\n"
 
-#: src/LYMain.c:3177
+#: src/LYMain.c:3178
 #, c-format
 msgid "%s Version %s (%s)"
 msgstr "%s Versioon %s (%s)"
 
-#: src/LYMain.c:3215
+#: src/LYMain.c:3216
 #, c-format
 msgid "Built on %s %s %s\n"
 msgstr "Ehitatud %s masinal %s %s\n"
 
-#: src/LYMain.c:3237
+#: src/LYMain.c:3238
 msgid "Copyrights held by the Lynx Developers Group,"
 msgstr ""
 
-#: src/LYMain.c:3238
+#: src/LYMain.c:3239
 #, fuzzy
 msgid "the University of Kansas, CERN, and other contributors."
 msgstr "Autoriõiguseid omavad University of Kansas, CERN ja teised."
 
-#: src/LYMain.c:3239
+#: src/LYMain.c:3240
 #, fuzzy
 msgid "Distributed under the GNU General Public License (Version 2)."
 msgstr "Levitatakse GNU üldise avaliku litsensiga."
 
-#: src/LYMain.c:3240
+#: src/LYMain.c:3241
 msgid "See http://lynx.isc.org/ and the online help for more information."
 msgstr "Abi ja muud infot leiate aadressil http://lynx.isc.org/."
 
-#: src/LYMain.c:4053
+#: src/LYMain.c:4054
 #, c-format
 msgid "USAGE: %s [options] [file]\n"
 msgstr "KASUTAMINE: %s [võtmed] [fail]\n"
 
-#: src/LYMain.c:4054
+#: src/LYMain.c:4055
 #, c-format
 msgid "Options are:\n"
 msgstr "Võtmed on:\n"
 
-#: src/LYMain.c:4353
+#: src/LYMain.c:4354
 #, c-format
 msgid "%s: Invalid Option: %s\n"
 msgstr "%s: Vigane võti: %s\n"
@@ -5186,38 +5186,38 @@ msgstr "Lynx: ei saa startida, CERN reeglite fail %s ei ole kasutatav\n"
 msgid "(no name)"
 msgstr "(nimetu)"
 
-#: src/LYReadCFG.c:1876
+#: src/LYReadCFG.c:1877
 #, c-format
 msgid "More than %d nested lynx.cfg includes -- perhaps there is a loop?!?\n"
 msgstr "Rohkem kui %d lynx.cfg kaasamist -- vahest on tekkinud tsükkel?!?\n"
 
-#: src/LYReadCFG.c:1878
+#: src/LYReadCFG.c:1879
 #, c-format
 msgid "Last attempted include was '%s',\n"
 msgstr "Viimane kaasata üritatud fail oli '%s',\n"
 
-#: src/LYReadCFG.c:1879
+#: src/LYReadCFG.c:1880
 #, c-format
 msgid "included from '%s'.\n"
 msgstr "kaasatud failist '%s'.\n"
 
-#: src/LYReadCFG.c:2287 src/LYReadCFG.c:2300 src/LYReadCFG.c:2358
+#: src/LYReadCFG.c:2288 src/LYReadCFG.c:2301 src/LYReadCFG.c:2359
 msgid "The following is read from your lynx.cfg file."
 msgstr "Järgnev on loetud teie lynx.cfg failist."
 
-#: src/LYReadCFG.c:2288 src/LYReadCFG.c:2301
+#: src/LYReadCFG.c:2289 src/LYReadCFG.c:2302
 msgid "Please read the distribution"
 msgstr "Lisainfo jaoks lugege palun"
 
-#: src/LYReadCFG.c:2294 src/LYReadCFG.c:2304
+#: src/LYReadCFG.c:2295 src/LYReadCFG.c:2305
 msgid "for more comments."
 msgstr "paketis olevat faili."
 
-#: src/LYReadCFG.c:2340
+#: src/LYReadCFG.c:2341
 msgid "RELOAD THE CHANGES"
 msgstr "MUUTUSTE LAADIMINE"
 
-#: src/LYReadCFG.c:2348
+#: src/LYReadCFG.c:2349
 msgid "Your primary configuration"
 msgstr "Teie primaarsed seaded"
 
