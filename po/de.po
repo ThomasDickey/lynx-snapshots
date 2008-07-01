@@ -1,5 +1,6 @@
 # German translations for the `lynx' program.
 # Copyright (C) 2000, 2002, 2003 Free Software Foundation, Inc.
+# Fabian Fingerle <fabian@datensalat.eu>, 2008.
 # Karl Eichwalder <ke@suse.de>, 2002-2004.
 # Erwin Dieterich <bamse@gmx.de>, 2000.
 # Klaus Weide <kweide@enteract.com>, 1999.
@@ -21,9 +22,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: lynx 2.8.6-dev6\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-04-27 19:12-0400\n"
-"PO-Revision-Date: 2004-10-14 09:10+0200\n"
-"Last-Translator: Karl Eichwalder <ke@gnu.franken.de>\n"
+"POT-Creation-Date: 2008-06-29 16:21-0400\n"
+"PO-Revision-Date: 2007-06-03 02:10+0200\n"
+"Last-Translator: Fabian Fingerle <fabian@datensalat.eu>\n"
 "Language-Team: German <de@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -3152,9 +3153,8 @@ msgid "the certificate has no known issuer"
 msgstr ""
 
 #: WWW/Library/Implementation/HTTP.c:720
-#, fuzzy
 msgid "the certificate has been revoked"
-msgstr "Der Keks ist weg!"
+msgstr "Das Zertifikat wurde widerrufen"
 
 #: WWW/Library/Implementation/HTTP.c:722
 msgid "the certificate is not trusted"
@@ -3171,9 +3171,8 @@ msgid "Verified connection to %s (subj=%s)"
 msgstr ""
 
 #: WWW/Library/Implementation/HTTP.c:931
-#, fuzzy
 msgid "Can't find common name in certificate"
-msgstr "SSL-Fehler:Es ist nicht möglich einen allgemeinen Namen im Zertifikat zu finden - Fortfahren?"
+msgstr "Kann Allgemeinen Namen im Zertifikat nicht finden"
 
 #: WWW/Library/Implementation/HTTP.c:934
 #, c-format
@@ -5012,9 +5011,8 @@ msgid "Personal mail address"
 msgstr "Persönliche Mailadresse"
 
 #: src/LYOptions.c:3761
-#, fuzzy
 msgid "Password for anonymous ftp"
-msgstr "Password für den News-Host '%s':"
+msgstr "Password für anonymen FTP"
 
 #. Preferred media type: SELECT
 #: src/LYOptions.c:3767
@@ -6165,6 +6163,9 @@ msgstr ""
 "Wenn Sie nach der generellen Konfigurationsdatei suchen - da sind sie\n"
 "hier am falschen Ort.  Die generelle Konfigurationsdatei wird üblicherweise\n"
 "lynx.cfg genannt, und ihr Inhalt und Format ist verschieden.\n"
+
+#~ msgid "History List maximum reached!  Document not pushed."
+#~ msgstr "Maximum für History-Liste erreicht! Dokument nicht auf Stapel abgelegt."
 
 #~ msgid "reason unknown."
 #~ msgstr "Grund nicht bekannt."

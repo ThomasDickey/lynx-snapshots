@@ -1,4 +1,4 @@
-# $LynxId: makefile.in,v 1.50 2007/05/23 00:19:09 tom Exp $
+# $LynxId: makefile.in,v 1.52 2008/06/30 23:36:34 tom Exp $
 # template-makefile for Lynx src directory
 
 SHELL		= @CONFIG_SHELL@
@@ -71,14 +71,14 @@ CHARTRANS_OBJS	= UCdomap$o UCAux$o UCAuto$o
 OBJS	= \
 	LYClean$o LYShowInfo$o LYEdit$o LYStrings$o LYMail$o \
 	HTAlert$o GridText$o LYGetFile$o LYMain$o LYMainLoop$o \
-	LYCurses$o LYBookmark$o LYUtils$o LYOptions$o \
+	LYCurses$o LYBookmark$o LYmktime$o LYUtils$o LYOptions$o \
 	LYReadCFG$o LYSearch$o LYHistory$o LYForms$o LYPrint$o \
 	LYrcFile$o LYDownload$o LYNews$o LYKeymap$o HTML$o \
 	HTFWriter$o HTInit$o DefaultStyle$o LYUpload$o \
 	LYLeaks$o LYexit$o LYJump$o LYList$o LYCgi$o \
 	LYTraversal$o LYEditmap$o LYCharSets$o LYCharUtils$o \
 	LYMap$o LYCookie$o LYStyle$o LYHash$o LYPrettySrc$o \
-	TRSTable$o $(CHARTRANS_OBJS) @EXTRA_OBJS@ @LIBOBJS@
+	TRSTable$o parsdate$o $(CHARTRANS_OBJS) @EXTRA_OBJS@ @LIBOBJS@
 
 C_SRC	= $(OBJS:$o=.c)
 
@@ -133,6 +133,7 @@ HTInit$o :		$(top_srcdir)/userdefs.h
 LYCharSets$o :		$(top_srcdir)/userdefs.h
 LYGetFile$o :		$(top_srcdir)/userdefs.h
 LYKeymap$o :		$(top_srcdir)/userdefs.h
+LYLeaks$o :		$(CMN)LYLeaks.h $(CMN)HTString.h
 LYMail$o :		$(top_srcdir)/userdefs.h
 LYMain$o :		$(top_srcdir)/userdefs.h $(top_builddir)/lynx_cfg.h
 LYMainLoop$o :		$(top_srcdir)/userdefs.h
@@ -141,8 +142,8 @@ LYReadCFG$o :		$(top_srcdir)/userdefs.h
 LYShowInfo$o :		$(top_builddir)/cfg_defs.h
 LYTraversal$o :		$(top_srcdir)/userdefs.h
 LYUtils$o :		$(top_srcdir)/userdefs.h
+LYmktime$o :		$(top_srcdir)/userdefs.h
 LYrcFile$o :		$(top_srcdir)/userdefs.h
-LYLeaks$o :		$(CMN)LYLeaks.h $(CMN)HTString.h
 
 CHRTR= chrtrans/
 
@@ -200,6 +201,15 @@ chrtrans/makeuctb$(BUILD_EXEEXT):
 
 UCAux$o : UCAux.c $(CMN)UCAux.h $(CMN)UCDefs.h
 LYCookie$o : $(top_srcdir)/userdefs.h
+
+# test-driver for LYmktime
+test_mktime: LYmktime.c parsdate.o
+	$(CC) -o $@ $(CC_OPTS) -DTEST_DRIVER LYmktime.c parsdate.o
+
+# update generated source
+parsdate.c : parsdate.y
+	yacc  parsdate.y 
+	mv y.tab.c $@
 
 depend : $(TABLES)
 	makedepend -fmakefile -- $(CC_OPTS) -- $(C_SRC)

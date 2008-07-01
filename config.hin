@@ -1,5 +1,5 @@
 /*
- * $LynxId: config.hin,v 1.101 2008/04/13 14:55:42 tom Exp $
+ * $LynxId: config.hin,v 1.102 2008/07/01 00:01:11 tom Exp $
  * vile:cmode
  *
  * The configure script translates "config.hin" into "lynx_cfg.h"
@@ -32,6 +32,7 @@
 #undef DISABLE_GOPHER		/* CF_ARG_DISABLE(gopher) */
 #undef DISABLE_NEWS		/* CF_ARG_DISABLE(news) */
 #undef DISP_PARTIAL		/* CF_ARG_ENABLE(partial) */
+#undef DONT_HAVE_TM_GMTOFF	/* CF_TM_GMTOFF */
 #undef DONT_TRACK_INTERNAL_LINKS /* CF_ARG_DISABLE(internal-links) */
 #undef ENABLE_IPV6		/* CF_CHECK_IPV6 */
 #undef ENABLE_NLS		/* defined if NLS is requested */

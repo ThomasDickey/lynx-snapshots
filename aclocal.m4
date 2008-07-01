@@ -1,11 +1,11 @@
-dnl $LynxId: aclocal.m4,v 1.125 2008/04/13 23:20:18 tom Exp $
+dnl $LynxId: aclocal.m4,v 1.126 2008/06/30 23:59:52 tom Exp $
 dnl Macros for auto-configure script.
 dnl by T.E.Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
 dnl and Philippe De Muyter <phdm@macqel.be>
 dnl
 dnl Created: 1997/1/28
-dnl Updated: 2008/04/13
+dnl Updated: 2008/06/30
 dnl
 dnl The autoconf used in Lynx development is GNU autoconf 2.13 or 2.52, patched
 dnl by Thomas Dickey.  See your local GNU archives, and this URL:
@@ -4683,6 +4683,34 @@ ncursesw/term.h)
 	AC_DEFINE(HAVE_NCURSESW_TERM_H)
 	;;
 esac
+])dnl
+dnl ---------------------------------------------------------------------------
+dnl CF_TM_GMTOFF version: 2 updated: 1997/08/28 23:57:55
+dnl ------------
+dnl Check if the tm-struct defines the '.tm_gmtoff' member (useful in decoding
+dnl dates).
+AC_DEFUN([CF_TM_GMTOFF],
+[
+AC_MSG_CHECKING([for tm.tm_gmtoff])
+AC_CACHE_VAL(cf_cv_tm_gmtoff,[
+	AC_TRY_COMPILE([
+#ifdef TIME_WITH_SYS_TIME
+#	include <sys/time.h>
+#	include <time.h>
+#else
+#	ifdef HAVE_SYS_TIME_H
+#		include <sys/time.h>
+#	else
+#		include <time.h>
+#	endif
+#endif
+],[
+	struct tm foo;
+	long bar = foo.tm_gmtoff],
+	[cf_cv_tm_gmtoff=yes],
+	[cf_cv_tm_gmtoff=no])])
+AC_MSG_RESULT($cf_cv_tm_gmtoff)
+test $cf_cv_tm_gmtoff = no && AC_DEFINE(DONT_HAVE_TM_GMTOFF)
 ])dnl
 dnl ---------------------------------------------------------------------------
 dnl CF_TTYTYPE version: 4 updated: 2002/10/27 18:21:42

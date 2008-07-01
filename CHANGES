@@ -1,7 +1,12 @@
--- $LynxId: CHANGES,v 1.271 2008/04/27 23:03:14 tom Exp $
+-- $LynxId: CHANGES,v 1.273 2008/06/30 23:52:31 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
+
+2008-0?-?? (2.8.7dev.10)
+* adapt/extend parsdate.y from tin to improve parsing of cookie expiration
+  times (Debian #480144).
+* update de.po (patch by Fabian Fingerle)
 
 2008-04-27 (2.8.7dev.9)
 * update nl.po, vi.po from
