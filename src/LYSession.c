@@ -1,4 +1,4 @@
-/* $LynxId: LYSession.c,v 1.5 2008/03/18 00:38:37 Paul.B.Mahol Exp $ */
+/* $LynxId: LYSession.c,v 1.6 2008/07/02 21:24:27 Paul.B.Mahol Exp $ */
 
 #include <LYSession.h>
 
@@ -247,15 +247,17 @@ void SaveSession(void)
 
 	for (i = j; i < k; i++) {
 	    vl = (VisitedLink *) HTList_objectAt(Visited_Links, i);
-	    fprintf(fp, "V %d ", vl->level);
-	    fputs(vl->address, fp);
-	    fprintf(fp, "\t");
-	    fputs(vl->title, fp);
-	    fprintf(fp, "\n");
+	    if (vl != NULL) {
+		fprintf(fp, "V %d ", vl->level);
+		fputs(vl->address, fp);
+		fprintf(fp, "\t");
+		fputs(vl->title, fp);
+		fprintf(fp, "\n");
+	    }
 	}
-	LYCloseOutput(fp);
 #endif /* VLINK_IN_SESSION */
 
+	LYCloseOutput(fp);
     }
     SetDefaultMode(O_BINARY);
 }

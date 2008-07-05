@@ -1,4 +1,4 @@
-/* $LynxId: LYOptions.c,v 1.122 2008/01/08 00:48:58 tom Exp $ */
+/* $LynxId: LYOptions.c,v 1.124 2008/07/04 15:06:56 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <HTTP.h>		/* 'reloading' flag */
@@ -2080,8 +2080,7 @@ int popup_choice(int cur_choice,
 				   -1,
 				   i_length,
 				   disabled,
-				   for_mouse,
-				   TRUE);
+				   for_mouse);
     switch (cur_choice) {
     case LYK_QUIT:
     case LYK_ABORT:

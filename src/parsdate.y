@@ -1,6 +1,6 @@
 %{
 /*
- *  $LynxId: parsdate.y,v 1.4 2008/06/30 23:25:14 tom Exp $
+ *  $LynxId: parsdate.y,v 1.5 2008/07/01 20:14:24 tom Exp $
  *
  *  This module is adapted and extended from tin, to use for LYmktime().
  *
@@ -31,6 +31,7 @@
 /* SUPPRESS 593 on yynewstate */ /* Label was not used */
 /* SUPPRESS 595 on yypvt */ /* Automatic variable may be used before set */
 
+#undef alloca			/* conflicting def may be set by yacc */
 #include <parsdate.h>
 
 /*

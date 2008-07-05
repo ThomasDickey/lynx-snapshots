@@ -1,4 +1,7 @@
-/*		Our Static DTD for HTML
+/*
+ * $LynxId: HTMLDTD.c,v 1.53 2008/07/05 00:23:48 tom Exp $
+ *
+ *		Our Static DTD for HTML
  *		-----------------------
  */
 
@@ -512,7 +515,7 @@ static attr gen_attr[] = {		/* Minimum HTML 3.0 */
 	{ 0               T(N) }	/* Terminate list */
 };
 
-static attr glossary_attr[] = {		/* DL (and DLC) attributes */
+static attr dl_attr[] = {		/* DL (and DLC) attributes */
 	{ "CLASS"         T(c) },
 	{ "CLEAR"         T(N) },
 	{ "COMPACT"       T(N) },
@@ -698,7 +701,7 @@ static attr link_attr[] = {		/* LINK attributes */
 	{ 0               T(N) }	/* Terminate list */
 };
 
-static attr list_attr[] = {		/* LI attributes */
+static attr li_attr[] = {		/* LI attributes */
 	{ "CLASS"         T(c) },
 	{ "CLEAR"         T(N) },
 	{ "DINGBAT"       T(N) },
@@ -794,7 +797,7 @@ static attr object_attr[] = {		/* OBJECT attributes */
 	{ 0               T(N) }	/* Terminate list */
 };
 
-static attr olist_attr[] = {		/* OL attributes */
+static attr ol_attr[] = {		/* OL attributes */
 	{ "CLASS"         T(c) },
 	{ "CLEAR"         T(N) },
 	{ "COMPACT"       T(N) },
@@ -1035,7 +1038,7 @@ static attr tr_attr[] = {	/* TR, THEAD, TFOOT, and TBODY attributes */
 	{ 0               T(N) }	/* Terminate list */
 };
 
-static attr ulist_attr[] = {		/* UL attributes */
+static attr ul_attr[] = {		/* UL attributes */
 	{ "CLASS"         T(c) },
 	{ "CLEAR"         T(N) },
 	{ "COMPACT"       T(N) },
@@ -1184,13 +1187,13 @@ static attr ulist_attr[] = {		/* UL attributes */
 #define T_DEL		0x0002, 0x8BBCF,0x8FFFF,0xA7F8F,0xF7FBF,0x00003,0x00000
  /* { "DFN"	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED }, */
 #define T_DFN		0x0002, 0x8B0CF,0x8FFFF,0x8778F,0xF7FBF,0x00003,0x00000
- /* { "DIR"	, ulist_attr,	HTML_UL_ATTRIBUTES,	SGML_MIXED }, */
+ /* { "DIR"	, ul_attr,	HTML_UL_ATTRIBUTES,	SGML_MIXED }, */
 #define T_DIR		0x0800, 0x0B400,0x0F75F,0x37680,0x36FB7,0x84F7F,0x00000
  /* { "DIV"	, div_attr,	HTML_DIV_ATTRIBUTES,	SGML_MIXED }, */
 #define T_DIV		0x0200, 0x8FB8F,0x8FFFF,0xB66A0,0xB7FFF,0x8031F,0x00004
- /* { "DL"	, glossary_attr, HTML_DL_ATTRIBUTES,	SGML_MIXED }, */
+ /* { "DL"	, dl_attr, 	HTML_DL_ATTRIBUTES,	SGML_MIXED }, */
 #define T_DL		0x0800, 0x0C480,0x8FFFF,0x36680,0xB7FB7,0x0075F,0x00000
- /* { "DLC"	, glossary_attr, HTML_DL_ATTRIBUTES,	SGML_MIXED }, */
+ /* { "DLC"	, dl_attr, 	HTML_DL_ATTRIBUTES,	SGML_MIXED }, */
 #define T_DLC		0x0800, 0x0C480,0x8FFFF,0x36680,0xB7FB7,0x0075F,0x00000
  /* { "DT"	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_EMPTY }, */
 #define T_DT		0x0400, 0x0B04F,0x0B1FF,0x00800,0x17FFF,0x8071F,0x00001
@@ -1251,7 +1254,7 @@ static attr ulist_attr[] = {		/* UL attributes */
 #define T_LEGEND	0x0002, 0x0B04F,0x8FF7F,0x00200,0xB7FA7,0x00003,0x00000
  /* { "LH"	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_EMPTY }, */
 #define T_LH		0x0400, 0x0BB7F,0x8FFFF,0x00800,0x97FFF,0x8071F,0x00001
- /* { "LI"	, list_attr,	HTML_LI_ATTRIBUTES,	SGML_EMPTY }, */
+ /* { "LI"	, li_attr,	HTML_LI_ATTRIBUTES,	SGML_EMPTY }, */
 #define T_LI		0x0400, 0x0BBFF,0x8FFFF,0x00800,0x97FFF,0x8071F,0x00001
  /* { "LINK"	, link_attr,	HTML_LINK_ATTRIBUTES,	SGML_EMPTY }, */
 #define T_LINK		0x8000, 0x00000,0x00000,0x50000,0x50000,0x0FF7F,0x00001
@@ -1263,7 +1266,7 @@ static attr ulist_attr[] = {		/* UL attributes */
 #define T_MARQUEE	0x4000, 0x0000F,0x8F01F,0x37787,0xB7FA7,0x8301C,0x00000
  /* { "MATH"	, math_attr,	HTML_MATH_ATTRIBUTES,	SGML_LITTERAL }, */
 #define T_MATH		0x0004, 0x0B05F,0x8FFFF,0x2778F,0xF7FBF,0x0001F,0x00000
- /* { "MENU"	, ulist_attr,	HTML_UL_ATTRIBUTES,	SGML_MIXED }, */
+ /* { "MENU"	, ul_attr,	HTML_UL_ATTRIBUTES,	SGML_MIXED }, */
 #define T_MENU		0x0800, 0x0B400,0x0F75F,0x17680,0x36FB7,0x88F7F,0x00000
  /* { "META"	, meta_attr,	HTML_META_ATTRIBUTES,	SGML_EMPTY }, */
 #define T_META		0x8000, 0x00000,0x00000,0x50000,0x50000,0x0FF7F,0x00001
@@ -1276,7 +1279,7 @@ static attr ulist_attr[] = {		/* UL attributes */
  /* { "OBJECT"	, object_attr,	HTML_OBJECT_ATTRIBUTES, SGML_LITTERAL }, */
 #define T_OBJECT	0x2000, 0x8FBCF,0x8FFFF,0xB679F,0xB6FBF,0x83F5F,0x00020
 #define T_OBJECT_PCDATA	0x2000, 0x8FBCF,0x8FFFF,0xB679F,0xB6FBF,0x83F5F,0x00008
- /* { "OL"	, olist_attr,	HTML_OL_ATTRIBUTES,	SGML_MIXED }, */
+ /* { "OL"	, ol_attr,	HTML_OL_ATTRIBUTES,	SGML_MIXED }, */
 #define T_OL		0x0800, 0x0C400,0x8FFFF,0x37680,0xB7FB7,0x88F7F,0x00000
  /* { "OPTION"	, option_attr,	HTML_OPTION_ATTRIBUTES, SGML_EMPTY }, */
 #define T_OPTION	0x8000, 0x00000,0x00000,0x00040,0x37FFF,0x8031F,0x00001
@@ -1343,7 +1346,7 @@ static attr ulist_attr[] = {		/* UL attributes */
 #define T_TT		0x0001, 0x8B04F,0x8FFFF,0xA778F,0xF7FBF,0x00001,0x00010
  /* { "U"	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED }, */
 #define T_U		0x0001, 0x8B04F,0x8FFFF,0xA778F,0xF7FBF,0x00001,0x00014
- /* { "UL"	, ulist_attr,	HTML_UL_ATTRIBUTES,	SGML_MIXED }, */
+ /* { "UL"	, ul_attr,	HTML_UL_ATTRIBUTES,	SGML_MIXED }, */
 #define T_UL		0x0800, 0x0C480,0x8FFFF,0x36680,0xB7FFF,0x8075F,0x00000
  /* { "VAR"	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED }, */
 #define T_VAR		0x0002, 0x8B04F,0x8FFFF,0xA778F,0xF7FBF,0x00001,0x00000
@@ -1367,7 +1370,6 @@ static attr ulist_attr[] = {		/* UL attributes */
  *
  *    Name*,	Attributes,	No. of attributes,     content,   extra info...
  */
-#undef P
 #undef P
 #undef P_
 #ifdef USE_COLOR_STYLE
@@ -1422,10 +1424,10 @@ static const HTTag tags_old[HTML_ALL_ELEMENTS] = {
  { P("DD")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_EMPTY,T_DD},
  { P("DEL")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_DEL},
  { P("DFN")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_DFN},
- { P("DIR")	, ulist_attr,	HTML_UL_ATTRIBUTES,	SGML_MIXED,T_DIR},
+ { P("DIR")	, ul_attr,	HTML_UL_ATTRIBUTES,	SGML_MIXED,T_DIR},
  { P("DIV")	, div_attr,	HTML_DIV_ATTRIBUTES,	SGML_MIXED,T_DIV},
- { P("DL")	, glossary_attr, HTML_DL_ATTRIBUTES,	SGML_MIXED,T_DL},
- { P("DLC")	, glossary_attr, HTML_DL_ATTRIBUTES,	SGML_MIXED,T_DLC},
+ { P("DL")	, dl_attr, 	HTML_DL_ATTRIBUTES,	SGML_MIXED,T_DL},
+ { P("DLC")	, dl_attr, 	HTML_DL_ATTRIBUTES,	SGML_MIXED,T_DLC},
  { P("DT")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_EMPTY,T_DT},
  { P("EM")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_EMPTY,T_EM},
  { P("EMBED")	, embed_attr,	HTML_EMBED_ATTRIBUTES,	SGML_EMPTY,T_EMBED},
@@ -1457,19 +1459,19 @@ static const HTTag tags_old[HTML_ALL_ELEMENTS] = {
  { P("LABEL")	, label_attr,	HTML_LABEL_ATTRIBUTES,	SGML_MIXED,T_LABEL},
  { P("LEGEND")	, legend_attr,	HTML_LEGEND_ATTRIBUTES, SGML_MIXED,T_LEGEND},
  { P("LH")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_EMPTY,T_LH},
- { P("LI")	, list_attr,	HTML_LI_ATTRIBUTES,	SGML_EMPTY,T_LI},
+ { P("LI")	, li_attr,	HTML_LI_ATTRIBUTES,	SGML_EMPTY,T_LI},
  { P("LINK")	, link_attr,	HTML_LINK_ATTRIBUTES,	SGML_EMPTY,T_LINK},
  { P("LISTING") , gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_LITTERAL,T_LISTING},
  { P("MAP")	, map_attr,	HTML_MAP_ATTRIBUTES,	SGML_MIXED,T_MAP},
  { P("MARQUEE") , gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_MARQUEE},
  { P("MATH")	, math_attr,	HTML_MATH_ATTRIBUTES,	SGML_LITTERAL,T_MATH},
- { P("MENU")	, ulist_attr,	HTML_UL_ATTRIBUTES,	SGML_MIXED,T_MENU},
+ { P("MENU")	, ul_attr,	HTML_UL_ATTRIBUTES,	SGML_MIXED,T_MENU},
  { P("META")	, meta_attr,	HTML_META_ATTRIBUTES,	SGML_EMPTY,T_META},
  { P("NEXTID")	, nextid_attr,	1,			SGML_EMPTY,T_NEXTID},
  { P("NOFRAMES"), gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_NOFRAMES},
  { P("NOTE")	, note_attr,	HTML_NOTE_ATTRIBUTES,	SGML_MIXED,T_NOTE},
  { P("OBJECT")	, object_attr,	HTML_OBJECT_ATTRIBUTES, SGML_LITTERAL,T_OBJECT},
- { P("OL")	, olist_attr,	HTML_OL_ATTRIBUTES,	SGML_MIXED,T_OL},
+ { P("OL")	, ol_attr,	HTML_OL_ATTRIBUTES,	SGML_MIXED,T_OL},
  { P("OPTION")	, option_attr,	HTML_OPTION_ATTRIBUTES, SGML_EMPTY,T_OPTION},
  { P("OVERLAY") , overlay_attr, HTML_OVERLAY_ATTRIBUTES, SGML_EMPTY,T_OVERLAY},
  { P("P")	, p_attr,	HTML_P_ATTRIBUTES,	SGML_EMPTY,T_P},
@@ -1503,7 +1505,7 @@ static const HTTag tags_old[HTML_ALL_ELEMENTS] = {
  { P("TR")	, tr_attr,	HTML_TR_ATTRIBUTES,	SGML_EMPTY,T_TR},
  { P("TT")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_EMPTY,T_TT},
  { P("U")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_EMPTY,T_U},
- { P("UL")	, ulist_attr,	HTML_UL_ATTRIBUTES,	SGML_MIXED,T_UL},
+ { P("UL")	, ul_attr,	HTML_UL_ATTRIBUTES,	SGML_MIXED,T_UL},
  { P("VAR")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_VAR},
  { P("WBR")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_EMPTY,T_WBR},
  { P0("XMP")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_LITTERAL,T_XMP},
@@ -1547,10 +1549,10 @@ static const HTTag tags_new[HTML_ALL_ELEMENTS] = {
  { P("DD")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_DD},
  { P("DEL")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_DEL},
  { P("DFN")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_DFN},
- { P("DIR")	, ulist_attr,	HTML_UL_ATTRIBUTES,	SGML_MIXED,T_DIR},
+ { P("DIR")	, ul_attr,	HTML_UL_ATTRIBUTES,	SGML_MIXED,T_DIR},
  { P("DIV")	, div_attr,	HTML_DIV_ATTRIBUTES,	SGML_MIXED,T_DIV},
- { P("DL")	, glossary_attr, HTML_DL_ATTRIBUTES,	SGML_MIXED,T_DL},
- { P("DLC")	, glossary_attr, HTML_DL_ATTRIBUTES,	SGML_MIXED,T_DLC},
+ { P("DL")	, dl_attr, 	HTML_DL_ATTRIBUTES,	SGML_MIXED,T_DL},
+ { P("DLC")	, dl_attr, 	HTML_DL_ATTRIBUTES,	SGML_MIXED,T_DLC},
  { P("DT")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_DT},
  { P("EM")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_EM},
  { P("EMBED")	, embed_attr,	HTML_EMBED_ATTRIBUTES,	SGML_EMPTY,T_EMBED},
@@ -1582,19 +1584,19 @@ static const HTTag tags_new[HTML_ALL_ELEMENTS] = {
  { P("LABEL")	, label_attr,	HTML_LABEL_ATTRIBUTES,	SGML_MIXED,T_LABEL},
  { P("LEGEND")	, legend_attr,	HTML_LEGEND_ATTRIBUTES, SGML_MIXED,T_LEGEND},
  { P("LH")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_LH},
- { P("LI")	, list_attr,	HTML_LI_ATTRIBUTES,	SGML_MIXED,T_LI},
+ { P("LI")	, li_attr,	HTML_LI_ATTRIBUTES,	SGML_MIXED,T_LI},
  { P("LINK")	, link_attr,	HTML_LINK_ATTRIBUTES,	SGML_EMPTY,T_LINK},
  { P("LISTING") , gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_LITTERAL,T_LISTING},
  { P("MAP")	, map_attr,	HTML_MAP_ATTRIBUTES,	SGML_ELEMENT,T_MAP},
  { P("MARQUEE") , gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_MARQUEE},
  { P("MATH")	, math_attr,	HTML_MATH_ATTRIBUTES,	SGML_PCDATA,T_MATH},
- { P("MENU")	, ulist_attr,	HTML_UL_ATTRIBUTES,	SGML_MIXED,T_MENU},
+ { P("MENU")	, ul_attr,	HTML_UL_ATTRIBUTES,	SGML_MIXED,T_MENU},
  { P("META")	, meta_attr,	HTML_META_ATTRIBUTES,	SGML_EMPTY,T_META},
  { P("NEXTID")	, nextid_attr,	1,			SGML_EMPTY,T_NEXTID},
  { P("NOFRAMES"), gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_NOFRAMES},
  { P("NOTE")	, note_attr,	HTML_NOTE_ATTRIBUTES,	SGML_MIXED,T_NOTE},
  { P("OBJECT")	, object_attr,	HTML_OBJECT_ATTRIBUTES, SGML_LITTERAL,T_OBJECT},
- { P("OL")	, olist_attr,	HTML_OL_ATTRIBUTES,	SGML_MIXED,T_OL},
+ { P("OL")	, ol_attr,	HTML_OL_ATTRIBUTES,	SGML_MIXED,T_OL},
  { P("OPTION")	, option_attr,	HTML_OPTION_ATTRIBUTES, SGML_PCDATA,T_OPTION},
  { P("OVERLAY") , overlay_attr, HTML_OVERLAY_ATTRIBUTES, SGML_PCDATA,T_OVERLAY},
  { P("P")	, p_attr,	HTML_P_ATTRIBUTES,	SGML_MIXED,T_P},
@@ -1628,7 +1630,7 @@ static const HTTag tags_new[HTML_ALL_ELEMENTS] = {
  { P("TR")	, tr_attr,	HTML_TR_ATTRIBUTES,	SGML_MIXED,T_TR},
  { P("TT")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_TT},
  { P("U")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_U},
- { P("UL")	, ulist_attr,	HTML_UL_ATTRIBUTES,	SGML_MIXED,T_UL},
+ { P("UL")	, ul_attr,	HTML_UL_ATTRIBUTES,	SGML_MIXED,T_UL},
  { P("VAR")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_MIXED,T_VAR},
  { P("WBR")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_EMPTY,T_WBR},
  { P0("XMP")	, gen_attr,	HTML_GEN_ATTRIBUTES,	SGML_LITTERAL,T_XMP},

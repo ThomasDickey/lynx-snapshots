@@ -1,11 +1,27 @@
--- $LynxId: CHANGES,v 1.273 2008/06/30 23:52:31 tom Exp $
+-- $LynxId: CHANGES,v 1.278 2008/07/05 00:40:57 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
 2008-0?-?? (2.8.7dev.10)
+* add program dtd_util which can be used to dump the SGML tables in readable
+  form -TD
+* change calls to LYhandlePopupList() to turn on (or off) numbering when
+  keypad_mode is not NUMBERS_AS_ARROWS -PBM
+* move close of session-file outside ifdef for VLINK_IN_SESSION, closing
+  session file properly if that ifdef is disabled.  Add a null-pointer check
+  for visited links that are saved -PBM
+* make auto_session and session_file configurable with ENABLE_LYNXRC -PBM
+* separate configure "--enable-sessions" option from "--enable-session-cache"
+  option -PBM
+* add ncurses scroll-wheel support, which requires the extended-mouse configure
+  option of ncurses (Debian #476394) -TD
+  Caveat:  if running on a local terminal, setting the ESCDELAY environment
+  variable to 0 (zero) helps, since the event rate is rather high.  That would
+  not help on a network with delays (this is true of all text applications that
+  use xterm's mouse protocol, such as gpm and ncurses).
 * adapt/extend parsdate.y from tin to improve parsing of cookie expiration
-  times (Debian #480144).
+  times (Debian #480144) -TD
 * update de.po (patch by Fabian Fingerle)
 
 2008-04-27 (2.8.7dev.9)

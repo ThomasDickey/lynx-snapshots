@@ -1,4 +1,4 @@
-/* $LynxId: LYStrings.c,v 1.131 2008/02/17 19:18:44 tom Exp $ */
+/* $LynxId: LYStrings.c,v 1.134 2008/07/04 15:06:56 tom Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <UCAux.h>
@@ -120,8 +120,8 @@ int fancy_mouse(WINDOW * win, int row,
     request_mouse_pos();
 
     if (BUTTON_STATUS(1)
-	&& (MOUSE_X_POS >= getbegx(win)
-	    && (MOUSE_X_POS < (getbegx(win) + getmaxx(win))))) {
+	&& (MOUSE_X_POS >= getbegx(win) &&
+	    MOUSE_X_POS < (getbegx(win) + getmaxx(win)))) {
 	int mypos = MOUSE_Y_POS - getbegy(win);
 	int delta = mypos - row;
 
@@ -172,17 +172,19 @@ int fancy_mouse(WINDOW * win, int row,
     }
 #else
 #if defined(NCURSES)
+#define ButtonModifiers (BUTTON_ALT | BUTTON_SHIFT | BUTTON_CTRL)
     MEVENT event;
 
     getmouse(&event);
-    if ((event.bstate & (BUTTON1_CLICKED
-			 | BUTTON1_DOUBLE_CLICKED
-			 | BUTTON1_TRIPLE_CLICKED))) {
+    if ((event.bstate & (BUTTON1_CLICKED |
+			 BUTTON1_DOUBLE_CLICKED |
+			 BUTTON1_TRIPLE_CLICKED))) {
 	int mypos = event.y - getbegy(win);
 	int delta = mypos - row;
 
-	if ((event.x < getbegx(win) || event.x >= (getbegx(win) + getmaxx(win)))
-	    && !(event.bstate & (BUTTON_ALT | BUTTON_SHIFT | BUTTON_CTRL)))
+	if ((event.x < getbegx(win) ||
+	     event.x >= (getbegx(win) + getmaxx(win)))
+	    && !(event.bstate & ButtonModifiers))
 	    return LYK_QUIT;	/* User clicked outside, wants to quit? */
 	if (mypos + 1 == getmaxy(win)) {
 	    /* At the decorative border: scroll forward */
@@ -193,8 +195,8 @@ int fancy_mouse(WINDOW * win, int row,
 	    else
 		cmd = LYK_NEXT_LINK;
 	} else if (mypos >= getmaxy(win)) {
-	    if (event.bstate & (BUTTON1_DOUBLE_CLICKED
-				| BUTTON1_TRIPLE_CLICKED))
+	    if (event.bstate & (BUTTON1_DOUBLE_CLICKED |
+				BUTTON1_TRIPLE_CLICKED))
 		cmd = LYK_END;
 	    else
 		cmd = LYK_NEXT_PAGE;
@@ -207,8 +209,8 @@ int fancy_mouse(WINDOW * win, int row,
 	    else
 		cmd = LYK_PREV_LINK;
 	} else if (mypos < 0) {
-	    if (event.bstate & (BUTTON1_DOUBLE_CLICKED
-				| BUTTON1_TRIPLE_CLICKED))
+	    if (event.bstate & (BUTTON1_DOUBLE_CLICKED |
+				BUTTON1_TRIPLE_CLICKED))
 		cmd = LYK_HOME;
 	    else
 		cmd = LYK_PREV_PAGE;
@@ -225,7 +227,7 @@ int fancy_mouse(WINDOW * win, int row,
 	     */
 	    *position += delta;
 	    cmd = -1;
-	} else if (event.bstate & (BUTTON_ALT | BUTTON_SHIFT | BUTTON_CTRL)) {
+	} else if (event.bstate & ButtonModifiers) {
 	    /* Probably some unrelated activity, such as selecting some text.
 	     * Select, but do nothing else.
 	     */
@@ -2274,6 +2276,13 @@ static int LYgetch_for(int code)
 		    LYrefresh();
 #endif
 		}
+#if NCURSES_MOUSE_VERSION > 1
+		else if (event.bstate & BUTTON4_PRESSED) {
+		    c = LAC_TO_LKC(LYK_UP_HALF);
+		} else if (event.bstate & BUTTON5_PRESSED) {
+		    c = LAC_TO_LKC(LYK_DOWN_HALF);
+		}
+#endif
 		if (code == FOR_INPUT && mouse_link == -1 &&
 		    lac != LYK_REFRESH && lac != LYK_SUBMIT) {
 		    ungetmouse(&event);		/* Caller will process this. */
@@ -3885,9 +3894,9 @@ int LYhandlePopupList(int cur_choice,
 		      int width,
 		      int i_length,
 		      int disabled,
-		      BOOLEAN for_mouse,
-		      BOOLEAN numbered)
+		      BOOLEAN for_mouse)
 {
+    BOOLEAN numbered = (keypad_mode != NUMBERS_AS_ARROWS);
     int c = 0, cmd = 0, i = 0, j = 0, rel = 0;
     int orig_choice;
     WINDOW *form_window;
@@ -4929,8 +4938,7 @@ int LYgetstr(char *inputline,
 						   -1,
 						   -1,
 						   FALSE,
-						   FALSE,
-						   TRUE);
+						   FALSE);
 		    if (cur_choice >= 0) {
 			if (recall == RECALL_CMD)
 			    _statusline(": ");
