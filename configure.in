@@ -1,4 +1,4 @@
-dnl $LynxId: configure.in,v 1.167 2008/06/30 23:58:56 tom Exp $
+dnl $LynxId: configure.in,v 1.168 2008/07/02 21:28:04 Paul.B.Mahol Exp $
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -912,6 +912,18 @@ CF_ARG_ENABLE(scrollbar,
 AC_MSG_RESULT($use_scrollbar)
 
 dnl --------------------------------------------------------------------------
+AC_MSG_CHECKING(if sessions code should be used)
+CF_ARG_ENABLE(sessions,
+[  --enable-sessions       use experimental sessions code],
+	[use_sessions=$enableval],
+	[use_sessions=no])
+AC_MSG_RESULT($use_sessions)
+if test $use_sessions != no ; then
+    AC_DEFINE(USE_SESSIONS)
+	EXTRA_OBJS="$EXTRA_OBJS LYSession\$o"
+fi
+
+dnl --------------------------------------------------------------------------
 AC_MSG_CHECKING(if session-caching code should be used)
 CF_ARG_ENABLE(session-cache,
 [  --enable-session-cache  use experimental session-caching code],
@@ -920,8 +932,6 @@ CF_ARG_ENABLE(session-cache,
 AC_MSG_RESULT($use_session_cache)
 if test $use_session_cache != no ; then
     AC_DEFINE(USE_CACHEJAR)
-    AC_DEFINE(USE_SESSIONS)
-	EXTRA_OBJS="$EXTRA_OBJS LYSession\$o"
 fi
 
 dnl --------------------------------------------------------------------------

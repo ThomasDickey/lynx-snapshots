@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYExtern.c,v 1.39 2007/07/31 21:30:21 tom Exp $
+ * $LynxId: LYExtern.c,v 1.40 2008/07/04 15:06:14 tom Exp $
  *
  External application support.
  This feature allows lynx to pass a given URL to an external program.
@@ -303,8 +303,7 @@ static char *lookup_external(char *param,
 				       -1,
 				       -1,
 				       FALSE,
-				       TRUE,
-				       (BOOLEAN) (keypad_mode != NUMBERS_AS_ARROWS));
+				       TRUE);
 	wmove(LYwin, old_y, old_x);
 	CTRACE((tfp, "selected choice %d of %d\n", cur_choice, num_choices));
 	if (cur_choice < 0) {

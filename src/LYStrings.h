@@ -322,8 +322,7 @@ extern "C" {
 				 int width,
 				 int i_length,
 				 int disabled,
-				 BOOLEAN for_mouse,
-				 BOOLEAN numbered);
+				 BOOLEAN for_mouse);
 
     typedef unsigned char LYEditCode;
 

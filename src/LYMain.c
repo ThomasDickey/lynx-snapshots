@@ -1,4 +1,4 @@
-/* $LynxId: LYMain.c,v 1.183 2008/03/18 00:38:37 Paul.B.Mahol Exp $ */
+/* $LynxId: LYMain.c,v 1.184 2008/07/02 21:26:25 Paul.B.Mahol Exp $ */
 #include <HTUtils.h>
 #include <HTTP.h>
 #include <HTParse.h>
@@ -447,16 +447,16 @@ char *proxyauth_info[2] =
 {NULL, NULL};			/* Id:Password for protected proxy servers */
 
 #ifdef USE_SESSIONS
-BOOLEAN LYAutoSession = FALSE;	/* enable/disable auto saving/restoring of
+BOOLEAN LYAutoSession = FALSE;	/* enable/disable auto saving/restoring of */
 
-				   session */
+				/* session */
 char *LYSessionFile = NULL;	/* the session file from lynx.cfg */
 char *session_file = NULL;	/* the current session file */
 char *sessionin_file = NULL;	/* only resume session from this file */
 char *sessionout_file = NULL;	/* only save session to this file */
-short session_limit = 250;	/* maximal number of entries saved for
+short session_limit = 250;	/* maximal number of entries saved per */
 
-				   session file, rest will be ignored */
+				/* session file, rest will be ignored */
 #endif /* USE_SESSIONS */
 char *startfile = NULL;		/* the first file */
 char *startrealm = NULL;	/* the startfile realm */

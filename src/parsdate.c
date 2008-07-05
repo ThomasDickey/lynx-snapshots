@@ -20,7 +20,7 @@ static int yygrowstack(void);
 #define YYPREFIX "yy"
 #line 2 "parsdate.y"
 /*
- *  $LynxId: parsdate.c,v 1.1 2008/06/30 23:25:19 tom Exp $
+ *  $LynxId: parsdate.c,v 1.2 2008/07/01 20:14:38 tom Exp $
  *
  *  This module is adapted and extended from tin, to use for LYmktime().
  *
@@ -51,6 +51,7 @@ static int yygrowstack(void);
 /* SUPPRESS 593 on yynewstate */ /* Label was not used */
 /* SUPPRESS 595 on yypvt */ /* Automatic variable may be used before set */
 
+#undef alloca			/* conflicting def may be set by yacc */
 #include <parsdate.h>
 
 /*
@@ -142,12 +143,12 @@ date_error(const char GCC_UNUSED *s)
     /*NOTREACHED*/
 }
 
-#line 127 "parsdate.y"
+#line 128 "parsdate.y"
 typedef union {
     time_t		Number;
     enum _MERIDIAN	Meridian;
 } YYSTYPE;
-#line 151 "y.tab.c"
+#line 152 "y.tab.c"
 #define tDAY 257
 #define tDAYZONE 258
 #define tMERIDIAN 259
@@ -355,7 +356,7 @@ static short   *yyss;
 static short   *yysslim;
 static YYSTYPE *yyvs;
 static int      yystacksize;
-#line 349 "parsdate.y"
+#line 350 "parsdate.y"
 
 /*
 **  An entry in the lexical lookup table.
@@ -927,7 +928,7 @@ parsedate(
      * from the error return value.  (Alternately could set errno on error.) */
     return Start == -1 ? 0 : Start;
 }
-#line 931 "y.tab.c"
+#line 932 "y.tab.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
 static int yygrowstack(void)
 {
@@ -1106,7 +1107,7 @@ yyreduce:
     switch (yyn)
     {
 case 3:
-#line 145 "parsdate.y"
+#line 146 "parsdate.y"
 {
 	    yyHaveTime++;
 #if	defined(lint)
@@ -1118,27 +1119,27 @@ case 3:
 	}
 break;
 case 4:
-#line 154 "parsdate.y"
+#line 155 "parsdate.y"
 {
 	    yyHaveTime++;
 	    yyTimezone = yyvsp[0].Number;
 	}
 break;
 case 5:
-#line 158 "parsdate.y"
+#line 159 "parsdate.y"
 {
 	    yyHaveDate++;
 	}
 break;
 case 6:
-#line 161 "parsdate.y"
+#line 162 "parsdate.y"
 {
 	    yyHaveDate++;
 	    yyHaveTime++;
 	}
 break;
 case 7:
-#line 165 "parsdate.y"
+#line 166 "parsdate.y"
 {
 	    yyHaveDate++;
 	    yyHaveTime++;
@@ -1146,13 +1147,13 @@ case 7:
 	}
 break;
 case 8:
-#line 170 "parsdate.y"
+#line 171 "parsdate.y"
 {
 	    yyHaveRel = 1;
 	}
 break;
 case 9:
-#line 175 "parsdate.y"
+#line 176 "parsdate.y"
 {
 	    if (yyvsp[-1].Number < 100) {
 		yyHour = yyvsp[-1].Number;
@@ -1167,7 +1168,7 @@ case 9:
 	}
 break;
 case 10:
-#line 187 "parsdate.y"
+#line 188 "parsdate.y"
 {
 	    yyHour = yyvsp[-3].Number;
 	    yyMinutes = yyvsp[-1].Number;
@@ -1176,7 +1177,7 @@ case 10:
 	}
 break;
 case 11:
-#line 193 "parsdate.y"
+#line 194 "parsdate.y"
 {
 	    yyHour = yyvsp[-3].Number;
 	    yyMinutes = yyvsp[-1].Number;
@@ -1186,7 +1187,7 @@ case 11:
 	}
 break;
 case 12:
-#line 200 "parsdate.y"
+#line 201 "parsdate.y"
 {
 	    yyHour = yyvsp[-5].Number;
 	    yyMinutes = yyvsp[-3].Number;
@@ -1195,7 +1196,7 @@ case 12:
 	}
 break;
 case 13:
-#line 206 "parsdate.y"
+#line 207 "parsdate.y"
 {
 	    yyHour = yyvsp[-5].Number;
 	    yyMinutes = yyvsp[-3].Number;
@@ -1206,28 +1207,28 @@ case 13:
 	}
 break;
 case 14:
-#line 216 "parsdate.y"
+#line 217 "parsdate.y"
 {
 	    yyval.Number = yyvsp[0].Number;
 	    yyDSTmode = DSToff;
 	}
 break;
 case 15:
-#line 220 "parsdate.y"
+#line 221 "parsdate.y"
 {
 	    yyval.Number = yyvsp[0].Number;
 	    yyDSTmode = DSTon;
 	}
 break;
 case 16:
-#line 224 "parsdate.y"
+#line 225 "parsdate.y"
 {
 	    yyTimezone = yyvsp[-1].Number;
 	    yyDSTmode = DSTon;
 	}
 break;
 case 17:
-#line 228 "parsdate.y"
+#line 229 "parsdate.y"
 {
 	    /* Only allow "GMT+300" and "GMT-0800" */
 	    if (yyvsp[-1].Number != 0) {
@@ -1238,14 +1239,14 @@ case 17:
 	}
 break;
 case 18:
-#line 236 "parsdate.y"
+#line 237 "parsdate.y"
 {
 	    yyval.Number = yyvsp[0].Number;
 	    yyDSTmode = DSToff;
 	}
 break;
 case 19:
-#line 242 "parsdate.y"
+#line 243 "parsdate.y"
 {
 	    int	i;
 
@@ -1267,14 +1268,14 @@ case 19:
 	}
 break;
 case 20:
-#line 263 "parsdate.y"
+#line 264 "parsdate.y"
 {
 	    yyMonth = yyvsp[-2].Number;
 	    yyDay = yyvsp[0].Number;
 	}
 break;
 case 21:
-#line 267 "parsdate.y"
+#line 268 "parsdate.y"
 {
 	    if (yyvsp[-4].Number > 100) {
 		yyYear = yyvsp[-4].Number;
@@ -1289,14 +1290,14 @@ case 21:
 	}
 break;
 case 22:
-#line 279 "parsdate.y"
+#line 280 "parsdate.y"
 {
 	    yyMonth = yyvsp[-1].Number;
 	    yyDay = yyvsp[0].Number;
 	}
 break;
 case 23:
-#line 283 "parsdate.y"
+#line 284 "parsdate.y"
 {
 	    yyMonth = yyvsp[-3].Number;
 	    yyDay = yyvsp[-2].Number;
@@ -1304,14 +1305,14 @@ case 23:
 	}
 break;
 case 24:
-#line 288 "parsdate.y"
+#line 289 "parsdate.y"
 {
 	    yyDay = yyvsp[-1].Number;
 	    yyMonth = yyvsp[0].Number;
 	}
 break;
 case 25:
-#line 292 "parsdate.y"
+#line 293 "parsdate.y"
 {
 	    yyDay = yyvsp[-2].Number;
 	    yyMonth = yyvsp[-1].Number;
@@ -1319,7 +1320,7 @@ case 25:
 	}
 break;
 case 26:
-#line 297 "parsdate.y"
+#line 298 "parsdate.y"
 {
 	    yyDay = yyvsp[-2].Number;
 	    yyMonth = yyvsp[-1].Number;
@@ -1327,7 +1328,7 @@ case 26:
 	}
 break;
 case 27:
-#line 302 "parsdate.y"
+#line 303 "parsdate.y"
 {
 	    yyDay = yyvsp[-3].Number;
 	    yyMonth = yyvsp[-1].Number;
@@ -1335,7 +1336,7 @@ case 27:
 	}
 break;
 case 28:
-#line 307 "parsdate.y"
+#line 308 "parsdate.y"
 {
 	    yyDay = yyvsp[-2].Number;
 	    yyMonth = -yyvsp[-1].Number;
@@ -1345,7 +1346,7 @@ case 28:
 	}
 break;
 case 29:
-#line 316 "parsdate.y"
+#line 317 "parsdate.y"
 {
 	    yyMonth = yyvsp[-7].Number;
 	    yyDay = yyvsp[-6].Number;
@@ -1356,42 +1357,42 @@ case 29:
 	}
 break;
 case 30:
-#line 326 "parsdate.y"
+#line 327 "parsdate.y"
 {
 	    yyRelSeconds += yyvsp[-1].Number * yyvsp[0].Number;
 	}
 break;
 case 31:
-#line 329 "parsdate.y"
+#line 330 "parsdate.y"
 {
 	    yyRelSeconds += yyvsp[-1].Number * yyvsp[0].Number;
 	}
 break;
 case 32:
-#line 332 "parsdate.y"
+#line 333 "parsdate.y"
 {
 	    yyRelMonth += yyvsp[-1].Number * yyvsp[0].Number;
 	}
 break;
 case 33:
-#line 335 "parsdate.y"
+#line 336 "parsdate.y"
 {
 	    yyRelMonth += yyvsp[-1].Number * yyvsp[0].Number;
 	}
 break;
 case 34:
-#line 340 "parsdate.y"
+#line 341 "parsdate.y"
 {
 	    yyval.Meridian = MER24;
 	}
 break;
 case 35:
-#line 343 "parsdate.y"
+#line 344 "parsdate.y"
 {
 	    yyval.Meridian = yyvsp[0].Meridian;
 	}
 break;
-#line 1395 "y.tab.c"
+#line 1396 "y.tab.c"
     }
     yyssp -= yym;
     yystate = *yyssp;

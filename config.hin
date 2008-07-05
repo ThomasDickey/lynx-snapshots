@@ -1,5 +1,5 @@
 /*
- * $LynxId: config.hin,v 1.102 2008/07/01 00:01:11 tom Exp $
+ * $LynxId: config.hin,v 1.103 2008/07/02 00:19:33 Paul.B.Mahol Exp $
  * vile:cmode
  *
  * The configure script translates "config.hin" into "lynx_cfg.h"
@@ -252,7 +252,7 @@
 #undef USE_PROGRESSBAR		/* CF_ARG_ENABLE(progressbar) */
 #undef USE_READPROGRESS		/* CF_ARG_ENABLE(read-eta) */
 #undef USE_SCROLLBAR		/* CF_ARG_ENABLE(scrollbar) */
-#undef USE_SESSIONS		/* CF_ARG_ENABLE(session-cache) */
+#undef USE_SESSIONS		/* CF_ARG_ENABLE(sessions) */
 #undef USE_SLANG		/* AC_ARG_WITH(screen=slang) */
 #undef USE_SOCKS4_PREFIX	/* CF_SOCKS5 */
 #undef USE_SOCKS5		/* CF_SOCKS5 */

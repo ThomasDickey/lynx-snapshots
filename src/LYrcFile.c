@@ -1,4 +1,4 @@
-/* $LynxId: LYrcFile.c,v 1.72 2008/01/08 00:19:25 tom Exp $ */
+/* $LynxId: LYrcFile.c,v 1.73 2008/07/02 00:17:13 Paul.B.Mahol Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <LYUtils.h>
@@ -599,6 +599,10 @@ and the keymap display, respectively.\n\
 The visited_links setting controls how Lynx organizes the information\n\
 in the Visited Links Page.\n\
 ")),
+#ifdef USE_SESSIONS
+    MAYBE_SET(RC_AUTO_SESSION,		LYAutoSession,	MSG_ENABLE_LYNXRC),
+    MAYBE_STR(RC_SESSION_FILE,		LYSessionFile,	MSG_ENABLE_LYNXRC),
+#endif
 
     PARSE_NIL
 };

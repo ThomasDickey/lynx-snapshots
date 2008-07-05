@@ -110,7 +110,6 @@ int change_form_link_ex(int cur,
 				      form->size,
 				      form->size_l,
 				      form->disabled,
-				      FALSE,
 				      FALSE);
 #if CTRL_W_HACK != DO_NOTHING
 	    if (!enable_scrollback)
@@ -128,7 +127,6 @@ int change_form_link_ex(int cur,
 					    form->size,
 					    form->size_l,
 					    form->disabled,
-					    FALSE,
 					    FALSE);
 	{
 	    OptionType *opt_ptr = form->select_list;
