@@ -1,5 +1,5 @@
 /*
- * $LynxId: config.hin,v 1.103 2008/07/02 00:19:33 Paul.B.Mahol Exp $
+ * $LynxId: config.hin,v 1.104 2008/07/05 14:53:30 tom Exp $
  * vile:cmode
  *
  * The configure script translates "config.hin" into "lynx_cfg.h"
@@ -86,6 +86,7 @@
 #undef HAVE_H_ERRNO
 #undef HAVE_ICONV		/* AM_ICONV */
 #undef HAVE_INET_ATON		/* CF_INET_ADDR */
+#undef HAVE_INTTYPES_H
 #undef HAVE_JCURSES_H
 #undef HAVE_KEYPAD
 #undef HAVE_LANGINFO_CODESET	/* AM_LANGINFO_CODESET */
@@ -215,6 +216,8 @@
 #undef RLOGIN_PATH		/* CF_PATH_PROG(rlogin) */
 #undef RM_PATH			/* CF_PATH_PROG(rm) */
 #undef SETFONT_PATH		/* CF_PATH_PROG(setfont) */
+#undef SIZEOF_OFF_T		/* AC_CHECK_SIZEOF(off_t) */
+#undef SIZEOF_TIME_T		/* AC_CHECK_SIZEOF(time_t) */
 #undef SOCKS			/* CF_SOCKS, CF_SOCKS5 */
 #undef STDC_HEADERS
 #undef SYSTEM_MAIL		/* CF_DEFINE_PROG */

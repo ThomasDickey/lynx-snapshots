@@ -1,12 +1,15 @@
 /*
- * $LynxId: dtd_util.c,v 1.10 2008/07/05 00:32:17 tom Exp $
+ * $LynxId: dtd_util.c,v 1.26 2008/07/07 00:03:09 tom Exp $
  *
  * Given a SGML_dtd structure, write a corresponding flat file, or "C" source.
  * Given the flat-file, write the "C" source.
+ *
+ * TODO: read flat-file
  */
 
 #include <HTUtils.h>
 #include <HTMLDTD.h>
+#include <string.h>
 
 /*
  * Tweaks to build standalone.
@@ -22,7 +25,9 @@ FILE *TraceFP(void)
 /*
  * Begin the actual utility.
  */
-#define GETOPT "flo:ts"
+#define GETOPT "chlo:ts"
+
+#define NOTE(message) fprintf(output, message "\n");
 
 static void failed(const char *s)
 {
@@ -37,11 +42,12 @@ static void usage(void)
 	"Usage: dtd_util [options]",
 	"",
 	"Options:",
-	"  -o filename",
-	"  -l load",
-	"  -f flat file",
-	"  -t tagsoup",
-	"  -s strict"
+	"  -c           generate C-source"
+	"  -h           generate C-header"
+	"  -l           load",
+	"  -o filename  specify output (default: stdout)",
+	"  -s           strict (HTML DTD 0)",
+	"  -t           tagsoup (HTML DTD 1)",
     };
     unsigned n;
 
@@ -112,6 +118,29 @@ static int first_attrs(const SGML_dtd * dtd, int which)
     return result;
 }
 
+static char *no_dashes(char *target, const char *source)
+{
+    int j;
+
+    for (j = 0; (target[j] = source[j]) != '\0'; ++j) {
+	if (!isalnum(target[j]))
+	    target[j] = '_';
+    }
+    return target;
+}
+
+/* the second "OBJECT" is treated specially */
+static int first_object(const SGML_dtd * dtd, int which)
+{
+    int check;
+
+    for (check = 0; check <= which; ++check) {
+	if (!strcmp(dtd->tags[check].name, "OBJECT"))
+	    break;
+    }
+    return (check == which);
+}
+
 static const char *NameOfAttrs(const SGML_dtd * dtd, int which)
 {
     int check;
@@ -152,14 +181,66 @@ static const char *XXX_attr(const SGML_dtd * dtd, int which)
     return result;
 }
 
-static void dump_src_HTTag_Defines(FILE *output, HTTag * tag)
+static const char *DEF_name(const SGML_dtd * dtd, int which)
 {
+    const char *result = dtd->tags[which].name;
+
+    if (!strcmp(result, "OBJECT") && !first_object(dtd, which))
+	result = "OBJECT_PCDATA";
+    return result;
+}
+
+typedef struct {
+    const char *name;
+    attr *attrs;
+    int count;
+    int which;
+} AttrInfo;
+
+static int compare_attr(const void *a, const void *b)
+{
+    const AttrInfo *p = (const AttrInfo *) a;
+    const AttrInfo *q = (const AttrInfo *) b;
+
+    return strcmp(p->name, q->name);
+}
+
+static AttrInfo *sorted_attrs(const SGML_dtd * dtd, unsigned *countp, int lower)
+{
+    int j;
+
+    AttrInfo *data = (AttrInfo *) calloc(dtd->number_of_tags, sizeof(AttrInfo));
+    unsigned count = 0;
+
+    /* get the attribute-data */
+    for (j = 0; j < dtd->number_of_tags; ++j) {
+	if (first_attrs(dtd, j)) {
+	    if (lower)
+		data[count].name = strdup(XXX_attr(dtd, j));
+	    else
+		data[count].name = NameOfAttrs(dtd, j);
+	    data[count].attrs = dtd->tags[j].attributes;
+	    data[count].count = dtd->tags[j].number_of_attributes;
+	    data[count].which = j;
+	    ++count;
+	}
+    }
+    /* sort the data by the name of their associated tag */
+    qsort(data, count, sizeof(*data), compare_attr);
+    *countp = count;
+    return data;
+}
+
+static void dump_src_HTTag_Defines(FILE *output, const SGML_dtd * dtd, int which)
+{
+    HTTag *tag = &(dtd->tags[which]);
+
 #define myFMT "0x%05X"
     fprintf(output,
-	    "#define T_%-10s "
+	    "#define T_%-13s "
 	    myFMT "," myFMT "," myFMT "," myFMT "," myFMT "," myFMT
-	    ", " myFMT "\n",
-	    tag->name,
+	    "," myFMT "\n",
+	    DEF_name(dtd, which),
 	    tag->tagclass,
 	    tag->contains,
 	    tag->icontains,
@@ -204,7 +285,7 @@ static void dump_src_HTTag_Attrs(FILE *output, const SGML_dtd * dtd, int which)
     }
     fprintf(output, "\t{ 0               T(N) }\t/* Terminate list */\n");
     fprintf(output, "};\n");
-    fprintf(output, "\n");
+    NOTE("");
 }
 
 static void dump_src_HTTag(FILE *output, const SGML_dtd * dtd, int which)
@@ -220,32 +301,193 @@ static void dump_src_HTTag(FILE *output, const SGML_dtd * dtd, int which)
     PrintF(output, 16, "%s_attr,", XXX_attr(dtd, which));
     PrintF(output, 28, "HTML_%s_ATTRIBUTES,", NameOfAttrs(dtd, which));
     PrintF(output, 14, "%s,", SGMLContent2s(tag->contents));
-    fprintf(output, "T_%s", tag->name);
+    fprintf(output, "T_%s", DEF_name(dtd, which));
     fprintf(output, "},\n");
 }
 
-static void dump_source(FILE *output, const SGML_dtd * dtd)
+static void dump_source(FILE *output, const SGML_dtd * dtd, int dtd_version)
 {
+    const char *marker = "src_HTMLDTD_H";
     int j;
 
+    unsigned count = 0;
+    AttrInfo *data = sorted_attrs(dtd, &count, 1);
+
+    fprintf(output, "/* %cLynxId%c */\n", '$', '$');
+    fprintf(output, "#ifndef %s%d\n", marker, dtd_version);
+    fprintf(output, "#define %s%d 1\n\n", marker, dtd_version);
+
+    /*
+     * If we ifdef this for once, and make the table names distinct, we can
+     * #include the strict- and tagsoup-output directly in HTMLDTD.c
+     */
+    NOTE("#ifndef once_HTMLDTD");
+    NOTE("#define once_HTMLDTD 1");
+    NOTE("");
+
     /* construct TagClass-define's */
-    fprintf(output, "/*\n vile:cmode\n   %d tags\n */\n", dtd->number_of_tags);
-    for (j = 0; j < dtd->number_of_tags; ++j) {
-	dump_src_HTTag_Defines(output, &(dtd->tags[j]));
+    for (j = 0; j <= dtd->number_of_tags; ++j) {
+	dump_src_HTTag_Defines(output, dtd, j);
     }
-    fprintf(output, "\n");
+    NOTE("#define T__UNREC_	0x00000,0x00000,0x00000,0x00000,0x00000,0x00000,0x00000");
 
     /* construct attribute-tables */
-    for (j = 0; j < dtd->number_of_tags; ++j) {
-	if (first_attrs(dtd, j))
-	    dump_src_HTTag_Attrs(output, dtd, j);
+    NOTE("#ifdef USE_PRETTYSRC");
+    NOTE("# define N HTMLA_NORMAL");
+    NOTE("# define i HTMLA_ANAME");
+    NOTE("# define h HTMLA_HREF");
+    NOTE("# define c HTMLA_CLASS");
+    NOTE("# define x HTMLA_AUXCLASS");
+    NOTE("# define T(t) , t");
+    NOTE("#else");
+    NOTE("# define T(t)			/*nothing */");
+    NOTE("#endif");
+    NOTE("/* *INDENT-OFF* */");
+    NOTE("");
+    for (j = 0; j < (int) count; ++j) {
+	dump_src_HTTag_Attrs(output, dtd, data[j].which);
     }
+    NOTE("/* *INDENT-ON* */");
+    NOTE("");
+    NOTE("#undef N");
+    NOTE("#undef i");
+    NOTE("#undef h");
+    NOTE("#undef c");
+    NOTE("#undef x");
+    NOTE("");
+    NOTE("#undef T");
+
+    NOTE("");
+    NOTE("/* these definitions are used in the tags-tables */");
+    NOTE("#undef P");
+    NOTE("#undef P_");
+    NOTE("#ifdef USE_COLOR_STYLE");
+    NOTE("#define P_(x) x , (sizeof x) -1");
+    NOTE("#define NULL_HTTag_ NULL, 0");
+    NOTE("#else");
+    NOTE("#define P_(x) x");
+    NOTE("#define NULL_HTTag_ NULL");
+    NOTE("#endif");
+    NOTE("");
+    NOTE("#ifdef EXP_JUSTIFY_ELTS");
+    NOTE("#define P(x) P_(x), 1");
+    NOTE("#define P0(x) P_(x), 0");
+    NOTE("#define NULL_HTTag NULL_HTTag_,0");
+    NOTE("#else");
+    NOTE("#define P(x) P_(x)");
+    NOTE("#define P0(x) P_(x)");
+    NOTE("#define NULL_HTTag NULL_HTTag_");
+    NOTE("#endif");
+    NOTE("");
+    NOTE("#endif /* once_HTMLDTD */");
+    NOTE("/* *INDENT-OFF* */");
+
     /* construct the tags table */
-    fprintf(output, "static const HTTag tags_table[HTML_ALL_ELEMENTS] = {\n");
-    for (j = 0; j < dtd->number_of_tags; ++j) {
+    fprintf(output,
+	    "static const HTTag tags_table%d[HTML_ALL_ELEMENTS] = {\n",
+	    dtd_version);
+    for (j = 0; j <= dtd->number_of_tags; ++j) {
+	if (j == dtd->number_of_tags) {
+	    NOTE("/* additional (alternative variants), not counted in HTML_ELEMENTS: */");
+	    NOTE("/* This one will be used as a temporary substitute within the parser when");
+	    NOTE("   it has been signalled to parse OBJECT content as MIXED. - kw */");
+	}
 	dump_src_HTTag(output, dtd, j);
     }
-    fprintf(output, "};\n\n");
+    fprintf(output, "};\n");
+
+    NOTE("/* *INDENT-ON* */");
+    NOTE("");
+    fprintf(output, "#endif /* %s%d */\n", marker, dtd_version);
+
+    free(data);
+}
+
+static void dump_hdr_attr(FILE *output, AttrInfo * data)
+{
+    int j;
+    char buffer[BUFSIZ];
+
+    for (j = 0; j < data->count; ++j) {
+	PrintF(output, 33, "#define HTML_%s_%s",
+	       data->name,
+	       no_dashes(buffer, data->attrs[j].name));
+	fprintf(output, "%2d\n", j);
+    }
+    PrintF(output, 33, "#define HTML_%s_ATTRIBUTES", data->name);
+    fprintf(output, "%2d\n", data->count);
+    fprintf(output, "\n");
+}
+
+static void dump_header(FILE *output, const SGML_dtd * dtd)
+{
+    const char *marker = "hdr_HTMLDTD_H";
+    int j;
+
+    unsigned count = 0;
+    AttrInfo *data = sorted_attrs(dtd, &count, 0);
+
+    fprintf(output, "/* %cLynxId%c */\n", '$', '$');
+    fprintf(output, "#ifndef %s\n", marker);
+    fprintf(output, "#define %s 1\n\n", marker);
+
+    NOTE("#ifdef __cplusplus");
+    NOTE("extern \"C\" {");
+    NOTE("#endif");
+
+    NOTE("/*");
+    NOTE("");
+    NOTE("   Element Numbers");
+    NOTE("");
+    NOTE("   Must Match all tables by element!");
+    NOTE("   These include tables in HTMLDTD.c");
+    NOTE("   and code in HTML.c.");
+    NOTE("");
+    NOTE(" */");
+
+    fprintf(output, "    typedef enum {\n");
+    for (j = 0; j < dtd->number_of_tags; ++j) {
+	fprintf(output, "\tHTML_%s,\n", dtd->tags[j].name);
+    }
+    NOTE("\tHTML_ALT_OBJECT");
+    NOTE("    } HTMLElement;\n");
+    NOTE("/* Notes: HTML.c uses a different extension of the");
+    NOTE("          HTML_ELEMENTS space privately, see");
+    NOTE("          HTNestedList.h.");
+    NOTE("");
+    NOTE("   Do NOT replace HTML_ELEMENTS with");
+    NOTE("   TABLESIZE(mumble_dtd.tags).");
+    NOTE("");
+    NOTE("   Keep the following defines in synch with");
+    NOTE("   the above enum!");
+    NOTE(" */");
+    NOTE("");
+    NOTE("/* # of elements generally visible to Lynx code */");
+    fprintf(output, "#define HTML_ELEMENTS %d\n", dtd->number_of_tags);
+    NOTE("");
+    NOTE("/* # of elements visible to SGML parser */");
+    fprintf(output, "#define HTML_ALL_ELEMENTS %d\n", dtd->number_of_tags + 1);
+    NOTE("");
+    NOTE("/*");
+    NOTE("");
+    NOTE("   Attribute numbers");
+    NOTE("");
+    NOTE("   Identifier is HTML_<element>_<attribute>.");
+    NOTE("   These must match the tables in HTML.c!");
+    NOTE("");
+    NOTE(" */");
+
+    /* output the sorted list */
+    for (j = 0; j < (int) count; ++j) {
+	dump_hdr_attr(output, data + j);
+    }
+    free(data);
+
+    NOTE("#ifdef __cplusplus");
+    NOTE("}");
+    NOTE("#endif");
+
+    fprintf(output, "#endif\t\t\t\t/* %s */\n", marker);
 }
 
 static void dump_flat_attrs(FILE *output, const char *name, attr * attributes, int number_of_attributes)
@@ -364,16 +606,20 @@ int main(int argc, char *argv[])
 {
     const SGML_dtd *the_dtd = &HTML_dtd;
     int ch;
-    int f_option = FALSE;
+    int dtd_version = 0;
+    int c_option = FALSE;
+    int h_option = FALSE;
     int l_option = FALSE;
     FILE *input = stdin;
     FILE *output = stdout;
 
-    HTSwitchDTD(FALSE);
     while ((ch = getopt(argc, argv, GETOPT)) != -1) {
 	switch (ch) {
-	case 'f':
-	    f_option = TRUE;
+	case 'c':
+	    c_option = TRUE;
+	    break;
+	case 'h':
+	    h_option = TRUE;
 	    break;
 	case 'l':
 	    l_option = TRUE;
@@ -384,20 +630,26 @@ int main(int argc, char *argv[])
 		failed(optarg);
 	    break;
 	case 't':
-	    HTSwitchDTD(TRUE);
+	    dtd_version = 1;
 	    break;
 	case 's':
-	    HTSwitchDTD(FALSE);
+	    dtd_version = 0;
 	    break;
 	default:
 	    usage();
 	}
     }
+
+    HTSwitchDTD(dtd_version);
     if (l_option)
 	load_flatfile(input, the_dtd);
-    if (f_option)
+
+    if (c_option)
+	dump_source(output, the_dtd, dtd_version);
+    if (h_option)
+	dump_header(output, the_dtd);
+    if (!c_option && !h_option)
 	dump_flatfile(output, the_dtd);
-    else
-	dump_source(output, the_dtd);
+
     return EXIT_SUCCESS;
 }

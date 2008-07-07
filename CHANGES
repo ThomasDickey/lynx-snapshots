@@ -1,9 +1,15 @@
--- $LynxId: CHANGES,v 1.278 2008/07/05 00:40:57 tom Exp $
+-- $LynxId: CHANGES,v 1.281 2008/07/06 17:45:19 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
 2008-0?-?? (2.8.7dev.10)
+* fix typo in Lynx_users_guide.html (report by Kristof Zelechovski)
+* minor fix to documentation in lynx.cfg -PW
+* use off_t rather than long for representing file sizes, e.g., when used to
+  print progress messages (reports by LP, Tomas Liska, TG, PG) -TD
+* use dtd_util to replace most of HTMLDTD.h and HTMLDTD.c with source generated
+  from the existing tables in those files.
 * add program dtd_util which can be used to dump the SGML tables in readable
   form -TD
 * change calls to LYhandlePopupList() to turn on (or off) numbering when

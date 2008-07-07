@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCookie.c,v 1.88 2007/11/12 01:11:06 tom Exp $
+ * $LynxId: LYCookie.c,v 1.91 2008/07/06 17:42:46 tom Exp $
  *
  *			       Lynx Cookie Support		   LYCookie.c
  *			       ===================
@@ -1051,8 +1051,8 @@ static unsigned parse_attribute(unsigned flags,
 		cur_cookie->expires = (time_t) 0;
 	    } else {
 		cur_cookie->expires = (time(NULL) + temp);
-		CTrace((tfp, "LYSetCookie: expires %ld, %s",
-			(long) cur_cookie->expires,
+		CTrace((tfp, "LYSetCookie: expires %" PRI_time_t ", %s",
+			CAST_time_t(cur_cookie->expires),
 			ctime(&cur_cookie->expires)));
 	    }
 	    flags |= FLAGS_MAXAGE_ATTR;
@@ -1072,8 +1072,8 @@ static unsigned parse_attribute(unsigned flags,
 		cur_cookie->flags |= COOKIE_FLAG_EXPIRES_SET;
 		cur_cookie->expires = LYmktime(value, FALSE);
 		if (cur_cookie->expires > 0) {
-		    CTrace((tfp, "LYSetCookie: expires %ld, %s",
-			    (long) cur_cookie->expires,
+		    CTrace((tfp, "LYSetCookie: expires %" PRI_time_t ", %s",
+			    CAST_time_t(cur_cookie->expires),
 			    ctime(&cur_cookie->expires)));
 		}
 	    }
@@ -1713,8 +1713,8 @@ static void LYProcessSetCookies(const char *SetCookie,
 		(co->name ? co->name : "[no name]"),
 		(co->value ? co->value : "[no value]")));
 	if (co->expires > 0) {
-	    CTrace((tfp, "                    expires: %ld, %s\n",
-		    (long) co->expires,
+	    CTrace((tfp, "                    expires: %" PRI_time_t ", %s\n",
+		    CAST_time_t(co->expires),
 		    ctime(&co->expires)));
 	}
 	if (isHTTPS_URL(address) &&
@@ -2067,8 +2067,8 @@ void LYStoreCookies(char *cookie_file)
 	    if ((co = (cookie *) cl->object) == NULL)
 		continue;
 
-	    CTrace((tfp, "LYStoreCookies: %ld cf %ld ",
-		    (long) now, (long) co->expires));
+	    CTrace((tfp, "LYStoreCookies: %" PRI_time_t " cf %" PRI_time_t " ",
+		    CAST_time_t(now), CAST_time_t(co->expires)));
 
 	    if ((co->flags & COOKIE_FLAG_DISCARD)) {
 		CTrace((tfp, "not stored - DISCARD\n"));
@@ -2081,12 +2081,13 @@ void LYStoreCookies(char *cookie_file)
 		continue;
 	    }
 
-	    fprintf(cookie_handle, "%s\t%s\t%s\t%s\t%ld\t%s\t%s%s%s\n",
+	    fprintf(cookie_handle, "%s\t%s\t%s\t%s\t%" PRI_time_t
+		    "\t%s\t%s%s%s\n",
 		    de->domain,
 		    (de->domain[0] == '.') ? "TRUE" : "FALSE",
 		    co->path,
 		    co->flags & COOKIE_FLAG_SECURE ? "TRUE" : "FALSE",
-		    (long) co->expires, co->name,
+		    CAST_time_t(co->expires), co->name,
 		    (co->quoted ? "\"" : ""),
 		    NonNull(co->value),
 		    (co->quoted ? "\"" : ""));

@@ -1,4 +1,4 @@
-dnl $LynxId: configure.in,v 1.168 2008/07/02 21:28:04 Paul.B.Mahol Exp $
+dnl $LynxId: configure.in,v 1.169 2008/07/05 14:55:40 tom Exp $
 dnl
 dnl Process this file with autoconf to produce a configure script.
 dnl
@@ -7,7 +7,7 @@ dnl by T.E.Dickey <dickey@invisible-island.net>
 dnl and Jim Spath <jspath@mail.bcpl.lib.md.us>
 dnl
 dnl ---------------------------------------------------------------------------
-dnl Copyright 1997-2006,2007 by Thomas E. Dickey
+dnl Copyright 1997-2007,2008 by Thomas E. Dickey
 dnl 
 dnl Permission to use, copy, modify, and distribute this software and its
 dnl documentation for any purpose and without fee is hereby granted,
@@ -710,11 +710,15 @@ CF_FUNC_SIGACTION
 CF_FUNC_WAIT
 CF_VARARGS
 AC_TYPE_GETGROUPS
+AC_TYPE_OFF_T
 AC_TYPE_PID_T
 AC_TYPE_UID_T
 AC_TYPE_MODE_T
 CF_CHECK_TYPE(socklen_t, int, [#include <sys/socket.h>])
 CF_TM_GMTOFF
+
+AC_CHECK_SIZEOF(off_t,4)
+AC_CHECK_SIZEOF(time_t,4)
 
 dnl --------------------------------------------------------------------------
 dnl Checks for library units

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTRules.c,v 1.30 2007/08/02 20:12:40 tom Exp $
+ * $LynxId: HTRules.c,v 1.34 2008/07/06 12:53:43 tom Exp $
  *
  *	Configuration manager for Hypertext Daemon		HTRules.c
  *	==========================================
@@ -456,7 +456,7 @@ int HTSetConfiguration(char *config)
     const char *cond_op = NULL;
     const char *cond = NULL;
     float quality, secs, secs_per_byte;
-    int maxbytes;
+    off_t maxbytes;
     int status;
 
     StrAllocCopy(line, config);
@@ -500,7 +500,7 @@ int HTSetConfiguration(char *config)
 
     } else if (0 == strcasecomp(word1, "presentation")) {
 	if (pointer)
-	    status = sscanf(pointer, "%f%f%f%d",
+	    status = sscanf(pointer, "%f%f%f%" SCN_off_t "",
 			    &quality, &secs, &secs_per_byte, &maxbytes);
 	else
 	    status = 0;

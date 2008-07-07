@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTCP.c,v 1.93 2007/05/22 23:54:43 tom Exp $
+ * $LynxId: HTTCP.c,v 1.95 2008/07/06 12:55:40 tom Exp $
  *
  *			Generic Communication Code		HTTCP.c
  *			==========================
@@ -2091,8 +2091,9 @@ int HTDoRead(int fildes,
 #endif /* UCX && VAXC */
     }
 #ifdef USE_READPROGRESS
-    CTRACE2(TRACE_TIMING, (tfp, "...HTDoRead returns %d (%ld seconds)\n",
-			   result, (long) (time((time_t *) 0) - start)));
+    CTRACE2(TRACE_TIMING, (tfp, "...HTDoRead returns %d (%" PRI_time_t
+			   " seconds)\n",
+			   result, CAST_time_t(time((time_t *) 0) - start)));
 #endif
     return result;
 }

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTTP.c,v 1.94 2008/04/27 17:05:55 tom Exp $
+ * $LynxId: HTTP.c,v 1.96 2008/07/06 12:55:40 tom Exp $
  *
  * HyperText Tranfer Protocol	- Client implementation		HTTP.c
  * ==========================
@@ -1034,13 +1034,13 @@ static int HTLoadHTTP(const char *arg,
 	    if (pres->get_accept) {
 		if (pres->quality < 1.0) {
 		    if (pres->maxbytes > 0) {
-			sprintf(temp, ";q=%4.3f;mxb=%ld",
+			sprintf(temp, ";q=%4.3f;mxb=%" PRI_off_t "",
 				pres->quality, pres->maxbytes);
 		    } else {
 			sprintf(temp, ";q=%4.3f", pres->quality);
 		    }
 		} else if (pres->maxbytes > 0) {
-		    sprintf(temp, ";mxb=%ld", pres->maxbytes);
+		    sprintf(temp, ";mxb=%" PRI_off_t "", pres->maxbytes);
 		} else {
 		    temp[0] = '\0';
 		}

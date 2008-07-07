@@ -1,5 +1,5 @@
 /*
- * $LynxId: SGML.c,v 1.92 2007/07/22 21:52:43 Rado.Smiljanic Exp $
+ * $LynxId: SGML.c,v 1.96 2008/07/06 15:01:52 tom Exp $
  *
  *			General SGML Parser code		SGML.c
  *			========================
@@ -13,13 +13,6 @@
  */
 
 #include <HTUtils.h>
-
-/* Remove the following to disable the experimental HTML DTD parsing.
-   Currently only used in this source file. - kw */
-
-#ifndef NO_EXTENDED_HTMLDTD
-#define EXTENDED_HTMLDTD
-#endif
 
 #include <SGML.h>
 #include <HTMLDTD.h>
@@ -90,8 +83,6 @@ static void fake_put_character(void *p GCC_UNUSED,
 #define PUTC(ch)  ((*context->actions->put_character)(context->target, ch))
 #define PUTUTF8(code) (UCPutUtf8_charstring((HTStream *)context->target, \
 		      (putc_func_t*)(context->actions->put_character), code))
-
-#define OPT 1
 
 /*the following macros are used for pretty source view. */
 #define IS_C(attr) (attr.type == HTMLA_CLASS)
@@ -788,7 +779,7 @@ static void handle_entity(HTStream *context, char term)
     if (psrc_view)
 	PSRCSTART(badseq);
 #endif
-    CTRACE((tfp, "SGML: Unknown entity '%s' %ld %ld\n", s, (long) code, uck));	/* S/390 -- gil -- 0695 */
+    CTRACE((tfp, "SGML: Unknown entity '%s' %" PRI_UCode_t " %ld\n", s, code, uck));	/* S/390 -- gil -- 0695 */
     PUTC('&');
     PUTS(s);
     if (term != '\0')
@@ -935,8 +926,6 @@ static void handle_sgmlatt(HTStream *context)
 #define ALT_TAGP(t) ALT_TAGP_OF_TAGNUM(TAGNUM_OF_TAGP(t))
 #define NORMAL_TAGP(t) NORMAL_TAGP_OF_TAGNUM(TAGNUM_OF_TAGP(t))
 
-#ifdef EXTENDED_HTMLDTD
-
 static BOOL element_valid_within(HTTag * new_tag, HTTag * stacked_tag, BOOL direct)
 {
     TagClass usecontains, usecontained;
@@ -1007,15 +996,12 @@ static int is_on_stack(HTStream *context, HTTag * old_tag)
     }
     return 0;
 }
-#endif /* EXTENDED_HTMLDTD */
 
 /*	End element
  *	-----------
  */
 static void end_element(HTStream *context, HTTag * old_tag)
 {
-#ifdef EXTENDED_HTMLDTD
-
     BOOL extra_action_taken = NO;
     canclose_t canclose_check = close_valid;
     int stackpos = is_on_stack(context, old_tag);
@@ -1061,8 +1047,6 @@ static void end_element(HTStream *context, HTTag * old_tag)
 	}
     }
     /* Now let the non-extended code deal with the rest. - kw */
-
-#endif /* EXTENDED_HTMLDTD */
 
     /*
      * If we are in a SELECT block, ignore anything but a SELECT end tag.  - FM
@@ -1162,8 +1146,6 @@ static void start_element(HTStream *context)
     HTMLElement e = TAGNUM_OF_TAGP(new_tag);
     BOOL ok = FALSE;
 
-#ifdef EXTENDED_HTMLDTD
-
     BOOL valid = YES;
     BOOL direct_container = YES;
     BOOL extra_action_taken = NO;
@@ -1236,8 +1218,6 @@ static void start_element(HTStream *context)
 	}
     }
     /* Fall through to the non-extended code - kw */
-
-#endif /* EXTENDED_HTMLDTD */
 
     /*
      * If we are not in a SELECT block, check if this is a SELECT start tag. 
@@ -3887,22 +3867,16 @@ static void SGML_character(HTStream *context, char c_in)
 #endif
 	    } else {
 		BOOL tag_OK = (BOOL) (c == '>' || WHITE(c));
-
-#if OPT
 		HTMLElement e = TAGNUM_OF_TAGP(t);
 		int branch = 2;	/* it can be 0,1,2 */
-#endif
+
 		context->current_tag = t;
 		if (HAS_ALT_TAGNUM(TAGNUM_OF_TAGP(t)) &&
 		    context->element_stack &&
 		    ALT_TAGP(t) == context->element_stack->tag)
 		    context->element_stack->tag = NORMAL_TAGP(context->element_stack->tag);
-#if OPT
-		if (tag_OK
-#ifdef EXTENDED_HTMLDTD
-		    && Old_DTD
-#endif
-		    ) {
+
+		if (tag_OK && Old_DTD) {
 		    switch (e) {
 		    case HTML_DD:
 		    case HTML_DT:
@@ -3936,34 +3910,13 @@ static void SGML_character(HTStream *context, char c_in)
 			break;
 		    }
 		}
-#endif
 
-#ifdef EXTENDED_HTMLDTD
 		/*
 		 * Just handle ALL end tags normally :-) - kw
 		 */
 		if (!Old_DTD) {
 		    end_element(context, context->current_tag);
-		} else
-#endif /* EXTENDED_HTMLDTD */
-
-		    if (tag_OK &&
-#if OPT
-			(branch == 0)
-#else
-			(!strcasecomp(string->data, "DD") ||
-			 !strcasecomp(string->data, "DT") ||
-			 !strcasecomp(string->data, "LI") ||
-			 !strcasecomp(string->data, "LH") ||
-			 !strcasecomp(string->data, "TD") ||
-			 !strcasecomp(string->data, "TH") ||
-			 !strcasecomp(string->data, "TR") ||
-			 !strcasecomp(string->data, "THEAD") ||
-			 !strcasecomp(string->data, "TFOOT") ||
-			 !strcasecomp(string->data, "TBODY") ||
-			 !strcasecomp(string->data, "COLGROUP"))
-#endif
-		    ) {
+		} else if (tag_OK && (branch == 0)) {
 		    /*
 		     * Don't treat these end tags as invalid, nor act on them. 
 		     * - FM
@@ -3979,24 +3932,7 @@ static void SGML_character(HTStream *context, char c_in)
 			context->state = S_text;
 		    }
 		    break;
-		} else if (tag_OK &&
-#if OPT
-			   (branch == 1)
-#else
-			   (!strcasecomp(string->data, "A") ||
-			    !strcasecomp(string->data, "B") ||
-			    !strcasecomp(string->data, "BLINK") ||
-			    !strcasecomp(string->data, "CITE") ||
-			    !strcasecomp(string->data, "EM") ||
-			    !strcasecomp(string->data, "FONT") ||
-			    !strcasecomp(string->data, "FORM") ||
-			    !strcasecomp(string->data, "I") ||
-			    !strcasecomp(string->data, "P") ||
-			    !strcasecomp(string->data, "STRONG") ||
-			    !strcasecomp(string->data, "TT") ||
-			    !strcasecomp(string->data, "U"))
-#endif
-		    ) {
+		} else if (tag_OK && (branch == 1)) {
 		    /*
 		     * Handle end tags for container elements declared as
 		     * SGML_EMPTY to prevent "expected tag substitution" but
