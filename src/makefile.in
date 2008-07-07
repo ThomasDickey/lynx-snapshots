@@ -1,4 +1,4 @@
-# $LynxId: makefile.in,v 1.52 2008/06/30 23:36:34 tom Exp $
+# $LynxId: makefile.in,v 1.53 2008/07/06 13:28:03 tom Exp $
 # template-makefile for Lynx src directory
 
 SHELL		= @CONFIG_SHELL@
@@ -118,7 +118,7 @@ lint:
 	$(LINT) $(LINTOPTS) $(CPP_OPTS) *.c  > $(top_builddir)/lint.lynx
 
 clean:
-	rm -f lynx$x core *.core *.leaks *.i *$o *.bak tags TAGS
+	rm -f lynx$x core *.core *.leaks *.i *$o *.bak tags TAGS test_*
 	cd chrtrans && $(MAKE) clean
 
 tags:

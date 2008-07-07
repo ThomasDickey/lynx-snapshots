@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAlert.c,v 1.79 2008/02/11 00:28:56 tom Exp $
+ * $LynxId: HTAlert.c,v 1.81 2008/07/06 12:55:40 tom Exp $
  *
  *	Displaying messages and getting input for Lynx Browser
  *	==========================================================
@@ -171,22 +171,22 @@ const char *HTProgressUnits(int rate)
 	)? kbunits : bunits;
 }
 
-static const char *sprint_bytes(char *s, long n, const char *was_units)
+static const char *sprint_bytes(char *s, off_t n, const char *was_units)
 {
-    static long kb_units = 1024;
+    static off_t kb_units = 1024;
     const char *u = HTProgressUnits(LYTransferRate);
 
     if (LYTransferRate == rateKB || LYTransferRate == rateEtaKB_maybe) {
 	if (n >= 10 * kb_units) {
-	    sprintf(s, "%ld", n / kb_units);
+	    sprintf(s, "%" PRI_off_t, n / kb_units);
 	} else if (n > 999) {	/* Avoid switching between 1016b/s and 1K/s */
 	    sprintf(s, "%.2g", ((double) n) / kb_units);
 	} else {
-	    sprintf(s, "%ld", n);
+	    sprintf(s, "%" PRI_off_t, n);
 	    u = HTProgressUnits(rateBYTES);
 	}
     } else {
-	sprintf(s, "%ld", n);
+	sprintf(s, "%" PRI_off_t, n);
     }
 
     if (!was_units || was_units != u)
@@ -211,10 +211,10 @@ static char *sprint_tbuf(char *s, long t)
 /*	Issue a read-progress message.			HTReadProgress()
  *	------------------------------
  */
-void HTReadProgress(long bytes, long total)
+void HTReadProgress(off_t bytes, off_t total)
 {
-    static long bytes_last, total_last;
-    static long transfer_rate = 0;
+    static off_t bytes_last, total_last;
+    static off_t transfer_rate = 0;
     static char *line = NULL;
     char bytesp[80], totalp[80], transferp[80];
     int renew = 0;
@@ -255,7 +255,7 @@ void HTReadProgress(long bytes, long total)
     if ((bytes > 0) &&
 	(now > first)) {
 	if (transfer_rate <= 0)	/* the very first time */
-	    transfer_rate = (long) ((bytes) / (now - first));	/* bytes/sec */
+	    transfer_rate = (off_t) ((bytes) / (now - first));	/* bytes/sec */
 	total_last = total;
 
 	/*
@@ -281,7 +281,7 @@ void HTReadProgress(long bytes, long total)
 		if (bytes_last != bytes)
 		    last_active = now;
 		bytes_last = bytes;
-		transfer_rate = (long) (bytes / (now - first));		/* more accurate value */
+		transfer_rate = (off_t) (bytes / (now - first));	/* more accurate value */
 	    }
 
 	    if (total > 0)
@@ -303,7 +303,8 @@ void HTReadProgress(long bytes, long total)
 		    float percent = bytes / (float) total;
 		    int meter = (LYcolLimit * percent) - 5;
 
-		    CTRACE((tfp, "rateBAR: bytes: %ld, total: %ld\n", bytes, total));
+		    CTRACE((tfp, "rateBAR: bytes: %" PRI_off_t ", total: "
+			    "%" PRI_off_t "\n", bytes, total));
 		    CTRACE((tfp, "meter = %d\n", meter));
 
 		    HTSprintf0(&line, "%d%% ", (int) (percent * 100));

@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTUtils.h,v 1.79 2008/04/13 14:43:32 tom Exp $
+ * $LynxId: HTUtils.h,v 1.85 2008/07/06 12:55:40 tom Exp $
  *
  * Utility macros for the W3 code library
  * MACROS FOR GENERAL USE
@@ -535,6 +535,63 @@ extern int WWW_TraceMask;
 #define TRACE_GRIDTEXT  (TRACE_bit(7))
 #define TRACE_TIMING    (TRACE_bit(8))
 
+/*
+ * Get printing/scanning formats.
+ */
+#if defined(HAVE_INTTYPES_H)
+#include <inttypes.h>
+#endif
+
+/*
+ * Printing/scanning-formats for "off_t", as well as cast needed to fit.
+ */
+#if defined(HAVE_INTTYPES_H) && defined(SIZEOF_OFF_T)
+#if SIZEOF_OFF_T == 8
+#define PRI_off_t	PRId64
+#define SCN_off_t	SCNd64
+#define CAST_off_t(n)	(int64_t)(n)
+#else
+#define PRI_off_t	PRId32
+#define SCN_off_t	SCNd32
+#define CAST_off_t(n)	(int32_t)(n)
+#endif
+#endif
+
+#ifndef PRI_off_t
+#define PRI_off_t	"ld"
+#define SCN_off_t	"ld"
+#define CAST_off_t(n)	(long)(n)
+#endif
+
+/*
+ * Printing-format for "time_t", as well as cast needed to fit.
+ */
+#if defined(HAVE_INTTYPES_H) && defined(SIZEOF_TIME_T)
+#if SIZEOF_TIME_T == 8
+#define PRI_time_t	PRId64
+#define SCN_time_t	SCNd64
+#define CAST_time_t(n)	(int64_t)(n)
+#else
+#define PRI_time_t	PRId32
+#define SCN_time_t	SCNd32
+#define CAST_time_t(n)	(int32_t)(n)
+#endif
+#endif
+
+#ifndef PRI_time_t
+#define PRI_time_t	"ld"
+#define SCN_time_t	"ld"
+#define CAST_time_t(n)	(long)(n)
+#endif
+
+/*
+ * Printing-format for "UCode_t".
+ */
+#define PRI_UCode_t	"ld"
+
+/*
+ * Verbose-tracing.
+ */
 #if defined(USE_VERTRACE) && !defined(LY_TRACELINE)
 #define LY_TRACELINE __LINE__
 #endif
@@ -615,7 +672,7 @@ extern int WWW_TraceMask;
 
 #if defined(USE_GNUTLS_FUNCS)
 #include <tidy_tls.h>
-#define USE_GNUTLS_INCL 1		/* do this for the ".c" ifdef's */
+#define USE_GNUTLS_INCL 1	/* do this for the ".c" ifdef's */
 #elif defined(USE_GNUTLS_INCL)
 #include <gnutls/openssl.h>
 /*

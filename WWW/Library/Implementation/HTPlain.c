@@ -616,12 +616,12 @@ static void HTPlain_write(HTStream *me, const char *s, int l)
 		/*
 		 * Ignore 8204 (zwnj) or 8205 (zwj), if we get to here.  - FM
 		 */
-		CTRACE((tfp, "HTPlain_write: Ignoring '%ld'.\n", code));
+		CTRACE((tfp, "HTPlain_write: Ignoring '%" PRI_UCode_t "'.\n", code));
 	    } else if (code == 8206 || code == 8207) {
 		/*
 		 * Ignore 8206 (lrm) or 8207 (rlm), if we get to here.  - FM
 		 */
-		CTRACE((tfp, "HTPlain_write: Ignoring '%ld'.\n", code));
+		CTRACE((tfp, "HTPlain_write: Ignoring '%" PRI_UCode_t "'.\n", code));
 	    } else {
 		/*
 		 * Out of luck, so use the UHHH notation (ugh).  - FM

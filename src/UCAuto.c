@@ -1,5 +1,5 @@
 /*
- * $LynxId: UCAuto.c,v 1.37 2008/01/07 23:51:16 tom Exp $
+ * $LynxId: UCAuto.c,v 1.38 2008/07/05 11:42:34 tom Exp $
  *
  *  This file contains code for changing the Linux console mode.
  *  Currently some names for font files are hardwired in here.
@@ -696,7 +696,7 @@ static int _Switch_Display_Charset(int ord, enum switch_display_charset_t really
 	if (rc == 0)
 	    goto report;
       err:
-	sprintf(msgbuf, "Can't change to '%s': err=%#lx=%ld", name, rc, rc);
+	sprintf(msgbuf, "Can't change to '%s': err=%#x=%d", name, rc, rc);
 	HTInfoMsg(msgbuf);
 	return -1;
     }
@@ -733,7 +733,7 @@ static int _Switch_Display_Charset(int ord, enum switch_display_charset_t really
 
 	rc = VioGetFont(font, 0);	/* Retrieve data for current font */
 	if (rc) {
-	    sprintf(msgbuf, "Can't fetch current font info: err=%#lx=%ld", rc, rc);
+	    sprintf(msgbuf, "Can't fetch current font info: err=%#x=%d", rc, rc);
 	    HTInfoMsg(msgbuf);
 	    ord = ord1 = auto_display_charset;
 	    goto retry;
@@ -768,7 +768,7 @@ static int _Switch_Display_Charset(int ord, enum switch_display_charset_t really
 	fclose(file);
 	rc = VioSetFont(font, 0);	/* Put it all back.. */
 	if (rc) {
-	    sprintf(msgbuf, "Can't set font: err=%#lx=%ld", rc, rc);
+	    sprintf(msgbuf, "Can't set font: err=%#x=%d", rc, rc);
 	    HTInfoMsg(msgbuf);
 	    ord = ord1 = auto_display_charset;
 	    font_loaded_for = -1;

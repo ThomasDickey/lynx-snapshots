@@ -42,7 +42,7 @@ extern "C" {
  */
     extern const char *HTProgressUnits(int kilobytes);
     extern void HTProgress(const char *Msg);
-    extern void HTReadProgress(long bytes, long total);
+    extern void HTReadProgress(off_t bytes, off_t total);
 
 #define _HTProgress(msg)	mustshow = TRUE, HTProgress(msg)
 
