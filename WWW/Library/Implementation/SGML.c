@@ -1,5 +1,5 @@
 /*
- * $LynxId: SGML.c,v 1.96 2008/07/06 15:01:52 tom Exp $
+ * $LynxId: SGML.c,v 1.102 2008/07/09 23:48:37 tom Exp $
  *
  *			General SGML Parser code		SGML.c
  *			========================
@@ -136,7 +136,6 @@ typedef enum {
     ,S_exclamation
     ,S_in_kanji
     ,S_incro
-    ,S_junk_pi
     ,S_junk_tag
     ,S_litteral
     ,S_marked
@@ -147,6 +146,7 @@ typedef enum {
     ,S_paren_dq
     ,S_paren_sq
     ,S_pcdata
+    ,S_pi
     ,S_script
     ,S_sgmlatt
     ,S_sgmlele
@@ -172,6 +172,7 @@ struct _HTStream {
     HTTag *current_tag;
     HTTag *slashedtag;
     const HTTag *unknown_tag;
+    BOOL extended_html;		/* xhtml */
     BOOL inSELECT;
     BOOL no_lynx_specialcodes;
     int current_attribute_number;
@@ -218,7 +219,6 @@ struct _HTStream {
 #ifdef USE_PRETTYSRC
     BOOL cur_attr_is_href;
     BOOL cur_attr_is_name;
-    BOOL seen_nonwhite_in_junk_tag;
 #endif
 };
 
@@ -252,7 +252,7 @@ static const char *state_name(sgml_state n)
     case S_exclamation:         result = "S_exclamation";       break;
     case S_in_kanji:            result = "S_in_kanji";          break;
     case S_incro:               result = "S_incro";             break;
-    case S_junk_pi:             result = "S_junk_pi";           break;
+    case S_pi:                  result = "S_pi";                break;
     case S_junk_tag:            result = "S_junk_tag";          break;
     case S_litteral:            result = "S_litteral";          break;
     case S_marked:              result = "S_marked";            break;
@@ -303,7 +303,9 @@ static void pool_free(HTElement * e)
 
 #ifdef USE_PRETTYSRC
 
-static void HTMLSRC_apply_markup(HTStream *context, HTlexeme lexeme, BOOL start)
+static void HTMLSRC_apply_markup(HTStream *context,
+				 HTlexeme lexeme,
+				 BOOL start)
 {
     HT_tagspec *ts = *((start ? lexeme_start : lexeme_end) + lexeme);
 
@@ -332,14 +334,15 @@ static void HTMLSRC_apply_markup(HTStream *context, HTlexeme lexeme, BOOL start)
     }
 }
 
-#define PSRCSTART(x)	HTMLSRC_apply_markup(context,HTL_##x,START)
+#define PSRCSTART(x)  HTMLSRC_apply_markup(context,HTL_##x,START)
 #define PSRCSTOP(x)   HTMLSRC_apply_markup(context,HTL_##x,STOP)
 
 #define attr_is_href context->cur_attr_is_href
 #define attr_is_name context->cur_attr_is_name
 #endif
 
-static void set_chartrans_handling(HTStream *context, HTParentAnchor *anchor,
+static void set_chartrans_handling(HTStream *context,
+				   HTParentAnchor *anchor,
 				   int chndl)
 {
     if (chndl < 0) {
@@ -830,12 +833,13 @@ static void handle_doctype(HTStream *context)
     const char *s = context->string->data;
 
     CTRACE((tfp, "SGML Doctype:\n<%s>\n", s));
+    if (strstr(s, "DTD XHTML ") != 0) {
+	CTRACE((tfp, "...processing extended HTML\n"));
+	context->extended_html = TRUE;
+    }
 
     return;
 }
-
-static void SGML_write(HTStream *me, const char *s,
-		       int l);
 
 /*	Handle marked
  *	-------------
@@ -859,6 +863,42 @@ static void handle_marked(HTStream *context)
 					context->string->size - 11);
 
     }
+    return;
+}
+
+/*	Handle processing instruction
+ *	-----------------------------
+ */
+static void handle_processing_instruction(HTStream *context)
+{
+    const char *s = context->string->data;
+
+    CTRACE((tfp, "SGML Processing instruction:\n<%s>\n", s));
+
+    if (!strncmp(s, "?xml", 4)) {
+	int flag = context->T.decode_utf8;
+
+	/*
+	 * Switch to UTF-8 unless the encoding is explicitly not "utf-8".
+	 */
+	if (!flag) {
+	    char *t = strstr(s, "encoding=");
+
+	    if (t != 0) {
+		t += 9;
+		if (*t == '"')
+		    ++t;
+		flag = !strncmp(t, "utf-8", 5);
+	    } else {
+		flag = TRUE;
+	    }
+	    if (flag) {
+		CTRACE((tfp, "...Use UTF-8 for XML\n"));
+		context->T.decode_utf8 = TRUE;
+	    }
+	}
+    }
+
     return;
 }
 
@@ -2125,10 +2165,9 @@ static void SGML_character(HTStream *context, char c_in)
 		    PSRCSTART(abracket);
 		    PUTS("<?");
 		    PSRCSTOP(abracket);
-		    context->seen_nonwhite_in_junk_tag = TRUE;	/* show all */
 		}
 #endif
-		context->state = S_junk_pi;
+		context->state = S_pi;
 		break;
 	    }
 	}
@@ -2971,16 +3010,17 @@ static void SGML_character(HTStream *context, char c_in)
 	    }
 	    if (!t) {
 		if (c == '?' && string->size <= 1) {
-		    CTRACE((tfp, "SGML: Found PI, junking it until '>'\n"));
+		    CTRACE((tfp, "SGML: Found PI, looking for '>'\n"));
 #ifdef USE_PRETTYSRC
 		    if (psrc_view) {
 			PSRCSTART(abracket);
 			PUTS("<?");
 			PSRCSTOP(abracket);
-			context->seen_nonwhite_in_junk_tag = TRUE;	/*show all */
 		    }
 #endif
-		    context->state = S_junk_pi;
+		    string->size = 0;
+		    context->state = S_pi;
+		    HTChunkPutc(string, c);
 		    break;
 		}
 		CTRACE((tfp, "SGML: *** Invalid element %s\n",
@@ -3480,8 +3520,18 @@ static void SGML_character(HTStream *context, char c_in)
 	/* accumulating value */
     case S_attr:
 	if (WHITE(c) || (c == '>') || (c == '=')) {	/* End of word */
-	    HTChunkTerminate(string);
-	    handle_attribute_name(context, string->data);
+	    if ((c == '>')
+		&& (string->size == 1)
+		&& (string->data[0] == '/')) {
+		if (context->extended_html
+		    && context->current_tag->name) {
+		    CTRACE((tfp, "SGML discarding empty %s\n", context->current_tag->name));
+		    context->current_tag->name = 0;
+		}
+	    } else {
+		HTChunkTerminate(string);
+		handle_attribute_name(context, string->data);
+	    }
 #ifdef USE_PRETTYSRC
 	    if (!psrc_view) {
 #endif
@@ -3621,7 +3671,6 @@ static void SGML_character(HTStream *context, char c_in)
 	    HTChunkTerminate(string);
 #ifdef USE_PRETTYSRC
 	    if (psrc_view) {
-		/*PSRCSTART(attrval); */
 		if (attr_is_name) {
 		    HTStartAnchor(context->target, string->data, NULL);
 		    (*context->actions->end_element) (context->target,
@@ -3641,21 +3690,23 @@ static void SGML_character(HTStream *context, char c_in)
 		PSRCSTOP(attrval);
 	    } else
 #endif
-#ifdef CJK_EX			/* Quick hack. - JH7AYN */
 	    {
-		char jis_buf[512];
+#ifdef CJK_EX			/* Quick hack. - JH7AYN */
+		if (HTCJK != NOCJK) {
+		    if (string->data[0] == '$') {
+			if (string->data[1] == 'B' || string->data[1] == '@') {
+			    char *jis_buf = 0;
 
-		if (string->data[0] == '$') {
-		    if (string->data[1] == 'B' || string->data[1] == '@') {
-			jis_buf[0] = '\033';
-			strcpy(jis_buf + 1, string->data);
-			TO_EUC((const unsigned char *) jis_buf,
-			       (unsigned char *) string->data);
+			    HTSprintf0(&jis_buf, "\033%s", string->data);
+			    TO_EUC((const unsigned char *) jis_buf,
+				   (unsigned char *) string->data);
+			    FREE(jis_buf);
+			}
 		    }
 		}
-	    }
 #endif
-	    handle_attribute_value(context, string->data);
+		handle_attribute_value(context, string->data);
+	    }
 	    string->size = 0;
 	    if (c == '>') {	/* End of tag */
 #ifdef USE_PRETTYSRC
@@ -4200,8 +4251,9 @@ static void SGML_character(HTStream *context, char c_in)
 	break;
 
     case S_junk_tag:
-    case S_junk_pi:
+    case S_pi:
 	if (c == '>') {
+	    HTChunkTerminate(string);
 #ifdef USE_PRETTYSRC
 	    if (psrc_view) {
 		if (context->state == S_junk_tag) {
@@ -4210,24 +4262,21 @@ static void SGML_character(HTStream *context, char c_in)
 		PSRCSTART(abracket);
 		PUTC('>');
 		PSRCSTOP(abracket);
-		context->seen_nonwhite_in_junk_tag = FALSE;
 	    }
 #endif
+	    if (context->state == S_pi)
+		handle_processing_instruction(context);
+	    string->size = 0;
 	    context->current_tag = NULL;
 	    context->state = S_text;
-	}
+	} else {
+	    HTChunkPutc(string, c);
 #ifdef USE_PRETTYSRC
-	else if (psrc_view) {
-	    /*pack spaces until first non-space is seen */
-	    if (!context->seen_nonwhite_in_junk_tag) {
-		if (!WHITE(c)) {
-		    context->seen_nonwhite_in_junk_tag = TRUE;
-		    PUTC(c);
-		}
-	    } else
+	    if (psrc_view) {
 		PUTC(c);
-	}
+	    }
 #endif
+	}
 
     }				/* switch on context->state */
     CTRACE2(TRACE_SGML, (tfp, "SGML after  %s|%.*s|%c|\n",
@@ -4334,8 +4383,7 @@ static void SGML_string(HTStream *context, const char *str)
 	SGML_character(context, *p);
 }
 
-static void SGML_write(HTStream *context, const char *str,
-		       int l)
+static void SGML_write(HTStream *context, const char *str, int l)
 {
     const char *p;
     const char *e = str + l;
@@ -4373,16 +4421,13 @@ HTStream *SGML_new(const SGML_dtd * dtd,
 		   HTParentAnchor *anchor,
 		   HTStructured * target)
 {
-    int i;
-    HTStream *context = (HTStream *) malloc(sizeof(*context));
+    HTStream *context = typecalloc(struct _HTStream);
 
     if (!context)
 	outofmem(__FILE__, "SGML_begin");
 
     context->isa = &SGMLParser;
     context->string = HTChunkCreate(128);	/* Grow by this much */
-    context->leading_spaces = 0;
-    context->trailing_spaces = 0;
     context->dtd = dtd;
     context->target = target;
     context->actions = (const HTStructuredClass *) (((HTStream *) target)->isa);
@@ -4390,28 +4435,11 @@ HTStream *SGML_new(const SGML_dtd * dtd,
     context->unknown_tag = &HTTag_unrecognized;
     context->current_tag = context->slashedtag = NULL;
     context->state = S_text;
-    context->kanji_buf = '\0';
-    context->element_stack = 0;	/* empty */
-    context->inSELECT = FALSE;
-    context->no_lynx_specialcodes = NO;		/* special codes normally generated */
 #ifdef CALLERDATA
     context->callerData = (void *) callerData;
 #endif /* CALLERDATA */
-    for (i = 0; i < MAX_ATTRIBUTES; i++)
-	context->value[i] = 0;
-
-    context->lead_exclamation = FALSE;
-    context->first_dash = FALSE;
-    context->end_comment = FALSE;
-    context->doctype_bracket = FALSE;
-    context->first_bracket = FALSE;
-    context->second_bracket = FALSE;
-    context->isHex = FALSE;
 
     context->node_anchor = anchor;	/* Could be NULL? */
-    context->utf_count = 0;
-    context->utf_char = 0;
-    context->utf_buf[0] = context->utf_buf[6] = '\0';
     context->utf_buf_p = context->utf_buf;
     UCTransParams_clear(&context->T);
     context->inUCLYhndl = HTAnchor_getUCLYhndl(anchor,
@@ -4459,7 +4487,6 @@ HTStream *SGML_new(const SGML_dtd * dtd,
 	psrc_view = TRUE;
 	psrc_convert_string = FALSE;
 	sgml_in_psrc_was_initialized = TRUE;
-	context->seen_nonwhite_in_junk_tag = FALSE;
     }
 #endif
 

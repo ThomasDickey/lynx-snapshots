@@ -1,4 +1,4 @@
-# $LynxId: makefile.in,v 1.17 2008/07/04 17:12:20 tom Exp $
+# $LynxId: makefile.in,v 1.18 2008/07/08 00:06:40 tom Exp $
 # Make WWW under unix for a.n.other unix system (bsd)
 # Use this as a template
 
@@ -316,6 +316,12 @@ $(LOB)/dtd_util$o : $(CMN)dtd_util.c $(CMN)HTUtils.h
 	$(COMPILE) $(CMN)dtd_util.c
 
 DTD_UTIL = $(LOB)/dtd_util$o $(LOB)/HTMLDTD$o
+
+sources: dtd_util$x
+	-rm -f *_HTMLDTD.h
+	./dtd_util$x -s -c -o src0_HTMLDTD.h
+	./dtd_util$x -t -c -o src1_HTMLDTD.h
+	./dtd_util$x -s -h -o hdr_HTMLDTD.h
 
 dtd_util$x: $(DTD_UTIL)
 	$(CC) $(CC_OPTS) $(LDFLAGS) -o $@  $(DTD_UTIL) $(LIBS)
