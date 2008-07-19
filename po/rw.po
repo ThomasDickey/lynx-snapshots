@@ -16,7 +16,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: lynx 2.8.5pre9\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-04-27 19:12-0400\n"
+"POT-Creation-Date: 2008-07-19 07:11-0400\n"
 "PO-Revision-Date: 2005-04-04 10:55-0700\n"
 "Last-Translator: Steven Michael Murphy <murf@e-tools.com>\n"
 "Language-Team: Kinyarwanda <translation-team-rw@lists.sourceforge.net>\n"
@@ -431,7 +431,7 @@ msgstr ""
 #: LYMessages.c:153
 #, fuzzy, c-format
 msgid "Skipping %s"
-msgstr "Gusimbuka: %s%s"
+msgstr "Gusimbuka: %s"
 
 #: LYMessages.c:154
 #, fuzzy, c-format
@@ -453,7 +453,7 @@ msgstr "Aderesi"
 #: LYMessages.c:157
 #, fuzzy, c-format
 msgid "URL: %s"
-msgstr "URL"
+msgstr "URL: %s"
 
 #: LYMessages.c:158
 #, fuzzy
@@ -486,31 +486,31 @@ msgstr "Inyandiko Inkomoko Kuri Garuka Kuri Verisiyo"
 #: LYMessages.c:166
 #, fuzzy
 msgid "  Arrow keys: Up and Down to move.  Right to follow a link; Left to go back.  \n"
-msgstr "Utubuto Na Kuri Kwimura Kuri a Ihuza Kuri Gyayo Inyuma"
+msgstr "Utubuto Na Kuri Kwimura Kuri a Ihuza Kuri Gyayo Inyuma\n"
 
 #. #define NOVICE_LINE_TWO
 #: LYMessages.c:168
 #, fuzzy
 msgid " H)elp O)ptions P)rint G)o M)ain screen Q)uit /=search [delete]=history list \n"
-msgstr "H o Mugaragaza Gushaka Gusiba Urutonde Urutonde"
+msgstr "H o Mugaragaza Gushaka Gusiba Urutonde Urutonde\n"
 
 #. #define NOVICE_LINE_TWO_A
 #: LYMessages.c:170
 #, fuzzy
 msgid "  O)ther cmds  H)elp  K)eymap  G)oto  P)rint  M)ain screen  o)ptions  Q)uit  \n"
-msgstr "H Mugaragaza o"
+msgstr "H Mugaragaza o\n"
 
 #. #define NOVICE_LINE_TWO_B
 #: LYMessages.c:172
 #, fuzzy
 msgid "  O)ther cmds  B)ack  E)dit  D)ownload ^R)eload ^W)ipe screen  search doc: / \n"
-msgstr "E Mugaragaza Gushaka"
+msgstr "E Mugaragaza Gushaka\n"
 
 #. #define NOVICE_LINE_TWO_C
 #: LYMessages.c:174
 #, fuzzy
 msgid "O)ther cmds  C)omment  History: <backspace>  Bookmarks: V)iew, A)dd, R)emove \n"
-msgstr "C Gusiba usubira inyuma V A"
+msgstr "C Gusiba usubira inyuma V A\n"
 
 #. #define FORM_NOVICELINE_ONE
 #: LYMessages.c:176
@@ -675,19 +675,19 @@ msgstr "Garuka Kuri Garuka Kuri"
 #: LYMessages.c:223
 #, fuzzy
 msgid "Spawning DCL subprocess.  Use 'logout' to return to Lynx.\n"
-msgstr "Kuri Garuka Kuri"
+msgstr "Kuri Garuka Kuri\n"
 
 #. #define SPAWNING_MSG
 #: LYMessages.c:227
 #, fuzzy
 msgid "Type EXIT to return to Lynx.\n"
-msgstr "Kuri Garuka Kuri"
+msgstr "Kuri Garuka Kuri\n"
 
 #. #define SPAWNING_MSG
 #: LYMessages.c:230
 #, fuzzy
 msgid "Spawning your default shell.  Use 'exit' to return to Lynx.\n"
-msgstr "Mburabuzi Igikonoshwa Kuri Garuka Kuri"
+msgstr "Mburabuzi Igikonoshwa Kuri Garuka Kuri\n"
 
 #: LYMessages.c:233
 #, fuzzy
@@ -1700,24 +1700,8 @@ msgstr "Ihuza Byanzwe Kuri Inyuguti"
 
 #. #define RELPATH_IN_EXEC_LINK
 #: LYMessages.c:481
-#, fuzzy
 msgid "Executable link rejected due to relative path string ('../')."
 msgstr ""
-"Project- Id- Version: basctl\n"
-"POT- Creation- Date: 2003- 12- 07 17: 13+ 02\n"
-"PO- Revision- Date: 2004- 11- 04 10: 13- 0700\n"
-"Last- Translator: Language- Team:< en@ li. org> MIME- Version: 1. 0\n"
-"Content- Type: text/ plain; charset= UTF- 8\n"
-"Content- Transfer- Encoding: 8bit\n"
-"X- Generator: KBabel 1. 0\n"
-". Project- Id- Version: basctl\n"
-"POT- Creation- Date: 2003- 12- 07 17: 13+ 02\n"
-"PO- Revision- Date: 2004- 11- 04 10: 13- 0700\n"
-"Last- Translator: Language- Team:< en@ li. org> MIME- Version: 1. 0\n"
-"Content- Type: text/ plain; charset= UTF- 8\n"
-"Content- Transfer- Encoding: 8bit\n"
-"X- Generator: KBabel 1. 0\n"
-"."
 
 #. #define BADLOCPATH_IN_EXEC_LINK
 #: LYMessages.c:483
@@ -2471,7 +2455,10 @@ msgid ""
 "\n"
 " With copy to:\n"
 "  "
-msgstr "Gukoporora Kuri"
+msgstr ""
+"\n"
+"Gukoporora Kuri\n"
+"  "
 
 #: LYMessages.c:672
 #, fuzzy
@@ -2479,7 +2466,10 @@ msgid ""
 "\n"
 " With copies to:\n"
 "  "
-msgstr "Amakopi Kuri"
+msgstr ""
+"\n"
+"Amakopi Kuri\n"
+"  "
 
 #. #define CTRL_G_TO_CANCEL_SEND
 #: LYMessages.c:674
@@ -2488,7 +2478,10 @@ msgid ""
 "\n"
 "\n"
 "Use Ctrl-G to cancel if you do not want to send a message\n"
-msgstr "Kuri Kureka NIBA OYA Kuri Kohereza a"
+msgstr ""
+"\n"
+"\n"
+"Kuri Kureka NIBA OYA Kuri Kohereza a\n"
 
 #. #define ENTER_NAME_OR_BLANK
 #: LYMessages.c:676
@@ -2496,7 +2489,9 @@ msgstr "Kuri Kureka NIBA OYA Kuri Kohereza a"
 msgid ""
 "\n"
 " Please enter your name, or leave it blank to remain anonymous\n"
-msgstr "Injiza Izina: Cyangwa Ahatanditseho Kuri"
+msgstr ""
+"\n"
+"Injiza Izina: Cyangwa Ahatanditseho Kuri\n"
 
 #. #define ENTER_MAIL_ADDRESS_OR_OTHER
 #: LYMessages.c:678
@@ -2504,20 +2499,24 @@ msgstr "Injiza Izina: Cyangwa Ahatanditseho Kuri"
 msgid ""
 "\n"
 " Please enter a mail address or some other\n"
-msgstr "Injiza a Ubutumwa Aderesi Cyangwa"
+msgstr ""
+"\n"
+"Injiza a Ubutumwa Aderesi Cyangwa\n"
 
 #. #define MEANS_TO_CONTACT_FOR_RESPONSE
 #: LYMessages.c:680
 #, fuzzy
 msgid " means to contact you, if you desire a response.\n"
-msgstr "Kuri Umuntu NIBA a"
+msgstr "Kuri Umuntu NIBA a\n"
 
 #: LYMessages.c:681
 #, fuzzy
 msgid ""
 "\n"
 " Please enter a subject line.\n"
-msgstr "Injiza a Ikivugwaho Umurongo"
+msgstr ""
+"\n"
+"Injiza a Ikivugwaho Umurongo\n"
 
 #. #define ENTER_ADDRESS_FOR_CC
 #: LYMessages.c:683
@@ -2525,12 +2524,14 @@ msgstr "Injiza a Ikivugwaho Umurongo"
 msgid ""
 "\n"
 " Enter a mail address for a CC of your message.\n"
-msgstr "a Ubutumwa Aderesi kugirango a Bya Ubutumwa"
+msgstr ""
+"\n"
+"a Ubutumwa Aderesi kugirango a Bya Ubutumwa\n"
 
 #: LYMessages.c:684
 #, fuzzy
 msgid " (Leave blank if you don't want a copy.)\n"
-msgstr "(Ahatanditseho NIBA a Gukoporora"
+msgstr "(Ahatanditseho NIBA a Gukoporora\n"
 
 #: LYMessages.c:685
 #, fuzzy
@@ -2538,33 +2539,42 @@ msgid ""
 "\n"
 " Please review the message body:\n"
 "\n"
-msgstr "Isubiramo i Ubutumwa Umubiri"
+msgstr ""
+"\n"
+"Isubiramo i Ubutumwa Umubiri\n"
+"\n"
 
 #: LYMessages.c:686
 #, fuzzy
 msgid ""
 "\n"
 "Press RETURN to continue: "
-msgstr "Kuri urifuzagukomeza"
+msgstr ""
+"\n"
+"Kuri urifuzagukomeza"
 
 #: LYMessages.c:687
 #, fuzzy
 msgid ""
 "\n"
 "Press RETURN to clean up: "
-msgstr "Kuri GUSUKURA Hejuru"
+msgstr ""
+"\n"
+"Kuri GUSUKURA Hejuru"
 
 #: LYMessages.c:688
 #, fuzzy
 msgid " Use Control-U to erase the default.\n"
-msgstr "U Kuri i Mburabuzi"
+msgstr "U Kuri i Mburabuzi\n"
 
 #: LYMessages.c:689
 #, fuzzy
 msgid ""
 "\n"
 " Please enter your message below."
-msgstr "Injiza Ubutumwa munsi"
+msgstr ""
+"\n"
+"Injiza Ubutumwa munsi"
 
 #. #define ENTER_PERIOD_WHEN_DONE_A
 #: LYMessages.c:691 src/LYNews.c:357
@@ -2572,7 +2582,9 @@ msgstr "Injiza Ubutumwa munsi"
 msgid ""
 "\n"
 " When you are done, press enter and put a single period (.)"
-msgstr "Byakozwe Kanda Injiza Na Gushyira a UMWE Igihe"
+msgstr ""
+"\n"
+"Byakozwe Kanda Injiza Na Gushyira a UMWE Igihe"
 
 #. #define ENTER_PERIOD_WHEN_DONE_B
 #: LYMessages.c:693 src/LYNews.c:358
@@ -2580,7 +2592,9 @@ msgstr "Byakozwe Kanda Injiza Na Gushyira a UMWE Igihe"
 msgid ""
 "\n"
 " on a line and press enter again."
-msgstr "ku a Umurongo Na Kanda Injiza"
+msgstr ""
+"\n"
+"ku a Umurongo Na Kanda Injiza"
 
 #. Cookies messages
 #. #define ADVANCED_COOKIE_CONFIRMATION
@@ -2666,7 +2680,7 @@ msgstr "(Izina:"
 msgid "(No value.)"
 msgstr "(Agaciro"
 
-#: LYMessages.c:716 src/LYOptions.c:2403
+#: LYMessages.c:716 src/LYOptions.c:2402
 msgid "None"
 msgstr "Ntacyo"
 
@@ -2882,7 +2896,9 @@ msgstr "Umubarendanga"
 msgid ""
 "\n"
 "This is a searchable index of a CSO database.\n"
-msgstr "ni a Umubarendanga Bya a Ububikoshingiro"
+msgstr ""
+"\n"
+"ni a Umubarendanga Bya a Ububikoshingiro\n"
 
 #: LYMessages.c:768
 msgid "CSO Search Results"
@@ -2891,21 +2907,25 @@ msgstr ""
 #: LYMessages.c:769
 #, fuzzy, c-format
 msgid "Seek fail on %s\n"
-msgstr "ku"
+msgstr "ku\n"
 
 #: LYMessages.c:770
 #, fuzzy
 msgid ""
 "\n"
 "Press the 's' key and enter search keywords.\n"
-msgstr "i Urufunguzo Na Injiza Gushaka Amagambo fatizo"
+msgstr ""
+"\n"
+"i Urufunguzo Na Injiza Gushaka Amagambo fatizo\n"
 
 #: LYMessages.c:771
 #, fuzzy
 msgid ""
 "\n"
 "This is a searchable Gopher index.\n"
-msgstr "ni a Umubarendanga"
+msgstr ""
+"\n"
+"ni a Umubarendanga\n"
 
 #: LYMessages.c:772
 #, fuzzy
@@ -2946,40 +2966,28 @@ msgstr "Kubaza... Yoherejwe: Tegereza kugirango"
 msgid ""
 "\n"
 "Please enter search keywords.\n"
-msgstr "Injiza Gushaka Amagambo fatizo"
+msgstr ""
+"\n"
+"Injiza Gushaka Amagambo fatizo\n"
 
 #: LYMessages.c:780
 #, fuzzy
 msgid ""
 "\n"
 "The keywords that you enter will allow you to search on a"
-msgstr "Amagambo fatizo Injiza Kwemerera Kuri Gushaka ku a"
+msgstr ""
+"\n"
+"Amagambo fatizo Injiza Kwemerera Kuri Gushaka ku a"
 
 #: LYMessages.c:781
 #, fuzzy
 msgid " person's name in the database.\n"
-msgstr "Izina: in i Ububikoshingiro"
+msgstr "Izina: in i Ububikoshingiro\n"
 
 #. HTNews.c
 #: LYMessages.c:784
-#, fuzzy
 msgid "Connection closed ???"
 msgstr ""
-"Project- Id- Version: basctl\n"
-"POT- Creation- Date: 2003- 12- 07 17: 13+ 02\n"
-"PO- Revision- Date: 2004- 11- 04 10: 13- 0700\n"
-"Last- Translator: Language- Team:< en@ li. org> MIME- Version: 1. 0\n"
-"Content- Type: text/ plain; charset= UTF- 8\n"
-"Content- Transfer- Encoding: 8bit\n"
-"X- Generator: KBabel 1. 0\n"
-". Project- Id- Version: basctl\n"
-"POT- Creation- Date: 2003- 12- 07 17: 13+ 02\n"
-"PO- Revision- Date: 2004- 11- 04 10: 13- 0700\n"
-"Last- Translator: Language- Team:< en@ li. org> MIME- Version: 1. 0\n"
-"Content- Type: text/ plain; charset= UTF- 8\n"
-"Content- Transfer- Encoding: 8bit\n"
-"X- Generator: KBabel 1. 0\n"
-"."
 
 #: LYMessages.c:785
 #, fuzzy
@@ -2995,25 +3003,17 @@ msgstr "Umukiriya OYA Gushigikira kugirango Kuri Amakuru Na:"
 #: LYMessages.c:789
 #, fuzzy, c-format
 msgid "Style %d `%s' SGML:%s.  Font %s %.1f point.\n"
-msgstr "Akadomo"
+msgstr "Akadomo\n"
 
 #: LYMessages.c:791
-#, fuzzy, c-format
+#, c-format
 msgid "\tAlign=%d, %d tabs. (%.0f before, %.0f after)\n"
 msgstr ""
-"Project- Id- Version: basctl\n"
-"POT- Creation- Date: 2003- 12- 07 17: 13+ 02\n"
-"PO- Revision- Date: 2004- 11- 04 10: 13- 0700\n"
-"Last- Translator: Language- Team:< en@ li. org> MIME- Version: 1. 0\n"
-"Content- Type: text/ plain; charset= UTF- 8\n"
-"Content- Transfer- Encoding: 8bit\n"
-"X- Generator: KBabel 1. 0\n"
-"."
 
 #: LYMessages.c:792
 #, fuzzy, c-format
 msgid "\t\tTab kind=%d at %.0f\n"
-msgstr "ku"
+msgstr "ku\n"
 
 #. HTTP.c
 #: LYMessages.c:795
@@ -3071,7 +3071,7 @@ msgstr "Byuzuye"
 #: LYMessages.c:809
 #, fuzzy, c-format
 msgid "Error processing line %d of %s\n"
-msgstr "Inonosora Umurongo Bya"
+msgstr "Inonosora Umurongo Bya\n"
 
 #. Lynx internal page titles
 #: LYMessages.c:812
@@ -3213,7 +3213,7 @@ msgstr "Ibyatanzwe Nka ku buryo bwikora Gukusanya Ryari: iyi Gukoporora Bya"
 #: LYMessages.c:851
 #, fuzzy
 msgid "  C)reate  D)ownload  E)dit  F)ull menu  M)odify  R)emove  T)ag  U)pload     \n"
-msgstr "C E Ibikubiyemo U"
+msgstr "C E Ibikubiyemo U\n"
 
 #: LYMessages.c:852
 #, fuzzy
@@ -3268,7 +3268,7 @@ msgstr "OYA"
 #: LYMessages.c:790
 #, fuzzy, c-format
 msgid "\tIndents: first=%.0f others=%.0f, Height=%.1f Desc=%.1f\n"
-msgstr "Itangira Ibindi"
+msgstr "Itangira Ibindi\n"
 
 #: WWW/Library/Implementation/HTAABrow.c:626
 #, fuzzy, c-format
@@ -3320,12 +3320,12 @@ msgstr ""
 #: WWW/Library/Implementation/HTAccess.c:1075
 #, fuzzy, c-format
 msgid "**** HTAccess: socket or file number returned by obsolete load routine!\n"
-msgstr "****Cyangwa IDOSIYE Umubare ku Ibirimo"
+msgstr "****Cyangwa IDOSIYE Umubare ku Ibirimo\n"
 
 #: WWW/Library/Implementation/HTAccess.c:1077
 #, fuzzy, c-format
 msgid "**** HTAccess: Internal software error.  Please mail lynx-dev@nongnu.org!\n"
-msgstr "****Ikosa Ubutumwa Cyuzuye"
+msgstr "****Ikosa Ubutumwa Cyuzuye\n"
 
 #: WWW/Library/Implementation/HTAccess.c:1078
 #, c-format
@@ -3453,14 +3453,18 @@ msgstr "kugirango"
 msgid ""
 "\n"
 "No articles in this group.\n"
-msgstr "in iyi Itsinda"
+msgstr ""
+"\n"
+"in iyi Itsinda\n"
 
 #: WWW/Library/Implementation/HTNews.c:1773
 #, fuzzy
 msgid ""
 "\n"
 "No articles in this range.\n"
-msgstr "in iyi Urutonde"
+msgstr ""
+"\n"
+"in iyi Urutonde\n"
 
 #.
 #. * Set window title.
@@ -3480,7 +3484,10 @@ msgid ""
 "\n"
 "There are about %d articles currently available in %s, IDs as follows:\n"
 "\n"
-msgstr "Ibyerekeye Bihari in Nka"
+msgstr ""
+"\n"
+"Ibyerekeye Bihari in Nka\n"
+"\n"
 
 #: WWW/Library/Implementation/HTNews.c:1884
 #, fuzzy
@@ -3752,7 +3759,7 @@ msgstr "Bya Ibikubiyemo Ukoresha:"
 #: WWW/Library/Implementation/HTTP.c:1962
 #, fuzzy
 msgid "Have POST content.  Treating Permanent Redirection as Temporary.\n"
-msgstr "Ibikubiyemo Nka"
+msgstr "Ibikubiyemo Nka\n"
 
 #: WWW/Library/Implementation/HTTP.c:2004
 #, fuzzy
@@ -3838,7 +3845,10 @@ msgstr "(Icyabitswe Kugaragaza"
 msgid ""
 "\n"
 "Long Header record, can't display\n"
-msgstr "Icyabitswe"
+msgstr ""
+"\n"
+"Icyabitswe\n"
+"\n"
 
 #: WWW/Library/Implementation/HTWAIS.c:572
 msgid ""
@@ -3851,14 +3861,18 @@ msgstr ""
 msgid ""
 "\n"
 "Headline record, can't display\n"
-msgstr "Icyabitswe"
+msgstr ""
+"\n"
+"Icyabitswe\n"
 
 #: WWW/Library/Implementation/HTWAIS.c:589
 #, fuzzy
 msgid ""
 "\n"
 "Code record, can't display\n"
-msgstr "Icyabitswe"
+msgstr ""
+"\n"
+"Icyabitswe\n"
 
 #: WWW/Library/Implementation/HTWAIS.c:693
 #, fuzzy
@@ -3887,7 +3901,9 @@ msgstr ""
 msgid ""
 "\n"
 "Enter the 's'earch command and then specify search words.\n"
-msgstr "i Komandi: Na Hanyuma Gushaka Amagambo"
+msgstr ""
+"\n"
+"i Komandi: Na Hanyuma Gushaka Amagambo\n"
 
 #: WWW/Library/Implementation/HTWAIS.c:833
 #, fuzzy
@@ -3940,7 +3956,7 @@ msgstr "Inyandiko"
 #: WWW/Library/Implementation/HTWAIS.c:1028
 #, fuzzy
 msgid "No text was returned!\n"
-msgstr "Umwandiko"
+msgstr "Umwandiko\n"
 
 #: WWW/Library/Implementation/HTWSRC.c:296
 #, fuzzy
@@ -4116,32 +4132,32 @@ msgstr "Bayite"
 #. * If we know the total size of the file, we can compute
 #. * a percentage, and show a corresponding progress bar.
 #.
-#: src/HTAlert.c:300 src/HTAlert.c:323
+#: src/HTAlert.c:300 src/HTAlert.c:324
 #, fuzzy, c-format
 msgid "Read %s of data"
 msgstr "Bya Ibyatanzwe"
 
-#: src/HTAlert.c:320
+#: src/HTAlert.c:321
 #, fuzzy, c-format
 msgid "Read %s of %s of data"
 msgstr "Bya Bya Ibyatanzwe"
 
-#: src/HTAlert.c:329
+#: src/HTAlert.c:330
 #, fuzzy, c-format
 msgid ", %s/sec"
 msgstr ",%s/isogonda"
 
-#: src/HTAlert.c:341
+#: src/HTAlert.c:342
 #, fuzzy, c-format
 msgid " (stalled for %s)"
 msgstr "(kugirango"
 
-#: src/HTAlert.c:345
+#: src/HTAlert.c:346
 #, c-format
 msgid ", ETA %s"
 msgstr ""
 
-#: src/HTAlert.c:367
+#: src/HTAlert.c:368
 #, fuzzy
 msgid " (Press 'z' to abort)"
 msgstr "(Kuri Kureka"
@@ -4171,11 +4187,11 @@ msgstr "(Kuri Kureka"
 #. * Lynx will also accept y Y n N as responses unless there is a conflict
 #. * with the first letter of the "yes" or "no" translation.
 #.
-#: src/HTAlert.c:405 src/HTAlert.c:453
+#: src/HTAlert.c:406 src/HTAlert.c:454
 msgid "yes"
 msgstr "Yego"
 
-#: src/HTAlert.c:408 src/HTAlert.c:454
+#: src/HTAlert.c:409 src/HTAlert.c:455
 #, fuzzy
 msgid "no"
 msgstr "Oya"
@@ -4196,7 +4212,7 @@ msgstr "Oya"
 #. * (Y/N/Always/neVer)              - English (original)
 #. * (O/N/Toujours/Jamais)           - French
 #.
-#: src/HTAlert.c:910
+#: src/HTAlert.c:911
 msgid "Y/N/A/V"
 msgstr ""
 
@@ -4248,7 +4264,7 @@ msgstr ""
 msgid ""
 "     You can delete links by the 'R' key<br>\n"
 "<ol>\n"
-msgstr "Gusiba amahuza ku i Urufunguzo"
+msgstr "Gusiba amahuza ku i Urufunguzo\n"
 
 #: src/LYBookmark.c:374
 #, fuzzy
@@ -4311,27 +4327,27 @@ msgstr "iyi Ihuza"
 #: src/LYCgi.c:717
 #, fuzzy
 msgid "It provides state of the art CGI script support.\n"
-msgstr "Leta Bya i IYANDIKA Gushigikira"
+msgstr "Leta Bya i IYANDIKA Gushigikira\n"
 
 #: src/LYClean.c:122
 #, fuzzy
 msgid "Exiting via interrupt:"
 msgstr "Biturutse Hagarikira aho"
 
-#: src/LYCookie.c:2460
+#: src/LYCookie.c:2461
 #, fuzzy
 msgid "(from a previous session)"
 msgstr "(Bivuye a Ibanjirije Umukoro"
 
-#: src/LYCookie.c:2521
+#: src/LYCookie.c:2522
 msgid "Maximum Gobble Date:"
 msgstr ""
 
-#: src/LYCookie.c:2561
+#: src/LYCookie.c:2562
 msgid "Internal"
 msgstr "By'imbere"
 
-#: src/LYCookie.c:2562
+#: src/LYCookie.c:2563
 #, fuzzy
 msgid "cookie_domain_flag_set error, aborting program"
 msgstr "Ikosa Porogaramu"
@@ -4341,37 +4357,39 @@ msgstr "Ikosa Porogaramu"
 msgid "Terminal initialisation failed - unknown terminal type?"
 msgstr "Byanze Kitazwi Ubwoko"
 
-#: src/LYCurses.c:1538
+#: src/LYCurses.c:1546
 msgid "Terminal ="
 msgstr ""
 
-#: src/LYCurses.c:1542
+#: src/LYCurses.c:1550
 #, fuzzy
 msgid "You must use a vt100, 200, etc. terminal with this program."
 msgstr "Gukoresha a 200 Na: iyi Porogaramu"
 
-#: src/LYCurses.c:1591
+#: src/LYCurses.c:1599
 #, fuzzy
 msgid "Your Terminal type is unknown!"
 msgstr "Ubwoko ni Kitazwi"
 
-#: src/LYCurses.c:1592
+#: src/LYCurses.c:1600
 #, fuzzy
 msgid "Enter a terminal type:"
 msgstr "a Ubwoko"
 
-#: src/LYCurses.c:1606
+#: src/LYCurses.c:1614
 msgid "TERMINAL TYPE IS SET TO"
 msgstr ""
 
-#: src/LYCurses.c:2111
+#: src/LYCurses.c:2119
 #, fuzzy, c-format
 msgid ""
 "\n"
 "A Fatal error has occurred in %s Ver. %s\n"
-msgstr "A Ikosa in"
+msgstr ""
+"\n"
+"A Ikosa in\n"
 
-#: src/LYCurses.c:2114
+#: src/LYCurses.c:2122
 #, fuzzy, c-format
 msgid ""
 "\n"
@@ -4381,8 +4399,9 @@ msgid ""
 "operating system name with version number, the TCPIP implementation, the\n"
 "TRACEBACK if it can be captured, and any other relevant information.\n"
 msgstr ""
+"\n"
 "Sisitemu umuyobozi/ uyobora Kuri Kwemeza a Na Kuri i Urutonde Raporo Bya i Komandi: Na Cyangwa i Sisitemu Izina: Na: Verisiyo "
-"Umubare i NIBA Na Ikindi Byagombwa Ibisobanuro"
+"Umubare i NIBA Na Ikindi Byagombwa Ibisobanuro\n"
 
 #: src/LYEdit.c:266
 #, fuzzy, c-format
@@ -4806,7 +4825,7 @@ msgstr "Mweretsi"
 #: src/LYLocal.c:1940
 #, fuzzy, c-format
 msgid "Executing %s "
-msgstr "Gukora: %s%s"
+msgstr "Gukora: %s"
 
 #: src/LYLocal.c:1943
 #, fuzzy
@@ -4892,7 +4911,7 @@ msgstr ""
 #: src/LYMail.c:1006
 #, fuzzy, c-format
 msgid "The link   %s :?: %s \n"
-msgstr "Ihuza"
+msgstr "Ihuza\n"
 
 #: src/LYMail.c:1008
 #, c-format
@@ -4902,7 +4921,7 @@ msgstr ""
 #: src/LYMail.c:1009
 #, fuzzy, c-format
 msgid "in the file \"%s\" called \"%s\"\n"
-msgstr "in i IDOSIYE"
+msgstr "in i IDOSIYE\n"
 
 #: src/LYMail.c:1010
 #, fuzzy
@@ -4944,7 +4963,10 @@ msgid ""
 "\n"
 "Configuration file \"%s\" is not available.\n"
 "\n"
-msgstr "IDOSIYE ni OYA Bihari"
+msgstr ""
+"\n"
+"IDOSIYE ni OYA Bihari\n"
+"\n"
 
 #: src/LYMain.c:1471
 #, fuzzy, c-format
@@ -4952,7 +4974,9 @@ msgid ""
 "\n"
 "Lynx character sets not declared.\n"
 "\n"
-msgstr "Inyuguti OYA"
+msgstr ""
+"\n"
+"Inyuguti OYA\n"
 
 #: src/LYMain.c:1500
 #, fuzzy, c-format
@@ -4960,7 +4984,9 @@ msgid ""
 "\n"
 "Lynx edit map not declared.\n"
 "\n"
-msgstr "Guhindura OYA"
+msgstr ""
+"\n"
+"Guhindura OYA\n"
 
 #: src/LYMain.c:1576
 #, fuzzy, c-format
@@ -4968,7 +4994,9 @@ msgid ""
 "\n"
 "Lynx file \"%s\" is not available.\n"
 "\n"
-msgstr "IDOSIYE ni OYA Bihari"
+msgstr ""
+"\n"
+"IDOSIYE ni OYA Bihari\n"
 
 #: src/LYMain.c:1651
 #, c-format
@@ -5003,7 +5031,7 @@ msgstr "Verisiyo"
 #: src/LYMain.c:3216
 #, fuzzy, c-format
 msgid "Built on %s %s %s\n"
-msgstr "ku"
+msgstr "ku\n"
 
 #: src/LYMain.c:3238
 msgid "Copyrights held by the Lynx Developers Group,"
@@ -5027,7 +5055,7 @@ msgstr "Mucukumbuzi."
 #: src/LYMain.c:4054
 #, fuzzy, c-format
 msgid "USAGE: %s [options] [file]\n"
-msgstr "Amahitamo IDOSIYE"
+msgstr "Amahitamo IDOSIYE\n"
 
 #: src/LYMain.c:4055
 #, c-format
@@ -5103,7 +5131,7 @@ msgstr "Inyandiko KIGEZWEHO Amagenamiterere"
 #: src/LYMainLoop.c:6558
 #, fuzzy, c-format
 msgid "Fatal error - could not open output file %s\n"
-msgstr "Ikosa OYA Gufungura Ibisohoka IDOSIYE"
+msgstr "Ikosa OYA Gufungura Ibisohoka IDOSIYE\n"
 
 #: src/LYMainLoop.c:6901
 msgid "TABLE center enable."
@@ -5173,7 +5201,9 @@ msgid ""
 "\n"
 "\n"
 " Please provide your mail address for the From: header\n"
-msgstr "Ubutumwa Aderesi kugirango i"
+msgstr ""
+"\n"
+"Ubutumwa Aderesi kugirango i\n"
 
 #.
 #. * Get the Subject header, offering the current document's title as the
@@ -5185,7 +5215,9 @@ msgid ""
 "\n"
 "\n"
 " Please provide or edit the Subject: header\n"
-msgstr "Cyangwa Guhindura i"
+msgstr ""
+"\n"
+"Cyangwa Guhindura i\n"
 
 #: src/LYNews.c:299
 #, fuzzy
@@ -5193,7 +5225,9 @@ msgid ""
 "\n"
 "\n"
 " Please provide or edit the Organization: header\n"
-msgstr "Cyangwa Guhindura i"
+msgstr ""
+"\n"
+"Cyangwa Guhindura i\n"
 
 #.
 #. * Use the built in line editior.
@@ -5204,7 +5238,10 @@ msgid ""
 "\n"
 "\n"
 " Please enter your message below."
-msgstr "Injiza Ubutumwa munsi"
+msgstr ""
+"\n"
+"\n"
+"Injiza Ubutumwa munsi"
 
 #: src/LYNews.c:402
 #, fuzzy
@@ -5221,339 +5258,339 @@ msgstr "Isubiramo Guhindura Idosiye"
 msgid "B)ookmark file: "
 msgstr "IDOSIYE"
 
-#: src/LYOptions.c:2128 src/LYOptions.c:2135
+#: src/LYOptions.c:2127 src/LYOptions.c:2134
 msgid "ON"
 msgstr ""
 
 #. verbose_img variable
-#: src/LYOptions.c:2129 src/LYOptions.c:2134 src/LYOptions.c:2286 src/LYOptions.c:2297
+#: src/LYOptions.c:2128 src/LYOptions.c:2133 src/LYOptions.c:2285 src/LYOptions.c:2296
 msgid "OFF"
 msgstr ""
 
-#: src/LYOptions.c:2130
+#: src/LYOptions.c:2129
 msgid "NEVER"
 msgstr ""
 
-#: src/LYOptions.c:2131
+#: src/LYOptions.c:2130
 msgid "ALWAYS"
 msgstr ""
 
-#: src/LYOptions.c:2147 src/LYOptions.c:2278
+#: src/LYOptions.c:2146 src/LYOptions.c:2277
 msgid "ignore"
 msgstr ""
 
-#: src/LYOptions.c:2148
+#: src/LYOptions.c:2147
 msgid "ask user"
 msgstr ""
 
-#: src/LYOptions.c:2149
+#: src/LYOptions.c:2148
 msgid "accept all"
 msgstr ""
 
-#: src/LYOptions.c:2161
+#: src/LYOptions.c:2160
 msgid "ALWAYS OFF"
 msgstr ""
 
-#: src/LYOptions.c:2162
+#: src/LYOptions.c:2161
 msgid "FOR LOCAL FILES ONLY"
 msgstr ""
 
-#: src/LYOptions.c:2164
+#: src/LYOptions.c:2163
 msgid "ALWAYS ON"
 msgstr ""
 
-#: src/LYOptions.c:2176
+#: src/LYOptions.c:2175
 msgid "Numbers act as arrows"
 msgstr ""
 
-#: src/LYOptions.c:2178
+#: src/LYOptions.c:2177
 msgid "Links are numbered"
 msgstr ""
 
-#: src/LYOptions.c:2181
+#: src/LYOptions.c:2180
 msgid "Links and form fields are numbered"
 msgstr ""
 
-#: src/LYOptions.c:2184
+#: src/LYOptions.c:2183
 msgid "Form fields are numbered"
 msgstr ""
 
-#: src/LYOptions.c:2198
+#: src/LYOptions.c:2197
 msgid "Case insensitive"
 msgstr ""
 
-#: src/LYOptions.c:2199
+#: src/LYOptions.c:2198
 msgid "Case sensitive"
 msgstr ""
 
-#: src/LYOptions.c:2223
+#: src/LYOptions.c:2222
 msgid "prompt normally"
 msgstr ""
 
-#: src/LYOptions.c:2224
+#: src/LYOptions.c:2223
 msgid "force yes-response"
 msgstr ""
 
-#: src/LYOptions.c:2225
+#: src/LYOptions.c:2224
 msgid "force no-response"
 msgstr ""
 
-#: src/LYOptions.c:2243
+#: src/LYOptions.c:2242
 #, fuzzy
 msgid "Novice"
 msgstr "Ntacyo"
 
-#: src/LYOptions.c:2244
+#: src/LYOptions.c:2243
 #, fuzzy
 msgid "Intermediate"
 msgstr "By'imbere"
 
-#: src/LYOptions.c:2245
+#: src/LYOptions.c:2244
 msgid "Advanced"
 msgstr ""
 
-#: src/LYOptions.c:2254
+#: src/LYOptions.c:2253
 msgid "By First Visit"
 msgstr ""
 
-#: src/LYOptions.c:2256
+#: src/LYOptions.c:2255
 msgid "By First Visit Reversed"
 msgstr ""
 
-#: src/LYOptions.c:2257
+#: src/LYOptions.c:2256
 msgid "As Visit Tree"
 msgstr ""
 
-#: src/LYOptions.c:2258
+#: src/LYOptions.c:2257
 msgid "By Last Visit"
 msgstr ""
 
-#: src/LYOptions.c:2260
+#: src/LYOptions.c:2259
 msgid "By Last Visit Reversed"
 msgstr ""
 
 #. Old_DTD variable
-#: src/LYOptions.c:2271
+#: src/LYOptions.c:2270
 msgid "relaxed (TagSoup mode)"
 msgstr ""
 
-#: src/LYOptions.c:2272
+#: src/LYOptions.c:2271
 msgid "strict (SortaSGML mode)"
 msgstr ""
 
-#: src/LYOptions.c:2279
+#: src/LYOptions.c:2278
 msgid "as labels"
 msgstr ""
 
-#: src/LYOptions.c:2280
+#: src/LYOptions.c:2279
 #, fuzzy
 msgid "as links"
 msgstr "iyi Ihuza"
 
-#: src/LYOptions.c:2287
+#: src/LYOptions.c:2286
 #, fuzzy
 msgid "show filename"
 msgstr "(IDOSIYE Izina:"
 
-#: src/LYOptions.c:2298
+#: src/LYOptions.c:2297
 msgid "STANDARD"
 msgstr ""
 
-#: src/LYOptions.c:2299
+#: src/LYOptions.c:2298
 msgid "ADVANCED"
 msgstr ""
 
 # svx/source\gallery2\gallery.src:RID_SVXDLG_GALLERY_CBX.text
-#: src/LYOptions.c:2330
+#: src/LYOptions.c:2329
 #, fuzzy
 msgid "Directories first"
 msgstr "Ububiko bwungirije"
 
-#: src/LYOptions.c:2331
+#: src/LYOptions.c:2330
 #, fuzzy
 msgid "Files first"
 msgstr "Itangira"
 
-#: src/LYOptions.c:2332
+#: src/LYOptions.c:2331
 #, fuzzy
 msgid "Mixed style"
 msgstr "Guhindura IMISUSIRE"
 
-#: src/LYOptions.c:2340 src/LYOptions.c:2360
+#: src/LYOptions.c:2339 src/LYOptions.c:2359
 #, fuzzy
 msgid "By Name"
 msgstr "Izina:"
 
-#: src/LYOptions.c:2341 src/LYOptions.c:2361
+#: src/LYOptions.c:2340 src/LYOptions.c:2360
 msgid "By Type"
 msgstr ""
 
-#: src/LYOptions.c:2342 src/LYOptions.c:2362
+#: src/LYOptions.c:2341 src/LYOptions.c:2361
 msgid "By Size"
 msgstr ""
 
-#: src/LYOptions.c:2343 src/LYOptions.c:2363
+#: src/LYOptions.c:2342 src/LYOptions.c:2362
 #, fuzzy
 msgid "By Date"
 msgstr "Itariki:"
 
-#: src/LYOptions.c:2344
+#: src/LYOptions.c:2343
 msgid "By Mode"
 msgstr ""
 
-#: src/LYOptions.c:2346
+#: src/LYOptions.c:2345
 msgid "By User"
 msgstr ""
 
-#: src/LYOptions.c:2347
+#: src/LYOptions.c:2346
 #, fuzzy
 msgid "By Group"
 msgstr "Itsinda"
 
-#: src/LYOptions.c:2372
+#: src/LYOptions.c:2371
 msgid "Do not show rate"
 msgstr ""
 
-#: src/LYOptions.c:2373 src/LYOptions.c:2374
+#: src/LYOptions.c:2372 src/LYOptions.c:2373
 #, fuzzy, c-format
 msgid "Show %s/sec rate"
 msgstr "Igipimo"
 
-#: src/LYOptions.c:2376 src/LYOptions.c:2377
+#: src/LYOptions.c:2375 src/LYOptions.c:2376
 #, c-format
 msgid "Show %s/sec, ETA"
 msgstr ""
 
-#: src/LYOptions.c:2380
+#: src/LYOptions.c:2379
 #, fuzzy
 msgid "Show progressbar"
 msgstr "Agafashsagenda"
 
-#: src/LYOptions.c:2392
+#: src/LYOptions.c:2391
 msgid "Accept lynx's internal types"
 msgstr ""
 
-#: src/LYOptions.c:2393
+#: src/LYOptions.c:2392
 msgid "Also accept lynx.cfg's types"
 msgstr ""
 
-#: src/LYOptions.c:2394
+#: src/LYOptions.c:2393
 msgid "Also accept user's types"
 msgstr ""
 
-#: src/LYOptions.c:2395
+#: src/LYOptions.c:2394
 msgid "Also accept system's types"
 msgstr ""
 
-#: src/LYOptions.c:2396
+#: src/LYOptions.c:2395
 #, fuzzy
 msgid "Accept all types"
 msgstr "emera ibihindutse/ibyahindutse"
 
-#: src/LYOptions.c:2405
+#: src/LYOptions.c:2404
 msgid "gzip"
 msgstr ""
 
-#: src/LYOptions.c:2406
+#: src/LYOptions.c:2405
 msgid "deflate"
 msgstr ""
 
-#: src/LYOptions.c:2409
+#: src/LYOptions.c:2408
 msgid "compress"
 msgstr ""
 
-#: src/LYOptions.c:2412
+#: src/LYOptions.c:2411
 msgid "bzip2"
 msgstr ""
 
-#: src/LYOptions.c:2414
+#: src/LYOptions.c:2413
 msgid "All"
 msgstr ""
 
-#: src/LYOptions.c:2682 src/LYOptions.c:2706
+#: src/LYOptions.c:2681 src/LYOptions.c:2705
 #, fuzzy, c-format
 msgid "Use %s to invoke the Options menu!"
 msgstr "Kuri i Ibikubiyemo"
 
-#: src/LYOptions.c:3478
+#: src/LYOptions.c:3477
 #, fuzzy
 msgid "(options marked with (!) will not be saved)"
 msgstr "(Amahitamo cy/ byagarajwe Na: OYA"
 
-#: src/LYOptions.c:3486
+#: src/LYOptions.c:3485
 msgid "General Preferences"
 msgstr ""
 
 #. ***************************************************************
 #. User Mode: SELECT
-#: src/LYOptions.c:3490
+#: src/LYOptions.c:3489
 #, fuzzy
 msgid "User mode"
 msgstr "Ubwoko"
 
 #. Editor: INPUT
-#: src/LYOptions.c:3496
+#: src/LYOptions.c:3495
 msgid "Editor"
 msgstr "umwanditsi"
 
 #. Search Type: SELECT
-#: src/LYOptions.c:3501
+#: src/LYOptions.c:3500
 #, fuzzy
 msgid "Type of Search"
 msgstr "Bya"
 
-#: src/LYOptions.c:3506
+#: src/LYOptions.c:3505
 msgid "Security and Privacy"
 msgstr ""
 
 #. ***************************************************************
 #. Cookies: SELECT
-#: src/LYOptions.c:3510
+#: src/LYOptions.c:3509
 msgid "Cookies"
 msgstr "Cookie"
 
 #. Cookie Prompting: SELECT
-#: src/LYOptions.c:3524
+#: src/LYOptions.c:3523
 msgid "Invalid-Cookie Prompting"
 msgstr ""
 
 #. SSL Prompting: SELECT
-#: src/LYOptions.c:3531
+#: src/LYOptions.c:3530
 msgid "SSL Prompting"
 msgstr ""
 
-#: src/LYOptions.c:3537
+#: src/LYOptions.c:3536
 msgid "Keyboard Input"
 msgstr ""
 
 #. ***************************************************************
 #. Keypad Mode: SELECT
-#: src/LYOptions.c:3541
+#: src/LYOptions.c:3540
 #, fuzzy
 msgid "Keypad mode"
 msgstr "Ubwoko"
 
 #. Emacs keys: ON/OFF
-#: src/LYOptions.c:3547
+#: src/LYOptions.c:3546
 #, fuzzy
 msgid "Emacs keys"
 msgstr "Utubuto"
 
 #. VI Keys: ON/OFF
-#: src/LYOptions.c:3553
+#: src/LYOptions.c:3552
 #, fuzzy
 msgid "VI keys"
 msgstr "Utubuto"
 
 #. Line edit style: SELECT
 #. well, at least 2 line edit styles available
-#: src/LYOptions.c:3560
+#: src/LYOptions.c:3559
 #, fuzzy
 msgid "Line edit style"
 msgstr "Guhindura IMISUSIRE"
 
 #. Keyboard layout: SELECT
-#: src/LYOptions.c:3572
+#: src/LYOptions.c:3571
 #, fuzzy
 msgid "Keyboard layout"
 msgstr "Imigaragarire"
@@ -5561,24 +5598,24 @@ msgstr "Imigaragarire"
 #.
 #. * Display and Character Set
 #.
-#: src/LYOptions.c:3586
+#: src/LYOptions.c:3585
 #, fuzzy
 msgid "Display and Character Set"
 msgstr "Na"
 
 #. Use locale-based character set: ON/OFF
-#: src/LYOptions.c:3591
+#: src/LYOptions.c:3590
 #, fuzzy
 msgid "Use locale-based character set"
 msgstr "Inyandiko Inyuguti Gushyiraho"
 
 #. Display Character Set: SELECT
-#: src/LYOptions.c:3600
+#: src/LYOptions.c:3599
 #, fuzzy
 msgid "Display character set"
 msgstr "Inyuguti Gushyiraho"
 
-#: src/LYOptions.c:3631
+#: src/LYOptions.c:3630
 #, fuzzy
 msgid "Assumed document character set"
 msgstr "Inyandiko Inyuguti Gushyiraho"
@@ -5588,71 +5625,71 @@ msgstr "Inyandiko Inyuguti Gushyiraho"
 #. * we split the header to make it more readable:
 #. * "CJK mode" for CJK display charsets, and "Raw 8-bit" for others.
 #.
-#: src/LYOptions.c:3651
+#: src/LYOptions.c:3650
 #, fuzzy
 msgid "CJK mode"
 msgstr "Ubwoko"
 
-#: src/LYOptions.c:3653
+#: src/LYOptions.c:3652
 #, fuzzy
 msgid "Raw 8-bit"
 msgstr "8"
 
 #. X Display: INPUT
-#: src/LYOptions.c:3661
+#: src/LYOptions.c:3660
 msgid "X Display"
 msgstr ""
 
 #.
 #. * Document Appearance
 #.
-#: src/LYOptions.c:3667
+#: src/LYOptions.c:3666
 msgid "Document Appearance"
 msgstr ""
 
-#: src/LYOptions.c:3673
+#: src/LYOptions.c:3672
 #, fuzzy
 msgid "Show color"
 msgstr "Ibara"
 
 #. Show cursor: ON/OFF
-#: src/LYOptions.c:3697
+#: src/LYOptions.c:3696
 #, fuzzy
 msgid "Show cursor"
 msgstr "indanga"
 
 #. Underline links: ON/OFF
-#: src/LYOptions.c:3703
+#: src/LYOptions.c:3702
 #, fuzzy
 msgid "Underline links"
 msgstr "amahuza"
 
 #. Show scrollbar: ON/OFF
-#: src/LYOptions.c:3710
+#: src/LYOptions.c:3709
 #, fuzzy
 msgid "Show scrollbar"
 msgstr "Agafashsagenda"
 
 #. Select Popups: ON/OFF
-#: src/LYOptions.c:3717
+#: src/LYOptions.c:3716
 #, fuzzy
 msgid "Popups for select fields"
 msgstr "kugirango Guhitamo Imyanya"
 
 #. HTML error recovery: SELECT
-#: src/LYOptions.c:3723
+#: src/LYOptions.c:3722
 #, fuzzy
 msgid "HTML error recovery"
 msgstr "Ikosa"
 
 #. Show Images: SELECT
-#: src/LYOptions.c:3729
+#: src/LYOptions.c:3728
 #, fuzzy
 msgid "Show images"
 msgstr "Ishusho"
 
 #. Verbose Images: ON/OFF
-#: src/LYOptions.c:3743
+#: src/LYOptions.c:3742
 #, fuzzy
 msgid "Verbose images"
 msgstr "Ishusho"
@@ -5660,48 +5697,48 @@ msgstr "Ishusho"
 #.
 #. * Headers Transferred to Remote Servers
 #.
-#: src/LYOptions.c:3751
+#: src/LYOptions.c:3750
 #, fuzzy
 msgid "Headers Transferred to Remote Servers"
 msgstr "Kuri"
 
 #. ***************************************************************
 #. Mail Address: INPUT
-#: src/LYOptions.c:3755
+#: src/LYOptions.c:3754
 #, fuzzy
 msgid "Personal mail address"
 msgstr "Ubutumwa Aderesi"
 
-#: src/LYOptions.c:3761
+#: src/LYOptions.c:3760
 #, fuzzy
 msgid "Password for anonymous ftp"
 msgstr "kugirango Amakuru Ubuturo"
 
 #. Preferred media type: SELECT
-#: src/LYOptions.c:3767
+#: src/LYOptions.c:3766
 #, fuzzy
 msgid "Preferred media type"
 msgstr "Bayite"
 
 #. Preferred encoding: SELECT
-#: src/LYOptions.c:3773
+#: src/LYOptions.c:3772
 #, fuzzy
 msgid "Preferred encoding"
 msgstr "Inyandiko Ururimi"
 
 #. Preferred Document Character Set: INPUT
-#: src/LYOptions.c:3779
+#: src/LYOptions.c:3778
 #, fuzzy
 msgid "Preferred document character set"
 msgstr "Inyandiko Inyuguti Gushyiraho"
 
 #. Preferred Document Language: INPUT
-#: src/LYOptions.c:3784
+#: src/LYOptions.c:3783
 #, fuzzy
 msgid "Preferred document language"
 msgstr "Inyandiko Ururimi"
 
-#: src/LYOptions.c:3790
+#: src/LYOptions.c:3789
 #, fuzzy
 msgid "User-Agent header"
 msgstr "Umutwempangano"
@@ -5709,46 +5746,46 @@ msgstr "Umutwempangano"
 #.
 #. * Listing and Accessing Files
 #.
-#: src/LYOptions.c:3798
+#: src/LYOptions.c:3797
 #, fuzzy
 msgid "Listing and Accessing Files"
 msgstr "Na"
 
 #. FTP sort: SELECT
-#: src/LYOptions.c:3803
+#: src/LYOptions.c:3802
 msgid "Use Passive FTP"
 msgstr ""
 
 #. FTP sort: SELECT
-#: src/LYOptions.c:3809
+#: src/LYOptions.c:3808
 #, fuzzy
 msgid "FTP sort criteria"
 msgstr "Ishungura Ibigenderwaho"
 
 #. Local Directory Sort: SELECT
-#: src/LYOptions.c:3817
+#: src/LYOptions.c:3816
 #, fuzzy
 msgid "Local directory sort criteria"
 msgstr "bushyinguro Ishungura Ibigenderwaho"
 
 #. Local Directory Order: SELECT
-#: src/LYOptions.c:3823
+#: src/LYOptions.c:3822
 #, fuzzy
 msgid "Local directory sort order"
 msgstr "bushyinguro Ishungura Itondekanya"
 
-#: src/LYOptions.c:3832
+#: src/LYOptions.c:3831
 #, fuzzy
 msgid "Show dot files"
 msgstr "Akadomo Idosiye"
 
-#: src/LYOptions.c:3840
+#: src/LYOptions.c:3839
 #, fuzzy
 msgid "Execution links"
 msgstr "amahuza"
 
 #. Show transfer rate: SELECT
-#: src/LYOptions.c:3860
+#: src/LYOptions.c:3859
 #, fuzzy
 msgid "Show transfer rate"
 msgstr "Igipimo"
@@ -5756,47 +5793,47 @@ msgstr "Igipimo"
 #.
 #. * Special Files and Screens
 #.
-#: src/LYOptions.c:3880
+#: src/LYOptions.c:3879
 #, fuzzy
 msgid "Special Files and Screens"
 msgstr "Na"
 
-#: src/LYOptions.c:3885
+#: src/LYOptions.c:3884
 #, fuzzy
 msgid "Multi-bookmarks"
 msgstr "Ibirango"
 
-#: src/LYOptions.c:3893
+#: src/LYOptions.c:3892
 #, fuzzy
 msgid "Review/edit Bookmarks files"
 msgstr "Guhindura Idosiye"
 
-#: src/LYOptions.c:3895
+#: src/LYOptions.c:3894
 #, fuzzy
 msgid "Goto multi-bookmark menu"
 msgstr "Akamenyetso Ibikubiyemo"
 
-#: src/LYOptions.c:3897
+#: src/LYOptions.c:3896
 #, fuzzy
 msgid "Bookmarks file"
 msgstr "IDOSIYE"
 
 #. Auto Session: ON/OFF
-#: src/LYOptions.c:3904
+#: src/LYOptions.c:3903
 msgid "Auto Session"
 msgstr ""
 
 #. Session File Menu: INPUT
-#: src/LYOptions.c:3910
+#: src/LYOptions.c:3909
 msgid "Session file"
 msgstr ""
 
 #. Visited Pages: SELECT
-#: src/LYOptions.c:3916
+#: src/LYOptions.c:3915
 msgid "Visited Pages"
 msgstr ""
 
-#: src/LYOptions.c:3921
+#: src/LYOptions.c:3920
 #, fuzzy
 msgid "View the file "
 msgstr "i IDOSIYE"
@@ -5804,7 +5841,7 @@ msgstr "i IDOSIYE"
 #: src/LYPrint.c:937
 #, fuzzy, c-format
 msgid " Print job complete.\n"
-msgstr "Byuzuye"
+msgstr "Byuzuye\n"
 
 #: src/LYPrint.c:1262
 msgid "Document:"
@@ -5886,7 +5923,7 @@ msgid ""
 "\n"
 "Here FOREGROUND and BACKGROUND must be one of:\n"
 "The special strings 'nocolor' or 'default', or\n"
-msgstr "in Iboneza IDOSIYE Umurongo Bya i Ifishi Na Bya Bidasanzwe Ikurikiranyanyuguti Cyangwa"
+msgstr "in Iboneza IDOSIYE Umurongo Bya i Ifishi Na Bya Bidasanzwe Ikurikiranyanyuguti Cyangwa\n"
 
 #: src/LYReadCFG.c:382
 #, fuzzy
@@ -5896,32 +5933,32 @@ msgstr "Umurongo"
 #: src/LYReadCFG.c:679
 #, fuzzy, c-format
 msgid "key remapping of %s to %s for %s failed\n"
-msgstr "Urufunguzo Bya Kuri kugirango"
+msgstr "Urufunguzo Bya Kuri kugirango\n"
 
 #: src/LYReadCFG.c:686
 #, fuzzy, c-format
 msgid "key remapping of %s to %s failed\n"
-msgstr "Urufunguzo Bya Kuri"
+msgstr "Urufunguzo Bya Kuri\n"
 
 #: src/LYReadCFG.c:707
 #, fuzzy, c-format
 msgid "invalid line-editor selection %s for key %s, selecting all\n"
-msgstr "Sibyo Umurongo Muhinduzi Ihitamo kugirango Urufunguzo"
+msgstr "Sibyo Umurongo Muhinduzi Ihitamo kugirango Urufunguzo\n"
 
 #: src/LYReadCFG.c:732 src/LYReadCFG.c:744
 #, fuzzy, c-format
 msgid "setting of line-editor binding for key %s (0x%x) to 0x%x for %s failed\n"
-msgstr "Igenamiterere Bya Umurongo Muhinduzi Bifatanya kugirango Urufunguzo Kuri kugirango"
+msgstr "Igenamiterere Bya Umurongo Muhinduzi Bifatanya kugirango Urufunguzo Kuri kugirango\n"
 
 #: src/LYReadCFG.c:748
 #, fuzzy, c-format
 msgid "setting of line-editor binding for key %s (0x%x) for %s failed\n"
-msgstr "Igenamiterere Bya Umurongo Muhinduzi Bifatanya kugirango Urufunguzo kugirango"
+msgstr "Igenamiterere Bya Umurongo Muhinduzi Bifatanya kugirango Urufunguzo kugirango\n"
 
 #: src/LYReadCFG.c:844
 #, fuzzy, c-format
 msgid "Lynx: cannot start, CERN rules file %s is not available\n"
-msgstr "Gutangira IDOSIYE ni OYA"
+msgstr "Gutangira IDOSIYE ni OYA\n"
 
 #: src/LYReadCFG.c:845
 #, fuzzy
@@ -5929,27 +5966,19 @@ msgid "(no name)"
 msgstr "(Oya Izina:"
 
 #: src/LYReadCFG.c:1877
-#, fuzzy, c-format
+#, c-format
 msgid "More than %d nested lynx.cfg includes -- perhaps there is a loop?!?\n"
 msgstr ""
-"Project- Id- Version: basctl\n"
-"POT- Creation- Date: 2003- 12- 07 17: 13+ 02\n"
-"PO- Revision- Date: 2004- 11- 04 10: 13- 0700\n"
-"Last- Translator: Language- Team:< en@ li. org> MIME- Version: 1. 0\n"
-"Content- Type: text/ plain; charset= UTF- 8\n"
-"Content- Transfer- Encoding: 8bit\n"
-"X- Generator: KBabel 1. 0\n"
-"."
 
 #: src/LYReadCFG.c:1879
 #, fuzzy, c-format
 msgid "Last attempted include was '%s',\n"
-msgstr "Gushyiramo"
+msgstr "Gushyiramo\n"
 
 #: src/LYReadCFG.c:1880
 #, fuzzy, c-format
 msgid "included from '%s'.\n"
-msgstr "Bivuye"
+msgstr "Bivuye\n"
 
 #: src/LYReadCFG.c:2288 src/LYReadCFG.c:2301 src/LYReadCFG.c:2359
 #, fuzzy
@@ -6243,7 +6272,7 @@ msgid ""
 "OBJECT:MONO:COLOR (ie em:bold:brightblue:white)\n"
 "where OBJECT is one of EM,STRONG,B,I,U,BLINK etc.\n"
 "\n"
-msgstr "IMISUSIRE in IDOSIYE Umurongo Bya i Ifishi UTSINDAGIYE Umweru ni Bya U"
+msgstr "IMISUSIRE in IDOSIYE Umurongo Bya i Ifishi UTSINDAGIYE Umweru ni Bya U\n"
 
 #: src/LYTraversal.c:108
 #, fuzzy
@@ -6256,17 +6285,8 @@ msgid "ERROR! - upload command is misconfigured"
 msgstr "Komandi: ni"
 
 #: src/LYUpload.c:96
-#, fuzzy
 msgid "Illegal redirection \"../\" found! Request ignored."
 msgstr ""
-"Project- Id- Version: basctl\n"
-"POT- Creation- Date: 2003- 12- 07 17: 13+ 02\n"
-"PO- Revision- Date: 2004- 11- 04 10: 13- 0700\n"
-"Last- Translator: Language- Team:< en@ li. org> MIME- Version: 1. 0\n"
-"Content- Type: text/ plain; charset= UTF- 8\n"
-"Content- Transfer- Encoding: 8bit\n"
-"X- Generator: KBabel 1. 0\n"
-"."
 
 #: src/LYUpload.c:99
 #, fuzzy
@@ -6313,12 +6333,12 @@ msgstr "Kitazwi"
 #: src/LYUtils.c:3732
 #, fuzzy, c-format
 msgid "No restrictions set.\n"
-msgstr "Amabwiriza Gushyiraho"
+msgstr "Amabwiriza Gushyiraho\n"
 
 #: src/LYUtils.c:3735
 #, fuzzy, c-format
 msgid "Restrictions set:\n"
-msgstr "Gushyiraho"
+msgstr "Gushyiraho\n"
 
 #: src/LYUtils.c:5113
 #, fuzzy
@@ -6328,7 +6348,7 @@ msgstr "Gushaka bushyinguro"
 #: src/LYrcFile.c:16
 #, fuzzy
 msgid "Normally disabled.  See ENABLE_LYNXRC in lynx.cfg\n"
-msgstr "Yahagaritswe in"
+msgstr "Yahagaritswe in\n"
 
 #: src/LYrcFile.c:317
 #, fuzzy
@@ -6337,7 +6357,7 @@ msgid ""
 "accept all cookies if desired.  The default is \"FALSE\" which will\n"
 "prompt for each cookie.  Set accept_all_cookies to \"TRUE\" to accept\n"
 "all cookies.\n"
-msgstr "i Ukoresha: Kuri Kuri Byose Inyandikonyakwirema NIBA Mburabuzi ni kugirango Kuri Kuri Inyandikonyakwirema"
+msgstr "i Ukoresha: Kuri Kuri Byose Inyandikonyakwirema NIBA Mburabuzi ni kugirango Kuri Kuri Inyandikonyakwirema\n"
 
 #: src/LYrcFile.c:325
 msgid ""
@@ -6353,7 +6373,7 @@ msgid ""
 "bookmark_file specifies the name and location of the default bookmark\n"
 "file into which the user can paste links for easy access at a later\n"
 "date.\n"
-msgstr "i Izina: Na Ahantu Bya i Mburabuzi i Ukoresha: Komeka amahuza kugirango ku a"
+msgstr "i Izina: Na Ahantu Bya i Mburabuzi i Ukoresha: Komeka amahuza kugirango ku a\n"
 
 #: src/LYrcFile.c:337
 #, fuzzy
@@ -6361,7 +6381,7 @@ msgid ""
 "If case_sensitive_searching is \"on\" then when the user invokes a search\n"
 "using the 's' or '/' keys, the search performed will be case sensitive\n"
 "instead of case INsensitive.  The default is usually \"off\".\n"
-msgstr "ni ku Hanyuma Ryari: i Ukoresha: a i Cyangwa Utubuto i Gushaka Bya Mburabuzi ni Bidakora"
+msgstr "ni ku Hanyuma Ryari: i Ukoresha: a i Cyangwa Utubuto i Gushaka Bya Mburabuzi ni Bidakora\n"
 
 #: src/LYrcFile.c:342
 #, fuzzy
@@ -6373,7 +6393,7 @@ msgid ""
 "Current valid characters sets are:\n"
 msgstr ""
 "Insobanuro Amagenzura i Bya 8 kugirango 8 Inyuguti OYA Garagaza ku Mugaragaza Gicurasi Kuri a 8 Cyangwa ikoresha i 7 Inyuguti "
-"Byemewe Inyuguti"
+"Byemewe Inyuguti\n"
 
 #: src/LYrcFile.c:349
 #, fuzzy
@@ -6383,7 +6403,7 @@ msgid ""
 "all cookies.  If a domain is specified in both options, rejection will\n"
 "take precedence.  The accept_all_cookies parameter will override any\n"
 "settings made here.\n"
-msgstr "Na Akitso Bya Bivuye ku buryo bwikora Kwemera Cyangwa Inyandikonyakwirema a Urwego ni in Byombi Amahitamo"
+msgstr "Na Akitso Bya Bivuye ku buryo bwikora Kwemera Cyangwa Inyandikonyakwirema a Urwego ni in Byombi Amahitamo\n"
 
 #: src/LYrcFile.c:357
 #, fuzzy
@@ -6404,14 +6424,14 @@ msgid ""
 "querying the user for an invalid path or domain.\n"
 msgstr ""
 "Akitso Intonde Bya Kuri Dogere Bya Ukugira agaciro ni Gushyiraho Kuri Kuri Byashyizweho A Urwego Na: Biregarega Kuri Gushyiraho "
-"Sibyo Inzira Cyangwa Urwego Ikiranga Mburabuzi i Ukoresha: kugirango Sibyo Inzira Cyangwa Urwego"
+"Sibyo Inzira Cyangwa Urwego Ikiranga Mburabuzi i Ukoresha: kugirango Sibyo Inzira Cyangwa Urwego\n"
 
 #: src/LYrcFile.c:376
 #, fuzzy
 msgid ""
 "dir_list_order specifies the directory list order under DIRED_SUPPORT\n"
 "(if implemented).  The default is \"ORDER_BY_NAME\"\n"
-msgstr "i bushyinguro Urutonde Itondekanya NIBA Mburabuzi ni"
+msgstr "i bushyinguro Urutonde Itondekanya NIBA Mburabuzi ni\n"
 
 #: src/LYrcFile.c:381
 #, fuzzy
@@ -6422,7 +6442,7 @@ msgid ""
 "\"DIRECTORIES_FIRST\" lists directories first.\n"
 msgstr ""
 "i bushyinguro Urutonde IMISUSIRE NIBA Mburabuzi ni Na ububiko bw'amaderese Intonde Idosiye Itangira Intonde ububiko bw'amaderese "
-"Itangira"
+"Itangira\n"
 
 #: src/LYrcFile.c:389
 #, fuzzy
@@ -6431,7 +6451,7 @@ msgid ""
 "  ^N = down    ^P = up\n"
 "  ^B = left    ^F = right\n"
 "will be enabled.\n"
-msgstr "ni Kuri ku Hanyuma i Bisanzwe Igenda Utubuto Hasi Ibumoso: Bikora"
+msgstr "ni Kuri ku Hanyuma i Bisanzwe Igenda Utubuto Hasi Ibumoso: Bikora\n"
 
 #: src/LYrcFile.c:395
 #, fuzzy
@@ -6442,7 +6462,7 @@ msgid ""
 "will be used for sending mail.\n"
 msgstr ""
 "i Muhinduzi Kuri Ryari: Ubutumwa Oya Muhinduzi ni Hanyuma IDOSIYE ni ni Bivuye i Komandi: Umurongo Na i in Umurongo kugirango "
-"Ubutumwa"
+"Ubutumwa\n"
 
 #: src/LYrcFile.c:402
 #, fuzzy
@@ -6455,7 +6475,7 @@ msgid ""
 "   BY_DATE     -- sorts on the date of the file\n"
 msgstr ""
 "Agaciro Kuri Ishungura ku Ryari: Intonde Nka ububiko bw'amaderese Amahitamo ku i Izina: Bya i ku i Ubwoko Bya i ku i Ingano Bya i "
-"ku i Itariki Bya i"
+"ku i Itariki Bya i\n"
 
 #: src/LYrcFile.c:424
 #, fuzzy
@@ -6473,7 +6493,7 @@ msgid ""
 "Current lineedit modes are:\n"
 msgstr ""
 "i Urufunguzo Bifatanya kugirango Ikurikiranyanyuguti Na Amafishi ni Gushyiraho Kuri Igenzura Inyuguti kugirango Na INYUGUTI "
-"ijambo U INYUGUTI H A Bya ijambo E Impera Bya"
+"ijambo U INYUGUTI H A Bya ijambo E Impera Bya\n"
 
 #: src/LYrcFile.c:442
 #, fuzzy
@@ -6484,7 +6504,7 @@ msgid ""
 "We start with \"multi_bookmarkB\" since 'A' is the default (see above).\n"
 msgstr ""
 "Kwemerera Kuri Kugaragaza... Akamenyetso Idosiye Na Imiterere ni Izina ry'idosiye: Isobanuramiterere Kuri Akamenyetso Idosiye "
-"kugirango i Gutangira Na: guhera ni i Mburabuzi hejuru"
+"kugirango i Gutangira Na: guhera ni i Mburabuzi hejuru\n"
 
 #: src/LYrcFile.c:448
 #, fuzzy
@@ -6498,7 +6518,7 @@ msgid ""
 "your mailed comments.\n"
 msgstr ""
 "Bwite Ubutumwa Aderesi Yoherejwe: IDOSIYE kugirango Impamvu Na kugirango Ibisobanuro OYA iyi Ibisobanuro Inyuma Gushyiraho i in "
-"Cyangwa Gukoresha i Komandi: Umurongo Hindura iyi Umwanya Ahatanditseho Hanyuma Ibisobanuro"
+"Cyangwa Gukoresha i Komandi: Umurongo Hindura iyi Umwanya Ahatanditseho Hanyuma Ibisobanuro\n"
 
 #: src/LYrcFile.c:457
 #, fuzzy
@@ -6515,7 +6535,7 @@ msgid ""
 "according to the Accept-Charset header, then the server SHOULD send\n"
 "an error response, though the sending of an unacceptable response\n"
 "is also allowed.\n"
-msgstr "g."
+msgstr "g.\n"
 
 #: src/LYrcFile.c:473
 #, fuzzy
@@ -6525,7 +6545,7 @@ msgid ""
 "which Lynx will indicate you prefer in requests to http servers.\n"
 "If a file in that language is available, the server will send it.\n"
 "Otherwise, the server will send the file in its default language.\n"
-msgstr "g."
+msgstr "g.\n"
 
 #: src/LYrcFile.c:484
 #, fuzzy
@@ -6541,7 +6561,7 @@ msgid ""
 "          you are viewing trusted source information.\n"
 msgstr ""
 "ni Gushyiraho ku Hanyuma Byose Ryari: Byahiswemo ni Gicurasi Ibisobanuro ni ku Kitazwi Na i amahuza amahuza Kuri Cyangwa "
-"Umutekano Gushyiraho Kuri ku Inkomoko Ibisobanuro"
+"Umutekano Gushyiraho Kuri ku Inkomoko Ibisobanuro\n"
 
 #: src/LYrcFile.c:495
 #, fuzzy
@@ -6560,7 +6580,7 @@ msgid ""
 "          you are viewing trusted source information.\n"
 msgstr ""
 "ni Gushyiraho ku Hanyuma Byose amahuza Byabonetse in Idosiye Ryari: Byahiswemo ni Bivuye in Idosiye ku i Sisitemu ni Gicurasi "
-"Ibisobanuro ni ku Kitazwi Na i amahuza amahuza Kuri Cyangwa Umutekano Gushyiraho Kuri ku Inkomoko Ibisobanuro"
+"Ibisobanuro ni ku Kitazwi Na i amahuza amahuza Kuri Cyangwa Umutekano Gushyiraho Kuri ku Inkomoko Ibisobanuro\n"
 
 #: src/LYrcFile.c:513
 #, fuzzy
@@ -6575,7 +6595,7 @@ msgid ""
 msgstr ""
 "i in a Funga a IBIKORWA Ikiranga Nka a Bihagaritse Urutonde Bya Cyangwa Biturutse a Ibikubiyemo NIBA i IBIKORWA Ikiranga in i "
 "Gutangira Itagi: Buri gihe Kurema a Bihagaritse kugirango i A Agaciro Bya ku Gushyiraho i Mburabuzi a Agaciro Bya Bidakora "
-"Gushyiraho Gukoresha Bya Mburabuzi Biturutse i Komandi: Umurongo Mukomatanya"
+"Gushyiraho Gukoresha Bya Mburabuzi Biturutse i Komandi: Umurongo Mukomatanya\n"
 
 #: src/LYrcFile.c:523
 #, fuzzy
@@ -6601,7 +6621,7 @@ msgstr ""
 "imyitwarire Bya bararimwe Ibara ni ku ku i Ubwoko Cyangwa i Ibara Komandi: Umurongo Hindura ni IMPINDURAGACIRO ni Gushyiraho "
 "Mburabuzi imyitwarire Buri gihe in Konti Cyangwa NIBA i ni Gushyiraho INGARUKA Bya i Agaciro Ibara Na Komandi: Umurongo Ubwoko "
 "Gushyiraho ku Byahinduwe Biturutse i Garagaza Ibara Ihitamo Ibikubiyemo i Ihitamo Amagenamiterere i ku Bidakora Garagaza Ibara "
-"Amagenamiterere Nka Mburabuzi"
+"Amagenamiterere Nka Mburabuzi\n"
 
 #: src/LYrcFile.c:540
 #, fuzzy
@@ -6619,7 +6639,7 @@ msgstr ""
 "Kuri i indanga Kuri i Iburyo: NIBA Bya i Mugaragaza Cyangwa Kuri Kuri i Ibumoso: Bya Ihuza in Inyandiko Cyangwa KIGEZWEHO Ihitamo "
 "in Guhitamo i indanga Kuri i Ibumoso: Bya i KIGEZWEHO Ihuza Cyangwa Ihitamo kugirango Cyangwa Na Ryari: i OYA i KIGEZWEHO Ihuza "
 "ku Ibara A Agaciro Bya ku Gushyiraho Kuri i Ibumoso: Nka a Agaciro Bya Bidakora Gushyiraho Bya i indanga Mburabuzi Biturutse i "
-"Komandi: Umurongo Mukomatanya"
+"Komandi: Umurongo Mukomatanya\n"
 
 #: src/LYrcFile.c:551
 #, fuzzy
@@ -6631,7 +6651,7 @@ msgid ""
 "is disabled, creation of such files via Lynx also is disabled.\n"
 msgstr ""
 "i bushyinguro gihishwe Akadomo Idosiye ububiko bw'amaderese Gushyiraho ku iyi NIBA Bikora Biturutse h Na Cyangwa Na Biturutse a "
-"Komandi: Umurongo Hindura Kugaragaza Bya gihishwe Yahagaritswe Bya Idosiye Biturutse ni Yahagaritswe"
+"Komandi: Umurongo Hindura Kugaragaza Bya gihishwe Yahagaritswe Bya Idosiye Biturutse ni Yahagaritswe\n"
 
 #: src/LYrcFile.c:562
 #, fuzzy
@@ -6648,7 +6668,7 @@ msgid ""
 msgstr ""
 "ni OYA Bidakora Na Igikubo Ibirango munsi Hanyuma Byose Akamenyetso Ibikorwa: i Ukoresha: Kuri Guhitamo Gikora Akamenyetso "
 "IDOSIYE i ni hejuru Nka Ihitamo iyi Ihitamo ni Gushyiraho Kuri Urwego rwo hejuru Na Ubwoko ni Urwego rwo hejuru i Akamenyetso "
-"Komandi: Urwinjiriro Bya i Ibikubiyemo in Na iyi Ihitamo ni Gushyiraho Kuri Bisanzwe i Ibikubiyemo Bya Ukoresha: Ubwoko"
+"Komandi: Urwinjiriro Bya i Ibikubiyemo in Na iyi Ihitamo ni Gushyiraho Kuri Bisanzwe i Ibikubiyemo Bya Ukoresha: Ubwoko\n"
 
 #: src/LYrcFile.c:576
 #, fuzzy
@@ -6661,7 +6681,7 @@ msgid ""
 "bottom of the screen.\n"
 msgstr ""
 "i urwego Bya Na: ni Birenga Imirongo Bya Ifashayobora ku Bya i Mugaragaza Kuri i Ukoresha: in i BASIC Kuri Kuri Bidakora i "
-"Birenga Ibisobanuro Kuri i Bya i Byahiswemo Ihuza ku Bya i Mugaragaza"
+"Birenga Ibisobanuro Kuri i Bya i Byahiswemo Ihuza ku Bya i Mugaragaza\n"
 
 #: src/LYrcFile.c:585
 #, fuzzy
@@ -6669,7 +6689,7 @@ msgid ""
 "If verbose_images is \"on\", lynx will print the name of the image\n"
 "source file in place of [INLINE], [LINK] or [IMAGE]\n"
 "See also VERBOSE_IMAGES in lynx.cfg\n"
-msgstr "ni ku Gucapa i Izina: Bya i IDOSIYE in Bya Cyangwa in"
+msgstr "ni ku Gucapa i Izina: Bya i IDOSIYE in Bya Cyangwa in\n"
 
 #: src/LYrcFile.c:590
 #, fuzzy
@@ -6682,16 +6702,16 @@ msgid ""
 "and the keymap display, respectively.\n"
 msgstr ""
 "ni Gushyiraho Kuri ku Hanyuma i Bisanzwe Igenda Utubuto j Hasi K h Ibumoso: L Bikora Utubuto Ntoya Na Kureka bigakora "
-"Ifashayobora Simbuka Na i Kugaragaza"
+"Ifashayobora Simbuka Na i Kugaragaza\n"
 
 #: src/LYrcFile.c:598
 #, fuzzy
 msgid ""
 "The visited_links setting controls how Lynx organizes the information\n"
 "in the Visited Links Page.\n"
-msgstr "Igenamiterere Amagenzura i i"
+msgstr "Igenamiterere Amagenzura i i\n"
 
-#: src/LYrcFile.c:816
+#: src/LYrcFile.c:820
 #, fuzzy
 msgid ""
 "If keypad_mode is set to \"NUMBERS_AS_ARROWS\", then the numbers on\n"
@@ -6703,16 +6723,16 @@ msgid ""
 "regardless of whether numlock is on.\n"
 msgstr ""
 "ni Gushyiraho Kuri Hanyuma i Imibare Ryari: i ni ku Nka Akambi Utubuto 8 4. 6 2. i Mwandikisho Imibare Nka Akambi Utubuto Bya ni "
-"ku"
+"ku\n"
 
-#: src/LYrcFile.c:825
+#: src/LYrcFile.c:829
 #, fuzzy
 msgid ""
 "If keypad_mode is set to \"LINKS_ARE_NUMBERED\", then numbers will\n"
 "appear next to each link and numbers are used to select links.\n"
-msgstr "ni Gushyiraho Kuri Hanyuma Imibare Komeza>> Kuri Ihuza Na Imibare Kuri Guhitamo amahuza"
+msgstr "ni Gushyiraho Kuri Hanyuma Imibare Komeza>> Kuri Ihuza Na Imibare Kuri Guhitamo amahuza\n"
 
-#: src/LYrcFile.c:829
+#: src/LYrcFile.c:833
 #, fuzzy
 msgid ""
 "If keypad_mode is set to \"LINKS_AND_FORM_FIELDS_ARE_NUMBERED\", then\n"
@@ -6726,17 +6746,17 @@ msgstr ""
 "ni Gushyiraho Kuri Kugaragara Komeza>> Kuri Ihuza Na Kigaragara Ifishi Iyinjiza Umwanya Kuri Guhitamo amahuza Cyangwa Kuri "
 "Kwimura i KIGEZWEHO Ihuza Kuri Iyinjiza Umwanya Cyangwa Akabuto Guteranya+ Amahitamo in Ibikubiyemo i Ukoresha: Gicurasi Ubwoko "
 "Ihitamo Umubare Kuri Guhitamo Ihitamo Ibikubiyemo ATARIIGIHARWE NIBA i Ihitamo si Kigaragara ku i Mugaragaza Na Ibisohoka Bivuye "
-"i Urutonde Komandi: Ifishi"
+"i Urutonde Komandi: Ifishi\n"
 
-#: src/LYrcFile.c:838
+#: src/LYrcFile.c:842
 #, fuzzy
 msgid ""
 "NOTE: Some fixed format documents may look disfigured when\n"
 "\"LINKS_ARE_NUMBERED\" or \"LINKS_AND_FORM_FIELDS_ARE_NUMBERED\" are\n"
 "enabled.\n"
-msgstr "BIHAMYE Imiterere Inyandiko Gicurasi Cyangwa"
+msgstr "BIHAMYE Imiterere Inyandiko Gicurasi Cyangwa\n"
 
-#: src/LYrcFile.c:870
+#: src/LYrcFile.c:874
 #, fuzzy
 msgid ""
 "Lynx User Defaults File\n"
@@ -6751,7 +6771,7 @@ msgid ""
 "It is not this file.\n"
 msgstr ""
 "IDOSIYE Kirimo Amahitamo Bivuye i i Urufunguzo ni Oya Kuri Guhindura iyi IDOSIYE guhera i Bivuye i Na Igihe Amahitamo Bivuye i "
-"iyi IDOSIYE kugirango i Rusange Iboneza IDOSIYE ni Na Ibikubiyemo Na a Imiterere ni OYA iyi IDOSIYE"
+"iyi IDOSIYE kugirango i Rusange Iboneza IDOSIYE ni Na Ibikubiyemo Na a Imiterere ni OYA iyi IDOSIYE\n"
 
 #, fuzzy
 #~ msgid "reason unknown."

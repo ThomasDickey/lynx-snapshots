@@ -1,5 +1,5 @@
 /*
- * $LynxId: SGML.c,v 1.102 2008/07/09 23:48:37 tom Exp $
+ * $LynxId: SGML.c,v 1.106 2008/07/15 23:54:39 tom Exp $
  *
  *			General SGML Parser code		SGML.c
  *			========================
@@ -173,6 +173,7 @@ struct _HTStream {
     HTTag *slashedtag;
     const HTTag *unknown_tag;
     BOOL extended_html;		/* xhtml */
+    BOOL strict_xml;		/* xml */
     BOOL inSELECT;
     BOOL no_lynx_specialcodes;
     int current_attribute_number;
@@ -454,7 +455,7 @@ static int current_is_class = 0;
 static void handle_attribute_name(HTStream *context, const char *s)
 {
     HTTag *tag = context->current_tag;
-    attr *attributes = tag->attributes;
+    const attr *attributes = tag->attributes;
     int high, low, i, diff;
 
 #ifdef USE_PRETTYSRC
@@ -878,6 +879,7 @@ static void handle_processing_instruction(HTStream *context)
     if (!strncmp(s, "?xml", 4)) {
 	int flag = context->T.decode_utf8;
 
+	context->strict_xml = TRUE;
 	/*
 	 * Switch to UTF-8 unless the encoding is explicitly not "utf-8".
 	 */
@@ -1509,6 +1511,20 @@ void SGML_setCallerData(HTStream *context, void *data)
     context->callerData = data;
 }
 #endif /* CALLERDATA */
+
+#ifdef USE_PRETTYSRC
+static void transform_tag(HTStream *context, HTChunk *string)
+{
+    if (!context->strict_xml) {
+	if (tagname_transform != 1) {
+	    if (tagname_transform == 0)
+		LYLowerCase(string->data);
+	    else
+		LYUpperCase(string->data);
+	}
+    }
+}
+#endif /* USE_PRETTYSRC */
 
 static void SGML_character(HTStream *context, char c_in)
 {
@@ -2241,12 +2257,7 @@ static void SGML_character(HTStream *context, char c_in)
 		    PSRCSTOP(abracket);
 		    PSRCSTART(tag);
 		    strcpy(string->data, context->current_tag->name);
-		    if (tagname_transform != 1) {
-			if (tagname_transform == 0)
-			    LYLowerCase(string->data);
-			else
-			    LYUpperCase(string->data);
-		    }
+		    transform_tag(context, string);
 		    PUTS(string->data);
 		    PSRCSTOP(tag);
 		    PSRCSTART(abracket);
@@ -3032,12 +3043,7 @@ static void SGML_character(HTStream *context, char c_in)
 		    PUTC('<');
 		    PSRCSTOP(abracket);
 		    PSRCSTART(badtag);
-		    if (tagname_transform != 1) {
-			if (tagname_transform == 0)
-			    LYLowerCase(string->data);
-			else
-			    LYUpperCase(string->data);
-		    }
+		    transform_tag(context, string);
 		    PUTS(string->data);
 		    if (c == '>') {
 			PSRCSTOP(badtag);
@@ -3071,12 +3077,7 @@ static void SGML_character(HTStream *context, char c_in)
 		    PSRCSTART(tag);
 		else
 		    PSRCSTART(badtag);
-		if (tagname_transform != 1) {
-		    if (tagname_transform == 0)
-			LYLowerCase(string->data);
-		    else
-			LYUpperCase(string->data);
-		}
+		transform_tag(context, string);
 		PUTS(string->data);
 		if (t != context->unknown_tag)
 		    PSRCSTOP(tag);
@@ -3526,7 +3527,8 @@ static void SGML_character(HTStream *context, char c_in)
 		if (context->extended_html
 		    && context->current_tag->name) {
 		    CTRACE((tfp, "SGML discarding empty %s\n", context->current_tag->name));
-		    context->current_tag->name = 0;
+		    string->size = 0;
+		    context->current_tag->contents = SGML_EMPTY;
 		}
 	    } else {
 		HTChunkTerminate(string);
@@ -3897,12 +3899,7 @@ static void SGML_character(HTStream *context, char c_in)
 		    PUTS("</");
 		    PSRCSTOP(abracket);
 		    PSRCSTART(badtag);
-		    if (tagname_transform != 1) {
-			if (tagname_transform == 0)
-			    LYLowerCase(string->data);
-			else
-			    LYUpperCase(string->data);
-		    }
+		    transform_tag(context, string);
 		    PUTS(string->data);
 		    if (c != '>') {
 			PUTC(c);

@@ -3,13 +3,13 @@
 # Volodymyr M. Lisivka <lvm@mystery.lviv.net>, 2003
 # Dmytro O. Redchuk <dor@kiev-online.net>, 2001-2002
 # Olexander Kunytsa <kunia@snark.ukma.kiev.ua>, 2000-2001
-# $LynxId: uk.po,v 1.26 2008/04/27 23:12:04 tom Exp $
+# $LynxId: uk.po,v 1.30 2008/07/19 14:43:01 tom Exp $
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: lynx 2.8.5pre9\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-04-27 19:12-0400\n"
+"POT-Creation-Date: 2008-07-19 07:11-0400\n"
 "PO-Revision-Date: 2003-01-22 18:21EEST\n"
 "Last-Translator: Volodymyr M. Lisivka <lvm@mystery.lviv.net>\n"
 "Language-Team: Ukrainian <translation-team-uk@lists.sourceforge.net>\n"
@@ -2316,7 +2316,7 @@ msgstr "(Без ╕мен╕.)"
 msgid "(No value.)"
 msgstr "(Без значення.)"
 
-#: LYMessages.c:716 src/LYOptions.c:2403
+#: LYMessages.c:716 src/LYOptions.c:2402
 msgid "None"
 msgstr "Н╕чого"
 
@@ -3610,32 +3610,32 @@ msgstr "байти"
 #. * If we know the total size of the file, we can compute
 #. * a percentage, and show a corresponding progress bar.
 #.
-#: src/HTAlert.c:300 src/HTAlert.c:323
+#: src/HTAlert.c:300 src/HTAlert.c:324
 #, c-format
 msgid "Read %s of data"
 msgstr "Прочитано %s даних"
 
-#: src/HTAlert.c:320
+#: src/HTAlert.c:321
 #, c-format
 msgid "Read %s of %s of data"
 msgstr "Прочитано %s з %s даних"
 
-#: src/HTAlert.c:329
+#: src/HTAlert.c:330
 #, c-format
 msgid ", %s/sec"
 msgstr ", %s/сек"
 
-#: src/HTAlert.c:341
+#: src/HTAlert.c:342
 #, fuzzy, c-format
 msgid " (stalled for %s)"
-msgstr " (призупинено на %ld сек)"
+msgstr " (призупинено на %s сек)"
 
-#: src/HTAlert.c:345
+#: src/HTAlert.c:346
 #, fuzzy, c-format
 msgid ", ETA %s"
-msgstr ", ETA %ld сек"
+msgstr ", ETA %s сек"
 
-#: src/HTAlert.c:367
+#: src/HTAlert.c:368
 msgid " (Press 'z' to abort)"
 msgstr " (Натисн╕ть 'z' щоб зупинити)"
 
@@ -3666,11 +3666,11 @@ msgstr " (Натисн╕ть 'z' щоб зупинити)"
 #. * Lynx will also accept y Y n N as responses unless there is a conflict
 #. * with the first letter of the "yes" or "no" translation.
 #.
-#: src/HTAlert.c:405 src/HTAlert.c:453
+#: src/HTAlert.c:406 src/HTAlert.c:454
 msgid "yes"
 msgstr "так"
 
-#: src/HTAlert.c:408 src/HTAlert.c:454
+#: src/HTAlert.c:409 src/HTAlert.c:455
 msgid "no"
 msgstr "н╕"
 
@@ -3690,7 +3690,7 @@ msgstr "н╕"
 #. * (Y/N/Always/neVer)              - English (original)
 #. * (O/N/Toujours/Jamais)           - French
 #.
-#: src/HTAlert.c:910
+#: src/HTAlert.c:911
 msgid "Y/N/A/V"
 msgstr ""
 
@@ -3811,19 +3811,19 @@ msgstr ""
 msgid "Exiting via interrupt:"
 msgstr "Завершу╓мо за сигналом:"
 
-#: src/LYCookie.c:2460
+#: src/LYCookie.c:2461
 msgid "(from a previous session)"
 msgstr "(з попередньо╖ сес╕╖)"
 
-#: src/LYCookie.c:2521
+#: src/LYCookie.c:2522
 msgid "Maximum Gobble Date:"
 msgstr ""
 
-#: src/LYCookie.c:2561
+#: src/LYCookie.c:2562
 msgid "Internal"
 msgstr "Внутр╕шн╕й"
 
-#: src/LYCookie.c:2562
+#: src/LYCookie.c:2563
 msgid "cookie_domain_flag_set error, aborting program"
 msgstr "помилка у cookie_domain_flag_set, урива╓мо програму"
 
@@ -3831,27 +3831,27 @@ msgstr "помилка у cookie_domain_flag_set, урива╓мо програму"
 msgid "Terminal initialisation failed - unknown terminal type?"
 msgstr "Не вдалося ╕н╕ц╕ал╕зувати терм╕нал - нев╕домий тип терм╕налу?"
 
-#: src/LYCurses.c:1538
+#: src/LYCurses.c:1546
 msgid "Terminal ="
 msgstr "Терм╕нал ="
 
-#: src/LYCurses.c:1542
+#: src/LYCurses.c:1550
 msgid "You must use a vt100, 200, etc. terminal with this program."
 msgstr "Ви ма╓те використовувати з ц╕╓ю програмою терм╕нали vt100, 200 тощо."
 
-#: src/LYCurses.c:1591
+#: src/LYCurses.c:1599
 msgid "Your Terminal type is unknown!"
 msgstr "Тип вашого терм╕налу нев╕домий!"
 
-#: src/LYCurses.c:1592
+#: src/LYCurses.c:1600
 msgid "Enter a terminal type:"
 msgstr "Введ╕ть тип терм╕налу:"
 
-#: src/LYCurses.c:1606
+#: src/LYCurses.c:1614
 msgid "TERMINAL TYPE IS SET TO"
 msgstr "ТИП ТЕРМ╤НАЛУ ВСТАНОВЛЕНО У"
 
-#: src/LYCurses.c:2111
+#: src/LYCurses.c:2119
 #, c-format
 msgid ""
 "\n"
@@ -3860,7 +3860,7 @@ msgstr ""
 "\n"
 "Фатальна помилка в %s, верс╕я %s\n"
 
-#: src/LYCurses.c:2114
+#: src/LYCurses.c:2122
 #, c-format
 msgid ""
 "\n"
@@ -3874,7 +3874,7 @@ msgstr ""
 #: src/LYEdit.c:266
 #, fuzzy, c-format
 msgid "Error starting editor, %s"
-msgstr "Помилка опрацьовування рядка %d з %s\n"
+msgstr "Помилка опрацьовування рядка ?? з %s"
 
 #: src/LYEdit.c:269
 msgid "Editor killed by signal"
@@ -4441,7 +4441,7 @@ msgstr ""
 #: src/LYMain.c:3178
 #, fuzzy, c-format
 msgid "%s Version %s (%s)"
-msgstr "%s Верс╕я %s (%s)\n"
+msgstr "%s Верс╕я %s (%s)"
 
 #: src/LYMain.c:3216
 #, c-format
@@ -4656,276 +4656,276 @@ msgstr "проглянути/зм╕нити файл Закладинок (B)"
 msgid "B)ookmark file: "
 msgstr "B) файл закладинок: "
 
-#: src/LYOptions.c:2128 src/LYOptions.c:2135
+#: src/LYOptions.c:2127 src/LYOptions.c:2134
 msgid "ON"
 msgstr ""
 
 #. verbose_img variable
-#: src/LYOptions.c:2129 src/LYOptions.c:2134 src/LYOptions.c:2286 src/LYOptions.c:2297
+#: src/LYOptions.c:2128 src/LYOptions.c:2133 src/LYOptions.c:2285 src/LYOptions.c:2296
 msgid "OFF"
 msgstr ""
 
-#: src/LYOptions.c:2130
+#: src/LYOptions.c:2129
 msgid "NEVER"
 msgstr ""
 
-#: src/LYOptions.c:2131
+#: src/LYOptions.c:2130
 msgid "ALWAYS"
 msgstr ""
 
-#: src/LYOptions.c:2147 src/LYOptions.c:2278
+#: src/LYOptions.c:2146 src/LYOptions.c:2277
 msgid "ignore"
 msgstr ""
 
-#: src/LYOptions.c:2148
+#: src/LYOptions.c:2147
 msgid "ask user"
 msgstr ""
 
-#: src/LYOptions.c:2149
+#: src/LYOptions.c:2148
 msgid "accept all"
 msgstr ""
 
-#: src/LYOptions.c:2161
+#: src/LYOptions.c:2160
 msgid "ALWAYS OFF"
 msgstr ""
 
-#: src/LYOptions.c:2162
+#: src/LYOptions.c:2161
 msgid "FOR LOCAL FILES ONLY"
 msgstr ""
 
-#: src/LYOptions.c:2164
+#: src/LYOptions.c:2163
 msgid "ALWAYS ON"
 msgstr ""
 
-#: src/LYOptions.c:2176
+#: src/LYOptions.c:2175
 msgid "Numbers act as arrows"
 msgstr ""
 
-#: src/LYOptions.c:2178
+#: src/LYOptions.c:2177
 msgid "Links are numbered"
 msgstr ""
 
-#: src/LYOptions.c:2181
+#: src/LYOptions.c:2180
 msgid "Links and form fields are numbered"
 msgstr ""
 
-#: src/LYOptions.c:2184
+#: src/LYOptions.c:2183
 msgid "Form fields are numbered"
 msgstr ""
 
-#: src/LYOptions.c:2198
+#: src/LYOptions.c:2197
 msgid "Case insensitive"
 msgstr ""
 
-#: src/LYOptions.c:2199
+#: src/LYOptions.c:2198
 msgid "Case sensitive"
 msgstr ""
 
-#: src/LYOptions.c:2223
+#: src/LYOptions.c:2222
 msgid "prompt normally"
 msgstr ""
 
-#: src/LYOptions.c:2224
+#: src/LYOptions.c:2223
 msgid "force yes-response"
 msgstr ""
 
-#: src/LYOptions.c:2225
+#: src/LYOptions.c:2224
 msgid "force no-response"
 msgstr ""
 
-#: src/LYOptions.c:2243
+#: src/LYOptions.c:2242
 #, fuzzy
 msgid "Novice"
 msgstr "Н╕чого"
 
-#: src/LYOptions.c:2244
+#: src/LYOptions.c:2243
 #, fuzzy
 msgid "Intermediate"
 msgstr "Внутр╕шн╕й"
 
-#: src/LYOptions.c:2245
+#: src/LYOptions.c:2244
 msgid "Advanced"
 msgstr ""
 
-#: src/LYOptions.c:2254
+#: src/LYOptions.c:2253
 msgid "By First Visit"
 msgstr ""
 
-#: src/LYOptions.c:2256
+#: src/LYOptions.c:2255
 msgid "By First Visit Reversed"
 msgstr ""
 
-#: src/LYOptions.c:2257
+#: src/LYOptions.c:2256
 msgid "As Visit Tree"
 msgstr ""
 
-#: src/LYOptions.c:2258
+#: src/LYOptions.c:2257
 msgid "By Last Visit"
 msgstr ""
 
-#: src/LYOptions.c:2260
+#: src/LYOptions.c:2259
 msgid "By Last Visit Reversed"
 msgstr ""
 
 #. Old_DTD variable
-#: src/LYOptions.c:2271
+#: src/LYOptions.c:2270
 msgid "relaxed (TagSoup mode)"
 msgstr ""
 
-#: src/LYOptions.c:2272
+#: src/LYOptions.c:2271
 msgid "strict (SortaSGML mode)"
 msgstr ""
 
-#: src/LYOptions.c:2279
+#: src/LYOptions.c:2278
 msgid "as labels"
 msgstr ""
 
-#: src/LYOptions.c:2280
+#: src/LYOptions.c:2279
 #, fuzzy
 msgid "as links"
 msgstr "це посилання"
 
-#: src/LYOptions.c:2287
+#: src/LYOptions.c:2286
 #, fuzzy
 msgid "show filename"
 msgstr " (погане ╕м'я файлу)"
 
-#: src/LYOptions.c:2298
+#: src/LYOptions.c:2297
 msgid "STANDARD"
 msgstr ""
 
-#: src/LYOptions.c:2299
+#: src/LYOptions.c:2298
 msgid "ADVANCED"
 msgstr ""
 
 # ТЕРМ╤НОЛОГ╤Я
 # ТЕРМ╤НОЛОГ╤Я
-#: src/LYOptions.c:2330
+#: src/LYOptions.c:2329
 #, fuzzy
 msgid "Directories first"
 msgstr "П╕дкаталоги:"
 
 # Тягнемо http://enigma.x-telecom.net/ вперше (ми там ще не були)
 # Тягнемо http://enigma.x-telecom.net/ вперше (ми там ще не були)
-#: src/LYOptions.c:2331
+#: src/LYOptions.c:2330
 #, fuzzy
 msgid "Files first"
 msgstr " вперше"
 
-#: src/LYOptions.c:2332
+#: src/LYOptions.c:2331
 msgid "Mixed style"
 msgstr ""
 
 # @ Dia GIMP Gabber Galeon- Ximian-setup-tools balsa control-center evolution gimp gimp-std-plugins- glade- gnome-core gnome-libs gnome-pim gnomeicu gphoto graphite guppi kandy kandy.po kateprojectmanager.po kcmemail kcmkio kde-i18n_4:2.2.2-2_kdeprintfax.po kdelibs kmail kmenuedit knode koffice korganizer ksysguard kword lynx pybliographer red-carpet rpmdrake screem userdrake xchat
 # * Yuriy Syrota <yuri@renome.rovno.ua>
-#: src/LYOptions.c:2340 src/LYOptions.c:2360
+#: src/LYOptions.c:2339 src/LYOptions.c:2359
 #, fuzzy
 msgid "By Name"
 msgstr "Назва:"
 
-#: src/LYOptions.c:2341 src/LYOptions.c:2361
+#: src/LYOptions.c:2340 src/LYOptions.c:2360
 msgid "By Type"
 msgstr ""
 
-#: src/LYOptions.c:2342 src/LYOptions.c:2362
+#: src/LYOptions.c:2341 src/LYOptions.c:2361
 #, fuzzy
 msgid "By Size"
 msgstr "Байт╕в:"
 
-#: src/LYOptions.c:2343 src/LYOptions.c:2363
+#: src/LYOptions.c:2342 src/LYOptions.c:2362
 #, fuzzy
 msgid "By Date"
 msgstr "Дата:"
 
-#: src/LYOptions.c:2344
+#: src/LYOptions.c:2343
 msgid "By Mode"
 msgstr ""
 
-#: src/LYOptions.c:2346
+#: src/LYOptions.c:2345
 msgid "By User"
 msgstr ""
 
-#: src/LYOptions.c:2347
+#: src/LYOptions.c:2346
 #, fuzzy
 msgid "By Group"
 msgstr "Група"
 
-#: src/LYOptions.c:2372
+#: src/LYOptions.c:2371
 msgid "Do not show rate"
 msgstr ""
 
 # перекачування - бо не знаю, куди, у який б╕к.
 # (вже краще "передавання", бо передача - не зовс╕м процес, наче)
-#: src/LYOptions.c:2373 src/LYOptions.c:2374
+#: src/LYOptions.c:2372 src/LYOptions.c:2373
 #, fuzzy, c-format
 msgid "Show %s/sec rate"
 msgstr "Перекачування даних завершено."
 
-#: src/LYOptions.c:2376 src/LYOptions.c:2377
+#: src/LYOptions.c:2375 src/LYOptions.c:2376
 #, c-format
 msgid "Show %s/sec, ETA"
 msgstr ""
 
-#: src/LYOptions.c:2380
+#: src/LYOptions.c:2379
 #, fuzzy
 msgid "Show progressbar"
 msgstr "Показувати кольори"
 
-#: src/LYOptions.c:2392
+#: src/LYOptions.c:2391
 msgid "Accept lynx's internal types"
 msgstr ""
 
-#: src/LYOptions.c:2393
+#: src/LYOptions.c:2392
 msgid "Also accept lynx.cfg's types"
 msgstr ""
 
-#: src/LYOptions.c:2394
+#: src/LYOptions.c:2393
 msgid "Also accept user's types"
 msgstr ""
 
-#: src/LYOptions.c:2395
+#: src/LYOptions.c:2394
 msgid "Also accept system's types"
 msgstr ""
 
 # msgstr "Прийняти"
 # мммм... не знаю. (контр)аргументи?
-#: src/LYOptions.c:2396
+#: src/LYOptions.c:2395
 #, fuzzy
 msgid "Accept all types"
 msgstr "Запровадити зм╕ни"
 
-#: src/LYOptions.c:2405
+#: src/LYOptions.c:2404
 msgid "gzip"
 msgstr ""
 
-#: src/LYOptions.c:2406
+#: src/LYOptions.c:2405
 msgid "deflate"
 msgstr ""
 
-#: src/LYOptions.c:2409
+#: src/LYOptions.c:2408
 msgid "compress"
 msgstr ""
 
-#: src/LYOptions.c:2412
+#: src/LYOptions.c:2411
 msgid "bzip2"
 msgstr ""
 
-#: src/LYOptions.c:2414
+#: src/LYOptions.c:2413
 msgid "All"
 msgstr ""
 
-#: src/LYOptions.c:2682 src/LYOptions.c:2706
+#: src/LYOptions.c:2681 src/LYOptions.c:2705
 #, c-format
 msgid "Use %s to invoke the Options menu!"
 msgstr "%s виклика╓ Меню Налаштувань!"
 
-#: src/LYOptions.c:3478
+#: src/LYOptions.c:3477
 msgid "(options marked with (!) will not be saved)"
 msgstr "(параметри в╕дм╕ен╕ (!) не будуть записан╕)"
 
 # @ GIMP lynx
 # * Yuri Syrota <rasta@renome.rovno.ua>
-#: src/LYOptions.c:3486
+#: src/LYOptions.c:3485
 msgid "General Preferences"
 msgstr "Загальн╕ налаштування"
 
@@ -4933,82 +4933,82 @@ msgstr "Загальн╕ налаштування"
 # б╕льше подоба╓ться "користування"
 #. ***************************************************************
 #. User Mode: SELECT
-#: src/LYOptions.c:3490
+#: src/LYOptions.c:3489
 msgid "User mode"
 msgstr "Режим користування"
 
 #. Editor: INPUT
-#: src/LYOptions.c:3496
+#: src/LYOptions.c:3495
 msgid "Editor"
 msgstr "Редактор"
 
 #. Search Type: SELECT
-#: src/LYOptions.c:3501
+#: src/LYOptions.c:3500
 msgid "Type of Search"
 msgstr "Тип пошуку"
 
-#: src/LYOptions.c:3506
+#: src/LYOptions.c:3505
 msgid "Security and Privacy"
 msgstr ""
 
 #. ***************************************************************
 #. Cookies: SELECT
-#: src/LYOptions.c:3510
+#: src/LYOptions.c:3509
 msgid "Cookies"
 msgstr "Коржики"
 
 #. Cookie Prompting: SELECT
-#: src/LYOptions.c:3524
+#: src/LYOptions.c:3523
 msgid "Invalid-Cookie Prompting"
 msgstr ""
 
 #. SSL Prompting: SELECT
-#: src/LYOptions.c:3531
+#: src/LYOptions.c:3530
 msgid "SSL Prompting"
 msgstr ""
 
-#: src/LYOptions.c:3537
+#: src/LYOptions.c:3536
 msgid "Keyboard Input"
 msgstr "Вв╕д з клав╕атури"
 
 #. ***************************************************************
 #. Keypad Mode: SELECT
-#: src/LYOptions.c:3541
+#: src/LYOptions.c:3540
 msgid "Keypad mode"
 msgstr "Цифрова клав╕атура"
 
 # msgstr "Клав╕ш╕ Emacs"
 # msgstr "Клав╕ш╕ Emacs"
 #. Emacs keys: ON/OFF
-#: src/LYOptions.c:3547
+#: src/LYOptions.c:3546
 msgid "Emacs keys"
 msgstr "Ключ╕ Emacs"
 
 #. VI Keys: ON/OFF
-#: src/LYOptions.c:3553
+#: src/LYOptions.c:3552
 msgid "VI keys"
 msgstr "Ключ╕ VI"
 
 #. Line edit style: SELECT
 #. well, at least 2 line edit styles available
-#: src/LYOptions.c:3560
+#: src/LYOptions.c:3559
 msgid "Line edit style"
 msgstr ""
 
 #. Keyboard layout: SELECT
-#: src/LYOptions.c:3572
+#: src/LYOptions.c:3571
 msgid "Keyboard layout"
 msgstr "Розкладка клав╕атури"
 
 #.
 #. * Display and Character Set
 #.
-#: src/LYOptions.c:3586
+#: src/LYOptions.c:3585
 msgid "Display and Character Set"
 msgstr "Дисплей та наб╕р символ╕в"
 
 #. Use locale-based character set: ON/OFF
-#: src/LYOptions.c:3591
+#: src/LYOptions.c:3590
 #, fuzzy
 msgid "Use locale-based character set"
 msgstr "Вважати кодуванням документа"
@@ -5018,11 +5018,11 @@ msgstr "Вважати кодуванням документа"
 # ???
 # msgstr "Наб╕р символ╕в дисплею"
 #. Display Character Set: SELECT
-#: src/LYOptions.c:3600
+#: src/LYOptions.c:3599
 msgid "Display character set"
 msgstr "Наб╕р символ╕в дисплея"
 
-#: src/LYOptions.c:3631
+#: src/LYOptions.c:3630
 msgid "Assumed document character set"
 msgstr "Вважати кодуванням документа"
 
@@ -5031,72 +5031,72 @@ msgstr "Вважати кодуванням документа"
 #. * we split the header to make it more readable:
 #. * "CJK mode" for CJK display charsets, and "Raw 8-bit" for others.
 #.
-#: src/LYOptions.c:3651
+#: src/LYOptions.c:3650
 msgid "CJK mode"
 msgstr "Режим CJK"
 
 # msgstr "Справжн╕ 8б╕т"
 # може "8-bit - як ╓" ?-)
-#: src/LYOptions.c:3653
+#: src/LYOptions.c:3652
 msgid "Raw 8-bit"
 msgstr "Режим Raw 8-bit"
 
 #. X Display: INPUT
-#: src/LYOptions.c:3661
+#: src/LYOptions.c:3660
 msgid "X Display"
 msgstr "X Дисплей"
 
 #.
 #. * Document Appearance
 #.
-#: src/LYOptions.c:3667
+#: src/LYOptions.c:3666
 msgid "Document Appearance"
 msgstr "Вигляд документа"
 
-#: src/LYOptions.c:3673
+#: src/LYOptions.c:3672
 msgid "Show color"
 msgstr "Показувати кольори"
 
 #. Show cursor: ON/OFF
-#: src/LYOptions.c:3697
+#: src/LYOptions.c:3696
 msgid "Show cursor"
 msgstr "Показувати курсор"
 
 #. Underline links: ON/OFF
-#: src/LYOptions.c:3703
+#: src/LYOptions.c:3702
 #, fuzzy
 msgid "Underline links"
 msgstr "Прихован╕ посилання:"
 
 #. Show scrollbar: ON/OFF
-#: src/LYOptions.c:3710
+#: src/LYOptions.c:3709
 msgid "Show scrollbar"
 msgstr "Показувати кольори"
 
 #. Select Popups: ON/OFF
-#: src/LYOptions.c:3717
+#: src/LYOptions.c:3716
 msgid "Popups for select fields"
 msgstr "Розкриття пол╕в вибору"
 
 #. HTML error recovery: SELECT
-#: src/LYOptions.c:3723
+#: src/LYOptions.c:3722
 msgid "HTML error recovery"
 msgstr "Виправляння помилок HTML"
 
 #. Show Images: SELECT
-#: src/LYOptions.c:3729
+#: src/LYOptions.c:3728
 msgid "Show images"
 msgstr "Показувати зображення"
 
 #. Verbose Images: ON/OFF
-#: src/LYOptions.c:3743
+#: src/LYOptions.c:3742
 msgid "Verbose images"
 msgstr "Додатково про зображення"
 
 #.
 #. * Headers Transferred to Remote Servers
 #.
-#: src/LYOptions.c:3751
+#: src/LYOptions.c:3750
 msgid "Headers Transferred to Remote Servers"
 msgstr "Заголовки для Надсилання на Сервери"
 
@@ -5106,11 +5106,11 @@ msgstr "Заголовки для Надсилання на Сервери"
 # msgstr "Адреса електронно╖ пошти"
 #. ***************************************************************
 #. Mail Address: INPUT
-#: src/LYOptions.c:3755
+#: src/LYOptions.c:3754
 msgid "Personal mail address"
 msgstr "Персональна поштова адреса"
 
-#: src/LYOptions.c:3761
+#: src/LYOptions.c:3760
 #, fuzzy
 msgid "Password for anonymous ftp"
 msgstr "Пароль користувача на сервер╕ новин '%s':"
@@ -5118,28 +5118,28 @@ msgstr "Пароль користувача на сервер╕ новин '%s':"
 # перекачано - бо не знаю, куди, у який б╕к.
 # перекачано - бо не знаю, куди, у який б╕к.
 #. Preferred media type: SELECT
-#: src/LYOptions.c:3767
+#: src/LYOptions.c:3766
 #, fuzzy
 msgid "Preferred media type"
 msgstr "Перекачано %d байт╕в"
 
 #. Preferred encoding: SELECT
-#: src/LYOptions.c:3773
+#: src/LYOptions.c:3772
 #, fuzzy
 msgid "Preferred encoding"
 msgstr "Улюблена мова документа"
 
 #. Preferred Document Character Set: INPUT
-#: src/LYOptions.c:3779
+#: src/LYOptions.c:3778
 msgid "Preferred document character set"
 msgstr "Улюблений наб╕р символ╕в"
 
 #. Preferred Document Language: INPUT
-#: src/LYOptions.c:3784
+#: src/LYOptions.c:3783
 msgid "Preferred document language"
 msgstr "Улюблена мова документа"
 
-#: src/LYOptions.c:3790
+#: src/LYOptions.c:3789
 msgid "User-Agent header"
 msgstr "Заголовок User-Agent"
 
@@ -5150,84 +5150,84 @@ msgstr "Заголовок User-Agent"
 #.
 #. * Listing and Accessing Files
 #.
-#: src/LYOptions.c:3798
+#: src/LYOptions.c:3797
 msgid "Listing and Accessing Files"
 msgstr "Списки та Доступ до Файл╕в"
 
 #. FTP sort: SELECT
-#: src/LYOptions.c:3803
+#: src/LYOptions.c:3802
 msgid "Use Passive FTP"
 msgstr ""
 
 #. FTP sort: SELECT
-#: src/LYOptions.c:3809
+#: src/LYOptions.c:3808
 msgid "FTP sort criteria"
 msgstr "Критер╕й сортування каталог╕в FTP"
 
 #. Local Directory Sort: SELECT
-#: src/LYOptions.c:3817
+#: src/LYOptions.c:3816
 msgid "Local directory sort criteria"
 msgstr "Критер╕й сортування локальних каталог╕в"
 
 #. Local Directory Order: SELECT
-#: src/LYOptions.c:3823
+#: src/LYOptions.c:3822
 msgid "Local directory sort order"
 msgstr "Порядок сортування локальних каталог╕в"
 
-#: src/LYOptions.c:3832
+#: src/LYOptions.c:3831
 msgid "Show dot files"
 msgstr "Показувати прихован╕ файли"
 
-#: src/LYOptions.c:3840
+#: src/LYOptions.c:3839
 msgid "Execution links"
 msgstr "Запускання програм за посиланнями"
 
 # перекачування - бо не знаю, куди, у який б╕к.
 # (вже краще "передавання", бо передача - не зовс╕м процес, наче)
 #. Show transfer rate: SELECT
-#: src/LYOptions.c:3860
+#: src/LYOptions.c:3859
 msgid "Show transfer rate"
 msgstr "Перекачування даних завершено."
 
 #.
 #. * Special Files and Screens
 #.
-#: src/LYOptions.c:3880
+#: src/LYOptions.c:3879
 msgid "Special Files and Screens"
 msgstr "Спец╕альн╕ Файли та Екрани"
 
-#: src/LYOptions.c:3885
+#: src/LYOptions.c:3884
 msgid "Multi-bookmarks"
 msgstr "Чисельн╕ файли закладинок"
 
-#: src/LYOptions.c:3893
+#: src/LYOptions.c:3892
 msgid "Review/edit Bookmarks files"
 msgstr "Продивитися/Редагувати закладинки"
 
-#: src/LYOptions.c:3895
+#: src/LYOptions.c:3894
 msgid "Goto multi-bookmark menu"
 msgstr "Перейти до меню multi-bookmar"
 
-#: src/LYOptions.c:3897
+#: src/LYOptions.c:3896
 msgid "Bookmarks file"
 msgstr "Файл закладинок"
 
 #. Auto Session: ON/OFF
-#: src/LYOptions.c:3904
+#: src/LYOptions.c:3903
 msgid "Auto Session"
 msgstr ""
 
 #. Session File Menu: INPUT
-#: src/LYOptions.c:3910
+#: src/LYOptions.c:3909
 msgid "Session file"
 msgstr ""
 
 #. Visited Pages: SELECT
-#: src/LYOptions.c:3916
+#: src/LYOptions.c:3915
 msgid "Visited Pages"
 msgstr "Проглянут╕ стор╕нки"
 
-#: src/LYOptions.c:3921
+#: src/LYOptions.c:3920
 msgid "View the file "
 msgstr "Переглянути файл "
 
@@ -6013,7 +6013,7 @@ msgstr ""
 "Установка visted_links визнача╓, як Lynx в╕добража╓ ╕нформац╕ю\n"
 "на Стор╕нц╕ В╕дв╕даних Посилань.\n"
 
-#: src/LYrcFile.c:816
+#: src/LYrcFile.c:820
 msgid ""
 "If keypad_mode is set to \"NUMBERS_AS_ARROWS\", then the numbers on\n"
 "your keypad when the numlock is on will act as arrow keys:\n"
@@ -6024,13 +6024,13 @@ msgid ""
 "regardless of whether numlock is on.\n"
 msgstr ""
 
-#: src/LYrcFile.c:825
+#: src/LYrcFile.c:829
 msgid ""
 "If keypad_mode is set to \"LINKS_ARE_NUMBERED\", then numbers will\n"
 "appear next to each link and numbers are used to select links.\n"
 msgstr ""
 
-#: src/LYrcFile.c:829
+#: src/LYrcFile.c:833
 msgid ""
 "If keypad_mode is set to \"LINKS_AND_FORM_FIELDS_ARE_NUMBERED\", then\n"
 "numbers will appear next to each link and visible form input field.\n"
@@ -6041,14 +6041,14 @@ msgid ""
 "lists and output from the list command also enumerate form inputs.\n"
 msgstr ""
 
-#: src/LYrcFile.c:838
+#: src/LYrcFile.c:842
 msgid ""
 "NOTE: Some fixed format documents may look disfigured when\n"
 "\"LINKS_ARE_NUMBERED\" or \"LINKS_AND_FORM_FIELDS_ARE_NUMBERED\" are\n"
 "enabled.\n"
 msgstr ""
 
-#: src/LYrcFile.c:870
+#: src/LYrcFile.c:874
 msgid ""
 "Lynx User Defaults File\n"
 "\n"

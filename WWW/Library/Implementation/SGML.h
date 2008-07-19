@@ -135,7 +135,7 @@ extern "C" {
 #ifdef EXP_JUSTIFY_ELTS
 	BOOL can_justify;	/* justification allowed? */
 #endif
-	attr *attributes;	/* The list of acceptable attributes */
+	const attr *attributes;	/* The list of acceptable attributes */
 	int number_of_attributes;	/* Number of possible attributes */
 	SGMLContent contents;	/* End only on end tag @@ */
 	TagClass tagclass;

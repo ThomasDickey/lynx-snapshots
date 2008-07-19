@@ -1,12 +1,18 @@
--- $LynxId: CHANGES,v 1.283 2008/07/09 23:50:09 tom Exp $
+-- $LynxId: CHANGES,v 1.288 2008/07/19 14:59:01 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
 2008-0?-?? (2.8.7dev.10)
+* add check-po rule to po/makefile -TD
+* modify top-level makefile to work with configure --srcdir -TD
+* add update-po rule to top-level makefile -TD
+* update fr.po, nl.po, tr.po, vi.po, zh_TW.po,sv.po from
+    http://translationproject.org/latest/lynx/
 * parse doctype for xhtml, to tell when empty tags such as "<textarea />" can
   be discarded (report by Nils Dagsson Moskopp) -TD
-* parse xml processing-instruction to turn on UTF-8 decoding -TD
+* parse xml processing-instruction to turn on UTF-8 decoding, as well as
+  disable upper/lower case transforming in source view -TD
 * fix typo in Lynx_users_guide.html (report by Kristof Zelechovski)
 * minor fix to documentation in lynx.cfg -PW
 * use off_t rather than long for representing file sizes, e.g., when used to

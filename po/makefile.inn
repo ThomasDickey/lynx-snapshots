@@ -1,4 +1,4 @@
-# $LynxId: makefile.inn,v 1.14 2007/05/13 23:43:17 tom Exp $
+# $LynxId: makefile.inn,v 1.16 2008/07/19 11:07:29 tom Exp $
 #
 # Makefile for program source directory in GNU NLS utilities package.
 # Copyright (C) 1995, 1996, 1997 by Ulrich Drepper <drepper@gnu.ai.mit.edu>
@@ -219,6 +219,17 @@ dist distdir: update-po $(DISTFILES)
 	for file in $$dists; do \
 	  ln $(srcdir)/$$file $(distdir) 2> /dev/null \
 	    || cp -p $(srcdir)/$$file $(distdir); \
+	done
+
+# GNU msgfmt -C option can also check for X/Open compat.
+check-po:
+	cd $(srcdir); \
+	catalogs='$(CATALOGS)'; \
+	for cat in $$catalogs; do \
+	  cat=`basename $$cat`; \
+	  lang=`echo $$cat | sed 's/\$(CATOBJEXT)$$//'`; \
+	  echo "$$lang:"; \
+	  $(MSGFMT) -f -c -v $$lang.po; \
 	done
 
 update-po: makefile
