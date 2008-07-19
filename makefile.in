@@ -1,4 +1,4 @@
-# $LynxId: makefile.in,v 1.97 2007/05/13 22:29:46 tom Exp $
+# $LynxId: makefile.in,v 1.99 2008/07/19 10:45:44 tom Exp $
 ##makefile for lynx
 
 SHELL		= @CONFIG_SHELL@
@@ -71,7 +71,19 @@ HELPDIR= $(DESTDIR)$(helpdir)
 ##set the relative location of the WWW library Implementation directory,
 ##from this directory
 ##do not set this to be an absolute path!!!
-WWWINC= WWW/Library/Implementation
+WWW_DIR= $(srcdir)/WWW/Library/Implementation
+
+##set the relative location of the message-file directory
+##do not set this to be an absolute path!!!
+PO_DIR= $(srcdir)/po
+
+##set the relative location of the main source-directory
+##do not set this to be an absolute path!!!
+SRC_DIR= $(srcdir)/src
+
+##set the relative location of the character-translation data directory
+##do not set this to be an absolute path!!!
+CHR_DIR= $(SRC_DIR)/chrtrans
 
 ## Path to gzip that will compress the help files.
 ## It will be used when --enable-gzip-help is set by configure.
@@ -170,18 +182,18 @@ SRC_CFLAGS = \
 	CPPFLAGS="$(CPPFLAGS)" \
 	LIBS="$(LIBS) $(RESOLVLIB) $(WAISLIB) $(SITE_LIBS)" \
 	SITE_DEFS="$(SITE_DEFS)" \
-	WWWINC=$(WWWINC) \
-	WWWLIB="../$(WWWINC)/libwww.a"
+	WWWINC=$(WWW_DIR) \
+	WWWLIB="../$(WWW_DIR)/libwww.a"
 
 all lynx$x: cfg_defs.h LYHelp.h
 @MSG_DIR_MAKE@	$(SHELL) $(scripts_dir)/fixtext.sh $(srcdir)/LYMessages_en.h >LYMessages.c
-@MSG_DIR_MAKE@	cd po && $(MAKE_RECUR)
-	cd $(WWWINC) && $(MAKE_RECUR) $(WWW_CFLAGS)
-	cd src && $(MAKE_RECUR) all $(SRC_CFLAGS)
+@MSG_DIR_MAKE@	cd $(PO_DIR) && $(MAKE_RECUR)
+	cd $(WWW_DIR) && $(MAKE_RECUR) $(WWW_CFLAGS)
+	cd $(SRC_DIR) && $(MAKE_RECUR) all $(SRC_CFLAGS)
 
 lint:
-	cd $(WWWINC) && $(MAKE_RECUR) LINT="$(LINT)" $(WWW_CFLAGS) $@
-	cd src && $(MAKE_RECUR) LINT="$(LINT)" $(SRC_CFLAGS) $@
+	cd $(WWW_DIR) && $(MAKE_RECUR) LINT="$(LINT)" $(WWW_CFLAGS) $@
+	cd $(SRC_DIR) && $(MAKE_RECUR) LINT="$(LINT)" $(SRC_CFLAGS) $@
 
 help:
 	@echo
@@ -198,30 +210,30 @@ help:
 clean:
 	rm -f WWW/Library/*/*.[aoib]
 	rm -f WWW/Library/*/.created
-	cd src && $(MAKE_RECUR) clean
+	cd $(SRC_DIR) && $(MAKE_RECUR) clean
 @MSG_DIR_MAKE@	rm -f LYMessages.c
-@MSG_DIR_MAKE@	cd po && $(MAKE_RECUR) $@
-	rm -f *.b src/lynx$x *.leaks cfg_defs.h LYHelp.h lint.*
+@MSG_DIR_MAKE@	cd $(PO_DIR) && $(MAKE_RECUR) $@
+	rm -f *.b $(SRC_DIR)/lynx$x *.leaks cfg_defs.h LYHelp.h lint.*
 @LYNXCFG_MAKE@	-rm -f alphatoc.html body.html cattoc.html tmp007
 	rm -f help_files.sed
 	rm -f core *.core
 
 depend: cfg_defs.h LYHelp.h
-	cd $(WWWINC) && $(MAKE_RECUR) $@
-	cd src && $(MAKE_RECUR) $@
+	cd $(WWW_DIR) && $(MAKE_RECUR) $@
+	cd $(SRC_DIR) && $(MAKE_RECUR) $@
 
 distclean: clean
 	-rm -f WWW/Library/*/*~
 	-rm -f WWW/Library/*/*.bak
-	-rm -rf src/obsolete
-	-cd src && $(MAKE_RECUR) $@
-	-cd src/chrtrans && $(MAKE_RECUR) $@
-@MSG_DIR_MAKE@	cd po && $(MAKE_RECUR) $@
-@MSG_DIR_MAKE@	-rmdir po
+	-rm -rf $(SRC_DIR)/obsolete
+	-cd $(SRC_DIR) && $(MAKE_RECUR) $@
+	-cd $(CHR_DIR) && $(MAKE_RECUR) $@
+@MSG_DIR_MAKE@	cd $(PO_DIR) && $(MAKE_RECUR) $@
+@MSG_DIR_MAKE@	-rmdir $(PO_DIR)
 	-rm -f *~ *.bak *.sav tags TAGS
-	-rm -f $(WWWINC)/makefile src/makefile src/chrtrans/makefile
-@SRCDIR_CLEAN@	-rmdir $(WWWINC) && rmdir WWW/Library && rmdir WWW
-@SRCDIR_CLEAN@	-rmdir src/chrtrans && rmdir src
+	-rm -f $(WWW_DIR)/makefile $(SRC_DIR)/makefile $(CHR_DIR)/makefile
+@SRCDIR_CLEAN@	-rmdir $(WWW_DIR) && rmdir WWW/Library && rmdir WWW
+@SRCDIR_CLEAN@	-rmdir $(CHR_DIR) && rmdir $(SRC_DIR)
 	-rm -f makefile lynx_cfg.h config.status config.log config.cache
 	-rm -f lynx$x
 
@@ -242,9 +254,9 @@ zipcompress: compress zip
 	echo "done!"
 
 zip:  clean
-	rm -f src/lynx$x
+	rm -f $(SRC_DIR)/lynx$x
 	rm -f lynx$x
-	rm -f src/a.out
+	rm -f $(SRC_DIR)/a.out
 	rm -f ../$(lynxname).zip
 	cd ..; rm -f $(lynxname).zip; zip -r $(lynxname).zip $(lynxdir)
 
@@ -264,7 +276,7 @@ lynx.patch: $(top_srcdir) $(top_srcdir)/CHANGES
 		config.status \
 		lynx_cfg.h \
 			; \
-		for I in . src $(WWWINC); do ( set +e; \
+		for I in . $(SRC_DIR) $(WWW_DIR); do ( set +e; \
 			( set -x; cd $$I && rm -f *.orig *.rej makefile ); : ); \
 		done; }
 	( cd $(top_srcdir)/..; echo "%%% Created `date` by target $@. %%%"; \
@@ -285,7 +297,7 @@ install-full: install install-help install-doc
 	@echo Full installation complete.
 
 install-bin: $(BINDIR) lynx$x
-@MSG_DIR_MAKE@	cd po && $(MAKE_RECUR) install
+@MSG_DIR_MAKE@	cd $(PO_DIR) && $(MAKE_RECUR) install
 	@ECHO_CC@$(SHELL) -c \
 	'if test -f $(BINDIR)/lynx$x ; then \
 	      mv -f $(BINDIR)/lynx$x $(BINDIR)/lynx.old; fi'
@@ -345,16 +357,16 @@ install-help : help_files.sed $(HELPDIR)
 	- (cd $(HELPDIR) && WD=`pwd` && HEAD=`echo $$WD|sed -e 's!/lynx_help$$!!'` && test $$WD != $$HEAD && rm -fr *)
 	test -d $(HELPDIR)/keystrokes || mkdir $(HELPDIR)/keystrokes
 @LYNXCFG_MAKE@	@echo 'Making htmlized lynx.cfg'
-@LYNXCFG_MAKE@	cd src && make LYReadCFG.i
+@LYNXCFG_MAKE@	cd $(SRC_DIR) && $(MAKE_RECUR) LYReadCFG.i
 @LYNXCFG_MAKE@	@-rm -f alphatoc.html body.html cattoc.html
-@LYNXCFG_MAKE@	sed -n -e '/Config_Type  *Config_Table/,/{0, *0, *0}/ p' src/LYReadCFG.i | \
+@LYNXCFG_MAKE@	sed -n -e '/Config_Type  *Config_Table/,/{0, *0, *0}/ p' $(SRC_DIR)/LYReadCFG.i | \
 @LYNXCFG_MAKE@	sed  -e 's/ *{ *"\([^"]*\)".*/\1/' | \
 @LYNXCFG_MAKE@	perl $(scripts_dir)/cfg2html.pl -ms $(srcdir)/lynx.cfg
 	@echo Translating/copying html files
 @LYNXCFG_MAKE@	@$(SHELL) -c 'for f in alphatoc.html body.html cattoc.html ; do \
 @LYNXCFG_MAKE@		sed -f help_files.sed $$f > $(HELPDIR)/$$f ; \
 @LYNXCFG_MAKE@		done'
-@LYNXCFG_MAKE@	-rm -f src/LYReadCFG.i
+@LYNXCFG_MAKE@	-rm -f $(SRC_DIR)/LYReadCFG.i
 	@ECHO_CC@$(SHELL) -c 'sed_prog=`pwd`/help_files.sed && \
 		cd $(srcdir)/lynx_help && \
 		dirs=keystrokes && \
@@ -410,7 +422,7 @@ install-lss : $(SYSCONFDIR)
 	@$(SHELL) $(scripts_dir)/install-lss.sh "$(INSTALL_DATA)" $(srcdir)/samples/lynx.lss $(SYSCONFDIR)/lynx.lss
 
 uninstall ::
-@MSG_DIR_MAKE@	cd po && $(MAKE_RECUR) uninstall
+@MSG_DIR_MAKE@	cd $(PO_DIR) && $(MAKE_RECUR) uninstall
 	-rm -f $(BINDIR)/lynx$x
 	-rm -f $(MANDIR)/lynx.1
 	-rm -f $(SYSCONFDIR)/lynx.cfg
@@ -424,6 +436,10 @@ uninstall \
 uninstall-doc ::
 	-test -d $(DOCDIR) && WD=`cd $(DOCDIR) && pwd` && HEAD=`echo $$WD|sed -e 's!/lynx_doc$$!!'` && test $$WD != $$HEAD && rm -rf $(DOCDIR)
 	-test -d $(HELPDIR) && WD=`cd $(HELPDIR) && pwd` && HEAD=`echo $$WD|sed -e 's!/lynx_help$$!!'` && test $$WD != $$HEAD && cd $(HELPDIR) && rm -f COPYING COPYHEADER
+
+update-po:
+	rsync -Lrtvz  translationproject.org::tp/latest/lynx/  $(PO_DIR)
+	test -f $(PO_DIR)/makefile && cd $(PO_DIR) && $(MAKE_RECUR) $@
 
 $(BINDIR) \
 $(MANDIR) \

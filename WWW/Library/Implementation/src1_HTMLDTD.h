@@ -1,4 +1,4 @@
-/* $LynxId: src1_HTMLDTD.h,v 1.5 2008/07/07 00:03:21 tom Exp $ */
+/* $LynxId: src1_HTMLDTD.h,v 1.6 2008/07/15 22:43:49 tom Exp $ */
 #ifndef src_HTMLDTD_H1
 #define src_HTMLDTD_H1 1
 
@@ -137,7 +137,7 @@
 #endif
 /* *INDENT-OFF* */
 
-static attr a_attr[] = {                /* A attributes */
+static const attr a_attr[] = {          /* A attributes */
 	{ "ACCESSKEY"     T(N) },
 	{ "CHARSET"       T(N) },
 	{ "CLASS"         T(c) },
@@ -166,7 +166,7 @@ static attr a_attr[] = {                /* A attributes */
 	{ 0               T(N) }	/* Terminate list */
 };
 
-static attr address_attr[] = {          /* ADDRESS attributes */
+static const attr address_attr[] = {    /* ADDRESS attributes */
 	{ "CLASS"         T(c) },
 	{ "CLEAR"         T(N) },
 	{ "DIR"           T(N) },
@@ -178,7 +178,7 @@ static attr address_attr[] = {          /* ADDRESS attributes */
 	{ 0               T(N) }	/* Terminate list */
 };
 
-static attr applet_attr[] = {           /* APPLET attributes */
+static const attr applet_attr[] = {     /* APPLET attributes */
 	{ "ALIGN"         T(N) },
 	{ "ALT"           T(N) },
 	{ "CLASS"         T(c) },
@@ -199,7 +199,7 @@ static attr applet_attr[] = {           /* APPLET attributes */
 	{ 0               T(N) }	/* Terminate list */
 };
 
-static attr area_attr[] = {             /* AREA attributes */
+static const attr area_attr[] = {       /* AREA attributes */
 	{ "ALT"           T(N) },
 	{ "CLASS"         T(c) },
 	{ "CLEAR"         T(N) },
@@ -221,14 +221,14 @@ static attr area_attr[] = {             /* AREA attributes */
 	{ 0               T(N) }	/* Terminate list */
 };
 
-static attr base_attr[] = {             /* BASE attributes */
+static const attr base_attr[] = {       /* BASE attributes */
 	{ "HREF"          T(h) },
 	{ "TARGET"        T(N) },
 	{ "TITLE"         T(N) },
 	{ 0               T(N) }	/* Terminate list */
 };
 
-static attr bgsound_attr[] = {          /* BGSOUND attributes */
+static const attr bgsound_attr[] = {    /* BGSOUND attributes */
 	{ "CLASS"         T(c) },
 	{ "CLEAR"         T(N) },
 	{ "DIR"           T(N) },
@@ -241,7 +241,7 @@ static attr bgsound_attr[] = {          /* BGSOUND attributes */
 	{ 0               T(N) }	/* Terminate list */
 };
 
-static attr body_attr[] = {             /* BODY attributes */
+static const attr body_attr[] = {       /* BODY attributes */
 	{ "ALINK"         T(N) },
 	{ "BACKGROUND"    T(h) },
 	{ "BGCOLOR"       T(N) },
@@ -260,7 +260,7 @@ static attr body_attr[] = {             /* BODY attributes */
 	{ 0               T(N) }	/* Terminate list */
 };
 
-static attr bodytext_attr[] = {         /* BODYTEXT attributes */
+static const attr bodytext_attr[] = {   /* BODYTEXT attributes */
 	{ "CLASS"         T(c) },
 	{ "CLEAR"         T(N) },
 	{ "DATA"          T(N) },
@@ -278,7 +278,7 @@ static attr bodytext_attr[] = {         /* BODYTEXT attributes */
 	{ 0               T(N) }	/* Terminate list */
 };
 
-static attr bq_attr[] = {               /* BLOCKQUOTE attributes */
+static const attr bq_attr[] = {         /* BLOCKQUOTE attributes */
 	{ "CITE"          T(h) },
 	{ "CLASS"         T(c) },
 	{ "CLEAR"         T(N) },
@@ -291,7 +291,7 @@ static attr bq_attr[] = {               /* BLOCKQUOTE attributes */
 	{ 0               T(N) }	/* Terminate list */
 };
 
-static attr button_attr[] = {           /* BUTTON attributes */
+static const attr button_attr[] = {     /* BUTTON attributes */
 	{ "CLASS"         T(c) },
 	{ "CLEAR"         T(N) },
 	{ "DIR"           T(N) },
@@ -309,7 +309,7 @@ static attr button_attr[] = {           /* BUTTON attributes */
 	{ 0               T(N) }	/* Terminate list */
 };
 
-static attr caption_attr[] = {          /* CAPTION attributes */
+static const attr caption_attr[] = {    /* CAPTION attributes */
 	{ "ACCESSKEY"     T(N) },
 	{ "ALIGN"         T(N) },
 	{ "CLASS"         T(c) },
@@ -322,7 +322,7 @@ static attr caption_attr[] = {          /* CAPTION attributes */
 	{ 0               T(N) }	/* Terminate list */
 };
 
-static attr col_attr[] = {              /* COL attributes */
+static const attr col_attr[] = {        /* COL attributes */
 	{ "ALIGN"         T(N) },
 	{ "CHAR"          T(N) },
 	{ "CHAROFF"       T(N) },
@@ -339,7 +339,7 @@ static attr col_attr[] = {              /* COL attributes */
 	{ 0               T(N) }	/* Terminate list */
 };
 
-static attr credit_attr[] = {           /* CREDIT attributes */
+static const attr credit_attr[] = {     /* CREDIT attributes */
 	{ "CLASS"         T(c) },
 	{ "CLEAR"         T(N) },
 	{ "DIR"           T(N) },
@@ -350,7 +350,7 @@ static attr credit_attr[] = {           /* CREDIT attributes */
 	{ 0               T(N) }	/* Terminate list */
 };
 
-static attr div_attr[] = {              /* CENTER attributes */
+static const attr div_attr[] = {        /* CENTER attributes */
 	{ "ALIGN"         T(N) },
 	{ "CLASS"         T(c) },
 	{ "CLEAR"         T(N) },
@@ -362,7 +362,7 @@ static attr div_attr[] = {              /* CENTER attributes */
 	{ 0               T(N) }	/* Terminate list */
 };
 
-static attr dl_attr[] = {               /* DL attributes */
+static const attr dl_attr[] = {         /* DL attributes */
 	{ "CLASS"         T(c) },
 	{ "CLEAR"         T(N) },
 	{ "COMPACT"       T(N) },
@@ -374,7 +374,7 @@ static attr dl_attr[] = {               /* DL attributes */
 	{ 0               T(N) }	/* Terminate list */
 };
 
-static attr embed_attr[] = {            /* EMBED attributes */
+static const attr embed_attr[] = {      /* EMBED attributes */
 	{ "ALIGN"         T(N) },
 	{ "ALT"           T(N) },
 	{ "BORDER"        T(N) },
@@ -399,7 +399,7 @@ static attr embed_attr[] = {            /* EMBED attributes */
 	{ 0               T(N) }	/* Terminate list */
 };
 
-static attr fieldset_attr[] = {         /* FIELDSET attributes */
+static const attr fieldset_attr[] = {   /* FIELDSET attributes */
 	{ "CLASS"         T(c) },
 	{ "CLEAR"         T(N) },
 	{ "DIR"           T(N) },
@@ -410,7 +410,7 @@ static attr fieldset_attr[] = {         /* FIELDSET attributes */
 	{ 0               T(N) }	/* Terminate list */
 };
 
-static attr fig_attr[] = {              /* FIG attributes */
+static const attr fig_attr[] = {        /* FIG attributes */
 	{ "ALIGN"         T(N) },
 	{ "BORDER"        T(N) },
 	{ "CLASS"         T(c) },
@@ -431,7 +431,7 @@ static attr fig_attr[] = {              /* FIG attributes */
 	{ 0               T(N) }	/* Terminate list */
 };
 
-static attr fn_attr[] = {               /* FN attributes */
+static const attr fn_attr[] = {         /* FN attributes */
 	{ "CLASS"         T(c) },
 	{ "CLEAR"         T(N) },
 	{ "DIR"           T(N) },
@@ -442,7 +442,7 @@ static attr fn_attr[] = {               /* FN attributes */
 	{ 0               T(N) }	/* Terminate list */
 };
 
-static attr font_attr[] = {             /* BASEFONT attributes */
+static const attr font_attr[] = {       /* BASEFONT attributes */
 	{ "CLASS"         T(c) },
 	{ "CLEAR"         T(N) },
 	{ "COLOR"         T(N) },
@@ -455,7 +455,7 @@ static attr font_attr[] = {             /* BASEFONT attributes */
 	{ 0               T(N) }	/* Terminate list */
 };
 
-static attr form_attr[] = {             /* FORM attributes */
+static const attr form_attr[] = {       /* FORM attributes */
 	{ "ACCEPT-CHARSET" T(N) },
 	{ "ACTION"        T(h) },
 	{ "CLASS"         T(c) },
@@ -474,7 +474,7 @@ static attr form_attr[] = {             /* FORM attributes */
 	{ 0               T(N) }	/* Terminate list */
 };
 
-static attr frame_attr[] = {            /* FRAME attributes */
+static const attr frame_attr[] = {      /* FRAME attributes */
 	{ "ID"            T(i) },
 	{ "LONGDESC"      T(h) },
 	{ "MARGINHEIGHT"  T(N) },
@@ -486,13 +486,13 @@ static attr frame_attr[] = {            /* FRAME attributes */
 	{ 0               T(N) }	/* Terminate list */
 };
 
-static attr frameset_attr[] = {         /* FRAMESET attributes */
+static const attr frameset_attr[] = {   /* FRAMESET attributes */
 	{ "COLS"          T(N) },
 	{ "ROWS"          T(N) },
 	{ 0               T(N) }	/* Terminate list */
 };
 
-static attr gen_attr[] = {              /* ABBR attributes */
+static const attr gen_attr[] = {        /* ABBR attributes */
 	{ "CLASS"         T(c) },
 	{ "CLEAR"         T(N) },
 	{ "DIR"           T(N) },
@@ -503,7 +503,7 @@ static attr gen_attr[] = {              /* ABBR attributes */
 	{ 0               T(N) }	/* Terminate list */
 };
 
-static attr h_attr[] = {                /* H1 attributes */
+static const attr h_attr[] = {          /* H1 attributes */
 	{ "ALIGN"         T(N) },
 	{ "CLASS"         T(c) },
 	{ "CLEAR"         T(N) },
@@ -521,7 +521,7 @@ static attr h_attr[] = {                /* H1 attributes */
 	{ 0               T(N) }	/* Terminate list */
 };
 
-static attr hr_attr[] = {               /* HR attributes */
+static const attr hr_attr[] = {         /* HR attributes */
 	{ "ALIGN"         T(N) },
 	{ "CLASS"         T(c) },
 	{ "CLEAR"         T(N) },
@@ -537,7 +537,7 @@ static attr hr_attr[] = {               /* HR attributes */
 	{ 0               T(N) }	/* Terminate list */
 };
 
-static attr iframe_attr[] = {           /* IFRAME attributes */
+static const attr iframe_attr[] = {     /* IFRAME attributes */
 	{ "ALIGN"         T(N) },
 	{ "FRAMEBORDER"   T(N) },
 	{ "HEIGHT"        T(N) },
@@ -553,7 +553,7 @@ static attr iframe_attr[] = {           /* IFRAME attributes */
 	{ 0               T(N) }	/* Terminate list */
 };
 
-static attr img_attr[] = {              /* IMG attributes */
+static const attr img_attr[] = {        /* IMG attributes */
 	{ "ALIGN"         T(N) },
 	{ "ALT"           T(N) },
 	{ "BORDER"        T(N) },
@@ -576,7 +576,7 @@ static attr img_attr[] = {              /* IMG attributes */
 	{ 0               T(N) }	/* Terminate list */
 };
 
-static attr input_attr[] = {            /* INPUT attributes */
+static const attr input_attr[] = {      /* INPUT attributes */
 	{ "ACCEPT"        T(N) },
 	{ "ACCEPT-CHARSET" T(N) },
 	{ "ALIGN"         T(N) },
@@ -612,7 +612,7 @@ static attr input_attr[] = {            /* INPUT attributes */
 	{ 0               T(N) }	/* Terminate list */
 };
 
-static attr isindex_attr[] = {          /* ISINDEX attributes */
+static const attr isindex_attr[] = {    /* ISINDEX attributes */
 	{ "ACTION"        T(h) },
 	{ "DIR"           T(N) },
 	{ "HREF"          T(h) },
@@ -623,7 +623,7 @@ static attr isindex_attr[] = {          /* ISINDEX attributes */
 	{ 0               T(N) }	/* Terminate list */
 };
 
-static attr keygen_attr[] = {           /* KEYGEN attributes */
+static const attr keygen_attr[] = {     /* KEYGEN attributes */
 	{ "CHALLENGE"     T(N) },
 	{ "CLASS"         T(c) },
 	{ "DIR"           T(N) },
@@ -635,7 +635,7 @@ static attr keygen_attr[] = {           /* KEYGEN attributes */
 	{ 0               T(N) }	/* Terminate list */
 };
 
-static attr label_attr[] = {            /* LABEL attributes */
+static const attr label_attr[] = {      /* LABEL attributes */
 	{ "ACCESSKEY"     T(N) },
 	{ "CLASS"         T(c) },
 	{ "CLEAR"         T(N) },
@@ -649,7 +649,7 @@ static attr label_attr[] = {            /* LABEL attributes */
 	{ 0               T(N) }	/* Terminate list */
 };
 
-static attr legend_attr[] = {           /* LEGEND attributes */
+static const attr legend_attr[] = {     /* LEGEND attributes */
 	{ "ACCESSKEY"     T(N) },
 	{ "ALIGN"         T(N) },
 	{ "CLASS"         T(c) },
@@ -662,7 +662,7 @@ static attr legend_attr[] = {           /* LEGEND attributes */
 	{ 0               T(N) }	/* Terminate list */
 };
 
-static attr li_attr[] = {               /* LI attributes */
+static const attr li_attr[] = {         /* LI attributes */
 	{ "CLASS"         T(c) },
 	{ "CLEAR"         T(N) },
 	{ "DINGBAT"       T(N) },
@@ -679,7 +679,7 @@ static attr li_attr[] = {               /* LI attributes */
 	{ 0               T(N) }	/* Terminate list */
 };
 
-static attr link_attr[] = {             /* LINK attributes */
+static const attr link_attr[] = {       /* LINK attributes */
 	{ "CHARSET"       T(N) },
 	{ "CLASS"         T(c) },
 	{ "HREF"          T(h) },
@@ -694,7 +694,7 @@ static attr link_attr[] = {             /* LINK attributes */
 	{ 0               T(N) }	/* Terminate list */
 };
 
-static attr map_attr[] = {              /* MAP attributes */
+static const attr map_attr[] = {        /* MAP attributes */
 	{ "CLASS"         T(c) },
 	{ "CLEAR"         T(N) },
 	{ "DIR"           T(N) },
@@ -706,7 +706,7 @@ static attr map_attr[] = {              /* MAP attributes */
 	{ 0               T(N) }	/* Terminate list */
 };
 
-static attr math_attr[] = {             /* MATH attributes */
+static const attr math_attr[] = {       /* MATH attributes */
 	{ "BOX"           T(N) },
 	{ "CLASS"         T(c) },
 	{ "CLEAR"         T(N) },
@@ -718,19 +718,19 @@ static attr math_attr[] = {             /* MATH attributes */
 	{ 0               T(N) }	/* Terminate list */
 };
 
-static attr meta_attr[] = {             /* META attributes */
+static const attr meta_attr[] = {       /* META attributes */
 	{ "CONTENT"       T(N) },
 	{ "HTTP-EQUIV"    T(N) },
 	{ "NAME"          T(N) },
 	{ 0               T(N) }	/* Terminate list */
 };
 
-static attr nextid_attr[] = {           /* NEXTID attributes */
+static const attr nextid_attr[] = {     /* NEXTID attributes */
 	{ "N"             T(N) },
 	{ 0               T(N) }	/* Terminate list */
 };
 
-static attr note_attr[] = {             /* NOTE attributes */
+static const attr note_attr[] = {       /* NOTE attributes */
 	{ "CLASS"         T(c) },
 	{ "CLEAR"         T(N) },
 	{ "DIR"           T(N) },
@@ -744,7 +744,7 @@ static attr note_attr[] = {             /* NOTE attributes */
 	{ 0               T(N) }	/* Terminate list */
 };
 
-static attr object_attr[] = {           /* OBJECT attributes */
+static const attr object_attr[] = {     /* OBJECT attributes */
 	{ "ALIGN"         T(N) },
 	{ "BORDER"        T(N) },
 	{ "CLASS"         T(c) },
@@ -773,7 +773,7 @@ static attr object_attr[] = {           /* OBJECT attributes */
 	{ 0               T(N) }	/* Terminate list */
 };
 
-static attr ol_attr[] = {               /* OL attributes */
+static const attr ol_attr[] = {         /* OL attributes */
 	{ "CLASS"         T(c) },
 	{ "CLEAR"         T(N) },
 	{ "COMPACT"       T(N) },
@@ -789,7 +789,7 @@ static attr ol_attr[] = {               /* OL attributes */
 	{ 0               T(N) }	/* Terminate list */
 };
 
-static attr option_attr[] = {           /* OPTION attributes */
+static const attr option_attr[] = {     /* OPTION attributes */
 	{ "CLASS"         T(c) },
 	{ "CLEAR"         T(N) },
 	{ "DIR"           T(N) },
@@ -805,7 +805,7 @@ static attr option_attr[] = {           /* OPTION attributes */
 	{ 0               T(N) }	/* Terminate list */
 };
 
-static attr overlay_attr[] = {          /* OVERLAY attributes */
+static const attr overlay_attr[] = {    /* OVERLAY attributes */
 	{ "CLASS"         T(c) },
 	{ "HEIGHT"        T(N) },
 	{ "ID"            T(i) },
@@ -821,7 +821,7 @@ static attr overlay_attr[] = {          /* OVERLAY attributes */
 	{ 0               T(N) }	/* Terminate list */
 };
 
-static attr p_attr[] = {                /* P attributes */
+static const attr p_attr[] = {          /* P attributes */
 	{ "ALIGN"         T(N) },
 	{ "CLASS"         T(c) },
 	{ "CLEAR"         T(N) },
@@ -834,7 +834,7 @@ static attr p_attr[] = {                /* P attributes */
 	{ 0               T(N) }	/* Terminate list */
 };
 
-static attr param_attr[] = {            /* PARAM attributes */
+static const attr param_attr[] = {      /* PARAM attributes */
 	{ "ACCEPT"        T(N) },
 	{ "ACCEPT-CHARSET" T(N) },
 	{ "ACCEPT-ENCODING" T(N) },
@@ -856,7 +856,7 @@ static attr param_attr[] = {            /* PARAM attributes */
 	{ 0               T(N) }	/* Terminate list */
 };
 
-static attr script_attr[] = {           /* SCRIPT attributes */
+static const attr script_attr[] = {     /* SCRIPT attributes */
 	{ "CLASS"         T(c) },
 	{ "CLEAR"         T(N) },
 	{ "DIR"           T(N) },
@@ -874,7 +874,7 @@ static attr script_attr[] = {           /* SCRIPT attributes */
 	{ 0               T(N) }	/* Terminate list */
 };
 
-static attr select_attr[] = {           /* SELECT attributes */
+static const attr select_attr[] = {     /* SELECT attributes */
 	{ "ALIGN"         T(N) },
 	{ "CLASS"         T(c) },
 	{ "CLEAR"         T(N) },
@@ -900,7 +900,7 @@ static attr select_attr[] = {           /* SELECT attributes */
 	{ 0               T(N) }	/* Terminate list */
 };
 
-static attr style_attr[] = {            /* STYLE attributes */
+static const attr style_attr[] = {      /* STYLE attributes */
 	{ "DIR"           T(N) },
 	{ "LANG"          T(N) },
 	{ "NOTATION"      T(N) },
@@ -908,7 +908,7 @@ static attr style_attr[] = {            /* STYLE attributes */
 	{ 0               T(N) }	/* Terminate list */
 };
 
-static attr tab_attr[] = {              /* TAB attributes */
+static const attr tab_attr[] = {        /* TAB attributes */
 	{ "ALIGN"         T(N) },
 	{ "CLASS"         T(c) },
 	{ "CLEAR"         T(N) },
@@ -923,7 +923,7 @@ static attr tab_attr[] = {              /* TAB attributes */
 	{ 0               T(N) }	/* Terminate list */
 };
 
-static attr table_attr[] = {            /* TABLE attributes */
+static const attr table_attr[] = {      /* TABLE attributes */
 	{ "ALIGN"         T(N) },
 	{ "BACKGROUND"    T(h) },
 	{ "BORDER"        T(N) },
@@ -949,7 +949,7 @@ static attr table_attr[] = {            /* TABLE attributes */
 	{ 0               T(N) }	/* Terminate list */
 };
 
-static attr td_attr[] = {               /* TD attributes */
+static const attr td_attr[] = {         /* TD attributes */
 	{ "ALIGN"         T(N) },
 	{ "AXES"          T(N) },
 	{ "AXIS"          T(N) },
@@ -973,7 +973,7 @@ static attr td_attr[] = {               /* TD attributes */
 	{ 0               T(N) }	/* Terminate list */
 };
 
-static attr textarea_attr[] = {         /* TEXTAREA attributes */
+static const attr textarea_attr[] = {   /* TEXTAREA attributes */
 	{ "ACCEPT-CHARSET" T(N) },
 	{ "ALIGN"         T(N) },
 	{ "CLASS"         T(c) },
@@ -997,7 +997,7 @@ static attr textarea_attr[] = {         /* TEXTAREA attributes */
 	{ 0               T(N) }	/* Terminate list */
 };
 
-static attr tr_attr[] = {               /* TBODY attributes */
+static const attr tr_attr[] = {         /* TBODY attributes */
 	{ "ALIGN"         T(N) },
 	{ "CHAR"          T(N) },
 	{ "CHAROFF"       T(N) },
@@ -1014,7 +1014,7 @@ static attr tr_attr[] = {               /* TBODY attributes */
 	{ 0               T(N) }	/* Terminate list */
 };
 
-static attr ul_attr[] = {               /* DIR attributes */
+static const attr ul_attr[] = {         /* DIR attributes */
 	{ "CLASS"         T(c) },
 	{ "CLEAR"         T(N) },
 	{ "COMPACT"       T(N) },

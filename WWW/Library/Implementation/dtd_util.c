@@ -1,5 +1,5 @@
 /*
- * $LynxId: dtd_util.c,v 1.26 2008/07/07 00:03:09 tom Exp $
+ * $LynxId: dtd_util.c,v 1.27 2008/07/15 22:43:29 tom Exp $
  *
  * Given a SGML_dtd structure, write a corresponding flat file, or "C" source.
  * Given the flat-file, write the "C" source.
@@ -257,7 +257,7 @@ static void dump_src_HTTag_Attrs(FILE *output, const SGML_dtd * dtd, int which)
     char pretty = 'N';
     int n;
 
-    sprintf(buffer, "static attr %s_attr[] = {", XXX_attr(dtd, which));
+    sprintf(buffer, "static const attr %s_attr[] = {", XXX_attr(dtd, which));
     fprintf(output,
 	    "%-40s/* %s attributes */\n", buffer, tag->name);
     for (n = 0; n < tag->number_of_attributes; ++n) {
