@@ -1,5 +1,5 @@
 /*
- * $LynxId: SGML.c,v 1.106 2008/07/15 23:54:39 tom Exp $
+ * $LynxId: SGML.c,v 1.109 2008/08/31 18:34:05 tom Exp $
  *
  *			General SGML Parser code		SGML.c
  *			========================
@@ -509,7 +509,7 @@ static void handle_attribute_name(HTStream *context, const char *s)
     }				/* for */
 
     CTRACE((tfp, "SGML: Unknown attribute %s for tag %s\n",
-	    s, context->current_tag->name));
+	    s, NonNull(context->current_tag->name)));
     context->current_attribute_number = INVALID;	/* Invalid */
 }
 
@@ -1371,8 +1371,12 @@ HTTag *SGMLFindTag(const SGML_dtd * dtd,
     {NULL};			/*optimize using the previous results */
     HTTag **res = last + (UCH(*s) % 64);	/*pointer arithmetic */
 
-    if (*res && !strcasecomp((*res)->name, s))
-	return *res;
+    if (*res) {
+	if ((*res)->name == NULL)
+	    return NULL;
+	if (!strcasecomp((*res)->name, s))
+	    return *res;
+    }
 
     for (low = 0, high = dtd->number_of_tags;
 	 high > low;
@@ -1525,6 +1529,39 @@ static void transform_tag(HTStream *context, HTChunk *string)
     }
 }
 #endif /* USE_PRETTYSRC */
+
+static BOOL ignore_when_empty(HTTag * tag)
+{
+    BOOL result = FALSE;
+
+    if (tag->name != 0
+	&& tag->contents != SGML_EMPTY
+	&& tag->tagclass != Tgc_Plike
+	&& (tag->tagclass == Tgc_SELECTlike
+	    || (tag->contains && tag->icontains))) {
+	result = TRUE;
+    }
+    CTRACE((tfp, "SGML Do%s ignore_when_empty:%s\n",
+	    result ? "" : " not",
+	    NonNull(tag->name)));
+    return result;
+}
+
+static void discard_empty(HTStream *context)
+{
+    CTRACE((tfp, "SGML discarding empty %s\n",
+	    NonNull(context->current_tag->name)));
+    CTRACE_FLUSH(tfp);
+
+    /* disable start_element() */
+    context->current_tag->name = 0;
+
+    /* these may be redundant: */
+    context->current_tag->contents = SGML_EMPTY;
+    context->string->size = 0;
+
+    /* do not call end_element() if start_element() was not called */
+}
 
 static void SGML_character(HTStream *context, char c_in)
 {
@@ -1750,7 +1787,7 @@ static void SGML_character(HTStream *context, char c_in)
  *  We jump up to here from below if we have
  *  stuff in the recover, insert, or csi buffers
  *  to process.	 We zero saved_char_in, in effect
- *  as a flag that the octet in not that of the
+ *  as a flag that the octet is not that of the
  *  actual call to this function.  This may be OK
  *  for now, for the stuff this function adds to
  *  its recover buffer, but it might not be for
@@ -1788,7 +1825,8 @@ static void SGML_character(HTStream *context, char c_in)
      */
     /*
      * Works for both ASCII and EBCDIC. -- gil
- *//* S/390 -- gil -- 0811 */
+     * S/390 -- gil -- 0811
+     */
     if (TOASCII(unsign_c) < 32 &&
 	c != '\t' && c != '\n' && c != '\r' &&
 	HTCJK == NOCJK)
@@ -1813,7 +1851,7 @@ static void SGML_character(HTStream *context, char c_in)
 
     /* Almost all CJK characters are double byte but only Japanese
      * JIS X0201 Kana is single byte. To prevent to fail SGML parsing
-     * we have to care them here. -- TH
+     * we have to take care of them here. -- TH
      */
     if ((HTCJK == JAPANESE) && (context->state == S_in_kanji) &&
 	!IS_JAPANESE_2BYTE(context->kanji_buf, UCH(c))
@@ -1861,7 +1899,7 @@ static void SGML_character(HTStream *context, char c_in)
     case S_tagname_slash:
 	/*
 	 * We had something link "<name/" so far, set state to S_text but keep
-	 * context->slashedtag as as a flag; except if we get '>' directly
+	 * context->slashedtag as a flag; except if we get '>' directly
 	 * after the "<name/", and really have a tag for that name in
 	 * context->slashedtag, in which case keep state as is and let code
 	 * below deal with it.  - kw
@@ -1940,6 +1978,7 @@ static void SGML_character(HTStream *context, char c_in)
 	    }
 	    context->slashedtag = NULL;
 	} else if (context->slashedtag &&
+		   context->slashedtag->name &&
 		   (c == '/' ||
 		    (c == '>' && context->state == S_tagname_slash)) &&
 		   TOASCII(unsign_c) < 127) {
@@ -2093,7 +2132,7 @@ static void SGML_character(HTStream *context, char c_in)
 	    HTChunkPuts(string, EntityName);
 	    HTChunkTerminate(string);
 #ifdef USE_PRETTYSRC
-	    /* we need to disable it temporary */
+	    /* we need to disable it temporarily */
 	    if (psrc_view) {
 		psrc_view_backup = 1;
 		psrc_view = 0;
@@ -2101,7 +2140,7 @@ static void SGML_character(HTStream *context, char c_in)
 #endif
 	    handle_entity(context, '\0');
 #ifdef USE_PRETTYSRC
-	    /* we need to disable it temporary */
+	    /* we need to disable it temporarily */
 	    if (psrc_view_backup)
 		psrc_view = TRUE;
 #endif
@@ -2216,17 +2255,20 @@ static void SGML_character(HTStream *context, char c_in)
 	 * with old servers, and for Lynx).  - FM
 	 */
       case_S_litteral:
-    case S_litteral:		/*PSRC:this case not understood completely by HV, not done */
+    case S_litteral:
+	/*PSRC:this case not understood completely by HV, not done */
 	HTChunkPutc(string, c);
 #ifdef USE_PRETTYSRC
-	if (psrc_view) {	/*there is nothing useful in the element_stack */
+	if (psrc_view) {
+	    /* there is nothing useful in the element_stack */
 	    testtag = context->current_tag;
 	} else
 #endif
-	    testtag = context->element_stack ?
-		context->element_stack->tag : NULL;
+	    testtag = (context->element_stack
+		       ? context->element_stack->tag
+		       : NULL);
 
-	if (testtag == NULL) {
+	if (testtag == NULL || testtag->name == NULL) {
 	    string->size--;
 	    context->state = S_text;
 	    goto top1;
@@ -2469,8 +2511,7 @@ static void SGML_character(HTStream *context, char c_in)
 	 * Handle a numeric entity.
 	 */
     case S_incro:
-/* S/390 -- gil -- 1075 *//* CTRACE((tfp, "%s: %d: numeric %d %d\n",
-   __FILE__, __LINE__, unsign_c, c)); */
+	/* S/390 -- gil -- 1075 */
 	if ((TOASCII(unsign_c) < 127) &&
 	    (context->isHex ? isxdigit(UCH(c)) :
 	     isdigit(UCH(c)))) {
@@ -3525,10 +3566,8 @@ static void SGML_character(HTStream *context, char c_in)
 		&& (string->size == 1)
 		&& (string->data[0] == '/')) {
 		if (context->extended_html
-		    && context->current_tag->name) {
-		    CTRACE((tfp, "SGML discarding empty %s\n", context->current_tag->name));
-		    string->size = 0;
-		    context->current_tag->contents = SGML_EMPTY;
+		    && ignore_when_empty(context->current_tag)) {
+		    discard_empty(context);
 		}
 	    } else {
 		HTChunkTerminate(string);

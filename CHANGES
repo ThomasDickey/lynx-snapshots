@@ -1,9 +1,22 @@
--- $LynxId: CHANGES,v 1.288 2008/07/19 14:59:01 tom Exp $
+-- $LynxId: CHANGES,v 1.293 2008/08/31 23:31:07 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
 2008-0?-?? (2.8.7dev.10)
+* revise introductory comment written to ".lynxrc" (Debian #461158) -TD
+* discard anchor's post_data field in HTLoadDocument() if Lynx is about to
+  reload a document.  That would happen if the result of the form includes a
+  link back to the form.  Removing the data causes Lynx to prompt the user,
+  e.g.,
+    Resubmit POST content to http://localhost/cgi-bin/lynxtest.pl ? (y/n)
+  to offer the user the choice between revisiting form or re-POST'ing the
+  data that was on the form (report by Andreas K Foerster) -TD 
+* fixes for LYHighlight() when the highlighted text is empty -TD
+* translate named entities, etc., for "content" field of refresh-URL, cf:
+  2.8.5dev.13 (report by Ivan Shmakov) -TD
+* suppress computation in TrimmedLength() for source-view, which is not needed
+  for Debian #204515 (patch by Mike Knight)
 * add check-po rule to po/makefile -TD
 * modify top-level makefile to work with configure --srcdir -TD
 * add update-po rule to top-level makefile -TD

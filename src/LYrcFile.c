@@ -1,4 +1,4 @@
-/* $LynxId: LYrcFile.c,v 1.73 2008/07/02 00:17:13 Paul.B.Mahol Exp $ */
+/* $LynxId: LYrcFile.c,v 1.74 2008/08/31 23:28:15 tom Exp $ */
 #include <HTUtils.h>
 #include <HTFTP.h>
 #include <LYUtils.h>
@@ -800,13 +800,12 @@ static void write_list(FILE *fp, const char *list)
     while (*list != 0) {
 	int ch = *list++;
 
+	if (first) {
+	    fputs("# ", fp);
+	    first = FALSE;
+	}
 	if (ch == '\n') {
 	    first = TRUE;
-	} else {
-	    if (first) {
-		fputs("# ", fp);
-		first = FALSE;
-	    }
 	}
 	fputc(ch, fp);
     }
@@ -874,13 +873,48 @@ int save_rc(FILE *fp)
     write_list(fp, gettext("\
 Lynx User Defaults File\n\
 \n\
+"));
+
+    /*
+     * We have either the HTML options form, or the older menu, or both.
+     */
+#ifndef NO_OPTION_FORMS
+    write_list(fp, gettext("\
 This file contains options saved from the Lynx Options Screen (normally\n\
-with the '>' key).  There is normally no need to edit this file manually,\n\
-since the defaults here can be controlled from the Options Screen, and the\n\
-next time options are saved from the Options Screen this file will be\n\
-completely rewritten.  You have been warned...\n\
+with the 'o' key).  To save options with that screen, you must select the\n\
+checkbox:\n\
+"));
+    fprintf(fp, "#\t%s\n", SAVE_OPTIONS);
+    fprintf(fp, "#\n");
+    write_list(fp, gettext("\
+You must then save the settings using the link on the line above the\n\
+checkbox:\n\
+"));
+    fprintf(fp, "#\t%s\n", ACCEPT_CHANGES);
+    fprintf(fp, "#\n");
+#ifndef NO_OPTION_MENU
+    write_list(fp, gettext("\
+You may also use the command-line option \"-forms_options\", which displays\n\
+the simpler Options Menu instead.  Save options with that using the '>' key.\n\
+\n\
+"));
+#endif
+#else /* we only have old options-menu */
+    write_list(fp, gettext("\
+This file contains options saved from the Lynx Options Screen (normally\n\
+with the '>' key).\n\
+\n\
+"));
+#endif
+
+    write_list(fp, gettext("\
+There is normally no need to edit this file manually, since the defaults\n\
+here can be controlled from the Options Screen, and the next time options\n\
+are saved from the Options Screen this file will be completely rewritten.\n\
+You have been warned...\n\
+\n\
 If you are looking for the general configuration file - it is normally\n\
-called lynx.cfg, and it has different content and a different format.\n\
+called \"lynx.cfg\".  It has different content and a different format.\n\
 It is not this file.\n\
 "));
     fprintf(fp, "\n");

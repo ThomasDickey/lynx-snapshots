@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.144 2008/02/11 00:07:05 Paul.B.Mahol Exp $
+ * $LynxId: GridText.c,v 1.146 2008/08/31 14:58:57 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -2754,15 +2754,20 @@ static HTLine *insert_blanks_in_line(HTLine *line, int line_number,
 }
 
 #if defined(USE_COLOR_STYLE)
+/*
+ * Found an OFF change not part of an adjacent matched pair.
+ *
+ * Walk backward looking for the corresponding ON change.
+ * Move everything after split_pos to be at split_pos.
+ *
+ * This can only work correctly if all changes are correctly nested!  If this
+ * fails, assume it is safer to leave whatever comes before the OFF on the
+ * previous line alone.
+ */
 static HTStyleChange *skip_matched_and_correct_offsets(HTStyleChange *end,
 						       HTStyleChange *start,
 						       unsigned split_pos)
-{				/* Found an OFF change not part of an adjacent matched pair.
-				 * Walk backward looking for the corresponding ON change.
-				 * Move everything after split_pos to be at split_pos.
-				 * This can only work correctly if all changes are correctly
-				 * nested!  If this fails, assume it is safer to leave whatever
-				 * comes before the OFF on the previous line alone. */
+{
     int level = 0;
     HTStyleChange *tmp = end;
 
@@ -7846,27 +7851,30 @@ static void write_hyphen(FILE *fp)
 static int TrimmedLength(char *string)
 {
     int result = strlen(string);
-    int adjust = result;
-    unsigned ch;
 
-    while (adjust > 0) {
-	ch = UCH(string[adjust - 1]);
-	if (isspace(ch) || IsSpecialAttrChar(ch)) {
-	    --adjust;
-	} else {
-	    break;
-	}
-    }
-    if (result != adjust) {
-	char *dst = string + adjust;
-	char *src = dst;
+    if (!HTisDocumentSource()) {
+	int adjust = result;
+	unsigned ch;
 
-	for (;;) {
-	    src = LYSkipBlanks(src);
-	    if ((*dst++ = *src++) == '\0')
+	while (adjust > 0) {
+	    ch = UCH(string[adjust - 1]);
+	    if (isspace(ch) || IsSpecialAttrChar(ch)) {
+		--adjust;
+	    } else {
 		break;
+	    }
 	}
-	result = (dst - string - 1);
+	if (result != adjust) {
+	    char *dst = string + adjust;
+	    char *src = dst;
+
+	    for (;;) {
+		src = LYSkipBlanks(src);
+		if ((*dst++ = *src++) == '\0')
+		    break;
+	    }
+	    result = (dst - string - 1);
+	}
     }
     return result;
 }
