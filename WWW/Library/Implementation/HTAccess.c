@@ -1,4 +1,7 @@
-/*		Access Manager					HTAccess.c
+/*
+ * $LynxId: HTAccess.c,v 1.66 2008/08/31 22:38:38 tom Exp $
+ *
+ *		Access Manager					HTAccess.c
  *		==============
  *
  *  Authors
@@ -681,21 +684,19 @@ static int HTLoad(const char *addr,
     if (status == HT_FORBIDDEN) {
 	/* prevent crash if telnet or similar was forbidden by rule. - kw */
 	LYFixCursesOn("show alert:");
-	return HTLoadError(sink, 500, gettext("Access forbidden by rule"));
+	status = HTLoadError(sink, 500, gettext("Access forbidden by rule"));
     } else if (status == HT_REDIRECTING) {
-	return status;		/* fake redirection by rule, to redirecting_url */
+	;			/* fake redirection by rule, to redirecting_url */
+    } else if (status >= 0) {
+	/* prevent crash if telnet or similar mapped or proxied by rule. - kw */
+	LYFixCursesOnForAccess(addr, HTAnchor_physical(anchor));
+	p = (HTProtocol *) HTAnchor_protocol(anchor);
+	anchor->parent->underway = TRUE;	/* Hack to deal with caching */
+	status = p->load(HTAnchor_physical(anchor),
+			 anchor, format_out, sink);
+	anchor->parent->underway = FALSE;
+	LYUCPopAssumed();
     }
-    if (status < 0)
-	return status;		/* Can't resolve or forbidden */
-
-    /* prevent crash if telnet or similar mapped or proxied by rule. - kw */
-    LYFixCursesOnForAccess(addr, HTAnchor_physical(anchor));
-    p = (HTProtocol *) HTAnchor_protocol(anchor);
-    anchor->parent->underway = TRUE;	/* Hack to deal with caching */
-    status = p->load(HTAnchor_physical(anchor),
-		     anchor, format_out, sink);
-    anchor->parent->underway = FALSE;
-    LYUCPopAssumed();
     return status;
 }
 
@@ -903,11 +904,12 @@ static BOOL HTLoadDocument(const char *full_address,	/* may include #fragment */
 	    return YES;
 	} else {
 	    ForcingNoCache = YES;
+	    BStrFree(anchor->post_data);
 	    CTRACE((tfp, "HTAccess: Auto-reloading document.\n"));
 	}
     }
 
-    if (text && HText_HaveUserChangedForms(text)) {
+    if (HText_HaveUserChangedForms(text)) {
 	/*
 	 * Issue a warning.  User forms content will be lost.
 	 * Will not restore changed forms, currently.

@@ -1,4 +1,4 @@
-/* $LynxId: LYStrings.c,v 1.134 2008/07/04 15:06:56 tom Exp $ */
+/* $LynxId: LYStrings.c,v 1.135 2008/08/31 18:54:07 tom Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <UCAux.h>
@@ -636,18 +636,22 @@ const char *LYmbcs_skip_glyphs(const char *data,
     if (n_glyphs < 0)
 	n_glyphs = 0;
 
-    if (!data)
-	return NULL;
-    if (!utf_flag)
-	return (data + n_glyphs);
-
-    while (*data) {
-	if (IS_NEW_GLYPH(*data)) {
-	    if (i_glyphs++ >= n_glyphs) {
-		return data;
+    if (!isEmpty(data)) {
+	if (!utf_flag) {
+	    while (n_glyphs-- > 0) {
+		if (!*++data)
+		    break;
+	    }
+	} else {
+	    while (*data) {
+		if (IS_NEW_GLYPH(*data)) {
+		    if (i_glyphs++ >= n_glyphs) {
+			break;
+		    }
+		}
+		data++;
 	    }
 	}
-	data++;
     }
     return data;
 }

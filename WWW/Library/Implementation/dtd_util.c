@@ -1,5 +1,5 @@
 /*
- * $LynxId: dtd_util.c,v 1.27 2008/07/15 22:43:29 tom Exp $
+ * $LynxId: dtd_util.c,v 1.28 2008/08/18 23:42:12 tom Exp $
  *
  * Given a SGML_dtd structure, write a corresponding flat file, or "C" source.
  * Given the flat-file, write the "C" source.
@@ -192,7 +192,7 @@ static const char *DEF_name(const SGML_dtd * dtd, int which)
 
 typedef struct {
     const char *name;
-    attr *attrs;
+    const attr *attrs;
     int count;
     int which;
 } AttrInfo;
@@ -490,7 +490,7 @@ static void dump_header(FILE *output, const SGML_dtd * dtd)
     fprintf(output, "#endif\t\t\t\t/* %s */\n", marker);
 }
 
-static void dump_flat_attrs(FILE *output, const char *name, attr * attributes, int number_of_attributes)
+static void dump_flat_attrs(FILE *output, const char *name, const attr * attributes, int number_of_attributes)
 {
     int n;
 

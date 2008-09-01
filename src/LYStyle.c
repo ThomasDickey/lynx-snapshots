@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYStyle.c,v 1.61 2007/07/23 19:57:17 tom Exp $
+ * $LynxId: LYStyle.c,v 1.62 2008/08/31 16:00:10 tom Exp $
  *
  * character level styles for Lynx
  * (c) 1996 Rob Partington -- donated to the Lyncei (if they want it :-)
@@ -46,7 +46,7 @@ static int cached_styles_rows = 0;
 static int cached_styles_cols = 0;
 
 /* stack of attributes during page rendering */
-int last_styles[MAX_LAST_STYLES] =
+int last_styles[MAX_LAST_STYLES + 1] =
 {0};
 int last_colorattr_ptr = 0;
 

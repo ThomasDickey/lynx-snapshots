@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCharUtils.c,v 1.89 2007/08/02 19:31:34 tom Exp $
+ * $LynxId: LYCharUtils.c,v 1.90 2008/08/31 17:00:05 tom Exp $
  *
  *  Functions associated with LYCharSets.c and the Lynx version of HTML.c - FM
  *  ==========================================================================
@@ -2490,6 +2490,8 @@ void LYHandleMETA(HTStructured * me, const BOOL *present,
     } else if (!strcasecomp(NonNull(http_equiv), "Refresh")) {
 	char *Seconds = NULL;
 
+	LYUCTranslateHTMLString(&content, me->tag_charset, me->tag_charset,
+				NO, NO, YES, st_other);
 	LYParseRefreshURL(content, &Seconds, &href);
 
 	if (Seconds) {

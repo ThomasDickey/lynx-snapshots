@@ -3,24 +3,37 @@ static const char yysccsid[] = "@(#)yaccpar	1.9 (Berkeley) 02/21/93";
 #endif
 
 #include <stdlib.h>
+#include <string.h>
 
 #define YYBYACC 1
 #define YYMAJOR 1
 #define YYMINOR 9
-#define YYPATCH 20050813
+#define YYPATCH 20080827
 
-#define YYEMPTY (-1)
-#define yyclearin    (yychar = YYEMPTY)
-#define yyerrok      (yyerrflag = 0)
-#define YYRECOVERING (yyerrflag != 0)
+#define YYEMPTY        (-1)
+#define yyclearin      (yychar = YYEMPTY)
+#define yyerrok        (yyerrflag = 0)
+#define YYRECOVERING() (yyerrflag != 0)
 
-extern int yyparse(void);
+/* compatibility with bison */
+#ifdef YYPARSE_PARAM
+/* compatibility with FreeBSD */
+#ifdef YYPARSE_PARAM_TYPE
+#define YYPARSE_DECL() yyparse(YYPARSE_PARAM_TYPE YYPARSE_PARAM)
+#else
+#define YYPARSE_DECL() yyparse(void *YYPARSE_PARAM)
+#endif
+#else
+#define YYPARSE_DECL() yyparse(void)
+#endif /* YYPARSE_PARAM */
+
+extern int YYPARSE_DECL();
 
 static int yygrowstack(void);
 #define YYPREFIX "yy"
 #line 2 "parsdate.y"
 /*
- *  $LynxId: parsdate.c,v 1.2 2008/07/01 20:14:38 tom Exp $
+ *  $LynxId: parsdate.c,v 1.3 2008/08/31 16:04:04 tom Exp $
  *
  *  This module is adapted and extended from tin, to use for LYmktime().
  *
@@ -148,7 +161,7 @@ typedef union {
     time_t		Number;
     enum _MERIDIAN	Meridian;
 } YYSTYPE;
-#line 152 "y.tab.c"
+#line 164 "y.tab.c"
 #define tDAY 257
 #define tDAYZONE 258
 #define tMERIDIAN 259
@@ -160,19 +173,19 @@ typedef union {
 #define tZONE 265
 #define tDST 266
 #define YYERRCODE 256
-short yylhs[] = {                                        -1,
+static const short yylhs[] = {                           -1,
     0,    0,    4,    4,    4,    4,    4,    4,    5,    5,
     5,    5,    5,    2,    2,    2,    2,    2,    1,    6,
     6,    6,    6,    6,    6,    6,    6,    6,    7,    8,
     8,    8,    8,    3,    3,
 };
-short yylen[] = {                                         2,
+static const short yylen[] = {                            2,
     0,    2,    1,    2,    1,    1,    2,    1,    2,    4,
     4,    6,    6,    1,    1,    2,    2,    1,    1,    3,
     5,    2,    4,    2,    3,    5,    6,    3,    9,    2,
     2,    2,    2,    0,    1,
 };
-short yydefred[] = {                                      1,
+static const short yydefred[] = {                         1,
     0,    0,    0,    0,    0,    2,    0,    5,    0,    8,
     0,    0,    0,   32,   30,   35,    0,   33,   31,    0,
     0,    0,    9,    0,   19,    0,   18,    4,    7,    0,
@@ -180,10 +193,10 @@ short yydefred[] = {                                      1,
     0,   23,    0,   11,   10,    0,    0,   26,    0,    0,
    21,    0,   27,   13,   12,    0,    0,   29,
 };
-short yydgoto[] = {                                       1,
+static const short yydgoto[] = {                          1,
    27,   28,   23,    6,    7,    8,    9,   10,
 };
-short yysindex[] = {                                      0,
+static const short yysindex[] = {                         0,
  -240,  -41, -256, -227,  -45,    0, -251,    0, -251,    0,
  -254, -249,  -22,    0,    0,    0, -237,    0,    0, -235,
  -228, -226,    0, -236,    0, -224,    0,    0,    0, -223,
@@ -191,7 +204,7 @@ short yysindex[] = {                                      0,
  -215,    0, -218,    0,    0, -217, -216,    0, -214, -234,
     0,   -8,    0,    0,    0, -213, -212,    0,
 };
-short yyrindex[] = {                                      0,
+static const short yyrindex[] = {                         0,
     0,    0,    0,    0,    5,    0,   26,    0,   31,    0,
     0,    0,   11,    0,    0,    0,   37,    0,    0,    0,
     0,    0,    0,   16,    0,   32,    0,    0,    0,    0,
@@ -199,11 +212,11 @@ short yyrindex[] = {                                      0,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    1,
     0,    0,    0,    0,    0,    0,    0,    0,
 };
-short yygindex[] = {                                      0,
+static const short yygindex[] = {                         0,
   -17,   44,  -31,    0,    0,    0,    0,    0,
 };
 #define YYTABLESIZE 300
-short yytable[] = {                                      43,
+static const short yytable[] = {                         43,
    34,   22,   12,   45,   34,   41,   24,   13,   38,   30,
    22,   25,   21,   26,   31,   15,    2,   44,   55,    3,
    20,   32,    4,    5,   16,    3,   33,   34,   25,   37,
@@ -235,7 +248,7 @@ short yytable[] = {                                      43,
    20,    0,    3,   20,   20,    3,    0,    6,   14,    3,
     6,   14,    0,   24,    6,   14,   24,    0,    0,   24,
 };
-short yycheck[] = {                                      58,
+static const short yycheck[] = {                         58,
     0,   47,   44,   35,    0,   45,  258,  264,   26,  264,
     0,  263,   58,  265,  264,    0,  257,   35,   50,  260,
     0,   44,  263,  264,  259,    0,  264,  263,  263,  266,
@@ -273,7 +286,8 @@ short yycheck[] = {                                      58,
 #endif
 #define YYMAXTOKEN 266
 #if YYDEBUG
-char *yyname[] = {
+static const char *yyname[] = {
+
 "end-of-file",0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,"','","'-'",0,"'/'",0,0,0,0,0,0,0,0,0,0,"':'",0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -284,7 +298,7 @@ char *yyname[] = {
 "tMERIDIAN","tMONTH","tMONTH_UNIT","tSEC_UNIT","tSNUMBER","tUNUMBER","tZONE",
 "tDST",
 };
-char *yyrule[] = {
+static const char *yyrule[] = {
 "$accept : spec",
 "spec :",
 "spec : spec item",
@@ -321,6 +335,7 @@ char *yyrule[] = {
 "rel : tUNUMBER tMONTH_UNIT",
 "o_merid :",
 "o_merid : tMERIDIAN",
+
 };
 #endif
 #if YYDEBUG
@@ -355,7 +370,7 @@ YYSTYPE  yylval;
 static short   *yyss;
 static short   *yysslim;
 static YYSTYPE *yyvs;
-static int      yystacksize;
+static unsigned yystacksize;
 #line 350 "parsdate.y"
 
 /*
@@ -928,11 +943,12 @@ parsedate(
      * from the error return value.  (Alternately could set errno on error.) */
     return Start == -1 ? 0 : Start;
 }
-#line 932 "y.tab.c"
+#line 946 "y.tab.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
 static int yygrowstack(void)
 {
-    int newsize, i;
+    int i;
+    unsigned newsize;
     short *newss;
     YYSTYPE *newvs;
 
@@ -965,16 +981,17 @@ static int yygrowstack(void)
     return 0;
 }
 
-#define YYABORT goto yyabort
+#define YYABORT  goto yyabort
 #define YYREJECT goto yyabort
 #define YYACCEPT goto yyaccept
-#define YYERROR goto yyerrlab
+#define YYERROR  goto yyerrlab
+
 int
-yyparse(void)
+YYPARSE_DECL()
 {
-    register int yym, yyn, yystate;
+    int yym, yyn, yystate;
 #if YYDEBUG
-    register const char *yys;
+    const char *yys;
 
     if ((yys = getenv("YYDEBUG")) != 0)
     {
@@ -987,11 +1004,13 @@ yyparse(void)
     yynerrs = 0;
     yyerrflag = 0;
     yychar = YYEMPTY;
+    yystate = 0;
 
     if (yyss == NULL && yygrowstack()) goto yyoverflow;
     yyssp = yyss;
     yyvsp = yyvs;
-    *yyssp = yystate = 0;
+    yystate = 0;
+    *yyssp = 0;
 
 yyloop:
     if ((yyn = yydefred[yystate]) != 0) goto yyreduce;
@@ -1021,7 +1040,8 @@ yyloop:
         {
             goto yyoverflow;
         }
-        *++yyssp = yystate = yytable[yyn];
+        yystate = yytable[yyn];
+        *++yyssp = yytable[yyn];
         *++yyvsp = yylval;
         yychar = YYEMPTY;
         if (yyerrflag > 0)  --yyerrflag;
@@ -1037,9 +1057,7 @@ yyloop:
 
     yyerror("syntax error");
 
-#ifdef lint
     goto yyerrlab;
-#endif
 
 yyerrlab:
     ++yynerrs;
@@ -1062,7 +1080,8 @@ yyinrecovery:
                 {
                     goto yyoverflow;
                 }
-                *++yyssp = yystate = yytable[yyn];
+                yystate = yytable[yyn];
+                *++yyssp = yytable[yyn];
                 *++yyvsp = yylval;
                 goto yyloop;
             }
@@ -1103,12 +1122,15 @@ yyreduce:
                 YYPREFIX, yystate, yyn, yyrule[yyn]);
 #endif
     yym = yylen[yyn];
-    yyval = yyvsp[1-yym];
+    if (yym)
+        yyval = yyvsp[1-yym];
+    else
+        memset(&yyval, 0, sizeof yyval);
     switch (yyn)
     {
 case 3:
 #line 146 "parsdate.y"
-{
+	{
 	    yyHaveTime++;
 #if	defined(lint)
 	    /* I am compulsive about lint natterings... */
@@ -1120,27 +1142,27 @@ case 3:
 break;
 case 4:
 #line 155 "parsdate.y"
-{
+	{
 	    yyHaveTime++;
 	    yyTimezone = yyvsp[0].Number;
 	}
 break;
 case 5:
 #line 159 "parsdate.y"
-{
+	{
 	    yyHaveDate++;
 	}
 break;
 case 6:
 #line 162 "parsdate.y"
-{
+	{
 	    yyHaveDate++;
 	    yyHaveTime++;
 	}
 break;
 case 7:
 #line 166 "parsdate.y"
-{
+	{
 	    yyHaveDate++;
 	    yyHaveTime++;
 	    yyTimezone = yyvsp[0].Number;
@@ -1148,13 +1170,13 @@ case 7:
 break;
 case 8:
 #line 171 "parsdate.y"
-{
+	{
 	    yyHaveRel = 1;
 	}
 break;
 case 9:
 #line 176 "parsdate.y"
-{
+	{
 	    if (yyvsp[-1].Number < 100) {
 		yyHour = yyvsp[-1].Number;
 		yyMinutes = 0;
@@ -1169,7 +1191,7 @@ case 9:
 break;
 case 10:
 #line 188 "parsdate.y"
-{
+	{
 	    yyHour = yyvsp[-3].Number;
 	    yyMinutes = yyvsp[-1].Number;
 	    yySeconds = 0;
@@ -1178,7 +1200,7 @@ case 10:
 break;
 case 11:
 #line 194 "parsdate.y"
-{
+	{
 	    yyHour = yyvsp[-3].Number;
 	    yyMinutes = yyvsp[-1].Number;
 	    yyTimezone = yyvsp[0].Number;
@@ -1188,7 +1210,7 @@ case 11:
 break;
 case 12:
 #line 201 "parsdate.y"
-{
+	{
 	    yyHour = yyvsp[-5].Number;
 	    yyMinutes = yyvsp[-3].Number;
 	    yySeconds = yyvsp[-1].Number;
@@ -1197,7 +1219,7 @@ case 12:
 break;
 case 13:
 #line 207 "parsdate.y"
-{
+	{
 	    yyHour = yyvsp[-5].Number;
 	    yyMinutes = yyvsp[-3].Number;
 	    yySeconds = yyvsp[-1].Number;
@@ -1208,28 +1230,28 @@ case 13:
 break;
 case 14:
 #line 217 "parsdate.y"
-{
+	{
 	    yyval.Number = yyvsp[0].Number;
 	    yyDSTmode = DSToff;
 	}
 break;
 case 15:
 #line 221 "parsdate.y"
-{
+	{
 	    yyval.Number = yyvsp[0].Number;
 	    yyDSTmode = DSTon;
 	}
 break;
 case 16:
 #line 225 "parsdate.y"
-{
+	{
 	    yyTimezone = yyvsp[-1].Number;
 	    yyDSTmode = DSTon;
 	}
 break;
 case 17:
 #line 229 "parsdate.y"
-{
+	{
 	    /* Only allow "GMT+300" and "GMT-0800" */
 	    if (yyvsp[-1].Number != 0) {
 		YYABORT;
@@ -1240,14 +1262,14 @@ case 17:
 break;
 case 18:
 #line 237 "parsdate.y"
-{
+	{
 	    yyval.Number = yyvsp[0].Number;
 	    yyDSTmode = DSToff;
 	}
 break;
 case 19:
 #line 243 "parsdate.y"
-{
+	{
 	    int	i;
 
 	    /* Unix and GMT and numeric timezones -- a little confusing. */
@@ -1269,14 +1291,14 @@ case 19:
 break;
 case 20:
 #line 264 "parsdate.y"
-{
+	{
 	    yyMonth = yyvsp[-2].Number;
 	    yyDay = yyvsp[0].Number;
 	}
 break;
 case 21:
 #line 268 "parsdate.y"
-{
+	{
 	    if (yyvsp[-4].Number > 100) {
 		yyYear = yyvsp[-4].Number;
 		yyMonth = yyvsp[-2].Number;
@@ -1291,14 +1313,14 @@ case 21:
 break;
 case 22:
 #line 280 "parsdate.y"
-{
+	{
 	    yyMonth = yyvsp[-1].Number;
 	    yyDay = yyvsp[0].Number;
 	}
 break;
 case 23:
 #line 284 "parsdate.y"
-{
+	{
 	    yyMonth = yyvsp[-3].Number;
 	    yyDay = yyvsp[-2].Number;
 	    yyYear = yyvsp[0].Number;
@@ -1306,14 +1328,14 @@ case 23:
 break;
 case 24:
 #line 289 "parsdate.y"
-{
+	{
 	    yyDay = yyvsp[-1].Number;
 	    yyMonth = yyvsp[0].Number;
 	}
 break;
 case 25:
 #line 293 "parsdate.y"
-{
+	{
 	    yyDay = yyvsp[-2].Number;
 	    yyMonth = yyvsp[-1].Number;
 	    yyYear = yyvsp[0].Number;
@@ -1321,7 +1343,7 @@ case 25:
 break;
 case 26:
 #line 298 "parsdate.y"
-{
+	{
 	    yyDay = yyvsp[-2].Number;
 	    yyMonth = yyvsp[-1].Number;
 	    yyYear = yyvsp[0].Number;
@@ -1329,7 +1351,7 @@ case 26:
 break;
 case 27:
 #line 303 "parsdate.y"
-{
+	{
 	    yyDay = yyvsp[-3].Number;
 	    yyMonth = yyvsp[-1].Number;
 	    yyYear = -yyvsp[0].Number;
@@ -1337,7 +1359,7 @@ case 27:
 break;
 case 28:
 #line 308 "parsdate.y"
-{
+	{
 	    yyDay = yyvsp[-2].Number;
 	    yyMonth = -yyvsp[-1].Number;
 	    yyYear = -yyvsp[0].Number;
@@ -1347,7 +1369,7 @@ case 28:
 break;
 case 29:
 #line 317 "parsdate.y"
-{
+	{
 	    yyMonth = yyvsp[-7].Number;
 	    yyDay = yyvsp[-6].Number;
 	    yyYear = yyvsp[0].Number;
@@ -1358,41 +1380,41 @@ case 29:
 break;
 case 30:
 #line 327 "parsdate.y"
-{
+	{
 	    yyRelSeconds += yyvsp[-1].Number * yyvsp[0].Number;
 	}
 break;
 case 31:
 #line 330 "parsdate.y"
-{
+	{
 	    yyRelSeconds += yyvsp[-1].Number * yyvsp[0].Number;
 	}
 break;
 case 32:
 #line 333 "parsdate.y"
-{
+	{
 	    yyRelMonth += yyvsp[-1].Number * yyvsp[0].Number;
 	}
 break;
 case 33:
 #line 336 "parsdate.y"
-{
+	{
 	    yyRelMonth += yyvsp[-1].Number * yyvsp[0].Number;
 	}
 break;
 case 34:
 #line 341 "parsdate.y"
-{
+	{
 	    yyval.Meridian = MER24;
 	}
 break;
 case 35:
 #line 344 "parsdate.y"
-{
+	{
 	    yyval.Meridian = yyvsp[0].Meridian;
 	}
 break;
-#line 1396 "y.tab.c"
+#line 1419 "y.tab.c"
     }
     yyssp -= yym;
     yystate = *yyssp;
@@ -1439,7 +1461,7 @@ to state %d\n", YYPREFIX, *yyssp, yystate);
     {
         goto yyoverflow;
     }
-    *++yyssp = yystate;
+    *++yyssp = (short) yystate;
     *++yyvsp = yyval;
     goto yyloop;
 

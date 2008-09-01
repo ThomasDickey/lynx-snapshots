@@ -47,7 +47,7 @@ extern "C" {
 
 /* stack of attributes during page rendering */
 #define MAX_LAST_STYLES 128
-    extern int last_styles[MAX_LAST_STYLES];
+    extern int last_styles[MAX_LAST_STYLES + 1];
     extern int last_colorattr_ptr;
 
 #endif
