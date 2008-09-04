@@ -1,9 +1,11 @@
--- $LynxId: CHANGES,v 1.293 2008/08/31 23:31:07 tom Exp $
+-- $LynxId: CHANGES,v 1.294 2008/09/04 00:27:30 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
 2008-0?-?? (2.8.7dev.10)
+* rewrite LYRefreshEdit(), to display multibyte/multicolumn characters properly
+  when using wide-character curses -TD
 * revise introductory comment written to ".lynxrc" (Debian #461158) -TD
 * discard anchor's post_data field in HTLoadDocument() if Lynx is about to
   reload a document.  That would happen if the result of the form includes a
