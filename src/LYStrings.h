@@ -1,3 +1,6 @@
+/*
+ * $LynxId: LYStrings.h,v 1.66 2008/09/01 15:09:03 tom Exp $
+ */
 #ifndef LYSTRINGS_H
 #define LYSTRINGS_H
 
@@ -183,6 +186,8 @@ extern "C" {
 #define ENHANCED_LINEEDIT
 #endif
 
+#define MAX_EDIT 1024
+
 /* EditFieldData preserves state between calls to LYEdit1
  */
     typedef struct _EditFieldData {
@@ -207,7 +212,10 @@ extern "C" {
 				   unactive mark.  */
 #endif
 
-	char buffer[1024];	/* String buffer                          */
+	char buffer[MAX_EDIT];	/* String buffer                          */
+
+	int offset2col[MAX_EDIT * 2];
+	int col2offset[MAX_EDIT * 2];
 
     } EditFieldData;
 
