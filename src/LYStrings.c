@@ -1,4 +1,4 @@
-/* $LynxId: LYStrings.c,v 1.146 2008/09/04 00:21:11 tom Exp $ */
+/* $LynxId: LYStrings.c,v 1.147 2008/09/05 00:17:48 tom Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <UCAux.h>
@@ -660,6 +660,21 @@ const char *LYmbcs_skip_glyphs(const char *data,
 	}
     }
     return data;
+}
+
+const char *LYmbcs_skip_cells(const char *data,
+			      int n_cells,
+			      BOOL utf_flag)
+{
+    const char *result;
+    int actual;
+    int target = n_cells;
+
+    do {
+	result = LYmbcs_skip_glyphs(data, target--, utf_flag);
+	actual = LYstrExtent2(data, result - data);
+    } while ((actual > 0) && (actual > n_cells));
+    return result;
 }
 
 /*

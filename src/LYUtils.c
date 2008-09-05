@@ -1,4 +1,4 @@
-/* $LynxId: LYUtils.c,v 1.169 2008/08/31 19:03:45 tom Exp $ */
+/* $LynxId: LYUtils.c,v 1.170 2008/09/05 00:19:21 tom Exp $ */
 #include <HTUtils.h>
 #include <HTTCP.h>
 #include <HTParse.h>
@@ -1091,8 +1091,8 @@ void LYhighlight(int flag,
 	    if (avail_space > links[cur].l_form->size)
 		avail_space = links[cur].l_form->size;
 
-	    gllen = LYmbcsstrlen(text, utf_flag, NO);
-	    len = LYmbcs_skip_glyphs(text, avail_space, utf_flag) - text;
+	    gllen = LYmbcsstrlen(text, utf_flag, YES);
+	    len = LYmbcs_skip_cells(text, avail_space, utf_flag) - text;
 	    LYwaddnstr(LYwin, text, len);
 	    while (gllen++ < avail_space)
 		LYaddch('_');
