@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYStrings.h,v 1.66 2008/09/01 15:09:03 tom Exp $
+ * $LynxId: LYStrings.h,v 1.67 2008/09/05 00:18:18 tom Exp $
  */
 #ifndef LYSTRINGS_H
 #define LYSTRINGS_H
@@ -53,6 +53,9 @@ extern "C" {
 			       int n_bytes,
 			       int n_glyphs,
 			       BOOL utf_flag);
+    extern const char *LYmbcs_skip_cells(const char *data,
+					 int n_cells,
+					 BOOL utf_flag);
     extern const char *LYmbcs_skip_glyphs(const char *data,
 					  int n_glyphs,
 					  BOOL utf_flag);

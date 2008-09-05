@@ -1,3 +1,4 @@
+/* $LynxId: LYForms.c,v 1.76 2008/09/05 00:28:05 tom Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <HTTP.h>
@@ -204,7 +205,7 @@ int change_form_link_ex(int cur,
     case F_PASSWORD_TYPE:
 	c = form_getstr(cur, use_last_tfpos, redraw_only);
 	LYSetHilite(cur, (form->type == F_PASSWORD_TYPE)
-		    ? STARS(strlen(form->value))
+		    ? STARS(LYstrCells(form->value))
 		    : form->value);
 	break;
 
@@ -457,8 +458,9 @@ static int form_getstr(int cur,
     }
 #endif /* TEXTFIELDS_MAY_NEED_ACTIVATION && INACTIVE_INPUT_STYLE_VH */
     LYRefreshEdit(&MyEdit);
-    if (redraw_only)
+    if (redraw_only) {
 	return 0;		/*return value won't be analysed */
+    }
 
     /*
      * And go for it!
@@ -686,7 +688,7 @@ static int form_getstr(int cur,
 	switch (ch) {
 	default:
 	    /* [ 1999/04/14 (Wed) 15:01:33 ]
-	     * Left arrrow in column 0 deserves special treatment here, else
+	     * Left arrow in column 0 deserves special treatment here, else
 	     * you can get trapped in a form without submit button!
 	     */
 	    if (action == LYE_BACK && MyEdit.pos == 0 && repeat == -1) {
@@ -798,7 +800,6 @@ static int form_getstr(int cur,
     }
   breakfor:
     if (Edited) {
-	char *p;
 
 	/*
 	 * Load the new value.
@@ -810,10 +811,13 @@ static int form_getstr(int cur,
 	     */
 	    StrAllocCopy(form->value, MyEdit.buffer);
 	} else {
+	    int old_len = strlen(form->value);
+	    int new_len = strlen(value);
+
 	    /*
 	     * Combine the modified tail with the unmodified head.  - FM
 	     */
-	    form->value[(strlen(form->value) - strlen(value))] = '\0';
+	    form->value[(old_len > new_len) ? (old_len - new_len) : 0] = '\0';
 	    StrAllocCat(form->value, MyEdit.buffer);
 	    HTUserMsg(FORM_TAIL_COMBINED_WITH_HEAD);
 	}
@@ -828,10 +832,7 @@ static int form_getstr(int cur,
 	 * form????
 	 */
 	if (LYtrimInputFields) {
-	    p = &(form->value[strlen(form->value)]);
-	    while ((p != form->value) && (p[-1] == ' '))
-		p--;
-	    *p = '\0';
+	    LYTrimTrailing(form->value);
 	}
 
 	/*

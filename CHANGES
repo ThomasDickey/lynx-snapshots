@@ -1,9 +1,10 @@
--- $LynxId: CHANGES,v 1.294 2008/09/04 00:27:30 tom Exp $
+-- $LynxId: CHANGES,v 1.295 2008/09/05 00:30:55 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
 2008-0?-?? (2.8.7dev.10)
+* modify LYhighlight() to limit display of multicolumn characters -TD
 * rewrite LYRefreshEdit(), to display multibyte/multicolumn characters properly
   when using wide-character curses -TD
 * revise introductory comment written to ".lynxrc" (Debian #461158) -TD
