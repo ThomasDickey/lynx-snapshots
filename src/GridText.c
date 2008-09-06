@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.146 2008/08/31 14:58:57 tom Exp $
+ * $LynxId: GridText.c,v 1.151 2008/09/06 14:40:45 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -57,9 +57,9 @@
 #include <LYJustify.h>
 
 #ifdef CONV_JISX0201KANA_JISX0208KANA
-#define is_CJK2(b) (HTCJK != NOCJK && is8bits(UCH(b)))
+#define is_CJK2(b) (IS_CJK_TTY && is8bits(UCH(b)))
 #else
-#define is_CJK2(b) (HTCJK != NOCJK && is8bits(UCH(b)) && kanji_code != SJIS)
+#define is_CJK2(b) (IS_CJK_TTY && is8bits(UCH(b)) && kanji_code != SJIS)
 #endif
 
 #ifdef USE_CURSES_PADS
@@ -569,7 +569,7 @@ void mark_justify_start_position(void *text)
 #define REALLY_CAN_JUSTIFY(text) ( (wait_for_this_stacked_elt<0) && \
 	( text->style->alignment == HT_LEFT     || \
 	  text->style->alignment == HT_JUSTIFY) && \
-	HTCJK == NOCJK && !in_DT && \
+	!IS_CJK_TTY && !in_DT && \
 	can_justify_here && can_justify_this_line && !form_in_htext )
 
 #endif /* EXP_JUSTIFY_ELTS */
@@ -1010,7 +1010,7 @@ HText *HText_new(HTParentAnchor *anchor)
     if (HTMainText) {
 	if (HText_hasUTF8OutputSet(HTMainText) &&
 	    HTLoadedDocumentEightbit() &&
-	    LYCharSet_UC[current_char_set].enc == UCT_ENC_UTF8) {
+	    IS_UTF8_TTY) {
 	    self->had_utf8 = HTMainText->has_utf8;
 	} else {
 	    self->had_utf8 = HTMainText->has_utf8;
@@ -1719,7 +1719,7 @@ static void display_title(HText *text)
      * if appropriate, preceded by the toolbar token if appropriate,
      * and truncated if necessary.  -FM & KW
      */
-    if (HTCJK != NOCJK) {
+    if (IS_CJK_TTY) {
 	if (*title &&
 	    (tmp = typecallocn(unsigned char, (strlen(title) * 2 + 256)))) {
 	    if (kanji_code == EUC) {
@@ -2202,7 +2202,7 @@ static void display_page(HText *text,
 			    tmp[1] = '\0';
 			    written += (utf_extra + 1);
 			    utf_extra = 0;
-			} else if (HTCJK != NOCJK && is8bits(tmp[0])) {
+			} else if (IS_CJK_TTY && is8bits(tmp[0])) {
 			    /*
 			     * For CJK strings, by Masanobu Kimura.
 			     */
@@ -2389,9 +2389,8 @@ static void display_page(HText *text,
 				? checked_box
 				: unchecked_box);
 		} else if (FormInfo_ptr->type == F_PASSWORD_TYPE) {
-		    /* FIXME: use LYstrExtent, not strlen */
 		    LYSetHilite(nlinks,
-				STARS(strlen(FormInfo_ptr->value)));
+				STARS(LYstrCells(FormInfo_ptr->value)));
 		} else {	/* TEXT type */
 		    LYSetHilite(nlinks,
 				FormInfo_ptr->value);
@@ -2475,7 +2474,7 @@ static void display_page(HText *text,
 	 */
 	text->had_utf8 = text->has_utf8;
 	clearok(curscr, TRUE);
-    } else if (HTCJK != NOCJK) {
+    } else if (IS_CJK_TTY) {
 	/*
 	 * For non-multibyte curses.
 	 *
@@ -3755,7 +3754,7 @@ void HText_appendCharacter(HText *text, int ch)
     /*
      * Make sure we don't hang on escape sequences.
      */
-    if (ch == CH_ESC && HTCJK == NOCJK) {	/* decimal 27  S/390 -- gil -- 1504 */
+    if (ch == CH_ESC && !IS_CJK_TTY) {	/* decimal 27  S/390 -- gil -- 1504 */
 	return;
     }
 #ifndef USE_SLANG
@@ -3768,14 +3767,14 @@ void HText_appendCharacter(HText *text, int ch)
      * processing stage anyway.  - kw
      */
 #ifndef   EBCDIC		/* S/390 -- gil -- 1514 */
-    if (is8bits(ch) && HTCJK == NOCJK &&
+    if (is8bits(ch) && !IS_CJK_TTY &&
 	!text->T.transp && !text->T.output_utf8 &&
 	UCH(ch) < LYlowest_eightbit[current_char_set]) {
 	return;
     }
 #endif /* EBCDIC */
 #endif /* !USE_SLANG */
-    if (UCH(ch) == 155 && HTCJK == NOCJK) {	/* octal 233 */
+    if (UCH(ch) == 155 && !IS_CJK_TTY) {	/* octal 233 */
 	if (!HTPassHighCtrlRaw &&
 	    !text->T.transp && !text->T.output_utf8 &&
 	    (155 < LYlowest_eightbit[current_char_set])) {
@@ -3788,7 +3787,7 @@ void HText_appendCharacter(HText *text, int ch)
 
     indent = text->in_line_1 ? (int) style->indent1st : (int) style->leftIndent;
 
-    if (HTCJK != NOCJK) {
+    if (IS_CJK_TTY) {
 	switch (text->state) {
 	case S_text:
 	    if (ch == CH_ESC) {	/* S/390 -- gil -- 1536 */
@@ -3960,7 +3959,7 @@ void HText_appendCharacter(HText *text, int ch)
 	return;
     }
 #ifdef CJK_EX			/* MOJI-BAKE Fix! 1997/10/12 -- 10/31 (Fri) 00:22:57 - JH7AYN */
-    if (HTCJK != NOCJK &&	/* added condition - kw */
+    if (IS_CJK_TTY &&		/* added condition - kw */
 	(ch == LY_BOLD_START_CHAR || ch == LY_BOLD_END_CHAR)) {
 	text->permissible_split = (int) line->size;	/* Can split here */
 	if (HTCJK == JAPANESE)
@@ -3974,7 +3973,7 @@ void HText_appendCharacter(HText *text, int ch)
 	    return;
 	}
 #if defined(USE_COLOR_STYLE) && !defined(NO_DUMP_WITH_BACKSPACES)
-	if (with_backspaces && HTCJK == NOCJK && !text->T.output_utf8) {
+	if (with_backspaces && !IS_CJK_TTY && !text->T.output_utf8) {
 #endif
 	    if (ch == LY_UNDERLINE_START_CHAR) {
 		line->data[line->size++] = LY_UNDERLINE_START_CHAR;
@@ -4234,7 +4233,7 @@ void HText_appendCharacter(HText *text, int ch)
 	int target_cu = target + UTFXTRA_ON_THIS_LINE;
 
 	if (target >= WRAP_COLS(text) - style->rightIndent -
-	    (((HTCJK != NOCJK) && text->kanji_buf) ? 1 : 0) ||
+	    ((IS_CJK_TTY && text->kanji_buf) ? 1 : 0) ||
 	    (text->T.output_utf8 &&
 	     target_cu + UTF_XLEN(ch) >= LYcols_cu(text))) {
 	    int saved_kanji_buf;
@@ -4306,7 +4305,7 @@ void HText_appendCharacter(HText *text, int ch)
     if ((actual
 	 + (int) style->rightIndent
 	 - ctrl_chars_on_this_line
-	 + (((HTCJK != NOCJK) && text->kanji_buf) ? 1 : 0)
+	 + ((IS_CJK_TTY && text->kanji_buf) ? 1 : 0)
 	) >= WRAP_COLS(text)
 	|| (text->T.output_utf8
 	    && ((actual
@@ -4385,7 +4384,7 @@ void HText_appendCharacter(HText *text, int ch)
 
 	line = text->last_line;	/* May have changed */
 
-	if (HTCJK != NOCJK && text->kanji_buf) {
+	if (IS_CJK_TTY && text->kanji_buf) {
 	    hi = UCH(text->kanji_buf);
 	    lo = UCH(ch);
 
@@ -4478,7 +4477,7 @@ void HText_appendCharacter(HText *text, int ch)
 	    line->data[line->size++] = ch;
 	}
 #endif
-	else if (HTCJK != NOCJK) {
+	else if (IS_CJK_TTY) {
 	    line->data[line->size++] = (char) ((kanji_code != NOKANJI) ?
 					       ch :
 					       (font & HT_CAPITALS) ?
@@ -4902,7 +4901,7 @@ static void free_enclosed_stbl(HText *me)
 	STable_info *stbl;
 
 	while (NULL != (stbl = (STable_info *) HTList_nextObject(list))) {
-	    CTRACE((tfp, "endStblTABLE: finally free %p\n", me->stbl));
+	    CTRACE((tfp, "endStblTABLE: finally free %p\n", (void *) me->stbl));
 	    Stbl_free(stbl);
 	}
 	HTList_delete(me->enclosed_stbl);
@@ -4953,7 +4952,7 @@ int HText_endStblTABLE(HText *me)
 	    if (me->enclosed_stbl == NULL)
 		me->enclosed_stbl = HTList_new();
 	    HTList_addObject(me->enclosed_stbl, me->stbl);
-	    CTRACE((tfp, "endStblTABLE: postpone free %p\n", me->stbl));
+	    CTRACE((tfp, "endStblTABLE: postpone free %p\n", (void *) me->stbl));
 	}
 	me->stbl = enclosing;
     } else {
@@ -4966,7 +4965,7 @@ int HText_endStblTABLE(HText *me)
 #endif
 
     CTRACE((tfp, "endStblTABLE: have%s enclosing table (%p)\n",
-	    enclosing == 0 ? " NO" : "", enclosing));
+	    enclosing == 0 ? " NO" : "", (void *) enclosing));
 
     return enclosing != 0;
 }
@@ -6172,7 +6171,7 @@ int HTGetRelLinkNum(int num,
     int curanchor = links[cur].anchor_number;
 
     CTRACE((tfp, "HTGetRelLinkNum(%d,%d,%d) -- HTMainText=%p\n",
-	    num, rel, cur, HTMainText));
+	    num, rel, cur, (void *) HTMainText));
     CTRACE((tfp,
 	    "  scrtop=%d, curline=%d, curanchor=%d, display_lines=%d, %s\n",
 	    scrtop, curline, curanchor, display_lines,
@@ -6205,7 +6204,7 @@ int HTGetRelLinkNum(int num,
 	l = a;
 	curanchor = l->number;
     }
-    CTRACE((tfp, "  a=%p, l=%p, curanchor=%d\n", a, l, curanchor));
+    CTRACE((tfp, "  a=%p, l=%p, curanchor=%d\n", (void *) a, (void *) l, curanchor));
     if (on_screen) {		/* on screen but not a numbered link */
 	for (; a; a = a->next) {
 	    if (a->number) {
@@ -7341,7 +7340,7 @@ BOOL HText_select(HText *text)
 	if (HTMainText) {
 	    if (HText_hasUTF8OutputSet(HTMainText) &&
 		HTLoadedDocumentEightbit() &&
-		LYCharSet_UC[current_char_set].enc == UCT_ENC_UTF8) {
+		IS_UTF8_TTY) {
 		text->had_utf8 = HTMainText->has_utf8;
 	    } else {
 		text->had_utf8 = NO;
@@ -7902,7 +7901,7 @@ void print_wwwfile_to_fd(FILE *fp,
     BOOL bs = (BOOL) (!is_email && !is_reply
 		      && text != 0
 		      && with_backspaces
-		      && HTCJK == NOCJK
+		      && !IS_CJK_TTY
 		      && !text->T.output_utf8);
 #endif
 
@@ -9566,7 +9565,7 @@ char *HText_setLastOptionValue(HText *text, char *value,
 	    }
 	}
 	cp[j] = '\0';
-	if (HTCJK != NOCJK) {
+	if (IS_CJK_TTY) {
 	    if (cp &&
 		(tmp = typecallocn(unsigned char, strlen(cp) * 2 + 1)) != 0) {
 		if (tmp == NULL)
@@ -9788,7 +9787,7 @@ int HText_beginInput(HText *text, BOOL underline,
     if (I->value)
 	StrAllocCopy(IValue, I->value);
     if (IValue &&
-	HTCJK != NOCJK &&
+	IS_CJK_TTY &&
 	((I->type == NULL) || strcasecomp(I->type, "hidden"))) {
 	if ((tmp = typecallocn(unsigned char, strlen(IValue) * 2 + 1)) != 0) {
 	    if (kanji_code == EUC) {
@@ -11224,7 +11223,7 @@ int HText_SubmitForm(FormInfo * submit_item, DocInfo *doc, char *link_name,
 			NonNull(my_data[anchor_count].name),
 			my_data[anchor_count].first,
 			NonNull(my_data[anchor_count].value),
-			my_data[anchor_count].data));
+			(void *) my_data[anchor_count].data));
 
 		if (my_data[anchor_count].first) {
 		    if (first_one) {
@@ -11841,7 +11840,7 @@ void HText_setKcode(HText *text, const char *charset,
 	 * it is enabled.  But only if we are quite sure.  -FM & kw
 	 */
 	text->kcode = NOKANJI;
-	if (HTCJK != NOCJK) {
+	if (IS_CJK_TTY) {
 	    if (!p_in || ((p_in->enc != UCT_ENC_CJK)
 #ifdef EXP_JAPANESEUTF8_SUPPORT
 			  && (p_in->enc != UCT_ENC_UTF8)
@@ -13956,7 +13955,7 @@ static void move_to_glyph(int YP,
 	    if (incurlink && intarget && flag && i_after_tgt > i) {
 		if (i == last_i - 1) {
 		    i_after_tgt = i;
-		} else if (i == last_i - 2 && HTCJK != NOCJK &&
+		} else if (i == last_i - 2 && IS_CJK_TTY &&
 			   is8bits(buffer[0])) {
 		    i_after_tgt = i;
 		    cp_tgt = NULL;
@@ -14049,7 +14048,7 @@ static void move_to_glyph(int YP,
 		sdata += utf_extra;
 		data += utf_extra;
 		utf_extra = 0;
-	    } else if (HTCJK != NOCJK && is8bits(buffer[0])) {
+	    } else if (IS_CJK_TTY && is8bits(buffer[0])) {
 		/*
 		 * For CJK strings, by Masanobu Kimura.
 		 */

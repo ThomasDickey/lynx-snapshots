@@ -1,3 +1,6 @@
+/*
+ * $LynxId: UCAux.c,v 1.37 2008/09/06 15:46:17 tom Exp $
+ */
 #include <HTUtils.h>
 
 #include <HTCJK.h>
@@ -7,6 +10,7 @@
 #include <UCAux.h>
 #include <LYCharSets.h>
 #include <LYCurses.h>
+#include <LYStrings.h>
 
 BOOL UCCanUniTranslateFrom(int from)
 {
@@ -58,7 +62,7 @@ BOOL UCCanTranslateFromTo(int from,
 	}
 	if (LYCharSet_UC[from].enc == UCT_ENC_CJK) {
 	    /*
-	     * CJK mode may be off (i.e., HTCJK == NOCJK) because the current
+	     * CJK mode may be off (i.e., !IS_CJK_TTY) because the current
 	     * document is not CJK, but the check may be for capability in
 	     * relation to another document, for which CJK mode might be turned
 	     * on when retrieved.  Thus, when the from charset is CJK, check if
@@ -122,7 +126,7 @@ BOOL UCNeedNotTranslate(int from,
 	    return YES;
     }
     if (LYCharSet_UC[from].enc == UCT_ENC_CJK) {
-	if (HTCJK == NOCJK)	/* Use that global flag, for now. */
+	if (!IS_CJK_TTY)	/* Use that global flag, for now. */
 	    return NO;
 	if (HTCJK == JAPANESE &&
 	    (!strcmp(fromname, "euc-jp") ||
@@ -192,7 +196,7 @@ void UCSetTransParams(UCTransParams * pT, int cs_in,
 	/*
 	 * Set this element if we want to treat the input as CJK.  - FM
 	 */
-	pT->do_cjk = (BOOL) ((p_in->enc == UCT_ENC_CJK) && (HTCJK != NOCJK));
+	pT->do_cjk = (BOOL) ((p_in->enc == UCT_ENC_CJK) && IS_CJK_TTY);
 	/*
 	 * Set these elements based on whether we are dealing with UTF-8.  - FM
 	 */
@@ -201,7 +205,7 @@ void UCSetTransParams(UCTransParams * pT, int cs_in,
 	if (pT->do_cjk) {
 	    /*
 	     * Set up the structure for a CJK input with
-	     * a CJK output (HTCJK != NOCJK).  - FM
+	     * a CJK output (IS_CJK_TTY).  - FM
 	     */
 	    intm_ucs = FALSE;
 	    pT->trans_to_uni = FALSE;

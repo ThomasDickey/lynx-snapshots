@@ -1,3 +1,6 @@
+/*
+ * $LynxId: AttrList.h,v 1.15 2008/09/06 15:47:47 tom Exp $
+ */
 #if !defined(__ATTRLIST_H)
 #define __ATTRLIST_H
 

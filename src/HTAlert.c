@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAlert.c,v 1.81 2008/07/06 12:55:40 tom Exp $
+ * $LynxId: HTAlert.c,v 1.82 2008/09/06 14:35:56 tom Exp $
  *
  *	Displaying messages and getting input for Lynx Browser
  *	==========================================================
@@ -123,7 +123,7 @@ void HTUserMsg(const char *Msg)
 	CTRACE((tfp, "User message: %s\n", Msg));
 	LYstore_message(Msg);
 #if !(defined(USE_SLANG) || defined(WIDEC_CURSES))
-	if (HTCJK != NOCJK) {
+	if (IS_CJK_TTY) {
 	    clearok(curscr, TRUE);
 	    LYrefresh();
 	}

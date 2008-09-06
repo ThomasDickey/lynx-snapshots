@@ -1,3 +1,6 @@
+/*
+ * $LynxId: LYCharSets.c,v 1.58 2008/09/06 15:45:56 tom Exp $
+ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <HTMLDTD.h>
@@ -456,10 +459,10 @@ void HTMLSetCharacterHandling(int i)
 	/* for any CJK: */
 	if (!LYUseDefaultRawMode)
 	    HTCJK = NOCJK;
-	LYRawMode = (BOOL) ((HTCJK != NOCJK) ? TRUE : FALSE);
+	LYRawMode = (BOOL) (IS_CJK_TTY ? TRUE : FALSE);
 	HTPassEightBitRaw = FALSE;
 	HTPassEightBitNum = FALSE;
-	HTPassHighCtrlRaw = (BOOL) ((HTCJK != NOCJK) ? TRUE : FALSE);
+	HTPassHighCtrlRaw = (BOOL) (IS_CJK_TTY ? TRUE : FALSE);
 	HTPassHighCtrlNum = FALSE;
     }
 
