@@ -1,5 +1,5 @@
 /*
- * $LynxId: SGML.c,v 1.109 2008/08/31 18:34:05 tom Exp $
+ * $LynxId: SGML.c,v 1.110 2008/09/06 14:44:04 tom Exp $
  *
  *			General SGML Parser code		SGML.c
  *			========================
@@ -395,7 +395,7 @@ static void set_chartrans_handling(HTStream *context,
      * its HTStructured object, itself, if this were needed.  - FM
      */
 #ifndef EXP_JAPANESEUTF8_SUPPORT
-    if (HTCJK != NOCJK) {
+    if (IS_CJK_TTY) {
 	context->current_tag_charset = -1;
     } else
 #endif
@@ -1829,7 +1829,7 @@ static void SGML_character(HTStream *context, char c_in)
      */
     if (TOASCII(unsign_c) < 32 &&
 	c != '\t' && c != '\n' && c != '\r' &&
-	HTCJK == NOCJK)
+	!IS_CJK_TTY)
 	goto after_switch;
 
     /*
@@ -1838,7 +1838,7 @@ static void SGML_character(HTStream *context, char c_in)
 #define PASSHICTRL (context->T.transp || \
 		    unsign_c >= LYlowest_eightbit[context->inUCLYhndl])
     if (TOASCII(c) == 127 &&	/* S/390 -- gil -- 0830 */
-	!(PASSHICTRL || HTCJK != NOCJK))
+	!(PASSHICTRL || IS_CJK_TTY))
 	goto after_switch;
 
     /*
@@ -1846,7 +1846,7 @@ static void SGML_character(HTStream *context, char c_in)
      * nor HTCJK is set.  - FM
      */
     if (TOASCII(unsign_c) > 127 && TOASCII(unsign_c) < 160 &&	/* S/390 -- gil -- 0847 */
-	!(PASSHICTRL || HTCJK != NOCJK))
+	!(PASSHICTRL || IS_CJK_TTY))
 	goto after_switch;
 
     /* Almost all CJK characters are double byte but only Japanese
@@ -1909,7 +1909,7 @@ static void SGML_character(HTStream *context, char c_in)
 	}
 	/* fall through in any case! */
     case S_text:
-	if ((HTCJK != NOCJK) && ((TOASCII(c) & 0200) != 0)
+	if (IS_CJK_TTY && ((TOASCII(c) & 0200) != 0)
 #ifdef EXP_JAPANESEUTF8_SUPPORT
 	    && !context->T.decode_utf8
 #endif
@@ -1925,7 +1925,7 @@ static void SGML_character(HTStream *context, char c_in)
 	    context->state = S_in_kanji;
 	    context->kanji_buf = c;
 	    break;
-	} else if (HTCJK != NOCJK && TOASCII(c) == '\033') {	/* S/390 -- gil -- 0881 */
+	} else if (IS_CJK_TTY && TOASCII(c) == '\033') {	/* S/390 -- gil -- 0881 */
 	    /*
 	     * Setting up for CJK escape sequence handling (based on Takuya
 	     * ASADA's (asada@three-a.co.jp) CJK Lynx).  - FM
@@ -2023,7 +2023,7 @@ static void SGML_character(HTStream *context, char c_in)
 		PUTS(context->utf_buf);
 		context->utf_buf_p = context->utf_buf;
 		*(context->utf_buf_p) = '\0';
-	    } else if (HTCJK == NOCJK &&
+	    } else if (!IS_CJK_TTY &&
 		       (context->T.output_utf8 ||
 			context->T.trans_from_uni)) {
 		if (LYIsASCII(clong)) {
@@ -2049,7 +2049,7 @@ static void SGML_character(HTStream *context, char c_in)
 	     */
 	} else if (unsign_c == CH_NBSP &&	/* S/390 -- gil -- 0932 */
 		   !context->no_lynx_specialcodes &&
-		   !(PASS8859SPECL || HTCJK != NOCJK)) {
+		   !(PASS8859SPECL || IS_CJK_TTY)) {
 	    PUTC(HT_NON_BREAK_SPACE);
 	    /*
 	     * Convert 173 (shy) to Lynx special character if neither
@@ -2057,7 +2057,7 @@ static void SGML_character(HTStream *context, char c_in)
 	     */
 	} else if (unsign_c == CH_SHY &&	/* S/390 -- gil -- 0949 */
 		   !context->no_lynx_specialcodes &&
-		   !(PASS8859SPECL || HTCJK != NOCJK)) {
+		   !(PASS8859SPECL || IS_CJK_TTY)) {
 	    PUTC(LY_SOFT_HYPHEN);
 	    /*
 	     * Handle the case in which we think we have a character which
@@ -2121,7 +2121,7 @@ static void SGML_character(HTStream *context, char c_in)
 		    (context->T.do_8bitraw && !context->T.trans_from_uni))
 
 	} else if (unsign_c > 160 && unsign_c < 256 &&
-		   !(PASSHI8BIT || HTCJK != NOCJK) &&
+		   !(PASSHI8BIT || IS_CJK_TTY) &&
 		   !IncludesLatin1Enc) {
 #ifdef USE_PRETTYSRC
 	    int psrc_view_backup = 0;
@@ -2827,9 +2827,9 @@ static void SGML_character(HTStream *context, char c_in)
 		} else if ((code > 255) ||
 			   (code < ' ' &&	/* S/390 -- gil -- 1140 */
 			    code != '\t' && code != '\n' && code != '\r' &&
-			    HTCJK == NOCJK) ||
+			    !IS_CJK_TTY) ||
 			   (TOASCII(code) == 127 &&
-			    !(HTPassHighCtrlRaw || HTCJK != NOCJK)) ||
+			    !(HTPassHighCtrlRaw || IS_CJK_TTY)) ||
 			   (TOASCII(code) > 127 && code < 160 &&
 			    !HTPassHighCtrlNum)) {
 		    /*
@@ -3341,7 +3341,7 @@ static void SGML_character(HTStream *context, char c_in)
 	    HTChunkPuts(string, context->utf_buf);
 	    context->utf_buf_p = context->utf_buf;
 	    *(context->utf_buf_p) = '\0';
-	} else if (HTCJK == NOCJK &&
+	} else if (!IS_CJK_TTY &&
 		   (context->T.output_utf8 ||
 		    context->T.trans_from_uni)) {
 	    if (clong == 0xfffd && saved_char_in &&
@@ -3733,7 +3733,7 @@ static void SGML_character(HTStream *context, char c_in)
 #endif
 	    {
 #ifdef CJK_EX			/* Quick hack. - JH7AYN */
-		if (HTCJK != NOCJK) {
+		if (IS_CJK_TTY) {
 		    if (string->data[0] == '$') {
 			if (string->data[1] == 'B' || string->data[1] == '@') {
 			    char *jis_buf = 0;
@@ -3768,7 +3768,7 @@ static void SGML_character(HTStream *context, char c_in)
 	    HTChunkPuts(string, context->utf_buf);
 	    context->utf_buf_p = context->utf_buf;
 	    *(context->utf_buf_p) = '\0';
-	} else if (HTCJK == NOCJK &&
+	} else if (!IS_CJK_TTY &&
 		   (context->T.output_utf8 ||
 		    context->T.trans_from_uni)) {
 	    if (clong == 0xfffd && saved_char_in &&
@@ -3828,7 +3828,7 @@ static void SGML_character(HTStream *context, char c_in)
 	    HTChunkPuts(string, context->utf_buf);
 	    context->utf_buf_p = context->utf_buf;
 	    *(context->utf_buf_p) = '\0';
-	} else if (HTCJK == NOCJK &&
+	} else if (!IS_CJK_TTY &&
 		   (context->T.output_utf8 ||
 		    context->T.trans_from_uni)) {
 	    if (clong == 0xfffd && saved_char_in &&
@@ -3893,7 +3893,7 @@ static void SGML_character(HTStream *context, char c_in)
 	    HTChunkPuts(string, context->utf_buf);
 	    context->utf_buf_p = context->utf_buf;
 	    *(context->utf_buf_p) = '\0';
-	} else if (HTCJK == NOCJK &&
+	} else if (!IS_CJK_TTY &&
 		   (context->T.output_utf8 ||
 		    context->T.trans_from_uni)) {
 	    if (clong == 0xfffd && saved_char_in &&

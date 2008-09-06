@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTAccess.c,v 1.66 2008/08/31 22:38:38 tom Exp $
+ * $LynxId: HTAccess.c,v 1.67 2008/09/06 14:44:37 tom Exp $
  *
  *		Access Manager					HTAccess.c
  *		==============
@@ -64,6 +64,7 @@
 
 #include <LYGlobalDefs.h>
 #include <LYexit.h>
+#include <LYStrings.h>
 #include <LYUtils.h>
 #include <LYLeaks.h>
 
@@ -1287,7 +1288,7 @@ BOOL HTSearch(const char *keywords,
 
 	if (WHITE(*p)) {
 	    *q++ = '+';
-	} else if (HTCJK != NOCJK) {
+	} else if (IS_CJK_TTY) {
 	    *q++ = *p;
 	} else if (c >= 32 && c <= UCH(127) && isAcceptable[c - 32]) {
 	    *q++ = *p;		/* 930706 TBL for MVS bug */

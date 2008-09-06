@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCookie.c,v 1.91 2008/07/06 17:42:46 tom Exp $
+ * $LynxId: LYCookie.c,v 1.92 2008/09/06 14:27:22 tom Exp $
  *
  *			       Lynx Cookie Support		   LYCookie.c
  *			       ===================
@@ -145,7 +145,7 @@ static cookie *newCookie(void)
 
     if (p == NULL)
 	outofmem(__FILE__, "newCookie");
-    HTSprintf0(&(p->lynxID), "%p", p);
+    HTSprintf0(&(p->lynxID), "%p", (void *) p);
     p->port = 80;
     return p;
 }
@@ -680,7 +680,7 @@ static char *scan_cookie_sublist(char *hostname,
 	if ((co) &&		/* speed-up host_matches() and limit trace output */
 	    (LYstrstr(hostname, co->domain) != NULL)) {
 	    CTrace((tfp, "Checking cookie %p %s=%s\n",
-		    hl,
+		    (void *) hl,
 		    (co->name ? co->name : "(no name)"),
 		    (co->value ? co->value : "(no value)")));
 	    CTrace((tfp, "\t%s %s %d %s %s %d%s\n",

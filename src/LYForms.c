@@ -1,4 +1,4 @@
-/* $LynxId: LYForms.c,v 1.76 2008/09/05 00:28:05 tom Exp $ */
+/* $LynxId: LYForms.c,v 1.79 2008/09/06 14:40:45 tom Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <HTTP.h>
@@ -204,9 +204,9 @@ int change_form_link_ex(int cur,
     case F_TEXTAREA_TYPE:
     case F_PASSWORD_TYPE:
 	c = form_getstr(cur, use_last_tfpos, redraw_only);
-	LYSetHilite(cur, (form->type == F_PASSWORD_TYPE)
-		    ? STARS(LYstrCells(form->value))
-		    : form->value);
+	LYSetHilite(cur, ((form->type == F_PASSWORD_TYPE)
+			  ? STARS(LYstrCells(form->value))
+			  : form->value));
 	break;
 
     case F_RESET_TYPE:
@@ -655,7 +655,7 @@ static int form_getstr(int cur,
 #endif
 #ifndef WIN_EX
 	if (action == LYE_AIX &&
-	    (HTCJK == NOCJK && LYlowest_eightbit[current_char_set] > 0x97))
+	    (!IS_CJK_TTY && LYlowest_eightbit[current_char_set] > 0x97))
 	    break;
 #endif
 	if (action == LYE_TAB) {
@@ -769,7 +769,7 @@ static int form_getstr(int cur,
 		}
 #ifdef SUPPORT_MULTIBYTE_EDIT
 		if (rc == 0) {
-		    if (HTCJK != NOCJK && (0x80 <= ch)
+		    if (IS_CJK_TTY && (0x80 <= ch)
 			&& (ch <= 0xfe) && refresh_mb)
 			refresh_mb = FALSE;
 		    else

@@ -1,4 +1,4 @@
-/* $LynxId: LYUtils.c,v 1.170 2008/09/05 00:19:21 tom Exp $ */
+/* $LynxId: LYUtils.c,v 1.173 2008/09/06 14:35:56 tom Exp $ */
 #include <HTUtils.h>
 #include <HTTCP.h>
 #include <HTParse.h>
@@ -428,7 +428,7 @@ static BOOL show_whereis_targets(int flag,
 		      (LYcolLimit - LYGetHilitePos(cur, count)),
 		      utf_flag);
 	hlen = strlen(buffer);
-	hLen = ((HTCJK != NOCJK || utf_flag) ?
+	hLen = ((IS_CJK_TTY || utf_flag) ?
 		LYmbcsstrlen(buffer, utf_flag, YES) : hlen);
 
 	/*
@@ -495,7 +495,7 @@ static BOOL show_whereis_targets(int flag,
 		    tmp[1] = '\0';
 		    written += (utf_extra + 1);
 		    utf_extra = 0;
-		} else if (HTCJK != NOCJK && is8bits(tmp[0])) {
+		} else if (IS_CJK_TTY && is8bits(tmp[0])) {
 		    /*
 		     * For CJK strings, by Masanobu Kimura.
 		     */
@@ -569,7 +569,7 @@ static BOOL show_whereis_targets(int flag,
 			tmp[1] = '\0';
 			written += (utf_extra + 1);
 			utf_extra = 0;
-		    } else if (HTCJK != NOCJK && is8bits(tmp[0])) {
+		    } else if (IS_CJK_TTY && is8bits(tmp[0])) {
 			/*
 			 * For CJK strings, by Masanobu Kimura.
 			 */
@@ -696,7 +696,7 @@ static BOOL show_whereis_targets(int flag,
 		    tmp[1] = '\0';
 		    written += (utf_extra + 1);
 		    utf_extra = 0;
-		} else if (HTCJK != NOCJK && is8bits(tmp[0])) {
+		} else if (IS_CJK_TTY && is8bits(tmp[0])) {
 		    /*
 		     * For CJK strings, by Masanobu Kimura.
 		     */
@@ -771,7 +771,7 @@ static BOOL show_whereis_targets(int flag,
 			tmp[1] = '\0';
 			written += (utf_extra + 1);
 			utf_extra = 0;
-		    } else if (HTCJK != NOCJK && is8bits(tmp[0])) {
+		    } else if (IS_CJK_TTY && is8bits(tmp[0])) {
 			/*
 			 * For CJK strings, by Masanobu Kimura.
 			 */
@@ -892,7 +892,7 @@ static BOOL show_whereis_targets(int flag,
 				tmp[1] = '\0';
 				written += (utf_extra + 1);
 				utf_extra = 0;
-			    } else if (HTCJK != NOCJK && is8bits(tmp[0])) {
+			    } else if (IS_CJK_TTY && is8bits(tmp[0])) {
 				/*
 				 * For CJK strings, by Masanobu Kimura.
 				 */
@@ -1024,7 +1024,7 @@ void LYhighlight(int flag,
     BOOL TargetEmphasisON = FALSE;
     BOOL target1_drawn = NO;
 #endif
-    BOOL utf_flag = (BOOL) (LYCharSet_UC[current_char_set].enc == UCT_ENC_UTF8);
+    BOOL utf_flag = (BOOL) IS_UTF8_TTY;
     BOOL hl1_drawn = NO;
 
 #ifdef USE_COLOR_STYLE
@@ -1151,7 +1151,7 @@ void LYhighlight(int flag,
 			/*
 			 * For CJK strings, by Masanobu Kimura.
 			 */
-			if (HTCJK != NOCJK && is8bits(tmp[0])) {
+			if (IS_CJK_TTY && is8bits(tmp[0])) {
 			    tmp[1] = hi_string[++i];
 			    LYaddstr(tmp);
 			    tmp[1] = '\0';
@@ -1433,7 +1433,7 @@ void statusline(const char *text)
     if (buffer[0] != '\0') {
 	BOOLEAN has_CJK = FALSE;
 
-	if (HTCJK != NOCJK) {
+	if (IS_CJK_TTY) {
 	    for (i = 0; buffer[i] != '\0'; i++) {
 		if (buffer[i] & 0x80) {
 		    has_CJK = TRUE;
@@ -1444,7 +1444,7 @@ void statusline(const char *text)
 
 	if (has_CJK
 #ifdef HAVE_UTF8_STATUSLINES
-	    || (LYCharSet_UC[current_char_set].enc == UCT_ENC_UTF8)
+	    || IS_UTF8_TTY
 #endif
 	    ) {
 	    LYrefresh();
@@ -1590,7 +1590,7 @@ int LYReopenInput(void)
 	    frp = freopen(term_name, "r", stdin);
 	    CTRACE((tfp,
 		    "LYReopenInput freopen(%s,\"r\",stdin) returned %p, stdin is now %p with fd %d.\n",
-		    term_name, frp, stdin, fileno(stdin)));
+		    term_name, (void *) frp, (void *) stdin, fileno(stdin)));
 	    result = 1;
 	} else {
 	    result = -1;

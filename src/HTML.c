@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTML.c,v 1.113 2007/07/02 23:43:40 tom Exp $
+ * $LynxId: HTML.c,v 1.114 2008/09/06 14:33:02 tom Exp $
  *
  *		Structured stream to Rich hypertext converter
  *		============================================
@@ -7886,7 +7886,7 @@ static void CacheThru_do_free(HTStream *me)
     } else if (me->status != HT_OK) {
 	if (me->chunk) {
 	    CTRACE((tfp, "SourceCacheWriter: memory chunk %p had errors.\n",
-		    me->chunk));
+		    (void *) me->chunk));
 	    HTChunkFree(me->chunk);
 	    me->chunk = me->last_chunk = NULL;
 	}

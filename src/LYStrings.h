@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYStrings.h,v 1.67 2008/09/05 00:18:18 tom Exp $
+ * $LynxId: LYStrings.h,v 1.68 2008/09/06 14:07:46 tom Exp $
  */
 #ifndef LYSTRINGS_H
 #define LYSTRINGS_H
@@ -15,6 +15,9 @@ extern "C" {
 	,RECALL_CMD
 	,RECALL_MAIL
     } RecallType;
+
+#define IS_UTF8_TTY (LYCharSet_UC[current_char_set].enc == UCT_ENC_UTF8)
+#define IS_CJK_TTY  (HTCJK != NOCJK)
 
 #define is8bits(ch) (UCH(ch) >= 128)	/* isascii(ch) is not POSIX */
 

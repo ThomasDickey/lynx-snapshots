@@ -1,4 +1,4 @@
-/* $LynxId: LYStrings.c,v 1.147 2008/09/05 00:17:48 tom Exp $ */
+/* $LynxId: LYStrings.c,v 1.155 2008/09/06 15:01:28 tom Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <UCAux.h>
@@ -629,7 +629,7 @@ char *LYmbcsstrncpy(char *dst,
 }
 
 /*
- * LYmbcs_skip_glyphs() skips a given number of display positions in a string
+ * LYmbcs_skip_glyphs() skips a given number of character positions in a string
  * and returns the resulting pointer.  It takes account of UTF-8 encoded
  * characters.  - KW
  */
@@ -662,6 +662,11 @@ const char *LYmbcs_skip_glyphs(const char *data,
     return data;
 }
 
+/*
+ * LYmbcs_skip_cells() skips a given number of display positions in a string
+ * and returns the resulting pointer.  It takes account of UTF-8 encoded
+ * characters.  - TD
+ */
 const char *LYmbcs_skip_cells(const char *data,
 			      int n_cells,
 			      BOOL utf_flag)
@@ -709,7 +714,7 @@ int LYmbcsstrlen(const char *str,
 			    i++;
 			    j++;
 			}
-		    } else if (!utf_flag && HTCJK != NOCJK && !count_gcells &&
+		    } else if (!utf_flag && IS_CJK_TTY && !count_gcells &&
 			       is8bits(str[i]) &&
 			       IsNormalChar(str[(i + 1)])) {
 			i++;
@@ -1757,7 +1762,7 @@ static int LYgetch_for(int code)
 
 	CTRACE((tfp,
 		"nozap: Got EOF, curses %s, stdin is %p, LYNoZapKey reduced from %d to 0.\n",
-		LYCursesON ? "on" : "off", stdin, LYNoZapKey));
+		LYCursesON ? "on" : "off", (void *) stdin, LYNoZapKey));
 	LYNoZapKey = 0;		/* 2 -> 0 */
 	if (LYReopenInput() > 0) {
 	    if (LYCursesON) {
@@ -2901,14 +2906,11 @@ void LYSetupEdit(EDREC * edit, char *old,
  *
  * LYmbcs* functions don't look very convenient to use here...
  * Do we really need utf_flag as an argument?
- * It is set LYCharSet_UC[current_char_set].enc == UCT_ENC_UTF8 for every
- * invocation out there, and they use HTCJK flag internally anyway.
- * Something like LYmbcsstrnlen == mbcs_glyphs would be useful to work
- * with string slices.
+ *
+ * It is set (see IS_UTF8_TTY) for every invocation out there, and they use
+ * HTCJK flag internally anyway.  Something like LYmbcsstrnlen == mbcs_glyphs
+ * would be useful to work with string slices -Sergej Kvachonok 
  */
-
-#define IS_UTF8_TTY (LYCharSet_UC[current_char_set].enc == UCT_ENC_UTF8)
-#define IS_CJK_TTY (HTCJK != NOCJK)
 
 #define IS_UTF8_EXTRA(x) (((unsigned char)(x) & 0300) == 0200)
 
@@ -3021,7 +3023,7 @@ int LYEditInsert(EDREC * edit, unsigned const char *s,
 #ifdef EXP_KEYBOARD_LAYOUT
     if (map < 0)
 	map = map_active;
-    if (map && LYCharSet_UC[current_char_set].enc == UCT_ENC_UTF8) {
+    if (map && IS_UTF8_TTY) {
 	int off = Pos;
 	unsigned const char *e = s + len;
 	char *tail = 0;
@@ -3141,7 +3143,7 @@ int LYEdit1(EDREC * edit, int ch,
 	 * in the current display character set.  Otherwise, we treat this as
 	 * LYE_ENTER.
 	 */
-	if (HTCJK == NOCJK && LYlowest_eightbit[current_char_set] > 0x97)
+	if (!IS_CJK_TTY && LYlowest_eightbit[current_char_set] > 0x97)
 	    return (ch);
 	/* FALLTHRU */
 #endif
@@ -3578,14 +3580,6 @@ int get_popup_number(const char *msg,
 #  define TmpStyleOff(s)
 #endif /* defined USE_COLOR_STYLE */
 
-static void fill_edited_line(int prompting GCC_UNUSED, int length, int ch)
-{
-    TmpStyleOn(prompting ? s_prompt_edit_pad : s_aedit_pad);
-    while (length-- > 0)
-	LYaddch(UCH(ch));
-    TmpStyleOff(prompting ? s_prompt_edit_pad : s_aedit_pad);
-}
-
 static void remember_column(EDREC * edit, int offset)
 {
     int y0, x0;
@@ -3599,6 +3593,19 @@ static void remember_column(EDREC * edit, int offset)
     getyx(stdscr, y0, x0);
 #endif
     edit->offset2col[offset] = x0;
+}
+
+static void fill_edited_line(int prompting GCC_UNUSED, int length, int ch)
+{
+    int i;
+
+    TmpStyleOn(prompting ? s_prompt_edit_pad : s_aedit_pad);
+
+    for (i = 0; i < length; i++) {
+	LYaddch(UCH(ch));
+    }
+
+    TmpStyleOff(prompting ? s_prompt_edit_pad : s_aedit_pad);
 }
 
 /*
@@ -3788,7 +3795,23 @@ void LYRefreshEdit(EDREC * edit)
     }
 #endif
     if (IsHidden) {
+	BOOL utf_flag = IS_UTF8_TTY;
+	int cell = 0;
+
 	fill_edited_line(0, dpy_cells, '*');
+
+	i = 0;
+	do {
+	    const char *last = str + i;
+	    const char *next = LYmbcs_skip_glyphs(last, 1, utf_flag);
+	    int j = (next - str);
+
+	    while (i < j) {
+		edit->offset2col[i++] = cell + StartX;
+	    }
+	    cell += LYstrExtent2(last, (next - last));
+	} while (i < dpy_bytes);
+	edit->offset2col[i] = cell + StartX;
     } else {
 #if defined(ENHANCED_LINEEDIT) && defined(USE_COLOR_STYLE)
 	if (Mark >= 0 && DspStart > Mark)
@@ -3797,7 +3820,6 @@ void LYRefreshEdit(EDREC * edit)
 	remember_column(edit, 0);
 	for (i = 0; i < dpy_bytes; i++) {
 #if defined(ENHANCED_LINEEDIT) && defined(USE_COLOR_STYLE)
-	    /* FIXME - make this work with multibyte-chars */
 	    if (Mark >= 0 && ((DspStart + i == Mark && Pos > Mark)
 			      || (DspStart + i == Pos && Pos < Mark)))
 		TmpStyleOn(prompting ? s_prompt_sel : s_aedit_sel);
@@ -3807,7 +3829,7 @@ void LYRefreshEdit(EDREC * edit)
 #endif
 	    if (str[i] == 1 || str[i] == 2 ||
 		(UCH(str[i]) == 160 &&
-		 !(HTPassHighCtrlRaw || HTCJK != NOCJK ||
+		 !(HTPassHighCtrlRaw || IS_CJK_TTY ||
 		   (LYCharSet_UC[current_char_set].enc != UCT_ENC_8859 &&
 		    !(LYCharSet_UC[current_char_set].like8859
 		      & UCT_R_8859SPECL))))) {
@@ -3818,7 +3840,6 @@ void LYRefreshEdit(EDREC * edit)
 	    remember_column(edit, i + 1);
 	}
 #if defined(ENHANCED_LINEEDIT) && defined(USE_COLOR_STYLE)
-	/* FIXME - make this work with multibyte-chars */
 	if (Mark >= 0 &&
 	    ((DspStart + dpy_bytes <= Mark && DspStart + dpy_bytes > Pos)
 	     || (DspStart + dpy_bytes > Mark
@@ -5098,7 +5119,7 @@ int LYgetstr(char *inputline,
 	     * LYE_ENTER.
 	     */
 	    if (ch != '\t' &&
-		(HTCJK != NOCJK ||
+		(IS_CJK_TTY ||
 		 LYlowest_eightbit[current_char_set] <= 0x97)) {
 		LYLineEdit(&MyEdit, ch, FALSE);
 		break;
@@ -5207,7 +5228,7 @@ int LYgetstr(char *inputline,
 	    LYLineEdit(&MyEdit, ch, FALSE);
 #else /* SUPPORT_MULTIBYTE_EDIT */
 	    if (LYLineEdit(&MyEdit, ch, FALSE) == 0) {
-		if (refresh_mb && HTCJK != NOCJK && (0x81 <= ch) && (ch <= 0xfe))
+		if (refresh_mb && IS_CJK_TTY && (0x81 <= ch) && (ch <= 0xfe))
 		    refresh_mb = FALSE;
 		else
 		    refresh_mb = TRUE;
@@ -5439,7 +5460,7 @@ const char *LYno_attr_mbcs_case_strstr(const char *chptr,
      * Seek a first target match.  - FM
      */
     for (; *chptr != '\0'; chptr++) {
-	if ((!utf_flag && HTCJK != NOCJK && is8bits(*chptr) &&
+	if ((!utf_flag && IS_CJK_TTY && is8bits(*chptr) &&
 	     *chptr == *tarptr &&
 	     IsNormalChar(*(chptr + 1))) ||
 	    (0 == UPPER8(*chptr, *tarptr))) {
@@ -5464,7 +5485,7 @@ const char *LYno_attr_mbcs_case_strstr(const char *chptr,
 		    *nendp = len;
 		return (chptr);
 	    }
-	    if (!utf_flag && HTCJK != NOCJK && is8bits(*chptr) &&
+	    if (!utf_flag && IS_CJK_TTY && is8bits(*chptr) &&
 		*chptr == *tarptr &&
 		IsNormalChar(*tmpchptr)) {
 		/*
@@ -5504,7 +5525,7 @@ const char *LYno_attr_mbcs_case_strstr(const char *chptr,
 	     */
 	    while (1) {
 		if (!IsSpecialAttrChar(*tmpchptr)) {
-		    if (!utf_flag && HTCJK != NOCJK && is8bits(*tmpchptr)) {
+		    if (!utf_flag && IS_CJK_TTY && is8bits(*tmpchptr)) {
 			if (*tmpchptr == *tmptarptr &&
 			    *(tmpchptr + 1) == *(tmptarptr + 1) &&
 			    !IsSpecialAttrChar(*(tmpchptr + 1))) {
@@ -5541,7 +5562,7 @@ const char *LYno_attr_mbcs_case_strstr(const char *chptr,
 	    }
 	} else if (!(IS_UTF_EXTRA(*chptr) ||
 		     IsSpecialAttrChar(*chptr))) {
-	    if (!utf_flag && HTCJK != NOCJK && is8bits(*chptr) &&
+	    if (!utf_flag && IS_CJK_TTY && is8bits(*chptr) &&
 		IsNormalChar(*(chptr + 1))) {
 		chptr++;
 		if (count_gcells)
@@ -5624,7 +5645,7 @@ const char *LYno_attr_mbcs_strstr(const char *chptr,
 		    *nendp = len;
 		return (chptr);
 	    }
-	    if (!utf_flag && HTCJK != NOCJK && is8bits(*chptr) &&
+	    if (!utf_flag && IS_CJK_TTY && is8bits(*chptr) &&
 		IsNormalChar(*tmpchptr)) {
 		/*
 		 * Check the CJK multibyte.  - FM
@@ -5663,7 +5684,7 @@ const char *LYno_attr_mbcs_strstr(const char *chptr,
 	     */
 	    while (1) {
 		if (!IsSpecialAttrChar(*tmpchptr)) {
-		    if (!utf_flag && HTCJK != NOCJK && is8bits(*tmpchptr)) {
+		    if (!utf_flag && IS_CJK_TTY && is8bits(*tmpchptr)) {
 			if (*tmpchptr == *tmptarptr &&
 			    *(tmpchptr + 1) == *(tmptarptr + 1) &&
 			    !IsSpecialAttrChar(*(tmpchptr + 1))) {
@@ -5699,7 +5720,7 @@ const char *LYno_attr_mbcs_strstr(const char *chptr,
 	    }
 	} else if (!(IS_UTF_EXTRA(*chptr) ||
 		     IsSpecialAttrChar(*chptr))) {
-	    if (!utf_flag && HTCJK != NOCJK && is8bits(*chptr) &&
+	    if (!utf_flag && IS_CJK_TTY && is8bits(*chptr) &&
 		IsNormalChar(*(chptr + 1))) {
 		chptr++;
 		if (count_gcells)

@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYCharUtils.c,v 1.90 2008/08/31 17:00:05 tom Exp $
+ * $LynxId: LYCharUtils.c,v 1.92 2008/09/06 14:40:45 tom Exp $
  *
  *  Functions associated with LYCharSets.c and the Lynx version of HTML.c - FM
  *  ==========================================================================
@@ -118,7 +118,7 @@ void LYEntify(char **str,
 	outofmem(__FILE__, "LYEntify");
     for (p = *str; *p; p++) {
 #ifdef CJK_EX
-	if (HTCJK != NOCJK) {
+	if (IS_CJK_TTY) {
 	    switch (state) {
 	    case S_text:
 		if (*p == '\033') {
@@ -1144,7 +1144,7 @@ char **LYUCFullyTranslateString(char **str,
      * iso-8859-1 (and we are not called to back-translate), or if we are in
      * CJK mode.
      */
-    if ((HTCJK != NOCJK)
+    if (IS_CJK_TTY
 #ifdef EXP_JAPANESEUTF8_SUPPORT
 	&& (strcmp(LYCharSet_UC[cs_from].MIMEname, "utf-8") != 0)
 	&& (strcmp(LYCharSet_UC[cs_to].MIMEname, "utf-8") != 0)
@@ -1251,7 +1251,7 @@ char **LYUCFullyTranslateString(char **str,
 	    }
 #endif
 	    if (*p == '\033') {
-		if ((HTCJK != NOCJK && !hidden) || stype != st_HTML) {
+		if ((IS_CJK_TTY && !hidden) || stype != st_HTML) {
 		    state = S_esc;
 		    if (stype == st_URL) {
 			REPLACE_STRING("%1B");
@@ -1332,7 +1332,7 @@ char **LYUCFullyTranslateString(char **str,
 
 	case S_nonascii_text:
 	    if (*p == '\033') {
-		if ((HTCJK != NOCJK && !hidden) || stype != st_HTML) {
+		if ((IS_CJK_TTY && !hidden) || stype != st_HTML) {
 		    state = S_esc;
 		    if (stype == st_URL) {
 			REPLACE_STRING("%1B");
@@ -1678,9 +1678,9 @@ char **LYUCFullyTranslateString(char **str,
 	     */
 	    if ((code < 32 &&
 		 code != 9 && code != 10 && code != 13 &&
-		 HTCJK == NOCJK) ||
+		 !IS_CJK_TTY) ||
 		(code == 127 &&
-		 !(HTPassHighCtrlRaw || HTCJK != NOCJK)) ||
+		 !(HTPassHighCtrlRaw || IS_CJK_TTY)) ||
 		(code > 127 && code < 160 &&
 		 !HTPassHighCtrlNum)) {
 		state = S_recover;

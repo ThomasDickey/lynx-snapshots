@@ -1,3 +1,6 @@
+/*
+ * $LynxId: HTForms.h,v 1.25 2008/09/06 15:46:41 tom Exp $
+ */
 #ifndef HTFORMS_H
 #define HTFORMS_H
 
@@ -115,20 +118,23 @@ extern "C" {
 #define INPUT_ANCHOR     2	/* forms mode input fields */
 #define INTERNAL_LINK_ANCHOR 5	/* 1+4, can be used as bitflag... - kw */
 
-#define F_TEXT_TYPE	   1
-#define F_PASSWORD_TYPE    2
-#define F_CHECKBOX_TYPE    3
-#define F_RADIO_TYPE	   4
-#define F_SUBMIT_TYPE	   5
-#define F_RESET_TYPE	   6
-#define F_OPTION_LIST_TYPE 7
-#define F_HIDDEN_TYPE      8
-#define F_TEXTAREA_TYPE    9
-#define F_RANGE_TYPE      10
-#define F_FILE_TYPE       11
-#define F_TEXT_SUBMIT_TYPE 12
-#define F_IMAGE_SUBMIT_TYPE 13
-#define F_KEYGEN_TYPE     14
+    typedef enum {
+	F_UNKNOWN = 0,
+	F_TEXT_TYPE,
+	F_PASSWORD_TYPE,
+	F_CHECKBOX_TYPE,
+	F_RADIO_TYPE,
+	F_SUBMIT_TYPE,
+	F_RESET_TYPE,
+	F_OPTION_LIST_TYPE,
+	F_HIDDEN_TYPE,
+	F_TEXTAREA_TYPE,
+	F_RANGE_TYPE,
+	F_FILE_TYPE,
+	F_TEXT_SUBMIT_TYPE,
+	F_IMAGE_SUBMIT_TYPE,
+	F_KEYGEN_TYPE
+    } FieldTypes;
 
 #define F_TEXTLIKE(type) ((type)==F_TEXT_TYPE ||\
 			  (type)==F_TEXT_SUBMIT_TYPE ||\
