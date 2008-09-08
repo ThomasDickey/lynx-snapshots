@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTForms.h,v 1.25 2008/09/06 15:46:41 tom Exp $
+ * $LynxId: HTForms.h,v 1.26 2008/09/07 16:35:26 tom Exp $
  */
 #ifndef HTFORMS_H
 #define HTFORMS_H
@@ -136,11 +136,11 @@ extern "C" {
 	F_KEYGEN_TYPE
     } FieldTypes;
 
-#define F_TEXTLIKE(type) ((type)==F_TEXT_TYPE ||\
-			  (type)==F_TEXT_SUBMIT_TYPE ||\
-			  (type)==F_PASSWORD_TYPE ||\
-			  (type)==F_FILE_TYPE ||\
-			  (type)==F_TEXTAREA_TYPE)
+#define F_TEXTLIKE(type) ((type) == F_TEXT_TYPE || \
+			  (type) == F_TEXT_SUBMIT_TYPE || \
+			  (type) == F_PASSWORD_TYPE || \
+			  (type) == F_FILE_TYPE || \
+			  (type) == F_TEXTAREA_TYPE)
 
 #define WWW_FORM_LINK_TYPE  1
 #define WWW_LINK_TYPE   2

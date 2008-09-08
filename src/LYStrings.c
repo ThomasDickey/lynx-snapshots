@@ -1,4 +1,4 @@
-/* $LynxId: LYStrings.c,v 1.155 2008/09/06 15:01:28 tom Exp $ */
+/* $LynxId: LYStrings.c,v 1.157 2008/09/07 22:09:02 tom Exp $ */
 #include <HTUtils.h>
 #include <HTCJK.h>
 #include <UCAux.h>
@@ -3586,7 +3586,7 @@ static void remember_column(EDREC * edit, int offset)
 
 #if defined(USE_SLANG)
     y0 = 0;
-    x0 = offset;
+    x0 = SLsmg_get_column();
 #elif defined(USE_CURSES_PADS)
     getyx(LYwin, y0, x0);
 #else
@@ -3833,6 +3833,16 @@ void LYRefreshEdit(EDREC * edit)
 		   (LYCharSet_UC[current_char_set].enc != UCT_ENC_8859 &&
 		    !(LYCharSet_UC[current_char_set].like8859
 		      & UCT_R_8859SPECL))))) {
+		LYaddch(' ');
+	    } else if (str[i] == '\t') {
+		int col = edit->offset2col[i] - StartX;
+
+		/*
+		 * Like LYwaddnstr(), expand tabs from the beginning of the
+		 * field.
+		 */
+		while (++col % 8)
+		    LYaddch(' ');
 		LYaddch(' ');
 	    } else {
 		LYaddch(UCH(str[i]));

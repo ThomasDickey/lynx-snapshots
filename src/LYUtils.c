@@ -1,4 +1,6 @@
-/* $LynxId: LYUtils.c,v 1.173 2008/09/06 14:35:56 tom Exp $ */
+/*
+ * $LynxId: LYUtils.c,v 1.175 2008/09/07 17:58:37 tom Exp $
+ */
 #include <HTUtils.h>
 #include <HTTCP.h>
 #include <HTParse.h>
@@ -982,16 +984,17 @@ static int find_cached_style(int cur,
 		    s = GetCachedStyle(LYP, x);
 		    if (s != 0) {
 			SetCachedStyle(LYP, LXP, s);
-			CTRACE((tfp, "found %d, x_offset=%d.\n", s, x - LXP));
+			CTRACE2(TRACE_STYLE,
+				(tfp, "found %d, x_offset=%d.\n", s, x - LXP));
 			break;
 		    }
 		}
 		if (s == 0) {
-		    CTRACE((tfp, "not found, assume <a>.\n"));
+		    CTRACE2(TRACE_STYLE, (tfp, "not found, assume <a>.\n"));
 		    s = s_a;
 		}
 	    } else {
-		CTRACE((tfp, "found %d.\n", s));
+		CTRACE2(TRACE_STYLE, (tfp, "found %d.\n", s));
 	    }
 	} else {
 	    CTRACE2(TRACE_STYLE,
@@ -1045,7 +1048,8 @@ void LYhighlight(int flag,
 	cur = 0;
     }
 
-    CTRACE((tfp, "LYhighlight %s %d [%d]:%s\n",
+    CTRACE((tfp, "LYhighlight at(%2d,%2d) %s %d [%d]:%s\n",
+	    links[cur].ly, links[cur].lx,
 	    (flag
 	     ? "on"
 	     : "off"),
