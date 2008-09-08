@@ -1,9 +1,10 @@
--- $LynxId: CHANGES,v 1.295 2008/09/05 00:30:55 tom Exp $
+-- $LynxId: CHANGES,v 1.296 2008/09/07 17:00:23 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
 2008-0?-?? (2.8.7dev.10)
+* modify external editing of TEXTAREA to not do tab-conversion -TD
 * modify LYhighlight() to limit display of multicolumn characters -TD
 * rewrite LYRefreshEdit(), to display multibyte/multicolumn characters properly
   when using wide-character curses -TD

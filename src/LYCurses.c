@@ -1,4 +1,4 @@
-/* $LynxId: LYCurses.c,v 1.133 2008/07/01 23:55:27 tom Exp $ */
+/* $LynxId: LYCurses.c,v 1.135 2008/09/07 22:03:52 tom Exp $ */
 #include <HTUtils.h>
 #include <HTAlert.h>
 
@@ -1864,6 +1864,10 @@ void LYwaddnstr(WINDOW * w GCC_UNUSED,
 		const char *src,
 		size_t len)
 {
+    int y0, x0;
+    int y, x;
+    size_t inx;
+
 #ifdef USE_CURSES_PADS
     /*
      * If we've configured to use pads for left/right scrolling, that can
@@ -1877,13 +1881,11 @@ void LYwaddnstr(WINDOW * w GCC_UNUSED,
      * simplify things, e.g., in case the string contains multibyte or
      * multicolumn characters.
      */
-    int y0, x0;
-
     getyx(LYwin, y0, x0);
 
     if (LYuseCursesPads
-	&& (LYwin == w)		/* popups do not wrap */
-	&&LYshiftWin == 0
+	&& (LYwin == w)
+	&& (LYshiftWin == 0)
 	&& LYwideLines == FALSE
 	&& ((int) len > (LYcolLimit - x0))
 	&& (x0 < LYcolLimit)) {
@@ -1908,25 +1910,26 @@ void LYwaddnstr(WINDOW * w GCC_UNUSED,
      */
 #ifdef USE_COLOR_STYLE
     if (TRACE) {
-	int y, x;
-
 	LYGetYX(y, x);
 	CTRACE2(TRACE_STYLE, (tfp, "[%2d,%2d] LYwaddnstr(%.*s, %u)\n",
 			      y, x, (int) len, src, (unsigned) len));
     }
 #endif
-    /*
-     * There's no guarantee that a library won't temporarily write on its input.
-     * Be safe and copy it when we have const-data.
-     */
-    while ((int) len > 0) {
-	char temp[MAX_LINE];
-	size_t use = (len >= MAX_LINE) ? MAX_LINE - 1 : len;
+    LYGetYX(y0, x0);
 
-	memcpy(temp, src, use);
-	temp[use] = 0;
-	waddstr(w, temp);
-	len -= use;
+    for (inx = 0; inx < len; ++inx) {
+	/*
+	 * Do tab-expansion relative to the base of the string (rather than
+	 * the screen) so that tabs in a TEXTAREA will look right.
+	 */
+	if (src[inx] == '\t') {
+	    LYGetYX(y, x);
+	    while ((++x - x0) % 8)
+		waddch(w, ' ');
+	    waddch(w, ' ');
+	} else {
+	    waddch(w, UCH(src[inx]));
+	}
     }
 }
 
@@ -1989,12 +1992,15 @@ int LYstrExtent(const char *string, int len, int maxCells)
 }
 
 /*
- * A simple call that relies upon the coincidence that multicell characters
- * use at least as many bytes as cells.
+ * Return the number of cells in the first 'len' bytes of the string.
+ *
+ * This relies upon the coincidence that multicell characters use at least as
+ * many bytes as cells.  But we have to account for tab, which can use 8, and
+ * control characters which use 2.
  */
 int LYstrExtent2(const char *string, int len)
 {
-    return LYstrExtent(string, len, len);
+    return LYstrExtent(string, len, 8 * len);
 }
 
 /*

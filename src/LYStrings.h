@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYStrings.h,v 1.68 2008/09/06 14:07:46 tom Exp $
+ * $LynxId: LYStrings.h,v 1.69 2008/09/07 22:59:14 tom Exp $
  */
 #ifndef LYSTRINGS_H
 #define LYSTRINGS_H
@@ -344,6 +344,8 @@ extern "C" {
     extern const char *LYLineeditNames[];
     extern LYEditCode *LYLineEditors[];
     extern const char *LYLineeditHelpURLs[];
+
+#define CurrentLineEditor() LYLineEditors[current_lineedit]
 
     extern const char *LYLineeditHelpURL(void);
 

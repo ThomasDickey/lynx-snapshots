@@ -1,5 +1,5 @@
 /*
- * $LynxId: GridText.c,v 1.151 2008/09/06 14:40:45 tom Exp $
+ * $LynxId: GridText.c,v 1.153 2008/09/07 22:38:54 tom Exp $
  *
  *		Character grid hypertext object
  *		===============================
@@ -11995,102 +11995,6 @@ BOOL HText_AreDifferent(HTParentAnchor *anchor,
     (LYtrimInputFields ? isspace(c) : ((c) == '\r' || (c) == '\n'))
 
 /*
- * Cleanup new lines coming into a TEXTAREA from an external editor, or a
- * file, such that they are in a suitable format for TEXTAREA rendering,
- * display, and manipulation.  That means trimming off trailing whitespace
- * from the line, expanding TABS into SPACES, and substituting a printable
- * character for control chars, and the like.
- *
- * --KED 02/24/99
- */
-static void cleanup_line_for_textarea(char *line,
-				      int len)
-{
-    char tbuf[MAX_LINE];
-
-    char *cp;
-    char *p;
-    char *s;
-    int i;
-    int n;
-
-    /*
-     * Whack off trailing whitespace from the line.
-     */
-    for (i = len, p = line + (len - 1); i != 0; p--, i--) {
-	if (CanTrimTextArea(UCH(*p)))
-	    *p = '\0';
-	else
-	    break;
-    }
-
-    if (strlen(line) != 0) {
-	/*
-	 * Expand any tab's, since they won't render properly in a TEXTAREA.
-	 *
-	 * [Is that "by spec", or just a "lynxism"?  As may be, it seems that
-	 * such chars may cause other problems, too ...  with cursor movement,
-	 * submit'ing, etc.  Probably needs looking into more deeply.]
-	 */
-	p = line;
-	s = tbuf;
-
-	while (*p) {
-	    if ((cp = strchr(p, '\t')) != 0) {
-		i = cp - p;
-		s = (strncpy(s, p, i)) + i;
-		n = TABSTOP - (i % TABSTOP);
-		s = (strncpy(s, SPACES, n)) + n;
-		p += (i + 1);
-
-	    } else {
-
-		strcpy(s, p);
-		break;
-	    }
-	}
-
-	/*
-	 * Replace control chars with something printable.  Note that char
-	 * substitution above 0x7f is dependent on the charset being used,
-	 * and then only applies to the contiguous run of char values that
-	 * are between 0x80, and the 1st real high-order-bit-set character,
-	 * as specified by the charset.  In general (ie, for many character
-	 * sets), that usually means the so-called "C1 control chars" that
-	 * range from 0x80 thru 0x9f.  For EBCDIC machines, we only trim the
-	 * (control) chars below a space (x'40').
-	 *
-	 * The assumption in all this is that the charset used in the editor,
-	 * is compatible with the charset specified in lynx.
-	 *
-	 * [At some point in time, when/if lynx ever supports multibyte chars
-	 * internally (eg, UCS-2, UCS-4, UTF-16, etc), this kind of thing may
-	 * well cause problems.  But then, supporting such char sets will
-	 * require massive changes in (most) all parts of the lynx code, so
-	 * until then, we do the rational thing with char values that would
-	 * otherwise foul the display, if left alone.  If you're implementing
-	 * multibyte character set support, consider yourself to have been
-	 * warned.]
-	 */
-	for (p = line, s = tbuf; *s != '\0'; p++, s++) {
-#ifndef EBCDIC
-	    *p = ((UCH(*s) < UCH(' ')) ||
-		  (UCH(*s) == UCH('\177')) ||
-		  ((UCH(*s) > UCH('\177')) &&
-		   (UCH(*s) <
-		    UCH(LYlowest_eightbit[current_char_set]))))
-		? (char) SPLAT : *s;
-#else
-	    *p = (UCH(*s) < UCH(' ')) ? SPLAT : *s;
-#endif
-	}
-	*p = '\0';
-    }
-
-    return;
-}
-
-/*
  * Re-render the text of a tagged ("[123]") HTLine (arg1), with the tag
  * number incremented by some value (arg5).  The re-rendered string may
  * be allowed to expand in the event of a tag width change (eg, 99 -> 100)
@@ -12630,6 +12534,28 @@ static void update_subsequent_anchors(int newlines,
 }
 
 /*
+ * Check if the given anchor is a TEXTAREA belonging to the given form.
+ *
+ * KED's note -
+ * [Finding the TEXTAREA we're actually *in* with these attributes isn't
+ * foolproof.  The form number isn't unique to a given TEXTAREA, and there
+ * *could* be TEXTAREA's with the same "name".  If that should ever be true,
+ * we'll actually get the data from the *1st* TEXTAREA in the page that
+ * matches.  We should probably assign a unique id to each TEXTAREA in a page,
+ * and match on that, to avoid this (potential) problem.
+ *
+ * Since the odds of "false matches" *actually* happening in real life seem
+ * rather small though, we'll hold off doing this, for a rainy day ...]
+ */
+static BOOLEAN IsFormsTextarea(FormInfo * form, TextAnchor *anchor_ptr)
+{
+    return ((anchor_ptr->link_type == INPUT_ANCHOR) &&
+	    (anchor_ptr->input_field->type == F_TEXTAREA_TYPE) &&
+	    (anchor_ptr->input_field->number == form->number) &&
+	    !strcmp(anchor_ptr->input_field->name, form->name));
+}
+
+/*
  * Transfer the initial contents of a TEXTAREA to a temp file, invoke the
  * user's editor on that file, then transfer the contents of the resultant
  * edited file back into the TEXTAREA (expanding the size of the area, if
@@ -12663,8 +12589,6 @@ int HText_ExtEditForm(LinkInfo * form_link)
     int line_cnt = 1;
 
     FormInfo *form = form_link->l_form;
-    char *areaname = form->name;
-    int form_num = form->number;
 
     HTLine *htline = NULL;
 
@@ -12690,27 +12614,12 @@ int HText_ExtEditForm(LinkInfo * form_link)
     /*
      * Begin at the beginning, to find 1st anchor in the TEXTAREA, then
      * write all of its lines (anchors) out to the edit temp file.
-     *
-     * [Finding the TEXTAREA we're actually *in* with these attributes
-     * isn't foolproof.  The form_num isn't unique to a given TEXTAREA,
-     * and there *could* be TEXTAREA's with the same "name".  If that
-     * should ever be true, we'll actually get the data from the *1st*
-     * TEXTAREA in the page that matches.  We should probably assign
-     * a unique id to each TEXTAREA in a page, and match on that, to
-     * avoid this (potential) problem.
-     *
-     * Since the odds of "false matches" *actually* happening in real
-     * life seem rather small though, we'll hold off doing this, for a
-     * rainy day ...]
      */
     anchor_ptr = HTMainText->first_anchor;
 
     while (anchor_ptr) {
 
-	if ((anchor_ptr->link_type == INPUT_ANCHOR) &&
-	    (anchor_ptr->input_field->type == F_TEXTAREA_TYPE) &&
-	    (anchor_ptr->input_field->number == form_num) &&
-	    !strcmp(anchor_ptr->input_field->name, areaname)) {
+	if (IsFormsTextarea(form, anchor_ptr)) {
 
 	    if (firstanchor) {
 		firstanchor = FALSE;
@@ -12734,7 +12643,7 @@ int HText_ExtEditForm(LinkInfo * form_link)
     }
     LYCloseTempFP(fp);
 
-    CTRACE((tfp, "GridText: TEXTAREA name=|%s| dumped to tempfile\n", areaname));
+    CTRACE((tfp, "GridText: TEXTAREA name=|%s| dumped to tempfile\n", form->name));
     CTRACE((tfp, "GridText: invoking editor (%s) on tempfile\n", editor));
 
     /*
@@ -12901,8 +12810,6 @@ int HText_ExtEditForm(LinkInfo * form_link)
 	strncat(line, lp, len);
 	*(line + len0 + len) = '\0';
 
-	cleanup_line_for_textarea(line, len0 + len);
-
 	/*
 	 * If there are more lines in the edit buffer than were in the
 	 * original TEXTAREA, we need to add a new line/anchor, continuing
@@ -12986,8 +12893,6 @@ void HText_ExpandTextarea(LinkInfo * form_link, int newlines)
     BOOLEAN firstanchor = TRUE;
 
     FormInfo *form = form_link->l_form;
-    char *areaname = form->name;
-    int form_num = form->number;
 
     HTLine *htline = NULL;
 
@@ -13002,27 +12907,12 @@ void HText_ExpandTextarea(LinkInfo * form_link, int newlines)
     /*
      * Begin at the beginning, to find the TEXTAREA, then on to find
      * the last line (anchor) in it.
-     *
-     * [Finding the TEXTAREA we're actually *in* with these attributes
-     * isn't foolproof.  The form_num isn't unique to a given TEXTAREA,
-     * and there *could* be TEXTAREA's with the same "name".  If that
-     * should ever be true, we'll actually expand the *1st* TEXTAREA
-     * in the page that matches.  We should probably assign a unique
-     * id to each TEXTAREA in a page, and match on that, to avoid this
-     * (potential) problem.
-     *
-     * Since the odds of "false matches" *actually* happening in real
-     * life seem rather small though, we'll hold off doing this, for a
-     * rainy day ...]
      */
     anchor_ptr = HTMainText->first_anchor;
 
     while (anchor_ptr) {
 
-	if ((anchor_ptr->link_type == INPUT_ANCHOR) &&
-	    (anchor_ptr->input_field->type == F_TEXTAREA_TYPE) &&
-	    (anchor_ptr->input_field->number == form_num) &&
-	    !strcmp(anchor_ptr->input_field->name, areaname)) {
+	if (IsFormsTextarea(form, anchor_ptr)) {
 
 	    if (firstanchor)
 		firstanchor = FALSE;
@@ -13053,7 +12943,7 @@ void HText_ExpandTextarea(LinkInfo * form_link, int newlines)
     }
 
     CTRACE((tfp, "GridText: %d blank line(s) added to TEXTAREA name=|%s|\n",
-	    newlines, areaname));
+	    newlines, form->name));
 
     /*
      * We need to adjust various things in all anchor bearing lines
@@ -13091,8 +12981,6 @@ int HText_InsertFile(LinkInfo * form_link)
     BOOLEAN truncalert = FALSE;
 
     FormInfo *form = form_link->l_form;
-    char *areaname = form->name;
-    int form_num = form->number;
 
     HTLine *htline = NULL;
 
@@ -13179,28 +13067,12 @@ int HText_InsertFile(LinkInfo * form_link)
     /*
      * Begin at the beginning, to find the TEXTAREA we're in, then
      * the current cursorline.
-     *
-     * [Finding the TEXTAREA we're actually *in* with these attributes
-     * isn't foolproof.  The form_num isn't unique to a given TEXTAREA,
-     * and there *could* be TEXTAREA's with the same "name".  If that
-     * should ever be true, we'll actually insert data into the *1st*
-     * TEXTAREA in the page that matches.  We should probably assign
-     * a unique id to each TEXTAREA in a page, and match on that, to
-     * avoid this (potential) problem.
-     *
-     * Since the odds of "false matches" *actually* happening in real
-     * life seem rather small though, we'll hold off doing this, for a
-     * rainy day ...]
      */
     anchor_ptr = HTMainText->first_anchor;
 
     while (anchor_ptr) {
 
-	if ((anchor_ptr->link_type == INPUT_ANCHOR) &&
-	    (anchor_ptr->input_field->type == F_TEXTAREA_TYPE) &&
-	    (anchor_ptr->input_field->number == form_num) &&
-	    !strcmp(anchor_ptr->input_field->name, areaname)) {
-
+	if (IsFormsTextarea(form, anchor_ptr)) {
 	    if (anchor_ptr->line_num == entry_line)
 		break;
 	}
@@ -13333,8 +13205,6 @@ int HText_InsertFile(LinkInfo * form_link)
 	}
 	strncpy(line, lp, len);
 	*(line + len) = '\0';
-
-	cleanup_line_for_textarea(line, len);
 
 	/*
 	 * If not the first line from the insert file, we need to add
