@@ -723,6 +723,10 @@
               emit backspaces in output if -dump'ing or -crawl'ing (like `man'
               does)
 
+       -xhtml_parsing
+              tells lynx that it can ignore certain tags which have no content
+              in an XHTML 1.0 document.  For example "<p/>" will be discarded.
+
 2 Commands
        o  Use Up arrow and Down arrow to scroll through hypertext links.
 

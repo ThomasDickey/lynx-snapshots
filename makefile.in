@@ -1,4 +1,4 @@
-# $LynxId: makefile.in,v 1.99 2008/07/19 10:45:44 tom Exp $
+# $LynxId: makefile.in,v 1.100 2008/09/10 13:53:35 tom Exp $
 ##makefile for lynx
 
 SHELL		= @CONFIG_SHELL@
@@ -10,6 +10,7 @@ prefix		= @prefix@
 exec_prefix	= @exec_prefix@
 top_srcdir	= @top_srcdir@
 srcdir		= @srcdir@
+builddir	= .
 VPATH		= $(srcdir)
 
 CC		= @CC@
@@ -61,29 +62,30 @@ sysconfdir= @sysconfdir@
 SYSCONFDIR= $(DESTDIR)$(sysconfdir)
 
 ## Where you want the doc-files installed
-docdir= @datadir@/lynx_doc
-DOCDIR= $(DESTDIR)$(docdir)
+docdir    = @datadir@/lynx_doc
+DOCDIR    = $(DESTDIR)$(docdir)
 
 ## Where you want the help-files installed
-helpdir= @datadir@/lynx_help
-HELPDIR= $(DESTDIR)$(helpdir)
+helpdir   = @datadir@/lynx_help
+HELPDIR   = $(DESTDIR)$(helpdir)
 
 ##set the relative location of the WWW library Implementation directory,
 ##from this directory
 ##do not set this to be an absolute path!!!
-WWW_DIR= $(srcdir)/WWW/Library/Implementation
+WWW_DIR   = $(builddir)/WWW/Library/Implementation
 
 ##set the relative location of the message-file directory
 ##do not set this to be an absolute path!!!
-PO_DIR= $(srcdir)/po
+PO_DIR    = $(builddir)/po
+PO_SRCDIR = $(srcdir)/po
 
 ##set the relative location of the main source-directory
 ##do not set this to be an absolute path!!!
-SRC_DIR= $(srcdir)/src
+SRC_DIR   = $(builddir)/src
 
 ##set the relative location of the character-translation data directory
 ##do not set this to be an absolute path!!!
-CHR_DIR= $(SRC_DIR)/chrtrans
+CHR_DIR   = $(SRC_DIR)/chrtrans
 
 ## Path to gzip that will compress the help files.
 ## It will be used when --enable-gzip-help is set by configure.
@@ -396,7 +398,7 @@ install-help : help_files.sed $(HELPDIR)
 	chmod 644 $(SYSCONFDIR)/lynx.cfg
 	-rm -f $(SYSCONFDIR)/lynx.tmp
 
-LYHelp.h : help_files.sed LYHelp.hin
+LYHelp.h : help_files.sed $(srcdir)/LYHelp.hin
 	@echo Creating $@
 	@sed -f help_files.sed $(srcdir)/LYHelp.hin > $@
 	@echo '**********************************************'
@@ -438,8 +440,8 @@ uninstall-doc ::
 	-test -d $(HELPDIR) && WD=`cd $(HELPDIR) && pwd` && HEAD=`echo $$WD|sed -e 's!/lynx_help$$!!'` && test $$WD != $$HEAD && cd $(HELPDIR) && rm -f COPYING COPYHEADER
 
 update-po:
-	rsync -Lrtvz  translationproject.org::tp/latest/lynx/  $(PO_DIR)
-	test -f $(PO_DIR)/makefile && cd $(PO_DIR) && $(MAKE_RECUR) $@
+	rsync -Lrtvz  translationproject.org::tp/latest/lynx/  $(PO_SRCDIR)
+	test -f $(PO_SRCDIR)/makefile && cd $(PO_SRCDIR) && $(MAKE_RECUR) $@
 
 $(BINDIR) \
 $(MANDIR) \

@@ -1,5 +1,8 @@
-/* $LynxId: LYGlobalDefs.h,v 1.109 2008/03/18 00:38:10 Paul.B.Mahol Exp $ */
-/* global variable definitions */
+/*
+ * $LynxId: LYGlobalDefs.h,v 1.110 2008/09/10 11:56:53 tom Exp $
+ *
+ * global variable definitions
+ */
 
 #ifndef LYGLOBALDEFS_H
 #define LYGLOBALDEFS_H
@@ -211,6 +214,7 @@ extern "C" {
     extern BOOLEAN LYoverride_no_cache;		/* don't need fresh copy, from history */
     extern BOOLEAN LYresubmit_posts;
     extern BOOLEAN LYtrimInputFields;
+    extern BOOLEAN LYxhtml_parsing;
     extern BOOLEAN bold_H1;
     extern BOOLEAN bold_headers;
     extern BOOLEAN bold_name_anchors;

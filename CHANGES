@@ -1,9 +1,17 @@
--- $LynxId: CHANGES,v 1.296 2008/09/07 17:00:23 tom Exp $
+-- $LynxId: CHANGES,v 1.299 2008/09/10 14:03:11 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
 2008-0?-?? (2.8.7dev.10)
+* fixes for srcdir!=objdir (report by FLWM) -TD
+* modify man2hlp.sh to work from subdirectory, e.g., its parameter would be
+  "../lynx.man" -TD
+* set POSIX locale for install-cfg.sh and man2hlp.sh since they use character
+  ranges -TD
+* add switch -xhtml-parsing and lynx.cfg XHTML_PARSING setting to control
+  whether the extensions for XHTML 1.0 are used (prompted by bug report by
+  FLWM, as well as discussion on lynx-dev) -TD
 * modify external editing of TEXTAREA to not do tab-conversion -TD
 * modify LYhighlight() to limit display of multicolumn characters -TD
 * rewrite LYRefreshEdit(), to display multibyte/multicolumn characters properly
