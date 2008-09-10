@@ -1,4 +1,6 @@
-/* $LynxId: LYMain.c,v 1.184 2008/07/02 21:26:25 Paul.B.Mahol Exp $ */
+/*
+ * $LynxId: LYMain.c,v 1.185 2008/09/10 11:58:28 tom Exp $
+ */
 #include <HTUtils.h>
 #include <HTTP.h>
 #include <HTParse.h>
@@ -191,6 +193,7 @@ BOOLEAN LYinternal_flag = FALSE;	/* override no-cache b/c internal link */
 BOOLEAN LYoverride_no_cache = FALSE;	/*override no-cache b/c history etc */
 BOOLEAN LYresubmit_posts = ALWAYS_RESUBMIT_POSTS;
 BOOLEAN LYtrimInputFields = FALSE;
+BOOLEAN LYxhtml_parsing = FALSE;
 BOOLEAN bold_H1 = FALSE;
 BOOLEAN bold_headers = FALSE;
 BOOLEAN bold_name_anchors = FALSE;
@@ -3987,6 +3990,10 @@ with filenames of these images"
       "emit backspaces in output if -dumping or -crawling\n(like 'man' does)"
    ),
 #endif
+   PARSE_SET(
+      "xhtml-parsing",	4|SET_ARG,		LYxhtml_parsing,
+      "enable XHTML 1.0 parsing"
+   ),
    PARSE_NIL
 };
 /* *INDENT-ON* */

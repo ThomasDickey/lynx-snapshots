@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYrcFile.h,v 1.25 2008/03/18 00:38:10 Paul.B.Mahol Exp $
+ * $LynxId: LYrcFile.h,v 1.26 2008/09/10 12:05:26 tom Exp $
  */
 #ifndef LYRCFILE_H
 #define LYRCFILE_H
@@ -254,6 +254,7 @@
 #define RC_VI_KEYS_ALWAYS_ON            "vi_keys_always_on"
 #define RC_WAIS_PROXY                   "wais_proxy"
 #define RC_XLOADIMAGE_COMMAND           "xloadimage_command"
+#define RC_XHTML_PARSING                "xhtml_parsing"
 #define RC_ZCAT_PATH                    "zcat_path"
 #define RC_ZIP_PATH                     "zip_path"
 

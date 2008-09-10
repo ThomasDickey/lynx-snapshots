@@ -1,5 +1,5 @@
 /*
- * $LynxId: SGML.c,v 1.110 2008/09/06 14:44:04 tom Exp $
+ * $LynxId: SGML.c,v 1.114 2008/09/10 12:56:58 tom Exp $
  *
  *			General SGML Parser code		SGML.c
  *			========================
@@ -1534,7 +1534,10 @@ static BOOL ignore_when_empty(HTTag * tag)
 {
     BOOL result = FALSE;
 
-    if (tag->name != 0
+    if (!LYPreparsedSource
+	&& LYxhtml_parsing
+	&& tag->name != 0
+	&& !(tag->flags & Tgf_mafse)
 	&& tag->contents != SGML_EMPTY
 	&& tag->tagclass != Tgc_Plike
 	&& (tag->tagclass == Tgc_SELECTlike
@@ -1549,15 +1552,14 @@ static BOOL ignore_when_empty(HTTag * tag)
 
 static void discard_empty(HTStream *context)
 {
+    static HTTag empty_tag;
+
     CTRACE((tfp, "SGML discarding empty %s\n",
 	    NonNull(context->current_tag->name)));
     CTRACE_FLUSH(tfp);
 
-    /* disable start_element() */
-    context->current_tag->name = 0;
-
-    /* these may be redundant: */
-    context->current_tag->contents = SGML_EMPTY;
+    memset(&empty_tag, 0, sizeof(empty_tag));
+    context->current_tag = &empty_tag;
     context->string->size = 0;
 
     /* do not call end_element() if start_element() was not called */
@@ -3854,7 +3856,6 @@ static void SGML_character(HTStream *context, char c_in)
 	    HTChunkTerminate(string);
 #ifdef USE_PRETTYSRC
 	    if (psrc_view) {
-		/*PSRCSTART(attrval); */
 		if (attr_is_name) {
 		    HTStartAnchor(context->target, string->data, NULL);
 		    (*context->actions->end_element) (context->target,

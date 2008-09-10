@@ -1,4 +1,4 @@
-.\" $LynxId: lynx.man,v 1.80 2008/02/17 19:14:40 Paul.B.Mahol Exp $
+.\" $LynxId: lynx.man,v 1.81 2008/09/10 13:09:54 tom Exp $
 .nr N -1
 .nr D 5
 .TH LYNX 1
@@ -842,6 +842,11 @@ number of columns for formatting of dumps, default is 80.
 .TP
 .B \-with_backspaces
 emit backspaces in output if \fB\-dump\fR'ing or \fB\-crawl\fR'ing (like 'man' does)
+.TP
+.B \-xhtml_parsing
+tells lynx that it can ignore certain tags which have no content
+in an XHTML 1.0 document.
+For example "<p/>" will be discarded.
 .SH COMMANDS
 .TP 3
 .B o

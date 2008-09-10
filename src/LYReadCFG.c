@@ -1,4 +1,6 @@
-/* $LynxId: LYReadCFG.c,v 1.128 2008/03/18 00:38:10 Paul.B.Mahol Exp $ */
+/*
+ * $LynxId: LYReadCFG.c,v 1.129 2008/09/10 12:06:23 tom Exp $
+ */
 #ifndef NO_RULES
 #include <HTRules.h>
 #else
@@ -1601,6 +1603,7 @@ static Config_Type Config_Table [] =
      PARSE_FUN(RC_VIEWER,               viewer_fun),
      PARSE_Env(RC_WAIS_PROXY,           0),
      PARSE_STR(RC_XLOADIMAGE_COMMAND,   XLoadImageCommand),
+     PARSE_SET(RC_XHTML_PARSING,        LYxhtml_parsing),
      PARSE_PRG(RC_ZCAT_PATH,            ppZCAT),
      PARSE_PRG(RC_ZIP_PATH,             ppZIP),
 
