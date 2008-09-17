@@ -1,4 +1,4 @@
-/* $LynxId: LYCurses.c,v 1.135 2008/09/07 22:03:52 tom Exp $ */
+/* $LynxId: LYCurses.c,v 1.136 2008/09/10 19:48:30 tom Exp $ */
 #include <HTUtils.h>
 #include <HTAlert.h>
 
@@ -1787,6 +1787,8 @@ WINDOW *LYstartPopup(int *top_y,
 	    *left_x = 1;
 	} else {
 	    *left_x = LYcolLimit - 4 - *width;
+	    if (*left_x <= 0)
+		*left_x = 1;
 	}
 	form_window = newwin(*height, *width + 4, *top_y, *left_x - 1);
     }

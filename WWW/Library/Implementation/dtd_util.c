@@ -1,5 +1,5 @@
 /*
- * $LynxId: dtd_util.c,v 1.28 2008/08/18 23:42:12 tom Exp $
+ * $LynxId: dtd_util.c,v 1.31 2008/09/16 23:43:49 tom Exp $
  *
  * Given a SGML_dtd structure, write a corresponding flat file, or "C" source.
  * Given the flat-file, write the "C" source.
@@ -297,7 +297,7 @@ static void dump_src_HTTag(FILE *output, const SGML_dtd * dtd, int which)
     if (!tag->can_justify)
 	P_macro = "P0";
 #endif
-    PrintF(output, 19, " { %s(\"%s\"),", P_macro, tag->name);
+    PrintF(output, 19, " { %s(%s),", P_macro, tag->name);
     PrintF(output, 16, "%s_attr,", XXX_attr(dtd, which));
     PrintF(output, 28, "HTML_%s_ATTRIBUTES,", NameOfAttrs(dtd, which));
     PrintF(output, 14, "%s,", SGMLContent2s(tag->contents));
@@ -349,6 +349,7 @@ static void dump_source(FILE *output, const SGML_dtd * dtd, int dtd_version)
     }
     NOTE("/* *INDENT-ON* */");
     NOTE("");
+    NOTE("/* justification-flags */");
     NOTE("#undef N");
     NOTE("#undef i");
     NOTE("#undef h");
@@ -356,16 +357,20 @@ static void dump_source(FILE *output, const SGML_dtd * dtd, int dtd_version)
     NOTE("#undef x");
     NOTE("");
     NOTE("#undef T");
-
+    NOTE("");
+    NOTE("/* tag-names */");
+    for (j = 0; j <= dtd->number_of_tags; ++j) {
+	fprintf(output, "#undef %s\n", DEF_name(dtd, j));
+    }
     NOTE("");
     NOTE("/* these definitions are used in the tags-tables */");
     NOTE("#undef P");
     NOTE("#undef P_");
     NOTE("#ifdef USE_COLOR_STYLE");
-    NOTE("#define P_(x) x , (sizeof x) -1");
+    NOTE("#define P_(x) #x, (sizeof #x) -1");
     NOTE("#define NULL_HTTag_ NULL, 0");
     NOTE("#else");
-    NOTE("#define P_(x) x");
+    NOTE("#define P_(x) #x");
     NOTE("#define NULL_HTTag_ NULL");
     NOTE("#endif");
     NOTE("");

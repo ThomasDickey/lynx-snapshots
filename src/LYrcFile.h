@@ -1,5 +1,5 @@
 /*
- * $LynxId: LYrcFile.h,v 1.26 2008/09/10 12:05:26 tom Exp $
+ * $LynxId: LYrcFile.h,v 1.27 2008/09/10 20:28:59 tom Exp $
  */
 #ifndef LYRCFILE_H
 #define LYRCFILE_H
@@ -62,7 +62,6 @@
 #define RC_DEFAULT_KEYPAD_MODE_NUMARO   "default_keypad_mode_is_numbers_as_arrows"
 #define RC_DEFAULT_USER_MODE            "default_user_mode"
 #define RC_DEFAULT_VIRTUAL_MEMORY_SIZE  "default_virtual_memory_size"
-#define RC_DEFINE RC_XLOADIMAGE_COMMAND "XLOADIMAGE_COMMAND"
 #define RC_DELAYSECS                    "delaysecs"
 #define RC_DIRED_MENU                   "dired_menu"
 #define RC_DIR_LIST_ORDER               "dir_list_order"

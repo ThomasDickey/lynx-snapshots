@@ -1,4 +1,4 @@
-/* $LynxId: src1_HTMLDTD.h,v 1.6 2008/07/15 22:43:49 tom Exp $ */
+/* $LynxId: src1_HTMLDTD.h,v 1.9 2008/09/16 23:47:45 tom Exp $ */
 #ifndef src_HTMLDTD_H1
 #define src_HTMLDTD_H1 1
 
@@ -1034,6 +1034,7 @@ static const attr ul_attr[] = {         /* DIR attributes */
 
 /* *INDENT-ON* */
 
+/* justification-flags */
 #undef N
 #undef i
 #undef h
@@ -1042,14 +1043,135 @@ static const attr ul_attr[] = {         /* DIR attributes */
 
 #undef T
 
+/* tag-names */
+#undef A
+#undef ABBR
+#undef ACRONYM
+#undef ADDRESS
+#undef APPLET
+#undef AREA
+#undef AU
+#undef AUTHOR
+#undef B
+#undef BANNER
+#undef BASE
+#undef BASEFONT
+#undef BDO
+#undef BGSOUND
+#undef BIG
+#undef BLINK
+#undef BLOCKQUOTE
+#undef BODY
+#undef BODYTEXT
+#undef BQ
+#undef BR
+#undef BUTTON
+#undef CAPTION
+#undef CENTER
+#undef CITE
+#undef CODE
+#undef COL
+#undef COLGROUP
+#undef COMMENT
+#undef CREDIT
+#undef DD
+#undef DEL
+#undef DFN
+#undef DIR
+#undef DIV
+#undef DL
+#undef DLC
+#undef DT
+#undef EM
+#undef EMBED
+#undef FIELDSET
+#undef FIG
+#undef FN
+#undef FONT
+#undef FORM
+#undef FRAME
+#undef FRAMESET
+#undef H1
+#undef H2
+#undef H3
+#undef H4
+#undef H5
+#undef H6
+#undef HEAD
+#undef HR
+#undef HTML
+#undef HY
+#undef I
+#undef IFRAME
+#undef IMG
+#undef INPUT
+#undef INS
+#undef ISINDEX
+#undef KBD
+#undef KEYGEN
+#undef LABEL
+#undef LEGEND
+#undef LH
+#undef LI
+#undef LINK
+#undef LISTING
+#undef MAP
+#undef MARQUEE
+#undef MATH
+#undef MENU
+#undef META
+#undef NEXTID
+#undef NOFRAMES
+#undef NOTE
+#undef OBJECT
+#undef OL
+#undef OPTION
+#undef OVERLAY
+#undef P
+#undef PARAM
+#undef PLAINTEXT
+#undef PRE
+#undef Q
+#undef S
+#undef SAMP
+#undef SCRIPT
+#undef SELECT
+#undef SHY
+#undef SMALL
+#undef SPAN
+#undef SPOT
+#undef STRIKE
+#undef STRONG
+#undef STYLE
+#undef SUB
+#undef SUP
+#undef TAB
+#undef TABLE
+#undef TBODY
+#undef TD
+#undef TEXTAREA
+#undef TEXTFLOW
+#undef TFOOT
+#undef TH
+#undef THEAD
+#undef TITLE
+#undef TR
+#undef TT
+#undef U
+#undef UL
+#undef VAR
+#undef WBR
+#undef XMP
+#undef OBJECT_PCDATA
+
 /* these definitions are used in the tags-tables */
 #undef P
 #undef P_
 #ifdef USE_COLOR_STYLE
-#define P_(x) x , (sizeof x) -1
+#define P_(x) #x, (sizeof #x) -1
 #define NULL_HTTag_ NULL, 0
 #else
-#define P_(x) x
+#define P_(x) #x
 #define NULL_HTTag_ NULL
 #endif
 
@@ -1066,128 +1188,128 @@ static const attr ul_attr[] = {         /* DIR attributes */
 #endif /* once_HTMLDTD */
 /* *INDENT-OFF* */
 static const HTTag tags_table1[HTML_ALL_ELEMENTS] = {
- { P("A"),         a_attr,         HTML_A_ATTRIBUTES,          SGML_MIXED,   T_A},
- { P("ABBR"),      gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_MIXED,   T_ABBR},
- { P("ACRONYM"),   gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_MIXED,   T_ACRONYM},
- { P("ADDRESS"),   address_attr,   HTML_ADDRESS_ATTRIBUTES,    SGML_MIXED,   T_ADDRESS},
- { P("APPLET"),    applet_attr,    HTML_APPLET_ATTRIBUTES,     SGML_MIXED,   T_APPLET},
- { P("AREA"),      area_attr,      HTML_AREA_ATTRIBUTES,       SGML_EMPTY,   T_AREA},
- { P("AU"),        gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_MIXED,   T_AU},
- { P("AUTHOR"),    gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_MIXED,   T_AUTHOR},
- { P("B"),         gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_MIXED,   T_B},
- { P0("BANNER"),   gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_MIXED,   T_BANNER},
- { P("BASE"),      base_attr,      HTML_BASE_ATTRIBUTES,       SGML_EMPTY,   T_BASE},
- { P("BASEFONT"),  font_attr,      HTML_FONT_ATTRIBUTES,       SGML_EMPTY,   T_BASEFONT},
- { P("BDO"),       gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_MIXED,   T_BDO},
- { P("BGSOUND"),   bgsound_attr,   HTML_BGSOUND_ATTRIBUTES,    SGML_EMPTY,   T_BGSOUND},
- { P("BIG"),       gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_MIXED,   T_BIG},
- { P("BLINK"),     gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_MIXED,   T_BLINK},
- { P("BLOCKQUOTE"),bq_attr,        HTML_BQ_ATTRIBUTES,         SGML_MIXED,   T_BLOCKQUOTE},
- { P("BODY"),      body_attr,      HTML_BODY_ATTRIBUTES,       SGML_MIXED,   T_BODY},
- { P("BODYTEXT"),  bodytext_attr,  HTML_BODYTEXT_ATTRIBUTES,   SGML_MIXED,   T_BODYTEXT},
- { P("BQ"),        bq_attr,        HTML_BQ_ATTRIBUTES,         SGML_MIXED,   T_BQ},
- { P("BR"),        gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_EMPTY,   T_BR},
- { P("BUTTON"),    button_attr,    HTML_BUTTON_ATTRIBUTES,     SGML_MIXED,   T_BUTTON},
- { P("CAPTION"),   caption_attr,   HTML_CAPTION_ATTRIBUTES,    SGML_MIXED,   T_CAPTION},
- { P("CENTER"),    div_attr,       HTML_DIV_ATTRIBUTES,        SGML_MIXED,   T_CENTER},
- { P("CITE"),      gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_MIXED,   T_CITE},
- { P("CODE"),      gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_MIXED,   T_CODE},
- { P("COL"),       col_attr,       HTML_COL_ATTRIBUTES,        SGML_EMPTY,   T_COL},
- { P("COLGROUP"),  col_attr,       HTML_COL_ATTRIBUTES,        SGML_ELEMENT, T_COLGROUP},
- { P("COMMENT"),   gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_PCDATA,  T_COMMENT},
- { P("CREDIT"),    credit_attr,    HTML_CREDIT_ATTRIBUTES,     SGML_MIXED,   T_CREDIT},
- { P("DD"),        gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_MIXED,   T_DD},
- { P("DEL"),       gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_MIXED,   T_DEL},
- { P("DFN"),       gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_MIXED,   T_DFN},
- { P("DIR"),       ul_attr,        HTML_UL_ATTRIBUTES,         SGML_MIXED,   T_DIR},
- { P("DIV"),       div_attr,       HTML_DIV_ATTRIBUTES,        SGML_MIXED,   T_DIV},
- { P("DL"),        dl_attr,        HTML_DL_ATTRIBUTES,         SGML_MIXED,   T_DL},
- { P("DLC"),       dl_attr,        HTML_DL_ATTRIBUTES,         SGML_MIXED,   T_DLC},
- { P("DT"),        gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_MIXED,   T_DT},
- { P("EM"),        gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_MIXED,   T_EM},
- { P("EMBED"),     embed_attr,     HTML_EMBED_ATTRIBUTES,      SGML_EMPTY,   T_EMBED},
- { P("FIELDSET"),  fieldset_attr,  HTML_FIELDSET_ATTRIBUTES,   SGML_MIXED,   T_FIELDSET},
- { P("FIG"),       fig_attr,       HTML_FIG_ATTRIBUTES,        SGML_MIXED,   T_FIG},
- { P("FN"),        fn_attr,        HTML_FN_ATTRIBUTES,         SGML_MIXED,   T_FN},
- { P("FONT"),      font_attr,      HTML_FONT_ATTRIBUTES,       SGML_MIXED,   T_FONT},
- { P("FORM"),      form_attr,      HTML_FORM_ATTRIBUTES,       SGML_MIXED,   T_FORM},
- { P("FRAME"),     frame_attr,     HTML_FRAME_ATTRIBUTES,      SGML_EMPTY,   T_FRAME},
- { P("FRAMESET"),  frameset_attr,  HTML_FRAMESET_ATTRIBUTES,   SGML_ELEMENT, T_FRAMESET},
- { P0("H1"),       h_attr,         HTML_H_ATTRIBUTES,          SGML_MIXED,   T_H1},
- { P0("H2"),       h_attr,         HTML_H_ATTRIBUTES,          SGML_MIXED,   T_H2},
- { P0("H3"),       h_attr,         HTML_H_ATTRIBUTES,          SGML_MIXED,   T_H3},
- { P0("H4"),       h_attr,         HTML_H_ATTRIBUTES,          SGML_MIXED,   T_H4},
- { P0("H5"),       h_attr,         HTML_H_ATTRIBUTES,          SGML_MIXED,   T_H5},
- { P0("H6"),       h_attr,         HTML_H_ATTRIBUTES,          SGML_MIXED,   T_H6},
- { P("HEAD"),      gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_ELEMENT, T_HEAD},
- { P("HR"),        hr_attr,        HTML_HR_ATTRIBUTES,         SGML_EMPTY,   T_HR},
- { P("HTML"),      gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_MIXED,   T_HTML},
- { P("HY"),        gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_EMPTY,   T_HY},
- { P("I"),         gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_MIXED,   T_I},
- { P("IFRAME"),    iframe_attr,    HTML_IFRAME_ATTRIBUTES,     SGML_MIXED,   T_IFRAME},
- { P("IMG"),       img_attr,       HTML_IMG_ATTRIBUTES,        SGML_EMPTY,   T_IMG},
- { P("INPUT"),     input_attr,     HTML_INPUT_ATTRIBUTES,      SGML_EMPTY,   T_INPUT},
- { P("INS"),       gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_MIXED,   T_INS},
- { P("ISINDEX"),   isindex_attr,   HTML_ISINDEX_ATTRIBUTES,    SGML_EMPTY,   T_ISINDEX},
- { P("KBD"),       gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_MIXED,   T_KBD},
- { P("KEYGEN"),    keygen_attr,    HTML_KEYGEN_ATTRIBUTES,     SGML_EMPTY,   T_KEYGEN},
- { P("LABEL"),     label_attr,     HTML_LABEL_ATTRIBUTES,      SGML_MIXED,   T_LABEL},
- { P("LEGEND"),    legend_attr,    HTML_LEGEND_ATTRIBUTES,     SGML_MIXED,   T_LEGEND},
- { P("LH"),        gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_MIXED,   T_LH},
- { P("LI"),        li_attr,        HTML_LI_ATTRIBUTES,         SGML_MIXED,   T_LI},
- { P("LINK"),      link_attr,      HTML_LINK_ATTRIBUTES,       SGML_EMPTY,   T_LINK},
- { P("LISTING"),   gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_LITTERAL,T_LISTING},
- { P("MAP"),       map_attr,       HTML_MAP_ATTRIBUTES,        SGML_ELEMENT, T_MAP},
- { P("MARQUEE"),   gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_MIXED,   T_MARQUEE},
- { P("MATH"),      math_attr,      HTML_MATH_ATTRIBUTES,       SGML_PCDATA,  T_MATH},
- { P("MENU"),      ul_attr,        HTML_UL_ATTRIBUTES,         SGML_MIXED,   T_MENU},
- { P("META"),      meta_attr,      HTML_META_ATTRIBUTES,       SGML_EMPTY,   T_META},
- { P("NEXTID"),    nextid_attr,    HTML_NEXTID_ATTRIBUTES,     SGML_EMPTY,   T_NEXTID},
- { P("NOFRAMES"),  gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_MIXED,   T_NOFRAMES},
- { P("NOTE"),      note_attr,      HTML_NOTE_ATTRIBUTES,       SGML_MIXED,   T_NOTE},
- { P("OBJECT"),    object_attr,    HTML_OBJECT_ATTRIBUTES,     SGML_LITTERAL,T_OBJECT},
- { P("OL"),        ol_attr,        HTML_OL_ATTRIBUTES,         SGML_MIXED,   T_OL},
- { P("OPTION"),    option_attr,    HTML_OPTION_ATTRIBUTES,     SGML_PCDATA,  T_OPTION},
- { P("OVERLAY"),   overlay_attr,   HTML_OVERLAY_ATTRIBUTES,    SGML_PCDATA,  T_OVERLAY},
- { P("P"),         p_attr,         HTML_P_ATTRIBUTES,          SGML_MIXED,   T_P},
- { P("PARAM"),     param_attr,     HTML_PARAM_ATTRIBUTES,      SGML_EMPTY,   T_PARAM},
- { P("PLAINTEXT"), gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_LITTERAL,T_PLAINTEXT},
- { P0("PRE"),      gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_MIXED,   T_PRE},
- { P("Q"),         gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_MIXED,   T_Q},
- { P("S"),         gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_MIXED,   T_S},
- { P("SAMP"),      gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_MIXED,   T_SAMP},
- { P("SCRIPT"),    script_attr,    HTML_SCRIPT_ATTRIBUTES,     SGML_SCRIPT,  T_SCRIPT},
- { P("SELECT"),    select_attr,    HTML_SELECT_ATTRIBUTES,     SGML_ELEMENT, T_SELECT},
- { P("SHY"),       gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_EMPTY,   T_SHY},
- { P("SMALL"),     gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_MIXED,   T_SMALL},
- { P("SPAN"),      gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_MIXED,   T_SPAN},
- { P("SPOT"),      gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_EMPTY,   T_SPOT},
- { P("STRIKE"),    gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_MIXED,   T_STRIKE},
- { P("STRONG"),    gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_MIXED,   T_STRONG},
- { P("STYLE"),     style_attr,     HTML_STYLE_ATTRIBUTES,      SGML_CDATA,   T_STYLE},
- { P("SUB"),       gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_MIXED,   T_SUB},
- { P("SUP"),       gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_MIXED,   T_SUP},
- { P("TAB"),       tab_attr,       HTML_TAB_ATTRIBUTES,        SGML_EMPTY,   T_TAB},
- { P("TABLE"),     table_attr,     HTML_TABLE_ATTRIBUTES,      SGML_ELEMENT, T_TABLE},
- { P("TBODY"),     tr_attr,        HTML_TR_ATTRIBUTES,         SGML_ELEMENT, T_TBODY},
- { P("TD"),        td_attr,        HTML_TD_ATTRIBUTES,         SGML_MIXED,   T_TD},
- { P("TEXTAREA"),  textarea_attr,  HTML_TEXTAREA_ATTRIBUTES,   SGML_PCDATA,  T_TEXTAREA},
- { P("TEXTFLOW"),  bodytext_attr,  HTML_BODYTEXT_ATTRIBUTES,   SGML_MIXED,   T_TEXTFLOW},
- { P("TFOOT"),     tr_attr,        HTML_TR_ATTRIBUTES,         SGML_ELEMENT, T_TFOOT},
- { P("TH"),        td_attr,        HTML_TD_ATTRIBUTES,         SGML_MIXED,   T_TH},
- { P("THEAD"),     tr_attr,        HTML_TR_ATTRIBUTES,         SGML_ELEMENT, T_THEAD},
- { P("TITLE"),     gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_PCDATA,  T_TITLE},
- { P("TR"),        tr_attr,        HTML_TR_ATTRIBUTES,         SGML_MIXED,   T_TR},
- { P("TT"),        gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_MIXED,   T_TT},
- { P("U"),         gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_MIXED,   T_U},
- { P("UL"),        ul_attr,        HTML_UL_ATTRIBUTES,         SGML_MIXED,   T_UL},
- { P("VAR"),       gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_MIXED,   T_VAR},
- { P("WBR"),       gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_EMPTY,   T_WBR},
- { P0("XMP"),      gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_LITTERAL,T_XMP},
+ { P(A),           a_attr,         HTML_A_ATTRIBUTES,          SGML_MIXED,   T_A},
+ { P(ABBR),        gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_MIXED,   T_ABBR},
+ { P(ACRONYM),     gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_MIXED,   T_ACRONYM},
+ { P(ADDRESS),     address_attr,   HTML_ADDRESS_ATTRIBUTES,    SGML_MIXED,   T_ADDRESS},
+ { P(APPLET),      applet_attr,    HTML_APPLET_ATTRIBUTES,     SGML_MIXED,   T_APPLET},
+ { P(AREA),        area_attr,      HTML_AREA_ATTRIBUTES,       SGML_EMPTY,   T_AREA},
+ { P(AU),          gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_MIXED,   T_AU},
+ { P(AUTHOR),      gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_MIXED,   T_AUTHOR},
+ { P(B),           gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_MIXED,   T_B},
+ { P0(BANNER),     gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_MIXED,   T_BANNER},
+ { P(BASE),        base_attr,      HTML_BASE_ATTRIBUTES,       SGML_EMPTY,   T_BASE},
+ { P(BASEFONT),    font_attr,      HTML_FONT_ATTRIBUTES,       SGML_EMPTY,   T_BASEFONT},
+ { P(BDO),         gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_MIXED,   T_BDO},
+ { P(BGSOUND),     bgsound_attr,   HTML_BGSOUND_ATTRIBUTES,    SGML_EMPTY,   T_BGSOUND},
+ { P(BIG),         gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_MIXED,   T_BIG},
+ { P(BLINK),       gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_MIXED,   T_BLINK},
+ { P(BLOCKQUOTE),  bq_attr,        HTML_BQ_ATTRIBUTES,         SGML_MIXED,   T_BLOCKQUOTE},
+ { P(BODY),        body_attr,      HTML_BODY_ATTRIBUTES,       SGML_MIXED,   T_BODY},
+ { P(BODYTEXT),    bodytext_attr,  HTML_BODYTEXT_ATTRIBUTES,   SGML_MIXED,   T_BODYTEXT},
+ { P(BQ),          bq_attr,        HTML_BQ_ATTRIBUTES,         SGML_MIXED,   T_BQ},
+ { P(BR),          gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_EMPTY,   T_BR},
+ { P(BUTTON),      button_attr,    HTML_BUTTON_ATTRIBUTES,     SGML_MIXED,   T_BUTTON},
+ { P(CAPTION),     caption_attr,   HTML_CAPTION_ATTRIBUTES,    SGML_MIXED,   T_CAPTION},
+ { P(CENTER),      div_attr,       HTML_DIV_ATTRIBUTES,        SGML_MIXED,   T_CENTER},
+ { P(CITE),        gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_MIXED,   T_CITE},
+ { P(CODE),        gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_MIXED,   T_CODE},
+ { P(COL),         col_attr,       HTML_COL_ATTRIBUTES,        SGML_EMPTY,   T_COL},
+ { P(COLGROUP),    col_attr,       HTML_COL_ATTRIBUTES,        SGML_ELEMENT, T_COLGROUP},
+ { P(COMMENT),     gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_PCDATA,  T_COMMENT},
+ { P(CREDIT),      credit_attr,    HTML_CREDIT_ATTRIBUTES,     SGML_MIXED,   T_CREDIT},
+ { P(DD),          gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_MIXED,   T_DD},
+ { P(DEL),         gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_MIXED,   T_DEL},
+ { P(DFN),         gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_MIXED,   T_DFN},
+ { P(DIR),         ul_attr,        HTML_UL_ATTRIBUTES,         SGML_MIXED,   T_DIR},
+ { P(DIV),         div_attr,       HTML_DIV_ATTRIBUTES,        SGML_MIXED,   T_DIV},
+ { P(DL),          dl_attr,        HTML_DL_ATTRIBUTES,         SGML_MIXED,   T_DL},
+ { P(DLC),         dl_attr,        HTML_DL_ATTRIBUTES,         SGML_MIXED,   T_DLC},
+ { P(DT),          gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_MIXED,   T_DT},
+ { P(EM),          gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_MIXED,   T_EM},
+ { P(EMBED),       embed_attr,     HTML_EMBED_ATTRIBUTES,      SGML_EMPTY,   T_EMBED},
+ { P(FIELDSET),    fieldset_attr,  HTML_FIELDSET_ATTRIBUTES,   SGML_MIXED,   T_FIELDSET},
+ { P(FIG),         fig_attr,       HTML_FIG_ATTRIBUTES,        SGML_MIXED,   T_FIG},
+ { P(FN),          fn_attr,        HTML_FN_ATTRIBUTES,         SGML_MIXED,   T_FN},
+ { P(FONT),        font_attr,      HTML_FONT_ATTRIBUTES,       SGML_MIXED,   T_FONT},
+ { P(FORM),        form_attr,      HTML_FORM_ATTRIBUTES,       SGML_MIXED,   T_FORM},
+ { P(FRAME),       frame_attr,     HTML_FRAME_ATTRIBUTES,      SGML_EMPTY,   T_FRAME},
+ { P(FRAMESET),    frameset_attr,  HTML_FRAMESET_ATTRIBUTES,   SGML_ELEMENT, T_FRAMESET},
+ { P0(H1),         h_attr,         HTML_H_ATTRIBUTES,          SGML_MIXED,   T_H1},
+ { P0(H2),         h_attr,         HTML_H_ATTRIBUTES,          SGML_MIXED,   T_H2},
+ { P0(H3),         h_attr,         HTML_H_ATTRIBUTES,          SGML_MIXED,   T_H3},
+ { P0(H4),         h_attr,         HTML_H_ATTRIBUTES,          SGML_MIXED,   T_H4},
+ { P0(H5),         h_attr,         HTML_H_ATTRIBUTES,          SGML_MIXED,   T_H5},
+ { P0(H6),         h_attr,         HTML_H_ATTRIBUTES,          SGML_MIXED,   T_H6},
+ { P(HEAD),        gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_ELEMENT, T_HEAD},
+ { P(HR),          hr_attr,        HTML_HR_ATTRIBUTES,         SGML_EMPTY,   T_HR},
+ { P(HTML),        gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_MIXED,   T_HTML},
+ { P(HY),          gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_EMPTY,   T_HY},
+ { P(I),           gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_MIXED,   T_I},
+ { P(IFRAME),      iframe_attr,    HTML_IFRAME_ATTRIBUTES,     SGML_MIXED,   T_IFRAME},
+ { P(IMG),         img_attr,       HTML_IMG_ATTRIBUTES,        SGML_EMPTY,   T_IMG},
+ { P(INPUT),       input_attr,     HTML_INPUT_ATTRIBUTES,      SGML_EMPTY,   T_INPUT},
+ { P(INS),         gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_MIXED,   T_INS},
+ { P(ISINDEX),     isindex_attr,   HTML_ISINDEX_ATTRIBUTES,    SGML_EMPTY,   T_ISINDEX},
+ { P(KBD),         gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_MIXED,   T_KBD},
+ { P(KEYGEN),      keygen_attr,    HTML_KEYGEN_ATTRIBUTES,     SGML_EMPTY,   T_KEYGEN},
+ { P(LABEL),       label_attr,     HTML_LABEL_ATTRIBUTES,      SGML_MIXED,   T_LABEL},
+ { P(LEGEND),      legend_attr,    HTML_LEGEND_ATTRIBUTES,     SGML_MIXED,   T_LEGEND},
+ { P(LH),          gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_MIXED,   T_LH},
+ { P(LI),          li_attr,        HTML_LI_ATTRIBUTES,         SGML_MIXED,   T_LI},
+ { P(LINK),        link_attr,      HTML_LINK_ATTRIBUTES,       SGML_EMPTY,   T_LINK},
+ { P(LISTING),     gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_LITTERAL,T_LISTING},
+ { P(MAP),         map_attr,       HTML_MAP_ATTRIBUTES,        SGML_ELEMENT, T_MAP},
+ { P(MARQUEE),     gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_MIXED,   T_MARQUEE},
+ { P(MATH),        math_attr,      HTML_MATH_ATTRIBUTES,       SGML_PCDATA,  T_MATH},
+ { P(MENU),        ul_attr,        HTML_UL_ATTRIBUTES,         SGML_MIXED,   T_MENU},
+ { P(META),        meta_attr,      HTML_META_ATTRIBUTES,       SGML_EMPTY,   T_META},
+ { P(NEXTID),      nextid_attr,    HTML_NEXTID_ATTRIBUTES,     SGML_EMPTY,   T_NEXTID},
+ { P(NOFRAMES),    gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_MIXED,   T_NOFRAMES},
+ { P(NOTE),        note_attr,      HTML_NOTE_ATTRIBUTES,       SGML_MIXED,   T_NOTE},
+ { P(OBJECT),      object_attr,    HTML_OBJECT_ATTRIBUTES,     SGML_LITTERAL,T_OBJECT},
+ { P(OL),          ol_attr,        HTML_OL_ATTRIBUTES,         SGML_MIXED,   T_OL},
+ { P(OPTION),      option_attr,    HTML_OPTION_ATTRIBUTES,     SGML_PCDATA,  T_OPTION},
+ { P(OVERLAY),     overlay_attr,   HTML_OVERLAY_ATTRIBUTES,    SGML_PCDATA,  T_OVERLAY},
+ { P(P),           p_attr,         HTML_P_ATTRIBUTES,          SGML_MIXED,   T_P},
+ { P(PARAM),       param_attr,     HTML_PARAM_ATTRIBUTES,      SGML_EMPTY,   T_PARAM},
+ { P(PLAINTEXT),   gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_LITTERAL,T_PLAINTEXT},
+ { P0(PRE),        gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_MIXED,   T_PRE},
+ { P(Q),           gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_MIXED,   T_Q},
+ { P(S),           gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_MIXED,   T_S},
+ { P(SAMP),        gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_MIXED,   T_SAMP},
+ { P(SCRIPT),      script_attr,    HTML_SCRIPT_ATTRIBUTES,     SGML_SCRIPT,  T_SCRIPT},
+ { P(SELECT),      select_attr,    HTML_SELECT_ATTRIBUTES,     SGML_ELEMENT, T_SELECT},
+ { P(SHY),         gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_EMPTY,   T_SHY},
+ { P(SMALL),       gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_MIXED,   T_SMALL},
+ { P(SPAN),        gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_MIXED,   T_SPAN},
+ { P(SPOT),        gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_EMPTY,   T_SPOT},
+ { P(STRIKE),      gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_MIXED,   T_STRIKE},
+ { P(STRONG),      gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_MIXED,   T_STRONG},
+ { P(STYLE),       style_attr,     HTML_STYLE_ATTRIBUTES,      SGML_CDATA,   T_STYLE},
+ { P(SUB),         gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_MIXED,   T_SUB},
+ { P(SUP),         gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_MIXED,   T_SUP},
+ { P(TAB),         tab_attr,       HTML_TAB_ATTRIBUTES,        SGML_EMPTY,   T_TAB},
+ { P(TABLE),       table_attr,     HTML_TABLE_ATTRIBUTES,      SGML_ELEMENT, T_TABLE},
+ { P(TBODY),       tr_attr,        HTML_TR_ATTRIBUTES,         SGML_ELEMENT, T_TBODY},
+ { P(TD),          td_attr,        HTML_TD_ATTRIBUTES,         SGML_MIXED,   T_TD},
+ { P(TEXTAREA),    textarea_attr,  HTML_TEXTAREA_ATTRIBUTES,   SGML_PCDATA,  T_TEXTAREA},
+ { P(TEXTFLOW),    bodytext_attr,  HTML_BODYTEXT_ATTRIBUTES,   SGML_MIXED,   T_TEXTFLOW},
+ { P(TFOOT),       tr_attr,        HTML_TR_ATTRIBUTES,         SGML_ELEMENT, T_TFOOT},
+ { P(TH),          td_attr,        HTML_TD_ATTRIBUTES,         SGML_MIXED,   T_TH},
+ { P(THEAD),       tr_attr,        HTML_TR_ATTRIBUTES,         SGML_ELEMENT, T_THEAD},
+ { P(TITLE),       gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_PCDATA,  T_TITLE},
+ { P(TR),          tr_attr,        HTML_TR_ATTRIBUTES,         SGML_MIXED,   T_TR},
+ { P(TT),          gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_MIXED,   T_TT},
+ { P(U),           gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_MIXED,   T_U},
+ { P(UL),          ul_attr,        HTML_UL_ATTRIBUTES,         SGML_MIXED,   T_UL},
+ { P(VAR),         gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_MIXED,   T_VAR},
+ { P(WBR),         gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_EMPTY,   T_WBR},
+ { P0(XMP),        gen_attr,       HTML_GEN_ATTRIBUTES,        SGML_LITTERAL,T_XMP},
 /* additional (alternative variants), not counted in HTML_ELEMENTS: */
 /* This one will be used as a temporary substitute within the parser when
    it has been signalled to parse OBJECT content as MIXED. - kw */
- { P("OBJECT"),    object_attr,    HTML_OBJECT_ATTRIBUTES,     SGML_MIXED,   T_OBJECT_PCDATA},
+ { P(OBJECT),      object_attr,    HTML_OBJECT_ATTRIBUTES,     SGML_MIXED,   T_OBJECT_PCDATA},
 };
 /* *INDENT-ON* */
 

@@ -1,4 +1,4 @@
-# $LynxId: makefile.in,v 1.18 2008/07/08 00:06:40 tom Exp $
+# $LynxId: makefile.in,v 1.19 2008/09/17 01:14:02 tom Exp $
 # Make WWW under unix for a.n.other unix system (bsd)
 # Use this as a template
 
@@ -178,6 +178,9 @@ clean :
 	rm -f core *.core *.leaks *.[oi] *.bak tags TAGS
 	rm -f dtd_util$x
 	rm -f $(LOB)/*$o
+
+distclean : clean
+	@echo made $@
 
 tags:
 	ctags *.[ch]
