@@ -1,5 +1,5 @@
 /*
- * $LynxId: SGML.c,v 1.114 2008/09/10 12:56:58 tom Exp $
+ * $LynxId: SGML.c,v 1.115 2008/09/17 00:45:07 tom Exp $
  *
  *			General SGML Parser code		SGML.c
  *			========================
@@ -876,12 +876,12 @@ static void handle_processing_instruction(HTStream *context)
 
     CTRACE((tfp, "SGML Processing instruction:\n<%s>\n", s));
 
-    if (!strncmp(s, "?xml", 4)) {
+    if (!strncmp(s, "?xml ", 5)) {
 	int flag = context->T.decode_utf8;
 
 	context->strict_xml = TRUE;
 	/*
-	 * Switch to UTF-8 unless the encoding is explicitly not "utf-8".
+	 * Switch to UTF-8 if the encoding is explicitly "utf-8".
 	 */
 	if (!flag) {
 	    char *t = strstr(s, "encoding=");
@@ -891,8 +891,6 @@ static void handle_processing_instruction(HTStream *context)
 		if (*t == '"')
 		    ++t;
 		flag = !strncmp(t, "utf-8", 5);
-	    } else {
-		flag = TRUE;
 	    }
 	    if (flag) {
 		CTRACE((tfp, "...Use UTF-8 for XML\n"));

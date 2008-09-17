@@ -1,9 +1,16 @@
--- $LynxId: CHANGES,v 1.299 2008/09/10 14:03:11 tom Exp $
+-- $LynxId: CHANGES,v 1.303 2008/09/17 00:46:51 tom Exp $
 ===============================================================================
 Changes since Lynx 2.8 release
 ===============================================================================
 
 2008-0?-?? (2.8.7dev.10)
+* implement "chunked" transfer-encoding to work with servers that ignore the
+  version number in HTTP get's -TD
+* change initialization of trace file, handing this during the first part of
+  argument parsing along with -help and -version, to show steps done for
+  initialization of presentors, etc -TD
+* minor fix to LYstartPopup() to handle a case where the popup menu was too
+  large for the screen -TD
 * fixes for srcdir!=objdir (report by FLWM) -TD
 * modify man2hlp.sh to work from subdirectory, e.g., its parameter would be
   "../lynx.man" -TD
@@ -37,7 +44,8 @@ Changes since Lynx 2.8 release
 * parse doctype for xhtml, to tell when empty tags such as "<textarea />" can
   be discarded (report by Nils Dagsson Moskopp) -TD
 * parse xml processing-instruction to turn on UTF-8 decoding, as well as
-  disable upper/lower case transforming in source view -TD
+  disable upper/lower case transforming in source view (discussion on
+  lynx-dev) -TD
 * fix typo in Lynx_users_guide.html (report by Kristof Zelechovski)
 * minor fix to documentation in lynx.cfg -PW
 * use off_t rather than long for representing file sizes, e.g., when used to

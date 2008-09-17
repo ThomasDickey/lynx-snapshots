@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTMIME.c,v 1.62 2007/07/03 00:16:30 tom Exp $
+ * $LynxId: HTMIME.c,v 1.64 2008/09/17 00:04:44 tom Exp $
  *
  *			MIME Message Parse			HTMIME.c
  *			==================
@@ -37,6 +37,16 @@
 
 typedef enum {
     MIME_TRANSPARENT,		/* put straight through to target ASAP! */
+    /* states for "Transfer-Encoding: chunked" */
+    MIME_CHUNKED,
+    mcCHUNKED_COUNT_DIGIT,
+    mcCHUNKED_COUNT_CR,
+    mcCHUNKED_COUNT_LF,
+    mcCHUNKED_EXTENSION,
+    mcCHUNKED_DATA,
+    mcCHUNKED_DATA_CR,
+    mcCHUNKED_DATA_LF,
+    /* character state-machine */
     miBEGINNING_OF_LINE,	/* first character and not a continuation */
     miA,
     miACCEPT_RANGES,
@@ -138,8 +148,12 @@ struct _HTStream {
 
     char *refresh_url;		/* "Refresh:" URL */
 
-    HTFormat encoding;		/* Content-Transfer-Encoding */
+    HTFormat c_t_encoding;	/* Content-Transfer-Encoding */
     char *compression_encoding;
+
+    BOOL chunked_encoding;	/* Transfer-Encoding: chunked */
+    long chunked_size;		/* ...counter for "chunked" */
+
     HTFormat format;		/* Content-Type */
     HTStream *target;		/* While writing out */
     HTStreamClass targetClass;
@@ -471,10 +485,11 @@ static int pumpData(HTStream *me)
     if (me->target) {
 	me->targetClass = *me->target->isa;
 	/*
-	 * Check for encoding and select state from there, someday, but until
-	 * we have the relevant code, from now push straight through.  - FM
+	 * Pump rest of data right through, according to the transfer encoding.
 	 */
-	me->state = MIME_TRANSPARENT;	/* Pump rest of data right through */
+	me->state = (me->chunked_encoding
+		     ? MIME_CHUNKED
+		     : MIME_TRANSPARENT);
     } else {
 	me->state = MIME_IGNORE;	/* What else to do? */
     }
@@ -754,7 +769,7 @@ static int dispatchField(HTStream *me)
 	 * Force the Content-Transfer-Encoding value to all lower case.  - FM
 	 */
 	LYLowerCase(me->value);
-	me->encoding = HTAtom_for(me->value);
+	me->c_t_encoding = HTAtom_for(me->value);
 	break;
     case miCONTENT_TYPE:
 	HTMIME_TrimDoubleQuotes(me->value);
@@ -937,6 +952,8 @@ static int dispatchField(HTStream *me)
 	HTMIME_TrimDoubleQuotes(me->value);
 	CTRACE((tfp, "HTMIME: PICKED UP Transfer-Encoding: '%s'\n",
 		me->value));
+	if (!strcmp(me->value, "chunked"))
+	    me->chunked_encoding = YES;
 	break;
     case miUPGRADE:
 	HTMIME_TrimDoubleQuotes(me->value);
@@ -990,9 +1007,82 @@ static int dispatchField(HTStream *me)
 static void HTMIME_put_character(HTStream *me,
 				 char c)
 {
-    if (me->state == MIME_TRANSPARENT) {
-	(*me->targetClass.put_character) (me->target, c);	/* MUST BE FAST */
+    /* MUST BE FAST */
+    switch (me->state) {
+      begin_transparent:
+    case MIME_TRANSPARENT:
+	(*me->targetClass.put_character) (me->target, c);
 	return;
+
+	/* RFC-2616 describes chunked transfer coding */
+    case mcCHUNKED_DATA:
+	(*me->targetClass.put_character) (me->target, c);
+	me->chunked_size--;
+	if (me->chunked_size <= 0)
+	    me->state = mcCHUNKED_DATA_CR;
+	return;
+
+    case mcCHUNKED_DATA_CR:
+	me->state = mcCHUNKED_DATA_LF;
+	if (c == CR) {
+	    return;
+	}
+
+    case mcCHUNKED_DATA_LF:
+	me->state = MIME_CHUNKED;
+	if (c == LF) {
+	    return;
+	}
+
+	CTRACE((tfp, "HTIME_put_character expected LF in chunked data\n"));
+	me->state = MIME_TRANSPARENT;
+	goto begin_transparent;
+
+	/* FALLTHRU */
+      begin_chunked:
+    case MIME_CHUNKED:
+	me->chunked_size = 0;
+	me->state = mcCHUNKED_COUNT_DIGIT;
+
+	/* FALLTHRU */
+    case mcCHUNKED_COUNT_DIGIT:
+	if (isxdigit(UCH(c))) {
+	    me->chunked_size <<= 4;
+	    if (isdigit(UCH(c)))
+		me->chunked_size += UCH(c) - '0';
+	    else
+		me->chunked_size += TOUPPER(UCH(c)) - 'A' + 10;
+	    return;
+	}
+	if (c == ';')
+	    me->state = mcCHUNKED_EXTENSION;
+
+	/* FALLTHRU */
+    case mcCHUNKED_EXTENSION:
+	if (c != CR && c != LF) {
+	    return;
+	}
+	me->state = mcCHUNKED_COUNT_CR;
+
+	/* FALLTHRU */
+    case mcCHUNKED_COUNT_CR:
+	me->state = mcCHUNKED_COUNT_LF;
+	if (c == CR) {
+	    return;
+	}
+
+	/* FALLTHRU */
+    case mcCHUNKED_COUNT_LF:
+	me->state = ((me->chunked_size != 0)
+		     ? mcCHUNKED_DATA
+		     : MIME_CHUNKED);
+	if (c == LF) {
+	    return;
+	}
+	goto begin_chunked;
+
+    default:
+	break;
     }
 
     /*
@@ -1025,7 +1115,14 @@ static void HTMIME_put_character(HTStream *me,
 	return;
 
     case MIME_TRANSPARENT:	/* Not reached see above */
-	(*me->targetClass.put_character) (me->target, c);
+    case MIME_CHUNKED:
+    case mcCHUNKED_COUNT_DIGIT:
+    case mcCHUNKED_COUNT_CR:
+    case mcCHUNKED_COUNT_LF:
+    case mcCHUNKED_EXTENSION:
+    case mcCHUNKED_DATA:
+    case mcCHUNKED_DATA_CR:
+    case mcCHUNKED_DATA_LF:
 	return;
 
     case MIME_NET_ASCII:
@@ -2049,7 +2146,7 @@ HTStream *HTMIMEConvert(HTPresentation *pres,
     me->set_cookie = NULL;	/* Not set yet */
     me->set_cookie2 = NULL;	/* Not set yet */
     me->refresh_url = NULL;	/* Not set yet */
-    me->encoding = 0;		/* Not set yet */
+    me->c_t_encoding = 0;	/* Not set yet */
     me->compression_encoding = NULL;	/* Not set yet */
     me->net_ascii = NO;		/* Local character set */
     HTAnchor_setUCInfoStage(me->anchor, current_char_set,

@@ -1,4 +1,6 @@
-/* $LynxId: LYHistory.c,v 1.71 2008/02/10 21:48:35 tom Exp $ */
+/*
+ * $LynxId: LYHistory.c,v 1.72 2008/09/10 23:09:21 tom Exp $
+ */
 #include <HTUtils.h>
 #include <HTTP.h>
 #include <GridText.h>
@@ -351,7 +353,6 @@ void LYAllocHistory(int entries)
 	if (history == 0)
 	    outofmem(__FILE__, "LYAllocHistory");
 	while (save < size_history) {
-	    CTRACE((tfp, "...LYAllocHistory clearing %d\n", save));
 	    memset(&history[save++], 0, sizeof(history[0]));
 	}
     }

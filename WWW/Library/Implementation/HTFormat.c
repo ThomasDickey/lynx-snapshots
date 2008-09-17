@@ -1,5 +1,5 @@
 /*
- * $LynxId: HTFormat.c,v 1.62 2007/08/02 20:12:22 tom Exp $
+ * $LynxId: HTFormat.c,v 1.63 2008/09/10 23:22:59 tom Exp $
  *
  *		Manage different file formats			HTFormat.c
  *		=============================
@@ -101,6 +101,14 @@ void HTSetPresentation(const char *representation,
     if (pres == NULL)
 	outofmem(__FILE__, "HTSetPresentation");
 
+    CTRACE2(TRACE_CFG,
+	    (tfp,
+	     "HTSetPresentation rep=%s, command=%s, test=%s, qual=%f\n",
+	     NonNull(representation),
+	     NonNull(command),
+	     NonNull(testcommand),
+	     quality));
+
     pres->rep = HTAtom_for(representation);
     pres->rep_out = WWW_PRESENT;	/* Fixed for now ... :-) */
     pres->converter = HTSaveAndExecute;		/* Fixed for now ...     */
@@ -152,6 +160,13 @@ void HTSetConversion(const char *representation_in,
 
     if (pres == NULL)
 	outofmem(__FILE__, "HTSetConversion");
+
+    CTRACE2(TRACE_CFG,
+	    (tfp,
+	     "HTSetConversion rep_in=%s, rep_out=%s, qual=%f\n",
+	     NonNull(representation_in),
+	     NonNull(representation_out),
+	     quality));
 
     pres->rep = HTAtom_for(representation_in);
     pres->rep_out = HTAtom_for(representation_out);
